@@ -9,15 +9,19 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-# 01 §1.1 set this at 1500 and 정본 §5 describes the shell as "500~1500 lines".
-# M1 measured 2028 with git · parse · store · the ingest job and 12 commands in place,
-# and the shell that produces that number is already dense (D68). The ceiling below is
-# **provisional**: it keeps the gate able to block growth while the canon change it
-# implies is put to the owner. Raise it only with a decision row.
+# 2300 is the ceiling the owner settled on in D68, replacing the 1500 that 01 §1.1 and
+# 정본 §5 carried until M1 was written. M1 measured 2043 — git 383 · parse 358 · store 343 ·
+# app 959 — with the ingest job and 12 commands in place, after D64~D67 had already moved
+# ten commands to TypeScript or to a later milestone.
 #
-# Still unwritten and still counted against whatever the final number is:
+# Still unwritten and counted against the same number, ~190 lines in all:
 #   parse_snippet (M3, ~25) · git_diff_text (M4, ~67) · dict_* (M5, ~65) · repo_glob_read (M6, ~30)
-BUDGET=${RUST_LINE_BUDGET:-2100}
+#
+# Per-crate caps in 01 §4 add up to exactly this number: git 460 · parse 400 · store 360 ·
+# app 1080. Only the total is enforced here; the split is printed so growth is attributable.
+# Raise either only with a decision row — the line count is a proxy, and the walls that
+# actually keep Rust thin are the four checks below.
+BUDGET=${RUST_LINE_BUDGET:-2300}
 SRC_GLOBS=(crates/*/src apps/desktop/src-tauri/src)
 fail=0
 

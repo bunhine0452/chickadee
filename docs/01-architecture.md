@@ -35,7 +35,7 @@
 
 | 장치 | 규칙 | 검사 |
 |---|---|---|
-| 줄 예산 | `crates/**` + `apps/desktop/src-tauri/src/**` 코드 줄(테스트·주석 제외) ≤ **1500** | `scripts/check-rust-budget.sh` (tokei) — 초과 시 CI 실패 |
+| 줄 예산 | `crates/**` + `apps/desktop/src-tauri/src/**` 코드 줄(테스트·주석 제외) ≤ **2300** (D68) | `scripts/check-rust-budget.sh` (tokei) — 초과 시 CI 실패 |
 | 금칙어 | Rust 식별자·문자열에 `concept·card·mastery·ink·fsrs·queue·session·grade·review` 금지. 검사 범위는 `crates/*/src/**` + `apps/desktop/src-tauri/src/**`(tests·benches 제외) | 같은 스크립트의 grep |
 | git 바이너리 금지 | `Command::new("git")` 발견 시 실패 | 같은 스크립트 |
 | SQL 금지 | Rust 소스에 `SELECT/INSERT/UPDATE/DELETE` 리터럴 없음. SQL 은 TS 카탈로그에서 **이름으로** 실행 | grep |
@@ -242,13 +242,13 @@ chickadee/
 ├── Cargo.toml                    # [workspace] members = ["crates/*", "apps/desktop/src-tauri"]
 ├── pnpm-workspace.yaml           # packages/*, apps/*
 ├── crates/
-│   ├── git/     src/{lib.rs, fingerprint.rs, commits.rs, blob.rs}          # chickadee-git  ≤ 400줄 (D64)
-│   ├── parse/   src/{lib.rs, langs.rs, query.rs, ast_lite.rs} · tests/     # chickadee-parse ≤ 400줄 (D64) (tests/ = insta 스냅샷·사전 예시 덤프)
-│   └── store/   src/{lib.rs, catalog.rs, migrate.rs, json.rs}              # chickadee-store ≤ 350줄
+│   ├── git/     src/{lib.rs, fingerprint.rs, commits.rs, blob.rs}          # chickadee-git  ≤ 460줄 (D68)
+│   ├── parse/   src/{lib.rs, langs.rs, query.rs, ast_lite.rs} · tests/     # chickadee-parse ≤ 400줄 (D68) (tests/ = insta 스냅샷·사전 예시 덤프)
+│   └── store/   src/{lib.rs, catalog.rs, migrate.rs, json.rs}              # chickadee-store ≤ 360줄 (D68)
 ├── apps/desktop/
 │   ├── src-tauri/  src/{main.rs, error.rs, state.rs, jobs.rs, commands/{repo,ingest,file,parse,git,store,dict,app}.rs}
 │   │               benches/ingest.rs (criterion)
-│   │               tauri.conf.json · capabilities/default.json · Cargo.toml   # chickadee-app ≤ 500줄 (D64)
+│   │               tauri.conf.json · capabilities/default.json · Cargo.toml   # chickadee-app ≤ 1080줄 (D68)
 │   └── src/        main.ts · screens/ …                                      # UI 셸 (프레임워크는 05)
 ├── packages/
 │   ├── ipc-client/  src/{index.ts, types.ts, errors.ts, events.ts}
@@ -477,7 +477,7 @@ Rust 명령 `t3_run` 은 `NOT_IMPLEMENTED` 만 돌려주고, 스키마의 `track
 1. **(02)** 사실 테이블(`files·captures·imports·commits·commit_files·ingest_runs`)의 열을 §3.3 의 `Capture`·`CommitFile` 형태로 확정해 주기. 특히 `captures.excerpt ≤ 200자` 저장(사다리 3단이 파일 읽기 없이 그려지게)과 `review_log.concept_id NOT NULL, card_id NULL 허용`(purge 후 자산 유지). → 결정 D2: 02 DDL 단수형이 정본, `review_log.card_id NOT NULL` 유지, 카드는 `retired_at`+`snapshot_json` 으로 은퇴.
 2. **(02)** 모든 DDL·SQL 을 `packages/store-sql` 한 곳이 소유하고 Rust 는 `facts.*` 이름만 참조하는 방식 수락 여부. → 결정 D2 수락.
 3. **(03)** import 해석(`./x`, tsconfig paths, 배럴)을 TS `concepts/resolve-imports.ts` 가 담당하고 Rust 는 원문 문자열만 저장하는 경계 수락 여부. 캡처 이름 규약 `concept.<id>` · `import.source` · `block.function` 확정. → 결정 D18: 규약은 03 §3.2 의 것(`@site`·`@pick.N`·`@hole`·`@ctx.*`), `import.source` 는 시스템 쿼리 `_imports.scm` 소속.
-4. **(04)** T1 AST 비교는 Rust 가 `AstLite` 를 주고 TS 가 비교한다. Rust 쪽 diff 가 필요하다고 판단되면 예산(1500줄)과 함께 논의. → 결정 D14: TS 비교 유지, `AstLite.kind` 에 `'ERROR'` 를 그대로 싣는다.
+4. **(04)** T1 AST 비교는 Rust 가 `AstLite` 를 주고 TS 가 비교한다. Rust 쪽 diff 가 필요하다고 판단되면 예산(2300줄, D68)과 함께 논의. → 결정 D14: TS 비교 유지, `AstLite.kind` 에 `'ERROR'` 를 그대로 싣는다.
 5. **(05)** UI 프레임워크 자유. 단 `invoke` 는 `ipc-client` 밖에서 호출 금지, 세션 카드 전환 IPC 0회(번들 프리페치) 준수. → 결정 D43: `packages/core`·`src/ipc/commands.ts` 폐기, `@chickadee/grading·scheduler·cards·ipc-client` 참조. UI id 는 `number`, `runId`→`sessionId`.
 6. **(06)** 폰트 3종 번들(OFL) 및 CSP `default-src 'self'` — 외부 네트워크 0. LLM 키 저장은 OS 키체인. → 결정 D7: OFL 원본 woff2 9파일 번들(≈8 MB), CSP `default-src 'self'`+`worker-src 'self' blob:`(Monaco), 네트워크 0(예외: 사용자가 켠 LLM 4단).
 7. Linux(WebKitGTK) 부속 기본값 `off` 로 할지. → 결정 D12: `off`.
