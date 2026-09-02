@@ -1,0 +1,20 @@
+schema: 1
+id: common/promise-chain
+universal: null
+name: { ko: "끝난 뒤 할 일 등록하기", en: "Callback chain" }
+token: null
+grammars: []
+essential: false
+difficulty: 3
+prereq: []
+confusions: []
+dict:
+  one_liner: "기다리는 대신 <b>끝난 뒤 할 일</b>을 미리 등록해 두고 지나가는 표기."
+  why: >-
+    기다렸다 꺼내는 표기와 하는 일이 같습니다 — 순서를 적는 방식이 다를 뿐이에요. 값이 콜백
+    <b>안에서만</b> 보인다는 점이 두 표기를 가르는 자리입니다.
+  trace: []
+rule: "등록만 하고 지나간다. 값은 콜백 안에서만 보인다."
+ok: "끝난 뒤 불릴 함수를 등록하고, 곧바로 다음 줄로 넘어갑니다."
+misconceptions:
+  - "등록한 줄에서 기다린다 — 기다리지 않습니다."

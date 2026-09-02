@@ -20,8 +20,16 @@ export type Grammar = z.infer<typeof grammarSchema>;
 /** 개념 id — `<lang>/<slug>` (03 §3.1). */
 export const conceptIdSchema = z.string().regex(/^[a-z][a-z0-9]*\/[a-z0-9][a-z0-9-]*$/);
 
+/** 태그를 걷어낸 길이. 상한은 사람이 읽는 글자 수를 재는 것이지 마크업을 재는 것이 아니다. */
+const visible = (text: string): number => text.replace(/<[^>]+>/g, '').length;
+
 const edge = z.object({ h: z.string(), code: z.array(z.string()).min(1) }).strict();
-const diag = z.object({ t: z.string().max(300), edge: edge.optional() }).strict();
+const diag = z.object({
+  t: z.string().max(1_200).refine((v) => visible(v) <= 300, {
+    message: '진단문은 태그를 뺀 300자까지다',
+  }),
+  edge: edge.optional(),
+}).strict();
 
 const option = z.object({
   t: z.string(),
@@ -86,7 +94,9 @@ export const conceptSchema = z.object({
   prereq: z.array(conceptIdSchema).default([]),
   confusions: z.array(conceptIdSchema).default([]),
   dict: z.object({
-    one_liner: z.string().max(80),
+    one_liner: z.string().max(400).refine((v) => visible(v) <= 80, {
+      message: 'one_liner 는 태그를 뺀 80자까지다',
+    }),
     why: z.string(),
     trace: z.array(z.string()).default([]),
   }).strict(),

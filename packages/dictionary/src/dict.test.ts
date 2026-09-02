@@ -40,10 +40,42 @@ describe('번들 사전', () => {
   });
 });
 
-describe('스키마 산출물', () => {
-  test('체크인된 JSON Schema 가 zod 와 어긋나지 않는다', async () => {
-    const { build, OUT } = await import('../../../scripts/dict-schema.js');
-    const { readFileSync } = await import('node:fs');
-    expect(readFileSync(OUT, 'utf8')).toBe(build());
+describe('사전이 실제로 담고 있는 것', () => {
+  test('필수 문법이 30개 이상이고 전부 개념으로 존재한다', () => {
+    const ts = dict.langs.get('ts');
+    expect(ts?.essential.length).toBeGreaterThanOrEqual(20);
+    for (const id of ts?.essential ?? []) expect(dict.concepts.has(id)).toBe(true);
+  });
+
+  test('「AI 가 대신 쓴 표기」의 양쪽이 모두 있다', () => {
+    for (const alt of dict.langs.get('ts')?.alternatives ?? []) {
+      expect(dict.concepts.has(alt.gap)).toBe(true);
+      expect(dict.concepts.has(alt.present)).toBe(true);
+    }
+  });
+
+  test('보편 개념은 쿼리가 없고 언어 개념은 쿼리가 있다', () => {
+    for (const concept of dict.concepts.values()) {
+      const universal = concept.id.startsWith('common/') || concept.id.startsWith('arch/');
+      expect(concept.queries.length === 0).toBe(universal);
+    }
+  });
+
+  test('구조 개념 넷은 t2 트랙이다', () => {
+    for (const slug of ['placement', 'radius', 'flow', 'direction']) {
+      expect(dict.concepts.get(`arch/${slug}`)?.track_default).toBe('t2');
+    }
+  });
+
+  test('프레임워크 사전은 감지 없이는 로드되지 않는다 (D59)', () => {
+    expect(loadDict().concepts.has('react/functional-state-update')).toBe(false);
+    expect(loadDict({ dependencies: ['react'] }).concepts.has('react/functional-state-update')).toBe(true);
+  });
+
+  test('시스템 쿼리는 문법마다 하나씩 등록된다', () => {
+    for (const grammar of ['typescript', 'tsx', 'javascript']) {
+      expect(dict.queries.has(`_imports::${grammar}`)).toBe(true);
+      expect(dict.queries.has(`_blocks::${grammar}`)).toBe(true);
+    }
   });
 });

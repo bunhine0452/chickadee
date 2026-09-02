@@ -1,0 +1,20 @@
+schema: 1
+id: common/filter-select
+universal: null
+name: { ko: "조건으로 골라내기", en: "Filter / select" }
+token: null
+grammars: []
+essential: false
+difficulty: 2
+prereq: []
+confusions: []
+dict:
+  one_liner: "조건이 참인 항목만 남긴 <b>새 묶음</b>을 만드는 표기. 개수가 줄 수 있다."
+  why: >-
+    「끝난 것만」 「내 것만」 은 어느 언어에나 있습니다. 원본을 지우는 대신 골라낸 새 묶음을 만들면
+    되돌리기가 공짜예요. 언어마다 이름만 다릅니다.
+  trace: []
+rule: "값은 그대로, 개수만 준다. 참인 것이 남는다."
+ok: "조건을 통과한 항목만 모아 새 묶음을 냅니다. 하나도 통과하지 못하면 빈 묶음입니다."
+misconceptions:
+  - "골라내면서 값도 바꿔 준다 — 남길지 말지만 고릅니다."

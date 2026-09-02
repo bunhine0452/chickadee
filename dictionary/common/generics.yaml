@@ -1,0 +1,20 @@
+schema: 1
+id: common/generics
+universal: null
+name: { ko: "타입 자리 비워 두기", en: "Generics" }
+token: null
+grammars: []
+essential: false
+difficulty: 4
+prereq: []
+confusions: []
+dict:
+  one_liner: "타입을 미리 정하지 않고 <b>쓰는 쪽에서 채우게</b> 남겨 두는 표기."
+  why: >-
+    같은 코드를 타입마다 복사하지 않으면서도, 넣은 것과 꺼낸 것이 같다는 사실을 잃지 않는 방법입니다.
+    이름은 언어마다 다르지만 「자리를 비우고 쓸 때 채운다」는 뜻은 하나예요.
+  trace: []
+rule: "자리를 비우고 쓰는 쪽이 채운다. 채우면 그 뒤가 따라 정해진다."
+ok: "타입 자리를 비워 두었다가 쓰는 쪽에서 채우면, 그 뒤의 타입이 전부 따라 정해집니다."
+misconceptions:
+  - "무엇이든 받는다는 뜻이다 — 받되 무엇을 받았는지 기억합니다."

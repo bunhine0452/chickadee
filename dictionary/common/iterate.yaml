@@ -1,0 +1,20 @@
+schema: 1
+id: common/iterate
+universal: null
+name: { ko: "하나씩 훑기", en: "Iterate" }
+token: null
+grammars: []
+essential: false
+difficulty: 2
+prereq: []
+confusions: []
+dict:
+  one_liner: "묶음의 항목을 앞에서부터 하나씩 꺼내 같은 일을 되풀이하는 표기."
+  why: >-
+    결과를 모으지 않고 <b>시키기만</b> 하는 반복입니다. 반복문으로 쓰든 콜백으로 쓰든 뜻은 같고,
+    갈리는 것은 중간에 멈출 수 있는지와 기다릴 수 있는지예요.
+  trace: []
+rule: "값을 모으지 않는 반복이다. 결과가 필요하면 다른 표기를 쓴다."
+ok: "항목마다 같은 일을 한 번씩 하고, 줄 자체는 값을 남기지 않습니다."
+misconceptions:
+  - "훑기만 해도 새 묶음이 생긴다 — 생기지 않습니다."

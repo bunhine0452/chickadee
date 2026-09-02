@@ -1,0 +1,21 @@
+schema: 1
+id: common/function-call
+universal: null
+name: { ko: 함수 부르기, en: Function call }
+token: null
+grammars: []
+essential: false
+difficulty: 1
+prereq: []
+confusions: []
+dict:
+  one_liner: "적어 둔 절차를 지금 돌리고, 돌려준 값을 받는다."
+  why: >-
+    같은 절차를 여러 곳에서 쓰려면 이름을 붙여 두고 필요할 때 부릅니다. 부르는 표시는 대부분의
+    언어에서 괄호예요. 이름만 적으면 절차는 값으로 남아 있고, 괄호가 붙어야 실제로 돕니다 —
+    이 구분이 콜백과 비동기를 이해하는 첫 계단입니다.
+  trace: []
+rule: "이름만 쓰면 절차 그 자체, 괄호를 붙이면 절차를 돌린 결과."
+ok: "괄호는 「지금 해라」는 표시입니다. 그 결과가 그 줄의 값이 됩니다."
+misconceptions:
+  - "이름만 넘겨도 나중에 알아서 돈다 — 받은 쪽이 괄호를 붙여 줄 때만 돕니다."

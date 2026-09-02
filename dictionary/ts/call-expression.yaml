@@ -1,0 +1,94 @@
+schema: 1
+id: ts/call-expression
+universal: common/function-call
+name: { ko: 함수 호출, en: Function call }
+token: "()"
+grammars: [typescript, tsx, javascript]
+framework: null
+essential: true
+difficulty: 1
+prereq: [ts/property-access]
+confusions: [ts/property-access]
+
+dict:
+  one_liner: "괄호가 붙는 순간 함수가 돈다. 괄호가 없으면 함수 자체가 값이다."
+  why: >-
+    함수는 「이렇게 하라」고 적어 둔 절차입니다. 적어 두기만 해서는 아무 일도 일어나지 않고,
+    괄호를 붙여야 그 절차가 실제로 돕니다. {{site.line}}행의 {{pick.2|code}}{{pick.2|josa:이,가}} 바로 그
+    「지금 해라」 표시예요.
+  trace:
+    - "{{pick.1|code}} 라는 이름이 가리키는 함수를 찾는다."
+    - "{{pick.2|code}} 안의 값을 왼쪽부터 하나씩 계산한다."
+    - "그 값들을 넘겨 함수를 돌리고, 함수가 돌려준 값이 {{site.line}}행의 값이 된다."
+
+rule: "<b>이름만 쓰면 함수 그 자체, 괄호를 붙이면 함수를 돌린 결과.</b>"
+result:
+  label: "{{site.line}}행의 값"
+  value: "{{pick.1}}{{pick.1|josa:이,가}} 돌려준 값"
+  note: "함수 자체가 아니라 결과"
+ok: >-
+  {{pick.2|code}}{{pick.2|josa:이,가}} 붙었으니 {{pick.1|code}}{{pick.1|josa:이,가}} <b>지금</b> 돌아갑니다. 괄호를 떼면 함수는
+  돌지 않고, {{site.line}}행의 값은 함수 그 자체가 됩니다.
+payoff: >-
+  같은 절차를 여러 곳에서 쓰려면 이름을 붙여 두고 필요할 때 괄호를 붙이면 됩니다.
+  {{site.line}}행은 그 절차를 여기서 한 번 쓰는 자리예요.
+bridge: >-
+  {{pick.1|code}}{{pick.1|josa:이,가}} <code>a.b</code> 꼴이면 점으로 꺼낸 값이 함수인 것입니다 — 점이 <b>꺼내고</b>
+  괄호가 <b>돌립니다</b>.
+misconceptions:
+  - "괄호 없이 이름만 넘겨도 나중에 알아서 돈다 — 넘긴 쪽이 괄호를 붙여 줄 때만 돕니다."
+  - "인자가 없으면 괄호도 없어도 된다 — 인자가 없어도 <code>()</code> 는 있어야 돕니다."
+
+point:
+  - q: "{{site.line}}행에서 <b>함수를 지금 돌리게 하는 자리</b>를 짚어 보세요."
+    hint: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+    answer: pick.2
+    diag:
+      pick.1:
+        t: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>무엇을 돌릴지</b>를 가리키는 이름입니다. 이름만 있으면 함수는 값으로 남아 있고, 돌리는 일은 뒤에 붙은 괄호가 합니다."
+        edge:
+          h: "가장 날카로운 자리 — 괄호가 있느냐"
+          code:
+            - "load          // 함수 그 자체"
+            - "load(path)    // 돌린 결과"
+
+meaning:
+  - q: "{{site.line}}행에서 {{pick.2|code}}{{pick.2|josa:을,를}} 떼어 내면 값이 어떻게 달라질까요?"
+    hint: "괄호는 「지금 해라」는 표시입니다."
+    options:
+      - t: "함수를 돌린 결과 대신 <b>함수 자체</b>가 값이 된다"
+      - t: "달라지지 않는다 — 어차피 나중에 돈다"
+        diag:
+          t: "받은 쪽이 괄호를 붙여 줄 때만 돕니다. 아무도 붙여 주지 않으면 그 절차는 끝까지 돌지 않아요."
+          edge:
+            h: "가장 날카로운 자리 — 누가 괄호를 붙이나"
+            code:
+              - "setTimeout(fn, 0)     // setTimeout 이 나중에 붙여 준다"
+              - "setTimeout(fn(), 0)   // 지금 돌고 결과를 넘긴다"
+      - t: "그 자리에서 멈춘다"
+        diag:
+          t: "이름을 그냥 읽는 것은 멈출 일이 아닙니다. 멈추는 것은 오히려 <b>함수가 아닌 값</b>에 괄호를 붙였을 때예요."
+          edge:
+            h: "가장 날카로운 자리 — 멈추는 쪽은 반대다"
+            code:
+              - "const f = load        // 멈추지 않는다"
+              - "const n = 42; n()     // TypeError"
+      - t: "<code>undefined</code> 가 된다"
+        diag:
+          t: "<code>undefined</code> 는 함수가 <b>돌고 나서</b> 돌려줄 것이 없을 때 나옵니다. 괄호를 떼면 애초에 돌지 않아요."
+          edge:
+            h: "가장 날카로운 자리 — 돌았느냐 안 돌았느냐"
+            code:
+              - "const a = console.log('x')   // undefined, 화면에는 찍힌다"
+              - "const b = console.log        // 함수 자체, 아무것도 안 찍힌다"
+
+queries:
+  - { grammars: [typescript, tsx, javascript], file: ./call-expression.scm }
+
+examples:
+  - code: "const rows = load(path)"
+    expect: { sites: 1, form: call, picks: { 1: "load", 2: "(path)" } }
+  - code: "console.log(name)"
+    expect: { sites: 1, picks: { 1: "console.log" } }
+  - code: "const f = load"
+    expect: none

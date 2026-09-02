@@ -1,0 +1,94 @@
+schema: 1
+id: ts/object-spread
+universal: common/copy-with-changes
+name: { ko: 객체 펼치기, en: Object spread }
+token: "..."
+grammars: [typescript, tsx, javascript]
+framework: null
+essential: true
+difficulty: 2
+prereq: [ts/property-access]
+confusions: [ts/array-basics]
+
+dict:
+  one_liner: "앞 객체를 펼쳐 복사하고, 뒤에 적은 것으로 덮어쓴다."
+  why: >-
+    화면은 객체가 <b>새 것</b>일 때만 다시 그립니다. 원본을 직접 고치면 안이 바뀌어도 겉은
+    같은 객체라 아무도 알아채지 못해요. {{site.line}}행은 {{pick.1|code}} 의 내용을 그대로
+    옮겨 담은 <b>다른</b> 객체를 만드는 자리입니다.
+  trace:
+    - "{{pick.1|code}} 의 이름과 값을 하나씩 새 객체에 옮겨 담는다."
+    - "{{site.line}}행에서 뒤에 적은 이름은 옮겨 담은 값을 덮어쓴다."
+    - "{{pick.1|code}} 자체는 손대지 않는다 — 결과는 새 객체다."
+
+rule: "<b>뒤에 적은 것이 이긴다.</b> 그리고 펼치기는 한 겹만 복사한다 — 안쪽 객체는 원본과 같은 것을 가리킨다."
+result:
+  label: "{{site.line}}행의 값"
+  value: "{{pick.1}}{{pick.1|josa:을,를}} 복사한 새 객체"
+  note: "원본은 그대로"
+ok: >-
+  {{pick.2|code}}{{pick.2|josa:은,는}} {{pick.1|code}} 의 내용을 <b>새 객체에 옮겨 담습니다</b>. 뒤에 같은 이름을
+  적으면 그 값이 이기고, {{pick.1|code}} 자체는 바뀌지 않아요.
+payoff: >-
+  원본을 두고 새 객체를 만드는 것이 「불변 갱신」이고, 화면이 바뀐 것을 알아채는 방법입니다.
+  {{site.line}}행이 바로 그 자리예요.
+bridge: >-
+  한 겹만 복사한다는 점이 다음 함정입니다 — 안쪽 객체까지 새로 만들려면 그 자리에서 다시
+  펼쳐야 해요.
+misconceptions:
+  - "펼치기가 안쪽까지 전부 새로 만든다 — 아니요. 한 겹입니다. 안쪽 객체는 원본과 같은 것을 가리켜요."
+  - "순서는 상관없다 — 아니요. 같은 이름이 겹치면 <b>뒤에 적은 것</b>이 남습니다."
+
+point:
+  - q: "{{site.line}}행에서 <b>앞의 객체를 통째로 복사해 오는 기호</b>를 짚어 보세요."
+    hint: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+    answer: pick.2
+    diag:
+      pick.1:
+        t: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>복사해 올 대상</b>입니다. 이름만 적으면 그 객체가 통째로 한 칸에 들어가고, 내용을 펼치는 일은 앞의 점 세 개가 해요."
+        edge:
+          h: "가장 날카로운 자리 — 펼쳤느냐 담았느냐"
+          code:
+            - "{ ...user, n: 1 }    // user 의 내용이 펼쳐진다"
+            - "{ user, n: 1 }       // user 라는 이름 한 칸"
+
+meaning:
+  - q: "{{site.line}}행이 끝난 뒤 {{pick.1|code}} 자체는 어떻게 될까요?"
+    hint: "펼치기는 읽어서 옮겨 담는 일입니다."
+    options:
+      - t: "그대로다 — 내용을 옮겨 담은 새 객체가 따로 만들어진다"
+      - t: "뒤에 적은 값으로 덮어써진다"
+        diag:
+          t: "<code>Object.assign({{pick.1}}, …)</code> 처럼 <b>첫 자리에</b> 원본을 두었다면 그 말이 맞습니다. 중괄호로 새로 여는 이 표기는 원본을 읽기만 해요."
+          edge:
+            h: "가장 날카로운 자리 — 어디에 담느냐"
+            code:
+              - "{ ...user, n: 1 }              // user 그대로"
+              - "Object.assign(user, { n: 1 })  // user 가 바뀐다"
+      - t: "안쪽 객체까지 전부 새로 만들어진다"
+        diag:
+          t: "펼치기는 <b>한 겹</b>만 복사합니다. 안쪽 객체는 원본과 같은 것을 가리켜서, 그것을 고치면 원본에서도 보여요."
+          edge:
+            h: "가장 날카로운 자리 — 몇 겹까지 복사하나"
+            code:
+              - "const b = { ...a }"
+              - "b.deep === a.deep   // true"
+      - t: "비워진다"
+        diag:
+          t: "펼치기는 읽어 오기만 합니다. 원본을 비우는 표기는 따로 없고, 지우려면 그 이름에 새 값을 다시 묶어야 해요."
+          edge:
+            h: "가장 날카로운 자리 — 읽기와 지우기"
+            code:
+              - "const b = { ...a }   // a 는 그대로"
+              - "a = {}               // 이래야 a 가 바뀐다"
+
+queries:
+  - { grammars: [typescript, tsx, javascript], file: ./object-spread.scm }
+
+examples:
+  - code: "const next = { ...state, done: true }"
+    expect: { sites: 1, form: object, picks: { 1: "state", 2: "..." } }
+  - code: "setUser({ ...user, name })"
+    expect: { sites: 1, picks: { 1: "user" } }
+  - code: "const o = { done: true }"
+    expect: none

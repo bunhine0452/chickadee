@@ -1,0 +1,103 @@
+schema: 1
+id: ts/logical-or-default
+universal: common/nullish-default
+name: { ko: 「또는」으로 기본값 주기, en: Default with logical OR }
+token: "||"
+grammars: [typescript, tsx, javascript]
+framework: null
+essential: false
+difficulty: 2
+prereq: [ts/undefined-null, ts/string-literal]
+confusions: [ts/nullish-coalescing, ts/conditional-ternary]
+
+dict:
+  one_liner: "<code>a || b</code> 는 <code>a</code> 가 falsy 면 <code>b</code>."
+  why: >-
+    <code>??</code> 가 생기기 전에는 기본값을 이렇게 줬습니다. 지금도 잘 도는 코드지만,
+    <code>||</code> 가 「없음」으로 치는 범위가 넓습니다 — <code>0</code>·빈 문자열·<code>false</code>·
+    <code>NaN</code> 까지 전부 왼쪽을 버리고 {{pick.3|code}}{{pick.3|josa:으로,로}} 넘어가요.
+    {{file.base}} 의 이 자리가 그 넷 중 하나를 <b>정상 값</b>으로 받아야 하는 자리인지 한 번 보세요.
+  trace:
+    - "{{pick.1|code}}{{pick.1|josa:을,를}} 읽고 참·거짓으로 바꿔 본다."
+    - "거짓 쪽이면 {{pick.3|code}}{{pick.3|josa:을,를}} 쓴다 — <code>0</code> 과 빈 문자열도 거짓 쪽이다."
+    - "참 쪽이면 {{site.line}}행의 결과는 {{pick.1|code}} 그대로다."
+
+rule: "<b><code>||</code> 는 falsy 를 전부 「없음」으로 본다.</b> <code>undefined</code>·<code>null</code> 만 걸러야 하면 <code>??</code> 다."
+result:
+  label: "{{pick.1|code}}{{pick.1|josa:이,가}} <code>0</code> 일 때"
+  value: "{{pick.3}}"
+  note: "<code>0</code> 도 falsy 라 넘어간다"
+ok: >-
+  <code>||</code> 는 왼쪽을 참·거짓으로 바꿔 보고 거짓이면 오른쪽을 씁니다. 그래서
+  {{pick.1|code}}{{pick.1|josa:이,가}} <code>0</code> 이나 빈 문자열일 때도
+  {{pick.3|code}}{{pick.3|josa:이,가}} 대신 들어가요.
+payoff: >-
+  이름이나 색처럼 <b>빈 값이 의미 없는</b> 자리에서는 이 표기가 짧고 정확합니다. 수량·좌표·검색어처럼
+  <code>0</code> 과 빈 문자열이 정상인 자리에서만 갈려요.
+bridge: >-
+  참·거짓으로 바꿨을 때 거짓이 되는 값은 <code>false</code>·<code>0</code>·빈 문자열·<code>null</code>·
+  <code>undefined</code>·<code>NaN</code> 여섯입니다. <code>||</code> 는 이 여섯을 하나로 묶어요.
+misconceptions:
+  - "<code>||</code> 는 값이 없을 때만 넘어간다 — <code>0</code> 과 빈 문자열에서도 넘어갑니다."
+  - "<code>||</code> 를 <code>??</code> 로 바꾸면 언제나 같다 — falsy 한 정상 값이 있으면 결과가 달라집니다."
+
+point:
+  - q: "{{site.line}}행에서 {{pick.1|code}}{{pick.1|josa:이,가}} <code>0</code> 이어도 {{pick.3|code}}{{pick.3|josa:을,를}} 쓰게 만드는 기호를 짚어 보세요."
+    hint: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+    answer: pick.2
+    diag:
+      pick.1:
+        t: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>판정받는</b> 값입니다. <code>0</code> 까지 거짓으로 볼지 말지는 값이 정하지 않고 그 뒤의 기호가 정해요."
+        edge:
+          h: "가장 날카로운 자리 — 값은 같고 기호만 다르다"
+          code:
+            - "0 || 10   // 10"
+            - "0 ?? 10   // 0"
+      pick.3:
+        t: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>대신 들어갈 값</b>입니다. 언제 들어갈지의 범위는 그 앞의 기호가 정합니다."
+        edge:
+          h: "가장 날카로운 자리 — 범위를 정하는 것"
+          code:
+            - "'' || '손님'   // '손님'"
+            - "'' ?? '손님'   // ''"
+
+meaning:
+  - q: "{{pick.1|code}}{{pick.1|josa:이,가}} <code>0</code> 이라면 {{site.line}}행의 값은 무엇일까요?"
+    hint: "<code>||</code> 가 보는 것은 「있음·없음」이 아니라 「참·거짓」."
+    options:
+      - t: "{{pick.3|code}} — <code>0</code> 은 거짓 쪽이라 오른쪽으로 넘어간다"
+      - t: "<code>0</code> — 값이 있으니 왼쪽이 남는다"
+        diag:
+          t: "<code>??</code> 였다면 그 말이 맞습니다. <code>||</code> 는 있음·없음이 아니라 참·거짓을 보고, <code>0</code> 은 거짓 쪽이에요."
+          edge:
+            h: "가장 날카로운 자리 — 있음이 아니라 참"
+            code:
+              - "0 ?? 10   // 0"
+              - "0 || 10   // 10"
+      - t: "<code>undefined</code>"
+        diag:
+          t: "<code>||</code> 는 양쪽 중 <b>하나를 골라</b> 내놓습니다. 고를 것이 없어 <code>undefined</code> 가 되는 일은 없어요."
+          edge:
+            h: "가장 날카로운 자리 — 둘 중 하나"
+            code:
+              - "0 || 10        // 10"
+              - "0 || undefined // undefined  (오른쪽 그대로)"
+      - t: "<code>true</code> 나 <code>false</code>"
+        diag:
+          t: "참·거짓으로 <b>판정만</b> 하고 내놓는 것은 원래 값입니다. 참·거짓이 나오려면 <code>Boolean(a)</code> 처럼 따로 바꿔야 해요."
+          edge:
+            h: "가장 날카로운 자리 — 판정과 결과는 다르다"
+            code:
+              - "'a' || 'b'        // 'a'"
+              - "Boolean('a')      // true"
+
+queries:
+  - { grammars: [typescript, tsx, javascript], file: ./logical-or-default.scm }
+
+examples:
+  - code: "const nick = user.name || '손님'"
+    expect: { sites: 1, form: default, picks: { 1: "user.name", 2: "||", 3: "'손님'" } }
+  - code: "const items = list || []"
+    expect: { sites: 1, picks: { 3: "[]" } }
+  - code: "if (loading || error) { hide() }"
+    expect: none

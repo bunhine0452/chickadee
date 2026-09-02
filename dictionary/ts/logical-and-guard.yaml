@@ -1,0 +1,103 @@
+schema: 1
+id: ts/logical-and-guard
+universal: common/optional-chaining
+name: { ko: 「그리고」로 지키기, en: Guarding with logical AND }
+token: "&&"
+grammars: [typescript, tsx, javascript]
+framework: null
+essential: false
+difficulty: 3
+prereq: [ts/property-access, ts/undefined-null]
+confusions: [ts/optional-chaining, ts/nullish-coalescing]
+
+dict:
+  one_liner: "<code>a && a.b</code> 는 <code>a</code> 가 있을 때만 <code>a.b</code>."
+  why: >-
+    <code>?.</code> 가 생기기 전에 없을 수 있는 값을 지나가던 방법입니다. 이름을 두 번 적고
+    「참이면 오른쪽」이라는 규칙에 기대는데, 여기엔 값이 하나 새어 나오는 자리가 있어요 —
+    {{pick.1|code}}{{pick.1|josa:이,가}} <code>0</code> 이나 빈 문자열이면
+    <code>.{{pick.3}}</code>{{pick.3|josa:을,를}} 읽지 않고 그 값이 그대로 결과가 됩니다.
+  trace:
+    - "{{pick.1|code}}{{pick.1|josa:을,를}} 참·거짓으로 바꿔 본다."
+    - "거짓 쪽이면 {{site.line}}행의 결과는 {{pick.1|code}} 그 값이다 — <code>.{{pick.3}}</code> 쪽은 읽지 않는다."
+    - "참 쪽이면 <code>.{{pick.3}}</code>{{pick.3|josa:을,를}} 읽어 그 값을 낸다."
+
+rule: "<b><code>&&</code> 는 「있으면 읽는다」를 참·거짓으로 흉내 낸다.</b> 멈춘 자리의 값은 <code>undefined</code> 가 아니라 왼쪽 값 그대로다."
+result:
+  label: "{{pick.1|code}}{{pick.1|josa:이,가}} 없을 때"
+  value: "{{pick.1}}"
+  note: "<code>undefined</code> 가 아니라 왼쪽 값 그대로"
+ok: >-
+  <code>&&</code> 는 왼쪽이 참일 때만 오른쪽을 읽습니다. 그래서 {{pick.1|code}}{{pick.1|josa:이,가}}
+  없으면 <code>.{{pick.3}}</code>{{pick.3|josa:을,를}} 읽지 않아 터지지 않아요. 다만 <b>결과는 왼쪽 값 그대로</b>라
+  <code>undefined</code> 를 기대하고 쓴 곳에서는 값이 달라집니다.
+payoff: >-
+  같은 이름을 두 번 적는 대신 <code>{{pick.1}}?.{{pick.3}}</code> 이라고 쓰면 한 번만 읽고,
+  멈춘 자리의 값도 언제나 <code>undefined</code> 하나로 정해집니다.
+bridge: >-
+  <code>&&</code> 가 지키는 것은 <b>바로 다음 한 칸</b>입니다. <code>{{pick.1}}.{{pick.3}}</code> 안쪽에
+  또 없을 수 있는 값이 있으면 조건을 하나 더 이어 붙여야 해요.
+misconceptions:
+  - "<code>&&</code> 가 멈추면 <code>undefined</code> 가 나온다 — 왼쪽 값이 그대로 나옵니다."
+  - "<code>a && a.b</code> 와 <code>a?.b</code> 는 언제나 같다 — <code>a</code> 가 <code>0</code> 이나 빈 문자열이면 갈립니다."
+
+point:
+  - q: "{{site.line}}행에서 <code>.{{pick.3}}</code>{{pick.3|josa:을,를}} 읽어도 되는지 <b>먼저 확인하게 만드는 기호</b>를 짚어 보세요."
+    hint: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+    answer: pick.2
+    diag:
+      pick.1:
+        t: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>확인받는</b> 값입니다. 이 이름은 왼쪽과 오른쪽에 두 번 나오는데, 둘을 이어 「먼저 확인」으로 만드는 것은 사이의 <code>&&</code> 예요."
+        edge:
+          h: "가장 날카로운 자리 — 이름이 아니라 사이의 기호"
+          code:
+            - "{{pick.1}} && {{pick.1}}.{{pick.3}}   // 확인하고 읽는다"
+            - "{{pick.1}}.{{pick.3}}                 // 바로 읽어 터질 수 있다"
+      pick.3:
+        t: "<code>{{pick.3}}</code>{{pick.3|josa:은,는}} 읽으려는 <b>이름</b>입니다. 읽어도 되는지 보는 일은 그보다 앞의 <code>&&</code> 가 합니다."
+        edge:
+          h: "가장 날카로운 자리 — 지키는 쪽은 왼쪽"
+          code:
+            - "{{pick.1}} && {{pick.1}}.{{pick.3}}"
+            - "{{pick.1}}?.{{pick.3}}                // 같은 일을 한 번만 적는다"
+
+meaning:
+  - q: "{{pick.1|code}}{{pick.1|josa:이,가}} <code>undefined</code> 라면 {{site.line}}행의 값은 무엇일까요?"
+    hint: "<code>&&</code> 는 둘 중 <b>하나를 골라</b> 내놓는다."
+    options:
+      - t: "<code>undefined</code> — 왼쪽 값이 그대로 결과가 된다"
+      - t: "<code>null</code>"
+        diag:
+          t: "<code>&&</code> 는 왼쪽 값을 <b>그대로</b> 내놓습니다. 왼쪽이 <code>null</code> 이었다면 <code>null</code> 이고, <code>undefined</code> 였다면 <code>undefined</code> 예요."
+          edge:
+            h: "가장 날카로운 자리 — 멈춘 값이 하나가 아니다"
+            code:
+              - "null && null.x        // null"
+              - "undefined?.x          // undefined"
+      - t: "TypeError 로 멈춘다"
+        diag:
+          t: "확인 없이 <code>{{pick.1}}.{{pick.3}}</code> 만 적었다면 그 말이 맞습니다. <code>&&</code> 가 왼쪽에서 이미 멈춰서 <code>.{{pick.3}}</code>{{pick.3|josa:을,를}} 아예 읽지 않아요."
+          edge:
+            h: "가장 날카로운 자리 — 읽었나 안 읽었나"
+            code:
+              - "undefined.x               // TypeError"
+              - "undefined && undefined.x  // undefined"
+      - t: "<code>false</code>"
+        diag:
+          t: "참·거짓으로 <b>판정만</b> 하고 내놓는 것은 원래 값입니다. 참·거짓이 필요하면 <code>Boolean(...)</code> 처럼 따로 바꿔야 해요."
+          edge:
+            h: "가장 날카로운 자리 — 판정과 결과는 다르다"
+            code:
+              - "0 && 1        // 0"
+              - "Boolean(0)    // false"
+
+queries:
+  - { grammars: [typescript, tsx, javascript], file: ./logical-and-guard.scm }
+
+examples:
+  - code: "const nick = user && user.name"
+    expect: { sites: 1, form: guard, picks: { 1: "user", 2: "&&", 3: "name" }, ctx: { object: "user" } }
+  - code: "res.user && res.user.save()"
+    expect: { sites: 1, form: guard-call, picks: { 3: "save" } }
+  - code: "const both = ready && done"
+    expect: none

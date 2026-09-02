@@ -1,0 +1,26 @@
+lang: react
+version: 0.1.0
+grammars: [typescript, tsx, javascript]
+grammar_abi: 15
+
+# 확장자 → 문법. `ts/_lang.yaml` 과 같은 표다 — 프레임워크 관습도 같은 파일에서 읽힌다 (03 §2.1).
+extensions:
+  typescript: [.ts, .mts, .cts]
+  tsx: [.tsx]
+  javascript: [.js, .mjs, .cjs, .jsx]
+
+# 문법이 아니라 프레임워크 관습이라 네임스페이스를 나눈다 (03 §3.1 · D59).
+# `package.json` 의 의존성으로 감지하고, 없는 리포에서는 아예 로드하지 않는다.
+framework: react
+detect: { dependency: react }
+
+essential:
+  - react/functional-state-update
+
+alternatives: []
+
+thin_threshold: { min_files: 2, min_sites: 3, small_repo_files: 20 }
+
+diag_default:
+  point: "«{{pick}}» 은 {{role}} 자리입니다. {{concept}} 는 «{{answer}}» 입니다. {{rule}}"
+  blank: "«{{pick}}» 은 이 자리에 오지 않습니다. {{rule}}"

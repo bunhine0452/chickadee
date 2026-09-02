@@ -471,3 +471,255 @@ fn declaration_files_are_excluded_but_test_files_are_not() {
     assert_eq!(out.files, 2);
     assert_eq!(out.changed, 2);
 }
+
+// ───────── IPC 덤프 (06 §1.4) ─────────
+//
+// `tiny` 픽스처를 읽고 Rust 가 돌려주는 것을 `fixtures/ipc/tiny/` 에 적는다. CI 가
+// `git diff --exit-code` 로 비교하므로, 파일이 바뀌었다는 것은 **Rust 계약이 바뀌었다**는 뜻이다.
+//
+// 쿼리는 사전이 아니라 이 파일에 고정돼 있다 — 사전이 개념을 늘릴 때마다 덤프가 흔들리면
+// 그것은 계약의 변화가 아니라 데이터의 변화이고, 사전 쪽은 `fixtures/golden/` 이 본다.
+
+fn dump_dir() -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../../fixtures/ipc/tiny")
+        .components()
+        .collect()
+}
+
+fn write_dump(name: &str, value: &serde_json::Value) {
+    let at = dump_dir();
+    std::fs::create_dir_all(&at).expect("mkdir");
+    let text = format!("{}\n", serde_json::to_string_pretty(value).expect("json"));
+    std::fs::write(at.join(name), text).expect("write dump");
+}
+
+#[test]
+fn tiny_ipc_dump_is_stable() {
+    let repos = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../../fixtures/repos/tiny")
+        .components()
+        .collect::<PathBuf>();
+    if !repos.join(".git").is_dir() {
+        eprintln!("skip: bash scripts/make-fixture-repo.sh tiny 를 먼저 돌린다");
+        return;
+    }
+    let data = tmp("dump-db");
+    let store = open_store(&data.0);
+    let mut only = spec(&repos, "full", None);
+    only.exclude_globs.push("*.d.ts".to_owned());
+    let out = ingest(&store, &only, &Arc::new(AtomicBool::new(false)));
+
+    // 파일 사실 — 시각과 자동 증가 id 는 뺀다. 나머지는 바이트에서 나온 값이라 결정적이다.
+    let mut files: Vec<serde_json::Value> = store
+        .query("facts.file_hashes", &json!({ "repoId": 1 }))
+        .expect("files")
+        .into_iter()
+        .collect();
+    files.sort_by_key(|f| f["path"].as_str().unwrap_or_default().to_owned());
+    write_dump("files.json", &json!(files));
+
+    // 캡처 한 페이지 — 화면이 실제로 읽는 단위다 (01 §3.4 `derive.captures_by_file`).
+    let page = store
+        .query(
+            "derive.captures_by_file",
+            &json!({ "fileId": file_id(&store, "src/store/repo.ts") }),
+        )
+        .expect("captures");
+    write_dump("captures.json", &json!(page));
+
+    write_dump(
+        "report.json",
+        &json!({
+            "files": out.files, "changed": out.changed, "captures": out.captures,
+            "commits": out.commits, "deleted": out.deleted, "warnings": out.warnings,
+            "cancelled": out.cancelled, "escalatedToFull": out.escalated_to_full,
+        }),
+    );
+    assert!(out.files > 0, "픽스처에서 파일을 하나도 읽지 못했다");
+}
+
+fn file_id(store: &Store, path: &str) -> i64 {
+    store
+        .query("derive.files", &json!({ "repoId": 1 }))
+        .expect("files")
+        .into_iter()
+        .find(|r| r["path"].as_str() == Some(path))
+        .and_then(|r| r["id"].as_i64())
+        .unwrap_or_default()
+}
+
+// ───────── 실제 사전으로 (03 §7 · M1 「끝났다는 증거」) ─────────
+//
+// 위의 테스트들은 쿼리 하나로 계약을 고정한다. 여기서는 **배포되는 사전 전량**을 얹어
+// 실제로 몇 개의 사용처가 나오고 얼마나 걸리는지를 잰다.
+
+/// `dictionary/ts/` 를 읽어 인제스트가 받는 것과 같은 `LangSpec` 을 만든다.
+fn real_langs() -> Vec<LangSpec> {
+    #[derive(serde::Deserialize)]
+    struct Meta {
+        extensions: BTreeMap<String, Vec<String>>,
+    }
+    #[derive(serde::Deserialize)]
+    struct Concept {
+        id: String,
+        #[serde(default)]
+        queries: Vec<QueryRef>,
+    }
+    #[derive(serde::Deserialize)]
+    struct QueryRef {
+        grammars: Vec<String>,
+        file: String,
+    }
+
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../../dictionary/ts")
+        .components()
+        .collect::<PathBuf>();
+    let meta: Meta =
+        serde_yaml::from_str(&std::fs::read_to_string(dir.join("_lang.yaml")).expect("_lang.yaml"))
+            .expect("meta");
+
+    let mut by_grammar: BTreeMap<String, Vec<QuerySpec>> = BTreeMap::new();
+    for id in ["_imports", "_blocks"] {
+        let scm = std::fs::read_to_string(dir.join(format!("{id}.scm"))).expect("system query");
+        for grammar in meta.extensions.keys() {
+            by_grammar
+                .entry(grammar.clone())
+                .or_default()
+                .push(QuerySpec {
+                    id: id.to_owned(),
+                    scm: scm.clone(),
+                });
+        }
+    }
+    let mut files: Vec<PathBuf> = std::fs::read_dir(&dir)
+        .expect("dict dir")
+        .filter_map(|e| e.ok().map(|e| e.path()))
+        .filter(|p| p.extension().is_some_and(|e| e == "yaml"))
+        .filter(|p| p.file_name().is_some_and(|n| n != "_lang.yaml"))
+        .collect();
+    files.sort();
+    for file in files {
+        let concept: Concept =
+            serde_yaml::from_str(&std::fs::read_to_string(&file).expect("read")).expect("concept");
+        for entry in &concept.queries {
+            let scm = std::fs::read_to_string(dir.join(entry.file.trim_start_matches("./")))
+                .expect("query file");
+            for grammar in &entry.grammars {
+                by_grammar
+                    .entry(grammar.clone())
+                    .or_default()
+                    .push(QuerySpec {
+                        id: concept.id.clone(),
+                        scm: scm.clone(),
+                    });
+            }
+        }
+    }
+    by_grammar
+        .into_iter()
+        .filter_map(|(grammar, queries)| {
+            let extensions = meta.extensions.get(&grammar)?.clone();
+            Some(LangSpec {
+                grammar,
+                extensions,
+                max_file_bytes: 512 * 1024,
+                queries,
+            })
+        })
+        .collect()
+}
+
+fn real_spec(root: &Path) -> JobSpec {
+    let mut out = spec(root, "full", None);
+    out.langs = real_langs();
+    out.exclude_globs.push("*.d.ts".to_owned());
+    out
+}
+
+#[test]
+fn the_shipped_dictionary_finds_sites_in_the_fixture() {
+    let repos = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../../fixtures/repos/tiny")
+        .components()
+        .collect::<PathBuf>();
+    if !repos.join(".git").is_dir() {
+        eprintln!("skip: bash scripts/make-fixture-repo.sh tiny 를 먼저 돌린다");
+        return;
+    }
+    let data = tmp("real-db");
+    let store = open_store(&data.0);
+    let started = std::time::Instant::now();
+    let out = ingest(
+        &store,
+        &real_spec(&repos),
+        &Arc::new(AtomicBool::new(false)),
+    );
+
+    println!(
+        "tiny: 파일 {} · 캡처 {} · 커밋 {} · {} ms",
+        out.files,
+        out.captures,
+        out.commits,
+        started.elapsed().as_millis()
+    );
+    assert!(
+        out.captures > 100,
+        "사전 전량이 캡처를 {} 개밖에 못 냈다",
+        out.captures
+    );
+    // 개념마다 최소 한 곳은 잡혀야 사전이 픽스처에 대해 살아 있는 것이다.
+    let ids: std::collections::BTreeSet<String> = store
+        .query(
+            "derive.captures_by_file",
+            &json!({ "fileId": file_id(&store, "src/index.ts") }),
+        )
+        .expect("captures")
+        .into_iter()
+        .filter_map(|r| r["query_id"].as_str().map(str::to_owned))
+        .collect();
+    assert!(
+        ids.len() >= 5,
+        "한 파일에서 개념 {} 종만 잡혔다: {ids:?}",
+        ids.len()
+    );
+}
+
+/// 실제 리포 검증 (03 구현 체크리스트 「projectox 실리포 검증」).
+/// 이 리포 자신이 TypeScript 실물이다 — `CHICKADEE_REAL_REPO` 로 다른 리포를 가리킬 수 있다.
+#[test]
+fn a_real_repository_ingests_within_the_budget() {
+    let at = std::env::var("CHICKADEE_REAL_REPO").unwrap_or_else(|_| {
+        Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../..")
+            .components()
+            .collect::<PathBuf>()
+            .to_string_lossy()
+            .into_owned()
+    });
+    let root = Path::new(&at);
+    if !root.join(".git").is_dir() {
+        eprintln!("skip: {at} 는 git 리포가 아니다");
+        return;
+    }
+    let data = tmp("real-repo-db");
+    let store = open_store(&data.0);
+    let started = std::time::Instant::now();
+    let out = ingest(&store, &real_spec(root), &Arc::new(AtomicBool::new(false)));
+    let ms = started.elapsed().as_millis();
+
+    println!(
+        "실리포: 파일 {} · 파싱 {} · 캡처 {} · 커밋 {} · 경고 {} · {ms} ms",
+        out.files, out.changed, out.captures, out.commits, out.warnings
+    );
+    assert!(out.files > 20, "실리포에서 파일 {} 개만 읽었다", out.files);
+    assert!(
+        out.captures > 500,
+        "실리포에서 캡처 {} 개만 냈다",
+        out.captures
+    );
+    // 03 §7 의 예산은 10만 줄에 15s 다. 이 리포는 그보다 훨씬 작으므로 넉넉히 잡아도
+    // 넘으면 무언가 잘못된 것이다.
+    assert!(ms < 15_000, "{ms} ms 걸렸다 — 03 §7 예산을 넘는다");
+}

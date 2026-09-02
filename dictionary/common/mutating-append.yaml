@@ -1,0 +1,20 @@
+schema: 1
+id: common/mutating-append
+universal: null
+name: { ko: "있던 묶음에 직접 더하기", en: "Mutating append" }
+token: null
+grammars: []
+essential: false
+difficulty: 2
+prereq: []
+confusions: []
+dict:
+  one_liner: "새 묶음을 만들지 않고 <b>있던 묶음</b>을 그 자리에서 늘리는 표기."
+  why: >-
+    가장 짧고 빠른 방법이라 어느 언어에나 있습니다. 대신 묶음이 <b>같은 것</b>인 채로 내용만 바뀌므로,
+    바뀐 걸 알아채는 쪽이 없다는 것이 대가예요.
+  trace: []
+rule: "원본이 바뀐다. 공유된 값이라면 이 사실이 곧 위험이다."
+ok: "있던 묶음을 그대로 늘립니다. 새 묶음은 생기지 않습니다."
+misconceptions:
+  - "더한 결과가 새 묶음으로 나온다 — 나오지 않습니다."

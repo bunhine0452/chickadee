@@ -1,0 +1,96 @@
+schema: 1
+id: ts/array-foreach
+universal: common/iterate
+name: { ko: "배열 훑기(forEach)", en: "Iterating with forEach" }
+token: "forEach"
+grammars: [typescript, tsx, javascript]
+framework: null
+essential: false
+difficulty: 2
+prereq: [ts/arrow-function, ts/array-basics]
+confusions: [ts/array-map-immutable, ts/for-of]
+
+dict:
+  one_liner: "<code>forEach</code> 는 항목마다 함수를 부르기만 하고 <code>undefined</code> 를 낸다."
+  why: >-
+    항목마다 <b>바깥에 무언가를 시키는</b> 자리입니다 — 로그를 찍거나, 저장을 부르거나.
+    {{site.line}}행은 값을 모으지 않으므로, 결과가 필요하면 이 줄이 아니라 다른 표기를 씁니다.
+  trace:
+    - "{{pick.1|code}} 의 항목을 앞에서부터 하나씩 꺼낸다."
+    - "항목마다 {{pick.3|code}}{{pick.3|josa:을,를}} 부른다. 돌려준 값은 버린다."
+    - "{{site.line}}행 전체의 값은 <code>undefined</code> 다."
+
+rule: "<b>결과를 모으면 map, 시키기만 하면 forEach.</b> forEach 의 값은 언제나 <code>undefined</code> 다."
+result:
+  label: "{{site.line}}행의 값"
+  value: "undefined"
+  note: "돌려주는 것이 없다"
+ok: >-
+  <code>forEach</code> 는 항목마다 함수를 부르고 <b>아무것도 돌려주지 않습니다</b>. 바깥을 바꾸는
+  일(출력·저장·전송)에 쓰는 표기예요.
+payoff: "값을 모으지 않겠다는 뜻을 이름으로 밝히는 자리입니다 — 읽는 사람이 결과를 찾지 않게 됩니다."
+bridge: "{{pick.3|code}}{{pick.3|josa:이,가}} <code>return</code> 으로 값을 돌려줘도 <code>forEach</code> 는 그 값을 받지 않습니다."
+misconceptions:
+  - "<code>forEach</code> 결과를 대입하면 배열이 온다 — <code>undefined</code> 가 옵니다."
+  - "<code>break</code> 로 중간에 멈출 수 있다 — 없습니다. 멈추려면 <code>for…of</code> 를 씁니다."
+
+point:
+  - q: "{{site.line}}행에서 <b>항목마다 실제로 불리는 것</b>을 짚어 보세요."
+    hint: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+    answer: pick.3
+    diag:
+      pick.1:
+        t: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>훑을 대상</b>입니다. 항목마다 불리는 것은 그 뒤에 넘긴 함수예요."
+        edge:
+          h: "가장 날카로운 자리 — 대상과 하는 일"
+          code:
+            - "{{pick.1}}.forEach(f)   // f 가 항목 수만큼 불린다"
+            - "{{pick.1}}              // 아무 일도 일어나지 않는다"
+      pick.2:
+        t: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>훑는다는 이름</b>이고, 무슨 일을 할지는 뒤에 넘긴 함수 안에 있습니다."
+        edge:
+          h: "가장 날카로운 자리 — 이름과 몸통"
+          code:
+            - "xs.forEach((x) => save(x))   // save 가 불린다"
+            - "xs.forEach(() => {})         // 아무 일도 안 한다"
+
+meaning:
+  - q: "{{site.line}}행의 결과를 변수에 담으면 그 변수에는 무엇이 들어갈까요?"
+    hint: "forEach 가 돌려주는 것."
+    options:
+      - t: "<code>undefined</code>"
+      - t: "항목 수만큼의 새 배열"
+        diag:
+          t: "새 배열을 받는 건 <code>map</code> 입니다. <code>forEach</code> 는 돌기만 하고 <code>undefined</code> 를 내요."
+          edge:
+            h: "가장 날카로운 자리 — 돌려주는 게 있나"
+            code:
+              - "[1,2].forEach((n) => n * 2)   // undefined"
+              - "[1,2].map((n) => n * 2)       // [2, 4]"
+      - t: "훑은 항목의 개수"
+        diag:
+          t: "개수(새 길이)를 돌려주는 건 <code>push</code> 입니다. <code>forEach</code> 는 숫자도 내지 않아요."
+          edge:
+            h: "가장 날카로운 자리 — 숫자를 내는 쪽"
+            code:
+              - "[1].push(2)               // 2  (새 길이)"
+              - "[1].forEach((n) => n)     // undefined"
+      - t: "원본 배열"
+        diag:
+          t: "자기 자신을 돌려줘 이어 붙일 수 있는 건 배열 메서드 중에서도 일부입니다. <code>forEach</code> 뒤에는 아무것도 이어 붙일 수 없어요."
+          edge:
+            h: "가장 날카로운 자리 — 이어 붙일 수 있나"
+            code:
+              - "xs.filter(f).map(g)      // 이어진다"
+              - "xs.forEach(f).map(g)     // undefined 에는 map 이 없다"
+
+queries:
+  - { grammars: [typescript, tsx, javascript], file: ./array-foreach.scm }
+
+examples:
+  - code: "rows.forEach((r) => send(r))"
+    expect: { sites: 1, form: forEach, picks: { 1: "rows", 2: "forEach" } }
+  - code: "items.forEach(i => console.log(i))"
+    expect: { sites: 1, picks: { 1: "items" } }
+  - code: "const doubled = nums.map((n) => n * 2)"
+    expect: none

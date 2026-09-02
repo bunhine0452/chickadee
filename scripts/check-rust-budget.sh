@@ -4,6 +4,7 @@
 #   2. forbidden words  no domain vocabulary in Rust identifiers or strings
 #   3. no SQL           no SQL literal in Rust source (SQL runs by name from the TS catalog)
 #   4. no git binary    Command::new("git")
+#   5. no raw output    println!/eprintln!/dbg! — logs go through tracing (01 §6)
 # tests and benches are outside the budget and the forbidden words (D40).
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -74,6 +75,14 @@ if hits=$(files | xargs -r grep -nE '\b(SELECT|INSERT[[:space:]]+INTO|UPDATE|DEL
   echo "FAIL SQL literal: SQL present in Rust source (01 §1.1)"; echo "$hits"; fail=1
 else
   echo "ok   no SQL literals"
+fi
+
+# ── 5. no raw output ── logs go through tracing with the forbidden fields skipped (01 §6).
+# println!/eprintln!/dbg! write straight to the terminal, past every redaction rule there is.
+if hits=$(files | xargs -r grep -nE '\b(println!|eprintln!|dbg!)' 2>/dev/null) && [ -n "$hits" ]; then
+  echo "FAIL raw output: use tracing, not println!/eprintln!/dbg! (01 §6)"; echo "$hits"; fail=1
+else
+  echo "ok   no raw output"
 fi
 
 # ── 4. no git binary ── libgit2 does not run hooks (06 §4.1).

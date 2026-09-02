@@ -1,0 +1,103 @@
+schema: 1
+id: ts/conditional-ternary
+universal: common/conditional-expression
+name: { ko: 삼항 조건식, en: Conditional (ternary) expression }
+token: "? :"
+grammars: [typescript, tsx, javascript]
+framework: null
+essential: true
+difficulty: 3
+prereq: [ts/const-declaration, ts/undefined-null]
+confusions: [ts/logical-or-default, ts/nullish-coalescing]
+
+dict:
+  one_liner: "<code>조건 ? 이것 : 저것</code> — 고른 쪽 하나가 그 자리의 값이 된다."
+  why: >-
+    <code>if</code> 는 흐름을 나누지만 값을 남기지 않습니다. 값이 필요한 자리 — 변수에 담을 때,
+    인자로 넘길 때, 화면에 그릴 때 — 에는 <b>식</b>이 있어야 하고 그게 이 표기예요.
+    {{site.line}}행은 {{pick.1|code}}{{pick.1|josa:을,를}} 한 번 보고
+    {{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}} 중 하나만 값으로 남깁니다.
+  trace:
+    - "{{pick.1|code}}{{pick.1|josa:을,를}} 참·거짓으로 판단한다."
+    - "참이면 {{pick.2|code}}{{pick.2|josa:을,를}} 계산한다 — 이때 {{pick.3|code}} 쪽은 계산조차 하지 않는다."
+    - "거짓이면 반대로 {{pick.3|code}}{{pick.3|josa:을,를}} 계산한다. 그 값이 {{site.line}}행의 결과다."
+
+rule: "<b>조건 하나에 값 둘, 남는 것은 하나.</b> 고르지 않은 쪽은 계산하지 않는다."
+result:
+  label: "{{pick.1|code}}{{pick.1|josa:이,가}} 참일 때"
+  value: "{{pick.2}}"
+  note: "거짓이면 {{pick.3}}"
+ok: >-
+  <code>?</code> 앞이 조건, <code>:</code> 를 사이에 둔 둘이 후보입니다. 조건이 참이면
+  {{pick.2|code}}{{pick.2|josa:이,가}}, 거짓이면 {{pick.3|code}}{{pick.3|josa:이,가}}
+  {{site.line}}행의 값이 됩니다.
+payoff: >-
+  같은 일을 <code>if</code> 로 쓰면 변수를 먼저 비워 두고 두 가지에서 채워야 합니다.
+  식으로 쓰면 <b>이름이 생기는 순간 값이 정해져</b> 중간 상태가 없어져요.
+bridge: >-
+  <code>?</code> 와 <code>:</code> 는 한 짝입니다. <code>:</code> 뒤가 빠지면 값이 하나만 남아
+  이 표기가 성립하지 않아요.
+misconceptions:
+  - "양쪽 다 계산된 뒤에 하나가 버려진다 — 고른 쪽만 계산합니다."
+  - "<code>if</code> 로 언제나 바꿔 쓸 수 있다 — 값이 필요한 자리에서는 식이라야 담깁니다."
+
+point:
+  - q: "{{site.line}}행에서 <b>조건이 거짓일 때</b> 남는 값을 짚어 보세요."
+    hint: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+    answer: pick.3
+    diag:
+      pick.1:
+        t: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>판단하는 쪽</b>입니다. 이 값 자체가 결과로 남지는 않고, 어느 쪽을 남길지만 정해요."
+        edge:
+          h: "가장 날카로운 자리 — 판단과 결과"
+          code:
+            - "done ? 'A' : 'B'   // 남는 것은 'A' 나 'B'"
+            - "done               // 남는 것은 done 자신"
+      pick.2:
+        t: "{{pick.2|code}}{{pick.2|josa:은,는}} <code>?</code> 바로 뒤, 즉 <b>참일 때</b> 남는 쪽입니다. 거짓일 때 남는 것은 <code>:</code> 뒤예요."
+        edge:
+          h: "가장 날카로운 자리 — 순서가 곧 조건"
+          code:
+            - "조건 ? 참일_때 : 거짓일_때"
+            - "!조건 ? 거짓일_때 : 참일_때   // 뒤집으면 자리도 바뀐다"
+
+meaning:
+  - q: "{{pick.1|code}}{{pick.1|josa:이,가}} 참이면 {{pick.3|code}} 쪽은 어떻게 될까요?"
+    hint: "고른 쪽만 계산한다."
+    options:
+      - t: "계산되지 않는다 — 값이 필요 없으니 건드리지 않는다"
+      - t: "먼저 계산해 두고 버린다"
+        diag:
+          t: "함수의 인자였다면 그 말이 맞습니다 — 인자는 부르기 전에 모두 계산돼요. 이 표기는 고른 쪽만 계산해서, 무거운 계산이나 화면에 그리는 일을 거기 둬도 값이 필요할 때만 돕니다."
+          edge:
+            h: "가장 날카로운 자리 — 인자와 다른 점"
+            code:
+              - "pick(heavy(), light())   // 둘 다 계산"
+              - "ok ? heavy() : light()   // 한쪽만 계산"
+      - t: "<code>undefined</code> 가 된다"
+        diag:
+          t: "고르지 않은 쪽은 값이 되지 않을 뿐 <code>undefined</code> 로 바뀌는 것도 아닙니다. 그 자리의 식은 아예 실행되지 않아요."
+          edge:
+            h: "가장 날카로운 자리 — 안 한 것과 없는 것"
+            code:
+              - "true ? 1 : log()   // log 는 호출되지 않는다"
+              - "[1, undefined][1]  // undefined 는 값이다"
+      - t: "둘을 이어 붙인 값이 된다"
+        diag:
+          t: "값 둘 중 <b>하나만</b> 남습니다. 둘을 함께 쓰고 싶으면 이 표기가 아니라 이어 붙이는 식을 따로 써야 해요."
+          edge:
+            h: "가장 날카로운 자리 — 고르기와 잇기"
+            code:
+              - "ok ? 'a' : 'b'   // 'a' 또는 'b'"
+              - "'a' + 'b'        // 'ab'"
+
+queries:
+  - { grammars: [typescript, tsx, javascript], file: ./conditional-ternary.scm }
+
+examples:
+  - code: "const label = done ? '완료' : '진행 중'"
+    expect: { sites: 1, form: ternary, picks: { 1: "done", 2: "'완료'", 3: "'진행 중'" } }
+  - code: "const cls = active ? 'on' : 'off'"
+    expect: { sites: 1, picks: { 1: "active" } }
+  - code: "if (done) { show() } else { hide() }"
+    expect: none

@@ -93,6 +93,8 @@ export const ipc = {
 } as const;
 
 export { devPanel, IpcError, toIpcError };
+export { log, REDACTED, safeFields, scrub, setSink } from './logger.js';
+export type { Fields, Level, Sink } from './logger.js';
 export { on } from './events.js';
 export type { IpcEvents, UnlistenFn } from './events.js';
 export type { IpcErrorCode } from './errors.js';

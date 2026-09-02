@@ -146,8 +146,15 @@ describe('미지 개념 수', () => {
   });
 
   test('자기 자신은 세지 않는다', () => {
-    const self = { ...site, lineConcepts: ['ts/optional-chaining'] };
-    expect(unknownCount(self, () => 0, dict)).toBe(0);
+    // 사전이 실물이라 선행 폐포가 값을 더한다 — 비교 대상은 「자기가 목록에 있을 때와 없을 때」다.
+    const withSelf = { ...site, lineConcepts: ['ts/optional-chaining'] };
+    const without = { ...site, lineConcepts: [] };
+    expect(unknownCount(withSelf, () => 0, dict)).toBe(unknownCount(without, () => 0, dict));
+  });
+
+  test('선행 개념도 미지에 든다 — 사전이 실제로 물려 있다', () => {
+    const bare = { ...site, lineConcepts: [] };
+    expect(unknownCount(bare, () => 0, dict)).toBeGreaterThan(0);
   });
 });
 

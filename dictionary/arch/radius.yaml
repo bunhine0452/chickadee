@@ -1,0 +1,20 @@
+schema: 1
+id: arch/radius
+universal: null
+name: { ko: "영향 반경", en: "Blast radius" }
+token: null
+grammars: []
+framework: null
+track_default: t2
+essential: false
+difficulty: 3
+prereq: []
+confusions: []
+dict:
+  one_liner: "이 줄을 고치면 <b>같이 흔들리는 곳</b>이 어디까지인가."
+  why: >-
+    고치기 전에 알아야 하는 것은 「어디가 깨질 수 있는가」입니다. 이름을 바꾸면 부르는 쪽이,
+    돌려주는 모양을 바꾸면 받는 쪽이 흔들려요. 반경을 먼저 재면 고칠지 말지부터 달라집니다.
+  trace: []
+rule: "밖으로 드러난 것(이름·모양·순서)을 바꾸면 반경이 커지고, 안쪽만 바꾸면 반경은 그 파일에 머문다."
+ok: "드러난 것을 그대로 두고 안쪽만 바꾸면 흔들리는 곳이 없습니다. 반경은 「누가 이걸 보고 있나」로 셉니다."

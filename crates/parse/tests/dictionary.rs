@@ -13,7 +13,8 @@ use serde::Deserialize;
 
 const BIG: usize = 512 * 1024;
 /// 03 §3.2. Anything else in a query is a name nothing downstream knows.
-const CAPTURE: &str = r"^(site|pick\.[1-9]|hole|ctx\.[a-z_]+|import\.source|block\.(function|name))$";
+const CAPTURE: &str =
+    r"^(site|pick\.[1-9]|hole|ctx\.[a-z_]+|import\.source|block\.(function|name))$";
 
 #[derive(Debug, Deserialize)]
 struct Concept {
@@ -68,8 +69,8 @@ fn concepts() -> Vec<(PathBuf, Concept)> {
         files.sort();
         for file in files {
             let text = std::fs::read_to_string(&file).expect("read");
-            let concept: Concept = serde_yaml::from_str(&text)
-                .unwrap_or_else(|e| panic!("{}: {e}", file.display()));
+            let concept: Concept =
+                serde_yaml::from_str(&text).unwrap_or_else(|e| panic!("{}: {e}", file.display()));
             out.push((file, concept));
         }
     }
@@ -101,7 +102,10 @@ fn run(grammar: &str, id: &str, scm: &str, code: &str) -> Vec<Capture> {
 
 #[test]
 fn there_is_at_least_one_language_to_check() {
-    assert!(!langs().is_empty(), "dictionary/<lang>/_lang.yaml 이 하나도 없다");
+    assert!(
+        !langs().is_empty(),
+        "dictionary/<lang>/_lang.yaml 이 하나도 없다"
+    );
 }
 
 #[test]
@@ -157,7 +161,11 @@ fn every_capture_name_is_one_the_pipeline_knows() {
                     .split(|c: char| !(c.is_ascii_alphanumeric() || c == '.' || c == '_'))
                     .next()
             }) {
-                assert!(allowed.is_match(name), "{}: @{name} 은 규약 밖이다", concept.id);
+                assert!(
+                    allowed.is_match(name),
+                    "{}: @{name} 은 규약 밖이다",
+                    concept.id
+                );
             }
         }
     }
@@ -192,15 +200,26 @@ fn no_pattern_is_dead_and_every_example_matches_what_it_says() {
 
 fn check(id: &str, example: &Example, sites: usize, caps: &[Capture]) {
     if example.expect.as_str() == Some("none") {
-        assert_eq!(sites, 0, "{id}: 음성 예시에서 매치가 났다\n{}", example.code);
+        assert_eq!(
+            sites, 0,
+            "{id}: 음성 예시에서 매치가 났다\n{}",
+            example.code
+        );
         return;
     }
-    let map = example.expect.as_mapping().expect("expect 는 매핑이거나 none");
+    let map = example
+        .expect
+        .as_mapping()
+        .expect("expect 는 매핑이거나 none");
     let get = |key: &str| map.get(serde_yaml::Value::String(key.to_owned()));
     if let Some(n) = get("sites").and_then(serde_yaml::Value::as_u64) {
         assert_eq!(sites as u64, n, "{id}: sites\n{}", example.code);
     } else {
-        assert!(sites > 0, "{id}: 양성 예시인데 매치가 없다\n{}", example.code);
+        assert!(
+            sites > 0,
+            "{id}: 양성 예시인데 매치가 없다\n{}",
+            example.code
+        );
     }
     // picks·ctx·form·hole 은 정렬 첫 Site 기준이다 (03 §4.4).
     let Some(first) = caps

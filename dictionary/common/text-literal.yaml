@@ -1,0 +1,21 @@
+schema: 1
+id: common/text-literal
+universal: null
+name: { ko: 글자 값, en: Text literal }
+token: null
+grammars: []
+essential: false
+difficulty: 1
+prereq: []
+confusions: []
+dict:
+  one_liner: "따옴표 안은 계산하지 않는다. 적힌 글자가 곧 값이다."
+  why: >-
+    프로그램은 적힌 낱말을 기본적으로 <b>이름</b>으로 읽습니다. 따옴표는 「여기서부터 여기까지는
+    이름이 아니라 글자」라고 표시하는 울타리예요. 어느 언어에서나 이 울타리가 있고, 다른 것은
+    울타리로 무엇을 쓰는지와 안에서 값을 끼워 넣을 수 있는지뿐입니다.
+  trace: []
+rule: "따옴표 안은 글자, 밖은 이름이다."
+ok: "따옴표로 감싼 것은 프로그램이 찾아 나서지 않고 적힌 그대로 값이 됩니다."
+misconceptions:
+  - "따옴표 안에 이름을 적으면 그 값이 들어간다 — 그러려면 언어마다 정해진 끼워 넣기 표기가 따로 있습니다."

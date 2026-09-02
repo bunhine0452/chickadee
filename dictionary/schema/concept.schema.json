@@ -117,7 +117,7 @@
           "properties": {
             "one_liner": {
               "type": "string",
-              "maxLength": 80
+              "maxLength": 400
             },
             "why": {
               "type": "string"
@@ -202,7 +202,7 @@
                       "properties": {
                         "t": {
                           "type": "string",
-                          "maxLength": 300
+                          "maxLength": 1200
                         },
                         "edge": {
                           "type": "object",

@@ -1,0 +1,81 @@
+schema: 1
+id: ts/string-literal
+universal: common/text-literal
+name: { ko: 문자열 리터럴, en: String literal }
+token: "'…'"
+grammars: [typescript, tsx, javascript]
+framework: null
+essential: true
+difficulty: 1
+prereq: []
+confusions: [ts/template-literal]
+
+dict:
+  one_liner: "따옴표 안은 계산하지 않는다. 적힌 글자 그대로가 값이다."
+  why: >-
+    따옴표가 없으면 {{pick.1}} 안의 글자는 <b>이름</b>으로 읽힙니다 — 어딘가에 그 이름으로
+    묶어 둔 값이 있어야 하고, 없으면 그 자리에서 멈춰요. 따옴표는 「이건 이름이 아니라
+    글자다」라고 표시하는 울타리입니다.
+  trace:
+    - "{{site.line}}행의 여는 따옴표부터 닫는 따옴표까지를 한 덩어리로 읽는다."
+    - "그 안은 계산하지 않는다 — {{pick.1|code}} 그대로가 값이다."
+    - "같은 줄의 다른 값과 이어 붙일 때는 문자열끼리 이어진다."
+
+rule: "<b>따옴표 안은 글자, 밖은 이름이다.</b> 작은따옴표와 큰따옴표는 하는 일이 같다."
+result:
+  label: "{{site.line}}행의 값"
+  value: "{{pick.1}}"
+  note: "따옴표를 뺀 글자만"
+ok: >-
+  {{pick.1|code}}{{pick.1|josa:은,는}} <b>적힌 글자 그대로</b>가 값입니다. 따옴표 안의 내용을
+  프로그램이 이름으로 찾아보는 일은 없어요.
+payoff: >-
+  따옴표 하나로 「이건 사람이 읽을 글자」와 「이건 내가 만든 이름」이 갈립니다. 이 구분이
+  없으면 {{site.line}}행은 없는 이름을 찾다가 멈춥니다.
+bridge: >-
+  값을 끼워 넣고 싶어지면 따옴표 대신 백틱을 씁니다 — 그때부터는 안쪽의 <code>${…}</code> 만
+  계산되고 나머지는 여전히 글자 그대로입니다.
+misconceptions:
+  - "작은따옴표와 큰따옴표가 다르게 동작한다 — 아니요. 고르는 기준은 팀의 포매터입니다."
+  - "따옴표 안에 이름을 쓰면 그 값이 들어간다 — 아니요. 그러려면 백틱과 <code>${…}</code> 가 필요합니다."
+
+meaning:
+  - q: "{{site.line}}행의 따옴표를 지우면 무엇이 달라질까요?"
+    hint: "따옴표는 「이름으로 찾지 마라」는 표시입니다."
+    options:
+      - t: "안의 글자가 <b>이름</b>으로 읽힌다 — 그 이름이 없으면 그 자리에서 멈춘다"
+      - t: "아무것도 달라지지 않는다"
+        diag:
+          t: "숫자만 적혀 있었다면 값이 남기는 합니다. 글자가 들어 있으면 프로그램은 그것을 이름으로 찾아 나서고, 묶어 둔 적이 없으면 멈춰요."
+          edge:
+            h: "가장 날카로운 자리 — 따옴표를 지운 뒤"
+            code:
+              - "const a = 'hi'   // 글자 hi"
+              - "const b = hi     // hi 라는 이름을 찾는다"
+      - t: "글자는 그대로고 타입만 바뀐다"
+        diag:
+          t: "따옴표는 타입 표시가 아니라 <b>여기부터 여기까지가 글자</b>라는 울타리입니다. 울타리를 지우면 글자 자체가 남지 않아요."
+          edge:
+            h: "가장 날카로운 자리 — 울타리냐 표시냐"
+            code:
+              - "const a = '42'   // 글자 42"
+              - "const b = 42     // 숫자 42"
+      - t: "빈 문자열이 된다"
+        diag:
+          t: "빈 문자열은 따옴표를 <b>둘 다 남기고</b> 안을 비웠을 때 나옵니다. 따옴표를 지우는 것과는 다른 일이에요."
+          edge:
+            h: "가장 날카로운 자리 — 비운 것과 지운 것"
+            code:
+              - "const a = ''     // 길이 0 인 글자"
+              - "const b =        // 적을 값이 없어 읽지 못한다"
+
+queries:
+  - { grammars: [typescript, tsx, javascript], file: ./string-literal.scm }
+
+examples:
+  - code: "const name = '한빈'"
+    expect: { sites: 1, form: quoted, picks: { 1: "'한빈'" } }
+  - code: "const path = './util.ts'"
+    expect: { sites: 1, picks: { 1: "'./util.ts'" } }
+  - code: "const max = 10"
+    expect: none

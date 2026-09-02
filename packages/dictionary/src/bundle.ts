@@ -37,12 +37,16 @@ const FILES: ReadonlyMap<string, string> = new Map(
     .filter((pair): pair is readonly [string, string] => pair[0] !== null),
 );
 
-/** 번들에 든 언어 네임스페이스 — `_lang.yaml` 이 있는 디렉터리만 언어로 친다. */
+/**
+ * 번들에 든 네임스페이스 전부. `_lang.yaml` 은 **있어도 되고 없어도 된다** —
+ * `common/`·`arch/` 는 개념만 있는 네임스페이스이고 문법에 매이지 않는다 (03 §3.1·§4.1).
+ * 03 §4.1 의 그림에도 `common/` 에는 `_lang.yaml` 이 없다.
+ */
 export function bundledLangs(): string[] {
   const out = new Set<string>();
   for (const rel of FILES.keys()) {
     const [lang, file] = rel.split('/');
-    if (lang !== undefined && file === '_lang.yaml') out.add(lang);
+    if (lang !== undefined && file !== undefined && file.endsWith('.yaml')) out.add(lang);
   }
   return [...out].sort();
 }

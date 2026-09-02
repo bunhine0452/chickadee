@@ -28,12 +28,18 @@ tauri-plugin-log = "2"
 thiserror = { workspace = true }
 tracing = { workspace = true }
 ignore = "0.4"
+# Test-only: the app never reads YAML (D40). The pipeline test builds the real
+# LangSpec from the shipped dictionary so the measurement is of the real thing.
+serde_yaml = "0.9"
 
 [dev-dependencies]
 # `test` gives the mock runtime the pipeline test drives the job through.
 tauri = { version = "2", features = ["test"] }
 git2 = { version = "0.21", default-features = false }
 ignore = "0.4"
+# Test-only: the app never reads YAML (D40). The pipeline test builds the real
+# LangSpec from the shipped dictionary so the measurement is of the real thing.
+serde_yaml = "0.9"
 
 [lints]
 workspace = true

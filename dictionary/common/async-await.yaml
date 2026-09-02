@@ -1,0 +1,20 @@
+schema: 1
+id: common/async-await
+universal: null
+name: { ko: "기다렸다 값 꺼내기", en: "Await" }
+token: null
+grammars: []
+essential: false
+difficulty: 3
+prereq: []
+confusions: []
+dict:
+  one_liner: "아직 오지 않은 값을 <b>그 줄에서 기다렸다가</b> 꺼내 이어 쓰는 표기."
+  why: >-
+    시간이 걸리는 일을 위에서 아래로 읽히게 적는 방법입니다. 기다리는 동안 멈추는 것은 그 흐름
+    하나이고 프로그램 전체가 아니라는 점이 어느 언어에서나 같아요.
+  trace: []
+rule: "기다리면 값이 나오고, 안 기다리면 「아직 오지 않은 것」이 나온다."
+ok: "값이 준비될 때까지 그 흐름만 멈췄다가, 준비되면 안에 든 값으로 이어 갑니다."
+misconceptions:
+  - "기다리는 동안 프로그램 전체가 멈춘다 — 그 흐름만 멈춥니다."

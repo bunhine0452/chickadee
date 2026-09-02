@@ -5,7 +5,6 @@
  * 문체 규칙이 린트인 이유: 「틀렸다」 대신 「그것이 참이 되는 조건」은 정본 §3-2 의
  * 불변 규칙이고, 조사 하드코딩은 값이 무엇인지 모르는 채로 반드시 틀린다 (03 §4.3).
  */
-import { bundledFile } from './bundle.js';
 import type { Concept, LangMeta } from './schema.js';
 import { keyOf, type Dict } from './load.js';
 
@@ -51,8 +50,11 @@ function checkLang(lang: string, meta: LangMeta, dict: Dict, issues: LintIssue[]
     if (!dict.concepts.has(alt.gap)) add('alternatives-exists', alt.gap);
     if (!dict.concepts.has(alt.present)) add('alternatives-exists', alt.present);
   }
-  for (const id of ['_imports', '_blocks']) {
-    if (bundledFile(`${lang}/${id}.scm`) === undefined) add('system-query', `${id}.scm 이 없다`);
+  // 시스템 쿼리는 문법마다 하나면 된다 — 어느 네임스페이스가 갖고 있든 상관없다.
+  for (const grammar of meta.grammars) {
+    for (const id of ['_imports', '_blocks']) {
+      if (!dict.queries.has(keyOf(id, grammar))) add('system-query', `${grammar}/${id}.scm 이 없다`);
+    }
   }
 }
 

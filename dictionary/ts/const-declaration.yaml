@@ -1,0 +1,101 @@
+schema: 1
+id: ts/const-declaration
+universal: common/variable-binding
+name: { ko: const 선언, en: const declaration }
+token: "const"
+grammars: [typescript, tsx, javascript]
+framework: null
+essential: true
+difficulty: 1
+prereq: []
+confusions: []
+
+dict:
+  one_liner: "<code>const</code> 는 이름 하나에 값을 묶는다. 그 묶음은 다시 바꿀 수 없다."
+  why: >-
+    이름이 없으면 같은 값을 쓸 때마다 다시 만들어야 하고, 이 줄이 무엇을 만드는 중인지도
+    코드에 남지 않습니다. {{pick.2|code}}{{pick.2|josa:은,는}} {{pick.3|code}} 에 붙인 이름이고,
+    {{site.line}}행 아래로는 그 이름으로 같은 값을 가리킵니다.
+  trace:
+    - "{{pick.3|code}}{{pick.3|josa:을,를}} 먼저 계산한다."
+    - "그 값에 {{pick.2|code}} 라는 이름을 붙인다."
+    - "{{site.line}}행 아래로 {{pick.2|code}}{{pick.2|josa:은,는}} 그 값이다."
+
+rule: "<b><code>const</code> 는 이름과 값을 묶는 것이지 값을 얼려 두는 것이 아니다.</b> 객체 안은 그대로 바뀐다."
+result:
+  label: "{{site.line}}행 아래의 {{pick.2}}"
+  value: "{{pick.3}}"
+  note: "이름은 다시 묶을 수 없다"
+ok: >-
+  <code>const</code> 는 {{pick.2|code}} 라는 이름을 {{pick.3|code}} 에 <b>한 번</b> 묶습니다.
+  아래에서 <code>{{pick.2}} = …</code> 로 다시 대입하면 그 자리에서 멈춥니다.
+payoff: >-
+  이름이 붙는 순간 {{site.line}}행은 「무엇을 만드는 줄」이 됩니다. 이름 없이 값을 흘려보내면
+  다음 줄에서 그 값을 처음부터 다시 만들어야 해요.
+bridge: >-
+  {{pick.2|code}}{{pick.2|josa:은,는}} {{pick.3|code}} 에 붙은 이름일 뿐입니다 — 아래에서
+  {{pick.2|code}}{{pick.2|josa:을,를}} 볼 때마다 {{pick.3|code}}{{pick.3|josa:을,를}} 떠올리면 됩니다.
+misconceptions:
+  - "<code>const</code> 면 안의 값도 못 바꾼다 — 아니요. <code>const o = {}</code> 여도 <code>o.a = 1</code> 은 됩니다."
+  - "<code>let</code> 이 더 안전하다 — 다시 대입할 일이 없다면 <code>const</code> 가 읽는 사람에게 더 많이 알려 줍니다."
+
+point:
+  - q: "{{site.line}}행에서 <b>이름과 값을 묶는 일을 맡은 낱말</b>을 짚어 보세요."
+    hint: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+    answer: pick.1
+    diag:
+      pick.2:
+        t: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>붙일 이름</b>입니다. 이름은 스스로 묶지 못하고, 묶는 일은 앞의 <code>const</code> 가 합니다."
+        edge:
+          h: "가장 날카로운 자리 — 이름만으로는 아무 일도 안 난다"
+          code:
+            - "const total = 42   // 이름과 값이 묶인다"
+            - "total = 42         // 앞에서 묶은 적이 있어야 한다"
+      pick.3:
+        t: "{{pick.3|code}}{{pick.3|josa:은,는}} 묶이는 <b>값</b>입니다. 값은 이름 없이도 계산되지만, 다음 줄에서 다시 부르려면 이름이 있어야 해요."
+        edge:
+          h: "가장 날카로운 자리 — 값과 이름은 다른 것"
+          code:
+            - "42                 // 계산되고 사라진다"
+            - "const total = 42   // 이름이 남는다"
+
+meaning:
+  - q: "{{site.line}}행 다음 줄에 <code>{{pick.2}} = 0</code> 이라고 쓰면 어떻게 될까요?"
+    hint: "<code>const</code> 가 막는 것은 <b>이름을 다시 묶는 일</b>입니다."
+    options:
+      - t: "그 자리에서 멈춘다 — <code>const</code> 로 묶은 이름에는 다시 대입할 수 없다"
+      - t: "조용히 <code>0</code> 으로 바뀐다"
+        diag:
+          t: "<code>let {{pick.2}} = …</code> 였다면 그 말이 맞습니다. <code>const</code> 로 묶은 이름에 다시 대입하면 TypeError 로 멈춰요."
+          edge:
+            h: "가장 날카로운 자리 — const 냐 let 이냐"
+            code:
+              - "let x = 1;   x = 0   // 1 에서 0 으로"
+              - "const y = 1; y = 0   // TypeError"
+      - t: "경고만 남고 값은 그대로다"
+        diag:
+          t: "타입 검사기가 미리 짚어 주기는 하지만 거기서 끝이 아닙니다. 실행 중에도 같은 자리에서 멈춰요."
+          edge:
+            h: "가장 날카로운 자리 — 검사와 실행 둘 다"
+            code:
+              - "const y = 1"
+              - "y = 0   // 타입 검사에서도, 실행에서도 멈춘다"
+      - t: "<code>{{pick.2}}</code> 안의 값만 바뀐다"
+        diag:
+          t: "<code>{{pick.2}}.a = 0</code> 처럼 <b>안</b>을 고쳤다면 그 말이 맞습니다. <code>{{pick.2}} = 0</code> 은 이름 자체를 다시 묶으려는 것이라 멈춰요."
+          edge:
+            h: "가장 날카로운 자리 — 안이냐 이름이냐"
+            code:
+              - "const o = { a: 1 }; o.a = 2   // 된다"
+              - "const o = { a: 1 }; o = {}    // TypeError"
+
+queries:
+  - { grammars: [typescript, tsx, javascript], file: ./const-declaration.scm }
+
+examples:
+  - code: "const total = 42"
+    expect: { sites: 1, form: const, picks: { 1: "const", 2: "total", 3: "42" } }
+  - code: "let count = 0"
+    expect: { sites: 1, form: let, picks: { 1: "let", 2: "count", 3: "0" } }
+  - code: "count = 1"
+    expect: none

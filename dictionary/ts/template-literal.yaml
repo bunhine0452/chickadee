@@ -1,0 +1,94 @@
+schema: 1
+id: ts/template-literal
+universal: common/string-interpolation
+name: { ko: 템플릿 문자열, en: Template literal }
+token: "`${}`"
+grammars: [typescript, tsx, javascript]
+framework: null
+essential: true
+difficulty: 2
+prereq: [ts/string-literal]
+confusions: [ts/string-literal]
+
+dict:
+  one_liner: "백틱 문자열 안의 <code>${…}</code> 만 계산해 그 자리에 끼워 넣는다."
+  why: >-
+    글자와 값을 섞어 문장을 만드는 일은 화면에 무엇을 띄울 때마다 생깁니다.
+    <code>+</code> 로 이어 붙이면 따옴표와 더하기가 번갈아 나와 읽기 어려워지는데,
+    백틱은 문장을 통째로 두고 값이 들어갈 자리만 표시하게 해 줍니다.
+  trace:
+    - "{{site.line}}행의 백틱 사이 글자는 그대로 둔다."
+    - "{{pick.2|code}} 안의 {{pick.1|code}} 만 계산한다."
+    - "그 값을 글자로 바꿔 그 자리에 끼워 넣고, 이어 붙인 문장이 결과가 된다."
+
+rule: "<b>백틱 안에서 계산되는 것은 <code>${…}</code> 안뿐이다.</b> 나머지는 줄바꿈까지 그대로 남는다."
+result:
+  label: "{{site.line}}행의 값"
+  value: "{{pick.1}} 자리에 값이 들어간 문장"
+  note: "숫자도 글자로 바뀐다"
+ok: >-
+  백틱 문자열은 <code>${…}</code> 안만 계산합니다. {{pick.1|code}} 의 값이 글자로 바뀌어
+  {{pick.2|code}} 자리에 들어가고, 나머지 글자는 적힌 그대로 남아요.
+payoff: >-
+  따옴표와 <code>+</code> 를 번갈아 쓰지 않아도 되니 문장의 모양이 코드에 그대로 보입니다.
+  줄바꿈도 적은 대로 남아요.
+bridge: >-
+  값이 <code>undefined</code> 여도 끼워 넣기는 멈추지 않습니다 — 글자 <code>undefined</code> 가
+  그대로 문장에 박히니 화면에서야 알아채게 돼요.
+misconceptions:
+  - "백틱 안에서는 모든 것이 계산된다 — 아니요. <code>${…}</code> 안만 계산합니다."
+  - "숫자를 넣으려면 먼저 글자로 바꿔야 한다 — 아니요. 끼워 넣는 순간 자동으로 글자가 됩니다."
+
+point:
+  - q: "{{site.line}}행에서 <b>계산해서 끼워 넣는 자리</b>를 짚어 보세요."
+    hint: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+    answer: pick.2
+    diag:
+      pick.1:
+        t: "{{pick.1|code}}{{pick.1|josa:은,는}} 끼워 넣을 <b>값</b>입니다. 이 이름만 백틱 안에 적으면 계산되지 않고 글자 그대로 남아요 — 감싸는 <code>${…}</code> 가 있어야 합니다."
+        edge:
+          h: "가장 날카로운 자리 — 감쌌느냐"
+          code:
+            - "`hi ${name}`   // name 의 값이 들어간다"
+            - "`hi name`      // 글자 name 이 그대로"
+
+meaning:
+  - q: "{{pick.1|code}} 의 값이 <code>undefined</code> 라면 {{site.line}}행의 결과는 무엇일까요?"
+    hint: "끼워 넣기는 값이 무엇이든 멈추지 않습니다."
+    options:
+      - t: "그 자리에 글자 <code>undefined</code> 가 박힌 문장"
+      - t: "그 자리가 빈칸으로 남는다"
+        diag:
+          t: "빈칸이 되는 값은 빈 문자열입니다. <code>undefined</code> 는 글자로 바뀌면 여덟 글자로 그대로 보여요."
+          edge:
+            h: "가장 날카로운 자리 — 빈 값과 없는 값"
+            code:
+              - "`[${undefined}]`   // '[undefined]'"
+              - "`[${''}]`          // '[]'"
+      - t: "그 자리에서 멈춘다"
+        diag:
+          t: "끼워 넣기는 어떤 값이든 글자로 바꿉니다. 멈추는 것은 <code>${…}</code> 안에서 없는 값에 점을 찍었을 때예요."
+          edge:
+            h: "가장 날카로운 자리 — 끼우기와 그 안의 계산"
+            code:
+              - "`${u}`         // u 가 없어도 문장은 나온다"
+              - "`${u.name}`    // u 가 없으면 TypeError"
+      - t: "문장 전체가 <code>undefined</code> 가 된다"
+        diag:
+          t: "백틱 문장은 언제나 글자입니다. 안쪽 한 자리의 값이 없어도 바깥 글자는 그대로 남아요."
+          edge:
+            h: "가장 날카로운 자리 — 안과 밖"
+            code:
+              - "`a${undefined}b`   // 'aundefinedb'"
+              - "undefined + 'b'    // 'undefinedb'"
+
+queries:
+  - { grammars: [typescript, tsx, javascript], file: ./template-literal.scm }
+
+examples:
+  - code: "const hello = `안녕, ${name}`"
+    expect: { sites: 1, form: interpolated, picks: { 1: "name", 2: "${name}" } }
+  - code: "const label = `${count}개`"
+    expect: { sites: 1, picks: { 1: "count" } }
+  - code: "const plain = `한 줄`"
+    expect: none

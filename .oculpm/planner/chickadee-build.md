@@ -32,11 +32,11 @@ owner: claude-code
 - [x] 01 · git 크레이트 — open/fingerprint/commits/commit_files/blob, 픽스처 bundle · 2일 (선행: M0) {#m1-01-git-crate}
 - [x] 03 · diff hunk → CommitRec — commit_file 쓰기·리네임 감지·touched 압축·공백 무시 통계 · 1.5일 (선행: git 크레이트) {#m1-03-diff-commitrec}
 - [x] 01 · parse 크레이트 — langs.rs(TS·TSX·SQL), parse+query, AstLite, 타임아웃, 골든 스니펫 테스트 · 3일 (선행: 03 캡처 규약 D18) {#m1-01-parse-crate}
-- [ ] 03 · 문법 크레이트 고정 + 언어 감지 + 파서 풀 — 핀·feature·parse_quality(확장자 표는 TS) · 1.5일 (선행: parse 크레이트) {#m1-03-grammar-pool}
-- [ ] 01 · 인제스트 잡 러너 — 워커 스레드, parse 풀, 해시 증분, 취소 토큰, 진행 이벤트, 500행 tx · 3일 (선행: store·git·parse) {#m1-01-ingest-runner}
-- [ ] 03 · 워킹트리 스캔 + 진행률 채널 + 취소·이어하기 — is_dirty·ingest_warning·재스캔 3시점 · 1일 (선행: 잡 러너) {#m1-03-worktree-progress}
+- [x] 03 · 문법 크레이트 고정 + 언어 감지 + 파서 풀 — 핀·feature·parse_quality(확장자 표는 TS) · 1.5일 (선행: parse 크레이트) {#m1-03-grammar-pool}
+- [x] 01 · 인제스트 잡 러너 — 워커 스레드, parse 풀, 해시 증분, 취소 토큰, 진행 이벤트, 500행 tx · 3일 (선행: store·git·parse) {#m1-01-ingest-runner}
+- [x] 03 · 워킹트리 스캔 + 진행률 채널 + 취소·이어하기 — is_dirty·ingest_warning·재스캔 3시점 · 1일 (선행: 잡 러너) {#m1-03-worktree-progress}
 - [ ] 03 · sqlite 쓰기·증분 — TS 재파생 증분·site_key 유지·is_reachable · 1.5일 (선행: 잡 러너·쿼리 실행기) {#m1-03-sqlite-incremental}
-- [ ] 01 · 파일 맥락 명령 — file_read_lines/block 작업 트리·rev 양쪽, 상한·UTF-8 lossy · 1일 (선행: git 크레이트) {#m1-01-file-context}
+- [x] 01 · 파일 맥락 명령 — file_read_lines/block 작업 트리·rev 양쪽, 상한·UTF-8 lossy · 1일 (선행: git 크레이트) {#m1-01-file-context}
 - [ ] 03 · blame 2차 패스 — git_blame_lines 명령 + TS 배경 잡, 파일당 2초 컷 · 1일 (선행: 파일 맥락 명령) {#m1-03-blame-pass}
 - [ ] 01 · 사전 명령 + dictionary 패키지 — dict_list/read/cache_*, zod 스키마, 사용자 오버라이드 우선 · 2일 (선행: 03 YAML 스키마) {#m1-01-dict-commands}
 - [ ] 03 · 사전 스키마·린트 — JSON Schema, TS 타입 생성, pnpm dict:lint(조사·금지어·참조·템플릿 변수), Rust 쿼리 테스트 · 2일 (선행: 사전 1차) {#m1-03-dict-lint}
@@ -133,4 +133,8 @@ owner: claude-code
 | 2026-09-03T03:44:56+09:00 | #m1-01-git-crate | claude-code | ☐→x | 20260903/Features_to_add/0344_feature_m1-git-parse-crates.md | 383줄 · 테스트 16건 · git_diff_text 는 M4 로 |
 | 2026-09-03T03:45:01+09:00 | #m1-01-parse-crate | claude-code | ☐→x | 20260903/Features_to_add/0344_feature_m1-git-parse-crates.md | 358줄 · 골든 스니펫 17건 · parse_snippet 명령은 M3 |
 | 2026-09-03T03:45:06+09:00 | #m1-03-diff-commitrec | claude-code | ☐→x | 20260903/Features_to_add/0344_feature_m1-git-parse-crates.md | 리네임 50·공백 무시·touched 압축 + 임시 리포 테스트. commit_file 쓰기는 잡 러너에서 |
+| 2026-09-03T04:04:25+09:00 | #m1-01-ingest-runner | claude-code | ☐→x | 20260903/Features_to_add/0404_feature_m1-ingest-runner-and-boundary.md | 워커 스레드·해시 증분·취소·500행 tx·4단계 이벤트. pipeline 9건 |
+| 2026-09-03T04:04:30+09:00 | #m1-01-file-context | claude-code | ☐→x | 20260903/Features_to_add/0404_feature_m1-ingest-runner-and-boundary.md | file_read_lines/block, 작업트리·rev 양쪽, 2000줄·64KiB 상한, UTF-8 lossy. repoId 대신 rootPath(D65) |
+| 2026-09-03T04:04:36+09:00 | #m1-03-grammar-pool | claude-code | ☐→x | 20260903/Features_to_add/0404_feature_m1-ingest-runner-and-boundary.md | Cargo feature 4종·thread_local 파서 풀·2s 타임아웃·parse_quality. 확장자 표는 TS LangSpec |
+| 2026-09-03T04:04:42+09:00 | #m1-03-worktree-progress | claude-code | ☐→x | 20260903/Features_to_add/0404_feature_m1-ingest-runner-and-boundary.md | is_dirty·ingest_warning 6종·취소 후 증분 재개 검증. TS 재스캔 3시점은 concepts/ingest.ts 에서 |
 <!-- oculpm:plan-log end -->

@@ -1,0 +1,23 @@
+schema: 1
+id: common/conditional-expression
+universal: null
+name: { ko: 조건으로 값 고르기, en: Conditional expression }
+token: null
+grammars: []
+essential: false
+difficulty: 2
+prereq: []
+confusions: []
+queries: []
+dict:
+  one_liner: "조건 하나로 두 값 중 하나를 골라 그 자리의 값으로 삼는 표기."
+  why: >-
+    <b>문이 아니라 식</b>이라는 것이 핵심입니다. 조건문은 실행 흐름을 나누지만 이 표기는
+    <b>값 하나</b>를 남기므로 변수에 바로 담기고 인자로도 바로 넘어갑니다. 언어마다 이름과
+    기호만 다르고 하는 일은 같습니다.
+  trace: []
+rule: "조건을 먼저 판단하고, 고른 쪽 하나만 값이 된다."
+ok: "조건이 참이면 앞쪽, 아니면 뒤쪽이 이 자리의 값이 됩니다."
+misconceptions:
+  - "양쪽 다 계산된다 — 아니요. 고른 쪽만 계산합니다."
+  - "조건문으로 바꿔 쓰면 언제나 같다 — 값이 필요한 자리에서는 식이라야 담깁니다."

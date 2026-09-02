@@ -1,0 +1,21 @@
+schema: 1
+id: common/number-literal
+universal: null
+name: { ko: 숫자 값, en: Number literal }
+token: null
+grammars: []
+essential: false
+difficulty: 1
+prereq: []
+confusions: []
+dict:
+  one_liner: "따옴표 없이 적은 값. 곧바로 셈에 쓸 수 있다."
+  why: >-
+    화면에 보이는 <code>42</code> 와 셈에 쓰는 <code>42</code> 는 프로그램 안에서 다른 값입니다.
+    따옴표가 그 둘을 가르고, 어느 쪽인지에 따라 <code>+</code> 가 더하기가 되기도 이어 붙이기가
+    되기도 해요. 입력칸이나 파일에서 온 값은 대개 글자라서, 셈하기 전에 숫자로 바꿔야 합니다.
+  trace: []
+rule: "셈이 이상하면 먼저 양쪽이 정말 숫자인지 본다."
+ok: "따옴표 없이 적힌 숫자는 다른 숫자와 곧바로 셈할 수 있는 값입니다."
+misconceptions:
+  - "화면에 숫자로 보이면 숫자다 — 입력칸에서 온 값은 대개 글자입니다."

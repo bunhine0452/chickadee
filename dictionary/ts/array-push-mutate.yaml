@@ -1,0 +1,97 @@
+schema: 1
+id: ts/array-push-mutate
+universal: common/mutating-append
+name: { ko: "배열에 직접 밀어 넣기(push)", en: "Mutating append with push" }
+token: "push"
+grammars: [typescript, tsx, javascript]
+framework: null
+essential: false
+difficulty: 2
+prereq: [ts/array-basics, ts/call-expression]
+confusions: [ts/array-map-immutable, ts/array-filter]
+
+dict:
+  one_liner: "<code>push</code> 는 원본 배열을 직접 늘리고 새 길이(숫자)를 돌려준다."
+  why: >-
+    한곳에서만 쓰는 임시 배열을 쌓을 때는 편합니다. 다만 화면에 붙은 상태라면 이야기가 달라져요 —
+    배열이 <b>같은 배열</b>인 채로 내용만 바뀌므로, 바뀐 걸 알아채는 쪽이 없습니다. {{site.line}}행은
+    {{pick.1|code}} 자체를 바꾸는 자리입니다.
+  trace:
+    - "{{pick.1|code}} 의 끝에 {{pick.2|code}}{{pick.2|josa:이,가}} {{pick.3|code}}{{pick.3|josa:을,를}} 붙인다."
+    - "{{pick.1|code}}{{pick.1|josa:은,는}} 새 것이 되지 않는다 — 같은 배열의 길이만 늘어난다."
+    - "{{site.line}}행의 값은 배열이 아니라 <b>늘어난 뒤의 길이</b>다."
+
+rule: "<b>push 는 원본을 바꾸고 길이를 돌려준다.</b> 새 배열이 필요하면 <code>[...xs, x]</code> 나 <code>map</code> 을 쓴다."
+result:
+  label: "{{site.line}}행의 값"
+  value: "늘어난 뒤의 길이(숫자)"
+  note: "{{pick.1|josa:은,는}} 그 자리에서 바뀐다"
+ok: >-
+  <code>push</code> 는 <b>있던 배열을 그대로 늘립니다</b>. 돌려주는 것은 배열이 아니라 새 길이예요.
+  같은 배열이 계속 쓰이므로 「바뀌었다」는 신호가 나가지 않습니다.
+payoff: "지역 변수에 쌓을 때는 가장 짧은 표기입니다. 화면에 붙은 값이라면 새 배열을 만드는 쪽이 안전해요."
+bridge: "<code>[...{{pick.1}}, {{pick.3}}]</code> 은 같은 결과를 <b>새 배열</b>로 만듭니다 — 원본은 그대로 남아요."
+misconceptions:
+  - "<code>push</code> 가 새 배열을 돌려준다 — 숫자(새 길이)를 돌려줍니다."
+  - "<code>const</code> 로 선언했으니 못 바꾼다 — 이름을 못 바꾸는 것이고 내용은 바뀝니다."
+
+point:
+  - q: "{{site.line}}행에서 <b>이 줄이 끝난 뒤 내용이 달라져 있는 것</b>을 짚어 보세요."
+    hint: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+    answer: pick.1
+    diag:
+      pick.3:
+        t: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>넣는 값</b>입니다. 이 값 자체는 그대로이고, 달라지는 것은 값을 받아 간 배열 쪽이에요."
+        edge:
+          h: "가장 날카로운 자리 — 담기는 값과 담는 그릇"
+          code:
+            - "{{pick.1}}.push({{pick.3}})   // 배열 길이가 는다"
+            - "{{pick.3}}                    // 그대로"
+      pick.2:
+        t: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>하는 일의 이름</b>입니다. 실제로 달라지는 것은 그 이름을 부른 대상, 즉 앞의 배열이에요."
+        edge:
+          h: "가장 날카로운 자리 — 이름과 대상"
+          code:
+            - "{{pick.1}}.push(x)     // {{pick.1}} 쪽이 바뀐다"
+            - "[...{{pick.1}}, x]     // 아무것도 바뀌지 않는다"
+
+meaning:
+  - q: "{{site.line}}행이 돌려주는 값은 무엇일까요?"
+    hint: "push 가 내는 것과 바꾸는 것은 다릅니다."
+    options:
+      - t: "늘어난 뒤의 <b>길이</b>(숫자)"
+      - t: "항목이 추가된 새 배열"
+        diag:
+          t: "새 배열을 받고 싶다면 <code>[...{{pick.1}}, {{pick.3}}]</code> 이나 <code>concat</code> 입니다. <code>push</code> 는 있던 배열을 늘리고 숫자를 냅니다."
+          edge:
+            h: "가장 날카로운 자리 — 새 배열이냐 길이냐"
+            code:
+              - "const a = xs.push(x)        // 숫자"
+              - "const b = [...xs, x]        // 배열"
+      - t: "원본 배열 자기 자신"
+        diag:
+          t: "자기 자신을 돌려주면 <code>{{pick.1}}.push(a).push(b)</code> 처럼 이을 수 있었겠지만, 숫자에는 <code>push</code> 가 없어 그 줄은 그 자리에서 멈춥니다."
+          edge:
+            h: "가장 날카로운 자리 — 이어 붙일 수 있나"
+            code:
+              - "xs.push(1).push(2)      // 숫자에는 push 가 없다"
+              - "xs.push(1); xs.push(2)  // 이렇게 나눠 쓴다"
+      - t: "<code>undefined</code>"
+        diag:
+          t: "<code>undefined</code> 를 내는 건 <code>forEach</code> 쪽입니다. <code>push</code> 는 늘어난 길이를 숫자로 돌려줘요."
+          edge:
+            h: "가장 날카로운 자리 — 숫자와 undefined"
+            code:
+              - "[].push(1)            // 1"
+              - "[].forEach(() => {})  // undefined"
+
+queries:
+  - { grammars: [typescript, tsx, javascript], file: ./array-push-mutate.scm }
+
+examples:
+  - code: "out.push(item)"
+    expect: { sites: 1, form: push, picks: { 1: "out", 2: "push", 3: "item" } }
+  - code: "acc.push({ id, qty })"
+    expect: { sites: 1, picks: { 1: "acc" } }
+  - code: "const next = [...out, item]"
+    expect: none

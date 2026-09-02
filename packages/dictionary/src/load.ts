@@ -49,11 +49,11 @@ export function loadDict(options: LoadOptions = {}): Dict {
   for (const lang of bundledLangs()) {
     if (wanted && !wanted.has(lang)) continue;
     const files = bundledFiles(lang);
+    // `_lang.yaml` 이 없는 네임스페이스(`common/`·`arch/`)는 개념만 싣는다.
     const meta = readMeta(lang, files, problems);
-    if (!meta) continue;
     // 감지 신호가 선언돼 있으면 그 의존성이 있는 리포에서만 쓴다 (D59).
-    if (meta.detect && !deps.has(meta.detect.dependency)) continue;
-    langs.set(lang, meta);
+    if (meta?.detect && !deps.has(meta.detect.dependency)) continue;
+    if (meta) langs.set(lang, meta);
 
     const text = new Map(files.map((f) => [f.relPath, f.text]));
     for (const { relPath } of files) {
@@ -63,10 +63,14 @@ export function loadDict(options: LoadOptions = {}): Dict {
       concepts.set(concept.id, concept);
       collectQueries(concept, relPath, text, queries, problems);
     }
+    // 시스템 쿼리는 **문법**의 것이지 네임스페이스의 것이 아니다. 두 사전이 같은 문법을
+    // 걸면 먼저 온 쪽이 이긴다 — `bundledLangs()` 가 정렬돼 있어 순서가 정해져 있다.
     for (const id of systemIds) {
       const scm = text.get(`${lang}/${id}.scm`);
-      if (scm === undefined) continue;
-      for (const grammar of meta.grammars) queries.set(keyOf(id, grammar), scm);
+      if (scm === undefined || !meta) continue;
+      for (const grammar of meta.grammars) {
+        if (!queries.has(keyOf(id, grammar))) queries.set(keyOf(id, grammar), scm);
+      }
     }
   }
   return { langs, concepts, queries, problems };
