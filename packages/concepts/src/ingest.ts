@@ -355,6 +355,8 @@ async function writeGaps(
   }));
   const all = [];
   for (const lang of dict.langs.keys()) {
+    // M1 에는 겹이 없다 — 전부 0겹이므로 사용처가 있는 필수 문법이 곧 구멍이다.
+    // M2 가 `mastery` 를 채우면 여기에 진짜 `layerOf` 를 넘겨야 한다 (03 §6).
     all.push(...buildGaps(dict, { lang, sites, langFileCount, layerOf: () => 0 }));
   }
   const ops = all.map((gap) => ({

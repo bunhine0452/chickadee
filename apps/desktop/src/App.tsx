@@ -34,6 +34,7 @@ export function App(): React.JSX.Element {
           cancelling={ui.cancelling}
           error={ui.error}
           onCancel={() => useUi.getState().cancel()}
+          onDone={() => useUi.getState().go('home')}
         />
         <Toast msg={ui.toast ?? ''} on={ui.toast !== undefined} />
       </>

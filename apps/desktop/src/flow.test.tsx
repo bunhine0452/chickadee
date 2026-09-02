@@ -195,3 +195,10 @@ describe('진행 화면', () => {
     expect(new Set(seen)).toEqual(new Set(['walk', 'parse', 'git', 'write', 'derive']));
   });
 });
+
+describe('끝난 뒤', () => {
+  test('성공하면 홈으로 넘어간다 — 진행 화면에 갇히지 않는다', async () => {
+    await addRepo('/work/cart-shop');
+    expect(useUi.getState().screen).toBe('home');
+  });
+});

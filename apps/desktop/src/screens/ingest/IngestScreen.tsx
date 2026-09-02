@@ -36,6 +36,8 @@ export interface IngestScreenProps {
   /** 취소를 눌렀는지. 누른 뒤에는 버튼이 잠긴다. */
   cancelling?: boolean | undefined;
   onCancel: () => void;
+  /** 끝났거나 실패했을 때 홈으로. 성공하면 화면이 알아서 넘어가지만, 실패하면 여기가 유일한 출구다. */
+  onDone: () => void;
   error?: string | undefined;
 }
 
@@ -77,7 +79,9 @@ export function IngestScreen(props: IngestScreenProps) {
         </section>
       ) : null}
 
-      {props.done ? null : (
+      {props.done ? (
+        <FlatButton onClick={props.onDone}>홈으로</FlatButton>
+      ) : (
         <FlatButton onClick={props.onCancel} disabled={props.cancelling} ghost>
           {props.cancelling ? '멈추는 중…' : '그만 읽기'}
         </FlatButton>

@@ -14,6 +14,7 @@ const base = {
   warnings: [],
   done: false,
   onCancel: () => undefined,
+  onDone: () => undefined,
 };
 
 describe('4단계 매핑 (D47)', () => {
@@ -74,10 +75,17 @@ describe('판 짜기 화면', () => {
     expect((screen.getByRole('button', { name: '멈추는 중…' }) as HTMLButtonElement).disabled).toBe(true);
   });
 
-  test('끝나면 취소 버튼이 사라지고 다음 할 일을 말한다', () => {
-    render(<IngestScreen {...base} done />);
-    expect(screen.queryByRole('button')).toBeNull();
+  test('끝나면 취소가 아니라 나갈 문을 준다 — 막다른 골목을 만들지 않는다', async () => {
+    const onDone = vi.fn();
+    render(<IngestScreen {...base} done onDone={onDone} />);
     expect(screen.getByText('다 읽었습니다')).toBeDefined();
+    await userEvent.click(screen.getByRole('button', { name: '홈으로' }));
+    expect(onDone).toHaveBeenCalledOnce();
+  });
+
+  test('실패해도 나갈 문이 있다', () => {
+    render(<IngestScreen {...base} done error="리포를 읽지 못했습니다." />);
+    expect(screen.getByRole('button', { name: '홈으로' })).toBeDefined();
   });
 
   test('실패하면 그 문구가 자리를 대신한다', () => {

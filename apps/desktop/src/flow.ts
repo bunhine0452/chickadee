@@ -97,6 +97,8 @@ export async function ingest(mode: 'full' | 'incremental'): Promise<void> {
     useUi.getState().finishIngest();
     await refreshRepos();
     await refreshHome();
+    // 끝나면 홈이다 (05 §2.1). 실패했을 때만 진행 화면에 남아 이유를 보인다.
+    useUi.getState().go('home');
     void background(repo.id, repo.rootPath);
   } catch (e) {
     report(e, '리포 읽기');
