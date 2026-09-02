@@ -18,6 +18,11 @@ serde = { workspace = true }
 thiserror = { workspace = true }
 streaming-iterator = "0.1"
 
+[dev-dependencies]
+# Test-only (D40): the app never reads YAML. These are outside the line budget.
+serde_yaml = "0.9"
+regex-lite = "0.1"
+
 [features]
 default = ["lang-typescript", "lang-javascript", "lang-sql"]
 lang-typescript = ["dep:tree-sitter-typescript"]

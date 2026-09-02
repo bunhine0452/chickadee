@@ -45,7 +45,10 @@ const ALLOWED_DEPS = {
   'ipc-client': [],
   'store-sql': ['ipc-client'],
   dictionary: ['ipc-client'],
-  concepts: ['dictionary', 'store-sql'],
+  // 01 §3.3 「`ingest_done` 을 받으면 `packages/concepts.derive(repoId)` 가 …」 와
+  // 03 §1.5 「`blame.ts` 가 `git_blame_lines` 를 배경에서 호출」 이 이 층에서 명령을
+  // 부르라고 정한다. §2 표의 「의존」 열에는 빠져 있었다 — 표를 문장에 맞춘다.
+  concepts: ['dictionary', 'store-sql', 'ipc-client'],
   cards: ['concepts', 'store-sql'],
   scheduler: ['store-sql'],
   grading: ['ipc-client'],

@@ -30,6 +30,8 @@ export interface IngestSpec {
   /** 잡 러너가 경로를 SQL 로 되찾지 않게 TS 가 넘긴다 (D65). */
   rootPath: string;
   mode: 'full' | 'incremental';
+  /** 직전 실행이 멈춘 head. `incremental` 에서만 쓰이고, git 이 그 커밋을 잃었으면 전체로 승격한다. */
+  sinceHead: string | null;
   langs: LangSpec[];
   maxCommits: number;
   maxFilesPerCommit: number;

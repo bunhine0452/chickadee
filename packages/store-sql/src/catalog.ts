@@ -7,6 +7,32 @@ export const migrations = [
 ] as const;
 
 export const statements = {
+  "concept.prereqs": "SELECT p.prereq_id, c.name_ko, c.token, COALESCE(m.layer, 0) AS layer,\n       EXISTS (SELECT 1 FROM card k WHERE k.repo_id = :repoId AND k.concept_id = p.prereq_id\n               AND k.retired_at IS NULL) AS has_card,\n       EXISTS (SELECT 1 FROM concept_site s WHERE s.repo_id = :repoId\n               AND s.concept_id = p.prereq_id AND s.is_alive = 1) AS has_site\nFROM concept_prereq p\nJOIN concept c ON c.id = p.prereq_id\nLEFT JOIN mastery m ON m.concept_id = p.prereq_id\nWHERE p.concept_id = :conceptId\nORDER BY p.prereq_id;\n\n-- 14일 컬러 바 — 하루 합산 분.",
+  "concept.uses": "SELECT s.id, s.site_key, f.path, s.line_start, s.line_end, s.unknown_count, s.excerpt\nFROM concept_site s JOIN file f ON f.id = s.file_id\nWHERE s.repo_id = :repoId AND s.concept_id = :conceptId AND s.is_alive = 1\nORDER BY s.unknown_count, (s.line_end - s.line_start), f.path LIMIT :limit;\n\n-- 선행 개념 + 겹 + 카드 유무 — 사다리 2단의 `prereq[{s}]`.",
+  "derive.blame_fill": "UPDATE concept_site\nSET commit_id = (SELECT id FROM git_commit WHERE repo_id = :repoId AND sha = :sha)\nWHERE repo_id = :repoId AND site_key = :siteKey;\n\n-- ───────── 커밋 파생 열 ─────────",
+  "derive.captures_by_file": "SELECT query_id, match_id, pattern_index, name, form, node_kind, in_error,\n       start_byte, end_byte, start_line, end_line, start_col, end_col, excerpt\nFROM capture WHERE file_id = :fileId ORDER BY query_id, match_id, start_byte;",
+  "derive.commit_classify": "UPDATE git_commit SET kind = :kind, author_matched = :authorMatched\nWHERE repo_id = :repoId AND sha = :sha;\n\n-- ───────── 대지 ─────────",
+  "derive.commits": "SELECT id, sha, parent_count, author_email, author_name, message, files_n, insertions\nFROM git_commit WHERE repo_id = :repoId AND is_reachable = 1 ORDER BY authored_at DESC;\n\n-- ───────── 사용처 ─────────",
+  "derive.concept_retire_missing": "UPDATE concept SET is_retired = 1 WHERE id NOT IN (SELECT value FROM json_each(:ids));",
+  "derive.concept_upsert": "INSERT INTO concept (id, lang, name_ko, token, kind, universal_id, track_default, dict_version_id, is_retired)\nVALUES (:id, :lang, :nameKo, :token, :kind, :universalId, :trackDefault, :dictVersionId, 0)\nON CONFLICT (id) DO UPDATE SET\n  lang = excluded.lang, name_ko = excluded.name_ko, token = excluded.token, kind = excluded.kind,\n  universal_id = excluded.universal_id, track_default = excluded.track_default,\n  dict_version_id = excluded.dict_version_id, is_retired = 0;\n\n-- 사전에서 사라진 개념은 지우지 않는다 — 학습 기록이 참조한다 (02 원장 규칙).",
+  "derive.dict_version_id": "SELECT id FROM dictionary_version WHERE lang = :lang AND version = :version;",
+  "derive.dict_version_upsert": "INSERT INTO dictionary_version (lang, version, sha256, concept_count, loaded_at)\nVALUES (:lang, :version, :sha256, :conceptCount, :loadedAt)\nON CONFLICT (lang, version) DO UPDATE SET\n  sha256 = excluded.sha256, concept_count = excluded.concept_count, loaded_at = excluded.loaded_at;",
+  "derive.files": "SELECT id, path, grammar, line_count, is_dirty, parse_quality\nFROM file WHERE repo_id = :repoId AND is_alive = 1 ORDER BY path;\n\n-- 파일이 언제 바뀌었는지 — 증분 재파생의 대상을 고른다 (03 §1.6-4).",
+  "derive.files_changed_since": "SELECT id, path, grammar, line_count, is_dirty, parse_quality\nFROM file WHERE repo_id = :repoId AND is_alive = 1 AND updated_at >= :since ORDER BY path;",
+  "derive.gap_delete_missing": "DELETE FROM gap\nWHERE repo_id = :repoId AND status = 'open'\n  AND concept_id NOT IN (SELECT value FROM json_each(:conceptIds));",
+  "derive.gap_upsert": "INSERT INTO gap (repo_id, concept_id, site_count, min_unknown, best_site_id, reason, status, computed_at)\nVALUES (:repoId, :conceptId, :siteCount, :minUnknown,\n        (SELECT id FROM concept_site WHERE repo_id = :repoId AND site_key = :bestSiteKey),\n        :reason, 'open', :computedAt)\nON CONFLICT (repo_id, concept_id) DO UPDATE SET\n  site_count = excluded.site_count, min_unknown = excluded.min_unknown,\n  best_site_id = excluded.best_site_id, reason = excluded.reason,\n  computed_at = excluded.computed_at;\n\n-- 겹이 오르거나 사용처가 사라진 개념은 더 이상 구멍이 아니다.",
+  "derive.prereq_clear": "DELETE FROM concept_prereq WHERE concept_id = :conceptId;",
+  "derive.prereq_insert": "INSERT OR IGNORE INTO concept_prereq (concept_id, prereq_id) VALUES (:conceptId, :prereqId);\n\n-- ───────── 사실 읽기 ─────────\n\n-- 01 §3.4 `derive.captures_by_file`. 파일 단위 페이지 — 한 번에 리포 전체를 읽지 않는다.",
+  "derive.site_retire_missing": "UPDATE concept_site SET is_alive = 0, updated_at = :updatedAt\nWHERE repo_id = :repoId AND file_id = :fileId AND is_alive = 1\n  AND site_key NOT IN (SELECT value FROM json_each(:keys));",
+  "derive.site_upsert": "INSERT INTO concept_site (repo_id, file_id, concept_id, site_key, line_start, line_end,\n                          col_start, col_end, ts_node_kind, form, shape, occurrence, excerpt,\n                          picks_json, hole_json, ctx_json, line_concepts_json, uncovered_ratio,\n                          confidence, parse_quality, is_dirty, is_oversize, unknown_count,\n                          is_alive, updated_at)\nVALUES (:repoId, :fileId, :conceptId, :siteKey, :lineStart, :lineEnd,\n        :colStart, :colEnd, :tsNodeKind, :form, :shape, :occurrence, :excerpt,\n        :picksJson, :holeJson, :ctxJson, :lineConceptsJson, :uncoveredRatio,\n        :confidence, :parseQuality, :isDirty, :isOversize, :unknownCount, 1, :updatedAt)\nON CONFLICT (repo_id, site_key) DO UPDATE SET\n  file_id = excluded.file_id, line_start = excluded.line_start, line_end = excluded.line_end,\n  col_start = excluded.col_start, col_end = excluded.col_end, ts_node_kind = excluded.ts_node_kind,\n  form = excluded.form, excerpt = excluded.excerpt, picks_json = excluded.picks_json,\n  hole_json = excluded.hole_json, ctx_json = excluded.ctx_json,\n  line_concepts_json = excluded.line_concepts_json, uncovered_ratio = excluded.uncovered_ratio,\n  confidence = excluded.confidence, parse_quality = excluded.parse_quality,\n  is_dirty = excluded.is_dirty, is_oversize = excluded.is_oversize,\n  unknown_count = excluded.unknown_count, is_alive = 1, updated_at = excluded.updated_at;\n\n-- 이번 재파생에서 나오지 않은 사용처는 죽는다. 지우지는 않는다 — 카드가 참조한다.",
+  "derive.sites_for_rank": "SELECT s.id, s.site_key, s.concept_id, f.path, s.line_start, s.line_end,\n       s.uncovered_ratio, s.line_concepts_json, s.is_dirty, s.unknown_count\nFROM concept_site s JOIN file f ON f.id = s.file_id\nWHERE s.repo_id = :repoId AND s.is_alive = 1;",
+  "derive.unit_delete_missing": "DELETE FROM unit WHERE repo_id = :repoId AND name NOT IN (SELECT value FROM json_each(:names));\n\n-- ───────── 구멍 지도 ─────────",
+  "derive.unit_file_insert": "INSERT OR IGNORE INTO unit_file (unit_id, file_id)\nVALUES ((SELECT id FROM unit WHERE repo_id = :repoId AND name = :name), :fileId);",
+  "derive.unit_files_clear": "DELETE FROM unit_file WHERE unit_id IN (SELECT id FROM unit WHERE repo_id = :repoId);",
+  "derive.unit_node_insert": "INSERT OR IGNORE INTO unit_node (unit_id, concept_id, track, node_order)\nVALUES ((SELECT id FROM unit WHERE repo_id = :repoId AND name = :name), :conceptId, :track, :nodeOrder);\n\n-- 이번 인제스트에서 사라진 대지. 하위 행은 ON DELETE CASCADE 가 정리한다.",
+  "derive.unit_nodes_clear": "DELETE FROM unit_node WHERE unit_id IN (SELECT id FROM unit WHERE repo_id = :repoId);",
+  "derive.unit_upsert": "INSERT INTO unit (repo_id, name, root_path, source, order_idx)\nVALUES (:repoId, :name, :rootPath, 'dir', :orderIdx)\nON CONFLICT (repo_id, name) DO UPDATE SET\n  root_path = excluded.root_path, order_idx = excluded.order_idx;",
+  "derive.unknown_count_set": "UPDATE concept_site SET unknown_count = :unknownCount\nWHERE repo_id = :repoId AND site_key = :siteKey;\n\n-- 2차 패스가 blame 으로 사용처의 출처 커밋을 채운다 (03 §1.5).",
   "facts.capture_delete_by_file": "DELETE FROM capture WHERE file_id = (SELECT id FROM file WHERE repo_id = :repoId AND path = :path);",
   "facts.capture_insert": "INSERT INTO capture (file_id, query_id, match_id, pattern_index, name, form, node_kind, in_error,\n                     start_byte, end_byte, start_line, end_line, start_col, end_col, excerpt)\nVALUES ((SELECT id FROM file WHERE repo_id = :repoId AND path = :path),\n        :queryId, :matchId, :patternIndex, :name, :form, :nodeKind, :inError,\n        :startByte, :endByte, :startLine, :endLine, :startCol, :endCol, :excerpt);",
   "facts.commit_file_insert": "INSERT INTO commit_file (commit_id, path, old_path, status, additions, deletions, touched_json)\nVALUES ((SELECT id FROM git_commit WHERE repo_id = :repoId AND sha = :sha),\n        :path, :oldPath, :status, :additions, :deletions, :touchedJson)\nON CONFLICT (commit_id, path) DO UPDATE SET\n  old_path = excluded.old_path, status = excluded.status,\n  additions = excluded.additions, deletions = excluded.deletions,\n  touched_json = excluded.touched_json;\n\n-- rebase·force-push 로 닿을 수 없게 된 커밋. 지우지 않는다 — 학습 기록이 참조한다 (03 §1.6).",
@@ -17,12 +43,31 @@ export const statements = {
   "facts.file_upsert": "INSERT INTO file (repo_id, path, lang, grammar, line_count, byte_size,\n                  content_hash, head_oid, is_dirty, parse_quality, skip_reason, is_alive, updated_at)\nVALUES (:repoId, :path, :lang, :grammar, :lineCount, :byteSize,\n        :contentHash, :headOid, :isDirty, :parseQuality, :skipReason, 1, :updatedAt)\nON CONFLICT (repo_id, path) DO UPDATE SET\n  lang = excluded.lang, grammar = excluded.grammar,\n  line_count = excluded.line_count, byte_size = excluded.byte_size,\n  content_hash = excluded.content_hash, head_oid = excluded.head_oid,\n  is_dirty = excluded.is_dirty, parse_quality = excluded.parse_quality,\n  skip_reason = excluded.skip_reason, is_alive = 1, updated_at = excluded.updated_at;",
   "facts.run_finish": "UPDATE ingest_run SET\n  finished_at = :finishedAt, status = :status, files_n = :filesN, sites_n = :sitesN,\n  captures_n = :capturesN, commits_n = :commitsN, warnings_n = :warningsN,\n  peak_rss_mb = :peakRssMb, escalated_to_full = :escalatedToFull,\n  grammar_versions_json = :grammarVersionsJson, query_hash = :queryHash,\n  dict_version = :dictVersion, dict_schema = :dictSchema, gen_version = :genVersion,\n  fingerprint = :fingerprint, error = :error\nWHERE id = :id;",
   "facts.run_start": "INSERT INTO ingest_run (repo_id, started_at, mode, head_sha, status, app_version)\nVALUES (:repoId, :startedAt, :mode, :headSha, 'running', :appVersion);",
-  "repo.detach": "UPDATE repo SET detached_at = :detachedAt WHERE id = :id;",
+  "gaps.list": "SELECT g.concept_id, c.name_ko, c.token, g.site_count, g.min_unknown, g.best_site_id\nFROM gap g JOIN concept c ON c.id = g.concept_id\nWHERE g.repo_id = :repoId AND g.status = 'open'\nORDER BY g.site_count DESC, g.concept_id LIMIT :limit;\n\n-- 사다리 3단·노드 상세의 「내 코드 N곳」 (02 §7.3).",
+  "home.bundle_counts": "SELECT COUNT(*) AS concepts,\n       SUM(CASE WHEN COALESCE(m.layer, 0) > 0 THEN 1 ELSE 0 END) AS printed,\n       AVG(COALESCE(m.layer, 0)) AS avg_layer\nFROM (SELECT DISTINCT n.concept_id FROM unit_node n\n      JOIN unit u ON u.id = n.unit_id WHERE u.repo_id = :repoId) x\nLEFT JOIN mastery m ON m.concept_id = x.concept_id;\n\n-- 잉크 겹 척도 — 겹별 개념 수. 홈의 `InkScale` 이 그대로 그린다.",
+  "home.file_count": "SELECT grammar, COUNT(*) AS n FROM file\nWHERE repo_id = :repoId AND is_alive = 1 GROUP BY grammar;",
+  "home.last_run": "SELECT id, status, mode, started_at, finished_at, files_n, captures_n, commits_n,\n       warnings_n, escalated_to_full, head_sha, error\nFROM ingest_run WHERE repo_id = :repoId ORDER BY id DESC LIMIT 1;",
+  "home.layer_scale": "SELECT COALESCE(m.layer, 0) AS layer, COUNT(*) AS n\nFROM (SELECT DISTINCT n.concept_id FROM unit_node n\n      JOIN unit u ON u.id = n.unit_id WHERE u.repo_id = :repoId) x\nLEFT JOIN mastery m ON m.concept_id = x.concept_id\nGROUP BY 1 ORDER BY 1;\n\n-- 대지 · 스티커 · 겹. 노드 상태(done/locked/current)는 TS 가 판정한다 (02 §7.1).",
+  "home.unit_files": "SELECT u.name, COUNT(uf.file_id) AS files\nFROM unit u LEFT JOIN unit_file uf ON uf.unit_id = u.id\nWHERE u.repo_id = :repoId GROUP BY u.name;\n\n-- 판이 없는 문법 — 등장 횟수 순. 패널의 정의가 「내 코드엔 있는데」라 site_count > 0 뿐이다.",
+  "home.units": "SELECT u.id AS unit_id, u.name, u.order_idx, u.root_path,\n       n.concept_id, n.track, n.node_order, c.name_ko, c.token,\n       COALESCE(m.layer, 0) AS layer, m.stability, m.last_review_at, m.state, m.due_at\nFROM unit u\nJOIN unit_node n ON n.unit_id = u.id\nJOIN concept c ON c.id = n.concept_id\nLEFT JOIN mastery m ON m.concept_id = n.concept_id\nWHERE u.repo_id = :repoId\nORDER BY u.order_idx, n.node_order;\n\n-- 대지마다 파일이 몇 개인지 — 시트 머리의 「파일 N개」.",
+  "queue.retake_pending": "SELECT m.concept_id, c.name_ko, c.token, c.track_default, m.layer, m.due_at, m.stability,\n       m.last_review_at, s.excerpt\nFROM mastery m JOIN concept c ON c.id = m.concept_id\nLEFT JOIN concept_site s ON s.id = (\n  SELECT s2.id FROM concept_site s2\n  WHERE s2.repo_id = :repoId AND s2.concept_id = m.concept_id AND s2.is_alive = 1\n  ORDER BY s2.unknown_count, (s2.line_end - s2.line_start), s2.id LIMIT 1)\nWHERE m.state <> 0\n  AND EXISTS (SELECT 1 FROM card k WHERE k.repo_id = :repoId AND k.concept_id = m.concept_id\n              AND k.retired_at IS NULL)\nORDER BY m.due_at LIMIT :limit;\n\n-- 인제스트가 무엇을 남겼는지 — 첫 실행 안내와 개발자 패널이 읽는다.",
+  "repo.detach": "UPDATE repo SET detached_at = :detachedAt WHERE id = :id;\n\n-- 리포 장부는 TS 가 조립한다 (D65) — 아래 세 개가 등록·삭제·인제스트 기록에 쓰인다.",
+  "repo.get_by_root": "SELECT id, root_path, name, default_branch, head_sha, primary_lang, fingerprint,\n       detached_at, added_at, last_ingest_at\nFROM repo WHERE root_path = :rootPath;",
   "repo.insert": "INSERT INTO repo (root_path, name, default_branch, head_sha, primary_lang, fingerprint, added_at)\nVALUES (:rootPath, :name, :defaultBranch, :headSha, :primaryLang, :fingerprint, :addedAt);",
   "repo.list": "-- 별칭을 붙이지 않는다 (D57) — 02 §8.1 은 행이 **열 이름**으로 오는 것을 전제하고,\n-- 그래야 테이블당 fromRow 하나가 성립한다.\nSELECT id, root_path, name, default_branch, head_sha, primary_lang,\n       fingerprint, detached_at, added_at, last_ingest_at\nFROM repo ORDER BY added_at;",
+  "repo.purge_commits": "DELETE FROM git_commit WHERE repo_id = :id;",
+  "repo.purge_derived": "DELETE FROM concept_site WHERE repo_id = :id;",
+  "repo.purge_facts": "DELETE FROM file WHERE repo_id = :id;",
+  "repo.purge_gaps": "DELETE FROM gap WHERE repo_id = :id;",
+  "repo.purge_runs": "DELETE FROM ingest_run WHERE repo_id = :id;\n\n-- 카드는 지우지 않고 은퇴시킨다 — review_log.card_id 가 NOT NULL 이다 (D31).",
+  "repo.purge_units": "DELETE FROM unit WHERE repo_id = :id;",
+  "repo.remove": "DELETE FROM repo WHERE id = :id;",
+  "repo.retire_cards": "UPDATE card SET retired_at = :at WHERE repo_id = :id AND retired_at IS NULL;",
+  "repo.set_head": "UPDATE repo SET head_sha = :headSha,\n                fingerprint = CASE WHEN fingerprint = '' THEN :fingerprint ELSE fingerprint END,\n                primary_lang = COALESCE(:primaryLang, primary_lang),\n                detached_at = NULL,\n                last_ingest_at = :lastIngestAt\nWHERE id = :id;\n\n-- 리포를 지운다. 사실·파생은 함께 사라지고 카드는 은퇴만 시킨다 (D31) — 은퇴는 별도 statement.",
   "repo.update_path": "UPDATE repo SET root_path = :rootPath, detached_at = NULL WHERE id = :id;",
   "settings.get_all": "SELECT key, value_json, updated_at FROM settings;",
   "settings.set": "INSERT INTO settings (key, value_json, updated_at) VALUES (:key, :valueJson, :updatedAt)\nON CONFLICT (key) DO UPDATE SET value_json = excluded.value_json, updated_at = excluded.updated_at;",
+  "stats.days": "SELECT day_key, SUM(elapsed_s) / 60.0 AS mins FROM session\nWHERE repo_id = :repoId AND day_key >= :fromDay AND status IN ('done', 'paused', 'abandoned')\nGROUP BY day_key ORDER BY day_key;\n\n-- 다시 찍을 개념 — 만기 가까운 순 (02 §7.1).",
   "store.table_names": "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name;",
 } as const;
 
@@ -49,6 +94,32 @@ import type {} from '@chickadee/ipc-client';
 // (선언 병합 — 01 §2 의 의존 방향 `store-sql → ipc-client` 를 순환 없이 지킨다).
 declare module '@chickadee/ipc-client' {
   interface StatementMap {
+    "concept.prereqs": { params: { repoId: number, conceptId: string }; row: { prereq_id: string, name_ko: string, token: string | null, layer: number, has_card: number, has_site: number } };
+    "concept.uses": { params: { repoId: number, conceptId: string, limit: number }; row: { id: number, site_key: string, path: string, line_start: number, line_end: number, unknown_count: number, excerpt: string } };
+    "derive.blame_fill": { params: { repoId: number, siteKey: string, sha: string }; row: never };
+    "derive.captures_by_file": { params: { fileId: number }; row: { query_id: string, match_id: number, pattern_index: number, name: string, form: string | null, node_kind: string, in_error: number, start_byte: number, end_byte: number, start_line: number, end_line: number, start_col: number, end_col: number, excerpt: string } };
+    "derive.commit_classify": { params: { repoId: number, sha: string, kind: 'normal' | 'merge' | 'revert' | 'bot' | 'bulk', authorMatched: boolean }; row: never };
+    "derive.commits": { params: { repoId: number }; row: { id: number, sha: string, parent_count: number, author_email: string | null, author_name: string | null, message: string, files_n: number, insertions: number } };
+    "derive.concept_retire_missing": { params: { ids: string[] }; row: never };
+    "derive.concept_upsert": { params: { id: string, lang: string, nameKo: string, token: string | null, kind: 'universal' | 'lang', universalId: string | null, trackDefault: 't0' | 't1' | 't2' | 't3', dictVersionId: number }; row: never };
+    "derive.dict_version_id": { params: { lang: string, version: string }; row: { id: number } };
+    "derive.dict_version_upsert": { params: { lang: string, version: string, sha256: string, conceptCount: number, loadedAt: number }; row: never };
+    "derive.files": { params: { repoId: number }; row: { id: number, path: string, grammar: string | null, line_count: number, is_dirty: number, parse_quality: string | null } };
+    "derive.files_changed_since": { params: { repoId: number, since: number }; row: { id: number, path: string, grammar: string | null, line_count: number, is_dirty: number, parse_quality: string | null } };
+    "derive.gap_delete_missing": { params: { repoId: number, conceptIds: string[] }; row: never };
+    "derive.gap_upsert": { params: { repoId: number, conceptId: string, siteCount: number, minUnknown: number, bestSiteKey: string | null, reason: string | null, computedAt: number }; row: never };
+    "derive.prereq_clear": { params: { conceptId: string }; row: never };
+    "derive.prereq_insert": { params: { conceptId: string, prereqId: string }; row: never };
+    "derive.site_retire_missing": { params: { repoId: number, fileId: number, keys: string[], updatedAt: number }; row: never };
+    "derive.site_upsert": { params: { repoId: number, fileId: number, conceptId: string, siteKey: string, lineStart: number, lineEnd: number, colStart: number, colEnd: number, tsNodeKind: string | null, form: string | null, shape: string, occurrence: number, excerpt: string, picksJson: string, holeJson: string | null, ctxJson: string, lineConceptsJson: string, uncoveredRatio: number, confidence: 'syntactic' | 'heuristic', parseQuality: 'ok' | 'poor', isDirty: boolean, isOversize: boolean, unknownCount: number, updatedAt: number }; row: never };
+    "derive.sites_for_rank": { params: { repoId: number }; row: { id: number, site_key: string, concept_id: string, path: string, line_start: number, line_end: number, uncovered_ratio: number, line_concepts_json: string, is_dirty: number, unknown_count: number } };
+    "derive.unit_delete_missing": { params: { repoId: number, names: string[] }; row: never };
+    "derive.unit_file_insert": { params: { repoId: number, name: string, fileId: number }; row: never };
+    "derive.unit_files_clear": { params: { repoId: number }; row: never };
+    "derive.unit_node_insert": { params: { repoId: number, name: string, conceptId: string, track: 't0' | 't1' | 't2' | 't3', nodeOrder: number }; row: never };
+    "derive.unit_nodes_clear": { params: { repoId: number }; row: never };
+    "derive.unit_upsert": { params: { repoId: number, name: string, rootPath: string | null, orderIdx: number }; row: never };
+    "derive.unknown_count_set": { params: { repoId: number, siteKey: string, unknownCount: number }; row: never };
     "facts.capture_delete_by_file": { params: { repoId: number, path: string }; row: never };
     "facts.capture_insert": { params: { repoId: number, path: string, queryId: string, matchId: number, patternIndex: number, name: string, form: string | null, nodeKind: string, inError: boolean, startByte: number, endByte: number, startLine: number, endLine: number, startCol: number, endCol: number, excerpt: string }; row: never };
     "facts.commit_file_insert": { params: { repoId: number, sha: string, path: string, oldPath: string | null, status: 'A' | 'M' | 'D' | 'R', additions: number, deletions: number, touchedJson: string }; row: never };
@@ -59,12 +130,31 @@ declare module '@chickadee/ipc-client' {
     "facts.file_upsert": { params: { repoId: number, path: string, lang: string | null, grammar: string | null, lineCount: number, byteSize: number, contentHash: string | null, headOid: string | null, isDirty: boolean, parseQuality: 'ok' | 'poor' | null, skipReason: string | null, updatedAt: number }; row: never };
     "facts.run_finish": { params: { id: number, finishedAt: number, status: 'done' | 'failed' | 'cancelled', filesN: number, sitesN: number, capturesN: number, commitsN: number, warningsN: number, peakRssMb: number | null, escalatedToFull: boolean, grammarVersionsJson: string | null, queryHash: string | null, dictVersion: string | null, dictSchema: number | null, genVersion: number | null, fingerprint: string | null, error: string | null }; row: never };
     "facts.run_start": { params: { repoId: number, startedAt: number, mode: 'full' | 'incremental', headSha: string | null, appVersion: string | null }; row: never };
+    "gaps.list": { params: { repoId: number, limit: number }; row: { concept_id: string, name_ko: string, token: string | null, site_count: number, min_unknown: number, best_site_id: number | null } };
+    "home.bundle_counts": { params: { repoId: number }; row: { concepts: number, printed: number, avg_layer: number | null } };
+    "home.file_count": { params: { repoId: number }; row: { grammar: string | null, n: number } };
+    "home.last_run": { params: { repoId: number }; row: { id: number, status: string, mode: string, started_at: number, finished_at: number | null, files_n: number, captures_n: number, commits_n: number, warnings_n: number, escalated_to_full: number, head_sha: string | null, error: string | null } };
+    "home.layer_scale": { params: { repoId: number }; row: { layer: number, n: number } };
+    "home.unit_files": { params: { repoId: number }; row: { name: string, files: number } };
+    "home.units": { params: { repoId: number }; row: { unit_id: number, name: string, order_idx: number, root_path: string | null, concept_id: string, track: string, node_order: number, name_ko: string, token: string | null, layer: number, stability: number | null, last_review_at: number | null, state: number | null, due_at: number | null } };
+    "queue.retake_pending": { params: { repoId: number, limit: number }; row: { concept_id: string, name_ko: string, token: string | null, track_default: string, layer: number, due_at: number | null, stability: number | null, last_review_at: number | null, excerpt: string | null } };
     "repo.detach": { params: { id: number, detachedAt: number }; row: never };
+    "repo.get_by_root": { params: { rootPath: string }; row: { id: number, root_path: string, name: string, default_branch: string | null, head_sha: string | null, primary_lang: string | null, fingerprint: string, detached_at: number | null, added_at: number, last_ingest_at: number | null } };
     "repo.insert": { params: { rootPath: string, name: string, defaultBranch: string | null, headSha: string | null, primaryLang: string | null, fingerprint: string, addedAt: number }; row: never };
     "repo.list": { params: {}; row: { id: number, root_path: string, name: string, default_branch: string | null, head_sha: string | null, primary_lang: string | null, fingerprint: string, detached_at: number | null, added_at: number, last_ingest_at: number | null } };
+    "repo.purge_commits": { params: { id: number }; row: never };
+    "repo.purge_derived": { params: { id: number }; row: never };
+    "repo.purge_facts": { params: { id: number }; row: never };
+    "repo.purge_gaps": { params: { id: number }; row: never };
+    "repo.purge_runs": { params: { id: number }; row: never };
+    "repo.purge_units": { params: { id: number }; row: never };
+    "repo.remove": { params: { id: number }; row: never };
+    "repo.retire_cards": { params: { id: number, at: number }; row: never };
+    "repo.set_head": { params: { id: number, headSha: string | null, fingerprint: string, primaryLang: string | null, lastIngestAt: number }; row: never };
     "repo.update_path": { params: { id: number, rootPath: string }; row: never };
     "settings.get_all": { params: {}; row: { key: string, value_json: string, updated_at: number } };
     "settings.set": { params: { key: string, valueJson: string, updatedAt: number }; row: never };
+    "stats.days": { params: { repoId: number, fromDay: string }; row: { day_key: string, mins: number } };
     "store.table_names": { params: {}; row: { name: string } };
   }
 }

@@ -94,7 +94,7 @@ Site 에 `commit` 을 붙이려면 blame 이 필요한데 `git blame` 은 파일
 2. `merge_base(old_head, new_head)` = `old_head` 면 정상 전진: `revwalk.push(new_head); hide(old_head)`.
 3. 다르면 rebase/force-push: `old_head` 쪽에만 있던 커밋은 `git_commit.is_reachable = 0`(삭제 금지 — 학습 기록이 참조한다). `merge_base..new_head` 를 걷는다.
 4. 파일 단위 증분: `diff_tree_to_tree(old_tree, new_tree)` 한 번으로 바뀐 파일 목록을 얻고 **그 파일만 재파싱**. `file.content_hash` 가 같으면 건너뛴다(01 §3.3).
-5. Site 의 정체성은 줄 번호가 아니라 `concept_site.site_key = sha1(concept, path, shape, occurrence)` (§3.5, TS 파생) 라 줄이 밀려도 학습 기록이 살아남는다. 재파생 후 같은 key 는 갱신, 사라진 key 는 `is_alive = 0`.
+5. Site 의 정체성은 줄 번호가 아니라 `concept_site.site_key = fnv1a64(concept, path, shape, occurrence)` (§3.5, TS 파생 · D70) 라 줄이 밀려도 학습 기록이 살아남는다. 재파생 후 같은 key 는 갱신, 사라진 key 는 `is_alive = 0`.
 
 ### 1.7 워킹트리 미커밋 변경
 
@@ -342,7 +342,7 @@ TS `packages/concepts/derive.ts` 가 `capture` 행(01 `Capture`, 파일 단위 �
 
 | 옛 `Site` | `ConceptSite` |
 |---|---|
-| `id` | `siteKey` — sha1(concept, path, shape, occurrence), 줄 번호 무관 |
+| `id` | `siteKey` — fnv1a64(concept, path, shape, occurrence), 줄 번호 무관 (D70) |
 | `concept` | `conceptId` |
 | `form` | `form` — `(#set! form)` |
 | `path` | `fileId` (+ `file.path`, 리포 상대 posix 구분자) |
@@ -675,7 +675,7 @@ examples:
 
 ### 5.1 스키마·타입·CI 린트
 
-- `dictionary/schema/concept.schema.json` 이 정본. TS 타입은 `json-schema-to-typescript` 로 생성(`Concept`, `LangMeta`). Rust 앱 코드는 YAML 을 읽지 않는다(01). `LangSpec` 은 TS 가 만든다.
+- `packages/dictionary/src/schema.ts` 의 zod 가 정본이고 `dictionary/schema/concept.schema.json` 은 거기서 생성한다 (D69). Rust 앱 코드는 YAML 을 읽지 않는다(01). `LangSpec` 은 TS 가 만든다.
 - `pnpm dict:lint`(TS) 가 검사하는 것: 필수 필드 · id = 경로 · `prereq`/`confusions`/`universal` 참조 존재 · 사이클 없음 · 의미형 옵션 4개·진단 3개 · 지목형 `answer` 의 pick 이 쿼리 캡처에 있음 · 빈칸형 오답이 `confusions` 토큰 · 템플릿 변수가 허용 목록(§4.3)에 있음 · HTML 태그 허용 목록 · **조사 하드코딩**(`/\}\}\s*(은|는|이|가|을|를|과|와|으로|로)(\s|$|<)/`) · 금지어(`틀렸|오답|실패했`) — discussion §3-2 「틀렸다 대신 조건」 · `dict.trace` 에 `{{site.` 또는 `{{pick.` 참조 없음(튜토리얼 변질 방지) · `one_liner` ≤ 80자, 진단 `t` ≤ 300자.
 - `crates/parse/tests/dictionary.rs`(테스트 전용 `serde_yaml` dev-dependency, 예산 밖)가 검사하는 것: 모든 `.scm` 이 고정된 문법으로 컴파일 · 캡처 이름 정규식(§3.2) · 패턴마다 `@site` 1개(맥락 패턴은 `@ctx.*` 만; `_imports`·`_blocks` 는 각자 규약) · 죽은 패턴(모든 `examples` 에서 0매치) 금지 · `examples[].code` 의 캡처를 `fixtures/ipc/dict-examples/<id>.json` 로 덤프.
 - Site 수준 `expect`(sites·form·picks·hole·ctx)는 `pnpm dict:test`(vitest)가 그 덤프에서 `derive.ts` 로 파생해 비교한다.

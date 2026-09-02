@@ -452,3 +452,22 @@ fn the_pass_reports_every_phase_and_no_source_line_leaks_into_an_event() {
         "repository-relative paths are allowed"
     );
 }
+
+#[test]
+fn declaration_files_are_excluded_but_test_files_are_not() {
+    let dir = tmp("suffixes");
+    let data = tmp("suffixes-db");
+    let raw = init(&dir.0);
+    write(&dir.0, "src/a.ts", "const a = 1;\n");
+    write(&dir.0, "src/a.test.ts", "const b = 1;\n");
+    write(&dir.0, "src/types.d.ts", "declare const c: number;\n");
+    commit(&raw, "first");
+    let store = open_store(&data.0);
+
+    let mut only = spec(&dir.0, "full", None);
+    only.exclude_globs.push("*.d.ts".to_owned());
+    let out = ingest(&store, &only, &Arc::new(AtomicBool::new(false)));
+    // D60: a declaration file gets no row at all; a test file is ordinary input.
+    assert_eq!(out.files, 2);
+    assert_eq!(out.changed, 2);
+}

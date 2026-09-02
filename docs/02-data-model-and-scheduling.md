@@ -273,7 +273,7 @@ CREATE TABLE concept_site (
   repo_id        INTEGER NOT NULL REFERENCES repo(id),
   file_id        INTEGER NOT NULL REFERENCES file(id),
   concept_id     TEXT    NOT NULL REFERENCES concept(id),
-  site_key       TEXT    NOT NULL,           -- sha1(concept, path, shape, occurrence)
+  site_key       TEXT    NOT NULL,           -- fnv1a64(concept, path, shape, occurrence) (D70)
   line_start     INTEGER NOT NULL,
   line_end       INTEGER NOT NULL,
   col_start      INTEGER NOT NULL,

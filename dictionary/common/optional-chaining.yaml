@@ -1,0 +1,20 @@
+schema: 1
+id: common/optional-chaining
+universal: null
+name: { ko: 없을 수 있는 값 건너뛰기, en: Safe navigation }
+token: null
+grammars: []
+essential: false
+difficulty: 2
+prereq: []
+confusions: []
+dict:
+  one_liner: "앞의 값이 없으면 더 읽지 않고 「없음」으로 멈추는 표기."
+  why: >-
+    이름은 언어마다 다르지만 하는 일은 하나입니다 — 없을 수 있는 값을 한 칸 지나갈 때,
+    터지는 대신 「없음」으로 멈춥니다. 이걸 아는 사람은 새 언어에서 <b>표기만</b> 배우면 됩니다.
+  trace: []
+rule: "없으면 멈춘다. 채우는 것은 다른 기호의 일이다."
+ok: "앞이 「없음」이면 뒤를 읽지 않고 「없음」을 냅니다."
+misconceptions:
+  - "기본값을 넣어 준다 — 아니요. 멈추기만 합니다."

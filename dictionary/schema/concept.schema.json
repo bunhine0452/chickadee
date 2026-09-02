@@ -1,0 +1,605 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chickadee.dev/schema/concept.schema.json",
+  "title": "Chickadee grammar dictionary",
+  "description": "Generated from packages/dictionary/src/schema.ts — do not edit by hand (D69). Run `pnpm dict:schema` after changing the zod schema.",
+  "$defs": {
+    "concept": {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "type": "number",
+          "const": 1
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*\\/[a-z0-9][a-z0-9-]*$"
+        },
+        "universal": {
+          "anyOf": [
+            {
+              "$ref": "#/properties/id"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "name": {
+          "type": "object",
+          "properties": {
+            "ko": {
+              "type": "string"
+            },
+            "en": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "ko",
+            "en"
+          ],
+          "additionalProperties": false
+        },
+        "token": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 16
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "grammars": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "typescript",
+              "tsx",
+              "javascript",
+              "python",
+              "go",
+              "rust",
+              "swift",
+              "dart",
+              "sql"
+            ]
+          },
+          "default": []
+        },
+        "framework": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        },
+        "track_default": {
+          "type": "string",
+          "enum": [
+            "t0",
+            "t1",
+            "t2",
+            "t3"
+          ],
+          "default": "t0"
+        },
+        "essential": {
+          "type": "boolean",
+          "default": false
+        },
+        "difficulty": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "prereq": {
+          "type": "array",
+          "items": {
+            "$ref": "#/properties/id"
+          },
+          "default": []
+        },
+        "confusions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/properties/id"
+          },
+          "default": []
+        },
+        "dict": {
+          "type": "object",
+          "properties": {
+            "one_liner": {
+              "type": "string",
+              "maxLength": 80
+            },
+            "why": {
+              "type": "string"
+            },
+            "trace": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            }
+          },
+          "required": [
+            "one_liner",
+            "why"
+          ],
+          "additionalProperties": false
+        },
+        "rule": {
+          "type": "string"
+        },
+        "result": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string"
+            },
+            "value": {
+              "type": "string"
+            },
+            "note": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "label",
+            "value",
+            "note"
+          ],
+          "additionalProperties": false
+        },
+        "ok": {
+          "type": "string"
+        },
+        "payoff": {
+          "type": "string"
+        },
+        "bridge": {
+          "type": "string"
+        },
+        "misconceptions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "meaning": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "q": {
+                "type": "string"
+              },
+              "hint": {
+                "type": "string"
+              },
+              "options": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "t": {
+                      "type": "string"
+                    },
+                    "mono": {
+                      "type": "boolean"
+                    },
+                    "diag": {
+                      "type": "object",
+                      "properties": {
+                        "t": {
+                          "type": "string",
+                          "maxLength": 300
+                        },
+                        "edge": {
+                          "type": "object",
+                          "properties": {
+                            "h": {
+                              "type": "string"
+                            },
+                            "code": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "minItems": 1
+                            }
+                          },
+                          "required": [
+                            "h",
+                            "code"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "t"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "t"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 4,
+                "maxItems": 4
+              }
+            },
+            "required": [
+              "q",
+              "options"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "point": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "q": {
+                "$ref": "#/properties/meaning/items/properties/q"
+              },
+              "hint": {
+                "$ref": "#/properties/meaning/items/properties/hint"
+              },
+              "answer": {
+                "type": "string",
+                "pattern": "^pick\\.[1-9]$"
+              },
+              "diag": {
+                "type": "object",
+                "additionalProperties": {
+                  "$ref": "#/properties/meaning/items/properties/options/items/properties/diag"
+                },
+                "propertyNames": {
+                  "pattern": "^pick\\.[1-9]$"
+                }
+              }
+            },
+            "required": [
+              "q",
+              "answer"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "blank": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "q": {
+                "$ref": "#/properties/meaning/items/properties/q"
+              },
+              "hint": {
+                "$ref": "#/properties/meaning/items/properties/hint"
+              },
+              "options": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/properties/meaning/items/properties/options/items"
+                },
+                "minItems": 4,
+                "maxItems": 4
+              }
+            },
+            "required": [
+              "q",
+              "options"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "why_gate": {
+          "type": "object",
+          "properties": {
+            "q": {
+              "type": "string"
+            },
+            "help": {
+              "type": "string"
+            },
+            "choices": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "t": {
+                    "type": "string"
+                  },
+                  "ok": {
+                    "type": "boolean"
+                  },
+                  "fb": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "t",
+                  "ok",
+                  "fb"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 3,
+              "maxItems": 3
+            }
+          },
+          "required": [
+            "q",
+            "choices"
+          ],
+          "additionalProperties": false
+        },
+        "queries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "grammars": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/properties/grammars/items"
+                },
+                "minItems": 1
+              },
+              "file": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "grammars",
+              "file"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "examples": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "expect": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "const": "none"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "sites": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "form": {
+                        "type": "string"
+                      },
+                      "hole": {
+                        "type": "string"
+                      },
+                      "picks": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "string"
+                        }
+                      },
+                      "ctx": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            },
+            "required": [
+              "code",
+              "expect"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        }
+      },
+      "required": [
+        "schema",
+        "id",
+        "name",
+        "difficulty",
+        "dict",
+        "rule",
+        "ok"
+      ],
+      "additionalProperties": false,
+      "$schema": "https://json-schema.org/draft/2019-09/schema#"
+    },
+    "lang": {
+      "type": "object",
+      "properties": {
+        "lang": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*$"
+        },
+        "version": {
+          "type": "string"
+        },
+        "grammars": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "typescript",
+              "tsx",
+              "javascript",
+              "python",
+              "go",
+              "rust",
+              "swift",
+              "dart",
+              "sql"
+            ]
+          },
+          "minItems": 1
+        },
+        "grammar_abi": {
+          "type": "integer",
+          "exclusiveMinimum": true,
+          "minimum": 0
+        },
+        "extensions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^\\.[a-z0-9.]+$"
+            }
+          },
+          "propertyNames": {
+            "enum": [
+              "typescript",
+              "tsx",
+              "javascript",
+              "python",
+              "go",
+              "rust",
+              "swift",
+              "dart",
+              "sql"
+            ]
+          }
+        },
+        "framework": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        },
+        "detect": {
+          "type": "object",
+          "properties": {
+            "dependency": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "dependency"
+          ],
+          "additionalProperties": false
+        },
+        "essential": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9]*\\/[a-z0-9][a-z0-9-]*$"
+          },
+          "default": []
+        },
+        "alternatives": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "gap": {
+                "$ref": "#/properties/essential/items"
+              },
+              "present": {
+                "$ref": "#/properties/essential/items"
+              },
+              "note": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "gap",
+              "present"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "thin_threshold": {
+          "type": "object",
+          "properties": {
+            "min_files": {
+              "type": "integer",
+              "exclusiveMinimum": true,
+              "minimum": 0
+            },
+            "min_sites": {
+              "type": "integer",
+              "exclusiveMinimum": true,
+              "minimum": 0
+            },
+            "small_repo_files": {
+              "type": "integer",
+              "exclusiveMinimum": true,
+              "minimum": 0
+            }
+          },
+          "required": [
+            "min_files",
+            "min_sites",
+            "small_repo_files"
+          ],
+          "additionalProperties": false
+        },
+        "diag_default": {
+          "type": "object",
+          "properties": {
+            "point": {
+              "type": "string"
+            },
+            "blank": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "point",
+            "blank"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "lang",
+        "version",
+        "grammars",
+        "grammar_abi",
+        "extensions",
+        "thin_threshold",
+        "diag_default"
+      ],
+      "additionalProperties": false,
+      "$schema": "https://json-schema.org/draft/2019-09/schema#"
+    }
+  }
+}

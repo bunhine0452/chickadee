@@ -1,0 +1,52 @@
+lang: ts
+version: 0.1.0
+grammars: [typescript, tsx, javascript]
+grammar_abi: 15
+
+# 확장자 → 문법. 인제스트가 이 표로 파일을 고른다 (03 §2.1).
+# `.ts` 를 TSX 문법으로 읽지 않는다 — `<T>` 캐스트가 JSX 로 오파싱된다.
+extensions:
+  typescript: [.ts, .mts, .cts]
+  tsx: [.tsx]
+  javascript: [.js, .mjs, .cjs, .jsx]
+
+# 「필수 문법」 — 구멍 지도가 세는 대상이자 위상 정렬 동률 시의 순서다 (03 §6).
+essential:
+  - ts/const-declaration
+  - ts/string-literal
+  - ts/number-literal
+  - ts/property-access
+  - ts/call-expression
+  - ts/arrow-function
+  - ts/undefined-null
+  - ts/array-basics
+  - ts/template-literal
+  - ts/object-spread
+  - ts/conditional-ternary
+  - ts/for-of
+  - ts/optional-chaining
+  - ts/nullish-coalescing
+  - ts/array-destructuring
+  - ts/object-destructuring
+  - ts/array-map-immutable
+  - ts/array-filter
+  - ts/array-method-chain
+  - ts/async-await
+  - ts/try-catch
+  - ts/generics
+
+# 「AI 가 대신 쓴 것」 — 구멍 개념 ↔ 같은 일을 하는 다른 표기.
+# 패널이 「.then 체인도 N곳」처럼 부기를 달고, 그 자리가 「선택의 왜」로 이어진다.
+alternatives:
+  - { gap: ts/async-await, present: ts/promise-then, note: "같은 일을 두 표기로 — AI 가 섞어 썼습니다" }
+  - { gap: ts/nullish-coalescing, present: ts/logical-or-default }
+  - { gap: ts/optional-chaining, present: ts/logical-and-guard }
+  - { gap: ts/array-destructuring, present: ts/index-access-pair }
+  - { gap: ts/array-map-immutable, present: ts/array-push-mutate }
+
+thin_threshold: { min_files: 2, min_sites: 3, small_repo_files: 20 }
+
+# point[].diag · blank 옵션에 진단이 없을 때의 폴백 (04 §2.1).
+diag_default:
+  point: "«{{pick}}» 은 {{role}} 자리입니다. {{concept}} 는 «{{answer}}» 입니다. {{rule}}"
+  blank: "«{{pick}}» 은 이 자리에 오지 않습니다. {{rule}}"

@@ -465,10 +465,12 @@ fn compile_all(spec: &JobSpec) -> Result<BTreeMap<String, Queries>, String> {
     Ok(out)
 }
 
-/// Every suffix, so `.d.ts` can be excluded while `.ts` stays (D60).
+/// The last dot segment, so `a.test.ts` is still TypeScript. `.d.ts` is taken out
+/// by an exclude glob instead, which is where the rest of the skip rules live (D60).
 fn extension_of(rel: &str) -> Option<String> {
-    let (_, rest) = rel.rsplit('/').next()?.split_once('.')?;
-    Some(rest.to_ascii_lowercase())
+    let name = rel.rsplit('/').next()?;
+    let (_, ext) = name.rsplit_once('.')?;
+    (!ext.is_empty()).then(|| ext.to_ascii_lowercase())
 }
 
 fn relative(at: &Path, root: &Path) -> Option<String> {

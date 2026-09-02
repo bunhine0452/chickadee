@@ -18,7 +18,9 @@
     "design:check": "node scripts/sync-design.mjs --check",
     "check:contrast": "node scripts/check-contrast.mjs",
     "check:rust": "bash scripts/check-rust-budget.sh",
-    "catalog:build": "tsx scripts/build-catalog.ts"
+    "catalog:build": "tsx scripts/build-catalog.ts",
+    "dict:lint": "vitest run packages/dictionary/src/dict.test.ts",
+    "dict:schema": "tsx scripts/dict-schema.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
@@ -32,6 +34,7 @@
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.18.1",
-    "vitest": "^3.2.6"
+    "vitest": "^3.2.6",
+    "zod-to-json-schema": "^3.25.2"
   }
 }
