@@ -7,7 +7,7 @@
 //! counts) are filled in by the derive layer afterwards.
 
 use std::collections::BTreeMap;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::channel;
 use std::sync::Arc;
@@ -78,10 +78,16 @@ pub struct Report {
 }
 
 /// A file that survived the filters, with everything its row needs but the parse.
+///
+/// It holds the **path**, not the bytes. Keeping every file's contents until the
+/// parse would make peak memory `files × size` — 50,000 files at the 512 KiB limit
+/// is gigabytes, against a 300 MB budget (03 §7). The worker reads it again; the
+/// page cache makes the second read close to free.
 struct Candidate {
     rel: String,
+    at: PathBuf,
     grammar: String,
-    bytes: Vec<u8>,
+    size: usize,
     hash: String,
     head_oid: Option<String>,
 }
@@ -219,7 +225,7 @@ fn pass(
             continue;
         };
         alive.push(rel.clone());
-        match take(spec, repo, &rel, lang, &head_oids, &known) {
+        match take(spec, repo, &rel, entry.path(), lang, &head_oids, &known) {
             Ok(Some(file)) => seen.push(file),
             Ok(None) => {}
             Err(reason) => sink.warn(&rel, reason, out),
@@ -278,8 +284,11 @@ fn scan_all(
                     let Some(q) = compiled.get(&file.grammar) else {
                         continue;
                     };
+                    let Ok(bytes) = std::fs::read(&file.at) else {
+                        continue;
+                    };
                     // The byte limit was already applied during the walk.
-                    let done = match chickadee_parse::scan(&file.bytes, q, usize::MAX) {
+                    let done = match chickadee_parse::scan(&bytes, q, usize::MAX) {
                         Ok(s) => (file, s.quality, s.line_count, s.captures),
                         Err(_) => (file, "poor", 1, Vec::new()),
                     };
@@ -374,6 +383,7 @@ fn take(
     spec: &JobSpec,
     repo: &Repo,
     rel: &str,
+    at: &Path,
     lang: &LangSpec,
     head_oids: &BTreeMap<String, String>,
     known: &BTreeMap<String, Option<String>>,
@@ -409,11 +419,11 @@ fn take(
         return Ok(None);
     }
     let head_oid = head_oids.get(rel).cloned();
-    let rel = rel.to_owned();
     Ok(Some(Candidate {
-        rel,
+        rel: rel.to_owned(),
+        at: at.to_path_buf(),
         grammar: lang.grammar.clone(),
-        bytes,
+        size: bytes.len(),
         hash,
         head_oid,
     }))
@@ -515,7 +525,7 @@ fn count(n: usize) -> u32 {
 
 fn file_row(spec: &JobSpec, file: &Candidate, quality: &str, rows: u32) -> Value {
     json!({ "repoId": spec.repo_id, "path": file.rel, "grammar": file.grammar,
-            "lineCount": rows, "byteSize": file.bytes.len(), "contentHash": file.hash,
+            "lineCount": rows, "byteSize": file.size, "contentHash": file.hash,
             "headOid": file.head_oid, "isDirty": file.head_oid.as_deref() != Some(&file.hash),
             "parseQuality": quality, "updatedAt": now_ms() })
 }
