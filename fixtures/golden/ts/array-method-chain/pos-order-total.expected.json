@@ -1,0 +1,54 @@
+[
+  {
+    "queryId": "ts/array-method-chain",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "chain",
+    "startLine": 3,
+    "startCol": 9,
+    "endLine": 5,
+    "endCol": 58,
+    "nodeKind": "call_expression",
+    "inError": false
+  },
+  {
+    "queryId": "ts/array-method-chain",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "chain",
+    "startLine": 3,
+    "startCol": 9,
+    "endLine": 3,
+    "endCol": 14,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "ts/array-method-chain",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "chain",
+    "startLine": 4,
+    "startCol": 5,
+    "endLine": 4,
+    "endCol": 11,
+    "nodeKind": "property_identifier",
+    "inError": false
+  },
+  {
+    "queryId": "ts/array-method-chain",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "chain",
+    "startLine": 5,
+    "startCol": 5,
+    "endLine": 5,
+    "endCol": 11,
+    "nodeKind": "property_identifier",
+    "inError": false
+  }
+]

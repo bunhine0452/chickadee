@@ -1,0 +1,67 @@
+[
+  {
+    "queryId": "ts/array-destructuring",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "site",
+    "form": "assign",
+    "startLine": 6,
+    "startCol": 2,
+    "endLine": 6,
+    "endCol": 31,
+    "nodeKind": "assignment_expression",
+    "inError": false
+  },
+  {
+    "queryId": "ts/array-destructuring",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "ctx.pattern",
+    "form": "assign",
+    "startLine": 6,
+    "startCol": 2,
+    "endLine": 6,
+    "endCol": 15,
+    "nodeKind": "array_pattern",
+    "inError": false
+  },
+  {
+    "queryId": "ts/array-destructuring",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.1",
+    "form": "assign",
+    "startLine": 6,
+    "startCol": 3,
+    "endLine": 6,
+    "endCol": 7,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "ts/array-destructuring",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.2",
+    "form": "assign",
+    "startLine": 6,
+    "startCol": 9,
+    "endLine": 6,
+    "endCol": 14,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "ts/array-destructuring",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.3",
+    "form": "assign",
+    "startLine": 6,
+    "startCol": 18,
+    "endLine": 6,
+    "endCol": 31,
+    "nodeKind": "array",
+    "inError": false
+  }
+]

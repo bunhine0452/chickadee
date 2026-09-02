@@ -1,0 +1,67 @@
+[
+  {
+    "queryId": "ts/object-destructuring",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "declarator",
+    "startLine": 3,
+    "startCol": 8,
+    "endLine": 3,
+    "endCol": 44,
+    "nodeKind": "variable_declarator",
+    "inError": false
+  },
+  {
+    "queryId": "ts/object-destructuring",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "ctx.pattern",
+    "form": "declarator",
+    "startLine": 3,
+    "startCol": 8,
+    "endLine": 3,
+    "endCol": 33,
+    "nodeKind": "object_pattern",
+    "inError": false
+  },
+  {
+    "queryId": "ts/object-destructuring",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "declarator",
+    "startLine": 3,
+    "startCol": 10,
+    "endLine": 3,
+    "endCol": 19,
+    "nodeKind": "pair_pattern",
+    "inError": false
+  },
+  {
+    "queryId": "ts/object-destructuring",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "declarator",
+    "startLine": 3,
+    "startCol": 21,
+    "endLine": 3,
+    "endCol": 31,
+    "nodeKind": "object_assignment_pattern",
+    "inError": false
+  },
+  {
+    "queryId": "ts/object-destructuring",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "declarator",
+    "startLine": 3,
+    "startCol": 36,
+    "endLine": 3,
+    "endCol": 44,
+    "nodeKind": "member_expression",
+    "inError": false
+  }
+]

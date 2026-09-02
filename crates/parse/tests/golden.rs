@@ -157,11 +157,12 @@ fn the_golden_files_still_describe_what_the_queries_capture() {
     );
 }
 
-/// 06 §1.2 — 언어당 기본 문법 12케이스 + 함정 3케이스. TSX·SQL 은 아직 개념이 적어
-/// 하한만 지킨다.
+/// 06 §1.2 — 언어당 기본 문법 12케이스 + 함정 3케이스. TS 하한은 03 §8 의 「첫 대상:
+/// TS 개념 20개」를 따른다(06 의 12칸은 insta 가 칸별로 따로 지킨다). TSX·SQL 은 아직
+/// 개념이 적어 하한만 지킨다.
 #[test]
 fn each_grammar_brings_its_concepts_and_its_three_traps() {
-    for (dir, least) in [("ts", 12usize), ("tsx", 3), ("sql", 3)] {
+    for (dir, least) in [("ts", 20usize), ("tsx", 3), ("sql", 3)] {
         let cases = support::cases_of(dir);
         let concepts: BTreeSet<&str> = cases
             .iter()

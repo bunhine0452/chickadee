@@ -1,0 +1,54 @@
+[
+  {
+    "queryId": "ts/array-filter",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "filter",
+    "startLine": 4,
+    "startCol": 9,
+    "endLine": 4,
+    "endCol": 73,
+    "nodeKind": "call_expression",
+    "inError": false
+  },
+  {
+    "queryId": "ts/array-filter",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "filter",
+    "startLine": 4,
+    "startCol": 9,
+    "endLine": 4,
+    "endCol": 14,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "ts/array-filter",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "filter",
+    "startLine": 4,
+    "startCol": 15,
+    "endLine": 4,
+    "endCol": 21,
+    "nodeKind": "property_identifier",
+    "inError": false
+  },
+  {
+    "queryId": "ts/array-filter",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "filter",
+    "startLine": 4,
+    "startCol": 22,
+    "endLine": 4,
+    "endCol": 72,
+    "nodeKind": "arrow_function",
+    "inError": false
+  }
+]

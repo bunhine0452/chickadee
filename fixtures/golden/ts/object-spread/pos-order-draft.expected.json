@@ -1,0 +1,80 @@
+[
+  {
+    "queryId": "ts/object-spread",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "object",
+    "startLine": 3,
+    "startCol": 9,
+    "endLine": 6,
+    "endCol": 3,
+    "nodeKind": "object",
+    "inError": false
+  },
+  {
+    "queryId": "ts/object-spread",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "object",
+    "startLine": 4,
+    "startCol": 4,
+    "endLine": 4,
+    "endCol": 7,
+    "nodeKind": "...",
+    "inError": false
+  },
+  {
+    "queryId": "ts/object-spread",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "object",
+    "startLine": 4,
+    "startCol": 7,
+    "endLine": 4,
+    "endCol": 12,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "ts/object-spread",
+    "matchId": 2,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "object",
+    "startLine": 5,
+    "startCol": 13,
+    "endLine": 5,
+    "endCol": 50,
+    "nodeKind": "object",
+    "inError": false
+  },
+  {
+    "queryId": "ts/object-spread",
+    "matchId": 2,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "object",
+    "startLine": 5,
+    "startCol": 15,
+    "endLine": 5,
+    "endCol": 18,
+    "nodeKind": "...",
+    "inError": false
+  },
+  {
+    "queryId": "ts/object-spread",
+    "matchId": 2,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "object",
+    "startLine": 5,
+    "startCol": 18,
+    "endLine": 5,
+    "endCol": 25,
+    "nodeKind": "identifier",
+    "inError": false
+  }
+]
