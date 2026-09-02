@@ -723,3 +723,34 @@ fn a_real_repository_ingests_within_the_budget() {
     // 넘으면 무언가 잘못된 것이다.
     assert!(ms < 15_000, "{ms} ms 걸렸다 — 03 §7 예산을 넘는다");
 }
+
+#[test]
+fn an_ordinary_fast_forward_drops_no_commits() {
+    let dir = tmp("fastforward");
+    let data = tmp("fastforward-db");
+    let raw = seed(&dir.0);
+    let store = open_store(&data.0);
+    let stop = Arc::new(AtomicBool::new(false));
+
+    ingest(&store, &spec(&dir.0, "full", None), &stop);
+    let head = raw
+        .head()
+        .ok()
+        .and_then(|h| h.target())
+        .map(|o| o.to_string());
+    write(&dir.0, "src/c.ts", "const c = res.user?.profile\n");
+    commit(&raw, "second");
+
+    ingest(&store, &spec(&dir.0, "incremental", head), &stop);
+    // 리베이스가 아니라 그냥 앞으로 간 것이다 — 사라진 커밋은 없어야 한다.
+    let gone = store
+        .query("derive.commits", &json!({ "repoId": 1 }))
+        .expect("commits")
+        .len();
+    let files = store
+        .query("facts.file_hashes", &json!({ "repoId": 1 }))
+        .expect("files")
+        .len();
+    assert!(files > 0);
+    assert_eq!(gone, 2, "닿을 수 있는 커밋 2개가 그대로 남아야 한다");
+}

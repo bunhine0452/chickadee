@@ -177,7 +177,7 @@ pub fn run(sink: &Sink, store: &Store, spec: &JobSpec) -> Result<Report, String>
         .map_err(|e| e.to_string())?
         .last_id;
 
-    let result = pass(sink, store, spec, &repo, &mut out);
+    let result = pass(sink, store, spec, &repo, head.as_deref(), &mut out);
     out.cancelled = sink.stopped();
     out.elapsed_ms = sink.ms();
     let status = match (result.is_ok(), out.cancelled) {
@@ -199,6 +199,7 @@ fn pass(
     store: &Store,
     spec: &JobSpec,
     repo: &Repo,
+    head: Option<&str>,
     out: &mut Report,
 ) -> Result<(), String> {
     let by_ext = extension_map(spec);
@@ -251,7 +252,7 @@ fn pass(
     }
 
     // ── git ──
-    history(sink, spec, repo, &mut writer, out)?;
+    history(sink, spec, repo, head, &mut writer, out)?;
     writer.flush()?;
     sink.step("write", out.captures, out.captures, None);
     Ok(())
@@ -322,6 +323,7 @@ fn history(
     sink: &Sink,
     spec: &JobSpec,
     repo: &Repo,
+    head: Option<&str>,
     writer: &mut Writer<'_>,
     out: &mut Report,
 ) -> Result<(), String> {
@@ -332,7 +334,10 @@ fn history(
         .as_deref()
         .filter(|_| spec.mode == "incremental");
     if let Some(old) = since {
-        match repo.dropped(old, "") {
+        // The second argument is what to hide. Passing "" hides nothing, which
+        // reports **every** commit reachable from the old head as dropped — on an
+        // ordinary fast-forward that is the entire history.
+        match repo.dropped(old, head.unwrap_or(old)) {
             Ok(gone) if !gone.is_empty() => {
                 let row = json!({ "repoId": spec.repo_id, "shas": gone });
                 writer.add("facts.commit_mark_unreachable", row)?;

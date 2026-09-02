@@ -55,7 +55,7 @@ owner: claude-code
 - [x] 05 · 홈 화면 — Masthead·RepoSwitcher·TodayPanel·TimeQueue·InkScale·ConceptList·GapsPanel·Sheet·Node·NodeDetail·Guide·Forecast·ColorBar, home.load · 3일 (선행: 프리미티브·02 홈 쿼리) {#m1-05-home}
 - [!] 05 · WKWebView 성능 첫 실측 — ?stress=48 이식, __audit.perf, performance.mark 6종, Web Inspector 절차 · 1일 (선행: 홈) {#m1-05-wkwebview-perf}
 - [x] 05 · 인제스트·첫 실행·안내·설정 — 폴더 선택, 진행 이벤트를 TimeQueue 로, 빈 상태, newcomer 시트, 설정(identity 포함) · 2일 (선행: 홈·01 이벤트) {#m1-05-ingest-onboarding}
-- [ ] 03 · 성능 픽스처·벤치 — large-100k 생성기·criterion·CI 임계 · 1.5일 (선행: 증분까지·Q1) {#m1-03-perf-bench}
+- [x] 03 · 성능 픽스처·벤치 — large-100k 생성기·criterion·CI 임계 · 1.5일 (선행: 증분까지·Q1) {#m1-03-perf-bench}
 - [x] 03 · Swift·Dart·SQL 품질 검증 — 실코드 20파일 ERROR 비율, 통과 시 바닥 개념 착수, 실패 시 보류 결정 · 2일 (선행: 파서 풀) {#m1-03-swift-dart-sql}
 - [x] 03 · projectox 실리포 검증 — TS/TSX/SQL 인제스트, Site 수·구멍 지도가 목업과 같은 모양인지 · 1일 (선행: 구멍 지도) {#m1-03-projectox-check}
 
@@ -160,4 +160,5 @@ owner: claude-code
 | 2026-09-03T05:01:23+09:00 | #m1-06-q2-parser-golden | claude-code | ☐→x | .oculpm/journal/20260903/Features_to_add/0501_feature_golden-fixtures-and-insta-snapshots.md | insta 스냅샷 45장 (TS/TSX/SQL 각 15), 절대 경로 없음 |
 | 2026-09-03T05:15:43+09:00 | #m1-06-q2-parser-golden | claude-code | x→x | 20260903/Features_to_add/0515_feature_m1-home-shell-and-flow.md | insta 스냅샷 45개(TS·TSX·SQL 각 15케이스). 골든과 스냅샷이 같은 한 줄을 각각 다른 형식으로 짚는 것까지 확인 |
 | 2026-09-03T05:18:42+09:00 | #m1-03-golden-fixtures | claude-code | x→x | 20260903/Features_to_add/0515_feature_m1-home-shell-and-flow.md | TS 20개념 × (양성3·음성2) + TSX 4 + SQL 4 + 함정 3종씩. UPDATE_GOLDEN 지원. 술어를 망가뜨려 그물이 도는 것을 확인 |
+| 2026-09-03T05:21:19+09:00 | #m1-03-perf-bench | claude-code | ☐→x | .oculpm/journal/20260903/Features_to_add/0521_feature_m1-perf-fixtures-and-ingest-bench.md | large-100k(800파일 101,772줄 1,000커밋)·poly(언어당 20)·criterion 벤치·scripts/bench.sh +30% 게이트. 실측 총 2.5~3.3s · 증분 0.34s · RSS 84~89MB — 03 §7 초과 없음. bench.yml 야간 잡은 m5-06-q15 몫. |
 <!-- oculpm:plan-log end -->
