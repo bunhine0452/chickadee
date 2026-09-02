@@ -1,0 +1,30 @@
+[package]
+name = "chickadee-parse"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "tree-sitter shell: parse, run queries, flatten a tree"
+publish = false
+
+[dependencies]
+# All grammar crates ride the same ABI and move together — bumping one alone is
+# how a query silently starts matching nothing (03 §2.2).
+tree-sitter = "0.25"
+tree-sitter-typescript = { version = "0.23", optional = true }
+tree-sitter-javascript = { version = "0.25", optional = true }
+tree-sitter-sequel = { version = "0.3", optional = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+streaming-iterator = "0.1"
+
+[features]
+default = ["lang-typescript", "lang-javascript", "lang-sql"]
+lang-typescript = ["dep:tree-sitter-typescript"]
+lang-javascript = ["dep:tree-sitter-javascript"]
+# A community grammar that breaks the build can be dropped from a release
+# without touching any other language (01 §9).
+lang-sql = ["dep:tree-sitter-sequel"]
+
+[lints]
+workspace = true

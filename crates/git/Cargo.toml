@@ -1,0 +1,18 @@
+[package]
+name = "chickadee-git"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "libgit2 shell: files, bytes, commits, diffs, blame"
+publish = false
+
+[dependencies]
+# >= 0.21 only: the 0.20 line carries three open unsound advisories and this crate
+# parses repositories we do not trust (06 §4.1).
+git2 = { version = "0.21", default-features = false }
+serde = { workspace = true }
+thiserror = { workspace = true }
+
+[lints]
+workspace = true

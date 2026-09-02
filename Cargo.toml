@@ -10,9 +10,9 @@ license = "MIT"
 repository = "https://github.com/chickadee-app/chickadee"
 
 [workspace.dependencies]
-# git·parse 크레이트는 M1 에서 생긴다 (01 §4). 그때 이 두 줄을 켠다.
-# chickadee-git = { path = "crates/git" }
-# chickadee-parse = { path = "crates/parse" }
+
+chickadee-git = { path = "crates/git" }
+chickadee-parse = { path = "crates/parse" }
 chickadee-store = { path = "crates/store" }
 
 anyhow = "1"
