@@ -234,11 +234,16 @@ function uncovered(site: DerivedSite, near: readonly DerivedSite[]): number {
   if (others.length === 0) return 1;
   let covered = 0;
   for (const tok of toks) {
-    const at = site.startByte + tok.col;
+    // `tok.col` 은 문자열 인덱스(UTF-16)이고 `startByte` 는 UTF-8 바이트다.
+    // 한글이나 이모지가 든 줄에서 두 단위를 그냥 더하면 어긋난다.
+    const at = site.startByte + utf8Length(site.excerpt.slice(0, tok.col));
     if (others.some((s) => s.startByte <= at && at < s.endByte)) covered += 1;
   }
   return 1 - covered / toks.length;
 }
+
+const utf8 = new TextEncoder();
+const utf8Length = (text: string): number => utf8.encode(text).length;
 
 /** 개념이 붙을 수 있는 토큰. 구두점은 개념이 아니라 구조라 덮개 계산에서 뺀다. */
 const meaningful = (toks: readonly Tok[]): Tok[] =>

@@ -173,3 +173,24 @@ describe('shapeOf — 구두점', () => {
     expect(shapeOf('a?.b // 주석')).toBe(shapeOf('a?.b'));
   });
 });
+
+describe('uncoveredRatio — 단위', () => {
+  test('한글이 든 줄에서도 덮개 계산이 어긋나지 않는다', () => {
+    // `const 이름 = res.user?.profile` — `이름` 은 UTF-8 로 6바이트, UTF-16 으로 2칸이다.
+    const line = 'const 이름 = res.user?.profile';
+    const at = Buffer.byteLength(line.slice(0, line.indexOf('res.user')), 'utf8');
+    const captures = [
+      cap({
+        queryId: 'ts/optional-chaining', matchId: 1, name: 'site',
+        startByte: at, endByte: at + 17, excerpt: 'res.user?.profile',
+      }),
+      cap({
+        queryId: 'ts/property-access', matchId: 2, name: 'site',
+        startByte: at, endByte: at + 17, excerpt: 'res.user?.profile',
+      }),
+    ];
+    const { sites } = deriveFile('src/a.ts', captures);
+    // 두 사용처가 같은 바이트 범위를 덮으므로 미설명 비율은 0 이어야 한다.
+    expect(sites[0]?.uncoveredRatio).toBe(0);
+  });
+});
