@@ -240,15 +240,20 @@ function uncovered(site: DerivedSite, near: readonly DerivedSite[]): number {
   return 1 - covered / toks.length;
 }
 
+/** 개념이 붙을 수 있는 토큰. 구두점은 개념이 아니라 구조라 덮개 계산에서 뺀다. */
 const meaningful = (toks: readonly Tok[]): Tok[] =>
   toks.filter((t) => t.k !== 'ws' && t.k !== 'cmt' && t.k !== 'punct');
+
+/** 모양에 남는 토큰. 구두점은 **남긴다** — `f(a)` 와 `f a` 는 같은 모양이 아니다. */
+const structural = (toks: readonly Tok[]): Tok[] =>
+  toks.filter((t) => t.k !== 'ws' && t.k !== 'cmt');
 
 /**
  * 식별자는 `_`, 리터럴은 `#`. 「같은 모양의 두 번째 사용처」를 세기 위한 정규형이다 —
  * `products.map(p => …)` 스무 줄이 카드 스무 장이 되지 않게 한다 (03 §3.5).
  */
 export function shapeOf(text: string): string {
-  return meaningful(tokenize(text))
+  return structural(tokenize(text))
     .map((t) => {
       if (t.k === 'id') return '_';
       if (t.k === 'num' || t.k === 'str' || t.k === 'tpl') return '#';

@@ -38,11 +38,11 @@ owner: claude-code
 - [ ] 03 · sqlite 쓰기·증분 — TS 재파생 증분·site_key 유지·is_reachable · 1.5일 (선행: 잡 러너·쿼리 실행기) {#m1-03-sqlite-incremental}
 - [x] 01 · 파일 맥락 명령 — file_read_lines/block 작업 트리·rev 양쪽, 상한·UTF-8 lossy · 1일 (선행: git 크레이트) {#m1-01-file-context}
 - [ ] 03 · blame 2차 패스 — git_blame_lines 명령 + TS 배경 잡, 파일당 2초 컷 · 1일 (선행: 파일 맥락 명령) {#m1-03-blame-pass}
-- [ ] 01 · 사전 명령 + dictionary 패키지 — dict_list/read/cache_*, zod 스키마, 사용자 오버라이드 우선 · 2일 (선행: 03 YAML 스키마) {#m1-01-dict-commands}
-- [ ] 03 · 사전 스키마·린트 — JSON Schema, TS 타입 생성, pnpm dict:lint(조사·금지어·참조·템플릿 변수), Rust 쿼리 테스트 · 2일 (선행: 사전 1차) {#m1-03-dict-lint}
-- [ ] 03 · TS 사전 1차 — 바닥 개념 10 + 개념 11 의 yaml+scm, _lang.yaml essential/alternatives · 4일 (선행: 쿼리 실행기) {#m1-03-dict-ts-v1}
-- [ ] 03 · 크레이트 골격 chickadee-ingest — packages/concepts 파생 층 골격·identity 매칭·커밋 kind·필터 기본값(전부 TS) · 1.5일 (선행: dictionary 패키지) {#m1-03-ingest-skeleton}
-- [ ] 03 · 쿼리 실행기 — Rust inError 플래그 + TS derive.ts Site 변환·lineConcepts·uncoveredRatio·shape·site_key · 3일 (선행: parse 크레이트·04 토크나이저) {#m1-03-query-runner}
+- [x] 01 · 사전 명령 + dictionary 패키지 — dict_list/read/cache_*, zod 스키마, 사용자 오버라이드 우선 · 2일 (선행: 03 YAML 스키마) {#m1-01-dict-commands}
+- [x] 03 · 사전 스키마·린트 — JSON Schema, TS 타입 생성, pnpm dict:lint(조사·금지어·참조·템플릿 변수), Rust 쿼리 테스트 · 2일 (선행: 사전 1차) {#m1-03-dict-lint}
+- [x] 03 · TS 사전 1차 — 바닥 개념 10 + 개념 11 의 yaml+scm, _lang.yaml essential/alternatives · 4일 (선행: 쿼리 실행기) {#m1-03-dict-ts-v1}
+- [x] 03 · 크레이트 골격 chickadee-ingest — packages/concepts 파생 층 골격·identity 매칭·커밋 kind·필터 기본값(전부 TS) · 1.5일 (선행: dictionary 패키지) {#m1-03-ingest-skeleton}
+- [x] 03 · 쿼리 실행기 — Rust inError 플래그 + TS derive.ts Site 변환·lineConcepts·uncoveredRatio·shape·site_key · 3일 (선행: parse 크레이트·04 토크나이저) {#m1-03-query-runner}
 - [ ] 03 · 골든 픽스처 — TS 개념 20개 양성/음성, 깨진 파일 픽스처, UPDATE_GOLDEN · 1.5일 (선행: 쿼리 실행기·Q1) {#m1-03-golden-fixtures}
 - [ ] 06 · Q2 Rust 파서·쿼리 골든 — insta 스냅샷 TS/TSX/SQL 각 15케이스 · 1일 (선행: 쿼리 실행기·Q1) {#m1-06-q2-parser-golden}
 - [ ] 03 · 미지 개념 개수·첫 노출 선택(TS) — unknownCount, 동률 규칙, shape 다양성 · 1.5일 (선행: 사전 1차·파생 층) {#m1-03-unknown-count}
@@ -50,7 +50,7 @@ owner: claude-code
 - [ ] 03 · 문법 구멍 지도 집계(TS) — essential 집계·thin 판정·alternatives 부기·판 만들기 큐 삽입 · 1.5일 (선행: 02 미지 개념 계산·D29 대지 탐지) {#m1-03-gap-map}
 - [ ] 01 · 오류 모델 배선 — thiserror → IpcError → 문구 표, 로그 금지 필드 skip, 회전 · 1일 (선행: 각 크레이트) {#m1-01-error-model}
 - [ ] 01 · 리포 이동/삭제 흐름 — missing 상태, repo_relocate fingerprint 검증, purge 시 자산 보존 테스트 · 1일 (선행: git·store-sql) {#m1-01-repo-relocate}
-- [ ] 06 · Q8 로그 안전 래퍼 — Rust log_safe! + clippy 금지, TS logger.ts + no-console, 통합 테스트 grep · 1일 (선행: 오류 모델) {#m1-06-q8-log-safe}
+- [x] 06 · Q8 로그 안전 래퍼 — Rust log_safe! + clippy 금지, TS logger.ts + no-console, 통합 테스트 grep · 1일 (선행: 오류 모델) {#m1-06-q8-log-safe}
 - [ ] 06 · Q10 악성 입력 방어 — 파일·행·깊이·타임아웃 상한, 심볼릭 링크·경로 탈출 거부, fixtures/evil·evil-dict, DOMPurify RichText 단일화 · 2일 (선행: 잡 러너·Q8) {#m1-06-q10-evil-input}
 - [ ] 05 · 홈 화면 — Masthead·RepoSwitcher·TodayPanel·TimeQueue·InkScale·ConceptList·GapsPanel·Sheet·Node·NodeDetail·Guide·Forecast·ColorBar, home.load · 3일 (선행: 프리미티브·02 홈 쿼리) {#m1-05-home}
 - [ ] 05 · WKWebView 성능 첫 실측 — ?stress=48 이식, __audit.perf, performance.mark 6종, Web Inspector 절차 · 1일 (선행: 홈) {#m1-05-wkwebview-perf}
@@ -137,4 +137,10 @@ owner: claude-code
 | 2026-09-03T04:04:30+09:00 | #m1-01-file-context | claude-code | ☐→x | 20260903/Features_to_add/0404_feature_m1-ingest-runner-and-boundary.md | file_read_lines/block, 작업트리·rev 양쪽, 2000줄·64KiB 상한, UTF-8 lossy. repoId 대신 rootPath(D65) |
 | 2026-09-03T04:04:36+09:00 | #m1-03-grammar-pool | claude-code | ☐→x | 20260903/Features_to_add/0404_feature_m1-ingest-runner-and-boundary.md | Cargo feature 4종·thread_local 파서 풀·2s 타임아웃·parse_quality. 확장자 표는 TS LangSpec |
 | 2026-09-03T04:04:42+09:00 | #m1-03-worktree-progress | claude-code | ☐→x | 20260903/Features_to_add/0404_feature_m1-ingest-runner-and-boundary.md | is_dirty·ingest_warning 6종·취소 후 증분 재개 검증. TS 재스캔 3시점은 concepts/ingest.ts 에서 |
+| 2026-09-03T04:38:59+09:00 | #m1-03-dict-ts-v1 | claude-code | ☐→x | 20260903/Features_to_add/0438_feature_m1-dictionary-and-derive.md | ts 31 + common 22 + arch 4 + react 1. 병렬 슬라이스 3개, 각자 Rust 쿼리 테스트·린트 통과 후 병합 |
+| 2026-09-03T04:39:04+09:00 | #m1-03-dict-lint | claude-code | ☐→x | 20260903/Features_to_add/0438_feature_m1-dictionary-and-derive.md | zod 정본(D69)·JSON Schema 생성물·pnpm dict:lint 11건·Rust 쿼리 테스트 5건 |
+| 2026-09-03T04:39:10+09:00 | #m1-03-query-runner | claude-code | ☐→x | 20260903/Features_to_add/0438_feature_m1-dictionary-and-derive.md | Rust inError·match_id + TS derive.ts(그룹화·ctx 병합·lineConcepts·uncoveredRatio·shape·site_key). 테스트 16건 |
+| 2026-09-03T04:39:15+09:00 | #m1-03-ingest-skeleton | claude-code | ☐→x | 20260903/Features_to_add/0438_feature_m1-dictionary-and-derive.md | concepts 파생 층 골격 — derive·commits(identity·kind)·ingest-defaults 상수. 단위 테스트 45건 |
+| 2026-09-03T04:39:23+09:00 | #m1-01-dict-commands | claude-code | ☐→x | 20260903/Features_to_add/0438_feature_m1-dictionary-and-derive.md | 범위 조정(D66) — dict_* 4개 명령 대신 Vite 번들. zod 스키마·로더는 완성. 사용자 오버라이드는 M5 |
+| 2026-09-03T04:39:29+09:00 | #m1-06-q8-log-safe | claude-code | ☐→x | 20260903/Features_to_add/0438_feature_m1-dictionary-and-derive.md | logger.ts(금지 필드·절대 경로 축약) + no-console + Rust println!/dbg! 금지 + 이벤트 누출 통합 테스트 |
 <!-- oculpm:plan-log end -->

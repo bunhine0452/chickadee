@@ -160,3 +160,16 @@ describe('siteKey', () => {
     expect(siteKey('ts/a', 'b', 'c', 0)).not.toBe(siteKey('ts/a b', 'c', '', 0));
   });
 });
+
+describe('shapeOf — 구두점', () => {
+  test('구두점은 모양에 남는다 — 구조가 다르면 다른 모양이다', () => {
+    expect(shapeOf('res.user?.profile')).toBe('_._?._');
+    expect(shapeOf('f(a)')).not.toBe(shapeOf('f a'));
+    expect(shapeOf('[a, b]')).not.toBe(shapeOf('[a b]'));
+  });
+
+  test('공백과 주석은 모양을 바꾸지 않는다', () => {
+    expect(shapeOf('a  ?.  b')).toBe(shapeOf('a?.b'));
+    expect(shapeOf('a?.b // 주석')).toBe(shapeOf('a?.b'));
+  });
+});

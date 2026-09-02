@@ -18,5 +18,9 @@
     "@chickadee/ipc-client": "workspace:*",
     "@chickadee/store-sql": "workspace:*",
     "@chickadee/text": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
+    "better-sqlite3": "^13.0.3"
   }
 }

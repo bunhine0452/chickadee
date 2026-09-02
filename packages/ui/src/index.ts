@@ -40,3 +40,5 @@ export { useDeeMotion, DEE_MOTIONS, DEE_MOTION_CLASSES, DEE_MOTION_BUDGET_MS } f
 export type { DeeMotion, DeeMotionOptions, DeeMotionSpec } from './dee/useDeeMotion';
 export { DEE_PLATES, DEE_BIRD_CLIP_POINTS, DEE_BIRD_DIECUT_POINTS } from './dee/deePlates';
 export type { DeePlate } from './dee/deePlates';
+export { ACTION_LABEL, errorCopy, isInternal } from './error-copy.js';
+export type { ErrorAction, ErrorCopy } from './error-copy.js';

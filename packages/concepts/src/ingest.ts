@@ -42,34 +42,46 @@ export interface IngestOptions {
   onWarning?: (relPath: string, reason: string) => void;
 }
 
-/** 사전을 DB 에 물질화한다 — 개념 행이 있어야 사용처의 외래키가 선다. */
+/**
+ * 사전을 DB 에 물질화한다 — 개념 행이 있어야 사용처의 외래키가 선다.
+ *
+ * 네임스페이스는 `_lang.yaml` 이 있는 것만이 아니다: `common/`·`arch/` 는 개념만 있고
+ * 문법에 매이지 않는다. 그래도 `concept.dict_version_id` 가 NOT NULL 이라 판 행은 필요하다.
+ */
 export async function materializeDict(dict: Dict, now: number): Promise<void> {
-  const ops: BatchOp[] = [];
-  for (const [lang, meta] of dict.langs) {
-    ops.push({
+  const spaces = new Set([...dict.langs.keys(), ...[...dict.concepts.keys()].map(langOf)]);
+  const ops: BatchOp[] = [...spaces].sort().map((lang) => {
+    const meta = dict.langs.get(lang);
+    return {
       name: 'derive.dict_version_upsert',
       params: {
         lang,
-        version: meta.version,
-        // 번들 사전은 빌드 산출물이라 파일 해시 대신 버전·개념 수로 식별한다.
-        sha256: `${meta.version}:${meta.grammar_abi}`,
+        version: meta?.version ?? '0',
+        // 번들 사전은 빌드 산출물이라 파일 해시 대신 버전·ABI 로 식별한다.
+        sha256: `${meta?.version ?? '0'}:${meta?.grammar_abi ?? 0}`,
         conceptCount: [...dict.concepts.keys()].filter((id) => langOf(id) === lang).length,
         loadedAt: now,
       },
-    });
-  }
-  await ipc.store.batch(ops);
+    };
+  });
+  await inBatches(ops);
 
   const versionIds = new Map<string, number>();
-  for (const [lang, meta] of dict.langs) {
+  for (const lang of spaces) {
     const [row] = await ipc.store.query('derive.dict_version_id', {
-      lang, version: meta.version,
+      lang, version: dict.langs.get(lang)?.version ?? '0',
     });
     if (row) versionIds.set(lang, row.id);
   }
 
+  // 보편 개념이 먼저다 — `concept.universal_id` 가 `concept(id)` 를 참조하므로
+  // 언어 개념을 먼저 넣으면 외래키가 걸린다.
+  const ordered = [...dict.concepts.values()].sort(
+    (a, b) => Number(kindOf(a.id) === 'lang') - Number(kindOf(b.id) === 'lang')
+      || a.id.localeCompare(b.id),
+  );
   const writes: BatchOp[] = [];
-  for (const concept of dict.concepts.values()) {
+  for (const concept of ordered) {
     const lang = langOf(concept.id);
     const dictVersionId = versionIds.get(lang);
     if (dictVersionId === undefined) continue;

@@ -1,0 +1,29 @@
+# 악성 문법 사전 (06 §4.2). 사전은 커뮤니티 기여 데이터이고 카드 문구는 HTML 로 렌더된다 —
+# 여기 있는 문자열이 화면에 닿았을 때 무엇이 남는지가 `RichText.evil.test.tsx` 의 질문이다.
+#
+# 이 파일은 사전으로 로드되지 않는다(`dictionary/` 밖이다). 렌더러의 입력 목록일 뿐이다.
+strings:
+  - name: script
+    html: "<script>alert(1)</script>안녕"
+  - name: img-onerror
+    html: "<img src=x onerror=alert(1)>"
+  - name: javascript-href
+    html: "<a href=\"javascript:alert(1)\">누르세요</a>"
+  - name: svg-onload
+    html: "<svg onload=alert(1)><circle r=1/></svg>"
+  - name: iframe
+    html: "<iframe src=\"https://example.invalid\"></iframe>"
+  - name: style-attribute
+    html: "<code style=\"position:fixed;inset:0\">a?.b</code>"
+  - name: mustache-constructor
+    html: "{{constructor.constructor('alert(1)')()}}"
+  - name: nested-script
+    html: "<scr<script>ipt>alert(1)</script>"
+  - name: entity-escape
+    html: "&lt;script&gt;alert(1)&lt;/script&gt;"
+  - name: event-handler-uppercase
+    html: "<B ONMOUSEOVER=alert(1)>굵게</B>"
+  - name: data-url
+    html: "<code data-x=\"1\">a</code>"
+  - name: allowed-tags-survive
+    html: "<code>a?.b</code> 는 <b>없으면</b> <em>멈춘다</em><br><kbd>Esc</kbd>"

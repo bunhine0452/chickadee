@@ -625,6 +625,13 @@ export function toSettingsParams(patch: Partial<Settings>, updatedAt: number): P
  */
 export function toSqliteBindings(params: Record<string, unknown>): Record<string, unknown> {
   const out: Record<string, unknown> = {};
-  for (const [k, v] of Object.entries(params)) out[k] = typeof v === 'boolean' ? (v ? 1 : 0) : v;
+  for (const [k, v] of Object.entries(params)) {
+    if (typeof v === 'boolean') out[k] = v ? 1 : 0;
+    // 배열·객체는 JSON 본문 그대로 — statement 가 `json_each` 로 푼다. Rust 의
+    // `to_sql` 이 하는 것과 같은 변환이라, 같은 statement 가 양쪽에서 같게 돈다.
+    else if (v !== null && typeof v === 'object') out[k] = JSON.stringify(v);
+    else if (v === undefined) out[k] = null;
+    else out[k] = v;
+  }
   return out;
 }
