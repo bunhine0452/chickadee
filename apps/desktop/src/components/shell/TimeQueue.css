@@ -1,0 +1,76 @@
+/* 목업 design/ink-home.html 의 `.queue`·`.qlist` 그대로 (05 §5).
+   단계가 지나간 칸은 옅어진다 — 남은 양이 눈에 먼저 들어와야 한다. */
+.queue {
+  display: flex;
+  gap: 2px;
+  height: 14px;
+  padding: 2px;
+  margin: 10px 0 8px;
+  border: 2px solid var(--rule);
+  background: var(--paper-3);
+}
+
+.queue i {
+  display: block;
+  height: 100%;
+  min-width: 6px;
+  flex: var(--w, 1) 1 0;
+  background: var(--paper-2);
+}
+
+.queue i.t0 { background: var(--t0); }
+.queue i.t1 { background: var(--t1); }
+.queue i.t2 { background: var(--t2); }
+
+/* 다시 찍기·복습은 점무늬로 구분한다 — 색을 하나 더 만들지 않는다. */
+.queue i.review {
+  background-image: radial-gradient(rgb(0 0 0 / 34%) 1.1px, transparent 1.3px);
+  background-size: 4px 4px;
+}
+
+.queue i[data-state="later"] { opacity: 0.3; }
+
+.qlist {
+  display: flex;
+  flex-direction: column;
+  margin: 0 0 13px;
+  padding: 0;
+  list-style: none;
+}
+
+.qi {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 6px 0;
+  border-top: 1px dashed var(--rule);
+  font-size: var(--fs-14);
+}
+
+.qi:first-child { border-top: 0; }
+.qi[data-state="later"] { color: var(--ink-soft); }
+
+.qi .nm {
+  overflow: hidden;
+  color: var(--ink);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qi .nm small {
+  margin-left: 5px;
+  color: var(--ink-soft);
+  font-weight: 400;
+  font-size: var(--fs-13);
+}
+
+.qi .min {
+  color: var(--ink-soft);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}

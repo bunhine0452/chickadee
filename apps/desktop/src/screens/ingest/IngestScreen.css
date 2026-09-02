@@ -1,0 +1,87 @@
+/* 판 짜기 화면 (05 §2.1). 스피너가 없는 대신 시간 비례 큐가 전부를 말한다. */
+.ingest {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+
+.ingest-h {
+  margin: 0 0 6px;
+  color: var(--ink);
+  font-family: var(--f-poster);
+  font-size: var(--fs-24);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  word-break: keep-all;
+}
+
+.ingest-sub {
+  margin: 0 0 18px;
+  color: var(--ink-soft);
+  font-size: var(--fs-14);
+  word-break: keep-all;
+}
+
+.ingest-now {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  min-height: 20px;
+  margin: 0 0 18px;
+  color: var(--ink-soft);
+  font-size: var(--fs-13);
+}
+
+/* 경로는 리포 상대다 — 절대 경로는 화면에도 로그에도 나가지 않는다 (01 §6). */
+.ingest-path {
+  overflow: hidden;
+  color: var(--ink);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ingest-skips {
+  margin: 0 0 18px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--rule);
+  background: var(--paper-2);
+}
+
+.ingest-skips h2 {
+  margin: 0 0 6px;
+  color: var(--ink);
+  font-size: var(--fs-14);
+  font-weight: 600;
+}
+
+.ingest-skips ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ingest-skips li {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  padding: 3px 0;
+  font-size: var(--fs-13);
+}
+
+.ingest-skips code {
+  overflow: hidden;
+  color: var(--ink);
+  font-family: var(--f-mono);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ingest-skips span { color: var(--ink-soft); }
+
+.ingest-more {
+  margin: 6px 0 0;
+  color: var(--ink-soft);
+  font-size: var(--fs-13);
+}

@@ -8,22 +8,21 @@
  * 키는 리포 루트 기준 `dictionary/<lang>/<file>` 이다.
  */
 
-declare global {
-  // Vite 가 빌드 때 채운다. 모듈 안에 두는 이유: 별도 `.d.ts` 는 이 패키지를 원본으로
-  // 컴파일하는 다른 패키지의 tsconfig 에 들어가지 않는다.
-  interface ImportMeta {
-    glob(
-      pattern: string,
-      options: { query: string; import: string; eager: true },
-    ): Record<string, string>;
-  }
-}
+/**
+ * Vite 가 빌드 때 채우는 `import.meta.glob`.
+ *
+ * 전역 선언(`declare global`) 대신 **국소 캐스트**를 쓴다: 전역으로 선언하면
+ * `vite/client` 타입이 이미 있는 패키지(앱)에서 중복 선언이 되고, 별도 `.d.ts` 로 두면
+ * 이 패키지를 **원본으로** 컴파일하는 다른 패키지(`concepts`)의 tsconfig 에 들어가지 않는다.
+ * 캐스트는 타입을 지우고 나면 `import.meta.glob(...)` 그대로라 Vite 의 변환도 그대로 걸린다.
+ */
+type Globber = { glob(p: string, o: { query: string; import: string; eager: true }): Record<string, string> };
 
-const RAW = import.meta.glob('../../../dictionary/**/*.{yaml,scm}', {
+const RAW = (import.meta as unknown as Globber).glob('../../../dictionary/**/*.{yaml,scm}', {
   query: '?raw',
   import: 'default',
   eager: true,
-}) as Record<string, string>;
+});
 
 /** `../../../dictionary/ts/_lang.yaml` → `ts/_lang.yaml` */
 function relOf(key: string): string | null {
