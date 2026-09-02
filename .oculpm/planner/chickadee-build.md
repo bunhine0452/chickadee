@@ -43,8 +43,8 @@ owner: claude-code
 - [x] 03 · TS 사전 1차 — 바닥 개념 10 + 개념 11 의 yaml+scm, _lang.yaml essential/alternatives · 4일 (선행: 쿼리 실행기) {#m1-03-dict-ts-v1}
 - [x] 03 · 크레이트 골격 chickadee-ingest — packages/concepts 파생 층 골격·identity 매칭·커밋 kind·필터 기본값(전부 TS) · 1.5일 (선행: dictionary 패키지) {#m1-03-ingest-skeleton}
 - [x] 03 · 쿼리 실행기 — Rust inError 플래그 + TS derive.ts Site 변환·lineConcepts·uncoveredRatio·shape·site_key · 3일 (선행: parse 크레이트·04 토크나이저) {#m1-03-query-runner}
-- [ ] 03 · 골든 픽스처 — TS 개념 20개 양성/음성, 깨진 파일 픽스처, UPDATE_GOLDEN · 1.5일 (선행: 쿼리 실행기·Q1) {#m1-03-golden-fixtures}
-- [ ] 06 · Q2 Rust 파서·쿼리 골든 — insta 스냅샷 TS/TSX/SQL 각 15케이스 · 1일 (선행: 쿼리 실행기·Q1) {#m1-06-q2-parser-golden}
+- [x] 03 · 골든 픽스처 — TS 개념 20개 양성/음성, 깨진 파일 픽스처, UPDATE_GOLDEN · 1.5일 (선행: 쿼리 실행기·Q1) {#m1-03-golden-fixtures}
+- [x] 06 · Q2 Rust 파서·쿼리 골든 — insta 스냅샷 TS/TSX/SQL 각 15케이스 · 1일 (선행: 쿼리 실행기·Q1) {#m1-06-q2-parser-golden}
 - [x] 03 · 미지 개념 개수·첫 노출 선택(TS) — unknownCount, 동률 규칙, shape 다양성 · 1.5일 (선행: 사전 1차·파생 층) {#m1-03-unknown-count}
 - [x] 02 · 미지 개념 계산 — known 집합·전이·증분 재계산·gap 갱신 · 1.5일 (선행: 03 미지 개념 개수) {#m1-02-unknown-cache}
 - [x] 03 · 문법 구멍 지도 집계(TS) — essential 집계·thin 판정·alternatives 부기·판 만들기 큐 삽입 · 1.5일 (선행: 02 미지 개념 계산·D29 대지 탐지) {#m1-03-gap-map}
@@ -52,9 +52,9 @@ owner: claude-code
 - [x] 01 · 리포 이동/삭제 흐름 — missing 상태, repo_relocate fingerprint 검증, purge 시 자산 보존 테스트 · 1일 (선행: git·store-sql) {#m1-01-repo-relocate}
 - [x] 06 · Q8 로그 안전 래퍼 — Rust log_safe! + clippy 금지, TS logger.ts + no-console, 통합 테스트 grep · 1일 (선행: 오류 모델) {#m1-06-q8-log-safe}
 - [x] 06 · Q10 악성 입력 방어 — 파일·행·깊이·타임아웃 상한, 심볼릭 링크·경로 탈출 거부, fixtures/evil·evil-dict, DOMPurify RichText 단일화 · 2일 (선행: 잡 러너·Q8) {#m1-06-q10-evil-input}
-- [ ] 05 · 홈 화면 — Masthead·RepoSwitcher·TodayPanel·TimeQueue·InkScale·ConceptList·GapsPanel·Sheet·Node·NodeDetail·Guide·Forecast·ColorBar, home.load · 3일 (선행: 프리미티브·02 홈 쿼리) {#m1-05-home}
-- [ ] 05 · WKWebView 성능 첫 실측 — ?stress=48 이식, __audit.perf, performance.mark 6종, Web Inspector 절차 · 1일 (선행: 홈) {#m1-05-wkwebview-perf}
-- [ ] 05 · 인제스트·첫 실행·안내·설정 — 폴더 선택, 진행 이벤트를 TimeQueue 로, 빈 상태, newcomer 시트, 설정(identity 포함) · 2일 (선행: 홈·01 이벤트) {#m1-05-ingest-onboarding}
+- [x] 05 · 홈 화면 — Masthead·RepoSwitcher·TodayPanel·TimeQueue·InkScale·ConceptList·GapsPanel·Sheet·Node·NodeDetail·Guide·Forecast·ColorBar, home.load · 3일 (선행: 프리미티브·02 홈 쿼리) {#m1-05-home}
+- [!] 05 · WKWebView 성능 첫 실측 — ?stress=48 이식, __audit.perf, performance.mark 6종, Web Inspector 절차 · 1일 (선행: 홈) {#m1-05-wkwebview-perf}
+- [x] 05 · 인제스트·첫 실행·안내·설정 — 폴더 선택, 진행 이벤트를 TimeQueue 로, 빈 상태, newcomer 시트, 설정(identity 포함) · 2일 (선행: 홈·01 이벤트) {#m1-05-ingest-onboarding}
 - [ ] 03 · 성능 픽스처·벤치 — large-100k 생성기·criterion·CI 임계 · 1.5일 (선행: 증분까지·Q1) {#m1-03-perf-bench}
 - [x] 03 · Swift·Dart·SQL 품질 검증 — 실코드 20파일 ERROR 비율, 통과 시 바닥 개념 착수, 실패 시 보류 결정 · 2일 (선행: 파서 풀) {#m1-03-swift-dart-sql}
 - [x] 03 · projectox 실리포 검증 — TS/TSX/SQL 인제스트, Site 수·구멍 지도가 목업과 같은 모양인지 · 1일 (선행: 구멍 지도) {#m1-03-projectox-check}
@@ -153,4 +153,9 @@ owner: claude-code
 | 2026-09-03T04:47:33+09:00 | #m1-03-blame-pass | claude-code | ☐→x |  | git_blame_lines 명령 + blame.ts 배경 잡(60s 예산·파일당 2s 컷·실패는 그 파일만 포기). libgit2 에 중단 수단이 없어 컷은 사후 검사다 |
 | 2026-09-03T04:51:16+09:00 | #m1-03-swift-dart-sql | claude-code | ☐→x |  | 실측 — sql 20파일 중 poor 1(5%) · ts 40/0 · tsx 20/0. Swift·Dart 는 크레이트 미탑재(03 §2.2 위험)이고 테스트가 그 사실을 고정한다 |
 | 2026-09-03T04:51:23+09:00 | #m1-03-projectox-check | claude-code | ☐→x |  | 배포 사전 전량으로 실리포(이 리포, TS 113파일) 인제스트 — 캡처 75,584 · 2.9s. projectox-like 픽스처 96파일도 통과. CHICKADEE_REAL_REPO 로 다른 리포를 가리킬 수 있다 |
+| 2026-09-03T04:59:37+09:00 | #m1-05-home | claude-code | ☐→x |  | 컴포넌트 14종 + HomeScreen + FirstRun, 목업 마크업·클래스 그대로. 테스트 58건. TodayPanel·StampCard·「인쇄 시작」은 큐가 M2 라 비워 둠 |
+| 2026-09-03T04:59:44+09:00 | #m1-05-ingest-onboarding | claude-code | ☐→x |  | 폴더 선택→등록→인제스트 배선, 진행 4단계를 TimeQueue 로, 빈 상태 FirstRun. 설정 화면과 identity 선택 UI 는 M2 |
+| 2026-09-03T04:59:50+09:00 | #m1-05-wkwebview-perf | claude-code | ☐→! |  | 계측만 넣었다 — __audit.perf·mark 6종·예산표·Web Inspector 절차. **실측은 못 했다**: WKWebView 수치는 macOS 앱 안에서만 뜻이 있고 이 세션엔 GUI 가 없다 |
+| 2026-09-03T05:01:21+09:00 | #m1-03-golden-fixtures | claude-code | ☐→x | .oculpm/journal/20260903/Features_to_add/0501_feature_golden-fixtures-and-insta-snapshots.md | TS 12개념 양성3/음성2 + 함정3, TSX·SQL 각 15케이스, UPDATE_GOLDEN |
+| 2026-09-03T05:01:23+09:00 | #m1-06-q2-parser-golden | claude-code | ☐→x | .oculpm/journal/20260903/Features_to_add/0501_feature_golden-fixtures-and-insta-snapshots.md | insta 스냅샷 45장 (TS/TSX/SQL 각 15), 절대 경로 없음 |
 <!-- oculpm:plan-log end -->

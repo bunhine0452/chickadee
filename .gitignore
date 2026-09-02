@@ -25,6 +25,9 @@ dist/
 # 벤치 — 기준선만 커밋, 이번 실행 결과는 기계마다 다르다 (06 §1.6)
 /bench/current.json
 
+# insta — `.snap` 은 골든이라 커밋하고, 실패했을 때 옆에 떨어지는 후보는 커밋하지 않는다
+*.snap.new
+
 # macOS
 .DS_Store
 

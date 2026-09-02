@@ -35,6 +35,14 @@ for name in tiny large-100k; do
   fi
 done
 
+# release 프로파일은 panic="abort" 다(루트 Cargo.toml). 그 설정이 켜져 있으면 cargo 는
+# chickadee-app 라이브러리를 두 벌(abort 하나, 벤치 하네스용 unwind 하나) 만들고 두 rlib 이
+# target/release/deps 에서 같은 파일명을 노린다 — cargo #6313 「output filename collision」.
+# 경고로 끝날 때도 있고 벤치가 엉뚱한 rlib 에 링크돼 E0308 로 죽을 때도 있다.
+# 벤치가 도는 동안만 unwind 로 통일해 라이브러리를 한 벌만 만들게 한다. 배포 바이너리를
+# 만드는 경로(`pnpm tauri build`)는 이 변수를 보지 않으므로 그대로 abort 다.
+export CARGO_PROFILE_RELEASE_PANIC=unwind
+
 echo "── cargo bench"
 cargo bench -p chickadee-app --bench ingest -- ${args[@]+"${args[@]}"}
 

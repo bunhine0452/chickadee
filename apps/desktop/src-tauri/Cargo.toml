@@ -10,11 +10,6 @@ publish = false        # 배포하지 않는다 — cargo-deny 가 private 로 �
 [lib]
 name = "chickadee_app_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
-# `cargo bench` 는 라이브러리 타깃 자체도 벤치 대상으로 잡는다. 그러면 이 라이브러리가
-# 두 번 빌드되고(release 는 panic="abort", 벤치 하네스는 unwind) 두 rlib 이 같은
-# 파일명을 노려 cargo issue #6313 의 「output filename collision」이 난다 — 어느 쪽이
-# 이기느냐에 따라 벤치 링크가 깨진다. 이 라이브러리에 #[bench] 는 없으므로 끈다.
-bench = false
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
