@@ -253,3 +253,41 @@ describe('홈 쿼리가 파생 결과를 읽는다', () => {
     expect(run('home.last_run', { repoId: 1 })).toEqual([]);
   });
 });
+
+describe('증분 재파생', () => {
+  beforeEach(async () => {
+    await materializeDict(dict, T);
+    seedFile(1, 'src/features/cart/useCart.ts', "const nick = res.user?.profile\n");
+    seedFile(2, 'src/features/cart/api.ts', "const a = res.user?.profile\n");
+    seedFile(3, 'src/features/cart/view.ts', "const b = res.user?.profile\n");
+    await deriveRepo(dict, options);
+  });
+
+  test('아무것도 안 바뀌었으면 아무것도 다시 파생하지 않는다', async () => {
+    const out = await deriveRepo(dict, { ...options, mode: 'incremental', now: T + 1_000 });
+    expect(out.sites).toBe(0);
+    // 그래도 사용처는 살아 있다 — 손대지 않았을 뿐이다.
+    const n = db.prepare('SELECT COUNT(*) AS n FROM concept_site WHERE is_alive = 1')
+      .get() as { n: number };
+    expect(n.n).toBe(3);
+  });
+
+  test('바뀐 파일 하나만 다시 파생한다', async () => {
+    const later = T + 1_000;
+    // Rust 가 바뀐 파일 하나를 다시 쓴 것과 같은 상태로 만든다.
+    db.prepare('UPDATE file SET updated_at = ? WHERE path = ?')
+      .run(later, 'src/features/cart/api.ts');
+    const out = await deriveRepo(dict, { ...options, mode: 'incremental', now: later });
+    expect(out.sites).toBe(1);
+  });
+
+  test('증분이어도 구멍 지도의 분모는 리포 전체다', async () => {
+    const later = T + 1_000;
+    db.prepare('UPDATE file SET updated_at = ? WHERE path = ?')
+      .run(later, 'src/features/cart/api.ts');
+    await deriveRepo(dict, { ...options, mode: 'incremental', now: later });
+    const row = db.prepare("SELECT site_count FROM gap WHERE concept_id = 'ts/optional-chaining'")
+      .get() as { site_count: number };
+    expect(row.site_count).toBe(3);
+  });
+});

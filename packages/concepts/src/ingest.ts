@@ -166,10 +166,15 @@ export async function deriveRepo(
       .map((c) => c.id),
   );
   const files = await ipc.store.query('derive.files', { repoId });
+  // 증분이면 이번 실행이 손댄 파일만 다시 파생한다 (03 §1.6-4). Rust 가 바뀐 파일만
+  // `file_upsert` 하므로 `updated_at` 이 곧 「이번에 바뀐 것」의 표시다.
+  const target = options.mode === 'incremental'
+    ? await ipc.store.query('derive.files_changed_since', { repoId, since: options.now })
+    : files;
   let siteCount = 0;
   let step = 0;
 
-  for (const file of files) {
+  for (const file of target) {
     const captures = await ipc.store.query('derive.captures_by_file', { fileId: file.id });
     const result = deriveFile(
       file.path,
@@ -181,10 +186,11 @@ export async function deriveRepo(
     await writeSites(repoId, file, sites, now);
     siteCount += sites.length;
     step += 1;
-    options.onProgress?.('derive', step, files.length);
+    options.onProgress?.('derive', step, target.length);
   }
 
   await classifyCommits(repoId, options.identities ?? []);
+  // 대지와 구멍은 리포 전체를 본다 — 증분이어도 「몇 파일 중 몇 곳」의 분모는 전체다.
   const units = await writeUnits(repoId, files);
   const gaps = await writeGaps(dict, repoId, files.length, now);
   return { sites: siteCount, gaps, units };
