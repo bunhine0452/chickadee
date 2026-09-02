@@ -239,8 +239,13 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      # macOS bundles the .app but not the .dmg. This job answers "does the app
+      # build and bundle on three OSes" (D53); a dmg is a release artifact, and
+      # bundle_dmg.sh drives hdiutil, which fails intermittently on a shared
+      # runner for reasons that have nothing to do with this code. release.yml
+      # makes the dmg, where a retry is cheap and a flake is visible.
       - name: tauri build --debug
-        run: pnpm tauri build --debug
+        run: pnpm tauri build --debug ${{ matrix.os == 'macos-14' && '--bundles app' || '' }}
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
