@@ -171,10 +171,10 @@ fn tree_hash(root: &Path) -> Vec<(String, String)> {
             .expect("under root")
             .to_string_lossy()
             .into_owned();
-        // `.git` churns on its own (index mtime, logs) and is not the user's code.
-        if rel.starts_with(".git/") || rel == ".git" {
-            continue;
-        }
+        // `.git` is included on purpose. libgit2 reads; it does not write. If a
+        // future change makes it write — a re-packed odb, a written index — this
+        // is where it shows up, and "we never touch the repository" is the whole
+        // promise (00 §5 M1 evidence).
         let bytes = std::fs::read(entry.path()).unwrap_or_default();
         out.push((rel, chickadee_git::hash_bytes(&bytes)));
     }

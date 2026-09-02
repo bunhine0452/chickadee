@@ -526,6 +526,11 @@ fn report(r: &Record, at: &Path) {
 
 /// 통과 하나를 표본으로 돌린다. 표본마다 데이터베이스를 새로 만든다 — 같은 것을 두 번
 /// 인제스트하면 두 번째는 증분이 되어 다른 것을 재게 된다.
+///
+/// `cap`(`measurement_time`) 은 **표본 수 × 1회 소요** 언저리로 잡는다. 넉넉히 주면
+/// criterion 이 남는 시간을 반복으로 채운다 — 600 s 를 줬더니 표본 10개를 250회
+/// 반복으로 돌려 11분이 걸렸다. 짧으면 표본당 1회로 떨어지고 criterion 이 「target
+/// time 을 늘리라」고 경고만 한다. 여기서 원하는 것은 p50 이지 나노초 해상도가 아니다.
 fn bench_full(c: &mut Criterion, name: &str, root: &Path, samples: usize, cap: Duration) {
     let mut group = c.benchmark_group("ingest");
     group
@@ -561,8 +566,8 @@ fn main() {
     // 2. criterion — p50. `cargo bench -- --sample-size 10 tiny` 처럼 걸러 부를 수 있다.
     let mut c = Criterion::default().configure_from_args();
     if let Some(tiny) = fixture("tiny") {
-        bench_full(&mut c, "tiny", &tiny, 20, Duration::from_secs(20));
+        bench_full(&mut c, "tiny", &tiny, 20, Duration::from_secs(5));
     }
-    bench_full(&mut c, "large-100k", &large, 10, Duration::from_secs(600));
+    bench_full(&mut c, "large-100k", &large, 10, Duration::from_secs(30));
     c.final_summary();
 }

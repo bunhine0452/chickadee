@@ -1,0 +1,32 @@
+{
+  "budget": {
+    "fullTotalMs": 15000,
+    "gitMs": 4000,
+    "incrementalMs": 500,
+    "parseMs": 8000,
+    "peakRssMb": 300,
+    "writeMs": 2000
+  },
+  "fixture": {
+    "captures": 444221,
+    "changed": 800,
+    "commits": 1000,
+    "files": 800,
+    "name": "large-100k"
+  },
+  "host": {
+    "arch": "aarch64",
+    "os": "macos",
+    "parallelism": 12
+  },
+  "metrics": {
+    "fullTotalMs": 3269,
+    "gitMs": 674,
+    "incrementalMs": 342,
+    "parseMs": 2247,
+    "peakRssMb": 89,
+    "walkMs": 347,
+    "writeMs": 1
+  },
+  "schema": 1
+}

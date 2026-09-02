@@ -159,4 +159,5 @@ owner: claude-code
 | 2026-09-03T05:01:21+09:00 | #m1-03-golden-fixtures | claude-code | ☐→x | .oculpm/journal/20260903/Features_to_add/0501_feature_golden-fixtures-and-insta-snapshots.md | TS 12개념 양성3/음성2 + 함정3, TSX·SQL 각 15케이스, UPDATE_GOLDEN |
 | 2026-09-03T05:01:23+09:00 | #m1-06-q2-parser-golden | claude-code | ☐→x | .oculpm/journal/20260903/Features_to_add/0501_feature_golden-fixtures-and-insta-snapshots.md | insta 스냅샷 45장 (TS/TSX/SQL 각 15), 절대 경로 없음 |
 | 2026-09-03T05:15:43+09:00 | #m1-06-q2-parser-golden | claude-code | x→x | 20260903/Features_to_add/0515_feature_m1-home-shell-and-flow.md | insta 스냅샷 45개(TS·TSX·SQL 각 15케이스). 골든과 스냅샷이 같은 한 줄을 각각 다른 형식으로 짚는 것까지 확인 |
+| 2026-09-03T05:18:42+09:00 | #m1-03-golden-fixtures | claude-code | x→x | 20260903/Features_to_add/0515_feature_m1-home-shell-and-flow.md | TS 20개념 × (양성3·음성2) + TSX 4 + SQL 4 + 함정 3종씩. UPDATE_GOLDEN 지원. 술어를 망가뜨려 그물이 도는 것을 확인 |
 <!-- oculpm:plan-log end -->
