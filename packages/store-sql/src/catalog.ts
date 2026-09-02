@@ -7,11 +7,13 @@ export const migrations = [
 ] as const;
 
 export const statements = {
-  "facts.capture_delete_by_file": "DELETE FROM capture WHERE file_id = :fileId;",
-  "facts.capture_insert": "INSERT INTO capture (file_id, query_id, match_id, pattern_index, name, form, node_kind, in_error,\n                     start_byte, end_byte, start_line, end_line, start_col, end_col, excerpt)\nVALUES (:fileId, :queryId, :matchId, :patternIndex, :name, :form, :nodeKind, :inError,\n        :startByte, :endByte, :startLine, :endLine, :startCol, :endCol, :excerpt);",
-  "facts.commit_file_insert": "INSERT INTO commit_file (commit_id, path, old_path, status, additions, deletions, touched_json)\nVALUES (:commitId, :path, :oldPath, :status, :additions, :deletions, :touchedJson)\nON CONFLICT (commit_id, path) DO UPDATE SET\n  old_path = excluded.old_path, status = excluded.status,\n  additions = excluded.additions, deletions = excluded.deletions,\n  touched_json = excluded.touched_json;",
+  "facts.capture_delete_by_file": "DELETE FROM capture WHERE file_id = (SELECT id FROM file WHERE repo_id = :repoId AND path = :path);",
+  "facts.capture_insert": "INSERT INTO capture (file_id, query_id, match_id, pattern_index, name, form, node_kind, in_error,\n                     start_byte, end_byte, start_line, end_line, start_col, end_col, excerpt)\nVALUES ((SELECT id FROM file WHERE repo_id = :repoId AND path = :path),\n        :queryId, :matchId, :patternIndex, :name, :form, :nodeKind, :inError,\n        :startByte, :endByte, :startLine, :endLine, :startCol, :endCol, :excerpt);",
+  "facts.commit_file_insert": "INSERT INTO commit_file (commit_id, path, old_path, status, additions, deletions, touched_json)\nVALUES ((SELECT id FROM git_commit WHERE repo_id = :repoId AND sha = :sha),\n        :path, :oldPath, :status, :additions, :deletions, :touchedJson)\nON CONFLICT (commit_id, path) DO UPDATE SET\n  old_path = excluded.old_path, status = excluded.status,\n  additions = excluded.additions, deletions = excluded.deletions,\n  touched_json = excluded.touched_json;\n\n-- rebase·force-push 로 닿을 수 없게 된 커밋. 지우지 않는다 — 학습 기록이 참조한다 (03 §1.6).",
   "facts.commit_insert": "INSERT INTO git_commit (repo_id, sha, parent_sha, parent_count, authored_at, author_email, author_name,\n                        message, truncated, files_n, insertions, deletions)\nVALUES (:repoId, :sha, :parentSha, :parentCount, :authoredAt, :authorEmail, :authorName,\n        :message, :truncated, :filesN, :insertions, :deletions)\nON CONFLICT (repo_id, sha) DO UPDATE SET\n  parent_sha = excluded.parent_sha, parent_count = excluded.parent_count,\n  authored_at = excluded.authored_at, author_email = excluded.author_email,\n  author_name = excluded.author_name, message = excluded.message,\n  truncated = excluded.truncated, files_n = excluded.files_n,\n  insertions = excluded.insertions, deletions = excluded.deletions;",
-  "facts.file_mark_deleted": "UPDATE file SET is_alive = 0, updated_at = :updatedAt\nWHERE repo_id = :repoId AND path = :path;",
+  "facts.commit_mark_unreachable": "UPDATE git_commit SET is_reachable = 0\nWHERE repo_id = :repoId AND sha IN (SELECT value FROM json_each(:shas));",
+  "facts.file_hashes": "SELECT path, content_hash FROM file WHERE repo_id = :repoId AND is_alive = 1;",
+  "facts.file_mark_deleted": "UPDATE file SET is_alive = 0, updated_at = :updatedAt\nWHERE repo_id = :repoId AND path = :path;\n\n-- 파일 id 는 Rust 가 들고 다니지 않는다 — 이름 하나로 찾는 일은 SQL 이 한다 (D65).",
   "facts.file_upsert": "INSERT INTO file (repo_id, path, lang, grammar, line_count, byte_size,\n                  content_hash, head_oid, is_dirty, parse_quality, skip_reason, is_alive, updated_at)\nVALUES (:repoId, :path, :lang, :grammar, :lineCount, :byteSize,\n        :contentHash, :headOid, :isDirty, :parseQuality, :skipReason, 1, :updatedAt)\nON CONFLICT (repo_id, path) DO UPDATE SET\n  lang = excluded.lang, grammar = excluded.grammar,\n  line_count = excluded.line_count, byte_size = excluded.byte_size,\n  content_hash = excluded.content_hash, head_oid = excluded.head_oid,\n  is_dirty = excluded.is_dirty, parse_quality = excluded.parse_quality,\n  skip_reason = excluded.skip_reason, is_alive = 1, updated_at = excluded.updated_at;",
   "facts.run_finish": "UPDATE ingest_run SET\n  finished_at = :finishedAt, status = :status, files_n = :filesN, sites_n = :sitesN,\n  captures_n = :capturesN, commits_n = :commitsN, warnings_n = :warningsN,\n  peak_rss_mb = :peakRssMb, escalated_to_full = :escalatedToFull,\n  grammar_versions_json = :grammarVersionsJson, query_hash = :queryHash,\n  dict_version = :dictVersion, dict_schema = :dictSchema, gen_version = :genVersion,\n  fingerprint = :fingerprint, error = :error\nWHERE id = :id;",
   "facts.run_start": "INSERT INTO ingest_run (repo_id, started_at, mode, head_sha, status, app_version)\nVALUES (:repoId, :startedAt, :mode, :headSha, 'running', :appVersion);",
@@ -29,17 +31,15 @@ export type StatementName = keyof typeof statements;
 /** Rust 가 기동 시 반드시 찾는 이름 (01 §3.3). 테스트가 이 목록을 카탈로그와 대조한다. */
 export const REQUIRED_BY_RUST = [
   "facts.file_upsert",
+  "facts.file_hashes",
   "facts.file_mark_deleted",
   "facts.capture_delete_by_file",
   "facts.capture_insert",
   "facts.commit_insert",
   "facts.commit_file_insert",
+  "facts.commit_mark_unreachable",
   "facts.run_start",
-  "facts.run_finish",
-  "repo.insert",
-  "repo.list",
-  "repo.update_path",
-  "repo.detach"
+  "facts.run_finish"
 ] as const;
 
 // 선언 병합은 대상 모듈이 프로그램 안에 있을 때만 성립한다 — 타입 전용 import 로 끌어온다(런타임엔 지워진다).
@@ -49,10 +49,12 @@ import type {} from '@chickadee/ipc-client';
 // (선언 병합 — 01 §2 의 의존 방향 `store-sql → ipc-client` 를 순환 없이 지킨다).
 declare module '@chickadee/ipc-client' {
   interface StatementMap {
-    "facts.capture_delete_by_file": { params: { fileId: number }; row: never };
-    "facts.capture_insert": { params: { fileId: number, queryId: string, matchId: number, patternIndex: number, name: string, form: string | null, nodeKind: string, inError: boolean, startByte: number, endByte: number, startLine: number, endLine: number, startCol: number, endCol: number, excerpt: string }; row: never };
-    "facts.commit_file_insert": { params: { commitId: number, path: string, oldPath: string | null, status: 'A' | 'M' | 'D' | 'R', additions: number, deletions: number, touchedJson: string }; row: never };
+    "facts.capture_delete_by_file": { params: { repoId: number, path: string }; row: never };
+    "facts.capture_insert": { params: { repoId: number, path: string, queryId: string, matchId: number, patternIndex: number, name: string, form: string | null, nodeKind: string, inError: boolean, startByte: number, endByte: number, startLine: number, endLine: number, startCol: number, endCol: number, excerpt: string }; row: never };
+    "facts.commit_file_insert": { params: { repoId: number, sha: string, path: string, oldPath: string | null, status: 'A' | 'M' | 'D' | 'R', additions: number, deletions: number, touchedJson: string }; row: never };
     "facts.commit_insert": { params: { repoId: number, sha: string, parentSha: string | null, parentCount: number, authoredAt: number, authorEmail: string | null, authorName: string | null, message: string, truncated: boolean, filesN: number, insertions: number, deletions: number }; row: never };
+    "facts.commit_mark_unreachable": { params: { repoId: number, shas: string[] }; row: never };
+    "facts.file_hashes": { params: { repoId: number }; row: { path: string, content_hash: string | null } };
     "facts.file_mark_deleted": { params: { repoId: number, path: string, updatedAt: number }; row: never };
     "facts.file_upsert": { params: { repoId: number, path: string, lang: string | null, grammar: string | null, lineCount: number, byteSize: number, contentHash: string | null, headOid: string | null, isDirty: boolean, parseQuality: 'ok' | 'poor' | null, skipReason: string | null, updatedAt: number }; row: never };
     "facts.run_finish": { params: { id: number, finishedAt: number, status: 'done' | 'failed' | 'cancelled', filesN: number, sitesN: number, capturesN: number, commitsN: number, warningsN: number, peakRssMb: number | null, escalatedToFull: boolean, grammarVersionsJson: string | null, queryHash: string | null, dictVersion: string | null, dictSchema: number | null, genVersion: number | null, fingerprint: string | null, error: string | null }; row: never };

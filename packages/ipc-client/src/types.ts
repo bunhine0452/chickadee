@@ -9,14 +9,12 @@ export type RepoId = number;
 export type JobId = string;
 export type FileId = number;
 
-export interface RepoInfo {
-  id: RepoId;
+/** `repo_probe` 의 답. 장부(등록·목록·이동·삭제)는 TS 가 statement 로 조립한다 (D65). */
+export interface RepoProbe {
   rootPath: string;
   /** 루트 커밋 해시들을 정렬해 `-` 로 이은 문자열. 커밋 0개면 `''`. */
   fingerprint: string;
   headCommit: string | null;
-  status: 'ok' | 'missing' | 'detached';
-  lastIngestAt: string | null;
 }
 
 export interface LangSpec {
@@ -29,6 +27,8 @@ export interface LangSpec {
 
 export interface IngestSpec {
   repoId: RepoId;
+  /** 잡 러너가 경로를 SQL 로 되찾지 않게 TS 가 넘긴다 (D65). */
+  rootPath: string;
   mode: 'full' | 'incremental';
   langs: LangSpec[];
   maxCommits: number;
@@ -115,22 +115,6 @@ export interface LinesChunk {
   hadInvalidUtf8: boolean;
 }
 
-export interface Block {
-  relPath: string;
-  rev: string | null;
-  startByte: number;
-  endByte: number;
-  text: string;
-}
-
-export interface CommitFileDiff {
-  relPath: string;
-  status: 'A' | 'M' | 'D' | 'R';
-  additions: number;
-  deletions: number;
-  hunks: { oldStart: number; newStart: number; text: string }[];
-}
-
 export interface StoreInfo { userVersion: number; path: string; sizeBytes: number; wal: boolean }
 export interface ExecInfo { changes: number; lastId: number }
 
@@ -148,13 +132,9 @@ export interface AppPaths {
 }
 export interface AppVersion { app: string; tauri: string; sqlite: string; rustc: string }
 
-export interface DictEntry { lang: string; source: 'bundled' | 'user' }
-export interface DictFiles { files: { relPath: string; text: string }[] }
 export interface LangInfo { grammar: string; grammarVersion: string; abi: number }
 
-export interface ReadLinesReq { repoId: RepoId; relPath: string; from: number; to: number; rev?: string }
-export interface ReadBlockReq { repoId: RepoId; relPath: string; startByte: number; endByte: number; rev?: string }
-export interface SnippetReq { grammar: string; text: string; queries?: { id: string; scm: string }[] }
-export interface SnippetResult { ast: AstLite; captures: Capture[]; hadError: boolean }
-export interface DiffReq { repoId: RepoId; commit: string; relPath: string }
-export interface GlobReadReq { repoId: RepoId; glob: string; maxFiles: number; maxBytesEach: number }
+/** 경로는 리포 루트 절대 경로다 — 장부가 TS 에 있으므로 id 를 되돌릴 곳이 Rust 에 없다 (D65). */
+export interface ReadLinesReq { rootPath: string; relPath: string; from: number; to: number; rev?: string }
+export interface ReadBlockReq { rootPath: string; relPath: string; startByte: number; endByte: number; rev?: string }
+export interface Block { relPath: string; rev: string | null; startByte: number; endByte: number; text: string }

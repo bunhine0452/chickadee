@@ -29,9 +29,9 @@ owner: claude-code
 - [x] 06 · Q11 Tauri 보안 설정 — CSP, capabilities 최소화, deny_unknown_fields·zod, react/no-danger 규칙 · 1일 (선행: 01 스캐폴드) {#m0-06-q11-tauri-security}
 
 ## M1 · 인제스트 수직 절단 — 리포 등록 → 캡처 → concept_site → 홈에 「판이 없는 문법」 (끝: projectox 등록 15s 안, 홈이 목업과 같은 모양으로 실데이터, 리포 트리 해시 불변·로그 소스 0·IPC 덤프 diff 0·Rust ≤1500줄) {#m1}
-- [ ] 01 · git 크레이트 — open/fingerprint/commits/commit_files/blob, 픽스처 bundle · 2일 (선행: M0) {#m1-01-git-crate}
-- [ ] 03 · diff hunk → CommitRec — commit_file 쓰기·리네임 감지·touched 압축·공백 무시 통계 · 1.5일 (선행: git 크레이트) {#m1-03-diff-commitrec}
-- [ ] 01 · parse 크레이트 — langs.rs(TS·TSX·SQL), parse+query, AstLite, 타임아웃, 골든 스니펫 테스트 · 3일 (선행: 03 캡처 규약 D18) {#m1-01-parse-crate}
+- [x] 01 · git 크레이트 — open/fingerprint/commits/commit_files/blob, 픽스처 bundle · 2일 (선행: M0) {#m1-01-git-crate}
+- [x] 03 · diff hunk → CommitRec — commit_file 쓰기·리네임 감지·touched 압축·공백 무시 통계 · 1.5일 (선행: git 크레이트) {#m1-03-diff-commitrec}
+- [x] 01 · parse 크레이트 — langs.rs(TS·TSX·SQL), parse+query, AstLite, 타임아웃, 골든 스니펫 테스트 · 3일 (선행: 03 캡처 규약 D18) {#m1-01-parse-crate}
 - [ ] 03 · 문법 크레이트 고정 + 언어 감지 + 파서 풀 — 핀·feature·parse_quality(확장자 표는 TS) · 1.5일 (선행: parse 크레이트) {#m1-03-grammar-pool}
 - [ ] 01 · 인제스트 잡 러너 — 워커 스레드, parse 풀, 해시 증분, 취소 토큰, 진행 이벤트, 500행 tx · 3일 (선행: store·git·parse) {#m1-01-ingest-runner}
 - [ ] 03 · 워킹트리 스캔 + 진행률 채널 + 취소·이어하기 — is_dirty·ingest_warning·재스캔 3시점 · 1일 (선행: 잡 러너) {#m1-03-worktree-progress}
@@ -130,4 +130,7 @@ owner: claude-code
 | 2026-09-02T22:32:05+09:00 | #m0-06-q7-ci | claude-code | ☐→x | 20260902/Features_to_add/2231_feature_m0-ci-workflows-and-security-config.md | lint/type/unit/audit + build-3os(D53), 액션 8개 SHA 고정, M1·M2 잡은 주석. 리포에 remote 가 없어 CI 실행은 미검증 |
 | 2026-09-02T22:32:11+09:00 | #m0-06-q11-tauri-security | claude-code | ☐→x | 20260902/Features_to_add/2231_feature_m0-ci-workflows-and-security-config.md | CSP 06 §4.3 그대로 · capabilities 최소 6개 · zod 응답 검증 · no-danger 는 D42 두 파일만. deny/gitleaks/audit 전부 초록 |
 | 2026-09-02T22:38:05+09:00 | #m0-02-db-sql-layer | claude-code | ☐→x | 20260902/Features_to_add/2237_feature_m0-row-converters-zod-tx-helper.md | fromRow 19개·zod 15벌·tx 헬퍼, 진짜 SQLite 왕복 테스트 44건. DDL↔§8.2 충돌 2건 수정(D57 별칭 금지·D58 picks_json) |
+| 2026-09-03T03:44:56+09:00 | #m1-01-git-crate | claude-code | ☐→x | 20260903/Features_to_add/0344_feature_m1-git-parse-crates.md | 383줄 · 테스트 16건 · git_diff_text 는 M4 로 |
+| 2026-09-03T03:45:01+09:00 | #m1-01-parse-crate | claude-code | ☐→x | 20260903/Features_to_add/0344_feature_m1-git-parse-crates.md | 358줄 · 골든 스니펫 17건 · parse_snippet 명령은 M3 |
+| 2026-09-03T03:45:06+09:00 | #m1-03-diff-commitrec | claude-code | ☐→x | 20260903/Features_to_add/0344_feature_m1-git-parse-crates.md | 리네임 50·공백 무시·touched 압축 + 임시 리포 테스트. commit_file 쓰기는 잡 러너에서 |
 <!-- oculpm:plan-log end -->

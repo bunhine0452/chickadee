@@ -286,8 +286,8 @@ function seed(): void {
     authorEmail: 'me@example.com', authorName: '나', message: 'fix: 로그인 응답 방어',
     truncated: false, filesN: 2, insertions: 13, deletions: 3,
   })));
-  db.prepare(statements['facts.commit_file_insert']).run(toSqliteBindings(toCommitFileParams(COMMIT_FILE)));
-  db.prepare(statements['facts.capture_insert']).run(toSqliteBindings(toCaptureParams(1, CAPTURE)));
+  db.prepare(statements['facts.commit_file_insert']).run(toSqliteBindings(toCommitFileParams(1, 'abc1234', COMMIT_FILE)));
+  db.prepare(statements['facts.capture_insert']).run(toSqliteBindings(toCaptureParams(1, 'src/a.ts', CAPTURE)));
   db.prepare(statements['facts.run_start']).run(toSqliteBindings(toIngestRunStartParams({
     repoId: 1, startedAt: T, mode: 'incremental', headSha: 'abc1234', appVersion: '0.1.0',
   })));

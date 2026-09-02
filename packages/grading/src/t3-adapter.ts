@@ -1,4 +1,7 @@
-import type { RepoId, RepoInfo } from '@chickadee/ipc-client';
+import type { RepoId } from '@chickadee/ipc-client';
+
+/** 러너가 필요한 것은 id 와 경로뿐이다 — 장부 행 전체(`RepoInfo`)는 `store-sql` 에 있고 01 §2 의 의존 방향상 여기서 볼 수 없다. */
+export interface RunnerRepo { id: RepoId; rootPath: string }
 
 /**
  * T3(버그 수리·재구현) 자리 — 인터페이스만 예약한다 (01 §9, 정본 §2 「유보」).
@@ -9,7 +12,7 @@ import type { RepoId, RepoInfo } from '@chickadee/ipc-client';
  */
 export interface RunnerAdapter {
   id: string;
-  detect(repo: RepoInfo, files: string[]): Promise<boolean>;
+  detect(repo: RunnerRepo, files: string[]): Promise<boolean>;
   run(spec: { repoId: RepoId; cmd: string[]; timeoutMs: number }): Promise<{
     passed: number;
     failed: number;

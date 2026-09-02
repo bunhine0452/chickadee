@@ -22,17 +22,24 @@ ON CONFLICT (repo_id, path) DO UPDATE SET
 UPDATE file SET is_alive = 0, updated_at = :updatedAt
 WHERE repo_id = :repoId AND path = :path;
 
+-- 파일 id 는 Rust 가 들고 다니지 않는다 — 이름 하나로 찾는 일은 SQL 이 한다 (D65).
+-- @name facts.file_hashes
+-- @params { repoId: number }
+-- @row { path: string, content_hash: string | null }
+SELECT path, content_hash FROM file WHERE repo_id = :repoId AND is_alive = 1;
+
 -- @name facts.capture_delete_by_file
--- @params { fileId: number }
+-- @params { repoId: number, path: string }
 -- @row void
-DELETE FROM capture WHERE file_id = :fileId;
+DELETE FROM capture WHERE file_id = (SELECT id FROM file WHERE repo_id = :repoId AND path = :path);
 
 -- @name facts.capture_insert
--- @params { fileId: number, queryId: string, matchId: number, patternIndex: number, name: string, form: string | null, nodeKind: string, inError: boolean, startByte: number, endByte: number, startLine: number, endLine: number, startCol: number, endCol: number, excerpt: string }
+-- @params { repoId: number, path: string, queryId: string, matchId: number, patternIndex: number, name: string, form: string | null, nodeKind: string, inError: boolean, startByte: number, endByte: number, startLine: number, endLine: number, startCol: number, endCol: number, excerpt: string }
 -- @row void
 INSERT INTO capture (file_id, query_id, match_id, pattern_index, name, form, node_kind, in_error,
                      start_byte, end_byte, start_line, end_line, start_col, end_col, excerpt)
-VALUES (:fileId, :queryId, :matchId, :patternIndex, :name, :form, :nodeKind, :inError,
+VALUES ((SELECT id FROM file WHERE repo_id = :repoId AND path = :path),
+        :queryId, :matchId, :patternIndex, :name, :form, :nodeKind, :inError,
         :startByte, :endByte, :startLine, :endLine, :startCol, :endCol, :excerpt);
 
 -- @name facts.commit_insert
@@ -50,14 +57,22 @@ ON CONFLICT (repo_id, sha) DO UPDATE SET
   insertions = excluded.insertions, deletions = excluded.deletions;
 
 -- @name facts.commit_file_insert
--- @params { commitId: number, path: string, oldPath: string | null, status: 'A' | 'M' | 'D' | 'R', additions: number, deletions: number, touchedJson: string }
+-- @params { repoId: number, sha: string, path: string, oldPath: string | null, status: 'A' | 'M' | 'D' | 'R', additions: number, deletions: number, touchedJson: string }
 -- @row void
 INSERT INTO commit_file (commit_id, path, old_path, status, additions, deletions, touched_json)
-VALUES (:commitId, :path, :oldPath, :status, :additions, :deletions, :touchedJson)
+VALUES ((SELECT id FROM git_commit WHERE repo_id = :repoId AND sha = :sha),
+        :path, :oldPath, :status, :additions, :deletions, :touchedJson)
 ON CONFLICT (commit_id, path) DO UPDATE SET
   old_path = excluded.old_path, status = excluded.status,
   additions = excluded.additions, deletions = excluded.deletions,
   touched_json = excluded.touched_json;
+
+-- rebase·force-push 로 닿을 수 없게 된 커밋. 지우지 않는다 — 학습 기록이 참조한다 (03 §1.6).
+-- @name facts.commit_mark_unreachable
+-- @params { repoId: number, shas: string[] }
+-- @row void
+UPDATE git_commit SET is_reachable = 0
+WHERE repo_id = :repoId AND sha IN (SELECT value FROM json_each(:shas));
 
 -- @name facts.run_start
 -- @params { repoId: number, startedAt: number, mode: 'full' | 'incremental', headSha: string | null, appVersion: string | null }

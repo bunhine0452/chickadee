@@ -30,7 +30,7 @@ export class BatchTooLargeError extends Error {
  * ```ts
  * const t = tx()
  *   .add('facts.file_upsert', toFileParams(file))
- *   .add('facts.capture_insert', toCaptureParams(fileId, capture));
+ *   .add('facts.capture_insert', toCaptureParams(repoId, path, capture));
  * await ipc.store.batch(t.build());
  * ```
  */

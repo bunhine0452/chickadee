@@ -546,10 +546,10 @@ export function toFileParams(v: FileWrite): ParamsOf<'facts.file_upsert'> {
   };
 }
 
-/** `Capture`(01 §3.1) + 파일 id → `capture` 행. */
-export function toCaptureParams(fileId: number, c: Capture): ParamsOf<'facts.capture_insert'> {
+/** `Capture`(01 §3.1) + 리포·경로 → `capture` 행. 파일 id 는 statement 가 찾는다 (D65). */
+export function toCaptureParams(repoId: number, path: string, c: Capture): ParamsOf<'facts.capture_insert'> {
   return {
-    fileId,
+    repoId, path,
     queryId: c.queryId, matchId: c.matchId, patternIndex: c.patternIndex, name: c.name,
     form: c.form, nodeKind: c.nodeKind, inError: c.inError,
     startByte: c.startByte, endByte: c.endByte, startLine: c.startLine, endLine: c.endLine,
@@ -573,9 +573,9 @@ export function toGitCommitParams(v: GitCommitWrite): ParamsOf<'facts.commit_ins
 }
 
 /** §8.2 `CommitFile` → `commit_file` 행. `touched` 가 여기서 JSON 텍스트가 된다. */
-export function toCommitFileParams(v: CommitFile): ParamsOf<'facts.commit_file_insert'> {
+export function toCommitFileParams(repoId: number, sha: string, v: CommitFile): ParamsOf<'facts.commit_file_insert'> {
   return {
-    commitId: v.commitId, path: v.path, oldPath: v.oldPath, status: v.status,
+    repoId, sha, path: v.path, oldPath: v.oldPath, status: v.status,
     additions: v.additions, deletions: v.deletions, touchedJson: JSON.stringify(v.touched),
   };
 }

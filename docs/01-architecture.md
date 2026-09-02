@@ -87,7 +87,8 @@ interface RepoInfo { id: RepoId; rootPath: string; fingerprint: string /* 커밋
   status: 'ok' | 'missing' | 'detached'; lastIngestAt: string | null }
 interface LangSpec { grammar: string; extensions: string[]; maxFileBytes: number; queries: { id: string; scm: string }[] }
 // queries[].id = 개념 id('ts/optional-chaining') 또는 예약 id '_imports' | '_blocks'
-interface IngestSpec { repoId: RepoId; mode: 'full' | 'incremental'; langs: LangSpec[];
+interface IngestSpec { repoId: RepoId; rootPath: string /* D65 — 잡 러너가 경로를 SQL 로 되찾지 않는다 */;
+  mode: 'full' | 'incremental'; langs: LangSpec[];
   maxCommits: number /* 2000 */; maxFilesPerCommit: number /* 200 */; maxFiles: number /* 50000 */;
   maxLineBytes: number /* 20000 */; excludeGlobs: string[]; generatedMarkers: string[] /* 첫 5줄 검사 */ }
 interface IngestWarning { jobId: JobId; relPath: string; reason: 'oversize' | 'parse-poor' | 'timeout' | 'binary' | 'generated' | 'long-line' }
@@ -116,33 +117,26 @@ interface CommitFileDiff { relPath: string; status: 'A' | 'M' | 'D' | 'R'; addit
 
 | 명령 | 입력 | 출력 | 오류(§6 코드) | p95 | 취소 | 이벤트 |
 |---|---|---|---|---|---|---|
-| `repo_register` | `{ path }` | `RepoInfo` — `Repository::discover` 로 루트를 찾아 `rootPath` 로 돌려준다. 커밋 0개 허용 | `FS_NOT_FOUND` `GIT_NOT_REPO` `GIT_BARE` `REPO_DUPLICATE` | 300ms | ✗ | — |
-| `repo_list` | — | `RepoInfo[]` (경로 존재 확인 포함) | `STORE_*` | 20ms | ✗ | — |
-| `repo_relocate` | `{ repoId, newPath }` | `RepoInfo` | `REPO_FINGERPRINT_MISMATCH` `GIT_NOT_REPO` | 300ms | ✗ | — |
-| `repo_remove` | `{ repoId, purge }` | `{}` | `REPO_NOT_FOUND` | 200ms | ✗ | — |
-| `repo_glob_read` | `{ repoId, glob, maxFiles: ≤200, maxBytesEach: ≤65536 }` | `{ relPath, text }[]` (ocul-pm 일지 `.oculpm/journal/**/*.md`) | `FS_*` `PAYLOAD_TOO_LARGE` | 50ms | ✗ | — |
+| `repo_probe` | `{ path }` | `{ rootPath, fingerprint, headCommit }` — `Repository::discover` 로 루트를 찾는다. 커밋 0개면 `fingerprint: ''`. 등록·목록·이동·삭제는 이것과 `repo.*` statement 로 TS 가 조립한다 (D65) | `FS_NOT_FOUND` `GIT_NOT_REPO` `GIT_BARE` | 300ms | ✗ | — |
 | `ingest_start` | `IngestSpec` | `{ jobId }` | `JOB_BUSY`(동시 1개) `REPO_PATH_MISSING` `PARSE_QUERY_INVALID` | 50ms(큐 등록) | — | — |
 | `ingest_cancel` | `{ jobId }` | `{}` | `JOB_NOT_FOUND` | 10ms(중단 완료는 ≤ 500ms) | — | `ingest_done{cancelled:true}` |
 | `ingest_status` | `{ jobId }` | `IngestProgress \| IngestDone` | `JOB_NOT_FOUND` | 5ms | ✗ | — |
 | (이벤트) | — | — | — | — | — | `ingest_progress`(≤ 10/s) · `ingest_done` · `ingest_warning{IngestWarning}` · `ingest_error{IpcError}` |
 | `file_read_lines` | `{ repoId, relPath, from, to /* ≤ 2000줄 */, rev? }` | `LinesChunk` | `FS_NOT_FOUND` `GIT_COMMIT_NOT_FOUND` `BAD_INPUT` | 10ms(작업 트리) · 30ms(rev) | ✗ | — |
 | `file_read_block` | `{ repoId, relPath, startByte, endByte /* ≤ 65536 */, rev? }` | `Block` | 위와 같음 | 10ms | ✗ | — |
-| `parse_snippet` | `{ grammar, text /* ≤ 65536B */, queries?: QuerySpec[] }` | `{ ast: AstLite; captures: Capture[]; hadError: boolean }` | `PARSE_LANG_UNSUPPORTED` `PARSE_TOO_LARGE` `PARSE_TIMEOUT`(2s) `PARSE_TOO_DEEP`(AstLite 깊이 512) | 20ms | ✗ | — |
 | `parse_langs` | — | `{ grammar, grammarVersion, abi }[]` | — | 1ms | ✗ | — |
-| `git_diff_text` | `{ repoId, commit, relPath }` | `CommitFileDiff` | `GIT_COMMIT_NOT_FOUND` `PAYLOAD_TOO_LARGE` | 50ms | ✗ | — |
 | `git_blame_lines` | `{ repoId, relPath, rev? }` | `{ hunks: BlameHunk[] }` | `GIT_COMMIT_NOT_FOUND` `GIT_BLAME_TIMEOUT`(2s) | 500ms | ✗ | — |
 | `store_open` | `{ catalog: { statements: Record<name, sql>; migrations: { version, sql }[] } }` | `StoreInfo` | `STORE_ALREADY_OPEN` `STORE_MIGRATION` `STORE_CORRUPT` `STORE_CATALOG_MISSING` | 200ms(마이그레이션 제외) | ✗ | — |
 | `store_query` | `{ name, params }` | `Row[]` | `STORE_CATALOG_MISSING` `STORE_BUSY` `BAD_INPUT` | 5ms(홈 번들 30ms) | ✗ | — |
 | `store_exec` | `{ name, params }` | `{ changes, lastId }` | 위 + `STORE_CONSTRAINT` | 5ms | ✗ | — |
 | `store_batch` | `{ ops: { name, params }[] /* ≤ 200 */ }` | `{ changes, lastId }[]` (단일 tx, 전부 아니면 무) | 위와 같음 | 10ms | ✗ | — |
 | `store_info` | — | `{ userVersion, path, sizeBytes, wal: true }` | — | 1ms | ✗ | — |
-| `dict_list` | — | `{ lang, source: 'bundled' \| 'user' }[]` | `FS_*` | 20ms | ✗ | — |
-| `dict_read` | `{ lang }` | `{ files: { relPath: string; text: string }[] }` (`_lang.yaml`·`*.yaml`·`*.scm` 원문, 파싱은 TS) | `DICT_NOT_FOUND` | 50ms | ✗ | — |
-| `dict_cache_read` / `dict_cache_write` | `{ key }` / `{ key, json /* ≤ 1 MiB */ }` | `{ json } \| null` / `{}` | `FS_*` | 10ms | ✗ | — |
 | `app_paths` | — | `{ dataDir, dbPath, logDir, dictCacheDir, dictUserDir }` | — | 1ms | ✗ | — |
 | `app_version` | — | `{ app, tauri, sqlite, rustc }` | — | 1ms | ✗ | — |
 | `app_reveal` | `{ which: 'data' \| 'logs' \| 'repo', repoId? }` | `{}` | `FS_NOT_FOUND` | 100ms | ✗ | — |
 | `t3_run` | — | — | 항상 `NOT_IMPLEMENTED` (§9) | — | — | — |
+
+M3 에서 돌아오는 명령: `parse_snippet`(D67). M4: `git_diff_text`(D64). M5: `dict_*` 4종과 `repo_glob_read`(D66 · D65). 표에서 빠진 것은 폐기가 아니라 그 마일스톤의 몫이다.
 
 `store_open` 은 프로세스당 1회만 허용한다(두 번째 호출 → `STORE_ALREADY_OPEN`). 왜: 카탈로그는 앱 번들 JS 에서만 오는데, WebView 가 뚫렸을 때 SQL 을 갈아끼우는 경로를 막는다. 카탈로그 밖 SQL 은 어떤 명령으로도 실행할 수 없다.
 
@@ -158,7 +152,7 @@ interface CommitFileDiff { relPath: string; status: 'A' | 'M' | 'D' | 'R'; addit
 
 `incremental` 은 직전 run 의 `queryHash`·`grammarVersions` 가 같을 때만 성립. 다르면 자동으로 `full` 로 올리고 `escalatedToFull: true` 를 보고한다.
 
-Rust 가 사용하는 카탈로그 이름(기동 시 전부 존재해야 하며 없으면 `STORE_CATALOG_MISSING`): `facts.file_upsert`(열 `path grammar byte_size line_count content_hash head_oid is_dirty parse_quality skip_reason`) · `facts.file_mark_deleted` · `facts.capture_delete_by_file` · `facts.capture_insert` · `facts.commit_insert` · `facts.commit_file_insert` · `facts.run_start` · `facts.run_finish` · `repo.insert` · `repo.list` · `repo.update_path` · `repo.detach`.
+Rust 가 사용하는 카탈로그 이름(기동 시 전부 존재해야 하며 없으면 `STORE_CATALOG_MISSING`): `facts.file_upsert`(열 `path grammar byte_size line_count content_hash head_oid is_dirty parse_quality skip_reason`) · `facts.file_mark_deleted` · `facts.capture_delete_by_file` · `facts.capture_insert` · `facts.commit_insert` · `facts.commit_file_insert` · `facts.run_start` · `facts.run_finish`. `repo.*` 는 TS 만 쓰므로 이 목록에 없다 (D65).
 
 **TS 파생 층**: `ingest_done` 을 받으면 `packages/concepts.derive(repoId)` 가 `derive.captures_by_file{fileId}` 로 파일 단위 페이지를 읽어 `concept_site`·`import_edge`·`block`·`unit`·`unit_node`·`gap` 을 쓰고(`store_batch` ≤ 200 op), 끝나면 `packages/concepts/blame.ts` 가 Site 가 있는 파일마다 `git_blame_lines` 를 배경에서 호출해 `concept_site.commit_id` 를 채운다. 커밋 `kind`·`author_matched` 도 이때 `git_commit` 파생 열에 쓴다.
 
@@ -248,19 +242,19 @@ chickadee/
 ├── Cargo.toml                    # [workspace] members = ["crates/*", "apps/desktop/src-tauri"]
 ├── pnpm-workspace.yaml           # packages/*, apps/*
 ├── crates/
-│   ├── git/     src/{lib.rs, fingerprint.rs, commits.rs, blob.rs}          # chickadee-git  ≤ 400줄
-│   ├── parse/   src/{lib.rs, langs.rs, query.rs, ast_lite.rs} · tests/     # chickadee-parse ≤ 450줄 (tests/ = insta 스냅샷·사전 예시 덤프)
+│   ├── git/     src/{lib.rs, fingerprint.rs, commits.rs, blob.rs}          # chickadee-git  ≤ 400줄 (D64)
+│   ├── parse/   src/{lib.rs, langs.rs, query.rs, ast_lite.rs} · tests/     # chickadee-parse ≤ 400줄 (D64) (tests/ = insta 스냅샷·사전 예시 덤프)
 │   └── store/   src/{lib.rs, catalog.rs, migrate.rs, json.rs}              # chickadee-store ≤ 350줄
 ├── apps/desktop/
 │   ├── src-tauri/  src/{main.rs, error.rs, state.rs, jobs.rs, commands/{repo,ingest,file,parse,git,store,dict,app}.rs}
 │   │               benches/ingest.rs (criterion)
-│   │               tauri.conf.json · capabilities/default.json · Cargo.toml   # chickadee-app ≤ 300줄
+│   │               tauri.conf.json · capabilities/default.json · Cargo.toml   # chickadee-app ≤ 500줄 (D64)
 │   └── src/        main.ts · screens/ …                                      # UI 셸 (프레임워크는 05)
 ├── packages/
 │   ├── ipc-client/  src/{index.ts, types.ts, errors.ts, events.ts}
 │   ├── store-sql/   migrations/0001_init.sql … · statements/{facts,repo,home,queue,card,session,…}.sql · src/rows.ts
-│   ├── dictionary/  src/{schema.ts (zod), load.ts, cache.ts}
-│   ├── concepts/    src/{derive.ts, prereq-graph.ts, unknown-rank.ts, resolve-imports.ts, units.ts, commits.ts, blame.ts, ingest-defaults.ts}
+│   ├── dictionary/  src/{schema.ts (zod), bundle.ts, load.ts}   # 번들 사전은 Vite 가 굽는다 (D66)
+│   ├── concepts/    src/{derive.ts, prereq-graph.ts, unknown-rank.ts, resolve-imports.ts, units.ts, commits.ts, blame.ts, ingest-defaults.ts, repos.ts, ingest.ts, gaps.ts}
 │   ├── cards/       src/{t0.ts, t1.ts, t2.ts}
 │   ├── scheduler/   src/{fsrs.ts, ink-layers.ts, today-queue.ts}
 │   ├── grading/     src/{t0.ts, t1-ast.ts, t1-regex.ts, t2.ts, t3-adapter.ts}
@@ -278,7 +272,7 @@ chickadee/
 └── .github/workflows/{ci.yml (lint·test·budget), release.yml (tauri-action 3-OS)}
 ```
 
-문법 사전은 앱 번들 리소스(`tauri.conf.json` `bundle.resources: ["../../dictionary/**"]`)로 들어가고, 사용자 오버라이드는 `app_data_dir/dict-user/<lang>/` 이 우선한다.
+문법 사전은 Vite 가 빌드 때 JS 번들에 굽는다 (D66) — `bundle.resources` 는 쓰지 않는다. 사용자 오버라이드 `app_data_dir/dict-user/<lang>/` 와 디스크 캐시는 M5 에서 `fs` 플러그인(`$APPDATA` 스코프)과 함께 들어온다.
 
 ---
 

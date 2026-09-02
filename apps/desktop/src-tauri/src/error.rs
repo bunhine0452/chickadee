@@ -39,6 +39,37 @@ impl From<chickadee_store::StoreError> for IpcError {
     }
 }
 
+impl From<chickadee_git::GitError> for IpcError {
+    fn from(e: chickadee_git::GitError) -> Self {
+        use chickadee_git::GitError as E;
+        let code = match &e {
+            E::NotARepo(_) => "GIT_NOT_REPO",
+            E::Bare => "GIT_BARE",
+            E::CommitNotFound(_) => "GIT_COMMIT_NOT_FOUND",
+            E::BlameTimeout { .. } => "GIT_BLAME_TIMEOUT",
+            E::BadPath(_) => "FS_NOT_FOUND",
+            E::Lib(_) => "GIT_IO",
+        };
+        // No path or byte reaches the message — `Display` on these variants is
+        // deliberately empty of user data (01 §6).
+        Self::new(code, e.to_string(), matches!(e, E::Lib(_)))
+    }
+}
+
+impl From<chickadee_parse::ParseError> for IpcError {
+    fn from(e: chickadee_parse::ParseError) -> Self {
+        use chickadee_parse::ParseError as E;
+        let code = match &e {
+            E::UnsupportedLang(_) => "PARSE_LANG_UNSUPPORTED",
+            E::QueryInvalid { .. } => "PARSE_QUERY_INVALID",
+            E::TooLarge { .. } => "PARSE_TOO_LARGE",
+            E::Timeout { .. } => "PARSE_TIMEOUT",
+            E::TooDeep { .. } => "PARSE_TOO_DEEP",
+        };
+        Self::new(code, e.to_string(), false)
+    }
+}
+
 /// 아직 구현하지 않은 자리 (T3 — 01 §9).
 pub fn not_implemented(what: &str) -> IpcError {
     IpcError::new(

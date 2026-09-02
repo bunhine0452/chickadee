@@ -1,5 +1,7 @@
 mod commands;
 mod error;
+// The integration test drives the job directly (06 §1.4).
+pub mod jobs;
 mod state;
 
 use tauri::Manager;
@@ -26,6 +28,15 @@ pub fn run() {
             commands::app::app_paths,
             commands::app::app_version,
             commands::app::t3_run,
+            commands::repo::repo_probe,
+            commands::repo::file_read_lines,
+            commands::repo::file_read_block,
+            commands::repo::git_blame_lines,
+            commands::repo::parse_langs,
+            commands::repo::app_reveal,
+            commands::ingest::ingest_start,
+            commands::ingest::ingest_cancel,
+            commands::ingest::ingest_status,
         ])
         .setup(|app| {
             // 창은 숨겨진 채 만들어지고 폰트가 준비된 뒤 프런트가 show 를 부른다 (05 §1.2).

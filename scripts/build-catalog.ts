@@ -64,11 +64,13 @@ migrations.forEach((m, i) => {
   if (m.version !== i + 1) throw new Error(`마이그레이션 번호가 1부터 연속이 아니다: ${m.file}`);
 });
 
-// Rust 가 기동 시 요구하는 이름 (01 §3.3). 하나라도 없으면 앱이 STORE_CATALOG_MISSING 으로 죽는다.
+// Rust 가 기동 시 요구하는 이름 (01 §3.3 · D65). 하나라도 없으면 앱이 STORE_CATALOG_MISSING 으로 죽는다.
+// `repo.*` 는 여기 없다 — 리포 장부는 TS 가 조립한다.
 const REQUIRED_BY_RUST = [
-  'facts.file_upsert', 'facts.file_mark_deleted', 'facts.capture_delete_by_file', 'facts.capture_insert',
-  'facts.commit_insert', 'facts.commit_file_insert', 'facts.run_start', 'facts.run_finish',
-  'repo.insert', 'repo.list', 'repo.update_path', 'repo.detach',
+  'facts.file_upsert', 'facts.file_hashes', 'facts.file_mark_deleted',
+  'facts.capture_delete_by_file', 'facts.capture_insert',
+  'facts.commit_insert', 'facts.commit_file_insert', 'facts.commit_mark_unreachable',
+  'facts.run_start', 'facts.run_finish',
 ];
 const missing = REQUIRED_BY_RUST.filter((n) => !seen.has(n));
 if (missing.length) throw new Error(`Rust 가 요구하는 statement 가 없다: ${missing.join(', ')}`);

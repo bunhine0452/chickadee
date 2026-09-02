@@ -5,9 +5,9 @@ import { devPanel } from './devpanel.js';
 import { IpcError, toIpcError } from './errors.js';
 import type { BatchOp, ParamsOf, RowOf, StatementName } from './statements.js';
 import type {
-  AppPaths, AppVersion, BlameHunk, Block, Catalog, CommitFileDiff, DictEntry, DictFiles,
-  DiffReq, ExecInfo, GlobReadReq, IngestDone, IngestProgress, IngestSpec, JobId, LangInfo,
-  LinesChunk, ReadBlockReq, ReadLinesReq, RepoId, RepoInfo, SnippetReq, SnippetResult, StoreInfo,
+  AppPaths, AppVersion, BlameHunk, Block, Catalog, ExecInfo, IngestDone, IngestProgress,
+  IngestSpec, JobId, LangInfo, LinesChunk, ReadBlockReq, ReadLinesReq, RepoProbe,
+  StoreInfo,
 } from './types.js';
 
 /** STORE_BUSY 재시도 (01 §6): 3회, 50ms 백오프. 여기가 유일한 자동 재시도다. */
@@ -42,11 +42,11 @@ async function call<T>(cmd: string, args?: object): Promise<T> {
  */
 export const ipc = {
   repo: {
-    register: (path: string) => call<RepoInfo>('repo_register', { path }),
-    list: () => call<RepoInfo[]>('repo_list'),
-    relocate: (repoId: RepoId, newPath: string) => call<RepoInfo>('repo_relocate', { repoId, newPath }),
-    remove: (repoId: RepoId, purge: boolean) => call<void>('repo_remove', { repoId, purge }),
-    globRead: (req: GlobReadReq) => call<{ relPath: string; text: string }[]>('repo_glob_read', req),
+    /**
+     * 루트를 찾아 신원만 돌려준다. 등록·목록·이동·삭제는 `@chickadee/concepts` 의
+     * `repos.ts` 가 이것과 `repo.*` statement 로 조립한다 (D65).
+     */
+    probe: (path: string) => call<RepoProbe>('repo_probe', { path }),
   },
   ingest: {
     start: (spec: IngestSpec) => call<{ jobId: JobId }>('ingest_start', spec),
@@ -58,13 +58,12 @@ export const ipc = {
     readBlock: (req: ReadBlockReq) => call<Block>('file_read_block', req),
   },
   parse: {
-    snippet: (req: SnippetReq) => call<SnippetResult>('parse_snippet', req),
+    /** `parse_snippet` 은 T1 AST 층과 함께 M3 에서 돌아온다 (D67). */
     langs: () => call<LangInfo[]>('parse_langs'),
   },
   git: {
-    diffText: (req: DiffReq) => call<CommitFileDiff>('git_diff_text', req),
-    blameLines: (repoId: RepoId, relPath: string, rev?: string) =>
-      call<{ hunks: BlameHunk[] }>('git_blame_lines', { repoId, relPath, rev }),
+    blameLines: (rootPath: string, relPath: string, rev?: string) =>
+      call<{ hunks: BlameHunk[] }>('git_blame_lines', { rootPath, relPath, rev }),
   },
   store: {
     open: (catalog: Catalog) => call<StoreInfo>('store_open', { catalog }),
@@ -75,16 +74,10 @@ export const ipc = {
     batch: (ops: BatchOp[]) => call<ExecInfo[]>('store_batch', { ops }),
     info: () => call<StoreInfo>('store_info'),
   },
-  dict: {
-    list: () => call<DictEntry[]>('dict_list'),
-    read: (lang: string) => call<DictFiles>('dict_read', { lang }),
-    cacheRead: (key: string) => call<{ json: string } | null>('dict_cache_read', { key }),
-    cacheWrite: (key: string, json: string) => call<void>('dict_cache_write', { key, json }),
-  },
   app: {
     paths: () => call<AppPaths>('app_paths'),
     version: () => call<AppVersion>('app_version'),
-    reveal: (which: 'data' | 'logs' | 'repo', repoId?: RepoId) => call<void>('app_reveal', { which, repoId }),
+    reveal: (which: 'data' | 'logs' | 'repo', at?: string) => call<void>('app_reveal', { which, at }),
   },
   win: {
     /**

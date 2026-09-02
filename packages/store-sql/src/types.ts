@@ -131,6 +131,24 @@ export interface WhyAnswer { id: number; reviewLogId: number; cardId: number; bl
   questionId: string; text: string; pick: number | null; pickOk: boolean | null; createdAt: number; }
 export interface PerfSample { id: number; kind: string; ms: number; n: number; at: number; }
 
+/**
+ * `repo` 한 행. 장부가 TS 로 내려오면서(D65) 이 타입도 IPC 경계에서 여기로 왔다.
+ * `status` 는 열이 아니라 파생이다 — 경로가 없으면 `missing`, `detached_at` 이 있으면 `detached`.
+ */
+export interface RepoInfo {
+  id: number;
+  rootPath: string;
+  name: string;
+  defaultBranch: string | null;
+  headSha: string | null;
+  primaryLang: string | null;
+  /** 루트 커밋 해시들을 정렬해 `-` 로 이은 문자열. 커밋 0개면 `''` (D44). */
+  fingerprint: string;
+  status: 'ok' | 'missing' | 'detached';
+  addedAt: number;
+  lastIngestAt: number | null;
+}
+
 export interface Settings { budgetMin: number; tz: string; rolloverHour: number; desiredRetention: number; newPerDay: number;
   t1PerWeek: number; newcomerFlag: 'none' | 'suspect' | 'confirmed'; theme: 'light' | 'dark'; trim: 'on' | 'off';
   motion: 'system' | 'reduce'; identities: { email: string; name: string }[]; excludeGlobs: string[]; }

@@ -28,23 +28,24 @@ pub fn store_open(
         .map_err(|e| IpcError::new("FS_PERMISSION", e.to_string(), false))?;
     let opened = Store::open(&dir.join("chickadee.db"), catalog)?;
     let info = opened.info()?;
-    *slot = Some(opened);
+    *slot = Some(std::sync::Arc::new(opened));
     Ok(info)
 }
 
+/// Takes a handle and lets go of the outer lock before doing any work, so a
+/// long ingest pass never blocks a read from the screen.
 fn with_store<T>(
     state: &State<'_, AppState>,
     f: impl FnOnce(&Store) -> Result<T, chickadee_store::StoreError>,
 ) -> Result<T, IpcError> {
-    let slot = state.store.lock().expect("state poisoned");
-    let store = slot.as_ref().ok_or_else(|| {
+    let store = state.store().ok_or_else(|| {
         IpcError::new(
             "STORE_CATALOG_MISSING",
             "저장소가 열려 있지 않습니다.",
             false,
         )
     })?;
-    Ok(f(store)?)
+    Ok(f(&store)?)
 }
 
 #[tauri::command]
