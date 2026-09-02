@@ -1,0 +1,30 @@
+# oculpm:begin v1
+.oculpm/index/
+.oculpm/hooks/
+.oculpm/.lock
+.oculpm/.schema-version
+.oculpm/oculpm.log
+.oculpm.backup-*/
+# oculpm:end
+
+# secrets
+.env
+.env.*
+!.env.example
+
+# build
+/target/
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+
+# fixtures — .steps 만 커밋, 생성물은 CI 가 만든다 (06 §1.2)
+/fixtures/repos/*/
+
+# macOS
+.DS_Store
+
+# python 캐시 (design/src/ink/build.py)
+__pycache__/
+*.pyc

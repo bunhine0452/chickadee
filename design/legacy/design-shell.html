@@ -1,0 +1,2486 @@
+<!doctype html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>after_coding — 셸 · 세션 플로우 · 디자인 시스템</title>
+<meta name="color-scheme" content="light dark">
+<style>
+/* ==========================================================================
+   after_coding — Design Tokens
+   레이어 1: 원시값(raw) 없이 곧바로 의미 토큰(semantic)만 노출한다.
+   컴포넌트는 var(--surface) 같은 의미 토큰만 참조하고 hex 를 직접 쓰지 않는다.
+   ========================================================================== */
+
+:root {
+  /* --- 타이포그래피 ------------------------------------------------------ */
+  /* 프로덕션에서는 Pretendard Variable / JetBrains Mono 를 로컬 self-host 로
+     교체한다. 목업은 외부 의존성 0 원칙에 따라 시스템 스택만 사용. */
+  --font-ui: -apple-system, BlinkMacSystemFont, "Pretendard Variable", Pretendard,
+             "Apple SD Gothic Neo", "Segoe UI", "Noto Sans KR", "Malgun Gothic", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo,
+               "Cascadia Mono", "Roboto Mono", "D2Coding", Consolas, monospace;
+
+  --fs-11: 0.6875rem;  --fs-12: 0.75rem;   --fs-13: 0.8125rem;
+  --fs-14: 0.875rem;   --fs-15: 0.9375rem; --fs-16: 1rem;
+  --fs-18: 1.125rem;   --fs-20: 1.25rem;   --fs-24: 1.5rem;
+  --fs-30: 1.875rem;   --fs-38: 2.375rem;
+
+  --lh-tight: 1.2;  --lh-snug: 1.4;  --lh-normal: 1.6;  --lh-relaxed: 1.75;
+  --tracking-tight: -0.02em;  --tracking-normal: -0.008em;  --tracking-wide: 0.06em;
+
+  --fw-regular: 400; --fw-medium: 500; --fw-semibold: 600; --fw-bold: 700;
+
+  /* 코드 전용 메트릭 — 화면의 주인공이므로 별도 토큰으로 분리 */
+  --code-fs: 0.875rem;        /* 14px. 12px 이하 금지 */
+  --code-lh: 1.75;            /* 24.5px. 초보자 스캔용으로 본문보다 넓게 */
+  --code-tracking: 0;
+  --code-gutter-w: 3.25rem;   /* 줄번호 열 */
+
+  /* --- 간격 (4px 베이스) ------------------------------------------------- */
+  --sp-1: 4px;   --sp-2: 8px;   --sp-3: 12px;  --sp-4: 16px;
+  --sp-5: 20px;  --sp-6: 24px;  --sp-8: 32px;  --sp-10: 40px;
+  --sp-12: 48px; --sp-16: 64px; --sp-20: 80px;
+
+  /* --- 반경 -------------------------------------------------------------- */
+  --r-sm: 6px; --r-md: 10px; --r-lg: 14px; --r-xl: 20px; --r-full: 999px;
+
+  /* --- 모션 -------------------------------------------------------------- */
+  --dur-1: 110ms; --dur-2: 180ms; --dur-3: 280ms;
+  --ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* --- 레이아웃 ---------------------------------------------------------- */
+  --rail-w: 232px;
+  --content-max: 1120px;
+  --measure: 68ch;         /* 한국어 본문 가독 폭 */
+  --header-h: 56px;
+
+  /* --- 컬러: 라이트(기본) ------------------------------------------------ */
+  --bg: #FAF9F7;
+  --bg-subtle: #F2F0EB;
+  --surface: #FFFFFF;
+  --surface-2: #F6F4F0;
+  --surface-hover: #EFEBE4;
+  --surface-sunken: #F0EDE7;
+  --border: #E4DFD7;
+  --border-strong: #CFC8BD;
+
+  --fg: #1B1917;
+  --fg-muted: #6A6459;
+  --fg-faint: #97907F;
+  --fg-on-accent: #FFFFFF;
+
+  --accent: #B25E0B;
+  --accent-hover: #964E07;
+  --accent-active: #7D4106;
+  --accent-fg: #FFFFFF;
+  --accent-subtle: #FCF1E1;
+  --accent-border: #EFC792;
+
+  --ok: #1E7A5B;      --ok-subtle: #E3F2EC;  --ok-border: #A5D3C2;
+  --warn: #9C6500;    --warn-subtle: #FAF0D8; --warn-border: #E5CB8C;
+  --danger: #B33029;  --danger-subtle: #FBE9E7; --danger-border: #EFBBB5;
+  --info: #29609A;    --info-subtle: #E8F0F9;  --info-border: #B4CDE8;
+
+  /* 학습 트랙 (항상 텍스트 라벨과 함께 쓴다 — 색맹 대응) */
+  --track-t0: #29609A;  --track-t0-subtle: #E8F0F9;   /* 문법 */
+  --track-t1: #B25E0B;  --track-t1-subtle: #FCF1E1;   /* 클론 */
+  --track-t2: #1E7A5B;  --track-t2-subtle: #E3F2EC;   /* 구조 */
+
+  /* 숙련도 5단계 — 회색 → 앰버 → 초록 순으로 진행감을 준다 */
+  --m0: #C6BFB3;  /* 미학습 = 문법 구멍 */
+  --m1: #DE8C33;  /* 처음 봄 */
+  --m2: #C4A024;  /* 배우는 중 */
+  --m3: #58996A;  /* 익숙함 */
+  --m4: #2A7C69;  /* 안정 */
+
+  /* 코드 표면 */
+  --code-bg: #FDFCFA;
+  --code-bg-alt: #F5F2EC;
+  --code-border: #E4DFD7;
+  --code-fg: #23201C;
+  --code-gutter-fg: #ADA598;
+  --code-line-hl: #FFF2DC;
+  --code-line-hl-edge: #DFA24F;
+  --code-selection: #D8E6F4;
+
+  /* 신택스 하이라이트 — 모든 값이 --code-bg 대비 4.5:1 이상 */
+  --syn-keyword: #9B2C8B;
+  --syn-string: #1D6738;
+  --syn-number: #96490F;
+  --syn-fn: #2A5CBB;
+  --syn-type: #0E6E7D;
+  --syn-comment: #78715F;
+  --syn-var: #23201C;
+  --syn-prop: #1A5490;
+  --syn-punct: #6B6458;
+  --syn-op: #9E3A1E;
+
+  /* diff */
+  --diff-add-bg: #E5F3E9;  --diff-add-edge: #79B98E;  --diff-add-fg: #165C33;
+  --diff-del-bg: #FBE8E6;  --diff-del-edge: #E08D85;  --diff-del-fg: #96322B;
+
+  /* 고도 */
+  --sh-1: 0 1px 2px rgba(27,25,23,.06);
+  --sh-2: 0 1px 2px rgba(27,25,23,.05), 0 6px 16px rgba(27,25,23,.07);
+  --sh-3: 0 2px 6px rgba(27,25,23,.06), 0 18px 44px rgba(27,25,23,.12);
+  --focus-ring: rgba(178,94,11,.38);
+  --overlay: rgba(27,25,23,.42);
+}
+
+/* --- 컬러: 다크 (시스템 설정) -------------------------------------------- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { color-scheme: dark; }
+}
+:root[data-theme="dark"] { color-scheme: dark; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131211;
+    --bg-subtle: #191817;
+    --surface: #1D1B19;
+    --surface-2: #242220;
+    --surface-hover: #2C2926;
+    --surface-sunken: #171614;
+    --border: #302D29;
+    --border-strong: #453F39;
+
+    --fg: #EDE9E2;
+    --fg-muted: #A29B8F;
+    --fg-faint: #736C61;
+    --fg-on-accent: #1A1409;
+
+    --accent: #F0A93B;
+    --accent-hover: #F8BC60;
+    --accent-active: #D8942C;
+    --accent-fg: #1A1409;
+    --accent-subtle: #2E2313;
+    --accent-border: #5B441D;
+
+    --ok: #5FC79E;      --ok-subtle: #15261F;   --ok-border: #2D4C3F;
+    --warn: #E8B45C;    --warn-subtle: #2A2113; --warn-border: #4E3D1D;
+    --danger: #F08C84;  --danger-subtle: #2E1A18; --danger-border: #5B2E2A;
+    --info: #82B4E9;    --info-subtle: #16222E;  --info-border: #2B4157;
+
+    --track-t0: #82B4E9;  --track-t0-subtle: #16222E;
+    --track-t1: #F0A93B;  --track-t1-subtle: #2E2313;
+    --track-t2: #5FC79E;  --track-t2-subtle: #15261F;
+
+    --m0: #4A453D;
+    --m1: #E7A24A;
+    --m2: #D2B140;
+    --m3: #6EBE7E;
+    --m4: #4FC0A5;
+
+    --code-bg: #0F0E0D;
+    --code-bg-alt: #171614;
+    --code-border: #2A2724;
+    --code-fg: #E6E1D8;
+    --code-gutter-fg: #5D564C;
+    --code-line-hl: #2B2214;
+    --code-line-hl-edge: #C9862B;
+    --code-selection: #2C3B4D;
+
+    --syn-keyword: #E58FD0;
+    --syn-string: #9CCB7A;
+    --syn-number: #E9A96A;
+    --syn-fn: #7FB6F0;
+    --syn-type: #6ED0C6;
+    --syn-comment: #8B8375;
+    --syn-var: #E6E1D8;
+    --syn-prop: #A8C7F5;
+    --syn-punct: #99907F;
+    --syn-op: #F0A98A;
+
+    --diff-add-bg: #142619;  --diff-add-edge: #4F8A5F;  --diff-add-fg: #96D6A6;
+    --diff-del-bg: #2B1615;  --diff-del-edge: #9E4A44;  --diff-del-fg: #EFA49D;
+
+    --sh-1: 0 1px 2px rgba(0,0,0,.4);
+    --sh-2: 0 1px 2px rgba(0,0,0,.35), 0 6px 18px rgba(0,0,0,.4);
+    --sh-3: 0 2px 6px rgba(0,0,0,.4), 0 20px 48px rgba(0,0,0,.55);
+    --focus-ring: rgba(240,169,59,.42);
+    --overlay: rgba(0,0,0,.62);
+  }
+}
+
+/* --- 컬러: 다크 (명시 토글) — 위 블록과 동일값 -------------------------- */
+:root[data-theme="dark"] {
+  --bg: #131211;
+  --bg-subtle: #191817;
+  --surface: #1D1B19;
+  --surface-2: #242220;
+  --surface-hover: #2C2926;
+  --surface-sunken: #171614;
+  --border: #302D29;
+  --border-strong: #453F39;
+
+  --fg: #EDE9E2;
+  --fg-muted: #A29B8F;
+  --fg-faint: #736C61;
+  --fg-on-accent: #1A1409;
+
+  --accent: #F0A93B;
+  --accent-hover: #F8BC60;
+  --accent-active: #D8942C;
+  --accent-fg: #1A1409;
+  --accent-subtle: #2E2313;
+  --accent-border: #5B441D;
+
+  --ok: #5FC79E;      --ok-subtle: #15261F;   --ok-border: #2D4C3F;
+  --warn: #E8B45C;    --warn-subtle: #2A2113; --warn-border: #4E3D1D;
+  --danger: #F08C84;  --danger-subtle: #2E1A18; --danger-border: #5B2E2A;
+  --info: #82B4E9;    --info-subtle: #16222E;  --info-border: #2B4157;
+
+  --track-t0: #82B4E9;  --track-t0-subtle: #16222E;
+  --track-t1: #F0A93B;  --track-t1-subtle: #2E2313;
+  --track-t2: #5FC79E;  --track-t2-subtle: #15261F;
+
+  --m0: #4A453D;
+  --m1: #E7A24A;
+  --m2: #D2B140;
+  --m3: #6EBE7E;
+  --m4: #4FC0A5;
+
+  --code-bg: #0F0E0D;
+  --code-bg-alt: #171614;
+  --code-border: #2A2724;
+  --code-fg: #E6E1D8;
+  --code-gutter-fg: #5D564C;
+  --code-line-hl: #2B2214;
+  --code-line-hl-edge: #C9862B;
+  --code-selection: #2C3B4D;
+
+  --syn-keyword: #E58FD0;
+  --syn-string: #9CCB7A;
+  --syn-number: #E9A96A;
+  --syn-fn: #7FB6F0;
+  --syn-type: #6ED0C6;
+  --syn-comment: #8B8375;
+  --syn-var: #E6E1D8;
+  --syn-prop: #A8C7F5;
+  --syn-punct: #99907F;
+  --syn-op: #F0A98A;
+
+  --diff-add-bg: #142619;  --diff-add-edge: #4F8A5F;  --diff-add-fg: #96D6A6;
+  --diff-del-bg: #2B1615;  --diff-del-edge: #9E4A44;  --diff-del-fg: #EFA49D;
+
+  --sh-1: 0 1px 2px rgba(0,0,0,.4);
+  --sh-2: 0 1px 2px rgba(0,0,0,.35), 0 6px 18px rgba(0,0,0,.4);
+  --sh-3: 0 2px 6px rgba(0,0,0,.4), 0 20px 48px rgba(0,0,0,.55);
+  --focus-ring: rgba(240,169,59,.42);
+  --overlay: rgba(0,0,0,.62);
+}
+
+/* ==========================================================================
+   기본 리셋 · 베이스
+   ========================================================================== */
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  font-family: var(--font-ui);
+  font-size: var(--fs-15);
+  line-height: var(--lh-normal);
+  letter-spacing: var(--tracking-normal);
+  color: var(--fg);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  min-height: 100vh;
+}
+button, input, textarea, select { font: inherit; color: inherit; letter-spacing: inherit; }
+button { background: none; border: none; padding: 0; cursor: pointer; }
+ul, ol { list-style: none; padding: 0; }
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+svg { display: block; }
+h1, h2, h3, h4 { line-height: var(--lh-tight); letter-spacing: var(--tracking-tight); font-weight: var(--fw-semibold); }
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+::selection { background: var(--accent-subtle); color: var(--fg); }
+[hidden] { display: none !important; }
+.sr {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ==========================================================================
+   앱 셸 — 좌측 레일 + 메인
+   ========================================================================== */
+.app { display: grid; grid-template-columns: var(--rail-w) minmax(0, 1fr); min-height: 100vh; }
+
+.rail {
+  position: sticky; top: 0; align-self: start; height: 100vh;
+  display: flex; flex-direction: column; gap: var(--sp-2);
+  padding: var(--sp-5) var(--sp-3) var(--sp-4);
+  background: var(--bg-subtle);
+  border-right: 1px solid var(--border);
+}
+.rail__brand {
+  display: flex; align-items: center; gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3) var(--sp-5);
+}
+.rail__mark {
+  width: 30px; height: 30px; border-radius: 8px; flex: none;
+  background: var(--accent); color: var(--accent-fg);
+  display: grid; place-items: center;
+  font-family: var(--font-mono); font-size: var(--fs-14); font-weight: var(--fw-bold);
+}
+.rail__name { font-size: var(--fs-14); font-weight: var(--fw-semibold); letter-spacing: var(--tracking-tight); }
+.rail__sub { font-size: var(--fs-11); color: var(--fg-faint); font-family: var(--font-mono); }
+
+.navlist { display: flex; flex-direction: column; gap: 2px; }
+.nav {
+  display: flex; align-items: center; gap: var(--sp-3);
+  width: 100%; padding: var(--sp-3) var(--sp-3);
+  border-radius: var(--r-md);
+  font-size: var(--fs-14); font-weight: var(--fw-medium);
+  color: var(--fg-muted);
+  transition: background var(--dur-1) var(--ease), color var(--dur-1) var(--ease);
+  text-align: left;
+}
+.nav:hover { background: var(--surface-hover); color: var(--fg); }
+.nav[aria-current="page"] { background: var(--surface); color: var(--fg); box-shadow: var(--sh-1); }
+.nav[aria-current="page"] .nav__icon { color: var(--accent); }
+.nav__icon { width: 18px; height: 18px; flex: none; color: var(--fg-faint); }
+.nav__badge {
+  margin-left: auto; font-family: var(--font-mono); font-size: var(--fs-11);
+  color: var(--fg-faint); background: var(--surface-2);
+  padding: 1px 6px; border-radius: var(--r-full);
+}
+.nav[aria-current="page"] .nav__badge { background: var(--accent-subtle); color: var(--accent); }
+
+.rail__spacer { flex: 1; }
+.rail__foot { display: flex; flex-direction: column; gap: var(--sp-2); }
+
+.repopick {
+  display: flex; align-items: center; gap: var(--sp-3);
+  width: 100%; padding: var(--sp-3);
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-md); text-align: left;
+  transition: border-color var(--dur-1) var(--ease);
+}
+.repopick:hover { border-color: var(--border-strong); }
+.repopick__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); flex: none; }
+.repopick__body { min-width: 0; flex: 1; }
+.repopick__label { font-size: var(--fs-11); color: var(--fg-faint); }
+.repopick__name {
+  font-family: var(--font-mono); font-size: var(--fs-13); font-weight: var(--fw-medium);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.main { min-width: 0; display: flex; flex-direction: column; }
+.page { width: 100%; max-width: var(--content-max); margin: 0 auto; padding: var(--sp-10) var(--sp-8) var(--sp-20); }
+
+/* 뷰 전환 시 살짝 올라오며 등장 (staggered) */
+.view[data-anim] > * { animation: rise var(--dur-3) var(--ease-out) both; }
+.view[data-anim] > *:nth-child(1) { animation-delay: 0ms; }
+.view[data-anim] > *:nth-child(2) { animation-delay: 40ms; }
+.view[data-anim] > *:nth-child(3) { animation-delay: 80ms; }
+.view[data-anim] > *:nth-child(4) { animation-delay: 120ms; }
+.view[data-anim] > *:nth-child(n+5) { animation-delay: 160ms; }
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* ==========================================================================
+   컴포넌트 기본형
+   ========================================================================== */
+
+/* --- 버튼 ---------------------------------------------------------------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-2);
+  padding: 0 var(--sp-4); height: 38px;
+  border-radius: var(--r-md);
+  font-size: var(--fs-14); font-weight: var(--fw-medium);
+  border: 1px solid transparent;
+  transition: background var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease),
+              color var(--dur-1) var(--ease), transform var(--dur-1) var(--ease);
+  white-space: nowrap;
+}
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: .45; pointer-events: none; }
+
+.btn--primary { background: var(--accent); color: var(--accent-fg); font-weight: var(--fw-semibold); }
+.btn--primary:hover { background: var(--accent-hover); }
+.btn--secondary { background: var(--surface); color: var(--fg); border-color: var(--border-strong); }
+.btn--secondary:hover { background: var(--surface-hover); }
+.btn--ghost { color: var(--fg-muted); }
+.btn--ghost:hover { background: var(--surface-hover); color: var(--fg); }
+.btn--danger { background: var(--danger-subtle); color: var(--danger); border-color: var(--danger-border); }
+.btn--danger:hover { background: var(--danger); color: var(--surface); }
+
+.btn--sm { height: 30px; padding: 0 var(--sp-3); font-size: var(--fs-13); border-radius: var(--r-sm); }
+.btn--lg { height: 52px; padding: 0 var(--sp-6); font-size: var(--fs-16); border-radius: var(--r-lg); }
+.btn--xl { height: 60px; padding: 0 var(--sp-8); font-size: var(--fs-18); border-radius: var(--r-lg); font-weight: var(--fw-semibold); }
+.btn--block { width: 100%; }
+
+.kbd {
+  font-family: var(--font-mono); font-size: var(--fs-11);
+  padding: 2px 6px; border-radius: 5px;
+  border: 1px solid var(--border-strong); background: var(--surface-2);
+  color: var(--fg-muted); line-height: 1.4;
+}
+.btn--primary .kbd { background: rgba(0,0,0,.14); border-color: transparent; color: inherit; opacity: .8; }
+
+/* --- 카드 ---------------------------------------------------------------- */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: var(--sp-6);
+}
+.card--flat { box-shadow: none; }
+.card--raised { box-shadow: var(--sh-2); }
+.card--quiet { background: var(--surface-2); border-color: transparent; }
+
+.card__title { font-size: var(--fs-15); font-weight: var(--fw-semibold); }
+.card__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-4); margin-bottom: var(--sp-4); }
+
+/* --- 뱃지 ---------------------------------------------------------------- */
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 2px 8px; border-radius: var(--r-full);
+  font-size: var(--fs-12); font-weight: var(--fw-medium);
+  background: var(--surface-2); color: var(--fg-muted);
+  border: 1px solid transparent;
+}
+.badge--t0 { background: var(--track-t0-subtle); color: var(--track-t0); }
+.badge--t1 { background: var(--track-t1-subtle); color: var(--track-t1); }
+.badge--t2 { background: var(--track-t2-subtle); color: var(--track-t2); }
+.badge--ok { background: var(--ok-subtle); color: var(--ok); }
+.badge--warn { background: var(--warn-subtle); color: var(--warn); }
+.badge--danger { background: var(--danger-subtle); color: var(--danger); }
+.badge--outline { background: transparent; border-color: var(--border-strong); }
+.badge__dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none; }
+.badge--mono { font-family: var(--font-mono); font-size: var(--fs-11); }
+
+/* 개념 칩 — 숙련도 색 점 + 이름 */
+.chip {
+  display: inline-flex; align-items: center; gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3); border-radius: var(--r-full);
+  background: var(--surface); border: 1px solid var(--border);
+  font-size: var(--fs-13); color: var(--fg);
+  transition: border-color var(--dur-1) var(--ease), background var(--dur-1) var(--ease);
+}
+button.chip:hover { border-color: var(--border-strong); background: var(--surface-hover); }
+.chip__dot { width: 8px; height: 8px; border-radius: 2px; flex: none; background: var(--m0); }
+.chip[data-m="0"] .chip__dot { background: var(--m0); }
+.chip[data-m="1"] .chip__dot { background: var(--m1); }
+.chip[data-m="2"] .chip__dot { background: var(--m2); }
+.chip[data-m="3"] .chip__dot { background: var(--m3); }
+.chip[data-m="4"] .chip__dot { background: var(--m4); }
+.chip__code { font-family: var(--font-mono); font-size: var(--fs-12); color: var(--fg-muted); }
+
+/* --- 진행바 -------------------------------------------------------------- */
+.bar { display: block; height: 8px; border-radius: var(--r-full); background: var(--border); overflow: hidden; }
+.bar__fill { display: block; height: 100%; border-radius: inherit; background: var(--accent); transition: width var(--dur-3) var(--ease); }
+.bar--thin { height: 4px; }
+
+/* 트랙 구성 바 — 한 세션에 어떤 비율로 섞여 있는지 */
+.mixbar { display: flex; height: 10px; border-radius: var(--r-full); overflow: hidden; background: var(--border); }
+.mixbar > span { display: block; }
+.mixbar__t0 { background: var(--track-t0); }
+.mixbar__t1 { background: var(--track-t1); }
+.mixbar__t2 { background: var(--track-t2); }
+.mixlegend { display: flex; flex-wrap: wrap; gap: var(--sp-4); margin-top: var(--sp-3); font-size: var(--fs-13); color: var(--fg-muted); }
+.mixlegend li { display: flex; align-items: center; gap: var(--sp-2); }
+.mixlegend i { width: 9px; height: 9px; border-radius: 3px; display: block; }
+
+/* --- 코드 블록 (핵심 컴포넌트) ------------------------------------------- */
+.code {
+  border: 1px solid var(--code-border); border-radius: var(--r-lg);
+  background: var(--code-bg); overflow: hidden;
+}
+.code__head {
+  display: flex; align-items: center; gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--code-bg-alt); border-bottom: 1px solid var(--code-border);
+  font-size: var(--fs-12);
+}
+.code__path { font-family: var(--font-mono); color: var(--fg); font-weight: var(--fw-medium); }
+.code__meta { color: var(--fg-faint); font-family: var(--font-mono); font-size: var(--fs-11); margin-left: auto; }
+.code__body {
+  margin: 0; padding: var(--sp-4) 0;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: var(--code-fs); line-height: var(--code-lh);
+  letter-spacing: var(--code-tracking);
+  color: var(--code-fg);
+  tab-size: 2;
+}
+.code__body code { display: block; min-width: max-content; }
+.cl {
+  display: grid; grid-template-columns: var(--code-gutter-w) 1fr;
+  white-space: pre;
+  counter-increment: ln;
+}
+.cl::before {
+  content: counter(ln);
+  text-align: right; padding-right: var(--sp-4);
+  color: var(--code-gutter-fg);
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+  position: sticky; left: 0; background: inherit;
+}
+.cl > span { padding-right: var(--sp-5); }
+.cl.is-hl { background: var(--code-line-hl); box-shadow: inset 3px 0 0 var(--code-line-hl-edge); }
+.cl.is-hl::before { color: var(--code-line-hl-edge); font-weight: var(--fw-bold); }
+.cl.is-add { background: var(--diff-add-bg); box-shadow: inset 3px 0 0 var(--diff-add-edge); }
+.cl.is-del { background: var(--diff-del-bg); box-shadow: inset 3px 0 0 var(--diff-del-edge); }
+.code--nogutter .cl { grid-template-columns: var(--sp-5) 1fr; }
+.code--nogutter .cl::before { content: ""; }
+.code--fade .cl { opacity: .3; }
+.code ::selection { background: var(--code-selection); }
+
+/* 신택스 토큰 (i 태그를 짧게 쓰되 기울임은 해제) */
+.code i, .codeline i { font-style: normal; }
+.k { color: var(--syn-keyword); }
+.s { color: var(--syn-string); }
+.n { color: var(--syn-number); }
+.f { color: var(--syn-fn); }
+.t { color: var(--syn-type); }
+.c { color: var(--syn-comment); font-style: italic !important; }
+.v { color: var(--syn-var); }
+.pr { color: var(--syn-prop); }
+.p { color: var(--syn-punct); }
+.o { color: var(--syn-op); }
+
+/* 본문 속 인라인 코드 */
+.mono {
+  font-family: var(--font-mono); font-size: 0.92em;
+  background: var(--surface-2); border: 1px solid var(--border);
+  padding: 1px 5px; border-radius: 5px; white-space: nowrap;
+}
+
+/* --- 알림/배너 ----------------------------------------------------------- */
+.note {
+  display: flex; gap: var(--sp-3); align-items: flex-start;
+  padding: var(--sp-4); border-radius: var(--r-md);
+  border: 1px solid var(--border); background: var(--surface-2);
+  font-size: var(--fs-14);
+}
+.note--info { background: var(--info-subtle); border-color: var(--info-border); }
+.note--ok { background: var(--ok-subtle); border-color: var(--ok-border); }
+.note--warn { background: var(--warn-subtle); border-color: var(--warn-border); }
+.note--danger { background: var(--danger-subtle); border-color: var(--danger-border); }
+.note__icon { flex: none; width: 18px; height: 18px; margin-top: 2px; }
+.note__body { flex: 1; min-width: 0; }
+.note__title { font-weight: var(--fw-semibold); margin-bottom: 2px; }
+.note__text { color: var(--fg-muted); font-size: var(--fs-13); }
+
+/* --- 섹션 제목 ----------------------------------------------------------- */
+.sec { margin-top: var(--sp-10); }
+.sec__head { display: flex; align-items: baseline; gap: var(--sp-3); margin-bottom: var(--sp-4); }
+.sec__title { font-size: var(--fs-16); font-weight: var(--fw-semibold); }
+.sec__hint { font-size: var(--fs-13); color: var(--fg-muted); }
+.sec__action { margin-left: auto; }
+.eyebrow {
+  font-size: var(--fs-11); font-weight: var(--fw-semibold);
+  letter-spacing: var(--tracking-wide); text-transform: uppercase;
+  color: var(--fg-faint);
+}
+
+/* ==========================================================================
+   화면: 오늘 (홈)
+   ========================================================================== */
+.topline { display: flex; align-items: center; gap: var(--sp-4); margin-bottom: var(--sp-6); }
+.topline__greet { font-size: var(--fs-14); color: var(--fg-muted); }
+.topline__tools { margin-left: auto; display: flex; gap: var(--sp-2); align-items: center; }
+
+.hero {
+  position: relative; overflow: hidden;
+  border: 1px solid var(--border); border-radius: var(--r-xl);
+  background: var(--surface); box-shadow: var(--sh-2);
+  padding: var(--sp-8);
+}
+.hero::after {
+  /* 앰버 하이라이터 자국 — 장식은 여기 한 곳만 */
+  content: ""; position: absolute; inset: 0 0 auto 0; height: 3px;
+  background: linear-gradient(90deg, var(--track-t0) 0 42%, var(--track-t1) 42% 76%, var(--track-t2) 76% 100%);
+  opacity: .9;
+}
+.hero__grid { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: var(--sp-8); align-items: end; }
+.hero__title { font-size: var(--fs-30); letter-spacing: var(--tracking-tight); margin: var(--sp-2) 0 var(--sp-3); }
+.hero__source { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); font-size: var(--fs-14); color: var(--fg-muted); }
+.hero__meta { display: flex; flex-wrap: wrap; gap: var(--sp-5); margin-top: var(--sp-5); font-size: var(--fs-14); color: var(--fg-muted); }
+.hero__meta b { color: var(--fg); font-weight: var(--fw-semibold); font-variant-numeric: tabular-nums; }
+.hero__mix { margin-top: var(--sp-6); max-width: 420px; }
+.hero__cta { display: flex; flex-direction: column; align-items: stretch; gap: var(--sp-3); min-width: 260px; }
+.hero__ctahint { text-align: center; font-size: var(--fs-12); color: var(--fg-faint); }
+.hero__resume { margin-top: var(--sp-5); }
+
+.textlink {
+  background: none; border: none; padding: 0; color: var(--fg-muted);
+  font-size: var(--fs-13); text-decoration: underline; text-underline-offset: 3px;
+  text-decoration-color: var(--border-strong); cursor: pointer;
+}
+.textlink:hover { color: var(--fg); text-decoration-color: currentColor; }
+
+/* 오늘 나올 것 미리보기 */
+.peek { display: grid; gap: var(--sp-2); }
+.peek__item {
+  display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: var(--sp-4);
+  align-items: center; padding: var(--sp-4);
+  border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface);
+}
+.peek__num { font-family: var(--font-mono); font-size: var(--fs-12); color: var(--fg-faint); width: 1.5em; }
+.peek__main { min-width: 0; }
+.peek__title { font-size: var(--fs-14); font-weight: var(--fw-medium); }
+.peek__where { font-family: var(--font-mono); font-size: var(--fs-12); color: var(--fg-faint); margin-top: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* 2열 배치 */
+.cols2 { display: grid; grid-template-columns: minmax(0,1.55fr) minmax(0,1fr); gap: var(--sp-5); align-items: start; }
+.cols3 { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: var(--sp-4); }
+
+/* 스트릭 */
+.streak__num { font-size: var(--fs-38); font-weight: var(--fw-bold); letter-spacing: var(--tracking-tight);
+  font-variant-numeric: tabular-nums; line-height: 1; }
+.streak__unit { font-size: var(--fs-15); color: var(--fg-muted); margin-left: var(--sp-2); font-weight: var(--fw-regular); }
+.streak__note { font-size: var(--fs-13); color: var(--fg-muted); margin-top: var(--sp-3); }
+.dots { display: flex; gap: 4px; margin-top: var(--sp-4); }
+.dots i { width: 100%; height: 26px; border-radius: 4px; background: var(--border); display: block; }
+.dots i[data-on="1"] { background: var(--m3); }
+.dots i[data-on="2"] { background: var(--m4); }
+.dots i[data-today] { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* ==========================================================================
+   세션 (전체화면 몰입 모드)
+   ========================================================================== */
+.session {
+  position: fixed; inset: 0; z-index: 60;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  animation: sessionIn var(--dur-3) var(--ease-out) both;
+}
+@keyframes sessionIn { from { opacity: 0; transform: scale(.99); } to { opacity: 1; transform: none; } }
+
+.shead {
+  height: var(--header-h); flex: none;
+  display: grid; grid-template-columns: 200px minmax(0,1fr) 200px;
+  align-items: center; gap: var(--sp-5);
+  padding: 0 var(--sp-5);
+  border-bottom: 1px solid var(--border); background: var(--bg-subtle);
+}
+.shead__right { display: flex; align-items: center; justify-content: flex-end; gap: var(--sp-4); }
+.shead__count { font-family: var(--font-mono); font-size: var(--fs-13); color: var(--fg-muted); font-variant-numeric: tabular-nums; }
+.shead__time { font-size: var(--fs-13); color: var(--fg-faint); }
+
+/* 세그먼트 진행바: 남은 개수가 눈으로 세어진다 + 트랙 색으로 구성이 드러난다 */
+.segbar { display: flex; gap: 3px; align-items: center; }
+.segbar__s {
+  height: 6px; flex: 1; border-radius: 3px;
+  background: var(--border-strong);
+  transition: background var(--dur-2) var(--ease), transform var(--dur-2) var(--ease);
+}
+.segbar__s[data-state="done"][data-track="t0"] { background: var(--track-t0); }
+.segbar__s[data-state="done"][data-track="t1"] { background: var(--track-t1); }
+.segbar__s[data-state="done"][data-track="t2"] { background: var(--track-t2); }
+.segbar__s[data-state="current"] { background: var(--fg); height: 10px; }
+.segbar__s[data-state="todo"] { background: var(--border-strong); opacity: .6; }
+
+.sbody { flex: 1; overflow-y: auto; }
+.swrap { max-width: 1000px; margin: 0 auto; padding: var(--sp-8) var(--sp-6) var(--sp-16); }
+
+.sfoot {
+  flex: none; border-top: 1px solid var(--border); background: var(--bg-subtle);
+  padding: var(--sp-4) var(--sp-5);
+}
+.sfoot__inner {
+  max-width: 1000px; margin: 0 auto;
+  display: flex; align-items: center; gap: var(--sp-4);
+}
+.sfoot__hint { font-size: var(--fs-12); color: var(--fg-faint); display: flex; gap: var(--sp-4); flex-wrap: wrap; }
+.sfoot__actions { margin-left: auto; display: flex; gap: var(--sp-3); align-items: center; }
+
+/* 카드 헤더 (트랙 + 개념) */
+.chead { display: flex; align-items: center; gap: var(--sp-3); margin-bottom: var(--sp-5); flex-wrap: wrap; }
+.cquestion {
+  font-size: var(--fs-20); font-weight: var(--fw-semibold); line-height: var(--lh-snug);
+  letter-spacing: var(--tracking-tight); max-width: var(--measure);
+  margin-bottom: var(--sp-5);
+}
+.cprose { max-width: var(--measure); color: var(--fg-muted); font-size: var(--fs-15); line-height: var(--lh-relaxed); }
+.cprose p + p { margin-top: var(--sp-3); }
+.cprose strong { color: var(--fg); font-weight: var(--fw-semibold); }
+
+/* 선택지 */
+.choices { display: grid; gap: var(--sp-3); margin-top: var(--sp-6); max-width: 780px; }
+.choice {
+  display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: var(--sp-4);
+  align-items: center; text-align: left;
+  padding: var(--sp-4) var(--sp-5);
+  border: 1px solid var(--border); border-radius: var(--r-md);
+  background: var(--surface);
+  font-size: var(--fs-15); line-height: var(--lh-snug);
+  transition: border-color var(--dur-1) var(--ease), background var(--dur-1) var(--ease), transform var(--dur-1) var(--ease);
+}
+.choice:hover:not(:disabled) { border-color: var(--border-strong); background: var(--surface-hover); }
+.choice__key {
+  width: 26px; height: 26px; border-radius: var(--r-sm); flex: none;
+  display: grid; place-items: center;
+  border: 1px solid var(--border-strong); background: var(--surface-2);
+  font-family: var(--font-mono); font-size: var(--fs-12); color: var(--fg-muted);
+}
+.choice__mark { opacity: 0; font-size: var(--fs-14); font-weight: var(--fw-semibold); }
+.choice[data-result="correct"] { border-color: var(--ok); background: var(--ok-subtle); }
+.choice[data-result="correct"] .choice__key { background: var(--ok); color: var(--surface); border-color: var(--ok); }
+.choice[data-result="correct"] .choice__mark { opacity: 1; color: var(--ok); }
+.choice[data-result="wrong"] { border-color: var(--danger); background: var(--danger-subtle); }
+.choice[data-result="wrong"] .choice__key { background: var(--danger); color: var(--surface); border-color: var(--danger); }
+.choice[data-result="wrong"] .choice__mark { opacity: 1; color: var(--danger); }
+.choice:disabled { cursor: default; }
+.choice:disabled:not([data-result]) { opacity: .5; }
+
+/* 해설 패널 */
+.reveal {
+  margin-top: var(--sp-6); border: 1px solid var(--border); border-left: 3px solid var(--accent);
+  border-radius: var(--r-md); background: var(--surface);
+  padding: var(--sp-6);
+  animation: rise var(--dur-3) var(--ease-out) both;
+}
+.reveal__label { margin-bottom: var(--sp-3); }
+.reveal__also { margin-top: var(--sp-5); padding-top: var(--sp-5); border-top: 1px solid var(--border); }
+.occ { display: grid; gap: var(--sp-2); margin-top: var(--sp-3); }
+.occ__row {
+  display: flex; align-items: center; gap: var(--sp-3);
+  font-family: var(--font-mono); font-size: var(--fs-12);
+  padding: var(--sp-2) var(--sp-3); border-radius: var(--r-sm);
+  background: var(--surface-2); color: var(--fg-muted);
+}
+.occ__row b { color: var(--fg); font-weight: var(--fw-medium); }
+.occ__row .badge { margin-left: auto; }
+
+/* 자기평가(FSRS) */
+.rate { display: flex; gap: var(--sp-3); align-items: center; }
+.rate__btn {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+  padding: var(--sp-2) var(--sp-4); min-width: 104px;
+  border: 1px solid var(--border-strong); border-radius: var(--r-md);
+  background: var(--surface);
+  transition: border-color var(--dur-1) var(--ease), background var(--dur-1) var(--ease);
+}
+.rate__btn:hover { background: var(--surface-hover); border-color: var(--fg-faint); }
+.rate__btn strong { font-size: var(--fs-14); font-weight: var(--fw-semibold); }
+.rate__btn span { font-size: var(--fs-11); color: var(--fg-faint); font-variant-numeric: tabular-nums; }
+.rate__btn[data-v="1"]:hover { border-color: var(--danger); }
+.rate__btn[data-v="2"]:hover { border-color: var(--warn); }
+.rate__btn[data-v="3"]:hover { border-color: var(--ok); }
+
+/* 클론 코딩 2단 */
+.clone { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: var(--sp-4); align-items: start; }
+.clone__col { min-width: 0; }
+.clone__label {
+  display: flex; align-items: center; gap: var(--sp-2);
+  font-size: var(--fs-12); color: var(--fg-muted); margin-bottom: var(--sp-2);
+}
+.fade { display: flex; gap: var(--sp-2); align-items: center; margin-bottom: var(--sp-5); }
+.fade__step {
+  flex: 1; padding: var(--sp-3); border-radius: var(--r-md);
+  border: 1px solid var(--border); background: var(--surface);
+  font-size: var(--fs-13); color: var(--fg-faint); text-align: center;
+}
+.fade__step b { display: block; font-size: var(--fs-11); letter-spacing: var(--tracking-wide); text-transform: uppercase; }
+.fade__step[data-state="done"] { color: var(--ok); border-color: var(--ok-border); background: var(--ok-subtle); }
+.fade__step[data-state="current"] { color: var(--fg); border-color: var(--accent); background: var(--accent-subtle); font-weight: var(--fw-semibold); }
+
+.editor { border: 1px solid var(--border-strong); border-radius: var(--r-lg); overflow: hidden; background: var(--code-bg); }
+.editor:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--focus-ring); }
+.editor__head {
+  display: flex; align-items: center; gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4); background: var(--code-bg-alt);
+  border-bottom: 1px solid var(--code-border); font-size: var(--fs-12);
+}
+.editor__ta {
+  display: block; width: 100%; min-height: 260px; resize: vertical;
+  border: none; outline: none; background: transparent;
+  padding: var(--sp-4) var(--sp-4) var(--sp-4) var(--sp-4);
+  font-family: var(--font-mono); font-size: var(--code-fs); line-height: var(--code-lh);
+  color: var(--code-fg); tab-size: 2;
+}
+.editor__ta::placeholder { color: var(--code-gutter-fg); }
+.editor__foot {
+  display: flex; align-items: center; gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4); border-top: 1px solid var(--code-border);
+  background: var(--code-bg-alt); font-size: var(--fs-12); color: var(--fg-muted);
+}
+.match { margin-left: auto; display: flex; align-items: center; gap: var(--sp-3); }
+.match__bar { width: 110px; flex: none; }
+.match__pct { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--fg); }
+
+/* 구조(T2) 파일 트리 */
+.tree { display: grid; gap: var(--sp-2); max-width: 720px; margin-top: var(--sp-6); }
+.tree__row {
+  display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: var(--sp-3);
+  align-items: center; text-align: left;
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface);
+  font-family: var(--font-mono); font-size: var(--fs-13);
+  transition: border-color var(--dur-1) var(--ease), background var(--dur-1) var(--ease);
+}
+.tree__row:hover:not(:disabled) { border-color: var(--border-strong); background: var(--surface-hover); }
+.tree__box {
+  width: 18px; height: 18px; border-radius: 5px; flex: none;
+  border: 1.5px solid var(--border-strong); background: var(--surface);
+  display: grid; place-items: center; font-size: 11px; color: transparent;
+}
+.tree__row[aria-pressed="true"] .tree__box { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+.tree__row[aria-pressed="true"] { border-color: var(--accent-border); background: var(--accent-subtle); }
+.tree__row[data-result="correct"] { border-color: var(--ok); background: var(--ok-subtle); }
+.tree__row[data-result="correct"] .tree__box { background: var(--ok); border-color: var(--ok); color: var(--surface); }
+.tree__row[data-result="missed"] { border-color: var(--warn); background: var(--warn-subtle); border-style: dashed; }
+.tree__row[data-result="wrong"] { border-color: var(--danger); background: var(--danger-subtle); }
+.tree__role { font-family: var(--font-ui); font-size: var(--fs-12); color: var(--fg-faint); }
+
+/* 세션 요약 */
+.summary { text-align: center; padding-top: var(--sp-8); }
+.summary__mark {
+  width: 56px; height: 56px; margin: 0 auto var(--sp-5); border-radius: var(--r-full);
+  background: var(--ok-subtle); color: var(--ok); display: grid; place-items: center;
+}
+.summary__title { font-size: var(--fs-30); letter-spacing: var(--tracking-tight); }
+.summary__sub { color: var(--fg-muted); margin-top: var(--sp-3); font-size: var(--fs-15); }
+.summary__grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: var(--sp-4); margin-top: var(--sp-8); text-align: left; }
+.stat { padding: var(--sp-5); border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface); }
+.stat__label { font-size: var(--fs-12); color: var(--fg-faint); }
+.stat__value { font-size: var(--fs-24); font-weight: var(--fw-semibold); margin-top: var(--sp-2); font-variant-numeric: tabular-nums; letter-spacing: var(--tracking-tight); }
+.stat__value small { font-size: var(--fs-13); font-weight: var(--fw-regular); color: var(--fg-muted); }
+.chips { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+
+.movelist { display: grid; gap: var(--sp-2); margin-top: var(--sp-4); text-align: left; }
+.move {
+  display: grid; grid-template-columns: minmax(0,1fr) auto; gap: var(--sp-4); align-items: center;
+  padding: var(--sp-3) var(--sp-4); border-radius: var(--r-md);
+  background: var(--surface-2); font-size: var(--fs-14);
+}
+.move__delta { display: flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-12); color: var(--fg-muted); }
+.move__delta i { width: 9px; height: 9px; border-radius: 3px; display: block; }
+
+/* ==========================================================================
+   화면: 성장 (대시보드)
+   ========================================================================== */
+.summaryline {
+  font-size: var(--fs-20); line-height: var(--lh-snug); letter-spacing: var(--tracking-tight);
+  max-width: 56ch;
+}
+.summaryline b { color: var(--accent); font-weight: var(--fw-semibold); }
+
+.buckets { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: var(--sp-3); }
+.bucket { border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface); padding: var(--sp-4); }
+.bucket__head { display: flex; align-items: center; gap: var(--sp-2); margin-bottom: var(--sp-4); }
+.bucket__dot { width: 9px; height: 9px; border-radius: 3px; }
+.bucket__name { font-size: var(--fs-13); font-weight: var(--fw-medium); }
+.bucket__n { margin-left: auto; font-family: var(--font-mono); font-size: var(--fs-12); color: var(--fg-faint); }
+.bucket__list { display: flex; flex-direction: column; gap: var(--sp-2); align-items: flex-start; }
+
+/* 히트맵 */
+.heat { display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, 14px);
+  grid-auto-columns: 14px; gap: 3px; justify-content: start; }
+.heat i { width: 14px; height: 14px; border-radius: 3px; background: var(--border); display: block; }
+.heat i[data-lv="1"] { background: color-mix(in srgb, var(--m3) 40%, var(--border)); }
+.heat i[data-lv="2"] { background: color-mix(in srgb, var(--m3) 70%, var(--border)); }
+.heat i[data-lv="3"] { background: var(--m3); }
+.heat i[data-lv="4"] { background: var(--m4); }
+.heatscale { display: flex; align-items: center; gap: 4px; font-size: var(--fs-11); color: var(--fg-faint); }
+.heatwrap { display: grid; grid-template-columns: minmax(0,1fr) 200px; gap: var(--sp-8); align-items: start; }
+.heatside { border-left: 1px solid var(--border); padding-left: var(--sp-6); display: grid; gap: var(--sp-5); }
+@media (max-width: 1000px) {
+  .heatwrap { grid-template-columns: 1fr; }
+  .heatside { border-left: none; border-top: 1px solid var(--border); padding: var(--sp-5) 0 0; }
+}
+.heatscale i { width: 10px; height: 10px; border-radius: 3px; display: block; }
+
+/* 개념 그래프 */
+.graph { width: 100%; height: auto; }
+.graph text { font-family: var(--font-ui); font-size: 11px; fill: var(--fg-muted); }
+.graph .gnode { stroke: var(--surface); stroke-width: 2; cursor: pointer; }
+.graph .gedge { stroke: var(--border-strong); stroke-width: 1.5; fill: none; }
+.graph .gedge--locked { stroke-dasharray: 3 3; }
+
+/* 구멍 목록 */
+.hole {
+  display: grid; grid-template-columns: minmax(0,1fr) auto; gap: var(--sp-4); align-items: center;
+  padding: var(--sp-4); border-radius: var(--r-md);
+  border: 1px dashed var(--border-strong); background: var(--surface);
+}
+.hole + .hole { margin-top: var(--sp-2); }
+.hole__name { font-size: var(--fs-14); font-weight: var(--fw-medium); }
+.hole__why { font-size: var(--fs-12); color: var(--fg-faint); font-family: var(--font-mono); margin-top: 2px; }
+
+/* ==========================================================================
+   화면: 내 코드 (리포)
+   ========================================================================== */
+.repo { border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface); padding: var(--sp-5); }
+.repo + .repo { margin-top: var(--sp-3); }
+.repo--active { border-color: var(--accent-border); box-shadow: inset 3px 0 0 var(--accent); }
+.repo__top { display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: var(--sp-4); align-items: center; }
+.repo__name { font-size: var(--fs-16); font-weight: var(--fw-semibold); display: flex; align-items: center; gap: var(--sp-3); }
+.repo__path { font-family: var(--font-mono); font-size: var(--fs-12); color: var(--fg-faint); margin-top: 2px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.repo__stats { display: flex; gap: var(--sp-6); margin-top: var(--sp-5); flex-wrap: wrap; }
+.repo__stat { font-size: var(--fs-13); color: var(--fg-muted); }
+.repo__stat b { display: block; font-size: var(--fs-18); color: var(--fg); font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums; letter-spacing: var(--tracking-tight); }
+.repo__radio {
+  width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border-strong);
+  display: grid; place-items: center; flex: none;
+}
+.repo__radio[aria-checked="true"] { border-color: var(--accent); }
+.repo__radio[aria-checked="true"]::after { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+.repo__progress { margin-top: var(--sp-5); }
+.repo__ptext { display: flex; justify-content: space-between; font-size: var(--fs-12); color: var(--fg-muted); margin-bottom: var(--sp-2); }
+
+/* 빈 상태 */
+.empty { text-align: center; padding: var(--sp-16) var(--sp-6); border: 1px dashed var(--border-strong); border-radius: var(--r-lg); }
+.empty__icon { width: 44px; height: 44px; margin: 0 auto var(--sp-5); color: var(--fg-faint); }
+.empty__title { font-size: var(--fs-18); }
+.empty__text { color: var(--fg-muted); font-size: var(--fs-14); margin: var(--sp-3) auto var(--sp-6); max-width: 44ch; }
+
+/* 스켈레톤 (로딩) */
+.skel { background: var(--surface-sunken); border-radius: var(--r-sm); position: relative; overflow: hidden; }
+.skel::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--fg) 6%, transparent), transparent);
+  animation: shimmer 1.4s infinite;
+}
+@keyframes shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+
+/* ==========================================================================
+   드로어 (개념 상세)
+   ========================================================================== */
+.scrim { position: fixed; inset: 0; background: var(--overlay); z-index: 70; animation: fade var(--dur-2) var(--ease) both; }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+.drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 71;
+  width: min(520px, 100%); background: var(--surface);
+  border-left: 1px solid var(--border); box-shadow: var(--sh-3);
+  display: flex; flex-direction: column;
+  animation: slideIn var(--dur-3) var(--ease-out) both;
+}
+@keyframes slideIn { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+.drawer__head { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-5); border-bottom: 1px solid var(--border); }
+.drawer__body { flex: 1; overflow-y: auto; padding: var(--sp-6); }
+.drawer__foot { padding: var(--sp-4) var(--sp-5); border-top: 1px solid var(--border); background: var(--surface-2); }
+
+/* ==========================================================================
+   디자인 시스템 뷰
+   ========================================================================== */
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); gap: var(--sp-3); }
+.sw { border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; background: var(--surface); }
+.sw__chip { height: 52px; border-bottom: 1px solid var(--border); }
+.sw__meta { padding: var(--sp-3); }
+.sw__name { font-family: var(--font-mono); font-size: var(--fs-12); }
+.sw__use { font-size: var(--fs-11); color: var(--fg-faint); margin-top: 2px; }
+
+.speclist { display: grid; gap: var(--sp-3); container-type: inline-size; }
+.specrow {
+  display: grid; grid-template-columns: minmax(0, 220px) minmax(0,1fr); gap: var(--sp-5);
+  padding: var(--sp-4) 0; border-bottom: 1px solid var(--border); align-items: baseline;
+}
+/* 좁은 칼럼 안에서는 키/값을 세로로 쌓는다 (컨테이너 쿼리) */
+@container (max-width: 560px) {
+  .specrow { grid-template-columns: 1fr; gap: var(--sp-1); }
+}
+.specrow__k { font-family: var(--font-mono); font-size: var(--fs-12); color: var(--fg-muted); }
+.spacerow { display: flex; align-items: center; gap: var(--sp-4); }
+.spacerow i { display: block; height: 14px; background: var(--accent); border-radius: 3px; }
+
+.demoRow { display: flex; flex-wrap: wrap; gap: var(--sp-3); align-items: center; }
+
+/* ==========================================================================
+   반응형
+   ========================================================================== */
+@media (max-width: 1000px) {
+  .app { grid-template-columns: 1fr; }
+  .rail {
+    position: sticky; top: 0; height: auto; z-index: 20;
+    flex-direction: row; align-items: center; gap: var(--sp-2);
+    border-right: none; border-bottom: 1px solid var(--border);
+    padding: var(--sp-2) var(--sp-3); overflow-x: auto;
+  }
+  .rail__brand { padding: 0 var(--sp-3) 0 0; }
+  .rail__brand .rail__meta { display: none; }
+  .navlist { flex-direction: row; }
+  .nav__badge { display: none; }
+  .rail__spacer { display: none; }
+  .rail__foot { flex-direction: row; margin-left: auto; }
+  .repopick { min-width: 170px; }
+  .page { padding: var(--sp-6) var(--sp-4) var(--sp-16); }
+  .hero { padding: var(--sp-6); }
+  .hero__grid { grid-template-columns: 1fr; align-items: stretch; }
+  .cols2, .cols3, .buckets, .summary__grid { grid-template-columns: 1fr; }
+  .clone { grid-template-columns: 1fr; }
+  .shead { grid-template-columns: auto minmax(0,1fr) auto; }
+  .shead__time { display: none; }
+}
+@media (max-width: 620px) {
+  .hero__title { font-size: var(--fs-24); }
+  .fade { flex-direction: column; align-items: stretch; }
+  :root { --code-gutter-w: 2.5rem; --code-fs: 0.8125rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+  <!-- ===================== 좌측 레일 ===================== -->
+  <nav class="rail" aria-label="주요 메뉴">
+    <div class="rail__brand">
+      <div class="rail__mark" aria-hidden="true">ac</div>
+      <div class="rail__meta">
+        <div class="rail__name">after_coding</div>
+        <div class="rail__sub">내 코드로 공부하기</div>
+      </div>
+    </div>
+
+    <ul class="navlist">
+      <li><button class="nav" data-goto="home" aria-current="page">
+        <svg class="nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/><path d="M9.5 20v-6h5v6"/></svg>
+        <span>오늘</span><span class="nav__badge">12</span>
+      </button></li>
+      <li><button class="nav" data-goto="progress">
+        <svg class="nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg>
+        <span>성장</span>
+      </button></li>
+      <li><button class="nav" data-goto="repos">
+        <svg class="nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 17-5-5 5-5"/><path d="m15 7 5 5-5 5"/></svg>
+        <span>내 코드</span><span class="nav__badge">3</span>
+      </button></li>
+      <li><button class="nav" data-goto="ds">
+        <svg class="nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18"/><path d="M3 12h18"/></svg>
+        <span>디자인 시스템</span>
+      </button></li>
+    </ul>
+
+    <div class="rail__spacer"></div>
+
+    <div class="rail__foot">
+      <button class="repopick" id="repoPick" type="button">
+        <span class="repopick__dot" aria-hidden="true"></span>
+        <span class="repopick__body">
+          <span class="repopick__label">학습 중인 리포</span>
+          <span class="repopick__name">shop-next</span>
+        </span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--fg-faint)"><path d="m7 9 5-5 5 5"/><path d="m7 15 5 5 5-5"/></svg>
+      </button>
+      <button class="btn btn--ghost btn--sm" id="themeBtn" type="button" aria-label="테마 전환">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/></svg>
+        <span id="themeLabel">다크</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===================== 메인 ===================== -->
+  <main class="main">
+
+  <!-- ===================================================================
+       화면 1 — 오늘 (홈)
+       =================================================================== -->
+  <section class="view page" id="view-home" data-anim>
+    <div class="topline">
+      <div>
+        <div class="eyebrow">2026년 9월 2일 · 수요일</div>
+        <div class="topline__greet" style="margin-top:4px">저녁 9시 12분. 오늘 몫은 <b style="color:var(--fg);font-weight:600">약 12분</b>입니다.</div>
+      </div>
+      <div class="topline__tools">
+        <span class="badge badge--mono badge--outline" title="목업 전용 컨트롤">홈 상태 미리보기</span>
+        <button class="btn btn--sm btn--secondary" data-homestate="ready">준비됨</button>
+        <button class="btn btn--sm btn--ghost" data-homestate="resume">이어서</button>
+        <button class="btn btn--sm btn--ghost" data-homestate="done">완료</button>
+        <button class="btn btn--sm btn--ghost" data-homestate="empty">빈 상태</button>
+      </div>
+    </div>
+
+    <!-- 히어로: 상태 A — 준비됨 -->
+    <div class="hero" id="heroReady">
+      <div class="hero__grid">
+        <div>
+          <div class="eyebrow">오늘의 세션</div>
+          <h1 class="hero__title">장바구니 기능, 12개 카드</h1>
+          <div class="hero__source">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 3v6M12 15v6"/></svg>
+            <span class="mono">a3f19c2</span>
+            <span>feat: 장바구니 담기/빼기</span>
+            <span style="color:var(--fg-faint)">· 3일 전 내가 쓴 코드</span>
+          </div>
+
+          <div class="hero__meta">
+            <span><b>12</b> 카드</span>
+            <span><b>12</b>분 예상</span>
+            <span><b>4</b>개 개념 복습 예정</span>
+            <span><b>2</b>개 새 개념</span>
+          </div>
+
+          <div class="hero__mix">
+            <div class="mixbar" role="img" aria-label="문법 7개, 클론 2개, 구조 3개">
+              <span class="mixbar__t0" style="width:58%"></span>
+              <span class="mixbar__t1" style="width:17%"></span>
+              <span class="mixbar__t2" style="width:25%"></span>
+            </div>
+            <ul class="mixlegend">
+              <li><i style="background:var(--track-t0)"></i>문법 7</li>
+              <li><i style="background:var(--track-t1)"></i>클론 2</li>
+              <li><i style="background:var(--track-t2)"></i>구조 3</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="hero__cta">
+          <button class="btn btn--primary btn--xl" data-start>
+            시작하기
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/><path d="m12 5 7 7-7 7"/></svg>
+          </button>
+          <div class="hero__ctahint"><span class="kbd">Space</span> 로도 시작</div>
+          <details style="margin-top:var(--sp-2)">
+            <summary class="textlink" style="list-style:none;cursor:pointer">오늘 구성 바꾸기</summary>
+            <div style="margin-top:var(--sp-3);display:flex;flex-direction:column;gap:var(--sp-2)">
+              <button class="chip" style="justify-content:center">문법 위주 · 가볍게</button>
+              <button class="chip" style="justify-content:center;border-color:var(--accent);background:var(--accent-subtle)">균형 (추천)</button>
+              <button class="chip" style="justify-content:center">클론 위주 · 손으로</button>
+            </div>
+          </details>
+        </div>
+      </div>
+    </div>
+
+    <!-- 히어로: 상태 B — 이어서 하기 -->
+    <div class="hero" id="heroResume" hidden>
+      <div class="hero__grid">
+        <div>
+          <div class="eyebrow">어제 하다 만 세션</div>
+          <h1 class="hero__title">5번째 카드에서 멈춰 있어요</h1>
+          <div class="hero__source"><span>장바구니 기능 · 남은 카드 7개 · 약 7분</span></div>
+          <div class="hero__resume" style="max-width:420px">
+            <div class="bar" role="img" aria-label="12개 중 5개 완료"><span class="bar__fill" style="width:41%"></span></div>
+            <div style="display:flex;justify-content:space-between;margin-top:var(--sp-2);font-size:var(--fs-12);color:var(--fg-muted)">
+              <span>5 / 12 완료</span><span>진행 상황은 자동 저장됩니다</span>
+            </div>
+          </div>
+        </div>
+        <div class="hero__cta">
+          <button class="btn btn--primary btn--xl" data-start>이어서 하기</button>
+          <button class="textlink">처음부터 새로 만들기</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 히어로: 상태 C — 오늘 완료 -->
+    <div class="hero" id="heroDone" hidden>
+      <div class="hero__grid">
+        <div>
+          <div class="eyebrow" style="color:var(--ok)">오늘 몫 완료</div>
+          <h1 class="hero__title">14분, 12개 카드를 끝냈습니다</h1>
+          <div class="hero__source"><span>연속 <b style="color:var(--fg)">9일</b> · 다음 복습은 내일 <span class="mono">useState</span> 외 3개</span></div>
+          <div class="hero__meta">
+            <span>새로 익숙해진 개념 <b>2</b>개</span>
+            <span>다시 볼 개념 <b>1</b>개</span>
+          </div>
+        </div>
+        <div class="hero__cta">
+          <button class="btn btn--secondary btn--lg" data-start>보너스 5분 더 하기</button>
+          <div class="hero__ctahint">무리하지 않아도 됩니다. 내일 이어서.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 히어로: 상태 D — 빈 상태 -->
+    <div class="hero" id="heroEmpty" hidden>
+      <div class="hero__grid">
+        <div>
+          <div class="eyebrow">시작 전</div>
+          <h1 class="hero__title">아직 읽을 코드가 없어요</h1>
+          <p class="cprose" style="margin-top:var(--sp-3)">
+            로컬에 있는 git 리포 폴더를 하나 등록하면, 커밋 diff 를 읽어 학습 카드를 자동으로 만듭니다.
+            남의 예제가 아니라 <strong>당신이 만든 코드</strong>가 교재가 됩니다.
+          </p>
+        </div>
+        <div class="hero__cta">
+          <button class="btn btn--primary btn--xl" data-goto="repos">리포 폴더 등록</button>
+          <div class="hero__ctahint">보통 1~2분이면 첫 세션이 준비됩니다</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 인제스트 알림 -->
+    <div class="sec" id="homeIngest">
+      <div class="note note--info">
+        <svg class="note__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 20h16"/></svg>
+        <div class="note__body">
+          <div class="note__title">새 커밋 3개를 읽었습니다</div>
+          <div class="note__text">학습 카드 8개가 추가로 만들어졌어요. 오늘 세션에는 이미 반영되어 있습니다.</div>
+        </div>
+        <button class="btn btn--sm btn--ghost">무엇이 추가됐는지 보기</button>
+      </div>
+    </div>
+
+    <!-- 하단 2열 -->
+    <div class="sec cols2" id="homeLower">
+      <div>
+        <div class="sec__head">
+          <h2 class="sec__title">오늘 나올 것들</h2>
+          <span class="sec__hint">미리 보되, 고르지는 않습니다</span>
+        </div>
+        <div class="peek">
+          <div class="peek__item">
+            <span class="peek__num">01</span>
+            <div class="peek__main">
+              <div class="peek__title">배열 구조 분해 할당</div>
+              <div class="peek__where">app/(shop)/cart/CartSheet.tsx:41</div>
+            </div>
+            <span class="badge badge--t0"><span class="badge__dot"></span>문법</span>
+          </div>
+          <div class="peek__item">
+            <span class="peek__num">02</span>
+            <div class="peek__main">
+              <div class="peek__title">스프레드로 배열 복사하기</div>
+              <div class="peek__where">lib/cart.ts:18 · 복습 3회차</div>
+            </div>
+            <span class="badge badge--t0"><span class="badge__dot"></span>문법</span>
+          </div>
+          <div class="peek__item">
+            <span class="peek__num">03</span>
+            <div class="peek__main">
+              <div class="peek__title">addToCart 함수 필사</div>
+              <div class="peek__where">lib/cart.ts · 2단계 (주석만 보고)</div>
+            </div>
+            <span class="badge badge--t1"><span class="badge__dot"></span>클론</span>
+          </div>
+          <div class="peek__item" style="opacity:.55">
+            <span class="peek__num">…</span>
+            <div class="peek__main"><div class="peek__title">그 외 9개</div>
+              <div class="peek__where">시작하면 순서대로 나옵니다</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sec__head"><h2 class="sec__title">연속 기록</h2></div>
+        <div class="card">
+          <div><span class="streak__num">9</span><span class="streak__unit">일 연속</span></div>
+          <div class="streak__note">최고 기록은 14일. 하루 쉬어도 기록은 다음 날 이어집니다.</div>
+          <div class="dots" id="homeDots" aria-hidden="true"></div>
+          <div style="display:flex;justify-content:space-between;margin-top:var(--sp-2);font-size:var(--fs-11);color:var(--fg-faint)">
+            <span>2주 전</span><span>오늘</span>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:var(--sp-3)">
+          <div class="card__head" style="margin-bottom:var(--sp-3)">
+            <span class="card__title">이번 주</span>
+            <span class="badge badge--ok">순항</span>
+          </div>
+          <div class="repo__stats" style="margin-top:0">
+            <div class="repo__stat"><b>4</b>일 학습</div>
+            <div class="repo__stat"><b>48</b>카드</div>
+            <div class="repo__stat"><b>+3</b>개념 승급</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================
+       화면 2 — 성장 (대시보드)
+       =================================================================== -->
+  <section class="view page" id="view-progress" hidden>
+    <div class="eyebrow">성장</div>
+    <h1 style="font-size:var(--fs-24);margin:var(--sp-2) 0 var(--sp-6)">내가 어디까지 알고 있나</h1>
+
+    <div class="card card--quiet">
+      <p class="summaryline">
+        이번 주 <b>4일</b> 공부했고, 내 코드에 나온 개념 <b>34개</b> 중 <b>11개</b>가 손에 익었어요.
+        아직 한 번도 안 본 문법이 <b>6개</b> 남아 있습니다.
+      </p>
+    </div>
+
+    <div class="sec">
+      <div class="sec__head">
+        <h2 class="sec__title">개념 숙련도</h2>
+        <span class="sec__hint">파일이 아니라 개념 단위로 쌓입니다 · 칩을 누르면 상세</span>
+      </div>
+      <div class="buckets">
+        <div class="bucket">
+          <div class="bucket__head"><span class="bucket__dot" style="background:var(--m1)"></span><span class="bucket__name">처음 봄</span><span class="bucket__n">7</span></div>
+          <div class="bucket__list">
+            <button class="chip" data-concept="제네릭 타입" data-m="1"><span class="chip__dot"></span>제네릭 타입</button>
+            <button class="chip" data-concept="옵셔널 체이닝" data-m="1"><span class="chip__dot"></span>옵셔널 체이닝</button>
+            <button class="chip" data-concept="Server Action" data-m="1"><span class="chip__dot"></span>Server Action</button>
+            <button class="chip" data-concept="useCallback" data-m="1"><span class="chip__dot"></span>useCallback</button>
+          </div>
+        </div>
+        <div class="bucket">
+          <div class="bucket__head"><span class="bucket__dot" style="background:var(--m2)"></span><span class="bucket__name">배우는 중</span><span class="bucket__n">10</span></div>
+          <div class="bucket__list">
+            <button class="chip" data-concept="스프레드 연산자" data-m="2"><span class="chip__dot"></span>스프레드 연산자</button>
+            <button class="chip" data-concept="Array.reduce" data-m="2"><span class="chip__dot"></span>Array.reduce</button>
+            <button class="chip" data-concept="조건부 렌더링" data-m="2"><span class="chip__dot"></span>조건부 렌더링</button>
+            <button class="chip" data-concept="타입 별칭" data-m="2"><span class="chip__dot"></span>타입 별칭</button>
+          </div>
+        </div>
+        <div class="bucket">
+          <div class="bucket__head"><span class="bucket__dot" style="background:var(--m3)"></span><span class="bucket__name">익숙함</span><span class="bucket__n">8</span></div>
+          <div class="bucket__list">
+            <button class="chip" data-concept="Array.map" data-m="3"><span class="chip__dot"></span>Array.map</button>
+            <button class="chip" data-concept="화살표 함수" data-m="3"><span class="chip__dot"></span>화살표 함수</button>
+            <button class="chip" data-concept="템플릿 리터럴" data-m="3"><span class="chip__dot"></span>템플릿 리터럴</button>
+          </div>
+        </div>
+        <div class="bucket">
+          <div class="bucket__head"><span class="bucket__dot" style="background:var(--m4)"></span><span class="bucket__name">안정</span><span class="bucket__n">3</span></div>
+          <div class="bucket__list">
+            <button class="chip" data-concept="배열 구조 분해" data-m="4"><span class="chip__dot"></span>배열 구조 분해</button>
+            <button class="chip" data-concept="import / export" data-m="4"><span class="chip__dot"></span>import / export</button>
+            <button class="chip" data-concept="const / let" data-m="4"><span class="chip__dot"></span>const / let</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec cols2">
+      <div>
+        <div class="sec__head">
+          <h2 class="sec__title">아직 안 배운 문법</h2>
+          <span class="sec__hint">내 코드엔 이미 들어 있는데 한 번도 안 다룬 것</span>
+        </div>
+        <div>
+          <div class="hole">
+            <div>
+              <div class="hole__name">async / await</div>
+              <div class="hole__why">app/api/cart/route.ts 외 4개 파일에서 11회 등장</div>
+            </div>
+            <button class="btn btn--sm btn--secondary" data-start>이것부터 배우기</button>
+          </div>
+          <div class="hole">
+            <div>
+              <div class="hole__name">try / catch 에러 처리</div>
+              <div class="hole__why">lib/db/client.ts 외 2개 파일에서 6회 등장</div>
+            </div>
+            <button class="btn btn--sm btn--secondary" data-start>이것부터 배우기</button>
+          </div>
+          <div class="hole">
+            <div>
+              <div class="hole__name">유니온 타입 <span class="mono">'a' | 'b'</span></div>
+              <div class="hole__why">types/order.ts 외 3개 파일에서 9회 등장</div>
+            </div>
+            <button class="btn btn--sm btn--secondary" data-start>이것부터 배우기</button>
+          </div>
+          <div style="margin-top:var(--sp-3)">
+            <button class="textlink">남은 3개 더 보기</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sec__head"><h2 class="sec__title">개념 지도</h2></div>
+        <div class="card">
+          <svg class="graph" viewBox="0 0 320 230" role="img" aria-label="개념 사이의 선후 관계 지도">
+            <path class="gedge" d="M60 40 L150 40"/>
+            <path class="gedge" d="M150 40 L150 100"/>
+            <path class="gedge" d="M60 40 L60 100"/>
+            <path class="gedge" d="M60 100 L150 100"/>
+            <path class="gedge" d="M150 100 L245 100"/>
+            <path class="gedge" d="M150 100 L150 165"/>
+            <path class="gedge gedge--locked" d="M245 100 L245 165"/>
+            <path class="gedge gedge--locked" d="M150 165 L245 165"/>
+
+            <circle class="gnode" cx="60" cy="40" r="11" fill="var(--m4)"/>
+            <text x="60" y="22" text-anchor="middle">const / let</text>
+            <circle class="gnode" cx="150" cy="40" r="11" fill="var(--m4)"/>
+            <text x="150" y="22" text-anchor="middle">구조 분해</text>
+            <circle class="gnode" cx="60" cy="100" r="11" fill="var(--m3)"/>
+            <text x="60" y="127" text-anchor="middle">화살표 함수</text>
+            <circle class="gnode" cx="150" cy="100" r="11" fill="var(--m2)"/>
+            <text x="150" y="127" text-anchor="middle">스프레드</text>
+            <circle class="gnode" cx="245" cy="100" r="11" fill="var(--m2)"/>
+            <text x="245" y="127" text-anchor="middle">reduce</text>
+            <circle class="gnode" cx="150" cy="165" r="11" fill="var(--m1)"/>
+            <text x="150" y="192" text-anchor="middle">useState</text>
+            <circle class="gnode" cx="245" cy="165" r="11" fill="var(--m0)"/>
+            <text x="245" y="192" text-anchor="middle">async/await</text>
+          </svg>
+          <div style="display:flex;gap:var(--sp-4);flex-wrap:wrap;font-size:var(--fs-12);color:var(--fg-muted);margin-top:var(--sp-4);padding-top:var(--sp-4);border-top:1px solid var(--border)">
+            <span style="display:flex;align-items:center;gap:6px"><i style="width:9px;height:9px;border-radius:3px;background:var(--m0);display:block"></i>미학습</span>
+            <span style="display:flex;align-items:center;gap:6px"><i style="width:9px;height:9px;border-radius:3px;background:var(--m1);display:block"></i>처음</span>
+            <span style="display:flex;align-items:center;gap:6px"><i style="width:9px;height:9px;border-radius:3px;background:var(--m2);display:block"></i>배우는 중</span>
+            <span style="display:flex;align-items:center;gap:6px"><i style="width:9px;height:9px;border-radius:3px;background:var(--m3);display:block"></i>익숙</span>
+            <span style="display:flex;align-items:center;gap:6px"><i style="width:9px;height:9px;border-radius:3px;background:var(--m4);display:block"></i>안정</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec__head">
+        <h2 class="sec__title">최근 6개월</h2>
+        <span class="sec__hint">연속 9일 · 최고 14일</span>
+      </div>
+      <div class="card">
+        <div class="heatwrap">
+          <div>
+            <div style="overflow-x:auto;padding-bottom:var(--sp-2)"><div class="heat" id="heat" aria-hidden="true"></div></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:var(--sp-4)">
+              <span style="font-size:var(--fs-12);color:var(--fg-faint)">빈칸은 쉰 날입니다. 벌점은 없습니다.</span>
+              <div class="heatscale">
+            <span>적음</span>
+            <i style="background:var(--border)"></i>
+            <i style="background:color-mix(in srgb, var(--m3) 35%, var(--surface-sunken))"></i>
+            <i style="background:color-mix(in srgb, var(--m3) 65%, var(--surface-sunken))"></i>
+            <i style="background:var(--m3)"></i>
+                <i style="background:var(--m4)"></i>
+                <span>많음</span>
+              </div>
+            </div>
+          </div>
+          <div class="heatside">
+            <div><div class="stat__label">지금 연속</div><div class="stat__value">9<small>일</small></div></div>
+            <div><div class="stat__label">최고 기록</div><div class="stat__value">14<small>일</small></div></div>
+            <div><div class="stat__label">공부한 날</div><div class="stat__value">78<small> / 182일</small></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================
+       화면 3 — 내 코드 (리포)
+       =================================================================== -->
+  <section class="view page" id="view-repos" hidden>
+    <div class="topline">
+      <div>
+        <div class="eyebrow">내 코드</div>
+        <h1 style="font-size:var(--fs-24);margin-top:var(--sp-2)">리포 관리</h1>
+      </div>
+      <div class="topline__tools">
+        <span class="badge badge--mono badge--outline">상태 미리보기</span>
+        <button class="btn btn--sm btn--secondary" data-repostate="list">목록</button>
+        <button class="btn btn--sm btn--ghost" data-repostate="empty">빈 상태</button>
+        <button class="btn btn--sm btn--primary">＋ 리포 추가</button>
+      </div>
+    </div>
+
+    <div id="repoList">
+      <!-- 활성 -->
+      <div class="repo repo--active">
+        <div class="repo__top">
+          <span class="repo__radio" role="radio" aria-checked="true" aria-label="학습 대상으로 선택됨"></span>
+          <div style="min-width:0">
+            <div class="repo__name">shop-next <span class="badge badge--ok"><span class="badge__dot"></span>학습 중</span></div>
+            <div class="repo__path">~/dev/shop-next · main · TypeScript, TSX, CSS</div>
+          </div>
+          <div style="display:flex;gap:var(--sp-2)">
+            <button class="btn btn--sm btn--secondary">지금 동기화</button>
+            <button class="btn btn--sm btn--ghost" aria-label="설정">⋯</button>
+          </div>
+        </div>
+        <div class="repo__stats">
+          <div class="repo__stat"><b>187</b>커밋</div>
+          <div class="repo__stat"><b>142</b>읽은 커밋</div>
+          <div class="repo__stat"><b>418</b>학습 카드</div>
+          <div class="repo__stat"><b>34</b>개념</div>
+          <div class="repo__stat"><b>6분 전</b>마지막 동기화</div>
+        </div>
+      </div>
+
+      <!-- 인제스트 진행중 -->
+      <div class="repo">
+        <div class="repo__top">
+          <span class="repo__radio" role="radio" aria-checked="false" aria-label="학습 대상으로 선택"></span>
+          <div style="min-width:0">
+            <div class="repo__name">note-app <span class="badge badge--warn"><span class="badge__dot"></span>읽는 중</span></div>
+            <div class="repo__path">~/dev/note-app · feat/editor · TypeScript, Rust</div>
+          </div>
+          <button class="btn btn--sm btn--ghost">중지</button>
+        </div>
+        <div class="repo__progress">
+          <div class="repo__ptext"><span>커밋 diff 파싱 중 — 64 / 96</span><span>약 40초 남음</span></div>
+          <div class="bar"><span class="bar__fill" style="width:66%"></span></div>
+        </div>
+        <div class="repo__stats">
+          <div class="repo__stat"><b>96</b>커밋</div>
+          <div class="repo__stat"><span class="skel" style="display:block;width:44px;height:22px;margin-bottom:2px"></span>학습 카드</div>
+          <div class="repo__stat"><span class="skel" style="display:block;width:34px;height:22px;margin-bottom:2px"></span>개념</div>
+        </div>
+      </div>
+
+      <!-- 실패 -->
+      <div class="repo">
+        <div class="repo__top">
+          <span class="repo__radio" role="radio" aria-checked="false" aria-label="학습 대상으로 선택"></span>
+          <div style="min-width:0">
+            <div class="repo__name">legacy-php <span class="badge badge--danger"><span class="badge__dot"></span>읽기 실패</span></div>
+            <div class="repo__path">~/work/legacy-php · master</div>
+          </div>
+          <button class="btn btn--sm btn--secondary">다시 시도</button>
+        </div>
+        <div style="margin-top:var(--sp-5)">
+          <div class="note note--danger">
+            <svg class="note__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.2v.1"/></svg>
+            <div class="note__body">
+              <div class="note__title">이 리포는 아직 못 읽습니다</div>
+              <div class="note__text">
+                커밋 <span class="mono">e91cd2f</span> 에서 <span class="mono">.php</span> 파서를 찾지 못했습니다.
+                지원 언어를 추가하거나, 이 확장자를 건너뛰도록 설정할 수 있습니다.
+              </div>
+              <div style="display:flex;gap:var(--sp-2);margin-top:var(--sp-4)">
+                <button class="btn btn--sm btn--secondary">.php 건너뛰기</button>
+                <button class="btn btn--sm btn--ghost">로그 보기</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec__head"><h2 class="sec__title">인제스트 규칙</h2><span class="sec__hint">모든 커밋이 교재가 되진 않습니다</span></div>
+        <div class="card">
+          <div class="speclist">
+            <div class="specrow" style="border:none;padding-bottom:0">
+              <div class="specrow__k">읽는 대상</div>
+              <div>내가 author 인 커밋만. 머지 커밋과 <span class="mono">node_modules</span>, lock 파일, 자동 생성 파일은 제외.</div>
+            </div>
+            <div class="specrow" style="border:none;padding:var(--sp-3) 0 0">
+              <div class="specrow__k">카드 생성 기준</div>
+              <div>diff 의 추가/변경 라인만 tree-sitter 로 파싱해 문법 노드를 추출하고, 같은 개념은 하나로 묶습니다.</div>
+            </div>
+            <div class="specrow" style="border:none;padding:var(--sp-3) 0 0">
+              <div class="specrow__k">보관</div>
+              <div>모든 데이터는 <span class="mono">~/.after_coding/db.sqlite</span> 에만 저장됩니다. 코드는 어디로도 전송되지 않습니다.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="repoEmpty" hidden>
+      <div class="empty">
+        <svg class="empty__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5A1.5 1.5 0 0 1 4.5 6h4l2 2.5h9A1.5 1.5 0 0 1 21 10v8a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18Z"/></svg>
+        <h2 class="empty__title">등록된 리포가 없습니다</h2>
+        <p class="empty__text">
+          AI 와 함께 만든 프로젝트 폴더를 하나 골라주세요.
+          git 히스토리를 읽어 학습 카드를 만듭니다. 인터넷 연결은 필요 없습니다.
+        </p>
+        <button class="btn btn--primary btn--lg">폴더 선택하기</button>
+        <div style="margin-top:var(--sp-4);font-size:var(--fs-12);color:var(--fg-faint)">
+          지원: JavaScript · TypeScript · Python · Go · Rust · Swift · Java · Kotlin
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================
+       화면 4 — 디자인 시스템
+       =================================================================== -->
+  <section class="view page" id="view-ds" hidden>
+    <div class="eyebrow">디자인 시스템</div>
+    <h1 style="font-size:var(--fs-24);margin:var(--sp-2) 0 var(--sp-3)">토큰과 기본형</h1>
+    <p class="cprose" style="margin-bottom:var(--sp-8)">
+      모든 값은 CSS 변수로만 노출합니다. 컴포넌트는 hex 를 직접 쓰지 않습니다.
+      라이트/다크는 같은 토큰 이름에 값만 바뀝니다 — 화면 코드는 테마를 몰라도 됩니다.
+    </p>
+
+    <div class="sec">
+      <div class="sec__head"><h2 class="sec__title">표면 · 텍스트</h2></div>
+      <div class="swatches">
+        <div class="sw"><div class="sw__chip" style="background:var(--bg)"></div><div class="sw__meta"><div class="sw__name">--bg</div><div class="sw__use">앱 바닥</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:var(--bg-subtle)"></div><div class="sw__meta"><div class="sw__name">--bg-subtle</div><div class="sw__use">레일 · 세션 헤더</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:var(--surface)"></div><div class="sw__meta"><div class="sw__name">--surface</div><div class="sw__use">카드</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:var(--surface-2)"></div><div class="sw__meta"><div class="sw__name">--surface-2</div><div class="sw__use">카드 안 요소</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:var(--surface-sunken)"></div><div class="sw__meta"><div class="sw__name">--surface-sunken</div><div class="sw__use">진행바 트랙</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:var(--border)"></div><div class="sw__meta"><div class="sw__name">--border</div><div class="sw__use">기본 경계</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:var(--fg)"></div><div class="sw__meta"><div class="sw__name">--fg</div><div class="sw__use">본문</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:var(--fg-muted)"></div><div class="sw__meta"><div class="sw__name">--fg-muted</div><div class="sw__use">보조 설명</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:var(--fg-faint)"></div><div class="sw__meta"><div class="sw__name">--fg-faint</div><div class="sw__use">메타 · 캡션</div></div></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec__head"><h2 class="sec__title">액센트 · 의미색 · 트랙 · 숙련도</h2></div>
+      <div class="swatches">
+        <div class="sw"><div class="sw__chip" style="background:var(--accent)"></div><div class="sw__meta"><div class="sw__name">--accent</div><div class="sw__use">주 액션 (앰버)</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:var(--accent-subtle)"></div><div class="sw__meta"><div class="sw__name">--accent-subtle</div><div class="sw__use">선택 배경</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:var(--ok)"></div><div class="sw__meta"><div class="sw__name">--ok</div><div class="sw__use">정답 · 성공</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:var(--warn)"></div><div class="sw__meta"><div class="sw__name">--warn</div><div class="sw__use">진행중 · 주의</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:var(--danger)"></div><div class="sw__meta"><div class="sw__name">--danger</div><div class="sw__use">오답 · 실패</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:var(--info)"></div><div class="sw__meta"><div class="sw__name">--info</div><div class="sw__use">안내</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:var(--track-t0)"></div><div class="sw__meta"><div class="sw__name">--track-t0</div><div class="sw__use">T0 문법</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:var(--track-t1)"></div><div class="sw__meta"><div class="sw__name">--track-t1</div><div class="sw__use">T1 클론</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:var(--track-t2)"></div><div class="sw__meta"><div class="sw__name">--track-t2</div><div class="sw__use">T2 구조</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:var(--m0)"></div><div class="sw__meta"><div class="sw__name">--m0</div><div class="sw__use">미학습</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:var(--m1)"></div><div class="sw__meta"><div class="sw__name">--m1</div><div class="sw__use">처음 봄</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:var(--m2)"></div><div class="sw__meta"><div class="sw__name">--m2</div><div class="sw__use">배우는 중</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:var(--m3)"></div><div class="sw__meta"><div class="sw__name">--m3</div><div class="sw__use">익숙함</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:var(--m4)"></div><div class="sw__meta"><div class="sw__name">--m4</div><div class="sw__use">안정</div></div></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec__head"><h2 class="sec__title">코드 표면 · 신택스</h2><span class="sec__hint">모든 토큰이 --code-bg 대비 4.5:1 이상</span></div>
+      <div class="cols2">
+        <div class="code">
+          <div class="code__head"><span class="code__path">토큰 확인용 샘플</span><span class="code__meta">--code-fs 14 / --code-lh 1.75</span></div>
+          <pre class="code__body" style="counter-reset:ln 0"><code><span class="cl"><span><i class="c">// 신택스 토큰이 모두 등장하는 샘플</i></span></span><span class="cl"><span><i class="k">import</i> <i class="p">{</i> <i class="v">cache</i> <i class="p">}</i> <i class="k">from</i> <i class="s">'react'</i></span></span><span class="cl"><span></span></span><span class="cl"><span><i class="k">export type</i> <i class="t">CartItem</i> <i class="o">=</i> <i class="p">{</i> <i class="pr">id</i><i class="p">:</i> <i class="t">string</i><i class="p">;</i> <i class="pr">qty</i><i class="p">:</i> <i class="t">number</i> <i class="p">}</i></span></span><span class="cl"><span></span></span><span class="cl"><span><i class="k">export const</i> <i class="f">getTotal</i> <i class="o">=</i> <i class="f">cache</i><i class="p">(</i><i class="k">async</i> <i class="p">(</i><i class="v">items</i><i class="p">:</i> <i class="t">CartItem</i><i class="p">[])</i> <i class="o">=&gt;</i> <i class="p">{</i></span></span><span class="cl"><span>  <i class="k">const</i> <i class="v">rate</i> <i class="o">=</i> <i class="n">1.1</i></span></span><span class="cl"><span>  <i class="k">return</i> <i class="v">items</i><i class="p">.</i><i class="f">reduce</i><i class="p">((</i><i class="v">a</i><i class="p">,</i> <i class="v">b</i><i class="p">)</i> <i class="o">=&gt;</i> <i class="v">a</i> <i class="o">+</i> <i class="v">b</i><i class="p">.</i><i class="pr">qty</i> <i class="o">*</i> <i class="v">rate</i><i class="p">,</i> <i class="n">0</i><i class="p">)</i></span></span><span class="cl"><span><i class="p">})</i></span></span></code></pre>
+        </div>
+        <div class="card">
+          <div class="speclist">
+            <div class="specrow"><div class="specrow__k">--code-bg / --code-fg</div><div>코드 평면. 다크에서는 카드보다 <b>더 어둡게</b> 해서 코드가 자기 평면을 갖도록 함.</div></div>
+            <div class="specrow"><div class="specrow__k">--code-gutter-fg</div><div>줄번호. 본문 대비를 일부러 낮춰 코드를 방해하지 않게.</div></div>
+            <div class="specrow"><div class="specrow__k">--code-line-hl / -edge</div><div>학습 대상 줄 강조. 배경 + 좌측 3px 마커를 함께 써서 색만으로 구분하지 않음.</div></div>
+            <div class="specrow"><div class="specrow__k">--syn-*</div><div>keyword / string / number / fn / type / comment / var / prop / punct / op</div></div>
+            <div class="specrow" style="border:none"><div class="specrow__k">--diff-add-* / --diff-del-*</div><div>커밋 diff 렌더링. 배경 + 좌측 마커 + 접두 기호 3중 표기.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec__head"><h2 class="sec__title">타이포그래피</h2><span class="sec__hint">본문/코드 서체 쌍</span></div>
+      <div class="card">
+        <div class="speclist">
+          <div class="specrow"><div class="specrow__k">--font-ui</div><div style="font-size:var(--fs-18)">한글 본문 — 다람쥐 헌 쳇바퀴에 타고파 <span style="color:var(--fg-muted);font-size:var(--fs-13)">(Pretendard → SF Pro/Apple SD Gothic Neo 폴백)</span></div></div>
+          <div class="specrow"><div class="specrow__k">--font-mono</div><div style="font-family:var(--font-mono);font-size:var(--fs-16)">const [a, setA] = useState(0) — Il1 O0 {}[]() =&gt; !== <span style="font-family:var(--font-ui);color:var(--fg-muted);font-size:var(--fs-13)">(JetBrains Mono → SF Mono 폴백)</span></div></div>
+          <div class="specrow"><div class="specrow__k">--fs-38 / bold</div><div style="font-size:var(--fs-38);font-weight:700;letter-spacing:var(--tracking-tight)">숫자 하나</div></div>
+          <div class="specrow"><div class="specrow__k">--fs-30 / semibold</div><div style="font-size:var(--fs-30);font-weight:600;letter-spacing:var(--tracking-tight)">화면 제목</div></div>
+          <div class="specrow"><div class="specrow__k">--fs-20 / semibold</div><div style="font-size:var(--fs-20);font-weight:600">카드 질문</div></div>
+          <div class="specrow"><div class="specrow__k">--fs-15 / regular</div><div style="font-size:var(--fs-15)">본문 기본. 줄간격 1.6, 한국어 자간 -0.008em</div></div>
+          <div class="specrow"><div class="specrow__k">--fs-13 / regular</div><div style="font-size:var(--fs-13);color:var(--fg-muted)">보조 설명 · 메타</div></div>
+          <div class="specrow" style="border:none"><div class="specrow__k">--fs-11 / semibold caps</div><div class="eyebrow">섹션 라벨</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec__head"><h2 class="sec__title">간격 · 반경</h2><span class="sec__hint">4px 베이스</span></div>
+      <div class="card">
+        <div class="speclist">
+          <div class="specrow"><div class="specrow__k">--sp-1 · 4px</div><div class="spacerow"><i style="width:4px"></i></div></div>
+          <div class="specrow"><div class="specrow__k">--sp-2 · 8px</div><div class="spacerow"><i style="width:8px"></i></div></div>
+          <div class="specrow"><div class="specrow__k">--sp-3 · 12px</div><div class="spacerow"><i style="width:12px"></i></div></div>
+          <div class="specrow"><div class="specrow__k">--sp-4 · 16px</div><div class="spacerow"><i style="width:16px"></i></div></div>
+          <div class="specrow"><div class="specrow__k">--sp-6 · 24px</div><div class="spacerow"><i style="width:24px"></i></div></div>
+          <div class="specrow"><div class="specrow__k">--sp-8 · 32px</div><div class="spacerow"><i style="width:32px"></i></div></div>
+          <div class="specrow"><div class="specrow__k">--sp-12 · 48px</div><div class="spacerow"><i style="width:48px"></i></div></div>
+          <div class="specrow" style="border:none"><div class="specrow__k">--r-sm/md/lg/xl</div>
+            <div class="demoRow">
+              <span style="width:56px;height:36px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);display:block"></span>
+              <span style="width:56px;height:36px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-md);display:block"></span>
+              <span style="width:56px;height:36px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-lg);display:block"></span>
+              <span style="width:56px;height:36px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-xl);display:block"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec__head"><h2 class="sec__title">컴포넌트 기본형</h2></div>
+      <div class="card">
+        <div class="eyebrow" style="margin-bottom:var(--sp-3)">버튼</div>
+        <div class="demoRow">
+          <button class="btn btn--primary btn--xl">시작하기</button>
+          <button class="btn btn--primary btn--lg">주 액션</button>
+          <button class="btn btn--primary">기본</button>
+          <button class="btn btn--secondary">보조</button>
+          <button class="btn btn--ghost">고스트</button>
+          <button class="btn btn--danger btn--sm">위험</button>
+          <button class="btn btn--secondary btn--sm">작게</button>
+          <button class="btn btn--primary" disabled>비활성</button>
+        </div>
+
+        <div class="eyebrow" style="margin:var(--sp-8) 0 var(--sp-3)">뱃지 · 칩</div>
+        <div class="demoRow">
+          <span class="badge badge--t0"><span class="badge__dot"></span>문법</span>
+          <span class="badge badge--t1"><span class="badge__dot"></span>클론</span>
+          <span class="badge badge--t2"><span class="badge__dot"></span>구조</span>
+          <span class="badge badge--ok">정답</span>
+          <span class="badge badge--warn">읽는 중</span>
+          <span class="badge badge--danger">실패</span>
+          <span class="badge badge--outline badge--mono">a3f19c2</span>
+          <span class="chip" data-m="0"><span class="chip__dot"></span>미학습</span>
+          <span class="chip" data-m="2"><span class="chip__dot"></span>배우는 중</span>
+          <span class="chip" data-m="4"><span class="chip__dot"></span>안정</span>
+        </div>
+
+        <div class="eyebrow" style="margin:var(--sp-8) 0 var(--sp-3)">진행 표시</div>
+        <div style="display:grid;gap:var(--sp-4);max-width:520px">
+          <div class="bar"><span class="bar__fill" style="width:66%"></span></div>
+          <div class="bar bar--thin"><span class="bar__fill" style="width:33%;background:var(--ok)"></span></div>
+          <div class="mixbar"><span class="mixbar__t0" style="width:58%"></span><span class="mixbar__t1" style="width:17%"></span><span class="mixbar__t2" style="width:25%"></span></div>
+          <div class="segbar">
+            <span class="segbar__s" data-state="done" data-track="t0"></span>
+            <span class="segbar__s" data-state="done" data-track="t0"></span>
+            <span class="segbar__s" data-state="done" data-track="t2"></span>
+            <span class="segbar__s" data-state="current"></span>
+            <span class="segbar__s" data-state="todo"></span>
+            <span class="segbar__s" data-state="todo"></span>
+            <span class="segbar__s" data-state="todo"></span>
+          </div>
+        </div>
+
+        <div class="eyebrow" style="margin:var(--sp-8) 0 var(--sp-3)">알림 4종</div>
+        <div style="display:grid;gap:var(--sp-3)">
+          <div class="note note--info"><div class="note__body"><div class="note__title">안내</div><div class="note__text">새 커밋을 읽었습니다.</div></div></div>
+          <div class="note note--ok"><div class="note__body"><div class="note__title">성공</div><div class="note__text">동기화가 끝났습니다.</div></div></div>
+          <div class="note note--warn"><div class="note__body"><div class="note__title">주의</div><div class="note__text">읽지 못한 파일이 3개 있습니다.</div></div></div>
+          <div class="note note--danger"><div class="note__body"><div class="note__title">실패</div><div class="note__text">파서를 찾지 못했습니다.</div></div></div>
+        </div>
+
+        <div class="eyebrow" style="margin:var(--sp-8) 0 var(--sp-3)">diff 렌더링</div>
+        <div class="code" style="max-width:640px">
+          <div class="code__head"><span class="code__path">lib/cart.ts</span><span class="code__meta">a3f19c2</span></div>
+          <pre class="code__body" style="counter-reset:ln 16"><code><span class="cl"><span>  <i class="k">const</i> <i class="v">existing</i> <i class="o">=</i> <i class="v">cart</i><i class="p">.</i><i class="f">find</i><i class="p">((</i><i class="v">i</i><i class="p">)</i> <i class="o">=&gt;</i> <i class="v">i</i><i class="p">.</i><i class="pr">id</i> <i class="o">===</i> <i class="v">product</i><i class="p">.</i><i class="pr">id</i><i class="p">)</i></span></span><span class="cl is-del"><span>- <i class="k">return</i> <i class="p">[...</i><i class="v">cart</i><i class="p">,</i> <i class="v">product</i><i class="p">]</i></span></span><span class="cl is-add"><span>+ <i class="k">if</i> <i class="p">(!</i><i class="v">existing</i><i class="p">)</i> <i class="k">return</i> <i class="p">[...</i><i class="v">cart</i><i class="p">,</i> <i class="p">{</i> <i class="p">...</i><i class="v">product</i><i class="p">,</i> <i class="pr">qty</i><i class="p">:</i> <i class="n">1</i> <i class="p">}]</i></span></span></code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  </main>
+</div>
+
+<!-- =====================================================================
+     세션 — 전체화면 오버레이
+     ===================================================================== -->
+<div class="session" id="session" role="dialog" aria-modal="true" aria-label="오늘의 학습 세션" hidden>
+  <header class="shead">
+    <div>
+      <button class="btn btn--ghost btn--sm" id="sessionExit">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H6"/><path d="m12 5-7 7 7 7"/></svg>
+        나가기 <span class="kbd">Esc</span>
+      </button>
+    </div>
+    <div class="segbar" id="segbar" role="img" aria-label="세션 진행 상황"></div>
+    <div class="shead__right">
+      <span class="shead__count" id="sessionCount">4 / 12</span>
+      <span class="shead__time" id="sessionTime">약 8분 남음</span>
+    </div>
+  </header>
+
+  <div class="sbody" id="sessionBody">
+    <div class="swrap">
+
+      <!-- ============ 세션 스텝 1 — T0 문법 ============ -->
+      <section class="scard" data-step="1">
+        <div class="chead">
+          <span class="badge badge--t0"><span class="badge__dot"></span>문법</span>
+          <span class="chip" data-m="1"><span class="chip__dot"></span>배열 구조 분해 할당</span>
+          <span class="badge badge--outline badge--mono">첫 등장</span>
+        </div>
+
+        <h2 class="cquestion">
+          내가 3일 전에 쓴 이 코드에서, <span class="mono">41</span>번 줄의 대괄호 <span class="mono">[ ]</span> 는 무슨 일을 하고 있을까요?
+        </h2>
+
+        <div class="code">
+          <div class="code__head">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="color:var(--fg-faint)"><path d="M14 3v5h5"/><path d="M6 3h8l5 5v13H6z"/></svg>
+            <span class="code__path">app/(shop)/cart/CartSheet.tsx</span>
+            <span class="code__meta">커밋 a3f19c2 · 3일 전</span>
+          </div>
+          <pre class="code__body" style="counter-reset:ln 34"><code><span class="cl"><span><i class="s">'use client'</i></span></span><span class="cl"><span></span></span><span class="cl"><span><i class="k">import</i> <i class="p">{</i> <i class="v">useState</i> <i class="p">}</i> <i class="k">from</i> <i class="s">'react'</i></span></span><span class="cl"><span><i class="k">import</i> <i class="p">{</i> <i class="v">formatPrice</i> <i class="p">}</i> <i class="k">from</i> <i class="s">'@/lib/format'</i></span></span><span class="cl"><span></span></span><span class="cl"><span><i class="k">export function</i> <i class="f">CartSheet</i><i class="p">(</i><i class="p">{</i> <i class="v">items</i> <i class="p">}:</i> <i class="t">CartSheetProps</i><i class="p">)</i> <i class="p">{</i></span></span><span class="cl is-hl"><span>  <i class="k">const</i> <i class="p">[</i><i class="v">isOpen</i><i class="p">,</i> <i class="v">setIsOpen</i><i class="p">]</i> <i class="o">=</i> <i class="f">useState</i><i class="p">(</i><i class="k">false</i><i class="p">)</i></span></span><span class="cl"><span>  <i class="k">const</i> <i class="v">total</i> <i class="o">=</i> <i class="v">items</i><i class="p">.</i><i class="f">reduce</i><i class="p">((</i><i class="v">sum</i><i class="p">,</i> <i class="v">item</i><i class="p">)</i> <i class="o">=&gt;</i> <i class="v">sum</i> <i class="o">+</i> <i class="v">item</i><i class="p">.</i><i class="pr">price</i> <i class="o">*</i> <i class="v">item</i><i class="p">.</i><i class="pr">qty</i><i class="p">,</i> <i class="n">0</i><i class="p">)</i></span></span><span class="cl"><span></span></span><span class="cl"><span>  <i class="k">return</i> <i class="p">(</i></span></span><span class="cl"><span>    <i class="p">&lt;</i><i class="t">aside</i> <i class="pr">className</i><i class="o">=</i><i class="p">{</i><i class="v">isOpen</i> <i class="o">?</i> <i class="s">'sheet sheet--open'</i> <i class="o">:</i> <i class="s">'sheet'</i><i class="p">}&gt;</i></span></span><span class="cl"><span>      <i class="p">&lt;</i><i class="t">button</i> <i class="pr">onClick</i><i class="o">=</i><i class="p">{()</i> <i class="o">=&gt;</i> <i class="f">setIsOpen</i><i class="p">(!</i><i class="v">isOpen</i><i class="p">)}&gt;</i>장바구니<i class="p">&lt;/</i><i class="t">button</i><i class="p">&gt;</i></span></span><span class="cl"><span>      <i class="p">&lt;</i><i class="t">p</i><i class="p">&gt;{</i><i class="f">formatPrice</i><i class="p">(</i><i class="v">total</i><i class="p">)}&lt;/</i><i class="t">p</i><i class="p">&gt;</i></span></span><span class="cl"><span>    <i class="p">&lt;/</i><i class="t">aside</i><i class="p">&gt;</i></span></span><span class="cl"><span>  <i class="p">)</i></span></span><span class="cl"><span><i class="p">}</i></span></span></code></pre>
+        </div>
+
+        <div class="choices" id="q1Choices">
+          <button class="choice" data-choice="a">
+            <span class="choice__key">1</span>
+            <span><span class="mono">isOpen</span> 과 <span class="mono">setIsOpen</span> 이라는 값 2개가 든 새 배열을 만들고 있다</span>
+            <span class="choice__mark">✕</span>
+          </button>
+          <button class="choice" data-choice="b" data-correct>
+            <span class="choice__key">2</span>
+            <span><span class="mono">useState</span> 가 돌려준 배열을 <b>순서대로 두 변수에 나눠 담고</b> 있다</span>
+            <span class="choice__mark">✓</span>
+          </button>
+          <button class="choice" data-choice="c">
+            <span class="choice__key">3</span>
+            <span><span class="mono">isOpen</span> 이라는 배열에서 <span class="mono">setIsOpen</span> 번째 값을 꺼내고 있다</span>
+            <span class="choice__mark">✕</span>
+          </button>
+        </div>
+
+        <div class="reveal" id="q1Reveal" hidden>
+          <div class="reveal__label eyebrow">해설</div>
+          <div class="cprose">
+            <p><span class="mono">useState(false)</span> 는 <strong>길이 2짜리 배열</strong>을 돌려줍니다.
+            0번째는 현재 값, 1번째는 그 값을 바꾸는 함수예요.</p>
+            <p>왼쪽의 <span class="mono">[isOpen, setIsOpen]</span> 은 그 배열을 <strong>순서대로 풀어서</strong> 각각 이름을 붙이는 문법입니다.
+            이걸 <strong>배열 구조 분해 할당</strong>이라고 부릅니다. 이름은 자유라서
+            <span class="mono">const [열림, 열림바꾸기] = useState(false)</span> 라고 써도 똑같이 동작합니다 — 순서만 지키면 됩니다.</p>
+          </div>
+
+          <div class="reveal__also">
+            <div class="eyebrow">내 코드의 다른 곳에서도</div>
+            <div class="occ">
+              <div class="occ__row"><b>app/(shop)/search/SearchBar.tsx</b> :12 <span class="badge badge--t0">같은 문법</span></div>
+              <div class="occ__row"><b>components/Toast.tsx</b> :8 <span class="badge badge--t0">같은 문법</span></div>
+              <div class="occ__row"><b>lib/hooks/useCart.ts</b> :23 <span class="badge badge--outline">객체 버전</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 세션 스텝 2 — T1 클론 코딩 ============ -->
+      <section class="scard" data-step="2" hidden>
+        <div class="chead">
+          <span class="badge badge--t1"><span class="badge__dot"></span>클론 코딩</span>
+          <span class="chip" data-m="2"><span class="chip__dot"></span>스프레드 · Array.map</span>
+        </div>
+
+        <h2 class="cquestion">주석만 보고, 내가 썼던 <span class="mono">addToCart</span> 를 다시 써 보세요.</h2>
+
+        <div class="fade">
+          <div class="fade__step" data-state="done"><b>1단계</b>원본 보고 따라 쓰기</div>
+          <div class="fade__step" data-state="current"><b>2단계</b>주석만 보고 쓰기</div>
+          <div class="fade__step"><b>3단계</b>스펙만 보고 쓰기</div>
+        </div>
+
+        <div class="clone">
+          <div class="clone__col">
+            <div class="clone__label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h10M4 18h13"/></svg>
+              남아 있는 단서 — 주석과 시그니처
+            </div>
+            <div class="code">
+              <div class="code__head"><span class="code__path">lib/cart.ts</span><span class="code__meta">내가 쓴 원본에서 몸통만 지움</span></div>
+              <pre class="code__body" style="counter-reset:ln 13"><code><span class="cl"><span><i class="c">/** 장바구니에 상품을 담는다. 원본 배열은 건드리지 않는다. */</i></span></span><span class="cl"><span><i class="k">export function</i> <i class="f">addToCart</i><i class="p">(</i></span></span><span class="cl"><span>  <i class="v">cart</i><i class="p">:</i> <i class="t">CartItem</i><i class="p">[],</i></span></span><span class="cl"><span>  <i class="v">product</i><i class="p">:</i> <i class="t">Product</i><i class="p">,</i></span></span><span class="cl"><span><i class="p">):</i> <i class="t">CartItem</i><i class="p">[]</i> <i class="p">{</i></span></span><span class="cl"><span>  <i class="c">// 1. 이미 담긴 상품인지 찾는다</i></span></span><span class="cl"><span>  <i class="c">// 2. 없으면 수량 1짜리 새 항목을 뒤에 붙인 새 배열을 돌려준다</i></span></span><span class="cl"><span>  <i class="c">// 3. 있으면 그 항목의 수량만 1 늘린 새 배열을 돌려준다</i></span></span><span class="cl"><span><i class="p">}</i></span></span></code></pre>
+            </div>
+
+            <div class="note" style="margin-top:var(--sp-3)">
+              <svg class="note__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8.2v.1"/></svg>
+              <div class="note__body">
+                <div class="note__text">
+                  막히면 <b>힌트</b>를 눌러도 괜찮습니다. 힌트는 감점이 아니라, 이 개념을 더 자주 보여줄 신호로만 쓰입니다.
+                </div>
+              </div>
+              <button class="btn btn--sm btn--secondary" id="hintBtn">힌트 보기</button>
+            </div>
+            <div class="note note--info" id="hintBox" style="margin-top:var(--sp-2)" hidden>
+              <div class="note__body">
+                <div class="note__text">
+                  “원본을 건드리지 않는다” = <span class="mono">push</span> 대신 <span class="mono">[...cart, 새항목]</span>,
+                  수정은 <span class="mono">map</span> 안에서 <span class="mono">{ ...item, qty: item.qty + 1 }</span>.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="clone__col">
+            <div class="clone__label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m8 8-4 4 4 4M16 8l4 4-4 4"/></svg>
+              직접 쓰기
+            </div>
+            <div class="editor">
+              <div class="editor__head">
+                <span class="code__path">답안</span>
+                <span class="code__meta">Tab 2칸 · 자동 저장</span>
+              </div>
+              <textarea class="editor__ta" id="cloneTa" spellcheck="false" placeholder="export function addToCart(cart: CartItem[], product: Product): CartItem[] {&#10;  ...&#10;}"></textarea>
+              <div class="editor__foot">
+                <span id="cloneLines">0줄</span>
+                <div class="match">
+                  <span>원본과 일치</span>
+                  <span class="bar match__bar"><span class="bar__fill" id="matchFill" style="width:0%"></span></span>
+                  <span class="match__pct" id="matchPct">0%</span>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;gap:var(--sp-2);margin-top:var(--sp-3)">
+              <button class="btn btn--sm btn--secondary" id="cloneCheck">채점하고 원본 비교</button>
+              <button class="btn btn--sm btn--ghost">모르겠어요 · 원본 보기</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 세션 스텝 3 — T2 구조 ============ -->
+      <section class="scard" data-step="3" hidden>
+        <div class="chead">
+          <span class="badge badge--t2"><span class="badge__dot"></span>구조</span>
+          <span class="chip" data-m="1"><span class="chip__dot"></span>책임 배치 · 관심사 분리</span>
+        </div>
+
+        <h2 class="cquestion">
+          장바구니에 “수량 직접 입력” 기능을 넣는다면, 어느 파일을 고쳐야 할까요? <span style="color:var(--fg-muted);font-weight:400">(2개 선택)</span>
+        </h2>
+        <p class="cprose">아래는 지금 <span class="mono">shop-next</span> 의 실제 파일 배치입니다. 정답을 맞히는 게 목적이 아니라, 내 프로젝트가 어떻게 나뉘어 있는지 감을 잡는 게 목적입니다.</p>
+
+        <div class="tree" id="treeList">
+          <button class="tree__row" aria-pressed="false" data-file="cartsheet" data-answer="1">
+            <span class="tree__box">✓</span>
+            <span>app/(shop)/cart/CartSheet.tsx</span>
+            <span class="tree__role">화면 · 사용자 입력</span>
+          </button>
+          <button class="tree__row" aria-pressed="false" data-file="cartlib" data-answer="1">
+            <span class="tree__box">✓</span>
+            <span>lib/cart.ts</span>
+            <span class="tree__role">장바구니 계산 로직</span>
+          </button>
+          <button class="tree__row" aria-pressed="false" data-file="layout">
+            <span class="tree__box">✓</span>
+            <span>app/layout.tsx</span>
+            <span class="tree__role">전체 뼈대</span>
+          </button>
+          <button class="tree__row" aria-pressed="false" data-file="button">
+            <span class="tree__box">✓</span>
+            <span>components/ui/Button.tsx</span>
+            <span class="tree__role">공용 버튼</span>
+          </button>
+          <button class="tree__row" aria-pressed="false" data-file="schema">
+            <span class="tree__box">✓</span>
+            <span>lib/db/schema.ts</span>
+            <span class="tree__role">DB 테이블 정의</span>
+          </button>
+        </div>
+
+        <div class="reveal" id="q3Reveal" hidden>
+          <div class="reveal__label eyebrow">해설</div>
+          <div class="cprose">
+            <p>수량 입력칸은 <strong>화면</strong>에서 받고(<span class="mono">CartSheet.tsx</span>),
+            “수량을 N으로 바꾼다”는 <strong>계산</strong>은 <span class="mono">lib/cart.ts</span> 에 있습니다.
+            지금 <span class="mono">cart.ts</span> 에는 <span class="mono">addToCart</span> 만 있고 <span class="mono">setQty</span> 가 없죠.</p>
+            <p><span class="mono">schema.ts</span> 는 이미 <span class="mono">qty: number</span> 를 갖고 있어서 DB 는 손댈 필요가 없습니다.
+            이게 <strong>화면과 로직을 나눠 둔 덕</strong>입니다 — AI 가 짜준 구조지만, 지금 그 이득을 보고 있습니다.</p>
+          </div>
+          <div class="reveal__also">
+            <div class="eyebrow">의존 방향</div>
+            <div class="occ" style="font-size:var(--fs-13)">
+              <div class="occ__row"><b>CartSheet.tsx</b> → <b>lib/cart.ts</b> → <b>lib/db/schema.ts</b></div>
+              <div class="occ__row" style="color:var(--fg-faint)">화면은 로직을 알지만, 로직은 화면을 모릅니다 (역방향 import 0건)</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 세션 스텝 4 — 요약 ============ -->
+      <section class="scard summary" data-step="4" hidden>
+        <div class="summary__mark">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5.5 5.5L20 7"/></svg>
+        </div>
+        <h2 class="summary__title">12개 카드, 끝냈습니다</h2>
+        <p class="summary__sub">오늘 걸린 시간 13분 24초. 이 정도가 딱 좋습니다.</p>
+
+        <div class="summary__grid">
+          <div class="stat">
+            <div class="stat__label">맞힌 카드</div>
+            <div class="stat__value">10 <small>/ 12</small></div>
+          </div>
+          <div class="stat">
+            <div class="stat__label">연속 기록</div>
+            <div class="stat__value">10<small>일</small></div>
+          </div>
+          <div class="stat">
+            <div class="stat__label">다음 세션</div>
+            <div class="stat__value">내일<small> 저녁</small></div>
+          </div>
+        </div>
+
+        <div style="margin-top:var(--sp-8);text-align:left">
+          <div class="sec__head"><h3 class="sec__title">오늘 움직인 개념</h3></div>
+          <div class="movelist">
+            <div class="move">
+              <span>배열 구조 분해 할당</span>
+              <span class="move__delta"><i style="background:var(--m1)"></i>처음 봄 <span aria-hidden="true">→</span> <i style="background:var(--m2)"></i>배우는 중</span>
+            </div>
+            <div class="move">
+              <span>스프레드 연산자</span>
+              <span class="move__delta"><i style="background:var(--m2)"></i>배우는 중 <span aria-hidden="true">→</span> <i style="background:var(--m3)"></i>익숙함</span>
+            </div>
+            <div class="move">
+              <span>Array.reduce</span>
+              <span class="move__delta" style="color:var(--warn)"><i style="background:var(--m2)"></i>제자리 · 3일 뒤 다시 나옵니다</span>
+            </div>
+            <div class="move">
+              <span>책임 배치 · 관심사 분리</span>
+              <span class="move__delta"><i style="background:var(--m0)"></i>새로 시작 <span aria-hidden="true">→</span> <i style="background:var(--m1)"></i>처음 봄</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:var(--sp-8);text-align:left">
+          <div class="note note--ok">
+            <svg class="note__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3v18M3 12h18"/></svg>
+            <div class="note__body">
+              <div class="note__title">내일은 <span class="mono">async / await</span> 부터 시작합니다</div>
+              <div class="note__text">지금 <span class="mono">app/api/cart/route.ts</span> 에서 11번 쓰고 있는데, 아직 한 번도 안 다룬 문법입니다.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <footer class="sfoot">
+    <div class="sfoot__inner">
+      <div class="sfoot__hint" id="sfootHint">
+        <span><span class="kbd">1</span><span class="kbd">2</span><span class="kbd">3</span> 선택</span>
+        <span><span class="kbd">Space</span> 다음</span>
+        <span><span class="kbd">Esc</span> 나가기 (진행 저장됨)</span>
+      </div>
+      <div class="sfoot__actions" id="sfootActions">
+        <!-- JS 로 교체 -->
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- =====================================================================
+     드로어 — 개념 상세
+     ===================================================================== -->
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" hidden>
+  <div class="drawer__head">
+    <span class="chip" id="drawerChip" data-m="2"><span class="chip__dot"></span><span id="drawerChipName">스프레드 연산자</span></span>
+    <button class="btn btn--ghost btn--sm" id="drawerClose" style="margin-left:auto" aria-label="닫기">✕</button>
+  </div>
+  <div class="drawer__body">
+    <h2 id="drawerTitle" style="font-size:var(--fs-20);margin-bottom:var(--sp-3)">스프레드 연산자</h2>
+    <p class="cprose">
+      점 3개 <span class="mono">...</span> 로 배열이나 객체의 내용을 <strong>펼쳐서 새 것에 담는</strong> 문법입니다.
+      원본을 바꾸지 않고 복사본을 만들 때 씁니다.
+    </p>
+
+    <div class="sec" style="margin-top:var(--sp-6)">
+      <div class="sec__head"><h3 class="sec__title">내 코드에서</h3><span class="sec__hint">14회 등장</span></div>
+      <div class="occ">
+        <div class="occ__row"><b>lib/cart.ts</b> :18</div>
+        <div class="occ__row"><b>lib/cart.ts</b> :24</div>
+        <div class="occ__row"><b>app/api/cart/route.ts</b> :31</div>
+        <div class="occ__row" style="color:var(--fg-faint)">그 외 11곳</div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec__head"><h3 class="sec__title">학습 이력</h3></div>
+      <div class="card card--quiet">
+        <div class="repo__stats" style="margin-top:0">
+          <div class="repo__stat"><b>5</b>번 나옴</div>
+          <div class="repo__stat"><b>4</b>번 맞힘</div>
+          <div class="repo__stat"><b>3일</b>뒤 복습</div>
+        </div>
+        <div style="margin-top:var(--sp-5)">
+          <div class="repo__ptext"><span>숙련도</span><span>배우는 중 → 익숙함까지 2회</span></div>
+          <div class="bar"><span class="bar__fill" style="width:52%;background:var(--m2)"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec__head"><h3 class="sec__title">이어지는 개념</h3></div>
+      <div class="chips">
+        <span class="chip" data-m="2"><span class="chip__dot"></span>객체 구조 분해</span>
+        <span class="chip" data-m="3"><span class="chip__dot"></span>Array.map</span>
+        <span class="chip" data-m="0"><span class="chip__dot"></span>불변성 (immutability)</span>
+      </div>
+    </div>
+  </div>
+  <div class="drawer__foot">
+    <button class="btn btn--primary btn--block" data-start>이 개념만 5분 복습하기</button>
+  </div>
+</aside>
+
+<div aria-live="polite" class="sr" id="live"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var $  = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var live = $('#live');
+  function say(msg) { if (live) { live.textContent = msg; } }
+  /* 정답 표시와 해설이 한 화면에 같이 보이도록 선택지 상단으로 스크롤한다 */
+  function bring(el, block) {
+    if (!el) { return; }
+    try { el.scrollIntoView({ behavior: 'smooth', block: block || 'center' }); }
+    catch (e) { el.scrollIntoView(); }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* 테마                                                                */
+  /* ------------------------------------------------------------------ */
+  var root = document.documentElement;
+  var themeLabel = $('#themeLabel');
+
+  function readStored() {
+    try { return localStorage.getItem('ac-theme'); } catch (e) { return null; }
+  }
+  function store(v) {
+    try { localStorage.setItem('ac-theme', v); } catch (e) { /* private mode */ }
+  }
+  function applyTheme(t) {
+    if (t === 'light' || t === 'dark') { root.setAttribute('data-theme', t); }
+    else { root.removeAttribute('data-theme'); }
+    var effective = t || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    if (themeLabel) { themeLabel.textContent = effective === 'dark' ? '다크' : '라이트'; }
+  }
+  applyTheme(readStored() || 'dark');
+
+  $('#themeBtn').addEventListener('click', function () {
+    var now = root.getAttribute('data-theme');
+    var next = now === 'dark' ? 'light' : 'dark';
+    applyTheme(next); store(next);
+    say(next === 'dark' ? '다크 모드' : '라이트 모드');
+  });
+
+  /* ------------------------------------------------------------------ */
+  /* 뷰 전환                                                             */
+  /* ------------------------------------------------------------------ */
+  var views = { home: $('#view-home'), progress: $('#view-progress'), repos: $('#view-repos'), ds: $('#view-ds') };
+
+  function goto(name) {
+    Object.keys(views).forEach(function (k) {
+      var v = views[k];
+      if (!v) { return; }
+      v.hidden = (k !== name);
+      if (k === name) { v.setAttribute('data-anim', ''); v.offsetHeight; }
+    });
+    $$('.nav').forEach(function (b) {
+      if (b.dataset.goto === name) { b.setAttribute('aria-current', 'page'); }
+      else { b.removeAttribute('aria-current'); }
+    });
+    window.scrollTo({ top: 0, behavior: 'instant' in document.documentElement.style ? 'instant' : 'auto' });
+  }
+
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-goto]');
+    if (t) { goto(t.dataset.goto); }
+  });
+
+  /* ------------------------------------------------------------------ */
+  /* 홈 — 상태 미리보기 (목업 전용)                                       */
+  /* ------------------------------------------------------------------ */
+  var heroes = { ready: $('#heroReady'), resume: $('#heroResume'), done: $('#heroDone'), empty: $('#heroEmpty') };
+  function setHome(state) {
+    Object.keys(heroes).forEach(function (k) { heroes[k].hidden = (k !== state); });
+    $('#homeIngest').hidden = (state === 'empty');
+    $('#homeLower').hidden = (state === 'empty');
+    $$('[data-homestate]').forEach(function (b) {
+      var on = b.dataset.homestate === state;
+      b.className = 'btn btn--sm ' + (on ? 'btn--secondary' : 'btn--ghost');
+    });
+  }
+  $$('[data-homestate]').forEach(function (b) {
+    b.addEventListener('click', function () { setHome(b.dataset.homestate); });
+  });
+
+  var repoList = $('#repoList'), repoEmpty = $('#repoEmpty');
+  $$('[data-repostate]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var empty = b.dataset.repostate === 'empty';
+      repoList.hidden = empty; repoEmpty.hidden = !empty;
+      $$('[data-repostate]').forEach(function (x) {
+        x.className = 'btn btn--sm ' + (x === b ? 'btn--secondary' : 'btn--ghost');
+      });
+    });
+  });
+
+  /* 홈 미니 스트릭 도트 (최근 14일) */
+  var dotPattern = [0,2,1,0,1,2,2,1,0,2,1,2,2,1];
+  var dotsEl = $('#homeDots');
+  dotPattern.forEach(function (v, i) {
+    var el = document.createElement('i');
+    if (v) { el.dataset.on = String(v); }
+    if (i === dotPattern.length - 1) { el.dataset.today = ''; }
+    dotsEl.appendChild(el);
+  });
+
+  /* 성장 — 12주 히트맵 */
+  var heat = $('#heat');
+  var seed = 7;
+  function rnd() { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; }
+  for (var i = 0; i < 182; i++) {
+    var cell = document.createElement('i');
+    var r = rnd();
+    var lv = r > 0.86 ? 4 : r > 0.66 ? 3 : r > 0.46 ? 2 : r > 0.3 ? 1 : 0;
+    if (i > 168) { lv = Math.max(lv, 2); }         /* 최근은 촘촘하게 */
+    if (lv) { cell.dataset.lv = String(lv); }
+    heat.appendChild(cell);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* 개념 드로어                                                          */
+  /* ------------------------------------------------------------------ */
+  var drawer = $('#drawer'), scrim = $('#scrim'), lastFocus = null;
+  function openDrawer(name, m) {
+    lastFocus = document.activeElement;
+    $('#drawerTitle').textContent = name;
+    $('#drawerChipName').textContent = name;
+    $('#drawerChip').dataset.m = m || '2';
+    drawer.hidden = false; scrim.hidden = false;
+    $('#drawerClose').focus();
+  }
+  function closeDrawer() {
+    drawer.hidden = true; scrim.hidden = true;
+    if (lastFocus) { lastFocus.focus(); }
+  }
+  document.addEventListener('click', function (e) {
+    var c = e.target.closest('[data-concept]');
+    if (c) { openDrawer(c.dataset.concept, c.dataset.m); }
+  });
+  $('#drawerClose').addEventListener('click', closeDrawer);
+  scrim.addEventListener('click', closeDrawer);
+
+  /* ------------------------------------------------------------------ */
+  /* 세션                                                                */
+  /* ------------------------------------------------------------------ */
+  var session = $('#session');
+  var segbar  = $('#segbar');
+  var sfootActions = $('#sfootActions');
+  var sfootHint = $('#sfootHint');
+
+  /* 12장 카드의 트랙 구성 — 진행바 자체가 오늘의 구성을 보여준다 */
+  var deck = ['t0','t0','t2','t0','t0','t1','t0','t2','t0','t0','t1','t2'];
+  var steps = [
+    { idx: 3,  el: null, kind: 't0' },   /* 4번째 카드 */
+    { idx: 6,  el: null, kind: 't1' },   /* 7번째 */
+    { idx: 10, el: null, kind: 't2' },   /* 11번째 */
+    { idx: 12, el: null, kind: 'end' }
+  ];
+  steps.forEach(function (s, n) { s.el = $('.scard[data-step="' + (n + 1) + '"]'); });
+
+  var cur = 0;         /* steps 인덱스 */
+  var revealed = false;
+
+  deck.forEach(function () {
+    var s = document.createElement('span');
+    s.className = 'segbar__s';
+    segbar.appendChild(s);
+  });
+  var segs = $$('.segbar__s', segbar);
+
+  function renderSeg() {
+    var at = steps[cur].idx;
+    segs.forEach(function (s, i) {
+      s.dataset.track = deck[i];
+      s.dataset.state = i < at ? 'done' : (i === at ? 'current' : 'todo');
+    });
+    var n = Math.min(at + 1, deck.length);
+    $('#sessionCount').textContent = (cur === steps.length - 1 ? deck.length : n) + ' / ' + deck.length;
+    var left = deck.length - at;
+    $('#sessionTime').textContent = cur === steps.length - 1 ? '완료' : ('약 ' + Math.max(1, Math.round(left * 0.9)) + '분 남음');
+  }
+
+  function renderFoot() {
+    var html = '';
+    if (cur === 0 && !revealed) {
+      html = '<button class="btn btn--ghost" data-act="idk">모르겠어요</button>' +
+             '<button class="btn btn--secondary" data-act="next">건너뛰기</button>';
+      sfootHint.innerHTML = '<span><span class="kbd">1</span><span class="kbd">2</span><span class="kbd">3</span> 답 고르기</span>' +
+                            '<span><span class="kbd">Esc</span> 나가기 (진행 저장됨)</span>';
+    } else if (cur === 0 && revealed) {
+      html = '<span style="font-size:var(--fs-12);color:var(--fg-faint);margin-right:var(--sp-2)">얼마나 확실했나요?</span>' +
+             '<div class="rate">' +
+             '<button class="rate__btn" data-v="1" data-act="rate"><strong>어려움</strong><span>1분 뒤 다시</span></button>' +
+             '<button class="rate__btn" data-v="2" data-act="rate"><strong>보통</strong><span>3일 뒤</span></button>' +
+             '<button class="rate__btn" data-v="3" data-act="rate"><strong>쉬움</strong><span>9일 뒤</span></button>' +
+             '</div>';
+      sfootHint.innerHTML = '<span><span class="kbd">1</span><span class="kbd">2</span><span class="kbd">3</span> 자기평가</span>' +
+                            '<span>FSRS 가 다음 등장 시점을 정합니다</span>';
+    } else if (cur === 1) {
+      html = '<button class="btn btn--ghost" data-act="idk">모르겠어요</button>' +
+             '<button class="btn btn--primary" data-act="next">다 썼어요 <span class="kbd">⌘↵</span></button>';
+      sfootHint.innerHTML = '<span>손으로 쓰는 것 자체가 목적입니다 — 100% 일치하지 않아도 됩니다</span>' +
+                            '<span><span class="kbd">Esc</span> 나가기</span>';
+    } else if (cur === 2) {
+      html = revealed
+        ? '<button class="btn btn--primary" data-act="next">다음 <span class="kbd">Space</span></button>'
+        : '<button class="btn btn--ghost" data-act="idk">모르겠어요</button>' +
+          '<button class="btn btn--primary" data-act="check">확인하기 <span class="kbd">Space</span></button>';
+      sfootHint.innerHTML = '<span>2개를 고르세요</span><span><span class="kbd">Esc</span> 나가기</span>';
+    } else {
+      html = '<button class="btn btn--secondary" data-act="review">오늘 카드 다시 보기</button>' +
+             '<button class="btn btn--primary btn--lg" data-act="finish">완료 <span class="kbd">Space</span></button>';
+      sfootHint.innerHTML = '<span>수고했습니다. 내일 같은 시간에 이어서.</span>';
+    }
+    sfootActions.innerHTML = html;
+  }
+
+  function showStep(n) {
+    cur = Math.max(0, Math.min(steps.length - 1, n));
+    revealed = false;
+    steps.forEach(function (s, i) { s.el.hidden = (i !== cur); });
+    /* 스텝 3 상태 초기화 */
+    $('#q3Reveal').hidden = true;
+    $$('#treeList .tree__row').forEach(function (r) {
+      r.setAttribute('aria-pressed', 'false');
+      r.removeAttribute('data-result');
+      r.disabled = false;
+    });
+    renderSeg(); renderFoot();
+    $('#sessionBody').scrollTop = 0;
+  }
+
+  function openSession() {
+    session.hidden = false;
+    document.body.style.overflow = 'hidden';
+    /* 1번 카드 초기화 */
+    $('#q1Reveal').hidden = true;
+    $$('#q1Choices .choice').forEach(function (c) { c.disabled = false; c.removeAttribute('data-result'); });
+    showStep(0);
+    $('#sessionExit').focus();
+    say('세션을 시작했습니다. 12개 카드 중 첫 번째.');
+  }
+  function closeSession() {
+    session.hidden = true;
+    document.body.style.overflow = '';
+    say('세션에서 나왔습니다. 진행 상황은 저장되었습니다.');
+  }
+
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('[data-start]')) {
+      closeDrawer();
+      openSession();
+    }
+  });
+  $('#sessionExit').addEventListener('click', closeSession);
+
+  /* --- 스텝 1: 선택지 --- */
+  function revealQ1(pickedEl) {
+    $$('#q1Choices .choice').forEach(function (c) {
+      c.disabled = true;
+      if (c.hasAttribute('data-correct')) { c.dataset.result = 'correct'; }
+      else if (c === pickedEl) { c.dataset.result = 'wrong'; }
+    });
+    $('#q1Reveal').hidden = false;
+    revealed = true;
+    renderFoot();
+    bring($('#q1Choices'), 'start');
+    say(pickedEl && pickedEl.hasAttribute('data-correct') ? '정답입니다. 해설이 열렸습니다.' : '해설이 열렸습니다.');
+  }
+  $('#q1Choices').addEventListener('click', function (e) {
+    var c = e.target.closest('.choice');
+    if (c && !c.disabled) { revealQ1(c); }
+  });
+
+  /* --- 스텝 2: 클론 에디터 --- */
+  var target = 'const existing = cart.find((item) => item.id === product.id)\n' +
+               'if (!existing) {\n' +
+               'return [...cart, { ...product, qty: 1 }]\n' +
+               '}\n' +
+               'return cart.map((item) =>\n' +
+               'item.id === product.id ? { ...item, qty: item.qty + 1 } : item\n' +
+               ')';
+  function norm(s) { return s.replace(/\s+/g, ' ').trim(); }
+  function similarity(a, b) {
+    if (!a) { return 0; }
+    var A = norm(a).split(' '), B = norm(b).split(' ');
+    var pool = B.slice(), hit = 0;
+    A.forEach(function (tok) {
+      var k = pool.indexOf(tok);
+      if (k > -1) { hit++; pool.splice(k, 1); }
+    });
+    return Math.min(100, Math.round((hit / B.length) * 100));
+  }
+  var ta = $('#cloneTa');
+  ta.addEventListener('input', function () {
+    var pct = similarity(ta.value, target);
+    $('#matchFill').style.width = pct + '%';
+    $('#matchPct').textContent = pct + '%';
+    $('#matchFill').style.background = pct > 75 ? 'var(--ok)' : pct > 40 ? 'var(--warn)' : 'var(--accent)';
+    $('#cloneLines').textContent = ta.value.split('\n').filter(Boolean).length + '줄';
+  });
+  ta.addEventListener('keydown', function (e) {
+    if (e.key === 'Tab') { e.preventDefault();
+      var s = ta.selectionStart;
+      ta.value = ta.value.slice(0, s) + '  ' + ta.value.slice(ta.selectionEnd);
+      ta.selectionStart = ta.selectionEnd = s + 2;
+    }
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); showStep(cur + 1); }
+  });
+  $('#hintBtn').addEventListener('click', function () {
+    var box = $('#hintBox');
+    box.hidden = !box.hidden;
+    this.textContent = box.hidden ? '힌트 보기' : '힌트 접기';
+  });
+  $('#cloneCheck').addEventListener('click', function () { showStep(cur + 1); });
+
+  /* --- 스텝 3: 파일 트리 다중 선택 --- */
+  $('#treeList').addEventListener('click', function (e) {
+    var r = e.target.closest('.tree__row');
+    if (!r || r.disabled) { return; }
+    r.setAttribute('aria-pressed', r.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+  });
+  function checkTree() {
+    $$('#treeList .tree__row').forEach(function (r) {
+      var picked = r.getAttribute('aria-pressed') === 'true';
+      var right = r.hasAttribute('data-answer');
+      r.disabled = true;
+      if (picked && right) { r.dataset.result = 'correct'; }
+      else if (picked && !right) { r.dataset.result = 'wrong'; }
+      else if (!picked && right) { r.dataset.result = 'missed'; }
+    });
+    $('#q3Reveal').hidden = false;
+    revealed = true;
+    renderFoot();
+    bring($('#treeList'), 'start');
+    say('해설이 열렸습니다.');
+  }
+
+  /* --- 푸터 액션 --- */
+  sfootActions.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-act]');
+    if (!b) { return; }
+    var act = b.dataset.act;
+    if (act === 'next')   { showStep(cur + 1); }
+    if (act === 'rate')   { showStep(cur + 1); }
+    if (act === 'check')  { checkTree(); }
+    if (act === 'finish') { closeSession(); setHome('done'); goto('home'); }
+    if (act === 'review') { showStep(0); }
+    if (act === 'idk') {
+      if (cur === 0) { revealQ1(null); }
+      else if (cur === 2) { checkTree(); }
+      else { showStep(cur + 1); }
+    }
+  });
+
+  /* ------------------------------------------------------------------ */
+  /* 키보드                                                              */
+  /* ------------------------------------------------------------------ */
+  document.addEventListener('keydown', function (e) {
+    var typing = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable;
+
+    if (e.key === 'Escape') {
+      if (!drawer.hidden) { closeDrawer(); return; }
+      if (!session.hidden) { closeSession(); return; }
+    }
+    if (!session.hidden) {
+      if (typing) { return; }
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        var main = sfootActions.querySelector('[data-act="check"], [data-act="next"], [data-act="finish"]');
+        if (main) { main.click(); }
+        return;
+      }
+      if (['1','2','3'].indexOf(e.key) > -1) {
+        e.preventDefault();
+        if (cur === 0 && !revealed) {
+          var ch = $$('#q1Choices .choice')[Number(e.key) - 1];
+          if (ch && !ch.disabled) { revealQ1(ch); }
+        } else if (cur === 0 && revealed) {
+          var rb = sfootActions.querySelector('.rate__btn[data-v="' + e.key + '"]');
+          if (rb) { rb.click(); }
+        }
+      }
+      return;
+    }
+    /* 세션 밖: Space 로 오늘 세션 시작 */
+    if (!typing && (e.key === ' ') && drawer.hidden && !views.home.hidden && heroes.empty.hidden) {
+      e.preventDefault();
+      openSession();
+    }
+  });
+
+  /* 초기 상태 */
+  setHome('ready');
+  goto('home');
+})();
+</script>
+</body>
+</html>

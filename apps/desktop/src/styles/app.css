@@ -1,0 +1,27 @@
+/* M0 셸. 토큰만 쓴다 — 원색 토큰(--blue/--pink/--yellow) 직접 참조 금지 (05 §4.2). */
+.shell {
+  min-height: 100vh;
+  display: grid;
+  place-content: center;
+  gap: 12px;
+  padding: 32px;
+  background: var(--desk);
+  color: var(--ink);
+}
+
+.wordmark {
+  margin: 0;
+  font-family: var(--f-poster);
+  font-size: var(--fs-poster);
+  line-height: var(--lh-tight);
+  color: var(--ink);
+}
+
+.note {
+  margin: 0;
+  max-width: var(--measure);
+  font-family: var(--f-ui);
+  font-size: var(--fs-16);
+  line-height: var(--lh-body);
+  color: var(--ink-soft);
+}

@@ -1,0 +1,309 @@
+# 06 §5.1 PR 워크플로 — 예산 12분
+#
+# 지금(M0) 실제로 도는 잡: lint-type-unit · audit · build-3os
+# M1/M2 에 켜는 잡(integration · design-gates · e2e-linux)은 파일 맨 아래에
+# 문서의 스텝 그대로 주석으로 남겨 뒀다. **가짜 초록 체크를 만들지 않으려고**
+# `if: false` 가드가 아니라 주석을 골랐다 — skip 된 잡은 브랜치 보호에서
+# 「성공」으로 세어져 없는 커버리지를 있는 것처럼 보이게 한다.
+#
+# Actions 는 전부 커밋 SHA 고정(06 §4.4). 옆의 태그는 사람이 읽는 용도다.
+
+name: ci
+
+on:
+  pull_request: {}
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # 06 §5.1 은 Node 22 를 적었지만 이 리포가 실제로 도는 조합은 Node 26 이다
+  # (개발 기계: Node 26.7.0 · pnpm 10.33.2 · rustc 1.98.0).
+  # pnpm 버전은 package.json 의 `packageManager` 가 정본이라 여기 적지 않는다.
+  NODE_VERSION: '26'
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: '1'
+
+jobs:
+  # ───────────────────────────────────────────────────────────────────────────
+  # 06 §5.1 예산 ≤ 4분
+  # ───────────────────────────────────────────────────────────────────────────
+  lint-type-unit:
+    name: lint · type · unit
+    runs-on: ubuntu-22.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        # version 을 안 주면 package.json 의 packageManager 를 읽는다 — 정본 하나.
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
+        with:
+          # SHA 로 고정하면 ref 에서 툴체인을 못 읽으므로 반드시 명시한다.
+          toolchain: stable
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          workspaces: .
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: lint (eslint + stylelint)
+        run: pnpm lint
+
+      - name: typecheck
+        run: pnpm typecheck
+
+      - name: TS 단위 테스트
+        run: pnpm test:unit
+        # 커버리지 게이트(06 §1.8, `--coverage` + cargo-llvm-cov)는 측정할 코드가
+        # 생긴 뒤 M1 에서 켠다. 지금 켜면 빈 패키지에서 0% 로 떨어진다.
+
+      - name: 디자인 토큰 동기 확인
+        run: pnpm design:check
+
+      - name: 대비비 확인
+        run: pnpm check:contrast
+
+      - name: cargo fmt
+        run: cargo fmt --all --check
+
+      - name: cargo clippy
+        run: cargo clippy --locked --all-targets -- -D warnings
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # 06 §4.4 · §5.1 예산 ≤ 1분
+  # ───────────────────────────────────────────────────────────────────────────
+  audit:
+    name: audit
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: gitleaks detect --no-git
+        # pnpm install 앞에 둔다 — node_modules 를 훑으면 스캔이 30배 느려지고
+        # 오탐만 나온다. 바이너리는 버전 + sha256 을 둘 다 고정한다(06 §4.4).
+        env:
+          GITLEAKS_VERSION: 8.30.1
+          GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+        run: |
+          set -euo pipefail
+          url="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -fsSL -o gitleaks.tar.gz "$url"
+          echo "${GITLEAKS_SHA256}  gitleaks.tar.gz" | sha256sum -c -
+          tar -xzf gitleaks.tar.gz gitleaks
+          ./gitleaks detect --no-git --redact --config .gitleaks.toml
+          rm -f gitleaks gitleaks.tar.gz
+
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: pnpm audit
+        run: pnpm audit --audit-level=high
+
+      - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
+        with:
+          toolchain: stable
+
+      - uses: taiki-e/install-action@e67fa11c4b9316fa714ddf0abed07a0c3143b95b # v2.87.4
+        with:
+          # 소스 빌드 대신 상류 릴리스 바이너리를 받는다 — 1분 예산은 그래야 지켜진다.
+          tool: cargo-deny@0.20.2,cargo-audit@0.22.2
+
+      - name: cargo audit
+        run: cargo audit
+
+      - name: cargo deny check
+        run: cargo deny check
+
+      - name: deny.toml 예외 만료 확인 (06 §4.4)
+        # cargo-deny 에는 만료 필드가 없다. 만료일이 reason 안의 주석으로만 살면
+        # 「일단 넣어 둔 ignore」가 영원히 남는다 — 그래서 여기서 기계로 읽는다.
+        run: |
+          python3 - <<'PY'
+          import datetime, pathlib, re, sys
+
+          text = pathlib.Path("deny.toml").read_text(encoding="utf-8")
+          block = re.search(r"^ignore\s*=\s*\[(.*?)^\]", text, re.S | re.M)
+          entries = re.findall(r"\{[^}]*\}", block.group(1)) if block else []
+          today = datetime.date.today()
+          problems = []
+
+          for entry in entries:
+              ident = re.search(r'id\s*=\s*"([^"]+)"', entry)
+              expiry = re.search(r"만료:\s*(\d{4}-\d{2}-\d{2})", entry)
+              if not ident:
+                  problems.append(f"id 없는 예외: {entry.strip()}")
+                  continue
+              if not expiry:
+                  problems.append(f"{ident.group(1)}: 만료일 없음 — reason 에 '만료: YYYY-MM-DD' 를 적는다")
+                  continue
+              when = datetime.date.fromisoformat(expiry.group(1))
+              if when < today:
+                  problems.append(f"{ident.group(1)}: {when} 에 만료됨 — 다시 판단하고 지우거나 연장한다")
+
+          for line in problems:
+              print(f"FAIL {line}")
+          if problems:
+              sys.exit(1)
+          print(f"ok   advisories.ignore {len(entries)}건, 만료된 예외 없음")
+          PY
+
+      - name: Rust 예산·금칙어 (01 §1.1)
+        run: bash scripts/check-rust-budget.sh
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # M0 종료 조건 — 「빈 창이 3-OS 에서 뜬다」.
+  # 문서 §5.1 에는 없는 잡이다. 릴리스(§5.2)까지 기다리면 3-OS 가 깨진 걸
+  # 태그 시점에 알게 되므로 PR 에서 debug 빌드로 미리 깬다.
+  # ───────────────────────────────────────────────────────────────────────────
+  build-3os:
+    name: build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-14, windows-2022, ubuntu-22.04]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Linux WebView 의존성
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            curl \
+            wget \
+            file \
+            libwebkit2gtk-4.1-dev \
+            libappindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            libssl-dev \
+            libxdo-dev
+
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
+        with:
+          toolchain: stable
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          workspaces: .
+          key: ${{ matrix.os }}
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: tauri build --debug
+        run: pnpm tauri build --debug
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: chickadee-debug-${{ matrix.os }}
+          # 서명이 없으므로(06 §5.4) 이건 배포물이 아니라 「열리는지」 확인용이다.
+          path: |
+            target/debug/bundle/**
+            target/debug/chickadee-app
+            target/debug/chickadee-app.exe
+          if-no-files-found: warn
+          retention-days: 7
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 아래는 M1/M2 에 켜는 잡이다. 06 §5.1 의 스텝을 그대로 보존해 뒀다.
+# 지금 켜지 못하는 이유가 각 블록 첫 줄에 있다 — 없는 산출물을 통과시키는
+# 빈 잡을 두는 것보다, 체크 목록에 아예 나타나지 않는 편이 정직하다.
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# ── M1: 픽스처 리포·pipeline 테스트·IPC 덤프가 생기면 켠다 ──────────────────────
+#   필요한 것: scripts/make-fixture-repo.sh, crates/*/tests/pipeline.rs, fixtures/ipc/
+#
+#   integration:                       # 06 §5.1 예산 ≤ 3분
+#     name: integration
+#     runs-on: ubuntu-22.04
+#     timeout-minutes: 10
+#     steps:
+#       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+#       - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
+#         with: { toolchain: stable }
+#       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+#         with: { workspaces: . }
+#       - run: bash scripts/make-fixture-repo.sh tiny
+#       - run: cargo test --locked --test pipeline
+#       - run: git diff --exit-code fixtures/ipc
+#
+# ── M2: 화면 골격 + tests/gates + 시각 기준선이 생기면 켠다 ─────────────────────
+#   필요한 것: apps/desktop/src/devtools/audit.ts, tests/gates/, tests/visual/,
+#              package.json 의 test:gates · test:visual 스크립트, playwright 의존성
+#
+#   design-gates:                      # 06 §5.1 예산 ≤ 3분, 규칙은 06 §2
+#     name: design-gates
+#     runs-on: ubuntu-22.04
+#     timeout-minutes: 10
+#     steps:
+#       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+#       - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+#       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+#         with: { node-version: '26', cache: pnpm }
+#       - run: pnpm install --frozen-lockfile
+#       - run: pnpm build
+#       # Playwright 브라우저 캐시 키 = 버전 (06 §5.1 「캐시」)
+#       - run: pnpm exec playwright install --with-deps chromium
+#       - run: pnpm test:gates
+#       - run: pnpm test:visual
+#
+# ── M2: tauri-driver + WebdriverIO 시나리오 E1~E8 이 생기면 켠다 ────────────────
+#   필요한 것: tests/e2e/, package.json 의 test:e2e 스크립트, 그리고 창이 실제로
+#              뜨는 앱. 06 §1.1 대로 **Linux 만** 차단한다.
+#
+#   e2e-linux:                         # 06 §5.1 예산 ≤ 8분, 시나리오는 06 §1.5
+#     name: e2e-linux
+#     runs-on: ubuntu-22.04
+#     timeout-minutes: 20
+#     steps:
+#       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+#       - run: |
+#           sudo apt-get update
+#           sudo apt-get install -y --no-install-recommends \
+#             build-essential curl wget file libwebkit2gtk-4.1-dev \
+#             libappindicator3-dev librsvg2-dev patchelf libssl-dev libxdo-dev \
+#             webkit2gtk-driver xvfb
+#       - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+#       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+#         with: { node-version: '26', cache: pnpm }
+#       - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
+#         with: { toolchain: stable }
+#       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+#         with: { workspaces: . }
+#       - run: cargo install tauri-driver --locked
+#       - run: pnpm install --frozen-lockfile
+#       - run: pnpm tauri build --debug
+#       - run: xvfb-run pnpm test:e2e
+#
+# ── 야간 벤치 `bench.yml` (06 §1.6 · §5.1) 은 이 파일이 아니라 별도 워크플로다.
+#    cron '0 18 * * *' (KST 03:00). criterion 기준선이 생기는 M2 이후.

@@ -1,0 +1,260 @@
+/* ==========================================================================
+   Chickadee — 도감(Field Guide) 디자인 토큰
+   레이어 1: 의미 토큰만 노출. 컴포넌트는 hex 를 직접 쓰지 않는다.
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  /* ── 서체 ───────────────────────────────────────────────────────────────
+     로컬 데스크톱(Tauri) 앱이므로 네트워크 폰트를 쓰지 않는다.
+     Pretendard 가 설치돼 있으면 쓰고, 아니면 OS 한글 서체로 떨어진다. */
+  --font-ui: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+             "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo,
+               "D2Coding", Consolas, monospace;
+  /* 학명(=영문 원어) 전용. 도감이 학명을 이탤릭 세리프로 쓰는 관습 그대로. */
+  --font-latin: "Iowan Old Style", "Palatino Linotype", Palatino, Charter, Georgia,
+                "Times New Roman", serif;
+
+  /* ── 타입 스케일 ────────────────────────────────────────────────────────
+     13px 아래 토큰은 아예 정의하지 않는다(11px 을 쓸 수 없게 만든다). */
+  --fs-13: 0.8125rem;
+  --fs-15: 0.9375rem;
+  --fs-17: 1.0625rem;   /* 본문 기준 */
+  --fs-20: 1.25rem;
+  --fs-24: 1.5rem;
+  --fs-26: 1.625rem;    /* 화면당 1회 한정 */
+
+  --lh-body: 1.75;
+  --lh-tight: 1.35;
+  --lh-code: 1.85;
+
+  --fw-normal: 400;
+  --fw-medium: 500;
+  --fw-semi: 600;
+  --fw-bold: 700;
+
+  --tr-label: 0.045em;  /* 라벨은 크기 대신 자간으로 구분 */
+  --tr-tight: -0.011em;
+
+  /* ── 행 길이 ───────────────────────────────────────────────────────────
+     이 앱에서 가장 중요한 토큰. ch 단위는 라틴 '0' 폭(≈0.5em) 기준이라
+     한글에는 2배로 틀린다. em 으로 걸고 브라우저에서 실측해 보정했다.
+     한글 advance 실측: Pretendard ≈1.00em, Apple SD Gothic Neo ≈0.857em.
+     36em 은 두 서체 모두를 목표 구간에 넣는 유일한 대역 → 36자(Pretendard)
+     ~ 42자(SD Gothic). 더 좁히면 Pretendard 에서 35자 아래로 떨어진다.
+     본문을 담는 모든 요소가 이 값을 기본으로 상속받는다(fg-base.css). */
+  --measure: 36em;
+  --measure-narrow: 26em;
+  --measure-note: 17em;
+
+  /* ── 간격 (4px 베이스) ─────────────────────────────────────────────────── */
+  --s1: 4px;  --s2: 8px;  --s3: 12px; --s4: 16px; --s5: 20px; --s6: 24px;
+  --s7: 32px; --s8: 40px; --s9: 48px; --s10: 64px; --s11: 80px; --s12: 96px;
+
+  /* ── 반경 (인쇄물이므로 작게) ─────────────────────────────────────────── */
+  --r1: 4px; --r2: 8px; --r3: 12px; --r-pill: 999px;
+
+  /* ── 모션 ──────────────────────────────────────────────────────────────── */
+  --dur-fast: 120ms;
+  --dur: 200ms;
+  --dur-slow: 420ms;
+  --ease: cubic-bezier(.2,.7,.3,1);
+  --ease-out: cubic-bezier(.16,1,.3,1);
+
+  /* ── 레이아웃 ──────────────────────────────────────────────────────────── */
+  --rail-w: 268px;
+  --head-h: 56px;
+  --spine: 44px;        /* 차례의 등뼈(경로선) 폭 */
+
+  /* ── 종이 / 잉크 (라이트) ─────────────────────────────────────────────── */
+  --paper:        #F5F2EA;
+  --paper-plate:  #FDFCF8;
+  --paper-sunken: #EBE7DC;
+  --paper-hover:  #EBE6D9;
+  --rule:         #DCD5C6;
+  --rule-strong:  #978B6E;
+
+  --ink:          #16150F;
+  --ink-2:        #3B382E;
+  --ink-3:        #4F4A3B;
+  --ink-inverse:  #FBFAF5;
+
+  /* ── 학습 트랙 (항상 텍스트 라벨과 함께) ──────────────────────────────── */
+  --t0:      #17457A;  --t0-wash: #E3EAF3;  --t0-rule: #9FB6D0;   /* 문법 */
+  --t1:      #684709;  --t1-wash: #F2EBDA;  --t1-rule: #C9AE7E;   /* 필사 */
+  --t2:      #3A5417;  --t2-wash: #E7EDDD;  --t2-rule: #A8BC8A;   /* 구조 */
+
+  /* ── 미기록 종 표시 (화면에서 유일하게 "여기를 보라" 를 뜻하는 색) ────── */
+  --mark:      #8E260F;
+  --mark-wash: #F7E5DE;
+  --mark-rule: #D3A08A;
+
+  /* ── 기록 눈금 ─────────────────────────────────────────────────────────── */
+  --rec-on:  var(--ink);
+  --rec-off: var(--rule-strong);
+
+  --focus: #17457A;
+
+  /* ── 코드 ──────────────────────────────────────────────────────────────── */
+  --code-paper:   #FBF9F3;
+  --code-ink:     #1A1913;
+  --code-gutter:  #524D3C;
+  --code-gutter-bg: #EFEBDF;
+  --code-rule:    #DCD5C6;
+  --code-hl:      #FBEFD2;
+  --code-hl-rule: #9A6A12;
+
+  --syn-key:   #7C1E6E;
+  --syn-str:   #14562F;
+  --syn-num:   #7A3B08;
+  --syn-fn:    #1B4A8E;
+  --syn-type:  #0D5560;
+  --syn-com:   #565040;
+  --syn-punct: #4A463A;
+  --syn-jsx:   #8A2B1C;
+
+  /* ── 도판(박새 그림) ───────────────────────────────────────────────────── */
+  --bird-cap:    #16150F;
+  --bird-cheek:  #FDFCF8;
+  --bird-breast: #DDB25A;
+  --bird-back:   #857F6B;
+  --bird-wing:   #625D4E;
+  --bird-bill:   #16150F;
+  --bird-eye:    #FDFCF8;
+  --bird-leg:    #6B6656;
+  --bird-edge:   #16150F;
+  --sil:         #B4AE9C;
+
+  /* ── 고도 (상호작용·오버레이 전용) ─────────────────────────────────────── */
+  --lift-1: 0 1px 2px rgba(22,21,15,.08);
+  --lift-2: 0 2px 4px rgba(22,21,15,.06), 0 14px 34px rgba(22,21,15,.16);
+  --scrim:  rgba(22,21,15,.44);
+}
+
+/* ── 다크: 시스템 설정 ────────────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --paper:        #15140F;
+    --paper-plate:  #1C1B15;
+    --paper-sunken: #100F0B;
+    --paper-hover:  #262419;
+    --rule:         #322F25;
+    --rule-strong:  #6C6653;
+
+    --ink:          #EFEADC;
+    --ink-2:        #C6BFAC;
+    --ink-3:        #B8B19C;
+    --ink-inverse:  #15140F;
+
+    --t0:      #93B9E6;  --t0-wash: #172231;  --t0-rule: #3E5670;
+    --t1:      #E7B96A;  --t1-wash: #2A2312;  --t1-rule: #6B5527;
+    --t2:      #A9C97E;  --t2-wash: #1E2617;  --t2-rule: #4A5C34;
+
+    --mark:      #F3A088;
+    --mark-wash: #2E1B15;
+    --mark-rule: #7A4033;
+
+    --rec-on:  var(--ink);
+    --rec-off: var(--rule-strong);
+
+    --focus: #93B9E6;
+
+    --code-paper:   #100F0B;
+    --code-ink:     #E9E4D5;
+    --code-gutter:  #ADA591;
+    --code-gutter-bg: #191811;
+    --code-rule:    #322F25;
+    --code-hl:      #2C2413;
+    --code-hl-rule: #C08F2F;
+
+    --syn-key:   #E39BD6;
+    --syn-str:   #8FCE9C;
+    --syn-num:   #E8B47C;
+    --syn-fn:    #8FB8E8;
+    --syn-type:  #7FCBD4;
+    --syn-com:   #B9B2A1;
+    --syn-punct: #B7B09C;
+    --syn-jsx:   #F0A084;
+
+    --bird-cap:    #201E17;
+    --bird-cheek:  #EFEBDD;
+    --bird-breast: #E7B96A;
+    --bird-back:   #6F6957;
+    --bird-wing:   #514C3D;
+    --bird-bill:   #201E17;
+    --bird-eye:    #EFEBDD;
+    --bird-leg:    #8C8674;
+    --bird-edge:   #6D6754;
+    --sil:         #4A4638;
+
+    --lift-1: 0 1px 2px rgba(0,0,0,.5);
+    --lift-2: 0 2px 4px rgba(0,0,0,.4), 0 14px 34px rgba(0,0,0,.55);
+    --scrim:  rgba(8,8,5,.62);
+  }
+}
+
+/* ── 다크: 사용자 명시 선택 ──────────────────────────────────────────────── */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --paper:        #15140F;
+  --paper-plate:  #1C1B15;
+  --paper-sunken: #100F0B;
+  --paper-hover:  #262419;
+  --rule:         #322F25;
+  --rule-strong:  #6C6653;
+
+  --ink:          #EFEADC;
+  --ink-2:        #C6BFAC;
+  --ink-3:        #B8B19C;
+  --ink-inverse:  #15140F;
+
+  --t0:      #93B9E6;  --t0-wash: #172231;  --t0-rule: #3E5670;
+  --t1:      #E7B96A;  --t1-wash: #2A2312;  --t1-rule: #6B5527;
+  --t2:      #A9C97E;  --t2-wash: #1E2617;  --t2-rule: #4A5C34;
+
+  --mark:      #F3A088;
+  --mark-wash: #2E1B15;
+  --mark-rule: #7A4033;
+
+  --rec-on:  var(--ink);
+  --rec-off: var(--rule-strong);
+
+  --focus: #93B9E6;
+
+  --code-paper:   #100F0B;
+  --code-ink:     #E9E4D5;
+  --code-gutter:  #ADA591;
+  --code-gutter-bg: #191811;
+  --code-rule:    #322F25;
+  --code-hl:      #2C2413;
+  --code-hl-rule: #C08F2F;
+
+  --syn-key:   #E39BD6;
+  --syn-str:   #8FCE9C;
+  --syn-num:   #E8B47C;
+  --syn-fn:    #8FB8E8;
+  --syn-type:  #7FCBD4;
+  --syn-com:   #B9B2A1;
+  --syn-punct: #B7B09C;
+  --syn-jsx:   #F0A084;
+
+  --bird-cap:    #201E17;
+  --bird-cheek:  #EFEBDD;
+  --bird-breast: #E7B96A;
+  --bird-back:   #6F6957;
+  --bird-wing:   #514C3D;
+  --bird-bill:   #201E17;
+  --bird-eye:    #EFEBDD;
+  --bird-leg:    #8C8674;
+  --bird-edge:   #6D6754;
+  --sil:         #4A4638;
+
+  --lift-1: 0 1px 2px rgba(0,0,0,.5);
+  --lift-2: 0 2px 4px rgba(0,0,0,.4), 0 14px 34px rgba(0,0,0,.55);
+  --scrim:  rgba(8,8,5,.62);
+}

@@ -1,0 +1,66 @@
+/* 목업: design/src/ink/shared.css `.press-btn`
+   바꾼 것 — 원색 토큰 금지(05 §4.2): 진홍(면·깊은 면)을 --t1 / --t1-deep 으로.
+   목업의 `.press-btn.blue` 는 이미 --t0 계열이라 그대로. */
+.press-btn {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 18px 12px;
+  border: 2.5px solid var(--rule);
+  background: var(--t1);
+  box-shadow: 0 5px 0 var(--t1-deep), 0 5px 0 2.5px var(--rule), 0 11px 14px -7px var(--drop);
+  color: var(--on-t1);
+  font-size: var(--fs-16);
+  font-weight: 700;
+  letter-spacing: -.02em;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform .08s cubic-bezier(.3, .8, .4, 1), box-shadow .08s, background .12s;
+}
+
+.press-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 0 var(--t1-deep), 0 6px 0 2.5px var(--rule), 0 13px 16px -7px var(--drop);
+}
+
+.press-btn:active,
+.press-btn.down {
+  transform: translateY(5px);
+  box-shadow: 0 0 0 var(--t1-deep), 0 0 0 2.5px var(--rule), 0 2px 6px -3px var(--drop);
+}
+
+.press-btn.blue {
+  background: var(--t0);
+  box-shadow: 0 5px 0 var(--t0-deep), 0 5px 0 2.5px var(--rule), 0 11px 14px -7px var(--drop);
+  color: var(--on-t0);
+}
+
+.press-btn.blue:hover {
+  box-shadow: 0 6px 0 var(--t0-deep), 0 6px 0 2.5px var(--rule), 0 13px 16px -7px var(--drop);
+}
+
+.press-btn.blue:active,
+.press-btn.blue.down {
+  box-shadow: 0 0 0 var(--t0-deep), 0 0 0 2.5px var(--rule), 0 2px 6px -3px var(--drop);
+}
+
+.press-btn[disabled] {
+  transform: none;
+  background: var(--paper-3);
+  box-shadow: 0 5px 0 var(--edge), 0 5px 0 2.5px var(--rule);
+  color: var(--ink-soft);
+  cursor: not-allowed;
+}
+
+/* 목업 ink-home.html: 버튼 안의 키 캡은 조금 더 얌전하다 */
+.press-btn kbd { font-size: var(--fs-13) }
+
+/* 야간반 글로우 — 05 §4.3 dark allowlist 6개 중 하나 */
+[data-theme="dark"] .press-btn:not([disabled]) {
+  box-shadow: 0 5px 0 var(--t1-deep), 0 5px 0 2.5px var(--rule), 0 0 26px var(--glow-t1);
+}
+
+[data-theme="dark"] .press-btn.blue:not([disabled]) {
+  box-shadow: 0 5px 0 var(--t0-deep), 0 5px 0 2.5px var(--rule), 0 0 26px var(--glow-t0);
+}

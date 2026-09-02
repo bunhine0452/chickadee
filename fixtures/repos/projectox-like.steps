@@ -1,0 +1,98 @@
+# projectox-like — 커밋 95, TS/TSX/SQL 약 12k줄 (06 §1.2 · 00 D36)
+# 진행률 이벤트(E3)·인제스트 예산·개념 분포를 볼 만큼 큰 픽스처다.
+# 12k줄을 손으로 적으면 리뷰가 불가능하므로 앞의 씨앗 3커밋만 손으로 쓰고
+# 나머지 92커밋은 `gen wave` 합성기에 맡긴다 — 시드 LCG 하나뿐이라 결과는 어느
+# 기계에서나 같다($RANDOM·시각·로케일 미사용). 자세히는 make-fixture-repo.sh --help.
+#
+#   gen wave <횟수> <경로틀> lines=<줄수> seed=<정수> msg=<메시지틀...>
+#     · 매 회 파일 1개(약 <줄수>줄)를 쓰고 커밋 1개를 만든다 → 커밋 수 = <횟수>
+#     · 경로틀·메시지틀의 {i} = 2자리 0채움 인덱스(01, 02, ...)
+#     · 종류는 확장자로: .ts(모듈·클래스·async) .tsx(컴포넌트) .sql(테이블·인덱스)
+#   커밋 3 + 30 + 30 + 32 = 95
+
+# ── 씨앗 커밋 1~3 (합성 파일들이 참조하는 뿌리) ─────────────────────────────
+write src/core/time.ts <<EOS
+export const DAY_MS = 86_400_000;
+export const DAY_START_HOUR = 4;
+
+export function clamp(value: number, low: number, high: number): number {
+  if (value < low) return low;
+  if (value > high) return high;
+  return value;
+}
+
+export function dayKey(at: Date): string {
+  const shifted = new Date(at.getTime() - DAY_START_HOUR * 3_600_000);
+  const m = String(shifted.getMonth() + 1).padStart(2, "0");
+  const d = String(shifted.getDate()).padStart(2, "0");
+  return shifted.getFullYear() + "-" + m + "-" + d;
+}
+EOS
+write src/index.ts <<EOS
+import { clamp, dayKey } from "./core/time";
+
+export interface Boot {
+  repoId: number;
+  startedAt: Date;
+}
+
+export async function boot(input: Boot): Promise<string> {
+  const id = clamp(input.repoId, 1, 9_999);
+  await Promise.resolve();
+  return dayKey(input.startedAt) + " · repo " + id;
+}
+EOS
+commit chore: 뼈대 — 시각 유틸과 진입점
+
+write db/migrations/0001_init.sql <<EOS
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE repo (
+  id          INTEGER PRIMARY KEY,
+  root        TEXT    NOT NULL UNIQUE,
+  created_at  INTEGER NOT NULL
+);
+
+CREATE TABLE concept (
+  id          INTEGER PRIMARY KEY,
+  repo_id     INTEGER NOT NULL REFERENCES repo(id) ON DELETE CASCADE,
+  concept_key TEXT    NOT NULL,
+  lang        TEXT    NOT NULL
+);
+
+CREATE UNIQUE INDEX ux_concept_repo_key ON concept(repo_id, concept_key);
+EOS
+commit feat: 초기 스키마
+
+write src/app/shell.tsx <<EOS
+import { useState } from "react";
+import { clamp } from "../core/time";
+
+export interface ShellProps {
+  panels: string[];
+  onOpen: (index: number) => void;
+}
+
+export function Shell({ panels, onOpen }: ShellProps) {
+  const [active, setActive] = useState(0);
+  const safe = clamp(active, 0, panels.length - 1);
+  return (
+    <main className="shell">
+      <nav>
+        {panels.map((name, i) => (
+          <button key={name} data-on={i === safe} onClick={() => setActive(i)}>
+            {name}
+          </button>
+        ))}
+      </nav>
+      <output onClick={() => onOpen(safe)}>{panels[safe] ?? "없음"}</output>
+    </main>
+  );
+}
+EOS
+commit feat: 앱 셸
+
+# ── 합성 커밋 4~95 ────────────────────────────────────────────────────────
+gen wave 30 src/gen/service-{i}.ts lines=170 seed=1101 msg=feat: 서비스 {i} 계층 추가
+gen wave 30 src/panels/panel-{i}.tsx lines=150 seed=2201 msg=feat: 패널 {i} 화면 추가
+gen wave 32 db/migrations/01{i}_change.sql lines=60 seed=3301 msg=chore: 마이그레이션 01{i}

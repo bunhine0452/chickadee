@@ -1,0 +1,128 @@
+/* 목업: ink-home.html `.dee` 판 변수 + design/src/ink/shared.css 동작 클래스
+   바꾼 것 — `peek` 의 `infinite` → `2` (00 D11 「상시 애니메이션 유한화」). */
+.dee {
+  display: inline-block;
+  overflow: visible;
+  vertical-align: middle;
+
+  /* 판(plate) 변수 — 겹에 따라 하나씩 켜진다 */
+  --lpaper: var(--dee-paper);
+  --lk: #1c1a17;
+  --lg: #9ca7ad;
+  --lb: #374fc4;
+  --lt: #e4bd84;
+  --lp: #ec4882;
+  --ly: #f0c032;
+}
+
+/* 0 빈 판 · 1 회색 스크린 · 2 먹판 · 3 +청판 · 4 +진홍·황판 (정본 §7) */
+.dee[data-ly="0"] {
+  --lk: var(--dee-blank);
+  --lg: var(--dee-blank);
+  --lb: var(--dee-blank);
+  --lt: var(--dee-blank);
+  --lp: transparent;
+  --ly: transparent;
+}
+
+.dee[data-ly="1"] {
+  --lk: url("#htGrayL");
+  --lg: url("#htGrayL");
+  --lb: url("#htGrayL");
+  --lt: url("#htGrayL");
+  --lp: transparent;
+  --ly: transparent;
+}
+
+.dee[data-ly="2"] {
+  --lb: url("#htGrayL");
+  --lt: transparent;
+  --lp: transparent;
+  --ly: transparent;
+}
+
+.dee[data-ly="3"] {
+  --lt: transparent;
+  --lp: transparent;
+  --ly: transparent;
+}
+
+/* 스티커 : 배지 자체가 링과 크림 원판을 가지므로 틀은 투명 — 종이 두께 그림자만 */
+.dee-sticker {
+  display: inline-grid;
+  border: 2.5px solid transparent;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: 0 3px 0 var(--edge);
+  place-items: center;
+}
+
+.dee-sticker > .dee {
+  width: 100%;
+  height: 100%;
+}
+
+/* ── 습성 동작 ── */
+.dee.hop { animation: hop 520ms var(--e-hop) }
+
+@keyframes hop {
+  0% { transform: translateY(0) }
+  34% { transform: translateY(-16px) }
+  62% { transform: translateY(0) }
+  74% { transform: translateY(-3.5px) }
+  100% { transform: translateY(0) }
+}
+
+.dee.tilt { animation: tilt 700ms var(--e-settle) both }
+
+@keyframes tilt {
+  0% { transform: rotate(0) }
+  40% { transform: rotate(-14deg) }
+  100% { transform: rotate(-9deg) }
+}
+
+/* 거꾸로 매달리기 : 안 보이던 면을 본다 */
+.dee.hang {
+  transform: rotate(180deg) scaleX(-1);
+  transition: transform .55s var(--e-hop);
+}
+
+.dee.peek { animation: peek 1.6s var(--e-soft) 2 }
+
+@keyframes peek {
+  0%, 100% { transform: translateY(0) }
+  50% { transform: translateY(-2px) rotate(-3deg) }
+}
+
+.dee.lifer { animation: lifer 1.35s var(--e-hop) both }
+
+@keyframes lifer {
+  0% { transform: translateY(0) scale(1) }
+  18% { transform: translateY(-22px) scale(1.06) rotate(-8deg) }
+  36% { transform: translateY(0) scale(1) }
+  52% { transform: translateY(-14px) rotate(6deg) }
+  68% { transform: translateY(0) }
+  82% { transform: translateY(-5px) }
+  100% { transform: translateY(0) }
+}
+
+/* 감축 모드 : 전환만 없애고 최종 포즈(`hang` 의 180deg, `tilt` 의 -9deg)는 남긴다 */
+@media (prefers-reduced-motion: reduce) {
+  .dee.hop,
+  .dee.tilt,
+  .dee.peek,
+  .dee.lifer {
+    animation-duration: .001ms;
+    animation-iteration-count: 1;
+  }
+  .dee.hang { transition-duration: .001ms }
+}
+
+[data-motion="reduce"] .dee.hop,
+[data-motion="reduce"] .dee.tilt,
+[data-motion="reduce"] .dee.peek,
+[data-motion="reduce"] .dee.lifer {
+  animation-duration: .001ms;
+  animation-iteration-count: 1;
+}
+[data-motion="reduce"] .dee.hang { transition-duration: .001ms }

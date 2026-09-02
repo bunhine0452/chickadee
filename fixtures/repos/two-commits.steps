@@ -1,0 +1,28 @@
+# two-commits — 커밋 2 (06 §1.2 · 00 D36)
+# 반례 픽스처다: 히스토리가 T2(배치) 카드 생성 최소 조건에 못 미쳐 「빈 상태」가 나와야 한다.
+# 일부러 작게 유지한다 — 파일 하나, 추가 1 + 수정 1.
+#
+# 형식은 scripts/make-fixture-repo.sh --help 참고.
+#   write <경로> <<EOS ... EOS · delete · rename · commit · gen wave
+
+write src/index.ts <<EOS
+export const NAME = "two-commits";
+
+export function greet(who?: string): string {
+  return "안녕, " + (who ?? NAME);
+}
+EOS
+commit feat: 진입점 하나
+
+write src/index.ts <<EOS
+export const NAME = "two-commits";
+export const VERSION = 2;
+
+export function greet(who?: string): string {
+  if (!who) {
+    return "안녕, " + NAME;
+  }
+  return "안녕, " + who + " (v" + VERSION + ")";
+}
+EOS
+commit fix: 빈 이름 분기 처리

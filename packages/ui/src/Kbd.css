@@ -1,0 +1,11 @@
+/* 목업: design/src/ink/shared.css `kbd.k` */
+kbd.k {
+  padding: 0 5px;
+  border: 1.5px solid currentcolor;
+  border-radius: 2px;
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  font-weight: 600;
+  line-height: 1.4;
+  opacity: .8;
+}

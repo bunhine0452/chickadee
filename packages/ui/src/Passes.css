@@ -1,0 +1,32 @@
+/* 목업: design/src/ink/shared.css `.passes` + ink-home.html `.n-pass` */
+.passes {
+  display: inline-flex;
+  gap: 2.5px;
+  vertical-align: middle;
+}
+
+.passes i {
+  display: block;
+  width: 9px;
+  height: 16px;
+  border: 1.5px solid var(--rule);
+  background: var(--paper-3);
+}
+.passes.t0 i.on { background: var(--t0) }
+.passes.t1 i.on { background: var(--t1) }
+.passes.t2 i.on { background: var(--t2) }
+
+.n-pass {
+  display: flex;
+  gap: 2.5px;
+}
+
+.n-pass i {
+  width: 8px;
+  height: 12px;
+  border: 1.5px solid var(--rule);
+  background: var(--paper-2);
+}
+.n-pass.t0 i.on { background: var(--t0) }
+.n-pass.t1 i.on { background: var(--t1) }
+.n-pass.t2 i.on { background: var(--t2) }

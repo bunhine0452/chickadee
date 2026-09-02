@@ -1,0 +1,123 @@
+# 06 §5.2 릴리스 워크플로 — OS당 예산 35분
+#
+# 태그는 **CI 를 통과한 main 커밋에만** 붙인다(브랜치 보호). 이 워크플로는
+# 드래프트 릴리스를 만들 뿐이고, 사람이 3-OS 설치 스모크를 한 뒤 공개한다(§5.3).
+#
+# 서명·공증 없음 — D13 대로 다운로드 500회 또는 「열리지 않아요」 10건까지 유보한다.
+# 자동 업데이트도 꺼져 있다(§5.5): `TAURI_SIGNING_PRIVATE_KEY` 류 시크릿을
+# 여기 넣지 않는다. 이름만 있어도 「곧 켤 것」처럼 읽혀서 안 넣는다.
+# 사용자 우회 안내 문구는 README(§5.4)가 소유한다.
+#
+# Actions 는 전부 커밋 SHA 고정(06 §4.4).
+
+name: release
+
+on:
+  push:
+    tags: ['v*']
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write # 드래프트 릴리스 생성·에셋 업로드
+
+env:
+  # ci.yml 과 같은 조합. 06 §5.2 의 「pnpm·node 셋업은 ci.yml 과 동일」.
+  NODE_VERSION: '26'
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: ${{ matrix.os }} ${{ matrix.args }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # 06 §5.2 는 x86_64 macOS 를 `macos-13` 으로 적었지만 그 러너는 은퇴했다.
+          # 현재 Intel macOS 러너는 `macos-15-intel` 이다(actionlint 1.7.12 라벨 목록 확인).
+          - { os: macos-14, target: aarch64-apple-darwin, args: '--target aarch64-apple-darwin' }
+          - { os: macos-15-intel, target: x86_64-apple-darwin, args: '--target x86_64-apple-darwin' }
+          - { os: windows-2022, target: '', args: '' }
+          - { os: ubuntu-22.04, target: '', args: '' }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Linux WebView 의존성
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            curl \
+            wget \
+            file \
+            libwebkit2gtk-4.1-dev \
+            libappindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            libssl-dev \
+            libxdo-dev
+
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
+        with:
+          toolchain: stable
+          # macOS 는 `--target` 을 명시하므로 그 타깃을 미리 깔아 둔다.
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          workspaces: .
+          key: ${{ matrix.os }}-${{ matrix.target }}
+
+      - run: pnpm install --frozen-lockfile
+
+      - uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f # v1.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # 서명 키 없음 — 06 §5.5 를 켤 때까지.
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: Chickadee ${{ github.ref_name }}
+          releaseBody: CHANGELOG.md 의 해당 절 참고
+          releaseDraft: true
+          prerelease: false
+          # 업데이터가 꺼져 있으므로 latest.json 도 .sig 도 올리지 않는다(§5.5).
+          uploadUpdaterJson: false
+          uploadUpdaterSignatures: false
+          args: ${{ matrix.args }}
+
+  # 06 §5.3 4항 — 드래프트에 SHA256SUMS.txt 를 붙인다. 서명이 없는 동안
+  # 사용자가 무결성을 확인할 수 있는 유일한 수단이다(§5.4 안내 문구가 이걸 가리킨다).
+  checksums:
+    name: SHA256SUMS
+    needs: build
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - name: 드래프트 에셋 내려받아 해시 계산
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          mkdir -p dist && cd dist
+          # 드래프트는 태그가 아직 커밋에 붙지 않았지만, gh 는 「pending tag name」으로
+          # 드래프트를 찾아 준다(cli/cli pkg/cmd/release/shared/fetch.go FetchRelease).
+          gh release download "$TAG" --clobber
+          # 재실행 시 이전 SHA256SUMS.txt 가 섞이지 않게 지운다.
+          rm -f SHA256SUMS.txt
+          sha256sum * > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+          gh release upload "$TAG" SHA256SUMS.txt --clobber

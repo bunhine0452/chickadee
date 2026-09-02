@@ -1,0 +1,369 @@
+# 00 · 개요 · 인계
+
+**이 문서의 위치** — Chickadee 설계 문서 6편(01~06)의 앞머리. 6편이 서로 어긋난 결정을 하나로 정하고(§4), 구현 순서를 마일스톤에 배치하고(§5), 이 폴더만 보고 구현을 이어갈 세션이 어디서 시작할지를 적는다. 각 문서 작성자가 자기 문서에 반영할 수정 지시는 `docs/REVIEW.md` 에 있다. **정본은 `.oculpm/discussion/vibe-code-study-app/discussion.md` 의 「결론」** 이며 이 문서는 정본을 바꾸지 않는다 — 정본을 고쳐야 하는 것은 §4.3 에 따로 모았다.
+
+---
+
+## 1. 요약과 시작점
+
+Chickadee 는 바이브 코딩으로 앱을 만들었지만 자기 코드를 이해하지 못하는 사람을 위한 Tauri 데스크톱 학습 앱이다. 사용자 리포를 **얇은 Rust**(git2 · tree-sitter · rusqlite 호출 껍데기, ≤ 1500줄)가 읽어 「사실」(파일 · 캡처 · 커밋 · 커밋 파일)만 SQLite 에 쓰고, **두꺼운 TypeScript** 가 그 사실에서 개념 사용처 · 카드 · 오늘의 큐 · 채점 · 잉크 겹(숙련도 0~4) · 전 UI 를 만든다. 세 트랙(T0 문법 · T1 클론 코딩 · T2 구조)은 실행 없이 채점되고, LLM 은 사다리 4단의 부가 기능일 뿐이며, 코드는 컴퓨터 밖으로 나가지 않는다. 시각은 「잉크」(리소그래프) + 박새 Dee 이고 목업 두 장이 화면의 정본이다.
+
+**이 폴더를 처음 여는 세션이 할 일**
+
+1. 정본 `.oculpm/discussion/vibe-code-study-app/discussion.md` 의 「결론」 §2 · §3 · §5 를 읽는다(§6~§8 은 화면을 만들 때).
+2. 이 문서 §3 용어집 → §4 결정 등록부 → §5 마일스톤 순으로 읽는다. 문서 간 이름이 다르면 §3 의 **확정 이름**이 답이다.
+3. 맡은 마일스톤의 문서만 읽는다 — M0·M1 은 `01` → `02` §2 → `03`, M2 는 `02` §3~§6 → `04` §1~§2 → `05`, M3·M4 는 `04` → `05`, M5 는 `06`. 읽기 전에 `REVIEW.md` 의 그 문서 절이 반영됐는지 확인한다.
+4. 목업은 `design/ink-home.html` · `design/ink-session.html` · 소스 `design/src/ink/*.js`(카드가 요구하는 데이터 모양의 실물). 로고는 `design/logo/chickadee-logo.svg`(변경 금지).
+5. 시작은 **M0** (§5) 의 `01 · 워크스페이스 스캐폴드` 부터. 작업 단위가 끝날 때마다 `AGENTS.md` 규칙대로 일지를 쓴다(§7).
+
+---
+
+## 2. 시스템 지도
+
+```
+ 사용자 리포 (읽기 전용, .git 은 git2 로만)            문법 사전 dictionary/<lang>/<concept>.{yaml,scm}
+        │                                                        │ (번들 리소스, dict-user/ 가 우선)
+        ▼                                                        ▼
+ ┌─ Rust 사실 층 ─ crates/{git,parse,store} + apps/desktop/src-tauri/jobs.rs ────────────────────┐
+ │ walk(ignore) → 해시(git blob oid) → tree-sitter parse+query → git2 revwalk/diff → 500행 tx      │ 01 · 03(§1~2)
+ │ 쓰는 것: repo · ingest_run · file · capture · git_commit · commit_file   (명령: repo_* ingest_*    │
+ │ file_read_* parse_snippet git_diff_text git_blame_lines store_* dict_* app_*)                      │
+ └────────────────────────────────────────────┬────────────────────────────────────────────────────┘
+                                              ▼  IPC(JSON ≤ 1 MiB, store_query/exec/batch 는 이름으로만)
+ ┌─ SQLite (app_data_dir/chickadee.db, WAL, user_version 마이그레이션) ────────────────────────────┐
+ │ 사실 6 + 사전 물질화 3 + 파생(concept_site · import_edge · block · unit · unit_node · gap · card) │ 02
+ │ + 원장(session · session_item · review_log · dunno_event · ladder_event · appeal · why_answer · lifer)│
+ │ + 캐시(mastery · card_state · perf_sample) + settings · scheduler_params                            │
+ └────────────────────────────────────────────┬────────────────────────────────────────────────────┘
+                                              ▼  TS 파생 층 (packages/*)
+   concepts  캡처 → concept_site(lineConcepts·uncoveredRatio·shape·site_key) · import 해석 · unit · gap   03(§3~6) · 04(§7.1)
+   cards     T0 3종 · T1 블록·마스크·스펙 · T2 4종·정답지(core/sec/trap)                                 04
+   scheduler FSRS(ts-fsrs) · 겹 리듀서 · 오늘의 큐 · 미지 개념 순위 · 전이                                02
+   grading   T0 판정·진단 · T1 정렬→정규식→AST 승격→치환 검증 · T2 3티어 · 사다리 데이터 · 프롬프트          04
+                                              ▼
+ ┌─ UI (React 19 · Vite · Zustand · Monaco · 순수 CSS 토큰) ──────────────────────────────────────┐
+ │ home(인쇄 대지) · session 오버레이(교정쇄: T0/T1/T2 판 · 사다리 · LIFER · 요약) · ingest · settings   │ 05
+ └──────────────────────────────────────────────────────────────────────────────────────────────┘
+ 품질·보안·릴리스: 골든·property·IPC 덤프 재생·디자인 게이트·E2E · CSP·키체인·로그 금지 필드 · 3-OS 빌드    06
+```
+
+| 상자 | 소유 문서 | 다른 문서는 |
+|---|---|---|
+| Rust 크레이트 · Tauri 명령·이벤트 · 오류 코드 · 디렉터리 · 성능 예산 | 01 | 이름으로만 참조 |
+| DDL 전부 · 겹 리듀서 · FSRS 매핑 · 큐 · 미지 개념 캐시 · TS 행 타입 | 02 | SQL 을 쓰지 않는다 |
+| 인제스트 정책(필터·커밋 분류·증분·blame) · 캡처 규약 · Site 파생 알고리즘 · 사전 YAML · 구멍 지도 · 대지 탐지 | 03 | Rust 부분은 01 의 명령 형태를 따른다 |
+| T0 생성·채점 · T1 엔진 · T2 그래프·정답지 · 사다리 데이터 · 프롬프트 규약 · 골든 | 04 | 겹·큐 효과는 이벤트로만 02 에 넘긴다 |
+| 컴포넌트 · 상태 · 키맵 · 토큰 · Monaco · 접근성 강제 · 목업 이전 | 05 | `invoke` 는 `ipc-client` 밖에서 금지 |
+| 테스트 피라미드 · 게이트 · 프라이버시 · 보안 · CI/CD · 릴리스 · 오픈소스 문서 | 06 | 경로·수치는 01·02·04 를 따른다 |
+
+---
+
+## 3. 용어집
+
+은유(화면 문구) ↔ 평문 ↔ 코드 이름. 「폐기」는 어느 문서에 있었으나 더 쓰지 않는 이름.
+
+| 은유 | 평문 | 확정 코드 이름 | 폐기 |
+|---|---|---|---|
+| 판 | 카드 | `card` (`track` t0/t1/t2/t3 · `kind`) | — |
+| 잉크 겹 0~4 (미인쇄·애벌·먹판·+청판·+진홍) | 숙련도 | `mastery.layer` · `Layer` · 표시 겹 `shownLayer` | `ly`(UI 지역 변수만) |
+| 다시 찍기 | 재출제(오답·모르겠어요 뒤 +3 자리) | `session_item.role='retry'` | — |
+| 모르겠어요 | 다시 찍기 버튼 · 감점 없음 | `dunno` · `dunno_event` | — |
+| 사다리 1~4단 | 모르겠어요 4단(사전·아래층·다른 자리·자유 질문) | `ReprintLadder` · `ladder_event.rung` | 세션 `.ladder` |
+| 아래층 | 선행 개념 판 | `prereq` · `concept_prereq` · `role='prereq'` | — |
+| 이어보기 문단 | 아래층에서 돌아온 뒤 연결 글 | `bridge`(사전) · `LinkPara` | — |
+| 교정쇄 | 하루 세션 | `session` · `session_item` | `sessions` · `state_json` 블롭 · `runId` |
+| 오늘의 인쇄 | 오늘의 큐 | `planSession` → `session_item` | `buildQueue` |
+| 작업 띠 | 시간 비례 진행바 | `JobBand` · `TimeQueue`(`est_min`) | — |
+| 새 판 · 판 만들기 | 새 카드 · 구멍에서 카드 생성 | `role='new'` · `role='gap'` | — |
+| 판이 없는 문법 | 내 코드엔 있는데 카드 없는 개념 | `gap` | 미기록 종 |
+| LIFER · 채집지 | 개념 첫 기록 의식 · 그 파일·줄 | `lifer`(id = 일련번호) · `lifer.file_path` | — |
+| 정합 · 동등 · 어긋남 · 누락 · 추가 | 맞음 · 같은 뜻 · 다름 | `exact · equiv · differ · missing · extra` | — |
+| 이의(「같은 뜻인데요」·「이것도 맞다」) | 판정 이의, 점수 불변 | `appeal` (`track` t1/t2) | `disputes` · `Dispute` · `t2_feedback` · `disputedLines` |
+| 왜 게이트 | 필사 뒤 자기 말 한 줄 | `why_answer` · `WhyGate` | `why_answers` |
+| 대지(시트) · 스티커(노드) | 내 리포의 기능 하나 · 그 안의 (개념, 트랙) | `unit` · `unit_node` PK(unit, concept, track) | — |
+| 사용처 | 개념이 내 코드에 쓰인 자리 | `concept_site` · TS `ConceptSite` | `Site`(03 타입) · `captures` |
+| 캡처 | tree-sitter 쿼리 결과 한 건 | `capture` · Rust `Capture` | `imports` 테이블 |
+| 정답지 | 실제 커밋의 변경 파일 | `git_commit` · `commit_file` · `core/sec/trap` | `CommitRec` · `commits` · `commit_files` |
+| 지도 | import 그래프 | `import_edge` · `DependencyMap` | — |
+| 판 짜기 | TS 파생 + 카드 생성 | `packages/concepts` `derive` · `packages/cards` | `chickadee-ingest` 크레이트(개념어로만) |
+| 리포 읽기 | 인제스트 | `ingest_run` · Rust `jobs.rs` | `ingest_runs` · `ingest_state` |
+| 문법 사전 | 개념 YAML + 쿼리 | `dictionary/<lang>/<concept>.yaml`+`.scm` · `_lang.yaml` | `dictionaries/` · `manifest.yaml` · `concepts.yaml` |
+| 문법(grammar) | tree-sitter 문법 키 | `grammar` = `typescript·tsx·javascript·python·go·rust·swift·dart·sql` | `LangSpec.lang` · `sequel` |
+| 언어(lang) | 사전 네임스페이스 | `lang` = `ts·py·go·rs·swift·dart·sql·common·react·arch` | `dictionary/typescript/` |
+| 전이 · 흐려짐 · 다음 인쇄 | 다른 언어에서 아는 개념 · 겹이 옅어짐 · 다음 복습 시점 | `universal_id`·`mastery.transfer_from` · `fade(R)` · `mastery.due_at`·`labelFor` | — |
+| 원본 잠깐 보기 · 한 단계 쉽게 · 힌트 | T1 힌트 · T1 단계 내리기 · T2 힌트 | `peeks` · `downgraded` · `hints` | — |
+| 블록 · 3단계 · 스펙 카드 · 대표 개념 | T1 필사 단위 · 페이딩 · 3단계 요구 목록 · T1 숙련도 키 | `block` · `card_state.stage` · `SpecCard` · `card.concept_id`(T1) | — |
+| 그것이 참이 되는 조건 · 가장 날카로운 자리 | 오답 진단문 · 반례 코드 | `diag.t` · `diag.edge` | 「틀렸다」 |
+| 선택의 왜 | 생성 시점 기록 | ocul-pm 일지 (`repo_glob_read`) | — |
+| 도장 · 판정란 · 길잡이 | 판정 스탬프 · 피드백 슬롯 · 마스코트 말풍선 | `Stamp` · `FeedbackSlot` · `Guide`/`Say` | — |
+| 잉크 겹 척도(홈) | 겹별 개념 수 | `InkScale` | 홈 `.ladder` |
+| 주간반/야간반 · 부속 숨김 | 라이트/다크 · 장식 끄기 | `data-theme` · `data-trim` | — |
+
+---
+
+## 4. 결정 등록부
+
+우선순위: 정본 > 검증된 것(02 DDL 은 SQLite 실행 검증, 04 는 목업 코드 정식화) > 단순한 쪽 > 나중에 바꾸기 쉬운 쪽. 정확한 문장·타입·DDL 은 `REVIEW.md` 의 해당 문서 절에 있다.
+
+### 4.1 제기된 상충 14건
+
+| # | 쟁점 | 결정 | 근거 | 반영 |
+|---|---|---|---|---|
+| D1 | Rust↔TS 경계 | 01 채택. Rust 는 `file·capture·git_commit·commit_file` 만 SQLite 에 직접 쓴다. TS `packages/concepts` 가 캡처를 **파일 단위 페이지**로 읽어 03 §3.3~3.6 알고리즘(Site 필드·shape+occurrence·lineConcepts·uncoveredRatio·unknownCount) 그대로 `concept_site` 를 파생해 쓴다. blame 은 `git_blame_lines` 명령 추가. 크레이트는 `crates/git·parse·store`+`jobs.rs`; `chickadee-ingest` 는 두 층을 가리키는 말로만. `Capture` 에 `matchId·patternIndex·form·inError·startCol·endCol·nodeKind` 추가 | 정본 §5; 03 알고리즘은 검증된 자산 | 01 §3.1·3.3·9 · 03 §1·§3 |
+| D2 | 테이블 이름·열 | 02 DDL 정본(단수형). 01 의 복수형 이름 폐기. 02 에 `capture`·`commit_file`·`import_edge`·`block`·`why_answer`·`perf_sample` 추가, `ingest_run` 에 fingerprint 구성 열, `concept_site.excerpt TEXT ≤ 200자` | 02 는 실행 검증됨 | 02 §2 · 01 §3.3~3.4 · 06 §6.3·§8 |
+| D3 | 겹 규칙 | 02 리듀서: 다시 찍기 정답 = 회복만, 모르겠어요 = −1 + Again, 하루 최대 +1, T1 4겹 = 3단계 통과, T2 진급 85. 04 `lyProposed` 폐기 → 이벤트에 `outcome:'ok'|'wrong'|'dunno'` 만, 02 `applyOutcome` 이 계산. 목업 `t0.js:146` 은 다시 찍기에도 +1 → 앱과 다름을 05 에 명시, 수정은 05 「목업 정리」 | 정본 §2 「시간을 두고 다시 맞힌 횟수」 | 02 §3.3 · 04 §2.2 · 05 §3 |
+| D4 | 이름 · 숙련도 키 | `appeal` 통일(`disputes`·`Dispute`·`t2_feedback` 폐기). 겹은 **언어 개념 id** 에 쌓는다. 전이: 같은 `universal_id` 의 어떤 언어 개념이 **3겹 이상**이면 새 언어 개념은 첫 노출 때 `mastery{layer:1, transfer_from}` 로 시작 + 「표기 차이」 카드 우선, 첫 정답 Good | 02 열린 질문 10 · 정본 §4 | 02 §6.3·DDL · 03 §3.1 · 04 §5 |
+| D5 | T2 core 임계 | `core = { status==='A' ∨ additions+deletions ≥ 5 ∨ 유닛 진입점 }` | import 한 줄 파일이 core 가 되는 것을 막음 | 03 열린 질문 7 · 04 §8.1 |
+| D6 | 사전 스키마 | 개념 필드 `why_gate:{q,help,choices[{t,ok,fb}]}`(선택) + `_lang.yaml.diag_default:{point,blank}` 일반 진단 템플릿 | 04 §6 | 03 §4.4·§6 · 04 §2.1 |
+| D7 | 폰트·네트워크 | 확인만: OFL 원본 woff2 9파일 번들(≈8 MB), CSP `default-src 'self'`+`worker-src 'self' blob:`(Monaco), 네트워크 0(예외: 사용자가 켠 LLM 4단) | 01·05·06 일치 | 06 §4.3 |
+| D8 | LLM 프롬프트 | 「이 줄+앞뒤 4줄(≤9줄), 디렉터리 경로·리포명·커밋 메시지·작성자 제외」. **파일 base name 허용** — 첫 줄 `파일 {file.base} {focus}행 근처입니다.` (§6-4 기본값) | base name 은 답 품질을 올리고 경로를 새지 않음 | 04 §2.4 · 05 `AskRung` · 06 §3.3·§3.6 |
+| D9 | FSRS 개인화 | MVP 밖. `ts-fsrs` 옵티마이저 확인 뒤 TS 로; Rust `fsrs` 크레이트 안 씀 | 01 금칙어 · 임계 1,000행 = 6주 뒤 | 02 §3.6·체크리스트 14 |
+| D10 | 세션 저장 | 02 `session`+`session_item` 정본; 01 `session.save` = 두 테이블 `store_batch`. 블롭 열 없음 — `session_item.state_json`·`session.plan_json` 으로 복구 | 원장이 곧 큐 | 01 §5 · 05 §3 |
+| D11 | 05 디자인 8건 | `--yellow-text:#664300` · 상시 애니 3건 유한화(`blink`→정적+「오늘」, `spin`→정지 링, `peek`→2회) · 잠긴 노드 `shake` 제거 · T1 3단계 Tab 유지 · 사다리 `1~4` 는 포커스가 사다리 안일 때만 · 최소 창 1000×680 · 홈 Enter 는 `main` 포커스일 때만 · `--verdict-exact/-equiv/-differ` 신설. 성능 강등은 05 안(윈도잉→판번호 어긋남 끄기→결 op 0), 01 의 「p95>12ms 면 `data-trim` on」 폐기 | 05 정적 대비 40쌍 · 정본 §3-7 | 05 §4·6·7·10 · 01 §8 · §4.3 |
+| D12 | 기본값 | 예산 **15분**(10~25) · 새 판 **2장**(상한 4) · 경계 **04:00** · `maxCommits 2000 / maxFileBytes 512 KiB / maxFilesPerCommit 200 / maxFiles 50000 / maxLineBytes 20000` · Linux 부속 기본 **off** · 개인화 1,000행 | 목업 「약 15분·새 판 1」 | 02 §5.1 · 01 §3.1·§8 · 05 §4.3 |
+| D13 | 06 열린 질문 | 서명·공증 = 다운로드 500회 또는 「열리지 않아요」 10건 · Windows E2E 는 릴리스 스모크(0.2 재검토) · 크래시 자동 전송 없음 · 마이그레이션 전진 전용+백업 3개 | 06 제안 채택 | 06 §5.4·1.5·8·6.1 |
+| D14 | 04 잔여 | T1 `total` = 비공백 줄(목업 20→18) · 원본 AST 캐시 = 02 `block.ast_json` · 소블록 완충 `min(85, 100 − 200/total)`(T1 만; T2 는 85 고정) | 04 열린 질문 2·5·6 | 02 DDL · 04 §4.6 · 05 §11 |
+
+### 4.2 읽으면서 발견한 상충
+
+| # | 쟁점 | 결정 | 근거 | 반영 |
+|---|---|---|---|---|
+| D15 | 인제스트 이벤트 | 01 이벤트(`ingest_progress/done/error`) 채택 + `ingest_warning{jobId,relPath,reason}` 추가. 03 의 `Channel<IngestEvent>` 폐기 | 01 이 IPC 소유 | 03 §1.8 · 01 §3.2 |
+| D16 | 저장소 경로 | 01 레이아웃 정본. 06 의 `src-tauri/`·`src/**`·`dictionaries/`·`src-tauri/migrations/`·`tests/golden/` → `apps/desktop/src-tauri/`·`packages/*`·`dictionary/`·`packages/store-sql/migrations/`·`crates/parse/tests/`. 01 `routes/`→`screens/` | 06 스스로 「이름이 다르면 01」 | 06 전체 · 01 §4 |
+| D17 | 사전 파일 배치 | 03: 개념당 `yaml+scm` + `_lang.yaml`, `common/`·`react/`·`arch/`. 01 의 `manifest.yaml`·`concepts.yaml`·`queries/` 폐기. `dict_read{lang}` → `{files:[{relPath,text}]}` | 기여 단위 = 파일 하나 | 01 §3.2·§4·§9 · 06 §7.2 |
+| D18 | 캡처 규약 | 03 의 `@site·@pick.N·@hole·@ctx.*·(#set! form)`. `Capture.queryId` = 개념 id; 시스템 쿼리 `_imports`(`@import.source`, form = static/type/dynamic/require)·`_blocks`(`@block.function`·`@block.name`). 01 `concept.<id>` 폐기. `inError` = ERROR 겹침 또는 조상 3단 안 ERROR | matchId 없이는 pick/hole 을 Site 로 못 묶음 | 01 §3.1·§9 · 03 §3.2 |
+| D19 | grammar vs lang | `grammar` = tree-sitter 키(`sql`; `sequel` 은 크레이트명), `lang` = 사전 네임스페이스. `LangSpec.lang`→`grammar`, `parse_snippet{grammar}`, 04 `Lang`→`Grammar` | `ts` vs `typescript` 혼선 제거 | 01 §3.1·§9 · 03 §2.1 · 04 §0 |
+| D20 | 파일 해시 | blake3 폐기. `file.content_hash` = 워크트리 바이트의 git blob oid, `head_oid` = HEAD 항목, `is_dirty = head_oid IS NULL OR head_oid<>content_hash` | 해시 하나로 증분+dirty | 01 §3.3 · 02 `file` · 03 §1.7 |
+| D21 | 커밋 분류·author | Rust 는 `author_email/name`(mailmap 후)·`parent_count`·`subject`·통계 저장. `kind`·`author_matched` 는 TS 판정 → 파생 열. 머지 diff 없음, 리네임 50, 통계는 공백 무시 | 정규식·identity 는 도메인 | 03 §1.2~1.4 · 01 §3.3 · 02 `git_commit` |
+| D22 | import·블록 | 원시 테이블 없음 — `_imports`·`_blocks` 캡처 행. TS 파생 `import_edge`·`block` | 삽입 경로 하나 | 02 DDL · 04 §3.1·§7.1 |
+| D23 | `concept_site` 열 | 02 열 + `site_key`(UNIQUE) `form shape occurrence excerpt picks_json hole_json ctx_json line_concepts_json uncovered_ratio confidence parse_quality is_dirty is_oversize`. 앞뒤 4줄은 저장 안 하고 카드 생성 때 읽어 `payload_json` 에 굽는다 | 사다리 3단은 excerpt, 프롬프트는 payload | 02 DDL · 03 §3.3 |
+| D24 | unknownCount | 03 §3.6 이 공식(자기 제외, `uncoveredRatio>0.5` +1, 3줄↑ +1), 02 `unknown_count` 는 캐시, 재계산은 02(세션 종료 후 증분). 02 §6.1 의 SQL 겹침·예시 숫자 폐기 | 03 이 알고리즘 소유 | 02 §6.1 · 03 §3.6 |
+| D25 | 배치·취소·재개 | 500행 tx. `ingest_run.status` 에 `'cancelled'`, 재개 = 다음 `incremental`. 03 `ingest_state`·`partial`·`resumeFrom`·200파일 폐기 | 상태 하나 줄임 | 03 §1.6·1.8 · 02 |
+| D26 | 파서 상한 | 타임아웃 2s, 파일 512 KiB, 행 20,000B 초과 스킵, `AstLite` 깊이 512, 파일 50,000, 풀 `min(4, cores−1)`. 06 의 `200_000µs`·1 MB·`num_cpus−1` 폐기 | 01·03 소유 | 06 §4.1 · 03 §2.4 |
+| D27 | T1·T2 숙련도 키 | T1 `concept_id` = **대표 개념**(블록 안 `essential` 중 `difficulty` 최고, 동률은 Site 수), 부수 개념은 `card_concept(secondary)` 겹 미반영. T2 = `arch/placement·radius·flow·direction` 4개(`dictionary/arch/`, universal, t2, 전역) | 새 테이블 없이 전역 mastery 유지 | 02 열린 질문 3 · 03 §3.1 · 04 §3.1·§8 |
+| D28 | `unit_node` 키 | PK `(unit_id, concept_id, track)` | T0·T1 노드가 같은 개념 가능 | 02 DDL |
+| D29 | 대지 탐지 | 어느 문서도 정의 안 함 → 03 §6.5 신설. `source='dir'`: `features/<x>`·`app|pages/<seg>`·`src/<x>` 첫 매치, 없으면 파일 ≥3 인 2단계 디렉터리; `commit-cluster` 는 MVP 밖 | 홈 대지·T2 범위가 걸림 | 03 §6.5 |
+| D30 | 원장·파생 보강 | `why_answer` 신설; T2 「이것도 맞다」 = `appeal(track='t2', auto_verdict='wrong-pick')`, 3회 → sec 편입 제안; `appeal` 에 `pattern_key engine_version dict_version norm_original norm_user reasons_json`, 04 `held/proposed` → `open`; `gap.reason` | 테이블 하나에 T1·T2 이의 | 02 DDL · 04 §5·§8.4 |
+| D31 | purge | 사실·파생은 지우되 `card` 는 `retired_at`+`snapshot_json` 은퇴. `review_log.card_id NOT NULL` 유지 | 02 원장 규칙 | 01 §7 |
+| D32 | 세션 저장 시점 | 05 의 5시점 + T1 초안 400ms 디바운스(flush: tick·blur·Esc·언마운트). 01 「1초 디바운스」·「24h 뒤 finish」 폐기 → `day_key` 바뀌면 `abandoned` | 05·02 소유 | 01 §5 |
+| D33 | 요약 「다시 보기」 | 읽기 전용. 05 `session.discard` 폐기 | 원장에 이미 기록 | 05 §3·체크리스트 10 |
+| D34 | E2E 분담 | 05 Playwright+`mockIPC` 15건(chromium+webkit, PR 차단) **과** 06 tauri-driver Linux E1~E8(PR 차단, retries 1) 둘 다. 05 「스모크 1개」 폐기. 시각 회귀 = 05 의 40장 | 결정론 층 05, 실 바이너리 06 | 05 §11 · 06 §1.5·1.7 |
+| D35 | 성능 수치 | 인제스트 100k 예산 15s·RSS 300 MB, CI 경고 1.5×·실패 2×. 홈 p95 ≤ 12ms. T1 = 04 수치. 06 §1.6 표 교체 | 01·04 소유 | 06 §1.6 |
+| D36 | 픽스처·골든 | 06 `.steps` 방식. 이름 `tiny·projectox-like·two-commits·large-100k·poly`. 01 `.bundle`·03 `repo-100k/poly` 폐기. 골든 `fixtures/golden/<lang>/<concept>/`, insta 는 `crates/parse/tests/snapshots/`, IPC 덤프 `fixtures/ipc/<fixture>/`, UI `fixtures/ui/run08.json` | 하나로 | 01 §4 · 03 §7~8 · 05 §11 · 06 §1.2 |
+| D37 | 벤치 도구 | `chickadee-cli` 없음. Rust criterion `src-tauri/benches/ingest.rs` + `vitest bench` + `scripts/bench.sh`·`bench/baseline.json`. 01 `bench-ingest.ts` 폐기 | 바이너리 추가 없음 | 01 §8 · 03 §7 |
+| D38 | 앱 id·경로·로그 | 01: `dev.chickadee.app`, `chickadee.db`, `logs/` 5×5 MiB, `dict-cache/`, `dict-user/`, 설정은 `settings` 테이블. 06 의 `com.chickadee.app`·`chickadee.sqlite`·`settings.json` 폐기. 로그 리포 식별 = `repoId` | 01 §7 소유 | 06 §3.1·3.4·6.2 |
+| D39 | 템플릿·태그 | 03 mustache 부분집합(변수·1단 섹션·부정·`josa`/`code`) 채택, 태그 6종 `code b i em br kbd`. 06 「플레이스홀더 3개」 폐기 | 섹션 없이는 `ctx.fallback` 분기 불가 | 03 §4.3 · 06 §4.2 |
+| D40 | Rust 와 YAML | Rust 는 YAML 을 읽지 않는다. 사전 Rust 테스트는 `crates/parse/tests/`(test-only serde_yaml)가 `.scm` 검사 + 예시 캡처를 `fixtures/ipc/dict-examples/` 로 덤프, `pnpm dict:test` 가 Site 로 파생해 `expect` 비교. 금칙어 grep 은 `src/**` 만 | 테스트는 예산 밖 | 03 §5.1 · 01 §1.1 |
+| D41 | 스크립트 이름 | `forbid.sh`→`check-rust-budget.sh`, `dict:check`→`dict:lint`, `extract-tokens.ts`→`sync-design.mjs` | 하나씩 | 06 · 01 §4 |
+| D42 | `dangerouslySetInnerHTML` | 허용 2파일: `packages/ui/src/RichText.tsx`·`components/dee/DeeSprite.tsx` | 스프라이트 인라인 필요 | 06 §4.3 · 05 §6 |
+| D43 | 05 패키지 참조 | `packages/core`·`src/ipc/commands.ts` 폐기 → `@chickadee/grading·scheduler·cards·ipc-client`. UI id 는 `number`, `runId`→`sessionId` | 01 패키지 정본 | 05 §1.2·§3 |
+| D44 | 리포 등록 | `repo_register` 는 `discover` 로 루트를 찾아 돌려줌; 커밋 0개면 `fingerprint=''`, 첫 인제스트에서 채움 | 03 §1.1 | 01 §3.2·§7 |
+| D45 | 사전 버전 | 개념 파일 `schema: 1`, 언어 버전 `_lang.yaml.version`(semver)+태그 `dict-vX.Y.Z`. 06 의 `schema: 2·dict_version` 예시 폐기 | 03 소유 | 06 §6.2 · 01 §10 |
+| D46 | 설정 키 | `Settings` 에 `motion`·`identities[]`·`excludeGlobs` 추가; 05 설정에 「내 커밋 identity」 절 | 03 §1.2·05 §2.1 | 02 §8 · 05 §2.1 |
+| D47 | 진행 화면 4단계 | Rust `walk·parse·git·write` → 「git 읽기」「파싱」 2칸, TS `derive·cards` → 「개념 추출」「판 짜기」 2칸. blame 은 배경 | 05 §2.1 | 05 §2.1 |
+
+### 4.2.1 구현 중 발견 (M0 · 골격)
+
+M0 를 구현하며 문서와 어긋난 것. §7-2 규칙대로 여기 먼저 올리고 해당 문서를 고쳤다.
+
+| # | 쟁점 | 결정 | 근거 | 반영 |
+|---|---|---|---|---|
+| D48 | 툴체인 실제 버전 | 기준 스택을 **Node 22+ (개발기 26.7) · pnpm 10 · Rust 1.80+ (개발기 1.98) · tauri-cli 2.11 · SQLite 3.45+ (개발기 3.51)** 로 적는다. CI 는 개발기와 같은 메이저를 쓴다 | 문서 전제(Node 22 · pnpm 9)가 설치본과 다르고, pnpm 10 은 lockfile v9 로 `--frozen-lockfile` 동작이 다르다 | 01 「읽는 순서/전제」 · 06 §5.1 |
+| D49 | `StatementMap` 순환 | `packages/ipc-client` 가 **빈 `interface StatementMap`** 을 선언하고, 생성된 `store-sql/src/catalog.ts` 가 **선언 병합**으로 채운다. 01 §3.5 의 `import type … from '@chickadee/store-sql/catalog'` 폐기 | 01 §2 의 의존 방향은 `store-sql → ipc-client` 인데 §3.5 코드는 반대로 import 해 순환이다. 병합은 방향을 지키면서 같은 타입 안전성을 준다 | 01 §2·§3.5 |
+| D50 | 시드·토크나이저 위치 | `packages/text` 신설 (의존 0, 최하위). `seedOf`·`fnv1a32`·`mulberry32`·`shuffle`·`tokenize` 가 산다 | 04 §0 의 이 세 가지를 `cards`(생성 결정성)·`grading`(T1 정규식층)·`concepts`(shape 파생) 셋이 모두 쓴다. cards 와 grading 은 형제라 한쪽에 두면 형제 import 가 된다 | 01 §2·§4 · 04 §0 |
+| D51 | statement 파일 규약 | 파일 하나에 여러 statement 를 두고 `-- @name <group>.<snake_case>` 로 자른다. `-- @params`·`-- @row`(또는 `void`) 는 그 아래에 붙는다. `scripts/build-catalog.ts` 가 이름 중복·번호 연속·**Rust 필수 이름 12개 존재**를 빌드 때 검사한다 | 01 §4 는 `statements/{facts,repo,home,…}.sql` 처럼 그룹 파일을 그리는데 §3.5 는 이름 분리자를 정하지 않았다 | 01 §3.5 |
+| D52 | 토큰 오버라이드 | `sync-design.mjs` 는 목업에서 뽑은 값 위에 **선언된 `OVERRIDES` 표**를 얹는다: `--yellow-text` → `#664300` · `--verdict-*` 신설 · 주간 `--glow-t*` → `transparent` · `--dee-k/-blue/-blue-deep/-pink` 삭제 | D11 이 정한 네 가지가 아직 목업에 반영되지 않았다(「05 · 목업 정리」는 뒤 마일스톤). 표가 없으면 `--check` 가 영구히 빨갛거나, 목업을 지금 고쳐 D11 의 순서를 깬다 | 05 §4.1·§12 |
+| D53 | M0 CI 잡 | `ci.yml` 에 `build-3os`(macos-14 · windows-2022 · ubuntu-22.04 에서 `tauri build --debug`) 를 넣는다. `integration`·`design-gates`·`e2e-linux` 는 M1·M2 에서 채울 자리로 남긴다 | M0 의 「끝났다는 증거」 1번이 3-OS 빈 창인데 06 §5.1 의 잡 목록엔 빌드 잡이 없다 | 06 §5.1 |
+| D54 | `dayKey` 와 DST | `dayKey` 는 **벽시계 규칙**이다 — `now` 의 로컬 날짜에서, 로컬 시각이 `rollover_hour` 보다 이르면 하루 뺀다. 02 §5.6 의 「`now − rollover_hour·3600e3` 를 존 변환」 표현은 폐기 | 고정 4시간 빼기는 그 창 안에 DST 전이가 있으면 `endOfDay` 와 어긋난다. `America/New_York` `2026-03-08T04:30-04:00` 은 뺄셈식으로 `2026-03-07` 인데 이미 `endOfDay('2026-03-07')`(= `03-08T04:00-04:00`)를 지났다. 벽시계 규칙은 전이가 없는 모든 순간에 뺄셈식과 같고, `endOfDay(d−1) ≤ t < endOfDay(d) ⟺ dayKey(t) = d` 를 유일하게 만족한다 | 02 §5.6 |
+| D55 | Black Han Sans woff2 | 상류에 woff2 가 **없다** — `google/fonts/ofl/blackhansans` 는 TTF 만 준다. TTF 를 `ttf2woff2` 로 **컨테이너만** 바꿔 동봉한다(글리프 2,734개 불변, `name` 테이블 불변 → RFN 유효, `DSIG` 만 빠짐 = WOFF2 규격). gstatic 의 한국어 서브셋은 쓰지 않는다. 9파일 합계는 ≈8 MB 가 아니라 **2.0 MB** | 05 §1.4 는 「원본 woff2 를 그대로」인데 원본 woff2 가 존재하지 않는다. 서브셋이 아니므로 OFL 의 RFN 조항(수정본에 예약명 금지)에 걸리지 않는다 | 05 §1.3·§1.4 |
+| D56 | 판정 글자 토큰 | `--verdict-exact-text/-equiv-text/-differ-text` 3개를 **신설**한다 (주간 `#960B42`/`#0F3F9E`/`#664300`, 야간 `#FFA3CE`/`#9CC2FF`/`#FFD866` — `--pink-text`/`--blue-text`/`--yellow-text` 와 같은 값). 앱 `tokens.css` 가 6개 전부를 소유하고 `packages/ui` 는 재정의하지 않는다 | D11 의 `--verdict-*` 는 **면**(도장 테두리·거터 틱·`.rtag`) 색인데 `.stamp` 의 **글자**는 종이 위 7:1 이 필요하다. 컴포넌트가 `--pink-text` 를 직접 쓰면 `chickadee/track-alias-only` 에 걸리고, 05 §4.2 의 「판정 색은 트랙 색과 독립」도 깨진다 | 05 §4.1·§4.2 |
+| D57 | statement 별칭 금지 | `statements/*.sql` 의 `SELECT` 는 **열 이름을 그대로** 돌려준다 — `AS rootPath` 같은 camelCase 별칭을 붙이지 않는다. `repo.list`·`settings.get_all` 의 별칭을 걷어냈다 | 02 §8.1 은 「Rust 가 열 이름 키로 돌려주고 TS 는 **테이블마다** `fromRow()` 하나로 변환한다」고 정한다. statement 마다 별칭이 다르면 변환기가 테이블당 하나일 수 없다 | 01 §3.4 · 02 §8.1 |
+| D58 | `picks_json` 기본값 | `concept_site.picks_json` 의 DEFAULT 를 `'[]'` → `'{}'` 로 고친다 | 02 §8.2 는 `picks: Record<number, string>` 인데 DDL 기본값이 배열이라 서로 어긋난다. 파생 층(M1)이 쓰는 값도 객체다 | 02 §2.2 |
+
+### 4.3 정본 갱신 (반영됨 — discussion.md 로그 2026-09-02T18:20, 「결론」 §2·§3·§5·§6)
+
+아래 표는 이 리뷰가 정본에 요구한 변경의 기록이다. 정본 「결론」에 이미 반영됐으므로 새 세션은 정본을 그대로 읽으면 된다. 표의 「현재」는 반영 전 문구.
+
+| 정본 절 | 현재 | 갱신 |
+|---|---|---|
+| §6 토큰 | `--yellow #FFC400 + 글자용 7:1 변형` | 황 글자 토큰 `#664300`(주간), 야간 `#FFD866` 유지 |
+| §6 토큰 | 트랙 별칭만 | 판정 색 별칭 `--verdict-exact/-equiv/-differ` 신설 |
+| §6 부속 숨김 | 기본 보임 | Linux(WebKitGTK) 만 기본 off |
+| §2 코어 루프 | 「약 12~15분」 | 기본 15분(10~25) · 새 판 하루 2장 · 하루 경계 04:00 |
+| §2 겹 | 「시간을 두고 다시 맞힌 횟수」 | 명문화: 다시 찍기 정답 = 회복만, 모르겠어요 −1 은 같은 날 회복만, 하루 최대 +1 |
+| §3-1 4단 | 「이 줄과 앞뒤 4줄만」 | + 「디렉터리 경로·리포명 제외, 파일 이름만」 |
+| §3-8 키맵 | `1~4 고르기` | 사다리 열림 + 포커스가 사다리 안이면 단 선택 |
+| §3-7 | 상시 애니메이션 금지 | 목업 3건(`blink`·`spin`·`peek`) 위반 → 유한화 |
+| §5 T1 | 줄 단위 동등 판정 | `total` 비공백 줄 · 진급 85(소블록 완충) · 4겹은 3단계 통과에서만 |
+| 미해결 | 미지 개념 알고리즘 · 보편/언어고유 필드 | 03 §3.6·§4.4 로 해결 → 완료 표시 |
+| 신규 | — | 최소 창 1000×680 · T2 진급 85/재도전 65 |
+
+---
+
+## 5. 마일스톤 계획
+
+87개 체크리스트 항목(01:14 · 02:14 · 03:15 · 04:14 · 05:15 · 06:15)을 빠짐없이 한 번씩 배치했다. 제목은 각 문서 원문 그대로(앞부분). 03 의 Rust 쪽 항목 7개와 02·06 의 겹치는 항목은 제목을 유지한 채 `REVIEW.md` 의 「체크리스트 범위」에서 범위만 조정했다. 규모는 1인 기준 일수.
+
+### M0 · 골격 — 워크스페이스 · CI · 토큰 · 픽스처
+
+| 항목(출처 · 원문 제목) | 선행 | 규모 |
+|---|---|---|
+| 01 · 워크스페이스 스캐폴드 | — | 2 |
+| 05 · 워크스페이스·Tauri 2 골격 | 01 스캐폴드 | 1 |
+| 01 · `ipc-client` 패키지 | 01 스캐폴드 | 1 |
+| 01 · `store` 크레이트 | 01 스캐폴드 | 2 |
+| 02 · 마이그레이션 러너 | `store` 크레이트 | 1 |
+| 01 · `store-sql` 패키지 | 02 DDL(REVIEW 반영본) | 2 |
+| 02 · `db/sql` + `fromRow` 계층 | `store-sql` | 2 |
+| 02 · 하루 경계·시각 유틸 | — | 0.5 |
+| 04 · 공통 시드·PRNG·토크나이저 | — | 1 |
+| 01 · T3 자리 | `store-sql` | 0.5 |
+| 05 · 토큰·리셋·인쇄 물리·폰트 동봉 | 05 골격 | 2 |
+| 05 · 마스코트 `DeeSprite`·`Dee`·`useDeeMotion` | 토큰 | 1 |
+| 05 · 프리미티브 12종 + `dev/Gallery` | 토큰 | 2 |
+| 06 · Q1 픽스처 리포 생성 스크립트 | 01 스캐폴드 | 1 |
+| 06 · Q7 `ci.yml` + `audit` 잡 | 01 스캐폴드 | 1 |
+| 06 · Q11 Tauri 보안 설정 | 01 스캐폴드 | 1 |
+
+**끝났다는 증거**: 빈 창이 3-OS 에서 뜨고, `store_open` 으로 `0001_init.sql` 이 적용된 DB 가 생기며, 토큰만 있는 화면이 `check-contrast`·Stylelint 4룰·`check-rust-budget.sh`·`clippy -D warnings`·`typecheck` 를 CI 에서 통과한다. `tiny` 픽스처 해시가 두 번 생성해도 같다.
+
+### M1 · 인제스트 수직 절단 — 리포 등록 → 캡처 → concept_site → 홈에 「판이 없는 문법」이 뜬다
+
+| 항목 | 선행 | 규모 |
+|---|---|---|
+| 01 · `git` 크레이트 | M0 | 2 |
+| 03 · diff hunk → `CommitRec` | `git` 크레이트 | 1.5 |
+| 01 · `parse` 크레이트 | D18 캡처 규약 | 3 |
+| 03 · 문법 크레이트 고정 + 언어 감지 + 파서 풀 | `parse` 크레이트 | 1.5 |
+| 01 · 인제스트 잡 러너 | store·git·parse | 3 |
+| 03 · 워킹트리 스캔 + 진행률 채널 + 취소·이어하기 | 잡 러너 | 1 |
+| 03 · 쿼리 실행기 | `parse` 크레이트 · 04 토크나이저 | 3 |
+| 03 · sqlite 쓰기·증분 | 잡 러너 · 쿼리 실행기 | 1.5 |
+| 01 · 파일 맥락 명령 | `git` 크레이트 | 1 |
+| 03 · blame 2차 패스 | 파일 맥락 명령 | 1 |
+| 01 · 사전 명령 + `dictionary` 패키지 | 03 YAML 스키마 | 2 |
+| 03 · TS 사전 1차 | 쿼리 실행기 | 4 |
+| 03 · 사전 스키마·린트 | 사전 1차 | 2 |
+| 03 · 크레이트 골격 `chickadee-ingest` | `dictionary` 패키지 | 1.5 |
+| 03 · 골든 픽스처 | 쿼리 실행기 · Q1 | 1.5 |
+| 06 · Q2 Rust 파서·쿼리 골든 | 쿼리 실행기 · Q1 | 1 |
+| 03 · 미지 개념 개수·첫 노출 선택(TS) | 사전 1차 · 파생 층 | 1.5 |
+| 02 · 미지 개념 계산 | 03 미지 개념 개수 | 1.5 |
+| 03 · 문법 구멍 지도 집계(TS) | 02 미지 개념 계산 · D29 | 1.5 |
+| 01 · 오류 모델 배선 | 각 크레이트 | 1 |
+| 01 · 리포 이동/삭제 흐름 | git · store-sql | 1 |
+| 06 · Q8 로그 안전 래퍼 | 오류 모델 | 1 |
+| 06 · Q10 악성 입력 방어 | 잡 러너 · Q8 | 2 |
+| 05 · 홈 화면 | 프리미티브 · 02 홈 쿼리 | 3 |
+| 05 · WKWebView 성능 첫 실측 | 홈 | 1 |
+| 05 · 인제스트·첫 실행·안내·설정 | 홈 · 01 이벤트 | 2 |
+| 03 · 성능 픽스처·벤치 | 증분 · Q1 | 1.5 |
+| 03 · Swift·Dart·SQL 품질 검증 | 파서 풀 | 2 |
+| 03 · projectox 실리포 검증 | 구멍 지도 | 1 |
+
+**끝났다는 증거**: projectox 를 등록하면 진행 4단계가 시간 비례 큐로 보이고 15s(M1) 안에 끝나며, 홈 마스트헤드·대지·「판이 없는 문법」 패널이 목업과 같은 모양으로 실데이터를 보인다. 게이트: 인제스트 전후 리포 트리 해시 동일 · 로그에 픽스처 소스 줄 0 · `fixtures/ipc/tiny` 덤프 diff 0 · 골든 전부 통과 · Rust ≤ 1500줄.
+
+### M2 · T0 세션 수직 절단 — 큐 → T0 카드 → 채점 → 겹 → 요약 (사다리 · LIFER 포함)
+
+| 항목 | 선행 | 규모 |
+|---|---|---|
+| 02 · FSRS 어댑터 | 시각 유틸 | 1.5 |
+| 02 · 겹 리듀서 | FSRS 어댑터 | 1 |
+| 02 · 새 개념 순위 | M1 미지 개념 계산 | 1.5 |
+| 02 · 큐 플래너 | 새 개념 순위 · FSRS 어댑터 | 2 |
+| 02 · 세션 중 삽입·복구 | 큐 플래너 | 1.5 |
+| 01 · 세션 저장/복원 | store-sql · 세션 중 삽입 | 1.5 |
+| 04 · T0 생성기 3종 | 03 사전·Site | 3 |
+| 04 · T0 채점·진단·이벤트 | T0 생성기 | 1 |
+| 02 · 판 완료 트랜잭션 | 겹 리듀서 · T0 이벤트 | 1.5 |
+| 02 · `rebuild_mastery()` | 판 완료 트랜잭션 | 1 |
+| 04 · 사다리 데이터 조립기 | T0 채점 · 02 겹 조회 | 2 |
+| 02 · 홈·요약·사다리 쿼리 | db/sql 계층 | 1.5 |
+| 02 · 이의·LIFER 처리 | 판 완료 트랜잭션 | 1 |
+| 05 · 세션 셸 | 프리미티브 · 02 세션 테이블 | 3 |
+| 05 · T0 판 | 세션 셸 · 04 T0 | 2 |
+| 05 · 다시 찍기 사다리·아래층·LIFER | T0 판 | 3 |
+| 05 · 인쇄 완료 요약 | T0 판 | 1 |
+| 06 · Q3 TS 채점기 골든·스케줄러 property | 04 T0 · 02 리듀서 | 2 |
+| 06 · Q4 통합 파이프라인·IPC 덤프 | Q1~Q3 | 2 |
+| 06 · Q5 `__audit` 이식 | 05 세션 화면 | 2 |
+| 01 · 성능 벤치 | 인제스트 · 세션 셸 | 1.5 |
+
+**끝났다는 증거**: 「인쇄 시작」 → T0 정답·오답·모르겠어요(사다리 1~4단·아래층 점프·자동 복귀·`B`)·다시 찍기·LIFER·요약이 실데이터로 한 흐름으로 돌고, Esc 후 재진입 시 N번째 판부터 이어진다. 게이트: 02 §3.3 검산 6건 · `rebuild_mastery == mastery` · fast-check 5속성 · 카드 전환 IPC 0회 · 판정란 0px · 13px 미만 0 · 대비 7:1 · 큐 결정성.
+
+### M3 · T1 클론 코딩
+
+| 항목 | 선행 | 규모 |
+|---|---|---|
+| 04 · T1 블록 선정·마스크 | 03 `_blocks` · 01 `file_read_block` · 02 `block` | 2 |
+| 04 · T1 정규식층 | 04 토크나이저 | 3 |
+| 04 · T1 AST 승격 | 정규식층 · 01 `parse_snippet` | 3 |
+| 04 · T1 결과·점수·이의 | 정규식층 · 02 `appeal` | 2 |
+| 04 · 왜 게이트 | T1 결과 · 02 `why_answer` | 1 |
+| 05 · T1 `ClonePad` Monaco | 세션 셸 · 04 T1 엔진 | 3 |
+
+**끝났다는 증거**: `projectox-like` 의 12~40줄 블록이 3단계 페이딩으로 나오고 04 §9 골든 28건이 통과하며, 목업 예시 답안이 비공백 줄 기준으로 채점되고 이의·왜 게이트가 `appeal`·`why_answer` 에 남는다. 게이트: 비교 엔진 20줄 < 20ms · Monaco 마운트 ≤ 250ms(WebKit) · IME 조합 중 판정 보류.
+
+### M4 · T2 구조
+
+| 항목 | 선행 | 규모 |
+|---|---|---|
+| 04 · T2 import 해석기 `resolve-imports.ts` | 03 `_imports` 캡처 | 3 |
+| 04 · T2 그래프 정리·배치 | 해석기 | 2 |
+| 04 · T2 정답지 도출 | `commit_file` · D21 | 2 |
+| 04 · T2 채점·문제 3종 | 정답지 | 2 |
+| 05 · T2 `DependencyMap` | 세션 셸 · 그래프 배치 | 2 |
+| 04 · 골든 케이스 스위트 | 위 전부 | 1 |
+
+**끝났다는 증거**: projectox 유닛 하나로 4종 문제가 생성되고 `two-commits` 리포는 책임 배치 없이 그래프 3종만 나온다. 게이트: 배치 결정성(난수 0) · 2,000 파일 해석 < 1.5s · 24 노드 상한 · 04 T2 골든 · Q4 재생을 T1·T2 까지 확장해 diff 0.
+
+### M5 · 릴리스 준비 — 보안 게이트 · 3-OS 빌드 · 오픈소스 문서
+
+| 항목 | 선행 | 규모 |
+|---|---|---|
+| 06 · Q9 LLM 전송 범위·키체인 | 05 사다리 4단 · D8 | 2 |
+| 06 · Q12 마이그레이션 프레임 | 02 스키마 | 2 |
+| 06 · Q6 시각 회귀·감축 모션·키보드 완결 | Q5 | 2 |
+| 05 · E2E 15 시나리오 + 시각 회귀 40장 + a11y 감사 자동화 | 전 화면 | 3 |
+| 06 · Q15 E2E Linux 8건 + 벤치 야간 | Q4 · Q12 | 3 |
+| 06 · Q13 오픈소스 문서 세트 | — | 1.5 |
+| 06 · Q14 `release.yml` + README 우회 안내 | Q7 | 1.5 |
+| 05 · 목업 정리 | D3·D11·D14 | 1 |
+
+**끝났다는 증거**: `v0.1.0` 태그로 3-OS 드래프트 릴리스가 생기고(`SHA256SUMS.txt`), 첫 실행 소켓 0(E1)·전부 지우기 후 파일 부재(E8)·모의 키 grep 0 이 CI 에서 통과하며, README 최상단에 서명 우회 안내가 있다.
+
+### M6 · MVP 이후
+
+| 항목 | 선행 | 규모 |
+|---|---|---|
+| 02 · FSRS 개인화 잡 (「MVP 이후 · TS 우선」) | `review_log` ≥ 1,000행 · `ts-fsrs` 옵티마이저 확인 | 2 |
+
+---
+
+## 6. 열린 질문 (사용자 결정 필요)
+
+결정이 없으면 「기본값」으로 진행한다.
+
+| # | 질문 | 기본값 |
+|---|---|---|
+| 1 | 서명·공증 결정 시점 — 다운로드 500회 또는 「열리지 않아요」 이슈 10건(연 $99 + $200~400)에 동의하는가 | 그 시점까지 유보, README 우회 안내 |
+| 2 | Swift·Dart 가 품질 게이트에 미달하면 언어를 보류하고 「아직 판이 없습니다」라고 말하는가, 정규식 폴백으로 T0 를 내는가 | 보류 |
+| 3 | `react/` 처럼 프레임워크 관습을 문법 사전에 넣는 것을 허용하는가 | 허용(`framework:` + `package.json` 감지) |
+| 4 | 4단 프롬프트에 파일 **이름**(base name)을 넣는가 | 넣는다(경로·리포명 제외) |
+| 5 | `.d.ts` · SQL 마이그레이션 · 테스트 파일의 인제스트 포함 여부 | `.d.ts` 제외 · 마이그레이션 포함 · 테스트 포함하되 `essential` 집계 제외 |
+| 6 | 문법 사전을 앱과 별도로 배포하는가 | MVP 는 번들만, `dict-user/` 로 대체 |
+| 7 | ocul-pm 일지 연동(「선택의 왜」)의 MVP 범위 | 최소: T2 커밋 출처와 구멍 지도 `alternatives` 행에서 커밋 해시로 `.oculpm/journal/**/*.md` 를 `repo_glob_read` 로 찾아 링크만 |
+| 8 | 복습 부채 모드(`desired_retention` 0.85 제안) | MVP 제외 |
+
+---
+
+## 7. 인계 규칙
+
+1. **정본 우선.** 문서가 정본과 어긋나면 문서를 고친다. 정본을 고쳐야 하면 §4.3 표에 먼저 올리고 사용자 확인 뒤 고친다.
+2. **결정은 등록부에 먼저.** 01~06 을 고치기 전에 §4 에 행(`D48…`)을 추가하고 「반영」 열에 절을 적은 뒤 문서를 고친다. 등록부에 없는 변경은 리뷰에서 되돌린다.
+3. **체크리스트 항목 제목은 안정 id 다.** §5 표가 제목으로 참조하므로 제목을 바꾸면 이 문서 §5 와 `REVIEW.md` 를 같은 커밋에서 같이 바꾼다. 범위 조정은 제목 뒤 괄호로.
+4. **이름은 §3 용어집이 정본.** 새 이름은 용어집에 행을 추가한다. 폐기 열의 이름은 새 문장에 쓰지 않는다.
+5. **소유권.** §2 표의 소유 문서만 그 내용을 정의한다. 다른 문서는 이름으로 참조한다(05 는 SQL 대신 statement 이름).
+6. **일지.** 작업 단위를 끝낼 때마다 `AGENTS.md` 의 ocul-pm 규칙대로 `journal_write` 를 부르고, 플랜 항목이 있으면 `plan_update` 로 글리프를 갱신한다. 시작 전에 `journal_search` 로 과거 결정을 찾는다. 시크릿은 어떤 파일에도 쓰지 않는다.
+7. **구현 플랜.** M0 착수 시 §5 표를 `plan_create` 로 ocul-pm 플랜에 옮긴다(항목 id = `m0-01-workspace` 식 kebab). 그 뒤 진행 상태의 정답은 플랜 글리프이고 §5 는 배치 근거로만 남는다.
+8. **검증.** 문서를 고친 뒤 `REVIEW.md` 끝의 「검증 방법」 grep 목록을 돌려 폐기 이름이 남지 않았는지 확인한다.

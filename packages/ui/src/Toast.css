@@ -1,0 +1,38 @@
+/* 목업: design/src/ink/shared.css `.toast` */
+.toast {
+  position: fixed;
+  bottom: 26px;
+  left: 50%;
+  z-index: 60;
+  max-width: min(92vw, 560px);
+  padding: 11px 16px;
+  border: 2.5px solid var(--rule);
+  background: var(--paper-2);
+  box-shadow: 4px 5px 0 var(--edge);
+  color: var(--ink);
+  font-size: var(--fs-15);
+  font-weight: 600;
+  letter-spacing: -.015em;
+  opacity: 0;
+  transform: translate(-50%, 20px);
+  transition: transform .22s var(--e-settle), opacity .18s;
+  pointer-events: none;
+}
+
+.toast.on {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.toast small {
+  display: block;
+  margin-top: 2px;
+  color: var(--ink-soft);
+  font-size: var(--fs-14);
+  font-weight: 400;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast { transition-duration: .001ms }
+}
+[data-motion="reduce"] .toast { transition-duration: .001ms }

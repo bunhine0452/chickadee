@@ -1,0 +1,48 @@
+/* 목업: design/src/ink/shared.css `.flat-btn` + session.css `.dunno`
+   바꾼 것 — `.dunno.on` 의 황 원색·먹 리터럴을 트랙 별칭 --t2 / --on-t2 로 (05 §4.2) */
+.flat-btn {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 13px;
+  border: 2px solid var(--rule);
+  background: var(--paper-2);
+  box-shadow: 0 3px 0 var(--edge);
+  color: var(--ink);
+  font-size: var(--fs-15);
+  font-weight: 600;
+  letter-spacing: -.015em;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform .08s, box-shadow .08s, background .12s;
+}
+.flat-btn:hover { background: var(--paper-3) }
+
+.flat-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 0 0 var(--edge);
+}
+
+.flat-btn.ghost {
+  border-style: dashed;
+  background: transparent;
+  box-shadow: none;
+  color: var(--ink-soft);
+}
+
+.flat-btn.ghost:hover {
+  border-style: solid;
+  background: var(--paper-3);
+  color: var(--ink);
+}
+
+.dunno {
+  border-color: var(--rule);
+  background: var(--paper-3);
+}
+
+.dunno.on {
+  border-style: solid;
+  background: var(--t2);
+  color: var(--on-t2);
+}

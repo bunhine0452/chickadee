@@ -1,0 +1,42 @@
+/* 목업: design/src/ink/shared.css `.sw`
+   바꾼 것 — `.sw span.on` 의 황 원색·먹 리터럴을 --t2 / --on-t2 로,
+   야간반의 청 원색을 --t0 로 (05 §4.2 별칭만) */
+.sw {
+  display: flex;
+  padding: 0;
+  border: 2.5px solid var(--rule);
+  background: var(--paper-3);
+  box-shadow: 3px 3px 0 var(--edge);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: transform .08s, box-shadow .08s;
+}
+
+.sw span {
+  padding: 6px 10px;
+  color: var(--ink-soft);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  font-weight: 600;
+  letter-spacing: .08em;
+  white-space: nowrap;
+  transition: background .12s, color .12s;
+}
+.sw span + span { border-left: 2.5px solid var(--rule) }
+
+.sw span.on {
+  background: var(--t2);
+  color: var(--on-t2);
+}
+
+.sw:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--edge);
+}
+
+/* 야간반 — 05 §4.3 dark allowlist 6개 중 하나 */
+[data-theme="dark"] .sw span.on {
+  background: var(--t0);
+  color: var(--on-t0);
+}

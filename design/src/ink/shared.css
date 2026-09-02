@@ -1,0 +1,130 @@
+/* ───────── 공용 컴포넌트 (ink-home.html 과 같은 모양 — 홈을 이 빌드로 옮기면 여기가 단일 출처가 된다) ───────── */
+.pill{
+  font-family:var(--f-mono); font-size:var(--fs-13); font-weight:700; letter-spacing:.04em;
+  padding:2px 7px; border:1.5px solid var(--rule); color:var(--ink); white-space:nowrap; line-height:1.4; display:inline-block;
+}
+.pill.t0{background:var(--t0); color:var(--on-t0)}
+.pill.t1{background:var(--t1); color:var(--on-t1)}
+.pill.t2{background:var(--t2); color:var(--on-t2)}
+.pill.ghost{background:transparent; color:var(--ink-soft)}
+
+.passes{display:inline-flex; gap:2.5px; vertical-align:middle}
+.passes i{width:9px; height:16px; border:1.5px solid var(--rule); background:var(--paper-3); display:block}
+.passes.t0 i.on{background:var(--t0)} .passes.t1 i.on{background:var(--t1)} .passes.t2 i.on{background:var(--t2)}
+
+kbd.k{font-family:var(--f-mono); font-size:var(--fs-13); font-weight:600; border:1.5px solid currentColor; padding:0 5px; opacity:.8; line-height:1.4; border-radius:2px}
+
+/* 촉각 버튼 : 두꺼운 종이가 눌린다 */
+.press-btn{
+  cursor:pointer; border:2.5px solid var(--rule); background:var(--pink); color:var(--on-t1);
+  font-size:var(--fs-16); font-weight:700; letter-spacing:-.02em; padding:11px 18px 12px;
+  display:inline-flex; align-items:center; justify-content:center; gap:10px; white-space:nowrap;
+  box-shadow:0 5px 0 var(--pink-deep), 0 5px 0 2.5px var(--rule), 0 11px 14px -7px var(--drop);
+  transition:transform .08s cubic-bezier(.3,.8,.4,1), box-shadow .08s, background .12s;
+}
+.press-btn:hover{transform:translateY(-1px); box-shadow:0 6px 0 var(--pink-deep), 0 6px 0 2.5px var(--rule), 0 13px 16px -7px var(--drop)}
+.press-btn:active,.press-btn.down{transform:translateY(5px); box-shadow:0 0 0 var(--pink-deep), 0 0 0 2.5px var(--rule), 0 2px 6px -3px var(--drop)}
+.press-btn.blue{background:var(--t0); color:var(--on-t0); box-shadow:0 5px 0 var(--t0-deep), 0 5px 0 2.5px var(--rule), 0 11px 14px -7px var(--drop)}
+.press-btn.blue:hover{box-shadow:0 6px 0 var(--t0-deep), 0 6px 0 2.5px var(--rule), 0 13px 16px -7px var(--drop)}
+.press-btn.blue:active,.press-btn.blue.down{box-shadow:0 0 0 var(--t0-deep), 0 0 0 2.5px var(--rule), 0 2px 6px -3px var(--drop)}
+.press-btn[disabled]{cursor:not-allowed; background:var(--paper-3); color:var(--ink-soft); box-shadow:0 5px 0 var(--edge), 0 5px 0 2.5px var(--rule); transform:none}
+[data-theme="dark"] .press-btn:not([disabled]){box-shadow:0 5px 0 var(--pink-deep), 0 5px 0 2.5px var(--rule), 0 0 26px var(--glow-t1)}
+[data-theme="dark"] .press-btn.blue:not([disabled]){box-shadow:0 5px 0 var(--t0-deep), 0 5px 0 2.5px var(--rule), 0 0 26px var(--glow-t0)}
+
+/* 얇은 종이 버튼 (보조 동작) */
+.flat-btn{
+  cursor:pointer; border:2px solid var(--rule); background:var(--paper-2); color:var(--ink);
+  font-size:var(--fs-15); font-weight:600; letter-spacing:-.015em; padding:8px 13px;
+  display:inline-flex; align-items:center; gap:8px; box-shadow:0 3px 0 var(--edge); white-space:nowrap;
+  transition:transform .08s, box-shadow .08s, background .12s;
+}
+.flat-btn:hover{background:var(--paper-3)}
+.flat-btn:active{transform:translateY(3px); box-shadow:0 0 0 var(--edge)}
+.flat-btn.ghost{background:transparent; color:var(--ink-soft); border-style:dashed; box-shadow:none}
+.flat-btn.ghost:hover{background:var(--paper-3); color:var(--ink); border-style:solid}
+
+/* 스위치 : 주간반/야간반, 부속 보임/숨김 */
+.sw{
+  display:flex; cursor:pointer; padding:0; border:2.5px solid var(--rule); background:var(--paper-3);
+  box-shadow:3px 3px 0 var(--edge); transition:transform .08s, box-shadow .08s;
+}
+.sw span{padding:6px 10px; font-family:var(--f-mono); font-size:var(--fs-13); font-weight:600; letter-spacing:.08em; color:var(--ink-soft); white-space:nowrap; transition:background .12s,color .12s}
+.sw span + span{border-left:2.5px solid var(--rule)}
+.sw span.on{background:var(--yellow); color:#221D18}
+[data-theme="dark"] .sw span.on{background:var(--blue); color:var(--on-t0)}
+.sw:active{transform:translate(2px,2px); box-shadow:1px 1px 0 var(--edge)}
+
+/* 등록 표시 : 한 장에 하나 */
+.reg{position:absolute; top:8px; right:8px; width:18px; height:18px; color:var(--ink-mute); pointer-events:none}
+.reg.hit{color:var(--pink)}
+[data-trim="on"] .reg{display:none}
+
+/* 도장 (오버프린트) — 정합 / 어긋남 / 재교 / LIFER */
+.stamp{
+  display:inline-block; transform:rotate(var(--r,-6deg)); mix-blend-mode:var(--blend); pointer-events:none;
+  border:3px double var(--pink); color:var(--pink-text);
+  font-family:var(--f-mono); font-size:var(--fs-14); font-weight:700; letter-spacing:.22em; line-height:1.15;
+  padding:6px 12px 6px 16px; text-align:center; white-space:nowrap;
+}
+.stamp small{display:block; font-size:var(--fs-13); letter-spacing:.16em; font-weight:600; margin-top:1px}
+.stamp.blue{border-color:var(--blue); color:var(--blue-text)}
+.stamp.yellow{border-color:var(--yellow-deep); color:var(--yellow-text)}
+.stamp.big{font-size:var(--fs-20); letter-spacing:.26em; padding:10px 18px 10px 24px; border-width:4px}
+.stamp.hit{animation:stampdown .38s cubic-bezier(.16,1.2,.3,1) both}
+@keyframes stampdown{0%{opacity:0; transform:rotate(var(--r,-6deg)) scale(1.5)}55%{opacity:1; transform:rotate(var(--r,-6deg)) scale(.96)}100%{opacity:1; transform:rotate(var(--r,-6deg)) scale(1)}}
+[data-trim="on"] .stamp{transform:none; mix-blend-mode:normal}
+[data-theme="dark"] .stamp{color:var(--pink-text)}
+
+/* 말풍선 (길잡이 Dee) */
+.say{
+  background:var(--paper-2); border:2px solid var(--rule); box-shadow:2px 3px 0 var(--edge);
+  font-size:var(--fs-14); font-weight:600; letter-spacing:-.015em; padding:6px 10px; color:var(--ink); white-space:nowrap; position:relative;
+}
+.say::after{content:""; position:absolute; right:-9px; bottom:9px; width:12px; height:12px; background:var(--paper-2); border-right:2px solid var(--rule); border-bottom:2px solid var(--rule); transform:rotate(-45deg)}
+.say code{font-size:var(--fs-13); background:var(--paper-3); padding:0 4px; border:1px solid var(--rule)}
+
+/* 토스트 (조작 결과) */
+.toast{
+  position:fixed; left:50%; bottom:26px; transform:translate(-50%, 20px); z-index:60; opacity:0; pointer-events:none;
+  background:var(--paper-2); border:2.5px solid var(--rule); box-shadow:4px 5px 0 var(--edge);
+  padding:11px 16px; font-size:var(--fs-15); font-weight:600; letter-spacing:-.015em; color:var(--ink);
+  transition:transform .22s var(--e-settle), opacity .18s; max-width:min(92vw, 560px);
+}
+.toast.on{opacity:1; transform:translate(-50%, 0)}
+.toast small{display:block; font-weight:400; font-size:var(--fs-14); color:var(--ink-soft); margin-top:2px}
+
+/* Dee 동작 — 전환만 없애고 최종 포즈는 유지 */
+.dee.hop{animation:hop 520ms var(--e-hop)}
+@keyframes hop{0%{transform:translateY(0)}34%{transform:translateY(-16px)}62%{transform:translateY(0)}74%{transform:translateY(-3.5px)}100%{transform:translateY(0)}}
+.dee.tilt{animation:tilt 700ms var(--e-settle) both}
+@keyframes tilt{0%{transform:rotate(0)}40%{transform:rotate(-14deg)}100%{transform:rotate(-9deg)}}
+.dee.hang{transform:rotate(180deg) scaleX(-1); transition:transform .55s var(--e-hop)}   /* 거꾸로 매달리기 : 안 보이던 면을 본다 */
+.dee.peek{animation:peek 1.6s var(--e-soft) infinite}
+@keyframes peek{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px) rotate(-3deg)}}
+.dee.lifer{animation:lifer 1.35s var(--e-hop) both}
+@keyframes lifer{0%{transform:translateY(0) scale(1)}18%{transform:translateY(-22px) scale(1.06) rotate(-8deg)}36%{transform:translateY(0) scale(1)}52%{transform:translateY(-14px) rotate(6deg)}68%{transform:translateY(0)}82%{transform:translateY(-5px)}100%{transform:translateY(0)}}
+
+/* 코드 판 : 16px / 1.85 / 줄번호. 판 안에는 잉크(색면)를 얹지 않는다 — 구문 강조만 (판독 보조) */
+.code{
+  font-family:var(--f-mono); font-size:var(--fs-16); line-height:1.85; color:var(--ink);
+  background:var(--stock); border:2px solid var(--rule); overflow:auto; tab-size:2;
+}
+.code .ln{display:grid; grid-template-columns:3.2em minmax(0,1fr); min-width:max-content}
+.code .ln > i{font-style:normal; text-align:right; padding:0 .9em 0 0; color:var(--ink-soft); border-right:1px solid var(--rule); background:var(--paper-3); user-select:none; font-variant-numeric:tabular-nums}
+.code .ln > span{padding:0 1em; white-space:pre}
+.code .ln.hi > span{background:var(--paper-3); box-shadow:inset 4px 0 0 var(--yellow)}
+.code .ln.hi > i{color:var(--ink); font-weight:700}
+.code .k{color:var(--blue-text); font-weight:600}          /* 키워드 */
+.code .s{color:var(--pink-text)}                           /* 문자열 */
+.code .n{color:var(--yellow-text)}                         /* 숫자·리터럴 */
+.code .c{color:var(--ink-soft); font-style:italic}         /* 주석 */
+.code .p{color:var(--ink-soft)}                            /* 구두점 */
+.code .f{color:var(--ink); font-weight:600}                /* 호출·타입 */
+.code .tok{position:relative; border-bottom:2px solid var(--yellow)}
+.code .tok.ans{background:var(--yellow); color:#221D18; border-bottom-color:var(--rule); padding:0 2px; margin:0 -2px}
+[data-theme="dark"] .code .tok.ans{color:#1C1400}
+
+/* 움직임 감축 */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important}
+}

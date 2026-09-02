@@ -1,0 +1,1249 @@
+<!doctype html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>T2 · 구조 학습</title>
+<style>
+/* ============ 토큰 ============ */
+:root{
+  --bg:#f4f6f8; --bg-elev:#ffffff; --bg-sunken:#e8ecf1; --band:#eceff4;
+  --fg:#161b22; --fg-dim:#55606c; --fg-mute:#7b8794;
+  --line:#d8dee6; --line-strong:#b9c2cd;
+  --accent:#0b6e8a; --accent-fg:#ffffff; --accent-soft:#d6eef5;
+  --code-bg:#eef1f5;
+  --ok:#1a7f37; --ok-soft:#d7f0dd; --err:#c62a32; --err-soft:#fadcdd;
+  --warn:#8a6100; --warn-soft:#fbeccb; --info:#0b5fa5; --info-soft:#d9e9fa;
+  --node-bg:#ffffff; --edge:#a4b0bd; --edge-strong:#0b6e8a;
+  --shadow:0 1px 2px rgba(16,24,40,.06),0 6px 18px rgba(16,24,40,.07);
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR","Malgun Gothic",sans-serif;
+}
+html[data-theme="dark"]{
+  --bg:#0d1117; --bg-elev:#151b23; --bg-sunken:#090c10; --band:#12181f;
+  --fg:#e6edf3; --fg-dim:#9fadbc; --fg-mute:#71808f;
+  --line:#242c37; --line-strong:#3a4552;
+  --accent:#4cc4e0; --accent-fg:#06222b; --accent-soft:#123642;
+  --code-bg:#0b1017;
+  --ok:#4ac26b; --ok-soft:#0f2a17; --err:#f2686e; --err-soft:#2e1315;
+  --warn:#e0aa4a; --warn-soft:#2c2110; --info:#5aa9ef; --info-soft:#10243a;
+  --node-bg:#1a212b; --edge:#46525f; --edge-strong:#4cc4e0;
+  --shadow:0 1px 2px rgba(0,0,0,.5),0 8px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--fg); font-family:var(--sans);
+  font-size:14px; line-height:1.55; -webkit-font-smoothing:antialiased;
+}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+/* ============ 공통 ============ */
+.mono{font-family:var(--mono)}
+.wrap{max-width:1520px;margin:0 auto;padding:0 20px}
+.muted{color:var(--fg-dim)}
+.tiny{font-size:12px}
+.xtiny{font-size:11px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;
+  border:1px solid var(--line);background:var(--bg-elev);font-size:11.5px;color:var(--fg-dim);
+  font-family:var(--mono);white-space:nowrap}
+.chip.ok{border-color:var(--ok);color:var(--ok);background:var(--ok-soft)}
+.chip.err{border-color:var(--err);color:var(--err);background:var(--err-soft)}
+.chip.warn{border-color:var(--warn);color:var(--warn);background:var(--warn-soft)}
+.chip.info{border-color:var(--info);color:var(--info);background:var(--info-soft)}
+.chip.acc{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.btn{border:1px solid var(--line-strong);background:var(--bg-elev);border-radius:8px;
+  padding:7px 13px;font-size:13px;font-weight:600;transition:.12s;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.btn.primary:hover{filter:brightness(1.1);color:var(--accent-fg)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--fg-dim);font-weight:500}
+.btn.ghost:hover{background:var(--bg-sunken);color:var(--fg)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.sm{padding:4px 9px;font-size:12px;border-radius:6px}
+.card{background:var(--bg-elev);border:1px solid var(--line);border-radius:12px}
+.pad{padding:16px 18px}
+code,.code{font-family:var(--mono);background:var(--code-bg);border:1px solid var(--line);
+  border-radius:5px;padding:1.5px 5px;font-size:12.5px}
+pre.code{display:block;padding:10px 12px;overflow-x:auto;white-space:pre;line-height:1.6}
+hr.sep{border:0;border-top:1px solid var(--line);margin:14px 0}
+
+/* ============ 상단 바 ============ */
+.topbar{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 88%,transparent);
+  backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topbar-in{display:flex;align-items:center;gap:18px;height:56px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:-.01em}
+.brand .t2{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em;
+  background:var(--accent);color:var(--accent-fg);padding:2px 7px;border-radius:5px}
+.brand .repo{font-family:var(--mono);font-size:12.5px;color:var(--fg-dim);font-weight:500}
+.tabs{display:flex;gap:2px;margin-left:8px;background:var(--bg-sunken);padding:3px;border-radius:9px}
+.tabs button{border:0;background:transparent;padding:6px 14px;border-radius:7px;font-size:13px;
+  font-weight:600;color:var(--fg-dim)}
+.tabs button[aria-selected="true"]{background:var(--bg-elev);color:var(--fg);box-shadow:var(--shadow)}
+.spacer{flex:1}
+
+/* ============ 그래프 ============ */
+.gpane{background:var(--bg-elev);border:1px solid var(--line);border-radius:12px;overflow:hidden;
+  display:flex;flex-direction:column;min-height:0}
+.gtools{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line);
+  background:var(--bg-elev);flex-wrap:wrap}
+.gscroll{overflow:auto;background:var(--bg-sunken);flex:1;min-height:280px;position:relative;cursor:grab}
+.gscroll.grabbing{cursor:grabbing}
+.gstatus{border-top:1px solid var(--line);padding:7px 12px;display:flex;align-items:center;gap:10px;
+  font-family:var(--mono);font-size:12px;color:var(--fg-dim);min-height:34px;background:var(--bg-elev)}
+.gstatus b{color:var(--fg);font-weight:600}
+.legend{display:flex;gap:12px;flex-wrap:wrap;align-items:center;font-size:11.5px;color:var(--fg-dim)}
+.legend i{width:11px;height:11px;border-radius:3px;display:inline-block;vertical-align:-1px;margin-right:4px;border:1.5px solid}
+
+svg.graph{display:block}
+svg.graph text{font-family:var(--mono);pointer-events:none;user-select:none}
+.band{fill:var(--band)}
+.band-lbl{font-family:var(--sans);font-size:12px;font-weight:700;fill:var(--fg-dim)}
+.band-sub{font-size:10px;fill:var(--fg-mute)}
+.edge{fill:none;stroke:var(--edge);stroke-width:1.3;opacity:.5;marker-end:url(#ar)}
+.edge.cyc{stroke:var(--warn);stroke-width:1.6;opacity:.85;marker-end:url(#ar-w);stroke-dasharray:5 3}
+.edge.hl{stroke:var(--edge-strong);stroke-width:2;opacity:1;marker-end:url(#ar-a)}
+.edge.imp{stroke:var(--warn);stroke-width:2;opacity:.95;marker-end:url(#ar-w);stroke-dasharray:6 4;
+  animation:march 1.1s linear infinite}
+@keyframes march{to{stroke-dashoffset:-20}}
+.edge.fade{opacity:.07}
+.nd{cursor:pointer}
+.nd .bg{fill:var(--node-bg);stroke:var(--line-strong);stroke-width:1}
+.nd .dir{font-size:9.5px;fill:var(--fg-mute)}
+.nd .nm{font-size:12px;font-weight:700;fill:var(--fg)}
+.nd:hover .bg{stroke:var(--accent);stroke-width:1.6}
+.nd.dim{opacity:.24}
+.nd.hot .bg{stroke:var(--accent);stroke-width:2}
+.nd.sel .bg{fill:var(--accent-soft);stroke:var(--accent);stroke-width:2.2}
+.nd.focus .bg{fill:var(--accent-soft);stroke:var(--accent);stroke-width:2.4}
+.nd.st-ok .bg{fill:var(--ok-soft);stroke:var(--ok);stroke-width:2.2}
+.nd.st-sec .bg{fill:var(--info-soft);stroke:var(--info);stroke-width:2;stroke-dasharray:4 3}
+.nd.st-missed .bg{fill:var(--warn-soft);stroke:var(--warn);stroke-width:2.4;stroke-dasharray:6 3}
+.nd.st-missed{animation:blip 1.6s ease-in-out 3}
+@keyframes blip{0%,100%{opacity:1}50%{opacity:.55}}
+.nd.st-wrong .bg{fill:var(--err-soft);stroke:var(--err);stroke-width:2.2}
+.badge{font-size:11px;font-weight:800}
+.badge.ok{fill:var(--ok)} .badge.err{fill:var(--err)} .badge.warn{fill:var(--warn)}
+.badge.info{fill:var(--info)} .badge.acc{fill:var(--accent)}
+.colhdr{font-family:var(--sans);font-size:11.5px;font-weight:700;fill:var(--fg-dim)}
+
+/* ============ 파일 목록 레일 ============ */
+.rail{display:flex;flex-direction:column;background:var(--bg-elev);border:1px solid var(--line);
+  border-radius:12px;overflow:hidden;min-height:0}
+.rail-hd{padding:10px 12px;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center}
+.search{flex:1;display:flex;align-items:center;gap:6px;background:var(--bg-sunken);
+  border:1px solid var(--line);border-radius:8px;padding:5px 9px}
+.search input{border:0;background:transparent;outline:0;color:var(--fg);font-family:var(--mono);
+  font-size:12.5px;width:100%}
+.rail-body{overflow:auto;flex:1;padding:6px 0;min-height:180px}
+.grp{padding:7px 12px 3px;font-family:var(--mono);font-size:10.5px;color:var(--fg-mute);
+  letter-spacing:.02em;display:flex;align-items:center;gap:6px}
+.grp::after{content:"";flex:1;border-top:1px dashed var(--line)}
+.fitem{display:flex;align-items:center;gap:9px;padding:5px 12px;cursor:pointer;border-left:2px solid transparent}
+.fitem:hover{background:var(--bg-sunken)}
+.fitem .box{width:15px;height:15px;flex:0 0 15px;border:1.5px solid var(--line-strong);border-radius:4px;
+  display:grid;place-items:center;font-size:10px;color:transparent}
+.fitem.on .box{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.fitem.on{background:var(--accent-soft);border-left-color:var(--accent)}
+.fitem .nm{font-family:var(--mono);font-size:12.5px;font-weight:600;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.fitem.r-ok{background:var(--ok-soft);border-left-color:var(--ok)}
+.fitem.r-missed{background:var(--warn-soft);border-left-color:var(--warn)}
+.fitem.r-wrong{background:var(--err-soft);border-left-color:var(--err)}
+.fitem.r-sec{background:var(--info-soft);border-left-color:var(--info)}
+.rail-ft{border-top:1px solid var(--line);padding:10px 12px;display:flex;gap:8px;align-items:center}
+
+/* ============ 레이아웃 ============ */
+main{padding:20px 0 80px}
+.hd{margin:0 0 4px;font-size:20px;font-weight:800;letter-spacing:-.02em}
+.sub{color:var(--fg-dim);font-size:13px;margin:0 0 16px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.stat{background:var(--bg-elev);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+.stat .n{font-family:var(--mono);font-size:22px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.stat .l{font-size:11.5px;color:var(--fg-dim);margin-top:2px}
+.split{display:grid;gap:14px;align-items:start}
+.split.brief{grid-template-columns:minmax(0,1fr) 312px}
+.split.q1{grid-template-columns:296px minmax(0,1fr)}
+@media(max-width:1080px){.split.brief,.split.q1{grid-template-columns:1fr}}
+
+/* 브리핑 투어 */
+.tour{position:sticky;top:76px}
+.tourdots{display:flex;gap:5px;margin-bottom:10px}
+.tourdots span{height:4px;flex:1;border-radius:2px;background:var(--line)}
+.tourdots span.on{background:var(--accent)}
+.tour h3{margin:0 0 6px;font-size:16px;letter-spacing:-.01em}
+.tour p{margin:0 0 10px;font-size:13.5px;color:var(--fg-dim);line-height:1.65}
+.tour .kb{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+.kb-row{display:flex;gap:8px;align-items:baseline;font-size:12.5px}
+.kb-row .k{font-family:var(--mono);font-size:11.5px;color:var(--accent);flex:0 0 auto}
+.shelf{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.shelf .f{font-family:var(--mono);font-size:11.5px;border:1px dashed var(--line-strong);
+  border-radius:7px;padding:4px 9px;color:var(--fg-dim);background:var(--bg-sunken)}
+
+/* 문제 네비 */
+.qnav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.qtab{border:1px solid var(--line);background:var(--bg-elev);border-radius:9px;padding:7px 12px;
+  display:flex;gap:8px;align-items:center;font-size:12.5px;font-weight:600;color:var(--fg-dim)}
+.qtab .no{font-family:var(--mono);font-size:11px;background:var(--bg-sunken);border-radius:5px;
+  padding:1px 6px;color:var(--fg-mute)}
+.qtab[aria-selected="true"]{border-color:var(--accent);color:var(--fg);background:var(--accent-soft)}
+.qtab.done .no{background:var(--ok);color:#fff}
+
+/* 문제 배너 */
+.qbanner{background:var(--bg-elev);border:1px solid var(--line);border-radius:12px;padding:16px 18px;
+  margin-bottom:14px}
+.qkind{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.qask{font-size:17px;font-weight:700;letter-spacing:-.015em;line-height:1.5;margin:0 0 6px}
+.qwhy{font-size:12.5px;color:var(--fg-dim);margin:0}
+.qactions{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.hintbox{margin-top:10px;border-left:3px solid var(--warn);background:var(--warn-soft);
+  border-radius:0 8px 8px 0;padding:8px 12px;font-size:12.5px}
+.hintbox div+div{margin-top:5px}
+
+/* 채점 결과 */
+.verdict{display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:14px 18px;border-radius:12px;
+  border:1px solid var(--line);background:var(--bg-elev);margin-bottom:12px}
+.vscore{font-family:var(--mono);font-size:28px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.meter{height:8px;border-radius:5px;background:var(--bg-sunken);overflow:hidden;display:flex;min-width:180px;flex:1}
+.meter i{display:block;height:100%}
+.reslist{display:grid;gap:8px}
+.res{display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:start;padding:10px 12px;
+  border-radius:9px;border:1px solid var(--line);background:var(--bg-elev)}
+.res .mk{font-size:14px;font-weight:800;text-align:center;line-height:1.3}
+.res .p{font-family:var(--mono);font-size:12.5px;font-weight:600;word-break:break-all}
+.res .n{font-size:12.5px;color:var(--fg-dim);margin-top:3px;line-height:1.55}
+.res .d{font-family:var(--mono);font-size:11px;color:var(--fg-mute);white-space:nowrap}
+.res.ok{border-left:3px solid var(--ok)} .res.missed{border-left:3px solid var(--warn)}
+.res.wrong{border-left:3px solid var(--err)} .res.sec{border-left:3px solid var(--info)}
+.rgrp{font-size:12.5px;font-weight:700;margin:14px 0 7px;display:flex;align-items:center;gap:7px}
+.commitcard{border:1px solid var(--line);border-radius:10px;background:var(--code-bg);padding:12px 14px;
+  font-family:var(--mono);font-size:12px;line-height:1.7}
+.commitcard .h{color:var(--accent);font-weight:700}
+
+/* 흐름 추적 */
+.flow{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px;align-items:start}
+@media(max-width:1080px){.flow{grid-template-columns:1fr}}
+.slots{display:flex;flex-direction:column;gap:0}
+.slot{border:1.5px dashed var(--line-strong);border-radius:10px;background:var(--bg-elev);
+  min-height:58px;display:flex;align-items:center;gap:10px;padding:9px 12px;position:relative}
+.slot.fixed{border-style:solid;background:var(--bg-sunken);border-color:var(--line)}
+.slot.filled{border-style:solid}
+.slot.over{border-color:var(--accent);background:var(--accent-soft)}
+.slot .idx{font-family:var(--mono);font-size:11px;color:var(--fg-mute);flex:0 0 20px;text-align:center}
+.slot .body{flex:1;min-width:0}
+.slot .ttl{font-family:var(--mono);font-size:12.5px;font-weight:700;word-break:break-all}
+.slot .dsc{font-size:12px;color:var(--fg-dim);margin-top:2px}
+.slot .ctl{display:flex;gap:3px}
+.slot .ctl button{width:24px;height:24px;border-radius:6px;border:1px solid var(--line);
+  background:var(--bg-elev);font-size:11px;display:grid;place-items:center;padding:0}
+.slot.ok{border-color:var(--ok);background:var(--ok-soft)}
+.slot.bad{border-color:var(--err);background:var(--err-soft)}
+.arrowdown{height:18px;display:grid;place-items:center;color:var(--fg-mute);font-size:12px}
+.bank{display:flex;flex-direction:column;gap:8px}
+.bankcard{border:1px solid var(--line-strong);border-radius:10px;background:var(--bg-elev);
+  padding:9px 11px;cursor:pointer;transition:.12s}
+.bankcard:hover{border-color:var(--accent);transform:translateY(-1px)}
+.bankcard.used{opacity:.35;pointer-events:none}
+.bankcard .ttl{font-family:var(--mono);font-size:12px;font-weight:700;word-break:break-all}
+.bankcard .dsc{font-size:11.5px;color:var(--fg-dim);margin-top:2px}
+
+/* 의존성 방향 */
+.dirq{border:1px solid var(--line);border-radius:12px;background:var(--bg-elev);padding:16px 18px;margin-bottom:12px}
+.dirpair{display:grid;grid-template-columns:1fr 44px 1fr;gap:10px;align-items:center;margin:12px 0 14px}
+.filecard{border:1px solid var(--line-strong);border-radius:10px;background:var(--bg-sunken);padding:11px 13px}
+.filecard .tag{font-family:var(--mono);font-size:10.5px;color:var(--accent);font-weight:700}
+.filecard .d{font-family:var(--mono);font-size:10.5px;color:var(--fg-mute);word-break:break-all}
+.filecard .n{font-family:var(--mono);font-size:13.5px;font-weight:700;word-break:break-all;margin-top:1px}
+.dirmid{text-align:center;font-size:20px;color:var(--fg-mute)}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px}
+.opt{border:1.5px solid var(--line);background:var(--bg-elev);border-radius:10px;padding:11px 13px;
+  text-align:left;font-size:13px;font-weight:600;transition:.12s}
+.opt:hover{border-color:var(--accent)}
+.opt .sm{display:block;font-weight:400;font-size:11.5px;color:var(--fg-dim);margin-top:3px}
+.opt.picked{border-color:var(--accent);background:var(--accent-soft)}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--err);background:var(--err-soft)}
+.opt[disabled]{cursor:default}
+.explain{margin-top:12px;border-radius:10px;padding:11px 13px;font-size:13px;line-height:1.65}
+.explain.ok{background:var(--ok-soft);border:1px solid var(--ok)}
+.explain.bad{background:var(--err-soft);border:1px solid var(--err)}
+.explain pre{margin:8px 0 0}
+
+/* 영향반경 */
+.fog{display:grid;place-items:center;min-height:280px;text-align:center;padding:30px;gap:8px}
+.fog .q{font-size:44px;color:var(--line-strong);font-family:var(--mono);font-weight:800}
+.pickgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.pick{display:flex;align-items:center;gap:9px;border:1.5px solid var(--line);border-radius:9px;
+  background:var(--bg-elev);padding:8px 11px;cursor:pointer;text-align:left}
+.pick:hover{border-color:var(--accent)}
+.pick.on{border-color:var(--accent);background:var(--accent-soft)}
+.pick .box{width:15px;height:15px;flex:0 0 15px;border:1.5px solid var(--line-strong);border-radius:4px;
+  display:grid;place-items:center;font-size:10px;color:transparent}
+.pick.on .box{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.pick .t{min-width:0}
+.pick .d{font-family:var(--mono);font-size:10px;color:var(--fg-mute);overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.pick .n{font-family:var(--mono);font-size:12.5px;font-weight:700;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.pick.r-ok{border-color:var(--ok);background:var(--ok-soft)}
+.pick.r-missed{border-color:var(--warn);background:var(--warn-soft)}
+.pick.r-wrong{border-color:var(--err);background:var(--err-soft)}
+
+.note{border-left:3px solid var(--info);background:var(--info-soft);border-radius:0 8px 8px 0;
+  padding:9px 12px;font-size:12.5px;line-height:1.6}
+.hidden{display:none !important}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="wrap topbar-in">
+  <div class="brand"><span class="t2">T2</span> 구조 학습 <span class="repo">· nextjs-shop</span></div>
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab-brief" aria-selected="true" onclick="setView('brief')">구조 브리핑</button>
+    <button role="tab" id="tab-quiz" aria-selected="false" onclick="setView('quiz')">문제 풀기</button>
+  </div>
+  <div class="spacer"></div>
+  <span class="chip" id="progchip">0 / 4 완료</span>
+  <button class="btn sm ghost" id="themebtn" onclick="toggleTheme()">☀︎ 밝게</button>
+</div></div>
+
+<main class="wrap">
+
+<!-- ================= 구조 브리핑 ================= -->
+<section id="view-brief">
+  <h1 class="hd">이 프로젝트는 이렇게 생겼습니다</h1>
+  <p class="sub">문제를 풀기 전에 30초만 훑어보세요. 파일이 어디에 있고, 무엇이 무엇을 가져다 쓰는지 한 장으로 보여드립니다.</p>
+  <div class="stats" id="briefstats"></div>
+  <div class="split brief">
+    <div class="gpane" style="height:772px">
+      <div class="gtools">
+        <strong style="font-size:13px">전체 조감도</strong>
+        <span id="briefctrl" style="display:flex;gap:4px;align-items:center;flex-wrap:wrap"></span>
+        <div class="spacer"></div>
+        <button class="btn sm ghost" onclick="zoomG('brief',-1)">−</button>
+        <span class="chip mono" id="bzoom">100%</span>
+        <button class="btn sm ghost" onclick="zoomG('brief',1)">＋</button>
+        <button class="btn sm" onclick="fitG('brief')">화면에 맞추기</button>
+      </div>
+      <div class="gscroll" id="brief-scroll"><svg class="graph" id="brief-svg"></svg></div>
+      <div class="gstatus" id="brief-status">파일 상자에 마우스를 올리거나 클릭하면 전체 경로와 연결이 여기 표시됩니다.</div>
+    </div>
+    <div class="card pad tour">
+      <div class="tourdots" id="tourdots"></div>
+      <h3 id="tour-t"></h3>
+      <p id="tour-b"></p>
+      <div id="tour-x"></div>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button class="btn sm" onclick="tourGo(-1)" id="tour-prev">← 이전</button>
+        <button class="btn sm primary" onclick="tourGo(1)" id="tour-next">다음 →</button>
+        <div class="spacer"></div>
+        <button class="btn sm ghost" onclick="setView('quiz')">문제로 →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 문제 ================= -->
+<section id="view-quiz" class="hidden">
+  <div class="qnav" id="qnav"></div>
+  <!-- ---------- Q1 책임 배치 ---------- -->
+  <div id="q1" class="qview">
+    <div class="qbanner">
+      <div class="qkind"><span class="chip acc">책임 배치</span><span class="chip">정답지 = 실제 커밋</span>
+        <span class="chip">부분 점수</span></div>
+      <p class="qask">장바구니에서 상품 수량을 <code>＋ / −</code> 버튼으로 바꾸는 기능을 넣는다면,
+        <b>어느 파일들을 고쳐야 할까요?</b></p>
+      <p class="qwhy">왼쪽 목록에서 고르거나, 오른쪽 지도에서 상자를 직접 클릭해도 됩니다. 정답은 이 저장소에
+        실제로 들어간 커밋의 변경 파일 목록입니다.</p>
+      <div class="qactions">
+        <button class="btn sm" onclick="q1Hint()">힌트 보기</button>
+        <span class="chip" id="q1count">0개 선택됨</span>
+        <div class="spacer"></div>
+        <button class="btn sm ghost" onclick="q1Reset()">다시 고르기</button>
+        <button class="btn primary" id="q1submit" onclick="q1Grade()" disabled>채점하기</button>
+      </div>
+      <div class="hintbox hidden" id="q1hints"></div>
+    </div>
+    <div class="split q1">
+      <div class="rail" style="height:772px">
+        <div class="rail-hd"><div class="search"><span class="mono tiny">/</span>
+          <input id="q1search" placeholder="파일 이름으로 찾기" oninput="q1RenderList()"></div></div>
+        <div class="rail-body" id="q1list"></div>
+        <div class="rail-ft"><span class="tiny muted" id="q1foot">28개 파일</span></div>
+      </div>
+      <div class="gpane" style="height:772px">
+        <div class="gtools">
+          <strong style="font-size:13px">전체 조감도</strong>
+          <span id="q1ctrl" style="display:flex;gap:4px;align-items:center;flex-wrap:wrap"></span>
+          <div class="spacer"></div>
+          <button class="btn sm ghost" onclick="zoomG('q1',-1)">−</button>
+          <span class="chip mono" id="q1zoom">100%</span>
+          <button class="btn sm ghost" onclick="zoomG('q1',1)">＋</button>
+          <button class="btn sm" onclick="fitG('q1')">화면에 맞추기</button>
+        </div>
+        <div class="gscroll" id="q1-scroll"><svg class="graph" id="q1-svg"></svg></div>
+        <div class="gstatus" id="q1-status">상자를 클릭하면 선택/해제됩니다.</div>
+      </div>
+    </div>
+    <div id="q1result" class="hidden" style="margin-top:14px"></div>
+  </div>
+
+  <!-- ---------- Q2 영향 반경 ---------- -->
+  <div id="q2" class="qview hidden">
+    <div class="qbanner">
+      <div class="qkind"><span class="chip acc">영향 반경</span><span class="chip">정답지 = 연결 그래프</span></div>
+      <p class="qask"><code>src/server/schema.ts</code> 에서 <code>Cart</code> 타입의 필드 이름을 바꿨습니다.
+        <b>바로 영향을 받아 같이 고쳐야 할 파일은 어디일까요?</b></p>
+      <p class="qwhy">이 파일을 <b>직접</b> 가져다 쓰는 파일만 고르세요. 한 단계 건너뛴 파일은 채점 뒤에 따로 보여드립니다.</p>
+      <div class="qactions">
+        <span class="chip" id="q2count">0개 선택됨</span>
+        <div class="spacer"></div>
+        <button class="btn sm ghost" onclick="q2Reset()">다시 고르기</button>
+        <button class="btn primary" id="q2submit" onclick="q2Grade()" disabled>채점하기</button>
+      </div>
+    </div>
+    <div class="card pad" style="margin-bottom:14px">
+      <div class="tiny muted" style="margin-bottom:8px">후보 파일 10개 · 정답 개수는 알려드리지 않습니다</div>
+      <div class="pickgrid" id="q2picks"></div>
+    </div>
+    <div class="gpane" style="height:700px">
+      <div class="gtools">
+        <strong style="font-size:13px">영향 지도</strong>
+        <span class="chip" id="q2mode">채점 전에는 가려져 있습니다</span>
+        <div class="spacer"></div>
+        <button class="btn sm hidden" id="q2flip" onclick="q2Flip()">화살표를 import 방향으로 보기</button>
+        <button class="btn sm ghost hidden" id="q2zo" onclick="zoomG('q2',-1)">−</button>
+        <span class="chip mono hidden" id="q2zoom">100%</span>
+        <button class="btn sm ghost hidden" id="q2zi" onclick="zoomG('q2',1)">＋</button>
+      </div>
+      <div class="gscroll" id="q2-scroll">
+        <div class="fog" id="q2fog">
+          <div class="q">?</div>
+          <div style="max-width:460px" class="muted">먼저 예상해 보세요.<br>
+            채점하면 <b>영향이 어디까지 번지는지</b> 물결처럼 펼쳐 보여드립니다.</div>
+        </div>
+        <svg class="graph hidden" id="q2-svg"></svg>
+      </div>
+      <div class="gstatus" id="q2-status">위에서 후보를 고르고 채점을 누르세요.</div>
+    </div>
+    <div id="q2result" class="hidden" style="margin-top:14px"></div>
+  </div>
+
+  <!-- ---------- Q3 흐름 추적 ---------- -->
+  <div id="q3" class="qview hidden">
+    <div class="qbanner">
+      <div class="qkind"><span class="chip acc">흐름 추적</span><span class="chip ok">드래그 없이 클릭만으로도 됩니다</span></div>
+      <p class="qask">장바구니에서 <code>＋</code> 를 눌러 수량을 2 → 3 으로 바꿉니다.
+        <b>그 사이에 무슨 일이 순서대로 일어날까요?</b></p>
+      <p class="qwhy">오른쪽 카드를 <b>클릭</b>하면 위에서부터 빈 칸에 차례로 들어갑니다.
+        들어간 카드는 ▲▼ 로 자리를 바꾸거나 클릭해서 뺄 수 있습니다. (드래그도 됩니다)</p>
+      <div class="qactions">
+        <span class="chip" id="q3count">0 / 5 채움</span>
+        <div class="spacer"></div>
+        <button class="btn sm ghost" onclick="q3Reset()">비우기</button>
+        <button class="btn primary" id="q3submit" onclick="q3Grade()" disabled>채점하기</button>
+      </div>
+    </div>
+    <div class="flow">
+      <div class="slots" id="q3slots"></div>
+      <div>
+        <div class="tiny muted" style="margin-bottom:8px">카드 보관함 · 이 중 <b>2장은 이 흐름과 상관없는 카드</b>입니다</div>
+        <div class="bank" id="q3bank"></div>
+      </div>
+    </div>
+    <div id="q3result" class="hidden" style="margin-top:14px"></div>
+  </div>
+
+  <!-- ---------- Q4 의존성 방향 ---------- -->
+  <div id="q4" class="qview hidden">
+    <div class="qbanner">
+      <div class="qkind"><span class="chip acc">의존성 방향</span><span class="chip">4연속 · 즉시 채점</span></div>
+      <p class="qask">두 파일 중 <b>어느 쪽이 어느 쪽을 가져다 쓰나요?</b></p>
+      <p class="qwhy">“가져다 쓴다”는 파일 맨 위의 <code>import</code> 한 줄을 뜻합니다.
+        답을 고르면 실제 코드 한 줄을 보여드립니다.</p>
+      <div class="qactions"><span class="chip" id="q4count">0 / 4</span>
+        <div class="spacer"></div>
+        <button class="btn sm ghost" onclick="q4Reset()">처음부터</button></div>
+    </div>
+    <div id="q4body"></div>
+    <div id="q4result" class="hidden" style="margin-top:14px"></div>
+  </div>
+</section>
+
+</main>
+<script>
+/* ================= 데이터 ================= */
+const ROWS=[
+ {l:'입구',s:'app/',d:'사용자가 여는 페이지, 서버가 받는 요청. 여기서 모든 게 시작됩니다.'},
+ {l:'기능 화면',s:'features/',d:'장바구니·상품·결제처럼 기능별로 화면을 그리는 조각들.'},
+ {l:'동작 · 상태',s:'hooks · api',d:'버튼을 누르면 무슨 일이 일어나는지, 데이터를 어떻게 들고 있는지.'},
+ {l:'공용 부품',s:'components/ui',d:'여러 화면이 같이 쓰는 버튼·입력창 같은 부품.'},
+ {l:'공용 로직',s:'lib/',d:'금액 포맷, 서버 통신, 값 검증처럼 어디서든 쓰는 도구 함수.'},
+ {l:'데이터',s:'server/',d:'DB에 실제로 넣고 빼는 곳, 그리고 데이터의 모양(타입).'}];
+
+const FILES=[
+ {p:'src/app/layout.tsx',r:0,c:3},{p:'src/app/page.tsx',r:0,c:5},
+ {p:'src/app/cart/page.tsx',r:0,c:7},{p:'src/app/checkout/page.tsx',r:0,c:4},
+ {p:'src/app/api/cart/route.ts',r:0,c:9},{p:'src/app/api/orders/route.ts',r:0,c:6},
+ {p:'src/features/cart/CartView.tsx',r:1,c:8},{p:'src/features/cart/CartItemRow.tsx',r:1,c:11},
+ {p:'src/features/cart/QuantityStepper.tsx',r:1,c:2},{p:'src/features/catalog/ProductGrid.tsx',r:1,c:6},
+ {p:'src/features/catalog/ProductCard.tsx',r:1,c:9},{p:'src/features/checkout/CheckoutForm.tsx',r:1,c:7},
+ {p:'src/features/checkout/useCheckout.ts',r:2,c:5},{p:'src/features/cart/hooks/useCartQuantity.ts',r:2,c:2},
+ {p:'src/features/cart/hooks/useCart.ts',r:2,c:12},{p:'src/features/cart/cartApi.ts',r:2,c:10},
+ {p:'src/components/ui/Button.tsx',r:3,c:4},{p:'src/components/ui/Input.tsx',r:3,c:3},
+ {p:'src/components/ui/Toast.tsx',r:3,c:2},
+ {p:'src/lib/format.ts',r:4,c:3},{p:'src/lib/http.ts',r:4,c:4},
+ {p:'src/lib/validation.ts',r:4,c:6},{p:'src/lib/analytics.ts',r:4,c:2},
+ {p:'src/server/cartRepo.ts',r:5,c:7},{p:'src/server/db.ts',r:5,c:3},{p:'src/server/schema.ts',r:5,c:8},
+ {p:'src/lib/legacyPrice.ts',r:4,c:1,iso:'예전에 쓰던 가격 계산기. 지금은 아무도 안 씁니다 — 지워도 되는 후보예요.'},
+ {p:'next.config.mjs',r:5,c:2,iso:'설정 파일. 코드가 import 하지 않고 빌드 도구가 직접 읽습니다.'}];
+
+const E=(f,t,i)=>({f,t,i});
+const EDGES=[
+ E('src/app/layout.tsx','src/components/ui/Toast.tsx','import { ToastHost } from "@/components/ui/Toast";'),
+ E('src/app/layout.tsx','src/lib/analytics.ts','import { initAnalytics } from "@/lib/analytics";'),
+ E('src/app/page.tsx','src/features/catalog/ProductGrid.tsx','import { ProductGrid } from "@/features/catalog/ProductGrid";'),
+ E('src/app/cart/page.tsx','src/features/cart/CartView.tsx','import { CartView } from "@/features/cart/CartView";'),
+ E('src/app/cart/page.tsx','src/features/cart/hooks/useCart.ts','import { useCart } from "@/features/cart/hooks/useCart";'),
+ E('src/app/checkout/page.tsx','src/features/checkout/CheckoutForm.tsx','import { CheckoutForm } from "@/features/checkout/CheckoutForm";'),
+ E('src/app/api/cart/route.ts','src/server/cartRepo.ts','import { cartRepo } from "@/server/cartRepo";'),
+ E('src/app/api/cart/route.ts','src/lib/validation.ts','import { parseQty } from "@/lib/validation";'),
+ E('src/app/api/cart/route.ts','src/server/schema.ts','import type { Cart } from "@/server/schema";'),
+ E('src/app/api/orders/route.ts','src/server/db.ts','import { db } from "@/server/db";'),
+ E('src/app/api/orders/route.ts','src/lib/validation.ts','import { parseOrder } from "@/lib/validation";'),
+ E('src/app/api/orders/route.ts','src/server/schema.ts','import type { Order } from "@/server/schema";'),
+ E('src/features/cart/CartView.tsx','src/features/cart/CartItemRow.tsx','import { CartItemRow } from "./CartItemRow";'),
+ E('src/features/cart/CartView.tsx','src/features/cart/hooks/useCart.ts','import { useCart } from "./hooks/useCart";'),
+ E('src/features/cart/CartView.tsx','src/lib/format.ts','import { won } from "@/lib/format";'),
+ E('src/features/cart/CartItemRow.tsx','src/features/cart/QuantityStepper.tsx','import { QuantityStepper } from "./QuantityStepper";'),
+ E('src/features/cart/CartItemRow.tsx','src/lib/format.ts','import { won } from "@/lib/format";'),
+ E('src/features/cart/CartItemRow.tsx','src/components/ui/Button.tsx','import { Button } from "@/components/ui/Button";'),
+ E('src/features/cart/QuantityStepper.tsx','src/features/cart/hooks/useCartQuantity.ts','import { useCartQuantity } from "./hooks/useCartQuantity";'),
+ E('src/features/cart/QuantityStepper.tsx','src/components/ui/Button.tsx','import { Button } from "@/components/ui/Button";'),
+ E('src/features/cart/hooks/useCartQuantity.ts','src/features/cart/cartApi.ts','import { updateQuantity } from "../cartApi";'),
+ E('src/features/cart/hooks/useCartQuantity.ts','src/components/ui/Toast.tsx','import { toast } from "@/components/ui/Toast";'),
+ E('src/features/cart/hooks/useCart.ts','src/features/cart/cartApi.ts','import { fetchCart } from "../cartApi";'),
+ E('src/features/cart/cartApi.ts','src/lib/http.ts','import { http } from "@/lib/http";'),
+ E('src/features/cart/cartApi.ts','src/server/schema.ts','import type { Cart } from "@/server/schema";'),
+ E('src/features/cart/cartApi.ts','src/features/cart/hooks/useCart.ts','import type { CartState } from "./hooks/useCart";'),
+ E('src/features/catalog/ProductGrid.tsx','src/features/catalog/ProductCard.tsx','import { ProductCard } from "./ProductCard";'),
+ E('src/features/catalog/ProductCard.tsx','src/lib/format.ts','import { won } from "@/lib/format";'),
+ E('src/features/catalog/ProductCard.tsx','src/components/ui/Button.tsx','import { Button } from "@/components/ui/Button";'),
+ E('src/features/checkout/CheckoutForm.tsx','src/features/checkout/useCheckout.ts','import { useCheckout } from "./useCheckout";'),
+ E('src/features/checkout/CheckoutForm.tsx','src/components/ui/Input.tsx','import { Input } from "@/components/ui/Input";'),
+ E('src/features/checkout/CheckoutForm.tsx','src/components/ui/Button.tsx','import { Button } from "@/components/ui/Button";'),
+ E('src/features/checkout/CheckoutForm.tsx','src/lib/validation.ts','import { orderSchema } from "@/lib/validation";'),
+ E('src/features/checkout/useCheckout.ts','src/lib/http.ts','import { http } from "@/lib/http";'),
+ E('src/features/checkout/useCheckout.ts','src/features/cart/hooks/useCart.ts','import { useCart } from "@/features/cart/hooks/useCart";'),
+ E('src/lib/validation.ts','src/server/schema.ts','import type { Cart, Order } from "@/server/schema";'),
+ E('src/lib/analytics.ts','src/lib/http.ts','import { http } from "./http";'),
+ E('src/server/cartRepo.ts','src/server/db.ts','import { db } from "./db";'),
+ E('src/server/cartRepo.ts','src/server/schema.ts','import type { Cart } from "./schema";')];
+
+/* ================= 파생 인덱스 ================= */
+const F=new Map(FILES.map(f=>[f.p,f]));
+const OUT=new Map(), INC=new Map();
+FILES.forEach(f=>{OUT.set(f.p,[]);INC.set(f.p,[])});
+EDGES.forEach(e=>{OUT.get(e.f).push(e);INC.get(e.t).push(e)});
+const EKEY=new Set(EDGES.map(e=>e.f+'|'+e.t));
+const CYC=EDGES.filter(e=>EKEY.has(e.t+'|'+e.f));
+const name=p=>p.slice(p.lastIndexOf('/')+1);
+const dir=p=>p.includes('/')?p.slice(0,p.lastIndexOf('/')):'(루트)';
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function cut(s,max,px){const n=Math.floor(max/px);if(s.length<=n)return s;return '…'+s.slice(-(n-1));}
+function cutMid(s,max,px){const n=Math.floor(max/px);if(s.length<=n)return s;
+  const h=Math.floor((n-1)/2);return s.slice(0,h)+'…'+s.slice(-(n-1-h));}
+/* 기능 묶음: 층(세로)과 별개로 "어느 기능인지"를 색과 이웃자리로 표시 */
+const GRP=[{k:'cart',l:'장바구니',c:'#d9843c'},{k:'catalog',l:'상품 목록',c:'#5f9e4a'},
+ {k:'checkout',l:'결제',c:'#9a6cc4'},{k:'common',l:'공용',c:'#7d8b99'}];
+const GC=Object.fromEntries(GRP.map(g=>[g.k,g.c])), GO={cart:0,catalog:1,checkout:2,common:3};
+function gk(p){
+  if(/cart|Cart/.test(p))return 'cart';
+  if(/catalog|Product/.test(p)||p==='src/app/page.tsx')return 'catalog';
+  if(/checkout|Checkout|orders|Order/.test(p))return 'checkout';
+  return 'common';}
+/* 같은 파일명이 여러 개면(page.tsx 3개, route.ts 2개) 상위 폴더까지 붙여 구분 */
+const NC={}; FILES.forEach(f=>{const n=name(f.p);NC[n]=(NC[n]||0)+1;});
+function disp(p){const n=name(p); if(NC[n]<2)return n;
+  const d=dir(p); return d.slice(d.lastIndexOf('/')+1)+'/'+n;}
+
+/* ================= 레이아웃 엔진 (직접 좌표 계산) ================= */
+const G={NW:158,NH:46,GX:14,GY:40,ARC:26,PADL:152,PADT:16,PADR:22,PADB:16};
+function place(rows){
+  const ws=rows.map(r=>r.length*G.NW+(r.length-1)*G.GX);
+  const maxW=Math.max(...ws), cx=G.PADL+maxW/2, pos={};
+  rows.forEach((r,i)=>{
+    let x=cx-ws[i]/2;
+    const y=G.PADT+i*(G.NH+G.ARC+G.GY);
+    r.forEach(p=>{pos[p]={x,y,w:G.NW,h:G.NH,row:i};x+=G.NW+G.GX;});
+  });
+  return {pos,W:G.PADL+maxW+G.PADR,H:G.PADT+rows.length*(G.NH+G.ARC+G.GY)-G.GY+G.PADB};
+}
+function ccw(a,b,c){return (c.y-a.y)*(b.x-a.x)>(b.y-a.y)*(c.x-a.x);}
+function xsec(s,t){return ccw(s.a,t.a,t.b)!==ccw(s.b,t.a,t.b)&&ccw(s.a,s.b,t.a)!==ccw(s.a,s.b,t.b);}
+function crossings(pos){
+  const seg=[];
+  for(const e of EDGES){const a=pos[e.f],b=pos[e.t];if(!a||!b)continue;
+    seg.push({f:e.f,t:e.t,a:{x:a.x+a.w/2,y:a.y+a.h},b:{x:b.x+b.w/2,y:b.y}});}
+  let n=0;
+  for(let i=0;i<seg.length;i++)for(let j=i+1;j<seg.length;j++){
+    const s=seg[i],u=seg[j];
+    if(s.f===u.f||s.f===u.t||s.t===u.f||s.t===u.t)continue;
+    if(xsec(s,u))n++;}
+  return n;
+}
+function optimize(rows){
+  let best=rows.map(r=>r.slice()), bc=crossings(place(best).pos);
+  for(let pass=0;pass<5;pass++){let imp=false;
+    for(let i=0;i<best.length;i++)for(let k=0;k<best[i].length-1;k++){
+      if(gk(best[i][k])!==gk(best[i][k+1]))continue; /* 기능 묶음은 흩뜨리지 않는다 */
+      const c=best.map(r=>r.slice());
+      [c[i][k],c[i][k+1]]=[c[i][k+1],c[i][k]];
+      const n=crossings(place(c).pos);
+      if(n<bc){bc=n;best=c;imp=true;}}
+    if(!imp)break;}
+  return {rows:best,cross:bc};
+}
+const ROWSET=ROWS.map((_,i)=>FILES.filter(f=>!f.iso&&f.r===i).map(f=>f.p)
+  .sort((a,b)=>GO[gk(a)]-GO[gk(b)]));
+const OPT=optimize(ROWSET);
+const LAY=place(OPT.rows);
+const POS=LAY.pos;
+
+/* 포트 계산: 한 노드에서 여러 선이 나갈 때 겹치지 않도록 아래/위 변에 분산 */
+const PORT={};
+(function(){
+  const spread=(list,node,key,edgeKey)=>{
+    const n=list.length, span=Math.min(node.w-30,(n-1)*16);
+    list.forEach((e,i)=>{
+      const x=node.x+node.w/2+(n===1?0:-span/2+span*i/(n-1));
+      (PORT[e.f+'|'+e.t]=PORT[e.f+'|'+e.t]||{})[key]=x;});
+  };
+  FILES.forEach(f=>{
+    const a=POS[f.p]; if(!a)return;
+    spread(OUT.get(f.p).filter(e=>POS[e.t]).sort((x,y)=>POS[x.t].x-POS[y.t].x),a,'sx');
+    spread(INC.get(f.p).filter(e=>POS[e.f]).sort((x,y)=>POS[x.f].x-POS[y.f].x),a,'tx');
+  });
+})();
+
+/* ================= SVG 그리기 ================= */
+function defs(){
+  const m=(id,cls)=>`<marker id="${id}" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6"
+    orient="auto-start-reverse"><path d="M0,0 L8,4 L0,8 z" class="${cls}"/></marker>`;
+  return `<defs>${m('ar','mk')}${m('ar-a','mk-a')}${m('ar-w','mk-w')}</defs>
+  <style>.mk{fill:var(--edge)}.mk-a{fill:var(--edge-strong)}.mk-w{fill:var(--warn)}</style>`;
+}
+function nodeSVG(p,x,y,w,h,cls,badge){
+  const dp=dir(p);
+  const inC=INC.get(p).length, outC=OUT.get(p).length;
+  return `<g class="nd ${cls||''}" data-p="${esc(p)}" transform="translate(${x},${y})" tabindex="0"
+    role="button" aria-label="${esc(p)}. 이 파일을 쓰는 곳 ${inC}개, 이 파일이 쓰는 것 ${outC}개">
+    <title>${esc(p)}</title>
+    <rect class="bg" width="${w}" height="${h}" rx="8"/>
+    <line x1="3.5" y1="7" x2="3.5" y2="${h-7}" stroke="${GC[gk(p)]}" stroke-width="3.5" stroke-linecap="round"/>
+    <text class="dir" x="13" y="17">${esc(cut(dp,w-27,4.85))}</text>
+    <text class="nm" x="13" y="34">${esc(cutMid(disp(p),w-(badge?30:27),6.05))}</text>
+    ${badge?`<text class="badge ${badge[1]}" x="${w-10}" y="${h/2+4}" text-anchor="middle">${badge[0]}</text>`:''}
+  </g>`;
+}
+function edgePath(a,b,ka,kb){
+  const P=PORT[ka+'|'+kb]||{};
+  if(a.row===b.row){
+    const right=b.x>a.x, by=a.y+a.h;
+    const sx=a.x+(right?a.w*.74:a.w*.26), tx=b.x+(right?b.w*.26:b.w*.74);
+    const d=right?18:24;
+    return `M${sx},${by} C${sx},${by+d} ${tx},${by+d} ${tx},${b.y+b.h+1}`;
+  }
+  const sx=P.sx!=null?P.sx:a.x+a.w/2, sy=a.y+a.h;
+  const tx=P.tx!=null?P.tx:b.x+b.w/2, ty=b.y-1;
+  const dy=Math.max(18,(ty-sy)*.42);
+  return `M${sx},${sy} C${sx},${sy+dy} ${tx},${ty-dy} ${tx},${ty}`;
+}
+/* 화면별 보기 설정: 선 밀도와 기능 필터 — 털뭉치를 사용자가 직접 줄일 수 있게 */
+const GS={brief:{edge:'all',grp:null},q1:{edge:'all',grp:null}};
+function ctrlHTML(k){
+  const g=GS[k];
+  const eb=[['all','전체'],['sel','고른 것만'],['none','끄기']].map(o=>
+    `<button class="btn sm ${g.edge===o[0]?'primary':'ghost'}" onclick="setEdge('${k}','${o[0]}')">${o[1]}</button>`).join('');
+  const gb=GRP.map(x=>`<button class="btn sm ${(!g.grp||g.grp.has(x.k))?'':'ghost'}"
+    style="border-color:${x.c};${(!g.grp||g.grp.has(x.k))?'':'opacity:.45'}"
+    onclick="setGrp('${k}','${x.k}')"><span style="width:8px;height:8px;border-radius:2px;background:${x.c};display:inline-block"></span>${x.l}</button>`).join('');
+  return `<span class="tiny muted">연결선</span>${eb}<span style="width:10px"></span>
+    <span class="tiny muted">기능</span>${gb}`;
+}
+function setEdge(k,v){GS[k].edge=v;redraw(k);}
+function setGrp(k,v){
+  const g=GS[k]; if(!g.grp)g.grp=new Set(GRP.map(x=>x.k));
+  g.grp.has(v)?g.grp.delete(v):g.grp.add(v);
+  if(g.grp.size===GRP.length)g.grp=null;
+  if(g.grp&&g.grp.size===0)g.grp=null;
+  redraw(k);}
+function redraw(k){
+  document.getElementById(k+'ctrl').innerHTML=ctrlHTML(k);
+  if(k==='brief')tourRender(); else q1Draw();}
+
+/* cfg: {states:{path:cls}, dim:Set|null, hot:Set|null, sel:Set, onPick, pane} */
+function drawFull(svg,cfg){
+  cfg=cfg||{};
+  const gs=cfg.pane?GS[cfg.pane]:{edge:'all',grp:null};
+  let s=defs();
+  ROWS.forEach((R,i)=>{
+    const y=G.PADT+i*(G.NH+G.ARC+G.GY)-9;
+    s+=`<rect class="band" x="4" y="${y}" width="${LAY.W-8}" height="${G.NH+G.ARC+10}" rx="10"/>
+      <text class="band-lbl" x="${G.PADL-18}" y="${y+24}" text-anchor="end">${esc(R.l)}</text>
+      <text class="band-sub" x="${G.PADL-18}" y="${y+39}" text-anchor="end">${esc(R.s)}</text>`;
+  });
+  let ed='';
+  const live=p=>!gs.grp||gs.grp.has(gk(p));
+  const focusSet=cfg.sel&&cfg.sel.size?cfg.sel:(cfg.hot||null);
+  EDGES.forEach(e=>{
+    const a=POS[e.f],b=POS[e.t]; if(!a||!b)return;
+    if(gs.edge==='none')return;
+    if(gs.edge==='sel'){ if(!focusSet||!(focusSet.has(e.f)||focusSet.has(e.t)))return; }
+    if(!live(e.f)&&!live(e.t))return;
+    const cyc=EKEY.has(e.t+'|'+e.f);
+    ed+=`<path class="edge ${cyc?'cyc':''}" data-f="${esc(e.f)}" data-t="${esc(e.t)}"
+      d="${edgePath(a,b,e.f,e.t)}"><title>${esc(name(e.f))} → ${esc(name(e.t))}\n${esc(e.i)}</title></path>`;
+  });
+  s+=`<g id="edges">${ed}</g><g id="nodes">`;
+  OPT.rows.flat().forEach(p=>{
+    const st=cfg.states&&cfg.states[p];
+    const cls=[st?'st-'+st:'', (cfg.dim&&!cfg.dim.has(p))||!live(p)?'dim':'',
+      cfg.hot&&cfg.hot.has(p)?'hot':'', cfg.sel&&cfg.sel.has(p)?'sel':''].filter(Boolean).join(' ');
+    const bd=st==='ok'?['✓','ok']:st==='missed'?['＋','warn']:st==='wrong'?['✕','err']:
+      st==='sec'?['◇','info']:(cfg.sel&&cfg.sel.has(p)?['✓','acc']:null);
+    const a=POS[p];
+    s+=nodeSVG(p,a.x,a.y,a.w,a.h,cls,bd);
+  });
+  s+='</g>';
+  svg.setAttribute('viewBox',`0 0 ${LAY.W} ${LAY.H}`);
+  svg.dataset.w=LAY.W; svg.dataset.h=LAY.H;
+  svg.innerHTML=s;
+  wire(svg,cfg);
+}
+function wire(svg,cfg){
+  const paths=[...svg.querySelectorAll('.edge')];
+  const st=cfg.status?document.getElementById(cfg.status):null;
+  const base=st?st.textContent:'';
+  svg.querySelectorAll('.nd').forEach(g=>{
+    const p=g.dataset.p;
+    const on=()=>{
+      paths.forEach(x=>{const t=x.dataset.f===p||x.dataset.t===p;
+        x.classList.toggle('hl',t);x.classList.toggle('fade',!t);});
+      if(st)st.innerHTML=`<b>${esc(p)}</b> <span class="chip">이 파일을 쓰는 곳 ${INC.get(p).length}</span>
+        <span class="chip">이 파일이 쓰는 것 ${OUT.get(p).length}</span>`;
+    };
+    const off=()=>{paths.forEach(x=>x.classList.remove('hl','fade'));if(st)st.innerHTML=base;};
+    g.addEventListener('mouseenter',on); g.addEventListener('focus',on);
+    g.addEventListener('mouseleave',off); g.addEventListener('blur',off);
+    if(cfg.onPick){
+      g.addEventListener('click',()=>cfg.onPick(p));
+      g.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();cfg.onPick(p);}});
+    }
+  });
+}
+
+/* ---- 국소(초점) 뷰: 영향 반경용 ---- */
+function drawFocus(svg,focus,ring1,ring2,states,mode,extra){
+  extra=extra||[];
+  const NW=196,NH=52,GAPY=12,COL=250,PADX=22,PADY=44;
+  const colH=a=>a.length*NH+(a.length-1)*GAPY;
+  const bodyH=Math.max(NH,colH(ring1),colH(ring2));
+  const H=bodyH+PADY+30+(extra.length?colH(extra)+52:0), W=PADX*2+COL*2+NW;
+  const pos={},cols=[[focus],ring1,ring2];
+  cols.forEach((c,ci)=>{
+    const h=colH(c), y0=PADY+(bodyH-h)/2;
+    c.forEach((p,i)=>{pos[p]={x:PADX+ci*COL,y:y0+i*(NH+GAPY),w:NW,h:NH};});
+  });
+  extra.forEach((p,i)=>{pos[p]={x:PADX,y:PADY+bodyH+52+i*(NH+GAPY),w:NW,h:NH};});
+  const hdr=['고친 파일','바로 영향받는 곳 (1단계)','한 다리 건너 영향 (2단계)'];
+  let s=defs();
+  cols.forEach((c,ci)=>{ if(!c.length)return;
+    s+=`<text class="colhdr" x="${PADX+ci*COL}" y="26">${esc(hdr[ci])}</text>`;});
+  if(extra.length)s+=`<text class="colhdr" x="${PADX}" y="${PADY+bodyH+38}" style="fill:var(--err)">
+    골랐지만 연결이 없는 파일 — 선이 하나도 붙지 않습니다</text>`;
+  /* 초점 상자의 오른쪽 변에 출발점을 나눠 배치해 선이 한 점에 뭉치지 않게 한다 */
+  const share={};
+  ring1.forEach((p,i)=>{const A=pos[focus],n=ring1.length,sp=Math.min(A.h-14,(n-1)*9);
+    share[p]=A.y+A.h/2+(n===1?0:-sp/2+sp*i/(n-1));});
+  const link=(a,b,cls)=>{
+    const A=pos[a],B=pos[b]; if(!A||!B)return '';
+    const imp=mode==='impact';
+    const ay=(a===focus&&share[b]!=null)?share[b]:A.y+A.h/2;
+    const s1=imp?{x:A.x+A.w+2,y:ay}:{x:B.x-2,y:B.y+B.h/2};
+    const e1=imp?{x:B.x-3,y:B.y+B.h/2}:{x:A.x+A.w+3,y:ay};
+    const mx=(s1.x+e1.x)/2;
+    return `<path class="edge ${cls}" d="M${s1.x},${s1.y} C${mx},${s1.y} ${mx},${e1.y} ${e1.x},${e1.y}"/>`;
+  };
+  let ed='';
+  ring1.forEach(p=>ed+=link(focus,p,mode==='impact'?'imp':'hl'));
+  ring2.forEach(p=>{ INC.get(p).forEach(e=>{ if(ring1.includes(e.f)) ed+=link(e.f,p,mode==='impact'?'imp':'hl'); }); });
+  s+=`<g>${ed}</g>`;
+  Object.keys(pos).forEach(p=>{
+    const a=pos[p], st=states&&states[p];
+    const bd=st==='ok'?['✓','ok']:st==='missed'?['＋','warn']:st==='wrong'?['✕','err']:null;
+    s+=nodeSVG(p,a.x,a.y,a.w,a.h,(p===focus?'focus ':'')+(st?'st-'+st:''),bd);
+  });
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  svg.dataset.w=W; svg.dataset.h=H;
+  svg.innerHTML=s;
+  wire(svg,{status:'q2-status'});
+}
+
+/* ================= 줌 / 팬 ================= */
+const Z={brief:1,q1:1,q2:1};
+function applyZ(k){
+  const svg=document.getElementById(k+'-svg'); if(!svg||!svg.dataset.w)return;
+  svg.setAttribute('width',Math.round(svg.dataset.w*Z[k]));
+  svg.setAttribute('height',Math.round(svg.dataset.h*Z[k]));
+  const lbl=document.getElementById(k+'zoom'); if(lbl)lbl.textContent=Math.round(Z[k]*100)+'%';
+}
+function zoomG(k,d){Z[k]=Math.min(1.8,Math.max(.5,+(Z[k]+d*.15).toFixed(2)));applyZ(k);}
+function fitG(k){
+  const sc=document.getElementById(k+'-scroll'),svg=document.getElementById(k+'-svg');
+  if(!sc||!svg.dataset.w)return;
+  const fw=(sc.clientWidth-18)/svg.dataset.w, fh=(sc.clientHeight-18)/svg.dataset.h;
+  Z[k]=Math.min(1.35,Math.max(.85,Math.min(fw,fh)));applyZ(k);
+}
+function panable(id){
+  const el=document.getElementById(id); let d=0,sx,sy,l,t;
+  el.addEventListener('pointerdown',e=>{if(e.target.closest('.nd'))return;
+    d=1;sx=e.clientX;sy=e.clientY;l=el.scrollLeft;t=el.scrollTop;el.classList.add('grabbing');el.setPointerCapture(e.pointerId);});
+  el.addEventListener('pointermove',e=>{if(!d)return;el.scrollLeft=l-(e.clientX-sx);el.scrollTop=t-(e.clientY-sy);});
+  const up=()=>{d=0;el.classList.remove('grabbing');};
+  el.addEventListener('pointerup',up); el.addEventListener('pointercancel',up);
+}
+
+/* ================= 테마 / 뷰 ================= */
+function toggleTheme(){
+  const h=document.documentElement, n=h.dataset.theme==='dark'?'light':'dark';
+  h.dataset.theme=n; try{localStorage.setItem('t2theme',n)}catch(e){}
+  document.getElementById('themebtn').textContent=n==='dark'?'☀︎ 밝게':'☾ 어둡게';
+}
+try{const t=localStorage.getItem('t2theme'); if(t)document.documentElement.dataset.theme=t;}catch(e){}
+document.getElementById('themebtn').textContent=
+  document.documentElement.dataset.theme==='dark'?'☀︎ 밝게':'☾ 어둡게';
+function setView(v){
+  document.getElementById('view-brief').classList.toggle('hidden',v!=='brief');
+  document.getElementById('view-quiz').classList.toggle('hidden',v!=='quiz');
+  document.getElementById('tab-brief').setAttribute('aria-selected',v==='brief');
+  document.getElementById('tab-quiz').setAttribute('aria-selected',v==='quiz');
+  window.scrollTo(0,0);
+  if(v==='quiz')setTimeout(()=>fitG('q1'),0);
+}
+
+/* ================= 구조 브리핑 ================= */
+const HUBS=FILES.filter(f=>!f.iso).map(f=>({p:f.p,n:INC.get(f.p).length}))
+  .sort((a,b)=>b.n-a.n).slice(0,3);
+const ISO=FILES.filter(f=>f.iso);
+document.getElementById('briefstats').innerHTML=[
+ ['파일',FILES.length+'개','이 중 '+ISO.length+'개는 아무와도 연결 없음'],
+ ['연결',EDGES.length+'개','"A가 B를 가져다 쓴다"의 개수'],
+ ['층',ROWS.length+'개','위에서 아래로 흐릅니다'],
+ ['가장 많이 쓰이는 파일',name(HUBS[0].p),HUBS[0].n+'곳이 이 파일을 씁니다'],
+ ['서로 물고 물리는 곳',(CYC.length/2)+'군데','고칠 때 주의가 필요해요']
+].map(s=>`<div class="stat"><div class="n">${esc(s[1])}</div><div class="l"><b>${esc(s[0])}</b> · ${esc(s[2])}</div></div>`).join('');
+
+
+const TOUR=[
+ {t:'큰 그림 먼저',b:`파일 ${FILES.length}개를 <b>6개 층</b>으로 줄 세웠습니다. 화살표는 항상 <b>“가져다 쓴다(import)”</b> 방향이고, 이 프로젝트에서는 전부 <b>위 → 아래</b>로만 흐릅니다. 위로 거슬러 올라가는 화살표가 보이면 그건 대개 문제 신호예요.`,
+  hot:null,x:`<div class="note">읽는 법: <b>위쪽 = 사용자와 가까운 쪽</b>, <b>아래쪽 = 데이터와 가까운 쪽</b>.
+  상자를 클릭하면 그 파일에 붙은 선만 진해집니다.</div>`},
+ {t:'1층 · 입구',b:'사용자가 여는 화면과, 서버가 받는 요청이 여기 있습니다. 모든 동작은 이 6개 중 하나에서 시작해요.',row:0,
+  x:`<div class="kb"><div class="kb-row"><span class="k">page.tsx</span><span>주소창에 보이는 그 화면</span></div>
+  <div class="kb-row"><span class="k">route.ts</span><span>서버가 요청을 받는 문. 화면이 아니라 데이터만 주고받아요</span></div></div>`},
+ {t:'2~3층 · 기능과 동작',b:'화면을 실제로 그리는 조각(2층)과, 버튼을 눌렀을 때 벌어지는 일(3층)이 나뉘어 있습니다. 새 기능은 대부분 이 두 층에서 시작해요.',row:1,row2:2,
+  x:`<div class="note">기능 폴더가 <code>cart</code> / <code>catalog</code> / <code>checkout</code> 셋으로 갈려 있습니다. <b>같은 폴더 안 파일끼리는 서로 참조</b>하고, 폴더를 넘어가는 참조는 드뭅니다 — 좋은 신호예요.</div>`},
+ {t:'4~5층 · 공용',b:'버튼·입력창 같은 부품(4층)과 금액 포맷·통신·검증 같은 도구(5층)입니다. <b>많은 곳이 여기를 쓰기 때문에, 여길 고치면 넓게 번집니다.</b>',row:3,row2:4},
+ {t:'6층 · 데이터',b:'DB에 실제로 넣고 빼는 코드와, 데이터의 모양을 정의한 파일입니다. 가장 아래에 있고 아무것도 위쪽을 참조하지 않습니다.',row:5},
+ {t:'조심할 곳 3가지',b:'구조를 다 외울 필요는 없습니다. 대신 이 셋만 기억하세요.',hot:new Set([...HUBS.map(h=>h.p),...CYC.map(e=>e.f)]),
+  x:`<div class="kb">
+   <div class="kb-row"><span class="k">① 많이 쓰이는 파일</span><span>${HUBS.map(h=>`<code>${esc(name(h.p))}</code> ${h.n}곳`).join(' · ')} — 고치면 넓게 번집니다.</span></div>
+   <div class="kb-row"><span class="k">② 서로 물고 물림</span><span><code>cartApi.ts</code> 와 <code>hooks/useCart.ts</code> 가 <b>서로</b> 가져다 씁니다. 한쪽을 고치면 다른 쪽도 흔들려요.</span></div>
+   <div class="kb-row"><span class="k">③ 혼자 있는 파일</span><span>아무와도 연결이 없습니다 ↓</span></div></div>
+   <div class="shelf">${ISO.map(f=>`<span class="f" title="${esc(f.iso)}">${esc(f.p)}</span>`).join('')}</div>
+   <div class="note" style="margin-top:8px">혼자 있는 파일은 지도에 그리지 않고 여기 따로 모아 둡니다.
+   지도에 띄우면 선 없는 상자가 여기저기 흩어져 오히려 읽기 어려워지거든요.</div>`}
+];
+let tourI=0;
+function tourRender(){
+  const s=TOUR[tourI];
+  document.getElementById('tourdots').innerHTML=TOUR.map((_,i)=>`<span class="${i<=tourI?'on':''}"></span>`).join('');
+  document.getElementById('tour-t').innerHTML=(tourI+1)+'. '+esc(s.t);
+  document.getElementById('tour-b').innerHTML=s.b;
+  document.getElementById('tour-x').innerHTML=s.x||'';
+  document.getElementById('tour-prev').disabled=tourI===0;
+  document.getElementById('tour-next').disabled=tourI===TOUR.length-1;
+  let dim=null;
+  if(s.row!=null){dim=new Set(FILES.filter(f=>!f.iso&&(f.r===s.row||f.r===s.row2)).map(f=>f.p));}
+  else if(s.hot){dim=s.hot;}
+  drawFull(document.getElementById('brief-svg'),{dim,hot:s.hot,status:'brief-status',pane:'brief'});
+  applyZ('brief');
+}
+function tourGo(d){tourI=Math.max(0,Math.min(TOUR.length-1,tourI+d));tourRender();}
+
+/* ================= Q1 · 책임 배치 ================= */
+const Q1={
+  commit:{h:'a3f19c2',m:'feat(cart): 장바구니 수량 +/- 조절 기능 추가',d:'2025-07-14',n:8,a:187,r:23},
+  core:{
+   'src/features/cart/QuantityStepper.tsx':['+64 −0','새로 만든 파일입니다. ＋ / − 버튼과 숫자 표시가 여기 들어갔어요.'],
+   'src/features/cart/hooks/useCartQuantity.ts':['+41 −0','새로 만든 파일입니다. 수량 상태를 들고, 서버로 보낼 준비를 합니다.'],
+   'src/features/cart/CartItemRow.tsx':['+9 −4','상품 한 줄을 그리는 곳. 여기에 스테퍼를 끼워 넣었습니다.'],
+   'src/features/cart/cartApi.ts':['+18 −1','서버로 나가는 창구. updateQuantity() 함수가 추가됐어요.'],
+   'src/app/api/cart/route.ts':['+27 −2','서버가 PATCH 요청을 받도록 문을 열어줬습니다.'],
+   'src/server/cartRepo.ts':['+14 −0','DB에 수량을 UPDATE 하는 쿼리가 추가됐습니다.']},
+  sec:{
+   'src/server/schema.ts':['+4 −1','수량 필드 타입이 같이 손봐졌어요. 몰랐어도 감점 없습니다.'],
+   'src/lib/validation.ts':['+10 −0','수량이 1 이상인지 검사하는 규칙이 붙었어요. 보너스 정답.']},
+  trap:{
+   'src/features/cart/CartView.tsx':'목록을 감싸기만 해서 실제로는 한 줄도 안 바뀌었습니다. 가장 흔한 오답이에요.',
+   'src/app/cart/page.tsx':'페이지는 CartView 를 부르기만 합니다. 안쪽이 바뀌어도 페이지는 그대로예요.',
+   'src/components/ui/Button.tsx':'이미 있던 버튼을 그대로 가져다 썼습니다. 공용 부품은 웬만하면 안 건드리는 쪽이 좋아요.',
+   'src/lib/format.ts':'금액을 원화로 표시하는 함수라, 수량 변경과는 상관없습니다.',
+   'src/features/cart/hooks/useCart.ts':'아깝습니다! 장바구니 상태는 여기 있지만, 이번엔 수량 전용 훅을 새로 만들었기 때문에 이 파일은 그대로 뒀어요.'},
+  def:'이번 커밋에서는 바뀌지 않은 파일입니다.',
+  hints:['이 기능은 6개 층 중 <b>4개 층</b>에 걸쳐 있습니다. 화면만 고쳐서는 끝나지 않아요.',
+   '<b>새로 만들어진 파일이 2개</b> 있습니다. 지금 지도에 있는 파일 중 “아직 아무도 안 쓰는데 최근에 생긴” 것을 찾아보세요.',
+   '꼭 고쳐야 하는 파일은 <b>6개</b>입니다. (＋ 보너스 2개)']
+};
+let q1sel=new Set(), q1done=false, q1hint=0;
+function q1Toggle(p){
+  if(q1done)return;
+  q1sel.has(p)?q1sel.delete(p):q1sel.add(p);
+  q1Sync();
+}
+function q1Sync(){
+  document.getElementById('q1count').textContent=q1sel.size+'개 선택됨';
+  document.getElementById('q1submit').disabled=q1sel.size===0;
+  q1RenderList(); q1Draw();
+}
+function q1Draw(){
+  drawFull(document.getElementById('q1-svg'),
+    {sel:q1sel,states:q1done?q1states():null,onPick:q1Toggle,status:'q1-status',pane:'q1'});
+  applyZ('q1');
+}
+function q1states(){
+  const st={};
+  Object.keys(Q1.core).forEach(p=>st[p]=q1sel.has(p)?'ok':'missed');
+  Object.keys(Q1.sec).forEach(p=>{if(q1sel.has(p))st[p]='sec';});
+  q1sel.forEach(p=>{if(!Q1.core[p]&&!Q1.sec[p])st[p]='wrong';});
+  return st;
+}
+function q1RenderList(){
+  const q=(document.getElementById('q1search').value||'').toLowerCase();
+  const st=q1done?q1states():{};
+  const groups={};
+  FILES.forEach(f=>{if(q&&!f.p.toLowerCase().includes(q))return;(groups[dir(f.p)]=groups[dir(f.p)]||[]).push(f);});
+  const keys=Object.keys(groups).sort();
+  document.getElementById('q1list').innerHTML=keys.map(k=>
+    `<div class="grp">${esc(k)}</div>`+groups[k].map(f=>{
+      const on=q1sel.has(f.p), r=st[f.p]?' r-'+st[f.p]:'';
+      return `<div class="fitem${on?' on':''}${r}" onclick="q1Toggle('${f.p}')" title="${esc(f.p)}">
+        <span class="box">✓</span><span class="nm">${esc(name(f.p))}</span>
+        ${f.iso?'<span class="chip xtiny">연결없음</span>':''}</div>`;}).join('')).join('')
+    ||'<div class="grp">찾는 파일이 없습니다</div>';
+  const n=keys.reduce((s,k)=>s+groups[k].length,0);
+  document.getElementById('q1foot').textContent=q?`${n}개 표시 중 (전체 ${FILES.length}개)`:`${FILES.length}개 파일`;
+}
+function q1Hint(){
+  if(q1hint>=Q1.hints.length)return;
+  q1hint++;
+  const b=document.getElementById('q1hints'); b.classList.remove('hidden');
+  b.innerHTML=Q1.hints.slice(0,q1hint).map((h,i)=>`<div><b>힌트 ${i+1}.</b> ${h}</div>`).join('');
+}
+function q1Reset(){q1sel=new Set();q1done=false;
+  document.getElementById('q1result').classList.add('hidden');
+  document.getElementById('q1submit').textContent='채점하기';q1Sync();}
+function q1Grade(){
+  q1done=true; done.add(1); prog();
+  const core=Object.keys(Q1.core), sec=Object.keys(Q1.sec);
+  const found=core.filter(p=>q1sel.has(p)), missed=core.filter(p=>!q1sel.has(p));
+  const bonus=sec.filter(p=>q1sel.has(p));
+  const wrong=[...q1sel].filter(p=>!Q1.core[p]&&!Q1.sec[p]);
+  const pct=Math.round(found.length/core.length*100);
+  const verdict=missed.length===0&&wrong.length===0?['완벽합니다','ok']
+    :pct>=67&&wrong.length<=1?['거의 맞았어요','warn']:['다시 한 번 볼까요','err'];
+  const row=(p,cls,mk,stat,note)=>`<div class="res ${cls}">
+    <div class="mk" style="color:var(--${cls==='ok'?'ok':cls==='wrong'?'err':cls==='sec'?'info':'warn'})">${mk}</div>
+    <div><div class="p">${esc(p)}</div><div class="n">${note}</div></div>
+    <div class="d">${stat||''}</div></div>`;
+  let h=`<div class="verdict">
+    <div><div class="vscore" style="color:var(--${verdict[1]})">${pct}<span style="font-size:15px">%</span></div>
+      <div class="tiny muted">${verdict[0]}</div></div>
+    <div style="flex:1;min-width:220px">
+      <div class="meter">
+        <i style="width:${found.length/core.length*100}%;background:var(--ok)"></i>
+        <i style="width:${missed.length/core.length*100}%;background:var(--warn)"></i></div>
+      <div class="tiny muted" style="margin-top:6px">
+        꼭 고쳐야 할 ${core.length}개 중 <b style="color:var(--ok)">${found.length}개 찾음</b> ·
+        <b style="color:var(--warn)">${missed.length}개 놓침</b> ·
+        필요 없는데 고른 것 <b style="color:var(--err)">${wrong.length}개</b>
+        ${bonus.length?` · 보너스 <b style="color:var(--info)">${bonus.length}개</b>`:''}</div></div>
+    <button class="btn sm" onclick="q1Reset()">다시 풀기</button>
+    <button class="btn sm ghost" onclick="alert('“이것도 맞다”는 의견이 접수됐습니다.\\n정답지는 커밋 1건이라 더 넓은 정답이 있을 수 있어요. 같은 의견이 쌓이면 이 문제의 정답지를 넓힙니다.')">이것도 맞다고 생각해요</button>
+  </div>
+  <div class="legend" style="margin:0 0 12px 2px">
+    <span><i style="background:var(--ok-soft);border-color:var(--ok)"></i>맞게 고름</span>
+    <span><i style="background:var(--warn-soft);border-color:var(--warn);border-style:dashed"></i>놓침 — 지도에서 깜빡입니다</span>
+    <span><i style="background:var(--err-soft);border-color:var(--err)"></i>안 고쳐도 됐음</span>
+    <span><i style="background:var(--info-soft);border-color:var(--info);border-style:dashed"></i>같이 바뀜(감점 없음)</span>
+  </div>`;
+  if(missed.length){h+=`<div class="rgrp"><span class="chip warn">놓친 파일 ${missed.length}개</span>
+    여기가 이번 학습의 핵심입니다</div><div class="reslist">`+
+    missed.map(p=>row(p,'missed','＋',Q1.core[p][0],Q1.core[p][1])).join('')+'</div>';}
+  if(found.length){h+=`<div class="rgrp"><span class="chip ok">맞게 고른 파일 ${found.length}개</span></div><div class="reslist">`+
+    found.map(p=>row(p,'ok','✓',Q1.core[p][0],Q1.core[p][1])).join('')+'</div>';}
+  if(wrong.length){h+=`<div class="rgrp"><span class="chip err">안 고쳐도 됐던 파일 ${wrong.length}개</span></div><div class="reslist">`+
+    wrong.map(p=>row(p,'wrong','✕','',Q1.trap[p]||Q1.def)).join('')+'</div>';}
+  h+=`<div class="rgrp"><span class="chip info">같이 바뀐 파일</span>골라도 안 골라도 감점하지 않습니다</div><div class="reslist">`+
+    sec.map(p=>row(p,'sec',q1sel.has(p)?'◆':'◇',Q1.sec[p][0],Q1.sec[p][1])).join('')+'</div>';
+  h+=`<div class="rgrp"><span class="chip">정답의 출처</span>LLM 채점이 아니라, 실제 커밋 기록입니다</div>
+   <div class="commitcard">
+     <div><span class="h">commit ${Q1.commit.h}</span> · ${Q1.commit.d}</div>
+     <div style="margin:4px 0 6px">${esc(Q1.commit.m)}</div>
+     <div style="color:var(--fg-mute)">${Q1.commit.n} files changed,
+       <span style="color:var(--ok)">+${Q1.commit.a}</span> <span style="color:var(--err)">−${Q1.commit.r}</span></div>
+   </div>`;
+  const box=document.getElementById('q1result'); box.innerHTML=h; box.classList.remove('hidden');
+  document.getElementById('q1submit').textContent='채점 완료';
+  document.getElementById('q1submit').disabled=true;
+  q1RenderList(); q1Draw();
+  if(missed.length){const el=document.getElementById('q1-scroll').querySelector('.nd.st-missed');
+    if(el){const b=el.getBBox?el.getBBox():null; if(b)document.getElementById('q1-scroll').scrollTo({top:Math.max(0,b.y*Z.q1-120),left:Math.max(0,b.x*Z.q1-200),behavior:'smooth'});}}
+}
+
+/* ================= Q2 · 영향 반경 ================= */
+const Q2F='src/server/schema.ts';
+const Q2R1=INC.get(Q2F).map(e=>e.f);
+const Q2R2=[...new Set(Q2R1.flatMap(p=>INC.get(p).map(e=>e.f)))].filter(p=>p!==Q2F&&!Q2R1.includes(p));
+const Q2CAND=[...Q2R1,'src/server/db.ts','src/features/cart/CartView.tsx','src/components/ui/Button.tsx',
+  'src/lib/format.ts','src/app/cart/page.tsx'];
+const Q2NOTE={'src/server/db.ts':'같은 server/ 폴더 옆에 있지만, db.ts 는 schema.ts 를 가져다 쓰지 않습니다. <b>폴더가 같다고 연결된 게 아니에요.</b>',
+ 'src/features/cart/CartView.tsx':'장바구니 화면이지만 타입은 훅에서 받아 씁니다. schema 를 직접 import 하지 않아요.',
+ 'src/components/ui/Button.tsx':'공용 버튼은 데이터 모양을 전혀 모릅니다.',
+ 'src/lib/format.ts':'숫자를 원화 문자열로 바꾸기만 합니다.',
+ 'src/app/cart/page.tsx':'페이지는 CartView 만 부릅니다.'};
+let q2sel=new Set(), q2done=false, q2mode='impact';
+function q2Toggle(p){if(q2done)return;q2sel.has(p)?q2sel.delete(p):q2sel.add(p);q2Render();}
+function q2Render(){
+  const st=q2done?q2states():{};
+  document.getElementById('q2picks').innerHTML=Q2CAND.map(p=>{
+    const r=st[p]?' r-'+st[p]:'';
+    return `<button class="pick${q2sel.has(p)?' on':''}${r}" onclick="q2Toggle('${p}')">
+      <span class="box">✓</span><span class="t"><span class="d">${esc(dir(p))}</span>
+      <span class="n">${esc(name(p))}</span></span></button>`;}).join('');
+  document.getElementById('q2count').textContent=q2sel.size+'개 선택됨';
+  document.getElementById('q2submit').disabled=q2sel.size===0;
+}
+function q2states(){const st={};
+  Q2R1.forEach(p=>st[p]=q2sel.has(p)?'ok':'missed');
+  q2sel.forEach(p=>{if(!Q2R1.includes(p))st[p]='wrong';});return st;}
+function q2Reset(){q2sel=new Set();q2done=false;q2mode='impact';
+  document.getElementById('q2fog').classList.remove('hidden');
+  document.getElementById('q2-svg').classList.add('hidden');
+  ['q2flip','q2zo','q2zi','q2zoom'].forEach(i=>document.getElementById(i).classList.add('hidden'));
+  document.getElementById('q2result').classList.add('hidden');
+  document.getElementById('q2submit').textContent='채점하기';
+  document.getElementById('q2mode').textContent='채점 전에는 가려져 있습니다';
+  document.getElementById('q2-status').textContent='위에서 후보를 고르고 채점을 누르세요.';
+  q2Render();}
+function q2Flip(){q2mode=q2mode==='impact'?'import':'impact';
+  document.getElementById('q2flip').textContent=q2mode==='impact'
+    ?'화살표를 import 방향으로 보기':'화살표를 영향 방향으로 되돌리기';
+  document.getElementById('q2mode').textContent=q2mode==='impact'
+    ?'화살표 = 영향이 가는 방향':'화살표 = 가져다 쓰는(import) 방향';
+  q2DrawG();}
+function q2DrawG(){
+  const extra=[...q2sel].filter(p=>!Q2R1.includes(p)&&!Q2R2.includes(p)&&p!==Q2F);
+  drawFocus(document.getElementById('q2-svg'),Q2F,Q2R1,Q2R2,q2states(),q2mode,extra);
+  fitG('q2');}
+function q2Grade(){
+  q2done=true; done.add(2); prog();
+  const found=Q2R1.filter(p=>q2sel.has(p)), missed=Q2R1.filter(p=>!q2sel.has(p));
+  const wrong=[...q2sel].filter(p=>!Q2R1.includes(p));
+  document.getElementById('q2fog').classList.add('hidden');
+  document.getElementById('q2-svg').classList.remove('hidden');
+  ['q2flip','q2zo','q2zi','q2zoom'].forEach(i=>document.getElementById(i).classList.remove('hidden'));
+  document.getElementById('q2mode').textContent='화살표 = 영향이 가는 방향';
+  document.getElementById('q2-status').innerHTML=
+    '<span class="chip ok">✓ 맞게 고름</span><span class="chip warn">＋ 놓침</span>'+
+    '<span class="chip err">✕ 아닌데 고름</span> 상자에 마우스를 올리면 그 파일의 연결 수가 보입니다.';
+  q2DrawG(); q2Render();
+  document.getElementById('q2submit').textContent='채점 완료';
+  document.getElementById('q2submit').disabled=true;
+  let h=`<div class="verdict">
+    <div><div class="vscore" style="color:var(--${missed.length||wrong.length?'warn':'ok'})">${found.length}<span style="font-size:15px">/${Q2R1.length}</span></div>
+    <div class="tiny muted">바로 영향받는 곳</div></div>
+    <div style="flex:1;min-width:220px"><div class="meter">
+      <i style="width:${found.length/Q2R1.length*100}%;background:var(--ok)"></i>
+      <i style="width:${missed.length/Q2R1.length*100}%;background:var(--warn)"></i></div>
+      <div class="tiny muted" style="margin-top:6px">놓침 ${missed.length}개 · 아닌데 고름 ${wrong.length}개</div></div>
+    <button class="btn sm" onclick="q2Reset()">다시 풀기</button></div>
+    <div class="note" style="margin-bottom:12px">한 다리 건너 영향까지 하면 <b>${Q2R1.length+Q2R2.length}개 파일</b>이 흔들립니다.
+    지도 오른쪽 끝 열이 그 “2단계”예요. — ${Q2R2.map(p=>`<code>${esc(name(p))}</code>`).join(' ')}</div>`;
+  if(wrong.length){h+='<div class="rgrp"><span class="chip err">아닌데 고른 파일</span>왜 아닌지 보세요</div><div class="reslist">'+
+    wrong.map(p=>`<div class="res wrong"><div class="mk" style="color:var(--err)">✕</div>
+      <div><div class="p">${esc(p)}</div><div class="n">${Q2NOTE[p]||'schema.ts 를 import 하지 않습니다.'}</div></div><div class="d"></div></div>`).join('')+'</div>';}
+  if(missed.length){h+='<div class="rgrp"><span class="chip warn">놓친 파일</span>실제 import 한 줄</div><div class="reslist">'+
+    missed.map(p=>`<div class="res missed"><div class="mk" style="color:var(--warn)">＋</div>
+      <div><div class="p">${esc(p)}</div><div class="n"><code>${esc(INC.get(Q2F).find(e=>e.f===p).i)}</code></div></div><div class="d"></div></div>`).join('')+'</div>';}
+  const box=document.getElementById('q2result');box.innerHTML=h;box.classList.remove('hidden');
+}
+
+/* ================= Q3 · 흐름 추적 ================= */
+const Q3START={t:'사용자가 장바구니에서 ＋ 를 누름',d:'브라우저 클릭 이벤트'};
+const Q3END={t:'DB의 cart_items 에 수량 3 저장됨',d:'UPDATE 완료'};
+const Q3CARDS=[
+ {id:'a',t:'src/features/cart/QuantityStepper.tsx',d:'＋ 버튼의 onClick 이 setQty(3) 호출',ans:0},
+ {id:'b',t:'src/features/cart/hooks/useCartQuantity.ts',d:'화면의 수량을 먼저 3으로 바꾸고 서버에 보낼 준비',ans:1},
+ {id:'c',t:'src/features/cart/cartApi.ts',d:'updateQuantity() 가 PATCH 요청을 만들어 보냄',ans:2},
+ {id:'d',t:'src/app/api/cart/route.ts',d:'서버가 PATCH 를 받아 수량이 올바른지 검사',ans:3},
+ {id:'e',t:'src/server/cartRepo.ts',d:'updateQty() 가 UPDATE 쿼리를 실행',ans:4},
+ {id:'x',t:'src/features/catalog/ProductCard.tsx',d:'상품 카드가 가격을 다시 계산',ans:-1},
+ {id:'y',t:'src/lib/format.ts',d:'금액을 “12,000원” 모양으로 바꿈',ans:-1}];
+const Q3MAP=Object.fromEntries(Q3CARDS.map(c=>[c.id,c]));
+let q3slots=[null,null,null,null,null], q3done=false;
+function q3Reset(){q3slots=[null,null,null,null,null];q3done=false;
+  document.getElementById('q3result').classList.add('hidden');
+  document.getElementById('q3submit').textContent='채점하기';q3Render();}
+function q3Put(id){ if(q3done)return; const i=q3slots.indexOf(null); if(i<0)return; q3slots[i]=id; q3Render(); }
+function q3Pull(i){ if(q3done)return; q3slots[i]=null; q3Render(); }
+function q3Move(i,d){ if(q3done)return; const j=i+d; if(j<0||j>=q3slots.length)return;
+  [q3slots[i],q3slots[j]]=[q3slots[j],q3slots[i]]; q3Render(); }
+function q3Render(){
+  const filled=q3slots.filter(Boolean).length;
+  document.getElementById('q3count').textContent=filled+' / 5 채움';
+  document.getElementById('q3submit').disabled=filled<5||q3done;
+  const fix=(o,cls)=>`<div class="slot fixed ${cls}"><div class="idx">${cls==='s'?'▶':'■'}</div>
+    <div class="body"><div class="ttl">${esc(o.t)}</div><div class="dsc">${esc(o.d)}</div></div></div>`;
+  let h=fix(Q3START,'s')+'<div class="arrowdown">↓</div>';
+  q3slots.forEach((id,i)=>{
+    const c=id?Q3MAP[id]:null;
+    let st='';
+    if(q3done&&c) st=c.ans===i?' ok':' bad';
+    h+=`<div class="slot${c?' filled':''}${st}" data-i="${i}" ondragover="event.preventDefault();this.classList.add('over')"
+      ondragleave="this.classList.remove('over')" ondrop="q3Drop(event,${i})">
+      <div class="idx">${i+1}</div>
+      <div class="body" ${c?`onclick="q3Pull(${i})" style="cursor:pointer"`:''}>
+        ${c?`<div class="ttl">${esc(c.t)}</div><div class="dsc">${esc(c.d)}</div>`
+           :'<div class="dsc">여기에 카드를 놓으세요 — 오른쪽 카드를 클릭하면 들어옵니다</div>'}</div>
+      ${c?`<div class="ctl"><button onclick="q3Move(${i},-1)" title="위로" aria-label="위로">▲</button>
+        <button onclick="q3Move(${i},1)" title="아래로" aria-label="아래로">▼</button>
+        <button onclick="q3Pull(${i})" title="빼기" aria-label="빼기">✕</button></div>`:''}
+    </div>`;
+    h+='<div class="arrowdown">↓</div>';
+  });
+  h+=fix(Q3END,'e');
+  document.getElementById('q3slots').innerHTML=h;
+  document.getElementById('q3bank').innerHTML=Q3CARDS.map(c=>
+    `<div class="bankcard${q3slots.includes(c.id)?' used':''}" draggable="true"
+      ondragstart="event.dataTransfer.setData('text/plain','${c.id}')"
+      onclick="q3Put('${c.id}')" tabindex="0" onkeydown="if(event.key==='Enter'){q3Put('${c.id}')}">
+      <div class="ttl">${esc(c.t)}</div><div class="dsc">${esc(c.d)}</div></div>`).join('');
+}
+function q3Drop(ev,i){ev.preventDefault();ev.currentTarget.classList.remove('over');
+  const id=ev.dataTransfer.getData('text/plain'); if(!id||q3done)return;
+  const j=q3slots.indexOf(id); if(j>=0)q3slots[j]=null;
+  q3slots[i]=id; q3Render();}
+function q3Grade(){
+  q3done=true; done.add(3); prog(); q3Render();
+  const right=q3slots.filter((id,i)=>id&&Q3MAP[id].ans===i).length;
+  const extra=q3slots.filter(id=>id&&Q3MAP[id].ans<0).map(id=>Q3MAP[id]);
+  let adj=0; for(let i=0;i<4;i++){const a=q3slots[i],b=q3slots[i+1];
+    if(a&&b&&Q3MAP[a].ans>=0&&Q3MAP[b].ans>=0&&Q3MAP[a].ans<Q3MAP[b].ans)adj++;}
+  const order=[...Q3CARDS].filter(c=>c.ans>=0).sort((a,b)=>a.ans-b.ans);
+  let h=`<div class="verdict">
+   <div><div class="vscore" style="color:var(--${right===5?'ok':right>=3?'warn':'err'})">${right}<span style="font-size:15px">/5</span></div>
+   <div class="tiny muted">자리까지 정확</div></div>
+   <div style="flex:1;min-width:220px"><div class="meter">
+     <i style="width:${right/5*100}%;background:var(--ok)"></i>
+     <i style="width:${(5-right)/5*100}%;background:var(--err)"></i></div>
+     <div class="tiny muted" style="margin-top:6px">앞뒤 관계는 4쌍 중 <b>${adj}쌍</b>을 맞췄습니다 —
+     자리는 틀려도 “무엇이 먼저인지”는 이만큼 이해하고 있다는 뜻이에요.
+     ${extra.length?`<br>흐름과 상관없는 카드를 <b style="color:var(--err)">${extra.length}장</b> 넣었습니다.`:''}</div></div>
+   <button class="btn sm" onclick="q3Reset()">다시 풀기</button></div>
+   <div class="rgrp"><span class="chip ok">정답 흐름</span>파일과 함수까지</div>
+   <div class="reslist">`+order.map((c,i)=>
+   `<div class="res ok"><div class="mk" style="color:var(--ok)">${i+1}</div>
+     <div><div class="p">${esc(c.t)}</div><div class="n">${esc(c.d)}</div></div>
+     <div class="d">${i<order.length-1?'↓':'✓'}</div></div>`).join('')+'</div>';
+  if(extra.length){h+='<div class="rgrp"><span class="chip err">이 흐름에 없는 카드</span></div><div class="reslist">'+
+    extra.map(c=>`<div class="res wrong"><div class="mk" style="color:var(--err)">✕</div>
+      <div><div class="p">${esc(c.t)}</div><div class="n">이 파일은 수량을 저장하는 흐름에 등장하지 않습니다. 화면 표시에만 쓰여요.</div></div>
+      <div class="d"></div></div>`).join('')+'</div>';}
+  const box=document.getElementById('q3result');box.innerHTML=h;box.classList.remove('hidden');
+}
+
+/* ================= Q4 · 의존성 방향 ================= */
+const Q4=[
+ {a:'src/features/cart/CartItemRow.tsx',b:'src/features/cart/QuantityStepper.tsx',ans:0,
+  why:'상품 한 줄(A) 안에 수량 스테퍼(B)를 끼워 넣었으니, <b>바깥이 안쪽을 가져다 씁니다.</b> 화면 조각은 거의 항상 “큰 것 → 작은 것” 방향이에요.'},
+ {a:'src/lib/validation.ts',b:'src/server/schema.ts',ans:0,
+  why:'값이 올바른지 검사하려면 먼저 “올바른 모양”을 알아야 합니다. 그래서 검사 코드(A)가 데이터 모양(B)을 가져다 씁니다. 반대는 있을 수 없어요.'},
+ {a:'src/features/cart/cartApi.ts',b:'src/features/cart/hooks/useCart.ts',ans:2,
+  why:'<b>서로</b> 가져다 씁니다. useCart 는 데이터를 받아오려고 cartApi 를 부르고, cartApi 는 타입 하나를 useCart 에서 가져옵니다. 이렇게 되면 한쪽만 떼어내기가 어려워져요. 보통은 <code>types.ts</code> 같은 파일을 하나 만들어 양쪽이 그걸 보게 고칩니다.'},
+ {a:'src/components/ui/Button.tsx',b:'src/lib/http.ts',ans:3,
+  why:'버튼은 서버 통신을 모르고, 통신 코드는 버튼을 모릅니다. <b>서로 남남</b>인 게 정상이에요. 공용 부품이 통신 코드를 알기 시작하면 재사용이 어려워집니다.'}];
+const Q4OPT=[['A → B','A 가 B 를 가져다 씀'],['B → A','B 가 A 를 가져다 씀'],
+ ['A ⇄ B','서로 가져다 씀 (주의 신호)'],['연결 없음','서로 모릅니다']];
+let q4ans=[null,null,null,null];
+function q4Reset(){q4ans=[null,null,null,null];q4Render();}
+function q4Pick(i,k){ if(q4ans[i]!=null)return; q4ans[i]=k;
+  if(q4ans.every(v=>v!=null)){done.add(4);prog();} q4Render(); }
+function q4Line(a,b){const e=EDGES.find(x=>x.f===a&&x.t===b);return e?e.i:null;}
+function q4Render(){
+  document.getElementById('q4count').textContent=q4ans.filter(v=>v!=null).length+' / 4';
+  document.getElementById('q4body').innerHTML=Q4.map((q,i)=>{
+    const picked=q4ans[i], solved=picked!=null;
+    const card=(p,tag)=>`<div class="filecard"><div class="tag">${tag}</div>
+      <div class="d">${esc(dir(p))}/</div><div class="n">${esc(name(p))}</div></div>`;
+    let ex='';
+    if(solved){
+      const ok=picked===q.ans;
+      const l1=q4Line(q.a,q.b), l2=q4Line(q.b,q.a);
+      ex=`<div class="explain ${ok?'ok':'bad'}">
+        <b>${ok?'맞았습니다':'아쉽습니다 — 정답은 “'+Q4OPT[q.ans][0]+'”'}</b><br>${q.why}
+        ${l1?`<pre class="code">// ${esc(q.a)}\n${esc(l1)}</pre>`:''}
+        ${l2?`<pre class="code">// ${esc(q.b)}\n${esc(l2)}</pre>`:''}
+        ${!l1&&!l2?`<pre class="code">// 두 파일 어디에도 서로를 가리키는 import 가 없습니다</pre>`:''}
+      </div>`;
+    }
+    return `<div class="dirq">
+      <div class="qkind"><span class="chip">${i+1} / 4</span>
+        ${solved?`<span class="chip ${picked===q.ans?'ok':'err'}">${picked===q.ans?'정답':'오답'}</span>`:''}</div>
+      <div class="dirpair">${card(q.a,'A')}<div class="dirmid">?</div>${card(q.b,'B')}</div>
+      <div class="opts">${Q4OPT.map((o,k)=>{
+        let c='opt';
+        if(solved){ if(k===q.ans)c+=' right'; else if(k===picked)c+=' wrong'; }
+        return `<button class="${c}" ${solved?'disabled':''} onclick="q4Pick(${i},${k})">
+          ${esc(o[0])}<span class="sm">${esc(o[1])}</span></button>`;}).join('')}</div>
+      ${ex}</div>`;}).join('');
+}
+
+/* ================= 진행 / 초기화 ================= */
+const done=new Set();
+const QMETA=[['책임 배치','어느 파일을 고쳐야 하나'],['영향 반경','고치면 어디가 깨지나'],
+ ['흐름 추적','무슨 순서로 일어나나'],['의존성 방향','누가 누구를 쓰나']];
+function prog(){
+  document.getElementById('progchip').textContent=done.size+' / 4 완료';
+  document.getElementById('qnav').innerHTML=QMETA.map((m,i)=>
+    `<button class="qtab${done.has(i+1)?' done':''}" aria-selected="${cur===i+1}" onclick="goQ(${i+1})">
+      <span class="no">${done.has(i+1)?'✓':'Q'+(i+1)}</span>${esc(m[0])}
+      <span class="tiny muted" style="font-weight:400">${esc(m[1])}</span></button>`).join('');
+}
+let cur=1;
+function goQ(n){cur=n;[1,2,3,4].forEach(i=>document.getElementById('q'+i).classList.toggle('hidden',i!==n));
+  prog(); window.scrollTo(0,0);
+  if(n===1)setTimeout(()=>fitG('q1'),0);
+  if(n===2&&q2done)setTimeout(()=>fitG('q2'),0);}
+
+document.getElementById('briefctrl').innerHTML=ctrlHTML('brief');
+document.getElementById('q1ctrl').innerHTML=ctrlHTML('q1');
+tourRender(); q1Sync(); q2Render(); q3Render(); q4Render(); prog();
+panable('brief-scroll'); panable('q1-scroll'); panable('q2-scroll');
+setTimeout(()=>{fitG('brief');fitG('q1');},30);
+let rt; addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{fitG('brief');fitG('q1');if(q2done)fitG('q2');},150);});
+</script>
+</body>
+</html>

@@ -1,0 +1,1558 @@
+<!doctype html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>T1 · 클론 코딩</title>
+<style>
+/* ============================================================
+   T1 클론 코딩 — 디자인 토큰
+   원칙: 10~20분 머무는 화면. 저채도 · 고대비 텍스트 · 무모션.
+   ============================================================ */
+:root{
+  --ui: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard",
+        "Noto Sans KR", "Malgun Gothic", "Segoe UI", sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+          "Liberation Mono", "D2Coding", monospace;
+
+  --code-size: 14px;
+  --code-lh: 24px;      /* 정수 px 고정 — 두 패널 행 정렬이 절대 어긋나지 않게 */
+  --pad-y: 14px;
+  --pad-x: 16px;
+  --gut: 54px;          /* 줄번호 폭. 항상 예약 — 리플로 0 */
+  --r: 8px;
+  --maxw: 1680px;
+}
+
+/* ---- DARK (기본) : 순흑 대신 따뜻한 차콜, 순백 대신 크림 ---- */
+:root[data-theme="dark"]{
+  --bg:        #141517;
+  --bg-2:      #191b1e;
+  --bg-3:      #1f2226;
+  --code-bg:   #101113;
+  --fg:        #ddd8ce;
+  --fg-dim:    #9b968d;
+  --fg-faint:  #63605a;
+  --line:      #2a2d31;
+  --line-2:    #383c41;
+  --band:      #ffffff0a;
+  --caret:     #e0a458;
+  --accent:    #e0a458;
+  --accent-fg: #1a1508;
+  --accent-soft:#e0a4581f;
+  --ok:        #8fb573;
+  --ok-soft:   #8fb5731f;
+  --eq:        #7aa6c2;
+  --eq-soft:   #7aa6c21f;
+  --err:       #e07a68;
+  --err-soft:  #e07a681f;
+  --warn:      #d9b45c;
+  --warn-soft: #d9b45c1a;
+  --shadow:    0 1px 0 #ffffff08 inset, 0 8px 24px #00000055;
+
+  --syn-key:  #e0898f;
+  --syn-str:  #a3b86c;
+  --syn-num:  #e0a458;
+  --syn-com:  #8c8781;
+  --syn-typ:  #84c1ad;
+  --syn-fn:   #7fb3c8;
+  --syn-punc: #8a8680;
+}
+
+/* ---- LIGHT : 순백 대신 따뜻한 종이색 ---- */
+:root[data-theme="light"]{
+  --bg:        #f4f1eb;
+  --bg-2:      #fbf9f5;
+  --bg-3:      #efece4;
+  --code-bg:   #fdfcf9;
+  --fg:        #26282c;
+  --fg-dim:    #5d6067;
+  --fg-faint:  #918c83;
+  --line:      #e0dad0;
+  --line-2:    #cdc6ba;
+  --band:      #0000000a;
+  --caret:     #9a6414;
+  --accent:    #9a6414;
+  --accent-fg: #fffdf8;
+  --accent-soft:#9a641416;
+  --ok:        #3d7a37;
+  --ok-soft:   #3d7a3716;
+  --eq:        #2b6b93;
+  --eq-soft:   #2b6b9316;
+  --err:       #b04429;
+  --err-soft:  #b0442916;
+  --warn:      #866109;
+  --warn-soft: #86610914;
+  --shadow:    0 1px 2px #0000000d, 0 6px 18px #0000000a;
+
+  --syn-key:  #a33d52;
+  --syn-str:  #46661f;
+  --syn-num:  #8a5710;
+  --syn-com:  #736e66;
+  --syn-typ:  #146b60;
+  --syn-fn:   #1e5679;
+  --syn-punc: #63605a;
+}
+
+*,*::before,*::after{ box-sizing:border-box }
+html,body{ height:100% }
+body{
+  margin:0; background:var(--bg); color:var(--fg);
+  font-family:var(--ui); font-size:14px; line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  display:flex; flex-direction:column; overflow:hidden;
+}
+button{ font:inherit; color:inherit }
+[hidden]{ display:none !important }
+::selection{ background:var(--accent-soft) }
+:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:4px }
+@media (prefers-reduced-motion: reduce){ *{ transition:none !important } }
+
+/* ============================ 상단 바 ============================ */
+.topbar{
+  flex:none; height:52px; display:flex; align-items:center; gap:16px;
+  padding:0 16px; background:var(--bg-2); border-bottom:1px solid var(--line);
+}
+.brand{ display:flex; align-items:center; gap:8px; font-weight:700; letter-spacing:-.01em; white-space:nowrap }
+.brand .dot{ width:9px; height:9px; border-radius:2px; background:var(--accent) }
+.brand small{ font-weight:500; color:var(--fg-dim); font-size:12px }
+.filechip{
+  font-family:var(--mono); font-size:12px; color:var(--fg-dim);
+  background:var(--bg-3); border:1px solid var(--line); border-radius:6px;
+  padding:3px 9px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:34ch;
+}
+.spacer{ flex:1 }
+
+/* 단계 스텝퍼 */
+.stepper{ display:flex; gap:4px; background:var(--bg-3); border:1px solid var(--line); border-radius:8px; padding:3px }
+.step{
+  display:flex; align-items:center; gap:7px; border:0; background:transparent; cursor:pointer;
+  padding:5px 11px; border-radius:6px; font-size:12.5px; color:var(--fg-dim); white-space:nowrap;
+  transition:background .12s ease, color .12s ease;
+}
+.step:hover{ color:var(--fg) }
+.step .sn{
+  width:17px; height:17px; border-radius:50%; display:grid; place-items:center;
+  font-size:10.5px; font-weight:700; border:1px solid var(--line-2); color:var(--fg-faint);
+}
+.step[aria-current="true"]{ background:var(--accent-soft); color:var(--fg); font-weight:600 }
+.step[aria-current="true"] .sn{ background:var(--accent); color:var(--accent-fg); border-color:var(--accent) }
+.step.done .sn{ background:var(--ok-soft); border-color:var(--ok); color:var(--ok) }
+.step.locked{ opacity:.45 }
+
+.meta{ font-size:12px; color:var(--fg-faint); font-variant-numeric:tabular-nums; white-space:nowrap }
+.meta b{ color:var(--fg-dim); font-weight:600 }
+
+.iconbtn{
+  border:1px solid var(--line); background:var(--bg-3); border-radius:7px;
+  padding:6px 10px; cursor:pointer; font-size:12.5px; color:var(--fg-dim);
+  transition:border-color .12s ease, color .12s ease;
+}
+.iconbtn:hover{ color:var(--fg); border-color:var(--line-2) }
+
+/* ============================ 화면 컨테이너 ============================ */
+main{ flex:1; min-height:0; display:flex; flex-direction:column }
+.screen{ display:none; flex:1; min-height:0 }
+.screen.on{ display:flex; flex-direction:column }
+.scroll{ overflow:auto; flex:1; min-height:0 }
+.wrap{ max-width:var(--maxw); margin:0 auto; padding:28px 24px 64px; width:100% }
+.wrap.narrow{ max-width:760px }
+
+h1{ font-size:22px; margin:0 0 6px; letter-spacing:-.02em }
+h2{ font-size:15px; margin:0 0 10px; letter-spacing:-.01em }
+.sub{ color:var(--fg-dim); font-size:13px; margin:0 0 24px }
+
+/* 버튼 */
+.btn{
+  border:1px solid var(--line-2); background:var(--bg-3); border-radius:7px;
+  padding:8px 14px; cursor:pointer; font-size:13px; font-weight:600; color:var(--fg);
+  transition:border-color .12s ease, background .12s ease;
+}
+.btn:hover{ border-color:var(--fg-faint) }
+.btn.primary{ background:var(--accent); border-color:var(--accent); color:var(--accent-fg) }
+.btn.primary:hover{ filter:brightness(1.06) }
+.btn.ghost{ background:transparent; border-color:transparent; color:var(--fg-dim); font-weight:500 }
+.btn.ghost:hover{ color:var(--fg); background:var(--bg-3) }
+.btn:disabled{ opacity:.4; cursor:not-allowed }
+.btn .kbd{ opacity:.65; font-family:var(--mono); font-size:11px; margin-left:6px; font-weight:500 }
+
+kbd{
+  font-family:var(--mono); font-size:11px; background:var(--bg-3);
+  border:1px solid var(--line); border-bottom-width:2px; border-radius:4px;
+  padding:1px 5px; color:var(--fg-dim);
+}
+
+/* ============================ 파일 선택 ============================ */
+.filterbar{ display:flex; gap:6px; margin-bottom:18px; flex-wrap:wrap; align-items:center }
+.chip{
+  border:1px solid var(--line); background:transparent; border-radius:999px;
+  padding:5px 13px; font-size:12.5px; cursor:pointer; color:var(--fg-dim);
+}
+.chip[aria-pressed="true"]{ background:var(--accent-soft); border-color:var(--accent); color:var(--fg); font-weight:600 }
+
+.cards{ display:grid; gap:10px }
+.card{
+  border:1px solid var(--line); background:var(--bg-2); border-radius:var(--r);
+  padding:14px 16px; cursor:pointer; text-align:left; width:100%;
+  display:grid; grid-template-columns:1fr auto; gap:6px 18px; align-items:center;
+  transition:border-color .12s ease, background .12s ease;
+}
+.card:hover{ border-color:var(--line-2); background:var(--bg-3) }
+.card .path{ font-family:var(--mono); font-size:13.5px; color:var(--fg); letter-spacing:-.01em }
+.card .path em{ font-style:normal; color:var(--accent) }
+.card .facts{ grid-column:1; display:flex; gap:14px; flex-wrap:wrap; font-size:12px; color:var(--fg-dim); font-variant-numeric:tabular-nums }
+.card .facts span{ display:flex; align-items:center; gap:5px }
+.card .why{ grid-column:1; font-size:12px; color:var(--fg-faint) }
+.card .right{ grid-row:1 / span 3; grid-column:2; text-align:right; display:grid; gap:6px; justify-items:end }
+.stars{ letter-spacing:2px; color:var(--warn); font-size:12px }
+.badge{
+  font-size:11px; padding:2px 8px; border-radius:999px; border:1px solid var(--line);
+  color:var(--fg-dim); white-space:nowrap;
+}
+.badge.ok{ color:var(--ok); border-color:var(--ok); background:var(--ok-soft) }
+.badge.next{ color:var(--accent); border-color:var(--accent); background:var(--accent-soft); font-weight:600 }
+.badge.new{ color:var(--fg-faint) }
+
+.resume{
+  grid-column:1 / -1; margin-top:6px; padding:9px 12px; border-radius:6px;
+  background:var(--accent-soft); border:1px solid var(--accent);
+  display:flex; align-items:center; gap:12px; font-size:12.5px; flex-wrap:wrap;
+}
+.resume .btn{ padding:4px 10px; font-size:12px }
+
+.chunknote{
+  grid-column:1 / -1; margin-top:4px; font-size:12px; color:var(--fg-dim);
+  border-top:1px dashed var(--line); padding-top:9px;
+}
+.note{
+  font-size:12.5px; color:var(--fg-dim); background:var(--bg-2);
+  border:1px solid var(--line); border-left:2px solid var(--line-2);
+  border-radius:6px; padding:10px 13px; margin:0 0 18px;
+}
+
+/* ============================ 에디터 화면 ============================
+   핵심: 고정 골격 / 가변 잉크.
+   1·2·3단계 어디서도 그리드 트랙 폭과 x좌표가 바뀌지 않는다.
+   ==================================================================== */
+#s-editor{ display:none }
+#s-editor.on{ display:grid; grid-template-rows:1fr auto; min-height:0 }
+
+.split{
+  display:grid;
+  grid-template-columns: minmax(320px, 1fr) 1px minmax(320px, 1fr); /* 절대 안 바뀜 */
+  min-height:0; overflow:hidden; background:var(--line);
+}
+.pane{ display:flex; flex-direction:column; min-width:0; min-height:0; overflow:hidden; background:var(--bg-2) }
+
+.pane-head{
+  flex:none; height:40px; display:flex; align-items:center; gap:10px;
+  padding:0 12px 0 14px; border-bottom:1px solid var(--line); background:var(--bg-2);
+}
+.pane-title{ font-size:12.5px; font-weight:600; color:var(--fg-dim); white-space:nowrap }
+.pane-title .lang{ font-family:var(--mono); font-weight:400; color:var(--fg-faint); margin-left:6px }
+.pane-head .spacer{ flex:1 }
+
+.tinybtn{
+  border:1px solid var(--line); background:transparent; border-radius:6px;
+  padding:4px 9px; font-size:11.5px; color:var(--fg-dim); cursor:pointer; white-space:nowrap;
+}
+.tinybtn:hover{ color:var(--fg); border-color:var(--line-2) }
+.tinybtn.hot{ color:var(--warn); border-color:var(--warn); background:var(--warn-soft) }
+.tinybtn.primary{ background:var(--accent); border-color:var(--accent); color:var(--accent-fg); font-weight:600 }
+
+.toggle{ display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--fg-faint); cursor:pointer; user-select:none }
+.toggle input{ accent-color:var(--accent); margin:0 }
+
+/* 유휴 힌트 — 타이핑이 20초 멈춘 뒤에만, 모션 없이 그냥 존재 */
+.hint{
+  flex:none; font-size:12px; color:var(--warn); background:var(--warn-soft);
+  border-bottom:1px solid var(--line); padding:7px 14px; display:none;
+}
+.hint.on{ display:block }
+
+/* ---- 코드 표면 공통 지표 (두 패널이 픽셀 단위로 같아야 함) ---- */
+.pane-body{
+  flex:1; min-height:0; overflow:auto; background:var(--code-bg);
+  font-family:var(--mono); font-size:var(--code-size); line-height:var(--code-lh);
+  font-variant-ligatures:none; tab-size:2;
+  padding:var(--pad-y) 0;
+  scrollbar-width:thin;
+}
+.pane-body::-webkit-scrollbar{ width:10px; height:10px }
+.pane-body::-webkit-scrollbar-thumb{ background:var(--line-2); border-radius:6px; border:3px solid var(--code-bg) }
+
+.row{ display:grid; grid-template-columns:var(--gut) 1fr; height:var(--code-lh); white-space:pre }
+.row.cur{ background:var(--band) }
+.ln{
+  color:var(--fg-faint); text-align:right; padding-right:14px;
+  font-variant-numeric:tabular-nums; font-size:12.5px; user-select:none;
+}
+.src{ padding-right:var(--pad-x); overflow:hidden; text-overflow:clip }
+
+/* 2단계 자리표시 막대 — 줄 수와 들여쓰기를 보존해 세로 리듬을 유지 */
+.ph{ display:inline-block; height:9px; border-radius:2px; background:var(--line-2); opacity:.5; vertical-align:middle }
+
+/* 3단계 스펙 카드 */
+.speccard{ padding:6px var(--pad-x) 0 var(--pad-x); font-family:var(--ui); line-height:1.65 }
+.speccard .lead{
+  font-size:14px; color:var(--fg); background:var(--bg-3); border:1px solid var(--line);
+  border-left:2px solid var(--accent); border-radius:6px; padding:13px 15px;
+}
+.speccard h3{ font-size:12px; color:var(--fg-dim); margin:20px 0 8px; font-weight:600; letter-spacing:.02em }
+.speccard ul{ margin:0; padding-left:18px; color:var(--fg-dim); font-size:13px }
+.speccard li{ margin-bottom:5px }
+.speccard .sealed{ margin-top:22px; font-size:12px; color:var(--fg-faint) }
+
+/* ---- 입력 패널 ---- */
+.editor-body{ flex:1; min-height:0; display:grid; grid-template-columns:var(--gut) 1fr; background:var(--code-bg) }
+.gutter{
+  overflow:hidden; padding:var(--pad-y) 0; background:var(--code-bg);
+  font-family:var(--mono); font-size:12.5px; line-height:var(--code-lh);
+  color:var(--fg-faint); user-select:none;
+}
+.gline{ display:grid; grid-template-columns:1fr 12px; align-items:center; height:var(--code-lh); padding-left:8px }
+.gline .n{ text-align:right; font-variant-numeric:tabular-nums; padding-right:4px }
+/* 판정 틱: 항상 자리를 차지 → 나타나고 사라져도 리플로 0 */
+.gline .tick{ width:3px; height:14px; border-radius:2px; background:transparent; justify-self:center }
+.gline.exact .tick{ background:var(--ok) }
+.gline.equiv .tick{ background:var(--eq) }
+.gline.differ .tick{ background:var(--err) }
+.gline.cur{ background:var(--band) }
+.gline.cur .n{ color:var(--fg-dim) }
+
+.code-scroll{ position:relative; min-width:0; overflow:hidden }
+.hl{
+  position:absolute; inset:0; margin:0; overflow:hidden; pointer-events:none;
+  padding:var(--pad-y) var(--pad-x); white-space:pre;
+  font-family:var(--mono); font-size:var(--code-size); line-height:var(--code-lh);
+  font-variant-ligatures:none; tab-size:2; color:var(--fg);
+}
+.curband{ position:absolute; left:0; right:0; height:var(--code-lh); background:var(--band) }
+#edTa{
+  position:absolute; inset:0; width:100%; height:100%; margin:0; border:0; resize:none;
+  padding:var(--pad-y) var(--pad-x); background:transparent; color:transparent;
+  caret-color:var(--caret); white-space:pre; overflow:auto; outline:none;
+  font-family:var(--mono); font-size:var(--code-size); line-height:var(--code-lh);
+  font-variant-ligatures:none; tab-size:2;
+}
+#edTa::selection{ background:var(--accent-soft) }
+#edTa::-webkit-scrollbar{ width:10px; height:10px }
+#edTa::-webkit-scrollbar-thumb{ background:var(--line-2); border-radius:6px; border:3px solid var(--code-bg) }
+
+/* 문법 색 */
+.k{ color:var(--syn-key) } .s{ color:var(--syn-str) } .n{ color:var(--syn-num) }
+.c{ color:var(--syn-com) } .t{ color:var(--syn-typ) } .f{ color:var(--syn-fn) }
+.p{ color:var(--syn-punc) } .v{ color:var(--fg) }
+i{ font-style:normal }  /* 문법 토큰은 <i> 로 감싸므로 기울임 해제 */
+
+/* 하단 상태 바 — 정적. 토스트/스낵바 없음. */
+.statusbar{
+  position:relative; z-index:2; flex:none; height:32px; display:flex; align-items:center; gap:18px;
+  padding:0 16px; background:var(--bg-2); border-top:1px solid var(--line);
+  font-size:11.5px; color:var(--fg-faint); overflow:hidden; white-space:nowrap;
+}
+.statusbar .sep{ color:var(--line-2) }
+.statusbar b{ color:var(--fg-dim); font-weight:500 }
+
+/* 임시 열람(peek) — 원본은 '지지대 칼럼' 안에서만 열린다.
+   입력창 위를 절대 덮지 않음 → 시선/캐럿이 안 밀림 */
+.peeking .pane-body.ref{ box-shadow:inset 0 0 0 1px var(--warn) }
+
+/* ============================ 채점 결과 ============================ */
+.scorehead{
+  display:flex; align-items:flex-end; gap:26px; flex-wrap:wrap;
+  border:1px solid var(--line); background:var(--bg-2); border-radius:var(--r);
+  padding:20px 22px; margin-bottom:16px;
+}
+.bignum{ font-size:38px; font-weight:700; letter-spacing:-.03em; line-height:1; font-variant-numeric:tabular-nums }
+.bignum small{ font-size:17px; color:var(--fg-dim); font-weight:600 }
+.scorehead .lbl{ font-size:12.5px; color:var(--fg-dim); margin-top:7px }
+.scorehead .lbl b{ color:var(--fg) }
+.tally{ display:flex; gap:8px; flex-wrap:wrap }
+.pill{
+  display:flex; align-items:center; gap:7px; font-size:12.5px;
+  border:1px solid var(--line); border-radius:999px; padding:5px 12px; color:var(--fg-dim);
+  font-variant-numeric:tabular-nums;
+}
+.pill i{ width:8px; height:8px; border-radius:2px; display:inline-block }
+.pill.ok i{ background:var(--ok) } .pill.ok{ color:var(--ok); border-color:var(--ok); background:var(--ok-soft) }
+.pill.eq i{ background:var(--eq) } .pill.eq{ color:var(--eq); border-color:var(--eq); background:var(--eq-soft) }
+.pill.er i{ background:var(--err) } .pill.er{ color:var(--err); border-color:var(--err); background:var(--err-soft) }
+
+.legend{ font-size:12px; color:var(--fg-dim); margin:0 0 16px; line-height:1.75 }
+.legend code{ font-family:var(--mono); background:var(--bg-3); padding:1px 5px; border-radius:4px; font-size:11.5px }
+
+.difftoolbar{ display:flex; gap:8px; align-items:center; margin-bottom:10px; flex-wrap:wrap }
+
+.diff{ border:1px solid var(--line); border-radius:var(--r); overflow:hidden; background:var(--bg-2) }
+.dhead{
+  display:grid; grid-template-columns:52px 1fr 1fr; gap:0;
+  font-size:11.5px; color:var(--fg-faint); background:var(--bg-3);
+  border-bottom:1px solid var(--line); padding:7px 0;
+}
+.dhead span{ padding:0 14px }
+.drow{ border-bottom:1px solid var(--line) }
+.drow:last-child{ border-bottom:0 }
+.dmain{
+  display:grid; grid-template-columns:52px 1fr 1fr; align-items:stretch;
+  cursor:pointer; border-left:3px solid transparent; background:transparent;
+  width:100%; border-top:0; border-right:0; border-bottom:0; text-align:left; padding:0;
+  font-family:var(--mono); font-size:13px; line-height:22px;
+}
+.dmain:hover{ background:var(--bg-3) }
+.drow.exact .dmain{ border-left-color:var(--ok); opacity:.62 }
+.drow.equiv .dmain{ border-left-color:var(--eq) }
+.drow.differ .dmain{ border-left-color:var(--err) }
+.drow.missing .dmain,.drow.extra .dmain{ border-left-color:var(--err) }
+.dmain .no{ color:var(--fg-faint); font-size:11.5px; padding:6px 10px 6px 0; text-align:right; font-variant-numeric:tabular-nums; font-family:var(--mono) }
+.dmain .cell{ padding:6px 14px; white-space:pre-wrap; word-break:break-all; overflow-wrap:anywhere; min-width:0 }
+.dmain .cell.mine{ border-left:1px solid var(--line) }
+.dmain .empty{ color:var(--fg-faint); font-family:var(--ui); font-size:12px; font-style:italic }
+mark.d{ background:var(--err-soft); color:var(--err); border-radius:3px; padding:0 2px; box-shadow:inset 0 -1px 0 var(--err) }
+mark.e{ background:var(--eq-soft); color:var(--eq); border-radius:3px; padding:0 2px }
+
+.dbody{ display:none; padding:12px 16px 14px 55px; background:var(--bg-3); border-top:1px solid var(--line); font-size:12.5px }
+.drow.open .dbody{ display:block }
+.reasons{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:9px }
+.rtag{ font-size:11.5px; border-radius:5px; padding:3px 9px; border:1px solid var(--line); color:var(--fg-dim) }
+.rtag.eq{ color:var(--eq); border-color:var(--eq); background:var(--eq-soft) }
+.rtag.er{ color:var(--err); border-color:var(--err); background:var(--err-soft) }
+.dbody p{ margin:0 0 9px; color:var(--fg-dim); line-height:1.7 }
+.dbody p b{ color:var(--fg) }
+.dbody code{ font-family:var(--mono); background:var(--bg-2); border:1px solid var(--line); padding:1px 5px; border-radius:4px; font-size:12px }
+.dacts{ display:flex; gap:8px; flex-wrap:wrap }
+.disputed .dacts .btn.dis{ color:var(--warn); border-color:var(--warn) }
+
+/* ============================ "왜" 입력 ============================ */
+.whycard{
+  border:1px solid var(--line); background:var(--bg-2); border-radius:var(--r);
+  padding:22px 24px; margin-bottom:14px;
+}
+.ctxcode{
+  font-family:var(--mono); font-size:13px; line-height:var(--code-lh);
+  background:var(--code-bg); border:1px solid var(--line); border-radius:6px;
+  padding:10px 0; margin:14px 0 18px; overflow:auto; white-space:pre;
+}
+.ctxcode .row{ grid-template-columns:44px 1fr }
+.ctxcode .row.focusline{ background:var(--err-soft) }
+.qtext{ font-size:15.5px; font-weight:600; letter-spacing:-.01em; line-height:1.6; margin:0 0 4px }
+.qhelp{ font-size:12.5px; color:var(--fg-dim); margin:0 0 14px }
+textarea.why{
+  width:100%; min-height:88px; resize:vertical; background:var(--code-bg);
+  border:1px solid var(--line-2); border-radius:7px; padding:12px 14px;
+  color:var(--fg); font-family:var(--ui); font-size:14.5px; line-height:1.7; outline:none;
+}
+textarea.why:focus{ border-color:var(--accent) }
+textarea.why::placeholder{ color:var(--fg-faint) }
+.whyfoot{ display:flex; align-items:center; gap:12px; margin-top:10px; flex-wrap:wrap }
+.counter{ font-size:12px; color:var(--fg-faint); font-variant-numeric:tabular-nums }
+.counter.ok{ color:var(--ok) }
+
+.quiz{ display:none; margin:14px 0 4px; border-top:1px dashed var(--line); padding-top:14px }
+.quiz.on{ display:block }
+.quiz .qlead{ font-size:12.5px; color:var(--fg-dim); margin:0 0 10px }
+.choice{
+  display:block; width:100%; text-align:left; border:1px solid var(--line);
+  background:var(--bg-3); border-radius:7px; padding:11px 14px; margin-bottom:8px;
+  cursor:pointer; font-size:13.5px; line-height:1.6; color:var(--fg-dim);
+}
+.choice:hover{ border-color:var(--line-2); color:var(--fg) }
+.choice.right{ border-color:var(--ok); background:var(--ok-soft); color:var(--fg) }
+.choice.wrong{ border-color:var(--err); background:var(--err-soft) }
+.choice .mk{ font-family:var(--mono); font-size:11px; color:var(--fg-faint); margin-right:8px }
+.quizfb{ font-size:13px; color:var(--fg-dim); line-height:1.75; margin:6px 0 0 }
+.whycard code, .quizfb code, .choice code{
+  font-family:var(--mono); font-size:.92em; background:var(--bg-3);
+  border:1px solid var(--line); border-radius:4px; padding:1px 5px;
+}
+.btn.primary:disabled{ background:var(--bg-3); color:var(--fg-faint); border-color:var(--line); opacity:1 }
+
+/* ============================ 완료 ============================ */
+.donecard{
+  border:1px solid var(--line); background:var(--bg-2); border-radius:var(--r);
+  padding:28px 26px; text-align:center;
+}
+.donecard .big{ font-size:20px; font-weight:700; letter-spacing:-.02em; margin-bottom:8px }
+.donegrid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; margin:22px 0 24px }
+.stat{ border:1px solid var(--line); border-radius:7px; padding:13px; background:var(--bg-3) }
+.stat .v{ font-size:20px; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:-.02em }
+.stat .l{ font-size:11.5px; color:var(--fg-dim); margin-top:3px }
+.rowbtns{ display:flex; gap:9px; justify-content:center; flex-wrap:wrap }
+
+@media (max-width: 900px){
+  .split{ grid-template-columns:1fr; grid-template-rows:minmax(0,1fr) 1px minmax(0,1fr) }
+  .dhead,.dmain{ grid-template-columns:44px 1fr }
+  .dmain .cell.mine{ grid-column:2; border-left:0; border-top:1px dashed var(--line) }
+  .stepper .step span:not(.sn){ display:none }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand"><span class="dot"></span>T1 <small>클론 코딩</small></div>
+  <div class="filechip" id="fileChip" hidden></div>
+  <div class="spacer"></div>
+  <div class="stepper" id="stepper" hidden>
+    <button class="step" data-stage="1"><span class="sn">1</span><span>보고 치기</span></button>
+    <button class="step" data-stage="2"><span class="sn">2</span><span>뼈대만</span></button>
+    <button class="step" data-stage="3"><span class="sn">3</span><span>백지</span></button>
+  </div>
+  <div class="spacer"></div>
+  <div class="meta" id="topMeta"></div>
+  <button class="iconbtn" id="themeBtn" title="테마 전환">◐ 라이트</button>
+</header>
+
+<main>
+  <!-- ==================== 1. 파일 선택 ==================== -->
+  <section class="screen on" id="s-files">
+    <div class="scroll"><div class="wrap">
+      <h1>오늘 다시 짜볼 코드 고르기</h1>
+      <p class="sub">내 리포 <code style="font-family:var(--mono)">market-radar</code> 에서 로직이 몰린 블록만 추렸습니다. 한 세션 10~20분, 주 2회 리듬.</p>
+      <p class="note"><b>단위는 파일이 아니라 블록입니다.</b> 200줄짜리 파일은 함수/클래스 경계로 잘라 12~40줄 블록으로 나눕니다. 한 번에 재현 가능한 크기여야 페이딩이 작동합니다.</p>
+      <div class="filterbar">
+        <button class="chip" aria-pressed="true" data-filter="all">전체</button>
+        <button class="chip" aria-pressed="false" data-filter="resume">이어서 하기</button>
+        <button class="chip" aria-pressed="false" data-filter="new">아직 안 해본 것</button>
+        <div class="spacer"></div>
+        <span class="meta">데모에서는 어떤 카드를 눌러도 같은 예제가 열립니다.</span>
+      </div>
+      <div class="cards" id="cards"></div>
+    </div></div>
+  </section>
+
+  <!-- ==================== 2. 에디터 ==================== -->
+  <section class="screen" id="s-editor">
+    <div class="split">
+      <!-- 지지대 칼럼: 위치·폭 고정, 내용만 단계별로 바뀜 -->
+      <div class="pane" id="paneRef">
+        <div class="pane-head">
+          <span class="pane-title" id="refTitle">원본<span class="lang">TypeScript</span></span>
+          <div class="spacer"></div>
+          <button class="tinybtn" id="peekBtn" hidden>원본 잠깐 보기 <span style="opacity:.6">(누르고 있기)</span></button>
+          <button class="tinybtn" id="downBtn">한 단계 쉽게</button>
+        </div>
+        <div class="hint" id="idleHint"></div>
+        <div class="pane-body ref" id="refBody"></div>
+      </div>
+
+      <div></div>
+
+      <!-- 입력 칼럼: 어떤 단계에서도 x좌표·폭 불변 -->
+      <div class="pane">
+        <div class="pane-head">
+          <span class="pane-title">내 코드<span class="lang" id="lineCount">0줄</span></span>
+          <div class="spacer"></div>
+          <label class="toggle" title="줄을 벗어날 때만 판정합니다. 타이핑 중에는 아무 일도 일어나지 않습니다.">
+            <input type="checkbox" id="liveChk"> 줄 판정 표시
+          </label>
+          <button class="tinybtn primary" id="gradeBtn">채점하기 <span style="opacity:.7">⌘↵</span></button>
+        </div>
+        <div class="editor-body">
+          <div class="gutter" id="edGutter"></div>
+          <div class="code-scroll">
+            <pre class="hl" id="edHl"><div class="curband" id="curBand"></div><code id="edHlCode"></code></pre>
+            <textarea id="edTa" spellcheck="false" autocapitalize="off" autocorrect="off" wrap="off" aria-label="코드 입력"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="statusbar" id="statusbar"></div>
+  </section>
+
+  <!-- ==================== 3. 채점 결과 ==================== -->
+  <section class="screen" id="s-result">
+    <div class="scroll"><div class="wrap">
+      <h1>채점 결과</h1>
+      <p class="sub" id="resSub"></p>
+      <div class="scorehead" id="scorehead"></div>
+      <p class="legend">
+        <b style="color:var(--ok)">정확</b> 원본과 글자까지 같음 ·
+        <b style="color:var(--eq)">동등</b> 형태는 다르지만 같은 뜻으로 인정 — 공백/들여쓰기 폭, <code>'</code> vs <code>"</code>, 세미콜론·후행 쉼표, 주석 문구, 지역 변수명 일관 치환 ·
+        <b style="color:var(--err)">다름</b> 뜻이 달라지거나 자동으로 같음을 증명할 수 없음.<br>
+        판정이 억울하면 각 줄의 <b>“같은 뜻인데요”</b>로 이의를 남길 수 있습니다. 점수는 그대로 두고 규칙 쪽을 고칩니다.
+      </p>
+      <div class="difftoolbar">
+        <button class="chip" data-dfilter="focus" aria-pressed="true">다름 + 동등만</button>
+        <button class="chip" data-dfilter="all" aria-pressed="false">전체 보기</button>
+        <button class="chip" data-dfilter="differ" aria-pressed="false">다름만</button>
+        <div class="spacer"></div>
+        <span class="meta">행 이동 <kbd>J</kbd><kbd>K</kbd> · 눌러서 펼치기</span>
+      </div>
+      <div class="diff" id="diff">
+        <div class="dhead"><span>행</span><span>원본</span><span>내 코드</span></div>
+        <div id="diffRows"></div>
+      </div>
+      <div class="rowbtns" style="justify-content:flex-start;margin-top:20px">
+        <button class="btn primary" id="toWhyBtn">다음 — 왜 이렇게 생겼는지 한 줄</button>
+        <button class="btn" id="retryBtn">이 단계 다시 하기</button>
+        <button class="btn ghost" id="backEditBtn">에디터로 돌아가기</button>
+      </div>
+    </div></div>
+  </section>
+
+  <!-- ==================== 4. "왜" 입력 ==================== -->
+  <section class="screen" id="s-why">
+    <div class="scroll"><div class="wrap narrow">
+      <h1>왜 이렇게 생겼을까</h1>
+      <p class="sub">한 줄이면 됩니다. 채점하지 않습니다. 다만 <b>건너뛸 수는 없습니다</b> — 여기서 뇌가 안 켜지면 앞의 20분은 타자연습이 됩니다.</p>
+      <div class="whycard">
+        <p class="qtext" id="whyQ"></p>
+        <p class="qhelp" id="whyHelp"></p>
+        <div class="ctxcode" id="whyCtx"></div>
+        <textarea class="why" id="whyInput" placeholder="예: 값이 없을 때만 기본값을 쓰고 싶어서. 빈 배열은 그대로 두려고."></textarea>
+        <div class="whyfoot">
+          <span class="counter" id="whyCount">0 / 10자</span>
+          <div class="spacer" style="flex:1"></div>
+          <button class="btn ghost" id="dunnoBtn">모르겠어요</button>
+          <button class="btn primary" id="whySubmit" disabled>저장하고 마치기</button>
+        </div>
+        <div class="quiz" id="quiz">
+          <p class="qlead">고르고 나서, 고른 이유를 한 줄로 다시 써 주세요. 답을 보고 써도 됩니다 — 손으로 옮기는 그 과정이 목적입니다.</p>
+          <div id="choices"></div>
+          <p class="quizfb" id="quizFb"></p>
+        </div>
+      </div>
+      <div class="whycard">
+        <p class="qtext" style="font-size:14px">오늘 새로 안 것 <span style="color:var(--fg-faint);font-weight:400">(선택)</span></p>
+        <textarea class="why" id="whyExtra" style="min-height:60px" placeholder="빈칸으로 둬도 됩니다."></textarea>
+      </div>
+    </div></div>
+  </section>
+
+  <!-- ==================== 5. 완료 ==================== -->
+  <section class="screen" id="s-done">
+    <div class="scroll"><div class="wrap narrow">
+      <div class="donecard">
+        <div class="big" id="doneTitle"></div>
+        <p class="sub" id="doneSub" style="margin-bottom:0"></p>
+        <div class="donegrid" id="doneStats"></div>
+        <div class="rowbtns">
+          <button class="btn primary" id="nextStageBtn"></button>
+          <button class="btn" id="againBtn">같은 단계 한 번 더</button>
+          <button class="btn ghost" id="toFilesBtn">파일 목록으로</button>
+        </div>
+        <p class="sub" style="margin:20px 0 0;font-size:12px" id="doneNote"></p>
+      </div>
+    </div></div>
+  </section>
+</main>
+
+<script>
+"use strict";
+/* ============================================================
+   원본 스냅샷 — 실제 리포에서 잘라온 블록 (내용 해시로 고정)
+   ============================================================ */
+const ORIGINAL = [
+'type Market = { id: string; title: string; volume: number };',
+'',
+'// 같은 검색어를 다시 치면 네트워크를 타지 않도록 메모리에 캐시한다',
+'const cache = new Map<string, Market[]>();',
+'',
+'export async function searchMarkets(',
+'  query: string,',
+'  limit = 20,',
+'): Promise<Market[]> {',
+'  const key = query.trim().toLowerCase();',
+'  if (!key) return [];',
+'',
+'  const hit = cache.get(key);',
+'  if (hit) return hit.slice(0, limit);',
+'',
+'  const res = await fetch(`/api/markets?q=${encodeURIComponent(key)}`);',
+'',
+'  // 서버가 죽어도 화면이 비지 않게 로컬 검색으로 떨어진다',
+'  if (!res.ok) {',
+'    return fallbackSearch(key, limit);',
+'  }',
+'',
+'  const data = (await res.json()) as { markets?: Market[] };',
+'  const markets = data.markets ?? [];',
+'  const sorted = markets.sort((a, b) => b.volume - a.volume);',
+'',
+'  cache.set(key, sorted);',
+'  return sorted.slice(0, limit);',
+'}'
+];
+
+/* 데모용 "그럴듯한 오답" — 채점 화면을 바로 볼 수 있게 */
+const SAMPLE = [
+'type Market = { id: string; title: string; volume: number };',
+'',
+'// 같은 검색어는 캐시에서 꺼낸다',
+'const cache = new Map<string, Market[]>();',
+'',
+'export async function searchMarkets(',
+'  query: string,',
+'  limit = 20,',
+'): Promise<Market[]> {',
+'  const k = query.trim().toLowerCase();',
+'  if (!k) return [];',
+'',
+'  const hit = cache.get(k);',
+'  if (hit) return hit.slice(0, limit);',
+'',
+"  const res = await fetch('/api/markets?q=' + encodeURIComponent(k));",
+'',
+'  // 서버가 죽어도 화면이 비지 않게 로컬 검색으로 떨어진다',
+'  if (!res.ok) {',
+'    return fallbackSearch(k, limit)',
+'  }',
+'',
+'  const data = (await res.json()) as { markets?: Market[] };',
+'  const markets = data.markets || [];',
+'  const sorted = markets.sort((a, b) => a.volume - b.volume);',
+'',
+'  cache.set(k, sorted);',
+'  return sorted;',
+'}'
+];
+
+/* 2단계에서 잉크를 남길 줄 = 주석 · 시그니처 · 빈 줄 · 블록 끝 */
+const SHOW2 = new Set([0,1,2,4,5,6,7,8,11,14,16,17,21,25,28]);
+
+const SPEC3 = {
+  lead: '검색어로 마켓을 찾아 거래량 많은 순으로 돌려주는 함수. 같은 검색어는 메모리에 캐시하고, 서버가 실패하면 로컬 검색으로 떨어진다. 결과는 limit 개수만큼 자른다.',
+  checks: [
+    '빈 검색어(공백만 포함)는 네트워크를 타지 않고 빈 배열',
+    '캐시에 있으면 요청 없이 바로 반환',
+    '응답이 ok가 아니면 fallbackSearch 로 대체',
+    'markets 키가 없을 수도 있음 — 없으면 빈 배열',
+    '거래량 내림차순 정렬 후 캐시에 저장',
+    '반환 직전 limit 개수로 자르기'
+  ],
+  sig: 'searchMarkets(query: string, limit = 20): Promise<Market[]>'
+};
+
+const FILES = [
+  { path:'src/lib/search.ts', fn:'searchMarkets()', lang:'TypeScript', lines:29, diff:2,
+    why:'중첩 2단계 · 비동기 1곳 · 외부 API 1곳 · 폴백 분기', mins:12, done:[1], resume:true },
+  { path:'src/lib/search.ts', fn:'fallbackSearch()', lang:'TypeScript', lines:18, diff:1,
+    why:'단일 루프 · 분기 1개', mins:7, done:[] },
+  { path:'src/hooks/useDebounce.ts', fn:'useDebounce()', lang:'TypeScript', lines:21, diff:2,
+    why:'클로저 · 정리(cleanup) 함수 · 타이머', mins:10, done:[1,2] },
+  { path:'src/store/cart.ts', fn:'applyCoupon()', lang:'TypeScript', lines:26, diff:2,
+    why:'조건 4갈래 · 반올림 규칙 · 불변 갱신', mins:13, done:[] },
+  { path:'src/app/api/sync/route.ts', fn:'POST()', lang:'TypeScript', lines:34, diff:3,
+    why:'중첩 3단계 · try/catch 2겹 · 트랜잭션', mins:16, done:[] },
+  { path:'src/server/sync.ts', fn:'전체 파일', lang:'TypeScript', lines:212, diff:3,
+    why:'너무 깁니다 — 함수 경계로 8개 블록으로 나눴습니다', mins:0, done:[], chunked:8 }
+];
+
+/* ============================================================
+   1. 문법 강조 (CodeMirror 자리를 흉내만 냅니다)
+   ============================================================ */
+const KW = new Set(['const','let','var','function','return','if','else','for','while','await','async',
+ 'export','import','from','type','interface','new','as','of','in','try','catch','throw','class',
+ 'extends','default','null','undefined','true','false','void','this','typeof','instanceof']);
+const TY = new Set(['string','number','boolean','any','unknown','never','void','Promise','Map','Set','Array','Record']);
+const PROT = new Set([...KW,'fetch','JSON','console','encodeURIComponent','searchMarkets','fallbackSearch',
+ 'cache','json','ok','status','markets','volume','id','title','slice','sort','get','set','trim',
+ 'toLowerCase','Market','string','number','boolean']);
+
+function esc(s){ return String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+function hl(line){
+  let out = '', i = 0, m;
+  while (i < line.length){
+    const rest = line.slice(i);
+    if ((m = /^\s+/.exec(rest)))                 { out += esc(m[0]); i += m[0].length; continue; }
+    if ((m = /^\/\/.*$/.exec(rest)))             { out += '<i class="c">' + esc(m[0]) + '</i>'; i += m[0].length; continue; }
+    if ((m = /^`(?:[^`\\]|\\.)*`?/.exec(rest)))  { out += '<i class="s">' + esc(m[0]) + '</i>'; i += m[0].length; continue; }
+    if ((m = /^'(?:[^'\\]|\\.)*'?/.exec(rest)))  { out += '<i class="s">' + esc(m[0]) + '</i>'; i += m[0].length; continue; }
+    if ((m = /^"(?:[^"\\]|\\.)*"?/.exec(rest)))  { out += '<i class="s">' + esc(m[0]) + '</i>'; i += m[0].length; continue; }
+    if ((m = /^\d[\d_]*(?:\.\d+)?/.exec(rest)))  { out += '<i class="n">' + esc(m[0]) + '</i>'; i += m[0].length; continue; }
+    if ((m = /^[A-Za-z_$][\w$]*/.exec(rest))){
+      const w = m[0], after = line.slice(i + w.length);
+      let cls = 'v';
+      if (KW.has(w)) cls = 'k';
+      else if (TY.has(w) || /^[A-Z]/.test(w)) cls = 't';
+      else if (/^\s*\(/.test(after)) cls = 'f';
+      out += '<i class="' + cls + '">' + esc(w) + '</i>'; i += w.length; continue;
+    }
+    if ((m = /^[^\w$\s'"`]+/.exec(rest)))        { out += '<i class="p">' + esc(m[0]) + '</i>'; i += m[0].length; continue; }
+    out += esc(line[i]); i++;
+  }
+  return out;
+}
+
+/* ============================================================
+   2. 채점 엔진 - 실행하지 않고 텍스트만 본다 (모든 언어 공통)
+   ============================================================ */
+const TOKRE = /[A-Za-z_$][\w$]*|\d[\d_]*(?:\.\d+)?|"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`|=>|===|!==|==|!=|\?\?|\|\||&&|<=|>=|\+\+|--|\S/g;
+const tok    = s => s.match(TOKRE) || [];
+const indent = s => (/^\s*/.exec(s))[0].length;
+const isId   = t => /^[A-Za-z_$][\w$]*$/.test(t);
+const J      = a => a.join(' ');
+
+const ORIG_IDENTS = new Set();
+ORIGINAL.forEach(l => tok(l).forEach(t => { if (isId(t)) ORIG_IDENTS.add(t); }));
+
+function sim(a,b){
+  if (a === b) return 1;
+  const A = tok(a.trim()), B = tok(b.trim());
+  if (!A.length && !B.length) return 1;
+  if (!A.length || !B.length) return 0;
+  const m = new Map(); A.forEach(t => m.set(t,(m.get(t)||0)+1));
+  let c = 0; B.forEach(t => { const n = m.get(t)||0; if (n>0){ c++; m.set(t,n-1);} });
+  return (2*c)/(A.length+B.length);
+}
+
+/* Needleman-Wunsch 정렬: 줄이 밀리거나 빠져도 짝을 제대로 찾는다 */
+function align(O,U){
+  const n=O.length, m=U.length, GAP=-0.55;
+  const S=[],P=[];
+  for(let i=0;i<=n;i++){ S.push(new Float64Array(m+1)); P.push(new Array(m+1).fill('d')); }
+  for(let i=1;i<=n;i++){ S[i][0]=S[i-1][0]+GAP; P[i][0]='u'; }
+  for(let j=1;j<=m;j++){ S[0][j]=S[0][j-1]+GAP; P[0][j]='l'; }
+  for(let i=1;i<=n;i++) for(let j=1;j<=m;j++){
+    const d=S[i-1][j-1]+(sim(O[i-1],U[j-1])*2-0.75), up=S[i-1][j]+GAP, lf=S[i][j-1]+GAP;
+    if(d>=up&&d>=lf){S[i][j]=d;P[i][j]='d';}
+    else if(up>=lf){S[i][j]=up;P[i][j]='u';}
+    else {S[i][j]=lf;P[i][j]='l';}
+  }
+  const out=[]; let i=n,j=m;
+  while(i>0||j>0){
+    const p=(i>0&&j>0)?P[i][j]:(i>0?'u':'l');
+    if(p==='d'){ out.push([i-1,j-1]); i--; j--; }
+    else if(p==='u'){ out.push([i-1,null]); i--; }
+    else { out.push([null,j-1]); j--; }
+  }
+  return out.reverse();
+}
+
+function compareLine(o,u){
+  const R=[];
+  if(o===u) return {status:'exact',reasons:R,maps:[]};
+  const ot=o.replace(/\s+$/,''), ut=u.replace(/\s+$/,'');
+  if(ot===ut) return {status:'exact',reasons:R,maps:[]};
+
+  const oc=/^\s*\/\//.test(ot), uc=/^\s*\/\//.test(ut);
+  if(oc&&uc){
+    if(indent(ot)!==indent(ut)) R.push('들여쓰기 폭');
+    R.push('주석 문구는 비교하지 않음');
+    return {status:'equiv',reasons:R,maps:[]};
+  }
+  if(oc!==uc) return {status:'differ',reasons:[oc?'원본의 주석이 없습니다':'원본에 없는 주석입니다'],maps:[]};
+  if(!ot.trim()||!ut.trim())
+    return (!ot.trim()&&!ut.trim()) ? {status:'exact',reasons:R,maps:[]}
+                                    : {status:'differ',reasons:['한쪽이 빈 줄입니다'],maps:[]};
+
+  if(indent(ot)!==indent(ut)) R.push('들여쓰기 폭');
+
+  let A=tok(ot.trim()), B=tok(ut.trim());
+  const raw0=J(A), raw1=J(B);
+  const tail=t=>t===';'||t===',';
+  let semi=false;
+  while(A.length&&B.length&&tail(A[A.length-1])&&!tail(B[B.length-1])){A=A.slice(0,-1);semi=true;}
+  while(A.length&&B.length&&tail(B[B.length-1])&&!tail(A[A.length-1])){B=B.slice(0,-1);semi=true;}
+  if(semi) R.push('세미콜론 / 후행 쉼표');
+
+  const q=t=>((t[0]==="'"||t[0]==='`')&&t.length>1&&t.indexOf('${')<0)?'"'+t.slice(1,-1)+'"':t;
+  const An=A.map(q), Bn=B.map(q);
+  if(raw0!==raw1 && J(An)===J(Bn) && J(A)!==J(B)) R.push('따옴표 종류');
+
+  if(An.length!==Bn.length) return {status:'differ',reasons:[],maps:[]};
+
+  const maps=[];
+  for(let i=0;i<An.length;i++){
+    if(An[i]===Bn[i]) continue;
+    const a=An[i], b=Bn[i];
+    if(!isId(a)||!isId(b))       return {status:'differ',reasons:[],maps:[]};
+    if(PROT.has(a)||PROT.has(b)) return {status:'differ',reasons:[],maps:[]};
+    if(i>0&&An[i-1]==='.')       return {status:'differ',reasons:[],maps:[]}; /* 속성 이름은 못 바꿈 */
+    maps.push([a,b]);
+  }
+  if(!maps.length){ if(!R.length) R.push('공백'); return {status:'equiv',reasons:R,maps:[]}; }
+  return {status:'pending',reasons:R,maps:maps};
+}
+
+/* 변수명 치환은 "파일 전체에서 1:1로 일관될 때"만 인정하고,
+   바꾼 이름이 원본에 이미 존재하면 인정하지 않는다 (스왑 / 그림자 방지). */
+function resolveRenames(rows){
+  const fwd=new Map(), bwd=new Map();
+  rows.forEach(r=>{ if(r.cmp&&r.cmp.status==='pending') r.cmp.maps.forEach(p=>{
+    const a=p[0], b=p[1];
+    if(!fwd.has(a)) fwd.set(a,new Set()); fwd.get(a).add(b);
+    if(!bwd.has(b)) bwd.set(b,new Set()); bwd.get(b).add(a);
+  });});
+  const okPair=(a,b)=> fwd.get(a).size===1 && bwd.get(b).size===1 && !ORIG_IDENTS.has(b);
+  rows.forEach(r=>{
+    if(!r.cmp||r.cmp.status!=='pending') return;
+    const good=r.cmp.maps.every(p=>okPair(p[0],p[1]));
+    if(good){
+      r.cmp.status='equiv';
+      r.cmp.reasons.push('지역 변수명 일관 치환 (' + r.cmp.maps.map(p=>p[0]+' → '+p[1]).join(', ') + ')');
+    } else {
+      r.cmp.status='differ';
+      r.cmp.swap = r.cmp.maps.some(p=>ORIG_IDENTS.has(p[1]));
+    }
+  });
+}
+
+function grade(text){
+  const U = text.replace(/\s+$/,'').split('\n');
+  const pairs = align(ORIGINAL,U);
+  const rows = pairs.map(pr=>{
+    const oi=pr[0], ui=pr[1];
+    if(oi===null) return {oi:null,ui:ui,status:'extra',cmp:null};
+    if(ui===null) return {oi:oi,ui:null,status:'missing',cmp:null};
+    return {oi:oi,ui:ui,cmp:compareLine(ORIGINAL[oi],U[ui])};
+  });
+  resolveRenames(rows);
+  rows.forEach(r=>{ if(r.cmp) r.status=r.cmp.status; });
+  const n={exact:0,equiv:0,differ:0,missing:0,extra:0};
+  rows.forEach(r=>{ n[r.status]++; });
+  return {rows:rows,n:n,user:U,total:ORIGINAL.length};
+}
+
+/* 데모 줄에 한해 사람이 쓴 해설을 붙인다 (자동 문구보다 훨씬 잘 읽히므로) */
+const NOTES = {
+ 15:{tag:'판정 범위 밖', t:'문자열을 만드는 <b>방식</b>이 다릅니다. 결과 문자열은 같을 수 있지만, 자동 판정은 <b>확실히 증명되는 것만</b> 동등으로 인정합니다 &mdash; 템플릿 리터럴과 <code>+</code> 연결은 토큰 구조가 달라서 같음을 보이지 못했습니다. 같은 뜻이라고 보시면 아래로 이의를 남겨 주세요. 점수는 그대로 두고 규칙 쪽을 고칩니다.'},
+ 23:{tag:'의미 차이', t:'<b>진짜로 다릅니다.</b> <code>??</code> 는 값이 <code>null</code> / <code>undefined</code> 일 때만 오른쪽을 씁니다. <code>||</code> 는 <code>0</code>, 빈 문자열, <code>false</code> 같은 falsy 값에도 오른쪽으로 넘어갑니다. 서버가 <code>markets: []</code> 를 명시적으로 보냈을 때 동작이 갈립니다.'},
+ 24:{tag:'의미 차이', t:'정렬 방향이 반대입니다. 원본은 <code>b.volume - a.volume</code> &mdash; 거래량 <b>내림차순</b>. 지금 코드는 오름차순이라 거래량이 가장 적은 마켓이 위로 옵니다.<br><span style="color:var(--fg-faint)">이름 <code>a</code> 와 <code>b</code> 를 맞바꾼 형태라 &ldquo;변수명 치환&rdquo;처럼 보이지만, 바꾼 이름이 원본에 이미 있으면 치환으로 인정하지 않습니다.</span>'},
+ 27:{tag:'누락', t:'<code>.slice(0, limit)</code> 가 빠졌습니다. 캐시가 맞았을 때(14행)는 잘랐는데 이 경로에서는 안 잘라서, 같은 함수가 상황에 따라 다른 개수를 돌려줍니다.'}
+};
+
+/* ============================================================
+   3. 상태
+   ============================================================ */
+const S = {
+  screen:'files', stage:1, drafts:{1:'',2:'',3:''}, res:null,
+  live:true, ticks:{}, cur:0, peeking:false, peeks:0, downgraded:false,
+  elapsed:0, lastAct:Date.now(), savedAt:null, disputed:new Set(),
+  dfilter:'focus', focusRow:0
+};
+const $  = id => document.getElementById(id);
+const ta = $('edTa'), edHl = $('edHl'), edHlCode = $('edHlCode'),
+      edGutter = $('edGutter'), refBody = $('refBody'), curBand = $('curBand');
+
+const LS = {
+  get(k){ try { return localStorage.getItem('t1.'+k); } catch(e){ return null; } },
+  set(k,v){ try { localStorage.setItem('t1.'+k,v); } catch(e){} }
+};
+
+/* ============================================================
+   4. 테마
+   ============================================================ */
+function setTheme(t){
+  document.documentElement.setAttribute('data-theme', t);
+  $('themeBtn').textContent = t === 'dark' ? '◐ 라이트' : '◑ 다크';
+  LS.set('theme', t);
+}
+$('themeBtn').addEventListener('click', () =>
+  setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+setTheme(LS.get('theme') || 'dark');
+
+/* ============================================================
+   5. 화면 전환
+   ============================================================ */
+function show(name){
+  S.screen = name;
+  ['files','editor','result','why','done'].forEach(n =>
+    $('s-'+n).classList.toggle('on', n === name));
+  const inEx = name !== 'files';
+  $('fileChip').hidden = !inEx;
+  $('stepper').hidden  = !inEx;
+  $('fileChip').textContent = 'src/lib/search.ts › searchMarkets()';
+  renderStepper(); renderTopMeta();
+  if(name === 'editor'){ requestAnimationFrame(()=>ta.focus()); }
+  document.querySelector('#s-'+name+' .scroll') && (document.querySelector('#s-'+name+' .scroll').scrollTop = 0);
+}
+
+function renderStepper(){
+  [...$('stepper').children].forEach(b => {
+    const n = +b.dataset.stage;
+    b.setAttribute('aria-current', n === S.stage ? 'true' : 'false');
+    b.classList.toggle('done', n < S.stage);
+  });
+}
+function renderTopMeta(){
+  if(S.screen === 'files'){ $('topMeta').textContent = ''; return; }
+  const m = Math.floor(S.elapsed/60000);
+  $('topMeta').innerHTML = '<b>' + m + '분</b> 경과 · ' +
+    (S.savedAt ? '저장됨 ' + S.savedAt : '자동 저장 대기');
+}
+
+/* ============================================================
+   6. 파일 선택
+   ============================================================ */
+function stars(n){ return '★'.repeat(n) + '☆'.repeat(3-n); }
+function renderCards(filter){
+  const draft = LS.get('draft.1');
+  $('cards').innerHTML = FILES.map((f,i) => {
+    const isResume = !!f.resume, isNew = f.done.length === 0 && !f.chunked;
+    if(filter === 'resume' && !isResume) return '';
+    if(filter === 'new' && !isNew) return '';
+    const nextStage = f.done.length ? Math.min(3, Math.max(...f.done)+1) : 1;
+    const badges =
+      (f.chunked ? '<span class="badge">8개 블록</span>' : '') +
+      f.done.map(d => '<span class="badge ok">'+d+'단계 완료</span>').join('') +
+      (f.chunked ? '' : '<span class="badge ' + (f.done.length?'next':'new') + '">' +
+        (f.done.length ? nextStage+'단계부터' : '처음부터') + '</span>');
+    return '<button class="card" data-i="'+i+'" data-stage="'+nextStage+'">' +
+      '<div class="path">'+f.path+' <span style="color:var(--fg-faint)">›</span> <em>'+f.fn+'</em></div>' +
+      '<div class="facts"><span>'+f.lang+'</span><span>'+f.lines+'줄</span>' +
+        (f.mins?'<span>약 '+f.mins+'분</span>':'') + '</div>' +
+      '<div class="why">'+f.why+'</div>' +
+      '<div class="right"><span class="stars">'+stars(f.diff)+'</span>'+badges+'</div>' +
+      (f.chunked ? '<div class="chunknote">한 세션에 212줄은 불가능합니다. ' +
+        '함수 경계로 잘라 <b>블록 1/8 · 24줄</b>부터 시작합니다. 블록 단위로 1→2→3단계를 끝내고 다음 블록으로 넘어갑니다.</div>' : '') +
+      (isResume && draft ? '<div class="resume">' +
+        '<span><b>이어서 하기</b> — 조금 전 ' + draft.split('\n').length + '행까지 작성 중이었습니다.</span>' +
+        '<span class="spacer" style="flex:1"></span>' +
+        '<span class="btn" data-act="resume">이어서</span>' +
+        '<span class="btn ghost" data-act="fresh">처음부터</span></div>' : '') +
+      '</button>';
+  }).join('') || '<p class="note">조건에 맞는 블록이 없습니다.</p>';
+}
+document.querySelectorAll('[data-filter]').forEach(c => c.addEventListener('click', () => {
+  document.querySelectorAll('[data-filter]').forEach(x => x.setAttribute('aria-pressed','false'));
+  c.setAttribute('aria-pressed','true');
+  renderCards(c.dataset.filter);
+}));
+$('cards').addEventListener('click', e => {
+  const card = e.target.closest('.card'); if(!card) return;
+  const act = e.target.dataset.act;
+  let stage = +card.dataset.stage || 1;
+  /* "이어서"는 저장된 초안이 있는 단계로 되돌아간다 */
+  if(act === 'resume'){ for(let n=3;n>=1;n--) if(LS.get('draft.'+n)){ stage = n; break; } }
+  openExercise(stage, act !== 'fresh');
+});
+
+/* ============================================================
+   7. 에디터
+   ============================================================ */
+function openExercise(stage, restore){
+  S.stage = stage; S.elapsed = 0; S.lastAct = Date.now();
+  S.peeks = 0; S.downgraded = false; S.ticks = {}; S.cur = 0;
+  const saved = restore ? LS.get('draft.'+stage) : null;
+  S.drafts[stage] = saved || '';
+  ta.value = S.drafts[stage];
+  S.live = stage < 3; $('liveChk').checked = S.live;
+  show('editor'); renderStage(); renderEditor();
+}
+
+function specHTML(){
+  return '<div class="speccard">' +
+    '<div class="lead">'+SPEC3.lead+'</div>' +
+    '<h3>시그니처</h3><div style="font-family:var(--mono);font-size:13px;color:var(--syn-typ)">'+esc(SPEC3.sig)+'</div>' +
+    '<h3>이건 지켜져야 합니다</h3><ul>'+SPEC3.checks.map(c=>'<li>'+esc(c)+'</li>').join('')+'</ul>' +
+    '<p class="sealed">원본은 채점한 뒤에 공개됩니다. 막히면 <b>원본 잠깐 보기</b>를 쓰세요 — 감점 없이 횟수만 기록됩니다.</p>' +
+    '</div>';
+}
+function refRows(mode){
+  let h = '';
+  for(let i=0;i<ORIGINAL.length;i++){
+    const l = ORIGINAL[i], cur = (i === S.cur ? ' cur' : '');
+    if(mode === 1 || SHOW2.has(i)){
+      h += '<div class="row'+cur+'"><span class="ln">'+(i+1)+'</span><span class="src">'+(l?hl(l):' ')+'</span></div>';
+    } else {
+      const w = Math.min(l.trim().length*0.56, 38);
+      h += '<div class="row'+cur+'"><span class="ln">'+(i+1)+'</span><span class="src">' +
+           '<span style="display:inline-block;width:'+indent(l)+'ch"></span>' +
+           '<span class="ph" style="width:'+w.toFixed(1)+'em"></span></span></div>';
+    }
+  }
+  return h;
+}
+const REF_TITLES = {
+  1:['원본 — 보면서 그대로 치세요','TypeScript · 29줄'],
+  2:['주석과 시그니처만','본문은 가려져 있습니다'],
+  3:['한 줄 스펙','원본은 잠겨 있습니다']
+};
+function renderStage(){
+  const st = S.peeking ? 1 : S.stage;
+  const t = REF_TITLES[st];
+  $('refTitle').innerHTML = t[0] + '<span class="lang">' + t[1] + '</span>';
+  $('peekBtn').hidden = (S.stage === 1);
+  $('downBtn').hidden = (S.stage === 1);
+  refBody.innerHTML = (st === 3) ? specHTML() : refRows(st);
+  document.body.classList.toggle('peeking', S.peeking);
+  renderStepper();
+  $('statusbar').innerHTML = [
+    '<b>⌘↵</b> 채점',
+    '<b>` 누르고 있기</b> 원본 잠깐 보기',
+    '<b>⌘.</b> 한 단계 쉽게',
+    '<b>Tab</b> 들여쓰기 (포커스 안 옮김)',
+    '<b>Esc → Tab</b> 편집 영역 빠져나가기',
+    '자동 저장 켜짐'
+  ].join(' <span class="sep">·</span> ');
+}
+function setStage(n, viaDown){
+  if(n < 1 || n > 3) return;
+  S.drafts[S.stage] = ta.value;
+  S.stage = n;
+  if(viaDown) S.downgraded = true;
+  S.live = n < 3; $('liveChk').checked = S.live;
+  S.ticks = {};
+  ta.value = S.drafts[n] || '';
+  renderStage(); renderEditor(); ta.focus();
+}
+[...$('stepper').children].forEach(b => b.addEventListener('click', () => {
+  if(S.screen === 'editor') setStage(+b.dataset.stage);
+}));
+$('downBtn').addEventListener('click', () => setStage(S.stage-1, true));
+
+/* --- 임시 열람: 지지대 칼럼 안에서만 열린다. 입력창은 손대지 않는다 --- */
+function peek(on){
+  if(S.stage === 1 || S.peeking === on) return;
+  S.peeking = on; if(on) S.peeks++;
+  renderStage();
+  if(on) refBody.scrollTop = Math.max(0, S.cur*24 - 120);
+}
+$('peekBtn').addEventListener('mousedown', () => peek(true));
+['mouseup','mouseleave','blur'].forEach(ev => $('peekBtn').addEventListener(ev, () => peek(false)));
+
+/* --- 렌더 --- */
+function renderEditor(){
+  const lines = ta.value.split('\n');
+  edHlCode.innerHTML = lines.map(hl).join('\n');
+  let g = '';
+  for(let i=0;i<lines.length;i++){
+    const st = S.live ? (S.ticks[i] || '') : '';
+    g += '<div class="gline '+st+(i===S.cur?' cur':'')+'"><span class="n">'+(i+1)+'</span><span class="tick"></span></div>';
+  }
+  edGutter.innerHTML = g;
+  $('lineCount').textContent = lines.length + '줄';
+  curBand.style.top = (14 + S.cur*24) + 'px';
+  syncScroll();
+}
+function syncScroll(){
+  edHl.scrollTop = ta.scrollTop; edHl.scrollLeft = ta.scrollLeft;
+  edGutter.scrollTop = ta.scrollTop;
+  if(S.stage === 1 && !S.peeking) refBody.scrollTop = ta.scrollTop;
+}
+ta.addEventListener('scroll', syncScroll);
+
+const caretLine = () => ta.value.slice(0, ta.selectionStart).split('\n').length - 1;
+
+/* 줄 판정: 캐럿이 그 줄을 떠날 때 한 번만. 타이핑 중에는 아무 일도 없다. */
+function evalLine(i, text){
+  if(!text.trim()) return '';
+  const lo = Math.max(0, i-3), hi = Math.min(ORIGINAL.length-1, i+3);
+  let best = 'differ';
+  for(let j=lo;j<=hi;j++){
+    const r = compareLine(ORIGINAL[j], text);
+    if(r.status === 'exact') return 'exact';
+    if(r.status === 'equiv' || r.status === 'pending') best = 'equiv';
+  }
+  return best;
+}
+function updateCaret(){
+  const c = caretLine();
+  if(c !== S.cur){
+    const lines = ta.value.split('\n');
+    if(S.live && lines[S.cur] !== undefined) S.ticks[S.cur] = evalLine(S.cur, lines[S.cur]);
+    S.cur = c;
+    renderEditor();
+    if(!S.peeking && S.stage !== 3){
+      refBody.querySelectorAll('.row.cur').forEach(r => r.classList.remove('cur'));
+      const row = refBody.children[c]; if(row) row.classList.add('cur');
+    }
+  }
+}
+
+let saveT = null, idleT = null;
+function markActivity(){
+  S.lastAct = Date.now();
+  $('idleHint').classList.remove('on');
+  clearTimeout(idleT);
+  idleT = setTimeout(showIdleHint, 20000); /* 운영값 45초 · 데모라 20초 */
+  clearTimeout(saveT);
+  saveT = setTimeout(() => {
+    S.drafts[S.stage] = ta.value;
+    LS.set('draft.'+S.stage, ta.value);
+    const d = new Date();
+    S.savedAt = String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+    renderTopMeta();
+  }, 800);
+}
+function showIdleHint(){
+  if(S.screen !== 'editor') return;
+  const lines = ta.value.split('\n');
+  if(S.stage === 1) return;
+  $('idleHint').innerHTML = '막혔나요? <b>`</b> 를 누르고 있으면 원본이 이 칼럼에만 잠깐 뜹니다. ' +
+    '그래도 안 풀리면 <b>한 단계 쉽게</b> 로 내려와도 됩니다 — 기록만 남고 감점은 없습니다.';
+  $('idleHint').classList.add('on');
+}
+
+ta.addEventListener('input', () => { renderEditor(); updateCaret(); markActivity(); });
+['click','keyup','select'].forEach(ev => ta.addEventListener(ev, updateCaret));
+$('liveChk').addEventListener('change', e => { S.live = e.target.checked; renderEditor(); });
+
+ta.addEventListener('keydown', e => {
+  if(e.key === 'Tab' && !e.shiftKey){
+    e.preventDefault();
+    const s = ta.selectionStart, t = ta.selectionEnd;
+    ta.value = ta.value.slice(0,s) + '  ' + ta.value.slice(t);
+    ta.selectionStart = ta.selectionEnd = s+2;
+    renderEditor(); markActivity(); return;
+  }
+  if(e.key === 'Enter' && S.stage < 3){ /* 자동 들여쓰기는 3단계에서 사라진다 */
+    const s = ta.selectionStart;
+    const cur = ta.value.slice(0, s).split('\n').pop();
+    let pad = (/^\s*/.exec(cur))[0];
+    if(/[{([]\s*$/.test(cur)) pad += '  ';
+    e.preventDefault();
+    ta.value = ta.value.slice(0,s) + '\n' + pad + ta.value.slice(ta.selectionEnd);
+    ta.selectionStart = ta.selectionEnd = s + 1 + pad.length;
+    renderEditor(); updateCaret(); markActivity(); return;
+  }
+  markActivity();
+});
+
+document.addEventListener('keydown', e => {
+  if(e.key === '`' && S.screen === 'editor' && !e.repeat && e.target === ta){
+    e.preventDefault(); peek(true); return;
+  }
+  if((e.metaKey||e.ctrlKey) && e.key === 'Enter' && S.screen === 'editor'){ e.preventDefault(); doGrade(); }
+  if((e.metaKey||e.ctrlKey) && e.key === '.' && S.screen === 'editor'){ e.preventDefault(); setStage(S.stage-1, true); }
+  if(S.screen === 'result' && (e.key === 'j' || e.key === 'k')) moveFocusRow(e.key === 'j' ? 1 : -1);
+});
+document.addEventListener('keyup', e => { if(e.key === '`') peek(false); });
+
+/* 타이머: 초 단위로 깜빡이지 않는다. 90초 이상 손을 놓으면 시간이 멈춘다. */
+setInterval(() => {
+  if(S.screen === 'files') return;
+  if(Date.now() - S.lastAct < 90000){ S.elapsed += 5000; renderTopMeta(); }
+}, 5000);
+
+/* 데모 보조: 그럴듯한 오답을 채워 넣어 채점 화면을 바로 볼 수 있게 */
+(function(){
+  const b = document.createElement('button');
+  b.className = 'tinybtn'; b.textContent = '데모: 예시 답안 넣기';
+  b.style.marginRight = '2px';
+  $('gradeBtn').parentNode.insertBefore(b, $('gradeBtn'));
+  b.addEventListener('click', () => {
+    ta.value = SAMPLE.join('\n');
+    S.ticks = {};
+    if(S.live) SAMPLE.forEach((l,i) => { S.ticks[i] = evalLine(i,l); });
+    renderEditor(); markActivity(); ta.focus();
+  });
+})();
+
+/* ============================================================
+   8. 채점
+   ============================================================ */
+function doGrade(){
+  const v = ta.value;
+  if(v.replace(/\s/g,'').length < 40){
+    $('idleHint').innerHTML = '아직 너무 짧습니다 (' + v.split('\n').length + '행). ' +
+      '조금 더 쓰고 채점하세요. 정말 여기까지만 보고 싶다면 <b>한 번 더</b> 채점을 누르면 그대로 채점합니다.';
+    $('idleHint').classList.add('on');
+    if(!S.forceGrade){ S.forceGrade = true; return; }
+  }
+  S.forceGrade = false;
+  S.drafts[S.stage] = v;
+  LS.set('draft.'+S.stage, v);
+  S.res = grade(v);
+  S.disputed = new Set();
+  /* 처음부터 펼쳐 두는 행은 "정확"이 아닌 첫 행 하나뿐 */
+  S.focusRow = S.res.rows.findIndex(r => r.status !== 'exact');
+  show('result'); renderResult();
+}
+$('gradeBtn').addEventListener('click', doGrade);
+
+/* 차이 표시는 토큰 단위가 먼저다 — 글자 단위로 뭉뚱그리면
+   "여기부터 줄 끝까지 다름" 같은 쓸모없는 빨간 덩어리가 생긴다. */
+function tokPos(str){
+  const out = []; TOKRE.lastIndex = 0; let m;
+  while((m = TOKRE.exec(str)) !== null) out.push({t:m[0], i:m.index, e:m.index+m[0].length});
+  return out;
+}
+function paint(str, spans, cls){
+  if(!spans.length) return esc(str);
+  let out = '', at = 0;
+  spans.forEach(sp => {
+    out += esc(str.slice(at, sp.i)) + '<mark class="'+cls+'">' + esc(str.slice(sp.i, sp.e)) + '</mark>';
+    at = sp.e;
+  });
+  return out + esc(str.slice(at));
+}
+function charMark(A, B, cls){
+  let p = 0;
+  while(p < A.length && p < B.length && A[p] === B[p]) p++;
+  let s = 0;
+  while(s < A.length-p && s < B.length-p && A[A.length-1-s] === B[B.length-1-s]) s++;
+  const wrap = str => esc(str.slice(0,p)) +
+    (str.length-s > p ? '<mark class="'+cls+'">' + esc(str.slice(p, str.length-s)) + '</mark>' : '') +
+    esc(str.slice(str.length-s));
+  return [wrap(A), wrap(B)];
+}
+function inlineMark(a, b, cls){
+  const A = a.replace(/\s+$/,''), B = b.replace(/\s+$/,'');
+  /* 주석은 문구를 비교하지 않으므로 아무 데도 표시하지 않는다 */
+  if(/^\s*\/\//.test(A) && /^\s*\/\//.test(B)) return [esc(A), esc(B)];
+  let PA = tokPos(A), PB = tokPos(B);
+  const tail = t => t === ';' || t === ',';
+  let a2 = PA.length, b2 = PB.length;
+  while(a2 && b2 && tail(PA[a2-1].t) && !tail(PB[b2-1].t)) a2--;
+  while(a2 && b2 && tail(PB[b2-1].t) && !tail(PA[a2-1].t)) b2--;
+  if(a2 === b2 && a2 > 0){
+    const sa = [], sb = [];
+    for(let i=0;i<a2;i++) if(PA[i].t !== PB[i].t){ sa.push(PA[i]); sb.push(PB[i]); }
+    return [paint(A, sa, cls), paint(B, sb, cls)];
+  }
+  return charMark(A, B, cls);
+}
+
+function autoNote(row){
+  const o = ORIGINAL[row.oi], u = S.res.user[row.ui];
+  const A = tok(o.trim()), B = tok(u.trim());
+  if(A.length !== B.length)
+    return '토큰 수가 다릅니다 (원본 ' + A.length + '개 / 내 코드 ' + B.length + '개). ' +
+           '빠뜨렸거나 더 쓴 부분이 있는지 보세요.';
+  for(let i=0;i<A.length;i++) if(A[i] !== B[i])
+    return '원본은 <code>' + esc(A[i]) + '</code>, 내 코드는 <code>' + esc(B[i]) +
+           '</code> 입니다. 이름만 다른 게 아니라 하는 일이 달라질 수 있는 자리입니다.';
+  return '자동으로 같음을 증명하지 못했습니다.';
+}
+
+function rowHTML(row, i){
+  const hasO = row.oi !== null, hasU = row.ui !== null;
+  const o = hasO ? ORIGINAL[row.oi] : '', u = hasU ? S.res.user[row.ui] : '';
+  let lc, rc;
+  if(row.status === 'exact'){ lc = esc(o); rc = esc(u); }
+  else if(row.status === 'missing'){ lc = esc(o); rc = '<span class="empty">이 줄을 안 썼습니다</span>'; }
+  else if(row.status === 'extra'){ lc = '<span class="empty">원본에 없는 줄입니다</span>'; rc = esc(u); }
+  else { const m = inlineMark(o, u, row.status === 'equiv' ? 'e' : 'd'); lc = m[0]; rc = m[1]; }
+
+  const no = hasO ? (row.oi+1) : '+';
+  const tags = row.cmp && row.cmp.reasons.length
+    ? row.cmp.reasons.map(r => '<span class="rtag ' + (row.status === 'equiv' ? 'eq' : 'er') + '">' + esc(r) + '</span>').join('')
+    : '';
+
+  let body = '';
+  if(row.status === 'equiv'){
+    body = '<div class="reasons">' + tags + '</div>' +
+      '<p>형태만 다릅니다. <b>틀린 게 아닙니다.</b> 위 사유에 해당하는 차이는 오답으로 세지 않습니다.</p>';
+  } else if(row.status === 'differ'){
+    const note = (hasO && NOTES[row.oi] && SAMPLE[row.oi] === u) ? NOTES[row.oi] : null;
+    body = '<div class="reasons">' +
+      '<span class="rtag er">' + (note ? note.tag : (row.cmp && row.cmp.swap ? '이름 맞바꿈' : '토큰 불일치')) + '</span>' +
+      tags + '</div><p>' + (note ? note.t : autoNote(row)) + '</p>';
+  } else if(row.status === 'missing'){
+    body = '<div class="reasons"><span class="rtag er">누락</span></div>' +
+      '<p>원본의 이 줄이 내 코드 어디에도 없습니다.</p>';
+  } else if(row.status === 'extra'){
+    body = '<div class="reasons"><span class="rtag er">추가</span></div>' +
+      '<p>원본에 없는 줄입니다. 틀렸다는 뜻은 아니지만, 원본이 왜 이게 없어도 됐는지 확인해 보세요.</p>';
+  } else {
+    body = '<p>원본과 글자까지 같습니다.</p>';
+  }
+  if(row.status !== 'exact'){
+    body += '<div class="dacts">' +
+      (hasU ? '<button class="btn" data-act="fix" data-line="' + row.ui + '">이 줄만 다시 쓰기</button>' : '') +
+      (row.status === 'differ' ? '<button class="btn dis" data-act="dispute" data-row="' + i + '">' +
+        (S.disputed.has(i) ? '이의 접수됨 (판정 보류)' : '같은 뜻인데요') + '</button>' : '') +
+      '</div>';
+  }
+
+  return '<div class="drow ' + row.status + (S.disputed.has(i) ? ' disputed' : '') +
+    (i === S.focusRow ? ' open' : '') + '" data-i="' + i + '" data-st="' + row.status + '">' +
+    '<button class="dmain"><span class="no">' + no + '</span>' +
+    '<span class="cell">' + (lc || ' ') + '</span>' +
+    '<span class="cell mine">' + (rc || ' ') + '</span></button>' +
+    '<div class="dbody">' + body + '</div></div>';
+}
+
+function renderResult(){
+  const r = S.res, meaning = r.n.exact + r.n.equiv;
+  const pct = Math.round(meaning / r.total * 100);
+  $('resSub').innerHTML = 'src/lib/search.ts › searchMarkets() · <b>' + S.stage + '단계</b> · ' +
+    Math.max(1, Math.floor(S.elapsed/60000)) + '분 소요' +
+    (S.peeks ? ' · 원본 잠깐 보기 ' + S.peeks + '회' : '') +
+    (S.downgraded ? ' · 도중에 한 단계 내려옴' : '');
+  $('scorehead').innerHTML =
+    '<div><div class="bignum">' + meaning + '<small> / ' + r.total + '</small></div>' +
+    '<div class="lbl"><b>의미가 맞은 줄</b> — 이 중 글자까지 같은 줄은 ' + r.n.exact + '줄</div></div>' +
+    '<div style="flex:1;min-width:200px"><div class="tally">' +
+      '<span class="pill ok"><i></i>정확 ' + r.n.exact + '</span>' +
+      '<span class="pill eq"><i></i>동등 ' + r.n.equiv + '</span>' +
+      '<span class="pill er"><i></i>다름 ' + (r.n.differ + r.n.missing + r.n.extra) + '</span>' +
+    '</div></div>' +
+    '<div style="text-align:right"><div class="lbl" style="margin:0">' +
+      (pct >= 85 ? '다음 단계로 가도 좋습니다.'
+                 : pct >= 65 ? '한 번 더 같은 단계를 권합니다.'
+                             : '같은 단계를 한 번 더 하는 편이 빠릅니다.') +
+    '</div></div>';
+  $('diffRows').innerHTML = r.rows.map(rowHTML).join('');
+  applyDFilter();
+}
+
+function applyDFilter(){
+  document.querySelectorAll('#diffRows .drow').forEach(el => {
+    const st = el.dataset.st;
+    let on = true;
+    if(S.dfilter === 'focus')  on = st !== 'exact';
+    if(S.dfilter === 'differ') on = (st === 'differ' || st === 'missing' || st === 'extra');
+    el.style.display = on ? '' : 'none';
+  });
+}
+document.querySelectorAll('[data-dfilter]').forEach(c => c.addEventListener('click', () => {
+  document.querySelectorAll('[data-dfilter]').forEach(x => x.setAttribute('aria-pressed','false'));
+  c.setAttribute('aria-pressed','true');
+  S.dfilter = c.dataset.dfilter; applyDFilter();
+}));
+
+$('diffRows').addEventListener('click', e => {
+  const act = e.target.dataset.act;
+  if(act === 'fix'){
+    const ln = +e.target.dataset.line;
+    show('editor'); renderStage(); renderEditor();
+    const pos = ta.value.split('\n').slice(0, ln).join('\n').length + (ln ? 1 : 0);
+    ta.focus(); ta.selectionStart = ta.selectionEnd = pos + ta.value.split('\n')[ln].length;
+    updateCaret(); return;
+  }
+  if(act === 'dispute'){
+    const i = +e.target.dataset.row;
+    S.disputed.has(i) ? S.disputed.delete(i) : S.disputed.add(i);
+    renderResult(); return;
+  }
+  const main = e.target.closest('.dmain');
+  if(main) main.parentNode.classList.toggle('open');
+});
+function moveFocusRow(d){
+  const rows = [...document.querySelectorAll('#diffRows .drow')].filter(r => r.style.display !== 'none');
+  if(!rows.length) return;
+  const cur = rows.findIndex(r => r.classList.contains('open'));
+  rows.forEach(r => r.classList.remove('open'));
+  const next = Math.max(0, Math.min(rows.length-1, (cur < 0 ? 0 : cur + d)));
+  rows[next].classList.add('open');
+  rows[next].scrollIntoView({block:'nearest'});
+}
+$('backEditBtn').addEventListener('click', () => { show('editor'); renderStage(); renderEditor(); });
+$('retryBtn').addEventListener('click', () => {
+  ta.value = ''; S.ticks = {}; S.cur = 0;
+  show('editor'); renderStage(); renderEditor();
+});
+
+/* ============================================================
+   9. "왜" 한 줄
+   ============================================================ */
+const WHYQ = {
+  23:{ q:'24행 — 왜 <code>||</code> 가 아니라 <code>??</code> 였을까요?',
+       help:'맞히는 문제가 아닙니다. 지금 머릿속에 있는 설명을 그대로 한 줄로 쓰면 됩니다.',
+       choices:[
+         {t:'사실상 같다. 취향 차이다.', ok:false,
+          fb:'거의 항상 같아 보이죠. 그런데 그 “거의”가 버그가 사는 자리입니다.'},
+         {t:'<code>??</code> 는 값이 <b>null / undefined</b> 일 때만 오른쪽을 쓴다. <code>||</code> 는 0, 빈 문자열, false 같은 falsy 값에도 오른쪽으로 넘어간다.', ok:true,
+          fb:'맞습니다. 서버가 <code>markets: []</code> 를 명시적으로 보냈을 때 동작이 갈립니다.'},
+         {t:'<code>??</code> 는 배열에만 쓸 수 있다.', ok:false,
+          fb:'타입 제한은 없습니다. 차이는 “무엇을 없는 값으로 볼 것인가” 하나입니다.'}
+       ]},
+  24:{ q:'25행 — 왜 <code>b.volume - a.volume</code> 순서였을까요?',
+       help:'한 줄이면 됩니다.',
+       choices:[
+         {t:'순서는 아무 의미 없다.', ok:false, fb:'비교 함수의 반환 부호가 정렬 방향을 정합니다.'},
+         {t:'<code>b - a</code> 가 양수면 b 를 앞으로 보내므로 <b>큰 값이 앞</b>, 즉 내림차순이 된다.', ok:true, fb:'그렇습니다. 화면에는 거래량 많은 마켓이 위로 와야 하니까요.'},
+         {t:'문자열 정렬이라 순서를 뒤집어야 한다.', ok:false, fb:'숫자 비교입니다.'}
+       ]},
+  27:{ q:'28행 — 왜 반환 직전에 또 <code>.slice(0, limit)</code> 를 할까요?',
+       help:'14행에서도 한 번 잘랐는데 말이죠.',
+       choices:[
+         {t:'습관이다. 없어도 된다.', ok:false, fb:'캐시 경로와 네트워크 경로가 다른 개수를 돌려주게 됩니다.'},
+         {t:'경로가 두 개(캐시 히트 / 네트워크)라서, <b>어느 경로로 나가든 같은 개수</b>를 보장하려고.', ok:true, fb:'맞습니다. 함수의 약속은 경로와 무관해야 합니다.'},
+         {t:'정렬 때문에 배열이 늘어나서.', ok:false, fb:'sort 는 길이를 바꾸지 않습니다.'}
+       ]}
+};
+function genericQ(idx){
+  return { q:(idx+1) + '행 — 왜 이 줄이 이렇게 생겼을까요?',
+    help:'한 줄이면 됩니다. 채점하지 않습니다.',
+    choices:[
+      {t:'이 줄이 없어도 결과는 같다.', ok:false, fb:'없으면 무엇이 깨지는지 되짚어 보세요.'},
+      {t:'이 줄은 <b>어떤 예외 상황</b>을 막기 위해 존재한다.', ok:true, fb:'대개는 그렇습니다. 어떤 상황인지 한 줄로 적어 주세요.'},
+      {t:'스타일 규칙 때문이다.', ok:false, fb:'포맷 문제라면 채점에서 “동등”으로 빠졌을 겁니다.'}
+    ]};
+}
+function pickWhy(){
+  const rows = S.res.rows.filter(r => r.status === 'differ' && r.oi !== null);
+  const byTag = t => rows.find(r => NOTES[r.oi] && NOTES[r.oi].tag === t && SAMPLE[r.oi] === S.res.user[r.ui]);
+  const pick = byTag('의미 차이') || byTag('누락') || rows[0];
+  return pick ? pick.oi : 23;
+}
+let whyTarget = 23, whyAnswered = false;
+function renderWhy(){
+  whyTarget = pickWhy(); whyAnswered = false;
+  const q = WHYQ[whyTarget] || genericQ(whyTarget);
+  $('whyQ').innerHTML = q.q;
+  $('whyHelp').textContent = q.help;
+  let h = '';
+  for(let i = Math.max(0, whyTarget-2); i <= Math.min(ORIGINAL.length-1, whyTarget+2); i++){
+    h += '<div class="row' + (i === whyTarget ? ' focusline' : '') + '">' +
+         '<span class="ln">' + (i+1) + '</span><span class="src">' + (ORIGINAL[i] ? hl(ORIGINAL[i]) : ' ') + '</span></div>';
+  }
+  $('whyCtx').innerHTML = h;
+  $('whyInput').value = ''; $('whyExtra').value = '';
+  $('quiz').classList.remove('on'); $('quizFb').textContent = '';
+  $('choices').innerHTML = q.choices.map((c,i) =>
+    '<button class="choice" data-c="' + i + '"><span class="mk">' + 'ABC'[i] + '</span>' + c.t + '</button>').join('');
+  updateWhyCount();
+}
+function updateWhyCount(){
+  const v = $('whyInput').value.trim();
+  const same = v === ORIGINAL[whyTarget].trim();
+  const ok = v.length >= 10 && !same;
+  $('whyCount').textContent = v.length + ' / 10자' + (same ? ' — 코드를 그대로 옮기지 말고 말로 써 주세요' : '');
+  $('whyCount').classList.toggle('ok', ok);
+  $('whySubmit').disabled = !ok;
+}
+$('whyInput').addEventListener('input', updateWhyCount);
+$('dunnoBtn').addEventListener('click', () => {
+  $('quiz').classList.add('on');
+  $('dunnoBtn').textContent = '보기 다시 보기';
+  $('quiz').scrollIntoView({block:'nearest'});
+});
+$('choices').addEventListener('click', e => {
+  const b = e.target.closest('.choice'); if(!b) return;
+  const q = WHYQ[whyTarget] || genericQ(whyTarget);
+  const c = q.choices[+b.dataset.c];
+  [...$('choices').children].forEach((el,i) => {
+    el.classList.remove('right','wrong');
+    if(q.choices[i].ok) el.classList.add('right');
+  });
+  if(!c.ok) b.classList.add('wrong');
+  $('quizFb').innerHTML = c.fb + ' <b>이제 같은 내용을 위 칸에 자기 말로 한 줄만 옮겨 주세요.</b> 옮겨 적는 그 순간이 목적입니다.';
+  whyAnswered = true;
+  $('whyInput').focus();
+});
+$('toWhyBtn').addEventListener('click', () => { show('why'); renderWhy(); });
+
+/* ============================================================
+   10. 완료
+   ============================================================ */
+$('whySubmit').addEventListener('click', () => {
+  const r = S.res, meaning = r.n.exact + r.n.equiv;
+  const pct = Math.round(meaning / r.total * 100);
+  $('doneTitle').textContent = S.stage + '단계 완료';
+  $('doneSub').innerHTML = 'src/lib/search.ts › searchMarkets()' +
+    (S.disputed.size ? ' · 이의 ' + S.disputed.size + '건은 판정 보류로 기록했습니다' : '');
+  $('doneStats').innerHTML =
+    '<div class="stat"><div class="v">' + meaning + '/' + r.total + '</div><div class="l">의미 일치</div></div>' +
+    '<div class="stat"><div class="v">' + Math.max(1, Math.floor(S.elapsed/60000)) + '분</div><div class="l">순수 작업 시간</div></div>' +
+    '<div class="stat"><div class="v">' + S.peeks + '회</div><div class="l">원본 잠깐 보기</div></div>' +
+    '<div class="stat"><div class="v">' + (S.downgraded ? '있음' : '없음') + '</div><div class="l">단계 내림</div></div>';
+  const next = Math.min(3, S.stage+1);
+  $('nextStageBtn').textContent = S.stage < 3 ? next + '단계로 넘어가기' : '이 블록 마치기';
+  $('doneNote').innerHTML = (pct >= 85
+      ? '다음 단계로 넘어가도 좋습니다. '
+      : '<b>같은 단계를 한 번 더</b> 하는 쪽을 권합니다. 지금 넘어가면 3단계에서 막힙니다. ') +
+    'T1 은 주 2회 리듬입니다. 다음 세션은 <b>모레</b>로 잡아 두었습니다. ' +
+    '방금 쓴 한 줄은 3일 뒤 T2 카드로 다시 물어봅니다.';
+  show('done');
+});
+$('nextStageBtn').addEventListener('click', () => {
+  if(S.stage < 3) openExercise(S.stage+1, false); else show('files');
+});
+$('againBtn').addEventListener('click', () => openExercise(S.stage, false));
+$('toFilesBtn').addEventListener('click', () => { renderCards('all'); show('files'); });
+
+/* ============================================================
+   11. 시작
+   ============================================================ */
+renderCards('all');
+show('files');
+</script>
+</body>
+</html>

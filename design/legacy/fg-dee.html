@@ -1,0 +1,1323 @@
+<!doctype html>
+<html lang="ko" data-theme="paper" data-motion="full" data-quiet="off">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DEE — 마스코트 · 모션 명세서</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════════
+   Chickadee / Dee — 캐릭터 + 모션 명세서
+   원칙: 정지 상태는 조용하게, 기쁨은 움직임에.
+   외부 의존성 0 — 시스템 폰트, 인라인 SVG, 인라인 JS
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root{
+  /* 타이포 — 시스템 폰트만 */
+  --f-disp:Impact,Haettenschweiler,'Arial Narrow Bold','Franklin Gothic Bold',sans-serif;
+  --f-k:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Pretendard','Malgun Gothic',sans-serif;
+  --f-sans:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Helvetica Neue',sans-serif;
+  --f-mono:ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace;
+
+  /* 종이 */
+  --paper:#F4F0E6; --paper-2:#EAE4D4; --paper-3:#DED7C3;
+  --ink:#141210; --mute:#5C564B;
+  --rule:#141210; --hair:rgba(20,18,16,.18); --hair2:rgba(20,18,16,.34);
+  --card:#FFFCF4;
+
+  /* 원색 */
+  --verm:#FF3B18; --yellow:#FFD400; --blue:#1B3BFF; --green:#00A855;
+  --on-color:#141210; --on-blue:#FFF6EC;
+  --acc-text:#B81F06;
+  --slab:#141210; --on-slab:#F6F1E4;
+
+  --shadow:6px 6px 0 var(--rule);
+  --shadow-sm:4px 4px 0 var(--rule);
+
+  /* ── Dee 팔레트 (도판은 항상 종이색 — 테마와 무관) ── */
+  --plate:#DDD5C0;
+  --dee-cap:#14110D;      /* 머리깃 + 턱받이 */
+  --dee-cheek:#FFFFFF;    /* 흰 뺨 */
+  --dee-belly:#FCF7EC;    /* 가슴·배 */
+  --dee-back:#8A8474;     /* 등·날개·꼬리 */
+  --dee-beak:#1F1B15;
+  --dee-leg:#6E6659;
+  --dee-glint:#E8E0CC;
+  --dee-detail:1;         /* 0 = 눈·다리 등 미세 디테일 제거 */
+  --dee-cheek-k:1;        /* 뺨 확대 계수 (소형 마크 보정) */
+  --branch:#4A4136;
+
+  /* ── 이징 토큰 ── */
+  --e-hop:cubic-bezier(.22,1.2,.36,1);     /* 홉 — 짧은 오버슛 */
+  --e-snap:cubic-bezier(.9,0,.1,1);        /* 경계 반응 — 붙었다 멈춤 */
+  --e-settle:cubic-bezier(.16,1,.3,1);     /* 착지·진입 */
+  --e-soft:cubic-bezier(.4,0,.2,1);        /* 일반 */
+  --e-stamp:cubic-bezier(.34,1.56,.64,1);  /* 도장 */
+}
+
+html[data-theme="ink"]{
+  --paper:#151310; --paper-2:#201D18; --paper-3:#2B2721;
+  --ink:#F2ECDD; --mute:#A79F8B;
+  --rule:#F2ECDD; --hair:rgba(242,236,221,.16); --hair2:rgba(242,236,221,.32);
+  --card:#201D18;
+  --verm:#FF4A22; --yellow:#FFD60A; --blue:#3D5BFF; --green:#22D07A;
+  --acc-text:#FF8A6B;
+  --slab:#000; --on-slab:#F6F1E4;
+  --shadow:6px 6px 0 var(--rule);
+  --shadow-sm:4px 4px 0 var(--rule);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:var(--f-k); font-size:14px; line-height:1.65;
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  word-break:keep-all; overflow-wrap:anywhere;
+  transition:background .25s var(--e-soft),color .25s var(--e-soft);
+}
+.mono,code,td.m,.rv.m,.lserial{word-break:normal;overflow-wrap:normal}
+button,select{font-family:inherit;color:inherit}
+a{color:inherit}
+
+/* 종이 결 */
+.grain{
+  position:fixed;inset:0;pointer-events:none;z-index:9998;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+html[data-theme="ink"] .grain{mix-blend-mode:screen;opacity:.045}
+
+/* ── 타이포 유틸 ── */
+.disp{font-family:var(--f-disp);font-weight:400;text-transform:uppercase;letter-spacing:.005em;line-height:.84}
+.kdisp{font-weight:800;letter-spacing:-.035em;line-height:1.05}
+.micro{font-size:10px;font-weight:800;letter-spacing:.17em;text-transform:uppercase;line-height:1.4}
+.mono{font-family:var(--f-mono)}
+.mute{color:var(--mute)}
+.tnum{font-variant-numeric:tabular-nums}
+
+/* ══════════ 상단 바 ══════════ */
+.top{
+  position:sticky;top:0;z-index:60;background:var(--paper);
+  border-bottom:7px solid var(--rule);
+}
+.top-in{
+  max-width:1180px;margin:0 auto;padding:12px clamp(14px,3vw,30px);
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+}
+.brandmark{width:36px;height:36px;flex:none;background:var(--plate);border:2.5px solid var(--rule);display:block}
+.brand-t{font-family:var(--f-disp);font-size:26px;line-height:.8;letter-spacing:.01em}
+.brand-s{font-size:10px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--mute);margin-top:2px}
+.top-sp{flex:1}
+.ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+.sw{
+  appearance:none;border:2.5px solid var(--rule);background:var(--paper);
+  display:flex;padding:0;cursor:pointer;overflow:hidden;
+}
+.sw span{
+  padding:6px 10px 5px;font-size:10px;font-weight:800;letter-spacing:.1em;
+  text-transform:uppercase;font-family:var(--f-mono);white-space:nowrap;
+  transition:background .16s var(--e-soft),color .16s var(--e-soft);
+}
+.sw span[data-on="1"]{background:var(--ink);color:var(--paper)}
+.sw:hover{box-shadow:3px 3px 0 var(--rule)}
+.sw:focus-visible{outline:3px solid var(--verm);outline-offset:2px}
+
+/* ══════════ 레이아웃 ══════════ */
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(14px,3vw,30px) 120px}
+
+.hero{padding:44px 0 34px;border-bottom:3px solid var(--rule)}
+.hero h1{
+  font-family:var(--f-disp);font-size:clamp(54px,13vw,168px);line-height:.78;
+  margin:0;letter-spacing:-.005em;text-transform:uppercase;
+}
+.hero .sub{
+  margin:14px 0 0;font-size:clamp(15px,2vw,21px);font-weight:800;letter-spacing:-.02em;max-width:42ch;
+}
+.hero .meta{margin-top:16px;display:flex;gap:22px;flex-wrap:wrap;font-family:var(--f-mono);font-size:11px;color:var(--mute)}
+
+.principle{
+  margin:28px 0 0;padding:20px 22px;background:var(--slab);color:var(--on-slab);
+  display:flex;gap:18px;align-items:baseline;flex-wrap:wrap;
+}
+.principle .n{font-family:var(--f-disp);font-size:40px;line-height:.8;color:var(--yellow)}
+.principle p{margin:0;font-size:clamp(16px,2.2vw,24px);font-weight:800;letter-spacing:-.025em;line-height:1.25}
+.principle small{display:block;font-weight:500;font-size:12px;color:#B9B2A0;letter-spacing:0;margin-top:7px;max-width:60ch;line-height:1.6}
+
+section{padding-top:52px}
+.sec-h{display:flex;align-items:flex-start;gap:16px;border-bottom:5px solid var(--rule);padding-bottom:10px;margin-bottom:22px}
+.sec-h .n{font-family:var(--f-disp);font-size:44px;line-height:.72;opacity:.26;flex:none;width:62px}
+.sec-h h2{margin:0;font-size:clamp(21px,3vw,31px);font-weight:800;letter-spacing:-.035em;line-height:1.05}
+.sec-h p{margin:5px 0 0;font-size:12.5px;color:var(--mute);max-width:64ch;line-height:1.6}
+
+.note{font-size:12.5px;color:var(--mute);line-height:1.7;max-width:78ch}
+.note b{color:var(--ink)}
+
+/* ══════════ 도판(plate) ══════════ */
+.plate{background:var(--plate);border:2.5px solid var(--rule);position:relative}
+.plate.dark{--plate:#1A1813;--dee-cap:#4C463C;--dee-back:#8A8474;--dee-leg:#8A8274;--dee-glint:#C9C1AE;background:#1A1813}
+.plate-cap{
+  position:absolute;left:0;bottom:-1px;transform:translateY(100%);
+  font-family:var(--f-mono);font-size:9.5px;font-weight:700;letter-spacing:.06em;
+  color:var(--mute);padding-top:5px;white-space:nowrap;
+}
+
+/* ── 크기 비교 ── */
+.sizes{display:flex;gap:clamp(14px,3vw,34px);align-items:flex-end;flex-wrap:wrap;margin-bottom:34px}
+.szbox{display:flex;flex-direction:column;align-items:center;gap:9px}
+.szbox .plate{display:grid;place-items:center;padding:8px}
+.szbox .lab{font-family:var(--f-mono);font-size:10px;font-weight:700;color:var(--mute);letter-spacing:.04em}
+.szbox .lab b{color:var(--ink)}
+.mark{display:block}
+
+/* 소형 마크 보정 */
+.sm-mark{--dee-detail:0;--dee-cheek-k:1.16}
+/* 실루엣 테스트 */
+.sil{--dee-cap:#141210;--dee-cheek:#141210;--dee-belly:#141210;--dee-back:#141210;--dee-beak:#141210;--dee-leg:#141210;--dee-glint:#141210}
+.blur{filter:blur(1.1px)}
+
+.rowlab{
+  font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--mute);margin:0 0 12px;padding-bottom:6px;border-bottom:1.5px solid var(--hair);
+}
+.rowlab em{font-style:normal;color:var(--verm)}
+
+/* ── 해부도 ── */
+.anat{display:grid;grid-template-columns:minmax(230px,320px) 1fr;gap:clamp(18px,3vw,40px);align-items:start}
+@media(max-width:760px){.anat{grid-template-columns:1fr}}
+.anat-list{list-style:none;margin:0;padding:0;display:grid;gap:0}
+.anat-list li{display:grid;grid-template-columns:26px 1fr;gap:12px;padding:11px 0;border-bottom:1.5px solid var(--hair);align-items:start}
+.anat-list .k{
+  font-family:var(--f-mono);font-size:10px;font-weight:700;background:var(--ink);color:var(--paper);
+  width:22px;height:22px;display:grid;place-items:center;margin-top:1px;
+}
+.anat-list b{display:block;font-size:13px;letter-spacing:-.01em}
+.anat-list span{display:block;font-size:12px;color:var(--mute);line-height:1.6;margin-top:2px}
+
+.habits{list-style:none;margin:0;padding:0;display:grid;gap:10px;margin-top:8px}
+.habits li{display:grid;grid-template-columns:1fr 18px 1fr;gap:10px;align-items:center;font-size:12.5px;
+  border-left:4px solid var(--verm);padding:9px 12px;background:var(--paper-2)}
+.habits .ar{font-family:var(--f-mono);color:var(--verm);font-weight:700;text-align:center}
+.habits b{font-weight:800;letter-spacing:-.01em}
+
+/* ══════════ 상태 무대 ══════════ */
+.stage-grid{display:grid;grid-template-columns:1fr minmax(280px,352px);gap:clamp(16px,2.6vw,30px);align-items:start}
+@media(max-width:900px){.stage-grid{grid-template-columns:1fr}}
+
+.stage-wrap{border:2.5px solid var(--rule);box-shadow:var(--shadow);background:var(--plate)}
+.stage-bar{
+  display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--ink);color:var(--paper);
+  font-family:var(--f-mono);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+}
+.stage-bar .dot{width:7px;height:7px;background:var(--yellow);flex:none}
+.stage-bar .sp{flex:1}
+#stageSvg{display:block;width:100%;height:auto;max-height:430px;background:var(--plate)}
+
+/* 상태 버튼 */
+.states{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.sbtn{
+  appearance:none;border:2.5px solid var(--rule);background:var(--paper);cursor:pointer;
+  padding:9px 12px 8px;display:flex;flex-direction:column;gap:2px;align-items:flex-start;
+  transition:transform .11s var(--e-soft),box-shadow .11s var(--e-soft),background .11s var(--e-soft);
+  box-shadow:0 0 0 var(--rule);
+}
+.sbtn i{font-style:normal;font-family:var(--f-mono);font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--mute)}
+.sbtn b{font-size:13px;font-weight:800;letter-spacing:-.02em}
+.sbtn:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--rule)}
+.sbtn:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--rule)}
+.sbtn:focus-visible{outline:3px solid var(--verm);outline-offset:2px}
+.sbtn[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.sbtn[aria-pressed="true"] i{color:var(--yellow)}
+.sbtn.key{border-color:var(--verm);background:var(--verm);color:var(--on-color)}
+.sbtn.key i{color:#5C1400}
+.sbtn.key[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.sbtn.key[aria-pressed="true"] i{color:var(--verm)}
+
+.replay{
+  appearance:none;border:2.5px solid var(--rule);background:var(--yellow);color:var(--on-color);
+  padding:9px 14px;font-family:var(--f-mono);font-size:11px;font-weight:700;letter-spacing:.09em;
+  text-transform:uppercase;cursor:pointer;box-shadow:var(--shadow-sm);
+  transition:transform .1s var(--e-soft),box-shadow .1s var(--e-soft);
+}
+.replay:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 var(--rule)}
+.replay:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--rule)}
+.replay:focus-visible{outline:3px solid var(--verm);outline-offset:2px}
+
+/* 상태 정보 카드 */
+.info{border:2.5px solid var(--rule);background:var(--card);box-shadow:var(--shadow);position:sticky;top:88px}
+.info-h{padding:14px 16px 12px;border-bottom:2.5px solid var(--rule);background:var(--paper-2)}
+.info-h .tag{font-family:var(--f-mono);font-size:9.5px;font-weight:700;letter-spacing:.13em;color:var(--mute);text-transform:uppercase}
+.info-h h3{margin:3px 0 0;font-size:24px;font-weight:800;letter-spacing:-.04em;line-height:1.05}
+.info-b{padding:4px 16px 16px}
+.info-row{padding:12px 0;border-bottom:1.5px solid var(--hair)}
+.info-row:last-child{border-bottom:0}
+.info-row .rl{font-size:9.5px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--mute);display:block;margin-bottom:5px}
+.info-row .rv{font-size:12.5px;line-height:1.65}
+.info-row .rv.m{font-family:var(--f-mono);font-size:11.5px;line-height:1.75;letter-spacing:-.01em}
+.info-row.hab{border-left:4px solid var(--green);padding-left:11px;background:var(--paper-2);margin:12px -4px;padding-top:10px;padding-bottom:10px}
+.info-row.rm{border-left:4px solid var(--blue);padding-left:11px;background:var(--paper-2);margin:0 -4px;padding-top:10px;padding-bottom:10px}
+
+/* 부산물(FX) — 상태별 UI 결과물 */
+.fx{margin-top:14px;min-height:62px;border:2px dashed var(--hair2);padding:12px 14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.fx-empty{font-family:var(--f-mono);font-size:10.5px;color:var(--mute);letter-spacing:.05em}
+.fx-item{display:none;align-items:center;gap:10px;flex-wrap:wrap}
+.fx[data-show="wrong"] .fx-empty,.fx[data-show="missed"] .fx-empty,.fx[data-show="done"] .fx-empty,
+.fx[data-show="correct"] .fx-empty,.fx[data-show="prereq"] .fx-empty{display:none}
+.fx[data-show="wrong"] #fxWrong,.fx[data-show="missed"] #fxMissed,.fx[data-show="done"] #fxDone,
+.fx[data-show="correct"] #fxCorrect,.fx[data-show="prereq"] #fxPrereq{display:flex}
+
+.deechip{
+  font-family:var(--f-mono);font-size:11px;font-weight:700;letter-spacing:.06em;
+  border:2px solid var(--rule);padding:3px 7px 2px;background:var(--paper);
+  opacity:0;transform:scale(.6);
+}
+.fx[data-show="wrong"] .deechip{animation:chipIn 220ms var(--e-hop) forwards}
+.fx[data-show="wrong"] .deechip:nth-child(2){animation-delay:70ms}
+.fx[data-show="wrong"] .deechip:nth-child(3){animation-delay:140ms}
+.fx[data-show="wrong"] .deechip:nth-child(4){animation-delay:210ms}
+@keyframes chipIn{to{opacity:1;transform:scale(1)}}
+
+.pill{font-family:var(--f-mono);font-size:11px;font-weight:700;padding:4px 8px 3px;letter-spacing:.05em}
+.pill.v{background:var(--verm);color:var(--on-color)}
+.pill.g{background:var(--green);color:var(--on-color)}
+.pill.y{background:var(--yellow);color:var(--on-color)}
+.pill.b{background:var(--blue);color:var(--on-blue)}
+.fx-note{font-size:12px;color:var(--mute)}
+
+/* 해마 게이지 */
+.hippo{display:flex;align-items:center;gap:8px}
+.hippo .bars{display:flex;gap:3px}
+.hippo i{display:block;width:15px;height:11px;background:var(--ink);opacity:.16}
+.hippo i.on{opacity:1}
+.fx[data-show="done"] .hippo i.new{animation:notchIn 380ms var(--e-hop) 640ms forwards;opacity:.16}
+@keyframes notchIn{0%{opacity:.16;transform:scaleY(.3)}60%{opacity:1;transform:scaleY(1.35)}100%{opacity:1;transform:scaleY(1)}}
+
+/* ══════════ 표 ══════════ */
+.tscroll{overflow-x:auto;border:2.5px solid var(--rule);background:var(--card)}
+table{border-collapse:collapse;width:100%;min-width:860px;font-size:12px}
+thead th{
+  background:var(--ink);color:var(--paper);text-align:left;padding:9px 11px;
+  font-size:9.5px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;white-space:nowrap;
+  position:sticky;top:0;
+}
+tbody td{padding:10px 11px;border-bottom:1.5px solid var(--hair);vertical-align:top;line-height:1.55}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:nth-child(odd){background:rgba(20,18,16,.028)}
+html[data-theme="ink"] tbody tr:nth-child(odd){background:rgba(242,236,221,.035)}
+td.st{font-weight:800;letter-spacing:-.02em;white-space:nowrap}
+td.m{font-family:var(--f-mono);font-size:11px;white-space:nowrap}
+td.rm{color:var(--mute)}
+.grp td{background:var(--paper-3)!important;font-weight:800;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+
+/* ══════════ LIFER ══════════ */
+.lifer-stage{
+  position:relative;border:2.5px solid var(--rule);background:var(--paper-2);
+  min-height:360px;display:grid;place-items:center;overflow:hidden;box-shadow:var(--shadow);
+  padding:30px 20px;
+}
+.lifer-bg{
+  position:absolute;inset:0;padding:26px 28px;font-family:var(--f-mono);font-size:11.5px;
+  color:var(--mute);line-height:1.9;opacity:1;transition:opacity .3s var(--e-soft),filter .3s var(--e-soft);
+  user-select:none;pointer-events:none;
+}
+.lifer-stage.play .lifer-bg{opacity:.28;filter:blur(1.4px)}
+
+.lcard{
+  position:relative;z-index:2;width:min(400px,100%);background:var(--card);
+  border:3px solid var(--rule);box-shadow:10px 10px 0 var(--rule);
+  opacity:0;transform:translateY(30px);
+}
+.lifer-stage.play .lcard{animation:cardIn 420ms var(--e-settle) 80ms forwards, cardHit 90ms linear 640ms 2}
+@keyframes cardIn{to{opacity:1;transform:translateY(0)}}
+@keyframes cardHit{0%{margin-left:0}50%{margin-left:3px}100%{margin-left:0}}
+
+.lcard-h{display:flex;align-items:center;gap:9px;padding:8px 12px;background:var(--ink);color:var(--paper)}
+.lcard-h .micro{font-size:9px;letter-spacing:.2em}
+.lcard-h .sp{flex:1}
+.lcard-h .no{font-family:var(--f-mono);font-size:11px;font-weight:700;color:var(--yellow)}
+.lcard-body{display:grid;grid-template-columns:112px 1fr;gap:14px;padding:16px 16px 14px;align-items:center}
+@media(max-width:420px){.lcard-body{grid-template-columns:88px 1fr}}
+.lcard-ill{background:var(--plate);border:2px solid var(--rule);display:grid;place-items:center;padding:8px;position:relative;overflow:hidden}
+.lcard-ill svg{display:block}
+.lifer-stage.play .lcard-ill .mark{animation:liferHop 520ms var(--e-hop) 300ms}
+@keyframes liferHop{0%{transform:translateY(0)}30%{transform:translateY(-13px)}62%{transform:translateY(0)}76%{transform:translateY(-3px)}100%{transform:translateY(0)}}
+
+.lcard-meta .sp-ko{font-size:19px;font-weight:800;letter-spacing:-.035em;line-height:1.2;margin:0}
+.lcard-meta .sp-la{font-family:var(--f-mono);font-size:11px;color:var(--mute);margin:3px 0 9px;letter-spacing:-.01em}
+.lcard-meta .dl{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:9px}
+.lserial{
+  font-family:var(--f-mono);font-size:11px;font-weight:700;letter-spacing:.02em;color:var(--ink);
+  white-space:nowrap;overflow:hidden;width:0;border-right:2px solid transparent;
+}
+.lifer-stage.play .lserial{animation:typeIn 560ms steps(25,end) 700ms forwards}
+@keyframes typeIn{to{width:25ch}}
+
+.stamp{
+  position:absolute;right:12px;bottom:10px;z-index:3;
+  font-family:var(--f-disp);font-size:34px;line-height:.8;letter-spacing:.02em;
+  color:var(--verm);border:4px solid var(--verm);padding:6px 11px 4px;
+  transform:rotate(-7deg) scale(2.7);opacity:0;
+  text-transform:uppercase;pointer-events:none;
+  box-shadow:inset 0 0 0 2px rgba(255,59,24,.25);
+}
+.lifer-stage.play .stamp{animation:stampIn 220ms var(--e-stamp) 420ms forwards}
+@keyframes stampIn{
+  0%{opacity:0;transform:rotate(-22deg) scale(2.7)}
+  60%{opacity:1}
+  100%{opacity:1;transform:rotate(-7deg) scale(1)}
+}
+.lcard-foot{border-top:2px solid var(--rule);padding:8px 12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--paper-2)}
+.lcard-foot .micro{color:var(--mute)}
+
+.lifer-ctl{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:16px}
+.lifer-seq{display:grid;gap:0;margin-top:18px;border:2px solid var(--hair2)}
+.lifer-seq div{display:grid;grid-template-columns:70px 1fr;gap:12px;padding:8px 12px;border-bottom:1.5px solid var(--hair);font-size:12px}
+.lifer-seq div:last-child{border-bottom:0}
+.lifer-seq b{font-family:var(--f-mono);font-size:11px;font-weight:700;color:var(--verm)}
+
+/* ══════════ 소리 ══════════ */
+.sound-vis{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:22px}
+.svcard{border:2.5px solid var(--rule);background:var(--card);padding:13px 15px;min-width:190px;flex:1 1 190px}
+.svcard .micro{color:var(--mute);margin-bottom:7px}
+.notes{display:flex;gap:4px;align-items:flex-end;height:40px;margin-bottom:8px}
+.notes i{display:block;width:14px;background:var(--ink);opacity:.85}
+.notes i.chick{height:36px;background:var(--blue)}
+.notes i.a{height:26px;background:var(--blue);opacity:.55}
+.notes i.dee{height:17px;background:var(--verm)}
+.notes i.fee{height:38px;background:var(--green)}
+.notes i.bee{height:24px;background:var(--green)}
+.svcard code{font-family:var(--f-mono);font-size:11px;color:var(--acc-text);font-weight:700}
+.svcard p{margin:6px 0 0;font-size:11.5px;color:var(--mute);line-height:1.6}
+
+/* ══════════ 버린 대안 ══════════ */
+.kill{display:grid;gap:0;border-top:3px solid var(--rule)}
+.kill-row{display:grid;grid-template-columns:26px minmax(150px,230px) 1fr;gap:14px;padding:14px 0;border-bottom:1.5px solid var(--hair);align-items:start}
+@media(max-width:680px){.kill-row{grid-template-columns:26px 1fr;gap:8px}.kill-row .why{grid-column:2}}
+.kill-row .x{font-family:var(--f-disp);font-size:22px;line-height:1;color:var(--verm)}
+.kill-row .what{font-weight:800;font-size:13.5px;letter-spacing:-.02em;text-decoration:line-through;text-decoration-color:var(--verm);text-decoration-thickness:2px}
+.kill-row .why{font-size:12.5px;color:var(--mute);line-height:1.65}
+.kill-row .why em{font-style:normal;color:var(--ink);font-weight:700}
+
+footer{margin-top:70px;padding-top:20px;border-top:7px solid var(--rule);display:flex;gap:16px;flex-wrap:wrap;
+  font-family:var(--f-mono);font-size:10.5px;color:var(--mute);letter-spacing:.05em;text-transform:uppercase}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Dee — 파트 트랜스폼 기준점
+   ═══════════════════════════════════════════════════════════════════ */
+#deeMove{transform-box:fill-box;transform-origin:48% 100%}
+#pHead{transform-box:fill-box;transform-origin:34% 92%}
+#pBody{transform-box:fill-box;transform-origin:50% 74%}
+#pWing{transform-box:fill-box;transform-origin:92% 4%}
+#pTail{transform-box:fill-box;transform-origin:100% 18%}
+#followMove{transform-box:fill-box;transform-origin:50% 100%}
+#seedX,#seedY{transform-box:fill-box;transform-origin:50% 50%}
+
+/* ── 앰비언트 (대기) ── */
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
+@keyframes blink{0%,95.5%,100%{opacity:1}96.5%,98.5%{opacity:0}}
+#stage[data-state="idle"] #pBody{animation:breathe 5.6s ease-in-out infinite}
+#stage[data-state="idle"] #pEye{animation:blink 7s linear infinite}
+html[data-quiet="on"] #stage[data-state="idle"] #pBody,
+html[data-quiet="on"] #stage[data-state="idle"] #pEye{animation:none}
+
+/* ── 생각 중: 고개 갸웃 ── */
+@keyframes tiltAB{
+  0%{transform:rotate(0deg)}
+  12%{transform:rotate(-13deg)}
+  40%{transform:rotate(-13deg)}
+  52%{transform:rotate(0deg)}
+  64%{transform:rotate(11deg)}
+  88%{transform:rotate(11deg)}
+  100%{transform:rotate(0deg)}
+}
+#stage[data-state="think"] #pHead{animation:tiltAB 3.2s var(--e-soft) infinite}
+#stage[data-state="think"] #pBody{animation:breathe 4.2s ease-in-out infinite}
+
+/* ── 정답: 홉 + 씨앗 저장 ── */
+@keyframes hop{
+  0%{transform:translateY(0)}
+  34%{transform:translateY(-16px)}
+  62%{transform:translateY(0)}
+  74%{transform:translateY(-3.5px)}
+  100%{transform:translateY(0)}
+}
+@keyframes tailFlick{0%{transform:rotate(0)}35%{transform:rotate(-13deg)}100%{transform:rotate(0)}}
+@keyframes wingFlash{0%{transform:rotate(0)}40%{transform:rotate(-26deg)}100%{transform:rotate(0)}}
+#stage[data-state="correct"] #deeMove{animation:hop 520ms var(--e-hop)}
+#stage[data-state="correct"] #pTail{animation:tailFlick 320ms var(--e-soft)}
+#stage[data-state="correct"] #pWing{animation:wingFlash 240ms var(--e-soft)}
+@keyframes seedGo{0%{opacity:0}6%{opacity:1}92%{opacity:1}100%{opacity:0}}
+@keyframes seedX{to{transform:translateX(-140px)}}
+@keyframes seedY{to{transform:translateY(44px)}}
+#seedWrap{opacity:0}
+#stage[data-state="correct"] #seedWrap{animation:seedGo 460ms linear 120ms both}
+#stage[data-state="correct"] #seedX{animation:seedX 420ms linear 120ms forwards}
+#stage[data-state="correct"] #seedY{animation:seedY 420ms cubic-bezier(.42,-.5,.62,1) 120ms forwards}
+@keyframes holePop{0%{opacity:.22;transform:scale(.6)}60%{opacity:1;transform:scale(1.3)}100%{opacity:1;transform:scale(1)}}
+.hseed{transform-box:fill-box;transform-origin:50% 50%;opacity:.22}
+#stage[data-state="correct"] #hseed2{animation:holePop 260ms var(--e-hop) 520ms forwards}
+
+/* ── 오답: 고개 스냅 + 깃털 부풀림 ── */
+@keyframes headSnap{
+  0%{transform:rotate(0)}
+  14%{transform:rotate(-23deg)}
+  30%{transform:rotate(-19deg)}
+  100%{transform:rotate(0)}
+}
+@keyframes puff{0%{transform:scale(1)}22%{transform:scale(1.09)}100%{transform:scale(1)}}
+#stage[data-state="wrong"] #pHead{animation:headSnap 640ms var(--e-snap)}
+#stage[data-state="wrong"] #pBody{animation:puff 700ms var(--e-soft)}
+@keyframes alertDraw{to{transform:scaleX(1)}}
+#alertBar{transform-box:fill-box;transform-origin:0 50%;transform:scaleX(0)}
+#stage[data-state="wrong"] #alertBar{animation:alertDraw 260ms var(--e-settle) 90ms forwards}
+
+/* ── 놓쳤어요: 거꾸로 매달리기 ── */
+@keyframes hangIn{
+  0%{transform:rotate(0deg)}
+  38%{transform:rotate(84deg) translateY(-4px)}
+  100%{transform:rotate(180deg)}
+}
+@keyframes sway{0%,100%{transform:rotate(180deg)}25%{transform:rotate(184.5deg)}75%{transform:rotate(175.5deg)}}
+#stage[data-state="missed"] #deeMove{
+  animation:hangIn 520ms var(--e-settle) forwards, sway 3.4s ease-in-out 520ms infinite;
+}
+@keyframes underDraw{to{stroke-dashoffset:0}}
+#underMark{stroke-dasharray:5 5;stroke-dashoffset:112;opacity:0}
+#stage[data-state="missed"] #underMark{animation:underDraw 420ms linear 300ms forwards,fadeIn 200ms linear 300ms forwards}
+@keyframes fadeIn{to{opacity:1}}
+/* 저장고에서 씨앗 되찾기 */
+@keyframes seedBackX{to{transform:translateX(74px)}}
+@keyframes seedBackY{to{transform:translateY(32px)}}
+#stage[data-state="missed"] #seedWrap{animation:seedGo 520ms linear 560ms both}
+#stage[data-state="missed"] #seedX{animation:seedBackX 480ms linear 560ms forwards}
+#stage[data-state="missed"] #seedY{animation:seedBackY 480ms cubic-bezier(.42,-.5,.62,1) 560ms forwards}
+#stage[data-state="missed"] #seedStart{transform:translate(-140px,44px)}
+
+/* ── 선행 개념: 무리를 이끌고 내려감 ── */
+@keyframes descend{
+  0%{transform:translate(0,0)}
+  26%{transform:translate(-19px,-15px)}
+  100%{transform:translate(-72px,84px)}
+}
+#stage[data-state="prereq"] #deeMove{animation:descend 460ms var(--e-settle) forwards}
+#stage[data-state="prereq"] #pWing{animation:wingFlash 280ms var(--e-soft) 60ms}
+#followMove{opacity:0}
+@keyframes followDrop{
+  0%{opacity:0;transform:translate(0,0)}
+  12%{opacity:1;transform:translate(-4px,-9px)}
+  100%{opacity:1;transform:translate(-58px,84px)}
+}
+#stage[data-state="prereq"] #followMove{animation:followDrop 460ms var(--e-settle) 160ms forwards}
+#guideLine{stroke-dasharray:6 6;stroke-dashoffset:170;opacity:0}
+#stage[data-state="prereq"] #guideLine{animation:underDraw 400ms linear 100ms forwards,fadeIn 180ms linear 100ms forwards}
+
+/* ── 세션 완료: 위 가지로 + 씨앗 점등 ── */
+@keyframes riseUp{
+  0%{transform:translate(0,0)}
+  40%{transform:translate(32px,-34px)}
+  100%{transform:translate(64px,-26px)}
+}
+#stage[data-state="done"] #deeMove{animation:riseUp 520ms var(--e-settle) forwards}
+#stage[data-state="done"] #pTail{animation:tailFlick 320ms var(--e-soft) 520ms}
+@keyframes lightUp{
+  0%{opacity:.22;transform:scale(1)}
+  55%{opacity:1;transform:scale(1.4)}
+  100%{opacity:1;transform:scale(1)}
+}
+#stage[data-state="done"] #hseed1{animation:lightUp 380ms var(--e-hop) 620ms forwards}
+#stage[data-state="done"] #hseed2{animation:lightUp 380ms var(--e-hop) 710ms forwards}
+#stage[data-state="done"] #hseed3{animation:lightUp 380ms var(--e-hop) 800ms forwards}
+
+/* ═══════════════════════════════════════════════════════════════════
+   prefers-reduced-motion — 전환은 없애되 "포즈와 정보"는 남긴다
+   ═══════════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion:reduce){
+  html:not([data-motion="full"]) *:not(.rm-fade){
+    animation-duration:1ms!important;animation-delay:0ms!important;
+    animation-iteration-count:1!important;transition-duration:1ms!important;
+  }
+  html:not([data-motion="full"]) .rm-fade{transition:opacity .2s linear!important;animation:none!important}
+}
+html[data-motion="reduced"] *:not(.rm-fade){
+  animation-duration:1ms!important;animation-delay:0ms!important;
+  animation-iteration-count:1!important;transition-duration:1ms!important;
+}
+html[data-motion="reduced"] .rm-fade{transition:opacity .2s linear!important;animation:none!important}
+
+/* 감축 모드에서도 최종 포즈는 유지 — 루프 애니메이션은 중립 포즈로 정지 */
+html[data-motion="reduced"] #stage[data-state="idle"] #pBody,
+html[data-motion="reduced"] #stage[data-state="idle"] #pEye,
+html[data-motion="reduced"] #stage[data-state="think"] #pBody{animation:none!important}
+/* 생각 중은 정지 포즈로 정보 전달 */
+html[data-motion="reduced"] #stage[data-state="think"] #pHead{animation:none!important;transform:rotate(-13deg)}
+/* 놓쳤어요는 처음부터 뒤집힌 포즈 */
+html[data-motion="reduced"] #stage[data-state="missed"] #deeMove{animation:none!important;transform:rotate(180deg)}
+html[data-motion="reduced"] #stage[data-state="missed"] #underMark{opacity:1;stroke-dashoffset:0;animation:none!important}
+html[data-motion="reduced"] #stage[data-state="prereq"] #deeMove{animation:none!important;transform:translate(-72px,84px)}
+html[data-motion="reduced"] #stage[data-state="prereq"] #followMove{animation:none!important;opacity:1;transform:translate(-58px,84px)}
+html[data-motion="reduced"] #stage[data-state="prereq"] #guideLine{opacity:1;stroke-dashoffset:0;animation:none!important}
+html[data-motion="reduced"] #stage[data-state="done"] #deeMove{animation:none!important;transform:translate(64px,-26px)}
+html[data-motion="reduced"] #stage[data-state="done"] .hseed{animation:none!important;opacity:1}
+html[data-motion="reduced"] #stage[data-state="correct"] #hseed2{animation:none!important;opacity:1}
+html[data-motion="reduced"] #stage[data-state="wrong"] #alertBar{animation:none!important;transform:scaleX(1)}
+html[data-motion="reduced"] #stage[data-state="correct"] #seedWrap,
+html[data-motion="reduced"] #stage[data-state="missed"] #seedWrap{animation:none!important;opacity:0}
+html[data-motion="reduced"] .fx .deechip{animation:none!important;opacity:1;transform:none}
+html[data-motion="reduced"] .hippo i.new{animation:none!important;opacity:1}
+/* LIFER — 최종 상태로 즉시, 200ms 페이드만 */
+html[data-motion="reduced"] .lifer-stage.play .lcard{animation:none!important;opacity:1;transform:none;transition:opacity .2s linear}
+html[data-motion="reduced"] .lifer-stage.play .stamp{animation:none!important;opacity:1;transform:rotate(-7deg) scale(1)}
+html[data-motion="reduced"] .lifer-stage.play .lserial{animation:none!important;width:25ch}
+html[data-motion="reduced"] .lifer-stage.play .lcard-ill .mark{animation:none!important}
+html[data-motion="reduced"] .lifer-bg{filter:none!important}
+
+/* 접근성 */
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+:focus-visible{outline:3px solid var(--verm);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+
+<!-- ══════ 공용 SVG 정의 ══════ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <clipPath id="deeHeadClip"><circle cx="59" cy="31" r="17"/></clipPath>
+    <symbol id="deeSym" viewBox="0 0 100 100">
+      <!-- 꼬리 · 몸 · 등날개는 서로 겹쳐 하나의 실루엣을 이룬다 -->
+      <path d="M36 64 L4 82 L11 91 L40 74 Z" style="fill:var(--dee-back)"/>
+      <ellipse cx="44" cy="58" rx="22" ry="20" style="fill:var(--dee-belly)"/>
+      <path d="M48 39 C34 40 23 49 22 60 C22 67 26 72 32 74 C38 64 45 52 48 39 Z" style="fill:var(--dee-back)"/>
+      <path d="M45 76 L44 87 M55 75 L57 87" style="stroke:var(--dee-leg);opacity:var(--dee-detail,1)" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+      <path d="M74 28 L92 33.5 L74 39 Z" style="fill:var(--dee-beak)"/>
+      <circle cx="59" cy="31" r="17" style="fill:var(--dee-cap)"/>
+      <g clip-path="url(#deeHeadClip)">
+        <ellipse cx="53" cy="38" rx="14.5" ry="8"
+          style="fill:var(--dee-cheek);transform-box:fill-box;transform-origin:50% 50%;transform:rotate(-8deg) scale(var(--dee-cheek-k,1))"/>
+      </g>
+      <path d="M67 35 C75.5 34 79 40 77.5 46.5 C75 53.5 66 56 61 51 C57 46 59.5 36.5 67 35 Z" style="fill:var(--dee-cap)"/>
+      <circle cx="66" cy="25.5" r="2.1" style="fill:var(--dee-glint);opacity:var(--dee-detail,1)"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- ══════ 상단 바 ══════ -->
+<header class="top">
+  <div class="top-in">
+    <svg class="brandmark" viewBox="0 0 100 100" aria-hidden="true"><use href="#deeSym" x="4" y="4" width="92" height="92"/></svg>
+    <div>
+      <div class="brand-t">Field Guide / Dee</div>
+      <div class="brand-s">Chickadee · 마스코트 &amp; 모션 명세 v1</div>
+    </div>
+    <div class="top-sp"></div>
+    <div class="ctl">
+      <button class="sw" id="swTheme" aria-label="테마 전환">
+        <span data-on="1">종이</span><span data-on="0">잉크</span>
+      </button>
+      <button class="sw" id="swMotion" aria-label="모션 감축 시뮬레이션">
+        <span data-on="1">움직임 전체</span><span data-on="0">움직임 감축</span>
+      </button>
+      <button class="sw" id="swQuiet" aria-label="대기 모션 정숙 모드">
+        <span data-on="1">대기 모션</span><span data-on="0">정숙(0)</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ══════ HERO ══════ -->
+  <div class="hero">
+    <h1>DEE</h1>
+    <p class="sub">검은 머리깃 · 흰 뺨 · 둥근 몸. 얼굴 근육이 없는 마스코트 — 감정은 전부 <b>박새가 실제로 하는 행동</b>으로 말한다.</p>
+    <div class="meta">
+      <span>SPECIES / Poecile atricapillus</span>
+      <span>ROLE / 길잡이 · 저장고 관리자</span>
+      <span>STATES / 7 + LIFER</span>
+      <span>DEPS / 0</span>
+    </div>
+  </div>
+
+  <div class="principle">
+    <div class="n">01</div>
+    <p>정지 상태는 조용하게, 기쁨은 움직임에.
+      <small>Dee는 화면에 상주하지만 <b style="color:#FFD400">기본값은 완전 정지</b>다. 즐거움은 전환·피드백·기록의 <b style="color:#FFD400">순간</b>에서만 나온다. T1 클론 코딩처럼 10~20분 머무는 화면에서 Dee의 움직임은 0이며, 이때 Dee는 배경의 일부다.</small></p>
+  </div>
+
+  <!-- ══════ 00 실루엣 ══════ -->
+  <section id="s-size">
+    <div class="sec-h">
+      <div class="n">00</div>
+      <div>
+        <h2>실루엣 검증 — 16px에서 살아남는가</h2>
+        <p>대비 구조는 <b>검은 캡 / 흰 뺨 / 검은 턱받이</b> 3단. 그라디언트·스트로크 없이 플랫 도형만 쌓았다. 16·24px에서는 눈·다리를 지우고 뺨을 16% 키운 <b>소형 마크</b>로 교체한다.</p>
+      </div>
+    </div>
+
+    <p class="rowlab">A · 표준 도판 (16px·24px는 소형 마크 자동 적용)</p>
+    <div class="sizes" id="rowA"></div>
+
+    <p class="rowlab">B · <em>미조정</em> 축소 — 왜 소형 마크가 필요한가</p>
+    <div class="sizes" id="rowB"></div>
+
+    <p class="rowlab">C · 어두운 UI — 캡을 <em>#4C463C</em> 로 올린다 (검정 캡은 배경에 먹힌다)</p>
+    <div class="sizes" id="rowC"></div>
+
+    <p class="rowlab">D · 스퀸트 / 실루엣 테스트</p>
+    <div class="sizes" id="rowD"></div>
+
+    <p class="note" style="margin-top:26px">
+      <b>판정 기준</b> — ① 32px 블러 1.1px 에서 검정–흰–검정 3단이 분리되어 보일 것 ② 단색 실루엣만으로 “둥근 몸 + 큰 머리 + 짧은 부리 + 긴 꼬리”가 새로 읽힐 것 ③ 16px에서 흰 뺨이 최소 2×2 픽셀 이상을 차지할 것.
+      뺨 확대 계수 <span class="mono">--dee-cheek-k</span> 는 이 세 번째 조건을 맞추기 위한 값이다.
+    </p>
+  </section>
+
+  <!-- ══════ 01 해부 ══════ -->
+  <section id="s-anat">
+    <div class="sec-h">
+      <div class="n">01</div>
+      <div>
+        <h2>해부 — 원 · 쐐기 · 삼각형</h2>
+        <p>도형 8개. 눈은 <b>검은 캡 안에 묻혀 있어 사실상 보이지 않는다</b> — 실제 박새가 그렇다. 그래서 Dee는 표정을 지을 수 없고, 그 제약이 이 시스템의 출발점이다.</p>
+      </div>
+    </div>
+    <div class="anat">
+      <div>
+        <div class="plate" style="padding:16px;display:grid;place-items:center">
+          <svg viewBox="0 0 100 100" width="100%" style="max-width:250px;display:block" aria-label="Dee 해부도">
+            <use href="#deeSym" width="100" height="100"/>
+            <g style="fill:none;stroke:var(--verm);stroke-width:.9;stroke-dasharray:3 2.5">
+              <path d="M60 15 L82 6"/><path d="M46 41 L16 30"/><path d="M74 52 L94 62"/>
+              <path d="M89 33 L97 20"/><path d="M28 52 L8 50"/><path d="M14 86 L6 96"/>
+            </g>
+            <g style="font-family:ui-monospace,monospace;font-size:5.2px;font-weight:700;fill:var(--verm)">
+              <text x="83" y="5">1 캡</text><text x="2" y="29">2 뺨</text>
+              <text x="80" y="67">3 턱받이</text><text x="84" y="18">4 부리</text>
+              <text x="0" y="49">5 등</text><text x="8" y="99">6 꼬리</text>
+            </g>
+          </svg>
+          <div class="plate-cap">PLATE 01 — 기본 도판 · 100×100 유닛</div>
+        </div>
+      </div>
+      <div>
+        <ul class="anat-list">
+          <li><span class="k">1</span><div><b>검은 머리깃 (cap)</b><span>원 하나. r=17. 눈을 삼킨다 → 표정 불가 → 자세로만 말한다.</span></div></li>
+          <li><span class="k">2</span><div><b>흰 뺨 (cheek)</b><span>기울인 타원. 캡에 클립. 이 흰색이 16px 식별의 전부다.</span></div></li>
+          <li><span class="k">3</span><div><b>검은 턱받이 (bib)</b><span>목–가슴으로 흘러내린다. 캡과 같은 검정 → 흰 뺨이 두 검정 사이에 낀 띠가 된다.</span></div></li>
+          <li><span class="k">4</span><div><b>부리</b><span>삼각형 하나. 씨앗을 물고 옮기는 유일한 도구 — 저장·회수 모션의 앵커.</span></div></li>
+          <li><span class="k">5</span><div><b>회색 등·날개</b><span>초승달 하나. 몸의 밝은 배와 대비를 만들어 실루엣을 잡는다.</span></div></li>
+          <li><span class="k">6</span><div><b>꼬리</b><span>사각 쐐기. 거꾸로 매달릴 때 회전 균형을 읽게 해주는 유일한 파트.</span></div></li>
+        </ul>
+
+        <p class="rowlab" style="margin-top:26px">실제 습성 → 제품 기능</p>
+        <ul class="habits">
+          <li><b>씨앗을 수천 곳에 묻고 몇 달 뒤 회수</b><span class="ar">→</span><span>간격 반복 복습 · 저장고 UI</span></li>
+          <li><b>가을에 해마가 실제로 커진다</b><span class="ar">→</span><span>개념 숙련도 누적 · 기억 용량 게이지</span></li>
+          <li><b><span class="mono">dee</span> 개수 ∝ 위협 수준</b><span class="ar">→</span><span>난이도 = 남은 반복 횟수</span></li>
+          <li><b>혼합 무리를 이끌고 다른 새가 따라온다</b><span class="ar">→</span><span>선행 개념으로 <em>인도</em>(강등 아님)</span></li>
+          <li><b>가지에 거꾸로 매달려 아랫면을 살핀다</b><span class="ar">→</span><span>「놓쳤어요」 = 아래를 같이 보기</span></li>
+          <li><b>몸집에 비해 대담해 사람 손에도 내려앉는다</b><span class="ar">→</span><span>겁 없이 먼저 다가오는 톤</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════ 02 상태 ══════ -->
+  <section id="s-states">
+    <div class="sec-h">
+      <div class="n">02</div>
+      <div>
+        <h2>상태 7종 — 눌러서 재생</h2>
+        <p>표정 근육 대신 <b>박새가 실제로 하는 동작</b>을 쓴다. 각 상태의 근거·수치·감축 모드 대체는 오른쪽 카드에.</p>
+      </div>
+    </div>
+
+    <div class="stage-grid">
+      <div>
+        <div class="stage-wrap">
+          <div class="stage-bar"><span class="dot"></span><span id="stageName">대기 / IDLE</span><span class="sp"></span><span id="stageDur">—</span></div>
+          <svg id="stageSvg" viewBox="0 0 340 240" role="img" aria-labelledby="stageTitle">
+            <title id="stageTitle">Dee 상태 재생 무대</title>
+            <g id="stage" data-state="idle">
+              <!-- 가지 -->
+              <path d="M14 114 C90 106 210 108 326 102" fill="none" style="stroke:var(--branch)" stroke-width="13" stroke-linecap="round"/>
+              <path d="M250 108 L272 76" fill="none" style="stroke:var(--branch)" stroke-width="8" stroke-linecap="round"/>
+              <path d="M20 196 C110 188 232 192 322 186" fill="none" style="stroke:var(--branch)" stroke-width="11" stroke-linecap="round"/>
+              <path d="M96 192 L74 216" fill="none" style="stroke:var(--branch)" stroke-width="6" stroke-linecap="round" opacity=".55"/>
+
+              <!-- 저장고 구멍 -->
+              <g>
+                <ellipse cx="60" cy="110" rx="6.5" ry="4.2" fill="#241E17"/>
+                <ellipse cx="96" cy="109" rx="6.5" ry="4.2" fill="#241E17"/>
+                <ellipse cx="132" cy="108" rx="6.5" ry="4.2" fill="#241E17"/>
+                <ellipse id="hseed1" class="hseed" cx="60" cy="110" rx="3.4" ry="2.6" fill="#C98A2E"/>
+                <ellipse id="hseed2" class="hseed" cx="96" cy="109" rx="3.4" ry="2.6" fill="#C98A2E"/>
+                <ellipse id="hseed3" class="hseed" cx="132" cy="108" rx="3.4" ry="2.6" fill="#C98A2E"/>
+              </g>
+
+              <!-- 아랫면 점검 표시 (놓쳤어요) -->
+              <path id="underMark" d="M52 132 L162 127" fill="none" style="stroke:var(--verm)" stroke-width="2.5"/>
+              <!-- 인도 경로 (선행 개념) -->
+              <path id="guideLine" d="M204 118 C190 146 168 164 148 182" fill="none" style="stroke:var(--verm)" stroke-width="2.5"/>
+              <!-- 경계 표시 (오답) -->
+              <rect id="alertBar" x="150" y="126" width="112" height="4" style="fill:var(--verm)"/>
+
+              <!-- 따라오는 무리 동료 -->
+              <g transform="translate(258,62)">
+                <g id="followMove">
+                  <g transform="scale(.46)">
+                    <path d="M36 64 L4 82 L11 91 L40 74 Z" fill="#A8A08C"/>
+                    <ellipse cx="44" cy="58" rx="22" ry="20" fill="#E4DCC7"/>
+                    <path d="M48 39 C34 40 23 49 22 60 C22 67 26 72 32 74 C38 64 45 52 48 39 Z" fill="#A8A08C"/>
+                    <path d="M74 28 L92 33.5 L74 39 Z" fill="#2A2620"/>
+                    <circle cx="59" cy="31" r="17" fill="#5A5346"/>
+                    <g clip-path="url(#deeHeadClip)"><ellipse cx="53" cy="38" rx="14.5" ry="8" fill="#FBF7EC" transform="rotate(-8 53 38)"/></g>
+                  </g>
+                </g>
+              </g>
+
+              <!-- 씨앗 -->
+              <g id="seedWrap"><g id="seedStart" transform="translate(0,0)"><g id="seedX"><g id="seedY">
+                <ellipse cx="238" cy="64" rx="3.6" ry="2.8" fill="#C98A2E" stroke="#7A5A2E" stroke-width="1"/>
+              </g></g></g></g>
+
+              <!-- DEE -->
+              <g transform="translate(168,36)">
+                <g id="deeMove">
+                  <g transform="scale(.76)">
+                    <g id="pTail"><path d="M36 64 L4 82 L11 91 L40 74 Z" style="fill:var(--dee-back)"/></g>
+                    <g id="pBody">
+                      <ellipse cx="44" cy="58" rx="22" ry="20" style="fill:var(--dee-belly)"/>
+                      <g id="pWing"><path d="M48 39 C34 40 23 49 22 60 C22 67 26 72 32 74 C38 64 45 52 48 39 Z" style="fill:var(--dee-back)"/></g>
+                    </g>
+                    <path d="M45 76 L44 87 M55 75 L57 87" style="stroke:var(--dee-leg)" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+                    <g id="pHead">
+                      <path d="M74 28 L92 33.5 L74 39 Z" style="fill:var(--dee-beak)"/>
+                      <circle cx="59" cy="31" r="17" style="fill:var(--dee-cap)"/>
+                      <g clip-path="url(#deeHeadClip)">
+                        <ellipse cx="53" cy="38" rx="14.5" ry="8" style="fill:var(--dee-cheek)" transform="rotate(-8 53 38)"/>
+                      </g>
+                      <path d="M67 35 C75.5 34 79 40 77.5 46.5 C75 53.5 66 56 61 51 C57 46 59.5 36.5 67 35 Z" style="fill:var(--dee-cap)"/>
+                      <circle id="pEye" cx="66" cy="25.5" r="2.1" style="fill:var(--dee-glint)"/>
+                    </g>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </svg>
+        </div>
+
+        <div class="states" id="stateBtns"></div>
+        <div style="margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <button class="replay" id="btnReplay">▶ 다시 재생 <span class="mute" style="font-weight:400">(R)</span></button>
+          <span class="note" style="font-size:11.5px">숫자키 <span class="mono">1–7</span> 로도 전환됩니다.</span>
+        </div>
+
+        <div class="fx" id="fx" data-show="idle" aria-live="polite">
+          <span class="fx-empty">이 상태의 UI 부산물 없음 — 화면은 조용합니다.</span>
+          <span class="fx-item" id="fxCorrect">
+            <span class="pill g">저장 완료</span>
+            <span class="fx-note">씨앗 1알이 저장고로. 다음 노출은 <b>4일 뒤</b>.</span>
+          </span>
+          <span class="fx-item" id="fxWrong">
+            <span class="pill v">경계 3</span>
+            <span class="deechip">dee</span><span class="deechip">dee</span><span class="deechip">dee</span>
+            <span class="fx-note"><span class="mono">dee</span> 개수 = 남은 반복 횟수. 벌점이 아니라 <b>일정</b>.</span>
+          </span>
+          <span class="fx-item" id="fxMissed">
+            <span class="pill y">+1 도감</span>
+            <span class="fx-note">누른 개념이 <b>도감에 등재</b>되고 저장고에서 씨앗을 꺼내 옵니다. 누를수록 이득.</span>
+          </span>
+          <span class="fx-item" id="fxPrereq">
+            <span class="pill b">인도 중</span>
+            <span class="fx-note">「구조 분해 할당」 → 선행 <b>「객체 리터럴」</b>. 무리가 따라 내려옵니다.</span>
+          </span>
+          <span class="fx-item" id="fxDone">
+            <span class="pill g">세션 종료</span>
+            <span class="hippo">
+              <span class="micro mute">기억 용량</span>
+              <span class="bars"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="new"></i><i></i><i></i><i></i></span>
+            </span>
+            <span class="fx-note">18분 · 씨앗 12알</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- 상태 정보 카드 -->
+      <aside class="info">
+        <div class="info-h">
+          <div class="tag" id="iTag">STATE 01 / IDLE</div>
+          <h3 id="iName">대기</h3>
+        </div>
+        <div class="info-b">
+          <div class="info-row hab">
+            <span class="rl">실제 습성 근거</span>
+            <div class="rv" id="iHab">—</div>
+          </div>
+          <div class="info-row">
+            <span class="rl">행동 (표정 아님)</span>
+            <div class="rv" id="iAct">—</div>
+          </div>
+          <div class="info-row">
+            <span class="rl">모션 수치</span>
+            <div class="rv m" id="iTim">—</div>
+          </div>
+          <div class="info-row rm">
+            <span class="rl">움직임 감축 시 대체</span>
+            <div class="rv" id="iRm">—</div>
+          </div>
+          <div class="info-row">
+            <span class="rl">쓰이는 화면</span>
+            <div class="rv" id="iWhere">—</div>
+          </div>
+          <div class="info-row">
+            <span class="rl">소리 (기본 음소거)</span>
+            <div class="rv m" id="iSnd">—</div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ══════ 03 LIFER ══════ -->
+  <section id="s-lifer">
+    <div class="sec-h">
+      <div class="n">03</div>
+      <div>
+        <h2>LIFER 모먼트 — 최대 보상</h2>
+        <p>탐조에서 <b>lifer</b>는 평생 처음 보는 종을 기록하는 순간이다. 이 앱에서는 <b>새 개념을 처음 도감에 올리는 순간</b>. 보상은 파티클이 아니라 <b>영구 기록</b> — 도감 카드에 도장이 찍히고 일련번호가 박힌다. 개념 하나당 평생 한 번.</p>
+      </div>
+    </div>
+
+    <div class="lifer-stage" id="liferStage">
+      <div class="lifer-bg" aria-hidden="true">
+const&nbsp;{&nbsp;title,&nbsp;tags&nbsp;=&nbsp;[]&nbsp;}&nbsp;=&nbsp;post<br>
+&nbsp;&nbsp;→&nbsp;구조&nbsp;분해&nbsp;할당&nbsp;·&nbsp;기본값<br>
+&nbsp;&nbsp;→&nbsp;처음&nbsp;보는&nbsp;문법입니다
+      </div>
+      <div class="lcard rm-fade">
+        <div class="lcard-h">
+          <span class="micro">FIELD GUIDE</span><span class="sp"></span><span class="no">NEW</span>
+        </div>
+        <div class="lcard-body">
+          <div class="lcard-ill">
+            <svg class="mark" viewBox="0 0 100 100" width="88" height="88" aria-hidden="true"><use href="#deeSym" width="100" height="100"/></svg>
+          </div>
+          <div class="lcard-meta">
+            <p class="sp-ko">구조 분해 할당</p>
+            <p class="sp-la">Destructuring assignment</p>
+            <div class="dl">
+              <span class="pill y">첫 관찰 · LIFER</span><span class="pill b">T0 문법</span>
+            </div>
+            <div class="lserial">#047 · 2026-09-02 · 09:41</div>
+          </div>
+        </div>
+        <div class="lcard-foot">
+          <span class="micro">당신의 <b>post-editor.js:12</b> 에서 채집</span>
+        </div>
+        <div class="stamp">Lifer</div>
+      </div>
+    </div>
+
+    <div class="lifer-ctl">
+      <button class="replay" id="btnLifer">▶ LIFER 재생</button>
+      <span class="note" style="font-size:11.5px">총 <b>1.36초</b>. 아무 키나 누르면 즉시 닫힘 — 성인은 기다려주지 않는다.</span>
+    </div>
+
+    <div class="lifer-seq">
+      <div><b>0 ms</b><span>배경 코드가 <span class="mono">opacity .28 / blur 1.4px</span> 로 물러난다. 검은 오버레이는 쓰지 않는다 — 맥락을 지우면 무엇을 기록했는지 사라진다.</span></div>
+      <div><b>80 ms</b><span>도감 카드 진입 <span class="mono">translateY 30→0 · 420ms · cubic-bezier(.16,1,.3,1)</span></span></div>
+      <div><b>300 ms</b><span>Dee 홉 <span class="mono">520ms · --e-hop</span> — 카드 위에 올라 앉는다</span></div>
+      <div><b>420 ms</b><span><b>도장</b> <span class="mono">scale 2.7→1 · rotate −22°→−7° · 220ms · cubic-bezier(.34,1.56,.64,1)</span></span></div>
+      <div><b>640 ms</b><span>임팩트 — 카드 <span class="mono">3px</span> 진동 <b>2프레임만</b> (90ms×2). 이것이 유일한 “충격” 표현이다.</span></div>
+      <div><b>700 ms</b><span>일련번호·날짜 타이핑 <span class="mono">steps(22) · 560ms</span> — 기록물처럼 찍힌다</span></div>
+      <div><b>1360 ms</b><span>종료. 이후 이 카드는 도감 탭에 영구히 남는다.</span></div>
+    </div>
+
+    <p class="note" style="margin-top:22px">
+      <b>왜 컨페티가 아닌가</b> — 컨페티는 3일이면 소음이 된다. 하루 10~25분을 몇 달 반복하는 성인 개발자에게 남는 보상은 <b>다시 볼 수 있는 것</b>뿐이다. 도감 카드는 세션이 끝나도 남고, 47번째 카드는 46번째와 다르다.
+      <b>빈도 상한</b> — 세션당 최대 3회, 연속 발생 시 두 번째부터는 도장 애니메이션을 생략하고 카드만 슬라이드한다.
+    </p>
+  </section>
+
+  <!-- ══════ 04 타이밍 표 ══════ -->
+  <section id="s-timing">
+    <div class="sec-h">
+      <div class="n">04</div>
+      <div>
+        <h2>모션 타이밍 표</h2>
+        <p>모든 값은 이 문서에서 실제로 도는 값이다. 이징 토큰 6종을 넘기지 않는다.</p>
+      </div>
+    </div>
+
+    <div class="tscroll">
+      <table>
+        <thead><tr>
+          <th>상태 / 구간</th><th>파트</th><th>지속</th><th>지연</th><th>이징</th><th>변위 · 값</th><th>감축 모드 대체</th>
+        </tr></thead>
+        <tbody>
+          <tr class="grp"><td colspan="7">이징 토큰</td></tr>
+          <tr><td class="st">--e-hop</td><td>홉·팝</td><td class="m">—</td><td class="m">—</td><td class="m">cubic-bezier(.22,1.2,.36,1)</td><td>짧은 오버슛. 착지감</td><td class="rm">—</td></tr>
+          <tr><td class="st">--e-snap</td><td>경계 반응</td><td class="m">—</td><td class="m">—</td><td class="m">cubic-bezier(.9,0,.1,1)</td><td>거의 즉시 붙고 멈춤</td><td class="rm">—</td></tr>
+          <tr><td class="st">--e-settle</td><td>진입·착지</td><td class="m">—</td><td class="m">—</td><td class="m">cubic-bezier(.16,1,.3,1)</td><td>빠르게 나가 천천히 안착</td><td class="rm">—</td></tr>
+          <tr><td class="st">--e-soft</td><td>일반</td><td class="m">—</td><td class="m">—</td><td class="m">cubic-bezier(.4,0,.2,1)</td><td>기본 전환</td><td class="rm">—</td></tr>
+          <tr><td class="st">--e-stamp</td><td>도장</td><td class="m">—</td><td class="m">—</td><td class="m">cubic-bezier(.34,1.56,.64,1)</td><td>과감한 오버슛. LIFER 전용</td><td class="rm">—</td></tr>
+
+          <tr class="grp"><td colspan="7">01 대기 — 기본값은 정지</td></tr>
+          <tr><td class="st">호흡</td><td>몸통</td><td class="m">5600ms ∞</td><td class="m">0</td><td class="m">ease-in-out</td><td>scale 1 → 1.02</td><td class="rm">정지 (중립 포즈)</td></tr>
+          <tr><td class="st">눈 깜빡임</td><td>눈</td><td class="m">7000ms ∞</td><td class="m">0</td><td class="m">linear</td><td>opacity 1→0→1, 실제 감김 140ms</td><td class="rm">정지 (뜬 상태)</td></tr>
+          <tr><td class="st">정숙 모드</td><td>전체</td><td class="m">0ms</td><td class="m">—</td><td class="m">—</td><td><b>T1 클론 코딩·긴 읽기 화면에서 강제</b>. 호흡·깜빡임까지 끔</td><td class="rm">동일</td></tr>
+
+          <tr class="grp"><td colspan="7">02 생각 중 — 고개 갸웃</td></tr>
+          <tr><td class="st">갸웃 진입</td><td>머리</td><td class="m">384ms</td><td class="m">0</td><td class="m">--e-soft</td><td>rotate 0 → −13°</td><td class="rm">−13° 정지 포즈로 즉시</td></tr>
+          <tr><td class="st">유지</td><td>머리</td><td class="m">896ms</td><td class="m">—</td><td class="m">—</td><td>−13° 홀드</td><td class="rm">유지</td></tr>
+          <tr><td class="st">반대편 교대</td><td>머리</td><td class="m">사이클 3200ms ∞</td><td class="m">—</td><td class="m">--e-soft</td><td>−13° ↔ +11° (비대칭 — 기계적으로 안 보이게)</td><td class="rm">교대 없음</td></tr>
+
+          <tr class="grp"><td colspan="7">03 정답 — 홉 + 씨앗 저장</td></tr>
+          <tr><td class="st">홉</td><td>전체</td><td class="m">520ms</td><td class="m">0</td><td class="m">--e-hop</td><td>translateY 0→−16px→0, 재착지 −3.5px</td><td class="rm">움직임 없음</td></tr>
+          <tr><td class="st">꼬리 튕김</td><td>꼬리</td><td class="m">320ms</td><td class="m">0</td><td class="m">--e-soft</td><td>rotate 0→−13°→0</td><td class="rm">없음</td></tr>
+          <tr><td class="st">날개 한 번</td><td>날개</td><td class="m">240ms</td><td class="m">0</td><td class="m">--e-soft</td><td>rotate 0→−26°→0</td><td class="rm">없음</td></tr>
+          <tr><td class="st">씨앗 이동</td><td>씨앗</td><td class="m">420ms</td><td class="m">120ms</td><td class="m">X linear / Y cubic-bezier(.42,−.5,.62,1)</td><td>부리 → 저장고. Y축 음수 제어점으로 포물선</td><td class="rm"><b>씨앗 생략, 구멍만 채움</b></td></tr>
+          <tr><td class="st">구멍 점등</td><td>저장고</td><td class="m">260ms</td><td class="m">520ms</td><td class="m">--e-hop</td><td>opacity .22→1, scale 1→1.3→1</td><td class="rm">즉시 채워진 상태</td></tr>
+
+          <tr class="grp"><td colspan="7">04 오답 — 알아챔, 벌 아님</td></tr>
+          <tr><td class="st">고개 스냅</td><td>머리</td><td class="m">640ms</td><td class="m">0</td><td class="m">--e-snap</td><td>rotate 0→−23°(90ms) → 복귀 448ms. <b>빠르게 보고, 천천히 푼다</b></td><td class="rm">움직임 없음</td></tr>
+          <tr><td class="st">깃털 부풀림</td><td>몸통</td><td class="m">700ms</td><td class="m">0</td><td class="m">--e-soft</td><td>scale 1→1.09→1 (긴장의 신체 신호)</td><td class="rm">없음</td></tr>
+          <tr><td class="st">경계 밑줄</td><td>UI</td><td class="m">260ms</td><td class="m">90ms</td><td class="m">--e-settle</td><td>scaleX 0→1, 좌→우</td><td class="rm">즉시 완성된 밑줄</td></tr>
+          <tr><td class="st">dee 칩</td><td>UI</td><td class="m">220ms ×n</td><td class="m">70ms 스태거</td><td class="m">--e-hop</td><td>opacity 0→1, scale .6→1. <b>칩 개수 = 남은 반복 횟수</b></td><td class="rm">전부 즉시 표시 (개수 정보 유지)</td></tr>
+          <tr><td class="st">금지</td><td>화면</td><td class="m">—</td><td class="m">—</td><td class="m">—</td><td>화면 흔들기 · 빨간 플래시 · 하강음 — 전부 없음</td><td class="rm">—</td></tr>
+
+          <tr class="grp"><td colspan="7">05 「놓쳤어요」 — 거꾸로 매달리기 ★ 가장 중요</td></tr>
+          <tr><td class="st">뒤집기</td><td>전체</td><td class="m">520ms</td><td class="m">0</td><td class="m">--e-settle</td><td>rotate 0→180°, 중간 84°에서 −4px 들림. 회전축 = <b>발</b> (가지를 놓지 않는다)</td><td class="rm"><b>처음부터 180° 정지 포즈</b> — 의미 100% 보존</td></tr>
+          <tr><td class="st">흔들림</td><td>전체</td><td class="m">3400ms ∞</td><td class="m">520ms</td><td class="m">ease-in-out</td><td>rotate 180° ±4.5° (매달림의 무게감)</td><td class="rm">정지</td></tr>
+          <tr><td class="st">아랫면 표시</td><td>UI</td><td class="m">420ms</td><td class="m">300ms</td><td class="m">linear</td><td>점선 stroke-dashoffset 120→0</td><td class="rm">즉시 완성</td></tr>
+          <tr><td class="st">씨앗 회수</td><td>씨앗</td><td class="m">480ms</td><td class="m">560ms</td><td class="m">포물선</td><td><b>저장고 → Dee</b>. 정답과 방향이 반대 — 묻어둔 걸 파내는 동작</td><td class="rm">생략, 「+1 도감」 칩만</td></tr>
+          <tr><td class="st">+1 도감</td><td>UI</td><td class="m">220ms</td><td class="m">300ms</td><td class="m">--e-hop</td><td>획득 칩. <b>손실 표현 일절 없음</b></td><td class="rm">즉시 표시</td></tr>
+
+          <tr class="grp"><td colspan="7">06 선행 개념 — 무리를 이끌고 내려감</td></tr>
+          <tr><td class="st">Dee 하강</td><td>전체</td><td class="m">460ms</td><td class="m">0</td><td class="m">--e-settle</td><td>translate(0,0) → (−72,+84). 26% 지점에서 위로 −15px (뛰어내리는 준비 동작)</td><td class="rm">아래 가지 위치로 즉시</td></tr>
+          <tr><td class="st">동료 따라옴</td><td>동료 새</td><td class="m">460ms</td><td class="m">160ms</td><td class="m">--e-settle</td><td>Dee보다 <b>160ms 늦게</b> 출발 — 이 지연이 “따라온다”를 만든다</td><td class="rm">아래 가지에 즉시 표시</td></tr>
+          <tr><td class="st">인도선</td><td>UI</td><td class="m">400ms</td><td class="m">100ms</td><td class="m">linear</td><td>점선 경로 그리기</td><td class="rm">즉시 완성</td></tr>
+
+          <tr class="grp"><td colspan="7">07 세션 완료 — 저장고 정리</td></tr>
+          <tr><td class="st">위 가지로</td><td>전체</td><td class="m">520ms</td><td class="m">0</td><td class="m">--e-settle</td><td>translate(+64,−26)</td><td class="rm">위 가지에 즉시</td></tr>
+          <tr><td class="st">씨앗 점등</td><td>저장고</td><td class="m">380ms ×3</td><td class="m">620/710/800ms</td><td class="m">--e-hop</td><td>90ms 스태거. <b>순차 점등이 컨페티를 대체한다</b></td><td class="rm">전부 점등된 상태로 즉시</td></tr>
+          <tr><td class="st">기억 용량</td><td>UI</td><td class="m">380ms</td><td class="m">640ms</td><td class="m">--e-hop</td><td>scaleY .3→1.35→1. 한 칸만 — 해마가 커지는 속도</td><td class="rm">채워진 칸으로 즉시</td></tr>
+
+          <tr class="grp"><td colspan="7">전역 규칙</td></tr>
+          <tr><td class="st">동시 재생 상한</td><td>—</td><td class="m">—</td><td class="m">—</td><td class="m">—</td><td>화면당 Dee 애니메이션 <b>1개</b>. 겹치면 뒤엣것이 앞엣것을 즉시 종료</td><td class="rm">—</td></tr>
+          <tr><td class="st">최대 길이</td><td>—</td><td class="m">≤ 720ms</td><td class="m">—</td><td class="m">—</td><td>LIFER(1360ms)만 예외</td><td class="rm">—</td></tr>
+          <tr><td class="st">입력 중</td><td>—</td><td class="m">0ms</td><td class="m">—</td><td class="m">—</td><td><b>타이핑·읽기 중 모든 모션 정지</b>. 마지막 키 입력 후 1200ms 지나야 재개</td><td class="rm">동일</td></tr>
+          <tr><td class="st">창 비활성</td><td>—</td><td class="m">0ms</td><td class="m">—</td><td class="m">—</td><td>포커스 없으면 전부 정지 (배터리·주의력)</td><td class="rm">동일</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══════ 05 소리 ══════ -->
+  <section id="s-sound">
+    <div class="sec-h">
+      <div class="n">05</div>
+      <div>
+        <h2>소리 명세 — 기본 음소거</h2>
+        <p>개발자는 조용한 환경을 선호한다. <b>기본값 <span class="mono">sound.enabled = false</span></b>. 켜야만 동작하고, 켠 뒤에도 창이 비활성이면 재생하지 않는다. 전부 WebAudio 합성 — 오디오 파일 0개(Tauri 번들 유지).</p>
+      </div>
+    </div>
+
+    <div class="sound-vis">
+      <div class="svcard">
+        <div class="micro">노래 · SONG</div>
+        <div class="notes"><i class="fee"></i><i class="bee"></i></div>
+        <code>fee-bee</code>
+        <p><b>정답 / LIFER.</b> 박새의 <b>노래</b>는 영역·안정 신호다. 성공에 노래를 쓰는 건 행동학적으로 맞다. 2음 하강, 총 340ms.</p>
+      </div>
+      <div class="svcard">
+        <div class="micro">경계음 · CALL</div>
+        <div class="notes"><i class="chick"></i><i class="a"></i><i class="dee"></i><i class="dee"></i><i class="dee"></i></div>
+        <code>chick-a-dee-dee-dee</code>
+        <p><b>오답.</b> 실제로 <span class="mono">dee</span> 개수는 위협 수준에 비례한다. 여기서는 <b>남은 반복 횟수 = dee 개수</b>(1~5). 소리만 듣고도 “이건 3번 더 나온다”를 안다.</p>
+      </div>
+      <div class="svcard">
+        <div class="micro">근접 접촉음 · GARGLE</div>
+        <div class="notes"><i style="height:22px;background:var(--yellow)"></i><i style="height:30px;background:var(--yellow)"></i></div>
+        <code>tsee-dip</code>
+        <p><b>「놓쳤어요」.</b> 가까운 개체끼리 쓰는 부드러운 접촉음. <b>상승</b> 2음 — 실패음처럼 들리면 안 된다. 220ms.</p>
+      </div>
+    </div>
+
+    <div class="tscroll">
+      <table>
+        <thead><tr><th>이벤트</th><th>소리</th><th>합성</th><th>길이</th><th>레벨</th><th>규칙</th></tr></thead>
+        <tbody>
+          <tr><td class="st">정답</td><td class="m">fee-bee</td><td class="m">sine, 620→528Hz, exp decay</td><td class="m">340ms</td><td class="m">−22 LUFS</td><td>연속 정답 시 3회마다 1회만 재생 (피로 방지)</td></tr>
+          <tr><td class="st">오답</td><td class="m">chick-a-dee × N</td><td class="m">square 1.4kHz 2틱 + noise-band dee ×N</td><td class="m">180 + 90×N ms</td><td class="m">−24 LUFS</td><td><b>N = 남은 반복 횟수 (1~5).</b> N&gt;5 는 5로 절단</td></tr>
+          <tr><td class="st">「놓쳤어요」</td><td class="m">tsee-dip</td><td class="m">triangle, 480→610Hz <b>상승</b></td><td class="m">220ms</td><td class="m">−24 LUFS</td><td>상승 음정 필수. 하강 금지 — 실패로 들린다</td></tr>
+          <tr><td class="st">선행 개념 이동</td><td class="m">soft chip ×2</td><td class="m">sine 700Hz, 두 번째 −3 반음</td><td class="m">160ms</td><td class="m">−26 LUFS</td><td>두 번째 칩이 <b>140ms 늦게</b> — 무리가 따라오는 소리</td></tr>
+          <tr><td class="st">LIFER</td><td class="m">fee-bee(+8st) + thunk</td><td class="m">sine + 저역 임펄스(도장)</td><td class="m">520ms</td><td class="m">−18 LUFS</td><td>앱에서 가장 큰 소리. 개념당 평생 1회</td></tr>
+          <tr><td class="st">세션 완료</td><td class="m">4음 시퀀스</td><td class="m">sine, 저장고 점등에 동기</td><td class="m">1100ms</td><td class="m">−22 LUFS</td><td>600ms를 넘는 <b>유일한</b> 소리</td></tr>
+          <tr><td class="st">대기 · 생각 중</td><td class="m">—</td><td class="m">—</td><td class="m">—</td><td class="m">—</td><td><b>무음.</b> 상시 상태에는 소리를 붙이지 않는다</td></tr>
+          <tr class="grp"><td colspan="6">전역 규칙</td></tr>
+          <tr><td class="st">기본값</td><td class="m" colspan="4">sound.enabled = false</td><td>설정에서 켜야만 동작. 최초 실행에 권유 팝업 없음</td></tr>
+          <tr><td class="st">디바운스</td><td class="m" colspan="4">400ms</td><td>이 안에 들어온 두 번째 소리는 버린다 (큐잉 없음)</td></tr>
+          <tr><td class="st">포커스</td><td class="m" colspan="4">document.hasFocus() === false → 재생 안 함</td><td>백그라운드에서 소리 내지 않는다</td></tr>
+          <tr><td class="st">주파수</td><td class="m" colspan="4">실제 박새 4kHz → <b>3옥타브 하향</b> (≈500~700Hz)</td><td>원음 그대로는 데스크톱에서 날카롭다</td></tr>
+          <tr><td class="st">감축 모드</td><td class="m" colspan="4">prefers-reduced-motion과 <b>독립</b></td><td>모션을 껐다고 소리를 켜지 않는다. 서로 대체재가 아니다</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══════ 06 버린 대안 ══════ -->
+  <section id="s-killed">
+    <div class="sec-h">
+      <div class="n">06</div>
+      <div>
+        <h2>버린 대안</h2>
+        <p>설계에서 실제로 만들었다가 지운 것들. 지운 이유가 곧 이 시스템의 경계다.</p>
+      </div>
+    </div>
+    <div class="kill">
+      <div class="kill-row"><span class="x">✕</span><span class="what">눈·눈썹으로 표정 짓기</span><span class="why">검은 머리깃이 <em>실제로 눈을 삼킨다</em>. 해부학적으로 불가능하고, 16px에서 가장 먼저 뭉개지는 것도 눈이다. 표정을 못 만드는 제약이 오히려 “행동으로 말하기”라는 규칙을 강제했다.</span></div>
+      <div class="kill-row"><span class="x">✕</span><span class="what">정답 컨페티</span><span class="why">하루 10~25분을 몇 달 반복하는 성인에게 컨페티는 <em>3일이면 소음</em>이다. 남는 건 다시 볼 수 있는 것뿐 → 도감 카드 기록으로 대체.</span></div>
+      <div class="kill-row"><span class="x">✕</span><span class="what">하트 · 목숨 게이지</span><span class="why">틀리는 걸 벌로 만들면 <em>「놓쳤어요」를 아무도 안 누른다</em>. 이 앱의 핵심 기능이 죽는다. 난이도는 목숨이 아니라 <span class="mono">dee</span> 개수(= 남은 반복 횟수)로 표현.</span></div>
+      <div class="kill-row"><span class="x">✕</span><span class="what">오답 시 화면 흔들기 / 빨간 플래시</span><span class="why">벌처럼 읽히고, 감축 모드에서 <em>정보가 0</em>이 된다. 대신 고개 스냅(알아챔) + 정적으로도 남는 밑줄.</span></div>
+      <div class="kill-row"><span class="x">✕</span><span class="what">상시 날아다니는 마스코트</span><span class="why">본문을 읽어야 하는 화면에서 <em>움직이는 것은 언제나 이긴다</em>. Dee는 가지에 앉아 있고, 기본값은 완전 정지.</span></div>
+      <div class="kill-row"><span class="x">✕</span><span class="what">말풍선으로 말하는 Dee</span><span class="why">텍스트가 늘어나면 본문과 <em>주의력을 두고 경쟁</em>한다. Dee는 말하지 않는다. 설명은 UI 한 줄이 한다.</span></div>
+      <div class="kill-row"><span class="x">✕</span><span class="what">그라디언트 · 광택 · 아웃라인 스트로크</span><span class="why">16px에서 실루엣이 붕괴한다. 플랫 3색 + 클립만 사용. 스트로크는 다리 하나뿐이고 그마저 소형 마크에서는 지운다.</span></div>
+      <div class="kill-row"><span class="x">✕</span><span class="what">「놓쳤어요」에 슬픈 Dee</span><span class="why">단 한 번의 실망 표현이 <em>버튼을 안 누르게</em> 만든다. 반대로 갔다 — 거꾸로 매달려 “아래를 같이 보자”. 박새의 시그니처 동작이면서 동시에 “안 보이던 아랫면을 본다”는 뜻이 된다.</span></div>
+      <div class="kill-row"><span class="x">✕</span><span class="what">선행 개념 = 강등 애니메이션 (아래로 떨어짐)</span><span class="why">추락은 실패의 문법이다. 박새는 <em>혼합 무리를 이끄는 길잡이</em>다 — Dee가 먼저 내려가고 동료가 160ms 뒤에 따라온다. 같은 이동, 정반대 의미.</span></div>
+      <div class="kill-row"><span class="x">✕</span><span class="what">진행률 바 상시 애니메이션</span><span class="why">항상 움직이면 아무것도 강조되지 않는다. 진행 피드백은 <em>세션 완료 시 1회</em>, 저장고 순차 점등으로 몰아준다.</span></div>
+      <div class="kill-row"><span class="x">✕</span><span class="what">감축 모드 = 애니메이션 전부 제거</span><span class="why">그러면 “거꾸로 매달림”이 사라져 <em>정보까지 사라진다</em>. 채택안: 전환만 없애고 <em>최종 포즈는 유지</em>한다. 감축 모드에서도 Dee는 뒤집혀 있다.</span></div>
+      <div class="kill-row"><span class="x">✕</span><span class="what">리그 · 랭킹 · 연속 기록 압박</span><span class="why">자기 코드를 교재로 쓰는 앱에 <em>비교 대상은 없다</em>. 연속 기록은 숫자로만 조용히 표시하고, 끊겨도 아무 연출을 하지 않는다.</span></div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Chickadee — Field Guide</span>
+    <span>Dee Motion Spec v1</span>
+    <span>Self-contained · 0 dependencies</span>
+    <span id="fMotion">Motion: full</span>
+  </footer>
+</main>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ── 크기 비교 렌더 ─────────────────────────────── */
+  function mark(size, cls){
+    return '<svg class="mark '+(cls||'')+'" width="'+size+'" height="'+size+'" viewBox="0 0 100 100" aria-hidden="true">'+
+           '<use href="#deeSym" width="100" height="100"/></svg>';
+  }
+  function box(size, cls, lab, plateCls){
+    var pad = size <= 24 ? 6 : (size <= 32 ? 8 : 12);
+    return '<div class="szbox">'+
+      '<div class="plate '+(plateCls||'')+'" style="padding:'+pad+'px">'+mark(size, cls)+'</div>'+
+      '<div class="lab">'+lab+'</div></div>';
+  }
+  var SM = 'sm-mark';
+  document.getElementById('rowA').innerHTML =
+      box(16, SM, '<b>16</b>px 소형')
+    + box(24, SM, '<b>24</b>px 소형')
+    + box(32, '',  '<b>32</b>px')
+    + box(64, '',  '<b>64</b>px')
+    + box(128,'',  '<b>128</b>px');
+
+  document.getElementById('rowB').innerHTML =
+      box(16, '', '16px 미조정')
+    + box(24, '', '24px 미조정')
+    + box(16, SM, '16px 소형 ✓')
+    + box(24, SM, '24px 소형 ✓');
+
+  document.getElementById('rowC').innerHTML =
+      box(16, SM, '16px 어두운 UI', 'dark')
+    + box(24, SM, '24px 어두운 UI', 'dark')
+    + box(32, '',  '32px 어두운 UI', 'dark')
+    + box(64, '',  '64px 어두운 UI', 'dark');
+
+  document.getElementById('rowD').innerHTML =
+      box(32, 'blur', '32px · blur 1.1px')
+    + box(64, 'blur', '64px · blur 1.1px')
+    + box(32, 'sil',  '32px · 단색 실루엣')
+    + box(64, 'sil',  '64px · 단색 실루엣');
+
+  /* ── 상태 정의 ─────────────────────────────────── */
+  var STATES = [
+    { id:'idle', no:'01', key:'1', name:'대기', en:'IDLE',
+      hab:'박새는 완전히 멈추지 않지만, <b>주변을 살필 때는 미동도 하지 않는다</b>. 이 앱에서는 그 정지를 기본값으로 삼았다.',
+      act:'가지에 앉아 있음. 5.6초 주기의 미세한 호흡(2%)과 7초마다 눈 깜빡임. 그게 전부.',
+      tim:'호흡 5600ms ∞ · scale 1→1.02\n깜빡임 7000ms ∞ · 감김 140ms\n정숙 모드: 전부 0ms',
+      rm:'루프 정지. 중립 포즈 유지 — 대기 상태는 애니메이션이 정보를 나르지 않으므로 손실 0.',
+      where:'대시보드 · 도감 · 목차. <b>T1 클론 코딩 화면에서는 정숙 모드 강제</b>(움직임 0).',
+      snd:'무음. 상시 상태에는 소리를 붙이지 않는다.' },
+
+    { id:'think', no:'02', key:'2', name:'생각 중', en:'THINKING',
+      hab:'박새는 낯선 것을 살필 때 <b>고개를 옆으로 꺾어 한쪽 눈으로 본다</b>. 호기심의 신체 신호.',
+      act:'고개를 −13° 갸웃, 0.9초 유지, 복귀, 반대로 +11°. 좌우를 비대칭으로 두어 기계처럼 안 보이게.',
+      tim:'진입 384ms · --e-soft\n유지 896ms\n사이클 3200ms ∞ · −13° ↔ +11°',
+      rm:'−13° <b>정지 포즈</b>로 즉시 고정. “살피는 중”이라는 정보는 포즈만으로 전달된다.',
+      where:'채점 대기 · AI 응답 대기 · T2 구조 분석 중.',
+      snd:'무음.' },
+
+    { id:'correct', no:'03', key:'3', name:'정답', en:'CORRECT',
+      hab:'박새는 걷지 않고 <b>홉(hop)</b>한다. 그리고 얻은 씨앗을 <b>바로 저장고에 묻는다</b> — 몇 달 뒤 회수한다.',
+      act:'짧은 홉 1회 + 꼬리 튕김. 부리에 물린 씨앗이 포물선을 그리며 가지의 저장 구멍으로 들어가 불이 들어온다.',
+      tim:'홉 520ms · --e-hop · −16px\n꼬리 320ms / 날개 240ms\n씨앗 420ms @120ms · 포물선\n구멍 점등 260ms @520ms',
+      rm:'씨앗 이동 <b>생략</b>, 구멍은 채워진 상태로 즉시 표시. “저장됐다”는 결과는 남는다.',
+      where:'T0 문법 정답 · T1 라인 통과 · T2 배치 정답.',
+      snd:'fee-bee (박새의 <b>노래</b> — 영역·안정 신호) · 340ms · 연속 3회마다 1회.' },
+
+    { id:'wrong', no:'04', key:'4', name:'오답', en:'WRONG',
+      hab:'경계음 <span class="mono">chick-a-dee-dee-dee</span> 의 <b>dee 개수는 위협 수준에 비례</b>한다. 위협을 알릴 뿐, 도망치지 않는다.',
+      act:'고개를 90ms 만에 홱 돌려 그 자리를 응시(알아챔), 깃털을 9% 부풀림(긴장). 그리고 <b>천천히</b> 푼다. 화면은 흔들리지 않는다.',
+      tim:'고개 스냅 640ms · --e-snap · −23°(90ms) → 복귀 448ms\n부풀림 700ms · scale 1→1.09\n밑줄 260ms @90ms\ndee 칩 220ms · 70ms 스태거',
+      rm:'모션 없음. <b>dee 칩 개수와 밑줄은 그대로</b> — 난이도 정보는 애니메이션이 아니라 개수가 나른다.',
+      where:'T0 오답 · T1 「같은 뜻인데요」 판정 실패.',
+      snd:'chick-a-dee × N (N = 남은 반복 횟수) · 180+90N ms.' },
+
+    { id:'missed', no:'05', key:'5', name:'「놓쳤어요」 눌림', en:'I MISSED THIS ★',
+      hab:'박새의 <b>시그니처 동작 — 가지에 거꾸로 매달려 아랫면을 살핀다</b>. 다른 새가 못 보는 곳을 보려는 행동.',
+      act:'Dee가 <b>발로 가지를 붙든 채</b> 520ms 동안 뒤집혀 매달린다. “아래를 같이 봅시다.” 동시에 저장고에서 <b>이미 묻어둔 씨앗을 파내</b> 가져온다 = 복습. 실망 표현 0, 획득 칩 +1.',
+      tim:'뒤집기 520ms · --e-settle · 0→180° (축 = 발)\n흔들림 3400ms ∞ · ±4.5°\n아랫면 점선 420ms @300ms\n씨앗 회수 480ms @560ms (방향 반대)',
+      rm:'<b>처음부터 180° 뒤집힌 정지 포즈</b>로 렌더. 이 상태는 포즈 자체가 메시지라 정보 손실이 없다.',
+      where:'모든 학습 화면의 <span class="mono">?</span> 키 · 「모르겠어요」 사다리 전 단계.',
+      snd:'tsee-dip — 근접 접촉음, <b>상승</b> 2음 220ms. 하강 음정 금지.' },
+
+    { id:'prereq', no:'06', key:'6', name:'선행 개념으로', en:'DESCEND',
+      hab:'박새는 <b>혼합 무리를 이끈다</b>. 박새가 움직이면 동고비·오목눈이가 따라간다. 무리의 길잡이.',
+      act:'Dee가 먼저 아래 가지로 뛰어내리고, 동료 새가 <b>160ms 늦게</b> 따라온다. 그 지연이 “인도”를 만든다 — 떨어지는 게 아니라 앞장서는 것.',
+      tim:'Dee 하강 460ms · --e-settle · (−72,+84)\n동료 460ms @160ms · (−58,+84)\n인도선 400ms @100ms',
+      rm:'양쪽 모두 아래 가지 위치에 즉시 표시. 인도선은 완성된 상태로. <b>“둘이 함께 내려왔다”는 배치가 정보</b>다.',
+      where:'오답 2회 누적 시 자동 · 「놓쳤어요」 사다리 3단.',
+      snd:'soft chip ×2, 두 번째가 140ms 늦게 · −3 반음.' },
+
+    { id:'done', no:'07', key:'7', name:'세션 완료', en:'SESSION DONE',
+      hab:'저장을 마친 박새는 자리를 옮겨 <b>저장고 전체를 훑는다</b>. 그리고 가을이면 <b>해마가 실제로 커진다</b>.',
+      act:'Dee가 위 가지로 올라 앉고, 오늘 묻은 씨앗들이 <b>90ms 간격으로 순차 점등</b>. 컨페티 대신 이 시퀀스가 마무리를 맡는다. 기억 용량 게이지가 한 칸 찬다.',
+      tim:'위 가지 520ms · --e-settle · (+64,−26)\n씨앗 점등 380ms ×3 @620/710/800ms\n기억 용량 380ms @640ms · scaleY .3→1.35→1',
+      rm:'전부 점등·충전된 상태로 즉시. 개수와 칸 수가 정보이므로 손실 없음.',
+      where:'세션 종료 화면.',
+      snd:'4음 시퀀스 1100ms — 600ms를 넘는 유일한 소리.' }
+  ];
+
+  var stage    = document.getElementById('stage');
+  var fx       = document.getElementById('fx');
+  var btnsWrap = document.getElementById('stateBtns');
+  var current  = 'idle';
+
+  // 버튼 생성
+  var html = '';
+  for (var i=0;i<STATES.length;i++){
+    var s = STATES[i];
+    html += '<button class="sbtn'+(s.id==='missed'?' key':'')+'" data-id="'+s.id+'" aria-pressed="'+(s.id==='idle')+'">'+
+            '<i>'+s.key+' · '+s.en+'</i><b>'+s.name+'</b></button>';
+  }
+  btnsWrap.innerHTML = html;
+
+  function find(id){ for (var i=0;i<STATES.length;i++) if (STATES[i].id===id) return STATES[i]; return STATES[0]; }
+  function nl2br(t){ return String(t).replace(/\n/g,'<br>'); }
+
+  function setState(id){
+    var s = find(id);
+    current = id;
+
+    // 애니메이션 재시작: 상태 제거 → 강제 리플로우 → 재설정
+    stage.removeAttribute('data-state');
+    void stage.getBoundingClientRect().width;
+    stage.setAttribute('data-state', id);
+
+    fx.removeAttribute('data-show');
+    void fx.getBoundingClientRect().width;
+    fx.setAttribute('data-show', id);
+
+    var bs = btnsWrap.querySelectorAll('.sbtn');
+    for (var i=0;i<bs.length;i++) bs[i].setAttribute('aria-pressed', String(bs[i].dataset.id===id));
+
+    document.getElementById('stageName').textContent = s.name + ' / ' + s.en.replace(' ★','');
+    document.getElementById('stageDur').textContent  = s.tim.split('\n')[0];
+    document.getElementById('iTag').textContent  = 'STATE ' + s.no + ' / ' + s.en;
+    document.getElementById('iName').textContent = s.name;
+    document.getElementById('iHab').innerHTML    = s.hab;
+    document.getElementById('iAct').innerHTML    = s.act;
+    document.getElementById('iTim').innerHTML    = nl2br(s.tim);
+    document.getElementById('iRm').innerHTML     = s.rm;
+    document.getElementById('iWhere').innerHTML  = s.where;
+    document.getElementById('iSnd').innerHTML    = s.snd;
+  }
+
+  btnsWrap.addEventListener('click', function(e){
+    var b = e.target.closest('.sbtn');
+    if (b) setState(b.dataset.id);
+  });
+  document.getElementById('btnReplay').addEventListener('click', function(){ setState(current); });
+
+  /* ── LIFER ─────────────────────────────────────── */
+  var lifer = document.getElementById('liferStage');
+  function playLifer(){
+    lifer.classList.remove('play');
+    void lifer.getBoundingClientRect().width;
+    lifer.classList.add('play');
+  }
+  document.getElementById('btnLifer').addEventListener('click', playLifer);
+
+  /* ── 토글 ──────────────────────────────────────── */
+  var root = document.documentElement;
+  function paint(btn, onIdx){
+    var sp = btn.querySelectorAll('span');
+    for (var i=0;i<sp.length;i++) sp[i].setAttribute('data-on', i===onIdx ? '1' : '0');
+  }
+  var swTheme = document.getElementById('swTheme');
+  swTheme.addEventListener('click', function(){
+    var ink = root.getAttribute('data-theme') === 'ink';
+    root.setAttribute('data-theme', ink ? 'paper' : 'ink');
+    paint(swTheme, ink ? 0 : 1);
+  });
+
+  var swMotion = document.getElementById('swMotion');
+  function applyMotion(mode){
+    root.setAttribute('data-motion', mode);
+    paint(swMotion, mode === 'full' ? 0 : 1);
+    document.getElementById('fMotion').textContent = 'Motion: ' + mode;
+    setState(current);
+  }
+  swMotion.addEventListener('click', function(){
+    applyMotion(root.getAttribute('data-motion') === 'full' ? 'reduced' : 'full');
+  });
+
+  var swQuiet = document.getElementById('swQuiet');
+  swQuiet.addEventListener('click', function(){
+    var on = root.getAttribute('data-quiet') === 'on';
+    root.setAttribute('data-quiet', on ? 'off' : 'on');
+    paint(swQuiet, on ? 0 : 1);
+    setState(current);
+  });
+
+  /* ── 키보드 ────────────────────────────────────── */
+  document.addEventListener('keydown', function(e){
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var t = e.target;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
+    for (var i=0;i<STATES.length;i++){
+      if (e.key === STATES[i].key){ setState(STATES[i].id); return; }
+    }
+    if (e.key === 'r' || e.key === 'R') setState(current);
+    if (e.key === 'l' || e.key === 'L') playLifer();
+    if (e.key === 'Escape') lifer.classList.remove('play');
+  });
+
+  /* ── OS 설정 반영 (토글이 항상 우선) ─────────────── */
+  try {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      applyMotion('reduced');
+    } else {
+      applyMotion('full');
+    }
+  } catch (err) {
+    applyMotion('full');
+  }
+
+  setState('idle');
+})();
+</script>
+</body>
+</html>

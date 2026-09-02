@@ -1,0 +1,30 @@
+[package]
+name = "chickadee-app"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Chickadee desktop shell"
+publish = false        # 배포하지 않는다 — cargo-deny 가 private 로 보고 wildcard·license 검사를 건너뛴다
+
+[lib]
+name = "chickadee_app_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+chickadee-store = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+tauri-plugin-clipboard-manager = "2"
+tauri-plugin-opener = "2"
+tauri-plugin-log = "2"
+thiserror = { workspace = true }
+tracing = { workspace = true }
+
+[lints]
+workspace = true

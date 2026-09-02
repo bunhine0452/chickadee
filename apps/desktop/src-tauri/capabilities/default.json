@@ -1,0 +1,14 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "최소 권한 — allowlist 는 처음 넓으면 절대 좁혀지지 않는다 (06 §4.3)",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-show",
+    "dialog:allow-open",
+    "clipboard-manager:allow-write-text",
+    "opener:allow-open-url",
+    "log:default"
+  ]
+}

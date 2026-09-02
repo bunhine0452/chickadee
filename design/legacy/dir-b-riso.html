@@ -1,0 +1,1809 @@
+<!doctype html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>잉크 — 내 코드를 교재로 찍는 인쇄소</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=Black+Han+Sans&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   잉크 (INK) — Risograph Study Press
+   방향: 리소그래프 인쇄 / 종이와 스티커
+   질감은 전부 CSS·SVG로. 코드 영역엔 질감 0.
+   ============================================================ */
+
+/* ---------- 잉크 팔레트 (light = 주간반) ---------- */
+:root{
+  color-scheme: light;
+
+  /* 종이·작업대 */
+  --desk:      #DED2BB;   /* 작업대 (누런 크라프트) */
+  --desk-2:    #D3C5AB;
+  --paper:     #F7F1E3;   /* 대지(sheet) */
+  --paper-2:   #FDFAF0;   /* 들린 카드 */
+  --paper-3:   #EFE7D4;   /* 눌린 면 */
+  --stock:     #FFFDF7;   /* 교정용 백색 용지 = 코드 판 */
+
+  /* 먹 */
+  --ink:       #221D18;
+  --ink-body:  #3B342C;
+  --ink-soft:  #5E564C;
+  --ink-2:     #6F6559;
+  --ink-faint: #9A8F80;
+  --rule:      #221D18;
+
+  /* 3색 잉크 (fill) */
+  --c1:        #1250C8;   /* 청 CYAN — T0 문법 */
+  --c1-deep:   #0B3A96;
+  --c2:        #FF2E7E;   /* 형광진홍 FLUORO — T1 클론 */
+  --c2-deep:   #C7135C;
+  --c3:        #FFC400;   /* 황 YELLOW — T2 구조 */
+  --c3-deep:   #C08F00;
+
+  /* 잉크 (본문 텍스트용, 4.5:1 확보) */
+  --c1t:       #0F47B0;
+  --c2t:       #B81254;
+  --c3t:       #7E5300;
+
+  --on-ink:    #221D18;   /* 잉크 위의 글자 = 먹 */
+  --knock:     #FFFDF7;   /* 녹아웃(백색) */
+
+  /* 코드 판 (질감 없음, 순수 대비) */
+  --code-bg:   #FFFDF7;
+  --code-fg:   #221D18;
+  --code-ln:   #8C8477;
+  --code-hl:   #FFEDAF;
+  --code-edge: #221D18;
+  --sx-key:    #C11A63;
+  --sx-str:    #146C4B;
+  --sx-num:    #8A4B00;
+  --sx-fn:     #1240A8;
+  --sx-com:    #5F5850;
+  --sx-pun:    #635B51;
+  --sx-typ:    #6A3AA8;
+
+  /* 인쇄 물리 */
+  --blend:     multiply;
+  --grain-op:  .17;
+  --grain-blend: multiply;
+  --grain-tint: rgba(255,255,255,0);
+  --lamp:      inset 0 0 0 0 transparent;
+  --edge:      rgba(34,29,24,.30);   /* 종이 두께 그림자 */
+  --drop:      rgba(58,44,26,.26);
+  --misreg:    1.6px;
+
+  --f-ui: "IBM Plex Sans KR","Apple SD Gothic Neo","Pretendard","Noto Sans KR",system-ui,-apple-system,"Malgun Gothic",sans-serif;
+  --f-mono: "IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  --f-poster: "Black Han Sans","IBM Plex Sans KR","Apple SD Gothic Neo",system-ui,sans-serif;
+}
+
+/* ---------- 야간반 : 흑지에 형광 잉크 ----------
+   반전이 아니라 "다른 인쇄 공정".
+   낮엔 잉크가 종이에 스며든다(multiply).
+   밤엔 형광 잉크가 어둠 위에서 빛난다(screen). */
+[data-theme="dark"]{
+  color-scheme: dark;
+  --desk:      #0C0906;
+  --desk-2:    #060403;
+  --paper:     #261E15;
+  --paper-2:   #31271A;
+  --paper-3:   #1D1710;
+  --stock:     #14110D;
+
+  --ink:       #F2E9DC;
+  --ink-body:  #DED3C3;
+  --ink-soft:  #BCAF9F;
+  --ink-2:     #A99B8A;
+  --ink-faint: #968878;
+  --rule:      #4A3F34;
+
+  --c1:        #4C93FF;
+  --c1-deep:   #1F5FC4;
+  --c2:        #FF5FA8;
+  --c2-deep:   #C72D74;
+  --c3:        #FFD24A;
+  --c3-deep:   #C69B14;
+
+  --c1t:       #7FB6FF;
+  --c2t:       #FF83BC;
+  --c3t:       #FFD866;
+
+  --on-ink:    #17120E;
+  --knock:     #17120E;
+
+  --code-bg:   #14110D;
+  --code-fg:   #F0E7DB;
+  --code-ln:   #8E8377;
+  --code-hl:   #3A2F14;
+  --code-edge: #5C4E3D;
+  --sx-key:    #FF7FB8;
+  --sx-str:    #7BE3AE;
+  --sx-num:    #FFC46B;
+  --sx-fn:     #7FB6FF;
+  --sx-com:    #ABA093;
+  --sx-pun:    #B8AB99;
+  --sx-typ:    #C6A6FF;
+
+  /* 밤엔 잉크가 어둠 위에서 더한다(screen).
+     단 종이 결은 soft-light로 — screen으로 얹으면 종이가 회색으로 뜬다. */
+  --blend:     screen;
+  --grain-op:  .5;
+  --grain-blend: soft-light;
+  --grain-tint: rgba(255,196,120,.5);
+  --lamp:      inset 0 1.5px 0 rgba(255,206,140,.11);
+  --edge:      #060403;
+  --drop:      rgba(0,0,0,.85);
+}
+
+/* 야간반 : 작업 램프 하나가 대지를 비춘다 */
+[data-theme="dark"] body{
+  background-image:
+    radial-gradient(80% 46% at 50% -6%, rgba(255,178,88,.13), transparent 62%),
+    radial-gradient(120% 90% at 12% 110%, rgba(120,80,255,.05), transparent 60%);
+}
+[data-theme="dark"] .deck[data-mode="ok"]{background:color-mix(in srgb, var(--c1) 9%, var(--paper))}
+[data-theme="dark"] .deck[data-mode="no"]{background:color-mix(in srgb, var(--c2) 9%, var(--paper))}
+[data-theme="dark"] .deck[data-mode="idk"]{background:color-mix(in srgb, var(--c3) 12%, var(--paper))}
+[data-theme="dark"] .choice.is-right{background:color-mix(in srgb, var(--c1) 9%, var(--paper-2))}
+[data-theme="dark"] .choice.is-wrong{background:color-mix(in srgb, var(--c2) 8%, var(--paper-2))}
+
+/* ---------- 리셋 ---------- */
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--desk);
+  background-image:
+    linear-gradient(115deg, rgba(255,255,255,.06) 0%, transparent 45%),
+    radial-gradient(120% 90% at 12% -10%, rgba(255,255,255,.10), transparent 60%);
+  color:var(--ink);
+  font-family:var(--f-ui);
+  font-size:15px; line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  min-height:100vh;
+}
+button{font-family:inherit; color:inherit}
+h1,h2,h3,h4,p,ul,ol{margin:0}
+ul,ol{padding:0; list-style:none}
+:focus-visible{outline:3px solid var(--c1); outline-offset:3px; border-radius:2px}
+
+/* ---------- 종이 결(그레인) : 이미지 없이 feTurbulence ---------- */
+.grain{position:relative; isolation:isolate}
+.grain::before{
+  content:""; position:absolute; inset:0; pointer-events:none; z-index:0;
+  border-radius:inherit;
+  opacity:var(--grain-op);
+  mix-blend-mode:var(--grain-blend);
+  background-image:
+    linear-gradient(var(--grain-tint), var(--grain-tint)),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-blend-mode:overlay;
+  background-size:180px 180px, 180px 180px;
+}
+.grain > *{position:relative; z-index:1}
+
+/* ---------- 판 어긋남(미세 오프셋) : 큰 활자에만 ---------- */
+.mr{position:relative}
+.mr::before{
+  content:attr(data-w); position:absolute; inset:0; pointer-events:none;
+  color:var(--c2); mix-blend-mode:var(--blend);
+  transform:translate(calc(var(--misreg) * -.75), 1px);
+}
+.mr > span{position:relative}
+
+/* ---------- 앱 프레임 ---------- */
+.press{max-width:1260px; margin:0 auto; padding:22px 24px 40px}
+
+/* ===== 마스트헤드 : 인쇄 작업 지시서 ===== */
+.masthead{
+  background:var(--paper);
+  border:2.5px solid var(--rule);
+  box-shadow:5px 6px 0 var(--edge), var(--lamp);
+  padding:16px 22px 14px;
+  display:flex; align-items:flex-start; gap:26px; flex-wrap:wrap;
+}
+.brand{flex:0 0 auto; padding-right:22px; border-right:2px dashed var(--rule); min-width:232px}
+.wordmark{
+  position:relative; display:inline-block;
+  font-family:var(--f-poster); font-size:44px; line-height:.94;
+  letter-spacing:.01em; color:var(--ink);
+}
+/* 미세 오프셋 = 판 어긋남 */
+.wordmark::before,.wordmark::after{
+  content:attr(data-w); position:absolute; inset:0; pointer-events:none;
+  mix-blend-mode:var(--blend);
+}
+.wordmark::before{color:var(--c2); transform:translate(calc(var(--misreg) * -1), 1px)}
+.wordmark::after{color:var(--c1); transform:translate(var(--misreg), -1.4px)}
+.brand-sub{
+  font-family:var(--f-mono); font-size:10.5px; font-weight:500;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--ink-2);
+  margin-top:6px;
+}
+.brand-line{font-size:12.5px; color:var(--ink-soft); margin-top:2px; letter-spacing:-.01em}
+
+/* 지시서 항목 : 괘선 박스 */
+.ticket{display:flex; gap:0; flex:1 1 380px; min-width:320px; align-self:stretch}
+.tk{
+  flex:1; padding:2px 14px; border-left:1px solid var(--rule);
+  display:flex; flex-direction:column; justify-content:center;
+}
+.ticket .tk:first-child{border-left:0; padding-left:0}
+.tk-k{font-family:var(--f-mono); font-size:9.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-faint)}
+.tk-v{font-size:16px; font-weight:700; letter-spacing:-.02em; margin-top:1px; font-variant-numeric:tabular-nums}
+.tk-v .u{font-size:11px; font-weight:500; color:var(--ink-2); margin-left:2px}
+.tk-v.mono{font-family:var(--f-mono); font-size:14px}
+
+/* 주간반 / 야간반 */
+.shift{flex:0 0 auto; align-self:center}
+.shift-btn{
+  display:flex; align-items:center; gap:0; cursor:pointer;
+  border:2.5px solid var(--rule); background:var(--paper-3); padding:0;
+  box-shadow:3px 3px 0 var(--edge);
+}
+.shift-btn span{
+  padding:7px 11px; font-family:var(--f-mono); font-size:10.5px; font-weight:600;
+  letter-spacing:.1em; color:var(--ink-2); transition:background .12s,color .12s;
+}
+.shift-btn span + span{border-left:2.5px solid var(--rule)}
+.shift-btn .on{background:var(--c3); color:#221D18}
+[data-theme="dark"] .shift-btn .on{background:var(--c1); color:#0E1420}
+.shift-btn:active{transform:translate(2px,2px); box-shadow:1px 1px 0 var(--edge)}
+
+/* ===== 탭 = 색인 탭 ===== */
+.tabs{display:flex; gap:6px; margin:0 0 -2.5px 26px; position:relative; z-index:3}
+.tab{
+  position:relative; cursor:pointer;
+  background:var(--paper-3); border:2.5px solid var(--rule); border-bottom:0;
+  padding:9px 20px 11px; margin-top:14px;
+  font-size:13.5px; font-weight:600; letter-spacing:-.01em; color:var(--ink-2);
+  border-radius:3px 3px 0 0;
+  box-shadow:3px -3px 0 var(--edge);
+}
+.tab .num{font-family:var(--f-mono); font-size:11px; margin-right:7px; opacity:.75}
+.tab[aria-selected="true"]{background:var(--paper); color:var(--ink); padding-bottom:14px; margin-top:8px}
+.tab[aria-selected="true"]::after{
+  content:""; position:absolute; left:12px; right:12px; bottom:5px; height:4px;
+  background:var(--c1);
+}
+.tab[aria-selected="true"]::before{
+  content:""; position:absolute; left:14px; right:10px; bottom:2px; height:4px;
+  background:var(--c2); mix-blend-mode:var(--blend);
+}
+
+/* ===== 뷰 ===== */
+.view{display:none}
+.view.is-on{display:block; animation:printin .3s cubic-bezier(.2,.9,.25,1) both}
+@keyframes printin{
+  from{opacity:0; transform:translateY(7px) scale(.996)}
+  to{opacity:1; transform:none}
+}
+
+.board{
+  background:var(--paper);
+  border:2.5px solid var(--rule);
+  box-shadow:6px 7px 0 var(--edge), var(--lamp);
+  padding:22px 24px 26px;
+}
+
+/* ===== 대지 머리 ===== */
+.board-head{display:flex; align-items:flex-end; gap:20px; flex-wrap:wrap; padding-bottom:16px; border-bottom:2.5px solid var(--rule)}
+.board-title{font-size:23px; font-weight:700; letter-spacing:-.035em; line-height:1.2}
+.board-title em{font-style:normal; font-family:var(--f-mono); font-size:19px; font-weight:600; color:var(--c1t)}
+.board-note{font-size:12.5px; color:var(--ink-soft); margin-top:3px}
+
+/* 잉크 범례 = 트랙 */
+.legend{display:flex; gap:0; margin-left:auto; border:2px solid var(--rule); background:var(--paper-2)}
+.lg{display:flex; align-items:center; gap:7px; padding:6px 12px 6px 9px}
+.lg + .lg{border-left:2px solid var(--rule)}
+.sw{width:15px; height:15px; border:1.5px solid var(--rule); flex:0 0 auto}
+.sw.t0{background:var(--c1)} .sw.t1{background:var(--c2)} .sw.t2{background:var(--c3)}
+.lg b{font-family:var(--f-mono); font-size:10.5px; font-weight:700; letter-spacing:.06em}
+.lg span{font-size:11.5px; color:var(--ink-soft)}
+
+/* ===== 본문 2단 ===== */
+.cols{display:grid; grid-template-columns:302px minmax(0,1fr); gap:26px; margin-top:22px; align-items:start}
+
+/* ---------- 좌측 : 오늘의 인쇄 ---------- */
+.panel{
+  background:var(--paper-2); border:2.5px solid var(--rule);
+  box-shadow:4px 5px 0 var(--edge), var(--lamp); padding:15px 16px 16px; margin-bottom:18px;
+  position:relative;
+}
+.panel-h{
+  display:flex; align-items:baseline; gap:8px; margin-bottom:11px;
+  font-family:var(--f-mono); font-size:10.5px; font-weight:600; letter-spacing:.15em;
+  text-transform:uppercase; color:var(--ink-2);
+}
+.panel-h b{font-family:var(--f-ui); font-size:14px; font-weight:700; letter-spacing:-.02em; color:var(--ink); text-transform:none}
+.panel-h .rule{flex:1; height:0; border-top:1px dashed var(--rule); opacity:.55; transform:translateY(-2px)}
+
+.today-n{display:flex; align-items:baseline; gap:9px; margin-bottom:3px}
+.today-n b{font-family:var(--f-poster); font-size:40px; line-height:.9; letter-spacing:.01em}
+.today-n i{font-style:normal; font-size:13px; color:var(--ink-soft); font-weight:500}
+.today-mix{display:flex; gap:5px; margin:9px 0 13px; flex-wrap:wrap}
+.pill{
+  font-family:var(--f-mono); font-size:10.5px; font-weight:700; letter-spacing:.04em;
+  padding:3px 8px; border:1.5px solid var(--rule); color:var(--on-ink);
+}
+.pill.t0{background:var(--c1); color:var(--knock)}
+.pill.t1{background:var(--c2); color:var(--on-ink)}
+.pill.t2{background:var(--c3); color:#221D18}
+.pill.ghost{background:transparent; color:var(--ink-2)}
+
+/* 촉각 버튼 : 두꺼운 종이가 눌린다 */
+.press-btn{
+  width:100%; cursor:pointer; border:2.5px solid var(--rule);
+  background:var(--c2); color:var(--on-ink);
+  font-size:16px; font-weight:700; letter-spacing:-.02em;
+  padding:12px 14px 13px; display:flex; align-items:center; justify-content:center; gap:9px;
+  box-shadow:0 5px 0 var(--c2-deep), 0 5px 0 2.5px var(--rule), 0 11px 14px -7px var(--drop);
+  transition:transform .08s cubic-bezier(.3,.8,.4,1), box-shadow .08s;
+}
+.press-btn:hover{transform:translateY(-1px); box-shadow:0 6px 0 var(--c2-deep), 0 6px 0 2.5px var(--rule), 0 13px 16px -7px var(--drop)}
+.press-btn:active{transform:translateY(5px); box-shadow:0 0 0 var(--c2-deep), 0 0 0 2.5px var(--rule), 0 2px 6px -3px var(--drop)}
+.press-btn .kbd{font-family:var(--f-mono); font-size:10.5px; font-weight:600; border:1.5px solid currentColor; padding:1px 5px; opacity:.72}
+
+/* 스탬프 카드 (연속 인쇄) */
+.stampcard{
+  margin-top:12px; padding:11px 12px 6px; background:var(--paper-3);
+  border:2px solid var(--rule);
+  /* 아래쪽 절취 구멍 */
+  -webkit-mask-image:radial-gradient(circle 4px at 8px 100%, transparent 98%, #000 100%),
+    linear-gradient(#000,#000);
+  -webkit-mask-composite:source-in;
+}
+.stamps{display:grid; grid-template-columns:repeat(5,1fr); gap:7px}
+.st{
+  aspect-ratio:1; border-radius:50%; display:grid; place-items:center;
+  font-family:var(--f-mono); font-size:11px; font-weight:700;
+  border:2px dashed var(--rule); color:var(--ink-faint); opacity:.6;
+}
+.st.done{
+  border:2.5px solid var(--c2); color:var(--c2t); opacity:1; font-weight:700;
+  box-shadow:inset 0 0 0 2px var(--paper-3), inset 0 0 0 3.5px var(--c2);
+  transform:rotate(var(--r,-4deg));
+}
+[data-theme="dark"] .st.done{box-shadow:inset 0 0 0 2px var(--paper-3), inset 0 0 0 3.5px var(--c2)}
+.st.today{border:2.5px dashed var(--c1); color:var(--c1t); opacity:1; animation:blink 1.9s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.45}}
+.perf{
+  height:9px; margin:9px -12px -6px;
+  background-image:radial-gradient(circle 3.4px at 9px 50%, var(--paper) 98%, transparent 100%);
+  background-size:18px 9px;
+}
+.streak-note{font-size:11.5px; color:var(--ink-soft); margin-top:12px; letter-spacing:-.01em}
+.streak-note b{color:var(--c2t)}
+
+/* 판 없는 문법 (문법 구멍) */
+.gaps{display:flex; flex-direction:column; gap:0}
+.gap{
+  display:grid; grid-template-columns:minmax(0,1fr) auto; grid-template-rows:auto auto;
+  gap:4px 10px; align-items:center;
+  padding:10px 0; border-top:1px dashed var(--rule);
+}
+.gap:first-child{border-top:0; padding-top:2px}
+.gap .tok{
+  grid-column:1; grid-row:1;
+  font-family:var(--f-mono); font-size:13px; font-weight:600; letter-spacing:-.01em;
+  background:var(--c3); color:#221D18; padding:2px 7px; border:1.5px solid var(--rule);
+  justify-self:start;
+}
+.gap.hot .tok{background:var(--c2); color:var(--on-ink)}
+.gap .mk{
+  grid-column:2; grid-row:1/3; align-self:center; cursor:pointer;
+  font-family:var(--f-mono); font-size:10.5px; font-weight:700; letter-spacing:.02em;
+  border:2px solid var(--rule); background:var(--paper-3); color:var(--ink);
+  padding:6px 9px; box-shadow:0 3px 0 var(--edge);
+}
+.gap .mk:hover{background:var(--c3); }
+.gap .mk:active{transform:translateY(3px); box-shadow:0 0 0 var(--edge)}
+.gap .cnt{grid-column:1; grid-row:2; font-size:11.5px; color:var(--ink-soft); display:flex; align-items:center; gap:7px}
+.gap .cnt b{font-family:var(--f-mono); font-size:13px; color:var(--ink); font-weight:700}
+.bar{
+  flex:1; height:11px; border:1.5px solid var(--rule); background:var(--paper-2);
+  position:relative; overflow:hidden; max-width:104px;
+}
+.bar i{
+  position:absolute; inset:0 auto 0 0; width:var(--f,50%);
+  background:var(--c2);
+  background-image:radial-gradient(rgba(0,0,0,.34) 1.1px, transparent 1.3px);
+  background-size:4px 4px;
+}
+.gap:not(.hot) .bar i{background-color:var(--c3)}
+.gaps-note{font-size:11.5px; color:var(--ink-soft); margin-top:10px; padding-top:10px; border-top:2px solid var(--rule)}
+
+/* 개념 잉크 겹 */
+.conc{display:flex; flex-direction:column}
+.cn{display:grid; grid-template-columns:minmax(0,1fr) auto; grid-template-rows:auto auto; gap:2px 10px; padding:9px 0; border-top:1px dashed var(--rule)}
+.cn:first-child{border-top:0; padding-top:0}
+.cn .nm{grid-column:1; grid-row:1; font-size:13px; font-weight:600; letter-spacing:-.02em}
+.cn .nm code{font-family:var(--f-mono); font-size:12.5px}
+.cn .due{grid-column:1; grid-row:2; font-family:var(--f-mono); font-size:10.5px; color:var(--ink-2)}
+.cn .due.soon{color:var(--c2t); font-weight:600}
+.passes{display:flex; gap:2.5px; grid-column:2; grid-row:1/3; align-self:center}
+.passes i{
+  width:9px; height:16px; border:1.5px solid var(--rule); background:var(--paper-3);
+  display:block;
+}
+.passes i.on{background:var(--ly, var(--c1))}
+.passes.t0 i.on{background:var(--c1)} .passes.t1 i.on{background:var(--c2)} .passes.t2 i.on{background:var(--c3)}
+
+/* ---------- 우측 : 인쇄 대지들 ---------- */
+.sheets{display:flex; flex-direction:column; gap:24px}
+
+.sheet{
+  position:relative; background:var(--paper-2);
+  border:2.5px solid var(--rule);
+  box-shadow:6px 7px 0 var(--edge), 0 18px 26px -18px var(--drop), var(--lamp);
+  padding:16px 22px 20px 0;
+  display:grid; grid-template-columns:40px minmax(0,1fr);
+  transform:rotate(var(--tilt,0deg));
+}
+.sheet[data-state="locked"]{background:var(--paper-3); box-shadow:4px 5px 0 var(--edge); border-style:solid; border-color:var(--rule); opacity:.94}
+
+/* 좌측 잉크 라벨 띠 */
+.rail{
+  border-right:2px dashed var(--rule); display:flex; align-items:center; justify-content:center;
+  padding:12px 0; position:relative;
+}
+.rail .vt{
+  writing-mode:vertical-rl; text-orientation:mixed;
+  font-family:var(--f-mono); font-size:10px; font-weight:600; letter-spacing:.22em;
+  text-transform:uppercase; color:var(--ink-2); white-space:nowrap;
+}
+.rail .chip{
+  position:absolute; top:12px; left:50%; transform:translateX(-50%);
+  width:14px; height:14px; border:1.5px solid var(--rule);
+}
+.rail .chip.t0{background:var(--c1)} .rail .chip.t1{background:var(--c2)} .rail .chip.t2{background:var(--c3)}
+
+.sheet-in{padding-left:22px; min-width:0}
+.sheet-head{display:flex; align-items:flex-start; gap:14px; flex-wrap:wrap}
+.sig{
+  font-family:var(--f-poster); font-size:30px; line-height:.9; letter-spacing:.01em;
+  color:var(--ink); opacity:.9; flex:0 0 auto; position:relative; top:-2px;
+}
+.sheet[data-state="locked"] .sig{color:var(--ink-faint)}
+.sheet-h2{font-size:19px; font-weight:700; letter-spacing:-.035em; line-height:1.25}
+.sheet-meta{font-family:var(--f-mono); font-size:10.5px; color:var(--ink-2); letter-spacing:.02em; margin-top:3px}
+.sheet-status{
+  margin-left:auto; font-family:var(--f-mono); font-size:10px; font-weight:700;
+  letter-spacing:.12em; padding:4px 9px; border:2px solid var(--rule); background:var(--paper-3);
+  color:var(--ink-2); white-space:nowrap;
+}
+.sheet[data-state="current"] .sheet-status{background:var(--c1); color:var(--knock); border-color:var(--rule)}
+.sheet[data-state="done"] .sheet-status{background:transparent; color:var(--ink-2)}
+
+/* 등록 표시(레지스터 마크) */
+.reg{position:absolute; width:17px; height:17px; color:var(--ink-faint); opacity:.75; pointer-events:none}
+.reg.tr{top:7px; right:7px} .reg.br{bottom:7px; right:7px} .reg.bl{bottom:7px; left:7px}
+
+/* 완료 도장 (오버프린트) */
+.sheet[data-state="done"] .sheet-status{display:none}
+.stamp-done{
+  position:absolute; top:15px; right:38px; transform:rotate(-8deg);
+  border:3px double var(--c2); color:var(--c2t);
+  font-family:var(--f-mono); font-size:14px; font-weight:700; letter-spacing:.24em;
+  padding:6px 12px 6px 17px; mix-blend-mode:var(--blend); opacity:.92;
+  pointer-events:none; z-index:2;
+}
+.stamp-done::after{
+  content:"02 SEP"; position:absolute; left:0; right:0; bottom:-15px; text-align:center;
+  font-size:8.5px; letter-spacing:.2em; opacity:.85;
+}
+
+/* ---------- 노드 = 스티커 ---------- */
+.nodes{
+  margin-top:18px; padding:20px 6px 6px 2px;
+  display:flex; align-items:flex-start; justify-content:space-between; gap:20px 26px; flex-wrap:wrap;
+  /* 절취 안내선 : 스티커들이 이 선 위에 손으로 붙었다 */
+  background-image:repeating-linear-gradient(to right, var(--ink-faint) 0 9px, transparent 9px 18px);
+  background-size:100% 2px; background-repeat:no-repeat; background-position:0 66px;
+}
+.sheet[data-state="locked"] .nodes{opacity:.85}
+
+.node{
+  all:unset; cursor:pointer; box-sizing:border-box;
+  width:104px; display:flex; flex-direction:column; align-items:center; gap:9px;
+  transform:translateY(var(--dy,0));
+  animation:stampdown .34s cubic-bezier(.16,1.2,.3,1) both;
+  animation-delay:var(--d,0ms);
+}
+@keyframes stampdown{
+  0%{opacity:0; transform:translateY(calc(var(--dy,0px) - 12px)) scale(1.14) rotate(var(--rot,0deg))}
+  60%{opacity:1}
+  100%{opacity:1; transform:translateY(var(--dy,0)) scale(1) rotate(var(--rot,0deg))}
+}
+.die{
+  position:relative; width:74px; height:74px; border-radius:50%;
+  background:var(--paper-2); padding:5px;         /* 도려낸 흰 테두리 */
+  transform:rotate(var(--rot,0deg));
+  filter:drop-shadow(0 5px 0 var(--edge)) drop-shadow(0 10px 9px rgba(0,0,0,.20));
+  transition:transform .13s cubic-bezier(.2,.9,.3,1), filter .13s;
+}
+.node:hover .die{transform:rotate(var(--rot,0deg)) translateY(-4px) scale(1.045); filter:drop-shadow(0 8px 0 var(--edge)) drop-shadow(0 15px 13px rgba(0,0,0,.26))}
+.node:active .die{transform:rotate(var(--rot,0deg)) translateY(3px) scale(.99); filter:drop-shadow(0 1px 0 var(--edge))}
+.face{
+  width:100%; height:100%; border-radius:50%; border:2.5px solid var(--rule);
+  display:grid; place-items:center; background:var(--paper-3);
+}
+.face .g{font-family:var(--f-mono); font-size:19px; font-weight:700; letter-spacing:-.03em; color:var(--on-ink)}
+.node[data-track="t0"] .face{background:var(--c1)} .node[data-track="t0"] .face .g{color:var(--knock)}
+.node[data-track="t1"] .face{background:var(--c2)} .node[data-track="t1"] .face .g{color:var(--on-ink)}
+.node[data-track="t2"] .face{background:var(--c3)} .node[data-track="t2"] .face .g{color:#221D18}
+
+/* 트랙 태그 */
+.tag{
+  position:absolute; top:-3px; right:-6px; z-index:2;
+  font-family:var(--f-mono); font-size:9.5px; font-weight:700; letter-spacing:.05em;
+  padding:2px 5px; border:2px solid var(--rule); background:var(--paper-2); color:var(--ink);
+}
+/* 완료 체크 = 오버프린트 도장 */
+.ck{
+  position:absolute; right:-8px; bottom:-4px; z-index:2; width:27px; height:27px;
+  border-radius:50%; border:2.5px solid var(--rule); background:var(--paper-2);
+  display:grid; place-items:center;
+}
+.ck svg{width:15px; height:15px; color:var(--c1t)}
+
+/* 상태 : 완료 */
+.node[data-state="done"] .face{position:relative; overflow:hidden}
+.node[data-state="done"] .face::after{
+  content:""; position:absolute; inset:0;
+  background:var(--c2); mix-blend-mode:var(--blend); opacity:.24;
+}
+/* 밤엔 screen이라 조금만 얹어도 색이 뜬다 */
+[data-theme="dark"] .node[data-state="done"] .face::after{opacity:.11}
+[data-theme="dark"] .node[data-state="current"] .die{
+  filter:drop-shadow(0 5px 0 var(--edge)) drop-shadow(0 0 16px rgba(255,95,168,.40));
+}
+[data-theme="dark"] .n-pass i{border-color:#6B5C4A}
+/* 상태 : 잠김 = 애벌 인쇄(하프톤 한 겹) */
+.node[data-state="locked"]{cursor:not-allowed}
+.node[data-state="locked"] .die{filter:none; background:transparent}
+.node[data-state="locked"] .face{
+  background:transparent !important; border-style:dashed; border-color:var(--ink-faint);
+  background-image:radial-gradient(var(--ink-faint) 1.2px, transparent 1.45px) !important;
+  background-size:5px 5px !important;
+}
+.node[data-state="locked"] .face .g{color:var(--ink-faint) !important}
+.node[data-state="locked"] .tag{background:transparent; border-color:var(--ink-faint); color:var(--ink-faint)}
+.node[data-state="locked"]:hover .die{transform:rotate(var(--rot,0deg)); }
+.node[data-state="locked"].shake{animation:shake .34s}
+@keyframes shake{0%,100%{transform:translateY(var(--dy,0)) translateX(0)}25%{transform:translateY(var(--dy,0)) translateX(-5px)}75%{transform:translateY(var(--dy,0)) translateX(5px)}}
+
+/* 상태 : 현재 */
+.node[data-state="current"] .die{width:82px; height:82px}
+.node[data-state="current"] .cut{
+  position:absolute; inset:-7px; pointer-events:none;
+}
+.node[data-state="current"] .cut circle{
+  fill:none; stroke:var(--c2); stroke-width:2.2; stroke-dasharray:7 7;
+  animation:spin 9s linear infinite;
+  transform-origin:50% 50%;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.now-flag{
+  position:absolute; top:-25px; left:50%; transform:translateX(-50%) rotate(-2deg);
+  background:var(--c2); color:var(--on-ink); border:2px solid var(--rule);
+  font-family:var(--f-mono); font-size:9.5px; font-weight:700; letter-spacing:.1em;
+  padding:2px 7px; white-space:nowrap; z-index:3;
+  box-shadow:0 3px 0 var(--edge);
+}
+
+.n-label{
+  font-size:12px; font-weight:600; letter-spacing:-.025em; line-height:1.3; text-align:center;
+  color:var(--ink); width:112px; margin:0 -4px;
+}
+.node[data-state="locked"] .n-label{color:var(--ink-faint); font-weight:500}
+.n-label code{font-family:var(--f-mono); font-size:11.5px}
+.n-pass{display:flex; gap:2.5px}
+.n-pass i{width:8px; height:12px; border:1.5px solid var(--rule); background:var(--paper-2)}
+.node[data-track="t0"] .n-pass i.on{background:var(--c1)}
+.node[data-track="t1"] .n-pass i.on{background:var(--c2)}
+.node[data-track="t2"] .n-pass i.on{background:var(--c3)}
+.node[data-state="locked"] .n-pass i{border-color:var(--ink-faint); border-style:dashed}
+
+/* 노드 상세 (클릭 시 펼침) */
+.detail{
+  margin:16px 0 0; padding:0 0 0 0; max-height:0; overflow:hidden;
+  transition:max-height .25s cubic-bezier(.3,.9,.3,1), opacity .2s; opacity:0;
+}
+.detail.open{max-height:280px; opacity:1}
+.detail-in{
+  border:2.5px solid var(--rule); background:var(--paper-3);
+  box-shadow:inset 0 3px 0 -1px var(--edge);
+  padding:14px 16px; display:flex; gap:18px; align-items:center; flex-wrap:wrap;
+}
+.detail-in h4{font-size:15px; font-weight:700; letter-spacing:-.03em}
+.detail-in h4 code{font-family:var(--f-mono); font-size:14px}
+.detail-in p{font-size:12.5px; color:var(--ink-soft); margin-top:3px; letter-spacing:-.01em}
+.detail-in p b{color:var(--ink); font-weight:600}
+.detail-go{
+  margin-left:auto; cursor:pointer; border:2.5px solid var(--rule); background:var(--c1); color:var(--knock);
+  font-size:14px; font-weight:700; letter-spacing:-.02em; padding:9px 16px;
+  box-shadow:0 4px 0 var(--c1-deep), 0 4px 0 2.5px var(--rule);
+}
+.detail-go:active{transform:translateY(4px); box-shadow:0 0 0 var(--c1-deep), 0 0 0 2.5px var(--rule)}
+
+/* ---------- 아직 짜이지 않은 판 ---------- */
+.forecast{
+  display:flex; align-items:center; gap:16px;
+  border:2.5px dashed var(--rule); background:transparent;
+  padding:14px 20px; opacity:.9;
+}
+.forecast .fc-sig{font-family:var(--f-poster); font-size:26px; color:var(--ink-faint); line-height:1; flex:0 0 auto}
+.forecast p{font-size:12.5px; color:var(--ink-soft); letter-spacing:-.01em; line-height:1.6}
+.forecast p b{color:var(--ink); font-weight:700}
+.forecast p code{font-family:var(--f-mono); font-size:12px}
+.forecast .fc-mark{
+  margin-left:auto; flex:0 0 auto;
+  font-family:var(--f-mono); font-size:10px; font-weight:700; letter-spacing:.16em;
+  border:2px dashed var(--ink-faint); color:var(--ink-2); padding:4px 9px;
+}
+
+/* ---------- 컬러 바 (지난 14일 잉크 농도) ---------- */
+.colorbar{margin-top:2px; padding-top:18px; border-top:2.5px solid var(--rule)}
+.cb-h{display:flex; align-items:baseline; gap:10px; margin-bottom:9px}
+.cb-h b{font-family:var(--f-mono); font-size:10.5px; font-weight:600; letter-spacing:.15em; text-transform:uppercase; color:var(--ink-2)}
+.cb-h span{font-size:11.5px; color:var(--ink-soft)}
+.cb{display:grid; grid-template-columns:repeat(14,1fr); gap:3px; border:2px solid var(--rule); padding:3px; background:var(--paper-3)}
+.cb div{height:28px; display:flex; flex-direction:column; position:relative}
+.cb div i{display:block; flex:1}
+.cb .i0{background:var(--c1)} .cb .i1{background:var(--c2)} .cb .i2{background:var(--c3)}
+.cb div[data-v="0"]{
+  background-image:repeating-linear-gradient(45deg, var(--ink-faint) 0 1px, transparent 1px 5px);
+  opacity:.45;
+}
+.cb div[data-today]::after{
+  content:"오늘"; position:absolute; left:50%; transform:translateX(-50%); top:calc(100% + 5px);
+  font-family:var(--f-mono); font-size:9px; letter-spacing:.1em; color:var(--ink-2); white-space:nowrap;
+}
+.colorbar{padding-bottom:20px}
+
+/* ============================================================
+   ② 교정쇄 — T0 문법 카드
+   ============================================================ */
+.proofwrap{display:grid; grid-template-columns:minmax(0,1fr) 268px; gap:24px; align-items:start}
+
+.proof{
+  position:relative; background:var(--paper-2); border:2.5px solid var(--rule);
+  box-shadow:6px 7px 0 var(--edge), 0 18px 26px -18px var(--drop), var(--lamp);
+  padding:20px 26px 24px;
+}
+.proof[hidden]{display:none}
+.proof-head{display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding-bottom:14px; border-bottom:2px dashed var(--rule)}
+.trk{
+  font-family:var(--f-mono); font-size:10.5px; font-weight:700; letter-spacing:.1em;
+  background:var(--c1); color:var(--knock); border:2px solid var(--rule); padding:4px 9px;
+}
+.loc{font-family:var(--f-mono); font-size:12.5px; color:var(--ink-soft); letter-spacing:-.01em}
+.loc b{color:var(--ink); font-weight:600}
+.proof-prog{margin-left:auto; display:flex; align-items:center; gap:8px}
+.proof-prog span{font-family:var(--f-mono); font-size:10.5px; color:var(--ink-2); letter-spacing:.08em}
+.sheetdots{display:flex; gap:3px}
+.sheetdots i{width:13px; height:17px; border:1.5px solid var(--rule); background:var(--paper-3)}
+.sheetdots i.on{background:var(--c1)}
+.sheetdots i.cur{background:var(--c2); box-shadow:0 0 0 2px var(--paper-2), 0 0 0 3.5px var(--c2)}
+
+/* ---- 코드 판 : 질감 0, 대비 최우선 ---- */
+.plate-wrap{margin:18px 0 0; position:relative; z-index:4}
+.plate-tab{
+  display:inline-flex; align-items:center; gap:8px;
+  font-family:var(--f-mono); font-size:10.5px; font-weight:600; letter-spacing:.1em;
+  background:var(--rule); color:var(--paper); padding:4px 11px 5px;
+}
+[data-theme="dark"] .plate-tab{background:var(--code-edge); color:var(--code-fg)}
+.plate{
+  background:var(--code-bg); border:2.5px solid var(--code-edge);
+  box-shadow:5px 6px 0 var(--edge);
+  padding:14px 0 15px; overflow-x:auto;
+}
+.code{
+  display:grid; grid-template-columns:auto 1fr;
+  font-family:var(--f-mono);
+  font-size:14.5px;
+  line-height:1.78;
+  color:var(--code-fg);
+  min-width:max-content;
+}
+.code .ln{
+  text-align:right; padding:0 15px 0 16px; color:var(--code-ln);
+  font-size:12.5px; font-variant-numeric:tabular-nums; user-select:none;
+  border-right:1px solid color-mix(in srgb, var(--code-ln) 40%, transparent);
+}
+.code .lc{padding:0 22px 0 15px; white-space:pre}
+.code .ln.hl, .code .lc.hl{background:var(--code-hl)}
+.code .ln.hl{color:var(--code-fg); font-weight:700; box-shadow:inset 4px 0 0 var(--c2)}
+.code .hint{
+  font-family:var(--f-ui); font-size:12px; font-weight:700; letter-spacing:-.02em;
+  color:var(--c2t); margin-left:18px;
+}
+[data-theme="dark"] .code .hint{color:var(--c2)}
+.k{color:var(--sx-key); font-weight:600}
+.s{color:var(--sx-str)}
+.n{color:var(--sx-num)}
+.f{color:var(--sx-fn)}
+.c{color:var(--sx-com); font-style:italic}
+.p{color:var(--sx-pun)}
+.t{color:var(--sx-typ)}
+.plate-foot{
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  margin-top:9px; font-size:11.5px; color:var(--ink-soft);
+}
+.plate-foot .mini{
+  font-family:var(--f-mono); font-size:10.5px; border:1.5px solid var(--rule);
+  background:var(--paper-3); padding:2px 6px; color:var(--ink-2);
+}
+
+/* ---- 개념 + 문제 ---- */
+.concept{margin-top:20px; display:flex; gap:14px; align-items:flex-start}
+.concept .mark{
+  flex:0 0 auto; width:34px; height:34px; border:2.5px solid var(--rule); background:var(--c3);
+  display:grid; place-items:center; font-family:var(--f-mono); font-weight:700; font-size:15px; color:#221D18;
+  transform:rotate(-3deg);
+}
+.concept h3{font-size:19px; font-weight:700; letter-spacing:-.035em; line-height:1.3}
+.concept h3 code{font-family:var(--f-mono); font-size:17px; background:var(--code-hl); color:var(--ink); padding:0 4px; border-bottom:2px solid var(--c3-deep)}
+[data-theme="dark"] .concept h3 code{background:var(--code-hl); color:var(--code-fg)}
+.concept p{font-size:13.5px; color:var(--ink-soft); margin-top:4px; letter-spacing:-.01em; max-width:62ch}
+
+.q{
+  margin-top:20px; padding-top:16px; border-top:2px dashed var(--rule);
+  font-size:16px; font-weight:600; letter-spacing:-.03em; line-height:1.55;
+}
+.q code{font-family:var(--f-mono); font-size:14.5px; background:var(--paper-3); padding:1px 5px; border:1px solid var(--rule)}
+
+/* ---- 선택지 = OMR 답안지 ---- */
+.choices{margin-top:14px; display:flex; flex-direction:column; gap:9px}
+.choice{
+  all:unset; box-sizing:border-box; cursor:pointer; display:flex; gap:13px; align-items:flex-start;
+  padding:11px 14px 12px; background:var(--paper-3); border:2.5px solid var(--rule);
+  box-shadow:0 4px 0 var(--edge);
+  transition:transform .09s, box-shadow .09s, background .12s;
+}
+.choice:hover{transform:translateY(-1px); box-shadow:0 5px 0 var(--edge); background:var(--paper-2)}
+.choice:active{transform:translateY(3px); box-shadow:0 1px 0 var(--edge)}
+.bub{
+  flex:0 0 auto; width:32px; height:32px; border:2.5px solid var(--rule); border-radius:9px;
+  display:grid; place-items:center; background:var(--paper-2);
+  font-family:var(--f-mono); font-size:14px; font-weight:700; line-height:1;
+  transition:background .1s, color .1s;
+}
+.choice .txt{font-size:14.5px; line-height:1.55; letter-spacing:-.02em; padding-top:4px}
+.choice .txt code{font-family:var(--f-mono); font-size:13.5px}
+.choice[aria-checked="true"]{background:var(--paper-2)}
+.choice[aria-checked="true"] .bub{background:var(--c1); color:var(--knock)}
+.choice[aria-checked="true"]{box-shadow:0 4px 0 var(--c1-deep), 0 4px 0 2.5px var(--rule)}
+
+.choices.graded .choice{cursor:default; pointer-events:none}
+.choice.is-right{background:color-mix(in srgb, var(--c1) 13%, var(--paper-2))}
+.choice.is-right .bub{background:var(--c1); color:var(--knock)}
+.choice.is-right{box-shadow:0 4px 0 var(--c1-deep), 0 4px 0 2.5px var(--rule)}
+.choice.is-wrong{background:color-mix(in srgb, var(--c2) 11%, var(--paper-2)); box-shadow:0 4px 0 var(--edge)}
+.choice.is-wrong .bub{background:var(--c2); color:var(--on-ink)}
+.choice.is-wrong .txt{text-decoration:line-through; text-decoration-color:var(--c2); text-decoration-thickness:2px}
+.choice.dim{opacity:.62}
+.choice .verdict{
+  margin-left:auto; align-self:center; flex:0 0 auto;
+  font-family:var(--f-mono); font-size:10px; font-weight:700; letter-spacing:.12em;
+  padding:3px 8px; border:2px solid var(--rule); display:none; white-space:nowrap;
+}
+.choice.is-right .verdict{display:block; background:var(--c1); color:var(--knock)}
+.choice.is-wrong .verdict{display:block; background:var(--c2); color:var(--on-ink)}
+
+/* ---- 판정란 : 답하기 전에도 자리를 잡아둔다 ---- */
+.result{
+  margin-top:18px; min-height:172px; position:relative;
+  border:2.5px dashed var(--rule); background:var(--paper-3);
+  padding:15px 18px; display:flex; flex-direction:column; justify-content:center;
+}
+.result[data-fill="1"]{border-style:solid; background:var(--paper-2); justify-content:flex-start}
+.result-tag{
+  position:absolute; top:-11px; left:16px; background:var(--paper-2);
+  font-family:var(--f-mono); font-size:9.5px; font-weight:700; letter-spacing:.2em;
+  padding:1px 8px; border:2px solid var(--rule); color:var(--ink-2);
+}
+.result-empty{display:flex; align-items:center; gap:14px; color:var(--ink-faint)}
+.result-empty svg{width:34px; height:34px; flex:0 0 auto; opacity:.65}
+.result-empty p{font-size:13px; letter-spacing:-.01em; line-height:1.5}
+.result-empty p b{display:block; font-family:var(--f-mono); font-size:10.5px; letter-spacing:.14em; margin-bottom:2px; color:var(--ink-2)}
+
+.fb{animation:stampin .26s cubic-bezier(.2,1.1,.3,1) both}
+@keyframes stampin{
+  0%{opacity:0; transform:scale(1.05) rotate(-1.4deg)}
+  100%{opacity:1; transform:none}
+}
+.fb-head{display:flex; align-items:center; gap:11px; margin-bottom:9px}
+.fb-stamp{
+  font-family:var(--f-mono); font-size:13px; font-weight:700; letter-spacing:.2em;
+  padding:5px 12px 5px 16px; border:3px double currentColor; transform:rotate(-4deg);
+  flex:0 0 auto;
+}
+.fb.ok .fb-stamp{color:var(--c1t)}
+.fb.no .fb-stamp{color:var(--c2t)}
+.fb.idk .fb-stamp{color:var(--c3t); border-style:dashed; border-width:2.5px}
+[data-theme="dark"] .fb.idk .fb-stamp{color:var(--c3)}
+.fb-head h4{font-size:15.5px; font-weight:700; letter-spacing:-.03em}
+.fb-body{font-size:13.5px; line-height:1.68; letter-spacing:-.015em; color:var(--ink-body)}
+.fb-body strong{color:var(--ink); font-weight:700}
+.fb-body code{font-family:var(--f-mono); font-size:12.5px; background:var(--paper-3); padding:1px 4px; border:1px solid var(--rule)}
+.fb-body .lead{color:var(--ink); font-weight:600; display:block; margin-bottom:5px}
+.fb-body em{font-style:normal; background:var(--code-hl); padding:0 3px; color:var(--ink); font-weight:600}
+[data-theme="dark"] .fb-body em{color:var(--code-fg)}
+
+/* 이득 칩 (모르겠어요) */
+.gain{display:flex; gap:9px; flex-wrap:wrap; margin:11px 0 10px}
+.gc{
+  display:flex; align-items:center; gap:8px; padding:6px 11px 7px;
+  border:2.5px solid var(--rule); background:var(--paper-3);
+  box-shadow:0 3px 0 var(--edge);
+}
+.gc svg{width:15px; height:15px; flex:0 0 auto}
+.gc.down svg{color:var(--c2t)} .gc.soon svg{color:var(--c1t)}
+.gc b{font-size:12.5px; font-weight:700; letter-spacing:-.02em}
+.gc s{font-family:var(--f-mono); font-size:11.5px; color:var(--ink-2); text-decoration-thickness:1.5px}
+.gc i{font-style:normal; font-family:var(--f-mono); font-size:12px; font-weight:700; color:var(--ink)}
+.idk-why{
+  font-size:12.5px; color:var(--ink-soft); letter-spacing:-.01em; line-height:1.6;
+  border-left:3px solid var(--c3); padding-left:11px; margin-top:2px;
+}
+.idk-why b{color:var(--ink)}
+
+/* ---- 우측 보조 : 내 코드에서의 이 문법 ---- */
+.side{display:flex; flex-direction:column; gap:16px; position:sticky; top:18px}
+.occ{display:flex; flex-direction:column}
+.oc{
+  display:grid; grid-template-columns:minmax(0,1fr) auto; gap:1px 10px;
+  padding:9px 0; border-top:1px dashed var(--rule);
+  font-family:var(--f-mono); color:var(--ink-soft);
+}
+.oc:first-child{border-top:0; padding-top:0}
+.oc b{grid-column:1; grid-row:1; color:var(--ink); font-weight:600; font-size:12.5px; letter-spacing:-.02em}
+.oc .dir{grid-column:1; grid-row:2; color:var(--ink-faint); font-size:10px; letter-spacing:.02em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.oc .lines{
+  grid-column:2; grid-row:1/3; align-self:center;
+  font-size:11px; font-weight:600; color:var(--ink); white-space:nowrap;
+  border:1.5px solid var(--rule); background:var(--paper-3); padding:2px 7px;
+}
+.mini-note{font-size:12px; color:var(--ink-soft); line-height:1.6; letter-spacing:-.01em}
+
+/* ---- 하단 고정 조작대 (인쇄기 제어반) ---- */
+.deck{
+  position:fixed; left:0; right:0; bottom:0; z-index:50;
+  border-top:2.5px solid var(--rule); background:var(--paper);
+  box-shadow:0 -8px 20px -12px var(--drop);
+  transition:background .18s;
+}
+.deck[data-mode="ok"]{background:color-mix(in srgb, var(--c1) 15%, var(--paper))}
+.deck[data-mode="no"]{background:color-mix(in srgb, var(--c2) 13%, var(--paper))}
+.deck[data-mode="idk"]{background:color-mix(in srgb, var(--c3) 20%, var(--paper))}
+.deck-in{max-width:1260px; margin:0 auto; padding:13px 24px; display:flex; align-items:center; gap:16px}
+.deck-msg{font-size:14px; font-weight:600; letter-spacing:-.025em; min-width:0}
+.deck-msg small{display:block; font-weight:400; font-size:11.5px; color:var(--ink-soft); letter-spacing:-.01em}
+.deck-keys{
+  margin-left:auto; display:flex; gap:12px; font-family:var(--f-mono); font-size:10.5px;
+  color:var(--ink-2); letter-spacing:.04em; flex-wrap:wrap;
+}
+.deck-keys kbd{
+  font:inherit; border:1.5px solid var(--rule); padding:1px 5px; background:var(--paper-2);
+  margin-right:4px;
+}
+.btn{
+  cursor:pointer; border:2.5px solid var(--rule); background:var(--paper-2); color:var(--ink);
+  font-size:15px; font-weight:700; letter-spacing:-.025em; padding:11px 20px;
+  box-shadow:0 4px 0 var(--edge), 0 4px 0 2.5px var(--rule);
+  transition:transform .08s, box-shadow .08s, background .12s;
+  white-space:nowrap;
+}
+.btn:active{transform:translateY(4px); box-shadow:0 0 0 var(--edge), 0 0 0 2.5px var(--rule)}
+.btn:disabled{opacity:.42; cursor:not-allowed; box-shadow:0 4px 0 var(--edge)}
+.btn.go{background:var(--c2); color:var(--on-ink); box-shadow:0 4px 0 var(--c2-deep), 0 4px 0 2.5px var(--rule)}
+.btn.go:active{box-shadow:0 0 0 var(--c2-deep), 0 0 0 2.5px var(--rule)}
+.btn.next{background:var(--c1); color:var(--knock); box-shadow:0 4px 0 var(--c1-deep), 0 4px 0 2.5px var(--rule)}
+.btn.next:active{box-shadow:0 0 0 var(--c1-deep), 0 0 0 2.5px var(--rule)}
+.btn .kb{font-family:var(--f-mono); font-size:10.5px; opacity:.7; margin-left:7px; font-weight:600}
+
+/* 모르겠어요 : 부끄럽지 않게, 오히려 눈에 띄게 */
+.btn.idk{
+  background:var(--paper-2); border-color:var(--rule);
+  box-shadow:0 4px 0 var(--c3-deep), 0 4px 0 2.5px var(--rule);
+  font-size:14.5px;
+}
+.btn.idk::before{
+  content:""; display:inline-block; width:11px; height:11px; margin-right:8px;
+  background:var(--c3); border:1.5px solid var(--rule); transform:translateY(1px) rotate(45deg);
+}
+.btn.idk:hover{background:color-mix(in srgb, var(--c3) 26%, var(--paper-2))}
+.btn.idk:active{box-shadow:0 0 0 var(--c3-deep), 0 0 0 2.5px var(--rule)}
+.btn.idk[aria-pressed="true"]{background:var(--c3); color:#221D18}
+
+.view#view-card.is-on{padding-bottom:86px}
+
+/* 잉크 얼룩 (장식) */
+.blob{position:absolute; border-radius:50%; mix-blend-mode:var(--blend); pointer-events:none; z-index:0}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important}
+}
+@media (max-width:1100px){
+  .cols{grid-template-columns:1fr}
+  .proofwrap{grid-template-columns:1fr}
+  .side{position:static}
+}
+</style>
+</head>
+<body>
+
+<div class="press">
+
+  <!-- ══════════ 마스트헤드 : 인쇄 작업 지시서 ══════════ -->
+  <header class="masthead grain">
+    <div class="brand">
+      <div class="wordmark" data-w="잉크">잉크</div>
+      <div class="brand-sub">Risograph Study Press</div>
+      <div class="brand-line">내 코드를 교재로 찍는 인쇄소</div>
+    </div>
+
+    <div class="ticket">
+      <div class="tk">
+        <span class="tk-k">작업번호</span>
+        <span class="tk-v mono">#0142</span>
+      </div>
+      <div class="tk">
+        <span class="tk-k">대지 · 리포</span>
+        <span class="tk-v mono">cart-shop-web</span>
+      </div>
+      <div class="tk">
+        <span class="tk-k">오늘 분량</span>
+        <span class="tk-v">12<span class="u">분</span></span>
+      </div>
+      <div class="tk">
+        <span class="tk-k">연속 인쇄</span>
+        <span class="tk-v">7<span class="u">일</span></span>
+      </div>
+    </div>
+
+    <div class="shift">
+      <button class="shift-btn" id="shift" aria-label="주간반 야간반 전환">
+        <span class="on" data-s="light">주간반</span><span data-s="dark">야간반</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ══════════ 색인 탭 ══════════ -->
+  <div class="tabs" role="tablist" aria-label="화면">
+    <button class="tab" role="tab" id="tab-path" aria-controls="view-path" aria-selected="true"><span class="num">①</span>인쇄 대지</button>
+    <button class="tab" role="tab" id="tab-card" aria-controls="view-card" aria-selected="false"><span class="num">②</span>교정쇄 · T0 문법</button>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       ① 학습 경로 홈 — 인쇄 대지
+       은유: 유닛 = 스티커 시트 한 장(=한 판), 노드 = 시트 위의 스티커
+       ══════════════════════════════════════════════════ -->
+  <section class="view is-on" id="view-path" role="tabpanel" aria-labelledby="tab-path">
+    <div class="board grain">
+
+      <div class="board-head">
+        <div>
+          <h1 class="board-title"><em>cart-shop-web</em> 대지</h1>
+          <p class="board-note">유닛은 내 리포의 실제 기능입니다. 커밋과 파일에서 뽑아낸 판 12장 중 <b>5장</b>을 찍었습니다.</p>
+        </div>
+        <div class="legend">
+          <div class="lg"><i class="sw t0"></i><b>T0</b><span>문법</span></div>
+          <div class="lg"><i class="sw t1"></i><b>T1</b><span>클론</span></div>
+          <div class="lg"><i class="sw t2"></i><b>T2</b><span>구조</span></div>
+        </div>
+      </div>
+
+      <div class="cols">
+
+        <!-- ───── 좌측 : 작업대 ───── -->
+        <aside>
+
+          <!-- 오늘의 인쇄 -->
+          <div class="panel">
+            <div class="panel-h"><b>오늘의 인쇄</b><i class="rule"></i><span>Run 08</span></div>
+            <div class="today-n"><b class="mr" data-w="3판">3판</b><i>약 12분 · 오후 9:40 예정</i></div>
+            <div class="today-mix">
+              <span class="pill t0">T0 × 2</span>
+              <span class="pill t1">T1 × 1</span>
+              <span class="pill ghost">복습 2 · 새 판 1</span>
+            </div>
+            <button class="press-btn" id="startBtn">인쇄 시작 <span class="kbd">Enter</span></button>
+
+            <div class="stampcard">
+              <div class="stamps">
+                <div class="st done" style="--r:-5deg">26</div>
+                <div class="st done" style="--r:3deg">27</div>
+                <div class="st done" style="--r:-2deg">28</div>
+                <div class="st done" style="--r:6deg">29</div>
+                <div class="st done" style="--r:-4deg">30</div>
+                <div class="st done" style="--r:2deg">31</div>
+                <div class="st done" style="--r:-6deg">01</div>
+                <div class="st today">02</div>
+                <div class="st">03</div>
+                <div class="st">04</div>
+              </div>
+              <div class="perf"></div>
+            </div>
+            <p class="streak-note">연속 <b>7일</b> — 오늘 찍으면 8일. 스탬프 칸은 10칸에서 한 바퀴 돕니다.</p>
+          </div>
+
+          <!-- 판이 없는 문법 = 문법 구멍 -->
+          <div class="panel">
+            <div class="panel-h"><b>판이 없는 문법</b><i class="rule"></i><span>Gap</span></div>
+            <ul class="gaps">
+              <li class="gap hot">
+                <code class="tok">async / await</code>
+                <span class="cnt"><b>11</b>번 등장 <i class="bar"><i style="--f:100%"></i></i></span>
+                <button class="mk">판 만들기</button>
+              </li>
+              <li class="gap">
+                <code class="tok">?.</code>
+                <span class="cnt"><b>7</b>번 등장 <i class="bar"><i style="--f:64%"></i></i></span>
+                <button class="mk">판 만들기</button>
+              </li>
+              <li class="gap">
+                <code class="tok">Generic &lt;T&gt;</code>
+                <span class="cnt"><b>4</b>번 등장 <i class="bar"><i style="--f:36%"></i></i></span>
+                <button class="mk">판 만들기</button>
+              </li>
+            </ul>
+            <p class="gaps-note">내 코드엔 이미 쓰였는데 아직 한 번도 안 찍은 문법입니다. AI가 써준 자리라도, 판을 만들면 그날 인쇄 목록에 들어갑니다.</p>
+          </div>
+
+          <!-- 개념 잉크 겹 -->
+          <div class="panel">
+            <div class="panel-h"><b>개념 잉크 겹</b><i class="rule"></i><span>4겹 = 완성</span></div>
+            <ul class="conc">
+              <li class="cn">
+                <span class="nm"><code>useState</code> 함수형 업데이트</span>
+                <span class="due soon">오늘 복습</span>
+                <span class="passes t0"><i class="on"></i><i class="on"></i><i></i><i></i></span>
+              </li>
+              <li class="cn">
+                <span class="nm">배열 불변 갱신 <code>map</code></span>
+                <span class="due">3일 뒤</span>
+                <span class="passes t0"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span>
+              </li>
+              <li class="cn">
+                <span class="nm">이벤트 핸들러 분리</span>
+                <span class="due">9일 뒤</span>
+                <span class="passes t1"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span>
+              </li>
+              <li class="cn">
+                <span class="nm">Context 경계</span>
+                <span class="due soon">내일</span>
+                <span class="passes t2"><i class="on"></i><i></i><i></i><i></i></span>
+              </li>
+            </ul>
+          </div>
+        </aside>
+
+        <!-- ───── 우측 : 대지(스티커 시트) 더미 ───── -->
+        <div class="sheets">
+
+          <!-- 1대 : 완료 -->
+          <article class="sheet" data-state="done" style="--tilt:-.25deg">
+            <svg class="reg tr" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M12 1v22M1 12h22" stroke="currentColor" stroke-width="1.2"/></svg>
+            <svg class="reg bl" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M12 1v22M1 12h22" stroke="currentColor" stroke-width="1.2"/></svg>
+            <div class="stamp-done">인쇄 완료</div>
+            <div class="rail"><i class="chip t0"></i><span class="vt">판 01 · 청+진홍 2도</span></div>
+            <div class="sheet-in">
+              <div class="sheet-head">
+                <span class="sig mr" data-w="1대">1대</span>
+                <div>
+                  <h2 class="sheet-h2">장바구니 담기 / 빼기</h2>
+                  <div class="sheet-meta">src/features/cart · 커밋 12 · 개념 4 · 4/4 완료</div>
+                </div>
+                <span class="sheet-status">4 / 4</span>
+              </div>
+              <div class="nodes">
+                <button class="node" data-state="done" data-track="t0" data-title="useState 초기값" data-glyph="[ ]" data-pass="4" data-desc="빈 배열로 시작하는 상태 선언. 내 코드 3곳에서 같은 모양." style="--dy:-9px;--rot:-3deg;--d:0ms">
+                  <span class="die"><span class="tag">T0</span><span class="face"><span class="g">[ ]</span></span><span class="ck"><svg viewBox="0 0 20 20" fill="none"><path d="M3 10.5l4.5 4.5L17 5" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
+                  <span class="n-label"><code>useState</code> 초기값</span>
+                  <span class="n-pass"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span>
+                </button>
+                <button class="node" data-state="done" data-track="t0" data-title="함수형 업데이트" data-glyph="=>" data-pass="2" data-desc="setItems((prev) => ...) — 최신 상태로 계산하기." style="--dy:6px;--rot:2deg;--d:60ms">
+                  <span class="die"><span class="tag">T0</span><span class="face"><span class="g">=&gt;</span></span><span class="ck"><svg viewBox="0 0 20 20" fill="none"><path d="M3 10.5l4.5 4.5L17 5" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
+                  <span class="n-label">함수형 업데이트</span>
+                  <span class="n-pass"><i class="on"></i><i class="on"></i><i></i><i></i></span>
+                </button>
+                <button class="node" data-state="done" data-track="t1" data-title="addItem 필사" data-glyph="✎" data-pass="4" data-desc="addItem 로직 26줄을 손으로 다시 씁니다." style="--dy:-5px;--rot:-2deg;--d:120ms">
+                  <span class="die"><span class="tag">T1</span><span class="face"><span class="g">✎</span></span><span class="ck"><svg viewBox="0 0 20 20" fill="none"><path d="M3 10.5l4.5 4.5L17 5" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
+                  <span class="n-label"><code>addItem</code> 필사</span>
+                  <span class="n-pass"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span>
+                </button>
+                <button class="node" data-state="done" data-track="t2" data-title="cart 폴더 책임" data-glyph="/ /" data-pass="3" data-desc="훅 / 컴포넌트 / 타입이 어디에 놓였는지." style="--dy:9px;--rot:3deg;--d:180ms">
+                  <span class="die"><span class="tag">T2</span><span class="face"><span class="g">/ /</span></span><span class="ck"><svg viewBox="0 0 20 20" fill="none"><path d="M3 10.5l4.5 4.5L17 5" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
+                  <span class="n-label"><code>cart/</code> 폴더 책임</span>
+                  <span class="n-pass"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span>
+                </button>
+              </div>
+              <div class="detail"><div class="detail-in"></div></div>
+            </div>
+          </article>
+
+          <!-- 2대 : 진행 중 -->
+          <article class="sheet" data-state="current" style="--tilt:.2deg">
+            <svg class="reg tr" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M12 1v22M1 12h22" stroke="currentColor" stroke-width="1.2"/></svg>
+            <svg class="reg bl" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M12 1v22M1 12h22" stroke="currentColor" stroke-width="1.2"/></svg>
+            <div class="rail"><i class="chip t1"></i><span class="vt">판 02 · 진행 중</span></div>
+            <div class="sheet-in">
+              <div class="sheet-head">
+                <span class="sig mr" data-w="2대">2대</span>
+                <div>
+                  <h2 class="sheet-h2">로그인 흐름</h2>
+                  <div class="sheet-meta">src/features/auth · 커밋 8 · 개념 5</div>
+                </div>
+                <span class="sheet-status">인쇄 중 3 / 5</span>
+              </div>
+              <div class="nodes">
+                <button class="node" data-state="done" data-track="t0" data-title="async / await" data-glyph="( )" data-pass="3" data-desc="await은 기다리는 표시입니다. 여기선 login() 응답." style="--dy:-8px;--rot:-2deg;--d:0ms">
+                  <span class="die"><span class="tag">T0</span><span class="face"><span class="g">( )</span></span><span class="ck"><svg viewBox="0 0 20 20" fill="none"><path d="M3 10.5l4.5 4.5L17 5" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
+                  <span class="n-label">폼 제출 핸들러</span>
+                  <span class="n-pass"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span>
+                </button>
+                <button class="node" data-state="done" data-track="t0" data-title="구조분해 할당" data-glyph="{ }" data-pass="2" data-desc="{ email, password } 를 꺼내 쓰는 문법." style="--dy:7px;--rot:3deg;--d:60ms">
+                  <span class="die"><span class="tag">T0</span><span class="face"><span class="g">{ }</span></span><span class="ck"><svg viewBox="0 0 20 20" fill="none"><path d="M3 10.5l4.5 4.5L17 5" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
+                  <span class="n-label">구조분해 할당</span>
+                  <span class="n-pass"><i class="on"></i><i class="on"></i><i></i><i></i></span>
+                </button>
+                <button class="node" data-state="done" data-track="t1" data-title="LoginForm 필사" data-glyph="✎" data-pass="3" data-desc="폼 컴포넌트 40줄 필사. 두 번째 인쇄." style="--dy:-4px;--rot:-3deg;--d:120ms">
+                  <span class="die"><span class="tag">T1</span><span class="face"><span class="g">✎</span></span><span class="ck"><svg viewBox="0 0 20 20" fill="none"><path d="M3 10.5l4.5 4.5L17 5" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
+                  <span class="n-label"><code>LoginForm</code> 필사</span>
+                  <span class="n-pass"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span>
+                </button>
+                <button class="node" data-state="current" data-track="t0" data-title="옵셔널 체이닝 ?." data-glyph="?." data-pass="1" data-desc="res.user?.profile?.nickname — 없으면 멈추는 문법." style="--dy:2px;--rot:-1deg;--d:180ms">
+                  <span class="die">
+                    <svg class="cut" viewBox="0 0 100 100"><circle cx="50" cy="50" r="47"/></svg>
+                    <span class="now-flag">지금 여기</span>
+                    <span class="tag">T0</span>
+                    <span class="face"><span class="g">?.</span></span>
+                  </span>
+                  <span class="n-label">옵셔널 체이닝 <code>?.</code></span>
+                  <span class="n-pass"><i class="on"></i><i></i><i></i><i></i></span>
+                </button>
+                <button class="node" data-state="locked" data-track="t2" data-title="auth 경계" data-glyph="/ /" data-pass="0" data-desc="" style="--dy:8px;--rot:2deg;--d:240ms">
+                  <span class="die"><span class="tag">T2</span><span class="face"><span class="g">/ /</span></span></span>
+                  <span class="n-label"><code>auth/</code> 경계</span>
+                  <span class="n-pass"><i></i><i></i><i></i><i></i></span>
+                </button>
+              </div>
+              <div class="detail"><div class="detail-in"></div></div>
+            </div>
+          </article>
+
+          <!-- 3대 : 잠김 = 애벌 인쇄 -->
+          <article class="sheet" data-state="locked" style="--tilt:-.15deg">
+            <svg class="reg tr" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M12 1v22M1 12h22" stroke="currentColor" stroke-width="1.2"/></svg>
+            <div class="rail"><i class="chip t2" style="opacity:.4"></i><span class="vt">판 03 · 애벌 1도</span></div>
+            <div class="sheet-in">
+              <div class="sheet-head">
+                <span class="sig mr" data-w="3대">3대</span>
+                <div>
+                  <h2 class="sheet-h2">주문서 · 결제 요청</h2>
+                  <div class="sheet-meta">src/features/checkout · 커밋 15 · 개념 6</div>
+                </div>
+                <span class="sheet-status">2대를 먼저</span>
+              </div>
+              <div class="nodes">
+                <button class="node" data-state="locked" data-track="t0" data-title="try / catch" data-glyph="!" data-pass="0" data-desc="" style="--dy:-6px;--rot:-2deg;--d:0ms">
+                  <span class="die"><span class="tag">T0</span><span class="face"><span class="g">!</span></span></span>
+                  <span class="n-label"><code>try / catch</code></span>
+                  <span class="n-pass"><i></i><i></i><i></i><i></i></span>
+                </button>
+                <button class="node" data-state="locked" data-track="t0" data-title="Promise.all" data-glyph="≡" data-pass="0" data-desc="" style="--dy:5px;--rot:2deg;--d:50ms">
+                  <span class="die"><span class="tag">T0</span><span class="face"><span class="g">≡</span></span></span>
+                  <span class="n-label"><code>Promise.all</code></span>
+                  <span class="n-pass"><i></i><i></i><i></i><i></i></span>
+                </button>
+                <button class="node" data-state="locked" data-track="t1" data-title="createOrder 필사" data-glyph="✎" data-pass="0" data-desc="" style="--dy:-3px;--rot:-3deg;--d:100ms">
+                  <span class="die"><span class="tag">T1</span><span class="face"><span class="g">✎</span></span></span>
+                  <span class="n-label"><code>createOrder</code> 필사</span>
+                  <span class="n-pass"><i></i><i></i><i></i><i></i></span>
+                </button>
+                <button class="node" data-state="locked" data-track="t2" data-title="결제 의존성" data-glyph="⇄" data-pass="0" data-desc="" style="--dy:7px;--rot:3deg;--d:150ms">
+                  <span class="die"><span class="tag">T2</span><span class="face"><span class="g">⇄</span></span></span>
+                  <span class="n-label">결제 모듈 의존성</span>
+                  <span class="n-pass"><i></i><i></i><i></i><i></i></span>
+                </button>
+              </div>
+              <div class="detail"><div class="detail-in"></div></div>
+            </div>
+          </article>
+
+          <!-- 아직 짜이지 않은 판 -->
+          <div class="forecast">
+            <span class="fc-sig">4대 ~</span>
+            <p><b>아직 판이 짜이지 않았습니다.</b> 커밋이 쌓이면 <code>src/</code> 를 다시 읽어 대지를 자동으로 늘립니다. 지금 리포에서 <b>9개 기능</b>이 대기 중입니다.</p>
+            <span class="fc-mark">미조판</span>
+          </div>
+
+          <!-- 컬러 바 : 인쇄 농도 = 학습 시간 -->
+          <div class="colorbar">
+            <div class="cb-h"><b>지난 14일 · 잉크 농도</b><span>칸 하나가 하루. 색이 진할수록 오래 찍었습니다.</span></div>
+            <div class="cb" id="cb"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       ② T0 문법 카드 — 교정쇄
+       ══════════════════════════════════════════════════ -->
+  <section class="view" id="view-card" role="tabpanel" aria-labelledby="tab-card">
+    <div class="proofwrap">
+
+      <!-- ───── 카드 1 ───── -->
+      <article class="proof grain" data-card="1">
+        <div class="proof-head">
+          <span class="trk">T0 · 문법</span>
+          <span class="loc"><b>src/features/cart/useCart.ts</b> : 38–50</span>
+          <div class="proof-prog">
+            <span>오늘 3 / 7판</span>
+            <div class="sheetdots"><i class="on"></i><i class="on"></i><i class="cur"></i><i></i><i></i><i></i><i></i></div>
+          </div>
+        </div>
+
+        <!-- 코드 판 : 질감 없음 -->
+        <div class="plate-wrap">
+          <span class="plate-tab">교정쇄 · useCart.ts</span>
+          <div class="plate">
+            <div class="code">
+              <div class="ln">38</div><div class="lc"><span class="k">export</span> <span class="k">function</span> <span class="f">useCart</span><span class="p">() {</span></div>
+              <div class="ln">39</div><div class="lc">  <span class="k">const</span> <span class="p">[</span>items<span class="p">,</span> setItems<span class="p">] =</span> <span class="f">useState</span><span class="p">&lt;</span><span class="t">CartItem</span><span class="p">[]&gt;([]);</span></div>
+              <div class="ln">40</div><div class="lc"> </div>
+              <div class="ln">41</div><div class="lc">  <span class="k">const</span> addItem <span class="p">= (</span>product<span class="p">:</span> <span class="t">Product</span><span class="p">) =&gt; {</span></div>
+              <div class="ln hl">42</div><div class="lc hl">    <span class="f">setItems</span><span class="p">((</span>prev<span class="p">) =&gt; {</span><span class="hint">← 오늘 읽을 줄</span></div>
+              <div class="ln">43</div><div class="lc">      <span class="k">const</span> found <span class="p">=</span> prev<span class="p">.</span><span class="f">find</span><span class="p">((</span>it<span class="p">) =&gt;</span> it<span class="p">.</span>id <span class="p">===</span> product<span class="p">.</span>id<span class="p">);</span></div>
+              <div class="ln">44</div><div class="lc">      <span class="k">if</span> <span class="p">(</span>found<span class="p">) {</span></div>
+              <div class="ln">45</div><div class="lc">        <span class="k">return</span> prev<span class="p">.</span><span class="f">map</span><span class="p">((</span>it<span class="p">) =&gt;</span></div>
+              <div class="ln">46</div><div class="lc">          it<span class="p">.</span>id <span class="p">===</span> product<span class="p">.</span>id <span class="p">? { ...</span>it<span class="p">,</span> qty<span class="p">:</span> it<span class="p">.</span>qty <span class="p">+</span> <span class="n">1</span> <span class="p">} :</span> it</div>
+              <div class="ln">47</div><div class="lc">        <span class="p">);</span></div>
+              <div class="ln">48</div><div class="lc">      <span class="p">}</span></div>
+              <div class="ln">49</div><div class="lc">      <span class="k">return</span> <span class="p">[...</span>prev<span class="p">, { ...</span>product<span class="p">,</span> qty<span class="p">:</span> <span class="n">1</span> <span class="p">}];</span></div>
+              <div class="ln">50</div><div class="lc">    <span class="p">});</span></div>
+            </div>
+          </div>
+          <div class="plate-foot">
+            <span class="mini">42번 줄</span>
+            <span>AI가 써준 줄입니다. 이 줄만 이해하면 나머지 8줄이 따라옵니다.</span>
+          </div>
+        </div>
+
+        <!-- 개념 -->
+        <div class="concept">
+          <span class="mark">?</span>
+          <div>
+            <h3>상태 갱신에 <code>(prev) =&gt;</code> 를 넘기는 이유</h3>
+            <p>리액트에 “새 값”이 아니라 “값을 만드는 방법”을 넘기는 형태입니다. 42번 줄이 딱 그것을 하고 있습니다.</p>
+          </div>
+        </div>
+
+        <div class="q">42번 줄에서 <code>setItems(prev =&gt; ...)</code> 처럼 <b>함수</b>를 넘기면, 그냥 <code>setItems([...items, product])</code> 라고 쓸 때와 무엇이 달라지나요?</div>
+
+        <div class="choices" role="radiogroup" aria-label="선택지">
+          <button class="choice" role="radio" aria-checked="false" data-i="1">
+            <span class="bub">1</span>
+            <span class="txt"><code>prev</code>는 리액트가 넘겨주는 <b>가장 최신 상태값</b>이라, 짧은 시간에 여러 번 호출해도 계산이 겹쳐 사라지지 않는다.</span>
+            <span class="verdict">승인</span>
+          </button>
+          <button class="choice" role="radio" aria-checked="false" data-i="2">
+            <span class="bub">2</span>
+            <span class="txt"><code>prev</code>를 쓰면 리렌더링을 건너뛴다. 성능을 위한 최적화 문법이다.</span>
+            <span class="verdict">교정</span>
+          </button>
+          <button class="choice" role="radio" aria-checked="false" data-i="3">
+            <span class="bub">3</span>
+            <span class="txt"><code>items</code> 변수를 쓸 수 없는 자리에서만 쓰는 대체 문법이다. 쓸 수 있으면 <code>items</code>가 낫다.</span>
+            <span class="verdict">교정</span>
+          </button>
+        </div>
+
+        <!-- 판정란 : 답하기 전부터 자리를 차지한다 -->
+        <div class="result" data-fill="0" aria-live="polite">
+          <span class="result-tag">판정란</span>
+          <div class="result-empty">
+            <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="13" stroke="currentColor" stroke-width="1.6" stroke-dasharray="4 4"/><path d="M20 2v36M2 20h36" stroke="currentColor" stroke-width="1.2"/></svg>
+            <p><b>RESULT · 미인쇄</b>답을 고르면 여기에 도장이 찍힙니다. 자리는 지금부터 비워 두었으니 화면이 밀리지 않습니다.</p>
+          </div>
+        </div>
+
+        <!-- 피드백 원고 (숨김) -->
+        <div hidden data-fbstore>
+          <div data-fb="ok">
+            <div class="fb ok">
+              <div class="fb-head"><span class="fb-stamp">승인</span><h4>맞습니다.</h4></div>
+              <div class="fb-body">
+                <span class="lead">리액트는 갱신을 큐에 쌓아 뒀다가 순서대로 적용하면서 <code>prev</code>에 <em>그 순간의 최신값</em>을 넣어 줍니다.</span>
+                그래서 버튼을 빠르게 두 번 눌러 <code>addItem</code>이 연달아 불려도 둘 다 반영됩니다.
+                <code>[...items, product]</code> 였다면 두 호출 모두 <strong>같은(낡은) items</strong>를 보고 계산해 하나가 사라집니다.
+                43번 줄의 <code>find</code>도 이 <code>prev</code> 위에서 돌기 때문에 같은 이유로 안전합니다.
+              </div>
+            </div>
+          </div>
+          <div data-fb="2">
+            <div class="fb no">
+              <div class="fb-head"><span class="fb-stamp">교정</span><h4>렌더 횟수와 계산 시점을 겹쳐 보셨습니다.</h4></div>
+              <div class="fb-body">
+                <span class="lead">혼동한 지점: <em>성능 최적화</em>(<code>useMemo</code>, <code>React.memo</code>)와 <em>상태 계산 방식</em>.</span>
+                함수형 업데이트는 렌더 횟수를 <strong>줄이지 않습니다</strong>. 바꾸는 건 <strong>무엇을 기준으로 계산하느냐</strong>입니다 —
+                “지금 내가 들고 있는 <code>items</code>”가 아니라 “리액트가 알고 있는 최신 <code>items</code>”. 속도가 아니라 정확성 문제입니다.
+              </div>
+            </div>
+          </div>
+          <div data-fb="3">
+            <div class="fb no">
+              <div class="fb-head"><span class="fb-stamp">교정</span><h4>“쓸 수 있느냐”와 “최신이냐”를 겹쳐 보셨습니다.</h4></div>
+              <div class="fb-body">
+                <span class="lead">혼동한 지점: <em>접근 가능성</em> ↔ <em>최신성</em>.</span>
+                <code>items</code>는 42번 줄에서도 <strong>얼마든지 쓸 수 있습니다</strong>. 문제는 쓸 수 있느냐가 아니라 그 값이 <strong>낡았을 수 있다</strong>는 것.
+                한 번의 클릭에서 <code>addItem</code>이 두 번 불리면, 두 호출 다 같은 <code>items</code>를 읽고 계산해서 결과 하나가 덮여 사라집니다.
+              </div>
+            </div>
+          </div>
+          <div data-fb="idk">
+            <div class="fb idk">
+              <div class="fb-head"><span class="fb-stamp">다시 인쇄</span><h4>흐린 인쇄는 다시 찍습니다. 그게 정상입니다.</h4></div>
+              <div class="gain">
+                <span class="gc down"><svg viewBox="0 0 20 20" fill="none"><path d="M10 3v13M4.5 11l5.5 5.5L15.5 11" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><b>잉크 겹</b><s>2겹</s><i>→ 1겹</i></span>
+                <span class="gc soon"><svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10.5" r="7.2" stroke="currentColor" stroke-width="2"/><path d="M10 6.5v4.4l3 1.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><b>다음 인쇄</b><s>6일 뒤</s><i>→ 오늘 안에</i></span>
+              </div>
+              <div class="idk-why"><b>답:</b> 1번. <code>prev</code>는 리액트가 넘겨주는 최신 상태값입니다. — 눌러 주셔서 이 개념이 오늘 인쇄 목록 맨 앞으로 갔습니다. <b>찍었다고 표시만 해두는 것보다, 지금 안 된다고 말하는 쪽이 항상 이득입니다.</b></div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ───── 카드 2 ───── -->
+      <article class="proof grain" data-card="2" hidden>
+        <div class="proof-head">
+          <span class="trk">T0 · 문법</span>
+          <span class="loc"><b>src/features/auth/LoginForm.tsx</b> : 24–32</span>
+          <div class="proof-prog">
+            <span>오늘 4 / 7판</span>
+            <div class="sheetdots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="cur"></i><i></i><i></i><i></i></div>
+          </div>
+        </div>
+
+        <div class="plate-wrap">
+          <span class="plate-tab">교정쇄 · LoginForm.tsx</span>
+          <div class="plate">
+            <div class="code">
+              <div class="ln">24</div><div class="lc">  <span class="k">const</span> onSubmit <span class="p">=</span> <span class="k">async</span> <span class="p">(</span>e<span class="p">:</span> <span class="t">FormEvent</span><span class="p">) =&gt; {</span></div>
+              <div class="ln">25</div><div class="lc">    e<span class="p">.</span><span class="f">preventDefault</span><span class="p">();</span></div>
+              <div class="ln">26</div><div class="lc">    <span class="k">const</span> res <span class="p">=</span> <span class="k">await</span> <span class="f">login</span><span class="p">(</span>email<span class="p">,</span> password<span class="p">);</span></div>
+              <div class="ln">27</div><div class="lc"> </div>
+              <div class="ln hl">28</div><div class="lc hl">    <span class="k">if</span> <span class="p">(</span>res<span class="p">.</span>user<span class="p">?.</span>profile<span class="p">?.</span>nickname<span class="p">) {</span><span class="hint">← 오늘 읽을 줄</span></div>
+              <div class="ln">29</div><div class="lc">      <span class="f">toast</span><span class="p">(</span><span class="s">`${res.user.profile.nickname}님 환영합니다`</span><span class="p">);</span></div>
+              <div class="ln">30</div><div class="lc">    <span class="p">}</span></div>
+              <div class="ln">31</div><div class="lc">    <span class="f">navigate</span><span class="p">(</span>res<span class="p">.</span>redirectTo <span class="p">??</span> <span class="s">"/"</span><span class="p">);</span></div>
+              <div class="ln">32</div><div class="lc">  <span class="p">};</span></div>
+            </div>
+          </div>
+          <div class="plate-foot">
+            <span class="mini">28번 줄</span>
+            <span>같은 <code>?.</code> 가 내 코드 7곳에 있습니다. 여기서 한 번만 잡으면 나머지도 읽힙니다.</span>
+          </div>
+        </div>
+
+        <div class="concept">
+          <span class="mark">?</span>
+          <div>
+            <h3>옵셔널 체이닝 <code>?.</code> 이 실제로 하는 일</h3>
+            <p>점(<code>.</code>) 대신 <code>?.</code> 을 찍었을 때 자바스크립트가 어떻게 다르게 움직이는지.</p>
+          </div>
+        </div>
+
+        <div class="q">28번 줄에서 <code>res.user</code>가 <code>undefined</code>일 때, <code>?.</code> 은 무엇을 하나요?</div>
+
+        <div class="choices" role="radiogroup" aria-label="선택지">
+          <button class="choice" role="radio" aria-checked="false" data-i="1">
+            <span class="bub">1</span>
+            <span class="txt">거기서 <b>평가를 멈추고</b> 뒤의 <code>.profile</code>은 읽지 않은 채 통째로 <code>undefined</code>를 내놓는다. 에러는 안 난다.</span>
+            <span class="verdict">승인</span>
+          </button>
+          <button class="choice" role="radio" aria-checked="false" data-i="2">
+            <span class="bub">2</span>
+            <span class="txt"><code>user</code> 자리에 빈 객체 <code>{}</code>를 대신 넣어 주고 계속 진행한다.</span>
+            <span class="verdict">교정</span>
+          </button>
+          <button class="choice" role="radio" aria-checked="false" data-i="3">
+            <span class="bub">3</span>
+            <span class="txt">리액트에게 이 <code>if</code> 블록을 건너뛰라고 알려 주는 리액트 전용 문법이다.</span>
+            <span class="verdict">교정</span>
+          </button>
+        </div>
+
+        <div class="result" data-fill="0" aria-live="polite">
+          <span class="result-tag">판정란</span>
+          <div class="result-empty">
+            <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="13" stroke="currentColor" stroke-width="1.6" stroke-dasharray="4 4"/><path d="M20 2v36M2 20h36" stroke="currentColor" stroke-width="1.2"/></svg>
+            <p><b>RESULT · 미인쇄</b>답을 고르면 여기에 도장이 찍힙니다. 자리는 지금부터 비워 두었으니 화면이 밀리지 않습니다.</p>
+          </div>
+        </div>
+
+        <div hidden data-fbstore>
+          <div data-fb="ok">
+            <div class="fb ok">
+              <div class="fb-head"><span class="fb-stamp">승인</span><h4>맞습니다.</h4></div>
+              <div class="fb-body">
+                <span class="lead"><code>?.</code> 는 왼쪽이 <code>null</code>이나 <code>undefined</code>면 <em>즉시 멈추고</em> <code>undefined</code>를 돌려줍니다.</span>
+                그래서 <code>res.user</code>가 없어도 <code>.profile</code>을 읽으려다 터지는 일이 없습니다.
+                단, 값을 <strong>채워 주지는 않습니다</strong> — 채우는 건 31번 줄의 <code>??</code> 가 하는 일입니다. 둘은 짝처럼 붙어 다닙니다.
+              </div>
+            </div>
+          </div>
+          <div data-fb="2">
+            <div class="fb no">
+              <div class="fb-head"><span class="fb-stamp">교정</span><h4><code>?.</code> 과 기본값 문법을 겹쳐 보셨습니다.</h4></div>
+              <div class="fb-body">
+                <span class="lead">혼동한 지점: <em>멈추는 문법</em>(<code>?.</code>) ↔ <em>채우는 문법</em>(<code>??</code>, <code>||</code>, 구조분해 기본값).</span>
+                <code>?.</code> 는 아무것도 넣어 주지 않습니다. 그냥 <strong>더 안 읽고 <code>undefined</code>를 내보낼 뿐</strong>입니다.
+                실제로 값을 채우는 코드는 바로 아래 31번 줄에 있습니다 — <code>res.redirectTo ?? "/"</code>. 두 줄을 나란히 놓고 보세요.
+              </div>
+            </div>
+          </div>
+          <div data-fb="3">
+            <div class="fb no">
+              <div class="fb-head"><span class="fb-stamp">교정</span><h4>문법과 프레임워크를 겹쳐 보셨습니다.</h4></div>
+              <div class="fb-body">
+                <span class="lead">혼동한 지점: <em>자바스크립트 자체의 연산자</em> ↔ <em>리액트 기능</em>.</span>
+                <code>?.</code> 는 리액트와 아무 상관이 없습니다. 브라우저와 Node 어디서나 도는 자바스크립트 문법입니다.
+                <code>if</code>가 건너뛰어지는 건 <code>?.</code> 가 지시해서가 아니라, 결과가 <code>undefined</code>(거짓 값)라서 <strong>조건이 그냥 거짓이 되기 때문</strong>입니다.
+              </div>
+            </div>
+          </div>
+          <div data-fb="idk">
+            <div class="fb idk">
+              <div class="fb-head"><span class="fb-stamp">다시 인쇄</span><h4>흐린 인쇄는 다시 찍습니다. 그게 정상입니다.</h4></div>
+              <div class="gain">
+                <span class="gc down"><svg viewBox="0 0 20 20" fill="none"><path d="M10 3v13M4.5 11l5.5 5.5L15.5 11" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><b>잉크 겹</b><s>1겹</s><i>→ 0겹</i></span>
+                <span class="gc soon"><svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10.5" r="7.2" stroke="currentColor" stroke-width="2"/><path d="M10 6.5v4.4l3 1.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><b>다음 인쇄</b><s>3일 뒤</s><i>→ 오늘 안에</i></span>
+              </div>
+              <div class="idk-why"><b>답:</b> 1번. <code>?.</code> 는 거기서 멈추고 <code>undefined</code>를 돌려줍니다. — <b>모르겠다고 눌렀기 때문에</b> 이 문법이 오늘 다시 나옵니다. 넘겨짚고 맞힌 카드는 6일 뒤에나 돌아옵니다.</div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- 우측 보조 -->
+      <aside class="side">
+        <div class="panel" style="margin:0">
+          <div class="panel-h"><b>내 코드 속 이 문법</b><i class="rule"></i></div>
+          <ul class="occ" id="occ"></ul>
+          <p class="mini-note" style="margin-top:11px; padding-top:11px; border-top:2px solid var(--rule)">
+            남의 예제가 아니라 <b>당신이 만든 파일</b>입니다. 그래서 여기서 이해하면 바로 그 화면이 읽힙니다.
+          </p>
+        </div>
+
+        <div class="panel" style="margin:0">
+          <div class="panel-h"><b>이 개념의 잉크</b><i class="rule"></i></div>
+          <div class="cn" style="border:0; padding:0">
+            <span class="nm" id="sideConcept">함수형 업데이트</span>
+            <span class="due" id="sideDue">3일 뒤 다시 인쇄 예정</span>
+            <span class="passes t0" id="sidePasses"><i class="on"></i><i class="on"></i><i></i><i></i></span>
+          </div>
+          <p class="mini-note" style="margin-top:12px">
+            4겹이 되면 완전히 익힌 것으로 봅니다. 겹은 <b>맞힌 횟수</b>가 아니라 <b>시간을 두고 다시 맞힌 횟수</b>로 쌓입니다.
+          </p>
+        </div>
+
+        <div class="panel" style="margin:0">
+          <div class="panel-h"><b>키보드</b><i class="rule"></i></div>
+          <p class="mini-note">
+            <kbd style="font-family:var(--f-mono);border:1.5px solid var(--rule);padding:0 4px">1</kbd>–<kbd style="font-family:var(--f-mono);border:1.5px solid var(--rule);padding:0 4px">3</kbd> 선택 ·
+            <kbd style="font-family:var(--f-mono);border:1.5px solid var(--rule);padding:0 4px">Enter</kbd> 제출 ·
+            <kbd style="font-family:var(--f-mono);border:1.5px solid var(--rule);padding:0 4px">Space</kbd> 다음 ·
+            <kbd style="font-family:var(--f-mono);border:1.5px solid var(--rule);padding:0 4px">?</kbd> 모르겠어요.
+            마우스 없이 한 판을 끝까지 찍을 수 있습니다.
+          </p>
+        </div>
+      </aside>
+    </div>
+  </section>
+</div>
+
+<!-- 하단 조작대 -->
+<div class="deck" id="deck" data-mode="idle" hidden>
+  <div class="deck-in">
+    <button class="btn idk" id="idkBtn" aria-pressed="false">모르겠어요 · 다시 찍기<span class="kb">?</span></button>
+    <div class="deck-msg" id="deckMsg">답을 고르고 <b>Enter</b>를 누르세요.<small>모르겠으면 왼쪽 버튼이 더 빠른 길입니다. 벌점은 없습니다.</small></div>
+    <div class="deck-keys">
+      <span><kbd>1</kbd>–<kbd>3</kbd>선택</span><span><kbd>Enter</kbd>제출</span><span><kbd>Space</kbd>다음</span><span><kbd>?</kbd>모르겠어요</span>
+    </div>
+    <button class="btn go" id="submitBtn" disabled>확인<span class="kb">Enter</span></button>
+    <button class="btn next" id="nextBtn" hidden>다음 판<span class="kb">Space</span></button>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- 테마 : 주간반 / 야간반 ---------- */
+  var root = document.documentElement;
+  var shift = document.getElementById('shift');
+  shift.addEventListener('click', function(){
+    var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    Array.prototype.forEach.call(shift.querySelectorAll('span'), function(s){
+      s.classList.toggle('on', s.dataset.s === next);
+    });
+  });
+
+  /* ---------- 컬러 바 : 지난 14일 잉크 농도 ---------- */
+  var mins = [0,14,22,0,9,18,25,12,16,20,11,24,19,12];
+  var cb = document.getElementById('cb');
+  mins.forEach(function(m, i){
+    var d = document.createElement('div');
+    d.setAttribute('data-v', m === 0 ? '0' : '1');
+    if (i === 13) d.setAttribute('data-today','');
+    d.title = (i===13?'오늘':(13-i)+'일 전') + ' · ' + (m===0?'쉼':m+'분');
+    var lv = Math.min(3, Math.ceil(m/9));
+    for (var k=0;k<3;k++){
+      var i2 = document.createElement('i');
+      i2.className = 'i'+k;
+      i2.style.opacity = m === 0 ? '0' : (k < lv ? '1' : '0.16');
+      d.appendChild(i2);
+    }
+    cb.appendChild(d);
+  });
+
+  /* ---------- 탭 ---------- */
+  var tabs = [document.getElementById('tab-path'), document.getElementById('tab-card')];
+  var views = [document.getElementById('view-path'), document.getElementById('view-card')];
+  var deck = document.getElementById('deck');
+  function showView(idx){
+    tabs.forEach(function(t,i){ t.setAttribute('aria-selected', i===idx ? 'true':'false'); });
+    views.forEach(function(v,i){ v.classList.toggle('is-on', i===idx); });
+    deck.hidden = idx !== 1;
+    window.scrollTo({top:0, behavior:'instant' in window ? 'auto':'auto'});
+  }
+  tabs.forEach(function(t,i){ t.addEventListener('click', function(){ showView(i); }); });
+  document.getElementById('startBtn').addEventListener('click', function(){ showView(1); });
+
+  /* ---------- 경로 : 노드 상호작용 ---------- */
+  var TRACKNAME = {t0:'T0 문법', t1:'T1 클론 코딩', t2:'T2 구조'};
+  document.querySelectorAll('.node').forEach(function(node){
+    node.addEventListener('click', function(){
+      var sheet = node.closest('.sheet');
+      var detail = sheet.querySelector('.detail');
+      var box = detail.querySelector('.detail-in');
+
+      if (node.dataset.state === 'locked'){
+        node.classList.remove('shake');
+        void node.offsetWidth;
+        node.classList.add('shake');
+        box.innerHTML =
+          '<div><h4>아직 판이 걸리지 않았습니다</h4>' +
+          '<p>앞 대지를 먼저 찍어야 이 스티커가 도려내집니다. ' +
+          '<b>' + (sheet.dataset.state === 'locked' ? '2대를 끝내면' : '앞 노드를 끝내면') + '</b> 바로 열립니다.</p></div>';
+        detail.classList.add('open');
+        return;
+      }
+
+      var pass = parseInt(node.dataset.pass,10) || 0;
+      var track = node.dataset.track;
+      var passHtml = '';
+      for (var i=0;i<4;i++) passHtml += '<i class="'+(i<pass?'on':'')+'"></i>';
+      box.innerHTML =
+        '<div><h4>' + node.dataset.title + '</h4>' +
+        '<p>' + (node.dataset.desc || '') + '</p></div>' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          '<span class="pill '+track+'">'+TRACKNAME[track]+'</span>' +
+          '<span style="font-family:var(--f-mono);font-size:11px;color:var(--ink-2)">잉크 '+pass+'겹 / 4</span>' +
+          '<span class="passes '+track+'" style="display:flex;gap:2.5px">'+passHtml+'</span>' +
+        '</div>' +
+        '<button class="detail-go">이 판 찍기</button>';
+      detail.classList.add('open');
+      box.querySelector('.detail-go').addEventListener('click', function(){ showView(1); });
+    });
+  });
+
+  /* ---------- 카드 엔진 ---------- */
+  var ANSWER = {"1":1, "2":1};
+  var OCC = {
+    "1":[['src/features/cart/useCart.ts','42, 61, 88'],['src/features/wish/useWish.ts','19'],['src/components/QtyStepper.tsx','34']],
+    "2":[['src/features/auth/LoginForm.tsx','28, 41'],['src/features/order/OrderCard.tsx','12, 55'],['src/lib/session.ts','7, 23, 30']]
+  };
+  var CONC = {
+    "1":['<code>useState</code> 함수형 업데이트','3일 뒤 다시 인쇄 예정', 2, 't0'],
+    "2":['옵셔널 체이닝 <code>?.</code>','내일 다시 인쇄 예정', 1, 't0']
+  };
+
+  var cards = document.querySelectorAll('.proof');
+  var cur = 1;
+  var state = 'idle';        // idle | picked | graded | idk
+  var picked = null;
+
+  var submitBtn = document.getElementById('submitBtn');
+  var nextBtn   = document.getElementById('nextBtn');
+  var idkBtn    = document.getElementById('idkBtn');
+  var deckMsg   = document.getElementById('deckMsg');
+
+  function card(){ return document.querySelector('.proof[data-card="'+cur+'"]'); }
+  function slot(){ return card().querySelector('.result'); }
+  function fbHTML(key){
+    var el = card().querySelector('[data-fbstore] [data-fb="'+key+'"]');
+    return el ? el.innerHTML : '';
+  }
+
+  function renderSide(){
+    var occ = document.getElementById('occ');
+    occ.innerHTML = OCC[cur].map(function(r){
+      return '<li class="oc"><b>'+r[0].split('/').pop()+'</b>' +
+             '<span class="dir">'+r[0].replace(/\/[^/]+$/,'')+'/</span>' +
+             '<span class="lines">'+r[1].replace(/,\s*/g,' · ')+'행</span></li>';
+    }).join('');
+    var c = CONC[cur];
+    document.getElementById('sideConcept').innerHTML = c[0];
+    document.getElementById('sideDue').textContent = c[1];
+    var p = document.getElementById('sidePasses'), h = '';
+    for (var i=0;i<4;i++) h += '<i class="'+(i<c[2]?'on':'')+'"></i>';
+    p.className = 'passes ' + c[3];
+    p.innerHTML = h;
+  }
+
+  function resetSlot(){
+    var s = slot();
+    s.setAttribute('data-fill','0');
+    s.innerHTML =
+      '<span class="result-tag">판정란</span>' +
+      '<div class="result-empty">' +
+      '<svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="13" stroke="currentColor" stroke-width="1.6" stroke-dasharray="4 4"/><path d="M20 2v36M2 20h36" stroke="currentColor" stroke-width="1.2"/></svg>' +
+      '<p><b>RESULT · 미인쇄</b>답을 고르면 여기에 도장이 찍힙니다. 자리는 지금부터 비워 두었으니 화면이 밀리지 않습니다.</p></div>';
+  }
+
+  function fillSlot(key){
+    var s = slot();
+    s.setAttribute('data-fill','1');
+    s.innerHTML = '<span class="result-tag">판정란</span>' + fbHTML(key);
+  }
+
+  function setDeck(mode, msg, sub){
+    deck.dataset.mode = mode;
+    deckMsg.innerHTML = msg + (sub ? '<small>'+sub+'</small>' : '');
+  }
+
+  function resetCard(){
+    state = 'idle'; picked = null;
+    var c = card();
+    c.querySelector('.choices').classList.remove('graded');
+    c.querySelectorAll('.choice').forEach(function(ch){
+      ch.setAttribute('aria-checked','false');
+      ch.classList.remove('is-right','is-wrong','dim');
+    });
+    resetSlot();
+    submitBtn.hidden = false; submitBtn.disabled = true;
+    nextBtn.hidden = true;
+    idkBtn.setAttribute('aria-pressed','false');
+    idkBtn.firstChild.nodeValue = '모르겠어요 · 다시 찍기';
+    setDeck('idle','답을 고르고 <b>Enter</b>를 누르세요.','모르겠으면 왼쪽 버튼이 더 빠른 길입니다. 벌점은 없습니다.');
+    renderSide();
+  }
+
+  function pick(i){
+    if (state === 'graded') return;
+    picked = i; state = 'picked';
+    card().querySelectorAll('.choice').forEach(function(ch){
+      ch.setAttribute('aria-checked', ch.dataset.i === String(i) ? 'true' : 'false');
+    });
+    submitBtn.disabled = false;
+    setDeck('idle','<b>'+i+'번</b>을 골랐습니다. <b>Enter</b>로 제출.','확신이 없으면 지금이라도 <b>모르겠어요</b>가 이득입니다.');
+  }
+
+  function grade(){
+    if (state === 'graded' || picked == null) return;
+    state = 'graded';
+    var c = card(), ans = ANSWER[cur];
+    c.querySelector('.choices').classList.add('graded');
+    c.querySelectorAll('.choice').forEach(function(ch){
+      var i = parseInt(ch.dataset.i,10);
+      if (i === ans) ch.classList.add('is-right');
+      else if (i === picked) ch.classList.add('is-wrong');
+      else ch.classList.add('dim');
+    });
+    var ok = picked === ans;
+    fillSlot(ok ? 'ok' : String(picked));
+    submitBtn.hidden = true; nextBtn.hidden = false;
+    if (ok) setDeck('ok','승인 — 판이 제대로 찍혔습니다.','잉크 한 겹이 올라갔습니다. 아직 헷갈리면 <b>모르겠어요</b>를 눌러도 됩니다.');
+    else    setDeck('no','교정 — 어디서 겹쳐 봤는지 판정란에 적었습니다.','틀린 건 벌이 아니라 <b>다음 인쇄 일정</b>입니다. 이 개념은 오늘 다시 나옵니다.');
+    idkBtn.firstChild.nodeValue = ok ? '사실 잘 모르겠어요' : '아직 모르겠어요';
+  }
+
+  function idk(){
+    var pressed = idkBtn.getAttribute('aria-pressed') === 'true';
+    if (pressed){
+      // 되돌리기 : 채점 상태였다면 채점 결과로 복귀
+      idkBtn.setAttribute('aria-pressed','false');
+      if (state === 'graded'){
+        var ok = picked === ANSWER[cur];
+        fillSlot(ok ? 'ok' : String(picked));
+        if (ok) setDeck('ok','승인 — 판이 제대로 찍혔습니다.','잉크 한 겹이 올라갔습니다.');
+        else    setDeck('no','교정 — 어디서 겹쳐 봤는지 판정란에 적었습니다.','이 개념은 오늘 다시 나옵니다.');
+      } else {
+        resetSlot();
+        setDeck('idle','답을 고르고 <b>Enter</b>를 누르세요.','모르겠으면 왼쪽 버튼이 더 빠른 길입니다. 벌점은 없습니다.');
+      }
+      return;
+    }
+    idkBtn.setAttribute('aria-pressed','true');
+    var wasGraded = (state === 'graded');
+    var wasOk = wasGraded && picked === ANSWER[cur];
+    fillSlot('idk');
+    if (wasOk){
+      var why = slot().querySelector('.idk-why');
+      if (why) why.innerHTML = '<b>정답을 맞혔지만</b> 확신이 없다고 표시했습니다 — 그게 더 정확한 기록입니다. 찍어서 맞힌 카드는 6일 뒤에 돌아와 그때 무너집니다. 지금 표시했으니 오늘 안에 한 번 더 나옵니다.';
+    }
+    // 답을 안 골랐어도 진행 가능
+    var c = card(), ans = ANSWER[cur];
+    c.querySelector('.choices').classList.add('graded');
+    c.querySelectorAll('.choice').forEach(function(ch){
+      var i = parseInt(ch.dataset.i,10);
+      if (i === ans) ch.classList.add('is-right'); else ch.classList.add('dim');
+    });
+    state = 'graded';
+    submitBtn.hidden = true; nextBtn.hidden = false;
+    setDeck('idk','다시 인쇄 대기열 맨 앞으로 넣었습니다.','잉크 겹이 내려간 만큼 <b>이 개념이 더 자주</b> 돌아옵니다. 이게 이 앱에서 가장 이득인 버튼입니다.');
+  }
+
+  function nextCard(){
+    if (state !== 'graded') return;
+    cards.forEach(function(c){ c.hidden = true; });
+    cur = cur === 1 ? 2 : 1;
+    card().hidden = false;
+    resetCard();
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  document.querySelectorAll('.choice').forEach(function(ch){
+    ch.addEventListener('click', function(){ pick(parseInt(ch.dataset.i,10)); });
+  });
+  submitBtn.addEventListener('click', grade);
+  nextBtn.addEventListener('click', nextCard);
+  idkBtn.addEventListener('click', idk);
+
+  /* ---------- 키보드 : 1~4 / Enter / Space / ? ---------- */
+  document.addEventListener('keydown', function(e){
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var onCard = views[1].classList.contains('is-on');
+
+    if (e.key === '1' || e.key === '2') {
+      // 탭 전환은 카드 화면이 아닐 때만 숫자로 처리하지 않는다 (선택지와 충돌 방지)
+    }
+    if (!onCard) return;
+
+    if (/^[1-4]$/.test(e.key)){
+      var n = parseInt(e.key,10);
+      if (card().querySelector('.choice[data-i="'+n+'"]')) { e.preventDefault(); pick(n); }
+      return;
+    }
+    if (e.key === 'Enter'){
+      if (document.activeElement && document.activeElement.classList.contains('choice')) return;
+      e.preventDefault();
+      if (state === 'graded') nextCard(); else grade();
+      return;
+    }
+    if (e.key === ' ' || e.code === 'Space'){
+      e.preventDefault();
+      if (state === 'graded') nextCard();
+      return;
+    }
+    if (e.key === '?' || (e.key === '/' && e.shiftKey)){
+      e.preventDefault(); idk();
+    }
+  });
+
+  renderSide();
+})();
+</script>
+</body>
+</html>

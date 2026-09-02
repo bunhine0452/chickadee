@@ -1,0 +1,2736 @@
+<!doctype html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>T0 · 내 코드로 배우는 문법</title>
+<style>
+/* ============================================================
+   T0 — Syntax from your own code
+   Aesthetic: "Editorial IDE" — 잉크빛 지면 + 앰버 신호색.
+   원칙: 코드 가독성 > 장식. 모든 장식은 코드 영역 바깥에서만.
+   ============================================================ */
+
+/* ---------- tokens ---------- */
+:root{
+  --bg:#0d0f13;
+  --bg-grain:#12151b;
+  --panel:#151920;
+  --panel-2:#1b212a;
+  --panel-3:#222935;
+  --fg:#e8ecf3;
+  --fg-dim:#a3adbc;
+  --fg-mute:#6d7889;
+  --line:#242b37;
+  --line-2:#333c4b;
+
+  --accent:#ffb454;
+  --accent-2:#ffd08a;
+  --accent-soft:rgba(255,180,84,.13);
+  --accent-line:rgba(255,180,84,.42);
+
+  --ok:#5fdc9c;
+  --ok-soft:rgba(95,220,156,.12);
+  --ok-line:rgba(95,220,156,.40);
+  --err:#ff7f74;
+  --err-soft:rgba(255,127,116,.12);
+  --err-line:rgba(255,127,116,.42);
+
+  --code-bg:#090b0f;
+  --code-fg:#d6dde8;
+  --code-gutter:#4d5666;
+  --code-ctx:#8a94a4;
+
+  --t-kw:#cba6ff;
+  --t-str:#96dd7c;
+  --t-num:#ffb86b;
+  --t-fn:#7cc0ff;
+  --t-type:#7ce0d3;
+  --t-com:#5e6a7c;
+  --t-punc:#8b95a5;
+  --t-var:#d6dde8;
+
+  --lang-ts:#5aa9ff;
+  --lang-py:#ecc94b;
+  --lang-go:#4ad4d4;
+
+  --radius:14px;
+  --radius-sm:8px;
+  --shadow:0 18px 50px -22px rgba(0,0,0,.85), 0 2px 0 rgba(255,255,255,.02) inset;
+
+  --font-ui:"Apple SD Gothic Neo","Pretendard","Noto Sans KR","Helvetica Neue",system-ui,sans-serif;
+  --font-mono:ui-monospace,"SF Mono","JetBrains Mono","Menlo","Cascadia Mono","Consolas",monospace;
+
+  --code-size:15px;
+  --code-lh:1.85;
+}
+
+html[data-theme="light"]{
+  --bg:#f7f4ee;
+  --bg-grain:#efeae0;
+  --panel:#fffdf9;
+  --panel-2:#f3efe6;
+  --panel-3:#e9e3d7;
+  --fg:#1b1f26;
+  --fg-dim:#4d5563;
+  --fg-mute:#7b8494;
+  --line:#e0d9cc;
+  --line-2:#cbc2b1;
+
+  --accent:#b06a00;
+  --accent-2:#8a5200;
+  --accent-soft:rgba(176,106,0,.13);
+  --accent-line:rgba(176,106,0,.45);
+
+  --ok:#1a7f4b;
+  --ok-soft:rgba(26,127,75,.11);
+  --ok-line:rgba(26,127,75,.40);
+  --err:#c0392b;
+  --err-soft:rgba(192,57,43,.10);
+  --err-line:rgba(192,57,43,.40);
+
+  --code-bg:#f7f2e7;          /* 지면 위 '코드 판'으로 읽히도록 카드보다 한 톤 어둡게 */
+  --code-fg:#1f242c;
+  --code-gutter:#a3987f;
+  --code-ctx:#5b6472;
+
+  --t-kw:#7526b8;
+  --t-str:#1f6f2e;
+  --t-num:#9a5300;
+  --t-fn:#0b5fbd;
+  --t-type:#0c6f66;
+  --t-com:#8a8f98;
+  --t-punc:#5f6875;
+  --t-var:#1f242c;
+
+  --lang-ts:#1565c0;
+  --lang-py:#8a6d00;
+  --lang-go:#00726f;
+
+  --shadow:0 14px 40px -24px rgba(60,45,20,.45), 0 1px 0 rgba(255,255,255,.7) inset;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:
+    radial-gradient(1200px 600px at 85% -10%, var(--bg-grain), transparent 60%),
+    radial-gradient(900px 500px at 5% 110%, var(--bg-grain), transparent 55%),
+    var(--bg);
+  color:var(--fg);
+  font-family:var(--font-ui);
+  font-size:15px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+.mono{font-family:var(--font-mono)}
+.kbd{
+  font-family:var(--font-mono);font-size:11px;line-height:1;
+  padding:4px 6px;border-radius:5px;
+  border:1px solid var(--line-2);background:var(--panel-2);
+  color:var(--fg-dim);white-space:nowrap;
+  box-shadow:0 1px 0 var(--line-2);
+}
+
+/* ---------- top bar ---------- */
+.top{
+  flex:0 0 auto;
+  display:flex;align-items:center;gap:18px;
+  padding:0 20px;height:56px;
+  border-bottom:1px solid var(--line);
+  background:var(--panel);
+  background:color-mix(in srgb, var(--panel) 70%, transparent);
+  backdrop-filter:blur(12px);
+}
+.brand{display:flex;align-items:baseline;gap:9px;letter-spacing:-.01em}
+.brand b{font-size:15px;font-weight:800}
+.brand .brand__t0{
+  font-family:var(--font-mono);font-size:11px;font-weight:700;
+  color:var(--accent);border:1px solid var(--accent-line);
+  padding:2px 6px;border-radius:5px;letter-spacing:.06em;
+}
+.brand span{font-size:12px;color:var(--fg-mute)}
+
+.tabs{display:flex;gap:4px;margin-left:6px}
+.tab{
+  padding:7px 13px;border-radius:9px;font-size:13.5px;font-weight:600;
+  color:var(--fg-dim);border:1px solid transparent;display:flex;align-items:center;gap:8px;
+}
+.tab:hover{background:var(--panel-2);color:var(--fg)}
+.tab[aria-selected="true"]{background:var(--panel-2);border-color:var(--line-2);color:var(--fg)}
+.tab .kbd{padding:2px 5px}
+.tab .pip{
+  font-family:var(--font-mono);font-size:10.5px;font-weight:700;
+  background:var(--accent);color:#20160a;border-radius:20px;padding:1px 6px;
+}
+html[data-theme="light"] .tab .pip{color:#fff}
+
+.top__right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.hud{
+  display:flex;align-items:center;gap:14px;
+  font-size:12px;color:var(--fg-mute);font-family:var(--font-mono);
+  padding-right:12px;border-right:1px solid var(--line);
+}
+.hud b{color:var(--fg-dim);font-weight:700}
+.iconbtn{
+  width:34px;height:34px;border-radius:9px;border:1px solid var(--line);
+  display:grid;place-items:center;color:var(--fg-dim);background:var(--panel);
+  font-size:14px;
+}
+.iconbtn:hover{border-color:var(--line-2);color:var(--fg)}
+
+/* ---------- layout ---------- */
+main{flex:1 1 auto;min-height:0;display:flex}
+.view{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+.view[hidden]{display:none}
+
+/* ---------- deck strip ---------- */
+.deck{
+  flex:0 0 auto;display:flex;align-items:center;gap:14px;
+  padding:11px 20px;border-bottom:1px solid var(--line);
+}
+.deck__label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--fg-mute);font-weight:700}
+.langfilter{display:flex;gap:6px}
+.lf{
+  display:flex;align-items:center;gap:7px;
+  padding:5px 11px 5px 9px;border-radius:20px;font-size:12.5px;font-weight:600;
+  border:1px solid var(--line);color:var(--fg-dim);background:var(--panel);
+}
+.lf:hover{border-color:var(--line-2);color:var(--fg)}
+.lf[aria-pressed="true"]{border-color:var(--line-2);background:var(--panel-2);color:var(--fg)}
+.lf .swatch{width:8px;height:8px;border-radius:3px;background:var(--sw,var(--fg-mute))}
+.lf .n{font-family:var(--font-mono);font-size:11px;color:var(--fg-mute)}
+
+.dots{margin-left:auto;display:flex;align-items:center;gap:5px}
+.dot{
+  width:9px;height:9px;border-radius:50%;
+  background:transparent;border:1.5px solid var(--dc,var(--line-2));
+  transition:transform .18s ease;
+}
+.dot.is-done{background:var(--dc,var(--fg-mute));border-color:var(--dc,var(--fg-mute))}
+.dot.is-wrong{background:var(--err);border-color:var(--err)}
+.dot.is-now{transform:scale(1.55);border-color:var(--accent);background:var(--accent)}
+.dot.is-retry{border-style:dashed}
+.deck__count{font-family:var(--font-mono);font-size:11.5px;color:var(--fg-mute);margin-left:8px}
+
+/* ---------- card ---------- */
+.stage{
+  flex:1 1 auto;min-height:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+  padding:14px 20px;
+  overflow:auto;
+}
+.bench{
+  display:flex;gap:14px;align-items:stretch;
+  width:min(920px,100%);max-height:100%;min-height:0;
+  transition:width .22s cubic-bezier(.2,.7,.3,1);
+}
+.bench.is-open{width:min(1340px,100%)}
+.bench > .card{flex:1 1 auto;min-width:0}
+.card{
+  width:100%;
+  max-height:100%;
+  display:flex;flex-direction:column;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  position:relative;
+  animation:cardIn .32s cubic-bezier(.2,.7,.3,1) both;
+}
+@keyframes cardIn{from{opacity:0;transform:translateY(10px) scale(.994)}to{opacity:1;transform:none}}
+.card::before{
+  content:"";position:absolute;inset:0 auto 0 0;width:3px;
+  background:var(--langc,var(--accent));
+}
+
+/* source strip */
+.src{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:11px 16px 11px 19px;
+  border-bottom:1px solid var(--line);
+  background:var(--panel-2);
+}
+.langchip{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--font-mono);font-size:10.5px;font-weight:800;letter-spacing:.08em;
+  padding:3px 8px;border-radius:6px;
+  color:var(--langc);border:1px solid color-mix(in srgb, var(--langc) 45%, transparent);
+  background:color-mix(in srgb, var(--langc) 12%, transparent);
+}
+.src__path{font-family:var(--font-mono);font-size:12.5px;color:var(--fg-dim);letter-spacing:-.01em}
+.src__path b{color:var(--fg);font-weight:600}
+.src__line{font-family:var(--font-mono);font-size:12px;color:var(--accent);font-weight:700}
+.src__sep{color:var(--fg-mute)}
+.src__right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.ghost{
+  font-size:12px;color:var(--fg-dim);padding:5px 10px;border-radius:7px;
+  border:1px solid var(--line);
+}
+.ghost:hover{border-color:var(--line-2);color:var(--fg);background:var(--panel-3)}
+.ribbon{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:11.5px;font-weight:700;color:var(--accent);
+  border:1px dashed var(--accent-line);border-radius:20px;padding:3px 10px;
+  background:var(--accent-soft);
+}
+
+/* code block */
+.codewrap{
+  background:var(--code-bg);
+  padding:14px 0 14px;
+  border-bottom:1px solid var(--line);
+  overflow:auto;
+  max-height:38vh;
+}
+.code{
+  font-family:var(--font-mono);
+  font-size:var(--code-size);
+  line-height:var(--code-lh);
+  color:var(--code-fg);
+  letter-spacing:-.005em;
+  tab-size:4;-moz-tab-size:4;
+}
+.cl{
+  display:grid;grid-template-columns:60px 1fr;
+  align-items:start;
+  border-left:3px solid transparent;
+  padding-right:18px;
+}
+.cl__n{
+  text-align:right;padding-right:16px;
+  color:var(--code-gutter);font-size:12.5px;
+  font-variant-numeric:tabular-nums;
+  user-select:none;
+  line-height:var(--code-lh);
+}
+.cl__t{
+  white-space:pre-wrap;
+  overflow-wrap:break-word;
+  padding-left:2ch;text-indent:-2ch;   /* 긴 줄 wrap 시 행잉 인덴트 */
+}
+.cl--ctx .cl__t{opacity:.55}
+.cl--ctx .cl__n{opacity:.6}
+.cl--target{
+  background:linear-gradient(90deg,var(--accent-soft),transparent 78%);
+  border-left-color:var(--accent);
+}
+.cl--target .cl__n{color:var(--accent);font-weight:700}
+.cl--target .cl__n::after{content:" \25B8";}
+.cl--fold{cursor:pointer}
+.cl--fold .cl__t{color:var(--fg-mute);font-size:12.5px;opacity:.9}
+.cl--fold:hover .cl__t{color:var(--accent);text-decoration:underline}
+
+.t-kw{color:var(--t-kw)}.t-str{color:var(--t-str)}.t-num{color:var(--t-num)}
+.t-fn{color:var(--t-fn)}.t-type{color:var(--t-type)}.t-com{color:var(--t-com);font-style:italic}
+.t-punc{color:var(--t-punc)}.t-var{color:var(--t-var)}
+
+/* 개념 하이라이트 (정답 노출용 / 의미형)
+   — padding 대신 box-shadow spread 를 써서 코드 글자 위치를 1px도 밀지 않는다 */
+.hl{
+  background:var(--accent-soft);
+  box-shadow:0 0 0 3px var(--accent-soft), inset 0 -2px 0 var(--accent);
+  border-radius:3px;
+}
+
+/* 지목형 클릭 토큰 — 기본 상태는 '점선 밑줄'만. 박스를 그리지 않아 코드가 깨끗하다 */
+.pick{
+  display:inline-block;              /* 절대 줄바꿈으로 쪼개지지 않게 */
+  white-space:pre;
+  cursor:pointer;border-radius:4px;
+  text-decoration:underline dotted;
+  text-decoration-color:var(--code-gutter);
+  text-decoration-thickness:1.5px;
+  text-underline-offset:5px;
+  transition:background .12s ease, box-shadow .12s ease;
+}
+.pick:hover{
+  background:var(--panel-3);
+  box-shadow:0 0 0 3px var(--panel-3);
+  text-decoration-color:var(--accent);
+}
+/* 선택/채점 상태는 링(외곽선) 대신 '색 배경 + 굵은 밑줄'.
+   링은 spread 가 옆 글자를 덮어 글자 중간에서 잘린 것처럼 보인다. */
+.pick[data-sel="1"]{
+  background:var(--accent-soft);
+  box-shadow:0 0 0 2px var(--accent-soft), inset 0 -2px 0 var(--accent);
+  text-decoration-color:transparent;
+}
+.pick--ok{
+  background:var(--ok-soft)!important;
+  box-shadow:0 0 0 2px var(--ok-soft), inset 0 -2px 0 var(--ok)!important;
+  text-decoration-color:transparent!important;
+}
+.pick--bad{
+  background:var(--err-soft)!important;
+  box-shadow:0 0 0 2px var(--err-soft), inset 0 -2px 0 var(--err)!important;
+  text-decoration-color:transparent!important;
+}
+/* 채점이 끝나면 나머지 토큰의 '클릭 가능' 점선을 지운다 — 더는 못 누르니까 */
+.pick--locked{cursor:default;text-decoration-color:transparent}
+.pick--locked:hover{background:none;box-shadow:none}
+
+/* 빈칸 슬롯 */
+.blank{
+  display:inline-block;min-width:9ch;text-align:center;
+  border-radius:5px;padding:0 6px;margin:0 1px;
+  border:1.5px dashed var(--accent-line);
+  background:var(--accent-soft);
+  color:var(--fg-mute);
+}
+.blank.is-filled{border-style:solid;color:var(--fg);background:var(--accent-soft)}
+.blank.is-ok{border-color:var(--ok);background:var(--ok-soft)}
+.blank.is-bad{border-color:var(--err);background:var(--err-soft)}
+.blank .cursorbar{animation:blink 1.1s steps(1,end) infinite;color:var(--accent)}
+@keyframes blink{50%{opacity:0}}
+
+/* concept */
+.concept{
+  display:flex;align-items:flex-start;gap:16px;
+  padding:13px 18px 13px 19px;
+  border-bottom:1px solid var(--line);
+  background:var(--panel);
+}
+.concept__main{flex:1 1 auto;min-width:0}
+.concept__name{
+  font-size:15.5px;font-weight:800;letter-spacing:-.015em;
+  display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;
+}
+.concept__en{font-family:var(--font-mono);font-size:11.5px;color:var(--fg-mute);font-weight:500}
+.concept__desc{font-size:13.5px;color:var(--fg-dim);margin-top:3px;line-height:1.62}
+.concept__desc code{
+  font-family:var(--font-mono);font-size:12.5px;
+  background:var(--panel-3);padding:1px 5px;border-radius:4px;color:var(--fg);
+}
+.mastery{flex:0 0 auto;text-align:right}
+.mastery__pips{display:flex;gap:3px;justify-content:flex-end}
+.mastery__pips i{width:16px;height:4px;border-radius:2px;background:var(--line-2)}
+.mastery__pips i.on{background:var(--accent)}
+.mastery__meta{font-family:var(--font-mono);font-size:10.5px;color:var(--fg-mute);margin-top:5px}
+
+/* quiz */
+.quiz{
+  flex:1 1 auto;min-height:0;
+  display:flex;flex-direction:column;
+  padding:15px 18px 0 19px;
+  overflow:auto;
+}
+.qhead{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.qtype{
+  font-size:10.5px;font-weight:800;letter-spacing:.1em;
+  color:var(--accent);border:1px solid var(--accent-line);
+  padding:2px 8px;border-radius:5px;background:var(--accent-soft);
+}
+.qhint{font-size:11.5px;color:var(--fg-mute)}
+.q{font-size:16px;font-weight:700;letter-spacing:-.015em;line-height:1.5}
+.q code{font-family:var(--font-mono);font-size:14px;background:var(--panel-3);padding:1px 6px;border-radius:5px}
+
+.opts{list-style:none;display:flex;flex-direction:column;gap:7px;margin-top:12px}
+.opt{
+  display:flex;align-items:flex-start;gap:11px;width:100%;text-align:left;
+  padding:10px 13px;border-radius:10px;
+  border:1px solid var(--line);background:var(--panel-2);
+  transition:border-color .12s ease, background .12s ease, transform .12s ease;
+}
+.opt:hover{border-color:var(--line-2);background:var(--panel-3)}
+.opt[data-sel="1"]{border-color:var(--accent);background:var(--accent-soft)}
+.opt__k{
+  flex:0 0 auto;width:20px;height:20px;border-radius:5px;
+  display:grid;place-items:center;
+  font-family:var(--font-mono);font-size:11px;font-weight:800;
+  border:1px solid var(--line-2);color:var(--fg-mute);margin-top:1px;
+}
+.opt[data-sel="1"] .opt__k{border-color:var(--accent);color:var(--accent)}
+.opt__t{flex:1 1 auto;font-size:14.5px;line-height:1.5}
+.opt__t .mono{font-family:var(--font-mono);font-size:14px}
+.opt__mark{flex:0 0 auto;font-size:13px;font-weight:800;opacity:0}
+.opt--ok{border-color:var(--ok)!important;background:var(--ok-soft)!important}
+.opt--ok .opt__k{border-color:var(--ok);color:var(--ok)}
+.opt--ok .opt__mark{opacity:1;color:var(--ok)}
+.opt--bad{border-color:var(--err)!important;background:var(--err-soft)!important}
+.opt--bad .opt__k{border-color:var(--err);color:var(--err)}
+.opt--bad .opt__mark{opacity:1;color:var(--err)}
+.opt--dim{opacity:.45}
+.opt--locked{cursor:default}
+
+/* feedback zone — 제출 전에도 자리를 비워둬서 레이아웃이 튀지 않음 */
+.fb{
+  flex:0 0 auto;margin-top:13px;margin-bottom:14px;min-height:104px;
+  border-radius:11px;border:1px dashed var(--line);
+  padding:13px 15px;
+  display:flex;flex-direction:column;gap:9px;
+  background:transparent;
+}
+.fb--idle{align-items:center;justify-content:center;color:var(--fg-mute);font-size:12.5px;gap:6px;text-align:center}
+.fb--ok{border:1px solid var(--ok-line);background:var(--ok-soft);animation:fbIn .26s ease both}
+.fb--bad{border:1px solid var(--err-line);background:var(--err-soft);animation:fbIn .26s ease both}
+@keyframes fbIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.fb__head{display:flex;align-items:center;gap:9px;font-size:14.5px;font-weight:800;letter-spacing:-.01em}
+.fb--ok .fb__head{color:var(--ok)}
+.fb--bad .fb__head{color:var(--err)}
+.fb__badge{
+  margin-left:auto;font-size:11px;font-weight:700;color:var(--accent);
+  border:1px dashed var(--accent-line);border-radius:20px;padding:2px 9px;background:var(--accent-soft);
+}
+.fb p{font-size:13.5px;line-height:1.68;color:var(--fg)}
+.fb p + p{margin-top:2px}
+.fb .lead{color:var(--fg-dim)}
+.fb code{font-family:var(--font-mono);font-size:12.5px;background:var(--panel-3);padding:1px 5px;border-radius:4px;color:var(--fg)}
+.fb__rule{
+  display:flex;gap:9px;align-items:flex-start;
+  font-size:13px;color:var(--fg);
+  border-left:2px solid var(--accent);padding-left:10px;
+}
+.fb__rule b{color:var(--accent);font-size:11px;letter-spacing:.08em;flex:0 0 auto;padding-top:2px}
+.snip{
+  font-family:var(--font-mono);font-size:12.5px;line-height:1.72;
+  background:var(--code-bg);border:1px solid var(--line);border-radius:8px;
+  padding:9px 12px;white-space:pre-wrap;overflow-wrap:break-word;color:var(--code-fg);
+}
+.snip .cap{display:block;font-family:var(--font-ui);font-size:11px;color:var(--fg-mute);margin-bottom:4px}
+.fb__cols{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+@media (max-width:680px){.fb__cols{grid-template-columns:1fr}}
+
+/* card footer */
+.foot{
+  flex:0 0 auto;
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:11px 16px 11px 19px;
+  border-top:1px solid var(--line);
+  background:var(--panel-2);
+}
+.keys{display:flex;align-items:center;gap:12px;font-size:11.5px;color:var(--fg-mute)}
+.keys span{display:flex;align-items:center;gap:5px}
+.foot__right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.btn{
+  display:inline-flex;align-items:center;gap:9px;
+  padding:9px 16px;border-radius:9px;font-size:13.5px;font-weight:700;
+  background:var(--accent);color:#1a1206;border:1px solid transparent;
+  transition:filter .12s ease, transform .12s ease;
+}
+html[data-theme="light"] .btn{color:#fff}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:translateY(1px)}
+.btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
+.btn .kbd{background:rgba(0,0,0,.22);border-color:rgba(0,0,0,.25);color:inherit;box-shadow:none}
+.btn--sub{background:var(--panel);color:var(--fg-dim);border-color:var(--line-2)}
+.btn--sub:hover{color:var(--fg);background:var(--panel-3)}
+/* 라이트 테마의 .btn 흰 글자 규칙이 보조 버튼까지 덮어 글자가 사라지는 것을 막는다 */
+html[data-theme="light"] .btn.btn--sub{color:var(--fg-dim)}
+html[data-theme="light"] .btn.btn--sub:hover{color:var(--fg)}
+
+/* ============ 학습 스택 (선행 개념으로 내려갔을 때의 길찾기) ============ */
+.stackbar{
+  flex:0 0 auto;width:min(920px,100%);
+  border:1px solid var(--accent-line);border-radius:11px;
+  background:var(--accent-soft);
+  padding:9px 12px;
+  animation:cardIn .24s ease both;
+  transition:width .22s cubic-bezier(.2,.7,.3,1);
+}
+.stackbar.is-open{width:min(1340px,100%)}
+.stackbar__h{
+  display:flex;align-items:center;gap:8px;
+  font-size:10.5px;font-weight:800;letter-spacing:.1em;color:var(--accent);
+  text-transform:uppercase;margin-bottom:7px;
+}
+.stackbar__h .why{
+  text-transform:none;letter-spacing:0;font-weight:600;font-size:11.5px;color:var(--fg-dim);
+}
+.stackbar__h .btn{margin-left:auto;padding:5px 12px;font-size:12px}
+.srow{
+  display:flex;align-items:center;gap:9px;
+  font-size:13px;padding:3px 0;
+}
+.srow__i{
+  flex:0 0 auto;width:17px;height:17px;border-radius:5px;
+  display:grid;place-items:center;font-family:var(--font-mono);font-size:10px;font-weight:800;
+  border:1px solid var(--line-2);color:var(--fg-mute);
+}
+.srow--now .srow__i{background:var(--accent);border-color:var(--accent);color:#20160a}
+html[data-theme="light"] .srow--now .srow__i{color:#fff}
+.srow__n{font-weight:700;letter-spacing:-.01em}
+.srow--paused .srow__n{color:var(--fg-dim)}
+.srow__s{font-size:11.5px;color:var(--fg-mute);margin-left:auto;font-family:var(--font-mono)}
+.srow--now .srow__s{color:var(--accent);font-weight:700}
+.srow__arm{flex:0 0 auto;color:var(--accent);font-family:var(--font-mono);font-size:12px;padding-left:6px}
+
+/* ============ 이해 도우미 패널 (모르겠어요 사다리) ============ */
+.dunno{
+  display:inline-flex;align-items:center;gap:9px;
+  padding:9px 15px;border-radius:9px;font-size:13.5px;font-weight:700;
+  color:var(--accent);background:var(--accent-soft);
+  border:1.5px solid var(--accent);
+}
+.dunno:hover{background:color-mix(in srgb,var(--accent) 24%,transparent)}
+.dunno .kbd{background:transparent;border-color:var(--accent-line);color:var(--accent)}
+.dunno--w{color:var(--fg-dim);border-color:var(--line-2);background:var(--panel);font-weight:600}
+.dunno--w:hover{background:var(--panel-3);color:var(--fg)}
+.dunno--w .kbd{color:var(--fg-mute);border-color:var(--line-2)}
+.fb__actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:4px;padding-top:11px;border-top:1px solid var(--line)}
+.fb__actions .nudge{font-size:11.5px;color:var(--fg-mute);margin-left:2px;line-height:1.4;flex:1 1 160px}
+
+.helper{
+  flex:0 0 390px;min-width:0;display:flex;flex-direction:column;
+  background:var(--panel);border:1px solid var(--line-2);border-radius:var(--radius);
+  box-shadow:var(--shadow);overflow:hidden;
+  animation:slideIn .24s cubic-bezier(.2,.7,.3,1) both;
+}
+@keyframes slideIn{from{opacity:0;transform:translateX(22px)}to{opacity:1;transform:none}}
+@media (max-width:1100px){.helper{flex-basis:330px}}
+.helper__h{
+  flex:0 0 auto;padding:11px 14px;border-bottom:1px solid var(--line);background:var(--panel-2);
+}
+.helper__t{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:800;letter-spacing:-.01em}
+.helper__t .ghost{margin-left:auto;padding:3px 9px}
+.htabs{display:flex;gap:5px;margin-top:9px}
+.htab{
+  flex:1 1 0;padding:7px 8px;border-radius:8px;font-size:12.5px;font-weight:700;
+  border:1px solid var(--line);color:var(--fg-mute);background:var(--panel);text-align:center;
+}
+.htab:hover{color:var(--fg);border-color:var(--line-2)}
+.htab[aria-selected="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.htab small{display:block;font-size:10px;font-weight:600;opacity:.8;margin-top:1px}
+
+.helper__b{flex:1 1 auto;min-height:0;overflow:auto;padding:14px}
+.helper__f{
+  flex:0 0 auto;padding:10px 14px;border-top:1px solid var(--line);background:var(--panel-2);
+  display:flex;flex-direction:column;gap:8px;
+}
+.helper__f .btn{width:100%;justify-content:center}
+
+.signal{
+  display:flex;gap:9px;align-items:flex-start;
+  border:1px solid var(--ok-line);background:var(--ok-soft);border-radius:10px;
+  padding:10px 12px;margin-bottom:13px;font-size:12.5px;line-height:1.6;color:var(--fg);
+  animation:fbIn .26s ease both;
+}
+.signal b{color:var(--ok)}
+.signal .mv{font-family:var(--font-mono);font-size:11.5px;color:var(--fg-dim)}
+.signal .mv s{color:var(--fg-mute);opacity:.7}
+
+.rail{display:flex;gap:4px;margin-bottom:14px}
+.rail i{
+  flex:1 1 0;height:3px;border-radius:2px;background:var(--line);position:relative;
+}
+.rail i.on{background:var(--accent)}
+.rail i.now{background:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+
+.rung{border-bottom:1px solid var(--line);padding:0 0 13px;margin-bottom:13px}
+.rung:last-of-type{border-bottom:0;margin-bottom:0}
+.rung__h{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.rung__no{
+  font-family:var(--font-mono);font-size:10px;font-weight:800;letter-spacing:.06em;
+  color:var(--accent);border:1px solid var(--accent-line);border-radius:5px;padding:2px 6px;
+  background:var(--accent-soft);
+}
+.rung__t{font-size:13px;font-weight:800;letter-spacing:-.01em}
+.rung__meta{margin-left:auto;font-family:var(--font-mono);font-size:10.5px;color:var(--fg-mute)}
+.rung--locked{opacity:.4}
+.rung--locked .rung__no{color:var(--fg-mute);border-color:var(--line);background:transparent}
+
+.layer{
+  border-left:2px solid var(--accent-line);padding:2px 0 2px 11px;margin-bottom:10px;
+  animation:fbIn .22s ease both;
+}
+.layer:last-child{margin-bottom:0}
+.layer__t{font-size:10.5px;font-weight:800;letter-spacing:.09em;color:var(--accent);margin-bottom:4px;text-transform:uppercase}
+.layer p{font-size:13px;line-height:1.7;color:var(--fg)}
+.layer p + p{margin-top:7px}
+.layer code{font-family:var(--font-mono);font-size:12px;background:var(--panel-3);padding:1px 5px;border-radius:4px}
+.layer .snip{margin-top:8px}
+.trace{list-style:none;counter-reset:tr;display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.trace li{
+  display:flex;gap:9px;font-size:12.5px;line-height:1.6;color:var(--fg);counter-increment:tr;
+}
+.trace li > span{flex:1 1 auto;min-width:0}   /* 텍스트를 한 덩어리로 — code 태그가 flex 아이템이 되지 않게 */
+.trace li::before{
+  content:counter(tr);flex:0 0 auto;
+  width:17px;height:17px;border-radius:50%;margin-top:2px;
+  display:grid;place-items:center;font-family:var(--font-mono);font-size:9.5px;font-weight:800;
+  background:var(--panel-3);color:var(--fg-dim);
+}
+.trace code{font-family:var(--font-mono);font-size:11.5px;background:var(--panel-3);padding:1px 4px;border-radius:3px}
+
+/* 선행 개념 진단 */
+.diag{display:flex;flex-direction:column;gap:7px}
+.pre{
+  display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:9px;
+  border:1px solid var(--line);background:var(--panel-2);font-size:12.5px;
+}
+.pre__s{
+  flex:0 0 auto;font-size:10px;font-weight:800;font-family:var(--font-mono);
+  padding:2px 7px;border-radius:20px;
+}
+.pre--known .pre__s{color:var(--ok);border:1px solid var(--ok-line);background:var(--ok-soft)}
+.pre--gap{border-color:var(--accent);background:var(--accent-soft)}
+.pre--gap .pre__s{color:var(--accent);border:1px solid var(--accent-line);background:transparent}
+.pre__n{font-weight:700}
+.pre__go{margin-left:auto;font-size:11.5px;color:var(--accent);font-weight:700;white-space:nowrap}
+.verdict{
+  font-size:12.5px;line-height:1.65;color:var(--fg);
+  border-left:2px solid var(--accent);padding-left:11px;margin:11px 0;
+}
+.verdict b{color:var(--accent)}
+
+/* 3단 다른 예시 */
+.exlist{display:flex;flex-direction:column;gap:9px}
+.ex{border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.ex__h{
+  display:flex;align-items:center;gap:7px;
+  font-family:var(--font-mono);font-size:11px;color:var(--fg-dim);
+  padding:6px 9px;background:var(--panel-2);border-bottom:1px solid var(--line);
+}
+.ex__h .langchip{font-size:9px;padding:1px 5px}
+.ex .snip{border:0;border-radius:0;font-size:12px;padding:8px 9px}
+
+/* 4단 LLM */
+.llmbox{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel-2)}
+.llmbox__h{
+  display:flex;align-items:flex-start;gap:8px;padding:8px 11px;font-size:11.5px;
+  border-bottom:1px solid var(--line);color:var(--fg-dim);
+}
+.llmbox__h > span:first-child{flex:1 1 auto;min-width:0;line-height:1.5}  /* 문장이 flex로 쪼개지지 않게 */
+.llmbox__h .stat{
+  margin-left:auto;font-family:var(--font-mono);font-size:10px;font-weight:800;
+  padding:2px 7px;border-radius:20px;border:1px solid var(--line-2);color:var(--fg-mute);
+}
+.llmbox__h .stat.on{color:var(--ok);border-color:var(--ok-line);background:var(--ok-soft)}
+.prompt{
+  width:100%;min-height:132px;resize:vertical;
+  font-family:var(--font-mono);font-size:11.5px;line-height:1.6;
+  background:var(--code-bg);color:var(--code-fg);
+  border:0;border-bottom:1px solid var(--line);padding:10px 11px;display:block;
+}
+.prompt:focus{outline:none;box-shadow:inset 0 0 0 2px var(--accent)}
+.llmbox__f{display:flex;gap:7px;padding:9px 10px;flex-wrap:wrap}
+.llmbox__f .ghost{flex:1 1 auto;text-align:center}
+.privacy{
+  display:flex;gap:8px;font-size:11px;line-height:1.55;color:var(--fg-mute);
+  margin-top:9px;padding:8px 10px;border:1px dashed var(--line-2);border-radius:8px;
+}
+.privacy b{color:var(--fg-dim)}
+.chatline{display:flex;gap:7px;margin-top:9px}
+.chatline input{
+  flex:1 1 auto;min-width:0;font:inherit;font-size:12.5px;
+  background:var(--panel-2);border:1px solid var(--line-2);border-radius:8px;
+  padding:8px 11px;color:var(--fg);
+}
+.chatline input:focus{outline:none;border-color:var(--accent)}
+
+/* 선택의 왜 — 생성 시점 기록 */
+.origin__row{display:flex;gap:10px;font-size:12.5px;padding:7px 0;border-bottom:1px solid var(--line)}
+.origin__k{flex:0 0 62px;color:var(--fg-mute);font-size:11.5px}
+.origin__v{flex:1 1 auto;color:var(--fg);min-width:0;word-break:break-word}
+.origin__v .mono{font-family:var(--font-mono);font-size:11.5px}
+.quoteprompt{
+  font-size:12.5px;line-height:1.65;color:var(--fg);
+  border-left:2px solid var(--line-2);padding:2px 0 2px 11px;font-style:italic;
+}
+.empty{
+  text-align:center;padding:22px 12px;
+  border:1px dashed var(--line-2);border-radius:11px;background:var(--panel-2);
+}
+.empty__i{font-size:22px;opacity:.5;margin-bottom:9px}
+.empty__t{font-size:13.5px;font-weight:800;margin-bottom:7px}
+.empty p{font-size:12.5px;line-height:1.65;color:var(--fg-dim)}
+.empty .ghost{margin-top:13px}
+
+.badlink{
+  display:block;width:100%;text-align:left;font-size:11.5px;color:var(--fg-mute);
+  padding:7px 9px;border-radius:8px;border:1px dashed var(--line);
+}
+.badlink:hover{color:var(--fg-dim);border-color:var(--line-2);background:var(--panel-3)}
+
+/* 이슈 템플릿 모달 */
+.issue{font-size:13px}
+.issue label{
+  display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:var(--fg-dim);
+  padding:10px 12px;border:1px solid var(--line);border-radius:9px;margin-top:11px;cursor:pointer;
+}
+.issue label input{margin-top:3px;accent-color:var(--accent)}
+.issue label b{color:var(--fg)}
+
+/* ============ 문법 구멍 지도 ============ */
+.map{
+  flex:1 1 auto;min-height:0;display:grid;
+  grid-template-columns:264px minmax(0,1fr) 330px;
+}
+@media (max-width:1180px){.map{grid-template-columns:230px minmax(0,1fr)} .map__detail{display:none}}
+.map__side{border-right:1px solid var(--line);padding:18px 16px;overflow:auto}
+.map__main{overflow:auto;padding:20px 22px 40px}
+.map__detail{border-left:1px solid var(--line);overflow:auto;padding:18px 18px 40px;background:var(--panel)}
+
+.sect{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--fg-mute);font-weight:800;margin-bottom:9px}
+.langlist{display:flex;flex-direction:column;gap:6px;margin-bottom:22px}
+.langrow{
+  display:block;width:100%;text-align:left;padding:10px 12px;border-radius:10px;
+  border:1px solid transparent;
+}
+.langrow:hover{background:var(--panel-2)}
+.langrow[aria-pressed="true"]{background:var(--panel-2);border-color:var(--line-2)}
+.langrow__t{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700}
+.langrow__t .swatch{width:9px;height:9px;border-radius:3px}
+.langrow__t .gapn{margin-left:auto;font-family:var(--font-mono);font-size:11.5px;color:var(--accent);font-weight:800}
+.langrow__sub{font-family:var(--font-mono);font-size:10.5px;color:var(--fg-mute);margin-top:4px}
+.bar{display:flex;height:5px;border-radius:3px;overflow:hidden;margin-top:7px;background:var(--panel-3)}
+.bar i{display:block;height:100%}
+.bar .b-known{background:var(--ok)}
+.bar .b-learn{background:var(--fg-mute)}
+.bar .b-gap{background:var(--accent)}
+
+.legend{display:flex;flex-direction:column;gap:11px;font-size:12px;color:var(--fg-dim)}
+.legend div{display:flex;align-items:flex-start;gap:9px;line-height:1.45}
+.legend .sw{flex:0 0 auto;margin-top:2px}
+
+.map__head{margin-bottom:6px}
+.map__title{font-size:24px;font-weight:800;letter-spacing:-.03em;display:flex;align-items:center;gap:11px}
+.map__sub{color:var(--fg-dim);font-size:13.5px;margin-top:7px;max-width:64ch;line-height:1.6}
+.bignum{
+  display:flex;gap:26px;margin:18px 0 6px;padding:15px 18px;
+  border:1px solid var(--line);border-radius:12px;background:var(--panel);
+}
+.bignum > div{display:flex;flex-direction:column;gap:2px}
+.bignum b{font-family:var(--font-mono);font-size:25px;font-weight:800;letter-spacing:-.03em;line-height:1.1}
+.bignum small{font-size:11.5px;color:var(--fg-mute)}
+.bignum .is-gap b{color:var(--accent)}
+.bignum .is-known b{color:var(--ok)}
+.bignum .divider{width:1px;background:var(--line);align-self:stretch}
+
+.notice{
+  display:flex;gap:10px;align-items:flex-start;
+  margin:14px 0 0;padding:11px 14px;border-radius:10px;
+  border:1px dashed var(--line-2);background:var(--panel);
+  font-size:12.5px;color:var(--fg-dim);line-height:1.55;
+}
+.notice b{color:var(--fg)}
+
+.maptools{display:flex;align-items:center;gap:10px;margin:20px 0 12px}
+.toggle{
+  display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--fg-dim);
+  border:1px solid var(--line);border-radius:20px;padding:5px 12px;
+}
+.toggle[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+
+.cat{margin-bottom:20px}
+.cat__h{
+  display:flex;align-items:baseline;gap:10px;margin-bottom:9px;
+  padding-bottom:6px;border-bottom:1px solid var(--line);
+}
+.cat__h h3{font-size:13.5px;font-weight:800;letter-spacing:-.01em}
+.cat__h .cnt{font-family:var(--font-mono);font-size:11px;color:var(--fg-mute)}
+.cat__h .gapc{
+  font-family:var(--font-mono);font-size:11px;color:var(--accent);font-weight:800;
+  margin-left:auto;
+}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:6px 11px;border-radius:8px;font-size:13px;
+  border:1px solid transparent;
+  font-family:var(--font-mono);letter-spacing:-.01em;
+}
+.chip--known{color:var(--fg-mute);border-color:var(--line);background:transparent}
+.chip--known::before{content:"\2713";color:var(--ok);font-size:11px}
+.chip--learn{color:var(--fg);border-color:var(--line-2);background:var(--panel-2);position:relative;overflow:hidden}
+.chip--learn::after{
+  content:"";position:absolute;left:0;bottom:0;height:2px;width:var(--p,50%);background:var(--fg-mute);
+}
+.chip--gap{
+  color:var(--accent);border:1px dashed var(--accent);background:var(--accent-soft);
+  font-weight:700;cursor:pointer;
+}
+.chip--gap:hover{background:color-mix(in srgb,var(--accent) 22%,transparent)}
+.chip--gap::before{content:"\25CB";font-size:10px}
+.chip--gap[aria-pressed="true"]{box-shadow:0 0 0 2px var(--accent-line);border-style:solid}
+
+.detail__empty{color:var(--fg-mute);font-size:12.5px;line-height:1.6;padding-top:40px;text-align:center}
+.detail h4{font-size:17px;font-weight:800;letter-spacing:-.02em;font-family:var(--font-mono)}
+.detail .tagline{font-size:11px;color:var(--accent);font-weight:800;letter-spacing:.09em;margin-bottom:6px}
+.detail .block{margin-top:16px}
+.detail .block > .sect{margin-bottom:6px}
+.detail p{font-size:13px;line-height:1.65;color:var(--fg-dim)}
+.detail p b{color:var(--fg)}
+.detail code{font-family:var(--font-mono);font-size:12px;background:var(--panel-3);padding:1px 5px;border-radius:4px;color:var(--fg)}
+.sitebox{border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.sitebox__h{
+  font-family:var(--font-mono);font-size:11.5px;color:var(--fg-dim);
+  padding:7px 10px;background:var(--panel-2);border-bottom:1px solid var(--line);
+}
+.sitebox .snip{border:0;border-radius:0;background:var(--code-bg)}
+.sitebox__fix{
+  font-size:12.5px;color:var(--fg);padding:9px 10px;border-top:1px solid var(--line);
+  background:var(--accent-soft);line-height:1.55;
+}
+.detail .btn{width:100%;justify-content:center;margin-top:16px}
+
+/* ---------- modal ---------- */
+.modal{
+  position:fixed;inset:0;z-index:50;
+  display:grid;place-items:center;padding:24px;
+  background:color-mix(in srgb,var(--bg) 72%,transparent);
+  backdrop-filter:blur(6px);
+}
+.modal[hidden]{display:none}
+.modal__box{
+  width:min(760px,100%);max-height:82vh;display:flex;flex-direction:column;
+  background:var(--panel);border:1px solid var(--line-2);border-radius:var(--radius);
+  box-shadow:var(--shadow);overflow:hidden;
+  animation:cardIn .2s ease both;
+}
+.modal__h{
+  display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--line);
+  font-size:14px;font-weight:800;background:var(--panel-2);
+}
+.modal__h .ghost{margin-left:auto}
+.modal__b{overflow:auto;padding:0}
+.modal__b.pad{padding:18px 20px}
+.klist{display:grid;grid-template-columns:1fr 1fr;gap:10px 26px}
+.klist div{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--fg-dim);padding:5px 0;border-bottom:1px solid var(--line)}
+.klist div .kbd{flex:0 0 auto}
+.klist b{color:var(--fg);font-weight:600;font-size:13px}
+
+/* toast */
+.toast{  /* 하단은 주요 버튼 자리 — 토스트는 상단에 띄워 조작을 가리지 않는다 */
+  position:fixed;left:50%;top:68px;transform:translateX(-50%) translateY(-16px);
+  background:var(--panel);border:1px solid var(--line-2);border-radius:10px;
+  padding:10px 16px;font-size:13px;color:var(--fg);box-shadow:var(--shadow);
+  opacity:0;pointer-events:none;transition:.24s ease;z-index:60;
+  display:flex;align-items:center;gap:9px;
+}
+.toast.show{opacity:1;transform:translateX(-50%)}
+.toast .dotmark{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <span class="brand__t0">T0</span>
+    <b>내 코드로 배우는 문법</b>
+    <span>after&nbsp;coding</span>
+  </div>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" data-view="learn">학습 <span class="kbd">L</span></button>
+    <button class="tab" role="tab" aria-selected="false" data-view="map">문법 구멍 지도 <span class="pip" id="gapPip">31</span> <span class="kbd">G</span></button>
+  </nav>
+
+  <div class="top__right">
+    <div class="hud">
+      <span>오늘 <b id="hudMin">8</b>분</span>
+      <span><b id="hudDone">0</b>/<b id="hudTotal">4</b>장</span>
+      <span>다시 보기 <b id="hudQueue">0</b></span>
+    </div>
+    <button class="iconbtn" id="btnHelp" title="단축키 (H)">⌘</button>
+    <button class="iconbtn" id="btnTheme" title="라이트/다크 전환 (T)">◐</button>
+  </div>
+</header>
+
+<main>
+  <!-- ==================== 학습 뷰 ==================== -->
+  <section class="view" id="view-learn">
+    <div class="deck">
+      <span class="deck__label">오늘의 덱</span>
+      <div class="langfilter" id="langFilter"></div>
+      <div class="dots" id="dots"></div>
+      <span class="deck__count" id="deckCount"></span>
+    </div>
+    <div class="stage" id="stage"></div>
+  </section>
+
+  <!-- ==================== 구멍 지도 뷰 ==================== -->
+  <section class="view" id="view-map" hidden>
+    <div class="map">
+      <aside class="map__side">
+        <div class="sect">리포에서 발견된 언어</div>
+        <div class="langlist" id="mapLangs"></div>
+
+        <div class="sect">표시 규칙</div>
+        <div class="legend">
+          <div><span class="chip chip--known sw" style="padding:2px 7px;font-size:11px">익힘</span>
+            <span>내 코드에 나왔고, 문제도 안정적으로 맞힙니다.</span></div>
+          <div><span class="chip chip--learn sw" style="padding:2px 7px;font-size:11px;--p:60%">배우는 중</span>
+            <span>내 코드에 나왔지만 아직 틀립니다. 복습 대상.</span></div>
+          <div><span class="chip chip--gap sw" style="padding:2px 7px;font-size:11px">구멍</span>
+            <span><b style="color:var(--fg)">내 코드에 한 번도 안 나온 문법.</b> AI가 안 써줬기 때문에, 가만히 두면 영영 만나지 못합니다.</span></div>
+        </div>
+      </aside>
+
+      <div class="map__main" id="mapMain"></div>
+
+      <aside class="map__detail" id="mapDetail"></aside>
+    </div>
+  </section>
+</main>
+
+<div class="modal" id="modal" hidden>
+  <div class="modal__box">
+    <div class="modal__h"><span id="modalTitle">전체 코드</span><button class="ghost" id="modalClose">닫기 <span class="kbd">Esc</span></button></div>
+    <div class="modal__b" id="modalBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span class="dotmark"></span><span id="toastText"></span></div>
+
+<script>
+"use strict";
+
+/* ============================================================
+   0. 유틸 + 신택스 하이라이터 (외부 의존성 0)
+   ============================================================ */
+const $  = (s,r=document)=>r.querySelector(s);
+const $$ = (s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+const KW = {
+  ts:new Set(['const','let','var','function','return','if','else','for','while','do','switch','case','break','continue','import','from','export','default','await','async','new','class','extends','implements','interface','type','as','of','in','typeof','instanceof','null','undefined','true','false','this','try','catch','finally','throw','void','keyof','readonly']),
+  py:new Set(['def','return','if','elif','else','for','while','in','not','and','or','is','import','from','as','with','class','lambda','None','True','False','try','except','finally','raise','yield','pass','break','continue','global','nonlocal','assert','async','await','del']),
+  go:new Set(['func','return','if','else','for','range','var','const','type','struct','interface','package','import','go','defer','nil','true','false','map','chan','select','switch','case','default','break','continue','string','int','int64','byte','bool','error','make','len','append'])
+};
+
+function sp(cls,txt){ return '<span class="t-'+cls+'">'+esc(txt)+'</span>'; }
+
+function hl(src, lang){
+  if(!src) return '';
+  const kws = KW[lang] || KW.ts;
+  const re = /(\/\/[^\n]*|#[^\n]*)|("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')|(\b\d+(?:\.\d+)?\b)|([A-Za-z_$][A-Za-z0-9_$]*)|(\s+)|([\s\S])/g;
+  let out='', m;
+  while((m = re.exec(src)) !== null){
+    const t = m[0];
+    if(m[1])       out += sp('com', t);
+    else if(m[2])  out += sp('str', t);
+    else if(m[3])  out += sp('num', t);
+    else if(m[4]){
+      if(kws.has(t))                                   out += sp('kw', t);
+      else if(/^[A-Z]/.test(t))                        out += sp('type', t);
+      else if(/^\s*\(/.test(src.slice(re.lastIndex)))  out += sp('fn', t);
+      else                                             out += sp('var', t);
+    }
+    else if(m[5])  out += esc(t);
+    else           out += sp('punc', t);
+  }
+  return out;
+}
+
+/* 마크(하이라이트 / 클릭토큰)를 문자 범위로 삽입 */
+function renderLine(text, lang, marks){
+  marks = (marks||[]).slice().sort((a,b)=>a.s-b.s);
+  let out='', pos=0;
+  for(const mk of marks){
+    if(mk.s > pos) out += hl(text.slice(pos, mk.s), lang);
+    out += mk.open + hl(text.slice(mk.s, mk.e), lang) + mk.close;
+    pos = mk.e;
+  }
+  out += hl(text.slice(pos), lang);
+  return out;
+}
+
+/* ============================================================
+   1. 데이터 — 카드 4장 (3가지 문제 유형 × 3개 언어)
+   ============================================================ */
+const LANGS = {
+  ts:{name:'TypeScript', short:'TS', color:'var(--lang-ts)'},
+  py:{name:'Python',     short:'PY', color:'var(--lang-py)'},
+  go:{name:'Go',         short:'GO', color:'var(--lang-go)'}
+};
+
+const CARDS = [
+/* ---------- 1. 지목형 · TypeScript ---------- */
+{
+  id:'c1', lang:'ts', type:'point',
+  file:'src/features/counter/Counter.tsx', focus:43,
+  foldBefore:'1–40행', foldAfter:'46–88행',
+  lines:[
+    {n:41, t:'export function Counter({ label }: Props) {'},
+    {n:42, t:'  // 버튼을 몇 번 눌렀는지 화면에 보여준다'},
+    {n:43, t:'  const [count, setCount] = useState(0)', target:true},
+    {n:44, t:''},
+    {n:45, t:'  return ('}
+  ],
+  full:[
+    {n:38,t:'type Props = {'},{n:39,t:'  label: string'},{n:40,t:'}'},
+    {n:41,t:'export function Counter({ label }: Props) {'},
+    {n:42,t:'  // 버튼을 몇 번 눌렀는지 화면에 보여준다'},
+    {n:43,t:'  const [count, setCount] = useState(0)',target:true},
+    {n:44,t:''},
+    {n:45,t:'  return ('},
+    {n:46,t:'    <button onClick={() => setCount(count + 1)}>'},
+    {n:47,t:'      {label}: {count}'},
+    {n:48,t:'    </button>'},
+    {n:49,t:'  )'},
+    {n:50,t:'}'}
+  ],
+  concept:{
+    name:'배열 구조 분해 할당', en:'array destructuring',
+    desc:'값이 여러 개 담긴 배열을 <code>[ ]</code> 모양으로 받아, 한 번에 여러 이름으로 나눠 담는 문법입니다. 이름은 <b>순서</b>로만 정해집니다.',
+    level:2, meta:'복습 3일 뒤 · 3번째'
+  },
+  answerSpan:'[count, setCount]',
+  q:'이 줄에서 <b>구조 분해 할당</b>이 일어나는 부분을 클릭하세요.',
+  hint:'코드 위 회색 밑줄이 클릭할 수 있는 곳입니다.',
+  picks:['const','[count, setCount]','=','useState(0)'],
+  answer:1,
+  why:[
+    '<code>const</code>는 “이름을 새로 만든다”는 선언 키워드입니다. 몇 개의 이름을 어떤 방식으로 만들지는 그 오른쪽에 적힌 <b>모양</b>이 정합니다.',
+    null,
+    '<code>=</code>는 오른쪽 값을 왼쪽에 넣으라는 대입 기호입니다. 구조 분해는 “왼쪽을 어떤 모양으로 받을까”의 문제라서, 모양이 적힌 쪽이 답이 됩니다.',
+    '<code>useState(0)</code>은 값을 <b>내놓는</b> 쪽입니다. 여기서는 <code>[0, 함수]</code> 라는 배열 하나를 돌려줘요. 그 배열을 <b>받는</b> 왼쪽이 구조 분해입니다.'
+  ],
+  okText:'<code>useState(0)</code>이 돌려준 배열 <code>[0, 함수]</code>를 순서대로 나눠 받습니다. 0번째는 <code>count</code>, 1번째는 <code>setCount</code>. 이름은 순서로만 정해지므로 <code>[n, setN]</code>으로 바꿔도 똑같이 동작합니다.',
+  rule:'대괄호는 <b>순서</b>로 꺼내고, 중괄호 <code>{ }</code>는 <b>이름</b>으로 꺼냅니다.',
+  compare:[
+    {cap:'구조 분해를 안 쓰면 (같은 뜻)', code:'const state = useState(0)\nconst count = state[0]\nconst setCount = state[1]'},
+    {cap:'구조 분해로 쓰면 (43행)', code:'const [count, setCount] = useState(0)'}
+  ]
+},
+
+/* ---------- 2. 빈칸형 · Python ---------- */
+{
+  id:'c2', lang:'py', type:'blank',
+  file:'services/report/rank.py', focus:27,
+  foldBefore:'1–22행', foldAfter:'30–74행',
+  lines:[
+    {n:23, t:'def top_matches(results, sources, threshold, mode):'},
+    {n:24, t:'    logger.info("rank: %s results from %s sources (threshold=%.2f, mode=%s)", len(results), len(sources), threshold, mode)'},
+    {n:25, t:''},
+    {n:26, t:'    # 점수가 높은 것만 남긴다'},
+    {n:27, t:'    rows = [r for r in results @@ r.score > threshold]', target:true, blank:true},
+    {n:28, t:'    return rows[:10]'}
+  ],
+  full:[
+    {n:20,t:'from .models import Match'},{n:21,t:''},{n:22,t:''},
+    {n:23,t:'def top_matches(results, sources, threshold, mode):'},
+    {n:24,t:'    logger.info("rank: %s results from %s sources (threshold=%.2f, mode=%s)", len(results), len(sources), threshold, mode)'},
+    {n:25,t:''},
+    {n:26,t:'    # 점수가 높은 것만 남긴다'},
+    {n:27,t:'    rows = [r for r in results @@ r.score > threshold]',target:true,blank:true},
+    {n:28,t:'    return rows[:10]'},
+    {n:29,t:''},
+    {n:30,t:'def group_by_source(rows):'}
+  ],
+  concept:{
+    name:'리스트 컴프리헨션의 조건절', en:'comprehension condition',
+    desc:'<code>[ 값 for 하나 in 여러개 <b>조건</b> ]</code> — 뒤쪽에 붙는 조건은 “통과시킬 것만 골라내는 문지기”입니다. 통과 못 한 것은 결과에서 아예 빠집니다.',
+    level:1, meta:'처음 만나는 문법'
+  },
+  q:'빈칸에 들어갈 것을 고르세요. 이 줄은 <b>점수가 기준보다 높은 것만 남긴</b> 새 리스트를 만듭니다.',
+  hint:'보기를 고르면 코드에 바로 끼워져 보입니다.',
+  options:[
+    {t:'if',     mono:true},
+    {t:'where',  mono:true},
+    {t:'filter', mono:true}
+  ],
+  answer:0,
+  why:[
+    null,
+    '<code>where</code>는 SQL의 조건 키워드입니다. 파이썬에는 <code>where</code>라는 키워드가 아예 없어서, 이 줄은 실행되기도 전에 <b>SyntaxError</b>로 멈춥니다. 하는 일의 느낌은 맞았지만, 파이썬에서 그 자리를 맡는 단어는 <code>if</code>입니다.',
+    '<code>filter</code>는 문법 요소가 아니라 <b>함수</b>입니다. 함수로 쓰려면 줄 전체가 <code>filter(lambda r: r.score > threshold, results)</code> 처럼 다른 모양이 돼야 해요. 지금처럼 대괄호 안 <code>for</code> 뒤에 그냥 붙이는 자리에는 함수가 올 수 없습니다.'
+  ],
+  okText:'<code>for r in results</code>가 하나씩 꺼내고, 뒤의 <code>if</code>가 그중 조건을 통과한 것만 <code>rows</code>에 넣습니다. 결과 개수는 원본보다 <b>줄어듭니다</b>.',
+  rule:'컴프리헨션에서 <b>뒤</b>의 <code>if</code>는 “거르기”. <b>앞</b>의 <code>if/else</code>는 “값 고르기”입니다.',
+  compare:[
+    {cap:'뒤의 if — 거르기 (개수가 줄어듦)', code:'[r for r in results if r.ok]'},
+    {cap:'앞의 if/else — 고르기 (개수는 그대로)', code:'[r if r.ok else None for r in results]'}
+  ]
+},
+
+/* ---------- 3. 의미형 · TypeScript ---------- */
+{
+  id:'c3', lang:'ts', type:'meaning',
+  file:'src/api/loadItems.ts', focus:12,
+  foldBefore:'1–9행', foldAfter:'15–41행',
+  lines:[
+    {n:10, t:'export async function loadItems() {'},
+    {n:11, t:'  const res = await fetch("/api/items")'},
+    {n:12, t:'  const { items = [] } = await res.json()', target:true, hlSpan:'items = []'},
+    {n:13, t:'  return items'},
+    {n:14, t:'}'}
+  ],
+  full:[
+    {n:8,t:'const BASE = "/api"'},{n:9,t:''},
+    {n:10,t:'export async function loadItems() {'},
+    {n:11,t:'  const res = await fetch("/api/items")'},
+    {n:12,t:'  const { items = [] } = await res.json()',target:true,hlSpan:'items = []'},
+    {n:13,t:'  return items'},
+    {n:14,t:'}'},
+    {n:15,t:''},
+    {n:16,t:'export async function loadItem(id: string) {'},
+    {n:17,t:'  const res = await fetch(`${BASE}/items/${id}`)'},
+    {n:18,t:'  return res.json()'},
+    {n:19,t:'}'}
+  ],
+  concept:{
+    name:'구조 분해 기본값', en:'default value',
+    desc:'구조 분해로 값을 꺼낼 때 <code>= 기본값</code>을 붙이면, 꺼낸 값이 <b>없을 때만</b> 그 기본값이 대신 들어갑니다.',
+    level:3, meta:'복습 6일 뒤 · 5번째'
+  },
+  q:'서버가 <code>{ "total": 0 }</code> 만 돌려줬습니다. 12행이 끝난 뒤 <code>items</code>에는 무엇이 들어 있을까요?',
+  hint:'실행 결과를 고르는 문제입니다.',
+  options:[
+    {t:'<span class="mono">[]</span> — 빈 배열', mono:false},
+    {t:'<span class="mono">undefined</span>', mono:false},
+    {t:'<span class="mono">null</span>', mono:false},
+    {t:'없는 값을 꺼내서 오류가 나고 멈춘다', mono:false}
+  ],
+  answer:0,
+  why:[
+    null,
+    '기본값 <code>= []</code>가 <b>없었다면</b> 정답이었습니다. 응답에 <code>items</code> 키가 없으니 꺼낸 값은 <code>undefined</code>가 맞아요. 다만 <code>= []</code>가 붙어 있어서, 그 <code>undefined</code>인 순간 <code>[]</code>로 바뀝니다.',
+    '서버가 <code>{ "items": null }</code>을 줬다면 정말로 <code>null</code>이 들어옵니다. 기본값은 <b><code>undefined</code>일 때만</b> 작동하고, <code>null</code>은 “값이 있는 것”으로 봅니다. 지금은 키 자체가 없으니 <code>undefined</code> → <code>[]</code>가 됩니다.',
+    '없는 키를 꺼내는 것만으로는 오류가 나지 않습니다. 그냥 <code>undefined</code>가 될 뿐이에요. 오류는 그 <code>undefined</code>에서 <b>또 뭔가를 꺼낼 때</b>(<code>items.length</code>) 납니다.'
+  ],
+  okText:'응답에 <code>items</code> 키가 없어 꺼낸 값은 <code>undefined</code>. 기본값 <code>= []</code>가 그 자리를 메워 <code>items</code>는 빈 배열이 됩니다. 그래서 13행이 돌려주는 값에 <code>.map()</code>을 걸어도 터지지 않습니다.',
+  rule:'기본값은 <code>undefined</code>일 때만 작동합니다. <code>null</code>·<code>0</code>·<code>""</code>은 “값이 있는 것”이라 그대로 통과합니다.',
+  compare:[
+    {cap:'키가 없을 때', code:'const { items = [] } = { total: 0 }\n// items → []'},
+    {cap:'값이 null일 때 (주의)', code:'const { items = [] } = { items: null }\n// items → null'}
+  ],
+  result:{label:'items', value:'[]', note:'빈 배열, 길이 0'}
+},
+
+/* ---------- 4. 지목형 · Go ---------- */
+{
+  id:'c4', lang:'go', type:'point',
+  file:'internal/cache/store.go', focus:58,
+  foldBefore:'1–54행', foldAfter:'62–130행',
+  lines:[
+    {n:55, t:'func (s *Store) Get(key string) []byte {'},
+    {n:56, t:'\ts.mu.RLock()'},
+    {n:57, t:'\tdefer s.mu.RUnlock()'},
+    {n:58, t:'\tv, ok := s.data[key]', target:true},
+    {n:59, t:'\tif !ok {'},
+    {n:60, t:'\t\treturn nil'},
+    {n:61, t:'\t}'}
+  ],
+  full:[
+    {n:52,t:'// Get 은 캐시에서 값을 꺼낸다. 없으면 nil.'},{n:53,t:''},{n:54,t:''},
+    {n:55,t:'func (s *Store) Get(key string) []byte {'},
+    {n:56,t:'\ts.mu.RLock()'},
+    {n:57,t:'\tdefer s.mu.RUnlock()'},
+    {n:58,t:'\tv, ok := s.data[key]',target:true},
+    {n:59,t:'\tif !ok {'},
+    {n:60,t:'\t\treturn nil'},
+    {n:61,t:'\t}'},
+    {n:62,t:'\treturn v'},
+    {n:63,t:'}'}
+  ],
+  concept:{
+    name:'맵 조회의 두 값 받기', en:'comma ok idiom',
+    desc:'Go에서 맵에 값을 꺼낼 때는 값 하나만이 아니라, <b>값</b>과 <b>“그 키가 있었는지”</b> 두 개를 한 번에 받을 수 있습니다.',
+    level:0, meta:'처음 만나는 문법'
+  },
+  answerSpan:'ok',
+  q:'이 줄에서 <b>“그 키가 있었는지”</b>를 받는 부분을 클릭하세요.',
+  hint:'코드 위 회색 밑줄이 클릭할 수 있는 곳입니다.',
+  picks:['v','ok',':=','s.data[key]'],
+  answer:1,
+  why:[
+    '<code>v</code>는 꺼낸 <b>값</b>을 받습니다. 키가 없으면 값 대신 그 타입의 기본값(여기서는 <code>nil</code>)이 들어와요. 그래서 <code>v</code>만 봐서는 “정말 nil이 저장된 것”과 “키가 아예 없는 것”을 구분할 수 없습니다. 바로 그 문제를 해결하려고 두 번째 값이 있는 겁니다.',
+    null,
+    '<code>:=</code>는 “새 이름을 만들면서 값을 넣어라”라는 선언 + 대입 기호입니다. 몇 개를 무슨 의미로 받을지는 그 왼쪽의 이름들이 정합니다.',
+    '<code>s.data[key]</code>는 <b>꺼내는 쪽</b>입니다. 이 표현이 값과 여부 두 개를 내놓고, 그것을 받는 왼쪽의 두 번째 이름이 “여부”가 됩니다.'
+  ],
+  okText:'맵 조회를 왼쪽에서 두 개로 받으면, 두 번째 값 <code>ok</code>는 <code>true</code>/<code>false</code>로 “그 키가 실제로 있었는가”를 알려줍니다. 59행의 <code>if !ok</code>가 바로 그것을 확인하는 코드예요.',
+  rule:'Go에서 <b>두 번째 값 <code>ok</code></b>는 맵·타입 단언·채널에서 똑같이 “있었나?”를 뜻합니다.',
+  compare:[
+    {cap:'하나만 받으면 — 구분 불가', code:'v := s.data[key]\n// 키가 없어도 v == nil\n// 키가 있고 값이 nil이어도 v == nil'},
+    {cap:'두 개로 받으면 (58행)', code:'v, ok := s.data[key]\n// ok == false 면 키가 없는 것'}
+  ]
+}
+];
+
+/* ---------- 선행 개념 카드 (덱에는 안 나오고, 2단 진단에서만 점프해 들어옴) ---------- */
+CARDS.push(
+{
+  id:'p1', lang:'ts', type:'meaning', prereqOnly:true,
+  file:'src/features/counter/initial.ts', focus:11,
+  foldBefore:'1–7행', foldAfter:'14–30행',
+  lines:[
+    {n:8,  t:'export function makeInitial() {'},
+    {n:9,  t:'  return [0, "idle"]'},
+    {n:10, t:'}'},
+    {n:11, t:'const pair = makeInitial()', target:true, hlSpan:'makeInitial()'},
+    {n:12, t:''},
+    {n:13, t:'console.log(pair)'}
+  ],
+  full:[
+    {n:6,t:'// 카운터의 처음 상태를 만든다'},{n:7,t:''},
+    {n:8,t:'export function makeInitial() {'},
+    {n:9,t:'  return [0, "idle"]'},
+    {n:10,t:'}'},
+    {n:11,t:'const pair = makeInitial()',target:true,hlSpan:'makeInitial()'},
+    {n:12,t:''},
+    {n:13,t:'console.log(pair)'},
+    {n:14,t:'// → [0, "idle"]'}
+  ],
+  concept:{
+    name:'함수가 돌려주는 값', en:'return value',
+    desc:'함수를 <code>( )</code>를 붙여 부르면, 그 자리는 <b>함수가 <code>return</code>한 값 하나</b>로 바뀝니다. 그 값이 배열일 수도 있습니다.',
+    level:0, meta:'선행 개념 · 처음 만남'
+  },
+  q:'11행이 끝난 뒤 <code>pair</code>에는 무엇이 들어 있을까요?',
+  hint:'실행 결과를 고르는 문제입니다.',
+  options:[
+    {t:'<span class="mono">[0, "idle"]</span> — 값 두 개가 든 배열 하나'},
+    {t:'<span class="mono">0</span> — 첫 번째 값만'},
+    {t:'<span class="mono">makeInitial</span> 함수 자체'},
+    {t:'<span class="mono">undefined</span>'}
+  ],
+  answer:0,
+  why:[
+    null,
+    '첫 번째 값만 꺼내려면 <code>makeInitial()[0]</code> 처럼 <b>따로 꺼내는 동작</b>을 한 번 더 해야 합니다. 부르기만 하면 <code>return</code>한 것이 통째로 옵니다.',
+    '<code>( )</code> 없이 <code>const pair = makeInitial</code> 이라고 썼다면 함수 자체가 들어갑니다. <code>( )</code>가 “지금 실행해서 결과를 달라”는 뜻입니다.',
+    '<code>return</code>이 없는 함수라면 <code>undefined</code>가 맞습니다. 9행에 <code>return</code>이 있으므로 그 값이 옵니다.'
+  ],
+  okText:'함수 호출은 항상 <b>값 하나</b>로 바뀝니다. 여기서는 그 하나가 “두 칸짜리 배열”이에요. 그래서 <code>pair[0]</code>은 <code>0</code>, <code>pair[1]</code>은 <code>"idle"</code>이 됩니다.',
+  rule:'<code>f()</code>는 “함수”가 아니라 <b>함수가 돌려준 값</b>입니다. 값 여러 개를 주고 싶으면 배열 하나에 담아 보냅니다.',
+  compare:[
+    {cap:'괄호가 있으면 — 실행한 결과', code:'const pair = makeInitial()\n// pair → [0, "idle"]'},
+    {cap:'괄호가 없으면 — 함수 그 자체', code:'const f = makeInitial\n// f → function'}
+  ],
+  result:{label:'pair', value:'[0, "idle"]', note:'길이 2인 배열'}
+},
+{
+  id:'p2', lang:'py', type:'point', prereqOnly:true,
+  file:'services/report/rank.py', focus:15,
+  foldBefore:'1–12행', foldAfter:'18–74행',
+  lines:[
+    {n:13, t:'def is_active(user):'},
+    {n:14, t:'    # 점수가 기준을 넘으면 활성 사용자'},
+    {n:15, t:'    if user.score > 0.5:', target:true},
+    {n:16, t:'        return True'},
+    {n:17, t:'    return False'}
+  ],
+  full:[
+    {n:11,t:'THRESHOLD = 0.5'},{n:12,t:''},
+    {n:13,t:'def is_active(user):'},
+    {n:14,t:'    # 점수가 기준을 넘으면 활성 사용자'},
+    {n:15,t:'    if user.score > 0.5:',target:true},
+    {n:16,t:'        return True'},
+    {n:17,t:'    return False'}
+  ],
+  concept:{
+    name:'조건식 — 참인가 거짓인가', en:'boolean expression',
+    desc:'<code>if</code> 뒤에 오는 것은 값이 아니라 <b>참/거짓으로 판정되는 식</b>입니다. 이 식 하나가 <code>True</code> 아니면 <code>False</code>로 계산됩니다.',
+    level:1, meta:'선행 개념 · 복습 필요'
+  },
+  answerSpan:'user.score > 0.5',
+  q:'이 줄에서 <b>참/거짓으로 계산되는 부분</b>(조건식)을 클릭하세요.',
+  hint:'코드 위 점선 밑줄이 클릭할 수 있는 곳입니다.',
+  picks:['if','user.score > 0.5',':'],
+  answer:1,
+  why:[
+    '<code>if</code>는 “뒤에 오는 식이 참이면 아래를 실행하라”는 <b>키워드</b>입니다. 판정 자체를 하는 것은 그 뒤의 식이에요.',
+    null,
+    '<code>:</code>는 “여기서부터 안쪽 블록이 시작된다”를 알리는 <b>구분 기호</b>입니다. 파이썬에서 들여쓰기의 시작을 알리는 표시라, 판정과는 관련이 없습니다.'
+  ],
+  okText:'<code>user.score > 0.5</code>는 계산되면 <code>True</code> 또는 <code>False</code> 하나로 바뀝니다. <code>if</code>는 그 결과만 보고 아래 줄을 실행할지 정합니다.',
+  rule:'<code>if</code>, <code>while</code>, 그리고 컴프리헨션의 <code>if</code> — 셋 다 뒤에 <b>참/거짓이 되는 식</b>을 받습니다. 자리만 다르고 하는 일은 같습니다.',
+  compare:[
+    {cap:'조건식은 그 자체로 값이다', code:'ok = user.score > 0.5\nprint(ok)   # True 또는 False'},
+    {cap:'그래서 if 뒤에 바로 쓸 수 있다', code:'if user.score > 0.5:\n    ...'}
+  ]
+}
+);
+
+/* ============================================================
+   1-b. 심화 설명 사다리 데이터
+        deep  : 문법 사전 3층 (1단)
+        prereq: 선행 개념 그래프 (2단)
+        examples: 내 리포의 다른 사용처 (3단)
+        origin: 생성 시점 기록 — '선택의 왜'
+   ============================================================ */
+const EXTRA = {
+c1:{
+  conceptId:'ts/array-destructuring',
+  deep:{
+    l2:{t:'왜 이 문법이 있나',
+      p:['<code>useState</code> 같은 함수는 돌려줄 것이 <b>두 개</b>입니다 — 지금 값과, 값을 바꾸는 함수. 그런데 함수는 값을 <b>하나만</b> 돌려줄 수 있어요.',
+         '그래서 둘을 배열 하나에 담아 보냅니다. 받는 쪽에서 그 배열을 다시 두 개로 풀어야 하는데, 그 “푸는 문법”이 구조 분해입니다. 이게 없으면 매번 <code>state[0]</code>, <code>state[1]</code>로 번호를 세어 꺼내야 합니다.']},
+    l3:{t:'안에서 무슨 일이 일어나나',
+      trace:['<code>useState(0)</code>이 실행되어 <code>[0, ƒ]</code> 라는 <b>배열 하나</b>가 만들어집니다.',
+             '<code>=</code>의 왼쪽이 <code>[ ]</code> 모양이므로, 자바스크립트는 “배열을 순서대로 풀어라”로 읽습니다.',
+             '0번째 칸의 값 <code>0</code>을 <code>count</code>라는 이름에 넣습니다.',
+             '1번째 칸의 값 <code>ƒ</code>(함수)를 <code>setCount</code>라는 이름에 넣습니다.',
+             '배열 자체는 이름 없이 사라집니다. 남는 것은 <code>count</code>와 <code>setCount</code> 두 이름뿐입니다.']}
+  },
+  prereq:[
+    {n:'배열 — 값을 순서대로 담는 상자', s:'known'},
+    {n:'함수가 돌려주는 값', s:'gap', card:'p1'}
+  ],
+  examples:[
+    {f:'src/features/todo/TodoList.tsx', l:18, code:'const [items, setItems] = useState<Todo[]>([])', span:'[items, setItems]'},
+    {f:'src/hooks/useToggle.ts', l:5, code:'const [on, setOn] = useState(false)', span:'[on, setOn]'},
+    {f:'src/pages/Search.tsx', l:22, code:'const [q, setQ] = useState("")', span:'[q, setQ]'}
+  ],
+  origin:{
+    commit:'a3f1c2e', date:'2026-08-14 21:03', msg:'feat: 카운터 컴포넌트 추가',
+    prompt:'버튼을 누르면 숫자가 하나씩 올라가는 리액트 컴포넌트를 만들어줘',
+    note:'화면에 보이는 값이 바뀌어야 하므로 리액트 상태가 필요했고, 그래서 <code>useState</code>를 썼습니다. <code>useState</code>는 값과 변경 함수를 배열로 함께 돌려주기 때문에, 받는 쪽에서 배열 구조 분해를 쓰는 것이 리액트의 관례입니다.'
+  }
+},
+c2:{
+  conceptId:'py/comprehension-condition',
+  deep:{
+    l2:{t:'왜 이 문법이 있나',
+      p:['“여러 개 중에 조건에 맞는 것만 골라 새 목록을 만든다”는 일은 프로그램에서 끝없이 반복됩니다. 원래는 빈 리스트를 만들고, 반복문을 돌고, <code>if</code>로 검사하고, <code>append</code>하는 <b>네 줄</b>이 필요했습니다.',
+         '컴프리헨션은 그 네 줄을 한 줄로 줄이면서, 무엇보다 <b>“무엇을 만드는지”가 첫머리에 보이게</b> 합니다. 읽는 사람이 반복문을 끝까지 따라가지 않아도 결과를 알 수 있습니다.']},
+    l3:{t:'안에서 무슨 일이 일어나나',
+      trace:['빈 리스트를 하나 준비합니다. (눈에 보이지는 않습니다)',
+             '<code>results</code>에서 값을 하나 꺼내 <code>r</code>이라는 이름에 넣습니다.',
+             '<code>r.score > threshold</code>를 계산합니다 → <code>True</code> 또는 <code>False</code>.',
+             '<code>True</code>면 앞쪽에 적힌 <code>r</code>을 리스트에 넣고, <code>False</code>면 <b>아무것도 하지 않고</b> 다음으로 넘어갑니다.',
+             '더 꺼낼 것이 없을 때까지 2~4를 반복한 뒤, 완성된 리스트를 <code>rows</code>에 넣습니다.']}
+  },
+  prereq:[
+    {n:'조건식 — 참인가 거짓인가', s:'gap', card:'p2'},
+    {n:'for 문 — 하나씩 꺼내기', s:'known'},
+    {n:'리스트 — 값을 순서대로 담기', s:'known'}
+  ],
+  examples:[
+    {f:'services/report/filter.py', l:12, code:'allowed = [m for m in matches if m.source in SOURCES]', span:'if m.source in SOURCES'},
+    {f:'services/ingest/clean.py', l:31, code:'lines = [s.strip() for s in raw if s.strip()]', span:'if s.strip()'}
+  ],
+  origin:{
+    commit:'7b40d19', date:'2026-08-20 10:47', msg:'wip',
+    prompt:null,
+    note:null
+  }
+},
+c3:{
+  conceptId:'ts/destructuring-default',
+  deep:{
+    l2:{t:'왜 이 문법이 있나',
+      p:['서버 응답이나 설정 파일처럼 <b>내가 만들지 않은 데이터</b>는 늘 “있을 줄 알았는데 없는” 경우가 생깁니다. 없는 값을 그대로 쓰면 다음 줄에서 프로그램이 멈춥니다.',
+         '기본값은 그 멈춤을 막는 가장 짧은 방어입니다. <code>if (items === undefined) items = []</code> 라는 세 줄짜리 검사를, 값을 꺼내는 그 자리에서 끝냅니다.']},
+    l3:{t:'안에서 무슨 일이 일어나나',
+      trace:['오른쪽 객체에서 <code>items</code>라는 이름의 칸을 찾습니다.',
+             '칸이 없으므로 꺼낸 결과는 <code>undefined</code>가 됩니다.',
+             '꺼낸 값이 <b>정확히 <code>undefined</code>인지</b> 확인합니다. (<code>null</code>이나 <code>0</code>은 여기서 통과합니다)',
+             '<code>undefined</code>가 맞으므로, 대신 <code>[]</code>를 새로 만들어 넣습니다.',
+             '<code>items</code>라는 이름에 그 빈 배열이 담깁니다.']}
+  },
+  prereq:[
+    {n:'배열 구조 분해 할당', s:'learn', card:'c1'},
+    {n:'undefined 와 null 의 차이', s:'known'}
+  ],
+  examples:[
+    {f:'src/api/loadUser.ts', l:9, code:'const { profile = {} } = await res.json()', span:'profile = {}'},
+    {f:'src/state/settings.ts', l:14, code:'const { theme = "dark", lang = "ko" } = saved', span:'theme = "dark"'}
+  ],
+  origin:{
+    commit:'e91a077', date:'2026-08-22 15:12', msg:'fix: 목록이 비었을 때 화면이 깨지는 문제',
+    prompt:'items가 없을 때 .map에서 에러나는데 고쳐줘',
+    note:'오류의 원인은 <code>items</code>가 <code>undefined</code>인 상태로 <code>.map()</code>에 들어간 것이었습니다. 호출하는 쪽을 전부 고치는 대신, 값을 꺼내는 한 곳에서 기본값을 주는 방식을 골랐습니다.'
+  }
+},
+c4:{
+  conceptId:'go/comma-ok',
+  deep:{
+    l2:{t:'왜 이 문법이 있나',
+      p:['Go의 맵은 없는 키를 꺼내도 오류를 내지 않고, 그 타입의 <b>기본값</b>을 조용히 돌려줍니다. 숫자면 <code>0</code>, 문자열이면 <code>""</code>, 슬라이스면 <code>nil</code>입니다.',
+         '그래서 <code>0</code>이 돌아왔을 때 “저장된 값이 0”인지 “키가 아예 없어서 0”인지 구분할 방법이 없습니다. 두 번째 값 <code>ok</code>는 바로 그 구분을 위해 존재합니다.']},
+    l3:{t:'안에서 무슨 일이 일어나나',
+      trace:['맵 <code>s.data</code>에서 <code>key</code>를 찾습니다.',
+             'Go는 이 조회를 <b>왼쪽이 몇 개인지</b> 보고 다르게 처리합니다.',
+             '왼쪽이 두 개이므로, 값과 “찾았는가” 두 개를 준비합니다.',
+             '찾았으면 <code>v</code>에 저장된 값 · <code>ok</code>에 <code>true</code>를 넣습니다.',
+             '못 찾았으면 <code>v</code>에 기본값(<code>nil</code>) · <code>ok</code>에 <code>false</code>를 넣습니다.']}
+  },
+  prereq:[
+    {n:'맵 — 이름표로 값 찾기', s:'known'},
+    {n:':= 짧은 선언', s:'known'},
+    {n:'타입별 기본값(zero value)', s:'known'}
+  ],
+  examples:[
+    {f:'internal/cache/store.go', l:88, code:'sess, ok := s.sessions[id]', span:'ok'},
+    {f:'internal/router/route.go', l:41, code:'h, ok := routes[path]', span:'ok'}
+  ],
+  origin:null
+},
+p1:{
+  conceptId:'ts/return-value',
+  deep:{
+    l2:{t:'왜 이 문법이 있나',
+      p:['함수는 “일을 시키고 결과를 받아오는” 도구입니다. <code>return</code>은 그 결과를 부른 자리로 돌려보내는 유일한 통로입니다.',
+         '통로가 하나뿐이라, 여러 개를 보내고 싶으면 배열이나 객체 <b>하나에 담아</b> 보내야 합니다. 리액트의 <code>useState</code>가 배열을 돌려주는 이유가 정확히 이것입니다.']},
+    l3:{t:'안에서 무슨 일이 일어나나',
+      trace:['<code>makeInitial()</code>을 만나면 함수 안으로 들어갑니다.',
+             '<code>return [0, "idle"]</code>에서 배열을 하나 만듭니다.',
+             '함수가 끝나고, <code>makeInitial()</code>이라고 적힌 <b>그 자리</b>가 그 배열로 바뀝니다.',
+             '즉 11행은 <code>const pair = [0, "idle"]</code> 과 같은 뜻이 됩니다.']}
+  },
+  prereq:[{n:'함수 부르기 f()', s:'known'}, {n:'배열 리터럴 [ ]', s:'known'}],
+  examples:[
+    {f:'src/lib/http.ts', l:14, code:'const data = await get(url)', span:'get(url)'},
+    {f:'src/features/cart/summary.ts', l:8, code:'const total = sum(prices)', span:'sum(prices)'}
+  ],
+  origin:null
+},
+p2:{
+  conceptId:'py/boolean-expression',
+  deep:{
+    l2:{t:'왜 이 문법이 있나',
+      p:['프로그램이 “갈림길”을 만들려면 어느 쪽으로 갈지 정해줄 <b>판정</b>이 필요합니다. 조건식이 그 판정을 만드는 도구입니다.',
+         '중요한 건 조건식이 <code>if</code>의 부속품이 아니라 <b>그 자체로 값</b>이라는 점입니다. 그래서 변수에 담을 수도, 컴프리헨션 뒤에 붙일 수도 있습니다.']},
+    l3:{t:'안에서 무슨 일이 일어나나',
+      trace:['<code>user.score</code>를 꺼냅니다 (예: <code>0.82</code>).',
+             '<code>0.82 > 0.5</code>를 계산합니다.',
+             '결과는 <code>True</code>라는 <b>값</b> 하나가 됩니다.',
+             '<code>if</code>가 그 값만 보고, <code>True</code>이므로 안쪽 블록으로 들어갑니다.']}
+  },
+  prereq:[{n:'비교 연산자 &gt; &lt; ==', s:'known'}, {n:'속성 꺼내기 a.b', s:'known'}],
+  examples:[
+    {f:'services/report/rank.py', l:27, code:'rows = [r for r in results if r.score > threshold]', span:'r.score > threshold'},
+    {f:'services/ingest/clean.py', l:19, code:'while retries < MAX_RETRY:', span:'retries < MAX_RETRY'}
+  ],
+  origin:null
+}
+};
+Object.keys(EXTRA).forEach(id=>{
+  const c = CARDS.find(x=>x.id===id);
+  if(c) Object.assign(c, EXTRA[id]);
+});
+const cardIdxById = id => CARDS.findIndex(c=>c.id===id);
+
+/* ============================================================
+   2. 문법 구멍 지도 데이터
+   ============================================================ */
+const MAP = {
+  ts:{
+    files:23, lines:1840, sample:'ok',
+    cats:[
+      {name:'값과 이름', items:[
+        {n:'const / let', s:'known'},
+        {n:'템플릿 문자열', s:'known'},
+        {n:'배열 구조 분해', s:'learn', p:65},
+        {n:'객체 구조 분해', s:'known'},
+        {n:'기본값', s:'learn', p:40},
+        {n:'전개 ...', s:'known'},
+        {n:'옵셔널 체이닝 ?.', s:'known'},
+        {n:'null 병합 ??', s:'gap',
+          why:'“값이 없을 때만 대신 쓸 값”을 고르는 연산자입니다. <code>||</code>로 대신하면 <code>0</code>이나 빈 문자열까지 “없는 것”으로 취급돼 버그가 납니다.',
+          ai:'AI는 이 자리에 전부 <code>||</code>를 썼습니다. 지금은 우연히 잘 돌아가지만, 값이 <code>0</code>인 순간 틀리게 동작합니다.',
+          site:{f:'src/features/cart/Summary.tsx', l:19, code:'const qty = input.qty || 1', fix:'<code>input.qty ?? 1</code> 로 써야 사용자가 0을 입력했을 때 1로 덮이지 않습니다.'}}
+      ]},
+      {name:'함수', items:[
+        {n:'함수 선언', s:'known'},
+        {n:'화살표 함수', s:'known'},
+        {n:'콜백으로 넘기기', s:'known'},
+        {n:'기본 매개변수', s:'learn', p:30},
+        {n:'나머지 매개변수 ...args', s:'gap',
+          why:'개수가 정해지지 않은 인자를 한 배열로 모아 받는 문법입니다. 로깅·이벤트 처리처럼 “몇 개가 올지 모르는” 함수를 만들 때 필요합니다.',
+          ai:'AI는 항상 인자 개수를 고정해서 함수를 만들었습니다.'},
+        {n:'즉시 실행 함수', s:'gap',
+          why:'파일이 로드될 때 딱 한 번 실행되는 초기화 코드를 감싸는 오래된 관용구입니다. 남의 코드를 읽을 때 자주 만납니다.'}
+      ]},
+      {name:'흐름 제어', items:[
+        {n:'if / else', s:'known'},
+        {n:'삼항 연산자 ? :', s:'known'},
+        {n:'논리 단축평가 &&', s:'known'},
+        {n:'for...of', s:'learn', p:50},
+        {n:'switch', s:'gap',
+          why:'“한 값이 여러 경우 중 무엇인가”를 나란히 늘어놓는 문법입니다. 경우가 4개를 넘어가면 <code>if / else if</code> 사슬보다 훨씬 읽기 쉽습니다.',
+          ai:'AI는 <code>if / else if</code>를 6번 이어 붙였습니다. 동작은 같지만, 새 경우를 넣을 때 어디에 끼워야 할지 헷갈립니다.',
+          site:{f:'src/state/reducer.ts', l:14, code:'if (action.type === "add") { ... }\nelse if (action.type === "remove") { ... }\nelse if (action.type === "clear") { ... }', fix:'<code>switch (action.type)</code> + <code>case</code> 로 바꾸면 경우가 한눈에 보이고, 빠뜨린 경우를 타입 검사가 잡아줍니다.'}},
+        {n:'for...in', s:'gap',
+          why:'객체의 키를 하나씩 도는 문법입니다. 배열용 <code>for...of</code>와 헷갈리기 쉬워서, 차이를 알고 있어야 남의 코드를 오해하지 않습니다.'},
+        {n:'while', s:'gap',
+          why:'“끝날 때까지 반복”이 필요한 상황(페이지네이션, 재시도)에서 씁니다. 횟수를 미리 모를 때 <code>for</code>로는 어색합니다.'},
+        {n:'break / continue', s:'gap',
+          why:'반복 도중에 빠져나오거나 한 번 건너뛰는 문법입니다. 이걸 모르면 “찾으면 그만두기”를 불필요한 플래그 변수로 흉내 내게 됩니다.'}
+      ]},
+      {name:'배열과 객체', items:[
+        {n:'배열 리터럴', s:'known'},
+        {n:'map', s:'known'},
+        {n:'filter', s:'known'},
+        {n:'find', s:'learn', p:45},
+        {n:'객체 축약 표기', s:'known'},
+        {n:'reduce', s:'gap',
+          why:'여러 값을 하나로 접어 합칠 때(합계·그룹화) 쓰는 문법입니다. <code>map</code>/<code>filter</code>만 알면 이런 계산을 매번 반복문으로 길게 돌게 됩니다.',
+          ai:'AI는 이 자리에서 <code>for</code> 반복문 + 임시 변수 <code>total</code>을 썼습니다.',
+          site:{f:'src/features/cart/summary.ts', l:31, code:'let total = 0\nfor (const it of items) {\n  total += it.price * it.qty\n}', fix:'<code>items.reduce((a, it) => a + it.price * it.qty, 0)</code> 한 줄로 같은 일을 합니다. 임시 변수가 사라져 중간에 값이 바뀔 걱정이 없습니다.'}},
+        {n:'계산된 키 [k]:', s:'gap',
+          why:'키 이름을 변수로 정해서 객체를 만드는 문법입니다. 폼 입력 여러 개를 한 상태 객체로 관리할 때 거의 반드시 필요합니다.',
+          site:{f:'src/features/form/useForm.ts', l:22, code:'if (name === "email") setState({ ...s, email: v })\nif (name === "phone") setState({ ...s, phone: v })', fix:'<code>setState({ ...s, [name]: v })</code> 한 줄이면 필드가 몇 개든 그대로 동작합니다.'}}
+      ]},
+      {name:'비동기', items:[
+        {n:'async / await', s:'known'},
+        {n:'try/catch + await', s:'learn', p:55},
+        {n:'.then 체인', s:'known'},
+        {n:'Promise.all', s:'gap',
+          why:'요청 여러 개를 <b>동시에</b> 보내고 전부 끝나기를 기다립니다. 하나씩 <code>await</code>하면 걸리는 시간이 그대로 더해집니다.',
+          ai:'AI는 <code>await</code> 두 줄을 위아래로 나란히 썼습니다. 서로 상관없는 요청인데도 앞의 것이 끝나야 뒤가 시작됩니다.',
+          site:{f:'src/pages/Dashboard.tsx', l:22, code:'const user = await loadUser()\nconst items = await loadItems()', fix:'<code>const [user, items] = await Promise.all([loadUser(), loadItems()])</code> — 두 요청이 동시에 나가서 대기 시간이 절반이 됩니다.'}}
+      ]},
+      {name:'에러 처리', items:[
+        {n:'try / catch', s:'known'},
+        {n:'throw', s:'learn', p:35},
+        {n:'finally', s:'gap',
+          why:'성공하든 실패하든 <b>반드시</b> 해야 하는 뒷정리(로딩 끄기, 연결 닫기)를 두는 자리입니다.',
+          ai:'AI는 <code>setLoading(false)</code>를 <code>try</code>와 <code>catch</code> 양쪽에 각각 복사해 뒀습니다. 한쪽만 고치면 버그가 됩니다.',
+          site:{f:'src/api/loadItems.ts', l:28, code:'try {\n  ...\n  setLoading(false)\n} catch (e) {\n  setError(e)\n  setLoading(false)\n}', fix:'<code>finally { setLoading(false) }</code> 로 옮기면 한 곳에서만 관리됩니다.'}},
+        {n:'커스텀 에러 클래스', s:'gap',
+          why:'에러의 종류를 타입으로 구분해서, 부르는 쪽이 “무슨 잘못인지”에 따라 다르게 대응할 수 있게 합니다.'}
+      ]},
+      {name:'타입', items:[
+        {n:'타입 별칭 type', s:'known'},
+        {n:'interface', s:'known'},
+        {n:'유니온 |', s:'learn', p:60},
+        {n:'as 단언', s:'known'},
+        {n:'제네릭 <T>', s:'gap',
+          why:'“어떤 타입이 올지는 쓰는 쪽이 정한다”를 표현하는 문법입니다. 이걸 모르면 재사용 함수를 만들 때마다 <code>any</code>로 도망가게 됩니다.',
+          ai:'AI는 재사용 함수의 반환 타입을 <code>any</code>로 두었습니다. 그 뒤로는 자동완성도, 오타 검사도 동작하지 않습니다.',
+          site:{f:'src/lib/http.ts', l:9, code:'export async function get(url: string): Promise<any> {', fix:'<code>export async function get&lt;T&gt;(url: string): Promise&lt;T&gt;</code> 로 바꾸면 부르는 쪽에서 정확한 타입이 살아납니다.'}},
+        {n:'리터럴 타입', s:'gap',
+          why:'문자열을 아무거나 못 넣게 “이 셋 중 하나”로 좁히는 문법입니다. 오타로 생기는 버그를 아예 못 쓰게 막습니다.'}
+      ]},
+      {name:'모듈', items:[
+        {n:'import', s:'known'},
+        {n:'export', s:'known'},
+        {n:'default export', s:'known'},
+        {n:'이름 바꿔 가져오기 as', s:'gap',
+          why:'서로 다른 파일에서 같은 이름을 가져올 때 충돌을 피하는 문법입니다.'}
+      ]}
+    ]
+  },
+  py:{
+    files:9, lines:640, sample:'ok',
+    cats:[
+      {name:'값과 이름', items:[
+        {n:'f-string', s:'known'},
+        {n:'튜플 언패킹', s:'learn', p:40},
+        {n:'슬라이싱 [a:b]', s:'known'},
+        {n:'walrus :=', s:'gap', why:'조건을 검사하면서 동시에 값을 저장하는 문법입니다. 최신 코드에서 자주 보이므로 읽을 줄은 알아야 합니다.'}
+      ]},
+      {name:'반복과 조건', items:[
+        {n:'for ... in', s:'known'},
+        {n:'리스트 컴프리헨션', s:'learn', p:25},
+        {n:'enumerate', s:'known'},
+        {n:'zip', s:'gap',
+          why:'두 리스트를 나란히 짝지어 도는 문법입니다. 인덱스로 <code>b[i]</code>를 꺼내는 코드는 대부분 <code>zip</code>으로 더 안전해집니다.',
+          ai:'AI는 <code>range(len(...))</code>로 인덱스를 돌렸습니다. 길이가 다르면 조용히 터집니다.',
+          site:{f:'services/report/merge.py', l:44, code:'for i in range(len(names)):\n    row = (names[i], scores[i])', fix:'<code>for name, score in zip(names, scores):</code> — 인덱스가 사라지고, 길이가 달라도 짧은 쪽에서 안전하게 멈춥니다.'}},
+        {n:'dict 컴프리헨션', s:'gap', why:'딕셔너리를 한 줄로 만들어 냅니다. 리스트 컴프리헨션을 알고 있다면 모양만 다른 같은 문법입니다.'},
+        {n:'for ... else', s:'gap', why:'“끝까지 돌았는데 못 찾았을 때”를 표현하는 파이썬 특유의 문법입니다. 남의 코드에서 만나면 오해하기 쉬운 대표적인 자리입니다.'}
+      ]},
+      {name:'함수', items:[
+        {n:'def / return', s:'known'},
+        {n:'기본 인자', s:'known'},
+        {n:'키워드 인자', s:'learn', p:50},
+        {n:'*args / **kwargs', s:'gap',
+          why:'개수가 정해지지 않은 인자를 받는 문법입니다. 라이브러리 코드를 읽을 때 거의 반드시 만납니다.'},
+        {n:'데코레이터 @', s:'gap',
+          why:'함수를 감싸서 기능을 덧붙이는 문법입니다. FastAPI·Flask의 라우팅이 전부 이 문법이라, 모르면 프레임워크 코드가 마법처럼 보입니다.',
+          ai:'AI가 써준 <code>@app.get("/items")</code> 를 그대로 복사해 쓰고 있지만, 그게 무슨 문법인지는 아직 학습되지 않았습니다.'},
+        {n:'제너레이터 yield', s:'gap', why:'값을 한 번에 다 만들지 않고 필요할 때 하나씩 내주는 문법입니다. 큰 파일을 다룰 때 메모리를 아낍니다.'}
+      ]},
+      {name:'에러와 자원', items:[
+        {n:'try / except', s:'known'},
+        {n:'with 문', s:'known'},
+        {n:'raise', s:'learn', p:30},
+        {n:'except ... as e', s:'known'},
+        {n:'finally', s:'gap', why:'실패하든 성공하든 반드시 실행되는 뒷정리 자리입니다.'},
+        {n:'커스텀 예외', s:'gap', why:'우리 서비스만의 오류를 종류별로 구분해 부르는 쪽이 다르게 대응하게 합니다.'}
+      ]},
+      {name:'클래스와 타입', items:[
+        {n:'class 정의', s:'known'},
+        {n:'__init__', s:'known'},
+        {n:'타입 힌트', s:'learn', p:40},
+        {n:'dataclass', s:'gap',
+          why:'“값을 담는 클래스”를 짧게 쓰는 문법입니다. <code>__init__</code>을 손으로 길게 쓰던 코드가 몇 줄로 줄어듭니다.',
+          site:{f:'services/report/models.py', l:7, code:'class Match:\n    def __init__(self, name, score, source):\n        self.name = name\n        self.score = score\n        self.source = source', fix:'<code>@dataclass</code> 를 붙이면 위 다섯 줄이 필드 선언 세 줄로 끝납니다.'}},
+        {n:'@property', s:'gap', why:'계산해서 얻는 값을 속성처럼 쓰게 만드는 문법입니다.'}
+      ]}
+    ]
+  },
+  go:{
+    files:3, lines:210, sample:'low',
+    cats:[
+      {name:'값과 이름', items:[
+        {n:':= 짧은 선언', s:'known'},
+        {n:'var 선언', s:'learn', p:40},
+        {n:'포인터 * &', s:'gap', why:'값을 복사하지 않고 “그 자리”를 가리키는 문법입니다. Go 코드를 읽으려면 피할 수 없습니다.'}
+      ]},
+      {name:'에러 처리', items:[
+        {n:'if err != nil', s:'known'},
+        {n:'errors.Is / As', s:'gap', why:'에러의 종류를 확인하는 표준 방법입니다. 문자열 비교로 에러를 판별하는 코드를 대체합니다.'},
+        {n:'defer', s:'known'}
+      ]},
+      {name:'타입과 구조', items:[
+        {n:'struct', s:'known'},
+        {n:'메서드 (수신자)', s:'known'},
+        {n:'interface', s:'gap', why:'“이 동작만 할 수 있으면 무엇이든 좋다”를 표현하는 Go의 핵심 문법입니다. 테스트에서 가짜 객체를 끼워 넣을 때 필요합니다.'},
+        {n:'comma ok', s:'learn', p:15}
+      ]},
+      {name:'동시성', items:[
+        {n:'goroutine go', s:'gap', why:'Go의 대표 문법이지만 지금 리포에는 한 번도 등장하지 않았습니다.'},
+        {n:'channel', s:'gap', why:'고루틴끼리 값을 주고받는 통로입니다.'},
+        {n:'sync.Mutex', s:'known'}
+      ]}
+    ]
+  }
+};
+
+/* ============================================================
+   3. 상태
+   ============================================================ */
+const S = {
+  view:'learn',
+  order:[0,1,2,3],   // 서빙 순서 (재시도 카드가 뒤에 붙음)
+  retry:[false,false,false,false], // order 와 같은 길이의 병렬 배열
+  pos:0,
+  results:{},        // order 위치 -> 'ok' | 'bad'
+  prevWrong:{},      // 카드 idx -> 이전에 고른 오답 번호
+  sel:null,
+  submitted:false,
+  filter:'all',
+  queue:0,
+  mapLang:'ts',
+  gapOnly:false,
+  gapSel:null,
+  minutes:8,
+
+  /* --- 심화 설명 사다리 --- */
+  helper:null,       // null | {tab:'syntax'|'origin', rung:1..4, layer:1..3, diagnosed:false}
+  stack:[],          // 학습 스택 — [{from:cardIdx, concept:'...'}]
+  returned:null,     // 방금 선행 학습을 마치고 돌아왔음을 알리는 표시
+  dunno:{},          // cardIdx -> true ('모르겠어요'를 누른 개념)
+  llmKey:false       // API 키 연결 여부 (데모 토글)
+};
+
+const deckIdx = () => CARDS.map((c,i)=>i)
+  .filter(i => !CARDS[i].prereqOnly && (S.filter==='all' || CARDS[i].lang===S.filter));
+
+/* ============================================================
+   4. 렌더 — 학습 뷰
+   ============================================================ */
+function currentCardIdx(){ return S.order[S.pos]; }
+function currentCard(){ return CARDS[currentCardIdx()]; }
+
+function langCount(l){ return CARDS.filter(c=>c.lang===l && !c.prereqOnly).length; }
+
+function renderFilter(){
+  const el = $('#langFilter');
+  const items = [{k:'all',label:'전체',n:CARDS.filter(c=>!c.prereqOnly).length,c:'var(--fg-mute)'}]
+    .concat(Object.keys(LANGS).map(k=>({k,label:LANGS[k].name,n:langCount(k),c:LANGS[k].color})));
+  el.innerHTML = items.map(it=>
+    '<button class="lf" data-lang="'+it.k+'" aria-pressed="'+(S.filter===it.k)+'">'+
+      '<span class="swatch" style="--sw:'+it.c+'"></span>'+it.label+
+      '<span class="n">'+it.n+'</span></button>').join('');
+  $$('.lf', el).forEach(b=>b.onclick=()=>{ setFilter(b.dataset.lang); });
+}
+
+function setFilter(l){
+  S.filter = l;
+  const base = deckIdx();
+  S.order = base.length ? base : [0];
+  S.retry = S.order.map(()=>false);
+  S.pos = 0; S.results = {}; S.queue = 0; S.prevWrong = {};
+  S.helper = null; S.stack = []; S.returned = null;
+  renderFilter(); renderAll();
+  toast(l==='all' ? '전체 언어 덱으로 돌아갔습니다' : LANGS[l].name+' 카드만 봅니다');
+}
+
+function renderDots(){
+  const el = $('#dots');
+  el.innerHTML = S.order.map((ci,i)=>{
+    const c = CARDS[ci];
+    const cls = ['dot'];
+    if(S.results[i]==='ok') cls.push('is-done');
+    if(S.results[i]==='bad') cls.push('is-wrong');
+    if(i===S.pos) cls.push('is-now');
+    if(S.retry[i]) cls.push('is-retry');
+    return '<i class="'+cls.join(' ')+'" style="--dc:'+LANGS[c.lang].color+'" title="'+LANGS[c.lang].name+'"></i>';
+  }).join('');
+  $('#deckCount').textContent = (S.pos+1)+' / '+S.order.length;
+  $('#hudDone').textContent = Object.keys(S.results).length;
+  $('#hudTotal').textContent = S.order.length;
+  $('#hudQueue').textContent = S.queue;
+}
+
+/* 코드 블록 렌더 */
+function renderCode(card, opts){
+  opts = opts||{};
+  const lines = opts.full ? card.full : card.lines;
+  let html = '';
+  if(!opts.full && card.foldBefore)
+    html += '<div class="cl cl--fold" data-full="1"><span class="cl__n">⋯</span><span class="cl__t">'+card.foldBefore+' 생략 — 전체 보기</span></div>';
+
+  for(const ln of lines){
+    const isTarget = !!ln.target;
+    const cls = ['cl'];
+    if(isTarget) cls.push('cl--target'); else cls.push('cl--ctx');
+    let body;
+
+    if(isTarget && ln.blank){
+      const parts = ln.t.split('@@');
+      body = hl(parts[0], card.lang) + blankHTML(card) + hl(parts[1], card.lang);
+    } else if(isTarget && card.type==='point' && !opts.full){
+      body = renderLine(ln.t, card.lang, pickMarks(card, ln.t));
+    } else if(isTarget && (ln.hlSpan || (opts.full && S.submitted && card.answerSpan))){
+      // 지목형은 제출 전에 정답 위치를 절대 노출하지 않는다
+      const span = ln.hlSpan || card.answerSpan;
+      const s = ln.t.indexOf(span);
+      body = s<0 ? hl(ln.t, card.lang)
+        : renderLine(ln.t, card.lang, [{s:s, e:s+span.length, open:'<span class="hl">', close:'</span>'}]);
+    } else {
+      body = hl(ln.t, card.lang);
+    }
+    html += '<div class="'+cls.join(' ')+'"><span class="cl__n">'+ln.n+'</span><span class="cl__t">'+(body||'&nbsp;')+'</span></div>';
+  }
+
+  if(!opts.full && card.foldAfter)
+    html += '<div class="cl cl--fold" data-full="1"><span class="cl__n">⋯</span><span class="cl__t">'+card.foldAfter+' 생략 — 전체 보기</span></div>';
+  return html;
+}
+
+function pickMarks(card, text){
+  const marks = []; let from = 0;
+  card.picks.forEach((p,i)=>{
+    const s = text.indexOf(p, from);
+    if(s < 0) return;
+    from = s + p.length;
+    let cls = 'pick';
+    if(S.submitted){
+      cls += ' pick--locked';
+      if(i===card.answer) cls += ' pick--ok';
+      else if(i===S.sel)  cls += ' pick--bad';
+    }
+    marks.push({
+      s, e:s+p.length,
+      open:'<span class="'+cls+'" data-pick="'+i+'" tabindex="'+(S.submitted?-1:0)+'" role="button" data-sel="'+(S.sel===i?1:0)+'">',
+      close:'</span>'
+    });
+  });
+  return marks;
+}
+
+function blankHTML(card){
+  let cls = 'blank';
+  let txt = '<span class="cursorbar">▁▁▁▁</span>';
+  if(S.sel!==null){ cls += ' is-filled'; txt = esc(card.options[S.sel].t); }
+  if(S.submitted) cls += (S.sel===card.answer ? ' is-ok' : ' is-bad');
+  return '<span class="'+cls+'">'+txt+'</span>';
+}
+
+function masteryHTML(c){
+  let pips = '';
+  for(let i=0;i<5;i++) pips += '<i class="'+(i<c.concept.level?'on':'')+'"></i>';
+  return '<div class="mastery"><div class="mastery__pips">'+pips+'</div><div class="mastery__meta">'+c.concept.meta+'</div></div>';
+}
+
+const TYPE_LABEL = {point:'지목형', blank:'빈칸형', meaning:'의미형'};
+
+function renderCard(){
+  const c = currentCard();
+  const isRetry = !!S.retry[S.pos];
+  const lang = LANGS[c.lang];
+
+  /* 문제 영역 */
+  let quizBody = '';
+  if(c.type==='point'){
+    quizBody = '<div style="font-size:12.5px;color:var(--fg-mute);margin-top:11px;display:flex;align-items:center;gap:8px">'+
+      '<span class="kbd">←</span><span class="kbd">→</span> 로 이동하거나 코드를 직접 클릭하세요.</div>';
+  } else {
+    quizBody = '<ol class="opts">' + c.options.map((o,i)=>{
+      let cls = 'opt';
+      if(S.submitted){
+        cls += ' opt--locked';
+        if(i===c.answer) cls += ' opt--ok';
+        else if(i===S.sel) cls += ' opt--bad';
+        else cls += ' opt--dim';
+      }
+      const mark = S.submitted ? (i===c.answer ? '✓ 정답' : (i===S.sel ? '✕ 내 답' : '')) : '';
+      const txt = o.mono ? '<span class="mono">'+esc(o.t)+'</span>' : o.t;
+      return '<li><button class="'+cls+'" data-opt="'+i+'" data-sel="'+(S.sel===i?1:0)+'">'+
+        '<span class="opt__k">'+(i+1)+'</span><span class="opt__t">'+txt+'</span>'+
+        '<span class="opt__mark">'+mark+'</span></button></li>';
+    }).join('') + '</ol>';
+  }
+
+  /* 피드백 영역 */
+  let fb;
+  if(!S.submitted){
+    fb = '<div class="fb fb--idle"><div>'+ (c.type==='point'
+        ? '코드에서 한 곳을 고른 뒤 <span class="kbd">Enter</span> 로 제출하세요.'
+        : '<span class="kbd">1</span>~<span class="kbd">'+c.options.length+'</span> 로 고르고 <span class="kbd">Enter</span> 로 제출하세요.')+
+      '</div><div style="font-size:11.5px;opacity:.8">채점 결과와 설명이 여기에 나옵니다.</div></div>';
+  } else {
+    fb = feedbackHTML(c);
+  }
+
+  const submitLabel = S.submitted
+    ? (S.pos < S.order.length-1 ? '다음 카드' : '세션 마치기')
+    : '제출';
+
+  const inStack = S.stack.length > 0;
+  const isPrereq = !!c.prereqOnly;
+  const returned = S.returned && S.returned.to === currentCardIdx();
+
+  const html =
+  '<article class="card" style="--langc:'+lang.color+'">'+
+    '<div class="src">'+
+      '<span class="langchip">'+lang.short+'</span>'+
+      '<span class="src__path">'+ c.file.replace(/([^/]+)$/,'<b>$1</b>') +'</span>'+
+      '<span class="src__sep">·</span><span class="src__line">'+c.focus+'행</span>'+
+      (isPrereq ? '<span class="ribbon">↓ 선행 개념 — 이걸 먼저 알아야 위 카드가 풀립니다</span>' : '')+
+      (returned ? '<span class="ribbon">↑ 「'+S.returned.concept+'」을(를) 배우고 돌아왔습니다 — 다시 풀어보세요</span>' : '')+
+      (isRetry ? '<span class="ribbon">↺ 다시 보기 — 지난번엔 '+(S.prevWrong[currentCardIdx()]+1)+'번을 고르셨습니다</span>' : '')+
+      '<span class="src__right"><button class="ghost" data-full="1">전체 보기</button></span>'+
+    '</div>'+
+
+    '<div class="codewrap"><div class="code">'+renderCode(c)+'</div></div>'+
+
+    '<div class="concept">'+
+      '<div class="concept__main">'+
+        '<div class="concept__name">'+c.concept.name+'<span class="concept__en">'+c.concept.en+'</span></div>'+
+        '<div class="concept__desc">'+c.concept.desc+'</div>'+
+      '</div>'+ masteryHTML(c) +
+    '</div>'+
+
+    '<div class="quiz">'+
+      '<div class="qhead"><span class="qtype">'+TYPE_LABEL[c.type]+'</span><span class="qhint">'+c.hint+'</span></div>'+
+      '<div class="q">'+c.q+'</div>'+
+      quizBody + fb +
+    '</div>'+
+
+    /* 푸터는 항상 보인다 — '모르겠어요'가 스크롤 아래로 숨지 않도록 여기에 둔다 */
+    '<div class="foot">'+
+      '<div class="keys">'+
+        (S.submitted
+          ? '<span><span class="kbd">Space</span> 다음</span><span><span class="kbd">H</span> 단축키</span>'
+          : (c.type==='point'
+              ? '<span><span class="kbd">←</span><span class="kbd">→</span> 이동</span>'
+              : '<span><span class="kbd">1</span>…<span class="kbd">'+c.options.length+'</span> 선택</span>')+
+            '<span><span class="kbd">Enter</span> 제출</span>'+
+            '<span><span class="kbd">Space</span> 다음</span>'+
+            '<span><span class="kbd">H</span> 단축키</span>')+
+      '</div>'+
+      '<div class="foot__right">'+
+        (S.submitted
+          ? '<button class="dunno" id="btnDunno">'+
+              (S.dunno[currentCardIdx()] ? '이해 도우미 열기' : '아직 모르겠어요')+
+              ' <span class="kbd">?</span></button>'+
+            '<button class="dunno dunno--w" id="btnWhy">왜 이 코드였나 <span class="kbd">W</span></button>'
+          : '')+
+        (S.submitted && S.results[S.pos]==='bad'
+          ? '<button class="btn btn--sub" id="btnAgain">다시 풀기 <span class="kbd">R</span></button>' : '')+
+        '<button class="btn" id="btnMain"'+(!S.submitted && S.sel===null?' disabled':'')+'>'+
+          submitLabel+' <span class="kbd">'+(S.submitted?'Space':'Enter')+'</span></button>'+
+      '</div>'+
+    '</div>'+
+  '</article>';
+
+  const open = !!S.helper;
+  $('#stage').innerHTML =
+    (inStack ? stackbarHTML(open) : '') +
+    '<div class="bench'+(open?' is-open':'')+'">' + html + (open ? helperHTML(c) : '') + '</div>';
+  bindCard();
+  if(open) bindHelper();
+}
+
+/* ---------- 학습 스택 바 : "어디로 내려왔고 어디로 돌아가는지" ---------- */
+function stackbarHTML(open){
+  const rows = S.stack.map((s,i)=>
+    '<div class="srow srow--paused">'+
+      (i?'<span class="srow__arm">└→</span>':'')+
+      '<span class="srow__i">'+(i+1)+'</span>'+
+      '<span class="srow__n">'+CARDS[s.from].concept.name+'</span>'+
+      '<span class="srow__s">⏸ 멈춰 있음 · 돌아옵니다</span>'+
+    '</div>').join('');
+  const d = S.stack.length;
+  return '<div class="stackbar'+(open?' is-open':'')+'">'+
+    '<div class="stackbar__h">학습 스택'+
+      '<span class="why">이해가 막혀서 선행 개념으로 한 단계 내려왔습니다. 마치면 자동으로 위로 돌아갑니다.</span>'+
+      '<button class="btn btn--sub" id="btnBack">지금 위로 돌아가기 <span class="kbd">B</span></button>'+
+    '</div>'+ rows +
+    '<div class="srow srow--now">'+
+      '<span class="srow__arm">└→</span>'+
+      '<span class="srow__i">'+(d+1)+'</span>'+
+      '<span class="srow__n">'+currentCard().concept.name+'</span>'+
+      '<span class="srow__s">● 지금 여기</span>'+
+    '</div>'+
+  '</div>';
+}
+
+function feedbackHTML(c){
+  const ok = S.sel === c.answer;
+  let h = '<div class="fb '+(ok?'fb--ok':'fb--bad')+'">';
+  h += '<div class="fb__head">'+(ok?'✓ 맞았습니다':'✕ 아쉽습니다')+
+       '<span style="font-weight:600;font-size:12.5px;color:var(--fg-dim)">'+
+       (ok?'':'내가 고른 것: '+pickedLabel(c))+'</span>'+
+       (ok?'':'<span class="fb__badge">↺ 다시 보기 큐에 담김 · '+queuePos()+'장 뒤</span>')+
+       '</div>';
+
+  if(!ok){
+    h += '<p class="lead">'+ (c.why[S.sel] || '') +'</p>';
+    h += '<p><b>정답은 '+correctLabel(c)+'</b> — '+c.okText+'</p>';
+  } else {
+    h += '<p>'+c.okText+'</p>';
+  }
+
+  if(c.result && ok){
+    h += '<div class="snip"><span class="cap">이 줄이 끝난 뒤의 값</span>'+
+         '<span class="t-var">'+c.result.label+'</span>  <span class="t-punc">→</span>  '+
+         '<span class="t-num">'+esc(c.result.value)+'</span>   <span class="t-com">// '+c.result.note+'</span></div>';
+  }
+
+  h += '<div class="fb__rule"><b>규칙</b><span>'+c.rule+'</span></div>';
+
+  /* 도우미가 열려 있으면 대조 코드는 접는다 — 같은 화면에서 설명이 두 번 경쟁하지 않게 */
+  if(c.compare && !S.helper){
+    h += '<div class="fb__cols">'+ c.compare.map(x=>
+      '<div class="snip"><span class="cap">'+x.cap+'</span>'+hl(x.code, c.lang)+'</div>').join('') +'</div>';
+  }
+  h += '<div class="fb__actions"><span class="nudge">'+ (S.dunno[currentCardIdx()]
+      ? '“모르겠어요”로 표시된 개념입니다 — 내일 다시 나옵니다.'
+      : '맞혔더라도 <b style="color:var(--fg-dim)">감이 안 오면</b> 아래 <b style="color:var(--accent)">아직 모르겠어요</b>를 누르세요. 이 앱에서 가장 값진 버튼입니다.')+
+    '</span></div>';
+
+  h += '</div>';
+  return h;
+}
+
+function pickedLabel(c){
+  if(c.type==='point') return '<span class="mono">'+esc(c.picks[S.sel])+'</span>';
+  return (S.sel+1)+'번';
+}
+function correctLabel(c){
+  if(c.type==='point') return '<span class="mono">'+esc(c.picks[c.answer])+'</span>';
+  return (c.answer+1)+'번';
+}
+function queuePos(){ return Math.max(2, S.order.length - S.pos); }
+
+/* ============================================================
+   4-b. 심화 설명 사다리 — "모르겠어요 / 왜?"
+   1단 사전 3층 → 2단 선행 개념 진단 → 3단 내 코드의 다른 예시 → 4단 자유 질문
+   앞의 3단은 LLM 없이 로컬 데이터만으로 동작한다.
+   ============================================================ */
+const RUNGS = [
+  {no:'1단', t:'더 자세히 — 문법 사전 3층', src:'로컬 사전'},
+  {no:'2단', t:'선행 개념 진단 — 무엇이 비어 있나', src:'개념 그래프'},
+  {no:'3단', t:'내 코드의 다른 예시', src:'개념 인덱스'},
+  {no:'4단', t:'직접 물어보기', src:'LLM · 선택'}
+];
+
+function openDunno(){
+  const ci = currentCardIdx(), c = CARDS[ci];
+  if(!S.dunno[ci]){
+    // '모르겠어요'는 신호다 — 숙련도를 내리고 복습을 당긴다
+    const from = c.concept.level, oldMeta = c.concept.meta;
+    c.concept.level = Math.max(0, from-1);
+    c.concept.meta = '복습 내일 · 앞당김';
+    S.dunno[ci] = {from, to:c.concept.level, oldMeta};
+  }
+  S.helper = {tab:'syntax', rung:1, layer:1};
+  renderAll();
+}
+
+function nextRung(){
+  const H = S.helper; if(!H) return;
+  if(H.rung===1 && H.layer<3){ H.layer++; }
+  else if(H.rung<4){ H.rung++; }
+  renderAll();
+}
+
+function shiftResults(at){
+  const nr = {};
+  Object.keys(S.results).forEach(k=>{ const i=+k; nr[i>=at ? i+1 : i] = S.results[k]; });
+  S.results = nr;
+}
+
+/* --- 2단의 핵심 : 선행 개념 카드로 '한 층 내려가기' --- */
+function jumpPrereq(cardId){
+  const target = cardIdxById(cardId);
+  if(target < 0) return;
+  const parent = currentCardIdx();
+  S.stack.push({from:parent, concept:CARDS[parent].concept.name});
+  shiftResults(S.pos);
+  S.order.splice(S.pos, 0, target);
+  S.retry.splice(S.pos, 0, false);
+  S.sel = null; S.submitted = false; S.helper = null; S.returned = null;
+  renderAll();
+  toast('선행 개념 「'+CARDS[target].concept.name+'」으로 한 층 내려왔습니다');
+}
+
+/* --- 다 배우면 원래 카드로 되돌아온다 (자동 또는 B 키) --- */
+function popStack(){
+  if(!S.stack.length) return;
+  const learned = currentCard().concept.name;
+  const fr = S.stack.pop();
+  const pi = S.order.indexOf(fr.from, S.pos+1);
+  if(pi > -1) S.pos = pi;
+  delete S.results[S.pos];
+  S.sel = null; S.submitted = false; S.helper = null;
+  S.returned = {to:fr.from, concept:learned};
+  renderAll();
+  toast('원래 카드로 돌아왔습니다 — 이제 다시 풀어보세요');
+}
+
+function helperHTML(c){
+  const H = S.helper, ci = currentCardIdx();
+  const body = H.tab==='origin' ? originHTML(c) : syntaxHTML(c);
+
+  let nextLabel = null;
+  if(H.tab==='syntax'){
+    if(H.rung===1 && H.layer<3) nextLabel = '더 자세히 &nbsp;<span style="opacity:.7">'+(H.layer+1)+'/3</span>';
+    else if(H.rung===1)         nextLabel = '여전히 모르겠어요 → 선행 개념 확인';
+    else if(H.rung===2)         nextLabel = '내 코드의 다른 예시 보기';
+    else if(H.rung===3)         nextLabel = '그래도 모르겠어요 → 직접 물어보기';
+  }
+
+  return '<aside class="helper">'+
+    '<div class="helper__h">'+
+      '<div class="helper__t">이해 도우미'+
+        '<button class="ghost" id="btnHelperClose">닫기 <span class="kbd">Esc</span></button></div>'+
+      '<div class="htabs">'+
+        '<button class="htab" data-htab="syntax" aria-selected="'+(H.tab==='syntax')+'">문법의 왜'+
+          '<small>왜 이렇게 쓰는가</small></button>'+
+        '<button class="htab" data-htab="origin" aria-selected="'+(H.tab==='origin')+'">선택의 왜'+
+          '<small>왜 여기에 이 코드인가</small></button>'+
+      '</div>'+
+    '</div>'+
+    '<div class="helper__b">'+body+'</div>'+
+    '<div class="helper__f">'+
+      (nextLabel ? '<button class="btn" id="btnRung">'+nextLabel+' <span class="kbd">?</span></button>' : '')+
+      '<button class="badlink" id="btnBadDoc">이 설명이 도움이 안 됐어요 → 사전 개선 이슈 만들기</button>'+
+    '</div>'+
+  '</aside>';
+}
+
+function syntaxHTML(c){
+  const H = S.helper, ci = currentCardIdx(), sig = S.dunno[ci];
+  let h = '';
+
+  /* '모르겠어요'가 손해가 아니라 이득임을 즉시 보여준다 */
+  if(sig){
+    h += '<div class="signal"><span>✓</span><div>'+
+      '<b>잘 눌렀습니다.</b> 모른다고 표시한 개념은 잊기 전에 다시 나옵니다. 숨기는 쪽이 손해입니다.<br>'+
+      '<span class="mv">숙련도 <s>'+pips(sig.from)+'</s> → '+pips(sig.to)+
+      ' &nbsp;·&nbsp; 복습 <s>'+esc(sig.oldMeta)+'</s> → <b style="color:var(--ok)">내일</b></span>'+
+      '</div></div>';
+  }
+
+  h += '<div class="rail">'+RUNGS.map((r,i)=>{
+    const n = i+1;
+    return '<i class="'+(n<H.rung?'on':n===H.rung?'on now':'')+'" title="'+r.t+'"></i>';
+  }).join('')+'</div>';
+
+  /* ---- 1단 : 문법 사전 3층 ---- */
+  h += rungHead(1);
+  h += '<div class="layer"><div class="layer__t">1층 · 한 줄로 말하면</div><p>'+c.concept.desc+'</p></div>';
+  if(H.layer>=2 && c.deep){
+    h += '<div class="layer"><div class="layer__t">2층 · '+c.deep.l2.t+'</div>'+
+      c.deep.l2.p.map(p=>'<p>'+p+'</p>').join('')+'</div>';
+  }
+  if(H.layer>=3 && c.deep){
+    h += '<div class="layer"><div class="layer__t">3층 · '+c.deep.l3.t+'</div>'+
+      '<ol class="trace">'+c.deep.l3.trace.map(t=>'<li><span>'+t+'</span></li>').join('')+'</ol></div>';
+  }
+  h += RUNG_END;
+
+  /* ---- 2단 : 선행 개념 진단 ---- */
+  if(H.rung>=2){
+    const pres = c.prereq || [];
+    const missing = pres.filter(p=>p.s!=='known');
+    h += rungHead(2);
+    h += '<div class="verdict">'+ (missing.length
+      ? '“모르겠다”의 대부분은 이 개념이 어려워서가 아니라 <b>아래층이 비어 있어서</b>입니다.<br>'+
+        '이 개념을 떠받치는 '+pres.length+'개 중 <b>'+missing.length+'개</b>가 아직 채워지지 않았습니다.'
+      : '이 개념을 떠받치는 선행 개념은 <b>모두 채워져 있습니다.</b><br>'+
+        '그렇다면 이건 “이해 못 한” 것이 아니라 아직 <b>익숙하지 않은</b> 것입니다. 설명을 더 읽기보다 3단으로 내려가 같은 문법이 쓰인 내 코드를 여러 개 보는 편이 빠릅니다.'
+      )+'</div>';
+    h += '<div class="diag">'+ pres.map(p=>
+      '<div class="pre pre--'+(p.s==='known'?'known':'gap')+'">'+
+        '<span class="pre__s">'+(p.s==='known'?'익힘':p.s==='learn'?'배우는 중':'비어 있음')+'</span>'+
+        '<span class="pre__n">'+p.n+'</span>'+
+        (p.s!=='known' && p.card ? '<button class="pre__go" data-pre="'+p.card+'">먼저 배우기 →</button>'
+          : p.s!=='known' ? '<span class="pre__go" style="color:var(--fg-mute);font-weight:600">카드 준비 중</span>' : '')+
+      '</div>').join('') +'</div>';
+    if(missing.length && missing.some(p=>p.card)){
+      h += '<p style="font-size:11.5px;color:var(--fg-mute);margin-top:9px;line-height:1.6">'+
+        '내려가도 지금 카드는 사라지지 않습니다. 선행 카드를 마치면 <b style="color:var(--fg-dim)">자동으로 여기로 돌아옵니다.</b></p>';
+    }
+    h += RUNG_END;
+  }
+
+  /* ---- 3단 : 내 코드의 다른 예시 ---- */
+  if(H.rung>=3){
+    h += rungHead(3);
+    h += '<p style="font-size:12.5px;color:var(--fg-dim);line-height:1.6;margin-bottom:11px">'+
+      '남의 예제가 아니라 <b style="color:var(--fg)">내 리포에서 같은 문법이 쓰인 다른 자리</b>입니다. '+
+      '모양이 조금씩 다른 걸 나란히 보면 “변하지 않는 부분”이 무엇인지 눈에 들어옵니다.</p>';
+    h += '<div class="exlist">'+ (c.examples||[]).map(ex=>exHTML(c,ex)).join('') +'</div>';
+    h += RUNG_END;
+  }
+
+  /* ---- 4단 : 자유 질문 ---- */
+  if(H.rung>=4){
+    h += rungHead(4);
+    h += llmHTML(c);
+    h += RUNG_END;
+  }
+
+  /* 아직 안 내려간 단은 흐리게 예고만 — 어디까지 더 갈 수 있는지 보이게 */
+  for(let n=H.rung+1; n<=4; n++) h += rungHead(n, true) + RUNG_END;
+  return h;
+}
+
+function pips(level){
+  let s=''; for(let i=0;i<5;i++) s += i<level ? '●' : '○';
+  return s;
+}
+
+/* 단(rung) 하나를 여는 헤더. 닫는 것은 호출부의 RUNG_END 가 맡는다. */
+function rungHead(n, locked){
+  const r = RUNGS[n-1];
+  return '<div class="rung'+(locked?' rung--locked':'')+'">'+
+    '<div class="rung__h"><span class="rung__no">'+r.no+'</span>'+
+    '<span class="rung__t">'+r.t+'</span>'+
+    '<span class="rung__meta">'+r.src+'</span></div>';
+}
+const RUNG_END = '</div>';
+
+function exHTML(c, ex){
+  const s = ex.code.indexOf(ex.span);
+  const body = s<0 ? hl(ex.code, c.lang)
+    : renderLine(ex.code, c.lang, [{s, e:s+ex.span.length, open:'<span class="hl">', close:'</span>'}]);
+  return '<div class="ex"><div class="ex__h"><span class="langchip" style="--langc:'+LANGS[c.lang].color+'">'+
+    LANGS[c.lang].short+'</span>'+esc(ex.f)+'<span style="color:var(--accent)">:'+ex.l+'</span></div>'+
+    '<div class="snip">'+body+'</div></div>';
+}
+
+/* ---- 4단 : API 키가 없어도 죽지 않는다 ---- */
+function buildPrompt(c){
+  const tl = c.lines.find(l=>l.target);
+  let line = tl.t;
+  if(tl.blank) line = line.replace('@@', c.options[c.answer].t);
+  const wrong = S.results[S.pos]==='bad';
+  return [
+    '나는 프로그래밍을 배우는 중입니다. 내가 만든 앱의 아래 코드 한 줄을 이해하지 못하고 있습니다.',
+    '',
+    '## 내 코드 — ' + c.file + ' ' + c.focus + '행 (' + LANGS[c.lang].name + ')',
+    '```' + c.lang,
+    line.trim(),
+    '```',
+    '',
+    '## 배우려는 문법',
+    c.concept.name + ' (' + c.concept.en + ')',
+    '',
+    '## 내가 막힌 지점',
+    '- 설명을 3층(내부 동작)까지 읽었지만 여전히 이해되지 않습니다.',
+    wrong ? '- 문제에서 ' + (c.type==='point' ? '「'+c.picks[S.sel]+'」' : (S.sel+1)+'번') + '을 골라 틀렸습니다.'
+          : '- 문제는 맞혔지만, 왜 그런지는 스스로 설명하지 못하겠습니다.',
+    '',
+    '## 부탁',
+    '- 위의 내 코드 줄을 그대로 예로 들어 설명해 주세요. 다른 예제로 바꾸지 말아 주세요.',
+    '- 전문 용어를 쓸 때는 반드시 풀어서 같이 설명해 주세요.'
+  ].join('\n');
+}
+
+function llmHTML(c){
+  if(S.llmKey){
+    return '<div class="llmbox">'+
+      '<div class="llmbox__h"><span>이 카드의 맥락(코드·개념·막힌 지점)이 자동으로 함께 전달됩니다</span>'+
+        '<button class="stat on" id="btnKey">키 연결됨</button></div>'+
+      '<div style="padding:11px">'+
+        '<div class="layer" style="margin:0"><div class="layer__t">예시 답변</div>'+
+        '<p>“<code>[count, setCount]</code>에서 대괄호는 <b>배열을 만드는 것이 아니라 푸는 것</b>입니다. '+
+        '오른쪽이 <code>[0, ƒ]</code>이니까, 왼쪽 대괄호는 그 두 칸에 이름표를 붙이는 셈이에요.”</p></div>'+
+        '<div class="chatline"><input placeholder="무엇이 헷갈리는지 그대로 적어보세요" '+
+          'value="대괄호가 배열 만드는 거랑 뭐가 다른지 모르겠어요"><button class="btn" id="btnAsk">묻기</button></div>'+
+      '</div></div>'+
+      '<div class="privacy"><span>🔒</span><span>질문할 때 <b>이 줄과 앞뒤 2줄</b>만 전송됩니다. 파일 전체나 다른 파일은 보내지 않습니다.</span></div>';
+  }
+  return '<div class="llmbox">'+
+    '<div class="llmbox__h"><span>API 키가 연결돼 있지 않습니다 — 대신 <b style="color:var(--fg)">물어볼 준비가 된 프롬프트</b>를 만들어 뒀습니다</span>'+
+      '<button class="stat" id="btnKey">키 없음</button></div>'+
+    '<textarea class="prompt" id="promptBox" spellcheck="false">'+esc(buildPrompt(c))+'</textarea>'+
+    '<div class="llmbox__f">'+
+      '<button class="btn" id="btnCopyPrompt" style="flex:1 1 100%;justify-content:center">프롬프트 복사</button>'+
+      '<button class="ghost" data-open="Claude">Claude 열기</button>'+
+      '<button class="ghost" data-open="ChatGPT">ChatGPT 열기</button>'+
+    '</div></div>'+
+    '<div class="privacy"><span>🔒</span><span>이 앱은 아무것도 전송하지 않습니다. <b>복사해서 붙여넣는 순간에만</b> 이 내용이 밖으로 나갑니다. 내보내기 전에 위 상자를 직접 고쳐도 됩니다.</span></div>'+
+    '<p style="font-size:11.5px;color:var(--fg-mute);margin-top:9px;line-height:1.6">'+
+      '1~3단은 인터넷도 API 키도 없이 동작합니다. 4단만 선택 사항입니다.</p>';
+}
+
+/* ---- '선택의 왜' — 사전이 아니라 생성 시점 기록만이 답할 수 있는 질문 ---- */
+function originHTML(c){
+  const o = c.origin;
+  const intro = '<p style="font-size:12.5px;color:var(--fg-dim);line-height:1.65;margin-bottom:14px;'+
+    'border-left:2px solid var(--line-2);padding-left:11px">'+
+    '<b style="color:var(--fg)">문법이 왜 그렇게 동작하는지</b>는 사전이 답할 수 있습니다. 하지만 '+
+    '<b style="color:var(--fg)">왜 하필 여기서 이 코드를 골랐는지</b>는 사전이 답할 수 없습니다. '+
+    '그건 그때의 커밋·지시·기록만이 압니다.</p>';
+
+  if(!o){
+    return intro + '<div class="empty">'+
+      '<div class="empty__i">◌</div>'+
+      '<div class="empty__t">이 선택의 이유는 기록돼 있지 않습니다.</div>'+
+      '<p>이 줄이 만들어질 때의 커밋 메시지도, 그때 준 지시도 남아 있지 않습니다. '+
+      '지어내서 알려드리지 않겠습니다 — 그럴듯한 추측은 잘못된 확신을 만듭니다.</p>'+
+      '<p style="margin-top:11px">대신 <b style="color:var(--fg-dim)">문법의 왜</b> 탭에서 이 문법이 어떤 문제를 풀려고 존재하는지는 끝까지 볼 수 있습니다.</p>'+
+      '<button class="ghost" id="btnToSyntax">문법의 왜로 가기</button>'+
+      '</div>'+
+      '<p style="font-size:11.5px;color:var(--fg-mute);margin-top:14px;line-height:1.6">'+
+      '앞으로 이 칸을 채우려면: 커밋 메시지에 <b style="color:var(--fg-dim)">무엇을</b>보다 <b style="color:var(--fg-dim)">왜</b>를 적고, AI에게 준 지시를 개발 일지로 남기세요. T0는 그 기록을 이 자리에 붙여 줍니다.</p>';
+  }
+
+  let h = intro +
+    '<div class="origin__row"><span class="origin__k">커밋</span>'+
+      '<span class="origin__v"><span class="mono">'+o.commit+'</span> · '+o.date+'</span></div>'+
+    '<div class="origin__row"><span class="origin__k">메시지</span>'+
+      '<span class="origin__v"><span class="mono">'+esc(o.msg)+'</span></span></div>';
+
+  if(o.prompt){
+    h += '<div class="block" style="margin-top:16px"><div class="sect" style="font-size:10.5px;letter-spacing:.12em;'+
+      'text-transform:uppercase;color:var(--fg-mute);font-weight:800;margin-bottom:7px">그때 내가 준 지시</div>'+
+      '<div class="quoteprompt">“'+esc(o.prompt)+'”</div></div>';
+  }
+  if(o.note){
+    h += '<div class="layer" style="margin-top:16px"><div class="layer__t">그래서 왜 이 코드였나</div><p>'+o.note+'</p></div>'+
+      '<p style="font-size:11.5px;color:var(--fg-mute);margin-top:14px;line-height:1.6">'+
+      '이 답은 문법 사전이 아니라 <b style="color:var(--fg-dim)">당신의 작업 기록</b>에서 나왔습니다.</p>';
+  } else {
+    h += '<div class="empty" style="margin-top:16px">'+
+      '<div class="empty__i">◌</div>'+
+      '<div class="empty__t">커밋은 남아 있지만, 이유는 적혀 있지 않습니다.</div>'+
+      '<p>커밋 메시지가 <span class="mono">'+esc(o.msg)+'</span> 한 단어이고, 그때 준 지시도 저장돼 있지 않습니다. '+
+      '이 줄을 왜 이렇게 썼는지는 <b style="color:var(--fg-dim)">지금은 알 수 없습니다.</b></p>'+
+      '</div>';
+  }
+  return h;
+}
+
+/* ---- 사전 품질 개선 : 코드 유출 없이 이슈 만들기 ---- */
+function openBadDoc(){
+  const c = currentCard(), H = S.helper;
+  const title = '[문법 사전] '+LANGS[c.lang].name+' · '+c.concept.name+' — 설명이 이해되지 않음';
+  const body = [
+    '- 개념 ID: `'+(c.conceptId||'-')+'`',
+    '- 막힌 층: '+H.layer+'층 / 도달한 단: '+H.rung+'단',
+    '- 문제 유형: '+TYPE_LABEL[c.type],
+    '- 결과: '+(S.results[S.pos]==='bad' ? '오답' : '정답이지만 이해 못 함'),
+    '',
+    '### 어디서 막혔나',
+    '(자유롭게 적어주세요)',
+    '',
+    '### 내 코드',
+    '포함되지 않음 — 아래 체크박스를 켜야 첨부됩니다.'
+  ].join('\n');
+
+  $('#modalTitle').textContent = '사전 개선 이슈 만들기';
+  $('#modalBody').classList.add('pad');
+  $('#modalBody').innerHTML = '<div class="issue">'+
+    '<p style="font-size:12.5px;color:var(--fg-dim);line-height:1.65;margin-bottom:14px">'+
+    'T0의 문법 사전은 오픈소스입니다. 이해되지 않은 설명을 알려주시면 사전이 좋아집니다. '+
+    '<b style="color:var(--fg)">내 코드는 기본적으로 포함되지 않습니다.</b></p>'+
+    '<div class="llmbox">'+
+      '<div class="llmbox__h"><span>github.com/after-coding/t0-dictionary · 새 이슈</span></div>'+
+      '<textarea class="prompt" id="issueBox" spellcheck="false" style="min-height:196px">'+
+        esc('## '+title+'\n\n'+body)+'</textarea>'+
+      '<div class="llmbox__f">'+
+        '<button class="btn" id="btnCopyIssue" style="flex:1 1 100%;justify-content:center">이슈 내용 복사</button>'+
+        '<button class="ghost" data-open="GitHub" style="flex:1 1 100%">GitHub에서 이슈 열기</button>'+
+      '</div></div>'+
+    '<label><input type="checkbox" id="chkCode"><span>'+
+      '<b>내 코드 한 줄을 함께 보냅니다</b><br>'+
+      '<span class="mono" style="font-size:11.5px">'+esc(c.file+':'+c.focus)+'</span> 의 그 줄만 첨부됩니다. '+
+      '파일 전체나 다른 파일은 절대 포함되지 않습니다. 기본은 꺼짐입니다.</span></label>'+
+  '</div>';
+  $('#modal').hidden = false;
+  $('#btnCopyIssue').onclick = ()=>{ copy($('#issueBox').value); };
+  $('#chkCode').onchange = e=>{
+    const ta = $('#issueBox');
+    const tl = c.lines.find(l=>l.target).t.replace('@@', c.options?c.options[c.answer].t:'').trim();
+    ta.value = e.target.checked
+      ? ta.value.replace('포함되지 않음 — 아래 체크박스를 켜야 첨부됩니다.', '```'+c.lang+'\n'+tl+'\n```')
+      : ta.value.replace(new RegExp('```'+c.lang+'\\n[\\s\\S]*?\\n```'), '포함되지 않음 — 아래 체크박스를 켜야 첨부됩니다.');
+  };
+  $$('[data-open]').forEach(b=>b.onclick=()=>toast(b.dataset.open+' 을(를) 새 탭에서 엽니다 (목업)'));
+}
+
+function copy(text){
+  if(navigator.clipboard) navigator.clipboard.writeText(text).catch(()=>{});
+  toast('클립보드에 복사했습니다');
+}
+
+function bindHelper(){
+  $$('[data-htab]').forEach(b=>b.onclick=()=>{ S.helper.tab = b.dataset.htab; renderAll(); });
+  const cl = $('#btnHelperClose'); if(cl) cl.onclick = ()=>{ S.helper=null; renderAll(); };
+  const rb = $('#btnRung');        if(rb) rb.onclick = nextRung;
+  const bd = $('#btnBadDoc');      if(bd) bd.onclick = openBadDoc;
+  const ts = $('#btnToSyntax');    if(ts) ts.onclick = ()=>{ S.helper.tab='syntax'; renderAll(); };
+  const kb = $('#btnKey');         if(kb) kb.onclick = ()=>{ S.llmKey=!S.llmKey; renderAll();
+                                     toast(S.llmKey?'API 키가 연결된 상태로 전환 (데모)':'API 키 없는 상태로 전환 (데모)'); };
+  const cp = $('#btnCopyPrompt');  if(cp) cp.onclick = ()=> copy($('#promptBox').value);
+  const ak = $('#btnAsk');         if(ak) ak.onclick = ()=> toast('질문을 보냈습니다 (목업)');
+  $$('[data-pre]').forEach(b=>b.onclick=()=> jumpPrereq(b.dataset.pre));
+  $$('[data-open]').forEach(b=>b.onclick=()=> toast(b.dataset.open+' 을(를) 새 탭에서 엽니다 (목업)'));
+
+  /* 새로 펼쳐진 층·단이 화면 밖에 생기지 않도록 그 자리로 스크롤 */
+  const b = $('.helper__b'), H = S.helper;
+  if(b && H.tab==='syntax'){
+    let target = null;
+    if(H.rung===1 && H.layer>1){ const ls = $$('.layer', b); target = ls[ls.length-1]; }
+    else if(H.rung>1){ const rs = $$('.rung:not(.rung--locked)', b); target = rs[rs.length-1]; }
+    if(target) b.scrollTop = Math.max(0, target.offsetTop - 10);
+  }
+}
+
+function bindCard(){
+  $$('[data-opt]').forEach(b=>{
+    b.onclick = ()=>{ if(S.submitted) return; S.sel = +b.dataset.opt; renderCard(); };
+  });
+  $$('[data-pick]').forEach(b=>{
+    const choose = ()=>{ if(S.submitted) return; S.sel = +b.dataset.pick; renderCard(); };
+    b.onclick = choose;
+    b.onkeydown = e=>{ if(e.key==='Enter'&&S.sel!==+b.dataset.pick){ e.preventDefault(); e.stopPropagation(); choose(); } };
+  });
+  $$('[data-full]').forEach(b=>{ b.onclick = openFull; });
+  const main = $('#btnMain');
+  if(main) main.onclick = ()=> S.submitted ? next() : submit();
+  const again = $('#btnAgain');
+  if(again) again.onclick = retryNow;
+  const dn = $('#btnDunno');
+  if(dn) dn.onclick = openDunno;
+  const wy = $('#btnWhy');
+  if(wy) wy.onclick = ()=>{ S.helper = S.helper || {tab:'origin', rung:1, layer:1}; S.helper.tab='origin'; renderAll(); };
+  const bk = $('#btnBack');
+  if(bk) bk.onclick = popStack;
+
+  /* 대상 줄은 무슨 일이 있어도 보여야 한다 — 코드 창을 그 줄에 맞춰 놓는다 */
+  const cw = $('.codewrap'), tl = $('.cl--target');
+  if(cw && tl){
+    const over = cw.scrollHeight - cw.clientHeight;
+    if(over > 0) cw.scrollTop = Math.max(0, Math.min(over,
+      tl.offsetTop - (cw.clientHeight - tl.offsetHeight)/2));
+  }
+}
+
+function submit(){
+  if(S.sel===null || S.submitted) return;
+  const c = currentCard();
+  const ok = S.sel === c.answer;
+  S.submitted = true;
+  S.results[S.pos] = ok ? 'ok' : 'bad';
+  if(!ok){
+    S.prevWrong[currentCardIdx()] = S.sel;
+    S.queue++;
+    // 다시 보기 큐: 이 카드를 덱 뒤쪽에 다시 꽂는다
+    const insertAt = Math.min(S.order.length, S.pos + 3);
+    S.order.splice(insertAt, 0, currentCardIdx());
+    S.retry.splice(insertAt, 0, true);
+    toast('다시 보기 큐에 담았습니다 — 이 세션 안에서 한 번 더 나옵니다');
+  }
+  renderCard(); renderDots();
+}
+
+function next(){
+  /* 선행 개념 카드를 마쳤으면 스택을 pop 해서 원래 카드로 되돌아간다 */
+  if(S.stack.length){
+    const top = S.stack[S.stack.length-1];
+    if(S.order.indexOf(top.from, S.pos+1) === S.pos+1){ popStack(); return; }
+  }
+  S.returned = null;
+  S.helper = null;
+  if(S.pos >= S.order.length-1){
+    toast('오늘 세션 끝! 맞은 카드 '+Object.values(S.results).filter(v=>v==='ok').length+'장');
+    S.pos = 0; S.results = {}; S.queue = 0; S.stack = [];
+    S.order = deckIdx();
+    S.retry = S.order.map(()=>false);
+  } else {
+    S.pos++;
+  }
+  S.sel = null; S.submitted = false;
+  renderAll();
+}
+
+function retryNow(){
+  S.sel = null; S.submitted = false;
+  // 지금 자리에서 같은 카드를 다시: 큐에 넣은 복사본은 제거
+  const i = S.order.indexOf(currentCardIdx(), S.pos+1);
+  if(i>-1){ S.order.splice(i,1); S.retry.splice(i,1); S.queue = Math.max(0,S.queue-1); }
+  delete S.results[S.pos];
+  renderAll();
+  toast('같은 카드를 다시 풉니다');
+}
+
+function openFull(){
+  const c = currentCard();
+  $('#modalTitle').textContent = c.file + ' — 전체 보기';
+  $('#modalBody').innerHTML = '<div class="code" style="padding:14px 0">'+renderCode(c,{full:true})+'</div>';
+  $('#modalBody').classList.remove('pad');
+  $('#modal').hidden = false;
+}
+
+/* ============================================================
+   5. 렌더 — 문법 구멍 지도
+   ============================================================ */
+function mapStats(l){
+  let known=0, learn=0, gap=0;
+  MAP[l].cats.forEach(cat=>cat.items.forEach(it=>{
+    if(it.s==='known') known++; else if(it.s==='learn') learn++; else gap++;
+  }));
+  return {known, learn, gap, total:known+learn+gap};
+}
+
+function renderMapSide(){
+  $('#mapLangs').innerHTML = Object.keys(MAP).map(l=>{
+    const st = mapStats(l);
+    const pct = n => (n/st.total*100).toFixed(1)+'%';
+    return '<button class="langrow" data-ml="'+l+'" aria-pressed="'+(S.mapLang===l)+'">'+
+      '<div class="langrow__t"><span class="swatch" style="background:'+LANGS[l].color+'"></span>'+LANGS[l].name+
+        '<span class="gapn">구멍 '+st.gap+'</span></div>'+
+      '<div class="bar"><i class="b-known" style="width:'+pct(st.known)+'"></i>'+
+        '<i class="b-learn" style="width:'+pct(st.learn)+'"></i>'+
+        '<i class="b-gap" style="width:'+pct(st.gap)+'"></i></div>'+
+      '<div class="langrow__sub">'+MAP[l].files+'개 파일 · '+MAP[l].lines+'줄 분석됨</div>'+
+    '</button>';
+  }).join('');
+  $$('[data-ml]').forEach(b=>b.onclick=()=>{ S.mapLang=b.dataset.ml; S.gapSel=null; renderMap(); });
+}
+
+function renderMap(){
+  const l = S.mapLang, st = mapStats(l), d = MAP[l];
+  let h = '<div class="map__head">'+
+    '<div class="map__title"><span class="swatch" style="width:11px;height:11px;border-radius:3px;background:'+LANGS[l].color+'"></span>'+
+      LANGS[l].name+' 문법 지도</div>'+
+    '<p class="map__sub">이 언어를 읽고 쓰려면 알아야 할 문법 '+st.total+'개를, <b>내 리포에 실제로 등장한 것</b>과 대조했습니다. '+
+      '<b style="color:var(--accent)">구멍</b>은 내 코드에 한 번도 나오지 않은 문법입니다 — AI가 그 문법을 쓰지 않았기 때문에, 그냥 두면 앞으로도 만날 일이 없습니다.</p>'+
+  '</div>';
+
+  h += '<div class="bignum">'+
+    '<div class="is-known"><b>'+st.known+'</b><small>익힘</small></div>'+
+    '<div><b>'+st.learn+'</b><small>배우는 중</small></div>'+
+    '<div class="divider"></div>'+
+    '<div class="is-gap"><b>'+st.gap+'</b><small>구멍 — 내 코드에 없음</small></div>'+
+    '<div style="flex:1 1 auto;justify-content:center">'+
+      '<div class="bar" style="height:9px;margin:0">'+
+        '<i class="b-known" style="width:'+(st.known/st.total*100)+'%"></i>'+
+        '<i class="b-learn" style="width:'+(st.learn/st.total*100)+'%"></i>'+
+        '<i class="b-gap" style="width:'+(st.gap/st.total*100)+'%"></i></div>'+
+      '<small style="margin-top:7px">필수 문법 '+st.total+'개 중 '+Math.round((st.known+st.learn)/st.total*100)+'%가 내 코드에 등장</small>'+
+    '</div>'+
+  '</div>';
+
+  if(d.sample==='low'){
+    h += '<div class="notice"><span style="color:var(--accent)">⚠</span><span>'+
+      '<b>표본이 적습니다.</b> Go 파일이 '+d.files+'개('+d.lines+'줄)뿐이라 “구멍” 판정의 신뢰도가 낮습니다. '+
+      '파일이 더 쌓이면 자동으로 다시 계산합니다.</span></div>';
+  }
+
+  h += '<div class="maptools">'+
+    '<button class="toggle" id="gapOnly" aria-pressed="'+S.gapOnly+'">구멍만 보기</button>'+
+    '<span style="font-size:12px;color:var(--fg-mute)">구멍 칩을 누르면 <b style="color:var(--fg-dim)">왜 필요한지</b>와 <b style="color:var(--fg-dim)">내 코드에서 쓸 수 있었던 자리</b>가 오른쪽에 나옵니다.</span>'+
+  '</div>';
+
+  d.cats.forEach((cat,ci)=>{
+    const items = S.gapOnly ? cat.items.filter(i=>i.s==='gap') : cat.items;
+    if(!items.length) return;
+    const g = cat.items.filter(i=>i.s==='gap').length;
+    h += '<section class="cat"><div class="cat__h"><h3>'+cat.name+'</h3>'+
+      '<span class="cnt">'+cat.items.length+'개</span>'+
+      (g?'<span class="gapc">구멍 '+g+'</span>':'<span class="gapc" style="color:var(--ok)">✓ 구멍 없음</span>')+
+      '</div><div class="chips">'+
+      items.map((it,ii)=>{
+        const key = ci+'.'+cat.items.indexOf(it);
+        if(it.s==='gap')
+          return '<button class="chip chip--gap" data-gap="'+key+'" aria-pressed="'+(S.gapSel===key)+'">'+esc(it.n)+'</button>';
+        if(it.s==='learn')
+          return '<span class="chip chip--learn" style="--p:'+(it.p||50)+'%" title="숙련도 '+(it.p||50)+'%">'+esc(it.n)+'</span>';
+        return '<span class="chip chip--known">'+esc(it.n)+'</span>';
+      }).join('')+'</div></section>';
+  });
+
+  $('#mapMain').innerHTML = h;
+  $('#gapOnly').onclick = ()=>{ S.gapOnly = !S.gapOnly; renderMap(); };
+  $$('[data-gap]').forEach(b=>b.onclick=()=>{ S.gapSel = b.dataset.gap; renderMap(); });
+  renderMapSide();
+  renderGapDetail();
+  $('#gapPip').textContent = Object.keys(MAP).reduce((a,k)=>a+mapStats(k).gap,0);
+}
+
+function renderGapDetail(){
+  const box = $('#mapDetail');
+  const EMPTY = '<div class="detail__empty">왼쪽에서 <b style="color:var(--accent)">주황 점선 칩</b>을 하나 고르세요.<br><br>'+
+      '그 문법이 왜 필요한지, AI가 대신 무엇을 썼는지,<br>내 코드 어디에 쓸 수 있었는지 보여드립니다.</div>';
+
+  let it = null;
+  if(S.gapSel){
+    const [ci, ii] = S.gapSel.split('.').map(Number);
+    const cat = MAP[S.mapLang].cats[ci];        // 언어를 바꾸면 인덱스가 남아 있을 수 있다
+    const cand = cat && cat.items[ii];
+    if(cand && cand.s==='gap') it = cand; else S.gapSel = null;
+  }
+  if(!it){ box.innerHTML = EMPTY; return; }
+  let h = '<div class="detail">'+
+    '<div class="tagline">내 코드에 한 번도 없었던 문법</div>'+
+    '<h4>'+esc(it.n)+'</h4>'+
+    '<div class="block"><div class="sect">왜 필요한가</div><p>'+it.why+'</p></div>';
+
+  if(it.ai){
+    h += '<div class="block"><div class="sect">AI는 대신 무엇을 썼나</div><p>'+it.ai+'</p></div>';
+  }
+  if(it.site){
+    h += '<div class="block"><div class="sect">내 코드에서 쓸 수 있었던 자리</div>'+
+      '<div class="sitebox">'+
+        '<div class="sitebox__h">'+esc(it.site.f)+' <span style="color:var(--accent)">:'+it.site.l+'</span></div>'+
+        '<div class="snip">'+hl(it.site.code, S.mapLang)+'</div>'+
+        '<div class="sitebox__fix">'+it.site.fix+'</div>'+
+      '</div></div>';
+  } else {
+    h += '<div class="block"><div class="sect">내 코드에서 쓸 수 있었던 자리</div>'+
+      '<p style="color:var(--fg-mute)">아직 딱 맞는 자리를 찾지 못했습니다. 이 문법은 <b>합성 예제</b>로 먼저 배운 뒤, 실제 코드에 나타나면 자동으로 연결됩니다.</p></div>';
+  }
+
+  h += '<button class="btn" id="gapStart">이 문법으로 3문제 풀기</button>'+
+       '<p style="font-size:11.5px;color:var(--fg-mute);margin-top:8px;text-align:center">'+
+       (it.site ? '위의 실제 코드로 문제를 만듭니다.' : '내 코드에 없으므로 최소 예제로 문제를 만듭니다.')+'</p>';
+  h += '</div>';
+  box.innerHTML = h;
+  $('#gapStart').onclick = ()=>{
+    toast('“'+it.n+'” 카드 3장을 오늘 덱 맨 앞에 넣었습니다');
+    setView('learn');
+  };
+}
+
+/* ============================================================
+   6. 뷰 전환 / 테마 / 토스트 / 키보드
+   ============================================================ */
+function setView(v){
+  S.view = v;
+  $('#view-learn').hidden = v!=='learn';
+  $('#view-map').hidden   = v!=='map';
+  $$('.tab').forEach(t=>t.setAttribute('aria-selected', String(t.dataset.view===v)));
+  if(v==='map') renderMap();
+}
+
+let toastTimer;
+function toast(msg){
+  $('#toastText').textContent = msg;
+  $('#toast').classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>$('#toast').classList.remove('show'), 2600);
+}
+
+function toggleTheme(){
+  const cur = document.documentElement.getAttribute('data-theme');
+  document.documentElement.setAttribute('data-theme', cur==='dark'?'light':'dark');
+}
+
+function openHelp(){
+  $('#modalTitle').textContent = '키보드 단축키 — 마우스 없이 전부 가능합니다';
+  $('#modalBody').classList.add('pad');
+  $('#modalBody').innerHTML = '<div class="klist">'+[
+    ['1 2 3 4','객관식 보기 고르기'],
+    ['← →','지목형에서 클릭 지점 이동'],
+    ['Enter','제출 (제출 후에는 다음 카드)'],
+    ['Space','다음 카드'],
+    ['?','<b style="color:var(--accent)">모르겠어요</b> — 이해 도우미 열기 / 한 단 더 내려가기'],
+    ['W','왜 하필 여기에 이 코드였나 (생성 기록)'],
+    ['B','선행 개념에서 원래 카드로 돌아가기'],
+    ['R','방금 틀린 카드 지금 다시 풀기'],
+    ['F','전체 코드 열기'],
+    ['L','학습 화면'],
+    ['G','문법 구멍 지도'],
+    ['T','라이트 / 다크 전환'],
+    ['H','이 도움말'],
+    ['Esc','도우미 · 열린 창 닫기']
+  ].map(k=>'<div><span class="kbd">'+k[0]+'</span><b>'+k[1]+'</b></div>').join('')+'</div>'+
+  '<p style="margin-top:16px;font-size:12.5px;color:var(--fg-mute);line-height:1.6">'+
+  '카드 한 장은 <b style="color:var(--fg-dim)">고르기 → Enter → Space</b> 세 번의 키 입력으로 끝납니다. '+
+  '이해가 안 될 때는 그 사이에 <b style="color:var(--accent)">?</b> 를 누르세요 — 누를수록 복습이 정확해집니다.</p>';
+  $('#modal').hidden = false;
+}
+
+function closeModal(){ $('#modal').hidden = true; }
+
+function movePick(dir){
+  const c = currentCard();
+  if(c.type!=='point' || S.submitted) return;
+  const n = c.picks.length;
+  S.sel = S.sel===null ? (dir>0?0:n-1) : (S.sel+dir+n)%n;
+  renderCard();
+  const el = $('[data-pick="'+S.sel+'"]');
+  if(el) el.scrollIntoView({block:'nearest', inline:'nearest'});
+}
+
+document.addEventListener('keydown', e=>{
+  const k = e.key;
+  if(k==='Escape'){
+    if(!$('#modal').hidden){ closeModal(); return; }
+    if(S.helper){ S.helper = null; renderAll(); }
+    return;
+  }
+  if(!$('#modal').hidden){ return; }
+  if(e.metaKey||e.ctrlKey||e.altKey) return;
+
+  const tag = (e.target.tagName||'').toLowerCase();
+  if(tag==='input' || tag==='textarea') return;   // 프롬프트 편집 중에는 단축키를 삼키지 않는다
+
+  if(k==='h'||k==='H'){ openHelp(); return; }
+  if(k==='t'||k==='T'){ toggleTheme(); return; }
+  if(k==='g'||k==='G'){ setView('map'); return; }
+  if(k==='l'||k==='L'){ setView('learn'); return; }
+  if(S.view!=='learn') return;
+
+  const c = currentCard();
+
+  /* '?' — 이 앱에서 가장 값진 키. 해설 상태에서 사다리를 열고, 열려 있으면 한 단 더 내려간다 */
+  if(k==='?'||(k==='/'&&e.shiftKey)){
+    e.preventDefault();
+    if(!S.submitted){ toast('먼저 답을 제출하면 이해 도우미를 열 수 있습니다'); return; }
+    if(!S.helper) openDunno(); else if(S.helper.tab==='syntax') nextRung(); else { S.helper.tab='syntax'; renderAll(); }
+    return;
+  }
+  if(k==='w'||k==='W'){
+    if(!S.submitted) return;
+    S.helper = S.helper || {tab:'origin', rung:1, layer:1}; S.helper.tab='origin'; renderAll(); return;
+  }
+  if(k==='b'||k==='B'){ if(S.stack.length) popStack(); return; }
+  if(k==='f'||k==='F'){ openFull(); return; }
+  if(k==='ArrowRight'){ e.preventDefault(); movePick(1); return; }
+  if(k==='ArrowLeft'){ e.preventDefault(); movePick(-1); return; }
+  if(/^[1-9]$/.test(k) && c.options && !S.submitted){
+    const i = +k-1;
+    if(i < c.options.length){ S.sel = i; renderCard(); }
+    return;
+  }
+  if(k==='Enter'){ e.preventDefault(); S.submitted ? next() : submit(); return; }
+  if(k===' '){ e.preventDefault(); if(S.submitted) next(); return; }
+  if((k==='r'||k==='R') && S.submitted && S.results[S.pos]==='bad'){ retryNow(); return; }
+});
+
+/* ============================================================
+   7. 부팅
+   ============================================================ */
+function renderAll(){ renderCard(); renderDots(); }
+
+$$('.tab').forEach(t=>t.onclick=()=>setView(t.dataset.view));
+$('#btnTheme').onclick = toggleTheme;
+$('#btnHelp').onclick = openHelp;
+$('#modalClose').onclick = closeModal;
+$('#modal').onclick = e=>{ if(e.target.id==='modal') closeModal(); };
+
+if(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches)
+  document.documentElement.setAttribute('data-theme','light');
+
+renderFilter();
+renderAll();
+renderMap();
+setView('learn');
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+/* 목업: ink-home.html `.mr` — 판 어긋남(인쇄 물리). 큰 활자에만, 본문 단 밖에서만 (05 §4.3).
+   바꾼 것 — 유령 판의 진홍 원색을 트랙 별칭 --t1 로. 뜻은 「진홍 판이 어긋났다」이고
+   05 §4.2 가 컴포넌트에 허용하는 이름은 트랙 별칭과 --verdict-* 뿐이다. */
+.mr { position: relative }
+
+.mr::before {
+  content: attr(data-w);
+  position: absolute;
+  inset: 0;
+  color: var(--t1);
+  transform: translate(calc(var(--misreg) * -.75), 1px);
+  mix-blend-mode: var(--blend);
+  pointer-events: none;
+}
+.mr > span { position: relative }
+[data-trim="on"] .mr::before { display: none }

@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="ko" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Chickadee</title>
+
+    <!-- 서체 4개만 미리 받는다 — 본문 400·700, Mono 400, 포스터 400 (05 §1.4).
+         나머지 5개(500·600)는 필요한 화면에서 받는다. 네트워크 요청은 0 — 전부 번들 파일이다. -->
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/src/assets/fonts/IBMPlexSansKR-Regular.woff2" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/src/assets/fonts/IBMPlexSansKR-Bold.woff2" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/src/assets/fonts/IBMPlexMono-Regular.woff2" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/src/assets/fonts/BlackHanSans-Regular.woff2" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

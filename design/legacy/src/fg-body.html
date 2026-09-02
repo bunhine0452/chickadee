@@ -1,0 +1,261 @@
+<template id="tpl-bird">
+  <svg class="bird" viewBox="0 0 72 72" width="44" height="44" aria-hidden="true" focusable="false">
+    <path class="back" d="M47 43 L69 59 L64 65 L44 50 Z"/>
+    <ellipse class="back" cx="34" cy="40" rx="18" ry="15.5"/>
+    <path class="wing" d="M35 31 Q49 34 51 45 Q43 50 35 43 Z"/>
+    <ellipse class="breast" cx="25" cy="44" rx="11.5" ry="11"/>
+    <circle class="cap" cx="24" cy="24" r="13"/>
+    <ellipse class="cheek" cx="20.5" cy="27.5" rx="8" ry="5.4"/>
+    <path class="bill" d="M12 24.5 L3.5 27 L12 29.5 Z"/>
+    <circle class="eye" cx="18.5" cy="20" r="1.9"/>
+    <path class="leg" d="M29 54.5 L29 61 M35 55 L35 61"/>
+  </svg>
+</template>
+
+<div class="app">
+
+  <!-- ══ 도감 표지 ══════════════════════════════════════════════════════ -->
+  <aside class="rail">
+    <div class="rail__brand">
+      <span data-bird="32"></span>
+      <div>
+        <h1>박새 도감</h1>
+        <p class="latin">Chickadee</p>
+      </div>
+    </div>
+
+    <div class="repo">
+      <span class="label">이 도감</span>
+      <span class="habitat">shop-web</span>
+    </div>
+
+    <div>
+      <p class="label" style="margin-bottom:var(--s4)">관찰 기록</p>
+      <ul class="record">
+        <li class="record__row"><span>눈에 익음</span><b id="rec-3">24</b></li>
+        <li class="record__row"><span>몇 번 봄</span><b id="rec-2">31</b></li>
+        <li class="record__row"><span>처음 봄</span><b id="rec-1">12</b></li>
+        <li class="record__row record__row--gap"><span>미기록</span><b id="rec-0">18</b></li>
+      </ul>
+    </div>
+
+    <div class="streak">
+      <div class="streak__ticks" aria-hidden="true">
+        <i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i>
+        <i class="on"></i><i class="on"></i><i class="on"></i>
+      </div>
+      <p>12일 연속 · 오늘 포함</p>
+    </div>
+
+    <div class="dee">
+      <span data-bird="36" id="dee-bird"></span>
+      <p id="dee-line">오늘은 장바구니 쪽을 보러 갈까요.</p>
+    </div>
+  </aside>
+
+  <!-- ══ 본문 ═══════════════════════════════════════════════════════════ -->
+  <div>
+    <header class="topbar">
+      <div class="seg" role="tablist" aria-label="화면">
+        <button role="tab" id="tab-home" aria-selected="true" aria-controls="view-home">도감 홈</button>
+        <button role="tab" id="tab-ds" aria-selected="false" aria-controls="view-ds">조판 규칙</button>
+      </div>
+      <span class="spacer"></span>
+      <span class="date">2월 12일 목요일</span>
+      <div class="seg" role="group" aria-label="표시 방식">
+        <button data-theme-btn="auto" aria-pressed="true">자동</button>
+        <button data-theme-btn="light" aria-pressed="false">밝게</button>
+        <button data-theme-btn="dark" aria-pressed="false">어둡게</button>
+      </div>
+    </header>
+
+    <main class="sheetwrap">
+
+      <!-- ── 뷰 1: 도감 홈 ─────────────────────────────────────────── -->
+      <div id="view-home" role="tabpanel" aria-labelledby="tab-home">
+
+        <!-- ① 오늘의 관찰 — 앱을 열면 보이는 유일한 일 -->
+        <section class="today" aria-labelledby="today-name">
+          <p class="label today__label">오늘의 관찰</p>
+          <h2 class="species species--hero today__name" id="today-name">옵셔널 체이닝</h2>
+          <p class="latin today__latin">Optional chaining</p>
+
+          <div class="today__meta">
+            <span class="tag tag--t0">T0 문법</span>
+            <span class="dot">·</span>
+            <span class="body" style="color:var(--ink-2)">장바구니 담기/빼기</span>
+            <span class="dot">·</span>
+            <span class="body" style="color:var(--ink-3)">카드 4장 · 약 12분</span>
+          </div>
+
+          <div class="today__why">
+            <p class="label">판별 포인트</p>
+            <p class="lede">
+              장바구니가 아직 안 불러와졌을 때 <code class="sign">cart.items</code> 를 읽으면
+              앱이 멈춥니다. <code class="sign">?.</code> 는 앞이 비어 있으면 거기서
+              조용히 멈추고 넘어갑니다. 지금 코드에 이미 7번 쓰고 있어요.
+            </p>
+          </div>
+
+          <div class="today__cta">
+            <button class="btn btn--ink" id="btn-start" data-concept="optional-chaining">오늘 관찰 시작</button>
+            <span class="hint"><span class="kbd">Space</span> 로도 시작</span>
+          </div>
+        </section>
+
+        <!-- ② 차례 -->
+        <section class="section" aria-labelledby="toc-h">
+          <div class="section__head">
+            <h2 class="label" id="toc-h">차례</h2>
+            <span class="count">shop-web · 유닛 4</span>
+          </div>
+          <ol class="toc" id="toc"></ol>
+        </section>
+
+        <!-- ③ 미기록 종 -->
+        <section class="section" aria-labelledby="gaps-h">
+          <div class="section__head">
+            <h2 class="label" id="gaps-h">미기록 종</h2>
+            <span class="count">내 코드에 이미 있는데 아직 안 본 문법</span>
+          </div>
+          <p class="body" style="margin-bottom:var(--s6)">
+            내 리포를 훑어서 찾았습니다. 아직 한 번도 열어보지 않은 것들이에요.
+          </p>
+          <ul class="gaps" id="gaps"></ul>
+        </section>
+      </div>
+
+      <!-- ── 뷰 2: 조판 규칙 ───────────────────────────────────────── -->
+      <div id="view-ds" role="tabpanel" aria-labelledby="tab-ds" hidden>
+        <div class="ds">
+
+          <section>
+            <div class="section__head" style="margin-top:var(--s8)">
+              <h2 class="label">도감의 조판 언어</h2>
+            </div>
+            <p class="body" style="margin-bottom:var(--s6)">
+              도감 한 페이지는 한 종을 다룹니다. 이 앱의 카드 한 장은 한 개념을 다룹니다.
+              아래 여섯 칸이 그 대응이고, 화면의 모든 위계는 이 여섯 개만 씁니다.
+            </p>
+            <table class="tbl">
+              <thead><tr><th>도감</th><th>이 앱</th><th>조판</th></tr></thead>
+              <tbody>
+                <tr><td>국명</td><td>개념 이름</td><td>UI 20px / 600</td></tr>
+                <tr><td>학명 <i>Parus minor</i></td><td>영문 원어 (검색용)</td><td>세리프 이탤릭 17px / 400</td></tr>
+                <tr><td>판별 표시</td><td>실제 문법 토큰</td><td>모노 15px / 500 · 괘선 상자</td></tr>
+                <tr><td>판별 포인트</td><td>알아보는 법</td><td>본문 17px / 1.75 / 39자</td></tr>
+                <tr><td>서식지</td><td>내 코드 속 위치</td><td>모노 13px</td></tr>
+                <tr><td>관찰 기록</td><td>숙련도 버킷</td><td>눈금 3칸 + 텍스트</td></tr>
+              </tbody>
+            </table>
+          </section>
+
+          <section>
+            <div class="section__head"><h2 class="label">행 길이 — 가장 중요한 규칙</h2></div>
+            <div class="ruler">
+              <div class="ruler__bar"></div>
+              <p class="body" id="ruler-text">
+                한글 글리프의 폭은 1em 이므로 max-width 를 em 으로 걸면 글자 수가 그대로 고정됩니다.
+                ch 단위는 라틴 숫자 0 의 폭이라 한글에는 두 배로 틀립니다.
+              </p>
+              <p class="label" style="margin-top:var(--s3)" id="ruler-measure"></p>
+            </div>
+          </section>
+
+          <section>
+            <div class="section__head"><h2 class="label">타입 스케일</h2></div>
+            <div class="scale">
+              <div class="scale__row"><p class="label">13 / 라벨</p><p class="label">관찰 기록 · T0 문법 · 미기록</p></div>
+              <div class="scale__row"><p class="label">15 / 보조</p><p style="font-size:var(--fs-15);color:var(--ink-2)">서식지 메모와 부가 설명에 씁니다.</p></div>
+              <div class="scale__row"><p class="label">17 / 본문</p><p class="body">읽어야 할 한국어 문장은 전부 이 크기입니다.</p></div>
+              <div class="scale__row"><p class="label">20 / 종명</p><p class="species">옵셔널 체이닝</p></div>
+              <div class="scale__row"><p class="label">26 / 화면당 1회</p><p class="species species--hero">옵셔널 체이닝</p></div>
+            </div>
+          </section>
+
+          <section>
+            <div class="section__head"><h2 class="label">색 토큰</h2><span class="count">대비는 실측값입니다</span></div>
+            <p class="body" style="margin-bottom:var(--s6)">
+              색은 의미에만 씁니다. 트랙 구분 셋, 미기록 표시 하나, 코드 강조 하나가 전부입니다.
+            </p>
+            <div class="ds__grid" id="sw-text"></div>
+            <p class="label" style="margin:var(--s7) 0 var(--s4)">면</p>
+            <div class="ds__grid" id="sw-surface"></div>
+          </section>
+
+          <section>
+            <div class="section__head"><h2 class="label">컴포넌트</h2></div>
+            <div style="display:flex;flex-wrap:wrap;gap:var(--s4);align-items:center;margin-bottom:var(--s7)">
+              <button class="btn btn--ink">1차 · 잉크 도장</button>
+              <button class="btn btn--line">2차 · 괘선</button>
+              <button class="btn btn--quiet">3차 · 모르겠어요</button>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:var(--s3);align-items:center;margin-bottom:var(--s7)">
+              <span class="tag tag--t0">T0 문법</span>
+              <span class="tag tag--t1">T1 필사</span>
+              <span class="tag tag--t2">T2 구조</span>
+              <span class="tag tag--gap">미기록</span>
+              <span class="sign">?.</span>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:var(--s7);align-items:center">
+              <span style="display:flex;gap:var(--s3);align-items:center"><span class="gauge" data-level="0"><i></i><i></i><i></i></span><span class="label">미기록</span></span>
+              <span style="display:flex;gap:var(--s3);align-items:center"><span class="gauge gauge--t0" data-level="1"><i class="on"></i><i></i><i></i></span><span class="label">처음 봄</span></span>
+              <span style="display:flex;gap:var(--s3);align-items:center"><span class="gauge gauge--t0" data-level="2"><i class="on"></i><i class="on"></i><i></i></span><span class="label">몇 번 봄</span></span>
+              <span style="display:flex;gap:var(--s3);align-items:center"><span class="gauge gauge--t0" data-level="3"><i class="on"></i><i class="on"></i><i class="on"></i></span><span class="label">눈에 익음</span></span>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ══ 관찰 시트 ═══════════════════════════════════════════════════════ -->
+<div class="scrim" id="scrim" hidden></div>
+<section class="obs" id="obs" role="dialog" aria-modal="true" aria-labelledby="obs-name" hidden>
+  <header class="obs__head">
+    <span data-bird="64" id="obs-bird"></span>
+    <div>
+      <p class="label" id="obs-kicker"></p>
+      <h2 class="species" id="obs-name"></h2>
+      <p class="latin" id="obs-latin"></p>
+      <div class="obs__signs"><span class="sign" id="obs-sign"></span><span class="habitat" id="obs-habitat"></span></div>
+    </div>
+    <button class="iconbtn" id="obs-close" aria-label="닫기 (Esc)">닫기 Esc</button>
+  </header>
+
+  <div class="obs__body">
+    <p class="lede" id="obs-lede"></p>
+
+    <div class="plate" id="plate">
+      <div class="code"><pre id="obs-code"></pre></div>
+      <aside class="fieldnote" id="fieldnote">
+        <p class="label">여기를 보세요</p>
+        <p id="obs-note"></p>
+      </aside>
+      <svg class="leader" id="leader" aria-hidden="true"><path id="leader-path"/><circle id="leader-dot" r="5"/></svg>
+    </div>
+
+    <div class="quiz">
+      <p class="quiz__q" id="obs-q"></p>
+      <div class="opts" id="obs-opts"></div>
+      <div class="miss">
+        <button class="btn btn--quiet" id="btn-miss">모르겠어요</button>
+        <span class="miss__hint">놓쳐도 괜찮아요. 다시 보러 오면 됩니다.</span>
+      </div>
+      <div class="answer" id="obs-answer">
+        <span class="stamp" id="obs-stamp" hidden>기록됨</span>
+        <p class="body" id="obs-explain"></p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="obs__foot">
+    <span class="label">관찰 기록</span>
+    <span class="gauge" id="obs-gauge"><i></i><i></i><i></i></span>
+    <span class="label" id="obs-level" style="color:var(--ink)"></span>
+    <span style="flex:1"></span>
+    <span class="label" id="obs-next"></span>
+  </footer>
+</section>

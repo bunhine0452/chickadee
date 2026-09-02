@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ko" data-theme="light" data-trim="off">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chickadee — 잉크 · 교정쇄 (오늘의 인쇄)</title>
+<link rel="icon" type="image/svg+xml" href="<!-- @include favicon.href.txt -->">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=Black+Han+Sans&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════════════════════════════
+   CHICKADEE — 「잉크」(리소그래프) + 박새
+   교정쇄 = 데일리 세션 (전체화면 오버레이)
+
+   원칙 한 줄: 본문은 조용하게, 나머지는 잉크답게.
+   토큰·기본 조판·Dee 심볼은 ink-home.html 이 단일 출처 — src/ink/build.py 가 인라인한다.
+   ══════════════════════════════════════════════════════════════════════ */
+<!-- @base-css -->
+
+<!-- @include shared.css -->
+
+<!-- @include session.css -->
+</style>
+</head>
+<body>
+<!-- @base-svg -->
+
+<div class="proof" id="proof">
+
+  <!-- ══════════ 작업 띠 : 어느 판을 걸었고 얼마나 남았나 ══════════ -->
+  <header class="jobband grain" aria-label="작업 띠">
+    <div class="jb-brand">
+      <svg class="logo" aria-hidden="true"><use href="#logo"/></svg>
+      <div>
+        <div class="jb-title mr" data-w="교정쇄"><span>교정쇄</span></div>
+        <div class="jb-sub" id="jbSub">Run 08 · cart-shop-web</div>
+      </div>
+    </div>
+    <div class="jb-queue">
+      <div class="jq-h"><span id="jqNow">지금 <b>1 / 5</b> · 함수형 업데이트 (복습)</span><span class="time" id="jqTime">남은 시간 약 15분</span></div>
+      <div class="jq" id="jq" role="img" aria-label="오늘 인쇄 순서. 칸 너비는 걸리는 시간에 비례하고, 지금 칸은 실제 경과에 따라 차오릅니다."></div>
+      <div class="jq-labels" id="jqLabels" aria-hidden="true"></div>
+    </div>
+    <div class="jb-ctl">
+      <button class="sw" id="swTrim" aria-label="인쇄 부속 보이기 숨기기" title="등록표시·기울기·질감을 숨깁니다"><span class="on" data-v="off">부속 보임</span><span data-v="on">부속 숨김</span></button>
+      <button class="sw" id="swTheme" aria-label="주간반 야간반 전환"><span class="on" data-v="light">주간반</span><span data-v="dark">야간반</span></button>
+      <button class="flat-btn ghost" id="exitBtn" title="확인 창 없이 바로 나갑니다. 진행은 저장됩니다.">나가기 <kbd class="k">Esc</kbd></button>
+    </div>
+  </header>
+
+  <!-- ══════════ 작업대 : 교정지가 놓인다 ══════════ -->
+  <main class="bench" id="bench" aria-live="off"></main>
+</div>
+
+<!-- LIFER : 처음 만난 종을 기록하는 순간 — 개념당 평생 한 번, 아무 키나 누르면 닫힘 -->
+<div class="lifer-veil" id="lifer" hidden>
+  <div class="lifer-card grain" role="dialog" aria-label="처음 기록한 개념">
+    <svg class="reg hit" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M12 1v22M1 12h22" stroke="currentColor" stroke-width="1.4"/></svg>
+    <span class="dee-sticker" aria-hidden="true"><svg class="dee" id="deeLifer" data-ly="4" viewBox="0 0 100 100"><use href="#dee"/></svg></span>
+    <div class="lifer-body">
+      <div class="lifer-k">첫 기록 · LIFER</div>
+      <h3 id="liferName"></h3>
+      <p id="liferWhere"></p>
+      <div class="lifer-serial" id="liferSerial"></div>
+    </div>
+    <div class="stamp big hit" style="--r:-7deg">첫 관찰<small>LIFER</small></div>
+    <div class="lifer-any">아무 키나 누르면 닫힙니다</div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="vh" id="live" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  "use strict";
+<!-- @include data.js -->
+
+<!-- @include util.js -->
+
+<!-- @include t0.js -->
+
+<!-- @include t1.js -->
+
+<!-- @include t2.js -->
+
+<!-- @include session.js -->
+})();
+</script>
+</body>
+</html>

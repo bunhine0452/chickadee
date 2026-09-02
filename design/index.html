@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chickadee — 목업 모음</title>
+<style>
+:root{--bg:#F4F0E6;--fg:#141210;--dim:#6B6459;--line:#141210;--red:#FF3B18;--blue:#1B3BFF;--green:#00C566;--card:#fffdf7}
+@media (prefers-color-scheme:dark){:root{--bg:#17150F;--fg:#F0EBDE;--dim:#9A9384;--line:#3A362C;--card:#211E17}}
+*{box-sizing:border-box}
+body{margin:0;padding:48px 24px 80px;background:var(--bg);color:var(--fg);
+ font:15px/1.65 -apple-system,"Apple SD Gothic Neo","Pretendard",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:860px;margin:0 auto}
+h1{font-size:38px;line-height:1.1;margin:0 0 6px;letter-spacing:-.02em}
+.sub{color:var(--dim);margin:0 0 40px;font-size:14px}
+h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);
+ margin:40px 0 14px;padding-bottom:8px;border-bottom:3px solid var(--line)}
+ul{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+a.item{display:grid;grid-template-columns:64px 1fr;gap:16px;align-items:baseline;
+ padding:16px 18px;background:var(--card);border:2px solid var(--line);
+ box-shadow:5px 5px 0 var(--line);text-decoration:none;color:inherit;
+ transition:transform .1s steps(2),box-shadow .1s steps(2)}
+a.item:hover{transform:translate(5px,5px);box-shadow:0 0 0 var(--line)}
+.tag{font:700 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.08em;
+ color:var(--card);background:var(--fg);padding:5px 7px;justify-self:start}
+.t-a{background:var(--red)}.t-b{background:var(--blue)}.t-c{background:var(--fg)}.t-d{background:var(--green)}
+.nm{font-weight:700;font-size:16px}
+.ds{color:var(--dim);font-size:13px;margin-top:3px}
+.note{margin-top:36px;padding:16px 18px;border-left:4px solid var(--red);color:var(--dim);font-size:13px}
+</style></head><body><div class="wrap">
+<h1>Chickadee</h1>
+<p class="sub">목업 모음 · 바이브 코딩 이후 내 코드를 공부하는 앱</p>
+
+<h2>현재 방향 — 「잉크」 리소그래프 + 박새</h2>
+<ul>
+<li><a class="item" href="ink-home.html"><span class="tag t-b">홈</span><span><span class="nm">경로 홈 — 인쇄 대지</span><span class="ds">잉크 겹 = 박새의 선명도 · 길잡이 Dee · 주간반/야간반 · 「부속 숨김」 · <b>?dev=1</b> 로 검수 패널, <b>?stress=48</b> 로 부하 시험 · 「인쇄 시작」 → 교정쇄</span></span></a></li>
+<li><a class="item" href="ink-session.html?reset=1"><span class="tag t-b">세션</span><span><span class="nm">교정쇄 — 오늘의 인쇄 5판</span><span class="ds">T0 의미/빈칸/지목 · 「모르겠어요 = 다시 찍기」 4단 사다리 + 아래층 점프/복귀 · LIFER · T1 필사(줄 판정 · 같은 뜻인데요 · 왜) · T2 책임 배치(3티어) · 인쇄 완료 요약 · <b>?at=N</b> 으로 N번째 판, <b>?dev=1</b> 검수</span></span></a></li>
+<li><a class="item" href="logo/contact-sheet.png"><span class="tag t-b">로고</span><span><span class="nm">확정 로고 — 파생 에셋 대조 시트</span><span class="ds"><b>logo/chickadee-logo.svg</b> 확정 · 배지 · 정사각 · 파비콘 크롭(16px 통과) · PNG · ico · <b>logo/README.md</b></span></span></a></li>
+</ul>
+
+<h2>레거시 — 폐기된 시안</h2>
+<ul>
+<li><a class="item" href="legacy/"><span class="tag">보관</span><span><span class="nm">legacy/</span><span class="ds">「도감」 3건 · 방향 4안 · 기능 설계 4건 · 이전 핸드오프 문서. 시각은 전부 폐기. 동작 설계는 <b>ink-session.html</b> 로 이식이 끝났으므로 참고용으로만 남긴다</span></span></a></li>
+</ul>
+
+<p class="note">현재 유효한 것은 「잉크」 경로 홈·교정쇄·확정 로고뿐입니다. 제품 결정과 설계 문서는 <b>.oculpm/discussion/vibe-code-study-app/discussion.md</b>, 파일 안내는 <b>README.md</b>.</p>
+</div></body></html>

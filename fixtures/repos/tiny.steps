@@ -1,0 +1,391 @@
+# tiny — 커밋 5, TS 약 200줄 (06 §1.2 · 00 D36)
+# CI 통합 잡과 IPC 덤프 골든(fixtures/ipc/tiny/)이 쓰는 기준 픽스처다.
+# 평범한 문법을 고르게 담는다: import · const · function · class · async/await ·
+# 옵셔널 체이닝 · 반복 · 조건 · 이름 바꾸기 · 삭제.
+#
+# 형식(자세히는 scripts/make-fixture-repo.sh --help)
+#   write <경로> <<EOS ... EOS   파일 통째 쓰기      delete <경로>
+#   rename <옛> <새>              이동                commit <메시지...>
+#   gen wave <횟수> <경로틀> lines= seed= msg=        결정론적 합성기
+# 재생은 scripts/make-fixture-repo.sh tiny — 생성물은 커밋하지 않는다.
+
+# ── 커밋 1 ───────────────────────────────────────────────────────────────
+write src/util/time.ts <<EOS
+export const DAY_MS = 86_400_000;
+export const DAY_START_HOUR = 4;
+
+export interface DayWindow {
+  key: string;
+  startMs: number;
+  endMs: number;
+}
+
+export function clamp(value: number, low: number, high: number): number {
+  if (value < low) return low;
+  if (value > high) return high;
+  return value;
+}
+
+export function dayKey(at: Date): string {
+  const shifted = new Date(at.getTime() - DAY_START_HOUR * 3_600_000);
+  const y = shifted.getFullYear();
+  const m = String(shifted.getMonth() + 1).padStart(2, "0");
+  const d = String(shifted.getDate()).padStart(2, "0");
+  return y + "-" + m + "-" + d;
+}
+
+export function labelFor(dueMs: number, now: number): string {
+  const delta = dueMs - now;
+  if (delta < 0) return "지남";
+  if (delta < DAY_MS) return "오늘";
+  if (delta < DAY_MS * 3) return "곧";
+  if (delta < DAY_MS * 14) return "이번 주";
+  return "나중";
+}
+
+export function windowOf(at: Date): DayWindow {
+  const key = dayKey(at);
+  const [y, m, d] = key.split("-").map(Number);
+  const start = new Date(y, m - 1, d, DAY_START_HOUR, 0, 0, 0);
+  return { key, startMs: start.getTime(), endMs: start.getTime() + DAY_MS };
+}
+EOS
+commit feat: 하루 경계 시각 유틸
+
+# ── 커밋 2 ───────────────────────────────────────────────────────────────
+write src/store/repo.ts <<EOS
+import { DAY_MS, dayKey, windowOf } from "../util/time";
+
+export interface CardRow {
+  id: number;
+  conceptId: string;
+  dueMs: number;
+  lapses?: number;
+}
+
+export interface RepoMeta {
+  id: number;
+  root: string;
+  lastIngest?: { at: number; files: number };
+}
+
+export class RepoStore {
+  private cards = new Map<number, CardRow>();
+
+  constructor(private readonly meta: RepoMeta) {}
+
+  get root(): string {
+    return this.meta.root;
+  }
+
+  put(row: CardRow): void {
+    this.cards.set(row.id, row);
+  }
+
+  dueOn(at: Date): CardRow[] {
+    const win = windowOf(at);
+    const out: CardRow[] = [];
+    for (const row of this.cards.values()) {
+      if (row.dueMs <= win.endMs) {
+        out.push(row);
+      }
+    }
+    return out;
+  }
+
+  async reload(fetch: (id: number) => Promise<CardRow[]>): Promise<number> {
+    const rows = await fetch(this.meta.id);
+    this.cards.clear();
+    for (let i = 0; i < rows.length; i += 1) {
+      this.put(rows[i]);
+    }
+    return this.cards.size;
+  }
+
+  describe(at: Date): string {
+    const seen = this.meta.lastIngest?.files ?? 0;
+    const stale = (this.meta.lastIngest?.at ?? 0) < at.getTime() - DAY_MS;
+    return dayKey(at) + " · 파일 " + seen + (stale ? " · 갱신 필요" : "");
+  }
+}
+EOS
+commit feat: 리포 저장소 계층
+
+# ── 커밋 3 ───────────────────────────────────────────────────────────────
+write src/session/queue.ts <<EOS
+import { CardRow, RepoStore } from "../store/repo";
+import { dayKey } from "../util/time";
+
+export const TARGET_MINUTES = 15;
+export const MINUTES_PER_CARD = 0.75;
+
+export interface SessionPlan {
+  key: string;
+  cards: CardRow[];
+  minutes: number;
+}
+
+function byDue(a: CardRow, b: CardRow): number {
+  return a.dueMs - b.dueMs;
+}
+
+export function planSession(store: RepoStore, at: Date): SessionPlan {
+  const due = store.dueOn(at).sort(byDue);
+  const picked: CardRow[] = [];
+  let minutes = 0;
+  for (const card of due) {
+    if (minutes + MINUTES_PER_CARD > TARGET_MINUTES) {
+      break;
+    }
+    if ((card.lapses ?? 0) > 3) {
+      continue;
+    }
+    picked.push(card);
+    minutes += MINUTES_PER_CARD;
+  }
+  return { key: dayKey(at), cards: picked, minutes };
+}
+
+export async function planFresh(
+  store: RepoStore,
+  at: Date,
+  fetch: (id: number) => Promise<CardRow[]>,
+): Promise<SessionPlan> {
+  await store.reload(fetch);
+  return planSession(store, at);
+}
+EOS
+write src/legacy/oldQueue.ts <<EOS
+import { CardRow } from "../store/repo";
+
+// 0.0 시절 큐 — planSession 이 대체했다. 다음 커밋에서 지운다.
+export function oldPlan(cards: CardRow[]): CardRow[] {
+  const out: CardRow[] = [];
+  for (let i = 0; i < cards.length; i += 1) {
+    if (i < 20) {
+      out.push(cards[i]);
+    }
+  }
+  return out;
+}
+EOS
+write src/session/grade.ts <<EOS
+import { CardRow } from "../store/repo";
+
+export type Verdict = "exact" | "equiv" | "differ" | "skip";
+
+export interface Judged {
+  card: CardRow;
+  verdict: Verdict;
+  reason?: string;
+}
+
+const NORMALIZE = /[;\s]+/g;
+
+export function normalize(src: string): string {
+  return src.replace(NORMALIZE, " ").trim();
+}
+
+export function judge(card: CardRow, answer: string, original: string): Judged {
+  if (answer.length === 0) {
+    return { card, verdict: "skip", reason: "빈 답" };
+  }
+  if (answer === original) {
+    return { card, verdict: "exact" };
+  }
+  if (normalize(answer) === normalize(original)) {
+    return { card, verdict: "equiv", reason: "공백·세미콜론만 다름" };
+  }
+  return { card, verdict: "differ", reason: "토큰 불일치" };
+}
+
+export async function judgeAll(
+  cards: CardRow[],
+  answers: Map<number, string>,
+  source: (id: number) => Promise<string>,
+): Promise<Judged[]> {
+  const out: Judged[] = [];
+  for (const card of cards) {
+    const original = await source(card.id);
+    const answer = answers.get(card.id) ?? "";
+    out.push(judge(card, answer, original));
+  }
+  return out;
+}
+EOS
+commit feat: 오늘 큐 생성기와 구 큐 잔재
+
+# ── 커밋 4: 이름 바꾸기 + 참조 갱신 ───────────────────────────────────────
+rename src/util/time.ts src/core/time.ts
+write src/store/repo.ts <<EOS
+import { DAY_MS, dayKey, windowOf } from "../core/time";
+
+export interface CardRow {
+  id: number;
+  conceptId: string;
+  dueMs: number;
+  lapses?: number;
+}
+
+export interface RepoMeta {
+  id: number;
+  root: string;
+  lastIngest?: { at: number; files: number };
+}
+
+export class RepoStore {
+  private cards = new Map<number, CardRow>();
+
+  constructor(private readonly meta: RepoMeta) {}
+
+  get root(): string {
+    return this.meta.root;
+  }
+
+  put(row: CardRow): void {
+    this.cards.set(row.id, row);
+  }
+
+  dueOn(at: Date): CardRow[] {
+    const win = windowOf(at);
+    const out: CardRow[] = [];
+    for (const row of this.cards.values()) {
+      if (row.dueMs <= win.endMs) {
+        out.push(row);
+      }
+    }
+    return out;
+  }
+
+  async reload(fetch: (id: number) => Promise<CardRow[]>): Promise<number> {
+    const rows = await fetch(this.meta.id);
+    this.cards.clear();
+    for (let i = 0; i < rows.length; i += 1) {
+      this.put(rows[i]);
+    }
+    return this.cards.size;
+  }
+
+  describe(at: Date): string {
+    const seen = this.meta.lastIngest?.files ?? 0;
+    const stale = (this.meta.lastIngest?.at ?? 0) < at.getTime() - DAY_MS;
+    return dayKey(at) + " · 파일 " + seen + (stale ? " · 갱신 필요" : "");
+  }
+}
+EOS
+write src/session/queue.ts <<EOS
+import { CardRow, RepoStore } from "../store/repo";
+import { dayKey } from "../core/time";
+
+export const TARGET_MINUTES = 15;
+export const MINUTES_PER_CARD = 0.75;
+
+export interface SessionPlan {
+  key: string;
+  cards: CardRow[];
+  minutes: number;
+}
+
+function byDue(a: CardRow, b: CardRow): number {
+  return a.dueMs - b.dueMs;
+}
+
+export function planSession(store: RepoStore, at: Date): SessionPlan {
+  const due = store.dueOn(at).sort(byDue);
+  const picked: CardRow[] = [];
+  let minutes = 0;
+  for (const card of due) {
+    if (minutes + MINUTES_PER_CARD > TARGET_MINUTES) {
+      break;
+    }
+    if ((card.lapses ?? 0) > 3) {
+      continue;
+    }
+    picked.push(card);
+    minutes += MINUTES_PER_CARD;
+  }
+  return { key: dayKey(at), cards: picked, minutes };
+}
+
+export async function planFresh(
+  store: RepoStore,
+  at: Date,
+  fetch: (id: number) => Promise<CardRow[]>,
+): Promise<SessionPlan> {
+  await store.reload(fetch);
+  return planSession(store, at);
+}
+EOS
+commit refactor: 시각 유틸을 core 로 옮김
+
+# ── 커밋 5: 수정 + 삭제 + 진입점 ──────────────────────────────────────────
+write src/session/queue.ts <<EOS
+import { CardRow, RepoStore } from "../store/repo";
+import { clamp, dayKey } from "../core/time";
+
+export const TARGET_MINUTES = 15;
+export const MINUTES_PER_CARD = 0.75;
+export const MAX_CARDS = 24;
+
+export interface SessionPlan {
+  key: string;
+  cards: CardRow[];
+  minutes: number;
+}
+
+function byDue(a: CardRow, b: CardRow): number {
+  return a.dueMs - b.dueMs;
+}
+
+export function planSession(store: RepoStore, at: Date): SessionPlan {
+  const due = store.dueOn(at).sort(byDue);
+  const limit = clamp(due.length, 0, MAX_CARDS);
+  const picked: CardRow[] = [];
+  let minutes = 0;
+  for (let i = 0; i < limit; i += 1) {
+    const card = due[i];
+    if (minutes + MINUTES_PER_CARD > TARGET_MINUTES) {
+      break;
+    }
+    if ((card.lapses ?? 0) > 3) {
+      continue;
+    }
+    picked.push(card);
+    minutes += MINUTES_PER_CARD;
+  }
+  return { key: dayKey(at), cards: picked, minutes };
+}
+
+export async function planFresh(
+  store: RepoStore,
+  at: Date,
+  fetch: (id: number) => Promise<CardRow[]>,
+): Promise<SessionPlan> {
+  await store.reload(fetch);
+  return planSession(store, at);
+}
+EOS
+delete src/legacy/oldQueue.ts
+write src/index.ts <<EOS
+import { RepoStore } from "./store/repo";
+import { planFresh } from "./session/queue";
+import { dayKey } from "./core/time";
+
+const store = new RepoStore({
+  id: 1,
+  root: "/fixture/tiny",
+  lastIngest: { at: 0, files: 4 },
+});
+
+export async function main(now: Date = new Date()): Promise<string> {
+  const plan = await planFresh(store, now, async () => [
+    { id: 1, conceptId: "ts/optional-chaining", dueMs: now.getTime() },
+    { id: 2, conceptId: "ts/async-await", dueMs: now.getTime(), lapses: 1 },
+  ]);
+  if (plan.cards.length === 0) {
+    return dayKey(now) + " · 오늘 인쇄할 카드 없음";
+  }
+  return plan.key + " · 카드 " + plan.cards.length + " · " + plan.minutes + "분";
+}
+EOS
+commit fix: 큐 상한 적용, 구 큐 삭제, 진입점 추가

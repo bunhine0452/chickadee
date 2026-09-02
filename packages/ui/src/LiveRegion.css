@@ -1,0 +1,9 @@
+/* 목업: ink-home.html 리셋의 `.vh` — 화면에서만 숨긴다 */
+.vh {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

@@ -1,0 +1,37 @@
+{
+  "name": "chickadee",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "packageManager": "pnpm@10.33.2",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @chickadee/desktop dev",
+    "build": "pnpm -r --filter=!@chickadee/desktop build && pnpm --filter @chickadee/desktop build",
+    "tauri": "pnpm --filter @chickadee/desktop tauri",
+    "lint": "eslint . && stylelint \"apps/**/*.css\" \"packages/**/*.css\"",
+    "typecheck": "pnpm -r typecheck",
+    "test:unit": "vitest run",
+    "design:sync": "node scripts/sync-design.mjs",
+    "design:check": "node scripts/sync-design.mjs --check",
+    "check:contrast": "node scripts/check-contrast.mjs",
+    "check:rust": "bash scripts/check-rust-budget.sh",
+    "catalog:build": "tsx scripts/build-catalog.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "@types/node": "^22.10.2",
+    "eslint": "^9.17.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "globals": "^15.14.0",
+    "stylelint": "^16.12.0",
+    "stylelint-config-standard": "^36.0.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.1",
+    "vitest": "^3.2.6"
+  }
+}

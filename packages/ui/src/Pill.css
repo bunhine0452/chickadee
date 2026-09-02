@@ -1,0 +1,33 @@
+/* 목업: design/src/ink/shared.css `.pill` — 클래스명·선언 그대로 */
+.pill {
+  display: inline-block;
+  padding: 2px 7px;
+  border: 1.5px solid var(--rule);
+  color: var(--ink);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  font-weight: 700;
+  letter-spacing: .04em;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.pill.t0 {
+  background: var(--t0);
+  color: var(--on-t0);
+}
+
+.pill.t1 {
+  background: var(--t1);
+  color: var(--on-t1);
+}
+
+.pill.t2 {
+  background: var(--t2);
+  color: var(--on-t2);
+}
+
+.pill.ghost {
+  background: transparent;
+  color: var(--ink-soft);
+}

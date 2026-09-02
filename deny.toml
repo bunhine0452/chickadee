@@ -1,0 +1,135 @@
+# cargo-deny — 06 §4.4 「의존성 공급망·시크릿」
+#
+#   cargo deny check   → advisories · licenses · bans · sources
+#
+# 예외는 전부 CVE/RUSTSEC id · 사유 · 만료일을 적는다. 만료일이 지난 예외는
+# 지우고 다시 판단한다 — 「일단 넣어 둔 ignore」가 영원히 남는 것을 막는 규칙이다.
+
+# ── 그래프 ────────────────────────────────────────────────────────────────────
+# 릴리스 매트릭스(06 §5.2)와 같은 4개 타깃만 본다. 타깃을 고정하지 않으면
+# 안 쓰는 플랫폼 크레이트의 라이선스까지 끌려 들어와 목록이 흐려진다.
+[graph]
+targets = [
+    "aarch64-apple-darwin",
+    "x86_64-apple-darwin",
+    "x86_64-pc-windows-msvc",
+    "x86_64-unknown-linux-gnu",
+]
+all-features = false
+no-default-features = false
+
+[output]
+feature-depth = 1
+
+# ── 취약점 ────────────────────────────────────────────────────────────────────
+[advisories]
+db-urls = ["https://github.com/rustsec/advisory-db"]
+
+# 06 §4.4 — 예외는 **id · 사유 · 만료일** 셋을 다 적는다. cargo-deny 에 만료 필드가
+# 없으므로 만료일은 `만료: YYYY-MM-DD` 형식으로 reason 안에 쓰고,
+# ci.yml 의 audit 잡이 지난 날짜를 찾아 CI 를 떨어뜨린다. 형식을 바꾸지 말 것.
+#
+# 아래 예외는 전부 `unmaintained`(관리 중단)이고 알려진 취약점(CVE)이 아니다.
+# 취약점이나 unsound 는 여기 넣지 않는다 — 버전을 올려서 푼다.
+ignore = [
+    # ── GTK3 바인딩 10종 — tauri 2 → wry → webkit2gtk 가 Linux 에서 요구한다.
+    # 우리가 고를 수 있는 게 아니다(wry 가 GTK4 로 옮기면 통째로 사라진다).
+    # 앱은 Linux 에서 이미 시스템 WebKitGTK 에 붙어 있고, 이 크레이트들은 그 FFI 껍데기다.
+    { id = "RUSTSEC-2024-0411", reason = "gdkwayland-sys — GTK3 바인딩 관리 중단. tauri/wry 가 강제. 만료: 2027-03-31" },
+    { id = "RUSTSEC-2024-0412", reason = "gdk — GTK3 바인딩 관리 중단. tauri/wry 가 강제. 만료: 2027-03-31" },
+    { id = "RUSTSEC-2024-0413", reason = "atk — GTK3 바인딩 관리 중단. tauri/wry 가 강제. 만료: 2027-03-31" },
+    { id = "RUSTSEC-2024-0414", reason = "gdkx11-sys — GTK3 바인딩 관리 중단. tauri/wry 가 강제. 만료: 2027-03-31" },
+    { id = "RUSTSEC-2024-0415", reason = "gtk — GTK3 바인딩 관리 중단. tauri/wry 가 강제. 만료: 2027-03-31" },
+    { id = "RUSTSEC-2024-0416", reason = "atk-sys — GTK3 바인딩 관리 중단. tauri/wry 가 강제. 만료: 2027-03-31" },
+    { id = "RUSTSEC-2024-0417", reason = "gdkx11 — GTK3 바인딩 관리 중단. tauri/wry 가 강제. 만료: 2027-03-31" },
+    { id = "RUSTSEC-2024-0418", reason = "gdk-sys — GTK3 바인딩 관리 중단. tauri/wry 가 강제. 만료: 2027-03-31" },
+    { id = "RUSTSEC-2024-0419", reason = "gtk3-macros — GTK3 바인딩 관리 중단. tauri/wry 가 강제. 만료: 2027-03-31" },
+    { id = "RUSTSEC-2024-0420", reason = "gtk-sys — GTK3 바인딩 관리 중단. tauri/wry 가 강제. 만료: 2027-03-31" },
+
+    # ── 빌드 시점에만 도는 proc-macro. 최종 바이너리에 코드가 들어가지 않는다.
+    { id = "RUSTSEC-2024-0370", reason = "proc-macro-error — 관리 중단, 빌드 전용 매크로라 산출물에 없음. 만료: 2027-03-31" },
+
+    # ── unic-* 5종 — 유니코드 표 크레이트. 관리 중단이고 취약점은 없다.
+    { id = "RUSTSEC-2025-0075", reason = "unic-char-range — 관리 중단, 취약점 아님. 만료: 2027-03-31" },
+    { id = "RUSTSEC-2025-0080", reason = "unic-common — 관리 중단, 취약점 아님. 만료: 2027-03-31" },
+    { id = "RUSTSEC-2025-0081", reason = "unic-char-property — 관리 중단, 취약점 아님. 만료: 2027-03-31" },
+    { id = "RUSTSEC-2025-0098", reason = "unic-ucd-version — 관리 중단, 취약점 아님. 만료: 2027-03-31" },
+    { id = "RUSTSEC-2025-0100", reason = "unic-ucd-ident — 관리 중단, 취약점 아님. 만료: 2027-03-31" },
+]
+
+# ── 라이선스 ──────────────────────────────────────────────────────────────────
+# 앱은 MIT. 아래는 「MIT 앱에 정적 링크해도 되는」 허용적 라이선스만 담는다.
+#
+# 목록은 tauri 2 + 플러그인 4종 + rusqlite(bundled) 트리를 실제로 돌려서 맞췄다.
+# 안 쓰이는 항목은 `license-not-encountered` 경고로만 남는다(CI 를 막지 않는다).
+[licenses]
+allow = [
+    "MIT",
+    "MIT-0",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Zlib",
+    "0BSD",
+    "CC0-1.0",
+    "Unlicense",
+    "BSL-1.0",
+    # icu_* / unicode-ident 계열. url → idna 로 tauri 트리에 반드시 들어온다.
+    "Unicode-3.0",
+    "Unicode-DFS-2016",
+]
+confidence-threshold = 0.93
+
+# 카피레프트는 **전면 허용하지 않는다**. 크레이트 단위 예외로만 연다.
+#
+# MPL-2.0 은 **파일 단위** 약한 카피레프트다: 해당 크레이트의 소스 파일을 고치지 않고
+# 그대로 링크하는 한 우리 MIT 코드에 전염되지 않는다(MPL-2.0 §3.3 「Larger Work」).
+# 고쳐야 할 일이 생기면 포크가 아니라 대체 크레이트를 찾는다.
+# 여기 없는 MPL/LGPL/GPL 크레이트가 새로 들어오면 CI 가 막는다 — 그게 의도다.
+#
+#   cssparser · cssparser-macros · dtoa-short · selectors
+#       Servo 의 CSS 선택자 엔진. tauri-utils 가 CSP 를 주입하려고 HTML 을
+#       파싱·재작성하는 경로로 들어온다. 우리 코드는 이들을 직접 부르지 않는다.
+#   option-ext
+#       dirs → dirs-sys → option-ext. 앱 데이터 디렉터리 경로 계산용.
+exceptions = [
+    { allow = ["MPL-2.0"], crate = "cssparser" },
+    { allow = ["MPL-2.0"], crate = "cssparser-macros" },
+    { allow = ["MPL-2.0"], crate = "dtoa-short" },
+    { allow = ["MPL-2.0"], crate = "selectors" },
+    { allow = ["MPL-2.0"], crate = "option-ext" },
+]
+
+[licenses.private]
+# 워크스페이스 크레이트는 publish = false 라 라이선스 검사에서 뺀다.
+ignore = true
+
+# ── 금지·중복 ─────────────────────────────────────────────────────────────────
+[bans]
+# tauri 트리는 중복 버전이 항상 있다. deny 로 두면 우리가 못 고치는 남의 트리 때문에
+# PR 이 막힌다 — 경고로 두고 리뷰에서 본다.
+multiple-versions = "warn"
+wildcards = "deny"
+allow-wildcard-paths = true
+highlight = "all"
+
+deny = [
+    # 06 §4.4 — 앱은 .env 를 읽지 않는다. 키는 OS 키체인(§3.5).
+    { crate = "dotenv", reason = "앱은 .env 를 읽지 않는다 (06 §4.4). 키는 키체인." },
+    { crate = "dotenvy", reason = "앱은 .env 를 읽지 않는다 (06 §4.4). 키는 키체인." },
+    # 06 §5.5 — 0.x 초기 릴리스는 업데이터를 빌드에 포함하지 않는다.
+    # 서명 없는 업데이트 채널은 그 자체가 공급망 취약점이다.
+    { crate = "tauri-plugin-updater", reason = "자동 업데이트는 06 §5.5 조건을 만족할 때까지 끔." },
+]
+skip = []
+skip-tree = []
+
+# ── 출처 ──────────────────────────────────────────────────────────────────────
+# git 의존은 감사 대상이 아니고 yank 도 안 된다. crates.io 만 받는다.
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = []

@@ -1,0 +1,454 @@
+/* ═══════════ 교정쇄 : 데일리 세션 = 전체화면 오버레이 ═══════════
+   은유 : 오늘의 인쇄를 한 판씩 건다. 맞으면 정합(in register), 틀리면 어긋남(off register) — 어긋남은 공정이지 벌이 아니다.
+   「모르겠어요」 = 다시 찍기. 세션 밖으로 가는 길은 Esc 하나뿐이고 확인 모달은 없다. */
+html,body{height:100%}
+body{overflow:hidden}
+.proof{position:fixed; inset:0; display:grid; grid-template-rows:auto minmax(0,1fr); z-index:1}
+
+/* ───────── 작업 띠 : 어느 판을 걸었고 얼마나 남았나 ───────── */
+.jobband{
+  margin:14px 18px 0; background:var(--paper); border:2.5px solid var(--rule);
+  box-shadow:4px 5px 0 var(--edge), var(--lamp); padding:9px 16px 10px;
+  display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:22px; align-items:center;
+}
+.jb-brand{display:flex; align-items:center; gap:12px; padding-right:18px; border-right:2px dashed var(--rule); min-width:0}
+.jb-brand .logo{width:46px; height:46px; flex:0 0 auto; display:block}
+.jb-title{font-family:var(--f-poster); font-size:var(--fs-poster-s); line-height:.9; letter-spacing:.01em; color:var(--ink); white-space:nowrap}
+.jb-sub{font-family:var(--f-mono); font-size:var(--fs-13); font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-soft); margin-top:4px; white-space:nowrap}
+
+.jq-h{display:flex; justify-content:space-between; align-items:baseline; gap:14px; font-size:var(--fs-14); color:var(--ink-soft); margin-bottom:5px}
+.jq-h b{color:var(--ink); font-weight:700}
+.jq-h .time{font-family:var(--f-mono); font-size:var(--fs-13); font-variant-numeric:tabular-nums; white-space:nowrap}
+/* 시간 비례 큐 : 칸 너비 = 걸리는 시간. 지금 칸은 실제 경과에 따라 차오른다 */
+.jq{display:flex; gap:3px; height:20px; border:2px solid var(--rule); padding:2px; background:var(--paper-3)}
+.jq i{display:block; position:relative; flex:var(--w,1) 1 0; min-width:9px; background:var(--paper-2); overflow:hidden; transition:flex .3s}
+.jq i::before{content:""; position:absolute; inset:0; width:var(--p,0%); transition:width .5s linear}
+.jq i.t0::before{background:var(--t0)} .jq i.t1::before{background:var(--t1)} .jq i.t2::before{background:var(--t2)}
+.jq i.review::after{content:""; position:absolute; inset:0; background-image:radial-gradient(rgba(0,0,0,.34) 1.1px, transparent 1.3px); background-size:4px 4px; pointer-events:none}
+.jq i.done::before{width:100%}
+.jq i.now{outline:2px solid var(--pink); outline-offset:1px}
+.jq i.skip::before{width:100%; opacity:.28}
+[data-theme="dark"] .jq{box-shadow:0 0 14px var(--glow-t1)}
+.jq-labels{display:flex; gap:3px; margin-top:4px}
+.jq-labels span{flex:var(--w,1) 1 0; min-width:0; font-family:var(--f-mono); font-size:var(--fs-13); color:var(--ink-soft); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; letter-spacing:-.01em}
+.jq-labels span.now{color:var(--ink); font-weight:700}
+
+.jb-ctl{display:flex; align-items:center; gap:10px}
+
+/* ───────── 작업대 : 교정지가 놓이는 자리 ───────── */
+.bench{overflow:auto; padding:40px 18px 48px; display:flex; flex-direction:column; align-items:center; gap:22px; scroll-behavior:smooth}
+
+/* ───────── 교정지 ───────── */
+.ps{
+  position:relative; width:100%; max-width:860px; background:var(--paper-2); border:2.5px solid var(--rule);
+  box-shadow:6px 7px 0 var(--edge), 0 18px 26px -18px var(--drop), var(--lamp);
+  display:grid; grid-template-columns:46px minmax(0,1fr); padding:18px 24px 22px 0;
+  transform:rotate(var(--tilt,0deg));
+  animation:sheetin .34s var(--e-settle) both;
+}
+.ps.wide{max-width:1120px}
+.ps.xwide{max-width:1240px}
+[data-trim="on"] .ps{transform:none}
+@keyframes sheetin{0%{opacity:0; transform:translateY(14px) rotate(var(--tilt,0deg))}100%{opacity:1; transform:translateY(0) rotate(var(--tilt,0deg))}}
+.ps-rail{border-right:2px dashed var(--rule); display:flex; flex-direction:column; align-items:center; gap:10px; padding:4px 0 10px}
+.ps-rail .dee-sticker{width:36px; height:36px; border-width:2px; box-shadow:none; transition:transform .3s var(--e-hop)}
+.ps-rail .dee{width:100%; height:100%}
+.ps-rail .vt{writing-mode:vertical-rl; text-orientation:mixed; font-family:var(--f-mono); font-size:var(--fs-13); font-weight:600; letter-spacing:.16em; color:var(--ink-soft); white-space:nowrap}
+.ps-rail .plus{font-family:var(--f-mono); font-size:var(--fs-13); font-weight:700; color:var(--pink-text); opacity:0; transform:translateY(6px); transition:opacity .3s, transform .3s var(--e-hop)}
+.ps-rail .plus.on{opacity:1; transform:none}
+[data-trim="on"] .ps-rail .vt{display:none}
+[data-trim="on"] .ps-rail{border-right-style:solid}
+.ps-in{padding-left:22px; min-width:0; display:flex; flex-direction:column; gap:16px}
+
+/* 머리 : 트랙 · 개념 · 출처 · 겹 */
+.ps-head{display:flex; align-items:flex-start; gap:14px; flex-wrap:wrap; padding-bottom:12px; border-bottom:2.5px solid var(--rule)}
+.ps-head .sig{font-family:var(--f-poster); font-size:var(--fs-poster-s); line-height:.9; letter-spacing:.01em; color:var(--ink); flex:0 0 auto; position:relative; top:-2px}
+.ps-h2{font-size:var(--fs-20); font-weight:700; letter-spacing:-.03em; line-height:1.25; display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.ps-h2 code{font-size:var(--fs-18); background:var(--paper-3); padding:0 6px; border:1.5px solid var(--rule)}
+.ps-h2 .pl{font-size:var(--fs-14); font-weight:500; color:var(--ink-soft); letter-spacing:0}
+.ps-src{font-family:var(--f-mono); font-size:var(--fs-13); color:var(--ink-soft); letter-spacing:.01em; margin-top:4px; display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.ps-src b{color:var(--ink); font-weight:600}
+.ps-ly{margin-left:auto; display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex:0 0 auto}
+.ps-ly .lyn{font-family:var(--f-mono); font-size:var(--fs-13); color:var(--ink-soft); white-space:nowrap}
+.ps-ly .lyn b{color:var(--ink)}
+
+/* 물음 (본문 = 조용하게) */
+.ask{font-size:var(--fs-18); font-weight:600; letter-spacing:-.02em; line-height:1.55; color:var(--ink)}
+.ask code{font-size:var(--fs-16); background:var(--paper-3); padding:0 5px; border:1.5px solid var(--rule); font-weight:600}
+.ask small{display:block; font-size:var(--fs-14); font-weight:400; color:var(--ink-soft); margin-top:3px}
+
+/* 선택지 1~4 : 두꺼운 종이 버튼. 코드 안엔 잉크를 안 얹으니 색은 테두리·번호에만 */
+.choices{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.choices.one{grid-template-columns:1fr}
+.ch{
+  all:unset; box-sizing:border-box; cursor:pointer; position:relative; display:grid; grid-template-columns:auto minmax(0,1fr); align-items:start; gap:12px;
+  padding:11px 14px 11px 11px; border:2.5px solid var(--rule); background:var(--paper); color:var(--ink);
+  box-shadow:0 4px 0 var(--edge); transition:transform .08s, box-shadow .08s, background .12s; min-height:54px;
+}
+.ch:focus-visible{outline:3px solid var(--t0); outline-offset:3px}
+.ch:hover{background:var(--stock)}
+.ch:active{transform:translateY(4px); box-shadow:0 0 0 var(--edge)}
+.ch .n{font-family:var(--f-mono); font-size:var(--fs-14); font-weight:700; width:26px; height:26px; border:2px solid var(--rule); display:grid; place-items:center; background:var(--paper-3); color:var(--ink-soft); flex:0 0 auto; margin-top:1px}
+.ch .t{font-size:var(--fs-16); line-height:1.5; letter-spacing:-.015em}
+.ch .t code{font-family:var(--f-mono); font-size:var(--fs-15); background:var(--paper-3); padding:0 4px; border:1px solid var(--rule)}
+.ch.code-choice .t{font-family:var(--f-mono); font-size:var(--fs-16); white-space:pre-wrap}
+.ch.sel{background:var(--stock); box-shadow:0 4px 0 var(--edge), inset 0 0 0 2px var(--t0)}
+.ch.sel .n{background:var(--t0); color:var(--on-t0); border-color:var(--rule)}
+.ch.right{box-shadow:0 4px 0 var(--edge), inset 0 0 0 2.5px var(--pink)}
+.ch.right .n{background:var(--pink); color:var(--on-t1)}
+.ch.wrong{border-style:dashed; color:var(--ink-soft)}
+.ch.wrong .n{background:var(--yellow); color:#221D18}
+.ch[disabled]{cursor:default}
+.ch[disabled]:hover{background:var(--paper)}
+.ch[disabled]:active{transform:none; box-shadow:0 4px 0 var(--edge)}
+.ch.sel[disabled],.ch.right[disabled]{background:var(--stock)}
+
+/* 지목형 : 코드 판 안의 토큰이 곧 선택지 */
+.code.pickable .tk{cursor:pointer; border-bottom:2px dashed var(--ink-mute); padding:0 1px; margin:0 -1px; transition:background .12s}
+.code.pickable .tk:hover{background:var(--paper-3); border-bottom-style:solid; border-bottom-color:var(--rule)}
+.code.pickable .tk.sel{background:var(--paper-3); border-bottom:2px solid var(--t0); box-shadow:inset 0 -2px 0 var(--t0)}
+.code .tk.right{background:var(--yellow); color:#221D18; border-bottom:2px solid var(--rule)}
+.code .tk.wrong{border-bottom:2px solid var(--pink); text-decoration:none; opacity:.85}
+[data-theme="dark"] .code .tk.right{color:#1C1400}
+.code:not(.pickable) .tk{cursor:default}
+
+/* 빈칸형 : 판에 뚫린 자리 */
+.code .hole{display:inline-block; min-width:5.5em; border:2px dashed var(--ink-mute); border-radius:2px; padding:0 .4em; margin:0 .1em; color:var(--ink-soft); background:var(--paper-3); text-align:center}
+.code .hole.filled{border-style:solid; border-color:var(--t0); color:var(--ink); background:var(--stock)}
+.code .hole.right{border-color:var(--rule); background:var(--yellow); color:#221D18}
+.code .hole.wrong{border-color:var(--pink); text-decoration:line-through; text-decoration-color:var(--pink)}
+[data-theme="dark"] .code .hole.right{color:#1C1400}
+
+/* 피드백 슬롯 : 자리를 미리 비워 두어 답할 때 레이아웃 점프 0px */
+.slot{min-height:118px; position:relative; display:grid; align-items:start}
+.slot-idle{grid-area:1/1; border:2px dashed var(--ink-mute); padding:14px 16px; font-size:var(--fs-14); color:var(--ink-soft); line-height:var(--lh-body); max-width:none}
+.slot-idle[hidden]{display:none}
+.fb{
+  grid-area:1/1;
+  border:2.5px solid var(--rule); background:var(--paper); padding:14px 16px 14px 18px;
+  display:grid; grid-template-columns:auto minmax(0,1fr); gap:16px; align-items:start;
+  opacity:0; transform:translateY(6px); transition:opacity .2s, transform .28s var(--e-settle);
+}
+.fb.on{opacity:1; transform:none}
+.fb .stampbox{width:118px; display:grid; place-items:center; padding-top:4px}
+.fb h4{font-size:var(--fs-16); font-weight:700; letter-spacing:-.02em; line-height:1.4}
+.fb h4 code{font-size:var(--fs-15); background:var(--paper-3); padding:0 4px; border:1px solid var(--rule)}
+.fb p{font-size:var(--fs-15); color:var(--ink-soft); margin-top:5px; line-height:var(--lh-body)}
+.fb p b{color:var(--ink); font-weight:600}
+.fb p code{font-size:var(--fs-14); background:var(--paper-3); padding:0 4px; border:1px solid var(--rule)}
+.fb .edge{margin-top:9px; padding:9px 12px; border-left:4px solid var(--yellow); background:var(--paper-3); font-size:var(--fs-15); color:var(--ink)}
+.fb .edge b{font-weight:700}
+.fb .edge code{font-size:var(--fs-14); background:var(--stock); padding:0 4px; border:1px solid var(--rule)}
+.fb.right{background:var(--stock)}
+.fb .gain{display:flex; align-items:center; gap:10px; margin-top:10px; font-family:var(--f-mono); font-size:var(--fs-13); color:var(--ink-soft); flex-wrap:wrap}
+.fb .gain .dee-sticker{width:30px; height:30px; border-width:2px; box-shadow:none}
+.fb .gain .dee{width:100%; height:100%}
+.fb .gain .arr{font-size:var(--fs-14); color:var(--ink-soft)}
+.fb .gain b{color:var(--pink-text)}
+
+/* 이어보기 : 아래층에서 돌아오면 새로 열리는 문단 (점프가 이득이 되는 장치) */
+.link-para{
+  position:relative; border:2.5px solid var(--rule); background:var(--stock); padding:14px 16px 14px 18px;
+  box-shadow:4px 4px 0 var(--edge); animation:sheetin .4s var(--e-settle) both;
+}
+.link-para .tag-new{position:absolute; top:-12px; left:14px; font-family:var(--f-mono); font-size:var(--fs-13); font-weight:700; letter-spacing:.1em; background:var(--yellow); color:#221D18; border:2px solid var(--rule); padding:1px 8px}
+.link-para h4{font-size:var(--fs-16); font-weight:700; letter-spacing:-.02em}
+.link-para p{font-size:var(--fs-15); color:var(--ink-soft); margin-top:5px}
+.link-para p b{color:var(--ink); font-weight:600}
+.link-para code{font-size:var(--fs-14); background:var(--paper-3); padding:0 4px; border:1px solid var(--rule)}
+
+/* 동작 줄 : 왼쪽 「모르겠어요 · 다시 찍기」 — 맞혀도 남는다 · 오른쪽 확인/다음 */
+.acts{display:flex; align-items:center; gap:12px; padding-top:14px; border-top:2px dashed var(--rule); flex-wrap:wrap}
+.acts .sp{flex:1}
+.acts .hint{font-size:var(--fs-14); color:var(--ink-soft)}
+.acts .hint b{color:var(--ink); font-weight:600}
+.dunno{border-color:var(--rule); background:var(--paper-3)}
+.dunno.on{background:var(--yellow); color:#221D18; border-style:solid}
+[data-theme="dark"] .dunno.on{background:var(--blue); color:var(--on-t0)}
+
+/* ───────── 다시 찍기 사다리 (모르겠어요 4단) ───────── */
+.ladder{border:2.5px solid var(--rule); background:var(--paper); box-shadow:inset 0 3px 0 -1px var(--edge); overflow:hidden; animation:sheetin .3s var(--e-settle) both}
+.ld-head{display:flex; align-items:center; gap:14px; padding:12px 16px; border-bottom:2.5px solid var(--rule); background:var(--paper-3); flex-wrap:wrap}
+.ld-head .dee-sticker{width:46px; height:46px; flex:0 0 auto}
+.ld-head .dee{width:100%; height:100%}
+.ld-head h3{font-size:var(--fs-18); font-weight:700; letter-spacing:-.025em; line-height:1.3}
+.ld-head p{font-size:var(--fs-14); color:var(--ink-soft); margin-top:2px}
+.ld-head p b{color:var(--pink-text); font-weight:700}
+.ld-gain{margin-left:auto; display:flex; align-items:center; gap:8px; font-family:var(--f-mono); font-size:var(--fs-13); color:var(--ink-soft); border:2px dashed var(--rule); padding:5px 10px; white-space:nowrap}
+.ld-gain b{color:var(--ink)}
+.ld-gain .arr{color:var(--pink-text); font-weight:700}
+.rungs{display:grid; grid-template-columns:repeat(4,1fr); border-bottom:2px solid var(--rule)}
+.rung{all:unset; box-sizing:border-box; cursor:pointer; display:flex; flex-direction:column; gap:4px; padding:11px 14px 12px; border-right:2px solid var(--rule); color:var(--ink-soft); transition:background .12s}
+.rung:last-child{border-right:0}
+.rung:hover{background:var(--paper-3)}
+.rung:focus-visible{outline:3px solid var(--t0); outline-offset:-3px}
+.rung b{font-family:var(--f-mono); font-size:var(--fs-13); font-weight:700; letter-spacing:.1em}
+.rung span{font-size:var(--fs-15); font-weight:600; letter-spacing:-.02em; color:var(--ink)}
+.rung small{font-size:var(--fs-13); color:var(--ink-soft)}
+.rung.on{background:var(--stock); box-shadow:inset 0 -4px 0 var(--yellow)}
+.rung.on b{color:var(--yellow-text)}
+.rung.llm b::after{content:" · LLM"; color:var(--ink-soft); font-weight:600}
+.rung-body{padding:16px 18px 18px}
+.rung-body h4{font-size:var(--fs-16); font-weight:700; letter-spacing:-.02em; margin-bottom:8px}
+.rung-body p{font-size:var(--fs-15); color:var(--ink-soft); line-height:var(--lh-body)}
+.rung-body p b{color:var(--ink); font-weight:600}
+.rung-body code{font-family:var(--f-mono); font-size:var(--fs-14); background:var(--paper-3); padding:0 4px; border:1px solid var(--rule)}
+/* ① 사전 3층 */
+.dict{display:grid; gap:0; border:2px solid var(--rule)}
+.dict > div{display:grid; grid-template-columns:96px minmax(0,1fr); gap:14px; padding:10px 14px; border-top:1px dashed var(--rule); align-items:start}
+.dict > div:first-child{border-top:0}
+.dict b{font-family:var(--f-mono); font-size:var(--fs-13); letter-spacing:.1em; color:var(--ink-soft); padding-top:3px}
+.dict p{font-size:var(--fs-15); color:var(--ink)}
+.dict .code{margin-top:6px; font-size:var(--fs-15)}
+/* ② 선행 개념 진단 */
+.prereq{display:flex; flex-direction:column; gap:8px}
+.pq{display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:12px; align-items:center; padding:10px 12px; border:2px solid var(--rule); background:var(--paper-2)}
+.pq .dee-sticker{width:34px; height:34px; border-width:2px; box-shadow:none}
+.pq .dee{width:100%; height:100%}
+.pq .nm{font-size:var(--fs-15); font-weight:600; letter-spacing:-.02em}
+.pq .nm small{display:block; font-weight:400; font-size:var(--fs-13); color:var(--ink-soft); margin-top:1px}
+.pq.gap{border-style:dashed}
+.pq.gap .nm small{color:var(--pink-text); font-weight:600}
+/* ③ 다른 사용처 */
+.uses{display:flex; flex-direction:column; gap:8px}
+.use{border:2px solid var(--rule); background:var(--paper-2)}
+.use .src{display:flex; justify-content:space-between; gap:10px; font-family:var(--f-mono); font-size:var(--fs-13); color:var(--ink-soft); padding:5px 10px; border-bottom:1px dashed var(--rule)}
+.use .src b{color:var(--ink); font-weight:600}
+.use .code{border:0; font-size:var(--fs-15); line-height:1.75}
+/* ④ 자유 질문 */
+.askbox{display:grid; gap:10px}
+.askbox textarea{font:inherit; font-size:var(--fs-15); line-height:var(--lh-body); color:var(--ink); background:var(--stock); border:2px solid var(--rule); padding:10px 12px; min-height:84px; resize:vertical; width:100%}
+.askbox textarea:focus{outline:3px solid var(--t0); outline-offset:2px}
+.askbox .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+.askbox .row .note{font-size:var(--fs-14); color:var(--ink-soft)}
+.prompt-out{font-family:var(--f-mono); font-size:var(--fs-14); line-height:1.7; white-space:pre-wrap; background:var(--paper-3); border:2px dashed var(--rule); padding:10px 12px; color:var(--ink)}
+
+/* 아래층 표식 : 선행 개념 카드로 내려왔을 때 */
+.crumb{display:flex; align-items:center; gap:10px; font-size:var(--fs-14); color:var(--ink-soft); flex-wrap:wrap}
+.crumb b{color:var(--ink); font-weight:600}
+.crumb .arr{color:var(--pink-text); font-weight:700}
+.crumb .depth{font-family:var(--f-mono); font-size:var(--fs-13); border:2px solid var(--rule); background:var(--yellow); color:#221D18; padding:1px 8px; font-weight:700; letter-spacing:.08em}
+[data-theme="dark"] .crumb .depth{color:#1C1400}
+
+/* 길잡이 Dee : 교정지 모서리에 앉는다 */
+.guide{position:absolute; top:-36px; right:44px; z-index:4; display:flex; align-items:flex-end; gap:8px}
+.guide .dee{width:56px; height:56px; transform-origin:48% 100%}
+.guide .say{margin-bottom:12px}
+
+/* ───────── 인쇄 완료 (세션 요약) ───────── */
+.done-head{display:flex; align-items:center; gap:18px; flex-wrap:wrap}
+.done-head .logo{width:84px; height:84px; flex:0 0 auto}
+.done-head h2{font-family:var(--f-poster); font-size:var(--fs-poster); line-height:.94; letter-spacing:.01em}
+.done-head p{font-size:var(--fs-15); color:var(--ink-soft); margin-top:4px}
+.done-head p b{color:var(--ink); font-weight:700}
+.done-head .stamp{margin-left:auto; --r:-7deg}
+.tally{display:grid; grid-template-columns:repeat(4,1fr); border:2.5px solid var(--rule); background:var(--paper)}
+.tally > div{padding:12px 14px; border-left:2px solid var(--rule)}
+.tally > div:first-child{border-left:0}
+.tally .k{font-family:var(--f-mono); font-size:var(--fs-13); letter-spacing:.14em; text-transform:uppercase; color:var(--ink-soft)}
+.tally .v{font-family:var(--f-poster); font-size:var(--fs-poster-s); line-height:1; margin-top:4px; letter-spacing:.01em}
+.tally .v .u{font-family:var(--f-ui); font-size:var(--fs-14); font-weight:500; color:var(--ink-soft); margin-left:3px}
+.shifts{display:flex; flex-direction:column; border-top:2.5px solid var(--rule)}
+.shift{display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:14px; align-items:center; padding:10px 0; border-top:1px dashed var(--rule)}
+.shift:first-child{border-top:0}
+.shift .pair{display:flex; align-items:center; gap:6px}
+.shift .pair .dee-sticker{width:38px; height:38px; border-width:2px; box-shadow:none}
+.shift .pair .dee{width:100%; height:100%}
+.shift .pair .arr{font-family:var(--f-mono); font-size:var(--fs-14); color:var(--pink-text); font-weight:700; padding:0 2px}
+.shift .nm{font-size:var(--fs-15); font-weight:600; letter-spacing:-.02em}
+.shift .nm small{display:block; font-weight:400; font-size:var(--fs-13); color:var(--ink-soft); margin-top:1px}
+.shift .nm code{font-size:var(--fs-14); background:var(--paper-3); padding:0 4px; border:1px solid var(--rule)}
+.shift .next{font-family:var(--f-mono); font-size:var(--fs-13); color:var(--ink-soft); white-space:nowrap; text-align:right}
+.shift .next b{color:var(--ink)}
+.shift .next.soon b{color:var(--pink-text)}
+.lifer-box{position:relative; display:flex; align-items:center; gap:18px; border:2.5px solid var(--rule); background:var(--stock); padding:14px 18px; box-shadow:4px 4px 0 var(--edge)}
+.lifer-box .dee-sticker{width:64px; height:64px; flex:0 0 auto}
+.lifer-box .dee{width:100%; height:100%}
+.lifer-box h4{font-size:var(--fs-18); font-weight:700; letter-spacing:-.025em}
+.lifer-box p{font-size:var(--fs-15); color:var(--ink-soft); margin-top:3px}
+.lifer-box p b{color:var(--ink); font-weight:600}
+.lifer-box .stamp{margin-left:auto; --r:6deg}
+.streak-line{display:flex; align-items:center; gap:14px; font-size:var(--fs-15); color:var(--ink-soft); flex-wrap:wrap}
+.streak-line b{color:var(--ink)}
+.streak-line .st{width:44px; height:44px; border-radius:50%; display:grid; place-items:center; font-family:var(--f-mono); font-size:var(--fs-14); font-weight:700; border:2.5px solid var(--pink); color:var(--pink-text); box-shadow:inset 0 0 0 2px var(--paper-2), inset 0 0 0 3.5px var(--pink); transform:rotate(-5deg); flex:0 0 auto}
+[data-trim="on"] .streak-line .st{transform:none}
+
+/* ───────── 개발 검수 (?dev=1) ───────── */
+.dev{width:100%; max-width:860px; background:var(--stock); border:2.5px solid var(--rule); box-shadow:5px 6px 0 var(--edge); padding:14px 18px}
+.dev h3{font-family:var(--f-mono); font-size:var(--fs-14); letter-spacing:.12em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:8px}
+.dev pre{font-size:var(--fs-13); line-height:1.6; white-space:pre-wrap; color:var(--ink); background:var(--paper-3); border:1px solid var(--rule); padding:10px 12px; margin:0}
+
+@media (max-width:1080px){
+  .jobband{grid-template-columns:auto minmax(0,1fr)}
+  .jb-ctl{grid-column:1/-1; justify-content:flex-end}
+  .rungs{grid-template-columns:1fr 1fr}
+  .rung:nth-child(2){border-right:0}
+  .rung:nth-child(-n+2){border-bottom:2px solid var(--rule)}
+}
+@media (max-width:720px){
+  .bench{padding:28px 10px 40px}
+  .ps{grid-template-columns:32px minmax(0,1fr); padding-right:14px}
+  .ps-in{padding-left:14px}
+  .choices{grid-template-columns:1fr}
+  .tally{grid-template-columns:1fr 1fr}
+  .tally > div:nth-child(3){border-left:0}
+  .tally > div:nth-child(n+3){border-top:2px solid var(--rule)}
+  .guide .say{display:none}
+  .jb-title{font-size:var(--fs-24)}
+}
+
+/* ───────── LIFER : 배경은 흐려지되 지워지지 않는다 (검은 오버레이 금지 — 맥락이 사라진다) ───────── */
+.lifer-veil[hidden]{display:none}
+.lifer-veil{position:fixed; inset:0; z-index:80; display:grid; place-items:center; background:rgba(217,205,180,.55); animation:veil .2s both}
+[data-theme="dark"] .lifer-veil{background:rgba(11,9,8,.62)}
+@keyframes veil{from{opacity:0}to{opacity:1}}
+.lifer-card{
+  position:relative; width:min(92vw, 560px); background:var(--paper-2); border:2.5px solid var(--rule);
+  box-shadow:8px 9px 0 var(--edge), 0 30px 40px -24px var(--drop), var(--lamp);
+  padding:22px 26px 20px; display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:18px; align-items:center;
+  animation:sheetin .42s var(--e-settle) both;
+}
+.lifer-card .dee-sticker{width:84px; height:84px}
+.lifer-card .dee{width:100%; height:100%}
+.lifer-k{font-family:var(--f-mono); font-size:var(--fs-13); font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--pink-text)}
+.lifer-card h3{font-size:var(--fs-24); font-weight:700; letter-spacing:-.03em; line-height:1.2; margin-top:3px}
+.lifer-card h3 code{font-size:var(--fs-20); background:var(--paper-3); padding:0 6px; border:1.5px solid var(--rule)}
+.lifer-card p{font-size:var(--fs-15); color:var(--ink-soft); margin-top:4px}
+.lifer-card p b{color:var(--ink); font-weight:600}
+.lifer-serial{font-family:var(--f-mono); font-size:var(--fs-14); color:var(--ink-soft); margin-top:8px; letter-spacing:.04em; white-space:nowrap; overflow:hidden; border-right:2px solid var(--pink); width:0; animation:typeout .56s steps(22) .7s forwards}
+@keyframes typeout{to{width:100%}}
+.lifer-card .stamp{align-self:start; animation-delay:.42s}
+.lifer-any{grid-column:1/-1; font-family:var(--f-mono); font-size:var(--fs-13); color:var(--ink-soft); text-align:right; letter-spacing:.06em}
+
+/* ───────── T1 필사 : 고정 골격 / 가변 잉크 ───────── */
+.stepper{display:flex; border:2px solid var(--rule); background:var(--paper)}
+.step{flex:1; display:flex; align-items:center; gap:9px; padding:8px 12px; border-left:2px solid var(--rule); font-size:var(--fs-14); color:var(--ink-soft)}
+.step:first-child{border-left:0}
+.step b{font-family:var(--f-mono); font-size:var(--fs-13); font-weight:700; letter-spacing:.08em; width:22px; height:22px; border:2px solid var(--rule); display:grid; place-items:center; background:var(--paper-3); color:var(--ink-soft)}
+.step.done b{background:var(--pink); color:var(--on-t1)} .step.done{color:var(--ink)}
+.step.cur{background:var(--stock); color:var(--ink); font-weight:700; box-shadow:inset 0 -4px 0 var(--t1)}
+.step.cur b{background:var(--t1); color:var(--on-t1)}
+.split{display:grid; grid-template-columns:minmax(300px,1fr) 2px minmax(300px,1fr); gap:0 18px; align-items:start}   /* 트랙 폭 절대 안 바뀜 */
+.split .vr{background:var(--rule); align-self:stretch; opacity:.6}
+.pane-h{display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:8px; font-size:var(--fs-14); color:var(--ink-soft)}
+.pane-h b{color:var(--ink); font-weight:700; font-size:var(--fs-15)}
+.pane-h .mono{font-family:var(--f-mono); font-size:var(--fs-13)}
+.ref{position:relative}
+.ref .code .ln > span{min-height:1.85em}
+/* 가려진 본문 = 애벌 하프톤 막대 (줄 수·들여쓰기는 보존해 세로 리듬을 지킨다) */
+.ref .ph{display:inline-block; height:.9em; vertical-align:-.1em; border-radius:1px; background-image:radial-gradient(var(--ink-faint) 1.1px, transparent 1.35px); background-size:4px 4px; opacity:.9}
+.ref.peek .ph{display:none}
+.ref.peek .ln.hidden > span{background:var(--paper-3); box-shadow:inset 4px 0 0 var(--pink)}
+.ref .ln.hidden .ink{display:none}
+.ref.peek .ln.hidden .ink{display:inline}
+.editor{position:relative; display:grid; grid-template-columns:3.2em minmax(0,1fr); background:var(--stock); border:2px solid var(--rule); font-family:var(--f-mono); font-size:var(--fs-16); line-height:1.85}
+.editor.focus{outline:3px solid var(--t1); outline-offset:2px}
+.gut{border-right:1px solid var(--rule); background:var(--paper-3); user-select:none; padding-top:6px}
+.gl{position:relative; text-align:right; padding-right:.9em; color:var(--ink-soft); font-variant-numeric:tabular-nums; height:1.85em}
+.gl::before{content:""; position:absolute; left:4px; top:.55em; width:3px; height:.75em; background:transparent}   /* 판정 틱 : 항상 자리를 차지 */
+.gl.exact::before{background:var(--pink)} .gl.equiv::before{background:var(--blue)} .gl.differ::before{background:var(--yellow-deep)}
+.gl.cur{color:var(--ink); font-weight:700; background:var(--paper-2)}
+.editor textarea{
+  font:inherit; line-height:inherit; color:var(--ink); background:transparent; border:0; outline:0; resize:none; width:100%;
+  padding:6px 1em 6px 1em; white-space:pre; overflow:hidden; tab-size:2; word-break:normal; overflow-wrap:normal; display:block;
+}
+.ed-status{display:flex; gap:16px; flex-wrap:wrap; margin-top:8px; font-family:var(--f-mono); font-size:var(--fs-13); color:var(--ink-soft)}
+.ed-status b{color:var(--ink); font-weight:600}
+.ed-status .legend i{display:inline-block; width:8px; height:12px; vertical-align:-1px; margin-right:4px}
+.ed-status .legend i.e{background:var(--pink)} .ed-status .legend i.q{background:var(--blue)} .ed-status .legend i.d{background:var(--yellow-deep)}
+/* 채점 결과 */
+.score{display:grid; grid-template-columns:auto minmax(0,1fr); gap:20px; align-items:center; border:2.5px solid var(--rule); background:var(--paper); padding:14px 18px}
+.score .big{font-family:var(--f-poster); font-size:var(--fs-poster); line-height:.9; letter-spacing:.01em; white-space:nowrap}
+.score .big small{font-family:var(--f-ui); font-size:var(--fs-15); font-weight:500; color:var(--ink-soft); letter-spacing:0; margin-left:6px}
+.score p{font-size:var(--fs-15); color:var(--ink-soft)}
+.score p b{color:var(--ink); font-weight:700}
+.score .pills{display:flex; gap:8px; margin-top:8px; flex-wrap:wrap}
+.drows{display:flex; flex-direction:column; border:2px solid var(--rule)}
+.drow{display:grid; grid-template-columns:2.6em minmax(0,1fr) minmax(0,1fr) auto; gap:0 12px; align-items:start; border-top:1px dashed var(--rule); padding:6px 10px 6px 0; font-family:var(--f-mono); font-size:var(--fs-15); line-height:1.7}
+.drow:first-child{border-top:0}
+.drow > i{font-style:normal; text-align:right; color:var(--ink-soft); font-size:var(--fs-13); padding-top:2px; border-right:1px solid var(--rule); padding-right:8px; height:100%}
+.drow .o,.drow .u{white-space:pre-wrap; overflow-wrap:anywhere; min-width:0}
+.drow .o{color:var(--ink-soft)}
+.drow.exact{background:var(--stock)}
+.drow.equiv .u{color:var(--blue-text)}
+.drow.differ .u{color:var(--ink)} .drow.differ .u mark{background:var(--yellow); color:#221D18; padding:0 1px}
+.drow.missing .u,.drow.extra .o{color:var(--ink-soft); font-style:italic; font-family:var(--f-ui); font-size:var(--fs-14)}
+.drow .st{display:flex; flex-direction:column; align-items:flex-end; gap:5px}
+.rtag{font-family:var(--f-mono); font-size:var(--fs-13); font-weight:700; letter-spacing:.06em; padding:1px 7px; border:1.5px solid var(--rule); white-space:nowrap}
+.rtag.e{background:var(--pink); color:var(--on-t1)} .rtag.q{background:var(--blue); color:var(--on-t0)} .rtag.d{background:var(--yellow); color:#221D18}
+.drow .why{grid-column:2/5; font-family:var(--f-ui); font-size:var(--fs-14); color:var(--ink-soft); padding:4px 0 2px}
+.drow .why b{color:var(--ink)} .drow .why code{font-size:var(--fs-13); background:var(--paper-3); padding:0 3px; border:1px solid var(--rule)}
+.drow .why .dis{margin-top:6px}
+.drow.disputed .dis{background:var(--yellow); color:#221D18; border-style:solid}
+.dfilter{display:flex; gap:8px; align-items:center; flex-wrap:wrap; font-size:var(--fs-14); color:var(--ink-soft)}
+.dfilter .sw span{padding:4px 9px}
+/* 왜 게이트 */
+.whybox{display:grid; gap:10px; border:2.5px solid var(--rule); background:var(--paper); padding:14px 16px}
+.whybox h4{font-size:var(--fs-17, 17px); font-size:var(--fs-18); font-weight:700; letter-spacing:-.02em}
+.whybox h4 code{font-size:var(--fs-16); background:var(--paper-3); padding:0 5px; border:1.5px solid var(--rule)}
+.whybox p{font-size:var(--fs-15); color:var(--ink-soft)}
+.whybox textarea{font:inherit; font-size:var(--fs-15); line-height:var(--lh-body); color:var(--ink); background:var(--stock); border:2px solid var(--rule); padding:10px 12px; min-height:72px; resize:vertical; width:100%}
+.whybox textarea:focus{outline:3px solid var(--t1); outline-offset:2px}
+.whybox .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+.whybox .cnt{font-family:var(--f-mono); font-size:var(--fs-13); color:var(--ink-soft)}
+.whybox .cnt.ok{color:var(--pink-text); font-weight:700}
+.whybox .choices{margin-top:2px}
+
+/* ───────── T2 구조 : 계층 밴드 지도 ───────── */
+.map{position:relative; border:2px solid var(--rule); background:var(--stock); overflow:auto}
+.map svg{display:block; font-family:var(--f-mono)}
+.map .band-l{font-family:var(--f-mono); font-size:13px; font-weight:700; letter-spacing:.08em; fill:var(--ink-soft)}
+.map .band-s{font-family:var(--f-mono); font-size:13px; fill:var(--ink-soft); opacity:.85}
+.map .band-line{stroke:var(--rule); stroke-dasharray:4 6; opacity:.5}
+.map .edge{fill:none; stroke:var(--ink-mute); stroke-width:1.8; marker-end:url(#ar)}
+.map .edge.hl{stroke:var(--ink); stroke-width:2.4; marker-end:url(#arK)}
+.map .edge.fade{opacity:.14}
+.map .nd{cursor:pointer}
+.map .nd rect{fill:var(--paper-2); stroke:var(--rule); stroke-width:2; transition:fill .12s}
+.map .nd:hover rect{fill:var(--paper-3)}
+.map .nd:focus-visible{outline:none} .map .nd:focus-visible rect{stroke:var(--t0); stroke-width:3}
+.map .nd .nm{font-size:14px; font-weight:600; fill:var(--ink)}
+.map .nd .dir{font-size:12.5px; fill:var(--ink-soft)}
+.map .nd.sel rect{fill:var(--t0)} .map .nd.sel .nm{fill:var(--on-t0)} .map .nd.sel .dir{fill:var(--on-t0); opacity:.8}
+.map .nd.dim{opacity:.28}
+.map .nd .badge{font-size:14px; font-weight:700}
+.map .nd.ok rect{fill:var(--stock); stroke:var(--pink); stroke-width:3} .map .nd.ok .badge{fill:var(--pink-text)}
+.map .nd.missed rect{fill:var(--paper-2); stroke:var(--yellow-deep); stroke-width:3; stroke-dasharray:6 4; animation:blip .5s 3} .map .nd.missed .badge{fill:var(--yellow-text)}
+@keyframes blip{50%{opacity:.35}}
+.map .nd.wrong rect{fill:var(--paper-3); stroke:var(--ink-mute); stroke-dasharray:3 3} .map .nd.wrong .nm{fill:var(--ink-soft)} .map .nd.wrong .badge{fill:var(--ink-soft)}
+.map .nd.sec rect{stroke:var(--blue); stroke-dasharray:6 4; stroke-width:2.5} .map .nd.sec .badge{fill:var(--blue-text)}
+.map .nd .newtag{font-size:12px; font-weight:700; fill:#221D18}
+.map .nd .newbg{fill:var(--yellow); stroke:var(--rule); stroke-width:1.5}
+[data-theme="dark"] .map .nd.sel rect{filter:none}
+.map-status{display:flex; justify-content:space-between; gap:12px; font-family:var(--f-mono); font-size:var(--fs-13); color:var(--ink-soft); margin-top:6px; flex-wrap:wrap}
+.map-status b{color:var(--ink); font-weight:600}
+.picked{display:flex; gap:6px; flex-wrap:wrap; min-height:30px; align-items:center}
+.picked .chip{font-family:var(--f-mono); font-size:var(--fs-13); font-weight:600; border:1.5px solid var(--rule); background:var(--t0); color:var(--on-t0); padding:2px 8px}
+.picked .none{font-size:var(--fs-14); color:var(--ink-soft)}
+.hintbox{border-left:4px solid var(--yellow); background:var(--paper-3); padding:9px 12px; font-size:var(--fs-15); color:var(--ink); display:grid; gap:4px}
+.hintbox b{font-weight:700}
+.verdict{display:grid; grid-template-columns:auto minmax(0,1fr); gap:18px; align-items:center; border:2.5px solid var(--rule); background:var(--paper); padding:14px 18px}
+.verdict .big{font-family:var(--f-poster); font-size:var(--fs-poster); line-height:.9; white-space:nowrap}
+.verdict h4{font-size:var(--fs-18); font-weight:700; letter-spacing:-.025em}
+.verdict p{font-size:var(--fs-15); color:var(--ink-soft); margin-top:3px}
+.verdict p b{color:var(--ink); font-weight:700}
+.meter{display:flex; height:14px; border:2px solid var(--rule); padding:2px; background:var(--paper-3); gap:2px; margin-top:8px; max-width:420px}
+.meter i{display:block; flex:var(--w) 1 0}
+.meter i.f{background:var(--pink)} .meter i.m{background:var(--yellow)}
+.rgroups{display:grid; gap:12px}
+.rg{border:2px solid var(--rule); background:var(--paper)}
+.rg h5{display:flex; align-items:center; gap:10px; font-size:var(--fs-15); font-weight:700; padding:8px 12px; border-bottom:2px solid var(--rule); background:var(--paper-3)}
+.rg h5 .sym{font-family:var(--f-mono); width:24px; height:24px; border:2px solid var(--rule); display:grid; place-items:center; font-size:var(--fs-14); background:var(--paper-2)}
+.rg.missed h5{box-shadow:inset 4px 0 0 var(--yellow-deep)} .rg.ok h5{box-shadow:inset 4px 0 0 var(--pink)} .rg.wrong h5{box-shadow:inset 4px 0 0 var(--ink-mute)} .rg.sec h5{box-shadow:inset 4px 0 0 var(--blue)}
+.rg h5 small{font-weight:500; color:var(--ink-soft); font-size:var(--fs-13); margin-left:auto}
+.rg ul{display:flex; flex-direction:column}
+.rg li{display:grid; grid-template-columns:auto minmax(0,1fr); gap:3px 12px; padding:8px 12px; border-top:1px dashed var(--rule); font-size:var(--fs-15)}
+.rg li:first-child{border-top:0}
+.rg li code{font-family:var(--f-mono); font-size:var(--fs-14); font-weight:600; color:var(--ink)}
+.rg li .stat{grid-column:1; grid-row:2; font-family:var(--f-mono); font-size:var(--fs-13); color:var(--ink-soft)}
+.rg li p{grid-column:2; grid-row:1/3; color:var(--ink-soft); font-size:var(--fs-15)}
+.commit{display:grid; grid-template-columns:auto minmax(0,1fr); gap:14px; align-items:center; border:2px dashed var(--rule); padding:12px 14px}
+.commit .h{font-family:var(--f-mono); font-size:var(--fs-15); font-weight:700; border:2px solid var(--rule); background:var(--yellow); color:#221D18; padding:3px 9px}
+.commit p{font-size:var(--fs-14); color:var(--ink-soft)}
+.commit p b{color:var(--ink); font-weight:600}
+.commit .msg{font-family:var(--f-mono); font-size:var(--fs-14); color:var(--ink)}

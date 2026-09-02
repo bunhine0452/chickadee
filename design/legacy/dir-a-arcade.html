@@ -1,0 +1,1511 @@
+<!doctype html>
+<html lang="ko" data-theme="crt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>리플레이 — 내 코드 다시 플레이</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   리플레이 / REPLAY  —  레트로 아케이드 · 게임 카트리지 방향
+   두 개의 모드: CRT(다크) = 아케이드 브라운관 / LABEL(라이트) = 카트리지 라벨 인쇄물
+   ============================================================ */
+
+:root{
+  /* --- 폰트 --- */
+  --f-pix : 'Press Start 2P', 'Courier New', ui-monospace, monospace;
+  --f-disp: 'Black Han Sans', 'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  --f-ui  : 'IBM Plex Sans KR', 'Apple SD Gothic Neo', Pretendard, 'Malgun Gothic', system-ui, sans-serif;
+  --f-mono: 'IBM Plex Mono', 'SFMono-Regular', 'Apple SD Gothic Neo', Menlo, Consolas, monospace;
+
+  /* --- 픽셀 노치(계단 모서리) --- */
+  --n: 7px;
+  --notch: polygon(
+    0 var(--n), var(--n) var(--n), var(--n) 0,
+    calc(100% - var(--n)) 0, calc(100% - var(--n)) var(--n), 100% var(--n),
+    100% calc(100% - var(--n)), calc(100% - var(--n)) calc(100% - var(--n)), calc(100% - var(--n)) 100%,
+    var(--n) 100%, var(--n) calc(100% - var(--n)), 0 calc(100% - var(--n))
+  );
+  --n2: 4px;
+  --notch-s: polygon(
+    0 var(--n2), var(--n2) var(--n2), var(--n2) 0,
+    calc(100% - var(--n2)) 0, calc(100% - var(--n2)) var(--n2), 100% var(--n2),
+    100% calc(100% - var(--n2)), calc(100% - var(--n2)) calc(100% - var(--n2)), calc(100% - var(--n2)) 100%,
+    var(--n2) 100%, var(--n2) calc(100% - var(--n2)), 0 calc(100% - var(--n2))
+  );
+
+  --ease-pop: cubic-bezier(.2,1.15,.35,1);
+}
+
+/* ---------- CRT (다크) ---------- */
+:root, :root[data-theme="crt"]{
+  --bg:        #0A0E14;
+  --bg-2:      #070A0F;
+  --surface:   #141C25;
+  --surface-2: #1D2733;
+  --surface-3: #263039;
+
+  --ink:   #EAF1F8;
+  --ink-2: #B6C3D1;
+  --ink-3: #93A1B1;
+
+  --line:      #38495A;        /* 패널 테두리 */
+  --line-hard: #4E627A;
+  --shadow:    #04070B;        /* 하드 오프셋 그림자 */
+  --hairline:  rgba(146,168,190,.20);
+
+  --gold:  #FFC53D;
+  --red:   #FF6134;
+  --cyan:  #3ED6EE;
+  --green: #45D66B;
+  --blue:  #5A9BFF;
+  --gray:  #33404D;
+  --gray-ink: #B2C0CE;
+
+  --gold-t: #FFC53D;  --red-t: #FF6134;  --cyan-t: #3ED6EE;
+  --green-t:#45D66B;  --blue-t:#5A9BFF;
+
+  --on-fill: #0A0C0F;          /* 채색 버튼 위 글자(근접 블랙) */
+
+  /* 코드 화면 */
+  --code-bg:  #0D131A;
+  --code-txt: #E7EFF7;
+  --code-kw:  #FF8A73;
+  --code-str: #86E0A0;
+  --code-num: #F2B368;
+  --code-fn:  #FFD07A;
+  --code-ty:  #79D8EE;
+  --code-com: #9BA9B8;
+  --code-pun: #B4C2D0;
+  --code-gut: #8494A4;
+  --code-hl:  rgba(255,197,61,.13);
+  --code-bar: #111A22;
+
+  /* 피드백 패널 */
+  --ok-bg:#12241A;   --ok-ink:#DAF5E2;   --ok-line:#2E6B44;
+  --no-bg:#2A1D12;   --no-ink:#FFE6CC;   --no-line:#7A4A22;
+  --hint-bg:#0E2530; --hint-ink:#D8F3FA; --hint-line:#2A6274;
+  --warn-bg:#2A2314; --warn-ink:#FFE1A0; --warn-line:#7A6320;
+
+  --tex: repeating-linear-gradient(180deg, rgba(190,215,240,.045) 0 1px, transparent 1px 3px);
+  --glowop: .5;
+}
+
+/* ---------- LABEL (라이트) : 카트리지 라벨 인쇄물 ---------- */
+:root[data-theme="label"]{
+  --bg:        #E7DFCD;
+  --bg-2:      #DDD3BC;
+  --surface:   #FBF7EC;
+  --surface-2: #F3ECDC;
+  --surface-3: #EAE1CD;
+
+  --ink:   #17130E;
+  --ink-2: #4A4237;
+  --ink-3: #645B4C;
+
+  --line:      #17130E;
+  --line-hard: #17130E;
+  --shadow:    #17130E;
+  --hairline:  rgba(23,19,14,.26);
+
+  --gold:  #F5B300;
+  --red:   #E8471A;
+  --cyan:  #10A8C4;
+  --green: #12A550;
+  --blue:  #1D63D8;
+  --gray:  #CFC6B4;
+  --gray-ink: #4A4237;
+
+  --gold-t: #7A5000;  --red-t: #A82E0B;  --cyan-t: #0A6B7E;
+  --green-t:#0A6A33;  --blue-t:#1852BC;
+
+  --on-fill: #12100C;
+
+  --code-bg:  #FFFDF6;
+  --code-txt: #1B1712;
+  --code-kw:  #B01B0E;
+  --code-str: #146B3A;
+  --code-num: #8A4A00;
+  --code-fn:  #0B5FA5;
+  --code-ty:  #0F6E7A;
+  --code-com: #5C5347;
+  --code-pun: #4A423A;
+  --code-gut: #7A7166;
+  --code-hl:  rgba(245,179,0,.20);
+  --code-bar: #F2ECDB;
+
+  --ok-bg:#DBF3E2;   --ok-ink:#17130E;   --ok-line:#0A6A33;
+  --no-bg:#FFEBD6;   --no-ink:#17130E;   --no-line:#A85A16;
+  --hint-bg:#D7F0F6; --hint-ink:#17130E; --hint-line:#0A6B7E;
+  --warn-bg:#FFE9A8; --warn-ink:#17130E; --warn-line:#8A6A00;
+
+  --tex: radial-gradient(circle at 1px 1px, rgba(23,19,14,.085) 1px, transparent 1.6px);
+  --glowop: 0;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--f-ui);
+  font-size:15px;
+  line-height:1.6;
+  word-break:keep-all;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+/* 배경 텍스처: CRT=주사선, LABEL=인쇄 하프톤 */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9;
+  background-image:var(--tex);
+  background-size:auto, 4px 4px;
+  opacity:1;
+}
+:root[data-theme="crt"] body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:8;
+  background:radial-gradient(ellipse 120% 90% at 50% 40%, transparent 40%, rgba(0,0,0,.55) 100%);
+}
+
+/* ---------- 공통 유틸 ---------- */
+.pix{font-family:var(--f-pix);text-transform:uppercase;letter-spacing:.06em;line-height:1.5;font-weight:400}
+.px{clip-path:var(--notch)}
+.mono{font-family:var(--f-mono);font-weight:500}
+
+/* 픽셀 패널: 노치 + 내부 테두리 + 하드 드롭섀도 */
+.panel{
+  background:var(--surface);
+  clip-path:var(--notch);
+  box-shadow:inset 0 0 0 3px var(--line);
+  filter:drop-shadow(4px 5px 0 var(--shadow));
+  padding:18px;
+  position:relative;
+}
+.panel.flat{filter:none}
+
+/* 칩 — 기본은 한글 가독을 위해 UI 폰트, .px9 를 붙였을 때만 픽셀 폰트(라틴 전용) */
+.chip{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 9px;font-size:11.5px;font-weight:700;letter-spacing:0;
+  font-family:var(--f-ui);
+  background:var(--surface-2);color:var(--ink-2);
+  box-shadow:inset 0 0 0 2px var(--hairline);
+}
+.chip.px9{font-family:var(--f-pix);font-weight:400;font-size:10px;
+  text-transform:uppercase;letter-spacing:.06em;padding:5px 8px}
+.chip.fill{color:var(--on-fill);box-shadow:inset 0 0 0 2px rgba(0,0,0,.35)}
+.chip.t0{background:var(--gold)} .chip.t1{background:var(--red)} .chip.t2{background:var(--cyan)}
+.chip.ok{background:var(--green)}
+
+/* 촉각 버튼 */
+.btn{
+  font-family:var(--f-ui);font-weight:700;font-size:15px;
+  color:var(--on-fill);
+  background:var(--gold);
+  border:0;padding:13px 20px;
+  clip-path:var(--notch);
+  box-shadow:inset 0 0 0 3px rgba(0,0,0,.45), inset 0 3px 0 rgba(255,255,255,.35), inset 0 -4px 0 rgba(0,0,0,.16);
+  filter:drop-shadow(0 6px 0 var(--shadow));
+  cursor:pointer;
+  transition:filter .09s var(--ease-pop), transform .09s var(--ease-pop);
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  text-align:center;
+}
+.btn:hover{transform:translateY(-2px);filter:drop-shadow(0 8px 0 var(--shadow))}
+.btn:active{transform:translateY(5px);filter:drop-shadow(0 1px 0 var(--shadow))}
+.btn:focus-visible{outline:3px solid var(--blue);outline-offset:4px}
+.btn.red{background:var(--red)} .btn.cyan{background:var(--cyan)}
+.btn.green{background:var(--green)} .btn.gray{background:var(--gray);color:var(--gray-ink)}
+.btn.sm{font-size:13px;padding:9px 13px;filter:drop-shadow(0 4px 0 var(--shadow))}
+.btn.sm:hover{filter:drop-shadow(0 6px 0 var(--shadow))}
+.btn.sm:active{filter:drop-shadow(0 1px 0 var(--shadow))}
+.btn.ghost{
+  background:transparent;color:var(--ink);
+  box-shadow:inset 0 0 0 3px var(--line-hard);
+  filter:drop-shadow(0 4px 0 var(--shadow));
+}
+.btn[disabled]{opacity:.5;cursor:not-allowed;transform:none;filter:drop-shadow(0 2px 0 var(--shadow))}
+
+.kbd{
+  display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 5px;
+  font-family:var(--f-pix);font-size:9px;
+  background:var(--surface-3);color:var(--ink);
+  box-shadow:inset 0 0 0 2px var(--line-hard), 0 3px 0 var(--shadow);
+}
+
+/* ================= 헤더 마퀴 ================= */
+.marquee{
+  position:sticky;top:0;z-index:20;
+  background:var(--bg-2);
+  box-shadow:inset 0 -3px 0 var(--line);
+  padding:11px 22px;
+  display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+}
+/* 아케이드 캐비닛 트림 스트라이프 */
+.marquee::after{
+  content:'';position:absolute;left:0;right:0;bottom:-6px;height:6px;
+  background:repeating-linear-gradient(90deg,
+    var(--red) 0 24px, var(--gold) 24px 48px, var(--cyan) 48px 72px, var(--green) 72px 96px);
+}
+.logo{display:flex;align-items:center;gap:11px}
+.logo .cart{width:34px;height:30px;flex:none}
+.logo b{font-family:var(--f-pix);font-size:15px;color:var(--gold);letter-spacing:.02em;
+  text-shadow:
+    -2px 0 0 var(--shadow), 2px 0 0 var(--shadow),
+    0 -2px 0 var(--shadow), 0 2px 0 var(--shadow),
+    -2px -2px 0 var(--shadow), 2px -2px 0 var(--shadow),
+    -2px 2px 0 var(--shadow), 2px 2px 0 var(--shadow),
+    0 4px 0 var(--shadow)}
+.logo small{display:block;font-size:11px;color:var(--ink-3);letter-spacing:.02em;margin-top:2px}
+.repo{
+  display:flex;align-items:center;gap:8px;padding:6px 11px;
+  background:var(--surface);box-shadow:inset 0 0 0 2px var(--hairline);
+  font-family:var(--f-mono);font-size:12.5px;color:var(--ink-2);
+}
+.repo i{width:8px;height:8px;background:var(--green);display:block;animation:blink 1.6s steps(2,jump-none) infinite}
+@keyframes blink{0%,50%{opacity:1}51%,100%{opacity:.25}}
+.spacer{flex:1}
+
+/* 로커 스위치 테마 토글 */
+.rocker{display:flex;box-shadow:inset 0 0 0 3px var(--line);background:var(--surface)}
+.rocker button{
+  font-family:var(--f-pix);font-size:9px;padding:9px 11px;border:0;background:transparent;
+  color:var(--ink-3);cursor:pointer;letter-spacing:.06em;
+}
+.rocker button[aria-pressed="true"]{background:var(--gold);color:var(--on-fill);
+  box-shadow:inset 0 3px 0 rgba(0,0,0,.22)}
+
+/* ================= 탭 ================= */
+.tabs{
+  display:flex;gap:0;padding:0 22px;margin-top:20px;max-width:1240px;margin-inline:auto;
+  position:relative;z-index:3;
+}
+.tab{
+  font-family:var(--f-ui);font-weight:700;font-size:14.5px;
+  padding:12px 22px 14px;border:0;cursor:pointer;
+  background:var(--surface-2);color:var(--ink-3);
+  box-shadow:inset 0 0 0 3px var(--line);
+  clip-path:polygon(0 8px,8px 8px,8px 0,calc(100% - 8px) 0,calc(100% - 8px) 8px,100% 8px,100% 100%,0 100%);
+  margin-right:6px;position:relative;top:3px;
+  transition:top .12s var(--ease-pop), background .12s;
+  display:flex;align-items:center;gap:9px;
+}
+.tab .n{font-family:var(--f-pix);font-size:9px;opacity:.85}
+.tab[aria-selected="true"]{background:var(--surface);color:var(--ink);top:0;
+  box-shadow:inset 0 0 0 3px var(--line), inset 0 5px 0 var(--gold)}
+.tab:hover{top:0}
+.tab:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+
+.wrap{max-width:1240px;margin:0 auto;padding:0 22px 90px}
+.screen{scroll-margin-top:86px}
+.screen[hidden]{display:none}
+
+/* ================= 화면 1 : 경로 ================= */
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 336px;gap:26px;align-items:start;margin-top:14px}
+@media(max-width:1080px){.layout{grid-template-columns:1fr}}
+
+/* 인서트 코인 히어로 */
+.coin{
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--gold) 14%, var(--surface)) 0%, var(--surface) 60%);
+  clip-path:var(--notch);
+  box-shadow:inset 0 0 0 3px var(--line);
+  filter:drop-shadow(5px 6px 0 var(--shadow));
+  padding:20px 22px;
+  display:grid;grid-template-columns:1fr auto;gap:22px;align-items:center;
+}
+@media(max-width:640px){.coin{grid-template-columns:1fr}}
+.coin .eye{font-family:var(--f-pix);font-size:9.5px;color:var(--gold-t);margin-bottom:9px;
+  animation:flick 2.4s steps(2,jump-none) infinite}
+@keyframes flick{0%,88%{opacity:1}89%,100%{opacity:.35}}
+.coin h2{font-family:var(--f-disp);font-size:29px;line-height:1.22;margin:0 0 8px;letter-spacing:-.01em;font-weight:400}
+.coin .meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;color:var(--ink-3);font-size:13px}
+.coin .go{display:flex;flex-direction:column;gap:9px;align-items:stretch;min-width:216px}
+.coin .go .btn{font-size:17px;padding:17px 22px}
+.coin .go .hint{font-family:var(--f-pix);font-size:8px;color:var(--ink-3);text-align:center;line-height:1.7}
+
+/* 월드(카트리지 라벨) */
+.world{margin-top:30px}
+.cartlabel{
+  display:flex;align-items:stretch;gap:0;
+  clip-path:var(--notch);
+  box-shadow:inset 0 0 0 3px var(--line);
+  filter:drop-shadow(4px 5px 0 var(--shadow));
+  background:var(--surface);
+  overflow:hidden;
+}
+.cartlabel .spine{width:52px;flex:none;display:grid;place-items:center;
+  background:repeating-linear-gradient(135deg, var(--sp) 0 7px, color-mix(in srgb, var(--sp) 62%, #000) 7px 14px);
+  box-shadow:inset -3px 0 0 var(--line);}
+.cartlabel .spine span{font-family:var(--f-pix);font-size:13px;color:var(--on-fill);
+  text-shadow:0 1px 0 rgba(255,255,255,.35)}
+.cartlabel .body{flex:1;padding:13px 17px;display:flex;align-items:center;gap:15px;flex-wrap:wrap}
+.cartlabel .body .ttl{font-family:var(--f-disp);font-size:22px;font-weight:400;line-height:1.3}
+.cartlabel .body .sub{font-family:var(--f-mono);font-size:11.5px;color:var(--ink-3)}
+.cartlabel .pill{margin-left:auto;display:flex;align-items:center;gap:10px}
+.cartlabel.locked{opacity:.72}
+.cartlabel.locked .ttl{color:var(--ink-3)}
+.fold{
+  font-family:var(--f-pix);font-size:9px;background:var(--surface-2);color:var(--ink-2);
+  border:0;padding:8px 11px;cursor:pointer;box-shadow:inset 0 0 0 2px var(--hairline);
+}
+.fold:hover{background:var(--surface-3)}
+.fold:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+
+/* 경로 — 3열 그리드로 노드를 항상 중앙 축에 두고, 행 전체를 translateX 로 지그재그 */
+.path{padding:26px 0 10px;position:relative;max-width:824px;margin-inline:auto}
+.path[hidden]{display:none}
+.row{
+  display:grid;grid-template-columns:1fr 112px 1fr;column-gap:18px;
+  align-items:center;position:relative;min-height:106px;
+}
+.row .slot{grid-column:2;position:relative;display:grid;place-items:center;min-height:106px}
+.row .desc{grid-column:3;max-width:300px}
+.row.rt .desc{grid-column:1;justify-self:end;text-align:right}
+.row .desc h4{margin:0 0 5px;font-size:16.5px;font-weight:700;line-height:1.35}
+.row .desc .m{font-size:12.5px;color:var(--ink-3);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row.rt .desc .m{justify-content:flex-end}
+.row.locked .desc h4{color:var(--ink-3)}
+
+/* 노드 */
+.node{
+  width:74px;height:74px;border:0;cursor:pointer;position:relative;
+  background:var(--c);
+  clip-path:var(--notch);
+  box-shadow:inset 0 0 0 3px rgba(0,0,0,.42), inset 0 4px 0 rgba(255,255,255,.34), inset 0 -5px 0 rgba(0,0,0,.18);
+  filter:drop-shadow(0 6px 0 var(--shadow));
+  color:var(--on-fill);
+  display:grid;place-items:center;
+  transition:transform .1s var(--ease-pop), filter .1s var(--ease-pop);
+  font-family:var(--f-pix);font-size:12px;
+  z-index:2;
+}
+.node.boss{width:92px;height:92px;font-size:13px}
+.node:hover{transform:translateY(-3px);filter:drop-shadow(0 9px 0 var(--shadow))}
+.node:active{transform:translateY(4px);filter:drop-shadow(0 1px 0 var(--shadow))}
+.node:focus-visible{outline:3px solid var(--blue);outline-offset:5px}
+.node.lock{--c:var(--gray);color:var(--gray-ink);
+  box-shadow:inset 0 0 0 3px var(--hairline), inset 0 3px 0 rgba(255,255,255,.10)}
+
+/* 배지는 노드 clip-path 바깥(슬롯 기준)에 배치 */
+.slot .tag{
+  position:absolute;z-index:3;
+  top:calc(50% - 46px);left:calc(50% - 47px);
+  width:30px;height:21px;display:grid;place-items:center;
+  font-family:var(--f-pix);font-size:8px;background:var(--surface);color:var(--ink);
+  box-shadow:inset 0 0 0 2px var(--line);
+}
+.slot.bs .tag{top:calc(50% - 55px);left:calc(50% - 56px)}
+.slot .st{
+  position:absolute;z-index:3;
+  right:calc(50% - 46px);bottom:calc(50% - 45px);
+  width:24px;height:24px;display:grid;place-items:center;
+  background:var(--green);box-shadow:inset 0 0 0 2px rgba(0,0,0,.4);color:var(--on-fill);
+}
+.slot.bs .st{right:calc(50% - 55px);bottom:calc(50% - 54px)}
+.slot.lock .st{background:var(--surface-3);box-shadow:inset 0 0 0 2px var(--hairline);color:var(--ink-3)}
+.slot .st svg{width:13px;height:13px}
+.slot .bossflag{
+  position:absolute;z-index:3;bottom:calc(50% - 62px);left:50%;transform:translateX(-50%);
+  font-family:var(--f-pix);font-size:8px;background:var(--red);color:var(--on-fill);
+  padding:3px 6px;box-shadow:inset 0 0 0 2px rgba(0,0,0,.4);white-space:nowrap;
+}
+.slot.lock .bossflag{background:var(--gray);color:var(--gray-ink)}
+
+/* 현재 노드 */
+.slot.cur::before{
+  content:'';position:absolute;z-index:1;
+  left:50%;top:50%;width:98px;height:98px;
+  clip-path:var(--notch);
+  box-shadow:inset 0 0 0 2px var(--line), inset 0 0 0 6px var(--gold);
+  animation:ringc .9s steps(2,jump-none) infinite;
+}
+@keyframes ring{0%,50%{opacity:1;transform:scale(1)}51%,100%{opacity:.3;transform:scale(1.05)}}
+@keyframes ringc{
+  0%,50%  {opacity:1;  transform:translate(-50%,-50%) scale(1)}
+  51%,100%{opacity:.28;transform:translate(-50%,-50%) scale(1.06)}
+}
+.arrow{position:absolute;z-index:4;top:calc(50% - 78px);left:50%;
+  animation:bob .62s steps(2,jump-none) infinite;color:var(--gold)}
+@keyframes bob{0%,50%{transform:translate(-50%,0)}51%,100%{transform:translate(-50%,7px)}}
+.arrow svg{width:26px;height:26px;display:block;filter:drop-shadow(0 2px 0 var(--shadow))}
+
+/* 점 경로 */
+.link{position:relative;height:34px}
+.link i{position:absolute;width:8px;height:8px;background:var(--ink-3);opacity:.6;display:block}
+.link.done i{background:var(--green);opacity:1}
+.link.lock i{background:var(--ink-3);opacity:.42}
+
+/* 사이드바 */
+.side{position:sticky;top:78px;display:flex;flex-direction:column;gap:18px}
+@media(max-width:1080px){.side{position:static}}
+.ptitle{font-family:var(--f-ui);font-size:12px;font-weight:600;color:var(--ink-3);
+  margin:0 0 13px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.ptitle b{color:var(--gold-t);font-size:10px}
+.ptitle .px9{font-family:var(--f-pix);font-size:9.5px;text-transform:uppercase;
+  letter-spacing:.06em;color:var(--ink-2)}
+
+.hud{display:flex;align-items:flex-end;gap:14px}
+.hud .big{font-family:var(--f-disp);font-size:52px;line-height:.9;font-weight:400;color:var(--gold-t)}
+.hud .unit{font-size:13px;color:var(--ink-2);padding-bottom:5px}
+.week{display:flex;gap:5px;margin-top:13px}
+.week i{width:100%;height:15px;background:var(--surface-3);box-shadow:inset 0 0 0 2px var(--hairline);display:block}
+.week i.on{background:var(--gold);box-shadow:inset 0 0 0 2px rgba(0,0,0,.32)}
+.week i.today{background:transparent;box-shadow:inset 0 0 0 2px var(--line), inset 0 0 0 5px var(--gold);animation:ring 1.1s steps(2,jump-none) infinite}
+.hline{height:3px;background:var(--hairline);margin:15px 0}
+.kv{display:flex;justify-content:space-between;align-items:center;font-size:13.5px;color:var(--ink-2);padding:3px 0}
+.kv b{font-family:var(--f-mono);font-weight:600;color:var(--ink);font-size:14px}
+
+/* 숙련도 미터(세그먼트) */
+.mrow{padding:9px 0;border-bottom:2px dotted var(--hairline)}
+.mrow:last-child{border-bottom:0}
+.mrow .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:7px}
+.mrow .nm{font-family:var(--f-mono);font-size:13px;color:var(--ink);font-weight:600}
+.mrow .due{font-family:var(--f-ui);font-size:11.5px;font-weight:700;color:var(--ink-3);white-space:nowrap}
+.mrow .due.hot{color:var(--red-t)}
+.meter{display:flex;gap:4px}
+.meter i{height:13px;flex:1;background:var(--surface-3);box-shadow:inset 0 0 0 2px var(--hairline);display:block}
+.meter i.on{background:var(--green);box-shadow:inset 0 0 0 2px rgba(0,0,0,.3)}
+.meter.max i.on{background:var(--gold)}
+.meter.zero i{box-shadow:inset 0 0 0 2px var(--hairline)}
+
+/* 숨은 스테이지(문법 구멍) */
+.secret{
+  background:var(--warn-bg);
+  clip-path:var(--notch);
+  box-shadow:inset 0 0 0 3px var(--warn-line);
+  filter:drop-shadow(4px 5px 0 var(--shadow));
+  padding:16px 17px;
+  animation:pulseb 2.2s steps(2,jump-none) infinite;
+}
+@keyframes pulseb{0%,70%{box-shadow:inset 0 0 0 3px var(--warn-line)}71%,100%{box-shadow:inset 0 0 0 3px var(--gold)}}
+.secret .ptitle{color:var(--warn-ink);opacity:.9}
+.secret .ptitle b{color:var(--warn-ink)}
+.srow{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:2px dotted color-mix(in srgb, var(--warn-line) 55%, transparent)}
+.srow:first-of-type{border-top:0}
+.srow .tk{font-family:var(--f-mono);font-weight:600;font-size:14px;color:var(--warn-ink)}
+.srow .ct{font-family:var(--f-ui);font-size:11.5px;color:var(--warn-ink);opacity:.82;margin-top:2px}
+.srow .ct b{font-family:var(--f-pix);font-size:10px;font-weight:400}
+.srow .btn{margin-left:auto}
+.secret .foot{font-size:12px;color:var(--warn-ink);opacity:.85;margin-top:11px;line-height:1.55}
+
+/* 노드 팝오버 */
+.pop{
+  position:fixed;z-index:60;width:288px;
+  background:var(--surface);clip-path:var(--notch);
+  box-shadow:inset 0 0 0 3px var(--line);
+  filter:drop-shadow(5px 6px 0 var(--shadow));
+  padding:16px;
+}
+.pop h4{margin:9px 0 6px;font-size:17px;font-weight:700;line-height:1.35}
+.pop p{margin:0 0 12px;font-size:13.5px;color:var(--ink-2);line-height:1.65}
+.pop .cl{position:absolute;top:6px;right:8px;background:transparent;border:0;color:var(--ink-3);
+  cursor:pointer;font-family:var(--f-pix);font-size:10px;padding:4px}
+.pop .cl:hover{color:var(--ink)}
+
+/* ================= 화면 2 : 카드 ================= */
+.cardgrid{display:grid;grid-template-columns:minmax(0,1fr) 282px;gap:24px;align-items:start;margin-top:14px}
+@media(max-width:1040px){.cardgrid{grid-template-columns:1fr}}
+
+.card{
+  background:var(--surface);clip-path:var(--notch);
+  box-shadow:inset 0 0 0 3px var(--line);
+  filter:drop-shadow(5px 6px 0 var(--shadow));
+  padding:24px;
+}
+/* 카드 상단 = 카트리지 라벨 띠 (트랙 색으로 채움 + 검정 글자) */
+.band{
+  margin:-24px -24px 24px;
+  background:var(--gold);color:var(--on-fill);
+  display:flex;align-items:stretch;
+  box-shadow:inset 0 -3px 0 rgba(0,0,0,.4);
+}
+.band .sp{
+  width:56px;flex:none;display:grid;place-items:center;
+  background:repeating-linear-gradient(135deg, rgba(0,0,0,.30) 0 7px, transparent 7px 14px);
+  box-shadow:inset -3px 0 0 rgba(0,0,0,.4);
+  font-family:var(--f-pix);font-size:13px;
+}
+.band .bb{flex:1;display:flex;align-items:center;gap:13px;padding:12px 18px;flex-wrap:wrap}
+.band .t{font-family:var(--f-pix);font-size:11px;letter-spacing:.05em}
+.band .u{font-size:13.5px;font-weight:700;opacity:.78}
+.band .c{font-family:var(--f-pix);font-size:9.5px;opacity:.85;color:inherit}
+.segs{display:flex;gap:4px;margin-left:auto}
+.segs i{width:19px;height:13px;display:block;
+  background:rgba(0,0,0,.20);box-shadow:inset 0 0 0 2px rgba(0,0,0,.34)}
+.segs i.on{background:var(--on-fill)}
+.segs i.now{background:transparent;box-shadow:inset 0 0 0 3px var(--on-fill)}
+
+/* 코드 화면(브라운관 창) — 필터/클립 없음: 텍스트 렌더링 보호 */
+.screenbox{
+  border:3px solid var(--line);background:var(--code-bg);margin-bottom:6px;
+  background-image:
+    linear-gradient(var(--line) 0 0),linear-gradient(var(--line) 0 0),
+    linear-gradient(var(--line) 0 0),linear-gradient(var(--line) 0 0);
+  background-size:5px 5px;background-repeat:no-repeat;
+  background-position:0 0,100% 0,0 100%,100% 100%;
+  box-shadow:0 5px 0 var(--shadow);
+}
+.filebar{
+  display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--code-bar);
+  border-bottom:3px solid var(--line);flex-wrap:wrap;
+}
+.filebar .fn{font-family:var(--f-mono);font-size:12.5px;color:var(--code-com);font-weight:600}
+.filebar .fn b{color:var(--code-txt)}
+.filebar .rng{margin-left:auto;font-family:var(--f-pix);font-size:8px;color:var(--code-gut)}
+.code{padding:14px 0 15px;overflow-x:auto}
+.cl{display:flex;align-items:flex-start;font-family:var(--f-mono);font-size:15px;line-height:1.8;white-space:pre}
+.cl .ln{
+  flex:none;width:56px;text-align:right;padding-right:16px;color:var(--code-gut);
+  font-size:13px;font-weight:400;user-select:none;position:relative;
+}
+.cl .src{color:var(--code-txt);padding-right:20px}
+.cl.hit{background:var(--code-hl);box-shadow:inset 4px 0 0 var(--gold)}
+.cl.hit .ln{color:var(--gold-t);font-weight:600}
+.cl.hit .ln::before{content:'\25B6';position:absolute;left:8px;font-size:9px;color:var(--gold)}
+.k{color:var(--code-kw)} .s{color:var(--code-str)} .nu{color:var(--code-num)}
+.f{color:var(--code-fn)} .ty{color:var(--code-ty)} .c{color:var(--code-com)}
+.p{color:var(--code-pun)}
+.aim{font-family:var(--f-ui);font-size:12.5px;font-weight:600;color:var(--gold-t);
+  margin:0 0 22px;padding-left:4px;display:flex;align-items:center;gap:9px}
+.aim .px9{font-family:var(--f-pix);font-size:9px;letter-spacing:.06em}
+
+.qhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:9px}
+.concept{font-family:var(--f-disp);font-size:26px;font-weight:400;line-height:1.3;margin:0 0 8px}
+.concept .tok{font-family:var(--f-mono);font-weight:600;font-size:23px;color:var(--gold-t)}
+.lead{margin:0 0 20px;color:var(--ink-2);font-size:14.5px;line-height:1.75;max-width:62ch}
+.q{margin:0 0 14px;font-size:17px;font-weight:700;line-height:1.55}
+
+/* 선택지 */
+.opts{display:flex;flex-direction:column;gap:11px;margin-bottom:18px}
+.opt{
+  display:flex;align-items:flex-start;gap:13px;text-align:left;width:100%;
+  background:var(--surface-2);border:0;cursor:pointer;padding:15px 16px;
+  clip-path:var(--notch);
+  box-shadow:inset 0 0 0 3px color-mix(in srgb, var(--line) 60%, transparent);
+  filter:drop-shadow(0 4px 0 var(--shadow));
+  color:var(--ink);font-family:var(--f-ui);font-size:14.5px;line-height:1.65;
+  transition:transform .09s var(--ease-pop), filter .09s var(--ease-pop), box-shadow .12s;
+}
+.opt:hover:not([disabled]){transform:translateY(-2px);filter:drop-shadow(0 6px 0 var(--shadow));box-shadow:inset 0 0 0 3px var(--line-hard)}
+.opt:active:not([disabled]){transform:translateY(3px);filter:drop-shadow(0 1px 0 var(--shadow))}
+.opt:focus-visible{outline:3px solid var(--blue);outline-offset:4px}
+.opt code{font-family:var(--f-mono);font-weight:600;font-size:13.5px;
+  background:color-mix(in srgb, var(--ink) 9%, transparent);padding:1px 5px;
+  box-shadow:inset 0 0 0 1px var(--hairline)}
+.opt .num{
+  flex:none;width:26px;height:26px;display:grid;place-items:center;margin-top:1px;
+  font-family:var(--f-pix);font-size:10px;
+  background:var(--surface-3);color:var(--ink-2);box-shadow:inset 0 0 0 2px var(--hairline);
+}
+.opt[aria-checked="true"]{box-shadow:inset 0 0 0 3px var(--gold);background:color-mix(in srgb,var(--gold) 12%,var(--surface-2))}
+.opt[aria-checked="true"] .num{background:var(--gold);color:var(--on-fill);box-shadow:inset 0 0 0 2px rgba(0,0,0,.35)}
+.opt[disabled]{cursor:default}
+.opt.right{box-shadow:inset 0 0 0 3px var(--green);background:color-mix(in srgb,var(--green) 14%,var(--surface-2))}
+.opt.right .num{background:var(--green);color:var(--on-fill)}
+.opt.wrong{box-shadow:inset 0 0 0 3px var(--red);background:color-mix(in srgb,var(--red) 12%,var(--surface-2))}
+.opt.wrong .num{background:var(--red);color:var(--on-fill)}
+.opt .mark{margin-left:auto;font-family:var(--f-ui);font-size:11.5px;font-weight:700;
+  align-self:center;flex:none;white-space:nowrap;padding-left:10px}
+.opt.right .mark{color:var(--green-t)} .opt.wrong .mark{color:var(--red-t)}
+
+/* 액션 바 */
+.actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:20px}
+.actions .btn{min-width:150px}
+.dk{margin-left:auto}
+
+/* 피드백 슬롯(높이 예약) */
+.slotfb{min-height:372px;position:relative}
+.fb-empty{
+  min-height:372px;display:flex;flex-direction:column;justify-content:center;gap:14px;
+  padding:20px 22px;
+  box-shadow:inset 0 0 0 3px var(--hairline);
+  clip-path:var(--notch);
+  background:repeating-linear-gradient(135deg,transparent 0 9px, color-mix(in srgb,var(--ink) 4%,transparent) 9px 18px);
+}
+.fb-empty .pix{font-size:9px;color:var(--ink-3);display:block}
+.fb-empty p{margin:0;color:var(--ink-3);font-size:13.5px;line-height:1.7}
+.fb-empty ul{margin:2px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
+.fb-empty li{display:flex;gap:11px;align-items:flex-start;font-size:13.5px;color:var(--ink-2);line-height:1.6}
+.fb-empty li b{flex:none;width:82px;font-family:var(--f-ui);font-weight:700;font-size:12px;
+  padding:3px 0;text-align:center;color:var(--on-fill)}
+.fb-empty li b.a{background:var(--green)} .fb-empty li b.b{background:var(--red)} .fb-empty li b.c{background:var(--cyan)}
+
+.fb{padding:19px 21px;clip-path:var(--notch);min-height:372px;animation:pop .22s var(--ease-pop)}
+@keyframes pop{from{transform:translateY(9px);opacity:0}to{transform:none;opacity:1}}
+.fb.ok  {background:var(--ok-bg);  color:var(--ok-ink);  box-shadow:inset 0 0 0 3px var(--ok-line)}
+.fb.no  {background:var(--no-bg);  color:var(--no-ink);  box-shadow:inset 0 0 0 3px var(--no-line)}
+.fb.hint{background:var(--hint-bg);color:var(--hint-ink);box-shadow:inset 0 0 0 3px var(--hint-line)}
+.fb h3{margin:0 0 4px;font-family:var(--f-disp);font-size:23px;font-weight:400;line-height:1.3}
+.fb .tagline{font-family:var(--f-pix);font-size:9px;margin-bottom:11px;opacity:.85}
+.fb p{margin:0 0 11px;font-size:14.5px;line-height:1.78}
+.fb p:last-child{margin-bottom:0}
+.fb code{font-family:var(--f-mono);font-weight:600;font-size:13.5px;
+  background:color-mix(in srgb, currentColor 13%, transparent);padding:1px 5px}
+.fb .gain{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+.fb .gain span{font-family:var(--f-ui);font-size:11.5px;font-weight:700;padding:6px 10px;
+  background:color-mix(in srgb, currentColor 14%, transparent);
+  box-shadow:inset 0 0 0 2px color-mix(in srgb, currentColor 30%, transparent)}
+.fb .also{margin-top:15px;padding-top:13px;
+  border-top:2px dotted color-mix(in srgb, currentColor 34%, transparent)}
+.fb .also .pix{font-size:8.5px;opacity:.75;display:block;margin-bottom:9px}
+.fb .also a{display:flex;align-items:center;gap:9px;font-family:var(--f-mono);font-size:12.5px;
+  font-weight:500;color:inherit;text-decoration:none;padding:3px 0;opacity:.92}
+.fb .also a span{margin-left:auto;font-family:var(--f-ui);font-size:11.5px;font-weight:700;opacity:.7}
+.fb .also a:hover{opacity:1;text-decoration:underline}
+.fb .head{display:flex;align-items:flex-start;gap:13px}
+.fb .head .ico{flex:none;width:44px;height:44px;display:grid;place-items:center;
+  box-shadow:inset 0 0 0 3px currentColor}
+.fb .head .ico svg{width:24px;height:24px}
+.fb ul{margin:11px 0 0;padding-left:0;list-style:none}
+.fb li{font-size:14px;line-height:1.7;padding-left:22px;position:relative;margin-bottom:6px}
+.fb li::before{content:'';position:absolute;left:2px;top:9px;width:8px;height:8px;background:currentColor}
+
+/* 컨트롤 패널(키보드) */
+.ctrlpanel{
+  margin-top:22px;padding:13px 16px;background:var(--surface-2);
+  clip-path:var(--notch);box-shadow:inset 0 0 0 3px var(--hairline);
+  display:flex;gap:20px;flex-wrap:wrap;align-items:center;
+}
+.ctrlpanel .g{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-2)}
+.ctrlpanel .lbl{font-family:var(--f-pix);font-size:8px;color:var(--ink-3);margin-right:4px}
+
+/* 우측 레일 */
+.rail{position:sticky;top:78px;display:flex;flex-direction:column;gap:16px}
+@media(max-width:1040px){.rail{position:static}}
+.xpfly{position:absolute;font-family:var(--f-pix);font-size:14px;color:var(--green-t);
+  pointer-events:none;animation:fly .95s steps(6,jump-none) forwards}
+@keyframes fly{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-46px);opacity:0}}
+
+/* 스파클(정답 시) */
+.spark{position:absolute;width:9px;height:9px;background:var(--gold);pointer-events:none;
+  animation:sp .55s steps(4,jump-none) forwards}
+@keyframes sp{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0}}
+
+.footnote{max-width:1240px;margin:34px auto 0;padding:0 22px;color:var(--ink-3);font-size:12px;line-height:1.7}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (prefers-reduced-motion: reduce){*{animation-duration:.001s !important;animation-iteration-count:1 !important}}
+</style>
+</head>
+<body>
+
+<!-- ===================== 마퀴 헤더 ===================== -->
+<header class="marquee">
+  <div class="logo">
+    <svg class="cart" viewBox="0 0 34 30" shape-rendering="crispEdges" aria-hidden="true">
+      <rect x="2" y="1" width="30" height="24" fill="var(--gold)"/>
+      <rect x="2" y="1" width="30" height="24" fill="none" stroke="var(--shadow)" stroke-width="2"/>
+      <rect x="6" y="5" width="22" height="10" fill="var(--surface)"/>
+      <rect x="6" y="5" width="22" height="10" fill="none" stroke="var(--shadow)" stroke-width="2"/>
+      <rect x="9" y="8" width="16" height="2" fill="var(--red)"/>
+      <rect x="9" y="11" width="10" height="2" fill="var(--cyan)"/>
+      <rect x="8" y="25" width="4" height="4" fill="var(--shadow)"/>
+      <rect x="15" y="25" width="4" height="4" fill="var(--shadow)"/>
+      <rect x="22" y="25" width="4" height="4" fill="var(--shadow)"/>
+    </svg>
+    <div>
+      <b>REPLAY</b>
+      <small>내 코드 다시 플레이</small>
+    </div>
+  </div>
+
+  <div class="repo"><i></i>CART&nbsp;:&nbsp;shopmate-web</div>
+
+  <span class="spacer"></span>
+
+  <div class="chip px9 fill t0" title="누적 경험치">SCORE 1,240</div>
+
+  <div class="rocker" role="group" aria-label="화면 모드">
+    <button id="mCrt"   aria-pressed="true"  title="브라운관 모드(다크)">CRT</button>
+    <button id="mLabel" aria-pressed="false" title="카트리지 라벨 모드(라이트)">LABEL</button>
+  </div>
+</header>
+
+<!-- ===================== 탭 ===================== -->
+<nav class="tabs" role="tablist" aria-label="화면 전환">
+  <button class="tab" role="tab" id="tabPath" aria-selected="true"  aria-controls="scPath"><span class="n">01</span> 학습 경로</button>
+  <button class="tab" role="tab" id="tabCard" aria-selected="false" aria-controls="scCard"><span class="n">02</span> T0 문법 카드</button>
+</nav>
+
+<div class="wrap">
+
+<!-- ===================== 화면 1 : 학습 경로 ===================== -->
+<section class="screen" id="scPath" role="tabpanel" aria-labelledby="tabPath">
+  <div class="layout">
+    <div>
+
+      <!-- 인서트 코인 -->
+      <div class="coin">
+        <div>
+          <div class="eye">▶ insert coin &nbsp;·&nbsp; continue?</div>
+          <h2>3-2 · <code style="font-family:var(--f-mono);font-size:26px">?.</code> 와 <code style="font-family:var(--f-mono);font-size:26px">??</code> 의 차이</h2>
+          <div class="meta">
+            <span class="chip fill t0">T0 문법</span>
+            <span>7문항 · 약 12분</span><span>·</span>
+            <span class="mono" style="font-size:12.5px">src/features/cart/useCart.ts</span>
+          </div>
+        </div>
+        <div class="go">
+          <button class="btn red" id="startBtn">▶ 오늘의 스테이지 시작</button>
+          <div class="hint">press <span style="color:var(--gold-t)">enter</span> to start</div>
+        </div>
+      </div>
+
+      <div id="worlds"></div>
+    </div>
+
+    <!-- 사이드 HUD -->
+    <aside class="side">
+      <div class="panel">
+        <p class="ptitle"><b>■</b> <span class="px9">player 1</span> 연속 기록</p>
+        <div class="hud">
+          <span class="big">12</span>
+          <span class="unit">일 연속<br>플레이 중</span>
+        </div>
+        <div class="week" aria-label="이번 주 기록">
+          <i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="today"></i><i></i>
+        </div>
+        <div class="hline"></div>
+        <div class="kv"><span>정복한 스테이지</span><b>11 / 21</b></div>
+        <div class="kv"><span>익힌 개념</span><b>19개</b></div>
+        <div class="kv"><span>오늘 남은 목표</span><b>12분</b></div>
+      </div>
+
+      <!-- 문법 구멍 = 숨은 스테이지 -->
+      <div class="secret">
+        <p class="ptitle"><b>⚠</b> <span class="px9">secret stage</span> 아직 안 배운 문법</p>
+        <div class="srow">
+          <div>
+            <div class="tk">async / await</div>
+            <div class="ct">내 코드에 <b>11</b>번 등장 · 미학습</div>
+          </div>
+          <button class="btn sm cyan" data-secret="async/await">열기</button>
+        </div>
+        <div class="srow">
+          <div>
+            <div class="tk">제네릭 &lt;T&gt;</div>
+            <div class="ct">내 코드에 <b>6</b>번 등장 · 미학습</div>
+          </div>
+          <button class="btn sm cyan" data-secret="제네릭">열기</button>
+        </div>
+        <div class="srow">
+          <div>
+            <div class="tk">구조 분해 기본값</div>
+            <div class="ct">내 코드에 <b>4</b>번 등장 · 미학습</div>
+          </div>
+          <button class="btn sm cyan" data-secret="구조 분해 기본값">열기</button>
+        </div>
+        <p class="foot">경로에는 아직 없지만 <b>당신 리포에는 이미 있는</b> 문법입니다. 순서를 건너뛰고 지금 열 수 있어요.</p>
+      </div>
+
+      <div class="panel">
+        <p class="ptitle"><b>■</b> <span class="px9">mastery</span> 개념 숙련도와 복습 대기</p>
+        <div class="mrow">
+          <div class="top"><span class="nm">배열 map / filter</span><span class="due">max</span></div>
+          <div class="meter max"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div>
+        </div>
+        <div class="mrow">
+          <div class="top"><span class="nm">구조 분해 할당</span><span class="due">복습 d-4</span></div>
+          <div class="meter"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div>
+        </div>
+        <div class="mrow">
+          <div class="top"><span class="nm">useState 갱신</span><span class="due hot">복습 내일</span></div>
+          <div class="meter"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div>
+        </div>
+        <div class="mrow">
+          <div class="top"><span class="nm">?. 옵셔널 체이닝</span><span class="due hot">오늘</span></div>
+          <div class="meter"><i class="on"></i><i></i><i></i><i></i><i></i></div>
+        </div>
+        <div class="mrow">
+          <div class="top"><span class="nm">async / await</span><span class="due">미학습</span></div>
+          <div class="meter zero"><i></i><i></i><i></i><i></i><i></i></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ===================== 화면 2 : T0 문법 카드 ===================== -->
+<section class="screen" id="scCard" role="tabpanel" aria-labelledby="tabCard" hidden>
+  <div class="cardgrid">
+    <div>
+      <div class="card">
+        <!-- 카트리지 라벨 띠 -->
+        <div class="band">
+          <div class="sp">3-2</div>
+          <div class="bb">
+            <span class="t">T0 syntax round</span>
+            <span class="u">장바구니 담기/빼기</span>
+            <div class="segs" id="segs" aria-label="문항 진행"></div>
+            <span class="c" id="qcount">02 / 07</span>
+          </div>
+        </div>
+
+        <!-- 코드 -->
+        <div class="screenbox">
+          <div class="filebar">
+            <span class="fn">src/features/cart/<b>useCart.ts</b></span>
+            <span class="rng" id="rng">line 38</span>
+          </div>
+          <div class="code" id="code"></div>
+        </div>
+        <p class="aim" id="aimline"><span class="px9">▲ line 38</span> 이번 문제의 대상</p>
+
+        <!-- 개념 -->
+        <div class="qhead">
+          <span class="chip">개념</span>
+          <span class="chip" id="mstchip">숙련도 1 / 5</span>
+          <span class="chip" id="freqchip">내 코드에 7번 등장</span>
+        </div>
+        <h3 class="concept" id="concept"></h3>
+        <p class="lead" id="lead"></p>
+
+        <!-- 문제 -->
+        <p class="q" id="qtext"></p>
+        <div class="opts" id="opts" role="radiogroup" aria-labelledby="qtext"></div>
+
+        <!-- 액션 -->
+        <div class="actions">
+          <button class="btn green" id="submitBtn" disabled>제출</button>
+          <button class="btn cyan dk" id="dkBtn">
+            <svg width="15" height="15" viewBox="0 0 12 12" shape-rendering="crispEdges" aria-hidden="true" fill="currentColor">
+              <rect x="3" y="1" width="6" height="2"/><rect x="7" y="3" width="2" height="2"/>
+              <rect x="5" y="5" width="2" height="2"/><rect x="5" y="7" width="2" height="1"/>
+              <rect x="5" y="9" width="2" height="2"/><rect x="3" y="3" width="2" height="2"/>
+            </svg>
+            <span id="dkLabel">모르겠어요</span>
+          </button>
+        </div>
+
+        <!-- 피드백 슬롯(높이 예약) -->
+        <div class="slotfb" id="slotfb" aria-live="polite">
+          <div class="fb-empty">
+            <span class="pix">result window</span>
+            <p>답을 고르면 이 창이 채워집니다. 자리를 미리 잡아 뒀으니 <b>버튼이 밀려나지 않습니다.</b></p>
+            <ul>
+              <li><b class="a">정답</b><span>왜 맞는지 한 줄 + 숙련도 상승, 다음 복습이 뒤로 밀립니다.</span></li>
+              <li><b class="b">오답</b><span>무엇과 헷갈렸는지 진단합니다. 목숨도, 감점도 없습니다.</span></li>
+              <li><b class="c">모르겠어요</b><span>정답과 해설을 바로 공개하고 복습을 내일로 당깁니다.</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 컨트롤 패널 -->
+        <div class="ctrlpanel">
+          <span class="lbl">control</span>
+          <span class="g"><span class="kbd">1</span><span class="kbd">2</span><span class="kbd">3</span> 선택</span>
+          <span class="g"><span class="kbd">ENTER</span> 제출</span>
+          <span class="g"><span class="kbd">SPACE</span> 다음</span>
+          <span class="g"><span class="kbd">?</span> 모르겠어요</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 세션 레일 -->
+    <aside class="rail">
+      <div class="panel" style="position:relative" id="scorePanel">
+        <p class="ptitle"><b>■</b> <span class="px9">this session</span> 이번 세션</p>
+        <div class="hud">
+          <span class="big" id="sessionXp">+24</span>
+          <span class="unit">XP<br>획득</span>
+        </div>
+        <div class="hline"></div>
+        <div class="kv"><span>맞힘</span><b id="cntOk">2</b></div>
+        <div class="kv"><span>모르겠어요</span><b id="cntDk">1</b></div>
+        <div class="kv"><span>경과</span><b>4분 12초</b></div>
+      </div>
+
+      <div class="panel">
+        <p class="ptitle"><b>■</b> <span class="px9">next review</span> 이 개념의 다음 복습</p>
+        <div class="mrow">
+          <div class="top"><span class="nm">?. 옵셔널 체이닝</span><span class="due hot" id="dueTxt">오늘</span></div>
+          <div class="meter" id="railMeter"><i class="on"></i><i></i><i></i><i></i><i></i></div>
+        </div>
+        <p style="margin:12px 0 0;font-size:12.5px;color:var(--ink-3);line-height:1.7">
+          숙련도가 낮을수록 다시 만나는 간격이 짧아집니다. 모른다고 말할수록 간격이 정확해집니다.
+        </p>
+      </div>
+
+      <div class="panel" style="background:var(--surface-2)">
+        <p class="ptitle"><b>■</b> <span class="px9">source</span> 왜 이 코드인가</p>
+        <p style="margin:0;font-size:13px;color:var(--ink-2);line-height:1.75">
+          이 스니펫은 남의 예제가 아니라 <b style="color:var(--ink)">당신이 3월 14일에 커밋한</b>
+          <span class="mono" style="font-size:12.5px">feat: 장바구니 합계</span> 에서 그대로 가져왔습니다.
+        </p>
+      </div>
+    </aside>
+  </div>
+</section>
+
+</div>
+
+<p class="footnote">
+  REPLAY — 레트로 아케이드 / 게임 카트리지 방향 목업. 두 화면 전환은 상단 탭, 테마는 우상단 <b>CRT / LABEL</b> 스위치.
+</p>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ---------------- 아이콘 ---------------- */
+  const ICON = {
+    check:'<svg viewBox="0 0 12 12" shape-rendering="crispEdges" fill="currentColor" aria-hidden="true"><rect x="1" y="6" width="2" height="2"/><rect x="3" y="8" width="2" height="2"/><rect x="5" y="6" width="2" height="2"/><rect x="7" y="4" width="2" height="2"/><rect x="9" y="2" width="2" height="2"/></svg>',
+    lock :'<svg viewBox="0 0 12 12" shape-rendering="crispEdges" fill="currentColor" aria-hidden="true"><rect x="3" y="1" width="6" height="2"/><rect x="3" y="3" width="2" height="2"/><rect x="7" y="3" width="2" height="2"/><rect x="2" y="5" width="8" height="6"/></svg>',
+    arrow:'<svg viewBox="0 0 12 12" shape-rendering="crispEdges" fill="currentColor" aria-hidden="true"><rect x="5" y="0" width="2" height="7"/><rect x="2" y="6" width="8" height="2"/><rect x="3" y="8" width="6" height="2"/><rect x="4" y="10" width="4" height="2"/></svg>',
+    star :'<svg viewBox="0 0 12 12" shape-rendering="crispEdges" fill="currentColor" aria-hidden="true"><rect x="5" y="0" width="2" height="12"/><rect x="0" y="5" width="12" height="2"/><rect x="2" y="2" width="8" height="8" opacity=".45"/></svg>',
+    bulb :'<svg viewBox="0 0 12 12" shape-rendering="crispEdges" fill="currentColor" aria-hidden="true"><rect x="4" y="0" width="4" height="2"/><rect x="2" y="2" width="8" height="5"/><rect x="4" y="7" width="4" height="2"/><rect x="4" y="10" width="4" height="1"/></svg>'
+  };
+
+  /* ---------------- 테마 ---------------- */
+  const root = document.documentElement;
+  const mCrt = document.getElementById('mCrt'), mLabel = document.getElementById('mLabel');
+  function setTheme(t){
+    root.setAttribute('data-theme', t);
+    mCrt.setAttribute('aria-pressed', String(t==='crt'));
+    mLabel.setAttribute('aria-pressed', String(t==='label'));
+  }
+  mCrt.addEventListener('click', ()=>setTheme('crt'));
+  mLabel.addEventListener('click', ()=>setTheme('label'));
+
+  /* ---------------- 탭 ---------------- */
+  const tabPath = document.getElementById('tabPath'), tabCard = document.getElementById('tabCard');
+  const scPath  = document.getElementById('scPath'),  scCard  = document.getElementById('scCard');
+  let active = 'path';
+  function go(which, focus){
+    active = which;
+    const p = which === 'path';
+    scPath.hidden = !p; scCard.hidden = p;
+    tabPath.setAttribute('aria-selected', String(p));
+    tabCard.setAttribute('aria-selected', String(!p));
+    closePop();
+    if(focus) (p?tabPath:tabCard).focus();
+    window.scrollTo(0, 0);
+  }
+  tabPath.addEventListener('click', ()=>go('path'));
+  tabCard.addEventListener('click', ()=>go('card'));
+
+  /* =========================================================
+     화면 1 — 경로 데이터 (유닛 = 내 리포의 실제 기능)
+     ========================================================= */
+  const WORLDS = [
+    { w:1, name:'로그인 흐름', path:'src/features/auth/', color:'var(--green)', state:'done', open:false,
+      stages:[
+        {id:'1-1', t:'T0', title:'useState 로 폼 상태 잡기',      state:'done', note:'3월 2일 정복 · 개념 2개'},
+        {id:'1-2', t:'T0', title:'화살표 함수와 이벤트 핸들러',    state:'done', note:'3월 3일 정복 · 개념 3개'},
+        {id:'1-3', t:'T1', title:'handleSubmit 통째로 필사',      state:'done', note:'3월 4일 정복 · 24줄'},
+        {id:'1-4', t:'T2', title:'auth 폴더는 왜 파일이 3개인가', state:'done', boss:true, note:'3월 5일 정복 · 구조 보스'}
+      ]},
+    { w:2, name:'상품 목록 & 필터', path:'src/features/catalog/', color:'var(--green)', state:'done', open:false,
+      stages:[
+        {id:'2-1', t:'T0', title:'배열 map 으로 목록 그리기',   state:'done', note:'3월 9일 정복 · 개념 2개'},
+        {id:'2-2', t:'T0', title:'filter 와 논리 연산자',       state:'done', note:'3월 10일 정복 · 개념 3개'},
+        {id:'2-3', t:'T1', title:'useProductFilter 필사',       state:'done', note:'3월 11일 정복 · 31줄'},
+        {id:'2-4', t:'T2', title:'필터 상태는 누가 갖고 있나',  state:'done', boss:true, note:'3월 12일 정복 · 구조 보스'}
+      ]},
+    { w:3, name:'장바구니 담기/빼기', path:'src/features/cart/', color:'var(--gold)', state:'now', open:true,
+      stages:[
+        {id:'3-1', t:'T0', title:'구조 분해 할당 { data: items }', state:'done', note:'어제 정복 · 개념 1개'},
+        {id:'3-2', t:'T0', title:'?. 와 ?? 의 차이',              state:'now',  note:'7문항 · 약 12분 · 오늘의 스테이지'},
+        {id:'3-3', t:'T0', title:'전개 연산자 [...prev, id]',     state:'lock', note:'3-2를 끝내면 열립니다'},
+        {id:'3-4', t:'T1', title:'removeItem 통째로 필사',        state:'lock', note:'T0 3개를 끝내면 열립니다'},
+        {id:'3-5', t:'T2', title:'낙관적 업데이트의 책임 배치',   state:'lock', boss:true, note:'유닛의 마지막 관문'}
+      ]},
+    { w:4, name:'결제 요청', path:'src/features/checkout/', color:'var(--cyan)', state:'lock', open:true,
+      stages:[
+        {id:'4-1', t:'T0', title:'async / await 첫 만남',       state:'lock', note:'내 코드에 11번 등장 · 숨은 스테이지로 미리 열 수 있음'},
+        {id:'4-2', t:'T0', title:'try / catch 로 실패 받아내기', state:'lock', note:'4-1 이후'},
+        {id:'4-3', t:'T1', title:'requestPayment 필사',          state:'lock', note:'42줄'},
+        {id:'4-4', t:'T2', title:'결제 실패는 어디서 처리되나',  state:'lock', boss:true, note:'유닛의 마지막 관문'}
+      ]},
+    { w:5, name:'주문 내역', path:'src/features/orders/', color:'var(--gray)', state:'lock', open:false, teaser:true, stages:[] }
+  ];
+
+  const TRACK_COLOR = {T0:'var(--gold)', T1:'var(--red)', T2:'var(--cyan)'};
+  const TRACK_NAME  = {T0:'문법', T1:'클론 코딩', T2:'구조'};
+  /* 지그재그 x 오프셋 — 부호가 설명글이 붙는 쪽을 정한다(음수=오른쪽, 양수=왼쪽) */
+  const OFFSETS = [-148, 96, -96, 148, -54, 84];
+
+  function slotHTML(st){
+    const lock = st.state === 'lock';
+    const col  = lock ? 'var(--gray)' : TRACK_COLOR[st.t];
+    const cls  = ['node']; if(lock) cls.push('lock'); if(st.boss) cls.push('boss');
+    const sc   = ['slot'];
+    if(st.state === 'now') sc.push('cur');
+    if(lock) sc.push('lock');
+    if(st.boss) sc.push('bs');
+    const badge = st.state === 'done' ? '<span class="st">'+ICON.check+'</span>'
+                : lock ? '<span class="st">'+ICON.lock+'</span>' : '';
+    const label = '스테이지 '+st.id+' '+st.title+' — '+(st.state==='done'?'완료':lock?'잠김':'현재 진행');
+    return '<div class="'+sc.join(' ')+'">'+
+      (st.state==='now' ? '<span class="arrow">'+ICON.arrow+'</span>' : '')+
+      '<button class="'+cls.join(' ')+'" style="--c:'+col+'" data-node="'+st.id+'" aria-label="'+label+'">'+st.id+'</button>'+
+      '<span class="tag">'+st.t+'</span>'+ badge +
+      (st.boss ? '<span class="bossflag">boss</span>' : '')+
+    '</div>';
+  }
+
+  function linkHTML(x1, x2, state){
+    let dots = '';
+    for(let i=1;i<=4;i++){
+      const t = i/5;
+      const x = x1 + (x2-x1)*t;
+      const y = 34*t - 4;
+      dots += '<i style="left:calc(50% + '+x.toFixed(1)+'px);top:'+y.toFixed(1)+'px"></i>';
+    }
+    return '<div class="link '+state+'">'+dots+'</div>';
+  }
+
+  function renderWorlds(){
+    const host = document.getElementById('worlds');
+    host.innerHTML = WORLDS.map(function(W){
+      const doneN = W.stages.filter(s=>s.state==='done').length;
+      const spine = W.state==='lock' ? 'var(--gray)' : W.color;
+
+      let head = '<div class="cartlabel'+(W.state==='lock'?' locked':'')+'">'+
+        '<div class="spine" style="--sp:'+spine+'"><span>'+W.w+'</span></div>'+
+        '<div class="body">'+
+          '<div>'+
+            '<div class="ttl">'+W.name+'</div>'+
+            '<div class="sub">'+W.path+'</div>'+
+          '</div>'+
+          '<div class="pill">'+
+            (W.teaser
+              ? '<span class="chip">잠긴 카트리지</span>'
+              : '<span class="chip px9'+(W.state==='done'?' fill ok':'')+'">'+doneN+' / '+W.stages.length+' stage</span>'
+                + (W.state==='now' ? '<span class="chip fill t0">진행 중</span>' : '')
+                + '<button class="fold" data-fold="'+W.w+'" aria-expanded="'+(W.open?'true':'false')+'">'+(W.open?'접기 ▲':'펼치기 ▼')+'</button>')+
+          '</div>'+
+        '</div></div>';
+
+      if(W.teaser){
+        return '<section class="world">'+head+
+          '<p style="margin:13px 0 0;padding-left:6px;font-size:13px;color:var(--ink-3)">'+
+          '아직 커밋 5개뿐인 기능입니다. 코드가 더 쌓이면 카트리지가 열립니다.</p></section>';
+      }
+
+      let body = '<div class="path" id="path'+W.w+'"'+(W.open?'':' hidden')+'>';
+      W.stages.forEach(function(st, i){
+        const x = OFFSETS[i % OFFSETS.length];
+        const rt = x > 0;   /* 노드가 오른쪽에 있으면 설명글은 왼쪽 */
+        body += '<div class="row'+(rt?' rt':'')+(st.state==='lock'?' locked':'')+'" style="transform:translateX('+x+'px)">'+
+            slotHTML(st)+
+            '<div class="desc">'+
+              '<h4>'+st.title+'</h4>'+
+              '<div class="m"><span class="chip" style="'+(st.state==='lock'?'':'box-shadow:inset 0 0 0 2px '+TRACK_COLOR[st.t])+'">'+st.t+' '+TRACK_NAME[st.t]+'</span><span>'+st.note+'</span></div>'+
+            '</div>'+
+          '</div>';
+        if(i < W.stages.length-1){
+          const x2 = OFFSETS[(i+1) % OFFSETS.length];
+          const lstate = (st.state==='done' && W.stages[i+1].state!=='lock') ? 'done'
+                       : (W.stages[i+1].state==='lock' ? 'lock' : '');
+          body += '<div style="transform:translateX('+((x+x2)/2)+'px)">'+linkHTML(x-(x+x2)/2, x2-(x+x2)/2, lstate)+'</div>';
+        }
+      });
+      body += '</div>';
+      return '<section class="world">'+head+body+'</section>';
+    }).join('');
+  }
+  renderWorlds();
+
+  /* 유닛 접기/펼치기 */
+  document.getElementById('worlds').addEventListener('click', function(e){
+    const f = e.target.closest('[data-fold]');
+    if(f){
+      const w = f.getAttribute('data-fold');
+      const p = document.getElementById('path'+w);
+      const open = p.hidden;
+      p.hidden = !open;
+      f.setAttribute('aria-expanded', String(open));
+      f.textContent = open ? '접기 ▲' : '펼치기 ▼';
+      closePop();
+      return;
+    }
+    const n = e.target.closest('[data-node]');
+    if(n) openPop(n);
+  });
+
+  /* ---------------- 노드 팝오버 ---------------- */
+  let pop = null;
+  function closePop(){ if(pop){ pop.remove(); pop = null; } }
+  function findStage(id){
+    for(const W of WORLDS){ const s = W.stages.find(x=>x.id===id); if(s) return {W:W, s:s}; }
+    return null;
+  }
+  function openPop(btn){
+    closePop();
+    const found = findStage(btn.getAttribute('data-node'));
+    if(!found) return;
+    const s = found.s, W = found.W;
+    const stateTxt = s.state==='done' ? '정복 완료' : s.state==='now' ? '지금 여기' : '잠김';
+    const col = s.state==='lock' ? 'var(--gray)' : TRACK_COLOR[s.t];
+
+    let action = '';
+    if(s.state==='now')      action = '<button class="btn red sm" data-popstart="1" style="width:100%">▶ 이 스테이지 시작</button>';
+    else if(s.state==='done')action = '<button class="btn ghost sm" data-popstart="1" style="width:100%">↺ 복습으로 다시 열기</button>';
+    else                     action = '<button class="btn gray sm" style="width:100%" disabled>'+s.note+'</button>';
+
+    pop = document.createElement('div');
+    pop.className = 'pop';
+    pop.setAttribute('role','dialog');
+    pop.setAttribute('aria-label', s.id+' 스테이지 정보');
+    pop.innerHTML =
+      '<button class="cl" aria-label="닫기">[X]</button>'+
+      '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
+        '<span class="chip px9 fill" style="background:'+col+'">'+s.id+' · '+s.t+'</span>'+
+        '<span class="chip">'+stateTxt+'</span>'+ (s.boss?'<span class="chip px9 fill t1">boss</span>':'') +
+      '</div>'+
+      '<h4>'+s.title+'</h4>'+
+      '<p>'+W.name+' · <span class="mono" style="font-size:12.5px">'+W.path+'</span><br>'+
+      (s.state==='lock' ? '앞 스테이지를 끝내면 자동으로 열립니다.' : s.note)+'</p>'+
+      action;
+    document.body.appendChild(pop);
+
+    const r = btn.getBoundingClientRect();
+    let left = r.left + r.width/2 - 144;
+    left = Math.max(12, Math.min(left, window.innerWidth - 300));
+    let top = r.bottom + 14;
+    if(top + pop.offsetHeight > window.innerHeight - 12) top = Math.max(12, r.top - pop.offsetHeight - 14);
+    pop.style.left = left+'px'; pop.style.top = top+'px';
+
+    pop.querySelector('.cl').addEventListener('click', closePop);
+    const st = pop.querySelector('[data-popstart]');
+    if(st) st.addEventListener('click', function(){ closePop(); go('card'); resetCard(); });
+    setTimeout(function(){ document.addEventListener('click', outside, {once:true}); }, 0);
+  }
+  function outside(e){
+    if(pop && !pop.contains(e.target) && !e.target.closest('[data-node]')) closePop();
+    else if(pop) setTimeout(function(){ document.addEventListener('click', outside, {once:true}); },0);
+  }
+  window.addEventListener('resize', closePop);
+  window.addEventListener('scroll', closePop, {passive:true});
+
+  document.getElementById('startBtn').addEventListener('click', function(){ go('card'); resetCard(); });
+  document.querySelectorAll('[data-secret]').forEach(function(b){
+    b.addEventListener('click', function(){ go('card'); resetCard(); });
+  });
+
+  /* =========================================================
+     화면 2 — T0 문법 카드
+     ========================================================= */
+  const CODE = [
+    {n:28, h:'<span class="k">export</span> <span class="k">function</span> <span class="f">useCart</span><span class="p">(</span>userId<span class="p">:</span> <span class="ty">string</span><span class="p">) {</span>'},
+    {n:29, h:'  <span class="k">const</span> <span class="p">{</span> data<span class="p">:</span> items <span class="p">} =</span> <span class="f">useCartQuery</span><span class="p">(</span>userId<span class="p">);</span>'},
+    {n:30, h:'  <span class="k">const</span> <span class="p">[</span>pending<span class="p">,</span> setPending<span class="p">] =</span> <span class="f">useState</span><span class="p">&lt;</span><span class="ty">string</span><span class="p">[]&gt;([]);</span>'},
+    {n:31, h:''},
+    {n:32, h:'  <span class="k">const</span> <span class="f">removeItem</span> <span class="p">= (</span>id<span class="p">:</span> <span class="ty">string</span><span class="p">) =&gt; {</span>'},
+    {n:33, h:'    <span class="f">setPending</span><span class="p">((</span>prev<span class="p">) =&gt; [...</span>prev<span class="p">,</span> id<span class="p">]);</span>'},
+    {n:34, h:'    <span class="k">void</span> <span class="f">mutateRemove</span><span class="p">({</span> userId<span class="p">,</span> id <span class="p">});</span>'},
+    {n:35, h:'  <span class="p">};</span>'},
+    {n:36, h:''},
+    {n:37, h:'  <span class="c">// 장바구니가 아직 로딩 중이면 items 는 undefined 다</span>'},
+    {n:38, h:'  <span class="k">const</span> total <span class="p">=</span> items<span class="p">?.</span><span class="f">reduce</span><span class="p">((</span>sum<span class="p">,</span> it<span class="p">) =&gt;</span> sum <span class="p">+</span> it<span class="p">.</span>price <span class="p">*</span> it<span class="p">.</span>qty<span class="p">,</span> <span class="nu">0</span><span class="p">)</span> <span class="p">??</span> <span class="nu">0</span><span class="p">;</span>'},
+    {n:39, h:''},
+    {n:40, h:'  <span class="k">return</span> <span class="p">{</span> items<span class="p">,</span> pending<span class="p">,</span> removeItem<span class="p">,</span> total <span class="p">};</span>'},
+    {n:41, h:'<span class="p">}</span>'}
+  ];
+
+  const QUESTIONS = [
+    {
+      hit: 38,
+      conceptHTML: '<span class="tok">??</span> 널 병합 연산자',
+      mastery: 1, freq: '내 코드에 7번 등장',
+      lead: '앞의 값이 <b>없을 때만</b> 뒤의 값을 대신 씁니다. 여기서 “없다”는 <code style="font-family:var(--f-mono)">null</code> 과 <code style="font-family:var(--f-mono)">undefined</code> 딱 두 가지뿐입니다.',
+      q: '38번 줄 끝의 <span class="mono">?? 0</span> 은 정확히 무슨 일을 하나요?',
+      opts:[
+        {t:'<code>items</code> 가 <code>0</code> 이면 <code>reduce</code> 를 건너뛴다.'},
+        {t:'앞의 결과가 <code>null</code> 또는 <code>undefined</code> 일 때만 <code>0</code> 을 대신 쓴다.'},
+        {t:'앞의 결과가 <code>0</code>, <code>\'\'</code>, <code>false</code> 처럼 falsy 이면 <code>0</code> 을 대신 쓴다.'}
+      ],
+      answer: 1,
+      okTitle: '정답',
+      okBody: '<p>장바구니가 아직 로딩 중이면 <code>items</code> 가 <code>undefined</code> 라서 <code>items?.reduce(...)</code> 전체가 <code>undefined</code> 가 됩니다. 그때만 <code>0</code> 이 대신 들어갑니다.</p>'+
+              '<p>합계가 진짜 <code>0</code> 원인 경우에는 <code>0</code> 이 그대로 유지됩니다 — 이게 <code>||</code> 와 갈리는 지점입니다.</p>',
+      diag:[
+        {t:'<code>?.</code> 와 <code>??</code> 를 하나로 묶어 보셨습니다',
+         b:'<p>둘은 짝처럼 붙어 다니지만 역할이 다릅니다. 앞의 <code>items?.</code> 가 “<code>items</code> 가 없으면 <code>reduce</code> 호출을 아예 건너뛴다”는 부분이고, 뒤의 <code>?? 0</code> 은 “그래서 결과가 없으면 <code>0</code> 을 쓴다”는 부분입니다.</p>'+
+           '<p>즉 <code>?.</code> 는 <b>호출을 멈추는</b> 장치, <code>??</code> 는 <b>빈자리를 메우는</b> 장치입니다.</p>'},
+        null,
+        {t:'그건 <code>||</code> 의 동작입니다',
+         b:'<p>가장 흔한 혼동입니다. <code>||</code> 는 falsy 전부(<code>0</code>, <code>\'\'</code>, <code>false</code>, <code>NaN</code>)를 갈아치우지만, <code>??</code> 는 <b><code>null</code> 과 <code>undefined</code> 두 가지만</b> 걸러냅니다.</p>'+
+           '<p>그래서 <code>0 ?? 5</code> 는 <code>0</code> 이고, <code>0 || 5</code> 는 <code>5</code> 입니다. 당신 코드에서 장바구니를 비워 합계가 실제로 <code>0</code> 원이 되는 순간, 이 차이가 화면에 그대로 드러납니다.</p>'}
+      ],
+      also:'<div class="also"><span class="pix">?? also in your code</span>'+
+        '<a href="#" onclick="return false"><code>src/features/cart/CartSummary.tsx</code><span>24번 줄</span></a>'+
+        '<a href="#" onclick="return false"><code>src/features/checkout/useTotals.ts</code><span>17번 줄</span></a>'+
+        '</div>',
+      dk:{ concept:'?? 널 병합', from:1, to:0, next:'내일' }
+    },
+    {
+      hit: 33,
+      conceptHTML: '<span class="tok">...</span> 전개 연산자',
+      mastery: 2, freq: '내 코드에 14번 등장',
+      lead: '기존 배열을 <b>건드리지 않고</b> 원소를 펼쳐 담아 새 배열을 만듭니다. React 상태를 다룰 때 거의 항상 이 형태가 나옵니다.',
+      q: '33번 줄을 <span class="mono">prev.push(id)</span> 로 바꾸면 어떻게 되나요?',
+      opts:[
+        {t:'똑같이 동작한다. 취향 차이일 뿐이다.'},
+        {t:'화면이 갱신되지 않을 수 있다. 같은 배열을 그대로 고쳐서 React 가 변화를 알아채지 못한다.'},
+        {t:'<code>pending</code> 이 배열에서 문자열로 바뀐다.'}
+      ],
+      answer: 1,
+      okTitle: '정답',
+      okBody: '<p>React 는 “배열 안이 바뀌었나”가 아니라 “<b>배열 자체가 다른 배열인가</b>”를 봅니다. <code>push</code> 는 원본을 그 자리에서 고치므로 참조가 그대로고, 리렌더가 생략될 수 있습니다.</p>'+
+              '<p><code>[...prev, id]</code> 는 매번 새 배열을 만들어 참조가 달라집니다. 그래서 이 코드는 안전하게 동작합니다.</p>',
+      diag:[
+        {t:'결과만 보면 같아 보이는 게 함정입니다',
+         b:'<p><code>push</code> 도 <code>[...prev, id]</code> 도 “뒤에 하나 붙는다”는 결과는 같습니다. 다른 건 <b>원본을 고치느냐, 새로 만드느냐</b> 입니다.</p>'+
+           '<p><code>push</code> 는 <code>prev</code> 를 직접 고칩니다. React 는 참조로 변화를 판단하기 때문에, 같은 배열이 돌아오면 “안 바뀌었네”라고 결론 내리고 화면을 다시 그리지 않을 수 있습니다.</p>'},
+        null,
+        {t:'<code>...</code> 를 문자열 전개로 오해하신 것 같습니다',
+         b:'<p><code>...</code> 는 놓인 자리에 따라 뜻이 달라집니다. <code>[ ]</code> 안에서 쓰면 <b>배열의 원소를 그대로 펼쳐 넣습니다</b>. 타입이 바뀌지 않고, 결과도 배열 그대로입니다.</p>'+
+           '<p>같은 <code>...</code> 가 함수 인자 자리에 오면 “나머지 인자 모으기”가 되는데, 그건 4-3 스테이지에서 다시 만납니다.</p>'}
+      ],
+      also:'<div class="also"><span class="pix">... also in your code</span>'+
+        '<a href="#" onclick="return false"><code>src/features/cart/useCart.ts</code><span>52번 줄</span></a>'+
+        '<a href="#" onclick="return false"><code>src/features/catalog/useProductFilter.ts</code><span>19번 줄</span></a>'+
+        '</div>',
+      dk:{ concept:'... 전개 연산자', from:2, to:1, next:'내일' }
+    }
+  ];
+
+  /* 결과창 빈 상태(높이 예약) — 최초 마크업과 동일하게 유지 */
+  const EMPTY_HTML =
+    '<div class="fb-empty">'+
+      '<span class="pix">result window</span>'+
+      '<p>답을 고르면 이 창이 채워집니다. 자리를 미리 잡아 뒀으니 <b>버튼이 밀려나지 않습니다.</b></p>'+
+      '<ul>'+
+        '<li><b class="a">정답</b><span>왜 맞는지 한 줄 + 숙련도 상승, 다음 복습이 뒤로 밀립니다.</span></li>'+
+        '<li><b class="b">오답</b><span>무엇과 헷갈렸는지 진단합니다. 목숨도, 감점도 없습니다.</span></li>'+
+        '<li><b class="c">모르겠어요</b><span>정답과 해설을 바로 공개하고 복습을 내일로 당깁니다.</span></li>'+
+      '</ul>'+
+    '</div>';
+
+  /* --- 카드 상태 --- */
+  let qi = 0, qNo = 2, picked = -1, answered = false, usedDk = false;
+  let sessionXp = 24, cntOk = 2, cntDk = 1;
+
+  const elCode = document.getElementById('code');
+  const elOpts = document.getElementById('opts');
+  const elSlot = document.getElementById('slotfb');
+  const elSubmit = document.getElementById('submitBtn');
+  const elDk = document.getElementById('dkBtn');
+  const elDkLabel = document.getElementById('dkLabel');
+
+  function renderCode(hit){
+    elCode.innerHTML = CODE.map(function(l){
+      return '<div class="cl'+(l.n===hit?' hit':'')+'"><span class="ln">'+l.n+'</span><span class="src">'+(l.h||' ')+'</span></div>';
+    }).join('');
+    document.getElementById('rng').textContent = 'line '+hit;
+    document.getElementById('aimline').innerHTML = '<span class="px9">▲ line '+hit+'</span> 이번 문제의 대상';
+  }
+
+  function renderSegs(){
+    const s = document.getElementById('segs');
+    let h = '';
+    for(let i=1;i<=7;i++) h += '<i class="'+(i<qNo?'on':i===qNo?'now':'')+'"></i>';
+    s.innerHTML = h;
+    document.getElementById('qcount').textContent = String(qNo).padStart(2,'0')+' / 07';
+  }
+
+  function meterHTML(v){
+    let h=''; for(let i=0;i<5;i++) h += '<i class="'+(i<v?'on':'')+'"></i>'; return h;
+  }
+
+  function renderCard(){
+    const Q = QUESTIONS[qi];
+    renderCode(Q.hit);
+    renderSegs();
+    document.getElementById('concept').innerHTML = Q.conceptHTML;
+    document.getElementById('lead').innerHTML = Q.lead;
+    document.getElementById('qtext').innerHTML = Q.q;
+    document.getElementById('mstchip').textContent = '숙련도 '+Q.mastery+' / 5';
+    document.getElementById('freqchip').textContent = Q.freq;
+    document.getElementById('railMeter').innerHTML = meterHTML(Q.mastery);
+    document.getElementById('dueTxt').textContent = '오늘';
+
+    elOpts.innerHTML = Q.opts.map(function(o,i){
+      return '<button class="opt" role="radio" aria-checked="false" data-opt="'+i+'">'+
+        '<span class="num">'+(i+1)+'</span><span>'+o.t+'</span><span class="mark"></span></button>';
+    }).join('');
+
+    elSlot.innerHTML = EMPTY_HTML;
+
+    elSubmit.textContent = '제출';
+    elSubmit.disabled = true;
+    elSubmit.className = 'btn green';
+    elDkLabel.textContent = '모르겠어요';
+    elDk.className = 'btn cyan dk';
+  }
+
+  function resetCard(){
+    picked = -1; answered = false; usedDk = false;
+    renderCard();
+  }
+
+  elOpts.addEventListener('click', function(e){
+    const b = e.target.closest('[data-opt]');
+    if(!b || answered) return;
+    pick(parseInt(b.getAttribute('data-opt'),10));
+  });
+  function pick(i){
+    if(answered) return;
+    picked = i;
+    elOpts.querySelectorAll('[data-opt]').forEach(function(b,k){
+      b.setAttribute('aria-checked', String(k===i));
+    });
+    elSubmit.disabled = false;
+  }
+
+  function sparks(host){
+    const r = host.getBoundingClientRect();
+    for(let i=0;i<12;i++){
+      const s = document.createElement('span');
+      s.className = 'spark';
+      s.style.left = (r.width/2 + (Math.random()*70-35))+'px';
+      s.style.top  = '26px';
+      s.style.setProperty('--dx', (Math.random()*160-80).toFixed(0)+'px');
+      s.style.setProperty('--dy', (-30-Math.random()*54).toFixed(0)+'px');
+      s.style.background = i%2 ? 'var(--gold)' : 'var(--green)';
+      host.appendChild(s);
+      setTimeout(function(){ s.remove(); }, 620);
+    }
+  }
+  function flyXp(txt){
+    const p = document.getElementById('scorePanel');
+    const f = document.createElement('span');
+    f.className = 'xpfly'; f.textContent = txt;
+    f.style.left = '20px'; f.style.top = '52px';
+    p.appendChild(f);
+    setTimeout(function(){ f.remove(); }, 980);
+  }
+
+  function submit(){
+    if(answered || picked < 0) return;
+    answered = true;
+    const Q = QUESTIONS[qi];
+    const ok = picked === Q.answer;
+
+    elOpts.querySelectorAll('[data-opt]').forEach(function(b,k){
+      b.disabled = true;
+      if(k === Q.answer){ b.classList.add('right'); b.querySelector('.mark').textContent = '정답'; }
+      else if(k === picked){ b.classList.add('wrong'); b.querySelector('.mark').textContent = '내 선택'; }
+    });
+
+    if(ok){
+      sessionXp += 12; cntOk += 1;
+      document.getElementById('sessionXp').textContent = '+'+sessionXp;
+      document.getElementById('cntOk').textContent = cntOk;
+      elSlot.innerHTML =
+        '<div class="fb ok">'+
+          '<div class="head"><span class="ico">'+ICON.star+'</span><div>'+
+            '<div class="tagline pix">stage clear &nbsp;+12 xp</div>'+
+            '<h3>'+Q.okTitle+'</h3></div></div>'+
+          Q.okBody+
+          '<div class="gain"><span>숙련도 '+Q.mastery+' → '+(Q.mastery+1)+'</span><span>다음 복습 4일 뒤</span></div>'+
+          Q.also+
+        '</div>';
+      sparks(elSlot);
+      flyXp('+12 XP');
+      document.getElementById('railMeter').innerHTML = meterHTML(Q.mastery+1);
+      document.getElementById('dueTxt').textContent = 'D-4';
+      /* 정답이어도 "모르겠어요"는 그대로 — 라벨만 정직하게 바뀜 */
+      elDkLabel.textContent = '사실 찍었어요';
+    } else {
+      const d = Q.diag[picked] || Q.diag.find(Boolean);
+      elSlot.innerHTML =
+        '<div class="fb no">'+
+          '<div class="head"><span class="ico">'+ICON.bulb+'</span><div>'+
+            '<div class="tagline pix">what you mixed up</div>'+
+            '<h3>'+d.t+'</h3></div></div>'+
+          d.b+
+          '<div class="gain"><span>숙련도 '+Q.mastery+' → '+Math.max(0,Q.mastery-1)+'</span><span>다음 복습 내일</span><span>페널티 없음</span></div>'+
+          Q.also+
+        '</div>';
+      document.getElementById('railMeter').innerHTML = meterHTML(Math.max(0,Q.mastery-1));
+      document.getElementById('dueTxt').textContent = '내일';
+    }
+
+    elSubmit.textContent = '다음 문제 ▶';
+    elSubmit.className = 'btn';
+    elSubmit.disabled = false;
+  }
+
+  function dontKnow(){
+    const Q = QUESTIONS[qi];
+    const wasRight = answered && picked === Q.answer;
+    usedDk = true;
+    cntDk += 1;
+    document.getElementById('cntDk').textContent = cntDk;
+
+    elOpts.querySelectorAll('[data-opt]').forEach(function(b,k){
+      b.disabled = true;
+      if(k === Q.answer){ b.classList.add('right'); b.querySelector('.mark').textContent = '정답'; }
+    });
+
+    const head = wasRight ? '맞혔지만, 찍은 건 찍은 겁니다' : '잘 눌렀습니다';
+    const lead = wasRight
+      ? '<p>정답 표시는 그대로 두고, 숙련도만 실제에 맞게 되돌립니다. 확신 없이 맞힌 문제는 <b>맞힌 적 없는 문제보다 위험합니다</b> — 다시 안 나오거든요.</p>'
+      : '<p>모른다고 말하는 순간 이 개념은 <b>대기열 맨 앞</b>으로 옵니다. 찍어서 맞히면 같은 개념을 다시 만나기까지 4일이 걸리지만, 모른다고 하면 내일 다시 옵니다.</p>';
+
+    elSlot.innerHTML =
+      '<div class="fb hint">'+
+        '<div class="head"><span class="ico">'+ICON.bulb+'</span><div>'+
+          '<div class="tagline pix">skip = smart &nbsp;·&nbsp; no penalty</div>'+
+          '<h3>'+head+'</h3></div></div>'+
+        lead+
+        '<ul>'+
+          '<li>정답은 <b>'+(Q.answer+1)+'번</b> — 해설을 지금 바로 펼쳐 뒀습니다.</li>'+
+          '<li>숙련도 '+Q.dk.from+' → '+Q.dk.to+' 로 조정 (기록이 정확해집니다)</li>'+
+          '<li>다음 복습이 <b>'+Q.dk.next+'</b> 로 당겨집니다</li>'+
+        '</ul>'+
+        Q.okBody+
+      '</div>';
+
+    document.getElementById('railMeter').innerHTML = meterHTML(Q.dk.to);
+    document.getElementById('dueTxt').textContent = '내일';
+    answered = true;
+    elSubmit.textContent = '다음 문제 ▶';
+    elSubmit.className = 'btn';
+    elSubmit.disabled = false;
+    elDkLabel.textContent = '기록됨 ✓';
+    elDk.className = 'btn gray dk';
+  }
+
+  function next(){
+    qi = (qi + 1) % QUESTIONS.length;
+    qNo = qNo >= 7 ? 1 : qNo + 1;
+    resetCard();
+    document.getElementById('scCard').scrollIntoView({block:'start', behavior:'smooth'});
+  }
+
+  elSubmit.addEventListener('click', function(){ answered ? next() : submit(); });
+  elDk.addEventListener('click', function(){ if(!usedDk) dontKnow(); });
+
+  /* ---------------- 키보드 ---------------- */
+  document.addEventListener('keydown', function(e){
+    if(e.metaKey || e.ctrlKey || e.altKey) return;
+    const tag = (e.target.tagName||'').toLowerCase();
+    if(tag === 'input' || tag === 'textarea') return;
+
+    if(e.key === 'Escape'){ closePop(); return; }
+
+    if(active === 'path'){
+      if(e.key === 'Enter' && !e.target.closest('button')){ e.preventDefault(); go('card'); resetCard(); }
+      return;
+    }
+    /* 카드 화면 */
+    if(e.key >= '1' && e.key <= '3'){ e.preventDefault(); pick(parseInt(e.key,10)-1); return; }
+    if(e.key === 'Enter'){ if(!e.target.closest('button')){ e.preventDefault(); if(!answered) submit(); } return; }
+    if(e.key === ' ' || e.code === 'Space'){
+      if(e.target.closest('button')) return;
+      e.preventDefault(); if(answered) next(); return;
+    }
+    if(e.key === '?'){ e.preventDefault(); if(!usedDk) dontKnow(); return; }
+  });
+
+  renderCard();
+})();
+</script>
+</body>
+</html>

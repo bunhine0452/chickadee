@@ -1,0 +1,233 @@
+/* ==========================================================================
+   레이어 3: 컴포넌트 기본형
+   ========================================================================== */
+
+/* ── 트랙 태그 ─────────────────────────────────────────────────────────────
+   색은 언제나 텍스트 라벨과 함께. 색맹 사용자도 T0/T1/T2 를 읽는다. */
+.tag {
+  display: inline-flex; align-items: center; gap: var(--s1);
+  font-size: var(--fs-13); font-weight: var(--fw-semi);
+  letter-spacing: var(--tr-label);
+  line-height: 1.5;
+  padding: 2px var(--s2);
+  border-radius: var(--r1);
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.tag--t0 { color: var(--t0); background: var(--t0-wash); border-color: var(--t0-rule); }
+.tag--t1 { color: var(--t1); background: var(--t1-wash); border-color: var(--t1-rule); }
+.tag--t2 { color: var(--t2); background: var(--t2-wash); border-color: var(--t2-rule); }
+.tag--gap {
+  color: var(--mark); background: var(--mark-wash);
+  border-color: var(--mark-rule); border-style: dashed;
+}
+.tag--quiet { color: var(--ink-3); background: transparent; border-color: var(--rule); }
+
+/* ── 버튼 ───────────────────────────────────────────────────────────────────
+   장식은 상호작용하는 것에만. 정지 상태의 그림자는 없다. */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--s2);
+  min-height: 44px;
+  padding: 0 var(--s6);
+  font-size: var(--fs-17);
+  font-weight: var(--fw-semi);
+  border-radius: var(--r2);
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease),
+              border-color var(--dur-fast) var(--ease),
+              transform var(--dur-fast) var(--ease),
+              box-shadow var(--dur-fast) var(--ease);
+}
+/* 1차: 잉크 도장. 색이 아니라 잉크 그 자체가 1차 행동을 뜻한다. */
+.btn--ink { background: var(--ink); color: var(--ink-inverse); box-shadow: var(--lift-1); }
+.btn--ink:hover { transform: translateY(-1px); box-shadow: var(--lift-2); }
+.btn--ink:active { transform: translateY(0); box-shadow: var(--lift-1); }
+/* 2차: 괘선만 */
+.btn--line { border-color: var(--rule-strong); color: var(--ink); }
+.btn--line:hover { background: var(--paper-hover); }
+/* 3차: 조용한 텍스트 버튼. "모르겠어요" 가 벌처럼 보이지 않게 1차와 같은 크기. */
+.btn--quiet { color: var(--ink-2); }
+.btn--quiet:hover { background: var(--paper-hover); }
+.btn--sm { min-height: 36px; padding: 0 var(--s4); font-size: var(--fs-15); }
+.btn[disabled] { opacity: .5; cursor: not-allowed; }
+
+/* 키 힌트 */
+.kbd {
+  font-family: var(--font-mono); font-size: var(--fs-13); font-weight: var(--fw-medium);
+  line-height: 1; padding: 4px 6px; border-radius: var(--r1);
+  border: 1px solid currentColor; opacity: .62; word-break: normal;
+}
+
+/* ── 카드 = 도판 (한 장 = 한 개념) ────────────────────────────────────────── */
+.plate-card {
+  background: var(--paper-plate);
+  border: 1px solid var(--rule);
+  border-radius: var(--r3);
+  padding: var(--s7);
+}
+.plate-card--gap { border-style: dashed; border-color: var(--mark-rule); background: transparent; }
+
+/* ── 관찰 눈금 (숙련도) ─────────────────────────────────────────────────────
+   점수도 퍼센트도 아니다. 도감 체크리스트의 정(正) 자 눈금이다.
+   0=미기록 1=처음 봄 2=몇 번 봄 3=눈에 익음 */
+.gauge { display: inline-flex; gap: 3px; align-items: center; }
+.gauge i {
+  display: block; width: 5px; height: 15px; border-radius: 1px;
+  background: transparent; box-shadow: inset 0 0 0 1px var(--rec-off);
+  transition: background var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+.gauge i.on { background: var(--rec-on); box-shadow: none; }
+.gauge[data-level="0"] i { background: transparent; box-shadow: inset 0 0 0 1px var(--mark-rule); }
+.gauge--t0 i.on { background: var(--t0); }
+.gauge--t1 i.on { background: var(--t1); }
+.gauge--t2 i.on { background: var(--t2); }
+
+/* ── 코드 블록 ───────────────────────────────────────────────────────────── */
+.code {
+  background: var(--code-paper);
+  border: 1px solid var(--code-rule);
+  border-radius: var(--r2);
+  overflow: hidden;
+  max-width: none;
+}
+.code pre {
+  margin: 0; overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 1rem;                /* 16px */
+  line-height: var(--lh-code);
+  color: var(--code-ink);
+  word-break: normal; overflow-wrap: normal; white-space: pre;
+  letter-spacing: 0;
+  tab-size: 2;
+}
+.code .ln {
+  display: grid; grid-template-columns: 3.25rem 1fr;
+}
+.code .ln > .n {
+  color: var(--code-gutter);
+  background: var(--code-gutter-bg);
+  text-align: right;
+  padding-right: var(--s3);
+  user-select: none;
+  border-right: 1px solid var(--code-rule);
+}
+.code .ln > .c { padding-left: var(--s4); padding-right: var(--s4); }
+.code .ln.hl > .c { background: var(--code-hl); }
+.code .ln:first-child > .n,
+.code .ln:first-child > .c { padding-top: var(--s4); }
+.code .ln:last-child > .n,
+.code .ln:last-child > .c { padding-bottom: var(--s4); }
+
+.k  { color: var(--syn-key);   font-weight: var(--fw-medium); }
+.st { color: var(--syn-str); }
+.nu { color: var(--syn-num); }
+.fn { color: var(--syn-fn); }
+.ty { color: var(--syn-type); }
+.cm { color: var(--syn-com);   font-style: italic; }
+.pu { color: var(--syn-punct); }
+.jx { color: var(--syn-jsx); }
+
+/* 지목 대상 토큰 — 지시선이 여기에 닿는다 */
+.tok {
+  background: var(--code-hl);
+  box-shadow: 0 0 0 1.5px var(--code-hl-rule);
+  border-radius: 3px;
+  padding: 1px 2px;
+  color: inherit;
+}
+
+/* ── 지시선 (leader line) ────────────────────────────────────────────────────
+   도감의 핵심 장치: "여기 검은 머리깃을 보라".
+   장식이 아니라 T0 지목형 문제의 형식 그 자체다. */
+.plate {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--measure-note);
+  gap: var(--s10);
+  align-items: start;
+  max-width: none;
+}
+.leader { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+.leader path { fill: none; stroke: var(--code-hl-rule); stroke-width: 1.5; stroke-linecap: round; }
+.leader circle { fill: none; stroke: var(--code-hl-rule); stroke-width: 1.5; }
+.leader.draw path { stroke-dasharray: var(--len); stroke-dashoffset: var(--len);
+  animation: leader-draw 520ms var(--ease-out) forwards; }
+.leader.draw circle { opacity: 0; animation: fade-in 200ms var(--ease) 460ms forwards; }
+@keyframes leader-draw { to { stroke-dashoffset: 0; } }
+@keyframes fade-in { to { opacity: 1; } }
+
+.fieldnote { padding-top: var(--s2); }
+.fieldnote .label { color: var(--ink-3); margin-bottom: var(--s2); }
+.fieldnote p { font-size: var(--fs-15); line-height: var(--lh-body); color: var(--ink-2); max-width: none; }
+.fieldnote code {
+  font-family: var(--font-mono); font-size: .92em;
+  color: var(--ink); background: var(--paper-sunken);
+  border-radius: 3px; padding: 0 3px; word-break: normal;
+}
+
+@media (max-width: 900px) {
+  .plate { grid-template-columns: 1fr; gap: var(--s5); }
+  .leader { display: none; }
+  .fieldnote { border-left: 2px solid var(--code-hl-rule); padding-left: var(--s4); }
+}
+
+/* ── 경로 노드 ─────────────────────────────────────────────────────────────── */
+.node {
+  position: absolute; left: 50%; top: 15px; transform: translateX(-50%);
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--paper); z-index: 1;
+}
+.node--done   { background: var(--ink); box-shadow: 0 0 0 3px var(--paper); }
+.node--now    { background: var(--paper); box-shadow: inset 0 0 0 4px var(--ink), 0 0 0 3px var(--paper); }
+.node--locked { background: var(--paper); box-shadow: inset 0 0 0 1.5px var(--rule-strong), 0 0 0 3px var(--paper); }
+
+/* ── 도장 (기록됨) — 기쁨은 순간에 ────────────────────────────────────────── */
+.stamp {
+  display: inline-flex; align-self: flex-start; align-items: center; gap: var(--s2);
+  font-size: var(--fs-15); font-weight: var(--fw-semi);
+  color: var(--ink); border: 2px solid var(--ink);
+  border-radius: var(--r2); padding: var(--s2) var(--s4);
+}
+.stamp.in { animation: stamp-in 460ms var(--ease-out) both; }
+@keyframes stamp-in {
+  0%   { opacity: 0; transform: scale(1.7) rotate(-9deg); }
+  55%  { opacity: 1; transform: scale(.94) rotate(2deg); }
+  100% { opacity: 1; transform: scale(1) rotate(-2deg); }
+}
+
+/* ── 박새 도판 ───────────────────────────────────────────────────────────────
+   도감의 판화처럼 얇은 윤곽선을 둔다. 어두운 배경에서 검은 머리깃이
+   바탕에 묻히지 않게 하는 기능적 선이다(장식이 아니다). */
+.bird .cap, .bird .back, .bird .wing, .bird .breast, .bird .bill {
+  stroke: var(--bird-edge); stroke-width: .6; paint-order: fill;
+}
+.bird .cap    { fill: var(--bird-cap); }
+.bird .cheek  { fill: var(--bird-cheek); }
+.bird .breast { fill: var(--bird-breast); }
+.bird .back   { fill: var(--bird-back); }
+.bird .wing   { fill: var(--bird-wing); }
+.bird .bill   { fill: var(--bird-bill); }
+.bird .eye    { fill: var(--bird-eye); }
+.bird .leg    { stroke: var(--bird-leg); stroke-width: 2; stroke-linecap: round; fill: none; }
+.bird [class] { transition: fill var(--dur-slow) var(--ease); }
+/* 미기록 = 실루엣. 아직 못 본 새는 색이 없다. */
+.bird[data-state="sil"] .cap,
+.bird[data-state="sil"] .cheek,
+.bird[data-state="sil"] .breast,
+.bird[data-state="sil"] .back,
+.bird[data-state="sil"] .wing,
+.bird[data-state="sil"] .bill,
+.bird[data-state="sil"] .eye { fill: var(--sil); }
+.bird[data-state="sil"] .leg { stroke: var(--sil); }
+.bird[data-state="sil"] .cap, .bird[data-state="sil"] .back,
+.bird[data-state="sil"] .wing, .bird[data-state="sil"] .breast,
+.bird[data-state="sil"] .bill { stroke: var(--sil); }
+.bird.hop { animation: hop 620ms var(--ease-out); }
+@keyframes hop {
+  0%,100% { transform: translateY(0) rotate(0); }
+  28%     { transform: translateY(-7px) rotate(-5deg); }
+  55%     { transform: translateY(0) rotate(1deg); }
+  74%     { transform: translateY(-2px); }
+}

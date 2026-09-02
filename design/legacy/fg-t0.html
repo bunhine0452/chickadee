@@ -1,0 +1,2328 @@
+<!doctype html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chickadee 도감 · T0 문법</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   Chickadee — 도감(Field Guide) / T0 문법 카드
+   색은 판별 표시에만. 정적 장식 0. 대비 AAA(7:1) 검증 완료.
+   ============================================================ */
+
+:root{
+  color-scheme: light;
+  --paper:#F6F2E9;   /* 종이 */
+  --plate:#FFFDF6;   /* 도판 */
+  --sunk:#EEE9DC;    /* 눌린 면 */
+  --tint-ok:#E3EBDE;
+  --tint-miss:#F6E6DE;
+  --ink:#141310;     /* 16.63:1 on paper */
+  --ink-2:#4E4837;   /*  8.15:1 on paper */
+  --mark:#2A5235;    /*  7.98:1 — 판별 표시 */
+  --miss:#872D13;    /*  7.78:1 — 놓침 */
+  --rule:#CDC4AE;    /* 헤어라인(비의미) */
+  --rule-2:#8E8570;  /* 3.28:1 — 의미 있는 선 */
+  --sel:#E8E2CF;
+  --f-body:"IBM Plex Sans KR","Pretendard Variable",Pretendard,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --f-serif:"Newsreader","Iowan Old Style","Palatino Linotype",Georgia,"Nanum Myeongjo",serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  --rail:236px;
+  --gap:36px;
+  --dur:200ms;
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --paper:#191712; --plate:#211E17; --sunk:#131109;
+  --tint-ok:#1D241C; --tint-miss:#261A14;
+  --ink:#F3EEE1;   /* 15.46:1 */
+  --ink-2:#C0B8A3; /*  9.06:1 */
+  --mark:#9BCBA3;  /*  9.78:1 */
+  --miss:#EFA98F;  /*  9.16:1 */
+  --rule:#403C2F; --rule-2:#7A7462; --sel:#322E23;
+}
+@media (prefers-reduced-motion: reduce){
+  :root{--dur:0.01ms}
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+html{font-size:16px}
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:var(--f-body); font-size:1rem; line-height:1.75;
+  word-break:keep-all; overflow-wrap:break-word;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  padding-bottom:82px;
+}
+h1,h2,h3,h4,p,ul,ol,figure{margin:0}
+ul,ol{padding:0;list-style:none}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+a{color:var(--ink);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--mark);outline-offset:2px;border-radius:2px}
+[hidden]{display:none!important}
+code,kbd,samp{font-family:var(--f-mono)}
+
+/* ---- 본문 조판: 행 길이 = 39em ≈ 한글 39자 --------------- */
+.prose{font-size:1.0625rem;line-height:1.75;max-width:39em}
+.prose + .prose{margin-top:.85em}
+.prose code{font-size:.94em;background:var(--sunk);padding:.08em .3em;border-radius:2px;
+  border-bottom:1px solid var(--rule)}
+.prose strong{font-weight:600;box-shadow:inset 0 -0.42em 0 var(--sel)}
+.lede{font-size:1.0625rem;line-height:1.75;max-width:36em;color:var(--ink-2)}
+
+/* ---- 작은 라벨: 최소 13px ------------------------------- */
+.tag{font-family:var(--f-mono);font-size:.8125rem;line-height:1;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+.latin{font-family:var(--f-serif);font-style:italic;font-size:1.0625rem;
+  line-height:1.4;color:var(--ink-2);letter-spacing:.005em}
+
+.wrap{max-width:940px;margin:0 auto;padding:0 28px}
+
+/* ============ 표제부 ============ */
+.masthead{border-bottom:1px solid var(--rule-2);background:var(--paper);
+  position:sticky;top:0;z-index:40}
+.masthead .wrap{display:flex;align-items:center;gap:20px;min-height:60px;flex-wrap:wrap}
+.brand{font-family:var(--f-serif);font-size:1.25rem;font-weight:600;letter-spacing:.01em;
+  display:flex;align-items:baseline;gap:9px}
+.brand .bi{font-family:var(--f-body);font-size:.8125rem;font-weight:600;letter-spacing:.14em;
+  color:var(--ink-2)}
+.mh-sp{flex:1}
+.mh-deck{font-family:var(--f-mono);font-size:.8125rem;color:var(--ink-2);
+  font-variant-numeric:tabular-nums}
+.btn{border:1px solid var(--rule-2);border-radius:2px;padding:7px 13px;
+  font-size:.875rem;font-weight:500;line-height:1.3;background:var(--plate);
+  transition:background var(--dur) ease}
+.btn:hover{background:var(--sel)}
+.btn[aria-pressed="true"],.btn.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn-lead{border-color:var(--ink);font-weight:600}
+.btn-ghost{border-color:transparent;padding:6px 9px;text-decoration:underline;
+  text-decoration-color:var(--rule-2);text-underline-offset:4px}
+.btn-ghost:hover{background:var(--sel)}
+.btn:disabled{opacity:1;color:var(--ink-2);border-style:dashed;cursor:not-allowed}
+
+/* ============ 학습 스택 바 (복귀 동선) ============ */
+.stackbar{position:sticky;top:60px;z-index:35;background:var(--sunk);
+  border-bottom:1px solid var(--rule-2)}
+.stackbar .wrap{padding-top:11px;padding-bottom:11px}
+.sb-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.sb-label{font-family:var(--f-mono);font-size:.8125rem;font-weight:600;letter-spacing:.08em;
+  color:var(--ink-2);white-space:nowrap}
+.sb-path{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:.9375rem}
+.sb-path .sep{color:var(--ink-2)}
+.sb-path .here{font-weight:600;border-bottom:2px solid var(--mark)}
+.sb-note{font-size:.875rem;color:var(--ink-2);margin-top:5px;max-width:44em}
+
+/* ============ 도감 페이지 ============ */
+.page{padding:38px 0 56px}
+.card[hidden]{display:none}
+
+/* ---- 도판(코드) + 여백(라벨) ---- */
+.figure{position:relative;display:grid;
+  grid-template-columns:minmax(0,1fr) var(--rail);column-gap:var(--gap);
+  align-items:start;margin-bottom:30px}
+.plate-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding-bottom:9px;margin-bottom:0}
+.chip{font-family:var(--f-mono);font-size:.8125rem;font-weight:600;line-height:1;
+  letter-spacing:.06em;background:var(--ink);color:var(--paper);padding:5px 7px;border-radius:2px}
+.path{font-family:var(--f-mono);font-size:.8125rem;color:var(--ink-2);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.path b{color:var(--ink);font-weight:600}
+.plate-tools{margin-left:auto;display:flex;gap:2px}
+.plate-tools .btn{padding:5px 9px;font-size:.8125rem}
+
+.plate{background:var(--plate);border:1px solid var(--rule-2);border-radius:2px;
+  overflow-x:auto;overflow-y:hidden;position:relative;
+  scrollbar-width:thin}
+.plate.tall{max-height:44vh;overflow-y:auto}
+.code{font-family:var(--f-mono);font-size:1rem;line-height:1.85;
+  white-space:normal;width:max-content;min-width:100%;padding:12px 0;tab-size:2}
+.ln{display:grid;grid-template-columns:60px minmax(0,1fr)}
+.lno{position:sticky;left:0;z-index:2;background:var(--plate);color:var(--ink-2);
+  text-align:right;padding-right:16px;user-select:none;font-variant-numeric:tabular-nums;
+  font-size:.9375rem}
+.src{padding-right:22px;white-space:pre}
+.ln.target{background:var(--sunk)}
+.ln.target .lno{background:var(--sunk);color:var(--ink);font-weight:600}
+.ln.extra{display:none}
+.plate.open .ln.extra{display:grid}
+.ln.fold{cursor:pointer;color:var(--ink-2)}
+.ln.fold .src{font-size:.875rem;font-family:var(--f-body);white-space:normal}
+.ln.fold:hover{background:var(--sel)}
+.plate.open .ln.fold{display:none}
+.plate.wrap .code{width:auto;min-width:0}
+.plate.wrap .src{white-space:pre-wrap;overflow-wrap:anywhere}
+.plate.wrap{overflow-x:hidden}
+.k{font-weight:600}
+.c{color:var(--ink-2);font-style:italic}
+
+/* ---- 짚을 수 있는 토큰 ---- */
+.tok{position:relative;padding:1px 2px;margin:0 -2px;border-radius:2px;
+  border-bottom:1px dotted var(--rule-2);
+  transition:background var(--dur) ease}
+.tok:hover{background:var(--sel)}
+.tok[aria-checked="true"]{background:var(--sel);border-bottom:2px solid var(--ink);
+  padding-bottom:0}
+.answered .tok{cursor:default;border-bottom-color:transparent}
+.answered .tok:hover{background:none}
+.tok.marked{border-bottom:2px solid var(--mark);padding-bottom:0;background:none}
+.tok.wrongpick{border-bottom:2px solid var(--miss);padding-bottom:0}
+
+/* ---- 빈칸 ---- */
+.blank{display:inline-block;min-width:7ch;text-align:center;
+  border-bottom:2px dotted var(--rule-2);color:var(--ink-2)}
+.blank.filled{color:var(--ink);font-weight:600;border-bottom-color:var(--ink);
+  animation:inkin 200ms ease-out}
+.blank.marked{border-bottom-color:var(--mark)}
+@keyframes inkin{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+
+/* ---- 지시선 + 여백 라벨 ---- */
+.leaders{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;
+  overflow:visible;z-index:5}
+.leaders path{fill:none;stroke:var(--mark);stroke-width:1.25;
+  stroke-linecap:round;stroke-linejoin:round}
+.leaders circle,.leaders polygon{fill:var(--mark)}
+.rail{position:relative}
+.lab{position:absolute;left:0;width:100%;padding-left:13px;
+  border-left:2px solid var(--mark);
+  font-size:.9375rem;line-height:1.6;visibility:hidden}
+.rail.on .lab{visibility:visible;animation:labin 240ms ease-out both}
+.lab .n{display:block;font-family:var(--f-mono);font-size:.8125rem;font-weight:600;
+  line-height:1;color:var(--mark);margin-bottom:5px}
+.lab code{font-size:.9em}
+@keyframes labin{from{opacity:0;transform:translateX(-5px)}to{opacity:1;transform:none}}
+.rail-fallback{display:none}
+.anchored::after{content:attr(data-mark);font-family:var(--f-body);font-size:.8125rem;
+  font-weight:600;vertical-align:.45em;color:var(--mark);margin-left:1px}
+
+/* ---- 종명 + 관찰 기록 ---- */
+.name-row{border-top:2px solid var(--ink);padding-top:14px}
+.sp-name{font-size:1.75rem;line-height:1.3;font-weight:700;letter-spacing:-.01em}
+.sp-latin{margin-top:2px}
+.obs{margin-top:14px;display:flex;align-items:center;gap:10px 22px;flex-wrap:wrap;
+  padding:10px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.obs-item{display:flex;align-items:baseline;gap:8px;font-size:.9375rem}
+.obs-item .ok{font-family:var(--f-mono);font-size:.8125rem;font-weight:600;
+  letter-spacing:.08em;color:var(--ink-2)}
+.dots{font-family:var(--f-mono);letter-spacing:.16em;font-size:1rem}
+.dots .f{color:var(--mark)}
+.dots .e{color:var(--rule-2)}
+.obs.bump .dots{animation:pop 320ms cubic-bezier(.2,1.5,.4,1)}
+@keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.22)}100%{transform:scale(1)}}
+/* 본문 단 폭. 안쪽 .prose(17px)가 39em = 한글 39자가 되도록 잡은 값이며,
+   왼쪽 도판 단(plate-col)과 같은 폭이라 여백선이 정확히 맞물린다 */
+.body{max-width:41.5em}
+
+/* ============ 문제 ============ */
+.qbox{margin-top:26px}
+.q-kind{display:inline-block;font-family:var(--f-mono);font-size:.8125rem;font-weight:600;
+  letter-spacing:.1em;color:var(--ink-2);border:1px solid var(--rule-2);border-radius:2px;
+  padding:3px 7px;margin-bottom:11px}
+.q-ask{font-size:1.125rem;line-height:1.7;font-weight:600;max-width:36em}
+.q-hint{font-size:.9375rem;color:var(--ink-2);margin-top:7px;max-width:36em}
+.opts{margin-top:16px;display:grid;gap:8px;max-width:36em}
+.opt{display:flex;align-items:flex-start;gap:12px;width:100%;text-align:left;
+  border:1px solid var(--rule-2);border-radius:2px;background:var(--plate);
+  padding:12px 14px;transition:background var(--dur) ease,border-color var(--dur) ease}
+.opt:hover{background:var(--sel)}
+.okey{flex:none;font-family:var(--f-mono);font-size:.8125rem;font-weight:600;
+  width:22px;height:22px;display:grid;place-items:center;
+  border:1px solid var(--rule-2);border-radius:2px;color:var(--ink-2);margin-top:2px}
+.olab{font-size:1rem;line-height:1.6}
+.olab code{font-family:var(--f-mono);font-size:1rem;font-weight:600}
+.opt[aria-checked="true"]{background:var(--sel);border-color:var(--ink)}
+.opt[aria-checked="true"] .okey{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.answered .opt{cursor:default}
+.answered .opt:hover{background:var(--plate)}
+.answered .opt[aria-checked="true"]:hover{background:var(--sel)}
+.opt.is-right{border-color:var(--mark);border-left-width:4px;background:var(--tint-ok)}
+.opt.is-wrongpick{border-color:var(--miss);border-left-width:4px;background:var(--tint-miss)}
+.opt .verdictmark{margin-left:auto;font-family:var(--f-mono);font-size:.8125rem;
+  font-weight:600;white-space:nowrap;padding-top:3px}
+.opt.is-right .verdictmark{color:var(--mark)}
+.opt.is-wrongpick .verdictmark{color:var(--miss)}
+.qactions{margin-top:16px;display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+
+/* ============ 판정란 (피드백 슬롯 · 예약됨) ============ */
+.verdict{margin-top:26px;border-top:1px solid var(--rule-2);padding-top:15px;
+  min-height:176px;border-left:3px solid transparent;padding-left:0;
+  transition:border-color var(--dur) ease,padding-left var(--dur) ease}
+.verdict.ok{border-left-color:var(--mark);padding-left:16px}
+.verdict.miss{border-left-color:var(--miss);padding-left:16px}
+.v-slot{font-family:var(--f-mono);font-size:.8125rem;font-weight:600;letter-spacing:.12em;
+  color:var(--ink-2)}
+.v-empty{font-size:.9375rem;color:var(--ink-2);margin-top:9px;max-width:34em}
+.v-head{font-size:1.125rem;font-weight:700;line-height:1.5;margin-top:8px}
+.verdict.ok .v-head{color:var(--mark)}
+.verdict.miss .v-head{color:var(--miss)}
+.v-body{margin-top:10px;animation:rise 220ms ease-out both}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.edge{margin-top:16px;background:var(--sunk);border:1px solid var(--rule);border-radius:2px;
+  padding:14px 16px;max-width:41.5em}
+.edge-t{font-family:var(--f-mono);font-size:.8125rem;font-weight:600;letter-spacing:.1em;
+  color:var(--ink-2);margin-bottom:7px}
+.edge .prose{font-size:1rem}
+.mini{font-family:var(--f-mono);font-size:.9375rem;line-height:1.85;
+  background:var(--plate);border:1px solid var(--rule);border-radius:2px;
+  padding:9px 12px;margin-top:9px;white-space:pre;overflow-x:auto}
+.mini.wrapok{white-space:pre-wrap}
+.v-actions{margin-top:16px;display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+.v-nudge{font-size:.9375rem;color:var(--ink-2);margin-top:13px;max-width:36em}
+
+/* ============ 카드 푸터 ============ */
+.card-foot{margin-top:22px;padding-top:15px;border-top:1px solid var(--rule);
+  display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.foot-note{font-size:.875rem;color:var(--ink-2)}
+</style>
+<style>
+/* ============ 4단 사다리 (놓쳤어요) ============ */
+.ladder{margin-top:26px;border:1px solid var(--rule-2);border-radius:2px;
+  background:var(--plate);animation:rise 220ms ease-out both;
+  /* 본문 단(39em)을 넘어 여백 단까지 차지한다 — 안쪽 본문은 그대로 39em */
+  width:calc(100% + var(--rail) + var(--gap));max-width:calc(100vw - 56px)}
+@media (max-width:920px){.ladder{width:100%}}
+.ladder-head{padding:16px 20px 14px;border-bottom:1px solid var(--rule)}
+.ladder-title{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.ladder-title h3{font-size:1.25rem;font-weight:700;line-height:1.4}
+.ladder-title .tag{margin-left:auto}
+.gain{margin-top:13px;background:var(--tint-ok);border:1px solid var(--mark);border-radius:2px;
+  padding:12px 15px}
+.gain-t{font-family:var(--f-mono);font-size:.8125rem;font-weight:600;letter-spacing:.1em;
+  color:var(--mark);margin-bottom:9px}
+.gain-row{display:flex;align-items:baseline;gap:10px;font-size:.9375rem;flex-wrap:wrap;
+  padding:3px 0}
+.gain-row .lbl{color:var(--ink-2);min-width:7.5em}
+.gain-row .was{text-decoration:line-through;text-decoration-thickness:1px;color:var(--ink-2)}
+.gain-row .arw{color:var(--mark);font-weight:600}
+.gain-row .now{font-weight:600;animation:labin 300ms ease-out both}
+.gain-note{margin-top:10px;font-size:.9375rem;line-height:1.7;max-width:36em}
+
+.rungs{list-style:none}
+.rung{border-bottom:1px solid var(--rule)}
+.rung:last-child{border-bottom:0}
+.rung-btn{display:flex;align-items:flex-start;gap:14px;width:100%;text-align:left;
+  padding:15px 20px;transition:background var(--dur) ease}
+.rung-btn:hover{background:var(--sel)}
+.rung-n{flex:none;font-family:var(--f-mono);font-size:.8125rem;font-weight:600;
+  width:24px;height:24px;display:grid;place-items:center;border-radius:2px;
+  border:1px solid var(--rule-2);color:var(--ink-2)}
+.rung[data-open="1"] .rung-n{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.rung-txt{min-width:0}
+.rung-h{font-size:1.0625rem;font-weight:600;line-height:1.5}
+.rung-s{font-size:.9375rem;color:var(--ink-2);line-height:1.6;margin-top:2px}
+.rung-caret{margin-left:auto;flex:none;font-family:var(--f-mono);font-size:.9375rem;
+  color:var(--ink-2);padding-top:3px}
+.rung-panel{padding:2px 20px 24px 58px;animation:rise 200ms ease-out both}
+@media (max-width:700px){.rung-panel{padding-left:20px}}
+
+.layer{border-top:1px solid var(--rule);padding-top:14px;margin-top:16px}
+.layer:first-child{border-top:0;padding-top:4px;margin-top:0}
+.layer-t{font-family:var(--f-mono);font-size:.8125rem;font-weight:600;letter-spacing:.1em;
+  color:var(--ink-2);margin-bottom:8px}
+.steps{counter-reset:s;margin-top:10px;display:grid;gap:11px;max-width:41em}
+.steps li{counter-increment:s;position:relative;padding-left:38px;
+  font-size:1.0625rem;line-height:1.7}
+.steps li::before{content:counter(s);position:absolute;left:0;top:4px;
+  font-family:var(--f-mono);font-size:.8125rem;
+  font-weight:600;color:var(--ink-2);border:1px solid var(--rule-2);border-radius:2px;
+  width:24px;height:24px;display:grid;place-items:center}
+.steps code{font-family:var(--f-mono);font-size:.94em;background:var(--sunk);
+  padding:.08em .3em;border-radius:2px}
+
+/* 선행 개념 진단 */
+.pre-list{display:grid;gap:8px;margin:14px 0 0;max-width:41.5em}
+.pre-item{display:flex;align-items:flex-start;gap:13px;padding:12px 14px;
+  border:1px solid var(--rule);border-radius:2px;background:var(--paper)}
+.pre-item.gap{border-color:var(--miss);border-left-width:4px;background:var(--tint-miss)}
+.pre-item.done{border-color:var(--mark);border-left-width:4px;background:var(--tint-ok)}
+.pre-state{flex:none;font-family:var(--f-mono);font-size:.8125rem;font-weight:600;
+  padding-top:3px;min-width:5.5em}
+.pre-item.gap .pre-state{color:var(--miss)}
+.pre-item.done .pre-state{color:var(--mark)}
+.pre-nm{font-size:1rem;font-weight:600;line-height:1.5}
+.pre-lat{font-family:var(--f-serif);font-style:italic;font-size:.9375rem;color:var(--ink-2)}
+.diagnosis{margin-top:16px;padding:14px 16px;border:1px solid var(--rule-2);border-radius:2px;
+  background:var(--sunk);max-width:41.5em}
+.diagnosis .prose{font-size:1.0625rem}
+.branch-pick{display:grid;gap:8px;margin-top:14px;max-width:36em}
+.branch-pick .btn{text-align:left;padding:12px 15px;font-size:1rem;line-height:1.5}
+
+/* 다른 예시 */
+.exs{display:grid;gap:12px;margin-top:14px;max-width:41.5em}
+.ex{border:1px solid var(--rule);border-radius:2px;background:var(--paper);overflow:hidden}
+.ex-h{display:flex;align-items:baseline;gap:10px;padding:11px 14px 0;flex-wrap:wrap}
+.ex-h .path{font-size:.8125rem}
+.ex-h .btn-ghost{margin-left:auto;font-size:.875rem;padding:2px 6px}
+.ex .mini{margin:9px 14px 0;background:var(--plate)}
+.ex-note{padding:10px 14px 13px;font-size:1rem;line-height:1.7;color:var(--ink)}
+.ex-more{padding:0 14px 13px}
+
+/* 자유 질문 */
+.ask-state{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:13px}
+.keychip{font-family:var(--f-mono);font-size:.8125rem;font-weight:600;letter-spacing:.06em;
+  background:var(--sunk);border-radius:2px;padding:5px 9px;color:var(--ink-2)}
+.keychip.live{color:var(--mark);background:var(--tint-ok)}
+.prompt-box{width:100%;max-width:41.5em;min-height:230px;resize:vertical;
+  font-family:var(--f-mono);font-size:.9375rem;line-height:1.75;
+  background:var(--plate);color:var(--ink);border:1px solid var(--rule-2);border-radius:2px;
+  padding:13px 15px}
+.privacy{font-size:.9375rem;color:var(--ink-2);margin-top:11px;max-width:38em;
+  border-left:2px solid var(--rule-2);padding-left:12px}
+.chat{max-width:41.5em;display:grid;gap:11px;margin-top:6px}
+.bub{border:1px solid var(--rule);border-radius:2px;padding:12px 15px;background:var(--paper)}
+.bub.me{background:var(--sunk)}
+.bub-who{font-family:var(--f-mono);font-size:.8125rem;font-weight:600;letter-spacing:.08em;
+  color:var(--ink-2);margin-bottom:6px}
+.copied{font-size:.9375rem;font-weight:600;color:var(--mark)}
+
+/* ============ 미기록 종 ============ */
+.gap-head{border-bottom:2px solid var(--ink);padding-bottom:16px;margin-bottom:8px}
+.gap-head h2{font-size:2rem;line-height:1.25;font-weight:700;letter-spacing:-.015em}
+.gap-list{display:grid;gap:0}
+.gitem{border-bottom:1px solid var(--rule-2)}
+.gitem-btn{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;
+  width:100%;text-align:left;padding:19px 4px;transition:background var(--dur) ease}
+.gitem-btn:hover{background:var(--sel)}
+.gitem-nm{font-size:1.25rem;font-weight:700;line-height:1.4}
+.gitem-lat{margin-top:1px}
+.gitem-meta{font-family:var(--f-mono);font-size:.8125rem;color:var(--ink-2);margin-top:7px;
+  display:flex;gap:16px;flex-wrap:wrap}
+.gitem-open{font-family:var(--f-mono);font-size:.9375rem;color:var(--ink-2)}
+.gpanel{padding:4px 4px 28px;animation:rise 200ms ease-out both}
+.gsec{border-top:1px solid var(--rule);padding-top:13px;margin-top:16px;max-width:41.5em}
+.gsec:first-child{border-top:0;margin-top:0;padding-top:0}
+.gsec-t{font-family:var(--f-mono);font-size:.8125rem;font-weight:600;letter-spacing:.1em;
+  color:var(--ink-2);margin-bottom:8px}
+.swap{display:grid;gap:11px;margin-top:11px;max-width:41.5em}
+.swap-b{border:1px solid var(--rule);border-radius:2px;overflow:hidden;background:var(--paper)}
+.swap-b.now{border-left:4px solid var(--miss)}
+.swap-b.could{border-left:4px solid var(--mark)}
+.swap-t{font-family:var(--f-mono);font-size:.8125rem;font-weight:600;letter-spacing:.08em;
+  padding:9px 13px 0}
+.swap-b.now .swap-t{color:var(--miss)}
+.swap-b.could .swap-t{color:var(--mark)}
+.swap-b .mini{margin:7px 13px 13px;background:var(--plate)}
+
+/* ============ 단축키 푸터 ============ */
+.keys{position:fixed;left:0;right:0;bottom:0;z-index:45;background:var(--sunk);
+  border-top:1px solid var(--rule-2)}
+.keys .wrap{display:flex;align-items:center;gap:8px 20px;flex-wrap:wrap;
+  padding-top:11px;padding-bottom:11px;min-height:58px}
+.keyitem{display:flex;align-items:center;gap:8px;font-size:.875rem;line-height:1.4}
+.keyitem .mk{font-family:var(--f-mono);font-size:.75rem;color:var(--rule-2)}
+.keyitem.act .mk{color:var(--mark)}
+.keyitem.act .kname{font-weight:600}
+kbd{font-family:var(--f-mono);font-size:.8125rem;font-weight:600;line-height:1;
+  border:1px solid var(--rule-2);border-bottom-width:2px;border-radius:3px;
+  padding:4px 6px;background:var(--plate);color:var(--ink);white-space:nowrap}
+.keys .btn{margin-left:auto}
+
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* ============ 좁은 화면: 여백을 아래로 ============ */
+@media (max-width:920px){
+  .figure{grid-template-columns:minmax(0,1fr);row-gap:20px}
+  .leaders{display:none}
+  .rail{min-height:0!important}
+  .lab{position:static!important;width:auto;margin-bottom:12px}
+  .rail.on .rail-fallback{display:block;font-family:var(--f-mono);font-size:.8125rem;
+    font-weight:600;letter-spacing:.1em;color:var(--ink-2);margin-bottom:11px}
+  /* 본문 행 길이 제한(39em)은 좁은 화면에서도 그대로 둔다 */
+  .ladder-head,.rung-panel{padding-left:20px;padding-right:20px}
+}
+</style>
+</head>
+<body>
+<div class="sr" id="live" role="status" aria-live="polite"></div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="brand">Chickadee <span class="bi">도감</span></div>
+    <span class="tag">T0 · 문법</span>
+    <span class="mh-sp"></span>
+    <span class="mh-deck" id="deck">오늘의 덱 1/3</span>
+    <button class="btn" id="nav-gaps">미기록 종 5</button>
+    <button class="btn" id="theme" aria-pressed="false">어둡게</button>
+  </div>
+</header>
+
+<!-- ============ 학습 스택 (선행 개념으로 내려간 상태에서만) ============ -->
+<div class="stackbar" id="stackbar" hidden>
+  <div class="wrap">
+    <div class="sb-row">
+      <span class="sb-label">내려온 길</span>
+      <span class="sb-path" id="sb-path"></span>
+      <button class="btn btn-lead" id="sb-up" style="margin-left:auto">↩ 지금 위로 돌아가기</button>
+    </div>
+    <p class="sb-note">이 카드를 마치면 위로 자동으로 돌아갑니다. 위 카드에서 고른 답과 코드는 그대로 둡니다.</p>
+  </div>
+</div>
+
+<main>
+<!-- ================================================================
+     보기 1 — 문법 카드
+     ================================================================ -->
+<section class="view wrap page" id="view-card">
+
+<!-- ────────────── 카드 A · 지목형 ────────────── -->
+<article class="card" id="c-destr" data-card="destr" data-type="point"
+         data-correct="2" data-next="compr" data-concept="destr">
+  <div class="figure">
+    <div class="plate-col">
+      <div class="plate-head">
+        <span class="chip">TypeScript</span>
+        <span class="path">src/features/counter/<b>CounterPanel.tsx</b></span>
+        <span class="tag">43행</span>
+        <span class="plate-tools">
+          <button class="btn" data-tool="wrap">긴 줄 접기</button>
+          <button class="btn" data-tool="open">전체 보기</button>
+        </span>
+      </div>
+      <div class="plate">
+        <div class="code">
+<div class="ln fold"><span class="lno"></span><span class="src">⋯ 위로 5줄 더 보기</span></div>
+<div class="ln extra"><span class="lno">36</span><span class="src"><span class="k">import</span> { useState } <span class="k">from</span> "react";</span></div>
+<div class="ln extra"><span class="lno">37</span><span class="src"></span></div>
+<div class="ln extra"><span class="lno">38</span><span class="src"><span class="k">type</span> Props = { start?: <span class="k">number</span> };</span></div>
+<div class="ln extra"><span class="lno">39</span><span class="src"></span></div>
+<div class="ln extra"><span class="lno">40</span><span class="src"><span class="c">// 대시보드 우상단의 작은 카운터</span></span></div>
+<div class="ln"><span class="lno">41</span><span class="src"><span class="k">export function</span> CounterPanel() {</span></div>
+<div class="ln"><span class="lno">42</span><span class="src">  <span class="k">const</span> label = "카운터";</span></div>
+<div class="ln target"><span class="lno">43</span><span class="src">  <button class="tok" data-k="1" role="radio" aria-checked="false" aria-label="const 키워드"><span class="k">const</span></button> <button class="tok" data-k="2" id="an-destr" role="radio" aria-checked="false" aria-label="대괄호 count 쉼표 setCount">[count<span id="an-comma">,</span> setCount]</button> = <span id="an-call"><button class="tok" data-k="3" role="radio" aria-checked="false" aria-label="useState 함수 이름">useState</button>(<button class="tok" data-k="4" role="radio" aria-checked="false" aria-label="초기값 0">0</button>)</span>;</span></div>
+<div class="ln"><span class="lno">44</span><span class="src">  <span class="k">return</span> &lt;button onClick={() =&gt; setCount(count + 1)}&gt;{label} {count}&lt;/button&gt;;</span></div>
+<div class="ln"><span class="lno">45</span><span class="src">}</span></div>
+<div class="ln extra"><span class="lno">46</span><span class="src"></span></div>
+<div class="ln extra"><span class="lno">47</span><span class="src"><span class="k">export default</span> CounterPanel;</span></div>
+<div class="ln fold"><span class="lno"></span><span class="src">⋯ 아래로 2줄 더 보기</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="rail">
+      <div class="rail-fallback">판별 표시</div>
+      <div class="lab" data-anchor="an-destr"><span class="n">①</span>왼쪽 대괄호. 배열을 <b>만드는</b> 게 아니라 <b>푸는</b> 표시입니다.</div>
+      <div class="lab" data-anchor="an-call"><span class="n">②</span>오른쪽은 배열 하나 <code>[0, 함수]</code> 를 돌려줍니다.</div>
+      <div class="lab" data-anchor="an-comma"><span class="n">③</span>쉼표가 순서를 가릅니다. 0번째, 1번째.</div>
+    </div>
+    <svg class="leaders" aria-hidden="true"></svg>
+  </div>
+
+  <div class="body">
+    <div class="name-row">
+      <h2 class="sp-name">배열 구조 분해 할당</h2>
+      <p class="sp-latin latin">Array destructuring assignment</p>
+    </div>
+    <div class="obs" data-obs="destr"></div>
+
+    <p class="prose" data-slot="gloss">오른쪽이 돌려준 <b>배열 하나</b>를, 왼쪽에서 여러 이름으로 나눠 받는 문법입니다. 대괄호가 왼쪽에 있으면 배열을 만드는 게 아니라 푸는 것입니다.</p>
+    <p class="prose payoff" hidden style="border-left:3px solid var(--mark);padding-left:15px;margin-top:16px"><b>↩ 방금 배운 것과 이어보기.</b> 함수는 값을 <b>하나만</b> 돌려줍니다. <code>useState(0)</code> 이 돌려주는 그 값 하나가 <code>[0, 함수]</code> 라는 배열이고, 43행은 그 배열 하나를 두 이름으로 나눠 받는 줄입니다.</p>
+
+    <section class="qbox">
+      <span class="q-kind">지목형</span>
+      <p class="q-ask">43행에서 <b>구조 분해가 실제로 일어나는 부분</b>을 코드 위에서 짚어 보세요.</p>
+      <p class="q-hint">점선이 그어진 곳을 클릭하거나, <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다.</p>
+      <div class="qactions">
+        <button class="btn btn-lead" data-act="submit">짚은 곳 제출</button>
+        <span class="foot-note" data-slot="pick">아직 아무 곳도 짚지 않았습니다.</span>
+      </div>
+    </section>
+
+    <section class="verdict">
+      <span class="v-slot">판정란</span>
+      <div class="v-fill"><p class="v-empty">짚은 곳을 제출하면 여기에 판정과 진단이 적힙니다. 이 칸은 미리 비워 둔 자리라 답해도 위쪽 글이 밀리지 않습니다.</p></div>
+    </section>
+
+    <div class="ladder-mount"></div>
+
+    <div class="card-foot">
+      <button class="btn" data-act="missed">놓쳤어요 <kbd>?</kbd></button>
+      <button class="btn" data-act="next">다음 <kbd>Space</kbd></button>
+      <span class="foot-note">찍어서 맞혔을 때도 「놓쳤어요」를 누르세요. 감점은 없습니다.</span>
+    </div>
+  </div>
+
+  <!-- 진단문 원본 (오답 보기마다 전용) -->
+  <div class="diags" hidden>
+    <div data-diag="ok" data-head="맞았습니다 — 판별 성공">
+      <p class="prose"><code>[count, setCount]</code> 가 대입의 <b>왼쪽</b>에 있다는 것이 판별 포인트입니다. 같은 대괄호라도 오른쪽에 있으면 배열을 만드는 것이고, 왼쪽에 있으면 배열을 푸는 것입니다.</p>
+      <div class="edge">
+        <div class="edge-t">가장 날카로운 자리</div>
+        <p class="prose">이름은 <b>순서로만</b> 정해집니다. 아래처럼 써도 오류 없이 통과하고, 값만 뒤바뀝니다.</p>
+        <div class="mini">const [setCount, count] = useState(0);
+// count 에는 함수가, setCount 에는 0 이 들어간다</div>
+      </div>
+    </div>
+    <div data-diag="1" data-head="놓쳤습니다 — const 를 짚었습니다">
+      <p class="prose"><code>const</code> 는 "이 이름에 다시 대입하지 않겠다"는 <b>선언 키워드</b>입니다. 이름을 <b>몇 개</b> 만들지는 정하지 않아요. 나누는 일은 바로 뒤 대괄호가 합니다.</p>
+      <p class="prose"><code>let [count, setCount] = ...</code> 라고 써도 구조 분해는 똑같이 일어납니다. 그러니 구조 분해를 만드는 것은 <code>const</code> 가 아닙니다.</p>
+      <div class="edge">
+        <div class="edge-t">가장 날카로운 자리</div>
+        <p class="prose"><code>const</code> 가 막는 것은 <b>이름을 다시 대입하는 것</b>뿐입니다. 배열 <b>안의 값</b>은 그대로 바뀝니다.</p>
+        <div class="mini">const [a, b] = [1, 2];
+a = 9;        // TypeError — 이름 재대입은 막힌다
+const xs = [1, 2];
+xs.push(3);   // 통과 — 안을 바꾸는 것은 막지 않는다</div>
+      </div>
+    </div>
+    <div data-diag="3" data-head="놓쳤습니다 — useState 를 짚었습니다">
+      <p class="prose">방향은 맞습니다. <code>useState</code> 는 <b>값을 배열 하나로 돌려주는 함수</b>예요. 하지만 그건 <b>보내는 쪽</b>입니다. 받아서 나누는 문법은 대입의 왼쪽에 있습니다.</p>
+      <p class="prose">돌려주기와 나누기는 다른 일입니다. <code>const pair = useState(0)</code> 라고 쓰면 <code>useState</code> 는 똑같이 동작하지만 구조 분해는 일어나지 않고, <code>pair[0]</code> 처럼 꺼내 써야 합니다.</p>
+      <div class="edge">
+        <div class="edge-t">가장 날카로운 자리</div>
+        <p class="prose">두 줄은 <b>완전히 같은 뜻</b>입니다. 위가 아래를 줄여 쓴 것뿐이에요.</p>
+        <div class="mini">const pair = useState(0);
+const count = pair[0], setCount = pair[1];
+// ↑ 이 두 줄 = 아래 한 줄
+const [count, setCount] = useState(0);</div>
+      </div>
+    </div>
+    <div data-diag="4" data-head="놓쳤습니다 — 0 을 짚었습니다">
+      <p class="prose"><code>0</code> 은 <code>useState</code> 에 넘기는 <b>초기값</b>입니다. 첫 렌더에서 <code>count</code> 가 0이 되게 하죠. 값을 나누는 일과는 관계가 없습니다.</p>
+      <div class="edge">
+        <div class="edge-t">가장 날카로운 자리</div>
+        <p class="prose">이 <code>0</code> 은 <b>첫 렌더에서 한 번만</b> 쓰입니다. 나중에 <code>useState(10)</code> 으로 고쳐도, 이미 살아 있는 컴포넌트의 <code>count</code> 는 바뀌지 않습니다.</p>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ────────────── 카드 B · 빈칸형 ────────────── -->
+<article class="card" id="c-compr" data-card="compr" data-type="blank"
+         data-correct="1" data-next="nullish" data-concept="compr" hidden>
+  <div class="figure">
+    <div class="plate-col">
+      <div class="plate-head">
+        <span class="chip">Python</span>
+        <span class="path">scripts/<b>report.py</b></span>
+        <span class="tag">33행</span>
+        <span class="plate-tools">
+          <button class="btn" data-tool="wrap">긴 줄 접기</button>
+          <button class="btn" data-tool="open">전체 보기</button>
+        </span>
+      </div>
+      <div class="plate">
+        <div class="code">
+<div class="ln fold"><span class="lno"></span><span class="src">⋯ 위로 2줄 더 보기</span></div>
+<div class="ln extra"><span class="lno">27</span><span class="src"><span class="k">import</span> csv</span></div>
+<div class="ln extra"><span class="lno">28</span><span class="src"></span></div>
+<div class="ln"><span class="lno">29</span><span class="src"><span class="k">def</span> top_students(path, cut):</span></div>
+<div class="ln"><span class="lno">30</span><span class="src">    students = load_students(path)</span></div>
+<div class="ln"><span class="lno">31</span><span class="src"></span></div>
+<div class="ln"><span class="lno">32</span><span class="src">    <span class="c"># 커트라인을 넘긴 학생 이름만 남긴다</span></span></div>
+<div class="ln target"><span class="lno">33</span><span class="src">    top = [<span id="an-name">s.name</span> <span id="an-for"><span class="k">for</span> s <span class="k">in</span> students</span> <span class="blank" id="an-blank">▢</span> s.score &gt;= cut]</span></div>
+<div class="ln"><span class="lno">34</span><span class="src">    <span class="k">return</span> top</span></div>
+<div class="ln extra"><span class="lno">35</span><span class="src"></span></div>
+<div class="ln extra"><span class="lno">36</span><span class="src">names = top_students("data/2026-1.csv", cut=70)</span></div>
+<div class="ln fold"><span class="lno"></span><span class="src">⋯ 아래로 2줄 더 보기</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="rail">
+      <div class="rail-fallback">판별 표시</div>
+      <div class="lab" data-anchor="an-blank"><span class="n">①</span>조건이 <b>뒤에</b> 오면 거르기. 개수가 줄어듭니다.</div>
+      <div class="lab" data-anchor="an-for"><span class="n">②</span>여기서 하나씩 꺼내 <code>s</code> 에 담습니다.</div>
+      <div class="lab" data-anchor="an-name"><span class="n">③</span>통과한 것만 이 모양으로 리스트에 들어갑니다.</div>
+    </div>
+    <svg class="leaders" aria-hidden="true"></svg>
+  </div>
+
+  <div class="body">
+    <div class="name-row">
+      <h2 class="sp-name">리스트 컴프리헨션의 조건</h2>
+      <p class="sp-latin latin">Comprehension filter clause</p>
+    </div>
+    <div class="obs" data-obs="compr"></div>
+
+    <p class="prose" data-slot="gloss">여러 개를 하나씩 꺼내서, <b>조건을 통과한 것만</b> 새 리스트에 담는 문법입니다. 꺼내는 부분 뒤에 조건이 붙습니다.</p>
+
+    <section class="qbox">
+      <span class="q-kind">빈칸형</span>
+      <p class="q-ask">33행의 빈칸에 들어갈 것을 고르세요. 고르는 즉시 코드에 써집니다.</p>
+      <p class="q-hint"><kbd>1</kbd>–<kbd>4</kbd> 로 고르고 <kbd>Enter</kbd> 로 제출합니다.</p>
+      <ul class="opts" role="radiogroup" aria-label="빈칸에 들어갈 것">
+        <li><button class="opt" data-k="1" data-fill="if" role="radio" aria-checked="false"><span class="okey">1</span><span class="olab"><code>if</code></span></button></li>
+        <li><button class="opt" data-k="2" data-fill="where" role="radio" aria-checked="false"><span class="okey">2</span><span class="olab"><code>where</code></span></button></li>
+        <li><button class="opt" data-k="3" data-fill="filter" role="radio" aria-checked="false"><span class="okey">3</span><span class="olab"><code>filter</code></span></button></li>
+        <li><button class="opt" data-k="4" data-fill="when" role="radio" aria-checked="false"><span class="okey">4</span><span class="olab"><code>when</code></span></button></li>
+      </ul>
+      <div class="qactions">
+        <button class="btn btn-lead" data-act="submit">제출</button>
+        <span class="foot-note" data-slot="pick">아직 고르지 않았습니다.</span>
+      </div>
+    </section>
+
+    <section class="verdict">
+      <span class="v-slot">판정란</span>
+      <div class="v-fill"><p class="v-empty">보기를 고르면 코드에 바로 써지고, 제출하면 여기에 판정과 진단이 적힙니다.</p></div>
+    </section>
+
+    <div class="ladder-mount"></div>
+
+    <div class="card-foot">
+      <button class="btn" data-act="missed">놓쳤어요 <kbd>?</kbd></button>
+      <button class="btn" data-act="next">다음 <kbd>Space</kbd></button>
+      <span class="foot-note">고르고도 왜 그런지 모르겠으면 「놓쳤어요」가 맞습니다.</span>
+    </div>
+  </div>
+
+  <div class="diags" hidden>
+    <div data-diag="ok" data-head="맞았습니다 — 판별 성공">
+      <p class="prose">컴프리헨션에서 <b>꺼내는 부분 뒤에 오는 <code>if</code></b> 는 거르개입니다. 조건을 통과한 것만 리스트에 들어가므로 결과 개수는 원본보다 <b>줄어들 수 있습니다</b>.</p>
+      <div class="edge">
+        <div class="edge-t">가장 날카로운 자리 — 같은 <code>if</code>, 다른 위치</div>
+        <p class="prose">위치가 바뀌면 하는 일이 완전히 달라집니다. <b>뒤에 오면 거르기, 앞에 오면 고르기</b>입니다.</p>
+        <div class="mini">[s.name for s in students if s.score &gt;= cut]
+# 거르기 — 통과한 것만. 개수가 줄어든다
+
+[s.name if s.score &gt;= cut else "-" for s in students]
+# 고르기 — 전부 남기고 값만 바꾼다. 개수는 그대로</div>
+      </div>
+    </div>
+    <div data-diag="2" data-head="놓쳤습니다 — where 를 골랐습니다">
+      <p class="prose">하는 일의 <b>느낌은 맞았습니다</b>. <code>where</code> 는 SQL에서 조건을 거는 키워드죠. 다만 파이썬에는 <code>where</code> 라는 키워드가 <b>아예 없습니다</b>.</p>
+      <p class="prose">그래서 이 줄은 실행되기도 전에 <code>SyntaxError: invalid syntax</code> 로 멈춥니다. 파이썬에서 그 자리를 맡는 단어는 <code>if</code> 입니다.</p>
+      <div class="edge">
+        <div class="edge-t">가장 날카로운 자리 — 같은 <code>if</code>, 다른 위치</div>
+        <p class="prose"><code>if</code> 를 <b>뒤에</b> 쓰면 거르기, <b>앞에</b> 쓰면 고르기입니다. 헷갈리면 결과 <b>개수</b>를 보세요.</p>
+        <div class="mini">[s.name for s in students if s.score &gt;= cut]
+# 거르기 — 개수가 줄어든다
+
+[s.name if s.score &gt;= cut else "-" for s in students]
+# 고르기 — 개수는 그대로</div>
+      </div>
+    </div>
+    <div data-diag="3" data-head="놓쳤습니다 — filter 를 골랐습니다">
+      <p class="prose"><code>filter</code> 는 실제로 파이썬에 있습니다. 다만 <b>내장 함수</b>이지 컴프리헨션의 문법 요소가 아닙니다. 그래서 이 자리에 그냥 놓을 수 없어요.</p>
+      <p class="prose"><code>filter</code> 로 같은 일을 하려면 줄 <b>전체 모양</b>이 달라집니다.</p>
+      <div class="edge">
+        <div class="edge-t">같은 뜻, 다른 두 문장</div>
+        <div class="mini">top = [s.name for s in students if s.score &gt;= cut]
+
+top = [s.name for s in filter(lambda s: s.score &gt;= cut, students)]
+# 같은 결과. 대부분의 파이썬 코드는 위쪽을 씁니다</div>
+      </div>
+    </div>
+    <div data-diag="4" data-head="놓쳤습니다 — when 을 골랐습니다">
+      <p class="prose"><code>when</code> 은 파이썬에 없는 단어입니다. 코틀린이나 SQL에서 보셨을 거예요. 이 줄은 <code>SyntaxError</code> 로 멈춥니다.</p>
+      <p class="prose">파이썬 3.10의 <code>match</code> / <code>case</code> 와 헷갈리기 쉽지만, 그건 값의 모양을 나눠 보는 다른 문법이고 컴프리헨션 안에서는 쓰지 않습니다.</p>
+      <div class="edge">
+        <div class="edge-t">가장 날카로운 자리 — 같은 <code>if</code>, 다른 위치</div>
+        <div class="mini">[s.name for s in students if s.score &gt;= cut]   # 거르기
+[s.name if s.score &gt;= cut else "-" for s in students]  # 고르기</div>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ────────────── 카드 C · 의미형 ────────────── -->
+<article class="card" id="c-nullish" data-card="nullish" data-type="meaning"
+         data-correct="2" data-next="done" data-concept="nullish" hidden>
+  <div class="figure">
+    <div class="plate-col">
+      <div class="plate-head">
+        <span class="chip">TypeScript</span>
+        <span class="path">src/api/<b>client.ts</b></span>
+        <span class="tag">88행</span>
+        <span class="plate-tools">
+          <button class="btn" data-tool="wrap">긴 줄 접기</button>
+          <button class="btn" data-tool="open">전체 보기</button>
+        </span>
+      </div>
+      <div class="plate">
+        <div class="code">
+<div class="ln fold"><span class="lno"></span><span class="src">⋯ 위로 2줄 더 보기</span></div>
+<div class="ln extra"><span class="lno">82</span><span class="src"><span class="k">import</span> { fetchDashboard } <span class="k">from</span> "./endpoints";</span></div>
+<div class="ln extra"><span class="lno">83</span><span class="src"></span></div>
+<div class="ln"><span class="lno">84</span><span class="src"><span class="k">export async function</span> loadRows() {</span></div>
+<div class="ln"><span class="lno">85</span><span class="src">  <span class="k">const</span> res = <span class="k">await</span> fetchDashboard();</span></div>
+<div class="ln"><span class="lno">86</span><span class="src">  <span class="c">// 이번 응답: { data: { user: { name: "지민" } } }</span></span></div>
+<div class="ln"><span class="lno">87</span><span class="src">  <span class="c">//   → data 는 있지만 items 키는 없다</span></span></div>
+<div class="ln target"><span class="lno">88</span><span class="src">  <span class="k">const</span> items = res.data<span id="an-opt">?.</span>items <span id="an-nc">??</span> <span id="an-arr">[]</span>;</span></div>
+<div class="ln"><span class="lno">89</span><span class="src">  <span class="k">return</span> items.map(toRow);</span></div>
+<div class="ln extra"><span class="lno">90</span><span class="src">}</span></div>
+<div class="ln fold"><span class="lno"></span><span class="src">⋯ 아래로 1줄 더 보기</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="rail">
+      <div class="rail-fallback">판별 표시</div>
+      <div class="lab" data-anchor="an-opt"><span class="n">①</span><code>data</code> 가 없으면 여기서 멈추고 <code>undefined</code>.</div>
+      <div class="lab" data-anchor="an-nc"><span class="n">②</span>왼쪽이 <code>null</code> / <code>undefined</code> <b>일 때만</b> 오른쪽으로.</div>
+      <div class="lab" data-anchor="an-arr"><span class="n">③</span>그래서 최종값은 빈 배열. 89행이 안전해집니다.</div>
+    </div>
+    <svg class="leaders" aria-hidden="true"></svg>
+  </div>
+
+  <div class="body">
+    <div class="name-row">
+      <h2 class="sp-name">널 병합 연산자</h2>
+      <p class="sp-latin latin">Nullish coalescing operator</p>
+    </div>
+    <div class="obs" data-obs="nullish"></div>
+
+    <p class="prose" data-slot="gloss">왼쪽 값이 <code>null</code> 이거나 <code>undefined</code> <b>일 때만</b> 오른쪽 값으로 대신하는 문법입니다. 그 외의 값은 그대로 통과합니다.</p>
+
+    <section class="qbox">
+      <span class="q-kind">의미형</span>
+      <p class="q-ask">86–87행의 응답이 들어왔을 때, 88행이 끝난 뒤 <code>items</code> 에 들어 있는 값은?</p>
+      <p class="q-hint"><kbd>1</kbd>–<kbd>4</kbd> 로 고르고 <kbd>Enter</kbd> 로 제출합니다.</p>
+      <ul class="opts" role="radiogroup" aria-label="items 에 들어 있는 값">
+        <li><button class="opt" data-k="1" role="radio" aria-checked="false"><span class="okey">1</span><span class="olab"><code>undefined</code></span></button></li>
+        <li><button class="opt" data-k="2" role="radio" aria-checked="false"><span class="okey">2</span><span class="olab"><code>[]</code> — 빈 배열</span></button></li>
+        <li><button class="opt" data-k="3" role="radio" aria-checked="false"><span class="okey">3</span><span class="olab"><code>null</code></span></button></li>
+        <li><button class="opt" data-k="4" role="radio" aria-checked="false"><span class="okey">4</span><span class="olab"><code>TypeError</code> 가 나며 멈춘다</span></button></li>
+      </ul>
+      <div class="qactions">
+        <button class="btn btn-lead" data-act="submit">제출</button>
+        <span class="foot-note" data-slot="pick">아직 고르지 않았습니다.</span>
+      </div>
+    </section>
+
+    <section class="verdict">
+      <span class="v-slot">판정란</span>
+      <div class="v-fill"><p class="v-empty">보기를 고르고 제출하면 여기에 판정과 진단이 적힙니다.</p></div>
+    </section>
+
+    <div class="ladder-mount"></div>
+
+    <div class="card-foot">
+      <button class="btn" data-act="missed">놓쳤어요 <kbd>?</kbd></button>
+      <button class="btn" data-act="next">다음 <kbd>Space</kbd></button>
+      <span class="foot-note">이 카드가 오늘 덱의 마지막입니다.</span>
+    </div>
+  </div>
+
+  <div class="diags" hidden>
+    <div data-diag="ok" data-head="맞았습니다 — 판별 성공">
+      <p class="prose"><code>res.data?.items</code> 는 <code>undefined</code> 입니다. 그런데 뒤에 <code>?? []</code> 가 붙어 있어서, <code>undefined</code> 인 순간 <b>빈 배열</b>로 바뀝니다. 그래서 89행의 <code>.map</code> 이 터지지 않습니다.</p>
+      <div class="edge">
+        <div class="edge-t">가장 날카로운 자리 — <code>??</code> 와 <code>||</code> 의 차이</div>
+        <p class="prose"><code>??</code> 는 <code>null</code> / <code>undefined</code> 일 때만 작동합니다. <code>0</code> 이나 <code>""</code> 는 그대로 통과해요. <code>||</code> 로 바꾸면 그 값들까지 삼켜 버립니다.</p>
+        <div class="mini">const n = 0;
+n ?? 10   // 0   ← 0 은 null 이 아니므로 그대로
+n || 10   // 10  ← 0 을 "빈 값"으로 보고 갈아치운다</div>
+      </div>
+    </div>
+    <div data-diag="1" data-head="놓쳤습니다 — undefined 를 골랐습니다">
+      <p class="prose"><b>중간까지는 정확합니다.</b> <code>res.data?.items</code> 만 놓고 보면 정말로 <code>undefined</code> 예요. <code>data</code> 는 있지만 그 안에 <code>items</code> 키가 없으니까요.</p>
+      <p class="prose">놓친 것은 그 <b>뒤</b>입니다. <code>?? []</code> 가 붙어 있어서, <code>undefined</code> 가 된 그 순간 값이 <code>[]</code> 로 바뀝니다. 한 줄 안에서 두 번 일이 일어나는 셈입니다.</p>
+      <div class="edge">
+        <div class="edge-t">가장 날카로운 자리 — <code>??</code> 와 <code>||</code> 의 차이</div>
+        <p class="prose"><code>??</code> 가 갈아치우는 것은 <code>null</code> 과 <code>undefined</code> <b>둘뿐</b>입니다.</p>
+        <div class="mini">0  ?? 10   // 0
+"" ?? "x"  // ""
+0  || 10   // 10   ← || 는 0 도 빈 값 취급</div>
+      </div>
+    </div>
+    <div data-diag="3" data-head="놓쳤습니다 — null 을 골랐습니다">
+      <p class="prose">두 가지가 겹쳤습니다. 첫째, <code>data</code> 는 응답에 <b>있으므로</b> <code>?.</code> 는 멈추지 않고 그냥 통과합니다. 둘째, 있는 객체에서 <b>없는 키</b>를 꺼내면 <code>null</code> 이 아니라 <code>undefined</code> 가 나옵니다.</p>
+      <p class="prose">그리고 어느 쪽이든 <code>?? []</code> 가 받아서 결국 <code>[]</code> 가 됩니다.</p>
+      <div class="edge">
+        <div class="edge-t">가장 날카로운 자리 — 둘은 다른 값입니다</div>
+        <div class="mini">const o = { a: 1 };
+o.b          // undefined  ← 없는 키
+JSON.parse('{"b":null}').b   // null  ← 서버가 준 빈 값
+null === undefined   // false
+null == undefined    // true   ← 이래서 헷갈립니다</div>
+      </div>
+    </div>
+    <div data-diag="4" data-head="놓쳤습니다 — TypeError 를 골랐습니다">
+      <p class="prose"><code>?.</code> 가 바로 그 <code>TypeError</code> 를 막으려고 있는 문법입니다. <code>data</code> 가 없었다면 <code>res.data.items</code> 는 터졌겠지만, <code>?.</code> 를 붙였으니 조용히 <code>undefined</code> 로 끝납니다.</p>
+      <div class="edge">
+        <div class="edge-t">가장 날카로운 자리 — <code>?.</code> 가 막아 주지 <b>않는</b> 곳</div>
+        <p class="prose"><code>?.</code> 는 <b>자기 바로 왼쪽</b>만 지킵니다. <code>res</code> 자체가 <code>undefined</code> 라면 그 앞은 못 막아요.</p>
+        <div class="mini">const res = undefined;
+res.data?.items   // TypeError — ?. 는 data 만 지킨다
+res?.data?.items  // undefined — 이렇게 써야 앞도 지킨다</div>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ────────────── 카드 D · 선행 개념 (점프 대상) ────────────── -->
+<article class="card" id="c-ret" data-card="ret" data-type="meaning"
+         data-correct="2" data-next="return" data-concept="ret" hidden>
+  <div class="figure">
+    <div class="plate-col">
+      <div class="plate-head">
+        <span class="chip">TypeScript</span>
+        <span class="path">src/utils/<b>toRow.ts</b></span>
+        <span class="tag">14행</span>
+        <span class="plate-tools">
+          <button class="btn" data-tool="wrap">긴 줄 접기</button>
+          <button class="btn" data-tool="open">전체 보기</button>
+        </span>
+      </div>
+      <div class="plate">
+        <div class="code">
+<div class="ln fold"><span class="lno"></span><span class="src">⋯ 위로 2줄 더 보기</span></div>
+<div class="ln extra"><span class="lno">7</span><span class="src"><span class="k">import type</span> { Raw } <span class="k">from</span> "../api/types";</span></div>
+<div class="ln extra"><span class="lno">8</span><span class="src"></span></div>
+<div class="ln"><span class="lno">9</span><span class="src"><span class="c">// 응답 한 건을 표의 한 줄로 바꾼다</span></span></div>
+<div class="ln"><span class="lno">10</span><span class="src"><span class="k">export function</span> toRow(item) {</span></div>
+<div class="ln"><span class="lno">11</span><span class="src">  <span id="an-ret" class="k">return</span> <span id="an-obj">{ id: item.id, name: item.name }</span>;</span></div>
+<div class="ln"><span class="lno">12</span><span class="src">}</span></div>
+<div class="ln"><span class="lno">13</span><span class="src"></span></div>
+<div class="ln target"><span class="lno">14</span><span class="src"><span class="k">const</span> row = <span id="an-call2">toRow(raw)</span>;</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="rail">
+      <div class="rail-fallback">판별 표시</div>
+      <div class="lab" data-anchor="an-ret"><span class="n">①</span>여기 적힌 것 <b>하나만</b> 함수 밖으로 나갑니다.</div>
+      <div class="lab" data-anchor="an-obj"><span class="n">②</span>밖으로 나가는 값 하나 — 객체 한 개.</div>
+      <div class="lab" data-anchor="an-call2"><span class="n">③</span>괄호를 붙여 부르면, 그 값이 <b>이 자리</b>에 놓입니다.</div>
+    </div>
+    <svg class="leaders" aria-hidden="true"></svg>
+  </div>
+
+  <div class="body">
+    <div class="name-row">
+      <h2 class="sp-name">함수의 반환값</h2>
+      <p class="sp-latin latin">Return value</p>
+    </div>
+    <div class="obs" data-obs="ret"></div>
+
+    <p class="prose" data-slot="gloss">함수 이름 뒤에 괄호를 붙여 <b>부르면</b>, 그 자리에는 함수가 아니라 함수가 <b>돌려준 값 하나</b>가 놓입니다.</p>
+    <p class="prose"><b>이 카드는 1문제입니다. 약 40초.</b> 마치면 원래 자리로 돌아갑니다.</p>
+
+    <section class="qbox">
+      <span class="q-kind">의미형</span>
+      <p class="q-ask">14행이 끝난 뒤 <code>row</code> 에 들어 있는 것은?</p>
+      <ul class="opts" role="radiogroup" aria-label="row 에 들어 있는 것">
+        <li><button class="opt" data-k="1" role="radio" aria-checked="false"><span class="okey">1</span><span class="olab"><code>toRow</code> 함수 자체</span></button></li>
+        <li><button class="opt" data-k="2" role="radio" aria-checked="false"><span class="okey">2</span><span class="olab"><code>{ id, name }</code> 모양의 객체 하나</span></button></li>
+        <li><button class="opt" data-k="3" role="radio" aria-checked="false"><span class="okey">3</span><span class="olab"><code>raw</code> 가 그대로</span></button></li>
+        <li><button class="opt" data-k="4" role="radio" aria-checked="false"><span class="okey">4</span><span class="olab"><code>undefined</code></span></button></li>
+      </ul>
+      <div class="qactions">
+        <button class="btn btn-lead" data-act="submit">제출</button>
+        <span class="foot-note" data-slot="pick">아직 고르지 않았습니다.</span>
+      </div>
+    </section>
+
+    <section class="verdict">
+      <span class="v-slot">판정란</span>
+      <div class="v-fill"><p class="v-empty">보기를 고르고 제출하면 여기에 판정과 진단이 적힙니다.</p></div>
+    </section>
+
+    <div class="ladder-mount"></div>
+
+    <div class="card-foot">
+      <button class="btn" data-act="missed">놓쳤어요 <kbd>?</kbd></button>
+      <button class="btn btn-lead" data-act="next">↩ 배열 구조 분해 할당으로 돌아가기 <kbd>Space</kbd></button>
+    </div>
+  </div>
+
+  <div class="diags" hidden>
+    <div data-diag="ok" data-head="맞았습니다 — 판별 성공">
+      <p class="prose"><code>return</code> 뒤에 적힌 것 하나가 함수 밖으로 나오고, <code>toRow(raw)</code> 라고 부른 <b>그 자리</b>에 놓입니다. 그래서 <code>row</code> 는 객체 하나입니다.</p>
+      <div class="edge">
+        <div class="edge-t">가장 날카로운 자리 — 괄호 하나 차이</div>
+        <div class="mini">const row = toRow(raw);  // 객체 하나  ← 부른 결과
+const fn  = toRow;       // 함수 자체  ← 부르지 않음
+fn(raw);                 // 이제서야 객체 하나</div>
+      </div>
+    </div>
+    <div data-diag="1" data-head="놓쳤습니다 — 함수 자체를 골랐습니다">
+      <p class="prose">괄호가 없었다면 정답이었습니다. <code>const row = toRow;</code> 라고 썼다면 정말 함수 자체가 들어갑니다.</p>
+      <p class="prose">하지만 14행에는 <code>(raw)</code> 가 붙어 있습니다. 괄호는 "<b>지금 실행해라</b>"는 표시이고, 실행하면 그 자리에는 함수가 아니라 <b>돌려준 값</b>이 남습니다.</p>
+    </div>
+    <div data-diag="3" data-head="놓쳤습니다 — raw 를 골랐습니다">
+      <p class="prose"><code>raw</code> 는 함수 <b>안으로 들어간</b> 값입니다. 나오는 값은 <code>return</code> 뒤에 적힌 것뿐이에요. 11행은 <code>raw</code> 에서 두 개만 뽑아 <b>새 객체</b>를 만들어 내보냅니다.</p>
+    </div>
+    <div data-diag="4" data-head="놓쳤습니다 — undefined 를 골랐습니다">
+      <p class="prose"><code>return</code> 이 있으면 <code>undefined</code> 가 아닙니다. <code>return</code> 을 <b>아예 쓰지 않은</b> 함수라면 <code>undefined</code> 가 맞아요 — 그게 이 문법의 기본값입니다.</p>
+      <div class="edge">
+        <div class="edge-t">가장 날카로운 자리</div>
+        <div class="mini">function noReturn(x) { x + 1; }
+noReturn(1)   // undefined  ← 계산은 했지만 내보내지 않았다</div>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- 덱을 마쳤을 때 -->
+<article class="card" id="c-done" data-card="done" hidden>
+  <div class="body" style="padding-top:20px">
+    <div class="name-row">
+      <h2 class="sp-name">오늘의 덱을 마쳤습니다</h2>
+      <p class="sp-latin latin">Three species recorded today</p>
+    </div>
+    <p class="prose" style="margin-top:18px">세 종을 관찰 기록에 남겼습니다. <b>배열 구조 분해 할당</b>과 <b>널 병합 연산자</b>는 내일, <b>리스트 컴프리헨션의 조건</b>은 3일 뒤에 다시 보러 갑니다.</p>
+    <p class="prose">아직 한 번도 기록하지 않은 종이 <b>5</b> 남아 있습니다. 내 코드에 이미 살고 있는데, AI가 대신 다른 방식으로 써 둬서 아직 마주치지 못한 문법입니다.</p>
+    <div class="card-foot">
+      <button class="btn btn-lead" id="done-gaps">미기록 종 보러 가기</button>
+      <button class="btn" id="done-again">덱 다시 풀기</button>
+    </div>
+  </div>
+</article>
+
+</section>
+
+<!-- ================================================================
+     보기 2 — 미기록 종 (문법 구멍)
+     ================================================================ -->
+<section class="view wrap page" id="view-gaps" hidden>
+  <div class="gap-head">
+    <span class="tag">미기록 종 · Unrecorded</span>
+    <h2 style="margin-top:8px">아직 기록하지 않은 5종</h2>
+  </div>
+  <p class="lede" style="margin-top:16px">내 코드에 이미 <b>살고 있는</b> 문법인데, 아직 한 번도 마주치지 못한 것들입니다. AI가 대신 다른 방식으로 써 뒀기 때문에, 가만히 두면 영영 만나지 못합니다.</p>
+  <p class="lede" style="margin-top:12px">각 항목은 세 가지를 답합니다 — <b>왜 필요한가</b>, <b>AI는 대신 뭘 썼나</b>, <b>내 코드에서 쓸 수 있었던 자리</b>.</p>
+
+  <div class="gap-list" style="margin-top:26px">
+
+    <div class="gitem">
+      <button class="gitem-btn" data-gap="1" aria-expanded="false">
+        <span>
+          <span class="gitem-nm">구조 분해 매개변수</span>
+          <span class="gitem-lat latin">Destructured parameters</span>
+          <span class="gitem-meta"><span>서식지 · src/components 외 2곳</span><span>쓸 수 있었던 자리 7</span></span>
+        </span>
+        <span class="gitem-open">펼치기 +</span>
+      </button>
+      <div class="gpanel" hidden>
+        <div class="gsec">
+          <div class="gsec-t">왜 필요한가</div>
+          <p class="prose">받은 물건을 <b>문 앞에서 바로 풀어</b>, 안에서는 이름만 쓰게 하는 문법입니다. <code>props.</code> 를 반복해서 적지 않아도 되고, 이 컴포넌트가 <b>무엇을 받는지</b>가 첫 줄에서 한눈에 보입니다.</p>
+        </div>
+        <div class="gsec">
+          <div class="gsec-t">AI는 대신 뭘 썼나</div>
+          <p class="prose"><code>props</code> 를 통째로 받아 두고 안에서 <code>props.title</code>, <code>props.onPick</code> 처럼 매번 앞에 <code>props.</code> 를 붙여 꺼내 썼습니다. 동작은 같지만, 이 컴포넌트가 무엇을 받는지 보려면 본문을 끝까지 읽어야 합니다.</p>
+        </div>
+        <div class="gsec">
+          <div class="gsec-t">내 코드에서 쓸 수 있었던 자리</div>
+          <p class="prose"><code>src/components/<b>MarketCard.tsx</b></code> · 12행</p>
+          <div class="swap">
+            <div class="swap-b now">
+              <div class="swap-t">지금 내 코드</div>
+              <div class="mini">export function MarketCard(props) {
+  return (
+    &lt;article onClick={props.onPick}&gt;
+      &lt;h3&gt;{props.title}&lt;/h3&gt;
+      &lt;p&gt;{props.desc}&lt;/p&gt;
+    &lt;/article&gt;
+  );
+}</div>
+            </div>
+            <div class="swap-b could">
+              <div class="swap-t">이 문법으로 쓰면</div>
+              <div class="mini">export function MarketCard({ title, desc, onPick }) {
+  return (
+    &lt;article onClick={onPick}&gt;
+      &lt;h3&gt;{title}&lt;/h3&gt;
+      &lt;p&gt;{desc}&lt;/p&gt;
+    &lt;/article&gt;
+  );
+}</div>
+            </div>
+          </div>
+        </div>
+        <div class="gsec" style="border-top:0;padding-top:0">
+          <button class="btn btn-lead" data-goto="destr">이 종 관찰하러 가기 — 먼저 배열 구조 분해부터</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="gitem">
+      <button class="gitem-btn" data-gap="2" aria-expanded="false">
+        <span>
+          <span class="gitem-nm">옵셔널 체이닝 &amp; 널 병합</span>
+          <span class="gitem-lat latin">Optional chaining &amp; nullish coalescing</span>
+          <span class="gitem-meta"><span>서식지 · src/api 외 3곳</span><span>쓸 수 있었던 자리 11</span></span>
+        </span>
+        <span class="gitem-open">펼치기 +</span>
+      </button>
+      <div class="gpanel" hidden>
+        <div class="gsec">
+          <div class="gsec-t">왜 필요한가</div>
+          <p class="prose">서버가 준 데이터는 <b>내가 만들지 않은 것</b>이라 어떤 키가 빠져 있을지 모릅니다. <code>?.</code> 는 없으면 조용히 멈추고, <code>??</code> 는 그 자리에 기본값을 놓습니다. 화면이 흰 화면으로 죽는 사고 대부분이 여기서 막힙니다.</p>
+        </div>
+        <div class="gsec">
+          <div class="gsec-t">AI는 대신 뭘 썼나</div>
+          <p class="prose"><code>&amp;&amp;</code> 를 길게 이어 붙여 한 단계씩 확인했습니다. 동작은 비슷하지만 길이가 길고, <code>||</code> 로 기본값을 주면 <code>0</code> 이나 빈 문자열까지 기본값으로 갈아치우는 <b>다른 버그</b>가 생깁니다.</p>
+        </div>
+        <div class="gsec">
+          <div class="gsec-t">내 코드에서 쓸 수 있었던 자리</div>
+          <p class="prose"><code>src/api/<b>client.ts</b></code> · 88행</p>
+          <div class="swap">
+            <div class="swap-b now">
+              <div class="swap-t">지금 내 코드</div>
+              <div class="mini">const items = (res &amp;&amp; res.data &amp;&amp; res.data.items) || [];
+const page  = (res &amp;&amp; res.page) || 1;
+// page 가 0 이면? → 1 로 갈아치워진다. 버그.</div>
+            </div>
+            <div class="swap-b could">
+              <div class="swap-t">이 문법으로 쓰면</div>
+              <div class="mini">const items = res?.data?.items ?? [];
+const page  = res?.page ?? 1;
+// page 가 0 이면 0 그대로. null 일 때만 1.</div>
+            </div>
+          </div>
+        </div>
+        <div class="gsec" style="border-top:0;padding-top:0">
+          <button class="btn btn-lead" data-goto="nullish">이 종 관찰하러 가기</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="gitem">
+      <button class="gitem-btn" data-gap="3" aria-expanded="false">
+        <span>
+          <span class="gitem-nm">리스트 컴프리헨션</span>
+          <span class="gitem-lat latin">List comprehension</span>
+          <span class="gitem-meta"><span>서식지 · scripts 외 1곳</span><span>쓸 수 있었던 자리 6</span></span>
+        </span>
+        <span class="gitem-open">펼치기 +</span>
+      </button>
+      <div class="gpanel" hidden>
+        <div class="gsec">
+          <div class="gsec-t">왜 필요한가</div>
+          <p class="prose">"여럿에서 골라 새 목록을 만든다"는 일을 <b>한 줄</b>로 적는 파이썬의 기본 문법입니다. 빈 리스트를 미리 만들고 <code>append</code> 하는 과정이 사라져서, 이 줄이 무엇을 만들려는지가 먼저 읽힙니다.</p>
+        </div>
+        <div class="gsec">
+          <div class="gsec-t">AI는 대신 뭘 썼나</div>
+          <p class="prose">빈 리스트를 만들고 <code>for</code> 루프를 돌며 <code>if</code> 로 걸러 <code>append</code> 하는 4줄짜리를 썼습니다. 다른 언어에서 그대로 옮겨 온 모양이라 파이썬 코드 속에서 눈에 띄게 깁니다.</p>
+        </div>
+        <div class="gsec">
+          <div class="gsec-t">내 코드에서 쓸 수 있었던 자리</div>
+          <p class="prose"><code>scripts/<b>report.py</b></code> · 41–45행</p>
+          <div class="swap">
+            <div class="swap-b now">
+              <div class="swap-t">지금 내 코드</div>
+              <div class="mini">passed = []
+for s in students:
+    if s.score &gt;= cut:
+        passed.append(s.name)
+return passed</div>
+            </div>
+            <div class="swap-b could">
+              <div class="swap-t">이 문법으로 쓰면</div>
+              <div class="mini">return [s.name for s in students if s.score &gt;= cut]</div>
+            </div>
+          </div>
+        </div>
+        <div class="gsec" style="border-top:0;padding-top:0">
+          <button class="btn btn-lead" data-goto="compr">이 종 관찰하러 가기</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="gitem">
+      <button class="gitem-btn" data-gap="4" aria-expanded="false">
+        <span>
+          <span class="gitem-nm">병렬 대기</span>
+          <span class="gitem-lat latin">Promise.all</span>
+          <span class="gitem-meta"><span>서식지 · src/lib</span><span>쓸 수 있었던 자리 3</span></span>
+        </span>
+        <span class="gitem-open">펼치기 +</span>
+      </button>
+      <div class="gpanel" hidden>
+        <div class="gsec">
+          <div class="gsec-t">왜 필요한가</div>
+          <p class="prose">서로 관계없는 요청 셋을 <b>동시에</b> 보내고 전부 끝나기를 한 번만 기다립니다. 하나씩 <code>await</code> 하면 앞 요청이 끝날 때까지 뒤 요청은 출발조차 하지 않아, 기다리는 시간이 그대로 더해집니다.</p>
+        </div>
+        <div class="gsec">
+          <div class="gsec-t">AI는 대신 뭘 썼나</div>
+          <p class="prose"><code>await</code> 를 세 줄 연달아 썼습니다. 읽기는 쉽지만 셋을 줄 세워 기다립니다. 실제로 이 화면은 첫 로딩이 <b>약 3배</b> 느립니다.</p>
+        </div>
+        <div class="gsec">
+          <div class="gsec-t">내 코드에서 쓸 수 있었던 자리</div>
+          <p class="prose"><code>src/lib/<b>sync.ts</b></code> · 52–55행</p>
+          <div class="swap">
+            <div class="swap-b now">
+              <div class="swap-t">지금 내 코드 — 약 900ms</div>
+              <div class="mini">const user  = await getUser();     // 300ms
+const repos = await getRepos();    // 300ms  ← user 를 기다렸다 출발
+const stars = await getStars();    // 300ms  ← repos 를 기다렸다 출발</div>
+            </div>
+            <div class="swap-b could">
+              <div class="swap-t">이 문법으로 쓰면 — 약 300ms</div>
+              <div class="mini">const [user, repos, stars] = await Promise.all([
+  getUser(), getRepos(), getStars(),
+]);   // 셋이 동시에 출발한다</div>
+            </div>
+          </div>
+          <p class="prose" style="margin-top:14px">왼쪽 <code>[user, repos, stars]</code> 가 눈에 익다면 맞습니다 — <b>배열 구조 분해 할당</b>입니다. 오늘 이미 기록한 종이에요.</p>
+        </div>
+        <div class="gsec" style="border-top:0;padding-top:0">
+          <button class="btn btn-lead" data-goto="destr">먼저 배열 구조 분해부터 보기</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="gitem">
+      <button class="gitem-btn" data-gap="5" aria-expanded="false">
+        <span>
+          <span class="gitem-nm">f-문자열</span>
+          <span class="gitem-lat latin">Formatted string literal</span>
+          <span class="gitem-meta"><span>서식지 · scripts 외 1곳</span><span>쓸 수 있었던 자리 14</span></span>
+        </span>
+        <span class="gitem-open">펼치기 +</span>
+      </button>
+      <div class="gpanel" hidden>
+        <div class="gsec">
+          <div class="gsec-t">왜 필요한가</div>
+          <p class="prose">문자열 <b>안에</b> 값을 그대로 끼워 넣습니다. 값이 들어갈 자리가 문장 안에 보이니, 순서가 어긋나 엉뚱한 값이 박히는 실수가 사라집니다.</p>
+        </div>
+        <div class="gsec">
+          <div class="gsec-t">AI는 대신 뭘 썼나</div>
+          <p class="prose"><code>"%s명 통과" % n</code> 처럼 오래된 <code>%</code> 방식과 <code>.format()</code> 을 섞어 썼습니다. 값이 문장 <b>바깥</b>에 있어서, 자리가 둘 이상이면 순서를 눈으로 맞춰야 합니다.</p>
+        </div>
+        <div class="gsec">
+          <div class="gsec-t">내 코드에서 쓸 수 있었던 자리</div>
+          <p class="prose"><code>scripts/<b>report.py</b></code> · 12행</p>
+          <div class="swap">
+            <div class="swap-b now">
+              <div class="swap-t">지금 내 코드</div>
+              <div class="mini">print("%s / %s 명 통과 (%s%%)" % (len(top), len(students), pct))</div>
+            </div>
+            <div class="swap-b could">
+              <div class="swap-t">이 문법으로 쓰면</div>
+              <div class="mini">print(f"{len(top)} / {len(students)} 명 통과 ({pct}%)")</div>
+            </div>
+          </div>
+        </div>
+        <div class="gsec" style="border-top:0;padding-top:0">
+          <button class="btn" disabled>카드 준비 중 — 내일 덱에 들어갑니다</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="card-foot" style="margin-top:30px">
+    <button class="btn btn-lead" id="gaps-back">카드로 돌아가기</button>
+  </div>
+</section>
+</main>
+
+<!-- ================================================================
+     4단 사다리 본문 보관함 (JS가 카드별로 꺼내 씁니다)
+     ================================================================ -->
+<div id="ladder-lib" hidden>
+
+<!-- ===== destr ===== -->
+<div data-for="destr">
+  <div data-rung="1">
+    <div class="layer">
+      <div class="layer-t">1층 · 한 줄로 말하면</div>
+      <p class="prose">오른쪽이 돌려준 <b>배열 하나</b>를, 왼쪽에서 여러 이름으로 나눠 받는 것입니다.</p>
+    </div>
+    <div class="layer">
+      <div class="layer-t">2층 · 왜 이런 게 필요한가</div>
+      <p class="prose"><code>useState</code> 같은 함수는 돌려줄 것이 <b>둘</b>입니다 — 지금 값과, 그 값을 바꾸는 함수. 그런데 함수는 값을 <b>하나만</b> 돌려줄 수 있습니다.</p>
+      <p class="prose">그래서 둘을 배열 하나에 담아 보냅니다. 받는 쪽에서 그 배열을 다시 푸는 일이 구조 분해예요. <b>하나로 묶어 보내고, 받아서 푼다</b> — 이 왕복이 전부입니다.</p>
+    </div>
+    <div class="layer">
+      <div class="layer-t">3층 · 43행 안에서 무슨 일이 일어나나</div>
+      <ol class="steps">
+        <li><code>useState(0)</code> 이 먼저 실행되어 <code>[0, 함수]</code> 라는 배열 하나가 됩니다.</li>
+        <li>왼쪽 <code>[ ]</code> 는 배열을 만들지 <b>않습니다</b>. "이 배열을 풀겠다"는 표시입니다.</li>
+        <li>0번째 값 <code>0</code> 이 <code>count</code> 라는 이름으로 갑니다.</li>
+        <li>1번째 값(그 함수)이 <code>setCount</code> 라는 이름으로 갑니다.</li>
+      </ol>
+      <div class="edge" style="margin-top:18px">
+        <div class="edge-t">여기서 한 번 더</div>
+        <p class="prose">이름은 <b>순서로만</b> 정해집니다. 아래처럼 써도 오류 없이 통과하고, 값만 뒤바뀐 채 조용히 잘못 돌아갑니다.</p>
+        <div class="mini">const [setCount, count] = useState(0);</div>
+      </div>
+    </div>
+  </div>
+
+  <div data-rung="2">
+    <p class="prose">"모르겠다"의 대부분은 이 개념이 어려워서가 아니라 <b>아래층이 비어 있어서</b>입니다. 이 문법이 딛고 선 세 개념의 관찰 기록을 확인했습니다.</p>
+    <ul class="pre-list">
+      <li class="pre-item done"><span class="pre-state">눈에 익음</span><span><span class="pre-nm">배열과 인덱스</span> <span class="pre-lat">Array and index</span></span></li>
+      <li class="pre-item done"><span class="pre-state">몇 번 봄</span><span><span class="pre-nm">변수 선언 <code>const</code> / <code>let</code></span> <span class="pre-lat">Declaration</span></span></li>
+      <li class="pre-item gap" data-pre="ret"><span class="pre-state">아직 안 봄</span><span><span class="pre-nm">함수의 반환값</span> <span class="pre-lat">Return value</span></span></li>
+    </ul>
+    <div class="diagnosis">
+      <p class="prose"><b>세 층 중 한 층이 비어 있습니다.</b> 오른쪽이 "배열 하나를 돌려준다"는 말이 안 잡히면 왼쪽에서 무엇을 푸는지도 잡히지 않습니다. 지금 막힌 곳은 이 문법이 아니라 그 아래일 가능성이 큽니다.</p>
+    </div>
+    <div class="branch-pick">
+      <button class="btn btn-lead" data-jump="ret">↳ 「함수의 반환값」 카드로 내려가기 — 1문제 · 약 40초</button>
+    </div>
+    <p class="prose" style="margin-top:14px;font-size:1rem">마치면 <b>이 자리로 자동으로 돌아옵니다.</b> 지금 짚은 곳과 코드는 그대로 둡니다.</p>
+  </div>
+
+  <div data-rung="3">
+    <p class="prose">내 리포에서 <b>같은 문법</b>이 쓰인 다른 자리입니다. 모양이 조금씩 달라도 하는 일은 같습니다.</p>
+    <div class="exs">
+      <div class="ex">
+        <div class="ex-h"><span class="path">src/features/auth/<b>LoginForm.tsx</b> · 22행</span><button class="btn-ghost" data-more>앞뒤 보기</button></div>
+        <div class="mini">const [email, setEmail] = useState("");</div>
+        <div class="ex-note">같은 모양입니다. 초기값만 빈 문자열이에요.</div>
+        <div class="ex-more" hidden><div class="mini">20  export function LoginForm({ onDone }) {
+21    const [email, setEmail] = useState("");
+22    const [pw, setPw]       = useState("");
+23    const canSend = email.length &gt; 0 &amp;&amp; pw.length &gt; 0;</div></div>
+      </div>
+      <div class="ex">
+        <div class="ex-h"><span class="path">src/lib/<b>args.ts</b> · 9행</span><button class="btn-ghost" data-more>앞뒤 보기</button></div>
+        <div class="mini">const [cmd, ...rest] = process.argv.slice(2);</div>
+        <div class="ex-note">앞의 하나만 <code>cmd</code> 로 받고, <b>나머지 전부</b>를 <code>rest</code> 한 이름에 담습니다.</div>
+        <div class="ex-more" hidden><div class="mini">8   // chickadee scan ./src --deep
+9   const [cmd, ...rest] = process.argv.slice(2);
+10  if (cmd === "scan") runScan(rest);</div></div>
+      </div>
+      <div class="ex">
+        <div class="ex-h"><span class="path">scripts/<b>report.py</b> · 58행 · Python</span><button class="btn-ghost" data-more>앞뒤 보기</button></div>
+        <div class="mini">name, score = row</div>
+        <div class="ex-note">파이썬에도 <b>같은 개념</b>이 있습니다. 대괄호 없이 쉼표만으로 나눠 받아요.</div>
+        <div class="ex-more" hidden><div class="mini">57  for row in reader:
+58      name, score = row
+59      students.append(Student(name, int(score)))</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div data-rung="4">
+    <div class="ask-state">
+      <span class="keychip" data-keystate>API 키 없음</span>
+      <button class="btn" data-togglekey>키가 연결된 경우 보기</button>
+    </div>
+    <div data-nokey>
+      <p class="prose">키가 없어도 막히지 않습니다. <b>물어볼 준비가 끝난 프롬프트</b>를 만들어 뒀습니다. 복사해서 아무 데나 붙여 넣으세요.</p>
+      <textarea class="prompt-box" readonly aria-label="복사할 프롬프트">아래는 제 프로젝트 코드입니다.
+
+파일: src/features/counter/CounterPanel.tsx (41–45행)
+```tsx
+export function CounterPanel() {
+  const label = "카운터";
+  const [count, setCount] = useState(0);
+  return <button onClick={() => setCount(count + 1)}>{label} {count}</button>;
+}
+```
+
+배우려는 문법: 배열 구조 분해 할당 (43행의 [count, setCount])
+제가 막힌 지점: 왼쪽 대괄호가 배열을 만드는 것인지 푸는 것인지 헷갈립니다.
+
+프로그래밍을 막 시작한 사람에게 설명하듯,
+다른 예제 말고 위 코드 그대로를 예로 들어 알려주세요.</textarea>
+      <div class="v-actions">
+        <button class="btn btn-lead" data-copy>프롬프트 복사</button>
+        <a class="btn" href="https://claude.ai/new" target="_blank" rel="noopener">Claude 열기</a>
+        <a class="btn" href="https://chatgpt.com" target="_blank" rel="noopener">ChatGPT 열기</a>
+        <span class="copied" data-copied hidden>복사했습니다</span>
+      </div>
+      <p class="privacy">담은 것은 <b>이 줄과 앞뒤 4줄</b>뿐입니다. 파일 전체나 다른 파일, 리포 이름은 담지 않습니다. 이 앱은 아무것도 스스로 전송하지 않습니다.</p>
+    </div>
+    <div data-haskey hidden>
+      <div class="chat">
+        <div class="bub me"><div class="bub-who">나</div><p class="prose">왼쪽 대괄호가 배열을 만드는 건지 푸는 건지 헷갈려요.</p></div>
+        <div class="bub"><div class="bub-who">Dee</div>
+          <p class="prose">대괄호가 <b>어느 쪽에 있는지</b>만 보면 됩니다. 대입의 오른쪽이면 만드는 것, 왼쪽이면 푸는 것이에요.</p>
+          <div class="mini wrapok">const xs = [1, 2];        // 오른쪽 → 만든다
+const [a, b] = xs;        // 왼쪽   → 푼다</div>
+          <p class="prose" style="margin-top:12px">43행의 대괄호는 <code>=</code> 왼쪽에 있으니 푸는 쪽입니다.</p>
+        </div>
+      </div>
+      <p class="privacy">보낸 것은 <b>43행과 앞뒤 4줄</b>, 개념 이름, 막힌 지점뿐입니다.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== compr ===== -->
+<div data-for="compr">
+  <div data-rung="1">
+    <div class="layer">
+      <div class="layer-t">1층 · 한 줄로 말하면</div>
+      <p class="prose">여러 개에서 하나씩 꺼내, <b>조건을 통과한 것만</b> 새 리스트에 담습니다.</p>
+    </div>
+    <div class="layer">
+      <div class="layer-t">2층 · 왜 이런 게 필요한가</div>
+      <p class="prose">"골라서 새 목록 만들기"는 코드에서 가장 자주 하는 일입니다. 빈 리스트를 만들고 루프를 돌며 <code>append</code> 하면 네 줄이 필요하고, <b>무엇을 만들려는지</b>가 마지막 줄에 가서야 드러납니다.</p>
+      <p class="prose">컴프리헨션은 <b>만들려는 것을 맨 앞에</b> 적습니다. <code>[s.name …]</code> 을 보는 순간 "이름 목록을 만드는구나"가 먼저 읽혀요.</p>
+    </div>
+    <div class="layer">
+      <div class="layer-t">3층 · 33행 안에서 무슨 일이 일어나나</div>
+      <ol class="steps">
+        <li><code>for s in students</code> 가 학생을 하나 꺼내 <code>s</code> 에 담습니다.</li>
+        <li><code>if s.score &gt;= cut</code> 로 검사합니다. 거짓이면 아무것도 하지 않고 다음으로 넘어갑니다.</li>
+        <li>참이면 맨 앞의 <code>s.name</code> 을 계산해 결과 리스트에 넣습니다.</li>
+        <li>학생이 떨어질 때까지 1–3을 반복하고, 완성된 리스트가 <code>top</code> 에 들어갑니다.</li>
+      </ol>
+      <div class="edge" style="margin-top:18px">
+        <div class="edge-t">여기서 한 번 더</div>
+        <p class="prose">읽는 순서와 쓰는 순서가 다릅니다. <b>실행은 가운데 <code>for</code> 부터</b> 시작해 오른쪽 <code>if</code> 로 갔다가, 마지막에 맨 앞으로 돌아옵니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <div data-rung="2">
+    <p class="prose">이 문법이 딛고 선 세 개념의 관찰 기록입니다.</p>
+    <ul class="pre-list">
+      <li class="pre-item done"><span class="pre-state">눈에 익음</span><span><span class="pre-nm">리스트와 반복문 <code>for</code></span> <span class="pre-lat">List and for-loop</span></span></li>
+      <li class="pre-item done"><span class="pre-state">몇 번 봄</span><span><span class="pre-nm">비교 연산자와 참·거짓</span> <span class="pre-lat">Comparison and truth</span></span></li>
+      <li class="pre-item done"><span class="pre-state">몇 번 봄</span><span><span class="pre-nm">속성 접근 <code>s.name</code></span> <span class="pre-lat">Attribute access</span></span></li>
+    </ul>
+    <div class="diagnosis">
+      <p class="prose"><b>아래층은 모두 채워져 있습니다.</b> 그렇다면 막힌 곳은 개념이 아니라 <b>순서</b>일 가능성이 큽니다 — 이 문법은 읽는 순서와 실행 순서가 다르거든요. 3단의 다른 예시를 나란히 보면 그 순서가 잡힙니다.</p>
+    </div>
+    <div class="branch-pick">
+      <button class="btn btn-lead" data-rung-go="3">3단 · 다른 예시로 건너뛰기</button>
+      <button class="btn" data-rung-go="4">그래도 안 잡히면 · 물어보기</button>
+    </div>
+  </div>
+
+  <div data-rung="3">
+    <p class="prose">내 리포에서 <b>같은 문법</b>이 쓰인 다른 자리입니다.</p>
+    <div class="exs">
+      <div class="ex">
+        <div class="ex-h"><span class="path">scripts/<b>report.py</b> · 61행</span><button class="btn-ghost" data-more>앞뒤 보기</button></div>
+        <div class="mini">ids = [s.id for s in students]</div>
+        <div class="ex-note">조건이 <b>없는</b> 모양입니다. 거르지 않으니 개수가 그대로예요.</div>
+        <div class="ex-more" hidden><div class="mini">60  # 전체 학생 id 목록 (거르지 않는다)
+61  ids = [s.id for s in students]
+62  assert len(ids) == len(students)</div></div>
+      </div>
+      <div class="ex">
+        <div class="ex-h"><span class="path">scripts/<b>clean.py</b> · 18행</span><button class="btn-ghost" data-more>앞뒤 보기</button></div>
+        <div class="mini">rows = [r.strip() for r in lines if r.strip()]</div>
+        <div class="ex-note">거르기와 바꾸기를 <b>동시에</b> 합니다. 빈 줄은 버리고, 남은 줄은 공백을 떼어서 담아요.</div>
+        <div class="ex-more" hidden><div class="mini">17  lines = open(path, encoding="utf-8").readlines()
+18  rows = [r.strip() for r in lines if r.strip()]
+19  print(f"{len(rows)}줄 남음")</div></div>
+      </div>
+      <div class="ex">
+        <div class="ex-h"><span class="path">src/lib/<b>sync.ts</b> · 71행 · TypeScript</span><button class="btn-ghost" data-more>앞뒤 보기</button></div>
+        <div class="mini">const names = repos.filter(r =&gt; r.stars &gt;= 10).map(r =&gt; r.name);</div>
+        <div class="ex-note">타입스크립트에는 컴프리헨션이 없어서 <code>filter</code> + <code>map</code> 으로 같은 일을 합니다. <b>거르고, 바꾼다</b>는 뼈대는 똑같아요.</div>
+        <div class="ex-more" hidden><div class="mini">70  // 별 10개 이상인 저장소 이름만
+71  const names = repos.filter(r =&gt; r.stars &gt;= 10).map(r =&gt; r.name);
+72  return names.sort();</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div data-rung="4">
+    <div class="ask-state">
+      <span class="keychip" data-keystate>API 키 없음</span>
+      <button class="btn" data-togglekey>키가 연결된 경우 보기</button>
+    </div>
+    <div data-nokey>
+      <p class="prose">키가 없어도 막히지 않습니다. <b>물어볼 준비가 끝난 프롬프트</b>를 만들어 뒀습니다.</p>
+      <textarea class="prompt-box" readonly aria-label="복사할 프롬프트">아래는 제 프로젝트 코드입니다.
+
+파일: scripts/report.py (29–34행)
+```python
+def top_students(path, cut):
+    students = load_students(path)
+
+    # 커트라인을 넘긴 학생 이름만 남긴다
+    top = [s.name for s in students if s.score >= cut]
+    return top
+```
+
+배우려는 문법: 리스트 컴프리헨션의 조건 (33행의 if)
+제가 막힌 지점: if 가 앞에 올 때와 뒤에 올 때가 어떻게 다른지 모르겠습니다.
+
+프로그래밍을 막 시작한 사람에게 설명하듯,
+다른 예제 말고 위 코드 그대로를 예로 들어 알려주세요.</textarea>
+      <div class="v-actions">
+        <button class="btn btn-lead" data-copy>프롬프트 복사</button>
+        <a class="btn" href="https://claude.ai/new" target="_blank" rel="noopener">Claude 열기</a>
+        <a class="btn" href="https://chatgpt.com" target="_blank" rel="noopener">ChatGPT 열기</a>
+        <span class="copied" data-copied hidden>복사했습니다</span>
+      </div>
+      <p class="privacy">담은 것은 <b>이 줄과 앞뒤 4줄</b>뿐입니다. 파일 전체나 다른 파일은 담지 않습니다.</p>
+    </div>
+    <div data-haskey hidden>
+      <div class="chat">
+        <div class="bub me"><div class="bub-who">나</div><p class="prose"><code>if</code> 가 앞에 올 때랑 뒤에 올 때가 왜 다른가요?</p></div>
+        <div class="bub"><div class="bub-who">Dee</div>
+          <p class="prose"><b>결과 개수</b>를 보면 바로 갈립니다. 뒤에 오면 걸러서 개수가 줄고, 앞에 오면 전부 남기고 값만 바뀝니다.</p>
+          <div class="mini wrapok">[s.name for s in students if s.score &gt;= cut]
+# 100명 중 40명 → 길이 40
+
+[s.name if s.score &gt;= cut else "-" for s in students]
+# 100명 → 길이 100. 떨어진 사람은 "-"</div>
+        </div>
+      </div>
+      <p class="privacy">보낸 것은 <b>33행과 앞뒤 4줄</b>, 개념 이름, 막힌 지점뿐입니다.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== nullish (선행 개념이 모두 채워진 분기) ===== -->
+<div data-for="nullish">
+  <div data-rung="1">
+    <div class="layer">
+      <div class="layer-t">1층 · 한 줄로 말하면</div>
+      <p class="prose">왼쪽이 <code>null</code> 이나 <code>undefined</code> <b>일 때만</b> 오른쪽 값으로 대신합니다.</p>
+    </div>
+    <div class="layer">
+      <div class="layer-t">2층 · 왜 이런 게 필요한가</div>
+      <p class="prose">서버가 준 데이터는 <b>내가 만들지 않은 것</b>이라 어떤 키가 빠져 있을지 알 수 없습니다. 없는 값을 그대로 다음 줄로 넘기면 <code>.map</code> 같은 데서 화면 전체가 죽습니다.</p>
+      <p class="prose">예전에는 <code>||</code> 로 기본값을 줬는데, <code>||</code> 는 <code>0</code> 과 빈 문자열까지 "빈 값"으로 보고 갈아치웁니다. <code>??</code> 는 <b>정말 없을 때만</b> 나섭니다.</p>
+    </div>
+    <div class="layer">
+      <div class="layer-t">3층 · 88행 안에서 무슨 일이 일어나나</div>
+      <ol class="steps">
+        <li><code>res.data</code> 를 꺼냅니다. 이번 응답에는 있으므로 통과합니다.</li>
+        <li><code>?.</code> 가 확인합니다 — 왼쪽이 <code>null</code> / <code>undefined</code> 면 여기서 멈추고 전체를 <code>undefined</code> 로 만듭니다.</li>
+        <li>통과했으니 <code>items</code> 를 꺼냅니다. 그런 키가 없으므로 <code>undefined</code> 가 나옵니다.</li>
+        <li><code>??</code> 가 받습니다. 왼쪽이 <code>undefined</code> 이므로 오른쪽 <code>[]</code> 를 대신 놓습니다.</li>
+      </ol>
+      <div class="edge" style="margin-top:18px">
+        <div class="edge-t">여기서 한 번 더</div>
+        <p class="prose"><code>?.</code> 는 <b>자기 바로 왼쪽</b>만 지킵니다. <code>res</code> 자체가 없을 수 있다면 <code>res?.data?.items</code> 처럼 앞에도 붙여야 합니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <div data-rung="2">
+    <p class="prose">이 문법이 딛고 선 세 개념의 관찰 기록입니다.</p>
+    <ul class="pre-list">
+      <li class="pre-item done"><span class="pre-state">눈에 익음</span><span><span class="pre-nm">객체와 키 꺼내기</span> <span class="pre-lat">Object property access</span></span></li>
+      <li class="pre-item done"><span class="pre-state">눈에 익음</span><span><span class="pre-nm"><code>undefined</code> 와 <code>null</code> 의 차이</span> <span class="pre-lat">Absent values</span></span></li>
+      <li class="pre-item done"><span class="pre-state">몇 번 봄</span><span><span class="pre-nm">논리 연산자 <code>||</code></span> <span class="pre-lat">Logical OR</span></span></li>
+    </ul>
+    <div class="diagnosis">
+      <p class="prose"><b>아래층은 모두 채워져 있습니다.</b> 이럴 때 막히는 이유는 대개 개념이 아니라 <b>이 코드의 사정</b>입니다 — 왜 하필 이 줄에 이 문법이 붙어 있는지가 안 보이는 것이죠. 두 갈래 중에 골라 주세요.</p>
+    </div>
+    <div class="branch-pick">
+      <button class="btn btn-lead" data-ctx>왜 이 줄에 이 코드가 붙었는지 보기</button>
+      <button class="btn" data-rung-go="3">3단 · 다른 예시로 건너뛰기</button>
+    </div>
+    <div class="diagnosis" data-ctxbox hidden style="margin-top:16px;border-left:4px solid var(--mark)">
+      <div class="gsec-t">이 줄의 사정</div>
+      <p class="prose">88행 바로 다음 줄이 <code>items.map(toRow)</code> 입니다. <code>items</code> 가 없는 값이면 <b>89행에서 화면 전체가 죽습니다</b>.</p>
+      <p class="prose">그런데 이 대시보드 API는 <b>계정이 새로 만들어진 직후</b> 응답에서 <code>items</code> 키를 아예 빼고 보냅니다. 첫 사용자만 흰 화면을 보는 사고가 이렇게 납니다.</p>
+      <p class="prose"><code>?? []</code> 한 조각이 그 경우에 빈 목록을 놓아 줍니다. <b>없을 수 있는 값과, 그 값을 그냥 쓰는 다음 줄 사이</b>가 이 문법의 자리예요.</p>
+      <div class="mini wrapok">// 없다면 이렇게 죽는다
+const items = res.data.items;   // undefined
+return items.map(toRow);        // TypeError</div>
+    </div>
+  </div>
+
+  <div data-rung="3">
+    <p class="prose">내 리포에서 <b>같은 문법</b>이 쓰인 다른 자리입니다.</p>
+    <div class="exs">
+      <div class="ex">
+        <div class="ex-h"><span class="path">src/api/<b>client.ts</b> · 104행</span><button class="btn-ghost" data-more>앞뒤 보기</button></div>
+        <div class="mini">const page = res?.page ?? 1;</div>
+        <div class="ex-note"><code>page</code> 가 <code>0</code> 이면 <b><code>0</code> 그대로</b> 통과합니다. <code>||</code> 였다면 <code>1</code> 로 갈아치워졌을 자리예요.</div>
+        <div class="ex-more" hidden><div class="mini">103 // page 는 0부터 시작한다 (0 이 유효한 값!)
+104 const page = res?.page ?? 1;
+105 const offset = page * PAGE_SIZE;</div></div>
+      </div>
+      <div class="ex">
+        <div class="ex-h"><span class="path">src/features/settings/<b>Prefs.tsx</b> · 31행</span><button class="btn-ghost" data-more>앞뒤 보기</button></div>
+        <div class="mini">const theme = saved?.ui?.theme ?? "system";</div>
+        <div class="ex-note"><code>?.</code> 를 <b>두 번</b> 이었습니다. 어느 단계가 비어도 조용히 <code>"system"</code> 으로 떨어집니다.</div>
+        <div class="ex-more" hidden><div class="mini">30  const saved = JSON.parse(localStorage.getItem("prefs") ?? "{}");
+31  const theme = saved?.ui?.theme ?? "system";
+32  applyTheme(theme);</div></div>
+      </div>
+      <div class="ex">
+        <div class="ex-h"><span class="path">scripts/<b>report.py</b> · 22행 · Python</span><button class="btn-ghost" data-more>앞뒤 보기</button></div>
+        <div class="mini">cut = cfg.get("cut", 60)</div>
+        <div class="ex-note">파이썬에는 <code>??</code> 가 없어서 <code>dict.get</code> 의 <b>두 번째 인자</b>가 그 자리를 맡습니다. 다만 <b>키가 없을 때만</b> 작동합니다 — 값이 <code>None</code> 이면 <code>None</code> 이 그대로 나와요.</div>
+        <div class="ex-more" hidden><div class="mini">21  cfg = json.load(open("config.json"))
+22  cut = cfg.get("cut", 60)
+23  # 주의: {"cut": None} 이면 cut 은 None 이다</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div data-rung="4">
+    <div class="ask-state">
+      <span class="keychip" data-keystate>API 키 없음</span>
+      <button class="btn" data-togglekey>키가 연결된 경우 보기</button>
+    </div>
+    <div data-nokey>
+      <p class="prose">키가 없어도 막히지 않습니다. <b>물어볼 준비가 끝난 프롬프트</b>를 만들어 뒀습니다.</p>
+      <textarea class="prompt-box" readonly aria-label="복사할 프롬프트">아래는 제 프로젝트 코드입니다.
+
+파일: src/api/client.ts (84–89행)
+```ts
+export async function loadRows() {
+  const res = await fetchDashboard();
+  // 이번 응답: { data: { user: { name: "지민" } } }
+  //   → data 는 있지만 items 키는 없다
+  const items = res.data?.items ?? [];
+  return items.map(toRow);
+}
+```
+
+배우려는 문법: 널 병합 연산자 ?? (88행)
+제가 막힌 지점: ?. 와 ?? 가 각각 어디까지 책임지는지 헷갈립니다.
+                또 ?? 와 || 를 언제 나눠 쓰는지 모르겠습니다.
+
+프로그래밍을 막 시작한 사람에게 설명하듯,
+다른 예제 말고 위 코드 그대로를 예로 들어 알려주세요.</textarea>
+      <div class="v-actions">
+        <button class="btn btn-lead" data-copy>프롬프트 복사</button>
+        <a class="btn" href="https://claude.ai/new" target="_blank" rel="noopener">Claude 열기</a>
+        <a class="btn" href="https://chatgpt.com" target="_blank" rel="noopener">ChatGPT 열기</a>
+        <span class="copied" data-copied hidden>복사했습니다</span>
+      </div>
+      <p class="privacy">담은 것은 <b>이 줄과 앞뒤 4줄</b>뿐입니다. 파일 전체나 다른 파일은 담지 않습니다.</p>
+    </div>
+    <div data-haskey hidden>
+      <div class="chat">
+        <div class="bub me"><div class="bub-who">나</div><p class="prose"><code>?.</code> 와 <code>??</code> 는 각각 어디까지 책임지나요?</p></div>
+        <div class="bub"><div class="bub-who">Dee</div>
+          <p class="prose">둘은 하는 일이 다릅니다. <code>?.</code> 는 <b>가다가 멈추는</b> 것이고, <code>??</code> 는 <b>없으면 대신 놓는</b> 것입니다.</p>
+          <div class="mini wrapok">res.data?.items   // 멈추면 undefined  ← 여기까지 ?. 의 몫
+      ?? []       // undefined 면 [] 로   ← 여기부터 ?? 의 몫</div>
+          <p class="prose" style="margin-top:12px">그래서 <code>?.</code> 만 쓰면 값이 <code>undefined</code> 로 나오고, <code>??</code> 까지 있어야 안전한 기본값이 됩니다.</p>
+        </div>
+      </div>
+      <p class="privacy">보낸 것은 <b>88행과 앞뒤 4줄</b>, 개념 이름, 막힌 지점뿐입니다.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ret (선행 개념 카드) ===== -->
+<div data-for="ret">
+  <div data-rung="1">
+    <div class="layer">
+      <div class="layer-t">1층 · 한 줄로 말하면</div>
+      <p class="prose">함수를 <b>부르면</b>, 그 자리에는 함수가 아니라 <code>return</code> 뒤에 적힌 <b>값 하나</b>가 놓입니다.</p>
+    </div>
+    <div class="layer">
+      <div class="layer-t">2층 · 왜 이런 게 필요한가</div>
+      <p class="prose">함수는 일을 맡기는 창구입니다. 맡긴 결과를 <b>돌려받아야</b> 다음 줄에서 쓸 수 있어요. 그 돌려주는 통로가 <code>return</code> 하나뿐입니다.</p>
+      <p class="prose">통로가 하나라서, 돌려줄 것이 둘 이상이면 <b>배열이나 객체 하나로 묶어</b> 보내야 합니다.</p>
+    </div>
+    <div class="layer">
+      <div class="layer-t">3층 · 14행 안에서 무슨 일이 일어나나</div>
+      <ol class="steps">
+        <li><code>toRow(raw)</code> 의 괄호가 "지금 실행해라"는 신호입니다.</li>
+        <li>함수 안으로 <code>raw</code> 가 들어가 <code>item</code> 이라는 이름을 받습니다.</li>
+        <li>11행이 새 객체 하나를 만들어 <code>return</code> 으로 내보냅니다.</li>
+        <li>내보낸 그 값이 <code>toRow(raw)</code> 라고 적힌 <b>자리에 놓이고</b>, <code>row</code> 라는 이름을 받습니다.</li>
+      </ol>
+      <div class="edge" style="margin-top:18px">
+        <div class="edge-t">여기서 한 번 더 — 위 카드로 이어지는 자리</div>
+        <p class="prose">돌려줄 것이 둘이면 하나로 묶어 보냅니다. <code>useState</code> 가 바로 그렇게 <code>[값, 함수]</code> 라는 배열 하나를 돌려줘요.</p>
+      </div>
+    </div>
+  </div>
+  <div data-rung="2">
+    <p class="prose">이 개념이 딛고 선 층입니다.</p>
+    <ul class="pre-list">
+      <li class="pre-item done"><span class="pre-state">눈에 익음</span><span><span class="pre-nm">함수를 부른다는 것</span> <span class="pre-lat">Function call</span></span></li>
+      <li class="pre-item done"><span class="pre-state">눈에 익음</span><span><span class="pre-nm">변수에 값을 담는다는 것</span> <span class="pre-lat">Assignment</span></span></li>
+    </ul>
+    <div class="diagnosis">
+      <p class="prose"><b>여기가 바닥입니다.</b> 아래로 더 내려갈 곳이 없어요. 이 카드에서 막히면 3단의 다른 예시를 보거나 4단에서 직접 물어보는 편이 빠릅니다.</p>
+    </div>
+    <div class="branch-pick">
+      <button class="btn btn-lead" data-rung-go="3">3단 · 다른 예시로</button>
+    </div>
+  </div>
+  <div data-rung="3">
+    <p class="prose">내 리포에서 <b>같은 개념</b>이 쓰인 다른 자리입니다.</p>
+    <div class="exs">
+      <div class="ex">
+        <div class="ex-h"><span class="path">src/lib/<b>fmt.ts</b> · 4행</span></div>
+        <div class="mini">const label = pad(n, 3);   // "007"</div>
+        <div class="ex-note">부른 결과인 <b>문자열 하나</b>가 <code>label</code> 에 들어갑니다.</div>
+      </div>
+      <div class="ex">
+        <div class="ex-h"><span class="path">src/features/counter/<b>CounterPanel.tsx</b> · 43행</span></div>
+        <div class="mini">const [count, setCount] = useState(0);</div>
+        <div class="ex-note">돌려주는 값 하나가 <b>배열</b>인 경우입니다. 바로 위 카드에서 보던 그 줄이에요.</div>
+      </div>
+    </div>
+  </div>
+  <div data-rung="4">
+    <div class="ask-state">
+      <span class="keychip" data-keystate>API 키 없음</span>
+      <button class="btn" data-togglekey>키가 연결된 경우 보기</button>
+    </div>
+    <div data-nokey>
+      <p class="prose">키가 없어도 막히지 않습니다. <b>물어볼 준비가 끝난 프롬프트</b>를 만들어 뒀습니다.</p>
+      <textarea class="prompt-box" readonly aria-label="복사할 프롬프트">아래는 제 프로젝트 코드입니다.
+
+파일: src/utils/toRow.ts (9–14행)
+```ts
+// 응답 한 건을 표의 한 줄로 바꾼다
+export function toRow(item) {
+  return { id: item.id, name: item.name };
+}
+
+const row = toRow(raw);
+```
+
+배우려는 문법: 함수의 반환값 (11행의 return, 14행의 호출)
+제가 막힌 지점: 함수를 부르면 그 자리에 무엇이 남는지 잘 모르겠습니다.
+
+프로그래밍을 막 시작한 사람에게 설명하듯,
+다른 예제 말고 위 코드 그대로를 예로 들어 알려주세요.</textarea>
+      <div class="v-actions">
+        <button class="btn btn-lead" data-copy>프롬프트 복사</button>
+        <a class="btn" href="https://claude.ai/new" target="_blank" rel="noopener">Claude 열기</a>
+        <span class="copied" data-copied hidden>복사했습니다</span>
+      </div>
+      <p class="privacy">담은 것은 <b>이 줄과 앞뒤 4줄</b>뿐입니다.</p>
+    </div>
+    <div data-haskey hidden>
+      <div class="chat">
+        <div class="bub me"><div class="bub-who">나</div><p class="prose">함수를 부르면 그 자리에 뭐가 남나요?</p></div>
+        <div class="bub"><div class="bub-who">Dee</div>
+          <p class="prose"><code>return</code> 뒤에 적힌 <b>값 하나</b>가 남습니다. 함수 이름이 그 값으로 <b>바뀐다</b>고 생각하면 쉽습니다.</p>
+          <div class="mini wrapok">const row = toRow(raw);
+//          ↑ 실행이 끝나면 이 자리가
+//            { id: 7, name: "지민" } 으로 바뀐 셈</div>
+        </div>
+      </div>
+      <p class="privacy">보낸 것은 <b>14행과 앞뒤 4줄</b>, 개념 이름, 막힌 지점뿐입니다.</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /#ladder-lib -->
+
+<!-- ================================================================ -->
+<footer class="keys">
+  <div class="wrap">
+    <span class="keyitem" data-key="opt"><span class="mk">▪</span><kbd>1</kbd>–<kbd>4</kbd><span class="kname">보기 고르기</span></span>
+    <span class="keyitem" data-key="arrow"><span class="mk">▪</span><kbd>←</kbd><kbd>→</kbd><span class="kname">코드에서 짚기</span></span>
+    <span class="keyitem" data-key="enter"><span class="mk">▪</span><kbd>Enter</kbd><span class="kname">제출</span></span>
+    <span class="keyitem" data-key="space"><span class="mk">▪</span><kbd>Space</kbd><span class="kname">다음</span></span>
+    <span class="keyitem" data-key="help"><span class="mk">▪</span><kbd>?</kbd><span class="kname">놓쳤어요</span></span>
+    <span class="keyitem" data-key="esc"><span class="mk">▪</span><kbd>Esc</kbd><span class="kname">닫기 · 돌아가기</span></span>
+  </div>
+</footer>
+
+<script>
+(function(){
+"use strict";
+var $  = function(s,r){return (r||document).querySelector(s);};
+var $$ = function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));};
+var live = $('#live');
+function say(t){ live.textContent=''; setTimeout(function(){live.textContent=t;},30); }
+
+/* ---------- 관찰 기록 ---------- */
+var LV = ['아직 안 봄','처음 봄','몇 번 봄','눈에 익음'];
+var CONCEPT = {
+  destr:  {name:'배열 구조 분해 할당', lv:2, seen:3, first:'8월 27일', due:'3일 뒤'},
+  compr:  {name:'리스트 컴프리헨션의 조건', lv:1, seen:1, first:'9월 1일', due:'내일'},
+  nullish:{name:'널 병합 연산자', lv:1, seen:2, first:'8월 30일', due:'내일'},
+  ret:    {name:'함수의 반환값', lv:0, seen:0, first:'아직 없음', due:'미정'}
+};
+function dots(lv){
+  var o='';
+  for(var i=0;i<3;i++) o += (i<lv? '<span class="f">●</span>':'<span class="e">○</span>');
+  return o;
+}
+function renderObs(){
+  $$('.obs').forEach(function(el){
+    var c = CONCEPT[el.dataset.obs]; if(!c) return;
+    el.innerHTML =
+      '<span class="obs-item"><span class="ok">관찰 기록</span><span class="dots">'+dots(c.lv)+'</span> <b>'+LV[c.lv]+'</b></span>'+
+      '<span class="obs-item"><span class="ok">본 횟수</span>'+(c.seen?c.seen+'번':'없음')+'</span>'+
+      '<span class="obs-item"><span class="ok">처음 본 날</span>'+c.first+'</span>'+
+      '<span class="obs-item"><span class="ok">다시 보러 가기</span>'+c.due+'</span>';
+  });
+}
+
+/* ---------- 상태 ---------- */
+var RT = {};
+function rt(id){ if(!RT[id]) RT[id]={sel:null,answered:false,correct:false,missed:false,ladder:false,rung:0}; return RT[id]; }
+var STATE = { card:'destr', stack:[], view:'card' };
+var DECK = ['destr','compr','nullish'];
+
+/* ---------- 테마 ---------- */
+var themeBtn = $('#theme');
+(function(){
+  var dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  setTheme(dark?'dark':'light');
+})();
+function setTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  themeBtn.textContent = (t==='dark'?'밝게':'어둡게');
+  themeBtn.setAttribute('aria-pressed', t==='dark'?'true':'false');
+}
+themeBtn.addEventListener('click',function(){
+  setTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark');
+});
+
+/* ---------- 지시선 ---------- */
+function anchorRect(el){
+  var rs = el.getClientRects();
+  return (rs && rs.length)? rs[0] : el.getBoundingClientRect();
+}
+function layoutLeaders(card, reveal){
+  var fig = card.querySelector('.figure'); if(!fig) return;
+  var rail = fig.querySelector('.rail'), svg = fig.querySelector('.leaders');
+  var labs = $$('.lab', rail); if(!labs.length) return;
+  var NUM = ['\u2460','\u2461','\u2462','\u2463'];
+  var narrow = window.matchMedia('(max-width:920px)').matches;
+  labs.forEach(function(l,i){
+    var a = card.querySelector('#'+l.dataset.anchor);
+    if(!a) return;
+    if(narrow && rail.classList.contains('on')){
+      a.dataset.mark = NUM[i] || ''; a.classList.add('anchored');
+    } else { a.removeAttribute('data-mark'); a.classList.remove('anchored'); }
+  });
+  if(narrow){
+    svg.innerHTML=''; rail.style.minHeight='';
+    labs.forEach(function(l){ l.style.top=''; });
+    return;
+  }
+  var fr = fig.getBoundingClientRect(), railR = rail.getBoundingClientRect();
+  var prev = -99999, GAPY = 16, items = [], tops = [];
+  labs.forEach(function(l,i){
+    var a = card.querySelector('#'+l.dataset.anchor);
+    var r = a? anchorRect(a) : null;
+    var top = r ? (r.top + r.height/2 - railR.top - 11) : i*92;
+    if(top < 0) top = 0;
+    if(top < prev + GAPY) top = prev + GAPY;
+    l.style.top = top+'px';
+    prev = top + l.offsetHeight;
+    tops.push(top); items.push({l:l, a:a});
+  });
+  // 라벨 묶음이 도판보다 아래로 삐져나오면 통째로 끌어올려 여백 낭비를 없앤다
+  var col = fig.querySelector('.plate-col');
+  var budget = col ? col.offsetHeight : prev;
+  if(prev > budget && tops.length){
+    var shift = Math.min(tops[0], prev - budget);
+    if(shift > 0){
+      labs.forEach(function(l,i){ l.style.top = (tops[i]-shift)+'px'; });
+      prev -= shift;
+    }
+  }
+  rail.style.minHeight = Math.max(prev + 8, 0)+'px';
+
+  if(!rail.classList.contains('on')){ svg.innerHTML=''; return; }
+  var out = [];
+  items.forEach(function(it, i){
+    if(!it.a) return;
+    var ar = anchorRect(it.a);
+    var plate = it.a.closest('.plate'); if(!plate) return;
+    var pr = plate.getBoundingClientRect();
+    var row = it.a.closest('.ln');
+    var rr = row ? row.getBoundingClientRect() : ar;
+    var visL = pr.left + 60, visR = pr.right - 2;
+    var x1 = ar.left - fr.left, x2 = ar.right - fr.left;
+    var by = ar.bottom - fr.top + 3;
+    var cx = (ar.left + ar.width/2) - fr.left;
+    var offL = ar.right < visL + 4, offR = ar.left > visR - 4;
+    var clipped = offL || offR;
+    cx = Math.min(Math.max(cx, visL - fr.left), visR - fr.left);
+    var lr = it.l.getBoundingClientRect();
+    var bx = lr.left - fr.left - 11, byL = lr.top - fr.top + 12;
+    /* 차선(lane): 지시선은 대상 줄의 '행간' 안에서만 가로로 달린 뒤
+       도판 밖으로 빠져나간다 — 다른 코드 줄 위를 절대 가로지르지 않는다 */
+    var laneY = (rr.bottom - fr.top) - 6 + i*6;
+    var exitX = (pr.right - fr.left) + 7;
+    /* 넓은 토큰은 밑줄 대괄호(bracket), 좁은 토큰은 점. 지시선은 그 끝에서 출발한다 */
+    var startX = cx;
+    if(!clipped && (x2 - x1) > 18){
+      out.push('<path d="M'+x1+','+(by-4)+' L'+x1+','+by+' L'+x2+','+by+' L'+x2+','+(by-4)+'"/>');
+      startX = x2;
+    } else if(clipped){
+      var d = offR ? 1 : -1;
+      out.push('<polygon points="'+(cx)+','+(by-4)+' '+(cx+8*d)+','+by+' '+(cx)+','+(by+4)+'"/>');
+    } else {
+      out.push('<circle cx="'+cx+'" cy="'+by+'" r="2.4"/>');
+    }
+    out.push('<path class="lead" d="M'+startX+','+by+' L'+exitX+','+laneY+
+             ' L'+(bx-16)+','+byL+' L'+bx+','+byL+'"/>');
+  });
+  svg.innerHTML = out.join('');
+  if(reveal){
+    $$('.lead', svg).forEach(function(p,i){
+      var len;
+      try{ len = p.getTotalLength(); }catch(e){ return; }
+      p.style.strokeDasharray = len; p.style.strokeDashoffset = len;
+      p.style.transition = 'stroke-dashoffset 400ms ease-out '+(i*110)+'ms';
+      requestAnimationFrame(function(){ p.style.strokeDashoffset = 0; });
+    });
+  }
+}
+function relayout(reveal){
+  var c = currentCard(); if(c) layoutLeaders(c, !!reveal);
+}
+window.addEventListener('resize', function(){ relayout(false); });
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ relayout(false); });
+
+/* ---------- 도판 도구 ---------- */
+document.addEventListener('click', function(e){
+  var t = e.target.closest('[data-tool]'); if(!t) return;
+  var card = t.closest('.card'), plate = card.querySelector('.plate');
+  if(t.dataset.tool==='wrap'){
+    var on = plate.classList.toggle('wrap');
+    t.textContent = on? '긴 줄 펴기':'긴 줄 접기';
+    t.setAttribute('aria-pressed', on?'true':'false');
+  } else {
+    var o = plate.classList.toggle('open');
+    plate.classList.toggle('tall', o);
+    t.textContent = o? '앞뒤 접기':'전체 보기';
+    t.setAttribute('aria-pressed', o?'true':'false');
+  }
+  setTimeout(function(){ layoutLeaders(card, false); }, 20);
+});
+document.addEventListener('click', function(e){
+  var f = e.target.closest('.ln.fold'); if(!f) return;
+  var card = f.closest('.card');
+  var btn = card.querySelector('[data-tool="open"]'); if(btn) btn.click();
+});
+$$('.plate').forEach(function(p){
+  p.addEventListener('scroll', function(){
+    var card = p.closest('.card');
+    if(card && !card.hidden) layoutLeaders(card, false);
+  });
+});
+function revealAnchor(card, el){
+  var plate = el.closest('.plate'); if(!plate) return;
+  var ar = anchorRect(el), pr = plate.getBoundingClientRect();
+  if(ar.left < pr.left + 66) plate.scrollLeft += (ar.left - pr.left - 80);
+  else if(ar.right > pr.right - 12) plate.scrollLeft += (ar.right - pr.right + 30);
+}
+
+/* ---------- 선택 ---------- */
+function currentCard(){ return document.getElementById('c-'+STATE.card); }
+function setSel(card, k){
+  var id = card.dataset.card, r = rt(id);
+  if(r.answered) return;
+  r.sel = k;
+  $$('.tok, .opt', card).forEach(function(el){
+    el.setAttribute('aria-checked', el.dataset.k===k ? 'true':'false');
+  });
+  var slot = card.querySelector('[data-slot="pick"]');
+  if(card.dataset.type==='blank'){
+    var opt = card.querySelector('.opt[data-k="'+k+'"]');
+    var b = card.querySelector('.blank');
+    if(opt && b){ b.textContent = opt.dataset.fill; b.classList.remove('filled');
+      void b.offsetWidth; b.classList.add('filled'); }
+    if(slot) slot.textContent = '코드에 «'+opt.dataset.fill+'» 를 써 넣었습니다. 제출하면 채점합니다.';
+    say('코드에 '+opt.dataset.fill+' 를 써 넣었습니다');
+  } else if(card.dataset.type==='point'){
+    var tk = card.querySelector('.tok[data-k="'+k+'"]');
+    if(slot) slot.textContent = '짚은 곳 — '+(tk?tk.textContent:'');
+    if(tk){ tk.focus({preventScroll:true}); revealAnchor(card, tk); }
+    say('짚은 곳 '+(tk?tk.textContent:''));
+  } else {
+    var o2 = card.querySelector('.opt[data-k="'+k+'"]');
+    if(slot) slot.textContent = '고른 보기 — '+k+'번';
+    say(k+'번을 골랐습니다');
+  }
+}
+document.addEventListener('click', function(e){
+  var el = e.target.closest('.tok, .opt'); if(!el) return;
+  var card = el.closest('.card'); if(!card) return;
+  setSel(card, el.dataset.k);
+});
+function moveTok(card, dir){
+  var toks = $$('.tok', card); if(!toks.length) return;
+  var r = rt(card.dataset.card);
+  var i = toks.findIndex(function(t){ return t.dataset.k===r.sel; });
+  if(i<0) i = dir>0 ? -1 : 0;
+  var n = (i + dir + toks.length) % toks.length;
+  setSel(card, toks[n].dataset.k);
+}
+
+/* ---------- 채점 ---------- */
+function flash(el){
+  if(!el || !el.animate) return;
+  try{ el.animate([{transform:'translateX(0)'},{transform:'translateX(-3px)'},
+    {transform:'translateX(3px)'},{transform:'translateX(0)'}],{duration:260,easing:'ease-out'}); }catch(e){}
+}
+function bump(card){
+  var o=card.querySelector('.obs'); if(!o) return;
+  o.classList.remove('bump'); void o.offsetWidth; o.classList.add('bump');
+}
+function grade(card){
+  var id=card.dataset.card, r=rt(id);
+  if(r.answered) return;
+  if(!r.sel){ say('먼저 답을 고르세요'); flash(card.querySelector('[data-act="submit"]')); return; }
+  r.answered=true; r.correct = (r.sel === card.dataset.correct);
+  card.classList.add('answered');
+
+  $$('.opt', card).forEach(function(o){
+    if(o.dataset.k===card.dataset.correct){
+      o.classList.add('is-right');
+      o.insertAdjacentHTML('beforeend','<span class="verdictmark">정답</span>');
+    } else if(o.dataset.k===r.sel){
+      o.classList.add('is-wrongpick');
+      o.insertAdjacentHTML('beforeend','<span class="verdictmark">고른 답</span>');
+    }
+  });
+  if(card.dataset.type==='blank'){
+    var b=card.querySelector('.blank');
+    var right=card.querySelector('.opt[data-k="'+card.dataset.correct+'"]').dataset.fill;
+    b.classList.add('marked');
+    if(b.textContent!==right){
+      setTimeout(function(){ b.classList.remove('filled'); void b.offsetWidth;
+        b.textContent=right; b.classList.add('filled'); }, 300);
+    }
+  }
+  if(card.dataset.type==='point'){
+    var rk=card.querySelector('.tok[data-k="'+card.dataset.correct+'"]');
+    if(rk){ rk.classList.add('marked'); revealAnchor(card, rk); }
+    if(!r.correct){ var w=card.querySelector('.tok[data-k="'+r.sel+'"]'); if(w) w.classList.add('wrongpick'); }
+  }
+
+  var src=card.querySelector('.diags [data-diag="'+(r.correct?'ok':r.sel)+'"]');
+  var v=card.querySelector('.verdict');
+  v.classList.remove('ok','miss'); v.classList.add(r.correct?'ok':'miss');
+  var retryLabel = card.dataset.type==='point' ? '다시 짚어보기' : '다시 고르기';
+  var extra = r.correct
+    ? '<p class="v-nudge">찍어서 맞혔거나 아직 개운하지 않다면 아래 <b>「놓쳤어요」</b>를 누르세요. 감점은 없고, 잊기 전에 이 자리로 다시 데려다 줍니다.</p>'
+    : '<div class="v-actions"><button class="btn" data-act="retry">'+retryLabel+'</button>'
+      +'<button class="btn btn-lead" data-act="missed">아직 모르겠어요 — 4단 사다리</button></div>';
+  v.querySelector('.v-fill').innerHTML =
+    '<p class="v-head">'+(src?src.dataset.head:(r.correct?'맞았습니다':'놓쳤습니다'))+'</p>'+
+    '<div class="v-body">'+(src?src.innerHTML:'')+extra+'</div>';
+
+  var c=CONCEPT[card.dataset.concept];
+  c.seen++; if(c.first==='아직 없음') c.first='오늘';
+  if(r.correct){ c.lv=Math.min(3,c.lv+1); c.due=['오늘 세션 안에','내일','3일 뒤','2주 뒤'][c.lv]; }
+  else { c.due='오늘 세션 안에'; if(c.lv>1) c.lv=c.lv-1; }
+  renderObs(); bump(card);
+
+  card.querySelector('.rail').classList.add('on');
+  setTimeout(function(){ layoutLeaders(card, true); }, 90);
+  say((r.correct?'맞았습니다. ':'놓쳤습니다. ')+'코드 위에 판별 표시를 그렸습니다.');
+  updateKeys();
+}
+function retry(card){
+  var r=rt(card.dataset.card);
+  r.answered=false; r.correct=false; r.sel=null;
+  card.classList.remove('answered');
+  $$('.opt', card).forEach(function(o){
+    o.classList.remove('is-right','is-wrongpick'); o.setAttribute('aria-checked','false');
+    var m=o.querySelector('.verdictmark'); if(m) m.remove();
+  });
+  $$('.tok', card).forEach(function(t){
+    t.classList.remove('marked','wrongpick'); t.setAttribute('aria-checked','false');
+  });
+  var b=card.querySelector('.blank'); if(b){ b.classList.remove('marked','filled'); b.textContent='▢'; }
+  card.querySelector('.rail').classList.remove('on');
+  card.querySelector('.leaders').innerHTML='';
+  var slot=card.querySelector('[data-slot="pick"]');
+  if(slot) slot.textContent='다시 고르세요. 위 진단은 그대로 둡니다.';
+  say('다시 고를 수 있습니다.');
+  updateKeys();
+}
+
+/* ---------- 4단 사다리 ---------- */
+var RUNGS=[
+ {h:'더 자세히', s:'사전 설명 3층 — 한 줄로 / 왜 필요한가 / 안에서 무슨 일이'},
+ {h:'여전히 모르겠어요', s:'아래층이 비어 있는지 진단하고, 비었으면 그 카드로 내려갑니다'},
+ {h:'다른 예시로', s:'내 리포에서 같은 문법이 쓰인 다른 코드 조각'},
+ {h:'자유 질문', s:'키가 있으면 대화, 없으면 복사해서 물어보기'}
+];
+function gainRow(lbl, was, now){
+  return '<div class="gain-row"><span class="lbl">'+lbl+'</span>'+
+    '<span class="was">'+was+'</span><span class="arw">→</span><span class="now">'+now+'</span></div>';
+}
+function toggleLadder(card){
+  var r=rt(card.dataset.card);
+  if(r.ladder) closeLadder(card); else openLadder(card);
+}
+function closeLadder(card){
+  rt(card.dataset.card).ladder=false;
+  card.querySelector('.ladder-mount').innerHTML='';
+  updateKeys();
+  say('사다리를 닫았습니다.');
+}
+function openLadder(card){
+  var r=rt(card.dataset.card), c=CONCEPT[card.dataset.concept];
+  r.ladder=true;
+  var wasLv=c.lv, wasDue=c.due, rows='';
+  if(!r.missed){ r.missed=true; c.lv=Math.max(0,c.lv-1); c.due='오늘 세션 안에'; }
+  if(wasLv!==c.lv) rows+=gainRow('관찰 기록', LV[wasLv], LV[c.lv]);
+  if(wasDue!==c.due) rows+=gainRow('다시 보러 가기', wasDue, c.due);
+  if(!rows) rows='<div class="gain-row"><span class="lbl">다시 보러 가기</span><span class="now">오늘 세션 안에</span></div>';
+  renderObs(); bump(card);
+
+  var rungs=RUNGS.map(function(x,i){
+    return '<li class="rung" data-n="'+(i+1)+'" data-open="0">'+
+      '<button class="rung-btn" data-rung="'+(i+1)+'"><span class="rung-n">'+(i+1)+'</span>'+
+      '<span class="rung-txt"><span class="rung-h" style="display:block">'+x.h+'</span>'+
+      '<span class="rung-s" style="display:block">'+x.s+'</span></span>'+
+      '<span class="rung-caret">+</span></button>'+
+      '<div class="rung-panel" hidden></div></li>';
+  }).join('');
+
+  card.querySelector('.ladder-mount').innerHTML =
+    '<section class="ladder" aria-label="놓쳤어요 4단 사다리">'+
+      '<div class="ladder-head">'+
+        '<div class="ladder-title"><h3>놓쳤어요</h3><span class="tag">4단 사다리</span></div>'+
+        '<p class="prose" style="margin-top:8px;font-size:1rem">탐조에서 새를 놓치는 건 일상입니다. 부끄러운 일이 아니라 <b>다시 그 자리로 데려다 달라는 신호</b>예요.</p>'+
+        '<div class="gain"><div class="gain-t">누른 순간 생긴 이득</div>'+rows+
+          '<p class="gain-note">숨기는 쪽이 손해입니다. 모른다고 표시한 종은 <b>잊기 전에</b> 다시 나옵니다.</p></div>'+
+      '</div>'+
+      '<ul class="rungs">'+rungs+'</ul>'+
+      '<div style="padding:14px 20px;border-top:1px solid var(--rule)">'+
+        '<button class="btn" data-act="closeladder">사다리 접기 <kbd>Esc</kbd></button></div>'+
+    '</section>';
+  openRung(card, 1);
+  updateKeys();
+  say('4단 사다리를 열었습니다. 관찰 기록이 내려가고 다시 보는 시점이 당겨졌습니다.');
+  setTimeout(function(){
+    var l=card.querySelector('.ladder');
+    if(l) l.scrollIntoView({block:'start',behavior:'smooth'});
+  },60);
+}
+function openRung(card, n){
+  var mount=card.querySelector('.ladder-mount');
+  $$('.rung', mount).forEach(function(li){
+    var on = li.dataset.n===String(n);
+    li.dataset.open = on?'1':'0';
+    li.querySelector('.rung-caret').textContent = on?'−':'+';
+    var p=li.querySelector('.rung-panel');
+    if(on){
+      if(!p.dataset.filled){
+        var src=$('#ladder-lib [data-for="'+card.dataset.concept+'"] [data-rung="'+li.dataset.n+'"]');
+        p.innerHTML = src? src.innerHTML : '<p class="prose">이 단은 아직 준비 중입니다.</p>';
+        p.dataset.filled='1';
+      }
+      p.hidden=false;
+    } else p.hidden=true;
+  });
+  rt(card.dataset.card).rung=n;
+  say(n+'단 · '+RUNGS[n-1].h);
+}
+
+/* ---------- 학습 스택 (선행 개념 점프 / 복귀) ---------- */
+function conceptName(cardId){
+  var el=document.getElementById('c-'+cardId);
+  return el? CONCEPT[el.dataset.concept].name : cardId;
+}
+function renderStackbar(){
+  var sb=$('#stackbar');
+  if(!STATE.stack.length || STATE.view!=='card'){ sb.hidden=true; return; }
+  sb.hidden=false;
+  var parts=STATE.stack.map(function(id){ return '<span>'+conceptName(id)+'</span>'; });
+  parts.push('<span class="here">'+conceptName(STATE.card)+' — 지금</span>');
+  $('#sb-path').innerHTML=parts.join('<span class="sep">›</span>');
+  $('#sb-up').textContent='↩ 「'+conceptName(STATE.stack[STATE.stack.length-1])+'」 로 지금 돌아가기';
+}
+function jumpTo(id){
+  STATE.stack.push(STATE.card);
+  showCard(id);
+  say('선행 개념 카드로 내려왔습니다. 마치면 자동으로 돌아갑니다.');
+}
+function popStack(){
+  if(!STATE.stack.length) return;
+  var back=STATE.stack.pop();
+  showCard(back);
+  var card=currentCard();
+  var p=card.querySelector('.payoff'); if(p) p.hidden=false;
+  var pre=card.querySelector('[data-pre]');
+  if(pre){ pre.classList.remove('gap'); pre.classList.add('done');
+    pre.querySelector('.pre-state').textContent='방금 봄'; }
+  var diag=card.querySelector('.ladder-mount .diagnosis');
+  if(diag) diag.innerHTML='<p class="prose"><b>비어 있던 층을 방금 채웠습니다.</b> 세 층이 모두 찼으니 이제 위 설명에 이어 붙은 문단을 한 번 더 읽고 다시 짚어 보세요.</p>';
+  var jb=card.querySelector('[data-jump]');
+  if(jb){ jb.textContent='✓ 「함수의 반환값」 — 방금 보고 왔습니다'; jb.disabled=true;
+    jb.classList.remove('btn-lead'); }
+  say('돌아왔습니다. 아까 막힌 자리입니다.');
+  setTimeout(function(){ if(p) p.scrollIntoView({block:'center',behavior:'smooth'}); },80);
+}
+
+/* ---------- 보기 전환 ---------- */
+function showCard(id){
+  STATE.card=id; STATE.view='card';
+  $('#view-card').hidden=false; $('#view-gaps').hidden=true;
+  $$('.card').forEach(function(c){ c.hidden = (c.dataset.card!==id); });
+  var idx=DECK.indexOf(id);
+  $('#deck').textContent = idx>=0 ? ('오늘의 덱 '+(idx+1)+'/'+DECK.length)
+    : (id==='done' ? '오늘의 덱 · 완료' : '선행 개념 · 덱 밖');
+  renderStackbar();
+  window.scrollTo(0,0);
+  updateKeys();
+  var card=currentCard();
+  if(card) requestAnimationFrame(function(){ layoutLeaders(card, rt(id).answered); });
+}
+function showGaps(){
+  STATE.view='gaps';
+  $('#view-card').hidden=true; $('#view-gaps').hidden=false;
+  $('#stackbar').hidden=true;
+  window.scrollTo(0,0); updateKeys();
+  say('미기록 종 화면입니다.');
+}
+function goNext(){
+  if(STATE.stack.length){ popStack(); return; }
+  var card=currentCard(); if(!card) return;
+  var nx=card.dataset.next;
+  if(!nx || nx==='return') return;
+  if(nx==='done'){ showCard('done'); return; }
+  showCard(nx);
+}
+
+/* ---------- 단축키 표시 ---------- */
+function updateKeys(){
+  var card=currentCard(), act={};
+  var r = card? rt(card.dataset.card) : null;
+  var optName='보기 고르기';
+  if(STATE.view==='gaps'){ act.esc=1; }
+  else if(card && card.dataset.card==='done'){ act.esc=1; }
+  else if(r && r.ladder){ act.opt=1; act.esc=1; act.help=1; act.space=1; optName='사다리 단 고르기'; }
+  else if(card){
+    if(card.dataset.type==='point') act.arrow=1; else act.opt=1;
+    if(r && !r.answered) act.enter=1; else act.space=1;
+    act.help=1;
+    if(STATE.stack.length) act.esc=1;
+  }
+  $$('.keyitem').forEach(function(k){ k.classList.toggle('act', !!act[k.dataset.key]); });
+  var o=$('.keyitem[data-key="opt"] .kname'); if(o) o.textContent=optName;
+}
+
+/* ---------- 클릭 위임 ---------- */
+document.addEventListener('click', function(e){
+  var el, card=e.target.closest('.card');
+
+  if((el=e.target.closest('[data-act]'))){
+    var a=el.dataset.act;
+    if(a==='submit') grade(card);
+    else if(a==='next') goNext();
+    else if(a==='missed') toggleLadder(card);
+    else if(a==='retry') retry(card);
+    else if(a==='closeladder') closeLadder(card);
+    return;
+  }
+  if((el=e.target.closest('[data-rung]'))){ openRung(card, +el.dataset.rung); return; }
+  if((el=e.target.closest('[data-rung-go]'))){ openRung(card, +el.dataset.rungGo); return; }
+  if((el=e.target.closest('[data-jump]'))){ if(!el.disabled) jumpTo(el.dataset.jump); return; }
+  if((el=e.target.closest('[data-ctx]'))){
+    var box=card.querySelector('[data-ctxbox]');
+    if(box){ box.hidden=!box.hidden; el.textContent = box.hidden
+      ? '왜 이 줄에 이 코드가 붙었는지 보기' : '이 줄의 사정 접기'; }
+    return;
+  }
+  if((el=e.target.closest('[data-more]'))){
+    var m=el.closest('.ex').querySelector('.ex-more');
+    m.hidden=!m.hidden; el.textContent = m.hidden? '앞뒤 보기':'앞뒤 접기';
+    return;
+  }
+  if((el=e.target.closest('[data-togglekey]'))){
+    var wrap=el.closest('.rung-panel');
+    var nk=wrap.querySelector('[data-nokey]'), hk=wrap.querySelector('[data-haskey]');
+    var chip=wrap.querySelector('[data-keystate]');
+    var on=nk.hidden;
+    nk.hidden=!on; hk.hidden=on;
+    chip.textContent = on? 'API 키 없음':'API 키 연결됨';
+    chip.classList.toggle('live', !on);
+    el.textContent = on? '키가 연결된 경우 보기':'키가 없는 경우 보기';
+    return;
+  }
+  if((el=e.target.closest('[data-copy]'))){
+    var ta=el.closest('.rung-panel').querySelector('.prompt-box');
+    var done=el.closest('.v-actions').querySelector('[data-copied]');
+    var ok=function(){ done.hidden=false; say('프롬프트를 복사했습니다.');
+      setTimeout(function(){ done.hidden=true; }, 2600); };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(ta.value).then(ok, function(){ legacy(); });
+    } else legacy();
+    function legacy(){
+      ta.removeAttribute('readonly'); ta.select();
+      try{ document.execCommand('copy'); ok(); }catch(err){ say('직접 선택해서 복사해 주세요.'); }
+      ta.setAttribute('readonly','');
+    }
+    return;
+  }
+  if((el=e.target.closest('[data-goto]'))){ showCard(el.dataset.goto); return; }
+  if((el=e.target.closest('.gitem-btn'))){
+    var panel=el.parentNode.querySelector('.gpanel');
+    var open=panel.hidden;
+    panel.hidden=!open;
+    el.setAttribute('aria-expanded', open?'true':'false');
+    el.querySelector('.gitem-open').textContent = open? '접기 −':'펼치기 +';
+    return;
+  }
+});
+$('#nav-gaps').addEventListener('click', showGaps);
+$('#gaps-back').addEventListener('click', function(){ showCard(STATE.card); });
+$('#done-gaps').addEventListener('click', showGaps);
+$('#done-again').addEventListener('click', function(){
+  DECK.forEach(function(id){
+    var card=document.getElementById('c-'+id);
+    RT[id]=null; rt(id);
+    card.classList.remove('answered');
+    $$('.opt',card).forEach(function(o){ o.classList.remove('is-right','is-wrongpick');
+      o.setAttribute('aria-checked','false');
+      var m=o.querySelector('.verdictmark'); if(m) m.remove(); });
+    $$('.tok',card).forEach(function(t){ t.classList.remove('marked','wrongpick');
+      t.setAttribute('aria-checked','false'); });
+    var b=card.querySelector('.blank'); if(b){ b.classList.remove('marked','filled'); b.textContent='▢'; }
+    var v=card.querySelector('.verdict'); v.classList.remove('ok','miss');
+    v.querySelector('.v-fill').innerHTML='<p class="v-empty">답을 제출하면 여기에 판정과 진단이 적힙니다.</p>';
+    card.querySelector('.rail').classList.remove('on');
+    card.querySelector('.leaders').innerHTML='';
+    card.querySelector('.ladder-mount').innerHTML='';
+    var p=card.querySelector('.payoff'); if(p) p.hidden=true;
+    var slot=card.querySelector('[data-slot="pick"]'); if(slot) slot.textContent='아직 고르지 않았습니다.';
+  });
+  showCard('destr');
+});
+$('#sb-up').addEventListener('click', popStack);
+
+/* ---------- 키보드 ---------- */
+document.addEventListener('keydown', function(e){
+  var t=e.target;
+  if(t && (t.tagName==='TEXTAREA'||t.tagName==='INPUT'||t.isContentEditable)) return;
+  if(e.metaKey||e.ctrlKey||e.altKey) return;
+  var card=currentCard(), r=card? rt(card.dataset.card):null;
+
+  if(e.key==='Escape'){
+    if(STATE.view==='gaps'){ e.preventDefault(); showCard(STATE.card); return; }
+    if(r && r.ladder){ e.preventDefault(); closeLadder(card); return; }
+    if(STATE.stack.length){ e.preventDefault(); popStack(); return; }
+    return;
+  }
+  if(STATE.view==='gaps') return;
+  if(!card || card.dataset.card==='done') return;
+
+  if(e.key==='?'){ e.preventDefault(); toggleLadder(card); return; }
+  if(e.key===' '||e.key==='Spacebar'){
+    e.preventDefault();
+    if(r.answered || STATE.stack.length) goNext();
+    else { say('먼저 답을 고르고 Enter 로 제출하세요.');
+      flash(card.querySelector('[data-act="submit"]')); }
+    return;
+  }
+  if(e.key==='Enter'){
+    if(t && t.tagName==='BUTTON' && !t.classList.contains('tok')) return;
+    e.preventDefault();
+    if(!r.answered) grade(card); else goNext();
+    return;
+  }
+  if(/^[1-4]$/.test(e.key)){
+    e.preventDefault();
+    if(r.ladder){ openRung(card, +e.key); return; }
+    if(r.answered) return;
+    if(card.dataset.type==='point'){
+      var toks=$$('.tok', card); var i=+e.key-1;
+      if(toks[i]) setSel(card, toks[i].dataset.k);
+    } else setSel(card, e.key);
+    return;
+  }
+  if(e.key==='ArrowLeft'||e.key==='ArrowRight'){
+    if(card.dataset.type!=='point' || r.answered) return;
+    e.preventDefault();
+    moveTok(card, e.key==='ArrowRight'?1:-1);
+    return;
+  }
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+    if(card.dataset.type==='point' || r.answered) return;
+    var opts=$$('.opt', card); if(!opts.length) return;
+    e.preventDefault();
+    var j=opts.findIndex(function(o){ return o.dataset.k===r.sel; });
+    if(j<0) j = e.key==='ArrowDown'? -1 : 0;
+    var n=(j + (e.key==='ArrowDown'?1:-1) + opts.length)%opts.length;
+    setSel(card, opts[n].dataset.k);
+  }
+});
+
+/* ---------- 시작 ---------- */
+renderObs();
+showCard('destr');
+})();
+</script>
+</body>
+</html>

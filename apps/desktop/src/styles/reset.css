@@ -1,0 +1,81 @@
+/* 리셋 + 조판 강제 — design/ink-home.html 의 「리셋 + 조판 강제」 절을 그대로 옮긴 것 (05 §4.2, §12).
+ *
+ * 가독성 규칙은 "지키자"가 아니라 "어길 수 없다"로 구현한다.
+ * 야간반 body 그라디언트는 tokens.css 에 있다 — [data-theme="dark"] 선택자는 거기서만 쓴다(05 §4.3).
+ */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html {
+  word-break: keep-all;
+  line-break: strict;
+  overflow-wrap: break-word;
+  -webkit-text-size-adjust: 100%;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--desk);
+  background-image:
+    linear-gradient(115deg, rgba(255,255,255,.07) 0%, transparent 45%),
+    radial-gradient(120% 90% at 12% -10%, rgba(255,255,255,.10), transparent 60%);
+  color: var(--ink);
+  font-family: var(--f-ui);
+  font-size: var(--fs-16);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  min-height: 100vh;
+}
+
+/* 코드는 한국어 조판 규칙에서 빼낸다 — 식별자가 아무 데서나 끊기면 안 된다. */
+code,
+kbd,
+pre,
+.mono {
+  font-family: var(--f-mono);
+  word-break: normal;
+  overflow-wrap: normal;
+  line-break: auto;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+}
+
+h1, h2, h3, h4, p, ul, ol { margin: 0; }
+
+ul, ol {
+  padding: 0;
+  list-style: none;
+}
+
+:focus-visible {
+  outline: 3px solid var(--t0);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* 본문을 담는 모든 요소에 행 길이를 건다. 해제는 명시적 클래스로만 (05 §4.2). */
+p, li, dd, blockquote, .prose { max-width: var(--measure); }
+
+.u-nomeasure { max-width: none; }
+
+/* 화면에서만 숨긴다 — 스크린리더는 읽는다 (05 §9). */
+.vh {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
