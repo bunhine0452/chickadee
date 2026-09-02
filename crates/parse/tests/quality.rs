@@ -50,7 +50,10 @@ fn measure(grammar: &str, files: &[PathBuf]) -> (usize, usize) {
         match chickadee_parse::scan(&bytes, &queries, MAX_BYTES) {
             Ok(out) if out.quality == "poor" => {
                 poor += 1;
-                println!("  poor: {}", file.file_name().unwrap_or_default().to_string_lossy());
+                println!(
+                    "  poor: {}",
+                    file.file_name().unwrap_or_default().to_string_lossy()
+                );
             }
             Ok(_) => {}
             Err(e) => {
@@ -83,7 +86,10 @@ fn sql_migrations_parse_cleanly_enough_to_ship() {
     #[allow(clippy::cast_precision_loss)]
     let share = poor as f64 / n as f64;
     println!("sql: {n} 파일 중 poor {poor} ({:.0}%)", share * 100.0);
-    assert!(share <= POOR_SHARE_LIMIT, "SQL 문법이 실코드에서 {poor}/{n} 을 못 읽는다");
+    assert!(
+        share <= POOR_SHARE_LIMIT,
+        "SQL 문법이 실코드에서 {poor}/{n} 을 못 읽는다"
+    );
 }
 
 #[test]

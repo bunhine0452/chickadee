@@ -48,7 +48,7 @@ fn root() -> PathBuf {
 fn langs() -> Vec<String> {
     let mut out: Vec<String> = std::fs::read_dir(root())
         .expect("dictionary")
-        .filter_map(|e| e.ok())
+        .filter_map(std::result::Result::ok)
         .filter(|e| e.path().join("_lang.yaml").is_file())
         .filter_map(|e| e.file_name().into_string().ok())
         .collect();
@@ -259,9 +259,8 @@ fn check(id: &str, example: &Example, sites: usize, caps: &[Capture]) {
 }
 
 fn scalar(v: &serde_yaml::Value) -> String {
-    v.as_str().map(str::to_owned).unwrap_or_else(|| {
-        v.as_u64()
-            .map(|n| n.to_string())
-            .unwrap_or_else(|| String::new())
-    })
+    if let Some(text) = v.as_str() {
+        return text.to_owned();
+    }
+    v.as_u64().map_or_else(String::new, |n| n.to_string())
 }

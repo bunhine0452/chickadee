@@ -30,7 +30,11 @@ fn deep_nesting_is_refused_by_the_depth_limit_not_by_a_stack_overflow() {
     let started = Instant::now();
     let err = chickadee_parse::ast("typescript", deep.as_bytes(), MAX_BYTES).expect_err("too deep");
     assert!(matches!(err, ParseError::TooDeep { .. }));
-    assert!(started.elapsed() < BOMB_BUDGET, "{:?} 걸렸다", started.elapsed());
+    assert!(
+        started.elapsed() < BOMB_BUDGET,
+        "{:?} 걸렸다",
+        started.elapsed()
+    );
 }
 
 #[test]
@@ -40,7 +44,11 @@ fn a_deeply_nested_file_still_scans_without_panicking() {
     // 쿼리 실행은 트리를 훑을 뿐이라 깊이 자체는 막지 않는다 — 막는 것은 시간이다.
     let out = chickadee_parse::scan(deep.as_bytes(), &queries(), MAX_BYTES);
     assert!(out.is_ok() || matches!(out, Err(ParseError::Timeout { .. })));
-    assert!(started.elapsed() < BOMB_BUDGET, "{:?} 걸렸다", started.elapsed());
+    assert!(
+        started.elapsed() < BOMB_BUDGET,
+        "{:?} 걸렸다",
+        started.elapsed()
+    );
 }
 
 #[test]
@@ -59,7 +67,11 @@ fn a_file_of_nothing_but_broken_syntax_ends_and_is_called_poor() {
     let started = Instant::now();
     let out = chickadee_parse::scan(wrecked.as_bytes(), &queries(), MAX_BYTES).expect("scan");
     assert_eq!(out.quality, "poor");
-    assert!(started.elapsed() < BOMB_BUDGET, "{:?} 걸렸다", started.elapsed());
+    assert!(
+        started.elapsed() < BOMB_BUDGET,
+        "{:?} 걸렸다",
+        started.elapsed()
+    );
 }
 
 #[test]
@@ -77,7 +89,11 @@ fn a_pathological_query_stops_at_the_match_limit() {
     let started = Instant::now();
     let out = chickadee_parse::scan(src.as_bytes(), &queries, MAX_BYTES).expect("scan");
     assert!(!out.captures.is_empty());
-    assert!(started.elapsed() < BOMB_BUDGET, "{:?} 걸렸다", started.elapsed());
+    assert!(
+        started.elapsed() < BOMB_BUDGET,
+        "{:?} 걸렸다",
+        started.elapsed()
+    );
 }
 
 #[test]

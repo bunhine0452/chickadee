@@ -473,7 +473,13 @@ fn write_json(value: &Value) -> PathBuf {
 }
 
 fn report(r: &Record, at: &Path) {
-    let over = |value: u64, budget: u64| if value > budget { "  ← 예산 초과" } else { "" };
+    let over = |value: u64, budget: u64| {
+        if value > budget {
+            "  ← 예산 초과"
+        } else {
+            ""
+        }
+    };
     println!("\n─── large-100k (03 §7) ───");
     println!(
         "  파일 {} · 파싱 {} · 커밋 {} · 캡처 {}",

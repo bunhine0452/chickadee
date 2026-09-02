@@ -271,14 +271,18 @@ jobs:
         with:
           workspaces: .
 
-      - name: build the fixture repository
-        run: bash scripts/make-fixture-repo.sh tiny
+      - name: build the fixture repositories
+        run: |
+          bash scripts/make-fixture-repo.sh tiny
+          bash scripts/make-fixture-repo.sh projectox-like
 
       # -p is needed: `--test pipeline` alone does not say which package owns it.
-      - name: pipeline + dictionary tests
+      # chickadee-parse carries the goldens, the insta snapshots, the dictionary
+      # queries, the hostile input and the grammar quality measurement.
+      - name: pipeline + parser tests
         run: |
           cargo test --locked -p chickadee-app --test pipeline
-          cargo test --locked -p chickadee-parse --test dictionary
+          cargo test --locked -p chickadee-parse
 
       - name: the IPC dump matches what is committed
         run: git diff --exit-code fixtures/ipc
