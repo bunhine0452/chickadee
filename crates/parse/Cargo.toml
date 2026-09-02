@@ -22,6 +22,8 @@ streaming-iterator = "0.1"
 # Test-only (D40): the app never reads YAML. These are outside the line budget.
 serde_yaml = "0.9"
 regex-lite = "0.1"
+insta = "1.48.0"
+serde_json.workspace = true
 
 [features]
 default = ["lang-typescript", "lang-javascript", "lang-sql"]

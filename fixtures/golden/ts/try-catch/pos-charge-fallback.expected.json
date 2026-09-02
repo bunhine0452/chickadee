@@ -1,0 +1,41 @@
+[
+  {
+    "queryId": "ts/try-catch",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "try",
+    "startLine": 3,
+    "startCol": 2,
+    "endLine": 7,
+    "endCol": 3,
+    "nodeKind": "try_statement",
+    "inError": false
+  },
+  {
+    "queryId": "ts/try-catch",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "try",
+    "startLine": 3,
+    "startCol": 6,
+    "endLine": 5,
+    "endCol": 3,
+    "nodeKind": "statement_block",
+    "inError": false
+  },
+  {
+    "queryId": "ts/try-catch",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "try",
+    "startLine": 5,
+    "startCol": 10,
+    "endLine": 7,
+    "endCol": 3,
+    "nodeKind": "statement_block",
+    "inError": false
+  }
+]

@@ -1,0 +1,9 @@
+---
+source: crates/parse/tests/insta.rs
+expression: render(&case)
+---
+fixtures/golden/sql/_traps/broken-parse.sql
+_traps · quality=poor · lines=4
+
+m1 p0 @site            form=select          select                 3:0-3:10 inError=true
+m1 p0 @pick.1          form=select          select_expression      3:7-3:10 inError=true

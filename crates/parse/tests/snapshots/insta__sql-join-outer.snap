@@ -1,0 +1,13 @@
+---
+source: crates/parse/tests/insta.rs
+expression: render(&case)
+---
+fixtures/golden/sql/join/pos-order-history.sql
+sql/join · quality=ok · lines=7
+
+m1 p0 @site            form=join            join                   4:0-4:31 inError=false
+m1 p0 @pick.1          form=join            relation               4:5-4:11 inError=false
+m1 p0 @pick.2          form=join            binary_expression      4:15-4:31 inError=false
+m2 p0 @site            form=join            join                   5:0-5:38 inError=false
+m2 p0 @pick.1          form=join            relation               5:10-5:18 inError=false
+m2 p0 @pick.2          form=join            binary_expression      5:22-5:38 inError=false

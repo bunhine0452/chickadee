@@ -1,0 +1,54 @@
+[
+  {
+    "queryId": "ts/conditional-ternary",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "ternary",
+    "startLine": 5,
+    "startCol": 11,
+    "endLine": 5,
+    "endCol": 59,
+    "nodeKind": "ternary_expression",
+    "inError": false
+  },
+  {
+    "queryId": "ts/conditional-ternary",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "ternary",
+    "startLine": 5,
+    "startCol": 11,
+    "endLine": 5,
+    "endCol": 23,
+    "nodeKind": "member_expression",
+    "inError": false
+  },
+  {
+    "queryId": "ts/conditional-ternary",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "ternary",
+    "startLine": 5,
+    "startCol": 26,
+    "endLine": 5,
+    "endCol": 41,
+    "nodeKind": "string",
+    "inError": false
+  },
+  {
+    "queryId": "ts/conditional-ternary",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "ternary",
+    "startLine": 5,
+    "startCol": 44,
+    "endLine": 5,
+    "endCol": 59,
+    "nodeKind": "string",
+    "inError": false
+  }
+]

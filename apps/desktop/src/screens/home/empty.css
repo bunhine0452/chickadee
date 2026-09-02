@@ -1,0 +1,49 @@
+/* 첫 실행 화면. 목업이 없는 신규 화면이라(05 §2.1) 마스트헤드·패널의 조판을 그대로 빌린다 —
+   새 색도 새 치수도 만들지 않는다. 클래스는 이 화면 전용으로 이름을 따로 준다(전역 충돌 방지). */
+.firstrun {
+  display: grid;
+  place-content: center;
+  min-height: 100vh;
+  padding: 22px 24px 48px;
+}
+
+.firstrun-in {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  max-width: 560px;
+  padding: 40px 36px 34px;
+  border: 2.5px solid var(--rule);
+  background: var(--paper);
+  box-shadow: 6px 7px 0 var(--edge), var(--lamp);
+  text-align: center;
+}
+
+.firstrun-in:focus-visible {
+  outline: 3px solid var(--t0);
+  outline-offset: 3px;
+}
+
+.firstrun-logo {
+  display: block;
+  width: 96px;
+  height: 96px;
+}
+
+.firstrun-title {
+  color: var(--ink);
+  font-family: var(--f-poster);
+  font-size: var(--fs-poster);
+  letter-spacing: .005em;
+  line-height: .94;
+}
+
+.firstrun-note {
+  max-width: var(--measure);
+  color: var(--ink-soft);
+  font-size: var(--fs-16);
+  line-height: var(--lh-body);
+  text-align: left;
+}
+
+.firstrun .press-btn { width: auto }

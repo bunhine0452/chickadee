@@ -30,7 +30,7 @@ usage() {
                                 결정론적 합성기. <횟수>번 반복하며 매 회
                                 파일 1개(약 <줄수>줄)를 쓰고 커밋 1개를 만든다.
                                 경로틀·메시지틀의 {i} 는 2자리 0채움 인덱스(01..).
-                                종류는 확장자로 정한다 — .ts .tsx .sql.
+                                종류는 확장자로 정한다 — .ts .tsx .js .sql.
                                 난수는 시드 LCG(x=(25173x+13849) mod 65536) 하나뿐 —
                                 $RANDOM·시각·로케일을 쓰지 않으므로 어느 기계에서나 같다.
                                 msg= 는 반드시 마지막 (줄 끝까지가 메시지).
@@ -190,6 +190,38 @@ function tsxUnit(k,   n, N) {
   p("")
 }
 
+function jsHeader() {
+  p("// fixture(seed=" seed ") — scripts/make-fixture-repo.sh 의 gen wave 가 만든 파일")
+  p("import { clamp, DAY_MS } from " q "../core/time.js" q ";")
+  p("")
+}
+function jsUnit(k,   n, v, w, m) {
+  n = nsym(); v = vsym(); w = vsym(); m = 2 + pick(7)
+  p("export const LIMIT_" k " = " (10 + pick(90)) ";")
+  p("")
+  p("export const " v k " = (rows, q) => {")
+  p("  const wanted = q ?? " q q ";")
+  p("  const [first, ...rest] = rows;")
+  p("  const hits = rows.filter((row) => row." n "?.startsWith(wanted));")
+  p("  return { first, rest: rest.length, hits: hits.map((r) => r.id) };")
+  p("};")
+  p("")
+  p("export async function " w k "(id) {")
+  p("  const age = Date.now() - id * DAY_MS;")
+  p("  try {")
+  p("    const rows = await Promise.resolve([{ id, " n ": `seed-${id}` }]);")
+  p("    for (const row of rows) {")
+  p("      if (row.id > clamp(LIMIT_" k ", 1, 99)) continue;")
+  p("      row.ready = age % " m " === 0;")
+  p("    }")
+  p("    return rows;")
+  p("  } catch (err) {")
+  p("    return [];")
+  p("  }")
+  p("}")
+  p("")
+}
+
 function sqlHeader() {
   p("-- fixture(seed=" seed ") — scripts/make-fixture-repo.sh 의 gen wave 가 만든 파일")
   p("PRAGMA foreign_keys = ON;")
@@ -220,12 +252,14 @@ BEGIN {
   L = 0
   if (kind == "ts")       tsHeader()
   else if (kind == "tsx") tsxHeader()
+  else if (kind == "js")  jsHeader()
   else                    sqlHeader()
   k = 0
   while (L < want + 0) {
     k++
     if (kind == "ts")       tsUnit(k)
     else if (kind == "tsx") tsxUnit(k)
+    else if (kind == "js")  jsUnit(k)
     else                    sqlUnit(k)
   }
 }
@@ -237,8 +271,9 @@ synth() {
   case "$path" in
     *.tsx) kind=tsx ;;
     *.ts)  kind=ts ;;
+    *.js)  kind=js ;;
     *.sql) kind=sql ;;
-    *) die "gen wave: 확장자로 종류를 정할 수 없다 (.ts/.tsx/.sql): $path" ;;
+    *) die "gen wave: 확장자로 종류를 정할 수 없다 (.ts/.tsx/.js/.sql): $path" ;;
   esac
   awk -v kind="$kind" -v seed="$seed" -v want="$want" "$SYNTH_AWK" </dev/null
 }

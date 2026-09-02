@@ -1,0 +1,67 @@
+/* 목업: design/ink-home.html `.panel` 블록 + `.note` — 그대로. */
+.panel {
+  position: relative;
+  margin-bottom: 18px;
+  padding: 15px 16px 16px;
+  border: 2.5px solid var(--rule);
+  background: var(--paper-2);
+  box-shadow: 4px 5px 0 var(--edge), var(--lamp);
+}
+
+.panel-h {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.panel-h b {
+  color: var(--ink);
+  font-size: var(--fs-16);
+  font-weight: 700;
+  letter-spacing: -.02em;
+}
+
+.panel-h .pl {
+  color: var(--ink-soft);
+  font-size: var(--fs-13);
+  letter-spacing: 0;
+}
+
+.panel-h .ruleline {
+  flex: 1;
+  min-width: 16px;
+  height: 0;
+  border-top: 1px dashed var(--rule);
+  opacity: .55;
+  transform: translateY(-3px);
+}
+
+.panel-h .tag-r {
+  color: var(--ink-soft);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.note {
+  color: var(--ink-soft);
+  font-size: var(--fs-15);
+  line-height: var(--lh-body);
+  letter-spacing: -.005em;
+}
+
+.note b {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.note code {
+  padding: 0 4px;
+  border: 1px solid var(--rule);
+  background: var(--paper-3);
+  font-size: var(--fs-14);
+}

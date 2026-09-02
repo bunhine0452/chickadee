@@ -1,0 +1,35 @@
+/* 목업: design/ink-home.html `.rail` 블록 — 그대로. */
+.rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0 10px;
+  border-right: 2px dashed var(--rule);
+}
+
+.rail .dee-sticker {
+  width: 34px;
+  height: 34px;
+  border-width: 2px;
+  box-shadow: none;
+}
+
+.rail .dee {
+  width: 100%;
+  height: 100%;
+}
+
+.rail .vt {
+  color: var(--ink-soft);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  font-weight: 600;
+  letter-spacing: .16em;
+  white-space: nowrap;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+[data-trim="on"] .rail { border-right-style: solid }
+[data-trim="on"] .rail .vt { display: none }

@@ -1,0 +1,145 @@
+/* 목업: design/ink-home.html `.masthead` 블록
+   바꾼 것 — 워드마크 어긋남의 원색(--pink/--blue)을 트랙 별칭으로 (05 §4.2),
+   리포 칸을 버튼으로(전환 자리)라 버튼 기본 모양을 지운다. */
+.masthead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 22px;
+  padding: 14px 20px;
+  border: 2.5px solid var(--rule);
+  background: var(--paper);
+  box-shadow: 5px 6px 0 var(--edge), var(--lamp);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  padding-right: 22px;
+  border-right: 2px dashed var(--rule);
+}
+
+.brand .brand-logo {
+  display: block;
+  flex: 0 0 auto;
+  width: 66px;
+  height: 66px;
+}
+
+.wordmark {
+  position: relative;
+  display: inline-block;
+  color: var(--ink);
+  font-family: var(--f-poster);
+  font-size: var(--fs-poster);
+  line-height: .94;
+  letter-spacing: .005em;
+  white-space: nowrap;
+}
+
+.wordmark::before,
+.wordmark::after {
+  content: attr(data-w);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: var(--blend);
+}
+
+.wordmark::before {
+  color: var(--t1);
+  transform: translate(calc(var(--misreg) * -1), 1px);
+}
+
+.wordmark::after {
+  color: var(--t0);
+  transform: translate(var(--misreg), -1.4px);
+}
+
+[data-trim="on"] .wordmark::before,
+[data-trim="on"] .wordmark::after { display: none }
+
+.brand-sub {
+  margin-top: 5px;
+  color: var(--ink-soft);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.brand-line {
+  margin-top: 1px;
+  color: var(--ink-soft);
+  font-size: var(--fs-14);
+}
+
+.ticket {
+  display: flex;
+  flex: 1 1 420px;
+  align-self: stretch;
+  min-width: 320px;
+}
+
+.ticket .tk {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2px 16px;
+  border-left: 1px solid var(--rule);
+}
+
+.ticket .tk:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.tk-k {
+  color: var(--ink-soft);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.tk-v {
+  margin-top: 1px;
+  font-size: var(--fs-18);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.02em;
+  white-space: nowrap;
+}
+
+.tk-v .u {
+  margin-left: 2px;
+  color: var(--ink-soft);
+  font-size: var(--fs-13);
+  font-weight: 500;
+}
+
+.tk-v.mono {
+  font-family: var(--f-mono);
+  font-size: var(--fs-15);
+}
+
+/* 리포 전환 자리 — 목록(listbox)은 M2 가 붙인다. 지금은 칸 모양 그대로. */
+.repo-switch {
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: default;
+}
+
+.ctl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-left: auto;
+  align-self: center;
+}

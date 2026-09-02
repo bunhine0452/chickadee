@@ -1,0 +1,11 @@
+---
+source: crates/parse/tests/insta.rs
+expression: render(&case)
+---
+fixtures/golden/tsx/array-map-immutable/pos-cart-list.tsx
+ts/array-map-immutable · quality=ok · lines=10
+
+m1 p0 @site            form=map             call_expression        4:7-6:8 inError=false
+m1 p0 @pick.1          form=map             identifier             4:7-4:12 inError=false
+m1 p0 @hole            form=map             property_identifier    4:13-4:16 inError=false
+m1 p0 @pick.2          form=map             arrow_function         4:17-6:7 inError=false

@@ -1,0 +1,40 @@
+/* 목업: design/ink-home.html `.forecast` 블록 — 그대로. */
+.forecast {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  border: 2.5px dashed var(--rule);
+}
+
+.forecast .fc-sig {
+  flex: 0 0 auto;
+  color: var(--ink-soft);
+  font-family: var(--f-poster);
+  font-size: var(--fs-24);
+  line-height: 1;
+}
+
+.forecast p {
+  color: var(--ink-soft);
+  font-size: var(--fs-15);
+}
+
+.forecast p b {
+  color: var(--ink);
+  font-weight: 700;
+}
+.forecast p code { font-size: var(--fs-14) }
+
+.forecast .fc-mark {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding: 4px 9px;
+  border: 2px dashed var(--ink-mute);
+  color: var(--ink-soft);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  font-weight: 700;
+  letter-spacing: .14em;
+  white-space: nowrap;
+}

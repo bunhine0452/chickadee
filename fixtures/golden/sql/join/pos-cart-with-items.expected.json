@@ -1,0 +1,41 @@
+[
+  {
+    "queryId": "sql/join",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "join",
+    "startLine": 4,
+    "startCol": 0,
+    "endLine": 4,
+    "endCol": 36,
+    "nodeKind": "join",
+    "inError": false
+  },
+  {
+    "queryId": "sql/join",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "join",
+    "startLine": 4,
+    "startCol": 5,
+    "endLine": 4,
+    "endCol": 16,
+    "nodeKind": "relation",
+    "inError": false
+  },
+  {
+    "queryId": "sql/join",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "join",
+    "startLine": 4,
+    "startCol": 20,
+    "endLine": 4,
+    "endCol": 36,
+    "nodeKind": "binary_expression",
+    "inError": false
+  }
+]

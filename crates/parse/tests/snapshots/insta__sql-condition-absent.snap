@@ -1,0 +1,8 @@
+---
+source: crates/parse/tests/insta.rs
+expression: render(&case)
+---
+fixtures/golden/sql/where-filter/neg-no-filter.sql
+sql/where-filter · quality=ok · lines=6
+
+(캡처 없음)

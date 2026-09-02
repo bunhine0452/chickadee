@@ -1,0 +1,56 @@
+# poly — 언어당 20파일 (03 §7 · 06 §1.2)
+# 「문법이 여럿일 때 인제스트가 얼마나 드는가」를 재는 픽스처다. 규모는 작고
+# 넓다 — large-100k 가 깊이를 재면 여기는 파서 풀과 확장자 표가 언어를 갈아탈 때
+# 드는 비용을 잰다.
+#
+# 지금 담긴 문법은 crates/parse/src/langs.rs 의 LANGS 넷이다:
+#   typescript(.ts) · tsx(.tsx) · javascript(.js) · sql(.sql)
+# Swift·Dart 는 아직 크레이트가 없어서 넣지 않는다(03 위험표 · 00 §6-2 「기본 보류」).
+# **언어가 늘면 여기 파도를 20개짜리로 하나 더 붙인다** — LANGS 에 줄이 늘고
+# scripts/make-fixture-repo.sh 의 synth() 가 그 확장자를 알게 된 다음에.
+#
+# 파일 수 세기: 씨앗 커밋의 src/core/time.ts · src/core/time.js 가 각 언어의
+# 20번째 파일이다. 그래서 파도는 19 · 20 · 19 · 20 이고 합이 언어당 20 이 된다.
+# sql 은 아직 dictionary/ 에 사전이 없다 — 파싱까지만 재고 캡처는 0 이 정상이다.
+#
+# 재생은 scripts/make-fixture-repo.sh poly — 생성물은 커밋하지 않는다.
+
+# ── 씨앗 커밋 (합성 파일이 import 하는 뿌리) ──────────────────────────────
+write src/core/time.ts <<EOS
+export const DAY_MS = 86_400_000;
+export const DAY_START_HOUR = 4;
+
+export function clamp(value: number, low: number, high: number): number {
+  if (value < low) return low;
+  if (value > high) return high;
+  return value;
+}
+
+export function dayKey(at: Date): string {
+  const shifted = new Date(at.getTime() - DAY_START_HOUR * 3_600_000);
+  const m = String(shifted.getMonth() + 1).padStart(2, "0");
+  return shifted.getFullYear() + "-" + m;
+}
+EOS
+write src/core/time.js <<EOS
+export const DAY_MS = 86_400_000;
+export const DAY_START_HOUR = 4;
+
+export const clamp = (value, low, high) => {
+  if (value < low) return low;
+  if (value > high) return high;
+  return value;
+};
+
+export function dayKey(at) {
+  const shifted = new Date(at.getTime() - DAY_START_HOUR * 3_600_000);
+  return `${shifted.getFullYear()}-${shifted.getMonth() + 1}`;
+}
+EOS
+commit chore: shared time helpers for both dialects
+
+# ── 언어별 파도 20개씩 ───────────────────────────────────────────────────
+gen wave 19 src/ts/mod-{i}.ts lines=90 seed=1301 msg=feat: typescript module {i}
+gen wave 20 src/panels/panel-{i}.tsx lines=80 seed=2302 msg=feat: tsx panel {i}
+gen wave 19 src/js/mod-{i}.js lines=70 seed=3303 msg=feat: javascript module {i}
+gen wave 20 db/migrations/0{i}_change.sql lines=50 seed=4304 msg=chore: migration 0{i}

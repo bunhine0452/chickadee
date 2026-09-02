@@ -79,6 +79,17 @@ export const ipc = {
     version: () => call<AppVersion>('app_version'),
     reveal: (which: 'data' | 'logs' | 'repo', at?: string) => call<void>('app_reveal', { which, at }),
   },
+  dialog: {
+    /**
+     * 리포 폴더 고르기. `plugin-dialog` 도 `@tauri-apps/*` 라 이 패키지 밖에서는
+     * import 할 수 없다 (01 §2 · 05 §1.2). 고른 경로는 그대로 `repo_probe` 로 간다.
+     */
+    pickFolder: async (title: string): Promise<string | null> => {
+      const { open } = await import('@tauri-apps/plugin-dialog');
+      const picked = await open({ directory: true, multiple: false, title });
+      return typeof picked === 'string' ? picked : null;
+    },
+  },
   win: {
     /**
      * 창은 `visible:false` 로 만들어진다 (05 §1.2). 폰트가 준비된 뒤 이것을 부른다 —

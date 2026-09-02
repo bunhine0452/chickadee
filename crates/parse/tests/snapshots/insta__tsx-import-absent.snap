@@ -1,0 +1,8 @@
+---
+source: crates/parse/tests/insta.rs
+expression: render(&case)
+---
+fixtures/golden/tsx/_imports/neg-self-contained.tsx
+_imports · quality=ok · lines=5
+
+(캡처 없음)

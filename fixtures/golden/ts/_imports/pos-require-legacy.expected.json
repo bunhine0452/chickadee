@@ -1,0 +1,54 @@
+[
+  {
+    "queryId": "_imports",
+    "matchId": 1,
+    "patternIndex": 3,
+    "name": "ctx.callee",
+    "form": "require",
+    "startLine": 2,
+    "startCol": 15,
+    "endLine": 2,
+    "endCol": 22,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "_imports",
+    "matchId": 1,
+    "patternIndex": 3,
+    "name": "import.source",
+    "form": "require",
+    "startLine": 2,
+    "startCol": 23,
+    "endLine": 2,
+    "endCol": 33,
+    "nodeKind": "string",
+    "inError": false
+  },
+  {
+    "queryId": "_imports",
+    "matchId": 2,
+    "patternIndex": 3,
+    "name": "ctx.callee",
+    "form": "require",
+    "startLine": 3,
+    "startCol": 21,
+    "endLine": 3,
+    "endCol": 28,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "_imports",
+    "matchId": 2,
+    "patternIndex": 3,
+    "name": "import.source",
+    "form": "require",
+    "startLine": 3,
+    "startCol": 29,
+    "endLine": 3,
+    "endCol": 41,
+    "nodeKind": "string",
+    "inError": false
+  }
+]

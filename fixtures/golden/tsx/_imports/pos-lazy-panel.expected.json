@@ -1,0 +1,28 @@
+[
+  {
+    "queryId": "_imports",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "import.source",
+    "form": "static",
+    "startLine": 1,
+    "startCol": 26,
+    "endLine": 1,
+    "endCol": 39,
+    "nodeKind": "string",
+    "inError": false
+  },
+  {
+    "queryId": "_imports",
+    "matchId": 2,
+    "patternIndex": 2,
+    "name": "import.source",
+    "form": "dynamic",
+    "startLine": 4,
+    "startCol": 27,
+    "endLine": 4,
+    "endCol": 41,
+    "nodeKind": "string",
+    "inError": false
+  }
+]

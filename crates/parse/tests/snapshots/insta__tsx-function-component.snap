@@ -1,0 +1,15 @@
+---
+source: crates/parse/tests/insta.rs
+expression: render(&case)
+---
+fixtures/golden/tsx/arrow-function/pos-search-field.tsx
+ts/arrow-function · quality=ok · lines=4
+
+m1 p0 @site            form=parens          arrow_function         1:27-3:1 inError=false
+m1 p0 @pick.1          form=parens          formal_parameters      1:27-1:72 inError=false
+m1 p0 @pick.2          form=parens          =>                     1:73-1:75 inError=false
+m1 p0 @pick.3          form=parens          parenthesized_expression 1:76-3:1 inError=false
+m2 p0 @site            form=parens          arrow_function         2:60-2:89 inError=false
+m2 p0 @pick.1          form=parens          formal_parameters      2:60-2:63 inError=false
+m2 p0 @pick.2          form=parens          =>                     2:64-2:66 inError=false
+m2 p0 @pick.3          form=parens          call_expression        2:67-2:89 inError=false

@@ -1,0 +1,80 @@
+[
+  {
+    "queryId": "sql/create-table",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "create",
+    "startLine": 2,
+    "startCol": 0,
+    "endLine": 6,
+    "endCol": 1,
+    "nodeKind": "create_table",
+    "inError": false
+  },
+  {
+    "queryId": "sql/create-table",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "create",
+    "startLine": 2,
+    "startCol": 13,
+    "endLine": 2,
+    "endCol": 17,
+    "nodeKind": "object_reference",
+    "inError": false
+  },
+  {
+    "queryId": "sql/create-table",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "create",
+    "startLine": 2,
+    "startCol": 18,
+    "endLine": 6,
+    "endCol": 1,
+    "nodeKind": "column_definitions",
+    "inError": false
+  },
+  {
+    "queryId": "sql/create-table",
+    "matchId": 2,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "create",
+    "startLine": 8,
+    "startCol": 0,
+    "endLine": 13,
+    "endCol": 1,
+    "nodeKind": "create_table",
+    "inError": false
+  },
+  {
+    "queryId": "sql/create-table",
+    "matchId": 2,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "create",
+    "startLine": 8,
+    "startCol": 13,
+    "endLine": 8,
+    "endCol": 22,
+    "nodeKind": "object_reference",
+    "inError": false
+  },
+  {
+    "queryId": "sql/create-table",
+    "matchId": 2,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "create",
+    "startLine": 8,
+    "startCol": 23,
+    "endLine": 13,
+    "endCol": 1,
+    "nodeKind": "column_definitions",
+    "inError": false
+  }
+]

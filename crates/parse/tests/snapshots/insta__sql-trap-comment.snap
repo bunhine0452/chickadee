@@ -1,0 +1,9 @@
+---
+source: crates/parse/tests/insta.rs
+expression: render(&case)
+---
+fixtures/golden/sql/_traps/comment-code.sql
+_traps · quality=ok · lines=6
+
+m1 p0 @site            form=select          select                 5:0-5:9 inError=false
+m1 p0 @pick.1          form=select          select_expression      5:7-5:9 inError=false

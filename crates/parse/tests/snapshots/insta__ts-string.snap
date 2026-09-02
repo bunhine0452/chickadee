@@ -1,0 +1,16 @@
+---
+source: crates/parse/tests/insta.rs
+expression: render(&case)
+---
+fixtures/golden/ts/template-literal/pos-receipt-line.ts
+ts/template-literal · quality=ok · lines=4
+
+m1 p0 @site            form=interpolated    template_string        2:9-2:70 inError=false
+m1 p0 @pick.2          form=interpolated    template_substitution  2:10-2:22 inError=false
+m1 p0 @pick.1          form=interpolated    member_expression      2:12-2:21 inError=false
+m2 p0 @site            form=interpolated    template_string        2:9-2:70 inError=false
+m2 p0 @pick.2          form=interpolated    template_substitution  2:26-2:37 inError=false
+m2 p0 @pick.1          form=interpolated    member_expression      2:28-2:36 inError=false
+m3 p0 @site            form=interpolated    template_string        2:9-2:70 inError=false
+m3 p0 @pick.2          form=interpolated    template_substitution  2:42-2:66 inError=false
+m3 p0 @pick.1          form=interpolated    binary_expression      2:44-2:65 inError=false

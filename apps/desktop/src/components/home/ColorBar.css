@@ -1,0 +1,71 @@
+/* 목업: design/ink-home.html `.colorbar` 블록
+   바꾼 것 — 목업은 줄마다 `style="opacity:…"` 를 직접 박았다. 앱의 인라인 style 은 CSS 변수
+   주입만 허용되므로(05 §1.2) `--o` 로 받는다. 값은 같다. */
+.colorbar {
+  padding-top: 18px;
+  border-top: 2.5px solid var(--rule);
+}
+
+.cb-h {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 9px;
+}
+
+.cb-h b {
+  font-size: var(--fs-15);
+  font-weight: 700;
+  letter-spacing: -.01em;
+}
+
+.cb-h span {
+  color: var(--ink-soft);
+  font-size: var(--fs-13);
+}
+
+.cb {
+  display: grid;
+  grid-template-columns: repeat(14, 1fr);
+  gap: 3px;
+  margin-bottom: 22px;
+  padding: 3px;
+  border: 2px solid var(--rule);
+  background: var(--paper-3);
+}
+
+.cb div {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 28px;
+}
+
+.cb div i {
+  display: block;
+  flex: 1;
+  opacity: var(--o, 1);
+}
+
+.cb .i0 { background: var(--t0) }
+.cb .i1 { background: var(--t1) }
+.cb .i2 { background: var(--t2) }
+
+.cb div[data-v="0"] {
+  opacity: .5;
+  background-image: repeating-linear-gradient(45deg, var(--ink-faint) 0 1px, transparent 1px 5px);
+}
+
+.cb div[data-today]::after {
+  content: "오늘";
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 50%;
+  color: var(--ink-soft);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  letter-spacing: .06em;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}

@@ -1,0 +1,19 @@
+---
+source: crates/parse/tests/insta.rs
+expression: render(&case)
+---
+fixtures/golden/tsx/arrow-function/pos-quantity-input.tsx
+ts/arrow-function · quality=ok · lines=11
+
+m1 p0 @site            form=parens          arrow_function         2:15-2:68 inError=false
+m1 p0 @pick.1          form=parens          formal_parameters      2:15-2:29 inError=false
+m1 p0 @pick.2          form=parens          =>                     2:30-2:32 inError=false
+m1 p0 @pick.3          form=parens          call_expression        2:33-2:68 inError=false
+m2 p0 @site            form=parens          arrow_function         5:37-5:51 inError=false
+m2 p0 @pick.1          form=parens          formal_parameters      5:37-5:39 inError=false
+m2 p0 @pick.2          form=parens          =>                     5:40-5:42 inError=false
+m2 p0 @pick.3          form=parens          call_expression        5:43-5:51 inError=false
+m3 p0 @site            form=parens          arrow_function         7:37-7:50 inError=false
+m3 p0 @pick.1          form=parens          formal_parameters      7:37-7:39 inError=false
+m3 p0 @pick.2          form=parens          =>                     7:40-7:42 inError=false
+m3 p0 @pick.3          form=parens          call_expression        7:43-7:50 inError=false

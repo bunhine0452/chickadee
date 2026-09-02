@@ -1,0 +1,41 @@
+[
+  {
+    "queryId": "_traps",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "call",
+    "startLine": 5,
+    "startCol": 2,
+    "endLine": 5,
+    "endCol": 15,
+    "nodeKind": "call_expression",
+    "inError": true
+  },
+  {
+    "queryId": "_traps",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "call",
+    "startLine": 5,
+    "startCol": 2,
+    "endLine": 5,
+    "endCol": 9,
+    "nodeKind": "identifier",
+    "inError": true
+  },
+  {
+    "queryId": "_traps",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "call",
+    "startLine": 5,
+    "startCol": 9,
+    "endLine": 5,
+    "endCol": 15,
+    "nodeKind": "arguments",
+    "inError": true
+  }
+]

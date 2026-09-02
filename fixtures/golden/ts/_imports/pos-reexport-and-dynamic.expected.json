@@ -1,0 +1,41 @@
+[
+  {
+    "queryId": "_imports",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "import.source",
+    "form": "static",
+    "startLine": 1,
+    "startCol": 26,
+    "endLine": 1,
+    "endCol": 36,
+    "nodeKind": "string",
+    "inError": false
+  },
+  {
+    "queryId": "_imports",
+    "matchId": 2,
+    "patternIndex": 1,
+    "name": "import.source",
+    "form": "static",
+    "startLine": 2,
+    "startCol": 14,
+    "endLine": 2,
+    "endCol": 26,
+    "nodeKind": "string",
+    "inError": false
+  },
+  {
+    "queryId": "_imports",
+    "matchId": 3,
+    "patternIndex": 2,
+    "name": "import.source",
+    "form": "dynamic",
+    "startLine": 5,
+    "startCol": 27,
+    "endLine": 5,
+    "endCol": 36,
+    "nodeKind": "string",
+    "inError": false
+  }
+]

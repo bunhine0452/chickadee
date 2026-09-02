@@ -1,0 +1,10 @@
+---
+source: crates/parse/tests/insta.rs
+expression: render(&case)
+---
+fixtures/golden/sql/join/pos-cart-with-items.sql
+sql/join · quality=ok · lines=6
+
+m1 p0 @site            form=join            join                   4:0-4:36 inError=false
+m1 p0 @pick.1          form=join            relation               4:5-4:16 inError=false
+m1 p0 @pick.2          form=join            binary_expression      4:20-4:36 inError=false

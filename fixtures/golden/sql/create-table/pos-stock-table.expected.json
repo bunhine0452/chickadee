@@ -1,0 +1,41 @@
+[
+  {
+    "queryId": "sql/create-table",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "create",
+    "startLine": 2,
+    "startCol": 0,
+    "endLine": 6,
+    "endCol": 1,
+    "nodeKind": "create_table",
+    "inError": false
+  },
+  {
+    "queryId": "sql/create-table",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "create",
+    "startLine": 2,
+    "startCol": 13,
+    "endLine": 2,
+    "endCol": 18,
+    "nodeKind": "object_reference",
+    "inError": false
+  },
+  {
+    "queryId": "sql/create-table",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "create",
+    "startLine": 2,
+    "startCol": 19,
+    "endLine": 6,
+    "endCol": 1,
+    "nodeKind": "column_definitions",
+    "inError": false
+  }
+]

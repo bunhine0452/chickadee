@@ -1,0 +1,11 @@
+---
+source: crates/parse/tests/insta.rs
+expression: render(&case)
+---
+fixtures/golden/tsx/conditional-ternary/pos-order-row.tsx
+ts/conditional-ternary · quality=ok · lines=9
+
+m1 p0 @site            form=ternary         ternary_expression     5:11-5:59 inError=false
+m1 p0 @pick.1          form=ternary         member_expression      5:11-5:23 inError=false
+m1 p0 @pick.2          form=ternary         string                 5:26-5:41 inError=false
+m1 p0 @pick.3          form=ternary         string                 5:44-5:59 inError=false

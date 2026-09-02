@@ -1,0 +1,15 @@
+---
+source: crates/parse/tests/insta.rs
+expression: render(&case)
+---
+fixtures/golden/tsx/conditional-ternary/pos-cart-badge.tsx
+ts/conditional-ternary · quality=ok · lines=8
+
+m1 p0 @site            form=ternary         ternary_expression     3:21-3:53 inError=false
+m1 p0 @pick.1          form=ternary         binary_expression      3:21-3:30 inError=false
+m1 p0 @pick.2          form=ternary         string                 3:33-3:43 inError=false
+m1 p0 @pick.3          form=ternary         string                 3:46-3:53 inError=false
+m2 p0 @site            form=ternary         ternary_expression     4:7-4:50 inError=false
+m2 p0 @pick.1          form=ternary         binary_expression      4:7-4:16 inError=false
+m2 p0 @pick.2          form=ternary         template_string        4:19-4:32 inError=false
+m2 p0 @pick.3          form=ternary         string                 4:35-4:50 inError=false

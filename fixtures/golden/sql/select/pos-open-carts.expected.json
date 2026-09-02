@@ -1,0 +1,28 @@
+[
+  {
+    "queryId": "sql/select",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "select",
+    "startLine": 2,
+    "startCol": 0,
+    "endLine": 2,
+    "endCol": 32,
+    "nodeKind": "select",
+    "inError": false
+  },
+  {
+    "queryId": "sql/select",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "select",
+    "startLine": 2,
+    "startCol": 7,
+    "endLine": 2,
+    "endCol": 32,
+    "nodeKind": "select_expression",
+    "inError": false
+  }
+]

@@ -1,0 +1,64 @@
+# large-100k — 커밋 1,000, TS/TSX 800파일 약 10만 줄 (03 §7 · 06 §1.2)
+# 벤치 전용 픽스처다. 골든은 여기에 매달려 있지 않다 — 재는 것은 시간과 메모리뿐이라
+# 내용의 뜻은 상관없고 규모와 결정성만 있으면 된다.
+#
+# 규모의 근거는 03 §7 의 예산 표다: 「10만 줄(≈800 파일 TS) 첫 인제스트, 커밋 1,000개 diff」.
+# 세 수를 따로 맞춰야 해서 파도가 셋이다 —
+#   파도 1·2 가 파일 798개를 만들고(= 커밋 798), 파도 3 은 새 파일 없이 앞의 200개를
+#   다른 시드로 다시 써 커밋만 200 늘린다. 그래야 파일 800 · 커밋 1,000 이 된다.
+#   (gen wave 는 1회에 파일 1개 + 커밋 1개이므로 파일 수와 커밋 수를 따로 못 준다.)
+#
+# 줄 수 계산 — 합성기의 한 단위는 .ts 36줄 · .tsx 26줄, 머리글은 3·4줄이고
+# lines= 는 「이 줄 수에 닿을 때까지 단위를 더한다」는 뜻이다.
+#   .ts  lines=125 → 3 + 36×4 = 147줄
+#   .tsx lines=100 → 4 + 26×4 = 108줄
+#   399×147 + 399×108 + 씨앗 ≈ 101,900줄
+#
+# 재생은 scripts/make-fixture-repo.sh large-100k — 생성물은 커밋하지 않는다.
+# 벤치는 apps/desktop/src-tauri/benches/ingest.rs, 임계는 scripts/bench.sh.
+
+# ── 씨앗 커밋 1~2 (합성 파일이 import 하는 뿌리) ───────────────────────────
+write src/core/time.ts <<EOS
+export const DAY_MS = 86_400_000;
+export const DAY_START_HOUR = 4;
+
+export function clamp(value: number, low: number, high: number): number {
+  if (value < low) return low;
+  if (value > high) return high;
+  return value;
+}
+
+export function dayKey(at: Date): string {
+  const shifted = new Date(at.getTime() - DAY_START_HOUR * 3_600_000);
+  const m = String(shifted.getMonth() + 1).padStart(2, "0");
+  const d = String(shifted.getDate()).padStart(2, "0");
+  return shifted.getFullYear() + "-" + m + "-" + d;
+}
+EOS
+commit chore: skeleton — day boundary helpers
+
+write src/index.ts <<EOS
+import { clamp, dayKey } from "./core/time";
+
+export interface Boot {
+  repoId: number;
+  startedAt: Date;
+}
+
+export async function boot(input: Boot): Promise<string> {
+  const id = clamp(input.repoId, 1, 9_999);
+  await Promise.resolve();
+  return dayKey(input.startedAt) + " · repo " + id;
+}
+EOS
+commit chore: entry point
+
+# ── 파도 1: 모듈 399개 (커밋 3~401) ───────────────────────────────────────
+gen wave 399 src/gen/mod-{i}.ts lines=125 seed=8101 msg=feat: module {i}
+
+# ── 파도 2: 패널 399개 (커밋 402~800) ─────────────────────────────────────
+gen wave 399 src/panels/panel-{i}.tsx lines=100 seed=9101 msg=feat: panel {i}
+
+# ── 파도 3: 새 파일 없이 커밋만 200 (커밋 801~1000) ───────────────────────
+# 앞의 mod-01..mod-200 을 다른 시드로 다시 쓴다 — diff 가 실제로 생기고 파일 수는 그대로다.
+gen wave 200 src/gen/mod-{i}.ts lines=125 seed=4201 msg=refactor: rework module {i}

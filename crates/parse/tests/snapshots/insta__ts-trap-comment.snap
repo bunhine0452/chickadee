@@ -1,0 +1,11 @@
+---
+source: crates/parse/tests/insta.rs
+expression: render(&case)
+---
+fixtures/golden/ts/_traps/comment-code.ts
+_traps · quality=ok · lines=9
+
+m1 p0 @site            form=member          member_expression      7:9-7:26 inError=false
+m1 p0 @pick.1          form=member          member_expression      7:9-7:17 inError=false
+m1 p0 @pick.2          form=member          optional_chain         7:17-7:19 inError=false
+m1 p0 @pick.3          form=member          property_identifier    7:19-7:26 inError=false

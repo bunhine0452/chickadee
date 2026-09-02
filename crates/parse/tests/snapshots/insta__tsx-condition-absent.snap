@@ -1,0 +1,8 @@
+---
+source: crates/parse/tests/insta.rs
+expression: render(&case)
+---
+fixtures/golden/tsx/conditional-ternary/neg-and-guard.tsx
+ts/conditional-ternary · quality=ok · lines=9
+
+(캡처 없음)

@@ -1,0 +1,11 @@
+---
+source: crates/parse/tests/insta.rs
+expression: render(&case)
+---
+fixtures/golden/ts/array-map-immutable/pos-set-qty.ts
+ts/array-map-immutable · quality=ok · lines=5
+
+m1 p0 @site            form=map             call_expression        3:9-3:72 inError=false
+m1 p0 @pick.1          form=map             identifier             3:9-3:14 inError=false
+m1 p0 @hole            form=map             property_identifier    3:15-3:18 inError=false
+m1 p0 @pick.2          form=map             arrow_function         3:19-3:71 inError=false

@@ -1,0 +1,121 @@
+/* 목업: design/ink-home.html `.sheet` 블록
+   바꾼 것 —
+     · `transform:rotate(var(--tilt))` 는 styles/physics.css 의 `.u-tilt` 로 나갔다 (05 §12).
+     · `.stamp-done` 대신 packages/ui 의 `Stamp` 를 쓴다 — 여기서는 자리만 잡는다 (05 §5).
+     · 완료 대지의 등록 표시 색은 `Reg` 의 `hit` 이 판정 색 별칭으로 낸다 (05 §4.2). */
+.sheet {
+  position: relative;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  padding: 16px 22px 20px 0;
+  border: 2.5px solid var(--rule);
+  background: var(--paper-2);
+  box-shadow: 6px 7px 0 var(--edge), 0 18px 26px -18px var(--drop), var(--lamp);
+}
+
+.sheet[data-state="locked"] {
+  background: var(--paper-3);
+  box-shadow: 4px 5px 0 var(--edge);
+}
+
+/* 완료 도장 (오버프린트) — 자리만 여기서 잡는다 */
+.sheet > .stamp {
+  position: absolute;
+  top: 14px;
+  right: 38px;
+  z-index: 2;
+}
+
+.sheet-in {
+  min-width: 0;
+  padding-left: 20px;
+}
+
+.sheet-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.sig {
+  position: relative;
+  top: -2px;
+  flex: 0 0 auto;
+  color: var(--ink);
+  font-family: var(--f-poster);
+  font-size: var(--fs-poster-s);
+  letter-spacing: .01em;
+  line-height: .9;
+}
+
+.sheet[data-state="locked"] .sig { color: var(--ink-soft) }
+
+.sheet-h2 {
+  font-size: var(--fs-20);
+  font-weight: 700;
+  letter-spacing: -.03em;
+  line-height: 1.25;
+}
+
+.sheet-h2 .pl {
+  margin-left: 8px;
+  color: var(--ink-soft);
+  font-size: var(--fs-14);
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.sheet-meta {
+  margin-top: 3px;
+  color: var(--ink-soft);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  letter-spacing: .01em;
+}
+
+.sheet-status {
+  margin-left: auto;
+  padding: 4px 10px;
+  border: 2px solid var(--rule);
+  background: var(--paper-3);
+  color: var(--ink-soft);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  font-weight: 700;
+  letter-spacing: .1em;
+  white-space: nowrap;
+}
+
+.sheet[data-state="current"] .sheet-status {
+  background: var(--t0);
+  color: var(--on-t0);
+}
+
+.sheet[data-state="done"] .sheet-status { display: none }
+
+/* 절취 안내선 : 스티커들이 이 선 위에 붙어 있다 */
+.nodes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px 22px;
+  margin-top: 16px;
+  padding: 22px 6px 6px 2px;
+  background-image: repeating-linear-gradient(to right, var(--ink-faint) 0 9px, transparent 9px 18px);
+  background-repeat: no-repeat;
+  background-position: 0 64px;
+  background-size: 100% 2px;
+}
+
+[data-trim="on"] .nodes { background-image: none }
+
+@media (width <= 640px) {
+  .sheet {
+    grid-template-columns: 32px minmax(0, 1fr);
+    padding-right: 12px;
+  }
+
+  .nodes { justify-content: flex-start }
+}

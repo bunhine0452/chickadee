@@ -1,0 +1,9 @@
+---
+source: crates/parse/tests/insta.rs
+expression: render(&case)
+---
+fixtures/golden/sql/select/pos-open-carts.sql
+sql/select · quality=ok · lines=6
+
+m1 p0 @site            form=select          select                 2:0-2:32 inError=false
+m1 p0 @pick.1          form=select          select_expression      2:7-2:32 inError=false

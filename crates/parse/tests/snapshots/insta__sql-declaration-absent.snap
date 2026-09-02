@@ -1,0 +1,8 @@
+---
+source: crates/parse/tests/insta.rs
+expression: render(&case)
+---
+fixtures/golden/sql/create-table/neg-index-and-view.sql
+sql/create-table · quality=ok · lines=6
+
+(캡처 없음)

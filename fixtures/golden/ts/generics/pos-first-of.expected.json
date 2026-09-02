@@ -1,0 +1,41 @@
+[
+  {
+    "queryId": "ts/generics",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "site",
+    "form": "fn-type-params",
+    "startLine": 2,
+    "startCol": 7,
+    "endLine": 4,
+    "endCol": 1,
+    "nodeKind": "function_declaration",
+    "inError": false
+  },
+  {
+    "queryId": "ts/generics",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "pick.2",
+    "form": "fn-type-params",
+    "startLine": 2,
+    "startCol": 16,
+    "endLine": 2,
+    "endCol": 23,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "ts/generics",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "pick.1",
+    "form": "fn-type-params",
+    "startLine": 2,
+    "startCol": 24,
+    "endLine": 2,
+    "endCol": 25,
+    "nodeKind": "type_identifier",
+    "inError": false
+  }
+]

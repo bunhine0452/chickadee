@@ -37,8 +37,23 @@ export interface LoadOptions {
 
 const systemIds = ['_imports', '_blocks'] as const;
 
+/**
+ * 같은 옵션이면 같은 사전이다 — 번들은 빌드 산출물이라 실행 중에 바뀌지 않는다.
+ * YAML 60여 파일 파싱을 인제스트마다 되풀이하지 않기 위한 것이고, 결과는 읽기 전용이다.
+ */
+const CACHE = new Map<string, Dict>();
+
 /** 번들 사전을 읽어 검증한다. 감지에 실패한 프레임워크 사전은 아예 로드하지 않는다. */
 export function loadDict(options: LoadOptions = {}): Dict {
+  const key = JSON.stringify([[...(options.dependencies ?? [])].sort(), options.langs ?? null]);
+  const hit = CACHE.get(key);
+  if (hit) return hit;
+  const built = build(options);
+  CACHE.set(key, built);
+  return built;
+}
+
+function build(options: LoadOptions): Dict {
   const langs = new Map<string, LangMeta>();
   const concepts = new Map<string, Concept>();
   const queries = new Map<string, string>();

@@ -1,0 +1,13 @@
+---
+source: crates/parse/tests/insta.rs
+expression: render(&case)
+---
+fixtures/golden/sql/create-table/pos-cart-tables.sql
+sql/create-table · quality=ok · lines=14
+
+m1 p0 @site            form=create          create_table           2:0-6:1 inError=false
+m1 p0 @pick.1          form=create          object_reference       2:13-2:17 inError=false
+m1 p0 @pick.2          form=create          column_definitions     2:18-6:1 inError=false
+m2 p0 @site            form=create          create_table           8:0-13:1 inError=false
+m2 p0 @pick.1          form=create          object_reference       8:13-8:22 inError=false
+m2 p0 @pick.2          form=create          column_definitions     8:23-13:1 inError=false

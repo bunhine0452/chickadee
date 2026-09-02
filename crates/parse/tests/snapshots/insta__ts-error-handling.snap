@@ -1,0 +1,12 @@
+---
+source: crates/parse/tests/insta.rs
+expression: render(&case)
+---
+fixtures/golden/ts/try-catch/pos-read-settings.ts
+ts/try-catch · quality=ok · lines=13
+
+m1 p0 @site            form=try             try_statement          4:2-11:3 inError=false
+m1 p0 @pick.1          form=try             statement_block        4:6-6:3 inError=false
+m1 p0 @pick.2          form=try             identifier             6:11-6:14 inError=false
+m1 p0 @pick.3          form=try             statement_block        6:16-9:3 inError=false
+m1 p0 @pick.4          form=try             finally_clause         9:4-11:3 inError=false

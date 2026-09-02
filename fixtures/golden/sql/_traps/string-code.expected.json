@@ -1,0 +1,28 @@
+[
+  {
+    "queryId": "_traps",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "select",
+    "startLine": 3,
+    "startCol": 0,
+    "endLine": 3,
+    "endCol": 9,
+    "nodeKind": "select",
+    "inError": false
+  },
+  {
+    "queryId": "_traps",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "select",
+    "startLine": 3,
+    "startCol": 7,
+    "endLine": 3,
+    "endCol": 9,
+    "nodeKind": "select_expression",
+    "inError": false
+  }
+]

@@ -1,0 +1,9 @@
+---
+source: crates/parse/tests/insta.rs
+expression: render(&case)
+---
+fixtures/golden/tsx/_traps/comment-code.tsx
+_traps · quality=ok · lines=10
+
+m1 p0 @site            form=element         jsx_element            8:9-8:45 inError=false
+m1 p0 @pick.1          form=element         identifier             8:10-8:12 inError=false

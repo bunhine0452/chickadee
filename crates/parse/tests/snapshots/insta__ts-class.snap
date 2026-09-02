@@ -1,0 +1,13 @@
+---
+source: crates/parse/tests/insta.rs
+expression: render(&case)
+---
+fixtures/golden/ts/_blocks/pos-cart-store-class.ts
+_blocks · quality=ok · lines=12
+
+m1 p2 @block.function  form=-               class_declaration      1:7-11:1 inError=false
+m1 p2 @block.name      form=-               type_identifier        1:13-1:22 inError=false
+m2 p1 @block.function  form=-               method_definition      4:2-6:3 inError=false
+m2 p1 @block.name      form=-               property_identifier    4:2-4:5 inError=false
+m3 p1 @block.function  form=-               method_definition      8:2-10:3 inError=false
+m3 p1 @block.name      form=-               property_identifier    8:2-8:7 inError=false

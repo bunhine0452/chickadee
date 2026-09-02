@@ -1,0 +1,28 @@
+[
+  {
+    "queryId": "sql/where-filter",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "where",
+    "startLine": 4,
+    "startCol": 0,
+    "endLine": 4,
+    "endCol": 21,
+    "nodeKind": "where",
+    "inError": false
+  },
+  {
+    "queryId": "sql/where-filter",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "where",
+    "startLine": 4,
+    "startCol": 6,
+    "endLine": 4,
+    "endCol": 21,
+    "nodeKind": "binary_expression",
+    "inError": false
+  }
+]

@@ -35,9 +35,9 @@ owner: claude-code
 - [x] 03 · 문법 크레이트 고정 + 언어 감지 + 파서 풀 — 핀·feature·parse_quality(확장자 표는 TS) · 1.5일 (선행: parse 크레이트) {#m1-03-grammar-pool}
 - [x] 01 · 인제스트 잡 러너 — 워커 스레드, parse 풀, 해시 증분, 취소 토큰, 진행 이벤트, 500행 tx · 3일 (선행: store·git·parse) {#m1-01-ingest-runner}
 - [x] 03 · 워킹트리 스캔 + 진행률 채널 + 취소·이어하기 — is_dirty·ingest_warning·재스캔 3시점 · 1일 (선행: 잡 러너) {#m1-03-worktree-progress}
-- [ ] 03 · sqlite 쓰기·증분 — TS 재파생 증분·site_key 유지·is_reachable · 1.5일 (선행: 잡 러너·쿼리 실행기) {#m1-03-sqlite-incremental}
+- [x] 03 · sqlite 쓰기·증분 — TS 재파생 증분·site_key 유지·is_reachable · 1.5일 (선행: 잡 러너·쿼리 실행기) {#m1-03-sqlite-incremental}
 - [x] 01 · 파일 맥락 명령 — file_read_lines/block 작업 트리·rev 양쪽, 상한·UTF-8 lossy · 1일 (선행: git 크레이트) {#m1-01-file-context}
-- [ ] 03 · blame 2차 패스 — git_blame_lines 명령 + TS 배경 잡, 파일당 2초 컷 · 1일 (선행: 파일 맥락 명령) {#m1-03-blame-pass}
+- [x] 03 · blame 2차 패스 — git_blame_lines 명령 + TS 배경 잡, 파일당 2초 컷 · 1일 (선행: 파일 맥락 명령) {#m1-03-blame-pass}
 - [x] 01 · 사전 명령 + dictionary 패키지 — dict_list/read/cache_*, zod 스키마, 사용자 오버라이드 우선 · 2일 (선행: 03 YAML 스키마) {#m1-01-dict-commands}
 - [x] 03 · 사전 스키마·린트 — JSON Schema, TS 타입 생성, pnpm dict:lint(조사·금지어·참조·템플릿 변수), Rust 쿼리 테스트 · 2일 (선행: 사전 1차) {#m1-03-dict-lint}
 - [x] 03 · TS 사전 1차 — 바닥 개념 10 + 개념 11 의 yaml+scm, _lang.yaml essential/alternatives · 4일 (선행: 쿼리 실행기) {#m1-03-dict-ts-v1}
@@ -45,19 +45,19 @@ owner: claude-code
 - [x] 03 · 쿼리 실행기 — Rust inError 플래그 + TS derive.ts Site 변환·lineConcepts·uncoveredRatio·shape·site_key · 3일 (선행: parse 크레이트·04 토크나이저) {#m1-03-query-runner}
 - [ ] 03 · 골든 픽스처 — TS 개념 20개 양성/음성, 깨진 파일 픽스처, UPDATE_GOLDEN · 1.5일 (선행: 쿼리 실행기·Q1) {#m1-03-golden-fixtures}
 - [ ] 06 · Q2 Rust 파서·쿼리 골든 — insta 스냅샷 TS/TSX/SQL 각 15케이스 · 1일 (선행: 쿼리 실행기·Q1) {#m1-06-q2-parser-golden}
-- [ ] 03 · 미지 개념 개수·첫 노출 선택(TS) — unknownCount, 동률 규칙, shape 다양성 · 1.5일 (선행: 사전 1차·파생 층) {#m1-03-unknown-count}
-- [ ] 02 · 미지 개념 계산 — known 집합·전이·증분 재계산·gap 갱신 · 1.5일 (선행: 03 미지 개념 개수) {#m1-02-unknown-cache}
-- [ ] 03 · 문법 구멍 지도 집계(TS) — essential 집계·thin 판정·alternatives 부기·판 만들기 큐 삽입 · 1.5일 (선행: 02 미지 개념 계산·D29 대지 탐지) {#m1-03-gap-map}
-- [ ] 01 · 오류 모델 배선 — thiserror → IpcError → 문구 표, 로그 금지 필드 skip, 회전 · 1일 (선행: 각 크레이트) {#m1-01-error-model}
-- [ ] 01 · 리포 이동/삭제 흐름 — missing 상태, repo_relocate fingerprint 검증, purge 시 자산 보존 테스트 · 1일 (선행: git·store-sql) {#m1-01-repo-relocate}
+- [x] 03 · 미지 개념 개수·첫 노출 선택(TS) — unknownCount, 동률 규칙, shape 다양성 · 1.5일 (선행: 사전 1차·파생 층) {#m1-03-unknown-count}
+- [x] 02 · 미지 개념 계산 — known 집합·전이·증분 재계산·gap 갱신 · 1.5일 (선행: 03 미지 개념 개수) {#m1-02-unknown-cache}
+- [x] 03 · 문법 구멍 지도 집계(TS) — essential 집계·thin 판정·alternatives 부기·판 만들기 큐 삽입 · 1.5일 (선행: 02 미지 개념 계산·D29 대지 탐지) {#m1-03-gap-map}
+- [x] 01 · 오류 모델 배선 — thiserror → IpcError → 문구 표, 로그 금지 필드 skip, 회전 · 1일 (선행: 각 크레이트) {#m1-01-error-model}
+- [x] 01 · 리포 이동/삭제 흐름 — missing 상태, repo_relocate fingerprint 검증, purge 시 자산 보존 테스트 · 1일 (선행: git·store-sql) {#m1-01-repo-relocate}
 - [x] 06 · Q8 로그 안전 래퍼 — Rust log_safe! + clippy 금지, TS logger.ts + no-console, 통합 테스트 grep · 1일 (선행: 오류 모델) {#m1-06-q8-log-safe}
-- [ ] 06 · Q10 악성 입력 방어 — 파일·행·깊이·타임아웃 상한, 심볼릭 링크·경로 탈출 거부, fixtures/evil·evil-dict, DOMPurify RichText 단일화 · 2일 (선행: 잡 러너·Q8) {#m1-06-q10-evil-input}
+- [x] 06 · Q10 악성 입력 방어 — 파일·행·깊이·타임아웃 상한, 심볼릭 링크·경로 탈출 거부, fixtures/evil·evil-dict, DOMPurify RichText 단일화 · 2일 (선행: 잡 러너·Q8) {#m1-06-q10-evil-input}
 - [ ] 05 · 홈 화면 — Masthead·RepoSwitcher·TodayPanel·TimeQueue·InkScale·ConceptList·GapsPanel·Sheet·Node·NodeDetail·Guide·Forecast·ColorBar, home.load · 3일 (선행: 프리미티브·02 홈 쿼리) {#m1-05-home}
 - [ ] 05 · WKWebView 성능 첫 실측 — ?stress=48 이식, __audit.perf, performance.mark 6종, Web Inspector 절차 · 1일 (선행: 홈) {#m1-05-wkwebview-perf}
 - [ ] 05 · 인제스트·첫 실행·안내·설정 — 폴더 선택, 진행 이벤트를 TimeQueue 로, 빈 상태, newcomer 시트, 설정(identity 포함) · 2일 (선행: 홈·01 이벤트) {#m1-05-ingest-onboarding}
 - [ ] 03 · 성능 픽스처·벤치 — large-100k 생성기·criterion·CI 임계 · 1.5일 (선행: 증분까지·Q1) {#m1-03-perf-bench}
-- [ ] 03 · Swift·Dart·SQL 품질 검증 — 실코드 20파일 ERROR 비율, 통과 시 바닥 개념 착수, 실패 시 보류 결정 · 2일 (선행: 파서 풀) {#m1-03-swift-dart-sql}
-- [ ] 03 · projectox 실리포 검증 — TS/TSX/SQL 인제스트, Site 수·구멍 지도가 목업과 같은 모양인지 · 1일 (선행: 구멍 지도) {#m1-03-projectox-check}
+- [x] 03 · Swift·Dart·SQL 품질 검증 — 실코드 20파일 ERROR 비율, 통과 시 바닥 개념 착수, 실패 시 보류 결정 · 2일 (선행: 파서 풀) {#m1-03-swift-dart-sql}
+- [x] 03 · projectox 실리포 검증 — TS/TSX/SQL 인제스트, Site 수·구멍 지도가 목업과 같은 모양인지 · 1일 (선행: 구멍 지도) {#m1-03-projectox-check}
 
 ## M2 · T0 세션 수직 절단 — 큐 → T0 카드 → 채점 → 겹 → 요약, 사다리·LIFER (끝: 인쇄 시작부터 요약까지 실데이터 한 흐름, Esc 후 이어 찍기, 검산 6건·rebuild_mastery==mastery·IPC 0회·판정란 0px·13px·7:1) {#m2}
 - [ ] 02 · FSRS 어댑터 — ts-fsrs 래핑, 등급 매핑, scheduler_params 로드, 궤적 검산(1.2→3.8→11→30) · 1.5일 (선행: 시각 유틸) {#m2-02-fsrs-adapter}
@@ -143,4 +143,14 @@ owner: claude-code
 | 2026-09-03T04:39:15+09:00 | #m1-03-ingest-skeleton | claude-code | ☐→x | 20260903/Features_to_add/0438_feature_m1-dictionary-and-derive.md | concepts 파생 층 골격 — derive·commits(identity·kind)·ingest-defaults 상수. 단위 테스트 45건 |
 | 2026-09-03T04:39:23+09:00 | #m1-01-dict-commands | claude-code | ☐→x | 20260903/Features_to_add/0438_feature_m1-dictionary-and-derive.md | 범위 조정(D66) — dict_* 4개 명령 대신 Vite 번들. zod 스키마·로더는 완성. 사용자 오버라이드는 M5 |
 | 2026-09-03T04:39:29+09:00 | #m1-06-q8-log-safe | claude-code | ☐→x | 20260903/Features_to_add/0438_feature_m1-dictionary-and-derive.md | logger.ts(금지 필드·절대 경로 축약) + no-console + Rust println!/dbg! 금지 + 이벤트 누출 통합 테스트 |
+| 2026-09-03T04:46:54+09:00 | #m1-06-q10-evil-input | claude-code | ☐→x |  | 파서 폭탄 6건(≤3s·패닉0)·심링크·경로 탈출·악성 사전 12문자열 27건. RichText 단일 통로 유지 |
+| 2026-09-03T04:47:00+09:00 | #m1-01-error-model | claude-code | ☐→x |  | thiserror→IpcError(git·parse·store) + error-copy.ts 문구 표 + 다음 동작 5종. 코드 전량 테스트 |
+| 2026-09-03T04:47:06+09:00 | #m1-03-sqlite-incremental | claude-code | ☐→x |  | Rust 해시 증분·is_reachable + TS 재파생(site_key 유지·사라진 키 is_alive=0). sqlite 위 통합 18건 |
+| 2026-09-03T04:47:11+09:00 | #m1-03-unknown-count | claude-code | ☐→x |  | unknownCount(03 §3.6 공식)·chooseFirst 동률 규칙·distinctShapes. 아는 개념이 늘면 값이 준다는 것까지 테스트 |
+| 2026-09-03T04:47:16+09:00 | #m1-02-unknown-cache | claude-code | ☐→x |  | knownSet(1겹 ∪ 보편 3겹 전이)·recountUnknown 이 concept_site.unknown_count 를 채운다 |
+| 2026-09-03T04:47:22+09:00 | #m1-03-gap-map | claude-code | ☐→x |  | essential 집계·thin 판정·alternatives 부기·테스트 파일 제외(D60). gaps.list 가 홈에 낸다 |
+| 2026-09-03T04:47:28+09:00 | #m1-01-repo-relocate | claude-code | ☐→x |  | repos.ts(D65) — 등록·목록(missing 판정)·이동(fingerprint 검증)·삭제(카드는 은퇴만, D31) |
+| 2026-09-03T04:47:33+09:00 | #m1-03-blame-pass | claude-code | ☐→x |  | git_blame_lines 명령 + blame.ts 배경 잡(60s 예산·파일당 2s 컷·실패는 그 파일만 포기). libgit2 에 중단 수단이 없어 컷은 사후 검사다 |
+| 2026-09-03T04:51:16+09:00 | #m1-03-swift-dart-sql | claude-code | ☐→x |  | 실측 — sql 20파일 중 poor 1(5%) · ts 40/0 · tsx 20/0. Swift·Dart 는 크레이트 미탑재(03 §2.2 위험)이고 테스트가 그 사실을 고정한다 |
+| 2026-09-03T04:51:23+09:00 | #m1-03-projectox-check | claude-code | ☐→x |  | 배포 사전 전량으로 실리포(이 리포, TS 113파일) 인제스트 — 캡처 75,584 · 2.9s. projectox-like 픽스처 96파일도 통과. CHICKADEE_REAL_REPO 로 다른 리포를 가리킬 수 있다 |
 <!-- oculpm:plan-log end -->

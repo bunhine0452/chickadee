@@ -1,0 +1,15 @@
+---
+source: crates/parse/tests/insta.rs
+expression: render(&case)
+---
+fixtures/golden/ts/arrow-function/pos-debounce.ts
+ts/arrow-function · quality=ok · lines=9
+
+m1 p0 @site            form=parens          arrow_function         4:9-7:3 inError=false
+m1 p0 @pick.1          form=parens          formal_parameters      4:9-4:11 inError=false
+m1 p0 @pick.2          form=parens          =>                     4:12-4:14 inError=false
+m1 p0 @pick.3          form=parens          statement_block        4:15-7:3 inError=false
+m2 p0 @site            form=parens          arrow_function         6:30-6:41 inError=false
+m2 p0 @pick.1          form=parens          formal_parameters      6:30-6:32 inError=false
+m2 p0 @pick.2          form=parens          =>                     6:33-6:35 inError=false
+m2 p0 @pick.3          form=parens          call_expression        6:36-6:41 inError=false

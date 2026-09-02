@@ -1,0 +1,8 @@
+---
+source: crates/parse/tests/insta.rs
+expression: render(&case)
+---
+fixtures/golden/tsx/array-map-immutable/neg-children-only.tsx
+ts/array-map-immutable · quality=ok · lines=5
+
+(캡처 없음)

@@ -1,0 +1,54 @@
+[
+  {
+    "queryId": "ts/for-of",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "for-of",
+    "startLine": 3,
+    "startCol": 2,
+    "endLine": 5,
+    "endCol": 3,
+    "nodeKind": "for_in_statement",
+    "inError": false
+  },
+  {
+    "queryId": "ts/for-of",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "for-of",
+    "startLine": 3,
+    "startCol": 13,
+    "endLine": 3,
+    "endCol": 17,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "ts/for-of",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "for-of",
+    "startLine": 3,
+    "startCol": 21,
+    "endLine": 3,
+    "endCol": 26,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "ts/for-of",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "for-of",
+    "startLine": 3,
+    "startCol": 28,
+    "endLine": 5,
+    "endCol": 3,
+    "nodeKind": "statement_block",
+    "inError": false
+  }
+]

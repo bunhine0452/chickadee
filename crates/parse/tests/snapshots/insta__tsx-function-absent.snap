@@ -1,0 +1,8 @@
+---
+source: crates/parse/tests/insta.rs
+expression: render(&case)
+---
+fixtures/golden/tsx/arrow-function/neg-function-only.tsx
+ts/arrow-function · quality=ok · lines=9
+
+(캡처 없음)

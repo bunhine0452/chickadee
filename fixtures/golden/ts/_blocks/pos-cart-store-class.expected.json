@@ -1,0 +1,80 @@
+[
+  {
+    "queryId": "_blocks",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "block.function",
+    "form": null,
+    "startLine": 1,
+    "startCol": 7,
+    "endLine": 11,
+    "endCol": 1,
+    "nodeKind": "class_declaration",
+    "inError": false
+  },
+  {
+    "queryId": "_blocks",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "block.name",
+    "form": null,
+    "startLine": 1,
+    "startCol": 13,
+    "endLine": 1,
+    "endCol": 22,
+    "nodeKind": "type_identifier",
+    "inError": false
+  },
+  {
+    "queryId": "_blocks",
+    "matchId": 2,
+    "patternIndex": 1,
+    "name": "block.function",
+    "form": null,
+    "startLine": 4,
+    "startCol": 2,
+    "endLine": 6,
+    "endCol": 3,
+    "nodeKind": "method_definition",
+    "inError": false
+  },
+  {
+    "queryId": "_blocks",
+    "matchId": 2,
+    "patternIndex": 1,
+    "name": "block.name",
+    "form": null,
+    "startLine": 4,
+    "startCol": 2,
+    "endLine": 4,
+    "endCol": 5,
+    "nodeKind": "property_identifier",
+    "inError": false
+  },
+  {
+    "queryId": "_blocks",
+    "matchId": 3,
+    "patternIndex": 1,
+    "name": "block.function",
+    "form": null,
+    "startLine": 8,
+    "startCol": 2,
+    "endLine": 10,
+    "endCol": 3,
+    "nodeKind": "method_definition",
+    "inError": false
+  },
+  {
+    "queryId": "_blocks",
+    "matchId": 3,
+    "patternIndex": 1,
+    "name": "block.name",
+    "form": null,
+    "startLine": 8,
+    "startCol": 2,
+    "endLine": 8,
+    "endCol": 7,
+    "nodeKind": "property_identifier",
+    "inError": false
+  }
+]

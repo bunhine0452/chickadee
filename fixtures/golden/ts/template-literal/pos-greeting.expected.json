@@ -1,0 +1,80 @@
+[
+  {
+    "queryId": "ts/template-literal",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "interpolated",
+    "startLine": 3,
+    "startCol": 9,
+    "endLine": 3,
+    "endCol": 73,
+    "nodeKind": "template_string",
+    "inError": false
+  },
+  {
+    "queryId": "ts/template-literal",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "interpolated",
+    "startLine": 3,
+    "startCol": 10,
+    "endLine": 3,
+    "endCol": 17,
+    "nodeKind": "template_substitution",
+    "inError": false
+  },
+  {
+    "queryId": "ts/template-literal",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "interpolated",
+    "startLine": 3,
+    "startCol": 12,
+    "endLine": 3,
+    "endCol": 16,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "ts/template-literal",
+    "matchId": 2,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "interpolated",
+    "startLine": 3,
+    "startCol": 9,
+    "endLine": 3,
+    "endCol": 73,
+    "nodeKind": "template_string",
+    "inError": false
+  },
+  {
+    "queryId": "ts/template-literal",
+    "matchId": 2,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "interpolated",
+    "startLine": 3,
+    "startCol": 46,
+    "endLine": 3,
+    "endCol": 55,
+    "nodeKind": "template_substitution",
+    "inError": false
+  },
+  {
+    "queryId": "ts/template-literal",
+    "matchId": 2,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "interpolated",
+    "startLine": 3,
+    "startCol": 48,
+    "endLine": 3,
+    "endCol": 54,
+    "nodeKind": "identifier",
+    "inError": false
+  }
+]

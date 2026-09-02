@@ -1,0 +1,54 @@
+[
+  {
+    "queryId": "ts/array-map-immutable",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "map",
+    "startLine": 2,
+    "startCol": 9,
+    "endLine": 5,
+    "endCol": 5,
+    "nodeKind": "call_expression",
+    "inError": false
+  },
+  {
+    "queryId": "ts/array-map-immutable",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "map",
+    "startLine": 2,
+    "startCol": 9,
+    "endLine": 2,
+    "endCol": 15,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "ts/array-map-immutable",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "hole",
+    "form": "map",
+    "startLine": 2,
+    "startCol": 16,
+    "endLine": 2,
+    "endCol": 19,
+    "nodeKind": "property_identifier",
+    "inError": false
+  },
+  {
+    "queryId": "ts/array-map-immutable",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "map",
+    "startLine": 2,
+    "startCol": 20,
+    "endLine": 5,
+    "endCol": 4,
+    "nodeKind": "arrow_function",
+    "inError": false
+  }
+]

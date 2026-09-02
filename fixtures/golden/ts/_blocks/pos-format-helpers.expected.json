@@ -1,0 +1,80 @@
+[
+  {
+    "queryId": "_blocks",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "block.function",
+    "form": null,
+    "startLine": 1,
+    "startCol": 7,
+    "endLine": 3,
+    "endCol": 1,
+    "nodeKind": "function_declaration",
+    "inError": false
+  },
+  {
+    "queryId": "_blocks",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "block.name",
+    "form": null,
+    "startLine": 1,
+    "startCol": 16,
+    "endLine": 1,
+    "endCol": 25,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "_blocks",
+    "matchId": 2,
+    "patternIndex": 0,
+    "name": "block.function",
+    "form": null,
+    "startLine": 5,
+    "startCol": 0,
+    "endLine": 7,
+    "endCol": 1,
+    "nodeKind": "function_declaration",
+    "inError": false
+  },
+  {
+    "queryId": "_blocks",
+    "matchId": 2,
+    "patternIndex": 0,
+    "name": "block.name",
+    "form": null,
+    "startLine": 5,
+    "startCol": 9,
+    "endLine": 5,
+    "endCol": 13,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "_blocks",
+    "matchId": 3,
+    "patternIndex": 0,
+    "name": "block.function",
+    "form": null,
+    "startLine": 9,
+    "startCol": 7,
+    "endLine": 11,
+    "endCol": 1,
+    "nodeKind": "function_declaration",
+    "inError": false
+  },
+  {
+    "queryId": "_blocks",
+    "matchId": 3,
+    "patternIndex": 0,
+    "name": "block.name",
+    "form": null,
+    "startLine": 9,
+    "startCol": 16,
+    "endLine": 9,
+    "endCol": 26,
+    "nodeKind": "identifier",
+    "inError": false
+  }
+]

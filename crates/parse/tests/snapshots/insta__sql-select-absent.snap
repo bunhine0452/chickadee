@@ -1,0 +1,8 @@
+---
+source: crates/parse/tests/insta.rs
+expression: render(&case)
+---
+fixtures/golden/sql/select/neg-write-only.sql
+sql/select · quality=ok · lines=5
+
+(캡처 없음)

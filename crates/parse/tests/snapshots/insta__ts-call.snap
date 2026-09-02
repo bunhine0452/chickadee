@@ -1,0 +1,22 @@
+---
+source: crates/parse/tests/insta.rs
+expression: render(&case)
+---
+fixtures/golden/ts/call-expression/pos-search-box.ts
+ts/call-expression · quality=ok · lines=10
+
+m1 p0 @site            form=call            call_expression        5:2-8:4 inError=false
+m1 p0 @pick.1          form=call            member_expression      5:2-5:24 inError=false
+m1 p0 @pick.2          form=call            arguments              5:24-8:4 inError=false
+m2 p0 @site            form=call            call_expression        6:4-6:30 inError=false
+m2 p0 @pick.1          form=call            member_expression      6:4-6:23 inError=false
+m2 p0 @pick.2          form=call            arguments              6:23-6:30 inError=false
+m3 p0 @site            form=call            call_expression        7:12-7:68 inError=false
+m3 p0 @pick.1          form=call            member_expression      7:12-7:29 inError=false
+m3 p0 @pick.2          form=call            arguments              7:29-7:68 inError=false
+m4 p0 @site            form=call            call_expression        7:36-7:62 inError=false
+m4 p0 @pick.1          form=call            identifier             7:36-7:42 inError=false
+m4 p0 @pick.2          form=call            arguments              7:42-7:62 inError=false
+m5 p0 @site            form=call            call_expression        7:43-7:61 inError=false
+m5 p0 @pick.1          form=call            member_expression      7:43-7:59 inError=false
+m5 p0 @pick.2          form=call            arguments              7:59-7:61 inError=false

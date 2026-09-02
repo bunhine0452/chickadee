@@ -1,0 +1,19 @@
+---
+source: crates/parse/tests/insta.rs
+expression: render(&case)
+---
+fixtures/golden/ts/const-declaration/pos-cart-total.ts
+ts/const-declaration · quality=ok · lines=9
+
+m1 p0 @site            form=const           lexical_declaration    2:0-2:21 inError=false
+m1 p0 @pick.1          form=const           const                  2:0-2:5 inError=false
+m1 p0 @pick.2          form=const           identifier             2:6-2:14 inError=false
+m1 p0 @pick.3          form=const           number                 2:17-2:20 inError=false
+m2 p0 @site            form=const           lexical_declaration    5:2-5:79 inError=false
+m2 p0 @pick.1          form=const           const                  5:2-5:7 inError=false
+m2 p0 @pick.2          form=const           identifier             5:8-5:16 inError=false
+m2 p0 @pick.3          form=const           call_expression        5:19-5:78 inError=false
+m3 p0 @site            form=const           lexical_declaration    6:2-6:46 inError=false
+m3 p0 @pick.1          form=const           const                  6:2-6:7 inError=false
+m3 p0 @pick.2          form=const           identifier             6:8-6:11 inError=false
+m3 p0 @pick.3          form=const           call_expression        6:14-6:45 inError=false

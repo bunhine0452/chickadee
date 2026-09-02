@@ -1,0 +1,8 @@
+---
+source: crates/parse/tests/insta.rs
+expression: render(&case)
+---
+fixtures/golden/sql/join/neg-single-table.sql
+sql/join · quality=ok · lines=6
+
+(캡처 없음)

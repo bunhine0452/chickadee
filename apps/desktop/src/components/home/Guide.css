@@ -1,0 +1,26 @@
+/* 목업: design/ink-home.html `.guide` 블록. 말풍선(.say)은 packages/ui 가 들고 있다. */
+.guide {
+  position: absolute;
+  top: -34px;
+  right: 44px;
+  z-index: 4;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.guide .dee {
+  width: 56px;
+  height: 56px;
+  transform-origin: 48% 100%;
+}
+
+.guide .say { margin-bottom: 12px }
+
+@media (width <= 1080px) {
+  .guide { top: -30px }
+}
+
+@media (width <= 640px) {
+  .guide .say { display: none }
+}

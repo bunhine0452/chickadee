@@ -1,0 +1,54 @@
+[
+  {
+    "queryId": "_blocks",
+    "matchId": 1,
+    "patternIndex": 3,
+    "name": "block.function",
+    "form": null,
+    "startLine": 2,
+    "startCol": 7,
+    "endLine": 2,
+    "endCol": 74,
+    "nodeKind": "lexical_declaration",
+    "inError": false
+  },
+  {
+    "queryId": "_blocks",
+    "matchId": 1,
+    "patternIndex": 3,
+    "name": "block.name",
+    "form": null,
+    "startLine": 2,
+    "startCol": 13,
+    "endLine": 2,
+    "endCol": 24,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "_blocks",
+    "matchId": 2,
+    "patternIndex": 3,
+    "name": "block.function",
+    "form": null,
+    "startLine": 4,
+    "startCol": 0,
+    "endLine": 6,
+    "endCol": 2,
+    "nodeKind": "lexical_declaration",
+    "inError": false
+  },
+  {
+    "queryId": "_blocks",
+    "matchId": 2,
+    "patternIndex": 3,
+    "name": "block.name",
+    "form": null,
+    "startLine": 4,
+    "startCol": 6,
+    "endLine": 4,
+    "endCol": 13,
+    "nodeKind": "identifier",
+    "inError": false
+  }
+]

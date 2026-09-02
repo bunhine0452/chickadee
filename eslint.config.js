@@ -136,6 +136,8 @@ module.exports = tseslint.config(
       '**/.venv/**',
       'design/**', // 목업은 원본 그대로 둔다 — 05 가 옮겨 심는 대상이지 린트 대상이 아니다.
       'fixtures/repos/*/', // make-fixture-repo.sh 생성물. `.steps` 만 커밋한다(06 §1.2).
+      // 파서 골든의 입력. 일부러 미선언 식별자·파싱이 깨진 파일을 담으므로 린트 대상이 아니다(06 §1.2).
+      'fixtures/golden/**',
       'packages/*/src/catalog.ts', // catalog:build 생성물
     ],
   },

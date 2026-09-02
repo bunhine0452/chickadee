@@ -1,0 +1,10 @@
+---
+source: crates/parse/tests/insta.rs
+expression: render(&case)
+---
+fixtures/golden/tsx/_traps/broken-jsx.tsx
+_traps · quality=poor · lines=14
+
+m1 p0 @site            form=call            call_expression        12:2-12:21 inError=true
+m1 p0 @pick.1          form=call            identifier             12:2-12:8 inError=true
+m1 p0 @pick.2          form=call            arguments              12:14-12:21 inError=true

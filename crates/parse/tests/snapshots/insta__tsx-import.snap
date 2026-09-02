@@ -1,0 +1,10 @@
+---
+source: crates/parse/tests/insta.rs
+expression: render(&case)
+---
+fixtures/golden/tsx/_imports/pos-cart-total.tsx
+_imports · quality=ok · lines=9
+
+m1 p0 @import.source   form=static          string                 1:24-1:31 inError=false
+m2 p0 @import.source   form=static          string                 2:30-2:45 inError=false
+m3 p0 @import.source   form=static          string                 3:26-3:36 inError=false
