@@ -1,6 +1,6 @@
-# rustfmt — stable 채널에서 동작하는 옵션만 쓴다.
-# nightly 전용(imports_granularity, group_imports, wrap_comments …)을 넣으면
-# CI 의 `cargo fmt --check` 가 조용히 무시하거나 경고를 뿜는다.
+# rustfmt — only options that work on the stable channel.
+# putting in nightly-only ones (imports_granularity, group_imports, wrap_comments …) makes
+# CI's `cargo fmt --check` either silently ignore them or spew warnings.
 edition = "2021"
 max_width = 100
 newline_style = "Unix"

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# 얇은 Rust 를 CI 로 잠근다 — 01 §1.1 의 장치 4개를 한 번에 본다.
-#   1. 줄 예산   crates/*/src/** + apps/desktop/src-tauri/src/** 코드 줄 <= 1500
-#   2. 금칙어    도메인 어휘가 Rust 식별자·문자열에 나타나지 않는다
-#   3. SQL 금지  Rust 소스에 SQL 리터럴이 없다 (SQL 은 TS 카탈로그에서 이름으로 실행)
-#   4. git 바이너리 금지  Command::new("git")
-# tests·benches 는 예산·금칙어 밖이다 (D40).
+# locks thin Rust in with CI — checks all 4 devices of 01 §1.1 in one pass.
+#   1. line budget      crates/*/src/** + apps/desktop/src-tauri/src/** code lines <= 1500
+#   2. forbidden words  no domain vocabulary in Rust identifiers or strings
+#   3. no SQL           no SQL literal in Rust source (SQL runs by name from the TS catalog)
+#   4. no git binary    Command::new("git")
+# tests and benches are outside the budget and the forbidden words (D40).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -14,7 +14,7 @@ fail=0
 
 files() { find "${SRC_GLOBS[@]}" -name '*.rs' -type f 2>/dev/null | sort; }
 
-# ── 1. 줄 예산 ── 주석·빈 줄 제외. tokei 가 있으면 쓰고, 없으면 같은 규칙을 awk 로.
+# ── 1. line budget ── comments and blank lines excluded. use tokei if present, else the same rule in awk.
 count_lines() {
   if command -v tokei >/dev/null 2>&1; then
     tokei --output json "${SRC_GLOBS[@]}" 2>/dev/null \
@@ -30,31 +30,42 @@ count_lines() {
 }
 LINES=$(count_lines)
 if [ "$LINES" -gt "$BUDGET" ]; then
-  echo "FAIL 줄 예산: Rust 코드 ${LINES}줄 > ${BUDGET}줄 (01 §1.1)"; fail=1
+  echo "FAIL line budget: ${LINES} lines of Rust code > ${BUDGET} (01 §1.1)"; fail=1
 else
-  echo "ok   줄 예산: ${LINES}/${BUDGET}줄"
+  echo "ok   line budget: ${LINES}/${BUDGET} lines"
 fi
 
-# ── 2. 금칙어 ── Rust 는 도메인 어휘를 모른다. 파일·바이트·커밋·diff·AST 노드·캡처·행만 안다.
+# ── 2. forbidden words ── Rust knows no domain vocabulary. only files · bytes · commits · diffs · AST nodes · captures · lines.
 FORBIDDEN='concept|card|mastery|ink|fsrs|queue|session|grade|review'
-if hits=$(files | xargs -r grep -nEi "\b(${FORBIDDEN})" 2>/dev/null) && [ -n "$hits" ]; then
-  echo "FAIL 금칙어: 도메인 어휘가 Rust 에 있다 (01 §1.1)"; echo "$hits"; fail=1
+# `\b` alone is not enough: `_` is a word character, so `\bcard` misses `_card` and
+# `card_probe` slips past a naive anchor. Two patterns instead, matching how the word can
+# appear as an *identifier component*:
+#   A. snake_case / standalone / quoted — bounded by anything that is not alphanumeric.
+#      This still spares `discard`, `wildcard`, `link`, `upgrade`, `enqueue`: those have an
+#      alphanumeric character immediately before the word.
+#   B. camelCase — a lowercase or digit followed by the capitalised word (`myCard`, `okInk`).
+FORBIDDEN_SNAKE="(^|[^A-Za-z0-9])(${FORBIDDEN})([^A-Za-z0-9]|$)"
+FORBIDDEN_CAMEL='[a-z0-9](Concept|Card|Mastery|Ink|Fsrs|Queue|Session|Grade|Review)'
+hits=$( { files | xargs -r grep -nEi "${FORBIDDEN_SNAKE}" 2>/dev/null || true
+           files | xargs -r grep -nE  "${FORBIDDEN_CAMEL}" 2>/dev/null || true; } | sort -u || true)
+if [ -n "$hits" ]; then
+  echo "FAIL forbidden words: domain vocabulary present in Rust (01 §1.1)"; echo "$hits"; fail=1
 else
-  echo "ok   금칙어 없음"
+  echo "ok   no forbidden words"
 fi
 
-# ── 3. SQL 리터럴 금지 ── SQL 은 packages/store-sql 카탈로그가 소유한다.
+# ── 3. no SQL literals ── SQL is owned by the packages/store-sql catalog.
 if hits=$(files | xargs -r grep -nE '\b(SELECT|INSERT[[:space:]]+INTO|UPDATE|DELETE[[:space:]]+FROM|CREATE[[:space:]]+TABLE)\b' 2>/dev/null) && [ -n "$hits" ]; then
-  echo "FAIL SQL 리터럴: Rust 소스에 SQL 이 있다 (01 §1.1)"; echo "$hits"; fail=1
+  echo "FAIL SQL literal: SQL present in Rust source (01 §1.1)"; echo "$hits"; fail=1
 else
-  echo "ok   SQL 리터럴 없음"
+  echo "ok   no SQL literals"
 fi
 
-# ── 4. git 바이너리 금지 ── libgit2 는 훅을 실행하지 않는다 (06 §4.1).
+# ── 4. no git binary ── libgit2 does not run hooks (06 §4.1).
 if hits=$(files | xargs -r grep -nE 'Command::new\("git"' 2>/dev/null) && [ -n "$hits" ]; then
-  echo "FAIL git 바이너리 호출 (06 §4.1)"; echo "$hits"; fail=1
+  echo "FAIL git binary call (06 §4.1)"; echo "$hits"; fail=1
 else
-  echo "ok   git 바이너리 호출 없음"
+  echo "ok   no git binary calls"
 fi
 
 exit "$fail"

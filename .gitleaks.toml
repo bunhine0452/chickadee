@@ -1,16 +1,17 @@
-# gitleaks — 06 §4.4 「PR 스캔」
+# gitleaks — 06 §4.4 "PR scan"
 #
 #   gitleaks detect --no-git --redact
 #
-# 기본 룰셋을 그대로 쓰고(useDefault) 「사람이 쓴 적 없는 파일」만 뺀다.
-# 빼는 기준: 생성물·바이너리·락파일. **실제 소스와 설정은 절대 빼지 않는다.**
+# use the default ruleset as-is (useDefault) and exclude only "files no human ever wrote".
+# the exclusion criteria: generated output · binaries · lockfiles.
+# **real source and configuration are never excluded.**
 title = "Chickadee gitleaks"
 
 [extend]
 useDefault = true
 
 [[allowlists]]
-description = "빌드 산출물·의존성 캐시 — 사람이 쓰지 않는 파일이고, 여기서 나온 고엔트로피 문자열은 전부 오탐이다."
+description = "build output · dependency caches — files no human writes, and every high-entropy string from here is a false positive."
 paths = [
   '''(^|/)node_modules/''',
   '''(^|/)target/''',
@@ -20,7 +21,7 @@ paths = [
 ]
 
 [[allowlists]]
-description = "락파일 — 무결성 해시가 generic-api-key 로 잡힌다. 비밀은 락파일에 들어갈 수 없다."
+description = "lockfiles — integrity hashes get flagged as generic-api-key. a secret cannot end up in a lockfile."
 paths = [
   '''(^|/)pnpm-lock\.yaml$''',
   '''(^|/)Cargo\.lock$''',
@@ -28,7 +29,7 @@ paths = [
 ]
 
 [[allowlists]]
-description = "바이너리 자산 — 폰트·아이콘·스크린샷."
+description = "binary assets — fonts · icons · screenshots."
 paths = [
   '''\.(png|jpg|jpeg|gif|webp|ico|icns|woff2?|ttf|otf|pdf|zip|gz|db)$''',
 ]
