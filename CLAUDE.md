@@ -19,6 +19,30 @@
 
 커밋 형식은 `<type>: <description>` (feat/fix/refactor/docs/test/chore/perf/ci).
 
+## 사람이 읽는 글 — AI 말투 금지
+
+README · 커밋 메시지 · PR · 이슈 답글 · 릴리스 노트 · 문서 산문에 적용된다.
+「AI 가 썼구나」는 대개 **내용이 없는데 있는 척하는 문장**에서 들킨다. 아래를 하지 않는다.
+
+**낱말** — `seamless` `robust` `powerful` `elegant` `comprehensive` `cutting-edge`
+`delve` `leverage`(동사) `unlock` `empower` `craft`(동사) `journey` `landscape`
+`game-changing` `revolutionize` `harness` `boasts` `plethora` `myriad` `realm`
+`testament to` `at its core` `in today's fast-paced world`. 한국어도 같다 —
+`혁신적인` `강력한` `~를 통해 ~할 수 있습니다` 남발.
+
+**문형**
+- `It's not just X — it's Y` / `~일 뿐만 아니라 ~입니다`
+- 근거 없는 최상급(`the best`, `blazingly fast`, `업계 최고의`)
+- 셋씩 나열하는 습관(`fast, simple, and powerful`)
+- 제목을 첫 문장에서 되풀이하기
+- 절마다 요약 문장으로 닫기
+- 이모지 제목(`## 🚀 Getting Started`), 불릿마다 이모지
+- 안 물어본 것에 대한 방어적 부연, 문장마다 붙는 헤지(`arguably`, `essentially`)
+
+**대신** — 구체적인 명사와 숫자, 짧은 평서문. 주장에는 근거나 수치를 붙이고, 못 붙이면
+그 주장을 지운다. 트레이드오프는 숨기지 않는다. 모르면 모른다고 쓴다.
+쓰고 나서 **「이 문장을 지우면 독자가 잃는 정보가 있나?」** 를 묻는다 — 없으면 지운다.
+
 ## 그 다음
 
 - **정본 > 설계 문서 > 내 판단.** 정본은 `.oculpm/discussion/vibe-code-study-app/discussion.md`

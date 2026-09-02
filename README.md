@@ -10,8 +10,6 @@ A desktop study app for people who shipped an app with AI but cannot read what t
 
 </div>
 
----
-
 ## What it is
 
 You vibe-coded an app. It works. You cannot explain a single line of it.
