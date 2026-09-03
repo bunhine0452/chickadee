@@ -64,19 +64,19 @@ owner: claude-code
 - [x] 02 · 겹 리듀서 — beginDay·applyOutcome·shownLayer, 검산 6건 테스트 · 1일 (선행: FSRS 어댑터) {#m2-02-layer-reducer}
 - [x] 02 · 새 개념 순위 — 위상 정렬·후보 SQL·bestSite·level 규칙·초보 감지 플래그 · 1.5일 (선행: M1 미지 개념 계산) {#m2-02-new-concept-rank}
 - [x] 02 · 큐 플래너 — 예산 15분 맞추기, 순서, 빈 상태, 하루 여러 세션 · 2일 (선행: 새 개념 순위·FSRS 어댑터) {#m2-02-queue-planner}
-- [~] 02 · 세션 중 삽입·복구 — insertRetry·insertPrereq·shiftPos·Esc 저장·다음 날 폐기 · 1.5일 (선행: 큐 플래너) {#m2-02-session-insert}
-- [~] 01 · 세션 저장/복원 — session.save batch 시점 5종, 기동 시 이어 찍기, 강제 종료 후 복구 E2E · 1.5일 (선행: store-sql·ipc-client·세션 중 삽입) {#m2-01-session-persist}
+- [x] 02 · 세션 중 삽입·복구 — insertRetry·insertPrereq·shiftPos·Esc 저장·다음 날 폐기 · 1.5일 (선행: 큐 플래너) {#m2-02-session-insert}
+- [x] 01 · 세션 저장/복원 — session.save batch 시점 5종, 기동 시 이어 찍기, 강제 종료 후 복구 E2E · 1.5일 (선행: store-sql·ipc-client·세션 중 삽입) {#m2-01-session-persist}
 - [x] 04 · T0 생성기 3종 — point/blank/meaning + 폴백 사슬 + no-plate 사유, 목업 4카드 재현 · 3일 (선행: 03 사전·Site) {#m2-04-t0-generators}
 - [x] 04 · T0 채점·진단·이벤트 — 판정, 진단 선택 표, t0.answered, 재출제 규칙 · 1일 (선행: T0 생성기) {#m2-04-t0-grading}
 - [x] 02 · 판 완료 트랜잭션 — review_log→mastery→session_item→lifer→dunno_event, 트랙별 detail_json · 1.5일 (선행: 겹 리듀서·T0 이벤트) {#m2-02-complete-tx}
 - [x] 02 · rebuild_mastery() — 원장 재생 = 캐시 검증, 시작 시 표본 검증 · 1일 (선행: 판 완료 트랜잭션) {#m2-02-rebuild-mastery}
 - [x] 04 · 사다리 데이터 조립기 — 4단 데이터, prereq 상태 판정, 프롬프트 규약(±4줄·경로 제외·파일명만) · 2일 (선행: T0 채점·02 겹 조회) {#m2-04-ladder-assembler}
 - [x] 02 · 홈·요약·사다리 쿼리 — §7 SQL 을 이름 붙여 노출, fade 적용, 노드 상태 계산 · 1.5일 (선행: db/sql 계층) {#m2-02-home-summary-queries}
-- [ ] 02 · 이의·LIFER 처리 — M2 는 LIFER, appeal 기록·내보내기는 M3 에서 연결 · 1일 (선행: 판 완료 트랜잭션) {#m2-02-appeal-lifer}
-- [ ] 05 · 세션 셸 — SessionOverlay(포커스 트랩·inert·Esc 4단계)·JobBand·useSessionClock·session.save/resume·키맵(e.code) · 3일 (선행: 프리미티브·02 세션 테이블) {#m2-05-session-shell}
-- [ ] 05 · T0 판 — ProofSheet·CodePlate(hl·PickToken·Hole)·Choices·FeedbackSlot·Acts·Crumb · 2일 (선행: 세션 셸·04 T0 규칙) {#m2-05-t0-plate}
-- [ ] 05 · 다시 찍기 사다리·아래층·LIFER — ReprintLadder 4단·점프/복귀/LinkPara·B·LiferVeil·클립보드 · 3일 (선행: T0 판) {#m2-05-ladder-lifer}
-- [ ] 05 · 인쇄 완료 요약 — Summary 전부, 「오늘 판 다시 보기」는 읽기 전용 · 1일 (선행: T0 판) {#m2-05-summary}
+- [x] 02 · 이의·LIFER 처리 — M2 는 LIFER, appeal 기록·내보내기는 M3 에서 연결 · 1일 (선행: 판 완료 트랜잭션) {#m2-02-appeal-lifer}
+- [x] 05 · 세션 셸 — SessionOverlay(포커스 트랩·inert·Esc 4단계)·JobBand·useSessionClock·session.save/resume·키맵(e.code) · 3일 (선행: 프리미티브·02 세션 테이블) {#m2-05-session-shell}
+- [x] 05 · T0 판 — ProofSheet·CodePlate(hl·PickToken·Hole)·Choices·FeedbackSlot·Acts·Crumb · 2일 (선행: 세션 셸·04 T0 규칙) {#m2-05-t0-plate}
+- [x] 05 · 다시 찍기 사다리·아래층·LIFER — ReprintLadder 4단·점프/복귀/LinkPara·B·LiferVeil·클립보드 · 3일 (선행: T0 판) {#m2-05-ladder-lifer}
+- [x] 05 · 인쇄 완료 요약 — Summary 전부, 「오늘 판 다시 보기」는 읽기 전용 · 1일 (선행: T0 판) {#m2-05-summary}
 - [x] 06 · Q3 TS 채점기 골든·스케줄러 property — T0·스케줄러(T1·T2 골든은 M3·M4) · 2일 (선행: 04 T0·02 리듀서) {#m2-06-q3-grading-golden}
 - [ ] 06 · Q4 통합 파이프라인·IPC 덤프 — M1 덤프 + T0 재생, git diff --exit-code 게이트 · 2일 (선행: Q1~Q3) {#m2-06-q4-ipc-dump}
 - [ ] 06 · Q5 __audit 이식 — src/devtools/audit.ts + Playwright tests/gates 7게이트 + allowlist 만료 · 2일 (선행: 05 세션 화면) {#m2-06-q5-audit-port}
@@ -175,4 +175,11 @@ owner: claude-code
 | 2026-09-03T10:17:43+09:00 | #m2-02-session-insert | claude-code | ☐→~ | 20260903/Features_to_add/1017_feature_m2-scheduler-core-and-ledger.md | 데이터 층·테스트 끝. 화면 배선 남음 |
 | 2026-09-03T10:17:44+09:00 | #m2-01-session-persist | claude-code | ☐→~ | 20260903/Features_to_add/1017_feature_m2-scheduler-core-and-ledger.md | 저장 5시점·이어 찍기·강제 종료 복구 테스트 끝. 화면 배선 남음 |
 | 2026-09-03T10:22:52+09:00 | #m2-06-q3-grading-golden | claude-code | ☐→x |  | T0 골든 6건 + fast-check 속성 5개(1,000회, seed 20260902). property 가 D78 을 잡았다 |
+| 2026-09-03T10:40:51+09:00 | #m2-05-session-shell | claude-code | ☐→x | 20260903/Features_to_add/1040_feature_m2-session-screen-and-plates.md | SessionOverlay Esc 4단계·JobBand·useSessionClock·키맵(e.code) |
+| 2026-09-03T10:40:54+09:00 | #m2-05-t0-plate | claude-code | ☐→x | 20260903/Features_to_add/1040_feature_m2-session-screen-and-plates.md | ProofSheet·CodePlate·Choices·FeedbackSlot(판정란 0px)·Acts·Crumb |
+| 2026-09-03T10:40:56+09:00 | #m2-05-ladder-lifer | claude-code | ☐→x | 20260903/Features_to_add/1040_feature_m2-session-screen-and-plates.md | 4단·점프/복귀/LinkPara·B·LiferVeil·클립보드 |
+| 2026-09-03T10:40:57+09:00 | #m2-05-summary | claude-code | ☐→x | 20260903/Features_to_add/1040_feature_m2-session-screen-and-plates.md | 읽기 전용. 세션 중 못 본 LIFER 가 여기서 보인다 |
+| 2026-09-03T10:40:59+09:00 | #m2-02-session-insert | claude-code | ~→x | 20260903/Features_to_add/1040_feature_m2-session-screen-and-plates.md | 화면 배선까지 끝. Esc 저장이 마친 판을 되돌리던 버그 포함 |
+| 2026-09-03T10:41:02+09:00 | #m2-01-session-persist | claude-code | ~→x | 20260903/Features_to_add/1040_feature_m2-session-screen-and-plates.md | 저장 5시점·이어 찍기·강제 종료 복구. 화면 테스트가 Esc 흐름을 건다 |
+| 2026-09-03T10:41:04+09:00 | #m2-02-appeal-lifer | claude-code | ☐→x | 20260903/Features_to_add/1040_feature_m2-session-screen-and-plates.md | LIFER 행/연출 분리(D76). appeal 은 항목 제목대로 M3 |
 <!-- oculpm:plan-log end -->
