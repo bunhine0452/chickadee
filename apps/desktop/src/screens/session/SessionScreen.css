@@ -1,0 +1,6 @@
+/* 세션 화면의 껍데기. 시각은 전부 컴포넌트에 있고 여기는 자리만 잡는다.
+   `.proof` 가 `position: fixed` 라 이 상자는 흐름에서 빠진다 — 홈은 뒤에 그대로 남는다. */
+.session-screen {
+  position: relative;
+  z-index: 20;
+}

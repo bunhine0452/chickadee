@@ -1,0 +1,137 @@
+/* 목업: design/src/ink/session.css 「작업 띠」 블록.
+   바꾼 것 —
+     · 막대는 `shell/TimeQueue` 가 그린다. 목업의 `.jq` 선언은 `.jobband .queue` 로 옮겨
+       높이·간격만 되돌린다 (05 §5 가 `.jq` 와 `.queue` 를 같은 컴포넌트로 묶었다).
+     · 지금 칸 테두리의 진홍 원색은 --t1 로 (05 §4.2).
+     · 목업의 `[data-theme="dark"] .jq{box-shadow:… var(--glow-t1)}` 은 뺐다 —
+       다크 선택자는 tokens.css 와 6개 컴포넌트에만 허용되고 JobBand 는 그 목록에 없다
+       (05 §4.3). 야간 글로우가 필요하면 TimeQueue.css 로 가야 한다.
+     · 이름표 줄은 목업의 가로 `.jq-labels` 그대로다. TimeQueue 의 `labels` 는 홈의
+       세로 목록(`.qlist`)이라 작업 띠에는 맞지 않는다. */
+.jobband {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 22px;
+  margin: 14px 18px 0;
+  padding: 9px 16px 10px;
+  border: 2.5px solid var(--rule);
+  background: var(--paper);
+  box-shadow: 4px 5px 0 var(--edge), var(--lamp);
+}
+
+.jb-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding-right: 18px;
+  border-right: 2px dashed var(--rule);
+}
+
+.jb-brand .logo {
+  display: block;
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+}
+
+.jb-title {
+  color: var(--ink);
+  font-family: var(--f-poster);
+  font-size: var(--fs-poster-s);
+  letter-spacing: .01em;
+  line-height: .9;
+  white-space: nowrap;
+}
+
+.jb-sub {
+  margin-top: 4px;
+  color: var(--ink-soft);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.jb-queue { min-width: 0 }
+
+.jq-h {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 5px;
+  color: var(--ink-soft);
+  font-size: var(--fs-14);
+}
+
+.jq-h b {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.jq-h .time {
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* 시간 비례 큐 — 칸 너비 = 걸리는 시간 (정본 §3-5) */
+.jobband .queue {
+  gap: 3px;
+  height: 20px;
+  margin: 0;
+}
+
+.jobband .queue i { min-width: 9px }
+
+.jobband .queue i[data-state="now"] {
+  outline: 2px solid var(--t1);
+  outline-offset: 1px;
+}
+
+.jq-labels {
+  display: flex;
+  gap: 3px;
+  margin-top: 4px;
+}
+
+.jq-labels span {
+  flex: var(--w, 1) 1 0;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink-soft);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  letter-spacing: -.01em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.jq-labels span.now {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.jb-ctl {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+@media (width <= 1080px) {
+  .jobband { grid-template-columns: auto minmax(0, 1fr) }
+
+  .jb-ctl {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
+}
+
+@media (width <= 720px) {
+  .jb-title { font-size: var(--fs-24) }
+}

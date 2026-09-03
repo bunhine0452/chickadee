@@ -484,3 +484,64 @@ function toSession(row: {
     liferShown: row.lifer_shown,
   };
 }
+
+// ───────── 홈의 「오늘의 인쇄」 미리보기 ─────────
+
+export interface TodayPreviewData {
+  items: { kind: string; label: string; mins: number; sub: string; review: boolean }[];
+  mins: number;
+  resumeAt: number | null;
+}
+
+/**
+ * 홈이 그리는 미리보기. **세션도 카드도 만들지 않는다** — 「인쇄 시작」을 누르기 전에
+ * 카드를 구우면 열어 보지도 않은 판이 원장에 쌓인다.
+ *
+ * 그래서 여기 수치는 근사다: 만기 개념 수 × 복습 예상 + 새 판 남은 장수 × 새 판 예상.
+ * 실제 큐는 `openSession` 이 짜고, 그때 예산에 맞춰 잘린다.
+ */
+export async function previewToday(repoId: number, now: number): Promise<TodayPreviewData> {
+  const settings = await loadSettings();
+  const day = today(now, settings);
+  const eod = endOfDay(day, settings.tz, settings.rolloverHour);
+
+  const open = await loadOpen(repoId);
+  if (open.session !== null && open.session.dayKey === day) {
+    const plates = await loadPlates(open.session.id);
+    const pending = plates.filter((p) => p.status === 'pending' || p.status === 'active');
+    return {
+      items: plates.map(toPreviewItem),
+      mins: plates.reduce((a, p) => a + p.estMin, 0),
+      resumeAt: pending[0]?.pos ?? null,
+    };
+  }
+
+  const [dueRows, candidates, newCount] = await Promise.all([
+    ipc.store.query('queue.due', { repoId, eod, day, limit: LIMIT.reviews_per_session }),
+    ipc.store.query('queue.new_candidates', { repoId }),
+    ipc.store.query('queue.new_count_today', { repoId, day }),
+  ]);
+
+  const newLeft = Math.max(0, Math.min(
+    settings.newPerDay - (newCount[0]?.n ?? 0),
+    candidates.length,
+  ));
+  const items = [
+    ...dueRows.map((r) => ({
+      kind: r.track_default, label: r.concept_id, mins: estMinFor(r.track_default as Track, 'review'),
+      sub: '복습', review: true,
+    })),
+    ...Array.from({ length: newLeft }, () => ({
+      kind: 't0', label: '새 판', mins: estMinFor('t0', 'new'), sub: '새 판', review: false,
+    })),
+  ];
+  return { items, mins: items.reduce((a, i) => a + i.mins, 0), resumeAt: null };
+}
+
+const toPreviewItem = (p: Plate) => ({
+  kind: p.track,
+  label: p.nameKo,
+  mins: p.estMin,
+  sub: p.token ?? p.role,
+  review: p.role === 'review' || p.role === 'retry',
+});

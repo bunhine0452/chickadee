@@ -1,0 +1,56 @@
+/* 목업: design/src/ink/session.css `.link-para`.
+   바꾼 것 — `.tag-new` 의 황 원색·먹 리터럴을 --t2 / --on-t2 로 (05 §4.2).
+   `sheetin` 은 ProofSheet.css 가 정의한다 — 같은 키프레임을 두 번 적지 않는다. */
+.link-para {
+  position: relative;
+  padding: 14px 16px 14px 18px;
+  border: 2.5px solid var(--rule);
+  background: var(--stock);
+  box-shadow: 4px 4px 0 var(--edge);
+  animation: sheetin .4s var(--e-settle) both;
+}
+
+.link-para .tag-new {
+  position: absolute;
+  top: -12px;
+  left: 14px;
+  padding: 1px 8px;
+  border: 2px solid var(--rule);
+  background: var(--t2);
+  color: var(--on-t2);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  font-weight: 700;
+  letter-spacing: .1em;
+}
+
+.link-para h4 {
+  font-size: var(--fs-16);
+  font-weight: 700;
+  letter-spacing: -.02em;
+}
+
+.link-para p {
+  margin-top: 5px;
+  color: var(--ink-soft);
+  font-size: var(--fs-15);
+}
+
+.link-para p b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.link-para code {
+  padding: 0 4px;
+  border: 1px solid var(--rule);
+  background: var(--paper-3);
+  font-size: var(--fs-14);
+}
+
+/* 감축 모드 — 문단은 그대로 열리고 미끄러짐만 사라진다 (05 §6). */
+@media (prefers-reduced-motion: reduce) {
+  .link-para { animation-duration: .001ms }
+}
+
+[data-motion="reduce"] .link-para { animation-duration: .001ms }

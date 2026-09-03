@@ -50,7 +50,7 @@ export function TimeQueue({ items, pos, progress, labels }: TimeQueueProps) {
       <div className="queue" role="img" aria-label={describe(items, pos, share)}>
         {items.map((item, i) => (
           <i
-            key={`${item.kind}-${item.label}`}
+            key={`${item.kind}-${item.label}-${i}`}
             className={`${item.kind}${item.review ? ' review' : ''}`}
             style={{ '--w': item.mins } as React.CSSProperties}
             data-state={i < pos ? 'done' : i === pos ? 'now' : 'later'}
@@ -60,7 +60,7 @@ export function TimeQueue({ items, pos, progress, labels }: TimeQueueProps) {
       {labels ? (
         <ul className="qlist" aria-hidden="true">
           {items.map((item, i) => (
-            <li className="qi" key={`${item.kind}-${item.label}-row`} data-state={i < pos ? 'done' : i === pos ? 'now' : 'later'}>
+            <li className="qi" key={`${item.kind}-${item.label}-${i}-row`} data-state={i < pos ? 'done' : i === pos ? 'now' : 'later'}>
               <span className={`pill ${item.kind}`}>{item.kind}</span>
               <span className="nm">
                 {item.label}

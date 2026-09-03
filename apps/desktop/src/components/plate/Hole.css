@@ -1,0 +1,33 @@
+/* 목업: design/src/ink/session.css 「빈칸형」 블록.
+   바꾼 것 — 정답 면의 황 원색·먹 리터럴을 --t2 / --on-t2 로, 어긋남 취소선을 --t1 로 (05 §4.2).
+   값은 목업의 --yellow / #221D18 / --pink 와 같아 야간반 한 줄이 필요 없어졌다. */
+.code .hole {
+  display: inline-block;
+  min-width: 5.5em;
+  margin: 0 .1em;
+  padding: 0 .4em;
+  border: 2px dashed var(--ink-mute);
+  border-radius: 2px;
+  background: var(--paper-3);
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+.code .hole.filled {
+  border-color: var(--t0);
+  border-style: solid;
+  background: var(--stock);
+  color: var(--ink);
+}
+
+.code .hole.right {
+  border-color: var(--rule);
+  background: var(--t2);
+  color: var(--on-t2);
+}
+
+.code .hole.wrong {
+  border-color: var(--t1);
+  text-decoration: line-through;
+  text-decoration-color: var(--t1);
+}

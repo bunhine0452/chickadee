@@ -17,20 +17,17 @@ import {
   insertPrereq, insertRetry, loadMastery, loadPlates, openSession, recordDunno, recordLadder,
   removePlate, saveItem, saveSession, today, type Plate,
 } from './data/session.js';
-import { loadSettings } from './data/settings.js';
+import { loadScheduler, loadSettings } from './data/settings.js';
 import { report, todayKey } from './flow.js';
 import { useUi, type PlateResult } from './store.js';
 
 export { TICK_MS };
 
-/** 세션 하나가 쓰는 사전·겹 사본. 판을 넘길 때마다 다시 만들지 않는다. */
-interface Ctx {
-  deps: MakerDeps;
-  dict: Dict;
-  layers: Map<ConceptId, Layer>;
-}
-
-let ctx: Ctx | null = null;
+/**
+ * 세션 하나가 쓰는 카드 생성기 문맥. **판을 만들 때만** 필요하다 —
+ * 채점·사다리·저장은 이것이 없어도 돈다(그래야 화면 테스트가 큐를 손으로 넣고 돌 수 있다).
+ */
+let maker: MakerDeps | null = null;
 
 const t0Of = (payload: CardPayload): Extract<CardPayload, { track: 't0' }> | null =>
   payload.track === 't0' ? payload : null;
@@ -52,25 +49,21 @@ export async function startSession(repoId: number, rootPath: string): Promise<bo
       layerOf: (conceptId) => layers.get(conceptId) ?? 0,
       now,
     };
-    ctx = { deps, dict, layers };
+    maker = deps;
 
     const view = await openSession(repoId, now, cardMaker(deps));
     if (view === null) return false;
 
-    await refreshLayers(view.plates);
+    // 유형 선호(04 §1.4)가 겹을 보므로 큐에 걸린 개념의 겹을 미리 담아 둔다.
+    for (const [conceptId, m] of await loadMastery(view.plates.map((p) => p.conceptId))) {
+      layers.set(conceptId, m.layer);
+    }
     useUi.getState().beginSession(view.session, view.plates, view.pos);
     return true;
   } catch (e) {
     report(e, '인쇄 시작');
     return false;
   }
-}
-
-/** 큐에 걸린 개념의 겹을 한 번에 읽어 둔다 — 판을 넘길 때 IPC 가 0회여야 한다 (05 §10). */
-async function refreshLayers(plates: readonly Plate[]): Promise<void> {
-  if (ctx === null) return;
-  const mastery = await loadMastery(plates.map((p) => p.conceptId));
-  for (const [conceptId, m] of mastery) ctx.layers.set(conceptId, m.layer);
 }
 
 function dictVersionOf(dict: Dict): string {
@@ -98,7 +91,7 @@ export async function answerPlate(input: AnswerInput): Promise<PlateResult | nul
   const store = useUi.getState();
   const { session, pos, plates } = store;
   const plate = plates[pos];
-  if (session === null || plate === undefined || ctx === null) return null;
+  if (session === null || plate === undefined) return null;
 
   const payload = t0Of(plate.payload);
   if (payload === null) return null;
@@ -141,7 +134,7 @@ export async function answerPlate(input: AnswerInput): Promise<PlateResult | nul
       item: plate,
       state,
       mastery,
-      scheduler: await schedulerFor(settings.desiredRetention, now),
+      scheduler: await loadScheduler(now, settings.desiredRetention),
       now,
       day,
       ok: verdict.correct,
@@ -162,8 +155,6 @@ export async function answerPlate(input: AnswerInput): Promise<PlateResult | nul
       site: { filePath: payload.file, lineNo: payload.focus },
       liferShown: store.liferShown,
     });
-
-    ctx.layers.set(plate.conceptId, finished.move.after);
 
     // 오답·모르겠어요면 다시 찍기를 건다 (02 §4). 판당 한 번, 아래층에서는 넣지 않는다.
     if (!verdict.correct || input.dunno) {
@@ -210,21 +201,15 @@ function gainText(
   return `잉크 ${after}겹 그대로 · 다음 인쇄 ${next}`;
 }
 
-async function schedulerFor(retention: number, now: number) {
-  const { loadScheduler } = await import('./data/settings.js');
-  return loadScheduler(now, retention);
-}
-
 // ───────── 사다리 (02 §4 · 04 §2.4) ─────────
 
 /** 「모르겠어요」를 누른 순간. 판당 한 행이고 겹은 판을 마칠 때 움직인다. */
 export async function pressDunno(answered: boolean, wasCorrect: boolean | null): Promise<number> {
   const { plates, pos } = useUi.getState();
   const plate = plates[pos];
-  if (plate === undefined || ctx === null) return 0;
+  if (plate === undefined) return 0;
   try {
-    const layer = ctx.layers.get(plate.conceptId) ?? 0;
-    return await recordDunno(plate, Date.now(), answered, wasCorrect, layer);
+    return await recordDunno(plate, Date.now(), answered, wasCorrect, plate.layer);
   } catch (e) {
     report(e, '모르겠어요');
     return 0;
@@ -250,19 +235,17 @@ export async function jumpPrereq(
 ): Promise<boolean> {
   const { session, plates, pos } = useUi.getState();
   const plate = plates[pos];
-  if (session === null || plate === undefined || ctx === null) return false;
+  if (session === null || plate === undefined || maker === null) return false;
   if (!shouldInsertPrereq(plate.role)) return false;
 
   try {
-    const cardId = await makeCard(ctx.deps, conceptId, null, 1);
+    const cardId = await makeCard(maker, conceptId, null, 1);
     if (cardId === null) return false;
     await insertPrereq(session.id, plate.pos, plate.id,
       { id: cardId, conceptId, track: 't0' }, Date.now());
     await recordLadder(dunnoEventId, 2, 'jump', cardId, Date.now());
 
-    const next = await loadPlates(session.id);
-    await refreshLayers(next);
-    useUi.getState().setPlates(next);
+    useUi.getState().setPlates(await loadPlates(session.id));
     useUi.getState().goTo(plate.pos);
     return true;
   } catch (e) {
@@ -316,7 +299,11 @@ export async function savePlate(status: Plate['status'] = 'active'): Promise<voi
   const plate = plates[pos];
   if (session === null || plate === undefined) return;
   try {
-    await saveItem(plate.id, status, elapsed[pos] ?? plate.elapsedS, plate.state);
+    // 이미 마친 판을 `active` 로 되돌리지 않는다 — Esc 로 나가면 5초 tick 과 나가기 저장이
+    // 둘 다 이 함수를 부르는데, 그때 마지막 판이 다시 「안 푼 판」이 되면 이어 찍기가
+    // 같은 판을 또 건다.
+    const keep = plate.status === 'done' ? 'done' : status;
+    await saveItem(plate.id, keep, elapsed[pos] ?? plate.elapsedS, plate.state);
   } catch (e) {
     log.warn('판 저장을 건너뛴다', { code: e instanceof IpcError ? e.code : 'UNKNOWN' });
   }

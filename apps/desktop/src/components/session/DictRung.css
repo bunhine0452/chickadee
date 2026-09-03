@@ -1,0 +1,38 @@
+/* 목업: design/src/ink/session.css 「① 사전 3층」 블록 — 그대로.
+   목업이 인라인으로 붙였던 `style="margin-top:10px"` 만 `.dict-note` 로 뺐다. */
+.dict {
+  display: grid;
+  gap: 0;
+  border: 2px solid var(--rule);
+}
+
+.dict > div {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  align-items: start;
+  gap: 14px;
+  padding: 10px 14px;
+  border-top: 1px dashed var(--rule);
+}
+
+.dict > div:first-child { border-top: 0 }
+
+.dict b {
+  padding-top: 3px;
+  color: var(--ink-soft);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  letter-spacing: .1em;
+}
+
+.dict p {
+  color: var(--ink);
+  font-size: var(--fs-15);
+}
+
+.dict .code {
+  margin-top: 6px;
+  font-size: var(--fs-15);
+}
+
+.dict-note { margin-top: 10px }

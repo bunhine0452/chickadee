@@ -1,0 +1,26 @@
+/* 목업: design/src/ink/session.css `.proof` · `.bench`.
+   목업의 `html,body{height:100%}` · `body{overflow:hidden}` 두 줄은 전역이라 여기 없다 —
+   오버레이가 `position:fixed` 라 없어도 덮이지만, 뒤 문서가 스크롤되지 않게 하려면
+   앱 셸(styles/app.css)이 세션 중에 body 스크롤을 잠가야 한다. */
+.proof {
+  position: fixed;
+  z-index: 1;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+/* 작업대 — 교정지가 놓이는 자리 */
+.bench {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  padding: 40px 18px 48px;
+  overflow: auto;
+  scroll-behavior: smooth;
+}
+
+@media (width <= 720px) {
+  .bench { padding: 28px 10px 40px }
+}

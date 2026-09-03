@@ -1,0 +1,144 @@
+/* 목업: design/src/ink/session.css 「피드백 슬롯」 블록.
+   바꾼 것 — `.edge` 의 황 원색을 --t2 로, `.gain b` 의 진홍 글자를 --t1-text 로 (05 §4.2).
+
+   ┌ 정본 §3-3 의 게이트 ─────────────────────────────────────────────────────┐
+   │ `.slot` 이 min-height 로 118px 을 미리 잡고, 빈 안내(`.slot-idle`)와 판정  │
+   │ (`.fb`)이 같은 격자 칸에 겹쳐 놓인다. 그래서 답해도 위쪽 글이 0px 도       │
+   │ 밀리지 않는다. 이 세 줄(min-height · grid-area 두 개)을 지우면 게이트가    │
+   │ 무너진다 — FeedbackSlot.test.tsx 가 이 선언을 직접 읽어 지킨다.           │
+   └──────────────────────────────────────────────────────────────────────────┘ */
+.slot {
+  position: relative;
+  display: grid;
+  align-items: start;
+  min-height: 118px;
+}
+
+.slot-idle {
+  grid-area: 1 / 1;
+  max-width: none;
+  padding: 14px 16px;
+  border: 2px dashed var(--ink-mute);
+  color: var(--ink-soft);
+  font-size: var(--fs-14);
+  line-height: var(--lh-body);
+}
+
+.slot-idle[hidden] { display: none }
+
+.fb {
+  grid-area: 1 / 1;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
+  padding: 14px 16px 14px 18px;
+  border: 2.5px solid var(--rule);
+  background: var(--paper);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity .2s, transform .28s var(--e-settle);
+}
+
+.fb.on {
+  opacity: 1;
+  transform: none;
+}
+
+.fb.right { background: var(--stock) }
+
+.fb .stampbox {
+  display: grid;
+  place-items: center;
+  width: 118px;
+  padding-top: 4px;
+}
+
+.fb h4 {
+  font-size: var(--fs-16);
+  font-weight: 700;
+  letter-spacing: -.02em;
+  line-height: 1.4;
+}
+
+.fb h4 code {
+  padding: 0 4px;
+  border: 1px solid var(--rule);
+  background: var(--paper-3);
+  font-size: var(--fs-15);
+}
+
+.fb p {
+  margin-top: 5px;
+  color: var(--ink-soft);
+  font-size: var(--fs-15);
+  line-height: var(--lh-body);
+}
+
+.fb p b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.fb p code {
+  padding: 0 4px;
+  border: 1px solid var(--rule);
+  background: var(--paper-3);
+  font-size: var(--fs-14);
+}
+
+/* 가장 날카로운 자리 — 실제로 터지는 최소 코드 (정본 §3-2) */
+.fb .edge {
+  margin-top: 9px;
+  padding: 9px 12px;
+  border-left: 4px solid var(--t2);
+  background: var(--paper-3);
+  color: var(--ink);
+  font-size: var(--fs-15);
+}
+
+.fb .edge b { font-weight: 700 }
+
+.fb .edge code {
+  padding: 0 4px;
+  border: 1px solid var(--rule);
+  background: var(--stock);
+  font-size: var(--fs-14);
+}
+
+.fb .gain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  color: var(--ink-soft);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+}
+
+.fb .gain .dee-sticker {
+  width: 30px;
+  height: 30px;
+  border-width: 2px;
+  box-shadow: none;
+}
+
+.fb .gain .dee {
+  width: 100%;
+  height: 100%;
+}
+
+.fb .gain .arr {
+  color: var(--ink-soft);
+  font-size: var(--fs-14);
+}
+
+.fb .gain b { color: var(--t1-text) }
+
+/* 감축 모드 — 판정은 즉시 자리에 선다. 자리는 어차피 미리 잡혀 있어 움직일 것이 없다 (05 §6). */
+@media (prefers-reduced-motion: reduce) {
+  .fb { transition-duration: .001ms }
+}
+
+[data-motion="reduce"] .fb { transition-duration: .001ms }

@@ -60,24 +60,24 @@ owner: claude-code
 - [x] 03 · projectox 실리포 검증 — TS/TSX/SQL 인제스트, Site 수·구멍 지도가 목업과 같은 모양인지 · 1일 (선행: 구멍 지도) {#m1-03-projectox-check}
 
 ## M2 · T0 세션 수직 절단 — 큐 → T0 카드 → 채점 → 겹 → 요약, 사다리·LIFER (끝: 인쇄 시작부터 요약까지 실데이터 한 흐름, Esc 후 이어 찍기, 검산 6건·rebuild_mastery==mastery·IPC 0회·판정란 0px·13px·7:1) {#m2}
-- [ ] 02 · FSRS 어댑터 — ts-fsrs 래핑, 등급 매핑, scheduler_params 로드, 궤적 검산(1.2→3.8→11→30) · 1.5일 (선행: 시각 유틸) {#m2-02-fsrs-adapter}
-- [ ] 02 · 겹 리듀서 — beginDay·applyOutcome·shownLayer, 검산 6건 테스트 · 1일 (선행: FSRS 어댑터) {#m2-02-layer-reducer}
-- [ ] 02 · 새 개념 순위 — 위상 정렬·후보 SQL·bestSite·level 규칙·초보 감지 플래그 · 1.5일 (선행: M1 미지 개념 계산) {#m2-02-new-concept-rank}
-- [ ] 02 · 큐 플래너 — 예산 15분 맞추기, 순서, 빈 상태, 하루 여러 세션 · 2일 (선행: 새 개념 순위·FSRS 어댑터) {#m2-02-queue-planner}
-- [ ] 02 · 세션 중 삽입·복구 — insertRetry·insertPrereq·shiftPos·Esc 저장·다음 날 폐기 · 1.5일 (선행: 큐 플래너) {#m2-02-session-insert}
-- [ ] 01 · 세션 저장/복원 — session.save batch 시점 5종, 기동 시 이어 찍기, 강제 종료 후 복구 E2E · 1.5일 (선행: store-sql·ipc-client·세션 중 삽입) {#m2-01-session-persist}
+- [x] 02 · FSRS 어댑터 — ts-fsrs 래핑, 등급 매핑, scheduler_params 로드, 궤적 검산(1.2→3.8→11→30) · 1.5일 (선행: 시각 유틸) {#m2-02-fsrs-adapter}
+- [x] 02 · 겹 리듀서 — beginDay·applyOutcome·shownLayer, 검산 6건 테스트 · 1일 (선행: FSRS 어댑터) {#m2-02-layer-reducer}
+- [x] 02 · 새 개념 순위 — 위상 정렬·후보 SQL·bestSite·level 규칙·초보 감지 플래그 · 1.5일 (선행: M1 미지 개념 계산) {#m2-02-new-concept-rank}
+- [x] 02 · 큐 플래너 — 예산 15분 맞추기, 순서, 빈 상태, 하루 여러 세션 · 2일 (선행: 새 개념 순위·FSRS 어댑터) {#m2-02-queue-planner}
+- [~] 02 · 세션 중 삽입·복구 — insertRetry·insertPrereq·shiftPos·Esc 저장·다음 날 폐기 · 1.5일 (선행: 큐 플래너) {#m2-02-session-insert}
+- [~] 01 · 세션 저장/복원 — session.save batch 시점 5종, 기동 시 이어 찍기, 강제 종료 후 복구 E2E · 1.5일 (선행: store-sql·ipc-client·세션 중 삽입) {#m2-01-session-persist}
 - [x] 04 · T0 생성기 3종 — point/blank/meaning + 폴백 사슬 + no-plate 사유, 목업 4카드 재현 · 3일 (선행: 03 사전·Site) {#m2-04-t0-generators}
-- [ ] 04 · T0 채점·진단·이벤트 — 판정, 진단 선택 표, t0.answered, 재출제 규칙 · 1일 (선행: T0 생성기) {#m2-04-t0-grading}
-- [ ] 02 · 판 완료 트랜잭션 — review_log→mastery→session_item→lifer→dunno_event, 트랙별 detail_json · 1.5일 (선행: 겹 리듀서·T0 이벤트) {#m2-02-complete-tx}
-- [ ] 02 · rebuild_mastery() — 원장 재생 = 캐시 검증, 시작 시 표본 검증 · 1일 (선행: 판 완료 트랜잭션) {#m2-02-rebuild-mastery}
-- [ ] 04 · 사다리 데이터 조립기 — 4단 데이터, prereq 상태 판정, 프롬프트 규약(±4줄·경로 제외·파일명만) · 2일 (선행: T0 채점·02 겹 조회) {#m2-04-ladder-assembler}
-- [ ] 02 · 홈·요약·사다리 쿼리 — §7 SQL 을 이름 붙여 노출, fade 적용, 노드 상태 계산 · 1.5일 (선행: db/sql 계층) {#m2-02-home-summary-queries}
+- [x] 04 · T0 채점·진단·이벤트 — 판정, 진단 선택 표, t0.answered, 재출제 규칙 · 1일 (선행: T0 생성기) {#m2-04-t0-grading}
+- [x] 02 · 판 완료 트랜잭션 — review_log→mastery→session_item→lifer→dunno_event, 트랙별 detail_json · 1.5일 (선행: 겹 리듀서·T0 이벤트) {#m2-02-complete-tx}
+- [x] 02 · rebuild_mastery() — 원장 재생 = 캐시 검증, 시작 시 표본 검증 · 1일 (선행: 판 완료 트랜잭션) {#m2-02-rebuild-mastery}
+- [x] 04 · 사다리 데이터 조립기 — 4단 데이터, prereq 상태 판정, 프롬프트 규약(±4줄·경로 제외·파일명만) · 2일 (선행: T0 채점·02 겹 조회) {#m2-04-ladder-assembler}
+- [x] 02 · 홈·요약·사다리 쿼리 — §7 SQL 을 이름 붙여 노출, fade 적용, 노드 상태 계산 · 1.5일 (선행: db/sql 계층) {#m2-02-home-summary-queries}
 - [ ] 02 · 이의·LIFER 처리 — M2 는 LIFER, appeal 기록·내보내기는 M3 에서 연결 · 1일 (선행: 판 완료 트랜잭션) {#m2-02-appeal-lifer}
 - [ ] 05 · 세션 셸 — SessionOverlay(포커스 트랩·inert·Esc 4단계)·JobBand·useSessionClock·session.save/resume·키맵(e.code) · 3일 (선행: 프리미티브·02 세션 테이블) {#m2-05-session-shell}
 - [ ] 05 · T0 판 — ProofSheet·CodePlate(hl·PickToken·Hole)·Choices·FeedbackSlot·Acts·Crumb · 2일 (선행: 세션 셸·04 T0 규칙) {#m2-05-t0-plate}
 - [ ] 05 · 다시 찍기 사다리·아래층·LIFER — ReprintLadder 4단·점프/복귀/LinkPara·B·LiferVeil·클립보드 · 3일 (선행: T0 판) {#m2-05-ladder-lifer}
 - [ ] 05 · 인쇄 완료 요약 — Summary 전부, 「오늘 판 다시 보기」는 읽기 전용 · 1일 (선행: T0 판) {#m2-05-summary}
-- [ ] 06 · Q3 TS 채점기 골든·스케줄러 property — T0·스케줄러(T1·T2 골든은 M3·M4) · 2일 (선행: 04 T0·02 리듀서) {#m2-06-q3-grading-golden}
+- [x] 06 · Q3 TS 채점기 골든·스케줄러 property — T0·스케줄러(T1·T2 골든은 M3·M4) · 2일 (선행: 04 T0·02 리듀서) {#m2-06-q3-grading-golden}
 - [ ] 06 · Q4 통합 파이프라인·IPC 덤프 — M1 덤프 + T0 재생, git diff --exit-code 게이트 · 2일 (선행: Q1~Q3) {#m2-06-q4-ipc-dump}
 - [ ] 06 · Q5 __audit 이식 — src/devtools/audit.ts + Playwright tests/gates 7게이트 + allowlist 만료 · 2일 (선행: 05 세션 화면) {#m2-06-q5-audit-port}
 - [ ] 01 · 성능 벤치 — 3 픽스처, WKWebView 홈·세션 프레임 측정, CI 소프트 게이트 · 1.5일 (선행: 인제스트·세션 셸) {#m2-01-perf-bench}
@@ -162,4 +162,17 @@ owner: claude-code
 | 2026-09-03T05:18:42+09:00 | #m1-03-golden-fixtures | claude-code | x→x | 20260903/Features_to_add/0515_feature_m1-home-shell-and-flow.md | TS 20개념 × (양성3·음성2) + TSX 4 + SQL 4 + 함정 3종씩. UPDATE_GOLDEN 지원. 술어를 망가뜨려 그물이 도는 것을 확인 |
 | 2026-09-03T05:21:19+09:00 | #m1-03-perf-bench | claude-code | ☐→x | .oculpm/journal/20260903/Features_to_add/0521_feature_m1-perf-fixtures-and-ingest-bench.md | large-100k(800파일 101,772줄 1,000커밋)·poly(언어당 20)·criterion 벤치·scripts/bench.sh +30% 게이트. 실측 총 2.5~3.3s · 증분 0.34s · RSS 84~89MB — 03 §7 초과 없음. bench.yml 야간 잡은 m5-06-q15 몫. |
 | 2026-09-03T10:10:49+09:00 | #m2-04-t0-generators | claude-code | ☐→x | .oculpm/journal/20260903/Features_to_add/1010_feature_m2-t0-generators-and-template.md | point/blank/meaning + prefer 사슬 + noPlate 사유, 템플릿 렌더러(D74) 함께. 목업 4카드 재현 — 다른 자리는 테스트 이름에 |
+| 2026-09-03T10:17:21+09:00 | #m2-02-fsrs-adapter | claude-code | ☐→x | 20260903/Features_to_add/1017_feature_m2-scheduler-core-and-ledger.md | ts-fsrs 5.4.2, 학습 단계 빈 목록(D73). 궤적 1.18→3.45→9.42→25.24 |
+| 2026-09-03T10:17:23+09:00 | #m2-02-layer-reducer | claude-code | ☐→x | 20260903/Features_to_add/1017_feature_m2-scheduler-core-and-ledger.md | 02 §3.3 검산 6건 통과 |
+| 2026-09-03T10:17:24+09:00 | #m2-02-new-concept-rank | claude-code | ☐→x | 20260903/Features_to_add/1017_feature_m2-scheduler-core-and-ledger.md | 위상 깊이로 정렬(D75)·초보 감지·전이 포함 |
+| 2026-09-03T10:17:26+09:00 | #m2-02-queue-planner | claude-code | ☐→x | 20260903/Features_to_add/1017_feature_m2-scheduler-core-and-ledger.md | 예산·순서·빈 상태·하루 여러 세션 테스트 18건 |
+| 2026-09-03T10:17:29+09:00 | #m2-02-complete-tx | claude-code | ☐→x | 20260903/Features_to_add/1017_feature_m2-scheduler-core-and-ledger.md | 한 tx 5쓰기. 순서는 D77 로 재배치 |
+| 2026-09-03T10:17:30+09:00 | #m2-02-rebuild-mastery | claude-code | ☐→x | 20260903/Features_to_add/1017_feature_m2-scheduler-core-and-ledger.md | diffMastery 가 실데이터 원장에서 빈 배열 |
+| 2026-09-03T10:17:36+09:00 | #m2-04-t0-generators | claude-code | x→x | 20260903/Features_to_add/1010_feature_m2-t0-generators-and-template.md | point/blank/meaning + 폴백 사슬 + no-plate 사유. 목업 4카드 비교 |
+| 2026-09-03T10:17:37+09:00 | #m2-04-t0-grading | claude-code | ☐→x |  | gradeT0·t0.answered·재출제 규칙. 겹은 제안하지 않는다 |
+| 2026-09-03T10:17:39+09:00 | #m2-04-ladder-assembler | claude-code | ☐→x |  | 4단 조립 + 프롬프트 골든(경로 0·펜스 9줄) |
+| 2026-09-03T10:17:41+09:00 | #m2-02-home-summary-queries | claude-code | ☐→x | 20260903/Features_to_add/1017_feature_m2-scheduler-core-and-ledger.md | fade 적용·노드 잠금·요약 3쿼리 |
+| 2026-09-03T10:17:43+09:00 | #m2-02-session-insert | claude-code | ☐→~ | 20260903/Features_to_add/1017_feature_m2-scheduler-core-and-ledger.md | 데이터 층·테스트 끝. 화면 배선 남음 |
+| 2026-09-03T10:17:44+09:00 | #m2-01-session-persist | claude-code | ☐→~ | 20260903/Features_to_add/1017_feature_m2-scheduler-core-and-ledger.md | 저장 5시점·이어 찍기·강제 종료 복구 테스트 끝. 화면 배선 남음 |
+| 2026-09-03T10:22:52+09:00 | #m2-06-q3-grading-golden | claude-code | ☐→x |  | T0 골든 6건 + fast-check 속성 5개(1,000회, seed 20260902). property 가 D78 을 잡았다 |
 <!-- oculpm:plan-log end -->

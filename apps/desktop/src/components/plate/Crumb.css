@@ -1,0 +1,36 @@
+/* 목업: design/src/ink/session.css `.crumb`.
+   바꾼 것 — `.depth` 의 황 원색·먹 리터럴을 --t2 / --on-t2 로 (05 §4.2). 값이 목업의
+   --yellow / #221D18 과 같고, 야간반 값도 --on-t2 가 들고 있어 목업의
+   `[data-theme="dark"] .crumb .depth` 한 줄을 지웠다 — Crumb 은 다크 선택자 허용
+   6개 중 하나지만(05 §4.3) 쓸 이유가 없어졌다. */
+.crumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink-soft);
+  font-size: var(--fs-14);
+}
+
+.crumb b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.crumb .arr {
+  color: var(--t1-text);
+  font-weight: 700;
+}
+
+.crumb .depth {
+  padding: 1px 8px;
+  border: 2px solid var(--rule);
+  background: var(--t2);
+  color: var(--on-t2);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  font-weight: 700;
+  letter-spacing: .08em;
+}
+
+.crumb .sp { flex: 1 }

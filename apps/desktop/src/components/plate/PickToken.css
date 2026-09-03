@@ -1,0 +1,52 @@
+/* 목업: design/src/ink/session.css 「지목형」 블록.
+   바꾼 것 —
+     · 정답 면의 황 원색·먹 리터럴을 --t2 / --on-t2 로, 어긋남 밑줄을 --t1 로 (05 §4.2).
+       값은 목업의 --yellow / #221D18 / --pink 와 같고, 목업의 [data-theme="dark"] 한 줄은
+       --on-t2 가 야간반 값을 이미 들고 있어 지웠다 (05 §4.3).
+     · 선택자 순서를 특이도 오름차순으로 다시 깔았다 — stylelint no-descending-specificity.
+       규칙끼리 겹치는 자리가 없어 화면은 목업과 같다.
+
+   버튼이지만 종이 위에 얹힌 면은 없다 — 짚을 수 있다는 것은 점선 밑줄로만 말한다. */
+.tk {
+  all: unset;
+  box-sizing: border-box;
+}
+
+.tk:focus-visible {
+  outline: 3px solid var(--t0);
+  outline-offset: 2px;
+}
+
+.code.pickable .tk {
+  margin: 0 -1px;
+  padding: 0 1px;
+  border-bottom: 2px dashed var(--ink-mute);
+  cursor: pointer;
+  transition: background .12s;
+}
+
+.code:not(.pickable) .tk { cursor: default }
+
+.code.pickable .tk:hover {
+  border-bottom-color: var(--rule);
+  border-bottom-style: solid;
+  background: var(--paper-3);
+}
+
+.code.pickable .tk.sel {
+  border-bottom: 2px solid var(--t0);
+  background: var(--paper-3);
+  box-shadow: inset 0 -2px 0 var(--t0);
+}
+
+.code .tk.right {
+  border-bottom: 2px solid var(--rule);
+  background: var(--t2);
+  color: var(--on-t2);
+}
+
+.code .tk.wrong {
+  border-bottom: 2px solid var(--t1);
+  opacity: .85;
+  text-decoration: none;
+}

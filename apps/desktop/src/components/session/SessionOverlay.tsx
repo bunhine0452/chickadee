@@ -1,0 +1,135 @@
+import { useEffect, useRef } from 'react';
+import type { ReactNode } from 'react';
+
+import './SessionOverlay.css';
+
+/** 탭 순서에 드는 것들. 포커스 트랩이 이 목록의 처음과 끝을 잇는다. */
+const TABBABLE =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+/** Esc 가 먼저 빠져나와야 하는 입력 (05 §2.3 ①). */
+function isTyping(el: Element | null): el is HTMLElement {
+  if (!(el instanceof HTMLElement)) return false;
+  const tag = el.tagName;
+  // Monaco 는 안쪽에 textarea 를 두므로 태그 검사로 함께 걸린다.
+  return tag === 'TEXTAREA' || tag === 'INPUT' || el.isContentEditable;
+}
+
+export interface SessionOverlayProps {
+  /** 작업 띠 (`JobBand`). */
+  band: ReactNode;
+  /** 작업대에 놓이는 교정지. */
+  children: ReactNode;
+  /** LIFER 베일. 열려 있으면 Esc 는 이것부터 닫는다 (05 §2.3 ②). */
+  lifer?: ReactNode;
+  onCloseLifer?: (() => void) | undefined;
+  /** 사다리가 펼쳐져 있나 (05 §2.3 ③). */
+  ladderOpen?: boolean | undefined;
+  onCloseLadder?: (() => void) | undefined;
+  /**
+   * 세션 나가기 (05 §2.3 ④). **확인 모달은 없다** — 진행 저장은 이 콜백이 한다.
+   */
+  onExit: () => void;
+}
+
+/**
+ * `.proof` — 전체화면 교정쇄 (05 §5 · 정본 §3-4).
+ *
+ * **Esc 의 유일한 주인이다.** 캡처 단계에서 한 번에 한 겹만 벗긴다 (05 §2.3):
+ *   ① 입력 중이면 입력에서 빠져나오기 → ② LIFER 베일 닫기 →
+ *   ③ 포커스가 사다리 안이면 사다리 접고 「모르겠어요」로 → ④ 세션 나가기.
+ *
+ * 포커스는 이 안에 갇힌다(첫/마지막 탭 가능 요소 순환). 홈 트리에 `inert` 를 거는 것은
+ * 앱 셸의 몫이다 — 오버레이는 자기 밖의 DOM 을 모른다.
+ */
+export function SessionOverlay({
+  band,
+  children,
+  lifer,
+  onCloseLifer,
+  ladderOpen,
+  onCloseLadder,
+  onExit,
+}: SessionOverlayProps) {
+  const ref = useRef<HTMLDivElement | null>(null);
+
+  // 리스너는 한 번만 걸고 콜백은 ref 로 읽는다 — 다시 걸면 캡처 순서가 바뀐다.
+  const stateRef = useRef({ lifer, onCloseLifer, ladderOpen, onCloseLadder, onExit });
+  useEffect(() => {
+    stateRef.current = { lifer, onCloseLifer, ladderOpen, onCloseLadder, onExit };
+  }, [lifer, onCloseLifer, ladderOpen, onCloseLadder, onExit]);
+
+  useEffect(() => {
+    const onKey = (e: globalThis.KeyboardEvent) => {
+      // 물리 키로 판정하고 조합 중인 글쇠는 무시한다 (05 §7).
+      if (e.code !== 'Escape' || e.isComposing) return;
+      const s = stateRef.current;
+      const active = document.activeElement;
+
+      // ① 입력에서 빠져나오기.
+      if (isTyping(active)) {
+        e.preventDefault();
+        active.blur();
+        return;
+      }
+
+      // ② LIFER 베일 — 아무 키나 닫힘의 일부다.
+      if (s.lifer !== undefined && s.lifer !== null) {
+        e.preventDefault();
+        s.onCloseLifer?.();
+        return;
+      }
+
+      // ③ 사다리 — 포커스가 사다리 안일 때만 접고, 「모르겠어요」로 돌려보낸다.
+      if (s.ladderOpen === true && active instanceof HTMLElement && active.closest('.reprint') !== null) {
+        e.preventDefault();
+        s.onCloseLadder?.();
+        ref.current?.querySelector<HTMLButtonElement>('.dunno')?.focus();
+        return;
+      }
+
+      // ④ 세션 나가기. 확인 모달 없음 (정본 §3-4).
+      e.preventDefault();
+      s.onExit();
+    };
+
+    document.addEventListener('keydown', onKey, true);
+    return () => document.removeEventListener('keydown', onKey, true);
+  }, []);
+
+  // 포커스 트랩 — 첫/마지막 탭 가능 요소에서 순환한다 (05 §7).
+  useEffect(() => {
+    const el = ref.current;
+    if (el === null) return;
+    const onKey = (e: globalThis.KeyboardEvent) => {
+      if (e.code !== 'Tab' || e.isComposing) return;
+      const items = [...el.querySelectorAll<HTMLElement>(TABBABLE)];
+      if (items.length === 0) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (first === undefined || last === undefined) return;
+      const active = document.activeElement;
+      if (e.shiftKey && (active === first || !el.contains(active))) {
+        e.preventDefault();
+        last.focus();
+        return;
+      }
+      if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    el.addEventListener('keydown', onKey);
+    return () => el.removeEventListener('keydown', onKey);
+  }, []);
+
+  return (
+    <div ref={ref} className="proof" role="dialog" aria-modal="true" aria-label="교정쇄">
+      {band}
+      <main className="bench" aria-live="off">
+        {children}
+      </main>
+      {lifer}
+    </div>
+  );
+}

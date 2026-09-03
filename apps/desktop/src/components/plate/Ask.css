@@ -1,0 +1,24 @@
+/* 목업: design/src/ink/session.css `.ask` — 그대로. 본문은 조용하게. */
+.ask {
+  color: var(--ink);
+  font-size: var(--fs-18);
+  font-weight: 600;
+  letter-spacing: -.02em;
+  line-height: 1.55;
+}
+
+.ask code {
+  padding: 0 5px;
+  border: 1.5px solid var(--rule);
+  background: var(--paper-3);
+  font-size: var(--fs-16);
+  font-weight: 600;
+}
+
+.ask small {
+  display: block;
+  margin-top: 3px;
+  color: var(--ink-soft);
+  font-size: var(--fs-14);
+  font-weight: 400;
+}

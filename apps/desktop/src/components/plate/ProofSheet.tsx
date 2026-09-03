@@ -1,0 +1,111 @@
+import { useEffect, useRef } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
+import { cx, Dee, Misreg, Passes, Pill, Reg, RichText } from '@chickadee/ui';
+import type { InkLayer, Track } from '@chickadee/ui';
+
+import { LAYER_NAMES } from '../../screens/home/data';
+import { layerText } from '../home/labels';
+import './ProofSheet.css';
+
+/** 교정지 폭 3단. 목업 `.ps` / `.ps.wide` / `.ps.xwide`. */
+export type ProofSheetWidth = 'normal' | 'wide' | 'xwide';
+
+export interface ProofSheetProps {
+  /** 판 번호 — 「3판」. 판 어긋남으로 크게 찍힌다. */
+  no: string;
+  track: Track;
+  /** 개념 이름. */
+  concept: string;
+  /** 개념의 코드 토큰 — `?.` 처럼. */
+  code: string;
+  /** 「의미형 · 새 판」 같은 곁말. */
+  kind: string;
+  /** 출처 한 줄. 서식 글이다 — 「내 코드 <b>src/cart.ts:42</b>」. */
+  source: string;
+  /** [걸 때의 겹, 지금 겹]. 채점 전에는 둘이 같다. */
+  ly: readonly [InkLayer, InkLayer];
+  width?: ProofSheetWidth | undefined;
+  /** 판이 대지에 얹힌 각도(도). 부속 숨김이면 CSS 가 0 으로 돌린다. */
+  tilt?: number | undefined;
+  /** 마운트할 때 판으로 포커스를 옮긴다 (05 §7). 복귀 판은 `LinkPara` 에 양보하므로 끈다. */
+  focusOnMount?: boolean | undefined;
+  children?: ReactNode;
+}
+
+/** 「+1겹」 / 「−1겹」 / 없음. 겹이 움직인 것을 이득으로 표시한다 (정본 §3-1). */
+function plusLabel(from: InkLayer, to: InkLayer): string {
+  if (to > from) return `+${to - from}겹`;
+  if (to < from) return `−${from - to}겹`;
+  return '';
+}
+
+/**
+ * `.ps` — 교정지 한 장 (05 §5).
+ *
+ * 마운트하면 판 자체로 포커스가 온다(`tabIndex=-1`, 스크롤 0). 채점 뒤에는 포커스를
+ * 옮기지 않는다 — 판정은 `FeedbackSlot` 의 `aria-live` 가 읽는다 (05 §7).
+ */
+export function ProofSheet({
+  no,
+  track,
+  concept,
+  code,
+  kind,
+  source,
+  ly,
+  width,
+  tilt,
+  focusOnMount,
+  children,
+}: ProofSheetProps) {
+  const ref = useRef<HTMLElement | null>(null);
+  const [from, to] = ly;
+  const plus = plusLabel(from, to);
+
+  useEffect(() => {
+    if (focusOnMount === false) return;
+    ref.current?.focus();
+  }, [focusOnMount]);
+
+  const style: CSSProperties | undefined =
+    tilt === undefined ? undefined : ({ '--tilt': `${tilt}deg` } as CSSProperties);
+
+  return (
+    <article
+      ref={ref}
+      className={cx('ps', width === 'wide' && 'wide', width === 'xwide' && 'xwide')}
+      style={style}
+      tabIndex={-1}
+      aria-label={`${no} · ${concept} ${code}`}
+    >
+      <Reg />
+
+      <div className="ps-rail" aria-hidden="true">
+        <Dee ly={to} sticker />
+        <span className={cx('plus', plus !== '' && 'on')}>{plus}</span>
+        <span className="vt">{`${no} · ${to}겹 · ${LAYER_NAMES[to].k}`}</span>
+      </div>
+
+      <div className="ps-in">
+        <div className="ps-head">
+          <Misreg className="sig" text={no} />
+          <div>
+            <h2 className="ps-h2">
+              <Pill track={track}>{track.toUpperCase()}</Pill>
+              {concept} <code>{code}</code>
+              <span className="pl">{kind}</span>
+            </h2>
+            <div className="ps-src">
+              <RichText html={source} />
+            </div>
+          </div>
+          <div className="ps-ly">
+            <Passes n={to} track={track} label={`${track.toUpperCase()} · 잉크 ${to}겹`} />
+            <span className="lyn">{layerText(to)}</span>
+          </div>
+        </div>
+        {children}
+      </div>
+    </article>
+  );
+}

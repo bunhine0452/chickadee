@@ -9,6 +9,7 @@ import { InkScale } from '../../components/home/InkScale';
 import { Masthead } from '../../components/home/Masthead';
 import { Panel } from '../../components/home/Panel';
 import { Sheet } from '../../components/home/Sheet';
+import { TodayPanel, type TodayPreview } from '../../components/home/TodayPanel';
 import { layerLabel } from '../../components/home/labels';
 import type { HomeData, HomeSheet } from './data';
 import './HomeScreen.css';
@@ -20,6 +21,10 @@ export interface HomeScreenProps {
   /** `YYYY-MM-DD`. */
   today: string;
   streak: number;
+  /** 오늘의 인쇄 미리보기. 없으면 패널을 내지 않는다(첫 실행 직후). */
+  today_?: TodayPreview | undefined;
+  /** 「인쇄 시작」 / 「이어 찍기」. */
+  onStart?: (() => void) | undefined;
   /** 「판 만들기」. */
   onMake: (conceptId: string) => void;
   /** 노드 상세의 「이 판 찍기」. */
@@ -44,7 +49,9 @@ function guideMsg(sheets: readonly HomeSheet[]): string | null {
  * **순수 컴포넌트다.** `HomeData` 를 통째로 받아 그리기만 한다 — 데이터를 스스로 불러오지
  * 않으므로 테스트가 픽스처 하나로 끝난다.
  */
-export function HomeScreen({ data, repoName, today, streak, onMake, onPick, now }: HomeScreenProps) {
+export function HomeScreen({
+  data, repoName, today, streak, today_, onStart, onMake, onPick, now,
+}: HomeScreenProps) {
   const guide = guideMsg(data.sheets);
   const currentUnitId = data.sheets.find((s) => s.state === 'current')?.unitId ?? null;
   const printed = data.masthead.printed;
@@ -73,6 +80,10 @@ export function HomeScreen({ data, repoName, today, streak, onMake, onPick, now 
       >
         <div className="cols">
           <aside>
+            {today_ === undefined || onStart === undefined ? null : (
+              <TodayPanel today={today_} onStart={onStart} date={today} />
+            )}
+
             <Panel title="잉크 겹" plain="= 얼마나 익혔나" tag="4겹 = 완성">
               <InkScale counts={data.inkScale} />
               <p className="note">

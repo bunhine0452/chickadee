@@ -1,0 +1,146 @@
+/* 목업: design/src/ink/session.css 「LIFER」 블록.
+   바꾼 것 —
+     · 베일 색을 `::before` 한 겹으로 옮겼다. 목업은 rgba 리터럴 두 개(주간 #D9CDB4 .55 ·
+       야간 #0B0908 .62)를 [data-theme="dark"] 로 갈랐는데, 그 두 값은 그냥 --desk 의
+       주간/야간 값이다. 다크 선택자는 tokens.css 와 6개 컴포넌트에만 허용되므로
+       (05 §4.3) `background: var(--desk)` 에 `opacity` 를 얹어 한 줄로 만들었다.
+       불투명도는 .55 하나로 통일했다 — 야간반의 --desk 는 거의 검정이라 .62 와
+       눈으로 구분되지 않는다. 카드는 `position:relative` 로 그 겹 위에 있다.
+     · 진홍 원색을 --t1 / --t1-text 로 (05 §4.2).
+
+   배경은 흐려지되 지워지지 않는다 — 검은 오버레이를 씌우면 맥락이 사라진다 (정본 §3-6). */
+.lifer-veil {
+  position: fixed;
+  z-index: 80;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  animation: veil .2s both;
+}
+
+.lifer-veil::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--desk);
+  opacity: .55;
+}
+
+@keyframes veil {
+  from { opacity: 0 }
+  to { opacity: 1 }
+}
+
+.lifer-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  width: min(92vw, 560px);
+  padding: 22px 26px 20px;
+  border: 2.5px solid var(--rule);
+  background: var(--paper-2);
+  box-shadow: 8px 9px 0 var(--edge), 0 30px 40px -24px var(--drop), var(--lamp);
+  animation: sheetin .42s var(--e-settle) both;
+}
+
+.lifer-card .dee-sticker {
+  width: 84px;
+  height: 84px;
+}
+
+.lifer-card .dee {
+  width: 100%;
+  height: 100%;
+}
+
+.lifer-k {
+  color: var(--t1-text);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.lifer-card h3 {
+  margin-top: 3px;
+  font-size: var(--fs-24);
+  font-weight: 700;
+  letter-spacing: -.03em;
+  line-height: 1.2;
+}
+
+.lifer-card h3 code {
+  padding: 0 6px;
+  border: 1.5px solid var(--rule);
+  background: var(--paper-3);
+  font-size: var(--fs-20);
+}
+
+.lifer-card p {
+  margin-top: 4px;
+  color: var(--ink-soft);
+  font-size: var(--fs-15);
+}
+
+.lifer-card p b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* 일련번호가 찍히는 소리 — 영구 기록이라는 것을 눈으로 말한다 */
+.lifer-serial {
+  width: 0;
+  margin-top: 8px;
+  overflow: hidden;
+  border-right: 2px solid var(--t1);
+  color: var(--ink-soft);
+  font-family: var(--f-mono);
+  font-size: var(--fs-14);
+  letter-spacing: .04em;
+  white-space: nowrap;
+  animation: typeout .56s steps(22) .7s forwards;
+}
+
+@keyframes typeout {
+  to { width: 100% }
+}
+
+.lifer-card .stamp {
+  align-self: start;
+  animation-delay: .42s;
+}
+
+.lifer-any {
+  grid-column: 1 / -1;
+  color: var(--ink-soft);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  letter-spacing: .06em;
+  text-align: right;
+}
+
+/* 감축 모드 — 최종 포즈는 남긴다 (05 §6). 일련번호와 도장은 지연도 함께 지운다:
+   `typeout` 은 지연 동안 폭이 0 이고 도장은 `both` 라 0% 포즈(투명)에 머문다.
+   지연만 남기면 감축 모드에서 둘 다 잠깐 사라진 것처럼 보인다. */
+@media (prefers-reduced-motion: reduce) {
+  .lifer-veil,
+  .lifer-card { animation-duration: .001ms }
+
+  .lifer-serial,
+  .lifer-card .stamp {
+    animation-duration: .001ms;
+    animation-delay: 0s;
+  }
+}
+
+[data-motion="reduce"] .lifer-veil,
+[data-motion="reduce"] .lifer-card { animation-duration: .001ms }
+
+[data-motion="reduce"] .lifer-serial,
+[data-motion="reduce"] .lifer-card .stamp {
+  animation-duration: .001ms;
+  animation-delay: 0s;
+}

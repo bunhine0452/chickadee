@@ -1,0 +1,54 @@
+/* 목업: design/src/ink/session.css 「② 선행 개념 진단」 블록.
+   바꾼 것 — 비어 있는 층의 진홍 글자를 --t1-text 로 (05 §4.2).
+   목업이 인라인으로 붙였던 `style="margin-top:10px"` 두 곳은 클래스로 뺐다. */
+.prereq {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.pq {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 2px solid var(--rule);
+  background: var(--paper-2);
+}
+
+.pq .dee-sticker {
+  width: 34px;
+  height: 34px;
+  border-width: 2px;
+  box-shadow: none;
+}
+
+.pq .dee {
+  width: 100%;
+  height: 100%;
+}
+
+.pq .nm {
+  font-size: var(--fs-15);
+  font-weight: 600;
+  letter-spacing: -.02em;
+}
+
+.pq .nm small {
+  display: block;
+  margin-top: 1px;
+  color: var(--ink-soft);
+  font-size: var(--fs-13);
+  font-weight: 400;
+}
+
+.pq.gap { border-style: dashed }
+
+.pq.gap .nm small {
+  color: var(--t1-text);
+  font-weight: 600;
+}
+
+.prereq-note { margin-top: 10px }

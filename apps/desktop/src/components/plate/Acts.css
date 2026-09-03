@@ -1,0 +1,22 @@
+/* 목업: design/src/ink/session.css `.acts` — 그대로.
+   `.dunno` 는 packages/ui 의 FlatButton 이 이미 들고 있다 (05 §5). */
+.acts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 2px dashed var(--rule);
+}
+
+.acts .sp { flex: 1 }
+
+.acts .hint {
+  color: var(--ink-soft);
+  font-size: var(--fs-14);
+}
+
+.acts .hint b {
+  color: var(--ink);
+  font-weight: 600;
+}
