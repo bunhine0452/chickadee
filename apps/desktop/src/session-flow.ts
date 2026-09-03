@@ -12,9 +12,7 @@ import {
   t0Answered, toReviewDetail, toT1Detail, type Question, type T0Answered, type T1Result,
 } from '@chickadee/grading';
 import { IpcError, ipc, log } from '@chickadee/ipc-client';
-import {
-  TICK_MS, advanceThreshold, labelFor, shouldInsertPrereq, shouldInsertRetry,
-} from '@chickadee/scheduler';
+import { TICK_MS, labelFor, shouldInsertPrereq, shouldInsertRetry } from '@chickadee/scheduler';
 import type { CardPayload, ConceptId, ItemState, Layer } from '@chickadee/store-sql';
 
 import { measure, markSessionOpen } from './devtools/audit.js';
@@ -306,9 +304,9 @@ export async function finishT1Plate(
     const mastery = (await loadMastery([plate.conceptId])).get(plate.conceptId)
       ?? emptyMastery(plate.conceptId, null);
     const swap = result.rows.some((r) => r.swap === true);
-    // 진급 문턱은 소블록 완충값이다 (04 §4.6 · D83). 겹·등급·단계가 같은 값을 본다.
-    const passPct = advanceThreshold(result.total);
-    const ok = result.pct >= passPct && !swap && !answer.downgraded;
+    // 진급 문턱은 채점기가 이미 낸 값이다 (04 §4.6 · D83) — 두 번 계산하면 언젠가 갈라진다.
+    // 겹은 그 문턱에 **「한 단계 쉽게」를 안 썼다**를 더한다 (02 §4 T1 행).
+    const ok = result.pct >= result.passPct && !swap && !answer.downgraded;
 
     const appealRows = answer.appealed
       .map((oi) => result.rows.find((r) => r.oi === oi))
@@ -366,7 +364,7 @@ export async function finishT1Plate(
       // 02 §3.2 의 T1 행 — 백분율·문턱·잠깐 보기 횟수·「한 단계 쉽게」·이름 맞바꿈.
       grade: {
         pct: result.pct,
-        passPct,
+        passPct: result.passPct,
         assists: answer.peeks,
         downgraded: answer.downgraded,
         swap,
