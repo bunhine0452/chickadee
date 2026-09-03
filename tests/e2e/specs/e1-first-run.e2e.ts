@@ -44,6 +44,27 @@ describe('E1 첫 실행', () => {
     );
   });
 
+  it('0단계 — 언어를 English 로 바꾸면 그 자리에서 문단이 영어다 (D117)', async () => {
+    const swap = async (): Promise<void> => {
+      const sw = await shown('.firstrun-lang [role="switch"]');
+      await sw.click();
+    };
+
+    await swap();
+    const en = await (await shown('.firstrun-note')).getText();
+    assert.ok(
+      en.includes('nothing is written back to the repo'),
+      `English 로 바꿔도 문단이 한국어다: ${JSON.stringify(en.slice(0, 120))}`,
+    );
+    // 리포가 0개여도 `settings` 쓰기가 된다 — 그것이 이 걸음이 서는 조건이다(boot 가 DB 를
+    // 이미 열어 둔다). 저장이 안 됐으면 되돌리기 클릭 뒤 값이 어긋난다.
+    assert.equal(await (await shown('.firstrun button.press-btn')).getText(), 'Add a repo');
+
+    await swap();
+    const ko = await (await shown('.firstrun-note')).getText();
+    assert.ok(ko.includes('읽기만 하고'), '한국어로 되돌아오지 않는다');
+  });
+
   // 06 §3.6 은 이 문구를 「첫 실행·설정에 표시」라고 적었는데, 05 §2.1 의 `first-run` 은
   // 「로고 배지 + 한 문단 + 버튼 하나」다. 지금 코드는 05 쪽이라 §3.6 전문은 설정 화면
   // (`#set-privacy`)에만 있다. **문서끼리 어긋난 자리**라 여기서 통과시키지 않는다 —

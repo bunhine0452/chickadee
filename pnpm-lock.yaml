@@ -99,6 +99,9 @@ importers:
       '@chickadee/grading':
         specifier: workspace:*
         version: link:../../packages/grading
+      '@chickadee/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
       '@chickadee/ipc-client':
         specifier: workspace:*
         version: link:../../packages/ipc-client
@@ -221,6 +224,12 @@ importers:
       '@chickadee/store-sql':
         specifier: workspace:*
         version: link:../store-sql
+      '@chickadee/text':
+        specifier: workspace:*
+        version: link:../text
+
+  packages/i18n:
+    dependencies:
       '@chickadee/text':
         specifier: workspace:*
         version: link:../text

@@ -115,13 +115,13 @@ git init -q --initial-branch=main "$1" && cd "$1"
 
 ## 2. 디자인 품질 게이트 자동화 — 목업의 `__audit`를 테스트로
 
-목업 `ink-home.html`의 `window.__audit`(`fonts`·`contrast`·`measure`·`dee`·`perf`)를 `apps/desktop/src/devtools/audit.ts`로 옮겨 **앱과 테스트가 같은 코드**를 쓴다(§8 디버그 패널도 이것). Playwright가 `vite preview` + `fixtures/ipc/tiny` 모의로 홈·T0/T1/T2·요약·야간반 6화면을 순회하며 `page.evaluate(() => window.__audit.*())`를 호출한다.
+목업 `ink-home.html`의 `window.__audit`(`fonts`·`contrast`·`measure`·`dee`·`perf`)를 `apps/desktop/src/devtools/audit.ts`로 옮겨 **앱과 테스트가 같은 코드**를 쓴다(§8 디버그 패널도 이것). Playwright가 `vite preview` + `fixtures/ipc/tiny` 모의로 홈·T0/T1/T2·요약·야간반 6화면을 순회하며 `page.evaluate(() => window.__audit.*())`를 호출한다. **로케일 축(D117)**: 전 게이트는 `ko` 로 돌고, `en` 은 첫 실행·홈·세션 3화면만 스모크로 돌려 행 길이와 axe serious 0 을 잰다 — 시각 기준선 40장은 `ko` 만 유지한다(en 까지 두 벌이면 기준선 재생성 비용이 두 배가 되고 번역이 바뀔 때마다 흔들린다).
 
 | 게이트 | 규칙(결론 §3·§6) | 측정 | 실패 조건 | 예외 처리 |
 |---|---|---|---|---|
 | 활자 하한 | 13px 미만 토큰 없음 | `audit.fonts()` — 텍스트 가진 가시 요소 전수 `fontSize` | `below13.length > 0` | 없음. `stylelint`로 `font-size` 리터럴도 금지 |
 | 대비 | 종이 위 7:1, 잉크 배지 위 4.5:1 | `audit.contrast()` — 실효 배경 합성 후 WCAG 비율 | `paper.below7 > 0` 또는 `onInk.below45 > 0` | `contrast.allow.json` 선택자+사유+만료일(목업의 완료 스티커 4.9:1 포함) |
-| 본문 행 길이 | 한글 **30~45자**, 좁은 패널(폭 ≤ 320px)은 하한 **22자** — 정본은 05 §9 (D112) | `audit.measure()` — `p, li, .ask, .fb p` 폭 ÷ 실측 advance | 45 초과 · 30 미만(좁은 패널은 22 미만) | 측면 패널 allowlist |
+| 본문 행 길이 | `ko` **30~45자**(좁은 패널 폭 ≤ 320px 은 하한 **22자**) · `en` **45~68자**(좁은 패널 33) — 정본은 05 §9 (D112 · D117) | `audit.measure()` — `p, li, .ask, .fb p` 폭 ÷ 실측 advance, `<html data-locale>` 로 기준 선택 | 로케일 상한 초과 · 하한 미만 | 측면 패널 allowlist |
 | 16px 실루엣 | 캡–뺨–턱받이 3단 열 ≥ 2, 뺨 띠 ≥ 2px | `audit.dee(16, 4, true, true)` 캔버스 래스터 열 스캔 | `pass === false` | 없음. `#deeHead`·파비콘·배지 24/32px 4건 고정 |
 | 감축 모션 | 전환만 없애고 최종 포즈 유지 | `page.emulateMedia({reducedMotion:'reduce'})` → 정답 제출 후 `.fb.on` 가시·`getAnimations()` 지속 ≤ 1ms | 애니메이션 잔존 또는 최종 상태 누락 | 없음 |
 | 키보드 완결 | 고르기 → Enter → Space | 마우스 0으로 E5 재생, 매 단계 `activeElement !== body`; `axe-core` serious 이상 0 | 포커스 유실·axe 위반 | axe 규칙 id allowlist(사유 필수) |

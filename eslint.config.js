@@ -38,9 +38,10 @@ const WORKSPACE_PACKAGES = [
   'grading',
   'ui',
   'text',
+  'i18n',
 ];
 
-/** 각 패키지가 import 해도 되는 워크스페이스 패키지. 자기 자신과 `text` 는 항상 허용. */
+/** 각 패키지가 import 해도 되는 워크스페이스 패키지. 자기 자신과 `text`·`i18n` 은 항상 허용. */
 const ALLOWED_DEPS = {
   'ipc-client': [],
   'store-sql': ['ipc-client'],
@@ -61,6 +62,9 @@ const ALLOWED_DEPS = {
   ui: ['cards', 'scheduler', 'grading', 'concepts', 'dictionary', 'store-sql', 'ipc-client'],
   // `text` 는 01 §2 표에 없다. 의존 없는 잎 유틸로 다룬다 — 누구나 쓰고, 아무것도 쓰지 않는다.
   text: [],
+  // `i18n` 도 잎이다 (D117). `text` 의 render() 위에 카탈로그 한 겹을 얹은 것뿐이라
+  // 화면 문구를 쓰는 층이면 어디서나 부른다.
+  i18n: ['text'],
 };
 
 const TAURI_GROUP = ['@tauri-apps/api', '@tauri-apps/api/**'];
@@ -70,7 +74,7 @@ const TAURI_MESSAGE =
 
 /** `zone` 이 import 하면 안 되는 워크스페이스 패키지 목록. */
 function forbiddenPackages(zone) {
-  const allowed = new Set([zone, 'text', ...(ALLOWED_DEPS[zone] ?? [])]);
+  const allowed = new Set([zone, 'text', 'i18n', ...(ALLOWED_DEPS[zone] ?? [])]);
   return WORKSPACE_PACKAGES.filter((pkg) => !allowed.has(pkg));
 }
 
@@ -88,7 +92,7 @@ function restrictedImportsFor(zone) {
       group: forbidden.flatMap((pkg) => [`@chickadee/${pkg}`, `@chickadee/${pkg}/**`]),
       message:
         `01 §2 의존 방향 위반 — ${zone} 이 import 해도 되는 것은 ` +
-        `[${[...(ALLOWED_DEPS[zone] ?? []), 'text'].join(', ') || 'text'}] 뿐이다.`,
+        `[${[...(ALLOWED_DEPS[zone] ?? []), 'text', 'i18n'].join(', ')}] 뿐이다.`,
     });
   }
 

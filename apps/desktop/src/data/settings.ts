@@ -4,6 +4,7 @@
  * `tz` 는 첫 실행에 OS 값을 저장하고 이후 시스템 시간대가 바뀌어도 사용자가 설정에서
  * 바꾸기 전까지 유지한다 (02 §5.6) — 여행 중에 어제 큐가 통째로 사라지는 것을 막는다.
  */
+import { guessLocale, setLocale as setI18nLocale, type Locale } from '@chickadee/i18n';
 import { ipc, log } from '@chickadee/ipc-client';
 import { FSRS5_DEFAULT_W, DEFAULT_RETENTION, makeScheduler, type Scheduler } from '@chickadee/scheduler';
 import { fromSettingsRows, type Settings } from '@chickadee/store-sql';
@@ -39,6 +40,8 @@ export const DEFAULTS: Omit<Settings, 'tz'> = {
   motion: 'system',
   identities: [],
   excludeGlobs: [],
+  // 저장된 값이 없을 때만 쓰는 추정이다 (D117). 첫 실행 0단계가 다시 묻는다.
+  locale: guessLocale(),
 };
 
 export async function loadSettings(): Promise<Settings> {
@@ -77,6 +80,7 @@ const KEY_OF: Record<keyof Settings, string> = {
   motion: 'motion',
   identities: 'identities',
   excludeGlobs: 'exclude_globs',
+  locale: 'locale',
 };
 
 // ───────── 모양 (테마 · 부속) ─────────
@@ -104,6 +108,19 @@ export function applyTheme(theme: Theme, measured = false): void {
 /** `<html data-trim>` 을 세우는 유일한 자리. 텍스트·레이아웃은 1px 도 바뀌지 않는다 (05 §4.3). */
 export function applyTrim(trim: Trim): void {
   document.documentElement.setAttribute('data-trim', trim);
+}
+
+/**
+ * `<html lang · data-locale>` 을 세우는 **유일한** 자리 (D117 · 05 §9).
+ *
+ * `applyTheme`·`applyTrim` 옆에 두는 이유는 하나다 — 두 곳에서 속성을 세우면 나중에 켠
+ * 쪽이 이긴다. 조판 CSS(`word-break`·`--measure`)가 `[data-locale="en"]` 하나만 본다.
+ * `lang` 은 스크린리더가 읽을 언어를 고르는 자리라 같이 세운다.
+ */
+export function applyLocale(locale: Locale): void {
+  document.documentElement.setAttribute('lang', locale);
+  document.documentElement.setAttribute('data-locale', locale);
+  setI18nLocale(locale);
 }
 
 export interface Appearance {

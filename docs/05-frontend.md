@@ -83,9 +83,9 @@ Chickadee 설계 문서 6편 중 다섯 번째. **목업 두 장(`design/ink-hom
 | `home` | 경로 홈 = 내 리포의 기능 지도 | `ink-home.html` | 마스트헤드(로고·작업 지시서·리포 전환·스위치 2) · 오늘의 인쇄(시간 비례 큐 + 목록 + 「인쇄 시작」) · 잉크 겹 척도 · 다시 찍을 개념 · 판이 없는 문법 · 대지(시트) 목록 · 미조판 예고 · 14일 컬러 바 |
 | `session` (오버레이) | 교정쇄 = 오늘의 세션 | `ink-session.html` | 작업 띠(큐·남은 시간·나가기) + 작업대(교정지 한 장). T0/T1/T2 판, 사다리, LIFER 베일, 인쇄 완료 요약 |
 | `ingest` | 판 짜기 = 리포 읽는 중 | 없음 (신규) | 단계 4 = Rust `walk·parse·git·write` 를 「git 읽기」「파싱」 2칸으로, TS 파생 `derive`·`cards` 를 「개념 추출」「판 짜기」 2칸으로. blame 은 배경(표시 없음). **시간 비례 큐 컴포넌트로 재사용**해 표시. 스피너 금지. 취소 가능. 끝나면 `home` |
-| `first-run` | 첫 실행 · 빈 상태 | 없음 (신규) | 리포가 0개: 로고 배지 + 한 문단 + 「리포 등록」 버튼 하나. 리포는 있는데 판이 0개(커밋 2개짜리 리포 등): 홈의 대지 자리에 `Forecast` 변형 「이 리포로는 T2 를 짤 수 없습니다 — 커밋 N개」 |
+| `first-run` | 첫 실행 · 빈 상태 | 없음 (신규) | 리포가 0개: 로고 배지 + 한 문단 + **0단계 언어 고르기(한국어/English, D117)** + 「리포 등록」 버튼 하나. 고른 값은 `settings.locale` 로 그 자리에서 내려간다 — DB 는 `boot.ts` 가 리포 0개에서도 열어 둔다. 리포는 있는데 판이 0개(커밋 2개짜리 리포 등): 홈의 대지 자리에 `Forecast` 변형 「이 리포로는 T2 를 짤 수 없습니다 — 커밋 N개」 |
 | `newcomer` | 「프로그래밍이 처음」 안내 | `discussion` §1·§4 | 02/03 이 「바닥 아래 바닥」으로 판정하면 홈 상단에 정직한 안내 시트: 이 앱이 못 하는 것 · 외부 입문 자료 링크(`plugin-opener`) · 「그래도 계속」. 게이트가 아니라 안내 |
-| `settings` | 설정 | 없음 (신규) | 주간/야간/시스템 · 부속 숨김 · 모션 감축(시스템 따름/항상) · 하루 분량 10~25분 · LLM 키(선택, 저장은 `06`) · 문법 사전 언어 · 내 커밋 identity(`email·name` 목록, 첫 열기 때 `git config` + author 상위 5명 자동 제안, 03 §1.2) · 데이터 위치 · 서체 고지 |
+| `settings` | 설정 | 없음 (신규) | **표시 언어(한국어/English, D117)** · 주간/야간/시스템 · 부속 숨김 · 모션 감축(시스템 따름/항상) · 하루 분량 10~25분 · LLM 키(선택, 저장은 `06`) · 문법 사전 언어 · 내 커밋 identity(`email·name` 목록, 첫 열기 때 `git config` + author 상위 5명 자동 제안, 03 §1.2) · 데이터 위치 · 서체 고지 |
 
 ### 2.2 라우팅 = 상태, 라우터 없음
 
@@ -357,7 +357,7 @@ interface SessionSlice {
 |---|---|---|
 | 대비 7:1 (종이 위 텍스트), 4.5:1 (잉크 배지 위) | ① `scripts/check-contrast.mjs` — `tokens.css` 를 파싱해 텍스트 토큰 5 × 바탕 4 × 테마 2 = 40 쌍을 정적으로 계산, `on-t*`×`t*` 6 쌍은 4.5 기준 ② Playwright 후 `__audit.contrast()` 런타임 전수 | CI 실패. 현재 `--yellow-text`/`--paper-3` 6.82 가 걸린다 (열린 질문 1) |
 | 13px 하한 | ① Stylelint 리터럴 룰(§4.2) ② `__audit.fonts()` 를 **SVG `<text>` 포함**으로 확장(`getBoundingClientRect` 로 가시성 판정, `offsetParent` 사용 금지) | CI 실패 |
-| 본문 행 길이 35~45자 | `__audit.measure()` 승격 → `tests/gates/measure.spec.ts`: `.ask`·`.note`·`.fb p`·`.rung-body p`·`.board-note` 각각 30 ≤ chars ≤ 45 (좁은 패널 노트는 22 이상 허용 목록) — 실제 서체 advance 로 실측(목업의 표본 문장 방식) | CI 실패 |
+| 본문 행 길이 — **로케일마다 다르다**(D117) | `__audit.measure()` 승격 → `tests/gates/measure.spec.ts`: `.ask`·`.note`·`.fb p`·`.rung-body p`·`.board-note` 각각 **`ko` 는 30 ≤ chars ≤ 45**(좁은 패널 노트는 22 이상 허용 목록), **`en` 은 45 ≤ chars ≤ 68**(좁은 패널 33) — 실제 서체 advance 로 실측(목업의 표본 문장 방식). 하네스가 `<html data-locale>` 을 읽어 어느 쪽을 걸지 고른다. en 숫자의 근거: 같은 `--measure` 에서 한글 1자 ≈ 라틴 1.5자 폭이라 30~45 를 환산하면 45~68 이고, 통상 권장 범위(45~75) 안에 든다 | CI 실패 |
 | 감축 모션 | `[data-motion="reduce"]` 를 설정과 `matchMedia` 로 결정, Playwright `reducedMotion:'reduce'` 로 최종 포즈 스냅샷 | 스냅샷 diff |
 | 스크린리더 | jsx-a11y 린트 + §7 문구 규약 단위 테스트(`announce()` 출력이 60자·태그 없음·마침표 형식) + Playwright 에서 `role=status` 텍스트 순서 검증 | 테스트 실패 |
 | 색맹 | 트랙 색은 항상 `T0/T1/T2` 라벨과 같이(`Pill`·`.tag`·범례) — `TimeQueue` 막대는 `role=img` 문장 + 아래 목록/라벨이 정보를 나르고, 판정 틱 3색은 `EdStatus` 텍스트 범례와 `.rtag` 글자 태그가 따로 있다. 린트: `Passes`·`TimeQueue` 를 라벨 없이 쓰면 타입 오류(`label` 필수 prop) | 타입 오류 |

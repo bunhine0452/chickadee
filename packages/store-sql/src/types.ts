@@ -159,5 +159,7 @@ export interface RepoInfo {
 
 export interface Settings { budgetMin: number; tz: string; rolloverHour: number; desiredRetention: number; newPerDay: number;
   t1PerWeek: number; newcomerFlag: 'none' | 'suspect' | 'confirmed'; theme: 'light' | 'dark'; trim: 'on' | 'off';
-  motion: 'system' | 'reduce'; identities: { email: string; name: string }[]; excludeGlobs: string[]; }
+  motion: 'system' | 'reduce'; identities: { email: string; name: string }[]; excludeGlobs: string[];
+  /** 표시 언어 (D117). `ko` 가 정본이고 `en` 은 번역이 있는 문구만 바뀐다. */
+  locale: 'ko' | 'en'; }
 // 기본값: newPerDay = 2, budgetMin = 15 (§5.1 LIMIT)

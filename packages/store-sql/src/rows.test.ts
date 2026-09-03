@@ -15,6 +15,7 @@ import { beforeAll, describe, expect, test } from 'vitest';
 
 import { migrations, statements } from './catalog.js';
 import { ColumnTypeError, JsonColumnError } from './errors.js';
+import { SETTINGS_KEYS } from './schemas.js';
 import {
   asConceptId, asDayKey, fromAppealRow, fromBlockRow, fromCaptureRow, fromCardRow, fromCommitFileRow,
   fromConceptRow, fromConceptSiteRow, fromDunnoEventRow, fromGapRow, fromImportEdgeRow,
@@ -246,6 +247,7 @@ const SETTINGS: Settings = {
   budgetMin: 15, tz: 'Asia/Seoul', rolloverHour: 4, desiredRetention: 0.9, newPerDay: 2,
   t1PerWeek: 2, newcomerFlag: 'suspect', theme: 'dark', trim: 'on', motion: 'reduce',
   identities: [{ email: 'me@example.com', name: '나' }], excludeGlobs: ['dist/**', '**/*.min.js'],
+  locale: 'en',
 };
 
 // ───────── 적재 ─────────
@@ -478,7 +480,8 @@ describe('toXxxParams 왕복 (카탈로그 statement 로 쓴 뒤 되읽기)', ()
 
   test('settings — 객체 → KV 행 → 객체', () => {
     const rows = db.prepare(statements['settings.get_all']).all() as { key: string; value_json: string; updated_at: number }[];
-    expect(rows).toHaveLength(12);
+    // 키를 더할 때마다 숫자를 고치지 않는다 — `Settings` 필드 전부가 한 행씩 돈다는 것이 요점이다.
+    expect(rows).toHaveLength(Object.keys(SETTINGS_KEYS).length);
     expect(fromSettingsRows(rows)).toStrictEqual(SETTINGS);
   });
 

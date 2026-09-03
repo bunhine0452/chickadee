@@ -18,6 +18,22 @@ export type TemplateVars = Readonly<Record<string, string>>;
 
 export type RenderResult = { text: string } | { missing: string[] };
 
+/**
+ * 로케일이 렌더러에 들어오는 유일한 자리 (D117).
+ *
+ * `josa` 를 끄면 조사 필터가 아무것도 내지 않는다 — 조사는 한국어 문법이고 `en` 카탈로그는
+ * 애초에 쓰지 않는다(03 §5.1 린트가 막는다). 켜고 끄는 판단은 부르는 쪽(`@chickadee/i18n`)이
+ * 하고 이 파일은 로케일 이름을 모른다.
+ *
+ * `escape` 를 끄면 치환값을 이스케이프하지 않는다 — 결과를 React 자식으로 그대로 넣는
+ * 화면 문구가 그 자리다(`&` 가 `&amp;` 로 보이면 안 된다). 사전 문장처럼 결과가 HTML 로
+ * 그려지는 자리는 기본값(켬)을 쓴다.
+ */
+export interface RenderOptions {
+  josa?: boolean;
+  escape?: boolean;
+}
+
 /** 호출자가 분기에 쓰는 좁히기. */
 export const isMissing = (r: RenderResult): r is { missing: string[] } => 'missing' in r;
 
@@ -131,8 +147,10 @@ function truthy(vars: TemplateVars, name: string): boolean {
  * 「res.userres.user 가」 가 된다. 대신 **앞선 필터가 있으면** 그 결과 뒤에 붙인다 —
  * D69 가 드는 `{{pick.1|code|josa:이,가}}`(감싸면서 조사까지)가 이 자리다.
  */
-function applyFilters(raw: string, filters: readonly Filter[], missing: string[]): string {
-  let text = escapeHtml(raw);
+function applyFilters(
+  raw: string, filters: readonly Filter[], missing: string[], opt: Required<RenderOptions>,
+): string {
+  let text = opt.escape ? escapeHtml(raw) : raw;
   for (const [i, filter] of filters.entries()) {
     if (filter.name === 'code') {
       text = `<code>${text}</code>`;
@@ -140,7 +158,7 @@ function applyFilters(raw: string, filters: readonly Filter[], missing: string[]
     }
     if (filter.name === 'josa') {
       const [withBatchim = '', without = ''] = filter.args;
-      const particle = hasBatchim(raw) ? withBatchim : without;
+      const particle = opt.josa ? (hasBatchim(raw) ? withBatchim : without) : '';
       text = i === 0 ? particle : text + particle;
       continue;
     }
@@ -149,7 +167,9 @@ function applyFilters(raw: string, filters: readonly Filter[], missing: string[]
   return text;
 }
 
-function emit(nodes: readonly Node[], vars: TemplateVars, missing: string[]): string {
+function emit(
+  nodes: readonly Node[], vars: TemplateVars, missing: string[], opt: Required<RenderOptions>,
+): string {
   let out = '';
   for (const node of nodes) {
     if (node.k === 'text') {
@@ -157,7 +177,7 @@ function emit(nodes: readonly Node[], vars: TemplateVars, missing: string[]): st
       continue;
     }
     if (node.k === 'section') {
-      if (truthy(vars, node.name) !== node.inverted) out += emit(node.body, vars, missing);
+      if (truthy(vars, node.name) !== node.inverted) out += emit(node.body, vars, missing, opt);
       continue;
     }
     const value = vars[node.name];
@@ -165,7 +185,7 @@ function emit(nodes: readonly Node[], vars: TemplateVars, missing: string[]): st
       missing.push(node.name);
       continue;
     }
-    out += applyFilters(value, node.filters, missing);
+    out += applyFilters(value, node.filters, missing, opt);
   }
   return out;
 }
@@ -175,8 +195,9 @@ function emit(nodes: readonly Node[], vars: TemplateVars, missing: string[]): st
  * 호출자(04 §1.3)가 「이 템플릿은 이 Site 에 못 쓴다」를 그것으로 판정한다.
  * 거짓 섹션 안쪽은 렌더되지 않으므로 그 안의 변수는 없어도 된다.
  */
-export function render(tpl: string, vars: TemplateVars): RenderResult {
+export function render(tpl: string, vars: TemplateVars, opts: RenderOptions = {}): RenderResult {
   const missing: string[] = [];
-  const text = emit(parse(tpl), vars, missing);
+  const opt = { josa: opts.josa ?? true, escape: opts.escape ?? true };
+  const text = emit(parse(tpl), vars, missing, opt);
   return missing.length > 0 ? { missing: [...new Set(missing)] } : { text };
 }

@@ -66,9 +66,13 @@ for (const screen of SCREENS) {
     expect(ink, JSON.stringify(ink, null, 1)).toEqual([]);
   });
 
-  test(`${screen.name} — 본문 행 길이 35~45자 (.note 22~24)`, async ({ page, app }) => {
+  test(`${screen.name} — 본문 행 길이 ko 30~45 (.note 는 하한 22)`, async ({ page, app }) => {
     await screen.open(page, app);
     const report = await runGates(page);
+    // 잰 것이 0건이면 위반도 0건이라 게이트가 소리 없이 통과한다 — 로케일이 어긋나
+    // 본문 판정 기준(`hasBody`)에 아무것도 안 걸릴 때가 그 자리다.
+    expect(report.measure.length, '행 길이를 잰 요소가 0건이다 — 로케일을 확인하라')
+      .toBeGreaterThan(0);
     const bad = report.measureViolations.filter((r) => !allowedBySel(measureAllow, r.sel));
     expect(bad, JSON.stringify(bad, null, 1)).toEqual([]);
   });

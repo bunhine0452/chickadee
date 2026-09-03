@@ -1,4 +1,5 @@
 import { loadDict } from '@chickadee/dictionary';
+import type { Locale } from '@chickadee/i18n';
 import { ipc, log } from '@chickadee/ipc-client';
 import type { ConceptId, RepoInfo } from '@chickadee/store-sql';
 import { Toast } from '@chickadee/ui';
@@ -6,6 +7,7 @@ import { useEffect, useState } from 'react';
 
 import type { TodayPreview } from './components/home/TodayPanel.js';
 import { currentBuild, ingestFingerprint, needsReingest } from './data/maintenance.js';
+import { applyLocale, saveSetting } from './data/settings.js';
 import { makePlateFor, pickPlateNow, type ManualResult } from './data/manual.js';
 import { previewToday } from './data/session.js';
 import { addRepo, cancelIngest, ingest, refreshHome, report, todayKey } from './flow.js';
@@ -109,7 +111,18 @@ export function App(): React.JSX.Element {
   if (repo === null || ui.repos.length === 0) {
     return (
       <>
-        <FirstRun onPick={() => void pickFolder()} />
+        <FirstRun
+          onPick={() => void pickFolder()}
+          locale={ui.locale}
+          onLocale={(locale: Locale) => {
+            // 첫 실행에서는 다시 그리기가 아니라 **그 자리에서** 바뀐다 — 고른 언어로
+            // 나머지 문장을 읽고 「리포 등록」을 누르는 것이 이 걸음의 요점이다.
+            applyLocale(locale);
+            useUi.getState().setLocale(locale);
+            void saveSetting('locale', locale, Date.now())
+              .catch(() => log.warn('표시 언어를 저장하지 못했다'));
+          }}
+        />
         <Toast msg={ui.toast ?? ''} on={ui.toast !== undefined} />
       </>
     );

@@ -78,6 +78,7 @@ review_log 1─n why_answer                 ← T1 왜 게이트 답 (채점·�
 - **원장 테이블은 추가만**: `ALTER TABLE … ADD COLUMN … DEFAULT …` 만 허용, 행 재작성·삭제·이름 변경 금지. 열을 없애고 싶으면 그냥 두고 TS 에서 읽지 않는다.
 - **파생 테이블은 DROP + 재생성 + 재계산 잡**이 허용된다. `mastery` 는 `rebuild_mastery()` 가 `review_log` 를 재생해 만들고, 테스트가 「재생 결과 == 현재 캐시」를 매 릴리스 검증한다.
 - 인제스트 테이블은 재인제스트로 채운다. 단 `card` 는 원장이 참조하므로 지우지 않고 `retired_at` 으로 은퇴시키며, 사용처가 사라져도 카드가 `snapshot_json` 에 코드 줄을 품고 있어 이력이 렌더된다.
+- **적용된 마이그레이션**: `0001_init.sql`(`user_version` 1) · `0002_name_en.sql`(2, D118 — `ALTER TABLE concept ADD COLUMN name_en TEXT`). 사전이 en 이름을 주지 않은 개념은 `NULL` 이고 화면은 `name_ko` 로 폴백한다. `name_ko` 는 컬럼 이름에 언어가 박혀 있지만 **개명하지 않는다** — 원장은 추가만이다.
 - 연결 시 항상: `PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON; PRAGMA synchronous=NORMAL; PRAGMA busy_timeout=5000;`
 
 ### 2.2 DDL (`migrations/0001_init.sql`, user_version = 1)
@@ -119,6 +120,7 @@ CREATE TABLE concept (
   id               TEXT PRIMARY KEY,       -- 'ts/optional-chaining' · 'common/loop' (보편 접두어는 03 문서의 `common/` 을 따른다)
   lang             TEXT NOT NULL,          -- 'common' | 'ts' | 'py' | 'rs' | 'swift' | 'dart' | 'sql' | 'go' | 'react' | 'arch'
   name_ko          TEXT NOT NULL,
+  -- name_en       TEXT            -- 0002_name_en.sql 이 더한다 (D118). NULL 이면 화면이 name_ko 로 폴백
   token            TEXT,                   -- '?.' · 'map' · NULL(패턴/구조 개념)
   kind             TEXT NOT NULL CHECK (kind IN ('universal','lang')),
   universal_id     TEXT REFERENCES concept(id),   -- lang 개념 → 보편 개념 (전이용)

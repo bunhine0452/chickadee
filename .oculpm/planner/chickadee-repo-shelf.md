@@ -10,11 +10,11 @@ owner: claude-code
 
 요청 2. 데이터 층은 이미 다 있다 — packages/concepts/src/repos.ts 의 register·list·relocate·remove 와 status(ok|missing|detached) 파생. 없는 것은 화면뿐이고, 지금은 첫 리포를 등록하고 나면 두 번째 리포를 추가할 문이 UI 에 없다(FirstRun 은 repos.length === 0 에서만 뜬다). 마스트헤드 리포 칸은 disabled 스텁이다(Masthead.tsx:60). 사용자 결정: 서가 화면 신설 + 스위처 둘 다. chickadee-i18n 의 P1(뼈대) 뒤에 착수해 새 문구를 처음부터 t() 로 쓴다. Rust 추가 0줄, SQL 은 TS 쪽이라 예산과 무관.
 
-## P0 · 결정 등록부 — D115 (문서 수정 전 선행) {#p0}
-- [ ] D115 — 리포 서가(repos) 화면 신설 · 0.3일 {#shelf-d115}
-  - [ ] docs/00-overview.md §4.2.1 에 D115 행 {#shelf-d115-row}
-  - [ ] docs/05-frontend.md §2.1 화면 표에 repos 행 추가 {#shelf-d115-screen-table}
-  - [ ] docs/05 §2.4「창 크기 · 다중 리포」를 서가 + 스위쳐 두 길로 갱신 {#shelf-d115-multi-repo}
+## P0 · 결정 등록부 — D119 (문서 수정 전 선행) {#p0}
+- [ ] D119 — 리포 서가(repos) 화면 신설 · 0.3일 {#shelf-d119}
+  - [ ] docs/00-overview.md §4.2.1 에 D119 행 {#shelf-d119-row}
+  - [ ] docs/05-frontend.md §2.1 화면 표에 repos 행 추가 {#shelf-d119-screen-table}
+  - [ ] docs/05 §2.4「창 크기 · 다중 리포」를 서가 + 스위쳐 두 길로 갱신 {#shelf-d119-multi-repo}
 
 ## P1 · 데이터와 화면 상태 {#p1}
 - [ ] statements/repo.sql 에 repo.overview 추가 · 0.5일 {#shelf-overview-sql}
@@ -27,7 +27,7 @@ owner: claude-code
   - [ ] 세션 중 전환 금지 가드 — 05 §2.4, 진행 중 세션은 리포별로 저장되므로 다녀와도 이어진다 {#shelf-store-guard}
 
 ## P2 · 화면 (끝: 리포 둘을 등록해 오가며 학습하고, 옮긴 리포를 다시 붙이고, 하나를 지운다) {#p2}
-- [ ] screens/repos/ReposScreen · 1.2일 (선행: D115 · repo.overview) {#shelf-screen}
+- [ ] screens/repos/ReposScreen · 1.2일 (선행: D119 · repo.overview) {#shelf-screen}
   - [ ] 리포 카드 — 이름·경로·상태 배지(ok·missing·detached)·마지막 인제스트·평균 겹·오늘 큐 {#shelf-screen-cards}
   - [ ] 「리포 추가」— App.tsx 의 pickFolder 를 공유로 올리고 addRepo 재사용 {#shelf-screen-add}
   - [ ] missing 이면「위치 알려주기」→ relocateRepo (첫 커밋 불일치 오류 문구 포함) {#shelf-screen-relocate}

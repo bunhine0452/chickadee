@@ -79,3 +79,14 @@ p, li, dd, blockquote, .prose { max-width: var(--measure); }
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+/* 로케일 축 (D117 · 05 §9). `keep-all` 과 `--measure: 36em` 은 한국어 전제다 — 라틴 문장에
+   그대로 걸면 긴 낱말이 안 쪼개져 오른쪽 가장자리가 들쭉날쭉해지고 한 줄이 70자를 넘는다.
+   en 의 목표는 45~68자이고 라틴 평균 자폭이 ≈0.5em 이라 30em 이 그 한가운데(≈60자)다.
+   토큰 파일은 `pnpm design:sync` 만 건드리므로(05 §12) 로케일 덮어쓰기는 여기 산다. */
+html[data-locale="en"] {
+  word-break: normal;
+  line-break: auto;
+
+  --measure: 30em;
+}

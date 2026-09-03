@@ -281,6 +281,7 @@ export const settingsSchema = z.object({
   motion: z.enum(['system', 'reduce']),
   identities: z.array(z.object({ email: z.string(), name: z.string() })),
   excludeGlobs: z.array(z.string()),
+  locale: z.enum(['ko', 'en']),
 });
 
 /**
@@ -302,6 +303,7 @@ export const SETTINGS_KEYS = {
   motion: 'motion',
   identities: 'identities',
   excludeGlobs: 'exclude_globs',
+  locale: 'locale',
 } as const satisfies Record<keyof Settings, string>;
 
 export type SettingsField = keyof typeof SETTINGS_KEYS;

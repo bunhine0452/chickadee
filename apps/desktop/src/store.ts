@@ -7,6 +7,7 @@
  * **SQLite 가 유일한 진실이고 여기 있는 것은 파생 캐시다**(01 §5). 언제든 버리고
  * 다시 조회할 수 있어야 한다.
  */
+import { getLocale, type Locale } from '@chickadee/i18n';
 import type { ItemState, Layer, RepoInfo, Session } from '@chickadee/store-sql';
 import { create } from 'zustand';
 
@@ -56,6 +57,11 @@ export interface SessionState {
 
 export interface UiState {
   screen: Screen;
+  /**
+   * 표시 언어 (D117). `t()` 는 모듈 상태를 읽으므로 문구 자체는 이것 없이도 바뀌지만,
+   * **React 가 다시 그릴 이유**가 여기 있어야 부팅이 세운 언어가 첫 화면에 닿는다.
+   */
+  locale: Locale;
   repos: RepoInfo[];
   activeId: number | null;
   home: HomeData | null;
@@ -85,6 +91,7 @@ export interface SessionActions {
 
 export interface UiActions {
   go: (screen: Screen) => void;
+  setLocale: (locale: Locale) => void;
   setRepos: (repos: RepoInfo[], activeId?: number | null) => void;
   setHome: (home: HomeData | null) => void;
   beginIngest: () => void;
@@ -110,6 +117,7 @@ const NO_SESSION: SessionState = {
 const EMPTY: UiState & SessionState = {
   ...NO_SESSION,
   screen: 'first-run',
+  locale: getLocale(),
   repos: [],
   activeId: null,
   home: null,
@@ -125,6 +133,7 @@ const EMPTY: UiState & SessionState = {
 export const useUi = create<UiState & SessionState & UiActions & SessionActions>((set) => ({
   ...EMPTY,
   go: (screen) => set({ screen }),
+  setLocale: (locale) => set({ locale }),
   setRepos: (repos, activeId) =>
     set((s) => ({
       repos,

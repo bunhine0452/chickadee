@@ -11,13 +11,13 @@ owner: claude-code
 요청 4. 지금 T1 은 12~40줄 블록 하나짜리다(cards/src/t1-block.ts). 사용자 결정: 일일 큐(D12 10~25분) 밖 별도 모드, 결과는 review_log 로 개념 겹에 반영. 재사용이 핵심이라 새로 짜는 것은 순서·진행 원장·화면 셋뿐이다 — 41줄 이상을 12~40줄 조각으로 자르고 「…이어서」 헤더를 붙이는 segment() 와 채점기 t1-align·t1-ast·t1-result 는 그대로 쓴다. Rust 추가 0줄(예산 2300/2300, 여유 0): 원문은 기존 file_read_lines 로 읽는다. 네 플랜 중 가장 크고, 새 문구가 많으므로 chickadee-i18n P1 뒤에 착수한다.
 
 ## P0 · 결정 등록부와 정본 (사용자 확인이 선행) {#p0}
-- [ ] D116 — 클론 코스는 일일 큐 밖 별도 모드 · 0.3일 {#clone-d116}
-  - [ ] docs/00-overview.md §4.2.1 에 D116 행 — 예산 D12 를 건드리지 않고 겹만 공유하는 근거 {#clone-d116-row}
-  - [ ] 정본 §2 트랙 표에 코스 행이 필요하므로 docs/00 §4.3「정본 갱신」후보로 먼저 올리고 사용자 확인 {#clone-d116-canon}
-  - [ ] docs/00 §5 에 M7 배치 행 추가 {#clone-d116-milestone}
+- [ ] D120 — 클론 코스는 일일 큐 밖 별도 모드 · 0.3일 {#clone-d120}
+  - [ ] docs/00-overview.md §4.2.1 에 D120 행 — 예산 D12 를 건드리지 않고 겹만 공유하는 근거 {#clone-d120-row}
+  - [ ] 정본 §2 트랙 표에 코스 행이 필요하므로 docs/00 §4.3「정본 갱신」후보로 먼저 올리고 사용자 확인 {#clone-d120-canon}
+  - [ ] docs/00 §5 에 M7 배치 행 추가 {#clone-d120-milestone}
 
 ## P1 · 원장과 순서 (끝: 같은 리포를 두 번 열면 같은 코스 순서가 나온다) {#p1}
-- [ ] 0003_clone.sql 마이그레이션 · 0.5일 (선행: D116) {#clone-migration}
+- [ ] 0003_clone.sql 마이그레이션 · 0.5일 (선행: D120) {#clone-migration}
   - [ ] clone_run(repo_id · mode 'commit'|'dep' · scope 'repo'|'unit' · unit_id · status · order_json · started_at · finished_at) {#clone-migration-run}
   - [ ] clone_step(run_id · seq · file_id · line_start · line_end · status · pct · elapsed_s · draft_text · review_log_id · done_at) {#clone-migration-step}
   - [ ] SCHEMA_VERSION · catalog 갱신 + 마이그레이션 테스트(백업 · 상위 버전 거부). 새 테이블이라 02 §2.2 의「원장은 추가만」을 어기지 않는다 {#clone-migration-runner}

@@ -496,6 +496,8 @@ examples:                                  # 골든 (§5.1 · §8) — 양성·�
   - { code: "…", expect: none }
 ```
 
+**로케일 (D117 · D118).** 사람이 읽는 문자열은 `{ ko, en }` 두 벌이다 — `name` 은 이미 그 모양이고 `dict.one_liner` · `dict.why` · `dict.trace[]` · `rule` · `ok` · `payoff` · `bridge` · `misconceptions[]` · `result.label` · `result.note` · 문항의 `q` · `hint` · `options[].t` · `diag.t` · `diag.edge.h` · `why_gate.q` · `why_gate.help` · `why_gate.choices[].t` · `.fb` 가 같은 규칙을 따른다. 위 예시는 `ko` 만 적은 축약형이고 **문자열 자리에 스칼라를 쓰면 `ko` 로 읽는다** — 기존 57 파일이 손대지 않고 통과하며 `en` 은 채우는 대로 붙는다. `en` 이 없으면 로더가 `ko` 로 폴백하고 판에 그 사실을 한 줄로 적는다(빈 칸을 그리지 않는다). 조사 필터 `{{…|josa:…}}` 는 `en` 에서 항등이므로 en 문자열에 쓰지 않는다(§5.1 린트). 개념 이름의 `en` 은 **용어집 `dictionary/_glossary.en.yaml` 이 정본**이다 — 같은 개념이 파일마다 다른 영단어로 나가는 것을 막는 유일한 자리이고, 사용자가 검수하는 지점도 여기 하나다.
+
 의미형은 옵션 4개(정답 1 + 진단 3), 지목형은 `diag` 가 오답 pick 마다 있어야 하고, 빈칸형은 옵션 4개 중 오답 3개가 `confusions` 에 있는 개념의 토큰이어야 한다. `why_gate.choices` 는 3개·`ok` 1개(린트).
 
 ### 4.5 완성 예시 1 — `ts/optional-chaining.yaml`
@@ -676,7 +678,7 @@ examples:
 ### 5.1 스키마·타입·CI 린트
 
 - `packages/dictionary/src/schema.ts` 의 zod 가 정본이고 `dictionary/schema/concept.schema.json` 은 거기서 생성한다 (D69). Rust 앱 코드는 YAML 을 읽지 않는다(01). `LangSpec` 은 TS 가 만든다.
-- `pnpm dict:lint`(TS) 가 검사하는 것: 필수 필드 · id = 경로 · `prereq`/`confusions`/`universal` 참조 존재 · 사이클 없음 · 의미형 옵션 4개·진단 3개 · 지목형 `answer` 의 pick 이 쿼리 캡처에 있음 · 빈칸형 오답이 `confusions` 토큰 · 템플릿 변수가 허용 목록(§4.3)에 있음 · HTML 태그 허용 목록 · **조사 하드코딩**(`/\}\}\s*(은|는|이|가|을|를|과|와|으로|로)(\s|$|<)/`) · 금지어(`틀렸|오답|실패했`) — discussion §3-2 「틀렸다 대신 조건」 · `dict.trace` 에 `{{site.` 또는 `{{pick.` 참조 없음(튜토리얼 변질 방지) · `one_liner` ≤ 80자, 진단 `t` ≤ 300자.
+- `pnpm dict:lint`(TS) 가 검사하는 것: 필수 필드 · id = 경로 · `prereq`/`confusions`/`universal` 참조 존재 · 사이클 없음 · 의미형 옵션 4개·진단 3개 · 지목형 `answer` 의 pick 이 쿼리 캡처에 있음 · 빈칸형 오답이 `confusions` 토큰 · 템플릿 변수가 허용 목록(§4.3)에 있음 · HTML 태그 허용 목록 · **조사 하드코딩**(`/\}\}\s*(은|는|이|가|을|를|과|와|으로|로)(\s|$|<)/`) · 금지어(`틀렸|오답|실패했`) — discussion §3-2 「틀렸다 대신 조건」 · `dict.trace` 에 `{{site.` 또는 `{{pick.` 참조 없음(튜토리얼 변질 방지) · **로케일(D118)**: `en` 만 있고 `ko` 가 없는 문자열 금지(역은 허용) · `en` 문자열에 조사 필터(`|josa:`) 금지 · 조사 하드코딩·금지어 검사는 `ko` 에만, 변수 참조·HTML 태그 허용 목록 검사는 **두 언어 모두** · `name.en` 이 `_glossary.en.yaml` 의 항목과 일치 · `one_liner` ≤ 80자, 진단 `t` ≤ 300자.
 - `crates/parse/tests/dictionary.rs`(테스트 전용 `serde_yaml` dev-dependency, 예산 밖)가 검사하는 것: 모든 `.scm` 이 고정된 문법으로 컴파일 · 캡처 이름 정규식(§3.2) · 패턴마다 `@site` 1개(맥락 패턴은 `@ctx.*` 만; `_imports`·`_blocks` 는 각자 규약) · 죽은 패턴(모든 `examples` 에서 0매치) 금지 · `examples[].code` 의 캡처를 `fixtures/ipc/dict-examples/<id>.json` 로 덤프.
 - Site 수준 `expect`(sites·form·picks·hole·ctx)는 `pnpm dict:test`(vitest)가 그 덤프에서 `derive.ts` 로 파생해 비교한다.
 

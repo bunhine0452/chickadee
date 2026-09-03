@@ -13,12 +13,19 @@ import { deeStandalone } from '@chickadee/ui';
 export const PAPER_RATIO = 7;
 /** 잉크 면 위 배지 글자는 AA 를 허용한다. */
 export const INK_RATIO = 4.5;
-/** 본문 행 길이 — 한글 35~45자. */
-export const MEASURE_MIN = 35;
-export const MEASURE_MAX = 45;
-/** `.note` 류 부차 텍스트는 더 짧다. */
-export const NOTE_MIN = 22;
-export const NOTE_MAX = 24;
+/**
+ * 본문 행 길이 — **로케일마다 다르다** (05 §9 가 정본, D112 · D117).
+ *
+ * `ko` 30~45 는 한글 자폭 기준이고, `en` 45~68 은 같은 물리 폭을 라틴으로 환산한 것이다
+ * (한글 1자 ≈ 라틴 1.5자). 좁은 패널(폭 ≤ 320px)의 부차 텍스트만 하한을 낮춘다 —
+ * 상한은 두 경우가 같다. 06 §2 의 옛 숫자(35~45 · `.note` 22~24)는 D112 가 이리로 맞췄다.
+ */
+export const MEASURE = {
+  ko: { min: 30, max: 45, noteMin: 22 },
+  en: { min: 45, max: 68, noteMin: 33 },
+} as const;
+
+export type MeasureLocale = keyof typeof MEASURE;
 /** 활자 하한 (정본 §6-④ — 13px 미만 토큰은 아예 정의하지 않는다). */
 export const MIN_FONT_PX = 13;
 
@@ -190,8 +197,27 @@ export interface MeasureRow {
   sel: string; px: number; chars: number; fs: string; lh: string; font: string; note: boolean;
 }
 
-/** 한글 표본. 라틴 문자로 재면 한 줄 글자 수가 두 배로 나온다. */
-const SAMPLE = '한글본문한줄에들어가는글자수를재는표본문장입니다';
+/**
+ * 자폭 표본. 한글로 재고 라틴을 세면 글자 수가 두 배로 나오므로 **로케일마다 다른 표본**을
+ * 쓴다. en 표본은 영문 평균 자모 분포에 가깝게 고른 문장이다.
+ */
+const SAMPLE = {
+  ko: '한글본문한줄에들어가는글자수를재는표본문장입니다',
+  en: 'The quick brown fox jumps over the lazy dog and reads a line of body text',
+} as const;
+
+/** `<html data-locale>` 을 세우는 자리는 `data/settings.ts` 의 `applyLocale` 하나다. */
+export function measureLocale(): MeasureLocale {
+  return document.documentElement.getAttribute('data-locale') === 'en' ? 'en' : 'ko';
+}
+
+/** 이 요소가 「본문」이라 할 만큼 글자를 담고 있나. 기준 글자가 로케일마다 다르다. */
+function hasBody(el: Element, locale: MeasureLocale): boolean {
+  const text = el.textContent ?? '';
+  return locale === 'en'
+    ? (text.match(/[A-Za-z]/g) ?? []).length >= 40
+    : (text.match(/[가-힣]/g) ?? []).length >= 15;
+}
 const MEASURE_SELECTOR = 'p, .note, .board-note, .forecast p, .detail-in p, .streak-note, .ask, .fb p';
 
 /**
@@ -199,10 +225,9 @@ const MEASURE_SELECTOR = 'p, .note, .board-note, .forecast p, .detail-in p, .str
  * 서체가 폴백으로 떨어지면 실제 글자 수가 달라지므로 **재서** 확인한다.
  */
 export function measure(): MeasureRow[] {
+  const locale = measureLocale();
   return [...document.querySelectorAll(MEASURE_SELECTOR)]
-    .filter((el) => visible(el)
-      && ((el.textContent ?? '').match(/[가-힣]/g) ?? []).length >= 15
-      && el.closest('.dev') === null)
+    .filter((el) => visible(el) && hasBody(el, locale) && el.closest('.dev') === null)
     .map((el) => {
       const cs = getComputedStyle(el);
       const span = document.createElement('span');
@@ -211,9 +236,9 @@ export function measure(): MeasureRow[] {
       span.style.fontSize = cs.fontSize;
       span.style.fontWeight = cs.fontWeight;
       span.style.letterSpacing = cs.letterSpacing;
-      span.textContent = SAMPLE;
+      span.textContent = SAMPLE[locale];
       document.body.appendChild(span);
-      const adv = span.getBoundingClientRect().width / SAMPLE.length;
+      const adv = span.getBoundingClientRect().width / SAMPLE[locale].length;
       span.remove();
       const w = el.getBoundingClientRect().width
         - Number.parseFloat(cs.paddingLeft) - Number.parseFloat(cs.paddingRight);
@@ -229,11 +254,13 @@ export function measure(): MeasureRow[] {
     });
 }
 
-/** 행 길이 위반. `.note` 류는 더 짧은 범위를 쓴다 (06 §2). */
-export const measureViolations = (rows: readonly MeasureRow[]): MeasureRow[] =>
-  rows.filter((r) => (r.note
-    ? r.chars < NOTE_MIN || r.chars > NOTE_MAX
-    : r.chars < MEASURE_MIN || r.chars > MEASURE_MAX));
+/** 행 길이 위반. `.note` 류는 하한만 낮다 — 상한은 같다 (05 §9). */
+export const measureViolations = (
+  rows: readonly MeasureRow[], locale: MeasureLocale = measureLocale(),
+): MeasureRow[] => {
+  const { min, max, noteMin } = MEASURE[locale];
+  return rows.filter((r) => r.chars > max || r.chars < (r.note ? noteMin : min));
+};
 
 // ───────── 16px 실루엣 (06 §2) ─────────
 

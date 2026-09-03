@@ -47,3 +47,16 @@
 }
 
 .firstrun .press-btn { width: auto }
+
+/* 0단계 언어 고르기 (D117). 설정 화면의 `.set-row` 와 같은 리듬을 쓴다 — 첫 실행에서 본
+   배치가 설정에서 또 나오면 같은 자리를 두 번 배우지 않는다. */
+.firstrun-lang {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.firstrun-lang-k {
+  color: var(--ink-soft);
+  font-size: var(--fs-14);
+}

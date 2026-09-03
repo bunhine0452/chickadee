@@ -1,7 +1,9 @@
 import { ipc, log } from '@chickadee/ipc-client';
 import { SCHEMA_VERSION, catalog } from '@chickadee/store-sql';
 
+import { applyLocale, DEFAULTS, loadSettings } from './data/settings.js';
 import { refreshRepos } from './flow.js';
+import { useUi } from './store.js';
 
 /**
  * 기동 순서 (01 §10): 마이그레이션 → `store_open` → 창 표시.
@@ -14,6 +16,12 @@ export async function boot(): Promise<void> {
   if (info.userVersion !== SCHEMA_VERSION) {
     throw new Error(`스키마 번호가 어긋난다: DB ${info.userVersion} ≠ 앱 ${SCHEMA_VERSION}`);
   }
+  // 언어를 **창을 보이기 전에** 세운다 (D117). 창은 `visible:false` 로 떠 있으므로
+  // 여기서 바꿔도 사용자는 다른 언어의 한 프레임을 보지 않는다.
+  const locale = await loadSettings().then((s) => s.locale, () => DEFAULTS.locale);
+  applyLocale(locale);
+  useUi.getState().setLocale(locale);
+
   // 등록된 리포가 있으면 홈, 없으면 첫 실행 화면 — 그 판단은 목록을 읽어야 한다.
   await refreshRepos().catch(() => log.warn('리포 목록을 읽지 못했다'));
   await document.fonts.ready;

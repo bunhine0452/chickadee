@@ -1,6 +1,7 @@
 import { ipc, log } from '@chickadee/ipc-client';
 import type { AppPaths, AppVersion } from '@chickadee/ipc-client';
 import type { Settings } from '@chickadee/store-sql';
+import { getLocale, t, type Locale } from '@chickadee/i18n';
 import { FlatButton, LiveRegion, Switch } from '@chickadee/ui';
 import { useEffect, useState } from 'react';
 
@@ -35,6 +36,24 @@ const TRIM_OPTIONS = [
   { v: 'off' as const, label: '부속 보임' },
   { v: 'on' as const, label: '부속 숨김' },
 ];
+
+/** 언어 이름은 그 언어로 적는다 (D117) — 두 카탈로그가 같은 값을 낸다. */
+const LOCALE_OPTIONS = [
+  { v: 'ko' as const, label: t('locale.ko') },
+  { v: 'en' as const, label: t('locale.en') },
+];
+
+/**
+ * 언어를 바꾸면 저장하고 **다시 그린다**.
+ *
+ * `t()` 는 모듈 상태를 읽으므로 프로바이더로 200 파일을 꿰면 화면을 안 새로 그려도 되지만,
+ * 그 배선의 값이 「설정에서 언어를 바꾸는 드문 한 번」뿐이다 (D117). 저장이 끝난 뒤에
+ * 새로 고쳐야 부팅이 그 값을 읽는다 — 먼저 새로 고치면 쓰기가 잘린다.
+ */
+async function onLocale(locale: Locale): Promise<void> {
+  await saveSetting('locale', locale, Date.now());
+  location.reload();
+}
 
 export interface SettingsScreenProps {
   onBack: () => void;
@@ -265,6 +284,16 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
             onChange={appearance.setTrim}
           />
         </div>
+        <div className="set-row">
+          <span className="set-k">{t('settings.look.locale')}</span>
+          <Switch
+            options={LOCALE_OPTIONS}
+            value={getLocale()}
+            label={t('settings.look.localeSwitch')}
+            onChange={(v) => void onLocale(v).catch(() => setNote('표시 언어를 저장하지 못했습니다.'))}
+          />
+        </div>
+        <p className="set-note">{t('settings.look.localeNote')}</p>
         <p className="set-note">
           여기서 고른 것은 저장되어 다음에 열 때도 그대로입니다. 「부속 숨김」은 등록표시·절취선·
           결·도장 회전만 끄고 글자와 배치는 1px 도 바꾸지 않습니다.

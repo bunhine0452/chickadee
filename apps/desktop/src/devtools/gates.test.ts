@@ -7,7 +7,7 @@
 import { describe, expect, test } from 'vitest';
 
 import {
-  INK_RATIO, MEASURE_MAX, MEASURE_MIN, MIN_FONT_PX, NOTE_MAX, NOTE_MIN, PAPER_RATIO,
+  INK_RATIO, MEASURE, MIN_FONT_PX, PAPER_RATIO,
   MOTION_BUDGET_MS,
   contrastRatio, effectiveBg, hex, longestMs, measureViolations, over, parseColor, pathOf,
   scanSilhouette,
@@ -68,15 +68,25 @@ describe('행 길이', () => {
     sel: 'p', px: 0, chars, fs: '16px', lh: '1.7', font: 'IBM Plex Sans KR', note,
   });
 
-  test('본문은 35~45자', () => {
-    expect(measureViolations([row(MEASURE_MIN), row(40), row(MEASURE_MAX)])).toEqual([]);
-    expect(measureViolations([row(34), row(46)])).toHaveLength(2);
+  test('ko 본문은 30~45자 (05 §9 · D112)', () => {
+    const ko = MEASURE.ko;
+    expect(measureViolations([row(ko.min), row(40), row(ko.max)], 'ko')).toEqual([]);
+    expect(measureViolations([row(ko.min - 1), row(ko.max + 1)], 'ko')).toHaveLength(2);
   });
 
-  test('`.note` 류는 22~24자', () => {
-    expect(measureViolations([row(NOTE_MIN, true), row(NOTE_MAX, true)])).toEqual([]);
-    // 본문 기준으로는 통과할 40자가 부차 텍스트에서는 위반이다.
-    expect(measureViolations([row(40, true)])).toHaveLength(1);
+  test('`.note` 류는 하한만 낮다 — 상한은 본문과 같다', () => {
+    const ko = MEASURE.ko;
+    expect(measureViolations([row(ko.noteMin, true), row(40, true)], 'ko')).toEqual([]);
+    expect(measureViolations([row(ko.noteMin - 1, true), row(ko.max + 1, true)], 'ko'))
+      .toHaveLength(2);
+  });
+
+  test('en 은 45~68자 — 같은 폭을 라틴으로 환산한 것이다 (D117)', () => {
+    const en = MEASURE.en;
+    expect(measureViolations([row(en.min), row(60), row(en.max)], 'en')).toEqual([]);
+    // ko 에서 통과하던 40자가 en 에서는 너무 짧다. 반대로 60자는 ko 에서 위반이다.
+    expect(measureViolations([row(40)], 'en')).toHaveLength(1);
+    expect(measureViolations([row(60)], 'ko')).toHaveLength(1);
   });
 });
 

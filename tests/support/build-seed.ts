@@ -91,6 +91,11 @@ export async function buildSeed(Database: new (path: string) => BetterSqlite3.Da
   ).run(NOW);
   db.prepare(`INSERT INTO settings (key, value_json, updated_at) VALUES ('tz', ?, ?)`)
     .run(JSON.stringify(TZ), NOW);
+  // **하네스는 로케일을 ko 로 고정한다** (D117). 기본값은 `navigator.language` 추정이라
+  // 러너가 어느 로케일이냐에 따라 게이트가 다른 문구·다른 행 길이 기준으로 돈다 —
+  // 골든과 게이트가 러너를 타면 그것은 게이트가 아니다. en 은 별도 스모크가 본다(06 §2).
+  db.prepare(`INSERT INTO settings (key, value_json, updated_at) VALUES ('locale', ?, ?)`)
+    .run(JSON.stringify('ko'), NOW);
 
   const dict = loadDict();
   await materializeDict(dict, NOW);

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { escapeHtml, isMissing, josa, render } from './template.js';
+import { escapeHtml, isMissing, josa, render, type RenderOptions } from './template.js';
 
 /** 실패하면 그 자리에서 이름을 보여 준다 — `missing` 을 그대로 비교하는 것보다 읽기 쉽다. */
 function text(tpl: string, vars: Record<string, string>): string {
@@ -132,5 +132,41 @@ describe('섹션', () => {
 describe('필터 오류', () => {
   test('모르는 필터는 missing 으로 알린다', () => {
     expect(missing('{{x|upper}}', { x: 'a' })).toEqual(['|upper']);
+  });
+});
+
+// ── 로케일 옵션 (D117) ───────────────────────────────────────────────────────
+
+/** 옵션을 준 렌더. 실패는 위 `text` 와 같은 이유로 던진다. */
+function opt(tpl: string, vars: Record<string, string>, options: RenderOptions): string {
+  const out = render(tpl, vars, options);
+  if (isMissing(out)) throw new Error(`없는 변수: ${out.missing.join(', ')}`);
+  return out.text;
+}
+
+describe('josa 끄기 — en 카탈로그', () => {
+  test('조사만 내는 자리는 아무것도 내지 않는다', () => {
+    const tpl = '{{name|code}}{{name|josa:을,를}} 읽습니다';
+    expect(opt(tpl, { name: 'App' }, { josa: true })).toBe('<code>App</code>을 읽습니다');
+    expect(opt(tpl, { name: 'App' }, { josa: false })).toBe('<code>App</code> 읽습니다');
+  });
+
+  test('연쇄 뒤에 붙는 조사도 빠진다 — 값은 남는다', () => {
+    expect(opt('{{x|code|josa:이,가}}', { x: 'res' }, { josa: false })).toBe('<code>res</code>');
+  });
+
+  test('기본값은 켬이다 — 사전은 이 옵션을 모른다', () => {
+    expect(text('{{x|josa:은,는}}', { x: '값' })).toBe('은');
+  });
+});
+
+describe('escape 끄기 — 화면 문구', () => {
+  test('치환값을 그대로 둔다', () => {
+    expect(opt('{{name}} 를 읽습니다', { name: 'a & b' }, { escape: false }))
+      .toBe('a & b 를 읽습니다');
+  });
+
+  test('기본값은 켬이다 — 사전 값은 코드에서 온다', () => {
+    expect(text('{{name}}', { name: '<script>' })).toBe('&lt;script&gt;');
   });
 });

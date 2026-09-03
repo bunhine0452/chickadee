@@ -174,6 +174,20 @@ test('14 리포 등록 → 인제스트 진행 → 홈', async ({ page, app }) =
   await expect(page.locator('.firstrun')).toBeVisible();
   await expect(page.locator('.firstrun')).toContainText('리포에는 아무것도 쓰지 않습니다');
 
+  // 0단계 — 리포가 **0개인 상태에서** 언어를 고르면 그 자리에서 문구가 바뀌고 `settings`
+  // 에 내려간다 (D117). 리포 없이 설정을 쓸 수 있다는 것이 이 걸음이 서는 조건이다 —
+  // DB 는 `boot.ts` 가 이미 열어 두었고 첫 실행 화면은 그것만 있으면 된다.
+  await page.locator('.firstrun-lang [role="switch"]').click();
+  await expect(page.locator('.firstrun')).toContainText('nothing is written back to the repo');
+  await expect
+    .poll(() => (app.db.prepare("SELECT value_json AS v FROM settings WHERE key = 'locale'")
+      .get() as { v: string } | undefined)?.v)
+    .toBe('"en"');
+
+  // 다시 한국어로 — 이 시나리오의 나머지는 한국어 문구를 본다.
+  await page.locator('.firstrun-lang [role="switch"]').click();
+  await expect(page.locator('.firstrun')).toContainText('리포에는 아무것도 쓰지 않습니다');
+
   await page.getByRole('button', { name: '리포 등록' }).click();
   await page.locator('.ingest').waitFor();
   await expect(page.locator('.ingest-h')).toHaveText('fresh 을 읽는 중');
