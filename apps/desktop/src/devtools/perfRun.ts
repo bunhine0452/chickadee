@@ -87,7 +87,7 @@ async function toggleTheme(): Promise<void> {
  * 여기서 카드가 처음 만들어지므로 **진짜 사전으로 생성기가 도는지**도 같이 확인된다.
  */
 async function runOnePlate(): Promise<void> {
-  const { startSession, answerPlate } = await import('../session-flow.js');
+  const { startSession } = await import('../session-flow.js');
   const { useUi } = await import('../store.js');
   const repo = useUi.getState().repos[0];
   if (!repo) {
@@ -102,9 +102,24 @@ async function runOnePlate(): Promise<void> {
   await waitFor(() => document.querySelector('.ps') !== null, 10_000);
   await sleep(300);
 
-  const result = await answerPlate({ sel: 0, elapsedMs: 1_200, dunno: false, rungsOpened: [] });
-  await step(result === null ? 'plate-failed' : 'plate-graded');
-  await sleep(500);
+  // **화면을 거쳐 답한다.** `answerPlate` 를 직접 부르면 LIFER 의식이 사는 자리(`SessionScreen`)를
+  // 건너뛰어 `lifer:open` 이 영영 안 재진다. 정답을 고르는 이유도 같다 — 첫 성공이 없으면
+  // 의식 자체가 안 뜬다.
+  const plate = useUi.getState().plates[useUi.getState().pos];
+  const answer = plate?.payload.track === 't0' ? plate.payload.answer : 0;
+  const choice = document.querySelector<HTMLElement>(`.ch[data-k="${answer + 1}"]`)
+    ?? document.querySelector<HTMLElement>(`.tk[data-k="${answer + 1}"]`);
+  const submit = document.querySelector<HTMLElement>('.acts .press-btn');
+  if (!choice || !submit) {
+    await step('plate-controls-missing');
+    return;
+  }
+  choice.click();
+  await sleep(200);
+  submit.click();
+  // 의식이 놓일 시간을 준다 — `lifer:open` 은 베일이 마운트될 때 닫힌다.
+  await sleep(1_500);
+  await step(`plate-graded:${String(document.querySelector('.lifer-card') !== null)}`);
 }
 
 /** 한 줄에 담는 결과. `kind` 는 06 §8 이 정한 이름 공간을 그대로 쓴다. */
