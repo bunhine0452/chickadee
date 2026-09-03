@@ -78,9 +78,9 @@ owner: claude-code
 - [x] 05 · 다시 찍기 사다리·아래층·LIFER — ReprintLadder 4단·점프/복귀/LinkPara·B·LiferVeil·클립보드 · 3일 (선행: T0 판) {#m2-05-ladder-lifer}
 - [x] 05 · 인쇄 완료 요약 — Summary 전부, 「오늘 판 다시 보기」는 읽기 전용 · 1일 (선행: T0 판) {#m2-05-summary}
 - [x] 06 · Q3 TS 채점기 골든·스케줄러 property — T0·스케줄러(T1·T2 골든은 M3·M4) · 2일 (선행: 04 T0·02 리듀서) {#m2-06-q3-grading-golden}
-- [ ] 06 · Q4 통합 파이프라인·IPC 덤프 — M1 덤프 + T0 재생, git diff --exit-code 게이트 · 2일 (선행: Q1~Q3) {#m2-06-q4-ipc-dump}
-- [ ] 06 · Q5 __audit 이식 — src/devtools/audit.ts + Playwright tests/gates 7게이트 + allowlist 만료 · 2일 (선행: 05 세션 화면) {#m2-06-q5-audit-port}
-- [ ] 01 · 성능 벤치 — 3 픽스처, WKWebView 홈·세션 프레임 측정, CI 소프트 게이트 · 1.5일 (선행: 인제스트·세션 셸) {#m2-01-perf-bench}
+- [x] 06 · Q4 통합 파이프라인·IPC 덤프 — M1 덤프 + T0 재생, git diff --exit-code 게이트 · 2일 (선행: Q1~Q3) {#m2-06-q4-ipc-dump}
+- [~] 06 · Q5 __audit 이식 — src/devtools/audit.ts + Playwright tests/gates 7게이트 + allowlist 만료 · 2일 (선행: 05 세션 화면) {#m2-06-q5-audit-port}
+- [!] 01 · 성능 벤치 — 3 픽스처, WKWebView 홈·세션 프레임 측정, CI 소프트 게이트 · 1.5일 (선행: 인제스트·세션 셸) {#m2-01-perf-bench}
 
 ## M3 · T1 클론 코딩 (끝: 12~40줄 블록 3단계 페이딩, 골든 28건 통과, 비공백 줄 점수, appeal·why_answer 기록, 20줄 <20ms, Monaco ≤250ms) {#m3}
 - [ ] 04 · T1 블록 선정·마스크 — 언어별 노드 표, 분절, 2단계 유지 집합, 스펙 카드 · 2일 (선행: 03 _blocks 캡처·01 file_read_block·02 block) {#m3-04-t1-block-mask}
@@ -182,4 +182,7 @@ owner: claude-code
 | 2026-09-03T10:40:59+09:00 | #m2-02-session-insert | claude-code | ~→x | 20260903/Features_to_add/1040_feature_m2-session-screen-and-plates.md | 화면 배선까지 끝. Esc 저장이 마친 판을 되돌리던 버그 포함 |
 | 2026-09-03T10:41:02+09:00 | #m2-01-session-persist | claude-code | ~→x | 20260903/Features_to_add/1040_feature_m2-session-screen-and-plates.md | 저장 5시점·이어 찍기·강제 종료 복구. 화면 테스트가 Esc 흐름을 건다 |
 | 2026-09-03T10:41:04+09:00 | #m2-02-appeal-lifer | claude-code | ☐→x | 20260903/Features_to_add/1040_feature_m2-session-screen-and-plates.md | LIFER 행/연출 분리(D76). appeal 은 항목 제목대로 M3 |
+| 2026-09-03T10:45:41+09:00 | #m2-06-q4-ipc-dump | claude-code | ☐→x |  | fixtures/ipc/tiny 재생 → 진짜 사전 카드 → 오답·다시 찍기·사다리·요약. git diff --exit-code 게이트는 M1 것 그대로 |
+| 2026-09-03T10:45:42+09:00 | #m2-06-q5-audit-port | claude-code | ☐→~ |  | gates.ts(fonts·contrast·measure)+모션 정적 게이트+allowlist 만료는 끝. Playwright 7게이트 하네스는 M5 E2E 와 함께 |
+| 2026-09-03T10:45:44+09:00 | #m2-01-perf-bench | claude-code | ☐→! |  | 헤드리스 스케줄러 실측은 끝. WKWebView 홈·세션 프레임은 m1-05 와 같은 이유로 사람이 GUI 에서 한 번 돌려야 한다 |
 <!-- oculpm:plan-log end -->
