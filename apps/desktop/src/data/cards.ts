@@ -190,7 +190,7 @@ async function loadSiteInputs(
   const out: SiteInput[] = [];
   for (const row of ordered) {
     const site = fromConceptSiteRow(row) as ConceptSite;
-    const lines = await readContext(deps.rootPath, row.path, row.line_start);
+    const lines = await readContext(deps.rootPath, row.path, row.line_start, row.excerpt);
     const lineSites = await ipc.store.query('card.sites_on_line', {
       repoId: deps.repoId, fileId: row.file_id, lineStart: row.line_start,
       lineEnd: row.line_end, exceptId: row.id,
@@ -206,19 +206,24 @@ async function loadSiteInputs(
   return out;
 }
 
-/** 초점 ±4 줄. 파일이 사라졌으면 `excerpt` 한 줄로 대신한다 — 카드를 못 만드는 것보다 낫다. */
+/**
+ * 초점 ±4 줄. 파일이 사라졌거나 못 읽으면 **`excerpt` 한 줄로 대신한다** — 앞뒤 맥락이 없는
+ * 카드는 좁지만, 코드 줄이 아예 없는 카드는 빈 판이라 아무것도 못 묻는다.
+ */
 async function readContext(
   rootPath: string,
   relPath: string,
   focus: number,
+  excerpt: string,
 ): Promise<FocusLine[]> {
   const from = Math.max(1, focus - CONTEXT_RADIUS);
   try {
     const chunk = await ipc.file.readLines({
       rootPath, relPath, from, to: focus + CONTEXT_RADIUS,
     });
-    return chunk.lines.map((t, i) => ({ n: from + i, t }));
+    if (chunk.lines.length > 0) return chunk.lines.map((t, i) => ({ n: from + i, t }));
   } catch {
-    return [];
+    // 아래 폴백으로 내려간다. 읽기 실패는 카드를 못 만들 이유가 아니다.
   }
+  return excerpt === '' ? [] : [{ n: focus, t: excerpt }];
 }

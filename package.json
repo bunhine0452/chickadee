@@ -21,7 +21,8 @@
     "bench": "bash scripts/bench.sh",
     "catalog:build": "tsx scripts/build-catalog.ts",
     "dict:lint": "vitest run packages/dictionary/src/dict.test.ts",
-    "dict:schema": "tsx scripts/dict-schema.ts"
+    "dict:schema": "tsx scripts/dict-schema.ts",
+    "check:motion": "node scripts/check-motion.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
