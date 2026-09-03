@@ -278,7 +278,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-14, windows-2022, ubuntu-22.04]
+        include:
+          - { os: macos-14, bundles: '--bundles app' }
+          - { os: windows-2022, bundles: '' }
+          - { os: ubuntu-22.04, bundles: '--bundles deb,appimage' }
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -316,13 +319,19 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # macOS bundles the .app but not the .dmg. This job answers "does the app
-      # build and bundle on three OSes" (D53); a dmg is a release artifact, and
-      # bundle_dmg.sh drives hdiutil, which fails intermittently on a shared
-      # runner for reasons that have nothing to do with this code. release.yml
-      # makes the dmg, where a retry is cheap and a flake is visible.
+      # Each OS bundles what this job is for and leaves the rest to release.yml.
+      #
+      # macOS: the .app, not the .dmg. A dmg is a release artifact, and bundle_dmg.sh
+      # drives hdiutil, which fails intermittently on a shared runner for reasons that
+      # have nothing to do with this code.
+      #
+      # Linux: deb and AppImage, not rpm. `bundle.targets` is "all", and the rpm bundler
+      # spent 25 min 43 s of a 32-minute job compressing a debug binary — measured on run
+      # 33804384792, against 8 s for the deb and 1 min 50 s for the AppImage. The releases
+      # ship AppImage and .deb (CHANGELOG), so an rpm that nobody downloads was setting
+      # this job's wall clock. release.yml still builds it.
       - name: tauri build --debug
-        run: pnpm tauri build --debug ${{ matrix.os == 'macos-14' && '--bundles app' || '' }}
+        run: pnpm tauri build --debug ${{ matrix.bundles }}
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -444,10 +453,11 @@ jobs:
   e2e-linux:
     name: e2e-linux
     runs-on: ubuntu-22.04
-    # 06 §5.1 budgets 8 min for the scenarios themselves. This job also compiles the app
-    # and installs tauri-driver, and on a cold cache that alone crossed 30 minutes on the
-    # first run. Same ceiling as build-3os for the same reason.
-    timeout-minutes: 55
+    # 06 §5.1 budgets 8 min for the scenarios themselves; they took 60 s on the first
+    # green run. The rest is the compile in front of them — 2 min 39 s on a cold cache
+    # now that `--no-bundle` skips the packaging. 25 leaves room for a cold cache and a
+    # retry without hiding a hang.
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -497,7 +507,10 @@ jobs:
       # by WebDriver, which is why E2 and E3 are not written at all (see tests/e2e/specs).
       - run: bash scripts/make-fixture-repo.sh tiny
 
-      - run: pnpm tauri build --debug
+      # `--no-bundle`: the scenarios drive `target/debug/chickadee-app`, and nothing here
+      # opens a deb, an rpm or an AppImage. Bundling them took 37 min 25 s of this job
+      # while E1~E8 themselves took 60 s (run 33804384792).
+      - run: pnpm tauri build --debug --no-bundle
 
       - run: xvfb-run -a bash tests/e2e/scripts/with-keyring.sh pnpm test:e2e
 
