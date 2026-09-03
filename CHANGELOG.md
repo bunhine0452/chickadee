@@ -43,3 +43,21 @@ There is no automatic update — a new version is downloaded by hand.
   motion honored, and every screen reachable without a mouse.
 - **Downloads** for macOS (Apple silicon and Intel), Windows, and Linux (AppImage and
   `.deb`), with `SHA256SUMS.txt` attached to the release.
+
+### Known issues
+
+Found by the end-to-end suite that landed with this release, and left in rather than
+rushed:
+
+- The ladder shows the layer you were on, not the layer the "I don't know" press moved you
+  to, and its "next print" line always reads "today" instead of the interval it replaced.
+- The fourth step of the ladder does not carry the sentence you type into "where I am
+  stuck" — the prompt is assembled once when the ladder opens.
+- The ingest screen never names the file it is reading; the progress boxes are right, the
+  filename beside them is not.
+- The session screen has no live region, so a screen reader hears the verdict only by
+  moving to it.
+- On macOS, Tab does not reach buttons unless "Keyboard navigation" is on in System
+  Settings. That is the platform default for WebKit, not something the app sets; every
+  screen is still reachable with Option+Tab and the documented shortcuts.
+- Home renders at 19 ms per frame against a 12 ms budget on a repository with 18 sheets.
