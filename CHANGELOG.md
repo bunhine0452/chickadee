@@ -12,7 +12,7 @@ survives a re-ingest; the cards and concept sites are rebuilt.
 The sections below are drafted with `git cliff` from the commit log and then rewritten by
 hand — `cliff.toml` holds the configuration and the rules.
 
-## [0.1.0] - 2026-09-03
+## [0.1.0] - unreleased
 
 First release. The app is not code-signed on Windows and not notarized by Apple: the
 Install section of the README has the per-OS workaround and the `SHA256SUMS.txt` check.
@@ -40,35 +40,17 @@ There is no automatic update — a new version is downloaded by hand.
   four lines on each side — file base name only, no directory path, no repository name,
   no commit message. 0.1.0 builds it for you to copy and never sends it.
 - **Korean interface** on design tokens generated from the mockups: dark theme, reduced
-  motion honored, and every screen reachable without a mouse.
+  motion honored, every screen reachable without a mouse, and one place per screen where
+  what just happened is read aloud — a sentence, not the whole panel.
 - **Downloads** for macOS (Apple silicon and Intel), Windows, and Linux (AppImage and
   `.deb`), with `SHA256SUMS.txt` attached to the release.
-
-### Fixed after the first end-to-end run
-
-The suite that landed with this release found six defects. Five are fixed here.
-
-- The ladder said "ink 2 passes → 2 passes" and "next print today → today". It now reads
-  the layer that pressing "I don't know" actually moves you to, and names the interval it
-  replaces — or leaves that line out on a card that had no schedule yet.
-- The ingest screen names the file it is reading. The path was travelling in the Rust
-  event and being dropped one layer above the screen.
-- The session has a live region. It reads one sentence — "정합 — 맞았습니다. 잉크 1겹 ·
-  다음 인쇄 내일. Space 로 다음." — instead of the whole verdict panel, which is what the
-  feedback box's own `aria-live` was doing.
-- The ladder's fourth step carries what you type. The prompt was assembled once when the
-  ladder opened, so "where I am stuck" always read "(비어 있음)" no matter what you wrote;
-  "프롬프트 만들기" now builds it from the box, and nothing is shown until you press it.
-- The home no longer draws a separate SVG per concept sticker. Each ink layer is baked
-  once and reused, which took the repaint of 1,600 stickers from 28 ms to 17 ms per frame
-  in the WebKit harness — the same as drawing none. Fixing it surfaced a second bug: the
-  badge was missing the mockup's `viewBox` and had been overflowing its box onto the ink
-  scale's labels.
 
 ### Known issues
 
 - On macOS, Tab does not reach buttons unless "Keyboard navigation" is on in System
   Settings. That is the platform default for WebKit, not something the app sets; every
   screen is still reachable with Option+Tab and the documented shortcuts.
-- The 19 ms per frame above still needs re-measuring on a release build against a
-  repository with 18 sheets; the number above comes from the browser harness.
+- The home's frame budget is 12 ms and the last release-build measurement on a repository
+  with 18 sheets was 19 ms. The stickers that caused it are drawn differently now — the
+  browser harness puts 1,600 of them at 17 ms, the same as drawing none — but that has not
+  been re-measured on a release build, so the 19 ms stands until it is.
