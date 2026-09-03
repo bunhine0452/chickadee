@@ -61,6 +61,11 @@ export interface CardMaker {
    * `null` — 그러면 그날 T1 슬롯은 비고 T0 이 그 시간을 쓴다 (02 §5.3).
    */
   forBlock(): Promise<Candidate | null>;
+  /**
+   * T2 구조 판. 대지에 지도가 안 서거나(파일이 없다) 문제를 못 만들면 `null` —
+   * T1 과 같은 규칙이다.
+   */
+  forUnit(): Promise<Candidate | null>;
 }
 
 const asLayer = (n: number): Layer => Math.max(0, Math.min(4, Math.trunc(n))) as Layer;
@@ -206,9 +211,8 @@ async function buildQueue(
 }
 
 /**
- * T1·T2 슬롯. 리듬이 「오늘 걸어라」고 할 때만 카드를 찾고, **T1 은 없으면 그 자리에서
- * 만든다** — 블록은 인제스트가 이미 써 뒀으므로(02 `block`) 필사 판은 언제든 굽을 수 있다.
- * T2 는 M4 가 같은 자리를 채운다.
+ * T1·T2 슬롯. 리듬이 「오늘 걸어라」고 할 때만 카드를 찾고, 없으면 **그 자리에서 만든다** —
+ * 블록도 지도도 인제스트가 이미 써 뒀으므로(02 `block`·`import_edge`) 둘 다 언제든 굽는다.
  */
 async function trackSlot(
   repoId: number,
@@ -233,7 +237,7 @@ async function trackSlot(
       estMin: estMinFor(track, card.prints > 0 ? 'review' : 'new', card.est_min_ema),
     };
   }
-  return track === 't1' ? maker.forBlock() : null;
+  return track === 't1' ? maker.forBlock() : maker.forUnit();
 }
 
 const shiftDay = (day: string, delta: number): string => {

@@ -48,6 +48,20 @@ const { deriveRepo, materializeDict, recountUnknown, writeUnitNodes } = await im
 
 const dict = loadDict();
 
+/**
+ * `_imports` 캡처 한 건을 심는다 (04 §7.1). Rust 는 지정자 문자열만 잡고 그것이 어느
+ * 파일인지는 TS 가 푼다 — 그 「푼다」가 `writeEdges` 이고 이 함수가 그 입력이다.
+ */
+function seedImport(path: string, spec: string, form: string, matchId: number): void {
+  const text = `'${spec}'`;
+  db.prepare(statements['facts.capture_insert']).run(toSqliteBindings({
+    repoId: 1, path, queryId: '_imports', matchId, patternIndex: 0,
+    name: 'import.source', form, nodeKind: 'string', inError: false,
+    startByte: 0, endByte: text.length, startLine: 1, endLine: 1,
+    startCol: 0, endCol: text.length, excerpt: text,
+  }));
+}
+
 /** `res.user?.profile` 한 줄이 든 파일 하나를 사실 층에 심는다. */
 function seedFile(id: number, path: string, line: string): void {
   db.prepare(statements['facts.file_upsert']).run(toSqliteBindings({
@@ -143,6 +157,44 @@ describe('파생 한 바퀴', () => {
     const rows = db.prepare('SELECT is_alive FROM concept_site').all() as { is_alive: number }[];
     expect(rows).toHaveLength(3);
     expect(rows.every((r) => r.is_alive === 0)).toBe(true);
+  });
+
+  test('import 지정자가 지도 엣지가 된다 — 확장자를 붙여 파일 집합에서 찾는다', async () => {
+    seedImport('src/features/cart/useCart.ts', './api', 'static', 10);
+    seedImport('src/features/cart/view.ts', './useCart', 'static', 11);
+    // bare 지정자는 external 이라 엣지가 없다 (04 §7.1).
+    seedImport('src/features/cart/view.ts', 'react', 'static', 12);
+    const out = await deriveRepo(dict, options);
+
+    expect(out.edges).toBe(2);
+    const rows = db.prepare(
+      `SELECT a.path AS from_path, b.path AS to_path, e.kind
+         FROM import_edge e
+         JOIN file a ON a.id = e.from_file_id
+         JOIN file b ON b.id = e.to_file_id
+        ORDER BY a.path`,
+    ).all() as { from_path: string; to_path: string; kind: string }[];
+    expect(rows).toEqual([
+      { from_path: 'src/features/cart/useCart.ts', to_path: 'src/features/cart/api.ts', kind: 'static' },
+      { from_path: 'src/features/cart/view.ts', to_path: 'src/features/cart/useCart.ts', kind: 'static' },
+    ]);
+  });
+
+  test('다시 돌려도 엣지가 늘지 않는다 — 파일마다 지우고 다시 넣는다', async () => {
+    seedImport('src/features/cart/useCart.ts', './api', 'static', 10);
+    await deriveRepo(dict, options);
+    await deriveRepo(dict, { ...options, now: T + 1 });
+    const n = db.prepare('SELECT COUNT(*) AS n FROM import_edge').get() as { n: number };
+    expect(n.n).toBe(1);
+  });
+
+  test('지정자가 사라지면 엣지도 사라진다', async () => {
+    seedImport('src/features/cart/useCart.ts', './api', 'static', 10);
+    await deriveRepo(dict, options);
+    db.prepare("DELETE FROM capture WHERE query_id = '_imports'").run();
+    await deriveRepo(dict, { ...options, now: T + 1 });
+    const n = db.prepare('SELECT COUNT(*) AS n FROM import_edge').get() as { n: number };
+    expect(n.n).toBe(0);
   });
 
   test('대지가 잡히고 파일이 붙는다', async () => {

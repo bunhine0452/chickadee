@@ -152,19 +152,35 @@ const t1PayloadSchema = z.object({
   }),
 });
 
+export const edgeKindSchema = z.enum(['static', 'type', 'dynamic', 'http']);
+
+/**
+ * D100 — 02 §8.2 의 t2 변형. 네 종이 한 모양을 나눠 쓴다.
+ *   · `commit` 없음  = 그래프만으로 만든 3종, 또는 커밋 부족 폴백 (04 §8.3·§8.4)
+ *   · `flow`/`pairs` = 흐름 추적·의존성 방향의 정답지. 파일을 **고르는** 두 종은 `core` 를 쓴다
+ *   · `edges` 3번째 자리 = `import_edge.kind`. 05 가 `type` 을 점선, `http` 를 이중선으로 (04 §7.3)
+ */
 const t2PayloadSchema = z.object({
   track: z.literal('t2'),
   kind: z.enum(['placement', 'radius', 'flow', 'direction']),
   q: z.string(),
   hint: z.string(),
   bands: z.array(z.object({ l: z.string(), s: z.string() })),
-  files: z.array(z.object({ p: z.string(), r: z.number(), isNew: z.boolean().optional() })),
-  edges: z.array(z.tuple([z.string(), z.string()])),
-  commit: z.object({ h: z.string(), d: z.string(), m: z.string(), n: z.string() }),
+  files: z.array(z.object({
+    p: z.string(), r: z.number(), isNew: z.boolean().optional(),
+    // 접힌 폴더 노드 안의 파일 수 (04 §7.4) · SCC 크기 > 1 (04 §7.2).
+    folded: int().optional(), cycle: z.boolean().optional(),
+  })),
+  edges: z.array(z.tuple([z.string(), z.string(), edgeKindSchema])),
+  commit: z.object({ h: z.string(), d: z.string(), m: z.string(), n: z.string() }).optional(),
   core: z.record(z.tuple([z.string(), z.string()])),
   sec: z.record(z.tuple([z.string(), z.string()])),
   trap: z.record(z.string()),
   hints: z.array(z.string()),
+  flow: z.object({ answer: z.array(z.string()), deck: z.array(z.string()) }).optional(),
+  pairs: z.array(z.object({
+    a: z.string(), b: z.string(), answer: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3)]),
+  })).optional(),
 });
 
 /** `card.payload_json` (02 §8.2 · 05 가 그대로 렌더한다). */

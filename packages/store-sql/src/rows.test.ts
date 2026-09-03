@@ -144,7 +144,7 @@ const CARD_T2: Card = {
   payload: {
     track: 't2', kind: 'placement', q: '이 커밋은 어느 파일을 건드렸을까요?', hint: '반지름을 보세요.',
     bands: [{ l: '핵심', s: '0-1' }], files: [{ p: 'src/a.ts', r: 0 }, { p: 'src/b.ts', r: 1, isNew: true }],
-    edges: [['src/a.ts', 'src/b.ts']],
+    edges: [['src/a.ts', 'src/b.ts', 'static']],
     commit: { h: 'abc1234', d: '2026-01-01', m: 'fix: 로그인 응답 방어', n: '2' },
     core: { 'src/a.ts': ['+12', '-3'] }, sec: { 'src/b.ts': ['+1', '-0'] },
     trap: { 'src/c.ts': '이 커밋과 무관' }, hints: ['라우터부터 보세요'],

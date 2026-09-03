@@ -120,14 +120,19 @@ impl Repo {
         walk.map(|o| Ok(o?.to_string())).collect()
     }
 
-    /// Merge commits get no diff — combined diffs invent changes nobody wrote.
-    fn changed(
+    /// The commit's diff against its first parent, renames already matched.
+    /// Merges give `None` — a combined diff invents changes nobody wrote.
+    ///
+    /// `only` narrows it to one path. Both callers must share these options: the
+    /// answer key compares `additions` from `changed()` with hunks from
+    /// `file_diff()`, and different whitespace rules would make them disagree.
+    fn diff_of(
         &self,
         commit: &git2::Commit<'_>,
-        max_files: usize,
-    ) -> Out<(Vec<ChangedFile>, u32, u32, bool)> {
+        only: Option<&str>,
+    ) -> Out<Option<git2::Diff<'_>>> {
         if commit.parent_count() > 1 {
-            return Ok((Vec::new(), 0, 0, false));
+            return Ok(None);
         }
         let mut opts = git2::DiffOptions::new();
         // Whitespace-only edits come out 0/0 and drop out of the answer key by
@@ -135,6 +140,9 @@ impl Repo {
         opts.context_lines(0)
             .ignore_whitespace(true)
             .include_typechange(false);
+        if let Some(path) = only {
+            opts.pathspec(path);
+        }
         let parent = commit.parent(0).ok();
         let parent_tree = parent.as_ref().map(git2::Commit::tree).transpose()?;
         let mut diff = self.inner.diff_tree_to_tree(
@@ -145,7 +153,17 @@ impl Repo {
         let mut find = git2::DiffFindOptions::new();
         find.renames(true).rename_threshold(RENAME_SIMILARITY);
         diff.find_similar(Some(&mut find))?;
+        Ok(Some(diff))
+    }
 
+    fn changed(
+        &self,
+        commit: &git2::Commit<'_>,
+        max_files: usize,
+    ) -> Out<(Vec<ChangedFile>, u32, u32, bool)> {
+        let Some(diff) = self.diff_of(commit, None)? else {
+            return Ok((Vec::new(), 0, 0, false));
+        };
         let total = diff.deltas().len();
         let truncated = total > max_files;
         let mut files = Vec::with_capacity(total.min(max_files));
@@ -222,4 +240,85 @@ fn rel_of(path: &std::path::Path) -> String {
         })
         .collect::<Vec<_>>()
         .join("/")
+}
+
+/// Added text one call returns. Past this the tail is dropped and `truncated`
+/// says so — the reader wants to know what kind of lines were added, not to
+/// rebuild the file.
+const MAX_DIFF_BYTES: usize = 65_536;
+
+/// The new side's added lines for one path in one commit (01 §3.1 · D98).
+///
+/// Status, `additions` and `deletions` are **not** repeated here — `commit_file`
+/// stored them at ingest, and shipping the whole patch would send more of the
+/// user's code across IPC than any reader needs.
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FileDiff {
+    pub rel_path: String,
+    /// `+` lines, origin byte and trailing newline stripped.
+    pub added: Vec<String>,
+    pub truncated: bool,
+}
+
+impl Repo {
+    /// The lines one commit added to one path. Merges give nothing, same as
+    /// `history()` — a combined diff invents changes nobody wrote.
+    ///
+    /// A path this commit did not touch comes back empty rather than as an error:
+    /// the caller reads `commit_file` rows, and a truncated commit has rows for
+    /// files the walk never produced (03 §1.4).
+    pub fn file_diff(&self, sha: &str, rel_path: &str) -> Out<FileDiff> {
+        let mut out = FileDiff {
+            rel_path: rel_path.to_owned(),
+            added: Vec::new(),
+            truncated: false,
+        };
+        let oid = git2::Oid::from_str(sha).map_err(|_| GitError::CommitNotFound(sha.to_owned()))?;
+        let commit = self
+            .inner
+            .find_commit(oid)
+            .map_err(|_| GitError::CommitNotFound(sha.to_owned()))?;
+        let Some(diff) = self.diff_of(&commit, Some(rel_path))? else {
+            return Ok(out);
+        };
+        // Renames are matched on the new side, which is where the caller looks.
+        let want = Some(rel_path.to_owned());
+        let Some(idx) = diff.deltas().position(|d| {
+            d.new_file()
+                .path()
+                .or_else(|| d.old_file().path())
+                .map(rel_of)
+                == want
+        }) else {
+            return Ok(out);
+        };
+        let Some(patch) = git2::Patch::from_diff(&diff, idx)? else {
+            return Ok(out);
+        };
+        let mut budget = MAX_DIFF_BYTES;
+        for h in 0..patch.num_hunks() {
+            let Ok(count) = patch.num_lines_in_hunk(h) else {
+                continue;
+            };
+            for l in 0..count {
+                let Ok(line) = patch.line_in_hunk(h, l) else {
+                    continue;
+                };
+                if line.origin() != '+' {
+                    continue;
+                }
+                let text = String::from_utf8_lossy(line.content())
+                    .trim_end()
+                    .to_owned();
+                if text.len() > budget {
+                    out.truncated = true;
+                    return Ok(out);
+                }
+                budget -= text.len();
+                out.added.push(text);
+            }
+        }
+        Ok(out)
+    }
 }

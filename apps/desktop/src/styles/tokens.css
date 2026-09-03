@@ -99,6 +99,8 @@
   --verdict-exact-text: #960B42;
   --verdict-equiv-text: #0F3F9E;
   --verdict-differ-text: #664300;
+  --verdict-differ-face: #FFC400;
+  --on-verdict-differ: #221D18;
   --glow-t0: transparent;
   --glow-t1: transparent;
   --glow-t2: transparent;
@@ -152,6 +154,8 @@
   --verdict-exact-text: #FFA3CE;
   --verdict-equiv-text: #9CC2FF;
   --verdict-differ-text: #FFD866;
+  --verdict-differ-face: #FFD030;
+  --on-verdict-differ: #221D18;
 }
 
 /* ───────── 야간 작업 램프 — 대지를 비추는 빛 하나 (05 §4.3: 다크 선택자는 tokens.css 에만) ───────── */

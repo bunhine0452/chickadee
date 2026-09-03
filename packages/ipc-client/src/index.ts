@@ -6,7 +6,7 @@ import { IpcError, toIpcError } from './errors.js';
 import type { BatchOp, ParamsOf, RowOf, StatementName } from './statements.js';
 import type {
   AppPaths, AppVersion, BlameHunk, Block, Catalog, ExecInfo, IngestDone, IngestProgress,
-  IngestSpec, JobId, LangInfo, LinesChunk, ReadBlockReq, ReadLinesReq, RepoProbe,
+  FileDiff, IngestSpec, JobId, LangInfo, LinesChunk, ReadBlockReq, ReadLinesReq, RepoProbe,
   SnippetReq, SnippetResult, StoreInfo,
 } from './types.js';
 
@@ -73,6 +73,9 @@ export const ipc = {
   git: {
     blameLines: (rootPath: string, relPath: string, rev?: string) =>
       call<{ hunks: BlameHunk[] }>('git_blame_lines', { rootPath, relPath, rev }),
+    /** 커밋 하나가 파일 하나에 더한 줄 (04 §8.1 의 「추가 줄이 전부 import 문」). */
+    diffText: (rootPath: string, sha: string, relPath: string) =>
+      call<FileDiff>('git_diff_text', { rootPath, sha, relPath }),
   },
   store: {
     open: (catalog: Catalog) => call<StoreInfo>('store_open', { catalog }),

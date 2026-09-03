@@ -7,12 +7,13 @@
 import { keyOf, kindOf, langOf, langSpecs, loadDict, type Dict } from '@chickadee/dictionary';
 import { fnv1a64 } from '@chickadee/text';
 import {
-  ipc, on, type BatchOp, type Capture, type IngestDone, type IngestProgress,
+  ipc, log, on, type BatchOp, type Capture, type IngestDone, type IngestProgress,
 } from '@chickadee/ipc-client';
 
 import { classify, isMine, type Identity } from './commits.js';
 import { deriveFile, type DerivedSite, type RawBlock } from './derive.js';
 import { buildGaps, type CountableSite } from './gaps.js';
+import { resolveImports, type FileImports } from './resolve-imports.js';
 import { EXCLUDE_GLOBS, GENERATED_MARKERS, LIMITS } from './ingest-defaults.js';
 import { assignUnits } from './units.js';
 import { knownSet, unknownCount, type MasteryRow } from './unknown-rank.js';
@@ -159,7 +160,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestReport> {
 export async function deriveRepo(
   dict: Dict,
   options: IngestOptions,
-): Promise<{ sites: number; blocks: number; gaps: number; units: number }> {
+): Promise<{ sites: number; blocks: number; edges: number; gaps: number; units: number }> {
   const { repoId, now } = options;
   const heuristic = new Set(
     [...dict.concepts.values()]
@@ -175,6 +176,7 @@ export async function deriveRepo(
   let siteCount = 0;
   let blockCount = 0;
   let step = 0;
+  const imports: FileImports[] = [];
 
   for (const file of target) {
     const captures = await ipc.store.query('derive.captures_by_file', { fileId: file.id });
@@ -187,17 +189,66 @@ export async function deriveRepo(
     const sites = result.sites.filter((s) => dict.concepts.has(s.conceptId));
     await writeSites(repoId, file, sites, now);
     await writeBlocks(repoId, file, result.blocks, now);
+    // 지정자는 모아 두었다가 파일 집합이 다 모인 뒤 한 번에 푼다 — `./x` 가 어느 파일인지는
+    // 그 파일이 인제스트에 들어왔는지를 알아야 답할 수 있다 (04 §7.1).
+    imports.push({ path: file.path, imports: result.imports });
     blockCount += result.blocks.length;
     siteCount += sites.length;
     step += 1;
     options.onProgress?.('derive', step, target.length);
   }
 
+  const edges = await writeEdges(repoId, files, imports, target.map((f) => f.id));
   await classifyCommits(repoId, options.identities ?? []);
   // 대지와 구멍은 리포 전체를 본다 — 증분이어도 「몇 파일 중 몇 곳」의 분모는 전체다.
   const units = await writeUnits(repoId, files);
   const gaps = await writeGaps(dict, repoId, files.length, now);
-  return { sites: siteCount, blocks: blockCount, gaps, units };
+  return { sites: siteCount, blocks: blockCount, edges, gaps, units };
+}
+
+/**
+ * import 지도 (02 `import_edge` · 04 §7.1).
+ *
+ * 해석은 **리포 전체 파일 집합**에 대고 한다 — 증분이라도 그렇다. 이번에 안 바뀐 파일이
+ * 이번에 바뀐 파일을 가리킬 수 있고, 그 엣지는 여전히 유효하다. 다만 **쓰는 것**은 이번에
+ * 다시 판 파일에서 나가는 엣지뿐이다: 안 바뀐 파일의 엣지를 지웠다 다시 넣으면 증분이
+ * 전체 인제스트가 된다.
+ */
+async function writeEdges(
+  repoId: number,
+  files: readonly { id: number; path: string }[],
+  imports: readonly FileImports[],
+  touched: readonly number[],
+): Promise<number> {
+  const idOf = new Map(files.map((f) => [f.path, f.id]));
+  const resolved = resolveImports({ paths: files.map((f) => f.path), files: imports });
+  const mine = new Set(touched);
+
+  // 다시 판 파일의 엣지를 먼저 지운다. 지정자가 하나도 안 남은 파일도 지워져야 하므로
+  // 「해석 결과가 있는 파일」이 아니라 「이번에 판 파일」이 기준이다.
+  const ops: BatchOp[] = [];
+  for (const fileId of touched) ops.push({ name: 'derive.edge_clear', params: { fileId } });
+  let unknown = 0;
+  for (const edge of resolved) {
+    const fromFileId = idOf.get(edge.from);
+    const toFileId = idOf.get(edge.to);
+    if (fromFileId === undefined || toFileId === undefined) {
+      // 해석기가 `file` 행이 없는 경로를 냈다는 뜻이다. 엣지 하나 때문에 인제스트를 세우지는
+      // 않되 조용히 넘어가지도 않는다 — 04 §7.1 의 go 처럼 노드 단위가 파일이 아닌 언어가
+      // 들어오면 여기서 전부 사라지고, 개수를 안 세면 그것을 눈치챌 방법이 없다.
+      unknown += 1;
+      continue;
+    }
+    if (!mine.has(fromFileId)) continue;
+    ops.push({
+      name: 'derive.edge_insert',
+      params: { repoId, fromFileId, toFileId, kind: edge.kind, confidence: edge.confidence },
+    });
+  }
+  // 경로는 싣지 않는다 (01 §6) — 개수만 남긴다.
+  if (unknown > 0) log.info('가리키는 파일이 없는 import', { n: unknown });
+  await inBatches(ops);
+  return ops.length - touched.length;
 }
 
 /**

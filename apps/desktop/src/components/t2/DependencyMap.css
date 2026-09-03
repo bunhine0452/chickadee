@@ -1,0 +1,208 @@
+/* 목업: design/src/ink/session.css 「T2 구조 : 계층 밴드 지도」의 `.map` · `.nd` · `.edge` ·
+   `.band-*`.
+
+   바꾼 것 —
+     · **13px 하한(05 §4.2)**. 목업의 `.dir{12.5px}` · `.newtag{12px}` 가 룰에 걸린다.
+       셋 다 var(--fs-13) 로 올렸고(`.band-s` 는 13px 리터럴 → 토큰), 넓어진 글에 맞춰
+       「＋ 새 파일」 배지 폭을 56 → 74, 상자 폭 NW 를 178 → **196**(+18) 으로 늘렸다.
+       왜 +18 인가: 가장 긴 표본 이름 `QuantityStepper.tsx` 는 19자 × 14px 모노 = 159.6px,
+       왼 여백 11 을 더해 170.6px 에서 끝난다. 178 폭에서는 판정 배지 자리(NW−22 = 156)를
+       이미 밟고 있었고 196 이면 배지가 174 에서 시작해 3.4px 이 남는다. 치수는
+       DependencyMap.tsx 의 `G` 에 있다 (04 §7.3).
+     · **판정 색을 별칭으로**(05 §4.2). `.nd.ok rect{stroke:var(--pink)}` → --verdict-exact,
+       `.missed` --yellow-deep → --verdict-differ, `.sec` --blue → --verdict-equiv,
+       배지 글자 --pink-text/--yellow-text/--blue-text → --verdict-*-text.
+       「＋ 새 파일」 배지는 황을 **면으로** 칠하므로 --verdict-differ-face /
+       --on-verdict-differ 다 (D95 — 면과 선은 다른 이름이다).
+     · 목업의 `[data-theme="dark"] .nd.sel rect{filter:none}` 은 지웠다. 이 파일에는 filter
+       가 하나도 없고(05 §10), 다크 선택자는 T2 컴포넌트에 허용되지 않는다 (05 §4.3).
+
+   목업에 없어서 여기서 그린 것 넷 — 전부 목업의 어휘(2px 실선 · 점선 · 모서리 배지) 안이다.
+     · `type` 엣지 = 점선. 「선의 성질이 다르다」를 목업이 이미 `.band-line` 점선으로 쓴다.
+       타입만 가져다 쓰는 관계는 실행 시점엔 없는 선이라 실선으로 그리면 거짓말이 된다.
+     · `http` 엣지 = 이중선. 한 경로를 x 로 ∓1.7px 밀어 두 줄로 낸다(엣지는 대체로 수직이라
+       x 이동이 법선 이동과 같다). 화살촉은 뒤쪽 줄(`.under`)에서 떼어 앞쪽 줄에만 붙인다 —
+       두 개면 촉이 겹쳐 뭉친다. 04 §7.1 의 Next `fetch('/api/…')` 엣지가 이것이다.
+     · `⟲` 순환 = 「＋ 새 파일」과 **같은 모양**의 배지를 왼쪽 위 모서리에 건다. 오른쪽 위는
+       새 파일 배지 자리라 겹치지 않는다. 기호만 두면 수수께끼라 낱말을 같이 낸다 (05 §9).
+     · 접힌 폴더 = 상자 뒤에 같은 크기 상자를 5px 어긋나게 한 장 더 깔아 「여러 장」으로
+       보이게 한다. 점선 테두리를 쓰지 않은 이유: 점선은 이미 missed·wrong·sec 의 뜻이다.
+       이름은 `lib/ (3)` (04 §7.4).
+
+   `.nd.missed` 의 `animation: blip .5s 3` 은 목업 그대로 둔다 — 유한(3회) 500ms 라
+   정본 §3-7 「상시 애니메이션 금지」와 720ms 상한에 걸리지 않는다. */
+.map {
+  position: relative;
+  overflow: auto;
+  border: 2px solid var(--rule);
+  background: var(--stock);
+}
+
+.map svg {
+  display: block;
+  font-family: var(--f-mono);
+}
+
+.map .band-l {
+  fill: var(--ink-soft);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  font-weight: 700;
+  letter-spacing: .08em;
+}
+
+.map .band-s {
+  fill: var(--ink-soft);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  opacity: .85;
+}
+
+.map .band-line {
+  stroke: var(--rule);
+  stroke-dasharray: 4 6;
+  opacity: .5;
+}
+
+/* ───────── 엣지 ───────── */
+.map .edge {
+  fill: none;
+  stroke: var(--ink-mute);
+  stroke-width: 1.8;
+  marker-end: url("#ar");
+}
+
+.map .edge.hl {
+  stroke: var(--ink);
+  stroke-width: 2.4;
+  marker-end: url("#arK");
+}
+
+.map .edge.fade { opacity: .14 }
+
+/* `import type` — 실행 시점엔 없는 선이다. */
+.map .edge.type { stroke-dasharray: 6 4 }
+
+/* HTTP 경계 — 두 줄이 나란히 보이도록 각 줄을 얇게. */
+.map .edge.http { stroke-width: 1.4 }
+.map .edge.http.hl { stroke-width: 1.9 }
+
+/* 이중선의 뒤쪽 줄. 화살촉은 앞쪽 줄 하나만 든다. */
+.map .edge.under { marker-end: none }
+
+/* ───────── 노드 ───────── */
+.map .nd { cursor: pointer }
+
+.map .nd rect {
+  fill: var(--paper-2);
+  stroke: var(--rule);
+  stroke-width: 2;
+  transition: fill .12s;
+}
+
+.map .nd:hover rect { fill: var(--paper-3) }
+
+.map .nd:focus-visible { outline: none }
+
+.map .nd:focus-visible rect {
+  stroke: var(--t0);
+  stroke-width: 3;
+}
+
+.map .nd .nm {
+  fill: var(--ink);
+  font-size: var(--fs-14);
+  font-weight: 600;
+}
+
+.map .nd .dir {
+  fill: var(--ink-soft);
+  font-size: var(--fs-13);
+}
+
+.map .nd.sel rect { fill: var(--t0) }
+.map .nd.sel .nm { fill: var(--on-t0) }
+
+.map .nd.sel .dir {
+  fill: var(--on-t0);
+  opacity: .8;
+}
+
+.map .nd.dim { opacity: .28 }
+
+.map .nd .badge {
+  font-size: var(--fs-14);
+  font-weight: 700;
+}
+
+.map .nd.ok rect {
+  fill: var(--stock);
+  stroke: var(--verdict-exact);
+  stroke-width: 3;
+}
+
+.map .nd.ok .badge { fill: var(--verdict-exact-text) }
+
+.map .nd.missed rect {
+  fill: var(--paper-2);
+  stroke: var(--verdict-differ);
+  stroke-width: 3;
+  stroke-dasharray: 6 4;
+  animation: blip .5s 3;
+}
+
+.map .nd.missed .badge { fill: var(--verdict-differ-text) }
+
+@keyframes blip {
+  50% { opacity: .35 }
+}
+
+.map .nd.wrong rect {
+  fill: var(--paper-3);
+  stroke: var(--ink-mute);
+  stroke-dasharray: 3 3;
+}
+
+.map .nd.wrong .nm { fill: var(--ink-soft) }
+.map .nd.wrong .badge { fill: var(--ink-soft) }
+
+.map .nd.sec rect {
+  stroke: var(--verdict-equiv);
+  stroke-width: 2.5;
+  stroke-dasharray: 6 4;
+}
+
+.map .nd.sec .badge { fill: var(--verdict-equiv-text) }
+
+/* 접힌 폴더 — 뒤에 한 장 더. `.nd.sel`·`.nd.ok` 의 면 색이 앞 상자에만 걸리도록
+   `.stack` 은 언제나 종이 색이다. */
+.map .nd .stack {
+  fill: var(--paper-3);
+  stroke: var(--rule);
+  stroke-width: 2;
+}
+
+/* ───────── 모서리 배지 둘 ───────── */
+.map .nd .newbg {
+  fill: var(--verdict-differ-face);
+  stroke: var(--rule);
+  stroke-width: 1.5;
+}
+
+.map .nd .newtag {
+  fill: var(--on-verdict-differ);
+  font-size: var(--fs-13);
+  font-weight: 700;
+}
+
+.map .nd .cycbg {
+  fill: var(--paper-3);
+  stroke: var(--rule);
+  stroke-width: 1.5;
+}
+
+.map .nd .cyctag {
+  fill: var(--ink);
+  font-size: var(--fs-13);
+  font-weight: 700;
+}

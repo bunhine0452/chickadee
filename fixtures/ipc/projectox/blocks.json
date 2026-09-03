@@ -50,6 +50,118 @@
   {
     "concepts": [
       {
+        "conceptId": "ts/arrow-function",
+        "siteCount": 2
+      },
+      {
+        "conceptId": "ts/call-expression",
+        "siteCount": 6
+      },
+      {
+        "conceptId": "ts/const-declaration",
+        "siteCount": 1
+      },
+      {
+        "conceptId": "ts/number-literal",
+        "siteCount": 3
+      },
+      {
+        "conceptId": "ts/property-access",
+        "siteCount": 2
+      },
+      {
+        "conceptId": "ts/string-literal",
+        "siteCount": 3
+      }
+    ],
+    "lineEnd": 27,
+    "lineStart": 9,
+    "name": null,
+    "path": "src/features/cart/CartRow.tsx"
+  },
+  {
+    "concepts": [
+      {
+        "conceptId": "ts/array-map-immutable",
+        "siteCount": 1
+      },
+      {
+        "conceptId": "ts/arrow-function",
+        "siteCount": 2
+      },
+      {
+        "conceptId": "ts/call-expression",
+        "siteCount": 2
+      },
+      {
+        "conceptId": "ts/const-declaration",
+        "siteCount": 1
+      },
+      {
+        "conceptId": "ts/object-destructuring",
+        "siteCount": 1
+      },
+      {
+        "conceptId": "ts/property-access",
+        "siteCount": 2
+      },
+      {
+        "conceptId": "ts/string-literal",
+        "siteCount": 1
+      },
+      {
+        "conceptId": "ts/undefined-null",
+        "siteCount": 1
+      }
+    ],
+    "lineEnd": 20,
+    "lineStart": 8,
+    "name": null,
+    "path": "src/features/cart/CartSheet.tsx"
+  },
+  {
+    "concepts": [
+      {
+        "conceptId": "ts/array-basics",
+        "siteCount": 2
+      },
+      {
+        "conceptId": "ts/array-destructuring",
+        "siteCount": 2
+      },
+      {
+        "conceptId": "ts/arrow-function",
+        "siteCount": 3
+      },
+      {
+        "conceptId": "ts/call-expression",
+        "siteCount": 7
+      },
+      {
+        "conceptId": "ts/const-declaration",
+        "siteCount": 3
+      },
+      {
+        "conceptId": "ts/generics",
+        "siteCount": 1
+      },
+      {
+        "conceptId": "ts/promise-then",
+        "siteCount": 1
+      },
+      {
+        "conceptId": "ts/property-access",
+        "siteCount": 1
+      }
+    ],
+    "lineEnd": 21,
+    "lineStart": 4,
+    "name": null,
+    "path": "src/features/cart/useCart.ts"
+  },
+  {
+    "concepts": [
+      {
         "conceptId": "ts/array-basics",
         "siteCount": 3
       },

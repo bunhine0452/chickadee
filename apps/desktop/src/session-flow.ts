@@ -8,8 +8,9 @@
 import { newcomerFlag, recountUnknown } from '@chickadee/concepts';
 import { loadDict, type Dict } from '@chickadee/dictionary';
 import {
-  canAppeal, draftAppeal, draftWhy, gradeT0, gradeT1, isLifer, nextStage, pickQuestion,
-  t0Answered, toReviewDetail, toT1Detail, type Question, type T0Answered, type T1Result,
+  canAppeal, draftAppeal, draftT2Appeal, draftWhy, gradeDirection, gradeFlow, gradePicks, gradeT0,
+  gradeT1, isLifer, nextStage, pickQuestion, t0Answered, toReviewDetail, toT1Detail, toT2Detail,
+  T2_ENGINE_VERSION, type Question, type T0Answered, type T1Result, type T2Result,
 } from '@chickadee/grading';
 import { IpcError, ipc, log } from '@chickadee/ipc-client';
 import { TICK_MS, labelFor, shouldInsertPrereq, shouldInsertRetry } from '@chickadee/scheduler';
@@ -37,6 +38,9 @@ let maker: MakerDeps | null = null;
 
 const t0Of = (payload: CardPayload): Extract<CardPayload, { track: 't0' }> | null =>
   payload.track === 't0' ? payload : null;
+
+const t2Of = (payload: CardPayload): Extract<CardPayload, { track: 't2' }> | null =>
+  payload.track === 't2' ? payload : null;
 
 /**
  * 홈의 「인쇄 시작」. 오늘 세션이 있으면 이어 찍고, 큐가 비면 아무것도 열지 않는다.
@@ -393,6 +397,127 @@ export async function finishT1Plate(
 
 const t1Of = (payload: CardPayload): Extract<CardPayload, { track: 't1' }> | null =>
   payload.track === 't1' ? payload : null;
+
+/** 04 §8.3 흐름 추적의 답 — 사용자가 세운 순서. 종마다 답의 모양이 다르다. */
+export type T2Answer =
+  | { kind: 'placement' | 'radius'; selected: readonly string[] }
+  | { kind: 'flow'; ordered: readonly string[] }
+  | { kind: 'direction'; picks: readonly (0 | 1 | 2 | 3)[] };
+
+/**
+ * 채점만 한다 — 원장에는 쓰지 않는다. T1 과 같은 두 걸음이다(`gradeT1Plate`/`finishT1Plate`):
+ * 화면이 결과를 먼저 보이고 「이것도 맞다」를 받은 뒤에 `finishT2Plate` 로 마친다.
+ *
+ * IPC 도 파싱도 없다 — T2 채점은 payload 와 선택만 본다 (04 §8.2).
+ */
+export function gradeT2Plate(answer: T2Answer, hints: number): T2Result | null {
+  const { plates, pos } = useUi.getState();
+  const plate = plates[pos];
+  if (plate === undefined) return null;
+  const payload = t2Of(plate.payload);
+  if (payload === null) return null;
+
+  try {
+    if (answer.kind === 'flow') return gradeFlow({ payload, ordered: answer.ordered, hints });
+    if (answer.kind === 'direction') return gradeDirection({ payload, picks: answer.picks, hints });
+    return gradePicks({ kind: answer.kind, payload, selected: answer.selected, hints });
+  } catch (e) {
+    report(e, '채점');
+    return null;
+  }
+}
+
+/**
+ * T2 판을 마친다. 겹·FSRS·원장은 `finishPlate` 가, 「이것도 맞다」는 같은 tx 에 실린다(D84).
+ *
+ * 다시 찍기는 넣지 않는다 — 02 §4 T2 행이 「정답지를 이미 다 봤다」다.
+ */
+export async function finishT2Plate(
+  result: T2Result,
+  appealed: readonly string[],
+  elapsedMs: number,
+): Promise<PlateResult | null> {
+  const store = useUi.getState();
+  const { session, pos, plates } = store;
+  const plate = plates[pos];
+  if (session === null || plate === undefined) return null;
+  const payload = t2Of(plate.payload);
+  if (payload === null) return null;
+
+  try {
+    const settings = await loadSettings();
+    const now = Date.now();
+    const day = today(now, settings);
+    const mastery = (await loadMastery([plate.conceptId])).get(plate.conceptId)
+      ?? emptyMastery(plate.conceptId, null);
+    // 진급은 채점기가 이미 낸 값이다 (04 §8.2) — 여기서 다시 계산하면 언젠가 갈라진다.
+    const ok = result.verdict === 'advance';
+
+    const appeals = appealed.map((path) => {
+      const draft = draftT2Appeal({ path, payload, engineVersion: T2_ENGINE_VERSION,
+        dictVersion: maker === null ? null : dictVersionOf(maker.dict) });
+      return {
+        track: 't2' as const,
+        lineNo: draft.lineNo,
+        originalText: draft.originalText,
+        userText: draft.userText,
+        normOriginal: draft.normOriginal,
+        normUser: draft.normUser,
+        autoVerdict: draft.autoVerdict,
+        autoReason: draft.autoReason,
+        reasons: draft.reasons,
+        patternKey: draft.patternKey,
+        engineVersion: draft.engineVersion,
+        dictVersion: draft.dictVersion,
+      };
+    });
+
+    const state: ItemState = {
+      answered: true,
+      t2Sel: [...result.found, ...result.wrong, ...result.bonus].sort(),
+      hints: result.hints,
+    };
+
+    const finished = await finishPlate({
+      repoId: session.repoId,
+      sessionId: session.id,
+      item: plate,
+      state,
+      mastery,
+      scheduler: await loadScheduler(now, settings.desiredRetention),
+      now,
+      day,
+      ok,
+      dunno: false,
+      transfer: mastery.transferFrom !== null,
+      detail: toT2Detail(result, appeals.length > 0),
+      durationMs: elapsedMs,
+      elapsedS: Math.round(elapsedMs / 1000),
+      // 채집지는 대지의 뿌리다 — T2 는 사용처가 아니라 대지에 매달린다.
+      site: { filePath: payload.files[0]?.p ?? '', lineNo: null },
+      liferShown: store.liferShown,
+      // **`pct` 를 빠뜨리면 조용히 Again 이 된다** (M3 지뢰) — `gradeFor` 가 `pct ?? 0` 을 본다.
+      grade: { pct: result.pct, assists: result.hints },
+      ...(appeals.length > 0 ? { appeals } : {}),
+    });
+
+    useUi.getState().setPlates(await loadPlates(session.id));
+    const outcome: PlateResult = {
+      sel: -1,
+      correct: ok,
+      dunno: false,
+      layer: [finished.move.before, finished.move.after],
+      gain: gainText(finished.move.before, finished.move.after, finished.dueAt, now, settings),
+      early: finished.move.early,
+    };
+    useUi.getState().recordResult(pos, outcome);
+    if (finished.ceremony) useUi.getState().countLifer();
+    return outcome;
+  } catch (e) {
+    report(e, '구조 판 마무리');
+    return null;
+  }
+}
 
 /**
  * 경로 확장자 → tree-sitter 문법 키 (03 §2.1 · D19). 사전의 `extensions` 표를 보는 것이

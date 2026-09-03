@@ -148,3 +148,10 @@ export interface SnippetReq { grammar: string; text: string; queries?: { id: str
 /** `hadError` 는 `ERROR` 노드의 **유무**다. 비율(04 §4.5 의 ≤ 20 %)은 `ast` 를 세어 TS 가 낸다. */
 export interface SnippetResult { ast: AstLite; captures: Capture[]; hadError: boolean }
 export interface Block { relPath: string; rev: string | null; startByte: number; endByte: number; text: string }
+
+/**
+ * `git_diff_text` (01 §3.2 · D98). 그 커밋이 그 경로에 **더한 줄**만 돌려준다 —
+ * `status`·`additions`·`deletions` 는 인제스트가 이미 `commit_file` 에 썼다.
+ * 머지 커밋과 그 커밋이 손대지 않은 경로는 빈 배열이다(오류가 아니다).
+ */
+export interface FileDiff { relPath: string; added: string[]; truncated: boolean }

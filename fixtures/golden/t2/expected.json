@@ -1,0 +1,516 @@
+{
+  "placement-mockup-5": {
+    "kind": "placement",
+    "pct": 67,
+    "found": [
+      "features/cart/CartItemRow.tsx",
+      "features/cart/QuantityStepper.tsx",
+      "features/cart/cartApi.ts",
+      "features/cart/useCartQuantity.ts"
+    ],
+    "missed": [
+      "app/api/cart/route.ts",
+      "server/cartRepo.ts"
+    ],
+    "wrong": [
+      "features/cart/CartSheet.tsx"
+    ],
+    "bonus": [],
+    "verdict": "repeat-soft",
+    "capped": null,
+    "hints": 0,
+    "rows": [
+      {
+        "path": "app/api/cart/route.ts",
+        "tier": "missed",
+        "stat": "+27 −2",
+        "note": "29줄이 바뀌었습니다."
+      },
+      {
+        "path": "server/cartRepo.ts",
+        "tier": "missed",
+        "stat": "+14 −0",
+        "note": "14줄이 바뀌었습니다."
+      },
+      {
+        "path": "features/cart/CartItemRow.tsx",
+        "tier": "found",
+        "stat": "+9 −4",
+        "note": "13줄이 바뀌었습니다."
+      },
+      {
+        "path": "features/cart/QuantityStepper.tsx",
+        "tier": "found",
+        "stat": "+64 −0",
+        "note": "새로 만든 파일입니다."
+      },
+      {
+        "path": "features/cart/cartApi.ts",
+        "tier": "found",
+        "stat": "+18 −1",
+        "note": "19줄이 바뀌었습니다."
+      },
+      {
+        "path": "features/cart/useCartQuantity.ts",
+        "tier": "found",
+        "stat": "+41 −0",
+        "note": "새로 만든 파일입니다."
+      },
+      {
+        "path": "features/cart/CartSheet.tsx",
+        "tier": "wrong",
+        "stat": null,
+        "note": "«CartSheet.tsx» 는 «CartItemRow.tsx» 를 놓기만 합니다. 안쪽이 바뀌어도 «CartSheet.tsx» 는 모릅니다"
+      },
+      {
+        "path": "server/schema.ts",
+        "tier": "sec",
+        "stat": "+4 −1",
+        "note": "몇 줄만 고쳐졌습니다."
+      }
+    ]
+  },
+  "placement-select-all": {
+    "kind": "placement",
+    "pct": 100,
+    "found": [
+      "features/cart/CartItemRow.tsx",
+      "features/cart/QuantityStepper.tsx",
+      "app/api/cart/route.ts",
+      "features/cart/cartApi.ts",
+      "features/cart/useCartQuantity.ts",
+      "server/cartRepo.ts"
+    ],
+    "missed": [],
+    "wrong": [
+      "app/cart/page.tsx",
+      "features/cart/CartSheet.tsx",
+      "features/cart/useCart.ts",
+      "components/ui/Button.tsx",
+      "lib/format.ts"
+    ],
+    "bonus": [
+      "server/schema.ts"
+    ],
+    "verdict": "repeat-soft",
+    "capped": "고른 것 중 절반 이상이 안 바뀐 파일 — 범위를 좁혀 보세요",
+    "hints": 0,
+    "rows": [
+      {
+        "path": "features/cart/CartItemRow.tsx",
+        "tier": "found",
+        "stat": "+9 −4",
+        "note": "13줄이 바뀌었습니다."
+      },
+      {
+        "path": "features/cart/QuantityStepper.tsx",
+        "tier": "found",
+        "stat": "+64 −0",
+        "note": "새로 만든 파일입니다."
+      },
+      {
+        "path": "app/api/cart/route.ts",
+        "tier": "found",
+        "stat": "+27 −2",
+        "note": "29줄이 바뀌었습니다."
+      },
+      {
+        "path": "features/cart/cartApi.ts",
+        "tier": "found",
+        "stat": "+18 −1",
+        "note": "19줄이 바뀌었습니다."
+      },
+      {
+        "path": "features/cart/useCartQuantity.ts",
+        "tier": "found",
+        "stat": "+41 −0",
+        "note": "새로 만든 파일입니다."
+      },
+      {
+        "path": "server/cartRepo.ts",
+        "tier": "found",
+        "stat": "+14 −0",
+        "note": "14줄이 바뀌었습니다."
+      },
+      {
+        "path": "app/cart/page.tsx",
+        "tier": "wrong",
+        "stat": null,
+        "note": "«page.tsx» 는 «CartSheet.tsx» 를 놓기만 합니다. 안쪽이 바뀌어도 «page.tsx» 는 모릅니다"
+      },
+      {
+        "path": "features/cart/CartSheet.tsx",
+        "tier": "wrong",
+        "stat": null,
+        "note": "«CartSheet.tsx» 는 «CartItemRow.tsx» 를 놓기만 합니다. 안쪽이 바뀌어도 «CartSheet.tsx» 는 모릅니다"
+      },
+      {
+        "path": "features/cart/useCart.ts",
+        "tier": "wrong",
+        "stat": null,
+        "note": "«useCart.ts» 에 상태가 있지만 이번엔 새 파일 «QuantityStepper.tsx» 이 그 일을 맡았습니다"
+      },
+      {
+        "path": "components/ui/Button.tsx",
+        "tier": "wrong",
+        "stat": null,
+        "note": "공용 부품. «QuantityStepper.tsx» 가 가져다 쓸 뿐입니다"
+      },
+      {
+        "path": "lib/format.ts",
+        "tier": "wrong",
+        "stat": null,
+        "note": "공용 부품. «CartItemRow.tsx» 가 가져다 쓸 뿐입니다"
+      },
+      {
+        "path": "server/schema.ts",
+        "tier": "sec",
+        "stat": "+4 −1",
+        "note": "몇 줄만 고쳐졌습니다."
+      }
+    ]
+  },
+  "placement-perfect": {
+    "kind": "placement",
+    "pct": 100,
+    "found": [
+      "features/cart/CartItemRow.tsx",
+      "features/cart/QuantityStepper.tsx",
+      "app/api/cart/route.ts",
+      "features/cart/cartApi.ts",
+      "features/cart/useCartQuantity.ts",
+      "server/cartRepo.ts"
+    ],
+    "missed": [],
+    "wrong": [],
+    "bonus": [],
+    "verdict": "advance",
+    "capped": null,
+    "hints": 0,
+    "rows": [
+      {
+        "path": "features/cart/CartItemRow.tsx",
+        "tier": "found",
+        "stat": "+9 −4",
+        "note": "13줄이 바뀌었습니다."
+      },
+      {
+        "path": "features/cart/QuantityStepper.tsx",
+        "tier": "found",
+        "stat": "+64 −0",
+        "note": "새로 만든 파일입니다."
+      },
+      {
+        "path": "app/api/cart/route.ts",
+        "tier": "found",
+        "stat": "+27 −2",
+        "note": "29줄이 바뀌었습니다."
+      },
+      {
+        "path": "features/cart/cartApi.ts",
+        "tier": "found",
+        "stat": "+18 −1",
+        "note": "19줄이 바뀌었습니다."
+      },
+      {
+        "path": "features/cart/useCartQuantity.ts",
+        "tier": "found",
+        "stat": "+41 −0",
+        "note": "새로 만든 파일입니다."
+      },
+      {
+        "path": "server/cartRepo.ts",
+        "tier": "found",
+        "stat": "+14 −0",
+        "note": "14줄이 바뀌었습니다."
+      },
+      {
+        "path": "server/schema.ts",
+        "tier": "sec",
+        "stat": "+4 −1",
+        "note": "몇 줄만 고쳐졌습니다."
+      }
+    ]
+  },
+  "placement-empty": {
+    "kind": "placement",
+    "pct": 0,
+    "found": [],
+    "missed": [
+      "features/cart/CartItemRow.tsx",
+      "features/cart/QuantityStepper.tsx",
+      "app/api/cart/route.ts",
+      "features/cart/cartApi.ts",
+      "features/cart/useCartQuantity.ts",
+      "server/cartRepo.ts"
+    ],
+    "wrong": [],
+    "bonus": [],
+    "verdict": "repeat",
+    "capped": null,
+    "hints": 3,
+    "rows": [
+      {
+        "path": "features/cart/CartItemRow.tsx",
+        "tier": "missed",
+        "stat": "+9 −4",
+        "note": "13줄이 바뀌었습니다."
+      },
+      {
+        "path": "features/cart/QuantityStepper.tsx",
+        "tier": "missed",
+        "stat": "+64 −0",
+        "note": "새로 만든 파일입니다."
+      },
+      {
+        "path": "app/api/cart/route.ts",
+        "tier": "missed",
+        "stat": "+27 −2",
+        "note": "29줄이 바뀌었습니다."
+      },
+      {
+        "path": "features/cart/cartApi.ts",
+        "tier": "missed",
+        "stat": "+18 −1",
+        "note": "19줄이 바뀌었습니다."
+      },
+      {
+        "path": "features/cart/useCartQuantity.ts",
+        "tier": "missed",
+        "stat": "+41 −0",
+        "note": "새로 만든 파일입니다."
+      },
+      {
+        "path": "server/cartRepo.ts",
+        "tier": "missed",
+        "stat": "+14 −0",
+        "note": "14줄이 바뀌었습니다."
+      },
+      {
+        "path": "server/schema.ts",
+        "tier": "sec",
+        "stat": "+4 −1",
+        "note": "몇 줄만 고쳐졌습니다."
+      }
+    ]
+  },
+  "flow-exact": {
+    "kind": "flow",
+    "pct": 100,
+    "found": [
+      "app/cart/page.tsx",
+      "features/cart/CartSheet.tsx",
+      "features/cart/CartItemRow.tsx",
+      "features/cart/QuantityStepper.tsx",
+      "features/cart/useCartQuantity.ts",
+      "features/cart/cartApi.ts"
+    ],
+    "missed": [],
+    "wrong": [],
+    "bonus": [],
+    "verdict": "advance",
+    "capped": null,
+    "hints": 0,
+    "rows": [
+      {
+        "path": "app/cart/page.tsx",
+        "tier": "found",
+        "stat": "1번째",
+        "note": "정답 경로의 1번째입니다."
+      },
+      {
+        "path": "features/cart/CartSheet.tsx",
+        "tier": "found",
+        "stat": "2번째",
+        "note": "정답 경로의 2번째입니다."
+      },
+      {
+        "path": "features/cart/CartItemRow.tsx",
+        "tier": "found",
+        "stat": "3번째",
+        "note": "정답 경로의 3번째입니다."
+      },
+      {
+        "path": "features/cart/QuantityStepper.tsx",
+        "tier": "found",
+        "stat": "4번째",
+        "note": "정답 경로의 4번째입니다."
+      },
+      {
+        "path": "features/cart/useCartQuantity.ts",
+        "tier": "found",
+        "stat": "5번째",
+        "note": "정답 경로의 5번째입니다."
+      },
+      {
+        "path": "features/cart/cartApi.ts",
+        "tier": "found",
+        "stat": "6번째",
+        "note": "정답 경로의 6번째입니다."
+      }
+    ]
+  },
+  "flow-decoy": {
+    "kind": "flow",
+    "pct": 80,
+    "found": [
+      "app/cart/page.tsx",
+      "features/cart/CartSheet.tsx",
+      "features/cart/CartItemRow.tsx",
+      "features/cart/QuantityStepper.tsx",
+      "features/cart/useCartQuantity.ts",
+      "features/cart/cartApi.ts"
+    ],
+    "missed": [],
+    "wrong": [
+      "features/cart/useCart.ts"
+    ],
+    "bonus": [],
+    "verdict": "repeat-soft",
+    "capped": null,
+    "hints": 0,
+    "rows": [
+      {
+        "path": "app/cart/page.tsx",
+        "tier": "found",
+        "stat": "1번째",
+        "note": "정답 경로의 1번째입니다."
+      },
+      {
+        "path": "features/cart/CartSheet.tsx",
+        "tier": "found",
+        "stat": "2번째",
+        "note": "정답 경로의 2번째입니다."
+      },
+      {
+        "path": "features/cart/CartItemRow.tsx",
+        "tier": "found",
+        "stat": "3번째",
+        "note": "정답 경로의 3번째입니다."
+      },
+      {
+        "path": "features/cart/QuantityStepper.tsx",
+        "tier": "found",
+        "stat": "4번째",
+        "note": "정답 경로의 4번째입니다."
+      },
+      {
+        "path": "features/cart/useCartQuantity.ts",
+        "tier": "found",
+        "stat": "5번째",
+        "note": "정답 경로의 5번째입니다."
+      },
+      {
+        "path": "features/cart/cartApi.ts",
+        "tier": "found",
+        "stat": "6번째",
+        "note": "정답 경로의 6번째입니다."
+      },
+      {
+        "path": "features/cart/useCart.ts",
+        "tier": "wrong",
+        "stat": null,
+        "note": "이 경로에 없는 카드입니다. 이 카드가 낀 자리의 쌍은 오답으로 셉니다."
+      }
+    ]
+  },
+  "direction-all": {
+    "kind": "direction",
+    "pct": 100,
+    "found": [
+      "page.tsx ↔ CartSheet.tsx",
+      "CartItemRow.tsx ↔ QuantityStepper.tsx",
+      "cartApi.ts ↔ route.ts",
+      "Button.tsx ↔ QuantityStepper.tsx",
+      "format.ts ↔ schema.ts"
+    ],
+    "missed": [],
+    "wrong": [],
+    "bonus": [],
+    "verdict": "advance",
+    "capped": null,
+    "hints": 0,
+    "rows": [
+      {
+        "path": "page.tsx ↔ CartSheet.tsx",
+        "tier": "found",
+        "stat": "page.tsx → CartSheet.tsx",
+        "note": "page.tsx → CartSheet.tsx — 가져다 쓰는 쪽이 page.tsx 입니다."
+      },
+      {
+        "path": "CartItemRow.tsx ↔ QuantityStepper.tsx",
+        "tier": "found",
+        "stat": "CartItemRow.tsx → QuantityStepper.tsx",
+        "note": "CartItemRow.tsx → QuantityStepper.tsx — 가져다 쓰는 쪽이 CartItemRow.tsx 입니다."
+      },
+      {
+        "path": "cartApi.ts ↔ route.ts",
+        "tier": "found",
+        "stat": "cartApi.ts → route.ts",
+        "note": "cartApi.ts → route.ts — 가져다 쓰는 쪽이 cartApi.ts 입니다."
+      },
+      {
+        "path": "Button.tsx ↔ QuantityStepper.tsx",
+        "tier": "found",
+        "stat": "QuantityStepper.tsx → Button.tsx",
+        "note": "QuantityStepper.tsx → Button.tsx — 가져다 쓰는 쪽이 QuantityStepper.tsx 입니다."
+      },
+      {
+        "path": "format.ts ↔ schema.ts",
+        "tier": "found",
+        "stat": "무관",
+        "note": "무관 — 둘 사이에 import 가 없습니다."
+      }
+    ]
+  },
+  "direction-three": {
+    "kind": "direction",
+    "pct": 60,
+    "found": [
+      "page.tsx ↔ CartSheet.tsx",
+      "CartItemRow.tsx ↔ QuantityStepper.tsx",
+      "cartApi.ts ↔ route.ts"
+    ],
+    "missed": [
+      "Button.tsx ↔ QuantityStepper.tsx",
+      "format.ts ↔ schema.ts"
+    ],
+    "wrong": [],
+    "bonus": [],
+    "verdict": "repeat",
+    "capped": null,
+    "hints": 1,
+    "rows": [
+      {
+        "path": "Button.tsx ↔ QuantityStepper.tsx",
+        "tier": "missed",
+        "stat": "Button.tsx → QuantityStepper.tsx",
+        "note": "QuantityStepper.tsx → Button.tsx — 가져다 쓰는 쪽이 QuantityStepper.tsx 입니다."
+      },
+      {
+        "path": "format.ts ↔ schema.ts",
+        "tier": "missed",
+        "stat": "format.ts → schema.ts",
+        "note": "무관 — 둘 사이에 import 가 없습니다."
+      },
+      {
+        "path": "page.tsx ↔ CartSheet.tsx",
+        "tier": "found",
+        "stat": "page.tsx → CartSheet.tsx",
+        "note": "page.tsx → CartSheet.tsx — 가져다 쓰는 쪽이 page.tsx 입니다."
+      },
+      {
+        "path": "CartItemRow.tsx ↔ QuantityStepper.tsx",
+        "tier": "found",
+        "stat": "CartItemRow.tsx → QuantityStepper.tsx",
+        "note": "CartItemRow.tsx → QuantityStepper.tsx — 가져다 쓰는 쪽이 CartItemRow.tsx 입니다."
+      },
+      {
+        "path": "cartApi.ts ↔ route.ts",
+        "tier": "found",
+        "stat": "cartApi.ts → route.ts",
+        "note": "cartApi.ts → route.ts — 가져다 쓰는 쪽이 cartApi.ts 입니다."
+      }
+    ]
+  }
+}

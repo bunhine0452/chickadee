@@ -397,3 +397,47 @@ fn binary_and_text_are_told_apart_by_a_nul_byte() {
     assert!(replaced);
     assert!(text.ends_with('a'));
 }
+
+#[test]
+fn file_diff_returns_only_the_added_lines_of_one_path() {
+    let dir = tmp("filediff");
+    let repo = init(&dir.0);
+    write(&dir.0, "a.ts", "const a = 1;\n");
+    write(&dir.0, "b.ts", "const b = 1;\n");
+    commit(&repo, "feat: two files");
+    write(
+        &dir.0,
+        "a.ts",
+        "import { x } from './x';\nconst a = 2;\nconst c = 3;\n",
+    );
+    write(&dir.0, "b.ts", "const b = 9;\n");
+    let sha = commit(&repo, "feat: touch both").to_string();
+
+    let open = Repo::open(&dir.0).expect("open");
+    let out = open.file_diff(&sha, "a.ts").expect("diff");
+    // The other file's change must not leak in — the pathspec is the whole point.
+    assert_eq!(
+        out.added,
+        vec!["import { x } from './x';", "const a = 2;", "const c = 3;"]
+    );
+    assert!(!out.truncated);
+    assert_eq!(out.rel_path, "a.ts");
+
+    // A path the commit never touched is empty, not an error (03 §1.4).
+    write(&dir.0, "c.ts", "const c = 1;\n");
+    let last = commit(&repo, "feat: third").to_string();
+    assert!(open.file_diff(&last, "a.ts").expect("diff").added.is_empty());
+}
+
+#[test]
+fn file_diff_refuses_a_sha_that_is_not_there() {
+    let dir = tmp("filediff-missing");
+    let repo = init(&dir.0);
+    write(&dir.0, "a.ts", "const a = 1;\n");
+    commit(&repo, "feat: one");
+    let open = Repo::open(&dir.0).expect("open");
+    assert!(matches!(
+        open.file_diff("0123456789012345678901234567890123456789", "a.ts"),
+        Err(GitError::CommitNotFound(_))
+    ));
+}

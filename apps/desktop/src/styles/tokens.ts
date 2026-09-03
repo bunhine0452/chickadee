@@ -74,6 +74,8 @@ export const tokens = {
     '--verdict-exact-text': '#960B42',
     '--verdict-equiv-text': '#0F3F9E',
     '--verdict-differ-text': '#664300',
+    '--verdict-differ-face': '#FFC400',
+    '--on-verdict-differ': '#221D18',
     '--glow-t0': 'transparent',
     '--glow-t1': 'transparent',
     '--glow-t2': 'transparent',
@@ -119,6 +121,8 @@ export const tokens = {
     '--verdict-exact-text': '#FFA3CE',
     '--verdict-equiv-text': '#9CC2FF',
     '--verdict-differ-text': '#FFD866',
+    '--verdict-differ-face': '#FFD030',
+    '--on-verdict-differ': '#221D18',
   },
 } as const;
 

@@ -77,10 +77,16 @@ export type CardPayload =
   | { track: 't1'; kind: 'transcribe'; blockId: number; file: string; fn: string; original: string[];
       show2: number[];
       why: { line: number; q: string; help: string; choices: { t: string; ok: boolean; fb: string }[] } }
+  // D100 — 네 종이 한 모양을 나눠 쓴다. `commit` 이 없는 카드는 그래프만으로 만든 3종과
+  // 커밋 부족 폴백(04 §8.3·§8.4)이고, `flow`·`pairs` 는 그 두 종의 정답지다.
+  // `edges` 의 3번째 자리는 `import_edge.kind` — 05 가 `type` 을 점선, `http` 를 이중선으로 그린다.
   | { track: 't2'; kind: 'placement' | 'radius' | 'flow' | 'direction'; q: string; hint: string;
-      bands: { l: string; s: string }[]; files: { p: string; r: number; isNew?: boolean }[]; edges: [string, string][];
-      commit: { h: string; d: string; m: string; n: string }; core: Record<string, [string, string]>;
-      sec: Record<string, [string, string]>; trap: Record<string, string>; hints: string[] };
+      bands: { l: string; s: string }[];
+      files: { p: string; r: number; isNew?: boolean; folded?: number; cycle?: boolean }[];
+      edges: [string, string, EdgeKind][];
+      commit?: { h: string; d: string; m: string; n: string }; core: Record<string, [string, string]>;
+      sec: Record<string, [string, string]>; trap: Record<string, string>; hints: string[];
+      flow?: { answer: string[]; deck: string[] }; pairs?: { a: string; b: string; answer: 0 | 1 | 2 | 3 }[] };
 
 /**
  * `session.plan_json` 의 원소. §8.2 는 `Session.plan: PlannedItem[]` 을 쓰면서 `PlannedItem` 을
@@ -124,8 +130,9 @@ export interface Gap { repoId: number; conceptId: ConceptId; siteCount: number; 
 // 인제스트 산출 · 원장 보강 (열과 1:1). `Capture`·`AstLite` 는 01 §3.1 에서 import 한다
 export interface CommitFile { commitId: number; path: string; oldPath: string | null; status: 'A' | 'M' | 'D' | 'R';
   additions: number; deletions: number; touched: [number, number][]; }
+export type EdgeKind = 'static' | 'type' | 'dynamic' | 'http';
 export interface ImportEdge { repoId: number; fromFileId: number; toFileId: number;
-  kind: 'static' | 'type' | 'dynamic' | 'http'; confidence: 'syntactic' | 'heuristic'; }
+  kind: EdgeKind; confidence: 'syntactic' | 'heuristic'; }
 export interface Block { id: number; repoId: number; fileId: number; rev: string | null; name: string; kind: string;
   lineStart: number; lineEnd: number; textHash: string; ast: AstLite | null; isAlive: boolean; updatedAt: number; }
 export interface WhyAnswer { id: number; reviewLogId: number; cardId: number; blockId: number | null; lineNo: number | null;

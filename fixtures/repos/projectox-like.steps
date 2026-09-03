@@ -96,3 +96,192 @@ commit feat: 앱 셸
 gen wave 30 src/gen/service-{i}.ts lines=170 seed=1101 msg=feat: 서비스 {i} 계층 추가
 gen wave 30 src/panels/panel-{i}.tsx lines=150 seed=2201 msg=feat: 패널 {i} 화면 추가
 gen wave 32 db/migrations/01{i}_change.sql lines=60 seed=3301 msg=chore: 마이그레이션 01{i}
+
+# ── 커밋 96~98: 층이 있는 기능 하나 ────────────────────────────────────────
+# 앞의 `gen wave` 세 줄은 **별 모양**만 만든다 — 서비스 30개가 전부 core/time.ts 하나를
+# 가리키고 끝이라 깊이가 2 다. T2 의 영향 반경(들어오는 화살표)과 흐름 추적(3~6 노드 경로)은
+# 그 모양에서 만들어질 수 없다 (04 §8.3). 화면 → 기능 → 훅 → 통신 → 데이터로 내려가는
+# 사슬을 하나 손으로 둬서 네 종이 다 나오는 대지를 만든다.
+write src/features/cart/cartApi.ts <<EOS
+import { DAY_MS } from "../../core/time";
+
+export interface CartLine {
+  sku: string;
+  count: number;
+}
+
+export async function fetchCart(id: string): Promise<CartLine[]> {
+  const res = await fetch("/api/cart?id=" + id, { cache: "no-store" });
+  if (!res.ok) {
+    return [];
+  }
+  const body = (await res.json()) as { lines?: CartLine[] };
+  return body.lines ?? [];
+}
+
+export function staleAfter(at: number): number {
+  return at + DAY_MS;
+}
+EOS
+write src/features/cart/useCart.ts <<EOS
+import { useEffect, useState } from "react";
+import { fetchCart, type CartLine } from "./cartApi";
+
+export function useCart(id: string) {
+  const [lines, setLines] = useState<CartLine[]>([]);
+  const [pending, setPending] = useState(true);
+
+  useEffect(() => {
+    let alive = true;
+    void fetchCart(id).then((next) => {
+      if (!alive) return;
+      setLines(next);
+      setPending(false);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [id]);
+
+  return { lines, pending };
+}
+EOS
+write src/features/cart/CartRow.tsx <<EOS
+import { clamp } from "../../core/time";
+import type { CartLine } from "./cartApi";
+
+export interface CartRowProps {
+  line: CartLine;
+  onChange: (count: number) => void;
+}
+
+export function CartRow({ line, onChange }: CartRowProps) {
+  const safe = clamp(line.count, 0, 99);
+  return (
+    <li className="cart-row">
+      <span>{line.sku}</span>
+      <button type="button" onClick={() => onChange(safe - 1)}>
+        빼기
+      </button>
+      <output>{safe}</output>
+      <button type="button" onClick={() => onChange(safe + 1)}>
+        더하기
+      </button>
+    </li>
+  );
+}
+EOS
+write src/features/cart/CartSheet.tsx <<EOS
+import { CartRow } from "./CartRow";
+import { useCart } from "./useCart";
+
+export interface CartSheetProps {
+  cartId: string;
+}
+
+export function CartSheet({ cartId }: CartSheetProps) {
+  const { lines, pending } = useCart(cartId);
+  if (pending) {
+    return <p>불러오는 중입니다.</p>;
+  }
+  return (
+    <ul className="cart-sheet">
+      {lines.map((line) => (
+        <CartRow key={line.sku} line={line} onChange={() => undefined} />
+      ))}
+    </ul>
+  );
+}
+EOS
+write src/app/cart-page.tsx <<EOS
+import { CartSheet } from "../features/cart/CartSheet";
+
+export function CartPage() {
+  return (
+    <section>
+      <h1>장바구니</h1>
+      <CartSheet cartId="demo" />
+    </section>
+  );
+}
+EOS
+commit feat: 장바구니 화면과 통신 계층
+
+write src/features/cart/quantity.ts <<EOS
+import { clamp } from "../../core/time";
+
+export const MAX_PER_LINE = 99;
+
+export function nextCount(current: number, delta: number): number {
+  return clamp(current + delta, 0, MAX_PER_LINE);
+}
+
+export function isAtCeiling(count: number): boolean {
+  return count >= MAX_PER_LINE;
+}
+EOS
+write src/features/cart/CartRow.tsx <<EOS
+import type { CartLine } from "./cartApi";
+import { isAtCeiling, nextCount } from "./quantity";
+
+export interface CartRowProps {
+  line: CartLine;
+  onChange: (count: number) => void;
+}
+
+export function CartRow({ line, onChange }: CartRowProps) {
+  const safe = nextCount(line.count, 0);
+  return (
+    <li className="cart-row">
+      <span>{line.sku}</span>
+      <button type="button" onClick={() => onChange(nextCount(safe, -1))}>
+        빼기
+      </button>
+      <output>{safe}</output>
+      <button
+        type="button"
+        disabled={isAtCeiling(safe)}
+        onClick={() => onChange(nextCount(safe, 1))}
+      >
+        더하기
+      </button>
+    </li>
+  );
+}
+EOS
+commit feat: 수량 상한과 증감 규칙
+
+write src/features/cart/cartApi.ts <<EOS
+import { DAY_MS } from "../../core/time";
+import { MAX_PER_LINE } from "./quantity";
+
+export interface CartLine {
+  sku: string;
+  count: number;
+}
+
+export async function fetchCart(id: string): Promise<CartLine[]> {
+  const res = await fetch("/api/cart?id=" + id, { cache: "no-store" });
+  if (!res.ok) {
+    return [];
+  }
+  const body = (await res.json()) as { lines?: CartLine[] };
+  return (body.lines ?? []).map((line) => ({
+    sku: line.sku,
+    count: Math.min(line.count, MAX_PER_LINE),
+  }));
+}
+
+export async function putCount(id: string, sku: string, count: number): Promise<boolean> {
+  const res = await fetch("/api/cart", {
+    method: "PUT",
+    body: JSON.stringify({ id, sku, count }),
+  });
+  return res.ok;
+}
+
+export function staleAfter(at: number): number {
+  return at + DAY_MS;
+}
+EOS
+commit fix: 서버가 준 수량도 상한을 넘지 않게

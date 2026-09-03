@@ -25,3 +25,24 @@ export { isT1Card } from './t1-types.js';
 export type {
   BlockCandidate, BlockConcept, SpecCard, T1Card, T1Payload, T1Request,
 } from './t1-types.js';
+
+// T2 — 구조 (04 §7~§8 · D97)
+export { generateT2 } from './t2.js';
+export { buildGraph, condense, isEntry } from './t2-graph.js';
+export type { GraphInput, Scc } from './t2-graph.js';
+export {
+  buildKey, candidates, isExcludedPath, question, subjectOf, trapReason,
+  CORE_CHANGED_LINES, CO_CHANGE_CORE, CO_CHANGE_RATIO, MAX_SOURCE_FILES, MIN_SOURCE_FILES,
+  MIN_SUBJECT_CHARS,
+} from './t2-key.js';
+export type { KeyInput } from './t2-key.js';
+export {
+  buildDirection, buildFlow, buildRadius,
+  DIRECTION_PAIRS, FLOW_DECOYS, FLOW_MAX, FLOW_MIN,
+} from './t2-quiz.js';
+export type { DirectionAnswer, DirectionQuiz, FlowQuiz, QuizInput, RadiusQuiz } from './t2-quiz.js';
+export { isT2Card, BANDS, MAX_NODES, MIN_COMMITS_FOR_PLACEMENT } from './t2-types.js';
+export type {
+  AnswerKey, Band, CommitFileRow, CommitRow, Graph, GraphEdge, GraphFile,
+  T2Card, T2Kind, T2Payload, T2Request,
+} from './t2-types.js';

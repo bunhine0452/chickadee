@@ -31,6 +31,8 @@ const INK_BADGE_PAIRS = [
   ['--on-t0', '--t0'],
   ['--on-t1', '--t1'],
   ['--on-t2', '--t2'],
+  // 판정 「면」 — 트랙 색과 독립이므로 따로 잰다 (D95).
+  ['--on-verdict-differ', '--verdict-differ-face'],
 ];
 
 const PAPER_MIN = 7;

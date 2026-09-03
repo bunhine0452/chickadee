@@ -1,0 +1,1626 @@
+{
+  "note": "04 §9 의 T2 골든. `requires` 는 **문서 표의 그 줄**을 손으로 옮긴 것이라 생성하지 않는다 — 이 칸이 깨지면 규칙이 깨진 것이다. `expected.json` 은 결과 전체의 회귀 스냅샷이고 `UPDATE_GOLDEN=1` 로 다시 쓴다. 지도는 목업 `data.js` 의 `T2` 를 옮긴 것이고 core/sec/trap 은 그 커밋에서 실제로 도출되는 값이다.",
+  "cases": [
+    {
+      "id": "placement-mockup-5",
+      "rule": "04 §9 — 선택 5개 → found 4 · missed 2 · wrong 1 · pct 67 · repeat-soft",
+      "payload": {
+        "track": "t2",
+        "kind": "placement",
+        "q": "«장바구니 수량 +/- 조절 기능 추가» 기능을 넣는다면, 어느 파일들을 고쳐야 할까요?",
+        "hint": "지도에서 파일 상자를 클릭해 고릅니다. 정답 개수는 비공개입니다.",
+        "bands": [
+          {
+            "l": "화면",
+            "s": "app/cart/"
+          },
+          {
+            "l": "기능",
+            "s": "features/cart/"
+          },
+          {
+            "l": "동작 · 통신",
+            "s": ""
+          },
+          {
+            "l": "공용 · 데이터",
+            "s": ""
+          }
+        ],
+        "files": [
+          {
+            "p": "app/cart/page.tsx",
+            "r": 0
+          },
+          {
+            "p": "features/cart/CartItemRow.tsx",
+            "r": 1
+          },
+          {
+            "p": "features/cart/CartSheet.tsx",
+            "r": 1
+          },
+          {
+            "p": "features/cart/QuantityStepper.tsx",
+            "r": 1,
+            "isNew": true
+          },
+          {
+            "p": "app/api/cart/route.ts",
+            "r": 2
+          },
+          {
+            "p": "features/cart/cartApi.ts",
+            "r": 2
+          },
+          {
+            "p": "features/cart/useCart.ts",
+            "r": 2
+          },
+          {
+            "p": "features/cart/useCartQuantity.ts",
+            "r": 2,
+            "isNew": true
+          },
+          {
+            "p": "components/ui/Button.tsx",
+            "r": 3
+          },
+          {
+            "p": "lib/format.ts",
+            "r": 3
+          },
+          {
+            "p": "server/cartRepo.ts",
+            "r": 3
+          },
+          {
+            "p": "server/schema.ts",
+            "r": 3
+          }
+        ],
+        "edges": [
+          [
+            "app/cart/page.tsx",
+            "features/cart/CartSheet.tsx",
+            "static"
+          ],
+          [
+            "features/cart/CartSheet.tsx",
+            "features/cart/CartItemRow.tsx",
+            "static"
+          ],
+          [
+            "features/cart/CartSheet.tsx",
+            "features/cart/useCart.ts",
+            "static"
+          ],
+          [
+            "features/cart/CartItemRow.tsx",
+            "features/cart/QuantityStepper.tsx",
+            "static"
+          ],
+          [
+            "features/cart/CartItemRow.tsx",
+            "lib/format.ts",
+            "static"
+          ],
+          [
+            "features/cart/QuantityStepper.tsx",
+            "features/cart/useCartQuantity.ts",
+            "static"
+          ],
+          [
+            "features/cart/QuantityStepper.tsx",
+            "components/ui/Button.tsx",
+            "static"
+          ],
+          [
+            "features/cart/useCartQuantity.ts",
+            "features/cart/cartApi.ts",
+            "static"
+          ],
+          [
+            "features/cart/useCart.ts",
+            "features/cart/cartApi.ts",
+            "static"
+          ],
+          [
+            "features/cart/cartApi.ts",
+            "app/api/cart/route.ts",
+            "http"
+          ],
+          [
+            "app/api/cart/route.ts",
+            "server/cartRepo.ts",
+            "static"
+          ],
+          [
+            "server/cartRepo.ts",
+            "server/schema.ts",
+            "type"
+          ]
+        ],
+        "commit": {
+          "h": "a3f19c2",
+          "d": "2026-07-14",
+          "m": "feat(cart): 장바구니 수량 +/- 조절 기능 추가",
+          "n": "파일 7개 · +181 −23"
+        },
+        "core": {
+          "features/cart/QuantityStepper.tsx": [
+            "+64 −0",
+            "새로 만든 파일입니다."
+          ],
+          "features/cart/useCartQuantity.ts": [
+            "+41 −0",
+            "새로 만든 파일입니다."
+          ],
+          "features/cart/CartItemRow.tsx": [
+            "+9 −4",
+            "13줄이 바뀌었습니다."
+          ],
+          "features/cart/cartApi.ts": [
+            "+18 −1",
+            "19줄이 바뀌었습니다."
+          ],
+          "app/api/cart/route.ts": [
+            "+27 −2",
+            "29줄이 바뀌었습니다."
+          ],
+          "server/cartRepo.ts": [
+            "+14 −0",
+            "14줄이 바뀌었습니다."
+          ]
+        },
+        "sec": {
+          "server/schema.ts": [
+            "+4 −1",
+            "몇 줄만 고쳐졌습니다."
+          ]
+        },
+        "trap": {
+          "features/cart/CartSheet.tsx": "«CartSheet.tsx» 는 «CartItemRow.tsx» 를 놓기만 합니다. 안쪽이 바뀌어도 «CartSheet.tsx» 는 모릅니다",
+          "app/cart/page.tsx": "«page.tsx» 는 «CartSheet.tsx» 를 놓기만 합니다. 안쪽이 바뀌어도 «page.tsx» 는 모릅니다",
+          "components/ui/Button.tsx": "공용 부품. «QuantityStepper.tsx» 가 가져다 쓸 뿐입니다",
+          "lib/format.ts": "공용 부품. «CartItemRow.tsx» 가 가져다 쓸 뿐입니다",
+          "features/cart/useCart.ts": "«useCart.ts» 에 상태가 있지만 이번엔 새 파일 «QuantityStepper.tsx» 이 그 일을 맡았습니다"
+        },
+        "hints": [
+          "이 기능은 4개 층 중 <b>4개 층</b>에 걸쳐 있습니다. 화면만 고쳐서는 끝나지 않아요.",
+          "<b>새로 만들어진 파일이 2개</b> 있습니다. 지도에 「새 판」 표시가 있어요.",
+          "꼭 고쳐야 하는 파일은 <b>6개</b>입니다. (＋ 보너스 1개)"
+        ]
+      },
+      "answer": {
+        "kind": "placement",
+        "selected": [
+          "features/cart/QuantityStepper.tsx",
+          "features/cart/useCartQuantity.ts",
+          "features/cart/CartItemRow.tsx",
+          "features/cart/cartApi.ts",
+          "features/cart/CartSheet.tsx"
+        ]
+      },
+      "hints": 0,
+      "requires": {
+        "pct": 67,
+        "verdict": "repeat-soft",
+        "found": 4,
+        "missed": 2,
+        "wrong": 1,
+        "bonus": 0,
+        "capped": false
+      }
+    },
+    {
+      "id": "placement-select-all",
+      "rule": "04 §9 — 12개 전부 → pct 100 이지만 wrong 5 > ceil(6/2)=3 이라 진급 금지",
+      "payload": {
+        "track": "t2",
+        "kind": "placement",
+        "q": "«장바구니 수량 +/- 조절 기능 추가» 기능을 넣는다면, 어느 파일들을 고쳐야 할까요?",
+        "hint": "지도에서 파일 상자를 클릭해 고릅니다. 정답 개수는 비공개입니다.",
+        "bands": [
+          {
+            "l": "화면",
+            "s": "app/cart/"
+          },
+          {
+            "l": "기능",
+            "s": "features/cart/"
+          },
+          {
+            "l": "동작 · 통신",
+            "s": ""
+          },
+          {
+            "l": "공용 · 데이터",
+            "s": ""
+          }
+        ],
+        "files": [
+          {
+            "p": "app/cart/page.tsx",
+            "r": 0
+          },
+          {
+            "p": "features/cart/CartItemRow.tsx",
+            "r": 1
+          },
+          {
+            "p": "features/cart/CartSheet.tsx",
+            "r": 1
+          },
+          {
+            "p": "features/cart/QuantityStepper.tsx",
+            "r": 1,
+            "isNew": true
+          },
+          {
+            "p": "app/api/cart/route.ts",
+            "r": 2
+          },
+          {
+            "p": "features/cart/cartApi.ts",
+            "r": 2
+          },
+          {
+            "p": "features/cart/useCart.ts",
+            "r": 2
+          },
+          {
+            "p": "features/cart/useCartQuantity.ts",
+            "r": 2,
+            "isNew": true
+          },
+          {
+            "p": "components/ui/Button.tsx",
+            "r": 3
+          },
+          {
+            "p": "lib/format.ts",
+            "r": 3
+          },
+          {
+            "p": "server/cartRepo.ts",
+            "r": 3
+          },
+          {
+            "p": "server/schema.ts",
+            "r": 3
+          }
+        ],
+        "edges": [
+          [
+            "app/cart/page.tsx",
+            "features/cart/CartSheet.tsx",
+            "static"
+          ],
+          [
+            "features/cart/CartSheet.tsx",
+            "features/cart/CartItemRow.tsx",
+            "static"
+          ],
+          [
+            "features/cart/CartSheet.tsx",
+            "features/cart/useCart.ts",
+            "static"
+          ],
+          [
+            "features/cart/CartItemRow.tsx",
+            "features/cart/QuantityStepper.tsx",
+            "static"
+          ],
+          [
+            "features/cart/CartItemRow.tsx",
+            "lib/format.ts",
+            "static"
+          ],
+          [
+            "features/cart/QuantityStepper.tsx",
+            "features/cart/useCartQuantity.ts",
+            "static"
+          ],
+          [
+            "features/cart/QuantityStepper.tsx",
+            "components/ui/Button.tsx",
+            "static"
+          ],
+          [
+            "features/cart/useCartQuantity.ts",
+            "features/cart/cartApi.ts",
+            "static"
+          ],
+          [
+            "features/cart/useCart.ts",
+            "features/cart/cartApi.ts",
+            "static"
+          ],
+          [
+            "features/cart/cartApi.ts",
+            "app/api/cart/route.ts",
+            "http"
+          ],
+          [
+            "app/api/cart/route.ts",
+            "server/cartRepo.ts",
+            "static"
+          ],
+          [
+            "server/cartRepo.ts",
+            "server/schema.ts",
+            "type"
+          ]
+        ],
+        "commit": {
+          "h": "a3f19c2",
+          "d": "2026-07-14",
+          "m": "feat(cart): 장바구니 수량 +/- 조절 기능 추가",
+          "n": "파일 7개 · +181 −23"
+        },
+        "core": {
+          "features/cart/QuantityStepper.tsx": [
+            "+64 −0",
+            "새로 만든 파일입니다."
+          ],
+          "features/cart/useCartQuantity.ts": [
+            "+41 −0",
+            "새로 만든 파일입니다."
+          ],
+          "features/cart/CartItemRow.tsx": [
+            "+9 −4",
+            "13줄이 바뀌었습니다."
+          ],
+          "features/cart/cartApi.ts": [
+            "+18 −1",
+            "19줄이 바뀌었습니다."
+          ],
+          "app/api/cart/route.ts": [
+            "+27 −2",
+            "29줄이 바뀌었습니다."
+          ],
+          "server/cartRepo.ts": [
+            "+14 −0",
+            "14줄이 바뀌었습니다."
+          ]
+        },
+        "sec": {
+          "server/schema.ts": [
+            "+4 −1",
+            "몇 줄만 고쳐졌습니다."
+          ]
+        },
+        "trap": {
+          "features/cart/CartSheet.tsx": "«CartSheet.tsx» 는 «CartItemRow.tsx» 를 놓기만 합니다. 안쪽이 바뀌어도 «CartSheet.tsx» 는 모릅니다",
+          "app/cart/page.tsx": "«page.tsx» 는 «CartSheet.tsx» 를 놓기만 합니다. 안쪽이 바뀌어도 «page.tsx» 는 모릅니다",
+          "components/ui/Button.tsx": "공용 부품. «QuantityStepper.tsx» 가 가져다 쓸 뿐입니다",
+          "lib/format.ts": "공용 부품. «CartItemRow.tsx» 가 가져다 쓸 뿐입니다",
+          "features/cart/useCart.ts": "«useCart.ts» 에 상태가 있지만 이번엔 새 파일 «QuantityStepper.tsx» 이 그 일을 맡았습니다"
+        },
+        "hints": [
+          "이 기능은 4개 층 중 <b>4개 층</b>에 걸쳐 있습니다. 화면만 고쳐서는 끝나지 않아요.",
+          "<b>새로 만들어진 파일이 2개</b> 있습니다. 지도에 「새 판」 표시가 있어요.",
+          "꼭 고쳐야 하는 파일은 <b>6개</b>입니다. (＋ 보너스 1개)"
+        ]
+      },
+      "answer": {
+        "kind": "placement",
+        "selected": [
+          "app/api/cart/route.ts",
+          "app/cart/page.tsx",
+          "components/ui/Button.tsx",
+          "features/cart/CartItemRow.tsx",
+          "features/cart/CartSheet.tsx",
+          "features/cart/QuantityStepper.tsx",
+          "features/cart/cartApi.ts",
+          "features/cart/useCart.ts",
+          "features/cart/useCartQuantity.ts",
+          "lib/format.ts",
+          "server/cartRepo.ts",
+          "server/schema.ts"
+        ]
+      },
+      "hints": 0,
+      "requires": {
+        "pct": 100,
+        "verdict": "repeat-soft",
+        "found": 6,
+        "missed": 0,
+        "wrong": 5,
+        "bonus": 1,
+        "capped": true
+      }
+    },
+    {
+      "id": "placement-perfect",
+      "rule": "04 §8.2 — core 만 정확히 → pct 100 · advance",
+      "payload": {
+        "track": "t2",
+        "kind": "placement",
+        "q": "«장바구니 수량 +/- 조절 기능 추가» 기능을 넣는다면, 어느 파일들을 고쳐야 할까요?",
+        "hint": "지도에서 파일 상자를 클릭해 고릅니다. 정답 개수는 비공개입니다.",
+        "bands": [
+          {
+            "l": "화면",
+            "s": "app/cart/"
+          },
+          {
+            "l": "기능",
+            "s": "features/cart/"
+          },
+          {
+            "l": "동작 · 통신",
+            "s": ""
+          },
+          {
+            "l": "공용 · 데이터",
+            "s": ""
+          }
+        ],
+        "files": [
+          {
+            "p": "app/cart/page.tsx",
+            "r": 0
+          },
+          {
+            "p": "features/cart/CartItemRow.tsx",
+            "r": 1
+          },
+          {
+            "p": "features/cart/CartSheet.tsx",
+            "r": 1
+          },
+          {
+            "p": "features/cart/QuantityStepper.tsx",
+            "r": 1,
+            "isNew": true
+          },
+          {
+            "p": "app/api/cart/route.ts",
+            "r": 2
+          },
+          {
+            "p": "features/cart/cartApi.ts",
+            "r": 2
+          },
+          {
+            "p": "features/cart/useCart.ts",
+            "r": 2
+          },
+          {
+            "p": "features/cart/useCartQuantity.ts",
+            "r": 2,
+            "isNew": true
+          },
+          {
+            "p": "components/ui/Button.tsx",
+            "r": 3
+          },
+          {
+            "p": "lib/format.ts",
+            "r": 3
+          },
+          {
+            "p": "server/cartRepo.ts",
+            "r": 3
+          },
+          {
+            "p": "server/schema.ts",
+            "r": 3
+          }
+        ],
+        "edges": [
+          [
+            "app/cart/page.tsx",
+            "features/cart/CartSheet.tsx",
+            "static"
+          ],
+          [
+            "features/cart/CartSheet.tsx",
+            "features/cart/CartItemRow.tsx",
+            "static"
+          ],
+          [
+            "features/cart/CartSheet.tsx",
+            "features/cart/useCart.ts",
+            "static"
+          ],
+          [
+            "features/cart/CartItemRow.tsx",
+            "features/cart/QuantityStepper.tsx",
+            "static"
+          ],
+          [
+            "features/cart/CartItemRow.tsx",
+            "lib/format.ts",
+            "static"
+          ],
+          [
+            "features/cart/QuantityStepper.tsx",
+            "features/cart/useCartQuantity.ts",
+            "static"
+          ],
+          [
+            "features/cart/QuantityStepper.tsx",
+            "components/ui/Button.tsx",
+            "static"
+          ],
+          [
+            "features/cart/useCartQuantity.ts",
+            "features/cart/cartApi.ts",
+            "static"
+          ],
+          [
+            "features/cart/useCart.ts",
+            "features/cart/cartApi.ts",
+            "static"
+          ],
+          [
+            "features/cart/cartApi.ts",
+            "app/api/cart/route.ts",
+            "http"
+          ],
+          [
+            "app/api/cart/route.ts",
+            "server/cartRepo.ts",
+            "static"
+          ],
+          [
+            "server/cartRepo.ts",
+            "server/schema.ts",
+            "type"
+          ]
+        ],
+        "commit": {
+          "h": "a3f19c2",
+          "d": "2026-07-14",
+          "m": "feat(cart): 장바구니 수량 +/- 조절 기능 추가",
+          "n": "파일 7개 · +181 −23"
+        },
+        "core": {
+          "features/cart/QuantityStepper.tsx": [
+            "+64 −0",
+            "새로 만든 파일입니다."
+          ],
+          "features/cart/useCartQuantity.ts": [
+            "+41 −0",
+            "새로 만든 파일입니다."
+          ],
+          "features/cart/CartItemRow.tsx": [
+            "+9 −4",
+            "13줄이 바뀌었습니다."
+          ],
+          "features/cart/cartApi.ts": [
+            "+18 −1",
+            "19줄이 바뀌었습니다."
+          ],
+          "app/api/cart/route.ts": [
+            "+27 −2",
+            "29줄이 바뀌었습니다."
+          ],
+          "server/cartRepo.ts": [
+            "+14 −0",
+            "14줄이 바뀌었습니다."
+          ]
+        },
+        "sec": {
+          "server/schema.ts": [
+            "+4 −1",
+            "몇 줄만 고쳐졌습니다."
+          ]
+        },
+        "trap": {
+          "features/cart/CartSheet.tsx": "«CartSheet.tsx» 는 «CartItemRow.tsx» 를 놓기만 합니다. 안쪽이 바뀌어도 «CartSheet.tsx» 는 모릅니다",
+          "app/cart/page.tsx": "«page.tsx» 는 «CartSheet.tsx» 를 놓기만 합니다. 안쪽이 바뀌어도 «page.tsx» 는 모릅니다",
+          "components/ui/Button.tsx": "공용 부품. «QuantityStepper.tsx» 가 가져다 쓸 뿐입니다",
+          "lib/format.ts": "공용 부품. «CartItemRow.tsx» 가 가져다 쓸 뿐입니다",
+          "features/cart/useCart.ts": "«useCart.ts» 에 상태가 있지만 이번엔 새 파일 «QuantityStepper.tsx» 이 그 일을 맡았습니다"
+        },
+        "hints": [
+          "이 기능은 4개 층 중 <b>4개 층</b>에 걸쳐 있습니다. 화면만 고쳐서는 끝나지 않아요.",
+          "<b>새로 만들어진 파일이 2개</b> 있습니다. 지도에 「새 판」 표시가 있어요.",
+          "꼭 고쳐야 하는 파일은 <b>6개</b>입니다. (＋ 보너스 1개)"
+        ]
+      },
+      "answer": {
+        "kind": "placement",
+        "selected": [
+          "features/cart/QuantityStepper.tsx",
+          "features/cart/useCartQuantity.ts",
+          "features/cart/CartItemRow.tsx",
+          "features/cart/cartApi.ts",
+          "app/api/cart/route.ts",
+          "server/cartRepo.ts"
+        ]
+      },
+      "hints": 0,
+      "requires": {
+        "pct": 100,
+        "verdict": "advance",
+        "found": 6,
+        "missed": 0,
+        "wrong": 0,
+        "bonus": 0,
+        "capped": false
+      }
+    },
+    {
+      "id": "placement-empty",
+      "rule": "04 §8.2 — 아무것도 안 고르면 pct 0 · repeat",
+      "payload": {
+        "track": "t2",
+        "kind": "placement",
+        "q": "«장바구니 수량 +/- 조절 기능 추가» 기능을 넣는다면, 어느 파일들을 고쳐야 할까요?",
+        "hint": "지도에서 파일 상자를 클릭해 고릅니다. 정답 개수는 비공개입니다.",
+        "bands": [
+          {
+            "l": "화면",
+            "s": "app/cart/"
+          },
+          {
+            "l": "기능",
+            "s": "features/cart/"
+          },
+          {
+            "l": "동작 · 통신",
+            "s": ""
+          },
+          {
+            "l": "공용 · 데이터",
+            "s": ""
+          }
+        ],
+        "files": [
+          {
+            "p": "app/cart/page.tsx",
+            "r": 0
+          },
+          {
+            "p": "features/cart/CartItemRow.tsx",
+            "r": 1
+          },
+          {
+            "p": "features/cart/CartSheet.tsx",
+            "r": 1
+          },
+          {
+            "p": "features/cart/QuantityStepper.tsx",
+            "r": 1,
+            "isNew": true
+          },
+          {
+            "p": "app/api/cart/route.ts",
+            "r": 2
+          },
+          {
+            "p": "features/cart/cartApi.ts",
+            "r": 2
+          },
+          {
+            "p": "features/cart/useCart.ts",
+            "r": 2
+          },
+          {
+            "p": "features/cart/useCartQuantity.ts",
+            "r": 2,
+            "isNew": true
+          },
+          {
+            "p": "components/ui/Button.tsx",
+            "r": 3
+          },
+          {
+            "p": "lib/format.ts",
+            "r": 3
+          },
+          {
+            "p": "server/cartRepo.ts",
+            "r": 3
+          },
+          {
+            "p": "server/schema.ts",
+            "r": 3
+          }
+        ],
+        "edges": [
+          [
+            "app/cart/page.tsx",
+            "features/cart/CartSheet.tsx",
+            "static"
+          ],
+          [
+            "features/cart/CartSheet.tsx",
+            "features/cart/CartItemRow.tsx",
+            "static"
+          ],
+          [
+            "features/cart/CartSheet.tsx",
+            "features/cart/useCart.ts",
+            "static"
+          ],
+          [
+            "features/cart/CartItemRow.tsx",
+            "features/cart/QuantityStepper.tsx",
+            "static"
+          ],
+          [
+            "features/cart/CartItemRow.tsx",
+            "lib/format.ts",
+            "static"
+          ],
+          [
+            "features/cart/QuantityStepper.tsx",
+            "features/cart/useCartQuantity.ts",
+            "static"
+          ],
+          [
+            "features/cart/QuantityStepper.tsx",
+            "components/ui/Button.tsx",
+            "static"
+          ],
+          [
+            "features/cart/useCartQuantity.ts",
+            "features/cart/cartApi.ts",
+            "static"
+          ],
+          [
+            "features/cart/useCart.ts",
+            "features/cart/cartApi.ts",
+            "static"
+          ],
+          [
+            "features/cart/cartApi.ts",
+            "app/api/cart/route.ts",
+            "http"
+          ],
+          [
+            "app/api/cart/route.ts",
+            "server/cartRepo.ts",
+            "static"
+          ],
+          [
+            "server/cartRepo.ts",
+            "server/schema.ts",
+            "type"
+          ]
+        ],
+        "commit": {
+          "h": "a3f19c2",
+          "d": "2026-07-14",
+          "m": "feat(cart): 장바구니 수량 +/- 조절 기능 추가",
+          "n": "파일 7개 · +181 −23"
+        },
+        "core": {
+          "features/cart/QuantityStepper.tsx": [
+            "+64 −0",
+            "새로 만든 파일입니다."
+          ],
+          "features/cart/useCartQuantity.ts": [
+            "+41 −0",
+            "새로 만든 파일입니다."
+          ],
+          "features/cart/CartItemRow.tsx": [
+            "+9 −4",
+            "13줄이 바뀌었습니다."
+          ],
+          "features/cart/cartApi.ts": [
+            "+18 −1",
+            "19줄이 바뀌었습니다."
+          ],
+          "app/api/cart/route.ts": [
+            "+27 −2",
+            "29줄이 바뀌었습니다."
+          ],
+          "server/cartRepo.ts": [
+            "+14 −0",
+            "14줄이 바뀌었습니다."
+          ]
+        },
+        "sec": {
+          "server/schema.ts": [
+            "+4 −1",
+            "몇 줄만 고쳐졌습니다."
+          ]
+        },
+        "trap": {
+          "features/cart/CartSheet.tsx": "«CartSheet.tsx» 는 «CartItemRow.tsx» 를 놓기만 합니다. 안쪽이 바뀌어도 «CartSheet.tsx» 는 모릅니다",
+          "app/cart/page.tsx": "«page.tsx» 는 «CartSheet.tsx» 를 놓기만 합니다. 안쪽이 바뀌어도 «page.tsx» 는 모릅니다",
+          "components/ui/Button.tsx": "공용 부품. «QuantityStepper.tsx» 가 가져다 쓸 뿐입니다",
+          "lib/format.ts": "공용 부품. «CartItemRow.tsx» 가 가져다 쓸 뿐입니다",
+          "features/cart/useCart.ts": "«useCart.ts» 에 상태가 있지만 이번엔 새 파일 «QuantityStepper.tsx» 이 그 일을 맡았습니다"
+        },
+        "hints": [
+          "이 기능은 4개 층 중 <b>4개 층</b>에 걸쳐 있습니다. 화면만 고쳐서는 끝나지 않아요.",
+          "<b>새로 만들어진 파일이 2개</b> 있습니다. 지도에 「새 판」 표시가 있어요.",
+          "꼭 고쳐야 하는 파일은 <b>6개</b>입니다. (＋ 보너스 1개)"
+        ]
+      },
+      "answer": {
+        "kind": "placement",
+        "selected": []
+      },
+      "hints": 3,
+      "requires": {
+        "pct": 0,
+        "verdict": "repeat",
+        "found": 0,
+        "missed": 6,
+        "wrong": 0,
+        "bonus": 0,
+        "capped": false
+      }
+    },
+    {
+      "id": "flow-exact",
+      "rule": "04 §8.3 — 정답 순서 그대로 → pct 100",
+      "payload": {
+        "track": "t2",
+        "kind": "flow",
+        "q": "«page.tsx» 에서 «schema.ts» 까지 어떤 순서로 지나가나요?",
+        "hint": "지도에서 파일 상자를 클릭해 고릅니다. 정답 개수는 비공개입니다.",
+        "bands": [
+          {
+            "l": "화면",
+            "s": "app/cart/"
+          },
+          {
+            "l": "기능",
+            "s": "features/cart/"
+          },
+          {
+            "l": "동작 · 통신",
+            "s": ""
+          },
+          {
+            "l": "공용 · 데이터",
+            "s": ""
+          }
+        ],
+        "files": [
+          {
+            "p": "app/cart/page.tsx",
+            "r": 0
+          },
+          {
+            "p": "features/cart/CartItemRow.tsx",
+            "r": 1
+          },
+          {
+            "p": "features/cart/CartSheet.tsx",
+            "r": 1
+          },
+          {
+            "p": "features/cart/QuantityStepper.tsx",
+            "r": 1,
+            "isNew": true
+          },
+          {
+            "p": "app/api/cart/route.ts",
+            "r": 2
+          },
+          {
+            "p": "features/cart/cartApi.ts",
+            "r": 2
+          },
+          {
+            "p": "features/cart/useCart.ts",
+            "r": 2
+          },
+          {
+            "p": "features/cart/useCartQuantity.ts",
+            "r": 2,
+            "isNew": true
+          },
+          {
+            "p": "components/ui/Button.tsx",
+            "r": 3
+          },
+          {
+            "p": "lib/format.ts",
+            "r": 3
+          },
+          {
+            "p": "server/cartRepo.ts",
+            "r": 3
+          },
+          {
+            "p": "server/schema.ts",
+            "r": 3
+          }
+        ],
+        "edges": [
+          [
+            "app/cart/page.tsx",
+            "features/cart/CartSheet.tsx",
+            "static"
+          ],
+          [
+            "features/cart/CartSheet.tsx",
+            "features/cart/CartItemRow.tsx",
+            "static"
+          ],
+          [
+            "features/cart/CartSheet.tsx",
+            "features/cart/useCart.ts",
+            "static"
+          ],
+          [
+            "features/cart/CartItemRow.tsx",
+            "features/cart/QuantityStepper.tsx",
+            "static"
+          ],
+          [
+            "features/cart/CartItemRow.tsx",
+            "lib/format.ts",
+            "static"
+          ],
+          [
+            "features/cart/QuantityStepper.tsx",
+            "features/cart/useCartQuantity.ts",
+            "static"
+          ],
+          [
+            "features/cart/QuantityStepper.tsx",
+            "components/ui/Button.tsx",
+            "static"
+          ],
+          [
+            "features/cart/useCartQuantity.ts",
+            "features/cart/cartApi.ts",
+            "static"
+          ],
+          [
+            "features/cart/useCart.ts",
+            "features/cart/cartApi.ts",
+            "static"
+          ],
+          [
+            "features/cart/cartApi.ts",
+            "app/api/cart/route.ts",
+            "http"
+          ],
+          [
+            "app/api/cart/route.ts",
+            "server/cartRepo.ts",
+            "static"
+          ],
+          [
+            "server/cartRepo.ts",
+            "server/schema.ts",
+            "type"
+          ]
+        ],
+        "core": {},
+        "sec": {},
+        "trap": {},
+        "hints": [
+          "이 기능은 4개 층 중 <b>4개 층</b>에 걸쳐 있습니다. 화면만 고쳐서는 끝나지 않아요.",
+          "<b>새로 만들어진 파일이 2개</b> 있습니다. 지도에 「새 판」 표시가 있어요.",
+          "꼭 고쳐야 하는 파일은 <b>6개</b>입니다. (＋ 보너스 1개)"
+        ],
+        "flow": {
+          "answer": [
+            "app/cart/page.tsx",
+            "features/cart/CartSheet.tsx",
+            "features/cart/CartItemRow.tsx",
+            "features/cart/QuantityStepper.tsx",
+            "features/cart/useCartQuantity.ts",
+            "features/cart/cartApi.ts"
+          ],
+          "deck": [
+            "app/cart/page.tsx",
+            "features/cart/CartItemRow.tsx",
+            "features/cart/CartSheet.tsx",
+            "features/cart/QuantityStepper.tsx",
+            "features/cart/cartApi.ts",
+            "features/cart/useCart.ts",
+            "features/cart/useCartQuantity.ts",
+            "lib/format.ts"
+          ]
+        }
+      },
+      "answer": {
+        "kind": "flow",
+        "ordered": [
+          "app/cart/page.tsx",
+          "features/cart/CartSheet.tsx",
+          "features/cart/CartItemRow.tsx",
+          "features/cart/QuantityStepper.tsx",
+          "features/cart/useCartQuantity.ts",
+          "features/cart/cartApi.ts"
+        ]
+      },
+      "hints": 0,
+      "requires": {
+        "pct": 100,
+        "verdict": "advance",
+        "found": 6,
+        "missed": 0,
+        "wrong": 0,
+        "bonus": 0,
+        "capped": false
+      }
+    },
+    {
+      "id": "flow-decoy",
+      "rule": "04 §8.3 — 함정 카드가 낀 자리는 그 쌍이 오답",
+      "payload": {
+        "track": "t2",
+        "kind": "flow",
+        "q": "«page.tsx» 에서 «schema.ts» 까지 어떤 순서로 지나가나요?",
+        "hint": "지도에서 파일 상자를 클릭해 고릅니다. 정답 개수는 비공개입니다.",
+        "bands": [
+          {
+            "l": "화면",
+            "s": "app/cart/"
+          },
+          {
+            "l": "기능",
+            "s": "features/cart/"
+          },
+          {
+            "l": "동작 · 통신",
+            "s": ""
+          },
+          {
+            "l": "공용 · 데이터",
+            "s": ""
+          }
+        ],
+        "files": [
+          {
+            "p": "app/cart/page.tsx",
+            "r": 0
+          },
+          {
+            "p": "features/cart/CartItemRow.tsx",
+            "r": 1
+          },
+          {
+            "p": "features/cart/CartSheet.tsx",
+            "r": 1
+          },
+          {
+            "p": "features/cart/QuantityStepper.tsx",
+            "r": 1,
+            "isNew": true
+          },
+          {
+            "p": "app/api/cart/route.ts",
+            "r": 2
+          },
+          {
+            "p": "features/cart/cartApi.ts",
+            "r": 2
+          },
+          {
+            "p": "features/cart/useCart.ts",
+            "r": 2
+          },
+          {
+            "p": "features/cart/useCartQuantity.ts",
+            "r": 2,
+            "isNew": true
+          },
+          {
+            "p": "components/ui/Button.tsx",
+            "r": 3
+          },
+          {
+            "p": "lib/format.ts",
+            "r": 3
+          },
+          {
+            "p": "server/cartRepo.ts",
+            "r": 3
+          },
+          {
+            "p": "server/schema.ts",
+            "r": 3
+          }
+        ],
+        "edges": [
+          [
+            "app/cart/page.tsx",
+            "features/cart/CartSheet.tsx",
+            "static"
+          ],
+          [
+            "features/cart/CartSheet.tsx",
+            "features/cart/CartItemRow.tsx",
+            "static"
+          ],
+          [
+            "features/cart/CartSheet.tsx",
+            "features/cart/useCart.ts",
+            "static"
+          ],
+          [
+            "features/cart/CartItemRow.tsx",
+            "features/cart/QuantityStepper.tsx",
+            "static"
+          ],
+          [
+            "features/cart/CartItemRow.tsx",
+            "lib/format.ts",
+            "static"
+          ],
+          [
+            "features/cart/QuantityStepper.tsx",
+            "features/cart/useCartQuantity.ts",
+            "static"
+          ],
+          [
+            "features/cart/QuantityStepper.tsx",
+            "components/ui/Button.tsx",
+            "static"
+          ],
+          [
+            "features/cart/useCartQuantity.ts",
+            "features/cart/cartApi.ts",
+            "static"
+          ],
+          [
+            "features/cart/useCart.ts",
+            "features/cart/cartApi.ts",
+            "static"
+          ],
+          [
+            "features/cart/cartApi.ts",
+            "app/api/cart/route.ts",
+            "http"
+          ],
+          [
+            "app/api/cart/route.ts",
+            "server/cartRepo.ts",
+            "static"
+          ],
+          [
+            "server/cartRepo.ts",
+            "server/schema.ts",
+            "type"
+          ]
+        ],
+        "core": {},
+        "sec": {},
+        "trap": {},
+        "hints": [
+          "이 기능은 4개 층 중 <b>4개 층</b>에 걸쳐 있습니다. 화면만 고쳐서는 끝나지 않아요.",
+          "<b>새로 만들어진 파일이 2개</b> 있습니다. 지도에 「새 판」 표시가 있어요.",
+          "꼭 고쳐야 하는 파일은 <b>6개</b>입니다. (＋ 보너스 1개)"
+        ],
+        "flow": {
+          "answer": [
+            "app/cart/page.tsx",
+            "features/cart/CartSheet.tsx",
+            "features/cart/CartItemRow.tsx",
+            "features/cart/QuantityStepper.tsx",
+            "features/cart/useCartQuantity.ts",
+            "features/cart/cartApi.ts"
+          ],
+          "deck": [
+            "app/cart/page.tsx",
+            "features/cart/CartItemRow.tsx",
+            "features/cart/CartSheet.tsx",
+            "features/cart/QuantityStepper.tsx",
+            "features/cart/cartApi.ts",
+            "features/cart/useCart.ts",
+            "features/cart/useCartQuantity.ts",
+            "lib/format.ts"
+          ]
+        }
+      },
+      "answer": {
+        "kind": "flow",
+        "ordered": [
+          "app/cart/page.tsx",
+          "features/cart/CartSheet.tsx",
+          "features/cart/useCart.ts",
+          "features/cart/CartItemRow.tsx",
+          "features/cart/QuantityStepper.tsx",
+          "features/cart/useCartQuantity.ts",
+          "features/cart/cartApi.ts"
+        ]
+      },
+      "hints": 0,
+      "requires": {
+        "verdict": "repeat-soft"
+      }
+    },
+    {
+      "id": "direction-all",
+      "rule": "04 §8.3 — 5문항 다 맞히면 pct 100",
+      "payload": {
+        "track": "t2",
+        "kind": "direction",
+        "q": "두 파일 사이의 방향을 고르세요. 화살표는 언제나 「가져다 쓴다」 방향입니다.",
+        "hint": "지도에서 파일 상자를 클릭해 고릅니다. 정답 개수는 비공개입니다.",
+        "bands": [
+          {
+            "l": "화면",
+            "s": "app/cart/"
+          },
+          {
+            "l": "기능",
+            "s": "features/cart/"
+          },
+          {
+            "l": "동작 · 통신",
+            "s": ""
+          },
+          {
+            "l": "공용 · 데이터",
+            "s": ""
+          }
+        ],
+        "files": [
+          {
+            "p": "app/cart/page.tsx",
+            "r": 0
+          },
+          {
+            "p": "features/cart/CartItemRow.tsx",
+            "r": 1
+          },
+          {
+            "p": "features/cart/CartSheet.tsx",
+            "r": 1
+          },
+          {
+            "p": "features/cart/QuantityStepper.tsx",
+            "r": 1,
+            "isNew": true
+          },
+          {
+            "p": "app/api/cart/route.ts",
+            "r": 2
+          },
+          {
+            "p": "features/cart/cartApi.ts",
+            "r": 2
+          },
+          {
+            "p": "features/cart/useCart.ts",
+            "r": 2
+          },
+          {
+            "p": "features/cart/useCartQuantity.ts",
+            "r": 2,
+            "isNew": true
+          },
+          {
+            "p": "components/ui/Button.tsx",
+            "r": 3
+          },
+          {
+            "p": "lib/format.ts",
+            "r": 3
+          },
+          {
+            "p": "server/cartRepo.ts",
+            "r": 3
+          },
+          {
+            "p": "server/schema.ts",
+            "r": 3
+          }
+        ],
+        "edges": [
+          [
+            "app/cart/page.tsx",
+            "features/cart/CartSheet.tsx",
+            "static"
+          ],
+          [
+            "features/cart/CartSheet.tsx",
+            "features/cart/CartItemRow.tsx",
+            "static"
+          ],
+          [
+            "features/cart/CartSheet.tsx",
+            "features/cart/useCart.ts",
+            "static"
+          ],
+          [
+            "features/cart/CartItemRow.tsx",
+            "features/cart/QuantityStepper.tsx",
+            "static"
+          ],
+          [
+            "features/cart/CartItemRow.tsx",
+            "lib/format.ts",
+            "static"
+          ],
+          [
+            "features/cart/QuantityStepper.tsx",
+            "features/cart/useCartQuantity.ts",
+            "static"
+          ],
+          [
+            "features/cart/QuantityStepper.tsx",
+            "components/ui/Button.tsx",
+            "static"
+          ],
+          [
+            "features/cart/useCartQuantity.ts",
+            "features/cart/cartApi.ts",
+            "static"
+          ],
+          [
+            "features/cart/useCart.ts",
+            "features/cart/cartApi.ts",
+            "static"
+          ],
+          [
+            "features/cart/cartApi.ts",
+            "app/api/cart/route.ts",
+            "http"
+          ],
+          [
+            "app/api/cart/route.ts",
+            "server/cartRepo.ts",
+            "static"
+          ],
+          [
+            "server/cartRepo.ts",
+            "server/schema.ts",
+            "type"
+          ]
+        ],
+        "core": {},
+        "sec": {},
+        "trap": {},
+        "hints": [
+          "이 기능은 4개 층 중 <b>4개 층</b>에 걸쳐 있습니다. 화면만 고쳐서는 끝나지 않아요.",
+          "<b>새로 만들어진 파일이 2개</b> 있습니다. 지도에 「새 판」 표시가 있어요.",
+          "꼭 고쳐야 하는 파일은 <b>6개</b>입니다. (＋ 보너스 1개)"
+        ],
+        "pairs": [
+          {
+            "a": "app/cart/page.tsx",
+            "b": "features/cart/CartSheet.tsx",
+            "answer": 0
+          },
+          {
+            "a": "features/cart/CartItemRow.tsx",
+            "b": "features/cart/QuantityStepper.tsx",
+            "answer": 0
+          },
+          {
+            "a": "features/cart/cartApi.ts",
+            "b": "app/api/cart/route.ts",
+            "answer": 0
+          },
+          {
+            "a": "components/ui/Button.tsx",
+            "b": "features/cart/QuantityStepper.tsx",
+            "answer": 1
+          },
+          {
+            "a": "lib/format.ts",
+            "b": "server/schema.ts",
+            "answer": 3
+          }
+        ]
+      },
+      "answer": {
+        "kind": "direction",
+        "picks": [
+          0,
+          0,
+          0,
+          1,
+          3
+        ]
+      },
+      "hints": 0,
+      "requires": {
+        "pct": 100,
+        "verdict": "advance",
+        "found": 5,
+        "missed": 0,
+        "wrong": 0,
+        "bonus": 0,
+        "capped": false
+      }
+    },
+    {
+      "id": "direction-three",
+      "rule": "04 §8.3 — 3/5 맞히면 pct 60 · repeat",
+      "payload": {
+        "track": "t2",
+        "kind": "direction",
+        "q": "두 파일 사이의 방향을 고르세요. 화살표는 언제나 「가져다 쓴다」 방향입니다.",
+        "hint": "지도에서 파일 상자를 클릭해 고릅니다. 정답 개수는 비공개입니다.",
+        "bands": [
+          {
+            "l": "화면",
+            "s": "app/cart/"
+          },
+          {
+            "l": "기능",
+            "s": "features/cart/"
+          },
+          {
+            "l": "동작 · 통신",
+            "s": ""
+          },
+          {
+            "l": "공용 · 데이터",
+            "s": ""
+          }
+        ],
+        "files": [
+          {
+            "p": "app/cart/page.tsx",
+            "r": 0
+          },
+          {
+            "p": "features/cart/CartItemRow.tsx",
+            "r": 1
+          },
+          {
+            "p": "features/cart/CartSheet.tsx",
+            "r": 1
+          },
+          {
+            "p": "features/cart/QuantityStepper.tsx",
+            "r": 1,
+            "isNew": true
+          },
+          {
+            "p": "app/api/cart/route.ts",
+            "r": 2
+          },
+          {
+            "p": "features/cart/cartApi.ts",
+            "r": 2
+          },
+          {
+            "p": "features/cart/useCart.ts",
+            "r": 2
+          },
+          {
+            "p": "features/cart/useCartQuantity.ts",
+            "r": 2,
+            "isNew": true
+          },
+          {
+            "p": "components/ui/Button.tsx",
+            "r": 3
+          },
+          {
+            "p": "lib/format.ts",
+            "r": 3
+          },
+          {
+            "p": "server/cartRepo.ts",
+            "r": 3
+          },
+          {
+            "p": "server/schema.ts",
+            "r": 3
+          }
+        ],
+        "edges": [
+          [
+            "app/cart/page.tsx",
+            "features/cart/CartSheet.tsx",
+            "static"
+          ],
+          [
+            "features/cart/CartSheet.tsx",
+            "features/cart/CartItemRow.tsx",
+            "static"
+          ],
+          [
+            "features/cart/CartSheet.tsx",
+            "features/cart/useCart.ts",
+            "static"
+          ],
+          [
+            "features/cart/CartItemRow.tsx",
+            "features/cart/QuantityStepper.tsx",
+            "static"
+          ],
+          [
+            "features/cart/CartItemRow.tsx",
+            "lib/format.ts",
+            "static"
+          ],
+          [
+            "features/cart/QuantityStepper.tsx",
+            "features/cart/useCartQuantity.ts",
+            "static"
+          ],
+          [
+            "features/cart/QuantityStepper.tsx",
+            "components/ui/Button.tsx",
+            "static"
+          ],
+          [
+            "features/cart/useCartQuantity.ts",
+            "features/cart/cartApi.ts",
+            "static"
+          ],
+          [
+            "features/cart/useCart.ts",
+            "features/cart/cartApi.ts",
+            "static"
+          ],
+          [
+            "features/cart/cartApi.ts",
+            "app/api/cart/route.ts",
+            "http"
+          ],
+          [
+            "app/api/cart/route.ts",
+            "server/cartRepo.ts",
+            "static"
+          ],
+          [
+            "server/cartRepo.ts",
+            "server/schema.ts",
+            "type"
+          ]
+        ],
+        "core": {},
+        "sec": {},
+        "trap": {},
+        "hints": [
+          "이 기능은 4개 층 중 <b>4개 층</b>에 걸쳐 있습니다. 화면만 고쳐서는 끝나지 않아요.",
+          "<b>새로 만들어진 파일이 2개</b> 있습니다. 지도에 「새 판」 표시가 있어요.",
+          "꼭 고쳐야 하는 파일은 <b>6개</b>입니다. (＋ 보너스 1개)"
+        ],
+        "pairs": [
+          {
+            "a": "app/cart/page.tsx",
+            "b": "features/cart/CartSheet.tsx",
+            "answer": 0
+          },
+          {
+            "a": "features/cart/CartItemRow.tsx",
+            "b": "features/cart/QuantityStepper.tsx",
+            "answer": 0
+          },
+          {
+            "a": "features/cart/cartApi.ts",
+            "b": "app/api/cart/route.ts",
+            "answer": 0
+          },
+          {
+            "a": "components/ui/Button.tsx",
+            "b": "features/cart/QuantityStepper.tsx",
+            "answer": 1
+          },
+          {
+            "a": "lib/format.ts",
+            "b": "server/schema.ts",
+            "answer": 3
+          }
+        ]
+      },
+      "answer": {
+        "kind": "direction",
+        "picks": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "hints": 1,
+      "requires": {
+        "pct": 60,
+        "verdict": "repeat",
+        "found": 3,
+        "missed": 2,
+        "wrong": 0,
+        "bonus": 0,
+        "capped": false
+      }
+    }
+  ]
+}

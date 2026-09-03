@@ -64,3 +64,14 @@ export {
   checkWhy, COPY_SIM_LIMIT, draftWhy, GENERIC_HELP, GENERIC_Q, hasWord, MIN_CHARS, pickQuestion,
 } from './t1-why.js';
 export type { Question, QuestionId, WhyCheck, WhyDraft, WhyPayload } from './t1-why.js';
+
+// T2 — 구조 채점 (04 §8.2·§8.3)
+export { gradeDirection, gradeFlow, gradePicks, toT2Detail } from './t2.js';
+export type { DirectionInput, FlowInput, PicksInput } from './t2.js';
+export { CAPPED_NOTE, FOLDED_NOTE, T2_ENGINE_VERSION, UNCHANGED_NOTE } from './t2-types.js';
+export type { T2Detail, T2Payload, T2Result, T2Row, T2Tier } from './t2-types.js';
+export type { T2Kind as T2QuestionKind } from './t2-types.js';
+
+// T2 — 「이것도 맞다」 (04 §8.4)
+export { draftT2Appeal, pickRelation, promoteToSec, t2PatternKey, PROMOTE_MIN } from './t2-appeal.js';
+export type { PickRelation, T2AppealDraft, T2AppealInput } from './t2-appeal.js';

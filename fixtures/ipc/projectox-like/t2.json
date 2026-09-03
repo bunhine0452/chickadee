@@ -1,0 +1,1997 @@
+{
+  "commits": 98,
+  "files": [
+    {
+      "captures": [
+        {
+          "end_byte": 54,
+          "end_col": 54,
+          "end_line": 1,
+          "excerpt": "\"../features/cart/CartSheet\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 26,
+          "start_col": 26,
+          "start_line": 1
+        }
+      ],
+      "path": "src/app/cart-page.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 32,
+          "end_col": 32,
+          "end_line": 1,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 25,
+          "start_col": 25,
+          "start_line": 1
+        },
+        {
+          "end_byte": 70,
+          "end_col": 36,
+          "end_line": 2,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 56,
+          "start_col": 22,
+          "start_line": 2
+        }
+      ],
+      "path": "src/app/shell.tsx"
+    },
+    {
+      "captures": [],
+      "path": "src/core/time.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 41,
+          "end_col": 41,
+          "end_line": 1,
+          "excerpt": "\"./cartApi\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 30,
+          "start_col": 30,
+          "start_line": 1
+        },
+        {
+          "end_byte": 94,
+          "end_col": 51,
+          "end_line": 2,
+          "excerpt": "\"./quantity\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 82,
+          "start_col": 39,
+          "start_line": 2
+        }
+      ],
+      "path": "src/features/cart/CartRow.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 35,
+          "end_col": 35,
+          "end_line": 1,
+          "excerpt": "\"./CartRow\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 24,
+          "start_col": 24,
+          "start_line": 1
+        },
+        {
+          "end_byte": 72,
+          "end_col": 35,
+          "end_line": 2,
+          "excerpt": "\"./useCart\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 61,
+          "start_col": 24,
+          "start_line": 2
+        }
+      ],
+      "path": "src/features/cart/CartSheet.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 40,
+          "end_col": 40,
+          "end_line": 1,
+          "excerpt": "\"../../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 23,
+          "start_col": 23,
+          "start_line": 1
+        },
+        {
+          "end_byte": 83,
+          "end_col": 41,
+          "end_line": 2,
+          "excerpt": "\"./quantity\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 71,
+          "start_col": 29,
+          "start_line": 2
+        }
+      ],
+      "path": "src/features/cart/cartApi.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 39,
+          "end_col": 39,
+          "end_line": 1,
+          "excerpt": "\"../../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 22,
+          "start_col": 22,
+          "start_line": 1
+        }
+      ],
+      "path": "src/features/cart/quantity.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 43,
+          "end_col": 43,
+          "end_line": 1,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 36,
+          "start_col": 36,
+          "start_line": 1
+        },
+        {
+          "end_byte": 97,
+          "end_col": 52,
+          "end_line": 2,
+          "excerpt": "\"./cartApi\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 86,
+          "start_col": 41,
+          "start_line": 2
+        }
+      ],
+      "path": "src/features/cart/useCart.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 130,
+          "end_col": 44,
+          "end_line": 2,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 116,
+          "start_col": 30,
+          "start_line": 2
+        }
+      ],
+      "path": "src/gen/service-01.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 130,
+          "end_col": 44,
+          "end_line": 2,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 116,
+          "start_col": 30,
+          "start_line": 2
+        }
+      ],
+      "path": "src/gen/service-02.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 130,
+          "end_col": 44,
+          "end_line": 2,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 116,
+          "start_col": 30,
+          "start_line": 2
+        }
+      ],
+      "path": "src/gen/service-03.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 130,
+          "end_col": 44,
+          "end_line": 2,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 116,
+          "start_col": 30,
+          "start_line": 2
+        }
+      ],
+      "path": "src/gen/service-04.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 130,
+          "end_col": 44,
+          "end_line": 2,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 116,
+          "start_col": 30,
+          "start_line": 2
+        }
+      ],
+      "path": "src/gen/service-05.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 130,
+          "end_col": 44,
+          "end_line": 2,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 116,
+          "start_col": 30,
+          "start_line": 2
+        }
+      ],
+      "path": "src/gen/service-06.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 130,
+          "end_col": 44,
+          "end_line": 2,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 116,
+          "start_col": 30,
+          "start_line": 2
+        }
+      ],
+      "path": "src/gen/service-07.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 130,
+          "end_col": 44,
+          "end_line": 2,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 116,
+          "start_col": 30,
+          "start_line": 2
+        }
+      ],
+      "path": "src/gen/service-08.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 130,
+          "end_col": 44,
+          "end_line": 2,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 116,
+          "start_col": 30,
+          "start_line": 2
+        }
+      ],
+      "path": "src/gen/service-09.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 130,
+          "end_col": 44,
+          "end_line": 2,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 116,
+          "start_col": 30,
+          "start_line": 2
+        }
+      ],
+      "path": "src/gen/service-10.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 130,
+          "end_col": 44,
+          "end_line": 2,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 116,
+          "start_col": 30,
+          "start_line": 2
+        }
+      ],
+      "path": "src/gen/service-11.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 130,
+          "end_col": 44,
+          "end_line": 2,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 116,
+          "start_col": 30,
+          "start_line": 2
+        }
+      ],
+      "path": "src/gen/service-12.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 130,
+          "end_col": 44,
+          "end_line": 2,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 116,
+          "start_col": 30,
+          "start_line": 2
+        }
+      ],
+      "path": "src/gen/service-13.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 130,
+          "end_col": 44,
+          "end_line": 2,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 116,
+          "start_col": 30,
+          "start_line": 2
+        }
+      ],
+      "path": "src/gen/service-14.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 130,
+          "end_col": 44,
+          "end_line": 2,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 116,
+          "start_col": 30,
+          "start_line": 2
+        }
+      ],
+      "path": "src/gen/service-15.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 130,
+          "end_col": 44,
+          "end_line": 2,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 116,
+          "start_col": 30,
+          "start_line": 2
+        }
+      ],
+      "path": "src/gen/service-16.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 130,
+          "end_col": 44,
+          "end_line": 2,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 116,
+          "start_col": 30,
+          "start_line": 2
+        }
+      ],
+      "path": "src/gen/service-17.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 130,
+          "end_col": 44,
+          "end_line": 2,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 116,
+          "start_col": 30,
+          "start_line": 2
+        }
+      ],
+      "path": "src/gen/service-18.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 130,
+          "end_col": 44,
+          "end_line": 2,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 116,
+          "start_col": 30,
+          "start_line": 2
+        }
+      ],
+      "path": "src/gen/service-19.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 130,
+          "end_col": 44,
+          "end_line": 2,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 116,
+          "start_col": 30,
+          "start_line": 2
+        }
+      ],
+      "path": "src/gen/service-20.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 130,
+          "end_col": 44,
+          "end_line": 2,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 116,
+          "start_col": 30,
+          "start_line": 2
+        }
+      ],
+      "path": "src/gen/service-21.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 130,
+          "end_col": 44,
+          "end_line": 2,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 116,
+          "start_col": 30,
+          "start_line": 2
+        }
+      ],
+      "path": "src/gen/service-22.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 130,
+          "end_col": 44,
+          "end_line": 2,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 116,
+          "start_col": 30,
+          "start_line": 2
+        }
+      ],
+      "path": "src/gen/service-23.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 130,
+          "end_col": 44,
+          "end_line": 2,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 116,
+          "start_col": 30,
+          "start_line": 2
+        }
+      ],
+      "path": "src/gen/service-24.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 130,
+          "end_col": 44,
+          "end_line": 2,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 116,
+          "start_col": 30,
+          "start_line": 2
+        }
+      ],
+      "path": "src/gen/service-25.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 130,
+          "end_col": 44,
+          "end_line": 2,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 116,
+          "start_col": 30,
+          "start_line": 2
+        }
+      ],
+      "path": "src/gen/service-26.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 130,
+          "end_col": 44,
+          "end_line": 2,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 116,
+          "start_col": 30,
+          "start_line": 2
+        }
+      ],
+      "path": "src/gen/service-27.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 130,
+          "end_col": 44,
+          "end_line": 2,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 116,
+          "start_col": 30,
+          "start_line": 2
+        }
+      ],
+      "path": "src/gen/service-28.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 130,
+          "end_col": 44,
+          "end_line": 2,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 116,
+          "start_col": 30,
+          "start_line": 2
+        }
+      ],
+      "path": "src/gen/service-29.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 130,
+          "end_col": 44,
+          "end_line": 2,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 116,
+          "start_col": 30,
+          "start_line": 2
+        }
+      ],
+      "path": "src/gen/service-30.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 43,
+          "end_col": 43,
+          "end_line": 1,
+          "excerpt": "\"./core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 30,
+          "start_col": 30,
+          "start_line": 1
+        }
+      ],
+      "path": "src/index.ts"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 118,
+          "end_col": 32,
+          "end_line": 2,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 111,
+          "start_col": 25,
+          "start_line": 2
+        },
+        {
+          "end_byte": 156,
+          "end_col": 36,
+          "end_line": 3,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 142,
+          "start_col": 22,
+          "start_line": 3
+        }
+      ],
+      "path": "src/panels/panel-01.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 118,
+          "end_col": 32,
+          "end_line": 2,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 111,
+          "start_col": 25,
+          "start_line": 2
+        },
+        {
+          "end_byte": 156,
+          "end_col": 36,
+          "end_line": 3,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 142,
+          "start_col": 22,
+          "start_line": 3
+        }
+      ],
+      "path": "src/panels/panel-02.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 118,
+          "end_col": 32,
+          "end_line": 2,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 111,
+          "start_col": 25,
+          "start_line": 2
+        },
+        {
+          "end_byte": 156,
+          "end_col": 36,
+          "end_line": 3,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 142,
+          "start_col": 22,
+          "start_line": 3
+        }
+      ],
+      "path": "src/panels/panel-03.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 118,
+          "end_col": 32,
+          "end_line": 2,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 111,
+          "start_col": 25,
+          "start_line": 2
+        },
+        {
+          "end_byte": 156,
+          "end_col": 36,
+          "end_line": 3,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 142,
+          "start_col": 22,
+          "start_line": 3
+        }
+      ],
+      "path": "src/panels/panel-04.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 118,
+          "end_col": 32,
+          "end_line": 2,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 111,
+          "start_col": 25,
+          "start_line": 2
+        },
+        {
+          "end_byte": 156,
+          "end_col": 36,
+          "end_line": 3,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 142,
+          "start_col": 22,
+          "start_line": 3
+        }
+      ],
+      "path": "src/panels/panel-05.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 118,
+          "end_col": 32,
+          "end_line": 2,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 111,
+          "start_col": 25,
+          "start_line": 2
+        },
+        {
+          "end_byte": 156,
+          "end_col": 36,
+          "end_line": 3,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 142,
+          "start_col": 22,
+          "start_line": 3
+        }
+      ],
+      "path": "src/panels/panel-06.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 118,
+          "end_col": 32,
+          "end_line": 2,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 111,
+          "start_col": 25,
+          "start_line": 2
+        },
+        {
+          "end_byte": 156,
+          "end_col": 36,
+          "end_line": 3,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 142,
+          "start_col": 22,
+          "start_line": 3
+        }
+      ],
+      "path": "src/panels/panel-07.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 118,
+          "end_col": 32,
+          "end_line": 2,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 111,
+          "start_col": 25,
+          "start_line": 2
+        },
+        {
+          "end_byte": 156,
+          "end_col": 36,
+          "end_line": 3,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 142,
+          "start_col": 22,
+          "start_line": 3
+        }
+      ],
+      "path": "src/panels/panel-08.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 118,
+          "end_col": 32,
+          "end_line": 2,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 111,
+          "start_col": 25,
+          "start_line": 2
+        },
+        {
+          "end_byte": 156,
+          "end_col": 36,
+          "end_line": 3,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 142,
+          "start_col": 22,
+          "start_line": 3
+        }
+      ],
+      "path": "src/panels/panel-09.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 118,
+          "end_col": 32,
+          "end_line": 2,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 111,
+          "start_col": 25,
+          "start_line": 2
+        },
+        {
+          "end_byte": 156,
+          "end_col": 36,
+          "end_line": 3,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 142,
+          "start_col": 22,
+          "start_line": 3
+        }
+      ],
+      "path": "src/panels/panel-10.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 118,
+          "end_col": 32,
+          "end_line": 2,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 111,
+          "start_col": 25,
+          "start_line": 2
+        },
+        {
+          "end_byte": 156,
+          "end_col": 36,
+          "end_line": 3,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 142,
+          "start_col": 22,
+          "start_line": 3
+        }
+      ],
+      "path": "src/panels/panel-11.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 118,
+          "end_col": 32,
+          "end_line": 2,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 111,
+          "start_col": 25,
+          "start_line": 2
+        },
+        {
+          "end_byte": 156,
+          "end_col": 36,
+          "end_line": 3,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 142,
+          "start_col": 22,
+          "start_line": 3
+        }
+      ],
+      "path": "src/panels/panel-12.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 118,
+          "end_col": 32,
+          "end_line": 2,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 111,
+          "start_col": 25,
+          "start_line": 2
+        },
+        {
+          "end_byte": 156,
+          "end_col": 36,
+          "end_line": 3,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 142,
+          "start_col": 22,
+          "start_line": 3
+        }
+      ],
+      "path": "src/panels/panel-13.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 118,
+          "end_col": 32,
+          "end_line": 2,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 111,
+          "start_col": 25,
+          "start_line": 2
+        },
+        {
+          "end_byte": 156,
+          "end_col": 36,
+          "end_line": 3,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 142,
+          "start_col": 22,
+          "start_line": 3
+        }
+      ],
+      "path": "src/panels/panel-14.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 118,
+          "end_col": 32,
+          "end_line": 2,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 111,
+          "start_col": 25,
+          "start_line": 2
+        },
+        {
+          "end_byte": 156,
+          "end_col": 36,
+          "end_line": 3,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 142,
+          "start_col": 22,
+          "start_line": 3
+        }
+      ],
+      "path": "src/panels/panel-15.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 118,
+          "end_col": 32,
+          "end_line": 2,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 111,
+          "start_col": 25,
+          "start_line": 2
+        },
+        {
+          "end_byte": 156,
+          "end_col": 36,
+          "end_line": 3,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 142,
+          "start_col": 22,
+          "start_line": 3
+        }
+      ],
+      "path": "src/panels/panel-16.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 118,
+          "end_col": 32,
+          "end_line": 2,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 111,
+          "start_col": 25,
+          "start_line": 2
+        },
+        {
+          "end_byte": 156,
+          "end_col": 36,
+          "end_line": 3,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 142,
+          "start_col": 22,
+          "start_line": 3
+        }
+      ],
+      "path": "src/panels/panel-17.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 118,
+          "end_col": 32,
+          "end_line": 2,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 111,
+          "start_col": 25,
+          "start_line": 2
+        },
+        {
+          "end_byte": 156,
+          "end_col": 36,
+          "end_line": 3,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 142,
+          "start_col": 22,
+          "start_line": 3
+        }
+      ],
+      "path": "src/panels/panel-18.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 118,
+          "end_col": 32,
+          "end_line": 2,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 111,
+          "start_col": 25,
+          "start_line": 2
+        },
+        {
+          "end_byte": 156,
+          "end_col": 36,
+          "end_line": 3,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 142,
+          "start_col": 22,
+          "start_line": 3
+        }
+      ],
+      "path": "src/panels/panel-19.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 118,
+          "end_col": 32,
+          "end_line": 2,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 111,
+          "start_col": 25,
+          "start_line": 2
+        },
+        {
+          "end_byte": 156,
+          "end_col": 36,
+          "end_line": 3,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 142,
+          "start_col": 22,
+          "start_line": 3
+        }
+      ],
+      "path": "src/panels/panel-20.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 118,
+          "end_col": 32,
+          "end_line": 2,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 111,
+          "start_col": 25,
+          "start_line": 2
+        },
+        {
+          "end_byte": 156,
+          "end_col": 36,
+          "end_line": 3,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 142,
+          "start_col": 22,
+          "start_line": 3
+        }
+      ],
+      "path": "src/panels/panel-21.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 118,
+          "end_col": 32,
+          "end_line": 2,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 111,
+          "start_col": 25,
+          "start_line": 2
+        },
+        {
+          "end_byte": 156,
+          "end_col": 36,
+          "end_line": 3,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 142,
+          "start_col": 22,
+          "start_line": 3
+        }
+      ],
+      "path": "src/panels/panel-22.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 118,
+          "end_col": 32,
+          "end_line": 2,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 111,
+          "start_col": 25,
+          "start_line": 2
+        },
+        {
+          "end_byte": 156,
+          "end_col": 36,
+          "end_line": 3,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 142,
+          "start_col": 22,
+          "start_line": 3
+        }
+      ],
+      "path": "src/panels/panel-23.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 118,
+          "end_col": 32,
+          "end_line": 2,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 111,
+          "start_col": 25,
+          "start_line": 2
+        },
+        {
+          "end_byte": 156,
+          "end_col": 36,
+          "end_line": 3,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 142,
+          "start_col": 22,
+          "start_line": 3
+        }
+      ],
+      "path": "src/panels/panel-24.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 118,
+          "end_col": 32,
+          "end_line": 2,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 111,
+          "start_col": 25,
+          "start_line": 2
+        },
+        {
+          "end_byte": 156,
+          "end_col": 36,
+          "end_line": 3,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 142,
+          "start_col": 22,
+          "start_line": 3
+        }
+      ],
+      "path": "src/panels/panel-25.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 118,
+          "end_col": 32,
+          "end_line": 2,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 111,
+          "start_col": 25,
+          "start_line": 2
+        },
+        {
+          "end_byte": 156,
+          "end_col": 36,
+          "end_line": 3,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 142,
+          "start_col": 22,
+          "start_line": 3
+        }
+      ],
+      "path": "src/panels/panel-26.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 118,
+          "end_col": 32,
+          "end_line": 2,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 111,
+          "start_col": 25,
+          "start_line": 2
+        },
+        {
+          "end_byte": 156,
+          "end_col": 36,
+          "end_line": 3,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 142,
+          "start_col": 22,
+          "start_line": 3
+        }
+      ],
+      "path": "src/panels/panel-27.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 118,
+          "end_col": 32,
+          "end_line": 2,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 111,
+          "start_col": 25,
+          "start_line": 2
+        },
+        {
+          "end_byte": 156,
+          "end_col": 36,
+          "end_line": 3,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 142,
+          "start_col": 22,
+          "start_line": 3
+        }
+      ],
+      "path": "src/panels/panel-28.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 118,
+          "end_col": 32,
+          "end_line": 2,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 111,
+          "start_col": 25,
+          "start_line": 2
+        },
+        {
+          "end_byte": 156,
+          "end_col": 36,
+          "end_line": 3,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 142,
+          "start_col": 22,
+          "start_line": 3
+        }
+      ],
+      "path": "src/panels/panel-29.tsx"
+    },
+    {
+      "captures": [
+        {
+          "end_byte": 118,
+          "end_col": 32,
+          "end_line": 2,
+          "excerpt": "\"react\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 1,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 111,
+          "start_col": 25,
+          "start_line": 2
+        },
+        {
+          "end_byte": 156,
+          "end_col": 36,
+          "end_line": 3,
+          "excerpt": "\"../core/time\"",
+          "form": "static",
+          "in_error": 0,
+          "match_id": 2,
+          "name": "import.source",
+          "node_kind": "string",
+          "pattern_index": 0,
+          "query_id": "_imports",
+          "start_byte": 142,
+          "start_col": 22,
+          "start_line": 3
+        }
+      ],
+      "path": "src/panels/panel-30.tsx"
+    }
+  ]
+}

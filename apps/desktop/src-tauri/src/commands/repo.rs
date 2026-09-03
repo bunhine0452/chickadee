@@ -134,6 +134,19 @@ pub fn git_blame_lines(
     Ok(repo.blame(&rel_path, rev.as_deref(), BLAME_MS)?)
 }
 
+/// One file's patch inside one commit. The T2 answer key reads it to tell an
+/// import-only change from a real one (04 §8.1); everything else it needs is
+/// already in `commit_file` (D64).
+#[tauri::command]
+pub fn git_diff_text(
+    root_path: String,
+    sha: String,
+    rel_path: String,
+) -> Result<chickadee_git::FileDiff, IpcError> {
+    let repo = Repo::open(Path::new(&root_path))?;
+    Ok(repo.file_diff(&sha, &rel_path)?)
+}
+
 #[tauri::command]
 pub fn parse_langs() -> Vec<chickadee_parse::LangInfo> {
     chickadee_parse::languages()

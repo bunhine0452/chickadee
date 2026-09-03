@@ -878,3 +878,88 @@ fn an_ordinary_fast_forward_drops_no_commits() {
     assert!(files > 0);
     assert_eq!(gone, 2, "닿을 수 있는 커밋 2개가 그대로 남아야 한다");
 }
+
+/// T2 지도·정답지 덤프 (04 §7~§8). 두 픽스처 리포를 **진짜 사전**으로 인제스트해
+/// `fixtures/ipc/<리포>/t2.json` 에 적는다: 파일 경로, `_imports` 캡처의 지정자,
+/// 커밋과 그 변경 파일. **코드는 담지 않는다** — 지정자는 `'./x'` 같은 문자열이고 그것이
+/// 이 트랙이 필요로 하는 전부다 (D18 · 04 §7.1).
+///
+/// M4 「끝났다는 증거」가 여기서 시작한다: TS 쪽 `data/graph.test.ts` 가 이 덤프를 받아
+/// 해석 → 배치 → 문제 4종까지 간다. `spec()` 이 아니라 `real_spec()` 을 쓰는 것이 중요하다 —
+/// 시스템 쿼리(`_imports`)는 사전에서 오고, `spec()` 의 고정 쿼리 하나로는 캡처가 0건이다.
+#[test]
+fn t2_graph_dump_is_stable() {
+    for name in ["projectox-like", "two-commits"] {
+        let repos = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../../fixtures/repos")
+            .join(name)
+            .components()
+            .collect::<PathBuf>();
+        if !repos.join(".git").is_dir() {
+            eprintln!("skip: bash scripts/make-fixture-repo.sh {name} 를 먼저 돌린다");
+            continue;
+        }
+        let data = tmp(&format!("t2-{name}"));
+        let store = open_store(&data.0);
+        let out = ingest(
+            &store,
+            &real_spec(&repos),
+            &Arc::new(AtomicBool::new(false)),
+        );
+        println!(
+            "{name}: 파일 {} · 캡처 {} · 커밋 {}",
+            out.files, out.captures, out.commits
+        );
+
+        let files: Vec<serde_json::Value> = store
+            .query("derive.files", &json!({ "repoId": 1 }))
+            .expect("files");
+        let mut nodes: Vec<serde_json::Value> = Vec::new();
+        for file in &files {
+            let path = file["path"].as_str().unwrap_or_default();
+            let id = file["id"].as_i64().unwrap_or_default();
+            // `capture` 행을 **그대로** 담는다. 지정자에서 따옴표를 벗기고 `RawImport` 로
+            // 바꾸는 것은 TS `deriveFile` 의 일이고(D18), 그 걸음까지 이 덤프로 재생해야
+            // 실제 경로를 지난다 — 여기서 미리 벗기면 그 걸음이 테스트에서 사라진다.
+            let specs: Vec<serde_json::Value> = store
+                .query("derive.captures_by_file", &json!({ "fileId": id }))
+                .expect("captures")
+                .into_iter()
+                .filter(|c| c["query_id"].as_str() == Some("_imports"))
+                .collect();
+            nodes.push(json!({ "path": path, "captures": specs }));
+        }
+        nodes.sort_by_key(|r| r["path"].as_str().unwrap_or_default().to_owned());
+
+        let commits: Vec<serde_json::Value> = store
+            .query("derive.commits", &json!({ "repoId": 1 }))
+            .expect("commits");
+        let dump = json!({ "files": nodes, "commits": commits.len() });
+
+        let at = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../../fixtures/ipc")
+            .join(name)
+            .components()
+            .collect::<PathBuf>();
+        std::fs::create_dir_all(&at).expect("mkdir");
+        std::fs::write(
+            at.join("t2.json"),
+            format!("{}\n", serde_json::to_string_pretty(&dump).expect("json")),
+        )
+        .expect("write dump");
+
+        let with_imports = nodes
+            .iter()
+            .filter(|n| !n["captures"].as_array().map_or(true, Vec::is_empty))
+            .count();
+        println!("{name}: import 를 낸 파일 {with_imports}");
+        // `spec()` 으로 인제스트하면 여기가 0 이 된다 — 파일 수만 보고 있으면 눈치채지 못한다.
+        // `two-commits` 는 파일 하나짜리 반례 픽스처라 import 가 없는 것이 정상이다(06 §1.2).
+        if name != "two-commits" {
+            assert!(
+                with_imports > 0,
+                "{name}: import 지정자를 낸 파일이 하나도 없다 (real_spec 을 썼는가?)"
+            );
+        }
+    }
+}

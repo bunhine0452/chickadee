@@ -13,7 +13,7 @@ use std::collections::BTreeMap;
 use std::path::{Component, Path, PathBuf};
 
 pub use blob::{lossy, Blame, Span};
-pub use commits::{ChangedFile, CommitMeta, HistoryOpts};
+pub use commits::{ChangedFile, CommitMeta, FileDiff, HistoryOpts};
 
 #[derive(Debug, thiserror::Error)]
 pub enum GitError {

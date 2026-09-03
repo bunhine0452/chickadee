@@ -1,0 +1,16 @@
+/* 목업: design/src/ink/session.css 의 `.map-status`. 그대로 옮겼다. */
+.map-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  margin-top: 6px;
+  color: var(--ink-soft);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+}
+
+.map-status b {
+  color: var(--ink);
+  font-weight: 600;
+}

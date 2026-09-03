@@ -63,6 +63,13 @@ const OVERRIDES = [
   { op: 'add', theme: 'dark', prop: '--verdict-equiv-text', value: '#9CC2FF', source: 'D56 / 05 §4.1' },
   { op: 'add', theme: 'dark', prop: '--verdict-differ-text', value: '#FFD866', source: 'D56 / 05 §4.1' },
 
+  // 어긋남을 **면으로** 칠하는 자리(`.rtag.d`)용. --verdict-differ 는 yellow-deep 이라 면이
+  // 어두워져 태그가 도장처럼 보인다 — 선(도장 테두리·거터 틱)과 면은 다른 이름이다 (D95).
+  { op: 'add', theme: 'light', prop: '--verdict-differ-face', value: '#FFC400', source: 'D95 / 05 §4.1·4.2' },
+  { op: 'add', theme: 'light', prop: '--on-verdict-differ', value: '#221D18', source: 'D95 / 05 §4.1·4.2' },
+  { op: 'add', theme: 'dark', prop: '--verdict-differ-face', value: '#FFD030', source: 'D95 / 05 §4.1·4.2' },
+  { op: 'add', theme: 'dark', prop: '--on-verdict-differ', value: '#221D18', source: 'D95 / 05 §4.1·4.2' },
+
   // 05 §4.1 마지막 문단 — 목업은 야간반에만 정의해 주간반에서 var() 가 무효값이 된다
   { op: 'add', theme: 'light', prop: '--glow-t0', value: 'transparent', source: '05 §4.1 마지막 문단' },
   { op: 'add', theme: 'light', prop: '--glow-t1', value: 'transparent', source: '05 §4.1 마지막 문단' },

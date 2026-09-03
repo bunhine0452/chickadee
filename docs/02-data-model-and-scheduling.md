@@ -981,9 +981,16 @@ export type CardPayload =
       // `blockId` = `block.id` (D92). `why_answer.block_id` 와 `block.ast_json` 캐시를 되찾는 열쇠다.
       // `why.choices` 는 **3개 아니면 0개**다 — 3개면 사전 `why_gate`(04 §6 ①), 0개면 일반 템플릿(④).
   | { track: 't2'; kind: 'placement' | 'radius' | 'flow' | 'direction'; q: string; hint: string;
-      bands: { l: string; s: string }[]; files: { p: string; r: number; isNew?: boolean }[]; edges: [string, string][];
-      commit: { h: string; d: string; m: string; n: string }; core: Record<string, [string, string]>;
-      sec: Record<string, [string, string]>; trap: Record<string, string>; hints: string[] };
+      bands: { l: string; s: string }[];
+      files: { p: string; r: number; isNew?: boolean; folded?: number; cycle?: boolean }[];
+      edges: [string, string, EdgeKind][];
+      commit?: { h: string; d: string; m: string; n: string }; core: Record<string, [string, string]>;
+      sec: Record<string, [string, string]>; trap: Record<string, string>; hints: string[];
+      flow?: { answer: string[]; deck: string[] }; pairs?: { a: string; b: string; answer: 0 | 1 | 2 | 3 }[] };
+      // 넷은 D100. `edges` 의 3번째 자리 = `import_edge.kind` — 05 가 `type` 을 점선,
+      // `http` 를 이중선으로 그린다 (04 §7.3). `folded` = 접힌 폴더 안 파일 수, `cycle` =
+      // SCC 크기 > 1 (04 §7.2·§7.4). `commit` 이 없는 카드는 그래프만으로 만든 3종과
+      // 커밋 부족 폴백이다 (04 §8.3·§8.4). `flow`·`pairs` 는 그 두 종의 정답지다.
 
 export interface Session { id: number; repoId: number; dayKey: DayKey; seqInDay: number; startedAt: number; endedAt: number | null;
   budgetMin: number; plannedMin: number; elapsedS: number; status: 'active' | 'paused' | 'done' | 'abandoned'; plan: PlannedItem[]; liferShown: number; }
@@ -1022,8 +1029,9 @@ export interface Gap { repoId: number; conceptId: ConceptId; siteCount: number; 
 // 인제스트 산출 · 원장 보강 (열과 1:1). `Capture`·`AstLite` 는 01 §3.1 에서 import 한다
 export interface CommitFile { commitId: number; path: string; oldPath: string | null; status: 'A' | 'M' | 'D' | 'R';
   additions: number; deletions: number; touched: [number, number][]; }
+export type EdgeKind = 'static' | 'type' | 'dynamic' | 'http';
 export interface ImportEdge { repoId: number; fromFileId: number; toFileId: number;
-  kind: 'static' | 'type' | 'dynamic' | 'http'; confidence: 'syntactic' | 'heuristic'; }
+  kind: EdgeKind; confidence: 'syntactic' | 'heuristic'; }
 export interface Block { id: number; repoId: number; fileId: number; rev: string | null; name: string; kind: string;
   lineStart: number; lineEnd: number; textHash: string; ast: AstLite | null; isAlive: boolean; updatedAt: number; }
 export interface WhyAnswer { id: number; reviewLogId: number; cardId: number; blockId: number | null; lineNo: number | null;

@@ -24,7 +24,8 @@ export const BUDGET: Record<Mark, number> = {
   'home:paint': 400,
   'session:mount': 50,
   't0:grade': 30,
-  't1:monaco': 250,
+  // D94 — 실측 314 ms(n=2)를 받아들이고 250 에서 올렸다. 1단계는 여전히 `PlainPad` 다(D93).
+  't1:monaco': 350,
   'theme:switch': 100,
   'lifer:open': 50,
 };

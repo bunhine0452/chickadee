@@ -14,6 +14,7 @@ import { estMinFor, type Candidate } from '@chickadee/scheduler';
 import { fromConceptSiteRow, type ConceptId, type ConceptSite, type Layer } from '@chickadee/store-sql';
 
 import { makeT1Card } from './blocks.js';
+import { makeT2Card } from './graph.js';
 import type { CardMaker } from './session.js';
 
 /** 카드 하나에 볼 사용처 수. 사슬이 몇 번 미끄러져도 이 안에서 끝난다 (04 §1.4). */
@@ -84,6 +85,31 @@ export function cardMaker(deps: MakerDeps): CardMaker {
             role: 'new',
             estMin: estMinFor('t1', 'new'),
           };
+    },
+
+    async forUnit() {
+      // T2 는 개념이 아니라 **대지**에서 나온다 (04 §7.4 「범위 = 유닛 + 1-hop 이웃」) —
+      // 그 경로는 `data/graph.ts` 다. 대지를 고르는 규칙은 「오늘 걸 만한 것 중 첫 번째」이고,
+      // 순서는 `unit.order_idx` 다(홈이 대지를 세우는 순서와 같아야 「그 대지」로 읽힌다).
+      const units = await ipc.store.query('home.units', { repoId: deps.repoId });
+      const seen = new Set<number>();
+      for (const row of units) {
+        if (seen.has(row.unit_id)) continue;
+        seen.add(row.unit_id);
+        const made = await makeT2Card(
+          { repoId: deps.repoId, rootPath: deps.rootPath, now: deps.now },
+          { id: row.unit_id, name: row.name, rootPath: row.root_path },
+        );
+        if (made === null) continue;
+        return {
+          cardId: made.cardId,
+          conceptId: made.card.conceptId,
+          track: 't2' as const,
+          role: 'new' as const,
+          estMin: estMinFor('t2', 'new'),
+        };
+      }
+      return null;
     },
   };
 }

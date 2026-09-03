@@ -134,6 +134,7 @@ const maker: CardMaker = {
     }),
   // 여기 픽스처에는 블록이 없다 — T1 슬롯이 비는 갈래가 이 테스트가 보는 것이다.
   forBlock: () => Promise.resolve(null),
+  forUnit: () => Promise.resolve(null),
 };
 
 async function settings() {

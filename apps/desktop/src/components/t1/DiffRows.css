@@ -2,9 +2,9 @@
    바꾼 것 —
      · 판정 색 원색을 별칭으로 — `.rtag.e` → --verdict-exact, `.rtag.q` → --verdict-equiv,
        `.drow.equiv .u` → --verdict-equiv-text (05 §4.2).
-     · 황 「면」(`.rtag.d` · `mark`)과 먹 리터럴 #221D18 은 --t2 / --on-t2 로. 목업의
-       --yellow(#FFC400)에 대응하는 판정 별칭이 없다 — --verdict-differ 는 --yellow-deep
-       이라 면으로 쓰면 색이 어두워진다. Choices.css 의 `.ch.wrong .n` 이 같은 선례다.
+     · 황 「면」(`.rtag.d`)은 --verdict-differ-face / --on-verdict-differ (D95). --verdict-differ
+       는 --yellow-deep 이라 면으로 쓰면 색이 어두워져 태그가 도장처럼 보인다 — 선(도장
+       테두리·거터 틱)과 면은 다른 이름이다. 어긋난 토큰을 짚는 `mark` 도 같은 짝이다.
      · 이의 버튼은 목업의 `.dis` 대신 FlatButton(`flat-btn ghost dunno`) 이다 —
        `aria-pressed` 가 필요하고(05 §5), 눌린 면은 `.dunno.on` 이 이미 황색이다. */
 .drows {
@@ -68,8 +68,8 @@
 
 .drow.differ .u mark {
   padding: 0 1px;
-  background: var(--t2);
-  color: var(--on-t2);
+  background: var(--verdict-differ-face);
+  color: var(--on-verdict-differ);
 }
 
 .drow.missing .u,
@@ -101,8 +101,8 @@
 }
 
 .rtag.d {
-  background: var(--t2);
-  color: var(--on-t2);
+  background: var(--verdict-differ-face);
+  color: var(--on-verdict-differ);
 }
 
 .drow .why {

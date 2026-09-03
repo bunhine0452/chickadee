@@ -194,3 +194,25 @@ ON CONFLICT (repo_id, concept_id) DO UPDATE SET
 DELETE FROM gap
 WHERE repo_id = :repoId AND status = 'open'
   AND concept_id NOT IN (SELECT value FROM json_each(:conceptIds));
+
+-- ───────── import_edge (04 §7.1 · 01 §3.3 「TS 파생 층」) ─────────
+-- 경로 해석은 `packages/concepts/src/resolve-imports.ts` 가 한다 — Rust 는 `_imports`
+-- 캡처(지정자 문자열)만 쓰고, `./x` 가 어느 파일인지는 언어 지식이라 TS 의 몫이다 (D18).
+-- 01 §3.4 는 이 자리를 `derive.edge_replace` 하나로 적었지만 한 문장이 지우고 넣을 수는
+-- 없다 — `derive.prereq_clear`/`_insert` 와 같은 짝으로 나눈다 (D99).
+
+-- @name derive.edge_clear
+-- @params { fileId: number }
+-- @row void
+DELETE FROM import_edge WHERE from_file_id = :fileId;
+
+-- 같은 (from, to, kind) 가 두 번 오는 것은 정상이다 — 한 파일이 같은 모듈을 두 줄에서
+-- 가져올 수 있다. `confidence` 는 더 확실한 쪽이 이긴다: syntactic 이 heuristic 을 덮는다.
+-- @name derive.edge_insert
+-- @params { repoId: number, fromFileId: number, toFileId: number, kind: string, confidence: string }
+-- @row void
+INSERT INTO import_edge (repo_id, from_file_id, to_file_id, kind, confidence)
+VALUES (:repoId, :fromFileId, :toFileId, :kind, :confidence)
+ON CONFLICT (from_file_id, to_file_id, kind) DO UPDATE SET
+  confidence = CASE WHEN excluded.confidence = 'syntactic' THEN 'syntactic'
+                    ELSE import_edge.confidence END;

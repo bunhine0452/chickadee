@@ -106,6 +106,7 @@ const DATA: HomeData = {
   },
   files: 41,
   newcomerFlag: 'none',
+  openableBlocks: 4,
 };
 
 const EMPTY: HomeData = {

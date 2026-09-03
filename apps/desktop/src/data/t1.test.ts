@@ -10,7 +10,10 @@
  */
 import { createRequire } from 'node:module';
 
-import { asDayKey, migrations, statements, toSqliteBindings } from '@chickadee/store-sql';
+import { diffMastery, makeScheduler, rebuildMastery } from '@chickadee/scheduler';
+import {
+  asDayKey, fromMasteryRow, fromReviewLogRow, migrations, statements, toSqliteBindings,
+} from '@chickadee/store-sql';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type BetterSqlite3 from 'better-sqlite3';
@@ -283,5 +286,21 @@ describe('T1 판 한 장 (04 §4~§6 · 02 §4)', () => {
     expect(checkWhy(line, line).ok).toBe(false);
     expect(checkWhy('짧다', line).ok).toBe(false);
     expect(checkWhy('브라우저 기본 제출을 막아 새로 고침을 피한다', line).ok).toBe(true);
+  });
+
+  test('Q4 재생 — `rebuild_mastery()` 가 캐시와 정확히 같다 (T1 까지 확장, diff 0)', async () => {
+    const graded = await gradeT1Plate({
+      draft: ORIGINAL.join('\n'), stage: 2, peeks: 0, downgraded: false,
+    });
+    await finishT1Plate(graded!.result, graded!.question, {
+      draft: ORIGINAL.join('\n'), stage: 2, peeks: 0, downgraded: false,
+      elapsedMs: 540_000, appealed: [], why: { text: '제출 기본 동작을 막는다', pick: null },
+    });
+
+    const logs = (rows('SELECT * FROM review_log ORDER BY id')).map(fromReviewLogRow);
+    const cached = (rows('SELECT * FROM mastery')).map(fromMasteryRow);
+    const replayed = rebuildMastery(logs, (paramsId) => makeScheduler({ paramsId }));
+    expect(cached).toHaveLength(1);
+    expect(diffMastery(cached, replayed)).toEqual([]);
   });
 });

@@ -107,8 +107,8 @@ interface AstLite { kind: string; named: boolean; start: number; end: number;
 interface LinesChunk { relPath: string; rev: string | null; from: number; to: number; lines: string[];
   totalLines: number; hadInvalidUtf8: boolean }
 interface Block { relPath: string; rev: string | null; startByte: number; endByte: number; text: string }
-interface CommitFileDiff { relPath: string; status: 'A' | 'M' | 'D' | 'R'; additions: number; deletions: number;
-  hunks: { oldStart: number; newStart: number; text: string }[] }
+interface FileDiff { relPath: string; added: string[] /* `+` 줄 본문, 합계 ≤ 64 KiB */; truncated: boolean }
+  // status·additions·deletions 는 인제스트가 이미 `commit_file` 에 썼다 (D98)
 ```
 
 ### 3.2 명령 전체 목록
@@ -126,6 +126,7 @@ interface CommitFileDiff { relPath: string; status: 'A' | 'M' | 'D' | 'R'; addit
 | `file_read_block` | `{ repoId, relPath, startByte, endByte /* ≤ 65536 */, rev? }` | `Block` | 위와 같음 | 10ms | ✗ | — |
 | `parse_langs` | — | `{ grammar, grammarVersion, abi }[]` | — | 1ms | ✗ | — |
 | `git_blame_lines` | `{ repoId, relPath, rev? }` | `{ hunks: BlameHunk[] }` | `GIT_COMMIT_NOT_FOUND` `GIT_BLAME_TIMEOUT`(2s) | 500ms | ✗ | — |
+| `git_diff_text` | `{ rootPath, sha, relPath }` | `FileDiff` — 그 커밋이 그 경로에 **더한 줄**만. 머지·미변경 경로는 빈 배열 (D98) | `GIT_COMMIT_NOT_FOUND` | 30ms | ✗ | — |
 | `store_open` | `{ catalog: { statements: Record<name, sql>; migrations: { version, sql }[] } }` | `StoreInfo` | `STORE_ALREADY_OPEN` `STORE_MIGRATION` `STORE_CORRUPT` `STORE_CATALOG_MISSING` | 200ms(마이그레이션 제외) | ✗ | — |
 | `store_query` | `{ name, params }` | `Row[]` | `STORE_CATALOG_MISSING` `STORE_BUSY` `BAD_INPUT` | 5ms(홈 번들 30ms) | ✗ | — |
 | `store_exec` | `{ name, params }` | `{ changes, lastId }` | 위 + `STORE_CONSTRAINT` | 5ms | ✗ | — |
@@ -136,7 +137,7 @@ interface CommitFileDiff { relPath: string; status: 'A' | 'M' | 'D' | 'R'; addit
 | `app_reveal` | `{ which: 'data' \| 'logs' \| 'repo', repoId? }` | `{}` | `FS_NOT_FOUND` | 100ms | ✗ | — |
 | `t3_run` | — | — | 항상 `NOT_IMPLEMENTED` (§9) | — | — | — |
 
-M3 에서 돌아오는 명령: `parse_snippet`(D67). M4: `git_diff_text`(D64). M5: `dict_*` 4종과 `repo_glob_read`(D66 · D65). 표에서 빠진 것은 폐기가 아니라 그 마일스톤의 몫이다.
+M4 에서 돌아온 명령: `git_diff_text`(D64 · 형태는 D98). M3: `parse_snippet`(D67). M5: `dict_*` 4종과 `repo_glob_read`(D66 · D65). 표에서 빠진 것은 폐기가 아니라 그 마일스톤의 몫이다.
 
 `store_open` 은 프로세스당 1회만 허용한다(두 번째 호출 → `STORE_ALREADY_OPEN`). 왜: 카탈로그는 앱 번들 JS 에서만 오는데, WebView 가 뚫렸을 때 SQL 을 갈아끼우는 경로를 막는다. 카탈로그 밖 SQL 은 어떤 명령으로도 실행할 수 없다.
 
@@ -170,13 +171,14 @@ Rust 가 사용하는 카탈로그 이름(기동 시 전부 존재해야 하며 
 | `concept.uses` | `conceptId, limit` | `{file, line, excerpt}` | 사다리 3단 `uses`, 홈 노드 `내 코드 3곳` |
 | `concept.prereqs` | `conceptId` | 선행 개념 + 겹 + `card` 유무 | 사다리 2단 `prereq[{s:'gap'|'known'|'none'}]` |
 | `t1.block_get` | `cardId` | `original[]`, `rev`, `show2` | `T1.original` |
-| `t2.graph` | `repoId, unitId` | `files[{p, r, isNew}]`, `edges[]` | `T2.files/edges` |
-| `t2.commit_key` | `commitHash` | `core/sec/trap` 후보 + `+/−` (`commit_file` 조인) | `T2.core/sec/trap/commit` |
+| `t2.unit_files` / `t2.edges` | `repoId, unitId` / `repoId, ids` | 대지 + 1-hop 노드 / 그 안쪽 엣지 | `T2.files/edges` (밴드·배치는 `cards`, D97) |
+| `t2.commit_candidates` / `t2.commit_files` / `t2.recent_changes` | `repoId, unitId, limit` / `commitId` / `repoId, limit` | 후보 커밋 · 그 커밋의 변경 파일 · 공변경 이력 | `T2.core/sec/trap/commit` (필터는 `cards`, D99) |
+| `t2.appeal_picks` | `cardId` | 「이것도 맞다」 3회 집계 | 04 §8.4 sec 편입 제안 |
 | `review.append` + `mastery.upsert` + `session.save` | (batch: `review_log` insert · `mastery` upsert · `session_item` update · `session` update · `lifer`/`dunno_event`) | — | `onDone(r)` 직후 한 tx |
 | `session.open_get` / `session.finish` | `repoId` / `sessionId` | `session` 행 + `session_item` 행 전부 | `restore()` / `summary()` |
 | `derive.captures_by_file` | `fileId` | `Capture[]` | TS 파생 층(§3.3) |
 | `derive.site_upsert` | — | — | `concept_site` 쓰기 |
-| `derive.edge_replace` | — | — | `import_edge` 쓰기 |
+| `derive.edge_clear` + `derive.edge_insert` | — | — | `import_edge` 쓰기 (D99) |
 | `derive.block_upsert` | — | — | `block` 쓰기 |
 | `derive.blame_fill` | — | — | `concept_site.commit_id` 채우기 |
 | `stats.days` | `repoId, days: 14` | 일별 분 | 「지난 14일 잉크 농도」 |
@@ -216,7 +218,7 @@ export const ipc = {
             readBlock: (req: ReadBlockReq) => call<Block>('file_read_block', req) },
   parse:  { snippet: (req: SnippetReq) => call<SnippetResult>('parse_snippet', req),
             langs: () => call<LangInfo[]>('parse_langs') },
-  git:    { diffText: (req: DiffReq) => call<CommitFileDiff>('git_diff_text', req) },
+  git:    { diffText: (rootPath: string, sha: string, relPath: string) => call<FileDiff>('git_diff_text', { rootPath, sha, relPath }) },
   store:  { open: (catalog: Catalog) => call<StoreInfo>('store_open', { catalog }),
             query: <K extends keyof StatementMap>(name: K, params: StatementMap[K]['params']) =>
                      call<StatementMap[K]['row'][]>('store_query', { name, params }),

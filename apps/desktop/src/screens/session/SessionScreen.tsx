@@ -14,19 +14,24 @@ import { Summary } from '../../components/session/Summary.js';
 import type { RungNo } from '../../components/session/ReprintLadder.js';
 import type { QueueItem } from '../../components/shell/TimeQueue.js';
 import { closeMark, markLiferOpen } from '../../devtools/audit.js';
-import { buildProt, evalLine, type Question, type T1Result, type Tick } from '@chickadee/grading';
+import {
+  buildProt, evalLine, type Question, type T1Result, type T2Result, type Tick,
+} from '@chickadee/grading';
 import { baseName, loadLadder, type LadderData } from '../../data/ladder.js';
 import type { Plate } from '../../data/session.js';
 import type { Track } from '@chickadee/store-sql';
 import { loadSettings } from '../../data/settings.js';
 import { loadSummary, markLifersShown, type SummaryData } from '../../data/summary.js';
 import {
-  answerPlate, backFromPrereq, completeSession, finishT1Plate, gradeT1Plate, jumpPrereq, openRung,
+  answerPlate, backFromPrereq, completeSession, finishT1Plate, finishT2Plate, gradeT1Plate,
+  gradeT2Plate, jumpPrereq, openRung,
   pauseSession, pressDunno, returnToParent, savePlate,
 } from '../../session-flow.js';
 import { currentPlate, useUi } from '../../store.js';
 import { T0Plate } from './T0Plate.js';
 import { T1Plate, type T1View } from './T1Plate.js';
+import { MAX_HINTS, T2Plate, type T2View } from './T2Plate.js';
+import { liveAfter } from './t2Copy.js';
 import { useSessionClock } from './useSessionClock.js';
 import './SessionScreen.css';
 
@@ -101,6 +106,13 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
   const [t1Why, setT1Why] = useState<{ text: string; pick: number | null }>({ text: '', pick: null });
   const [t1Short, setT1Short] = useState(false);
 
+  // ── T2 판 하나가 들고 있는 것 (05 §5 · 04 §7~§8). 판이 바뀌면 아래 효과가 비운다.
+  const [t2View, setT2View] = useState<T2View>('pick');
+  const [t2Sel, setT2Sel] = useState<string[]>([]);
+  const [t2Hints, setT2Hints] = useState(0);
+  const [t2Graded, setT2Graded] = useState<T2Result | null>(null);
+  const [t2Appealed, setT2Appealed] = useState<string[]>([]);
+
   const result = results[pos] ?? null;
   const elapsed = useUi((s) => s.elapsed[pos] ?? 0);
 
@@ -133,11 +145,18 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
     setT1Peeking(false);
     setT1Downgraded(false);
     setT1SavedAt(null);
+    // T2 도 같다 — 고른 파일과 힌트 단은 `session_item.state_json` 에 남아 있다.
+    setT2View('pick');
+    setT2Sel(plate?.state?.t2Sel ?? []);
+    setT2Hints(plate?.state?.hints ?? 0);
+    setT2Graded(null);
+    setT2Appealed([]);
     setT1Graded(null);
     setT1Appealed([]);
     setT1Why({ text: '', pick: null });
     setT1Short(false);
-  }, [plate?.id, plate?.level, plate?.state?.t1Draft, plate?.state?.t1Stage, plate?.state?.peeks]);
+  }, [plate?.id, plate?.level, plate?.state?.t1Draft, plate?.state?.t1Stage, plate?.state?.peeks,
+    plate?.state?.t2Sel, plate?.state?.hints]);
 
   // 마지막 판을 마치면 요약을 읽는다 (05 §3 — 요약은 읽기 전용이다).
   useEffect(() => {
@@ -294,6 +313,42 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
     await goNext();
   }, [t1Graded, plate, t1Draft, t1Stage, t1Peeks, t1Downgraded, elapsed, t1Appealed, t1Why, goNext]);
 
+  // ── T2 (04 §7~§8). 고르기 → 채점 → 마치기. T1 과 같은 두 걸음이다.
+  const t2Toggle = useCallback((path: string) => {
+    setT2Sel((prev) => (prev.includes(path) ? prev.filter((p) => p !== path) : [...prev, path]));
+  }, []);
+
+  const t2Hint = useCallback(() => {
+    setT2Hints((prev) => {
+      if (prev >= MAX_HINTS) return prev;
+      useUi.getState().say(prev + 1 === MAX_HINTS ? '이제 개수까지 알려 드렸어요.' : '힌트는 감점이 아니에요.');
+      return prev + 1;
+    });
+  }, []);
+
+  const t2Grade = useCallback(() => {
+    const payload = plate?.payload.track === 't2' ? plate.payload : null;
+    if (payload === null || t2Sel.length === 0) return;
+    // 파일을 고르는 두 종만 이 화면이 받는다 — 흐름 추적·의존성 방향의 입력 화면은 M5 다.
+    if (payload.kind !== 'placement' && payload.kind !== 'radius') return;
+    const graded = gradeT2Plate({ kind: payload.kind, selected: t2Sel }, t2Hints);
+    if (graded === null) return;
+    setT2Graded(graded);
+    setT2View('result');
+    useUi.getState().say(liveAfter(graded));
+  }, [plate, t2Sel, t2Hints]);
+
+  const t2Appeal = useCallback((path: string) => {
+    setT2Appealed((prev) => (prev.includes(path) ? prev : [...prev, path]));
+  }, []);
+
+  const t2Finish = useCallback(async () => {
+    if (t2Graded === null) return;
+    const finished = await finishT2Plate(t2Graded, t2Appealed, elapsed * 1000);
+    if (finished === null) return;
+    await goNext();
+  }, [t2Graded, t2Appealed, elapsed, goNext]);
+
   if (session === null) return null;
 
   const band = (
@@ -351,7 +406,24 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
               useUi.getState().go('home');
             }}
           />
-        ) : plate === null ? null : plate.track === 't1' ? (
+        ) : plate === null ? null : plate.track === 't2' ? (
+          <T2Plate
+            plate={plate}
+            no={pos + 1}
+            result={result}
+            graded={t2Graded}
+            view={t2View}
+            onView={setT2View}
+            selected={t2Sel}
+            onToggle={t2Toggle}
+            hints={t2Hints}
+            onHint={t2Hint}
+            onGrade={t2Grade}
+            appealed={t2Appealed}
+            onAppeal={t2Appeal}
+            onFinish={() => void t2Finish()}
+          />
+        ) : plate.track === 't1' ? (
           <T1Plate
             plate={plate}
             no={pos + 1}

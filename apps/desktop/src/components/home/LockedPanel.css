@@ -1,0 +1,28 @@
+/* 목업에 없는 자리다 (D96) — `Newcomer` 와 같은 문법을 쓴다: 판의 괘선, 왼쪽 굵은 변,
+   경고색 없음. 이것은 게이트가 아니라 안내다 (정본 §3-7 「하트·목숨 금지」와 같은 뜻).
+   왼쪽 변만 점선인 것이 「아직」의 표시다 — 「판이 없는 문법」의 막대가 실선인 것과 짝. */
+.locked-panel {
+  margin-top: 14px;
+  border: 2px solid var(--rule);
+  border-left: 9px dashed var(--ink-mute);
+  background: var(--paper-3);
+  padding: 12px 15px;
+}
+
+.locked-panel b {
+  display: block;
+  color: var(--ink);
+  font-family: var(--f-mono);
+  font-size: var(--fs-14);
+  font-weight: 700;
+  letter-spacing: .06em;
+}
+
+.locked-panel p {
+  margin: 6px 0 0;
+  color: var(--ink-soft);
+  font-size: var(--fs-14);
+  line-height: var(--lh-body);
+}
+
+.locked-panel .how { color: var(--ink) }

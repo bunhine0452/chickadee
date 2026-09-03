@@ -4,6 +4,7 @@
  * 목업 `design/ink-home.html` 이 시각의 정본이고, 이 파일은 그 목업이 손으로 적어 둔
  * 값(`LY_COUNT`·`mins`·시트·노드)이 실데이터에서 어떤 이름으로 오는지를 고정한다.
  */
+import { MAX_BLOCK_LINES, MAX_UNKNOWN_CONCEPTS, MIN_BLOCK_LINES } from '@chickadee/cards';
 import { ipc } from '@chickadee/ipc-client';
 import { shownLayerOf, type Scheduler } from '@chickadee/scheduler';
 import type { Layer, Settings } from '@chickadee/store-sql';
@@ -27,6 +28,11 @@ export const COLOR_BAR_DAYS = 14;
 export const GAPS_LIMIT = 5;
 /** 「다시 찍을 개념」 줄 수. */
 export const RETAKE_LIMIT = 6;
+/**
+ * 이보다 많으면 대지 목록에 윈도잉을 건다 (05 §10 · D81). 12 는 05 §10 의 「홈 시트 12장
+ * 초과」 그대로다 — 그 아래에서는 화면 밖 대지가 거의 없어 가시성 판정 비용만 남는다.
+ */
+export const WINDOW_SHEETS = 12;
 
 export type NodeState = 'done' | 'current' | 'locked' | 'open';
 
@@ -107,6 +113,8 @@ export interface HomeData {
   files: number;
   /** 홈 상단 안내를 보일지 (02 §6.4). 계산과 저장은 세션 끝에 이미 끝나 있다. */
   newcomerFlag: NewcomerFlag;
+  /** 04 §3.1 순위 ②를 통과하는 필사 블록 수. 0 이면 T1 이 아직 안 열린다 (D96). */
+  openableBlocks: number;
 }
 
 /**
@@ -136,7 +144,7 @@ export async function loadHome(
   fade?: { scheduler: Scheduler; now: number },
 ): Promise<HomeData> {
   const [counts, scale, units, unitFiles, gapRows, retakeRows, dayRows, runRows, fileRows, prereqRows,
-    settings] =
+    openableRows, settings] =
     await Promise.all([
       ipc.store.query('home.bundle_counts', { repoId }),
       ipc.store.query('home.layer_scale', { repoId }),
@@ -148,6 +156,10 @@ export async function loadHome(
       ipc.store.query('home.last_run', { repoId }),
       ipc.store.query('home.file_count', { repoId }),
       ipc.store.query('home.node_prereqs', { repoId }),
+      ipc.store.query('block.openable', {
+        repoId, minLines: MIN_BLOCK_LINES, maxLines: MAX_BLOCK_LINES,
+        maxUnknown: MAX_UNKNOWN_CONCEPTS,
+      }),
       // 초보 안내는 `settings` 한 곳에서 온다 (02 §6.4) — 홈이 스스로 판단하지 않는다.
       loadSettings(),
     ]);
@@ -202,6 +214,7 @@ export async function loadHome(
       : null,
     files: fileRows.reduce((sum, r) => sum + r.n, 0),
     newcomerFlag: settings.newcomerFlag,
+    openableBlocks: openableRows[0]?.n ?? 0,
   };
 }
 

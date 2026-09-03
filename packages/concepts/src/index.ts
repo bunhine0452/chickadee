@@ -25,6 +25,10 @@ export type {
 } from './new-rank.js';
 export { topoOrder } from './prereq-graph.js';
 export type { GraphNode } from './prereq-graph.js';
+export { resolveImports } from './resolve-imports.js';
+export type {
+  EdgeKind, FileImports, ResolveInput, ResolvedEdge, TsconfigPaths,
+} from './resolve-imports.js';
 export { registerRepo, listRepos, relocateRepo, removeRepo } from './repos.js';
 export { BLAME_BUDGET_MS, fillCommits } from './blame.js';
 export type { BlameOptions } from './blame.js';

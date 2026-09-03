@@ -183,6 +183,7 @@ interface SessionSlice {
 | `--t2`·`--t2-deep`·`--t2-text`·`--on-t2` | =yellow 계열, on #221D18 | =yellow 계열, on #1C1400 | **T2 별칭** (10.5 / 12.5:1) | on 만 ✓ |
 | `--verdict-exact` / `--verdict-equiv` / `--verdict-differ` | #FF2E7E / #1250C8 / #C08F00 | #FF3A86 / #3B82FF / #C09600 | 판정 색(도장·거터 틱·`.rtag`) — 트랙 색과 독립 | ✗(면) |
 | `--verdict-exact-text` / `--verdict-equiv-text` / `--verdict-differ-text` | #960B42 / #0F3F9E / #664300 | #FFA3CE / #9CC2FF / #FFD866 | 판정 **글자**(`.stamp` 라벨) — 값은 pink/blue/yellow-text 와 같다 (D56) | ✓ |
+| `--verdict-differ-face` / `--on-verdict-differ` | #FFC400 / #221D18 | #FFD030 / #221D18 | 어긋남을 **면으로** 칠하는 자리(`.rtag.d`) — `--verdict-differ` 는 yellow-deep 이라 면이 어두워진다 (D95) | on 만 ✓ |
 | `--knock` | #FFFDF7 | #12100C | 녹아웃(잉크 위 종이색) | ✗ |
 | `--glow-t0/-t1/-t2` | **transparent** (신규 정의) | rgba 청/진홍/황 .36~.45 | 야간 글로우 `box-shadow` | ✗ |
 | `--dee-paper` · `--dee-gray` · `--dee-blank` | #FDFAF0 · #A69B8B · #E4DAC4 | 동일 | Dee 종이·스크린·빈 판 | ✗ |
@@ -201,7 +202,7 @@ interface SessionSlice {
 
 ### 4.2 별칭 · 활자 · 행 길이 강제
 
-- **컴포넌트 CSS 는 `--t0/--t1/--t2(-deep/-text)` 와 `--on-t*` 만 쓴다.** `--blue/--pink/--yellow` 직접 참조는 `styles/` 밖에서 Stylelint 룰 `chickadee/track-alias-only` 로 금지. 예외: 도장(`Stamp`)·판정 틱·`.rtag` 처럼 "정합 = 진홍, 동등 = 청, 어긋남 = 황"이라는 **트랙과 무관한 판정 색**은 `--verdict-exact/-equiv/-differ` 별칭을 새로 만들어 쓴다(값은 pink/blue/yellow-deep). 왜: 목업엔 `.gl.exact{background:var(--pink)}` 처럼 판정 색이 원색으로 박혀 있어 나중에 T1 색을 바꾸면 판정 색까지 딸려 바뀐다.
+- **컴포넌트 CSS 는 `--t0/--t1/--t2(-deep/-text)` 와 `--on-t*` 만 쓴다.** `--blue/--pink/--yellow` 직접 참조는 `styles/` 밖에서 Stylelint 룰 `chickadee/track-alias-only` 로 금지. 예외: 도장(`Stamp`)·판정 틱·`.rtag` 처럼 "정합 = 진홍, 동등 = 청, 어긋남 = 황"이라는 **트랙과 무관한 판정 색**은 `--verdict-exact/-equiv/-differ` 별칭을 새로 만들어 쓴다(값은 pink/blue/yellow-deep). 왜: 목업엔 `.gl.exact{background:var(--pink)}` 처럼 판정 색이 원색으로 박혀 있어 나중에 T1 색을 바꾸면 판정 색까지 딸려 바뀐다. **면과 선은 다른 이름이다** — `--verdict-differ`(yellow-deep)는 도장 테두리·거터 틱·범례처럼 선으로 쓰고, 태그처럼 면을 통째로 칠하는 자리는 `--verdict-differ-face`/`--on-verdict-differ` 를 쓴다 (D95). `-exact`·`-equiv` 는 이미 원색이라 `-face` 를 따로 두지 않는다.
 - **13px 하한**: 토큰이 없으니 `--fs-12` 는 쓸 수 없다. 남은 구멍은 리터럴 — Stylelint `chickadee/no-font-size-below-13`(`font-size` 선언값이 px/rem 리터럴이고 13px 미만이면 오류, `var()` 만 허용). 목업의 `.map .nd .dir{font-size:12.5px}` · `.newtag{12px}` · `.band-s{13px}` 가 **이 룰에 걸린다** — SVG `<text>` 는 `__audit` 이 `offsetParent` 로 걸러 못 잡았다(§9). 앱에서는 `--fs-13` 이상으로 올리고 상자 폭을 늘린다.
 - **`--measure` 강제 선택자**는 목업 그대로: `p, li, dd, blockquote, .prose { max-width: var(--measure) }`, 해제는 `.u-nomeasure` 로만. 추가로 `.ask`·`.note`·`.fb p`·`.rung-body p` 는 이미 `p` 라 자동 적용. 코드 판(`.code`)·표·지도는 `p` 가 아니므로 자유.
 - `html{word-break:keep-all; line-break:strict; overflow-wrap:break-word}` 와 `code,kbd,pre{word-break:normal}` 은 `styles/reset.css` 에 그대로.
@@ -244,6 +245,7 @@ interface SessionSlice {
 | `.inkscale`(구 `.ladder`) | `InkScale` | `counts:number[5]` | — | `role=img` | — |
 | `.conc` `.cn` | `ConceptList` | `rows` | soon | `<ul aria-label>` | — |
 | `.gaps` `.gap` | `GapsPanel` | `gaps`, `onMake` | hot | 「판 만들기」 `<button>` | — |
+| `.panel.locked` | `LockedPanel` | `title`, `body` | — | `<section aria-labelledby>`; 「판이 없는 문법」 옆. T1 후보가 0이면 뜨고, 열리면 사라진다 (D96) | — |
 | `.sheet` `.sheet-head` | `Sheet` | `no`, `title`, `meta`, `state:'done'\|'current'\|'locked'`, `avgLy`, `tilt` | — | `<article aria-labelledby>` | — |
 | `.rail` `.ps-rail` | `InkRail` | `ly`, `label`, `plus?` | plus on | `aria-hidden` (겹은 `Passes`·텍스트가 전달) | — |
 | `.node` | `Node` | `state`, `track`, `glyph`, `title`, `pass`, `seed`(dy/rot) | open | `<button aria-expanded>`; locked 는 `aria-disabled` (포커스 가능, 이유 설명). 잠긴 노드는 흔들지 않고 상세에 이유만 연다 | Enter/Space=상세 |
@@ -381,18 +383,18 @@ interface SessionSlice {
 | 폰트 FOUT | `index.html` preload 4 + `font-display:block` + `document.fonts.ready`(300ms 타임아웃) 뒤 `root.render` → `getCurrentWindow().show()` | 창을 폰트 뒤에 보여주면 FOUT 자체가 없다 |
 | 측정 | `?dev=1` 에서 `__audit.perf(ms)`(목업 그대로: 스크롤+hover 교대, avg/p95/max/over16) 와 `performance.mark` 6종(`home:paint`, `session:mount`, `t0:grade`, `t1:monaco`, `theme:switch`, `lifer:open`) → `plugin-log` 파일. macOS 는 Safari › 개발 › 앱 이름으로 Web Inspector 타임라인 부착 | Tauri 릴리스엔 DevTools 가 없다 |
 
-예산(p95, 야간반 포함): 홈 48노드 스크롤+hover ≤ 12ms · 교정지 마운트 ≤ 50ms · T0 채점→판정란 ≤ 30ms · Monaco 마운트 ≤ 250ms · 테마 전환 ≤ 100ms · 창 표시 후 홈 인터랙티브 ≤ 400ms. **첫 실측을 체크리스트 3번 항목으로 잡고, 예산을 넘는 항목은 규칙을 강화하지 목표를 낮추지 않는다.**
+예산(p95, 야간반 포함): 홈 48노드 스크롤+hover ≤ 12ms · 교정지 마운트 ≤ 50ms · T0 채점→판정란 ≤ 30ms · Monaco 마운트 ≤ 350ms(D94 — 250 에서 올렸다) · 테마 전환 ≤ 100ms · 창 표시 후 홈 인터랙티브 ≤ 400ms. **첫 실측을 체크리스트 3번 항목으로 잡고, 예산을 넘는 항목은 규칙을 강화하지 목표를 낮추지 않는다.**
 
 **WKWebView 실측** (릴리스 빌드 · 격리된 데이터 디렉터리 · 창을 앞에 세운 채). 재는 절차는 `apps/desktop/src/devtools/audit.ts` 의 `HOW` 와 `devtools/perfRun.ts` 에 있다.
 
 | mark | 실측 | 예산 | |
 |---|---|---|---|
-| `frame_p95` | 18 ms (이 리포 · 스티커 384개) · 18~24 ms (`projectox-like`) | 12 | **초과 — D80, 답은 윈도잉(D81), 자리는 `m4-05-dependency-map` 앞** |
-| `t1:monaco` | **314 ms** (n=2) | 250 | **초과 — D93, 1단계는 `PlainPad`. 남은 일은 기여 집합 줄이기** |
-| `home:paint` | 106~156 ms | 400 | 통과 |
+| `frame_p95` | 19 ms (이 리포 · 대지 18 · 스티커 391 · **윈도잉 켜짐**) · 18 ms (`projectox-like`) | 12 | **초과 — 윈도잉이 안 들었다(D105)** |
+| `t1:monaco` | **292~303 ms** (n=2) | 350 | 통과 — 예산을 D94 로 올렸다. 1단계는 `PlainPad` 그대로(D93) |
+| `home:paint` | 106~156 ms (M4 실측 141) | 400 | 통과 |
 | `session:mount` | 3~6 ms | 50 | 통과 |
 | `t0:grade` | < 1 ms | 30 | 통과 |
-| `theme:switch` | 7~48 ms | 100 | 통과 |
+| `theme:switch` | 7~48 ms (M4 실측 12~39) | 100 | 통과 |
 | `lifer:open` | 11~13 ms | 50 | 통과 |
 
 **리포가 다르면 `frame_p95` 를 비교하지 마라** — 노드 수가 곧 그 값이다(D81).

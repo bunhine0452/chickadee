@@ -89,3 +89,24 @@ LIMIT :limit;
 -- @row void
 INSERT INTO card_concept (card_id, concept_id, role) VALUES (:cardId, :conceptId, 'secondary')
 ON CONFLICT (card_id, concept_id) DO NOTHING;
+
+-- 필사 판이 열릴 수 있는가 (D96). 04 §3.1 순위 ②의 「모르는 문법 ≤ 3개」와 줄 수 조건을
+-- **후보를 긷지 않고** 센다 — 홈은 매 렌더마다 이것을 묻는데 `block.candidates` 는 블록마다
+-- 부속질의 둘을 돌리고 원문까지 읽어야 하므로 그 자리에 쓸 수 없다.
+-- 분절(41줄 이상 → 여러 조각)은 세지 않는다: 여기서 0 이 나와도 분절이 후보를 만들 수는
+-- 있으나, 갓 등록한 리포에서 0 이 나오는 이유는 줄 수가 아니라 **겹**이라 답이 달라지지 않는다.
+-- @name block.openable
+-- @params { repoId: number, minLines: number, maxLines: number, maxUnknown: number }
+-- @row { n: number }
+SELECT COUNT(*) AS n FROM block b
+JOIN file f ON f.id = b.file_id
+WHERE b.repo_id = :repoId AND b.is_alive = 1 AND f.is_alive = 1
+  AND (b.line_end - b.line_start + 1) BETWEEN :minLines AND :maxLines
+  AND (SELECT COUNT(DISTINCT s.concept_id) FROM concept_site s
+        LEFT JOIN mastery m ON m.concept_id = s.concept_id
+       WHERE s.file_id = b.file_id AND s.is_alive = 1
+         AND s.line_start <= b.line_end AND s.line_end >= b.line_start
+         AND COALESCE(m.layer, 0) = 0) <= :maxUnknown
+  AND EXISTS (SELECT 1 FROM concept_site s
+               WHERE s.file_id = b.file_id AND s.is_alive = 1
+                 AND s.line_start <= b.line_end AND s.line_end >= b.line_start);

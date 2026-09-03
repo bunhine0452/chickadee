@@ -1,0 +1,24 @@
+/* 목업: design/src/ink/session.css 의 `.picked`. 칩 면은 목업 그대로 --t0 이다 —
+   「고름」은 판정이 아니라 선택이라 판정 색 별칭을 쓰지 않는다 (05 §4.2). */
+.picked {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  min-height: 30px;
+}
+
+.picked .chip {
+  padding: 2px 8px;
+  border: 1.5px solid var(--rule);
+  background: var(--t0);
+  color: var(--on-t0);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  font-weight: 600;
+}
+
+.picked .none {
+  color: var(--ink-soft);
+  font-size: var(--fs-14);
+}

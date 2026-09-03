@@ -91,12 +91,12 @@ owner: claude-code
 - [x] 05 · T1 ClonePad Monaco — 지연 로드·테마 2종·거터 틱·줄 이탈 판정·백틱 홀드·자동 저장·Stepper·RefPlate·ScoreCard·DiffRows·WhyGate · 3일 (선행: 세션 셸·04 T1 엔진) {#m3-05-clonepad}
 
 ## M4 · T2 구조 (끝: projectox 유닛으로 문제 4종 생성, two-commits 는 그래프 3종만, 배치 결정성·2,000파일 <1.5s·24 노드·골든·IPC 재생 T1/T2 확장) {#m4}
-- [ ] 04 · T2 import 해석기 resolve-imports.ts — ts/py/go/rs/dart 표, tsconfig paths, Next http 엣지, external 분류 · 3일 (선행: 03 _imports 캡처) {#m4-04-resolve-imports}
-- [ ] 04 · T2 그래프 정리·배치 — SCC, 고립, 밴드 규칙, barycenter, 포트, 24 노드 축약 · 2일 (선행: 해석기) {#m4-04-graph-layout}
-- [ ] 04 · T2 정답지 도출 — 커밋 후보 필터, core/sec/trap, 힌트, 질문 템플릿, 커밋 부족 폴백 · 2일 (선행: commit_file·D21 커밋 분류) {#m4-04-answer-key}
-- [ ] 04 · T2 채점·문제 3종 — 3티어·wrong 상한, 영향 반경·흐름 추적·방향, 「이것도 맞다」 편입 · 2일 (선행: 정답지) {#m4-04-t2-grading}
-- [ ] 05 · T2 DependencyMap — SVG 레이아웃·포트 분산·호버/포커스 강조·3티어 결과·커밋 출처, 13px 룰 · 2일 (선행: 세션 셸·그래프 배치) {#m4-05-dependency-map}
-- [ ] 04 · 골든 케이스 스위트 — §9 표 28건 + T0/T2 케이스 픽스처, CI 게이트 · 1일 (선행: 위 전부) {#m4-04-golden-suite}
+- [x] 04 · T2 import 해석기 resolve-imports.ts — ts/py/go/rs/dart 표, tsconfig paths, Next http 엣지, external 분류 · 3일 (선행: 03 _imports 캡처) {#m4-04-resolve-imports}
+- [x] 04 · T2 그래프 정리·배치 — SCC, 고립, 밴드 규칙, barycenter, 포트, 24 노드 축약 · 2일 (선행: 해석기) {#m4-04-graph-layout}
+- [x] 04 · T2 정답지 도출 — 커밋 후보 필터, core/sec/trap, 힌트, 질문 템플릿, 커밋 부족 폴백 · 2일 (선행: commit_file·D21 커밋 분류) {#m4-04-answer-key}
+- [x] 04 · T2 채점·문제 3종 — 3티어·wrong 상한, 영향 반경·흐름 추적·방향, 「이것도 맞다」 편입 · 2일 (선행: 정답지) {#m4-04-t2-grading}
+- [x] 05 · T2 DependencyMap — SVG 레이아웃·포트 분산·호버/포커스 강조·3티어 결과·커밋 출처, 13px 룰 · 2일 (선행: 세션 셸·그래프 배치) {#m4-05-dependency-map}
+- [x] 04 · 골든 케이스 스위트 — §9 표 28건 + T0/T2 케이스 픽스처, CI 게이트 · 1일 (선행: 위 전부) {#m4-04-golden-suite}
 
 ## M5 · 릴리스 준비 — 보안 게이트 · 3-OS 빌드 · 오픈소스 문서 (끝: v0.1.0 드래프트 릴리스 + SHA256SUMS, 첫 실행 소켓 0, 전부 지우기 검증, README 우회 안내) {#m5}
 - [ ] 06 · Q9 LLM 전송 범위·키체인 — buildPrompt 골든(9줄·경로 없음·파일명만), keyring 저장/삭제, Rust 측 호출, 「보내기」 확인 UI · 2일 (선행: 05 사다리 4단·D8) {#m5-06-q9-llm-keychain}
@@ -194,4 +194,11 @@ owner: claude-code
 | 2026-09-03T16:21:48+09:00 | #m3-04-t1-block-mask | claude-code | ☐→x | .oculpm/journal/20260903/Features_to_add/1555_feature_t1-block-mask-spec-generator.md | 블록 선정·분절·2단계 마스크(목업 show2 재현)·스펙 카드 + 인제스트 block 쓰기 |
 | 2026-09-03T16:25:26+09:00 | #m3-05-clonepad | claude-code | ☐→~ | .oculpm/journal/20260903/Features_to_add/1625_feature_t1-clonepad-monaco.md | 에디터 부분 완료(Monaco 옵션·테마 2종·거터 틱·IME 보류·백틱 홀드·자동 저장·PlainPad 되돌림). 표현 컴포넌트 8종과 화면 배선은 별도. |
 | 2026-09-03T16:50:39+09:00 | #m3-05-clonepad | claude-code | ~→x | .oculpm/journal/20260903/Features_to_add/1650_feature_t1-clonepad-and-session-wiring.md | 컴포넌트 9종 + T1Plate + 배선. t1:monaco 314ms 실측 → 1단계 textarea (D93) |
+| 2026-09-03T18:41:07+09:00 | #m4-05-dependency-map | claude-code | ☐→~ | .oculpm/journal/20260903/Features_to_add/1840_feature_t2-dependency-map-components.md | components/t2 7개 완료(NW 178→196, type 점선·http 이중선·⟲·접힌 폴더). T2Plate 배선 남음 |
+| 2026-09-03T19:04:36+09:00 | #m4-04-resolve-imports | claude-code | ☐→x | 20260903/Features_to_add/1901_feature_m4-t2-structure-track.md | 04 §7.1 표 전량(swift 제외) · go 는 대표 파일로 · 2,000파일 5만조회 60ms |
+| 2026-09-03T19:04:38+09:00 | #m4-04-graph-layout | claude-code | ☐→x | 20260903/Features_to_add/1901_feature_m4-t2-structure-track.md | SCC·밴드·barycenter·24 축약. D102 세 번째 걸음 추가, 허브 보존 버그 수정 |
+| 2026-09-03T19:04:45+09:00 | #m4-04-answer-key | claude-code | ☐→x | 20260903/Features_to_add/1901_feature_m4-t2-structure-track.md | 후보 필터·core/sec/trap·힌트 3단·폴백. D101 로 trap 집합을 넓혀 템플릿 4종이 다 나온다 |
+| 2026-09-03T19:04:47+09:00 | #m4-04-t2-grading | claude-code | ☐→x | 20260903/Features_to_add/1901_feature_m4-t2-structure-track.md | 3티어·wrong 상한·문제 3종·「이것도 맞다」. 04 §9 골든 2건 실측 통과 |
+| 2026-09-03T19:04:53+09:00 | #m4-05-dependency-map | claude-code | ~→x | 20260903/Features_to_add/1901_feature_m4-t2-structure-track.md | 컴포넌트 7종 + T2Plate 배선 + 홈 윈도잉(D81). 13px 룰로 NW 178→196 |
+| 2026-09-03T19:04:55+09:00 | #m4-04-golden-suite | claude-code | ☐→x | 20260903/Features_to_add/1901_feature_m4-t2-structure-track.md | T2 골든 픽스처 8건 + Rust 덤프 재생(4종 생성) + Q4 재생을 T1·T2 로 확장해 diff 0 |
 <!-- oculpm:plan-log end -->

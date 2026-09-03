@@ -6,13 +6,14 @@ import { ConceptList } from '../../components/home/ConceptList';
 import { Forecast } from '../../components/home/Forecast';
 import { GapsPanel } from '../../components/home/GapsPanel';
 import { InkScale } from '../../components/home/InkScale';
+import { LockedPanel } from '../../components/home/LockedPanel';
 import { Masthead } from '../../components/home/Masthead';
 import { Newcomer } from '../../components/home/Newcomer';
 import { Panel } from '../../components/home/Panel';
 import { Sheet } from '../../components/home/Sheet';
 import { TodayPanel, type TodayPreview } from '../../components/home/TodayPanel';
 import { layerLabel } from '../../components/home/labels';
-import type { HomeData, HomeSheet } from './data';
+import { WINDOW_SHEETS, type HomeData, type HomeSheet } from './data';
 import './HomeScreen.css';
 
 export interface HomeScreenProps {
@@ -103,10 +104,14 @@ export function HomeScreen({
                 AI가 써준 자리라도 판을 만들면 그날 인쇄 목록에 들어갑니다. 등장 횟수가 많은
                 것부터 잡으면 한 번에 여러 파일이 읽힙니다.
               </p>
+              {/* 「아직 못 하는 것」을 한 자리에 모은다 — 구멍 지도 바로 아래다 (D96). */}
+              <LockedPanel openable={data.openableBlocks} files={data.files} />
             </Panel>
           </aside>
 
-          <div className="sheets">
+          {/* 12장을 넘으면 화면 밖 대지를 그리지 않는다 (D81 · 05 §10). 문턱 아래에서는
+              걸지 않는다 — 가시성 판정 비용만 남는다. */}
+          <div className="sheets" data-windowed={data.sheets.length > WINDOW_SHEETS ? 'on' : 'off'}>
             {data.sheets.length === 0 ? (
               <>
                 <p className="note">
