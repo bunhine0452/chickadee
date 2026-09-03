@@ -11,8 +11,10 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
+    "@chickadee/cards": "workspace:*",
     "@chickadee/concepts": "workspace:*",
     "@chickadee/dictionary": "workspace:*",
+    "@chickadee/grading": "workspace:*",
     "@chickadee/ipc-client": "workspace:*",
     "@chickadee/scheduler": "workspace:*",
     "@chickadee/store-sql": "workspace:*",

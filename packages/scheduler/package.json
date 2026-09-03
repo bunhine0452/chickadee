@@ -12,5 +12,11 @@
     "build": "tsc --build",
     "test": "vitest run",
     "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@chickadee/concepts": "workspace:*",
+    "@chickadee/store-sql": "workspace:*",
+    "@chickadee/text": "workspace:*",
+    "ts-fsrs": "^5.4.2"
   }
 }

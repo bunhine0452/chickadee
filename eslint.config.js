@@ -49,9 +49,13 @@ const ALLOWED_DEPS = {
   // 03 §1.5 「`blame.ts` 가 `git_blame_lines` 를 배경에서 호출」 이 이 층에서 명령을
   // 부르라고 정한다. §2 표의 「의존」 열에는 빠져 있었다 — 표를 문장에 맞춘다.
   concepts: ['dictionary', 'store-sql', 'ipc-client'],
-  cards: ['concepts', 'store-sql'],
-  scheduler: ['store-sql'],
-  grading: ['ipc-client'],
+  // D72 — 01 §2 표의 「의존」 열이 같은 문서의 문장과 어긋난 자리 셋을 문장에 맞춘다.
+  // 04 §1 「입력: 사전 항목 + Site[] + layerOf」(cards → dictionary),
+  // 02 §5.3 planSession 이 rankNewConcepts·loadKnownSet 을 부른다(scheduler → concepts),
+  // 04 §2.2 t0.answered 가 만드는 ReviewDetail 은 02 §8.2 타입이다(grading → store-sql).
+  cards: ['concepts', 'store-sql', 'dictionary'],
+  scheduler: ['store-sql', 'concepts'],
+  grading: ['ipc-client', 'store-sql'],
   // 01 §2: `ui` 는 「위 전부」 — 단 invoke 직접 호출은 금지(= @tauri-apps 는 여전히 막힌다).
   ui: ['cards', 'scheduler', 'grading', 'concepts', 'dictionary', 'store-sql', 'ipc-client'],
   // `text` 는 01 §2 표에 없다. 의존 없는 잎 유틸로 다룬다 — 누구나 쓰고, 아무것도 쓰지 않는다.

@@ -1,5 +1,5 @@
 {
-  "name": "@chickadee/grading",
+  "name": "@chickadee/cards",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -14,7 +14,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@chickadee/ipc-client": "workspace:*",
+    "@chickadee/concepts": "workspace:*",
+    "@chickadee/dictionary": "workspace:*",
     "@chickadee/store-sql": "workspace:*",
     "@chickadee/text": "workspace:*"
   }

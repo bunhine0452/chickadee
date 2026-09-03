@@ -15,6 +15,14 @@ export {
   LONG_SITE_LINES, MAX_UNKNOWN_FOR_NEW, PREREQ_DEPTH, TRANSFER_LAYER, UNCOVERED_THRESHOLD,
 } from './unknown-rank.js';
 export type { ChoosableSite, LayerOf, MasteryRow, RankableSite } from './unknown-rank.js';
+export {
+  NEWCOMER_CLEAR_OKS, NEWCOMER_MIN_MISSES, NEWCOMER_MIN_ROOT_NEW, UNKNOWN_CAP,
+  isRockBottom, levelForLayer, newcomerFlag, rankNewConcepts, transferFrom,
+} from './new-rank.js';
+export type {
+  BestSite, NewCandidate, NewcomerFlag, NewcomerInput, RankInput, RankedConcept, RootResult,
+  TransferSource,
+} from './new-rank.js';
 export { topoOrder } from './prereq-graph.js';
 export type { GraphNode } from './prereq-graph.js';
 export { registerRepo, listRepos, relocateRepo, removeRepo } from './repos.js';

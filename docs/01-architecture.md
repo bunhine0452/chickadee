@@ -59,9 +59,9 @@
 | `text` | `packages/text` | 문자열, 시드 재료 | `Tok[]`, `seedOf`·`mulberry32`·`shuffle` | **없음**(최하위, D50) |
 | `dictionary` | `packages/dictionary` | YAML 텍스트 | 검증된 `Dict`(zod), `.scm` 쿼리 | ipc-client |
 | `concepts` | `packages/concepts` | `Capture[]` + `Dict` | `concept_site`·`import_edge`·`block`·`unit`·`gap` 행, 선행 그래프, 미지 개념 수, 커밋 `kind`·`author_matched` | dictionary · store-sql |
-| `cards` | `packages/cards` | `ConceptUse`, 파일 블록, 커밋 사실 | `T0Card / T1Card / T2Card` | concepts · store-sql |
-| `scheduler` | `packages/scheduler` | `Mastery`, `ReviewLog`, 오늘 시각 | `TodayQueue`, 잉크 겹 전이, FSRS 간격 | store-sql |
-| `grading` | `packages/grading` | 답안 + 카드 (+ `AstLite`) | `Verdict` | ipc-client(parse) |
+| `cards` | `packages/cards` | `ConceptUse`, 파일 블록, 커밋 사실 | `T0Card / T1Card / T2Card` | concepts · store-sql · dictionary(D72) |
+| `scheduler` | `packages/scheduler` | `Mastery`, `ReviewLog`, 오늘 시각 | `TodayQueue`, 잉크 겹 전이, FSRS 간격 | store-sql · concepts(D72) · ts-fsrs |
+| `grading` | `packages/grading` | 답안 + 카드 (+ `AstLite`) | `Verdict` | ipc-client(parse) · store-sql(D72) |
 | `ui` | `packages/ui` + `apps/desktop/src` | 위 전부 | DOM | 위 전부 (invoke 직접 호출 금지) |
 
 의존 방향 규칙(어기면 lint 실패 — `eslint no-restricted-imports` + `dependency-cruiser`, Rust 는 `Cargo.toml` 로 자연 강제):

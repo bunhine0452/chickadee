@@ -50,12 +50,18 @@ importers:
 
   apps/desktop:
     dependencies:
+      '@chickadee/cards':
+        specifier: workspace:*
+        version: link:../../packages/cards
       '@chickadee/concepts':
         specifier: workspace:*
         version: link:../../packages/concepts
       '@chickadee/dictionary':
         specifier: workspace:*
         version: link:../../packages/dictionary
+      '@chickadee/grading':
+        specifier: workspace:*
+        version: link:../../packages/grading
       '@chickadee/ipc-client':
         specifier: workspace:*
         version: link:../../packages/ipc-client
@@ -115,6 +121,21 @@ importers:
         specifier: ^6.0.5
         version: 6.4.3(@types/node@22.20.1)(tsx@4.23.13)(yaml@2.9.0)
 
+  packages/cards:
+    dependencies:
+      '@chickadee/concepts':
+        specifier: workspace:*
+        version: link:../concepts
+      '@chickadee/dictionary':
+        specifier: workspace:*
+        version: link:../dictionary
+      '@chickadee/store-sql':
+        specifier: workspace:*
+        version: link:../store-sql
+      '@chickadee/text':
+        specifier: workspace:*
+        version: link:../text
+
   packages/concepts:
     dependencies:
       '@chickadee/dictionary':
@@ -154,13 +175,12 @@ importers:
       '@chickadee/ipc-client':
         specifier: workspace:*
         version: link:../ipc-client
-      '@chickadee/text':
-        specifier: workspace:*
-        version: link:../text
-    devDependencies:
       '@chickadee/store-sql':
         specifier: workspace:*
         version: link:../store-sql
+      '@chickadee/text':
+        specifier: workspace:*
+        version: link:../text
 
   packages/ipc-client:
     dependencies:
@@ -171,7 +191,20 @@ importers:
         specifier: ^2.0.0
         version: 2.7.3
 
-  packages/scheduler: {}
+  packages/scheduler:
+    dependencies:
+      '@chickadee/concepts':
+        specifier: workspace:*
+        version: link:../concepts
+      '@chickadee/store-sql':
+        specifier: workspace:*
+        version: link:../store-sql
+      '@chickadee/text':
+        specifier: workspace:*
+        version: link:../text
+      ts-fsrs:
+        specifier: ^5.4.2
+        version: 5.4.2
 
   packages/store-sql:
     dependencies:
@@ -2492,6 +2525,10 @@ packages:
     engines: {node: '>=18.12'}
     peerDependencies:
       typescript: '>=4.8.4'
+
+  ts-fsrs@5.4.2:
+    resolution: {integrity: sha512-z4qop4pzTcyTzuJ566d9EaX/4bZZzhYfeaPImfVr+xcYT65c5oBgFDijUhCE/D+C78eaolHIhKRZ04/RwF+v2g==}
+    engines: {node: '>=20.0.0'}
 
   tsx@4.23.13:
     resolution: {integrity: sha512-BL5MGkRln6aDYhb0xbQlEAGw743BaZYWdbWtdJOBriYJboKgUUYCadFp2/FpBBZquBC/ezNBn7wMMPx7FDZUDw==}
@@ -5040,6 +5077,8 @@ snapshots:
   ts-api-utils@2.5.0(typescript@5.9.3):
     dependencies:
       typescript: 5.9.3
+
+  ts-fsrs@5.4.2: {}
 
   tsx@4.23.13:
     dependencies:
