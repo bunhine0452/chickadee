@@ -5,9 +5,10 @@
  * 규칙의 주인은 여전히 셋이다: 판정 `@chickadee/grading` · 겹과 큐 `@chickadee/scheduler` ·
  * 문항 `@chickadee/cards`. 이 파일은 그 셋을 원장과 store 에 잇는다.
  */
+import { newcomerFlag, recountUnknown } from '@chickadee/concepts';
 import { loadDict, type Dict } from '@chickadee/dictionary';
 import { gradeT0, isLifer, t0Answered, toReviewDetail, type T0Answered } from '@chickadee/grading';
-import { IpcError, log } from '@chickadee/ipc-client';
+import { IpcError, ipc, log } from '@chickadee/ipc-client';
 import { TICK_MS, labelFor, shouldInsertPrereq, shouldInsertRetry } from '@chickadee/scheduler';
 import type { CardPayload, ConceptId, ItemState, Layer } from '@chickadee/store-sql';
 
@@ -17,7 +18,7 @@ import {
   insertPrereq, insertRetry, loadMastery, loadPlates, openSession, recordDunno, recordLadder,
   removePlate, saveItem, saveSession, today, type Plate,
 } from './data/session.js';
-import { loadScheduler, loadSettings } from './data/settings.js';
+import { loadScheduler, loadSettings, saveSetting } from './data/settings.js';
 import { report, todayKey } from './flow.js';
 import { useUi, type PlateResult } from './store.js';
 
@@ -334,10 +335,39 @@ export async function completeSession(): Promise<void> {
   try {
     await saveSession(session, 'done', totalElapsed(store.elapsed), session.plannedMin,
       Date.now(), store.liferShown);
+    await afterSession(session.repoId, session.id);
   } catch (e) {
     report(e, '세션 마무리');
   }
   useUi.getState().finishSession();
+}
+
+/**
+ * 세션이 끝나고 도는 것 둘 (02 §6.1·§6.4).
+ *
+ * 화면을 막지 않는다 — 실패해도 요약은 이미 떠 있고, 다음 세션이 다시 센다.
+ */
+async function afterSession(repoId: number, sessionId: number): Promise<void> {
+  const dict = maker?.dict ?? loadDict();
+
+  // ① 「아직 모르는 개념 개수」 다시 세기. 겹이 움직였으면 그 줄의 순위가 바뀐다.
+  const rows = await ipc.store.query('queue.known_rows', {});
+  await recountUnknown(dict, repoId, rows.map((r) => ({
+    conceptId: r.id, layer: r.layer, universalId: r.universal_id,
+  })));
+
+  // ② 초보 감지. 아무것도 잠그지 않는다 — 홈에 안내 한 줄이 뜰 뿐이다 (정본 §1).
+  const [roots, empties, settings] = await Promise.all([
+    ipc.store.query('review.session_root_new', { sessionId }),
+    ipc.store.query('review.ladder_empty_prereq', { sessionId }),
+    loadSettings(),
+  ]);
+  const flag = newcomerFlag({
+    rootResults: roots.map((r) => ({ conceptId: r.concept_id, ok: r.ok === 1, dunno: r.dunno === 1 })),
+    emptyPrereqReports: empties[0]?.n ?? 0,
+    previous: settings.newcomerFlag,
+  });
+  if (flag !== settings.newcomerFlag) await saveSetting('newcomerFlag', flag, Date.now());
 }
 
 const totalElapsed = (elapsed: Record<number, number>): number =>

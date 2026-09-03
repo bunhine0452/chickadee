@@ -341,6 +341,27 @@ describe('중단 · 복구 (§5.6)', () => {
   });
 });
 
+describe('카드 인스턴스 상태 (02 §5.1)', () => {
+  test('판을 마치면 인쇄 횟수와 실측 EMA 가 남는다 — 진행바가 이것을 쓴다', async () => {
+    const view = await openSession(1, T, maker);
+    const plate = view?.plates[0];
+    if (!plate) throw new Error('판이 없다');
+
+    await answer(plate, { ok: true, at: T });
+    const first = db.prepare('SELECT prints, est_min_ema FROM card_state WHERE card_id = ?')
+      .get(plate.cardId) as { prints: number; est_min_ema: number };
+    expect(first.prints).toBe(1);
+    expect(first.est_min_ema).toBeCloseTo(0.2, 2); // 12초 = 0.2분
+
+    // 두 번째 인쇄는 EMA 로 섞인다 (α = 0.3).
+    await answer({ ...plate, role: 'retry' }, { ok: true, at: T + 60_000 });
+    const second = db.prepare('SELECT prints, est_min_ema FROM card_state WHERE card_id = ?')
+      .get(plate.cardId) as { prints: number; est_min_ema: number };
+    expect(second.prints).toBe(2);
+    expect(second.est_min_ema).toBeCloseTo(0.2, 2);
+  });
+});
+
 describe('요약과 원장 재생', () => {
   test('요약이 움직인 잉크와 LIFER 를 보여 준다', async () => {
     const view = await openSession(1, T, maker);

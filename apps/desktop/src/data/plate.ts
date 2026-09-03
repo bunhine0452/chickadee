@@ -46,6 +46,14 @@ export interface FinishInput {
   stage?: 1 | 2 | 3;
 }
 
+/** 실측 소요 시간 EMA (02 §5.1 — α=0.3). 9분 예상이 19분이면 진행바가 거짓말한다. */
+export const EMA_ALPHA = 0.3;
+
+export function nextEma(previous: number | null, tookMin: number): number {
+  if (previous === null) return Math.round(tookMin * 100) / 100;
+  return Math.round((previous * (1 - EMA_ALPHA) + tookMin * EMA_ALPHA) * 100) / 100;
+}
+
 export interface FinishResult {
   move: LayerMove;
   grade: 1 | 2 | 3;
@@ -167,6 +175,23 @@ export async function finishPlate(input: FinishInput): Promise<FinishResult> {
   });
 
   await ipc.store.batch(t.build());
+
+  // 카드 인스턴스 상태 — 다음 큐의 예상 시간이 이 EMA 를 쓴다 (02 §5.1).
+  //
+  // 부르는 쪽에서 받지 않고 여기서 읽는다: 세 곳(화면·재생·테스트)이 각자 챙기게 하면
+  // 한 곳만 빠뜨려도 인쇄 횟수가 조용히 1 에 멈춘다. 판을 넘기는 경로가 아니라 마치는
+  // 경로라 쿼리 한 번은 예산 밖이다.
+  const stateRows = await ipc.store.query('card.state_get', { cardId: item.cardId });
+  const prev = stateRows[0];
+  await ipc.store.exec('card.state_upsert', {
+    cardId: item.cardId,
+    prints: (prev?.prints ?? 0) + 1,
+    stage: input.stage ?? ((prev?.stage ?? 1) as 1 | 2 | 3),
+    lastPct: prev?.last_pct ?? null,
+    estMinEma: nextEma(prev?.est_min_ema ?? null, input.elapsedS / 60),
+    lastPrintedAt: now,
+  });
+
   // `applied_log_id` 는 방금 쓴 로그의 id 다. 한 번 더 읽어 캐시를 재생과 맞춘다 —
   // 이 한 줄이 없으면 `rebuild_mastery == mastery` 가 커서에서만 어긋난다.
   const written = await ipc.store.query('review.mastery_get', {

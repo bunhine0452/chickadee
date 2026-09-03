@@ -226,6 +226,8 @@ describe('교정쇄 한 흐름', () => {
       expect(document.querySelector('.done-head')).toBeTruthy();
     });
     expect(db.prepare(`SELECT status FROM session WHERE id = 1`).get()).toEqual({ status: 'done' });
+    // 세션 종료에 붙은 것들(미지 개념 재계산·초보 감지)이 조용히 실패하지 않았다 (02 §6).
+    expect(useUi.getState().error).toBeUndefined();
     // 두 개념 모두 0겹 → 1겹.
     expect(db.prepare('SELECT COUNT(*) AS n FROM review_log WHERE layer_after = 1').get()).toEqual({ n: 2 });
   });
