@@ -29,9 +29,16 @@ const focusPath = (page: Page): Promise<string> => page.evaluate(() => {
 
 /** 한 걸음 뒤에 포커스가 살아 있는지. 어디에 있는지도 같이 돌려준다 — 실패 보고가 그것이다. */
 async function focusHolds(page: Page, step: string): Promise<string> {
-  const at = await focusPath(page);
-  expect(at, `${step} 뒤에 포커스가 body 로 떨어졌다`).not.toBe('body');
-  return at;
+  // **한 번 재고 끝내지 않는다.** 포커스를 옮기는 코드 몇 곳은 `requestAnimationFrame` 뒤에
+  // 옮긴다 — 옮길 자리가 그 tick 에 언마운트되기 때문이다(D111). 리눅스 xvfb 의 WebKitGTK 는
+  // 합성기가 없어 그 한 프레임이 늦게 오고, 한 번만 재면 **아직 안 옮겨진 순간**을 잡아
+  // 거짓 실패가 난다(CI 에서 실제로 그랬다 — 스냅샷에는 단추가 `[active]` 로 찍혀 있었다).
+  // 게이트가 지키려는 것은 「포커스가 `body` 에 **머물지** 않는다」이지 「한 microtask 안에
+  // 옮겨진다」가 아니다.
+  await expect.poll(() => focusPath(page), {
+    message: `${step} 뒤에 포커스가 body 로 떨어졌다`,
+  }).not.toBe('body');
+  return focusPath(page);
 }
 
 test('키보드 완결 — 마우스 0 으로 홈 → T0 → 사다리 → 정합 → 요약 → 홈', async ({ page, app }) => {
