@@ -59,5 +59,20 @@
     "vitest": "^3.2.6",
     "webdriverio": "^9.31.5",
     "zod-to-json-schema": "^3.25.2"
+  },
+  "pnpm": {
+    "overrides": {
+      "deepmerge-ts": ">=8.0.0",
+      "serialize-javascript": ">=7.0.3"
+    },
+    "auditConfig": {
+      "_comment": "06 §4.4 — every ignore records id · reason · expiry. ci.yml fails on an expired one.",
+      "ignoreGhsas": [
+        "GHSA-jmr9-qjv8-65gv"
+      ],
+      "_reasons": {
+        "GHSA-jmr9-qjv8-65gv": "extract-zip symlink traversal, no patched version exists. Dev-only, and on a path we never execute: @wdio/cli > @wdio/utils > @puppeteer/browsers downloads browsers, while our E2E drives tauri-driver installed by cargo. Nothing from it ships. expires: 2026-12-02"
+      }
+    }
   }
 }

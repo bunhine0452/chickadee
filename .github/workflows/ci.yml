@@ -170,6 +170,41 @@ jobs:
       - name: cargo deny check
         run: cargo deny check
 
+      - name: package.json audit ignore expiry check (06 §4.4)
+        # Same rule as deny.toml: an ignore records id · reason · expiry, and an expired
+        # one fails CI. pnpm's ignoreGhsas has no reason or expiry field, so both live in
+        # `pnpm.auditConfig._reasons` and are read here by machine rather than by trust.
+        run: |
+          python3 - <<'PY'
+          import datetime, json, pathlib, re, sys
+
+          cfg = json.loads(pathlib.Path("package.json").read_text(encoding="utf-8"))
+          audit = cfg.get("pnpm", {}).get("auditConfig", {})
+          ignored = audit.get("ignoreGhsas", [])
+          reasons = audit.get("_reasons", {})
+          today = datetime.date.today()
+          problems = []
+
+          for ident in ignored:
+              reason = reasons.get(ident)
+              if not reason:
+                  problems.append(f"{ident}: no reason — add one to pnpm.auditConfig._reasons")
+                  continue
+              expiry = re.search(r"expires:\s*(\d{4}-\d{2}-\d{2})", reason)
+              if not expiry:
+                  problems.append(f"{ident}: no expiry date — write 'expires: YYYY-MM-DD' in the reason")
+                  continue
+              when = datetime.date.fromisoformat(expiry.group(1))
+              if when < today:
+                  problems.append(f"{ident}: expired on {when} — judge it again, then drop or extend it")
+
+          for line in problems:
+              print(f"FAIL {line}")
+          if problems:
+              sys.exit(1)
+          print(f"ok   pnpm.auditConfig.ignoreGhsas {len(ignored)} entries, no expired exception")
+          PY
+
       - name: deny.toml exception expiry check (06 §4.4)
         # cargo-deny has no expiry field. if the expiry date lives only as prose inside reason,
         # a "parked here for now" ignore stays forever — so we read it by machine here.
