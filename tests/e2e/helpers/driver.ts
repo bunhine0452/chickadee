@@ -95,7 +95,13 @@ export async function hasText(needle: string): Promise<boolean> {
   return body.includes(needle);
 }
 
-/** 문구가 나타날 때까지 기다린다. */
+/**
+ * 문구가 나타날 때까지 기다린다.
+ *
+ * **보이는 글자만 읽는다.** `getText` 는 rendered text 라 `.vh#live`(1px·`clip`)에 놓인
+ * 낭독 문구는 안 들어온다 — 토스트를 여기서 기다리면 영영 안 온다. 그런 자리는 화면 문구
+ * 대신 그 문구가 약속한 **결과**(디스크·DB)를 봐야 한다(E8 의 「전부 지우기」가 그 예다).
+ */
 export async function waitForText(needle: string, timeout = WAIT): Promise<void> {
   await wd().waitUntil(async () => hasText(needle), {
     timeout,

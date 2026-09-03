@@ -18,7 +18,7 @@ import {
   waitForAppFile,
 } from '../helpers/env.js';
 import {
-  before, describe, invoke, it, shown, waitForBoot, waitForText, wd,
+  before, describe, invoke, it, shown, waitForBoot, wd,
 } from '../helpers/driver.js';
 
 /** 모의 키 — 진짜처럼 생겼지만 어디에도 통하지 않는다. 이 문자열이 산출 파일에 있으면 실패다. */
@@ -149,7 +149,14 @@ describe('E8 설정', () => {
     const confirm = await shown('.set-wipe .set-acts button.flat-btn');
     assert.equal(await confirm.getText(), '정말 전부 지웁니다');
     await confirm.click();
-    await waitForText('전부 지웠습니다');
+    // 화면의 문구를 기다리지 않는다 — 「전부 지웠습니다」는 `.vh#live` 낭독 지점에만 놓이고
+    // 그 자리는 1px·`clip` 이라 WebDriver 의 「rendered text」에 안 들어온다. 지우기의 계약은
+    // 파일이므로(06 §6.4) 디스크가 비는 것을 기다린다 — 바로 위 내보내기와 같은 이유다.
+    await wd().waitUntil(async () => !listAppFiles().some((f) => f.endsWith(DB_FILE)), {
+      timeout: 30_000,
+      interval: 250,
+      timeoutMsg: `「정말 전부 지웁니다」 뒤 30초가 지나도 ${DB_FILE} 이 그대로다`,
+    });
 
     const left = listAppFiles().map(shortPath);
     for (const entry of WIPED_ENTRIES) {

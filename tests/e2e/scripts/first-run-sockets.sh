@@ -61,7 +61,10 @@ echo "first-run-sockets: ${SECS}s 동안 strace -e trace=network 로 첫 실행�
 # 프로세스가 있으면 뒤에서 한 번 더 정리한다 — 남으면 다음 세션이 같은 DB 를 잡는다.
 timeout -k 5 "$SECS" \
   strace -f -qq -s 256 -e trace=network -o "$TRACE" "$BIN" >"$APPLOG" 2>&1
-pkill -f "$(basename "$BIN")" >/dev/null 2>&1 || true
+# `-x -f` 로 **명령줄 전체**가 같은 것만 고른다. 이름으로 고르면 이 스크립트 자신의 명령줄
+# (`bash .../first-run-sockets.sh .../chickadee-app ...`)에도 그 이름이 있어 스스로를 죽이고,
+# 그러면 아래 JSON 이 안 남는다 — E1 은 「측정 결과가 없다」로만 실패한다.
+pkill -x -f "$BIN" >/dev/null 2>&1 || true
 sleep 1
 
 [ -f "$TRACE" ] || fail_json "트레이스 파일이 안 생겼다 — strace 가 ptrace 권한을 못 얻었을 수 있다"

@@ -13,7 +13,7 @@
  */
 import { spawn, spawnSync } from 'node:child_process';
 import type { ChildProcess } from 'node:child_process';
-import { existsSync, mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import Database from 'better-sqlite3';
@@ -110,7 +110,19 @@ export const config = {
         process.env['CHICKADEE_E2E_SOCKET_SECONDS'] ?? '12'],
       { stdio: 'inherit', env: process.env },
     );
-    if (probe.status !== 0) say('e2e: 소켓 측정 스크립트가 0 이 아닌 값으로 끝났다 — E1 이 판정한다');
+    if (probe.status !== 0) {
+      const how = probe.signal ? `신호 ${probe.signal} 로 죽었다` : `${probe.status} 로 끝났다`;
+      say(`e2e: 소켓 측정 스크립트가 ${how} — E1 이 판정한다`);
+    }
+    // 스크립트가 결과를 못 남기고 죽으면 E1 은 「측정 결과가 없다」로만 실패한다 — 왜 죽었는지는
+    // 로그를 뒤져야 나온다. 사유를 여기서 적어 두면 실패 메시지가 그것을 그대로 싣는다.
+    if (!existsSync(socketsJson())) {
+      writeFileSync(socketsJson(), `${JSON.stringify({
+        schema: 1, traced: false, booted: false,
+        reason: `측정 스크립트가 결과를 안 남겼다 (status=${probe.status} signal=${probe.signal})`,
+        counts: {}, samples: {},
+      }, null, 2)}\n`);
+    }
 
     // 측정이 남긴 첫 실행 DB 를 치우고 세션용으로 다시 첫 실행 상태를 만든다.
     resetIsolated();
