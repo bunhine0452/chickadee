@@ -160,11 +160,22 @@ export async function runPerf(repoPath: string): Promise<void> {
     const frames = await perf(SWEEP_MS);
     await step('swept', frames.p95);
 
+    // 05 §10 강등 사다리의 아래 두 단(판번호 어긋남 끄기 · 결 op 0)은 이미 「부속 숨김」
+    // 스위치로 있다. 켜고 한 번 더 재서 **장식이 문제인지 노드 수가 문제인지** 가른다.
+    document.documentElement.setAttribute('data-trim', 'on');
+    await sleep(600);
+    const trimmed = await perf(SWEEP_MS);
+    document.documentElement.setAttribute('data-trim', 'off');
+    await step('swept-trim', trimmed.p95);
+
     // 전환 두 번 — `theme:switch` 는 **전환**의 값이라 마운트가 아니라 여기서 나온다.
     await toggleTheme();
     // 세션 한 판 — `session:mount`·`t0:grade`(첫 성공이면 `lifer:open`)가 여기서 찍힌다.
     await runOnePlate();
-    const rows: Row[] = [{ kind: 'frame_p95', ms: frames.p95, n: frames.frames }];
+    const rows: Row[] = [
+      { kind: 'frame_p95', ms: frames.p95, n: frames.frames },
+      { kind: 'frame_p95.trim', ms: trimmed.p95, n: trimmed.frames },
+    ];
 
     // `measure` 로 이미 찍힌 구간들 — 이번 실행에서 지나온 것만 담긴다.
     for (const [mark, sample] of Object.entries(collected()) as [Mark, ReturnType<typeof collected>[Mark]][]) {

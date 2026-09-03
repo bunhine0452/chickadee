@@ -31,6 +31,25 @@ const TAG = /<\/?([a-zA-Z][a-zA-Z0-9]*)([^>]*)>/g;
  * 같은 실수이고, 태그를 그대로 두면 규칙을 우회하는 법이 되어 버린다.
  */
 const JOSA_AFTER_VAR = /\}\}\s*(은|는|이|가|을|를|과|와|으로|로)(\s|$|<)/;
+
+/**
+ * 조사만 내고 값을 안 내는 자리. `{{pick.2|josa:이,가}} 돌려준 것` 은 「이 돌려준 것」이 되어
+ * 명사가 통째로 빠진다 — 렌더러는 `josa` 필터에 **조사만** 실어 보내기 때문이다(D69).
+ * 값을 내는 것은 같은 문장 앞쪽의 `{{pick.2}}` 나 `{{pick.2|code}}` 다.
+ */
+const JOSA_CALL = /\{\{([a-zA-Z0-9_.]+)\|[^}]*josa:/g;
+
+function josaWithoutValue(text: string): string[] {
+  const missing: string[] = [];
+  for (const m of text.matchAll(JOSA_CALL)) {
+    const name = m[1] ?? '';
+    const before = text.slice(0, m.index ?? 0);
+    // 같은 이름이 앞에서 한 번이라도 **조사 아닌 형태로** 나왔나.
+    const emitted = new RegExp(`\\{\\{${name.replace(/[.]/g, '\\.')}(\\|(?![^}]*josa:)[^}]*)?\\}\\}`).test(before);
+    if (!emitted) missing.push(name);
+  }
+  return missing;
+}
 const BANNED_WORDS = /틀렸|오답|실패했/;
 
 export function lintDict(dict: Dict): LintIssue[] {
@@ -150,6 +169,9 @@ function checkText(
   }
   const bare = text.replace(TAG, '');
   if (JOSA_AFTER_VAR.test(bare)) add('josa-filter', `${where}: 변수 뒤 조사는 |josa: 로`);
+  for (const name of josaWithoutValue(text)) {
+    add('josa-without-value', `${where}: {{${name}|josa:…}} 앞에 {{${name}}} 이 없다`);
+  }
   if (BANNED_WORDS.test(text)) add('diagnosis-not-verdict', `${where}: 정본 §3-2`);
 }
 

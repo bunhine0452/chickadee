@@ -45,7 +45,7 @@ point:
         edge:
           h: "가장 날카로운 자리 — 받는 쪽과 주는 쪽"
           code:
-            - "for (const {{pick.1}} of {{pick.2}})   // {{pick.2|josa:이,가}} 내주고 {{pick.1|josa:이,가}} 받는다"
+            - "for (const {{pick.1}} of {{pick.2}})   // {{pick.2}}{{pick.2|josa:이,가}} 내주고 {{pick.1}}{{pick.1|josa:이,가}} 받는다"
             - "for (const x of xs)                    // 이름은 아무거나"
       pick.3:
         t: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>반복마다 실행되는 몸통</b>입니다. 몇 번 돌지는 <code>of</code> 뒤의 값이 정해요."

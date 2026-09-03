@@ -48,5 +48,5 @@ thin_threshold: { min_files: 2, min_sites: 3, small_repo_files: 20 }
 
 # point[].diag · blank 옵션에 진단이 없을 때의 폴백 (04 §2.1).
 diag_default:
-  point: "«{{pick}}» 은 {{role}} 자리입니다. {{concept}} 는 «{{answer}}» 입니다. {{rule}}"
-  blank: "«{{pick}}» 은 이 자리에 오지 않습니다. {{rule}}"
+  point: "«{{pick}}»{{pick|josa:은,는}} {{role}} 자리입니다. {{concept}}{{concept|josa:은,는}} «{{answer}}» 입니다. {{rule}}"
+  blank: "«{{pick}}»{{pick|josa:은,는}} 이 자리에 오지 않습니다. {{rule}}"

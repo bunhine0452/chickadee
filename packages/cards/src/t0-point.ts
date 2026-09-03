@@ -4,7 +4,7 @@
  *
  * 셔플하지 않는 이유: 위치가 정보이고 `← →` 이동 순서와 같아야 한다.
  */
-import { mulberry32, tokenize } from '@chickadee/text';
+import { mulberry32, tokenize, josa } from '@chickadee/text';
 import type { Concept } from '@chickadee/dictionary';
 
 import { codeLines, lineAt, type Span } from './lines.js';
@@ -185,7 +185,9 @@ function diagFor(
     return { t: first ? `${confused.dict.one_liner} ${first}` : confused.dict.one_liner };
   }
 
-  const plain = `«${c.text}» 은 ${ROLE[c.kind]} 자리입니다. 정답은 «${answer.text}» 입니다.`;
+  // 조사는 앞 값이 정한다 — 하드코딩하면 「«map» 은」·「«useState» 은」이 둘 다 나온다 (03 §4.3).
+  const plain = `«${c.text}»${josa(c.text, '은', '는')} ${ROLE[c.kind]} 자리입니다. `
+    + `정답은 «${answer.text}» 입니다.`;
   const template = req.diagDefault?.point;
   if (template === undefined) return { t: plain };
   const soft = new Renderer(buildVars(input, req.concept, {

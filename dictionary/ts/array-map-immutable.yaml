@@ -24,7 +24,7 @@ dict:
 rule: "새 배열이 필요하면 <b>map</b>, 골라내려면 <b>filter</b>, 돌기만 하면 <b>forEach</b>. 원본을 바꾸는 <b>push</b> 는 상태에 쓰지 않는다."
 result:
   label: "{{site.line}}행의 값"
-  value: "{{pick.1|josa:과,와}} 길이가 같은 새 배열"
+  value: "{{pick.1}}{{pick.1|josa:과,와}} 길이가 같은 새 배열"
   note: "원본은 그대로"
 ok: >-
   <code>map</code> 은 항목마다 함수를 불러 <b>돌려준 값으로 새 배열</b>을 만듭니다. 길이는 같고
