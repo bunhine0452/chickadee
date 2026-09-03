@@ -58,6 +58,13 @@ const PLATE = {
   layer: 1 as const,
 };
 
+/**
+ * 커밋 없는 payload (04 §8.3 — 그래프만으로 만드는 3종). `commit: undefined` 로 덮지 않고
+ * **키를 지운다**: `exactOptionalPropertyTypes` 아래에서 선택 필드에 `undefined` 를 넣는 것은
+ * 「값이 undefined 다」이지 「없다」가 아니라 `CardPayload` 에 붙지 않는다.
+ */
+const { commit: _commit, ...NO_COMMIT } = PAYLOAD;
+
 const RESULT: T2Result = {
   kind: 'placement',
   pct: 50,
@@ -185,7 +192,7 @@ describe('결과 화면', () => {
   });
 
   test('커밋 없이 만든 문제는 출처 블록을 그리지 않는다 (04 §8.3)', () => {
-    const noCommit = { ...PLATE, payload: { ...PAYLOAD, commit: undefined } };
+    const noCommit = { ...PLATE, payload: NO_COMMIT };
     mount({ plate: noCommit, view: 'result', graded: RESULT, selected: [A, C] });
     expect(screen.queryByText(/실제 커밋 기록입니다/)).toBeNull();
   });
