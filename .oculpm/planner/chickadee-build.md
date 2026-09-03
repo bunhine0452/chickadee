@@ -53,7 +53,7 @@ owner: claude-code
 - [x] 06 · Q8 로그 안전 래퍼 — Rust log_safe! + clippy 금지, TS logger.ts + no-console, 통합 테스트 grep · 1일 (선행: 오류 모델) {#m1-06-q8-log-safe}
 - [x] 06 · Q10 악성 입력 방어 — 파일·행·깊이·타임아웃 상한, 심볼릭 링크·경로 탈출 거부, fixtures/evil·evil-dict, DOMPurify RichText 단일화 · 2일 (선행: 잡 러너·Q8) {#m1-06-q10-evil-input}
 - [x] 05 · 홈 화면 — Masthead·RepoSwitcher·TodayPanel·TimeQueue·InkScale·ConceptList·GapsPanel·Sheet·Node·NodeDetail·Guide·Forecast·ColorBar, home.load · 3일 (선행: 프리미티브·02 홈 쿼리) {#m1-05-home}
-- [!] 05 · WKWebView 성능 첫 실측 — ?stress=48 이식, __audit.perf, performance.mark 6종, Web Inspector 절차 · 1일 (선행: 홈) {#m1-05-wkwebview-perf}
+- [x] 05 · WKWebView 성능 첫 실측 — ?stress=48 이식, __audit.perf, performance.mark 6종, Web Inspector 절차 · 1일 (선행: 홈) {#m1-05-wkwebview-perf}
 - [x] 05 · 인제스트·첫 실행·안내·설정 — 폴더 선택, 진행 이벤트를 TimeQueue 로, 빈 상태, newcomer 시트, 설정(identity 포함) · 2일 (선행: 홈·01 이벤트) {#m1-05-ingest-onboarding}
 - [x] 03 · 성능 픽스처·벤치 — large-100k 생성기·criterion·CI 임계 · 1.5일 (선행: 증분까지·Q1) {#m1-03-perf-bench}
 - [x] 03 · Swift·Dart·SQL 품질 검증 — 실코드 20파일 ERROR 비율, 통과 시 바닥 개념 착수, 실패 시 보류 결정 · 2일 (선행: 파서 풀) {#m1-03-swift-dart-sql}
@@ -80,7 +80,7 @@ owner: claude-code
 - [x] 06 · Q3 TS 채점기 골든·스케줄러 property — T0·스케줄러(T1·T2 골든은 M3·M4) · 2일 (선행: 04 T0·02 리듀서) {#m2-06-q3-grading-golden}
 - [x] 06 · Q4 통합 파이프라인·IPC 덤프 — M1 덤프 + T0 재생, git diff --exit-code 게이트 · 2일 (선행: Q1~Q3) {#m2-06-q4-ipc-dump}
 - [~] 06 · Q5 __audit 이식 — src/devtools/audit.ts + Playwright tests/gates 7게이트 + allowlist 만료 · 2일 (선행: 05 세션 화면) {#m2-06-q5-audit-port}
-- [!] 01 · 성능 벤치 — 3 픽스처, WKWebView 홈·세션 프레임 측정, CI 소프트 게이트 · 1.5일 (선행: 인제스트·세션 셸) {#m2-01-perf-bench}
+- [x] 01 · 성능 벤치 — 3 픽스처, WKWebView 홈·세션 프레임 측정, CI 소프트 게이트 · 1.5일 (선행: 인제스트·세션 셸) {#m2-01-perf-bench}
 
 ## M3 · T1 클론 코딩 (끝: 12~40줄 블록 3단계 페이딩, 골든 28건 통과, 비공백 줄 점수, appeal·why_answer 기록, 20줄 <20ms, Monaco ≤250ms) {#m3}
 - [ ] 04 · T1 블록 선정·마스크 — 언어별 노드 표, 분절, 2단계 유지 집합, 스펙 카드 · 2일 (선행: 03 _blocks 캡처·01 file_read_block·02 block) {#m3-04-t1-block-mask}
@@ -185,4 +185,6 @@ owner: claude-code
 | 2026-09-03T10:45:41+09:00 | #m2-06-q4-ipc-dump | claude-code | ☐→x |  | fixtures/ipc/tiny 재생 → 진짜 사전 카드 → 오답·다시 찍기·사다리·요약. git diff --exit-code 게이트는 M1 것 그대로 |
 | 2026-09-03T10:45:42+09:00 | #m2-06-q5-audit-port | claude-code | ☐→~ |  | gates.ts(fonts·contrast·measure)+모션 정적 게이트+allowlist 만료는 끝. Playwright 7게이트 하네스는 M5 E2E 와 함께 |
 | 2026-09-03T10:45:44+09:00 | #m2-01-perf-bench | claude-code | ☐→! |  | 헤드리스 스케줄러 실측은 끝. WKWebView 홈·세션 프레임은 m1-05 와 같은 이유로 사람이 GUI 에서 한 번 돌려야 한다 |
+| 2026-09-03T13:42:24+09:00 | #m1-05-wkwebview-perf | claude-code | !→x | 20260903/Bugs/1342_bug_wkwebview-perf-and-three-real-app-bugs.md | 릴리스 빌드 실측 완료. frame p95 18ms(예산 12) 초과, 나머지 넷 통과. 재는 절차는 VITE_PERF 하네스로 자동화 |
+| 2026-09-03T13:42:26+09:00 | #m2-01-perf-bench | claude-code | !→x | 20260903/Bugs/1342_bug_wkwebview-perf-and-three-real-app-bugs.md | 홈·세션 프레임 실측 + mark 5종 계측. 강등 사다리를 밟을지는 사용자 결정(D80) |
 <!-- oculpm:plan-log end -->
