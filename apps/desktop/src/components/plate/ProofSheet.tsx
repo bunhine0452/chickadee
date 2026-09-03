@@ -43,7 +43,7 @@ function plusLabel(from: InkLayer, to: InkLayer): string {
  * `.ps` — 교정지 한 장 (05 §5).
  *
  * 마운트하면 판 자체로 포커스가 온다(`tabIndex=-1`, 스크롤 0). 채점 뒤에는 포커스를
- * 옮기지 않는다 — 판정은 `FeedbackSlot` 의 `aria-live` 가 읽는다 (05 §7).
+ * 옮기지 않는다 — 판정은 오버레이의 `.vh#live` 가 한 줄로 읽는다 (05 §7 · D114).
  */
 export function ProofSheet({
   no,

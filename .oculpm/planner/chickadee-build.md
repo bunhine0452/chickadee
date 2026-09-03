@@ -2,9 +2,9 @@
 oculpm_plan: v1
 id: chickadee-build
 title: "Chickadee 구현 플랜 — 설계 문서 docs/00~06 의 체크리스트 87개를 마일스톤 M0~M6 로"
-status: active
+status: archived
 created: 2026-09-02
-updated: 2026-09-02
+updated: 2026-09-03
 owner: claude-code
 ---
 

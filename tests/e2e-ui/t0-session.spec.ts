@@ -49,10 +49,12 @@ test('01 홈 → 인쇄 시작 → 1판 정답', async ({ page, app }) => {
   await expect(page.locator('.ps-rail .plus')).toHaveText('+1겹');
   await expect(page.locator('.ps-rail .plus')).toHaveClass(/\bon\b/);
 
-  // live 문구. 세션에는 `ui.live` 한 곳이 없고 판정란이 `aria-live=polite` 를 들고 있다.
-  const fb = page.locator('.fb[aria-live="polite"]');
-  await expect(fb).toContainText('맞았습니다');
-  await expect(fb).toContainText('잉크 1겹 · 다음 인쇄');
+  // live 문구 — 세션의 낭독 지점은 오버레이의 `.vh#live` 한 곳이다 (05 §7 · D114).
+  // 판정란 자신은 `aria-live` 를 들지 않는다: 통째로 읽으면 60자 규약을 넘는다.
+  await expect(page.locator('.fb')).not.toHaveAttribute('aria-live', /.*/);
+  const live = page.locator('.proof #live');
+  await expect(live).toHaveText(/정합 — 맞았습니다\. 잉크 1겹 · 다음 인쇄.*Space 로 다음\./);
+  await expect(page.locator('.fb')).toContainText('맞았습니다');
 
   // 판정란은 자리를 미리 비워 뒀다 — 답해도 위쪽 글이 0px 도 밀리지 않는다 (정본 §3-3).
   expect(await askOffset(page)).toBe(before);
@@ -101,11 +103,11 @@ test('03 3판 `?` 사다리 1~4단', async ({ page }) => {
   // 사다리를 열면 포커스는 지금 단으로 온다 (05 §7).
   expect(await focusPath(page)).toContain('rung');
 
-  // 겹과 다시 찍기 시점을 **이득으로** 적는다.
+  // 겹과 다시 찍기 시점을 **이득으로** 적는다. 이 판은 처음 거는 새 판이라 겹이 0 이고
+  // 예정도 없다 — 「모르겠어요」가 옮길 자리가 없으므로 0 → 0 이고 다시 찍기 줄은 뜨지
+  // 않는다. 앞서는 예정이 없는데도 「다시 찍기 오늘 안에 → 오늘 안에」를 적었다.
   const gain = ladder.locator('.ld-gain');
-  await expect(gain).toContainText('잉크');
-  await expect(gain).toContainText('다시 찍기');
-  await expect(gain).toContainText('오늘 안에');
+  await expect(gain).toHaveText('잉크 0겹 → 0겹');
 
   // 1단 — 사전 3층.
   await expect(ladder.locator('.rung-body h4')).toHaveText(/사전 3층/);

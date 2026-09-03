@@ -89,9 +89,10 @@ describe('FeedbackSlot', () => {
     expect(screen.getByText(IDLE_NOTE)).toBeTruthy();
   });
 
-  it('판정은 polite 로 읽힌다 — 포커스를 뺏지 않는다', () => {
+  it('판정란은 낭독 지점이 아니다 — 포커스도 뺏지 않는다 (D114)', () => {
     const { container } = render(<FeedbackSlot {...GRADED} />);
-    expect(container.querySelector('.fb')?.getAttribute('aria-live')).toBe('polite');
+    // D114 — 낭독은 오버레이의 `.vh#live` 한 곳이다. 판정란은 낭독 지점이 아니다.
+    expect(container.querySelector('.fb')?.getAttribute('aria-live')).toBeNull();
     expect(document.activeElement).toBe(document.body);
   });
 

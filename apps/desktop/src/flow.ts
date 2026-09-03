@@ -89,7 +89,8 @@ export async function ingest(mode: 'full' | 'incremental'): Promise<void> {
       identities: [],
       now: Date.now(),
       onJob: (jobId) => { lastJobId = jobId; },
-      onProgress: (phase, done, total) => useUi.getState().step({ phase, done, total }),
+      onProgress: (phase, done, total, currentRelPath) =>
+        useUi.getState().step({ phase, done, total }, currentRelPath),
       onWarning: (relPath, reason) => useUi.getState().warn({ relPath, reason }),
     });
     log.info('리포를 읽었다', {

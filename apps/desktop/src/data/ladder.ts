@@ -7,7 +7,7 @@
  */
 import { buildLadder, buildPrompt, type LadderInput } from '@chickadee/grading';
 import { ipc } from '@chickadee/ipc-client';
-import { labelFor } from '@chickadee/scheduler';
+import { applyOutcome, labelFor, type LayerState } from '@chickadee/scheduler';
 import type { CardPayload, ConceptId, Layer, Settings } from '@chickadee/store-sql';
 
 import type { LadderCard } from '../components/session/ReprintLadder.js';
@@ -44,8 +44,16 @@ export interface LadderData {
   nowhereToGo: boolean;
   /** 4단 프롬프트. 「막힌 지점」이 바뀌면 이것만 다시 만든다. */
   prompt: string;
-  /** 원래 예정돼 있던 다시 찍기 시점 — 「11일 뒤」. */
-  nextWas: string;
+  /**
+   * 「모르겠어요」가 겹을 **어디로 옮기나**. 아직 답하지 않았을 때 머리말이 쓰는 값이다 —
+   * 답한 뒤라면 채점이 낸 이동(`result.layer`)이 이미 진짜다.
+   */
+  ly: { from: Layer; to: Layer };
+  /**
+   * 원래 예정돼 있던 다시 찍기 시점 — 「11일 뒤」. **처음 거는 판이면 없다**: 예정이 없던
+   * 자리에 「오늘 안에 → 오늘 안에」를 적으면 이득이 없는 것을 이득처럼 말하게 된다.
+   */
+  nextWas?: string;
 }
 
 export interface LadderQuery {
@@ -61,7 +69,11 @@ export interface LadderQuery {
   answered: boolean;
   correct: boolean;
   stuck: string;
-  dueAt: number | null;
+  /**
+   * 판이 걸릴 때 읽은 숙련도. 겹의 이동과 「원래 예정」이 여기서 나온다 — 행이 없으면
+   * (처음 만나는 개념) `null`.
+   */
+  mastery: LayerState | null;
   now: number;
   settings: Pick<Settings, 'tz' | 'rolloverHour'>;
 }
@@ -110,13 +122,19 @@ export async function loadLadder(q: LadderQuery): Promise<LadderData> {
   };
   const built = buildLadder(input);
 
+  // 겹의 이동은 **감축기가 정한다** — 「한 겹」을 화면이 따로 세면 R4 의 「같은 날 두 번째는
+  // 더 안 내림」과 언젠가 갈라진다 (02 §4 · `applyOutcome`).
+  const from = q.mastery?.layer ?? (0 as Layer);
+  const ly = { from, to: q.mastery === null ? from : applyOutcome(q.mastery, 'dunno').layer };
+
   return {
     card: { dict: q.payload.dict ?? [], prereq, uses },
     nowhereToGo: built.prereq.nowhereToGo,
     prompt: built.prompt,
-    nextWas: q.dueAt === null
-      ? '오늘 안에'
-      : labelFor(q.dueAt, q.now, q.settings.tz, q.settings.rolloverHour),
+    ly,
+    ...(q.mastery?.dueAt == null
+      ? {}
+      : { nextWas: labelFor(q.mastery.dueAt, q.now, q.settings.tz, q.settings.rolloverHour) }),
   };
 }
 

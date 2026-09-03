@@ -44,20 +44,30 @@ There is no automatic update — a new version is downloaded by hand.
 - **Downloads** for macOS (Apple silicon and Intel), Windows, and Linux (AppImage and
   `.deb`), with `SHA256SUMS.txt` attached to the release.
 
+### Fixed after the first end-to-end run
+
+The suite that landed with this release found six defects. Four are fixed here.
+
+- The ladder said "ink 2 passes → 2 passes" and "next print today → today". It now reads
+  the layer that pressing "I don't know" actually moves you to, and names the interval it
+  replaces — or leaves that line out on a card that had no schedule yet.
+- The ingest screen names the file it is reading. The path was travelling in the Rust
+  event and being dropped one layer above the screen.
+- The session has a live region. It reads one sentence — "정합 — 맞았습니다. 잉크 1겹 ·
+  다음 인쇄 내일. Space 로 다음." — instead of the whole verdict panel, which is what the
+  feedback box's own `aria-live` was doing.
+- The home no longer draws a separate SVG per concept sticker. Each ink layer is baked
+  once and reused, which took the repaint of 1,600 stickers from 28 ms to 17 ms per frame
+  in the WebKit harness — the same as drawing none. Fixing it surfaced a second bug: the
+  badge was missing the mockup's `viewBox` and had been overflowing its box onto the ink
+  scale's labels.
+
 ### Known issues
 
-Found by the end-to-end suite that landed with this release, and left in rather than
-rushed:
-
-- The ladder shows the layer you were on, not the layer the "I don't know" press moved you
-  to, and its "next print" line always reads "today" instead of the interval it replaced.
 - The fourth step of the ladder does not carry the sentence you type into "where I am
   stuck" — the prompt is assembled once when the ladder opens.
-- The ingest screen never names the file it is reading; the progress boxes are right, the
-  filename beside them is not.
-- The session screen has no live region, so a screen reader hears the verdict only by
-  moving to it.
 - On macOS, Tab does not reach buttons unless "Keyboard navigation" is on in System
   Settings. That is the platform default for WebKit, not something the app sets; every
   screen is still reachable with Option+Tab and the documented shortcuts.
-- Home renders at 19 ms per frame against a 12 ms budget on a repository with 18 sheets.
+- The 19 ms per frame above still needs re-measuring on a release build against a
+  repository with 18 sheets; the number above comes from the browser harness.

@@ -7,6 +7,7 @@
  * 토큰 대비는 `scripts/check-contrast.mjs`, 모션 상한은 `scripts/check-motion.mjs`.
  * 여기서 재는 것은 **합성 배경과 실제 조판** 이다.
  */
+import { deeStandalone } from '@chickadee/ui';
 
 /** 본문 대비 하한 (정본 §6 측정 규칙). */
 export const PAPER_RATIO = 7;
@@ -236,9 +237,6 @@ export const measureViolations = (rows: readonly MeasureRow[]): MeasureRow[] =>
 
 // ───────── 16px 실루엣 (06 §2) ─────────
 
-/** 판(plate) 변수 — `dee.css` 가 `data-ly` 로 하나씩 켠다. 순서는 인쇄 순서다. */
-const PLATE_VARS = ['--lpaper', '--lk', '--lg', '--lb', '--lt', '--lp', '--ly'] as const;
-
 /** 캔버스 바탕. 스티커가 놓이는 종이 색이다 (목업 `audit.dee`). */
 const DEE_CANVAS_BG = '#FDFAF0';
 
@@ -263,42 +261,10 @@ export interface DeeReport {
 }
 
 /**
- * 화면의 Dee 스프라이트를 **자립형 SVG 문자열**로 뽑는다 (목업 `audit.deeStandalone`).
- *
- * `<use href="#deePlates">` 와 `var(--l*)` 는 문서 밖에서 풀리지 않는다 — 판을 제자리에
- * 펼치고 변수를 그 겹의 실제 색으로 바꿔야 이미지로 그려진다.
+ * 자립형 SVG 는 `@chickadee/ui` 가 만든다 — 스티커의 배경 그림(D115)과 **같은 문자열**이어야
+ * 게이트가 재는 것과 화면에 뜨는 것이 같다. 여기서는 이름만 다시 내보낸다.
  */
-export function deeStandalone(ly: number, head: boolean): string {
-  const symbol = document.getElementById(head ? 'deeHead' : 'dee');
-  const plates = document.getElementById('deePlates');
-  if (symbol === null || plates === null) {
-    throw new Error('Dee 스프라이트가 문서에 없다 — `DeeSprite` 가 그려졌는지 봐라');
-  }
-
-  // 겹에 따른 판 색은 CSS 가 정한다. 표를 여기 베끼면 `dee.css` 와 갈라진다 —
-  // 실제 요소를 하나 세워 계산된 값을 읽는다.
-  const probe = document.createElement('div');
-  probe.className = 'dee';
-  probe.setAttribute('data-ly', String(ly));
-  probe.style.cssText = 'position:absolute;left:-9999px;top:0;width:0;height:0';
-  document.body.appendChild(probe);
-  const cs = getComputedStyle(probe);
-  const value: Record<string, string> = {};
-  for (const name of PLATE_VARS) value[name] = cs.getPropertyValue(name).trim();
-  const gray = cs.getPropertyValue('--dee-gray').trim() || '#9CA7AD';
-  probe.remove();
-
-  const body = symbol.innerHTML
-    .replace(/<use[^>]*href="#deePlates"[^>]*>(?:<\/use>)?/g, plates.innerHTML)
-    .replace(/var\(\s*(--l[a-z]+)\s*\)/g, (whole, name: string) => value[name] ?? whole);
-
-  // 1·2겹의 판은 `url("#htGrayL")` 이라 그 패턴도 같이 실어야 한다.
-  const defs = `<defs><pattern id="htGrayL" width="16" height="16" patternUnits="userSpaceOnUse"`
-    + ` patternTransform="rotate(22)"><circle cx="8" cy="8" r="4.4" fill="${gray}"/></pattern></defs>`;
-  const viewBox = symbol.getAttribute('viewBox') ?? '0 0 430 430';
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" width="100" height="100">`
-    + `${defs}${body}</svg>`;
-}
+export { deeStandalone };
 
 /**
  * 06 §2 16px 실루엣 — 자립형 SVG 를 캔버스에 그 크기로 찍고 **열(column)을 훑어**
@@ -309,7 +275,7 @@ export function deeStandalone(ly: number, head: boolean): string {
  */
 export function dee(size = 16, ly = 4, smallMark = size <= 24, headMark = size <= 20)
 : Promise<DeeReport> {
-  const svg = deeStandalone(ly, headMark);
+  const svg = deeStandalone(ly, headMark ? 'head' : 'badge');
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onerror = () => { reject(new Error('실루엣 SVG 를 이미지로 못 읽었다')); };

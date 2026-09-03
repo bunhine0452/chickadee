@@ -91,7 +91,12 @@ export function FeedbackSlot({
       <div className="slot-idle" hidden={answered}>
         {idleNote ?? IDLE_NOTE}
       </div>
-      <div className={cx('fb', state === 'right' && 'right', on && 'on')} aria-live="polite">
+      {/*
+        `aria-live` 를 들지 않는다 (D114). 이 칸을 통째로 읽으면 나가는 것이 도장·규칙·코드판까지
+        포함한 판정란 전문이라 05 §7 의 「[상태]. [수치]. [다음 행동]」 60자 규약을 넘는다.
+        판정은 `SessionOverlay` 의 `.vh#live` 가 한 줄로 읽는다.
+      */}
+      <div className={cx('fb', state === 'right' && 'right', on && 'on')}>
         {!answered ? null : (
           <>
             <div className="stampbox">

@@ -1,3 +1,4 @@
+import { LiveRegion } from '@chickadee/ui';
 import { useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 
@@ -31,6 +32,13 @@ export interface SessionOverlayProps {
    * 세션 나가기 (05 §2.3 ④). **확인 모달은 없다** — 진행 저장은 이 콜백이 한다.
    */
   onExit: () => void;
+  /**
+   * 낭독 한 줄 (05 §7 · D114). `announce()` 규약을 이미 지난 문장을 받는다.
+   *
+   * **세션의 낭독 지점은 여기다.** `.proof` 가 `aria-modal` 이라 홈의 `.vh#live` 는 세션 중
+   * 보조 기술에서 가려진다 — 밖에 두면 판정이 읽히지 않는다.
+   */
+  live?: string | undefined;
 }
 
 /**
@@ -51,6 +59,7 @@ export function SessionOverlay({
   ladderOpen,
   onCloseLadder,
   onExit,
+  live,
 }: SessionOverlayProps) {
   const ref = useRef<HTMLDivElement | null>(null);
 
@@ -142,6 +151,7 @@ export function SessionOverlay({
         {children}
       </main>
       {lifer}
+      <LiveRegion text={live ?? ''} />
     </div>
   );
 }

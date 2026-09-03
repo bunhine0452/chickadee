@@ -208,10 +208,15 @@ test('14 리포 등록 → 인제스트 진행 → 홈', async ({ page, app }) =
     seen.push(share);
   }
   expect(seen.at(-1)).toBeGreaterThan(seen[0] as number);
-  // 칸마다 무엇을 하는 중인지가 곁에 적힌다.
-  await expect(page.locator('.ingest-now')).toHaveText('커밋과 캡처 저장');
-  // 「지금 읽는 파일」(`.ingest-path`)은 뜨지 않는다 — `currentRelPath` 가 `onProgress` 를
-  // 건너오지 못한다(보고 참조). 여기서 그 자리를 단언하면 결함을 굳히게 되므로 재지 않는다.
+  // 칸마다 무엇을 하는 중인지가 곁에 적히고, 그 옆에 지금 읽는 파일이 붙는다.
+  await expect(page.locator('.ingest-now')).toContainText('커밋과 캡처 저장');
+  await expect(page.locator('.ingest-path')).toHaveText('src/write.ts');
+
+  // 파일 단위가 아닌 단계는 그 자리를 **비운다** — 앞 단계의 파일 이름이 남으면 거짓말이다.
+  await emitIpcEvent(page, 'ingest_progress', {
+    jobId: 'job-1', phase: 'git', done: 20, total: 0, elapsedMs: 2,
+  });
+  await expect(page.locator('.ingest-path')).toHaveCount(0);
 
   await emitIpcEvent(page, 'ingest_warning', { jobId: 'job-1', relPath: 'huge.ts', reason: 'oversize' });
   await expect(page.locator('.ingest-skips')).toContainText('건너뛴 파일 1개');

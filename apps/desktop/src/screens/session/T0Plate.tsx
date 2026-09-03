@@ -94,8 +94,8 @@ export function T0Plate(props: T0PlateProps): React.JSX.Element | null {
   /*
    * 채점하면 고른 보기가 `disabled` 가 된다 — 포커스가 그 위에 있으면 그대로 죽는다
    * (브라우저는 `body` 로 떨어뜨리고, 그러면 06 §2 의 「매 단계 `activeElement !== body`」가
-   * 깨진다). 그래서 다음 동작 버튼으로 옮긴다. 판정문은 `aria-live` 가 읽으므로 포커스가
-   * 옮겨져도 읽히는 것은 같다 (05 §7).
+   * 깨진다). 그래서 다음 동작 버튼으로 옮긴다. 판정문은 오버레이의 `.vh#live` 가 읽으므로
+   * 포커스가 옮겨져도 읽히는 것은 같다 (05 §7 · D114).
    */
   useEffect(() => {
     if (!answered) return;
@@ -217,11 +217,11 @@ export function T0Plate(props: T0PlateProps): React.JSX.Element | null {
         <ReprintLadder
           rung={props.rung}
           onRung={props.onRung}
-          lyFrom={result?.layer[0] ?? plate.layer}
-          lyTo={result?.layer[1] ?? plate.layer}
+          lyFrom={result?.layer[0] ?? ladder.ly.from}
+          lyTo={result?.layer[1] ?? ladder.ly.to}
           card={ladder.card}
           prereqDone={plate.state?.prereqDone ?? []}
-          nextWas={ladder.nextWas}
+          {...(ladder.nextWas === undefined ? {} : { nextWas: ladder.nextWas })}
           onJump={(row) => props.onJumpPrereq(row.conceptId)}
           ask={{
             text: props.stuck,

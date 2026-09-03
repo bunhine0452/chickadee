@@ -40,7 +40,11 @@ export interface IngestOptions {
   dependencies?: readonly string[];
   identities?: readonly Identity[];
   now: number;
-  onProgress?: (phase: Phase, done: number, total: number) => void;
+  /**
+   * 진행 한 칸. `currentRelPath` 는 **지금 읽는 파일**이고 없을 수 있다 — Rust 의 `git` 단계는
+   * 파일 단위가 아니라 커밋 단위라 그 자리를 비운다 (01 §3.1).
+   */
+  onProgress?: (phase: Phase, done: number, total: number, currentRelPath?: string) => void;
   onWarning?: (relPath: string, reason: string) => void;
   /**
    * 잡 id 가 정해지자마자 한 번. **취소는 이것 없이는 불가능하다** — `ingest_cancel` 이
@@ -132,7 +136,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestReport> {
   const done = await new Promise<IngestDone>((resolve, reject) => {
     void (async () => {
       stops.push(await on('ingest_progress', (p) => {
-        options.onProgress?.(p.phase, p.done, p.total);
+        options.onProgress?.(p.phase, p.done, p.total, p.currentRelPath);
       }));
       stops.push(await on('ingest_warning', (w) => {
         options.onWarning?.(w.relPath, w.reason);
@@ -201,7 +205,7 @@ export async function deriveRepo(
     blockCount += result.blocks.length;
     siteCount += sites.length;
     step += 1;
-    options.onProgress?.('derive', step, target.length);
+    options.onProgress?.('derive', step, target.length, file.path);
   }
 
   const edges = await writeEdges(repoId, files, imports, target.map((f) => f.id));
@@ -439,7 +443,7 @@ export async function writeUnitNodes(repoId: number): Promise<number> {
   for (const site of sites) {
     const unit = byPath.get(site.path);
     if (unit === undefined) continue;
-    const key = `${unit} ${site.concept_id}`;
+    const key = `${unit}\u0000${site.concept_id}`;
     if (seen.has(key)) continue;
     seen.add(key);
     ops.push({

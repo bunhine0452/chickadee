@@ -5,7 +5,7 @@
  * `@chickadee/grading` 이, 겹이 얼마나 오를지는 `@chickadee/scheduler` 가 정한다.
  */
 import { ipc } from '@chickadee/ipc-client';
-import { FlatButton } from '@chickadee/ui';
+import { announce, FlatButton } from '@chickadee/ui';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 
 import { JobBand } from '../../components/session/JobBand.js';
@@ -19,7 +19,7 @@ import {
   buildProt, evalLine, type Question, type T1Result, type T2Result, type Tick,
 } from '@chickadee/grading';
 import { baseName, loadLadder, type LadderData } from '../../data/ladder.js';
-import type { Plate } from '../../data/session.js';
+import { loadMastery, type Plate } from '../../data/session.js';
 import type { Track } from '@chickadee/store-sql';
 import { loadSettings } from '../../data/settings.js';
 import { loadSummary, markLifersShown, type SummaryData } from '../../data/summary.js';
@@ -121,6 +121,18 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
   const result = results[pos] ?? null;
   const elapsed = useUi((s) => s.elapsed[pos] ?? 0);
 
+  /**
+   * 오버레이가 읽을 한 줄 (05 §7 문구 규약 · D114). 형식은 `[상태]. [수치]. [다음 행동]` 이고
+   * 60자는 `announce()` 가 지킨다. 판정란을 통째로 읽히지 않는 이유는 D114 에 있다.
+   */
+  const live = result === null
+    ? ''
+    : announce(
+      result.correct ? '정합 — 맞았습니다' : '어긋남 — 어긋났습니다',
+      result.gain,
+      'Space 로 다음',
+    );
+
   useSessionClock(pos, plate?.elapsedS ?? 0, () => void savePlate());
 
   // 05 §10 `session:mount` — 「인쇄 시작」을 누른 뒤 첫 교정지가 실제로 놓일 때까지.
@@ -197,7 +209,7 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
       answered: result !== null,
       correct: result?.correct ?? false,
       stuck: '',
-      dueAt: null,
+      mastery: (await loadMastery([plate.conceptId])).get(plate.conceptId) ?? null,
       now: Date.now(),
       settings,
     }));
@@ -384,6 +396,7 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
         onCloseLifer={() => setLifer(null)}
         ladderOpen={ladderOpen}
         onCloseLadder={() => setLadderOpen(false)}
+        live={live}
       >
         {done && summary !== null ? (
           <Summary
@@ -515,6 +528,7 @@ function SessionShell(props: {
   onCloseLifer: () => void;
   ladderOpen: boolean;
   onCloseLadder: () => void;
+  live: string;
   children: React.ReactNode;
 }): React.JSX.Element {
   return (
@@ -526,6 +540,7 @@ function SessionShell(props: {
       onCloseLifer={props.onCloseLifer}
       ladderOpen={props.ladderOpen}
       onCloseLadder={props.onCloseLadder}
+      live={props.live}
       onExit={() => void pauseSession()}
     >
       {props.children}

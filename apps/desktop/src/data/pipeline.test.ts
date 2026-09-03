@@ -204,9 +204,29 @@ describe('Rust 덤프 재생', () => {
       repoId: 1, payload, conceptId: first.conceptId,
       concept: { name: first.nameKo, token: first.token ?? '' },
       siteId: first.siteId, sel: wrong, answered: true, correct: false, stuck: '',
-      dueAt: finished.dueAt, now: T, settings,
+      mastery: (await loadMastery([first.conceptId])).get(first.conceptId) ?? null,
+      now: T, settings,
     });
     expect(ladder.card.dict.length).toBeGreaterThan(0);
+    // 머리말은 「모르겠어요」가 옮길 자리를 말한다 — 0겹이면 더 내려갈 곳이 없다.
+    expect(ladder.ly).toEqual({ from: 0, to: 0 });
+    // 오답이 이미 다음 자리를 잡아 두었으므로 머리말이 그것을 적는다 — 앞서는 `dueAt` 을
+    // 호출부가 `null` 로 굳혀 이 줄이 언제나 「오늘 안에 → 오늘 안에」였다.
+    expect(ladder.nextWas).toBe('내일');
+
+    // 겹이 있고 예정이 있으면 머리말이 **이득 두 개**를 말한다: 겹 한 칸과 당겨진 시점.
+    const scheduled = await loadLadder({
+      repoId: 1, payload, conceptId: first.conceptId,
+      concept: { name: first.nameKo, token: first.token ?? '' },
+      siteId: first.siteId, sel: wrong, answered: true, correct: false, stuck: '',
+      mastery: {
+        layer: 2, dayKey: null, dayStartLayer: 2, dayCeiling: 4,
+        firstOkAt: T - 86_400_000, lastOkDay: null, dueAt: T + 5 * 86_400_000,
+      },
+      now: T, settings,
+    });
+    expect(scheduled.ly).toEqual({ from: 2, to: 1 });
+    expect(scheduled.nextWas).toBe('5일 뒤');
     // 4단 프롬프트는 파일 이름만 담는다 (D8).
     expect(ladder.prompt).not.toContain('/');
     expect(ladder.prompt).toContain('배우려는 문법');

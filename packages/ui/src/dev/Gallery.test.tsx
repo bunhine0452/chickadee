@@ -39,7 +39,8 @@ describe('Gallery (DEV 전용)', () => {
   it('Dee 를 겹 0~4 로 나란히 놓는다', () => {
     const { container } = render(<Gallery />);
     for (const ly of [0, 1, 2, 3, 4]) {
-      expect(container.querySelector(`svg.dee[data-ly="${ly}"]`)).not.toBeNull();
+      // 움직이지 않는 스티커는 그림 한 장으로 구워진다 (D115) — 겹은 `data-ly` 로 남는다.
+      expect(container.querySelector(`[data-ly="${ly}"]`)).not.toBeNull();
     }
   });
 
