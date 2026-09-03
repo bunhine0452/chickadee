@@ -62,7 +62,7 @@ const {
 } = await import('./session.js');
 const { loadScheduler, loadSettings } = await import('./settings.js');
 const { loadSummary } = await import('./summary.js');
-const { loadLadder } = await import('./ladder.js');
+const { loadLadder, rebuildPrompt } = await import('./ladder.js');
 
 /** Rust 덤프의 snake_case 한 행 → 01 §3.1 의 `Capture`. */
 interface DumpCapture {
@@ -227,9 +227,16 @@ describe('Rust 덤프 재생', () => {
     });
     expect(scheduled.ly).toEqual({ from: 2, to: 1 });
     expect(scheduled.nextWas).toBe('5일 뒤');
-    // 4단 프롬프트는 파일 이름만 담는다 (D8).
-    expect(ladder.prompt).not.toContain('/');
-    expect(ladder.prompt).toContain('배우려는 문법');
+    // 4단 프롬프트는 「프롬프트 만들기」를 누른 순간 그때의 「막힌 지점」으로 조립된다 —
+    // 사다리를 열 때 미리 구우면 사용자가 적은 문장이 영영 안 담긴다.
+    const asked = rebuildPrompt({
+      payload, concept: { name: first.nameKo, token: first.token ?? '' },
+      sel: wrong, stuck: '왜 여기서 undefined 가 나오는지 모르겠어요',
+    });
+    expect(asked).toContain('왜 여기서 undefined 가 나오는지 모르겠어요');
+    // 파일 이름만 담는다 (D8).
+    expect(asked).not.toContain('/');
+    expect(asked).toContain('배우려는 문법');
 
     // ④ 아래층 판을 끼우고 마친 뒤 부모로 돌아온다.
     const prereq = ladder.card.prereq[0];

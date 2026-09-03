@@ -38,8 +38,11 @@ export interface T0PlateProps {
   ladderOpen: boolean;
   rung: RungNo;
   stuck: string;
+  /** 4단이 내놓은 프롬프트. 「프롬프트 만들기」를 누르기 전에는 빈 문자열이다. */
+  prompt: string;
   onRung: (rung: RungNo) => void;
   onStuck: (text: string) => void;
+  onBuildPrompt: () => void;
   onCopyPrompt: () => void;
   onDunno: () => void;
   onJumpPrereq: (conceptId: string) => void;
@@ -226,8 +229,8 @@ export function T0Plate(props: T0PlateProps): React.JSX.Element | null {
           ask={{
             text: props.stuck,
             onText: props.onStuck,
-            prompt: ladder.prompt,
-            onBuild: () => props.onStuck(props.stuck),
+            prompt: props.prompt,
+            onBuild: props.onBuildPrompt,
             onCopy: props.onCopyPrompt,
           }}
         />

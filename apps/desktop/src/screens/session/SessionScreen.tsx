@@ -18,7 +18,7 @@ import { closeMark, markLiferOpen } from '../../devtools/audit.js';
 import {
   buildProt, evalLine, type Question, type T1Result, type T2Result, type Tick,
 } from '@chickadee/grading';
-import { baseName, loadLadder, type LadderData } from '../../data/ladder.js';
+import { baseName, loadLadder, rebuildPrompt, type LadderData } from '../../data/ladder.js';
 import { loadMastery, type Plate } from '../../data/session.js';
 import type { Track } from '@chickadee/store-sql';
 import { loadSettings } from '../../data/settings.js';
@@ -86,6 +86,12 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
   const [ladderOpen, setLadderOpen] = useState(false);
   const [rung, setRung] = useState<RungNo>(1);
   const [stuck, setStuck] = useState('');
+  /**
+   * 4단이 내놓은 프롬프트. **빈 채로 시작한다** — 목업의 `promptOut` 이 그렇고, 「프롬프트
+   * 만들기」를 누른 순간 그때의 「막힌 지점」으로 조립된다. 사다리를 열 때 미리 구우면
+   * 사용자가 적은 문장이 영영 안 담긴다.
+   */
+  const [prompt, setPrompt] = useState('');
   const [ladder, setLadder] = useState<LadderData | null>(null);
   const [dunnoId, setDunnoId] = useState(0);
   const [lifer, setLifer] = useState<LiferView | null>(null);
@@ -195,6 +201,8 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
     setLadderOpen(next);
     if (!next) return;
 
+    // 새로 여는 사다리는 앞 판의 프롬프트를 물려받지 않는다.
+    setPrompt('');
     const id = await pressDunno(result !== null, result?.correct ?? null);
     setDunnoId(id);
     await openRung(id, 1);
@@ -499,11 +507,21 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
               void openRung(dunnoId, r);
             }}
             onStuck={setStuck}
+            prompt={prompt}
+            onBuildPrompt={() => {
+              if (plate.payload.track !== 't0') return;
+              setPrompt(rebuildPrompt({
+                payload: plate.payload,
+                concept: { name: plate.nameKo, token: plate.token ?? '' },
+                sel: result?.sel ?? null,
+                stuck,
+              }));
+            }}
             onCopyPrompt={() => {
               // 복사가 실패하면 말한다 — `void` 로 삼키면 WKWebView 에서 아무 일도 안 일어난
               // 것처럼 보인다(거절이 조용하다).
-              if (ladder !== null) {
-                void ipc.clip.write(ladder.prompt).catch(() => {
+              if (prompt !== '') {
+                void ipc.clip.write(prompt).catch(() => {
                   useUi.getState().say('클립보드에 복사하지 못했습니다.');
                 });
               }

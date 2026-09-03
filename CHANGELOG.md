@@ -46,7 +46,7 @@ There is no automatic update — a new version is downloaded by hand.
 
 ### Fixed after the first end-to-end run
 
-The suite that landed with this release found six defects. Four are fixed here.
+The suite that landed with this release found six defects. Five are fixed here.
 
 - The ladder said "ink 2 passes → 2 passes" and "next print today → today". It now reads
   the layer that pressing "I don't know" actually moves you to, and names the interval it
@@ -56,6 +56,9 @@ The suite that landed with this release found six defects. Four are fixed here.
 - The session has a live region. It reads one sentence — "정합 — 맞았습니다. 잉크 1겹 ·
   다음 인쇄 내일. Space 로 다음." — instead of the whole verdict panel, which is what the
   feedback box's own `aria-live` was doing.
+- The ladder's fourth step carries what you type. The prompt was assembled once when the
+  ladder opened, so "where I am stuck" always read "(비어 있음)" no matter what you wrote;
+  "프롬프트 만들기" now builds it from the box, and nothing is shown until you press it.
 - The home no longer draws a separate SVG per concept sticker. Each ink layer is baked
   once and reused, which took the repaint of 1,600 stickers from 28 ms to 17 ms per frame
   in the WebKit harness — the same as drawing none. Fixing it surfaced a second bug: the
@@ -64,8 +67,6 @@ The suite that landed with this release found six defects. Four are fixed here.
 
 ### Known issues
 
-- The fourth step of the ladder does not carry the sentence you type into "where I am
-  stuck" — the prompt is assembled once when the ladder opens.
 - On macOS, Tab does not reach buttons unless "Keyboard navigation" is on in System
   Settings. That is the platform default for WebKit, not something the app sets; every
   screen is still reachable with Option+Tab and the documented shortcuts.

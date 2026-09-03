@@ -42,8 +42,6 @@ export interface LadderData {
   card: LadderCard;
   /** 2단이 「내려갈 곳이 없다」를 보고했나 — 초보 감지가 이것을 센다 (02 §6.4). */
   nowhereToGo: boolean;
-  /** 4단 프롬프트. 「막힌 지점」이 바뀌면 이것만 다시 만든다. */
-  prompt: string;
   /**
    * 「모르겠어요」가 겹을 **어디로 옮기나**. 아직 답하지 않았을 때 머리말이 쓰는 값이다 —
    * 답한 뒤라면 채점이 낸 이동(`result.layer`)이 이미 진짜다.
@@ -120,6 +118,9 @@ export async function loadLadder(q: LadderQuery): Promise<LadderData> {
     sel: q.sel,
     stuck: q.stuck,
   };
+  // 4단 프롬프트는 여기서 만들지 않는다. 목업의 `promptOut` 은 **빈 채로 시작**하고
+  // 「프롬프트 만들기」를 누른 순간 그때의 「막힌 지점」으로 조립된다 — 열 때 미리 구우면
+  // 사용자가 적은 문장이 영영 안 담긴다. 그 자리는 `rebuildPrompt` 이고 화면이 들고 있는다.
   const built = buildLadder(input);
 
   // 겹의 이동은 **감축기가 정한다** — 「한 겹」을 화면이 따로 세면 R4 의 「같은 날 두 번째는
@@ -130,7 +131,6 @@ export async function loadLadder(q: LadderQuery): Promise<LadderData> {
   return {
     card: { dict: q.payload.dict ?? [], prereq, uses },
     nowhereToGo: built.prereq.nowhereToGo,
-    prompt: built.prompt,
     ly,
     ...(q.mastery?.dueAt == null
       ? {}

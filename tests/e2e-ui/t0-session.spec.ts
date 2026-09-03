@@ -127,11 +127,18 @@ test('03 3판 `?` 사다리 1~4단', async ({ page }) => {
 
   // 4단 — 프롬프트 생성·복사. 나가는 것은 이 줄과 앞뒤 4줄, 파일 **이름**뿐이다 (D8).
   await ladder.locator('.rung[data-r="4"]').click();
-  await ladder.locator('.askbox textarea').fill('?. 다음 줄이 어떻게 되는지 모르겠어요');
+  // 누르기 전에는 프롬프트가 없다 (목업 `promptOut: ''`) — 그래서 「복사」도 잠겨 있다.
+  await expect(ladder.locator('.prompt-out')).toHaveCount(0);
+  await expect(ladder.getByRole('button', { name: '복사' })).toBeDisabled();
+
+  const STUCK = '?. 다음 줄이 어떻게 되는지 모르겠어요';
+  await ladder.locator('.askbox textarea').fill(STUCK);
   await ladder.getByRole('button', { name: '프롬프트 만들기' }).click();
   const prompt = ladder.locator('.prompt-out');
   await expect(prompt).toBeVisible();
   const shown = (await prompt.innerText()).trim();
+  // **적은 문장이 담긴다.** 앞서는 사다리를 열 때 한 번 구워 두어 언제나 「(비어 있음)」이었다.
+  expect(shown).toContain(STUCK);
   expect(shown).toContain('time.ts');
   expect(shown).not.toContain('/w/tiny');
 
