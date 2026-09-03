@@ -203,7 +203,12 @@ jobs:
   build-3os:
     name: build (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 40
+    # 40 was enough until M3 added three grammar crates (python · go · rust). The
+    # ubuntu build then finished the compile and the artifact upload but was cut
+    # while *saving* the Rust cache — a bigger `target/` costs minutes to pack, and
+    # 29 min of compile plus that save crossed the cap. The 12-min budget in
+    # 06 §5.1 is the fast lane (lint · type · unit), not this matrix.
+    timeout-minutes: 55
     strategy:
       fail-fast: false
       matrix:
