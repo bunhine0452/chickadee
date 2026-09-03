@@ -1,0 +1,70 @@
+{
+  "name": "blank-wrong-has-edge",
+  "rule": "04 §2.1 — 빈칸 오답 3개의 진단은 03 린트가 강제한다. `edge` 는 실제로 터지는 최소 코드",
+  "card": {
+    "track": "t0",
+    "kind": "blank",
+    "file": "src/cart.ts",
+    "focus": 27,
+    "lines": [
+      {
+        "n": 27,
+        "t": "const name = res.user?.profile?.nickname"
+      }
+    ],
+    "q": "값이 없을 수도 있는 곳에서 멈추는 기호를 짚으세요",
+    "hint": "왼쪽부터 한 곳",
+    "answer": 2,
+    "why": [
+      {
+        "t": "`filter` 는 고르기만 합니다",
+        "edge": {
+          "h": "이렇게 하면 빕니다",
+          "code": [
+            "[1,2].filter(n => n * 2)"
+          ]
+        }
+      },
+      {
+        "t": "`forEach` 는 아무것도 돌려주지 않습니다"
+      },
+      null,
+      {
+        "t": "`reduce` 는 하나로 접습니다"
+      }
+    ],
+    "ok": "정합입니다",
+    "rule": "규칙",
+    "prereq": [],
+    "uses": [],
+    "promptLines": [
+      "const name = res.user?.profile?.nickname"
+    ],
+    "options": [
+      {
+        "t": "filter",
+        "mono": true
+      },
+      {
+        "t": "forEach",
+        "mono": true
+      },
+      {
+        "t": "map",
+        "mono": true
+      },
+      {
+        "t": "reduce",
+        "mono": true
+      }
+    ]
+  },
+  "choice": 0,
+  "expect": {
+    "ok": false,
+    "why_index": 0,
+    "has_edge": true,
+    "has_result": false,
+    "has_bridge": false
+  }
+}

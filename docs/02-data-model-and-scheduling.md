@@ -603,7 +603,7 @@ T3 는 `track='t3'`·`kind IN ('repair','reimpl')` 자리만 두고 테이블은
 | R1 하루 한 겹 | 한 개념은 로컬 하루(§5.6)에 최대 +1. 그날 첫 접촉 때 `day_ceiling` 을 정한다 |
 | R2 만기 근처에서만 | +1 자격 = 개념 첫 성공이거나, `last_ok_day < 오늘` 이고 `now ≥ due_at − 12h`. 그 전에 찍으면 `early=1`, 겹 유지, 「아직 잉크가 마르지 않았어요 — 다음 인쇄 N일 뒤에 겹이 쌓입니다」 |
 | R3 오답은 유지 | `layer` 불변, 대신 그날 천장을 현재 겹으로 내린다(다시 찍기 정답이 겹을 올리지 못하게) |
-| R4 모르겠어요는 −1, 회복만 | `layer = max(0, layer−1)`, 천장은 `day_start_layer` 로. 같은 날 다시 찍기 정답은 원래 겹까지만 돌아온다 |
+| R4 모르겠어요는 −1, 회복만 | `layer = max(day_start_layer − 1, layer − 1)`, 천장은 `day_start_layer` 로. 같은 날 다시 찍기 정답은 원래 겹까지만 돌아오고, **같은 날 두 번째 「모르겠어요」는 더 내리지 않는다**(D78 — R1 의 대칭) |
 | R5 첫 성공은 무조건 1겹 | `first_ok_at` 이 NULL 이면 천장 하한 1. 오답·모르겠어요 뒤 다시 찍기에서 맞혀도 첫 겹은 찍힌다(LIFER) |
 | R6 흐려짐 | 표시 겹 = `layer − fade(R)`; 그날 첫 접촉 때 표시 겹을 저장값으로 물질화한다(§3.4) |
 
@@ -624,7 +624,7 @@ export function beginDay(m: Mastery, now: number, day: string): Mastery {
 
 export function applyOutcome(m: Mastery, o: Outcome): Mastery {
   let { layer, day_ceiling: ceiling } = m;
-  if (o === 'dunno')      { layer = Math.max(0, layer - 1); ceiling = Math.min(ceiling, m.day_start_layer); } // R4
+  if (o === 'dunno')      { layer = Math.max(m.day_start_layer - 1, layer - 1); ceiling = Math.min(ceiling, m.day_start_layer); } // R4 (D78)
   else if (o === 'wrong') { ceiling = Math.min(ceiling, layer); }                                              // R3
   if (m.first_ok_at == null) ceiling = Math.max(ceiling, 1);                                                   // R5
   if (o === 'ok') layer = Math.min(layer + 1, ceiling);

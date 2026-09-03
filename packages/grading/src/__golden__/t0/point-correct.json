@@ -1,0 +1,47 @@
+{
+  "name": "point-correct",
+  "rule": "04 §2.1 — 정답이면 진단이 없고 ok·rule 이 나간다",
+  "card": {
+    "track": "t0",
+    "kind": "point",
+    "file": "src/cart.ts",
+    "focus": 27,
+    "lines": [
+      {
+        "n": 27,
+        "t": "const name = res.user?.profile?.nickname"
+      }
+    ],
+    "q": "값이 없을 수도 있는 곳에서 멈추는 기호를 짚으세요",
+    "hint": "왼쪽부터 한 곳",
+    "answer": 1,
+    "why": [
+      {
+        "t": "`.` 은 앞이 없으면 던집니다"
+      },
+      null,
+      {
+        "t": "`??` 는 멈추지 않고 채웁니다"
+      }
+    ],
+    "ok": "정합입니다",
+    "rule": "규칙",
+    "prereq": [],
+    "uses": [],
+    "promptLines": [
+      "const name = res.user?.profile?.nickname"
+    ],
+    "result": {
+      "label": "name",
+      "value": "undefined",
+      "note": "중간이 비면 거기서 멈춥니다"
+    }
+  },
+  "choice": 1,
+  "expect": {
+    "ok": true,
+    "why_index": null,
+    "has_result": true,
+    "has_bridge": false
+  }
+}

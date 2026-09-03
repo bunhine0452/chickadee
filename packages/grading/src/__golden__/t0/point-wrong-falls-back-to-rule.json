@@ -1,0 +1,40 @@
+{
+  "name": "point-wrong-falls-back-to-rule",
+  "rule": "04 §2.1 — ①② 밖 후보에는 진단이 없다. 규칙 문장이 최후의 그물이다",
+  "card": {
+    "track": "t0",
+    "kind": "point",
+    "file": "src/cart.ts",
+    "focus": 27,
+    "lines": [
+      {
+        "n": 27,
+        "t": "const name = res.user?.profile?.nickname"
+      }
+    ],
+    "q": "값이 없을 수도 있는 곳에서 멈추는 기호를 짚으세요",
+    "hint": "왼쪽부터 한 곳",
+    "answer": 0,
+    "why": [
+      null,
+      {
+        "t": "그건 다릅니다"
+      }
+    ],
+    "ok": "정합입니다",
+    "rule": "`?.` 는 앞이 없으면 거기서 멈춥니다",
+    "prereq": [],
+    "uses": [],
+    "promptLines": [
+      "const name = res.user?.profile?.nickname"
+    ]
+  },
+  "choice": 3,
+  "expect": {
+    "ok": false,
+    "why_index": null,
+    "diag_is_rule": true,
+    "has_result": false,
+    "has_bridge": false
+  }
+}

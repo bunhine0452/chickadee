@@ -1,0 +1,64 @@
+{
+  "name": "meaning-correct-with-result",
+  "rule": "04 §1.3 — 의미형의 `result` 는 사전 템플릿이 정한다. 실행하지 않는다",
+  "card": {
+    "track": "t0",
+    "kind": "meaning",
+    "file": "src/cart.ts",
+    "focus": 27,
+    "lines": [
+      {
+        "n": 27,
+        "t": "const name = res.user?.profile?.nickname"
+      }
+    ],
+    "q": "값이 없을 수도 있는 곳에서 멈추는 기호를 짚으세요",
+    "hint": "왼쪽부터 한 곳",
+    "answer": 0,
+    "why": [
+      null,
+      {
+        "t": "새 배열은 반환값입니다"
+      },
+      {
+        "t": "인자는 언제나 채워집니다"
+      },
+      {
+        "t": "빈 배열이 되려면 원본이 비어야 합니다"
+      }
+    ],
+    "ok": "정합입니다",
+    "rule": "규칙",
+    "prereq": [],
+    "uses": [],
+    "promptLines": [
+      "const name = res.user?.profile?.nickname"
+    ],
+    "options": [
+      {
+        "t": "이전 상태 배열"
+      },
+      {
+        "t": "새 배열"
+      },
+      {
+        "t": "undefined"
+      },
+      {
+        "t": "빈 배열"
+      }
+    ],
+    "result": {
+      "label": "prev",
+      "value": "[{ id: 1, qty: 2 }]",
+      "note": "직전 상태 그대로"
+    }
+  },
+  "choice": 0,
+  "expect": {
+    "ok": true,
+    "why_index": null,
+    "has_result": true,
+    "has_bridge": false
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "name": "point-wrong-picks-selected-diag",
+  "rule": "04 §2.1 — 진단은 **고른 보기**의 것 하나뿐이다",
+  "card": {
+    "track": "t0",
+    "kind": "point",
+    "file": "src/cart.ts",
+    "focus": 27,
+    "lines": [
+      {
+        "n": 27,
+        "t": "const name = res.user?.profile?.nickname"
+      }
+    ],
+    "q": "값이 없을 수도 있는 곳에서 멈추는 기호를 짚으세요",
+    "hint": "왼쪽부터 한 곳",
+    "answer": 1,
+    "why": [
+      {
+        "t": "`.` 은 앞이 없으면 던집니다"
+      },
+      null,
+      {
+        "t": "`??` 는 멈추지 않고 채웁니다"
+      }
+    ],
+    "ok": "정합입니다",
+    "rule": "규칙",
+    "prereq": [],
+    "uses": [],
+    "promptLines": [
+      "const name = res.user?.profile?.nickname"
+    ]
+  },
+  "choice": 2,
+  "expect": {
+    "ok": false,
+    "why_index": 2,
+    "has_result": false,
+    "has_bridge": false
+  }
+}

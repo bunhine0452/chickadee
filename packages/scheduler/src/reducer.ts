@@ -62,8 +62,11 @@ export function applyOutcome(m: LayerState, o: Outcome, ceilingCap: Layer = MAX_
   let ceiling = Math.min(m.dayCeiling, ceilingCap);
 
   if (o === 'dunno') {
-    layer = clampLayer(layer - 1);
-    ceiling = Math.min(ceiling, m.dayStartLayer); // R4 같은 날 회복만
+    // R4 — 하루에 한 겹만 내려간다. 「+1 은 하루 한 번」의 대칭이다(D78): 같은 날 두 번째
+    // 「모르겠어요」가 또 내리면 사다리를 열어 본 것에 벌을 주는 셈이 되고, 그것이 곧
+    // 「모르겠어요는 벌이 아니라 공정」(정본 §3-1)을 깬다.
+    layer = clampLayer(Math.max(m.dayStartLayer - 1, layer - 1));
+    ceiling = Math.min(ceiling, m.dayStartLayer); // 같은 날 회복만
   } else if (o === 'wrong') {
     ceiling = Math.min(ceiling, layer); // R3 다시 찍기 정답이 겹을 올리지 못하게
   }

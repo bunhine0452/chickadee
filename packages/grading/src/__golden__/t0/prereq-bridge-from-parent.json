@@ -1,0 +1,65 @@
+{
+  "name": "prereq-bridge-from-parent",
+  "rule": "04 §2.1 — 아래층 판이면 부모 개념 사전의 `bridge` 를 「이어보기」로 덧붙인다",
+  "card": {
+    "track": "t0",
+    "kind": "point",
+    "file": "src/cart.ts",
+    "focus": 27,
+    "lines": [
+      {
+        "n": 27,
+        "t": "const name = res.user?.profile?.nickname"
+      }
+    ],
+    "q": "값이 없을 수도 있는 곳에서 멈추는 기호를 짚으세요",
+    "hint": "왼쪽부터 한 곳",
+    "answer": 0,
+    "why": [
+      null,
+      {
+        "t": "그건 다릅니다"
+      }
+    ],
+    "ok": "정합입니다",
+    "rule": "규칙",
+    "prereq": [],
+    "uses": [],
+    "promptLines": [
+      "const name = res.user?.profile?.nickname"
+    ],
+    "bridge": "선행 쪽 문장"
+  },
+  "parent": {
+    "track": "t0",
+    "kind": "point",
+    "file": "src/cart.ts",
+    "focus": 27,
+    "lines": [
+      {
+        "n": 27,
+        "t": "const name = res.user?.profile?.nickname"
+      }
+    ],
+    "q": "값이 없을 수도 있는 곳에서 멈추는 기호를 짚으세요",
+    "hint": "왼쪽부터 한 곳",
+    "answer": 0,
+    "why": [],
+    "ok": "정합입니다",
+    "rule": "규칙",
+    "prereq": [],
+    "uses": [],
+    "promptLines": [
+      "const name = res.user?.profile?.nickname"
+    ],
+    "bridge": "방금 배운 `?.` 가 여기서 이어집니다"
+  },
+  "choice": 0,
+  "expect": {
+    "ok": true,
+    "why_index": null,
+    "has_result": false,
+    "has_bridge": true,
+    "bridge": "방금 배운 `?.` 가 여기서 이어집니다"
+  }
+}
