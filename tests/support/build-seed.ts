@@ -24,8 +24,15 @@ import type BetterSqlite3 from 'better-sqlite3';
 export { NOW, SEED_PATH, TZ } from './build-seed-const.js';
 import { NOW, TZ } from './build-seed-const.js';
 
-/** 덤프가 담은 파일은 하나다 — `derive.captures_by_file` 한 페이지가 그 계약이다. */
-const DUMPED_FILE = 'src/store/repo.ts';
+/**
+ * 시드의 재료는 `captures-all.json` — 픽스처의 **모든 파일**이다 (D113).
+ * `captures.json` 은 `derive.captures_by_file` 한 페이지가 곧 계약인 자리라 파일 하나뿐이고,
+ * 그것만 깔면 사용처가 둘이라 홈 큐가 한 판밖에 안 선다.
+ */
+interface DumpPage {
+  path: string;
+  captures: DumpCapture[];
+}
 
 interface DumpCapture {
   query_id: string; match_id: number; name: string; pattern_index: number;
@@ -99,21 +106,27 @@ export async function buildSeed(Database: new (path: string) => BetterSqlite3.Da
   );
   files.forEach((f, i) => insertFile.run(i + 1, f.path, f.content_hash, NOW));
 
-  const fileId = files.findIndex((f) => f.path === DUMPED_FILE) + 1;
-  if (fileId === 0) throw new Error(`덤프에 ${DUMPED_FILE} 이 없다`);
+  const fileIds = new Map(files.map((f, i) => [f.path, i + 1]));
   const insertCapture = db.prepare(
     `INSERT INTO capture (file_id, query_id, match_id, pattern_index, name, form, node_kind,
        in_error, start_byte, end_byte, start_line, end_line, start_col, end_col, excerpt)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   );
-  for (const c of dump<DumpCapture[]>('captures.json')) {
-    const cap = toCapture(c);
-    insertCapture.run(
-      fileId, cap.queryId, cap.matchId, cap.patternIndex, cap.name, cap.form, cap.nodeKind,
-      cap.inError ? 1 : 0, cap.startByte, cap.endByte, cap.startLine, cap.endLine,
-      cap.startCol, cap.endCol, cap.excerpt,
-    );
+  let captures = 0;
+  for (const page of dump<DumpPage[]>('captures-all.json')) {
+    const fileId = fileIds.get(page.path);
+    if (fileId === undefined) throw new Error(`덤프의 ${page.path} 이 files.json 에 없다`);
+    for (const c of page.captures) {
+      const cap = toCapture(c);
+      insertCapture.run(
+        fileId, cap.queryId, cap.matchId, cap.patternIndex, cap.name, cap.form, cap.nodeKind,
+        cap.inError ? 1 : 0, cap.startByte, cap.endByte, cap.startLine, cap.endLine,
+        cap.startCol, cap.endCol, cap.excerpt,
+      );
+      captures += 1;
+    }
   }
+  if (captures === 0) throw new Error('덤프에 캡처가 하나도 없다 — 다시 떠라');
 
   await deriveRepo(dict, {
     repoId: 1, rootPath: '/w/tiny', mode: 'full', sinceHead: null, now: NOW,

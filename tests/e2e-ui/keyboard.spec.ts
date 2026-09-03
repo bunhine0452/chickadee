@@ -10,19 +10,14 @@
  * Esc 겹 벗기기(13) → 정합(1)과 LIFER(6) → 요약(11) → 홈 → 야간반(12).
  * 4·5(아래층)와 7~10(T1·T2)은 시드로 열리지 않아 여기서도 빠진다.
  */
-import type { Database } from 'better-sqlite3';
 
-import { expect, focusPath, keyboardOnly as test, openHome, tabTo } from '../support/ui.js';
+import {
+  expect, finishSession, focusPath, keyboardOnly as test, openHome, tabTo,
+} from '../support/ui.js';
+import { answerKeyOf } from '../support/app-db.js';
 
 const SHEET = '.proof article.ps';
 
-function answerKey(db: Database): number {
-  const row = db.prepare('SELECT payload_json FROM card ORDER BY id DESC LIMIT 1').get() as
-    | { payload_json: string }
-    | undefined;
-  if (row === undefined) throw new Error('카드가 없다 — 세션이 열리지 않았다');
-  return (JSON.parse(row.payload_json) as { answer: number }).answer + 1;
-}
 
 test('15 키보드만으로 1~13', async ({ page, app }) => {
   await openHome(page);
@@ -72,7 +67,7 @@ test('15 키보드만으로 1~13', async ({ page, app }) => {
   await expect(page.locator('.proof')).toHaveCount(1);
 
   // ── 1. 보기를 고르고 Enter 로 확인. `1~4` 는 사다리가 접혔으니 다시 보기 고르기다.
-  const key = answerKey(app.db);
+  const key = answerKeyOf(app.db);
   await page.keyboard.press(`Digit${key}`);
   await expect(page.locator(`.ch[data-k="${key}"]`)).toHaveAttribute('aria-checked', 'true');
   await page.keyboard.press('Enter');
@@ -86,11 +81,10 @@ test('15 키보드만으로 1~13', async ({ page, app }) => {
   await expect(veil).toHaveCount(0);
   expect(await focusPath(page)).toContain('press-btn');
 
-  // ── 11. Space 로 다음 → 큐가 끝나 요약. Enter 로 홈.
-  await page.keyboard.press('Space');
+  // ── 11. Space 로 다음. 남은 판까지 답하면 요약 (D113). Enter 로 홈.
+  await finishSession(page, app.db);
   const done = page.locator('[aria-label="인쇄 완료"]');
-  await done.waitFor();
-  await expect(done.locator('.shifts .shift')).toHaveCount(1);
+  await expect(done.locator('.shifts .shift')).toHaveCount(2);
   expect(await focusPath(page)).toContain('press-btn');
   await page.keyboard.press('Enter');
   await page.locator('.masthead').waitFor();

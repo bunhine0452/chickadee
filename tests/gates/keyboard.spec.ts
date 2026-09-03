@@ -11,7 +11,7 @@ import { test, expect } from '../support/fixture.js';
 import type { Page } from '@playwright/test';
 
 import {
-  T1_SKIP, T2_SKIP, answerKey, gotoDev, loadAllow, startSession, toNight,
+  T1_SKIP, T2_SKIP, answerKey, gotoDev, loadAllow, startSession, toNight, toSummary,
 } from '../support/gates.js';
 
 const axeAllow = loadAllow('axe.allow.json').entries;
@@ -99,9 +99,8 @@ test('키보드 완결 — 마우스 0 으로 홈 → T0 → 사다리 → 정�
   expect(afterGrade).toContain('press-btn');
   trail.push(`판정 뒤 → ${afterGrade}`);
 
-  // ⑦ Space 로 다음 → 마지막 판이라 요약.
-  await page.keyboard.press('Space');
-  await page.locator('article.ps[aria-label="인쇄 완료"]').waitFor();
+  // ⑦ Space 로 다음. 남은 판이 있으면 그것도 답하고 마지막에 요약이 뜬다 (D113).
+  await toSummary(page, app);
   trail.push(`요약 → ${await focusHolds(page, '요약')}`);
 
   // ⑧ 요약에서 Enter 는 홈으로 (05 §7). 돌아온 뒤의 포커스는 아래 `test.fail` 이 따로 본다.
@@ -150,8 +149,7 @@ test('키보드 완결 — 세션을 닫고 홈으로 와도 포커스가 남는
     await page.keyboard.press('Escape');
     await veil.waitFor({ state: 'detached' });
   }
-  await page.keyboard.press('Space');
-  await page.locator('article.ps[aria-label="인쇄 완료"]').waitFor();
+  await toSummary(page, app);
   await page.keyboard.press('Enter');
   await expect(page.locator('.masthead')).toBeVisible();
   await focusHolds(page, '세션 닫힘');

@@ -11,7 +11,7 @@ import { join } from 'node:path';
 
 import type { Page } from '@playwright/test';
 
-import type { AppDb } from './app-db.js';
+import { answerKeyOf, type AppDb } from './app-db.js';
 
 /**
  * 앱의 게이트 보고를 그대로 받는 모양. 앱 타입을 import 하지 않는 이유는 `tests/` 가
@@ -107,7 +107,7 @@ export const motionOver = (page: Page, limitMs: number, exempt: readonly string[
  * import 간선이 없어 `makeT2Card` 가 `null` 을 준다 — 둘 다 큐에 자리가 서지 않는다.
  * **없는 커버리지를 있는 것처럼 만들지 않는다**: 그 둘은 `test.skip` 으로 사유와 함께 남긴다.
  */
-export const T1_SKIP = 'tiny 시드에 `block` 행이 없다 — forBlock() 이 null 이라 T1 판이 큐에 안 선다';
+export const T1_SKIP = '첫날 큐는 새 판(T0)뿐이라 T1 판이 서지 않는다 — 시드에 `block` 은 18행 있다(D113)';
 export const T2_SKIP = 'tiny 시드에 커밋·import 간선이 없다 — makeT2Card() 가 null 이라 T2 판이 큐에 안 선다';
 
 /** 홈의 「인쇄 시작」. 마우스를 쓰지 않는다 — 포커스를 옮기고 Enter 를 친다. */
@@ -122,18 +122,13 @@ export async function startSession(page: Page): Promise<void> {
 }
 
 /**
- * 이 세션이 건 T0 판의 **보기 번호**(1부터). 큐가 한 장이라 마지막 카드가 그 판이다.
+ * **지금 걸린** T0 판의 보기 번호(1부터). 「큐가 한 장이라 마지막 카드가 그 판」이라는 가정은
+ * 두지 않는다 — 첫날 큐가 두 판이 되면서(D113) 그 가정이 다음 판의 답을 집었다.
  *
  * `payload.answer` 는 0부터인 보기 인덱스다(`gradeT0` 이 `sel === card.answer` 로 잰다).
  * 05 §7 의 `1~4` 는 그 인덱스에 1 을 더한 것이다 — 이 한 칸 차이를 여기서 한 번만 넘긴다.
  */
-export function answerKey(app: AppDb): number {
-  const row = app.db
-    .prepare("SELECT payload_json AS p FROM card WHERE track = 't0' ORDER BY id DESC LIMIT 1")
-    .get() as { p: string } | undefined;
-  if (row === undefined) throw new Error('T0 카드가 없다 — 세션을 먼저 열어라');
-  return (JSON.parse(row.p) as { answer: number }).answer + 1;
-}
+export const answerKey = (app: AppDb): number => answerKeyOf(app.db);
 
 /** 고르기 → Enter (정본 §3-8). `sel` 은 보기 번호(1부터)다. */
 export async function submit(page: Page, sel: number): Promise<void> {
@@ -152,11 +147,28 @@ export async function closeLifer(page: Page): Promise<void> {
   await settled(page);
 }
 
-/** 마지막 판을 마치면 요약이 뜬다 (05 §3). */
-export async function toSummary(page: Page): Promise<void> {
-  await page.keyboard.press('Space');
-  await page.locator('article.ps[aria-label="인쇄 완료"]').waitFor();
-  await settled(page);
+/** 요약까지 걸어 볼 수 있는 판 수의 상한. 넘으면 큐가 안 줄고 있다는 뜻이다. */
+const MAX_PLATES = 12;
+
+/**
+ * 남은 판을 다 답하고 요약까지 간다 (05 §3). **부르기 전에 지금 판은 채점돼 있어야 한다.**
+ *
+ * 판 수를 상수로 두지 않는다 — 큐 길이는 시드가 정하고(D113 으로 첫날 두 판이 됐다) 오답은
+ * 다시 찍기를 한 장 더 넣는다. 그래서 「요약이 떴나」로 끝을 판정하고, 안 떴으면 새로 걸린
+ * 판을 답한 뒤 다시 넘긴다.
+ */
+export async function toSummary(page: Page, app: AppDb): Promise<void> {
+  const done = page.locator('article.ps[aria-label="인쇄 완료"]');
+  for (let left = MAX_PLATES; left > 0; left -= 1) {
+    await page.keyboard.press('Space');
+    // 넘어갔으면 판정이 걷힌다 — 요약이 떠도 마찬가지다.
+    await page.locator('.fb.on').waitFor({ state: 'detached' });
+    await settled(page);
+    if (await done.count() > 0) return;
+    await submit(page, answerKey(app));
+    await closeLifer(page);
+  }
+  throw new Error(`판 ${MAX_PLATES}장을 답했는데도 요약이 안 떴다 — 큐가 안 줄고 있다`);
 }
 
 /** 야간반 (05 §4.3). 스위치는 마스트헤드에 있고 `<html data-theme>` 하나만 바뀐다. */

@@ -200,7 +200,7 @@ for (const theme of ['day', 'night'] as const) {
     await page.keyboard.press('Enter');
     await page.locator('.fb.on').waitFor();
     await closeLifer(page);
-    await toSummary(page);
+    await toSummary(page, app);
     await shoot(page, `summary-${theme}`, { scope: 'summary', anchor: 'article.ps' });
   });
 }

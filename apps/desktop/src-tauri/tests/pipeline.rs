@@ -684,6 +684,26 @@ fn the_shipped_dictionary_finds_sites_in_the_fixture() {
         "한 파일에서 개념 {} 종만 잡혔다: {ids:?}",
         ids.len()
     );
+
+    // 화면 시드(D108)가 읽는 재료 — **배포되는 사전이 낸 캡처 전량**을 경로 순으로 담는다.
+    // `captures.json` 은 `derive.captures_by_file` 한 페이지가 곧 계약인 자리라 파일 하나에
+    // 최소 쿼리뿐이고, 그것으로 파생하면 사용처가 둘이라 홈 큐가 한 판밖에 안 선다 — E4·E6 가
+    // 거기서 죽었다 (D113). 시드의 TS 쪽도 같은 사전(`loadDict()`)을 얹으므로 짝이 맞는다.
+    let mut pages: Vec<serde_json::Value> = store
+        .query("derive.files", &json!({ "repoId": 1 }))
+        .expect("files")
+        .into_iter()
+        .filter_map(|f| {
+            let id = f["id"].as_i64()?;
+            let path = f["path"].as_str()?.to_owned();
+            let captures: Vec<serde_json::Value> = store
+                .query("derive.captures_by_file", &json!({ "fileId": id }))
+                .expect("captures");
+            Some(json!({ "path": path, "captures": captures }))
+        })
+        .collect();
+    pages.sort_by_key(|p| p["path"].as_str().unwrap_or_default().to_owned());
+    write_dump("captures-all.json", &json!(pages));
 }
 
 /// 파일 하나의 T1 후보 블록. 04 §3.1 의 12~40줄만 담고 그 범위에 걸린 개념을 붙인다 —

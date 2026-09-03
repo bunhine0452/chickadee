@@ -20,6 +20,31 @@ import { SEED_PATH } from './build-seed-const.js';
 
 const SCHEMA_VERSION = 1;
 
+/**
+ * **지금 걸린** T0 판의 정답 보기 번호(1부터). 생성기가 섞은 순서를 **원장에서** 읽는다 —
+ * 화면을 보고 답을 고르면 「채점이 맞나」가 아니라 「화면이 자기 말을 되풀이하나」가 된다.
+ *
+ * 열린 세션의 **안 끝난 첫 판**을 집는다. 「마지막 카드가 그 판」이라는 앞의 가정은 큐가 한
+ * 장일 때만 맞았고, 첫날 큐가 두 판이 되면서(D113) 다음 판의 답을 집었다.
+ *
+ * `payload.answer` 는 0부터인 보기 인덱스다(`gradeT0` 이 `sel === card.answer` 로 잰다).
+ * 05 §7 의 `1~4` 는 그 인덱스에 1 을 더한 것이다 — 이 한 칸 차이를 여기서 한 번만 넘긴다.
+ */
+export function answerKeyOf(db: BetterSqlite3.Database): number {
+  const row = db
+    .prepare(
+      `SELECT c.payload_json AS p
+         FROM session_item i JOIN card c ON c.id = i.card_id
+        WHERE i.session_id = (SELECT MAX(id) FROM session)
+          AND i.status IN ('pending', 'active')
+          AND c.track = 't0'
+        ORDER BY i.pos LIMIT 1`,
+    )
+    .get() as { p: string } | undefined;
+  if (row === undefined) throw new Error('안 끝난 T0 판이 없다 — 세션을 먼저 열어라');
+  return (JSON.parse(row.p) as { answer: number }).answer + 1;
+}
+
 export interface AppDb {
   /** 브라우저가 부르는 명령 하나. 모르는 이름은 던진다 — 조용히 `null` 을 주지 않는다. */
   handle: (cmd: string, args: Record<string, unknown>) => unknown;

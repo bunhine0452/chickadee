@@ -4,47 +4,40 @@
  * 이 넷은 교정지 한 장이 아니라 **셸**을 잰다: 세션이 닫힐 때 무엇이 남는가, 테마와 부속이
  * 조판을 건드리지 않는가, Esc 가 한 번에 한 겹만 벗기는가, 리포를 처음 등록하면 무엇이 도는가.
  */
-import type { Database } from 'better-sqlite3';
 
 import {
-  emitIpcEvent, expect, focusPath, focusWithin, openApp, openHome, queueSpeech, stubCommands,
-  test, wipeRepos,
+  emitIpcEvent, expect, finishSession, focusPath, focusWithin, openApp, openHome, queueSpeech,
+  stubCommands, test, wipeRepos,
 } from '../support/ui.js';
+import { answerKeyOf } from '../support/app-db.js';
 
 const SHEET = '.proof article.ps';
 const DONE = '[aria-label="인쇄 완료"]';
 
-function answerKey(db: Database): number {
-  const row = db.prepare('SELECT payload_json FROM card ORDER BY id DESC LIMIT 1').get() as
-    | { payload_json: string }
-    | undefined;
-  if (row === undefined) throw new Error('카드가 없다 — 세션이 열리지 않았다');
-  return (JSON.parse(row.payload_json) as { answer: number }).answer + 1;
-}
 
 test('11 요약', async ({ page, app }) => {
   await openHome(page);
   await page.getByRole('button', { name: /인쇄 시작/ }).click();
   await page.locator(SHEET).waitFor();
-  await page.locator(`.ch[data-k="${answerKey(app.db)}"]`).click();
+  await page.locator(`.ch[data-k="${answerKeyOf(app.db)}"]`).click();
   await page.locator('.acts .press-btn').click();
 
   // LIFER 는 첫 정합의 연출이다 — 닫고 나서야 다음 판으로 간다.
   await page.locator('.lifer-veil').waitFor();
   await page.keyboard.press('KeyG');
-  await page.keyboard.press('Space');
-  await page.locator(DONE).waitFor();
+  // 큐는 두 판이다 (D113) — 남은 판까지 답해야 요약이 뜬다.
+  await finishSession(page, app.db);
 
-  // 겹 이동 목록 — %가 아니라 겹으로 센다.
+  // 겹 이동 목록 — %가 아니라 겹으로 센다. 답한 판마다 한 줄이다.
   const shift = page.locator(`${DONE} .shifts .shift`);
-  await expect(shift).toHaveCount(1);
-  await expect(shift.first()).toContainText('옵셔널 체이닝');
+  await expect(shift).toHaveCount(2);
+  await expect(shift.first()).toContainText('문자열 리터럴');
   await expect(shift.first().locator('small')).toContainText('미인쇄 → 애벌 · +1겹');
   await expect(shift.first().locator('.next')).toContainText('다음 인쇄');
 
   // LIFER 박스 · 내일 예고.
   await expect(page.locator(`${DONE} .lifer-box`)).toContainText('처음 기록한 문법');
-  await expect(page.locator(`${DONE} .lifer-box`)).toContainText('repo.ts:50');
+  await expect(page.locator(`${DONE} .lifer-box`)).toContainText('time.ts:19');
   await expect(page.locator(`${DONE} .hintbox`)).toContainText('내일은');
 
   // 요약이 뜨면 포커스는 「홈으로」다 (05 §7).
@@ -160,8 +153,8 @@ test('13 Esc 4단계', async ({ page, app }) => {
   // 재진입하면 같은 판이 다시 걸린다.
   await resume.click();
   await page.locator(SHEET).waitFor();
-  await expect(page.locator(SHEET)).toHaveAttribute('aria-label', /1판 · 옵셔널 체이닝/);
-  await expect(page.locator('.jq-h')).toContainText('지금 1 / 1');
+  await expect(page.locator(SHEET)).toHaveAttribute('aria-label', /1판 · 문자열 리터럴/);
+  await expect(page.locator('.jq-h')).toContainText('지금 1 / 2');
 });
 
 test('14 리포 등록 → 인제스트 진행 → 홈', async ({ page, app }) => {

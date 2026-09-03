@@ -34,7 +34,7 @@ const SCREENS: Array<{ name: string; open: (page: Page, app: AppDb) => Promise<v
       await startSession(page);
       await submit(page, answerKey(app));
       await closeLifer(page);
-      await toSummary(page);
+      await toSummary(page, app);
     },
   },
   {

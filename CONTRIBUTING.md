@@ -157,6 +157,9 @@ code, not refreshed on sight.
   repository. `git diff --exit-code fixtures/ipc` is a CI gate. **A change here means the
   Rust ↔ TypeScript contract moved.** Say in the PR what moved and why the TypeScript side
   matches; a diff with no explanation gets rejected even when the tests are green.
+  One file in there is not a contract: `tiny/captures-all.json` is the material the browser
+  seed derives from (every file's capture page, from the shipped dictionary), so it also
+  moves when `dictionary/ts/**` changes. Say which of the two moved.
 - **insta snapshots (`crates/*/tests/snapshots/*.snap`)** — parser and query output. Update
   with `cargo insta review` and read each hunk. `cargo insta accept` on a whole run defeats
   the point of having them.

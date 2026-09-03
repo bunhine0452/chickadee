@@ -14,6 +14,7 @@ import type { Locator, Page } from '@playwright/test';
 
 import { test as base, expect } from './fixture.js';
 import { NOW } from './build-seed-const.js';
+import { answerKeyOf } from './app-db.js';
 
 export { expect, NOW };
 
@@ -253,6 +254,36 @@ export async function tabTo(page: Page, selector: string, limit = 40): Promise<v
 }
 
 /** 리포를 0개로 만든다 — 첫 실행 화면(빈 상태)에서 시작해야 하는 시나리오가 쓴다. */
+/** 요약까지 걸어 볼 수 있는 판 수의 상한. 넘으면 큐가 안 줄고 있다는 뜻이다. */
+const MAX_PLATES = 12;
+
+/**
+ * 지금 판을 마친 뒤, **남은 판을 다 답하고** 요약까지 간다 (05 §3).
+ *
+ * 판 수를 상수로 두지 않는다 — 큐 길이는 시드가 정하고(D113 으로 첫날 두 판이 됐다) 오답은
+ * 다시 찍기를 한 장 더 넣는다. 「요약이 떴나」로 끝을 판정한다.
+ */
+export async function finishSession(
+  page: Page,
+  db: import('better-sqlite3').Database,
+): Promise<void> {
+  const done = page.locator('[aria-label="인쇄 완료"]');
+  for (let left = MAX_PLATES; left > 0; left -= 1) {
+    await page.keyboard.press('Space');
+    await page.locator('.fb.on').waitFor({ state: 'detached' });
+    if (await done.count() > 0) return;
+    await page.keyboard.press(`Digit${answerKeyOf(db)}`);
+    await page.keyboard.press('Enter');
+    await page.locator('.fb.on').waitFor();
+    const veil = page.locator('.lifer-veil');
+    if (await veil.count() > 0) {
+      await page.keyboard.press('KeyG');
+      await veil.waitFor({ state: 'detached' });
+    }
+  }
+  throw new Error(`판 ${MAX_PLATES}장을 답했는데도 요약이 안 떴다 — 큐가 안 줄고 있다`);
+}
+
 export function wipeRepos(db: import('better-sqlite3').Database): void {
   db.pragma('foreign_keys = OFF');
   for (const table of [
