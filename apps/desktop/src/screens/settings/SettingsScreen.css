@@ -262,3 +262,61 @@
   font-family: var(--f-mono);
   font-size: var(--fs-13);
 }
+
+/* 내 커밋 identity (D121). 설정의 다른 줄은 「이름 — 값」 한 줄인데 이 칸은 목록·입력·제안
+   셋이라 줄을 세로로 연다. 새 색도 새 치수도 만들지 않는다 — 기존 토큰만 쓴다. */
+.set-row-block {
+  display: block;
+}
+
+.ident {
+  display: grid;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.ident-list {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ident-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  max-width: none;
+}
+
+.ident-mail {
+  color: var(--ink);
+  font-family: var(--f-mono);
+  font-size: var(--fs-14);
+}
+
+.ident-name {
+  color: var(--ink-soft);
+  font-size: var(--fs-14);
+}
+
+.ident-add,
+.ident-sug {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.ident-f {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 「어긋남」 색을 그대로 쓴다 — 입력이 형식과 맞지 않는다는 뜻이 판정의 그것과 같고,
+   원색 직접 참조는 05 §4.2 가 막는다. 대비는 check:contrast 가 이미 재 둔 값이다. */
+.ident-err {
+  color: var(--verdict-differ-text);
+}

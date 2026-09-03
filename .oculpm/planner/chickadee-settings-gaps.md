@@ -11,12 +11,12 @@ owner: claude-code
 요청 3. 설정 화면은 이미 8절로 있다(screens/settings/SettingsScreen.tsx). 없는 것은 05 §2.1 이 요구한 모션 감축 · 문법 사전 언어 · 내 커밋 identity · 제외 글롭 넷이고, 그중 identity 는 단순 누락이 아니라 배선 버그다 — 설정 타입·isMine()·classifyCommits 까지 다 있는데 flow.ts:89 가 identities: [] 를 넘겨 모든 커밋이 「내 것 아님」으로 분류된다. 네 플랜 중 가장 싸고 다른 셋의 그릇이 되므로 chickadee-i18n P1 직후에 하는 것이 좋다. Rust 추가 0줄.
 
 ## P0 · identity 배선 (버그 — 먼저) {#p0}
-- [ ] 내 커밋 identity — 편집 UI + 자동 제안 + 인제스트 배선 · 1일 {#set-identities}
-  - [ ] 증상 확인 — flow.ts:89 가 identities: [] 를 넘겨 isMine() 이 항상 false, git_commit.author_matched 가 전부 0 임을 테스트로 고정 {#set-identities-repro}
-  - [ ] 상위 저자 5명 제안 쿼리 — git_commit 에서 author_email·author_name 빈도순 (03 §1.2 의 git config 는 Rust 명령이 없어 몸리는다) {#set-identities-suggest}
-  - [ ] 설정 「학습」절에 identity 목록 편집(추가·삭제·제안 받기) + settings.identities 저장 {#set-identities-ui}
-  - [ ] flow.ts 가 저장된 값을 runIngest 로 넘기고, 바꿔도 재인제스트 없이 classifyCommits 만 다시 돌 수 있게 {#set-identities-wire}
-  - [ ] 검증 — 픽스처 리포에서 identity 하나를 넣으면 author_matched 가 기대 건수만큼 1 이 된다 {#set-identities-verify}
+- [x] 내 커밋 identity — 편집 UI + 자동 제안 + 인제스트 배선 · 1일 {#set-identities}
+  - [x] 증상 확인 — flow.ts:89 가 identities: [] 를 넘겨 isMine() 이 항상 false, git_commit.author_matched 가 전부 0 임을 테스트로 고정 {#set-identities-repro}
+  - [x] 상위 저자 5명 제안 쿼리 — git_commit 에서 author_email·author_name 빈도순 (03 §1.2 의 git config 는 Rust 명령이 없어 몸리는다) {#set-identities-suggest}
+  - [x] 설정 「학습」절에 identity 목록 편집(추가·삭제·제안 받기) + settings.identities 저장 {#set-identities-ui}
+  - [x] flow.ts 가 저장된 값을 runIngest 로 넘기고, 바꿔도 재인제스트 없이 classifyCommits 만 다시 돌 수 있게 {#set-identities-wire}
+  - [x] 검증 — 픽스처 리포에서 identity 하나를 넣으면 author_matched 가 기대 건수만큼 1 이 된다 {#set-identities-verify}
 
 ## P1 · 05 §2.1 대비 빈 칸 셋 {#p1}
 - [ ] 모션 감축 스위치 · 0.5일 {#set-motion}
@@ -39,4 +39,9 @@ owner: claude-code
 <!-- oculpm:plan-log begin v1 -->
 | 시각 | 항목 | 에이전트 | 변화 | 일지 | 메모 |
 |---|---|---|---|---|---|
+| 2026-09-04T08:43:09+09:00 | #set-identities-repro | claude-code | ☐→x | .oculpm/journal/20260904/Bugs/0843_bug_identities-never-reached-classify-commits.md | flow.test.tsx — 배선을 되돌리면 실제로 빨개지는 것을 확인 |
+| 2026-09-04T08:43:17+09:00 | #set-identities-suggest | claude-code | ☐→x | .oculpm/journal/20260904/Bugs/0843_bug_identities-never-reached-classify-commits.md | suggestIdentitiesFor() — 기존 derive.commits 재사용, 새 statement 0. git config 는 D121 로 뺌 |
+| 2026-09-04T08:43:25+09:00 | #set-identities-ui | claude-code | ☐→x | .oculpm/journal/20260904/Bugs/0843_bug_identities-never-reached-classify-commits.md | IdentityPanel — 「학습」절, 새 문구 13개 전부 t() · ko 카탈로그. 테스트 9건 |
+| 2026-09-04T08:43:32+09:00 | #set-identities-wire | claude-code | ☐→x | .oculpm/journal/20260904/Bugs/0843_bug_identities-never-reached-classify-commits.md | flow.ts 가 loadSettings 로 읽어 넘김 · reclassifyCommits 로 재인제스트 없이 반영 |
+| 2026-09-04T08:43:41+09:00 | #set-identities-verify | claude-code | ☐→x | .oculpm/journal/20260904/Bugs/0843_bug_identities-never-reached-classify-commits.md | flow 통합에서 커밋 둘 중 하나만 author_matched=1 · identities.test 6건이 원장 왕복 |
 <!-- oculpm:plan-log end -->

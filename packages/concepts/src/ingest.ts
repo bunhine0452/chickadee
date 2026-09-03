@@ -10,7 +10,9 @@ import {
   ipc, log, on, type BatchOp, type Capture, type IngestDone, type IngestProgress, type JobId,
 } from '@chickadee/ipc-client';
 
-import { classify, isMine, type Identity } from './commits.js';
+import { inBatches } from './batch.js';
+import { type Identity } from './commits.js';
+import { reclassifyCommits } from './identities.js';
 import { deriveFile, type DerivedSite, type RawBlock } from './derive.js';
 import { buildGaps, type CountableSite } from './gaps.js';
 import { resolveImports, type FileImports } from './resolve-imports.js';
@@ -19,7 +21,6 @@ import { assignUnits } from './units.js';
 import { knownSet, unknownCount, type MasteryRow } from './unknown-rank.js';
 
 /** `store_batch` 한 번의 상한 (01 §3.2). */
-const BATCH = 200;
 
 export type Phase = IngestProgress['phase'] | 'derive' | 'cards';
 
@@ -209,7 +210,7 @@ export async function deriveRepo(
   }
 
   const edges = await writeEdges(repoId, files, imports, target.map((f) => f.id));
-  await classifyCommits(repoId, options.identities ?? []);
+  await reclassifyCommits(repoId, options.identities ?? []);
   // 대지와 구멍은 리포 전체를 본다 — 증분이어도 「몇 파일 중 몇 곳」의 분모는 전체다.
   const units = await writeUnits(repoId, files);
   const gaps = await writeGaps(dict, repoId, files.length, now);
@@ -385,31 +386,6 @@ export async function recountUnknown(
   return ops.length;
 }
 
-async function classifyCommits(repoId: number, identities: readonly Identity[]): Promise<void> {
-  const rows = await ipc.store.query('derive.commits', { repoId });
-  const ops = rows.map((row) => {
-    const facts = {
-      sha: row.sha,
-      parentCount: row.parent_count,
-      authorEmail: row.author_email,
-      authorName: row.author_name,
-      message: row.message,
-      filesN: row.files_n,
-      insertions: row.insertions,
-    };
-    return {
-      name: 'derive.commit_classify' as const,
-      params: {
-        repoId,
-        sha: row.sha,
-        kind: classify(facts),
-        authorMatched: isMine(facts, identities),
-      },
-    };
-  });
-  await inBatches(ops);
-}
-
 async function writeUnits(
   repoId: number,
   files: readonly { id: number; path: string }[],
@@ -518,14 +494,3 @@ function toCapture(row: {
   };
 }
 
-/** `store_batch` 는 한 번에 200 op 까지다 (01 §3.2). */
-/**
- * `store_batch` 는 한 번에 200 op 다 (01 §3.2). 넘겨 보내면 Rust 가 `BAD_INPUT` 으로 되던지고,
- * 그 오류는 대개 호출자의 `catch` 에 먹혀 「조용히 아무것도 안 된」 것으로 보인다 —
- * blame 2차 패스가 실제로 그랬다. 새 쓰기 경로는 전부 이것을 거친다.
- */
-export async function inBatches(ops: readonly BatchOp[]): Promise<void> {
-  for (let at = 0; at < ops.length; at += BATCH) {
-    await ipc.store.batch(ops.slice(at, at + BATCH));
-  }
-}

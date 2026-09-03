@@ -1,4 +1,7 @@
+export { inBatches } from './batch.js';
 export { classify, isAnswerKey, isMine, suggestIdentities, BULK_FILES, BULK_INSERTIONS } from './commits.js';
+export { reclassifyCommits, suggestIdentitiesFor } from './identities.js';
+export type { ClassifyCount } from './identities.js';
 export type { CommitFacts, CommitKind, Identity } from './commits.js';
 export { deriveFile, shapeOf, siteKey, SYSTEM_QUERIES } from './derive.js';
 export type { ConfidenceOf, DeriveResult, DerivedSite, RawBlock, RawImport } from './derive.js';
@@ -32,5 +35,5 @@ export type {
 export { registerRepo, listRepos, relocateRepo, removeRepo } from './repos.js';
 export { BLAME_BUDGET_MS, fillCommits } from './blame.js';
 export type { BlameOptions } from './blame.js';
-export { deriveRepo, inBatches, materializeDict, recountUnknown, runIngest, writeUnitNodes } from './ingest.js';
+export { deriveRepo, materializeDict, recountUnknown, runIngest, writeUnitNodes } from './ingest.js';
 export type { IngestOptions, IngestReport, Phase } from './ingest.js';

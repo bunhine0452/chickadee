@@ -21,6 +21,22 @@ export const ko = {
   'firstRun.languageSwitch': '표시 언어 고르기 — 한국어 · English',
   'firstRun.pick': '리포 등록',
 
+  'settings.identity.label': '내 커밋',
+  'settings.identity.note':
+    '커밋 author 가 여기 있는 메일·이름과 맞으면 「내 커밋」으로 셉니다. 비어 있으면 전부 '
+    + '남의 것으로 갈리고, 구조 문제(T2)의 정답지가 한 장도 서지 않습니다.',
+  'settings.identity.email': '메일',
+  'settings.identity.name': '이름',
+  'settings.identity.add': '추가',
+  'settings.identity.remove': '{{email}} 지우기',
+  'settings.identity.suggest': '이 리포에서 다시 찾기',
+  'settings.identity.suggestions': '커밋에 남은 author',
+  'settings.identity.suggestNone': '읽은 커밋에 author 가 없습니다. 손으로 넣어 주세요.',
+  'settings.identity.invalid': '메일 주소 형태가 아닙니다.',
+  'settings.identity.duplicate': '이미 있는 메일입니다.',
+  'settings.identity.reclassified': '커밋 {{mine}} / {{all}} 건을 내 것으로 갈랐습니다.',
+  'settings.identity.reclassifyFailed': '다시 가르지 못했습니다. 리포를 다시 읽으면 반영됩니다.',
+
   'settings.look.locale': '표시 언어',
   'settings.look.localeSwitch': '표시 언어 한국어 · English',
   'settings.look.localeNote':

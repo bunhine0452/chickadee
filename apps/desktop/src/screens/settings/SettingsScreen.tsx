@@ -1,3 +1,4 @@
+import { reclassifyCommits, suggestIdentitiesFor, type Identity } from '@chickadee/concepts';
 import { ipc, log } from '@chickadee/ipc-client';
 import type { AppPaths, AppVersion } from '@chickadee/ipc-client';
 import type { Settings } from '@chickadee/store-sql';
@@ -9,6 +10,8 @@ import {
   EXPORT_DEFAULTS, exportRecords, wipeAll, type ExportOptions,
 } from '../../data/maintenance.js';
 import { DEFAULTS, loadSettings, saveSetting, useAppearance } from '../../data/settings.js';
+import { useUi } from '../../store.js';
+import { IdentityPanel } from './IdentityPanel.js';
 import { KeyPanel } from './KeyPanel.js';
 import { PerfTable, type PerfRow } from './PerfTable.js';
 import './SettingsScreen.css';
@@ -26,6 +29,12 @@ const PRIVACY_NOTE = [
   '이 판은 인터넷을 아예 쓰지 않습니다 — 「자유 질문」의 프롬프트도 이 컴퓨터에서 만들어 복사할 뿐, 앱이 스스로 보내지 않습니다.',
   '사용 통계·오류 보고를 보내지 않고, 업데이트도 확인하지 않습니다. 「설정 → 전부 지우기」로 모든 기록을 삭제할 수 있습니다.',
 ];
+
+/** 제안을 뽑을 리포. 홈이 보고 있는 것이고, 없으면 목록의 첫 줄이다. */
+function activeRepoId(): number | null {
+  const ui = useUi.getState();
+  return ui.activeId ?? ui.repos[0]?.id ?? null;
+}
 
 const THEME_OPTIONS = [
   { v: 'light' as const, label: '주간반' },
@@ -137,6 +146,7 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
   const [paths, setPaths] = useState<AppPaths | null>(null);
   const [opts, setOpts] = useState<ExportOptions>(EXPORT_DEFAULTS);
   const [confirming, setConfirming] = useState(false);
+  const [suggested, setSuggested] = useState<Identity[]>([]);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState('');
 
@@ -153,6 +163,14 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
         ]);
         if (!live) return;
         setSettings(s);
+        // 05 §2.1 「첫 열기 때 … author 상위 5명 자동 제안」. 이미 정해 둔 사람이 있으면
+        // 부르지 않는다 — 커밋 전부를 읽는 쿼리다.
+        if (s.identities.length === 0) {
+          const id = repoRows[0]?.id ?? null;
+          if (id !== null) {
+            void suggestIdentitiesFor(id).then((v) => { if (live) setSuggested(v); }, () => undefined);
+          }
+        }
         setRepos(repoRows.map((r) => ({
           id: r.id, name: r.name, rootPath: r.root_path, lastIngestAt: r.last_ingest_at,
         })));
@@ -174,6 +192,28 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
       log.warn('설정을 저장하지 못했다');
       setNote('저장하지 못했습니다.');
     });
+  };
+
+  /**
+   * identity 를 바꾸면 저장하고 **그 자리에서 다시 가른다** — 리포를 다시 읽지 않는다.
+   * 바뀌는 것은 `git_commit` 두 열뿐인데 재인제스트는 수천 파일을 다시 파싱한다.
+   */
+  const putIdentities = (next: Identity[]): void => {
+    put('identities', next);
+    const repoId = activeRepoId();
+    if (repoId === null) return;
+    void reclassifyCommits(repoId, next).then(
+      ({ mine, all }) => setNote(t('settings.identity.reclassified', {
+        mine: String(mine), all: String(all),
+      })),
+      () => setNote(t('settings.identity.reclassifyFailed')),
+    );
+  };
+
+  const loadSuggestions = (): void => {
+    const repoId = activeRepoId();
+    if (repoId === null) return;
+    void suggestIdentitiesFor(repoId).then(setSuggested, () => setSuggested([]));
   };
 
   const doExport = (): void => {
@@ -256,6 +296,16 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
           max={4}
           onChange={(n) => put('newPerDay', n)}
         />
+        <div className="set-row set-row-block">
+          <span className="set-k">{t('settings.identity.label')}</span>
+          <IdentityPanel
+            value={s.identities}
+            suggestions={suggested}
+            onChange={putIdentities}
+            onSuggest={loadSuggestions}
+          />
+        </div>
+        <p className="set-note">{t('settings.identity.note')}</p>
         <label className="set-row">
           <span className="set-k">시간대</span>
           <input

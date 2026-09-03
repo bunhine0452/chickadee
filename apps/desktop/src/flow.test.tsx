@@ -39,6 +39,26 @@ function run(name: string, params: unknown): unknown[] {
   return stmt.reader ? (stmt.all(bound) as unknown[]) : [stmt.run(bound)];
 }
 
+/**
+ * Rust 가 커밋을 쓰는 자리. author 가 다른 둘이라 identity 하나로 하나만 걸려야 한다 —
+ * 「전부 내 것」도 「전부 남의 것」도 아닌 값이라야 배선이 실제로 도는지 보인다 (03 §1.2).
+ */
+const COMMITS = [
+  { sha: 'c1', email: 'me@example.com', name: 'Kim Hyunbin' },
+  { sha: 'c2', email: 'other@example.com', name: 'Someone Else' },
+];
+
+function seedCommits(): void {
+  for (const [i, c] of COMMITS.entries()) {
+    db.prepare(
+      `INSERT INTO git_commit
+         (repo_id, sha, authored_at, author_email, author_name, message, parent_count,
+          files_n, insertions, deletions, is_reachable, kind, author_matched)
+       VALUES (1, ?, ?, ?, ?, 'feat: x', 1, 1, 5, 0, 1, 'normal', 0)`,
+    ).run(c.sha, T + i, c.email, c.name);
+  }
+}
+
 /** Rust 가 캡처를 쓰는 자리. `res.user?.profile` 한 줄의 site + pick 3개. */
 function seedFacts(repoId: number): void {
   for (const { path, line } of FILES) {
@@ -98,6 +118,7 @@ vi.mock('@chickadee/ipc-client', async (real) => {
             jobId: 'j', files: 3, changed: 3, deleted: 0, captures: 12, commits: 0,
             escalatedToFull: false, elapsedMs: 12, peakRssMb: 0, cancelled: false, warnings: 1,
           });
+          seedCommits();
           return Promise.resolve({ jobId: 'j' });
         },
       },
@@ -135,6 +156,16 @@ beforeEach(() => {
 });
 
 afterEach(cleanup);
+
+/** 설정 한 칸을 원장에 직접 넣는다 — 화면을 거치지 않고 「저장돼 있었다」를 만든다. */
+function seedSetting(key: string, value: unknown): void {
+  db.prepare('INSERT INTO settings (key, value_json, updated_at) VALUES (?, ?, ?)')
+    .run(key, JSON.stringify(value), T);
+}
+
+const matched = (): string[] =>
+  (db.prepare('SELECT sha FROM git_commit WHERE author_matched = 1 ORDER BY sha')
+    .all() as { sha: string }[]).map((r) => r.sha);
 
 describe('리포 하나를 등록하면', () => {
   test('사실 → 사용처 → 대지 → 구멍 이 한 흐름으로 이어진다', async () => {
@@ -180,6 +211,25 @@ describe('리포 하나를 등록하면', () => {
     await addRepo('/work/cart-shop');
     await addRepo('/work/cart-shop');
     expect(useUi.getState().error).toContain('이미 등록된');
+  });
+});
+
+/**
+ * D121 — 이 자리가 배선 버그가 살던 곳이다. `flow.ts` 가 `identities: []` 를 상수로
+ * 넘기고 있어서 `isMine()` 이 언제나 거짓이었고, 그래서 `git_commit.author_matched` 가
+ * 전부 0 이었다. T2 정답지(`isAnswerKey`)는 「내 것 + normal」을 요구하므로 **한 장도
+ * 서지 않았다.** 판정 함수·저장 키·제안 쿼리는 다 있었고 잇는 줄 하나가 없었다.
+ */
+describe('내 커밋 가르기', () => {
+  test('설정에 identity 가 있으면 그 저자의 커밋만 내 것이 된다', async () => {
+    seedSetting('identities', [{ email: 'me@example.com', name: 'Kim Hyunbin' }]);
+    await addRepo('/work/cart-shop');
+    expect(matched()).toEqual(['c1']);
+  });
+
+  test('설정이 비면 한 건도 내 것이 아니다 — 배선이 빠졌을 때와 같은 그림이다', async () => {
+    await addRepo('/work/cart-shop');
+    expect(matched()).toEqual([]);
   });
 });
 

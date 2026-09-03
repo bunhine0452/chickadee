@@ -19,6 +19,23 @@ export const en: Partial<Record<MessageKey, string>> = {
   'firstRun.languageSwitch': 'Choose a display language — 한국어 · English',
   'firstRun.pick': 'Add a repo',
 
+  'settings.identity.label': 'My commits',
+  'settings.identity.note':
+    'A commit counts as yours when its author matches one of these addresses or names. '
+    + 'With none set, every commit is read as someone else\u2019s and no structure question '
+    + '(T2) gets an answer key.',
+  'settings.identity.email': 'Email',
+  'settings.identity.name': 'Name',
+  'settings.identity.add': 'Add',
+  'settings.identity.remove': 'Remove {{email}}',
+  'settings.identity.suggest': 'Look again in this repo',
+  'settings.identity.suggestions': 'Authors found in commits',
+  'settings.identity.suggestNone': 'No author on the commits read. Add one by hand.',
+  'settings.identity.invalid': 'That is not an email address.',
+  'settings.identity.duplicate': 'That address is already listed.',
+  'settings.identity.reclassified': 'Sorted {{mine}} of {{all}} commits as yours.',
+  'settings.identity.reclassifyFailed': 'Could not sort them again. Re-reading the repo applies it.',
+
   'settings.look.locale': 'Display language',
   'settings.look.localeSwitch': 'Display language 한국어 · English',
   'settings.look.localeNote':

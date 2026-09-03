@@ -7,7 +7,7 @@
  */
 import { ipc } from '@chickadee/ipc-client';
 
-import { inBatches } from './ingest.js';
+import { inBatches } from './batch.js';
 
 /** 03 §7 — 2차 패스 전체 예산. 이보다 오래 걸리면 남은 파일은 다음 인제스트로 미룬다. */
 export const BLAME_BUDGET_MS = 60_000;
