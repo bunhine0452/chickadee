@@ -240,6 +240,15 @@ export async function runPerf(repoPath: string): Promise<void> {
     log.info('perf: 시작', { repoPath: repoPath.split('/').slice(-1)[0] ?? '' });
     pipeLogsToDb();
     await step('boot');
+
+    // **절대 경로여야 한다.** 이름만 주면 `addRepo` 가 `GIT_NOT_REPO` 로 실패하고, 홈이 빈
+    // 채로 프레임을 재서 **숫자는 나오는데 뜻이 없다**(M4·M5 인계에 같은 사고가 적혀 있다).
+    // 표식을 먼저 남긴다 — 나중에 `perf_sample` 을 읽는 사람이 「왜 프레임이 이 모양인가」를
+    // `step:home-timeout` 앞에서 바로 본다.
+    if (!/^(\/|[A-Za-z]:[\\/])/.test(repoPath)) {
+      await step(`perf-repo-not-absolute:${repoPath === '' ? 'empty' : 'relative'}`);
+    }
+
     await smokeParseSnippet();
 
     // 홈에 실데이터가 없으면 이 리포를 등록하고 읽는다. 두 번째 실행부터는 그냥 지나간다.

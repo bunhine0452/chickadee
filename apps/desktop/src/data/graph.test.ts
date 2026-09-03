@@ -169,6 +169,65 @@ describe('projectox-like — 유닛 하나로 문제 4종이 생성된다', () =
     expect(made.payload.commit === undefined).toBe(kind !== 'placement');
   });
 
+  test('종을 안 주면 04 §8.3·§8.4 의 순서대로 만들 수 있는 첫 종이 나온다 (D107)', () => {
+    // 앱의 `makeT2Card` 는 종을 고르지 않고 이 기본 경로를 그대로 탄다 — 순서를 아는 곳은
+    // 생성기 하나다. 커밋이 있으면 책임 배치, 없으면 그래프만으로 나오는 종으로 내려간다.
+    const { commits, filesOf } = fakeCommits(unitPaths);
+    const req = {
+      repoId: 1, unitId: 1, unitName: unit, unitRoot,
+      conceptId: 'arch/placement' as ConceptId, seed: 7,
+      files, edges, commits, filesOf, recent: new Map<number, string[]>(),
+    };
+    const first = generateT2(req);
+    if (!isT2Card(first)) throw new Error(first.reason);
+    expect(first.kind).toBe('placement');
+
+    // 04 §8.4 커밋 부족 폴백 — 정답지가 그래프에서만 나온다.
+    const fallback = generateT2({ ...req, commits: [], filesOf: new Map() });
+    if (!isT2Card(fallback)) throw new Error(fallback.reason);
+    expect(fallback.kind).toBe('radius');
+  });
+
+  test('흐름 추적의 덱이 화면이 요구하는 모양이다 (D100 · D107)', () => {
+    const { commits, filesOf } = fakeCommits(unitPaths);
+    const made = generateT2({
+      repoId: 1, unitId: 1, unitName: unit, unitRoot,
+      conceptId: 'arch/placement' as ConceptId, seed: 7,
+      files, edges, commits, filesOf, recent: new Map(),
+    }, 'flow');
+    if (!isT2Card(made)) throw new Error(made.reason);
+    const flow = made.payload.flow;
+    expect(flow).toBeDefined();
+    // 정답 경로는 3~6 노드 (04 §8.3) 이고 덱은 그것 + 함정이라 더 길거나 같다.
+    expect(flow!.answer.length).toBeGreaterThanOrEqual(3);
+    expect(flow!.answer.length).toBeLessThanOrEqual(6);
+    expect(flow!.deck.length).toBeGreaterThanOrEqual(flow!.answer.length);
+    // **덱은 지도 안에서만 나온다** — 지도에 없는 카드는 화면이 이름을 댈 근거가 없다.
+    const nodes = new Set(made.payload.files.map((f) => f.p));
+    for (const path of flow!.deck) expect(nodes.has(path)).toBe(true);
+    for (const path of flow!.answer) expect(flow!.deck).toContain(path);
+  });
+
+  test('의존성 방향의 5쌍이 화면이 요구하는 모양이다 (D100 · D107)', () => {
+    const { commits, filesOf } = fakeCommits(unitPaths);
+    const made = generateT2({
+      repoId: 1, unitId: 1, unitName: unit, unitRoot,
+      conceptId: 'arch/placement' as ConceptId, seed: 7,
+      files, edges, commits, filesOf, recent: new Map(),
+    }, 'direction');
+    if (!isT2Card(made)) throw new Error(made.reason);
+    const pairs = made.payload.pairs;
+    expect(pairs).toHaveLength(5);
+    const nodes = new Set(made.payload.files.map((f) => f.p));
+    for (const pair of pairs!) {
+      expect(pair.a).not.toBe(pair.b);
+      expect([0, 1, 2, 3]).toContain(pair.answer);
+      expect(nodes.has(pair.a) && nodes.has(pair.b)).toBe(true);
+    }
+    // 「무관」만 다섯이면 지도를 안 봐도 다 맞는다 (04 §8.3 · `buildDirection`).
+    expect(pairs!.some((p) => p.answer !== 3)).toBe(true);
+  });
+
   test('같은 입력으로 두 번 구우면 deep-equal 이다 (배치 결정성 · 난수 0)', () => {
     const { commits, filesOf } = fakeCommits(unitPaths);
     const req = {

@@ -184,10 +184,13 @@ export function buildUses(
  *
  * `promptLines` 는 01 `file_read_lines` 가 읽은 **파일 원문**이라 빈칸 자리에 정답이 이미
  * 들어 있다. 비어 있을 때만 카드의 `lines` 로 되돌아가 빈칸을 정답 보기로 채운다.
+ *
+ * 상한은 원소 수가 아니라 **찍히는 줄 수**에 건다 — 06 §3.3-1 이 세는 것이 줄이다.
+ * 원소 하나가 줄바꿈을 품고 있으면 원소 9개가 펜스 안에서 10줄이 된다.
  */
 export function promptCodeLines(card: T0Card): string[] {
   const baked = card.promptLines.length > 0 ? card.promptLines : filledCardLines(card);
-  return baked.slice(0, MAX_PROMPT_LINES);
+  return baked.flatMap((line) => line.split('\n')).slice(0, MAX_PROMPT_LINES);
 }
 
 /** 고른 보기를 사람 말로. 지목형은 짚은 토큰, 나머지는 보기 문구(마크업 제거). */

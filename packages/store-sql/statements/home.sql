@@ -104,9 +104,11 @@ ORDER BY m.due_at LIMIT :limit;
 -- 인제스트가 무엇을 남겼는지 — 첫 실행 안내와 개발자 패널이 읽는다.
 -- @name home.last_run
 -- @params { repoId: number }
--- @row { id: number, status: string, mode: string, started_at: number, finished_at: number | null, files_n: number, captures_n: number, commits_n: number, warnings_n: number, escalated_to_full: number, head_sha: string | null, error: string | null }
+-- @row { id: number, status: string, mode: string, started_at: number, finished_at: number | null, files_n: number, captures_n: number, commits_n: number, warnings_n: number, escalated_to_full: number, head_sha: string | null, fingerprint: string | null, error: string | null }
+-- `fingerprint` 는 06 §6.3 의 「재인제스트 필요」 판정에 쓴다 — 이 값과 지금 빌드의 값이
+-- 다르면 홈에 배너가 뜬다. 리포 동일성 해시(`repo.fingerprint`)와는 다른 것이다.
 SELECT id, status, mode, started_at, finished_at, files_n, captures_n, commits_n,
-       warnings_n, escalated_to_full, head_sha, error
+       warnings_n, escalated_to_full, head_sha, fingerprint, error
 FROM ingest_run WHERE repo_id = :repoId ORDER BY id DESC LIMIT 1;
 
 -- @name home.file_count

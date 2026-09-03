@@ -1,0 +1,82 @@
+{
+  "name": "deep-path",
+  "rule": "D8 · 06 §3.3-2 — 디렉터리가 다섯 겹이어도 나가는 것은 base name 하나다. 한 조각도 새지 않는다",
+  "card": {
+    "track": "t0",
+    "kind": "meaning",
+    "file": "src/features/cart/hooks/useCart.ts",
+    "focus": 17,
+    "lines": [
+      {
+        "n": 17,
+        "target": true,
+        "t": "  const nick = res.user?.profile?.nickname"
+      }
+    ],
+    "q": "17행에서 <code>res.user</code> 가 비어 있으면 어떻게 됩니까?",
+    "hint": "멈추는 기호가 있습니다.",
+    "options": [
+      {
+        "t": "그 자리에서 멈추고 <code>undefined</code>"
+      },
+      {
+        "t": "오류를 던집니다"
+      }
+    ],
+    "answer": 0,
+    "why": [
+      null,
+      {
+        "t": "던지는 것은 <code>.</code> 입니다."
+      }
+    ],
+    "ok": "<code>?.</code> 는 앞이 없으면 멈춥니다.",
+    "rule": "<code>.</code> 은 없으면 터지고 <code>?.</code> 은 없으면 멈춘다.",
+    "prereq": [],
+    "uses": [],
+    "promptLines": [
+      "export function useNickname(res) {",
+      "  if (!res.ok) {",
+      "    return null",
+      "  }",
+      "  const nick = res.user?.profile?.nickname",
+      "  return nick ?? '손님'",
+      "}"
+    ]
+  },
+  "concept": {
+    "name": "옵셔널 체이닝",
+    "token": "?."
+  },
+  "sel": 1,
+  "stuck": "멈춘 다음 줄은 어떻게 되나요",
+  "absent": [
+    "cart-shop-web",
+    "feat: 장바구니 훅 분리",
+    "kimhyunbin",
+    "/Users"
+  ],
+  "expect": {
+    "header": "파일 useCart.ts 17행 근처입니다.",
+    "fenceCount": 7,
+    "prompt": [
+      "파일 useCart.ts 17행 근처입니다.",
+      "",
+      "```",
+      "export function useNickname(res) {",
+      "  if (!res.ok) {",
+      "    return null",
+      "  }",
+      "  const nick = res.user?.profile?.nickname",
+      "  return nick ?? '손님'",
+      "}",
+      "```",
+      "",
+      "배우려는 문법: 옵셔널 체이닝 (?.)",
+      "제가 막힌 지점: 멈춘 다음 줄은 어떻게 되나요",
+      "문제에서 「오류를 던집니다」 를 골라 틀렸습니다.",
+      "",
+      "프로그래밍을 막 시작한 사람에게 설명하듯, 다른 예제 말고 위 코드 그대로를 예로 들어 알려주세요."
+    ]
+  }
+}

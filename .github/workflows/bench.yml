@@ -1,0 +1,164 @@
+# 06 §1.6 · §5.1 — nightly performance bench.
+#
+# 06 §1.1 puts this layer on "main nightly only", and §1.6 spells out the failure handling:
+# a pull request gets a **comment**, the nightly run over main opens an **issue**, and
+# `bench/baseline.json` is only ever moved by a human in a PR. The reason is in the doc:
+# block a PR on a shared runner's noise and people switch the benchmark off.
+#
+# Pull requests therefore run this only when the `bench` label is on them - a 15-minute
+# benchmark on every PR would blow the 12-minute PR budget in 06 §5.1 for nothing.
+#
+# Every action is pinned to a commit SHA (06 §4.4); the tag beside it is for humans. The
+# pins are the same ones ci.yml uses - two workflows disagreeing about which checkout they
+# run is a supply-chain question nobody wants to answer twice.
+
+name: bench
+
+on:
+  schedule:
+    # 18:00 UTC = 03:00 KST (06 §5.1).
+    - cron: '0 18 * * *'
+  workflow_dispatch: {}
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+
+concurrency:
+  group: bench-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+env:
+  NODE_VERSION: '26'
+  CARGO_TERM_COLOR: always
+
+jobs:
+  bench:
+    name: bench
+    # A pull request opts in with the `bench` label; schedule and manual runs always go.
+    if: >-
+      github.event_name != 'pull_request' ||
+      contains(github.event.pull_request.labels.*.name, 'bench')
+    runs-on: ubuntu-22.04
+    # The 15-minute figure in 06 §1.1 is the benchmark itself. The cold Rust build in front
+    # of it is what the 3-OS job needed 55 minutes for after three grammar crates landed.
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # `cargo bench -p chickadee-app` links tauri, so this job needs the GTK/WebKitGTK
+      # headers even though nothing here opens a window.
+      - name: Linux WebView deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential curl wget file libwebkit2gtk-4.1-dev \
+            libappindicator3-dev librsvg2-dev patchelf libssl-dev libxdo-dev
+
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
+        with:
+          toolchain: stable
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          workspaces: .
+          key: bench
+
+      - run: pnpm install --frozen-lockfile
+
+      # `scripts/bench.sh` builds the fixture repositories itself when they are missing
+      # (06 §1.2 - only the `.steps` files are committed).
+      - name: ingest bench (criterion) + baseline comparison
+        id: ingest
+        continue-on-error: true
+        run: bash scripts/bench.sh
+
+      - name: TS benches (T1 grading latency, session queue)
+        run: pnpm exec vitest bench --run bench --outputJson=bench/ts-current.json
+
+      - name: build the report
+        id: report
+        continue-on-error: true
+        # Exit 2 means "a blocking threshold was crossed" - `continue-on-error` keeps the
+        # step's outcome as `failure` while letting the comment/issue steps below run.
+        run: |
+          python3 bench/report.py \
+            bench/baseline.json bench/current.json bench/ts-current.json bench/report.md \
+            "${{ steps.ingest.outcome }}"
+          cat bench/report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: bench-${{ github.run_id }}
+          path: |
+            bench/current.json
+            bench/ts-current.json
+            bench/report.md
+          if-no-files-found: warn
+          retention-days: 30
+
+      # ── pull request: report only, never block (06 §1.6) ───────────────────────────────
+      # A fork's token is read-only, so the comment would fail there; the job summary above
+      # carries the same table for everyone.
+      - name: comment on the pull request
+        if: >-
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.head.repo.full_name == github.repository
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr comment "${{ github.event.pull_request.number }}" --body-file bench/report.md
+
+      # ── nightly over main: one issue, reused ───────────────────────────────────────────
+      # Creating a fresh issue every night would bury the first one within a week, so an
+      # open issue with this exact title gets the comment instead.
+      - name: open or update the nightly issue
+        if: >-
+          github.event_name != 'pull_request' &&
+          steps.report.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TITLE: 'bench: a nightly performance threshold was crossed'
+        run: |
+          set -euo pipefail
+          # report.py also exits non-zero when an input is missing - then there is no report
+          # to paste, and the issue should still say so rather than the step dying on `cat`.
+          [ -f bench/report.md ] || echo 'The report could not be built - see the run log.' > bench/report.md
+          {
+            echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            echo "Commit: ${{ github.sha }}"
+            echo
+            cat bench/report.md
+          } > bench/issue.md
+
+          # No pipe into `head` here: with `pipefail`, gh takes SIGPIPE and the step dies.
+          existing=$(gh issue list --state open --limit 100 --json number,title \
+            --jq "[.[] | select(.title == \"$TITLE\") | .number] | first // empty")
+
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body-file bench/issue.md
+            echo "commented on #$existing"
+          else
+            gh issue create --title "$TITLE" --body-file bench/issue.md
+          fi
+
+      # The step above only runs when something is over the limit. Make the job itself red
+      # on the nightly so the workflow list shows it without opening the run.
+      - name: fail the nightly run when a threshold was crossed
+        if: >-
+          github.event_name != 'pull_request' &&
+          steps.report.outcome == 'failure'
+        run: |
+          echo "a blocking threshold was crossed - see the issue and the job summary"
+          exit 1

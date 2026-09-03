@@ -1,0 +1,66 @@
+/* ───────── 리셋 + 조판 강제 ─────────
+   가독성 규칙은 "지키자"가 아니라 "어길 수 없다"로 구현한다. */
+*,*::before,*::after{box-sizing:border-box}
+html{word-break:keep-all; line-break:strict; overflow-wrap:break-word; -webkit-text-size-adjust:100%}
+html,body{margin:0; padding:0}
+body{
+  background:var(--desk);
+  background-image:
+    linear-gradient(115deg, rgba(255,255,255,.07) 0%, transparent 45%),
+    radial-gradient(120% 90% at 12% -10%, rgba(255,255,255,.10), transparent 60%);
+  color:var(--ink);
+  font-family:var(--f-ui); font-size:var(--fs-16); line-height:var(--lh-body);
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  min-height:100vh;
+}
+code,kbd,pre,.mono{font-family:var(--f-mono); word-break:normal; overflow-wrap:normal; line-break:auto}
+button{font:inherit; color:inherit; letter-spacing:inherit}
+h1,h2,h3,h4,p,ul,ol{margin:0}
+ul,ol{padding:0; list-style:none}
+:focus-visible{outline:3px solid var(--t0); outline-offset:3px; border-radius:2px}
+/* 본문을 담는 모든 요소에 행 길이를 건다. 해제는 명시적 클래스로만. */
+p,li,dd,blockquote,.prose{max-width:var(--measure)}
+.u-nomeasure{max-width:none}
+.vh{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+
+/* ───────── 종이 결 : feTurbulence, 이미지 0 ───────── */
+.grain{position:relative; isolation:isolate}
+.grain::before{
+  content:""; position:absolute; inset:0; pointer-events:none; z-index:0; border-radius:inherit;
+  opacity:var(--grain-op); mix-blend-mode:var(--grain-blend);
+  background-image:
+    linear-gradient(var(--grain-tint), var(--grain-tint)),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-blend-mode:overlay; background-size:180px 180px;
+}
+.grain > *{position:relative; z-index:1}
+[data-trim="on"] .grain::before{display:none}
+
+/* ───────── 판 어긋남 : 큰 활자에만 ───────── */
+.mr{position:relative}
+.mr::before{
+  content:attr(data-w); position:absolute; inset:0; pointer-events:none;
+  color:var(--pink); mix-blend-mode:var(--blend);
+  transform:translate(calc(var(--misreg) * -.75), 1px);
+}
+.mr > span{position:relative}
+[data-trim="on"] .mr::before{display:none}
+
+/* ═══════════ Dee = 확정 로고의 새 — 판(plate)이 하나씩 켜진다 ═══════════
+   겹(잉크 층) = 숙련도. 배울수록 새가 선명해진다.
+   0겹 실루엣(전부 빈 판) · 1겹 애벌(회색 스크린) · 2겹 먹판(먹·회색) · 3겹 +청판 · 4겹 +진홍·황판(어긋난 링·바닥·황갈 배 = 완성) */
+.dee{
+  display:inline-block; vertical-align:middle; overflow:visible;
+  --lpaper:var(--dee-paper); --lk:#1C1A17; --lg:#9CA7AD; --lb:#374FC4; --lt:#E4BD84; --lp:#EC4882; --ly:#F0C032;
+}
+.dee[data-ly="0"]{--lk:var(--dee-blank); --lg:var(--dee-blank); --lb:var(--dee-blank); --lt:var(--dee-blank); --lp:transparent; --ly:transparent}
+.dee[data-ly="1"]{--lk:url(#htGrayL); --lg:url(#htGrayL); --lb:url(#htGrayL); --lt:url(#htGrayL); --lp:transparent; --ly:transparent}
+.dee[data-ly="2"]{--lb:url(#htGrayL); --lt:transparent; --lp:transparent; --ly:transparent}
+.dee[data-ly="3"]{--lt:transparent; --lp:transparent; --ly:transparent}
+/* 스티커 : 배지 자체가 링과 크림 원판을 가지므로 틀은 투명 — 종이 두께 그림자만 남긴다 */
+.dee-sticker{
+  display:inline-grid; place-items:center; border-radius:50%;
+  background:transparent; border:2.5px solid transparent;
+  box-shadow:0 3px 0 var(--edge);
+}
+.dee-sticker > .dee{width:100%; height:100%}

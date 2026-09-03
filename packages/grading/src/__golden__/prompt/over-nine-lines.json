@@ -1,0 +1,91 @@
+{
+  "name": "over-nine-lines",
+  "rule": "06 §3.3-1 — 9줄이 상한이다. 카드가 더 많이 구워져 있어도 펜스에는 9줄만 들어간다",
+  "card": {
+    "track": "t0",
+    "kind": "meaning",
+    "file": "queue.ts",
+    "focus": 30,
+    "lines": [
+      {
+        "n": 30,
+        "target": true,
+        "t": "  for (const job of jobs) {"
+      }
+    ],
+    "q": "30행의 <code>for…of</code> 가 도는 것은 무엇입니까?",
+    "hint": "값 하나씩입니다.",
+    "options": [
+      {
+        "t": "인덱스"
+      },
+      {
+        "t": "값"
+      }
+    ],
+    "answer": 1,
+    "why": [
+      {
+        "t": "인덱스를 도는 것은 <code>for…in</code> 입니다."
+      },
+      null
+    ],
+    "ok": "값을 하나씩 꺼냅니다.",
+    "rule": "<code>for…of</code> 는 값을, <code>for…in</code> 은 키를 돈다.",
+    "prereq": [],
+    "uses": [],
+    "promptLines": [
+      "line 1",
+      "line 2",
+      "line 3",
+      "line 4",
+      "line 5",
+      "line 6",
+      "line 7",
+      "line 8",
+      "line 9",
+      "line 10",
+      "line 11",
+      "line 12",
+      "line 13",
+      "line 14"
+    ]
+  },
+  "concept": {
+    "name": "값 순회",
+    "token": "for…of"
+  },
+  "sel": 0,
+  "stuck": "",
+  "absent": [
+    "line 10",
+    "line 14",
+    "cart-shop-web",
+    "kimhyunbin"
+  ],
+  "expect": {
+    "header": "파일 queue.ts 30행 근처입니다.",
+    "fenceCount": 9,
+    "prompt": [
+      "파일 queue.ts 30행 근처입니다.",
+      "",
+      "```",
+      "line 1",
+      "line 2",
+      "line 3",
+      "line 4",
+      "line 5",
+      "line 6",
+      "line 7",
+      "line 8",
+      "line 9",
+      "```",
+      "",
+      "배우려는 문법: 값 순회 (for…of)",
+      "제가 막힌 지점: (비어 있음)",
+      "문제에서 「인덱스」 를 골라 틀렸습니다.",
+      "",
+      "프로그래밍을 막 시작한 사람에게 설명하듯, 다른 예제 말고 위 코드 그대로를 예로 들어 알려주세요."
+    ]
+  }
+}

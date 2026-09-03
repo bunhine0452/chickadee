@@ -1,0 +1,79 @@
+{
+  "name": "windows-absolute-path",
+  "rule": "D8 · 06 §3.3-2 — 절대 경로가 통째로 들어와도 드라이브·홈·리포명이 다 잘린다",
+  "card": {
+    "track": "t0",
+    "kind": "meaning",
+    "file": "C:\\Users\\kim\\repos\\cart-shop-web\\web\\auth\\login.ts",
+    "focus": 5,
+    "lines": [
+      {
+        "n": 5,
+        "target": true,
+        "t": "  const token = await sign(payload)"
+      }
+    ],
+    "q": "5행의 <code>await</code> 는 무엇을 기다립니까?",
+    "hint": "약속 하나입니다.",
+    "options": [
+      {
+        "t": "함수가 정의되기를"
+      },
+      {
+        "t": "<code>Promise</code> 가 끝나기를"
+      }
+    ],
+    "answer": 1,
+    "why": [
+      {
+        "t": "정의는 기다릴 것이 없습니다."
+      },
+      null
+    ],
+    "ok": "<code>Promise</code> 가 끝날 때까지 멈춥니다.",
+    "rule": "<code>await</code> 는 <code>Promise</code> 가 끝날 때까지 그 줄에서 멈춘다.",
+    "prereq": [],
+    "uses": [],
+    "promptLines": [
+      "export async function issue(payload) {",
+      "  const token = await sign(payload)",
+      "  return { token }",
+      "}"
+    ]
+  },
+  "concept": {
+    "name": "기다리기",
+    "token": "await"
+  },
+  "sel": 0,
+  "stuck": "멈춘 동안 다른 코드는 도나요",
+  "absent": [
+    "C:",
+    "Users",
+    "kim",
+    "repos",
+    "cart-shop-web",
+    "web",
+    "auth"
+  ],
+  "expect": {
+    "header": "파일 login.ts 5행 근처입니다.",
+    "fenceCount": 4,
+    "prompt": [
+      "파일 login.ts 5행 근처입니다.",
+      "",
+      "```",
+      "export async function issue(payload) {",
+      "  const token = await sign(payload)",
+      "  return { token }",
+      "}",
+      "```",
+      "",
+      "배우려는 문법: 기다리기 (await)",
+      "제가 막힌 지점: 멈춘 동안 다른 코드는 도나요",
+      "문제에서 「함수가 정의되기를」 를 골라 틀렸습니다.",
+      "",
+      "프로그래밍을 막 시작한 사람에게 설명하듯, 다른 예제 말고 위 코드 그대로를 예로 들어 알려주세요."
+    ]
+  }
+}

@@ -1,0 +1,86 @@
+# git-cliff — 06 §5.3-2 "CHANGELOG.md is generated with git-cliff (conventional commits),
+# then edited down to the changes a user can see".
+#
+#   git cliff --tag v0.2.0 --output CHANGELOG.md      regenerate the whole file
+#   git cliff --unreleased --tag v0.2.0               just the section for the next tag
+#
+# the output is a **draft**. two things are always done by hand afterwards:
+#
+#   1. rewrite each line so it says what changed for the person using the app. a commit
+#      subject is written for a reviewer; a changelog line is written for a stranger.
+#   2. if the release needs a re-ingest, put **⚠ Re-ingest required** on the first line of
+#      the section, above the groups.
+#
+# on 2: 06 §6.3. the app stores `ingest_run.fingerprint` =
+# sha256(grammar_versions_json ‖ query_hash ‖ gen_version ‖ dict_schema) and compares the
+# last row against the running build at startup — if any input differs it shows the
+# "re-ingest needed" banner on the home screen. mastery is per concept and survives
+# (canon §2); cards and concept sites are rebuilt. CI labels a PR that changes any of those
+# inputs `needs-reingest`, and that label is the evidence for the ⚠ line.
+
+[changelog]
+header = """
+# Changelog
+
+All notable changes to Chickadee are recorded here. The format follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the version numbers follow
+[Semantic Versioning](https://semver.org/spec/v2.0.0.html) — in `0.x`, minor means a
+feature or a schema change, patch means a fix (06 §5.3).
+
+A release that makes the app re-derive cards from your repository is marked
+**⚠ Re-ingest required** on the first line of its section. Your per-concept mastery
+survives a re-ingest; the cards and concept sites are rebuilt.
+
+"""
+
+body = """
+{% if version -%}
+## [{{ version | trim_start_matches(pat="v") }}] - {{ timestamp | date(format="%Y-%m-%d") }}
+{% else -%}
+## [Unreleased]
+{% endif -%}
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group | striptags | trim | upper_first }}
+{% for commit in commits %}
+- {{ commit.message | upper_first }}
+{%- endfor %}
+{% endfor %}
+"""
+
+footer = ""
+trim = true
+
+[git]
+conventional_commits = true
+# a commit that is not conventional is not a changelog line — it is a mistake in the log.
+filter_unconventional = true
+filter_commits = true
+split_commits = false
+protect_breaking_commits = false
+tag_pattern = "v[0-9]*"
+topo_order = false
+sort_commits = "oldest"
+
+# the commit types this repo uses are fixed by the root CLAUDE.md:
+# feat · fix · refactor · docs · test · chore · perf · ci.
+#
+# `chore`, `ci` and `test` are dropped. nothing in them reaches a person who installed the
+# app — a cache key, a workflow timeout, a new fixture. keeping them buries the four lines
+# that do matter. the record of that work is the git log, which is not going anywhere.
+#
+# the group names are Keep a Changelog's. the `<!-- n -->` prefix only fixes the order;
+# `striptags` in the template removes it.
+commit_parsers = [
+  { message = "^feat", group = "<!-- 0 -->Added" },
+  { message = "^refactor", group = "<!-- 1 -->Changed" },
+  { message = "^perf", group = "<!-- 2 -->Performance" },
+  { message = "^fix", group = "<!-- 3 -->Fixed" },
+  { message = "^docs", group = "<!-- 4 -->Documentation" },
+  { message = "^(chore|ci|test)", skip = true },
+  { message = ".*", skip = true },
+]
+
+# drop the trailing attribution trailers — they belong in the git log, not in a release note.
+commit_preprocessors = [
+  { pattern = "(?s)\\n\\n(Co-Authored-By|Claude-Session|Signed-off-by):.*$", replace = "" },
+]

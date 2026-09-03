@@ -137,7 +137,7 @@ var T2M = (function(){
   }
   function resultHTML(){
     var R = T.res, core = Object.keys(T2.core).length;
-    var title = R.pct === 100 ? '완벽합니다' : R.pct >= 66 ? '거의 맞았어요' : '다시 한 번 볼까요';
+    var title = R.pct === 100 ? '완벽합니다' : R.pct >= 65 ? '거의 맞았어요' : '다시 한 번 볼까요';
     return '<div class="verdict"><div class="big mr" data-w="'+R.pct+'%"><span>'+R.pct+'%</span></div><div><h4>'+title+'</h4>' +
         '<p>꼭 고쳐야 할 '+core+'개 중 <b>'+R.found.length+'개 찾음</b> · <b>'+R.missed.length+'개 놓침</b> · 필요 없는데 고른 것 <b>'+R.wrong.length+'개</b> · 보너스 <b>'+R.bonus.length+'개</b></p>' +
         '<div class="meter"><i class="f" style="--w:'+R.found.length+'"></i><i class="m" style="--w:'+R.missed.length+'"></i></div></div></div>' +

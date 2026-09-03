@@ -21,8 +21,6 @@ export interface PrereqRow {
   state: PrereqState;
   /** 「3일 전 · 2겹」 같은 곁말. */
   note: string;
-  /** 내려갈 판이 있나. 없으면 점프 버튼을 내지 않는다. */
-  cardId?: number | undefined;
 }
 
 export interface PrereqRungProps {
@@ -69,7 +67,14 @@ export function PrereqRung({ rows, done, onJump }: PrereqRungProps) {
                 {row.n}
                 <small>{seen ? `방금 봄 · ${ly}겹` : row.note}</small>
               </span>
-              {row.state === 'gap' && row.cardId !== undefined ? (
+              {/*
+                내려갈 수 있다는 뜻은 `state === 'gap'` 하나가 이미 담고 있다
+                (`stateOf` 가 `hasCard && hasSite` 일 때만 그 값을 준다). 앞서 여기에
+                `row.cardId !== undefined` 가 하나 더 걸려 있었는데 그 필드를 **아무도
+                채우지 않아** 점프 단추가 한 번도 뜨지 않았다 — 02 §4 의 아래층 점프가
+                화면에서 도달 불가였다 (D111). 판 만들기는 `jumpPrereq` 가 점프 시점에 한다.
+              */}
+              {row.state === 'gap' ? (
                 seen ? (
                   <Pill ghost>✓ 방금 보고 왔습니다</Pill>
                 ) : (

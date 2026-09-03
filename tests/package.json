@@ -1,0 +1,19 @@
+{
+  "name": "@chickadee/tests",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@chickadee/concepts": "workspace:*",
+    "@chickadee/dictionary": "workspace:*",
+    "@chickadee/ipc-client": "workspace:*",
+    "@chickadee/store-sql": "workspace:*",
+    "@playwright/test": "^1.62.1",
+    "@axe-core/playwright": "^4.13.0",
+    "@types/better-sqlite3": "^9.6.0",
+    "better-sqlite3": "^13.0.3"
+  }
+}

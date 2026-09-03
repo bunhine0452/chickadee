@@ -64,3 +64,12 @@
 [data-theme="dark"] .press-btn.blue:not([disabled]) {
   box-shadow: 0 5px 0 var(--t0-deep), 0 5px 0 2.5px var(--rule), 0 0 26px var(--glow-t0);
 }
+
+/* 감축 모션 (06 §2 · 05 §3.7) — 전환만 없애고 최종 포즈는 그대로 둔다.
+   `.001ms` 인 이유: `0` 이면 `transitionend` 가 안 오는 엔진이 있다. */
+@media (prefers-reduced-motion: reduce) {
+  .press-btn { transition-duration: .001ms }
+}
+/* stylelint-disable-next-line no-descending-specificity -- 감축 모션은 규칙 순서가
+   아니라 뜻으로 마지막이어야 한다. 특정도를 올려 앞으로 옮기면 야간 규칙을 덮는다. */
+[data-motion="reduce"] .press-btn { transition-duration: .001ms }

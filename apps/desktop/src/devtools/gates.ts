@@ -234,6 +234,197 @@ export const measureViolations = (rows: readonly MeasureRow[]): MeasureRow[] =>
     ? r.chars < NOTE_MIN || r.chars > NOTE_MAX
     : r.chars < MEASURE_MIN || r.chars > MEASURE_MAX));
 
+// ───────── 16px 실루엣 (06 §2) ─────────
+
+/** 판(plate) 변수 — `dee.css` 가 `data-ly` 로 하나씩 켠다. 순서는 인쇄 순서다. */
+const PLATE_VARS = ['--lpaper', '--lk', '--lg', '--lb', '--lt', '--lp', '--ly'] as const;
+
+/** 캔버스 바탕. 스티커가 놓이는 종이 색이다 (목업 `audit.dee`). */
+const DEE_CANVAS_BG = '#FDFAF0';
+
+/** 먹 판정 — 어두운 **무채색**만. 청판(#374FC4)은 먹이 아니다. */
+const INK_MAX_CHANNEL = 96;
+/** 종이 판정 — 밝기 0.72 위. 회색 경계 픽셀은 둘 다 아니다. */
+const PAPER_MIN_L = 0.72;
+
+export interface DeeReport {
+  size: number;
+  ly: number;
+  smallMark: boolean;
+  headMark: boolean;
+  /** 먹 → 종이 → 먹 3단이 나오는 열의 수. 캡–뺨–턱받이가 살아 있는지. */
+  bandCols: number;
+  /** 그 열들에서 가장 두꺼운 흰 띠(뺨)의 높이 px. */
+  cheekPx: number;
+  darkPx: number;
+  pass: boolean;
+  /** 실패했을 때 사람이 보는 것. 숫자만으로는 어디가 뭉갰는지 모른다. */
+  ascii: string;
+}
+
+/**
+ * 화면의 Dee 스프라이트를 **자립형 SVG 문자열**로 뽑는다 (목업 `audit.deeStandalone`).
+ *
+ * `<use href="#deePlates">` 와 `var(--l*)` 는 문서 밖에서 풀리지 않는다 — 판을 제자리에
+ * 펼치고 변수를 그 겹의 실제 색으로 바꿔야 이미지로 그려진다.
+ */
+export function deeStandalone(ly: number, head: boolean): string {
+  const symbol = document.getElementById(head ? 'deeHead' : 'dee');
+  const plates = document.getElementById('deePlates');
+  if (symbol === null || plates === null) {
+    throw new Error('Dee 스프라이트가 문서에 없다 — `DeeSprite` 가 그려졌는지 봐라');
+  }
+
+  // 겹에 따른 판 색은 CSS 가 정한다. 표를 여기 베끼면 `dee.css` 와 갈라진다 —
+  // 실제 요소를 하나 세워 계산된 값을 읽는다.
+  const probe = document.createElement('div');
+  probe.className = 'dee';
+  probe.setAttribute('data-ly', String(ly));
+  probe.style.cssText = 'position:absolute;left:-9999px;top:0;width:0;height:0';
+  document.body.appendChild(probe);
+  const cs = getComputedStyle(probe);
+  const value: Record<string, string> = {};
+  for (const name of PLATE_VARS) value[name] = cs.getPropertyValue(name).trim();
+  const gray = cs.getPropertyValue('--dee-gray').trim() || '#9CA7AD';
+  probe.remove();
+
+  const body = symbol.innerHTML
+    .replace(/<use[^>]*href="#deePlates"[^>]*>(?:<\/use>)?/g, plates.innerHTML)
+    .replace(/var\(\s*(--l[a-z]+)\s*\)/g, (whole, name: string) => value[name] ?? whole);
+
+  // 1·2겹의 판은 `url("#htGrayL")` 이라 그 패턴도 같이 실어야 한다.
+  const defs = `<defs><pattern id="htGrayL" width="16" height="16" patternUnits="userSpaceOnUse"`
+    + ` patternTransform="rotate(22)"><circle cx="8" cy="8" r="4.4" fill="${gray}"/></pattern></defs>`;
+  const viewBox = symbol.getAttribute('viewBox') ?? '0 0 430 430';
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" width="100" height="100">`
+    + `${defs}${body}</svg>`;
+}
+
+/**
+ * 06 §2 16px 실루엣 — 자립형 SVG 를 캔버스에 그 크기로 찍고 **열(column)을 훑어**
+ * 먹 → 종이 → 먹 3단이 남았는지 센다. 합격 = 그런 열 2개 이상 + 뺨 띠 2px 이상.
+ *
+ * 왜 눈이 아니라 래스터인가: 16px 에서 무너지는 것은 곡선이 아니라 **획 사이의 흰 틈**이고,
+ * 그것은 실제로 찍어 봐야 보인다. 사람이 보는 것은 `ascii` 에 남는다.
+ */
+export function dee(size = 16, ly = 4, smallMark = size <= 24, headMark = size <= 20)
+: Promise<DeeReport> {
+  const svg = deeStandalone(ly, headMark);
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onerror = () => { reject(new Error('실루엣 SVG 를 이미지로 못 읽었다')); };
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      if (ctx === null) { reject(new Error('2d 컨텍스트가 없다')); return; }
+      ctx.fillStyle = DEE_CANVAS_BG;
+      ctx.fillRect(0, 0, size, size);
+      ctx.drawImage(img, 0, 0, size, size);
+      resolve(scanSilhouette(ctx.getImageData(0, 0, size, size).data, size, ly, smallMark, headMark));
+    };
+    img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  });
+}
+
+/**
+ * 열 훑기 그 자체 (06 §2 의 판정). 래스터가 아니라 **규칙**이라 따로 뽑아 테스트한다.
+ */
+export function scanSilhouette(
+  data: Uint8ClampedArray, size: number, ly: number, smallMark: boolean, headMark: boolean,
+): DeeReport {
+  const at = (x: number, y: number): [number, number, number] => {
+    const i = (y * size + x) * 4;
+    return [data[i] ?? 0, data[i + 1] ?? 0, data[i + 2] ?? 0];
+  };
+  const isInk = (x: number, y: number): boolean => Math.max(...at(x, y)) < INK_MAX_CHANNEL;
+  const isPaper = (x: number, y: number): boolean => {
+    const [r, g, b] = at(x, y);
+    return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255 > PAPER_MIN_L;
+  };
+
+  const lines: string[] = [];
+  let darkPx = 0;
+  for (let y = 0; y < size; y += 1) {
+    let line = '';
+    for (let x = 0; x < size; x += 1) {
+      const ink = isInk(x, y);
+      line += ink ? '#' : isPaper(x, y) ? '.' : '+';
+      if (ink) darkPx += 1;
+    }
+    lines.push(line);
+  }
+
+  // 열 하나를 위에서 아래로 훑으며 먹(캡) → 종이(뺨) → 먹(턱받이) 3단을 찾는다.
+  let bandCols = 0;
+  let cheekPx = 0;
+  for (let x = 0; x < size; x += 1) {
+    let stage = 0;
+    let run = 0;
+    let best = 0;
+    for (let y = 0; y < size; y += 1) {
+      const ink = isInk(x, y);
+      const paper = isPaper(x, y);
+      if (stage === 0 && ink) stage = 1;
+      else if (stage === 1 && paper) { stage = 2; run = 1; }
+      else if (stage === 2 && paper) run += 1;
+      else if (stage === 2 && ink) { best = Math.max(best, run); stage = 3; break; }
+      // 회색 경계 픽셀(먹도 종이도 아닌 것)은 띠를 끊지 않는다.
+    }
+    if (stage === 3) {
+      bandCols += 1;
+      cheekPx = Math.max(cheekPx, best);
+    }
+  }
+
+  return {
+    size, ly, smallMark, headMark, bandCols, cheekPx, darkPx,
+    pass: bandCols >= 2 && cheekPx >= 2,
+    ascii: lines.join('\n'),
+  };
+}
+
+// ───────── 모션 (06 §2 · 정본 §3-9) ─────────
+
+/** 정본 §3-9 — 기쁨은 움직임에, 최대 720ms. */
+export const MOTION_BUDGET_MS = 720;
+
+export interface MotionRow { sel: string; kind: 'animation' | 'transition'; ms: number; name: string }
+
+/** `1s, 200ms` 처럼 쉼표로 늘어선 지속 중 가장 긴 것을 ms 로. */
+export const longestMs = (value: string): number =>
+  Math.max(0, ...value.split(',').map((v) => {
+    const t = v.trim();
+    if (t.endsWith('ms')) return Number.parseFloat(t);
+    if (t.endsWith('s')) return Number.parseFloat(t) * 1000;
+    return 0;
+  }));
+
+/**
+ * 살아 있는 문서에서 실제로 걸린 지속을 훑는다. **정적 파싱의 보완이다** —
+ * 규칙 자체는 `scripts/check-motion.mjs` 가 CSS 전수로 보고, 여기서는 그 파서가 볼 수 없는
+ * 것(인라인 스타일·JS 가 세운 지속·조합된 단축 속성)을 본다.
+ *
+ * 예외 선택자는 부르는 쪽이 준다 — 예외의 주인은 06 §2 지 이 함수가 아니다.
+ */
+export function motionOver(limitMs = MOTION_BUDGET_MS, exempt: readonly string[] = []): MotionRow[] {
+  const rows: MotionRow[] = [];
+  for (const el of document.querySelectorAll('body *')) {
+    if (exempt.some((sel) => el.matches(sel))) continue;
+    const cs = getComputedStyle(el);
+    const anim = longestMs(cs.animationDuration);
+    if (anim > limitMs && cs.animationName !== 'none') {
+      rows.push({ sel: pathOf(el), kind: 'animation', ms: anim, name: cs.animationName });
+    }
+    const trans = longestMs(cs.transitionDuration);
+    if (trans > limitMs) {
+      rows.push({ sel: pathOf(el), kind: 'transition', ms: trans, name: cs.transitionProperty });
+    }
+  }
+  return rows;
+}
+
 export interface GateReport {
   fonts: ReturnType<typeof fonts>;
   contrast: ContrastReport;

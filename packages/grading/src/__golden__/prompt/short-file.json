@@ -1,0 +1,82 @@
+{
+  "name": "short-file",
+  "rule": "06 §3.3-1 — 파일이 9줄보다 짧으면 파일 전체가 범위다. 상한은 상한일 뿐 채우지 않는다",
+  "card": {
+    "track": "t0",
+    "kind": "blank",
+    "file": "config.ts",
+    "focus": 2,
+    "lines": [
+      {
+        "n": 2,
+        "target": true,
+        "seg": [
+          {
+            "t": "export const RETRY = "
+          },
+          {
+            "hole": true
+          }
+        ]
+      }
+    ],
+    "q": "빈칸에 들어갈 것을 고르세요.",
+    "hint": "세 번까지 다시 시도합니다.",
+    "options": [
+      {
+        "t": "3",
+        "mono": true
+      },
+      {
+        "t": "'3'",
+        "mono": true
+      }
+    ],
+    "answer": 0,
+    "why": [
+      null,
+      {
+        "t": "따옴표가 붙으면 글자입니다."
+      }
+    ],
+    "ok": "숫자 그대로입니다.",
+    "rule": "따옴표가 붙으면 숫자가 아니라 글자다.",
+    "prereq": [],
+    "uses": [],
+    "promptLines": [
+      "// 재시도 설정",
+      "export const RETRY = 3",
+      "export const BACKOFF_MS = 50"
+    ]
+  },
+  "concept": {
+    "name": "숫자와 문자열",
+    "token": "3"
+  },
+  "sel": 1,
+  "stuck": "따옴표가 있고 없고가 왜 다른지 모르겠어요",
+  "absent": [
+    "cart-shop-web",
+    "fix: 재시도 횟수 조정",
+    "kimhyunbin"
+  ],
+  "expect": {
+    "header": "파일 config.ts 2행 근처입니다.",
+    "fenceCount": 3,
+    "prompt": [
+      "파일 config.ts 2행 근처입니다.",
+      "",
+      "```",
+      "// 재시도 설정",
+      "export const RETRY = 3",
+      "export const BACKOFF_MS = 50",
+      "```",
+      "",
+      "배우려는 문법: 숫자와 문자열 (3)",
+      "제가 막힌 지점: 따옴표가 있고 없고가 왜 다른지 모르겠어요",
+      "문제에서 「'3'」 를 골라 틀렸습니다.",
+      "",
+      "프로그래밍을 막 시작한 사람에게 설명하듯, 다른 예제 말고 위 코드 그대로를 예로 들어 알려주세요."
+    ]
+  }
+}

@@ -29,8 +29,58 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  # 06 §5.3-2 — the release note IS the CHANGELOG section. pulling it here (instead of
+  # pointing at the file) means a tag with no section fails loudly before four builds run,
+  # and the "⚠ Re-ingest required" first line reaches the release page as written.
+  notes:
+    name: release notes
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    outputs:
+      body: ${{ steps.extract.outputs.body }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # 06 §5.3-3 — the tag, the root package.json and the three version files are one value.
+      # a tag that disagrees renames every artifact and is only noticed after four builds.
+      - name: tag and version files agree
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          node scripts/sync-version.mjs --check
+          version="$(node -p "require('./package.json').version")"
+          if [ "$TAG" != "v$version" ]; then
+            echo "tag $TAG does not match package.json $version — run \`node scripts/sync-version.mjs\` and retag." >&2
+            exit 1
+          fi
+
+      - name: take this version's section out of CHANGELOG.md
+        id: extract
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          version="${TAG#v}"
+          # the section runs from `## [x.y.z]` to the next `## `.
+          body="$(awk -v want="[$version]" '
+            /^## / { inside = index($0, want) > 0; next }
+            inside { print }
+          ' CHANGELOG.md)"
+          if [ -z "$(printf '%s' "$body" | tr -d '[:space:]')" ]; then
+            echo "CHANGELOG.md has no '## [$version]' section — write it before tagging (06 §5.3-2)." >&2
+            exit 1
+          fi
+          {
+            echo 'body<<CHANGELOG_SECTION'
+            printf '%s\n' "$body"
+            echo 'Check your download against `SHA256SUMS.txt`. The builds are unsigned — the README has the per-OS workaround.'
+            echo 'CHANGELOG_SECTION'
+          } >> "$GITHUB_OUTPUT"
+
   build:
     name: ${{ matrix.os }} ${{ matrix.args }}
+    needs: notes
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     strategy:
@@ -89,7 +139,7 @@ jobs:
         with:
           tagName: ${{ github.ref_name }}
           releaseName: Chickadee ${{ github.ref_name }}
-          releaseBody: See the matching section of CHANGELOG.md
+          releaseBody: ${{ needs.notes.outputs.body }}
           releaseDraft: true
           prerelease: false
           # the updater is off, so neither latest.json nor .sig is uploaded (§5.5).

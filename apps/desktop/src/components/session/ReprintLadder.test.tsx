@@ -15,7 +15,7 @@ const CARD: LadderCard = {
     { k: '42행 안에서', steps: ['cart 를 본다', '없으면 undefined', '있으면 items 로 간다'] },
   ],
   prereq: [
-    { conceptId: 'ts/nullish', n: '없을 때의 기본값', ly: 0, state: 'gap', note: '아직 안 찍힘', cardId: 12 },
+    { conceptId: 'ts/nullish', n: '없을 때의 기본값', ly: 0, state: 'gap', note: '아직 안 찍힘' },
     { conceptId: 'ts/object', n: '객체 접근', ly: 3, state: 'ok', note: '3일 전 · 3겹' },
   ],
   uses: [{ siteId: 7, f: 'checkout.ts', l: 88, code: 'const id = user?.id;' }],

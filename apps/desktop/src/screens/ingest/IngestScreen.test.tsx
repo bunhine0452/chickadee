@@ -19,25 +19,54 @@ const base = {
 
 describe('4단계 매핑 (D47)', () => {
   test('Rust 의 네 단계와 TS 의 두 단계가 네 칸으로 접힌다', () => {
-    expect(BOXES.map((b) => b.label)).toEqual(['git 읽기', '파싱', '개념 추출', '판 짜기']);
+    expect(BOXES.map((b) => b.label)).toEqual(['코드 읽기', '히스토리', '개념 추출', '판 짜기']);
     expect(positionOf({ phase: 'walk', done: 1, total: 2 }).pos).toBe(0);
-    expect(positionOf({ phase: 'git', done: 1, total: 2 }).pos).toBe(0);
-    expect(positionOf({ phase: 'parse', done: 1, total: 2 }).pos).toBe(1);
-    expect(positionOf({ phase: 'write', done: 1, total: 2 }).pos).toBe(2);
+    expect(positionOf({ phase: 'parse', done: 1, total: 2 }).pos).toBe(0);
+    expect(positionOf({ phase: 'git', done: 1, total: 2 }).pos).toBe(1);
+    expect(positionOf({ phase: 'write', done: 1, total: 2 }).pos).toBe(1);
     expect(positionOf({ phase: 'derive', done: 1, total: 2 }).pos).toBe(2);
     expect(positionOf({ phase: 'cards', done: 1, total: 2 }).pos).toBe(3);
   });
 
-  test('총량을 모르면 칸 안의 진행은 비운다 — 커밋 수가 그렇다', () => {
-    expect(positionOf({ phase: 'git', done: 40, total: 0 }).progress).toBeUndefined();
-    expect(positionOf({ phase: 'parse', done: 1, total: 4 }).progress).toBe(0.25);
+  test('칸은 잡이 내보내는 순서대로만 앞으로 간다 (D110)', () => {
+    // `jobs.rs` 의 실제 순서. 앞 묶음은 여기서 1 → 2 → **1** → 3 으로 되돌았다.
+    const emitted = ['walk', 'parse', 'git', 'write', 'derive', 'cards'] as const;
+    const seen = emitted.map((phase) => positionOf({ phase, done: 1, total: 2 }).pos);
+    for (let i = 1; i < seen.length; i += 1) {
+      expect(seen[i], `${emitted[i]} 에서 뒤로 갔다`).toBeGreaterThanOrEqual(seen[i - 1] as number);
+    }
+  });
+
+  test('총량을 몰라도 칸 안에서 뒤로 가지 않는다 — 커밋 수가 그렇다 (D110)', () => {
+    // `git` 은 `total: 0` 으로 온다. 안쪽 진행은 셀 수 없지만 **그 단계가 시작했다는 것**은
+    // 세야 한다 — 앞 단계(`write` 아님, 같은 칸의 첫째)가 채운 자리를 0 으로 되돌리면 안 된다.
+    expect(positionOf({ phase: 'git', done: 40, total: 0 }).progress).toBe(0);
+    // 칸 하나에 단계 둘이면 안쪽 자리는 `(순번 + 진행) / 단계 수` 다.
+    expect(positionOf({ phase: 'walk', done: 1, total: 4 }).progress).toBe(0.125);
+    expect(positionOf({ phase: 'walk', done: 4, total: 4 }).progress).toBe(0.5);
+    expect(positionOf({ phase: 'parse', done: 0, total: 4 }).progress).toBe(0.5);
+    expect(positionOf({ phase: 'parse', done: 4, total: 4 }).progress).toBe(1);
+  });
+
+  test('한 칸 안에서도 채움이 뒤로 가지 않는다 (D110)', () => {
+    const seq = [
+      { phase: 'walk', done: 4, total: 10 }, { phase: 'walk', done: 10, total: 10 },
+      { phase: 'parse', done: 6, total: 10 }, { phase: 'parse', done: 10, total: 10 },
+    ] as const;
+    let last = -1;
+    for (const at of seq) {
+      const { pos, progress } = positionOf(at);
+      const share = pos + (progress ?? 0);
+      expect(share, `${at.phase} ${at.done}/${at.total} 에서 뒤로 갔다`).toBeGreaterThanOrEqual(last);
+      last = share;
+    }
   });
 });
 
 describe('판 짜기 화면', () => {
   test('스피너가 아니라 시간 비례 큐로 말한다', () => {
     render(<IngestScreen {...base} at={{ phase: 'parse', done: 3, total: 6 }} />);
-    expect(screen.getByRole('img').getAttribute('aria-label')).toContain('2번째 「파싱」');
+    expect(screen.getByRole('img').getAttribute('aria-label')).toContain('1번째 「코드 읽기」');
   });
 
   test('리포에 쓰지 않는다는 것을 먼저 말한다', () => {

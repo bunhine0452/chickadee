@@ -28,6 +28,10 @@ tauri-plugin-log = "2"
 thiserror = { workspace = true }
 tracing = { workspace = true }
 ignore = "0.4"
+# OS secret store for the LLM key (06 §3.5). `crypto-rust`, not `crypto-openssl`:
+# the openssl backend drags in `openssl-src`, which compiles OpenSSL from source on
+# every cold CI run. The sync Secret Service client keeps the async runtime out.
+keyring = { version = "3", default-features = false, features = ["apple-native", "windows-native", "sync-secret-service", "crypto-rust"] }
 # Test-only: the app never reads YAML (D40). The pipeline test builds the real
 # LangSpec from the shipped dictionary so the measurement is of the real thing.
 serde_yaml = "0.9"

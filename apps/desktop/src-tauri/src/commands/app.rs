@@ -1,5 +1,5 @@
 use serde::Serialize;
-use tauri::{AppHandle, Manager};
+use tauri::AppHandle;
 
 use crate::error::IpcError;
 
@@ -24,10 +24,7 @@ pub struct AppVersion {
 
 #[tauri::command]
 pub fn app_paths(app: AppHandle) -> Result<AppPaths, IpcError> {
-    let dir = app
-        .path()
-        .app_data_dir()
-        .map_err(|e| IpcError::new("FS_NOT_FOUND", e.to_string(), false))?;
+    let dir = super::maint::data_dir(&app)?;
     let s = |p: std::path::PathBuf| p.to_string_lossy().into_owned();
     Ok(AppPaths {
         db_path: s(dir.join("chickadee.db")),

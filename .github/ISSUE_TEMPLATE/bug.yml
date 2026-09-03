@@ -1,0 +1,139 @@
+name: Bug report
+description: Something in the app behaves differently from what it says it does.
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### The app will not open — read this first
+
+        This is not a bug. Chickadee is not code-signed or notarized yet.
+
+        - **macOS** — "unidentified developer": move the app to Applications, then
+          Control-click it and choose **Open**. Once is enough. Or run
+          `xattr -d com.apple.quarantine /Applications/Chickadee.app`.
+        - **Windows** — SmartScreen: **More info → Run anyway**.
+        - **Linux** — AppImage: `chmod +x` it first. It needs `libwebkit2gtk-4.1`.
+
+        Verify what you downloaded against `SHA256SUMS.txt` on the release page.
+        If that was the problem, you do not need to file this issue.
+
+  - type: markdown
+    attributes:
+      value: |
+        **Do not paste code from your own repository.** Chickadee is built so your code stays
+        on your machine, and an issue is a public page. Everything below can be answered
+        without a source excerpt. A vulnerability goes to
+        [private reporting](https://github.com/bunhine0452/chickadee/security/advisories/new),
+        not here.
+
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      description: Settings → About, or the file name you installed.
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - macOS 14 or newer (Apple silicon)
+        - macOS 14 or newer (Intel)
+        - macOS 12 or 13
+        - Windows 11
+        - Windows 10
+        - Ubuntu 24.04
+        - Ubuntu 22.04
+        - Other Linux
+    validations:
+      required: true
+
+  - type: input
+    id: os_detail
+    attributes:
+      label: OS version detail
+      description: The exact version, if you have it.
+      placeholder: "macOS 14.6.1 / Windows 10 22H2 / Fedora 40"
+    validations:
+      required: false
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Numbered, starting from a fresh launch.
+      placeholder: |
+        1. Open the app with a repository already registered
+        2. Start a session from the home board
+        3. Answer the first card
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected, and what happened instead
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where in the app
+      options:
+        - Registering or ingesting a repository
+        - Home board
+        - Session — T0 cards
+        - Session — T1 transcription
+        - Session — T2 structure
+        - Settings
+        - Somewhere else, or not sure
+    validations:
+      required: false
+
+  - type: textarea
+    id: error_text
+    attributes:
+      label: Error message
+      description: >-
+        The exact text of an error the app showed. Error codes and ids are useful; a path
+        from your machine is not — replace it with `…` if one appears.
+      render: text
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: include_code
+    attributes:
+      label: Code excerpt
+      description: >-
+        Leave this unticked unless the bug cannot be described without one. If you tick it,
+        write the smallest synthetic snippet that reproduces the bug, not a file from a real
+        project.
+      options:
+        - label: I am deliberately attaching a code excerpt below, and it is mine to publish.
+          required: false
+
+  - type: textarea
+    id: code
+    attributes:
+      label: The excerpt
+      description: Only if you ticked the box above. Otherwise leave it empty.
+      render: text
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Before you submit
+      options:
+        - label: This is not a vulnerability report.
+          required: true
+        - label: There is no source from a private repository, no database, no log file and no API key in this issue.
+          required: true

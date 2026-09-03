@@ -1,0 +1,4 @@
+{
+  "$why": "06 §2 키보드 완결 게이트의 axe 규칙 id 예외 목록. `rule` 은 axe 규칙 id 이고 사유는 필수다. 규격은 contrast.allow.json 과 같다.",
+  "entries": []
+}

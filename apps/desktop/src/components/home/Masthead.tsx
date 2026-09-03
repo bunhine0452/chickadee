@@ -1,12 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
-import { DeeLogo, Switch } from '@chickadee/ui';
+import { DeeLogo, FlatButton, Switch } from '@chickadee/ui';
 
-import { measure } from '../../devtools/audit';
+import { useAppearance, type Theme, type Trim } from '../../data/settings.js';
 import type { HomeMasthead } from '../../screens/home/data';
 import './Masthead.css';
 
-export type Theme = 'light' | 'dark';
-export type Trim = 'off' | 'on';
+export type { Theme, Trim };
 
 const THEME_OPTIONS = [
   { v: 'light' as const, label: '주간반' },
@@ -25,39 +23,19 @@ export interface MastheadProps {
   /** 연속 인쇄 일수. 진도를 열지 않는다 — 숫자만 보여 준다 (정본 §3). */
   streak: number;
   masthead: HomeMasthead;
+  /** 설정 화면 열기 (05 §2.1 `settings`). */
+  onSettings: () => void;
 }
 
 /**
  * `.masthead` — 인쇄 작업 지시서.
  *
- * 스위치 두 개는 여기서 상태를 들고 `<html data-theme|data-trim>` 을 직접 세운다.
- * 설정 화면(05 §2.1 `settings`)이 생기면 그쪽으로 옮겨 간다 — 그때까지 저장은 없다.
+ * 스위치 두 개의 상태와 저장은 `data/settings.ts` 의 `useAppearance` 가 들고, `<html>` 을
+ * 만지는 것도 그쪽 한 곳뿐이다 — 설정 화면이 같은 스위치를 들고 있어서 둘이 각자 속성을
+ * 세우면 나중에 켠 쪽이 이긴다. 값은 `settings` 테이블에 남아 재실행해도 유지된다 (E7).
  */
-export function Masthead({ repoName, today, streak, masthead }: MastheadProps) {
-  const [theme, setTheme] = useState<Theme>('light');
-  const firstRun = useRef(true);
-  const [trim, setTrim] = useState<Trim>('off');
-
-  useEffect(() => {
-    // 05 §10 `theme:switch` 예산 100ms — 토큰을 갈아 끼우고 **다시 계산까지** 끝나는 데까지다.
-    // `offsetHeight` 를 읽어 재계산을 그 자리에서 끝낸다(안 그러면 다음 프레임에 밀린다).
-    //
-    // **첫 실행은 재지 않는다.** 마운트 때의 이 효과는 전환이 아니라 홈 전체의 첫 조판이라
-    // 같은 이름으로 세면 예산이 늘 초과로 보인다(실측 138ms 대 237ms).
-    if (firstRun.current) {
-      firstRun.current = false;
-      document.documentElement.setAttribute('data-theme', theme);
-      return;
-    }
-    measure('theme:switch', () => {
-      document.documentElement.setAttribute('data-theme', theme);
-      void document.documentElement.offsetHeight;
-    });
-  }, [theme]);
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-trim', trim);
-  }, [trim]);
+export function Masthead({ repoName, today, streak, masthead, onSettings }: MastheadProps) {
+  const { theme, trim, setTheme, setTrim } = useAppearance();
 
   return (
     <header className="masthead grain">
@@ -117,6 +95,10 @@ export function Masthead({ repoName, today, streak, masthead }: MastheadProps) {
           onChange={setTrim}
         />
         <Switch options={THEME_OPTIONS} value={theme} label="주간반 · 야간반 전환" onChange={setTheme} />
+        {/* 목업에는 이 자리가 없다 — 스위치 옆에 조용히 붙인다(로고와 지시서의 시각은 그대로). */}
+        <FlatButton onClick={onSettings} ghost>
+          설정
+        </FlatButton>
       </div>
     </header>
   );

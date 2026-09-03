@@ -65,6 +65,40 @@ const PLATE = {
  */
 const { commit: _commit, ...NO_COMMIT } = PAYLOAD;
 
+/** 흐름 추적 (04 §8.3) — 정답 경로 3장 + 함정 1장이 섞인 덱. 커밋은 없다. */
+const FLOW_PAYLOAD = {
+  ...NO_COMMIT,
+  kind: 'flow' as const,
+  q: '«CartSheet.tsx» 에서 «QuantityStepper.tsx» 까지 어떤 순서로 지나가나요?',
+  hint: '카드를 위에서 아래 순서로 세웁니다.',
+  core: {},
+  sec: {},
+  trap: {},
+  flow: { answer: [C, A, B], deck: [A, B, C, 'lib/format.ts'] },
+  hints: ['지나가는 파일은 3개입니다.', '덱에 경로 밖 파일이 섞여 있습니다.', `첫 자리는 «CartSheet.tsx» 입니다.`],
+};
+
+/** 의존성 방향 (04 §8.3) — 5쌍 4지선다. */
+const PAIRS = [
+  { a: C, b: A, answer: 0 as const },
+  { a: A, b: B, answer: 0 as const },
+  { a: B, b: C, answer: 3 as const },
+  { a: C, b: B, answer: 1 as const },
+  { a: A, b: C, answer: 2 as const },
+];
+
+const DIRECTION_PAYLOAD = {
+  ...NO_COMMIT,
+  kind: 'direction' as const,
+  q: '두 파일 사이의 방향을 고르세요.',
+  hint: '5문항입니다.',
+  core: {},
+  sec: {},
+  trap: {},
+  pairs: PAIRS,
+  hints: ['위쪽 층이 아래쪽 층을 가져다 씁니다.', '두 상자에 마우스를 올려 보세요.', '관계가 있는 쌍은 4개입니다.'],
+};
+
 const RESULT: T2Result = {
   kind: 'placement',
   pct: 50,
@@ -195,5 +229,121 @@ describe('결과 화면', () => {
     const noCommit = { ...PLATE, payload: NO_COMMIT };
     mount({ plate: noCommit, view: 'result', graded: RESULT, selected: [A, C] });
     expect(screen.queryByText(/실제 커밋 기록입니다/)).toBeNull();
+  });
+});
+
+describe('흐름 추적 (04 §8.3 · D107)', () => {
+  const flowPlate = { ...PLATE, kind: 'flow' as const, payload: FLOW_PAYLOAD, nameKo: '흐름 추적' };
+  const flow = (over: Partial<Props> = {}) => mount({ plate: flowPlate, ...over });
+
+  test('덱과 지도가 함께 뜬다 — 지도는 이 종에서도 문제의 일부다', () => {
+    flow();
+    expect(screen.getByText(/어떤 순서로 지나가나요/)).toBeTruthy();
+    expect(screen.getByLabelText('cart/ 의존 지도')).toBeTruthy();
+    expect(screen.getByLabelText('남은 카드')).toBeTruthy();
+    expect(document.querySelectorAll('.frest .add')).toHaveLength(4);
+  });
+
+  test('파일 칩은 안 뜬다 — 이 종의 답은 「고른 것」이 아니라 「세운 순서」다', () => {
+    flow({ selected: [A] });
+    expect(document.querySelector('.picked')).toBeNull();
+  });
+
+  test('지도 상자를 눌러도 고르기가 아니다 (답은 덱에만 들어간다)', () => {
+    const { spies, container } = flow();
+    fireEvent.click(container.querySelector('.map .nd') as HTMLElement);
+    expect(spies.onToggle).not.toHaveBeenCalled();
+  });
+
+  test('한 장도 안 세웠으면 채점이 잠기고 Enter 도 안 먹는다', () => {
+    const { spies } = flow({ ordered: [] });
+    expect(screen.getByRole('button', { name: /채점하기/ }).hasAttribute('disabled')).toBe(true);
+    fireEvent.keyDown(document, { code: 'Enter' });
+    expect(spies.onGrade).not.toHaveBeenCalled();
+  });
+
+  test('한 장이라도 세웠으면 Enter 가 채점한다', () => {
+    const { spies } = flow({ ordered: [C] });
+    fireEvent.keyDown(document, { code: 'Enter' });
+    expect(spies.onGrade).toHaveBeenCalledTimes(1);
+  });
+
+  test('덱 버튼에 포커스가 있으면 판이 Enter 를 가로채지 않는다', () => {
+    const { spies, container } = flow({ ordered: [C, A] });
+    const up = container.querySelector('.fcard[data-seat="2"] .mv-up') as HTMLElement;
+    fireEvent.keyDown(up, { code: 'Enter', bubbles: true });
+    expect(spies.onGrade).not.toHaveBeenCalled();
+  });
+
+  test('세운 순서가 그대로 보인다 — 자리를 옮기면 부모에게 새 순서가 간다', () => {
+    const onOrder = vi.fn();
+    flow({ ordered: [C, A, B], onOrder });
+    expect([...document.querySelectorAll('.fcard .nm')].map((el) => el.textContent))
+      .toEqual(['CartSheet.tsx', 'CartItemRow.tsx', 'QuantityStepper.tsx']);
+    fireEvent.click(screen.getByRole('button', { name: /QuantityStepper\.tsx — 3개 중 3번째\. 위로/ }));
+    expect(onOrder).toHaveBeenCalledWith([C, B, A]);
+  });
+
+  test('동작 줄이 「다 세우지 않아도 된다」를 말한다 (함정 카드가 섞여 있다)', () => {
+    flow({ ordered: [C] });
+    expect(screen.getByText(/다 세우지 않아도 됩니다/)).toBeTruthy();
+  });
+
+  test('결과 화면의 분모는 정답 경로의 길이다 — `core` 가 비어 있어도 0 이 아니다', () => {
+    const graded: T2Result = {
+      kind: 'flow', pct: 50, found: [C, A], missed: [B], wrong: ['lib/format.ts'],
+      bonus: [], verdict: 'repeat', capped: null, hints: 0,
+      rows: [{ path: B, tier: 'missed', stat: '3번째', note: '정답 경로의 3번째인데 빠졌습니다.' }],
+    };
+    flow({ view: 'result', graded, ordered: [C, A] });
+    expect(screen.getByText(/꼭 고쳐야 할 3개 중/)).toBeTruthy();
+  });
+});
+
+describe('의존성 방향 (04 §8.3 · D107)', () => {
+  const dirPlate = {
+    ...PLATE, kind: 'direction' as const, payload: DIRECTION_PAYLOAD, nameKo: '의존성 방향',
+  };
+  const dir = (over: Partial<Props> = {}) => mount({ plate: dirPlate, ...over });
+
+  test('5문항이 한 화면에 뜨고 지도도 같이 뜬다 (04 §8.3 힌트 ②)', () => {
+    dir();
+    expect(document.querySelectorAll('.dq')).toHaveLength(5);
+    expect(screen.getByLabelText('cart/ 의존 지도')).toBeTruthy();
+  });
+
+  test('다 안 풀면 채점이 잠기고 남은 문항 수를 적는다', () => {
+    const { spies } = dir({ picks: [0, 1] });
+    expect(screen.getByRole('button', { name: /채점하기/ }).hasAttribute('disabled')).toBe(true);
+    expect(screen.getByText(/아직 3문항 남았습니다/)).toBeTruthy();
+    fireEvent.keyDown(document, { code: 'Enter' });
+    expect(spies.onGrade).not.toHaveBeenCalled();
+  });
+
+  test('다 풀면 Enter 가 채점한다', () => {
+    const { spies } = dir({ picks: [0, 1, 2, 3, 0] });
+    expect(screen.getByRole('button', { name: /채점하기/ }).hasAttribute('disabled')).toBe(false);
+    fireEvent.keyDown(document, { code: 'Enter' });
+    expect(spies.onGrade).toHaveBeenCalledTimes(1);
+  });
+
+  test('보기에 포커스가 있으면 판이 Enter 를 가로채지 않는다', () => {
+    const { spies, container } = dir({ picks: [0, 1, 2, 3, 0] });
+    const choice = container.querySelector('.dquiz .ch') as HTMLElement;
+    fireEvent.keyDown(choice, { code: 'Enter', bubbles: true });
+    expect(spies.onGrade).not.toHaveBeenCalled();
+  });
+
+  test('보기를 고르면 문항 번호와 0~3 이 부모로 간다', () => {
+    const onPick = vi.fn();
+    dir({ picks: [], onPick });
+    const groups = document.querySelectorAll('.dquiz .choices');
+    fireEvent.click(groups[1]!.querySelectorAll('.ch')[3] as HTMLElement);
+    expect(onPick).toHaveBeenCalledWith(1, 3);
+  });
+
+  test('파일 칩은 안 뜬다 — 이 종의 답은 문항이다', () => {
+    dir();
+    expect(document.querySelector('.picked')).toBeNull();
   });
 });

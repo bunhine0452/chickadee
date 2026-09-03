@@ -22,11 +22,30 @@
     "catalog:build": "tsx scripts/build-catalog.ts",
     "dict:lint": "vitest run packages/dictionary/src/dict.test.ts",
     "dict:schema": "tsx scripts/dict-schema.ts",
-    "check:motion": "node scripts/check-motion.mjs"
+    "check:motion": "node scripts/check-motion.mjs",
+    "test:gates": "pnpm test:seed && playwright test tests/gates",
+    "test:visual": "pnpm test:seed && playwright test tests/visual",
+    "test:e2e-ui": "pnpm test:seed && playwright test tests/e2e-ui",
+    "version:sync": "node scripts/sync-version.mjs",
+    "version:check": "node scripts/sync-version.mjs --check",
+    "test:seed": "vitest run tests/support/build-seed.test.ts",
+    "licenses": "node scripts/third-party.mjs",
+    "licenses:check": "node scripts/third-party.mjs --check",
+    "test:e2e": "pnpm test:seed && NODE_OPTIONS=\"--import tsx\" wdio run tests/e2e/wdio.conf.ts",
+    "bench:ts": "vitest bench --run bench"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@eslint/js": "^9.17.0",
+    "@playwright/test": "^1.62.1",
+    "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^22.10.2",
+    "@wdio/cli": "^9.31.5",
+    "@wdio/local-runner": "^9.31.5",
+    "@wdio/mocha-framework": "^9.31.5",
+    "@wdio/spec-reporter": "^9.31.2",
+    "axe-core": "^4.13.0",
+    "better-sqlite3": "^13.0.3",
     "eslint": "^9.17.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react-hooks": "^5.1.0",
@@ -38,6 +57,7 @@
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.18.1",
     "vitest": "^3.2.6",
+    "webdriverio": "^9.31.5",
     "zod-to-json-schema": "^3.25.2"
   }
 }

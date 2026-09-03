@@ -167,7 +167,7 @@ body{overflow:hidden}
 [data-theme="dark"] .dunno.on{background:var(--blue); color:var(--on-t0)}
 
 /* ───────── 다시 찍기 사다리 (모르겠어요 4단) ───────── */
-.ladder{border:2.5px solid var(--rule); background:var(--paper); box-shadow:inset 0 3px 0 -1px var(--edge); overflow:hidden; animation:sheetin .3s var(--e-settle) both}
+.reprint{border:2.5px solid var(--rule); background:var(--paper); box-shadow:inset 0 3px 0 -1px var(--edge); overflow:hidden; animation:sheetin .3s var(--e-settle) both}
 .ld-head{display:flex; align-items:center; gap:14px; padding:12px 16px; border-bottom:2.5px solid var(--rule); background:var(--paper-3); flex-wrap:wrap}
 .ld-head .dee-sticker{width:46px; height:46px; flex:0 0 auto}
 .ld-head .dee{width:100%; height:100%}

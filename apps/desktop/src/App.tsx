@@ -1,16 +1,19 @@
-import { ipc } from '@chickadee/ipc-client';
+import { loadDict } from '@chickadee/dictionary';
+import { ipc, log } from '@chickadee/ipc-client';
 import type { ConceptId, RepoInfo } from '@chickadee/store-sql';
 import { Toast } from '@chickadee/ui';
 import { useEffect, useState } from 'react';
 
 import type { TodayPreview } from './components/home/TodayPanel.js';
+import { currentBuild, ingestFingerprint, needsReingest } from './data/maintenance.js';
 import { makePlateFor, pickPlateNow, type ManualResult } from './data/manual.js';
 import { previewToday } from './data/session.js';
-import { addRepo, ingest, refreshHome, report, todayKey } from './flow.js';
+import { addRepo, cancelIngest, ingest, refreshHome, report, todayKey } from './flow.js';
 import { HomeScreen } from './screens/home/HomeScreen.js';
 import { conceptLabel, type HomeData } from './screens/home/data.js';
 import { FirstRun } from './screens/home/empty.js';
 import { IngestScreen } from './screens/ingest/IngestScreen.js';
+import { SettingsScreen } from './screens/settings/SettingsScreen.js';
 import { SessionScreen } from './screens/session/SessionScreen.js';
 import { startSession } from './session-flow.js';
 import { activeRepo, useUi } from './store.js';
@@ -26,11 +29,41 @@ export function App(): React.JSX.Element {
   const repo = activeRepo(ui);
   const inSession = ui.session !== null;
   const [today, setToday] = useState<TodayPreview | null>(null);
+  // 06 §6.3 — 마지막 인제스트의 지문과 지금 빌드의 지문이 다르면 홈이 배너를 낸다.
+  // 지문 계산은 `parse_langs` 한 번을 부르므로 리포가 바뀔 때만 다시 잰다.
+  const [reingest, setReingest] = useState(false);
 
   // 리포를 바꾸면 홈을 다시 읽는다. 화면 상태는 파생 캐시라 언제든 버릴 수 있다 (01 §5).
   useEffect(() => {
     if (ui.screen === 'home' && ui.home === null && ui.activeId !== null) void refreshHome();
   }, [ui.screen, ui.home, ui.activeId]);
+
+  useEffect(() => {
+    const stored = ui.home?.lastRun?.fingerprint ?? null;
+    if (stored === null) {
+      setReingest(false);
+      return;
+    }
+    let live = true;
+    void (async () => {
+      const current = await ingestFingerprint(await currentBuild(loadDict()));
+      if (live) setReingest(needsReingest(stored, current));
+    })().catch(() => log.warn('재인제스트 판별에 실패했다'));
+    return () => {
+      live = false;
+    };
+  }, [ui.home?.lastRun?.fingerprint]);
+
+  // 세션 오버레이가 닫히면 포커스가 `<body>` 로 떨어진다 (05 §9 「포커스 유실」). 홈은
+  // 방금 다시 그려졌으므로 다음 프레임에 그 뿌리로 옮긴다 (D111). 05 §7 의 `returnFocusId`
+  // 를 제대로 만들면 「나온 자리」로 돌아가지만, 지금은 「어딘가 문맥 안」이 `body` 보다 낫다.
+  useEffect(() => {
+    if (inSession || ui.screen !== 'home') return;
+    const id = requestAnimationFrame(() => {
+      document.querySelector<HTMLElement>('.press')?.focus();
+    });
+    return () => cancelAnimationFrame(id);
+  }, [inSession, ui.screen]);
 
   // 세션이 닫히면 오늘의 인쇄를 다시 읽는다 — 부분 갱신보다 통째로 다시 읽는 편이 싸다 (05 §3).
   useEffect(() => {
@@ -56,9 +89,18 @@ export function App(): React.JSX.Element {
           done={ui.ingestDone}
           cancelling={ui.cancelling}
           error={ui.error}
-          onCancel={() => useUi.getState().cancel()}
+          onCancel={() => void cancelIngest()}
           onDone={() => useUi.getState().go('home')}
         />
+        <Toast msg={ui.toast ?? ''} on={ui.toast !== undefined} />
+      </>
+    );
+  }
+
+  if (ui.screen === 'settings') {
+    return (
+      <>
+        <SettingsScreen onBack={() => useUi.getState().go('home')} />
         <Toast msg={ui.toast ?? ''} on={ui.toast !== undefined} />
       </>
     );
@@ -90,6 +132,8 @@ export function App(): React.JSX.Element {
           today={todayKey()}
           streak={0}
           {...(today ? { today_: today } : {})}
+          onSettings={() => useUi.getState().go('settings')}
+          reingest={reingest}
           onStart={() => void start(repo.id, repo.rootPath)}
           onMake={(conceptId) => void place('gap', repo, home, conceptId)}
           onPick={(conceptId) => void place('manual', repo, home, conceptId)}

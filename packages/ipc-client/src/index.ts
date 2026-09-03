@@ -90,6 +90,23 @@ export const ipc = {
     paths: () => call<AppPaths>('app_paths'),
     version: () => call<AppVersion>('app_version'),
     reveal: (which: 'data' | 'logs' | 'repo', at?: string) => call<void>('app_reveal', { which, at }),
+    /**
+     * 산출 파일 하나 (D109). 경로가 아니라 **자리와 이름**을 준다 — 임의 경로 쓰기를
+     * IPC 에 열지 않는다. 돌려받는 것은 만든 파일의 디렉터리이고, 화면은 그것을 연다.
+     */
+    writeJson: (box: 'exports' | 'logs/crash', name: string, json: string) =>
+      call<string>('app_write_json', { box, name, json }),
+    /** 전부 지우기 (06 §6.4). 키체인 항목과 앱 종료는 부르는 쪽의 몫이다. */
+    wipe: () => call<void>('app_wipe'),
+  },
+  /**
+   * OS 비밀 저장소 (06 §3.5). **값을 되읽는 문은 없다** — 있는지만 물을 수 있다.
+   * 키는 `WebView` 로 내려오지 않는다 (06 §4.3).
+   */
+  secret: {
+    set: (account: string, value: string) => call<void>('secret_set', { account, value }),
+    delete: (account: string) => call<void>('secret_delete', { account }),
+    has: (account: string) => call<boolean>('secret_has', { account }),
   },
   dialog: {
     /**
@@ -100,6 +117,17 @@ export const ipc = {
       const { open } = await import('@tauri-apps/plugin-dialog');
       const picked = await open({ directory: true, multiple: false, title });
       return typeof picked === 'string' ? picked : null;
+    },
+  },
+  clip: {
+    /**
+     * 4단 프롬프트 복사 (05 §6). `navigator.clipboard` 는 **패키징된 WKWebView 에서
+     * 조용히 거절한다** — 보안 컨텍스트가 아니어서다. 플러그인은 Rust 를 거치므로 세 OS 에서
+     * 같게 돈다. `@tauri-apps/plugin-*` 도 이 패키지 밖에서는 import 할 수 없다 (01 §2).
+     */
+    write: async (text: string): Promise<void> => {
+      const { writeText } = await import('@tauri-apps/plugin-clipboard-manager');
+      await writeText(text);
     },
   },
   win: {

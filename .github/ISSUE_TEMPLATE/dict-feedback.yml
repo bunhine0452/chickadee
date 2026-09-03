@@ -1,0 +1,106 @@
+name: This explanation did not help
+description: An explanation in the grammar dictionary was wrong, unclear, or aimed at the wrong thing.
+title: "dict: "
+labels: ["dictionary"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### The app will not open — read this first
+
+        This is not a bug. Chickadee is not code-signed or notarized yet.
+
+        - **macOS** — "unidentified developer": move the app to Applications, then
+          Control-click it and choose **Open**. Once is enough. Or run
+          `xattr -d com.apple.quarantine /Applications/Chickadee.app`.
+        - **Windows** — SmartScreen: **More info → Run anyway**.
+        - **Linux** — AppImage: `chmod +x` it first. It needs `libwebkit2gtk-4.1`.
+
+        Verify what you downloaded against `SHA256SUMS.txt` on the release page.
+
+  - type: markdown
+    attributes:
+      value: |
+        The card screen's **"이 설명이 도움이 안 됐어요"** button opens this form with the
+        first four fields already filled in. There is no field for a code excerpt on this
+        form, by design: an explanation is fixed by rewriting the dictionary entry, and that
+        never needs your code.
+
+  - type: input
+    id: concept_id
+    attributes:
+      label: concept_id
+      description: Filled in by the app. It is the dictionary path, e.g. `ts/array-filter`.
+      placeholder: "ts/array-filter"
+    validations:
+      required: true
+
+  - type: input
+    id: dict_version
+    attributes:
+      label: dict_version
+      description: Filled in by the app. The version of the language dictionary you are on.
+      placeholder: "1.2.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: track
+    attributes:
+      label: Track
+      description: Filled in by the app — which kind of card you were on.
+      options:
+        - t0
+        - t1
+        - t2
+    validations:
+      required: true
+
+  - type: dropdown
+    id: layer
+    attributes:
+      label: Which of the three layers
+      description: >-
+        Filled in by the app. `one_liner` is the single sentence, `why` is the paragraph that
+        connects it to the line you are looking at, `trace` is the step list.
+      options:
+        - one_liner
+        - why
+        - trace
+        - the diagnosis after a wrong answer
+        - something else on the card
+    validations:
+      required: true
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What is wrong with it
+      options:
+        - It states something incorrect
+        - It is correct but I could not follow it
+        - It explains a different thing than the line I was looking at
+        - The wording is condescending or blames the reader
+        - The Korean reads badly (particles, spacing, line breaks)
+        - It is too long, or too short to be useful
+    validations:
+      required: true
+
+  - type: textarea
+    id: detail
+    attributes:
+      label: What happened when you read it
+      description: >-
+        What you understood, what you expected the sentence to say, or the point at which you
+        stopped following. Describe the shape of the code in words ("an array method with an
+        arrow callback") rather than pasting it.
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: A better sentence, if you have one
+      description: Korean. This is often the whole fix.
+    validations:
+      required: false

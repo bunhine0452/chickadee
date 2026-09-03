@@ -6,12 +6,16 @@
 import { fillCommits, listRepos, registerRepo, recountUnknown, runIngest, writeUnitNodes }
   from '@chickadee/concepts';
 import { loadDict } from '@chickadee/dictionary';
-import { IpcError, log } from '@chickadee/ipc-client';
+import { ipc, IpcError, log } from '@chickadee/ipc-client';
 import { dayKey } from '@chickadee/scheduler';
 import { errorCopy, isInternal } from '@chickadee/ui';
 
+import { stampRun } from './data/maintenance.js';
 import { loadHome } from './screens/home/data.js';
 import { useUi } from './store.js';
+
+/** 도는 잡의 id. 취소가 그것을 요구한다 (03 §1.8). */
+let lastJobId: string | null = null;
 
 /** 하루 경계 04:00 (D12). 오늘이 언제인지는 스케줄러가 정한다. */
 const ROLLOVER_HOUR = 4;
@@ -84,6 +88,7 @@ export async function ingest(mode: 'full' | 'incremental'): Promise<void> {
       dependencies: [],
       identities: [],
       now: Date.now(),
+      onJob: (jobId) => { lastJobId = jobId; },
       onProgress: (phase, done, total) => useUi.getState().step({ phase, done, total }),
       onWarning: (relPath, reason) => useUi.getState().warn({ relPath, reason }),
     });
@@ -99,6 +104,10 @@ export async function ingest(mode: 'full' | 'incremental'): Promise<void> {
     const dict = loadDict();
     await writeUnitNodes(repo.id);
     await recountUnknown(dict, repo.id, []);
+    // 06 §6.3 — 이 실행이 무엇으로 읽혔는지를 지문으로 남긴다. 다음에 열 때 지금 빌드의
+    // 값과 다르면 홈이 「재인제스트 필요」를 낸다. 실패해도 인제스트는 끝난 것이다.
+    await stampRun(repo.id, dict, report_.sites)
+      .catch(() => log.warn('인제스트 지문을 남기지 못했다'));
     useUi.getState().finishIngest();
     await refreshRepos();
     await refreshHome();
@@ -109,6 +118,19 @@ export async function ingest(mode: 'full' | 'incremental'): Promise<void> {
     report(e, '리포 읽기');
     useUi.getState().finishIngest(useUi.getState().error);
   }
+}
+
+/**
+ * 인제스트 취소 (03 §1.8). 화면 상태만 잠그던 자리에 **실제 취소**를 붙였다 — 그 전에는
+ * 「취소 중」이 뜬 채로 잡이 끝까지 돌았다.
+ *
+ * `jobId` 는 `runIngest` 안에 있으므로 여기 모듈이 마지막 것을 들고 있는다. 없으면
+ * 화면만 잠근다(잡이 이미 끝났다는 뜻이다).
+ */
+export async function cancelIngest(): Promise<void> {
+  useUi.getState().cancel();
+  if (lastJobId === null) return;
+  await ipc.ingest.cancel(lastJobId).catch((e: unknown) => report(e, '인제스트 취소'));
 }
 
 /** 2차 패스. 실패해도 카드는 산다 — 출처가 없을 뿐이다 (03 §1.5). */

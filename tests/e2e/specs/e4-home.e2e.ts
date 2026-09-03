@@ -1,0 +1,48 @@
+/**
+ * E4 홈 — 오늘의 인쇄 큐 표시, 총 분 10~25, 「인쇄 시작」 활성 (06 §1.5).
+ *
+ * 앱은 「리포 하나가 등록된」 DB 위에서 뜬다(`wdio.conf.ts` 의 `beforeSession`). 그 DB 는
+ * 손으로 넣은 행이 아니라 Rust 덤프에서 앱 코드가 파생한 시드다(D108).
+ */
+import { strict as assert } from 'node:assert';
+
+import { before, describe, it, shown, waitForBoot } from '../helpers/driver.js';
+
+describe('E4 홈', () => {
+  before(async () => {
+    await waitForBoot();
+    await shown('.today');
+  });
+
+  it('오늘의 인쇄 큐가 보인다', async () => {
+    const list = await shown('.today .qlist');
+    const items = await list.$$('li');
+    assert.ok(items.length > 0, '오늘 걸릴 판이 한 장도 없다 — 시드가 큐를 못 만들었다');
+  });
+
+  it('총 분이 10~25 안이다 (02 §5.3 예산)', async () => {
+    const line = await (await shown('.today .today-n')).getText();
+    const found = /(\d+)\s*판\s*·\s*약\s*(\d+)\s*분/.exec(line);
+    assert.ok(found, `「N판 · 약 M분」 모양이 아니다: ${JSON.stringify(line)}`);
+    const plates = Number(found[1]);
+    const mins = Number(found[2]);
+    assert.ok(plates > 0, `판이 0장이다: ${line}`);
+    assert.ok(mins >= 10 && mins <= 25, `총 분이 예산 밖이다: ${mins}분 (10~25)`);
+  });
+
+  it('「인쇄 시작」이 눌린다', async () => {
+    const start = await shown('.today button.press-btn');
+    assert.equal(await start.isEnabled(), true, '「인쇄 시작」이 비활성이다');
+    assert.ok(
+      (await start.getText()).startsWith('인쇄 시작'),
+      '첫 진입인데 「이어 찍기」로 떠 있다 — 앞 시나리오의 세션이 남았다',
+    );
+  });
+
+  it('마스트헤드에서 설정으로 갈 수 있다 (E7·E8 의 입구)', async () => {
+    const masthead = await shown('header.masthead');
+    const buttons = await masthead.$$('button.flat-btn');
+    const labels = await Promise.all(buttons.map((b) => b.getText()));
+    assert.ok(labels.includes('설정'), `마스트헤드에 「설정」이 없다: ${labels.join(' · ')}`);
+  });
+});

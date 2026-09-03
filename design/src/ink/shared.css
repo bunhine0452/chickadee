@@ -1,4 +1,6 @@
-/* ───────── 공용 컴포넌트 (ink-home.html 과 같은 모양 — 홈을 이 빌드로 옮기면 여기가 단일 출처가 된다) ───────── */
+/* ───────── 공용 컴포넌트 — **세션 전용**이다 ─────────
+   홈도 같은 모양을 쓰지만 사본을 따로 들고 있다(겹치는 셀렉터 24개 중 5개는 본문이 다르다).
+   합치려면 그 5개를 어느 쪽으로 맞출지 정해야 해서 「목업 정리」에서는 손대지 않았다. */
 .pill{
   font-family:var(--f-mono); font-size:var(--fs-13); font-weight:700; letter-spacing:.04em;
   padding:2px 7px; border:1.5px solid var(--rule); color:var(--ink); white-space:nowrap; line-height:1.4; display:inline-block;
@@ -99,7 +101,7 @@ kbd.k{font-family:var(--f-mono); font-size:var(--fs-13); font-weight:600; border
 .dee.tilt{animation:tilt 700ms var(--e-settle) both}
 @keyframes tilt{0%{transform:rotate(0)}40%{transform:rotate(-14deg)}100%{transform:rotate(-9deg)}}
 .dee.hang{transform:rotate(180deg) scaleX(-1); transition:transform .55s var(--e-hop)}   /* 거꾸로 매달리기 : 안 보이던 면을 본다 */
-.dee.peek{animation:peek 1.6s var(--e-soft) infinite}
+.dee.peek{animation:peek 1.6s var(--e-soft) 2}   /* D11 : infinite 였다 — 상시 애니메이션 금지 */
 @keyframes peek{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px) rotate(-3deg)}}
 .dee.lifer{animation:lifer 1.35s var(--e-hop) both}
 @keyframes lifer{0%{transform:translateY(0) scale(1)}18%{transform:translateY(-22px) scale(1.06) rotate(-8deg)}36%{transform:translateY(0) scale(1)}52%{transform:translateY(-14px) rotate(6deg)}68%{transform:translateY(0)}82%{transform:translateY(-5px)}100%{transform:translateY(0)}}

@@ -79,7 +79,7 @@ owner: claude-code
 - [x] 05 · 인쇄 완료 요약 — Summary 전부, 「오늘 판 다시 보기」는 읽기 전용 · 1일 (선행: T0 판) {#m2-05-summary}
 - [x] 06 · Q3 TS 채점기 골든·스케줄러 property — T0·스케줄러(T1·T2 골든은 M3·M4) · 2일 (선행: 04 T0·02 리듀서) {#m2-06-q3-grading-golden}
 - [x] 06 · Q4 통합 파이프라인·IPC 덤프 — M1 덤프 + T0 재생, git diff --exit-code 게이트 · 2일 (선행: Q1~Q3) {#m2-06-q4-ipc-dump}
-- [~] 06 · Q5 __audit 이식 — src/devtools/audit.ts + Playwright tests/gates 7게이트 + allowlist 만료 · 2일 (선행: 05 세션 화면) {#m2-06-q5-audit-port}
+- [x] 06 · Q5 __audit 이식 — src/devtools/audit.ts + Playwright tests/gates 7게이트 + allowlist 만료 · 2일 (선행: 05 세션 화면) {#m2-06-q5-audit-port}
 - [x] 01 · 성능 벤치 — 3 픽스처, WKWebView 홈·세션 프레임 측정, CI 소프트 게이트 · 1.5일 (선행: 인제스트·세션 셸) {#m2-01-perf-bench}
 
 ## M3 · T1 클론 코딩 (끝: 12~40줄 블록 3단계 페이딩, 골든 28건 통과, 비공백 줄 점수, appeal·why_answer 기록, 20줄 <20ms, Monaco ≤250ms) {#m3}
@@ -99,14 +99,14 @@ owner: claude-code
 - [x] 04 · 골든 케이스 스위트 — §9 표 28건 + T0/T2 케이스 픽스처, CI 게이트 · 1일 (선행: 위 전부) {#m4-04-golden-suite}
 
 ## M5 · 릴리스 준비 — 보안 게이트 · 3-OS 빌드 · 오픈소스 문서 (끝: v0.1.0 드래프트 릴리스 + SHA256SUMS, 첫 실행 소켓 0, 전부 지우기 검증, README 우회 안내) {#m5}
-- [ ] 06 · Q9 LLM 전송 범위·키체인 — buildPrompt 골든(9줄·경로 없음·파일명만), keyring 저장/삭제, Rust 측 호출, 「보내기」 확인 UI · 2일 (선행: 05 사다리 4단·D8) {#m5-06-q9-llm-keychain}
-- [ ] 06 · Q12 마이그레이션 프레임 — 백업 3개·시드 DB 테스트·ingest_fingerprint 배너·내보내기·전부 지우기 · 2일 (선행: 02 스키마) {#m5-06-q12-migration-frame}
-- [ ] 06 · Q6 시각 회귀·감축 모션·키보드 완결 — 6장 기준선, emulateMedia, axe-core, 마우스 0 주행 · 2일 (선행: Q5) {#m5-06-q6-visual-a11y}
-- [ ] 05 · E2E 15 시나리오 + 시각 회귀 40장 + a11y 감사 자동화 — mockIPC 픽스처, webkit 프로젝트, 골든 갱신 규칙 · 3일 (선행: 전 화면) {#m5-05-e2e-visual}
-- [ ] 06 · Q15 E2E Linux 8건 + 벤치 야간 — tauri-driver·xvfb, E1~E8, bench.yml 기준선·PR 코멘트, 크래시 리포트·perf_sample·디버그 모드 · 3일 (선행: Q4·Q12) {#m5-06-q15-e2e-linux-bench}
-- [ ] 06 · Q13 오픈소스 문서 세트 — LICENSE·THIRD_PARTY·OFL 전문·CONTRIBUTING·이슈 템플릿 3종·CoC·SECURITY·지원 매트릭스 · 1.5일 {#m5-06-q13-oss-docs}
-- [ ] 06 · Q14 release.yml + README 우회 안내 — tauri-action 매트릭스 드래프트, SHA256SUMS.txt, git-cliff, 버전 동기 · 1.5일 (선행: Q7) {#m5-06-q14-release}
-- [ ] 05 · 목업 정리 — tokens.css 분리·홈을 build.py 로 이전·.ladder 개명·D3(다시 찍기 회복)·D11·D14 반영 · 1일 (선행: 결정) {#m5-05-mockup-cleanup}
+- [x] 06 · Q9 LLM 전송 범위·키체인 — buildPrompt 골든(9줄·경로 없음·파일명만), keyring 저장/삭제, Rust 측 호출, 「보내기」 확인 UI · 2일 (선행: 05 사다리 4단·D8) {#m5-06-q9-llm-keychain}
+- [x] 06 · Q12 마이그레이션 프레임 — 백업 3개·시드 DB 테스트·ingest_fingerprint 배너·내보내기·전부 지우기 · 2일 (선행: 02 스키마) {#m5-06-q12-migration-frame}
+- [x] 06 · Q6 시각 회귀·감축 모션·키보드 완결 — 6장 기준선, emulateMedia, axe-core, 마우스 0 주행 · 2일 (선행: Q5) {#m5-06-q6-visual-a11y}
+- [x] 05 · E2E 15 시나리오 + 시각 회귀 40장 + a11y 감사 자동화 — mockIPC 픽스처, webkit 프로젝트, 골든 갱신 규칙 · 3일 (선행: 전 화면) {#m5-05-e2e-visual}
+- [x] 06 · Q15 E2E Linux 8건 + 벤치 야간 — tauri-driver·xvfb, E1~E8, bench.yml 기준선·PR 코멘트, 크래시 리포트·perf_sample·디버그 모드 · 3일 (선행: Q4·Q12) {#m5-06-q15-e2e-linux-bench}
+- [x] 06 · Q13 오픈소스 문서 세트 — LICENSE·THIRD_PARTY·OFL 전문·CONTRIBUTING·이슈 템플릿 3종·CoC·SECURITY·지원 매트릭스 · 1.5일 {#m5-06-q13-oss-docs}
+- [x] 06 · Q14 release.yml + README 우회 안내 — tauri-action 매트릭스 드래프트, SHA256SUMS.txt, git-cliff, 버전 동기 · 1.5일 (선행: Q7) {#m5-06-q14-release}
+- [x] 05 · 목업 정리 — tokens.css 분리·홈을 build.py 로 이전·.ladder 개명·D3(다시 찍기 회복)·D11·D14 반영 · 1일 (선행: 결정) {#m5-05-mockup-cleanup}
 
 ## M6 · MVP 이후 {#m6}
 - [ ] 02 · FSRS 개인화 잡 — MVP 이후 · TS 우선(ts-fsrs 옵티마이저 가용성 확인 뒤), 채택 기준·롤백 · 2일 (선행: review_log ≥ 1,000행) {#m6-02-fsrs-personalize}
@@ -201,4 +201,13 @@ owner: claude-code
 | 2026-09-03T19:04:47+09:00 | #m4-04-t2-grading | claude-code | ☐→x | 20260903/Features_to_add/1901_feature_m4-t2-structure-track.md | 3티어·wrong 상한·문제 3종·「이것도 맞다」. 04 §9 골든 2건 실측 통과 |
 | 2026-09-03T19:04:53+09:00 | #m4-05-dependency-map | claude-code | ~→x | 20260903/Features_to_add/1901_feature_m4-t2-structure-track.md | 컴포넌트 7종 + T2Plate 배선 + 홈 윈도잉(D81). 13px 룰로 NW 178→196 |
 | 2026-09-03T19:04:55+09:00 | #m4-04-golden-suite | claude-code | ☐→x | 20260903/Features_to_add/1901_feature_m4-t2-structure-track.md | T2 골든 픽스처 8건 + Rust 덤프 재생(4종 생성) + Q4 재생을 T1·T2 로 확장해 diff 0 |
+| 2026-09-03T19:59:32+09:00 | #m5-06-q13-oss-docs | claude-code | ☐→x |  | CONTRIBUTING·SECURITY·CoC 2.1·THIRD_PARTY(생성기+커밋본)·이슈 폼 3종·PR 템플릿·CODEOWNERS |
+| 2026-09-03T19:59:34+09:00 | #m5-06-q14-release | claude-code | ☐→x |  | README 설치·우회 안내·CHANGELOG·cliff.toml·sync-version.mjs(--check)·release.yml notes 잡 |
+| 2026-09-03T20:02:11+09:00 | #m5-06-q9-llm-keychain | claude-code | ☐→x |  | D106 범위 — buildPrompt 골든 8건+property 2, keyring 3종, KeyPanel 세 상태. 전송은 0.2 |
+| 2026-09-03T20:21:41+09:00 | #m5-06-q12-migration-frame | claude-code | ☐→x |  | 설정 화면 8절·내보내기·전부 지우기·시드 DB(v0001)·백업 3개 확인. 재인제스트 지문은 상위가 facts.run_stamp 로 이었다 |
+| 2026-09-03T20:22:03+09:00 | #m5-05-mockup-cleanup | claude-code | ☐→x | .oculpm/journal/20260903/Refactors/2021_refactor_mockup-cleanup-token-single-source.md | tokens.css/base.css 분리 · 홈도 build.py · OVERRIDES 비움 · .ladder→.reprint · D3/D8/D11/D14 반영. 앱 토큰 값 변경 0(주석 5줄만), 48쌍 통과 |
+| 2026-09-03T20:52:13+09:00 | #m2-06-q5-audit-port | claude-code | ~→x |  | __audit 7종 + Playwright tests/gates + allowlist 만료 검사. 86 통과·8 건너뜀(두 엔진) |
+| 2026-09-03T20:52:15+09:00 | #m5-06-q6-visual-a11y | claude-code | ☐→x |  | 감축 모션·axe serious 0·마우스 0 주행. 시각 40장 스펙은 있고 기준선은 리눅스 러너에서 최초 생성 |
+| 2026-09-03T20:52:21+09:00 | #m5-05-e2e-visual | claude-code | ☐→x |  | 15 시나리오 20통과·12건너뜀(시드에 T1블록·T2커밋 없음)·시각 40장 스펙. mockIPC 는 Node 다리(D108) |
+| 2026-09-03T20:52:23+09:00 | #m5-06-q15-e2e-linux-bench | claude-code | ☐→x |  | E1·E4~E8 작성(E2·E3 은 네이티브 폴더 대화상자라 불가) · bench.yml 야간 · CI 에서 처음 돈다 |
 <!-- oculpm:plan-log end -->

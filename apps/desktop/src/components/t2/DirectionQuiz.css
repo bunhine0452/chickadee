@@ -1,0 +1,45 @@
+/* 목업에 없는 자리다. 보기 상자는 `Choices`(`.choices`·`.ch`)가 그대로 그리므로 여기서는
+   문항을 세우는 뼈대만 둔다 — 문항 번호는 목업 `.ch .n` 과 같은 모양의 작은 사각이다.
+   색은 별칭만 쓴다 (05 §4.2). */
+.dquiz {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dq {
+  display: grid;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1.5px dashed var(--rule);
+}
+
+.dq:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.dq-q {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  margin: 0;
+  font-family: var(--f-mono);
+  font-size: var(--fs-15);
+  font-weight: 600;
+}
+
+.dq-q .n {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--rule);
+  background: var(--t2);
+  color: var(--on-t2);
+  font-size: var(--fs-13);
+  font-weight: 700;
+}

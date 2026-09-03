@@ -9,6 +9,8 @@ export default defineConfig({
       'apps/*/src/**/*.test.ts',
       'apps/*/src/**/*.test.tsx',
       'scripts/**/*.test.mjs',
+      // 브라우저 게이트의 시드를 굽는 것도 여기서 돈다 (D108).
+      'tests/support/**/*.test.ts',
       'scripts/**/*.test.ts',
     ],
     environment: 'node',

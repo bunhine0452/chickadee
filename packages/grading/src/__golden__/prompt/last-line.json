@@ -1,0 +1,84 @@
+{
+  "name": "last-line",
+  "rule": "06 §3.3-1 — 파일 끝 줄에는 뒤 4줄이 없다. 04 §2.4 의 상태 한 줄은 「미답」이다",
+  "card": {
+    "track": "t0",
+    "kind": "point",
+    "file": "server/handlers/health.ts",
+    "focus": 88,
+    "lines": [
+      {
+        "n": 88,
+        "target": true,
+        "seg": [
+          {
+            "t": "export default "
+          },
+          {
+            "t": "handler",
+            "pick": 1
+          },
+          {
+            "t": " as "
+          },
+          {
+            "t": "Handler",
+            "pick": 2
+          }
+        ]
+      }
+    ],
+    "q": "88행에서 실제로 내보내는 값을 짚으세요.",
+    "hint": "왼쪽부터 한 곳.",
+    "answer": 0,
+    "why": [
+      null,
+      {
+        "t": "뒤의 것은 타입이라 실행 시점에 사라집니다."
+      }
+    ],
+    "ok": "내보내는 것은 값입니다.",
+    "rule": "<code>as</code> 뒤는 타입이고, 값은 그 앞에 있다.",
+    "prereq": [],
+    "uses": [],
+    "promptLines": [
+      "function handler(req, res) {",
+      "  res.statusCode = 200",
+      "  res.end('ok')",
+      "}",
+      "export default handler as Handler"
+    ]
+  },
+  "concept": {
+    "name": "타입 단언",
+    "token": "as"
+  },
+  "sel": null,
+  "stuck": "",
+  "absent": [
+    "cart-shop-web",
+    "chore: 헬스체크 정리",
+    "kimhyunbin"
+  ],
+  "expect": {
+    "header": "파일 health.ts 88행 근처입니다.",
+    "fenceCount": 5,
+    "prompt": [
+      "파일 health.ts 88행 근처입니다.",
+      "",
+      "```",
+      "function handler(req, res) {",
+      "  res.statusCode = 200",
+      "  res.end('ok')",
+      "}",
+      "export default handler as Handler",
+      "```",
+      "",
+      "배우려는 문법: 타입 단언 (as)",
+      "제가 막힌 지점: (비어 있음)",
+      "아직 답을 고르지 못했습니다.",
+      "",
+      "프로그래밍을 막 시작한 사람에게 설명하듯, 다른 예제 말고 위 코드 그대로를 예로 들어 알려주세요."
+    ]
+  }
+}

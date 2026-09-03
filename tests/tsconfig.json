@@ -1,0 +1,14 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    // Playwright 는 TS 를 CJS 로 옮겨 돌린다 — `import.meta` 를 쓸 수 없고
+    // `better-sqlite3`(CJS, `export =`) 를 기본 import 로 받으려면 interop 이 필요하다.
+    "module": "Preserve",
+    "moduleResolution": "bundler",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": ["**/*.ts", "../playwright.config.ts"]
+}

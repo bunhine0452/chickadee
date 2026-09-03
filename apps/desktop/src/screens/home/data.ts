@@ -94,6 +94,8 @@ export interface LastRun {
   commits: number;
   warnings: number;
   finishedAt: number | null;
+  /** 06 §6.3 의 재인제스트 판별 값. 지문을 적기 전 판으로 읽은 DB 는 `null` 이다. */
+  fingerprint: string | null;
   error: string | null;
 }
 
@@ -209,6 +211,7 @@ export async function loadHome(
           commits: run.commits_n,
           warnings: run.warnings_n,
           finishedAt: run.finished_at,
+          fingerprint: run.fingerprint,
           error: run.error,
         }
       : null,

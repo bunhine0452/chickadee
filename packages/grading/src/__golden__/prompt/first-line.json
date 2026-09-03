@@ -1,0 +1,77 @@
+{
+  "name": "first-line",
+  "rule": "06 §3.3-1 — 파일 첫 줄에는 앞 4줄이 없다. 범위가 줄어들 뿐 규칙은 같다",
+  "card": {
+    "track": "t0",
+    "kind": "meaning",
+    "file": "hooks/useToggle.ts",
+    "focus": 1,
+    "lines": [
+      {
+        "n": 1,
+        "target": true,
+        "t": "import { useState } from 'react'"
+      }
+    ],
+    "q": "1행의 import 가 하는 일은 무엇입니까?",
+    "hint": "이름 하나를 끌어옵니다.",
+    "options": [
+      {
+        "t": "다른 파일의 이름 하나를 이 파일로 끌어옵니다"
+      },
+      {
+        "t": "파일을 복사합니다"
+      }
+    ],
+    "answer": 0,
+    "why": [
+      null,
+      {
+        "t": "복사가 아니라 참조입니다."
+      }
+    ],
+    "ok": "이름 하나만 끌어옵니다.",
+    "rule": "<code>import</code> 는 다른 파일이 내보낸 이름을 끌어온다.",
+    "prereq": [],
+    "uses": [],
+    "promptLines": [
+      "import { useState } from 'react'",
+      "",
+      "export function useToggle(initial = false) {",
+      "  const [on, setOn] = useState(initial)",
+      "  return [on, () => setOn((v) => !v)]"
+    ]
+  },
+  "concept": {
+    "name": "이름 가져오기",
+    "token": "import"
+  },
+  "sel": 0,
+  "stuck": "",
+  "absent": [
+    "cart-shop-web",
+    "feat: 토글 훅 추가",
+    "kimhyunbin"
+  ],
+  "expect": {
+    "header": "파일 useToggle.ts 1행 근처입니다.",
+    "fenceCount": 5,
+    "prompt": [
+      "파일 useToggle.ts 1행 근처입니다.",
+      "",
+      "```",
+      "import { useState } from 'react'",
+      "",
+      "export function useToggle(initial = false) {",
+      "  const [on, setOn] = useState(initial)",
+      "  return [on, () => setOn((v) => !v)]",
+      "```",
+      "",
+      "배우려는 문법: 이름 가져오기 (import)",
+      "제가 막힌 지점: (비어 있음)",
+      "문제는 맞혔지만, 왜 그런지는 스스로 설명하지 못하겠습니다.",
+      "",
+      "프로그래밍을 막 시작한 사람에게 설명하듯, 다른 예제 말고 위 코드 그대로를 예로 들어 알려주세요."
+    ]
+  }
+}

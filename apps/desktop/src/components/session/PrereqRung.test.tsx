@@ -9,7 +9,7 @@ import type { PrereqRow } from './PrereqRung';
 afterEach(cleanup);
 
 const ROWS: PrereqRow[] = [
-  { conceptId: 'ts/nullish', n: '없을 때의 기본값', ly: 0, state: 'gap', note: '아직 안 찍힘', cardId: 12 },
+  { conceptId: 'ts/nullish', n: '없을 때의 기본값', ly: 0, state: 'gap', note: '아직 안 찍힘' },
   { conceptId: 'ts/object', n: '객체 접근', ly: 3, state: 'ok', note: '3일 전 · 3겹' },
   { conceptId: 'ts/guard', n: '값 있는지 보기', ly: 0, state: 'none', note: '판 없음' },
 ];

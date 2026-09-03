@@ -4,9 +4,27 @@
  * `tz` 는 첫 실행에 OS 값을 저장하고 이후 시스템 시간대가 바뀌어도 사용자가 설정에서
  * 바꾸기 전까지 유지한다 (02 §5.6) — 여행 중에 어제 큐가 통째로 사라지는 것을 막는다.
  */
-import { ipc } from '@chickadee/ipc-client';
+import { ipc, log } from '@chickadee/ipc-client';
 import { FSRS5_DEFAULT_W, DEFAULT_RETENTION, makeScheduler, type Scheduler } from '@chickadee/scheduler';
 import { fromSettingsRows, type Settings } from '@chickadee/store-sql';
+import { useCallback, useEffect, useState } from 'react';
+
+import { measure } from '../devtools/audit.js';
+
+/**
+ * 부속 기본값은 **플랫폼별**이다 (D12 · 05 §4.3) — Linux(WebKitGTK)는 `'on'`(부속 숨김),
+ * macOS·Windows 는 `'off'`. 부속(등록표시·기울기·결·어긋남·절취선·도장 회전)은 블렌드와
+ * 필터를 쓰는데 WebKitGTK 가 그것을 가장 비싸게 그린다.
+ *
+ * `navigator.userAgent` 로 가른다 — `@tauri-apps/plugin-os` 를 붙이면 권한 표면이 하나
+ * 늘어나는데(06 §4.3), 얻는 것은 이 한 줄뿐이다. 브라우저 게이트에서도 같은 값이 나온다.
+ */
+function defaultTrim(): Settings['trim'] {
+  return typeof navigator !== 'undefined' && /Linux|X11/.test(navigator.userAgent)
+    && !/Android/.test(navigator.userAgent)
+    ? 'on'
+    : 'off';
+}
 
 /** D12 기본값. `settings` 에 행이 없을 때 쓰는 값이며 화면이 바꾸면 행이 생긴다. */
 export const DEFAULTS: Omit<Settings, 'tz'> = {
@@ -17,7 +35,7 @@ export const DEFAULTS: Omit<Settings, 'tz'> = {
   t1PerWeek: 2,
   newcomerFlag: 'none',
   theme: 'light',
-  trim: 'on',
+  trim: defaultTrim(),
   motion: 'system',
   identities: [],
   excludeGlobs: [],
@@ -60,6 +78,84 @@ const KEY_OF: Record<keyof Settings, string> = {
   identities: 'identities',
   excludeGlobs: 'exclude_globs',
 };
+
+// ───────── 모양 (테마 · 부속) ─────────
+
+export type Theme = Settings['theme'];
+export type Trim = Settings['trim'];
+
+/**
+ * `<html data-theme>` 을 세우는 **유일한** 자리 (05 §4.3 — 테마는 이 속성 하나로만 바뀐다).
+ *
+ * `measured` 는 사용자가 스위치를 눌렀을 때만 참이다. 마운트와 부팅 복원은 전환이 아니라
+ * 화면 전체의 첫 조판이라 같은 이름으로 세면 예산이 늘 초과로 보인다(실측 138ms 대 237ms).
+ */
+export function applyTheme(theme: Theme, measured = false): void {
+  const set = (): void => {
+    document.documentElement.setAttribute('data-theme', theme);
+    // 05 §10 `theme:switch` 예산 100ms — 토큰을 갈아 끼우고 **다시 계산까지** 끝나는 데까지다.
+    // `offsetHeight` 를 읽어 재계산을 그 자리에서 끝낸다(안 그러면 다음 프레임에 밀린다).
+    void document.documentElement.offsetHeight;
+  };
+  if (measured) measure('theme:switch', set);
+  else document.documentElement.setAttribute('data-theme', theme);
+}
+
+/** `<html data-trim>` 을 세우는 유일한 자리. 텍스트·레이아웃은 1px 도 바뀌지 않는다 (05 §4.3). */
+export function applyTrim(trim: Trim): void {
+  document.documentElement.setAttribute('data-trim', trim);
+}
+
+export interface Appearance {
+  theme: Theme;
+  trim: Trim;
+  setTheme: (v: Theme) => void;
+  setTrim: (v: Trim) => void;
+}
+
+/**
+ * 테마·부속을 `settings` 테이블에 넣고 켤 때 도로 읽는다 (E7 — 재실행해도 야간반이 유지된다).
+ *
+ * 마스트헤드와 설정 화면이 같이 쓴다. 둘은 App 이 서로 배타적으로 그리므로 한 번에 하나만
+ * 산다 — 그래서 상태를 전역으로 올리지 않았다. 읽기에 실패하면 기본값으로 뜨고 화면은 산다.
+ */
+export function useAppearance(): Appearance {
+  const [theme, setThemeState] = useState<Theme>(DEFAULTS.theme);
+  const [trim, setTrimState] = useState<Trim>(DEFAULTS.trim);
+
+  useEffect(() => {
+    let live = true;
+    applyTheme(DEFAULTS.theme);
+    applyTrim(DEFAULTS.trim);
+    void loadSettings().then(
+      (s) => {
+        if (!live) return;
+        setThemeState(s.theme);
+        setTrimState(s.trim);
+        applyTheme(s.theme);
+        applyTrim(s.trim);
+      },
+      () => log.warn('설정을 읽지 못해 기본 모양으로 연다'),
+    );
+    return () => {
+      live = false;
+    };
+  }, []);
+
+  const setTheme = useCallback((v: Theme) => {
+    setThemeState(v);
+    applyTheme(v, true);
+    void saveSetting('theme', v, Date.now()).catch(() => log.warn('테마를 저장하지 못했다'));
+  }, []);
+
+  const setTrim = useCallback((v: Trim) => {
+    setTrimState(v);
+    applyTrim(v);
+    void saveSetting('trim', v, Date.now()).catch(() => log.warn('부속 설정을 저장하지 못했다'));
+  }, []);
+
+  return { theme, trim, setTheme, setTrim };
+}
 
 /**
  * 활성 스케줄러. 행이 없으면 기본 파라미터로 한 줄 만든다 (02 §3.6).

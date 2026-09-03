@@ -18,6 +18,7 @@ import { LinkPara } from '../../components/plate/LinkPara.js';
 import { ProofSheet } from '../../components/plate/ProofSheet.js';
 import { ReprintLadder, type RungNo } from '../../components/session/ReprintLadder.js';
 import type { LadderData } from '../../data/ladder.js';
+import { focusOrFallback } from '../../components/session/focus.js';
 import type { Plate } from '../../data/session.js';
 import type { PlateResult } from '../../store.js';
 
@@ -133,7 +134,16 @@ export function T0Plate(props: T0PlateProps): React.JSX.Element | null {
       }
       if (e.code === 'Slash' && e.shiftKey) {
         e.preventDefault();
+        // 사다리 안에서 `?` 로 접으면 포커스가 사라진 요소와 함께 `<body>` 로 떨어진다 —
+        // `SessionOverlay` 의 Escape 갈래가 `.dunno` 로 돌려보내는 것과 대칭이 빠져 있었다
+        // (D111). 05 §9 의 「포커스 유실」 게이트가 그 순간 깨진다.
+        const inside = target?.closest('.reprint') != null;
         props.onDunno();
+        if (inside) {
+          requestAnimationFrame(() => {
+            focusOrFallback(document.querySelector('.dunno'), '.proof');
+          });
+        }
       }
     };
     document.addEventListener('keydown', onKey);

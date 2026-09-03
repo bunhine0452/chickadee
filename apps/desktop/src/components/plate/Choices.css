@@ -115,3 +115,10 @@
 
 .ch.sel[disabled],
 .ch.right[disabled] { background: var(--stock) }
+
+/* 감축 모션 (06 §2 · 05 §3.7) — 전환만 없애고 최종 포즈는 그대로 둔다.
+   `.001ms` 인 이유: `0` 이면 `transitionend` 가 안 오는 엔진이 있다. */
+@media (prefers-reduced-motion: reduce) {
+  .ch { transition-duration: .001ms }
+}
+[data-motion="reduce"] .ch { transition-duration: .001ms }

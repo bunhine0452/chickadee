@@ -165,6 +165,8 @@ var T1M = (function(){
       else rows.push({oi:i, ui:-1, cmp:{status:'missing', reasons:[], maps:[]}});
     });
     U.forEach(function(u, j){ if (!used[j] && u.trim()) rows.push({oi:-1, ui:j, cmp:{status:'extra', reasons:[], maps:[]}}); });
+    /* 빈 줄은 채점하지 않는다 — 원본 20줄 중 비공백 18줄이 분모다 (D14 · 04 §4.6) */
+    rows = rows.filter(function(r){ return r.oi < 0 || O[r.oi].trim(); });
     /* 변수명 치환 3조건 : 파일 전체 1:1 · 새 이름이 원본에 없음 (스왑·그림자 방지) */
     var fwd = {}, bwd = {};
     rows.forEach(function(r){ r.cmp.maps.forEach(function(m){ (fwd[m[0]] = fwd[m[0]] || {})[m[1]] = 1; (bwd[m[1]] = bwd[m[1]] || {})[m[0]] = 1; }); });
@@ -177,11 +179,11 @@ var T1M = (function(){
     });
     var n = {exact:0, equiv:0, differ:0, missing:0, extra:0};
     rows.forEach(function(r){ n[r.cmp.status]++; });
-    T.res = {rows:rows, n:n, total:O.length, meaning:n.exact + n.equiv, user:U};   /* 결과 화면은 에디터가 사라진 뒤에도 다시 그려진다 — 답안 줄을 여기 보관 */
+    T.res = {rows:rows, n:n, total:rows.filter(function(r){ return r.oi >= 0; }).length, meaning:n.exact + n.equiv, user:U};   /* 결과 화면은 에디터가 사라진 뒤에도 다시 그려진다 — 답안 줄을 여기 보관 */
     T.view = 'result'; T.filter = 'ne';
     renderResult();
-    T.ctx.guide(T.res.meaning/T.total >= .85 ? '판이 거의 맞물렸어요.' : '어긋난 줄부터 보세요. 동등은 틀린 게 아니에요.', T.res.meaning/O.length >= .85 ? 'hop' : 'tilt');
-    live('채점했습니다. '+O.length+'줄 중 '+T.res.meaning+'줄이 의미가 맞습니다.');
+    T.ctx.guide(T.res.meaning/T.res.total >= .85 ? '판이 거의 맞물렸어요.' : '어긋난 줄부터 보세요. 동등은 틀린 게 아니에요.', T.res.meaning/T.res.total >= .85 ? 'hop' : 'tilt');
+    live('채점했습니다. '+T.res.total+'줄 중 '+T.res.meaning+'줄이 의미가 맞습니다.');
   }
 
   /* ---------- 결과 화면 ---------- */

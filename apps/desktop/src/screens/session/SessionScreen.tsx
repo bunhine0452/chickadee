@@ -4,6 +4,7 @@
  * **상태는 여기 있고 규칙은 없다.** 무엇을 쓸지는 `session-flow` 가, 무엇이 맞는지는
  * `@chickadee/grading` 이, 겹이 얼마나 오를지는 `@chickadee/scheduler` 가 정한다.
  */
+import { ipc } from '@chickadee/ipc-client';
 import { FlatButton } from '@chickadee/ui';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 
@@ -25,7 +26,7 @@ import { loadSummary, markLifersShown, type SummaryData } from '../../data/summa
 import {
   answerPlate, backFromPrereq, completeSession, finishT1Plate, finishT2Plate, gradeT1Plate,
   gradeT2Plate, jumpPrereq, openRung,
-  pauseSession, pressDunno, returnToParent, savePlate,
+  pauseSession, pressDunno, returnToParent, savePlate, type T2Answer,
 } from '../../session-flow.js';
 import { currentPlate, useUi } from '../../store.js';
 import { T0Plate } from './T0Plate.js';
@@ -112,6 +113,10 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
   const [t2Hints, setT2Hints] = useState(0);
   const [t2Graded, setT2Graded] = useState<T2Result | null>(null);
   const [t2Appealed, setT2Appealed] = useState<string[]>([]);
+  // 흐름 추적은 세운 순서, 의존성 방향은 문항별 고른 보기 (D107). 파일을 고르는 두 종은
+  // `t2Sel` 을 쓰므로 셋이 서로 겹치지 않는다 — 판 하나는 그중 하나만 채운다.
+  const [t2Ordered, setT2Ordered] = useState<readonly string[]>([]);
+  const [t2Picks, setT2Picks] = useState<readonly (0 | 1 | 2 | 3 | undefined)[]>([]);
 
   const result = results[pos] ?? null;
   const elapsed = useUi((s) => s.elapsed[pos] ?? 0);
@@ -151,6 +156,8 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
     setT2Hints(plate?.state?.hints ?? 0);
     setT2Graded(null);
     setT2Appealed([]);
+    setT2Ordered([]);
+    setT2Picks([]);
     setT1Graded(null);
     setT1Appealed([]);
     setT1Why({ text: '', pick: null });
@@ -328,15 +335,20 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
 
   const t2Grade = useCallback(() => {
     const payload = plate?.payload.track === 't2' ? plate.payload : null;
-    if (payload === null || t2Sel.length === 0) return;
-    // 파일을 고르는 두 종만 이 화면이 받는다 — 흐름 추적·의존성 방향의 입력 화면은 M5 다.
-    if (payload.kind !== 'placement' && payload.kind !== 'radius') return;
-    const graded = gradeT2Plate({ kind: payload.kind, selected: t2Sel }, t2Hints);
+    if (payload === null) return;
+    // 네 종이 서로 다른 것을 낸다 (D107). 「덜 골랐다」는 여기서 막지 않는다 —
+    // 채점 단추의 자물쇠가 종마다 이미 그것을 안다(`T2Plate`).
+    const answer: T2Answer = payload.kind === 'flow'
+      ? { kind: 'flow', ordered: t2Ordered }
+      : payload.kind === 'direction'
+        ? { kind: 'direction', picks: t2Picks as readonly (0 | 1 | 2 | 3)[] }
+        : { kind: payload.kind, selected: t2Sel };
+    const graded = gradeT2Plate(answer, t2Hints);
     if (graded === null) return;
     setT2Graded(graded);
     setT2View('result');
     useUi.getState().say(liveAfter(graded));
-  }, [plate, t2Sel, t2Hints]);
+  }, [plate, t2Sel, t2Ordered, t2Picks, t2Hints]);
 
   const t2Appeal = useCallback((path: string) => {
     setT2Appealed((prev) => (prev.includes(path) ? prev : [...prev, path]));
@@ -419,6 +431,14 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
             hints={t2Hints}
             onHint={t2Hint}
             onGrade={t2Grade}
+            ordered={t2Ordered}
+            onOrder={setT2Ordered}
+            picks={t2Picks}
+            onPick={(i, choice) => setT2Picks((prev) => {
+              const next = [...prev];
+              next[i] = choice;
+              return next;
+            })}
             appealed={t2Appealed}
             onAppeal={t2Appeal}
             onFinish={() => void t2Finish()}
@@ -467,7 +487,13 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
             }}
             onStuck={setStuck}
             onCopyPrompt={() => {
-              if (ladder !== null) void navigator.clipboard?.writeText(ladder.prompt);
+              // 복사가 실패하면 말한다 — `void` 로 삼키면 WKWebView 에서 아무 일도 안 일어난
+              // 것처럼 보인다(거절이 조용하다).
+              if (ladder !== null) {
+                void ipc.clip.write(ladder.prompt).catch(() => {
+                  useUi.getState().say('클립보드에 복사하지 못했습니다.');
+                });
+              }
             }}
             onDunno={() => void openLadder()}
             onJumpPrereq={(conceptId) => void jumpPrereq(dunnoId, conceptId as Plate['conceptId'])}

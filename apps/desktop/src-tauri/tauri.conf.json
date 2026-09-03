@@ -30,7 +30,6 @@
     "active": true,
     "targets": "all",
     "icon": ["icons/32x32.png", "icons/128x128.png", "icons/icon.icns", "icons/icon.ico"],
-    "resources": ["../../../dictionary"],
     "copyright": "MIT",
     "category": "Education",
     "shortDescription": "내 리포로 공부하는 학습 앱",

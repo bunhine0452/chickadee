@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Chickadee — 잉크 · 교정쇄 (오늘의 인쇄)</title>
 <link rel="icon" type="image/svg+xml" href="<!-- @include favicon.href.txt -->">
+<!-- 서체는 **목업 전용**으로 Google Fonts 에서 받는다 — 더블클릭으로 열리는 자립형 HTML 이라
+     CDN 하나는 남긴다. 앱은 반대로 폰트를 동봉하고 외부 요청을 CSP 로 막는다 (06 §3.2). -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=Black+Han+Sans&display=swap" rel="stylesheet">
@@ -14,9 +16,12 @@
    교정쇄 = 데일리 세션 (전체화면 오버레이)
 
    원칙 한 줄: 본문은 조용하게, 나머지는 잉크답게.
-   토큰·기본 조판·Dee 심볼은 ink-home.html 이 단일 출처 — src/ink/build.py 가 인라인한다.
+   토큰·기본 조판·Dee 심볼은 src/ink/{tokens,base}.css · mascot.svg.html 이 단일 출처 —
+   src/ink/build.py 가 인라인한다. 이 파일은 생성물이다.
    ══════════════════════════════════════════════════════════════════════ */
-<!-- @base-css -->
+<!-- @include tokens.css -->
+
+<!-- @include base.css -->
 
 <!-- @include shared.css -->
 
@@ -24,7 +29,7 @@
 </style>
 </head>
 <body>
-<!-- @base-svg -->
+<!-- @include mascot.svg.html -->
 
 <div class="proof" id="proof">
 

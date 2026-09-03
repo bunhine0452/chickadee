@@ -142,13 +142,14 @@ var T0 = (function(){
     var code = $('#t0code'); if (code) code.classList.remove('pickable');
     var hole = $('.hole', T.ctx.bench);
     if (hole){ hole.classList.add(ok ? 'right' : 'wrong'); if (!ok) setTimeout(function(){ hole.classList.remove('wrong'); hole.classList.add('right'); hole.textContent = c.options[c.answer].t; }, 320); }
-    /* 잉크 겹 : 맞히면 +1. 한 번 어긋났다고 바닥까지 떨어지지 않는다 — 대신 다시 찍기가 잡힌다 */
-    if (ok && !T.dunno) T.lyTo = Math.min(4, T.lyFrom + 1);
+    /* 잉크 겹 : 맞히면 +1. 한 번 어긋났다고 바닥까지 떨어지지 않는다 — 대신 다시 찍기가 잡힌다.
+       다시 찍는 판은 회복만 한다 — 같은 개념으로 하루에 두 번 오르지 않는다 (D3 · 02 §3.3) */
+    if (ok && !T.dunno && !T.retry) T.lyTo = Math.min(4, T.lyFrom + 1);
     paintRail();
     /* 피드백 슬롯 : 자리가 미리 비어 있어 위 글이 안 밀린다 */
     var fb = $('#t0fb'), why = ok ? null : c.why[T.sel - 1];
     var gain = ok
-      ? '<div class="gain">'+deeSVG(T.lyFrom,'sm')+'<span class="arr">→</span>'+deeSVG(T.lyTo,'sm')+'<span>잉크 <b>'+T.lyTo+'겹</b> · 다음 인쇄 <b>'+NEXT_AT[T.lyTo]+'</b></span></div>'
+      ? '<div class="gain">'+deeSVG(T.lyFrom,'sm')+'<span class="arr">→</span>'+deeSVG(T.lyTo,'sm')+'<span>잉크 <b>'+T.lyTo+'겹</b>'+(T.retry ? ' · 원래 겹으로 돌아옴' : '')+' · 다음 인쇄 <b>'+NEXT_AT[T.lyTo]+'</b></span></div>'
       : '<div class="gain">'+deeSVG(T.lyFrom,'sm')+'<span class="arr">→</span>'+deeSVG(T.lyTo,'sm')+'<span>잉크 <b>'+T.lyTo+'겹</b> 그대로 · <b>다시 찍기</b>를 오늘 순서에 넣었습니다</span></div>';
     var idle = $('#t0idle'); if (idle) idle.hidden = true;
     fb.className = 'fb' + (ok ? ' right' : '');
@@ -201,7 +202,7 @@ var T0 = (function(){
   }
   function ladderHTML(){
     var c = T.card;
-    return '<section class="ladder" aria-label="다시 찍기 사다리">' +
+    return '<section class="reprint" aria-label="다시 찍기 사다리">' +
       '<div class="ld-head">'+deeSVG(T.lyTo, 'hang')+'<div><h3>모르겠어요 = 다시 찍기</h3><p>흐리게 찍힌 판을 다시 거는 건 실패가 아니라 <b>공정</b>입니다. 부끄러운 일이 아니라 그 자리로 다시 데려다 달라는 신호예요.</p></div>' +
         '<div class="ld-gain">잉크 <b>'+T.lyFrom+'겹</b> <span class="arr">→</span> <b>'+T.lyTo+'겹</b> · 다시 찍기 <b>'+NEXT_AT[Math.min(4,T.lyFrom)]+'</b> <span class="arr">→</span> <b>오늘 안에</b></div></div>' +
       '<div class="rungs" role="tablist">' + RUNGS.map(function(r, i){
@@ -264,8 +265,9 @@ var T0 = (function(){
     $$('[data-jump]', T.ctx.bench).forEach(function(b){ b.addEventListener('click', function(){ T.ctx.jump(b.dataset.jump, {parent:T.card.id, parentName:T.card.concept+' '+T.card.code, lyFrom:T.lyFrom, lyTo:T.lyTo, prereqDone:T.prereqDone}); }); });
     var ta = $('#askText'); if (ta) ta.addEventListener('input', function(){ T.askText = ta.value; });
     var build = $('#askBuild'); if (build) build.addEventListener('click', function(){
-      var c = T.card, ctxLines = c.lines.map(function(l){ return l.n+'  '+(l.seg ? l.seg.map(function(s){ return s.hole ? (c.options[c.answer].t) : s.t; }).join('') : l.t); }).join('\n');
-      T.promptOut = '파일 '+c.file+' '+c.focus+'행 근처입니다.\n\n```\n'+ctxLines+'\n```\n\n배우려는 문법: '+c.concept+' ('+c.code+')\n제가 막힌 지점: '+(T.askText||'(비어 있음)')+'\n'+(T.answered ? (T.correct ? '문제는 맞혔지만, 왜 그런지는 스스로 설명하지 못하겠습니다.' : '문제에서 「'+selLabel()+'」 를 골라 틀렸습니다.') : '아직 답을 고르지 못했습니다.')+'\n\n프로그래밍을 막 시작한 사람에게 설명하듯, 다른 예제 말고 위 코드 그대로를 예로 들어 알려주세요.';
+      var c = T.card, base = c.file.split('/').pop();   /* D8 : 경로는 빼고 파일명만 나간다 */
+      var ctxLines = c.lines.map(function(l){ return l.n+'  '+(l.seg ? l.seg.map(function(s){ return s.hole ? (c.options[c.answer].t) : s.t; }).join('') : l.t); }).join('\n');
+      T.promptOut = '파일 '+base+' '+c.focus+'행 근처입니다.\n\n```\n'+ctxLines+'\n```\n\n배우려는 문법: '+c.concept+' ('+c.code+')\n제가 막힌 지점: '+(T.askText||'(비어 있음)')+'\n'+(T.answered ? (T.correct ? '문제는 맞혔지만, 왜 그런지는 스스로 설명하지 못하겠습니다.' : '문제에서 「'+selLabel()+'」 를 골라 틀렸습니다.') : '아직 답을 고르지 못했습니다.')+'\n\n프로그래밍을 막 시작한 사람에게 설명하듯, 다른 예제 말고 위 코드 그대로를 예로 들어 알려주세요.';
       $('#rungBody').innerHTML = rungHTML(4); bindRung(); say('프롬프트를 만들었습니다.', '복사해서 Claude 나 ChatGPT 에 붙여넣으세요.');
     });
     var copy = $('#askCopy'); if (copy) copy.addEventListener('click', function(){

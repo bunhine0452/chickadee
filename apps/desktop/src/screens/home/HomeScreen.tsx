@@ -27,6 +27,14 @@ export interface HomeScreenProps {
   today_?: TodayPreview | undefined;
   /** 「인쇄 시작」 / 「이어 찍기」. */
   onStart?: (() => void) | undefined;
+  /** 마스트헤드의 「설정」 (05 §2.1 `settings`). */
+  onSettings: () => void;
+  /**
+   * 06 §6.3 — `ingest_run.fingerprint` 가 현재 빌드 값과 다르면 참. 판정은
+   * `data/maintenance.ts` 의 `needsReingest` 가 하고 여기서는 그리기만 한다.
+   * **리포 동일성 해시(`repo.fingerprint`)와는 다른 것이다.**
+   */
+  reingest?: boolean | undefined;
   /** 「판 만들기」. */
   onMake: (conceptId: string) => void;
   /** 노드 상세의 「이 판 찍기」. */
@@ -52,7 +60,7 @@ function guideMsg(sheets: readonly HomeSheet[]): string | null {
  * 않으므로 테스트가 픽스처 하나로 끝난다.
  */
 export function HomeScreen({
-  data, repoName, today, streak, today_, onStart, onMake, onPick, now,
+  data, repoName, today, streak, today_, onSettings, reingest, onStart, onMake, onPick, now,
 }: HomeScreenProps) {
   const guide = guideMsg(data.sheets);
   const currentUnitId = data.sheets.find((s) => s.state === 'current')?.unitId ?? null;
@@ -60,13 +68,32 @@ export function HomeScreen({
   const concepts = data.masthead.concepts;
 
   return (
-    <div className="press">
+    // 세션 오버레이가 닫히면 포커스가 `<body>` 로 떨어진다 — 05 §9 의 「포커스 유실」이다.
+    // 05 §7 의 `returnFocusId` 는 아직 없으므로, 홈이 스스로 받을 수 있게 해 두고
+    // `App` 이 세션이 닫힐 때 여기로 옮긴다 (D111).
+    <div className="press" tabIndex={-1}>
       {/* 스프라이트는 앱 루트에 한 번만 박는 것이 정본이다 (05 §6). AppShell 이 생기기 전까지는
           화면이 스스로 들고 있어야 새가 그려진다 — 셸이 들어오면 이 줄이 그리로 옮겨 간다. */}
       <DeeSprite />
-      <Masthead repoName={repoName} today={today} streak={streak} masthead={data.masthead} />
+      <Masthead
+        repoName={repoName}
+        today={today}
+        streak={streak}
+        masthead={data.masthead}
+        onSettings={onSettings}
+      />
       {/* 초보 안내는 대지보다 위다 — 아래에 두면 스크롤해야 보이고, 그러면 안내가 아니다. */}
       <Newcomer flag={data.newcomerFlag} />
+
+      {/* 06 §6.3 재인제스트 배너. 경고가 아니라 안내다 — 겹은 개념에 붙어 있어 살아남는다. */}
+      {reingest === true ? (
+        <Panel title="재인제스트 필요" plain="= 리포를 다시 읽어야 합니다">
+          <p className="note">
+            문법·쿼리·카드 생성기·문법 사전 중 하나가 바뀌었습니다. 리포를 다시 읽으면 카드와
+            사용처를 새로 만듭니다 — <b>익힌 겹은 개념에 붙어 있어 그대로 남습니다</b>.
+          </p>
+        </Panel>
+      ) : null}
 
       <Board
         title={

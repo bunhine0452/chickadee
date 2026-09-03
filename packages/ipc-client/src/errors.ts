@@ -10,6 +10,9 @@ export const IPC_ERROR_CODES = [
   'NOT_IMPLEMENTED',
   'FS_PERMISSION', 'FS_NOT_FOUND',
   'DICT_NOT_FOUND',
+  // OS 비밀 저장소가 없거나 거부했다 (06 §3.5 · D109). Linux 에 Secret Service 가 없으면
+  // 저장 자체가 이 코드로 실패하고, 화면은 그것으로 「저장할 수 없다」를 안다.
+  'SECRET_STORE',
   'UNKNOWN',
 ] as const;
 export type IpcErrorCode = (typeof IPC_ERROR_CODES)[number];

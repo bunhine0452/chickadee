@@ -3,8 +3,19 @@ import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+// 마스트헤드가 `settings` 를 읽어 모양을 복원한다 — 홈 테스트는 그 조회만 비워 둔다.
+vi.mock('@chickadee/ipc-client', () => ({
+  ipc: {
+    store: {
+      query: () => Promise.resolve([]),
+      exec: () => Promise.resolve({ changes: 1, lastId: 0 }),
+    },
+  },
+  log: { info: () => undefined, warn: () => undefined, error: () => undefined },
+}));
+
 import type { HomeData } from './data';
-import { HomeScreen } from './HomeScreen';
+const { HomeScreen } = await import('./HomeScreen.js');
 
 afterEach(() => {
   cleanup();
@@ -102,6 +113,7 @@ const DATA: HomeData = {
     commits: 35,
     warnings: 0,
     finishedAt: NOW,
+    fingerprint: 'f0',
     error: null,
   },
   files: 41,
@@ -121,15 +133,17 @@ const EMPTY: HomeData = {
   files: 0,
 };
 
-function draw(data: HomeData, onMake = vi.fn()) {
+function draw(data: HomeData, onMake = vi.fn(), extra: { reingest?: boolean } = {}) {
   render(
     <HomeScreen
       data={data}
       repoName="cart-shop-web"
       today="2026-09-03"
       streak={7}
+      onSettings={() => undefined}
       onMake={onMake}
       now={NOW}
+      {...extra}
     />,
   );
   return onMake;
@@ -193,6 +207,38 @@ describe('HomeScreen', () => {
     // 상단이다 — 작업대(「판이 없는 문법」)보다 문서 순서가 앞이면 스크롤 없이 보인다.
     const gaps = screen.getByRole('list', { name: '판이 없는 문법' });
     expect(notice.compareDocumentPosition(gaps) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('재인제스트 배너는 지문이 달라졌을 때만 뜬다 (06 §6.3)', () => {
+    draw(DATA);
+    expect(screen.queryByText(/재인제스트 필요/)).toBeNull();
+    cleanup();
+
+    draw(DATA, vi.fn(), { reingest: true });
+    const banner = screen.getByRole('region', { name: /재인제스트 필요/ });
+    // 경고가 아니라 안내다 — 다시 읽어도 겹은 남는다는 것이 배너의 본문이다 (06 §6.3).
+    expect(banner.textContent).toContain('익힌 겹은 개념에 붙어 있어 그대로 남습니다');
+    // 마스트헤드 바로 아래 — 대지보다 앞이라 스크롤 없이 보인다.
+    const gaps = screen.getByRole('list', { name: '판이 없는 문법' });
+    expect(banner.compareDocumentPosition(gaps) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('마스트헤드의 설정 버튼이 화면 밖으로 나간다', async () => {
+    const user = userEvent.setup();
+    const onSettings = vi.fn();
+    render(
+      <HomeScreen
+        data={DATA}
+        repoName="cart-shop-web"
+        today="2026-09-03"
+        streak={7}
+        onSettings={onSettings}
+        onMake={vi.fn()}
+        now={NOW}
+      />,
+    );
+    await user.click(screen.getByRole('button', { name: '설정' }));
+    expect(onSettings).toHaveBeenCalledTimes(1);
   });
 
   it('대지의 스티커를 눌러 상세를 열 수 있다', async () => {

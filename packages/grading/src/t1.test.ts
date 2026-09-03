@@ -8,6 +8,9 @@
  * 「끝났다는 증거」 한 줄이라 그것도 여기 있다. 원본 20줄은 목업을 import 하지 않고
  * 그대로 적었다 — `design/**` 은 앱의 의존이 아니다.
  */
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { describe, expect, test } from 'vitest';
 
 import { align } from './t1-align.js';
@@ -356,6 +359,26 @@ describe('이의 (04 §5)', () => {
     };
     expect(issueUrl(base)).not.toContain('secret');
     expect(issueUrl({ ...base, includeCode: true })).toContain('secret');
+  });
+
+  test('쿼리 키가 이슈 폼의 필드 id 와 같다 (06 §7.3)', () => {
+    // GitHub 이슈 **폼**은 `body=` 를 무시하고 필드 id 로만 미리 채운다. 이름이 하나라도
+    // 어긋나면 오류 없이 빈 칸으로 열리므로, 폼 파일을 읽어 대조한다.
+    const form = readFileSync(
+      join(process.cwd(), '.github/ISSUE_TEMPLATE/t1-appeal.yml'), 'utf8',
+    );
+    const ids = new Set([...form.matchAll(/^\s{4}id:\s*(\S+)/gm)].map((m) => m[1]));
+    const url = new URL(issueUrl({
+      repoSlug: 'bunhine0452/chickadee', grammar: 'tsx', reasons: ['TOKEN_COUNT'],
+      patternKey: 'k', shapeOriginal: 'I=L', shapeUser: 'I=L', engineVersion: '1',
+      dictVersion: 'ts@1.0.0', localCount: 3, includeCode: true,
+      originalText: 'a', userText: 'b',
+    }));
+    expect(url.searchParams.get('template')).toBe('t1-appeal.yml');
+    for (const key of url.searchParams.keys()) {
+      if (key === 'template') continue;
+      expect(ids, `이슈 폼에 없는 필드: ${key}`).toContain(key);
+    }
   });
 });
 

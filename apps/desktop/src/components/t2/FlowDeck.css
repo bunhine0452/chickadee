@@ -1,0 +1,153 @@
+/* 목업에 없는 자리다 — `t2.js` 는 책임 배치 한 종만 그린다. 그래서 모양은 목업의 두꺼운
+   종이 보기(`session.css` 의 `.ch`)에서 가져왔다: 2.5px 괘선 · 4px 그림자 · 누르면 내려앉음.
+   색은 별칭만 쓴다 (05 §4.2) — 자리 번호는 트랙 면 --t2, 포커스 링은 --t0 로 목업의
+   `.map .nd:focus-visible` 과 같다. 글자 크기는 전부 토큰이다 (13px 하한). */
+.fdeck {
+  display: grid;
+  gap: 8px;
+}
+
+.fpath,
+.frest {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fpath {
+  display: grid;
+  gap: 6px;
+}
+
+.fcard {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 9px;
+  border: 2.5px solid var(--rule);
+  background: var(--paper);
+  box-shadow: 0 4px 0 var(--edge);
+}
+
+.fcard .seat {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 2px solid var(--rule);
+  background: var(--t2);
+  color: var(--on-t2);
+  font-family: var(--f-mono);
+  font-size: var(--fs-14);
+  font-weight: 700;
+}
+
+.fcard .nm {
+  overflow: hidden;
+  font-family: var(--f-mono);
+  font-size: var(--fs-15);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fcard .mvs {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.fdeck .mv,
+.fdeck .drop,
+.fdeck .add {
+  all: unset;
+  box-sizing: border-box;
+  border: 2px solid var(--rule);
+  background: var(--paper-3);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background .12s, transform .08s;
+}
+
+.fdeck .mv {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  font-size: var(--fs-16);
+  line-height: 1;
+}
+
+.fdeck .drop,
+.fdeck .add {
+  padding: 5px 10px;
+  font-size: var(--fs-13);
+}
+
+.fdeck .add {
+  background: var(--stock);
+  font-family: var(--f-mono);
+  font-size: var(--fs-14);
+  box-shadow: 0 3px 0 var(--edge);
+}
+
+.fdeck .mv:hover,
+.fdeck .drop:hover,
+.fdeck .add:hover {
+  background: var(--stock);
+}
+
+.fdeck .add:hover {
+  background: var(--paper-3);
+}
+
+.fdeck .mv:active,
+.fdeck .drop:active,
+.fdeck .add:active {
+  transform: translateY(2px);
+}
+
+.fdeck .add:active {
+  box-shadow: 0 0 0 var(--edge);
+}
+
+.fdeck .mv:focus-visible,
+.fdeck .drop:focus-visible,
+.fdeck .add:focus-visible {
+  outline: 3px solid var(--t0);
+  outline-offset: 2px;
+}
+
+.fdeck .mv[disabled],
+.fdeck .drop[disabled],
+.fdeck .add[disabled] {
+  border-style: dashed;
+  color: var(--ink-soft);
+  cursor: default;
+}
+
+.fdeck .mv[disabled]:hover,
+.fdeck .drop[disabled]:hover,
+.fdeck .add[disabled]:hover {
+  background: var(--paper-3);
+}
+
+.fdeck .mv[disabled]:active,
+.fdeck .drop[disabled]:active,
+.fdeck .add[disabled]:active {
+  transform: none;
+}
+
+.frest {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  min-height: 30px;
+}
+
+.fdeck .none {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: var(--fs-14);
+}

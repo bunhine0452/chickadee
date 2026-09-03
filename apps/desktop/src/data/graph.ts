@@ -170,23 +170,19 @@ export async function makeT2Card(
     if (rows) filesOf.set(newest.id, await fillAdded(deps, newest.sha, rows));
   }
 
-  // 화면이 받을 수 있는 종만 굽는다. 흐름 추적·의존성 방향은 생성기와 채점기가 다 있고
-  // 골든이 고정하지만 **입력 화면이 없다**(05 §5 의 `DependencyMap` 행은 파일을 고르는
-  // 두 종의 것이다) — 큐에 넣으면 세션이 그 판에서 멈춘다. M5 의 화면 항목이 이어받는다.
-  const kinds: T2Kind[] = kind === undefined ? ['placement', 'radius'] : [kind];
-  let made: ReturnType<typeof generateT2> = { noPlate: true, reason: '시도한 종이 없다' };
-  for (const one of kinds) {
-    made = generateT2({
-      repoId: deps.repoId,
-      unitId: unit.id,
-      unitName: unit.name,
-      unitRoot: unit.rootPath ?? '',
-      conceptId: T2_CONCEPTS.placement,
-      seed: deps.repoId * 1_000 + unit.id,
-      files, edges, commits, filesOf, recent,
-    }, one);
-    if (isT2Card(made)) break;
-  }
+  // **네 종을 다 굽는다** (D107). 시도 순서(책임 배치 → 영향 반경 → 흐름 추적 → 의존성
+  // 방향)와 「만들 수 없는 종은 조용히 건너뛴다」는 생성기가 갖고 있으므로 여기서 종을
+  // 고르지 않는다 — 04 §8.3·§8.4 를 아는 곳이 둘이 되면 언젠가 갈라진다. 한 종도 못 만드는
+  // 리포가 있고 그것이 정상이다(`two-commits` — 파일이 하나라 지도가 없다, D103).
+  const made = generateT2({
+    repoId: deps.repoId,
+    unitId: unit.id,
+    unitName: unit.name,
+    unitRoot: unit.rootPath ?? '',
+    conceptId: T2_CONCEPTS.placement,
+    seed: deps.repoId * 1_000 + unit.id,
+    files, edges, commits, filesOf, recent,
+  }, kind);
 
   if (!isT2Card(made)) {
     log.info('구조 판을 만들지 못했다', { reason: made.reason });

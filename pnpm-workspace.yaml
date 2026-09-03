@@ -1,3 +1,5 @@
 packages:
   - "packages/*"
   - "apps/*"
+  # 브라우저 게이트·E2E 하네스. 워크스페이스 패키지를 import 하므로 링크가 필요하다.
+  - "tests"

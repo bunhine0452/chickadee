@@ -1,0 +1,75 @@
+{
+  "name": "korean-spaced-name",
+  "rule": "D8 — 파일 이름에 한글과 공백이 있어도 base name 그대로 나간다. 04 §2.4 의 첫 줄 형태는 바뀌지 않는다",
+  "card": {
+    "track": "t0",
+    "kind": "meaning",
+    "file": "app/화면 모음/장바구니 담기.ts",
+    "focus": 9,
+    "lines": [
+      {
+        "n": 9,
+        "target": true,
+        "t": "  const [담긴것, 담기] = useState([])"
+      }
+    ],
+    "q": "9행의 두 번째 이름은 무엇을 합니까?",
+    "hint": "값을 바꾸는 쪽입니다.",
+    "options": [
+      {
+        "t": "지금 값을 읽습니다"
+      },
+      {
+        "t": "값을 바꾸고 다시 그리게 합니다"
+      }
+    ],
+    "answer": 1,
+    "why": [
+      {
+        "t": "읽는 것은 첫 번째입니다."
+      },
+      null
+    ],
+    "ok": "두 번째가 바꾸는 쪽입니다.",
+    "rule": "<code>useState</code> 는 [값, 바꾸는 함수] 두 개를 준다.",
+    "prereq": [],
+    "uses": [],
+    "promptLines": [
+      "export function 담기판() {",
+      "  const [담긴것, 담기] = useState([])",
+      "  return { 담긴것, 담기 }",
+      "}"
+    ]
+  },
+  "concept": {
+    "name": "상태 훅",
+    "token": "useState"
+  },
+  "sel": 0,
+  "stuck": "왜 두 개를 한꺼번에 받나요",
+  "absent": [
+    "cart-shop-web",
+    "feat: 담기 화면",
+    "kimhyunbin"
+  ],
+  "expect": {
+    "header": "파일 장바구니 담기.ts 9행 근처입니다.",
+    "fenceCount": 4,
+    "prompt": [
+      "파일 장바구니 담기.ts 9행 근처입니다.",
+      "",
+      "```",
+      "export function 담기판() {",
+      "  const [담긴것, 담기] = useState([])",
+      "  return { 담긴것, 담기 }",
+      "}",
+      "```",
+      "",
+      "배우려는 문법: 상태 훅 (useState)",
+      "제가 막힌 지점: 왜 두 개를 한꺼번에 받나요",
+      "문제에서 「지금 값을 읽습니다」 를 골라 틀렸습니다.",
+      "",
+      "프로그래밍을 막 시작한 사람에게 설명하듯, 다른 예제 말고 위 코드 그대로를 예로 들어 알려주세요."
+    ]
+  }
+}

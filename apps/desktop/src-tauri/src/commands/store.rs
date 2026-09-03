@@ -1,6 +1,6 @@
 use chickadee_store::{Catalog, ExecInfo, Op, Store, StoreInfo};
 use serde_json::Value;
-use tauri::{AppHandle, Manager, State};
+use tauri::{AppHandle, State};
 
 use crate::error::IpcError;
 use crate::state::AppState;
@@ -20,10 +20,7 @@ pub fn store_open(
             false,
         ));
     }
-    let dir = app
-        .path()
-        .app_data_dir()
-        .map_err(|e| IpcError::new("FS_NOT_FOUND", e.to_string(), false))?;
+    let dir = super::maint::data_dir(&app)?;
     std::fs::create_dir_all(&dir)
         .map_err(|e| IpcError::new("FS_PERMISSION", e.to_string(), false))?;
     let opened = Store::open(&dir.join("chickadee.db"), catalog)?;

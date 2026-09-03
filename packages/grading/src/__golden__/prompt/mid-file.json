@@ -1,0 +1,91 @@
+{
+  "name": "mid-file",
+  "rule": "06 §3.3-1 — 범위는 대상 줄 + 앞 4줄 + 뒤 4줄. 앞뒤가 다 있는 한가운데가 그 최대치(9줄)다",
+  "card": {
+    "track": "t0",
+    "kind": "meaning",
+    "file": "src/checkout/total.ts",
+    "focus": 42,
+    "lines": [
+      {
+        "n": 42,
+        "target": true,
+        "t": "  const sum = items.reduce((a, b) => a + b.price, 0)"
+      }
+    ],
+    "q": "42행의 reduce 가 돌려주는 것은 무엇입니까?",
+    "hint": "누적값 하나입니다.",
+    "options": [
+      {
+        "t": "값이 걸러진 새 배열"
+      },
+      {
+        "t": "원소마다 한 번씩 실행하고 <code>undefined</code>"
+      },
+      {
+        "t": "하나로 접힌 값"
+      }
+    ],
+    "answer": 2,
+    "why": [
+      {
+        "t": "<code>filter</code> 는 고르기만 합니다."
+      },
+      {
+        "t": "<code>forEach</code> 는 아무것도 돌려주지 않습니다."
+      },
+      null
+    ],
+    "ok": "<code>reduce</code> 는 하나로 접습니다.",
+    "rule": "<code>reduce</code> 는 배열을 값 하나로 접는다.",
+    "prereq": [],
+    "uses": [],
+    "promptLines": [
+      "function orderTotal(items) {",
+      "  if (items.length === 0) {",
+      "    return 0",
+      "  }",
+      "  const sum = items.reduce((a, b) => a + b.price, 0)",
+      "  const fee = sum > 50000 ? 0 : 3000",
+      "  return sum + fee",
+      "}",
+      "const won = new Intl.NumberFormat('ko-KR')"
+    ]
+  },
+  "concept": {
+    "name": "배열 접기",
+    "token": "reduce"
+  },
+  "sel": 0,
+  "stuck": "누적값이 어디서 시작하는지 모르겠어요",
+  "absent": [
+    "cart-shop-web",
+    "fix: 합계가 음수로 나오던 것",
+    "kimhyunbin"
+  ],
+  "expect": {
+    "header": "파일 total.ts 42행 근처입니다.",
+    "fenceCount": 9,
+    "prompt": [
+      "파일 total.ts 42행 근처입니다.",
+      "",
+      "```",
+      "function orderTotal(items) {",
+      "  if (items.length === 0) {",
+      "    return 0",
+      "  }",
+      "  const sum = items.reduce((a, b) => a + b.price, 0)",
+      "  const fee = sum > 50000 ? 0 : 3000",
+      "  return sum + fee",
+      "}",
+      "const won = new Intl.NumberFormat('ko-KR')",
+      "```",
+      "",
+      "배우려는 문법: 배열 접기 (reduce)",
+      "제가 막힌 지점: 누적값이 어디서 시작하는지 모르겠어요",
+      "문제에서 「값이 걸러진 새 배열」 를 골라 틀렸습니다.",
+      "",
+      "프로그래밍을 막 시작한 사람에게 설명하듯, 다른 예제 말고 위 코드 그대로를 예로 들어 알려주세요."
+    ]
+  }
+}

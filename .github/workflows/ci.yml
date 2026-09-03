@@ -1,11 +1,10 @@
 # 06 §5.1 PR workflow — budget 12 min
 #
-# jobs that actually run now (M1): lint-type-unit · audit · build-3os · integration
-# the jobs turned on in M2 (design-gates · e2e-linux) are kept at
-# the bottom of this file as comments, with the doc's steps preserved verbatim.
-# **so as not to manufacture a fake green check** we chose comments over an
-# `if: false` guard — a skipped job is counted as "success" by branch protection,
-# making coverage we do not have look like coverage we do.
+# every job in 06 §5.1 now runs: lint-type-unit · audit · build-3os · integration ·
+# design-gates · e2e-linux. The last two were comments until M5, on the principle that a
+# skipped job counts as "success" for branch protection and makes coverage we do not have
+# look like coverage we do. The one thing still held back for that reason is
+# `pnpm test:visual` — see the note on design-gates.
 #
 # every action is pinned to a commit SHA (06 §4.4). the tag beside it is for humans.
 
@@ -102,6 +101,18 @@ jobs:
       - name: contrast ratio check
         run: pnpm check:contrast
 
+      # 06 §5.3-3 — the tag, the root package.json and the three version files are one value.
+      # release.yml checks this too, but at tag time: a drift merged into main is then only
+      # found when someone tries to cut a release.
+      - name: version files agree
+        run: pnpm version:check
+
+      # 06 §7.1 — THIRD_PARTY_NOTICES.md is generated. A lockfile change that does not
+      # regenerate it ships a notice naming the wrong versions. This needs node_modules,
+      # which is why it is here and not in `audit`.
+      - name: THIRD_PARTY_NOTICES.md is current
+        run: pnpm licenses:check
+
       - name: cargo fmt
         run: cargo fmt --all --check
 
@@ -194,6 +205,26 @@ jobs:
 
       - name: Rust budget · forbidden words (01 §1.1)
         run: bash scripts/check-rust-budget.sh
+
+      # 06 §3.5 — "put a mock key in and grep every produced file". The full form of this
+      # runs in E8, which needs a real app and a real keychain. This is the static half:
+      # the canary the key tests store must never appear outside a test file. It catches the
+      # cheap way a key leaks — a debug print, a fixture, a committed log.
+      - name: mock key does not escape its tests (06 §3.5)
+        run: |
+          set -uo pipefail
+          # assembled from two halves so this file is not itself a hit.
+          canary="sk-test-CHICKADEE""-LEAK-CANARY"
+          hits=$(grep -rIl --exclude-dir=node_modules --exclude-dir=target \
+                   --exclude-dir=.git --exclude='*.test.ts' --exclude='*.test.tsx' \
+                   "$canary" . || true)
+          if [ -n "$hits" ]; then
+            echo "FAIL the mock key appears outside a test file:" >&2
+            echo "$hits" >&2
+            exit 1
+          fi
+          echo "ok   mock key grep 0"
+
 
   # ───────────────────────────────────────────────────────────────────────────
   # M0 exit condition — "the empty window opens on 3 OSes".
@@ -319,53 +350,115 @@ jobs:
 # check list at all.
 # ═══════════════════════════════════════════════════════════════════════════════
 #
-# ── M2: turn on once the screen skeleton + tests/gates + visual baselines exist ─
-#   needs: apps/desktop/src/devtools/audit.ts, tests/gates/, tests/visual/,
-#          the test:gates · test:visual scripts in package.json, the playwright dependency
-#
-#   design-gates:                      # 06 §5.1 budget ≤ 3 min, rules in 06 §2
-#     name: design-gates
-#     runs-on: ubuntu-22.04
-#     timeout-minutes: 10
-#     steps:
-#       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-#       - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
-#       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-#         with: { node-version: '26', cache: pnpm }
-#       - run: pnpm install --frozen-lockfile
-#       - run: pnpm build
-#       # Playwright browser cache key = version (06 §5.1 "cache")
-#       - run: pnpm exec playwright install --with-deps chromium
-#       - run: pnpm test:gates
-#       - run: pnpm test:visual
-#
-# ── M2: turn on once tauri-driver + the WebdriverIO scenarios E1~E8 exist ─────
-#   needs: tests/e2e/, the test:e2e script in package.json, and an app whose window
-#          actually opens. per 06 §1.1 this blocks on **Linux only**.
-#
-#   e2e-linux:                         # 06 §5.1 budget ≤ 8 min, scenarios in 06 §1.5
-#     name: e2e-linux
-#     runs-on: ubuntu-22.04
-#     timeout-minutes: 20
-#     steps:
-#       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-#       - run: |
-#           sudo apt-get update
-#           sudo apt-get install -y --no-install-recommends \
-#             build-essential curl wget file libwebkit2gtk-4.1-dev \
-#             libappindicator3-dev librsvg2-dev patchelf libssl-dev libxdo-dev \
-#             webkit2gtk-driver xvfb
-#       - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
-#       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-#         with: { node-version: '26', cache: pnpm }
-#       - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
-#         with: { toolchain: stable }
-#       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
-#         with: { workspaces: . }
-#       - run: cargo install tauri-driver --locked
-#       - run: pnpm install --frozen-lockfile
-#       - run: pnpm tauri build --debug
-#       - run: xvfb-run pnpm test:e2e
-#
-# ── the nightly bench `bench.yml` (06 §1.6 · §5.1) is a separate workflow, not this file.
-#    cron '0 18 * * *' (03:00 KST). after M2, once the criterion baseline exists.
+  # ───────────────────────────────────────────────────────────────────────────
+  # 06 §5.1 budget ≤ 3 min, rules in 06 §2. Seven gates on the real screens, driven
+  # through the Node IPC bridge (D108). `pnpm test:gates` bakes the seed first.
+  #
+  # `pnpm test:visual` is NOT here yet: the 40 baseline screenshots must be generated
+  # on a Linux runner first (06 §1.7 keeps one OS only), and a job with no baseline
+  # fails every run. The procedure is in tests/visual/README.md.
+  # ───────────────────────────────────────────────────────────────────────────
+  design-gates:
+    name: design-gates
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm build
+
+      # both engines — the config has a `webkit` project (WKWebView's stand-in, 05 §11)
+      # and chromium alone cannot run it.
+      - name: playwright browsers
+        run: pnpm exec playwright install --with-deps chromium webkit
+
+      # 06 §2 — the static half of the motion ceiling. The runtime half is in test:gates.
+      - name: motion ceiling (static)
+        run: pnpm check:motion
+
+      - run: pnpm test:gates
+
+      # the 15 mockIPC scenarios of 05 §11 — same harness, same two engines, retries 0.
+      - run: pnpm test:e2e-ui
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            test-results/**
+            playwright-report/**
+          if-no-files-found: ignore
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # 06 §5.1 · §1.5 — E1~E8 on the real binary. Blocks on **Linux only** (06 §1.1):
+  # macOS WKWebView has no WebDriver and Windows is covered by the release smoke test (D13).
+  #
+  # This job is where E1~E8 run for the first time — they cannot run on a developer's
+  # macOS machine at all, because `tauri-driver` supports Linux and Windows only.
+  # ───────────────────────────────────────────────────────────────────────────
+  e2e-linux:
+    name: e2e-linux
+    runs-on: ubuntu-22.04
+    # 20 in the doc, 30 here: a cold Rust build of the app is inside this job.
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # beyond the WebView deps: `webkit2gtk-driver` for tauri-driver, `xvfb` for a display,
+      # `strace` for E1's socket count, and dbus + gnome-keyring + secret-tool for E8's
+      # mock keychain (a bare runner has no Secret Service).
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential curl wget file libwebkit2gtk-4.1-dev \
+            libappindicator3-dev librsvg2-dev patchelf libssl-dev libxdo-dev \
+            webkit2gtk-driver xvfb strace gnome-keyring libsecret-tools dbus-x11
+
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
+        with:
+          toolchain: stable
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          workspaces: .
+
+      - run: cargo install tauri-driver --locked
+
+      - run: pnpm install --frozen-lockfile
+
+      # E4~E8 boot on a DB that already has a repo registered; the seed's repo row is
+      # rewritten to point at this fixture. E2's native GTK folder dialog is not drivable
+      # by WebDriver, which is why E2 and E3 are not written at all (see tests/e2e/specs).
+      - run: bash scripts/make-fixture-repo.sh tiny
+
+      - run: pnpm tauri build --debug
+
+      - run: xvfb-run -a bash tests/e2e/scripts/with-keyring.sh pnpm test:e2e
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: e2e-linux
+          # E1's socket census — the file the "zero sockets on first run" claim rests on.
+          path: test-results/e1-sockets.json
+          if-no-files-found: warn
+
+# ── the nightly bench lives in `.github/workflows/bench.yml` (06 §1.6 · §5.1),
+#    cron '0 18 * * *' (03:00 KST). It is a separate workflow, not this file.

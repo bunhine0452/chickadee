@@ -5,9 +5,10 @@ members = ["crates/*", "apps/desktop/src-tauri"]
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
-rust-version = "1.80"
+# 1.81 — `PanicHookInfo` 가 그때 안정됐고 크래시 훅(06 §8)이 그것을 쓴다 (D109).
+rust-version = "1.81"
 license = "MIT"
-repository = "https://github.com/chickadee-app/chickadee"
+repository = "https://github.com/bunhine0452/chickadee"
 
 [workspace.dependencies]
 

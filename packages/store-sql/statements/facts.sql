@@ -91,3 +91,16 @@ UPDATE ingest_run SET
   dict_version = :dictVersion, dict_schema = :dictSchema, gen_version = :genVersion,
   fingerprint = :fingerprint, error = :error
 WHERE id = :id;
+
+-- @name facts.run_stamp
+-- @params { repoId: number, sitesN: number, grammarVersionsJson: string, queryHash: string, dictVersion: string, dictSchema: number, genVersion: number, fingerprint: string }
+-- @row void
+-- 06 §6.3 — 파생 층이 인제스트 끝에 채우는 다섯 값과 그 지문. Rust 는 이 다섯을 모른다
+-- (사전·생성기는 TS 것이다) 그래서 `facts.run_finish` 는 null 로 두고 여기서 덮는다.
+-- 대상은 그 리포의 **마지막 실행 한 줄**이다 — 잡 id 를 파생 층까지 들고 다니지 않는다.
+UPDATE ingest_run SET
+  sites_n = :sitesN,
+  grammar_versions_json = :grammarVersionsJson, query_hash = :queryHash,
+  dict_version = :dictVersion, dict_schema = :dictSchema, gen_version = :genVersion,
+  fingerprint = :fingerprint
+WHERE id = (SELECT id FROM ingest_run WHERE repo_id = :repoId ORDER BY id DESC LIMIT 1);

@@ -6,7 +6,11 @@
  *
  * **기준 엔진은 WKWebView 다.** Chromium 수치는 참고값일 뿐이라, 이 파일이 재는 값은
  * macOS 앱 안에서 잰 것만 뜻이 있다. 절차는 아래 `HOW` 에 적어 둔다.
+ *
+ * 디자인 품질 게이트(06 §2)도 같은 손잡이에 달린다 — 계산은 `gates.ts` 에 있고 여기서는
+ * 그것을 `?dev=1` 문에 내놓기만 한다. `tests/gates/**` 가 부르는 것이 이 문이다.
  */
+import * as gates from './gates.js';
 
 /** 05 §10 이 정한 6종. 이름을 바꾸면 예산 표와 어긋난다. */
 export const MARKS = [
@@ -165,6 +169,15 @@ export interface Audit {
   marks: typeof collected;
   budget: typeof BUDGET;
   how: typeof HOW;
+  // ── 06 §2 디자인 품질 게이트. 앱(디버그 패널)과 Playwright 가 **같은 코드**를 부른다.
+  fonts: typeof gates.fonts;
+  contrast: typeof gates.contrast;
+  measure: typeof gates.measure;
+  measureViolations: typeof gates.measureViolations;
+  motionOver: typeof gates.motionOver;
+  dee: typeof gates.dee;
+  /** 활자·대비·행 길이를 한 번에. 화면마다 이것을 부른다. */
+  gates: typeof gates.runGates;
 }
 
 /** `?dev=1` 일 때만 붙인다 — 릴리스 번들에 손잡이를 남기지 않는다. */
@@ -172,6 +185,13 @@ export function installAudit(search: string): boolean {
   if (!new URLSearchParams(search).has('dev')) return false;
   (globalThis as unknown as { __audit: Audit }).__audit = {
     perf, marks: collected, budget: BUDGET, how: HOW,
+    fonts: gates.fonts,
+    contrast: gates.contrast,
+    measure: gates.measure,
+    measureViolations: gates.measureViolations,
+    motionOver: gates.motionOver,
+    dee: gates.dee,
+    gates: gates.runGates,
   };
   return true;
 }

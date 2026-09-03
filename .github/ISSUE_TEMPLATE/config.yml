@@ -1,0 +1,12 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/bunhine0452/chickadee/security/advisories/new
+    about: >-
+      Report privately. Never in a public issue — the builds are unsigned and users cannot be
+      patched automatically. First response within 72 hours. See SECURITY.md.
+  - name: The app will not open (macOS "unidentified developer", Windows SmartScreen)
+    url: https://github.com/bunhine0452/chickadee#the-build-is-not-signed
+    about: >-
+      Expected, not a bug: releases are not signed or notarized yet. The per-OS workaround is
+      in the README and takes one click.

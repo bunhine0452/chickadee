@@ -1,5 +1,5 @@
 // 생성 파일 — 직접 고치지 마세요.
-// 원본: design/ink-home.html → apps/desktop/src/styles/tokens.css → 이 파일. 갱신: pnpm design:sync
+// 원본: design/src/ink/tokens.css → apps/desktop/src/styles/tokens.css → 이 파일. 갱신: pnpm design:sync
 // 용도: Monaco 테마(05 §8)와 정적 대비 테스트(scripts/check-contrast.mjs, 05 §9).
 // 값은 CSS 원문 그대로다 — `var(--blue)` 같은 별칭은 소비자가 푼다.
 

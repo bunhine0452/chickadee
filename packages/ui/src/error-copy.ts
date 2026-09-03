@@ -102,6 +102,14 @@ const COPY: Record<IpcErrorCode, ErrorCopy> = {
   },
   FS_NOT_FOUND: { title: '파일이 없습니다.', action: null },
   DICT_NOT_FOUND: { title: '문법 사전을 찾지 못했습니다.', action: 'contribute' },
+  // 설정 화면이 이 상태를 스스로 말한다(「이 컴퓨터에는 안전하게 저장할 수 없습니다」) —
+  // 토스트로 한 번 더 띄우면 같은 말이 두 곳에서 나온다.
+  SECRET_STORE: {
+    title: '키를 이 컴퓨터의 비밀 저장소에 넣지 못했습니다.',
+    detail: 'Linux 는 GNOME 키링 같은 Secret Service 가 있어야 합니다.',
+    action: null,
+    internal: true,
+  },
   UNKNOWN: {
     title: '알 수 없는 오류입니다.',
     detail: '자세한 내용은 로그에 있습니다.',

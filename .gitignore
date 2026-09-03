@@ -39,3 +39,14 @@ dist/
 # python 캐시 (design/src/ink/build.py)
 __pycache__/
 *.pyc
+
+# 브라우저 게이트가 굽는 시드 (D108)
+.seed/
+
+# Playwright 실패 아티팩트·리포트
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+/bench/ts-current.json
+/bench/report.md

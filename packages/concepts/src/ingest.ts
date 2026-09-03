@@ -7,7 +7,7 @@
 import { keyOf, kindOf, langOf, langSpecs, loadDict, type Dict } from '@chickadee/dictionary';
 import { fnv1a64 } from '@chickadee/text';
 import {
-  ipc, log, on, type BatchOp, type Capture, type IngestDone, type IngestProgress,
+  ipc, log, on, type BatchOp, type Capture, type IngestDone, type IngestProgress, type JobId,
 } from '@chickadee/ipc-client';
 
 import { classify, isMine, type Identity } from './commits.js';
@@ -42,6 +42,11 @@ export interface IngestOptions {
   now: number;
   onProgress?: (phase: Phase, done: number, total: number) => void;
   onWarning?: (relPath: string, reason: string) => void;
+  /**
+   * 잡 id 가 정해지자마자 한 번. **취소는 이것 없이는 불가능하다** — `ingest_cancel` 이
+   * id 를 요구하는데 그 값은 이 함수 안에서만 났다 (03 §1.8).
+   */
+  onJob?: (jobId: JobId) => void;
 }
 
 /**
@@ -134,7 +139,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestReport> {
       }));
       stops.push(await on('ingest_done', resolve));
       stops.push(await on('ingest_error', reject));
-      await ipc.ingest.start({
+      const { jobId } = await ipc.ingest.start({
         repoId: options.repoId,
         rootPath: options.rootPath,
         mode: options.mode,
@@ -147,6 +152,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestReport> {
         excludeGlobs: [...EXCLUDE_GLOBS],
         generatedMarkers: [...GENERATED_MARKERS],
       });
+      options.onJob?.(jobId);
     })().catch(reject);
   }).finally(() => {
     for (const stop of stops) stop();

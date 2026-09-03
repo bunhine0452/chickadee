@@ -1,0 +1,31 @@
+# Who has to review what. Later matches win, so the specific paths are at the bottom.
+#
+# For this to block a merge, "Require review from Code Owners" has to be on in the
+# branch protection rule for `main`. Without that setting this file only requests
+# reviewers; it does not stop anything.
+
+*                               @bunhine0452
+
+# ── Expected output, committed ───────────────────────────────────────────────
+# A green test run is not evidence when the expectation moved with the code. These two
+# are the ones a passing build cannot catch, so a person reads the diff (06, risk table).
+#
+#   fixtures/ipc   what the Rust commands returned for a fixture repository. A change
+#                  here means the Rust ↔ TypeScript contract moved.
+#   *.snap         insta snapshots of parser and query output.
+/fixtures/ipc/                  @bunhine0452
+**/*.snap                       @bunhine0452
+
+# ── Design ───────────────────────────────────────────────────────────────────
+# The logo and the two mockups are settled. Tokens are regenerated with
+# `pnpm design:sync`, never edited by hand.
+/design/                        @bunhine0452
+
+# ── Schema, licensing, CI ────────────────────────────────────────────────────
+# Migrations are forward-only and run against databases that hold months of a user's
+# work. The rest decides what may enter the tree and what runs on a PR.
+/packages/store-sql/migrations/ @bunhine0452
+/deny.toml                      @bunhine0452
+/LICENSE                        @bunhine0452
+/THIRD_PARTY_NOTICES.md         @bunhine0452
+/.github/                       @bunhine0452

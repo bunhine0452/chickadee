@@ -2,7 +2,7 @@
 
 **이 문서의 위치** — Chickadee 설계 문서 6편 중 첫 편. 프로세스·모듈 경계·Tauri IPC 계약·디렉터리·상태·오류·경로·성능 예산을 고정한다. 스키마와 FSRS 는 `02-data-model-and-scheduling.md`, 파싱·문법 사전은 `03-ingest-parsing-dictionary.md`, 채점은 `04-grading-engines.md`, 화면은 `05-frontend.md`, 품질·보안·릴리스는 `06-quality-security-release.md` 가 소유하며, 이 문서는 그 사이의 **경계면(타입·명령 이름·소유권)** 만 정의한다.
 
-**읽는 순서/전제** — `.oculpm/discussion/vibe-code-study-app/discussion.md` 의 「결론」 §2·§3·§5 를 읽었다고 전제한다. 화면이 요구하는 데이터의 정본은 목업 소스 `design/src/ink/{data,session,t0,t1,t2}.js` 와 `design/ink-home.html` 이다. 기준 스택: Tauri 2.x(cli 2.11) · Rust 1.80+ · Node 22+ · pnpm 10 · SQLite 3.45+ (개발기 실측 rustc 1.98 · Node 26.7 · pnpm 10.33 · sqlite 3.51 — D48).
+**읽는 순서/전제** — `.oculpm/discussion/vibe-code-study-app/discussion.md` 의 「결론」 §2·§3·§5 를 읽었다고 전제한다. 화면이 요구하는 데이터의 정본은 목업 소스 `design/src/ink/{data,session,t0,t1,t2}.js` 와 `design/ink-home.html` 이다. 기준 스택: Tauri 2.x(cli 2.11) · Rust 1.81+(D109) · Node 22+ · pnpm 10 · SQLite 3.45+ (개발기 실측 rustc 1.98 · Node 26.7 · pnpm 10.33 · sqlite 3.51 — D48).
 
 ---
 
@@ -135,9 +135,16 @@ interface FileDiff { relPath: string; added: string[] /* `+` 줄 본문, 합계 
 | `app_paths` | — | `{ dataDir, dbPath, logDir, dictCacheDir, dictUserDir }` | — | 1ms | ✗ | — |
 | `app_version` | — | `{ app, tauri, sqlite, rustc }` | — | 1ms | ✗ | — |
 | `app_reveal` | `{ which: 'data' \| 'logs' \| 'repo', repoId? }` | `{}` | `FS_NOT_FOUND` | 100ms | ✗ | — |
+| `secret_set` | `{ account, value }` | `{}` | `SECRET_STORE` | 100ms | ✗ | — |
+| `secret_delete` | `{ account }` | `{}` — 없어도 성공(멱등) | `SECRET_STORE` | 100ms | ✗ | — |
+| `secret_has` | `{ account }` | `boolean` — **값을 꺼내는 문은 없다** (D109) | `SECRET_STORE` | 100ms | ✗ | — |
+| `app_write_json` | `{ box: 'exports' \| 'logs/crash', name, json }` | `string` — 만든 파일의 **디렉터리**. 경로를 인자로 받지 않고 `name` 은 `[A-Za-z0-9._-]` 만 통과한다 (D109) | `BAD_INPUT` `FS_PERMISSION` `FS_NOT_FOUND` | 30ms | ✗ | — |
+| `app_wipe` | — | `{}` — DB·백업·캐시·로그·크래시·내보내기. 키체인과 종료는 부르는 쪽이 (06 §6.4) | `FS_PERMISSION` `FS_NOT_FOUND` | 500ms | ✗ | — |
 | `t3_run` | — | — | 항상 `NOT_IMPLEMENTED` (§9) | — | — | — |
 
-M4 에서 돌아온 명령: `git_diff_text`(D64 · 형태는 D98). M3: `parse_snippet`(D67). M5: `dict_*` 4종과 `repo_glob_read`(D66 · D65). 표에서 빠진 것은 폐기가 아니라 그 마일스톤의 몫이다.
+M4 에서 돌아온 명령: `git_diff_text`(D64 · 형태는 D98). M3: `parse_snippet`(D67). M5: 위의 다섯(D109). 표에서 빠진 것은 폐기가 아니라 그 마일스톤의 몫이다.
+
+**M5 가 쓰지 않은 것**: `dict_*` 4종(D66 이 「사용자 오버라이드 `dict-user/` 와 디스크 캐시는 M5 로」라고 적었으나 00 §5 M5 표에도 06 구현 체크리스트에도 그 항목이 없다 — MVP 는 번들 사전 하나로 돈다, 00 §6-6). `repo_glob_read`(D65 — M6). **줄 예산이 2,300/2,300 으로 꽉 찼으므로 둘 중 어느 것도 D68 을 다시 열지 않고는 들어가지 않는다**(D109).
 
 `store_open` 은 프로세스당 1회만 허용한다(두 번째 호출 → `STORE_ALREADY_OPEN`). 왜: 카탈로그는 앱 번들 JS 에서만 오는데, WebView 가 뚫렸을 때 SQL 을 갈아끼우는 경로를 막는다. 카탈로그 밖 SQL 은 어떤 명령으로도 실행할 수 없다.
 
@@ -422,7 +429,7 @@ export const runners: RunnerAdapter[] = [];   // MVP 에서 비어 있음
 ```
 Rust 명령 `t3_run` 은 `NOT_IMPLEMENTED` 만 돌려주고, 스키마의 `track` 열거형에 `'t3'` 을 예약한다(02). 프로세스 실행이 들어오면 Tauri `shell` 스코프와 샌드박스 결정이 필요하므로 06 에서 다룬다.
 
-**LLM 4단**: MVP 는 프롬프트 생성·복사만(목업 그대로, 전송 없음). 이후 `llm_ask` 를 Rust 에 두고 키는 OS 키체인(`keyring`)에 — 키가 WebView 에 존재하지 않게. 인터페이스만 예약: `llm_ask{ provider, messages } → 이벤트 llm_token`.
+**LLM 4단**: MVP 는 프롬프트 생성·복사만(목업 그대로, 전송 없음) — **D106 이 이 문장을 06 §3.3 보다 앞세웠다**. 키는 0.1.0 부터 OS 키체인(`keyring`)에 넣을 수 있고 명령 셋은 §3.2 표에 있다(`secret_*`, D109) — 값을 되읽는 문이 없어 키가 `WebView` 에 존재하지 않는다. 전송은 0.2 이고 인터페이스만 예약: `llm_ask{ provider, messages } → 이벤트 llm_token`.
 
 ---
 

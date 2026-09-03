@@ -1,0 +1,168 @@
+name: T1 appeal — propose a normalization rule
+description: A transcription line was marked different, but it means the same thing. Ask for the rule, not the score.
+title: "t1: "
+labels: ["t1-appeal"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### The app will not open — read this first
+
+        This is not a bug. Chickadee is not code-signed or notarized yet.
+
+        - **macOS** — "unidentified developer": move the app to Applications, then
+          Control-click it and choose **Open**. Once is enough. Or run
+          `xattr -d com.apple.quarantine /Applications/Chickadee.app`.
+        - **Windows** — SmartScreen: **More info → Run anyway**.
+        - **Linux** — AppImage: `chmod +x` it first. It needs `libwebkit2gtk-4.1`.
+
+        Verify what you downloaded against `SHA256SUMS.txt` on the release page.
+
+  - type: markdown
+    attributes:
+      value: |
+        **This does not change a score, and it is not meant to.** Fixing one score helps one
+        learner; fixing the rule helps the next one. What this issue asks for is a
+        normalization rule — a form the grader should treat as equivalent from now on.
+
+        The app's **"같은 뜻인데요"** button fills the fields below. They carry the *shape* of
+        the two lines with every identifier replaced by `I` and every literal by `L`, which is
+        enough to write a rule and not enough to read your code. The two real lines are opt-in
+        at the bottom and off by default.
+
+        Some differences are never equivalence, whatever the count: a changed operator,
+        reordered arguments, a call that is not made, a template literal against concatenation,
+        a missing `await` or `?.`, a different literal value, two names swapped. Those change
+        what the code does.
+
+  - type: input
+    id: grammar
+    attributes:
+      label: grammar
+      description: >-
+        Filled in by the app. The tree-sitter grammar key — `typescript`, `tsx`, `javascript`,
+        `python`, `go`, `rust`, `swift`, `dart`, `sql`. The same complaint in another language
+        is a different rule.
+      placeholder: "typescript"
+    validations:
+      required: true
+
+  - type: input
+    id: reasons
+    attributes:
+      label: reasons
+      description: Filled in by the app. The reason codes the grader attached to the line.
+      placeholder: "TOKEN_COUNT"
+    validations:
+      required: true
+
+  - type: input
+    id: shapeOriginal
+    attributes:
+      label: shape(original)
+      description: >-
+        Filled in by the app. The original line as a token-kind signature: identifiers are `I`,
+        literals are `L`, operators and punctuation are themselves.
+      placeholder: "I.I((I)=>I.I)"
+    validations:
+      required: true
+
+  - type: input
+    id: shapeUser
+    attributes:
+      label: shape(answer)
+      description: Filled in by the app. The same signature for what you typed.
+      placeholder: "I.I((I)=>{returnI.I})"
+    validations:
+      required: true
+
+  - type: input
+    id: patternKey
+    attributes:
+      label: patternKey
+      description: >-
+        Filled in by the app. A hash of grammar, sorted reason codes and the two shape
+        signatures. Identical complaints from different code carry the same key, which is how
+        they get counted together.
+      placeholder: "a3f1c0d29b4e5a71"
+    validations:
+      required: true
+
+  - type: input
+    id: engineVersion
+    attributes:
+      label: engineVersion
+      description: Filled in by the app.
+    validations:
+      required: true
+
+  - type: input
+    id: dictVersion
+    attributes:
+      label: dictVersion
+      description: Filled in by the app.
+    validations:
+      required: true
+
+  - type: input
+    id: localCount
+    attributes:
+      label: localCount
+      description: >-
+        Filled in by the app. How many times this same pattern has come up on your machine.
+        Nothing about this count is sent anywhere; it is read out of your local database at
+        the moment you press the button.
+      placeholder: "3"
+    validations:
+      required: true
+
+  - type: textarea
+    id: rule
+    attributes:
+      label: The rule you are proposing
+      description: >-
+        Say it as a rule, in words, without your code. "A trailing comma in an argument list
+        should not count as a token difference." "An arrow body wrapped in braces with a bare
+        `return` is the same as the expression body."
+    validations:
+      required: true
+
+  - type: textarea
+    id: why_equivalent
+    attributes:
+      label: Why the two forms mean the same thing
+      description: >-
+        Same evaluation, same result, same side effects — say which of those you are claiming,
+        and whether it holds in every position or only in some.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: includeCode
+    attributes:
+      label: The two real lines
+      description: >-
+        Off by default. The shape signatures above are usually enough. Tick this only if the
+        rule cannot be judged without the literal text, and only if those two lines are yours
+        to publish.
+      options:
+        - label: I am including the original and my answer, in full, below.
+          required: false
+
+  - type: textarea
+    id: originalText
+    attributes:
+      label: original
+      description: Only if you ticked the box above.
+      render: text
+    validations:
+      required: false
+
+  - type: textarea
+    id: userText
+    attributes:
+      label: answer
+      description: Only if you ticked the box above.
+      render: text
+    validations:
+      required: false

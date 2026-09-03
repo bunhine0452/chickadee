@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 
+import { focusOrFallback } from './focus.js';
 import './SessionOverlay.css';
 
 /** 탭 순서에 드는 것들. 포커스 트랩이 이 목록의 처음과 끝을 잇는다. */
@@ -66,10 +67,13 @@ export function SessionOverlay({
       const s = stateRef.current;
       const active = document.activeElement;
 
-      // ① 입력에서 빠져나오기.
+      // ① 입력에서 빠져나오기. **`blur()` 하지 않는다** — 포커스가 `<body>` 로 떨어지면
+      // 05 §9 의 「포커스 유실」 게이트가 그 순간 깨지고, 다음 Esc 가 ③(사다리 접기)을
+      // 건너뛰어 **두 번에 홈까지** 간다(`closest('.reprint')` 가 `body` 에서는 못 찾는다).
+      // 오버라이 자체로 옮기면 문맥이 유지된 채 입력만 빠져나온다.
       if (isTyping(active)) {
         e.preventDefault();
-        active.blur();
+        ref.current?.focus();
         return;
       }
 
@@ -84,7 +88,7 @@ export function SessionOverlay({
       if (s.ladderOpen === true && active instanceof HTMLElement && active.closest('.reprint') !== null) {
         e.preventDefault();
         s.onCloseLadder?.();
-        ref.current?.querySelector<HTMLButtonElement>('.dunno')?.focus();
+        focusOrFallback(ref.current?.querySelector('.dunno') ?? null, '.proof');
         return;
       }
 
@@ -124,7 +128,15 @@ export function SessionOverlay({
   }, []);
 
   return (
-    <div ref={ref} className="proof" role="dialog" aria-modal="true" aria-label="교정쇄">
+    <div
+      ref={ref}
+      className="proof"
+      role="dialog"
+      aria-modal="true"
+      aria-label="교정쇄"
+      // Esc ① 이 입력에서 빠져나올 때 포커스가 갈 자리. 탭 순서에는 들어가지 않는다.
+      tabIndex={-1}
+    >
       {band}
       <main className="bench" aria-live="off">
         {children}
