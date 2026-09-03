@@ -157,13 +157,12 @@ export async function answerPlate(input: AnswerInput): Promise<PlateResult | nul
       liferShown: store.liferShown,
     });
 
-    // 오답·모르겠어요면 다시 찍기를 건다 (02 §4). 판당 한 번, 아래층에서는 넣지 않는다.
-    if (!verdict.correct || input.dunno) {
-      const guard = { role: plate.role, pendingRetry: false };
-      if (shouldInsertRetry(guard)) {
-        await insertRetry(session.id, plate.pos, plate.id,
-          { id: plate.cardId, conceptId: plate.conceptId, track: plate.track }, now);
-      }
+    // 오답·모르겠어요면 다시 찍기를 건다 (02 §4). 아래층·다시 찍기 판에서는 안 넣고,
+    // 「같은 판의 retry 가 이미 뒤에 있나」는 `insertRetry` 가 SQL 로 본다 — 여기서 `false` 를
+    // 넘기는 것은 그 검사를 두 번 하지 않겠다는 뜻이다.
+    if ((!verdict.correct || input.dunno) && shouldInsertRetry({ role: plate.role, pendingRetry: false })) {
+      await insertRetry(session.id, plate.pos, plate.id,
+        { id: plate.cardId, conceptId: plate.conceptId, track: plate.track }, now);
     }
     useUi.getState().setPlates(await loadPlates(session.id));
 
