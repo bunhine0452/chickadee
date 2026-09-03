@@ -52,8 +52,8 @@ const { emptyMastery, finishPlate } = await import('./plate.js');
 import type { CardMaker, Plate } from './session.js';
 
 const {
-  insertPrereq, insertRetry, loadMastery, loadPlates, openSession, removePlate, saveItem,
-  saveSession, today,
+  insertPrereq, insertRetry, loadMastery, loadPlates, openSession, previewToday, removePlate,
+  saveItem, saveSession, today,
 } = await import('./session.js');
 const { loadSummary } = await import('./summary.js');
 const { loadSettings, loadScheduler } = await import('./settings.js');
@@ -339,6 +339,35 @@ describe('중단 · 복구 (§5.6)', () => {
     const again = await loadPlates(view.session.id);
     expect(again[0]?.state).toEqual({ sel: 2, rung: 3 });
     expect(again[0]?.elapsedS).toBe(7);
+  });
+});
+
+describe('홈의 「오늘의 인쇄」 미리보기', () => {
+  test('세션을 만들지 않고 오늘 걸릴 판을 센다', async () => {
+    const before = await previewToday(1, T);
+    expect(before.items.length).toBeGreaterThan(0);
+    expect(before.resumeAt).toBeNull();
+    // **미리보기는 아무것도 쓰지 않는다** — 열어 보지도 않은 판이 원장에 쌓이면 안 된다.
+    expect(db.prepare('SELECT COUNT(*) AS n FROM session').get()).toEqual({ n: 0 });
+    expect(db.prepare('SELECT COUNT(*) AS n FROM card').get()).toEqual({ n: 0 });
+  });
+
+  test('오늘 세션이 있으면 이어 찍을 자리를 알려 준다', async () => {
+    const view = await openSession(1, T, maker);
+    const plate = view?.plates[0];
+    if (!plate) throw new Error('판이 없다');
+    await answer(plate, { ok: true, at: T });
+
+    const preview = await previewToday(1, T);
+    expect(preview.resumeAt).toBe(1);
+    expect(preview.items).toHaveLength(view?.plates.length ?? 0);
+  });
+
+  test('찍을 것이 없으면 빈 미리보기다', async () => {
+    db.exec('DELETE FROM concept_site');
+    const preview = await previewToday(1, T);
+    expect(preview.items).toEqual([]);
+    expect(preview.mins).toBe(0);
   });
 });
 
