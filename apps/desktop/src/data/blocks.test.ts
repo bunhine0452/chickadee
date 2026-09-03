@@ -35,6 +35,13 @@ const dump: DumpRow[] = existsSync(DUMP)
   : [];
 
 /**
+ * 픽스처 리포는 커밋되지 않는다(생성물 12k줄) — `bash scripts/make-fixture-repo.sh
+ * projectox-like` 가 만든다. 없으면 **건너뛴다**: Rust 쪽 골든이 쓰는 것과 같은 관례다.
+ * CI 는 `lint-type-unit` 에서 이 스크립트를 먼저 돌린다.
+ */
+const ready = dump.length > 0 && existsSync(REPO);
+
+/**
  * 「이미 배운 개념」 집합. 덤프 전체에서 가장 자주 나오는 25개를 2겹으로 둔다.
  *
  * 왜 이것이 필요한가: 04 §3.1 의 순위 ②는 「ly 0 개념 ≤ 3개」다. 갓 등록한 리포는 모든
@@ -97,7 +104,7 @@ const generate = (stage: 1 | 2 | 3, candidates: readonly BlockCandidate[]) =>
     stage,
   });
 
-describe('projectox-like 의 T1 후보 (04 §3 · M3 증거)', () => {
+describe.skipIf(!ready)('projectox-like 의 T1 후보 (04 §3 · M3 증거)', () => {
   test('덤프가 있다 — 없으면 `cargo test -p chickadee-app --test pipeline projectox` 를 먼저 돌린다', () => {
     expect(dump.length, 'fixtures/ipc/projectox/blocks.json 이 비었다').toBeGreaterThan(10);
   });

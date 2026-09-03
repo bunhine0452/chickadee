@@ -85,6 +85,12 @@ jobs:
       - name: typecheck
         run: pnpm typecheck
 
+      # `apps/desktop/src/data/blocks.test.ts` reads the fixture repository's real
+      # source files (M3: the T1 candidates come out of it). Two seconds here beats
+      # committing 12k generated lines, and the test skips itself if it is missing.
+      - name: build the fixture repository the T1 tests read
+        run: bash scripts/make-fixture-repo.sh projectox-like
+
       - name: TS unit tests
         run: pnpm test:unit
         # the coverage gate (06 §1.8, `--coverage` + cargo-llvm-cov) is turned on in M1,
