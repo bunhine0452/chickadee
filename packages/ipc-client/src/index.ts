@@ -49,7 +49,12 @@ export const ipc = {
     probe: (path: string) => call<RepoProbe>('repo_probe', { path }),
   },
   ingest: {
-    start: (spec: IngestSpec) => call<{ jobId: JobId }>('ingest_start', spec),
+    /**
+     * `ingest_start(spec: JobSpec)` 는 인자를 **구조체 하나**로 받는다 — 펼쳐 보내면
+     * Tauri 가 `missing required key spec` 으로 되던진다. 다른 명령들은 인자를 낱개로
+     * 받아 그대로 펼치므로 이 하나만 모양이 다르다.
+     */
+    start: (spec: IngestSpec) => call<{ jobId: JobId }>('ingest_start', { spec }),
     cancel: (jobId: JobId) => call<void>('ingest_cancel', { jobId }),
     status: (jobId: JobId) => call<IngestProgress | IngestDone>('ingest_status', { jobId }),
   },

@@ -13,7 +13,13 @@ export type Level = 'debug' | 'info' | 'warn' | 'error';
 /** 로그 한 줄. 값은 원시형만 — 객체를 통째로 넘기면 무엇이 들었는지 아무도 모른다. */
 export type Fields = Record<string, string | number | boolean | null | undefined>;
 
-/** 이름만으로 거른다. 무엇을 담았든 이 이름이면 나가지 않는다. */
+/**
+ * 이름만으로 거른다. 무엇을 담았든 이 이름이면 나가지 않는다.
+ *
+ * `code` 는 **소스 코드 조각**을 막으려는 것이다. 01 §6 이 허용한 「오류 코드」는 이 이름과
+ * 부딪히므로 **`errorCode`** 로 적는다 — M2 에서 인제스트 실패를 쫓다가 로그에 남은 것이
+ * `[redacted]` 뿐이라 원인을 못 본 적이 있다 (D79).
+ */
 const FORBIDDEN_KEYS = [
   'text', 'code', 'excerpt', 'content', 'source', 'snippet', 'answer', 'why',
   'prompt', 'body', 'lines', 'bytes', 'value', 'query', 'sql', 'scm',

@@ -55,6 +55,35 @@ export function measure<T>(mark: Mark, run: () => T): T {
   }
 }
 
+/**
+ * 시작 시각을 이미 아는 구간을 남긴다 — 마운트처럼 **끝나는 자리가 시작한 자리와 다른** 것.
+ * React 는 상태를 동기로 반영하지 않으므로 `measure(mark, run)` 으로는 잡을 수 없다.
+ */
+export function measureSince(mark: Mark, startedAt: number): void {
+  try {
+    performance.measure(mark, { start: startedAt, duration: performance.now() - startedAt });
+  } catch {
+    // 측정이 앱을 방해하지 않는다.
+  }
+}
+
+/**
+ * 마운트 구간의 시작 시각. 세션과 LIFER 는 상태를 세운 자리와 화면에 놓이는 자리가 달라서
+ * 시작을 여기 적어 두고 컴포넌트가 끝을 찍는다.
+ */
+const pending: Partial<Record<Mark, number>> = {};
+
+export const markSessionOpen = (): void => { pending['session:mount'] = performance.now(); };
+export const markLiferOpen = (): void => { pending['lifer:open'] = performance.now(); };
+
+/** 시작이 적혀 있으면 지금까지를 남기고 지운다. 없으면 아무 일도 하지 않는다. */
+export function closeMark(mark: Mark): void {
+  const started = pending[mark];
+  if (started === undefined) return;
+  delete pending[mark];
+  measureSince(mark, started);
+}
+
 /** 이미 찍힌 `measure` 들을 이름별로 모은다. */
 export function collected(): Partial<Record<Mark, Sample>> {
   const out: Partial<Record<Mark, Sample>> = {};
@@ -112,12 +141,22 @@ export async function perf(ms = 3_000): Promise<Sample> {
 
 /** WKWebView 에서 실제로 재는 절차 (05 §10). 코드가 아니라 사람이 하는 일이라 글로 둔다. */
 export const HOW = [
-  '1. macOS 에서 `pnpm tauri dev` 로 앱을 띄운다.',
+  '자동 — `VITE_PERF=1 VITE_PERF_REPO=<리포> pnpm --filter @chickadee/desktop exec tauri build --no-bundle`',
+  '  뒤 `HOME=<빈 디렉터리> ./target/release/chickadee-app` 로 띄우면 하네스가 혼자 돌고',
+  '  결과가 그 HOME 아래 `chickadee.db` 의 `perf_sample` 에 남는다 (devtools/perfRun.ts).',
+  '  **창을 앞에 세워 둬야 한다** — 가려진 WKWebView 는 requestAnimationFrame 을 멈춰서',
+  '  프레임이 0개로 나온다(실측). `osascript` 로 frontmost 를 계속 세우면 된다.',
+  '  `HOME` 을 바꾸는 이유는 Tauri 의 app_data_dir 이 거기 딸려 있어서다 — 실제 프로필을 안 건드린다.',
+  '',
+  '손으로 — 1. macOS 에서 `pnpm tauri dev` 로 앱을 띄운다.',
   '2. Safari → 설정 → 고급 → 「메뉴 막대에서 개발자용 기능 보기」를 켠다.',
   '3. Safari → 개발 → (기기 이름) → Chickadee 로 Web Inspector 를 붙인다.',
   '4. 주소에 `?dev=1` 을 붙여 다시 연다 (`window.__audit` 이 여기서만 붙는다).',
   '5. 콘솔에서 `await __audit.perf()` 를 부르고 p95 를 05 §10 예산과 비교한다.',
   '6. 예산을 넘으면 Timelines 로 어느 규칙이 깨졌는지 본다 — 목표를 낮추지 않는다.',
+  '',
+  '개발 서버(`tauri dev`)로 잰 `home:paint` 는 번들되지 않은 ESM 을 세는 것이라 과장된다.',
+  '릴리스 빌드로 재라.',
 ] as const;
 
 export interface Audit {

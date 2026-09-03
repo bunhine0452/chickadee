@@ -185,12 +185,23 @@ pub fn run(sink: &Sink, store: &Store, spec: &JobSpec) -> Result<Report, String>
         (_, true) => "cancelled",
         _ => "done",
     };
-    drop(store.exec(
-        "facts.run_finish",
-        &json!({ "id": id, "finishedAt": now_ms(), "status": status, "filesN": out.files,
-                 "capturesN": out.captures, "commitsN": out.commits, "warningsN": out.warnings,
-                 "escalatedToFull": out.escalated_to_full }),
-    ));
+    // Every named parameter must be present: rusqlite rejects the whole statement when one
+    // is missing, and `drop()` used to hide that -- every run stayed `running` with zero
+    // counts. The columns this side cannot know (sites, dictionary and generator versions)
+    // are the derive layer's, and go in as null until it fills them.
+    let finish = json!({
+        "id": id, "finishedAt": now_ms(), "status": status,
+        "filesN": out.files, "sitesN": 0, "capturesN": out.captures,
+        "commitsN": out.commits, "warningsN": out.warnings,
+        "peakRssMb": Value::Null, "escalatedToFull": out.escalated_to_full,
+        "grammarVersionsJson": Value::Null, "queryHash": Value::Null,
+        "dictVersion": Value::Null, "dictSchema": Value::Null, "genVersion": Value::Null,
+        "fingerprint": Value::Null,
+        "error": result.as_ref().err().map(String::as_str),
+    });
+    if let Err(e) = store.exec("facts.run_finish", &finish) {
+        sink.warn("", &format!("run_finish: {e}"), &mut out);
+    }
     result.map(|()| out)
 }
 

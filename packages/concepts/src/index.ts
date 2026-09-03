@@ -28,5 +28,5 @@ export type { GraphNode } from './prereq-graph.js';
 export { registerRepo, listRepos, relocateRepo, removeRepo } from './repos.js';
 export { BLAME_BUDGET_MS, fillCommits } from './blame.js';
 export type { BlameOptions } from './blame.js';
-export { deriveRepo, materializeDict, recountUnknown, runIngest, writeUnitNodes } from './ingest.js';
+export { deriveRepo, inBatches, materializeDict, recountUnknown, runIngest, writeUnitNodes } from './ingest.js';
 export type { IngestOptions, IngestReport, Phase } from './ingest.js';

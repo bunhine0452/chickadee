@@ -25,7 +25,12 @@ export const todayKey = (now = Date.now()): string => dayKey(now, TZ, ROLLOVER_H
 export function report(e: unknown, where: string): void {
   const err = e instanceof IpcError ? e : null;
   const code = err?.code ?? 'UNKNOWN';
-  log.error(`${where} 실패`, { code });
+  // 코드만 남기면 IPC 밖에서 난 오류가 언제나 `UNKNOWN` 한 줄이 되어 원인을 못 쫓는다.
+  // 메시지의 절대 경로는 로거가 줄여 준다 (01 §6).
+  log.error(`${where} 실패`, {
+    errorCode: code,
+    message: e instanceof Error ? e.message.slice(0, 200) : String(e).slice(0, 200),
+  });
   if (err && isInternal(err.code)) return;
   const copy = errorCopy(code);
   useUi.getState().fail([copy.title, copy.detail].filter(Boolean).join(' '));
@@ -113,6 +118,6 @@ async function background(repoId: number, rootPath: string): Promise<void> {
     log.info('사용처에 출처를 붙였다', { repoId, filled });
     await refreshHome();
   } catch (e) {
-    log.warn('출처 채우기를 건너뛴다', { code: e instanceof IpcError ? e.code : 'UNKNOWN' });
+    log.warn('출처 채우기를 건너뛴다', { errorCode: e instanceof IpcError ? e.code : 'UNKNOWN' });
   }
 }

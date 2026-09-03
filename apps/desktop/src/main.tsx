@@ -23,4 +23,11 @@ createRoot(el).render(
 // `?dev=1` 에서만 계측 손잡이를 붙인다 (05 §10).
 installAudit(window.location.search);
 
-void boot();
+void boot().then(async () => {
+  // WKWebView 실측 하네스. `VITE_PERF=1` 로 빌드했을 때만 들어간다 — 평소 번들에는
+  // 이 분기 자체가 없다(Vite 가 상수 접기로 지운다).
+  if (__PERF__) {
+    const { runPerf } = await import('./devtools/perfRun.js');
+    await runPerf(import.meta.env['VITE_PERF_REPO'] ?? '');
+  }
+});

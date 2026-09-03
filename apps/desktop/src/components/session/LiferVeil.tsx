@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { Dee, RichText, Stamp } from '@chickadee/ui';
 
+import { closeMark } from '../../devtools/audit.js';
 import './LiferVeil.css';
 
 /** LIFER Dee 의 키(px). 목업 `.lifer-card .dee-sticker{width:84px}`. */
@@ -57,6 +58,11 @@ export function LiferVeil({ concept, code, where, serial, onClose }: LiferVeilPr
   useEffect(() => {
     closeRef.current = onClose;
   }, [onClose]);
+
+  // 05 §10 `lifer:open` — 첫 성공을 알아챈 순간부터 베일이 실제로 놓일 때까지.
+  useLayoutEffect(() => {
+    closeMark('lifer:open');
+  }, []);
 
   useEffect(() => {
     const before = document.activeElement;

@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { DeeLogo, Switch } from '@chickadee/ui';
 
+import { measure } from '../../devtools/audit';
 import type { HomeMasthead } from '../../screens/home/data';
 import './Masthead.css';
 
@@ -34,10 +35,24 @@ export interface MastheadProps {
  */
 export function Masthead({ repoName, today, streak, masthead }: MastheadProps) {
   const [theme, setTheme] = useState<Theme>('light');
+  const firstRun = useRef(true);
   const [trim, setTrim] = useState<Trim>('off');
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
+    // 05 §10 `theme:switch` 예산 100ms — 토큰을 갈아 끼우고 **다시 계산까지** 끝나는 데까지다.
+    // `offsetHeight` 를 읽어 재계산을 그 자리에서 끝낸다(안 그러면 다음 프레임에 밀린다).
+    //
+    // **첫 실행은 재지 않는다.** 마운트 때의 이 효과는 전환이 아니라 홈 전체의 첫 조판이라
+    // 같은 이름으로 세면 예산이 늘 초과로 보인다(실측 138ms 대 237ms).
+    if (firstRun.current) {
+      firstRun.current = false;
+      document.documentElement.setAttribute('data-theme', theme);
+      return;
+    }
+    measure('theme:switch', () => {
+      document.documentElement.setAttribute('data-theme', theme);
+      void document.documentElement.offsetHeight;
+    });
   }, [theme]);
 
   useEffect(() => {

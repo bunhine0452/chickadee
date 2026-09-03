@@ -5,7 +5,7 @@
  * `@chickadee/grading` 이, 겹이 얼마나 오를지는 `@chickadee/scheduler` 가 정한다.
  */
 import { FlatButton } from '@chickadee/ui';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 
 import { JobBand } from '../../components/session/JobBand.js';
 import { SessionOverlay } from '../../components/session/SessionOverlay.js';
@@ -13,6 +13,7 @@ import { LiferVeil } from '../../components/session/LiferVeil.js';
 import { Summary } from '../../components/session/Summary.js';
 import type { RungNo } from '../../components/session/ReprintLadder.js';
 import type { QueueItem } from '../../components/shell/TimeQueue.js';
+import { closeMark, markLiferOpen } from '../../devtools/audit.js';
 import { baseName, loadLadder, type LadderData } from '../../data/ladder.js';
 import type { Plate } from '../../data/session.js';
 import type { Track } from '@chickadee/store-sql';
@@ -73,6 +74,12 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
   const elapsed = useUi((s) => s.elapsed[pos] ?? 0);
 
   useSessionClock(pos, plate?.elapsedS ?? 0, () => void savePlate());
+
+  // 05 §10 `session:mount` — 「인쇄 시작」을 누른 뒤 첫 교정지가 실제로 놓일 때까지.
+  // 레이아웃 효과라 브라우저가 그리기 직전에 찍힌다.
+  useLayoutEffect(() => {
+    closeMark('session:mount');
+  }, []);
 
   // 판이 바뀌면 사다리는 접힌다 — 앞 판의 4단 입력이 다음 판에 따라오면 안 된다.
   useEffect(() => {
@@ -150,6 +157,7 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
     if (answered.correct && answered.layer[1] > answered.layer[0] && answered.layer[0] === 0
       && plate.role !== 'retry' && plate.role !== 'prereq' && shown <= 3) {
       const payload = plate.payload.track === 't0' ? plate.payload : null;
+      markLiferOpen();
       setLifer({
         concept: plate.nameKo,
         code: plate.token ?? '',

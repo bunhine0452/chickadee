@@ -7,6 +7,8 @@
  */
 import { ipc } from '@chickadee/ipc-client';
 
+import { inBatches } from './ingest.js';
+
 /** 03 §7 — 2차 패스 전체 예산. 이보다 오래 걸리면 남은 파일은 다음 인제스트로 미룬다. */
 export const BLAME_BUDGET_MS = 60_000;
 
@@ -50,7 +52,9 @@ export async function fillCommits(options: BlameOptions): Promise<number> {
         params: { repoId: options.repoId, siteKey: site.siteKey, sha: hunk.sha },
       });
     }
-    if (ops.length > 0) await ipc.store.batch(ops);
+    // 200 op 상한을 넘기면 `BAD_INPUT` 이고, 그 오류는 배경 패스의 catch 에 먹혀
+    // 출처가 영영 안 채워진다. 사용처가 많은 파일 하나면 바로 넘는다.
+    if (ops.length > 0) await inBatches(ops);
     filled += ops.length;
     options.onFile?.(path, filled);
   }

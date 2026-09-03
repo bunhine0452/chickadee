@@ -12,6 +12,7 @@ import { IpcError, ipc, log } from '@chickadee/ipc-client';
 import { TICK_MS, labelFor, shouldInsertPrereq, shouldInsertRetry } from '@chickadee/scheduler';
 import type { CardPayload, ConceptId, ItemState, Layer } from '@chickadee/store-sql';
 
+import { measure, markSessionOpen } from './devtools/audit.js';
 import { cardMaker, makeCard, type MakerDeps } from './data/cards.js';
 import { emptyMastery, finishPlate } from './data/plate.js';
 import {
@@ -59,6 +60,7 @@ export async function startSession(repoId: number, rootPath: string): Promise<bo
     for (const [conceptId, m] of await loadMastery(view.plates.map((p) => p.conceptId))) {
       layers.set(conceptId, m.layer);
     }
+    markSessionOpen();
     useUi.getState().beginSession(view.session, view.plates, view.pos);
     return true;
   } catch (e) {
@@ -105,7 +107,8 @@ export async function answerPlate(input: AnswerInput): Promise<PlateResult | nul
     const parent = plate.parentItemId === null
       ? undefined
       : t0Of(plates.find((p) => p.id === plate.parentItemId)?.payload ?? plate.payload) ?? undefined;
-    const verdict = gradeT0(payload, input.sel, parent);
+    // 05 §10 `t0:grade` 예산 30ms 는 **판정 계산**의 것이다 — 원장 쓰기는 그 뒤다.
+    const verdict = measure('t0:grade', () => gradeT0(payload, input.sel, parent));
 
     const mastery = (await loadMastery([plate.conceptId])).get(plate.conceptId)
       ?? emptyMastery(plate.conceptId, null);
@@ -221,7 +224,7 @@ export async function openRung(dunnoEventId: number, rung: 1 | 2 | 3 | 4): Promi
   try {
     await recordLadder(dunnoEventId, rung, 'open', null, Date.now());
   } catch (e) {
-    log.warn('사다리 발자국을 남기지 못했다', { code: e instanceof IpcError ? e.code : 'UNKNOWN' });
+    log.warn('사다리 발자국을 남기지 못했다', { errorCode: e instanceof IpcError ? e.code : 'UNKNOWN' });
   }
 }
 
@@ -305,7 +308,7 @@ export async function savePlate(status: Plate['status'] = 'active'): Promise<voi
     const keep = plate.status === 'done' ? 'done' : status;
     await saveItem(plate.id, keep, elapsed[pos] ?? plate.elapsedS, plate.state);
   } catch (e) {
-    log.warn('판 저장을 건너뛴다', { code: e instanceof IpcError ? e.code : 'UNKNOWN' });
+    log.warn('판 저장을 건너뛴다', { errorCode: e instanceof IpcError ? e.code : 'UNKNOWN' });
   }
 }
 
