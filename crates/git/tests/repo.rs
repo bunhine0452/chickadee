@@ -426,7 +426,11 @@ fn file_diff_returns_only_the_added_lines_of_one_path() {
     // A path the commit never touched is empty, not an error (03 §1.4).
     write(&dir.0, "c.ts", "const c = 1;\n");
     let last = commit(&repo, "feat: third").to_string();
-    assert!(open.file_diff(&last, "a.ts").expect("diff").added.is_empty());
+    assert!(open
+        .file_diff(&last, "a.ts")
+        .expect("diff")
+        .added
+        .is_empty());
 }
 
 #[test]
