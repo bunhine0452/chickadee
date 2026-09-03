@@ -20,6 +20,12 @@ pub const LANGS: &[(&str, Load)] = &[
     ("javascript", || tree_sitter_javascript::LANGUAGE.into()),
     #[cfg(feature = "lang-sql")]
     ("sql", || tree_sitter_sequel::LANGUAGE.into()),
+    #[cfg(feature = "lang-python")]
+    ("python", || tree_sitter_python::LANGUAGE.into()),
+    #[cfg(feature = "lang-go")]
+    ("go", || tree_sitter_go::LANGUAGE.into()),
+    #[cfg(feature = "lang-rust")]
+    ("rust", || tree_sitter_rust::LANGUAGE.into()),
 ];
 
 #[derive(Debug, Clone, Serialize)]

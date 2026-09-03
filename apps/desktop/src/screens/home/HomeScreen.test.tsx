@@ -105,6 +105,7 @@ const DATA: HomeData = {
     error: null,
   },
   files: 41,
+  newcomerFlag: 'none',
 };
 
 const EMPTY: HomeData = {
@@ -175,6 +176,22 @@ describe('HomeScreen', () => {
     expect(screen.getByText(/판이 없는 문법이 없습니다/)).toBeTruthy();
     expect(screen.getByText(/다시 찍을 개념이 아직 없습니다/)).toBeTruthy();
     expect(screen.getByRole('img', { name: /지난 14일 잉크 농도/ })).toBeTruthy();
+  });
+
+  it('초보 안내는 플래그가 섰을 때만, 대지보다 위에 뜬다 (02 §6.4)', () => {
+    draw(DATA);
+    expect(screen.queryByRole('complementary', { name: '먼저 읽을 것' })).toBeNull();
+    cleanup();
+
+    draw({ ...DATA, newcomerFlag: 'confirmed' });
+    const notice = screen.getByRole('complementary', { name: '먼저 읽을 것' });
+    expect(notice.textContent).toContain('내 코드를 교재로 씁니다');
+    // 아무것도 잠그지 않는 것이 눈에 보여야 한다. 닫기 버튼은 두지 않는다(다시 켤 길이 없다).
+    expect(notice.textContent).toContain('잠기는 것은 없습니다');
+    expect(notice.querySelector('button')).toBeNull();
+    // 상단이다 — 작업대(「판이 없는 문법」)보다 문서 순서가 앞이면 스크롤 없이 보인다.
+    const gaps = screen.getByRole('list', { name: '판이 없는 문법' });
+    expect(notice.compareDocumentPosition(gaps) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   it('대지의 스티커를 눌러 상세를 열 수 있다', async () => {

@@ -1,0 +1,124 @@
+/* 목업: design/src/ink/session.css 의 `.editor` · `.gut` · `.gl` · `.editor textarea`.
+   바꾼 것 —
+     · 판정 틱 3색의 원색(--pink/--blue/--yellow-deep)을 --verdict-* 로 (05 §4.2).
+     · Monaco 판의 틱은 `.gl::before` 가 아니라 linesDecorations 자리(`.gl-tick`)에 그린다.
+       Monaco 는 `<div class="cldr gl-tick gl-exact" style="left:…px;width:14px">` 를 만들고
+       그 인라인 width 가 클래스의 width 를 이긴다 — 그래서 3px 폭은 inset 그림자가 낸다.
+     · `.editor` 를 Monaco 판(`.mono`)과 textarea 판(`.plain`)이 나눠 쓴다. 격자
+       `3.2em minmax(0,1fr)` 는 거터 div 를 손으로 그리는 plain 판만 필요하다. */
+.editor {
+  position: relative;
+  border: 2px solid var(--rule);
+  background: var(--stock);
+  font-family: var(--f-mono);
+  font-size: var(--fs-16);
+  line-height: 1.85;
+}
+
+.editor.focus {
+  outline: 3px solid var(--t1);
+  outline-offset: 2px;
+}
+
+/* ── Monaco 판 ─────────────────────────────────────────────────────────────── */
+
+/* 높이는 내용에 맞춰 JS 가 넣는다(onDidContentSizeChange) — 안쪽에 스크롤을 만들지 않는다.
+   목업의 `textarea.rows = n+1` 과 같은 규칙이고, `scrollBeyondLastLine:false` 가 전제다. */
+.editor.mono > .mono-host {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Monaco 의 linesDecorations.css 가 `background:white` 를 하드코딩해 둔다 —
+   야간반에서 거터 왼쪽에 흰 띠가 남는다. */
+.editor.mono .monaco-editor .lines-decorations {
+  background: transparent;
+}
+
+/* 판정 틱. 목업 `.gl::before{top:.55em; height:.75em}` 을 lineHeight 30px 기준 px 로 굳혔다. */
+.editor.mono .gl-tick {
+  height: 12px;
+  margin-top: 9px;
+  margin-left: 4px;
+}
+
+.editor.mono .gl-tick.gl-exact {
+  box-shadow: inset 3px 0 0 var(--verdict-exact);
+}
+
+.editor.mono .gl-tick.gl-equiv {
+  box-shadow: inset 3px 0 0 var(--verdict-equiv);
+}
+
+.editor.mono .gl-tick.gl-differ {
+  box-shadow: inset 3px 0 0 var(--verdict-differ);
+}
+
+/* ── textarea 판 (05 §8 마지막 문단의 되돌림 스위치) ──────────────────────── */
+.editor.plain {
+  display: grid;
+  grid-template-columns: 3.2em minmax(0, 1fr);
+}
+
+.editor.plain .gut {
+  padding-top: 6px;
+  border-right: 1px solid var(--rule);
+  background: var(--paper-3);
+  user-select: none;
+}
+
+.editor.plain .gl {
+  position: relative;
+  height: 1.85em;
+  padding-right: .9em;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* 틱은 늘 자리를 차지한다 — 판정이 붙고 빠질 때 줄 번호가 밀리지 않게. */
+.editor.plain .gl::before {
+  content: "";
+  position: absolute;
+  top: .55em;
+  left: 4px;
+  width: 3px;
+  height: .75em;
+  background: transparent;
+}
+
+.editor.plain .gl.cur {
+  background: var(--paper-2);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.editor.plain .gl.exact::before {
+  background: var(--verdict-exact);
+}
+
+.editor.plain .gl.equiv::before {
+  background: var(--verdict-equiv);
+}
+
+.editor.plain .gl.differ::before {
+  background: var(--verdict-differ);
+}
+
+.editor.plain textarea {
+  display: block;
+  width: 100%;
+  padding: 6px 1em;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  line-height: inherit;
+  overflow: hidden;
+  overflow-wrap: normal;
+  resize: none;
+  tab-size: 2;
+  white-space: pre;
+  word-break: normal;
+}

@@ -134,6 +134,12 @@ const t0PayloadSchema = z.object({
 const t1PayloadSchema = z.object({
   track: z.literal('t1'),
   kind: z.literal('transcribe'),
+  /**
+   * 02 `block.id` (D92). 판을 마칠 때 `why_answer.block_id` 와 `block.ast_json` 캐시를
+   * 되찾을 열쇠다 — `card` 에는 블록을 가리키는 열이 없고(`file_id` 뿐이다) 원본 줄만으로
+   * 블록을 되짚으면 같은 파일의 같은 길이 블록과 헷갈린다.
+   */
+  blockId: int(),
   file: z.string(),
   fn: z.string(),
   original: z.array(z.string()),

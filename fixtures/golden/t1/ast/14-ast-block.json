@@ -1,0 +1,429 @@
+{
+  "grammar": "typescript",
+  "original": {
+    "kind": "program",
+    "named": true,
+    "start": 0,
+    "end": 41,
+    "children": [
+      {
+        "kind": "function_declaration",
+        "named": true,
+        "start": 0,
+        "end": 41,
+        "children": [
+          {
+            "kind": "function",
+            "named": false,
+            "start": 0,
+            "end": 8,
+            "text": "function",
+            "children": []
+          },
+          {
+            "kind": "identifier",
+            "named": true,
+            "start": 9,
+            "end": 10,
+            "text": "f",
+            "children": []
+          },
+          {
+            "kind": "formal_parameters",
+            "named": true,
+            "start": 10,
+            "end": 15,
+            "children": [
+              {
+                "kind": "(",
+                "named": false,
+                "start": 10,
+                "end": 11,
+                "text": "(",
+                "children": []
+              },
+              {
+                "kind": "required_parameter",
+                "named": true,
+                "start": 11,
+                "end": 14,
+                "children": [
+                  {
+                    "kind": "identifier",
+                    "named": true,
+                    "start": 11,
+                    "end": 14,
+                    "text": "res",
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "kind": ")",
+                "named": false,
+                "start": 14,
+                "end": 15,
+                "text": ")",
+                "children": []
+              }
+            ]
+          },
+          {
+            "kind": "statement_block",
+            "named": true,
+            "start": 16,
+            "end": 41,
+            "children": [
+              {
+                "kind": "{",
+                "named": false,
+                "start": 16,
+                "end": 17,
+                "text": "{",
+                "children": []
+              },
+              {
+                "kind": "if_statement",
+                "named": true,
+                "start": 20,
+                "end": 39,
+                "children": [
+                  {
+                    "kind": "if",
+                    "named": false,
+                    "start": 20,
+                    "end": 22,
+                    "text": "if",
+                    "children": []
+                  },
+                  {
+                    "kind": "parenthesized_expression",
+                    "named": true,
+                    "start": 23,
+                    "end": 32,
+                    "children": [
+                      {
+                        "kind": "(",
+                        "named": false,
+                        "start": 23,
+                        "end": 24,
+                        "text": "(",
+                        "children": []
+                      },
+                      {
+                        "kind": "unary_expression",
+                        "named": true,
+                        "start": 24,
+                        "end": 31,
+                        "children": [
+                          {
+                            "kind": "!",
+                            "named": false,
+                            "start": 24,
+                            "end": 25,
+                            "text": "!",
+                            "children": []
+                          },
+                          {
+                            "kind": "member_expression",
+                            "named": true,
+                            "start": 25,
+                            "end": 31,
+                            "children": [
+                              {
+                                "kind": "identifier",
+                                "named": true,
+                                "start": 25,
+                                "end": 28,
+                                "text": "res",
+                                "children": []
+                              },
+                              {
+                                "kind": ".",
+                                "named": false,
+                                "start": 28,
+                                "end": 29,
+                                "text": ".",
+                                "children": []
+                              },
+                              {
+                                "kind": "property_identifier",
+                                "named": true,
+                                "start": 29,
+                                "end": 31,
+                                "text": "ok",
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "kind": ")",
+                        "named": false,
+                        "start": 31,
+                        "end": 32,
+                        "text": ")",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "return_statement",
+                    "named": true,
+                    "start": 33,
+                    "end": 39,
+                    "children": [
+                      {
+                        "kind": "return",
+                        "named": false,
+                        "start": 33,
+                        "end": 39,
+                        "text": "return",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "}",
+                "named": false,
+                "start": 40,
+                "end": 41,
+                "text": "}",
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "originalHadError": false,
+  "user": {
+    "kind": "program",
+    "named": true,
+    "start": 0,
+    "end": 45,
+    "children": [
+      {
+        "kind": "function_declaration",
+        "named": true,
+        "start": 0,
+        "end": 45,
+        "children": [
+          {
+            "kind": "function",
+            "named": false,
+            "start": 0,
+            "end": 8,
+            "text": "function",
+            "children": []
+          },
+          {
+            "kind": "identifier",
+            "named": true,
+            "start": 9,
+            "end": 10,
+            "text": "f",
+            "children": []
+          },
+          {
+            "kind": "formal_parameters",
+            "named": true,
+            "start": 10,
+            "end": 15,
+            "children": [
+              {
+                "kind": "(",
+                "named": false,
+                "start": 10,
+                "end": 11,
+                "text": "(",
+                "children": []
+              },
+              {
+                "kind": "required_parameter",
+                "named": true,
+                "start": 11,
+                "end": 14,
+                "children": [
+                  {
+                    "kind": "identifier",
+                    "named": true,
+                    "start": 11,
+                    "end": 14,
+                    "text": "res",
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "kind": ")",
+                "named": false,
+                "start": 14,
+                "end": 15,
+                "text": ")",
+                "children": []
+              }
+            ]
+          },
+          {
+            "kind": "statement_block",
+            "named": true,
+            "start": 16,
+            "end": 45,
+            "children": [
+              {
+                "kind": "{",
+                "named": false,
+                "start": 16,
+                "end": 17,
+                "text": "{",
+                "children": []
+              },
+              {
+                "kind": "if_statement",
+                "named": true,
+                "start": 20,
+                "end": 43,
+                "children": [
+                  {
+                    "kind": "if",
+                    "named": false,
+                    "start": 20,
+                    "end": 22,
+                    "text": "if",
+                    "children": []
+                  },
+                  {
+                    "kind": "parenthesized_expression",
+                    "named": true,
+                    "start": 23,
+                    "end": 32,
+                    "children": [
+                      {
+                        "kind": "(",
+                        "named": false,
+                        "start": 23,
+                        "end": 24,
+                        "text": "(",
+                        "children": []
+                      },
+                      {
+                        "kind": "unary_expression",
+                        "named": true,
+                        "start": 24,
+                        "end": 31,
+                        "children": [
+                          {
+                            "kind": "!",
+                            "named": false,
+                            "start": 24,
+                            "end": 25,
+                            "text": "!",
+                            "children": []
+                          },
+                          {
+                            "kind": "member_expression",
+                            "named": true,
+                            "start": 25,
+                            "end": 31,
+                            "children": [
+                              {
+                                "kind": "identifier",
+                                "named": true,
+                                "start": 25,
+                                "end": 28,
+                                "text": "res",
+                                "children": []
+                              },
+                              {
+                                "kind": ".",
+                                "named": false,
+                                "start": 28,
+                                "end": 29,
+                                "text": ".",
+                                "children": []
+                              },
+                              {
+                                "kind": "property_identifier",
+                                "named": true,
+                                "start": 29,
+                                "end": 31,
+                                "text": "ok",
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "kind": ")",
+                        "named": false,
+                        "start": 31,
+                        "end": 32,
+                        "text": ")",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "statement_block",
+                    "named": true,
+                    "start": 33,
+                    "end": 43,
+                    "children": [
+                      {
+                        "kind": "{",
+                        "named": false,
+                        "start": 33,
+                        "end": 34,
+                        "text": "{",
+                        "children": []
+                      },
+                      {
+                        "kind": "return_statement",
+                        "named": true,
+                        "start": 35,
+                        "end": 41,
+                        "children": [
+                          {
+                            "kind": "return",
+                            "named": false,
+                            "start": 35,
+                            "end": 41,
+                            "text": "return",
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "kind": "}",
+                        "named": false,
+                        "start": 42,
+                        "end": 43,
+                        "text": "}",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "}",
+                "named": false,
+                "start": 44,
+                "end": 45,
+                "text": "}",
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "userHadError": false
+}

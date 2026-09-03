@@ -56,6 +56,11 @@ export interface CardMaker {
   forReview(conceptId: ConceptId, layer: Layer): Promise<Candidate | null>;
   /** 첫 노출 카드. 사전이 비어 만들 수 없으면 `null` — 그 개념은 「판이 없는 문법」에 남는다. */
   forNew(conceptId: ConceptId, siteId: number): Promise<Candidate | null>;
+  /**
+   * T1 필사 판. 블록 후보가 하나도 없거나(12~40줄 함수가 없다) 대표 개념을 못 뽑으면
+   * `null` — 그러면 그날 T1 슬롯은 비고 T0 이 그 시간을 쓴다 (02 §5.3).
+   */
+  forBlock(): Promise<Candidate | null>;
 }
 
 const asLayer = (n: number): Layer => Math.max(0, Math.min(4, Math.trunc(n))) as Layer;
@@ -201,14 +206,15 @@ async function buildQueue(
 }
 
 /**
- * T1·T2 슬롯. M2 에는 그 트랙 카드가 없어 언제나 `null` 이지만, 리듬 판정은 여기 있고
- * M3·M4 가 `queue.next_track_card` 에 카드를 넣으면 그대로 돈다.
+ * T1·T2 슬롯. 리듬이 「오늘 걸어라」고 할 때만 카드를 찾고, **T1 은 없으면 그 자리에서
+ * 만든다** — 블록은 인제스트가 이미 써 뒀으므로(02 `block`) 필사 판은 언제든 굽을 수 있다.
+ * T2 는 M4 가 같은 자리를 채운다.
  */
 async function trackSlot(
   repoId: number,
   track: 't1' | 't2',
   day: DayKey,
-  _maker: CardMaker,
+  maker: CardMaker,
 ): Promise<Candidate | null> {
   const since = shiftDay(day, -7);
   const rows = await ipc.store.query('queue.track_cadence', { repoId, track, sinceDay: since });
@@ -218,14 +224,16 @@ async function trackSlot(
 
   const cards = await ipc.store.query('queue.next_track_card', { repoId, track });
   const card = cards[0];
-  if (!card) return null;
-  return {
-    cardId: card.id,
-    conceptId: card.concept_id as ConceptId,
-    track,
-    role: card.prints > 0 ? 'review' : 'new',
-    estMin: estMinFor(track, card.prints > 0 ? 'review' : 'new', card.est_min_ema),
-  };
+  if (card) {
+    return {
+      cardId: card.id,
+      conceptId: card.concept_id as ConceptId,
+      track,
+      role: card.prints > 0 ? 'review' : 'new',
+      estMin: estMinFor(track, card.prints > 0 ? 'review' : 'new', card.est_min_ema),
+    };
+  }
+  return track === 't1' ? maker.forBlock() : null;
 }
 
 const shiftDay = (day: string, delta: number): string => {

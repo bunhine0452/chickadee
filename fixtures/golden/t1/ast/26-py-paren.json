@@ -1,0 +1,237 @@
+{
+  "grammar": "python",
+  "original": {
+    "kind": "module",
+    "named": true,
+    "start": 0,
+    "end": 22,
+    "children": [
+      {
+        "kind": "function_definition",
+        "named": true,
+        "start": 0,
+        "end": 22,
+        "children": [
+          {
+            "kind": "def",
+            "named": false,
+            "start": 0,
+            "end": 3,
+            "text": "def",
+            "children": []
+          },
+          {
+            "kind": "identifier",
+            "named": true,
+            "start": 4,
+            "end": 5,
+            "text": "f",
+            "children": []
+          },
+          {
+            "kind": "parameters",
+            "named": true,
+            "start": 5,
+            "end": 8,
+            "children": [
+              {
+                "kind": "(",
+                "named": false,
+                "start": 5,
+                "end": 6,
+                "text": "(",
+                "children": []
+              },
+              {
+                "kind": "identifier",
+                "named": true,
+                "start": 6,
+                "end": 7,
+                "text": "x",
+                "children": []
+              },
+              {
+                "kind": ")",
+                "named": false,
+                "start": 7,
+                "end": 8,
+                "text": ")",
+                "children": []
+              }
+            ]
+          },
+          {
+            "kind": ":",
+            "named": false,
+            "start": 8,
+            "end": 9,
+            "text": ":",
+            "children": []
+          },
+          {
+            "kind": "block",
+            "named": true,
+            "start": 14,
+            "end": 22,
+            "children": [
+              {
+                "kind": "return_statement",
+                "named": true,
+                "start": 14,
+                "end": 22,
+                "children": [
+                  {
+                    "kind": "return",
+                    "named": false,
+                    "start": 14,
+                    "end": 20,
+                    "text": "return",
+                    "children": []
+                  },
+                  {
+                    "kind": "identifier",
+                    "named": true,
+                    "start": 21,
+                    "end": 22,
+                    "text": "x",
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "originalHadError": false,
+  "user": {
+    "kind": "module",
+    "named": true,
+    "start": 0,
+    "end": 24,
+    "children": [
+      {
+        "kind": "function_definition",
+        "named": true,
+        "start": 0,
+        "end": 24,
+        "children": [
+          {
+            "kind": "def",
+            "named": false,
+            "start": 0,
+            "end": 3,
+            "text": "def",
+            "children": []
+          },
+          {
+            "kind": "identifier",
+            "named": true,
+            "start": 4,
+            "end": 5,
+            "text": "f",
+            "children": []
+          },
+          {
+            "kind": "parameters",
+            "named": true,
+            "start": 5,
+            "end": 8,
+            "children": [
+              {
+                "kind": "(",
+                "named": false,
+                "start": 5,
+                "end": 6,
+                "text": "(",
+                "children": []
+              },
+              {
+                "kind": "identifier",
+                "named": true,
+                "start": 6,
+                "end": 7,
+                "text": "x",
+                "children": []
+              },
+              {
+                "kind": ")",
+                "named": false,
+                "start": 7,
+                "end": 8,
+                "text": ")",
+                "children": []
+              }
+            ]
+          },
+          {
+            "kind": ":",
+            "named": false,
+            "start": 8,
+            "end": 9,
+            "text": ":",
+            "children": []
+          },
+          {
+            "kind": "block",
+            "named": true,
+            "start": 14,
+            "end": 24,
+            "children": [
+              {
+                "kind": "return_statement",
+                "named": true,
+                "start": 14,
+                "end": 24,
+                "children": [
+                  {
+                    "kind": "return",
+                    "named": false,
+                    "start": 14,
+                    "end": 20,
+                    "text": "return",
+                    "children": []
+                  },
+                  {
+                    "kind": "parenthesized_expression",
+                    "named": true,
+                    "start": 21,
+                    "end": 24,
+                    "children": [
+                      {
+                        "kind": "(",
+                        "named": false,
+                        "start": 21,
+                        "end": 22,
+                        "text": "(",
+                        "children": []
+                      },
+                      {
+                        "kind": "identifier",
+                        "named": true,
+                        "start": 22,
+                        "end": 23,
+                        "text": "x",
+                        "children": []
+                      },
+                      {
+                        "kind": ")",
+                        "named": false,
+                        "start": 23,
+                        "end": 24,
+                        "text": ")",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "userHadError": false
+}

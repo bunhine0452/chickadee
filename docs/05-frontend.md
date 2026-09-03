@@ -345,6 +345,7 @@ interface SessionSlice {
 - **자동 저장**: `onDidChangeModelContent` → 400ms 디바운스 → `session.t1Draft` → 5초 tick 의 `session.save` 에 실린다. 블러·Esc·언마운트에서 즉시 flush. 「한 단계 쉽게」는 draft 를 유지한 채 stage 만 내린다.
 - **폰트 재측정**: 마운트 직후와 `document.fonts.ready` 후 `monaco.editor.remeasureFonts()` — 안 부르면 WKWebView 에서 폴백 폭으로 측정된 커서가 글자 사이에 뜬다.
 - **대안(목업의 textarea + 거터)과 버린 이유**: 거터 `div` 를 `textarea.rows` 로 맞추는 방식은 wrap 이 없어야만 정렬되고, 구문 색·줄 API·접근성 모드가 없으며 T3(버그 수리)에서 다시 짜야 한다. 비용은 지연 로드 1.2MB. 단 **WKWebView 마운트가 250ms 를 넘기면**(§10) 1단계만 textarea 로 되돌리는 스위치를 `ClonePad` 인터페이스 뒤에 남긴다.
+- **그 스위치는 켜졌다 (D93).** WKWebView 실측 `t1:monaco` **314 ms**(n=2, 릴리스 빌드)로 예산 250 을 넘겼다. 첫 마운트 299 ms 와 두 번째가 비슷해 청크 내려받기 비용이 아니라 **에디터 구성 자체**의 값이다. 그래서 `ClonePad` 는 `fallback` prop 을 갖고 `T1Plate` 이 `stage === 1` 에 켠다(`PlainPad` = textarea + 거터, 같은 props). 2·3단계는 Monaco 그대로다. 예산은 낮추지 않았다 — 남은 일은 `editor.api`(전체 에디터) 대신 기여 집합을 줄이는 것이다.
 
 ---
 
@@ -381,6 +382,20 @@ interface SessionSlice {
 | 측정 | `?dev=1` 에서 `__audit.perf(ms)`(목업 그대로: 스크롤+hover 교대, avg/p95/max/over16) 와 `performance.mark` 6종(`home:paint`, `session:mount`, `t0:grade`, `t1:monaco`, `theme:switch`, `lifer:open`) → `plugin-log` 파일. macOS 는 Safari › 개발 › 앱 이름으로 Web Inspector 타임라인 부착 | Tauri 릴리스엔 DevTools 가 없다 |
 
 예산(p95, 야간반 포함): 홈 48노드 스크롤+hover ≤ 12ms · 교정지 마운트 ≤ 50ms · T0 채점→판정란 ≤ 30ms · Monaco 마운트 ≤ 250ms · 테마 전환 ≤ 100ms · 창 표시 후 홈 인터랙티브 ≤ 400ms. **첫 실측을 체크리스트 3번 항목으로 잡고, 예산을 넘는 항목은 규칙을 강화하지 목표를 낮추지 않는다.**
+
+**WKWebView 실측** (릴리스 빌드 · 격리된 데이터 디렉터리 · 창을 앞에 세운 채). 재는 절차는 `apps/desktop/src/devtools/audit.ts` 의 `HOW` 와 `devtools/perfRun.ts` 에 있다.
+
+| mark | 실측 | 예산 | |
+|---|---|---|---|
+| `frame_p95` | 18 ms (이 리포 · 스티커 384개) · 18~24 ms (`projectox-like`) | 12 | **초과 — D80, 답은 윈도잉(D81), 자리는 `m4-05-dependency-map` 앞** |
+| `t1:monaco` | **314 ms** (n=2) | 250 | **초과 — D93, 1단계는 `PlainPad`. 남은 일은 기여 집합 줄이기** |
+| `home:paint` | 106~156 ms | 400 | 통과 |
+| `session:mount` | 3~6 ms | 50 | 통과 |
+| `t0:grade` | < 1 ms | 30 | 통과 |
+| `theme:switch` | 7~48 ms | 100 | 통과 |
+| `lifer:open` | 11~13 ms | 50 | 통과 |
+
+**리포가 다르면 `frame_p95` 를 비교하지 마라** — 노드 수가 곧 그 값이다(D81).
 
 ---
 

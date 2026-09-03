@@ -13,6 +13,7 @@ import { ipc } from '@chickadee/ipc-client';
 import { estMinFor, type Candidate } from '@chickadee/scheduler';
 import { fromConceptSiteRow, type ConceptId, type ConceptSite, type Layer } from '@chickadee/store-sql';
 
+import { makeT1Card } from './blocks.js';
 import type { CardMaker } from './session.js';
 
 /** 카드 하나에 볼 사용처 수. 사슬이 몇 번 미끄러져도 이 안에서 끝난다 (04 §1.4). */
@@ -65,6 +66,24 @@ export function cardMaker(deps: MakerDeps): CardMaker {
       return made === null
         ? null
         : { cardId: made, conceptId, track: 't0', role: 'new', estMin: estMinFor('t0', 'new') };
+    },
+
+    async forBlock() {
+      // T1 은 개념이 아니라 **블록**에서 나온다 (04 §3.1) — 그 경로는 `data/blocks.ts` 다.
+      // 첫 판은 언제나 1단계(보고 치기)다.
+      const made = await makeT1Card(
+        { repoId: deps.repoId, rootPath: deps.rootPath, dict: deps.dict, dictVersion: deps.dictVersion, now: deps.now },
+        1,
+      );
+      return made === null
+        ? null
+        : {
+            cardId: made.cardId,
+            conceptId: made.card.conceptId,
+            track: 't1',
+            role: 'new',
+            estMin: estMinFor('t1', 'new'),
+          };
     },
   };
 }

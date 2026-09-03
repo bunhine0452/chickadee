@@ -1,0 +1,29 @@
+/* 목업: design/src/ink/session.css 의 `.ref` · `.ref .ph` · `.ref.peek` 규칙.
+   바꾼 것 — `.ref.peek .ln.hidden > span` 의 진홍 원색을 트랙 별칭 --t1 로 (05 §4.2).
+
+   가려진 본문 = 애벌 하프톤 막대. 줄 수와 들여쓰기를 보존해 세로 리듬을 지킨다. */
+.ref { position: relative }
+
+.ref .code .ln > span { min-height: 1.85em }
+
+.ref .ph {
+  display: inline-block;
+  height: .9em;
+  border-radius: 1px;
+  background-image: radial-gradient(var(--ink-faint) 1.1px, transparent 1.35px);
+  background-size: 4px 4px;
+  opacity: .9;
+  vertical-align: -.1em;
+}
+
+.ref .ln.hidden .ink { display: none }
+
+/* `` ` `` 홀드 — 자리표를 걷고 잉크를 드러낸다. 시각 전용이라 aria-hidden 은 그대로다. */
+.ref.peek .ph { display: none }
+
+.ref.peek .ln.hidden > span {
+  background: var(--paper-3);
+  box-shadow: inset 4px 0 0 var(--t1);
+}
+
+.ref.peek .ln.hidden .ink { display: inline }

@@ -71,9 +71,36 @@ describe('「판 완료」 (02 §8.1 · D77)', () => {
   test('잇는 UPDATE 가 원장 INSERT 바로 뒤에 온다 — 그 사이의 INSERT 는 rowid 를 바꾼다', () => {
     expect(PLATE_DONE_STEPS.map((s) => s.table)).toStrictEqual([
       'review_log', 'session_item', 'dunno_event', 'mastery', 'lifer',
+      'why_answer', 'appeal',
     ]);
     expect(PLATE_DONE_STEPS.filter((s) => s.optional).map((s) => s.table))
-      .toStrictEqual(['dunno_event', 'lifer']);
+      .toStrictEqual(['dunno_event', 'lifer', 'why_answer', 'appeal']);
+    // T1 이 더한 뒤의 둘은 `last_insert_rowid()` 를 쓰지 않는다 (D84) — 그래서 자리가
+    // 맨 뒤여도 되고, 이의가 몇 건이든 앞의 두 UPDATE 가 흔들리지 않는다.
+    const t1 = ['why_answer', 'appeal'];
+    expect(PLATE_DONE_STEPS.slice(-2).map((s) => s.table)).toStrictEqual(t1);
+  });
+
+  test('T1 은 왜 한 줄과 이의를 같은 tx 에 싣는다 (D84)', () => {
+    const ops = buildPlateDoneTx({
+      reviewLog,
+      sessionItem,
+      mastery,
+      whyAnswer: {
+        sessionItemId: 2, cardId: 1, blockId: 9, lineNo: 8, questionId: 'generic',
+        text: '자기 말 한 줄', pick: null, pickOk: null, createdAt: 1,
+      },
+      appeals: [0, 1].map((i) => ({
+        sessionItemId: 2, cardId: 1, track: 't1', lineNo: i + 1,
+        originalText: 'a', userText: 'b', normOriginal: 'I', normUser: 'I',
+        autoVerdict: 'differ', autoReason: 'TOKEN_COUNT', reasonsJson: '["TOKEN_COUNT"]',
+        patternKey: 'k', engineVersion: '1', dictVersion: 'ts@1.0.0', createdAt: 1,
+      })),
+    }).build();
+    expect(ops.map((o) => o.name)).toStrictEqual([
+      'review.append', 'session.item_link_last', 'review.mastery_upsert_last',
+      'why.insert_for_item', 'appeal.insert_for_item', 'appeal.insert_for_item',
+    ]);
   });
 
   test('가장 짧은 판은 op 세 개다', () => {

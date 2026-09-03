@@ -1,0 +1,357 @@
+{
+  "grammar": "rust",
+  "original": {
+    "kind": "source_file",
+    "named": true,
+    "start": 0,
+    "end": 37,
+    "children": [
+      {
+        "kind": "function_item",
+        "named": true,
+        "start": 0,
+        "end": 37,
+        "children": [
+          {
+            "kind": "fn",
+            "named": false,
+            "start": 0,
+            "end": 2,
+            "text": "fn",
+            "children": []
+          },
+          {
+            "kind": "identifier",
+            "named": true,
+            "start": 3,
+            "end": 7,
+            "text": "main",
+            "children": []
+          },
+          {
+            "kind": "parameters",
+            "named": true,
+            "start": 7,
+            "end": 9,
+            "children": [
+              {
+                "kind": "(",
+                "named": false,
+                "start": 7,
+                "end": 8,
+                "text": "(",
+                "children": []
+              },
+              {
+                "kind": ")",
+                "named": false,
+                "start": 8,
+                "end": 9,
+                "text": ")",
+                "children": []
+              }
+            ]
+          },
+          {
+            "kind": "block",
+            "named": true,
+            "start": 10,
+            "end": 37,
+            "children": [
+              {
+                "kind": "{",
+                "named": false,
+                "start": 10,
+                "end": 11,
+                "text": "{",
+                "children": []
+              },
+              {
+                "kind": "let_declaration",
+                "named": true,
+                "start": 16,
+                "end": 35,
+                "children": [
+                  {
+                    "kind": "let",
+                    "named": false,
+                    "start": 16,
+                    "end": 19,
+                    "text": "let",
+                    "children": []
+                  },
+                  {
+                    "kind": "identifier",
+                    "named": true,
+                    "start": 20,
+                    "end": 21,
+                    "text": "v",
+                    "children": []
+                  },
+                  {
+                    "kind": "=",
+                    "named": false,
+                    "start": 22,
+                    "end": 23,
+                    "text": "=",
+                    "children": []
+                  },
+                  {
+                    "kind": "call_expression",
+                    "named": true,
+                    "start": 24,
+                    "end": 34,
+                    "children": [
+                      {
+                        "kind": "scoped_identifier",
+                        "named": true,
+                        "start": 24,
+                        "end": 32,
+                        "children": [
+                          {
+                            "kind": "identifier",
+                            "named": true,
+                            "start": 24,
+                            "end": 27,
+                            "text": "Vec",
+                            "children": []
+                          },
+                          {
+                            "kind": "::",
+                            "named": false,
+                            "start": 27,
+                            "end": 29,
+                            "text": "::",
+                            "children": []
+                          },
+                          {
+                            "kind": "identifier",
+                            "named": true,
+                            "start": 29,
+                            "end": 32,
+                            "text": "new",
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "kind": "arguments",
+                        "named": true,
+                        "start": 32,
+                        "end": 34,
+                        "children": [
+                          {
+                            "kind": "(",
+                            "named": false,
+                            "start": 32,
+                            "end": 33,
+                            "text": "(",
+                            "children": []
+                          },
+                          {
+                            "kind": ")",
+                            "named": false,
+                            "start": 33,
+                            "end": 34,
+                            "text": ")",
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kind": ";",
+                    "named": false,
+                    "start": 34,
+                    "end": 35,
+                    "text": ";",
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "kind": "}",
+                "named": false,
+                "start": 36,
+                "end": 37,
+                "text": "}",
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "originalHadError": false,
+  "user": {
+    "kind": "source_file",
+    "named": true,
+    "start": 0,
+    "end": 33,
+    "children": [
+      {
+        "kind": "function_item",
+        "named": true,
+        "start": 0,
+        "end": 33,
+        "children": [
+          {
+            "kind": "fn",
+            "named": false,
+            "start": 0,
+            "end": 2,
+            "text": "fn",
+            "children": []
+          },
+          {
+            "kind": "identifier",
+            "named": true,
+            "start": 3,
+            "end": 7,
+            "text": "main",
+            "children": []
+          },
+          {
+            "kind": "parameters",
+            "named": true,
+            "start": 7,
+            "end": 9,
+            "children": [
+              {
+                "kind": "(",
+                "named": false,
+                "start": 7,
+                "end": 8,
+                "text": "(",
+                "children": []
+              },
+              {
+                "kind": ")",
+                "named": false,
+                "start": 8,
+                "end": 9,
+                "text": ")",
+                "children": []
+              }
+            ]
+          },
+          {
+            "kind": "block",
+            "named": true,
+            "start": 10,
+            "end": 33,
+            "children": [
+              {
+                "kind": "{",
+                "named": false,
+                "start": 10,
+                "end": 11,
+                "text": "{",
+                "children": []
+              },
+              {
+                "kind": "let_declaration",
+                "named": true,
+                "start": 16,
+                "end": 31,
+                "children": [
+                  {
+                    "kind": "let",
+                    "named": false,
+                    "start": 16,
+                    "end": 19,
+                    "text": "let",
+                    "children": []
+                  },
+                  {
+                    "kind": "identifier",
+                    "named": true,
+                    "start": 20,
+                    "end": 21,
+                    "text": "v",
+                    "children": []
+                  },
+                  {
+                    "kind": "=",
+                    "named": false,
+                    "start": 22,
+                    "end": 23,
+                    "text": "=",
+                    "children": []
+                  },
+                  {
+                    "kind": "macro_invocation",
+                    "named": true,
+                    "start": 24,
+                    "end": 30,
+                    "children": [
+                      {
+                        "kind": "identifier",
+                        "named": true,
+                        "start": 24,
+                        "end": 27,
+                        "text": "vec",
+                        "children": []
+                      },
+                      {
+                        "kind": "!",
+                        "named": false,
+                        "start": 27,
+                        "end": 28,
+                        "text": "!",
+                        "children": []
+                      },
+                      {
+                        "kind": "token_tree",
+                        "named": true,
+                        "start": 28,
+                        "end": 30,
+                        "children": [
+                          {
+                            "kind": "[",
+                            "named": false,
+                            "start": 28,
+                            "end": 29,
+                            "text": "[",
+                            "children": []
+                          },
+                          {
+                            "kind": "]",
+                            "named": false,
+                            "start": 29,
+                            "end": 30,
+                            "text": "]",
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kind": ";",
+                    "named": false,
+                    "start": 30,
+                    "end": 31,
+                    "text": ";",
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "kind": "}",
+                "named": false,
+                "start": 32,
+                "end": 33,
+                "text": "}",
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "userHadError": false
+}

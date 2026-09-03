@@ -7,12 +7,18 @@
  */
 import { newcomerFlag, recountUnknown } from '@chickadee/concepts';
 import { loadDict, type Dict } from '@chickadee/dictionary';
-import { gradeT0, isLifer, t0Answered, toReviewDetail, type T0Answered } from '@chickadee/grading';
+import {
+  canAppeal, draftAppeal, draftWhy, gradeT0, gradeT1, isLifer, nextStage, pickQuestion,
+  t0Answered, toReviewDetail, toT1Detail, type Question, type T0Answered, type T1Result,
+} from '@chickadee/grading';
 import { IpcError, ipc, log } from '@chickadee/ipc-client';
-import { TICK_MS, labelFor, shouldInsertPrereq, shouldInsertRetry } from '@chickadee/scheduler';
+import {
+  TICK_MS, advanceThreshold, labelFor, shouldInsertPrereq, shouldInsertRetry,
+} from '@chickadee/scheduler';
 import type { CardPayload, ConceptId, ItemState, Layer } from '@chickadee/store-sql';
 
 import { measure, markSessionOpen } from './devtools/audit.js';
+import { originalAst, parseSnippet } from './data/blocks.js';
 import { cardMaker, makeCard, type MakerDeps } from './data/cards.js';
 import { emptyMastery, finishPlate } from './data/plate.js';
 import {
@@ -202,6 +208,209 @@ function gainText(
   if (after > before) return `잉크 ${after}겹 · 다음 인쇄 ${next}`;
   if (after < before) return `잉크 ${after}겹으로 내려갑니다 · 다음 인쇄 ${next}`;
   return `잉크 ${after}겹 그대로 · 다음 인쇄 ${next}`;
+}
+
+// ───────── T1 채점 (04 §4~§6 · 02 §4) ─────────
+
+/** T1 판을 마칠 때 화면이 들고 오는 것 전부. */
+export interface T1Answer {
+  /** 필사 초안. **로그에 넣지 않는다** — 사용자 답안은 금지 필드다 (01 §6). */
+  draft: string;
+  /** 채점한 단계. 「한 단계 쉽게」를 눌렀으면 내려간 쪽이다 (D85). */
+  stage: 1 | 2 | 3;
+  peeks: number;
+  downgraded: boolean;
+  elapsedMs: number;
+  /** 이의를 접수한 행의 `oi`(0-based 원본 줄 색인). */
+  appealed: readonly number[];
+  why: { text: string; pick: number | null };
+}
+
+/**
+ * 채점만 한다 — 원장에는 쓰지 않는다. 화면이 결과를 보이고, 「왜」를 받은 뒤에
+ * `finishT1Plate` 로 마친다 (04 §6 — 왜 게이트는 건너뛸 수 없다).
+ *
+ * 답안 AST 는 여기서 **한 번** 파싱하고(04 §4.5) 원본 AST 는 `block.ast_json` 캐시다.
+ * 05 §10 `t1:grade` 예산은 비교 엔진의 것이므로 IPC 를 그 밖에 둔다.
+ */
+export async function gradeT1Plate(
+  input: Pick<T1Answer, 'draft' | 'stage' | 'peeks' | 'downgraded'>,
+): Promise<{ result: T1Result; question: Question } | null> {
+  const { plates, pos } = useUi.getState();
+  const plate = plates[pos];
+  if (plate === undefined) return null;
+  const payload = t1Of(plate.payload);
+  if (payload === null) return null;
+
+  try {
+    const grammar = grammarOf(payload.file);
+    const user = input.draft.split('\n');
+    const blockId = payload.blockId;
+    const [answerAst, sourceAst] = await Promise.all([
+      parseSnippet(grammar, input.draft),
+      blockId === 0
+        ? Promise.resolve(null)
+        : originalAst(blockId, grammar, payload.original.join('\n')),
+    ]);
+
+    const result = gradeT1({
+      blockId,
+      stage: input.stage,
+      original: payload.original,
+      user,
+      grammar,
+      peeks: input.peeks,
+      downgraded: input.downgraded,
+      ...(answerAst !== null && sourceAst !== null
+        ? {
+            ast: {
+              original: sourceAst,
+              originalText: payload.original,
+              user: answerAst,
+              userText: user,
+            },
+          }
+        : { astFallback: 'PARSE_LANG_UNSUPPORTED' as const }),
+    });
+    const question = pickQuestion({ payload: payload.why, result, conceptId: plate.conceptId });
+    return { result, question };
+  } catch (e) {
+    report(e, '채점');
+    return null;
+  }
+}
+
+/**
+ * T1 판을 마친다. 겹·FSRS·원장은 `finishPlate` 가, 이의와 왜 한 줄은 같은 tx 에 실린다(D84).
+ *
+ * 다시 찍기는 넣지 않는다 — 02 §4 T1 행이 「7~16분 판을 같은 날 두 번 걸지 않는다」다.
+ */
+export async function finishT1Plate(
+  result: T1Result,
+  question: Question,
+  answer: T1Answer,
+): Promise<PlateResult | null> {
+  const store = useUi.getState();
+  const { session, pos, plates } = store;
+  const plate = plates[pos];
+  if (session === null || plate === undefined) return null;
+  const payload = t1Of(plate.payload);
+  if (payload === null) return null;
+
+  try {
+    const settings = await loadSettings();
+    const now = Date.now();
+    const day = today(now, settings);
+    const grammar = grammarOf(payload.file);
+
+    const mastery = (await loadMastery([plate.conceptId])).get(plate.conceptId)
+      ?? emptyMastery(plate.conceptId, null);
+    const swap = result.rows.some((r) => r.swap === true);
+    // 진급 문턱은 소블록 완충값이다 (04 §4.6 · D83). 겹·등급·단계가 같은 값을 본다.
+    const passPct = advanceThreshold(result.total);
+    const ok = result.pct >= passPct && !swap && !answer.downgraded;
+
+    const appealRows = answer.appealed
+      .map((oi) => result.rows.find((r) => r.oi === oi))
+      .filter((r): r is NonNullable<typeof r> => r !== undefined && canAppeal(r))
+      .map((row) => {
+        const draft = draftAppeal(row, payload.original, answer.draft.split('\n'), grammar);
+        return {
+          track: 't1' as const,
+          lineNo: draft.lineNo,
+          originalText: draft.originalText,
+          userText: draft.userText,
+          normOriginal: draft.normOriginal,
+          normUser: draft.normUser,
+          autoVerdict: draft.autoVerdict,
+          autoReason: draft.autoReason,
+          reasons: draft.reasons,
+          patternKey: draft.patternKey,
+          engineVersion: draft.engineVersion,
+          dictVersion: maker === null ? null : dictVersionOf(maker.dict),
+        };
+      });
+
+    const why = draftWhy(question, result.blockId === 0 ? null : result.blockId,
+      answer.why.text, answer.why.pick);
+    const stageAfter = nextStage(result.stage, result.verdict);
+    const state: ItemState = {
+      answered: true, t1Draft: answer.draft, t1Stage: result.stage, peeks: answer.peeks,
+    };
+
+    const finished = await finishPlate({
+      repoId: session.repoId,
+      sessionId: session.id,
+      item: plate,
+      state,
+      mastery,
+      scheduler: await loadScheduler(now, settings.desiredRetention),
+      now,
+      day,
+      ok,
+      dunno: false,
+      transfer: mastery.transferFrom !== null,
+      // `appealedLines` 는 **1-based 원본 줄**이다 — `appeal.line_no` 와 같은 단위로 둔다.
+      detail: toT1Detail(
+        { ...result, appeals: appealRows.length },
+        answer.why,
+        answer.appealed.map((oi) => oi + 1),
+      ),
+      durationMs: answer.elapsedMs,
+      elapsedS: Math.round(answer.elapsedMs / 1000),
+      site: { filePath: payload.file, lineNo: null },
+      liferShown: store.liferShown,
+      stage: result.stage,
+      stageAfter,
+      lastPct: result.pct,
+      // 02 §3.2 의 T1 행 — 백분율·문턱·잠깐 보기 횟수·「한 단계 쉽게」·이름 맞바꿈.
+      grade: {
+        pct: result.pct,
+        passPct,
+        assists: answer.peeks,
+        downgraded: answer.downgraded,
+        swap,
+      },
+      whyAnswer: why,
+      ...(appealRows.length > 0 ? { appeals: appealRows } : {}),
+    });
+
+    useUi.getState().setPlates(await loadPlates(session.id));
+    const outcome: PlateResult = {
+      sel: -1,
+      correct: ok,
+      dunno: false,
+      layer: [finished.move.before, finished.move.after],
+      gain: gainText(finished.move.before, finished.move.after, finished.dueAt, now, settings),
+      early: finished.move.early,
+    };
+    useUi.getState().recordResult(pos, outcome);
+    if (finished.ceremony) useUi.getState().countLifer();
+    return outcome;
+  } catch (e) {
+    report(e, '필사 판 마무리');
+    return null;
+  }
+}
+
+const t1Of = (payload: CardPayload): Extract<CardPayload, { track: 't1' }> | null =>
+  payload.track === 't1' ? payload : null;
+
+/**
+ * 경로 확장자 → tree-sitter 문법 키 (03 §2.1 · D19). 사전의 `extensions` 표를 보는 것이
+ * 정본이지만 채점 경로는 사전을 들고 있지 않을 수 있어(세션을 이어 찍으면 `maker` 가
+ * `null` 이다) 표를 여기 좁게 둔다 — 모르면 `typescript` 로 두고, 그때 AST 층이 폴백한다.
+ */
+export function grammarOf(path: string): string {
+  const ext = path.slice(path.lastIndexOf('.'));
+  if (ext === '.tsx' || ext === '.jsx') return 'tsx';
+  if (ext === '.ts' || ext === '.mts' || ext === '.cts') return 'typescript';
+  if (ext === '.js' || ext === '.mjs' || ext === '.cjs') return 'javascript';
+  if (ext === '.py') return 'python';
+  if (ext === '.go') return 'go';
+  if (ext === '.rs') return 'rust';
+  if (ext === '.sql') return 'sql';
+  return 'typescript';
 }
 
 // ───────── 사다리 (02 §4 · 04 §2.4) ─────────

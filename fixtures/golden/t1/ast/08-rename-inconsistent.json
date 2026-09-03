@@ -1,0 +1,565 @@
+{
+  "grammar": "tsx",
+  "original": {
+    "kind": "program",
+    "named": true,
+    "start": 0,
+    "end": 73,
+    "children": [
+      {
+        "kind": "lexical_declaration",
+        "named": true,
+        "start": 0,
+        "end": 38,
+        "children": [
+          {
+            "kind": "const",
+            "named": false,
+            "start": 0,
+            "end": 5,
+            "text": "const",
+            "children": []
+          },
+          {
+            "kind": "variable_declarator",
+            "named": true,
+            "start": 6,
+            "end": 38,
+            "children": [
+              {
+                "kind": "array_pattern",
+                "named": true,
+                "start": 6,
+                "end": 23,
+                "children": [
+                  {
+                    "kind": "[",
+                    "named": false,
+                    "start": 6,
+                    "end": 7,
+                    "text": "[",
+                    "children": []
+                  },
+                  {
+                    "kind": "identifier",
+                    "named": true,
+                    "start": 7,
+                    "end": 12,
+                    "text": "email",
+                    "children": []
+                  },
+                  {
+                    "kind": ",",
+                    "named": false,
+                    "start": 12,
+                    "end": 13,
+                    "text": ",",
+                    "children": []
+                  },
+                  {
+                    "kind": "identifier",
+                    "named": true,
+                    "start": 14,
+                    "end": 22,
+                    "text": "setEmail",
+                    "children": []
+                  },
+                  {
+                    "kind": "]",
+                    "named": false,
+                    "start": 22,
+                    "end": 23,
+                    "text": "]",
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "kind": "=",
+                "named": false,
+                "start": 24,
+                "end": 25,
+                "text": "=",
+                "children": []
+              },
+              {
+                "kind": "call_expression",
+                "named": true,
+                "start": 26,
+                "end": 38,
+                "children": [
+                  {
+                    "kind": "identifier",
+                    "named": true,
+                    "start": 26,
+                    "end": 34,
+                    "text": "useState",
+                    "children": []
+                  },
+                  {
+                    "kind": "arguments",
+                    "named": true,
+                    "start": 34,
+                    "end": 38,
+                    "children": [
+                      {
+                        "kind": "(",
+                        "named": false,
+                        "start": 34,
+                        "end": 35,
+                        "text": "(",
+                        "children": []
+                      },
+                      {
+                        "kind": "string",
+                        "named": true,
+                        "start": 35,
+                        "end": 37,
+                        "children": [
+                          {
+                            "kind": "'",
+                            "named": false,
+                            "start": 35,
+                            "end": 36,
+                            "text": "'",
+                            "children": []
+                          },
+                          {
+                            "kind": "'",
+                            "named": false,
+                            "start": 36,
+                            "end": 37,
+                            "text": "'",
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "kind": ")",
+                        "named": false,
+                        "start": 37,
+                        "end": 38,
+                        "text": ")",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "lexical_declaration",
+        "named": true,
+        "start": 39,
+        "end": 73,
+        "children": [
+          {
+            "kind": "const",
+            "named": false,
+            "start": 39,
+            "end": 44,
+            "text": "const",
+            "children": []
+          },
+          {
+            "kind": "variable_declarator",
+            "named": true,
+            "start": 45,
+            "end": 73,
+            "children": [
+              {
+                "kind": "identifier",
+                "named": true,
+                "start": 45,
+                "end": 47,
+                "text": "el",
+                "children": []
+              },
+              {
+                "kind": "=",
+                "named": false,
+                "start": 48,
+                "end": 49,
+                "text": "=",
+                "children": []
+              },
+              {
+                "kind": "jsx_self_closing_element",
+                "named": true,
+                "start": 50,
+                "end": 73,
+                "children": [
+                  {
+                    "kind": "<",
+                    "named": false,
+                    "start": 50,
+                    "end": 51,
+                    "text": "<",
+                    "children": []
+                  },
+                  {
+                    "kind": "identifier",
+                    "named": true,
+                    "start": 51,
+                    "end": 56,
+                    "text": "input",
+                    "children": []
+                  },
+                  {
+                    "kind": "jsx_attribute",
+                    "named": true,
+                    "start": 57,
+                    "end": 70,
+                    "children": [
+                      {
+                        "kind": "property_identifier",
+                        "named": true,
+                        "start": 57,
+                        "end": 62,
+                        "text": "value",
+                        "children": []
+                      },
+                      {
+                        "kind": "=",
+                        "named": false,
+                        "start": 62,
+                        "end": 63,
+                        "text": "=",
+                        "children": []
+                      },
+                      {
+                        "kind": "jsx_expression",
+                        "named": true,
+                        "start": 63,
+                        "end": 70,
+                        "children": [
+                          {
+                            "kind": "{",
+                            "named": false,
+                            "start": 63,
+                            "end": 64,
+                            "text": "{",
+                            "children": []
+                          },
+                          {
+                            "kind": "identifier",
+                            "named": true,
+                            "start": 64,
+                            "end": 69,
+                            "text": "email",
+                            "children": []
+                          },
+                          {
+                            "kind": "}",
+                            "named": false,
+                            "start": 69,
+                            "end": 70,
+                            "text": "}",
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "/>",
+                    "named": false,
+                    "start": 71,
+                    "end": 73,
+                    "text": "/>",
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "originalHadError": false,
+  "user": {
+    "kind": "program",
+    "named": true,
+    "start": 0,
+    "end": 72,
+    "children": [
+      {
+        "kind": "lexical_declaration",
+        "named": true,
+        "start": 0,
+        "end": 37,
+        "children": [
+          {
+            "kind": "const",
+            "named": false,
+            "start": 0,
+            "end": 5,
+            "text": "const",
+            "children": []
+          },
+          {
+            "kind": "variable_declarator",
+            "named": true,
+            "start": 6,
+            "end": 37,
+            "children": [
+              {
+                "kind": "array_pattern",
+                "named": true,
+                "start": 6,
+                "end": 22,
+                "children": [
+                  {
+                    "kind": "[",
+                    "named": false,
+                    "start": 6,
+                    "end": 7,
+                    "text": "[",
+                    "children": []
+                  },
+                  {
+                    "kind": "identifier",
+                    "named": true,
+                    "start": 7,
+                    "end": 11,
+                    "text": "mail",
+                    "children": []
+                  },
+                  {
+                    "kind": ",",
+                    "named": false,
+                    "start": 11,
+                    "end": 12,
+                    "text": ",",
+                    "children": []
+                  },
+                  {
+                    "kind": "identifier",
+                    "named": true,
+                    "start": 13,
+                    "end": 21,
+                    "text": "setEmail",
+                    "children": []
+                  },
+                  {
+                    "kind": "]",
+                    "named": false,
+                    "start": 21,
+                    "end": 22,
+                    "text": "]",
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "kind": "=",
+                "named": false,
+                "start": 23,
+                "end": 24,
+                "text": "=",
+                "children": []
+              },
+              {
+                "kind": "call_expression",
+                "named": true,
+                "start": 25,
+                "end": 37,
+                "children": [
+                  {
+                    "kind": "identifier",
+                    "named": true,
+                    "start": 25,
+                    "end": 33,
+                    "text": "useState",
+                    "children": []
+                  },
+                  {
+                    "kind": "arguments",
+                    "named": true,
+                    "start": 33,
+                    "end": 37,
+                    "children": [
+                      {
+                        "kind": "(",
+                        "named": false,
+                        "start": 33,
+                        "end": 34,
+                        "text": "(",
+                        "children": []
+                      },
+                      {
+                        "kind": "string",
+                        "named": true,
+                        "start": 34,
+                        "end": 36,
+                        "children": [
+                          {
+                            "kind": "'",
+                            "named": false,
+                            "start": 34,
+                            "end": 35,
+                            "text": "'",
+                            "children": []
+                          },
+                          {
+                            "kind": "'",
+                            "named": false,
+                            "start": 35,
+                            "end": 36,
+                            "text": "'",
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "kind": ")",
+                        "named": false,
+                        "start": 36,
+                        "end": 37,
+                        "text": ")",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "lexical_declaration",
+        "named": true,
+        "start": 38,
+        "end": 72,
+        "children": [
+          {
+            "kind": "const",
+            "named": false,
+            "start": 38,
+            "end": 43,
+            "text": "const",
+            "children": []
+          },
+          {
+            "kind": "variable_declarator",
+            "named": true,
+            "start": 44,
+            "end": 72,
+            "children": [
+              {
+                "kind": "identifier",
+                "named": true,
+                "start": 44,
+                "end": 46,
+                "text": "el",
+                "children": []
+              },
+              {
+                "kind": "=",
+                "named": false,
+                "start": 47,
+                "end": 48,
+                "text": "=",
+                "children": []
+              },
+              {
+                "kind": "jsx_self_closing_element",
+                "named": true,
+                "start": 49,
+                "end": 72,
+                "children": [
+                  {
+                    "kind": "<",
+                    "named": false,
+                    "start": 49,
+                    "end": 50,
+                    "text": "<",
+                    "children": []
+                  },
+                  {
+                    "kind": "identifier",
+                    "named": true,
+                    "start": 50,
+                    "end": 55,
+                    "text": "input",
+                    "children": []
+                  },
+                  {
+                    "kind": "jsx_attribute",
+                    "named": true,
+                    "start": 56,
+                    "end": 69,
+                    "children": [
+                      {
+                        "kind": "property_identifier",
+                        "named": true,
+                        "start": 56,
+                        "end": 61,
+                        "text": "value",
+                        "children": []
+                      },
+                      {
+                        "kind": "=",
+                        "named": false,
+                        "start": 61,
+                        "end": 62,
+                        "text": "=",
+                        "children": []
+                      },
+                      {
+                        "kind": "jsx_expression",
+                        "named": true,
+                        "start": 62,
+                        "end": 69,
+                        "children": [
+                          {
+                            "kind": "{",
+                            "named": false,
+                            "start": 62,
+                            "end": 63,
+                            "text": "{",
+                            "children": []
+                          },
+                          {
+                            "kind": "identifier",
+                            "named": true,
+                            "start": 63,
+                            "end": 68,
+                            "text": "email",
+                            "children": []
+                          },
+                          {
+                            "kind": "}",
+                            "named": false,
+                            "start": 68,
+                            "end": 69,
+                            "text": "}",
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "/>",
+                    "named": false,
+                    "start": 70,
+                    "end": 72,
+                    "text": "/>",
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "userHadError": false
+}

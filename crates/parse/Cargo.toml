@@ -14,6 +14,9 @@ tree-sitter = "0.25"
 tree-sitter-typescript = { version = "0.23", optional = true }
 tree-sitter-javascript = { version = "0.25", optional = true }
 tree-sitter-sequel = { version = "0.3", optional = true }
+tree-sitter-python = { version = "0.23", optional = true }
+tree-sitter-go = { version = "0.23", optional = true }
+tree-sitter-rust = { version = "0.23", optional = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
 streaming-iterator = "0.1"
@@ -26,12 +29,15 @@ insta = "1.48.0"
 serde_json.workspace = true
 
 [features]
-default = ["lang-typescript", "lang-javascript", "lang-sql"]
+default = ["lang-typescript", "lang-javascript", "lang-sql", "lang-python", "lang-go", "lang-rust"]
 lang-typescript = ["dep:tree-sitter-typescript"]
 lang-javascript = ["dep:tree-sitter-javascript"]
 # A community grammar that breaks the build can be dropped from a release
 # without touching any other language (01 §9).
 lang-sql = ["dep:tree-sitter-sequel"]
+lang-python = ["dep:tree-sitter-python"]
+lang-go = ["dep:tree-sitter-go"]
+lang-rust = ["dep:tree-sitter-rust"]
 
 [lints]
 workspace = true

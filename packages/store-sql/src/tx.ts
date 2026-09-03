@@ -82,12 +82,18 @@ export const tx = (): Tx => new Tx();
  * 여기서는 **잇는 두 UPDATE 를 로그 바로 뒤로 당긴다**(D77):
  *
  *   `review_log INSERT → session_item UPDATE → dunno_event UPDATE → mastery UPSERT → lifer INSERT`
+ *   `→ why_answer INSERT → appeal INSERT×n`
  *
  * 이유는 하나다 — `store_batch` 는 op 를 **미리 만들어** 보내므로 batch 중간에 생긴
  * `review_log.id` 를 TS 가 알 수 없다. 두 UPDATE 는 `last_insert_rowid()` 로 그것을 집는데,
  * 그 값은 **다음 INSERT 가 성공하면 바뀐다**. `mastery` 는 UPSERT 라 INSERT 경로를 탈 수 있고
  * `lifer` 도 INSERT 다 — 둘 중 하나라도 앞에 오면 `review_log_id` 가 엉뚱한 행을 가리킨다.
  * 의미상의 순서(로그가 먼저다)는 그대로이고, 바뀐 것은 서로 독립인 두 쓰기의 자리뿐이다.
+ *
+ * T1 이 더하는 `why_answer`·`appeal` 은 **맨 뒤**에 붙고 `last_insert_rowid()` 를 쓰지 않는다
+ * (D84). 이의는 0~n 행이라 두 번째 INSERT 가 첫 번째 이의의 id 를 원장 행으로 착각한다 —
+ * 두 statement 는 `session_item_id` 로 원장 행을 되찾는 부속질의를 쓴다. 그래서 자리를 더
+ * 붙여도 D77 의 두 UPDATE 가 흔들리지 않는다.
  */
 export const PLATE_DONE_STEPS = [
   { table: 'review_log', op: 'insert', optional: false },
@@ -95,6 +101,8 @@ export const PLATE_DONE_STEPS = [
   { table: 'dunno_event', op: 'update', optional: true },
   { table: 'mastery', op: 'upsert', optional: false },
   { table: 'lifer', op: 'insert', optional: true },
+  { table: 'why_answer', op: 'insert', optional: true },
+  { table: 'appeal', op: 'insert', optional: true },
 ] as const;
 
 /** 「판 완료」 한 tx 의 입력. 값은 전부 그 statement 의 파라미터 그대로다. */
@@ -108,6 +116,10 @@ export interface PlateDoneWrite {
   lifer?: ParamsOf<'review.lifer_insert'>;
   /** 그 판에서 「모르겠어요」를 눌렀을 때만. */
   dunnoEvent?: ParamsOf<'review.dunno_link_last'>;
+  /** T1 왜 게이트 한 줄 (04 §6). 채점·겹 효과는 없다. */
+  whyAnswer?: ParamsOf<'why.insert_for_item'>;
+  /** T1·T2 이의. **점수 불변**이고 몇 건이든 같은 tx 에 들어간다 (04 §5). */
+  appeals?: readonly ParamsOf<'appeal.insert_for_item'>[];
 }
 
 export function buildPlateDoneTx(write: PlateDoneWrite): Tx {
@@ -117,5 +129,7 @@ export function buildPlateDoneTx(write: PlateDoneWrite): Tx {
   if (write.dunnoEvent) t.add('review.dunno_link_last', write.dunnoEvent);
   t.add('review.mastery_upsert_last', write.mastery);
   if (write.lifer) t.add('review.lifer_insert', write.lifer);
+  if (write.whyAnswer) t.add('why.insert_for_item', write.whyAnswer);
+  for (const appeal of write.appeals ?? []) t.add('appeal.insert_for_item', appeal);
   return t;
 }

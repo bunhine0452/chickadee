@@ -1,0 +1,45 @@
+/* 목업: design/src/ink/session.css 「채점 결과」 블록의 `.score`.
+   알약 3색은 목업 그대로 `.pill t1/t0/t2` 를 쓴다 — Pill 이 이미 트랙 별칭만 만진다. */
+.score {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 20px;
+  align-items: center;
+  padding: 14px 18px;
+  border: 2.5px solid var(--rule);
+  background: var(--paper);
+}
+
+.score .big {
+  font-family: var(--f-poster);
+  font-size: var(--fs-poster);
+  letter-spacing: .01em;
+  line-height: .9;
+  white-space: nowrap;
+}
+
+.score .big small {
+  margin-left: 6px;
+  color: var(--ink-soft);
+  font-family: var(--f-ui);
+  font-size: var(--fs-15);
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.score p {
+  color: var(--ink-soft);
+  font-size: var(--fs-15);
+}
+
+.score p b {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.score .pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}

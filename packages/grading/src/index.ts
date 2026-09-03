@@ -22,3 +22,45 @@ export type {
   ConceptRef, Ladder, LadderInput, PrereqFacts, PrereqRung, PrereqRungs, PrereqStatus,
   PromptInput, UseMeta, UseRef,
 } from './ladder.js';
+
+// T1 — 판정 엔진 (04 §4)
+export { align, GAP, PAIR_MIN, SAME_LINE_MIN, WINDOW } from './t1-align.js';
+export type { Alignment, Pair } from './t1-align.js';
+export {
+  canPromote, cover, ERROR_RATIO_LIMIT, lineAt, lineStarts, MAX_RUN_LINES, promote, runsOf,
+  sequence, templateVersusConcat,
+} from './t1-ast.js';
+export type { AstDetail, AstOutcome, AstPair, Covered, PromoteInput } from './t1-ast.js';
+export {
+  compareLine, evalLine, GUTTER_WINDOW, indentWidth, isCommentOnly, normalizeQuotes, sim,
+  stripTrailingComment, tokenText,
+} from './t1-line.js';
+export type { LineCompare, LineStatus } from './t1-line.js';
+export {
+  buildProt, BUILTINS, builtinsFor, freeIdents, isIdent, looksLikeJsx, meaningful, origIdents,
+  protectedAt,
+} from './t1-prot.js';
+export type { ProtInput } from './t1-prot.js';
+export { judgeRenames } from './t1-rename.js';
+export type { RenameInput, RenameVerdict } from './t1-rename.js';
+export { advanceThreshold, gradeT1, nextStage, toT1Detail, verdictOf } from './t1-result.js';
+export type { T1Input } from './t1-result.js';
+export { REASON_CODES, T1_ENGINE_VERSION } from './t1-types.js';
+export type {
+  AppealVerdict, Engine, Reason, ReasonCode, Status, T1Result, T1Row, Tick,
+} from './t1-types.js';
+
+// T1 — 이의 (04 §5)
+export {
+  canAppeal, CATALOG, draftAppeal, issueUrl, NEVER_EQUIV, patternKey, shapeSignature, suggest,
+  SUGGEST_MIN,
+} from './t1-appeal.js';
+export type {
+  AppealDraft, CatalogKey, CatalogRule, IssueInput, PatternGroup, PatternInput, Suggestion,
+} from './t1-appeal.js';
+
+// T1 — 왜 게이트 (04 §6)
+export {
+  checkWhy, COPY_SIM_LIMIT, draftWhy, GENERIC_HELP, GENERIC_Q, hasWord, MIN_CHARS, pickQuestion,
+} from './t1-why.js';
+export type { Question, QuestionId, WhyCheck, WhyDraft, WhyPayload } from './t1-why.js';

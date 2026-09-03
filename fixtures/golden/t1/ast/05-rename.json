@@ -1,0 +1,405 @@
+{
+  "grammar": "typescript",
+  "original": {
+    "kind": "program",
+    "named": true,
+    "start": 0,
+    "end": 62,
+    "children": [
+      {
+        "kind": "function_declaration",
+        "named": true,
+        "start": 0,
+        "end": 62,
+        "children": [
+          {
+            "kind": "async",
+            "named": false,
+            "start": 0,
+            "end": 5,
+            "text": "async",
+            "children": []
+          },
+          {
+            "kind": "function",
+            "named": false,
+            "start": 6,
+            "end": 14,
+            "text": "function",
+            "children": []
+          },
+          {
+            "kind": "identifier",
+            "named": true,
+            "start": 15,
+            "end": 23,
+            "text": "onSubmit",
+            "children": []
+          },
+          {
+            "kind": "formal_parameters",
+            "named": true,
+            "start": 23,
+            "end": 37,
+            "children": [
+              {
+                "kind": "(",
+                "named": false,
+                "start": 23,
+                "end": 24,
+                "text": "(",
+                "children": []
+              },
+              {
+                "kind": "required_parameter",
+                "named": true,
+                "start": 24,
+                "end": 36,
+                "children": [
+                  {
+                    "kind": "identifier",
+                    "named": true,
+                    "start": 24,
+                    "end": 25,
+                    "text": "e",
+                    "children": []
+                  },
+                  {
+                    "kind": "type_annotation",
+                    "named": true,
+                    "start": 25,
+                    "end": 36,
+                    "children": [
+                      {
+                        "kind": ":",
+                        "named": false,
+                        "start": 25,
+                        "end": 26,
+                        "text": ":",
+                        "children": []
+                      },
+                      {
+                        "kind": "type_identifier",
+                        "named": true,
+                        "start": 27,
+                        "end": 36,
+                        "text": "FormEvent",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": ")",
+                "named": false,
+                "start": 36,
+                "end": 37,
+                "text": ")",
+                "children": []
+              }
+            ]
+          },
+          {
+            "kind": "statement_block",
+            "named": true,
+            "start": 38,
+            "end": 62,
+            "children": [
+              {
+                "kind": "{",
+                "named": false,
+                "start": 38,
+                "end": 39,
+                "text": "{",
+                "children": []
+              },
+              {
+                "kind": "expression_statement",
+                "named": true,
+                "start": 42,
+                "end": 60,
+                "children": [
+                  {
+                    "kind": "call_expression",
+                    "named": true,
+                    "start": 42,
+                    "end": 60,
+                    "children": [
+                      {
+                        "kind": "member_expression",
+                        "named": true,
+                        "start": 42,
+                        "end": 58,
+                        "children": [
+                          {
+                            "kind": "identifier",
+                            "named": true,
+                            "start": 42,
+                            "end": 43,
+                            "text": "e",
+                            "children": []
+                          },
+                          {
+                            "kind": ".",
+                            "named": false,
+                            "start": 43,
+                            "end": 44,
+                            "text": ".",
+                            "children": []
+                          },
+                          {
+                            "kind": "property_identifier",
+                            "named": true,
+                            "start": 44,
+                            "end": 58,
+                            "text": "preventDefault",
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "kind": "arguments",
+                        "named": true,
+                        "start": 58,
+                        "end": 60,
+                        "children": [
+                          {
+                            "kind": "(",
+                            "named": false,
+                            "start": 58,
+                            "end": 59,
+                            "text": "(",
+                            "children": []
+                          },
+                          {
+                            "kind": ")",
+                            "named": false,
+                            "start": 59,
+                            "end": 60,
+                            "text": ")",
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "}",
+                "named": false,
+                "start": 61,
+                "end": 62,
+                "text": "}",
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "originalHadError": false,
+  "user": {
+    "kind": "program",
+    "named": true,
+    "start": 0,
+    "end": 64,
+    "children": [
+      {
+        "kind": "function_declaration",
+        "named": true,
+        "start": 0,
+        "end": 64,
+        "children": [
+          {
+            "kind": "async",
+            "named": false,
+            "start": 0,
+            "end": 5,
+            "text": "async",
+            "children": []
+          },
+          {
+            "kind": "function",
+            "named": false,
+            "start": 6,
+            "end": 14,
+            "text": "function",
+            "children": []
+          },
+          {
+            "kind": "identifier",
+            "named": true,
+            "start": 15,
+            "end": 23,
+            "text": "onSubmit",
+            "children": []
+          },
+          {
+            "kind": "formal_parameters",
+            "named": true,
+            "start": 23,
+            "end": 38,
+            "children": [
+              {
+                "kind": "(",
+                "named": false,
+                "start": 23,
+                "end": 24,
+                "text": "(",
+                "children": []
+              },
+              {
+                "kind": "required_parameter",
+                "named": true,
+                "start": 24,
+                "end": 37,
+                "children": [
+                  {
+                    "kind": "identifier",
+                    "named": true,
+                    "start": 24,
+                    "end": 26,
+                    "text": "ev",
+                    "children": []
+                  },
+                  {
+                    "kind": "type_annotation",
+                    "named": true,
+                    "start": 26,
+                    "end": 37,
+                    "children": [
+                      {
+                        "kind": ":",
+                        "named": false,
+                        "start": 26,
+                        "end": 27,
+                        "text": ":",
+                        "children": []
+                      },
+                      {
+                        "kind": "type_identifier",
+                        "named": true,
+                        "start": 28,
+                        "end": 37,
+                        "text": "FormEvent",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": ")",
+                "named": false,
+                "start": 37,
+                "end": 38,
+                "text": ")",
+                "children": []
+              }
+            ]
+          },
+          {
+            "kind": "statement_block",
+            "named": true,
+            "start": 39,
+            "end": 64,
+            "children": [
+              {
+                "kind": "{",
+                "named": false,
+                "start": 39,
+                "end": 40,
+                "text": "{",
+                "children": []
+              },
+              {
+                "kind": "expression_statement",
+                "named": true,
+                "start": 43,
+                "end": 62,
+                "children": [
+                  {
+                    "kind": "call_expression",
+                    "named": true,
+                    "start": 43,
+                    "end": 62,
+                    "children": [
+                      {
+                        "kind": "member_expression",
+                        "named": true,
+                        "start": 43,
+                        "end": 60,
+                        "children": [
+                          {
+                            "kind": "identifier",
+                            "named": true,
+                            "start": 43,
+                            "end": 45,
+                            "text": "ev",
+                            "children": []
+                          },
+                          {
+                            "kind": ".",
+                            "named": false,
+                            "start": 45,
+                            "end": 46,
+                            "text": ".",
+                            "children": []
+                          },
+                          {
+                            "kind": "property_identifier",
+                            "named": true,
+                            "start": 46,
+                            "end": 60,
+                            "text": "preventDefault",
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "kind": "arguments",
+                        "named": true,
+                        "start": 60,
+                        "end": 62,
+                        "children": [
+                          {
+                            "kind": "(",
+                            "named": false,
+                            "start": 60,
+                            "end": 61,
+                            "text": "(",
+                            "children": []
+                          },
+                          {
+                            "kind": ")",
+                            "named": false,
+                            "start": 61,
+                            "end": 62,
+                            "text": ")",
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "}",
+                "named": false,
+                "start": 63,
+                "end": 64,
+                "text": "}",
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "userHadError": false
+}

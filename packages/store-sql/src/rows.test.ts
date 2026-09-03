@@ -128,7 +128,7 @@ const CARD_T1: Card = {
   id: 2, repoId: 1, unitId: null, track: 't1', kind: 'transcribe', conceptId: CID.ts,
   level: 1, siteId: null, fileId: 1, commitId: null,
   payload: {
-    track: 't1', kind: 'transcribe', file: 'src/features/auth/useLogin.ts', fn: 'useLogin',
+    track: 't1', kind: 'transcribe', blockId: 9, file: 'src/features/auth/useLogin.ts', fn: 'useLogin',
     original: ['export function useLogin() {', '  return null', '}'], show2: [0, 2],
     why: {
       line: 1, q: '이 줄이 없으면 무엇이 달라질까요?', help: '반환값을 보세요.',

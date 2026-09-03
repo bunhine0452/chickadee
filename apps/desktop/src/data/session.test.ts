@@ -132,6 +132,8 @@ const maker: CardMaker = {
       cardId: makeCard(conceptId, siteId),
       conceptId, track: 't0' as const, role: 'new' as const, estMin: 2,
     }),
+  // 여기 픽스처에는 블록이 없다 — T1 슬롯이 비는 갈래가 이 테스트가 보는 것이다.
+  forBlock: () => Promise.resolve(null),
 };
 
 async function settings() {

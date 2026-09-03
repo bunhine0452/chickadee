@@ -1,7 +1,7 @@
 export { DEFAULT_ROLLOVER_HOUR, dayKey, endOfDay, labelFor } from './day.js';
 export type { DayKey } from './day.js';
 export {
-  DEFAULT_RETENTION, FADE_STEPS, FSRS5_DEFAULT_W, FSRS5_PARAM_COUNT, PASS_PCT, RETRY_PCT,
+  DEFAULT_RETENTION, FADE_STEPS, advanceThreshold, FSRS5_DEFAULT_W, FSRS5_PARAM_COUNT, PASS_PCT, RETRY_PCT,
   T1_PEEK_LIMIT, T2_HINT_LIMIT, asGrade, fadeOf, gradeFor, makeScheduler, okFor, shownLayer,
   shownLayerOf, toLibraryParams,
 } from './fsrs.js';

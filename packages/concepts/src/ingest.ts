@@ -5,12 +5,13 @@
  * 2칸이다 (D47). 이 파일은 그중 `derive` 를 소유한다 — `cards` 는 M2.
  */
 import { keyOf, kindOf, langOf, langSpecs, loadDict, type Dict } from '@chickadee/dictionary';
+import { fnv1a64 } from '@chickadee/text';
 import {
   ipc, on, type BatchOp, type Capture, type IngestDone, type IngestProgress,
 } from '@chickadee/ipc-client';
 
 import { classify, isMine, type Identity } from './commits.js';
-import { deriveFile, type DerivedSite } from './derive.js';
+import { deriveFile, type DerivedSite, type RawBlock } from './derive.js';
 import { buildGaps, type CountableSite } from './gaps.js';
 import { EXCLUDE_GLOBS, GENERATED_MARKERS, LIMITS } from './ingest-defaults.js';
 import { assignUnits } from './units.js';
@@ -158,7 +159,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestReport> {
 export async function deriveRepo(
   dict: Dict,
   options: IngestOptions,
-): Promise<{ sites: number; gaps: number; units: number }> {
+): Promise<{ sites: number; blocks: number; gaps: number; units: number }> {
   const { repoId, now } = options;
   const heuristic = new Set(
     [...dict.concepts.values()]
@@ -172,6 +173,7 @@ export async function deriveRepo(
     ? await ipc.store.query('derive.files_changed_since', { repoId, since: options.now })
     : files;
   let siteCount = 0;
+  let blockCount = 0;
   let step = 0;
 
   for (const file of target) {
@@ -184,6 +186,8 @@ export async function deriveRepo(
     // 사전에 없는 개념의 캡처는 버린다 — 사전이 줄어들면 사용처도 줄어야 한다.
     const sites = result.sites.filter((s) => dict.concepts.has(s.conceptId));
     await writeSites(repoId, file, sites, now);
+    await writeBlocks(repoId, file, result.blocks, now);
+    blockCount += result.blocks.length;
     siteCount += sites.length;
     step += 1;
     options.onProgress?.('derive', step, target.length);
@@ -193,8 +197,53 @@ export async function deriveRepo(
   // 대지와 구멍은 리포 전체를 본다 — 증분이어도 「몇 파일 중 몇 곳」의 분모는 전체다.
   const units = await writeUnits(repoId, files);
   const gaps = await writeGaps(dict, repoId, files.length, now);
-  return { sites: siteCount, gaps, units };
+  return { sites: siteCount, blocks: blockCount, gaps, units };
 }
+
+/**
+ * T1 필사 단위 (02 `block` · 04 §3.1). `_blocks` 캡처를 그대로 담는다 —
+ * **분절·순위·마스크는 여기서 하지 않는다**: 그 셋은 `@chickadee/cards` 의 몫이고
+ * (01 §2 의 의존 방향이 `cards → concepts` 라 여기서 부를 수도 없다) 판을 걸 때 정해진다.
+ *
+ * `text_hash` 는 `fnv1a64(파일 content_hash · 줄 범위)` 다. 블록 원문을 읽지 않는 이유는
+ * 파일 377개짜리 리포에서 블록마다 IPC 를 한 번 더 하게 되기 때문이고, 파일의
+ * `content_hash` 가 git blob oid 라(D20) 본문이 바뀌면 해시도 바뀐다 — 「같은 자리 같은
+ * 본문이면 같은 행」이라는 UNIQUE 의 뜻이 그대로 지켜진다.
+ */
+async function writeBlocks(
+  repoId: number,
+  file: { id: number; content_hash: string | null },
+  blocks: readonly RawBlock[],
+  now: number,
+): Promise<void> {
+  const hashes = blocks.map((b) => blockHash(file.content_hash, b));
+  const ops = blocks.map((block, i) => ({
+    name: 'block.upsert' as const,
+    params: {
+      repoId,
+      fileId: file.id,
+      rev: null,
+      name: block.name ?? '',
+      kind: 'function',
+      lineStart: block.lineStart,
+      lineEnd: block.lineEnd,
+      textHash: hashes[i] as string,
+      // AST 는 판을 걸 때 `parse_snippet` 으로 채운다 (04 §3.1 · D14) — 인제스트가
+      // 블록마다 파서를 한 번 더 돌리면 10만 줄 예산이 무너진다.
+      astJson: null,
+      updatedAt: now,
+    },
+  }));
+  await inBatches(ops);
+  await ipc.store.exec('block.retire_missing', {
+    fileId: file.id,
+    keep: JSON.stringify(hashes),
+    at: now,
+  });
+}
+
+const blockHash = (contentHash: string | null, block: RawBlock): string =>
+  fnv1a64(`${contentHash ?? ''}:${block.lineStart}:${block.lineEnd}`);
 
 async function writeSites(
   repoId: number,

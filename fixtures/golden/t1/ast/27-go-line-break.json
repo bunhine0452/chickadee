@@ -1,0 +1,453 @@
+{
+  "grammar": "go",
+  "original": {
+    "kind": "source_file",
+    "named": true,
+    "start": 0,
+    "end": 63,
+    "children": [
+      {
+        "kind": "function_declaration",
+        "named": true,
+        "start": 0,
+        "end": 63,
+        "children": [
+          {
+            "kind": "func",
+            "named": false,
+            "start": 0,
+            "end": 4,
+            "text": "func",
+            "children": []
+          },
+          {
+            "kind": "identifier",
+            "named": true,
+            "start": 5,
+            "end": 9,
+            "text": "load",
+            "children": []
+          },
+          {
+            "kind": "parameter_list",
+            "named": true,
+            "start": 9,
+            "end": 11,
+            "children": [
+              {
+                "kind": "(",
+                "named": false,
+                "start": 9,
+                "end": 10,
+                "text": "(",
+                "children": []
+              },
+              {
+                "kind": ")",
+                "named": false,
+                "start": 10,
+                "end": 11,
+                "text": ")",
+                "children": []
+              }
+            ]
+          },
+          {
+            "kind": "type_identifier",
+            "named": true,
+            "start": 12,
+            "end": 17,
+            "text": "error",
+            "children": []
+          },
+          {
+            "kind": "block",
+            "named": true,
+            "start": 18,
+            "end": 63,
+            "children": [
+              {
+                "kind": "{",
+                "named": false,
+                "start": 18,
+                "end": 19,
+                "text": "{",
+                "children": []
+              },
+              {
+                "kind": "if_statement",
+                "named": true,
+                "start": 21,
+                "end": 49,
+                "children": [
+                  {
+                    "kind": "if",
+                    "named": false,
+                    "start": 21,
+                    "end": 23,
+                    "text": "if",
+                    "children": []
+                  },
+                  {
+                    "kind": "binary_expression",
+                    "named": true,
+                    "start": 24,
+                    "end": 34,
+                    "children": [
+                      {
+                        "kind": "identifier",
+                        "named": true,
+                        "start": 24,
+                        "end": 27,
+                        "text": "err",
+                        "children": []
+                      },
+                      {
+                        "kind": "!=",
+                        "named": false,
+                        "start": 28,
+                        "end": 30,
+                        "text": "!=",
+                        "children": []
+                      },
+                      {
+                        "kind": "nil",
+                        "named": true,
+                        "start": 31,
+                        "end": 34,
+                        "text": "nil",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "block",
+                    "named": true,
+                    "start": 35,
+                    "end": 49,
+                    "children": [
+                      {
+                        "kind": "{",
+                        "named": false,
+                        "start": 35,
+                        "end": 36,
+                        "text": "{",
+                        "children": []
+                      },
+                      {
+                        "kind": "return_statement",
+                        "named": true,
+                        "start": 37,
+                        "end": 47,
+                        "children": [
+                          {
+                            "kind": "return",
+                            "named": false,
+                            "start": 37,
+                            "end": 43,
+                            "text": "return",
+                            "children": []
+                          },
+                          {
+                            "kind": "expression_list",
+                            "named": true,
+                            "start": 44,
+                            "end": 47,
+                            "children": [
+                              {
+                                "kind": "identifier",
+                                "named": true,
+                                "start": 44,
+                                "end": 47,
+                                "text": "err",
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "kind": "}",
+                        "named": false,
+                        "start": 48,
+                        "end": 49,
+                        "text": "}",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "return_statement",
+                "named": true,
+                "start": 51,
+                "end": 61,
+                "children": [
+                  {
+                    "kind": "return",
+                    "named": false,
+                    "start": 51,
+                    "end": 57,
+                    "text": "return",
+                    "children": []
+                  },
+                  {
+                    "kind": "expression_list",
+                    "named": true,
+                    "start": 58,
+                    "end": 61,
+                    "children": [
+                      {
+                        "kind": "nil",
+                        "named": true,
+                        "start": 58,
+                        "end": 61,
+                        "text": "nil",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "}",
+                "named": false,
+                "start": 62,
+                "end": 63,
+                "text": "}",
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "originalHadError": false,
+  "user": {
+    "kind": "source_file",
+    "named": true,
+    "start": 0,
+    "end": 66,
+    "children": [
+      {
+        "kind": "function_declaration",
+        "named": true,
+        "start": 0,
+        "end": 66,
+        "children": [
+          {
+            "kind": "func",
+            "named": false,
+            "start": 0,
+            "end": 4,
+            "text": "func",
+            "children": []
+          },
+          {
+            "kind": "identifier",
+            "named": true,
+            "start": 5,
+            "end": 9,
+            "text": "load",
+            "children": []
+          },
+          {
+            "kind": "parameter_list",
+            "named": true,
+            "start": 9,
+            "end": 11,
+            "children": [
+              {
+                "kind": "(",
+                "named": false,
+                "start": 9,
+                "end": 10,
+                "text": "(",
+                "children": []
+              },
+              {
+                "kind": ")",
+                "named": false,
+                "start": 10,
+                "end": 11,
+                "text": ")",
+                "children": []
+              }
+            ]
+          },
+          {
+            "kind": "type_identifier",
+            "named": true,
+            "start": 12,
+            "end": 17,
+            "text": "error",
+            "children": []
+          },
+          {
+            "kind": "block",
+            "named": true,
+            "start": 18,
+            "end": 66,
+            "children": [
+              {
+                "kind": "{",
+                "named": false,
+                "start": 18,
+                "end": 19,
+                "text": "{",
+                "children": []
+              },
+              {
+                "kind": "if_statement",
+                "named": true,
+                "start": 21,
+                "end": 52,
+                "children": [
+                  {
+                    "kind": "if",
+                    "named": false,
+                    "start": 21,
+                    "end": 23,
+                    "text": "if",
+                    "children": []
+                  },
+                  {
+                    "kind": "binary_expression",
+                    "named": true,
+                    "start": 24,
+                    "end": 34,
+                    "children": [
+                      {
+                        "kind": "identifier",
+                        "named": true,
+                        "start": 24,
+                        "end": 27,
+                        "text": "err",
+                        "children": []
+                      },
+                      {
+                        "kind": "!=",
+                        "named": false,
+                        "start": 28,
+                        "end": 30,
+                        "text": "!=",
+                        "children": []
+                      },
+                      {
+                        "kind": "nil",
+                        "named": true,
+                        "start": 31,
+                        "end": 34,
+                        "text": "nil",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "block",
+                    "named": true,
+                    "start": 35,
+                    "end": 52,
+                    "children": [
+                      {
+                        "kind": "{",
+                        "named": false,
+                        "start": 35,
+                        "end": 36,
+                        "text": "{",
+                        "children": []
+                      },
+                      {
+                        "kind": "return_statement",
+                        "named": true,
+                        "start": 39,
+                        "end": 49,
+                        "children": [
+                          {
+                            "kind": "return",
+                            "named": false,
+                            "start": 39,
+                            "end": 45,
+                            "text": "return",
+                            "children": []
+                          },
+                          {
+                            "kind": "expression_list",
+                            "named": true,
+                            "start": 46,
+                            "end": 49,
+                            "children": [
+                              {
+                                "kind": "identifier",
+                                "named": true,
+                                "start": 46,
+                                "end": 49,
+                                "text": "err",
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "kind": "}",
+                        "named": false,
+                        "start": 51,
+                        "end": 52,
+                        "text": "}",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "return_statement",
+                "named": true,
+                "start": 54,
+                "end": 64,
+                "children": [
+                  {
+                    "kind": "return",
+                    "named": false,
+                    "start": 54,
+                    "end": 60,
+                    "text": "return",
+                    "children": []
+                  },
+                  {
+                    "kind": "expression_list",
+                    "named": true,
+                    "start": 61,
+                    "end": 64,
+                    "children": [
+                      {
+                        "kind": "nil",
+                        "named": true,
+                        "start": 61,
+                        "end": 64,
+                        "text": "nil",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "}",
+                "named": false,
+                "start": 65,
+                "end": 66,
+                "text": "}",
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "userHadError": false
+}

@@ -686,6 +686,129 @@ fn the_shipped_dictionary_finds_sites_in_the_fixture() {
     );
 }
 
+/// 파일 하나의 T1 후보 블록. 04 §3.1 의 12~40줄만 담고 그 범위에 걸린 개념을 붙인다 —
+/// `@site` 캡처의 `query_id` 가 곧 개념 id 다 (03 §3.3).
+fn block_rows(store: &Arc<Store>, file: &serde_json::Value) -> Vec<serde_json::Value> {
+    let id = file["id"].as_i64().unwrap_or_default();
+    let path = file["path"].as_str().unwrap_or_default().to_owned();
+    let captures: Vec<serde_json::Value> = store
+        .query("derive.captures_by_file", &json!({ "fileId": id }))
+        .expect("captures");
+    let sites: Vec<(String, i64)> = captures
+        .iter()
+        .filter(|c| c["name"].as_str() == Some("site"))
+        .filter_map(|c| {
+            Some((
+                c["query_id"].as_str()?.to_owned(),
+                c["start_line"].as_i64()?,
+            ))
+        })
+        .collect();
+
+    let mut out = Vec::new();
+    let mut name: Option<String> = None;
+    for capture in &captures {
+        if capture["query_id"].as_str() != Some("_blocks") {
+            continue;
+        }
+        match capture["name"].as_str() {
+            Some("block.name") => name = capture["excerpt"].as_str().map(str::to_owned),
+            Some("block.function") => {
+                let from = capture["start_line"].as_i64().unwrap_or_default();
+                let to = capture["end_line"].as_i64().unwrap_or_default();
+                // 분절 대상(41줄 이상)은 TS 가 다시 나눈다 — 덤프는 바로 걸 수 있는 것만 담는다.
+                if !(12..=40).contains(&(to - from + 1)) {
+                    name = None;
+                    continue;
+                }
+                let mut counts: BTreeMap<String, i64> = BTreeMap::new();
+                for (concept, line) in &sites {
+                    if (from..=to).contains(line) {
+                        *counts.entry(concept.clone()).or_default() += 1;
+                    }
+                }
+                let concepts: Vec<serde_json::Value> = counts
+                    .into_iter()
+                    .map(|(concept_id, n)| json!({ "conceptId": concept_id, "siteCount": n }))
+                    .collect();
+                out.push(json!({
+                    "path": path,
+                    "name": name.take(),
+                    "lineStart": from,
+                    "lineEnd": to,
+                    "concepts": concepts,
+                }));
+            }
+            _ => {}
+        }
+    }
+    out
+}
+
+/// T1 블록 후보 덤프 (04 §3.1). `projectox-like` 의 `_blocks` 캡처를 줄 범위만 남겨
+/// `fixtures/ipc/projectox/blocks.json` 에 적는다 — **코드는 담지 않는다**. 원문은 픽스처
+/// 리포에 그대로 있으므로 TS 쪽 테스트가 그 파일을 읽어 붙인다(리포에 코드 두 벌을 두지 않는다).
+///
+/// M3 「끝났다는 증거」의 첫 줄(「`projectox-like` 의 12~40줄 블록」)이 여기서 시작한다.
+#[test]
+fn projectox_block_dump_is_stable() {
+    let repos = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../../fixtures/repos/projectox-like")
+        .components()
+        .collect::<PathBuf>();
+    if !repos.join(".git").is_dir() {
+        eprintln!("skip: bash scripts/make-fixture-repo.sh projectox-like 를 먼저 돌린다");
+        return;
+    }
+    let data = tmp("blocks-db");
+    let store = open_store(&data.0);
+    // 시스템 쿼리(`_blocks`)는 사전에서 온다 — `spec()` 의 고정 쿼리 하나로는 블록이 안 나온다.
+    let out = ingest(
+        &store,
+        &real_spec(&repos),
+        &Arc::new(AtomicBool::new(false)),
+    );
+    assert!(out.files > 20, "픽스처에서 파일 {} 개만 읽었다", out.files);
+
+    let files: Vec<serde_json::Value> = store
+        .query("derive.files", &json!({ "repoId": 1 }))
+        .expect("files");
+    let mut rows: Vec<serde_json::Value> = Vec::new();
+    for file in &files {
+        rows.extend(block_rows(&store, file));
+    }
+    rows.sort_by_key(|r| {
+        (
+            r["path"].as_str().unwrap_or_default().to_owned(),
+            r["lineStart"].as_i64().unwrap_or_default(),
+        )
+    });
+    let at = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../../fixtures/ipc/projectox")
+        .components()
+        .collect::<PathBuf>();
+    std::fs::create_dir_all(&at).expect("mkdir");
+    let text = format!(
+        "{}\n",
+        serde_json::to_string_pretty(&json!(rows)).expect("json")
+    );
+    std::fs::write(at.join("blocks.json"), text).expect("write dump");
+
+    let sized = rows
+        .iter()
+        .filter(|r| {
+            let n = r["lineEnd"].as_i64().unwrap_or_default()
+                - r["lineStart"].as_i64().unwrap_or_default()
+                + 1;
+            (12..=40).contains(&n)
+        })
+        .count();
+    assert!(
+        sized >= 10,
+        "12~40줄 블록이 {sized} 개뿐이다 — T1 이 걸 판이 없다"
+    );
+}
+
 /// 실제 리포 검증 (03 구현 체크리스트 「projectox 실리포 검증」).
 /// 이 리포 자신이 TypeScript 실물이다 — `CHICKADEE_REAL_REPO` 로 다른 리포를 가리킬 수 있다.
 #[test]

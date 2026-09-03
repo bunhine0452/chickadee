@@ -1,0 +1,11 @@
+/* 목업: design/src/ink/session.css 의 `.dfilter`. */
+.dfilter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  color: var(--ink-soft);
+  font-size: var(--fs-14);
+}
+
+.dfilter .sw span { padding: 4px 9px }

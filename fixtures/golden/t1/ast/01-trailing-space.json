@@ -1,0 +1,117 @@
+{
+  "grammar": "typescript",
+  "original": {
+    "kind": "program",
+    "named": true,
+    "start": 0,
+    "end": 11,
+    "children": [
+      {
+        "kind": "lexical_declaration",
+        "named": true,
+        "start": 0,
+        "end": 11,
+        "children": [
+          {
+            "kind": "const",
+            "named": false,
+            "start": 0,
+            "end": 5,
+            "text": "const",
+            "children": []
+          },
+          {
+            "kind": "variable_declarator",
+            "named": true,
+            "start": 6,
+            "end": 11,
+            "children": [
+              {
+                "kind": "identifier",
+                "named": true,
+                "start": 6,
+                "end": 7,
+                "text": "x",
+                "children": []
+              },
+              {
+                "kind": "=",
+                "named": false,
+                "start": 8,
+                "end": 9,
+                "text": "=",
+                "children": []
+              },
+              {
+                "kind": "number",
+                "named": true,
+                "start": 10,
+                "end": 11,
+                "text": "1",
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "originalHadError": false,
+  "user": {
+    "kind": "program",
+    "named": true,
+    "start": 0,
+    "end": 14,
+    "children": [
+      {
+        "kind": "lexical_declaration",
+        "named": true,
+        "start": 0,
+        "end": 11,
+        "children": [
+          {
+            "kind": "const",
+            "named": false,
+            "start": 0,
+            "end": 5,
+            "text": "const",
+            "children": []
+          },
+          {
+            "kind": "variable_declarator",
+            "named": true,
+            "start": 6,
+            "end": 11,
+            "children": [
+              {
+                "kind": "identifier",
+                "named": true,
+                "start": 6,
+                "end": 7,
+                "text": "x",
+                "children": []
+              },
+              {
+                "kind": "=",
+                "named": false,
+                "start": 8,
+                "end": 9,
+                "text": "=",
+                "children": []
+              },
+              {
+                "kind": "number",
+                "named": true,
+                "start": 10,
+                "end": 11,
+                "text": "1",
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "userHadError": false
+}

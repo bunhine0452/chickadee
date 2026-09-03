@@ -1,0 +1,357 @@
+{
+  "grammar": "typescript",
+  "original": {
+    "kind": "program",
+    "named": true,
+    "start": 0,
+    "end": 35,
+    "children": [
+      {
+        "kind": "expression_statement",
+        "named": true,
+        "start": 0,
+        "end": 35,
+        "children": [
+          {
+            "kind": "call_expression",
+            "named": true,
+            "start": 0,
+            "end": 35,
+            "children": [
+              {
+                "kind": "identifier",
+                "named": true,
+                "start": 0,
+                "end": 8,
+                "text": "setItems",
+                "children": []
+              },
+              {
+                "kind": "arguments",
+                "named": true,
+                "start": 8,
+                "end": 35,
+                "children": [
+                  {
+                    "kind": "(",
+                    "named": false,
+                    "start": 8,
+                    "end": 9,
+                    "text": "(",
+                    "children": []
+                  },
+                  {
+                    "kind": "arrow_function",
+                    "named": true,
+                    "start": 9,
+                    "end": 34,
+                    "children": [
+                      {
+                        "kind": "formal_parameters",
+                        "named": true,
+                        "start": 9,
+                        "end": 15,
+                        "children": [
+                          {
+                            "kind": "(",
+                            "named": false,
+                            "start": 9,
+                            "end": 10,
+                            "text": "(",
+                            "children": []
+                          },
+                          {
+                            "kind": "required_parameter",
+                            "named": true,
+                            "start": 10,
+                            "end": 14,
+                            "children": [
+                              {
+                                "kind": "identifier",
+                                "named": true,
+                                "start": 10,
+                                "end": 14,
+                                "text": "prev",
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "kind": ")",
+                            "named": false,
+                            "start": 14,
+                            "end": 15,
+                            "text": ")",
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "kind": "=>",
+                        "named": false,
+                        "start": 16,
+                        "end": 18,
+                        "text": "=>",
+                        "children": []
+                      },
+                      {
+                        "kind": "array",
+                        "named": true,
+                        "start": 19,
+                        "end": 34,
+                        "children": [
+                          {
+                            "kind": "[",
+                            "named": false,
+                            "start": 19,
+                            "end": 20,
+                            "text": "[",
+                            "children": []
+                          },
+                          {
+                            "kind": "spread_element",
+                            "named": true,
+                            "start": 20,
+                            "end": 27,
+                            "children": [
+                              {
+                                "kind": "...",
+                                "named": false,
+                                "start": 20,
+                                "end": 23,
+                                "text": "...",
+                                "children": []
+                              },
+                              {
+                                "kind": "identifier",
+                                "named": true,
+                                "start": 23,
+                                "end": 27,
+                                "text": "prev",
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "kind": ",",
+                            "named": false,
+                            "start": 27,
+                            "end": 28,
+                            "text": ",",
+                            "children": []
+                          },
+                          {
+                            "kind": "identifier",
+                            "named": true,
+                            "start": 29,
+                            "end": 33,
+                            "text": "item",
+                            "children": []
+                          },
+                          {
+                            "kind": "]",
+                            "named": false,
+                            "start": 33,
+                            "end": 34,
+                            "text": "]",
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kind": ")",
+                    "named": false,
+                    "start": 34,
+                    "end": 35,
+                    "text": ")",
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "originalHadError": false,
+  "user": {
+    "kind": "program",
+    "named": true,
+    "start": 0,
+    "end": 29,
+    "children": [
+      {
+        "kind": "expression_statement",
+        "named": true,
+        "start": 0,
+        "end": 29,
+        "children": [
+          {
+            "kind": "call_expression",
+            "named": true,
+            "start": 0,
+            "end": 29,
+            "children": [
+              {
+                "kind": "identifier",
+                "named": true,
+                "start": 0,
+                "end": 8,
+                "text": "setItems",
+                "children": []
+              },
+              {
+                "kind": "arguments",
+                "named": true,
+                "start": 8,
+                "end": 29,
+                "children": [
+                  {
+                    "kind": "(",
+                    "named": false,
+                    "start": 8,
+                    "end": 9,
+                    "text": "(",
+                    "children": []
+                  },
+                  {
+                    "kind": "arrow_function",
+                    "named": true,
+                    "start": 9,
+                    "end": 28,
+                    "children": [
+                      {
+                        "kind": "formal_parameters",
+                        "named": true,
+                        "start": 9,
+                        "end": 12,
+                        "children": [
+                          {
+                            "kind": "(",
+                            "named": false,
+                            "start": 9,
+                            "end": 10,
+                            "text": "(",
+                            "children": []
+                          },
+                          {
+                            "kind": "required_parameter",
+                            "named": true,
+                            "start": 10,
+                            "end": 11,
+                            "children": [
+                              {
+                                "kind": "identifier",
+                                "named": true,
+                                "start": 10,
+                                "end": 11,
+                                "text": "p",
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "kind": ")",
+                            "named": false,
+                            "start": 11,
+                            "end": 12,
+                            "text": ")",
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "kind": "=>",
+                        "named": false,
+                        "start": 13,
+                        "end": 15,
+                        "text": "=>",
+                        "children": []
+                      },
+                      {
+                        "kind": "array",
+                        "named": true,
+                        "start": 16,
+                        "end": 28,
+                        "children": [
+                          {
+                            "kind": "[",
+                            "named": false,
+                            "start": 16,
+                            "end": 17,
+                            "text": "[",
+                            "children": []
+                          },
+                          {
+                            "kind": "spread_element",
+                            "named": true,
+                            "start": 17,
+                            "end": 21,
+                            "children": [
+                              {
+                                "kind": "...",
+                                "named": false,
+                                "start": 17,
+                                "end": 20,
+                                "text": "...",
+                                "children": []
+                              },
+                              {
+                                "kind": "identifier",
+                                "named": true,
+                                "start": 20,
+                                "end": 21,
+                                "text": "p",
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "kind": ",",
+                            "named": false,
+                            "start": 21,
+                            "end": 22,
+                            "text": ",",
+                            "children": []
+                          },
+                          {
+                            "kind": "identifier",
+                            "named": true,
+                            "start": 23,
+                            "end": 27,
+                            "text": "item",
+                            "children": []
+                          },
+                          {
+                            "kind": "]",
+                            "named": false,
+                            "start": 27,
+                            "end": 28,
+                            "text": "]",
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kind": ")",
+                    "named": false,
+                    "start": 28,
+                    "end": 29,
+                    "text": ")",
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "userHadError": false
+}

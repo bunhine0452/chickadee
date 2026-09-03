@@ -7,6 +7,7 @@ import { Forecast } from '../../components/home/Forecast';
 import { GapsPanel } from '../../components/home/GapsPanel';
 import { InkScale } from '../../components/home/InkScale';
 import { Masthead } from '../../components/home/Masthead';
+import { Newcomer } from '../../components/home/Newcomer';
 import { Panel } from '../../components/home/Panel';
 import { Sheet } from '../../components/home/Sheet';
 import { TodayPanel, type TodayPreview } from '../../components/home/TodayPanel';
@@ -63,6 +64,8 @@ export function HomeScreen({
           화면이 스스로 들고 있어야 새가 그려진다 — 셸이 들어오면 이 줄이 그리로 옮겨 간다. */}
       <DeeSprite />
       <Masthead repoName={repoName} today={today} streak={streak} masthead={data.masthead} />
+      {/* 초보 안내는 대지보다 위다 — 아래에 두면 스크롤해야 보이고, 그러면 안내가 아니다. */}
+      <Newcomer flag={data.newcomerFlag} />
 
       <Board
         title={

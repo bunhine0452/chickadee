@@ -1,0 +1,33 @@
+/* 목업: design/src/ink/session.css 의 `.ed-status`.
+   바꾼 것 —
+     · 범례 3색의 원색(--pink/--blue/--yellow-deep)을 판정 색 별칭 --verdict-* 로
+       (05 §4.2 — T1 색을 바꿀 때 판정 색이 딸려 바뀌지 않게).
+     · 안내의 `<b>Tab</b>` 은 Kbd(`kbd.k`) 로 바꿨다 — 키 표기는 한 컴포넌트가 맡는다. */
+.ed-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 8px;
+  color: var(--ink-soft);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+}
+
+.ed-status b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.ed-status .legend i {
+  display: inline-block;
+  width: 8px;
+  height: 12px;
+  margin-right: 4px;
+  vertical-align: -1px;
+}
+
+.ed-status .legend i.e { background: var(--verdict-exact) }
+
+.ed-status .legend i.q { background: var(--verdict-equiv) }
+
+.ed-status .legend i.d { background: var(--verdict-differ) }

@@ -139,4 +139,12 @@ export interface LangInfo { grammar: string; grammarVersion: string; abi: number
 /** 경로는 리포 루트 절대 경로다 — 장부가 TS 에 있으므로 id 를 되돌릴 곳이 Rust 에 없다 (D65). */
 export interface ReadLinesReq { rootPath: string; relPath: string; from: number; to: number; rev?: string }
 export interface ReadBlockReq { rootPath: string; relPath: string; startByte: number; endByte: number; rev?: string }
+
+/**
+ * `parse_snippet` (01 §3.2 · D87). 인자를 **낱개로** 보낸다 — 구조체 하나를 받는 것은
+ * `ingest_start` 뿐이다. `queries` 를 주지 않으면 캡처를 돌리지 않고 파싱만 한다.
+ */
+export interface SnippetReq { grammar: string; text: string; queries?: { id: string; scm: string }[] }
+/** `hadError` 는 `ERROR` 노드의 **유무**다. 비율(04 §4.5 의 ≤ 20 %)은 `ast` 를 세어 TS 가 낸다. */
+export interface SnippetResult { ast: AstLite; captures: Capture[]; hadError: boolean }
 export interface Block { relPath: string; rev: string | null; startByte: number; endByte: number; text: string }

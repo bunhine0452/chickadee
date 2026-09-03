@@ -7,7 +7,7 @@
  */
 import { ipc } from '@chickadee/ipc-client';
 import {
-  gradeFor, shownLayerOf, step, type LayerMove, type Outcome, type Scheduler,
+  gradeFor, shownLayerOf, step, type GradeInput, type LayerMove, type Outcome, type Scheduler,
 } from '@chickadee/scheduler';
 import {
   buildPlateDoneTx, type ConceptId, type DayKey, type ItemState, type Layer, type Mastery,
@@ -42,8 +42,31 @@ export interface FinishInput {
   site: { filePath: string; lineNo: number | null };
   /** 이 세션에서 이미 연출을 보여 준 횟수. */
   liferShown: number;
-  /** T1 만 — 3단계(백지)를 통과해야 4겹이다 (02 §4). */
+  /**
+   * T1·T2 만 — 등급 매핑에 그대로 넘어가는 것들 (02 §3.2). T0 은 정오만으로 등급이 나온다.
+   *
+   * **빠뜨리면 조용히 Again 이 된다**: `gradeFor` 의 T1 갈래는 `pct ?? 0` 을 보므로 100 %
+   * 답안이 `pct` 없이 오면 0 으로 읽혀 등급 1 이 되고 FSRS 간격이 무너진다.
+   */
+  grade?: Pick<GradeInput, 'pct' | 'passPct' | 'assists' | 'downgraded' | 'swap'>;
+  /**
+   * T1 만 — **채점한 단계**다 (D85). 3단계(백지)를 통과해야 4겹이고, `ReviewDetail` 의
+   * `stageBefore` 와 같은 값이어야 재생이 캐시와 갈라지지 않는다.
+   */
   stage?: 1 | 2 | 3;
+  /** T1 만 — 다음에 걸 단계. `card_state.stage` 에 남는다 (02 §4 T1 행). */
+  stageAfter?: 1 | 2 | 3;
+  /** T1 만 — `card_state.last_pct`. */
+  lastPct?: number;
+  /** T1 왜 게이트 한 줄 (04 §6). 채점·겹 효과는 없고 같은 tx 에 들어간다 (D84). */
+  whyAnswer?: { blockId: number | null; lineNo: number | null; questionId: string; text: string; pick: number | null; pickOk: boolean | null };
+  /** T1·T2 이의. **점수 불변**이고 몇 건이든 같은 tx 다 (04 §5 · D84). */
+  appeals?: readonly {
+    track: 't1' | 't2'; lineNo: number | null; originalText: string | null; userText: string | null;
+    normOriginal: string | null; normUser: string | null; autoVerdict: string;
+    autoReason: string | null; reasons: readonly string[]; patternKey: string | null;
+    engineVersion: string | null; dictVersion: string | null;
+  }[];
 }
 
 /** 실측 소요 시간 EMA (02 §5.1 — α=0.3). 9분 예상이 19분이면 진행바가 거짓말한다. */
@@ -92,6 +115,7 @@ export async function finishPlate(input: FinishInput): Promise<FinishResult> {
     fresh: mastery.firstOkAt === null,
     transfer: input.transfer,
     retry: item.role === 'retry',
+    ...input.grade,
   });
   const fsrs = scheduler.review(mastery, grade, now);
 
@@ -172,6 +196,44 @@ export async function finishPlate(input: FinishInput): Promise<FinishResult> {
           },
         }
       : {}),
+    // 뒤의 둘은 `review_log.id` 를 `session_item_id` 부속질의로 집는다 (D84) — 자리에
+    // 기대지 않으므로 이의가 몇 건이든 D77 의 두 UPDATE 가 흔들리지 않는다.
+    ...(input.whyAnswer
+      ? {
+          whyAnswer: {
+            sessionItemId: item.id,
+            cardId: item.cardId,
+            blockId: input.whyAnswer.blockId,
+            lineNo: input.whyAnswer.lineNo,
+            questionId: input.whyAnswer.questionId,
+            text: input.whyAnswer.text,
+            pick: input.whyAnswer.pick,
+            pickOk: input.whyAnswer.pickOk === null ? null : input.whyAnswer.pickOk ? 1 : 0,
+            createdAt: now,
+          },
+        }
+      : {}),
+    ...(input.appeals && input.appeals.length > 0
+      ? {
+          appeals: input.appeals.map((a) => ({
+            sessionItemId: item.id,
+            cardId: item.cardId,
+            track: a.track,
+            lineNo: a.lineNo,
+            originalText: a.originalText,
+            userText: a.userText,
+            normOriginal: a.normOriginal,
+            normUser: a.normUser,
+            autoVerdict: a.autoVerdict,
+            autoReason: a.autoReason,
+            reasonsJson: JSON.stringify(a.reasons),
+            patternKey: a.patternKey,
+            engineVersion: a.engineVersion,
+            dictVersion: a.dictVersion,
+            createdAt: now,
+          })),
+        }
+      : {}),
   });
 
   await ipc.store.batch(t.build());
@@ -186,8 +248,8 @@ export async function finishPlate(input: FinishInput): Promise<FinishResult> {
   await ipc.store.exec('card.state_upsert', {
     cardId: item.cardId,
     prints: (prev?.prints ?? 0) + 1,
-    stage: input.stage ?? ((prev?.stage ?? 1) as 1 | 2 | 3),
-    lastPct: prev?.last_pct ?? null,
+    stage: input.stageAfter ?? input.stage ?? ((prev?.stage ?? 1) as 1 | 2 | 3),
+    lastPct: input.lastPct ?? prev?.last_pct ?? null,
     estMinEma: nextEma(prev?.est_min_ema ?? null, input.elapsedS / 60),
     lastPrintedAt: now,
   });

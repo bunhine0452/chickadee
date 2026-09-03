@@ -1,0 +1,1003 @@
+{
+  "01-trailing-space": {
+    "rows": [
+      {
+        "oi": 0,
+        "ui": 0,
+        "status": "exact",
+        "codes": [],
+        "engine": "regex"
+      }
+    ],
+    "n": {
+      "exact": 1,
+      "equiv": 0,
+      "differ": 0,
+      "missing": 0,
+      "extra": 0
+    },
+    "total": 1,
+    "meaning": 1,
+    "pct": 100,
+    "passPct": 65,
+    "verdict": "advance",
+    "engine": "regex"
+  },
+  "02-terminator": {
+    "rows": [
+      {
+        "oi": 0,
+        "ui": 0,
+        "status": "equiv",
+        "codes": [
+          "TERMINATOR"
+        ],
+        "engine": "regex"
+      }
+    ],
+    "n": {
+      "exact": 0,
+      "equiv": 1,
+      "differ": 0,
+      "missing": 0,
+      "extra": 0
+    },
+    "total": 1,
+    "meaning": 1,
+    "pct": 100,
+    "passPct": 65,
+    "verdict": "advance",
+    "engine": "regex"
+  },
+  "03-quote": {
+    "rows": [
+      {
+        "oi": 0,
+        "ui": 0,
+        "status": "equiv",
+        "codes": [
+          "QUOTE"
+        ],
+        "engine": "regex"
+      }
+    ],
+    "n": {
+      "exact": 0,
+      "equiv": 1,
+      "differ": 0,
+      "missing": 0,
+      "extra": 0
+    },
+    "total": 1,
+    "meaning": 1,
+    "pct": 100,
+    "passPct": 65,
+    "verdict": "advance",
+    "engine": "regex"
+  },
+  "04-indent": {
+    "rows": [
+      {
+        "oi": 0,
+        "ui": 0,
+        "status": "exact",
+        "codes": [],
+        "engine": "regex"
+      },
+      {
+        "oi": 1,
+        "ui": 1,
+        "status": "equiv",
+        "codes": [
+          "INDENT"
+        ],
+        "engine": "regex"
+      },
+      {
+        "oi": 2,
+        "ui": 2,
+        "status": "exact",
+        "codes": [],
+        "engine": "regex"
+      }
+    ],
+    "n": {
+      "exact": 2,
+      "equiv": 1,
+      "differ": 0,
+      "missing": 0,
+      "extra": 0
+    },
+    "total": 3,
+    "meaning": 3,
+    "pct": 100,
+    "passPct": 65,
+    "verdict": "advance",
+    "engine": "regex"
+  },
+  "05-rename": {
+    "rows": [
+      {
+        "oi": 0,
+        "ui": 0,
+        "status": "equiv",
+        "codes": [
+          "RENAME"
+        ],
+        "engine": "regex"
+      },
+      {
+        "oi": 1,
+        "ui": 1,
+        "status": "equiv",
+        "codes": [
+          "RENAME"
+        ],
+        "engine": "regex"
+      },
+      {
+        "oi": 2,
+        "ui": 2,
+        "status": "exact",
+        "codes": [],
+        "engine": "regex"
+      }
+    ],
+    "n": {
+      "exact": 1,
+      "equiv": 2,
+      "differ": 0,
+      "missing": 0,
+      "extra": 0
+    },
+    "total": 3,
+    "meaning": 3,
+    "pct": 100,
+    "passPct": 65,
+    "verdict": "advance",
+    "engine": "regex"
+  },
+  "06-swap": {
+    "rows": [
+      {
+        "oi": 0,
+        "ui": 0,
+        "status": "exact",
+        "codes": [],
+        "engine": "regex"
+      },
+      {
+        "oi": 1,
+        "ui": 1,
+        "status": "differ",
+        "codes": [
+          "SWAP"
+        ],
+        "engine": "regex",
+        "swap": true
+      },
+      {
+        "oi": 2,
+        "ui": 2,
+        "status": "exact",
+        "codes": [],
+        "engine": "regex"
+      }
+    ],
+    "n": {
+      "exact": 2,
+      "equiv": 0,
+      "differ": 1,
+      "missing": 0,
+      "extra": 0
+    },
+    "total": 3,
+    "meaning": 2,
+    "pct": 67,
+    "passPct": 65,
+    "verdict": "repeat-soft",
+    "engine": "regex"
+  },
+  "07-prot-property": {
+    "rows": [
+      {
+        "oi": 0,
+        "ui": 0,
+        "status": "differ",
+        "codes": [
+          "TOKEN_MISMATCH"
+        ],
+        "engine": "regex"
+      }
+    ],
+    "n": {
+      "exact": 0,
+      "equiv": 0,
+      "differ": 1,
+      "missing": 0,
+      "extra": 0
+    },
+    "total": 1,
+    "meaning": 0,
+    "pct": 0,
+    "passPct": 65,
+    "verdict": "repeat",
+    "engine": "regex"
+  },
+  "08-rename-inconsistent": {
+    "rows": [
+      {
+        "oi": 0,
+        "ui": 0,
+        "status": "differ",
+        "codes": [
+          "RENAME_INCONSISTENT"
+        ],
+        "engine": "regex"
+      },
+      {
+        "oi": 1,
+        "ui": 1,
+        "status": "exact",
+        "codes": [],
+        "engine": "regex"
+      }
+    ],
+    "n": {
+      "exact": 1,
+      "equiv": 0,
+      "differ": 1,
+      "missing": 0,
+      "extra": 0
+    },
+    "total": 2,
+    "meaning": 1,
+    "pct": 50,
+    "passPct": 65,
+    "verdict": "repeat",
+    "engine": "regex"
+  },
+  "09-comment-text": {
+    "rows": [
+      {
+        "oi": 0,
+        "ui": 0,
+        "status": "equiv",
+        "codes": [
+          "COMMENT_TEXT"
+        ],
+        "engine": "regex"
+      },
+      {
+        "oi": 1,
+        "ui": 1,
+        "status": "exact",
+        "codes": [],
+        "engine": "regex"
+      }
+    ],
+    "n": {
+      "exact": 1,
+      "equiv": 1,
+      "differ": 0,
+      "missing": 0,
+      "extra": 0
+    },
+    "total": 2,
+    "meaning": 2,
+    "pct": 100,
+    "passPct": 65,
+    "verdict": "advance",
+    "engine": "regex"
+  },
+  "10-comment-missing": {
+    "rows": [
+      {
+        "oi": 0,
+        "ui": -1,
+        "status": "missing",
+        "codes": [],
+        "engine": "regex"
+      },
+      {
+        "oi": 1,
+        "ui": 0,
+        "status": "exact",
+        "codes": [],
+        "engine": "regex"
+      }
+    ],
+    "n": {
+      "exact": 1,
+      "equiv": 0,
+      "differ": 0,
+      "missing": 1,
+      "extra": 0
+    },
+    "total": 2,
+    "meaning": 1,
+    "pct": 50,
+    "passPct": 65,
+    "verdict": "repeat",
+    "engine": "regex"
+  },
+  "11-jsx-text": {
+    "rows": [
+      {
+        "oi": 0,
+        "ui": 0,
+        "status": "differ",
+        "codes": [
+          "TOKEN_COUNT"
+        ],
+        "engine": "regex"
+      }
+    ],
+    "n": {
+      "exact": 0,
+      "equiv": 0,
+      "differ": 1,
+      "missing": 0,
+      "extra": 0
+    },
+    "total": 1,
+    "meaning": 0,
+    "pct": 0,
+    "passPct": 65,
+    "verdict": "repeat",
+    "engine": "regex"
+  },
+  "12-jsx-line-missing": {
+    "rows": [
+      {
+        "oi": 0,
+        "ui": -1,
+        "status": "missing",
+        "codes": [],
+        "engine": "regex"
+      },
+      {
+        "oi": 1,
+        "ui": 0,
+        "status": "exact",
+        "codes": [],
+        "engine": "regex"
+      }
+    ],
+    "n": {
+      "exact": 1,
+      "equiv": 0,
+      "differ": 0,
+      "missing": 1,
+      "extra": 0
+    },
+    "total": 2,
+    "meaning": 1,
+    "pct": 50,
+    "passPct": 65,
+    "verdict": "repeat",
+    "engine": "regex"
+  },
+  "13-extra": {
+    "rows": [
+      {
+        "oi": 0,
+        "ui": 0,
+        "status": "exact",
+        "codes": [],
+        "engine": "regex"
+      },
+      {
+        "oi": -1,
+        "ui": 1,
+        "status": "extra",
+        "codes": [],
+        "engine": "regex"
+      }
+    ],
+    "n": {
+      "exact": 1,
+      "equiv": 0,
+      "differ": 0,
+      "missing": 0,
+      "extra": 1
+    },
+    "total": 1,
+    "meaning": 1,
+    "pct": 100,
+    "passPct": 65,
+    "verdict": "advance",
+    "engine": "regex"
+  },
+  "14-ast-block": {
+    "rows": [
+      {
+        "oi": 0,
+        "ui": 0,
+        "status": "exact",
+        "codes": [],
+        "engine": "regex"
+      },
+      {
+        "oi": 1,
+        "ui": 1,
+        "status": "equiv",
+        "codes": [
+          "TOKEN_COUNT",
+          "AST_EQUIV"
+        ],
+        "engine": "ast"
+      },
+      {
+        "oi": 2,
+        "ui": 2,
+        "status": "exact",
+        "codes": [],
+        "engine": "regex"
+      }
+    ],
+    "n": {
+      "exact": 2,
+      "equiv": 1,
+      "differ": 0,
+      "missing": 0,
+      "extra": 0
+    },
+    "total": 3,
+    "meaning": 3,
+    "pct": 100,
+    "passPct": 65,
+    "verdict": "advance",
+    "engine": "ast"
+  },
+  "15-ast-line-break": {
+    "rows": [
+      {
+        "oi": 0,
+        "ui": 0,
+        "status": "exact",
+        "codes": [],
+        "engine": "regex"
+      },
+      {
+        "oi": 1,
+        "ui": -1,
+        "status": "equiv",
+        "codes": [
+          "AST_EQUIV"
+        ],
+        "engine": "ast"
+      },
+      {
+        "oi": 2,
+        "ui": 1,
+        "status": "equiv",
+        "codes": [
+          "INDENT",
+          "TOKEN_COUNT",
+          "AST_EQUIV"
+        ],
+        "engine": "ast"
+      },
+      {
+        "oi": 3,
+        "ui": -1,
+        "status": "equiv",
+        "codes": [
+          "AST_EQUIV"
+        ],
+        "engine": "ast"
+      },
+      {
+        "oi": 4,
+        "ui": 2,
+        "status": "exact",
+        "codes": [],
+        "engine": "regex"
+      }
+    ],
+    "n": {
+      "exact": 2,
+      "equiv": 3,
+      "differ": 0,
+      "missing": 0,
+      "extra": 0
+    },
+    "total": 5,
+    "meaning": 5,
+    "pct": 100,
+    "passPct": 65,
+    "verdict": "advance",
+    "engine": "ast"
+  },
+  "16-ast-paren": {
+    "rows": [
+      {
+        "oi": 0,
+        "ui": 0,
+        "status": "exact",
+        "codes": [],
+        "engine": "regex"
+      },
+      {
+        "oi": 1,
+        "ui": 1,
+        "status": "equiv",
+        "codes": [
+          "TOKEN_COUNT",
+          "AST_EQUIV"
+        ],
+        "engine": "ast"
+      },
+      {
+        "oi": 2,
+        "ui": 2,
+        "status": "exact",
+        "codes": [],
+        "engine": "regex"
+      },
+      {
+        "oi": 3,
+        "ui": 3,
+        "status": "exact",
+        "codes": [],
+        "engine": "regex"
+      }
+    ],
+    "n": {
+      "exact": 3,
+      "equiv": 1,
+      "differ": 0,
+      "missing": 0,
+      "extra": 0
+    },
+    "total": 4,
+    "meaning": 4,
+    "pct": 100,
+    "passPct": 65,
+    "verdict": "advance",
+    "engine": "ast"
+  },
+  "17-template-vs-concat": {
+    "rows": [
+      {
+        "oi": 0,
+        "ui": 0,
+        "status": "differ",
+        "codes": [
+          "TOKEN_COUNT",
+          "TEMPLATE_VS_CONCAT"
+        ],
+        "engine": "regex"
+      }
+    ],
+    "n": {
+      "exact": 0,
+      "equiv": 0,
+      "differ": 1,
+      "missing": 0,
+      "extra": 0
+    },
+    "total": 1,
+    "meaning": 0,
+    "pct": 0,
+    "passPct": 65,
+    "verdict": "repeat",
+    "engine": "regex"
+  },
+  "18-operator": {
+    "rows": [
+      {
+        "oi": 0,
+        "ui": 0,
+        "status": "differ",
+        "codes": [
+          "TOKEN_MISMATCH"
+        ],
+        "engine": "regex"
+      }
+    ],
+    "n": {
+      "exact": 0,
+      "equiv": 0,
+      "differ": 1,
+      "missing": 0,
+      "extra": 0
+    },
+    "total": 1,
+    "meaning": 0,
+    "pct": 0,
+    "passPct": 65,
+    "verdict": "repeat",
+    "engine": "regex"
+  },
+  "19-arrow-parens": {
+    "rows": [
+      {
+        "oi": 0,
+        "ui": 0,
+        "status": "equiv",
+        "codes": [
+          "TOKEN_COUNT",
+          "AST_EQUIV"
+        ],
+        "engine": "ast"
+      }
+    ],
+    "n": {
+      "exact": 0,
+      "equiv": 1,
+      "differ": 0,
+      "missing": 0,
+      "extra": 0
+    },
+    "total": 1,
+    "meaning": 1,
+    "pct": 100,
+    "passPct": 65,
+    "verdict": "advance",
+    "engine": "ast"
+  },
+  "20-rename-arrow-param": {
+    "rows": [
+      {
+        "oi": 0,
+        "ui": 0,
+        "status": "equiv",
+        "codes": [
+          "RENAME"
+        ],
+        "engine": "regex"
+      }
+    ],
+    "n": {
+      "exact": 0,
+      "equiv": 1,
+      "differ": 0,
+      "missing": 0,
+      "extra": 0
+    },
+    "total": 1,
+    "meaning": 1,
+    "pct": 100,
+    "passPct": 65,
+    "verdict": "advance",
+    "engine": "regex"
+  },
+  "21-stale-closure": {
+    "rows": [
+      {
+        "oi": 0,
+        "ui": 0,
+        "status": "differ",
+        "codes": [
+          "TOKEN_COUNT"
+        ],
+        "engine": "regex"
+      }
+    ],
+    "n": {
+      "exact": 0,
+      "equiv": 0,
+      "differ": 1,
+      "missing": 0,
+      "extra": 0
+    },
+    "total": 1,
+    "meaning": 0,
+    "pct": 0,
+    "passPct": 65,
+    "verdict": "repeat",
+    "engine": "regex"
+  },
+  "22-optional-chain-space": {
+    "rows": [
+      {
+        "oi": 0,
+        "ui": 0,
+        "status": "equiv",
+        "codes": [
+          "WHITESPACE"
+        ],
+        "engine": "regex"
+      }
+    ],
+    "n": {
+      "exact": 0,
+      "equiv": 1,
+      "differ": 0,
+      "missing": 0,
+      "extra": 0
+    },
+    "total": 1,
+    "meaning": 1,
+    "pct": 100,
+    "passPct": 65,
+    "verdict": "advance",
+    "engine": "regex"
+  },
+  "23-optional-chain-dropped": {
+    "rows": [
+      {
+        "oi": 0,
+        "ui": 0,
+        "status": "differ",
+        "codes": [
+          "TOKEN_MISMATCH"
+        ],
+        "engine": "regex"
+      }
+    ],
+    "n": {
+      "exact": 0,
+      "equiv": 0,
+      "differ": 1,
+      "missing": 0,
+      "extra": 0
+    },
+    "total": 1,
+    "meaning": 0,
+    "pct": 0,
+    "passPct": 65,
+    "verdict": "repeat",
+    "engine": "regex"
+  },
+  "24-nw-shift": {
+    "rows": [
+      {
+        "oi": 0,
+        "ui": 4,
+        "status": "exact",
+        "codes": [],
+        "engine": "regex"
+      },
+      {
+        "oi": 1,
+        "ui": 5,
+        "status": "exact",
+        "codes": [],
+        "engine": "regex"
+      },
+      {
+        "oi": 2,
+        "ui": 6,
+        "status": "exact",
+        "codes": [],
+        "engine": "regex"
+      },
+      {
+        "oi": 3,
+        "ui": 7,
+        "status": "exact",
+        "codes": [],
+        "engine": "regex"
+      },
+      {
+        "oi": 4,
+        "ui": 8,
+        "status": "exact",
+        "codes": [],
+        "engine": "regex"
+      },
+      {
+        "oi": 5,
+        "ui": 9,
+        "status": "exact",
+        "codes": [],
+        "engine": "regex"
+      },
+      {
+        "oi": 6,
+        "ui": 10,
+        "status": "exact",
+        "codes": [],
+        "engine": "regex"
+      },
+      {
+        "oi": -1,
+        "ui": 0,
+        "status": "extra",
+        "codes": [],
+        "engine": "regex"
+      },
+      {
+        "oi": -1,
+        "ui": 1,
+        "status": "extra",
+        "codes": [],
+        "engine": "regex"
+      },
+      {
+        "oi": -1,
+        "ui": 2,
+        "status": "extra",
+        "codes": [],
+        "engine": "regex"
+      },
+      {
+        "oi": -1,
+        "ui": 3,
+        "status": "extra",
+        "codes": [],
+        "engine": "regex"
+      }
+    ],
+    "n": {
+      "exact": 7,
+      "equiv": 0,
+      "differ": 0,
+      "missing": 0,
+      "extra": 4
+    },
+    "total": 7,
+    "meaning": 7,
+    "pct": 100,
+    "passPct": 71,
+    "verdict": "advance",
+    "engine": "regex"
+  },
+  "25-py-whitespace": {
+    "rows": [
+      {
+        "oi": 0,
+        "ui": 0,
+        "status": "equiv",
+        "codes": [
+          "WHITESPACE"
+        ],
+        "engine": "regex"
+      },
+      {
+        "oi": 1,
+        "ui": 1,
+        "status": "exact",
+        "codes": [],
+        "engine": "regex"
+      }
+    ],
+    "n": {
+      "exact": 1,
+      "equiv": 1,
+      "differ": 0,
+      "missing": 0,
+      "extra": 0
+    },
+    "total": 2,
+    "meaning": 2,
+    "pct": 100,
+    "passPct": 65,
+    "verdict": "advance",
+    "engine": "regex"
+  },
+  "26-py-paren": {
+    "rows": [
+      {
+        "oi": 0,
+        "ui": 0,
+        "status": "exact",
+        "codes": [],
+        "engine": "regex"
+      },
+      {
+        "oi": 1,
+        "ui": 1,
+        "status": "equiv",
+        "codes": [
+          "TOKEN_COUNT",
+          "AST_EQUIV"
+        ],
+        "engine": "ast"
+      }
+    ],
+    "n": {
+      "exact": 1,
+      "equiv": 1,
+      "differ": 0,
+      "missing": 0,
+      "extra": 0
+    },
+    "total": 2,
+    "meaning": 2,
+    "pct": 100,
+    "passPct": 65,
+    "verdict": "advance",
+    "engine": "ast"
+  },
+  "27-go-line-break": {
+    "rows": [
+      {
+        "oi": 0,
+        "ui": 0,
+        "status": "exact",
+        "codes": [],
+        "engine": "regex"
+      },
+      {
+        "oi": 1,
+        "ui": 1,
+        "status": "equiv",
+        "codes": [
+          "TOKEN_COUNT",
+          "AST_EQUIV"
+        ],
+        "engine": "ast"
+      },
+      {
+        "oi": 2,
+        "ui": 4,
+        "status": "exact",
+        "codes": [],
+        "engine": "regex"
+      },
+      {
+        "oi": 3,
+        "ui": 3,
+        "status": "equiv",
+        "codes": [
+          "INDENT"
+        ],
+        "engine": "regex"
+      },
+      {
+        "oi": -1,
+        "ui": 5,
+        "status": "extra",
+        "codes": [],
+        "engine": "regex"
+      }
+    ],
+    "n": {
+      "exact": 2,
+      "equiv": 2,
+      "differ": 0,
+      "missing": 0,
+      "extra": 1
+    },
+    "total": 4,
+    "meaning": 4,
+    "pct": 100,
+    "passPct": 65,
+    "verdict": "advance",
+    "engine": "ast"
+  },
+  "28-rs-macro": {
+    "rows": [
+      {
+        "oi": 0,
+        "ui": 0,
+        "status": "exact",
+        "codes": [],
+        "engine": "regex"
+      },
+      {
+        "oi": 1,
+        "ui": 1,
+        "status": "differ",
+        "codes": [
+          "TOKEN_COUNT"
+        ],
+        "engine": "regex"
+      },
+      {
+        "oi": 2,
+        "ui": 2,
+        "status": "exact",
+        "codes": [],
+        "engine": "regex"
+      }
+    ],
+    "n": {
+      "exact": 2,
+      "equiv": 0,
+      "differ": 1,
+      "missing": 0,
+      "extra": 0
+    },
+    "total": 3,
+    "meaning": 2,
+    "pct": 67,
+    "passPct": 65,
+    "verdict": "advance",
+    "engine": "regex"
+  }
+}

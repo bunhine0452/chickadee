@@ -1,0 +1,304 @@
+{
+  "note": "04 §9 T1 골든 28건. `rule` 은 그 표의 행이고 `requires` 는 그 행이 요구하는 것을 손으로 적은 것이다 — 문서가 정본이므로 이 칸은 생성하지 않는다. `rows` 는 회귀 스냅샷이고 `UPDATE_GOLDEN=1 pnpm vitest run packages/grading/src/golden-t1.test.ts` 로 다시 쓴다. 문서의 표가 한 줄짜리 조각인 케이스는 그 줄이 성립하는 최소 블록으로 감쌌다(`return`·`await`·`let` 은 함수 밖에서 파싱되지 않는다) — 규칙은 그대로이고 행 수만 늘었다.",
+  "cases": [
+    {
+      "id": "01-trailing-space",
+      "rule": "#1 `const x = 1` / `const x = 1   ` → exact",
+      "grammar": "typescript",
+      "ast": true,
+      "original": ["const x = 1"],
+      "user": ["const x = 1   "],
+      "requires": [{ "oi": 0, "status": "exact" }]
+    },
+    {
+      "id": "02-terminator",
+      "rule": "#2 `… = useLogin()` / `… = useLogin();` → equiv TERMINATOR",
+      "grammar": "typescript",
+      "ast": true,
+      "moduleDecls": ["useLogin"],
+      "original": ["const { submit, error, pending } = useLogin()"],
+      "user": ["const { submit, error, pending } = useLogin();"],
+      "requires": [{ "oi": 0, "status": "equiv", "code": "TERMINATOR" }]
+    },
+    {
+      "id": "03-quote",
+      "rule": "#3 `useState('')` / `useState(\"\")` → equiv QUOTE",
+      "grammar": "typescript",
+      "ast": true,
+      "moduleDecls": ["useState"],
+      "original": ["const [v, setV] = useState('')"],
+      "user": ["const [v, setV] = useState(\"\")"],
+      "requires": [{ "oi": 0, "status": "equiv", "code": "QUOTE" }]
+    },
+    {
+      "id": "04-indent",
+      "rule": "#4 `  e.preventDefault()` / `e.preventDefault()` → equiv INDENT",
+      "grammar": "typescript",
+      "ast": false,
+      "original": ["function f(e) {", "  e.preventDefault()", "}"],
+      "user": ["function f(e) {", "e.preventDefault()", "}"],
+      "requires": [{ "oi": 1, "status": "equiv", "code": "INDENT" }]
+    },
+    {
+      "id": "05-rename",
+      "rule": "#5 `(e: FormEvent)` + `e.preventDefault()` / `ev` → equiv RENAME e→ev",
+      "grammar": "typescript",
+      "ast": true,
+      "moduleDecls": ["FormEvent", "submit"],
+      "original": ["async function onSubmit(e: FormEvent) {", "  e.preventDefault()", "}"],
+      "user": ["async function onSubmit(ev: FormEvent) {", "  ev.preventDefault()", "}"],
+      "requires": [
+        { "oi": 0, "status": "equiv", "code": "RENAME" },
+        { "oi": 1, "status": "equiv", "code": "RENAME" }
+      ]
+    },
+    {
+      "id": "06-swap",
+      "rule": "#6 `await submit(email, password)` / `submit(password, email)` → differ SWAP",
+      "grammar": "typescript",
+      "ast": true,
+      "moduleDecls": ["submit"],
+      "original": ["async function go() {", "  await submit(email, password)", "}"],
+      "user": ["async function go() {", "  await submit(password, email)", "}"],
+      "requires": [{ "oi": 1, "status": "differ", "code": "SWAP", "swap": true }]
+    },
+    {
+      "id": "07-prot-property",
+      "rule": "#7 `e.target.value` / `e.target.val` → differ TOKEN_MISMATCH(PROT 속성)",
+      "grammar": "typescript",
+      "ast": true,
+      "original": ["setEmail(e.target.value)"],
+      "user": ["setEmail(e.target.val)"],
+      "requires": [{ "oi": 0, "status": "differ", "code": "TOKEN_MISMATCH" }]
+    },
+    {
+      "id": "08-rename-inconsistent",
+      "rule": "#8 `email` 을 한 줄만 `mail` 로 → differ RENAME_INCONSISTENT (검증 ④)",
+      "grammar": "tsx",
+      "ast": true,
+      "moduleDecls": ["useState"],
+      "original": ["const [email, setEmail] = useState('')", "const el = <input value={email} />"],
+      "user": ["const [mail, setEmail] = useState('')", "const el = <input value={email} />"],
+      "requires": [{ "oi": 0, "status": "differ", "code": "RENAME_INCONSISTENT" }]
+    },
+    {
+      "id": "09-comment-text",
+      "rule": "#9 `// 로그인 폼…` / `// login form` → equiv COMMENT_TEXT",
+      "grammar": "typescript",
+      "ast": false,
+      "original": ["// 로그인 폼. 제출하면 useLogin 의 submit 을 부른다", "const x = 1"],
+      "user": ["// login form. calls submit from useLogin", "const x = 1"],
+      "requires": [{ "oi": 0, "status": "equiv", "code": "COMMENT_TEXT" }]
+    },
+    {
+      "id": "10-comment-missing",
+      "rule": "#10 `// 로그인 폼…` / (없음) → missing",
+      "grammar": "typescript",
+      "ast": false,
+      "original": ["// 로그인 폼. 제출하면 useLogin 의 submit 을 부른다", "const x = 1"],
+      "user": ["const x = 1"],
+      "requires": [{ "oi": 0, "status": "missing" }]
+    },
+    {
+      "id": "11-jsx-text",
+      "rule": "#11 `>로그인</button>` / `>Login</button>` → differ TOKEN_COUNT (JSX 텍스트는 뜻)",
+      "grammar": "tsx",
+      "ast": true,
+      "original": ["const b = <button disabled={pending}>로그인</button>"],
+      "user": ["const b = <button disabled={pending}>Login</button>"],
+      "requires": [{ "oi": 0, "status": "differ", "code": "TOKEN_COUNT" }]
+    },
+    {
+      "id": "12-jsx-line-missing",
+      "rule": "#12 `{error && <p className=\"err\">{error}</p>}` / (없음) → missing",
+      "grammar": "tsx",
+      "ast": false,
+      "original": ["const el = <div>{error && <p className=\"err\">{error}</p>}</div>", "const y = 2"],
+      "user": ["const y = 2"],
+      "requires": [{ "oi": 0, "status": "missing" }]
+    },
+    {
+      "id": "13-extra",
+      "rule": "#13 (없음) / `console.log(email)` → extra",
+      "grammar": "typescript",
+      "ast": false,
+      "original": ["const x = 1"],
+      "user": ["const x = 1", "console.log(email)"],
+      "requires": [{ "ui": 1, "status": "extra" }]
+    },
+    {
+      "id": "14-ast-block",
+      "rule": "#14 `if (!res.ok) return` / `{ return }` → equiv AST_EQUIV:BLOCK",
+      "grammar": "typescript",
+      "ast": true,
+      "original": ["function f(res) {", "  if (!res.ok) return", "}"],
+      "user": ["function f(res) {", "  if (!res.ok) { return }", "}"],
+      "requires": [{ "oi": 1, "status": "equiv", "code": "AST_EQUIV", "detail": "BLOCK" }]
+    },
+    {
+      "id": "15-ast-line-break",
+      "rule": "#15 `return (` + `<form …>` 2행 / 1행 → equiv AST_EQUIV:LINE_BREAK",
+      "grammar": "tsx",
+      "ast": true,
+      "moduleDecls": ["onSubmit"],
+      "original": ["function F() {", "  return (", "    <form onSubmit={onSubmit}>x</form>", "  )", "}"],
+      "user": ["function F() {", "  return <form onSubmit={onSubmit}>x</form>", "}"],
+      "requires": [{ "oi": 2, "status": "equiv", "code": "AST_EQUIV", "detail": "LINE_BREAK" }]
+    },
+    {
+      "id": "16-ast-paren",
+      "rule": "#16 `const t = a + b` / `const t = (a + b)` → equiv AST_EQUIV:PAREN",
+      "grammar": "typescript",
+      "ast": true,
+      "original": ["function f(a, b) {", "  const t = a + b", "  return t", "}"],
+      "user": ["function f(a, b) {", "  const t = (a + b)", "  return t", "}"],
+      "requires": [{ "oi": 1, "status": "equiv", "code": "AST_EQUIV", "detail": "PAREN" }]
+    },
+    {
+      "id": "17-template-vs-concat",
+      "rule": "#17 `` `${nick} 님` `` / `nick + ' 님'` → differ TEMPLATE_VS_CONCAT",
+      "grammar": "typescript",
+      "ast": true,
+      "original": ["const s = `${nick} 님`"],
+      "user": ["const s = nick + ' 님'"],
+      "requires": [{ "oi": 0, "status": "differ", "code": "TEMPLATE_VS_CONCAT" }]
+    },
+    {
+      "id": "18-operator",
+      "rule": "#18 `x == null` / `x === null` → differ TOKEN_MISMATCH(연산자)",
+      "grammar": "typescript",
+      "ast": true,
+      "original": ["const same = x == null"],
+      "user": ["const same = x === null"],
+      "requires": [{ "oi": 0, "status": "differ", "code": "TOKEN_MISMATCH" }]
+    },
+    {
+      "id": "19-arrow-parens",
+      "rule": "#19 `items.map((i) => i.id)` / `map(i => i.id)` → equiv AST_EQUIV:ARROW_PARENS",
+      "grammar": "typescript",
+      "ast": true,
+      "original": ["const ids = items.map((i) => i.id)"],
+      "user": ["const ids = items.map(i => i.id)"],
+      "requires": [{ "oi": 0, "status": "equiv", "code": "AST_EQUIV", "detail": "ARROW_PARENS" }]
+    },
+    {
+      "id": "20-rename-arrow-param",
+      "rule": "#20 `(prev) => [...prev, item]` / `(p) => [...p, item]` → equiv RENAME prev→p",
+      "grammar": "typescript",
+      "ast": true,
+      "original": ["setItems((prev) => [...prev, item])"],
+      "user": ["setItems((p) => [...p, item])"],
+      "requires": [{ "oi": 0, "status": "equiv", "code": "RENAME" }]
+    },
+    {
+      "id": "21-stale-closure",
+      "rule": "#21 `(prev) => [...prev, item]` / `([...items, item])` → differ TOKEN_COUNT (AST 도 다름)",
+      "grammar": "typescript",
+      "ast": true,
+      "original": ["setItems((prev) => [...prev, item])"],
+      "user": ["setItems([...items, item])"],
+      "requires": [{ "oi": 0, "status": "differ", "code": "TOKEN_COUNT" }]
+    },
+    {
+      "id": "22-optional-chain-space",
+      "rule": "#22 `res.user?.profile` / `res.user ?. profile` → equiv WHITESPACE (다중문자 op)",
+      "grammar": "typescript",
+      "ast": true,
+      "original": ["const p = res.user?.profile"],
+      "user": ["const p = res.user ?. profile"],
+      "requires": [{ "oi": 0, "status": "equiv", "code": "WHITESPACE" }]
+    },
+    {
+      "id": "23-optional-chain-dropped",
+      "rule": "#23 `res.user?.profile` / `res.user.profile` → differ TOKEN_MISMATCH(`?.` 유무)",
+      "grammar": "typescript",
+      "ast": true,
+      "original": ["const p = res.user?.profile"],
+      "user": ["const p = res.user.profile"],
+      "requires": [{ "oi": 0, "status": "differ", "code": "TOKEN_MISMATCH" }]
+    },
+    {
+      "id": "24-nw-shift",
+      "rule": "#24 위에 주석 넉 줄을 끼워 넣고 나머지 동일 → 전부 exact, NW 폴백 정렬",
+      "grammar": "typescript",
+      "ast": false,
+      "usedNw": true,
+      "original": [
+        "function f(a, b) {",
+        "  const t = a + b",
+        "  if (t > 0) {",
+        "    return t",
+        "  }",
+        "  return 0",
+        "}"
+      ],
+      "user": [
+        "// 두 수를 더한다",
+        "// 음수면 0",
+        "// 호출부는 features/sum",
+        "// 2026-09 추가",
+        "function f(a, b) {",
+        "  const t = a + b",
+        "  if (t > 0) {",
+        "    return t",
+        "  }",
+        "  return 0",
+        "}"
+      ],
+      "requires": [
+        { "oi": 0, "status": "exact" },
+        { "oi": 3, "status": "exact" },
+        { "oi": 6, "status": "exact" }
+      ]
+    },
+    {
+      "id": "25-py-whitespace",
+      "rule": "#25 py `def f(x):` / `def f( x ):` → equiv WHITESPACE",
+      "grammar": "python",
+      "ast": true,
+      "original": ["def f(x):", "    return x"],
+      "user": ["def f( x ):", "    return x"],
+      "requires": [{ "oi": 0, "status": "equiv", "code": "WHITESPACE" }]
+    },
+    {
+      "id": "26-py-paren",
+      "rule": "#26 py `return x` / `return (x)` → equiv(ast) AST_EQUIV:PAREN / differ(regex) TOKEN_COUNT",
+      "grammar": "python",
+      "ast": true,
+      "original": ["def f(x):", "    return x"],
+      "user": ["def f(x):", "    return (x)"],
+      "requires": [{ "oi": 1, "status": "equiv", "code": "AST_EQUIV", "detail": "PAREN" }],
+      "regexOnly": [{ "oi": 1, "status": "differ", "code": "TOKEN_COUNT" }]
+    },
+    {
+      "id": "27-go-line-break",
+      "rule": "#27 go `if err != nil { return err }` / 3행으로 나눔 → equiv AST_EQUIV:LINE_BREAK",
+      "grammar": "go",
+      "ast": true,
+      "original": [
+        "func load() error {",
+        "\tif err != nil { return err }",
+        "\treturn nil",
+        "}"
+      ],
+      "user": [
+        "func load() error {",
+        "\tif err != nil {",
+        "\t\treturn err",
+        "\t}",
+        "\treturn nil",
+        "}"
+      ],
+      "requires": [{ "oi": 1, "status": "equiv", "code": "AST_EQUIV", "detail": "LINE_BREAK" }]
+    },
+    {
+      "id": "28-rs-macro",
+      "rule": "#28 rs `Vec::new()` / `vec![]` → differ TOKEN_COUNT (매크로 ≠ 호출)",
+      "grammar": "rust",
+      "ast": true,
+      "original": ["fn main() {", "    let v = Vec::new();", "}"],
+      "user": ["fn main() {", "    let v = vec![];", "}"],
+      "requires": [{ "oi": 1, "status": "differ", "code": "TOKEN_COUNT" }]
+    }
+  ]
+}

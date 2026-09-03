@@ -33,6 +33,7 @@ pub fn run() {
             commands::repo::file_read_block,
             commands::repo::git_blame_lines,
             commands::repo::parse_langs,
+            commands::repo::parse_snippet,
             commands::repo::app_reveal,
             commands::ingest::ingest_start,
             commands::ingest::ingest_cancel,

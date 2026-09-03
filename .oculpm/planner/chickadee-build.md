@@ -83,12 +83,12 @@ owner: claude-code
 - [x] 01 · 성능 벤치 — 3 픽스처, WKWebView 홈·세션 프레임 측정, CI 소프트 게이트 · 1.5일 (선행: 인제스트·세션 셸) {#m2-01-perf-bench}
 
 ## M3 · T1 클론 코딩 (끝: 12~40줄 블록 3단계 페이딩, 골든 28건 통과, 비공백 줄 점수, appeal·why_answer 기록, 20줄 <20ms, Monaco ≤250ms) {#m3}
-- [ ] 04 · T1 블록 선정·마스크 — 언어별 노드 표, 분절, 2단계 유지 집합, 스펙 카드 · 2일 (선행: 03 _blocks 캡처·01 file_read_block·02 block) {#m3-04-t1-block-mask}
-- [ ] 04 · T1 정규식층 — 정렬 A/B/C(NW), 파이프라인 11단계, PROT 구성, 치환 3조건+④ · 3일 (선행: 04 토크나이저) {#m3-04-t1-regex}
-- [ ] 04 · T1 AST 승격 — 문장 단위 잘라내기, 정규화 ⓐ~ⓗ, 폴백 게이트, 성능 측정 · 3일 (선행: 정규식층·01 parse_snippet) {#m3-04-t1-ast}
-- [ ] 04 · T1 결과·점수·이의 — 데이터 모델, 임계(소블록 완충), appeal·patternKey·카탈로그·이슈 URL · 2일 (선행: 정규식층·02 appeal) {#m3-04-t1-result-appeal}
-- [ ] 04 · 왜 게이트 — 문항 선정, 검증 4조건, why_answer 저장, 스펙 카드 연계 · 1일 (선행: T1 결과·02 why_answer) {#m3-04-why-gate}
-- [ ] 05 · T1 ClonePad Monaco — 지연 로드·테마 2종·거터 틱·줄 이탈 판정·백틱 홀드·자동 저장·Stepper·RefPlate·ScoreCard·DiffRows·WhyGate · 3일 (선행: 세션 셸·04 T1 엔진) {#m3-05-clonepad}
+- [x] 04 · T1 블록 선정·마스크 — 언어별 노드 표, 분절, 2단계 유지 집합, 스펙 카드 · 2일 (선행: 03 _blocks 캡처·01 file_read_block·02 block) {#m3-04-t1-block-mask}
+- [x] 04 · T1 정규식층 — 정렬 A/B/C(NW), 파이프라인 11단계, PROT 구성, 치환 3조건+④ · 3일 (선행: 04 토크나이저) {#m3-04-t1-regex}
+- [x] 04 · T1 AST 승격 — 문장 단위 잘라내기, 정규화 ⓐ~ⓗ, 폴백 게이트, 성능 측정 · 3일 (선행: 정규식층·01 parse_snippet) {#m3-04-t1-ast}
+- [x] 04 · T1 결과·점수·이의 — 데이터 모델, 임계(소블록 완충), appeal·patternKey·카탈로그·이슈 URL · 2일 (선행: 정규식층·02 appeal) {#m3-04-t1-result-appeal}
+- [x] 04 · 왜 게이트 — 문항 선정, 검증 4조건, why_answer 저장, 스펙 카드 연계 · 1일 (선행: T1 결과·02 why_answer) {#m3-04-why-gate}
+- [x] 05 · T1 ClonePad Monaco — 지연 로드·테마 2종·거터 틱·줄 이탈 판정·백틱 홀드·자동 저장·Stepper·RefPlate·ScoreCard·DiffRows·WhyGate · 3일 (선행: 세션 셸·04 T1 엔진) {#m3-05-clonepad}
 
 ## M4 · T2 구조 (끝: projectox 유닛으로 문제 4종 생성, two-commits 는 그래프 3종만, 배치 결정성·2,000파일 <1.5s·24 노드·골든·IPC 재생 T1/T2 확장) {#m4}
 - [ ] 04 · T2 import 해석기 resolve-imports.ts — ts/py/go/rs/dart 표, tsconfig paths, Next http 엣지, external 분류 · 3일 (선행: 03 _imports 캡처) {#m4-04-resolve-imports}
@@ -187,4 +187,11 @@ owner: claude-code
 | 2026-09-03T10:45:44+09:00 | #m2-01-perf-bench | claude-code | ☐→! |  | 헤드리스 스케줄러 실측은 끝. WKWebView 홈·세션 프레임은 m1-05 와 같은 이유로 사람이 GUI 에서 한 번 돌려야 한다 |
 | 2026-09-03T13:42:24+09:00 | #m1-05-wkwebview-perf | claude-code | !→x | 20260903/Bugs/1342_bug_wkwebview-perf-and-three-real-app-bugs.md | 릴리스 빌드 실측 완료. frame p95 18ms(예산 12) 초과, 나머지 넷 통과. 재는 절차는 VITE_PERF 하네스로 자동화 |
 | 2026-09-03T13:42:26+09:00 | #m2-01-perf-bench | claude-code | !→x | 20260903/Bugs/1342_bug_wkwebview-perf-and-three-real-app-bugs.md | 홈·세션 프레임 실측 + mark 5종 계측. 강등 사다리를 밟을지는 사용자 결정(D80) |
+| 2026-09-03T16:21:16+09:00 | #m3-04-t1-regex | claude-code | ☐→x | .oculpm/journal/20260903/Features_to_add/1621_feature_t1-grading-engine-and-boundary.md | 정렬 A/B/C(NW)+D91 · 파이프라인 1~10 · PROT · 치환 3조건+④ |
+| 2026-09-03T16:21:25+09:00 | #m3-04-t1-ast | claude-code | ☐→x | .oculpm/journal/20260903/Features_to_add/1621_feature_t1-grading-engine-and-boundary.md | 문장 단위 승격 · 정규화 ⓐ~ⓗ · parse_snippet(D87) · py/go/rs 문법 추가 |
+| 2026-09-03T16:21:32+09:00 | #m3-04-t1-result-appeal | claude-code | ☐→x | .oculpm/journal/20260903/Features_to_add/1621_feature_t1-grading-engine-and-boundary.md | T1Result · 문턱 D83 · appeal·patternKey·카탈로그 5종·이슈 URL · tx D84 |
+| 2026-09-03T16:21:40+09:00 | #m3-04-why-gate | claude-code | ☐→x | .oculpm/journal/20260903/Features_to_add/1621_feature_t1-grading-engine-and-boundary.md | 문항 선정 ①~④ · 검증 4조건(코드포인트) · why_answer 저장 · 스펙 카드 연계 |
+| 2026-09-03T16:21:48+09:00 | #m3-04-t1-block-mask | claude-code | ☐→x | .oculpm/journal/20260903/Features_to_add/1555_feature_t1-block-mask-spec-generator.md | 블록 선정·분절·2단계 마스크(목업 show2 재현)·스펙 카드 + 인제스트 block 쓰기 |
+| 2026-09-03T16:25:26+09:00 | #m3-05-clonepad | claude-code | ☐→~ | .oculpm/journal/20260903/Features_to_add/1625_feature_t1-clonepad-monaco.md | 에디터 부분 완료(Monaco 옵션·테마 2종·거터 틱·IME 보류·백틱 홀드·자동 저장·PlainPad 되돌림). 표현 컴포넌트 8종과 화면 배선은 별도. |
+| 2026-09-03T16:50:39+09:00 | #m3-05-clonepad | claude-code | ~→x | .oculpm/journal/20260903/Features_to_add/1650_feature_t1-clonepad-and-session-wiring.md | 컴포넌트 9종 + T1Plate + 배선. t1:monaco 314ms 실측 → 1단계 textarea (D93) |
 <!-- oculpm:plan-log end -->

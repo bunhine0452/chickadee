@@ -976,8 +976,10 @@ export type CardPayload =
       dict?: DictLayer[]; prereq: { conceptId: ConceptId; n: string }[]; uses: { siteId: number; f: string; l: number }[];
       promptLines: string[];                                    // focus±4, 사다리 4단(프롬프트)용
       payoff?: string; bridge?: string; transferFrom?: ConceptId; previewSiteId?: number }   // 합성 예제일 때 「곧 여기서 본다」
-  | { track: 't1'; kind: 'transcribe'; file: string; fn: string; original: string[]; show2: number[];
+  | { track: 't1'; kind: 'transcribe'; blockId: number; file: string; fn: string; original: string[]; show2: number[];
       why: { line: number; q: string; help: string; choices: { t: string; ok: boolean; fb: string }[] } }
+      // `blockId` = `block.id` (D92). `why_answer.block_id` 와 `block.ast_json` 캐시를 되찾는 열쇠다.
+      // `why.choices` 는 **3개 아니면 0개**다 — 3개면 사전 `why_gate`(04 §6 ①), 0개면 일반 템플릿(④).
   | { track: 't2'; kind: 'placement' | 'radius' | 'flow' | 'direction'; q: string; hint: string;
       bands: { l: string; s: string }[]; files: { p: string; r: number; isNew?: boolean }[]; edges: [string, string][];
       commit: { h: string; d: string; m: string; n: string }; core: Record<string, [string, string]>;
@@ -1001,6 +1003,8 @@ export type ReviewDetail =
   | { track: 't0'; sel: number; answer: number; kind: 'meaning' | 'blank' | 'point' }
   | { track: 't1'; meaning: number; total: number; exact: number; equiv: number; differ: number; missing: number; extra: number;
       peeks: number; downgraded: boolean; stageBefore: 1|2|3; stageAfter: 1|2|3; appealedLines: number[]; whyText: string; whyPick: number | null }
+      // `stageBefore` 는 **채점한 단계**다 — 「한 단계 쉽게」를 누른 뒤면 내려간 쪽이다 (D85).
+      // `appealedLines` 는 1-based 원본 줄 (`appeal.line_no` 와 같은 단위).
   | { track: 't2'; pct: number; found: string[]; missed: string[]; wrong: string[]; bonus: string[]; hints: number; more: boolean };
 
 export interface DunnoEvent { id: number; sessionItemId: number; reviewLogId: number | null; cardId: number; conceptId: ConceptId; at: number;

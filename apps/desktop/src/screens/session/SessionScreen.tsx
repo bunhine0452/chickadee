@@ -5,7 +5,7 @@
  * `@chickadee/grading` 이, 겹이 얼마나 오를지는 `@chickadee/scheduler` 가 정한다.
  */
 import { FlatButton } from '@chickadee/ui';
-import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 
 import { JobBand } from '../../components/session/JobBand.js';
 import { SessionOverlay } from '../../components/session/SessionOverlay.js';
@@ -14,21 +14,36 @@ import { Summary } from '../../components/session/Summary.js';
 import type { RungNo } from '../../components/session/ReprintLadder.js';
 import type { QueueItem } from '../../components/shell/TimeQueue.js';
 import { closeMark, markLiferOpen } from '../../devtools/audit.js';
+import { buildProt, evalLine, type Question, type T1Result, type Tick } from '@chickadee/grading';
 import { baseName, loadLadder, type LadderData } from '../../data/ladder.js';
 import type { Plate } from '../../data/session.js';
 import type { Track } from '@chickadee/store-sql';
 import { loadSettings } from '../../data/settings.js';
 import { loadSummary, markLifersShown, type SummaryData } from '../../data/summary.js';
 import {
-  answerPlate, backFromPrereq, completeSession, jumpPrereq, openRung, pauseSession, pressDunno,
-  returnToParent, savePlate,
+  answerPlate, backFromPrereq, completeSession, finishT1Plate, gradeT1Plate, jumpPrereq, openRung,
+  pauseSession, pressDunno, returnToParent, savePlate,
 } from '../../session-flow.js';
 import { currentPlate, useUi } from '../../store.js';
 import { T0Plate } from './T0Plate.js';
+import { T1Plate, type T1View } from './T1Plate.js';
 import { useSessionClock } from './useSessionClock.js';
 import './SessionScreen.css';
 
 const TRACK_LABEL = { t0: 'T0', t1: 'T1', t2: 'T2', t3: 'T3' } as const;
+
+/** 04 §4.6 — 6줄 미만은 한 번 경고하고 두 번째 누름에 채점한다. */
+const MIN_GRADE_LINES = 6;
+
+/** 경로 확장자 → tree-sitter 문법 키. 거터의 PROT 집합이 이것으로 내장 표를 고른다. */
+function grammarKeyOf(path: string): string {
+  const ext = path.slice(path.lastIndexOf('.'));
+  if (ext === '.tsx' || ext === '.jsx') return 'tsx';
+  if (ext === '.py') return 'python';
+  if (ext === '.go') return 'go';
+  if (ext === '.rs') return 'rust';
+  return 'typescript';
+}
 
 /**
  * 화면의 `Track`(`packages/ui`)은 t0~t2 뿐이고 스키마의 `Track`(02 §8.2)은 t3 를 포함한다 —
@@ -69,6 +84,22 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
   const [dunnoId, setDunnoId] = useState(0);
   const [lifer, setLifer] = useState<LiferView | null>(null);
   const [summary, setSummary] = useState<SummaryData | null>(null);
+  /** Monaco 는 CSS 변수를 못 받아 테마를 hex 로 받는다 (05 §8) — 설정에서 한 번 읽는다. */
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+  // ── T1 판 하나가 들고 있는 것 (05 §5 · 04 §4~§6). 판이 바뀌면 아래 효과가 비운다.
+  const [t1View, setT1View] = useState<T1View>('edit');
+  const [t1Stage, setT1Stage] = useState<1 | 2 | 3>(1);
+  const [t1Draft, setT1Draft] = useState('');
+  const [t1Ticks, setT1Ticks] = useState<Record<number, Tick>>({});
+  const [t1Peeks, setT1Peeks] = useState(0);
+  const [t1Peeking, setT1Peeking] = useState(false);
+  const [t1Downgraded, setT1Downgraded] = useState(false);
+  const [t1SavedAt, setT1SavedAt] = useState<number | null>(null);
+  const [t1Graded, setT1Graded] = useState<{ result: T1Result; question: Question } | null>(null);
+  const [t1Appealed, setT1Appealed] = useState<number[]>([]);
+  const [t1Why, setT1Why] = useState<{ text: string; pick: number | null }>({ text: '', pick: null });
+  const [t1Short, setT1Short] = useState(false);
 
   const result = results[pos] ?? null;
   const elapsed = useUi((s) => s.elapsed[pos] ?? 0);
@@ -81,6 +112,10 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
     closeMark('session:mount');
   }, []);
 
+  useEffect(() => {
+    void loadSettings().then((s) => setTheme(s.theme));
+  }, []);
+
   // 판이 바뀌면 사다리는 접힌다 — 앞 판의 4단 입력이 다음 판에 따라오면 안 된다.
   useEffect(() => {
     setLadderOpen(false);
@@ -88,7 +123,21 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
     setStuck('');
     setLadder(null);
     setDunnoId(0);
-  }, [plate?.id]);
+    // T1 도 같다. 초안은 `session_item.state_json` 에 저장돼 있으므로 그것을 되살린다
+    // (02 §5.6 — Esc 로 나갔다 오면 이어 찍는다).
+    setT1View('edit');
+    setT1Draft(plate?.state?.t1Draft ?? '');
+    setT1Stage(plate?.state?.t1Stage ?? (plate?.level ?? 1));
+    setT1Ticks({});
+    setT1Peeks(plate?.state?.peeks ?? 0);
+    setT1Peeking(false);
+    setT1Downgraded(false);
+    setT1SavedAt(null);
+    setT1Graded(null);
+    setT1Appealed([]);
+    setT1Why({ text: '', pick: null });
+    setT1Short(false);
+  }, [plate?.id, plate?.level, plate?.state?.t1Draft, plate?.state?.t1Stage, plate?.state?.peeks]);
 
   // 마지막 판을 마치면 요약을 읽는다 (05 §3 — 요약은 읽기 전용이다).
   useEffect(() => {
@@ -167,6 +216,84 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
     }
   }, [elapsed, ladderOpen, rung, plate]);
 
+  /** 원본 블록의 PROT 집합. 거터가 줄마다 다시 만들면 0.2 ms 예산을 못 지킨다 (04 §4.5). */
+  const t1Prot = useMemo(() => {
+    const payload = plate?.payload.track === 't1' ? plate.payload : null;
+    if (payload === null) return new Set<string>();
+    return buildProt({ original: payload.original, grammar: grammarKeyOf(payload.file) });
+  }, [plate]);
+
+  const t1LeaveLine = useCallback((index: number, text: string) => {
+    const payload = plate?.payload.track === 't1' ? plate.payload : null;
+    if (payload === null) return;
+    const tick = evalLine(index, text, payload.original, t1Prot);
+    setT1Ticks((prev) => ({ ...prev, [index]: tick }));
+  }, [plate, t1Prot]);
+
+  const t1SaveDraft = useCallback((draft: string) => {
+    setT1Draft(draft);
+    setT1SavedAt(Date.now());
+    // 초안은 `session_item.state_json` 으로 내려간다 (05 §3 저장 5시점).
+    useUi.getState().patchState(pos, { t1Draft: draft, t1Stage, peeks: t1Peeks });
+  }, [pos, t1Stage, t1Peeks]);
+
+  const t1Grade = useCallback(async () => {
+    const nonEmpty = t1Draft.split('\n').filter((l) => l.trim() !== '').length;
+    // 6줄 미만은 한 번 경고하고 두 번째 누름에 채점한다 (04 §4.6 · 목업).
+    if (nonEmpty < MIN_GRADE_LINES && !t1Short) {
+      setT1Short(true);
+      useUi.getState().say(`아직 너무 짧습니다 (${nonEmpty}줄). 한 번 더 누르면 그대로 채점합니다.`);
+      return;
+    }
+    setT1Peeking(false);
+    const graded = await gradeT1Plate({
+      draft: t1Draft, stage: t1Stage, peeks: t1Peeks, downgraded: t1Downgraded,
+    });
+    if (graded === null) return;
+    setT1Graded(graded);
+    setT1View('result');
+  }, [t1Draft, t1Stage, t1Peeks, t1Downgraded, t1Short]);
+
+  const t1Downgrade = useCallback(() => {
+    if (t1Stage <= 1) return;
+    setT1Downgraded(true);
+    setT1Stage((prev) => (prev - 1) as 1 | 2 | 3);
+    useUi.getState().say('한 단계 쉽게 — 기록만 남고 감점은 없습니다.');
+  }, [t1Stage]);
+
+  const t1Peek = useCallback((on: boolean) => {
+    setT1Peeking(on);
+    // 첫 홀드에만 센다 (05 §8). 감점이 아니라 「더 자주 보여줄 신호」다.
+    if (on) setT1Peeks((prev) => prev + 1);
+  }, []);
+
+  const t1Finish = useCallback(async () => {
+    if (t1Graded === null || plate === null) return;
+    const finished = await finishT1Plate(t1Graded.result, t1Graded.question, {
+      draft: t1Draft,
+      stage: t1Stage,
+      peeks: t1Peeks,
+      downgraded: t1Downgraded,
+      elapsedMs: elapsed * 1000,
+      appealed: t1Appealed,
+      why: t1Why,
+    });
+    if (finished === null) return;
+    const shown = useUi.getState().liferShown;
+    if (finished.correct && finished.layer[1] > finished.layer[0] && finished.layer[0] === 0
+      && plate.role !== 'retry' && plate.role !== 'prereq' && shown <= 3) {
+      markLiferOpen();
+      const payload = plate.payload.track === 't1' ? plate.payload : null;
+      setLifer({
+        concept: `${plate.nameKo} 필사`,
+        code: payload?.fn ?? '',
+        where: `당신의 <b>${baseName(payload?.file ?? '')}</b> 에서 채집 · T1 클론 코딩`,
+        serial: `#${String(shown).padStart(3, '0')}`,
+      });
+    }
+    await goNext();
+  }, [t1Graded, plate, t1Draft, t1Stage, t1Peeks, t1Downgraded, elapsed, t1Appealed, t1Why, goNext]);
+
   if (session === null) return null;
 
   const band = (
@@ -224,7 +351,35 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
               useUi.getState().go('home');
             }}
           />
-        ) : plate === null ? null : (
+        ) : plate === null ? null : plate.track === 't1' ? (
+          <T1Plate
+            plate={plate}
+            no={pos + 1}
+            result={result}
+            theme={theme}
+            graded={t1Graded}
+            view={t1View}
+            onView={setT1View}
+            stage={t1Stage}
+            draft={t1Draft}
+            onDraft={t1SaveDraft}
+            peeks={t1Peeks}
+            onPeek={t1Peek}
+            peeking={t1Peeking}
+            ticks={t1Ticks}
+            onLeaveLine={t1LeaveLine}
+            onGrade={() => void t1Grade()}
+            onDowngrade={t1Downgrade}
+            savedAt={t1SavedAt}
+            appealed={t1Appealed}
+            onAppeal={(oi) => setT1Appealed((prev) =>
+              prev.includes(oi) ? prev.filter((x) => x !== oi) : [...prev, oi])}
+            why={t1Why}
+            onWhyText={(text) => setT1Why((prev) => ({ ...prev, text }))}
+            onWhyPick={(pick) => setT1Why((prev) => ({ ...prev, pick }))}
+            onFinish={() => void t1Finish()}
+          />
+        ) : (
           <T0Plate
             plate={plate}
             no={pos + 1}

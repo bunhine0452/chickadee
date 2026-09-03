@@ -161,6 +161,32 @@ export interface GradeInput {
   assists?: number;
   /** T1 「한 단계 쉽게」를 썼나. */
   downgraded?: boolean;
+  /**
+   * 합격 문턱(백분율). 없으면 `PASS_PCT`(85)다. T1 은 소블록 완충값을 넘긴다 —
+   * `advanceThreshold(total) = min(85, 100 − 200/total)` (04 §4.6 · D83).
+   */
+  passPct?: number;
+  /** T1 이름 맞바꿈이 한 줄이라도 있나 — 백분율과 무관하게 불합격이다 (04 §4.6). */
+  swap?: boolean;
+}
+
+/**
+ * T1 합격 문턱 (04 §4.6 · 정본 §5). `100 − 200/total` 은 「두 줄까지 놓쳐도 된다」와 같은
+ * 값이다 — 20줄 미만 소블록에서 한 줄이 15 점을 넘게 잡아먹는 것을 완충한다.
+ * `total` 은 원본의 **비공백** 줄 수다. 12줄 블록은 83, 14줄부터는 85 다.
+ *
+ * **정수로 반올림한다**(D83). 04 §4.6 은 `pct` 를 `round(100·meaning/total)` 로 정하고
+ * 문턱은 실수로 두는데, 12줄 블록의 10/12 는 정확히 83.333…이라 `pct` 83 이 문턱 83.333 을
+ * **못 넘는다** — 공식이 허락한 「두 줄」이 반올림에서 사라진다. 양쪽을 정수로 맞추면 그
+ * 부류의 오차가 통째로 없어진다.
+ *
+ * 하한이 `RETRY_PCT`(65)인 이유: 완충 공식만 쓰면 3줄 블록의 문턱이 33 이 되어 **40 %가
+ * 합격이면서 동시에 「같은 단계를 한 번 더」**(04 §4.6 의 65 규칙)가 된다. 블록은 12~40줄
+ * 이지만(04 §3.1) 빈 줄을 뺀 `total` 은 그보다 작아질 수 있어 실제로 닿는 자리다.
+ */
+export function advanceThreshold(total: number): number {
+  if (total <= 0) return PASS_PCT;
+  return Math.max(RETRY_PCT, Math.min(PASS_PCT, Math.round(100 - 200 / total)));
 }
 
 /** 원본 잠깐 보기 3회 이상이면 Good → Hard (02 §3.2). */
@@ -183,19 +209,27 @@ export function gradeFor(v: GradeInput): UsedGrade {
     return 3;
   }
   const pct = v.pct ?? 0;
+  const pass = v.passPct ?? PASS_PCT;
   if (pct < RETRY_PCT) return 1;
   if (v.track === 't1') {
-    if (pct < PASS_PCT || v.downgraded === true) return 2;
+    if (pct < pass || v.downgraded === true || v.swap === true) return 2;
     return (v.assists ?? 0) >= T1_PEEK_LIMIT ? 2 : 3;
   }
-  if (pct < PASS_PCT) return 2;
+  if (pct < pass) return 2;
   return (v.assists ?? 0) >= T2_HINT_LIMIT ? 2 : 3;
 }
 
-/** 02 §3.2 의 `ok` 열 — T1·T2 는 85 % 가 기준이고 T0 은 정오 그대로. */
-export function okFor(v: Pick<GradeInput, 'track' | 'ok' | 'pct'>): boolean {
+/**
+ * 02 §3.2 의 `ok` 열 — T0 은 정오 그대로, T1·T2 는 백분율이 문턱을 넘었나다.
+ *
+ * 문턱은 기본 85 이고 T1 은 소블록 완충값(`advanceThreshold`, 04 §4.6)을 넘겨 준다 (D83).
+ * 이름 맞바꿈(`swap`)은 백분율과 무관하게 불합격이다 — 인자 순서가 바뀐 코드는 뜻이 바뀐
+ * 코드이고, 그것이 겹을 올려 주면 04 §4.6 의 그 문장이 거짓이 된다.
+ */
+export function okFor(v: Pick<GradeInput, 'track' | 'ok' | 'pct' | 'passPct' | 'swap'>): boolean {
   if (v.track === 't0') return v.ok;
-  return (v.pct ?? 0) >= PASS_PCT;
+  if (v.swap === true) return false;
+  return (v.pct ?? 0) >= (v.passPct ?? PASS_PCT);
 }
 
 // ───────── 02 §3.4 흐려짐 ─────────

@@ -1,0 +1,357 @@
+{
+  "grammar": "typescript",
+  "original": {
+    "kind": "program",
+    "named": true,
+    "start": 0,
+    "end": 55,
+    "children": [
+      {
+        "kind": "function_declaration",
+        "named": true,
+        "start": 0,
+        "end": 55,
+        "children": [
+          {
+            "kind": "async",
+            "named": false,
+            "start": 0,
+            "end": 5,
+            "text": "async",
+            "children": []
+          },
+          {
+            "kind": "function",
+            "named": false,
+            "start": 6,
+            "end": 14,
+            "text": "function",
+            "children": []
+          },
+          {
+            "kind": "identifier",
+            "named": true,
+            "start": 15,
+            "end": 17,
+            "text": "go",
+            "children": []
+          },
+          {
+            "kind": "formal_parameters",
+            "named": true,
+            "start": 17,
+            "end": 19,
+            "children": [
+              {
+                "kind": "(",
+                "named": false,
+                "start": 17,
+                "end": 18,
+                "text": "(",
+                "children": []
+              },
+              {
+                "kind": ")",
+                "named": false,
+                "start": 18,
+                "end": 19,
+                "text": ")",
+                "children": []
+              }
+            ]
+          },
+          {
+            "kind": "statement_block",
+            "named": true,
+            "start": 20,
+            "end": 55,
+            "children": [
+              {
+                "kind": "{",
+                "named": false,
+                "start": 20,
+                "end": 21,
+                "text": "{",
+                "children": []
+              },
+              {
+                "kind": "expression_statement",
+                "named": true,
+                "start": 24,
+                "end": 53,
+                "children": [
+                  {
+                    "kind": "await_expression",
+                    "named": true,
+                    "start": 24,
+                    "end": 53,
+                    "children": [
+                      {
+                        "kind": "await",
+                        "named": false,
+                        "start": 24,
+                        "end": 29,
+                        "text": "await",
+                        "children": []
+                      },
+                      {
+                        "kind": "call_expression",
+                        "named": true,
+                        "start": 30,
+                        "end": 53,
+                        "children": [
+                          {
+                            "kind": "identifier",
+                            "named": true,
+                            "start": 30,
+                            "end": 36,
+                            "text": "submit",
+                            "children": []
+                          },
+                          {
+                            "kind": "arguments",
+                            "named": true,
+                            "start": 36,
+                            "end": 53,
+                            "children": [
+                              {
+                                "kind": "(",
+                                "named": false,
+                                "start": 36,
+                                "end": 37,
+                                "text": "(",
+                                "children": []
+                              },
+                              {
+                                "kind": "identifier",
+                                "named": true,
+                                "start": 37,
+                                "end": 42,
+                                "text": "email",
+                                "children": []
+                              },
+                              {
+                                "kind": ",",
+                                "named": false,
+                                "start": 42,
+                                "end": 43,
+                                "text": ",",
+                                "children": []
+                              },
+                              {
+                                "kind": "identifier",
+                                "named": true,
+                                "start": 44,
+                                "end": 52,
+                                "text": "password",
+                                "children": []
+                              },
+                              {
+                                "kind": ")",
+                                "named": false,
+                                "start": 52,
+                                "end": 53,
+                                "text": ")",
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "}",
+                "named": false,
+                "start": 54,
+                "end": 55,
+                "text": "}",
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "originalHadError": false,
+  "user": {
+    "kind": "program",
+    "named": true,
+    "start": 0,
+    "end": 55,
+    "children": [
+      {
+        "kind": "function_declaration",
+        "named": true,
+        "start": 0,
+        "end": 55,
+        "children": [
+          {
+            "kind": "async",
+            "named": false,
+            "start": 0,
+            "end": 5,
+            "text": "async",
+            "children": []
+          },
+          {
+            "kind": "function",
+            "named": false,
+            "start": 6,
+            "end": 14,
+            "text": "function",
+            "children": []
+          },
+          {
+            "kind": "identifier",
+            "named": true,
+            "start": 15,
+            "end": 17,
+            "text": "go",
+            "children": []
+          },
+          {
+            "kind": "formal_parameters",
+            "named": true,
+            "start": 17,
+            "end": 19,
+            "children": [
+              {
+                "kind": "(",
+                "named": false,
+                "start": 17,
+                "end": 18,
+                "text": "(",
+                "children": []
+              },
+              {
+                "kind": ")",
+                "named": false,
+                "start": 18,
+                "end": 19,
+                "text": ")",
+                "children": []
+              }
+            ]
+          },
+          {
+            "kind": "statement_block",
+            "named": true,
+            "start": 20,
+            "end": 55,
+            "children": [
+              {
+                "kind": "{",
+                "named": false,
+                "start": 20,
+                "end": 21,
+                "text": "{",
+                "children": []
+              },
+              {
+                "kind": "expression_statement",
+                "named": true,
+                "start": 24,
+                "end": 53,
+                "children": [
+                  {
+                    "kind": "await_expression",
+                    "named": true,
+                    "start": 24,
+                    "end": 53,
+                    "children": [
+                      {
+                        "kind": "await",
+                        "named": false,
+                        "start": 24,
+                        "end": 29,
+                        "text": "await",
+                        "children": []
+                      },
+                      {
+                        "kind": "call_expression",
+                        "named": true,
+                        "start": 30,
+                        "end": 53,
+                        "children": [
+                          {
+                            "kind": "identifier",
+                            "named": true,
+                            "start": 30,
+                            "end": 36,
+                            "text": "submit",
+                            "children": []
+                          },
+                          {
+                            "kind": "arguments",
+                            "named": true,
+                            "start": 36,
+                            "end": 53,
+                            "children": [
+                              {
+                                "kind": "(",
+                                "named": false,
+                                "start": 36,
+                                "end": 37,
+                                "text": "(",
+                                "children": []
+                              },
+                              {
+                                "kind": "identifier",
+                                "named": true,
+                                "start": 37,
+                                "end": 45,
+                                "text": "password",
+                                "children": []
+                              },
+                              {
+                                "kind": ",",
+                                "named": false,
+                                "start": 45,
+                                "end": 46,
+                                "text": ",",
+                                "children": []
+                              },
+                              {
+                                "kind": "identifier",
+                                "named": true,
+                                "start": 47,
+                                "end": 52,
+                                "text": "email",
+                                "children": []
+                              },
+                              {
+                                "kind": ")",
+                                "named": false,
+                                "start": 52,
+                                "end": 53,
+                                "text": ")",
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "}",
+                "named": false,
+                "start": 54,
+                "end": 55,
+                "text": "}",
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "userHadError": false
+}

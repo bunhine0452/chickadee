@@ -1,0 +1,132 @@
+/* 목업: design/src/ink/session.css 의 `.drows` · `.drow` · `.rtag`.
+   바꾼 것 —
+     · 판정 색 원색을 별칭으로 — `.rtag.e` → --verdict-exact, `.rtag.q` → --verdict-equiv,
+       `.drow.equiv .u` → --verdict-equiv-text (05 §4.2).
+     · 황 「면」(`.rtag.d` · `mark`)과 먹 리터럴 #221D18 은 --t2 / --on-t2 로. 목업의
+       --yellow(#FFC400)에 대응하는 판정 별칭이 없다 — --verdict-differ 는 --yellow-deep
+       이라 면으로 쓰면 색이 어두워진다. Choices.css 의 `.ch.wrong .n` 이 같은 선례다.
+     · 이의 버튼은 목업의 `.dis` 대신 FlatButton(`flat-btn ghost dunno`) 이다 —
+       `aria-pressed` 가 필요하고(05 §5), 눌린 면은 `.dunno.on` 이 이미 황색이다. */
+.drows {
+  display: flex;
+  flex-direction: column;
+  border: 2px solid var(--rule);
+}
+
+.drow {
+  display: grid;
+  grid-template-columns: 2.6em minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 0 12px;
+  align-items: start;
+  padding: 6px 10px 6px 0;
+  border-top: 1px dashed var(--rule);
+  font-family: var(--f-mono);
+  font-size: var(--fs-15);
+  line-height: 1.7;
+}
+
+.drow:first-child { border-top: 0 }
+
+.drow > i {
+  height: 100%;
+  padding-top: 2px;
+  padding-right: 8px;
+  border-right: 1px solid var(--rule);
+  color: var(--ink-soft);
+  font-size: var(--fs-13);
+  font-style: normal;
+  text-align: right;
+}
+
+.drow .o,
+.drow .u {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.drow .o { color: var(--ink-soft) }
+
+.drow .st {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: flex-end;
+}
+
+.drow.exact { background: var(--stock) }
+
+/* 「이 조건에 맞는 줄이 없습니다」 — 목업의 인라인 style 을 클래스로 옮겼다. */
+.drow.empty .o {
+  grid-column: 2/5;
+  font-family: var(--f-ui);
+}
+
+.drow.equiv .u { color: var(--verdict-equiv-text) }
+
+.drow.differ .u { color: var(--ink) }
+
+.drow.differ .u mark {
+  padding: 0 1px;
+  background: var(--t2);
+  color: var(--on-t2);
+}
+
+.drow.missing .u,
+.drow.extra .o {
+  color: var(--ink-soft);
+  font-family: var(--f-ui);
+  font-size: var(--fs-14);
+  font-style: italic;
+}
+
+.rtag {
+  padding: 1px 7px;
+  border: 1.5px solid var(--rule);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  font-weight: 700;
+  letter-spacing: .06em;
+  white-space: nowrap;
+}
+
+.rtag.e {
+  background: var(--verdict-exact);
+  color: var(--on-t1);
+}
+
+.rtag.q {
+  background: var(--verdict-equiv);
+  color: var(--on-t0);
+}
+
+.rtag.d {
+  background: var(--t2);
+  color: var(--on-t2);
+}
+
+.drow .why {
+  grid-column: 2/5;
+  padding: 4px 0 2px;
+  color: var(--ink-soft);
+  font-family: var(--f-ui);
+  font-size: var(--fs-14);
+}
+
+.drow .why b { color: var(--ink) }
+
+.drow .why code {
+  padding: 0 3px;
+  border: 1px solid var(--rule);
+  font-size: var(--fs-13);
+  background: var(--paper-3);
+}
+
+.drow .why .flat-btn { margin-top: 6px }
+
+/* `.dunno.on`(0,2,0) 은 `.flat-btn.ghost:hover`(0,2,1) 에 진다 — 이의가 접수된 버튼은
+   손이 올라가도 황색 면을 유지해야 상태가 안 사라진다(목업 `.drow.disputed .dis`). */
+.drow .why .flat-btn.on:hover {
+  background: var(--t2);
+  color: var(--on-t2);
+}

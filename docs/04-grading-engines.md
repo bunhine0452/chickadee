@@ -179,9 +179,10 @@ align(O, U):
   extra = 미사용 비공백 U 줄
   C. NW 폴백 조건: (missing + extra) > max(3, 0.25·|O|)  → A·B 결과를 버리고 Needleman-Wunsch
      점수 = 2·sim − 1 (−1..1), 갭 = −0.5, 공백↔공백 sim = 1, 공백↔비공백 0 ; 역추적 후 sim < 0.5 짝은 해제
-sim(a,b) = Dice(토큰 bag(따옴표 정규화 후))   // 목업 sim
+  D. 같은 자리 강제 짝: A·B·C 뒤에 원본 i 가 missing 이고 답안 i 가 extra 면 닮음을 묻지 않고 짝짓는다 (D91)
+sim(a,b) = Dice(토큰 bag(따옴표 정규화 후))   // 목업 sim. 주석 전용 줄끼리는 1 (2단계가 문구를 비교하지 않으므로)
 ```
-**왜**: 글자 단위 diff 는 한 줄이 밀리면 아래 전부가 빨간 덩어리가 된다. 같은 줄 우선은 「내가 쓴 3행이 원본 3행」이라는 사용자의 기대와 일치하고, 창 ±2 는 한두 줄 밀림을 흡수하며, 3줄 이상 밀림(위에 줄을 끼워 넣음)만 NW 가 받는다. **목업과 다름**: C 단계 추가.
+**왜**: 글자 단위 diff 는 한 줄이 밀리면 아래 전부가 빨간 덩어리가 된다. 같은 줄 우선은 「내가 쓴 3행이 원본 3행」이라는 사용자의 기대와 일치하고, 창 ±2 는 한두 줄 밀림을 흡수하며, 3줄 이상 밀림(위에 줄을 끼워 넣음)만 NW 가 받는다. **목업과 다름**: C 단계 추가. **D 단계는 문서·목업에 없다**(D91) — §9 #28 의 Dice 가 0.44 라 문턱 0.5 를 못 넘어 「누락 + 추가」로 갈리는데, 학습자는 그 줄을 썼으므로 §9 가 요구한 `differ TOKEN_COUNT` 가 나오지 않는다.
 
 ### 4.2 정규화 파이프라인 (한 짝, 순서 고정)
 
@@ -238,7 +239,7 @@ interface T1Result { blockId; stage:1|2|3; rows:T1Row[]; n:Record<Status,number>
   verdict:'advance'|'repeat-soft'|'repeat'; peeks:number; downgraded:boolean; engine:'regex'|'ast'; elapsedMs; appeals:number }
 ```
 - `total` = 원본 **비공백** 줄 수 · `meaning = exact + equiv` · `pct = round(100·meaning/total)`. **목업과 다름**: 빈 줄 제외 — 빈 줄이 분모에 들면 20줄 중 2줄이 공짜라 85 문턱이 실질 83 이 된다.
-- 판정: `pct ≥ advanceThreshold(total) → advance`(다음 단계), `advanceThreshold(total) = min(85, 100 − 200/total)`(12줄 블록 83.3, 14줄 85.7→85) · `65 ≤ pct < 85 → repeat-soft`(같은 단계 한 번 더 권함) · `< 65 → repeat`. 겹 4 는 **3단계 통과에서만**(그 전엔 3 상한). `swap` 행이 하나라도 있으면 pct 와 무관하게 advance 금지 → repeat-soft(인자 순서 오류는 뜻이 바뀐 코드다).
+- 판정: `pct ≥ advanceThreshold(total) → advance`(다음 단계), `advanceThreshold(total) = max(65, min(85, round(100 − 200/total)))`(12줄 블록 83, 14줄 85.7→85) · `65 ≤ pct < 85 → repeat-soft`(같은 단계 한 번 더 권함) · `< 65 → repeat`. **정수로 반올림하고 하한을 65 로 잡는다**(D83) — 실수 문턱 83.333 은 `pct`(= `round`) 83 이 못 넘어 공식이 허락한 「두 줄」이 반올림에서 사라지고, 하한이 없으면 3줄 블록의 문턱이 33 이 되어 40 %가 합격이면서 동시에 「한 번 더」가 된다. 이 문턱은 판정뿐 아니라 `ok`(02 §3.2)와 `card_state.stage` 도 같이 본다. 겹 4 는 **3단계 통과에서만**(그 전엔 3 상한). `swap` 행이 하나라도 있으면 pct 와 무관하게 advance 금지 → repeat-soft(인자 순서 오류는 뜻이 바뀐 코드다).
 - 힌트: `` ` `` 홀드 = `peeks` 카운트, `⌘.` = `downgraded` — 감점 없음, 이벤트로만 02 에 전달(더 자주 보여줄 신호). 6줄 미만 채점은 1회 경고 후 두 번째 누름에 채점(목업).
 - 이벤트 `t1.graded` 는 `T1Result` 요약 + `outcome` + 스테이지.
 

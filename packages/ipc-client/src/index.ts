@@ -7,7 +7,7 @@ import type { BatchOp, ParamsOf, RowOf, StatementName } from './statements.js';
 import type {
   AppPaths, AppVersion, BlameHunk, Block, Catalog, ExecInfo, IngestDone, IngestProgress,
   IngestSpec, JobId, LangInfo, LinesChunk, ReadBlockReq, ReadLinesReq, RepoProbe,
-  StoreInfo,
+  SnippetReq, SnippetResult, StoreInfo,
 } from './types.js';
 
 /** STORE_BUSY 재시도 (01 §6): 3회, 50ms 백오프. 여기가 유일한 자동 재시도다. */
@@ -63,7 +63,11 @@ export const ipc = {
     readBlock: (req: ReadBlockReq) => call<Block>('file_read_block', req),
   },
   parse: {
-    /** `parse_snippet` 은 T1 AST 층과 함께 M3 에서 돌아온다 (D67). */
+    /**
+     * 답안 블록 하나를 파싱한다 (04 §4.5). 인자를 낱개로 펼쳐 보낸다 (D87) —
+     * `req` 를 그대로 넘기면 필드 이름이 그대로 인자 이름이 된다.
+     */
+    snippet: (req: SnippetReq) => call<SnippetResult>('parse_snippet', req),
     langs: () => call<LangInfo[]>('parse_langs'),
   },
   git: {

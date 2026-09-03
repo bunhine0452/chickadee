@@ -1,0 +1,373 @@
+{
+  "grammar": "tsx",
+  "original": {
+    "kind": "program",
+    "named": true,
+    "start": 0,
+    "end": 55,
+    "children": [
+      {
+        "kind": "lexical_declaration",
+        "named": true,
+        "start": 0,
+        "end": 55,
+        "children": [
+          {
+            "kind": "const",
+            "named": false,
+            "start": 0,
+            "end": 5,
+            "text": "const",
+            "children": []
+          },
+          {
+            "kind": "variable_declarator",
+            "named": true,
+            "start": 6,
+            "end": 55,
+            "children": [
+              {
+                "kind": "identifier",
+                "named": true,
+                "start": 6,
+                "end": 7,
+                "text": "b",
+                "children": []
+              },
+              {
+                "kind": "=",
+                "named": false,
+                "start": 8,
+                "end": 9,
+                "text": "=",
+                "children": []
+              },
+              {
+                "kind": "jsx_element",
+                "named": true,
+                "start": 10,
+                "end": 55,
+                "children": [
+                  {
+                    "kind": "jsx_opening_element",
+                    "named": true,
+                    "start": 10,
+                    "end": 37,
+                    "children": [
+                      {
+                        "kind": "<",
+                        "named": false,
+                        "start": 10,
+                        "end": 11,
+                        "text": "<",
+                        "children": []
+                      },
+                      {
+                        "kind": "identifier",
+                        "named": true,
+                        "start": 11,
+                        "end": 17,
+                        "text": "button",
+                        "children": []
+                      },
+                      {
+                        "kind": "jsx_attribute",
+                        "named": true,
+                        "start": 18,
+                        "end": 36,
+                        "children": [
+                          {
+                            "kind": "property_identifier",
+                            "named": true,
+                            "start": 18,
+                            "end": 26,
+                            "text": "disabled",
+                            "children": []
+                          },
+                          {
+                            "kind": "=",
+                            "named": false,
+                            "start": 26,
+                            "end": 27,
+                            "text": "=",
+                            "children": []
+                          },
+                          {
+                            "kind": "jsx_expression",
+                            "named": true,
+                            "start": 27,
+                            "end": 36,
+                            "children": [
+                              {
+                                "kind": "{",
+                                "named": false,
+                                "start": 27,
+                                "end": 28,
+                                "text": "{",
+                                "children": []
+                              },
+                              {
+                                "kind": "identifier",
+                                "named": true,
+                                "start": 28,
+                                "end": 35,
+                                "text": "pending",
+                                "children": []
+                              },
+                              {
+                                "kind": "}",
+                                "named": false,
+                                "start": 35,
+                                "end": 36,
+                                "text": "}",
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "kind": ">",
+                        "named": false,
+                        "start": 36,
+                        "end": 37,
+                        "text": ">",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "jsx_text",
+                    "named": true,
+                    "start": 37,
+                    "end": 46,
+                    "text": "로그인",
+                    "children": []
+                  },
+                  {
+                    "kind": "jsx_closing_element",
+                    "named": true,
+                    "start": 46,
+                    "end": 55,
+                    "children": [
+                      {
+                        "kind": "</",
+                        "named": false,
+                        "start": 46,
+                        "end": 48,
+                        "text": "</",
+                        "children": []
+                      },
+                      {
+                        "kind": "identifier",
+                        "named": true,
+                        "start": 48,
+                        "end": 54,
+                        "text": "button",
+                        "children": []
+                      },
+                      {
+                        "kind": ">",
+                        "named": false,
+                        "start": 54,
+                        "end": 55,
+                        "text": ">",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "originalHadError": false,
+  "user": {
+    "kind": "program",
+    "named": true,
+    "start": 0,
+    "end": 51,
+    "children": [
+      {
+        "kind": "lexical_declaration",
+        "named": true,
+        "start": 0,
+        "end": 51,
+        "children": [
+          {
+            "kind": "const",
+            "named": false,
+            "start": 0,
+            "end": 5,
+            "text": "const",
+            "children": []
+          },
+          {
+            "kind": "variable_declarator",
+            "named": true,
+            "start": 6,
+            "end": 51,
+            "children": [
+              {
+                "kind": "identifier",
+                "named": true,
+                "start": 6,
+                "end": 7,
+                "text": "b",
+                "children": []
+              },
+              {
+                "kind": "=",
+                "named": false,
+                "start": 8,
+                "end": 9,
+                "text": "=",
+                "children": []
+              },
+              {
+                "kind": "jsx_element",
+                "named": true,
+                "start": 10,
+                "end": 51,
+                "children": [
+                  {
+                    "kind": "jsx_opening_element",
+                    "named": true,
+                    "start": 10,
+                    "end": 37,
+                    "children": [
+                      {
+                        "kind": "<",
+                        "named": false,
+                        "start": 10,
+                        "end": 11,
+                        "text": "<",
+                        "children": []
+                      },
+                      {
+                        "kind": "identifier",
+                        "named": true,
+                        "start": 11,
+                        "end": 17,
+                        "text": "button",
+                        "children": []
+                      },
+                      {
+                        "kind": "jsx_attribute",
+                        "named": true,
+                        "start": 18,
+                        "end": 36,
+                        "children": [
+                          {
+                            "kind": "property_identifier",
+                            "named": true,
+                            "start": 18,
+                            "end": 26,
+                            "text": "disabled",
+                            "children": []
+                          },
+                          {
+                            "kind": "=",
+                            "named": false,
+                            "start": 26,
+                            "end": 27,
+                            "text": "=",
+                            "children": []
+                          },
+                          {
+                            "kind": "jsx_expression",
+                            "named": true,
+                            "start": 27,
+                            "end": 36,
+                            "children": [
+                              {
+                                "kind": "{",
+                                "named": false,
+                                "start": 27,
+                                "end": 28,
+                                "text": "{",
+                                "children": []
+                              },
+                              {
+                                "kind": "identifier",
+                                "named": true,
+                                "start": 28,
+                                "end": 35,
+                                "text": "pending",
+                                "children": []
+                              },
+                              {
+                                "kind": "}",
+                                "named": false,
+                                "start": 35,
+                                "end": 36,
+                                "text": "}",
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "kind": ">",
+                        "named": false,
+                        "start": 36,
+                        "end": 37,
+                        "text": ">",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "jsx_text",
+                    "named": true,
+                    "start": 37,
+                    "end": 42,
+                    "text": "Login",
+                    "children": []
+                  },
+                  {
+                    "kind": "jsx_closing_element",
+                    "named": true,
+                    "start": 42,
+                    "end": 51,
+                    "children": [
+                      {
+                        "kind": "</",
+                        "named": false,
+                        "start": 42,
+                        "end": 44,
+                        "text": "</",
+                        "children": []
+                      },
+                      {
+                        "kind": "identifier",
+                        "named": true,
+                        "start": 44,
+                        "end": 50,
+                        "text": "button",
+                        "children": []
+                      },
+                      {
+                        "kind": ">",
+                        "named": false,
+                        "start": 50,
+                        "end": 51,
+                        "text": ">",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "userHadError": false
+}

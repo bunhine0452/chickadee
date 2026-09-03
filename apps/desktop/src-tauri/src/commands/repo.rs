@@ -6,7 +6,7 @@
 use std::path::Path;
 
 use chickadee_git::Repo;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use tauri::AppHandle;
 
 use crate::error::IpcError;
@@ -137,6 +137,58 @@ pub fn git_blame_lines(
 #[tauri::command]
 pub fn parse_langs() -> Vec<chickadee_parse::LangInfo> {
     chickadee_parse::languages()
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SnippetQuery {
+    pub id: String,
+    pub scm: String,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SnippetResult {
+    pub ast: chickadee_parse::Ast,
+    pub captures: Vec<chickadee_parse::Capture>,
+    pub had_error: bool,
+}
+
+fn errored(node: &chickadee_parse::Ast) -> bool {
+    node.kind == "ERROR" || node.children.iter().any(errored)
+}
+
+/// One block of typed-in code, parsed once at grading time (04 §4.5). Arguments
+/// arrive one by one, like every other command but `ingest_start` (D87). Without
+/// `queries` nothing is matched, so the snippet is parsed exactly once. The share
+/// of `ERROR` nodes is counted in TS, which already has the tree.
+#[tauri::command]
+pub fn parse_snippet(
+    grammar: String,
+    text: String,
+    queries: Option<Vec<SnippetQuery>>,
+) -> Result<SnippetResult, IpcError> {
+    let src = text.as_bytes();
+    let ast = chickadee_parse::ast(&grammar, src, MAX_BLOCK)?;
+    let specs: Vec<chickadee_parse::Spec> = queries
+        .unwrap_or_default()
+        .into_iter()
+        .map(|q| chickadee_parse::Spec {
+            id: q.id,
+            scm: q.scm,
+        })
+        .collect();
+    let captures = if specs.is_empty() {
+        Vec::new()
+    } else {
+        chickadee_parse::scan(src, &chickadee_parse::compile(&grammar, &specs)?, MAX_BLOCK)?
+            .captures
+    };
+    Ok(SnippetResult {
+        had_error: errored(&ast),
+        ast,
+        captures,
+    })
 }
 
 /// Opens a folder in the platform's file manager. The path comes from the caller,

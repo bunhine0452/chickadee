@@ -8,7 +8,7 @@ import type { Mastery } from '@chickadee/store-sql';
 
 import {
   DEFAULT_RETENTION, FSRS5_DEFAULT_W, FSRS5_PARAM_COUNT, fadeOf, gradeFor, makeScheduler,
-  okFor, shownLayer, toLibraryParams,
+  advanceThreshold, okFor, shownLayer, toLibraryParams,
 } from './fsrs.js';
 
 const DAY_MS = 86_400_000;
@@ -151,6 +151,28 @@ describe('등급 매핑 (02 §3.2)', () => {
   test('T1·T2 의 `ok` 는 85 % 가 기준이다', () => {
     expect(okFor({ track: 't1', ok: false, pct: 85 })).toBe(true);
     expect(okFor({ track: 't2', ok: true, pct: 84 })).toBe(false);
+  });
+
+  test('T1 소블록은 완충된 문턱을 쓴다 (D83) — 12줄 블록의 10/12 는 합격이다', () => {
+    const pass = advanceThreshold(12);
+    expect(pass).toBe(83);
+    expect(okFor({ track: 't1', ok: false, pct: 83, passPct: pass })).toBe(true);
+    expect(gradeFor({ ...base, track: 't1', pct: 83, passPct: pass })).toBe(3);
+    // 문턱을 안 넘기면 평 85 라 같은 답안이 불합격이 된다 — 두 규칙이 갈라지는 자리다.
+    expect(okFor({ track: 't1', ok: false, pct: 83 })).toBe(false);
+  });
+
+  test('완충 공식의 하한은 65 다 — 40 %가 합격이면서 「한 번 더」일 수는 없다', () => {
+    expect(advanceThreshold(14)).toBe(85);
+    expect(advanceThreshold(40)).toBe(85);
+    expect(advanceThreshold(9)).toBe(78);
+    expect(advanceThreshold(3)).toBe(65);
+    expect(advanceThreshold(0)).toBe(85);
+  });
+
+  test('이름 맞바꿈은 백분율과 무관하게 불합격이다 (04 §4.6 · D83)', () => {
+    expect(okFor({ track: 't1', ok: false, pct: 100, swap: true })).toBe(false);
+    expect(gradeFor({ ...base, track: 't1', pct: 100, swap: true })).toBe(2);
   });
 });
 

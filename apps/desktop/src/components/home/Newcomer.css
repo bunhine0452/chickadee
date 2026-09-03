@@ -1,0 +1,23 @@
+/* 목업에 없는 자리다 (05 §2.1 표의 `newcomer`) — 판(`.panel`)의 괘선 문법을 그대로 쓴다.
+   경고색을 쓰지 않는다: 이것은 게이트가 아니라 안내다 (02 §6.4 · 정본 §3-7). */
+.newcomer {
+  margin-top: 18px;
+  border: 2px solid var(--rule);
+  border-left-width: 9px;
+  background: var(--paper-2);
+  padding: 13px 16px;
+}
+
+.newcomer p {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--fs-15);
+  line-height: var(--lh-body);
+}
+
+.newcomer p + p { margin-top: 7px }
+
+.newcomer .why {
+  color: var(--ink-soft);
+  font-size: var(--fs-14);
+}

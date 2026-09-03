@@ -1,0 +1,461 @@
+{
+  "grammar": "typescript",
+  "original": {
+    "kind": "program",
+    "named": true,
+    "start": 0,
+    "end": 49,
+    "children": [
+      {
+        "kind": "function_declaration",
+        "named": true,
+        "start": 0,
+        "end": 49,
+        "children": [
+          {
+            "kind": "function",
+            "named": false,
+            "start": 0,
+            "end": 8,
+            "text": "function",
+            "children": []
+          },
+          {
+            "kind": "identifier",
+            "named": true,
+            "start": 9,
+            "end": 10,
+            "text": "f",
+            "children": []
+          },
+          {
+            "kind": "formal_parameters",
+            "named": true,
+            "start": 10,
+            "end": 16,
+            "children": [
+              {
+                "kind": "(",
+                "named": false,
+                "start": 10,
+                "end": 11,
+                "text": "(",
+                "children": []
+              },
+              {
+                "kind": "required_parameter",
+                "named": true,
+                "start": 11,
+                "end": 12,
+                "children": [
+                  {
+                    "kind": "identifier",
+                    "named": true,
+                    "start": 11,
+                    "end": 12,
+                    "text": "a",
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "kind": ",",
+                "named": false,
+                "start": 12,
+                "end": 13,
+                "text": ",",
+                "children": []
+              },
+              {
+                "kind": "required_parameter",
+                "named": true,
+                "start": 14,
+                "end": 15,
+                "children": [
+                  {
+                    "kind": "identifier",
+                    "named": true,
+                    "start": 14,
+                    "end": 15,
+                    "text": "b",
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "kind": ")",
+                "named": false,
+                "start": 15,
+                "end": 16,
+                "text": ")",
+                "children": []
+              }
+            ]
+          },
+          {
+            "kind": "statement_block",
+            "named": true,
+            "start": 17,
+            "end": 49,
+            "children": [
+              {
+                "kind": "{",
+                "named": false,
+                "start": 17,
+                "end": 18,
+                "text": "{",
+                "children": []
+              },
+              {
+                "kind": "lexical_declaration",
+                "named": true,
+                "start": 21,
+                "end": 36,
+                "children": [
+                  {
+                    "kind": "const",
+                    "named": false,
+                    "start": 21,
+                    "end": 26,
+                    "text": "const",
+                    "children": []
+                  },
+                  {
+                    "kind": "variable_declarator",
+                    "named": true,
+                    "start": 27,
+                    "end": 36,
+                    "children": [
+                      {
+                        "kind": "identifier",
+                        "named": true,
+                        "start": 27,
+                        "end": 28,
+                        "text": "t",
+                        "children": []
+                      },
+                      {
+                        "kind": "=",
+                        "named": false,
+                        "start": 29,
+                        "end": 30,
+                        "text": "=",
+                        "children": []
+                      },
+                      {
+                        "kind": "binary_expression",
+                        "named": true,
+                        "start": 31,
+                        "end": 36,
+                        "children": [
+                          {
+                            "kind": "identifier",
+                            "named": true,
+                            "start": 31,
+                            "end": 32,
+                            "text": "a",
+                            "children": []
+                          },
+                          {
+                            "kind": "+",
+                            "named": false,
+                            "start": 33,
+                            "end": 34,
+                            "text": "+",
+                            "children": []
+                          },
+                          {
+                            "kind": "identifier",
+                            "named": true,
+                            "start": 35,
+                            "end": 36,
+                            "text": "b",
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "return_statement",
+                "named": true,
+                "start": 39,
+                "end": 47,
+                "children": [
+                  {
+                    "kind": "return",
+                    "named": false,
+                    "start": 39,
+                    "end": 45,
+                    "text": "return",
+                    "children": []
+                  },
+                  {
+                    "kind": "identifier",
+                    "named": true,
+                    "start": 46,
+                    "end": 47,
+                    "text": "t",
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "kind": "}",
+                "named": false,
+                "start": 48,
+                "end": 49,
+                "text": "}",
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "originalHadError": false,
+  "user": {
+    "kind": "program",
+    "named": true,
+    "start": 0,
+    "end": 51,
+    "children": [
+      {
+        "kind": "function_declaration",
+        "named": true,
+        "start": 0,
+        "end": 51,
+        "children": [
+          {
+            "kind": "function",
+            "named": false,
+            "start": 0,
+            "end": 8,
+            "text": "function",
+            "children": []
+          },
+          {
+            "kind": "identifier",
+            "named": true,
+            "start": 9,
+            "end": 10,
+            "text": "f",
+            "children": []
+          },
+          {
+            "kind": "formal_parameters",
+            "named": true,
+            "start": 10,
+            "end": 16,
+            "children": [
+              {
+                "kind": "(",
+                "named": false,
+                "start": 10,
+                "end": 11,
+                "text": "(",
+                "children": []
+              },
+              {
+                "kind": "required_parameter",
+                "named": true,
+                "start": 11,
+                "end": 12,
+                "children": [
+                  {
+                    "kind": "identifier",
+                    "named": true,
+                    "start": 11,
+                    "end": 12,
+                    "text": "a",
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "kind": ",",
+                "named": false,
+                "start": 12,
+                "end": 13,
+                "text": ",",
+                "children": []
+              },
+              {
+                "kind": "required_parameter",
+                "named": true,
+                "start": 14,
+                "end": 15,
+                "children": [
+                  {
+                    "kind": "identifier",
+                    "named": true,
+                    "start": 14,
+                    "end": 15,
+                    "text": "b",
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "kind": ")",
+                "named": false,
+                "start": 15,
+                "end": 16,
+                "text": ")",
+                "children": []
+              }
+            ]
+          },
+          {
+            "kind": "statement_block",
+            "named": true,
+            "start": 17,
+            "end": 51,
+            "children": [
+              {
+                "kind": "{",
+                "named": false,
+                "start": 17,
+                "end": 18,
+                "text": "{",
+                "children": []
+              },
+              {
+                "kind": "lexical_declaration",
+                "named": true,
+                "start": 21,
+                "end": 38,
+                "children": [
+                  {
+                    "kind": "const",
+                    "named": false,
+                    "start": 21,
+                    "end": 26,
+                    "text": "const",
+                    "children": []
+                  },
+                  {
+                    "kind": "variable_declarator",
+                    "named": true,
+                    "start": 27,
+                    "end": 38,
+                    "children": [
+                      {
+                        "kind": "identifier",
+                        "named": true,
+                        "start": 27,
+                        "end": 28,
+                        "text": "t",
+                        "children": []
+                      },
+                      {
+                        "kind": "=",
+                        "named": false,
+                        "start": 29,
+                        "end": 30,
+                        "text": "=",
+                        "children": []
+                      },
+                      {
+                        "kind": "parenthesized_expression",
+                        "named": true,
+                        "start": 31,
+                        "end": 38,
+                        "children": [
+                          {
+                            "kind": "(",
+                            "named": false,
+                            "start": 31,
+                            "end": 32,
+                            "text": "(",
+                            "children": []
+                          },
+                          {
+                            "kind": "binary_expression",
+                            "named": true,
+                            "start": 32,
+                            "end": 37,
+                            "children": [
+                              {
+                                "kind": "identifier",
+                                "named": true,
+                                "start": 32,
+                                "end": 33,
+                                "text": "a",
+                                "children": []
+                              },
+                              {
+                                "kind": "+",
+                                "named": false,
+                                "start": 34,
+                                "end": 35,
+                                "text": "+",
+                                "children": []
+                              },
+                              {
+                                "kind": "identifier",
+                                "named": true,
+                                "start": 36,
+                                "end": 37,
+                                "text": "b",
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "kind": ")",
+                            "named": false,
+                            "start": 37,
+                            "end": 38,
+                            "text": ")",
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "return_statement",
+                "named": true,
+                "start": 41,
+                "end": 49,
+                "children": [
+                  {
+                    "kind": "return",
+                    "named": false,
+                    "start": 41,
+                    "end": 47,
+                    "text": "return",
+                    "children": []
+                  },
+                  {
+                    "kind": "identifier",
+                    "named": true,
+                    "start": 48,
+                    "end": 49,
+                    "text": "t",
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "kind": "}",
+                "named": false,
+                "start": 50,
+                "end": 51,
+                "text": "}",
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "userHadError": false
+}

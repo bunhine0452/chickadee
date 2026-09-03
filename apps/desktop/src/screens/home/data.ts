@@ -6,7 +6,9 @@
  */
 import { ipc } from '@chickadee/ipc-client';
 import { shownLayerOf, type Scheduler } from '@chickadee/scheduler';
-import type { Layer } from '@chickadee/store-sql';
+import type { Layer, Settings } from '@chickadee/store-sql';
+
+import { loadSettings } from '../../data/settings.js';
 
 /** 잉크 겹 0~4 의 이름. 은유 옆에 평문을 병기한다 (정본 §6). */
 export const LAYER_NAMES = [
@@ -89,6 +91,9 @@ export interface LastRun {
   error: string | null;
 }
 
+/** 02 §6.4 의 초보 감지 플래그. `'none'` 이면 홈에 안내가 없다. */
+export type NewcomerFlag = Settings['newcomerFlag'];
+
 export interface HomeData {
   masthead: HomeMasthead;
   inkScale: number[];
@@ -100,12 +105,29 @@ export interface HomeData {
   lastRun: LastRun | null;
   /** 인제스트된 파일 수. 0 이면 아직 읽은 것이 없다는 뜻이다. */
   files: number;
+  /** 홈 상단 안내를 보일지 (02 §6.4). 계산과 저장은 세션 끝에 이미 끝나 있다. */
+  newcomerFlag: NewcomerFlag;
+}
+
+/**
+ * 개념 하나의 화면 이름. 토큰이 있으면 코드가 더 잘 읽히므로 그것을 먼저 쓴다
+ * (`GapsPanel` 의 규칙과 같다). 홈이 모르는 개념이면 id 를 그대로 돌려준다.
+ */
+export function conceptLabel(home: HomeData, conceptId: string): string {
+  const gap = home.gaps.find((g) => g.conceptId === conceptId);
+  if (gap) return gap.token === null || gap.token.trim() === '' ? gap.nameKo : gap.token;
+  for (const sheet of home.sheets) {
+    const node = sheet.nodes.find((n) => n.conceptId === conceptId);
+    if (node) return node.nameKo;
+  }
+  const retake = home.retake.find((r) => r.conceptId === conceptId);
+  return retake?.nameKo ?? conceptId;
 }
 
 const asLayer = (n: number): Layer => Math.max(0, Math.min(4, Math.trunc(n))) as Layer;
 
 /**
- * 홈 한 화면치를 읽는다. 쿼리 여섯 번 — 세션 시작 전 화면이라 예산이 넉넉하고,
+ * 홈 한 화면치를 읽는다. 쿼리 열한 번 — 세션 시작 전 화면이라 예산이 넉넉하고,
  * 하나로 합치면 어느 패널이 느린지 알 수 없게 된다 (01 §8).
  */
 export async function loadHome(
@@ -113,7 +135,8 @@ export async function loadHome(
   today: string,
   fade?: { scheduler: Scheduler; now: number },
 ): Promise<HomeData> {
-  const [counts, scale, units, unitFiles, gapRows, retakeRows, dayRows, runRows, fileRows, prereqRows] =
+  const [counts, scale, units, unitFiles, gapRows, retakeRows, dayRows, runRows, fileRows, prereqRows,
+    settings] =
     await Promise.all([
       ipc.store.query('home.bundle_counts', { repoId }),
       ipc.store.query('home.layer_scale', { repoId }),
@@ -125,6 +148,8 @@ export async function loadHome(
       ipc.store.query('home.last_run', { repoId }),
       ipc.store.query('home.file_count', { repoId }),
       ipc.store.query('home.node_prereqs', { repoId }),
+      // 초보 안내는 `settings` 한 곳에서 온다 (02 §6.4) — 홈이 스스로 판단하지 않는다.
+      loadSettings(),
     ]);
 
   const inkScale = [0, 0, 0, 0, 0];
@@ -176,6 +201,7 @@ export async function loadHome(
         }
       : null,
     files: fileRows.reduce((sum, r) => sum + r.n, 0),
+    newcomerFlag: settings.newcomerFlag,
   };
 }
 

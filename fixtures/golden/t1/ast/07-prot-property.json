@@ -1,0 +1,229 @@
+{
+  "grammar": "typescript",
+  "original": {
+    "kind": "program",
+    "named": true,
+    "start": 0,
+    "end": 24,
+    "children": [
+      {
+        "kind": "expression_statement",
+        "named": true,
+        "start": 0,
+        "end": 24,
+        "children": [
+          {
+            "kind": "call_expression",
+            "named": true,
+            "start": 0,
+            "end": 24,
+            "children": [
+              {
+                "kind": "identifier",
+                "named": true,
+                "start": 0,
+                "end": 8,
+                "text": "setEmail",
+                "children": []
+              },
+              {
+                "kind": "arguments",
+                "named": true,
+                "start": 8,
+                "end": 24,
+                "children": [
+                  {
+                    "kind": "(",
+                    "named": false,
+                    "start": 8,
+                    "end": 9,
+                    "text": "(",
+                    "children": []
+                  },
+                  {
+                    "kind": "member_expression",
+                    "named": true,
+                    "start": 9,
+                    "end": 23,
+                    "children": [
+                      {
+                        "kind": "member_expression",
+                        "named": true,
+                        "start": 9,
+                        "end": 17,
+                        "children": [
+                          {
+                            "kind": "identifier",
+                            "named": true,
+                            "start": 9,
+                            "end": 10,
+                            "text": "e",
+                            "children": []
+                          },
+                          {
+                            "kind": ".",
+                            "named": false,
+                            "start": 10,
+                            "end": 11,
+                            "text": ".",
+                            "children": []
+                          },
+                          {
+                            "kind": "property_identifier",
+                            "named": true,
+                            "start": 11,
+                            "end": 17,
+                            "text": "target",
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "kind": ".",
+                        "named": false,
+                        "start": 17,
+                        "end": 18,
+                        "text": ".",
+                        "children": []
+                      },
+                      {
+                        "kind": "property_identifier",
+                        "named": true,
+                        "start": 18,
+                        "end": 23,
+                        "text": "value",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "kind": ")",
+                    "named": false,
+                    "start": 23,
+                    "end": 24,
+                    "text": ")",
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "originalHadError": false,
+  "user": {
+    "kind": "program",
+    "named": true,
+    "start": 0,
+    "end": 22,
+    "children": [
+      {
+        "kind": "expression_statement",
+        "named": true,
+        "start": 0,
+        "end": 22,
+        "children": [
+          {
+            "kind": "call_expression",
+            "named": true,
+            "start": 0,
+            "end": 22,
+            "children": [
+              {
+                "kind": "identifier",
+                "named": true,
+                "start": 0,
+                "end": 8,
+                "text": "setEmail",
+                "children": []
+              },
+              {
+                "kind": "arguments",
+                "named": true,
+                "start": 8,
+                "end": 22,
+                "children": [
+                  {
+                    "kind": "(",
+                    "named": false,
+                    "start": 8,
+                    "end": 9,
+                    "text": "(",
+                    "children": []
+                  },
+                  {
+                    "kind": "member_expression",
+                    "named": true,
+                    "start": 9,
+                    "end": 21,
+                    "children": [
+                      {
+                        "kind": "member_expression",
+                        "named": true,
+                        "start": 9,
+                        "end": 17,
+                        "children": [
+                          {
+                            "kind": "identifier",
+                            "named": true,
+                            "start": 9,
+                            "end": 10,
+                            "text": "e",
+                            "children": []
+                          },
+                          {
+                            "kind": ".",
+                            "named": false,
+                            "start": 10,
+                            "end": 11,
+                            "text": ".",
+                            "children": []
+                          },
+                          {
+                            "kind": "property_identifier",
+                            "named": true,
+                            "start": 11,
+                            "end": 17,
+                            "text": "target",
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "kind": ".",
+                        "named": false,
+                        "start": 17,
+                        "end": 18,
+                        "text": ".",
+                        "children": []
+                      },
+                      {
+                        "kind": "property_identifier",
+                        "named": true,
+                        "start": 18,
+                        "end": 21,
+                        "text": "val",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "kind": ")",
+                    "named": false,
+                    "start": 21,
+                    "end": 22,
+                    "text": ")",
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "userHadError": false
+}

@@ -56,15 +56,15 @@ FROM capture WHERE file_id = :fileId ORDER BY query_id, match_id, start_byte;
 
 -- @name derive.files
 -- @params { repoId: number }
--- @row { id: number, path: string, grammar: string | null, line_count: number, is_dirty: number, parse_quality: string | null }
-SELECT id, path, grammar, line_count, is_dirty, parse_quality
+-- @row { id: number, path: string, grammar: string | null, line_count: number, is_dirty: number, parse_quality: string | null, content_hash: string | null }
+SELECT id, path, grammar, line_count, is_dirty, parse_quality, content_hash
 FROM file WHERE repo_id = :repoId AND is_alive = 1 ORDER BY path;
 
 -- 파일이 언제 바뀌었는지 — 증분 재파생의 대상을 고른다 (03 §1.6-4).
 -- @name derive.files_changed_since
 -- @params { repoId: number, since: number }
--- @row { id: number, path: string, grammar: string | null, line_count: number, is_dirty: number, parse_quality: string | null }
-SELECT id, path, grammar, line_count, is_dirty, parse_quality
+-- @row { id: number, path: string, grammar: string | null, line_count: number, is_dirty: number, parse_quality: string | null, content_hash: string | null }
+SELECT id, path, grammar, line_count, is_dirty, parse_quality, content_hash
 FROM file WHERE repo_id = :repoId AND is_alive = 1 AND updated_at >= :since ORDER BY path;
 
 -- @name derive.commits

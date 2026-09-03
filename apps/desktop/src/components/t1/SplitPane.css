@@ -1,0 +1,39 @@
+/* 목업: design/src/ink/session.css 의 `.split` · `.split .vr` · `.pane-h`.
+
+   `.pane-h` 가 여기 있는 이유: 두 단의 머리말은 같은 자(`.vr`)를 낀 한 벌이다.
+   왼쪽은 RefPlate, 오른쪽은 ClonePad 가 그리지만 조판은 이 파일 하나가 정한다. */
+.split {
+  display: grid;
+
+  /* 트랙 폭 절대 안 바뀜 — 미디어 쿼리도 없다 (05 §5 · D11 최소 1000×680) */
+  grid-template-columns: minmax(300px, 1fr) 2px minmax(300px, 1fr);
+  gap: 0 18px;
+  align-items: start;
+}
+
+.split .vr {
+  align-self: stretch;
+  background: var(--rule);
+  opacity: .6;
+}
+
+.pane-h {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  color: var(--ink-soft);
+  font-size: var(--fs-14);
+}
+
+.pane-h b {
+  color: var(--ink);
+  font-size: var(--fs-15);
+  font-weight: 700;
+}
+
+.pane-h .mono {
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+}
