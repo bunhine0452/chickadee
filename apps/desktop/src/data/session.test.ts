@@ -52,7 +52,8 @@ const { emptyMastery, finishPlate } = await import('./plate.js');
 import type { CardMaker, Plate } from './session.js';
 
 const {
-  loadMastery, loadPlates, openSession, insertRetry, saveItem, saveSession, today,
+  insertPrereq, insertRetry, loadMastery, loadPlates, openSession, removePlate, saveItem,
+  saveSession, today,
 } = await import('./session.js');
 const { loadSummary } = await import('./summary.js');
 const { loadSettings, loadScheduler } = await import('./settings.js');
@@ -338,6 +339,70 @@ describe('중단 · 복구 (§5.6)', () => {
     const again = await loadPlates(view.session.id);
     expect(again[0]?.state).toEqual({ sel: 2, rung: 3 });
     expect(again[0]?.elapsedS).toBe(7);
+  });
+});
+
+describe('아래층 (02 §4)', () => {
+  test('점프하면 현재 자리 앞에 끼고 부모는 뒤로 밀린다', async () => {
+    const view = await openSession(1, T, maker);
+    const plate = view?.plates[0];
+    if (!view || !plate) throw new Error('판이 없다');
+
+    const cardId = makeCard(CONCEPTS[0], 1);
+    await insertPrereq(view.session.id, plate.pos, plate.id,
+      { id: cardId, conceptId: plate.conceptId, track: 't0' }, T);
+
+    const plates = await loadPlates(view.session.id);
+    const inserted = plates.find((p) => p.role === 'prereq');
+    const parent = plates.find((p) => p.id === plate.id);
+    expect(inserted?.pos).toBe(plate.pos);
+    expect(parent?.pos).toBe(plate.pos + 1);
+    expect(inserted?.parentItemId).toBe(plate.id);
+  });
+
+  test('`B` 로 올라가면 그 판만 지워지고 원장에는 아무것도 안 남는다', async () => {
+    const view = await openSession(1, T, maker);
+    const plate = view?.plates[0];
+    if (!view || !plate) throw new Error('판이 없다');
+
+    const cardId = makeCard(CONCEPTS[0], 1);
+    await insertPrereq(view.session.id, plate.pos, plate.id,
+      { id: cardId, conceptId: plate.conceptId, track: 't0' }, T);
+    const inserted = (await loadPlates(view.session.id)).find((p) => p.role === 'prereq');
+    if (!inserted) throw new Error('아래층 판이 없다');
+
+    await removePlate(inserted.id);
+    // `loadPlates` 는 `removed` 를 걸러 준다 — 화면에서 사라진다.
+    expect((await loadPlates(view.session.id)).some((p) => p.role === 'prereq')).toBe(false);
+    expect(db.prepare('SELECT COUNT(*) AS n FROM review_log').get()).toEqual({ n: 0 });
+  });
+
+  test('아래층을 마치면 부모의 `returned` 가 서고 「이어보기」가 열린다', async () => {
+    const view = await openSession(1, T, maker);
+    const plate = view?.plates[0];
+    if (!view || !plate) throw new Error('판이 없다');
+
+    // 아래층은 **다른 개념**이다 — 겹이 그쪽에 붙는지가 이 테스트의 요점이다.
+    const prereqConcept = CONCEPTS[2];
+    const cardId = makeCard(prereqConcept, 3);
+    await insertPrereq(view.session.id, plate.pos, plate.id,
+      { id: cardId, conceptId: prereqConcept as never, track: 't0' }, T);
+    const inserted = (await loadPlates(view.session.id)).find((p) => p.role === 'prereq');
+    if (!inserted) throw new Error('아래층 판이 없다');
+
+    await answer(inserted, { ok: true, at: T });
+    // 복귀 = 부모 항목에 `returned` 를 세우는 것. 그 한 필드가 문단을 연다 (02 §4).
+    await saveItem(plate.id, 'pending', plate.elapsedS, { ...(plate.state ?? {}), returned: true });
+
+    const parent = (await loadPlates(view.session.id)).find((p) => p.id === plate.id);
+    expect(parent?.state?.returned).toBe(true);
+    // 아래층 결과는 **선행 개념의** 숙련도에 남는다 — 부모 겹은 건드리지 않는다.
+    const log = db.prepare('SELECT concept_id, role FROM review_log').get();
+    expect(log).toEqual({ concept_id: prereqConcept, role: 'prereq' });
+    expect(db.prepare('SELECT layer FROM mastery WHERE concept_id = ?').get(prereqConcept))
+      .toEqual({ layer: 1 });
+    expect(db.prepare('SELECT layer FROM mastery WHERE concept_id = ?').get(plate.conceptId))
+      .toBeUndefined();
   });
 });
 
