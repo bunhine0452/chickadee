@@ -286,9 +286,12 @@ function numberOccurrences(path: string, sites: DerivedSite[]): void {
  * 이 값에 필요한 성질은 충돌 회피이지 암호학적 강도가 아니다.
  */
 export function siteKey(conceptId: string, path: string, shape: string, occurrence: number): string {
-  const body = `${conceptId} ${path} ${shape} ${occurrence}`;
+  // 구분자와 접두어를 **이스케이프로** 적는다. 예전에는 진짜 제어 문자가 소스에 박혀 있었는데
+  // 편집기·grep 에서 보이지 않아 「hi 와 lo 가 같은 문자열을 해싱한다 = 사실상 32비트」로
+  // 읽히는 사고가 실제로 났다. 바이트는 그대로이고 읽는 사람만 달라진다.
+  const body = `${conceptId}\u0000${path}\u0000${shape}\u0000${occurrence}`;
   const lo = fnv1a32(body);
-  const hi = fnv1a32(`${body}`);
+  const hi = fnv1a32(`\u0001${body}`);
   return `${hi.toString(16).padStart(8, '0')}${lo.toString(16).padStart(8, '0')}`;
 }
 

@@ -73,54 +73,49 @@ export class Tx {
 
 export const tx = (): Tx => new Tx();
 
-// ───────── 「판 완료」 (02 §8.1) — M2 대기 ─────────
+// ───────── 「판 완료」 (02 §8.1) ─────────
 
 /**
- * 한 판을 마칠 때의 쓰기 순서. 02 §8.1 이 못박은 그대로이며 **한 tx** 다.
+ * 한 판을 마칠 때의 쓰기. 02 §8.1 이 못박은 다섯 걸음이 **한 tx** 로 나간다.
  *
- *   `review_log INSERT → mastery UPSERT → session_item UPDATE → (lifer INSERT) → (dunno_event UPDATE review_log_id)`
+ * 문서의 순서는 `review_log → mastery → session_item → lifer → dunno_event` 인데
+ * 여기서는 **잇는 두 UPDATE 를 로그 바로 뒤로 당긴다**(D77):
  *
- * 순서가 계약인 이유: `session_item.review_log_id` 와 `dunno_event.review_log_id` 가 방금 넣은
- * `review_log.id` 를 참조하고, `mastery` 는 `applied_log_id` 로 그 로그까지 반영했음을 표시한다.
- * 하나라도 빠지면 `rebuild_mastery()` 의 재생 결과가 캐시와 어긋난다.
+ *   `review_log INSERT → session_item UPDATE → dunno_event UPDATE → mastery UPSERT → lifer INSERT`
+ *
+ * 이유는 하나다 — `store_batch` 는 op 를 **미리 만들어** 보내므로 batch 중간에 생긴
+ * `review_log.id` 를 TS 가 알 수 없다. 두 UPDATE 는 `last_insert_rowid()` 로 그것을 집는데,
+ * 그 값은 **다음 INSERT 가 성공하면 바뀐다**. `mastery` 는 UPSERT 라 INSERT 경로를 탈 수 있고
+ * `lifer` 도 INSERT 다 — 둘 중 하나라도 앞에 오면 `review_log_id` 가 엉뚱한 행을 가리킨다.
+ * 의미상의 순서(로그가 먼저다)는 그대로이고, 바뀐 것은 서로 독립인 두 쓰기의 자리뿐이다.
  */
 export const PLATE_DONE_STEPS = [
   { table: 'review_log', op: 'insert', optional: false },
-  { table: 'mastery', op: 'upsert', optional: false },
   { table: 'session_item', op: 'update', optional: false },
-  { table: 'lifer', op: 'insert', optional: true },
   { table: 'dunno_event', op: 'update', optional: true },
+  { table: 'mastery', op: 'upsert', optional: false },
+  { table: 'lifer', op: 'insert', optional: true },
 ] as const;
 
-/**
- * 「판 완료」 한 tx 의 입력. 필드는 각 테이블의 쓰기 인자가 아니라 **자리만** 잡아 둔 것이다 —
- * 세부 파라미터 타입은 대응 statement 가 생기는 M2 에 확정된다.
- */
+/** 「판 완료」 한 tx 의 입력. 값은 전부 그 statement 의 파라미터 그대로다. */
 export interface PlateDoneWrite {
-  /** `review_log` 에 넣을 행 (§8.2 `ReviewLog` 에서 `id` 를 뺀 것). */
-  reviewLog: unknown;
-  /** `mastery` UPSERT 값 (§3.3 겹 리듀서 + FSRS 결과). */
-  mastery: unknown;
-  /** `session_item` 갱신 — `status`·`elapsed_s`·`state_json`·`review_log_id`. */
-  sessionItem: unknown;
-  /** 개념 첫 성공일 때만 (§4 「T0 정답 · 개념 첫 성공」). */
-  lifer?: unknown;
-  /** 그 판에서 「모르겠어요」를 눌렀을 때만 — `review_log_id` 를 잇는다. */
-  dunnoEvent?: unknown;
+  reviewLog: ParamsOf<'review.append'>;
+  /** `review_log_id` 는 SQL 이 `last_insert_rowid()` 로 채운다. */
+  sessionItem: ParamsOf<'session.item_link_last'>;
+  /** `applied_log_id` 는 SQL 이 `last_insert_rowid()` 로 채운다 — 그 값이 재생 커서다. */
+  mastery: ParamsOf<'review.mastery_upsert_last'>;
+  /** 개념 첫 성공일 때만 (02 §3.3 R5 · D76 — 다시 찍기로 맞혀도 행은 쓴다). */
+  lifer?: ParamsOf<'review.lifer_insert'>;
+  /** 그 판에서 「모르겠어요」를 눌렀을 때만. */
+  dunnoEvent?: ParamsOf<'review.dunno_link_last'>;
 }
 
-/**
- * **아직 만들 수 없다.** 필요한 statement (`review_log` INSERT · `mastery` UPSERT ·
- * `session_item` UPDATE · `lifer` INSERT · `dunno_event` UPDATE) 가 카탈로그에 없다 —
- * 01 §3.4 표의 `review.append` + `mastery.upsert` + `session.save` 줄이며 M2 에서 들어온다.
- * 이름을 지어내면 그때 진짜 이름과 어긋나므로 모양만 두고 던진다.
- *
- * M2 에서 할 일: 이 함수 본문을 `PLATE_DONE_STEPS` 순서대로 `tx().add(…)` 로 채우고,
- * `PlateDoneWrite` 의 `unknown` 을 `ParamsOf<…>` 로 좁힌다.
- */
-export function buildPlateDoneTx(_write: PlateDoneWrite): Tx {
-  throw new Error(
-    'store-sql: 「판 완료」 tx 는 아직 만들 수 없다 — review_log INSERT · mastery UPSERT · ' +
-      'session_item UPDATE · lifer INSERT · dunno_event UPDATE statement 가 카탈로그에 없다 (M2, 01 §3.4).',
-  );
+export function buildPlateDoneTx(write: PlateDoneWrite): Tx {
+  const t = tx()
+    .add('review.append', write.reviewLog)
+    .add('session.item_link_last', write.sessionItem);
+  if (write.dunnoEvent) t.add('review.dunno_link_last', write.dunnoEvent);
+  t.add('review.mastery_upsert_last', write.mastery);
+  if (write.lifer) t.add('review.lifer_insert', write.lifer);
+  return t;
 }

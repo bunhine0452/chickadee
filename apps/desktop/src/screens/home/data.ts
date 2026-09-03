@@ -5,6 +5,7 @@
  * 값(`LY_COUNT`·`mins`·시트·노드)이 실데이터에서 어떤 이름으로 오는지를 고정한다.
  */
 import { ipc } from '@chickadee/ipc-client';
+import { shownLayerOf, type Scheduler } from '@chickadee/scheduler';
 import type { Layer } from '@chickadee/store-sql';
 
 /** 잉크 겹 0~4 의 이름. 은유 옆에 평문을 병기한다 (정본 §6). */
@@ -33,7 +34,7 @@ export interface HomeNode {
   nameKo: string;
   token: string | null;
   layer: Layer;
-  /** 흐려짐을 반영한 표시 겹. M1 에서는 `layer` 와 같고 M2 의 `fade` 가 갈라놓는다. */
+  /** 흐려짐을 반영한 표시 겹 (02 §3.4). 스케줄러를 안 넘기면 `layer` 와 같다. */
   shownLayer: Layer;
   state: NodeState;
   dueAt: number | null;
@@ -107,8 +108,12 @@ const asLayer = (n: number): Layer => Math.max(0, Math.min(4, Math.trunc(n))) as
  * 홈 한 화면치를 읽는다. 쿼리 여섯 번 — 세션 시작 전 화면이라 예산이 넉넉하고,
  * 하나로 합치면 어느 패널이 느린지 알 수 없게 된다 (01 §8).
  */
-export async function loadHome(repoId: number, today: string): Promise<HomeData> {
-  const [counts, scale, units, unitFiles, gapRows, retakeRows, dayRows, runRows, fileRows] =
+export async function loadHome(
+  repoId: number,
+  today: string,
+  fade?: { scheduler: Scheduler; now: number },
+): Promise<HomeData> {
+  const [counts, scale, units, unitFiles, gapRows, retakeRows, dayRows, runRows, fileRows, prereqRows] =
     await Promise.all([
       ipc.store.query('home.bundle_counts', { repoId }),
       ipc.store.query('home.layer_scale', { repoId }),
@@ -119,13 +124,14 @@ export async function loadHome(repoId: number, today: string): Promise<HomeData>
       ipc.store.query('stats.days', { repoId, fromDay: shiftDay(today, -(COLOR_BAR_DAYS - 1)) }),
       ipc.store.query('home.last_run', { repoId }),
       ipc.store.query('home.file_count', { repoId }),
+      ipc.store.query('home.node_prereqs', { repoId }),
     ]);
 
   const inkScale = [0, 0, 0, 0, 0];
   for (const row of scale) inkScale[asLayer(row.layer)] = row.n;
 
   const filesByUnit = new Map(unitFiles.map((r) => [r.name, r.files]));
-  const sheets = buildSheets(units, filesByUnit);
+  const sheets = buildSheets(units, filesByUnit, prereqRows, fade);
   const maxGap = Math.max(1, ...gapRows.map((g) => g.site_count));
   const first = counts[0];
   const run = runRows[0];
@@ -174,14 +180,50 @@ export async function loadHome(repoId: number, today: string): Promise<HomeData>
 }
 
 type UnitRow = Awaited<ReturnType<typeof ipc.store.query<'home.units'>>>[number];
+type PrereqRow = Awaited<ReturnType<typeof ipc.store.query<'home.node_prereqs'>>>[number];
 
 /**
  * 노드 상태 (02 §7.1): 표시 겹 ≥ 1 이면 `done`, 직접 선행 중 이 리포에 카드가 있는데
  * 표시 겹 0 인 것이 있으면 `locked`, 잠기지 않은 첫 미인쇄가 `current`.
  *
- * M1 에는 카드가 없어 `locked` 가 나올 수 없다 — 잠금은 카드가 생기는 M2 부터다.
+ * 잠긴 노드는 흔들지 않는다 — 상세에 이유만 연다 (D11).
  */
-function buildSheets(rows: readonly UnitRow[], files: ReadonlyMap<string, number>): HomeSheet[] {
+function buildSheets(
+  rows: readonly UnitRow[],
+  files: ReadonlyMap<string, number>,
+  prereqRows: readonly PrereqRow[],
+  fade?: { scheduler: Scheduler; now: number },
+): HomeSheet[] {
+  const shownOf = new Map<string, Layer>();
+  for (const row of rows) {
+    const layer = asLayer(row.layer);
+    shownOf.set(row.concept_id, fade
+      ? shownLayerOf(
+          {
+            state: row.state === null ? 0 : (row.state as 0 | 1 | 2 | 3),
+            stability: row.stability,
+            difficulty: null,
+            dueAt: row.due_at,
+            lastReviewAt: row.last_review_at,
+            reps: 0,
+            lapses: 0,
+            layer,
+          },
+          fade.scheduler,
+          fade.now,
+        )
+      : layer);
+  }
+
+  const blockers = new Map<string, PrereqRow[]>();
+  for (const p of prereqRows) {
+    if (p.has_card !== 1) continue;
+    // 선행의 표시 겹이 0 이면 잠근다. 대지 밖 개념은 저장 겹으로 본다(흐려짐은 표시용이다).
+    const shown = shownOf.get(p.prereq_id) ?? asLayer(p.layer);
+    if (shown >= 1) continue;
+    blockers.set(p.concept_id, [...(blockers.get(p.concept_id) ?? []), p]);
+  }
+
   const sheets = new Map<number, HomeSheet>();
   for (const row of rows) {
     const sheet = sheets.get(row.unit_id) ?? {
@@ -194,14 +236,15 @@ function buildSheets(rows: readonly UnitRow[], files: ReadonlyMap<string, number
       nodes: [],
     };
     const layer = asLayer(row.layer);
+    const shown = shownOf.get(row.concept_id) ?? layer;
     sheet.nodes.push({
       conceptId: row.concept_id,
       track: row.track as HomeNode['track'],
       nameKo: row.name_ko,
       token: row.token,
       layer,
-      shownLayer: layer,
-      state: layer >= 1 ? 'done' : 'open',
+      shownLayer: shown,
+      state: shown >= 1 ? 'done' : blockers.has(row.concept_id) ? 'locked' : 'open',
       dueAt: row.due_at,
     });
     sheets.set(row.unit_id, sheet);

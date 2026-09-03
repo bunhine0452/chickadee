@@ -38,6 +38,30 @@ ON CONFLICT (concept_id) DO UPDATE SET
   transfer_from = excluded.transfer_from, applied_log_id = excluded.applied_log_id,
   updated_at = excluded.updated_at;
 
+-- 「판 완료」가 쓰는 것. `applied_log_id`(재생 커서)를 방금 넣은 `review_log.id` 로 세운다 —
+-- 이 값이 0 으로 남으면 `rebuild_mastery` 가 커서에서만 어긋난다. `last_insert_rowid()` 는
+-- VALUES 를 계산할 때 읽히므로 **자기 자신이 아니라** 직전 INSERT(원장 행)를 가리킨다 (D77).
+-- @name review.mastery_upsert_last
+-- @params { conceptId: string, state: number, stability: number | null, difficulty: number | null, dueAt: number | null, lastReviewAt: number | null, reps: number, lapses: number, layer: number, dayKey: string | null, dayStartLayer: number, dayCeiling: number, firstOkAt: number | null, lastOkDay: string | null, dunnoTotal: number, transferFrom: string | null, updatedAt: number }
+-- @row void
+INSERT INTO mastery (concept_id, state, stability, difficulty, due_at, last_review_at,
+                     reps, lapses, layer, day_key, day_start_layer, day_ceiling,
+                     first_ok_at, last_ok_day, dunno_total, transfer_from,
+                     applied_log_id, updated_at)
+VALUES (:conceptId, :state, :stability, :difficulty, :dueAt, :lastReviewAt,
+        :reps, :lapses, :layer, :dayKey, :dayStartLayer, :dayCeiling,
+        :firstOkAt, :lastOkDay, :dunnoTotal, :transferFrom,
+        last_insert_rowid(), :updatedAt)
+ON CONFLICT (concept_id) DO UPDATE SET
+  state = excluded.state, stability = excluded.stability, difficulty = excluded.difficulty,
+  due_at = excluded.due_at, last_review_at = excluded.last_review_at,
+  reps = excluded.reps, lapses = excluded.lapses, layer = excluded.layer,
+  day_key = excluded.day_key, day_start_layer = excluded.day_start_layer,
+  day_ceiling = excluded.day_ceiling, first_ok_at = excluded.first_ok_at,
+  last_ok_day = excluded.last_ok_day, dunno_total = excluded.dunno_total,
+  transfer_from = excluded.transfer_from, applied_log_id = excluded.applied_log_id,
+  updated_at = excluded.updated_at;
+
 -- @name review.mastery_get
 -- @params { conceptIds: string }
 -- @row { concept_id: string, state: number, stability: number | null, difficulty: number | null, due_at: number | null, last_review_at: number | null, reps: number, lapses: number, layer: number, day_key: string | null, day_start_layer: number, day_ceiling: number, first_ok_at: number | null, last_ok_day: string | null, dunno_total: number, transfer_from: string | null, applied_log_id: number, updated_at: number }
@@ -126,7 +150,15 @@ SELECT id, session_item_id, review_log_id, card_id, concept_id, at, answered_bef
        was_correct, max_rung, layer_before, layer_after
 FROM dunno_event WHERE session_item_id = :sessionItemId;
 
--- 판을 마치면 원장 행을 잇는다 (02 §8.1 「판 완료」 5번).
+-- 판을 마치면 원장 행을 잇는다 (02 §8.1 「판 완료」 5번). `last_insert_rowid()` 를 쓰는 이유는
+-- `session.item_link_last` 와 같다 (D77).
+-- @name review.dunno_link_last
+-- @params { sessionItemId: number, maxRung: number, layerAfter: number }
+-- @row void
+UPDATE dunno_event SET review_log_id = last_insert_rowid(), max_rung = :maxRung,
+                       layer_after = :layerAfter
+WHERE session_item_id = :sessionItemId;
+
 -- @name review.dunno_link_log
 -- @params { sessionItemId: number, reviewLogId: number, maxRung: number, layerAfter: number }
 -- @row void

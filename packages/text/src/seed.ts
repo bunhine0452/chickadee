@@ -26,6 +26,19 @@ export function fnv1a32(s: string): number {
 }
 
 /**
+ * 64비트 지문 (D70). FNV-1a 32비트를 **접두어를 달리해 두 벌** 돌린다 — 16자리 hex.
+ *
+ * 접두어가 없으면 두 벌이 같은 값이 되어 앞뒤 8자리가 똑같아지고, 실제 강도는 32비트로
+ * 떨어진다. 사용처 5만 건이면 32비트 충돌 확률이 30 % 에 가깝고 `ux_site_key` 가 UNIQUE 라
+ * 그중 하나가 조용히 사라진다. 암호학적 강도는 어디에도 쓰이지 않지만 이 폭은 필요하다.
+ */
+export function fnv1a64(body: string): string {
+  const hi = fnv1a32(`hi ${body}`);
+  const lo = fnv1a32(`lo ${body}`);
+  return hi.toString(16).padStart(8, '0') + lo.toString(16).padStart(8, '0');
+}
+
+/**
  * 04 §0: `seedOf(repoId, kind, targetId, attempt, dictVersion)`.
  * 카드 레코드의 `gen:{seed, dictVersion, attempt, siteId}` 로 같은 카드를 언제든 재생성한다.
  */

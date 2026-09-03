@@ -114,3 +114,16 @@ FROM ingest_run WHERE repo_id = :repoId ORDER BY id DESC LIMIT 1;
 -- @row { grammar: string | null, n: number }
 SELECT grammar, COUNT(*) AS n FROM file
 WHERE repo_id = :repoId AND is_alive = 1 GROUP BY grammar;
+
+-- 스티커 잠금 판정 (02 §7.1) — 대지에 놓인 개념들의 직접 선행과 그 겹·카드 유무.
+-- 노드마다 `concept.prereqs` 를 부르면 대지 40장에 쿼리 수백 번이 된다.
+-- @name home.node_prereqs
+-- @params { repoId: number }
+-- @row { concept_id: string, prereq_id: string, layer: number, has_card: number }
+SELECT p.concept_id, p.prereq_id, COALESCE(m.layer, 0) AS layer,
+       EXISTS (SELECT 1 FROM card k WHERE k.repo_id = :repoId AND k.concept_id = p.prereq_id
+               AND k.retired_at IS NULL) AS has_card
+FROM concept_prereq p
+LEFT JOIN mastery m ON m.concept_id = p.prereq_id
+WHERE p.concept_id IN (SELECT DISTINCT n.concept_id FROM unit_node n
+                       JOIN unit u ON u.id = n.unit_id WHERE u.repo_id = :repoId);

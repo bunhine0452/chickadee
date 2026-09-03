@@ -18,6 +18,17 @@ FROM session
 WHERE repo_id = :repoId AND day_key = :dayKey AND status IN ('active', 'paused')
 ORDER BY seq_in_day DESC LIMIT 1;
 
+-- 날짜를 가리지 않고 열린 세션 하나. 어제 것이 남아 있는지 보려면 이것이 필요하다 —
+-- 「오늘 것」만 찾으면 어제 세션은 영영 `active` 로 남는다 (02 §5.6).
+-- @name session.open_any
+-- @params { repoId: number }
+-- @row { id: number, repo_id: number, day_key: string, seq_in_day: number, started_at: number, ended_at: number | null, budget_min: number, planned_min: number, elapsed_s: number, status: string, plan_json: string, lifer_shown: number }
+SELECT id, repo_id, day_key, seq_in_day, started_at, ended_at, budget_min, planned_min,
+       elapsed_s, status, plan_json, lifer_shown
+FROM session
+WHERE repo_id = :repoId AND status IN ('active', 'paused')
+ORDER BY day_key DESC, seq_in_day DESC LIMIT 1;
+
 -- @name session.get
 -- @params { id: number }
 -- @row { id: number, repo_id: number, day_key: string, seq_in_day: number, started_at: number, ended_at: number | null, budget_min: number, planned_min: number, elapsed_s: number, status: string, plan_json: string, lifer_shown: number }
@@ -88,6 +99,17 @@ UPDATE session_item SET status = :status, elapsed_s = :elapsedS, state_json = :s
 WHERE id = :id;
 
 -- 판을 마칠 때 원장 행을 잇는다 (02 §8.1 「판 완료」 3번).
+-- 방금 넣은 `review_log.id` 를 **SQL 안에서** 집는다 — `store_batch` 는 op 를 미리 만들어
+-- 보내므로 batch 중간의 `lastId` 를 TS 가 알 수 없다. 그래서 이 문장은 `review.append` 바로
+-- 뒤에서만 뜻이 있고, 그 사이에 다른 INSERT 가 끼면 안 된다 (D77).
+-- @name session.item_link_last
+-- @params { id: number, status: string, elapsedS: number, stateJson: string | null }
+-- @row void
+UPDATE session_item SET review_log_id = last_insert_rowid(), status = :status,
+                        elapsed_s = :elapsedS, state_json = :stateJson
+WHERE id = :id;
+
+-- 재생·복구처럼 id 를 이미 아는 경로용.
 -- @name session.item_link_log
 -- @params { id: number, reviewLogId: number, status: string, elapsedS: number, stateJson: string | null }
 -- @row void

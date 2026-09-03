@@ -56,3 +56,38 @@ UPDATE gap SET status = :status WHERE repo_id = :repoId AND concept_id = :concep
 -- @params { repoId: number, conceptId: string, reason: string | null }
 -- @row void
 UPDATE gap SET reason = :reason WHERE repo_id = :repoId AND concept_id = :conceptId;
+
+-- 카드 한 장을 만드는 데 필요한 사용처 — `concept_site` 전 열 + 파일 경로.
+-- 03 §3.6 `rank` 순(미지 최소 → 짧은 줄 → 사전 설명이 많은 것 → 경로)으로 이미 정렬해 준다.
+-- @name card.sites_for_concept
+-- @params { repoId: number, conceptId: string, limit: number }
+-- @row { id: number, repo_id: number, file_id: number, concept_id: string, site_key: string, line_start: number, line_end: number, col_start: number, col_end: number, ts_node_kind: string | null, form: string | null, shape: string, occurrence: number, excerpt: string, picks_json: string, hole_json: string | null, ctx_json: string, line_concepts_json: string, uncovered_ratio: number, confidence: string, parse_quality: string, is_dirty: number, is_oversize: number, commit_id: number | null, unknown_count: number, is_alive: number, updated_at: number, path: string }
+SELECT s.id, s.repo_id, s.file_id, s.concept_id, s.site_key, s.line_start, s.line_end,
+       s.col_start, s.col_end, s.ts_node_kind, s.form, s.shape, s.occurrence, s.excerpt,
+       s.picks_json, s.hole_json, s.ctx_json, s.line_concepts_json, s.uncovered_ratio,
+       s.confidence, s.parse_quality, s.is_dirty, s.is_oversize, s.commit_id,
+       s.unknown_count, s.is_alive, s.updated_at, f.path
+FROM concept_site s JOIN file f ON f.id = s.file_id
+WHERE s.repo_id = :repoId AND s.concept_id = :conceptId AND s.is_alive = 1
+ORDER BY s.unknown_count, s.uncovered_ratio, (s.line_end - s.line_start), s.is_dirty, f.path, s.id
+LIMIT :limit;
+
+-- 같은 줄에 걸친 다른 개념의 사용처 — 지목형 오답이 여기서 나온다 (04 §1.1 혼동 쌍).
+-- @name card.sites_on_line
+-- @params { repoId: number, fileId: number, lineStart: number, lineEnd: number, exceptId: number }
+-- @row { id: number, repo_id: number, file_id: number, concept_id: string, site_key: string, line_start: number, line_end: number, col_start: number, col_end: number, ts_node_kind: string | null, form: string | null, shape: string, occurrence: number, excerpt: string, picks_json: string, hole_json: string | null, ctx_json: string, line_concepts_json: string, uncovered_ratio: number, confidence: string, parse_quality: string, is_dirty: number, is_oversize: number, commit_id: number | null, unknown_count: number, is_alive: number, updated_at: number }
+SELECT s.id, s.repo_id, s.file_id, s.concept_id, s.site_key, s.line_start, s.line_end,
+       s.col_start, s.col_end, s.ts_node_kind, s.form, s.shape, s.occurrence, s.excerpt,
+       s.picks_json, s.hole_json, s.ctx_json, s.line_concepts_json, s.uncovered_ratio,
+       s.confidence, s.parse_quality, s.is_dirty, s.is_oversize, s.commit_id,
+       s.unknown_count, s.is_alive, s.updated_at
+FROM concept_site s
+WHERE s.repo_id = :repoId AND s.file_id = :fileId AND s.is_alive = 1 AND s.id <> :exceptId
+  AND s.line_start <= :lineEnd AND s.line_end >= :lineStart;
+
+-- 카드의 개념 이름 — 큐가 카드 id 로만 판을 걸 때 화면 문구가 필요하다.
+-- @name card.concept_of
+-- @params { id: number }
+-- @row { concept_id: string, universal_id: string | null, name_ko: string, token: string | null, lang: string }
+SELECT c.id AS concept_id, c.universal_id, c.name_ko, c.token, c.lang
+FROM card k JOIN concept c ON c.id = k.concept_id WHERE k.id = :id;

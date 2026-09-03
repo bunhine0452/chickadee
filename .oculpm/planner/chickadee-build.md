@@ -66,7 +66,7 @@ owner: claude-code
 - [ ] 02 · 큐 플래너 — 예산 15분 맞추기, 순서, 빈 상태, 하루 여러 세션 · 2일 (선행: 새 개념 순위·FSRS 어댑터) {#m2-02-queue-planner}
 - [ ] 02 · 세션 중 삽입·복구 — insertRetry·insertPrereq·shiftPos·Esc 저장·다음 날 폐기 · 1.5일 (선행: 큐 플래너) {#m2-02-session-insert}
 - [ ] 01 · 세션 저장/복원 — session.save batch 시점 5종, 기동 시 이어 찍기, 강제 종료 후 복구 E2E · 1.5일 (선행: store-sql·ipc-client·세션 중 삽입) {#m2-01-session-persist}
-- [ ] 04 · T0 생성기 3종 — point/blank/meaning + 폴백 사슬 + no-plate 사유, 목업 4카드 재현 · 3일 (선행: 03 사전·Site) {#m2-04-t0-generators}
+- [x] 04 · T0 생성기 3종 — point/blank/meaning + 폴백 사슬 + no-plate 사유, 목업 4카드 재현 · 3일 (선행: 03 사전·Site) {#m2-04-t0-generators}
 - [ ] 04 · T0 채점·진단·이벤트 — 판정, 진단 선택 표, t0.answered, 재출제 규칙 · 1일 (선행: T0 생성기) {#m2-04-t0-grading}
 - [ ] 02 · 판 완료 트랜잭션 — review_log→mastery→session_item→lifer→dunno_event, 트랙별 detail_json · 1.5일 (선행: 겹 리듀서·T0 이벤트) {#m2-02-complete-tx}
 - [ ] 02 · rebuild_mastery() — 원장 재생 = 캐시 검증, 시작 시 표본 검증 · 1일 (선행: 판 완료 트랜잭션) {#m2-02-rebuild-mastery}
@@ -161,4 +161,5 @@ owner: claude-code
 | 2026-09-03T05:15:43+09:00 | #m1-06-q2-parser-golden | claude-code | x→x | 20260903/Features_to_add/0515_feature_m1-home-shell-and-flow.md | insta 스냅샷 45개(TS·TSX·SQL 각 15케이스). 골든과 스냅샷이 같은 한 줄을 각각 다른 형식으로 짚는 것까지 확인 |
 | 2026-09-03T05:18:42+09:00 | #m1-03-golden-fixtures | claude-code | x→x | 20260903/Features_to_add/0515_feature_m1-home-shell-and-flow.md | TS 20개념 × (양성3·음성2) + TSX 4 + SQL 4 + 함정 3종씩. UPDATE_GOLDEN 지원. 술어를 망가뜨려 그물이 도는 것을 확인 |
 | 2026-09-03T05:21:19+09:00 | #m1-03-perf-bench | claude-code | ☐→x | .oculpm/journal/20260903/Features_to_add/0521_feature_m1-perf-fixtures-and-ingest-bench.md | large-100k(800파일 101,772줄 1,000커밋)·poly(언어당 20)·criterion 벤치·scripts/bench.sh +30% 게이트. 실측 총 2.5~3.3s · 증분 0.34s · RSS 84~89MB — 03 §7 초과 없음. bench.yml 야간 잡은 m5-06-q15 몫. |
+| 2026-09-03T10:10:49+09:00 | #m2-04-t0-generators | claude-code | ☐→x | .oculpm/journal/20260903/Features_to_add/1010_feature_m2-t0-generators-and-template.md | point/blank/meaning + prefer 사슬 + noPlate 사유, 템플릿 렌더러(D74) 함께. 목업 4카드 재현 — 다른 자리는 테스트 이름에 |
 <!-- oculpm:plan-log end -->
