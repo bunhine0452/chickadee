@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { t } from '@chickadee/i18n';
 import { Misreg, Reg, Stamp } from '@chickadee/ui';
 
 import type { HomeSheet } from '../../screens/home/data';
@@ -25,15 +26,20 @@ export interface SheetProps {
 }
 
 function metaOf(sheet: HomeSheet): string {
-  const where = sheet.rootPath === null ? '경로 없음' : sheet.rootPath;
-  return `${where} · 파일 ${sheet.files}개 · 개념 ${sheet.nodes.length}개`;
+  return t('home.sheetMeta', {
+    where: sheet.rootPath === null ? t('home.sheetNoPath') : sheet.rootPath,
+    files: String(sheet.files),
+    concepts: String(sheet.nodes.length),
+  });
 }
 
 function statusOf(sheet: HomeSheet, no: number): string {
-  const done = sheet.nodes.filter((n) => n.state === 'done').length;
-  if (sheet.state === 'done') return `${done} / ${sheet.nodes.length}`;
-  if (sheet.state === 'locked') return `${no - 1}대를 먼저`;
-  return `인쇄 중 ${done} / ${sheet.nodes.length}`;
+  const done = String(sheet.nodes.filter((n) => n.state === 'done').length);
+  const all = String(sheet.nodes.length);
+  // 다 찍은 대지는 숫자만 낸다 — 「인쇄 중」이 붙으면 끝난 것이 안 끝난 것처럼 읽힌다.
+  if (sheet.state === 'done') return `${done} / ${all}`;
+  if (sheet.state === 'locked') return t('home.sheetStatusLocked', { n: String(no - 1) });
+  return t('home.sheetStatusPrinting', { done, all });
 }
 
 /**
@@ -68,17 +74,17 @@ export function Sheet({ sheet, no, guide, onPick, now }: SheetProps) {
       aria-labelledby={headId}
     >
       <Reg hit={sheet.state === 'done'} />
-      {sheet.state === 'done' ? <Stamp text="인쇄 완료" rotate={STAMP_ROTATE} /> : null}
+      {sheet.state === 'done' ? <Stamp text={t('home.sheetStamp')} rotate={STAMP_ROTATE} /> : null}
       {guide === undefined ? null : <Guide msg={guide} />}
       <InkRail ly={sheet.avgLayer} label={railLabel(no, sheet.avgLayer)} />
 
       <div className="sheet-in">
         <div className="sheet-head">
-          <Misreg className="sig" text={`${no}대`} />
+          <Misreg className="sig" text={t('home.sheetSig', { n: String(no) })} />
           <div>
             <h2 className="sheet-h2" id={headId}>
               {sheet.name}
-              <span className="pl">기능 {no}</span>
+              <span className="pl">{t('home.sheetFeature', { n: String(no) })}</span>
             </h2>
             <div className="sheet-meta">{metaOf(sheet)}</div>
           </div>

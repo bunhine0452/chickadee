@@ -5,22 +5,54 @@
  * 값(`LY_COUNT`·`mins`·시트·노드)이 실데이터에서 어떤 이름으로 오는지를 고정한다.
  */
 import { MAX_BLOCK_LINES, MAX_UNKNOWN_CONCEPTS, MIN_BLOCK_LINES } from '@chickadee/cards';
+import { t, type MessageKey } from '@chickadee/i18n';
 import { ipc } from '@chickadee/ipc-client';
 import { shownLayerOf, type Scheduler } from '@chickadee/scheduler';
 import type { Layer, Settings } from '@chickadee/store-sql';
 
 import { loadSettings } from '../../data/settings.js';
 
-/** 잉크 겹 0~4 의 이름. 은유 옆에 평문을 병기한다 (정본 §6). */
-export const LAYER_NAMES = [
-  { n: '0겹', k: '미인쇄', plain: '실루엣만' },
-  { n: '1겹', k: '애벌', plain: '흐린 하프톤' },
-  { n: '2겹', k: '먹판', plain: '윤곽이 잡힘' },
-  { n: '3겹', k: '+ 청판', plain: '색이 들어옴' },
-  { n: '4겹', k: '+ 진홍', plain: '완성' },
-] as const;
+/** 잉크 겹 하나의 이름 셋 — 겹 수 · 은유 · 평문 (정본 §6). */
+export interface LayerName {
+  n: string;
+  k: string;
+  plain: string;
+}
 
-export const TRACK_NAMES = { t0: 'T0 문법', t1: 'T1 클론 코딩', t2: 'T2 구조', t3: 'T3' } as const;
+/**
+ * 겹 이름의 카탈로그 키. **값이 아니라 키다** — 문장을 모듈 상수로 얼리면 그 상수는
+ * `setLocale()` 보다 먼저 굳는다 (D117).
+ */
+const LAYER_KEYS: readonly { n: MessageKey; k: MessageKey; plain: MessageKey }[] = [
+  { n: 'home.layer0N', k: 'home.layer0K', plain: 'home.layer0Plain' },
+  { n: 'home.layer1N', k: 'home.layer1K', plain: 'home.layer1Plain' },
+  { n: 'home.layer2N', k: 'home.layer2K', plain: 'home.layer2Plain' },
+  { n: 'home.layer3N', k: 'home.layer3K', plain: 'home.layer3Plain' },
+  { n: 'home.layer4N', k: 'home.layer4K', plain: 'home.layer4Plain' },
+];
+
+const layerNameAt = (i: number): LayerName => {
+  const keys = LAYER_KEYS[i] ?? LAYER_KEYS[0];
+  if (keys === undefined) return { n: '', k: '', plain: '' };
+  return { n: t(keys.n), k: t(keys.k), plain: t(keys.plain) };
+};
+
+/**
+ * 잉크 겹 0~4 의 이름. **함수다** — 겹 이름은 화면 문구라 로케일을 탄다 (D117).
+ * 다섯 칸 고정이라 `Layer` 로 바로 색인해도 `undefined` 가 나오지 않는다.
+ */
+export const layerNames = (): readonly [LayerName, LayerName, LayerName, LayerName, LayerName] => [
+  layerNameAt(0), layerNameAt(1), layerNameAt(2), layerNameAt(3), layerNameAt(4),
+];
+
+const TRACK_KEYS = {
+  t0: 'home.trackT0', t1: 'home.trackT1', t2: 'home.trackT2', t3: 'home.trackT3',
+} as const satisfies Record<'t0' | 't1' | 't2' | 't3', MessageKey>;
+
+/** 「T0 문법」처럼 코드를 병기한 트랙 이름. 상수가 아니라 함수인 이유는 위와 같다. */
+export const trackNames = (): Record<'t0' | 't1' | 't2' | 't3', string> => ({
+  t0: t(TRACK_KEYS.t0), t1: t(TRACK_KEYS.t1), t2: t(TRACK_KEYS.t2), t3: t(TRACK_KEYS.t3),
+});
 
 /** 지난 14일 컬러 바의 칸 수. */
 export const COLOR_BAR_DAYS = 14;

@@ -1,3 +1,5 @@
+import { t } from '@chickadee/i18n';
+
 import './LockedPanel.css';
 
 export interface LockedPanelProps {
@@ -24,13 +26,10 @@ export function LockedPanel({ openable, files }: LockedPanelProps) {
   if (openable > 0 || files === 0) return null;
 
   return (
-    <aside className="locked-panel" aria-label="아직 안 열린 것">
-      <b>T1 필사</b>
-      <p>
-        이 리포의 문법을 조금 익힌 뒤에 열립니다. 지금은 어느 블록을 봐도 처음 보는 문법이
-        너무 많아, 필사가 타자 연습이 됩니다.
-      </p>
-      <p className="how">문법 판(T0)을 며칠 찍으면 그 블록부터 열립니다.</p>
+    <aside className="locked-panel" aria-label={t('home.locked')}>
+      <b>{t('home.lockedTitle')}</b>
+      <p>{t('home.lockedBody')}</p>
+      <p className="how">{t('home.lockedHow')}</p>
     </aside>
   );
 }

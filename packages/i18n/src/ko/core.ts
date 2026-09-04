@@ -35,7 +35,7 @@ export const core = {
 
   'settings.globs.label': '제외 글롭',
   'settings.globs.note':
-    '한 줄에 하나. 기본 제외 목록(node_modules · 빌드 산출물 · 잠금 파일)에 **더해집니다** '
+    '한 줄에 하나. 기본 제외 목록(node_modules · 빌드 산출물 · 잠금 파일)에 <b>더해집니다</b> '
     + '— 여기를 비워도 그것들은 계속 빠집니다.',
   'settings.globs.reingest': '바꾼 것은 리포를 다시 읽어야 반영됩니다.',
   'settings.globs.errNegation': '{{line}} — 부정(!)은 오히려 포함시킵니다.',
@@ -45,7 +45,7 @@ export const core = {
 
   'settings.dictLangs.label': '문법 사전 언어',
   'settings.dictLangs.note':
-    '끈 언어는 **새 판**에서 빠집니다. 이미 익힌 개념의 복습은 그대로 돌아갑니다 — 껐다고 '
+    '끈 언어는 <b>새 판</b>에서 빠집니다. 이미 익힌 개념의 복습은 그대로 돌아갑니다 — 껐다고 '
     + '겹이 멈추면 다시 켰을 때 만기가 통째로 밀립니다.',
   'settings.dictLangs.axis':
     '화면에 보이는 글의 언어(위 「표시 언어」)와는 다른 축입니다. 여기서 고르는 것은 '
@@ -66,4 +66,145 @@ export const core = {
   'settings.look.localeSwitch': '표시 언어 한국어 · English',
   'settings.look.localeNote':
     '언어를 바꾸면 화면을 다시 그립니다. 번역이 없는 문구는 한국어로 나옵니다.',
+
+  // ── 모양 절의 스위치 두 벌. 마스트헤드가 같은 두 벌을 쓴다 — 키는 하나씩만 둔다.
+  'settings.look.title': '모양',
+  'settings.look.plain': '= 화면의 공정',
+  'settings.look.process': '공정',
+  'settings.look.themeLight': '주간반',
+  'settings.look.themeDark': '야간반',
+  'settings.look.themeSwitch': '주간반 · 야간반 전환',
+  'settings.look.trimOff': '부속 보임',
+  'settings.look.trimOn': '부속 숨김',
+  'settings.look.trimSwitch': '인쇄 부속 보이기 · 숨기기',
+  'settings.look.note':
+    '여기서 고른 것은 저장되어 다음에 열 때도 그대로입니다. 「부속 숨김」은 등록표시·절취선·'
+    + '결·도장 회전만 끄고 글자와 배치는 1px 도 바꾸지 않습니다.',
+
+  // ── 화면 머리와 절 제목 (05 §2.1 — 은유 옆에 평문) ───────────────────────
+  'settings.title': '설정',
+  'settings.plain': '= 이 앱이 나를 어떻게 다룰지',
+
+  'settings.repo.title': '리포',
+  'settings.repo.plain': '= 교재로 읽는 폴더',
+  'settings.repo.empty': '등록된 리포가 없습니다.',
+  'settings.repo.lastIngest': '마지막 인제스트 {{when}}',
+  'settings.repo.never': '없음',
+  'settings.repo.reingestNote':
+    '문법·쿼리·생성기·사전이 바뀌면 홈에 「재인제스트 필요」 배너가 뜹니다. 다시 읽어도 '
+    + '<b>숙련도는 개념 단위라 그대로 남고</b> 카드와 사용처만 새로 만듭니다.',
+
+  'settings.study.title': '학습',
+  'settings.study.plain': '= 하루에 얼마나, 언제부터',
+  'settings.study.budget': '하루 예산',
+  'settings.study.budgetNote': '분 (10~25)',
+  'settings.study.rollover': '하루 경계',
+  'settings.study.rolloverNote': '시 — 이 시각 전은 어제로 셉니다',
+  'settings.study.newPerDay': '새 판',
+  'settings.study.newPerDayNote': '장/일 (상한 4)',
+  'settings.study.tz': '시간대',
+  'settings.study.tzNote': '여행 중에 어제 큐가 사라지지 않도록 여기 값이 기준입니다',
+
+  'settings.key.title': 'LLM 키',
+  'settings.key.plain': '= 자유 질문에 쓸 열쇠',
+  'settings.perf.title': '성능',
+  'settings.perf.plain': '= 이 컴퓨터에서 잰 시간',
+  'settings.data.title': '데이터',
+  'settings.data.plain': '= 내 기록을 꺼내거나 지우기',
+  'settings.privacy.title': '프라이버시 노트',
+  'settings.privacy.plain': '= 무엇이 어디에 남는가',
+  'settings.about.title': '정보',
+  'settings.about.plain': '= 판 번호',
+  'settings.about.dataDir': '데이터 위치',
+
+  // ── 데이터 절 ────────────────────────────────────────────────────────────
+  'settings.data.legend': '내보낼 것',
+  'settings.data.note':
+    '스키마 번호·개념 숙련도·세션 요약·설정은 항상 담습니다. 아래 둘은 <b>내 코드와 내가 '
+    + '쓴 글</b>이라 기본으로 빼 둡니다.',
+  'settings.data.excerpts': '카드 발췌(내 코드 줄)도 담기',
+  'settings.data.drafts': 'T1 필사 초안도 담기',
+  'settings.data.export': '내 기록 내보내기',
+  'settings.data.openData': '데이터 폴더 열기',
+  'settings.data.openLogs': '로그 폴더 열기',
+  'settings.data.whereNote':
+    '저장 위치를 묻지 않습니다 — 앱 데이터 폴더의 <code>exports/</code> 에 만들고 그 폴더를 '
+    + '엽니다. 거기서 원하는 곳으로 옮기면 됩니다.',
+  'settings.data.wipe': '전부 지우기',
+  'settings.data.wipeWarn':
+    '<b>되돌릴 수 없습니다.</b> 학습 DB·백업·사전 캐시·로그·크래시 기록·설정과 키체인에 '
+    + '넣은 API 키를 지웁니다. 리포 폴더의 파일은 건드리지 않습니다.',
+  'settings.data.wipeGo': '정말 전부 지웁니다',
+  'settings.data.wiping': '지우는 중…',
+  'settings.data.wipeCancel': '그만두기',
+
+  // ── 06 §3.6 의 0.1.0 문구. README·이 화면·06 이 같은 문장이어야 한다. ─────
+  'settings.privacy.p1':
+    '당신의 코드는 이 컴퓨터를 떠나지 않습니다. Chickadee는 리포를 읽기만 하고, 학습 기록은 '
+    + '이 컴퓨터의 데이터베이스 한 파일에만 저장합니다.',
+  'settings.privacy.p2':
+    '이 판은 인터넷을 아예 쓰지 않습니다 — 「자유 질문」의 프롬프트도 이 컴퓨터에서 만들어 '
+    + '복사할 뿐, 앱이 스스로 보내지 않습니다.',
+  'settings.privacy.p3':
+    '사용 통계·오류 보고를 보내지 않고, 업데이트도 확인하지 않습니다. 「설정 → 전부 지우기」로 '
+    + '모든 기록을 삭제할 수 있습니다.',
+
+  // ── 알림 한 줄 (LiveRegion) ──────────────────────────────────────────────
+  'settings.loadFailed': '설정을 다 읽지 못했습니다.',
+  'settings.saveFailed': '저장하지 못했습니다.',
+  'settings.exported': '{{dir}} 에 {{name}}{{name|josa:을,를}} 만들었습니다.',
+  'settings.exportFailed': '내보내지 못했습니다.',
+  'settings.wiped': '전부 지웠습니다. 앱을 닫아 주세요 — 다시 열면 첫 실행부터 시작합니다.',
+  'settings.wipeFailed': '다 지우지 못했습니다. 앱을 닫고 다시 시도해 주세요.',
+  'settings.localeFailed': '표시 언어를 저장하지 못했습니다.',
+
+  // ── 성능 표 (06 §8) ──────────────────────────────────────────────────────
+  'settings.perf.empty': '아직 잰 것이 없습니다. 리포를 읽거나 판을 찍으면 쌓입니다.',
+  'settings.perf.caption': '최근 표본 {{n}}건 (밀리초)',
+  'settings.perf.colItem': '항목',
+  'settings.perf.colSamples': '표본',
+  'settings.perf.colMax': '최대',
+  'settings.perf.colBudget': '예산',
+  'settings.perf.kindIngestTotal': '인제스트 총',
+  'settings.perf.kindIngestFileP95': '파일당 파싱 p95',
+  'settings.perf.kindQueue': '큐 생성',
+  'settings.perf.kindT1Grade': 'T1 채점',
+  'settings.perf.kindFrameP95': '홈 프레임 p95',
+  'settings.perf.kindHomePaint': '홈 첫 조판',
+  'settings.perf.kindSessionMount': '세션 열기',
+  'settings.perf.kindT0Grade': 'T0 채점',
+  'settings.perf.kindT1Monaco': 'T1 편집기',
+  'settings.perf.kindThemeSwitch': '공정 전환',
+  'settings.perf.kindLiferOpen': 'LIFER 열기',
+
+  // ── LLM 키 (06 §3.5 · D106) ──────────────────────────────────────────────
+  // 「보내기」는 없다 — 지금의 사실은 「전송하지 않는다」이고 프롬프트 복사는 키가 없어도 된다.
+  'settings.key.apiKey': 'API 키',
+  'settings.key.save': '저장',
+  'settings.key.drop': '지우기',
+  'settings.key.loading': '키체인을 확인하는 중입니다.',
+  'settings.key.noSend':
+    '지금 이 앱은 아무것도 스스로 전송하지 않습니다. 「자유 질문」에서 프롬프트를 만들고 '
+    + '복사하는 것은 키가 없어도 그대로 됩니다.',
+  'settings.key.none':
+    '키를 넣어 두면 그 프롬프트를 앱에서 바로 보내는 문이 0.2 에서 열립니다. 지금은 저장만 '
+    + '합니다.',
+  'settings.key.noneNote':
+    '키는 이 컴퓨터의 키체인에만 들어갑니다. 넣고 나면 화면에도 로그에도 다시 나오지 '
+    + '않습니다.',
+  'settings.key.stored': '이 컴퓨터의 키체인에 저장돼 있습니다.',
+  'settings.key.storedSoon':
+    '보내기는 0.2 에서 열립니다. 지금 할 수 있는 것은 프롬프트를 만들어 복사하는 '
+    + '것까지입니다.',
+  'settings.key.storedNote': '값은 다시 보여 드리지 않습니다 — 되읽는 문 자체가 없습니다.',
+  'settings.key.unavailable':
+    '이 컴퓨터에는 안전하게 저장할 수 없습니다(Secret Service 없음). 프롬프트 복사는 그대로 '
+    + '됩니다.',
+  'settings.key.unavailableNote':
+    '평문 파일에는 두지 않습니다. gnome-keyring 이나 KWallet 을 설치한 뒤 이 화면을 다시 '
+    + '열어 주세요.',
+  'settings.key.saved': '키를 저장했습니다.',
+  'settings.key.dropped': '키를 지웠습니다.',
+  'settings.key.cannotStore': '이 컴퓨터에는 키를 넣지 못했습니다.',
+  'settings.key.failed': '저장하지 못했습니다. 잠시 뒤 다시 시도해 주세요.',
 } as const;

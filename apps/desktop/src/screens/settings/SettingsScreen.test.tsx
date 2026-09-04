@@ -8,6 +8,7 @@
  */
 import { createRequire } from 'node:module';
 
+import { getLocale, setLocale } from '@chickadee/i18n';
 import { migrations, statements, toSqliteBindings } from '@chickadee/store-sql';
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -315,5 +316,53 @@ describe('SettingsScreen', () => {
     expect(sec.textContent).toContain('2.9.0');
     expect(sec.textContent).toContain('3.46.0');
     expect(sec.textContent).toContain('/data/dev.chickadee.app');
+  });
+});
+
+/**
+ * `en` 스모크 — 설정 화면이 실제로 영어로 뜨는가 (D117 · 05 §9).
+ *
+ * 이 화면은 스위치 라벨 네 벌(`공정`·`부속`·`모션`·`표시 언어`)과 프라이버시 문단 셋을
+ * **모듈 최상단**에 두고 있었다. 그 자리는 모듈이 열리는 시점에 굳고 그 시점은
+ * `setLocale()` 보다 이르다 — `tsc` 도 카탈로그 린트도 못 잡고, 화면을 그려야 드러난다.
+ * 그래서 여기서 재는 것은 「번역이 있는가」가 아니라 **「번역이 닿는가」** 다.
+ */
+describe('SettingsScreen — en', () => {
+  // 이 파일의 나머지는 `ko` 를 전제한다. 로케일은 모듈 상태라 반드시 되돌린다.
+  const before = getLocale();
+  beforeEach(() => setLocale('en'));
+  afterEach(() => setLocale(before));
+
+  /** 절 제목이 영어라 `drawn()` 의 ko 대기 문구를 쓸 수 없다 — 리포 이름으로 기다린다. */
+  async function drawnEn() {
+    render(<SettingsScreen onBack={vi.fn()} />);
+    await screen.findByText('cart-shop');
+  }
+
+  it('06 §6 의 여덟 절이 영어 제목으로 선다', async () => {
+    await drawnEn();
+    for (const title of [
+      'Repos', 'Study', 'Look', 'LLM key', 'Performance', 'Data', 'Privacy note', 'About',
+    ]) {
+      expect(screen.getByRole('region', { name: new RegExp(title) })).toBeTruthy();
+    }
+  });
+
+  it('그려진 글자에 한글이 없다 — 얼어붙은 문구가 있으면 여기서 걸린다', async () => {
+    await drawnEn();
+    // 「저장」 버튼이 없는 화면이라(05 §2.1) 값은 칸에서 바로 내려간다 — 그리기만으로 전부 뜬다.
+    const left = (document.body.textContent ?? '').match(/[가-힣]/g) ?? [];
+    // 언어 이름은 그 언어로 적는다 (D117) — `en/core.ts` 가 `locale.ko` 를 일부러 비워 두어
+    // ko 로 폴백한다. 못 읽는 말로 적힌 이름은 고를 수가 없기 때문이다. 그래서 언어 스위치의
+    // 「한국어」 석 자만 남는 것이 정상이고, **그 밖의 한글은 얼어붙은 문구다.**
+    expect(left.join(''), '이 글자를 내는 자리가 로케일보다 먼저 굳었다').toBe('한국어');
+  });
+
+  it('프라이버시 노트도 06 §3.6 을 영어로 그대로 싣는다', async () => {
+    await drawnEn();
+    const text = screen.getByRole('region', { name: /Privacy note/ }).textContent ?? '';
+    expect(text).toContain('Your code does not leave this computer.');
+    expect(text).toContain('does not use the internet at all');
+    expect(text).toContain('No usage statistics, no crash reports, no update checks.');
   });
 });

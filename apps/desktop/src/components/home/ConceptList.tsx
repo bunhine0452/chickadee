@@ -1,3 +1,4 @@
+import { t } from '@chickadee/i18n';
 import { Dee, Passes } from '@chickadee/ui';
 
 import type { HomeRetake } from '../../screens/home/data';
@@ -17,11 +18,11 @@ export function ConceptList({ rows, now }: ConceptListProps) {
   const at = now ?? Date.now();
 
   if (rows.length === 0) {
-    return <p className="note">다시 찍을 개념이 아직 없습니다. 첫 판을 찍으면 여기에 쌓입니다.</p>;
+    return <p className="note">{t('home.retakeEmpty')}</p>;
   }
 
   return (
-    <ul className="conc" aria-label="다시 찍을 개념">
+    <ul className="conc" aria-label={t('home.retake')}>
       {rows.map((row) => {
         const track = inkTrack(row.track);
         return (
@@ -33,7 +34,11 @@ export function ConceptList({ rows, now }: ConceptListProps) {
               {row.nameKo}
             </span>
             <span className={isSoon(row.dueAt, at) ? 'due soon' : 'due'}>{dueLabel(row.dueAt, at)}</span>
-            <Passes n={row.layer} track={track} label={`${trackName(row.track)} · 잉크 ${row.layer}겹`} />
+            <Passes
+              n={row.layer}
+              track={track}
+              label={t('home.passesLabel', { track: trackName(row.track), n: String(row.layer) })}
+            />
           </li>
         );
       })}

@@ -1,3 +1,4 @@
+import { t } from '@chickadee/i18n';
 import type { CSSProperties } from 'react';
 
 import { COLOR_BAR_DAYS } from '../../screens/home/data';
@@ -16,8 +17,11 @@ export interface ColorBarProps {
 }
 
 function cellTitle(index: number, last: number, mins: number): string {
-  const when = index === last ? '오늘' : `${last - index}일 전`;
-  return `${when} · ${mins === 0 ? '쉼' : `${mins}분`}`;
+  const when = index === last
+    ? t('home.barToday')
+    : t('home.barDaysAgo', { n: String(last - index) });
+  const amount = mins === 0 ? t('home.barRest') : t('home.mins', { n: String(mins) });
+  return t('home.barCell', { when, amount });
 }
 
 /** `.colorbar` — 지난 14일 잉크 농도. 색이 아니라 문장과 `title` 이 정보를 나른다 (05 §9). */
@@ -30,13 +34,13 @@ export function ColorBar({ days }: ColorBarProps) {
   return (
     <div className="colorbar">
       <div className="cb-h">
-        <b>지난 14일 · 잉크 농도</b>
-        <span>칸 하나가 하루. 색이 진할수록 오래 찍었습니다.</span>
+        <b>{t('home.barTitle')}</b>
+        <span>{t('home.barNote')}</span>
       </div>
       <div
         className="cb"
         role="img"
-        aria-label={`지난 14일 잉크 농도. 찍은 날 ${printed}일, 모두 ${total}분.`}
+        aria-label={t('home.barSaid', { printed: String(printed), total: String(total) })}
       >
         {cells.map((mins, i) => {
           const level = Math.min(INK_ROWS, Math.ceil(mins / MINUTES_PER_ROW));

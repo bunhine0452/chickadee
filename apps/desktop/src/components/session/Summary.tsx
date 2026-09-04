@@ -3,7 +3,7 @@ import { t } from '@chickadee/i18n';
 import { cx, Dee, DeeLogo, FlatButton, Misreg, Pill, PressButton, Reg, RichText, Stamp } from '@chickadee/ui';
 import type { InkLayer, Track } from '@chickadee/ui';
 
-import { LAYER_NAMES } from '../../screens/home/data';
+import { layerNames } from '../../screens/home/data';
 import { Acts } from '../plate/Acts';
 // 요약도 교정지 한 장이다 — 껍데기(`.ps`·`.ps-rail`·`.ps-in`)를 plate 에서 그대로 쓴다.
 import '../plate/ProofSheet.css';
@@ -90,6 +90,8 @@ export function Summary({
   onAgain,
 }: SummaryProps) {
   const ref = useRef<HTMLElement | null>(null);
+  // 겹 이름은 로케일을 타므로 렌더마다 푼다 — 모듈 상수로 두면 `setLocale()` 보다 먼저 굳는다.
+  const names = layerNames();
 
   const homeRefCb = useRef(onHome);
   useEffect(() => {
@@ -183,8 +185,8 @@ export function Summary({
                 <span className="nm">
                   {row.concept} <code>{row.code}</code>
                   <small>
-                    <Pill track={row.track}>{row.track.toUpperCase()}</Pill> {LAYER_NAMES[row.lyFrom].k} →{' '}
-                    {LAYER_NAMES[row.lyTo].k} · {moved(row.lyFrom, row.lyTo)}
+                    <Pill track={row.track}>{row.track.toUpperCase()}</Pill> {names[row.lyFrom].k} →{' '}
+                    {names[row.lyTo].k} · {moved(row.lyFrom, row.lyTo)}
                     {row.extra ?? ''}
                   </small>
                 </span>

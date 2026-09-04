@@ -1,3 +1,5 @@
+import { t } from '@chickadee/i18n';
+import { RichText } from '@chickadee/ui';
 import type { CSSProperties } from 'react';
 
 import type { HomeGap } from '../../screens/home/data';
@@ -20,11 +22,11 @@ function labelOf(gap: HomeGap): string {
  */
 export function GapsPanel({ gaps, onMake }: GapsPanelProps) {
   if (gaps.length === 0) {
-    return <p className="note">판이 없는 문법이 없습니다. 내 코드의 문법은 모두 판으로 짜였습니다.</p>;
+    return <p className="note">{t('home.gapsEmpty')}</p>;
   }
 
   return (
-    <ul className="gaps" aria-label="판이 없는 문법">
+    <ul className="gaps" aria-label={t('home.gapsTitle')}>
       {gaps.map((gap) => {
         const label = labelOf(gap);
         const fill = { '--f': `${Math.round(Math.max(0, Math.min(1, gap.fill)) * 100)}%` } as CSSProperties;
@@ -32,7 +34,7 @@ export function GapsPanel({ gaps, onMake }: GapsPanelProps) {
           <li key={gap.conceptId} className={gap.hot ? 'gap hot' : 'gap'}>
             <code className="tok">{label}</code>
             <span className="cnt">
-              <b>{gap.siteCount}</b>번 등장
+              <RichText html={t('home.gapsCount', { n: String(gap.siteCount) })} />
               <i className="bar" aria-hidden="true">
                 <i style={fill} />
               </i>
@@ -40,10 +42,10 @@ export function GapsPanel({ gaps, onMake }: GapsPanelProps) {
             <button
               type="button"
               className="mk"
-              aria-label={`${label} 판 만들기`}
+              aria-label={t('home.gapsMakeFor', { label })}
               onClick={() => onMake(gap.conceptId)}
             >
-              판 만들기
+              {t('home.gapsMake')}
             </button>
           </li>
         );

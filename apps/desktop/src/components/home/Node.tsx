@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { t, type MessageKey } from '@chickadee/i18n';
 import { Passes } from '@chickadee/ui';
 
 import type { HomeNode } from '../../screens/home/data';
@@ -21,11 +22,12 @@ const TRACK_TAG: Readonly<Record<HomeNode['track'], string>> = {
   t3: 'T3',
 };
 
-const STATE_SUFFIX: Readonly<Record<HomeNode['state'], string>> = {
-  done: '찍음',
-  current: '지금 여기',
-  locked: '아직 판이 걸리지 않음',
-  open: '다음 차례',
+/** 표가 문장이 아니라 **키**를 드는 이유는 로케일이다 (D117). */
+const STATE_KEY: Readonly<Record<HomeNode['state'], MessageKey>> = {
+  done: 'home.stateDone',
+  current: 'home.stateCurrent',
+  locked: 'home.stateLocked',
+  open: 'home.stateOpen',
 };
 
 /**
@@ -37,7 +39,12 @@ const STATE_SUFFIX: Readonly<Record<HomeNode['state'], string>> = {
 export const Node = memo(function Node({ node, index, expanded, onOpen }: NodeProps) {
   const locked = node.state === 'locked';
   const track = inkTrack(node.track);
-  const label = `${node.nameKo}. ${trackName(node.track)}. ${layerLabel(node.shownLayer)}. ${STATE_SUFFIX[node.state]}.`;
+  const label = t('home.nodeLabel', {
+    name: node.nameKo,
+    track: trackName(node.track),
+    layer: layerLabel(node.shownLayer),
+    state: t(STATE_KEY[node.state]),
+  });
 
   return (
     <button
@@ -58,7 +65,7 @@ export const Node = memo(function Node({ node, index, expanded, onOpen }: NodePr
             <svg className="cut" viewBox="0 0 100 100" focusable="false">
               <circle cx="50" cy="50" r="47" />
             </svg>
-            <span className="now-flag">지금 여기</span>
+            <span className="now-flag">{t('home.stateCurrent')}</span>
           </>
         ) : null}
         <span className="tag">{TRACK_TAG[node.track]}</span>
