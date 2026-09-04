@@ -2,9 +2,8 @@
  * 서가 · 리포 스위처 영문 (D117 · D119). `ko` 의 부분집합이고 없는 키는 `ko` 로 폴백한다.
  * 조사 필터(`|josa:`)는 쓰지 않는다 — `catalog.test.ts` 가 막는다.
  */
-import type { koRepos } from '../ko/repos.js';
 
-export const repos: Partial<Record<keyof typeof koRepos, string>> = {
+export const repos: Record<string, string> = {
   'repos.title': 'Shelf',
   'repos.plain': '= every repo you registered',
   'repos.back': 'Home',
