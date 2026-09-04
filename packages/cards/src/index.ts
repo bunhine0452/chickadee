@@ -11,6 +11,12 @@ export { genMeaning } from './t0-meaning.js';
 export { genPoint } from './t0-point.js';
 export { makeSyntheticCard, isSynthetic, SYNTHETIC_SITE_ID } from './t0-synthetic.js';
 export type { SyntheticRequest } from './t0-synthetic.js';
+export { buildFirstRun, makeExecCard, renderFirstRun, EXEC_SITE_ID } from './t0-exec.js';
+export type { ExecPick, ExecQuestion, ExecRequest, WrongBecause } from './t0-exec.js';
+export {
+  DIALECTS, blockOf, dialectOf, execFacts, functionsIn, lineIndex, statementsOf, terminatorAt,
+} from './exec-facts.js';
+export type { Dialect, ExecFacts } from './exec-facts.js';
 export { isFailure, isNoPlate } from './types.js';
 export type {
   FocusLine, GenResult, LineWindow, NoPlate, OtherUse, SiteInput,

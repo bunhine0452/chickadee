@@ -9,6 +9,7 @@
  */
 import {
   generateT1, isT1Card, type BlockCandidate, type BlockConcept, type T1Card,
+  makeExecCard,
 } from '@chickadee/cards';
 import type { Dict } from '@chickadee/dictionary';
 import { ipc, log, type AstLite } from '@chickadee/ipc-client';
@@ -241,3 +242,76 @@ export const toQueueCandidate = (
   role: prints > 0 ? 'review' : 'new',
   estMin: estMinFor('t1', prints > 0 ? 'review' : 'new', ema),
 });
+
+// ───────── 실행 추적 (D151) ─────────
+
+/** 한 세션에 시도해 보는 블록 수. `bakeNextT2` 의 `BAKE_ATTEMPTS` 와 같은 이유 — 일괄 생성 금지. */
+const EXEC_ATTEMPTS = 6;
+
+/** 지금 있는 추적 개념. 늘어나면 여기 붙는다. */
+const EXEC_CONCEPT = 'exec/order';
+
+/**
+ * 추적 카드를 **한 장** 굽는다 (D151). 없으면 `null`.
+ *
+ * 블록마다 굽지 않는다 — 일괄 생성 금지(D140 과 같은 이유)이고, 추적은 어차피 세션에 한두
+ * 장이면 된다. 짧은 함수에서는 생성기가 사유를 내고 물러나므로 몇 개를 시도해 본다.
+ *
+ * 실패해도 던지지 않는다: 추적 판이 한 장 안 나오는 것이 세션을 막을 이유는 없다.
+ */
+export async function bakeNextExec(deps: BlockDeps): Promise<number | null> {
+  const concept = deps.dict.concepts.get(EXEC_CONCEPT);
+  if (concept === undefined) return null;
+
+  const groups = await loadCandidates(deps);
+  let tried = 0;
+  for (const { grammar, blocks } of groups) {
+    for (const block of blocks) {
+      if (tried >= EXEC_ATTEMPTS) return null;
+      tried += 1;
+
+      const text = block.lines.map((l) => l.t).join('\n');
+      const ast = await originalAst(block.blockId, grammar, text);
+      if (ast === null) continue;
+
+      const out = makeExecCard({
+        repoId: deps.repoId,
+        dictVersion: deps.dictVersion,
+        attempt: 0,
+        concept,
+        concepts: deps.dict.concepts,
+        ly: 0,
+        lines: block.lines,
+        ast,
+        grammar,
+        path: block.path,
+        window: { from: block.lineStart, to: block.lineEnd },
+        blockHash: block.textHash,
+      });
+      if ('reason' in out) continue;
+
+      // 같은 블록에서 이미 구운 판은 `content_hash` UNIQUE 가 막는다 — 넣어 보고 조회한다.
+      await ipc.store.exec('card.insert', {
+        repoId: deps.repoId,
+        unitId: null,
+        track: 't0',
+        kind: out.card.kind,
+        conceptId: out.card.conceptId,
+        level: 1,
+        siteId: null,
+        fileId: block.fileId,
+        commitId: null,
+        payloadJson: JSON.stringify(out.card.payload),
+        genVersion: 1,
+        contentHash: out.card.contentHash,
+        createdAt: deps.now,
+      });
+      const rows = await ipc.store.query('card.by_hash', {
+        repoId: deps.repoId, contentHash: out.card.contentHash,
+      });
+      const cardId = rows[0]?.id;
+      if (cardId !== undefined) return cardId;
+    }
+  }
+  return null;
+}
