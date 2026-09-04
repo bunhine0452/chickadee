@@ -1,3 +1,28 @@
+/* 창 크로뮴 (D126 · 05 §1.2). macOS 는 제목 표시줄을 숨기고 웹뷰가 창 끝까지 그린다 —
+   종이·책상 색이 창 위에서 끊기지 않는다. 비우는 것은 신호등이 지나는 왼쪽 위 한 줄뿐이고,
+   그 띠가 곧 창을 잡아 끄는 자리다. 다른 OS 는 시스템 표시줄을 그대로 쓰므로 0px 이다. */
+:root { --chrome-top: 0px; }
+
+html[data-chrome="overlay"] { --chrome-top: 28px; }
+
+body { padding-top: var(--chrome-top); }
+
+/* 무언가를 화면 안으로 끌어오는 스크롤(포커스 이동·앵커·`scrollIntoView`)이 이 띠를 접지
+   않게 한다. `focus({ preventScroll })` 만으로는 부족하다 — WebKit(= 앱의 WKWebView)이
+   그것을 지키지 않아 홈 뿌리에 포커스가 갈 때 종이가 신호등 밑으로 28px 들어갔다. */
+html { scroll-padding-top: var(--chrome-top); }
+
+/* 띠는 **불투명**하다. 오버레이 크로뮴에서는 스크롤한 내용이 신호등 밑을 지나가므로,
+   비워 두면 종이와 활자가 창 단추 뒤로 흘러간다 — 책상색으로 덮어 그 자리를 제목 표시줄로
+   남긴다. 다른 OS 에서는 높이가 0 이라 아무것도 그리지 않는다. */
+.chrome-drag {
+  position: fixed;
+  z-index: 90;
+  inset: 0 0 auto;
+  height: var(--chrome-top);
+  background: var(--desk);
+}
+
 /* M0 셸. 토큰만 쓴다 — 원색 토큰(--blue/--pink/--yellow) 직접 참조 금지 (05 §4.2). */
 .shell {
   min-height: 100vh;

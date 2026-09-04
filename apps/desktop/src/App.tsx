@@ -74,7 +74,10 @@ export function App(): React.JSX.Element {
   useEffect(() => {
     if (inSession || ui.screen !== 'home') return;
     const id = requestAnimationFrame(() => {
-      document.querySelector<HTMLElement>('.press')?.focus();
+      // `preventScroll` — 포커스를 옮기는 것이 목적이고 스크롤은 목적이 아니다. 뿌리에
+      // 포커스를 주면 브라우저가 그것을 화면 맨 위로 끌어올리는데, 창 크로뮴 여백(D126)이
+      // 생긴 뒤로는 그 28px 이 스크롤로 접혀 종이가 신호등 밑으로 들어갔다.
+      document.querySelector<HTMLElement>('.press')?.focus({ preventScroll: true });
     });
     return () => cancelAnimationFrame(id);
   }, [inSession, ui.screen]);

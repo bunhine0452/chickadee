@@ -14,6 +14,10 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- 창을 잡아 끄는 띠 (D126). macOS 에서만 높이가 생긴다(`--chrome-top`) — 다른 OS 에서는
+         0px 이라 아무것도 가리지 않는다. #root 밖에 두는 이유는 화면 여섯이 각자 뿌리를
+         갈아 끼워도 이 띠는 한 자리에 남아야 하기 때문이다. -->
+    <div class="chrome-drag" data-tauri-drag-region></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
