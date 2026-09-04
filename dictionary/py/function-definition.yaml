@@ -1,0 +1,194 @@
+schema: 1
+id: py/function-definition
+universal: common/function-definition
+name: { ko: 함수 정의, en: Function definition }
+token: "def"
+grammars: [python]
+framework: null
+essential: true
+difficulty: 1
+prereq: []
+confusions: []
+
+dict:
+  one_liner:
+    ko: "줄 몇 개에 이름을 붙여 두고, 필요할 때 그 이름으로 부른다."
+    en: "Gives a name to a few lines so they can be called by that name later."
+  why:
+    ko: >-
+      정의는 <b>실행이 아닙니다.</b> {{site.line}}행은 「이런 일을 {{pick.2|code}} 라고 부르기로
+      한다」고 적어 둘 뿐이고, 들여쓴 묶음은 누가 {{pick.2|code}}{{pick.2|josa:을,를}} 부를 때까지
+      한 번도 돌지 않아요.
+    en: >-
+      Defining is <b>not running.</b> Line {{site.line}} only writes down “work of this shape goes
+      by the name {{pick.2|code}}”; not one line of the indented block runs until something calls
+      {{pick.2|code}}.
+  trace:
+    - ko: "{{pick.2|code}} 라는 이름이 만들어진다."
+      en: "The name {{pick.2|code}} comes into being."
+    - ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 부를 때 받을 값의 이름이다 — 아직 값이 없다."
+      en: "{{pick.3|code}} names the values it will receive — none exist yet."
+    - ko: "들여쓴 묶음은 부를 때 비로소 돈다."
+      en: "The indented block runs only when it is called."
+
+rule:
+  ko: "<b>정의한 자리에서는 돌지 않는다. 부른 자리에서 돈다.</b>"
+  en: "<b>It does not run where it is defined. It runs where it is called.</b>"
+result:
+  label:
+    ko: "{{site.line}}행이 만든 이름"
+    en: "the name made on line {{site.line}}"
+  value: "{{pick.2}}"
+  note:
+    ko: "부를 때 돈다"
+    en: "runs when called"
+ok:
+  ko: >-
+    {{site.line}}행은 이름 {{pick.2|code}}{{pick.2|josa:을,를}} 만듭니다. 들여쓴 묶음은 여기서
+    돌지 않고 부르는 자리에서 돕니다.
+  en: >-
+    Line {{site.line}} makes the name {{pick.2|code}}. The indented block does not run here; it
+    runs wherever it is called.
+payoff:
+  ko: >-
+    이걸 알면 파일을 위에서 아래로 읽어도 실행 순서가 그 순서가 아니라는 것이 풀립니다 —
+    정의는 건너뛰고 부르는 자리를 따라가면 됩니다.
+  en: >-
+    This explains why reading a file top to bottom is not the order things run — skip the
+    definitions and follow the calls.
+bridge:
+  ko: >-
+    {{pick.3|code}} 안의 이름은 <b>안에서만</b> 쓰는 이름이라 바깥과 달라도 됩니다 — 부를 때
+    그 자리에 값이 들어옵니다.
+  en: >-
+    The names in {{pick.3|code}} are <b>inside-only</b>, so they need not match anything outside —
+    values drop into those slots at the call.
+misconceptions:
+  - ko: "정의하면 그 자리에서 한 번 돈다 — 아니요. 부르기 전에는 돌지 않습니다."
+    en: "Defining runs it once there — no. Nothing runs before a call."
+  - ko: "받는 값의 이름은 바깥과 같아야 한다 — 안에서만 쓰는 이름이라 달라도 됩니다."
+    en: "The names it takes must match the outside — they are inside-only, so they need not."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>줄 묶음에 이름을 붙이는 일을 맡은 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that puts a name on the block</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>붙일 이름</b>입니다. 이름만 적어서는 묶음이 이름을 갖지 못해요."
+          en: "{{pick.2|code}} is <b>the name to attach</b>. A name alone does not name the block."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 이름만으로는 아무 일도 안 난다"
+            en: "The sharpest spot — a name alone does nothing"
+          code:
+            - "add                # 그런 이름이 없다"
+            - "def add(): ...     # 이름이 생긴다"
+      pick.4:
+        t:
+          ko: "{{pick.4|code}}{{pick.4|josa:은,는}} <b>부를 때 돌 줄들</b>입니다. 이 묶음은 자기 이름을 모르고, 이름을 붙이는 것은 앞의 낱말이에요."
+          en: >-
+            {{pick.4|code}} is <b>the lines that run when called</b>. The block does not know its
+            own name; the word in front gives it one.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 들여쓰기만으로는 이름이 안 붙는다"
+            en: "The sharpest spot — indentation alone gives no name"
+          code:
+            - "    send()             # 그냥 들여쓴 줄"
+            - "def f():\n    send()   # 부를 때 돈다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 줄 묶음에 <b>이름을 붙여 두기만</b> 합니다."
+      en: "Choose what goes in the blank. Line {{site.line}} only <b>names</b> a block of lines."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "def", mono: true }
+      - t: "class"
+        mono: true
+        diag:
+          t:
+            ko: "<code>class</code> 는 <b>여러 함수와 값을 한 덩어리로</b> 묶는 자리라 안에 이런 정의들이 들어갑니다. 묶음 하나에 이름을 붙이는 자리가 아니에요."
+            en: >-
+              <code>class</code> groups <b>several functions and values</b>, so definitions like
+              this live inside it. It is not for naming one block.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 하나냐 덩어리냐"
+              en: "The sharpest spot — one block or a group"
+            code:
+              - "def add(a): ...              # 하나"
+              - "class M:\n    def add(a): ... # 덩어리 안의 하나"
+      - t: "lambda"
+        mono: true
+        diag:
+          t:
+            ko: "<code>lambda</code> 도 함수를 만들지만 <b>식 하나</b>만 담고 이름도 안 붙습니다. 들여쓴 여러 줄을 담는 자리가 아니에요."
+            en: >-
+              <code>lambda</code> also makes a function, but it holds <b>one expression</b> and
+              carries no name. It cannot hold an indented block.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 여러 줄이냐 한 식이냐"
+              en: "The sharpest spot — many lines or one expression"
+            code:
+              - "def f(a):\n    return a * 2   # 여러 줄"
+              - "lambda a: a * 2               # 식 하나"
+      - t: "return"
+        mono: true
+        diag:
+          t:
+            ko: "<code>return</code> 은 <b>묶음 안에서</b> 값을 건네고 끝내는 낱말이라 바깥에서 이름을 붙이는 자리에는 오지 않습니다."
+            en: >-
+              <code>return</code> works <b>inside</b> a block, handing a value back and ending. It
+              does not stand outside where a name is given.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 밖에서 붙이나 안에서 끝내나"
+              en: "The sharpest spot — naming outside or ending inside"
+            code:
+              - "def add(a):\n    return a   # 밖에서 이름, 안에서 끝냄"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 이 줄들을 따로 떼어 이름을 붙였을까요?"
+    en: "Why does line {{site.line}} pull these lines out and name them?"
+  choices:
+    - t:
+        ko: "같은 일을 여러 자리에서 해야 해서 — 이름이 있으면 그 자리마다 다시 적지 않아도 된다"
+        en: "Because the same work is needed in several places — a name saves rewriting it"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이름이 하나 더 하는 일이 있는데, 읽는 사람에게 무엇을 알려 주는지도 적어 보세요."
+        en: "That is the direction. The name does one more thing — say what it tells a reader."
+    - t:
+        ko: "코드를 빠르게 하려고"
+        en: "To make the code faster"
+      ok: false
+      fb:
+        ko: "부르는 일에는 오히려 약간의 비용이 듭니다. 얻는 것은 반복을 없애는 것과 이름입니다."
+        en: "Calling costs a little. What you gain is reuse and a name."
+    - t:
+        ko: "들여쓰기를 줄이려고"
+        en: "To reduce indentation"
+      ok: false
+      fb:
+        ko: "떼어 내면 들여쓰기가 줄기는 하지만 그건 결과입니다. 이유는 여러 자리에서 쓰는 데 있습니다."
+        en: "Pulling it out does flatten things, but that is a result. The reason is reuse."
+
+queries:
+  - { grammars: [python], file: ./function-definition.scm }
+
+examples:
+  - code: "def add(a, b):\n    return a + b"
+    expect: { sites: 1, form: def, hole: "def", picks: { 1: "def", 2: "add", 3: "(a, b)" } }
+  - code: "add = lambda a, b: a + b"
+    expect: none
