@@ -282,6 +282,7 @@ export const settingsSchema = z.object({
   identities: z.array(z.object({ email: z.string(), name: z.string() })),
   excludeGlobs: z.array(z.string()),
   locale: z.enum(['ko', 'en']),
+  tutorialSeen: z.boolean(),
   dictLangs: z.array(z.string()),
   lastRepoId: z.number().nullable(),
 });
@@ -306,6 +307,7 @@ export const SETTINGS_KEYS = {
   identities: 'identities',
   excludeGlobs: 'exclude_globs',
   locale: 'locale',
+  tutorialSeen: 'tutorial_seen',
   dictLangs: 'dict_langs',
   lastRepoId: 'last_repo_id',
 } as const satisfies Record<keyof Settings, string>;

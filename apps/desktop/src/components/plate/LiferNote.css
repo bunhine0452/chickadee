@@ -1,0 +1,103 @@
+/* 목업 `design/src/ink/session.css` 의 「LIFER」 카드 속을 판정란 크기로 옮긴 것 (D131).
+   베일(`.lifer-veil`)과 그 위의 카드 그림자·포커스 트랩은 함께 사라졌다 — 덮을 배경이
+   없으므로 남길 것이 없다. 담는 것(Dee 4겹 · 머리말 · 개념 · 채집지 · 일련번호 · 도장)은
+   그대로다. */
+.lifer-note {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 2px solid var(--rule);
+  background: var(--paper-2);
+  animation: sheetin .42s var(--e-settle) both;
+}
+
+.lifer-note .dee-sticker {
+  width: 56px;
+  height: 56px;
+}
+
+.lifer-note .dee {
+  width: 100%;
+  height: 100%;
+}
+
+.lifer-k {
+  color: var(--t1-text);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.lifer-note h5 {
+  margin-top: 2px;
+  font-size: var(--fs-20);
+  font-weight: 700;
+  letter-spacing: -.03em;
+  line-height: 1.2;
+}
+
+.lifer-note h5 code {
+  padding: 0 5px;
+  border: 1.5px solid var(--rule);
+  background: var(--paper-3);
+  font-size: var(--fs-16);
+}
+
+.lifer-note p {
+  margin-top: 3px;
+  color: var(--ink-soft);
+  font-size: var(--fs-14);
+}
+
+.lifer-note p b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* 일련번호가 찍히는 소리 — 영구 기록이라는 것을 눈으로 말한다 */
+.lifer-serial {
+  width: 0;
+  margin-top: 6px;
+  overflow: hidden;
+  border-right: 2px solid var(--t1);
+  color: var(--ink-soft);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  letter-spacing: .04em;
+  white-space: nowrap;
+  animation: typeout .56s steps(22) .7s forwards;
+}
+
+@keyframes typeout {
+  to { width: 100% }
+}
+
+.lifer-note .stamp {
+  align-self: start;
+  animation-delay: .42s;
+}
+
+/* 감축 모드 — 최종 포즈는 남긴다 (05 §6). 일련번호와 도장은 지연도 함께 지운다:
+   `typeout` 은 지연 동안 폭이 0 이고 도장은 `both` 라 0% 포즈(투명)에 머문다. */
+@media (prefers-reduced-motion: reduce) {
+  .lifer-note { animation-duration: .001ms }
+
+  .lifer-serial,
+  .lifer-note .stamp {
+    animation-duration: .001ms;
+    animation-delay: 0s;
+  }
+}
+
+[data-motion="reduce"] .lifer-note { animation-duration: .001ms }
+
+[data-motion="reduce"] .lifer-serial,
+[data-motion="reduce"] .lifer-note .stamp {
+  animation-duration: .001ms;
+  animation-delay: 0s;
+}

@@ -44,6 +44,8 @@ export const DEFAULTS: Omit<Settings, 'tz'> = {
   excludeGlobs: [],
   // 저장된 값이 없을 때만 쓰는 추정이다 (D117). 첫 실행 0단계가 다시 묻는다.
   locale: guessLocale(),
+  // 아직 첫 판을 함께 걸어 본 적이 없다 (D134).
+  tutorialSeen: false,
   // 비면 전부 켜진 것이다 (D122).
   dictLangs: [],
 };
@@ -85,6 +87,7 @@ const KEY_OF: Record<keyof Settings, string> = {
   identities: 'identities',
   excludeGlobs: 'exclude_globs',
   locale: 'locale',
+  tutorialSeen: 'tutorial_seen',
   dictLangs: 'dict_langs',
   lastRepoId: 'last_repo_id',
 };

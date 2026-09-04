@@ -83,15 +83,10 @@ test('키보드 완결 — 마우스 0 으로 홈 → T0 → 사다리 → 정�
   await page.locator('.fb.on').waitFor();
   trail.push(`채점 → ${await focusHolds(page, '채점')}`);
 
-  // ⑥ 첫 정합이면 LIFER 가 그 위에 뜬다 — 2중 트랩이라 포커스는 베일 안이다 (05 §7).
-  //    아무 키로 닫히고, 닫히면 포커스가 돌아와야 한다.
-  const veil = page.locator('.lifer-veil');
-  if (await veil.count() > 0) {
-    const inVeil = await focusHolds(page, 'LIFER 열림');
-    expect(inVeil).toContain('lifer-card');
-    trail.push(`LIFER → ${inVeil}`);
-    await page.keyboard.press('Escape');
-    await veil.waitFor({ state: 'detached' });
+  // ⑥ 첫 정합이면 첫 기록이 판정란 안에 남는다 (D131) — 덮는 것이 없으므로 포커스는
+  //    움직이지 않고, 벗길 겹도 없다.
+  if (await page.locator('.lifer-note').count() > 0) {
+    trail.push(`LIFER → ${await focusHolds(page, '첫 기록')}`);
   }
 
   // 05 §7 — 고른 보기가 `disabled` 로 굳으므로 포커스는 다음 동작 버튼에 있어야 한다.
@@ -144,11 +139,6 @@ test('키보드 완결 — 세션을 닫고 홈으로 와도 포커스가 남는
   await page.keyboard.press(`Digit${answerKey(app)}`);
   await page.keyboard.press('Enter');
   await page.locator('.fb.on').waitFor();
-  const veil = page.locator('.lifer-veil');
-  if (await veil.count() > 0) {
-    await page.keyboard.press('Escape');
-    await veil.waitFor({ state: 'detached' });
-  }
   await toSummary(page, app);
   await page.keyboard.press('Enter');
   await expect(page.locator('.masthead')).toBeVisible();

@@ -102,9 +102,9 @@ async function runOnePlate(): Promise<void> {
   await waitFor(() => document.querySelector('.ps') !== null, 10_000);
   await sleep(300);
 
-  // **화면을 거쳐 답한다.** `answerPlate` 를 직접 부르면 LIFER 의식이 사는 자리(`SessionScreen`)를
+  // **화면을 거쳐 답한다.** `answerPlate` 를 직접 부르면 첫 기록이 사는 자리(`SessionScreen`)를
   // 건너뛰어 `lifer:open` 이 영영 안 재진다. 정답을 고르는 이유도 같다 — 첫 성공이 없으면
-  // 의식 자체가 안 뜬다.
+  // 기록 자체가 안 뜬다.
   const plate = useUi.getState().plates[useUi.getState().pos];
   const answer = plate?.payload.track === 't0' ? plate.payload.answer : 0;
   const choice = document.querySelector<HTMLElement>(`.ch[data-k="${answer + 1}"]`)
@@ -117,9 +117,9 @@ async function runOnePlate(): Promise<void> {
   choice.click();
   await sleep(200);
   submit.click();
-  // 의식이 놓일 시간을 준다 — `lifer:open` 은 베일이 마운트될 때 닫힌다.
+  // 기록이 놓일 시간을 준다 — `lifer:open` 은 판정란의 기록이 마운트될 때 닫힌다.
   await sleep(1_500);
-  await step(`plate-graded:${String(document.querySelector('.lifer-card') !== null)}`);
+  await step(`plate-graded:${String(document.querySelector('.lifer-note') !== null)}`);
 }
 
 /**

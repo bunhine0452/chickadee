@@ -4,14 +4,13 @@
  * **상태는 여기 있고 규칙은 없다.** 무엇을 쓸지는 `session-flow` 가, 무엇이 맞는지는
  * `@chickadee/grading` 이, 겹이 얼마나 오를지는 `@chickadee/scheduler` 가 정한다.
  */
-import { ipc } from '@chickadee/ipc-client';
+import { ipc, log } from '@chickadee/ipc-client';
 import { announce, FlatButton } from '@chickadee/ui';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { t } from '@chickadee/i18n';
 
 import { JobBand } from '../../components/session/JobBand.js';
 import { SessionOverlay } from '../../components/session/SessionOverlay.js';
-import { LiferVeil } from '../../components/session/LiferVeil.js';
 import { Summary } from '../../components/session/Summary.js';
 import type { RungNo } from '../../components/session/ReprintLadder.js';
 import type { QueueItem } from '../../components/shell/TimeQueue.js';
@@ -22,7 +21,7 @@ import {
 import { baseName, loadLadder, rebuildPrompt, type LadderData } from '../../data/ladder.js';
 import { loadMastery, type Plate } from '../../data/session.js';
 import type { Track } from '@chickadee/store-sql';
-import { loadSettings } from '../../data/settings.js';
+import { loadSettings, saveSetting } from '../../data/settings.js';
 import { loadSummary, markLifersShown, type SummaryData } from '../../data/summary.js';
 import {
   answerPlate, backFromPrereq, completeSession, finishT1Plate, finishT2Plate, gradeT1Plate,
@@ -60,6 +59,7 @@ function grammarKeyOf(path: string): string {
 const asViewTrack = (t: Track): 't0' | 't1' | 't2' => (t === 't3' ? 't0' : t);
 
 /** LIFER 베일에 넘길 것. 시각은 부르는 쪽이 굳힌다 — 컴포넌트는 시계를 읽지 않는다. */
+/** 판정란 안에 놓이는 첫 기록 (D131). `LiferNote` 가 그대로 받는 모양이다. */
 interface LiferView { concept: string; code: string; where: string; serial: string }
 
 const toQueueItem = (p: Plate): QueueItem => ({
@@ -96,6 +96,8 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
   const [ladder, setLadder] = useState<LadderData | null>(null);
   const [dunnoId, setDunnoId] = useState(0);
   const [lifer, setLifer] = useState<LiferView | null>(null);
+  /** 첫 판을 함께 걷나 (D134). 설정을 읽기 전에는 띠를 내지 않는다 — 깜빡이면 안내가 아니다. */
+  const [coach, setCoach] = useState(false);
   const [summary, setSummary] = useState<SummaryData | null>(null);
   /** Monaco 는 CSS 변수를 못 받아 테마를 hex 로 받는다 (05 §8) — 설정에서 한 번 읽는다. */
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
@@ -149,7 +151,10 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
   }, []);
 
   useEffect(() => {
-    void loadSettings().then((s) => setTheme(s.theme));
+    void loadSettings().then((s) => {
+      setTheme(s.theme);
+      setCoach(!s.tutorialSeen);
+    });
   }, []);
 
   // 판이 바뀌면 사다리는 접힌다 — 앞 판의 4단 입력이 다음 판에 따라오면 안 된다.
@@ -238,6 +243,7 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
     }
     useUi.getState().setCarry(null);
     useUi.getState().goTo(next);
+    setLifer(null);
   }, [session, plate, pos, plates.length, dunnoId]);
 
   const submit = useCallback(async (sel: number) => {
@@ -248,6 +254,12 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
       rungsOpened: ladderOpen ? [rung] : [],
     });
     if (answered === null || plate === null) return;
+    // 첫 판을 한 번 걸어 봤으면 다음부터는 띠가 안 뜬다. 띠 자체는 이 판이 끝날 때까지
+    // 남는다 — 3걸음(판정 읽기)이 아직 남았다 (D134).
+    if (coach) {
+      void saveSetting('tutorialSeen', true, Date.now())
+        .catch(() => log.warn('첫 판 안내 표시를 저장하지 못했다'));
+    }
     const shown = useUi.getState().liferShown;
     // 연출은 첫 성공이고 다시 찍기·아래층이 아닐 때만 (D76).
     if (answered.correct && answered.layer[1] > answered.layer[0] && answered.layer[0] === 0
@@ -264,7 +276,7 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
         serial: `#${String(shown).padStart(3, '0')}`,
       });
     }
-  }, [elapsed, ladderOpen, rung, plate]);
+  }, [elapsed, ladderOpen, rung, plate, coach]);
 
   /** 원본 블록의 PROT 집합. 거터가 줄마다 다시 만들면 0.2 ms 예산을 못 지킨다 (04 §4.5). */
   const t1Prot = useMemo(() => {
@@ -329,18 +341,8 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
       why: t1Why,
     });
     if (finished === null) return;
-    const shown = useUi.getState().liferShown;
-    if (finished.correct && finished.layer[1] > finished.layer[0] && finished.layer[0] === 0
-      && plate.role !== 'retry' && plate.role !== 'prereq' && shown <= 3) {
-      markLiferOpen();
-      const payload = plate.payload.track === 't1' ? plate.payload : null;
-      setLifer({
-        concept: t('session.conceptTranscribe', { name: plate.nameKo }),
-        code: payload?.fn ?? '',
-        where: t('session.liferWhereT1', { file: baseName(payload?.file ?? '') }),
-        serial: `#${String(shown).padStart(3, '0')}`,
-      });
-    }
+    // T1 은 마치는 즉시 다음 판으로 가므로 기록을 놓을 판정란이 없다 — 첫 기록은
+    // 인쇄 완료의 「처음 기록한 문법」 칸이 나른다 (D131).
     await goNext();
   }, [t1Graded, plate, t1Draft, t1Stage, t1Peeks, t1Downgraded, elapsed, t1Appealed, t1Why, goNext]);
 
@@ -404,8 +406,6 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
     <div className="session-screen">
       <SessionShell
         band={band}
-        lifer={lifer}
-        onCloseLifer={() => setLifer(null)}
         ladderOpen={ladderOpen}
         onCloseLadder={() => setLadderOpen(false)}
         live={live}
@@ -503,6 +503,8 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
             plate={plate}
             no={pos + 1}
             result={result}
+            lifer={lifer}
+            coach={coach && pos === 0}
             payoff={carry !== null && carry.parentItemId === plate.id ? carry.payoff : null}
             ladder={ladder}
             ladderOpen={ladderOpen}
@@ -545,11 +547,8 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
   );
 }
 
-/** 오버레이는 자기 밖의 DOM 을 모른다 — LIFER 를 실제 요소로 바꿔 넘기는 것은 여기 몫이다. */
 function SessionShell(props: {
   band: React.ReactNode;
-  lifer: LiferView | null;
-  onCloseLifer: () => void;
   ladderOpen: boolean;
   onCloseLadder: () => void;
   live: string;
@@ -558,10 +557,6 @@ function SessionShell(props: {
   return (
     <SessionOverlay
       band={props.band}
-      {...(props.lifer
-        ? { lifer: <LiferVeil {...props.lifer} onClose={props.onCloseLifer} /> }
-        : {})}
-      onCloseLifer={props.onCloseLifer}
       ladderOpen={props.ladderOpen}
       onCloseLadder={props.onCloseLadder}
       live={props.live}

@@ -143,12 +143,13 @@ export async function submit(page: Page, sel: number): Promise<void> {
   await settled(page);
 }
 
-/** LIFER 베일이 떠 있으면 아무 키로 닫는다 (정본 §3-6). */
-export async function closeLifer(page: Page): Promise<void> {
-  const veil = page.locator('.lifer-veil');
-  if (await veil.count() === 0) return;
-  await page.keyboard.press('Escape');
-  await veil.waitFor({ state: 'detached' });
+/**
+ * 첫 기록은 판정란 안에 남는다 (정본 §3-6 · D131) — 닫을 것이 없으므로 이 함수가 하는 일은
+ * **연출이 다 놓일 때까지 기다리는 것**뿐이다. 일련번호가 0.7초 뒤에 찍히기 시작하므로
+ * `settled` 만으로는 화면이 아직 움직이는 중일 수 있다.
+ */
+export async function settleLifer(page: Page): Promise<void> {
+  if (await page.locator('.lifer-note').count() === 0) return;
   await settled(page);
 }
 
@@ -171,7 +172,7 @@ export async function toSummary(page: Page, app: AppDb): Promise<void> {
     await settled(page);
     if (await done.count() > 0) return;
     await submit(page, answerKey(app));
-    await closeLifer(page);
+    await settleLifer(page);
   }
   throw new Error(`판 ${MAX_PLATES}장을 답했는데도 요약이 안 떴다 — 큐가 안 줄고 있다`);
 }

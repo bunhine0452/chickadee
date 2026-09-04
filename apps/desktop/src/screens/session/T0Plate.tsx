@@ -11,10 +11,12 @@ import { t, type MessageKey } from '@chickadee/i18n';
 import { Acts } from '../../components/plate/Acts.js';
 import { Ask } from '../../components/plate/Ask.js';
 import { Choices } from '../../components/plate/Choices.js';
+import { CoachBand, type CoachStep } from '../../components/plate/CoachBand.js';
 import { CodePlate, type CodePlateProps } from '../../components/plate/CodePlate.js';
 import type { HoleState } from '../../components/plate/Hole.js';
 import { Crumb } from '../../components/plate/Crumb.js';
 import { FeedbackSlot, type FeedbackState } from '../../components/plate/FeedbackSlot.js';
+import type { LiferNoteProps } from '../../components/plate/LiferNote.js';
 import { LinkPara } from '../../components/plate/LinkPara.js';
 import { ProofSheet } from '../../components/plate/ProofSheet.js';
 import { ReprintLadder, type RungNo } from '../../components/session/ReprintLadder.js';
@@ -41,6 +43,10 @@ export interface T0PlateProps {
   result: PlateResult | null;
   /** 아래층에서 돌아온 직후면 「이어보기」 문단이 열린다 (02 §4). */
   payoff: string | null;
+  /** 이 개념을 처음 기록한 판이면 판정란 안에 그 기록이 남는다 (D131). */
+  lifer: LiferNoteProps | null;
+  /** 첫 판을 함께 걷는 안내 띠 (D134). 이 리포의 첫 세션 첫 판에서만 참이다. */
+  coach: boolean;
   ladder: LadderData | null;
   ladderOpen: boolean;
   rung: RungNo;
@@ -192,6 +198,11 @@ export function T0Plate(props: T0PlateProps): React.JSX.Element | null {
 
       {props.payoff === null ? null : <LinkPara payoff={props.payoff} focusOnMount />}
 
+      {/* 걸음은 사용자가 무엇을 했는지로만 정해진다 — 넘기기 버튼도 타이머도 없다 (D134). */}
+      {!props.coach ? null : (
+        <CoachBand step={(answered ? 3 : sel === null ? 1 : 2) satisfies CoachStep} />
+      )}
+
       <Ask q={payload.q} hint={payload.hint} />
 
       <CodePlate
@@ -226,6 +237,7 @@ export function T0Plate(props: T0PlateProps): React.JSX.Element | null {
               rule: payload.rule,
               ...(payload.result ? { result: payload.result } : {}),
               gain: { from: result.layer[0], to: result.layer[1], text: result.gain },
+              ...(props.lifer === null ? {} : { lifer: props.lifer }),
             })}
       />
 

@@ -8,7 +8,7 @@ export const session: Record<string, string> = {
   'session.extra': 'Extra',
   'session.swap': 'Names swapped',
   'session.right': 'That is right',
-  'session.wrong': 'That is off register',
+  'session.wrong': 'That is wrong',
   'session.printDone': 'Printing done',
 
   'session.roleReview': 'Review',
@@ -38,11 +38,10 @@ export const session: Record<string, string> = {
   'session.copyFailed': 'Could not copy to the clipboard.',
 
   'session.liveRight': 'In register — that is right',
-  'session.liveWrong': 'Off register — that is off',
+  'session.liveWrong': 'Off register — that is wrong',
   'session.liveNext': 'Space for the next',
 
   'session.liferWhereT0': 'Collected from your <b>{{file}}:{{focus}}</b> · T0 grammar',
-  'session.liferWhereT1': 'Collected from your <b>{{file}}</b> · T1 clone coding',
 
   'plate.choices': 'Options',
   'plate.pickTargets': 'Where to point',
@@ -133,10 +132,22 @@ export const session: Record<string, string> = {
   'ask.copy': 'Copy',
   'ask.noKey': 'No API key · local dictionary and your own code only',
 
+  'coach.label': 'First plate walkthrough',
+  'coach.step': '{{n}} / 3',
+  'coach.pick':
+    'Pick <b>one of the four choices</b> — number keys <b>1~4</b> work too. The code above is '
+    + 'not a made-up example; it is <b>a line lifted straight out of your repo</b>.',
+  'coach.confirm':
+    'Press <b>Enter</b> to submit. Getting it wrong costs you nothing — one reprint plate joins '
+    + "today's queue, that is all. If you are stuck, <b>Not sure · reprint</b> at the bottom left "
+    + 'takes you down a level.',
+  'coach.read':
+    'Below is the <b>verdict slot</b>: whether you were right, why, and how many ink layers you '
+    + 'gained. When you have read it, <b>Space</b> goes to the next plate — the job band up top '
+    + 'counts what is left.',
   'lifer.label': 'First concept on record',
   'lifer.kicker': 'First record · LIFER',
   'lifer.stamp': 'First sighting',
-  'lifer.anyKey': 'Any key closes this',
 
   'summary.railVertical': '{{runNo}} · done',
   'summary.line': 'You hung {{printed}} plates and it took {{mins}} minutes. That is about right.',

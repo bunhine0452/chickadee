@@ -9,7 +9,7 @@ import { test, expect } from '../support/fixture.js';
 import type { Page } from '@playwright/test';
 
 import {
-  T1_SKIP, T2_SKIP, allowedBySel, closeLifer, deeSilhouette, gotoDev, loadAllow, motionOver,
+  T1_SKIP, T2_SKIP, allowedBySel, deeSilhouette, gotoDev, loadAllow, motionOver, settleLifer,
   runGates, startSession, submit, toNight, toShelf, toSummary, answerKey,
 } from '../support/gates.js';
 import type { AppDb } from '../support/app-db.js';
@@ -33,7 +33,7 @@ const SCREENS: Array<{ name: string; open: (page: Page, app: AppDb) => Promise<v
       await gotoDev(page);
       await startSession(page);
       await submit(page, answerKey(app));
-      await closeLifer(page);
+      await settleLifer(page);
       await toSummary(page, app);
     },
   },
@@ -116,7 +116,7 @@ test('실루엣 — 24 · 32px 배지도 3단이 산다', async ({ page, app: _a
  * 여기서 보는 것은 그 파서가 볼 수 없는 것이다: 계산된 값, 인라인 스타일, 단축 속성의 조합.
  * LIFER(1.36s)와 `peek`(1.6s × 2, D11)는 문서가 올린 예외라 선택자로 뺀다.
  */
-const MOTION_EXEMPT = ['.dee.lifer', '.dee.peek', '.lifer-veil', '.lifer-veil *'];
+const MOTION_EXEMPT = ['.dee.lifer', '.dee.peek', '.lifer-note', '.lifer-note *'];
 
 for (const screen of SCREENS) {
   test(`${screen.name} — 모션 상한 720ms`, async ({ page, app }) => {

@@ -26,7 +26,7 @@ test('감축 모션 — 정답 뒤 최종 포즈가 남고 판정란의 전환�
 
   // ① 최종 포즈 — 판정란이 켜져 있고 도장이 찍혀 있다.
   await expect(page.locator('.fb.on')).toBeVisible();
-  await expect(page.locator('.fb .stamp')).toBeVisible();
+  await expect(page.locator('.fb .stampbox .stamp')).toBeVisible();
 
   // ② 선언 — 판정란과 도장은 감축 모드에서 지속을 지운다(`FeedbackSlot.css`·`Stamp.css`).
   const declared = await page.evaluate(() => {
@@ -34,7 +34,7 @@ test('감축 모션 — 정답 뒤 최종 포즈가 남고 판정란의 전환�
       const el = document.querySelector(sel);
       return el === null ? null : getComputedStyle(el)[prop];
     };
-    return { fb: read('.fb', 'transitionDuration'), stamp: read('.fb .stamp', 'animationDuration') };
+    return { fb: read('.fb', 'transitionDuration'), stamp: read('.fb .stampbox .stamp', 'animationDuration') };
   });
   expect(declared.fb).not.toBeNull();
   expect(declared.stamp).not.toBeNull();
@@ -92,7 +92,7 @@ test('감축 모션 — 설정으로 켠 것도 미디어 쿼리와 같다 (05 �
 
   // ① 최종 포즈는 남는다 — 「모션 0」이 아니다.
   await expect(page.locator('.fb.on')).toBeVisible();
-  await expect(page.locator('.fb .stamp')).toBeVisible();
+  await expect(page.locator('.fb .stampbox .stamp')).toBeVisible();
 
   // ② 돌고 있는 것은 없다.
   const running = await page.evaluate((limit) => document.getAnimations()
@@ -130,7 +130,7 @@ test('감축 모션 아님 — 같은 자리에 판정란과 도장이 선다', 
   await startSession(page);
   await submit(page, answerKey(app));
   await expect(page.locator('.fb.on')).toBeVisible();
-  await expect(page.locator('.fb .stamp')).toBeVisible();
+  await expect(page.locator('.fb .stampbox .stamp')).toBeVisible();
 });
 
 /**

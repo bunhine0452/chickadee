@@ -163,6 +163,11 @@ export interface Settings { budgetMin: number; tz: string; rolloverHour: number;
   /** 표시 언어 (D117). `ko` 가 정본이고 `en` 은 번역이 있는 문구만 바뀐다. */
   locale: 'ko' | 'en';
   /**
+   * 첫 판을 함께 걸어 본 적이 있나 (D134). 거짓이면 이 리포의 첫 세션 첫 판에 안내 띠가
+   * 얹힌다. 설정 「학습」에서 다시 거짓으로 돌릴 수 있다.
+   */
+  tutorialSeen: boolean;
+  /**
    * 새 판을 만들 문법 사전 언어 (D122). **비면 전부 켜진 것**이다 — 빈 목록이
    * 「아무 언어도 안 함」이 되면 첫 실행에서 큐가 통째로 빈다. 표시 언어와 다른 축이다.
    */

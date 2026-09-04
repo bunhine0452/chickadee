@@ -4,6 +4,7 @@ import { cx, Dee, RichText, Stamp } from '@chickadee/ui';
 import type { InkLayer, StampTone } from '@chickadee/ui';
 
 import { CodePlate } from './CodePlate';
+import { LiferNote, type LiferNoteProps } from './LiferNote';
 import './FeedbackSlot.css';
 
 /**
@@ -49,6 +50,8 @@ export interface FeedbackSlotProps {
   /** 아래층에서 올라올 때 이어 붙는 다리 문장. */
   bridge?: string | undefined;
   gain?: FeedbackGain | undefined;
+  /** 이 개념을 처음 기록한 판이면 그 기록이 여기 남는다 (정본 §3-6 · D131). */
+  lifer?: LiferNoteProps | undefined;
   /** 비어 있을 때의 안내를 갈아 끼운다. */
   idleNote?: string | undefined;
 }
@@ -70,6 +73,7 @@ export function FeedbackSlot({
   result,
   bridge,
   gain,
+  lifer,
   idleNote,
 }: FeedbackSlotProps) {
   const answered = state !== 'idle';
@@ -113,7 +117,7 @@ export function FeedbackSlot({
               {body === undefined ? null : <RichText as="p" html={body} />}
               {edge === undefined ? null : (
                 <div className="edge">
-                  <b>{edge.h}</b>
+                  <b><RichText html={edge.h} /></b>
                   <CodePlate lines={edge.code.map((t, i) => ({ n: i + 1, t }))} />
                 </div>
               )}
@@ -124,7 +128,9 @@ export function FeedbackSlot({
               )}
               {result === undefined ? null : (
                 <p>
-                  <b>{t('plate.afterLine')}</b> · <code>{result.label}</code> = <code>{result.value}</code> — {result.note}
+                  <b>{t('plate.afterLine')}</b> · <code><RichText html={result.label} /></code>
+                  {' = '}
+                  <code><RichText html={result.value} /></code> — <RichText html={result.note} />
                 </p>
               )}
               {bridge === undefined ? null : (
@@ -140,6 +146,7 @@ export function FeedbackSlot({
                   <RichText html={gain.text} />
                 </div>
               )}
+              {lifer === undefined ? null : <LiferNote {...lifer} />}
             </div>
           </>
         )}

@@ -40,11 +40,11 @@ test('01 홈 → 인쇄 시작 → 1판 정답', async ({ page, app }) => {
 
   await page.locator(`.ch[data-k="${answerKeyOf(app.db)}"]`).click();
   await page.locator('.acts .press-btn').click();
-  await expect(page.locator('.fb .stamp')).toBeVisible();
+  await expect(page.locator('.fb .stampbox .stamp')).toBeVisible();
 
   // 정합 도장 — 은유와 평문을 같이 찍는다.
-  await expect(page.locator('.fb .stamp')).toContainText('정합');
-  await expect(page.locator('.fb .stamp')).toContainText('in register');
+  await expect(page.locator('.fb .stampbox .stamp')).toContainText('정합');
+  await expect(page.locator('.fb .stampbox .stamp')).toContainText('in register');
   // `+1겹` — 겹이 움직인 것을 이득으로 (05 §5 `ProofSheet`).
   await expect(page.locator('.ps-rail .plus')).toHaveText('+1겹');
   await expect(page.locator('.ps-rail .plus')).toHaveClass(/\bon\b/);
@@ -70,8 +70,8 @@ test('02 2판 오답', async ({ page, app }) => {
   const wrong = (answerKeyOf(app.db) % 4) + 1;
   await page.locator(`.ch[data-k="${wrong}"]`).click();
   await page.locator('.acts .press-btn').click();
-  await expect(page.locator('.fb .stamp')).toContainText('어긋남');
-  await expect(page.locator('.fb')).toContainText('어긋났습니다');
+  await expect(page.locator('.fb .stampbox .stamp')).toContainText('어긋남');
+  await expect(page.locator('.fb')).toContainText('틀렸습니다');
 
   // 날카로운 자리 — 실제로 터지는 최소 코드 두 줄이 코드판으로 붙는다.
   const edge = page.locator('.fb .edge');
@@ -169,21 +169,17 @@ test('06 새 판 첫 정합 → LIFER', async ({ page, app }) => {
   await page.locator(`.ch[data-k="${answerKeyOf(app.db)}"]`).click();
   await page.locator('.acts .press-btn').click();
 
-  // 베일이 열린다 — 컨페티가 아니라 영구 기록이다 (정본 §3-6).
-  const veil = page.locator('.lifer-veil');
-  await veil.waitFor();
-  await expect(veil.locator('.lifer-k')).toHaveText('첫 기록 · LIFER');
-  await expect(veil.locator('.lifer-serial')).toHaveText('#001');
-  await expect(veil).toContainText('time.ts:19');
-  expect(await focusPath(page)).toContain('lifer-card');
+  // 판정란 **안**에 남는다 — 컨페티가 아니라 영구 기록이다 (정본 §3-6 · D131).
+  const note = page.locator('.fb .lifer-note');
+  await note.waitFor();
+  await expect(note.locator('.lifer-k')).toHaveText('첫 기록 · LIFER');
+  await expect(note.locator('.lifer-serial')).toHaveText('#001');
+  await expect(note).toContainText('time.ts:19');
 
-  // 수식키 단독은 닫지 않는다 — Shift 로 대문자를 만들려던 손짓에 평생 한 번이 사라지면 안 된다.
-  await page.keyboard.press('Shift');
-  await expect(veil).toBeVisible();
+  // 판정문과 같은 칸에 있다 — 덮는 것이 없으므로 판정도 같이 읽힌다.
+  await expect(page.locator('.fb h4')).toContainText('맞았습니다');
 
-  // 아무 키나 닫는다. 포커스는 열기 전 자리(다음 판 단추)로 돌아온다.
-  await page.keyboard.press('KeyG');
-  await expect(page.locator('.lifer-veil')).toHaveCount(0);
+  // 덮는 것이 없으니 포커스는 채점 직후 자리(다음 판 단추)에 그대로 있다 (05 §7).
   expect(await focusPath(page)).toContain('press-btn');
 
   // 원장에도 남는다 — 개념당 평생 한 행이고 `shown_at` 이 연출을 본 시각이다.

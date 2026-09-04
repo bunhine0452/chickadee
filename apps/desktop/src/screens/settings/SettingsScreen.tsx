@@ -54,6 +54,12 @@ const trimOptions = () => [
   { v: 'on' as const, label: t('settings.look.trimOn') },
 ];
 
+/** 첫 판 안내 (D134). 켜면 다음 세션의 첫 판에서 다시 함께 걷는다. */
+const coachOptions = () => [
+  { v: 'off' as const, label: t('settings.study.coachOff') },
+  { v: 'on' as const, label: t('settings.study.coachOn') },
+];
+
 const motionOptions = () => [
   { v: 'system' as const, label: t('settings.look.motionSystem') },
   { v: 'reduce' as const, label: t('settings.look.motionReduce') },
@@ -347,6 +353,16 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
         </div>
         <RichText as="p" className="set-note" html={t('settings.dictLangs.note')} />
         <p className="set-note">{t('settings.dictLangs.axis')}</p>
+        <div className="set-row">
+          <span className="set-k">{t('settings.study.coach')}</span>
+          <Switch
+            options={coachOptions()}
+            value={s.tutorialSeen ? 'off' : 'on'}
+            label={t('settings.study.coachSwitch')}
+            onChange={(v) => put('tutorialSeen', v === 'off')}
+          />
+        </div>
+        <p className="set-note">{t('settings.study.coachNote')}</p>
         <label className="set-row">
           <span className="set-k">{t('settings.study.tz')}</span>
           <input

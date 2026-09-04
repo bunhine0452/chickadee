@@ -1,5 +1,5 @@
 /**
- * 05 §11 시나리오 11~14 — 요약 · 모양 스위치 · Esc 4단계 · 리포 등록과 인제스트.
+ * 05 §11 시나리오 11~14 — 요약 · 모양 스위치 · Esc 3단계 · 리포 등록과 인제스트.
  *
  * 이 넷은 교정지 한 장이 아니라 **셸**을 잰다: 세션이 닫힐 때 무엇이 남는가, 테마와 부속이
  * 조판을 건드리지 않는가, Esc 가 한 번에 한 겹만 벗기는가, 리포를 처음 등록하면 무엇이 도는가.
@@ -22,9 +22,8 @@ test('11 요약', async ({ page, app }) => {
   await page.locator(`.ch[data-k="${answerKeyOf(app.db)}"]`).click();
   await page.locator('.acts .press-btn').click();
 
-  // LIFER 는 첫 정합의 연출이다 — 닫고 나서야 다음 판으로 간다.
-  await page.locator('.lifer-veil').waitFor();
-  await page.keyboard.press('KeyG');
+  // 첫 정합의 기록은 판정란 안에 남는다 (D131) — 닫을 것이 없다.
+  await page.locator('.lifer-note').waitFor();
   // 큐는 두 판이다 (D113) — 남은 판까지 답해야 요약이 뜬다.
   await finishSession(page, app.db);
 
@@ -112,7 +111,7 @@ test('12 야간반 + 부속 숨김', async ({ page }) => {
   expect((await contrast()).checked).toBe(dayContrast.checked);
 });
 
-test('13 Esc 4단계', async ({ page, app }) => {
+test('13 Esc 3단계', async ({ page, app }) => {
   void app;
   await openHome(page);
   await page.getByRole('button', { name: /인쇄 시작/ }).click();
@@ -130,9 +129,8 @@ test('13 Esc 4단계', async ({ page, app }) => {
   await expect(page.locator('.proof')).toHaveCount(1);
   await expect(page.locator('.askbox textarea')).toHaveValue('여기서 막혔습니다');
 
-  // ② 사다리 접기. **포커스가 사다리 안일 때만** 이 겹이 벗겨진다 (05 §2.3 ③) —
-  //    ① 의 `blur()` 가 포커스를 `<body>` 로 떨어뜨리므로 여기서 다시 사다리로 넣어 준다.
-  //    그 자리 이동이 필요하다는 것 자체가 결함이다(보고 참조).
+  // ② 사다리 접기. **포커스가 사다리 안일 때만** 이 겹이 벗겨진다 (05 §2.3 ②) —
+  //    ① 이 포커스를 오버레이로 옮겨 두므로 여기서 다시 사다리 안으로 넣어 준다.
   await page.locator('.rung[data-r="4"]').focus();
   expect(await focusWithin(page, '.reprint')).toBe(true);
   await page.keyboard.press('Escape');

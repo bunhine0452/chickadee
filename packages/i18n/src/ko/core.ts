@@ -102,6 +102,12 @@ export const core = {
   'settings.study.rolloverNote': '시 — 이 시각 전은 어제로 셉니다',
   'settings.study.newPerDay': '새 판',
   'settings.study.newPerDayNote': '장/일 (상한 4)',
+  'settings.study.coach': '첫 판 안내',
+  'settings.study.coachSwitch': '첫 판 안내 켜기 · 끄기',
+  'settings.study.coachOn': '켜기',
+  'settings.study.coachOff': '끄기',
+  'settings.study.coachNote':
+    '켜면 다음 세션의 첫 판에서 고르기 → 확인 → 판정 읽기를 한 걸음씩 다시 짚어 줍니다. 판은 진짜 판이라 겹도 그대로 오릅니다.',
   'settings.study.tz': '시간대',
   'settings.study.tzNote': '여행 중에 어제 큐가 사라지지 않도록 여기 값이 기준입니다',
 

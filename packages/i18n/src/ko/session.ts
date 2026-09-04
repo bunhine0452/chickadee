@@ -19,7 +19,8 @@ export const session = {
   'session.extra': '추가',
   'session.swap': '이름 맞바꿈',
   'session.right': '맞았습니다',
-  'session.wrong': '어긋났습니다',
+  // 도장이 「어긋남」을 나르므로 제목은 평문이다 — 은유 옆에 평문을 병기한다 (정본 §6 · D130).
+  'session.wrong': '틀렸습니다',
   'session.printDone': '인쇄 완료',
 
   'session.roleReview': '복습',
@@ -50,11 +51,10 @@ export const session = {
 
   // 낭독 한 줄 (05 §7). 은유 옆에 평문을 병기한다.
   'session.liveRight': '정합 — 맞았습니다',
-  'session.liveWrong': '어긋남 — 어긋났습니다',
+  'session.liveWrong': '어긋남 — 틀렸습니다',
   'session.liveNext': 'Space 로 다음',
 
   'session.liferWhereT0': '당신의 <b>{{file}}:{{focus}}</b> 에서 채집 · T0 문법',
-  'session.liferWhereT1': '당신의 <b>{{file}}</b> 에서 채집 · T1 클론 코딩',
 
   // ───────── 교정지 부속 (components/plate) ─────────
   'plate.choices': '보기',
@@ -139,11 +139,23 @@ export const session = {
   'ask.copy': '복사',
   'ask.noKey': 'API 키 없음 · 로컬 사전과 내 코드만 사용',
 
+  // ───────── 첫 판 안내 (D134) ─────────
+  'coach.label': '첫 판 안내',
+  'coach.step': '{{n}} / 3',
+  'coach.pick':
+    '<b>보기 넷 중 하나</b>를 고르세요 — 숫자 키 <b>1~4</b> 도 됩니다. 위에 있는 코드는 '
+    + '설명용 예제가 아니라 <b>당신 리포에서 그대로 떠 온 줄</b>이에요.',
+  'coach.confirm':
+    '<b>Enter</b> 로 확인합니다. 틀려도 잃는 것은 없어요 — 다시 찍기 판이 오늘 큐에 한 장 '
+    + '들어갈 뿐입니다. 모르겠으면 왼쪽 아래 <b>모르겠어요 · 다시 찍기</b> 로 내려가도 됩니다.',
+  'coach.read':
+    '아래가 <b>판정란</b>입니다. 맞았는지, 왜 그런지, 잉크가 몇 겹 올랐는지가 여기 적혀요. '
+    + '다 읽었으면 <b>Space</b> 로 다음 판 — 남은 판은 맨 위 작업 띠가 셉니다.',
+
   // ───────── 첫 기록 ─────────
   'lifer.label': '처음 기록한 개념',
   'lifer.kicker': '첫 기록 · LIFER',
   'lifer.stamp': '첫 관찰',
-  'lifer.anyKey': '아무 키나 누르면 닫힙니다',
 
   // ───────── 인쇄 완료 ─────────
   'summary.railVertical': '{{runNo}} · 완료',

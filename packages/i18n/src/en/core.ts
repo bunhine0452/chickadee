@@ -103,6 +103,12 @@ export const core: Record<string, string> = {
   'settings.study.rolloverNote': 'hour \u2014 before this counts as yesterday',
   'settings.study.newPerDay': 'New plates',
   'settings.study.newPerDayNote': 'per day (max 4)',
+  'settings.study.coach': 'First-plate walkthrough',
+  'settings.study.coachSwitch': 'First-plate walkthrough on · off',
+  'settings.study.coachOn': 'On',
+  'settings.study.coachOff': 'Off',
+  'settings.study.coachNote':
+    'When on, the first plate of your next session walks you through pick → submit → read the verdict, one step at a time. It is a real plate, so the ink layers still count.',
   'settings.study.tz': 'Time zone',
   'settings.study.tzNote': 'This is the reference so travelling does not drop yesterday\u2019s queue',
 

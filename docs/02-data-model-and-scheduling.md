@@ -88,7 +88,7 @@ PRAGMA user_version = 1;
 
 -- ───────── 설정 · 스케줄러 파라미터 · 사전 ─────────
 CREATE TABLE settings (
-  key         TEXT PRIMARY KEY,           -- 'budget_min' | 'tz' | 'rollover_hour' | 'desired_retention' | 'new_per_day' | 'newcomer_flag' | 'motion' | 'identities' | 'exclude_globs' | 'locale' | 'dict_langs' …
+  key         TEXT PRIMARY KEY,           -- 'budget_min' | 'tz' | 'rollover_hour' | 'desired_retention' | 'new_per_day' | 'newcomer_flag' | 'motion' | 'identities' | 'exclude_globs' | 'locale' | 'tutorial_seen' | 'dict_langs' …
   value_json  TEXT NOT NULL,
   updated_at  INTEGER NOT NULL
 );
@@ -1043,9 +1043,10 @@ export interface PerfSample { id: number; kind: string; ms: number; n: number; a
 export interface Settings { budgetMin: number; tz: string; rolloverHour: number; desiredRetention: number; newPerDay: number;
   t1PerWeek: number; newcomerFlag: 'none' | 'suspect' | 'confirmed'; theme: 'light' | 'dark'; trim: 'on' | 'off';
   motion: 'system' | 'reduce'; identities: { email: string; name: string }[]; excludeGlobs: string[];
-  locale: 'ko' | 'en'; dictLangs: string[]; }
+  locale: 'ko' | 'en'; tutorialSeen: boolean; dictLangs: string[]; }
 // 기본값: newPerDay = 2, budgetMin = 15 (§5.1 LIMIT) · locale 은 OS 추정(D117) ·
 // excludeGlobs 는 기본 목록에 **더해지고**, dictLangs 는 **비면 전부 켜짐**이다 (D122)
+// tutorialSeen 이 거짓이면 첫 세션 첫 판에 안내 띠가 얹힌다 (D134)
 ```
 
 `ItemState`·`CardPayload`·`ReviewDetail`·`Settings` 는 각각 zod 스키마를 갖고, `Card.payload` 의 필드명은 목업 `data.js` 의 `CARDS`·`T1`·`T2` 키를 그대로 따라 05 문서가 그대로 렌더할 수 있게 한다.

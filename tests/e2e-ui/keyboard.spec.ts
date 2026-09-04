@@ -71,14 +71,11 @@ test('15 키보드만으로 1~13', async ({ page, app }) => {
   await page.keyboard.press(`Digit${key}`);
   await expect(page.locator(`.ch[data-k="${key}"]`)).toHaveAttribute('aria-checked', 'true');
   await page.keyboard.press('Enter');
-  await expect(page.locator('.fb .stamp')).toContainText('정합');
+  await expect(page.locator('.fb .stampbox .stamp')).toContainText('정합');
   await expect(page.locator('.ps-rail .plus')).toHaveText('+1겹');
 
-  // ── 6. LIFER — 아무 키나 닫고 포커스는 열기 전 자리로.
-  const veil = page.locator('.lifer-veil');
-  await veil.waitFor();
-  await page.keyboard.press('KeyG');
-  await expect(veil).toHaveCount(0);
+  // ── 6. LIFER — 판정란 안에 남으므로 벗길 겹이 없고, 포커스는 채점 자리에 그대로다 (D131).
+  await page.locator('.fb .lifer-note').waitFor();
   expect(await focusPath(page)).toContain('press-btn');
 
   // ── 11. Space 로 다음. 남은 판까지 답하면 요약 (D113). Enter 로 홈.

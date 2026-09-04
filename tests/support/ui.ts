@@ -275,11 +275,6 @@ export async function finishSession(
     await page.keyboard.press(`Digit${answerKeyOf(db)}`);
     await page.keyboard.press('Enter');
     await page.locator('.fb.on').waitFor();
-    const veil = page.locator('.lifer-veil');
-    if (await veil.count() > 0) {
-      await page.keyboard.press('KeyG');
-      await veil.waitFor({ state: 'detached' });
-    }
   }
   throw new Error(`판 ${MAX_PLATES}장을 답했는데도 요약이 안 떴다 — 큐가 안 줄고 있다`);
 }

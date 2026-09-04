@@ -19,11 +19,7 @@ async function answerAndAdvance(): Promise<void> {
   await (await shown('.acts button.press-btn')).click();
   await shown('.fb.on');
 
-  // 첫 성공이면 LIFER 의식이 덮는다 (D76). Esc 로 걷는다 — 걷히지 않으면 다음 클릭이 막힌다.
-  if (await wd().$('.lifer-card').isExisting()) {
-    await wd().keys(['Escape']);
-    await wd().$('.lifer-card').waitForExist({ timeout: 10_000, reverse: true });
-  }
+  // 첫 성공의 기록은 판정란 **안**이라 아무것도 덮지 않는다 (D131) — 걷을 것이 없다.
   await (await shown('.acts button.press-btn')).click();
 }
 
