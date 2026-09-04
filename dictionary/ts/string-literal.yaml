@@ -3,7 +3,7 @@ id: ts/string-literal
 universal: common/text-literal
 name: { ko: 문자열 리터럴, en: String literal }
 token: "'…'"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 1
@@ -167,7 +167,7 @@ why_gate:
         en: "A value that will change is the kind you bind to a name. Quotes say “exactly what is written here, now”."
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./string-literal.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./string-literal.scm }
 
 examples:
   - code: "const name = '한빈'"

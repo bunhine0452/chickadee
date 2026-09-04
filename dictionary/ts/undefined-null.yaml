@@ -3,7 +3,7 @@ id: ts/undefined-null
 universal: common/absent-value
 name: { ko: undefined 와 null, en: undefined and null }
 token: "undefined"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 1
@@ -170,7 +170,7 @@ why_gate:
         en: "Plenty of places allow both. What picks between them there is meaning, not the type."
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./undefined-null.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./undefined-null.scm }
 
 examples:
   - code: "const user = null"

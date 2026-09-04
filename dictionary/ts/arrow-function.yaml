@@ -3,7 +3,7 @@ id: ts/arrow-function
 universal: common/function-value
 name: { ko: 화살표 함수, en: Arrow function }
 token: "=>"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 2
@@ -206,7 +206,7 @@ why_gate:
         en: "A named function passes just as well. What parts ways is whether it is called again."
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./arrow-function.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./arrow-function.scm }
 
 examples:
   - code: "const double = (n) => n * 2"

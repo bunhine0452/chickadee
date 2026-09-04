@@ -3,7 +3,7 @@ id: ts/call-expression
 universal: common/function-call
 name: { ko: 함수 호출, en: Function call }
 token: "()"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 1
@@ -190,7 +190,7 @@ why_gate:
         en: "Parentheses go on even with no arguments. What they say is “run it now”."
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./call-expression.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./call-expression.scm }
 
 examples:
   - code: "const rows = load(path)"

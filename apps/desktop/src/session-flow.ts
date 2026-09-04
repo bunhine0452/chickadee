@@ -561,6 +561,7 @@ const GRAMMAR_BY_EXT: Readonly<Record<string, string>> = {
   '.js': 'javascript', '.mjs': 'javascript', '.cjs': 'javascript',
   // `.pyi` 가 빠져 있어 스텁이 `typescript` 로 폴백하고 있었다 — `py/_lang.yaml` 은
   // 처음부터 `python: [.py, .pyi]` 였다 (D156 조사).
+  '.vue': 'vue',
   '.py': 'python', '.pyi': 'python',
   '.go': 'go',
   '.rs': 'rust',

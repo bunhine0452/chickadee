@@ -3,7 +3,7 @@ id: ts/try-catch
 universal: common/try-catch
 name: { ko: "try / catch", en: "try and catch" }
 token: "try"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 3
@@ -202,7 +202,7 @@ why_gate:
         en: "The wider the wrap, the blurrier the origin. A narrow wrap is itself a mark saying “this part is risky”."
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./try-catch.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./try-catch.scm }
 
 examples:
   - code: "try { risky() } catch (e) { report(e) } finally { done() }"

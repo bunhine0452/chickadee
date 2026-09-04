@@ -3,7 +3,7 @@ id: ts/object-spread
 universal: common/copy-with-changes
 name: { ko: 객체 펼치기, en: Object spread }
 token: "..."
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 2
@@ -192,7 +192,7 @@ why_gate:
         en: "They can be edited. Not editing was a decision, and this line is where it is written down."
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./object-spread.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./object-spread.scm }
 
 examples:
   - code: "const next = { ...state, done: true }"

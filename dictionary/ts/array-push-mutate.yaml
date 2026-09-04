@@ -3,7 +3,7 @@ id: ts/array-push-mutate
 universal: common/mutating-append
 name: { ko: "배열에 직접 밀어 넣기(push)", en: "Mutating append with push" }
 token: "push"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: false
 difficulty: 2
@@ -228,7 +228,7 @@ blank:
 
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./array-push-mutate.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./array-push-mutate.scm }
 
 examples:
   - code: "out.push(item)"

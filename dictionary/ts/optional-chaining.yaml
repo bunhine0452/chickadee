@@ -3,7 +3,7 @@ id: ts/optional-chaining
 universal: common/optional-chaining
 name: { ko: 옵셔널 체이닝, en: Optional chaining }
 token: "?."
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 2
@@ -277,7 +277,7 @@ why_gate:
 
 queries:
   - { grammars: [typescript, tsx], file: ./optional-chaining.scm }
-  - { grammars: [javascript], file: ./optional-chaining.js.scm }
+  - { grammars: [javascript, vue], file: ./optional-chaining.js.scm }
 
 examples:
   - code: "const nick = res.user?.profile?.nickname ?? '손님'"

@@ -4,6 +4,7 @@
 //! captures. It never opens a `.scm` file or a `.yaml` file — the caller hands it
 //! query text, and what a query means is decided in TS (D1 · D40).
 
+mod sfc;
 mod ast;
 mod langs;
 mod query;
@@ -87,6 +88,20 @@ fn with_tree<T>(
             pool.insert(grammar.to_owned(), fresh);
         }
         let parser = pool.get_mut(grammar).expect("just inserted");
+        // SFC 는 한 파일에 언어가 셋이라 `<script>` 구간만 읽는다 (D159). 파서는 문법마다
+        // 재사용되므로 **매번 새로 지정한다** — 앞 파일의 구간이 남으면 조용히 틀린다.
+        if sfc::is_embedded(grammar) {
+            let ranges = sfc::script_ranges(src);
+            // `<script>` 가 없으면 빈 구간을 준다. 비워 두면 tree-sitter 가 문서 전체를
+            // 읽어 템플릿을 자바스크립트로 파싱한다.
+            let empty = [tree_sitter::Range {
+                start_byte: 0,
+                end_byte: 0,
+                start_point: tree_sitter::Point::new(0, 0),
+                end_point: tree_sitter::Point::new(0, 0),
+            }];
+            let _ = parser.set_included_ranges(if ranges.is_empty() { &empty } else { &ranges });
+        }
         let started = Instant::now();
         let mut over = |_: &tree_sitter::ParseState| started.elapsed() > TIMEOUT;
         let opts = tree_sitter::ParseOptions::new().progress_callback(&mut over);

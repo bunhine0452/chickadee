@@ -3,7 +3,7 @@ id: ts/index-access-pair
 universal: null
 name: { ko: 인덱스로 하나씩 꺼내기, en: "Reading by index" }
 token: "[0]"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: false
 difficulty: 2
@@ -177,7 +177,7 @@ meaning:
               - "const [a, ...rest] = xs"
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./index-access-pair.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./index-access-pair.scm }
 
 examples:
   - code: "const first = parts[0]\nconst second = parts[1]"

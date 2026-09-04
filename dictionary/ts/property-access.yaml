@@ -3,7 +3,7 @@ id: ts/property-access
 universal: common/member-access
 name: { ko: 점 표기 속성 읽기, en: Property access }
 token: "."
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 1
@@ -210,7 +210,7 @@ why_gate:
         en: "It can be taken out and bound to a name. For a value used more than once, that is the better call."
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./property-access.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./property-access.scm }
 
 examples:
   - code: "const nick = user.profile.nickname"

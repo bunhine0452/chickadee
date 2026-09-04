@@ -3,7 +3,7 @@ id: ts/array-destructuring
 universal: common/destructuring
 name: { ko: 배열 구조분해, en: Array destructuring }
 token: "[a, b] ="
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 2
@@ -208,7 +208,7 @@ why_gate:
         en: "Fewer lines is the outcome. What you gained is names in place of numbers."
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./array-destructuring.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./array-destructuring.scm }
 
 examples:
   - code: "const [count, setCount] = useState(0)"

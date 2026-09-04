@@ -3,7 +3,7 @@ id: ts/comparison
 universal: common/comparison
 name: { ko: 견주기, en: Comparison }
 token: "==="
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 1
@@ -247,7 +247,7 @@ why_gate:
         en: "Weighing is not about speed. It is about getting an answer."
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./comparison.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./comparison.scm }
 
 examples:
   - code: "const same = a === b"

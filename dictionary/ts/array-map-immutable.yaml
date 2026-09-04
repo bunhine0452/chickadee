@@ -3,7 +3,7 @@ id: ts/array-map-immutable
 universal: common/map-transform
 name: { ko: "배열 불변 갱신(map)", en: "Immutable array update with map" }
 token: "map"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 2
@@ -244,7 +244,7 @@ why_gate:
         en: "Building a new one is more work. The reason for paying it is the side watching the original."
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./array-map-immutable.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./array-map-immutable.scm }
 
 examples:
   - code: "const next = prev.map((i) => (i.id === id ? { ...i, qty } : i))"

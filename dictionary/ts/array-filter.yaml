@@ -3,7 +3,7 @@ id: ts/array-filter
 universal: common/filter-select
 name: { ko: "배열 골라내기(filter)", en: "Selecting items with filter" }
 token: "filter"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 2
@@ -245,7 +245,7 @@ why_gate:
         en: "Short is the outcome. The reason for choosing it is that the original is left untouched."
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./array-filter.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./array-filter.scm }
 
 examples:
   - code: "const open = tasks.filter((t) => !t.done)"

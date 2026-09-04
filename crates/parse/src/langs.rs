@@ -28,6 +28,10 @@ pub const LANGS: &[(&str, Load)] = &[
     ("rust", || tree_sitter_rust::LANGUAGE.into()),
     #[cfg(feature = "lang-java")]
     ("java", || tree_sitter_java::LANGUAGE.into()),
+    // Vue SFC. 문법이 따로 있는 것이 아니라 **자바스크립트를 `<script>` 구간에만** 돌린다
+    // (`sfc.rs`). 문법 키를 따로 두는 이유는 파서 풀과 구간 지정이 그 키로 갈리기 때문이다.
+    #[cfg(feature = "lang-javascript")]
+    ("vue", || tree_sitter_javascript::LANGUAGE.into()),
 ];
 
 #[derive(Debug, Clone, Serialize)]

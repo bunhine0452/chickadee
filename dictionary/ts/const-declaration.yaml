@@ -3,7 +3,7 @@ id: ts/const-declaration
 universal: common/variable-binding
 name: { ko: const 선언, en: const declaration }
 token: "const"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 1
@@ -262,7 +262,7 @@ why_gate:
         en: "The type checker demands no name. Whether to give one is a choice made for the reader."
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./const-declaration.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./const-declaration.scm }
 
 examples:
   - code: "const total = 42"

@@ -3,7 +3,7 @@ id: ts/logical-and-guard
 universal: common/optional-chaining
 name: { ko: 「그리고」로 지키기, en: Guarding with logical AND }
 token: "&&"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: false
 difficulty: 3
@@ -180,7 +180,7 @@ meaning:
               - "Boolean(0)    // false"
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./logical-and-guard.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./logical-and-guard.scm }
 
 examples:
   - code: "const nick = user && user.name"

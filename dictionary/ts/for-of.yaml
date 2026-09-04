@@ -3,7 +3,7 @@ id: ts/for-of
 universal: common/iterate
 name: { ko: "for…of 반복", en: "for…of loop" }
 token: "for…of"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 2
@@ -198,7 +198,7 @@ why_gate:
         en: "It can. You just write the start, the end and the step by hand — three more places to slip."
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./for-of.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./for-of.scm }
 
 examples:
   - code: "for (const row of rows) { send(row) }"

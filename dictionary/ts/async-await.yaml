@@ -3,7 +3,7 @@ id: ts/async-await
 universal: common/async-await
 name: { ko: "async / await", en: "async and await" }
 token: "await"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 3
@@ -183,7 +183,7 @@ why_gate:
         en: "<code>async</code> only opens the door to waiting; it does not order it. This line decides."
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./async-await.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./async-await.scm }
 
 examples:
   - code: "async function load() { const res = await fetch(url) }"

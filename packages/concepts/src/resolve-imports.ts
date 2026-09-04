@@ -52,7 +52,7 @@ type Lang = 'ts' | 'py' | 'go' | 'rs' | 'dart' | 'swift' | 'java';
 
 /** 확장자 → 언어. 표에 없는 확장자(`.sql` 등)는 엣지가 없다. */
 const LANG_OF: Readonly<Record<string, Lang>> = {
-  ts: 'ts', tsx: 'ts', js: 'ts', jsx: 'ts', mjs: 'ts', cjs: 'ts',
+  ts: 'ts', tsx: 'ts', js: 'ts', jsx: 'ts', mjs: 'ts', cjs: 'ts', vue: 'ts',
   py: 'py', go: 'go', rs: 'rs', dart: 'dart', swift: 'swift', java: 'java',
 };
 
@@ -62,7 +62,7 @@ const ROUTE_FORM = /^route-/;
 const HTTP_FORM = /^http-(get|post|put|patch|delete)$/;
 
 /** 상대 지정자에 붙여 보는 확장자. 순서가 곧 우선순위다 (04 §7.1). */
-const TS_EXT = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.d.ts'] as const;
+const TS_EXT = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.vue', '.d.ts'] as const;
 /** ESM 출력 규약상 소스가 아니라 **결과물** 이름으로 적히는 확장자. */
 const JS_OUT_EXT = ['.js', '.jsx', '.mjs', '.cjs'] as const;
 /** Next 라우트가 앉는 자리. `src/` 배치를 공식으로 허용하므로 둘 다 본다. */

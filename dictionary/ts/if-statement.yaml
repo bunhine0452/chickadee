@@ -3,7 +3,7 @@ id: ts/if-statement
 universal: common/conditional-branch
 name: { ko: if 문, en: if statement }
 token: "if"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 1
@@ -257,7 +257,7 @@ why_gate:
         en: "Skipping can be faster, but that is a result, not the reason. The reason is when those lines are right."
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./if-statement.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./if-statement.scm }
 
 examples:
   - code: "if (count > 0) { send() }"

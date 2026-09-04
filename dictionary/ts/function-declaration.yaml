@@ -3,7 +3,7 @@ id: ts/function-declaration
 universal: common/function-definition
 name: { ko: 함수 정의, en: Function declaration }
 token: "function"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 1
@@ -248,7 +248,7 @@ why_gate:
         en: "Used once, it makes things longer. The reason lies in being used in several places."
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./function-declaration.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./function-declaration.scm }
 
 examples:
   - code: "function add(a, b) { return a + b }"

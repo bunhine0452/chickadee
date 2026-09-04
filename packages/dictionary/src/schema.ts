@@ -30,6 +30,8 @@ export const grammarSchema = z.enum([
   // D156 의 열 언어. `c_sharp` 은 tree-sitter 크레이트가 쓰는 키이고 사전 네임스페이스는
   // `csharp` 이다 — `cs/` 를 기초 CS 사전이 가져갔다 (D157).
   'c', 'cpp', 'java', 'c_sharp',
+  // Vue SFC. 문법이 따로 있는 게 아니라 자바스크립트를 `<script>` 구간에만 돌린다 (D159).
+  'vue',
 ]);
 export type Grammar = z.infer<typeof grammarSchema>;
 

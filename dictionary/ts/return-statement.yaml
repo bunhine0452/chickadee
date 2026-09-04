@@ -3,7 +3,7 @@ id: ts/return-statement
 universal: common/return-value
 name: { ko: 값 돌려주기, en: return statement }
 token: "return"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 1
@@ -213,7 +213,7 @@ why_gate:
         en: "It can print. It does not because this function leaves the decision to its caller."
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./return-statement.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./return-statement.scm }
 
 examples:
   - code: "function f() { return 1 }"

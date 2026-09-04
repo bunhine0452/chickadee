@@ -3,7 +3,7 @@ id: ts/number-literal
 universal: common/number-literal
 name: { ko: 숫자 리터럴, en: Number literal }
 token: "42"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 1
@@ -169,7 +169,7 @@ why_gate:
         en: "Speed does not part ways here. What parts ways is whether the reader knows what the number means."
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./number-literal.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./number-literal.scm }
 
 examples:
   - code: "const max = 10"

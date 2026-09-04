@@ -3,7 +3,7 @@ id: ts/template-literal
 universal: common/string-interpolation
 name: { ko: 템플릿 문자열, en: Template literal }
 token: "`${}`"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 2
@@ -192,7 +192,7 @@ why_gate:
         en: "Joining works with quotes too. The backtick form is that same join, folded into one line."
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./template-literal.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./template-literal.scm }
 
 examples:
   - code: "const hello = `안녕, ${name}`"

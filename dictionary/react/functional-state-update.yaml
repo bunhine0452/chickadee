@@ -3,7 +3,7 @@ id: react/functional-state-update
 universal: null
 name: { ko: "함수형 상태 갱신", en: "Functional state update" }
 token: "setX(prev =>"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: react
 essential: false
 difficulty: 3
@@ -183,7 +183,7 @@ why_gate:
 
 queries:
   - { grammars: [typescript, tsx], file: ./functional-state-update.scm }
-  - { grammars: [javascript], file: ./functional-state-update.js.scm }
+  - { grammars: [javascript, vue], file: ./functional-state-update.js.scm }
 
 examples:
   - code: "setCount((prev) => prev + 1)"

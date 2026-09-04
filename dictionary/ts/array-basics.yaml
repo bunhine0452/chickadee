@@ -3,7 +3,7 @@ id: ts/array-basics
 universal: common/list
 name: { ko: 배열 기본, en: Array basics }
 token: "[]"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 1
@@ -189,7 +189,7 @@ why_gate:
         en: "Several named values fit an object better. An array is what you call by position, not by name."
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./array-basics.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./array-basics.scm }
 
 examples:
   - code: "const xs = [1, 2, 3]"

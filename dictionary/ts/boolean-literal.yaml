@@ -3,7 +3,7 @@ id: ts/boolean-literal
 universal: common/boolean-value
 name: { ko: 참·거짓 값, en: Boolean literal }
 token: "true"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 1
@@ -162,7 +162,7 @@ why_gate:
         en: "A name does not change a value. It only points at one."
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./boolean-literal.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./boolean-literal.scm }
 
 examples:
   - code: "const done = true"

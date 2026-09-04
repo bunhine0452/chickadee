@@ -3,7 +3,7 @@ id: ts/object-destructuring
 universal: common/destructuring
 name: { ko: 객체 구조분해, en: Object destructuring }
 token: "{ a } ="
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 2
@@ -212,7 +212,7 @@ why_gate:
         en: "A dot reads them fine. What it does is scatter the dependency across many lines."
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./object-destructuring.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./object-destructuring.scm }
 
 examples:
   - code: "const { data, error } = useQuery()"

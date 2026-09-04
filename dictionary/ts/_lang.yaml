@@ -1,10 +1,11 @@
 lang: ts
 version: 0.1.0
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 # 문법마다 다르다 — `Cargo.lock` 이 고정한 크레이트의 `parser.c` 를 읽은 값이다.
 # tree-sitter-typescript 0.23.2 → typescript 14 · tsx 14, tree-sitter-javascript 0.25.0 → 15.
 # 예전에 여기 `15` 하나가 적혀 있었고 셋 중 하나에만 맞았다 (D156 조사).
-grammar_abi: { typescript: 14, tsx: 14, javascript: 15 }
+# `vue` 는 자바스크립트를 `<script>` 구간에만 돌리는 가상 문법이라 값이 같다 (D159).
+grammar_abi: { typescript: 14, tsx: 14, javascript: 15, vue: 15 }
 
 # 확장자 → 문법. 인제스트가 이 표로 파일을 고른다 (03 §2.1).
 # `.ts` 를 TSX 문법으로 읽지 않는다 — `<T>` 캐스트가 JSX 로 오파싱된다.
@@ -12,6 +13,7 @@ extensions:
   typescript: [.ts, .mts, .cts]
   tsx: [.tsx]
   javascript: [.js, .mjs, .cjs, .jsx]
+  vue: [.vue]
 
 # 「필수 문법」 — 구멍 지도가 세는 대상이자 위상 정렬 동률 시의 순서다 (03 §6).
 essential:

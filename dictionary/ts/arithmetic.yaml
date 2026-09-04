@@ -3,7 +3,7 @@ id: ts/arithmetic
 universal: common/arithmetic
 name: { ko: 셈하기, en: Arithmetic }
 token: "+"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 1
@@ -245,7 +245,7 @@ why_gate:
         en: "Changing the kind is another job. What happens here is two values making a third."
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./arithmetic.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./arithmetic.scm }
 
 examples:
   - code: "const total = a + b"

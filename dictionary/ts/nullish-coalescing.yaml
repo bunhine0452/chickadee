@@ -3,7 +3,7 @@ id: ts/nullish-coalescing
 universal: common/nullish-default
 name: { ko: 널 병합, en: Nullish coalescing }
 token: "??"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 2
@@ -278,7 +278,7 @@ why_gate:
         en: "If it were always missing you would just use the default. This notation is for where both happen."
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./nullish-coalescing.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./nullish-coalescing.scm }
 
 examples:
   - code: "const nick = name ?? '손님'"

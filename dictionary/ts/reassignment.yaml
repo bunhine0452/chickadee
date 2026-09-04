@@ -3,7 +3,7 @@ id: ts/reassignment
 universal: common/reassignment
 name: { ko: 다시 넣기, en: Reassignment }
 token: "="
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 1
@@ -250,7 +250,7 @@ why_gate:
         en: "What one name costs is not the issue. The reason is about the reader."
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./reassignment.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./reassignment.scm }
 
 examples:
   - code: "count = 0"

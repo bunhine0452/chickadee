@@ -3,7 +3,7 @@ id: ts/while-loop
 universal: common/loop-while
 name: { ko: while 문, en: while loop }
 token: "while"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 2
@@ -251,7 +251,7 @@ why_gate:
         en: "Conditions usually contain numbers. The reason is that the count is unknown up front."
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./while-loop.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./while-loop.scm }
 
 examples:
   - code: "while (n < 3) { n++ }"

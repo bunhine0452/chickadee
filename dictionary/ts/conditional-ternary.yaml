@@ -3,7 +3,7 @@ id: ts/conditional-ternary
 universal: common/conditional-expression
 name: { ko: 삼항 조건식, en: Conditional (ternary) expression }
 token: "? :"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 3
@@ -207,7 +207,7 @@ why_gate:
         en: "It can — you just have to make the name first and assign in each branch, which adds lines."
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./conditional-ternary.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./conditional-ternary.scm }
 
 examples:
   - code: "const label = done ? '완료' : '진행 중'"
