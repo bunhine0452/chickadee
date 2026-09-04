@@ -11,10 +11,14 @@
  * 사전은 개념 산문(`dict`·`rule`·`ok`·`misconceptions`)만 댄다.
  */
 import { t, type MessageKey } from '@chickadee/i18n';
-import type { AstLite } from '@chickadee/store-sql';
+import type { AstLite, ConceptId, ConceptSite } from '@chickadee/store-sql';
 
+import { blockOf, dialectOf, execFacts, functionsIn, lineIndex } from './exec-facts.js';
 import type { ExecFacts } from './exec-facts.js';
-import type { LineWindow } from './types.js';
+import { codeLines, type Span } from './lines.js';
+import { commonPayload, finish } from './payload.js';
+import { buildVars, Renderer } from './vars.js';
+import type { FocusLine, GenResult, LineWindow, SiteInput, T0Request } from './types.js';
 
 /** 오답이 참이 되는 조건. 산문은 사전의 `diag` 가 이 키로 댄다. */
 export type WrongBecause =
@@ -121,5 +125,97 @@ export function renderFirstRun(question: ExecQuestion): RenderedExec {
     q: t('exec.orderQ'),
     hint: t('exec.orderHint'),
     why: question.picks.map((p) => (p.because === null ? null : t(WHY_KEY[p.because]))),
+  };
+}
+
+/**
+ * 추적 카드의 `site_id`. 원장에는 `NULL` 로 들어간다 — 대응하는 `concept_site` 행이 없다.
+ * 합성(-1)과 다른 음수라 둘이 섞이지 않고, 진짜 사용처 id(자동 증가, 1부터)와도 안 겹친다.
+ */
+export const EXEC_SITE_ID = -2;
+
+export interface ExecRequest extends Omit<T0Request, 'sites' | 'previewSiteId'> {
+  /** 블록의 원문 줄. `n` 은 **파일 기준** 1-based 다. */
+  lines: readonly FocusLine[];
+  /** `block.ast_json`. 블록만 따로 파싱한 것이라 오프셋이 **블록 기준**이다. */
+  ast: AstLite;
+  grammar: string;
+  path: string;
+  /** 블록 범위 = 창 (D141). */
+  window: LineWindow;
+  /**
+   * `block.text_hash`. 시드와 재생성 계약의 키다 — 줄이 밀려도 같은 카드가 다시 나와야
+   * 하므로(D70) 줄 번호가 아니라 **내용 해시**라야 한다.
+   */
+  blockHash: string;
+}
+
+/** 짚을 줄 하나를 「들여쓰기를 뺀 코드 부분」으로. 들여쓰기까지 짚게 하면 빈칸을 짚는 셈이다. */
+function spanOfLine(line: FocusLine, pick: number): Span | null {
+  const from = line.t.length - line.t.trimStart().length;
+  const to = line.t.trimEnd().length;
+  return to > from ? { line: line.n, from, to, pick } : null;
+}
+
+/**
+ * 실행 추적 카드 (D151). 사이트가 없으므로 **센티넬 사이트를 지어** 정상 경로를 그대로 쓴다 —
+ * 합성 카드(D137)가 같은 방식이다. `commonPayload`·`finish` 를 재사용하니 시드·해시·사전 3층의
+ * 계약이 전부 그대로 걸린다.
+ *
+ * 못 내면 사유를 낸다. **모르면 안 낸다** — 문법을 모르거나, 함수가 없거나, 오답 셋을 못 채우면
+ * 카드를 만들지 않는다.
+ */
+export function makeExecCard(req: ExecRequest): GenResult {
+  const d = dialectOf(req.grammar);
+  if (d === null) return { reason: t('exec.noGrammar') };
+
+  const fn = functionsIn(req.ast, d).find((f) => f.depth === 0)?.node;
+  if (fn === undefined) return { reason: t('exec.noFunction') };
+  const body = blockOf(fn, d);
+  if (body === null) return { reason: t('exec.noFunction') };
+
+  // 오프셋은 블록 기준이라 창의 첫 줄을 더해 파일 줄로 옮긴다.
+  const rel = lineIndex(req.lines.map((l) => l.t).join('\n'));
+  const at = (offset: number): number => req.window.from + rel(offset) - 1;
+
+  const question = buildFirstRun({ facts: execFacts(body, d), fn, at, window: req.window });
+  if (question === null) return { reason: t('exec.noTrace') };
+
+  const byLine = new Map(req.lines.map((l) => [l.n, l]));
+  const spans: Span[] = [];
+  question.picks.forEach((p, i) => {
+    const line = byLine.get(p.line);
+    const span = line ? spanOfLine(line, i + 1) : null;
+    if (span) spans.push(span);
+  });
+  // 짚을 자리를 하나라도 못 만들면 보기 번호가 어긋난다 — 그럴 바엔 안 낸다.
+  if (spans.length !== question.picks.length) return { reason: t('exec.noTrace') };
+
+  const site: ConceptSite = {
+    id: EXEC_SITE_ID, repoId: req.repoId, fileId: 0,
+    conceptId: req.concept.id as ConceptId, siteKey: req.blockHash,
+    lineStart: question.focus, lineEnd: req.window.to, colStart: 0, colEnd: 0,
+    tsNodeKind: null, form: null, shape: 'exec', occurrence: 0,
+    excerpt: byLine.get(question.focus)?.t.trim() ?? '',
+    picks: {}, hole: null, ctx: {}, lineConcepts: [], uncoveredRatio: 0,
+    confidence: 'syntactic', parseQuality: 'ok', isDirty: false, isOversize: false,
+    commitId: null, unknownCount: 0, isAlive: true, updatedAt: 0,
+  };
+  const input: SiteInput = { site, path: req.path, lines: req.lines, block: req.window };
+  const full: T0Request = { ...req, sites: [input] };
+  const r = new Renderer(buildVars(input, req.concept));
+  const rendered = renderFirstRun(question);
+
+  return {
+    card: finish(full, input, 'point', {
+      track: 't0',
+      kind: 'point',
+      ...commonPayload(full, input, r),
+      lines: codeLines(req.lines, question.focus, spans, req.window),
+      q: rendered.q,
+      hint: rendered.hint,
+      answer: question.answer,
+      why: rendered.why.map((w) => (w === null ? null : { t: w })),
+    }),
   };
 }

@@ -140,6 +140,9 @@ export const cards: Record<string, string> = {
   't2.smallRepoMap': 'the repo map has only {{n}} nodes',
   't2.entryNone': 'doors cover more than half the map, or none at all (nodes {{n}})',
   // ───────── Execution tracing (D151) ─────────
+  'exec.noGrammar': 'execution order cannot be read for this grammar yet',
+  'exec.noFunction': 'no function definition in this block',
+  'exec.noTrace': 'fewer than four lines to point at — the function is too short',
   'exec.orderQ': 'Point at the line that runs <b>first</b> when this function is called.',
   'exec.orderHint': 'Where it is defined, nothing has run yet.',
   'exec.whyDefinition':

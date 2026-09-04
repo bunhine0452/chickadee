@@ -12,8 +12,9 @@ import { describe, expect, test } from 'vitest';
 
 import type { AstLite } from '@chickadee/store-sql';
 import { blockOf, dialectOf, execFacts, lineIndex } from './exec-facts.js';
-import { buildFirstRun, renderFirstRun } from './t0-exec.js';
+import { EXEC_SITE_ID, buildFirstRun, makeExecCard, renderFirstRun } from './t0-exec.js';
 import type { ExecFacts } from './exec-facts.js';
+import type { FocusLine } from './types.js';
 
 const node = (start: number, kind = 'expression_statement'): AstLite =>
   ({ kind, named: true, start, end: start + 1, children: [] });
@@ -128,5 +129,77 @@ describe('사람 말로', () => {
     // 정의 줄 진단은 「부를 때 돈다」를 말해야 한다 — 이 오해가 이 문항의 존재 이유다.
     expect(r.why[0]).toContain('정의');
     expect(r.q.length).toBeGreaterThan(0);
+  });
+});
+
+describe('카드 한 장 (끝에서 끝까지)', () => {
+  /** 소스 한 덩이에서 줄과 오프셋을 같이 만든다 — 손으로 센 숫자를 안 쓰기 위해서다. */
+  function source(text: string, from: number): { lines: FocusLine[]; offsetOf: (needle: string) => number } {
+    const lines = text.split('\n').map((t, i) => ({ n: from + i, t }));
+    const enc = new TextEncoder();
+    return { lines, offsetOf: (needle) => enc.encode(text.slice(0, text.indexOf(needle))).length };
+  }
+
+  test('exec/order 카드가 나오고 페이로드가 스키마를 통과한다', async () => {
+    const { loadDict } = await import('@chickadee/dictionary');
+    const { cardPayloadSchema } = await import('@chickadee/store-sql');
+    const dict = loadDict();
+    const concept = dict.concepts.get('exec/order');
+    expect(concept).toBeDefined();
+    if (!concept) return;
+
+    const text = [
+      'function total(items) {',
+      '  const n = items.length;',
+      '  const sum = add(items);',
+      '  if (n === 0) { return 0; }',
+      '  return sum;',
+      '}',
+    ].join('\n');
+    const { lines, offsetOf } = source(text, 10);   // 파일 10행부터
+    const stmt = (needle: string, kind = 'lexical_declaration'): AstLite =>
+      ({ kind, named: true, start: offsetOf(needle), end: offsetOf(needle) + 1, children: [] });
+
+    const body: AstLite = {
+      kind: 'statement_block', named: true, start: offsetOf('{'), end: text.length,
+      children: [
+        { kind: '{', named: false, start: offsetOf('{'), end: offsetOf('{') + 1, children: [] },
+        stmt('const n'),
+        stmt('const sum'),
+        stmt('if (n', 'if_statement'),
+        stmt('return sum', 'return_statement'),
+      ],
+    };
+    const fn: AstLite = {
+      kind: 'function_declaration', named: true, start: 0, end: text.length, children: [body],
+    };
+
+    const out = makeExecCard({
+      repoId: 1, dictVersion: 'x', attempt: 0, concept, concepts: dict.concepts, ly: 0,
+      lines, ast: fn, grammar: 'typescript', path: 'src/cart.ts',
+      window: { from: 10, to: 15 }, blockHash: 'deadbeef',
+    });
+    if ('reason' in out) throw new Error(`판이 안 나왔다: ${out.reason}`);
+
+    const card = out.card;
+    expect(card.kind).toBe('point');
+    expect(card.siteId).toBe(EXEC_SITE_ID);
+    // 재생성 계약 — 시드가 블록 해시에 걸린다 (D70). 줄이 밀려도 같은 카드다.
+    expect(card.gen.siteId).toBe(EXEC_SITE_ID);
+    expect(card.contentHash.length).toBeGreaterThan(0);
+
+    const p = card.payload;
+    expect(p.track).toBe('t0');
+    // 정답은 첫 실행 줄(11행 `const n`)이고, 진단은 정답 자리만 비어 있다.
+    expect(p.focus).toBe(11);
+    expect(p.why[p.answer]).toBeNull();
+    expect(p.why.filter((w) => w !== null)).toHaveLength(3);
+    // 정의 줄(10행)이 오답으로 들어가 있어야 한다 — 이 문항의 존재 이유다.
+    const picked = p.lines.filter((l) => 'seg' in l).map((l) => l.n);
+    expect(picked).toContain(10);
+    expect(picked).toContain(11);
+
+    // 진짜로 저장 가능한가.
+    expect(() => cardPayloadSchema.parse(p)).not.toThrow();
   });
 });
