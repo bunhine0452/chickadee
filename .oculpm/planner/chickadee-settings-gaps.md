@@ -2,7 +2,7 @@
 oculpm_plan: v1
 id: chickadee-settings-gaps
 title: "설정창 보완 — identity 배선 버그와 05 §2.1 대비 빈 네 칸"
-status: active
+status: done
 created: 2026-09-04
 updated: 2026-09-04
 owner: claude-code
@@ -32,9 +32,9 @@ owner: claude-code
   - [x] UI 표시 언어(chickadee-i18n 의 locale)와 다른 축임을 절 문구로 명시 {#set-dict-langs-copy}
 
 ## P2 · 검증 {#p2}
-- [ ] SettingsScreen.test 확장과 설정 왕복 E2E · 0.3일 {#set-tests}
-  - [ ] 네 칸이 저장되고 재실행에 남는지(E7 과 같은 모양) {#set-tests-persist}
-  - [ ] 읽기 실패해도 화면이 기본값으로 뜼는 기존 규칙을 깨지 않는지 {#set-tests-fallback}
+- [x] SettingsScreen.test 확장과 설정 왕복 E2E · 0.3일 {#set-tests}
+  - [x] 네 칸이 저장되고 재실행에 남는지(E7 과 같은 모양) {#set-tests-persist}
+  - [x] 읽기 실패해도 화면이 기본값으로 뜼는 기존 규칙을 깨지 않는지 {#set-tests-fallback}
 
 <!-- oculpm:plan-log begin v1 -->
 | 시각 | 항목 | 에이전트 | 변화 | 일지 | 메모 |
@@ -52,4 +52,6 @@ owner: claude-code
 | 2026-09-04T09:02:00+09:00 | #set-globs-reingest | claude-code | ☐→x | .oculpm/journal/20260904/Features_to_add/0901_feature_settings-motion-globs-dict-langs.md | 홈 배너와 같은 모양의 안내(버튼 없음). 지문에는 넣지 않았다 — 06 §6.3 은 빌드 축이다 |
 | 2026-09-04T09:02:08+09:00 | #set-dict-langs-ui | claude-code | ☐→x | .oculpm/journal/20260904/Features_to_add/0901_feature_settings-motion-globs-dict-langs.md | DictLangPanel + Settings.dictLangs + derive.dict_langs. 빈 목록 = 전부 켜짐, 새 판에서만 뺀다 |
 | 2026-09-04T09:02:15+09:00 | #set-dict-langs-copy | claude-code | ☐→x | .oculpm/journal/20260904/Features_to_add/0901_feature_settings-motion-globs-dict-langs.md | settings.dictLangs.axis — 「무엇을 배울지」와 「어느 말로 읽을지」를 갈라 적었다 |
+| 2026-09-04T09:59:35+09:00 | #set-tests-persist | claude-code | ☐→x |  | 모션 왕복을 E7 과 같은 모양으로 |
+| 2026-09-04T09:59:37+09:00 | #set-tests-fallback | claude-code | ☐→x |  | settings.get_all 하나만 넘어뜨려도 화면이 기본값으로 선다 |
 <!-- oculpm:plan-log end -->

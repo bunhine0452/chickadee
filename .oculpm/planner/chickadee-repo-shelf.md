@@ -2,7 +2,7 @@
 oculpm_plan: v1
 id: chickadee-repo-shelf
 title: "리포 서가 — 여러 리포를 추가·전환·이동·삭제하는 화면"
-status: active
+status: done
 created: 2026-09-04
 updated: 2026-09-04
 owner: claude-code
