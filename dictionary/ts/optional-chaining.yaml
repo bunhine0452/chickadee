@@ -11,83 +11,179 @@ prereq: [ts/property-access, ts/undefined-null]
 confusions: [ts/nullish-coalescing, ts/logical-and-guard]
 
 dict:
-  one_liner: "<code>a?.b</code> 는 <code>a</code> 가 있으면 <code>a.b</code>, 없으면 <code>undefined</code>."
-  why: >-
-    서버 응답은 늘 완전하지 않습니다. {{pick.1|code}}{{pick.1|josa:이,가}} 빠진 값일 때
-    <code>.{{pick.3}}</code>{{pick.3|josa:을,를}} 읽으면 앱이 그 자리에서 멈춥니다(TypeError).
-    예전엔 <code>{{pick.1}} && {{pick.1}}.{{pick.3}}</code> 처럼 하나씩 확인했는데,
-    <code>?.</code> 가 그 확인을 두 글자에 담았어요.
+  one_liner:
+    ko: "<code>a?.b</code> 는 <code>a</code> 가 있으면 <code>a.b</code>, 없으면 <code>undefined</code>."
+    en: >-
+      <code>a?.b</code> gives <code>a.b</code> when <code>a</code> is there, otherwise
+      <code>undefined</code>.
+  why:
+    ko: >-
+      서버 응답은 늘 완전하지 않습니다. {{pick.1|code}}{{pick.1|josa:이,가}} 빠진 값일 때
+      <code>.{{pick.3}}</code>{{pick.3|josa:을,를}} 읽으면 앱이 그 자리에서 멈춥니다(TypeError).
+      예전엔 <code>{{pick.1}} && {{pick.1}}.{{pick.3}}</code> 처럼 하나씩 확인했는데,
+      <code>?.</code> 가 그 확인을 두 글자에 담았어요.
+    en: >-
+      A server response is not always complete. When {{pick.1|code}} is a missing value, reading
+      <code>.{{pick.3}}</code> stops the app right there (TypeError). It used to be checked one step
+      at a time, as <code>{{pick.1}} && {{pick.1}}.{{pick.3}}</code>, and <code>?.</code> put that
+      check into two characters.
   trace:
-    - "{{pick.1|code}}{{pick.1|josa:을,를}} 읽는다. 없으면 {{site.line}}행은 여기서 끝 — 값은 <code>undefined</code>."
-    - "있으면 <code>.{{pick.3}}</code>{{pick.3|josa:을,를}} 읽는다."
-    - "{{#ctx.fallback}}결과가 <code>undefined</code> 나 <code>null</code> 이면 <code>??</code> 가 {{ctx.fallback|code}}{{ctx.fallback|josa:을,를}} 고른다.{{/ctx.fallback}}{{^ctx.fallback}}그 값이 {{site.line}}행의 결과다.{{/ctx.fallback}}"
+    - ko: "{{pick.1|code}}{{pick.1|josa:을,를}} 읽는다. 없으면 {{site.line}}행은 여기서 끝 — 값은 <code>undefined</code>."
+      en: >-
+        {{pick.1|code}} is read. If it is absent, line {{site.line}} ends here — the value is
+        <code>undefined</code>.
+    - ko: "있으면 <code>.{{pick.3}}</code>{{pick.3|josa:을,를}} 읽는다."
+      en: "If it is there, <code>.{{pick.3}}</code> is read."
+    - ko: "{{#ctx.fallback}}결과가 <code>undefined</code> 나 <code>null</code> 이면 <code>??</code> 가 {{ctx.fallback|code}}{{ctx.fallback|josa:을,를}} 고른다.{{/ctx.fallback}}{{^ctx.fallback}}그 값이 {{site.line}}행의 결과다.{{/ctx.fallback}}"
+      en: >-
+        {{#ctx.fallback}}If the result is <code>undefined</code> or <code>null</code>,
+        <code>??</code> picks {{ctx.fallback|code}}.{{/ctx.fallback}}{{^ctx.fallback}}That value is
+        the result of line {{site.line}}.{{/ctx.fallback}}
 
-rule: "<b><code>.</code> 은 없으면 터지고, <code>?.</code> 은 없으면 멈춘다.</b> 멈춘 자리의 값은 <code>undefined</code>."
+rule:
+  ko: "<b><code>.</code> 은 없으면 터지고, <code>?.</code> 은 없으면 멈춘다.</b> 멈춘 자리의 값은 <code>undefined</code>."
+  en: >-
+    <b><code>.</code> blows up when it is absent; <code>?.</code> stops when it is absent.</b> The
+    value where it stops is <code>undefined</code>.
 result:
-  label: "{{pick.1}}{{pick.1|josa:이,가}} 없을 때"
+  label:
+    ko: "{{pick.1}}{{pick.1|josa:이,가}} 없을 때"
+    en: "When {{pick.1}} is absent"
   value: "{{#ctx.fallback}}{{ctx.fallback}}{{/ctx.fallback}}{{^ctx.fallback}}undefined{{/ctx.fallback}}"
-  note: "{{#ctx.fallback}}?. 가 멈추고 ?? 가 채움{{/ctx.fallback}}{{^ctx.fallback}}?. 가 멈춤{{/ctx.fallback}}"
-ok: >-
-  <code>?.</code> 는 <b>앞의 값이 없으면(<code>undefined</code>·<code>null</code>) 거기서 멈추고
-  <code>undefined</code> 를 냅니다.</b> {{pick.1|code}}{{pick.1|josa:이,가}} 없어도
-  <code>.{{pick.3}}</code>{{pick.3|josa:을,를}} 읽으려다 터지지 않아요.
-payoff: >-
-  {{pick.1|code}}{{pick.1|josa:이,가}} <code>undefined</code> 면 <code>.{{pick.3}}</code>{{pick.3|josa:을,를}}
-  읽는 순간 터집니다. <code>?.</code> 는 바로 그 순간에 <b>「없으면 멈춤」</b>을 끼워 넣는 기호예요.
-bridge: >-
-  여기서 한 번 더 — {{pick.1|code}}{{pick.1|josa:이,가}} <code>undefined</code> 일 때
-  <code>{{pick.1}}.{{pick.3}}</code> 쪽은 터지고, <code>{{pick.1}}?.{{pick.3}}</code> 쪽은
-  <code>undefined</code> 로 멈춥니다.
+  note:
+    ko: "{{#ctx.fallback}}?. 가 멈추고 ?? 가 채움{{/ctx.fallback}}{{^ctx.fallback}}?. 가 멈춤{{/ctx.fallback}}"
+    en: >-
+      {{#ctx.fallback}}?. stops and ?? fills in{{/ctx.fallback}}{{^ctx.fallback}}?.
+      stops{{/ctx.fallback}}
+ok:
+  ko: >-
+    <code>?.</code> 는 <b>앞의 값이 없으면(<code>undefined</code>·<code>null</code>) 거기서 멈추고
+    <code>undefined</code> 를 냅니다.</b> {{pick.1|code}}{{pick.1|josa:이,가}} 없어도
+    <code>.{{pick.3}}</code>{{pick.3|josa:을,를}} 읽으려다 터지지 않아요.
+  en: >-
+    <code>?.</code> <b>stops there and gives <code>undefined</code> when the value in front is
+    absent (<code>undefined</code> or <code>null</code>).</b> Even when {{pick.1|code}} is absent,
+    it does not blow up trying to read <code>.{{pick.3}}</code>.
+payoff:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:이,가}} <code>undefined</code> 면 <code>.{{pick.3}}</code>{{pick.3|josa:을,를}}
+    읽는 순간 터집니다. <code>?.</code> 는 바로 그 순간에 <b>「없으면 멈춤」</b>을 끼워 넣는 기호예요.
+  en: >-
+    If {{pick.1|code}} is <code>undefined</code>, it blows up the moment <code>.{{pick.3}}</code> is
+    read. <code>?.</code> is the symbol that slips <b>“stop if absent”</b> into exactly that moment.
+bridge:
+  ko: >-
+    여기서 한 번 더 — {{pick.1|code}}{{pick.1|josa:이,가}} <code>undefined</code> 일 때
+    <code>{{pick.1}}.{{pick.3}}</code> 쪽은 터지고, <code>{{pick.1}}?.{{pick.3}}</code> 쪽은
+    <code>undefined</code> 로 멈춥니다.
+  en: >-
+    Once more here — when {{pick.1|code}} is <code>undefined</code>, the
+    <code>{{pick.1}}.{{pick.3}}</code> side blows up and the <code>{{pick.1}}?.{{pick.3}}</code>
+    side stops at <code>undefined</code>.
 misconceptions:
-  - "<code>?.</code> 가 기본값을 넣어 준다 — 아니요, 멈추기만 합니다. 채우는 건 <code>??</code>."
-  - "<code>?.</code> 뒤의 모든 것이 안전해진다 — 앞 한 칸만 지킵니다. 다음 칸도 없을 수 있으면 <code>?.</code> 를 또 씁니다."
+  - ko: "<code>?.</code> 가 기본값을 넣어 준다 — 아니요, 멈추기만 합니다. 채우는 건 <code>??</code>."
+    en: "<code>?.</code> puts a default in for you — no, it only stops. Filling in is <code>??</code>."
+  - ko: "<code>?.</code> 뒤의 모든 것이 안전해진다 — 앞 한 칸만 지킵니다. 다음 칸도 없을 수 있으면 <code>?.</code> 를 또 씁니다."
+    en: >-
+      Everything after <code>?.</code> becomes safe — it guards one step only. If the next step may
+      also be absent, you write <code>?.</code> again.
 
 point:
-  - q: "{{site.line}}행에서 {{pick.1|code}}{{pick.1|josa:이,가}} 없을 때 <b>터지지 않고 그 자리에서 멈추게 해 주는 기호</b>를 짚어 보세요."
-    hint: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+  - q:
+      ko: "{{site.line}}행에서 {{pick.1|code}}{{pick.1|josa:이,가}} 없을 때 <b>터지지 않고 그 자리에서 멈추게 해 주는 기호</b>를 짚어 보세요."
+      en: >-
+        On line {{site.line}}, point at <b>the symbol that makes it stop there instead of blowing
+        up</b> when {{pick.1|code}} is absent.
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
     answer: pick.2
     diag:
       pick.1:
-        t: "{{pick.1|code}}{{pick.1|josa:은,는}} 값을 <b>꺼내는</b> 자리입니다. 없을 수 있는 건 이 값이고, 그걸 지키는 기호는 바로 뒤의 <code>?.</code> 입니다."
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 값을 <b>꺼내는</b> 자리입니다. 없을 수 있는 건 이 값이고, 그걸 지키는 기호는 바로 뒤의 <code>?.</code> 입니다."
+          en: >-
+            {{pick.1|code}} is the spot the value is <b>taken from</b>. This is the value that may
+            be absent, and the symbol guarding it is the <code>?.</code> right after.
         edge:
-          h: "가장 날카로운 자리 — ?. 가 지키는 건 앞이다"
+          h:
+            ko: "가장 날카로운 자리 — ?. 가 지키는 건 앞이다"
+            en: "The sharpest spot — what ?. guards is what comes before"
           code:
             - "{{pick.1}}?.{{pick.3}}   // 없으면 undefined, 터지지 않음"
             - "{{pick.1}}.{{pick.3}}    // 없으면 TypeError"
       pick.3:
-        t: "<code>{{pick.3}}</code>{{pick.3|josa:은,는}} 읽으려는 <b>이름</b>입니다. 멈추는 일은 그 앞의 <code>?.</code> 가 합니다."
+        t:
+          ko: "<code>{{pick.3}}</code>{{pick.3|josa:은,는}} 읽으려는 <b>이름</b>입니다. 멈추는 일은 그 앞의 <code>?.</code> 가 합니다."
+          en: >-
+            <code>{{pick.3}}</code> is the <b>name</b> being read. The stopping is done by the
+            <code>?.</code> before it.
         edge:
-          h: "가장 날카로운 자리 — 이름은 지키지 않는다"
+          h:
+            ko: "가장 날카로운 자리 — 이름은 지키지 않는다"
+            en: "The sharpest spot — the name is not what is guarded"
           code:
             - "{{pick.1}}?.{{pick.3}}     // ?. 가 앞을 확인"
             - "{{pick.1}}.{{pick.3}}?.x   // 여기 ?. 는 {{pick.3}} 을 확인"
 
 meaning:
-  - q: "{{pick.1|code}}{{pick.1|josa:이,가}} <code>undefined</code> 라면 {{site.line}}행의 값은 무엇일까요?"
-    hint: "<code>?.</code> 는 멈추는 기호, <code>??</code> 는 채우는 기호."
+  - q:
+      ko: "{{pick.1|code}}{{pick.1|josa:이,가}} <code>undefined</code> 라면 {{site.line}}행의 값은 무엇일까요?"
+      en: "If {{pick.1|code}} is <code>undefined</code>, what is the value of line {{site.line}}?"
+    hint:
+      ko: "<code>?.</code> 는 멈추는 기호, <code>??</code> 는 채우는 기호."
+      en: "<code>?.</code> is the stopping symbol; <code>??</code> is the filling symbol."
     options:
-      - t: "{{#ctx.fallback}}{{ctx.fallback|code}} — <code>?.</code> 가 <code>undefined</code> 로 멈추고 <code>??</code> 가 채운다{{/ctx.fallback}}{{^ctx.fallback}}<code>undefined</code> — <code>?.</code> 가 거기서 멈춘다{{/ctx.fallback}}"
-      - t: "TypeError 로 멈춘다"
+      - t:
+          ko: "{{#ctx.fallback}}{{ctx.fallback|code}} — <code>?.</code> 가 <code>undefined</code> 로 멈추고 <code>??</code> 가 채운다{{/ctx.fallback}}{{^ctx.fallback}}<code>undefined</code> — <code>?.</code> 가 거기서 멈춘다{{/ctx.fallback}}"
+          en: >-
+            {{#ctx.fallback}}{{ctx.fallback|code}} — <code>?.</code> stops at <code>undefined</code>
+            and <code>??</code> fills in{{/ctx.fallback}}{{^ctx.fallback}}<code>undefined</code> —
+            <code>?.</code> stops there{{/ctx.fallback}}
+      - t:
+          ko: "TypeError 로 멈춘다"
+          en: "It stops with a TypeError"
         diag:
-          t: "<code>{{pick.1}}.{{pick.3}}</code> 처럼 <b>점(<code>.</code>)이었다면</b> 그 말이 맞습니다. <code>?.</code> 는 그 순간에 터지는 대신 <code>undefined</code> 를 냅니다."
+          t:
+            ko: "<code>{{pick.1}}.{{pick.3}}</code> 처럼 <b>점(<code>.</code>)이었다면</b> 그 말이 맞습니다. <code>?.</code> 는 그 순간에 터지는 대신 <code>undefined</code> 를 냅니다."
+            en: >-
+              That would hold <b>if it were a plain dot (<code>.</code>)</b>, as in
+              <code>{{pick.1}}.{{pick.3}}</code>. At that moment <code>?.</code> gives
+              <code>undefined</code> instead of blowing up.
           edge:
-            h: "가장 날카로운 자리 — 점 하나 차이"
+            h:
+              ko: "가장 날카로운 자리 — 점 하나 차이"
+              en: "The sharpest spot — one dot apart"
             code:
               - "{{pick.1}}.{{pick.3}}    // TypeError"
               - "{{pick.1}}?.{{pick.3}}   // undefined"
       - t: "<code>null</code>"
         diag:
-          t: "<code>?.</code> 가 멈추며 내는 값은 앞이 <code>null</code> 이었어도 <b>항상 <code>undefined</code></b> 입니다."
+          t:
+            ko: "<code>?.</code> 가 멈추며 내는 값은 앞이 <code>null</code> 이었어도 <b>항상 <code>undefined</code></b> 입니다."
+            en: >-
+              The value <code>?.</code> gives when it stops is <b>always <code>undefined</code></b>,
+              even when what came before was <code>null</code>.
           edge:
-            h: "가장 날카로운 자리 — 멈춘 값은 하나"
+            h:
+              ko: "가장 날카로운 자리 — 멈춘 값은 하나"
+              en: "The sharpest spot — the stopping value is one thing"
             code:
               - "null?.x        // undefined"
               - "undefined?.x   // undefined"
-      - t: "빈 문자열 <code>''</code>"
+      - t:
+          ko: "빈 문자열 <code>''</code>"
+          en: "An empty string <code>''</code>"
         diag:
-          t: "<code>''</code> 은 <b>값이 있는 것</b>입니다. <code>?.</code> 는 <code>undefined</code>·<code>null</code> 에서만 멈춰요."
+          t:
+            ko: "<code>''</code> 은 <b>값이 있는 것</b>입니다. <code>?.</code> 는 <code>undefined</code>·<code>null</code> 에서만 멈춰요."
+            en: >-
+              <code>''</code> is <b>a value that is present</b>. <code>?.</code> stops only at
+              <code>undefined</code> and <code>null</code>.
           edge:
-            h: "가장 날카로운 자리 — 비어 보여도 값"
+            h:
+              ko: "가장 날카로운 자리 — 비어 보여도 값"
+              en: "The sharpest spot — empty-looking but present"
             code:
               - "''?.length     // 0  (멈추지 않음)"
               - "('' ?? 'x')    // ''"

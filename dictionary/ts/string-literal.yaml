@@ -11,60 +11,126 @@ prereq: []
 confusions: [ts/template-literal]
 
 dict:
-  one_liner: "따옴표 안은 계산하지 않는다. 적힌 글자 그대로가 값이다."
-  why: >-
-    따옴표가 없으면 {{pick.1}} 안의 글자는 <b>이름</b>으로 읽힙니다 — 어딘가에 그 이름으로
-    묶어 둔 값이 있어야 하고, 없으면 그 자리에서 멈춰요. 따옴표는 「이건 이름이 아니라
-    글자다」라고 표시하는 울타리입니다.
+  one_liner:
+    ko: "따옴표 안은 계산하지 않는다. 적힌 글자 그대로가 값이다."
+    en: "Nothing inside the quotes is evaluated. The characters written are the value."
+  why:
+    ko: >-
+      따옴표가 없으면 {{pick.1}} 안의 글자는 <b>이름</b>으로 읽힙니다 — 어딘가에 그 이름으로
+      묶어 둔 값이 있어야 하고, 없으면 그 자리에서 멈춰요. 따옴표는 「이건 이름이 아니라
+      글자다」라고 표시하는 울타리입니다.
+    en: >-
+      Without the quotes, the characters in {{pick.1}} are read as <b>a name</b> — a value has to be
+      bound to that name somewhere, and if there is none it stops right there. Quotes are the fence
+      that says “this is text, not a name”.
   trace:
-    - "{{site.line}}행의 여는 따옴표부터 닫는 따옴표까지를 한 덩어리로 읽는다."
-    - "그 안은 계산하지 않는다 — {{pick.1|code}} 그대로가 값이다."
-    - "같은 줄의 다른 값과 이어 붙일 때는 문자열끼리 이어진다."
+    - ko: "{{site.line}}행의 여는 따옴표부터 닫는 따옴표까지를 한 덩어리로 읽는다."
+      en: "From the opening quote to the closing quote on line {{site.line}} is read as one piece."
+    - ko: "그 안은 계산하지 않는다 — {{pick.1|code}} 그대로가 값이다."
+      en: "The inside is not evaluated — {{pick.1|code}} as written is the value."
+    - ko: "같은 줄의 다른 값과 이어 붙일 때는 문자열끼리 이어진다."
+      en: "When it joins another value on the same line, the join is text to text."
 
-rule: "<b>따옴표 안은 글자, 밖은 이름이다.</b> 작은따옴표와 큰따옴표는 하는 일이 같다."
+rule:
+  ko: "<b>따옴표 안은 글자, 밖은 이름이다.</b> 작은따옴표와 큰따옴표는 하는 일이 같다."
+  en: "<b>Inside the quotes is text; outside is a name.</b> Single and double quotes do the same job."
 result:
-  label: "{{site.line}}행의 값"
+  label:
+    ko: "{{site.line}}행의 값"
+    en: "The value of line {{site.line}}"
   value: "{{pick.1}}"
-  note: "따옴표를 뺀 글자만"
-ok: >-
-  {{pick.1|code}}{{pick.1|josa:은,는}} <b>적힌 글자 그대로</b>가 값입니다. 따옴표 안의 내용을
-  프로그램이 이름으로 찾아보는 일은 없어요.
-payoff: >-
-  따옴표 하나로 「이건 사람이 읽을 글자」와 「이건 내가 만든 이름」이 갈립니다. 이 구분이
-  없으면 {{site.line}}행은 없는 이름을 찾다가 멈춥니다.
-bridge: >-
-  값을 끼워 넣고 싶어지면 따옴표 대신 백틱을 씁니다 — 그때부터는 안쪽의 <code>${…}</code> 만
-  계산되고 나머지는 여전히 글자 그대로입니다.
+  note:
+    ko: "따옴표를 뺀 글자만"
+    en: "the characters without the quotes"
+ok:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:은,는}} <b>적힌 글자 그대로</b>가 값입니다. 따옴표 안의 내용을
+    프로그램이 이름으로 찾아보는 일은 없어요.
+  en: >-
+    The value of {{pick.1|code}} is <b>the characters exactly as written</b>. The program never goes
+    looking up what is inside the quotes as a name.
+payoff:
+  ko: >-
+    따옴표 하나로 「이건 사람이 읽을 글자」와 「이건 내가 만든 이름」이 갈립니다. 이 구분이
+    없으면 {{site.line}}행은 없는 이름을 찾다가 멈춥니다.
+  en: >-
+    One quote mark separates “text a person reads” from “a name I made”. Without that separation,
+    line {{site.line}} goes looking for a name that is not there and stops.
+bridge:
+  ko: >-
+    값을 끼워 넣고 싶어지면 따옴표 대신 백틱을 씁니다 — 그때부터는 안쪽의 <code>${…}</code> 만
+    계산되고 나머지는 여전히 글자 그대로입니다.
+  en: >-
+    When you want to slip a value in, you use backticks instead of quotes — from then on only the
+    <code>${…}</code> inside is evaluated and the rest is still text as written.
 misconceptions:
-  - "작은따옴표와 큰따옴표가 다르게 동작한다 — 아니요. 고르는 기준은 팀의 포매터입니다."
-  - "따옴표 안에 이름을 쓰면 그 값이 들어간다 — 아니요. 그러려면 백틱과 <code>${…}</code> 가 필요합니다."
+  - ko: "작은따옴표와 큰따옴표가 다르게 동작한다 — 아니요. 고르는 기준은 팀의 포매터입니다."
+    en: >-
+      Single and double quotes behave differently — no. What picks between them is your team's
+      formatter.
+  - ko: "따옴표 안에 이름을 쓰면 그 값이 들어간다 — 아니요. 그러려면 백틱과 <code>${…}</code> 가 필요합니다."
+    en: >-
+      Write a name inside the quotes and its value goes in — no. For that you need backticks and
+      <code>${…}</code>.
 
 meaning:
-  - q: "{{site.line}}행의 따옴표를 지우면 무엇이 달라질까요?"
-    hint: "따옴표는 「이름으로 찾지 마라」는 표시입니다."
+  - q:
+      ko: "{{site.line}}행의 따옴표를 지우면 무엇이 달라질까요?"
+      en: "If you delete the quotes on line {{site.line}}, what changes?"
+    hint:
+      ko: "따옴표는 「이름으로 찾지 마라」는 표시입니다."
+      en: "Quotes are the mark that says “do not look this up as a name”."
     options:
-      - t: "안의 글자가 <b>이름</b>으로 읽힌다 — 그 이름이 없으면 그 자리에서 멈춘다"
-      - t: "아무것도 달라지지 않는다"
+      - t:
+          ko: "안의 글자가 <b>이름</b>으로 읽힌다 — 그 이름이 없으면 그 자리에서 멈춘다"
+          en: >-
+            The characters inside are read as <b>a name</b> — and if there is no such name it stops
+            right there
+      - t:
+          ko: "아무것도 달라지지 않는다"
+          en: "Nothing changes"
         diag:
-          t: "숫자만 적혀 있었다면 값이 남기는 합니다. 글자가 들어 있으면 프로그램은 그것을 이름으로 찾아 나서고, 묶어 둔 적이 없으면 멈춰요."
+          t:
+            ko: "숫자만 적혀 있었다면 값이 남기는 합니다. 글자가 들어 있으면 프로그램은 그것을 이름으로 찾아 나서고, 묶어 둔 적이 없으면 멈춰요."
+            en: >-
+              If it had held only digits, a value would indeed remain. With letters in it, the
+              program goes looking for that name, and if nothing was ever bound to it, it stops.
           edge:
-            h: "가장 날카로운 자리 — 따옴표를 지운 뒤"
+            h:
+              ko: "가장 날카로운 자리 — 따옴표를 지운 뒤"
+              en: "The sharpest spot — after the quotes are gone"
             code:
               - "const a = 'hi'   // 글자 hi"
               - "const b = hi     // hi 라는 이름을 찾는다"
-      - t: "글자는 그대로고 타입만 바뀐다"
+      - t:
+          ko: "글자는 그대로고 타입만 바뀐다"
+          en: "The characters stay and only the type changes"
         diag:
-          t: "따옴표는 타입 표시가 아니라 <b>여기부터 여기까지가 글자</b>라는 울타리입니다. 울타리를 지우면 글자 자체가 남지 않아요."
+          t:
+            ko: "따옴표는 타입 표시가 아니라 <b>여기부터 여기까지가 글자</b>라는 울타리입니다. 울타리를 지우면 글자 자체가 남지 않아요."
+            en: >-
+              Quotes are not a type marker but the fence saying <b>from here to here is text</b>.
+              Delete the fence and the text itself does not survive.
           edge:
-            h: "가장 날카로운 자리 — 울타리냐 표시냐"
+            h:
+              ko: "가장 날카로운 자리 — 울타리냐 표시냐"
+              en: "The sharpest spot — a fence or a marker"
             code:
               - "const a = '42'   // 글자 42"
               - "const b = 42     // 숫자 42"
-      - t: "빈 문자열이 된다"
+      - t:
+          ko: "빈 문자열이 된다"
+          en: "It becomes an empty string"
         diag:
-          t: "빈 문자열은 따옴표를 <b>둘 다 남기고</b> 안을 비웠을 때 나옵니다. 따옴표를 지우는 것과는 다른 일이에요."
+          t:
+            ko: "빈 문자열은 따옴표를 <b>둘 다 남기고</b> 안을 비웠을 때 나옵니다. 따옴표를 지우는 것과는 다른 일이에요."
+            en: >-
+              An empty string is what you get when you <b>keep both quotes</b> and empty the inside.
+              Deleting the quotes is a different thing.
           edge:
-            h: "가장 날카로운 자리 — 비운 것과 지운 것"
+            h:
+              ko: "가장 날카로운 자리 — 비운 것과 지운 것"
+              en: "The sharpest spot — emptied and deleted"
             code:
               - "const a = ''     // 길이 0 인 글자"
               - "const b =        // 적을 값이 없어 읽지 못한다"

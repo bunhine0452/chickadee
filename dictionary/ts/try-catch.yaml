@@ -11,76 +11,161 @@ prereq: [ts/call-expression, ts/undefined-null]
 confusions: [ts/async-await, ts/promise-then]
 
 dict:
-  one_liner: "<code>try</code> 안에서 터진 것을 <code>catch</code> 가 받아 흐름을 잇는다."
-  why: >-
-    예외는 그 자리에서 남은 줄을 전부 건너뛰게 만듭니다. {{site.line}}행의 <code>try</code> 는
-    「여기서 터지면 아래로 흘리지 말고 옆으로 빠지자」는 표시이고, 받는 곳이 있어야 앱이 멈추지
-    않아요.
+  one_liner:
+    ko: "<code>try</code> 안에서 터진 것을 <code>catch</code> 가 받아 흐름을 잇는다."
+    en: "<code>catch</code> takes what blew up inside <code>try</code> and carries the flow on."
+  why:
+    ko: >-
+      예외는 그 자리에서 남은 줄을 전부 건너뛰게 만듭니다. {{site.line}}행의 <code>try</code> 는
+      「여기서 터지면 아래로 흘리지 말고 옆으로 빠지자」는 표시이고, 받는 곳이 있어야 앱이 멈추지
+      않아요.
+    en: >-
+      An exception makes every remaining line be skipped from that point. The <code>try</code> on
+      line {{site.line}} marks “if it blows up here, do not let it run downward — step aside”, and
+      the app keeps going only if there is somewhere to catch it.
   trace:
-    - "{{pick.1|code}} 안을 위에서부터 실행한다."
-    - "어딘가에서 터지면 <b>남은 줄을 건너뛰고</b> {{pick.3|code}}{{pick.3|josa:으로,로}} 간다."
-    - "{{pick.4|code}}{{pick.4|josa:이,가}} 있으면 터졌든 아니든 마지막에 실행한다."
+    - ko: "{{pick.1|code}} 안을 위에서부터 실행한다."
+      en: "The inside of {{pick.1|code}} runs from the top."
+    - ko: "어딘가에서 터지면 <b>남은 줄을 건너뛰고</b> {{pick.3|code}}{{pick.3|josa:으로,로}} 간다."
+      en: >-
+        If it blows up somewhere, <b>the remaining lines are skipped</b> and it goes to
+        {{pick.3|code}}.
+    - ko: "{{pick.4|code}}{{pick.4|josa:이,가}} 있으면 터졌든 아니든 마지막에 실행한다."
+      en: "If {{pick.4|code}} is there, it runs last whether it blew up or not."
 
-rule: "<b>터진 자리에서 남은 줄은 건너뛴다.</b> 받는 곳이 없으면 예외는 계속 위로 올라간다."
+rule:
+  ko: "<b>터진 자리에서 남은 줄은 건너뛴다.</b> 받는 곳이 없으면 예외는 계속 위로 올라간다."
+  en: >-
+    <b>From the point it blows up, the remaining lines are skipped.</b> With nowhere to catch it,
+    the exception keeps rising.
 result:
-  label: "터졌을 때 실행되는 곳"
+  label:
+    ko: "터졌을 때 실행되는 곳"
+    en: "Where it runs when it blows up"
   value: "{{pick.3}}"
-  note: "그 뒤로도 프로그램은 계속된다"
-ok: >-
-  <code>try</code> 블록 안에서 예외가 나면 <b>그 지점부터의 남은 줄을 건너뛰고</b> <code>catch</code>
-  로 갑니다. <code>finally</code> 는 어느 쪽이든 마지막에 한 번 돕니다.
-payoff: "터질 수 있는 자리를 좁게 감싸면, 무엇이 안 됐는지 사용자에게 말해 줄 수 있습니다."
-bridge: "<code>await</code> 한 약속이 깨지면 그것도 예외입니다 — 같은 <code>try</code> 로 받습니다."
+  note:
+    ko: "그 뒤로도 프로그램은 계속된다"
+    en: "the program carries on after that too"
+ok:
+  ko: >-
+    <code>try</code> 블록 안에서 예외가 나면 <b>그 지점부터의 남은 줄을 건너뛰고</b> <code>catch</code>
+    로 갑니다. <code>finally</code> 는 어느 쪽이든 마지막에 한 번 돕니다.
+  en: >-
+    If an exception comes out inside the <code>try</code> block, <b>the lines remaining from that
+    point are skipped</b> and it goes to <code>catch</code>. <code>finally</code> runs once at the
+    end either way.
+payoff:
+  ko: "터질 수 있는 자리를 좁게 감싸면, 무엇이 안 됐는지 사용자에게 말해 줄 수 있습니다."
+  en: "Wrap the spot that can blow up narrowly and you can tell the person what did not work."
+bridge:
+  ko: "<code>await</code> 한 약속이 깨지면 그것도 예외입니다 — 같은 <code>try</code> 로 받습니다."
+  en: >-
+    A promise you <code>await</code> that breaks is an exception too — the same <code>try</code>
+    catches it.
 misconceptions:
-  - "<code>catch</code> 가 있으면 터진 줄 다음부터 이어 실행된다 — 남은 줄은 건너뜁니다."
-  - "빈 <code>catch</code> 로 두면 문제가 사라진다 — 보이지 않게 될 뿐 그대로 남습니다."
+  - ko: "<code>catch</code> 가 있으면 터진 줄 다음부터 이어 실행된다 — 남은 줄은 건너뜁니다."
+    en: >-
+      With a <code>catch</code> it carries on from the line after the one that blew up — the
+      remaining lines are skipped.
+  - ko: "빈 <code>catch</code> 로 두면 문제가 사라진다 — 보이지 않게 될 뿐 그대로 남습니다."
+    en: >-
+      An empty <code>catch</code> makes the problem go away — it only makes it invisible; it is
+      still there.
 
 point:
-  - q: "{{site.line}}행에서 <b>터졌을 때 실행되는 곳</b>을 짚어 보세요."
-    hint: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+  - q:
+      ko: "{{site.line}}행에서 <b>터졌을 때 실행되는 곳</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>where it runs when it blows up</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
     answer: pick.3
     diag:
       pick.1:
-        t: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>터질 수 있는 쪽</b>입니다. 예외가 나면 이 안의 남은 줄은 건너뛰어요."
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>터질 수 있는 쪽</b>입니다. 예외가 나면 이 안의 남은 줄은 건너뛰어요."
+          en: >-
+            {{pick.1|code}} is <b>the side that can blow up</b>. When an exception comes out, the
+            remaining lines in here are skipped.
         edge:
-          h: "가장 날카로운 자리 — 터지는 쪽과 받는 쪽"
+          h:
+            ko: "가장 날카로운 자리 — 터지는 쪽과 받는 쪽"
+            en: "The sharpest spot — the blowing-up side and the catching side"
           code:
             - "try { a(); b() } catch (e) { c() }   // a 가 터지면 b 는 건너뛴다"
             - "try { a() } catch (e) { c() }        // c 가 받는다"
       pick.4:
-        t: "{{pick.4|code}}{{pick.4|josa:은,는}} <b>터졌든 아니든</b> 도는 곳입니다. 받는 일은 <code>catch</code> 쪽이 하고, 이쪽은 뒷정리예요."
+        t:
+          ko: "{{pick.4|code}}{{pick.4|josa:은,는}} <b>터졌든 아니든</b> 도는 곳입니다. 받는 일은 <code>catch</code> 쪽이 하고, 이쪽은 뒷정리예요."
+          en: >-
+            {{pick.4|code}} is where it goes <b>whether it blew up or not</b>. Catching is the job
+            of the <code>catch</code> side; this side is the tidying up.
         edge:
-          h: "가장 날카로운 자리 — 받는가 정리하는가"
+          h:
+            ko: "가장 날카로운 자리 — 받는가 정리하는가"
+            en: "The sharpest spot — catching or tidying"
           code:
             - "try { a() } finally { close() }             // 받지 않아 예외는 계속 올라간다"
             - "try { a() } catch (e) {} finally { close() } // 받고 나서 정리"
 
 meaning:
-  - q: "{{pick.1|code}} 의 첫 줄에서 예외가 나면 그 아래 줄들은 어떻게 될까요?"
-    hint: "예외는 흐름을 옆으로 꺾습니다."
+  - q:
+      ko: "{{pick.1|code}} 의 첫 줄에서 예외가 나면 그 아래 줄들은 어떻게 될까요?"
+      en: >-
+        If an exception comes out on the first line of {{pick.1|code}}, what happens to the lines
+        below it?
+    hint:
+      ko: "예외는 흐름을 옆으로 꺾습니다."
+      en: "An exception bends the flow sideways."
     options:
-      - t: "실행되지 않고 곧바로 <code>catch</code> 로 넘어간다"
-      - t: "그대로 이어서 실행된다"
+      - t:
+          ko: "실행되지 않고 곧바로 <code>catch</code> 로 넘어간다"
+          en: "They do not run; it goes straight to <code>catch</code>"
+      - t:
+          ko: "그대로 이어서 실행된다"
+          en: "They carry on running as they were"
         diag:
-          t: "예외는 <b>그 자리에서</b> 흐름을 꺾습니다. 나머지를 마저 돌리고 싶다면 터질 수 있는 줄만 따로 감싸야 해요."
+          t:
+            ko: "예외는 <b>그 자리에서</b> 흐름을 꺾습니다. 나머지를 마저 돌리고 싶다면 터질 수 있는 줄만 따로 감싸야 해요."
+            en: >-
+              An exception bends the flow <b>right there</b>. To have the rest still run, you wrap
+              only the line that can blow up.
           edge:
-            h: "가장 날카로운 자리 — 어디까지 건너뛰나"
+            h:
+              ko: "가장 날카로운 자리 — 어디까지 건너뛰나"
+              en: "The sharpest spot — how far it skips"
             code:
               - "try { risky(); keep() } catch (e) {}   // keep 은 건너뛴다"
               - "try { risky() } catch (e) {}; keep()   // keep 은 돈다"
-      - t: "프로그램 전체가 그 자리에서 끝난다"
+      - t:
+          ko: "프로그램 전체가 그 자리에서 끝난다"
+          en: "The whole program ends right there"
         diag:
-          t: "받는 곳이 <b>하나도 없을 때</b>의 이야기입니다. <code>catch</code> 가 있으면 그쪽으로 빠져 흐름이 이어져요."
+          t:
+            ko: "받는 곳이 <b>하나도 없을 때</b>의 이야기입니다. <code>catch</code> 가 있으면 그쪽으로 빠져 흐름이 이어져요."
+            en: >-
+              That is the story when there is <b>nowhere at all</b> to catch it. With a
+              <code>catch</code> it steps aside there and the flow carries on.
           edge:
-            h: "가장 날카로운 자리 — 받는 곳이 있나"
+            h:
+              ko: "가장 날카로운 자리 — 받는 곳이 있나"
+              en: "The sharpest spot — is there somewhere to catch it"
             code:
               - "risky()                        // 위로 올라가 멈춘다"
               - "try { risky() } catch (e) {}   // 여기서 멈춘다"
-      - t: "<code>catch</code> 를 거친 뒤 건너뛴 줄로 되돌아온다"
+      - t:
+          ko: "<code>catch</code> 를 거친 뒤 건너뛴 줄로 되돌아온다"
+          en: "After going through <code>catch</code> it returns to the lines it skipped"
         diag:
-          t: "되돌아오는 길은 없습니다. <code>catch</code> 가 끝나면 <code>try</code> 문 <b>다음</b> 줄로 갑니다."
+          t:
+            ko: "되돌아오는 길은 없습니다. <code>catch</code> 가 끝나면 <code>try</code> 문 <b>다음</b> 줄로 갑니다."
+            en: >-
+              There is no way back. When <code>catch</code> finishes, it goes to the line
+              <b>after</b> the <code>try</code> statement.
           edge:
-            h: "가장 날카로운 자리 — 되돌아오지 않는다"
+            h:
+              ko: "가장 날카로운 자리 — 되돌아오지 않는다"
+              en: "The sharpest spot — there is no return"
             code:
               - "try { a(); b() } catch (e) { c() }"
               - "// 순서: a → c → 그다음 줄  (b 는 영영 건너뛴다)"
