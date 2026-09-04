@@ -21,7 +21,7 @@
  */
 import {
   buildSpec, contentHash, fnv1a64, keepKinds, pickConcept, segment,
-  GENERIC_WHY_HELP, GENERIC_WHY_Q, GEN_VERSION,
+  genericWhyHelp, genericWhyQ, GEN_VERSION,
   type BlockCandidate, type BlockConcept, type Segment, type SpecCard, type T1Payload,
 } from '@chickadee/cards';
 import {
@@ -355,7 +355,8 @@ export async function buildCoursePlate(
     show2,
     // 코스에는 왜 게이트가 없다 (04 §6 은 큐의 것이다). 페이로드 모양은 지켜야 하므로
     // 일반 템플릿을 채워 둔다 — 화면이 이 판을 열 때 게이트를 띄울지는 P3 이 정한다.
-    why: { line: masked[0] ?? 0, q: GENERIC_WHY_Q, help: GENERIC_WHY_HELP, choices: [] },
+    // 문구는 부를 때 고른다 — 모듈 상수로 얼려 두면 `setLocale()` 보다 먼저 굳는다.
+      why: { line: masked[0] ?? 0, q: genericWhyQ(), help: genericWhyHelp(), choices: [] },
   };
   const spec = buildSpec({
     lines: piece.lines,
