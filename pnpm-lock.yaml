@@ -172,6 +172,9 @@ importers:
       '@chickadee/dictionary':
         specifier: workspace:*
         version: link:../dictionary
+      '@chickadee/i18n':
+        specifier: workspace:*
+        version: link:../i18n
       '@chickadee/store-sql':
         specifier: workspace:*
         version: link:../store-sql
@@ -215,6 +218,9 @@ importers:
 
   packages/grading:
     dependencies:
+      '@chickadee/i18n':
+        specifier: workspace:*
+        version: link:../i18n
       '@chickadee/ipc-client':
         specifier: workspace:*
         version: link:../ipc-client
@@ -281,6 +287,9 @@ importers:
 
   packages/ui:
     dependencies:
+      '@chickadee/i18n':
+        specifier: workspace:*
+        version: link:../i18n
       '@chickadee/ipc-client':
         specifier: workspace:*
         version: link:../ipc-client

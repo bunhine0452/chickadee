@@ -7,6 +7,7 @@
  * 4단 프롬프트에는 **파일 base name 만** 넣는다 (D8 · 06 §3.3). 디렉터리 경로·리포명·
  * 커밋 메시지·작성자는 인자로도 받지 않는다 — 받지 않으면 샐 수 없다.
  */
+import { t } from '@chickadee/i18n';
 import type { ConceptId, DictLayer, Layer } from '@chickadee/store-sql';
 
 import type { T0Card } from './t0.js';
@@ -103,14 +104,14 @@ export interface Ladder {
 export function buildDict(card: T0Card): DictLayer[] {
   if (card.dict && card.dict.length > 0) return [...card.dict];
   const layers: DictLayer[] = [
-    { k: '한 줄로', t: card.rule },
-    { k: '왜 필요한가', t: card.ok },
+    { k: t('card.dictOneLiner'), t: card.rule },
+    { k: t('card.dictWhy'), t: card.ok },
   ];
   if (card.result) {
     // `label`·`value` 는 코드 조각이라 그대로 두면 `<Item[]>` 같은 것이 마크업으로 먹힌다 —
     // 목업 `t0.js` 의 `esc()` 와 같은 자리다. `rule`·`ok` 는 사전이 쓴 문장이라 그대로 통과.
     layers.push({
-      k: `${card.focus}행 뒤의 값`,
+      k: t('grading.dictResult', { focus: String(card.focus) }),
       t: `<code>${escapeCode(card.result.label)}</code> = <code>${escapeCode(card.result.value)}</code> — ${card.result.note}`,
     });
   }
@@ -214,26 +215,26 @@ export interface PromptInput {
 export function buildPrompt(input: PromptInput): string {
   const { card, concept, sel = null, stuck = '' } = input;
   const fence = promptCodeLines(card).join('\n');
-  const stuckAt = stuck.trim() === '' ? '(비어 있음)' : stuck.trim();
+  const stuckAt = stuck.trim() === '' ? t('grading.promptStuckEmpty') : stuck.trim();
   return [
-    `파일 ${fileBaseName(card.file)} ${card.focus}행 근처입니다.`,
+    t('grading.promptHeader', { file: fileBaseName(card.file), focus: String(card.focus) }),
     '',
     '```',
     fence,
     '```',
     '',
-    `배우려는 문법: ${concept.name} (${concept.token})`,
-    `제가 막힌 지점: ${stuckAt}`,
+    t('grading.promptConcept', { name: concept.name, token: concept.token }),
+    t('grading.promptStuck', { stuck: stuckAt }),
     statusLine(card, sel),
     '',
-    '프로그래밍을 막 시작한 사람에게 설명하듯, 다른 예제 말고 위 코드 그대로를 예로 들어 알려주세요.',
+    t('grading.promptAsk'),
   ].join('\n');
 }
 
 function statusLine(card: T0Card, sel: number | null): string {
-  if (sel === null) return '아직 답을 고르지 못했습니다.';
-  if (sel === card.answer) return '문제는 맞혔지만, 왜 그런지는 스스로 설명하지 못하겠습니다.';
-  return `문제에서 「${selectionLabel(card, sel)}」 를 골라 틀렸습니다.`;
+  if (sel === null) return t('grading.promptNoAnswer');
+  if (sel === card.answer) return t('grading.promptCorrectButWhy');
+  return t('grading.promptWrongPick', { label: selectionLabel(card, sel) });
 }
 
 // ─── 조립 ───────────────────────────────────────────────────────────────────
@@ -262,7 +263,7 @@ export function fileBaseName(path: string): string {
   const trimmed = path.replace(/[/\\]+$/, '');
   const cut = Math.max(trimmed.lastIndexOf('/'), trimmed.lastIndexOf('\\'));
   const base = cut >= 0 ? trimmed.slice(cut + 1) : trimmed;
-  return base === '' ? '(파일 이름 없음)' : base;
+  return base === '' ? t('grading.noFileName') : base;
 }
 
 const ENTITIES: Record<string, string> = {

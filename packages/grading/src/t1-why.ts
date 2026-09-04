@@ -5,6 +5,7 @@
  * 목적이다. 그래서 여기 있는 것은 「무엇을 물을까」(문항 선정)와 「그 줄이 자기 말인가」
  * (검증 4조건)뿐이고, 정오는 없다.
  */
+import { t } from '@chickadee/i18n';
 import type { CardPayload } from '@chickadee/store-sql';
 
 import { sim } from './t1-line.js';
@@ -30,11 +31,9 @@ export interface Question {
   choices: WhyPayload['choices'];
 }
 
-/** 04 §6 ②의 일반 템플릿. */
-export const GENERIC_Q = '이 줄이 없으면 무엇이 달라질까요?';
-export const GENERIC_HELP =
-  '한 줄이면 됩니다. 채점하지 않습니다. 다만 건너뛸 수는 없습니다 — '
-  + '여기서 뇌가 안 켜지면 앞의 9분은 타자 연습이 됩니다.';
+/** 04 §6 ②의 일반 템플릿. 상수가 아니라 함수인 이유는 로케일이다 (D117). */
+export const genericQ = (): string => t('t1.whyQuestion');
+export const genericHelp = (): string => t('grading.whyHelpNineMinutes');
 
 export interface PickInput {
   /** 카드에 구워진 문항. `choices` 가 3개면 사전 `why_gate` 에서 온 것이다(04 §6 ①). */
@@ -76,8 +75,8 @@ export function pickQuestion(input: PickInput): Question {
     return {
       questionId: `missing:${missing.oi + 1}`,
       line: missing.oi,
-      q: GENERIC_Q,
-      help: payload.help === '' ? GENERIC_HELP : payload.help,
+      q: genericQ(),
+      help: payload.help === '' ? genericHelp() : payload.help,
       choices: [],
     };
   }
@@ -87,8 +86,8 @@ export function pickQuestion(input: PickInput): Question {
     return {
       questionId: `differ:${differ.oi + 1}`,
       line: differ.oi,
-      q: GENERIC_Q,
-      help: payload.help === '' ? GENERIC_HELP : payload.help,
+      q: genericQ(),
+      help: payload.help === '' ? genericHelp() : payload.help,
       choices: [],
     };
   }
@@ -98,8 +97,8 @@ export function pickQuestion(input: PickInput): Question {
   return {
     questionId: 'generic',
     line,
-    q: payload.q === '' ? GENERIC_Q : payload.q,
-    help: payload.help === '' ? GENERIC_HELP : payload.help,
+    q: payload.q === '' ? genericQ() : payload.q,
+    help: payload.help === '' ? genericHelp() : payload.help,
     choices: [],
   };
 }
@@ -126,18 +125,15 @@ export function checkWhy(text: string, originalLine: string): WhyCheck {
   const orig = originalLine.trim();
 
   if (value === orig && orig !== '') {
-    return { ok: false, message: '코드를 그대로 옮기지 말고 말로 써 주세요' };
+    return { ok: false, message: t('grading.whyNotCode') };
   }
   if (orig !== '' && sim(value, orig) >= COPY_SIM_LIMIT) {
-    return { ok: false, message: '코드를 그대로 옮기지 말고 말로 써 주세요' };
+    return { ok: false, message: t('grading.whyNotCode') };
   }
-  if (!hasWord(value)) {
-    return { ok: false, message: `${chars} / ${MIN_CHARS}자` };
-  }
-  if (chars < MIN_CHARS) {
-    return { ok: false, message: `${chars} / ${MIN_CHARS}자` };
-  }
-  return { ok: true, message: `${chars} / ${MIN_CHARS}자` };
+  const count = t('grading.whyChars', { n: String(chars), min: String(MIN_CHARS) });
+  if (!hasWord(value)) return { ok: false, message: count };
+  if (chars < MIN_CHARS) return { ok: false, message: count };
+  return { ok: true, message: count };
 }
 
 /** ⓓ — 한글 또는 라틴 낱말이 하나라도 있나. 기호만 열 개는 자기 말이 아니다. */

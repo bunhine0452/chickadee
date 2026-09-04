@@ -1,3 +1,4 @@
+import { t, type MessageKey } from '@chickadee/i18n';
 import { cx } from '@chickadee/ui';
 
 import './Stepper.css';
@@ -10,10 +11,10 @@ export type CloneStage = 1 | 2 | 3;
  * 쓰므로 부모가 이 표를 다시 적지 않게 내보낸다.
  */
 export const CLONE_STAGES = [
-  { name: '보고 치기', sub: '원본을 보면서 그대로' },
-  { name: '뼈대만', sub: '주석과 시그니처만' },
-  { name: '백지', sub: '한 줄 스펙만' },
-] as const;
+  { name: 'clone.stage1Name', sub: 'clone.stage1Sub' },
+  { name: 'clone.stage2Name', sub: 'clone.skeletonOnly' },
+  { name: 'clone.stage3Name', sub: 'clone.stage3Sub' },
+] as const satisfies readonly { name: MessageKey; sub: MessageKey }[];
 
 export interface StepperProps {
   stage: CloneStage;
@@ -38,8 +39,8 @@ export function Stepper({ stage }: StepperProps) {
             {...(n === stage ? { 'aria-current': 'step' as const } : {})}
           >
             <b>{n}</b>
-            <span>{s.name}</span>
-            <small>{s.sub}</small>
+            <span>{t(s.name)}</span>
+            <small>{t(s.sub)}</small>
           </div>
         );
       })}

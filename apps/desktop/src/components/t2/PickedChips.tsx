@@ -1,3 +1,4 @@
+import { t } from '@chickadee/i18n';
 import './PickedChips.css';
 
 export interface PickedChipsProps {
@@ -20,7 +21,7 @@ export function PickedChips({ picked }: PickedChipsProps) {
   return (
     <div className="picked">
       {picked.length === 0 ? (
-        <span className="none">아직 고른 파일이 없습니다.</span>
+        <span className="none">{t('map.pickedNone')}</span>
       ) : (
         picked.map((p) => (
           <span className="chip" key={p}>

@@ -6,6 +6,7 @@
  * 04 §0 은 「엔진은 템플릿 + 변수 묶음만 넘긴다」고 적지만 D74 가 그것을 **생성기 안의
  * 단계 구분**으로 읽는다. 그래서 이 파일이 만든 묶음은 밖으로 나가지 않고 여기서 소비된다.
  */
+import { t } from '@chickadee/i18n';
 import { isMissing, render, type TemplateVars } from '@chickadee/text';
 import type { Concept } from '@chickadee/dictionary';
 
@@ -90,6 +91,6 @@ export class Renderer {
 
   /** 실패 사유 한 줄. 홈의 「판이 없는 문법」에 그대로 뜬다. */
   get reason(): string {
-    return `템플릿이 이 사용처에 없는 변수를 쓴다: ${[...new Set(this.missing)].join(', ')}`;
+    return t('card.varsMissing', { names: [...new Set(this.missing)].join(', ') });
   }
 }

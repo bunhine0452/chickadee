@@ -1,3 +1,4 @@
+import { t } from '@chickadee/i18n';
 import { cx, FlatButton, RichText } from '@chickadee/ui';
 import type { CodeLine } from '@chickadee/store-sql';
 
@@ -22,8 +23,8 @@ export interface WhyCount {
   message: string;
 }
 
-const PLACEHOLDER = '예: 브라우저가 폼을 보내면서 페이지를 새로 고치는 걸 막으려고';
-const AFTER_PICK = '<b>이제 같은 내용을 위 칸에 자기 말로 한 줄만 옮겨 주세요.</b> 답을 보고 써도 됩니다.';
+const PLACEHOLDER = (): string => t('clone.whyPlaceholder');
+const AFTER_PICK = (): string => t('clone.whyAfterPick');
 
 export interface WhyGateProps {
   /** 문항. 서식 글이다. */
@@ -67,7 +68,7 @@ export function WhyGate({
   onPick,
   onReveal,
   revealed,
-  placeholder = PLACEHOLDER,
+  placeholder = PLACEHOLDER(),
 }: WhyGateProps) {
   const lines: CodeLine[] = [{ n: 1, t: orig }];
   const okAt = choices.findIndex((c) => c.ok);
@@ -86,7 +87,7 @@ export function WhyGate({
       <RichText as="p" html={help} />
       <CodePlate lines={lines} />
       <textarea
-        aria-label="왜 이렇게 생겼는지 한 줄"
+        aria-label={t('clone.whyField')}
         placeholder={placeholder}
         value={text}
         spellCheck={false}
@@ -95,7 +96,7 @@ export function WhyGate({
       <div className="row">
         <span className={cx('cnt', count.ok && 'ok')}>{count.message}</span>
         <FlatButton ghost onClick={onReveal}>
-          모르겠어요 · 보기 보기
+          {t('clone.whyReveal')}
         </FlatButton>
       </div>
       <div>
@@ -108,7 +109,7 @@ export function WhyGate({
             onSelect={(k) => onPick(k - 1)}
           />
         ) : null}
-        {pick === null ? null : <RichText as="p" className="after-pick" html={AFTER_PICK} />}
+        {pick === null ? null : <RichText as="p" className="after-pick" html={AFTER_PICK()} />}
       </div>
     </div>
   );

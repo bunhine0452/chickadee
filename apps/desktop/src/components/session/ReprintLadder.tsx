@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { KeyboardEvent } from 'react';
-import { cx, Dee } from '@chickadee/ui';
+import { t, type MessageKey } from '@chickadee/i18n';
+import { cx, Dee, RichText } from '@chickadee/ui';
 import type { InkLayer } from '@chickadee/ui';
 import type { DictLayer } from '@chickadee/store-sql';
 
@@ -16,13 +17,13 @@ import './ReprintLadder.css';
 /** 사다리 단. 1→4 로 갈수록 밖으로 나간다 — 4단만 선택 사항이다 (정본 §3-1). */
 export type RungNo = 1 | 2 | 3 | 4;
 
-/** 4단의 머리말. 목업 `t0.js` 의 `RUNGS` 그대로. */
+/** 4단의 머리말. 목업 `t0.js` 의 `RUNGS` 그대로. 문장은 부를 때 푼다 (D117). */
 const RUNGS = [
-  { h: '더 자세히', s: '사전 3층 — 한 줄로 · 왜 필요한가 · 이 줄 안에서', llm: false },
-  { h: '여전히 모르겠어요', s: '아래층이 비어 있는지 진단하고, 비었으면 그 판으로 내려갑니다', llm: false },
-  { h: '다른 예시로', s: '내 리포에서 같은 문법이 쓰인 다른 자리', llm: false },
-  { h: '자유 질문', s: '키가 있으면 대화, 없으면 복사해서 물어보기', llm: true },
-] as const;
+  { h: 'ladder.rung1', s: 'ladder.rung1Sub', llm: false },
+  { h: 'ladder.rung2', s: 'ladder.rung2Sub', llm: false },
+  { h: 'ladder.rung3', s: 'ladder.rung3Sub', llm: false },
+  { h: 'ladder.rung4', s: 'ladder.rung4Sub', llm: true },
+] as const satisfies readonly { h: MessageKey; s: MessageKey; llm: boolean }[];
 
 const DIGITS = ['Digit1', 'Digit2', 'Digit3', 'Digit4'] as const;
 const NUMPADS = ['Numpad1', 'Numpad2', 'Numpad3', 'Numpad4'] as const;
@@ -147,28 +148,27 @@ export function ReprintLadder({
   const tabId = (n: RungNo) => `reprint-tab-${n}`;
 
   return (
-    <section ref={ref} className="reprint" aria-label="다시 찍기 사다리">
+    <section ref={ref} className="reprint" aria-label={t('ladder.label')}>
       <div className="ld-head">
         <Dee ly={lyTo} motion="hang" sticker />
         <div>
-          <h3>모르겠어요 = 다시 찍기</h3>
-          <p>
-            흐리게 찍힌 판을 다시 거는 건 실패가 아니라 <b>공정</b>입니다. 부끄러운 일이 아니라 그 자리로
-            다시 데려다 달라는 신호예요.
-          </p>
+          <h3>{t('ladder.heading')}</h3>
+          <RichText as="p" html={t('ladder.note')} />
         </div>
         <div className="ld-gain">
-          잉크 <b>{lyFrom}겹</b> <span className="arr">→</span> <b>{lyTo}겹</b>
+          {t('ladder.ink')} <b>{t('plate.layerN', { n: String(lyFrom) })}</b>{' '}
+          <span className="arr">→</span> <b>{t('plate.layerN', { n: String(lyTo) })}</b>
           {nextWas === undefined ? null : (
             <>
               {' '}
-              · 다시 찍기 <b>{nextWas}</b> <span className="arr">→</span> <b>오늘 안에</b>
+              · {t('session.roleRetry')} <b>{nextWas}</b> <span className="arr">→</span>{' '}
+              <b>{t('ladder.today')}</b>
             </>
           )}
         </div>
       </div>
 
-      <div ref={tabsRef} className="rungs" role="tablist" aria-label="다시 찍기 4단">
+      <div ref={tabsRef} className="rungs" role="tablist" aria-label={t('ladder.tabs')}>
         {RUNGS.map((r, i) => {
           const n = (i + 1) as RungNo;
           const on = rung === n;
@@ -186,9 +186,9 @@ export function ReprintLadder({
               onClick={() => onRung(n)}
               onKeyDown={(e) => onTabKey(e, n)}
             >
-              <b>{n}단</b>
-              <span>{r.h}</span>
-              <small>{r.s}</small>
+              <b>{t('ladder.rungNo', { n: String(n) })}</b>
+              <span>{t(r.h)}</span>
+              <small>{t(r.s)}</small>
             </button>
           );
         })}

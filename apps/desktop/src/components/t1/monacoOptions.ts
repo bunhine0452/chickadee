@@ -1,9 +1,10 @@
+import { t } from '@chickadee/i18n';
 import type * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
 import type { CloneStage } from './Stepper';
 
 /** 05 §5 표가 정한 Monaco 의 접근성 이름. */
-export const CLONE_ARIA_LABEL = '필사 입력';
+export const cloneAriaLabel = (): string => t('clone.padLabel');
 
 /** `Tab` 이 넣는 것. `insertSpaces:true` · `tabSize:2` 와 같은 값이어야 한다. */
 export const TAB_TEXT = '  ';
@@ -61,7 +62,6 @@ export const FIXED_OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions =
   insertSpaces: true,
   unicodeHighlight: { ambiguousCharacters: false, nonBasicASCII: false },
   accessibilitySupport: 'auto',
-  ariaLabel: CLONE_ARIA_LABEL,
 };
 
 /**
@@ -72,5 +72,9 @@ export const FIXED_OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions =
  * 학습 대상이지 자동화 대상이 아니다 (05 §7 T1 행).
  */
 export function optionsFor(stage: CloneStage): monaco.editor.IStandaloneEditorConstructionOptions {
-  return { ...FIXED_OPTIONS, autoIndent: stage === 3 ? 'none' : 'brackets' };
+  return {
+    ...FIXED_OPTIONS,
+    ariaLabel: cloneAriaLabel(),
+    autoIndent: stage === 3 ? 'none' : 'brackets',
+  };
 }

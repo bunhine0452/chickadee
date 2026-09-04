@@ -7,6 +7,7 @@
  * 왜: 겹이 낮을수록 인식(지목)이, 높을수록 예측(의미)이 맞다. 사전이 비면 카드가 안 나오는
  * 것이 정상이고, 그 빈자리가 기여 표면이다.
  */
+import { t } from '@chickadee/i18n';
 import { genBlank } from './t0-blank.js';
 import { genMeaning } from './t0-meaning.js';
 import { genPoint } from './t0-point.js';
@@ -36,7 +37,7 @@ export function prefer(ly: number): readonly T0Kind[] {
 function summarize(reasons: readonly string[]): string {
   const count = new Map<string, number>();
   for (const reason of reasons) count.set(reason, (count.get(reason) ?? 0) + 1);
-  let best = reasons[0] ?? '쓸 수 있는 사용처가 없다';
+  let best = reasons[0] ?? t('t0.noSiteUsable');
   for (const [reason, n] of count) {
     if (n > (count.get(best) ?? 0)) best = reason;
   }
@@ -50,7 +51,7 @@ function summarize(reasons: readonly string[]): string {
  * 「순위를 낮춘다(전부 leak 면 허용)」가 이 두 바퀴다.
  */
 export function generateT0(req: T0Request): T0Card | NoPlate {
-  if (req.sites.length === 0) return { noPlate: true, reason: '리포에 이 문법의 사용처가 없다' };
+  if (req.sites.length === 0) return { noPlate: true, reason: t('t0.noSiteInRepo') };
 
   const reasons: string[] = [];
   let leaked: T0Card | null = null;

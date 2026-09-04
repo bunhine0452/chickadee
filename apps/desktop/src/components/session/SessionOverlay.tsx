@@ -1,6 +1,7 @@
 import { LiveRegion } from '@chickadee/ui';
 import { useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
+import { t } from '@chickadee/i18n';
 
 import { focusOrFallback } from './focus.js';
 import './SessionOverlay.css';
@@ -142,7 +143,7 @@ export function SessionOverlay({
       className="proof"
       role="dialog"
       aria-modal="true"
-      aria-label="교정쇄"
+      aria-label={t('band.title')}
       // Esc ① 이 입력에서 빠져나올 때 포커스가 갈 자리. 탭 순서에는 들어가지 않는다.
       tabIndex={-1}
     >

@@ -4,6 +4,7 @@
  *
  * 그래서 템플릿이 참조하는 `{{pick.N}}`·`{{ctx.*}}` 가 이 사용처에 없으면 그 문항은 못 쓴다.
  */
+import { t } from '@chickadee/i18n';
 import { mulberry32, shuffle } from '@chickadee/text';
 
 import { codeLines } from './lines.js';
@@ -14,14 +15,14 @@ import type { GenResult, SiteInput, T0Request } from './types.js';
 export function genMeaning(req: T0Request, input: SiteInput): GenResult {
   const { concept } = req;
   const { site } = input;
-  if (concept.meaning.length === 0) return { reason: '사전에 의미형 문항이 없다' };
+  if (concept.meaning.length === 0) return { reason: t('t0.dropNoMeaningEntry') };
   // 값 추적은 캡처가 정확해야 한다. 추정으로 잡은 자리에서는 값이 무엇인지 말할 수 없다.
-  if (site.confidence === 'heuristic') return { reason: '추정으로 잡은 사용처라 의미형에 못 쓴다' };
-  if (site.parseQuality === 'poor') return { reason: '파싱이 온전치 않은 파일이라 의미형에 못 쓴다' };
+  if (site.confidence === 'heuristic') return { reason: t('t0.dropHeuristicSite') };
+  if (site.parseQuality === 'poor') return { reason: t('t0.dropPoorParse') };
 
   const rng = mulberry32(seedFor(req, 'meaning', input));
   const entry = concept.meaning[Math.floor(rng() * concept.meaning.length)] ?? concept.meaning[0];
-  if (!entry) return { reason: '사전에 의미형 문항이 없다' };
+  if (!entry) return { reason: t('t0.dropNoMeaningEntry') };
 
   const r = new Renderer(buildVars(input, concept));
   const rendered = entry.options.map((o) => ({
@@ -33,7 +34,7 @@ export function genMeaning(req: T0Request, input: SiteInput): GenResult {
   const q = r.need(entry.q);
   const hint = entry.hint === undefined ? '' : r.need(entry.hint);
   if (!r.ok) return { reason: r.reason };
-  if (rendered.slice(1).some((o) => o.diag === null)) return { reason: '오답 보기에 진단이 없다' };
+  if (rendered.slice(1).some((o) => o.diag === null)) return { reason: t('t0.dropNoWrongDiag') };
 
   const order = shuffle(rendered.map((_, i) => i), rng);
   const options = order.map((i) => {

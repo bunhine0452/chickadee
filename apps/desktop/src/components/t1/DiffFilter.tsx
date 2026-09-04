@@ -1,3 +1,4 @@
+import { t } from '@chickadee/i18n';
 import { RichText, Switch } from '@chickadee/ui';
 import type { SwitchOption } from '@chickadee/ui';
 
@@ -6,16 +7,12 @@ import './DiffFilter.css';
 /** 보기 필터 3택. `ne` = 어긋남 + 동등만(기본), `all` = 전체, `d` = 어긋남만. */
 export type DiffFilterValue = 'ne' | 'all' | 'd';
 
-/** 목업 `renderResult()` 의 `.dfilter` 세 칸 그대로. */
-export const DIFF_FILTERS: ReadonlyArray<SwitchOption<DiffFilterValue>> = [
-  { v: 'ne', label: '어긋남 + 동등만' },
-  { v: 'all', label: '전체' },
-  { v: 'd', label: '어긋남만' },
+/** 목업 `renderResult()` 의 `.dfilter` 세 칸 그대로. 문장은 부를 때 푼다 (D117). */
+export const diffFilters = (): ReadonlyArray<SwitchOption<DiffFilterValue>> => [
+  { v: 'ne', label: t('clone.filterNotExact') },
+  { v: 'all', label: t('clone.filterAll') },
+  { v: 'd', label: t('clone.filterDiffer') },
 ];
-
-const APPEAL_NOTE =
-  '판정이 억울하면 각 줄의 <b>「같은 뜻인데요」</b>로 이의를 남길 수 있습니다. ' +
-  '점수는 그대로 두고 규칙 쪽을 고칩니다.';
 
 export interface DiffFilterProps {
   value: DiffFilterValue;
@@ -32,9 +29,14 @@ export interface DiffFilterProps {
 export function DiffFilter({ value, onChange }: DiffFilterProps) {
   return (
     <div className="dfilter">
-      <span>보기</span>
-      <Switch options={DIFF_FILTERS} value={value} label="보기" onChange={onChange} />
-      <RichText html={APPEAL_NOTE} />
+      <span>{t('clone.filterLabel')}</span>
+      <Switch
+        options={diffFilters()}
+        value={value}
+        label={t('clone.filterLabel')}
+        onChange={onChange}
+      />
+      <RichText html={t('clone.appealNote')} />
     </div>
   );
 }

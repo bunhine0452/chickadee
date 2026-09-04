@@ -13,7 +13,7 @@ import { cardPayloadSchema } from '@chickadee/store-sql';
 
 import { contentHash } from './hash.js';
 import { GEN_VERSION } from './payload.js';
-import { generateT1, GENERIC_WHY_HELP, GENERIC_WHY_Q } from './t1.js';
+import { generateT1, genericWhyHelp, genericWhyQ } from './t1.js';
 import { isT1Card } from './t1-types.js';
 import type { BlockCandidate, T1Card, T1Request } from './t1-types.js';
 
@@ -133,13 +133,13 @@ describe('generateT1 — 목업 T1 판', () => {
     expect(why.choices).toHaveLength(3);
     expect(why.choices.filter((c) => c.ok)).toHaveLength(1);
     // `help` 가 없는 사전 항목은 일반 안내문을 쓴다.
-    expect(why.help).toBe(GENERIC_WHY_HELP);
+    expect(why.help).toBe(genericWhyHelp());
   });
 
   test('왜 게이트 ④ — why_gate 가 없으면 일반 템플릿, 보기는 0개', () => {
     const plain = request({ concepts: dict.concepts, essential: new Set(dict.langs.get('ts')?.essential ?? []) });
     const { why } = card(plain).payload;
-    expect(why.q).toBe(GENERIC_WHY_Q);
+    expect(why.q).toBe(genericWhyQ());
     expect(why.choices).toStrictEqual([]);
     // 첫 지워지는 줄 = 첫 비-시그니처 문장 (04 §6 ④).
     expect(why.line).toBe(2);
@@ -158,7 +158,7 @@ describe('generateT1 — 목업 T1 판', () => {
     const { why } = card(request({
       concepts: new Map([...dict.concepts, [needsPick.id, needsPick]]),
     })).payload;
-    expect(why.q).toBe(GENERIC_WHY_Q);
+    expect(why.q).toBe(genericWhyQ());
     expect(why.choices).toStrictEqual([]);
   });
 

@@ -1,3 +1,4 @@
+import { t } from '@chickadee/i18n';
 import { cx } from '@chickadee/ui';
 
 import './Hole.css';
@@ -21,7 +22,7 @@ export interface HoleProps {
 export function Hole({ value, state }: HoleProps) {
   const filled = value !== undefined && value !== '';
   return (
-    <span className={cx('hole', state !== 'empty' && state)} aria-label="빈칸" data-hole>
+    <span className={cx('hole', state !== 'empty' && state)} aria-label={t('plate.hole')} data-hole>
       {filled ? value : HOLE_GLYPH}
     </span>
   );

@@ -7,6 +7,7 @@
 import { ipc } from '@chickadee/ipc-client';
 import { announce, FlatButton } from '@chickadee/ui';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { t } from '@chickadee/i18n';
 
 import { JobBand } from '../../components/session/JobBand.js';
 import { SessionOverlay } from '../../components/session/SessionOverlay.js';
@@ -134,9 +135,9 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
   const live = result === null
     ? ''
     : announce(
-      result.correct ? '정합 — 맞았습니다' : '어긋남 — 어긋났습니다',
+      result.correct ? t('session.liveRight') : t('session.liveWrong'),
       result.gain,
-      'Space 로 다음',
+      t('session.liveNext'),
     );
 
   useSessionClock(pos, plate?.elapsedS ?? 0, () => void savePlate());
@@ -256,7 +257,10 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
       setLifer({
         concept: plate.nameKo,
         code: plate.token ?? '',
-        where: `당신의 <b>${baseName(payload?.file ?? '')}:${payload?.focus ?? 0}</b> 에서 채집 · T0 문법`,
+        where: t('session.liferWhereT0', {
+          file: baseName(payload?.file ?? ''),
+          focus: String(payload?.focus ?? 0),
+        }),
         serial: `#${String(shown).padStart(3, '0')}`,
       });
     }
@@ -288,7 +292,7 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
     // 6줄 미만은 한 번 경고하고 두 번째 누름에 채점한다 (04 §4.6 · 목업).
     if (nonEmpty < MIN_GRADE_LINES && !t1Short) {
       setT1Short(true);
-      useUi.getState().say(`아직 너무 짧습니다 (${nonEmpty}줄). 한 번 더 누르면 그대로 채점합니다.`);
+      useUi.getState().say(t('clone.tooShort', { n: String(nonEmpty) }));
       return;
     }
     setT1Peeking(false);
@@ -304,7 +308,7 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
     if (t1Stage <= 1) return;
     setT1Downgraded(true);
     setT1Stage((prev) => (prev - 1) as 1 | 2 | 3);
-    useUi.getState().say('한 단계 쉽게 — 기록만 남고 감점은 없습니다.');
+    useUi.getState().say(t('clone.downgraded'));
   }, [t1Stage]);
 
   const t1Peek = useCallback((on: boolean) => {
@@ -331,9 +335,9 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
       markLiferOpen();
       const payload = plate.payload.track === 't1' ? plate.payload : null;
       setLifer({
-        concept: `${plate.nameKo} 필사`,
+        concept: t('session.conceptTranscribe', { name: plate.nameKo }),
         code: payload?.fn ?? '',
-        where: `당신의 <b>${baseName(payload?.file ?? '')}</b> 에서 채집 · T1 클론 코딩`,
+        where: t('session.liferWhereT1', { file: baseName(payload?.file ?? '') }),
         serial: `#${String(shown).padStart(3, '0')}`,
       });
     }
@@ -348,7 +352,7 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
   const t2Hint = useCallback(() => {
     setT2Hints((prev) => {
       if (prev >= MAX_HINTS) return prev;
-      useUi.getState().say(prev + 1 === MAX_HINTS ? '이제 개수까지 알려 드렸어요.' : '힌트는 감점이 아니에요.');
+      useUi.getState().say(prev + 1 === MAX_HINTS ? t('map.hintLast') : t('map.hintFree'));
       return prev + 1;
     });
   }, []);
@@ -392,7 +396,7 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
       elapsed={elapsed}
       totalElapsed={session.elapsedS}
     >
-      <FlatButton ghost onClick={() => void pauseSession()}>나가기</FlatButton>
+      <FlatButton ghost onClick={() => void pauseSession()}>{t('session.leave')}</FlatButton>
     </JobBand>
   );
 
@@ -416,7 +420,7 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
               conceptId: s.conceptId, concept: s.nameKo, code: s.token ?? '',
               track: asViewTrack(s.track),
               lyFrom: s.from, lyTo: s.to, next: s.nextLabel,
-              ...(s.lastRole === 'prereq' ? { extra: '아래층' } : {}),
+              ...(s.lastRole === 'prereq' ? { extra: t('session.rolePrereq') } : {}),
             }))}
             printed={summary.plates}
             ok={summary.exact}
@@ -427,13 +431,15 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
                   lifer: {
                     concept: summary.lifers[0].nameKo,
                     code: summary.lifers[0].token ?? '',
-                    where: `#${String(summary.lifers[0].serial).padStart(3, '0')} · 당신의 `
-                      + `<b>${baseName(summary.lifers[0].filePath)}`
-                      + `:${summary.lifers[0].lineNo ?? 0}</b> 에서 채집`,
+                    where: t('summary.liferWhere', {
+                      serial: String(summary.lifers[0].serial).padStart(3, '0'),
+                      file: baseName(summary.lifers[0].filePath),
+                      line: String(summary.lifers[0].lineNo ?? 0),
+                    }),
                   },
                 }
               : {})}
-            tomorrow={`내일은 <b>${summary.shifts.length}</b> 개념이 다시 올라옵니다.`}
+            tomorrow={t('summary.tomorrow', { n: String(summary.shifts.length) })}
             onHome={() => {
               useUi.getState().closeSession();
               useUi.getState().go('home');
@@ -522,7 +528,7 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
               // 것처럼 보인다(거절이 조용하다).
               if (prompt !== '') {
                 void ipc.clip.write(prompt).catch(() => {
-                  useUi.getState().say('클립보드에 복사하지 못했습니다.');
+                  useUi.getState().say(t('session.copyFailed'));
                 });
               }
             }}

@@ -1,3 +1,4 @@
+import { t, type MessageKey } from '@chickadee/i18n';
 import { RichText } from '@chickadee/ui';
 
 import './ResultGroups.css';
@@ -23,12 +24,14 @@ export interface ResultGroupsProps {
   rows: readonly ResultRow[];
 }
 
-/** 묶음 머리말. 기호 · 제목 · 부제 전부 목업 `resultHTML()` 그대로. */
-const GROUPS: readonly { tier: ResultTier; cls: string; sym: string; title: string; sub: string }[] = [
-  { tier: 'missed', cls: 'missed', sym: '＋', title: '놓친 파일', sub: '여기가 이번 학습의 핵심입니다 — 지도에서 깜빡입니다' },
-  { tier: 'found', cls: 'ok', sym: '✓', title: '맞게 고른 파일', sub: '' },
-  { tier: 'wrong', cls: 'wrong', sym: '✕', title: '안 고쳐도 됐던 파일', sub: '흔한 오답과 그 이유' },
-  { tier: 'sec', cls: 'sec', sym: '◆', title: '같이 바뀐 파일', sub: '골라도 안 골라도 감점하지 않습니다' },
+/** 묶음 머리말. 기호 · 제목 · 부제 전부 목업 `resultHTML()` 그대로. 문장은 부를 때 푼다. */
+const GROUPS: readonly {
+  tier: ResultTier; cls: string; sym: string; title: MessageKey; sub: MessageKey | null;
+}[] = [
+  { tier: 'missed', cls: 'missed', sym: '＋', title: 'map.groupMissed', sub: 'map.groupMissedSub' },
+  { tier: 'found', cls: 'ok', sym: '✓', title: 'map.groupFound', sub: null },
+  { tier: 'wrong', cls: 'wrong', sym: '✕', title: 'map.groupWrong', sub: 'map.groupWrongSub' },
+  { tier: 'sec', cls: 'sec', sym: '◆', title: 'map.groupSec', sub: 'map.groupSecSub' },
 ];
 
 /**
@@ -51,14 +54,14 @@ export function ResultGroups({ rows }: ResultGroupsProps) {
               <span className="sym" aria-hidden="true">
                 {sym}
               </span>
-              {title}
-              {sub === '' ? null : <small>{sub}</small>}
+              {t(title)}
+              {sub === null ? null : <small>{t(sub)}</small>}
             </h5>
             <ul>
               {items.map((r) => (
                 <li key={r.path}>
                   <code>{r.path}</code>
-                  <span className="stat">{r.stat ?? '변경 없음'}</span>
+                  <span className="stat">{r.stat ?? t('map.noChange')}</span>
                   <RichText as="p" html={r.note} />
                 </li>
               ))}

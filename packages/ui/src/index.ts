@@ -43,5 +43,5 @@ export { deeStandalone } from './dee/deeStandalone';
 export { deeImageUrl, clearDeeImageCache } from './dee/deeImage';
 export { SYMBOL_ID } from './dee/symbols';
 export type { DeePlate } from './dee/deePlates';
-export { ACTION_LABEL, errorCopy, isInternal } from './error-copy.js';
+export { actionLabel, errorCopy, isInternal } from './error-copy.js';
 export type { ErrorAction, ErrorCopy } from './error-copy.js';

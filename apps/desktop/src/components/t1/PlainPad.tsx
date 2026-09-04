@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ChangeEvent, KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { cx } from '@chickadee/ui';
 
-import { CLONE_ARIA_LABEL, MIN_ROWS, SAVE_DEBOUNCE_MS, TAB_TEXT } from './monacoOptions';
+import { cloneAriaLabel, MIN_ROWS, SAVE_DEBOUNCE_MS, TAB_TEXT } from './monacoOptions';
 import type { ClonePadProps } from './ClonePad';
 import './ClonePad.css';
 
@@ -21,7 +21,7 @@ export function nextIndent(line: string): string {
  */
 export function PlainPad(props: ClonePadProps) {
   const { stage, ticks } = props;
-  const label = props.ariaLabel ?? CLONE_ARIA_LABEL;
+  const label = props.ariaLabel ?? cloneAriaLabel();
 
   const taRef = useRef<HTMLTextAreaElement | null>(null);
   const [text, setText] = useState(props.value);

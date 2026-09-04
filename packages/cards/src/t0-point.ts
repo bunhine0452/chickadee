@@ -4,7 +4,8 @@
  *
  * 셔플하지 않는 이유: 위치가 정보이고 `← →` 이동 순서와 같아야 한다.
  */
-import { mulberry32, tokenize, josa } from '@chickadee/text';
+import { t, type MessageKey } from '@chickadee/i18n';
+import { mulberry32, tokenize } from '@chickadee/text';
 import type { Concept } from '@chickadee/dictionary';
 
 import { codeLines, lineAt, type Span } from './lines.js';
@@ -27,9 +28,12 @@ interface Candidate extends Span {
   kind: CandKind;
 }
 
-const ROLE: Readonly<Record<CandKind, string>> = {
-  op: '기호', id: '이름', lit: '값', other: '조각',
+const ROLE: Readonly<Record<CandKind, MessageKey>> = {
+  op: 't0.roleOp', id: 't0.roleId', lit: 't0.roleLit', other: 't0.roleOther',
 };
+
+/** 화면에 나가는 자리 이름. 카탈로그를 부를 때 푼다 — 모듈이 열리는 시점은 로케일보다 이르다. */
+const roleName = (kind: CandKind): string => t(ROLE[kind]);
 
 function classify(text: string): CandKind {
   const tokens = tokenize(text).filter((t) => t.k !== 'ws');
@@ -112,11 +116,11 @@ const distance = (c: Candidate, answer: Candidate): number =>
 
 export function genPoint(req: T0Request, input: SiteInput): GenResult {
   const { concept } = req;
-  if (concept.point.length === 0) return { reason: '사전에 지목형 문항이 없다' };
+  if (concept.point.length === 0) return { reason: t('t0.dropNoPointEntry') };
   const seed = seedFor(req, 'point', input);
   const rng = mulberry32(seed);
   const entry = concept.point[Math.floor(rng() * concept.point.length)] ?? concept.point[0];
-  if (!entry) return { reason: '사전에 지목형 문항이 없다' };
+  if (!entry) return { reason: t('t0.dropNoPointEntry') };
 
   const answerN = Number(entry.answer.slice('pick.'.length));
   const hasDiag = (n: number): boolean => entry.diag?.[`pick.${n}`] !== undefined;
@@ -129,10 +133,10 @@ export function genPoint(req: T0Request, input: SiteInput): GenResult {
     answer = candidates.find((c) => c.pickN === answerN);
     if (answer && candidates.length - 1 >= WRONG_N) break;
   }
-  if (!answer) return { reason: `정답 토큰 ${entry.answer} 이 초점 줄에 없다` };
+  if (!answer) return { reason: t('t0.dropAnswerNotInFocus', { token: entry.answer }) };
   const chosen = answer;
   const pool = candidates.filter((c) => c !== chosen);
-  if (pool.length < WRONG_N) return { reason: '짚을 후보가 3개에 못 미친다' };
+  if (pool.length < WRONG_N) return { reason: t('t0.dropFewCandidates', { n: String(WRONG_N) }) };
 
   const wrong = [...pool]
     .sort((a, b) =>
@@ -186,12 +190,11 @@ function diagFor(
   }
 
   // 조사는 앞 값이 정한다 — 하드코딩하면 「«map» 은」·「«useState» 은」이 둘 다 나온다 (03 §4.3).
-  const plain = `«${c.text}»${josa(c.text, '은', '는')} ${ROLE[c.kind]} 자리입니다. `
-    + `정답은 «${answer.text}» 입니다.`;
+  const plain = t('t0.pointDiag', { pick: c.text, role: roleName(c.kind), answer: answer.text });
   const template = req.diagDefault?.point;
   if (template === undefined) return { t: plain };
   const soft = new Renderer(buildVars(input, req.concept, {
-    extra: { pick: c.text, role: ROLE[c.kind], answer: answer.text, rule: r.need(req.concept.rule) },
+    extra: { pick: c.text, role: roleName(c.kind), answer: answer.text, rule: r.need(req.concept.rule) },
   }));
   const text = soft.maybe(template);
   return { t: text ?? plain };

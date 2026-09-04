@@ -9,6 +9,7 @@
  * **정렬 키**다. 아래에서 `DROPS` 와 `compare` 로 나눠 두었다 — 섞어 놓으면 「탈락인가
  * 뒤로 밀리는가」를 코드에서 읽을 수 없다.
  */
+import { t } from '@chickadee/i18n';
 import type { Concept } from '@chickadee/dictionary';
 
 import { keepKinds } from './t1-mask.js';
@@ -46,6 +47,10 @@ export interface SegmentOptions {
   /** 블록 첫 줄의 파일 줄 번호 (1-based). 기본 1. */
   lineStart?: number;
 }
+
+/** 「이어서」 헤더 줄인가. 주석 접두를 떼고 표시만 본다 — 접두는 언어가, 표시는 로케일이 정한다. */
+export const isContinuedHeader = (line: string): boolean =>
+  line.replace(/^\s*(\/\/|#)\s*/, '').trim() === t('t1.continued');
 
 /** 주석 접두. 04 §3.1 이 적은 `// …이어서` 는 ts 예시다 — py 는 `#` 다. */
 function commentPrefix(grammar: string): string {
@@ -172,7 +177,7 @@ export function segment(lines: readonly string[], opts: SegmentOptions): Segment
     chunks.splice(chunks.length - 2, 2, [...prev, ...tail]);
   }
 
-  const header = `${commentPrefix(opts.grammar)} …이어서`;
+  const header = `${commentPrefix(opts.grammar)} ${t('t1.continued')}`;
   const out: Segment[] = [];
   let offset = sigEnd + 1;
   for (const [i, chunk] of chunks.entries()) {
@@ -222,19 +227,19 @@ const meanLayer = (c: BlockCandidate): number =>
  * 따로 잴 방법도 없다.
  */
 function dropReason(c: BlockCandidate, opts: RankOptions): string | null {
-  if (c.lines.length === 0) return '블록 원문을 읽지 못했다';
+  if (c.lines.length === 0) return t('t1.dropNoLines');
   const n = c.lines.length;
   if (n < MIN_BLOCK_LINES || n > MAX_BLOCK_LINES) {
-    return `${n}줄 — 필사 블록은 ${MIN_BLOCK_LINES}~${MAX_BLOCK_LINES}줄이다`;
+    return t('t1.dropLineCount', { n: String(n), min: String(MIN_BLOCK_LINES), max: String(MAX_BLOCK_LINES) });
   }
-  if (c.concepts.length === 0) return '블록에 걸린 문법 개념이 없다';
+  if (c.concepts.length === 0) return t('t1.dropNoConcepts');
   const unknown = unknownCount(c);
   if (unknown > MAX_UNKNOWN_CONCEPTS) {
-    return `모르는 문법이 ${unknown}개 — ${MAX_UNKNOWN_CONCEPTS}개까지만 필사한다`;
+    return t('t1.dropTooManyUnknown', { n: String(unknown), max: String(MAX_UNKNOWN_CONCEPTS) });
   }
   const first = opts.prints === undefined ? opts.stage === 1 : opts.prints === 0;
   if (first && n > FIRST_PRINT_LINES) {
-    return `첫 노출은 ${FIRST_PRINT_LINES}줄까지다 (${n}줄)`;
+    return t('t1.dropFirstPrintTooLong', { max: String(FIRST_PRINT_LINES), n: String(n) });
   }
   return null;
 }
@@ -299,14 +304,14 @@ export function pickConcept(
     (k) => opts.essential.has(k.conceptId) && opts.concepts.has(k.conceptId),
   );
   if (eligible.length === 0) {
-    return { reason: '블록 안에 사전에 있는 필수 문법 개념이 없다' };
+    return { reason: t('t1.dropNoDictConcept') };
   }
   const difficultyOf = (k: BlockConcept): number => opts.concepts.get(k.conceptId)?.difficulty ?? 0;
   const primary = [...eligible].sort((a, b) =>
     difficultyOf(b) - difficultyOf(a)
     || b.siteCount - a.siteCount
     || byConceptId(a, b))[0];
-  if (!primary) return { reason: '블록 안에 사전에 있는 필수 문법 개념이 없다' };
+  if (!primary) return { reason: t('t1.dropNoDictConcept') };
   return {
     primary,
     secondary: candidate.concepts

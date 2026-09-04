@@ -16,6 +16,7 @@
   "dependencies": {
     "@chickadee/concepts": "workspace:*",
     "@chickadee/dictionary": "workspace:*",
+    "@chickadee/i18n": "workspace:*",
     "@chickadee/store-sql": "workspace:*",
     "@chickadee/text": "workspace:*"
   }

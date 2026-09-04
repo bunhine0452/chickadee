@@ -15,7 +15,8 @@
  * 대신 뽑는 넷(외부 호출·지역 변수 수·반환 루트·조기 반환 수)은 전부 **행 모양**으로
  * 드러나는 것만 골랐다. 정규식이 놓치면 항목이 빠질 뿐 틀린 문장은 나오지 않는다.
  */
-import { escapeHtml, isMissing, josa, render } from '@chickadee/text';
+import { t } from '@chickadee/i18n';
+import { escapeHtml, isMissing, render } from '@chickadee/text';
 import type { Concept } from '@chickadee/dictionary';
 
 import { signatureRange } from './t1-block.js';
@@ -152,23 +153,17 @@ function earlyReturns(
 
 const code = (text: string): string => `<code>${escapeHtml(text)}</code>`;
 
-/**
- * 조사만. `josa` 는 낱말 + 조사를 돌려주므로 낱말 길이만큼 잘라 낸다 — 여기서는 낱말이
- * 이미 `<code>` 로 감싸여 문장에 들어가 있고, 조사를 정하는 것은 그 안의 낱말이다.
- */
-const particle = (word: string, withBatchim: string, without: string): string =>
-  josa(word, withBatchim, without).slice(word.length);
-
 /** ③AST 휴리스틱 넷. 근거가 없는 항목은 문장을 만들지 않는다. */
 function astHolds(lines: readonly string[], grammar: string): Hold[] {
   const out: Hold[] = [];
 
   const calls = externalCalls(lines);
   if (calls.names.length > 0) {
-    const last = calls.names[calls.names.length - 1] ?? '';
     const list = calls.names.map(code).join(' · ');
     out.push({
-      text: `${list} ${particle(last, '을', '를')} 부른다`,
+      // 조사는 목록의 **마지막** 이름이 정한다. `josa` 필터는 태그를 벗기고 마지막 글자를
+      // 보므로 `<code>` 로 감싼 목록을 그대로 넘겨도 마지막 이름으로 재는 것과 같다.
+      text: t('t1.specCalls', { list }),
       source: 'ast',
       anchor: calls.anchor,
     });
@@ -177,7 +172,10 @@ function astHolds(lines: readonly string[], grammar: string): Hold[] {
   const local = locals(lines);
   if (local.names.length > 0) {
     out.push({
-      text: `지역 변수 ${local.names.length}개를 선언한다 — ${local.names.map(code).join(' · ')}`,
+      text: t('t1.specLocals', {
+        n: String(local.names.length),
+        names: local.names.map(code).join(' · '),
+      }),
       source: 'ast',
       anchor: local.anchor,
     });
@@ -187,7 +185,7 @@ function astHolds(lines: readonly string[], grammar: string): Hold[] {
   if (root) {
     out.push({
       // 조사는 태그 이름이 정한다 — `<form>` 의 마지막 글자는 `>` 라 받침을 못 센다.
-      text: `${code(`<${root.tag}>`)} ${particle(root.tag, '을', '를')} 루트로 돌려준다`,
+      text: t('t1.specReturnRoot', { tag: escapeHtml(root.tag) }),
       source: 'ast',
       anchor: [root.line],
     });
@@ -196,7 +194,7 @@ function astHolds(lines: readonly string[], grammar: string): Hold[] {
   const early = earlyReturns(lines, grammar);
   if (early.count > 0) {
     out.push({
-      text: `조기 반환이 ${early.count}군데 있다`,
+      text: t('t1.specEarlyReturns', { n: String(early.count) }),
       source: 'ast',
       anchor: early.anchor,
     });

@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { FeedbackSlot, FEEDBACK_SLOT_MIN_HEIGHT_PX, IDLE_NOTE } from './FeedbackSlot';
+import { FeedbackSlot, FEEDBACK_SLOT_MIN_HEIGHT_PX, idleNoteText } from './FeedbackSlot';
 
 afterEach(cleanup);
 
@@ -86,7 +86,7 @@ describe('FeedbackSlot', () => {
 
   it('비어 있으면 왜 비어 있는지를 그 자리에 적는다', () => {
     render(<FeedbackSlot state="idle" />);
-    expect(screen.getByText(IDLE_NOTE)).toBeTruthy();
+    expect(screen.getByText(idleNoteText())).toBeTruthy();
   });
 
   it('판정란은 낭독 지점이 아니다 — 포커스도 뺏지 않는다 (D114)', () => {

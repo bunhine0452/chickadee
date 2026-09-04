@@ -1,3 +1,4 @@
+import { t } from '@chickadee/i18n';
 import { RichText } from '@chickadee/ui';
 
 import './HintBox.css';
@@ -20,7 +21,7 @@ export function HintBox({ hints }: HintBoxProps) {
     <div className="hintbox">
       {hints.map((h, i) => (
         <span key={i}>
-          <b>힌트 {i + 1}</b> — <RichText html={h} />
+          <b>{t('map.hint', { n: String(i + 1) })}</b> — <RichText html={h} />
         </span>
       ))}
     </div>

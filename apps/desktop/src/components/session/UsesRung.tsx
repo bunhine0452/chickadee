@@ -1,3 +1,4 @@
+import { t } from '@chickadee/i18n';
 import { CodePlate } from '../plate/CodePlate';
 import './UsesRung.css';
 
@@ -27,17 +28,17 @@ export interface UsesRungProps {
 export function UsesRung({ uses }: UsesRungProps) {
   return (
     <>
-      <h4>내 리포의 같은 문법 — 다른 자리</h4>
-      <p>같은 규칙이 다른 모양으로 쓰인 곳입니다. 설명을 더 읽기보다 이쪽이 빠를 때가 많아요.</p>
+      <h4>{t('uses.heading')}</h4>
+      <p>{t('uses.note')}</p>
       {uses.length === 0 ? (
-        <p className="uses-none">이 문법이 쓰인 다른 자리는 아직 찾지 못했습니다.</p>
+        <p className="uses-none">{t('uses.none')}</p>
       ) : (
         <div className="uses">
           {uses.map((use) => (
             <div key={use.siteId} className="use">
               <div className="src">
                 <b>{use.f}</b>
-                <span>{use.l}행</span>
+                <span>{t('uses.line', { n: String(use.l) })}</span>
               </div>
               <CodePlate lines={[{ n: use.l, t: use.code }]} />
             </div>

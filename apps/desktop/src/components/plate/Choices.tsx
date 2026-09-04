@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import type { KeyboardEvent } from 'react';
+import { t } from '@chickadee/i18n';
 import { cx, RichText } from '@chickadee/ui';
 
 import './Choices.css';
@@ -106,7 +107,7 @@ export function Choices({ options, selected, answer, one, onSelect }: ChoicesPro
       ref={ref}
       className={cx('choices', one === true && 'one')}
       role="radiogroup"
-      aria-label="보기"
+      aria-label={t('plate.choices')}
       // 탭 순서에는 넣지 않는다 — 묶음 안의 라디오가 로빙 tabindex 로 돌고,
       // 묶음 자신은 프로그램에서만 포커스를 받는다.
       tabIndex={-1}

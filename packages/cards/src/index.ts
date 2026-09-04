@@ -11,7 +11,7 @@ export type {
   FocusLine, GenResult, NoPlate, OtherUse, SiteInput, T0Card, T0Kind, T0Payload, T0Request,
 } from './types.js';
 export { baseName } from './vars.js';
-export { generateT1, GENERIC_WHY_HELP, GENERIC_WHY_Q } from './t1.js';
+export { generateT1, genericWhyHelp, genericWhyQ } from './t1.js';
 export {
   pickConcept, rankBlocks, segment, signatureRange,
   FIRST_PRINT_LINES, MAX_BLOCK_LINES, MAX_UNKNOWN_CONCEPTS, MIN_BLOCK_LINES,

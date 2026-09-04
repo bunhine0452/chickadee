@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { t } from '@chickadee/i18n';
 import { RichText } from '@chickadee/ui';
 
 import './LinkPara.css';
@@ -24,9 +25,9 @@ export function LinkPara({ payoff, focusOnMount }: LinkParaProps) {
   }, [focusOnMount]);
 
   return (
-    <section ref={ref} className="link-para" aria-label="이어보기" tabIndex={-1}>
-      <span className="tag-new">새로 열림</span>
-      <h4>↩ 방금 배운 것과 이어보기</h4>
+    <section ref={ref} className="link-para" aria-label={t('plate.linkPara')} tabIndex={-1}>
+      <span className="tag-new">{t('plate.linkNew')}</span>
+      <h4>{t('plate.linkHeading')}</h4>
       <RichText as="p" html={payoff} />
     </section>
   );

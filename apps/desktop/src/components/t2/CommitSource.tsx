@@ -1,3 +1,4 @@
+import { t } from '@chickadee/i18n';
 import './CommitSource.css';
 
 export interface Commit {
@@ -30,7 +31,7 @@ export function CommitSource({ commit }: CommitSourceProps) {
       <span className="h">{commit.h}</span>
       <div>
         <p>
-          <b>정답의 출처</b> — LLM 채점이 아니라 실제 커밋 기록입니다.
+          <b>{t('map.commitSource')}</b> {t('map.commitNote')}
         </p>
         <p className="msg">{commit.m}</p>
         <p>
