@@ -13,6 +13,11 @@ export {
   globProblem, parseGlobs,
 } from './ingest-defaults.js';
 export type { GlobProblem } from './ingest-defaults.js';
+export { commitOrder, courseOrder, depOrder, COMMIT_ORDER_MIN } from './clone-order.js';
+export type {
+  CourseEdge, CourseFile, CourseOrder, CourseStep, CourseUnit, CommitTouch, OrderInput,
+} from './clone-order.js';
+export { courseStage, keepCardStage, BLANK_FROM_LAYER, COURSE_STAGE } from './clone-fading.js';
 export { assignUnits, MIN_FILES_FOR_UNIT, OTHER_UNIT } from './units.js';
 export type { Assignment, UnitOf } from './units.js';
 export {

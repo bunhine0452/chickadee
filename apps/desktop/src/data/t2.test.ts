@@ -132,10 +132,10 @@ const PAYLOAD = {
 };
 
 function seed(): void {
-  const init = migrations.find((m) => m.version === 1);
-  if (!init) throw new Error('0001_init.sql 이 카탈로그에 없다');
   db = new Database(':memory:');
-  db.exec(init.sql);
+  // 마이그레이션을 전부, 번호 순으로 태운다 — 0001 만 태우면 뒤 마이그레이션이 만든 표를
+  // 쓰는 statement 가 「no such table」로 터진다.
+  for (const m of [...migrations].sort((a, b) => a.version - b.version)) db.exec(m.sql);
   db.pragma('foreign_keys = ON');
   db.prepare(
     `INSERT INTO repo (id, root_path, name, fingerprint, added_at) VALUES (1, '/w/app', 'app', 'r', ?)`,

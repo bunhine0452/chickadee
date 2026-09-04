@@ -10,15 +10,13 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import Database from 'better-sqlite3';
-import { statements, toSqliteBindings } from '@chickadee/store-sql';
+import { SCHEMA_VERSION, statements, toSqliteBindings } from '@chickadee/store-sql';
 
 import type BetterSqlite3 from 'better-sqlite3';
 
 /** 고정 시각·시간대. `build-seed.ts` 와 같은 값이어야 한다. */
 export { NOW, TZ, SEED_PATH } from './build-seed-const.js';
 import { SEED_PATH } from './build-seed-const.js';
-
-const SCHEMA_VERSION = 1;
 
 /**
  * **지금 걸린** T0 판의 정답 보기 번호(1부터). 생성기가 섞은 순서를 **원장에서** 읽는다 —

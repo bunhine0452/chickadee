@@ -87,10 +87,10 @@ const today = (): string => dayKey(now, TZ, ROLLOVER);
 
 /** 개념 셋과 그 카드. 큐는 「만기 복습」만으로 세운다 — 새 판 상한을 0 으로 눌러 둔다. */
 function seed(): void {
-  const init = migrations.find((m) => m.version === 1);
-  if (!init) throw new Error('0001_init.sql 이 카탈로그에 없다');
   db = new Database(':memory:');
-  db.exec(init.sql);
+  // 마이그레이션을 전부, 번호 순으로 태운다 — 0001 만 태우면 뒤 마이그레이션이 만든 표를
+  // 쓰는 statement 가 「no such table」로 터진다.
+  for (const m of [...migrations].sort((a, b) => a.version - b.version)) db.exec(m.sql);
   db.pragma('foreign_keys = ON');
 
   db.prepare(

@@ -19,9 +19,11 @@ const Database = require_('better-sqlite3') as new (path: string) => BetterSqlit
 describe('statement', () => {
   it('전부 SQLite 가 prepare 한다', () => {
     const db = new Database(':memory:');
-    // statement 는 **지금** 스키마에 붙어야 한다 — 0001 만 올리면 뒤 마이그레이션이 더한
-    // 열을 쓰는 statement 가 여기서 안 걸리고 화면에서 터진다.
-    for (const m of [...migrations].sort((a, b) => a.version - b.version)) db.exec(m.sql);
+    // 마이그레이션을 전부 태운다 — statement 는 **지금 스키마**에 대고 prepare 되어야 한다.
+    // 0001 만 태우면 뒤 마이그레이션이 만든 표를 쓰는 문장이 여기서 안 걸린다.
+    const ordered = [...migrations].sort((a, b) => a.version - b.version);
+    if (ordered[0]?.version !== 1) throw new Error('0001_init.sql 이 카탈로그에 없다');
+    for (const m of ordered) db.exec(m.sql);
 
     const broken: { name: string; message: string }[] = [];
     for (const [name, sql] of Object.entries(statements)) {

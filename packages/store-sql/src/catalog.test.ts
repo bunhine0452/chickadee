@@ -8,8 +8,15 @@ describe('카탈로그', () => {
     expect(missing).toEqual([]);
   });
 
-  it('마이그레이션 번호는 1부터 빈틈없이 오른다', () => {
-    expect(migrations.map((m) => m.version)).toEqual(migrations.map((_, i) => i + 1));
+  // 「빈틈없이」가 아니라 「오르기만」이다 — 갈래를 나눠 병렬로 만드는 동안 각 갈래가
+  // 번호를 하나씩 예약하므로 아직 안 들어온 번호가 생긴다. 러너는 `user_version` 보다 큰
+  // 것만 순서대로 적용하니 빈틈은 무해하고, 빠뜨린 마이그레이션은 `migrate-seed.test.ts` 가
+  // 마이그레이션마다 시드 하나를 요구해 잡는다.
+  it('마이그레이션 번호는 1부터 오르고 겹치지 않는다', () => {
+    const versions = migrations.map((m) => m.version);
+    expect(versions[0]).toBe(1);
+    expect(versions).toEqual([...versions].sort((a, b) => a - b));
+    expect(new Set(versions).size).toBe(versions.length);
   });
 
   it('마이그레이션마다 자기 번호로 user_version 을 세운다', () => {

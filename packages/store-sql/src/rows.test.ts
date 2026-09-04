@@ -410,9 +410,9 @@ beforeAll(() => {
 // ───────── 왕복 ─────────
 
 describe('fromXxxRow 왕복 (인메모리 SQLite + 마이그레이션 전부)', () => {
-  test('마이그레이션이 31개 테이블을 만든다', () => {
+  test('마이그레이션이 33개 테이블을 만든다', () => {
     const rows = db.prepare(statements['store.table_names']).all() as { name: string }[];
-    expect(rows).toHaveLength(31);
+    expect(rows).toHaveLength(33);
     expect(db.pragma('user_version')).toEqual([{ user_version: SCHEMA_VERSION }]);
   });
 

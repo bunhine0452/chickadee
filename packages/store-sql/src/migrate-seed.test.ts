@@ -174,11 +174,13 @@ describe('시드 DB 이행 (06 §6.1)', () => {
 
   test('한 판 낮은 DB 는 이행할 것이 남아 있다 — 러너가 백업을 뜨는 조건이다', () => {
     // `migrate.rs` 는 `pending` 이 비지 않고 파일이 이미 있을 때만 백업한다 (01 §7).
-    const { db, dir } = openCopy(SEED_NAME(1));
+    // 마이그레이션이 늘어도 뜻이 안 바뀌도록 「마지막 바로 아래」를 연다 — 번호를 박으면
+    // 판이 오를 때마다 이 줄이 틀린다.
+    const { db, dir } = openCopy(SEED_NAME(SCHEMA_VERSION - 1));
     try {
       const from = Number(db.pragma('user_version', { simple: true }));
       expect(migrations.filter((m) => m.version > from).map((m) => m.version))
-        .toEqual([2]);
+        .toEqual([SCHEMA_VERSION]);
     } finally {
       db.close();
       rmSync(dir, { recursive: true, force: true });
