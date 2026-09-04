@@ -79,9 +79,9 @@ owner: claude-code
 - [x] 0002 마이그레이션 · 0.5일 {#i18n-migration}
   - [x] concept.name_en ADD COLUMN — 원장은 추가만(02 §2.2) {#i18n-migration-ddl}
   - [x] SCHEMA_VERSION · catalog 갱신, 백업·상위 버전 거부 경로 테스트 {#i18n-migration-runner}
-- [ ] en 스모크 게이트 · 0.5일 {#i18n-en-smoke}
-  - [ ] E2E 3화면(첫 실행 · 홈 · 세션)을 en 으로 한 번 {#i18n-en-smoke-e2e}
-  - [ ] 시각 기준선 40장은 ko 만 유지 — en 은 axe serious 0 과 행 길이만 재다 {#i18n-en-smoke-visual}
+- [x] en 스모크 게이트 · 0.5일 {#i18n-en-smoke}
+  - [x] E2E 3화면(첫 실행 · 홈 · 세션)을 en 으로 한 번 {#i18n-en-smoke-e2e}
+  - [x] 시각 기준선 40장은 ko 만 유지 — en 은 axe serious 0 과 행 길이만 재다 {#i18n-en-smoke-visual}
 
 <!-- oculpm:plan-log begin v1 -->
 | 시각 | 항목 | 에이전트 | 변화 | 일지 | 메모 |
@@ -134,4 +134,6 @@ owner: claude-code
 | 2026-09-04T11:17:24+09:00 | #i18n-dict-ts-react | claude-code | ☐→x | 20260904/Features_to_add/1116_feature_parallel-v03-course-screen-i18n-dict.md | ts 29/29 + react 2/2 · 875 문자열 |
 | 2026-09-04T11:17:26+09:00 | #i18n-dict-arch | claude-code | ☐→x | 20260904/Features_to_add/1116_feature_parallel-v03-course-screen-i18n-dict.md | 4/4 · 16 문자열 |
 | 2026-09-04T11:17:29+09:00 | #i18n-dict-rest | claude-code | ☐→- | 20260904/Features_to_add/1116_feature_parallel-v03-course-screen-i18n-dict.md | 남은 것이 없다 — dictionary/ 는 네 네임스페이스뿐이고 57 = 55 개념 + _lang 둘, 앞 세 항목이 다 덮었다. 다른 언어 사전(python·rust)은 아직 없다 |
+| 2026-09-04T11:26:42+09:00 | #i18n-en-smoke-e2e | claude-code | ☐→x | 20260904/Bugs/1126_bug_en-smoke-gate-and-kbd-contrast.md | tests/gates/en-smoke.spec.ts — 첫 실행·홈·교정지+요약. 114 passed (108+3×2) |
+| 2026-09-04T11:26:45+09:00 | #i18n-en-smoke-visual | claude-code | ☐→x | 20260904/Bugs/1126_bug_en-smoke-gate-and-kbd-contrast.md | 기준선 40장은 ko 만. en 은 axe serious 0 + 행 길이만 — 요약의 kbd 3.79:1 을 그 자리에서 잡았다 |
 <!-- oculpm:plan-log end -->
