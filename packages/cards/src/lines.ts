@@ -11,12 +11,17 @@
  *
  * 생성기는 파일을 읽지 않는다 — 부르는 쪽이 블록 범위(∪ 초점 ±4)를 한 번 읽어 넘긴다 (D72).
  */
+import { WINDOW_MAX_LINES as MAX_LINES, WINDOW_PAD, windowRange } from '@chickadee/concepts';
 import type { CodeLine, Seg } from '@chickadee/store-sql';
 
 import type { FocusLine, LineWindow } from './types.js';
 
-/** 감싸는 블록을 못 찾았을 때의 폭. 옛 고정 창 그대로다 — 폴백이 곧 지금까지의 동작이다. */
-export const LINES_WINDOW = 2;
+/**
+ * 감싸는 블록을 못 찾았을 때의 폭. 옛 고정 창 그대로다 — 폴백이 곧 지금까지의 동작이다.
+ *
+ * 값은 `@chickadee/concepts` 가 쥔다 (D155) — 순위가 재는 창과 판이 그리는 창이 같아야 한다.
+ */
+export const LINES_WINDOW = WINDOW_PAD;
 /** 프롬프트 폭. discussion §3-1 「이 줄과 앞뒤 4줄」. 창과 무관하게 고정이다. */
 export const PROMPT_WINDOW = 4;
 /**
@@ -25,7 +30,7 @@ export const PROMPT_WINDOW = 4;
  * 40 인 이유: 사용자가 상한을 정할 때 「40줄을 다 펴면 한 판이 두 판 시간이 된다」고 했다.
  * 그래서 40 은 **다 펴도 넘지 않는 선**이고, 판이 처음 보여 주는 폭은 05 의 접기(20줄)가 정한다.
  */
-export const WINDOW_MAX_LINES = 40;
+export const WINDOW_MAX_LINES = MAX_LINES;
 
 /** 초점 줄 안에서 짚을 수 있는 조각 하나. `to` 는 끝 다음 열이다. */
 export interface Span {
@@ -63,21 +68,7 @@ function segments(text: string, spans: readonly Span[]): Seg[] {
  * 창을 못 찾았다고 판이 없어지면 사용자가 잃는 것은 창이 아니라 그 개념 전부다.
  */
 export function windowOf(focus: number, block?: LineWindow | undefined): LineWindow {
-  // 옛 고정 창이 바닥이다 — 창은 넓히는 것이지 좁히는 것이 아니다. 세 줄짜리 함수에서
-  // 초점 ±2 보다 좁게 잘라 내면 목업 카드 1(`addItem` + 그것이 건드리는 선언)이 못 선다.
-  const floor: LineWindow = { from: focus - LINES_WINDOW, to: focus + LINES_WINDOW };
-  if (block === undefined || focus < block.from || focus > block.to) return floor;
-
-  const from = Math.min(block.from, floor.from);
-  const to = Math.max(block.to, floor.to);
-  if (to - from + 1 <= WINDOW_MAX_LINES) return { from, to };
-
-  // 상한을 넘으면 초점을 가운데 두고 자르되 창 경계 밖으로는 나가지 않는다.
-  const half = Math.floor((WINDOW_MAX_LINES - 1) / 2);
-  let cut = focus - half;
-  if (cut < from) cut = from;
-  else if (cut + WINDOW_MAX_LINES - 1 > to) cut = to - WINDOW_MAX_LINES + 1;
-  return { from: cut, to: cut + WINDOW_MAX_LINES - 1 };
+  return windowRange(focus, block);
 }
 
 /** 창 안에 드는 줄만. 창 계산은 `windowOf` 하나뿐이다 — 누설 검사도 이것을 쓴다. */

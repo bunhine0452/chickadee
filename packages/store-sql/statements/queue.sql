@@ -55,7 +55,7 @@ SELECT s.id, s.unknown_count, s.line_start, s.line_end, s.shape, s.occurrence,
        s.confidence, s.parse_quality, s.is_dirty
 FROM concept_site s
 WHERE s.repo_id = :repoId AND s.concept_id = :conceptId AND s.is_alive = 1
-ORDER BY s.unknown_count, (s.line_end - s.line_start), s.id LIMIT 1;
+ORDER BY s.unknown_count, s.window_unknown, (s.line_end - s.line_start), s.id LIMIT 1;
 
 -- `loadKnownSet` 의 입력 (02 §6.1). 개념 전부 + 겹 + 보편 id.
 -- @name queue.known_rows

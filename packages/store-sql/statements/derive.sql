@@ -113,18 +113,29 @@ UPDATE concept_site SET is_alive = 0, updated_at = :updatedAt
 WHERE repo_id = :repoId AND file_id = :fileId AND is_alive = 1
   AND site_key NOT IN (SELECT value FROM json_each(:keys));
 
+-- `file_id` 는 창 계산이 쓴다 — 같은 파일 안 사용처끼리만 창을 나눠 가진다 (D155).
 -- @name derive.sites_for_rank
 -- @params { repoId: number }
--- @row { id: number, site_key: string, concept_id: string, path: string, line_start: number, line_end: number, uncovered_ratio: number, line_concepts_json: string, is_dirty: number, unknown_count: number }
-SELECT s.id, s.site_key, s.concept_id, f.path, s.line_start, s.line_end,
+-- @row { id: number, site_key: string, concept_id: string, file_id: number, path: string, line_start: number, line_end: number, uncovered_ratio: number, line_concepts_json: string, is_dirty: number, unknown_count: number }
+SELECT s.id, s.site_key, s.concept_id, s.file_id, f.path, s.line_start, s.line_end,
        s.uncovered_ratio, s.line_concepts_json, s.is_dirty, s.unknown_count
 FROM concept_site s JOIN file f ON f.id = s.file_id
 WHERE s.repo_id = :repoId AND s.is_alive = 1;
 
+-- 창의 바깥 테두리 — 사용처를 감싸는 블록 (D141 · D155). 리포 한 번에 다 긷고 파일별로
+-- 나눈다: 사용처마다 부르면 4,000번짜리 쿼리가 된다.
+-- @name derive.blocks_for_rank
+-- @params { repoId: number }
+-- @row { file_id: number, line_start: number, line_end: number }
+SELECT b.file_id, b.line_start, b.line_end
+FROM block b
+WHERE b.repo_id = :repoId AND b.is_alive = 1 AND b.rev IS NULL;
+
+-- 두 수는 같은 패스가 함께 쓴다 — 겹이 바뀌면 둘 다 바뀐다 (D155).
 -- @name derive.unknown_count_set
--- @params { repoId: number, siteKey: string, unknownCount: number }
+-- @params { repoId: number, siteKey: string, unknownCount: number, windowUnknown: number }
 -- @row void
-UPDATE concept_site SET unknown_count = :unknownCount
+UPDATE concept_site SET unknown_count = :unknownCount, window_unknown = :windowUnknown
 WHERE repo_id = :repoId AND site_key = :siteKey;
 
 -- 2차 패스가 blame 으로 사용처의 출처 커밋을 채운다 (03 §1.5).

@@ -18,7 +18,10 @@ import { buildGaps, type CountableSite } from './gaps.js';
 import { resolveImports, type FileImports } from './resolve-imports.js';
 import { EXCLUDE_GLOBS, GENERATED_MARKERS, LIMITS } from './ingest-defaults.js';
 import { assignUnits } from './units.js';
-import { knownSet, unknownCount, type MasteryRow } from './unknown-rank.js';
+import {
+  innermostBlock, knownSet, lineIndex, unknownCount, windowUnknown,
+  type LineIndex, type LineSpan, type MasteryRow, type WindowSite,
+} from './unknown-rank.js';
 import {
   ZERO_CHAPTER_ORDER, ZERO_CHAPTER_UNIT, shouldOpen as shouldOpenZeroChapter, zeroChapterPlates,
 } from './zero-chapter.js';
@@ -363,6 +366,10 @@ async function writeSites(
 /**
  * 미지 개념 수를 다시 센다 (02 §6.1). 겹이 바뀌면 값이 바뀌므로 인제스트 뒤와
  * 세션 뒤 두 시점에 돈다 — 여기서는 앞의 것이다.
+ *
+ * 두 수를 함께 센다 (D155): **초점 줄**의 미지(`unknown_count`)와 **창**의
+ * 미지(`window_unknown`). 앞의 것은 「오늘 낼 수 있는가」의 문턱이고 뒤의 것은 같은 값
+ * 안에서의 순서다. 겹을 봐야 나오는 수라 둘 다 여기서 난다 — 나뉘면 한쪽만 낡는다.
  */
 export async function recountUnknown(
   dict: Dict,
@@ -372,6 +379,24 @@ export async function recountUnknown(
   const known = knownSet(mastery);
   const layerOf = (id: string): number => (known.has(id) ? 1 : 0);
   const rows = await ipc.store.query('derive.sites_for_rank', { repoId });
+  const blocks = await ipc.store.query('derive.blocks_for_rank', { repoId });
+
+  // 창은 파일 안에서만 뜻이 있다 — 사용처와 블록을 파일별로 갈라 둔다.
+  const sitesOf = new Map<number, WindowSite[]>();
+  for (const row of rows) {
+    const at = sitesOf.get(row.file_id) ?? [];
+    at.push({ conceptId: row.concept_id, lineStart: row.line_start, lineEnd: row.line_end });
+    sitesOf.set(row.file_id, at);
+  }
+  const blocksOf = new Map<number, LineSpan[]>();
+  for (const block of blocks) {
+    const at = blocksOf.get(block.file_id) ?? [];
+    at.push({ from: block.line_start, to: block.line_end });
+    blocksOf.set(block.file_id, at);
+  }
+  const indexOf = new Map<number, LineIndex>();
+  for (const [fileId, sites] of sitesOf) indexOf.set(fileId, lineIndex(sites));
+
   const ops = rows.map((row) => ({
     name: 'derive.unknown_count_set' as const,
     params: {
@@ -387,6 +412,12 @@ export async function recountUnknown(
         },
         layerOf,
         dict,
+      ),
+      windowUnknown: windowUnknown(
+        { conceptId: row.concept_id, lineStart: row.line_start },
+        innermostBlock(blocksOf.get(row.file_id) ?? [], row.line_start),
+        indexOf.get(row.file_id) ?? new Map(),
+        layerOf,
       ),
     },
   }));

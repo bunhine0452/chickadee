@@ -21,10 +21,14 @@ export { courseStage, keepCardStage, BLANK_FROM_LAYER, COURSE_STAGE } from './cl
 export { assignUnits, MIN_FILES_FOR_UNIT, OTHER_UNIT } from './units.js';
 export type { Assignment, UnitOf } from './units.js';
 export {
-  chooseFirst, distinctShapes, knownSet, unknownCount,
+  chooseFirst, distinctShapes, innermostBlock, knownSet, lineIndex, unknownCount,
+  windowRange, windowUnknown,
+  WINDOW_MAX_LINES, WINDOW_PAD,
   LONG_SITE_LINES, MAX_UNKNOWN_FOR_NEW, PREREQ_DEPTH, TRANSFER_LAYER, UNCOVERED_THRESHOLD,
 } from './unknown-rank.js';
-export type { ChoosableSite, LayerOf, MasteryRow, RankableSite } from './unknown-rank.js';
+export type {
+  ChoosableSite, LayerOf, LineIndex, LineSpan, MasteryRow, RankableSite, WindowSite,
+} from './unknown-rank.js';
 export {
   CARD_ONLY_SITE_ID, NEWCOMER_CLEAR_OKS, NEWCOMER_MIN_MISSES, NEWCOMER_MIN_ROOT_NEW, UNKNOWN_CAP,
   isRockBottom, levelForLayer, newcomerFlag, rankNewConcepts, transferFrom,

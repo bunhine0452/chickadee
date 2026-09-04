@@ -194,6 +194,13 @@ export interface Settings { budgetMin: number; tz: string; rolloverHour: number;
    */
   dictLangs: string[];
   /**
+   * 0장 종료 조건 ② — 뿌리 판을 통과한 세션이 한 번이라도 나왔나 (D136).
+   * **한 번 참이면 참으로 남는다**: 조건이 「나옴」이라 나중 세션이 그 사실을 되돌리지
+   * 못한다. `newcomerFlag` 로 대신할 수 없다 — 그쪽 `'none'` 은 아직 아무것도 재 보지
+   * 않은 첫날과 구별되지 않는다.
+   */
+  rootCleared: boolean;
+  /**
    * 마지막으로 연 리포 (D119 · 05 §2.4 진입 규칙). 다음에 켤 때 그 리포의 홈으로 바로
    * 들어간다. 그 리포가 목록에서 사라졌으면 첫 줄로 내려온다 — 값이 화면을 막지 않는다.
    */

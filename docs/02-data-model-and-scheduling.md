@@ -65,7 +65,7 @@ review_log 1─n appeal
 review_log 1─n why_answer                 ← T1 왜 게이트 답 (채점·겹 효과 없음)
 ```
 
-읽는 법: `A 1─n B` = A 하나에 B 여럿. 원장(append-only)은 `session · session_item · review_log · dunno_event · ladder_event · appeal · lifer`. 파생(재계산 가능)은 `mastery · gap · concept_site.unknown_count · card_state.est_min_ema`. 인제스트 산출(재인제스트로 재생성)은 `file · git_commit · commit_file · capture · import_edge · block · unit · unit_node · unit_file · concept_site`.
+읽는 법: `A 1─n B` = A 하나에 B 여럿. 원장(append-only)은 `session · session_item · review_log · dunno_event · ladder_event · appeal · lifer`. 파생(재계산 가능)은 `mastery · gap · concept_site.unknown_count · concept_site.window_unknown · card_state.est_min_ema`. 인제스트 산출(재인제스트로 재생성)은 `file · git_commit · commit_file · capture · import_edge · block · unit · unit_node · unit_file · concept_site`.
 
 ---
 
@@ -296,11 +296,12 @@ CREATE TABLE concept_site (
   is_oversize    INTEGER NOT NULL DEFAULT 0,
   commit_id      INTEGER REFERENCES git_commit(id),  -- 처음 등장한 커밋 (「선택의 왜」 연결)
   unknown_count  INTEGER NOT NULL DEFAULT 0,          -- 파생: 같은 줄의 미지 개념 수 (§6)
+  window_unknown INTEGER NOT NULL DEFAULT 0,          -- 파생: 판에 보이는 창의 미지 개념 수 (§6 · D155)
   is_alive       INTEGER NOT NULL DEFAULT 1 CHECK (is_alive IN (0,1)),
   updated_at     INTEGER NOT NULL,
   CHECK (line_end >= line_start)
 );
-CREATE INDEX ix_site_repo_concept ON concept_site(repo_id, concept_id, is_alive, unknown_count);
+CREATE INDEX ix_site_repo_concept ON concept_site(repo_id, concept_id, is_alive, unknown_count, window_unknown);
 CREATE INDEX ix_site_file_line    ON concept_site(file_id, line_start, line_end);
 CREATE UNIQUE INDEX ux_site_key ON concept_site(repo_id, site_key);
 
@@ -806,6 +807,8 @@ function loadKnownSet(): Set<string> {
 ```
 `unknownCount` 는 03 §3.6 의 함수를 `@chickadee/concepts` 에서 import 해 쓴다(입력 `ConceptSite.lineConcepts`·`uncoveredRatio`, 사전 선행 2단). 결과를 `concept_site.unknown_count` 에 캐시한다.
 
+같은 자리에서 `windowUnknown`(03 §3.6 · D155)도 함께 세어 `concept_site.window_unknown` 에 캐시한다 — **한 패스에서 둘 다 낸다**. 겹이 바뀌면 두 수가 같이 바뀌므로 나누면 한쪽만 낡는다. 앞의 것은 「오늘 낼 수 있는가」의 문턱(`> 3` 보류)이고 뒤의 것은 같은 값 안에서의 순서다.
+
 예시와 숫자는 03 §3.6 을 따른다(`const MAX = 10` → 0~1, `useState` 줄 → 3~4). `unknown_count` 는 세션이 끝날 때마다 **그 세션에서 겹이 바뀐 개념의 사용처와 같은 줄에 있는 사용처만** 재계산한다(전체 4.5만 행을 매번 돌지 않는다).
 
 ### 6.2 새 개념 순위와 첫 노출 사용처
@@ -825,7 +828,7 @@ function rankNewConcepts(repo: number, known: Set<string>): Candidate[] {
 }
 function bestSite(repo, conceptId, known) {  // 미지 최소 → 줄 짧은 것 → 현재 대지 안의 것
   return db.get(`SELECT s.id, s.unknown_count AS unknown FROM concept_site s WHERE s.repo_id=? AND s.concept_id=? AND s.is_alive=1
-                 ORDER BY s.unknown_count, (s.line_end - s.line_start), s.id LIMIT 1`, [repo, conceptId]);
+                 ORDER BY s.unknown_count, s.window_unknown, (s.line_end - s.line_start), s.id LIMIT 1`, [repo, conceptId]);
 }
 ```
 카드 `level` 은 첫 노출 1(미지 ≤ 2 인 사용처), 2겹부터 2(미지 ≤ 3), 3겹부터 3(제한 없음). 복습 때 `pickCard` 가 `level=clamp(1,3,layer)` 카드를 고르고 없으면 그 자리에서 생성한다 — 같은 개념이 점점 복잡한 자기 코드로 나온다.
@@ -874,7 +877,7 @@ SELECT m.concept_id, c.name_ko, c.token, c.track_default, m.layer, m.due_at, m.s
 FROM mastery m JOIN concept c ON c.id = m.concept_id
 LEFT JOIN concept_site s ON s.id = (SELECT s2.id FROM concept_site s2
        WHERE s2.repo_id = :repo AND s2.concept_id = m.concept_id AND s2.is_alive = 1
-       ORDER BY s2.unknown_count, (s2.line_end - s2.line_start), s2.id LIMIT 1)
+       ORDER BY s2.unknown_count, s2.window_unknown, (s2.line_end - s2.line_start), s2.id LIMIT 1)
 WHERE m.state <> 0 AND EXISTS (SELECT 1 FROM card k WHERE k.repo_id = :repo AND k.concept_id = m.concept_id AND k.retired_at IS NULL)
 ORDER BY m.due_at LIMIT 6;
 

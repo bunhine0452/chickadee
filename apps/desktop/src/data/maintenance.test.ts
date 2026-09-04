@@ -269,7 +269,7 @@ describe('내보내기', () => {
       settings: { budgetMin: 15, tz: TZ, rolloverHour: 4, desiredRetention: 0.9, newPerDay: 2,
         t1PerWeek: 2, newcomerFlag: 'none' as const, theme: 'light' as const, trim: 'off' as const,
         motion: 'system' as const, identities: [], excludeGlobs: [], locale: 'ko' as const, tutorialSeen: false, declaredNewcomer: false,
-        dictLangs: [], lastRepoId: null },
+        dictLangs: [], rootCleared: false, lastRepoId: null },
       repos: [], mastery: [],
       logs: [
         { session_id: 2, day_key: '2026-01-02', ok: 1, dunno: 0, duration_ms: 100 },

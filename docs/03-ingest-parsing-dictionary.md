@@ -401,7 +401,23 @@ function unknownCount(site: ConceptSite, layerOf: (c: string) => 0 | 1 | 2 | 3 |
 }
 ```
 
-첫 노출 = `unknownCount` 최소 → 동률이면 `uncoveredRatio` 오름차순 → `dirty=false` 우선 → 파일 내 Site 수 많은 파일 우선(한 파일이 여러 카드에 다시 나와 익숙해진다). `unknownCount > 3` 인 사용처는 겹이 오를 때까지 보류 — 이것이 §4 「난이도 곡선이 파생된다」의 구현이다. `const MAX = 10` 은 lineConcepts = {const-declaration, number-literal} 로 0~1, `const [c, setC] = useState(0)` 은 {const, array-destructuring, call, react/use-state} 로 3~4 가 된다.
+`unknownCount` 가 재는 것은 **초점 줄**이다. 판이 보여 주는 것은 줄이 아니라 **창**(D141 — 감싸는 블록 ∪ 초점 ±2, 상한 40줄)이므로 창을 따로 센다 (D155):
+
+```ts
+function windowUnknown(site, block, index, layerOf): number {
+  const win = windowRange(site.lineStart, block);              // 판이 그리는 창과 같은 함수
+  const ids = new Set<string>();
+  for (let n = win.from; n <= win.to; n += 1)
+    for (const id of index.get(n) ?? []) if (id !== site.conceptId) ids.add(id);
+  return [...ids].filter((id) => layerOf(id) === 0).length;
+}
+```
+
+첫 노출 = `unknownCount` 최소 → 동률이면 **`windowUnknown` 최소** → `uncoveredRatio` 오름차순 → 짧은 사용처 → `dirty=false` 우선 → 경로. `unknownCount > 3` 인 사용처는 겹이 오를 때까지 보류 — 이것이 §4 「난이도 곡선이 파생된다」의 구현이다. 문턱은 초점 줄 기준 그대로이고 창은 **순서만** 정한다. `const MAX = 10` 은 lineConcepts = {const-declaration, number-literal} 로 0~1, `const [c, setC] = useState(0)` 은 {const, array-destructuring, call, react/use-state} 로 3~4 가 된다.
+
+**왜 창을 따로 세나** (D155): 초점 줄만 보면 1,747줄짜리 파일 한복판의 두 글자짜리 리터럴이 만점을 받는다. 실측 리포에서 `ts/number-literal` 사용처 261곳 중 미지 0 인 다섯이 동률이 되었고, 마지막 동률 처리가 경로 알파벳순이라 **가장 큰 파일이 이겼다** — 「숫자」의 첫 판이 `function Spark({ data, w = 56, h = 16 }: { data: number[]; w?: number; h?: number })` 로 나갔다. `const MIN_FONT = 9;` 가 같은 후보 안에 있었다. 창을 넣으면 창 14줄·미지 10 에서 5줄·미지 0 으로 옮겨간다.
+
+`uncoveredRatio`(> 0.5 면 +1)가 이것을 잡았어야 했는데 같은 리포 4,488 사용처의 평균이 0.00 이라 **한 번도 걸리지 않는다** — 감싸는 사용처의 바이트 범위가 안쪽 토큰을 전부 「덮은 것」으로 치기 때문이다. 그 자리는 따로 본다.
 
 ---
 

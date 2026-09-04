@@ -8,7 +8,7 @@
  * 만들지 않는다. 순위·마스크·스펙 카드는 생성기가, 판정은 `@chickadee/grading` 이 한다.
  */
 import {
-  generateT1, isT1Card, type BlockCandidate, type BlockConcept, type T1Card,
+  generateT1, isT1Card, type BlockCandidate, type BlockConcept, type FocusLine, type T1Card,
   makeExecCard,
 } from '@chickadee/cards';
 import type { Dict } from '@chickadee/dictionary';
@@ -270,7 +270,11 @@ export async function bakeNextExec(deps: BlockDeps): Promise<number | null> {
       if (tried >= EXEC_ATTEMPTS) return null;
       tried += 1;
 
-      const text = block.lines.map((l) => l.t).join('\n');
+      // T1 은 원문 줄(`BlockCandidate.lines`)을 쓰고 추적 생성기는 **줄 번호가 붙은** 줄을
+      // 받는다. 읽어 온 첫 줄이 `block.lineStart` 이므로 i 번째가 `lineStart + i` 다
+      // (`cards.ts` 의 `readContext` 와 같은 규약).
+      const lines: FocusLine[] = block.lines.map((t, i) => ({ n: block.lineStart + i, t }));
+      const text = block.lines.join('\n');
       const ast = await originalAst(block.blockId, grammar, text);
       if (ast === null) continue;
 
@@ -281,7 +285,7 @@ export async function bakeNextExec(deps: BlockDeps): Promise<number | null> {
         concept,
         concepts: deps.dict.concepts,
         ly: 0,
-        lines: block.lines,
+        lines,
         ast,
         grammar,
         path: block.path,

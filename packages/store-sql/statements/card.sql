@@ -58,7 +58,8 @@ UPDATE gap SET status = :status WHERE repo_id = :repoId AND concept_id = :concep
 UPDATE gap SET reason = :reason WHERE repo_id = :repoId AND concept_id = :conceptId;
 
 -- 카드 한 장을 만드는 데 필요한 사용처 — `concept_site` 전 열 + 파일 경로.
--- 03 §3.6 `rank` 순(미지 최소 → 짧은 줄 → 사전 설명이 많은 것 → 경로)으로 이미 정렬해 준다.
+-- 03 §3.6 `rank` 순(미지 최소 → **창의 미지 최소**(D155) → 사전 설명이 많은 것 → 짧은 줄
+-- → 경로)으로 이미 정렬해 준다.
 -- @name card.sites_for_concept
 -- @params { repoId: number, conceptId: string, limit: number }
 -- @row { id: number, repo_id: number, file_id: number, concept_id: string, site_key: string, line_start: number, line_end: number, col_start: number, col_end: number, ts_node_kind: string | null, form: string | null, shape: string, occurrence: number, excerpt: string, picks_json: string, hole_json: string | null, ctx_json: string, line_concepts_json: string, uncovered_ratio: number, confidence: string, parse_quality: string, is_dirty: number, is_oversize: number, commit_id: number | null, unknown_count: number, is_alive: number, updated_at: number, path: string }
@@ -69,7 +70,8 @@ SELECT s.id, s.repo_id, s.file_id, s.concept_id, s.site_key, s.line_start, s.lin
        s.unknown_count, s.is_alive, s.updated_at, f.path
 FROM concept_site s JOIN file f ON f.id = s.file_id
 WHERE s.repo_id = :repoId AND s.concept_id = :conceptId AND s.is_alive = 1
-ORDER BY s.unknown_count, s.uncovered_ratio, (s.line_end - s.line_start), s.is_dirty, f.path, s.id
+ORDER BY s.unknown_count, s.window_unknown, s.uncovered_ratio, (s.line_end - s.line_start),
+         s.is_dirty, f.path, s.id
 LIMIT :limit;
 
 -- 같은 줄에 걸친 다른 개념의 사용처 — 지목형 오답이 여기서 나온다 (04 §1.1 혼동 쌍).
