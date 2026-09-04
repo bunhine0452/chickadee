@@ -8,9 +8,12 @@ grammar_abi: { java: 14 }
 extensions:
   java: [.java]
 
-# 아직 개념이 없다 — 이 판(D159 첫 조각)이 여는 것은 **라우트 간선**이지 자바 어휘가 아니다.
-# 바닥 여덟은 `docs/curriculum/java.md` 가 이미 설계해 뒀고, 그것을 담는 것은 다음 판이다.
-essential: []
+# 바닥 여덟 (`docs/curriculum/java.md` §2). 순서는 읽는 순서이고 0장에 담기는 순서는
+# `prereq` 깊이가 정한다. 지금 선 것은 셋이고 나머지 다섯은 다음 판이다.
+essential:
+  - java/class-declaration
+  - java/method-declaration
+  - java/if-statement
 
 alternatives: []
 

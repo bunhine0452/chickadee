@@ -1,0 +1,262 @@
+schema: 1
+id: java/if-statement
+universal: common/conditional-branch
+name: { ko: 조건으로 흐름 나누기, en: if statement }
+token: "if"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 1
+prereq: []
+confusions: []
+
+dict:
+  one_liner:
+    ko: "조건이 참일 때만 아래 묶음을 한 번 실행한다. 조건 자리에는 참·거짓만 온다."
+    en: "Runs the block below once, only when the condition holds — truth values only."
+  why:
+    ko: >-
+      {{site.line}}행의 괄호 안에는 <b>참·거짓 말고는 못 옵니다</b>. 다른 언어에서 흔한
+      <code>if (list)</code>·<code>if (count)</code>·<code>if (name)</code> 이 자바에서는 전부
+      컴파일이 멈춰요 — 「비어 있으면 거짓」 같은 규칙이 <b>없기</b> 때문입니다. 그래서 조건은
+      언제나 <b>견주기</b>거나 참·거짓을 내는 물음이 됩니다.
+    en: >-
+      Inside the parentheses on line {{site.line}} <b>nothing but true or false</b> may stand.
+      <code>if (list)</code>, <code>if (count)</code>, <code>if (name)</code> — ordinary elsewhere —
+      all stop the compiler here, because Java has <b>no</b> rule that reads “empty” as false. So a
+      condition is always a <b>comparison</b> or something that answers true or false.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:을,를}} 먼저 따져 참인지 거짓인지 정한다."
+      en: "{{pick.2|code}} is weighed first, and comes out true or false."
+    - ko: "참이면 그 아래 묶음이 한 번 돈다."
+      en: "If it holds, the block below runs once."
+    - ko: "거짓이면 묶음을 통째로 건너뛴다."
+      en: "If it does not, the whole block is skipped."
+
+rule:
+  ko: "<b>조건 자리에는 참·거짓만 온다.</b> 숫자도 목록도 글자도 조건이 되지 못한다."
+  en: "<b>Only true or false stands in the condition.</b> Not a number, a list, or a string."
+result:
+  label:
+    ko: "{{site.line}}행의 갈림"
+    en: "the branch on line {{site.line}}"
+  value: "{{pick.2}}"
+  note:
+    ko: "참일 때만 아래로 간다"
+    en: "goes below only when it holds"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:이,가}} 참일 때만 아래 묶음이 한 번 돕니다. 거짓이면 통째로 건너뜁니다.
+  en: >-
+    The block below runs once only when {{pick.2|code}} holds. Otherwise it is skipped whole.
+payoff:
+  ko: >-
+    이걸 알면 「왜 <code>if (list)</code> 가 안 되나」가 풀립니다 — 목록은 참도 거짓도 아니라서,
+    무엇을 물을지 <b>내가 적어야</b> 합니다(<code>list.isEmpty()</code>).
+  en: >-
+    This untangles “why won't <code>if (list)</code> compile” — a list is neither true nor false, so
+    <b>you</b> have to write the question (<code>list.isEmpty()</code>).
+bridge:
+  ko: >-
+    파이썬·자바스크립트는 빈 목록·0·빈 글자를 거짓으로 읽어 줍니다. 자바는 <b>안 읽어 줍니다</b> —
+    편의가 사라진 대신 「무엇을 물었는지」가 코드에 남습니다.
+  en: >-
+    Python and JavaScript read an empty list, a zero, an empty string as false. Java <b>does not</b> —
+    the convenience is gone, and what was asked stays written down.
+misconceptions:
+  - ko: "0 이면 거짓이다 — 자바에서 <code>if (0)</code> 은 컴파일이 멈춥니다. 숫자는 조건이 아닙니다."
+    en: "Zero is false — <code>if (0)</code> stops the compiler. A number is not a condition."
+  - ko: "빈 목록이면 거짓이다 — 목록도 조건이 못 됩니다. <code>isEmpty()</code> 를 물어야 합니다."
+    en: "An empty list is false — a list is not a condition either. Ask <code>isEmpty()</code>."
+  - ko: "<code>null</code> 이면 거짓이다 — <code>null</code> 도 참·거짓이 아닙니다. <code>x != null</code> 로 물어야 합니다."
+    en: "<code>null</code> is false — it is not a truth value. Ask <code>x != null</code>."
+  - ko: "괄호는 생략할 수 있다 — 자바에서는 문법에 박혀 있어 뺄 수 없습니다."
+    en: "The parentheses are optional — they are part of the grammar here and cannot be dropped."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>흐름을 나누는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that splits the flow</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>물음</b>입니다. 물음만으로는 흐름이 안 갈려요 — 갈리게 하는 낱말이 앞에 있습니다."
+          en: >-
+            {{pick.2|code}} is the <b>question</b>. A question alone splits nothing; the word that
+            splits stands in front of it.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 묻기냐 나누기냐"
+            en: "The sharpest spot — asking or splitting"
+          code:
+            - "(n > 3);        // 묻기만 하고 끝"
+            - "if (n > 3) {}   // 흐름이 갈린다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>참일 때 갈 곳</b>입니다. 어디로 갈지는 앞의 낱말이 정해요."
+          en: >-
+            {{pick.3|code}} is <b>where it goes when it holds</b>. Which way it goes is decided by
+            the word in front.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 나누는 곳이냐 가는 곳이냐"
+            en: "The sharpest spot — the split or the destination"
+          code:
+            - "if (ok) { save(); }"
+            - "//         ^ 여기는 결과"
+
+meaning:
+  - q:
+      ko: "조건 자리에 참·거짓이 아니라 숫자를 적으면 어떻게 될까요?"
+      en: "What if a number stands in the condition instead of true or false?"
+    hint:
+      ko: "자바에는 「0 이면 거짓」이라는 규칙이 <b>없습니다</b>."
+      en: "Java has <b>no</b> rule that reads zero as false."
+    options:
+      - t:
+          ko: "컴파일이 멈춘다 — 참·거짓이 와야 한다고 한다"
+          en: "It stops compiling — it wants true or false"
+      - t:
+          ko: "0 이면 거짓, 아니면 참으로 읽는다"
+          en: "Zero reads as false, anything else as true"
+        diag:
+          t:
+            ko: "그 규칙은 C·파이썬·자바스크립트의 것입니다. 자바는 숫자와 참·거짓을 <b>아예 다른 종류</b>로 보고 섞지 않아요."
+            en: >-
+              That rule belongs to C, Python and JavaScript. Java treats numbers and truth values as
+              <b>different kinds</b> and does not mix them.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 섞이느냐 갈리느냐"
+              en: "The sharpest spot — mixed or separate"
+            code:
+              - "if (count) {}      // 컴파일 안 됨"
+              - "if (count > 0) {}  // 이렇게 물어야 한다"
+      - t:
+          ko: "실행하다가 멈춘다"
+          en: "It stops while running"
+        diag:
+          t:
+            ko: "돌기 <b>전에</b> 걸립니다. 타입이 안 맞는 것은 컴파일러가 보는 일이라 실행까지 가지 않아요."
+            en: >-
+              It is caught <b>before</b> running. A type mismatch is the compiler's business and
+              never reaches run time.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 번역할 때냐 돌 때냐"
+              en: "The sharpest spot — translating or running"
+            code:
+              - "javac  // 여기서 멈춘다"
+              - "java   // 여기까지 못 간다"
+      - t:
+          ko: "경고만 뜨고 그냥 돈다"
+          en: "It warns and runs anyway"
+        diag:
+          t:
+            ko: "경고가 아니라 <b>오류</b>입니다. 자바는 이 자리에서 타입을 양보하지 않아요."
+            en: >-
+              It is an <b>error</b>, not a warning. Java gives no ground on the type here.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 넘어가느냐 막느냐"
+              en: "The sharpest spot — waved through or stopped"
+            code:
+              - "error: incompatible types:"
+              - "       int cannot be converted to boolean"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 조건이 참일 때만 아래 묶음을 <b>한 번</b> 실행합니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} runs the block below <b>once</b>, only when
+        the condition holds.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "if", mono: true }
+      - t: "while"
+        mono: true
+        diag:
+          t:
+            ko: "<code>while</code> 도 같은 물음을 봅니다. 다른 점은 <b>거짓이 될 때까지 되풀이한다</b>는 것 하나예요."
+            en: >-
+              <code>while</code> reads the same question. The one difference is that it
+              <b>repeats until it fails</b>.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 한 번이냐 되풀이냐"
+              en: "The sharpest spot — once or repeated"
+            code:
+              - "if (n < 3) n++;     // 한 번만"
+              - "while (n < 3) n++;  // 3 이 될 때까지"
+      - t: "switch"
+        mono: true
+        diag:
+          t:
+            ko: "<code>switch</code> 는 참·거짓이 아니라 <b>값이 무엇인지</b>로 여러 갈래를 냅니다. 괄호 안에 물음이 아니라 값이 와요."
+            en: >-
+              <code>switch</code> splits many ways by <b>what the value is</b>, not by true or false.
+              A value stands in the parentheses, not a question.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 참·거짓이냐 값이냐"
+              en: "The sharpest spot — a truth value or a value"
+            code:
+              - "if (day == 1) {}   // 참·거짓"
+              - "switch (day) {}    // 값 그대로"
+      - t: "for"
+        mono: true
+        diag:
+          t:
+            ko: "<code>for</code> 의 괄호 안은 셋(<b>시작·조건·다음</b>)입니다. 물음 하나만 넣으면 나머지 둘이 비어 문법이 안 서요."
+            en: >-
+              A <code>for</code> holds three things in its parentheses — <b>start, condition, step</b>.
+              One question alone leaves two of them empty and the grammar does not stand.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 하나냐 셋이냐"
+              en: "The sharpest spot — one thing or three"
+            code:
+              - "if (n < 3) {}"
+              - "for (int i = 0; i < 3; i++) {}"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 이 일을 <b>언제나</b> 하지 않고 조건을 걸었을까요?"
+    en: "Why does line {{site.line}} put a condition on this instead of doing it <b>always</b>?"
+  choices:
+    - t:
+        ko: "이 아래 코드가 참일 때만 말이 되기 때문 — 아니면 없는 값을 만지거나 헛일을 한다"
+        en: "Because the code below only makes sense when it holds — otherwise it touches nothing or wastes work"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 조건을 지우면 무엇이 터지는지도 함께 적어 보세요."
+        en: "That is the direction. Say also what breaks if the condition is removed."
+    - t:
+        ko: "코드를 빠르게 하려고"
+        en: "To make the code faster"
+      ok: false
+      fb:
+        ko: "빨라지는 것은 곁다리입니다. 갈림의 이유는 대개 <b>경우가 다름</b>이지 속도가 아니에요."
+        en: "Speed is a side effect. A branch is usually about <b>whether the case holds</b>, not about time."
+    - t:
+        ko: "자바가 조건을 요구해서"
+        en: "Because Java demands a condition"
+      ok: false
+      fb:
+        ko: "요구하지 않습니다. 조건 없이 그냥 적어도 됩니다 — 거는 것은 선택입니다."
+        en: "It does not. The line could stand with no condition — putting one there is a choice."
+
+queries:
+  - { grammars: [java], file: ./if-statement.scm }
+
+examples:
+  - code: "if (n > 3) { save(); }"
+    expect: { sites: 1, form: if, hole: "if", picks: { 1: "if", 2: "(n > 3)", 3: "{ save(); }" } }
+  - code: "while (n > 3) { n--; }"
+    expect: none
