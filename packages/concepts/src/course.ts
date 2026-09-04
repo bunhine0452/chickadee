@@ -13,8 +13,10 @@
  * 자기 것이 **3장**뿐(공유 0.89)이라 남의 것에 얹혀 있고, 그 탓에 세 지표에서 다 1번이 됐다.
  * `SecurityUtil`(7챕터)·`api.js`(8챕터) 같은 공유 부품에는 **폐포 의미론상 주인이 없다.**
  *
- * 그래서 순서를 그래프로만 매기고, 「이 리포에서는 로그인이 먼저다」는 **사람이 고정한다**
- * (`docs/program/course.md` §2 · 아직 배선 안 됨).
+ * 그래서 그래프에 지표를 하나 더 만들지 않고 **사전에 물어본다** — 규약(`proto/`)의 근거
+ * 낱말이 가장 많이 보이는 챕터가 1번이다. JWT·토큰을 다루는 기능이 먼저라는 규칙이고,
+ * 그 판단은 코드의 모양이 아니라 **무엇에 대한 코드인가**에서 온다.
+ * 사람이 `first` 로 직접 고정할 수도 있다.
  *
  * **② 그다음은 새로 여는 파일이 적은 순.** 앞 챕터가 이미 연 파일은 다시 안 센다 —
  * 뼈대를 1번에서 배우고 그 뼈대의 최소형을 다음에 본다. 동점은 이름으로 끊는다.
@@ -28,11 +30,29 @@ export interface Chapter extends FeatureUnit {
   opens: string[];
 }
 
-/**
- * 사람이 1번으로 고정한 챕터 이름. 없으면 규칙이 정한다.
- * 그래프가 못 보는 판단(「로그인을 먼저」)이 들어오는 유일한 문이다.
- */
-export interface CourseOptions { first?: string }
+export interface CourseOptions {
+  /** 사람이 1번으로 못박은 챕터. `protoHits` 보다 우선한다. */
+  first?: string;
+  /**
+   * 파일 → 그 파일에서 보인 규약(`proto/`) 근거 낱말 수.
+   *
+   * **이 기능만의 파일에서만 센다.** 공유 파일로 세면 전부 동점이 된다 — `api.js` 하나에
+   * `accessToken` 이 있고 그 파일은 여덟 챕터가 다 갖고 있다.
+   */
+  protoHits?: ReadonlyMap<string, number>;
+}
+
+/** 이 챕터만의 파일에 보인 규약 근거 수. 공유 파일은 안 센다. */
+function protoScore(
+  unit: FeatureUnit,
+  mine: ReadonlyMap<string, number>,
+  hits: ReadonlyMap<string, number>,
+): number {
+  return unit.files.reduce(
+    (n, f) => (mine.get(f) === 1 ? n + (hits.get(f) ?? 0) : n),
+    0,
+  );
+}
 
 export function buildCourse(units: readonly FeatureUnit[], opts: CourseOptions = {}): Chapter[] {
   if (units.length === 0) return [];
@@ -40,7 +60,16 @@ export function buildCourse(units: readonly FeatureUnit[], opts: CourseOptions =
   const out: Chapter[] = [];
   const opened = new Set<string>();
 
-  const pinned = left.findIndex((u) => u.name === opts.first);
+  let pinned = left.findIndex((u) => u.name === opts.first);
+  if (pinned < 0 && opts.protoHits !== undefined) {
+    const mine = new Map<string, number>();
+    for (const u of units) for (const f of u.files) mine.set(f, (mine.get(f) ?? 0) + 1);
+    const scored = left
+      .map((u) => [u, protoScore(u, mine, opts.protoHits as ReadonlyMap<string, number>)] as const)
+      .filter(([, n]) => n > 0)
+      .sort((a, b) => b[1] - a[1] || a[0].name.localeCompare(b[0].name));
+    if (scored.length > 0) pinned = left.indexOf(scored[0]?.[0] as FeatureUnit);
+  }
   if (pinned > 0) left.unshift(...left.splice(pinned, 1));
 
   for (let order = 1; left.length > 0; order += 1) {
