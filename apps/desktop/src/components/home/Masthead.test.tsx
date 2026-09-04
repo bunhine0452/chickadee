@@ -66,11 +66,12 @@ describe('Masthead', () => {
     expect(ticket.textContent).toContain('2.4');
   });
 
-  it('리포 칸은 전환 자리다 — 목록은 아직 없다', () => {
+  it('리포 칸이 스위처다 — 칸 이름과 지금 리포를 같이 읽는다 (D119)', () => {
     setup();
-    const button = screen.getByRole('button', { name: '리포' });
+    const button = screen.getByRole('button', { name: '리포 cart-shop-web' });
     expect(button.getAttribute('aria-haspopup')).toBe('listbox');
-    expect(button.hasAttribute('disabled')).toBe(true);
+    expect(button.hasAttribute('disabled')).toBe(false);
+    // 목록 자체의 거동은 `screens/repos/RepoSwitcher.test.tsx` 가 본다.
   });
 
   it('스위치 두 개가 <html> 의 data-theme · data-trim 을 세운다', async () => {

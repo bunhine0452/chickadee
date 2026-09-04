@@ -10,7 +10,7 @@ import type { Page } from '@playwright/test';
 
 import {
   T1_SKIP, T2_SKIP, allowedBySel, closeLifer, deeSilhouette, gotoDev, loadAllow, motionOver,
-  runGates, startSession, submit, toNight, toSummary, answerKey,
+  runGates, startSession, submit, toNight, toShelf, toSummary, answerKey,
 } from '../support/gates.js';
 import type { AppDb } from '../support/app-db.js';
 
@@ -42,6 +42,15 @@ const SCREENS: Array<{ name: string; open: (page: Page, app: AppDb) => Promise<v
     open: async (page) => {
       await gotoDev(page);
       await toNight(page);
+    },
+  },
+  // 06 §2 의 여섯에는 없던 화면이다 (D119). 목업이 없어 조판을 설정 화면에서 빌려 왔고,
+  // 빌린 조판이 실제로 규칙 안에 있는지는 여기서만 드러난다.
+  {
+    name: '서가',
+    open: async (page) => {
+      await gotoDev(page);
+      await toShelf(page);
     },
   },
 ];

@@ -2,6 +2,7 @@ import { DeeLogo, FlatButton, Switch } from '@chickadee/ui';
 
 import { useAppearance, type Theme, type Trim } from '../../data/settings.js';
 import type { HomeMasthead } from '../../screens/home/data';
+import { RepoSwitcher } from '../../screens/repos/RepoSwitcher.js';
 import './Masthead.css';
 
 export type { Theme, Trim };
@@ -55,17 +56,7 @@ export function Masthead({ repoName, today, streak, masthead, onSettings }: Mast
           <span className="tk-k" id="tk-repo">
             리포
           </span>
-          {/* 리포 전환은 M2 의 RepoSwitcher(listbox) 자리다 — 지금은 이름만 보여 준다. */}
-          <button
-            type="button"
-            className="tk-v mono repo-switch"
-            aria-haspopup="listbox"
-            aria-expanded={false}
-            aria-labelledby="tk-repo"
-            disabled
-          >
-            {repoName}
-          </button>
+          <RepoSwitcher repoName={repoName} />
         </div>
         <div className="tk">
           <span className="tk-k">날짜</span>

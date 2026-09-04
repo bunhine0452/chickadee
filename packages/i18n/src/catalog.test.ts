@@ -10,8 +10,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
-import { en } from './en.js';
-import { ko, type MessageKey } from './ko.js';
+import { en, ko, type MessageKey } from './catalog.js';
 
 const KEYS = Object.keys(ko) as MessageKey[];
 

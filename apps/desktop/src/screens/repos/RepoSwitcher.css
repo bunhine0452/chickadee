@@ -1,0 +1,53 @@
+/* 리포 스위처 (05 §2.4). 칸 자체의 모양은 `Masthead.css` 의 `.repo-switch` 가 이미 들고
+   있다 — 여기 있는 것은 열렸을 때 뜨는 목록뿐이다. */
+.repo-switch-wrap {
+  position: relative;
+}
+
+.repo-switch-list {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 6px);
+  left: -8px;
+  min-width: 14em;
+  max-height: 18em;
+  overflow-y: auto;
+  margin: 0;
+  padding: 4px;
+  border: 2.5px solid var(--rule);
+  background: var(--paper);
+  box-shadow: 4px 5px 0 var(--edge), var(--lamp);
+  list-style: none;
+}
+
+.repo-switch-list:focus-visible {
+  outline: 3px solid var(--t0);
+  outline-offset: 2px;
+}
+
+.repo-switch-opt {
+  padding: 5px 9px;
+  color: var(--ink);
+  font-family: var(--f-mono);
+  font-size: var(--fs-14);
+  cursor: default;
+}
+
+/* 방향키가 짚은 줄. 포커스는 listbox 에 있으므로 이 표시가 「지금 어디인지」의 전부다. */
+.repo-switch-opt[data-at="on"] {
+  background: var(--paper-3);
+  box-shadow: inset 3px 0 0 var(--t0);
+}
+
+.repo-switch-opt[aria-selected="true"]::after {
+  content: " ·";
+  color: var(--ink-soft);
+}
+
+.repo-switch-all {
+  margin-top: 4px;
+  padding-top: 7px;
+  border-top: 1px dashed var(--rule);
+  font-family: var(--f-ui);
+  font-size: var(--fs-13);
+}

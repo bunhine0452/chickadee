@@ -10,8 +10,7 @@
  */
 import { isMissing, render, type TemplateVars } from '@chickadee/text';
 
-import { en } from './en.js';
-import { ko, type MessageKey } from './ko.js';
+import { en, ko, type MessageKey } from './catalog.js';
 import { detectLocale, type Locale } from './locale.js';
 
 let current: Locale = 'ko';

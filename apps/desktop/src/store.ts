@@ -16,7 +16,7 @@ import type { HomeData } from './screens/home/data.js';
 import type { IngestWarningRow } from './screens/ingest/IngestScreen.js';
 import type { Progress } from './screens/ingest/phases.js';
 
-export type Screen = 'first-run' | 'home' | 'ingest' | 'settings';
+export type Screen = 'first-run' | 'home' | 'ingest' | 'repos' | 'settings';
 
 /** 판 하나의 결과 — 채점 뒤 화면이 그리는 것 전부 (05 §3 `CardResult`). */
 export interface PlateResult {
@@ -93,6 +93,8 @@ export interface UiActions {
   go: (screen: Screen) => void;
   setLocale: (locale: Locale) => void;
   setRepos: (repos: RepoInfo[], activeId?: number | null) => void;
+  /** 서가·스위처의 리포 전환 (D119 · 05 §2.4). 세션 중에는 아무것도 하지 않는다. */
+  setActive: (repoId: number) => boolean;
   setHome: (home: HomeData | null) => void;
   beginIngest: () => void;
   step: (at: Progress, currentPath?: string) => void;
@@ -135,12 +137,38 @@ export const useUi = create<UiState & SessionState & UiActions & SessionActions>
   go: (screen) => set({ screen }),
   setLocale: (locale) => set({ locale }),
   setRepos: (repos, activeId) =>
-    set((s) => ({
-      repos,
-      activeId: activeId === undefined ? (s.activeId ?? repos[0]?.id ?? null) : activeId,
-      screen: repos.length === 0 ? 'first-run' : s.screen === 'first-run' ? 'home' : s.screen,
-    })),
+    set((s) => {
+      // 보던 리포가 목록에서 사라졌으면(서가에서 지웠다) 첫 줄로 내려온다. 그대로 두면
+      // `activeRepo()` 가 `null` 이라 리포가 남아 있는데도 첫 실행 화면이 뜬다.
+      const next = activeId === undefined
+        ? (repos.some((r) => r.id === s.activeId) ? s.activeId : repos[0]?.id ?? null)
+        : activeId;
+      return {
+        repos,
+        activeId: next,
+        // 리포가 바뀌었으면 홈은 남의 리포 것이다 — 비워서 다시 읽게 한다.
+        home: next === s.activeId ? s.home : null,
+        screen: repos.length === 0 ? 'first-run' : s.screen === 'first-run' ? 'home' : s.screen,
+      };
+    }),
   setHome: (home) => set({ home }),
+  /**
+   * 리포를 바꾼다 (05 §2.4). 바꾸는 것은 `activeId` 하나이고 `home` 을 비워 다시 읽게 한다 —
+   * 화면 상태는 파생 캐시라 통째로 버리는 편이 부분 갱신보다 싸고 틀릴 자리가 없다 (05 §3).
+   *
+   * **세션 중에는 바꾸지 않는다.** 교정지 한 장이 어느 리포 것인지가 도중에 바뀌면 그 세션의
+   * 채점이 어느 원장에 남는지가 흔들린다. 진행 중 세션은 리포별로 저장되므로 나갔다 와도
+   * 그 자리에서 이어 찍힌다.
+   */
+  setActive: (repoId) => {
+    let moved = false;
+    set((s) => {
+      if (s.session !== null || s.activeId === repoId) return {};
+      moved = true;
+      return { activeId: repoId, home: null, screen: 'home' as Screen };
+    });
+    return moved;
+  },
   beginIngest: () =>
     set({ screen: 'ingest', at: null, warnings: [], ingestDone: false, cancelling: false, error: undefined }),
   step: (at, currentPath) => set({ at, currentPath }),
