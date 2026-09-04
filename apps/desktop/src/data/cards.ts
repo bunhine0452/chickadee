@@ -9,6 +9,7 @@ import {
   type FocusLine, type GenResult, type LineWindow, type NoPlate, type OtherUse,
   type SiteInput, type T0Card,
 } from '@chickadee/cards';
+import { CARD_ONLY_SITE_ID } from '@chickadee/concepts';
 import type { Dict } from '@chickadee/dictionary';
 import { ipc } from '@chickadee/ipc-client';
 import { estMinFor, type Candidate } from '@chickadee/scheduler';
@@ -69,6 +70,17 @@ export function cardMaker(deps: MakerDeps): CardMaker {
     },
 
     async forNew(conceptId, siteId) {
+      // 사용처 없이 이미 구워진 카드 (D154 · 추적). 만들 것이 아니라 **찾을** 것이다 —
+      // `makeCard` 를 부르면 없는 사용처를 읽으려다 사유 없이 실패한다.
+      if (siteId === CARD_ONLY_SITE_ID) {
+        const rows = await ipc.store.query('queue.pick_card', {
+          repoId: deps.repoId, conceptId, level: 1,
+        });
+        const id = rows[0]?.id;
+        return id === undefined
+          ? null
+          : { cardId: id, conceptId, track: 't0', role: 'new', estMin: estMinFor('t0', 'new') };
+      }
       const made = await makeCard(deps, conceptId, siteId, 1);
       return made === null
         ? null

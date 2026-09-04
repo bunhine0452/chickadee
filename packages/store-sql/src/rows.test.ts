@@ -522,6 +522,59 @@ describe('toXxxParams 왕복 (카탈로그 statement 로 쓴 뒤 되읽기)', ()
 
 // ───────── 무음 손상 금지 ─────────
 
+/**
+ * D154 — 「사용처 없이 카드만 있는 개념」 가지. **이 문장에는 시험이 없었다**: 가지를 더하며
+ * 문법 오류가 나도 아무도 안 잡는 상태였고, 낡은 `dist` 로 확인하면 옛 문장을 재게 된다.
+ *
+ * 시험마다 다른 개념을 쓴다 — DB 가 이 파일 전체에 하나뿐이라 순서에 기대면 안 된다.
+ */
+describe('queue.new_candidates (실제 SQLite)', () => {
+  let n = 0;
+  /** 사용처 없이 카드만 있는 개념 하나를 심고 그 id 를 준다. */
+  const seedCardOnly = (over: { retired?: boolean; printed?: boolean } = {}): string => {
+    n += 1;
+    const id = `exec/order${n}`;
+    insert(db, 'concept', {
+      id, lang: 'exec', name_ko: id, name_en: id, token: null, kind: 'universal',
+      universal_id: null, track_default: 't0', dict_version_id: 1, is_retired: 0,
+    });
+    insert(db, 'card', {
+      id: 900 + n, repo_id: 1, unit_id: null, track: 't0', kind: 'point', concept_id: id,
+      level: 1, site_id: null, file_id: null, commit_id: null, payload_json: '{}',
+      snapshot_json: null, gen_version: 1, content_hash: `exec-${n}`, created_at: T,
+      retired_at: over.retired === true ? T : null,
+    });
+    if (over.printed === true) {
+      insert(db, 'mastery', {
+        concept_id: id, state: 2, stability: 1, difficulty: 5, due_at: T, last_review_at: T,
+        reps: 1, lapses: 0, layer: 1, day_key: '2026-09-04', day_start_layer: 0, day_ceiling: 1,
+        first_ok_at: T, last_ok_day: '2026-09-04', dunno_total: 0, transfer_from: null,
+        applied_log_id: 0, updated_at: T,
+      });
+    }
+    return id;
+  };
+  const rows = (): { id: string; site_count: number }[] =>
+    db.prepare(statements['queue.new_candidates']).all({ repoId: 1 }) as never;
+
+  test('사용처가 없어도 카드가 있으면 후보로 나온다 — site_count 는 0 이다', () => {
+    const id = seedCardOnly();
+    const hit = rows().find((r) => r.id === id);
+    expect(hit).toBeDefined();
+    expect(hit?.site_count).toBe(0);
+  });
+
+  test('카드가 은퇴하면 빠진다', () => {
+    const id = seedCardOnly({ retired: true });
+    expect(rows().some((r) => r.id === id)).toBe(false);
+  });
+
+  test('이미 찍은 개념은 빠진다 — 새 판 후보가 아니다', () => {
+    const id = seedCardOnly({ printed: true });
+    expect(rows().some((r) => r.id === id)).toBe(false);
+  });
+});
+
 describe('*_json 이 스키마와 다르면 오류다 (02 §8.1)', () => {
   const SECRET = 'PRIVATE_CODE_ZZTOP_9931';
 

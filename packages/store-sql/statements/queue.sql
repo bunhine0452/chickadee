@@ -31,7 +31,21 @@ WHERE c.kind = 'lang' AND c.is_retired = 0 AND c.track_default = 't0'
     WHERE p.concept_id = c.id AND COALESCE(pm.layer, 0) = 0
       AND EXISTS (SELECT 1 FROM concept_site ps
                   WHERE ps.repo_id = :repoId AND ps.concept_id = p.prereq_id AND ps.is_alive = 1))
-GROUP BY c.id;
+GROUP BY c.id
+UNION ALL
+-- 사용처 없이 카드가 이미 구워진 개념 (D154 · 추적 `exec/*`). 위 가지는 손대지 않는다 —
+-- 새 판 순위가 전부 거기 걸려 있다. 이 가지는 `site_count` 0 이라 셋째 정렬 키에서 뒤에 서고,
+-- 랭커가 미지를 경계값으로 줘서 같은 깊이의 어휘 개념보다 뒤에 선다 (02 §6.2).
+SELECT c.id, 0 AS site_count
+FROM concept c
+LEFT JOIN mastery m ON m.concept_id = c.id
+WHERE c.is_retired = 0 AND c.track_default = 't0'
+  AND COALESCE(m.state, 0) = 0
+  AND EXISTS (SELECT 1 FROM card k
+              WHERE k.repo_id = :repoId AND k.concept_id = c.id
+                AND k.track = 't0' AND k.retired_at IS NULL)
+  AND NOT EXISTS (SELECT 1 FROM concept_site s
+                  WHERE s.repo_id = :repoId AND s.concept_id = c.id AND s.is_alive = 1);
 
 -- 첫 노출 사용처 (02 §6.2 `bestSite`) — 미지 최소 → 짧은 줄 → id.
 -- @name queue.best_site

@@ -203,3 +203,10 @@ describe('카드 한 장 (끝에서 끝까지)', () => {
     expect(() => cardPayloadSchema.parse(p)).not.toThrow();
   });
 });
+
+describe('큐 진입 (D154)', () => {
+  test('두 패키지의 센티넬이 같은 값이다 — 어긋나면 큐가 카드를 못 찾는다', async () => {
+    const { CARD_ONLY_SITE_ID } = await import('@chickadee/concepts');
+    expect(CARD_ONLY_SITE_ID).toBe(EXEC_SITE_ID);
+  });
+});

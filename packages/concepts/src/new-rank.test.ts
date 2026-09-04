@@ -157,3 +157,29 @@ describe('초보 감지 (§6.4)', () => {
       .toBe('suspect');
   });
 });
+
+describe('사용처 없이 카드만 있는 후보 (D154)', () => {
+  const rank = (candidates: { conceptId: string; siteCount: number }[]) =>
+    rankNewConcepts({
+      candidates,
+      bestSiteOf: (id) =>
+        (id === 'ts/a' ? { siteId: 1, unknown: 0, lineStart: 1, lineEnd: 1 } : null),
+      prereqOf: () => [],
+    }).map((c) => c.conceptId);
+
+  test('걸러지지 않고 후보로 남는다', () => {
+    expect(rank([{ conceptId: 'exec/order', siteCount: 0 }])).toEqual(['exec/order']);
+  });
+
+  // 추적을 더하되 이미 잰 곡선을 흔들지 않는다 — 미지 경계값이라 어휘 뒤에 선다.
+  test('같은 깊이의 어휘 개념보다 뒤에 선다', () => {
+    expect(rank([
+      { conceptId: 'exec/order', siteCount: 0 },
+      { conceptId: 'ts/a', siteCount: 5 },
+    ])).toEqual(['ts/a', 'exec/order']);
+  });
+
+  test('사용처가 있는데 죽어 best 가 없으면 그대로 걸러진다 — 예전 행동이 안 바뀐다', () => {
+    expect(rank([{ conceptId: 'ts/dead', siteCount: 3 }])).toEqual([]);
+  });
+});

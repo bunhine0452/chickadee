@@ -26,7 +26,7 @@ export {
 } from './unknown-rank.js';
 export type { ChoosableSite, LayerOf, MasteryRow, RankableSite } from './unknown-rank.js';
 export {
-  NEWCOMER_CLEAR_OKS, NEWCOMER_MIN_MISSES, NEWCOMER_MIN_ROOT_NEW, UNKNOWN_CAP,
+  CARD_ONLY_SITE_ID, NEWCOMER_CLEAR_OKS, NEWCOMER_MIN_MISSES, NEWCOMER_MIN_ROOT_NEW, UNKNOWN_CAP,
   isRockBottom, levelForLayer, newcomerFlag, rankNewConcepts, transferFrom,
 } from './new-rank.js';
 export type {
