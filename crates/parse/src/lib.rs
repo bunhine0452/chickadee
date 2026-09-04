@@ -65,10 +65,13 @@ pub fn scan(src: &[u8], queries: &Queries, max_bytes: usize) -> Result<Scan, Par
 ///
 /// tree-sitter reads several included ranges as **one joined document**, so a node
 /// can span two of them and report an excerpt covering the gap between. That is
-/// wrong for a MyBatis mapper, where each statement is its own SQL, and for a Vue
+/// wrong for a `MyBatis` mapper, where each statement is its own SQL, and for a Vue
 /// file with both `<script>` and `<script setup>`. Parsing them one at a time costs
 /// a parse per range and gives each its own tree.
 fn scan_ranges(src: &[u8], queries: &Queries) -> Result<Scan, ParseError> {
+    // `bytecount` 를 들이지 않는다 — 파일 하나를 여는 길에 한 번 도는 셈이고,
+    // 크레이트 하나가 그 값보다 비싸다 (01 §1.1 얇은 Rust).
+    #[allow(clippy::naive_bytecount)]
     let lines = u32::try_from(src.iter().filter(|&&b| b == b'\n').count()).unwrap_or(u32::MAX) + 1;
     let mut captures = Vec::new();
     let mut quality = "ok";

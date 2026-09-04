@@ -36,6 +36,9 @@ fn find(hay: &[u8], needle: &[u8], from: usize) -> Option<usize> {
 
 fn point_at(src: &[u8], at: usize) -> Point {
     let before = &src[..at.min(src.len())];
+    // `bytecount` 를 들이지 않는다 — 파일 하나를 여는 길에 한 번 도는 셈이고,
+    // 크레이트 하나가 그 값보다 비싸다 (01 §1.1 얇은 Rust).
+    #[allow(clippy::naive_bytecount)]
     let row = before.iter().filter(|&&b| b == b'\n').count();
     let start = before
         .iter()
@@ -75,7 +78,7 @@ pub(crate) fn script_ranges(src: &[u8]) -> Vec<Range> {
     tag_bodies(src, b"<script")
 }
 
-/// The SQL inside a MyBatis mapper's statement elements.
+/// The SQL inside a `MyBatis` mapper's statement elements.
 ///
 /// A body holding `<` is a dynamic statement (`<if>`, `<foreach>`): XML tags sit
 /// inside the SQL and no SQL grammar reads that. Those are skipped rather than

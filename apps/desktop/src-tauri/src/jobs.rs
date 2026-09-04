@@ -501,7 +501,7 @@ fn extension_map(spec: &JobSpec) -> BTreeMap<String, &LangSpec> {
 /// Every grammar that reads a given extension (D159).
 ///
 /// `extension_map` collects into a map, so one extension keeps **one** language —
-/// the row written to `file.grammar`. A MyBatis mapper needs two: XML for the
+/// the row written to `file.grammar`. A `MyBatis` mapper needs two: XML for the
 /// attributes and SQL for the statement bodies, and unlike `.vue` that cannot be
 /// one grammar restricted to ranges. This one keeps them all, for captures only.
 fn grammars_of(spec: &JobSpec) -> BTreeMap<String, Vec<String>> {
