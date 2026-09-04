@@ -33,8 +33,10 @@
   line-height: var(--lh-tight);
 }
 
+/* 높이는 목업의 10px 이 아니라 14px 이고, 찬 만큼의 끝을 선으로 끊는다 (D127) —
+   최소 창(1000px)에서 10px 띠는 「어디까지 찼나」가 색면 하나로만 남는다. */
 .ctoc-bar {
-  height: 10px;
+  height: 14px;
   margin: 8px 0 6px;
   border: 2px solid var(--rule);
   background: var(--paper-3);
@@ -44,8 +46,12 @@
   display: block;
   width: var(--pct, 0%);
   height: 100%;
+  border-right: 2px solid var(--rule);
   background: var(--t1);
 }
+
+.ctoc-bar[data-fill="empty"] i,
+.ctoc-bar[data-fill="full"] i { border-right: 0 }
 
 .ctoc-cut {
   color: var(--ink-soft);

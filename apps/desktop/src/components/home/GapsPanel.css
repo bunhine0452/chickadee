@@ -80,11 +80,13 @@
   font-weight: 700;
 }
 
+/* 목업보다 굵고(11 → 14px) 넓다(104 → 120px). 찬 만큼의 끝을 선으로 끊는다 (D127) —
+   황 채움은 종이 위에서 밝아 경계가 없으면 길이를 눈으로 못 잰다. */
 .bar {
   position: relative;
   flex: 1;
-  max-width: 104px;
-  height: 11px;
+  max-width: 120px;
+  height: 14px;
   overflow: hidden;
   border: 1.5px solid var(--rule);
   background: var(--paper-2);
@@ -94,6 +96,7 @@
   position: absolute;
   inset: 0 auto 0 0;
   width: var(--f, 50%);
+  border-right: 1.5px solid var(--rule);
   background-color: var(--t2);
   background-image: radial-gradient(rgba(0, 0, 0, .34) 1.1px, transparent 1.3px);
   background-size: 4px 4px;

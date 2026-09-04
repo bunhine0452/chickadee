@@ -1,9 +1,10 @@
-/* 목업 design/ink-home.html 의 `.queue`·`.qlist` 그대로 (05 §5).
-   단계가 지나간 칸은 옅어진다 — 남은 양이 눈에 먼저 들어와야 한다. */
+/* 목업 design/ink-home.html 의 `.queue`·`.qlist` (05 §5).
+   목업과 다른 것 둘 (D127) — 높이 14 → 18px, 「아직 안 지난 칸」을 `opacity: .3` 대신
+   빗금으로 비운다. 남은 양이 눈에 먼저 들어와야 하는데 흐린 색은 종이와 갈리지 않았다. */
 .queue {
   display: flex;
   gap: 2px;
-  height: 14px;
+  height: 18px;
   padding: 2px;
   margin: 10px 0 8px;
   border: 2px solid var(--rule);
@@ -28,7 +29,15 @@
   background-size: 4px 4px;
 }
 
-.queue i[data-state="later"] { opacity: 0.3; }
+/* 아직 안 지난 칸 = 아직 안 찍힌 판. 색은 그대로 두고 종이 빗금을 얹는다 —
+   `opacity: .3` 은 `--paper-3` 위에서 대비 1.4:1 이라 칸의 경계부터 안 보였다 (D127). */
+.queue i[data-state="later"] {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0 3px,
+    var(--paper-2) 3px 6px
+  );
+}
 
 .qlist {
   display: flex;

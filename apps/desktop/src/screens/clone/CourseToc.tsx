@@ -66,6 +66,9 @@ export function CourseToc(props: CourseTocProps) {
           className="ctoc-bar"
           role="img"
           aria-label={t('course.tocPct', { n: String(pct) })}
+          // 찬 자리의 끝을 선으로 끊는다 (D127). 0·100 에서는 끊을 자리가 없다 —
+          // 0 에서 선이 남으면 「조금 찼다」로, 100 에서는 테두리가 두 겹으로 읽힌다.
+          data-fill={pct === 0 ? 'empty' : pct === 100 ? 'full' : 'part'}
           style={{ '--pct': `${pct}%` } as React.CSSProperties}
         >
           <i aria-hidden="true" />
