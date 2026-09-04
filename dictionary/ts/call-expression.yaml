@@ -11,73 +11,149 @@ prereq: [ts/property-access]
 confusions: [ts/property-access]
 
 dict:
-  one_liner: "괄호가 붙는 순간 함수가 돈다. 괄호가 없으면 함수 자체가 값이다."
-  why: >-
-    함수는 「이렇게 하라」고 적어 둔 절차입니다. 적어 두기만 해서는 아무 일도 일어나지 않고,
-    괄호를 붙여야 그 절차가 실제로 돕니다. {{site.line}}행의 {{pick.2|code}}{{pick.2|josa:이,가}} 바로 그
-    「지금 해라」 표시예요.
+  one_liner:
+    ko: "괄호가 붙는 순간 함수가 돈다. 괄호가 없으면 함수 자체가 값이다."
+    en: "The moment parentheses follow, the function runs. Without them it is a value."
+  why:
+    ko: >-
+      함수는 「이렇게 하라」고 적어 둔 절차입니다. 적어 두기만 해서는 아무 일도 일어나지 않고,
+      괄호를 붙여야 그 절차가 실제로 돕니다. {{site.line}}행의 {{pick.2|code}}{{pick.2|josa:이,가}} 바로 그
+      「지금 해라」 표시예요.
+    en: >-
+      A function is a procedure written down as “do it this way”. Writing it down makes nothing
+      happen; the parentheses are what actually run it. {{pick.2|code}} on line {{site.line}} is
+      exactly that “do it now” mark.
   trace:
-    - "{{pick.1|code}} 라는 이름이 가리키는 함수를 찾는다."
-    - "{{pick.2|code}} 안의 값을 왼쪽부터 하나씩 계산한다."
-    - "그 값들을 넘겨 함수를 돌리고, 함수가 돌려준 값이 {{site.line}}행의 값이 된다."
+    - ko: "{{pick.1|code}} 라는 이름이 가리키는 함수를 찾는다."
+      en: "The function the name {{pick.1|code}} points at is looked up."
+    - ko: "{{pick.2|code}} 안의 값을 왼쪽부터 하나씩 계산한다."
+      en: "The values inside {{pick.2|code}} are evaluated one at a time from the left."
+    - ko: "그 값들을 넘겨 함수를 돌리고, 함수가 돌려준 값이 {{site.line}}행의 값이 된다."
+      en: >-
+        Those values are passed, the function runs, and what it hands back becomes the value of line
+        {{site.line}}.
 
-rule: "<b>이름만 쓰면 함수 그 자체, 괄호를 붙이면 함수를 돌린 결과.</b>"
+rule:
+  ko: "<b>이름만 쓰면 함수 그 자체, 괄호를 붙이면 함수를 돌린 결과.</b>"
+  en: "<b>The name alone is the function itself; with parentheses it is the result of running it.</b>"
 result:
-  label: "{{site.line}}행의 값"
+  label:
+    ko: "{{site.line}}행의 값"
+    en: "The value of line {{site.line}}"
   value: "{{pick.1}}{{pick.1|josa:이,가}} 돌려준 값"
-  note: "함수 자체가 아니라 결과"
-ok: >-
-  {{pick.2|code}}{{pick.2|josa:이,가}} 붙었으니 {{pick.1|code}}{{pick.1|josa:이,가}} <b>지금</b> 돌아갑니다. 괄호를 떼면 함수는
-  돌지 않고, {{site.line}}행의 값은 함수 그 자체가 됩니다.
-payoff: >-
-  같은 절차를 여러 곳에서 쓰려면 이름을 붙여 두고 필요할 때 괄호를 붙이면 됩니다.
-  {{site.line}}행은 그 절차를 여기서 한 번 쓰는 자리예요.
-bridge: >-
-  {{pick.1|code}}{{pick.1|josa:이,가}} <code>a.b</code> 꼴이면 점으로 꺼낸 값이 함수인 것입니다 — 점이 <b>꺼내고</b>
-  괄호가 <b>돌립니다</b>.
+  note:
+    ko: "함수 자체가 아니라 결과"
+    en: "the result, not the function itself"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:이,가}} 붙었으니 {{pick.1|code}}{{pick.1|josa:이,가}} <b>지금</b> 돌아갑니다. 괄호를 떼면 함수는
+    돌지 않고, {{site.line}}행의 값은 함수 그 자체가 됩니다.
+  en: >-
+    {{pick.2|code}} is there, so {{pick.1|code}} runs <b>now</b>. Take the parentheses off and the
+    function does not run, and the value of line {{site.line}} becomes the function itself.
+payoff:
+  ko: >-
+    같은 절차를 여러 곳에서 쓰려면 이름을 붙여 두고 필요할 때 괄호를 붙이면 됩니다.
+    {{site.line}}행은 그 절차를 여기서 한 번 쓰는 자리예요.
+  en: >-
+    To use the same procedure in several places you give it a name and add parentheses when you need
+    it. Line {{site.line}} is where that procedure is used once, here.
+bridge:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:이,가}} <code>a.b</code> 꼴이면 점으로 꺼낸 값이 함수인 것입니다 — 점이 <b>꺼내고</b>
+    괄호가 <b>돌립니다</b>.
+  en: >-
+    If {{pick.1|code}} has the shape <code>a.b</code>, then the value the dot took out is a function
+    — the dot <b>takes out</b> and the parentheses <b>run</b>.
 misconceptions:
-  - "괄호 없이 이름만 넘겨도 나중에 알아서 돈다 — 넘긴 쪽이 괄호를 붙여 줄 때만 돕니다."
-  - "인자가 없으면 괄호도 없어도 된다 — 인자가 없어도 <code>()</code> 는 있어야 돕니다."
+  - ko: "괄호 없이 이름만 넘겨도 나중에 알아서 돈다 — 넘긴 쪽이 괄호를 붙여 줄 때만 돕니다."
+    en: >-
+      Pass the name without parentheses and it runs later by itself — it runs only when the receiver
+      adds the parentheses.
+  - ko: "인자가 없으면 괄호도 없어도 된다 — 인자가 없어도 <code>()</code> 는 있어야 돕니다."
+    en: >-
+      With no arguments you can leave the parentheses off — even with no arguments, <code>()</code>
+      has to be there for it to run.
 
 point:
-  - q: "{{site.line}}행에서 <b>함수를 지금 돌리게 하는 자리</b>를 짚어 보세요."
-    hint: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+  - q:
+      ko: "{{site.line}}행에서 <b>함수를 지금 돌리게 하는 자리</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the spot that makes the function run now</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
     answer: pick.2
     diag:
       pick.1:
-        t: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>무엇을 돌릴지</b>를 가리키는 이름입니다. 이름만 있으면 함수는 값으로 남아 있고, 돌리는 일은 뒤에 붙은 괄호가 합니다."
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>무엇을 돌릴지</b>를 가리키는 이름입니다. 이름만 있으면 함수는 값으로 남아 있고, 돌리는 일은 뒤에 붙은 괄호가 합니다."
+          en: >-
+            {{pick.1|code}} is the name pointing at <b>what to run</b>. With only the name the
+            function stays a value; running it is the job of the parentheses that follow.
         edge:
-          h: "가장 날카로운 자리 — 괄호가 있느냐"
+          h:
+            ko: "가장 날카로운 자리 — 괄호가 있느냐"
+            en: "The sharpest spot — whether there are parentheses"
           code:
             - "load          // 함수 그 자체"
             - "load(path)    // 돌린 결과"
 
 meaning:
-  - q: "{{site.line}}행에서 {{pick.2|code}}{{pick.2|josa:을,를}} 떼어 내면 값이 어떻게 달라질까요?"
-    hint: "괄호는 「지금 해라」는 표시입니다."
+  - q:
+      ko: "{{site.line}}행에서 {{pick.2|code}}{{pick.2|josa:을,를}} 떼어 내면 값이 어떻게 달라질까요?"
+      en: "If you take {{pick.2|code}} off line {{site.line}}, how does the value change?"
+    hint:
+      ko: "괄호는 「지금 해라」는 표시입니다."
+      en: "Parentheses are the “do it now” mark."
     options:
-      - t: "함수를 돌린 결과 대신 <b>함수 자체</b>가 값이 된다"
-      - t: "달라지지 않는다 — 어차피 나중에 돈다"
+      - t:
+          ko: "함수를 돌린 결과 대신 <b>함수 자체</b>가 값이 된다"
+          en: "<b>The function itself</b> becomes the value, instead of the result of running it"
+      - t:
+          ko: "달라지지 않는다 — 어차피 나중에 돈다"
+          en: "It does not change — it runs later anyway"
         diag:
-          t: "받은 쪽이 괄호를 붙여 줄 때만 돕니다. 아무도 붙여 주지 않으면 그 절차는 끝까지 돌지 않아요."
+          t:
+            ko: "받은 쪽이 괄호를 붙여 줄 때만 돕니다. 아무도 붙여 주지 않으면 그 절차는 끝까지 돌지 않아요."
+            en: >-
+              It runs only when the receiver adds the parentheses. If nobody adds them, that
+              procedure never runs at all.
           edge:
-            h: "가장 날카로운 자리 — 누가 괄호를 붙이나"
+            h:
+              ko: "가장 날카로운 자리 — 누가 괄호를 붙이나"
+              en: "The sharpest spot — who adds the parentheses"
             code:
               - "setTimeout(fn, 0)     // setTimeout 이 나중에 붙여 준다"
               - "setTimeout(fn(), 0)   // 지금 돌고 결과를 넘긴다"
-      - t: "그 자리에서 멈춘다"
+      - t:
+          ko: "그 자리에서 멈춘다"
+          en: "It stops right there"
         diag:
-          t: "이름을 그냥 읽는 것은 멈출 일이 아닙니다. 멈추는 것은 오히려 <b>함수가 아닌 값</b>에 괄호를 붙였을 때예요."
+          t:
+            ko: "이름을 그냥 읽는 것은 멈출 일이 아닙니다. 멈추는 것은 오히려 <b>함수가 아닌 값</b>에 괄호를 붙였을 때예요."
+            en: >-
+              Simply reading a name is nothing to stop over. What does stop is the opposite —
+              putting parentheses on <b>a value that is not a function</b>.
           edge:
-            h: "가장 날카로운 자리 — 멈추는 쪽은 반대다"
+            h:
+              ko: "가장 날카로운 자리 — 멈추는 쪽은 반대다"
+              en: "The sharpest spot — the stopping case is the reverse"
             code:
               - "const f = load        // 멈추지 않는다"
               - "const n = 42; n()     // TypeError"
-      - t: "<code>undefined</code> 가 된다"
+      - t:
+          ko: "<code>undefined</code> 가 된다"
+          en: "It becomes <code>undefined</code>"
         diag:
-          t: "<code>undefined</code> 는 함수가 <b>돌고 나서</b> 돌려줄 것이 없을 때 나옵니다. 괄호를 떼면 애초에 돌지 않아요."
+          t:
+            ko: "<code>undefined</code> 는 함수가 <b>돌고 나서</b> 돌려줄 것이 없을 때 나옵니다. 괄호를 떼면 애초에 돌지 않아요."
+            en: >-
+              <code>undefined</code> comes out when a function has <b>run</b> and has nothing to
+              hand back. Take the parentheses off and it never runs in the first place.
           edge:
-            h: "가장 날카로운 자리 — 돌았느냐 안 돌았느냐"
+            h:
+              ko: "가장 날카로운 자리 — 돌았느냐 안 돌았느냐"
+              en: "The sharpest spot — ran or did not run"
             code:
               - "const a = console.log('x')   // undefined, 화면에는 찍힌다"
               - "const b = console.log        // 함수 자체, 아무것도 안 찍힌다"

@@ -11,76 +11,148 @@ prereq: [ts/arrow-function, ts/array-basics]
 confusions: [ts/array-map-immutable, ts/array-foreach]
 
 dict:
-  one_liner: "<code>filter</code> 는 조건이 참인 항목만 남긴 새 배열을 만든다. 길이가 줄 수 있다."
-  why: >-
-    목록에서 「끝난 것만」 「내 것만」 을 보여 주려면 원본을 지우지 않고 <b>골라낸 새 배열</b>이
-    필요합니다. {{site.line}}행의 {{pick.3|code}}{{pick.3|josa:이,가}} 각 항목에 대해 참·거짓을
-    내고, 참인 것만 새 배열로 넘어갑니다.
+  one_liner:
+    ko: "<code>filter</code> 는 조건이 참인 항목만 남긴 새 배열을 만든다. 길이가 줄 수 있다."
+    en: "<code>filter</code> builds a new array of the items the condition keeps. It can be shorter."
+  why:
+    ko: >-
+      목록에서 「끝난 것만」 「내 것만」 을 보여 주려면 원본을 지우지 않고 <b>골라낸 새 배열</b>이
+      필요합니다. {{site.line}}행의 {{pick.3|code}}{{pick.3|josa:이,가}} 각 항목에 대해 참·거짓을
+      내고, 참인 것만 새 배열로 넘어갑니다.
+    en: >-
+      To show “only the finished ones” or “only mine” from a list, you need <b>a new array of what
+      you picked</b>, not a deletion from the original. On line {{site.line}}, {{pick.3|code}}
+      returns true or false for each item, and only the true ones carry over into the new array.
   trace:
-    - "{{pick.1|code}} 의 항목 하나를 {{pick.3|code}} 에 넣는다."
-    - "돌려준 값이 참 같으면 새 배열에 담고, 거짓 같으면 버린다."
-    - "{{site.line}}행의 값은 <b>남은 것만 든 새 배열</b>이고 {{pick.1|code}}{{pick.1|josa:은,는}} 그대로다."
+    - ko: "{{pick.1|code}} 의 항목 하나를 {{pick.3|code}} 에 넣는다."
+      en: "One item of {{pick.1|code}} goes into {{pick.3|code}}."
+    - ko: "돌려준 값이 참 같으면 새 배열에 담고, 거짓 같으면 버린다."
+      en: "If what comes back is truthy the item goes into the new array; if falsy it is dropped."
+    - ko: "{{site.line}}행의 값은 <b>남은 것만 든 새 배열</b>이고 {{pick.1|code}}{{pick.1|josa:은,는}} 그대로다."
+      en: >-
+        The value of line {{site.line}} is <b>a new array of what remained</b>, and {{pick.1|code}}
+        is unchanged.
 
-rule: "<b>골라내면 filter, 값을 바꾸면 map.</b> 둘 다 새 배열을 만들고 원본은 건드리지 않는다."
+rule:
+  ko: "<b>골라내면 filter, 값을 바꾸면 map.</b> 둘 다 새 배열을 만들고 원본은 건드리지 않는다."
+  en: "<b>Picking is filter, changing is map.</b> Both make a new array and leave the original alone."
 result:
-  label: "{{site.line}}행의 값"
+  label:
+    ko: "{{site.line}}행의 값"
+    en: "The value of line {{site.line}}"
   value: "조건이 참인 항목만 든 새 배열"
-  note: "길이는 원본보다 짧거나 같다"
-ok: >-
-  <code>filter</code> 는 콜백이 <b>참을 돌려준 항목만</b> 모아 새 배열을 만듭니다. 항목의 값은
-  그대로이고 개수만 줄어요.
-payoff: "원본을 지우지 않고도 「이번에 보여 줄 것」을 만들 수 있습니다 — 되돌리기가 공짜입니다."
-bridge: "콜백 {{pick.3|code}}{{pick.3|josa:이,가}} 돌려주는 건 <b>참·거짓</b>이지 새 값이 아닙니다."
+  note:
+    ko: "길이는 원본보다 짧거나 같다"
+    en: "its length is the same as the original or shorter"
+ok:
+  ko: >-
+    <code>filter</code> 는 콜백이 <b>참을 돌려준 항목만</b> 모아 새 배열을 만듭니다. 항목의 값은
+    그대로이고 개수만 줄어요.
+  en: >-
+    <code>filter</code> gathers <b>only the items the callback returned true for</b> into a new
+    array. The item values are unchanged; only the count drops.
+payoff:
+  ko: "원본을 지우지 않고도 「이번에 보여 줄 것」을 만들 수 있습니다 — 되돌리기가 공짜입니다."
+  en: "You can build “what to show this time” without deleting from the original — undo costs nothing."
+bridge:
+  ko: "콜백 {{pick.3|code}}{{pick.3|josa:이,가}} 돌려주는 건 <b>참·거짓</b>이지 새 값이 아닙니다."
+  en: "The callback {{pick.3|code}} returns <b>true or false</b>, not a new value."
 misconceptions:
-  - "<code>filter</code> 가 항목을 바꿔 준다 — 아니요. 남길지 말지만 고릅니다."
-  - "조건이 <code>false</code> 여야 남는다 — 반대입니다. <b>참</b>인 것이 남습니다."
+  - ko: "<code>filter</code> 가 항목을 바꿔 준다 — 아니요. 남길지 말지만 고릅니다."
+    en: "<code>filter</code> changes the items — no. It only chooses whether to keep them."
+  - ko: "조건이 <code>false</code> 여야 남는다 — 반대입니다. <b>참</b>인 것이 남습니다."
+    en: >-
+      An item has to be <code>false</code> to survive — it is the other way round. The <b>true</b>
+      ones survive.
 
 point:
-  - q: "{{site.line}}행에서 <b>남길지 말지를 정하는 것</b>을 짚어 보세요."
-    hint: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+  - q:
+      ko: "{{site.line}}행에서 <b>남길지 말지를 정하는 것</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>what decides whether an item is kept</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
     answer: pick.3
     diag:
       pick.1:
-        t: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>고를 대상</b>입니다. 무엇을 남길지는 그 뒤에 넘긴 조건 함수가 정해요."
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>고를 대상</b>입니다. 무엇을 남길지는 그 뒤에 넘긴 조건 함수가 정해요."
+          en: >-
+            {{pick.1|code}} is <b>what is being picked from</b>. What survives is settled by the
+            condition function passed after it.
         edge:
-          h: "가장 날카로운 자리 — 대상과 조건"
+          h:
+            ko: "가장 날카로운 자리 — 대상과 조건"
+            en: "The sharpest spot — the source and the condition"
           code:
             - "{{pick.1}}.filter((x) => x.done)   // 조건이 정한다"
             - "{{pick.1}}                         // 아직 아무것도 고르지 않은 원본"
       pick.2:
-        t: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>하는 일의 이름</b>입니다. 어떤 항목이 남을지는 뒤에 넘긴 함수가 참을 돌려주느냐로 갈려요."
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>하는 일의 이름</b>입니다. 어떤 항목이 남을지는 뒤에 넘긴 함수가 참을 돌려주느냐로 갈려요."
+          en: >-
+            {{pick.2|code}} is <b>the name of the job</b>. Which items survive turns on whether the
+            function passed after it returns true.
         edge:
-          h: "가장 날카로운 자리 — 이름과 판단"
+          h:
+            ko: "가장 날카로운 자리 — 이름과 판단"
+            en: "The sharpest spot — the name and the judgement"
           code:
             - "{{pick.1}}.filter((x) => x.ok)    // ok 인 것만"
             - "{{pick.1}}.filter((x) => !x.ok)   // 반대로 고르기"
 
 meaning:
-  - q: "{{pick.3|code}}{{pick.3|josa:이,가}} 어느 항목에도 참을 돌려주지 않으면 {{site.line}}행의 값은 무엇일까요?"
-    hint: "filter 는 항상 배열을 돌려줍니다."
+  - q:
+      ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 어느 항목에도 참을 돌려주지 않으면 {{site.line}}행의 값은 무엇일까요?"
+      en: "If {{pick.3|code}} returns true for no item at all, what is the value of line {{site.line}}?"
+    hint:
+      ko: "filter 는 항상 배열을 돌려줍니다."
+      en: "filter always returns an array."
     options:
-      - t: "빈 배열 <code>[]</code>"
+      - t:
+          ko: "빈 배열 <code>[]</code>"
+          en: "An empty array <code>[]</code>"
       - t: "<code>undefined</code>"
         diag:
-          t: "찾은 게 없을 때 <code>undefined</code> 를 내는 건 <code>find</code> 입니다. <code>filter</code> 는 하나도 못 골라도 <b>배열</b>을 돌려줘요."
+          t:
+            ko: "찾은 게 없을 때 <code>undefined</code> 를 내는 건 <code>find</code> 입니다. <code>filter</code> 는 하나도 못 골라도 <b>배열</b>을 돌려줘요."
+            en: >-
+              Returning <code>undefined</code> when nothing is found is <code>find</code>.
+              <code>filter</code> hands back <b>an array</b> even when it picks nothing.
           edge:
-            h: "가장 날카로운 자리 — find 와 filter"
+            h:
+              ko: "가장 날카로운 자리 — find 와 filter"
+              en: "The sharpest spot — find and filter"
             code:
               - "[1,2].find((n) => n > 9)     // undefined"
               - "[1,2].filter((n) => n > 9)   // []"
       - t: "<code>null</code>"
         diag:
-          t: "<code>filter</code> 가 <code>null</code> 을 내는 경우는 없습니다. 결과는 언제나 배열이고, 아무것도 못 고르면 길이 0 입니다."
+          t:
+            ko: "<code>filter</code> 가 <code>null</code> 을 내는 경우는 없습니다. 결과는 언제나 배열이고, 아무것도 못 고르면 길이 0 입니다."
+            en: >-
+              There is no case where <code>filter</code> gives <code>null</code>. The result is
+              always an array, and when nothing is picked its length is 0.
           edge:
-            h: "가장 날카로운 자리 — 결과의 종류는 하나"
+            h:
+              ko: "가장 날카로운 자리 — 결과의 종류는 하나"
+              en: "The sharpest spot — the result has one kind"
             code:
               - "[].filter(Boolean)          // []"
               - "[0, null].filter(Boolean)   // []"
-      - t: "원본 배열 그대로"
+      - t:
+          ko: "원본 배열 그대로"
+          en: "The original array, unchanged"
         diag:
-          t: "조건을 <b>모두</b> 통과했다면 길이가 같은 배열이 나옵니다. 하지만 그것도 <b>새 배열</b>이고, 하나도 통과하지 못하면 길이는 0 입니다."
+          t:
+            ko: "조건을 <b>모두</b> 통과했다면 길이가 같은 배열이 나옵니다. 하지만 그것도 <b>새 배열</b>이고, 하나도 통과하지 못하면 길이는 0 입니다."
+            en: >-
+              If <b>every</b> item passed the condition you get an array of the same length. But
+              that too is <b>a new array</b>, and if none pass, the length is 0.
           edge:
-            h: "가장 날카로운 자리 — 같은 내용, 다른 배열"
+            h:
+              ko: "가장 날카로운 자리 — 같은 내용, 다른 배열"
+              en: "The sharpest spot — same contents, different array"
             code:
               - "const a = [1,2]"
               - "a.filter(() => true) === a   // false"

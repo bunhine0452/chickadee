@@ -11,76 +11,155 @@ prereq: [ts/arrow-function, ts/call-expression]
 confusions: [ts/async-await, ts/array-method-chain]
 
 dict:
-  one_liner: "<code>.then</code> 은 약속이 풀린 뒤 할 일을 콜백으로 이어 붙인다."
-  why: >-
-    <code>await</code> 와 <b>하는 일이 같습니다</b> — 순서를 정하는 표기가 다를 뿐이에요.
-    {{site.line}}행은 {{pick.1|code}}{{pick.1|josa:이,가}} 풀리면 {{pick.3|code}}{{pick.3|josa:을,를}} 부르라고 미리 등록해 두고,
-    기다리지 않고 다음 줄로 갑니다.
+  one_liner:
+    ko: "<code>.then</code> 은 약속이 풀린 뒤 할 일을 콜백으로 이어 붙인다."
+    en: "<code>.then</code> attaches what to do once the promise settles, as a callback."
+  why:
+    ko: >-
+      <code>await</code> 와 <b>하는 일이 같습니다</b> — 순서를 정하는 표기가 다를 뿐이에요.
+      {{site.line}}행은 {{pick.1|code}}{{pick.1|josa:이,가}} 풀리면 {{pick.3|code}}{{pick.3|josa:을,를}} 부르라고 미리 등록해 두고,
+      기다리지 않고 다음 줄로 갑니다.
+    en: >-
+      It <b>does the same job</b> as <code>await</code> — only the notation for setting the order
+      differs. Line {{site.line}} registers in advance that {{pick.3|code}} should be called once
+      {{pick.1|code}} settles, then goes to the next line without waiting.
   trace:
-    - "{{pick.1|code}}{{pick.1|josa:이,가}} 약속을 낸다."
-    - "{{pick.2|code}}{{pick.2|josa:이,가}} «풀리면 {{pick.3|code}}{{pick.3|josa:을,를}} 불러라»를 등록한다."
-    - "{{site.line}}행의 값은 값이 아니라 <b>또 하나의 약속</b>이다."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 약속을 낸다."
+      en: "{{pick.1|code}} gives a promise."
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} «풀리면 {{pick.3|code}}{{pick.3|josa:을,를}} 불러라»를 등록한다."
+      en: "{{pick.2|code}} registers «once it settles, call {{pick.3|code}}»."
+    - ko: "{{site.line}}행의 값은 값이 아니라 <b>또 하나의 약속</b>이다."
+      en: "The value of line {{site.line}} is not a value but <b>another promise</b>."
 
-rule: "<b><code>.then</code> 은 값이 아니라 약속을 돌려준다.</b> 그래서 계속 이어 붙일 수 있고, 그래서 밖으로 값을 꺼내지 못한다."
+rule:
+  ko: "<b><code>.then</code> 은 값이 아니라 약속을 돌려준다.</b> 그래서 계속 이어 붙일 수 있고, 그래서 밖으로 값을 꺼내지 못한다."
+  en: >-
+    <b><code>.then</code> hands back a promise, not a value.</b> That is why it can keep being
+    chained, and why the value cannot be taken outside.
 result:
-  label: "{{site.line}}행의 값"
+  label:
+    ko: "{{site.line}}행의 값"
+    en: "The value of line {{site.line}}"
   value: "또 하나의 약속"
-  note: "콜백 안에서만 값을 본다"
-ok: >-
-  <code>.then</code> 은 콜백을 <b>미리 등록</b>하고 곧바로 새 약속을 돌려줍니다. 값은 콜백 안에서만
-  보이고, 바깥 변수로 꺼내려 하면 아직 비어 있어요.
-payoff: "이미 이렇게 쓰인 줄을 읽을 수 있어야 <code>await</code> 로 바꿔도 되는 자리인지 판단할 수 있습니다."
-bridge: "<code>const v = await p</code> 와 <code>p.then((v) => …)</code> 는 같은 순서를 다르게 적은 것입니다."
+  note:
+    ko: "콜백 안에서만 값을 본다"
+    en: "the value is visible only inside the callback"
+ok:
+  ko: >-
+    <code>.then</code> 은 콜백을 <b>미리 등록</b>하고 곧바로 새 약속을 돌려줍니다. 값은 콜백 안에서만
+    보이고, 바깥 변수로 꺼내려 하면 아직 비어 있어요.
+  en: >-
+    <code>.then</code> <b>registers a callback in advance</b> and hands back a new promise straight
+    away. The value is visible only inside the callback; try to take it out into an outer variable
+    and it is still empty.
+payoff:
+  ko: "이미 이렇게 쓰인 줄을 읽을 수 있어야 <code>await</code> 로 바꿔도 되는 자리인지 판단할 수 있습니다."
+  en: >-
+    You have to be able to read a line already written this way before you can judge whether it is a
+    place to switch to <code>await</code>.
+bridge:
+  ko: "<code>const v = await p</code> 와 <code>p.then((v) => …)</code> 는 같은 순서를 다르게 적은 것입니다."
+  en: "<code>const v = await p</code> and <code>p.then((v) => …)</code> write the same order two ways."
 misconceptions:
-  - "<code>.then</code> 이 그 줄에서 기다린다 — 기다리지 않습니다. 등록만 하고 지나갑니다."
-  - "콜백 안에서 <code>return</code> 한 값이 바깥 변수에 담긴다 — 다음 <code>.then</code> 으로 넘어갑니다."
+  - ko: "<code>.then</code> 이 그 줄에서 기다린다 — 기다리지 않습니다. 등록만 하고 지나갑니다."
+    en: "<code>.then</code> waits on that line — it does not. It registers and moves on."
+  - ko: "콜백 안에서 <code>return</code> 한 값이 바깥 변수에 담긴다 — 다음 <code>.then</code> 으로 넘어갑니다."
+    en: >-
+      A value returned from inside the callback lands in an outer variable — it goes on to the next
+      <code>.then</code>.
 
 point:
-  - q: "{{site.line}}행에서 <b>약속이 풀린 뒤에야 불리는 것</b>을 짚어 보세요."
-    hint: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+  - q:
+      ko: "{{site.line}}행에서 <b>약속이 풀린 뒤에야 불리는 것</b>을 짚어 보세요."
+      en: >-
+        On line {{site.line}}, point at <b>the thing that is called only after the promise
+        settles</b>.
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
     answer: pick.3
     diag:
       pick.1:
-        t: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>지금 바로</b> 실행되어 약속을 냅니다. 나중으로 미뤄지는 것은 그 뒤에 등록한 콜백이에요."
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>지금 바로</b> 실행되어 약속을 냅니다. 나중으로 미뤄지는 것은 그 뒤에 등록한 콜백이에요."
+          en: >-
+            {{pick.1|code}} runs <b>right now</b> and gives a promise. What is put off until later
+            is the callback registered after it.
         edge:
-          h: "가장 날카로운 자리 — 지금과 나중"
+          h:
+            ko: "가장 날카로운 자리 — 지금과 나중"
+            en: "The sharpest spot — now and later"
           code:
             - "{{pick.1}}            // 지금 실행"
             - "{{pick.1}}.then(f)    // f 는 나중"
       pick.2:
-        t: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>등록하는 이름</b>이고, 그 자체는 이 줄에서 바로 실행됩니다. 미뤄지는 것은 안에 넘긴 함수예요."
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>등록하는 이름</b>이고, 그 자체는 이 줄에서 바로 실행됩니다. 미뤄지는 것은 안에 넘긴 함수예요."
+          en: >-
+            {{pick.2|code}} is <b>the name that registers</b>, and it runs on this line straight
+            away. What is put off is the function handed to it.
         edge:
-          h: "가장 날카로운 자리 — 등록과 실행"
+          h:
+            ko: "가장 날카로운 자리 — 등록과 실행"
+            en: "The sharpest spot — registering and running"
           code:
             - "p.then(f)     // then 은 지금, f 는 나중"
             - "p.then(f())   // f 를 지금 부른 실수"
 
 meaning:
-  - q: "{{site.line}}행 바로 다음 줄에서 결과 값을 읽으면 무엇이 보일까요?"
-    hint: ".then 은 기다리지 않습니다."
+  - q:
+      ko: "{{site.line}}행 바로 다음 줄에서 결과 값을 읽으면 무엇이 보일까요?"
+      en: "If you read the result on the line right after line {{site.line}}, what do you see?"
+    hint:
+      ko: ".then 은 기다리지 않습니다."
+      en: ".then does not wait."
     options:
-      - t: "아직 아무 값도 없다 — 약속만 있다"
-      - t: "콜백이 돌려준 값"
+      - t:
+          ko: "아직 아무 값도 없다 — 약속만 있다"
+          en: "No value yet — only a promise"
+      - t:
+          ko: "콜백이 돌려준 값"
+          en: "The value the callback returned"
         diag:
-          t: "그 값은 콜백 <b>안</b>에서만 보입니다. 다음 줄은 콜백이 불리기 전에 이미 지나가 있어요."
+          t:
+            ko: "그 값은 콜백 <b>안</b>에서만 보입니다. 다음 줄은 콜백이 불리기 전에 이미 지나가 있어요."
+            en: >-
+              That value is visible only <b>inside</b> the callback. The next line has already gone
+              past before the callback is called.
           edge:
-            h: "가장 날카로운 자리 — 등록한 순간과 불리는 순간"
+            h:
+              ko: "가장 날카로운 자리 — 등록한 순간과 불리는 순간"
+              en: "The sharpest spot — the moment of registering and the moment of calling"
             code:
               - "let v; p.then((r) => { v = r }); use(v)   // 아직 비어 있다"
               - "const v = await p; use(v)                 // 값이 있다"
       - t: "<code>null</code>"
         diag:
-          t: "<code>.then</code> 이 <code>null</code> 을 내는 경우는 없습니다. 돌려주는 것은 언제나 새 약속이에요."
+          t:
+            ko: "<code>.then</code> 이 <code>null</code> 을 내는 경우는 없습니다. 돌려주는 것은 언제나 새 약속이에요."
+            en: >-
+              There is no case where <code>.then</code> gives <code>null</code>. What it hands back
+              is always a new promise.
           edge:
-            h: "가장 날카로운 자리 — 돌려주는 것의 종류"
+            h:
+              ko: "가장 날카로운 자리 — 돌려주는 것의 종류"
+              en: "The sharpest spot — the kind of thing handed back"
             code:
               - "typeof p.then(f)          // object (Promise)"
               - "p.then(f).then(g)         // 그래서 이어 붙는다"
-      - t: "그 줄에서 기다린 뒤의 값"
+      - t:
+          ko: "그 줄에서 기다린 뒤의 값"
+          en: "The value after waiting on that line"
         diag:
-          t: "기다리는 표기는 <code>await</code> 쪽입니다. <code>.then</code> 은 등록만 하고 바로 다음 줄로 넘어가요."
+          t:
+            ko: "기다리는 표기는 <code>await</code> 쪽입니다. <code>.then</code> 은 등록만 하고 바로 다음 줄로 넘어가요."
+            en: >-
+              The notation that waits is <code>await</code>. <code>.then</code> only registers and
+              goes straight to the next line.
           edge:
-            h: "가장 날카로운 자리 — 멈추나 지나가나"
+            h:
+              ko: "가장 날카로운 자리 — 멈추나 지나가나"
+              en: "The sharpest spot — halts or passes through"
             code:
               - "p.then(f); next()          // next 가 먼저"
               - "await p; next()            // next 가 나중"

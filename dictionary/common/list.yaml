@@ -9,13 +9,26 @@ difficulty: 1
 prereq: []
 confusions: []
 dict:
-  one_liner: "같은 종류의 값을 순서대로 한 이름에 담는 그릇."
-  why: >-
-    값이 여럿이면 이름을 하나씩 붙일 수 없습니다. 순서를 붙여 한 그릇에 담아 두면 「몇 번째」로
-    부를 수 있고 개수를 셀 수 있어요. 언어가 갈리는 지점은 셋입니다 — 번호를 0 부터 세는지,
-    없는 번호를 읽었을 때 멈추는지, 길이를 바꿀 수 있는지.
+  one_liner:
+    ko: "같은 종류의 값을 순서대로 한 이름에 담는 그릇."
+    en: "A container that holds values of one kind, in order, under one name."
+  why:
+    ko: >-
+      값이 여럿이면 이름을 하나씩 붙일 수 없습니다. 순서를 붙여 한 그릇에 담아 두면 「몇 번째」로
+      부를 수 있고 개수를 셀 수 있어요. 언어가 갈리는 지점은 셋입니다 — 번호를 0 부터 세는지,
+      없는 번호를 읽었을 때 멈추는지, 길이를 바꿀 수 있는지.
+    en: >-
+      When there are many values you cannot name them one by one. Put them in one container in order
+      and you can ask for “the nth” and count them. Languages part ways at three points — whether
+      numbering starts at 0, whether reading a number that is not there stops the program, and
+      whether the length can change.
   trace: []
-rule: "번호를 0 부터 세는 언어에서 마지막 번호는 개수보다 하나 작다."
-ok: "목록은 순서를 붙여 값을 담습니다. 그 순서가 곧 꺼내는 방법이에요."
+rule:
+  ko: "번호를 0 부터 세는 언어에서 마지막 번호는 개수보다 하나 작다."
+  en: "Where numbering starts at 0, the last number is one less than the count."
+ok:
+  ko: "목록은 순서를 붙여 값을 담습니다. 그 순서가 곧 꺼내는 방법이에요."
+  en: "A list holds values in order. That order is how you get them back out."
 misconceptions:
-  - "길이가 곧 마지막 번호다 — 0 부터 세는 언어에서는 하나 작습니다."
+  - ko: "길이가 곧 마지막 번호다 — 0 부터 세는 언어에서는 하나 작습니다."
+    en: "The length is the last number — where numbering starts at 0 it is one less."

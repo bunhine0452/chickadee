@@ -11,69 +11,141 @@ prereq: [ts/arrow-function, ts/object-spread]
 confusions: [ts/array-map-immutable, ts/array-push-mutate]
 
 dict:
-  one_liner: "이전 값을 <b>인자로 받아</b> 새 값을 돌려주면, 밀린 갱신도 순서대로 쌓인다."
-  why: >-
-    상태를 바꾸는 요청은 곧바로 반영되지 않고 모였다가 처리됩니다. 바깥에서 읽은 값으로 계산하면
-    그 사이에 다른 갱신이 끼어들어도 알아채지 못해요. {{site.line}}행처럼 이전 값을 받아 쓰면
-    {{ctx.setter|code}}{{ctx.setter|josa:이,가}} 항상 <b>바로 앞의 결과</b>를 넘겨 줍니다.
+  one_liner:
+    ko: "이전 값을 <b>인자로 받아</b> 새 값을 돌려주면, 밀린 갱신도 순서대로 쌓인다."
+    en: "<b>Receive the previous value</b>, return a new one, and queued updates stack in order."
+  why:
+    ko: >-
+      상태를 바꾸는 요청은 곧바로 반영되지 않고 모였다가 처리됩니다. 바깥에서 읽은 값으로 계산하면
+      그 사이에 다른 갱신이 끼어들어도 알아채지 못해요. {{site.line}}행처럼 이전 값을 받아 쓰면
+      {{ctx.setter|code}}{{ctx.setter|josa:이,가}} 항상 <b>바로 앞의 결과</b>를 넘겨 줍니다.
+    en: >-
+      A request to change state is not applied at once; requests gather and are handled together.
+      Compute from a value read outside and you will not notice another update slipping in between.
+      Take the previous value in, as line {{site.line}} does, and {{ctx.setter|code}} always hands
+      you <b>the result just before</b>.
   trace:
-    - "{{ctx.setter|code}}{{ctx.setter|josa:이,가}} 갱신 요청을 줄에 세운다."
-    - "차례가 오면 바로 앞 결과를 {{pick.1|code}} 에 넣어 부른다."
-    - "{{pick.2|code}}{{pick.2|josa:이,가}} 돌려준 것이 {{site.line}}행 갱신의 새 상태가 된다."
+    - ko: "{{ctx.setter|code}}{{ctx.setter|josa:이,가}} 갱신 요청을 줄에 세운다."
+      en: "{{ctx.setter|code}} puts the update request in line."
+    - ko: "차례가 오면 바로 앞 결과를 {{pick.1|code}} 에 넣어 부른다."
+      en: "When its turn comes, the result just before goes into {{pick.1|code}} and it is called."
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 돌려준 것이 {{site.line}}행 갱신의 새 상태가 된다."
+      en: "What {{pick.2|code}} returns becomes the new state for the update on line {{site.line}}."
 
-rule: "<b>이전 값이 필요하면 인자로 받는다.</b> 바깥에서 읽은 값은 그 사이에 낡을 수 있다."
+rule:
+  ko: "<b>이전 값이 필요하면 인자로 받는다.</b> 바깥에서 읽은 값은 그 사이에 낡을 수 있다."
+  en: >-
+    <b>If you need the previous value, take it as an argument.</b> A value read outside can go stale
+    in between.
 result:
-  label: "새 상태"
+  label:
+    ko: "새 상태"
+    en: "New state"
   value: "{{pick.2}}"
-  note: "직전 결과를 받아 계산한다"
-ok: >-
-  이전 값을 <b>인자로 받으면</b> 요청이 몇 개 밀려 있어도 각자 바로 앞 결과 위에 쌓입니다. 바깥
-  변수를 읽어 계산하면 여러 요청이 같은 값을 보고 겹쳐 써요.
-payoff: "빠르게 두 번 누르면 하나가 사라지는 종류의 문제가 이 표기에서는 생기지 않습니다."
-bridge: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>읽기 전용</b>입니다 — 직접 고치지 말고 새 값을 돌려주세요."
+  note:
+    ko: "직전 결과를 받아 계산한다"
+    en: "computed from the result just before"
+ok:
+  ko: >-
+    이전 값을 <b>인자로 받으면</b> 요청이 몇 개 밀려 있어도 각자 바로 앞 결과 위에 쌓입니다. 바깥
+    변수를 읽어 계산하면 여러 요청이 같은 값을 보고 겹쳐 써요.
+  en: >-
+    <b>Take the previous value as an argument</b> and however many requests are queued, each stacks
+    on the result just before it. Compute by reading an outside variable and several requests all
+    see the same value and overwrite each other.
+payoff:
+  ko: "빠르게 두 번 누르면 하나가 사라지는 종류의 문제가 이 표기에서는 생기지 않습니다."
+  en: >-
+    The kind of problem where pressing twice quickly loses one of them does not arise with this
+    notation.
+bridge:
+  ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>읽기 전용</b>입니다 — 직접 고치지 말고 새 값을 돌려주세요."
+  en: "{{pick.1|code}} is <b>read-only</b> — do not change it in place; return a new value."
 misconceptions:
-  - "갱신을 부르면 그 줄 다음에 바로 새 값을 읽을 수 있다 — 다음 그리기 때 반영됩니다."
-  - "값을 하나씩 두 번 부르면 두 번 오른다 — 바깥 값을 읽어 썼다면 한 번만 오릅니다."
+  - ko: "갱신을 부르면 그 줄 다음에 바로 새 값을 읽을 수 있다 — 다음 그리기 때 반영됩니다."
+    en: "Call the update and the next line can read the new value — it lands on the next render."
+  - ko: "값을 하나씩 두 번 부르면 두 번 오른다 — 바깥 값을 읽어 썼다면 한 번만 오릅니다."
+    en: "Calling it twice raises the value twice — if you read the outside value, it rises once."
 
 point:
-  - q: "{{site.line}}행에서 <b>직전 상태가 담겨 들어오는 이름</b>을 짚어 보세요."
-    hint: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+  - q:
+      ko: "{{site.line}}행에서 <b>직전 상태가 담겨 들어오는 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name the previous state arrives in</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
     answer: pick.1
     diag:
       pick.2:
-        t: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>돌려주는 새 값</b>입니다. 계산의 재료로 들어오는 직전 상태는 그 앞에 있는 이름이에요."
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>돌려주는 새 값</b>입니다. 계산의 재료로 들어오는 직전 상태는 그 앞에 있는 이름이에요."
+          en: >-
+            {{pick.2|code}} is <b>the new value being returned</b>. The previous state that comes in
+            as material for the computation is the name before it.
         edge:
-          h: "가장 날카로운 자리 — 들어오는 것과 나가는 것"
+          h:
+            ko: "가장 날카로운 자리 — 들어오는 것과 나가는 것"
+            en: "The sharpest spot — what comes in and what goes out"
           code:
             - "setN((prev) => prev + 1)   // prev 가 들어오고 prev + 1 이 나간다"
             - "setN(n + 1)                // 바깥의 n 을 읽는다"
 
 meaning:
-  - q: "{{site.line}}행 같은 갱신을 한 번에 두 번 부르면 결과는 어떻게 될까요?"
-    hint: "각 요청이 무엇을 보고 계산하는지."
+  - q:
+      ko: "{{site.line}}행 같은 갱신을 한 번에 두 번 부르면 결과는 어떻게 될까요?"
+      en: "If an update like the one on line {{site.line}} is called twice at once, what happens?"
+    hint:
+      ko: "각 요청이 무엇을 보고 계산하는지."
+      en: "What each request looks at when it computes."
     options:
-      - t: "두 번 모두 반영된다 — 각자 바로 앞 결과 위에 쌓인다"
-      - t: "한 번만 반영된다"
+      - t:
+          ko: "두 번 모두 반영된다 — 각자 바로 앞 결과 위에 쌓인다"
+          en: "Both land — each stacks on the result just before it"
+      - t:
+          ko: "한 번만 반영된다"
+          en: "Only one lands"
         diag:
-          t: "바깥 값을 읽어 계산했다면 그렇게 됩니다. 이전 값을 <b>인자로 받으면</b> 각 요청이 서로 다른 값을 보므로 둘 다 남아요."
+          t:
+            ko: "바깥 값을 읽어 계산했다면 그렇게 됩니다. 이전 값을 <b>인자로 받으면</b> 각 요청이 서로 다른 값을 보므로 둘 다 남아요."
+            en: >-
+              That is what happens if you computed from a value read outside. <b>Take the previous
+              value as an argument</b> and each request sees a different value, so both survive.
           edge:
-            h: "가장 날카로운 자리 — 무엇을 보고 계산하나"
+            h:
+              ko: "가장 날카로운 자리 — 무엇을 보고 계산하나"
+              en: "The sharpest spot — what it computes from"
             code:
               - "setN(n + 1); setN(n + 1)                    // 1 만 오른다"
               - "setN((p) => p + 1); setN((p) => p + 1)      // 2 오른다"
-      - t: "마지막 것만 남고 앞의 것은 사라진다"
+      - t:
+          ko: "마지막 것만 남고 앞의 것은 사라진다"
+          en: "Only the last survives and the earlier one disappears"
         diag:
-          t: "덮어쓰는 건 <b>고정된 값</b>을 넘길 때입니다. 함수를 넘기면 차례로 불려서 앞의 결과가 뒤의 재료가 돼요."
+          t:
+            ko: "덮어쓰는 건 <b>고정된 값</b>을 넘길 때입니다. 함수를 넘기면 차례로 불려서 앞의 결과가 뒤의 재료가 돼요."
+            en: >-
+              Overwriting is what happens when you pass <b>a fixed value</b>. Pass a function and
+              they are called in turn, so the earlier result becomes the material for the later one.
           edge:
-            h: "가장 날카로운 자리 — 값이냐 함수냐"
+            h:
+              ko: "가장 날카로운 자리 — 값이냐 함수냐"
+              en: "The sharpest spot — a value or a function"
             code:
               - "setN(5); setN(5)                 // 5"
               - "setN((p) => p + 5); setN((p) => p + 5)   // 10 만큼 오른다"
-      - t: "그 줄에서 바로 두 번 다시 그린다"
+      - t:
+          ko: "그 줄에서 바로 두 번 다시 그린다"
+          en: "It redraws twice, right on that line"
         diag:
-          t: "요청은 모였다가 한 번에 처리되는 것이 보통입니다. 갱신 횟수와 다시 그리는 횟수는 같지 않아요."
+          t:
+            ko: "요청은 모였다가 한 번에 처리되는 것이 보통입니다. 갱신 횟수와 다시 그리는 횟수는 같지 않아요."
+            en: >-
+              Requests usually gather and are handled together. The number of updates and the number
+              of redraws are not the same.
           edge:
-            h: "가장 날카로운 자리 — 요청 수와 그리기 수"
+            h:
+              ko: "가장 날카로운 자리 — 요청 수와 그리기 수"
+              en: "The sharpest spot — request count and redraw count"
             code:
               - "setA(1); setB(2)   // 요청 둘"
               - "// 다시 그리기는 한 번으로 묶일 수 있다"

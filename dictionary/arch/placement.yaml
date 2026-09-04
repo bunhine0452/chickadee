@@ -11,11 +11,27 @@ difficulty: 3
 prereq: []
 confusions: []
 dict:
-  one_liner: "이 일을 <b>어느 파일이 해야 하는가</b>를 정하는 판단."
-  why: >-
-    같은 코드라도 놓이는 자리에 따라 나중에 드는 비용이 달라집니다. 화면이 서버 규칙을 알게 되면
-    화면을 고칠 때마다 규칙이 흔들리고, 규칙이 화면을 알게 되면 규칙을 재사용할 수 없어요.
-    「여기에 두면 누가 이걸 알아야 하는가」가 이 판단의 질문입니다.
+  one_liner:
+    ko: "이 일을 <b>어느 파일이 해야 하는가</b>를 정하는 판단."
+    en: "The judgement of <b>which file should do this work</b>."
+  why:
+    ko: >-
+      같은 코드라도 놓이는 자리에 따라 나중에 드는 비용이 달라집니다. 화면이 서버 규칙을 알게 되면
+      화면을 고칠 때마다 규칙이 흔들리고, 규칙이 화면을 알게 되면 규칙을 재사용할 수 없어요.
+      「여기에 두면 누가 이걸 알아야 하는가」가 이 판단의 질문입니다.
+    en: >-
+      The same code costs differently later depending on where it sits. Let the screen know the
+      server's rules and the rules shake every time you touch the screen; let the rules know the
+      screen and the rules cannot be reused. “If it goes here, who has to know about it?” is the
+      question behind this judgement.
   trace: []
-rule: "그 일을 하는 데 필요한 것을 <b>이미 알고 있는 쪽</b>에 둔다. 새로 알려 줘야 한다면 자리가 틀어진 신호다."
-ok: "이미 필요한 것을 알고 있는 쪽에 두면 새 연결이 생기지 않습니다. 자리를 옮길수록 아는 것이 늘어난다면 다시 볼 때입니다."
+rule:
+  ko: "그 일을 하는 데 필요한 것을 <b>이미 알고 있는 쪽</b>에 둔다. 새로 알려 줘야 한다면 자리가 틀어진 신호다."
+  en: >-
+    Put the work on the side that <b>already knows</b> what it needs. Having to tell that side
+    something new is a sign the placement is off.
+ok:
+  ko: "이미 필요한 것을 알고 있는 쪽에 두면 새 연결이 생기지 않습니다. 자리를 옮길수록 아는 것이 늘어난다면 다시 볼 때입니다."
+  en: >-
+    Put it on the side that already knows what it needs and no new connection appears. If moving it
+    keeps adding to what a side knows, it is time to look again.

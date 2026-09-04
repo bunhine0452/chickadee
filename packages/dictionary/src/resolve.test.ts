@@ -106,12 +106,22 @@ describe('번들 사전', () => {
     expect(optional?.name).toEqual({ ko: '옵셔널 체이닝', en: 'Optional chaining' });
   });
 
-  test('산문은 아직 ko 뿐이라 en 으로 열면 폴백이 잡힌다 (P3 번역 전)', () => {
+  test('번들 사전은 en 으로 열어도 폴백이 없다 — 새 개념이 ko 만 들고 오면 여기서 걸린다', () => {
     const en = loadDict({ dependencies: ['react'], locale: 'en' });
-    const optional = en.concepts.get('ts/optional-chaining');
-    expect(optional?.untranslated).toContain('dict.one_liner');
-    expect(optional?.dict.one_liner).toBe(
-      loadDict({ dependencies: ['react'] }).concepts.get('ts/optional-chaining')?.dict.one_liner,
-    );
+    const missing = [...en.concepts.values()]
+      .filter((c) => (c.untranslated?.length ?? 0) > 0)
+      .map((c) => `${c.id}: ${c.untranslated?.join(', ')}`);
+    expect(missing).toEqual([]);
+  });
+
+  test('en 으로 연 산문은 ko 와 다른 글이다 — 폴백이 아니라 번역이다', () => {
+    const ko = loadDict({ dependencies: ['react'] });
+    const en = loadDict({ dependencies: ['react'], locale: 'en' });
+    const id = 'ts/optional-chaining';
+    const koLine = ko.concepts.get(id)?.dict.one_liner;
+    const enLine = en.concepts.get(id)?.dict.one_liner;
+    expect(enLine).toBeDefined();
+    expect(enLine).not.toBe(koLine);
+    expect(enLine).not.toMatch(/[가-힣]/);
   });
 });

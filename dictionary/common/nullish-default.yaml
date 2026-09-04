@@ -10,14 +10,31 @@ prereq: []
 confusions: []
 queries: []
 dict:
-  one_liner: "값이 없을 때 대신 쓸 값을 그 자리에서 정해 두는 표기."
-  why: >-
-    표기는 언어마다 다르지만 갈리는 지점은 하나입니다 — <b>무엇을 「없음」으로 볼 것인가</b>.
-    없는 값만 「없음」으로 보는 언어도 있고, <code>0</code> 이나 빈 문자열까지 함께 보는 표기도
-    있습니다. 새 언어에서 확인할 것은 그 경계 하나예요.
+  one_liner:
+    ko: "값이 없을 때 대신 쓸 값을 그 자리에서 정해 두는 표기."
+    en: "Sets, right there, the value to use instead when a value is missing."
+  why:
+    ko: >-
+      표기는 언어마다 다르지만 갈리는 지점은 하나입니다 — <b>무엇을 「없음」으로 볼 것인가</b>.
+      없는 값만 「없음」으로 보는 언어도 있고, <code>0</code> 이나 빈 문자열까지 함께 보는 표기도
+      있습니다. 새 언어에서 확인할 것은 그 경계 하나예요.
+    en: >-
+      The notation differs by language but they part ways at one point — <b>what counts as
+      missing</b>. Some languages count only an absent value; some notations count <code>0</code>
+      and the empty string as well. In a new language that boundary is the one thing to check.
   trace: []
-rule: "채우기 전에 무엇을 「없음」으로 볼지부터 정한다."
-ok: "왼쪽이 「없음」이면 오른쪽 값을 쓰고, 아니면 왼쪽을 그대로 씁니다."
+rule:
+  ko: "채우기 전에 무엇을 「없음」으로 볼지부터 정한다."
+  en: "Before filling anything in, settle what counts as missing."
+ok:
+  ko: "왼쪽이 「없음」이면 오른쪽 값을 쓰고, 아니면 왼쪽을 그대로 씁니다."
+  en: "If the left side is missing it uses the right-hand value, otherwise it keeps the left."
 misconceptions:
-  - "「비어 있음」과 「없음」은 같다 — 빈 문자열과 <code>0</code> 은 값이 있는 것입니다."
-  - "기본값을 주면 왼쪽은 안 읽는다 — 왼쪽부터 읽고, 그 결과를 보고 정합니다."
+  - ko: "「비어 있음」과 「없음」은 같다 — 빈 문자열과 <code>0</code> 은 값이 있는 것입니다."
+    en: >-
+      “Empty” and “missing” are the same — the empty string and <code>0</code> are values that are
+      present.
+  - ko: "기본값을 주면 왼쪽은 안 읽는다 — 왼쪽부터 읽고, 그 결과를 보고 정합니다."
+    en: >-
+      Giving a default means the left side is not read — the left is read first, and the choice
+      follows from it.

@@ -9,12 +9,24 @@ difficulty: 2
 prereq: []
 confusions: []
 dict:
-  one_liner: "앞의 값이 없으면 더 읽지 않고 「없음」으로 멈추는 표기."
-  why: >-
-    이름은 언어마다 다르지만 하는 일은 하나입니다 — 없을 수 있는 값을 한 칸 지나갈 때,
-    터지는 대신 「없음」으로 멈춥니다. 이걸 아는 사람은 새 언어에서 <b>표기만</b> 배우면 됩니다.
+  one_liner:
+    ko: "앞의 값이 없으면 더 읽지 않고 「없음」으로 멈추는 표기."
+    en: "If the value in front is absent, it reads no further and stops at absent."
+  why:
+    ko: >-
+      이름은 언어마다 다르지만 하는 일은 하나입니다 — 없을 수 있는 값을 한 칸 지나갈 때,
+      터지는 대신 「없음」으로 멈춥니다. 이걸 아는 사람은 새 언어에서 <b>표기만</b> 배우면 됩니다.
+    en: >-
+      The name differs by language but the job is one — stepping past a value that may be absent, it
+      stops at absent instead of blowing up. Anyone who knows this only has to learn <b>the
+      notation</b> in a new language.
   trace: []
-rule: "없으면 멈춘다. 채우는 것은 다른 기호의 일이다."
-ok: "앞이 「없음」이면 뒤를 읽지 않고 「없음」을 냅니다."
+rule:
+  ko: "없으면 멈춘다. 채우는 것은 다른 기호의 일이다."
+  en: "Absent, and it stops. Filling in is another symbol’s job."
+ok:
+  ko: "앞이 「없음」이면 뒤를 읽지 않고 「없음」을 냅니다."
+  en: "If what comes before is absent, it does not read what follows and yields absent."
 misconceptions:
-  - "기본값을 넣어 준다 — 아니요. 멈추기만 합니다."
+  - ko: "기본값을 넣어 준다 — 아니요. 멈추기만 합니다."
+    en: "It puts a default in for you — no. It only stops."

@@ -9,13 +9,28 @@ difficulty: 1
 prereq: []
 confusions: []
 dict:
-  one_liner: "적어 둔 절차를 지금 돌리고, 돌려준 값을 받는다."
-  why: >-
-    같은 절차를 여러 곳에서 쓰려면 이름을 붙여 두고 필요할 때 부릅니다. 부르는 표시는 대부분의
-    언어에서 괄호예요. 이름만 적으면 절차는 값으로 남아 있고, 괄호가 붙어야 실제로 돕니다 —
-    이 구분이 콜백과 비동기를 이해하는 첫 계단입니다.
+  one_liner:
+    ko: "적어 둔 절차를 지금 돌리고, 돌려준 값을 받는다."
+    en: "Runs a procedure you wrote down, now, and takes back the value it returns."
+  why:
+    ko: >-
+      같은 절차를 여러 곳에서 쓰려면 이름을 붙여 두고 필요할 때 부릅니다. 부르는 표시는 대부분의
+      언어에서 괄호예요. 이름만 적으면 절차는 값으로 남아 있고, 괄호가 붙어야 실제로 돕니다 —
+      이 구분이 콜백과 비동기를 이해하는 첫 계단입니다.
+    en: >-
+      To use the same procedure in several places you give it a name and call it when you need it.
+      In most languages the mark for calling is a pair of parentheses. Write the name alone and the
+      procedure stays a value; add the parentheses and it actually runs — that distinction is the
+      first step toward callbacks and async work.
   trace: []
-rule: "이름만 쓰면 절차 그 자체, 괄호를 붙이면 절차를 돌린 결과."
-ok: "괄호는 「지금 해라」는 표시입니다. 그 결과가 그 줄의 값이 됩니다."
+rule:
+  ko: "이름만 쓰면 절차 그 자체, 괄호를 붙이면 절차를 돌린 결과."
+  en: "The name alone is the procedure itself. With parentheses it is the result of running it."
+ok:
+  ko: "괄호는 「지금 해라」는 표시입니다. 그 결과가 그 줄의 값이 됩니다."
+  en: "Parentheses mean “do it now”. The result becomes the value of that line."
 misconceptions:
-  - "이름만 넘겨도 나중에 알아서 돈다 — 받은 쪽이 괄호를 붙여 줄 때만 돕니다."
+  - ko: "이름만 넘겨도 나중에 알아서 돈다 — 받은 쪽이 괄호를 붙여 줄 때만 돕니다."
+    en: >-
+      Passing the name alone makes it run later by itself — it runs only when the receiver adds the
+      parentheses.

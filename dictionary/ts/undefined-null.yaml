@@ -11,60 +11,129 @@ prereq: []
 confusions: [ts/optional-chaining]
 
 dict:
-  one_liner: "<code>undefined</code> 는 아직 안 넣은 것, <code>null</code> 은 비우기로 한 것."
-  why: >-
-    「값이 없다」에는 두 가지가 있습니다. 아무도 넣지 않아서 없는 것과, 누군가 「여기는 비운다」고
-    적어 넣은 것이에요. 앞의 것이 <code>undefined</code>, 뒤의 것이 <code>null</code> 입니다.
-    {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 어느 쪽인지가 다음 줄의 분기를 정합니다.
+  one_liner:
+    ko: "<code>undefined</code> 는 아직 안 넣은 것, <code>null</code> 은 비우기로 한 것."
+    en: "<code>undefined</code> is not put in yet; <code>null</code> is emptied on purpose."
+  why:
+    ko: >-
+      「값이 없다」에는 두 가지가 있습니다. 아무도 넣지 않아서 없는 것과, 누군가 「여기는 비운다」고
+      적어 넣은 것이에요. 앞의 것이 <code>undefined</code>, 뒤의 것이 <code>null</code> 입니다.
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 어느 쪽인지가 다음 줄의 분기를 정합니다.
+    en: >-
+      “There is no value” comes in two kinds: absent because nobody put anything in, and absent
+      because someone wrote in “this one is empty”. The first is <code>undefined</code>, the second
+      is <code>null</code>. Which of the two {{pick.1|code}} is on line {{site.line}} settles the
+      branch on the next line.
   trace:
-    - "{{site.line}}행은 {{pick.1|code}} 라는 「없음」을 값으로 둔다."
-    - "이 값에 점을 찍어 무엇을 읽으려 하면 그 자리에서 멈춘다."
-    - "<code>??</code> 나 <code>?.</code> 는 이 두 값에서만 반응한다."
+    - ko: "{{site.line}}행은 {{pick.1|code}} 라는 「없음」을 값으로 둔다."
+      en: "Line {{site.line}} holds the absence called {{pick.1|code}} as its value."
+    - ko: "이 값에 점을 찍어 무엇을 읽으려 하면 그 자리에서 멈춘다."
+      en: "Put a dot on this value to read something and it stops right there."
+    - ko: "<code>??</code> 나 <code>?.</code> 는 이 두 값에서만 반응한다."
+      en: "<code>??</code> and <code>?.</code> react to these two values only."
 
-rule: "<b><code>undefined</code> 와 <code>null</code> 은 <code>==</code> 로는 같고 <code>===</code> 로는 다르다.</b>"
+rule:
+  ko: "<b><code>undefined</code> 와 <code>null</code> 은 <code>==</code> 로는 같고 <code>===</code> 로는 다르다.</b>"
+  en: >-
+    <b><code>undefined</code> and <code>null</code> are equal under <code>==</code> and different
+    under <code>===</code>.</b>
 result:
-  label: "{{site.line}}행의 값"
+  label:
+    ko: "{{site.line}}행의 값"
+    en: "The value of line {{site.line}}"
   value: "{{pick.1}}"
-  note: "값이 없다는 표시"
-ok: >-
-  {{pick.1|code}}{{pick.1|josa:은,는}} 「값이 없다」를 나타내는 값입니다. 없는 것도 값이라서 이름에 묶을 수는
-  있지만, 여기에 점을 찍어 안을 읽으려 하면 그 자리에서 멈춥니다.
-payoff: >-
-  둘을 나눠 두면 「아직 안 받았다」와 「받았는데 비어 있다」를 코드에서 구분할 수 있습니다.
-  로딩 중과 결과 없음을 가르는 자리가 대개 여기예요.
-bridge: >-
-  이 두 값에서만 <code>?.</code> 가 멈추고 <code>??</code> 가 채웁니다 — <code>0</code> 이나
-  빈 문자열은 「있는 값」이라 반응하지 않아요.
+  note:
+    ko: "값이 없다는 표시"
+    en: "a mark that there is no value"
+ok:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:은,는}} 「값이 없다」를 나타내는 값입니다. 없는 것도 값이라서 이름에 묶을 수는
+    있지만, 여기에 점을 찍어 안을 읽으려 하면 그 자리에서 멈춥니다.
+  en: >-
+    {{pick.1|code}} is a value standing for “there is no value”. An absence is still a value, so a
+    name can hold it, but put a dot on it to read inside and it stops right there.
+payoff:
+  ko: >-
+    둘을 나눠 두면 「아직 안 받았다」와 「받았는데 비어 있다」를 코드에서 구분할 수 있습니다.
+    로딩 중과 결과 없음을 가르는 자리가 대개 여기예요.
+  en: >-
+    Keeping the two apart lets the code tell “not received yet” from “received and empty”. What
+    separates loading from no results usually sits here.
+bridge:
+  ko: >-
+    이 두 값에서만 <code>?.</code> 가 멈추고 <code>??</code> 가 채웁니다 — <code>0</code> 이나
+    빈 문자열은 「있는 값」이라 반응하지 않아요.
+  en: >-
+    Only at these two values does <code>?.</code> stop and <code>??</code> fill in — <code>0</code>
+    and the empty string are values that are present, so nothing reacts.
 misconceptions:
-  - "<code>null</code> 이면 <code>undefined</code> 도 마찬가지다 — <code>==</code> 로 비교할 때만 같습니다. <code>===</code> 로는 서로 다른 값이에요."
-  - "<code>0</code> 이나 빈 문자열도 「없음」이다 — 아니요. 있는 값입니다. <code>if</code> 안에서 거짓처럼 보일 뿐이에요."
+  - ko: "<code>null</code> 이면 <code>undefined</code> 도 마찬가지다 — <code>==</code> 로 비교할 때만 같습니다. <code>===</code> 로는 서로 다른 값이에요."
+    en: >-
+      If it is <code>null</code> then <code>undefined</code> is the same — they match only under
+      <code>==</code>. Under <code>===</code> they are different values.
+  - ko: "<code>0</code> 이나 빈 문자열도 「없음」이다 — 아니요. 있는 값입니다. <code>if</code> 안에서 거짓처럼 보일 뿐이에요."
+    en: >-
+      <code>0</code> and the empty string are absences too — no. They are values that are present.
+      They only look false inside an <code>if</code>.
 
 meaning:
-  - q: "{{site.line}}행 뒤에 <code>{{pick.1}} === null</code> 을 물으면 무엇이 나올까요?"
-    hint: "<code>==</code> 와 <code>===</code> 는 이 두 값에서 답이 갈립니다."
+  - q:
+      ko: "{{site.line}}행 뒤에 <code>{{pick.1}} === null</code> 을 물으면 무엇이 나올까요?"
+      en: "If you ask <code>{{pick.1}} === null</code> after line {{site.line}}, what comes out?"
+    hint:
+      ko: "<code>==</code> 와 <code>===</code> 는 이 두 값에서 답이 갈립니다."
+      en: "<code>==</code> and <code>===</code> part ways on these two values."
     options:
-      - t: "{{pick.1|code}}{{pick.1|josa:이,가}} <code>null</code> 일 때만 참 — <code>===</code> 는 종류까지 본다"
-      - t: "<code>undefined</code> 여도 참이다"
+      - t:
+          ko: "{{pick.1|code}}{{pick.1|josa:이,가}} <code>null</code> 일 때만 참 — <code>===</code> 는 종류까지 본다"
+          en: >-
+            True only when {{pick.1|code}} is <code>null</code> — <code>===</code> looks at the kind
+            too
+      - t:
+          ko: "<code>undefined</code> 여도 참이다"
+          en: "True for <code>undefined</code> as well"
         diag:
-          t: "<code>==</code> 로 물었다면 그 말이 맞습니다. 등호 두 개는 이 두 값을 한 묶음으로 보고, 세 개는 서로 다른 값으로 봐요."
+          t:
+            ko: "<code>==</code> 로 물었다면 그 말이 맞습니다. 등호 두 개는 이 두 값을 한 묶음으로 보고, 세 개는 서로 다른 값으로 봐요."
+            en: >-
+              That would hold if you had asked with <code>==</code>. Two equals signs take these two
+              values as one group; three take them as different values.
           edge:
-            h: "가장 날카로운 자리 — 등호 두 개와 세 개"
+            h:
+              ko: "가장 날카로운 자리 — 등호 두 개와 세 개"
+              en: "The sharpest spot — two equals signs and three"
             code:
               - "undefined == null    // true"
               - "undefined === null   // false"
-      - t: "<code>0</code> 이어도 참이다"
+      - t:
+          ko: "<code>0</code> 이어도 참이다"
+          en: "True for <code>0</code> as well"
         diag:
-          t: "<code>0</code> 은 있는 값입니다. <code>if</code> 안에서 거짓처럼 굴 뿐이고, 「없음」과 견주면 다른 값이에요."
+          t:
+            ko: "<code>0</code> 은 있는 값입니다. <code>if</code> 안에서 거짓처럼 굴 뿐이고, 「없음」과 견주면 다른 값이에요."
+            en: >-
+              <code>0</code> is a value that is present. It only behaves as false inside an
+              <code>if</code>; set against an absence it is a different value.
           edge:
-            h: "가장 날카로운 자리 — 거짓 같음과 없음"
+            h:
+              ko: "가장 날카로운 자리 — 거짓 같음과 없음"
+              en: "The sharpest spot — falsy and absent"
             code:
               - "0 == null      // false"
               - "if (0) {}      // 들어가지 않는다"
-      - t: "언제나 참이다"
+      - t:
+          ko: "언제나 참이다"
+          en: "Always true"
         diag:
-          t: "값이 들어 있으면 거짓입니다. 항상 참이 되게 하려면 <code>==</code> 로 두 「없음」을 한꺼번에 물어야 해요."
+          t:
+            ko: "값이 들어 있으면 거짓입니다. 항상 참이 되게 하려면 <code>==</code> 로 두 「없음」을 한꺼번에 물어야 해요."
+            en: >-
+              If a value is in there it is false. To make it true in both cases you ask both
+              absences at once with <code>==</code>.
           edge:
-            h: "가장 날카로운 자리 — 값이 있을 때"
+            h:
+              ko: "가장 날카로운 자리 — 값이 있을 때"
+              en: "The sharpest spot — when a value is there"
             code:
               - "const a = 1; a === null   // false"
               - "const b = null; b === null // true"

@@ -38,7 +38,7 @@ essential:
 # 「AI 가 대신 쓴 것」 — 구멍 개념 ↔ 같은 일을 하는 다른 표기.
 # 패널이 「.then 체인도 N곳」처럼 부기를 달고, 그 자리가 「선택의 왜」로 이어진다.
 alternatives:
-  - { gap: ts/async-await, present: ts/promise-then, note: "같은 일을 두 표기로 — AI 가 섞어 썼습니다" }
+  - { gap: ts/async-await, present: ts/promise-then, note: { ko: "같은 일을 두 표기로 — AI 가 섞어 썼습니다", en: "The same job in two notations — the AI mixed them" } }
   - { gap: ts/nullish-coalescing, present: ts/logical-or-default }
   - { gap: ts/optional-chaining, present: ts/logical-and-guard }
   - { gap: ts/array-destructuring, present: ts/index-access-pair }
@@ -48,5 +48,9 @@ thin_threshold: { min_files: 2, min_sites: 3, small_repo_files: 20 }
 
 # point[].diag · blank 옵션에 진단이 없을 때의 폴백 (04 §2.1).
 diag_default:
-  point: "«{{pick}}»{{pick|josa:은,는}} {{role}} 자리입니다. {{concept}}{{concept|josa:은,는}} «{{answer}}» 입니다. {{rule}}"
-  blank: "«{{pick}}»{{pick|josa:은,는}} 이 자리에 오지 않습니다. {{rule}}"
+  point:
+    ko: "«{{pick}}»{{pick|josa:은,는}} {{role}} 자리입니다. {{concept}}{{concept|josa:은,는}} «{{answer}}» 입니다. {{rule}}"
+    en: "«{{pick}}» is the {{role}} slot. The {{concept}} is «{{answer}}». {{rule}}"
+  blank:
+    ko: "«{{pick}}»{{pick|josa:은,는}} 이 자리에 오지 않습니다. {{rule}}"
+    en: "«{{pick}}» does not go in this slot. {{rule}}"

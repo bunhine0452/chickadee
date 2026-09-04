@@ -11,82 +11,170 @@ prereq: [ts/property-access, ts/undefined-null]
 confusions: [ts/optional-chaining, ts/nullish-coalescing]
 
 dict:
-  one_liner: "<code>a && a.b</code> 는 <code>a</code> 가 있을 때만 <code>a.b</code>."
-  why: >-
-    <code>?.</code> 가 생기기 전에 없을 수 있는 값을 지나가던 방법입니다. 이름을 두 번 적고
-    「참이면 오른쪽」이라는 규칙에 기대는데, 여기엔 값이 하나 새어 나오는 자리가 있어요 —
-    {{pick.1|code}}{{pick.1|josa:이,가}} <code>0</code> 이나 빈 문자열이면
-    <code>.{{pick.3}}</code>{{pick.3|josa:을,를}} 읽지 않고 그 값이 그대로 결과가 됩니다.
+  one_liner:
+    ko: "<code>a && a.b</code> 는 <code>a</code> 가 있을 때만 <code>a.b</code>."
+    en: "<code>a && a.b</code> gives <code>a.b</code> only when <code>a</code> is there."
+  why:
+    ko: >-
+      <code>?.</code> 가 생기기 전에 없을 수 있는 값을 지나가던 방법입니다. 이름을 두 번 적고
+      「참이면 오른쪽」이라는 규칙에 기대는데, 여기엔 값이 하나 새어 나오는 자리가 있어요 —
+      {{pick.1|code}}{{pick.1|josa:이,가}} <code>0</code> 이나 빈 문자열이면
+      <code>.{{pick.3}}</code>{{pick.3|josa:을,를}} 읽지 않고 그 값이 그대로 결과가 됩니다.
+    en: >-
+      This is how people stepped past a value that might be absent before <code>?.</code> existed.
+      You write the name twice and lean on the rule “if truthy, the right-hand side”, and there is
+      one spot where a value leaks through — if {{pick.1|code}} is <code>0</code> or an empty
+      string, <code>.{{pick.3}}</code> is not read and that value becomes the result as it is.
   trace:
-    - "{{pick.1|code}}{{pick.1|josa:을,를}} 참·거짓으로 바꿔 본다."
-    - "거짓 쪽이면 {{site.line}}행의 결과는 {{pick.1|code}} 그 값이다 — <code>.{{pick.3}}</code> 쪽은 읽지 않는다."
-    - "참 쪽이면 <code>.{{pick.3}}</code>{{pick.3|josa:을,를}} 읽어 그 값을 낸다."
+    - ko: "{{pick.1|code}}{{pick.1|josa:을,를}} 참·거짓으로 바꿔 본다."
+      en: "{{pick.1|code}} is turned into true or false."
+    - ko: "거짓 쪽이면 {{site.line}}행의 결과는 {{pick.1|code}} 그 값이다 — <code>.{{pick.3}}</code> 쪽은 읽지 않는다."
+      en: >-
+        On the falsy side, the result of line {{site.line}} is that {{pick.1|code}} value itself —
+        the <code>.{{pick.3}}</code> side is not read.
+    - ko: "참 쪽이면 <code>.{{pick.3}}</code>{{pick.3|josa:을,를}} 읽어 그 값을 낸다."
+      en: "On the truthy side, <code>.{{pick.3}}</code> is read and its value comes out."
 
-rule: "<b><code>&&</code> 는 「있으면 읽는다」를 참·거짓으로 흉내 낸다.</b> 멈춘 자리의 값은 <code>undefined</code> 가 아니라 왼쪽 값 그대로다."
+rule:
+  ko: "<b><code>&&</code> 는 「있으면 읽는다」를 참·거짓으로 흉내 낸다.</b> 멈춘 자리의 값은 <code>undefined</code> 가 아니라 왼쪽 값 그대로다."
+  en: >-
+    <b><code>&&</code> imitates “read it if it is there” with true and false.</b> The value where it
+    stops is not <code>undefined</code> but the left-hand value as it is.
 result:
-  label: "{{pick.1|code}}{{pick.1|josa:이,가}} 없을 때"
+  label:
+    ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 없을 때"
+    en: "When {{pick.1|code}} is absent"
   value: "{{pick.1}}"
-  note: "<code>undefined</code> 가 아니라 왼쪽 값 그대로"
-ok: >-
-  <code>&&</code> 는 왼쪽이 참일 때만 오른쪽을 읽습니다. 그래서 {{pick.1|code}}{{pick.1|josa:이,가}}
-  없으면 <code>.{{pick.3}}</code>{{pick.3|josa:을,를}} 읽지 않아 터지지 않아요. 다만 <b>결과는 왼쪽 값 그대로</b>라
-  <code>undefined</code> 를 기대하고 쓴 곳에서는 값이 달라집니다.
-payoff: >-
-  같은 이름을 두 번 적는 대신 <code>{{pick.1}}?.{{pick.3}}</code> 이라고 쓰면 한 번만 읽고,
-  멈춘 자리의 값도 언제나 <code>undefined</code> 하나로 정해집니다.
-bridge: >-
-  <code>&&</code> 가 지키는 것은 <b>바로 다음 한 칸</b>입니다. <code>{{pick.1}}.{{pick.3}}</code> 안쪽에
-  또 없을 수 있는 값이 있으면 조건을 하나 더 이어 붙여야 해요.
+  note:
+    ko: "<code>undefined</code> 가 아니라 왼쪽 값 그대로"
+    en: "not <code>undefined</code> but the left-hand value as it is"
+ok:
+  ko: >-
+    <code>&&</code> 는 왼쪽이 참일 때만 오른쪽을 읽습니다. 그래서 {{pick.1|code}}{{pick.1|josa:이,가}}
+    없으면 <code>.{{pick.3}}</code>{{pick.3|josa:을,를}} 읽지 않아 터지지 않아요. 다만 <b>결과는 왼쪽 값 그대로</b>라
+    <code>undefined</code> 를 기대하고 쓴 곳에서는 값이 달라집니다.
+  en: >-
+    <code>&&</code> reads the right-hand side only when the left is truthy. So if {{pick.1|code}} is
+    absent it does not read <code>.{{pick.3}}</code> and does not blow up. But <b>the result is the
+    left-hand value as it is</b>, so anywhere written expecting <code>undefined</code>, the value
+    differs.
+payoff:
+  ko: >-
+    같은 이름을 두 번 적는 대신 <code>{{pick.1}}?.{{pick.3}}</code> 이라고 쓰면 한 번만 읽고,
+    멈춘 자리의 값도 언제나 <code>undefined</code> 하나로 정해집니다.
+  en: >-
+    Write <code>{{pick.1}}?.{{pick.3}}</code> instead of the name twice and it reads once, and the
+    value where it stops is always the single <code>undefined</code>.
+bridge:
+  ko: >-
+    <code>&&</code> 가 지키는 것은 <b>바로 다음 한 칸</b>입니다. <code>{{pick.1}}.{{pick.3}}</code> 안쪽에
+    또 없을 수 있는 값이 있으면 조건을 하나 더 이어 붙여야 해요.
+  en: >-
+    What <code>&&</code> guards is <b>the very next step</b>. If there is another possibly-absent
+    value inside <code>{{pick.1}}.{{pick.3}}</code>, you have to add one more condition.
 misconceptions:
-  - "<code>&&</code> 가 멈추면 <code>undefined</code> 가 나온다 — 왼쪽 값이 그대로 나옵니다."
-  - "<code>a && a.b</code> 와 <code>a?.b</code> 는 언제나 같다 — <code>a</code> 가 <code>0</code> 이나 빈 문자열이면 갈립니다."
+  - ko: "<code>&&</code> 가 멈추면 <code>undefined</code> 가 나온다 — 왼쪽 값이 그대로 나옵니다."
+    en: >-
+      When <code>&&</code> stops, <code>undefined</code> comes out — the left-hand value comes out
+      as it is.
+  - ko: "<code>a && a.b</code> 와 <code>a?.b</code> 는 언제나 같다 — <code>a</code> 가 <code>0</code> 이나 빈 문자열이면 갈립니다."
+    en: >-
+      <code>a && a.b</code> and <code>a?.b</code> are always the same — they part ways when
+      <code>a</code> is <code>0</code> or an empty string.
 
 point:
-  - q: "{{site.line}}행에서 <code>.{{pick.3}}</code>{{pick.3|josa:을,를}} 읽어도 되는지 <b>먼저 확인하게 만드는 기호</b>를 짚어 보세요."
-    hint: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+  - q:
+      ko: "{{site.line}}행에서 <code>.{{pick.3}}</code>{{pick.3|josa:을,를}} 읽어도 되는지 <b>먼저 확인하게 만드는 기호</b>를 짚어 보세요."
+      en: >-
+        On line {{site.line}}, point at <b>the symbol that makes it check first</b> whether
+        <code>.{{pick.3}}</code> may be read.
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
     answer: pick.2
     diag:
       pick.1:
-        t: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>확인받는</b> 값입니다. 이 이름은 왼쪽과 오른쪽에 두 번 나오는데, 둘을 이어 「먼저 확인」으로 만드는 것은 사이의 <code>&&</code> 예요."
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>확인받는</b> 값입니다. 이 이름은 왼쪽과 오른쪽에 두 번 나오는데, 둘을 이어 「먼저 확인」으로 만드는 것은 사이의 <code>&&</code> 예요."
+          en: >-
+            {{pick.1|code}} is the value <b>being checked</b>. This name appears twice, on the left
+            and on the right, and what joins the two into “check first” is the <code>&&</code>
+            between them.
         edge:
-          h: "가장 날카로운 자리 — 이름이 아니라 사이의 기호"
+          h:
+            ko: "가장 날카로운 자리 — 이름이 아니라 사이의 기호"
+            en: "The sharpest spot — the symbol between, not the name"
           code:
             - "{{pick.1}} && {{pick.1}}.{{pick.3}}   // 확인하고 읽는다"
             - "{{pick.1}}.{{pick.3}}                 // 바로 읽어 터질 수 있다"
       pick.3:
-        t: "<code>{{pick.3}}</code>{{pick.3|josa:은,는}} 읽으려는 <b>이름</b>입니다. 읽어도 되는지 보는 일은 그보다 앞의 <code>&&</code> 가 합니다."
+        t:
+          ko: "<code>{{pick.3}}</code>{{pick.3|josa:은,는}} 읽으려는 <b>이름</b>입니다. 읽어도 되는지 보는 일은 그보다 앞의 <code>&&</code> 가 합니다."
+          en: >-
+            <code>{{pick.3}}</code> is the <b>name</b> being read. Seeing whether it may be read is
+            the job of the <code>&&</code> before it.
         edge:
-          h: "가장 날카로운 자리 — 지키는 쪽은 왼쪽"
+          h:
+            ko: "가장 날카로운 자리 — 지키는 쪽은 왼쪽"
+            en: "The sharpest spot — the guard is on the left"
           code:
             - "{{pick.1}} && {{pick.1}}.{{pick.3}}"
             - "{{pick.1}}?.{{pick.3}}                // 같은 일을 한 번만 적는다"
 
 meaning:
-  - q: "{{pick.1|code}}{{pick.1|josa:이,가}} <code>undefined</code> 라면 {{site.line}}행의 값은 무엇일까요?"
-    hint: "<code>&&</code> 는 둘 중 <b>하나를 골라</b> 내놓는다."
+  - q:
+      ko: "{{pick.1|code}}{{pick.1|josa:이,가}} <code>undefined</code> 라면 {{site.line}}행의 값은 무엇일까요?"
+      en: "If {{pick.1|code}} is <code>undefined</code>, what is the value of line {{site.line}}?"
+    hint:
+      ko: "<code>&&</code> 는 둘 중 <b>하나를 골라</b> 내놓는다."
+      en: "<code>&&</code> <b>picks one</b> of the two and hands it out."
     options:
-      - t: "<code>undefined</code> — 왼쪽 값이 그대로 결과가 된다"
+      - t:
+          ko: "<code>undefined</code> — 왼쪽 값이 그대로 결과가 된다"
+          en: "<code>undefined</code> — the left-hand value becomes the result as it is"
       - t: "<code>null</code>"
         diag:
-          t: "<code>&&</code> 는 왼쪽 값을 <b>그대로</b> 내놓습니다. 왼쪽이 <code>null</code> 이었다면 <code>null</code> 이고, <code>undefined</code> 였다면 <code>undefined</code> 예요."
+          t:
+            ko: "<code>&&</code> 는 왼쪽 값을 <b>그대로</b> 내놓습니다. 왼쪽이 <code>null</code> 이었다면 <code>null</code> 이고, <code>undefined</code> 였다면 <code>undefined</code> 예요."
+            en: >-
+              <code>&&</code> hands out the left-hand value <b>as it is</b>. If the left was
+              <code>null</code> it is <code>null</code>; if it was <code>undefined</code> it is
+              <code>undefined</code>.
           edge:
-            h: "가장 날카로운 자리 — 멈춘 값이 하나가 아니다"
+            h:
+              ko: "가장 날카로운 자리 — 멈춘 값이 하나가 아니다"
+              en: "The sharpest spot — the stopping value is not one thing"
             code:
               - "null && null.x        // null"
               - "undefined?.x          // undefined"
-      - t: "TypeError 로 멈춘다"
+      - t:
+          ko: "TypeError 로 멈춘다"
+          en: "It stops with a TypeError"
         diag:
-          t: "확인 없이 <code>{{pick.1}}.{{pick.3}}</code> 만 적었다면 그 말이 맞습니다. <code>&&</code> 가 왼쪽에서 이미 멈춰서 <code>.{{pick.3}}</code>{{pick.3|josa:을,를}} 아예 읽지 않아요."
+          t:
+            ko: "확인 없이 <code>{{pick.1}}.{{pick.3}}</code> 만 적었다면 그 말이 맞습니다. <code>&&</code> 가 왼쪽에서 이미 멈춰서 <code>.{{pick.3}}</code>{{pick.3|josa:을,를}} 아예 읽지 않아요."
+            en: >-
+              That would hold if you had written <code>{{pick.1}}.{{pick.3}}</code> without the
+              check. <code>&&</code> already stopped on the left, so <code>.{{pick.3}}</code> is
+              never read at all.
           edge:
-            h: "가장 날카로운 자리 — 읽었나 안 읽었나"
+            h:
+              ko: "가장 날카로운 자리 — 읽었나 안 읽었나"
+              en: "The sharpest spot — read or not read"
             code:
               - "undefined.x               // TypeError"
               - "undefined && undefined.x  // undefined"
       - t: "<code>false</code>"
         diag:
-          t: "참·거짓으로 <b>판정만</b> 하고 내놓는 것은 원래 값입니다. 참·거짓이 필요하면 <code>Boolean(...)</code> 처럼 따로 바꿔야 해요."
+          t:
+            ko: "참·거짓으로 <b>판정만</b> 하고 내놓는 것은 원래 값입니다. 참·거짓이 필요하면 <code>Boolean(...)</code> 처럼 따로 바꿔야 해요."
+            en: >-
+              It <b>judges</b> true or false but hands out the original value. If you need true or
+              false, convert separately with something like <code>Boolean(...)</code>.
           edge:
-            h: "가장 날카로운 자리 — 판정과 결과는 다르다"
+            h:
+              ko: "가장 날카로운 자리 — 판정과 결과는 다르다"
+              en: "The sharpest spot — the judgement and the result differ"
             code:
               - "0 && 1        // 0"
               - "Boolean(0)    // false"

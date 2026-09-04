@@ -11,72 +11,146 @@ prereq: [ts/number-literal, ts/property-access]
 confusions: [ts/object-spread]
 
 dict:
-  one_liner: "대괄호 안에 값을 순서대로 담는다. 첫 자리는 0 번이다."
-  why: >-
-    같은 종류의 값이 여럿이면 이름을 하나씩 붙일 수 없습니다. 배열은 순서를 붙여 한 이름에
-    담아 두는 그릇이고, {{site.line}}행은 그 그릇을 만들거나 그 안을 들여다보는 자리예요.
+  one_liner:
+    ko: "대괄호 안에 값을 순서대로 담는다. 첫 자리는 0 번이다."
+    en: "Values go in square brackets, in order. The first slot is number 0."
+  why:
+    ko: >-
+      같은 종류의 값이 여럿이면 이름을 하나씩 붙일 수 없습니다. 배열은 순서를 붙여 한 이름에
+      담아 두는 그릇이고, {{site.line}}행은 그 그릇을 만들거나 그 안을 들여다보는 자리예요.
+    en: >-
+      When there are many values of one kind you cannot name them one by one. An array is the
+      container that holds them in order under a single name, and line {{site.line}} is where that
+      container is made or looked into.
   trace:
-    - "{{pick.1|code}} 안의 값에는 앞에서부터 0, 1, 2 … 번호가 붙어 있다."
-    - "{{site.line}}행은 그 번호나 개수를 통해 안을 본다."
-    - "없는 번호를 읽어도 멈추지 않고 <code>undefined</code> 가 나온다."
+    - ko: "{{pick.1|code}} 안의 값에는 앞에서부터 0, 1, 2 … 번호가 붙어 있다."
+      en: "The values in {{pick.1|code}} are numbered 0, 1, 2 … from the front."
+    - ko: "{{site.line}}행은 그 번호나 개수를 통해 안을 본다."
+      en: "Line {{site.line}} looks inside by that number or by the count."
+    - ko: "없는 번호를 읽어도 멈추지 않고 <code>undefined</code> 가 나온다."
+      en: "Reading a number that is not there does not stop; <code>undefined</code> comes out."
 
-rule: "<b>첫 자리는 0 번이고, 마지막 자리는 <code>length - 1</code> 번이다.</b> 없는 번호는 <code>undefined</code>."
+rule:
+  ko: "<b>첫 자리는 0 번이고, 마지막 자리는 <code>length - 1</code> 번이다.</b> 없는 번호는 <code>undefined</code>."
+  en: >-
+    <b>The first slot is 0 and the last is <code>length - 1</code>.</b> A number that is not there
+    gives <code>undefined</code>.
 result:
-  label: "없는 번호를 읽을 때"
+  label:
+    ko: "없는 번호를 읽을 때"
+    en: "Reading a number that is not there"
   value: "undefined"
-  note: "멈추지 않는다"
-ok: >-
-  배열은 값을 <b>순서대로</b> 담습니다. 번호는 0 부터 시작하니 <code>length</code> 가 3 이면
-  쓸 수 있는 번호는 0, 1, 2 예요.
-payoff: >-
-  순서가 있으니 「몇 번째」로 부를 수 있고, 개수를 셀 수 있으니 화면에 「N개」를 띄울 수
-  있습니다. {{site.line}}행이 그 둘 중 하나예요.
-bridge: >-
-  번호로 하나씩 꺼내는 대신 전부를 한 번에 다루고 싶어지면 그때 <code>map</code> 이나
-  <code>filter</code> 같은 도구로 넘어갑니다.
+  note:
+    ko: "멈추지 않는다"
+    en: "it does not stop"
+ok:
+  ko: >-
+    배열은 값을 <b>순서대로</b> 담습니다. 번호는 0 부터 시작하니 <code>length</code> 가 3 이면
+    쓸 수 있는 번호는 0, 1, 2 예요.
+  en: >-
+    An array holds values <b>in order</b>. Numbering starts at 0, so if <code>length</code> is 3 the
+    usable numbers are 0, 1 and 2.
+payoff:
+  ko: >-
+    순서가 있으니 「몇 번째」로 부를 수 있고, 개수를 셀 수 있으니 화면에 「N개」를 띄울 수
+    있습니다. {{site.line}}행이 그 둘 중 하나예요.
+  en: >-
+    Because there is an order you can ask for “the nth”, and because you can count them you can put
+    “N items” on the screen. Line {{site.line}} is one of those two.
+bridge:
+  ko: >-
+    번호로 하나씩 꺼내는 대신 전부를 한 번에 다루고 싶어지면 그때 <code>map</code> 이나
+    <code>filter</code> 같은 도구로 넘어갑니다.
+  en: >-
+    When you want to handle all of them at once instead of taking them out one number at a time,
+    that is when you move to tools like <code>map</code> and <code>filter</code>.
 misconceptions:
-  - "<code>length</code> 는 마지막 번호다 — 아니요. 개수입니다. 마지막 번호는 그보다 하나 작아요."
-  - "없는 번호를 읽으면 멈춘다 — 아니요. <code>undefined</code> 가 나옵니다. 멈추는 것은 그 결과에 다시 점을 찍을 때예요."
+  - ko: "<code>length</code> 는 마지막 번호다 — 아니요. 개수입니다. 마지막 번호는 그보다 하나 작아요."
+    en: "<code>length</code> is the last number — no. It is the count. The last number is one less."
+  - ko: "없는 번호를 읽으면 멈춘다 — 아니요. <code>undefined</code> 가 나옵니다. 멈추는 것은 그 결과에 다시 점을 찍을 때예요."
+    en: >-
+      Reading a number that is not there stops it — no. <code>undefined</code> comes out. What stops
+      it is putting a dot on that result.
 
 point:
-  - q: "{{site.line}}행에서 <b>배열에서 무엇을 꺼내는지 정하는 자리</b>를 짚어 보세요."
-    hint: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+  - q:
+      ko: "{{site.line}}행에서 <b>배열에서 무엇을 꺼내는지 정하는 자리</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the spot that decides what is taken out of the array</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
     answer: pick.2
     diag:
       pick.1:
-        t: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>어느 배열</b>인지를 가리킵니다. 무엇을 꺼낼지까지 정하지는 않고, 그 일은 바로 뒤의 자리가 해요."
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>어느 배열</b>인지를 가리킵니다. 무엇을 꺼낼지까지 정하지는 않고, 그 일은 바로 뒤의 자리가 해요."
+          en: >-
+            {{pick.1|code}} says <b>which array</b>. It does not decide what to take out; the spot
+            right after it does that.
         edge:
-          h: "가장 날카로운 자리 — 그릇과 꺼내는 자리"
+          h:
+            ko: "가장 날카로운 자리 — 그릇과 꺼내는 자리"
+            en: "The sharpest spot — the container and the spot that takes from it"
           code:
             - "xs            // 배열 전체"
             - "xs[0]         // 그중 0 번"
 
 meaning:
-  - q: "{{pick.1|code}} 에 값이 세 개 들어 있을 때 <code>{{pick.1}}[3]</code> 은 무엇일까요?"
-    hint: "번호는 0 부터 시작합니다."
+  - q:
+      ko: "{{pick.1|code}} 에 값이 세 개 들어 있을 때 <code>{{pick.1}}[3]</code> 은 무엇일까요?"
+      en: "If {{pick.1|code}} holds three values, what is <code>{{pick.1}}[3]</code>?"
+    hint:
+      ko: "번호는 0 부터 시작합니다."
+      en: "Numbering starts at 0."
     options:
-      - t: "<code>undefined</code> — 0, 1, 2 번까지만 있고 3 번은 비어 있다"
-      - t: "마지막 값"
+      - t:
+          ko: "<code>undefined</code> — 0, 1, 2 번까지만 있고 3 번은 비어 있다"
+          en: "<code>undefined</code> — only 0, 1 and 2 exist; 3 is empty"
+      - t:
+          ko: "마지막 값"
+          en: "The last value"
         diag:
-          t: "번호가 1 부터 시작했다면 그 말이 맞습니다. 0 부터 세니 값이 세 개면 마지막은 2 번이에요."
+          t:
+            ko: "번호가 1 부터 시작했다면 그 말이 맞습니다. 0 부터 세니 값이 세 개면 마지막은 2 번이에요."
+            en: >-
+              That would hold if numbering started at 1. It starts at 0, so with three values the
+              last is 2.
           edge:
-            h: "가장 날카로운 자리 — 0 부터 세는가"
+            h:
+              ko: "가장 날카로운 자리 — 0 부터 세는가"
+              en: "The sharpest spot — does counting start at 0"
             code:
               - "['a','b','c'][2]   // 'c'"
               - "['a','b','c'][3]   // undefined"
-      - t: "그 자리에서 멈춘다"
+      - t:
+          ko: "그 자리에서 멈춘다"
+          en: "It stops right there"
         diag:
-          t: "없는 번호를 읽는 것만으로는 멈추지 않습니다. 멈추는 것은 그 <code>undefined</code> 에 다시 점을 찍을 때예요."
+          t:
+            ko: "없는 번호를 읽는 것만으로는 멈추지 않습니다. 멈추는 것은 그 <code>undefined</code> 에 다시 점을 찍을 때예요."
+            en: >-
+              Reading a number that is not there does not stop it on its own. What stops it is
+              putting a dot on that <code>undefined</code>.
           edge:
-            h: "가장 날카로운 자리 — 읽기와 그다음"
+            h:
+              ko: "가장 날카로운 자리 — 읽기와 그다음"
+              en: "The sharpest spot — the read and what comes after"
             code:
               - "xs[3]              // undefined"
               - "xs[3].name         // TypeError"
-      - t: "배열이 늘어나면서 빈 자리가 생긴다"
+      - t:
+          ko: "배열이 늘어나면서 빈 자리가 생긴다"
+          en: "The array grows and an empty slot appears"
         diag:
-          t: "번호로 <b>넣을</b> 때는 늘어납니다. 읽기만 할 때는 배열이 그대로예요."
+          t:
+            ko: "번호로 <b>넣을</b> 때는 늘어납니다. 읽기만 할 때는 배열이 그대로예요."
+            en: >-
+              It grows when you <b>put</b> something at a number. When you only read, the array
+              stays as it is.
           edge:
-            h: "가장 날카로운 자리 — 읽기냐 넣기냐"
+            h:
+              ko: "가장 날카로운 자리 — 읽기냐 넣기냐"
+              en: "The sharpest spot — reading or putting"
             code:
               - "xs[3]        // 읽기, 길이 그대로"
               - "xs[3] = 'd'  // 넣기, 길이가 4 가 된다"

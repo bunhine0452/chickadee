@@ -9,14 +9,29 @@ difficulty: 1
 prereq: []
 confusions: []
 dict:
-  one_liner: "값에 이름을 붙여 두고, 아래에서 그 이름으로 다시 부른다."
-  why: >-
-    낱말은 언어마다 다릅니다 — <code>const</code>, <code>let</code>, <code>val</code>,
-    <code>:=</code>. 하는 일은 하나예요. 값을 계산해 두고 이름을 붙여, 다음 줄부터 그 이름으로
-    가리키는 것입니다. 언어가 갈리는 지점은 대개 하나뿐입니다 — <b>그 이름을 나중에 다른 값에
-    다시 묶을 수 있는가</b>.
+  one_liner:
+    ko: "값에 이름을 붙여 두고, 아래에서 그 이름으로 다시 부른다."
+    en: "Gives a value a name, and below that you refer to it by that name."
+  why:
+    ko: >-
+      낱말은 언어마다 다릅니다 — <code>const</code>, <code>let</code>, <code>val</code>,
+      <code>:=</code>. 하는 일은 하나예요. 값을 계산해 두고 이름을 붙여, 다음 줄부터 그 이름으로
+      가리키는 것입니다. 언어가 갈리는 지점은 대개 하나뿐입니다 — <b>그 이름을 나중에 다른 값에
+      다시 묶을 수 있는가</b>.
+    en: >-
+      The word differs by language — <code>const</code>, <code>let</code>, <code>val</code>,
+      <code>:=</code>. The job is one. Compute a value, put a name on it, and from the next line
+      refer to it by that name. Languages usually part ways at one point only — <b>whether that name
+      can later be bound to a different value</b>.
   trace: []
-rule: "이름은 값을 가리킬 뿐이고, 이름을 다시 묶는 것과 값 안을 고치는 것은 다른 일이다."
-ok: "값을 한 번 계산해 이름에 묶어 두면, 아래에서는 그 이름이 곧 그 값입니다."
+rule:
+  ko: "이름은 값을 가리킬 뿐이고, 이름을 다시 묶는 것과 값 안을 고치는 것은 다른 일이다."
+  en: >-
+    A name only points at a value; rebinding the name and changing the inside of the value are
+    different things.
+ok:
+  ko: "값을 한 번 계산해 이름에 묶어 두면, 아래에서는 그 이름이 곧 그 값입니다."
+  en: "Compute a value once and bind it to a name, and below that the name is the value."
 misconceptions:
-  - "다시 묶을 수 없으면 값 안도 못 바꾼다 — 아니요. 잠기는 것은 이름 쪽입니다."
+  - ko: "다시 묶을 수 없으면 값 안도 못 바꾼다 — 아니요. 잠기는 것은 이름 쪽입니다."
+    en: "If it cannot be rebound, the inside cannot change either — no. What is locked is the name."

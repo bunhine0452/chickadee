@@ -11,60 +11,128 @@ prereq: []
 confusions: [ts/string-literal]
 
 dict:
-  one_liner: "따옴표 없이 적은 숫자. 더하기·빼기가 곧바로 되는 값이다."
-  why: >-
-    같은 <code>42</code> 라도 따옴표가 붙으면 글자입니다. 글자끼리 <code>+</code> 하면
-    이어 붙고 숫자끼리 하면 더해져요. {{site.line}}행의 {{pick.1|code}} 에 따옴표가 없다는 것이
-    「이 값으로 셈을 한다」는 뜻입니다.
+  one_liner:
+    ko: "따옴표 없이 적은 숫자. 더하기·빼기가 곧바로 되는 값이다."
+    en: "A number written without quotes. Adding and subtracting work on it directly."
+  why:
+    ko: >-
+      같은 <code>42</code> 라도 따옴표가 붙으면 글자입니다. 글자끼리 <code>+</code> 하면
+      이어 붙고 숫자끼리 하면 더해져요. {{site.line}}행의 {{pick.1|code}} 에 따옴표가 없다는 것이
+      「이 값으로 셈을 한다」는 뜻입니다.
+    en: >-
+      The same <code>42</code> is text once quotes go round it. Two pieces of text joined with
+      <code>+</code> run together; two numbers add up. That {{pick.1|code}} on line {{site.line}}
+      has no quotes is what says “this value is for arithmetic”.
   trace:
-    - "{{pick.1|code}}{{pick.1|josa:을,를}} 숫자로 읽는다 — 따옴표가 없으니 글자가 아니다."
-    - "{{site.line}}행의 다른 숫자와 곧바로 셈할 수 있다."
-    - "화면에 내보낼 때만 글자로 바뀐다."
+    - ko: "{{pick.1|code}}{{pick.1|josa:을,를}} 숫자로 읽는다 — 따옴표가 없으니 글자가 아니다."
+      en: "{{pick.1|code}} is read as a number — there are no quotes, so it is not text."
+    - ko: "{{site.line}}행의 다른 숫자와 곧바로 셈할 수 있다."
+      en: "It can go straight into arithmetic with the other numbers on line {{site.line}}."
+    - ko: "화면에 내보낼 때만 글자로 바뀐다."
+      en: "It turns into text only when it goes out to the screen."
 
-rule: "<b>따옴표가 없으면 셈하는 값, 있으면 이어 붙이는 글자.</b> <code>+</code> 가 어느 쪽인지 정한다."
+rule:
+  ko: "<b>따옴표가 없으면 셈하는 값, 있으면 이어 붙이는 글자.</b> <code>+</code> 가 어느 쪽인지 정한다."
+  en: >-
+    <b>No quotes and it is a value you compute with; quotes and it is text you join.</b> That is
+    what decides which job <code>+</code> does.
 result:
-  label: "{{site.line}}행의 값"
+  label:
+    ko: "{{site.line}}행의 값"
+    en: "The value of line {{site.line}}"
   value: "{{pick.1}}"
-  note: "셈할 수 있는 숫자"
-ok: >-
-  {{pick.1|code}}{{pick.1|josa:은,는}} 따옴표 없이 적힌 <b>숫자</b>입니다. 다른 숫자와 더하면
-  더해지고, 글자와 더하면 글자로 이어 붙습니다.
-payoff: >-
-  따옴표 하나가 <code>1 + 1</code> 을 <code>2</code> 로도, <code>11</code> 로도 만듭니다.
-  {{site.line}}행이 어느 쪽인지는 {{pick.1|code}} 에 따옴표가 있는지로 갈려요.
-bridge: >-
-  화면에 숫자를 보여 줄 때는 다시 글자가 됩니다 — 백틱 안에 <code>${…}</code> 로 끼워 넣으면
-  그 변환이 자동으로 일어납니다.
+  note:
+    ko: "셈할 수 있는 숫자"
+    en: "a number you can compute with"
+ok:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:은,는}} 따옴표 없이 적힌 <b>숫자</b>입니다. 다른 숫자와 더하면
+    더해지고, 글자와 더하면 글자로 이어 붙습니다.
+  en: >-
+    {{pick.1|code}} is <b>a number</b> written without quotes. Add it to another number and they
+    add; add it to text and they join as text.
+payoff:
+  ko: >-
+    따옴표 하나가 <code>1 + 1</code> 을 <code>2</code> 로도, <code>11</code> 로도 만듭니다.
+    {{site.line}}행이 어느 쪽인지는 {{pick.1|code}} 에 따옴표가 있는지로 갈려요.
+  en: >-
+    One quote mark makes <code>1 + 1</code> either <code>2</code> or <code>11</code>. Which one line
+    {{site.line}} is turns on whether {{pick.1|code}} has quotes.
+bridge:
+  ko: >-
+    화면에 숫자를 보여 줄 때는 다시 글자가 됩니다 — 백틱 안에 <code>${…}</code> 로 끼워 넣으면
+    그 변환이 자동으로 일어납니다.
+  en: >-
+    It becomes text again when you show a number on screen — put it inside backticks with
+    <code>${…}</code> and that conversion happens on its own.
 misconceptions:
-  - "정수와 소수가 다른 값이다 — 자바스크립트에서는 둘 다 같은 숫자 하나입니다."
-  - "화면에 보이는 숫자는 숫자다 — 입력칸에서 온 값은 대개 글자입니다. 셈하기 전에 숫자로 바꿔야 해요."
+  - ko: "정수와 소수가 다른 값이다 — 자바스크립트에서는 둘 다 같은 숫자 하나입니다."
+    en: >-
+      Whole numbers and decimals are different values — in JavaScript both are the same single
+      number kind.
+  - ko: "화면에 보이는 숫자는 숫자다 — 입력칸에서 온 값은 대개 글자입니다. 셈하기 전에 숫자로 바꿔야 해요."
+    en: >-
+      A number on screen is a number — a value from an input box is usually text. It has to be
+      turned into a number before you compute with it.
 
 meaning:
-  - q: "{{site.line}}행의 {{pick.1|code}} 에 따옴표를 씌우면 <code>{{pick.1}} + 1</code> 의 값은 무엇이 될까요?"
-    hint: "<code>+</code> 는 양쪽이 무엇이냐에 따라 하는 일이 달라집니다."
+  - q:
+      ko: "{{site.line}}행의 {{pick.1|code}} 에 따옴표를 씌우면 <code>{{pick.1}} + 1</code> 의 값은 무엇이 될까요?"
+      en: >-
+        If you put quotes round {{pick.1|code}} on line {{site.line}}, what does <code>{{pick.1}} +
+        1</code> become?
+    hint:
+      ko: "<code>+</code> 는 양쪽이 무엇이냐에 따라 하는 일이 달라집니다."
+      en: "<code>+</code> does a different job depending on what is on each side."
     options:
-      - t: "글자로 이어 붙는다 — 뒤에 <code>1</code> 이 그대로 달라붙는다"
-      - t: "그대로 더해진다"
+      - t:
+          ko: "글자로 이어 붙는다 — 뒤에 <code>1</code> 이 그대로 달라붙는다"
+          en: "They join as text — the <code>1</code> sticks on the end as it is"
+      - t:
+          ko: "그대로 더해진다"
+          en: "They add as before"
         diag:
-          t: "양쪽이 모두 숫자였다면 그 말이 맞습니다. 한쪽이 글자가 되는 순간 <code>+</code> 는 더하기를 그만두고 이어 붙이기가 돼요."
+          t:
+            ko: "양쪽이 모두 숫자였다면 그 말이 맞습니다. 한쪽이 글자가 되는 순간 <code>+</code> 는 더하기를 그만두고 이어 붙이기가 돼요."
+            en: >-
+              That would hold if both sides were numbers. The moment one side is text,
+              <code>+</code> stops adding and joins instead.
           edge:
-            h: "가장 날카로운 자리 — 한쪽만 글자여도 충분하다"
+            h:
+              ko: "가장 날카로운 자리 — 한쪽만 글자여도 충분하다"
+              en: "The sharpest spot — one side being text is enough"
             code:
               - "10 + 1     // 11 (숫자)"
               - "'10' + 1   // '101' (글자)"
-      - t: "읽지 못하고 멈춘다"
+      - t:
+          ko: "읽지 못하고 멈춘다"
+          en: "It cannot be read and stops"
         diag:
-          t: "글자와 숫자를 <code>+</code> 로 묶는 것은 허용된 일이라 멈추지 않습니다. 조용히 글자가 되어서 나중에 셈이 어긋나요."
+          t:
+            ko: "글자와 숫자를 <code>+</code> 로 묶는 것은 허용된 일이라 멈추지 않습니다. 조용히 글자가 되어서 나중에 셈이 어긋나요."
+            en: >-
+              Joining text and a number with <code>+</code> is allowed, so it does not stop. It
+              quietly becomes text and the arithmetic goes off later.
           edge:
-            h: "가장 날카로운 자리 — 멈추지 않아서 더 어렵다"
+            h:
+              ko: "가장 날카로운 자리 — 멈추지 않아서 더 어렵다"
+              en: "The sharpest spot — not stopping is what makes it harder"
             code:
               - "'10' + 1   // '101', 아무 경고 없음"
               - "'10' - 1   // 9, 빼기는 숫자로 되돌린다"
-      - t: "<code>0</code> 이 된다"
+      - t:
+          ko: "<code>0</code> 이 된다"
+          en: "It becomes <code>0</code>"
         diag:
-          t: "숫자로 읽을 수 없는 글자를 셈에 넣으면 <code>NaN</code> 이 나옵니다. <code>0</code> 으로 대신 채워 주는 자리는 없어요."
+          t:
+            ko: "숫자로 읽을 수 없는 글자를 셈에 넣으면 <code>NaN</code> 이 나옵니다. <code>0</code> 으로 대신 채워 주는 자리는 없어요."
+            en: >-
+              Put text that cannot be read as a number into arithmetic and you get <code>NaN</code>.
+              Nothing fills the gap with <code>0</code>.
           edge:
-            h: "가장 날카로운 자리 — 빈자리는 0 이 아니다"
+            h:
+              ko: "가장 날카로운 자리 — 빈자리는 0 이 아니다"
+              en: "The sharpest spot — a gap is not 0"
             code:
               - "Number('abc')   // NaN"
               - "Number('')      // 0"

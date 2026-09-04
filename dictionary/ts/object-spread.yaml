@@ -11,73 +11,151 @@ prereq: [ts/property-access]
 confusions: [ts/array-basics]
 
 dict:
-  one_liner: "앞 객체를 펼쳐 복사하고, 뒤에 적은 것으로 덮어쓴다."
-  why: >-
-    화면은 객체가 <b>새 것</b>일 때만 다시 그립니다. 원본을 직접 고치면 안이 바뀌어도 겉은
-    같은 객체라 아무도 알아채지 못해요. {{site.line}}행은 {{pick.1|code}} 의 내용을 그대로
-    옮겨 담은 <b>다른</b> 객체를 만드는 자리입니다.
+  one_liner:
+    ko: "앞 객체를 펼쳐 복사하고, 뒤에 적은 것으로 덮어쓴다."
+    en: "Spread the first object to copy it, then overwrite with what is written after."
+  why:
+    ko: >-
+      화면은 객체가 <b>새 것</b>일 때만 다시 그립니다. 원본을 직접 고치면 안이 바뀌어도 겉은
+      같은 객체라 아무도 알아채지 못해요. {{site.line}}행은 {{pick.1|code}} 의 내용을 그대로
+      옮겨 담은 <b>다른</b> 객체를 만드는 자리입니다.
+    en: >-
+      The screen redraws only when the object is <b>a new one</b>. Change the original in place and
+      the inside differs but the outside is the same object, so nobody notices. Line {{site.line}}
+      is where <b>a different</b> object is made carrying the contents of {{pick.1|code}}.
   trace:
-    - "{{pick.1|code}} 의 이름과 값을 하나씩 새 객체에 옮겨 담는다."
-    - "{{site.line}}행에서 뒤에 적은 이름은 옮겨 담은 값을 덮어쓴다."
-    - "{{pick.1|code}} 자체는 손대지 않는다 — 결과는 새 객체다."
+    - ko: "{{pick.1|code}} 의 이름과 값을 하나씩 새 객체에 옮겨 담는다."
+      en: "The names and values of {{pick.1|code}} are carried one at a time into a new object."
+    - ko: "{{site.line}}행에서 뒤에 적은 이름은 옮겨 담은 값을 덮어쓴다."
+      en: "A name written after it on line {{site.line}} overwrites the value carried over."
+    - ko: "{{pick.1|code}} 자체는 손대지 않는다 — 결과는 새 객체다."
+      en: "{{pick.1|code}} itself is not touched — the result is a new object."
 
-rule: "<b>뒤에 적은 것이 이긴다.</b> 그리고 펼치기는 한 겹만 복사한다 — 안쪽 객체는 원본과 같은 것을 가리킨다."
+rule:
+  ko: "<b>뒤에 적은 것이 이긴다.</b> 그리고 펼치기는 한 겹만 복사한다 — 안쪽 객체는 원본과 같은 것을 가리킨다."
+  en: >-
+    <b>What is written later wins.</b> And spreading copies one layer only — objects inside still
+    point at the same things as the original.
 result:
-  label: "{{site.line}}행의 값"
+  label:
+    ko: "{{site.line}}행의 값"
+    en: "The value of line {{site.line}}"
   value: "{{pick.1}}{{pick.1|josa:을,를}} 복사한 새 객체"
-  note: "원본은 그대로"
-ok: >-
-  {{pick.2|code}}{{pick.2|josa:은,는}} {{pick.1|code}} 의 내용을 <b>새 객체에 옮겨 담습니다</b>. 뒤에 같은 이름을
-  적으면 그 값이 이기고, {{pick.1|code}} 자체는 바뀌지 않아요.
-payoff: >-
-  원본을 두고 새 객체를 만드는 것이 「불변 갱신」이고, 화면이 바뀐 것을 알아채는 방법입니다.
-  {{site.line}}행이 바로 그 자리예요.
-bridge: >-
-  한 겹만 복사한다는 점이 다음 함정입니다 — 안쪽 객체까지 새로 만들려면 그 자리에서 다시
-  펼쳐야 해요.
+  note:
+    ko: "원본은 그대로"
+    en: "the original is unchanged"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} {{pick.1|code}} 의 내용을 <b>새 객체에 옮겨 담습니다</b>. 뒤에 같은 이름을
+    적으면 그 값이 이기고, {{pick.1|code}} 자체는 바뀌지 않아요.
+  en: >-
+    {{pick.2|code}} <b>carries the contents of {{pick.1|code}} into a new object</b>. Write the same
+    name after it and that value wins, and {{pick.1|code}} itself does not change.
+payoff:
+  ko: >-
+    원본을 두고 새 객체를 만드는 것이 「불변 갱신」이고, 화면이 바뀐 것을 알아채는 방법입니다.
+    {{site.line}}행이 바로 그 자리예요.
+  en: >-
+    Leaving the original and making a new object is what “immutable update” means, and it is how the
+    screen notices a change. Line {{site.line}} is exactly that spot.
+bridge:
+  ko: >-
+    한 겹만 복사한다는 점이 다음 함정입니다 — 안쪽 객체까지 새로 만들려면 그 자리에서 다시
+    펼쳐야 해요.
+  en: >-
+    Copying one layer only is the next trap — to make the inner objects new as well, you have to
+    spread again right there.
 misconceptions:
-  - "펼치기가 안쪽까지 전부 새로 만든다 — 아니요. 한 겹입니다. 안쪽 객체는 원본과 같은 것을 가리켜요."
-  - "순서는 상관없다 — 아니요. 같은 이름이 겹치면 <b>뒤에 적은 것</b>이 남습니다."
+  - ko: "펼치기가 안쪽까지 전부 새로 만든다 — 아니요. 한 겹입니다. 안쪽 객체는 원본과 같은 것을 가리켜요."
+    en: >-
+      Spreading makes everything inside new — no. One layer. Objects inside point at the same things
+      as the original.
+  - ko: "순서는 상관없다 — 아니요. 같은 이름이 겹치면 <b>뒤에 적은 것</b>이 남습니다."
+    en: "Order does not matter — it does. When names collide, <b>what is written later</b> survives."
 
 point:
-  - q: "{{site.line}}행에서 <b>앞의 객체를 통째로 복사해 오는 기호</b>를 짚어 보세요."
-    hint: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+  - q:
+      ko: "{{site.line}}행에서 <b>앞의 객체를 통째로 복사해 오는 기호</b>를 짚어 보세요."
+      en: >-
+        On line {{site.line}}, point at <b>the symbol that copies the object in front of it
+        whole</b>.
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
     answer: pick.2
     diag:
       pick.1:
-        t: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>복사해 올 대상</b>입니다. 이름만 적으면 그 객체가 통째로 한 칸에 들어가고, 내용을 펼치는 일은 앞의 점 세 개가 해요."
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>복사해 올 대상</b>입니다. 이름만 적으면 그 객체가 통째로 한 칸에 들어가고, 내용을 펼치는 일은 앞의 점 세 개가 해요."
+          en: >-
+            {{pick.1|code}} is <b>what is being copied from</b>. Write the name alone and that
+            object goes into one slot whole; spreading its contents is the job of the three dots
+            before it.
         edge:
-          h: "가장 날카로운 자리 — 펼쳤느냐 담았느냐"
+          h:
+            ko: "가장 날카로운 자리 — 펼쳤느냐 담았느냐"
+            en: "The sharpest spot — spread or placed"
           code:
             - "{ ...user, n: 1 }    // user 의 내용이 펼쳐진다"
             - "{ user, n: 1 }       // user 라는 이름 한 칸"
 
 meaning:
-  - q: "{{site.line}}행이 끝난 뒤 {{pick.1|code}} 자체는 어떻게 될까요?"
-    hint: "펼치기는 읽어서 옮겨 담는 일입니다."
+  - q:
+      ko: "{{site.line}}행이 끝난 뒤 {{pick.1|code}} 자체는 어떻게 될까요?"
+      en: "After line {{site.line}} finishes, what happens to {{pick.1|code}} itself?"
+    hint:
+      ko: "펼치기는 읽어서 옮겨 담는 일입니다."
+      en: "Spreading is reading and carrying over."
     options:
-      - t: "그대로다 — 내용을 옮겨 담은 새 객체가 따로 만들어진다"
-      - t: "뒤에 적은 값으로 덮어써진다"
+      - t:
+          ko: "그대로다 — 내용을 옮겨 담은 새 객체가 따로 만들어진다"
+          en: "Unchanged — a new object carrying the contents is made separately"
+      - t:
+          ko: "뒤에 적은 값으로 덮어써진다"
+          en: "It is overwritten by what is written after"
         diag:
-          t: "<code>Object.assign({{pick.1}}, …)</code> 처럼 <b>첫 자리에</b> 원본을 두었다면 그 말이 맞습니다. 중괄호로 새로 여는 이 표기는 원본을 읽기만 해요."
+          t:
+            ko: "<code>Object.assign({{pick.1}}, …)</code> 처럼 <b>첫 자리에</b> 원본을 두었다면 그 말이 맞습니다. 중괄호로 새로 여는 이 표기는 원본을 읽기만 해요."
+            en: >-
+              That would hold if the original sat <b>in the first slot</b>, as in
+              <code>Object.assign({{pick.1}}, …)</code>. This notation opens a new pair of braces
+              and only reads the original.
           edge:
-            h: "가장 날카로운 자리 — 어디에 담느냐"
+            h:
+              ko: "가장 날카로운 자리 — 어디에 담느냐"
+              en: "The sharpest spot — where it is carried into"
             code:
               - "{ ...user, n: 1 }              // user 그대로"
               - "Object.assign(user, { n: 1 })  // user 가 바뀐다"
-      - t: "안쪽 객체까지 전부 새로 만들어진다"
+      - t:
+          ko: "안쪽 객체까지 전부 새로 만들어진다"
+          en: "Everything inside is made new as well"
         diag:
-          t: "펼치기는 <b>한 겹</b>만 복사합니다. 안쪽 객체는 원본과 같은 것을 가리켜서, 그것을 고치면 원본에서도 보여요."
+          t:
+            ko: "펼치기는 <b>한 겹</b>만 복사합니다. 안쪽 객체는 원본과 같은 것을 가리켜서, 그것을 고치면 원본에서도 보여요."
+            en: >-
+              Spreading copies <b>one layer</b>. Objects inside point at the same things as the
+              original, so editing one shows up in the original too.
           edge:
-            h: "가장 날카로운 자리 — 몇 겹까지 복사하나"
+            h:
+              ko: "가장 날카로운 자리 — 몇 겹까지 복사하나"
+              en: "The sharpest spot — how many layers are copied"
             code:
               - "const b = { ...a }"
               - "b.deep === a.deep   // true"
-      - t: "비워진다"
+      - t:
+          ko: "비워진다"
+          en: "It is emptied"
         diag:
-          t: "펼치기는 읽어 오기만 합니다. 원본을 비우는 표기는 따로 없고, 지우려면 그 이름에 새 값을 다시 묶어야 해요."
+          t:
+            ko: "펼치기는 읽어 오기만 합니다. 원본을 비우는 표기는 따로 없고, 지우려면 그 이름에 새 값을 다시 묶어야 해요."
+            en: >-
+              Spreading only reads. There is no notation here for emptying the original; to clear it
+              you have to bind a new value to that name.
           edge:
-            h: "가장 날카로운 자리 — 읽기와 지우기"
+            h:
+              ko: "가장 날카로운 자리 — 읽기와 지우기"
+              en: "The sharpest spot — reading and clearing"
             code:
               - "const b = { ...a }   // a 는 그대로"
               - "a = {}               // 이래야 a 가 바뀐다"

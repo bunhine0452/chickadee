@@ -11,76 +11,158 @@ prereq: [ts/array-basics, ts/call-expression]
 confusions: [ts/array-map-immutable, ts/array-filter]
 
 dict:
-  one_liner: "<code>push</code> 는 원본 배열을 직접 늘리고 새 길이(숫자)를 돌려준다."
-  why: >-
-    한곳에서만 쓰는 임시 배열을 쌓을 때는 편합니다. 다만 화면에 붙은 상태라면 이야기가 달라져요 —
-    배열이 <b>같은 배열</b>인 채로 내용만 바뀌므로, 바뀐 걸 알아채는 쪽이 없습니다. {{site.line}}행은
-    {{pick.1|code}} 자체를 바꾸는 자리입니다.
+  one_liner:
+    ko: "<code>push</code> 는 원본 배열을 직접 늘리고 새 길이(숫자)를 돌려준다."
+    en: "<code>push</code> grows the original array in place and returns the new length."
+  why:
+    ko: >-
+      한곳에서만 쓰는 임시 배열을 쌓을 때는 편합니다. 다만 화면에 붙은 상태라면 이야기가 달라져요 —
+      배열이 <b>같은 배열</b>인 채로 내용만 바뀌므로, 바뀐 걸 알아채는 쪽이 없습니다. {{site.line}}행은
+      {{pick.1|code}} 자체를 바꾸는 자리입니다.
+    en: >-
+      For piling up a temporary array used in one place it is handy. State attached to the screen is
+      another matter — the array stays <b>the same array</b> while its contents change, so nothing
+      notices. Line {{site.line}} is where {{pick.1|code}} itself is changed.
   trace:
-    - "{{pick.1|code}} 의 끝에 {{pick.2|code}}{{pick.2|josa:이,가}} {{pick.3|code}}{{pick.3|josa:을,를}} 붙인다."
-    - "{{pick.1|code}}{{pick.1|josa:은,는}} 새 것이 되지 않는다 — 같은 배열의 길이만 늘어난다."
-    - "{{site.line}}행의 값은 배열이 아니라 <b>늘어난 뒤의 길이</b>다."
+    - ko: "{{pick.1|code}} 의 끝에 {{pick.2|code}}{{pick.2|josa:이,가}} {{pick.3|code}}{{pick.3|josa:을,를}} 붙인다."
+      en: "{{pick.2|code}} attaches {{pick.3|code}} to the end of {{pick.1|code}}."
+    - ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 새 것이 되지 않는다 — 같은 배열의 길이만 늘어난다."
+      en: "{{pick.1|code}} does not become a new one — the same array just gets longer."
+    - ko: "{{site.line}}행의 값은 배열이 아니라 <b>늘어난 뒤의 길이</b>다."
+      en: "The value of line {{site.line}} is not the array but <b>the length after it grew</b>."
 
-rule: "<b>push 는 원본을 바꾸고 길이를 돌려준다.</b> 새 배열이 필요하면 <code>[...xs, x]</code> 나 <code>map</code> 을 쓴다."
+rule:
+  ko: "<b>push 는 원본을 바꾸고 길이를 돌려준다.</b> 새 배열이 필요하면 <code>[...xs, x]</code> 나 <code>map</code> 을 쓴다."
+  en: >-
+    <b>push changes the original and returns the length.</b> If you need a new array, use
+    <code>[...xs, x]</code> or <code>map</code>.
 result:
-  label: "{{site.line}}행의 값"
+  label:
+    ko: "{{site.line}}행의 값"
+    en: "The value of line {{site.line}}"
   value: "늘어난 뒤의 길이(숫자)"
-  note: "{{pick.1}}{{pick.1|josa:은,는}} 그 자리에서 바뀐다"
-ok: >-
-  <code>push</code> 는 <b>있던 배열을 그대로 늘립니다</b>. 돌려주는 것은 배열이 아니라 새 길이예요.
-  같은 배열이 계속 쓰이므로 「바뀌었다」는 신호가 나가지 않습니다.
-payoff: "지역 변수에 쌓을 때는 가장 짧은 표기입니다. 화면에 붙은 값이라면 새 배열을 만드는 쪽이 안전해요."
-bridge: "<code>[...{{pick.1}}, {{pick.3}}]</code> 은 같은 결과를 <b>새 배열</b>로 만듭니다 — 원본은 그대로 남아요."
+  note:
+    ko: "{{pick.1}}{{pick.1|josa:은,는}} 그 자리에서 바뀐다"
+    en: "{{pick.1}} is changed in place"
+ok:
+  ko: >-
+    <code>push</code> 는 <b>있던 배열을 그대로 늘립니다</b>. 돌려주는 것은 배열이 아니라 새 길이예요.
+    같은 배열이 계속 쓰이므로 「바뀌었다」는 신호가 나가지 않습니다.
+  en: >-
+    <code>push</code> <b>grows the array that was already there</b>. What it hands back is the new
+    length, not an array. The same array carries on being used, so no “this changed” signal goes
+    out.
+payoff:
+  ko: "지역 변수에 쌓을 때는 가장 짧은 표기입니다. 화면에 붙은 값이라면 새 배열을 만드는 쪽이 안전해요."
+  en: >-
+    For piling into a local variable it is the shortest notation. For a value attached to the
+    screen, building a new array is safer.
+bridge:
+  ko: "<code>[...{{pick.1}}, {{pick.3}}]</code> 은 같은 결과를 <b>새 배열</b>로 만듭니다 — 원본은 그대로 남아요."
+  en: >-
+    <code>[...{{pick.1}}, {{pick.3}}]</code> gives the same result as <b>a new array</b> — the
+    original is left as it was.
 misconceptions:
-  - "<code>push</code> 가 새 배열을 돌려준다 — 숫자(새 길이)를 돌려줍니다."
-  - "<code>const</code> 로 선언했으니 못 바꾼다 — 이름을 못 바꾸는 것이고 내용은 바뀝니다."
+  - ko: "<code>push</code> 가 새 배열을 돌려준다 — 숫자(새 길이)를 돌려줍니다."
+    en: "<code>push</code> hands back a new array — it hands back a number, the new length."
+  - ko: "<code>const</code> 로 선언했으니 못 바꾼다 — 이름을 못 바꾸는 것이고 내용은 바뀝니다."
+    en: >-
+      It was declared <code>const</code>, so it cannot change — the name cannot change; the contents
+      can.
 
 point:
-  - q: "{{site.line}}행에서 <b>이 줄이 끝난 뒤 내용이 달라져 있는 것</b>을 짚어 보세요."
-    hint: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+  - q:
+      ko: "{{site.line}}행에서 <b>이 줄이 끝난 뒤 내용이 달라져 있는 것</b>을 짚어 보세요."
+      en: >-
+        On line {{site.line}}, point at <b>the thing whose contents differ once this line
+        finishes</b>.
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
     answer: pick.1
     diag:
       pick.3:
-        t: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>넣는 값</b>입니다. 이 값 자체는 그대로이고, 달라지는 것은 값을 받아 간 배열 쪽이에요."
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>넣는 값</b>입니다. 이 값 자체는 그대로이고, 달라지는 것은 값을 받아 간 배열 쪽이에요."
+          en: >-
+            {{pick.3|code}} is <b>the value going in</b>. That value itself is unchanged; what
+            differs is the array that took it.
         edge:
-          h: "가장 날카로운 자리 — 담기는 값과 담는 그릇"
+          h:
+            ko: "가장 날카로운 자리 — 담기는 값과 담는 그릇"
+            en: "The sharpest spot — the value put in and the container"
           code:
             - "{{pick.1}}.push({{pick.3}})   // 배열 길이가 는다"
             - "{{pick.3}}                    // 그대로"
       pick.2:
-        t: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>하는 일의 이름</b>입니다. 실제로 달라지는 것은 그 이름을 부른 대상, 즉 앞의 배열이에요."
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>하는 일의 이름</b>입니다. 실제로 달라지는 것은 그 이름을 부른 대상, 즉 앞의 배열이에요."
+          en: >-
+            {{pick.2|code}} is <b>the name of the job</b>. What actually differs is what that name
+            was called on, the array in front.
         edge:
-          h: "가장 날카로운 자리 — 이름과 대상"
+          h:
+            ko: "가장 날카로운 자리 — 이름과 대상"
+            en: "The sharpest spot — the name and what it acts on"
           code:
             - "{{pick.1}}.push(x)     // {{pick.1}} 쪽이 바뀐다"
             - "[...{{pick.1}}, x]     // 아무것도 바뀌지 않는다"
 
 meaning:
-  - q: "{{site.line}}행이 돌려주는 값은 무엇일까요?"
-    hint: "push 가 내는 것과 바꾸는 것은 다릅니다."
+  - q:
+      ko: "{{site.line}}행이 돌려주는 값은 무엇일까요?"
+      en: "What does line {{site.line}} hand back?"
+    hint:
+      ko: "push 가 내는 것과 바꾸는 것은 다릅니다."
+      en: "What push gives and what it changes are different."
     options:
-      - t: "늘어난 뒤의 <b>길이</b>(숫자)"
-      - t: "항목이 추가된 새 배열"
+      - t:
+          ko: "늘어난 뒤의 <b>길이</b>(숫자)"
+          en: "The <b>length</b> after it grew, as a number"
+      - t:
+          ko: "항목이 추가된 새 배열"
+          en: "A new array with the item added"
         diag:
-          t: "새 배열을 받고 싶다면 <code>[...{{pick.1}}, {{pick.3}}]</code> 이나 <code>concat</code> 입니다. <code>push</code> 는 있던 배열을 늘리고 숫자를 냅니다."
+          t:
+            ko: "새 배열을 받고 싶다면 <code>[...{{pick.1}}, {{pick.3}}]</code> 이나 <code>concat</code> 입니다. <code>push</code> 는 있던 배열을 늘리고 숫자를 냅니다."
+            en: >-
+              If you want a new array, that is <code>[...{{pick.1}}, {{pick.3}}]</code> or
+              <code>concat</code>. <code>push</code> grows the array that was there and gives a
+              number.
           edge:
-            h: "가장 날카로운 자리 — 새 배열이냐 길이냐"
+            h:
+              ko: "가장 날카로운 자리 — 새 배열이냐 길이냐"
+              en: "The sharpest spot — a new array or a length"
             code:
               - "const a = xs.push(x)        // 숫자"
               - "const b = [...xs, x]        // 배열"
-      - t: "원본 배열 자기 자신"
+      - t:
+          ko: "원본 배열 자기 자신"
+          en: "The original array itself"
         diag:
-          t: "자기 자신을 돌려주면 <code>{{pick.1}}.push(a).push(b)</code> 처럼 이을 수 있었겠지만, 숫자에는 <code>push</code> 가 없어 그 줄은 그 자리에서 멈춥니다."
+          t:
+            ko: "자기 자신을 돌려주면 <code>{{pick.1}}.push(a).push(b)</code> 처럼 이을 수 있었겠지만, 숫자에는 <code>push</code> 가 없어 그 줄은 그 자리에서 멈춥니다."
+            en: >-
+              If it handed itself back you could write <code>{{pick.1}}.push(a).push(b)</code>, but
+              a number has no <code>push</code>, so that line stops right there.
           edge:
-            h: "가장 날카로운 자리 — 이어 붙일 수 있나"
+            h:
+              ko: "가장 날카로운 자리 — 이어 붙일 수 있나"
+              en: "The sharpest spot — can anything be chained on"
             code:
               - "xs.push(1).push(2)      // 숫자에는 push 가 없다"
               - "xs.push(1); xs.push(2)  // 이렇게 나눠 쓴다"
       - t: "<code>undefined</code>"
         diag:
-          t: "<code>undefined</code> 를 내는 건 <code>forEach</code> 쪽입니다. <code>push</code> 는 늘어난 길이를 숫자로 돌려줘요."
+          t:
+            ko: "<code>undefined</code> 를 내는 건 <code>forEach</code> 쪽입니다. <code>push</code> 는 늘어난 길이를 숫자로 돌려줘요."
+            en: >-
+              Giving <code>undefined</code> is <code>forEach</code>. <code>push</code> hands back
+              the grown length as a number.
           edge:
-            h: "가장 날카로운 자리 — 숫자와 undefined"
+            h:
+              ko: "가장 날카로운 자리 — 숫자와 undefined"
+              en: "The sharpest spot — a number and undefined"
             code:
               - "[].push(1)            // 1"
               - "[].forEach(() => {})  // undefined"

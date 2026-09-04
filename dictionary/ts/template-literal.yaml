@@ -11,73 +11,151 @@ prereq: [ts/string-literal]
 confusions: [ts/string-literal]
 
 dict:
-  one_liner: "백틱 문자열 안의 <code>${…}</code> 만 계산해 그 자리에 끼워 넣는다."
-  why: >-
-    글자와 값을 섞어 문장을 만드는 일은 화면에 무엇을 띄울 때마다 생깁니다.
-    <code>+</code> 로 이어 붙이면 따옴표와 더하기가 번갈아 나와 읽기 어려워지는데,
-    백틱은 문장을 통째로 두고 값이 들어갈 자리만 표시하게 해 줍니다.
+  one_liner:
+    ko: "백틱 문자열 안의 <code>${…}</code> 만 계산해 그 자리에 끼워 넣는다."
+    en: "Only the <code>${…}</code> inside a backtick string is evaluated and slotted in."
+  why:
+    ko: >-
+      글자와 값을 섞어 문장을 만드는 일은 화면에 무엇을 띄울 때마다 생깁니다.
+      <code>+</code> 로 이어 붙이면 따옴표와 더하기가 번갈아 나와 읽기 어려워지는데,
+      백틱은 문장을 통째로 두고 값이 들어갈 자리만 표시하게 해 줍니다.
+    en: >-
+      Mixing text and values into a sentence comes up every time something goes on screen. Join it
+      with <code>+</code> and the quotes and plus signs alternate until it is hard to read;
+      backticks let you keep the sentence whole and mark only where the values go.
   trace:
-    - "{{site.line}}행의 백틱 사이 글자는 그대로 둔다."
-    - "{{pick.2|code}} 안의 {{pick.1|code}} 만 계산한다."
-    - "그 값을 글자로 바꿔 그 자리에 끼워 넣고, 이어 붙인 문장이 결과가 된다."
+    - ko: "{{site.line}}행의 백틱 사이 글자는 그대로 둔다."
+      en: "The characters between the backticks on line {{site.line}} are left as they are."
+    - ko: "{{pick.2|code}} 안의 {{pick.1|code}} 만 계산한다."
+      en: "Only the {{pick.1|code}} inside {{pick.2|code}} is evaluated."
+    - ko: "그 값을 글자로 바꿔 그 자리에 끼워 넣고, 이어 붙인 문장이 결과가 된다."
+      en: "That value is turned into text and slotted in, and the joined sentence is the result."
 
-rule: "<b>백틱 안에서 계산되는 것은 <code>${…}</code> 안뿐이다.</b> 나머지는 줄바꿈까지 그대로 남는다."
+rule:
+  ko: "<b>백틱 안에서 계산되는 것은 <code>${…}</code> 안뿐이다.</b> 나머지는 줄바꿈까지 그대로 남는다."
+  en: >-
+    <b>Inside backticks, only what is in <code>${…}</code> is evaluated.</b> Everything else stays
+    as written, line breaks included.
 result:
-  label: "{{site.line}}행의 값"
+  label:
+    ko: "{{site.line}}행의 값"
+    en: "The value of line {{site.line}}"
   value: "{{pick.1}} 자리에 값이 들어간 문장"
-  note: "숫자도 글자로 바뀐다"
-ok: >-
-  백틱 문자열은 <code>${…}</code> 안만 계산합니다. {{pick.1|code}} 의 값이 글자로 바뀌어
-  {{pick.2|code}} 자리에 들어가고, 나머지 글자는 적힌 그대로 남아요.
-payoff: >-
-  따옴표와 <code>+</code> 를 번갈아 쓰지 않아도 되니 문장의 모양이 코드에 그대로 보입니다.
-  줄바꿈도 적은 대로 남아요.
-bridge: >-
-  값이 <code>undefined</code> 여도 끼워 넣기는 멈추지 않습니다 — 글자 <code>undefined</code> 가
-  그대로 문장에 박히니 화면에서야 알아채게 돼요.
+  note:
+    ko: "숫자도 글자로 바뀐다"
+    en: "numbers turn into text too"
+ok:
+  ko: >-
+    백틱 문자열은 <code>${…}</code> 안만 계산합니다. {{pick.1|code}} 의 값이 글자로 바뀌어
+    {{pick.2|code}} 자리에 들어가고, 나머지 글자는 적힌 그대로 남아요.
+  en: >-
+    A backtick string evaluates only what is inside <code>${…}</code>. The value of {{pick.1|code}}
+    is turned into text and goes into the {{pick.2|code}} spot, and the rest of the characters stay
+    as written.
+payoff:
+  ko: >-
+    따옴표와 <code>+</code> 를 번갈아 쓰지 않아도 되니 문장의 모양이 코드에 그대로 보입니다.
+    줄바꿈도 적은 대로 남아요.
+  en: >-
+    You do not alternate quotes and <code>+</code>, so the shape of the sentence stays visible in
+    the code. Line breaks stay as you wrote them too.
+bridge:
+  ko: >-
+    값이 <code>undefined</code> 여도 끼워 넣기는 멈추지 않습니다 — 글자 <code>undefined</code> 가
+    그대로 문장에 박히니 화면에서야 알아채게 돼요.
+  en: >-
+    Slotting in does not stop even when the value is <code>undefined</code> — the text
+    <code>undefined</code> goes into the sentence as it is, so you only notice on screen.
 misconceptions:
-  - "백틱 안에서는 모든 것이 계산된다 — 아니요. <code>${…}</code> 안만 계산합니다."
-  - "숫자를 넣으려면 먼저 글자로 바꿔야 한다 — 아니요. 끼워 넣는 순간 자동으로 글자가 됩니다."
+  - ko: "백틱 안에서는 모든 것이 계산된다 — 아니요. <code>${…}</code> 안만 계산합니다."
+    en: "Everything inside backticks is evaluated — no. Only what is inside <code>${…}</code>."
+  - ko: "숫자를 넣으려면 먼저 글자로 바꿔야 한다 — 아니요. 끼워 넣는 순간 자동으로 글자가 됩니다."
+    en: >-
+      You have to turn a number into text first — no. It becomes text automatically as it is slotted
+      in.
 
 point:
-  - q: "{{site.line}}행에서 <b>계산해서 끼워 넣는 자리</b>를 짚어 보세요."
-    hint: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+  - q:
+      ko: "{{site.line}}행에서 <b>계산해서 끼워 넣는 자리</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the spot that is evaluated and slotted in</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
     answer: pick.2
     diag:
       pick.1:
-        t: "{{pick.1|code}}{{pick.1|josa:은,는}} 끼워 넣을 <b>값</b>입니다. 이 이름만 백틱 안에 적으면 계산되지 않고 글자 그대로 남아요 — 감싸는 <code>${…}</code> 가 있어야 합니다."
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 끼워 넣을 <b>값</b>입니다. 이 이름만 백틱 안에 적으면 계산되지 않고 글자 그대로 남아요 — 감싸는 <code>${…}</code> 가 있어야 합니다."
+          en: >-
+            {{pick.1|code}} is the <b>value</b> to slot in. Write just this name inside the
+            backticks and it is not evaluated but stays as text — it needs the <code>${…}</code>
+            around it.
         edge:
-          h: "가장 날카로운 자리 — 감쌌느냐"
+          h:
+            ko: "가장 날카로운 자리 — 감쌌느냐"
+            en: "The sharpest spot — is it wrapped"
           code:
             - "`hi ${name}`   // name 의 값이 들어간다"
             - "`hi name`      // 글자 name 이 그대로"
 
 meaning:
-  - q: "{{pick.1|code}} 의 값이 <code>undefined</code> 라면 {{site.line}}행의 결과는 무엇일까요?"
-    hint: "끼워 넣기는 값이 무엇이든 멈추지 않습니다."
+  - q:
+      ko: "{{pick.1|code}} 의 값이 <code>undefined</code> 라면 {{site.line}}행의 결과는 무엇일까요?"
+      en: >-
+        If the value of {{pick.1|code}} is <code>undefined</code>, what is the result of line
+        {{site.line}}?
+    hint:
+      ko: "끼워 넣기는 값이 무엇이든 멈추지 않습니다."
+      en: "Slotting in does not stop, whatever the value is."
     options:
-      - t: "그 자리에 글자 <code>undefined</code> 가 박힌 문장"
-      - t: "그 자리가 빈칸으로 남는다"
+      - t:
+          ko: "그 자리에 글자 <code>undefined</code> 가 박힌 문장"
+          en: "A sentence with the text <code>undefined</code> stuck in that spot"
+      - t:
+          ko: "그 자리가 빈칸으로 남는다"
+          en: "That spot is left blank"
         diag:
-          t: "빈칸이 되는 값은 빈 문자열입니다. <code>undefined</code> 는 글자로 바뀌면 여덟 글자로 그대로 보여요."
+          t:
+            ko: "빈칸이 되는 값은 빈 문자열입니다. <code>undefined</code> 는 글자로 바뀌면 여덟 글자로 그대로 보여요."
+            en: >-
+              The value that leaves a blank is the empty string. Turned into text,
+              <code>undefined</code> shows as those letters, just as they are.
           edge:
-            h: "가장 날카로운 자리 — 빈 값과 없는 값"
+            h:
+              ko: "가장 날카로운 자리 — 빈 값과 없는 값"
+              en: "The sharpest spot — an empty value and a missing one"
             code:
               - "`[${undefined}]`   // '[undefined]'"
               - "`[${''}]`          // '[]'"
-      - t: "그 자리에서 멈춘다"
+      - t:
+          ko: "그 자리에서 멈춘다"
+          en: "It stops right there"
         diag:
-          t: "끼워 넣기는 어떤 값이든 글자로 바꿉니다. 멈추는 것은 <code>${…}</code> 안에서 없는 값에 점을 찍었을 때예요."
+          t:
+            ko: "끼워 넣기는 어떤 값이든 글자로 바꿉니다. 멈추는 것은 <code>${…}</code> 안에서 없는 값에 점을 찍었을 때예요."
+            en: >-
+              Slotting in turns any value into text. What stops it is putting a dot on a missing
+              value inside the <code>${…}</code>.
           edge:
-            h: "가장 날카로운 자리 — 끼우기와 그 안의 계산"
+            h:
+              ko: "가장 날카로운 자리 — 끼우기와 그 안의 계산"
+              en: "The sharpest spot — the slotting and what is computed inside it"
             code:
               - "`${u}`         // u 가 없어도 문장은 나온다"
               - "`${u.name}`    // u 가 없으면 TypeError"
-      - t: "문장 전체가 <code>undefined</code> 가 된다"
+      - t:
+          ko: "문장 전체가 <code>undefined</code> 가 된다"
+          en: "The whole sentence becomes <code>undefined</code>"
         diag:
-          t: "백틱 문장은 언제나 글자입니다. 안쪽 한 자리의 값이 없어도 바깥 글자는 그대로 남아요."
+          t:
+            ko: "백틱 문장은 언제나 글자입니다. 안쪽 한 자리의 값이 없어도 바깥 글자는 그대로 남아요."
+            en: >-
+              A backtick sentence is always text. Even with no value in one inner spot, the
+              characters outside stay as they are.
           edge:
-            h: "가장 날카로운 자리 — 안과 밖"
+            h:
+              ko: "가장 날카로운 자리 — 안과 밖"
+              en: "The sharpest spot — inside and outside"
             code:
               - "`a${undefined}b`   // 'aundefinedb'"
               - "undefined + 'b'    // 'undefinedb'"

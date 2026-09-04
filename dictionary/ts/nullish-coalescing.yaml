@@ -11,116 +11,237 @@ prereq: [ts/undefined-null, ts/const-declaration]
 confusions: [ts/logical-or-default, ts/logical-and-guard, ts/conditional-ternary]
 
 dict:
-  one_liner: "<code>a ?? b</code> 는 <code>a</code> 가 없을 때만 <code>b</code>."
-  why: >-
-    없을 때 쓸 값을 그 자리에서 정하는 기호입니다. <code>??</code> 가 「없음」으로 보는 것은
-    <code>undefined</code> 와 <code>null</code> 둘뿐이라, {{pick.1|code}}{{pick.1|josa:이,가}}
-    <code>0</code> 이거나 빈 문자열이어도 그 값이 그대로 남습니다. 예전에 쓰던 <code>||</code> 는
-    그 둘까지 「없음」으로 쳐서, 수량 <code>0</code> 이 조용히
-    {{pick.3|code}}{{pick.3|josa:으로,로}} 바뀌는 자리를 만들었어요.
+  one_liner:
+    ko: "<code>a ?? b</code> 는 <code>a</code> 가 없을 때만 <code>b</code>."
+    en: "<code>a ?? b</code> gives <code>b</code> only when <code>a</code> is missing."
+  why:
+    ko: >-
+      없을 때 쓸 값을 그 자리에서 정하는 기호입니다. <code>??</code> 가 「없음」으로 보는 것은
+      <code>undefined</code> 와 <code>null</code> 둘뿐이라, {{pick.1|code}}{{pick.1|josa:이,가}}
+      <code>0</code> 이거나 빈 문자열이어도 그 값이 그대로 남습니다. 예전에 쓰던 <code>||</code> 는
+      그 둘까지 「없음」으로 쳐서, 수량 <code>0</code> 이 조용히
+      {{pick.3|code}}{{pick.3|josa:으로,로}} 바뀌는 자리를 만들었어요.
+    en: >-
+      This is the symbol that settles, right there, what to use when a value is missing. What
+      <code>??</code> counts as missing is only <code>undefined</code> and <code>null</code>, so if
+      {{pick.1|code}} is <code>0</code> or an empty string that value survives. The older
+      <code>||</code> counted those two as missing as well, which made spots where a quantity of
+      <code>0</code> quietly turned into {{pick.3|code}}.
   trace:
-    - "{{pick.1|code}}{{pick.1|josa:을,를}} 먼저 읽는다."
-    - "그 값이 <code>undefined</code> 나 <code>null</code> 이면 {{pick.3|code}}{{pick.3|josa:을,를}} 대신 쓴다."
-    - "그 밖의 값이면 {{site.line}}행의 결과는 {{pick.1|code}} 그대로다."
+    - ko: "{{pick.1|code}}{{pick.1|josa:을,를}} 먼저 읽는다."
+      en: "{{pick.1|code}} is read first."
+    - ko: "그 값이 <code>undefined</code> 나 <code>null</code> 이면 {{pick.3|code}}{{pick.3|josa:을,를}} 대신 쓴다."
+      en: >-
+        If that value is <code>undefined</code> or <code>null</code>, {{pick.3|code}} is used
+        instead.
+    - ko: "그 밖의 값이면 {{site.line}}행의 결과는 {{pick.1|code}} 그대로다."
+      en: "For any other value the result of line {{site.line}} is {{pick.1|code}} as it is."
 
-rule: "<b><code>??</code> 는 <code>undefined</code>·<code>null</code> 에서만 오른쪽으로 넘어간다.</b> <code>0</code>·<code>''</code>·<code>false</code> 는 왼쪽 그대로."
+rule:
+  ko: "<b><code>??</code> 는 <code>undefined</code>·<code>null</code> 에서만 오른쪽으로 넘어간다.</b> <code>0</code>·<code>''</code>·<code>false</code> 는 왼쪽 그대로."
+  en: >-
+    <b><code>??</code> moves right only for <code>undefined</code> and <code>null</code>.</b>
+    <code>0</code>, <code>''</code> and <code>false</code> stay on the left.
 result:
-  label: "{{pick.1|code}}{{pick.1|josa:이,가}} <code>0</code> 일 때"
+  label:
+    ko: "{{pick.1|code}}{{pick.1|josa:이,가}} <code>0</code> 일 때"
+    en: "When {{pick.1|code}} is <code>0</code>"
   value: "0"
-  note: "<code>??</code> 는 넘어가지 않는다"
-ok: >-
-  <code>??</code> 는 왼쪽이 <code>undefined</code> 나 <code>null</code> <b>일 때만</b> 오른쪽을
-  씁니다. {{pick.1|code}}{{pick.1|josa:이,가}} <code>0</code> 이나 빈 문자열이면 그 값이 그대로
-  {{site.line}}행의 결과가 돼요.
-payoff: >-
-  기본값을 <code>||</code> 로 주면 <code>0</code> 과 빈 문자열이 함께 지워집니다.
-  <code>??</code> 는 지우는 대상을 <b>「없음」 둘</b>로 좁혀서 그 자리를 없앤 기호예요.
-bridge: >-
-  <code>undefined</code> 와 <code>null</code> 만이 「없음」입니다. <code>0</code>·<code>''</code>·<code>false</code>
-  는 <b>값이 있는 것</b>이라 <code>??</code> 가 건너뛰지 않아요.
+  note:
+    ko: "<code>??</code> 는 넘어가지 않는다"
+    en: "<code>??</code> does not move on"
+ok:
+  ko: >-
+    <code>??</code> 는 왼쪽이 <code>undefined</code> 나 <code>null</code> <b>일 때만</b> 오른쪽을
+    씁니다. {{pick.1|code}}{{pick.1|josa:이,가}} <code>0</code> 이나 빈 문자열이면 그 값이 그대로
+    {{site.line}}행의 결과가 돼요.
+  en: >-
+    <code>??</code> uses the right <b>only when</b> the left is <code>undefined</code> or
+    <code>null</code>. If {{pick.1|code}} is <code>0</code> or an empty string, that value becomes
+    the result of line {{site.line}} as it is.
+payoff:
+  ko: >-
+    기본값을 <code>||</code> 로 주면 <code>0</code> 과 빈 문자열이 함께 지워집니다.
+    <code>??</code> 는 지우는 대상을 <b>「없음」 둘</b>로 좁혀서 그 자리를 없앤 기호예요.
+  en: >-
+    Give a default with <code>||</code> and <code>0</code> and the empty string are wiped out along
+    with it. <code>??</code> narrows what gets wiped to <b>the two kinds of missing</b>, which
+    closes that gap.
+bridge:
+  ko: >-
+    <code>undefined</code> 와 <code>null</code> 만이 「없음」입니다. <code>0</code>·<code>''</code>·<code>false</code>
+    는 <b>값이 있는 것</b>이라 <code>??</code> 가 건너뛰지 않아요.
+  en: >-
+    Only <code>undefined</code> and <code>null</code> are “missing”. <code>0</code>, <code>''</code>
+    and <code>false</code> are <b>values that are present</b>, so <code>??</code> does not step over
+    them.
 misconceptions:
-  - "<code>??</code> 가 falsy 를 다 걸러 준다 — 아니요. <code>0</code> 과 빈 문자열은 통과합니다."
-  - "<code>??</code> 와 <code>||</code> 는 같다 — <code>0</code> 이 들어오는 순간 결과가 갈립니다."
+  - ko: "<code>??</code> 가 falsy 를 다 걸러 준다 — 아니요. <code>0</code> 과 빈 문자열은 통과합니다."
+    en: >-
+      <code>??</code> filters out every falsy value — no. <code>0</code> and the empty string pass
+      through.
+  - ko: "<code>??</code> 와 <code>||</code> 는 같다 — <code>0</code> 이 들어오는 순간 결과가 갈립니다."
+    en: >-
+      <code>??</code> and <code>||</code> are the same — the moment a <code>0</code> arrives, the
+      results part ways.
 
 point:
-  - q: "{{site.line}}행에서 {{pick.1|code}}{{pick.1|josa:이,가}} <b>없을 때만</b> 오른쪽으로 넘어가게 하는 기호를 짚어 보세요."
-    hint: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+  - q:
+      ko: "{{site.line}}행에서 {{pick.1|code}}{{pick.1|josa:이,가}} <b>없을 때만</b> 오른쪽으로 넘어가게 하는 기호를 짚어 보세요."
+      en: >-
+        On line {{site.line}}, point at the symbol that moves right <b>only when</b> {{pick.1|code}}
+        is missing.
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
     answer: pick.2
     diag:
       pick.1:
-        t: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>확인받는</b> 값입니다. 없는지 보고 넘어갈지 정하는 일은 바로 뒤의 <code>??</code> 가 해요."
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>확인받는</b> 값입니다. 없는지 보고 넘어갈지 정하는 일은 바로 뒤의 <code>??</code> 가 해요."
+          en: >-
+            {{pick.1|code}} is the value <b>being checked</b>. Seeing whether it is missing and
+            deciding to move on is the job of the <code>??</code> right after it.
         edge:
-          h: "가장 날카로운 자리 — 확인받는 쪽과 확인하는 쪽"
+          h:
+            ko: "가장 날카로운 자리 — 확인받는 쪽과 확인하는 쪽"
+            en: "The sharpest spot — the checked side and the checking side"
           code:
             - "{{pick.1}} ?? {{pick.3}}   // 없으면 오른쪽"
             - "{{pick.1}}                 // 확인 없이 그대로"
       pick.3:
-        t: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>대신 쓸 값</b>입니다. 언제 그 값으로 넘어갈지를 정하는 건 그 앞의 <code>??</code> 예요."
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>대신 쓸 값</b>입니다. 언제 그 값으로 넘어갈지를 정하는 건 그 앞의 <code>??</code> 예요."
+          en: >-
+            {{pick.3|code}} is <b>the value to use instead</b>. What settles when it is moved to is
+            the <code>??</code> before it.
         edge:
-          h: "가장 날카로운 자리 — 값이 아니라 조건"
+          h:
+            ko: "가장 날카로운 자리 — 값이 아니라 조건"
+            en: "The sharpest spot — the condition, not the value"
           code:
             - "{{pick.1}} ?? {{pick.3}}   // undefined·null 에서만"
             - "{{pick.1}} || {{pick.3}}   // 0·'' 에서도"
 
 meaning:
-  - q: "{{site.line}}행에서 오른쪽 {{pick.3|code}}{{pick.3|josa:이,가}} 쓰이는 때는 언제일까요?"
-    hint: "<code>??</code> 가 「없음」으로 보는 것이 무엇인지부터."
+  - q:
+      ko: "{{site.line}}행에서 오른쪽 {{pick.3|code}}{{pick.3|josa:이,가}} 쓰이는 때는 언제일까요?"
+      en: "When is the {{pick.3|code}} on the right of line {{site.line}} used?"
+    hint:
+      ko: "<code>??</code> 가 「없음」으로 보는 것이 무엇인지부터."
+      en: "Start from what <code>??</code> counts as missing."
     options:
-      - t: "{{pick.1|code}}{{pick.1|josa:이,가}} <code>undefined</code> 나 <code>null</code> 일 때"
-      - t: "<code>0</code>·<code>''</code>·<code>false</code> 일 때도"
+      - t:
+          ko: "{{pick.1|code}}{{pick.1|josa:이,가}} <code>undefined</code> 나 <code>null</code> 일 때"
+          en: "When {{pick.1|code}} is <code>undefined</code> or <code>null</code>"
+      - t:
+          ko: "<code>0</code>·<code>''</code>·<code>false</code> 일 때도"
+          en: "For <code>0</code>, <code>''</code> and <code>false</code> as well"
         diag:
-          t: "<code>||</code> 였다면 그 말이 맞습니다 — <code>||</code> 는 falsy 를 전부 「없음」으로 봐요. <code>??</code> 가 넘어가는 것은 <code>undefined</code> 와 <code>null</code> 둘뿐입니다."
+          t:
+            ko: "<code>||</code> 였다면 그 말이 맞습니다 — <code>||</code> 는 falsy 를 전부 「없음」으로 봐요. <code>??</code> 가 넘어가는 것은 <code>undefined</code> 와 <code>null</code> 둘뿐입니다."
+            en: >-
+              That would hold for <code>||</code> — <code>||</code> counts every falsy value as
+              missing. What <code>??</code> moves on for is only <code>undefined</code> and
+              <code>null</code>.
           edge:
-            h: "가장 날카로운 자리 — 수량 0"
+            h:
+              ko: "가장 날카로운 자리 — 수량 0"
+              en: "The sharpest spot — a quantity of 0"
             code:
               - "0 ?? 10   // 0"
               - "0 || 10   // 10"
-      - t: "<code>null</code> 일 때만 — <code>undefined</code> 는 그대로"
+      - t:
+          ko: "<code>null</code> 일 때만 — <code>undefined</code> 는 그대로"
+          en: "Only when it is <code>null</code> — <code>undefined</code> stays"
         diag:
-          t: "「없음」 둘을 함께 봅니다. 없는 속성을 읽으면 <code>undefined</code> 가 나오는데, 그것까지 받지 못하면 기본값이 필요한 자리에서 대부분 쓸 수 없어요."
+          t:
+            ko: "「없음」 둘을 함께 봅니다. 없는 속성을 읽으면 <code>undefined</code> 가 나오는데, 그것까지 받지 못하면 기본값이 필요한 자리에서 대부분 쓸 수 없어요."
+            en: >-
+              It takes both kinds of missing together. Reading a property that is not there gives
+              <code>undefined</code>, and if that were not caught too, the notation would be
+              unusable in most places a default is needed.
           edge:
-            h: "가장 날카로운 자리 — 둘 다 없음"
+            h:
+              ko: "가장 날카로운 자리 — 둘 다 없음"
+              en: "The sharpest spot — both are missing"
             code:
               - "undefined ?? 'x'   // 'x'"
               - "null ?? 'x'        // 'x'"
-      - t: "{{pick.1|code}}{{pick.1|josa:이,가}} 빈 배열 <code>[]</code> 일 때도"
+      - t:
+          ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 빈 배열 <code>[]</code> 일 때도"
+          en: "When {{pick.1|code}} is an empty array <code>[]</code> as well"
         diag:
-          t: "빈 배열은 <b>값이 있는 것</b>입니다. 길이가 <code>0</code> 인 것과 값이 없는 것은 다르고, <code>??</code> 는 값이 없는 쪽만 봅니다."
+          t:
+            ko: "빈 배열은 <b>값이 있는 것</b>입니다. 길이가 <code>0</code> 인 것과 값이 없는 것은 다르고, <code>??</code> 는 값이 없는 쪽만 봅니다."
+            en: >-
+              An empty array is <b>a value that is present</b>. Having length <code>0</code> is not
+              the same as having no value, and <code>??</code> looks only at the no-value side.
           edge:
-            h: "가장 날카로운 자리 — 비어 보여도 값"
+            h:
+              ko: "가장 날카로운 자리 — 비어 보여도 값"
+              en: "The sharpest spot — empty-looking but present"
             code:
               - "[] ?? [1]   // []"
               - "[].length   // 0"
 
 blank:
-  - q: "빈칸에 들어갈 것을 고르세요. 이 줄은 {{pick.1|code}}{{pick.1|josa:이,가}} <b>없을 때만</b> {{pick.3|code}}{{pick.3|josa:을,를}} 씁니다."
-    hint: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. 이 줄은 {{pick.1|code}}{{pick.1|josa:이,가}} <b>없을 때만</b> {{pick.3|code}}{{pick.3|josa:을,를}} 씁니다."
+      en: >-
+        Choose what goes in the blank. This line uses {{pick.3|code}} <b>only when</b>
+        {{pick.1|code}} is missing.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
     options:
       - { t: "??", mono: true }
       - t: "||"
         mono: true
         diag:
-          t: "<code>||</code> 도 왼쪽이 없으면 오른쪽으로 갑니다. 다만 <code>0</code>·<code>''</code>·<code>false</code> 까지 「없음」으로 쳐요. 수량이나 검색어처럼 <code>0</code> 과 빈 문자열이 <b>정상 값</b>인 자리에서 갈립니다."
+          t:
+            ko: "<code>||</code> 도 왼쪽이 없으면 오른쪽으로 갑니다. 다만 <code>0</code>·<code>''</code>·<code>false</code> 까지 「없음」으로 쳐요. 수량이나 검색어처럼 <code>0</code> 과 빈 문자열이 <b>정상 값</b>인 자리에서 갈립니다."
+            en: >-
+              <code>||</code> also goes right when the left is missing. It just counts
+              <code>0</code>, <code>''</code> and <code>false</code> as missing too. It parts ways
+              where <code>0</code> and the empty string are <b>real values</b>, like a quantity or a
+              search term.
           edge:
-            h: "가장 날카로운 자리 — 수량 0"
+            h:
+              ko: "가장 날카로운 자리 — 수량 0"
+              en: "The sharpest spot — a quantity of 0"
             code:
               - "0 ?? 10   // 0"
               - "0 || 10   // 10"
       - t: "&&"
         mono: true
         diag:
-          t: "<code>&&</code> 는 왼쪽이 <b>있을 때</b> 오른쪽으로 갑니다 — 방향이 반대예요. 없을 때 채우려는 자리에 쓰면, 없을 때 오른쪽을 건너뜁니다."
+          t:
+            ko: "<code>&&</code> 는 왼쪽이 <b>있을 때</b> 오른쪽으로 갑니다 — 방향이 반대예요. 없을 때 채우려는 자리에 쓰면, 없을 때 오른쪽을 건너뜁니다."
+            en: >-
+              <code>&&</code> goes right when the left <b>is</b> there — the direction is reversed.
+              Used where you meant to fill in a missing value, it skips the right exactly when the
+              value is missing.
           edge:
-            h: "가장 날카로운 자리 — 방향이 반대"
+            h:
+              ko: "가장 날카로운 자리 — 방향이 반대"
+              en: "The sharpest spot — the direction is reversed"
             code:
               - "null ?? 'x'   // 'x'"
               - "null && 'x'   // null"
       - t: "? :"
         mono: true
         diag:
-          t: "삼항으로도 같은 일을 쓸 수 있지만 「없음」의 경계를 손으로 적어야 합니다. 짧게 줄인 <code>a ? a : b</code> 는 <code>0</code> 과 빈 문자열까지 함께 지워요."
+          t:
+            ko: "삼항으로도 같은 일을 쓸 수 있지만 「없음」의 경계를 손으로 적어야 합니다. 짧게 줄인 <code>a ? a : b</code> 는 <code>0</code> 과 빈 문자열까지 함께 지워요."
+            en: >-
+              A ternary can write the same thing, but you have to spell out the boundary of
+              “missing” by hand. The shortened <code>a ? a : b</code> wipes out <code>0</code> and
+              the empty string along with it.
           edge:
-            h: "가장 날카로운 자리 — 같은 뜻을 길게"
+            h:
+              ko: "가장 날카로운 자리 — 같은 뜻을 길게"
+              en: "The sharpest spot — the same meaning, at length"
             code:
               - "a ?? b"
               - "a === undefined || a === null ? b : a"

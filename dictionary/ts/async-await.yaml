@@ -11,69 +11,142 @@ prereq: [ts/call-expression, ts/arrow-function]
 confusions: [ts/promise-then, ts/try-catch]
 
 dict:
-  one_liner: "<code>await</code> 는 약속이 풀릴 때까지 그 줄에서 기다렸다가 값을 꺼낸다."
-  why: >-
-    네트워크·파일은 당장 값을 주지 못하고 <b>약속</b>을 줍니다. {{site.line}}행의
-    {{pick.1|code}}{{pick.1|josa:은,는}} 그 약속이 풀릴 때까지 이 함수만 멈춰 세우고, 풀리면 <b>안에 든 값</b>을
-    꺼내 이어 갑니다. 화면 전체가 멈추는 것이 아니라 이 함수만 기다립니다.
+  one_liner:
+    ko: "<code>await</code> 는 약속이 풀릴 때까지 그 줄에서 기다렸다가 값을 꺼낸다."
+    en: "<code>await</code> waits on that line until the promise settles, then takes the value out."
+  why:
+    ko: >-
+      네트워크·파일은 당장 값을 주지 못하고 <b>약속</b>을 줍니다. {{site.line}}행의
+      {{pick.1|code}}{{pick.1|josa:은,는}} 그 약속이 풀릴 때까지 이 함수만 멈춰 세우고, 풀리면 <b>안에 든 값</b>을
+      꺼내 이어 갑니다. 화면 전체가 멈추는 것이 아니라 이 함수만 기다립니다.
+    en: >-
+      The network and the filesystem cannot give you a value right away; they give you <b>a
+      promise</b>. On line {{site.line}}, {{pick.1|code}} halts only this function until that
+      promise settles, then takes <b>the value inside</b> and carries on. The whole screen does not
+      stop; only this function waits.
   trace:
-    - "{{pick.2|code}}{{pick.2|josa:이,가}} 약속을 돌려준다."
-    - "{{pick.1|code}}{{pick.1|josa:이,가}} 그 약속이 풀릴 때까지 {{site.line}}행에서 기다린다."
-    - "풀리면 약속 <b>안의 값</b>이 {{site.line}}행의 값이 되고 다음 줄로 간다."
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 약속을 돌려준다."
+      en: "{{pick.2|code}} hands back a promise."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 그 약속이 풀릴 때까지 {{site.line}}행에서 기다린다."
+      en: "{{pick.1|code}} waits on line {{site.line}} until that promise settles."
+    - ko: "풀리면 약속 <b>안의 값</b>이 {{site.line}}행의 값이 되고 다음 줄로 간다."
+      en: >-
+        Once it settles, <b>the value inside</b> the promise becomes the value of line {{site.line}}
+        and it moves to the next line.
 
-rule: "<b><code>await</code> 는 <code>async</code> 안에서만 쓴다.</b> 기다리면 값이 나오고, 안 기다리면 약속이 나온다."
+rule:
+  ko: "<b><code>await</code> 는 <code>async</code> 안에서만 쓴다.</b> 기다리면 값이 나오고, 안 기다리면 약속이 나온다."
+  en: >-
+    <b><code>await</code> is only used inside <code>async</code>.</b> Wait and you get the value; do
+    not wait and you get the promise.
 result:
-  label: "{{site.line}}행의 값"
+  label:
+    ko: "{{site.line}}행의 값"
+    en: "The value of line {{site.line}}"
   value: "약속 안에 들어 있던 값"
-  note: "기다리지 않으면 약속 자체"
-ok: >-
-  <code>await</code> 는 약속이 풀릴 때까지 <b>그 함수만</b> 멈춰 세웁니다. 풀린 뒤에는 약속이 아니라
-  안에 든 값이 나오고, 약속이 깨지면 그 자리에서 예외가 됩니다.
-payoff: "콜백을 겹치지 않고도 「먼저 이것, 그다음 저것」을 위에서 아래로 씁니다."
-bridge: "<code>async</code> 가 붙은 함수는 무엇을 돌려주든 <b>약속으로 감싸서</b> 돌려줍니다."
+  note:
+    ko: "기다리지 않으면 약속 자체"
+    en: "without waiting, the promise itself"
+ok:
+  ko: >-
+    <code>await</code> 는 약속이 풀릴 때까지 <b>그 함수만</b> 멈춰 세웁니다. 풀린 뒤에는 약속이 아니라
+    안에 든 값이 나오고, 약속이 깨지면 그 자리에서 예외가 됩니다.
+  en: >-
+    <code>await</code> halts <b>only that function</b> until the promise settles. After it settles
+    you get the value inside, not the promise, and if the promise breaks it becomes an exception
+    right there.
+payoff:
+  ko: "콜백을 겹치지 않고도 「먼저 이것, 그다음 저것」을 위에서 아래로 씁니다."
+  en: "You write “first this, then that” from top to bottom without nesting callbacks."
+bridge:
+  ko: "<code>async</code> 가 붙은 함수는 무엇을 돌려주든 <b>약속으로 감싸서</b> 돌려줍니다."
+  en: "A function marked <code>async</code> hands back whatever it returns <b>wrapped in a promise</b>."
 misconceptions:
-  - "<code>await</code> 가 프로그램 전체를 멈춘다 — 그 함수만 멈춥니다. 다른 일은 계속 돕니다."
-  - "<code>async</code> 만 붙이면 빨라진다 — 순서를 쓰는 표기일 뿐 속도와는 무관합니다."
+  - ko: "<code>await</code> 가 프로그램 전체를 멈춘다 — 그 함수만 멈춥니다. 다른 일은 계속 돕니다."
+    en: "<code>await</code> stops the whole program — it stops that function. Other work carries on."
+  - ko: "<code>async</code> 만 붙이면 빨라진다 — 순서를 쓰는 표기일 뿐 속도와는 무관합니다."
+    en: >-
+      Adding <code>async</code> makes it faster — it is a notation for writing order and has nothing
+      to do with speed.
 
 point:
-  - q: "{{site.line}}행에서 <b>값이 올 때까지 기다리게 하는 낱말</b>을 짚어 보세요."
-    hint: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+  - q:
+      ko: "{{site.line}}행에서 <b>값이 올 때까지 기다리게 하는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that makes it wait for the value</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
     answer: pick.1
     diag:
       pick.2:
-        t: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>약속을 만드는 쪽</b>입니다. 만들어진 약속을 풀어 값으로 바꾸는 일은 그 앞의 낱말이 해요."
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>약속을 만드는 쪽</b>입니다. 만들어진 약속을 풀어 값으로 바꾸는 일은 그 앞의 낱말이 해요."
+          en: >-
+            {{pick.2|code}} is <b>the side that makes the promise</b>. Settling that promise into a
+            value is the job of the word before it.
         edge:
-          h: "가장 날카로운 자리 — 만드는 쪽과 기다리는 쪽"
+          h:
+            ko: "가장 날카로운 자리 — 만드는 쪽과 기다리는 쪽"
+            en: "The sharpest spot — the maker and the waiter"
           code:
             - "const p = {{pick.2}}          // 약속"
             - "const v = await {{pick.2}}    // 값"
 
 meaning:
-  - q: "{{pick.1|code}}{{pick.1|josa:을,를}} 빼면 {{site.line}}행의 값은 무엇이 될까요?"
-    hint: "약속과 약속 안의 값은 다릅니다."
+  - q:
+      ko: "{{pick.1|code}}{{pick.1|josa:을,를}} 빼면 {{site.line}}행의 값은 무엇이 될까요?"
+      en: "If you drop {{pick.1|code}}, what does the value of line {{site.line}} become?"
+    hint:
+      ko: "약속과 약속 안의 값은 다릅니다."
+      en: "A promise and the value inside a promise are different."
     options:
-      - t: "약속 객체 자체 — 안의 값이 아니다"
-      - t: "같은 값이 나온다"
+      - t:
+          ko: "약속 객체 자체 — 안의 값이 아니다"
+          en: "The promise object itself — not the value inside"
+      - t:
+          ko: "같은 값이 나온다"
+          en: "The same value comes out"
         diag:
-          t: "기다리는 낱말이 없으면 <b>약속 그대로</b>가 나옵니다. 겉보기에 값처럼 보여도 <code>.name</code> 같은 것을 읽으면 <code>undefined</code> 예요."
+          t:
+            ko: "기다리는 낱말이 없으면 <b>약속 그대로</b>가 나옵니다. 겉보기에 값처럼 보여도 <code>.name</code> 같은 것을 읽으면 <code>undefined</code> 예요."
+            en: >-
+              Without the waiting word you get <b>the promise as it is</b>. It may look like a
+              value, but read something like <code>.name</code> off it and you get
+              <code>undefined</code>.
           edge:
-            h: "가장 날카로운 자리 — 약속인가 값인가"
+            h:
+              ko: "가장 날카로운 자리 — 약속인가 값인가"
+              en: "The sharpest spot — a promise or a value"
             code:
               - "const a = getUser()         // Promise"
               - "const b = await getUser()   // { name: ... }"
       - t: "<code>undefined</code>"
         diag:
-          t: "값을 안 꺼냈을 뿐 약속은 분명히 있습니다. <code>undefined</code> 가 나오는 건 함수가 아무것도 돌려주지 않을 때예요."
+          t:
+            ko: "값을 안 꺼냈을 뿐 약속은 분명히 있습니다. <code>undefined</code> 가 나오는 건 함수가 아무것도 돌려주지 않을 때예요."
+            en: >-
+              The value was simply not taken out; the promise is plainly there.
+              <code>undefined</code> comes out when a function hands back nothing.
           edge:
-            h: "가장 날카로운 자리 — 없는 것과 안 푼 것"
+            h:
+              ko: "가장 날카로운 자리 — 없는 것과 안 푼 것"
+              en: "The sharpest spot — absent and unsettled"
             code:
               - "function f() {}       // undefined"
               - "async function g() {} // Promise<undefined>"
-      - t: "그 줄에서 예외가 난다"
+      - t:
+          ko: "그 줄에서 예외가 난다"
+          en: "An exception is raised on that line"
         diag:
-          t: "기다리지 않는 것 자체는 예외가 아닙니다. 다만 약속이 깨졌는데 아무도 받지 않으면 나중에 경고가 남아요."
+          t:
+            ko: "기다리지 않는 것 자체는 예외가 아닙니다. 다만 약속이 깨졌는데 아무도 받지 않으면 나중에 경고가 남아요."
+            en: >-
+              Not waiting is not itself an exception. But if the promise breaks and nobody catches
+              it, a warning is left behind later.
           edge:
-            h: "가장 날카로운 자리 — 언제 예외가 되나"
+            h:
+              ko: "가장 날카로운 자리 — 언제 예외가 되나"
+              en: "The sharpest spot — when it becomes an exception"
             code:
               - "const p = fail()         // 조용하다"
               - "const v = await fail()   // 여기서 예외"
