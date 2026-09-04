@@ -87,10 +87,7 @@ pub(crate) fn statement_bodies(src: &[u8]) -> Vec<Range> {
     const TAGS: [&[u8]; 4] = [b"<select", b"<insert", b"<update", b"<delete"];
     let mut out = Vec::new();
     let mut at = 0usize;
-    loop {
-        let Some(open) = TAGS.iter().filter_map(|t| find(src, t, at)).min() else {
-            break;
-        };
+    while let Some(open) = TAGS.iter().filter_map(|t| find(src, t, at)).min() {
         let Some(gt) = find(src, b">", open) else {
             break;
         };
