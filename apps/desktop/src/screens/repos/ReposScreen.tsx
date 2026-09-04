@@ -70,6 +70,23 @@ export function ReposScreen({ onBack }: ReposScreenProps) {
     else useUi.getState().say(t('repos.inSession'));
   };
 
+  /**
+   * 코스로 들어가는 문 (D120 · `clone-screen-entry`). 서가에서 여는 것은 **리포 전체**
+   * 코스다 — 대지 하나짜리 코스는 홈의 대지 카드가 연다.
+   *
+   * 보던 리포가 아니면 먼저 옮긴다. `setActive` 가 홈으로 보내지만 그 다음 줄이 바로
+   * 코스로 덮으므로 홈은 한 프레임도 그려지지 않는다.
+   */
+  const onCourse = (id: number): void => {
+    const ui = useUi.getState();
+    if (ui.session !== null) {
+      ui.say(t('course.inSession'));
+      return;
+    }
+    if (ui.activeId !== id) ui.setActive(id);
+    ui.openClone({ kind: 'repo' });
+  };
+
   const onLocate = (card: RepoCard): void => {
     void (async () => {
       try {
@@ -165,7 +182,11 @@ export function ReposScreen({ onBack }: ReposScreenProps) {
                 </FlatButton>
                 {card.status === 'missing' ? (
                   <FlatButton onClick={() => onLocate(card)}>{t('repos.locate')}</FlatButton>
-                ) : null}
+                ) : (
+                  <FlatButton onClick={() => onCourse(card.id)} aria-label={t('course.openOn', { name: card.name })}>
+                    {t('course.open')}
+                  </FlatButton>
+                )}
                 <FlatButton onClick={() => setAsk({ id: card.id, purge: false })} ghost>
                   {t('repos.remove')}
                 </FlatButton>

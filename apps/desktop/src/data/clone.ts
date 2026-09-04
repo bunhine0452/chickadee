@@ -229,11 +229,19 @@ async function cutBlock(
  * 코스를 열 때 리포 전체를 자르지 않는 이유(clone-plate-lazy): 파일마다 원문을 읽어야
  * 하므로 2,000 파일이면 IPC 가 2,000회다. 목차는 SQL 넷으로 서고, 자르기는 그 파일에
  * 닿을 때 한 번씩 한다.
+ *
+ * `partFrom` 은 **다시 자를 때**만 0 이 아니다 (P4 `clone-resume-stale`). 재인제스트로
+ * 원문이 바뀌면 앞서 잘린 조각은 `stale` 로 남고 새 조각이 그 뒤 번호에 붙는다 —
+ * `UNIQUE (run_id, seq, part)` 위에 덮어쓰지 않고 이어 붙이는 쪽을 고른 이유는 둘이다.
+ * ① 원장은 되돌리지 않는다(`clone.step_stale` 머리 주석) — 무엇이 무효가 됐는지가 남아야
+ * 목차가 「원본이 바뀜」을 정직하게 말할 수 있다. ② 지우려면 새 statement 가 필요하고,
+ * 그러면 생성물(`catalog.ts`)까지 같이 움직인다.
  */
 export async function materializeFile(
   deps: CloneDeps,
   run: CloneRun,
   seq: number,
+  partFrom = 0,
 ): Promise<number> {
   const file = run.steps[seq];
   if (file === undefined) return 0;
@@ -241,7 +249,7 @@ export async function materializeFile(
   const grammar = (await ipc.store.query('clone.file_grammar', { fileId: file.fileId }))[0]
     ?.grammar ?? 'typescript';
 
-  let part = 0;
+  let part = partFrom;
   for (const block of [...blocks].sort((a, b) => a.line_start - b.line_start)) {
     for (const piece of await cutBlock(deps, file.path, grammar, block)) {
       await ipc.store.exec('clone.step_insert', {
@@ -257,7 +265,7 @@ export async function materializeFile(
       part += 1;
     }
   }
-  return part;
+  return part - partFrom;
 }
 
 /**

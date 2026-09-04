@@ -11,6 +11,7 @@ import { applyLocale, saveSetting } from './data/settings.js';
 import { makePlateFor, pickPlateNow, type ManualResult } from './data/manual.js';
 import { previewToday } from './data/session.js';
 import { cancelIngest, ingest, refreshHome, report, todayKey } from './flow.js';
+import { CloneScreen } from './screens/clone/CloneScreen.js';
 import { HomeScreen } from './screens/home/HomeScreen.js';
 import { conceptLabel, type HomeData } from './screens/home/data.js';
 import { FirstRun } from './screens/home/empty.js';
@@ -123,6 +124,26 @@ export function App(): React.JSX.Element {
     return (
       <>
         <ReposScreen onBack={() => useUi.getState().go('home')} />
+        <Toast msg={ui.toast ?? ''} on={ui.toast !== undefined} />
+      </>
+    );
+  }
+
+  /*
+   * 코스는 세션과 달리 **오버레이가 아니라 화면**이다 (D120 · 05 §2.1 `clone`). 일일 큐
+   * 밖의 모드라 홈을 덮는 것이 아니라 대신하고, 그래서 Esc 의 주인이 하나로 남는다.
+   * `cloneScope` 가 없으면 열지 않는다 — `openClone` 이 언제나 같이 세운다.
+   */
+  if (ui.screen === 'clone' && repo !== null && ui.cloneScope !== null) {
+    return (
+      <>
+        <CloneScreen
+          repoId={repo.id}
+          repoName={repo.name}
+          rootPath={repo.rootPath}
+          scope={ui.cloneScope}
+          onBack={() => useUi.getState().go('home')}
+        />
         <Toast msg={ui.toast ?? ''} on={ui.toast !== undefined} />
       </>
     );

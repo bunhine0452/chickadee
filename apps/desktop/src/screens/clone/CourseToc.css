@@ -1,0 +1,159 @@
+/* 코스 목차 (D120 · `clone-screen-toc`). 서가·설정과 같은 패널 규칙이다 —
+   2.5px 괘선 · 종이 바탕 · 종이 두께 그림자. 인쇄 물리(결·어긋남)는 안 쓴다: 본문을 읽는
+   면이고 05 §4.3 이 물리를 본문 단 밖으로만 허용한다.
+
+   `--ink-soft` 를 책상(`--desk`) 위에 바로 놓으면 6.19:1 이라 06 §2 의 종이 7:1 을 못 넘긴다.
+   목차는 `--paper` 판 위에 서고 글자는 전부 그 위에 놓인다. */
+.ctoc {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  padding: 16px 16px 20px;
+  border: 2.5px solid var(--rule);
+  background: var(--paper);
+  box-shadow: 6px 7px 0 var(--edge), var(--lamp);
+}
+
+.ctoc-head {
+  position: sticky;
+  top: -16px;
+  z-index: 1;
+  padding: 4px 0 10px;
+  border-bottom: 2.5px solid var(--rule);
+  margin-bottom: 12px;
+  background: var(--paper);
+}
+
+.ctoc-count {
+  display: block;
+  color: var(--ink);
+  font-size: var(--fs-16);
+  line-height: var(--lh-tight);
+}
+
+.ctoc-bar {
+  height: 10px;
+  margin: 8px 0 6px;
+  border: 2px solid var(--rule);
+  background: var(--paper-3);
+}
+
+.ctoc-bar i {
+  display: block;
+  width: var(--pct, 0%);
+  height: 100%;
+  background: var(--t1);
+}
+
+.ctoc-cut {
+  color: var(--ink-soft);
+  font-size: var(--fs-13);
+}
+
+.ctoc-units,
+.ctoc-files,
+.ctoc-parts {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.ctoc-unit + .ctoc-unit {
+  margin-top: 18px;
+}
+
+.ctoc-unit h3 {
+  margin: 0 0 6px;
+  color: var(--ink);
+  font-size: var(--fs-13);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.ctoc-file {
+  padding: 6px 8px;
+  border-left: 3px solid transparent;
+}
+
+.ctoc-file.cur {
+  border-left-color: var(--t1);
+  background: var(--paper-2);
+}
+
+.ctoc-file-top {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.ctoc-no {
+  flex: none;
+  color: var(--ink-mute);
+  font-size: var(--fs-13);
+  font-variant-numeric: tabular-nums;
+}
+
+.ctoc-path {
+  overflow: hidden;
+  color: var(--ink);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ctoc-tally {
+  flex: none;
+  margin-left: auto;
+  color: var(--ink-soft);
+  font-size: var(--fs-13);
+  font-variant-numeric: tabular-nums;
+}
+
+.ctoc-parts {
+  margin: 4px 0 2px 18px;
+}
+
+.ctoc-part {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  padding: 2px 0;
+  color: var(--ink-soft);
+  font-size: var(--fs-13);
+}
+
+.ctoc-part b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.ctoc-part small {
+  color: var(--ink-mute);
+  font-variant-numeric: tabular-nums;
+}
+
+.ctoc-st {
+  margin-left: auto;
+}
+
+/* 상태는 색만으로 말하지 않는다 (05 §9) — 낱말이 `.ctoc-st` 에 이미 있고 색은 거든다. */
+.ctoc-part[data-status="done"] .ctoc-st {
+  color: var(--t0-text);
+}
+
+.ctoc-part[data-status="stale"] .ctoc-st,
+.ctoc-part[data-status="skipped"] .ctoc-st {
+  color: var(--ink-mute);
+}
+
+.ctoc-part[aria-current="step"] {
+  background: var(--paper-3);
+  box-shadow: -6px 0 0 var(--t1);
+}
+
+.ctoc-part[aria-current="step"] .ctoc-st {
+  color: var(--t1-text);
+}
