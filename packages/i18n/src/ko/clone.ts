@@ -65,7 +65,6 @@ export const clone = {
     '이 조각에는 사전이 아는 문법이 없어 겹은 오르지 않습니다. 점수만 남습니다.',
 
   // ───────── 진입 ─────────
-  'course.open': '코스',
   'course.openOn': '「{{name}}」 코스 열기',
   'course.inSession': '인쇄 중에는 코스를 열 수 없습니다. 먼저 세션에서 나와 주세요.',
 } as const;

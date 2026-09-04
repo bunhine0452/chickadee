@@ -49,7 +49,9 @@ export function CourseToc(props: CourseTocProps) {
   // 목차가 길면(2,000 파일) 지금 자리가 화면 밖이다. 파일이 바뀔 때만 옮긴다 —
   // 매 렌더마다 부르면 사용자가 목차를 훑는 동안 스크롤을 빼앗는다.
   useEffect(() => {
-    cur.current?.scrollIntoView({ block: 'nearest' });
+    // `scrollIntoView` 는 jsdom 에 없다. 있는 곳에서만 부른다 — 목차가 안 따라오는 것은
+    // 화면이 죽는 것보다 훨씬 작은 손실이다.
+    cur.current?.scrollIntoView?.({ block: 'nearest' });
   }, [props.curSeq]);
 
   const pct = props.files === 0 ? 0 : Math.round((props.filesDone / props.files) * 100);

@@ -183,8 +183,8 @@ export function ReposScreen({ onBack }: ReposScreenProps) {
                 {card.status === 'missing' ? (
                   <FlatButton onClick={() => onLocate(card)}>{t('repos.locate')}</FlatButton>
                 ) : (
-                  <FlatButton onClick={() => onCourse(card.id)} aria-label={t('course.openOn', { name: card.name })}>
-                    {t('course.open')}
+                  <FlatButton onClick={() => onCourse(card.id)}>
+                    {t('course.openOn', { name: card.name })}
                   </FlatButton>
                 )}
                 <FlatButton onClick={() => setAsk({ id: card.id, purge: false })} ghost>

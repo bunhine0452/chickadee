@@ -50,7 +50,6 @@ export const clone: Record<string, string> = {
   'course.noConceptNote':
     'The dictionary knows no grammar in this segment, so no ink layer moves. Only the score is kept.',
 
-  'course.open': 'Course',
   'course.openOn': 'Open the course for “{{name}}”',
   'course.inSession': 'A course cannot open while a run is printing. Leave the session first.',
 };

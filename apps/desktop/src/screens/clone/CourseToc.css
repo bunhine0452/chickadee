@@ -90,7 +90,7 @@
 
 .ctoc-no {
   flex: none;
-  color: var(--ink-mute);
+  color: var(--ink-soft);
   font-size: var(--fs-13);
   font-variant-numeric: tabular-nums;
 }
@@ -130,8 +130,12 @@
   font-weight: 600;
 }
 
+/* `small` 은 부모의 0.83em 이 된다 — `.ctoc-part` 가 13px 라도 여기서 10.8px 로 떨어진다.
+   06 §2 의 하한이 13px 이므로 크기를 다시 못박는다. 색도 `--ink-mute` 로는 종이 위에서
+   4.65:1 이라 7:1 을 못 넘긴다. 둘 다 브라우저 게이트가 잡았다. */
 .ctoc-part small {
-  color: var(--ink-mute);
+  color: var(--ink-soft);
+  font-size: var(--fs-13);
   font-variant-numeric: tabular-nums;
 }
 
@@ -146,7 +150,7 @@
 
 .ctoc-part[data-status="stale"] .ctoc-st,
 .ctoc-part[data-status="skipped"] .ctoc-st {
-  color: var(--ink-mute);
+  color: var(--ink-soft);
 }
 
 .ctoc-part[aria-current="step"] {
