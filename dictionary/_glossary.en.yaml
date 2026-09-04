@@ -1,0 +1,243 @@
+# 개념 이름 ko→en 용어집 (D118 · 플랜 i18n-dict-review).
+#
+# 이 표를 먼저 확정하고, 57 YAML 의 나머지 산문을 여기에 고정해 번역한다. 사람이 보는
+# 지점을 표 하나로 줄이면서, 같은 개념이 파일마다 다른 영단어로 나가는 것을 막는다.
+#
+# **초안이다.** `en` 값은 이미 55개 개념 YAML 의 `name.en` 에 들어 있던 것을 그대로 모은
+# 것이지 새로 지은 것이 아니다. 사용자가 확정하면 `status: confirmed` 로 바꾸고, 고친
+# 항목은 해당 YAML 의 `name.en` 에도 같이 반영한다 — 이 파일은 사전 로더가 읽지 않는다
+# (개념 파일은 `dictionary/<lang>/` 아래에만 있다).
+#
+# 정하고 나서: 산문 번역은 `en` 열의 낱말을 그대로 쓴다. 예를 들어 `ts/optional-chaining`
+# 의 본문에서 그 개념을 가리킬 때는 "optional chaining" 이지 "safe navigation" 이 아니다.
+
+version: 0
+status: draft
+
+# ── 사용자가 정할 것 ───────────────────────────────────────────────────────
+decide:
+  - what: 보편 개념과 언어 개념이 en 에서 같은 이름이 된 셋
+    why: |
+      ko 는 둘을 구분한다 — 「함수 부르기」(보편)와 「함수 호출」(TS) 처럼. en 이 같으면
+      화면에서 두 개념이 한 이름으로 보이고, 개념 전이(03 §3.1)의 근거가 흐려진다.
+    rows:
+      - en: "Function call"
+        ids: [common/function-call, ts/call-expression]
+        # common/function-call 의 ko 는 "함수 부르기"
+        # ts/call-expression 의 ko 는 "함수 호출"
+      - en: "Generics"
+        ids: [common/generics, ts/generics]
+        # common/generics 의 ko 는 "타입 자리 비워 두기"
+        # ts/generics 의 ko 는 "제네릭"
+      - en: "Number literal"
+        ids: [common/number-literal, ts/number-literal]
+        # common/number-literal 의 ko 는 "숫자 값"
+        # ts/number-literal 의 ko 는 "숫자 리터럴"
+  - what: 키워드로 시작하는 이름의 대소문자
+    why: |
+      `const declaration` · `for…of loop` · `try and catch` · `async and await` ·
+      `undefined and null` 다섯은 소문자로 시작한다 — 코드 키워드라서다. 그런데 보편 쪽
+      `common/try-catch` 는 `Try and catch` 로 대문자다. 둘 중 하나로 맞출지, 「키워드로
+      시작하면 소문자」를 규칙으로 둘지 정한다.
+  - what: 보편 개념과 언어 개념이 일부러 다른 이름을 쓰는 자리
+    why: |
+      `common/optional-chaining` 은 `Safe navigation`, `ts/optional-chaining` 은
+      `Optional chaining` 이다. 보편 이름은 언어를 안 가리키고 언어 이름은 그 언어의
+      문법을 가리키므로 다른 것이 맞다 — 다만 이것이 의도인지 확인한다. 아래 표의
+      `universal` 열이 짝을 보여 준다.
+
+# ── 개념 이름 ─────────────────────────────────────────────────────────────
+# ko 가 정본이다. en 을 고치면 해당 YAML 의 name.en 도 같이 고친다.
+concepts:
+  - id: arch/direction
+    ko: "의존성 방향"
+    en: "Direction of dependency"
+  - id: arch/flow
+    ko: "흐름 추적"
+    en: "Tracing the flow"
+  - id: arch/placement
+    ko: "책임 배치"
+    en: "Placement of responsibility"
+  - id: arch/radius
+    ko: "영향 반경"
+    en: "Blast radius"
+  - id: common/absent-value
+    ko: "값이 없음"
+    en: "Absent value"
+  - id: common/async-await
+    ko: "기다렸다 값 꺼내기"
+    en: "Await"
+  - id: common/conditional-expression
+    ko: "조건으로 값 고르기"
+    en: "Conditional expression"
+  - id: common/copy-with-changes
+    ko: "복사하며 바꾸기"
+    en: "Copy with changes"
+  - id: common/destructuring
+    ko: "한 번에 꺼내 이름 붙이기"
+    en: "Destructuring"
+  - id: common/filter-select
+    ko: "조건으로 골라내기"
+    en: "Filter / select"
+  - id: common/function-call
+    ko: "함수 부르기"
+    en: "Function call"
+  - id: common/function-value
+    ko: "값으로서의 함수"
+    en: "Function as a value"
+  - id: common/generics
+    ko: "타입 자리 비워 두기"
+    en: "Generics"
+  - id: common/iterate
+    ko: "하나씩 훑기"
+    en: "Iterate"
+  - id: common/list
+    ko: "순서 있는 목록"
+    en: "Ordered list"
+  - id: common/map-transform
+    ko: "항목마다 바꿔 새로 만들기"
+    en: "Map / transform"
+  - id: common/member-access
+    ko: "안의 이름 꺼내기"
+    en: "Member access"
+  - id: common/mutating-append
+    ko: "있던 묶음에 직접 더하기"
+    en: "Mutating append"
+  - id: common/nullish-default
+    ko: "없을 때 채우기"
+    en: "Default for a missing value"
+  - id: common/number-literal
+    ko: "숫자 값"
+    en: "Number literal"
+  - id: common/optional-chaining
+    ko: "없을 수 있는 값 건너뛰기"
+    en: "Safe navigation"
+  - id: common/promise-chain
+    ko: "끝난 뒤 할 일 등록하기"
+    en: "Callback chain"
+  - id: common/string-interpolation
+    ko: "문장에 값 끼워 넣기"
+    en: "String interpolation"
+  - id: common/text-literal
+    ko: "글자 값"
+    en: "Text literal"
+  - id: common/try-catch
+    ko: "터진 것을 받아 잇기"
+    en: "Try and catch"
+  - id: common/variable-binding
+    ko: "이름에 값 묶기"
+    en: "Variable binding"
+  - id: react/functional-state-update
+    ko: "함수형 상태 갱신"
+    en: "Functional state update"
+  - id: ts/array-basics
+    ko: "배열 기본"
+    en: "Array basics"
+    universal: common/list   # Ordered list
+  - id: ts/array-destructuring
+    ko: "배열 구조분해"
+    en: "Array destructuring"
+    universal: common/destructuring   # Destructuring
+  - id: ts/array-filter
+    ko: "배열 골라내기(filter)"
+    en: "Selecting items with filter"
+    universal: common/filter-select   # Filter / select
+  - id: ts/array-foreach
+    ko: "배열 훑기(forEach)"
+    en: "Iterating with forEach"
+    universal: common/iterate   # Iterate
+  - id: ts/array-map-immutable
+    ko: "배열 불변 갱신(map)"
+    en: "Immutable array update with map"
+    universal: common/map-transform   # Map / transform
+  - id: ts/array-method-chain
+    ko: "배열 메서드 체인"
+    en: "Array method chain"
+    universal: common/map-transform   # Map / transform
+  - id: ts/array-push-mutate
+    ko: "배열에 직접 밀어 넣기(push)"
+    en: "Mutating append with push"
+    universal: common/mutating-append   # Mutating append
+  - id: ts/arrow-function
+    ko: "화살표 함수"
+    en: "Arrow function"
+    universal: common/function-value   # Function as a value
+  - id: ts/async-await
+    ko: "async / await"
+    en: "async and await"
+    universal: common/async-await   # Await
+  - id: ts/call-expression
+    ko: "함수 호출"
+    en: "Function call"
+    universal: common/function-call   # Function call
+  - id: ts/conditional-ternary
+    ko: "삼항 조건식"
+    en: "Conditional (ternary) expression"
+    universal: common/conditional-expression   # Conditional expression
+  - id: ts/const-declaration
+    ko: "const 선언"
+    en: "const declaration"
+    universal: common/variable-binding   # Variable binding
+  - id: ts/for-of
+    ko: "for…of 반복"
+    en: "for…of loop"
+    universal: common/iterate   # Iterate
+  - id: ts/generics
+    ko: "제네릭"
+    en: "Generics"
+    universal: common/generics   # Generics
+  - id: ts/index-access-pair
+    ko: "인덱스로 하나씩 꺼내기"
+    en: "Reading by index"
+  - id: ts/logical-and-guard
+    ko: "「그리고」로 지키기"
+    en: "Guarding with logical AND"
+    universal: common/optional-chaining   # Safe navigation
+  - id: ts/logical-or-default
+    ko: "「또는」으로 기본값 주기"
+    en: "Default with logical OR"
+    universal: common/nullish-default   # Default for a missing value
+  - id: ts/nullish-coalescing
+    ko: "널 병합"
+    en: "Nullish coalescing"
+    universal: common/nullish-default   # Default for a missing value
+  - id: ts/number-literal
+    ko: "숫자 리터럴"
+    en: "Number literal"
+    universal: common/number-literal   # Number literal
+  - id: ts/object-destructuring
+    ko: "객체 구조분해"
+    en: "Object destructuring"
+    universal: common/destructuring   # Destructuring
+  - id: ts/object-spread
+    ko: "객체 펼치기"
+    en: "Object spread"
+    universal: common/copy-with-changes   # Copy with changes
+  - id: ts/optional-chaining
+    ko: "옵셔널 체이닝"
+    en: "Optional chaining"
+    universal: common/optional-chaining   # Safe navigation
+  - id: ts/promise-then
+    ko: "약속 체인(.then)"
+    en: "Promise chain with .then"
+    universal: common/promise-chain   # Callback chain
+  - id: ts/property-access
+    ko: "점 표기 속성 읽기"
+    en: "Property access"
+    universal: common/member-access   # Member access
+  - id: ts/string-literal
+    ko: "문자열 리터럴"
+    en: "String literal"
+    universal: common/text-literal   # Text literal
+  - id: ts/template-literal
+    ko: "템플릿 문자열"
+    en: "Template literal"
+    universal: common/string-interpolation   # String interpolation
+  - id: ts/try-catch
+    ko: "try / catch"
+    en: "try and catch"
+    universal: common/try-catch   # Try and catch
+  - id: ts/undefined-null
+    ko: "undefined 와 null"
+    en: "undefined and null"
+    universal: common/absent-value   # Absent value

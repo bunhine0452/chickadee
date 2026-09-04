@@ -1,7 +1,7 @@
 /**
  * 왕복 테스트 — 진짜 SQLite 로 한다.
  *
- * 인메모리 DB 에 `migrations/0001_init.sql` 을 그대로 적용하고, 테이블마다 값이 다 찬 행을 넣고,
+ * 인메모리 DB 에 `migrations/*.sql` 을 순서대로 적용하고, 테이블마다 값이 다 찬 행을 넣고,
  * `SELECT *` 로 도로 읽어 `fromXxxRow()` 를 태운 뒤 원본 객체와 깊은 비교를 한다.
  * 이게 증명하는 것: DDL 의 열 이름·타입과 §8.2 의 필드가 실제로 맞물린다는 것. 손으로 쓴 목 행으로는
  * 열 이름을 틀려도 통과해 버린다.
@@ -14,6 +14,7 @@ import { createRequire } from 'node:module';
 import { beforeAll, describe, expect, test } from 'vitest';
 
 import { migrations, statements } from './catalog.js';
+import { SCHEMA_VERSION } from './index.js';
 import { ColumnTypeError, JsonColumnError } from './errors.js';
 import { SETTINGS_KEYS } from './schemas.js';
 import {
@@ -44,10 +45,8 @@ const T = 1_767_225_600_000; // 고정 시각 (unix ms)
 // ───────── DB ─────────
 
 function open(): SqliteDb {
-  const init = migrations.find((m) => m.version === 1);
-  if (!init) throw new Error('0001_init.sql 마이그레이션이 카탈로그에 없다');
   const db = new Database(':memory:');
-  db.exec(init.sql);
+  for (const m of [...migrations].sort((a, b) => a.version - b.version)) db.exec(m.sql);
   db.pragma('foreign_keys = ON'); // 01 §7 의 연결 PRAGMA
   return db;
 }
@@ -76,7 +75,7 @@ const CID = {
 const DAY: DayKey = asDayKey('2026-01-01');
 
 const CONCEPT: Concept = {
-  id: CID.ts, lang: 'ts', nameKo: '옵셔널 체이닝', token: '?.',
+  id: CID.ts, lang: 'ts', nameKo: '옵셔널 체이닝', nameEn: 'Optional chaining', token: '?.',
   kind: 'lang', universalId: CID.universal, trackDefault: 't0', dictVersionId: 1, isRetired: false,
 };
 
@@ -258,11 +257,12 @@ function seed(): void {
   insert(db, 'dictionary_version', { id: 1, lang: 'ts', version: '1.0.0', sha256: 'deadbeef', concept_count: 3, loaded_at: T });
   // 보편 개념 먼저 — `concept.universal_id` 가 같은 표를 참조한다.
   insert(db, 'concept', {
-    id: CID.universal, lang: 'common', name_ko: '옵셔널 체이닝(보편)', token: '?.', kind: 'universal',
+    id: CID.universal, lang: 'common', name_ko: '옵셔널 체이닝(보편)', name_en: 'Safe navigation', token: '?.', kind: 'universal',
     universal_id: null, track_default: 't0', dict_version_id: 1, is_retired: 0,
   });
   insert(db, 'concept', {
-    id: CONCEPT.id, lang: CONCEPT.lang, name_ko: CONCEPT.nameKo, token: CONCEPT.token, kind: CONCEPT.kind,
+    id: CONCEPT.id, lang: CONCEPT.lang, name_ko: CONCEPT.nameKo, name_en: CONCEPT.nameEn,
+    token: CONCEPT.token, kind: CONCEPT.kind,
     universal_id: CONCEPT.universalId, track_default: CONCEPT.trackDefault,
     dict_version_id: CONCEPT.dictVersionId, is_retired: 0,
   });
@@ -409,11 +409,11 @@ beforeAll(() => {
 
 // ───────── 왕복 ─────────
 
-describe('fromXxxRow 왕복 (인메모리 SQLite + 0001_init.sql)', () => {
+describe('fromXxxRow 왕복 (인메모리 SQLite + 마이그레이션 전부)', () => {
   test('마이그레이션이 31개 테이블을 만든다', () => {
     const rows = db.prepare(statements['store.table_names']).all() as { name: string }[];
     expect(rows).toHaveLength(31);
-    expect(db.pragma('user_version')).toEqual([{ user_version: 1 }]);
+    expect(db.pragma('user_version')).toEqual([{ user_version: SCHEMA_VERSION }]);
   });
 
   test('concept', () => {

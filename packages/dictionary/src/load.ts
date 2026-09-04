@@ -8,9 +8,11 @@ import type { LangSpec } from '@chickadee/ipc-client';
 import { parse as parseYaml } from 'yaml';
 
 import { bundledFiles, bundledLangs } from './bundle.js';
+import { resolveConcept, resolveLangMeta } from './resolve.js';
 import {
-  conceptSchema, langMetaSchema, SUPPORTED_SCHEMA,
-  type Concept, type Grammar, type LangMeta,
+  conceptSourceSchema, langMetaSourceSchema, SUPPORTED_SCHEMA,
+  type Concept, type Grammar, type LangMeta, type Locale,
+  type SourceConcept, type SourceLangMeta,
 } from './schema.js';
 
 /** 건너뛴 파일 하나. 로그와 개발자 패널이 읽는다. */
@@ -21,8 +23,15 @@ export interface DictProblem {
 }
 
 export interface Dict {
+  /** 이 사전을 어느 언어로 풀었는가 (D118). `concepts` 의 문자열은 전부 이 언어다. */
+  locale: Locale;
   langs: ReadonlyMap<string, LangMeta>;
   concepts: ReadonlyMap<string, Concept>;
+  /**
+   * 로케일을 풀기 전의 원문. 린트와 번역 도구가 두 언어를 다 봐야 하므로 남긴다 —
+   * 화면·카드·채점은 `concepts` 만 본다.
+   */
+  sources: ReadonlyMap<string, SourceConcept>;
   /** `<conceptId>::<grammar>` → `.scm` 원문. */
   queries: ReadonlyMap<string, string>;
   problems: readonly DictProblem[];
@@ -33,6 +42,8 @@ export interface LoadOptions {
   dependencies?: readonly string[];
   /** 이 언어만. 생략하면 번들에 든 전부. */
   langs?: readonly string[];
+  /** 사람이 읽는 문자열을 어느 언어로 풀 것인가. 기본은 정본인 `ko` 다 (D117 · D118). */
+  locale?: Locale;
 }
 
 const systemIds = ['_imports', '_blocks'] as const;
@@ -45,7 +56,9 @@ const CACHE = new Map<string, Dict>();
 
 /** 번들 사전을 읽어 검증한다. 감지에 실패한 프레임워크 사전은 아예 로드하지 않는다. */
 export function loadDict(options: LoadOptions = {}): Dict {
-  const key = JSON.stringify([[...(options.dependencies ?? [])].sort(), options.langs ?? null]);
+  const key = JSON.stringify([
+    [...(options.dependencies ?? [])].sort(), options.langs ?? null, options.locale ?? 'ko',
+  ]);
   const hit = CACHE.get(key);
   if (hit) return hit;
   const built = build(options);
@@ -54,8 +67,10 @@ export function loadDict(options: LoadOptions = {}): Dict {
 }
 
 function build(options: LoadOptions): Dict {
+  const locale = options.locale ?? 'ko';
   const langs = new Map<string, LangMeta>();
   const concepts = new Map<string, Concept>();
+  const sources = new Map<string, SourceConcept>();
   const queries = new Map<string, string>();
   const problems: DictProblem[] = [];
   const deps = new Set(options.dependencies ?? []);
@@ -68,14 +83,15 @@ function build(options: LoadOptions): Dict {
     const meta = readMeta(lang, files, problems);
     // 감지 신호가 선언돼 있으면 그 의존성이 있는 리포에서만 쓴다 (D59).
     if (meta?.detect && !deps.has(meta.detect.dependency)) continue;
-    if (meta) langs.set(lang, meta);
+    if (meta) langs.set(lang, resolveLangMeta(meta, locale));
 
     const text = new Map(files.map((f) => [f.relPath, f.text]));
     for (const { relPath } of files) {
       if (!relPath.endsWith('.yaml') || relPath.endsWith('/_lang.yaml')) continue;
       const concept = readConcept(relPath, text.get(relPath) ?? '', problems);
       if (!concept) continue;
-      concepts.set(concept.id, concept);
+      sources.set(concept.id, concept);
+      concepts.set(concept.id, resolveConcept(concept, locale));
       collectQueries(concept, relPath, text, queries, problems);
     }
     // 시스템 쿼리는 **문법**의 것이지 네임스페이스의 것이 아니다. 두 사전이 같은 문법을
@@ -88,7 +104,7 @@ function build(options: LoadOptions): Dict {
       }
     }
   }
-  return { langs, concepts, queries, problems };
+  return { locale, langs, concepts, sources, queries, problems };
 }
 
 export const keyOf = (conceptId: string, grammar: string): string => `${conceptId}::${grammar}`;
@@ -97,13 +113,13 @@ function readMeta(
   lang: string,
   files: readonly { relPath: string; text: string }[],
   problems: DictProblem[],
-): LangMeta | null {
+): SourceLangMeta | null {
   const relPath = `${lang}/_lang.yaml`;
   const raw = files.find((f) => f.relPath === relPath)?.text;
   if (raw === undefined) return null;
   const parsed = tryYaml(raw, relPath, problems);
   if (parsed === undefined) return null;
-  const checked = langMetaSchema.safeParse(parsed);
+  const checked = langMetaSourceSchema.safeParse(parsed);
   if (!checked.success) {
     problems.push({ relPath, reason: 'schema', detail: checked.error.issues[0]?.message ?? '' });
     return null;
@@ -115,7 +131,7 @@ function readMeta(
   return checked.data;
 }
 
-function readConcept(relPath: string, raw: string, problems: DictProblem[]): Concept | null {
+function readConcept(relPath: string, raw: string, problems: DictProblem[]): SourceConcept | null {
   const parsed = tryYaml(raw, relPath, problems);
   if (parsed === undefined) return null;
   const version = (parsed as { schema?: unknown }).schema;
@@ -123,7 +139,7 @@ function readConcept(relPath: string, raw: string, problems: DictProblem[]): Con
     problems.push({ relPath, reason: 'unsupported-schema', detail: String(version) });
     return null;
   }
-  const checked = conceptSchema.safeParse(parsed);
+  const checked = conceptSourceSchema.safeParse(parsed);
   if (!checked.success) {
     const issue = checked.error.issues[0];
     const where = issue?.path.join('.') ?? '';
@@ -140,7 +156,7 @@ function readConcept(relPath: string, raw: string, problems: DictProblem[]): Con
 }
 
 function collectQueries(
-  concept: Concept,
+  concept: SourceConcept,
   relPath: string,
   text: ReadonlyMap<string, string>,
   queries: Map<string, string>,
