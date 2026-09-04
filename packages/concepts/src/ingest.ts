@@ -249,7 +249,8 @@ async function writeEdges(
   files: readonly { id: number; path: string }[],
   imports: readonly FileImports[],
   touched: readonly number[],
-): Promise<number> {
+  // 해석 결과를 함께 돌려준다 — 대지가 같은 것을 다시 풀지 않게 (D160).
+): Promise<{ count: number; resolved: ResolvedEdge[] }> {
   const idOf = new Map(files.map((f) => [f.path, f.id]));
   const resolved = resolveImports({ paths: files.map((f) => f.path), files: imports });
   const mine = new Set(touched);

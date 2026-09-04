@@ -284,27 +284,43 @@ fn scan_all(
         .clamp(1, 4);
     let chunk = seen.len().div_ceil(lanes).max(1);
     let total = count(seen.len());
+    let by_ext = grammars_of(spec);
     let (tx, rx) = channel::<(&Candidate, &'static str, u32, Vec<Capture>)>();
     std::thread::scope(|scope| -> Result<(), String> {
         for files in seen.chunks(chunk) {
             let tx = tx.clone();
+            let by_ext = &by_ext;
             scope.spawn(move || {
                 for file in files {
                     if sink.stopped() {
                         return;
                     }
-                    let Some(q) = compiled.get(&file.grammar) else {
-                        continue;
-                    };
                     let Ok(bytes) = std::fs::read(&file.at) else {
                         continue;
                     };
-                    // The byte limit was already applied during the walk.
-                    let done = match chickadee_parse::scan(&bytes, q, usize::MAX) {
-                        Ok(s) => (file, s.quality, s.line_count, s.captures),
-                        Err(_) => (file, "poor", 1, Vec::new()),
-                    };
-                    drop(tx.send(done));
+                    // One extension can be read by more than one grammar (D159).
+                    // Quality and line count come from the primary — the one written
+                    // to the file row — and the rest only add captures.
+                    let all = extension_of(&file.rel)
+                        .and_then(|e| by_ext.get(&e))
+                        .map_or(&[][..], Vec::as_slice);
+                    let mut quality = "poor";
+                    let mut rows = 1u32;
+                    let mut caps: Vec<Capture> = Vec::new();
+                    for grammar in all {
+                        let Some(q) = compiled.get(grammar) else {
+                            continue;
+                        };
+                        // The byte limit was already applied during the walk.
+                        if let Ok(s) = chickadee_parse::scan(&bytes, q, usize::MAX) {
+                            if *grammar == file.grammar {
+                                quality = s.quality;
+                                rows = s.line_count;
+                            }
+                            caps.extend(s.captures);
+                        }
+                    }
+                    drop(tx.send((file, quality, rows, caps)));
                 }
             });
         }
@@ -473,6 +489,23 @@ fn extension_map(spec: &JobSpec) -> BTreeMap<String, &LangSpec> {
     pairs
         .map(|(e, l)| (e.trim_start_matches('.').to_ascii_lowercase(), l))
         .collect()
+}
+
+/// Every grammar that reads a given extension (D159).
+///
+/// `extension_map` collects into a map, so one extension keeps **one** language —
+/// the row written to `file.grammar`. A MyBatis mapper needs two: XML for the
+/// attributes and SQL for the statement bodies, and unlike `.vue` that cannot be
+/// one grammar restricted to ranges. This one keeps them all, for captures only.
+fn grammars_of(spec: &JobSpec) -> BTreeMap<String, Vec<String>> {
+    let mut out: BTreeMap<String, Vec<String>> = BTreeMap::new();
+    for lang in &spec.langs {
+        for ext in &lang.extensions {
+            let key = ext.trim_start_matches('.').to_ascii_lowercase();
+            out.entry(key).or_default().push(lang.grammar.clone());
+        }
+    }
+    out
 }
 
 fn compile_all(spec: &JobSpec) -> Result<BTreeMap<String, Queries>, String> {

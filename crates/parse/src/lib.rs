@@ -91,7 +91,7 @@ fn with_tree<T>(
         // SFC 는 한 파일에 언어가 셋이라 `<script>` 구간만 읽는다 (D159). 파서는 문법마다
         // 재사용되므로 **매번 새로 지정한다** — 앞 파일의 구간이 남으면 조용히 틀린다.
         if sfc::is_embedded(grammar) {
-            let ranges = sfc::script_ranges(src);
+            let ranges = sfc::ranges_for(grammar, src);
             // `<script>` 가 없으면 빈 구간을 준다. 비워 두면 tree-sitter 가 문서 전체를
             // 읽어 템플릿을 자바스크립트로 파싱한다.
             let empty = [tree_sitter::Range {
