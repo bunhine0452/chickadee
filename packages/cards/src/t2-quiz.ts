@@ -7,6 +7,7 @@
  * 순수 함수다. 난수를 쓰는 곳은 의존성 방향의 5쌍 고르기 하나뿐이고 그것도 `req.seed` 로
  * 고정한 `mulberry32` 다 (04 §9 결정성).
  */
+import { t } from '@chickadee/i18n';
 import { mulberry32 } from '@chickadee/text';
 
 import { condense, isEntry } from './t2-graph.js';
@@ -78,29 +79,31 @@ export function buildRadius(input: QuizInput): RadiusQuiz | null {
 
   const core: Record<string, [string, string]> = {};
   for (const path of one) {
-    core[path] = ['직접', `«${baseName(path)}» 가 «${baseName(target)}» 를 직접 가져다 씁니다.`];
+    core[path] = [
+      t('t2.radiusDirect'),
+      t('t2.radiusDirectNote', { name: baseName(path), target: baseName(target) }),
+    ];
   }
   const sec: Record<string, [string, string]> = {};
   for (const path of two) {
-    sec[path] = ['건너서', `한 다리 건너 닿습니다. 골라도 안 골라도 감점하지 않습니다.`];
+    sec[path] = [t('t2.radiusHop'), t('t2.radiusHopNote')];
   }
   const trap: Record<string, string> = {};
   for (const path of [...new Set(outbound.get(target) ?? [])].sort()) {
     if (core[path] !== undefined || sec[path] !== undefined) continue;
-    trap[path] = `«${baseName(path)}» 는 «${baseName(target)}» 가 가져다 쓰는 쪽이라 `
-      + `«${baseName(target)}» 가 바뀌어도 모릅니다.`;
+    trap[path] = t('t2.radiusTrap', { name: baseName(path), target: baseName(target) });
   }
 
   const bands = new Set(one.map((p) => input.bandOf(p)));
   return {
     target,
-    q: `«${baseName(target)}» 를 바꾸면 어느 파일이 영향을 받나요?`,
-    hint: '지도에서 파일 상자를 클릭해 고릅니다. 화살표 방향이 답을 가릅니다.',
+    q: t('t2.radiusQuestion', { target: baseName(target) }),
+    hint: t('t2.radiusHint'),
     core, sec, trap,
     hints: [
-      `영향을 받는 파일은 ${bands.size}개 층에 걸쳐 있습니다.`,
-      '화살표가 이 파일로 **들어오는** 쪽만 영향을 받습니다. 나가는 쪽은 아닙니다.',
-      `직접 영향을 받는 파일은 ${one.length}개입니다. (＋ 한 다리 건너 ${two.length}개)`,
+      t('t2.radiusHint1', { n: String(bands.size) }),
+      t('t2.radiusHint2'),
+      t('t2.radiusHint3', { one: String(one.length), two: String(two.length) }),
     ],
   };
 }
@@ -154,14 +157,14 @@ export function buildFlow(input: QuizInput): FlowQuiz | null {
   const first = answer.at(0) ?? '';
   const last = answer.at(-1) ?? '';
   return {
-    q: `«${baseName(first)}» 에서 «${baseName(last)}» 까지 어떤 순서로 지나가나요?`,
-    hint: '카드를 위에서 아래 순서로 세웁니다. 덱에는 경로에 없는 파일도 섞여 있습니다.',
+    q: t('t2.flowQuestion', { first: baseName(first), last: baseName(last) }),
+    hint: t('t2.flowHint'),
     answer,
     deck,
     hints: [
-      `지나가는 파일은 ${answer.length}개입니다.`,
-      '덱에 경로 밖 파일이 섞여 있습니다. 화살표가 이어지는지 보세요.',
-      `첫 자리는 «${baseName(first)}» 입니다.`,
+      t('t2.flowHint1', { n: String(answer.length) }),
+      t('t2.flowHint2'),
+      t('t2.flowHint3', { first: baseName(first) }),
     ],
   };
 }
@@ -220,13 +223,13 @@ export function buildDirection(input: QuizInput): DirectionQuiz | null {
   if (pairs.length < DIRECTION_PAIRS) return null;
 
   return {
-    q: '두 파일 사이의 방향을 고르세요. 화살표는 언제나 「가져다 쓴다」 방향입니다.',
-    hint: '5문항입니다. 지도를 보고 답해도 됩니다 — 외우는 문제가 아닙니다.',
+    q: t('t2.directionQuestion'),
+    hint: t('t2.directionHint', { n: String(DIRECTION_PAIRS) }),
     pairs,
     hints: [
-      '위쪽 층이 아래쪽 층을 가져다 쓰는 것이 보통입니다.',
-      '지도에서 두 상자에 마우스를 올리면 이어진 선만 진해집니다.',
-      `관계가 있는 쌍은 ${pairs.filter((p) => p.answer !== 3).length}개입니다.`,
+      t('t2.directionHint1'),
+      t('t2.directionHint2'),
+      t('t2.directionHint3', { n: String(pairs.filter((p) => p.answer !== 3).length) }),
     ],
   };
 }

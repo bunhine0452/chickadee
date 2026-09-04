@@ -14,7 +14,7 @@ import 'monaco-editor/esm/vs/basic-languages/sql/sql.contribution';
 import { measureSince } from '../../devtools/audit.js';
 import { PlainPad } from './PlainPad';
 import {
-  CLONE_ARIA_LABEL,
+  cloneAriaLabel,
   LINE_HEIGHT,
   MIN_ROWS,
   SAVE_DEBOUNCE_MS,
@@ -96,7 +96,7 @@ export function ClonePad(props: ClonePadProps) {
 
 function MonacoPad(props: ClonePadProps) {
   const { stage, grammar, theme, ticks } = props;
-  const label = props.ariaLabel ?? CLONE_ARIA_LABEL;
+  const label = props.ariaLabel ?? cloneAriaLabel();
 
   const hostRef = useRef<HTMLDivElement | null>(null);
   const edRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -125,7 +125,7 @@ function MonacoPad(props: ClonePadProps) {
 
     const editor = monaco.editor.create(host, {
       ...optionsFor(at.stage),
-      ariaLabel: at.ariaLabel ?? CLONE_ARIA_LABEL,
+      ariaLabel: at.ariaLabel ?? cloneAriaLabel(),
       value: at.value,
       language: at.grammar,
       theme: THEME_NAME[at.theme],

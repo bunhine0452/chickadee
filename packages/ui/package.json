@@ -14,6 +14,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
+    "@chickadee/i18n": "workspace:*",
     "@chickadee/ipc-client": "workspace:*",
     "dompurify": "^3.2.3",
     "react": "^19.0.0",

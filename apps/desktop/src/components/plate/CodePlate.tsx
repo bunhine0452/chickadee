@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import type { KeyboardEvent } from 'react';
+import { t } from '@chickadee/i18n';
 import { cx } from '@chickadee/ui';
 import type { CodeLine, Seg } from '@chickadee/store-sql';
 
@@ -138,7 +139,7 @@ export function CodePlate({ lines, pickable, selected, answer, hole, onPick, cla
   // `tabIndex: -1` 은 탭 순서에 넣지 않으면서 프로그램 포커스만 허락한다 — 묶음 안의
   // 토큰이 로빙 tabindex 로 돌기 때문에 묶음 자신이 탭에 걸리면 한 번 더 멈추게 된다.
   const interactive = group
-    ? { role: 'radiogroup' as const, 'aria-label': '짚을 곳', tabIndex: -1, onKeyDown }
+    ? { role: 'radiogroup' as const, 'aria-label': t('plate.pickTargets'), tabIndex: -1, onKeyDown }
     : {};
 
   return (

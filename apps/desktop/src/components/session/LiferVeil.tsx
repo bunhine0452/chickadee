@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
+import { t } from '@chickadee/i18n';
 import { Dee, RichText, Stamp } from '@chickadee/ui';
 
 import { closeMark } from '../../devtools/audit.js';
@@ -90,18 +91,24 @@ export function LiferVeil({ concept, code, where, serial, onClose }: LiferVeilPr
 
   return (
     <div ref={veilRef} className="lifer-veil">
-      <div ref={cardRef} className="lifer-card grain" role="dialog" aria-label="처음 기록한 개념" tabIndex={-1}>
+      <div
+        ref={cardRef}
+        className="lifer-card grain"
+        role="dialog"
+        aria-label={t('lifer.label')}
+        tabIndex={-1}
+      >
         <Dee ly={4} size={DEE_SIZE} motion="lifer" sticker />
         <div className="lifer-body">
-          <div className="lifer-k">첫 기록 · LIFER</div>
+          <div className="lifer-k">{t('lifer.kicker')}</div>
           <h3>
             {concept} <code>{code}</code>
           </h3>
           <RichText as="p" html={where} />
           <div className="lifer-serial">{serial}</div>
         </div>
-        <Stamp text="첫 관찰" sub="LIFER" rotate={STAMP_ROTATE} hit />
-        <div className="lifer-any">아무 키나 누르면 닫힙니다</div>
+        <Stamp text={t('lifer.stamp')} sub="LIFER" rotate={STAMP_ROTATE} hit />
+        <div className="lifer-any">{t('lifer.anyKey')}</div>
       </div>
     </div>
   );

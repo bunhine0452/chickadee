@@ -1,2 +1,116 @@
 /** `ko/cards.ts` 의 영어 짝. 없는 키는 `ko` 로 폴백한다 (D117). 조사 필터는 쓰지 않는다. */
-export const cards: Record<string, string> = {};
+export const cards: Record<string, string> = {
+  'card.dictOneLiner': 'In one line',
+  'card.dictWhy': 'Why it is needed',
+  'card.dictTrace': 'Inside line {{focus}}',
+  'card.varsMissing': 'The template uses a variable this site does not have: {{names}}',
+
+  't0.roleOp': 'operator',
+  't0.roleId': 'name',
+  't0.roleLit': 'value',
+  't0.roleOther': 'fragment',
+  't0.pointDiag': '«{{pick}}» sits in the {{role}} slot. The answer is «{{answer}}».',
+
+  't0.noSiteInRepo': 'this grammar is used nowhere in the repo',
+  't0.noSiteUsable': 'no usable site',
+  't0.dropNoHole': 'this site has no hole (@hole)',
+  't0.dropHoleTooShort': 'the hole is one character — too short for a blank',
+  't0.dropNoBlankEntry': 'the dictionary has no blank question',
+  't0.dropNoMeaningEntry': 'the dictionary has no meaning question',
+  't0.dropNoPointEntry': 'the dictionary has no point question',
+  't0.dropFirstOptionDiffers': 'the first option differs from the hole ({{hole}})',
+  't0.dropOptionKinds': 'the four options are of different kinds',
+  't0.dropNoWrongDiag': 'a wrong option has no diagnosis',
+  't0.dropNoFocusLine': 'could not read the focus line',
+  't0.dropHoleNotInFocus': 'the hole ({{hole}}) is not on the focus line',
+  't0.dropHeuristicSite': 'a guessed site cannot carry a meaning question',
+  't0.dropPoorParse': 'the file did not parse cleanly — no meaning question',
+  't0.dropAnswerNotInFocus': 'the answer token {{token}} is not on the focus line',
+  't0.dropFewCandidates': 'fewer than {{n}} tokens to point at',
+
+  't1.continued': '…continued',
+  't1.whyQuestion': 'What would change if this line were gone?',
+  't1.whyHelpTranscribe':
+    'One line is enough. It is not graded. It cannot be skipped either — if your head '
+    + 'does not switch on here, the transcription before it was typing practice.',
+  't1.specCalls': 'calls {{list}}',
+  't1.specLocals': 'declares {{n}} local variables — {{names}}',
+  't1.specReturnRoot': 'returns <code>&lt;{{tag}}&gt;</code> as the root',
+  't1.specEarlyReturns': 'has {{n}} early returns',
+
+  't1.noBlockInRepo': 'no block in the repo to transcribe',
+  't1.noBlockUsable': 'no block to transcribe',
+  't1.dropNoLines': 'could not read the block',
+  't1.dropLineCount': '{{n}} lines — a transcription block is {{min}}–{{max}}',
+  't1.dropNoConcepts': 'no grammar concept lands in this block',
+  't1.dropTooManyUnknown': '{{n}} unknown concepts — at most {{max}} per block',
+  't1.dropFirstPrintTooLong': 'a first print runs to {{max}} lines ({{n}})',
+  't1.dropNoDictConcept': 'no required grammar concept in the block is in the dictionary',
+  't1.dropNothingToMask': 'stage 2 has nothing to hide — signature, comments and closers only',
+
+  't2.bandScreen': 'Screen',
+  't2.bandFeature': 'Feature',
+  't2.bandAction': 'Action · network',
+  't2.bandShared': 'Shared · data',
+
+  't2.question': 'To add «{{subject}}», which files would you change?',
+  't2.placementHint': 'Click a file box on the map to pick it. The count stays hidden.',
+  't2.changeAdded': 'A new file.',
+  't2.changeDeleted': 'Deleted here.',
+  't2.changeRenamed': 'Renamed and changed along with it.',
+  't2.changeLines': '{{n}} lines changed.',
+  't2.changeFew': 'Only a few lines changed.',
+  't2.relationUsedBy': '«{{name}}» imports this file.',
+  't2.relationUses': 'Imports «{{name}}».',
+  't2.relationBand': 'On the {{band}} band.',
+  't2.coChanged':
+    'Not changed in this commit, but it often changes together with these files in recent commits.',
+  't2.trapPlacesOnly':
+    '«{{self}}» only places «{{child}}». What changes inside is nothing «{{self}}» knows about',
+  't2.trapShared': 'A shared part. «{{name}}» only imports it',
+  't2.trapStateMoved':
+    '«{{self}}» holds state, but this time the new file «{{taker}}» took that job',
+  't2.trapUnchanged': 'Not changed in this commit',
+  't2.hintSpreadUnknown':
+    'This feature spans several bands. Changing the screen alone does not finish it.',
+  't2.hintSpread':
+    'This feature spans <b>{{n}} of {{bands}} bands</b>. Changing the screen alone does not '
+    + 'finish it.',
+  't2.hintNoNewFiles': 'No file was created in this commit. Only existing ones changed.',
+  't2.hintNewFiles': '<b>{{n}} files were created.</b> The map marks them “new plate”.',
+  't2.hintCoreCount': '<b>{{n}} files</b> have to change.',
+  't2.hintCoreCountBonus': '{{count}} (＋ {{n}} bonus)',
+  't2.commitStat': '{{files}} files · +{{ins}} −{{del}}',
+
+  't2.radiusQuestion': 'If you change «{{target}}», which files are affected?',
+  't2.radiusHint': 'Click a file box on the map to pick it. Arrow direction decides the answer.',
+  't2.radiusDirect': 'direct',
+  't2.radiusDirectNote': '«{{name}}» imports «{{target}}» directly.',
+  't2.radiusHop': 'one hop',
+  't2.radiusHopNote': 'Reached one hop away. Picking it or not costs nothing.',
+  't2.radiusTrap':
+    '«{{name}}» is what «{{target}}» imports, so a change to «{{target}}» does not reach it.',
+  't2.radiusHint1': 'The affected files span {{n}} bands.',
+  't2.radiusHint2': 'Only arrows pointing **into** this file carry the change. Outgoing ones do not.',
+  't2.radiusHint3': '{{one}} files are affected directly. (＋ {{two}} one hop away)',
+
+  't2.flowQuestion': 'In what order does it pass from «{{first}}» to «{{last}}»?',
+  't2.flowHint': 'Stack the cards top to bottom. The deck also holds files off the path.',
+  't2.flowHint1': 'The path passes {{n}} files.',
+  't2.flowHint2': 'The deck holds files off the path. Check whether the arrows connect.',
+  't2.flowHint3': 'The first seat is «{{first}}».',
+
+  't2.directionQuestion':
+    'Pick the direction between the two files. An arrow always means “imports”.',
+  't2.directionHint': '{{n}} questions. Reading them off the map is fine — this is not recall.',
+  't2.directionHint1': 'An upper band usually imports a lower one.',
+  't2.directionHint2': 'Hover two boxes on the map and only the lines between them darken.',
+  't2.directionHint3': '{{n}} of the pairs are related.',
+
+  't2.noCommits': '{{n}} candidate commits — {{min}} are needed',
+  't2.noCommitFiles': 'no changed files on the candidate commit',
+  't2.mapTooSmall': '{{n}} map nodes — too small',
+  't2.noRadiusTarget': 'no sheet file has an incoming arrow',
+  't2.noFlowPath': 'no path runs through {{n}} or more files',
+  't2.noDirectionPairs': 'fewer than {{n}} pairs to ask a direction about',
+};

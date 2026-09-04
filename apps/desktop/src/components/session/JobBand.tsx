@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
+import { t } from '@chickadee/i18n';
 import { cx, DeeLogo } from '@chickadee/ui';
 
 import { TimeQueue } from '../shell/TimeQueue';
@@ -13,7 +14,9 @@ const LABEL_MIN_MINS = 2;
 
 /** 목업 `fmtMin` — 1분 미만은 초로. */
 function fmtMin(mins: number): string {
-  return mins < 1 ? `${Math.round(mins * 60)}초` : `${Math.round(mins * 10) / 10}분`;
+  return mins < 1
+    ? t('band.seconds', { n: String(Math.round(mins * 60)) })
+    : t('band.minutes', { n: String(Math.round(mins * 10) / 10) });
 }
 
 export interface JobBandProps {
@@ -49,11 +52,11 @@ export function JobBand({ runNo, repo, queue, pos, elapsed, totalElapsed, childr
   const progress = at === undefined || at.mins === 0 ? 0 : Math.min(1, elapsed / (at.mins * 60));
 
   return (
-    <header className="jobband grain" aria-label="작업 띠">
+    <header className="jobband grain" aria-label={t('band.label')}>
       <div className="jb-brand">
         <DeeLogo size={LOGO_SIZE} className="logo" />
         <div>
-          <div className="jb-title">교정쇄</div>
+          <div className="jb-title">{t('band.title')}</div>
           <div className="jb-sub">
             {runNo} · {repo}
           </div>
@@ -67,11 +70,11 @@ export function JobBand({ runNo, repo, queue, pos, elapsed, totalElapsed, childr
               <b>
                 {queue.length} / {queue.length}
               </b>{' '}
-              · 인쇄 완료
+              · {t('session.printDone')}
             </span>
           ) : (
             <span>
-              지금{' '}
+              {t('band.now')}{' '}
               <b>
                 {pos + 1} / {queue.length}
               </b>{' '}
@@ -81,8 +84,11 @@ export function JobBand({ runNo, repo, queue, pos, elapsed, totalElapsed, childr
           )}
           <span className="time">
             {done || at === undefined
-              ? `오늘 ${fmtMin((totalElapsed ?? elapsed) / 60)}`
-              : `남은 시간 약 ${Math.max(1, Math.round(left / 60))}분 · ${fmtMin(at.mins)} 판`}
+              ? t('band.today', { time: fmtMin((totalElapsed ?? elapsed) / 60) })
+              : t('band.left', {
+                n: String(Math.max(1, Math.round(left / 60))),
+                time: fmtMin(at.mins),
+              })}
           </span>
         </div>
 

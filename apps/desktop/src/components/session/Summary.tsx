@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { t } from '@chickadee/i18n';
 import { cx, Dee, DeeLogo, FlatButton, Misreg, Pill, PressButton, Reg, RichText, Stamp } from '@chickadee/ui';
 import type { InkLayer, Track } from '@chickadee/ui';
 
@@ -62,9 +63,9 @@ export interface SummaryProps {
 
 /** 「+1겹」 / 「−1겹 · 다시 찍기」 / 「제자리」. */
 function moved(from: InkLayer, to: InkLayer): string {
-  if (to > from) return `+${to - from}겹`;
-  if (to < from) return `−${from - to}겹 · 다시 찍기`;
-  return '제자리';
+  if (to > from) return t('plate.layerPlus', { n: String(to - from) });
+  if (to < from) return t('summary.layerMinusReprint', { n: String(from - to) });
+  return t('summary.layerSame');
 }
 
 /**
@@ -115,60 +116,61 @@ export function Summary({
   }, []);
 
   return (
-    <article ref={ref} className="ps wide" tabIndex={-1} aria-label="인쇄 완료">
+    <article ref={ref} className="ps wide" tabIndex={-1} aria-label={t('session.printDone')}>
       <Reg hit />
 
       <div className="ps-rail" aria-hidden="true">
         <Dee ly={4} sticker />
-        <span className="vt">{runNo} · 완료</span>
+        <span className="vt">{t('summary.railVertical', { runNo })}</span>
       </div>
 
       <div className="ps-in">
         <div className="done-head">
           <DeeLogo size={LOGO_SIZE} className="logo" />
           <div>
-            <Misreg as="h2" text="인쇄 완료" />
+            <Misreg as="h2" text={t('session.printDone')} />
             <p>
-              <b>{runNo}</b> · {repo} · {printed}판을 걸었고 {mins}분 걸렸습니다. 이 정도가 딱 좋습니다.
+              <b>{runNo}</b> · {repo} ·{' '}
+              {t('summary.line', { printed: String(printed), mins: String(mins) })}
             </p>
           </div>
-          <Stamp text="인쇄 완료" sub={date} rotate={STAMP_ROTATE} />
+          <Stamp text={t('session.printDone')} sub={date} rotate={STAMP_ROTATE} />
         </div>
 
         <div className="tally">
           <div>
-            <span className="k">찍은 판</span>
+            <span className="k">{t('summary.tallyPrinted')}</span>
             <div className="v">
               {printed}
-              <span className="u">판</span>
+              <span className="u">{t('summary.unitPlate')}</span>
             </div>
           </div>
           <div>
-            <span className="k">정합</span>
+            <span className="k">{t('session.exact')}</span>
             <div className="v">
               {ok} / {printed}
             </div>
           </div>
           <div>
-            <span className="k">걸린 시간</span>
+            <span className="k">{t('summary.tallyTime')}</span>
             <div className="v">
               {mins}
-              <span className="u">분</span>
+              <span className="u">{t('summary.unitMinute')}</span>
             </div>
           </div>
           <div>
-            <span className="k">연속 인쇄</span>
+            <span className="k">{t('summary.tallyStreak')}</span>
             <div className="v">
               {streak}
-              <span className="u">일</span>
+              <span className="u">{t('summary.unitDay')}</span>
             </div>
           </div>
         </div>
 
         <div>
           <div className="pane-h">
-            <b>오늘 움직인 잉크</b>
-            <span>%가 아니라 겹으로 셉니다. 겹은 시간을 두고 다시 맞힐 때만 쌓입니다.</span>
+            <b>{t('summary.inkMoved')}</b>
+            <span>{t('summary.inkNote')}</span>
           </div>
           <ul className="shifts">
             {results.map((row) => (
@@ -187,7 +189,7 @@ export function Summary({
                   </small>
                 </span>
                 <span className={cx('next', row.lyTo <= SOON_LAYER && 'soon')}>
-                  다음 인쇄
+                  {t('summary.nextPrint')}
                   <br />
                   <b>{row.next}</b>
                 </span>
@@ -201,11 +203,11 @@ export function Summary({
             <Dee ly={4} motion="hop" sticker />
             <div>
               <h4>
-                처음 기록한 문법 — {lifer.concept} <code>{lifer.code}</code>
+                {t('summary.liferHeading')} {lifer.concept} <code>{lifer.code}</code>
               </h4>
               <RichText as="p" html={lifer.where} />
             </div>
-            <Stamp text="첫 관찰" sub="LIFER" rotate={LIFER_STAMP_ROTATE} />
+            <Stamp text={t('lifer.stamp')} sub="LIFER" rotate={LIFER_STAMP_ROTATE} />
           </div>
         )}
 
@@ -213,10 +215,7 @@ export function Summary({
           <span className="st" aria-hidden="true">
             {day}
           </span>
-          <span>
-            연속 <b>{streak}일</b>. 연속 기록은 진도를 열지 않습니다 — 진도는 잉크 겹으로만 열립니다. 하루
-            쉬어도 다음 날 이어집니다.
-          </span>
+          <RichText html={t('summary.streakNote', { n: String(streak) })} />
         </div>
 
         <div className="hintbox">
@@ -227,14 +226,14 @@ export function Summary({
           left={
             onAgain === undefined ? null : (
               <FlatButton ghost onClick={onAgain}>
-                오늘 판 다시 보기
+                {t('summary.again')}
               </FlatButton>
             )
           }
-          hint="수고했습니다. 내일 같은 시간에 이어서."
+          hint={t('summary.hint')}
           right={
             <PressButton kbd="Enter" onClick={onHome}>
-              홈으로
+              {t('summary.home')}
             </PressButton>
           }
         />

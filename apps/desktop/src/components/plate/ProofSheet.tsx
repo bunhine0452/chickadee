@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
+import { t } from '@chickadee/i18n';
 import { cx, Dee, Misreg, Passes, Pill, Reg, RichText } from '@chickadee/ui';
 import type { InkLayer, Track } from '@chickadee/ui';
 
@@ -34,8 +35,8 @@ export interface ProofSheetProps {
 
 /** 「+1겹」 / 「−1겹」 / 없음. 겹이 움직인 것을 이득으로 표시한다 (정본 §3-1). */
 function plusLabel(from: InkLayer, to: InkLayer): string {
-  if (to > from) return `+${to - from}겹`;
-  if (to < from) return `−${from - to}겹`;
+  if (to > from) return t('plate.layerPlus', { n: String(to - from) });
+  if (to < from) return t('plate.layerMinus', { n: String(from - to) });
   return '';
 }
 
@@ -83,7 +84,9 @@ export function ProofSheet({
       <div className="ps-rail" aria-hidden="true">
         <Dee ly={to} sticker />
         <span className={cx('plus', plus !== '' && 'on')}>{plus}</span>
-        <span className="vt">{`${no} · ${to}겹 · ${LAYER_NAMES[to].k}`}</span>
+        <span className="vt">
+          {t('plate.railVertical', { no, n: String(to), name: LAYER_NAMES[to].k })}
+        </span>
       </div>
 
       <div className="ps-in">
@@ -100,7 +103,11 @@ export function ProofSheet({
             </div>
           </div>
           <div className="ps-ly">
-            <Passes n={to} track={track} label={`${track.toUpperCase()} · 잉크 ${to}겹`} />
+            <Passes
+              n={to}
+              track={track}
+              label={t('plate.inkLabel', { track: track.toUpperCase(), n: String(to) })}
+            />
             <span className="lyn">{layerText(to)}</span>
           </div>
         </div>

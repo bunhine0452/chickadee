@@ -8,7 +8,7 @@
  */
 import type { EdgeKind } from '@chickadee/store-sql';
 
-import { BAND_NAMES, BANDS, MAX_NODES } from './t2-types.js';
+import { bandNames, BANDS, MAX_NODES } from './t2-types.js';
 import type { Band, Graph, GraphEdge, GraphFile } from './t2-types.js';
 
 /**
@@ -413,7 +413,8 @@ export function buildGraph(input: GraphInput): Graph {
   const rows: string[][] = Array.from({ length: BANDS }, () => []);
   for (const p of live) rows[band.get(p) ?? 0]?.push(p);
   for (const row of rows) row.sort(byPathAsc);
-  const bands = rows.map((row, r) => ({ l: BAND_NAMES[r] ?? '', s: commonDir(row) }));
+  const names = bandNames();
+  const bands = rows.map((row, r) => ({ l: names[r] ?? '', s: commonDir(row) }));
 
   // 7. 밴드 안 순서를 그대로 `files` 배열 순서로 굽는다.
   orderRows(rows, band, edges);

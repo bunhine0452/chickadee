@@ -1,16 +1,19 @@
-import { Pill } from '@chickadee/ui';
+import { t, type MessageKey } from '@chickadee/i18n';
+import { Pill, RichText } from '@chickadee/ui';
 
 import './ScoreCard.css';
 
 /** 채점 뒤의 권고. 점수가 아니라 다음 행동이다 (정본 §3-3). */
 export type CloneVerdict = 'advance' | 'repeat-soft' | 'repeat';
 
-/** 목업 `renderResult()` 의 판정 알약 문구 3종 그대로. */
-export const VERDICT_TEXT: Record<CloneVerdict, string> = {
-  advance: '다음 단계로 가도 좋습니다',
-  'repeat-soft': '한 번 더 같은 단계를 권합니다',
-  repeat: '같은 단계를 한 번 더 하는 편이 빠릅니다',
+/** 목업 `renderResult()` 의 판정 알약 문구 3종 그대로. 문장은 부를 때 푼다 (D117). */
+const VERDICT_KEY: Record<CloneVerdict, MessageKey> = {
+  advance: 'clone.verdictAdvance',
+  'repeat-soft': 'clone.verdictRepeatSoft',
+  repeat: 'clone.verdictRepeat',
 };
+
+export const verdictText = (verdict: CloneVerdict): string => t(VERDICT_KEY[verdict]);
 
 export interface ScoreCardProps {
   /** 원본 줄 수 = 점수의 분모. */
@@ -35,19 +38,16 @@ export function ScoreCard({ total, meaning, exact, equiv, wrong, verdict }: Scor
   return (
     <div className="score">
       <div className="big">
-        {total}분의 {meaning}
-        <small>의미가 맞은 줄</small>
+        {t('clone.scoreOf', { total: String(total), meaning: String(meaning) })}
+        <small>{t('clone.scoreCaption')}</small>
       </div>
       <div>
-        <p>
-          이 중 글자까지 같은 줄은 <b>{exact}줄</b>. <b>동등</b>은 형태만 다르고 같은 뜻으로 인정한 줄 — 공백·들여쓰기,
-          따옴표 종류, 세미콜론, 주석 문구, 지역 변수명 일관 치환.
-        </p>
+        <RichText as="p" html={t('clone.scoreNote', { exact: String(exact) })} />
         <div className="pills">
-          <Pill track="t1">정합 {exact}</Pill>
-          <Pill track="t0">동등 {equiv}</Pill>
-          <Pill track="t2">어긋남 {wrong}</Pill>
-          <Pill ghost>{VERDICT_TEXT[verdict]}</Pill>
+          <Pill track="t1">{t('session.exact')} {exact}</Pill>
+          <Pill track="t0">{t('session.equiv')} {equiv}</Pill>
+          <Pill track="t2">{t('session.differ')} {wrong}</Pill>
+          <Pill ghost>{verdictText(verdict)}</Pill>
         </div>
       </div>
     </div>

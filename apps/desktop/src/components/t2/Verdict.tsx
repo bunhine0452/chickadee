@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
-import { Misreg } from '@chickadee/ui';
+import { t } from '@chickadee/i18n';
+import { Misreg, RichText } from '@chickadee/ui';
 
 import './Verdict.css';
 
@@ -18,8 +19,8 @@ export interface VerdictProps {
 
 /** 목업 `resultHTML()` 의 제목 3종 그대로. 문턱은 100 과 66 이다. */
 export function verdictTitle(pct: number): string {
-  if (pct === 100) return '완벽합니다';
-  return pct >= 66 ? '거의 맞았어요' : '다시 한 번 볼까요';
+  if (pct === 100) return t('map.verdictPerfect');
+  return pct >= 66 ? t('map.verdictClose') : t('map.verdictAgain');
 }
 
 /**
@@ -37,11 +38,25 @@ export function Verdict({ pct, core, found, missed, wrong, bonus }: VerdictProps
       <Misreg as="div" className="big" text={`${pct}%`} />
       <div>
         <h4>{verdictTitle(pct)}</h4>
-        <p>
-          꼭 고쳐야 할 {core}개 중 <b>{found}개 찾음</b> · <b>{missed}개 놓침</b> · 필요 없는데 고른 것{' '}
-          <b>{wrong}개</b> · 보너스 <b>{bonus}개</b>
-        </p>
-        <div className="meter" role="img" aria-label={`${core}개 중 ${found}개 찾음, ${missed}개 놓침`}>
+        <RichText
+          as="p"
+          html={t('map.verdictLine', {
+            core: String(core),
+            found: String(found),
+            missed: String(missed),
+            wrong: String(wrong),
+            bonus: String(bonus),
+          })}
+        />
+        <div
+          className="meter"
+          role="img"
+          aria-label={t('map.meterLabel', {
+            core: String(core),
+            found: String(found),
+            missed: String(missed),
+          })}
+        >
           <i className="f" style={{ '--w': found } as CSSProperties} />
           <i className="m" style={{ '--w': missed } as CSSProperties} />
         </div>

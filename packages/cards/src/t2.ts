@@ -14,13 +14,16 @@
  * 커밋」), 나머지 셋이 뒤인 이유는 그래프만으로 나와 커밋이 적은 리포의 폴백이기
  * 때문이다 (04 §8.4).
  */
+import { t } from '@chickadee/i18n';
 import type { ConceptId } from '@chickadee/store-sql';
 
 import { contentHash } from './hash.js';
 import { GEN_VERSION } from './payload.js';
 import { buildGraph } from './t2-graph.js';
 import { buildKey, candidates, question } from './t2-key.js';
-import { buildDirection, buildFlow, buildRadius, type QuizInput } from './t2-quiz.js';
+import {
+  buildDirection, buildFlow, buildRadius, DIRECTION_PAIRS, FLOW_MIN, type QuizInput,
+} from './t2-quiz.js';
 import type { NoPlate } from './types.js';
 import {
   MIN_COMMITS_FOR_PLACEMENT,
@@ -63,12 +66,12 @@ function placement(req: T2Request): T2Card | NoPlate {
   const picked = candidates({ commits: req.commits, filesOf: req.filesOf, unitPaths });
   if (picked.length < MIN_COMMITS_FOR_PLACEMENT) {
     // 04 §8.4 — 정답지가 커밋 1건이면 「정답 하나뿐인 정답지」다. 그래프 3종으로 넘긴다.
-    return { noPlate: true, reason: `후보 커밋 ${picked.length}건 — ${MIN_COMMITS_FOR_PLACEMENT}건은 있어야 한다` };
+    return { noPlate: true, reason: t('t2.noCommits', { n: String(picked.length), min: String(MIN_COMMITS_FOR_PLACEMENT) }) };
   }
   const commit = picked[0];
   const files = commit === undefined ? undefined : req.filesOf.get(commit.id);
   if (commit === undefined || files === undefined) {
-    return { noPlate: true, reason: '후보 커밋의 변경 파일을 찾지 못했다' };
+    return { noPlate: true, reason: t('t2.noCommitFiles') };
   }
 
   const first = buildGraph({ files: req.files, edges: req.edges, unitRoot: req.unitRoot });
@@ -95,7 +98,7 @@ function placement(req: T2Request): T2Card | NoPlate {
     track: 't2',
     kind: 'placement',
     q: question(key.subject),
-    hint: '지도에서 파일 상자를 클릭해 고릅니다. 정답 개수는 비공개입니다.',
+    hint: t('t2.placementHint'),
     bands: graph.bands,
     files: graph.files,
     edges: graph.edges,
@@ -113,7 +116,7 @@ function placement(req: T2Request): T2Card | NoPlate {
 function quiz(req: T2Request, kind: Exclude<T2Kind, 'placement'>): T2Card | NoPlate {
   const graph = buildGraph({ files: req.files, edges: req.edges, unitRoot: req.unitRoot });
   const paths = graph.files.map((f) => f.p);
-  if (paths.length < 3) return { noPlate: true, reason: `지도 노드 ${paths.length}개 — 너무 작다` };
+  if (paths.length < 3) return { noPlate: true, reason: t('t2.mapTooSmall', { n: String(paths.length) }) };
 
   const input: QuizInput = {
     paths,
@@ -131,7 +134,7 @@ function quiz(req: T2Request, kind: Exclude<T2Kind, 'placement'>): T2Card | NoPl
 
   if (kind === 'radius') {
     const made = buildRadius(input);
-    if (made === null) return { noPlate: true, reason: '들어오는 화살표가 있는 대지 파일이 없다' };
+    if (made === null) return { noPlate: true, reason: t('t2.noRadiusTarget') };
     return card('radius', req, {
       ...base, kind: 'radius', q: made.q, hint: made.hint,
       core: made.core, sec: made.sec, trap: made.trap, hints: made.hints,
@@ -140,7 +143,7 @@ function quiz(req: T2Request, kind: Exclude<T2Kind, 'placement'>): T2Card | NoPl
 
   if (kind === 'flow') {
     const made = buildFlow(input);
-    if (made === null) return { noPlate: true, reason: '3개 이상 이어지는 경로가 없다' };
+    if (made === null) return { noPlate: true, reason: t('t2.noFlowPath', { n: String(FLOW_MIN) }) };
     return card('flow', req, {
       ...base, kind: 'flow', q: made.q, hint: made.hint,
       core: {}, sec: {}, trap: {}, hints: made.hints,
@@ -149,7 +152,7 @@ function quiz(req: T2Request, kind: Exclude<T2Kind, 'placement'>): T2Card | NoPl
   }
 
   const made = buildDirection(input);
-  if (made === null) return { noPlate: true, reason: '방향을 물을 쌍이 5개가 안 된다' };
+  if (made === null) return { noPlate: true, reason: t('t2.noDirectionPairs', { n: String(DIRECTION_PAIRS) }) };
   return card('direction', req, {
     ...base, kind: 'direction', q: made.q, hint: made.hint,
     core: {}, sec: {}, trap: {}, hints: made.hints,

@@ -8,7 +8,7 @@ import { describe, expect, test } from 'vitest';
 
 import { draftT2Appeal, pickRelation, PROMOTE_MIN, promoteToSec, t2PatternKey } from './t2-appeal.js';
 import { gradeDirection, gradeFlow, gradePicks, toT2Detail } from './t2.js';
-import { CAPPED_NOTE, FOLDED_NOTE, T2_ENGINE_VERSION, UNCHANGED_NOTE, type T2Payload } from './t2-types.js';
+import { cappedNote, foldedNote, T2_ENGINE_VERSION, unchangedNote, type T2Payload } from './t2-types.js';
 
 const PAGE = 'app/cart/page.tsx';
 const SHEET = 'features/cart/CartSheet.tsx';
@@ -116,7 +116,7 @@ describe('04 §9 T2 골든', () => {
     expect(r.wrong.length).toBeGreaterThan(Math.ceil(6 / 2));
     expect(r.verdict).not.toBe('advance');
     expect(r.verdict).toBe('repeat-soft');
-    expect(r.capped).toBe(CAPPED_NOTE);
+    expect(r.capped).toBe(cappedNote());
   });
 });
 
@@ -160,7 +160,7 @@ describe('책임 배치 · 영향 반경 (04 §8.2)', () => {
   test('trap 에도 없는 wrong 은 기본 사유를 받는다', () => {
     const bare: T2Payload = { ...CART, trap: {} };
     const r = gradePicks({ kind: 'placement', payload: bare, selected: [SHEET], hints: 0 });
-    expect(r.rows.find((x) => x.tier === 'wrong')?.note).toBe(UNCHANGED_NOTE);
+    expect(r.rows.find((x) => x.tier === 'wrong')?.note).toBe(unchangedNote());
   });
 
   test('접힌 폴더를 고르면 wrong 이되 사유가 다르다 (04 §7.4)', () => {
@@ -176,7 +176,7 @@ describe('책임 배치 · 영향 반경 (04 §8.2)', () => {
       foldedOf: { 'lib/': ['lib/a.ts', 'lib/b.ts', 'lib/c.ts'] },
     });
     expect(r.wrong).toEqual(['lib/']);
-    expect(r.rows.find((x) => x.tier === 'wrong')?.note).toBe(FOLDED_NOTE);
+    expect(r.rows.find((x) => x.tier === 'wrong')?.note).toBe(foldedNote());
   });
 
   test('|core| = 0 이면 나누지 않는다 — pct 0 · repeat', () => {

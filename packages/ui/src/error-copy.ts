@@ -1,11 +1,15 @@
 /**
  * 오류 코드 → 사용자 문구 (01 §6 표). 코드는 Rust 가 정하고 **문장은 여기가 정한다** —
- * 오류 문구는 앱 문구이므로 한국어이고(D61), 은유 옆에 평문을 병기한다(정본 §6).
+ * 오류 문구도 앱 문구이므로 카탈로그를 거친다(D117). 은유 옆에 평문을 병기한다(정본 §6).
  *
  * 「무엇이 잘못됐다」로 끝내지 않는다. 사용자가 **다음에 할 수 있는 일**이 있으면 `action`
  * 으로 같이 준다 — 리포를 옮겼으면 위치를 알려 주고, 히스토리가 바뀌었으면 다시 읽는다.
+ *
+ * 표는 문장이 아니라 **키**를 든다. 모듈이 열리는 시점은 `setLocale()` 보다 이를 수 있어서
+ * 문장을 여기서 굳히면 첫 화면이 늘 한국어로 나온다 — `errorCopy()` 가 부를 때 푼다.
  */
 import type { IpcErrorCode } from '@chickadee/ipc-client';
+import { t, type MessageKey } from '@chickadee/i18n';
 
 /** 화면이 이어 붙일 수 있는 다음 동작. 문구는 버튼 라벨이다. */
 export type ErrorAction = 'relocate' | 'reingest' | 'restore' | 'reveal-logs' | 'contribute' | null;
@@ -20,99 +24,107 @@ export interface ErrorCopy {
   internal?: true;
 }
 
-const COPY: Record<IpcErrorCode, ErrorCopy> = {
+/** 표에 적히는 것. `title` 이 `null` 이면 화면에 나가지 않는 코드다. */
+interface ErrorEntry {
+  title: MessageKey | null;
+  detail?: MessageKey;
+  action: ErrorAction;
+  internal?: true;
+}
+
+const COPY: Record<IpcErrorCode, ErrorEntry> = {
   GIT_NOT_REPO: {
-    title: '이 폴더에는 <code>.git</code> 이 없습니다.',
-    detail: '리포 루트 폴더를 고르세요. 하위 폴더를 골라도 루트를 찾아 드립니다.',
+    title: 'error.gitNotRepo.title',
+    detail: 'error.gitNotRepo.detail',
     action: null,
   },
   GIT_BARE: {
-    title: 'bare 리포는 파일이 없어 교재로 쓸 수 없습니다.',
+    title: 'error.gitBare.title',
     action: null,
   },
   GIT_COMMIT_NOT_FOUND: {
-    title: '히스토리가 바뀐 것 같습니다.',
-    detail: '리포를 다시 읽어 옵니다.',
+    title: 'error.gitCommitNotFound.title',
+    detail: 'error.gitCommitNotFound.detail',
     action: 'reingest',
   },
   // 출처 없이 카드를 유지한다 — 사용자가 알아야 할 일이 아니다 (03 §1.5).
-  GIT_BLAME_TIMEOUT: { title: '', action: null, internal: true },
+  GIT_BLAME_TIMEOUT: { title: null, action: null, internal: true },
   GIT_IO: {
-    title: '리포를 읽지 못했습니다.',
-    detail: '자세한 내용은 로그에 있습니다.',
+    title: 'error.gitIo.title',
+    detail: 'error.logsHaveMore',
     action: 'reveal-logs',
   },
   PARSE_LANG_UNSUPPORTED: {
-    title: '아직 이 언어의 판이 없습니다.',
-    detail: '문법 사전에 언어를 더하면 그날부터 읽습니다.',
+    title: 'error.parseLangUnsupported.title',
+    detail: 'error.parseLangUnsupported.detail',
     action: 'contribute',
   },
   PARSE_QUERY_INVALID: {
-    title: '문법 사전에 오류가 있습니다.',
-    detail: '어느 파일의 몇 행인지는 개발자 패널에 있습니다.',
+    title: 'error.parseQueryInvalid.title',
+    detail: 'error.parseQueryInvalid.detail',
     action: 'contribute',
   },
-  PARSE_TOO_LARGE: { title: '이 파일은 너무 커서 건너뛰었습니다.', action: null },
-  PARSE_TIMEOUT: { title: '이 파일은 읽는 데 너무 오래 걸려 건너뛰었습니다.', action: null },
-  PARSE_TOO_DEEP: { title: '이 파일은 너무 깊어 건너뛰었습니다.', action: null },
-  STORE_ALREADY_OPEN: { title: '', action: null, internal: true },
+  PARSE_TOO_LARGE: { title: 'error.parseTooLarge.title', action: null },
+  PARSE_TIMEOUT: { title: 'error.parseTimeout.title', action: null },
+  PARSE_TOO_DEEP: { title: 'error.parseTooDeep.title', action: null },
+  STORE_ALREADY_OPEN: { title: null, action: null, internal: true },
   STORE_MIGRATION: {
-    title: '데이터 파일을 새 판으로 옮기지 못했습니다.',
-    detail: '백업은 <code>backups/</code> 에 있습니다.',
+    title: 'error.storeMigration.title',
+    detail: 'error.storeMigration.detail',
     action: 'reveal-logs',
   },
-  STORE_CATALOG_MISSING: { title: '', action: null, internal: true },
-  STORE_BUSY: { title: '', action: null, internal: true },
+  STORE_CATALOG_MISSING: { title: null, action: null, internal: true },
+  STORE_BUSY: { title: null, action: null, internal: true },
   STORE_CONSTRAINT: {
-    title: '저장하지 못했습니다.',
-    detail: '화면을 새로 고쳐 주세요.',
+    title: 'error.storeConstraint.title',
+    detail: 'error.storeConstraint.detail',
     action: null,
   },
   STORE_CORRUPT: {
-    title: '데이터 파일이 손상됐습니다.',
-    detail: '백업에서 복구할까요?',
+    title: 'error.storeCorrupt.title',
+    detail: 'error.storeCorrupt.detail',
     action: 'restore',
   },
-  BAD_INPUT: { title: '', action: null, internal: true },
-  PAYLOAD_TOO_LARGE: { title: '', action: null, internal: true },
-  JOB_BUSY: { title: '이미 읽는 중입니다.', action: null },
-  JOB_NOT_FOUND: { title: '', action: null, internal: true },
+  BAD_INPUT: { title: null, action: null, internal: true },
+  PAYLOAD_TOO_LARGE: { title: null, action: null, internal: true },
+  JOB_BUSY: { title: 'error.jobBusy.title', action: null },
+  JOB_NOT_FOUND: { title: null, action: null, internal: true },
   CANCELLED: {
-    title: '중단했습니다.',
-    detail: '지금까지 읽은 부분은 유지됩니다.',
+    title: 'error.cancelled.title',
+    detail: 'error.cancelled.detail',
     action: null,
   },
-  REPO_NOT_FOUND: { title: '그 리포가 목록에 없습니다.', action: null },
-  REPO_DUPLICATE: { title: '이미 등록된 리포입니다.', action: null },
+  REPO_NOT_FOUND: { title: 'error.repoNotFound.title', action: null },
+  REPO_DUPLICATE: { title: 'error.repoDuplicate.title', action: null },
   REPO_PATH_MISSING: {
-    title: '리포 폴더를 찾을 수 없습니다.',
-    detail: '옮겼다면 위치를 알려 주세요.',
+    title: 'error.repoPathMissing.title',
+    detail: 'error.repoPathMissing.detail',
     action: 'relocate',
   },
   REPO_FINGERPRINT_MISMATCH: {
-    title: '다른 리포입니다.',
-    detail: '첫 커밋이 다릅니다.',
+    title: 'error.repoFingerprintMismatch.title',
+    detail: 'error.repoFingerprintMismatch.detail',
     action: null,
   },
-  NOT_IMPLEMENTED: { title: 'T3 은 아직 없습니다.', action: null },
+  NOT_IMPLEMENTED: { title: 'error.notImplemented.title', action: null },
   FS_PERMISSION: {
-    title: '폴더 접근 권한이 없습니다.',
-    detail: 'macOS 는 시스템 설정 → 개인정보 보호 및 보안에서 허용해 주세요.',
+    title: 'error.fsPermission.title',
+    detail: 'error.fsPermission.detail',
     action: null,
   },
-  FS_NOT_FOUND: { title: '파일이 없습니다.', action: null },
-  DICT_NOT_FOUND: { title: '문법 사전을 찾지 못했습니다.', action: 'contribute' },
+  FS_NOT_FOUND: { title: 'error.fsNotFound.title', action: null },
+  DICT_NOT_FOUND: { title: 'error.dictNotFound.title', action: 'contribute' },
   // 설정 화면이 이 상태를 스스로 말한다(「이 컴퓨터에는 안전하게 저장할 수 없습니다」) —
   // 토스트로 한 번 더 띄우면 같은 말이 두 곳에서 나온다.
   SECRET_STORE: {
-    title: '키를 이 컴퓨터의 비밀 저장소에 넣지 못했습니다.',
-    detail: 'Linux 는 GNOME 키링 같은 Secret Service 가 있어야 합니다.',
+    title: 'error.secretStore.title',
+    detail: 'error.secretStore.detail',
     action: null,
     internal: true,
   },
   UNKNOWN: {
-    title: '알 수 없는 오류입니다.',
-    detail: '자세한 내용은 로그에 있습니다.',
+    title: 'error.unknown.title',
+    detail: 'error.logsHaveMore',
     action: 'reveal-logs',
   },
 };
@@ -121,14 +133,24 @@ const COPY: Record<IpcErrorCode, ErrorCopy> = {
 export const isInternal = (code: IpcErrorCode): boolean => COPY[code]?.internal === true;
 
 export function errorCopy(code: IpcErrorCode): ErrorCopy {
-  return COPY[code] ?? COPY.UNKNOWN;
+  const entry = COPY[code] ?? COPY.UNKNOWN;
+  return {
+    title: entry.title === null ? '' : t(entry.title),
+    ...(entry.detail === undefined ? {} : { detail: t(entry.detail) }),
+    action: entry.action,
+    ...(entry.internal === undefined ? {} : { internal: entry.internal }),
+  };
 }
 
-/** 다음 동작의 버튼 라벨. `null` 이면 버튼이 없다. */
-export const ACTION_LABEL: Record<Exclude<ErrorAction, null>, string> = {
-  relocate: '위치 알려 주기',
-  reingest: '다시 읽기',
-  restore: '백업에서 복구',
-  'reveal-logs': '로그 폴더 열기',
-  contribute: '사전 기여 안내',
+const ACTION_KEY: Record<Exclude<ErrorAction, null>, MessageKey> = {
+  relocate: 'error.actionRelocate',
+  reingest: 'error.actionReingest',
+  restore: 'error.actionRestore',
+  'reveal-logs': 'error.actionRevealLogs',
+  contribute: 'error.actionContribute',
 };
+
+/** 다음 동작의 버튼 라벨. `action` 이 `null` 이면 버튼이 없어 부를 일도 없다. */
+export function actionLabel(action: Exclude<ErrorAction, null>): string {
+  return t(ACTION_KEY[action]);
+}

@@ -1,7 +1,7 @@
 import { IPC_ERROR_CODES } from '@chickadee/ipc-client';
 import { describe, expect, test } from 'vitest';
 
-import { ACTION_LABEL, errorCopy, isInternal } from './error-copy.js';
+import { actionLabel, errorCopy, isInternal } from './error-copy.js';
 import { RICH_TEXT_ALLOWED_TAGS } from './RichText.js';
 
 describe('오류 문구 표 (01 §6)', () => {
@@ -33,7 +33,7 @@ describe('오류 문구 표 (01 §6)', () => {
   test('다음 동작에는 버튼 라벨이 있다', () => {
     for (const code of IPC_ERROR_CODES) {
       const { action } = errorCopy(code);
-      if (action !== null) expect(ACTION_LABEL[action]).toBeTruthy();
+      if (action !== null) expect(actionLabel(action)).toBeTruthy();
     }
   });
 

@@ -3,6 +3,7 @@
  * 색인에서 오답을 만드는 폴백은 두지 않는다. 오답에는 진단이 붙어야 하고 진단은
  * 사전에만 있기 때문이다.
  */
+import { t } from '@chickadee/i18n';
 import { mulberry32, shuffle, tokenize } from '@chickadee/text';
 
 import { codeLines, lineAt, spanOf, LINES_WINDOW, type Span } from './lines.js';
@@ -27,14 +28,14 @@ function sameKind(options: readonly string[]): boolean {
 export function genBlank(req: T0Request, input: SiteInput): GenResult {
   const { concept } = req;
   const { site } = input;
-  if (site.hole === null) return { reason: '이 사용처에는 구멍(@hole)이 없다' };
+  if (site.hole === null) return { reason: t('t0.dropNoHole') };
   const hole = site.hole;
-  if (hole.length < MIN_HOLE) return { reason: '구멍이 한 글자라 빈칸으로 못 낸다' };
-  if (concept.blank.length === 0) return { reason: '사전에 빈칸형 문항이 없다' };
+  if (hole.length < MIN_HOLE) return { reason: t('t0.dropHoleTooShort') };
+  if (concept.blank.length === 0) return { reason: t('t0.dropNoBlankEntry') };
 
   const rng = mulberry32(seedFor(req, 'blank', input));
   const entry = concept.blank[Math.floor(rng() * concept.blank.length)] ?? concept.blank[0];
-  if (!entry) return { reason: '사전에 빈칸형 문항이 없다' };
+  if (!entry) return { reason: t('t0.dropNoBlankEntry') };
 
   const vars = buildVars(input, concept);
   const r = new Renderer(vars);
@@ -46,17 +47,17 @@ export function genBlank(req: T0Request, input: SiteInput): GenResult {
   if (!r.ok) return { reason: r.reason };
 
   // ⓐ 첫 보기는 구멍 원문이어야 한다. 아니면 이 문항은 이 사용처의 것이 아니다.
-  if (rendered[0]?.t !== hole) return { reason: `첫 보기가 구멍 원문(${hole})과 다르다` };
+  if (rendered[0]?.t !== hole) return { reason: t('t0.dropFirstOptionDiffers', { hole }) };
   // ⓑ 종류가 섞이면 오답이 오답으로 보인다.
-  if (!sameKind(rendered.map((o) => o.t))) return { reason: '보기 4개의 종류가 서로 다르다' };
+  if (!sameKind(rendered.map((o) => o.t))) return { reason: t('t0.dropOptionKinds') };
   // 진단이 빠진 오답은 「틀렸다」만 남긴다 — 그런 카드는 내지 않는다 (04 §2.1).
-  if (rendered.slice(1).some((o) => o.diag === null)) return { reason: '오답 보기에 진단이 없다' };
+  if (rendered.slice(1).some((o) => o.diag === null)) return { reason: t('t0.dropNoWrongDiag') };
 
   const focusLine = lineAt(input.lines, site.lineStart);
-  if (!focusLine) return { reason: '초점 줄을 못 읽었다' };
+  if (!focusLine) return { reason: t('t0.dropNoFocusLine') };
   const at = focusLine.n === site.lineStart ? site.colStart : 0;
   const found = spanOf(focusLine, hole, at) ?? spanOf(focusLine, hole);
-  if (!found) return { reason: `구멍(${hole})을 초점 줄에서 못 찾았다` };
+  if (!found) return { reason: t('t0.dropHoleNotInFocus', { hole }) };
   const span: Span = { ...found, hole: true };
 
   // 정답 토큰이 맥락 줄에 또 보이면 「보고 베낀다」 — 순위를 낮춘다 (전부 leak 이면 허용).

@@ -1,3 +1,4 @@
+import { t } from '@chickadee/i18n';
 import { Kbd } from '@chickadee/ui';
 
 import './EdStatus.css';
@@ -33,26 +34,27 @@ export function EdStatus({ lines, savedAt, peeks }: EdStatusProps) {
     <div className="ed-status">
       <span className="legend">
         <i className="e" aria-hidden="true" />
-        정합{' '}
+        {t('session.exact')}{' '}
         <i className="q" aria-hidden="true" />
-        동등{' '}
+        {t('session.equiv')}{' '}
         <i className="d" aria-hidden="true" />
-        어긋남
+        {t('session.differ')}
       </span>
       <span>
-        {lines}줄 · {savedAt === null ? '자동 저장' : `저장됨 ${hhmm(savedAt)}`}
+        {t('clone.lines', { n: String(lines) })} ·{' '}
+        {savedAt === null ? t('clone.autoSave') : t('clone.savedAt', { time: hhmm(savedAt) })}
       </span>
       <span>
-        <Kbd keys="Tab" /> 들여쓰기
+        <Kbd keys="Tab" /> {t('clone.indent')}
       </span>
       <span>
-        <Kbd keys="`" /> 누르고 있기 = 원본 잠깐 보기
+        <Kbd keys="`" /> {t('clone.peekHold')}
       </span>
       <span>
-        <Kbd keys="⌘↵" /> 채점
+        <Kbd keys="⌘↵" /> {t('clone.grade')}
       </span>
       <span>
-        원본 본 횟수 <b>{peeks}</b>
+        {t('clone.peekCount')} <b>{peeks}</b>
       </span>
     </div>
   );

@@ -2,6 +2,7 @@
  * 세 유형이 함께 쓰는 페이로드 조각 — 정답 해설·규칙·사전 3층·선행·다른 자리
  * (04 §2.1 · §2.4). 사다리가 이것을 읽는다.
  */
+import { t } from '@chickadee/i18n';
 import { seedOf } from '@chickadee/text';
 import type { Concept } from '@chickadee/dictionary';
 import type { ConceptId, DictLayer } from '@chickadee/store-sql';
@@ -30,13 +31,13 @@ export function renderDiag(
 function dictLayers(concept: Concept, focus: number, r: Renderer): DictLayer[] | undefined {
   const layers: DictLayer[] = [];
   const oneLiner = r.maybe(concept.dict.one_liner);
-  if (oneLiner !== undefined) layers.push({ k: '한 줄로', t: oneLiner });
+  if (oneLiner !== undefined) layers.push({ k: t('card.dictOneLiner'), t: oneLiner });
   const why = r.maybe(concept.dict.why);
-  if (why !== undefined) layers.push({ k: '왜 필요한가', t: why });
+  if (why !== undefined) layers.push({ k: t('card.dictWhy'), t: why });
   const steps = concept.dict.trace.map((step) => r.maybe(step));
   // 한 단계라도 이 사용처에서 못 쓰면 층 전체를 뺀다 — 04 §2.4 가 `rule`·`ok` 로 대신한다.
   if (steps.length > 0 && steps.every((s) => s !== undefined)) {
-    layers.push({ k: `${focus}행 안에서`, steps: steps as string[] });
+    layers.push({ k: t('card.dictTrace', { focus: String(focus) }), steps: steps as string[] });
   }
   return layers.length > 0 ? layers : undefined;
 }

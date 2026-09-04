@@ -10,8 +10,9 @@
  * 새 파일인가 · 몇 줄이 바뀌었나 · 어느 층인가 · 무엇이 가져다 쓰나.
  */
 import { isTestPath } from '@chickadee/concepts';
+import { t } from '@chickadee/i18n';
 
-import { BAND_NAMES, BANDS } from './t2-types.js';
+import { bandNames, BANDS } from './t2-types.js';
 import type { AnswerKey, CommitFileRow, CommitRow } from './t2-types.js';
 import { baseName } from './vars.js';
 
@@ -62,7 +63,7 @@ export function subjectOf(message: string): string {
 
 /** 04 §8.1 질문 템플릿. */
 export function question(subject: string): string {
-  return `«${subject}» 기능을 넣는다면, 어느 파일들을 고쳐야 할까요?`;
+  return t('t2.question', { subject });
 }
 
 // ───────── 소스 파일 ─────────
@@ -187,11 +188,11 @@ function coChanged(input: {
 const stat = (f: CommitFileRow): string => `+${f.additions} −${f.deletions}`;
 
 function changeClause(file: CommitFileRow): string {
-  if (file.status === 'A') return '새로 만든 파일입니다.';
-  if (file.status === 'D') return '지워진 파일입니다.';
-  if (file.status === 'R') return '이름이 바뀌면서 함께 고쳐졌습니다.';
+  if (file.status === 'A') return t('t2.changeAdded');
+  if (file.status === 'D') return t('t2.changeDeleted');
+  if (file.status === 'R') return t('t2.changeRenamed');
   const n = file.additions + file.deletions;
-  return n >= CORE_CHANGED_LINES ? `${n}줄이 바뀌었습니다.` : '몇 줄만 고쳐졌습니다.';
+  return n >= CORE_CHANGED_LINES ? t('t2.changeLines', { n: String(n) }) : t('t2.changeFew');
 }
 
 /** 이 커밋이 바꾼 다른 파일과의 관계 한 문장. 없으면 층 이름, 그것도 없으면 빈 문자열. */
@@ -203,15 +204,15 @@ function relationClause(
 ): string {
   const users = edges.filter((e) => e.to === path && changed.has(e.from)).map((e) => e.from).sort();
   const first = users[0];
-  if (first !== undefined) return `«${baseName(first)}» 가 이 파일을 가져다 씁니다.`;
+  if (first !== undefined) return t('t2.relationUsedBy', { name: baseName(first) });
 
   const used = edges.filter((e) => e.from === path && changed.has(e.to)).map((e) => e.to).sort();
   const second = used[0];
-  if (second !== undefined) return `«${baseName(second)}» 를 가져다 씁니다.`;
+  if (second !== undefined) return t('t2.relationUses', { name: baseName(second) });
 
   if (bandOf === undefined) return '';
-  const band = BAND_NAMES[Math.min(Math.max(bandOf(path), 0), BANDS - 1)];
-  return band === undefined ? '' : `${band} 층입니다.`;
+  const band = bandNames()[Math.min(Math.max(bandOf(path), 0), BANDS - 1)];
+  return band === undefined ? '' : t('t2.relationBand', { band });
 }
 
 /** 이름으로 「상태를 들고 있는 파일」을 좁힌다 — `use*.ts` · `*Store.*` · `*State.*`. */
@@ -238,33 +239,34 @@ export function trapReason(input: {
   const down = edges.filter((e) => e.from === path).map((e) => e.to).sort();
   const child = down.find((p) => core.has(p)) ?? down[0];
   if (child !== undefined) {
-    return `«${self}» 는 «${baseName(child)}» 를 놓기만 합니다. 안쪽이 바뀌어도 «${self}» 는 모릅니다`;
+    return t('t2.trapPlacesOnly', { self, child: baseName(child) });
   }
 
   const user = edges.filter((e) => e.to === path && core.has(e.from)).map((e) => e.from).sort()[0];
-  if (user !== undefined) return `공용 부품. «${baseName(user)}» 가 가져다 쓸 뿐입니다`;
+  if (user !== undefined) return t('t2.trapShared', { name: baseName(user) });
 
   if (STATE_FILE.test(path)) {
     const dir = path.slice(0, path.lastIndexOf('/') + 1);
     const sibling = input.newFiles.filter((p) => p.startsWith(dir) && !p.slice(dir.length).includes('/'));
     const taker = (sibling.length > 0 ? sibling : [...input.newFiles].sort())[0];
     if (taker !== undefined) {
-      return `«${self}» 에 상태가 있지만 이번엔 새 파일 «${baseName(taker)}» 이 그 일을 맡았습니다`;
+      return t('t2.trapStateMoved', { self, taker: baseName(taker) });
     }
   }
-  return '이번 커밋에서는 바뀌지 않은 파일입니다';
+  return t('t2.trapUnchanged');
 }
 
 /** 힌트 3단 (목업 `T2.hints`). 밴드 수를 못 세면 1단을 층 수 없이 낮춘다. */
 function hintsOf(input: { coreN: number; secN: number; newN: number; bandN: number | null }): string[] {
   const spread = input.bandN === null
-    ? '이 기능은 여러 층에 걸쳐 있습니다. 화면만 고쳐서는 끝나지 않아요.'
-    : `이 기능은 ${BANDS}개 층 중 <b>${input.bandN}개 층</b>에 걸쳐 있습니다. 화면만 고쳐서는 끝나지 않아요.`;
+    ? t('t2.hintSpreadUnknown')
+    : t('t2.hintSpread', { bands: String(BANDS), n: String(input.bandN) });
   const made = input.newN === 0
-    ? '이번 커밋에서 새로 만들어진 파일은 없습니다. 있던 파일만 고쳤어요.'
-    : `<b>새로 만들어진 파일이 ${input.newN}개</b> 있습니다. 지도에 「새 판」 표시가 있어요.`;
-  const count = `꼭 고쳐야 하는 파일은 <b>${input.coreN}개</b>입니다.`;
-  return [spread, made, input.secN === 0 ? count : `${count} (＋ 보너스 ${input.secN}개)`];
+    ? t('t2.hintNoNewFiles')
+    : t('t2.hintNewFiles', { n: String(input.newN) });
+  const count = t('t2.hintCoreCount', { n: String(input.coreN) });
+  return [spread, made,
+    input.secN === 0 ? count : t('t2.hintCoreCountBonus', { count, n: String(input.secN) })];
 }
 
 /** 커밋 출처 블록 (목업 `T2.commit`). 날짜는 UTC 로 굳힌다 — 시간대가 바뀌어도 같은 카드다. */
@@ -276,7 +278,11 @@ function commitOf(commit: CommitRow): AnswerKey['commit'] {
     m: commit.message,
     // 목업은 `7 files changed, +181 −23` 이지만 사용자에게 보이는 문구는 한국어다 (D61).
     // 숫자와 부호는 목업 그대로 두고 낱말만 옮긴다 — 시각은 안 바뀐다.
-    n: `파일 ${commit.filesN}개 · +${commit.insertions} −${commit.deletions}`,
+    n: t('t2.commitStat', {
+      files: String(commit.filesN),
+      ins: String(commit.insertions),
+      del: String(commit.deletions),
+    }),
   };
 }
 
@@ -333,7 +339,7 @@ export function buildKey(input: KeyInput): AnswerKey {
     const file = byPath.get(path);
     const relation = relationClause(path, changed, input.edges, input.bandOf);
     if (file === undefined) {
-      return ['—', '이번 커밋에서는 안 바뀌었지만, 최근 커밋에서 이 파일들과 함께 자주 바뀌었습니다.'];
+      return ['—', t('t2.coChanged')];
     }
     const change = changeClause(file);
     return [stat(file), relation === '' ? change : `${change} ${relation}`];

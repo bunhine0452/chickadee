@@ -1,3 +1,4 @@
+import { t } from '@chickadee/i18n';
 import { RichText } from '@chickadee/ui';
 import type { DictLayer } from '@chickadee/store-sql';
 
@@ -15,7 +16,7 @@ export interface DictRungProps {
 export function DictRung({ layers }: DictRungProps) {
   return (
     <>
-      <h4>사전 3층 — 한 줄로 시작해 이 줄 안까지</h4>
+      <h4>{t('dict.heading')}</h4>
       <div className="dict">
         {layers.map((layer) => (
           <div key={layer.k}>
@@ -38,7 +39,7 @@ export function DictRung({ layers }: DictRungProps) {
           </div>
         ))}
       </div>
-      <p className="dict-note">1~3단은 인터넷도 API 키도 없이 동작합니다. 4단만 선택 사항입니다.</p>
+      <p className="dict-note">{t('dict.note')}</p>
     </>
   );
 }

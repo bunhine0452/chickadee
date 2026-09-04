@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { t } from '@chickadee/i18n';
 import { cx, Dee, RichText, Stamp } from '@chickadee/ui';
 import type { InkLayer, StampTone } from '@chickadee/ui';
 
@@ -14,8 +15,7 @@ import './FeedbackSlot.css';
 export const FEEDBACK_SLOT_MIN_HEIGHT_PX = 118;
 
 /** 비어 있는 판정란에 적히는 안내. 「왜 비어 있나」를 그 자리에서 답한다. */
-export const IDLE_NOTE =
-  '판정란 — 답을 제출하면 여기에 판정과 진단이 적힙니다. 이 칸은 미리 비워 둔 자리라 답해도 위쪽 글이 밀리지 않습니다.';
+export const idleNoteText = (): string => t('plate.idleNote');
 
 export type FeedbackState = 'idle' | 'right' | 'wrong';
 
@@ -89,7 +89,7 @@ export function FeedbackSlot({
   return (
     <div className="slot">
       <div className="slot-idle" hidden={answered}>
-        {idleNote ?? IDLE_NOTE}
+        {idleNote ?? idleNoteText()}
       </div>
       {/*
         `aria-live` 를 들지 않는다 (D114). 이 칸을 통째로 읽으면 나가는 것이 도장·규칙·코드판까지
@@ -119,12 +119,12 @@ export function FeedbackSlot({
               )}
               {rule === undefined ? null : (
                 <p>
-                  <b>규칙</b> — <RichText html={rule} />
+                  <b>{t('plate.rule')}</b> — <RichText html={rule} />
                 </p>
               )}
               {result === undefined ? null : (
                 <p>
-                  <b>이 줄이 끝난 뒤</b> · <code>{result.label}</code> = <code>{result.value}</code> — {result.note}
+                  <b>{t('plate.afterLine')}</b> · <code>{result.label}</code> = <code>{result.value}</code> — {result.note}
                 </p>
               )}
               {bridge === undefined ? null : (

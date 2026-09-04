@@ -1,4 +1,5 @@
 import { Fragment } from 'react';
+import { t } from '@chickadee/i18n';
 import { cx, FlatButton, RichText } from '@chickadee/ui';
 
 import type { DiffFilterValue } from './DiffFilter';
@@ -103,7 +104,7 @@ export interface DiffRowsProps {
 
 /** 내가 쓴 줄 칸. `differ` 이고 토큰 수가 같을 때만 다른 토큰이 `<mark>` 로 뜬다. */
 function UserCell({ row }: { row: DiffRow }) {
-  if (row.user === null) return <span>이 줄을 안 썼습니다</span>;
+  if (row.user === null) return <span>{t('clone.rowNotWritten')}</span>;
   if (row.status !== 'differ' || row.original === null) return <>{row.user}</>;
   return (
     <>
@@ -129,17 +130,17 @@ export function DiffRows({ rows, filter, onAppeal }: DiffRowsProps) {
 
   if (shown.length === 0) {
     return (
-      <div className="drows" role="list" aria-label="줄별 결과">
+      <div className="drows" role="list" aria-label={t('clone.rowsLabel')}>
         <div className="drow exact empty" role="listitem">
           <i>·</i>
-          <span className="o">이 조건에 맞는 줄이 없습니다.</span>
+          <span className="o">{t('clone.rowsEmpty')}</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="drows" role="list" aria-label="줄별 결과">
+    <div className="drows" role="list" aria-label={t('clone.rowsLabel')}>
       {shown.map(({ row, index }) => (
         <div
           key={index}
@@ -149,7 +150,9 @@ export function DiffRows({ rows, filter, onAppeal }: DiffRowsProps) {
           data-ui={row.ui}
         >
           <i>{row.oi >= 0 ? row.oi + 1 : '＋'}</i>
-          <span className="o">{row.original === null ? <span>원본에 없는 줄입니다</span> : row.original}</span>
+          <span className="o">
+            {row.original === null ? <span>{t('clone.rowNotInOriginal')}</span> : row.original}
+          </span>
           <span className="u">
             <UserCell row={row} />
           </span>
@@ -162,7 +165,7 @@ export function DiffRows({ rows, filter, onAppeal }: DiffRowsProps) {
               {row.canAppeal ? (
                 <div>
                   <FlatButton ghost variant="dunno" on={row.appealed} onClick={() => onAppeal(index)}>
-                    {row.appealed ? '이의 접수됨 · 판정 보류' : '같은 뜻인데요'}
+                    {row.appealed ? t('clone.appealDone') : t('clone.appealIdle')}
                   </FlatButton>
                 </div>
               ) : null}

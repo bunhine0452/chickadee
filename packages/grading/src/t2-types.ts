@@ -8,6 +8,7 @@
  * 문구 상수는 04 · 목업에서 **글자 그대로** 옮겼다. 화면이 이 문장을 그대로 쓰므로
  * 여기서 말을 다듬으면 문서와 화면이 어긋난다.
  */
+import { t } from '@chickadee/i18n';
 import type { CardPayload, ReviewDetail } from '@chickadee/store-sql';
 
 /** 카드 한 장의 정답지·지도 (02 §8.2 · D100). 네 종이 한 모양을 나눠 쓴다. */
@@ -52,11 +53,16 @@ export interface T2Result {
  */
 export const T2_ENGINE_VERSION = '1';
 
+/**
+ * 세 문장. 상수가 아니라 함수인 이유는 로케일이다 — 모듈이 열리는 시점은 `setLocale()`
+ * 보다 이르다 (D117).
+ */
+
 /** wrong 상한에 걸려 진급이 막혔을 때의 문장 (04 §8.2). */
-export const CAPPED_NOTE = '고른 것 중 절반 이상이 안 바뀐 파일 — 범위를 좁혀 보세요';
+export const cappedNote = (): string => t('grading.cappedNote');
 
 /** 접힌 폴더 노드를 골랐을 때의 사유 (04 §7.4 마지막 문장). */
-export const FOLDED_NOTE = '접힌 폴더 — 안쪽 파일을 묻는 문제가 아님';
+export const foldedNote = (): string => t('grading.foldedNote');
 
 /** `trap` 에도 없는 wrong 의 기본 사유 (04 §8.1 기본 템플릿 · 목업 `t2.js`). */
-export const UNCHANGED_NOTE = '이번 커밋에서는 바뀌지 않은 파일입니다.';
+export const unchangedNote = (): string => t('grading.unchangedNote');

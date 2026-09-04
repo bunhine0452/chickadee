@@ -17,6 +17,7 @@
 import { FlatButton, Kbd, PressButton } from '@chickadee/ui';
 import type { T2Result } from '@chickadee/grading';
 import { useEffect, useMemo, useState } from 'react';
+import { t, type MessageKey } from '@chickadee/i18n';
 
 import { Acts } from '../../components/plate/Acts.js';
 import { Ask } from '../../components/plate/Ask.js';
@@ -33,17 +34,20 @@ import { Verdict } from '../../components/t2/Verdict.js';
 import type { Plate } from '../../data/session.js';
 import type { PlateResult } from '../../store.js';
 import {
-  APPEAL_DONE, APPEAL_IDLE, APPEAL_NOTE, DIRECTION_DONE, FLOW_NOTE, HINT_NOTE,
-  KIND_NAME, KIND_SUB, MAP_HINT, directionLeft, verdictTitle,
+  appealDone, appealIdle, appealNote, directionDone, flowNote, hintNote,
+  kindName, kindSub, mapHint, directionLeft, verdictTitle,
 } from './t2Copy.js';
 
 /** 힌트는 3단까지다 (04 §8.1 · 목업). */
 export const MAX_HINTS = 3;
 
-const ROLE_NAME = {
-  review: '복습', new: '새 판', retry: '다시 찍기', prereq: '아래층',
-  manual: '이 판 찍기', gap: '판 만들기',
-} as const;
+const ROLE_KEY = {
+  review: 'session.roleReview', new: 'session.roleNew', retry: 'session.roleRetry',
+  prereq: 'session.rolePrereq', manual: 'session.roleManual', gap: 'session.roleGap',
+} as const satisfies Record<string, MessageKey>;
+
+/** 판 머리의 역할 이름. 세 판이 같은 표를 쓴다. */
+const roleName = (role: keyof typeof ROLE_KEY): string => t(ROLE_KEY[role]);
 
 /**
  * 흐름 추적·의존성 방향에서 지도는 **읽는 자리**다 (04 §8.3). 답은 덱과 문항에만 들어가므로
@@ -59,9 +63,9 @@ const noop = (): void => undefined;
  * 나머지 둘은 자물쇠가 왜 걸렸는지·덱을 다 쓸 필요가 없는지를 먼저 말해야 한다.
  */
 function pickHint(kind: string, left: number): string {
-  if (kind === 'flow') return FLOW_NOTE;
-  if (kind === 'direction') return left > 0 ? directionLeft(left) : DIRECTION_DONE;
-  return HINT_NOTE;
+  if (kind === 'flow') return flowNote();
+  if (kind === 'direction') return left > 0 ? directionLeft(left) : directionDone();
+  return hintNote();
 }
 
 /** 지금 보고 있는 화면. 한 판 안에서만 움직인다. */
@@ -187,20 +191,28 @@ export function T2Plate(props: T2PlateProps): React.JSX.Element | null {
   const coreN = graded === null
     ? Object.keys(payload.core).length
     : graded.found.length + graded.missed.length;
-  const label = `${plate.token ?? plate.nameKo} 의존 지도`;
+  const label = t('map.plateLabel', { name: plate.token ?? plate.nameKo });
 
   return (
     <ProofSheet
-      no={`${props.no}판`}
+      no={t('session.plateNo', { n: String(props.no) })}
       track="t2"
       concept={plate.nameKo}
       code={plate.token ?? ''}
-      kind={`${KIND_NAME[payload.kind]} · ${ROLE_NAME[plate.role]}`}
-      source={`${KIND_SUB[payload.kind]} · 파일 ${payload.files.length} · 연결 ${edges.length} · 층 ${payload.bands.length} · 화살표는 언제나 <b>가져다 쓴다(import)</b> 방향`}
+      kind={t('session.kindAndRole', {
+        kind: kindName(payload.kind),
+        role: roleName(plate.role),
+      })}
+      source={t('map.sourceT2', {
+        sub: kindSub(payload.kind),
+        files: String(payload.files.length),
+        edges: String(edges.length),
+        bands: String(payload.bands.length),
+      })}
       ly={ly}
       width="xwide"
     >
-      <Ask q={payload.q} hint={`${payload.hint} ${MAP_HINT}`} />
+      <Ask q={payload.q} hint={`${payload.hint} ${mapHint()}`} />
 
       <DependencyMap
         bands={payload.bands}
@@ -241,13 +253,17 @@ export function T2Plate(props: T2PlateProps): React.JSX.Element | null {
                 disabled={props.hints >= MAX_HINTS}
                 onClick={props.onHint}
               >
-                모르겠어요 · 힌트 {Math.min(MAX_HINTS, props.hints + 1)}/{MAX_HINTS} <Kbd keys="H" />
+                {t('map.dunnoHint', {
+                  n: String(Math.min(MAX_HINTS, props.hints + 1)),
+                  max: String(MAX_HINTS),
+                })}{' '}
+                <Kbd keys="H" />
               </FlatButton>
             )}
             hint={pickHint(payload.kind, left)}
             right={(
               <PressButton tone="blue" disabled={!canGrade} onClick={props.onGrade}>
-                채점하기 <Kbd keys="Enter" />
+                {t('session.grade')} <Kbd keys="Enter" />
               </PressButton>
             )}
           />
@@ -282,13 +298,13 @@ export function T2Plate(props: T2PlateProps): React.JSX.Element | null {
                   for (const path of graded.wrong) props.onAppeal(path);
                 }}
               >
-                {props.appealed.length > 0 ? APPEAL_DONE : APPEAL_IDLE}
+                {props.appealed.length > 0 ? appealDone() : appealIdle()}
               </FlatButton>
             )}
-            hint={props.appealed.length > 0 ? APPEAL_NOTE : ''}
+            hint={props.appealed.length > 0 ? appealNote() : ''}
             right={(
               <PressButton tone="blue" onClick={props.onFinish}>
-                다음 <Kbd keys="Space" />
+                {t('session.next')} <Kbd keys="Space" />
               </PressButton>
             )}
           />

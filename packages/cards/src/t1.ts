@@ -8,13 +8,14 @@
  * 2단계에 지울 줄이 없는 블록은 판을 만들 수 없고, 그때 「판 없음」으로 끝내면 뒤에 있는
  * 멀쩡한 후보를 버리게 된다 — `t0.ts` 의 사용처 순회와 같은 이유다.
  */
+import { t } from '@chickadee/i18n';
 import { isMissing, mulberry32, render, seedOf } from '@chickadee/text';
 import type { Concept } from '@chickadee/dictionary';
 import type { ConceptId } from '@chickadee/store-sql';
 
 import { contentHash } from './hash.js';
 import { GEN_VERSION } from './payload.js';
-import { pickConcept, rankBlocks } from './t1-block.js';
+import { isContinuedHeader, pickConcept, rankBlocks } from './t1-block.js';
 import { keepKinds } from './t1-mask.js';
 import { buildSpec } from './t1-spec.js';
 import { baseName } from './vars.js';
@@ -22,14 +23,12 @@ import type { NoPlate } from './types.js';
 import type { BlockCandidate, BlockConcept, T1Card, T1Payload, T1Request } from './t1-types.js';
 
 /** 04 §6 ② 의 일반 템플릿. 사전 `why_gate` 가 없을 때의 문항이다. */
-export const GENERIC_WHY_Q = '이 줄이 없으면 무엇이 달라질까요?';
+export const genericWhyQ = (): string => t('t1.whyQuestion');
 /**
  * 목업 `T1.why.help` 를 옮긴 것. 목업은 「앞의 9분」이라 그 카드의 예상 시간을 박아 두었는데,
  * 예상 시간은 `card_state.est_min_ema` 에서 나오고 생성 시점에는 없다 — 숫자를 빼고 쓴다.
  */
-export const GENERIC_WHY_HELP =
-  '한 줄이면 됩니다. 채점하지 않습니다. 다만 건너뛸 수는 없습니다 — '
-  + '여기서 뇌가 안 켜지면 앞의 필사는 타자 연습이 됩니다.';
+export const genericWhyHelp = (): string => t('t1.whyHelpTranscribe');
 
 type Why = T1Payload['why'];
 
@@ -55,7 +54,7 @@ function buildWhy(
   seed: number,
 ): Why {
   const generic = (line: number): Why =>
-    ({ line, q: GENERIC_WHY_Q, help: GENERIC_WHY_HELP, choices: [] });
+    ({ line, q: genericWhyQ(), help: genericWhyHelp(), choices: [] });
   const fallback = masked[0] ?? 0;
 
   // ① 사전 `why_gate` 가 있고 토큰이 지워지는 줄에 보이는 개념.
@@ -89,7 +88,7 @@ function buildWhy(
     return isMissing(out) ? null : out.text;
   };
   const q = one(gate.q);
-  const help = gate.help === undefined ? GENERIC_WHY_HELP : one(gate.help);
+  const help = gate.help === undefined ? genericWhyHelp() : one(gate.help);
   const choices = gate.choices.map((c) => {
     const t = one(c.t);
     const fb = one(c.fb);
@@ -104,7 +103,7 @@ function buildWhy(
 function summarize(reasons: readonly string[]): string {
   const count = new Map<string, number>();
   for (const reason of reasons) count.set(reason, (count.get(reason) ?? 0) + 1);
-  let best = reasons[0] ?? '필사할 블록이 없다';
+  let best = reasons[0] ?? t('t1.noBlockUsable');
   for (const [reason, n] of count) {
     if (n > (count.get(best) ?? 0)) best = reason;
   }
@@ -113,7 +112,7 @@ function summarize(reasons: readonly string[]): string {
 
 export function generateT1(req: T1Request): T1Card | NoPlate {
   if (req.candidates.length === 0) {
-    return { noPlate: true, reason: '리포에 필사할 블록 후보가 없다' };
+    return { noPlate: true, reason: t('t1.noBlockInRepo') };
   }
   const { blocks, dropped } = rankBlocks(req.candidates, {
     stage: req.stage,
@@ -135,7 +134,7 @@ export function generateT1(req: T1Request): T1Card | NoPlate {
       else show2.push(i);
     }
     if (masked.length === 0) {
-      reasons.push('2단계에 지울 줄이 없다 — 전부 시그니처·주석·닫힘이다');
+      reasons.push(t('t1.dropNothingToMask'));
       continue;
     }
 
@@ -159,7 +158,7 @@ export function generateT1(req: T1Request): T1Card | NoPlate {
       path: candidate.path,
       ...(req.whyOwn !== undefined ? { whyOwn: req.whyOwn } : {}),
       // 「…이어서」 조각은 첫 줄이 주석 헤더다 — 3단계에도 그 표시를 남긴다.
-      ...(candidate.kind === 'segment' && /^\s*(\/\/|#)\s*…이어서/.test(candidate.lines[0] ?? '')
+      ...(candidate.kind === 'segment' && isContinuedHeader(candidate.lines[0] ?? '')
         ? { header: (candidate.lines[0] ?? '').trim() }
         : {}),
     });

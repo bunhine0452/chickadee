@@ -52,8 +52,8 @@ export type {
 
 // T1 — 이의 (04 §5)
 export {
-  canAppeal, CATALOG, draftAppeal, issueUrl, NEVER_EQUIV, patternKey, shapeSignature, suggest,
-  SUGGEST_MIN,
+  canAppeal, CATALOG, draftAppeal, issueUrl, NEVER_EQUIV, patternKey, ruleLabel, shapeSignature,
+  suggest, SUGGEST_MIN,
 } from './t1-appeal.js';
 export type {
   AppealDraft, CatalogKey, CatalogRule, IssueInput, PatternGroup, PatternInput, Suggestion,
@@ -61,14 +61,14 @@ export type {
 
 // T1 — 왜 게이트 (04 §6)
 export {
-  checkWhy, COPY_SIM_LIMIT, draftWhy, GENERIC_HELP, GENERIC_Q, hasWord, MIN_CHARS, pickQuestion,
+  checkWhy, COPY_SIM_LIMIT, draftWhy, genericHelp, genericQ, hasWord, MIN_CHARS, pickQuestion,
 } from './t1-why.js';
 export type { Question, QuestionId, WhyCheck, WhyDraft, WhyPayload } from './t1-why.js';
 
 // T2 — 구조 채점 (04 §8.2·§8.3)
 export { gradeDirection, gradeFlow, gradePicks, toT2Detail } from './t2.js';
 export type { DirectionInput, FlowInput, PicksInput } from './t2.js';
-export { CAPPED_NOTE, FOLDED_NOTE, T2_ENGINE_VERSION, UNCHANGED_NOTE } from './t2-types.js';
+export { cappedNote, foldedNote, T2_ENGINE_VERSION, unchangedNote } from './t2-types.js';
 export type { T2Detail, T2Payload, T2Result, T2Row, T2Tier } from './t2-types.js';
 export type { T2Kind as T2QuestionKind } from './t2-types.js';
 

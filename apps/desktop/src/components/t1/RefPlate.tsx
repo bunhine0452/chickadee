@@ -1,3 +1,4 @@
+import { t } from '@chickadee/i18n';
 import { cx } from '@chickadee/ui';
 
 import { hl } from '../plate/hl';
@@ -85,12 +86,15 @@ export function RefPlate({ original, stage, show, peek, curLine, lang }: RefPlat
     );
   });
 
-  const meta = stage === 1 ? (lang === undefined ? `${original.length}줄` : `${lang} · ${original.length}줄`) : '본문은 가려져 있습니다';
+  const lineCount = t('clone.lines', { n: String(original.length) });
+  const meta = stage === 1
+    ? (lang === undefined ? lineCount : t('clone.refMeta', { lang, lines: lineCount }))
+    : t('clone.refHidden');
 
   return (
     <div className={cx('ref', peek && 'peek')}>
       <div className="pane-h">
-        <b>{stage === 1 ? '원본 — 보면서 그대로 치세요' : '주석과 시그니처만'}</b>
+        <b>{stage === 1 ? t('clone.refStage1') : t('clone.skeletonOnly')}</b>
         <span className="mono">{meta}</span>
       </div>
       <div className="code">{rows}</div>

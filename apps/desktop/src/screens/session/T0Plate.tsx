@@ -6,6 +6,7 @@
  */
 import { FlatButton, Kbd, PressButton } from '@chickadee/ui';
 import { useCallback, useEffect, useState } from 'react';
+import { t, type MessageKey } from '@chickadee/i18n';
 
 import { Acts } from '../../components/plate/Acts.js';
 import { Ask } from '../../components/plate/Ask.js';
@@ -22,11 +23,17 @@ import { focusOrFallback } from '../../components/session/focus.js';
 import type { Plate } from '../../data/session.js';
 import type { PlateResult } from '../../store.js';
 
-const KIND_NAME = { point: '지목형', blank: '빈칸형', meaning: '의미형' } as const;
-const ROLE_NAME = {
-  review: '복습', new: '새 판', retry: '다시 찍기', prereq: '아래층',
-  manual: '이 판 찍기', gap: '판 만들기',
-} as const;
+const KIND_KEY = {
+  point: 'session.kindPoint', blank: 'session.kindBlank', meaning: 'session.kindMeaning',
+} as const satisfies Record<string, MessageKey>;
+
+const ROLE_KEY = {
+  review: 'session.roleReview', new: 'session.roleNew', retry: 'session.roleRetry',
+  prereq: 'session.rolePrereq', manual: 'session.roleManual', gap: 'session.roleGap',
+} as const satisfies Record<string, MessageKey>;
+
+/** 판 머리의 역할 이름. 세 판이 같은 표를 쓴다. */
+const roleName = (role: keyof typeof ROLE_KEY): string => t(ROLE_KEY[role]);
 
 export interface T0PlateProps {
   plate: Plate;
@@ -161,18 +168,24 @@ export function T0Plate(props: T0PlateProps): React.JSX.Element | null {
 
   return (
     <ProofSheet
-      no={`${props.no}판`}
+      no={t('session.plateNo', { n: String(props.no) })}
       track="t0"
       concept={plate.nameKo}
       code={plate.token ?? ''}
-      kind={`${KIND_NAME[payload.kind]} · ${ROLE_NAME[plate.role]}`}
-      source={`내 코드 <b>${payload.file}:${payload.focus}</b>`}
+      kind={t('session.kindAndRole', {
+        kind: t(KIND_KEY[payload.kind]),
+        role: roleName(plate.role),
+      })}
+      source={t('session.sourceT0', {
+        file: payload.file,
+        focus: String(payload.focus),
+      })}
       ly={result === null ? [plate.layer, plate.layer] : result.layer}
       focusOnMount={props.payoff === null}
     >
       {plate.role === 'prereq' || plate.role === 'retry' ? (
         <Crumb
-          depth={plate.role === 'prereq' ? '아래층' : '다시 찍기'}
+          depth={plate.role === 'prereq' ? 'prereq' : 'reprint'}
           {...(plate.role === 'prereq' ? { onBack: props.onBack } : {})}
         />
       ) : null}
@@ -205,9 +218,9 @@ export function T0Plate(props: T0PlateProps): React.JSX.Element | null {
           ? {}
           : {
               stamp: result.correct
-                ? { text: '정합', sub: 'in register', tone: 'pink' as const }
-                : { text: '어긋남', sub: 'off register', tone: 'blue' as const },
-              title: result.correct ? '맞았습니다' : '어긋났습니다',
+                ? { text: t('session.exact'), sub: 'in register', tone: 'pink' as const }
+                : { text: t('session.differ'), sub: 'off register', tone: 'blue' as const },
+              title: result.correct ? t('session.right') : t('session.wrong'),
               body: result.correct ? payload.ok : diag?.t,
               ...(diag?.edge ? { edge: diag.edge } : {}),
               rule: payload.rule,
@@ -239,17 +252,17 @@ export function T0Plate(props: T0PlateProps): React.JSX.Element | null {
       <Acts
         left={(
           <FlatButton variant="dunno" on={ladderOpen} onClick={props.onDunno}>
-            모르겠어요 · 다시 찍기
+            {t('session.dunnoReprint')}
           </FlatButton>
         )}
-        hint={answered ? '<b>Space</b> 로 다음 판' : '<b>Enter</b> 로 확인'}
+        hint={answered ? t('session.hintNextPlate') : t('session.hintConfirm')}
         right={answered ? (
           <PressButton tone="blue" onClick={props.onNext}>
-            다음 <Kbd keys="Space" />
+            {t('session.next')} <Kbd keys="Space" />
           </PressButton>
         ) : (
           <PressButton tone="pink" disabled={sel === null} onClick={() => sel !== null && props.onSubmit(sel)}>
-            확인 <Kbd keys="Enter" />
+            {t('session.confirm')} <Kbd keys="Enter" />
           </PressButton>
         )}
       />

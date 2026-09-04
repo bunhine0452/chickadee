@@ -2,7 +2,8 @@
 import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { ScoreCard, VERDICT_TEXT } from './ScoreCard';
+import { ScoreCard, verdictText } from './ScoreCard';
+import type { CloneVerdict } from './ScoreCard';
 
 afterEach(cleanup);
 
@@ -37,11 +38,11 @@ describe('ScoreCard', () => {
   });
 
   it('판정 문구 3종은 목업 그대로다', () => {
-    expect(VERDICT_TEXT).toEqual({
-      advance: '다음 단계로 가도 좋습니다',
-      'repeat-soft': '한 번 더 같은 단계를 권합니다',
-      repeat: '같은 단계를 한 번 더 하는 편이 빠릅니다',
-    });
+    expect(['advance', 'repeat-soft', 'repeat'].map((v) => verdictText(v as CloneVerdict))).toEqual([
+      '다음 단계로 가도 좋습니다',
+      '한 번 더 같은 단계를 권합니다',
+      '같은 단계를 한 번 더 하는 편이 빠릅니다',
+    ]);
     const { container } = render(<ScoreCard {...NUMBERS} verdict="repeat" />);
     expect(container.querySelector('.pill.ghost')?.textContent).toBe('같은 단계를 한 번 더 하는 편이 빠릅니다');
   });

@@ -1,5 +1,6 @@
 import { memo, useCallback, useMemo, useState } from 'react';
 import type { KeyboardEvent } from 'react';
+import { t, type MessageKey } from '@chickadee/i18n';
 import { cx } from '@chickadee/ui';
 import type { EdgeKind } from '@chickadee/store-sql';
 
@@ -78,11 +79,11 @@ const BADGE: Readonly<Record<NodeState, string>> = {
 };
 
 /** 색만으로는 판정이 전달되지 않는다 (05 §9) — 낱말을 `aria-label` 에 같이 싣는다. */
-const STATE_LABEL: Readonly<Record<NodeState, string>> = {
-  ok: '맞게 고름',
-  missed: '놓침',
-  wrong: '아닌데 고름',
-  sec: '같이 바뀜',
+const STATE_KEY: Readonly<Record<NodeState, MessageKey>> = {
+  ok: 'map.stateOk',
+  missed: 'map.stateMissed',
+  wrong: 'map.stateWrong',
+  sec: 'map.stateSec',
 };
 
 /** 좌표 문자열이 부동소수 꼬리를 달지 않게 — 배치 결정론 테스트가 `d` 를 글자로 본다. */
@@ -102,7 +103,7 @@ export function nodeDir(f: MapFile): string {
   const parts = f.p.replace(/\/+$/, '').split('/');
   parts.pop();
   const dir = `${parts.join('/')}/`;
-  return f.folded !== undefined && dir === '/' ? '접힌 폴더' : dir;
+  return f.folded !== undefined && dir === '/' ? t('map.folded') : dir;
 }
 
 /**
@@ -248,10 +249,10 @@ const MapNode = memo(function MapNode({
 
   const label = [
     file.p,
-    file.folded === undefined ? null : `접힌 폴더 · 파일 ${file.folded}개`,
-    file.cycle === true ? '순환' : null,
-    showNew ? '새 파일' : null,
-    state === null ? null : STATE_LABEL[state],
+    file.folded === undefined ? null : t('map.foldedFiles', { n: String(file.folded) }),
+    file.cycle === true ? t('map.cycle') : null,
+    showNew ? t('map.newFile') : null,
+    state === null ? null : t(STATE_KEY[state]),
   ]
     .filter((s): s is string => s !== null)
     .join(' · ');
@@ -290,7 +291,7 @@ const MapNode = memo(function MapNode({
         <>
           <rect className="cycbg" x={x + CYCLE_TAG.dx} y={y - 11} width={CYCLE_TAG.w} height={20} rx={2} />
           <text className="cyctag" x={x + CYCLE_TAG.tx} y={y + 3}>
-            ⟲ 순환
+            {t('map.cycleTag')}
           </text>
         </>
       ) : null}
@@ -298,7 +299,7 @@ const MapNode = memo(function MapNode({
         <>
           <rect className="newbg" x={x + NEW_TAG.dx} y={y - 11} width={NEW_TAG.w} height={20} rx={2} />
           <text className="newtag" x={x + NEW_TAG.tx} y={y + 3}>
-            ＋ 새 파일
+            {t('map.newTag')}
           </text>
         </>
       ) : null}
@@ -340,7 +341,7 @@ export function DependencyMap({
   graded,
   hints,
   onHover,
-  label = '의존 지도',
+  label = t('map.label'),
 }: DependencyMapProps) {
   const [hovered, setHovered] = useState<string | null>(null);
   const { pos, W, H } = useMemo(() => layoutMap(bands, files), [bands, files]);

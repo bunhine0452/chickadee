@@ -9,6 +9,7 @@
  * 부르지 않는다 — 04 §9 의 「같은 `(repoId, target, attempt, dictVersion)` 로 두 번
  * 생성하면 deep-equal」이 그것 없이는 성립하지 않는다. T2 배치에는 난수 자체가 없다.
  */
+import { t } from '@chickadee/i18n';
 import type { CardPayload, ConceptId, EdgeKind } from '@chickadee/store-sql';
 
 import type { NoPlate } from './types.js';
@@ -24,8 +25,11 @@ export const BANDS = 4;
 /**
  * 밴드 라벨 (04 §7.2 · 목업 `T2.bands[].l`). 지도가 밴드 머리에 찍고 정답지의 설명 문장이
  * 층을 부를 때도 쓴다 — 두 곳에 따로 두면 「동작 · 통신」의 가운뎃점 하나가 언젠가 갈라진다.
+ *
+ * 상수가 아니라 함수인 이유는 로케일이다 — 모듈이 열리는 시점은 `setLocale()` 보다 이르다.
  */
-export const BAND_NAMES: readonly string[] = ['화면', '기능', '동작 · 통신', '공용 · 데이터'];
+export const bandNames = (): readonly string[] =>
+  [t('t2.bandScreen'), t('t2.bandFeature'), t('t2.bandAction'), t('t2.bandShared')];
 
 /** 한 문제 지도의 노드 상한 (04 §7.4). */
 export const MAX_NODES = 24;

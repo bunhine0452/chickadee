@@ -1,9 +1,7 @@
-import { FlatButton } from '@chickadee/ui';
+import { t } from '@chickadee/i18n';
+import { FlatButton, RichText } from '@chickadee/ui';
 
 import './AskRung.css';
-
-/** 목업의 placeholder — 무엇을 적으면 되는지를 예로 보여 준다. */
-const PLACEHOLDER = '예: ?. 가 undefined 를 내면 그 다음 줄은 어떻게 되는지 모르겠어요';
 
 export interface AskRungProps {
   /** 「막힌 지점」 입력값. */
@@ -28,25 +26,22 @@ export interface AskRungProps {
 export function AskRung({ text, onText, prompt, onBuild, onCopy }: AskRungProps) {
   return (
     <>
-      <h4>직접 물어보기</h4>
-      <p>
-        키가 없어도 됩니다. 아래 칸에 막힌 지점을 적으면 <b>이 줄과 앞뒤 4줄만</b> 담은 프롬프트를 만들어
-        드립니다. 이 앱은 아무것도 스스로 전송하지 않습니다 — 복사해서 붙여넣는 순간에만 밖으로 나갑니다.
-      </p>
+      <h4>{t('ask.heading')}</h4>
+      <RichText as="p" html={t('ask.note')} />
 
       <div className="askbox">
         <textarea
-          aria-label="막힌 지점"
-          placeholder={PLACEHOLDER}
+          aria-label={t('ask.field')}
+          placeholder={t('ask.placeholder')}
           value={text}
           onChange={(e) => onText(e.target.value)}
         />
         <div className="row">
-          <FlatButton onClick={onBuild}>프롬프트 만들기</FlatButton>
+          <FlatButton onClick={onBuild}>{t('ask.build')}</FlatButton>
           <FlatButton ghost disabled={prompt === undefined || prompt === ''} onClick={onCopy}>
-            복사
+            {t('ask.copy')}
           </FlatButton>
-          <span className="note">API 키 없음 · 로컬 사전과 내 코드만 사용</span>
+          <span className="note">{t('ask.noKey')}</span>
         </div>
         {prompt === undefined || prompt === '' ? null : <div className="prompt-out">{prompt}</div>}
       </div>

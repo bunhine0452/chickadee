@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
+import { t } from '@chickadee/i18n';
 import { fileBaseName } from '@chickadee/grading';
 
 import {
-  FLOW_DECK_EMPTY, FLOW_DECK_LABEL, FLOW_EMPTY, FLOW_PATH_LABEL,
+  flowDeckEmpty, flowDeckLabel, flowEmpty, flowPathLabel,
   flowAddLabel, flowDropLabel, flowMoveLabel,
 } from '../../screens/session/t2Copy.js';
 
@@ -62,7 +63,7 @@ export function FlowDeck({ deck, ordered, onOrder }: FlowDeckProps) {
 
   return (
     <div className="fdeck">
-      <ol className="fpath" ref={listRef} aria-label={FLOW_PATH_LABEL}>
+      <ol className="fpath" ref={listRef} aria-label={flowPathLabel()}>
         {ordered.map((path, i) => {
           const name = fileBaseName(path);
           return (
@@ -95,16 +96,16 @@ export function FlowDeck({ deck, ordered, onOrder }: FlowDeckProps) {
                   aria-label={flowDropLabel(name)}
                   onClick={() => onOrder?.(ordered.filter((p) => p !== path))}
                 >
-                  빼기
+                  {t('map.flowRemove')}
                 </button>
               </span>
             </li>
           );
         })}
       </ol>
-      {ordered.length === 0 ? <p className="none">{FLOW_EMPTY}</p> : null}
+      {ordered.length === 0 ? <p className="none">{flowEmpty()}</p> : null}
 
-      <ul className="frest" aria-label={FLOW_DECK_LABEL}>
+      <ul className="frest" aria-label={flowDeckLabel()}>
         {rest.map((path) => (
           <li key={path}>
             <button
@@ -119,7 +120,7 @@ export function FlowDeck({ deck, ordered, onOrder }: FlowDeckProps) {
           </li>
         ))}
       </ul>
-      {rest.length === 0 ? <p className="none">{FLOW_DECK_EMPTY}</p> : null}
+      {rest.length === 0 ? <p className="none">{flowDeckEmpty()}</p> : null}
     </div>
   );
 }

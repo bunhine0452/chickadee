@@ -8,6 +8,7 @@
 import { FlatButton, Kbd, PressButton } from '@chickadee/ui';
 import { canAppeal, checkWhy, type Question, type T1Result } from '@chickadee/grading';
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { t, type MessageKey } from '@chickadee/i18n';
 
 import { Acts } from '../../components/plate/Acts.js';
 import { Ask } from '../../components/plate/Ask.js';
@@ -22,7 +23,7 @@ import { Stepper } from '../../components/t1/Stepper.js';
 import { WhyGate } from '../../components/t1/WhyGate.js';
 import type { Plate } from '../../data/session.js';
 import type { PlateResult } from '../../store.js';
-import { ASK_HINT, ASK_TEXT, tagOf, whyOf, wrongCount } from './t1Copy.js';
+import { askHint, askText, tagOf, whyOf, wrongCount } from './t1Copy.js';
 
 /**
  * Monaco 는 T1 판을 걸 때만 내려온다 (05 §1.3 · §8). 1.2 MB 짜리 청크라 홈과 T0 은
@@ -33,10 +34,13 @@ const ClonePad = lazy(async () => {
   return { default: mod.ClonePad };
 });
 
-const ROLE_NAME = {
-  review: '복습', new: '새 판', retry: '다시 찍기', prereq: '아래층',
-  manual: '이 판 찍기', gap: '판 만들기',
-} as const;
+const ROLE_KEY = {
+  review: 'session.roleReview', new: 'session.roleNew', retry: 'session.roleRetry',
+  prereq: 'session.rolePrereq', manual: 'session.roleManual', gap: 'session.roleGap',
+} as const satisfies Record<string, MessageKey>;
+
+/** 판 머리의 역할 이름. 세 판이 같은 표를 쓴다. */
+const roleName = (role: keyof typeof ROLE_KEY): string => t(ROLE_KEY[role]);
 
 /** 지금 보고 있는 화면. 한 판 안에서만 움직이고 큐와는 무관하다. */
 export type T1View = 'edit' | 'result' | 'why';
@@ -142,12 +146,19 @@ export function T1Plate(props: T1PlateProps): React.JSX.Element | null {
 
   return (
     <ProofSheet
-      no={`${props.no}판`}
+      no={t('session.plateNo', { n: String(props.no) })}
       track="t1"
-      concept={`${plate.nameKo} 필사`}
+      concept={t('session.conceptTranscribe', { name: plate.nameKo })}
       code={plate.token ?? payload.fn}
-      kind={`${props.stage}단계 · ${ROLE_NAME[plate.role]}`}
-      source={`내 코드 <b>${payload.file}</b> · <b>${payload.fn}</b> · ${original.length}줄`}
+      kind={t('session.stageAndRole', {
+        stage: String(props.stage),
+        role: roleName(plate.role),
+      })}
+      source={t('session.sourceT1', {
+        file: payload.file,
+        fn: payload.fn,
+        lines: String(original.length),
+      })}
       ly={ly}
       width="wide"
     >
@@ -155,7 +166,7 @@ export function T1Plate(props: T1PlateProps): React.JSX.Element | null {
 
       {props.view === 'edit' ? (
         <>
-          <Ask q={ASK_TEXT[props.stage]} hint={ASK_HINT} />
+          <Ask q={askText(props.stage)} hint={askHint()} />
           <SplitPane
             left={(
               <RefPlate
@@ -196,13 +207,13 @@ export function T1Plate(props: T1PlateProps): React.JSX.Element | null {
           <Acts
             left={(
               <FlatButton variant="dunno" on={props.peeking} onHold={props.onPeek}>
-                모르겠어요 · 원본 잠깐 보기 <Kbd keys="`" />
+                {t('session.dunnoPeek')} <Kbd keys="`" />
               </FlatButton>
             )}
-            hint="힌트는 감점이 아니라 이 판을 더 자주 보여줄 신호로만 쓰입니다."
+            hint={t('clone.editHint')}
             right={(
               <PressButton tone="pink" onClick={props.onGrade}>
-                채점하기 <Kbd keys="⌘↵" />
+                {t('session.grade')} <Kbd keys="⌘↵" />
               </PressButton>
             )}
           />
@@ -229,13 +240,17 @@ export function T1Plate(props: T1PlateProps): React.JSX.Element | null {
             }}
           />
           <Acts
-            left={<FlatButton ghost onClick={() => props.onView('edit')}>에디터로 돌아가기</FlatButton>}
+            left={(
+              <FlatButton ghost onClick={() => props.onView('edit')}>
+                {t('clone.backToEditor')}
+              </FlatButton>
+            )}
             hint={props.appealed.length > 0
-              ? `이의 <b>${props.appealed.length}건</b>은 판정 보류로 기록합니다.`
-              : `원본 본 횟수 <b>${props.peeks}</b> · 감점 없음`}
+              ? t('clone.appealHeld', { n: String(props.appealed.length) })
+              : t('clone.peekHint', { n: String(props.peeks) })}
             right={(
               <PressButton tone="blue" onClick={() => props.onView('why')}>
-                다음 — 왜 이렇게 생겼는지 한 줄 <Kbd keys="Enter" />
+                {t('clone.nextWhy')} <Kbd keys="Enter" />
               </PressButton>
             )}
           />
@@ -258,11 +273,15 @@ export function T1Plate(props: T1PlateProps): React.JSX.Element | null {
             revealed={revealed || props.why.pick !== null}
           />
           <Acts
-            left={<FlatButton ghost onClick={() => props.onView('result')}>채점 결과로</FlatButton>}
-            hint="고르고 나서도 <b>자기 말로 한 줄</b> 옮겨야 마칩니다. 옮겨 적는 그 순간이 목적입니다."
+            left={(
+              <FlatButton ghost onClick={() => props.onView('result')}>
+                {t('clone.backToResult')}
+              </FlatButton>
+            )}
+            hint={t('clone.whyHint')}
             right={(
               <PressButton tone="pink" disabled={!check.ok} onClick={props.onFinish}>
-                저장하고 마치기 <Kbd keys="Enter" />
+                {t('clone.saveAndFinish')} <Kbd keys="Enter" />
               </PressButton>
             )}
           />
