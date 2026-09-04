@@ -5,6 +5,7 @@
  * 두 테이블이 전부다. 그래서 Esc 로 나갔다 돌아오면 이어 찍히고, 강제 종료 뒤에도 같다.
  */
 import { rankNewConcepts, knownSet, levelForLayer, transferFrom } from '@chickadee/concepts';
+import { langOf } from '@chickadee/dictionary';
 import { ipc } from '@chickadee/ipc-client';
 import {
   LIMIT, dayKey, endOfDay, estMinFor, plannedMin, planSession, prereqAt, resumeOf, retryAt,
@@ -146,6 +147,16 @@ async function buildQueue(
     ipc.store.query('queue.new_count_today', { repoId, day }),
   ]);
 
+  /**
+   * 꺼 둔 문법 사전 언어는 **새 판에서만** 뺀다 (05 §2.1 · D122). 이미 익힌 개념의 복습은
+   * 그대로 둔다 — 원장에 겹이 쌓여 있는데 언어를 껐다고 그 기록이 멈추면, 다시 켰을 때
+   * 만기가 통째로 밀려 있다. 목록이 비면 전부 켜진 것이다.
+   */
+  const langOn = settings.dictLangs.length === 0
+    ? () => true
+    : (id: string) => settings.dictLangs.includes(langOf(id));
+  const candidates = candidateRows.filter((c) => langOn(c.id));
+
   const due: DueConcept[] = dueRows.map((m) => ({
     conceptId: m.concept_id as ConceptId,
     layer: m.layer,
@@ -170,14 +181,14 @@ async function buildQueue(
   const prereq = new Map<string, string[]>();
   for (const e of edgeRows) prereq.set(e.concept_id, [...(prereq.get(e.concept_id) ?? []), e.prereq_id]);
 
-  const bestSites = new Map(await Promise.all(candidateRows.map(async (c) => {
+  const bestSites = new Map(await Promise.all(candidates.map(async (c) => {
     const rows = await ipc.store.query('queue.best_site', { repoId, conceptId: c.id });
     const s = rows[0];
     return [c.id, s ? { siteId: s.id, unknown: s.unknown_count, lineStart: s.line_start, lineEnd: s.line_end } : null] as const;
   })));
 
   const ranked = rankNewConcepts({
-    candidates: candidateRows.map((c) => ({ conceptId: c.id, siteCount: c.site_count })),
+    candidates: candidates.map((c) => ({ conceptId: c.id, siteCount: c.site_count })),
     bestSiteOf: (id) => bestSites.get(id) ?? null,
     prereqOf: (id) => prereq.get(id) ?? [],
   });

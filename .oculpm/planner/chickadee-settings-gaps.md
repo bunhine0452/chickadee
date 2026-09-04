@@ -19,17 +19,17 @@ owner: claude-code
   - [x] 검증 — 픽스처 리포에서 identity 하나를 넣으면 author_matched 가 기대 건수만큼 1 이 된다 {#set-identities-verify}
 
 ## P1 · 05 §2.1 대비 빈 칸 셋 {#p1}
-- [ ] 모션 감축 스위치 · 0.5일 {#set-motion}
-  - [ ] settings.motion('system'|'reduce')를 <html data-motion> 으로 세우는 자리 하나(applyTheme · applyTrim 옆) {#set-motion-apply}
-  - [ ] styles/physics.css 가 data-motion=reduce 에서 prefers-reduced-motion 과 같은 결과를 내도록 {#set-motion-css}
-  - [ ] check-motion 정적 게이트·감축 모션 E2E 와 정합 확인 {#set-motion-gate}
-- [ ] 제외 글롭 편집 · 0.5일 {#set-globs}
-  - [ ] 지금 하드코딩인 concepts/ingest.ts 의 EXCLUDE_GLOBS 를 기본값으로 내리고 settings.excludeGlobs 를 올려보낸다 {#set-globs-wire}
-  - [ ] 설정에 줄 단위 편집 + 잘못된 글롭 거부 {#set-globs-ui}
-  - [ ] 바꾸면「다시 읽어야 반영됩니다」— 홈의 재인제스트 배너와 같은 길 {#set-globs-reingest}
-- [ ] 문법 사전 언어 필터 · 0.5일 {#set-dict-langs}
-  - [ ] dictionary_version 의 lang 목록을 체크박스로 — 끈 언어는 카드 생성에서 빠진다 {#set-dict-langs-ui}
-  - [ ] UI 표시 언어(chickadee-i18n 의 locale)와 다른 축임을 절 문구로 명시 {#set-dict-langs-copy}
+- [x] 모션 감축 스위치 · 0.5일 {#set-motion}
+  - [x] settings.motion('system'|'reduce')를 <html data-motion> 으로 세우는 자리 하나(applyTheme · applyTrim 옆) {#set-motion-apply}
+  - [x] styles/physics.css 가 data-motion=reduce 에서 prefers-reduced-motion 과 같은 결과를 내도록 {#set-motion-css}
+  - [x] check-motion 정적 게이트·감축 모션 E2E 와 정합 확인 {#set-motion-gate}
+- [x] 제외 글롭 편집 · 0.5일 {#set-globs}
+  - [x] 지금 하드코딩인 concepts/ingest.ts 의 EXCLUDE_GLOBS 를 기본값으로 내리고 settings.excludeGlobs 를 올려보낸다 {#set-globs-wire}
+  - [x] 설정에 줄 단위 편집 + 잘못된 글롭 거부 {#set-globs-ui}
+  - [x] 바꾸면「다시 읽어야 반영됩니다」— 홈의 재인제스트 배너와 같은 길 {#set-globs-reingest}
+- [x] 문법 사전 언어 필터 · 0.5일 {#set-dict-langs}
+  - [x] dictionary_version 의 lang 목록을 체크박스로 — 끈 언어는 카드 생성에서 빠진다 {#set-dict-langs-ui}
+  - [x] UI 표시 언어(chickadee-i18n 의 locale)와 다른 축임을 절 문구로 명시 {#set-dict-langs-copy}
 
 ## P2 · 검증 {#p2}
 - [ ] SettingsScreen.test 확장과 설정 왕복 E2E · 0.3일 {#set-tests}
@@ -44,4 +44,12 @@ owner: claude-code
 | 2026-09-04T08:43:25+09:00 | #set-identities-ui | claude-code | ☐→x | .oculpm/journal/20260904/Bugs/0843_bug_identities-never-reached-classify-commits.md | IdentityPanel — 「학습」절, 새 문구 13개 전부 t() · ko 카탈로그. 테스트 9건 |
 | 2026-09-04T08:43:32+09:00 | #set-identities-wire | claude-code | ☐→x | .oculpm/journal/20260904/Bugs/0843_bug_identities-never-reached-classify-commits.md | flow.ts 가 loadSettings 로 읽어 넘김 · reclassifyCommits 로 재인제스트 없이 반영 |
 | 2026-09-04T08:43:41+09:00 | #set-identities-verify | claude-code | ☐→x | .oculpm/journal/20260904/Bugs/0843_bug_identities-never-reached-classify-commits.md | flow 통합에서 커밋 둘 중 하나만 author_matched=1 · identities.test 6건이 원장 왕복 |
+| 2026-09-04T09:01:20+09:00 | #set-motion-apply | claude-code | ☐→x | .oculpm/journal/20260904/Features_to_add/0901_feature_settings-motion-globs-dict-langs.md | applyMotion() — applyTheme·applyTrim·applyLocale 옆. 'system' 도 속성으로 적는다 |
+| 2026-09-04T09:01:28+09:00 | #set-motion-css | claude-code | ☐→x | .oculpm/journal/20260904/Features_to_add/0901_feature_settings-motion-globs-dict-langs.md | CSS 는 이미 다 되어 있었다 — 11개 파일 전부에 [data-motion=reduce] 쌍이 있었다 |
+| 2026-09-04T09:01:36+09:00 | #set-motion-gate | claude-code | ☐→x | .oculpm/journal/20260904/Features_to_add/0901_feature_settings-motion-globs-dict-langs.md | 게이트 2건 추가 — 속성 경로가 미디어 쿼리와 같은지 · system 은 아무것도 줄이지 않는지 |
+| 2026-09-04T09:01:44+09:00 | #set-globs-wire | claude-code | ☐→x | .oculpm/journal/20260904/Features_to_add/0901_feature_settings-motion-globs-dict-langs.md | EXCLUDE_GLOBS 뒤에 덧붙인다 — 03 §1.2 의「추가 제외 목록」을 코드로 확정(D122) |
+| 2026-09-04T09:01:52+09:00 | #set-globs-ui | claude-code | ☐→x | .oculpm/journal/20260904/Features_to_add/0901_feature_settings-motion-globs-dict-langs.md | GlobPanel — 줄 단위 · blur 저장 · globProblem 넷은 막지 않고 말하되 저장에서 뺀다 |
+| 2026-09-04T09:02:00+09:00 | #set-globs-reingest | claude-code | ☐→x | .oculpm/journal/20260904/Features_to_add/0901_feature_settings-motion-globs-dict-langs.md | 홈 배너와 같은 모양의 안내(버튼 없음). 지문에는 넣지 않았다 — 06 §6.3 은 빌드 축이다 |
+| 2026-09-04T09:02:08+09:00 | #set-dict-langs-ui | claude-code | ☐→x | .oculpm/journal/20260904/Features_to_add/0901_feature_settings-motion-globs-dict-langs.md | DictLangPanel + Settings.dictLangs + derive.dict_langs. 빈 목록 = 전부 켜짐, 새 판에서만 뺀다 |
+| 2026-09-04T09:02:15+09:00 | #set-dict-langs-copy | claude-code | ☐→x | .oculpm/journal/20260904/Features_to_add/0901_feature_settings-motion-globs-dict-langs.md | settings.dictLangs.axis — 「무엇을 배울지」와 「어느 말로 읽을지」를 갈라 적었다 |
 <!-- oculpm:plan-log end -->

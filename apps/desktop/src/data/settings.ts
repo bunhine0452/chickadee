@@ -42,6 +42,8 @@ export const DEFAULTS: Omit<Settings, 'tz'> = {
   excludeGlobs: [],
   // 저장된 값이 없을 때만 쓰는 추정이다 (D117). 첫 실행 0단계가 다시 묻는다.
   locale: guessLocale(),
+  // 비면 전부 켜진 것이다 (D122).
+  dictLangs: [],
 };
 
 export async function loadSettings(): Promise<Settings> {
@@ -81,12 +83,14 @@ const KEY_OF: Record<keyof Settings, string> = {
   identities: 'identities',
   excludeGlobs: 'exclude_globs',
   locale: 'locale',
+  dictLangs: 'dict_langs',
 };
 
 // ───────── 모양 (테마 · 부속) ─────────
 
 export type Theme = Settings['theme'];
 export type Trim = Settings['trim'];
+export type Motion = Settings['motion'];
 
 /**
  * `<html data-theme>` 을 세우는 **유일한** 자리 (05 §4.3 — 테마는 이 속성 하나로만 바뀐다).
@@ -111,6 +115,22 @@ export function applyTrim(trim: Trim): void {
 }
 
 /**
+ * `<html data-motion>` 을 세우는 **유일한** 자리 (05 §2.1 · 06 §2).
+ *
+ * `'system'` 은 속성을 지우지 않고 그대로 적는다 — CSS 선택자는 `="reduce"` 만 보므로
+ * 아무 효과가 없고, 대신 게이트와 개발자 패널이 **지금 무엇이 걸려 있는지**를 DOM 에서
+ * 읽을 수 있다. 속성이 없는 상태와 「시스템 따름」을 구별하지 못하면 그 둘의 차이를
+ * 화면 밖에서 증명할 수 없다.
+ *
+ * `'system'` 일 때 실제로 감축할지는 `@media (prefers-reduced-motion: reduce)` 가 정한다.
+ * 두 길은 같은 선언을 낸다 — CSS 파일마다 media 블록과 `[data-motion="reduce"]` 규칙이
+ * 짝으로 있고, `tests/gates/motion.spec.ts` 가 두 길을 따로 잰다.
+ */
+export function applyMotion(motion: Motion): void {
+  document.documentElement.setAttribute('data-motion', motion);
+}
+
+/**
  * `<html lang · data-locale>` 을 세우는 **유일한** 자리 (D117 · 05 §9).
  *
  * `applyTheme`·`applyTrim` 옆에 두는 이유는 하나다 — 두 곳에서 속성을 세우면 나중에 켠
@@ -126,8 +146,10 @@ export function applyLocale(locale: Locale): void {
 export interface Appearance {
   theme: Theme;
   trim: Trim;
+  motion: Motion;
   setTheme: (v: Theme) => void;
   setTrim: (v: Trim) => void;
+  setMotion: (v: Motion) => void;
 }
 
 /**
@@ -139,18 +161,22 @@ export interface Appearance {
 export function useAppearance(): Appearance {
   const [theme, setThemeState] = useState<Theme>(DEFAULTS.theme);
   const [trim, setTrimState] = useState<Trim>(DEFAULTS.trim);
+  const [motion, setMotionState] = useState<Motion>(DEFAULTS.motion);
 
   useEffect(() => {
     let live = true;
     applyTheme(DEFAULTS.theme);
     applyTrim(DEFAULTS.trim);
+    applyMotion(DEFAULTS.motion);
     void loadSettings().then(
       (s) => {
         if (!live) return;
         setThemeState(s.theme);
         setTrimState(s.trim);
+        setMotionState(s.motion);
         applyTheme(s.theme);
         applyTrim(s.trim);
+        applyMotion(s.motion);
       },
       () => log.warn('설정을 읽지 못해 기본 모양으로 연다'),
     );
@@ -171,7 +197,13 @@ export function useAppearance(): Appearance {
     void saveSetting('trim', v, Date.now()).catch(() => log.warn('부속 설정을 저장하지 못했다'));
   }, []);
 
-  return { theme, trim, setTheme, setTrim };
+  const setMotion = useCallback((v: Motion) => {
+    setMotionState(v);
+    applyMotion(v);
+    void saveSetting('motion', v, Date.now()).catch(() => log.warn('모션 설정을 저장하지 못했다'));
+  }, []);
+
+  return { theme, trim, motion, setTheme, setTrim, setMotion };
 }
 
 /**

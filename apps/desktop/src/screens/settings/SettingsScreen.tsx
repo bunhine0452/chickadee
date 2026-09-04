@@ -11,6 +11,8 @@ import {
 } from '../../data/maintenance.js';
 import { DEFAULTS, loadSettings, saveSetting, useAppearance } from '../../data/settings.js';
 import { useUi } from '../../store.js';
+import { DictLangPanel, type DictLang } from './DictLangPanel.js';
+import { GlobPanel } from './GlobPanel.js';
 import { IdentityPanel } from './IdentityPanel.js';
 import { KeyPanel } from './KeyPanel.js';
 import { PerfTable, type PerfRow } from './PerfTable.js';
@@ -44,6 +46,11 @@ const THEME_OPTIONS = [
 const TRIM_OPTIONS = [
   { v: 'off' as const, label: '부속 보임' },
   { v: 'on' as const, label: '부속 숨김' },
+];
+
+const MOTION_OPTIONS = [
+  { v: 'system' as const, label: t('settings.look.motionSystem') },
+  { v: 'reduce' as const, label: t('settings.look.motionReduce') },
 ];
 
 /** 언어 이름은 그 언어로 적는다 (D117) — 두 카탈로그가 같은 값을 낸다. */
@@ -147,6 +154,7 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
   const [opts, setOpts] = useState<ExportOptions>(EXPORT_DEFAULTS);
   const [confirming, setConfirming] = useState(false);
   const [suggested, setSuggested] = useState<Identity[]>([]);
+  const [dictLangs, setDictLangs] = useState<DictLang[]>([]);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState('');
 
@@ -154,12 +162,13 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
     let live = true;
     void (async () => {
       try {
-        const [s, repoRows, perfRows, v, p] = await Promise.all([
+        const [s, repoRows, perfRows, v, p, langRows] = await Promise.all([
           loadSettings(),
           ipc.store.query('repo.list', {}),
           ipc.store.query('perf.list', { limit: PERF_WINDOW }),
           ipc.app.version(),
           ipc.app.paths(),
+          ipc.store.query('derive.dict_langs', {}),
         ]);
         if (!live) return;
         setSettings(s);
@@ -175,6 +184,7 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
           id: r.id, name: r.name, rootPath: r.root_path, lastIngestAt: r.last_ingest_at,
         })));
         setPerf(perfRows.map((r) => ({ kind: r.kind, ms: r.ms })));
+        setDictLangs(langRows.map((r) => ({ lang: r.lang, conceptCount: r.concept_count })));
         setVersion(v);
         setPaths(p);
       } catch {
@@ -269,6 +279,11 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
           문법·쿼리·생성기·사전이 바뀌면 홈에 「재인제스트 필요」 배너가 뜹니다. 다시 읽어도{' '}
           <b>숙련도는 개념 단위라 그대로 남고</b> 카드와 사용처만 새로 만듭니다.
         </p>
+        <div className="set-row set-row-block">
+          <span className="set-k">{t('settings.globs.label')}</span>
+          <GlobPanel value={s.excludeGlobs} onChange={(next) => put('excludeGlobs', next)} />
+        </div>
+        <p className="set-note">{t('settings.globs.note')}</p>
       </Section>
 
       <Section id="set-study" title="학습" plain="= 하루에 얼마나, 언제부터">
@@ -306,6 +321,16 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
           />
         </div>
         <p className="set-note">{t('settings.identity.note')}</p>
+        <div className="set-row set-row-block">
+          <span className="set-k">{t('settings.dictLangs.label')}</span>
+          <DictLangPanel
+            langs={dictLangs}
+            value={s.dictLangs}
+            onChange={(next) => put('dictLangs', next)}
+          />
+        </div>
+        <p className="set-note">{t('settings.dictLangs.note')}</p>
+        <p className="set-note">{t('settings.dictLangs.axis')}</p>
         <label className="set-row">
           <span className="set-k">시간대</span>
           <input
@@ -334,6 +359,16 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
             onChange={appearance.setTrim}
           />
         </div>
+        <div className="set-row">
+          <span className="set-k">{t('settings.look.motion')}</span>
+          <Switch
+            options={MOTION_OPTIONS}
+            value={appearance.motion}
+            label={t('settings.look.motionSwitch')}
+            onChange={appearance.setMotion}
+          />
+        </div>
+        <p className="set-note">{t('settings.look.motionNote')}</p>
         <div className="set-row">
           <span className="set-k">{t('settings.look.locale')}</span>
           <Switch

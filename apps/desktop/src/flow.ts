@@ -83,11 +83,11 @@ export async function ingest(mode: 'full' | 'incremental'): Promise<void> {
   // 내 커밋 판정은 `settings.identities` 가 정한다 (03 §1.2 · D46). 여기서 안 넘기면
   // `isMine()` 이 언제나 거짓이라 **모든 커밋이 남의 것**이 되고 T2 정답지가 0장이 된다.
   // 읽기에 실패했을 때 조용히 빈 목록으로 내려가면 같은 증상이 원인 없이 재현되므로 남긴다.
-  const identities = await loadSettings().then(
-    (s) => s.identities,
+  const settings = await loadSettings().then(
+    (s) => ({ identities: s.identities, excludeGlobs: s.excludeGlobs }),
     () => {
       log.warn('설정을 읽지 못해 내 커밋을 가르지 못한다');
-      return [];
+      return { identities: [], excludeGlobs: [] };
     },
   );
 
@@ -98,7 +98,8 @@ export async function ingest(mode: 'full' | 'incremental'): Promise<void> {
       mode,
       sinceHead: mode === 'incremental' ? repo.headSha : null,
       dependencies: [],
-      identities,
+      identities: settings.identities,
+      excludeGlobs: settings.excludeGlobs,
       now: Date.now(),
       onJob: (jobId) => { lastJobId = jobId; },
       onProgress: (phase, done, total, currentRelPath) =>

@@ -320,3 +320,45 @@
 .ident-err {
   color: var(--verdict-differ-text);
 }
+
+/* 제외 글롭 (D122). 여러 줄 상자 하나 — 새 색도 새 치수도 만들지 않는다. */
+.globs {
+  display: grid;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.globs-in {
+  width: 100%;
+  max-width: 32em;
+  padding: 6px 8px;
+  border: 2px solid var(--rule);
+  background: var(--stock);
+  color: var(--ink);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  line-height: var(--lh-body);
+  resize: vertical;
+}
+
+/* 문법 사전 언어 (D122). */
+.dictlangs {
+  display: grid;
+  gap: 4px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dictlang {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.dictlang-k {
+  min-width: 4em;
+  color: var(--ink);
+  font-family: var(--f-mono);
+  font-size: var(--fs-14);
+}

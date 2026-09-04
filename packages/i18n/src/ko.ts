@@ -37,6 +37,35 @@ export const ko = {
   'settings.identity.reclassified': '커밋 {{mine}} / {{all}} 건을 내 것으로 갈랐습니다.',
   'settings.identity.reclassifyFailed': '다시 가르지 못했습니다. 리포를 다시 읽으면 반영됩니다.',
 
+  'settings.globs.label': '제외 글롭',
+  'settings.globs.note':
+    '한 줄에 하나. 기본 제외 목록(node_modules · 빌드 산출물 · 잠금 파일)에 **더해집니다** '
+    + '— 여기를 비워도 그것들은 계속 빠집니다.',
+  'settings.globs.reingest': '바꾼 것은 리포를 다시 읽어야 반영됩니다.',
+  'settings.globs.errNegation': '{{line}} — 부정(!)은 오히려 포함시킵니다.',
+  'settings.globs.errBackslash': '{{line}} — 역슬래시 대신 / 를 씁니다.',
+  'settings.globs.errAbsolute': '{{line}} — 리포 안의 상대 경로여야 합니다.',
+  'settings.globs.errUnbalanced': '{{line}} — 괄호 짝이 맞지 않습니다.',
+
+  'settings.dictLangs.label': '문법 사전 언어',
+  'settings.dictLangs.note':
+    '끈 언어는 **새 판**에서 빠집니다. 이미 익힌 개념의 복습은 그대로 돌아갑니다 — 껐다고 '
+    + '겹이 멈추면 다시 켰을 때 만기가 통째로 밀립니다.',
+  'settings.dictLangs.axis':
+    '화면에 보이는 글의 언어(위 「표시 언어」)와는 다른 축입니다. 여기서 고르는 것은 '
+    + '무엇을 배울지이고, 표시 언어는 그것을 어느 말로 읽을지입니다.',
+  'settings.dictLangs.count': '개념 {{n}}개',
+  'settings.dictLangs.empty': '아직 읽은 사전이 없습니다. 리포를 한 번 읽으면 여기 찹니다.',
+
+  'settings.look.motion': '모션',
+  'settings.look.motionSwitch': '모션 시스템 따름 · 항상 줄이기',
+  'settings.look.motionSystem': '시스템 따름',
+  'settings.look.motionReduce': '항상 줄이기',
+  'settings.look.motionNote':
+    '「시스템 따름」은 이 컴퓨터의 「동작 줄이기」 설정을 그대로 씁니다. 「항상 줄이기」는 '
+    + '전환 시간만 없애고 최종 모습은 그대로 둡니다 — 도장은 찍히고, 찍히는 데 걸리는 '
+    + '시간만 사라집니다.',
+
   'settings.look.locale': '표시 언어',
   'settings.look.localeSwitch': '표시 언어 한국어 · English',
   'settings.look.localeNote':

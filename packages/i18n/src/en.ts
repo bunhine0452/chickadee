@@ -36,6 +36,36 @@ export const en: Partial<Record<MessageKey, string>> = {
   'settings.identity.reclassified': 'Sorted {{mine}} of {{all}} commits as yours.',
   'settings.identity.reclassifyFailed': 'Could not sort them again. Re-reading the repo applies it.',
 
+  'settings.globs.label': 'Excluded paths',
+  'settings.globs.note':
+    'One glob per line. These are **added to** the built-in list (node_modules, build '
+    + 'output, lock files) \u2014 leaving this empty still skips those.',
+  'settings.globs.reingest': 'Changes here apply the next time the repo is read.',
+  'settings.globs.errNegation': '{{line}} \u2014 a negation (!) puts files back in.',
+  'settings.globs.errBackslash': '{{line}} \u2014 use / rather than a backslash.',
+  'settings.globs.errAbsolute': '{{line}} \u2014 must be a path inside the repo.',
+  'settings.globs.errUnbalanced': '{{line}} \u2014 the brackets do not close.',
+
+  'settings.dictLangs.label': 'Grammar dictionary languages',
+  'settings.dictLangs.note':
+    'A language you turn off is dropped from **new plates**. Reviews of concepts you '
+    + 'already know keep running \u2014 if layers stopped, everything would be overdue at '
+    + 'once when you turn it back on.',
+  'settings.dictLangs.axis':
+    'This is a different axis from the display language above. Here you choose what to '
+    + 'learn; the display language chooses which words you read it in.',
+  'settings.dictLangs.count': '{{n}} concepts',
+  'settings.dictLangs.empty': 'No dictionary read yet. Reading a repo once fills this in.',
+
+  'settings.look.motion': 'Motion',
+  'settings.look.motionSwitch': 'Motion follow the system \u00b7 always reduce',
+  'settings.look.motionSystem': 'Follow the system',
+  'settings.look.motionReduce': 'Always reduce',
+  'settings.look.motionNote':
+    '\u201cFollow the system\u201d takes this computer\u2019s reduce-motion setting as is. '
+    + '\u201cAlways reduce\u201d drops the transition time and keeps the end state \u2014 '
+    + 'the stamp still lands, it just stops taking time to get there.',
+
   'settings.look.locale': 'Display language',
   'settings.look.localeSwitch': 'Display language 한국어 · English',
   'settings.look.localeNote':

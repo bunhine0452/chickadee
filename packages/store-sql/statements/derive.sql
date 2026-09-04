@@ -5,6 +5,14 @@
 -- ───────── 사전 물질화 ─────────
 -- 개념 행이 먼저 있어야 concept_site 의 외래키가 선다.
 
+-- @name derive.dict_langs
+-- @params {}
+-- @row { lang: string, concept_count: number }
+-- 이 DB 에 실제로 물질화된 언어. 설정의 「문법 사전 언어」 체크박스가 이 목록을 그린다
+-- (05 §2.1 · D122) — 번들 사전을 열지 않고 원장이 아는 것만 본다.
+SELECT lang, SUM(concept_count) AS concept_count
+FROM dictionary_version GROUP BY lang ORDER BY lang;
+
 -- @name derive.dict_version_upsert
 -- @params { lang: string, version: string, sha256: string, conceptCount: number, loadedAt: number }
 -- @row void

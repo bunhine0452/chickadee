@@ -40,6 +40,11 @@ export interface IngestOptions {
   /** 리포 `package.json` 의 의존성. 프레임워크 사전의 게이트다 (D59). */
   dependencies?: readonly string[];
   identities?: readonly Identity[];
+  /**
+   * 사용자가 더한 제외 글롭 (05 §2.1 · D122). 기본 목록을 **덮지 않고 덧붙인다** —
+   * 비어 있는 설정이 「아무것도 제외하지 않는다」가 되면 `node_modules` 가 딸려 온다.
+   */
+  excludeGlobs?: readonly string[];
   now: number;
   /**
    * 진행 한 칸. `currentRelPath` 는 **지금 읽는 파일**이고 없을 수 있다 — Rust 의 `git` 단계는
@@ -154,7 +159,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestReport> {
         maxFilesPerCommit: LIMITS.maxFilesPerCommit,
         maxFiles: LIMITS.maxFiles,
         maxLineBytes: LIMITS.maxLineBytes,
-        excludeGlobs: [...EXCLUDE_GLOBS],
+        excludeGlobs: [...EXCLUDE_GLOBS, ...(options.excludeGlobs ?? [])],
         generatedMarkers: [...GENERATED_MARKERS],
       });
       options.onJob?.(jobId);

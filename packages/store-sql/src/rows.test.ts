@@ -247,7 +247,7 @@ const SETTINGS: Settings = {
   budgetMin: 15, tz: 'Asia/Seoul', rolloverHour: 4, desiredRetention: 0.9, newPerDay: 2,
   t1PerWeek: 2, newcomerFlag: 'suspect', theme: 'dark', trim: 'on', motion: 'reduce',
   identities: [{ email: 'me@example.com', name: '나' }], excludeGlobs: ['dist/**', '**/*.min.js'],
-  locale: 'en',
+  locale: 'en', dictLangs: ['ts', 'py'],
 };
 
 // ───────── 적재 ─────────

@@ -51,3 +51,37 @@ export const OVERSIZE_SITES_PER_CONCEPT = 20;
 const TEST_PATH = /(^|\/)(__tests__|test|tests|spec)\/|\.(test|spec)\.[a-z]+$/;
 
 export const isTestPath = (path: string): boolean => TEST_PATH.test(path);
+
+/**
+ * 사용자가 넣은 제외 글롭의 문제 (05 §2.1 · D122). 문제가 없으면 `null`.
+ *
+ * 완전한 문법 검사가 아니다 — `ignore` 크레이트의 override 파서는 Rust 에 있고 여기서
+ * 다시 구현하지 않는다. 여기서 막는 것은 **조용히 반대로 도는 네 가지**다:
+ * 부정(`!`)은 제외 목록에서 오히려 포함시키고, 역슬래시는 글롭이 아니라 Windows 경로
+ * 구분자이며, 절대 경로는 리포 상대 경로와 안 맞고, 짝이 안 맞는 괄호는 파서를 던지게
+ * 해서 인제스트 전체를 세운다.
+ */
+export type GlobProblem = 'negation' | 'backslash' | 'absolute' | 'unbalanced';
+
+export function globProblem(pattern: string): GlobProblem | null {
+  const p = pattern.trim();
+  if (p === '') return null;
+  if (p.startsWith('!')) return 'negation';
+  if (p.includes('\\')) return 'backslash';
+  if (p.startsWith('/') || /^[A-Za-z]:/.test(p)) return 'absolute';
+  const balanced = (open: string, close: string): boolean => {
+    let depth = 0;
+    for (const ch of p) {
+      if (ch === open) depth += 1;
+      else if (ch === close) depth -= 1;
+      if (depth < 0) return false;
+    }
+    return depth === 0;
+  };
+  if (!balanced('[', ']') || !balanced('{', '}')) return 'unbalanced';
+  return null;
+}
+
+/** 여러 줄 입력을 글롭 목록으로. 빈 줄과 앞뒤 공백은 버린다. */
+export const parseGlobs = (text: string): string[] =>
+  text.split('\n').map((l) => l.trim()).filter((l) => l !== '');

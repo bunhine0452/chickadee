@@ -74,6 +74,53 @@ test('감축 모션 — 잔존 애니메이션 0',
   });
 
 /**
+ * 설정으로 켠 감축(`<html data-motion="reduce">`)이 **미디어 쿼리와 같은 결과**를 내는지.
+ *
+ * 두 길이 있다는 것이 이 게이트가 필요한 이유다 — CSS 파일마다
+ * `@media (prefers-reduced-motion: reduce)` 블록과 `[data-motion="reduce"]` 규칙이 짝으로
+ * 있고, 한쪽에만 선택자를 더하면 설정 스위치가 조용히 아무것도 안 하게 된다. 여기서는
+ * **시스템 설정을 끈 채로** 속성만 세워 잰다.
+ */
+test('감축 모션 — 설정으로 켠 것도 미디어 쿼리와 같다 (05 §2.1)', async ({ page, app }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await gotoDev(page);
+  await page.evaluate(() => document.documentElement.setAttribute('data-motion', 'reduce'));
+  await startSession(page);
+  await page.keyboard.press(`Digit${answerKey(app)}`);
+  await page.keyboard.press('Enter');
+  await page.locator('.fb.on').waitFor();
+
+  // ① 최종 포즈는 남는다 — 「모션 0」이 아니다.
+  await expect(page.locator('.fb.on')).toBeVisible();
+  await expect(page.locator('.fb .stamp')).toBeVisible();
+
+  // ② 돌고 있는 것은 없다.
+  const running = await page.evaluate((limit) => document.getAnimations()
+    .map((a) => ({
+      ms: Number(a.effect?.getComputedTiming().duration ?? 0),
+      target: (a.effect as KeyframeEffect | null)?.target?.className ?? '',
+    }))
+    .filter((r) => r.ms > limit), RESIDUAL_MS);
+  expect(running, JSON.stringify(running, null, 1)).toEqual([]);
+});
+
+/**
+ * 「시스템 따름」은 아무것도 걸지 않는다 — 속성이 `system` 이면 감축 규칙이 붙으면 안 된다.
+ * 이것이 없으면 위 테스트는 「속성이 무엇이든 늘 감축」을 통과로 읽는다.
+ */
+test('감축 모션 — data-motion="system" 은 아무것도 줄이지 않는다', async ({ page, app: _app }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await gotoDev(page);
+  await page.evaluate(() => document.documentElement.setAttribute('data-motion', 'system'));
+  const ms = await page.evaluate(() => {
+    const el = document.querySelector('.press-btn');
+    return el === null ? null : getComputedStyle(el).transitionDuration;
+  });
+  expect(ms).not.toBeNull();
+  expect(msOf(ms), `press-btn = ${String(ms)}`).toBeGreaterThan(RESIDUAL_MS);
+});
+
+/**
  * 감축 모드가 **꺼져 있을 때**도 같은 자리가 서는지. 이것이 없으면 위 테스트는
  * 「감축 모드에서 아무것도 안 그린다」를 통과로 읽는다.
  */

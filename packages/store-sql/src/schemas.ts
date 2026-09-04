@@ -282,6 +282,7 @@ export const settingsSchema = z.object({
   identities: z.array(z.object({ email: z.string(), name: z.string() })),
   excludeGlobs: z.array(z.string()),
   locale: z.enum(['ko', 'en']),
+  dictLangs: z.array(z.string()),
 });
 
 /**
@@ -304,6 +305,7 @@ export const SETTINGS_KEYS = {
   identities: 'identities',
   excludeGlobs: 'exclude_globs',
   locale: 'locale',
+  dictLangs: 'dict_langs',
 } as const satisfies Record<keyof Settings, string>;
 
 export type SettingsField = keyof typeof SETTINGS_KEYS;

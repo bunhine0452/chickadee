@@ -161,5 +161,10 @@ export interface Settings { budgetMin: number; tz: string; rolloverHour: number;
   t1PerWeek: number; newcomerFlag: 'none' | 'suspect' | 'confirmed'; theme: 'light' | 'dark'; trim: 'on' | 'off';
   motion: 'system' | 'reduce'; identities: { email: string; name: string }[]; excludeGlobs: string[];
   /** 표시 언어 (D117). `ko` 가 정본이고 `en` 은 번역이 있는 문구만 바뀐다. */
-  locale: 'ko' | 'en'; }
+  locale: 'ko' | 'en';
+  /**
+   * 새 판을 만들 문법 사전 언어 (D122). **비면 전부 켜진 것**이다 — 빈 목록이
+   * 「아무 언어도 안 함」이 되면 첫 실행에서 큐가 통째로 빈다. 표시 언어와 다른 축이다.
+   */
+  dictLangs: string[]; }
 // 기본값: newPerDay = 2, budgetMin = 15 (§5.1 LIMIT)

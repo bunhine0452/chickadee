@@ -10,7 +10,9 @@ export type { CountableSite, GapInput, GapRow } from './gaps.js';
 export {
   EXCLUDE_DIRS, EXCLUDE_FILES, EXCLUDE_GLOBS, GENERATED_MARKERS, LIMITS,
   OVERSIZE_FILE_LINES, OVERSIZE_SITES_PER_CONCEPT, OVERSIZE_SITE_LINES, isTestPath,
+  globProblem, parseGlobs,
 } from './ingest-defaults.js';
+export type { GlobProblem } from './ingest-defaults.js';
 export { assignUnits, MIN_FILES_FOR_UNIT, OTHER_UNIT } from './units.js';
 export type { Assignment, UnitOf } from './units.js';
 export {

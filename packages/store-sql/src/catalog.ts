@@ -37,6 +37,7 @@ export const statements = {
   "derive.commits": "SELECT id, sha, parent_count, author_email, author_name, message, files_n, insertions\nFROM git_commit WHERE repo_id = :repoId AND is_reachable = 1 ORDER BY authored_at DESC;\n\n-- ───────── 사용처 ─────────",
   "derive.concept_retire_missing": "UPDATE concept SET is_retired = 1 WHERE id NOT IN (SELECT value FROM json_each(:ids));",
   "derive.concept_upsert": "INSERT INTO concept (id, lang, name_ko, token, kind, universal_id, track_default, dict_version_id, is_retired)\nVALUES (:id, :lang, :nameKo, :token, :kind, :universalId, :trackDefault, :dictVersionId, 0)\nON CONFLICT (id) DO UPDATE SET\n  lang = excluded.lang, name_ko = excluded.name_ko, token = excluded.token, kind = excluded.kind,\n  universal_id = excluded.universal_id, track_default = excluded.track_default,\n  dict_version_id = excluded.dict_version_id, is_retired = 0;\n\n-- 사전에서 사라진 개념은 지우지 않는다 — 학습 기록이 참조한다 (02 원장 규칙).",
+  "derive.dict_langs": "-- 이 DB 에 실제로 물질화된 언어. 설정의 「문법 사전 언어」 체크박스가 이 목록을 그린다\n-- (05 §2.1 · D122) — 번들 사전을 열지 않고 원장이 아는 것만 본다.\nSELECT lang, SUM(concept_count) AS concept_count\nFROM dictionary_version GROUP BY lang ORDER BY lang;",
   "derive.dict_version_id": "SELECT id FROM dictionary_version WHERE lang = :lang AND version = :version;",
   "derive.dict_version_upsert": "INSERT INTO dictionary_version (lang, version, sha256, concept_count, loaded_at)\nVALUES (:lang, :version, :sha256, :conceptCount, :loadedAt)\nON CONFLICT (lang, version) DO UPDATE SET\n  sha256 = excluded.sha256, concept_count = excluded.concept_count, loaded_at = excluded.loaded_at;",
   "derive.edge_clear": "DELETE FROM import_edge WHERE from_file_id = :fileId;\n\n-- 같은 (from, to, kind) 가 두 번 오는 것은 정상이다 — 한 파일이 같은 모듈을 두 줄에서\n-- 가져올 수 있다. `confidence` 는 더 확실한 쪽이 이긴다: syntactic 이 heuristic 을 덮는다.",
@@ -209,6 +210,7 @@ declare module '@chickadee/ipc-client' {
     "derive.commits": { params: { repoId: number }; row: { id: number, sha: string, parent_count: number, author_email: string | null, author_name: string | null, message: string, files_n: number, insertions: number } };
     "derive.concept_retire_missing": { params: { ids: string[] }; row: never };
     "derive.concept_upsert": { params: { id: string, lang: string, nameKo: string, token: string | null, kind: 'universal' | 'lang', universalId: string | null, trackDefault: 't0' | 't1' | 't2' | 't3', dictVersionId: number }; row: never };
+    "derive.dict_langs": { params: {}; row: { lang: string, concept_count: number } };
     "derive.dict_version_id": { params: { lang: string, version: string }; row: { id: number } };
     "derive.dict_version_upsert": { params: { lang: string, version: string, sha256: string, conceptCount: number, loadedAt: number }; row: never };
     "derive.edge_clear": { params: { fileId: number }; row: never };
