@@ -243,6 +243,8 @@ D48~D62 는 M0(골격), D63~D71 은 M1(인제스트), D72~D82 는 M2(T0 세션),
 | D121 | 내 커밋 identity 는 **커밋 author 에서만** 제안한다 — `git config` 는 읽지 않는다 | 05 §2.1 의 「첫 열기 때 `git config` + author 상위 5명 자동 제안」에서 **`git config` 를 뺀다**. 설정 「학습」 절이 `settings.identities` 를 목록으로 편집하고(추가·삭제·제안 고르기), 제안은 `suggestIdentitiesFor(repoId)` 가 `derive.commits` 의 author 를 빈도순으로 낸다. identity 가 비어 있을 때만 화면을 열며 자동으로 한 번 부른다 — 이미 정해 둔 사람이 있으면 커밋 전부를 읽는 쿼리를 돌리지 않는다. 목록을 고치면 **재인제스트 없이** `reclassifyCommits(repoId, identities)` 가 `git_commit.kind`·`author_matched` 두 열만 다시 쓰고 「몇 건 중 몇 건이 내 것이 되었나」를 그 자리에서 말한다 | ① `git config user.email` 을 읽으려면 Rust 명령이 하나 더 필요한데 **줄 예산이 2,300/2,300 으로 차 있다**(D68) — 그 한 줄을 위해 예산을 여는 것은 값이 안 맞고, 커밋 author 상위 5명이면 같은 답이 거의 언제나 1순위로 나온다. ② 재인제스트를 요구하지 않는 이유: identity 가 바꾸는 것은 `git_commit` 두 열뿐인데 재인제스트는 수천 파일을 다시 파싱한다. ③ **이 행이 고치는 것은 문서가 아니라 코드다** — `flow.ts` 가 `runIngest` 에 `identities: []` 를 상수로 넘기고 있어 `isMine()` 이 언제나 거짓이었고, 그래서 `author_matched` 가 전부 0 이며 T2 정답지(`isAnswerKey` = 내 것 + normal)가 **한 장도 서지 않았다**. 판정 함수·설정 타입·저장 키·제안 함수는 다 있었고 잇는 줄 하나가 없었다 | 05 §2.1 `settings` 행 · `packages/concepts/src/identities.ts` · `apps/desktop/src/flow.ts` |
 | D122 | 설정의 빈 칸 셋을 채우며 정한 규약 — 모션 속성 · 「추가」 제외 글롭 · 사전 언어 필터 | ① **모션**: `<html data-motion>` 을 세우는 자리는 `applyMotion()` 하나(`applyTheme`·`applyTrim`·`applyLocale` 옆)이고 `'system'` 도 **속성으로 적는다** — CSS 선택자는 `="reduce"` 만 보므로 효과는 없고, 대신 게이트가 지금 무엇이 걸려 있는지를 DOM 에서 읽는다. ② **제외 글롭**: `settings.exclude_globs` 는 `EXCLUDE_GLOBS` 를 **덮지 않고 덧붙인다**(03 §1.2 의 「추가 제외 목록」을 코드로 확정) — 비어 있는 설정이 「아무것도 제외 안 함」이 되면 `node_modules` 가 딸려 온다. 검사기 `globProblem()` 은 `ignore` 파서를 다시 구현하지 않고 **조용히 반대로 도는 넷**(`!` 부정 · 역슬래시 · 절대 경로 · 짝 안 맞는 괄호)만 막으며, 문제 있는 줄은 막지 않고 말하되 저장에서 뺀다. ③ **사전 언어**: `Settings.dictLangs` 를 더한다 — **빈 목록 = 전부 켜짐**이고, 끈 언어는 **새 판에서만** 빠진다(복습은 계속 돈다). 목록은 새 statement `derive.dict_langs` 가 원장의 `dictionary_version` 에서 낸다. ④ 02 §8.2·§2.2 의 `Settings` 에 `locale`(D117 이 반영에서 빠뜨렸다)과 `dictLangs` 를 적는다 | ① 두 곳에서 속성을 세우면 나중에 켠 쪽이 이긴다. `'system'` 을 「속성 없음」으로 두면 「시스템 따름」과 「아직 안 정했다」를 화면 밖에서 구별할 수 없다. ② 검사기를 통과 조건으로 걸면 정당한 글롭이 걸릴 때 사용자가 빠져나갈 길이 없다 — Rust 의 override 파서가 진짜 심판이고 이쪽은 예고다. ③ 빈 목록을 「아무 언어도 안 함」으로 읽으면 첫 실행에서 큐가 통째로 빈다. 복습까지 끄면 언어를 다시 켰을 때 만기가 한꺼번에 밀려 하루 예산(D12)이 무너진다 — 원장에 쌓인 겹은 언어 설정과 무관하다. 목록의 출처가 번들 사전이 아니라 원장인 이유: 체크박스는 **실제로 카드를 만들 수 있는 것**만 보여야 거짓말을 하지 않는다 | 02 §2.2 `settings` · 02 §8.2 · 03 §1.2 · 05 §2.1 · `packages/store-sql/statements/derive.sql` |
 
+| D119 | 리포 **서가**(`repos`) 화면을 신설한다 — 전환은 마스트헤드, 관리는 서가 | 05 §2.1 화면 표에 `repos` 행을 더하고 §2.4 의 리포 전환을 **두 길**로 나눈다: 마스트헤드 `RepoSwitcher`(listbox)는 **고르기**만 하고, 추가·이동(`relocateRepo`)·삭제(`removeRepo(purge)`)·상태(`ok|missing|detached`)는 서가 화면이 맡는다. 홈은 그대로 활성 리포 하나를 본다. 리포별 요약은 `repo.overview` statement 한 개로 긷는다 — `listRepos()` 처럼 리포마다 `repo_probe` 를 부르지 않는다 | 데이터 층은 M1 에 다 들어왔는데(`packages/concepts/src/repos.ts` 의 register·list·relocate·remove 와 status 파생) **그것을 부르는 화면이 하나도 없다.** `FirstRun` 이 `repos.length === 0` 에서만 뜨므로 첫 리포를 넣고 나면 **둘째를 추가할 문이 UI 에 없고**, 마스트헤드의 리포 칸은 M2 이후 `disabled` 스텁으로 남았다. 스위처만 살리면 이동·삭제·상태가 갈 자리가 없어 설정 화면에 얹히는데, 설정은 「이 앱이 나를 어떻게 다룰지」이지 교재 목록이 아니다 | 05 §2.1 · §2.4 · `apps/desktop/src/screens/repos/` · `packages/store-sql/statements/repo.sql` |
+| D120 | 클론 코스는 일일 큐 **밖** 별도 모드다 (사용자 결정) | 리포 하나를 순서대로 통째로 필사하는 「코스」를 T1 의 확장이 아니라 **별도 화면 + 별도 원장**으로 둔다. 예산(D12 10~25분)과 FSRS 큐를 건드리지 않고 채점 결과만 `review_log` 로 개념 겹에 반영한다. 순서는 커밋 20개 이상이면 커밋 순, 아니면 `unit.order_idx` → `import_edge` 위상 정렬이고 난수는 0이다. 조각 나누기는 기존 `segment()`, 채점은 기존 `t1-align`·`t1-ast`·`t1-result` 를 그대로 쓴다 | ① 코스 한 판이 수십 분이라 큐에 넣으면 `estMin`·`newPerDay` 를 다시 정해야 하고 02 §5 의 스케줄러 규칙을 통째로 연다. ② 원장 쪽은 선택지가 없다 — `review_log.session_id`·`session_item_id` 가 NOT NULL 이고 02 §2.2 가 원장 변경을 `ALTER ADD COLUMN` 으로만 허용해 열을 풀 수 없다. 그래서 큐 밖 모드라도 **코스 실행마다 `session` 행 하나 + 조각마다 `session_item`** 을 만든다. SQLite 는 CHECK 제약도 ALTER 로 못 고치므로 새 `role` 값 대신 목록 안의 `manual` 을 쓰고 코스 소속은 `clone_step.review_log_id` 로 가른다. ③ Rust 는 0줄이다 — 원문은 기존 `file_read_lines` 로 읽는다(D68 예산 2,300/2,300) | 00 §5 M7 · `packages/store-sql/migrations/0003_clone.sql` · `apps/desktop/src/screens/clone/` · **정본 §2 트랙 표에 코스 행이 필요하다 — 사용자 확인 대기** |
 ### 4.3 정본 갱신 (반영됨 — discussion.md 로그 2026-09-02T18:20, 「결론」 §2·§3·§5·§6)
 
 아래 표는 이 리뷰가 정본에 요구한 변경의 기록이다. 정본 「결론」에 이미 반영됐으므로 새 세션은 정본을 그대로 읽으면 된다. 표의 「현재」는 반영 전 문구.
@@ -405,6 +407,21 @@ D48~D62 는 M0(골격), D63~D71 은 M1(인제스트), D72~D82 는 M2(T0 세션),
 | 항목 | 선행 | 규모 |
 |---|---|---|
 | 02 · FSRS 개인화 잡 (「MVP 이후 · TS 우선」) | `review_log` ≥ 1,000행 · `ts-fsrs` 옵티마이저 확인 | 2 |
+
+---
+
+### M7 · 0.2 기능 요청 넷
+
+§5 의 다른 마일스톤과 달리 사용자가 직접 요청한 것이고 M6 와 배타가 아니다. 진행 상태의 정답은 ocul-pm 플랜 넷(`chickadee-i18n` · `chickadee-settings-gaps` · `chickadee-repo-shelf` · `chickadee-clone-course`)이고 이 표는 배치 근거로만 남는다. 인계는 `docs/handoff/v02.md`.
+
+| 항목 | 선행 | 규모 |
+|---|---|---|
+| 언어 선택(한/영) — i18n 뼈대 · 문구 전수 · 사전 영문화 | D117 · D118 | 13.5 |
+| 설정창 보완 — identity 배선 · 모션 · 제외 글롭 · 사전 언어 | D121 · D122 | 2.8 |
+| 리포 서가 — 서가 화면 + 마스트헤드 스위처 | D119 | 3 |
+| 프로젝트 전체 클론 코스 | D120 · 정본 §2 | 7.8 |
+
+**끝났다는 증거**: 첫 실행이 언어를 묻고 `en` 으로 열면 카드 본문까지 영어이며, 리포 둘을 오가며 학습하고 하나를 옮기거나 지울 수 있고, 리포 하나를 코스로 열어 조각 순서대로 필사한 것이 나갔다 와도 그 자리에서 이어진다. Rust 는 0줄 늘었다.
 
 ---
 
