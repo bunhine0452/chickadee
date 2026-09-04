@@ -1,0 +1,205 @@
+/* 서가 (D119 · 05 §2.1 `repos`). 목업이 없는 화면이라 설정 화면과 같은 패널 규칙을 쓴다 —
+   2.5px 괘선 · `--paper-2` 바탕 · 종이 두께 그림자. 인쇄 물리(결·어긋남)는 쓰지 않는다:
+   여기도 본문을 읽는 화면이고 05 §4.3 이 물리를 본문 단 밖으로만 허용한다.
+   클래스는 `shelf-` 로 따로 준다(전역 충돌 방지).
+
+   화면 전체를 종이 한 장으로 깐다(`.firstrun-in` 과 같은 판). 책상(`--desk`) 위에 글자를
+   바로 놓으면 `--ink-soft` 가 6.19:1 이라 06 §2 의 종이 7:1 을 못 넘긴다 — 대비 게이트가
+   그 자리에서 잡는다. */
+.shelf {
+  max-width: 52em;
+  margin: 24px auto 48px;
+  padding: 28px 28px 32px;
+  border: 2.5px solid var(--rule);
+  background: var(--paper);
+  box-shadow: 6px 7px 0 var(--edge), var(--lamp);
+}
+
+.shelf:focus-visible {
+  outline: 3px solid var(--t0);
+  outline-offset: 3px;
+}
+
+.shelf-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2.5px solid var(--rule);
+}
+
+.shelf-head h1 {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--f-poster);
+  font-size: var(--fs-24);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.shelf .pl {
+  margin-left: 8px;
+  color: var(--ink-soft);
+  font-family: var(--f-ui);
+  font-size: var(--fs-13);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.shelf-head-act {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+/* 서가에 서 있는 유일한 산문. 「리포를 바꾸면 지금 세션은 어떻게 되나」의 답이라 목록보다
+   먼저 온다. 행 길이 규칙은 05 §9 — `--measure` 하나로 잡는다. */
+.shelf-lede {
+  max-width: var(--measure);
+  margin: 0 0 16px;
+  color: var(--ink-soft);
+  font-size: var(--fs-15);
+  line-height: var(--lh-body);
+}
+
+.shelf-empty {
+  max-width: var(--measure);
+  color: var(--ink-soft);
+  font-size: var(--fs-15);
+  line-height: var(--lh-body);
+}
+
+.shelf-list {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ───────── 카드 한 장 ───────── */
+
+.shelf-card {
+  padding: 14px 16px 15px;
+  border: 2.5px solid var(--rule);
+  background: var(--paper-2);
+  box-shadow: 4px 5px 0 var(--edge), var(--lamp);
+}
+
+/* 못 읽는 리포는 바탕을 한 칸 뒤로 물린다. 색으로만 구분하지 않는다 — 배지 문구가 정본이고
+   이 바탕은 거들 뿐이다 (05 §9). */
+.shelf-card[data-status="missing"],
+.shelf-card[data-status="detached"] {
+  background: var(--paper-3);
+}
+
+.shelf-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.shelf-name {
+  color: var(--ink);
+  font-size: var(--fs-18);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.shelf-badge {
+  padding: 1px 7px;
+  border: 1px solid var(--rule);
+  color: var(--ink-soft);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  letter-spacing: 0.04em;
+}
+
+.shelf-now {
+  color: var(--ink-soft);
+  font-size: var(--fs-13);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.shelf-path {
+  display: block;
+  overflow-wrap: anywhere;
+  margin-top: 4px;
+  color: var(--ink-soft);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+}
+
+/* ───────── 숫자 넉 칸 ───────── */
+
+.shelf-figs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin: 12px 0 0;
+}
+
+.shelf-figs > div {
+  padding: 2px 16px;
+  border-left: 1px solid var(--rule);
+}
+
+.shelf-figs > div:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.shelf-figs dt {
+  color: var(--ink-soft);
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.shelf-figs dd {
+  margin: 1px 0 0;
+  color: var(--ink);
+  font-size: var(--fs-16);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.shelf-note {
+  max-width: var(--measure);
+  margin: 10px 0 0;
+  color: var(--ink);
+  font-size: var(--fs-14);
+  line-height: var(--lh-body);
+}
+
+.shelf-act {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 12px;
+}
+
+/* ───────── 2단 확인 ───────── */
+
+.shelf-ask {
+  margin-top: 12px;
+  padding: 11px 13px 13px;
+  border: 2px dashed var(--rule);
+  background: var(--paper);
+}
+
+.shelf-ask p {
+  max-width: var(--measure);
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--fs-15);
+  line-height: var(--lh-body);
+}

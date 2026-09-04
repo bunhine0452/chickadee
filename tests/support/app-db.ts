@@ -107,6 +107,14 @@ export function makeAppDb(): AppDb {
         return '/w/data/exports';
       case 'parse_langs':
         return [];
+      // 서가가 「폴더가 아직 있나」를 묻는 자리 (D119). 픽스처 리포는 디스크에 없지만
+      // 하네스가 던지면 화면이 전부 `missing` 으로 보인다 — 원장에 적힌 그대로 답한다.
+      case 'repo_probe': {
+        const row = db.prepare('SELECT root_path, fingerprint, head_sha FROM repo WHERE root_path = ?')
+          .get(args['path'] as string) as { root_path: string; fingerprint: string; head_sha: string | null } | undefined;
+        if (row === undefined) throw Object.assign(new Error('FS_NOT_FOUND'), { code: 'FS_NOT_FOUND' });
+        return { rootPath: row.root_path, fingerprint: row.fingerprint, headCommit: row.head_sha };
+      }
       // 파일을 읽는 명령은 실패한다 — 픽스처 리포가 없고, 생성기는 그때 `excerpt` 로
       // 물러선다. 그 갈래가 화면에 뜨는 것도 게이트가 봐야 하는 것이다.
       case 'file_read_lines': case 'file_read_block': case 'parse_snippet':

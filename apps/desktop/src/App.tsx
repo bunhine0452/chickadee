@@ -1,6 +1,6 @@
 import { loadDict } from '@chickadee/dictionary';
 import type { Locale } from '@chickadee/i18n';
-import { ipc, log } from '@chickadee/ipc-client';
+import { log } from '@chickadee/ipc-client';
 import type { ConceptId, RepoInfo } from '@chickadee/store-sql';
 import { Toast } from '@chickadee/ui';
 import { useEffect, useState } from 'react';
@@ -10,11 +10,13 @@ import { currentBuild, ingestFingerprint, needsReingest } from './data/maintenan
 import { applyLocale, saveSetting } from './data/settings.js';
 import { makePlateFor, pickPlateNow, type ManualResult } from './data/manual.js';
 import { previewToday } from './data/session.js';
-import { addRepo, cancelIngest, ingest, refreshHome, report, todayKey } from './flow.js';
+import { cancelIngest, ingest, refreshHome, report, todayKey } from './flow.js';
 import { HomeScreen } from './screens/home/HomeScreen.js';
 import { conceptLabel, type HomeData } from './screens/home/data.js';
 import { FirstRun } from './screens/home/empty.js';
 import { IngestScreen } from './screens/ingest/IngestScreen.js';
+import { pickFolder } from './screens/repos/data.js';
+import { ReposScreen } from './screens/repos/ReposScreen.js';
 import { SettingsScreen } from './screens/settings/SettingsScreen.js';
 import { SessionScreen } from './screens/session/SessionScreen.js';
 import { startSession } from './session-flow.js';
@@ -103,6 +105,16 @@ export function App(): React.JSX.Element {
     return (
       <>
         <SettingsScreen onBack={() => useUi.getState().go('home')} />
+        <Toast msg={ui.toast ?? ''} on={ui.toast !== undefined} />
+      </>
+    );
+  }
+
+  // 서가는 리포가 0개면 뜨지 않는다 — 그때는 `setRepos` 가 첫 실행 화면으로 돌린다 (D119).
+  if (ui.screen === 'repos') {
+    return (
+      <>
+        <ReposScreen onBack={() => useUi.getState().go('home')} />
         <Toast msg={ui.toast ?? ''} on={ui.toast !== undefined} />
       </>
     );
@@ -209,11 +221,6 @@ async function place(
     : `「${label}」 판을 ${where}에 넣었습니다.`);
 }
 
-/** 폴더 고르기. 대화상자도 `@tauri-apps/*` 라 `ipc-client` 를 거친다 (01 §2). */
-async function pickFolder(): Promise<void> {
-  const picked = await ipc.dialog.pickFolder('리포 폴더 고르기');
-  if (picked !== null) await addRepo(picked);
-}
 
 /** 세션 시작 직전과 수동 새로고침이 부르는 재스캔 (03 §1.7). */
 export const rescan = (): Promise<void> => ingest('incremental');

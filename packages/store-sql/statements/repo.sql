@@ -85,3 +85,39 @@ DELETE FROM ingest_run WHERE repo_id = :id;
 -- @params { id: number, at: number }
 -- @row void
 UPDATE card SET retired_at = :at WHERE repo_id = :id AND retired_at IS NULL;
+
+-- 서가 화면 한 벌 (D119 · 05 §2.1 `repos`). 리포마다 한 번씩 묻지 않는다 —
+-- `listRepos()` 는 상태를 알려고 리포마다 `repo_probe` 를 부르므로 목록이 리포 수에
+-- 비례해 느려진다. 여기서는 등록된 전부를 **한 번에** 긷고, 폴더가 실제로 있는지만
+-- 화면이 그린 뒤에 따로 확인한다.
+--
+-- `due_n` 은 오늘 큐의 **복습 몫**이다. 새 개념 몫은 `new_per_day` 상한과 선행 판정이
+-- 걸려 TS 가 정하므로(02 §6.2) SQL 이 셀 수 있는 것이 아니다 — 화면도 「오늘 만기」로
+-- 적고 「오늘 N판」이라고 말하지 않는다.
+-- @name repo.overview
+-- @params { eod: number, day: string }
+-- @row { id: number, root_path: string, name: string, fingerprint: string, detached_at: number | null, added_at: number, last_ingest_at: number | null, concepts: number, avg_layer: number | null, due_n: number }
+WITH placed AS (
+  SELECT u.repo_id AS repo_id, n.concept_id AS concept_id
+  FROM unit u JOIN unit_node n ON n.unit_id = u.id
+  GROUP BY u.repo_id, n.concept_id
+),
+ink AS (
+  SELECT p.repo_id AS repo_id, COUNT(*) AS concepts, AVG(COALESCE(m.layer, 0)) AS avg_layer
+  FROM placed p LEFT JOIN mastery m ON m.concept_id = p.concept_id
+  GROUP BY p.repo_id
+),
+due AS (
+  SELECT k.repo_id AS repo_id, COUNT(DISTINCT m.concept_id) AS due_n
+  FROM card k JOIN mastery m ON m.concept_id = k.concept_id
+  WHERE k.retired_at IS NULL AND m.state <> 0 AND m.due_at <= :eod
+    AND NOT EXISTS (SELECT 1 FROM review_log r WHERE r.concept_id = m.concept_id
+                    AND r.day_key = :day AND r.ok = 1)
+  GROUP BY k.repo_id
+)
+SELECT r.id, r.root_path, r.name, r.fingerprint, r.detached_at, r.added_at, r.last_ingest_at,
+       COALESCE(ink.concepts, 0) AS concepts, ink.avg_layer, COALESCE(due.due_n, 0) AS due_n
+FROM repo r
+LEFT JOIN ink ON ink.repo_id = r.id
+LEFT JOIN due ON due.repo_id = r.id
+ORDER BY r.added_at;

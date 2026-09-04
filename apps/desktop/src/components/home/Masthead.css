@@ -127,13 +127,18 @@
   font-size: var(--fs-15);
 }
 
-/* 리포 전환 자리 — 목록(listbox)은 M2 가 붙인다. 지금은 칸 모양 그대로. */
+/* 리포 전환 (05 §2.4). 칸 모양은 목업의 값 칸 그대로고, 열렸을 때 뜨는 목록은
+   `screens/repos/RepoSwitcher.css` 가 들고 있다. */
 .repo-switch {
   padding: 0;
   border: 0;
   background: none;
   text-align: left;
   cursor: default;
+}
+
+.repo-switch:disabled {
+  color: var(--ink-soft);
 }
 
 .ctl {

@@ -180,6 +180,23 @@ export async function toNight(page: Page): Promise<void> {
   await settled(page);
 }
 
+/**
+ * 서가 (D119 · 05 §2.4). 마스트헤드 스위처를 열고 목록 끝의 「전부 보기」로 간다 —
+ * 이 화면으로 가는 길 자체가 마우스 없이 열려야 한다.
+ */
+export async function toShelf(page: Page): Promise<void> {
+  await page.locator('button.repo-switch').focus();
+  await page.keyboard.press('Enter');
+  await page.locator('ul[role="listbox"]').waitFor();
+  await page.keyboard.press('End');
+  await page.keyboard.press('Enter');
+  // 목록이 설 때까지 기다린다 — `main.shelf` 는 머리말만으로도 먼저 뜨므로 여기서 멈추면
+  // 「검사 0건」에 가까운 화면을 재게 된다.
+  await page.locator('main.shelf ul.shelf-list li, main.shelf p.shelf-empty').first().waitFor();
+  await page.evaluate(() => document.fonts.ready);
+  await settled(page);
+}
+
 /** 인쇄 부속 숨김 (05 §4.3 — 텍스트·레이아웃은 1px 도 바뀌지 않는다). */
 export async function toggleTrim(page: Page): Promise<void> {
   const sw = page.getByRole('switch', { name: '인쇄 부속 보이기 · 숨기기' });

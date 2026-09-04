@@ -11,7 +11,7 @@ import { test, expect } from '../support/fixture.js';
 import type { Page } from '@playwright/test';
 
 import {
-  T1_SKIP, T2_SKIP, answerKey, gotoDev, loadAllow, startSession, toNight, toSummary,
+  T1_SKIP, T2_SKIP, answerKey, gotoDev, loadAllow, startSession, toNight, toShelf, toSummary,
 } from '../support/gates.js';
 
 const axeAllow = loadAllow('axe.allow.json').entries;
@@ -169,6 +169,11 @@ const AXE_SCREENS: Array<{ name: string; open: (page: Page) => Promise<void> }> 
   {
     name: '야간반',
     open: async (page) => { await gotoDev(page); await toNight(page); },
+  },
+  // 서가는 목록(listbox)과 2단 확인이 새로 들어온 자리라 aria 를 여기서 한 번 더 받는다 (D119).
+  {
+    name: '서가',
+    open: async (page) => { await gotoDev(page); await toShelf(page); },
   },
 ];
 

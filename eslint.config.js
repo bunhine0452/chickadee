@@ -140,6 +140,9 @@ module.exports = tseslint.config(
   {
     ignores: [
       '**/node_modules/**',
+      // 병렬 세션이 쓰는 격리 워크트리. 리포 전체의 사본이라 여기까지 훑으면 `design/**`
+      // 같은 무시 대상이 경로가 달라져 되살아난다.
+      '.claude/worktrees/**',
       '**/dist/**',
       '**/target/**',
       '**/.venv/**',

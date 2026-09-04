@@ -83,6 +83,7 @@ Chickadee 설계 문서 6편 중 다섯 번째. **목업 두 장(`design/ink-hom
 | `home` | 경로 홈 = 내 리포의 기능 지도 | `ink-home.html` | 마스트헤드(로고·작업 지시서·리포 전환·스위치 2) · 오늘의 인쇄(시간 비례 큐 + 목록 + 「인쇄 시작」) · 잉크 겹 척도 · 다시 찍을 개념 · 판이 없는 문법 · 대지(시트) 목록 · 미조판 예고 · 14일 컬러 바 |
 | `session` (오버레이) | 교정쇄 = 오늘의 세션 | `ink-session.html` | 작업 띠(큐·남은 시간·나가기) + 작업대(교정지 한 장). T0/T1/T2 판, 사다리, LIFER 베일, 인쇄 완료 요약 |
 | `ingest` | 판 짜기 = 리포 읽는 중 | 없음 (신규) | 단계 4 = Rust `walk·parse·git·write` 를 「git 읽기」「파싱」 2칸으로, TS 파생 `derive`·`cards` 를 「개념 추출」「판 짜기」 2칸으로. blame 은 배경(표시 없음). **시간 비례 큐 컴포넌트로 재사용**해 표시. 스피너 금지. 취소 가능. 끝나면 `home` |
+| `repos` | 서가 = 등록한 리포 전부 | 없음 (신규) | 리포마다 카드 한 장: 이름 · 경로 · 상태 배지(`ok`·`missing`·`detached`) · 마지막 읽기 · 개념 수 · 겹 평균 · 오늘 만기. 목록은 `repo.overview` **한 번**으로 긷는다 — `listRepos()` 는 상태를 알려고 리포마다 `repo_probe` 를 부르므로 목록이 리포 수에 비례해 느려진다. 폴더가 아직 있는지는 **그린 뒤에** 확인해 `missing` 으로 고친다. 「리포 추가」는 첫 실행과 같은 폴더 대화상자고, `missing` 이면 「위치 알려주기」가 `relocateRepo` 를 부른다(첫 커밋이 다르면 거절). 「목록에서 빼기 / 전부 지우기」는 모달 없이 카드 안에서 **2단**으로 묻고, `purge` 여도 **카드는 은퇴만** 한다 — `review_log.card_id` 가 NOT NULL 이라 지우면 학습 기록이 끊긴다(D31). 확인 문구가 그 사실을 말한다. 여는 문은 마스트헤드 스위처의 「전부 보기」와 설정 「리포」 절 둘이다 (D119) |
 | `first-run` | 첫 실행 · 빈 상태 | 없음 (신규) | 리포가 0개: 로고 배지 + 한 문단 + **0단계 언어 고르기(한국어/English, D117)** + 「리포 등록」 버튼 하나. 고른 값은 `settings.locale` 로 그 자리에서 내려간다 — DB 는 `boot.ts` 가 리포 0개에서도 열어 둔다. 리포는 있는데 판이 0개(커밋 2개짜리 리포 등): 홈의 대지 자리에 `Forecast` 변형 「이 리포로는 T2 를 짤 수 없습니다 — 커밋 N개」 |
 | `newcomer` | 「프로그래밍이 처음」 안내 | `discussion` §1·§4 | 02/03 이 「바닥 아래 바닥」으로 판정하면 홈 상단에 정직한 안내 시트: 이 앱이 못 하는 것 · 외부 입문 자료 링크(`plugin-opener`) · 「그래도 계속」. 게이트가 아니라 안내 |
 | `settings` | 설정 | 없음 (신규) | **표시 언어(한국어/English, D117)** · 주간/야간/시스템 · 부속 숨김 · 모션 감축(시스템 따름/항상) · 하루 분량 10~25분 · LLM 키(선택, 저장은 `06`) · 문법 사전 언어(**끈 언어는 새 판에서만 빠진다**, D122) · **제외 글롭**(기본 목록에 더해진다, 03 §1.2 · D122) · 내 커밋 identity(`email·name` 목록, **커밋 author 상위 5명**을 첫 열기 때 자동 제안 — `git config` 는 읽지 않는다, D121 · 03 §1.2. 목록을 고치면 재인제스트 없이 `git_commit.kind`·`author_matched` 만 다시 쓴다) · 데이터 위치 · 서체 고지 |
@@ -90,7 +91,7 @@ Chickadee 설계 문서 6편 중 다섯 번째. **목업 두 장(`design/ink-hom
 ### 2.2 라우팅 = 상태, 라우터 없음
 
 ```ts
-type Screen = 'home' | 'ingest' | 'first-run' | 'settings';
+type Screen = 'home' | 'ingest' | 'first-run' | 'repos' | 'settings';
 interface UiSlice { screen: Screen; session: SessionState | null; lifer: LiferCard | null; }
 ```
 
@@ -112,7 +113,11 @@ interface UiSlice { screen: Screen; session: SessionState | null; lifer: LiferCa
 ### 2.4 창 크기 · 다중 리포
 
 - (확정 — 00 D11) 최소 1000×680. 근거: T1 `.split` 은 `minmax(300px,1fr) 2px minmax(300px,1fr)` + 레일 46 + 패딩으로 860px 교정지가 필요하고, 작업 띠는 1080px 아래에서 2행으로 접힌다(목업 미디어 쿼리). 680 아래에서는 판정란 예약(118px)까지 보이지 않는다.
-- 리포 전환: 마스트헤드 「리포」 칸이 `RepoSwitcher`(`button[aria-haspopup=listbox]` + `ul[role=listbox]`). **세션 중에는 전환 불가**(작업 띠에 리포명만). 전환하면 `repo.activeId` 만 바뀌고 홈은 `home.load(repoId)` 를 다시 부른다. 진행 중 세션은 리포별로 저장되므로 다른 리포로 갔다 와도 이어 찍힌다.
+- **리포를 다루는 길은 둘이다** (D119). 빠른 쪽이 마스트헤드의 스위처, 관리하는 쪽이 `repos` 화면(서가)이다. 홈은 그대로 활성 리포 하나만 본다.
+- 리포 전환: 마스트헤드 「리포」 칸이 `RepoSwitcher`(`button[aria-haspopup=listbox]` + `ul[role=listbox]`). 방향키 · Home · End 로 짚고 Enter 로 고르며 Esc 는 목록만 닫고 포커스를 칸으로 돌린다. 포커스는 `ul` 하나에 있고 어느 줄인지는 `aria-activedescendant` 가 말한다. 목록 끝의 「전부 보기」가 서가를 연다. **세션 중에는 전환 불가**(작업 띠에 리포명만).
+- 전환은 `repo.activeId` 만 바꾸고 `home` 을 비운다 — 홈이 `home.load(repoId)` 를 다시 부른다. 화면 상태는 파생 캐시라 부분 갱신보다 통째로 버리는 편이 싸고 틀릴 자리가 없다(§3). 진행 중 세션은 리포별로 저장되므로 다른 리포로 갔다 와도 이어 찍힌다.
+- 진입: 리포가 0개면 `first-run`, 1개 이상이면 곧장 홈이다. 서가는 **스스로 열리지 않는다** — 스위처의 「전부 보기」나 설정 「리포」 절에서만 연다. 마지막 리포를 지우면 `setRepos` 가 다시 `first-run` 으로 떨어뜨린다.
+- 리포를 **추가하는 문은 서가 하나**다. 첫 리포를 넣고 나면 `first-run` 이 다시 뜨지 않으므로, 서가가 없으면 둘째 리포를 넣을 자리도 옮긴 리포를 다시 붙일 자리도 없다.
 
 ---
 
