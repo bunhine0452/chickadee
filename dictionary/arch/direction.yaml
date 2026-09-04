@@ -11,10 +11,23 @@ difficulty: 3
 prereq: []
 confusions: []
 dict:
-  one_liner: "누가 누구를 아는가. <b>화살표의 방향</b>이 구조를 정한다."
-  why: >-
-    두 파일이 서로를 알면 어느 쪽도 따로 옮기거나 시험할 수 없습니다. 방향이 한쪽으로만 나 있으면
-    아래쪽은 위쪽을 모른 채로 살아남아요. 방향은 나중에 바꾸기 가장 비싼 결정입니다.
+  one_liner:
+    ko: "누가 누구를 아는가. <b>화살표의 방향</b>이 구조를 정한다."
+    en: "Who knows whom. <b>The direction of the arrow</b> sets the structure."
+  why:
+    ko: >-
+      두 파일이 서로를 알면 어느 쪽도 따로 옮기거나 시험할 수 없습니다. 방향이 한쪽으로만 나 있으면
+      아래쪽은 위쪽을 모른 채로 살아남아요. 방향은 나중에 바꾸기 가장 비싼 결정입니다.
+    en: >-
+      If two files know each other, neither one can be moved or tested on its own. When the
+      direction runs one way only, the lower side survives without knowing the upper. Direction is
+      the most expensive decision to change later.
   trace: []
-rule: "자주 바뀌는 쪽이 덜 바뀌는 쪽을 안다. 반대로 나 있거나 서로 알고 있으면 방향이 틀어진 것이다."
-ok: "화살표가 한쪽으로만 나 있으면 아래쪽을 따로 옮기고 따로 시험할 수 있습니다."
+rule:
+  ko: "자주 바뀌는 쪽이 덜 바뀌는 쪽을 안다. 반대로 나 있거나 서로 알고 있으면 방향이 틀어진 것이다."
+  en: >-
+    The side that changes often knows the side that changes rarely. If it runs the other way, or
+    both know each other, the direction is off.
+ok:
+  ko: "화살표가 한쪽으로만 나 있으면 아래쪽을 따로 옮기고 따로 시험할 수 있습니다."
+  en: "When the arrow runs one way only, the lower side can be moved and tested on its own."

@@ -11,10 +11,22 @@ difficulty: 3
 prereq: []
 confusions: []
 dict:
-  one_liner: "값이 <b>어디서 들어와 어디로 나가는지</b>를 끝까지 따라가는 일."
-  why: >-
-    버그는 대개 값이 만들어진 자리가 아니라 <b>건네지는 자리</b>에 있습니다. 들어온 곳과 나가는 곳을
-    잇지 못하면 고친 자리가 원인이 아닌 곳일 수 있어요.
+  one_liner:
+    ko: "값이 <b>어디서 들어와 어디로 나가는지</b>를 끝까지 따라가는 일."
+    en: "Following a value all the way — <b>where it comes in and where it goes out</b>."
+  why:
+    ko: >-
+      버그는 대개 값이 만들어진 자리가 아니라 <b>건네지는 자리</b>에 있습니다. 들어온 곳과 나가는 곳을
+      잇지 못하면 고친 자리가 원인이 아닌 곳일 수 있어요.
+    en: >-
+      A bug usually sits where the value is <b>handed over</b>, not where it was made. If you cannot
+      join the place it came in to the place it goes out, the spot you fixed may not be the cause.
   trace: []
-rule: "값이 바뀌는 자리를 순서대로 짚는다. 짚을 수 없는 구간이 남으면 아직 원인을 모르는 것이다."
-ok: "들어온 자리부터 나가는 자리까지 이어서 짚을 수 있으면 흐름을 읽은 것입니다."
+rule:
+  ko: "값이 바뀌는 자리를 순서대로 짚는다. 짚을 수 없는 구간이 남으면 아직 원인을 모르는 것이다."
+  en: >-
+    Point at the places the value changes, in order. While a stretch you cannot point at remains,
+    the cause is still unknown.
+ok:
+  ko: "들어온 자리부터 나가는 자리까지 이어서 짚을 수 있으면 흐름을 읽은 것입니다."
+  en: "If you can point from where it came in through to where it goes out, you have read the flow."
