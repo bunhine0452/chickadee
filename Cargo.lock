@@ -619,6 +619,7 @@ dependencies = [
  "streaming-iterator",
  "thiserror 1.0.69",
  "tree-sitter",
+ "tree-sitter-css",
  "tree-sitter-go",
  "tree-sitter-java",
  "tree-sitter-javascript",
@@ -5108,6 +5109,16 @@ dependencies = [
  "regex-syntax",
  "serde_json",
  "streaming-iterator",
+ "tree-sitter-language",
+]
+
+[[package]]
+name = "tree-sitter-css"
+version = "0.23.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5ad6489794d41350d12a7fbe520e5199f688618f43aace5443980d1ddcf1b29e"
+dependencies = [
+ "cc",
  "tree-sitter-language",
 ]
 

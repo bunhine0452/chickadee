@@ -74,7 +74,9 @@
               "c_sharp",
               "vue",
               "xml",
-              "mybatis_sql"
+              "mybatis_sql",
+              "css",
+              "vue_style"
             ]
           },
           "default": []
@@ -553,7 +555,9 @@
               "c_sharp",
               "vue",
               "xml",
-              "mybatis_sql"
+              "mybatis_sql",
+              "css",
+              "vue_style"
             ]
           },
           "minItems": 1
@@ -582,7 +586,9 @@
               "c_sharp",
               "vue",
               "xml",
-              "mybatis_sql"
+              "mybatis_sql",
+              "css",
+              "vue_style"
             ]
           }
         },
@@ -612,7 +618,9 @@
               "c_sharp",
               "vue",
               "xml",
-              "mybatis_sql"
+              "mybatis_sql",
+              "css",
+              "vue_style"
             ]
           }
         },

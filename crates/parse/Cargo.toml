@@ -19,6 +19,7 @@ tree-sitter-go = { version = "0.23", optional = true }
 tree-sitter-rust = { version = "0.23", optional = true }
 tree-sitter-java = { version = "0.23", optional = true }
 tree-sitter-xml = { version = "0.7", optional = true }
+tree-sitter-css = { version = "0.23", optional = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
 streaming-iterator = "0.1"
@@ -33,7 +34,7 @@ serde_json.workspace = true
 [features]
 default = [
   "lang-typescript", "lang-javascript", "lang-sql", "lang-python", "lang-go", "lang-rust",
-  "lang-java", "lang-xml",
+  "lang-java", "lang-xml", "lang-css",
 ]
 lang-typescript = ["dep:tree-sitter-typescript"]
 lang-javascript = ["dep:tree-sitter-javascript"]
@@ -47,6 +48,8 @@ lang-rust = ["dep:tree-sitter-rust"]
 lang-java = ["dep:tree-sitter-java"]
 # MyBatis 매퍼가 XML 이고 그 안에 SQL 과 **자바 클래스 이름**이 산다 (D159).
 lang-xml = ["dep:tree-sitter-xml"]
+# `.vue` 의 `<style>` 과 `.css` (D159). 화면이 왜 그렇게 보이는지의 재료다.
+lang-css = ["dep:tree-sitter-css"]
 
 [lints]
 workspace = true

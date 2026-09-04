@@ -36,6 +36,8 @@ export const grammarSchema = z.enum([
   'xml',
   // 매퍼 안의 SQL. 문법은 sql 이고 읽는 자리만 문 본문으로 좁힌다 (D159).
   'mybatis_sql',
+  // `.css` 와 `.vue` 의 `<style>` (D159).
+  'css', 'vue_style',
 ]);
 export type Grammar = z.infer<typeof grammarSchema>;
 

@@ -12,13 +12,14 @@ use tree_sitter::{Point, Range};
 
 /// Grammars whose files are read range by range rather than whole.
 pub(crate) fn is_embedded(grammar: &str) -> bool {
-    matches!(grammar, "vue" | "mybatis_sql")
+    matches!(grammar, "vue" | "vue_style" | "mybatis_sql")
 }
 
 /// The ranges a given embedded grammar reads.
 pub(crate) fn ranges_for(grammar: &str, src: &[u8]) -> Vec<Range> {
     match grammar {
         "mybatis_sql" => statement_bodies(src),
+        "vue_style" => tag_bodies(src, b"<style"),
         _ => script_ranges(src),
     }
 }
@@ -40,15 +41,15 @@ fn point_at(src: &[u8], at: usize) -> Point {
     Point::new(row, before.len() - start)
 }
 
-/// The `<script>` bodies, in order. Empty when there is none — the caller then
-/// parses nothing rather than reading the template as JavaScript.
-pub(crate) fn script_ranges(src: &[u8]) -> Vec<Range> {
+/// The bodies of one kind of tag, in order. Empty when there is none — the caller
+/// then parses nothing rather than reading the rest of the file in the wrong language.
+pub(crate) fn tag_bodies(src: &[u8], open_tag: &[u8]) -> Vec<Range> {
     let mut out = Vec::new();
     let mut at = 0usize;
-    while let Some(open) = find(src, b"<script", at) {
+    while let Some(open) = find(src, open_tag, at) {
         let Some(gt) = find(src, b">", open) else { break };
         let start = gt + 1;
-        let Some(end) = find(src, b"</script", start) else { break };
+        let Some(end) = find(src, b"</", start) else { break };
         if end > start {
             out.push(Range {
                 start_byte: start,
@@ -60,6 +61,11 @@ pub(crate) fn script_ranges(src: &[u8]) -> Vec<Range> {
         at = end;
     }
     out
+}
+
+/// The `<script>` bodies of a single-file component.
+pub(crate) fn script_ranges(src: &[u8]) -> Vec<Range> {
+    tag_bodies(src, b"<script")
 }
 
 /// The SQL inside a MyBatis mapper's statement elements.

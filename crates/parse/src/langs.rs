@@ -37,6 +37,11 @@ pub const LANGS: &[(&str, Load)] = &[
     // MyBatis 매퍼 안의 SQL. 문법은 sql 이고 읽는 자리만 문 본문으로 좁힌다 (`sfc.rs`).
     #[cfg(feature = "lang-sql")]
     ("mybatis_sql", || tree_sitter_sequel::LANGUAGE.into()),
+    #[cfg(feature = "lang-css")]
+    ("css", || tree_sitter_css::LANGUAGE.into()),
+    // `.vue` 의 `<style>`. 같은 css 문법을 그 구간에만 돌린다.
+    #[cfg(feature = "lang-css")]
+    ("vue_style", || tree_sitter_css::LANGUAGE.into()),
 ];
 
 #[derive(Debug, Clone, Serialize)]
