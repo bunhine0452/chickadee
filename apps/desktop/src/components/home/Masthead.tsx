@@ -1,3 +1,4 @@
+import { t } from '@chickadee/i18n';
 import { DeeLogo, FlatButton, Switch } from '@chickadee/ui';
 
 import { useAppearance, type Theme, type Trim } from '../../data/settings.js';
@@ -7,14 +8,18 @@ import './Masthead.css';
 
 export type { Theme, Trim };
 
-const THEME_OPTIONS = [
-  { v: 'light' as const, label: '주간반' },
-  { v: 'dark' as const, label: '야간반' },
+/**
+ * 스위치 두 벌. **함수다** — 라벨을 모듈 상수로 두면 `setLocale()` 보다 먼저 굳는다 (D117).
+ * 설정 화면이 같은 두 벌을 쓰므로 키는 `core` 카탈로그에 하나씩만 있다.
+ */
+const themeOptions = () => [
+  { v: 'light' as const, label: t('settings.look.themeLight') },
+  { v: 'dark' as const, label: t('settings.look.themeDark') },
 ];
 
-const TRIM_OPTIONS = [
-  { v: 'off' as const, label: '부속 보임' },
-  { v: 'on' as const, label: '부속 숨김' },
+const trimOptions = () => [
+  { v: 'off' as const, label: t('settings.look.trimOff') },
+  { v: 'on' as const, label: t('settings.look.trimOn') },
 ];
 
 export interface MastheadProps {
@@ -47,48 +52,53 @@ export function Masthead({ repoName, today, streak, masthead, onSettings }: Mast
             <span>CHICKADEE</span>
           </div>
           <div className="brand-sub">Risograph Study Press</div>
-          <div className="brand-line">내 코드가 교재인 인쇄소</div>
+          <div className="brand-line">{t('home.brandLine')}</div>
         </div>
       </div>
 
-      <div className="ticket" role="group" aria-label="작업 지시서">
+      <div className="ticket" role="group" aria-label={t('home.ticket')}>
         <div className="tk">
           <span className="tk-k" id="tk-repo">
-            리포
+            {t('home.tkRepo')}
           </span>
           <RepoSwitcher repoName={repoName} />
         </div>
         <div className="tk">
-          <span className="tk-k">날짜</span>
+          <span className="tk-k">{t('home.tkDate')}</span>
           <span className="tk-v mono">{today}</span>
         </div>
         <div className="tk">
-          <span className="tk-k">연속 인쇄</span>
+          <span className="tk-k">{t('home.tkStreak')}</span>
           <span className="tk-v">
             {streak}
-            <span className="u">일</span>
+            <span className="u">{t('home.tkDay')}</span>
           </span>
         </div>
         <div className="tk">
-          <span className="tk-k">개념 잉크</span>
+          <span className="tk-k">{t('home.tkInk')}</span>
           <span className="tk-v">
             {masthead.avgLayer.toFixed(1)}
-            <span className="u">겹 평균</span>
+            <span className="u">{t('home.tkAvgLayer')}</span>
           </span>
         </div>
       </div>
 
       <div className="ctl">
         <Switch
-          options={TRIM_OPTIONS}
+          options={trimOptions()}
           value={trim}
-          label="인쇄 부속 보이기 · 숨기기"
+          label={t('settings.look.trimSwitch')}
           onChange={setTrim}
         />
-        <Switch options={THEME_OPTIONS} value={theme} label="주간반 · 야간반 전환" onChange={setTheme} />
+        <Switch
+          options={themeOptions()}
+          value={theme}
+          label={t('settings.look.themeSwitch')}
+          onChange={setTheme}
+        />
         {/* 목업에는 이 자리가 없다 — 스위치 옆에 조용히 붙인다(로고와 지시서의 시각은 그대로). */}
         <FlatButton onClick={onSettings} ghost>
-          설정
+          {t('home.settings')}
         </FlatButton>
       </div>
     </header>

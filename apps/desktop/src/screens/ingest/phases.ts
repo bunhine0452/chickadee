@@ -12,6 +12,7 @@
  * 말할 수 있다(정본 §3-5). 아래 분값은 03 §7 의 10만 줄 예산 15초를 4칸에 나눈 것이다.
  */
 import type { Phase } from '@chickadee/concepts';
+import { t, type MessageKey } from '@chickadee/i18n';
 
 import type { QueueItem } from '../../components/shell/TimeQueue.js';
 
@@ -21,15 +22,64 @@ export interface Box extends QueueItem {
 }
 
 /**
+ * 칸의 뼈대 — 로케일과 무관한 것만 든다. 문구는 **키**로 들고 `boxes()` 가 그때 푼다.
+ * 문장을 여기 박으면 모듈이 열리는 시점에 굳어 `setLocale()` 보다 이르다 (D117).
+ */
+interface BoxSpec {
+  kind: string;
+  mins: number;
+  phases: readonly Phase[];
+  labelKey: MessageKey;
+  subKey: MessageKey;
+}
+
+/**
  * 03 §7 의 예산 배분(파싱+쿼리 8s · 커밋 diff 4s · sqlite 2s)을 분으로 옮긴 값.
  * 실측이 아니라 **예상**이고, 그래서 칸 안의 진행은 실제 `done/total` 이 이긴다.
  */
-export const BOXES: readonly Box[] = [
-  { kind: 'walk', label: '코드 읽기', sub: '파일 목록과 문법', mins: 0.18, phases: ['walk', 'parse'] },
-  { kind: 'git', label: '히스토리', sub: '커밋과 캡처 저장', mins: 0.12, phases: ['git', 'write'] },
-  { kind: 'write', label: '개념 추출', sub: '내 코드의 사용처 찾기', mins: 0.06, phases: ['derive'] },
-  { kind: 'cards', label: '판 짜기', sub: '카드로 만들 자리 고르기', mins: 0.02, phases: ['cards'] },
+const SPECS: readonly BoxSpec[] = [
+  {
+    kind: 'walk',
+    mins: 0.18,
+    phases: ['walk', 'parse'],
+    labelKey: 'ingest.walkLabel',
+    subKey: 'ingest.walkSub',
+  },
+  {
+    kind: 'git',
+    mins: 0.12,
+    phases: ['git', 'write'],
+    labelKey: 'ingest.gitLabel',
+    subKey: 'ingest.gitSub',
+  },
+  {
+    kind: 'write',
+    mins: 0.06,
+    phases: ['derive'],
+    labelKey: 'ingest.deriveLabel',
+    subKey: 'ingest.deriveSub',
+  },
+  {
+    kind: 'cards',
+    mins: 0.02,
+    phases: ['cards'],
+    labelKey: 'ingest.cardsLabel',
+    subKey: 'ingest.cardsSub',
+  },
 ];
+
+/** 칸 수. 자리 계산은 문구를 풀지 않아도 된다. */
+export const BOX_COUNT = SPECS.length;
+
+/** 화면이 그릴 네 칸. **함수다** — 상수로 두면 로케일보다 먼저 굳는다 (D117). */
+export const boxes = (): readonly Box[] =>
+  SPECS.map((spec) => ({
+    kind: spec.kind,
+    mins: spec.mins,
+    phases: spec.phases,
+    label: t(spec.labelKey),
+    sub: t(spec.subKey),
+  }));
 
 export interface Progress {
   phase: Phase;
@@ -47,16 +97,16 @@ export interface Progress {
  */
 export function positionOf(at: Progress | null): { pos: number; progress: number | undefined } {
   if (!at) return { pos: 0, progress: 0 };
-  const pos = BOXES.findIndex((box) => box.phases.includes(at.phase));
-  const box = BOXES[pos];
-  if (pos === -1 || box === undefined) return { pos: 0, progress: 0 };
-  const step = box.phases.indexOf(at.phase);
+  const pos = SPECS.findIndex((spec) => spec.phases.includes(at.phase));
+  const spec = SPECS[pos];
+  if (pos === -1 || spec === undefined) return { pos: 0, progress: 0 };
+  const step = spec.phases.indexOf(at.phase);
   // `total` 이 0 이면 Rust 가 아직 총량을 모르는 것이다(커밋 수가 그렇다) — 그 단계가
   // 시작했다는 것까지만 세고 안쪽 진행은 비운다.
   const inner = at.total > 0 ? Math.min(1, at.done / at.total) : 0;
-  const progress = (step + inner) / box.phases.length;
-  return { pos, progress: at.total > 0 || box.phases.length > 1 ? progress : undefined };
+  const progress = (step + inner) / spec.phases.length;
+  return { pos, progress: at.total > 0 || spec.phases.length > 1 ? progress : undefined };
 }
 
 /** 끝난 뒤의 자리 — 모든 칸이 찬 상태. */
-export const DONE = { pos: BOXES.length, progress: 1 } as const;
+export const DONE = { pos: BOX_COUNT, progress: 1 } as const;

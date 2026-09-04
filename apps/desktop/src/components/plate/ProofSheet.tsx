@@ -4,7 +4,7 @@ import { t } from '@chickadee/i18n';
 import { cx, Dee, Misreg, Passes, Pill, Reg, RichText } from '@chickadee/ui';
 import type { InkLayer, Track } from '@chickadee/ui';
 
-import { LAYER_NAMES } from '../../screens/home/data';
+import { layerNames } from '../../screens/home/data';
 import { layerText } from '../home/labels';
 import './ProofSheet.css';
 
@@ -85,7 +85,7 @@ export function ProofSheet({
         <Dee ly={to} sticker />
         <span className={cx('plus', plus !== '' && 'on')}>{plus}</span>
         <span className="vt">
-          {t('plate.railVertical', { no, n: String(to), name: LAYER_NAMES[to].k })}
+          {t('plate.railVertical', { no, n: String(to), name: layerNames()[to].k })}
         </span>
       </div>
 

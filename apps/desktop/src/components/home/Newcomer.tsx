@@ -1,3 +1,5 @@
+import { t, type MessageKey } from '@chickadee/i18n';
+
 import type { NewcomerFlag } from '../../screens/home/data';
 import './Newcomer.css';
 
@@ -11,9 +13,9 @@ export interface NewcomerProps {
  * 사다리 2단이 매번 「비어 있는 층 0」)을 숫자 없이 그대로 옮긴 문장이다 — 규칙의 상수가
  * 바뀌어도 이 문장은 거짓이 되지 않는다.
  */
-const WHY: Record<Exclude<NewcomerFlag, 'none'>, string> = {
-  suspect: '오늘 뿌리 개념 판이 막혔고, 그 아래로 내려갈 판이 없었습니다.',
-  confirmed: '두 세션 내리 뿌리 개념 판이 막혔고, 그 아래로 내려갈 판이 없었습니다.',
+const WHY_KEY: Record<Exclude<NewcomerFlag, 'none'>, MessageKey> = {
+  suspect: 'home.newcomerSuspect',
+  confirmed: 'home.newcomerConfirmed',
 };
 
 /**
@@ -29,13 +31,9 @@ export function Newcomer({ flag }: NewcomerProps) {
   if (flag === 'none') return null;
 
   return (
-    <aside className="newcomer" aria-label="먼저 읽을 것">
-      <p className="why">{WHY[flag]}</p>
-      <p>
-        이 앱은 내 코드를 교재로 씁니다 — 「변수」·「함수」 자체가 처음이면 교재가 없는
-        셈입니다. 생활코딩(opentutorials.org)이나 CS50(cs50.harvard.edu · 한국어 자막)을
-        먼저 보시면 여기 판이 읽힙니다. 잠기는 것은 없습니다.
-      </p>
+    <aside className="newcomer" aria-label={t('home.newcomer')}>
+      <p className="why">{t(WHY_KEY[flag])}</p>
+      <p>{t('home.newcomerBody')}</p>
     </aside>
   );
 }

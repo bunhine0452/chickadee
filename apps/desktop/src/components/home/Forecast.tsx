@@ -1,3 +1,6 @@
+import { t } from '@chickadee/i18n';
+import { RichText } from '@chickadee/ui';
+
 import './Forecast.css';
 
 export interface ForecastProps {
@@ -20,19 +23,16 @@ export function Forecast({ pending, variant, nextNo }: ForecastProps) {
   const cannot = variant === 'cannot';
   return (
     <div className="forecast">
-      <span className="fc-sig">{cannot || nextNo === undefined ? '—' : `${nextNo}대 ~`}</span>
-      {cannot ? (
-        <p>
-          <b>이 리포로는 T2 를 짤 수 없습니다.</b> 구조를 물으려면 커밋이 더 필요합니다. 지금
-          커밋은 <b>{pending}개</b>입니다.
-        </p>
-      ) : (
-        <p>
-          <b>아직 판이 짜이지 않았습니다.</b> 커밋이 쌓이면 소스를 다시 읽어 대지를 자동으로
-          늘립니다. 지금 읽은 파일은 <b>{pending}개</b>입니다.
-        </p>
-      )}
-      <span className="fc-mark">{cannot ? '불가' : '미조판'}</span>
+      <span className="fc-sig">
+        {cannot || nextNo === undefined ? '—' : t('home.forecastNext', { n: String(nextNo) })}
+      </span>
+      <RichText
+        as="p"
+        html={t(cannot ? 'home.forecastCannot' : 'home.forecastLater', { n: String(pending) })}
+      />
+      <span className="fc-mark">
+        {cannot ? t('home.forecastMarkCannot') : t('home.forecastMarkLater')}
+      </span>
     </div>
   );
 }

@@ -4,12 +4,13 @@
  * 데이터 계약은 `screens/home/data.ts` 가 소유한다 — 여기서는 그 값을 사람 말로 바꾸기만 하고
  * 새 필드를 만들지 않는다. 은유 옆에 평문을 병기하는 규칙(정본 §6)도 여기서 지킨다.
  */
+import { t, type MessageKey } from '@chickadee/i18n';
 import type { Layer } from '@chickadee/store-sql';
 import { fnv1a32, mulberry32 } from '@chickadee/text';
 import type { Track } from '@chickadee/ui';
 import type { CSSProperties } from 'react';
 
-import { LAYER_NAMES, TRACK_NAMES } from '../../screens/home/data';
+import { layerNames, trackNames } from '../../screens/home/data';
 import type { HomeNode } from '../../screens/home/data';
 
 /** 노드·개념이 들고 다니는 트랙. T3 는 스키마 예약이라 M1 에서는 오지 않는다 (02 §2.2). */
@@ -35,29 +36,39 @@ export function inkTrack(track: HomeTrack): Track {
 
 /** 「T0 문법」처럼 라벨을 병기한 트랙 이름. 색만으로 트랙을 읽히지 않는다 (05 §9). */
 export function trackName(track: HomeTrack): string {
-  return TRACK_NAMES[track];
+  return trackNames()[track];
 }
 
 /** 「3겹 + 청판」 — 은유와 겹 수를 한 덩어리로. */
 export function layerLabel(layer: Layer): string {
-  const it = LAYER_NAMES[layer];
-  return it === undefined ? `${layer}겹` : `${it.n} ${it.k}`;
+  const it = layerNames()[layer];
+  return it === undefined
+    ? t('home.layerN', { n: String(layer) })
+    : t('home.layerLabel', { n: it.n, k: it.k });
 }
 
 /** 「잉크 3겹 / 4 · + 청판 · 색이 들어옴」 — 상세·레일이 쓰는 긴 형태. */
 export function layerText(layer: Layer): string {
-  const it = LAYER_NAMES[layer];
-  if (it === undefined) return `잉크 ${layer}겹 / 4`;
-  return `잉크 ${layer}겹 / 4 · ${it.k} · ${it.plain}`;
+  const it = layerNames()[layer];
+  if (it === undefined) return t('home.layerTextShort', { n: String(layer) });
+  return t('home.layerText', { n: String(layer), k: it.k, plain: it.plain });
 }
 
-/** 목업 JS 의 `DO` — 레일에 세로로 찍히는 「N도」. */
-export const PRESS_RUNS = ['미인쇄', '애벌 1도', '1도', '2도', '3도'] as const;
+/**
+ * 목업 JS 의 `DO` — 레일에 세로로 찍히는 「N도」. 표가 문장이 아니라 **키**를 드는 이유는
+ * 로케일이다: 모듈이 열리는 시점은 `setLocale()` 보다 이르다 (D117).
+ */
+const RUN_KEYS: readonly MessageKey[] = [
+  'home.run0', 'home.run1', 'home.run2', 'home.run3', 'home.run4',
+];
 
 /** 레일 문구 「판 02 · 2도」. */
 export function railLabel(no: number, layer: Layer): string {
-  const run = PRESS_RUNS[layer] ?? PRESS_RUNS[0];
-  return `판 ${String(no).padStart(2, '0')} · ${run}`;
+  const keys = RUN_KEYS[layer] ?? RUN_KEYS[0];
+  return t('home.railLabel', {
+    no: String(no).padStart(2, '0'),
+    run: keys === undefined ? '' : t(keys),
+  });
 }
 
 /** 지금부터 만기까지 남은 날. 하루가 덜 남았으면 0 이다. */
@@ -70,12 +81,12 @@ function daysAhead(dueAt: number, now: number): number {
  * 표는 라벨 근사이고 결정은 FSRS 가 한다 — 화면은 라벨만 고른다.
  */
 export function dueLabel(dueAt: number | null, now: number): string {
-  if (dueAt === null) return '예정 없음';
+  if (dueAt === null) return t('home.dueNone');
   const days = daysAhead(dueAt, now);
-  if (days <= 0) return '오늘 안에';
-  if (days === 1) return '내일';
-  if (days < WEEK_CUTOFF_DAYS) return `${days}일 뒤`;
-  return `${Math.round(days / 7)}주 뒤`;
+  if (days <= 0) return t('home.dueToday');
+  if (days === 1) return t('home.dueTomorrow');
+  if (days < WEEK_CUTOFF_DAYS) return t('home.dueDays', { n: String(days) });
+  return t('home.dueWeeks', { n: String(Math.round(days / 7)) });
 }
 
 /** 오늘·내일이면 눈에 띄게 (목업 `.due.soon`). */

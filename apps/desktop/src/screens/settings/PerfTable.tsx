@@ -4,6 +4,8 @@
  * `perf_sample` 은 최근 500행 순환이므로 이 표가 보는 것은 **추세**이지 이력이 아니다.
  * 예산은 05 §10 의 것이고 넘은 값에 표시를 남긴다 — 여기서 목표를 낮추지 않는다.
  */
+import { t, type MessageKey } from '@chickadee/i18n';
+
 import { BUDGET, type Mark } from '../../devtools/audit.js';
 
 export interface PerfRow {
@@ -11,19 +13,27 @@ export interface PerfRow {
   ms: number;
 }
 
-/** 06 §8 이 적은 `kind` 값들의 사람 이름. 모르는 이름은 그대로 보인다. */
-const KIND_NAMES: Record<string, string> = {
-  'ingest.total': '인제스트 총',
-  'ingest.file_p95': '파일당 파싱 p95',
-  queue: '큐 생성',
-  't1.grade': 'T1 채점',
-  frame_p95: '홈 프레임 p95',
-  'home:paint': '홈 첫 조판',
-  'session:mount': '세션 열기',
-  't0:grade': 'T0 채점',
-  't1:monaco': 'T1 편집기',
-  'theme:switch': '공정 전환',
-  'lifer:open': 'LIFER 열기',
+/**
+ * 06 §8 이 적은 `kind` 값들의 사람 이름. 모르는 이름은 그대로 보인다.
+ * 표가 문장이 아니라 **키**를 드는 이유는 로케일이다 (D117).
+ */
+const KIND_KEY: Record<string, MessageKey> = {
+  'ingest.total': 'settings.perf.kindIngestTotal',
+  'ingest.file_p95': 'settings.perf.kindIngestFileP95',
+  queue: 'settings.perf.kindQueue',
+  't1.grade': 'settings.perf.kindT1Grade',
+  frame_p95: 'settings.perf.kindFrameP95',
+  'home:paint': 'settings.perf.kindHomePaint',
+  'session:mount': 'settings.perf.kindSessionMount',
+  't0:grade': 'settings.perf.kindT0Grade',
+  't1:monaco': 'settings.perf.kindT1Monaco',
+  'theme:switch': 'settings.perf.kindThemeSwitch',
+  'lifer:open': 'settings.perf.kindLiferOpen',
+};
+
+const kindLabel = (kind: string): string => {
+  const key = KIND_KEY[kind];
+  return key === undefined ? kind : t(key);
 };
 
 export interface PerfStat {
@@ -56,7 +66,7 @@ export function summarize(rows: readonly PerfRow[]): PerfStat[] {
       const sorted = [...values].sort((a, b) => a - b);
       return {
         kind,
-        label: KIND_NAMES[kind] ?? kind,
+        label: kindLabel(kind),
         n: sorted.length,
         p50: pct(sorted, 0.5),
         p95: pct(sorted, 0.95),
@@ -72,20 +82,20 @@ const ms = (n: number): string => `${n.toFixed(1)}`;
 export function PerfTable({ rows }: { rows: readonly PerfRow[] }) {
   const stats = summarize(rows);
   if (stats.length === 0) {
-    return <p className="set-empty">아직 잰 것이 없습니다. 리포를 읽거나 판을 찍으면 쌓입니다.</p>;
+    return <p className="set-empty">{t('settings.perf.empty')}</p>;
   }
   return (
     <div className="set-tablewrap">
       <table className="set-table">
-        <caption>최근 표본 {rows.length}건 (밀리초)</caption>
+        <caption>{t('settings.perf.caption', { n: String(rows.length) })}</caption>
         <thead>
           <tr>
-            <th scope="col">항목</th>
-            <th scope="col">표본</th>
+            <th scope="col">{t('settings.perf.colItem')}</th>
+            <th scope="col">{t('settings.perf.colSamples')}</th>
             <th scope="col">p50</th>
             <th scope="col">p95</th>
-            <th scope="col">최대</th>
-            <th scope="col">예산</th>
+            <th scope="col">{t('settings.perf.colMax')}</th>
+            <th scope="col">{t('settings.perf.colBudget')}</th>
           </tr>
         </thead>
         <tbody>

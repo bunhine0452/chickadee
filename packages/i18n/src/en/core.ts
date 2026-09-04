@@ -33,7 +33,7 @@ export const core: Record<string, string> = {
 
   'settings.globs.label': 'Excluded paths',
   'settings.globs.note':
-    'One glob per line. These are **added to** the built-in list (node_modules, build '
+    'One glob per line. These are <b>added to</b> the built-in list (node_modules, build '
     + 'output, lock files) \u2014 leaving this empty still skips those.',
   'settings.globs.reingest': 'Changes here apply the next time the repo is read.',
   'settings.globs.errNegation': '{{line}} \u2014 a negation (!) puts files back in.',
@@ -43,7 +43,7 @@ export const core: Record<string, string> = {
 
   'settings.dictLangs.label': 'Grammar dictionary languages',
   'settings.dictLangs.note':
-    'A language you turn off is dropped from **new plates**. Reviews of concepts you '
+    'A language you turn off is dropped from <b>new plates</b>. Reviews of concepts you '
     + 'already know keep running \u2014 if layers stopped, everything would be overdue at '
     + 'once when you turn it back on.',
   'settings.dictLangs.axis':
@@ -65,4 +65,146 @@ export const core: Record<string, string> = {
   'settings.look.localeSwitch': 'Display language 한국어 · English',
   'settings.look.localeNote':
     'Changing the language redraws the screen. Anything not translated yet shows in Korean.',
+
+  // ── Look: the two switches the masthead shares ──────────────────────────
+  'settings.look.title': 'Look',
+  'settings.look.plain': '= the shop floor of the screen',
+  'settings.look.process': 'Shift',
+  'settings.look.themeLight': 'Day shift',
+  'settings.look.themeDark': 'Night shift',
+  'settings.look.themeSwitch': 'Day shift \u00b7 night shift',
+  'settings.look.trimOff': 'Trim shown',
+  'settings.look.trimOn': 'Trim hidden',
+  'settings.look.trimSwitch': 'Show \u00b7 hide print trim',
+  'settings.look.note':
+    'What you pick here is saved and comes back next time. \u201cTrim hidden\u201d drops only '
+    + 'the registration marks, crop lines, grain and stamp rotation \u2014 not one pixel of '
+    + 'the type or the layout.',
+
+  // ── Screen heading and section titles ──────────────────────────────────
+  'settings.title': 'Settings',
+  'settings.plain': '= how this app treats you',
+
+  'settings.repo.title': 'Repos',
+  'settings.repo.plain': '= the folders read as a textbook',
+  'settings.repo.empty': 'No repo registered.',
+  'settings.repo.lastIngest': 'Last read {{when}}',
+  'settings.repo.never': 'never',
+  'settings.repo.reingestNote':
+    'When the grammar, queries, generator or dictionary change, home shows a '
+    + '\u201cneeds re-reading\u201d banner. Reading again rebuilds only the cards and their '
+    + 'sites \u2014 <b>mastery is per concept and stays</b>.',
+
+  'settings.study.title': 'Study',
+  'settings.study.plain': '= how much a day, and from when',
+  'settings.study.budget': 'Daily budget',
+  'settings.study.budgetNote': 'minutes (10\u201325)',
+  'settings.study.rollover': 'Day boundary',
+  'settings.study.rolloverNote': 'hour \u2014 before this counts as yesterday',
+  'settings.study.newPerDay': 'New plates',
+  'settings.study.newPerDayNote': 'per day (max 4)',
+  'settings.study.tz': 'Time zone',
+  'settings.study.tzNote': 'This is the reference so travelling does not drop yesterday\u2019s queue',
+
+  'settings.key.title': 'LLM key',
+  'settings.key.plain': '= the key for free questions',
+  'settings.perf.title': 'Performance',
+  'settings.perf.plain': '= times measured on this computer',
+  'settings.data.title': 'Data',
+  'settings.data.plain': '= take my records out, or delete them',
+  'settings.privacy.title': 'Privacy note',
+  'settings.privacy.plain': '= what is kept, and where',
+  'settings.about.title': 'About',
+  'settings.about.plain': '= version numbers',
+  'settings.about.dataDir': 'Data location',
+
+  // ── Data section ───────────────────────────────────────────────────────
+  'settings.data.legend': 'What to include',
+  'settings.data.note':
+    'Schema version, concept mastery, session summaries and settings are always included. '
+    + 'The two below are <b>your code and your own writing</b>, so they are left out by '
+    + 'default.',
+  'settings.data.excerpts': 'Include card excerpts (lines of your code)',
+  'settings.data.drafts': 'Include T1 transcription drafts',
+  'settings.data.export': 'Export my records',
+  'settings.data.openData': 'Open the data folder',
+  'settings.data.openLogs': 'Open the log folder',
+  'settings.data.whereNote':
+    'You are not asked where to put it \u2014 it goes in <code>exports/</code> inside the app '
+    + 'data folder, and that folder opens. Move it wherever you like from there.',
+  'settings.data.wipe': 'Delete everything',
+  'settings.data.wipeWarn':
+    '<b>This cannot be undone.</b> It deletes the study database, backups, dictionary '
+    + 'cache, logs, crash records, settings and the API key in the keychain. Files in your '
+    + 'repo folders are not touched.',
+  'settings.data.wipeGo': 'Yes, delete everything',
+  'settings.data.wiping': 'Deleting\u2026',
+  'settings.data.wipeCancel': 'Never mind',
+
+  // ── 06 \u00a73.6 privacy note (0.1.0 wording) ─────────────────────────────
+  'settings.privacy.p1':
+    'Your code does not leave this computer. Chickadee only reads your repo, and keeps '
+    + 'your study record in a single database file on this machine.',
+  'settings.privacy.p2':
+    'This build does not use the internet at all \u2014 even the prompt for a free question '
+    + 'is built here for you to copy. The app never sends it.',
+  'settings.privacy.p3':
+    'No usage statistics, no crash reports, no update checks. Settings \u2192 Delete '
+    + 'everything removes every record.',
+
+  // ── One-line notices (LiveRegion) ──────────────────────────────────────
+  'settings.loadFailed': 'Some settings could not be read.',
+  'settings.saveFailed': 'Could not save that.',
+  'settings.exported': 'Wrote {{name}} to {{dir}}.',
+  'settings.exportFailed': 'Could not export.',
+  'settings.wiped': 'Everything deleted. Please close the app \u2014 it starts fresh next time.',
+  'settings.wipeFailed': 'Could not delete all of it. Close the app and try again.',
+  'settings.localeFailed': 'Could not save the display language.',
+
+  // ── Performance table ──────────────────────────────────────────────────
+  'settings.perf.empty': 'Nothing measured yet. Reading a repo or printing a plate fills this.',
+  'settings.perf.caption': 'Last {{n}} samples (milliseconds)',
+  'settings.perf.colItem': 'Item',
+  'settings.perf.colSamples': 'Samples',
+  'settings.perf.colMax': 'Max',
+  'settings.perf.colBudget': 'Budget',
+  'settings.perf.kindIngestTotal': 'Read, total',
+  'settings.perf.kindIngestFileP95': 'Parse per file p95',
+  'settings.perf.kindQueue': 'Queue build',
+  'settings.perf.kindT1Grade': 'T1 grading',
+  'settings.perf.kindFrameP95': 'Home frame p95',
+  'settings.perf.kindHomePaint': 'Home first paint',
+  'settings.perf.kindSessionMount': 'Session open',
+  'settings.perf.kindT0Grade': 'T0 grading',
+  'settings.perf.kindT1Monaco': 'T1 editor',
+  'settings.perf.kindThemeSwitch': 'Shift change',
+  'settings.perf.kindLiferOpen': 'LIFER open',
+
+  // ── LLM key ────────────────────────────────────────────────────────────
+  'settings.key.apiKey': 'API key',
+  'settings.key.save': 'Save',
+  'settings.key.drop': 'Delete',
+  'settings.key.loading': 'Checking the keychain.',
+  'settings.key.noSend':
+    'This app sends nothing on its own. Building and copying a prompt in '
+    + '\u201cFree question\u201d works without a key.',
+  'settings.key.none':
+    'Store a key and 0.2 opens a door to send that prompt from the app. For now it is '
+    + 'only saved.',
+  'settings.key.noneNote':
+    'The key goes into this computer\u2019s keychain and nowhere else. Once stored it never '
+    + 'appears on screen or in the logs again.',
+  'settings.key.stored': 'Stored in this computer\u2019s keychain.',
+  'settings.key.storedSoon':
+    'Sending opens in 0.2. For now you can build a prompt and copy it, and that is all.',
+  'settings.key.storedNote': 'The value is never shown again \u2014 there is no door to read it back.',
+  'settings.key.unavailable':
+    'This computer cannot store it safely (no Secret Service). Copying prompts still works.',
+  'settings.key.unavailableNote':
+    'It is not kept in a plain file. Install gnome-keyring or KWallet and open this screen '
+    + 'again.',
+  'settings.key.saved': 'Key saved.',
+  'settings.key.dropped': 'Key deleted.',
+  'settings.key.cannotStore': 'Could not put the key on this computer.',
+  'settings.key.failed': 'Could not save. Try again in a moment.',
 };

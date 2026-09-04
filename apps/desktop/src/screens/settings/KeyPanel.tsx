@@ -1,3 +1,4 @@
+import { t } from '@chickadee/i18n';
 import { FlatButton } from '@chickadee/ui';
 import { useEffect, useId, useRef, useState } from 'react';
 
@@ -18,27 +19,32 @@ import './KeyPanel.css';
  * `h2` 를 갖고 있어 여기서 또 매기면 제목이 두 겹이 된다.
  */
 
-const COPY = {
-  loading: '키체인을 확인하는 중입니다.',
-  noSend: '지금 이 앱은 아무것도 스스로 전송하지 않습니다. 「자유 질문」에서 프롬프트를 만들고 복사하는 것은 키가 없어도 그대로 됩니다.',
-  none: '키를 넣어 두면 그 프롬프트를 앱에서 바로 보내는 문이 0.2 에서 열립니다. 지금은 저장만 합니다.',
-  noneNote: '키는 이 컴퓨터의 키체인에만 들어갑니다. 넣고 나면 화면에도 로그에도 다시 나오지 않습니다.',
-  stored: '이 컴퓨터의 키체인에 저장돼 있습니다.',
-  storedSoon: '보내기는 0.2 에서 열립니다. 지금 할 수 있는 것은 프롬프트를 만들어 복사하는 것까지입니다.',
-  storedNote: '값은 다시 보여 드리지 않습니다 — 되읽는 문 자체가 없습니다.',
-  unavailable: '이 컴퓨터에는 안전하게 저장할 수 없습니다(Secret Service 없음). 프롬프트 복사는 그대로 됩니다.',
-  unavailableNote: '평문 파일에는 두지 않습니다. gnome-keyring 이나 KWallet 을 설치한 뒤 이 화면을 다시 열어 주세요.',
-  saved: '키를 저장했습니다.',
-  dropped: '키를 지웠습니다.',
-  cannotStore: '이 컴퓨터에는 키를 넣지 못했습니다.',
-  failed: '저장하지 못했습니다. 잠시 뒤 다시 시도해 주세요.',
-} as const;
+/**
+ * 이 패널의 문구. **상수가 아니라 함수다** — 문장을 모듈 상수로 두면 그 상수는
+ * `setLocale()` 보다 먼저 굳는다 (D117).
+ */
+const copy = () => ({
+  loading: t('settings.key.loading'),
+  noSend: t('settings.key.noSend'),
+  none: t('settings.key.none'),
+  noneNote: t('settings.key.noneNote'),
+  stored: t('settings.key.stored'),
+  storedSoon: t('settings.key.storedSoon'),
+  storedNote: t('settings.key.storedNote'),
+  unavailable: t('settings.key.unavailable'),
+  unavailableNote: t('settings.key.unavailableNote'),
+  saved: t('settings.key.saved'),
+  dropped: t('settings.key.dropped'),
+  cannotStore: t('settings.key.cannotStore'),
+  failed: t('settings.key.failed'),
+});
 
 export function KeyPanel() {
   const [state, setState] = useState<KeyState | 'loading'>('loading');
   const [value, setValue] = useState('');
   const [busy, setBusy] = useState(false);
   const [said, setSaid] = useState('');
+  const c = copy();
   const inputId = useId();
   const noteId = useId();
   const saidRef = useRef<HTMLParagraphElement>(null);
@@ -67,10 +73,10 @@ export function KeyPanel() {
     try {
       const next = await storeKey(value);
       setState(next);
-      setSaid(next === 'stored' ? COPY.saved : COPY.cannotStore);
+      setSaid(next === 'stored' ? c.saved : c.cannotStore);
     } catch {
       // 오류에는 키가 실려 있지 않고, 실려 있어도 화면에 옮기지 않는다 (06 §3.5).
-      setSaid(COPY.failed);
+      setSaid(c.failed);
     } finally {
       // 성공이든 실패든 입력을 비운다 — 실패한 값을 다시 보여 주지 않는다.
       setValue('');
@@ -84,9 +90,9 @@ export function KeyPanel() {
     try {
       await dropKey();
       setState(await keyState());
-      setSaid(COPY.dropped);
+      setSaid(c.dropped);
     } catch {
-      setSaid(COPY.failed);
+      setSaid(c.failed);
     } finally {
       setBusy(false);
     }
@@ -94,17 +100,17 @@ export function KeyPanel() {
 
   return (
     <div className="keypanel">
-      {state === 'loading' ? <p className="key-note">{COPY.loading}</p> : null}
+      {state === 'loading' ? <p className="key-note">{c.loading}</p> : null}
 
       {state === 'none' ? (
         <>
-          <p>{COPY.noSend}</p>
-          <p>{COPY.none}</p>
+          <p>{c.noSend}</p>
+          <p>{c.none}</p>
           <form
             className="key-form"
             onSubmit={(e) => { e.preventDefault(); void save(); }}
           >
-            <label className="key-k" htmlFor={inputId}>API 키</label>
+            <label className="key-k" htmlFor={inputId}>{t('settings.key.apiKey')}</label>
             <input
               id={inputId}
               className="key-input"
@@ -117,28 +123,30 @@ export function KeyPanel() {
               onChange={(e) => setValue(e.currentTarget.value)}
             />
             <FlatButton disabled={busy || value.trim() === ''} onClick={() => void save()}>
-              저장
+              {t('settings.key.save')}
             </FlatButton>
           </form>
-          <p className="key-note" id={noteId}>{COPY.noneNote}</p>
+          <p className="key-note" id={noteId}>{c.noneNote}</p>
         </>
       ) : null}
 
       {state === 'stored' ? (
         <>
-          <p>{COPY.stored}</p>
-          <p>{COPY.storedSoon}</p>
+          <p>{c.stored}</p>
+          <p>{c.storedSoon}</p>
           <div className="key-form">
-            <FlatButton ghost disabled={busy} onClick={() => void drop()}>지우기</FlatButton>
+            <FlatButton ghost disabled={busy} onClick={() => void drop()}>
+              {t('settings.key.drop')}
+            </FlatButton>
           </div>
-          <p className="key-note">{COPY.storedNote}</p>
+          <p className="key-note">{c.storedNote}</p>
         </>
       ) : null}
 
       {state === 'unavailable' ? (
         <>
-          <p>{COPY.unavailable}</p>
-          <p className="key-note">{COPY.unavailableNote}</p>
+          <p>{c.unavailable}</p>
+          <p className="key-note">{c.unavailableNote}</p>
         </>
       ) : null}
 

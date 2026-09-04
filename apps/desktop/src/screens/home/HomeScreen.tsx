@@ -1,4 +1,5 @@
-import { DeeSprite, LiveRegion } from '@chickadee/ui';
+import { t } from '@chickadee/i18n';
+import { DeeSprite, LiveRegion, RichText } from '@chickadee/ui';
 
 import { Board } from '../../components/home/Board';
 import { ColorBar } from '../../components/home/ColorBar';
@@ -48,7 +49,10 @@ function guideMsg(sheets: readonly HomeSheet[]): string | null {
   for (const sheet of sheets) {
     const current = sheet.nodes.find((n) => n.state === 'current');
     if (current === undefined) continue;
-    return `다음은 「${current.nameKo}」입니다. ${layerLabel(current.shownLayer)}.`;
+    return t('home.guide', {
+      name: current.nameKo,
+      layer: layerLabel(current.shownLayer),
+    });
   }
   return null;
 }
@@ -87,26 +91,18 @@ export function HomeScreen({
 
       {/* 06 §6.3 재인제스트 배너. 경고가 아니라 안내다 — 겹은 개념에 붙어 있어 살아남는다. */}
       {reingest === true ? (
-        <Panel title="재인제스트 필요" plain="= 리포를 다시 읽어야 합니다">
-          <p className="note">
-            문법·쿼리·카드 생성기·문법 사전 중 하나가 바뀌었습니다. 리포를 다시 읽으면 카드와
-            사용처를 새로 만듭니다 — <b>익힌 겹은 개념에 붙어 있어 그대로 남습니다</b>.
-          </p>
+        <Panel title={t('home.reingestTitle')} plain={t('home.reingestPlain')}>
+          <RichText as="p" className="note" html={t('home.reingestNote')} />
         </Panel>
       ) : null}
 
       <Board
-        title={
-          <>
-            <em>{repoName}</em> 대지
-          </>
-        }
-        plain="= 내 리포의 기능 지도"
+        title={<RichText html={t('home.boardTitle', { repo: repoName })} />}
+        plain={t('home.boardPlain')}
         note={
-          <>
-            유닛 하나가 내 리포의 실제 기능 하나입니다. 커밋과 파일에서 뽑은 개념 {concepts}개 중{' '}
-            <b>{printed}개</b>를 찍었습니다.
-          </>
+          <RichText
+            html={t('home.boardNote', { concepts: String(concepts), printed: String(printed) })}
+          />
         }
       >
         <div className="cols">
@@ -115,22 +111,15 @@ export function HomeScreen({
               <TodayPanel today={today_} onStart={onStart} date={today} />
             )}
 
-            <Panel title="잉크 겹" plain="= 얼마나 익혔나" tag="4겹 = 완성">
+            <Panel title={t('home.inkTitle')} plain={t('home.inkPlain')} tag={t('home.inkTag')}>
               <InkScale counts={data.inkScale} />
-              <p className="note">
-                개념을 익힐수록 새가 선명해집니다. 겹은 <b>맞힌 횟수</b>가 아니라{' '}
-                <b>시간을 두고 다시 맞힌 횟수</b>로 쌓입니다. 「모르겠어요」를 누르면 한 겹
-                내려가고 그만큼 빨리 다시 찍습니다.
-              </p>
+              <RichText as="p" className="note" html={t('home.inkNote')} />
               <ConceptList rows={data.retake} now={now} />
             </Panel>
 
-            <Panel title="판이 없는 문법" plain="= 내 코드엔 있는데 아직 안 찍은 문법">
+            <Panel title={t('home.gapsTitle')} plain={t('home.gapsPlain')}>
               <GapsPanel gaps={data.gaps} onMake={onMake} />
-              <p className="note gaps-note">
-                AI가 써준 자리라도 판을 만들면 그날 인쇄 목록에 들어갑니다. 등장 횟수가 많은
-                것부터 잡으면 한 번에 여러 파일이 읽힙니다.
-              </p>
+              <p className="note gaps-note">{t('home.gapsNote')}</p>
               {/* 「아직 못 하는 것」을 한 자리에 모은다 — 구멍 지도 바로 아래다 (D96). */}
               <LockedPanel openable={data.openableBlocks} files={data.files} />
             </Panel>
@@ -141,9 +130,7 @@ export function HomeScreen({
           <div className="sheets" data-windowed={data.sheets.length > WINDOW_SHEETS ? 'on' : 'off'}>
             {data.sheets.length === 0 ? (
               <>
-                <p className="note">
-                  아직 대지가 없습니다. 리포를 읽으면 기능마다 대지가 한 장씩 깔립니다.
-                </p>
+                <p className="note">{t('home.noSheets')}</p>
                 <Forecast pending={data.lastRun?.commits ?? 0} variant="cannot" />
               </>
             ) : (

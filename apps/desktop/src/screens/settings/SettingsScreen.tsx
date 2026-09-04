@@ -3,7 +3,7 @@ import { ipc, log } from '@chickadee/ipc-client';
 import type { AppPaths, AppVersion } from '@chickadee/ipc-client';
 import type { Settings } from '@chickadee/store-sql';
 import { getLocale, t, type Locale } from '@chickadee/i18n';
-import { FlatButton, LiveRegion, Switch } from '@chickadee/ui';
+import { FlatButton, LiveRegion, RichText, Switch } from '@chickadee/ui';
 import { useEffect, useState } from 'react';
 
 import {
@@ -25,11 +25,13 @@ const PERF_WINDOW = 500;
  * 06 §3.6 의 **0.1.0 문구** — 문장을 고치지 않는다. README·이 화면·06 이 같은 문장이어야
  * 한다는 것이 그 절의 요구다. 이 판에는 네트워크 호출이 하나도 없다(D106) — 전송이 열리는
  * 0.2 에서 06 §3.6 의 두 번째 문단으로 통째로 바꾼다.
+ *
+ * **함수다** — 문장을 모듈 상수로 두면 `setLocale()` 보다 먼저 굳는다 (D117).
  */
-const PRIVACY_NOTE = [
-  '당신의 코드는 이 컴퓨터를 떠나지 않습니다. Chickadee는 리포를 읽기만 하고, 학습 기록은 이 컴퓨터의 데이터베이스 한 파일에만 저장합니다.',
-  '이 판은 인터넷을 아예 쓰지 않습니다 — 「자유 질문」의 프롬프트도 이 컴퓨터에서 만들어 복사할 뿐, 앱이 스스로 보내지 않습니다.',
-  '사용 통계·오류 보고를 보내지 않고, 업데이트도 확인하지 않습니다. 「설정 → 전부 지우기」로 모든 기록을 삭제할 수 있습니다.',
+const privacyNote = (): readonly string[] => [
+  t('settings.privacy.p1'),
+  t('settings.privacy.p2'),
+  t('settings.privacy.p3'),
 ];
 
 /** 제안을 뽑을 리포. 홈이 보고 있는 것이고, 없으면 목록의 첫 줄이다. */
@@ -38,26 +40,33 @@ function activeRepoId(): number | null {
   return ui.activeId ?? ui.repos[0]?.id ?? null;
 }
 
-const THEME_OPTIONS = [
-  { v: 'light' as const, label: '주간반' },
-  { v: 'dark' as const, label: '야간반' },
+/**
+ * 스위치 네 벌. **전부 함수다** — 라벨을 모듈 상수로 두면 그 상수는 `setLocale()` 보다
+ * 먼저 굳어, 언어를 바꾼 뒤에도 옛 말이 남는다 (D117).
+ */
+const themeOptions = () => [
+  { v: 'light' as const, label: t('settings.look.themeLight') },
+  { v: 'dark' as const, label: t('settings.look.themeDark') },
 ];
 
-const TRIM_OPTIONS = [
-  { v: 'off' as const, label: '부속 보임' },
-  { v: 'on' as const, label: '부속 숨김' },
+const trimOptions = () => [
+  { v: 'off' as const, label: t('settings.look.trimOff') },
+  { v: 'on' as const, label: t('settings.look.trimOn') },
 ];
 
-const MOTION_OPTIONS = [
+const motionOptions = () => [
   { v: 'system' as const, label: t('settings.look.motionSystem') },
   { v: 'reduce' as const, label: t('settings.look.motionReduce') },
 ];
 
 /** 언어 이름은 그 언어로 적는다 (D117) — 두 카탈로그가 같은 값을 낸다. */
-const LOCALE_OPTIONS = [
+const localeOptions = () => [
   { v: 'ko' as const, label: t('locale.ko') },
   { v: 'en' as const, label: t('locale.en') },
 ];
+
+/** 목록의 시각 표기도 로케일을 탄다. `Intl` 이 아는 태그로만 넘긴다. */
+const dateTag = (): string => (getLocale() === 'ko' ? 'ko-KR' : 'en-US');
 
 /**
  * 언어를 바꾸면 저장하고 **다시 그린다**.
@@ -189,7 +198,7 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
         setPaths(p);
       } catch {
         // 설정을 다 못 읽어도 화면은 뜬다 — 읽힌 것만 보인다 (01 §6).
-        if (live) setNote('설정을 다 읽지 못했습니다.');
+        if (live) setNote(t('settings.loadFailed'));
       }
     })();
     return () => { live = false; };
@@ -199,8 +208,8 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
   const put = <K extends keyof Settings>(key: K, value: Settings[K]): void => {
     setSettings((prev) => (prev === null ? prev : { ...prev, [key]: value }));
     void saveSetting(key, value, Date.now()).catch(() => {
-      log.warn('설정을 저장하지 못했다');
-      setNote('저장하지 못했습니다.');
+      log.warn('failed to save a setting');
+      setNote(t('settings.saveFailed'));
     });
   };
 
@@ -230,18 +239,18 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
     setBusy(true);
     void exportRecords(opts)
       .then(async ({ dir, name }) => {
-        setNote(`${dir} 에 ${name} 을 만들었습니다.`);
+        setNote(t('settings.exported', { dir, name }));
         await ipc.app.reveal('data');
       })
-      .catch(() => setNote('내보내지 못했습니다.'))
+      .catch(() => setNote(t('settings.exportFailed')))
       .finally(() => setBusy(false));
   };
 
   const doWipe = (): void => {
     setBusy(true);
     void wipeAll()
-      .then(() => setNote('전부 지웠습니다. 앱을 닫아 주세요 — 다시 열면 첫 실행부터 시작합니다.'))
-      .catch(() => setNote('다 지우지 못했습니다. 앱을 닫고 다시 시도해 주세요.'))
+      .then(() => setNote(t('settings.wiped')))
+      .catch(() => setNote(t('settings.wipeFailed')))
       .finally(() => { setBusy(false); setConfirming(false); });
   };
 
@@ -251,16 +260,17 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
     <main className="settings" tabIndex={-1}>
       <header className="set-head">
         <h1>
-          설정<span className="pl">= 이 앱이 나를 어떻게 다룰지</span>
+          {t('settings.title')}
+          <span className="pl">{t('settings.plain')}</span>
         </h1>
         <FlatButton onClick={onBack} ghost>
-          홈으로
+          {t('home.back')}
         </FlatButton>
       </header>
 
-      <Section id="set-repo" title="리포" plain="= 교재로 읽는 폴더">
+      <Section id="set-repo" title={t('settings.repo.title')} plain={t('settings.repo.plain')}>
         {repos.length === 0 ? (
-          <p className="set-empty">등록된 리포가 없습니다.</p>
+          <p className="set-empty">{t('settings.repo.empty')}</p>
         ) : (
           <ul className="set-repos">
             {repos.map((r) => (
@@ -268,8 +278,11 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
                 <b>{r.name}</b>
                 <code>{r.rootPath}</code>
                 <span className="set-note">
-                  마지막 인제스트{' '}
-                  {r.lastIngestAt === null ? '없음' : new Date(r.lastIngestAt).toLocaleString('ko-KR')}
+                  {t('settings.repo.lastIngest', {
+                    when: r.lastIngestAt === null
+                      ? t('settings.repo.never')
+                      : new Date(r.lastIngestAt).toLocaleString(dateTag()),
+                  })}
                 </span>
               </li>
             ))}
@@ -281,37 +294,34 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
           </FlatButton>
         </div>
         <p className="set-note">{t('repos.fromSettingsNote')}</p>
-        <p className="set-note">
-          문법·쿼리·생성기·사전이 바뀌면 홈에 「재인제스트 필요」 배너가 뜹니다. 다시 읽어도{' '}
-          <b>숙련도는 개념 단위라 그대로 남고</b> 카드와 사용처만 새로 만듭니다.
-        </p>
+        <RichText as="p" className="set-note" html={t('settings.repo.reingestNote')} />
         <div className="set-row set-row-block">
           <span className="set-k">{t('settings.globs.label')}</span>
           <GlobPanel value={s.excludeGlobs} onChange={(next) => put('excludeGlobs', next)} />
         </div>
-        <p className="set-note">{t('settings.globs.note')}</p>
+        <RichText as="p" className="set-note" html={t('settings.globs.note')} />
       </Section>
 
-      <Section id="set-study" title="학습" plain="= 하루에 얼마나, 언제부터">
+      <Section id="set-study" title={t('settings.study.title')} plain={t('settings.study.plain')}>
         <NumberRow
-          label="하루 예산"
-          note="분 (10~25)"
+          label={t('settings.study.budget')}
+          note={t('settings.study.budgetNote')}
           value={s.budgetMin}
           min={10}
           max={25}
           onChange={(n) => put('budgetMin', n)}
         />
         <NumberRow
-          label="하루 경계"
-          note="시 — 이 시각 전은 어제로 셉니다"
+          label={t('settings.study.rollover')}
+          note={t('settings.study.rolloverNote')}
           value={s.rolloverHour}
           min={0}
           max={23}
           onChange={(n) => put('rolloverHour', n)}
         />
         <NumberRow
-          label="새 판"
-          note="장/일 (상한 4)"
+          label={t('settings.study.newPerDay')}
+          note={t('settings.study.newPerDayNote')}
           value={s.newPerDay}
           min={0}
           max={4}
@@ -335,40 +345,40 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
             onChange={(next) => put('dictLangs', next)}
           />
         </div>
-        <p className="set-note">{t('settings.dictLangs.note')}</p>
+        <RichText as="p" className="set-note" html={t('settings.dictLangs.note')} />
         <p className="set-note">{t('settings.dictLangs.axis')}</p>
         <label className="set-row">
-          <span className="set-k">시간대</span>
+          <span className="set-k">{t('settings.study.tz')}</span>
           <input
             type="text"
             className="set-text"
             value={s.tz}
             onChange={(e) => put('tz', e.currentTarget.value)}
           />
-          <span className="set-note">여행 중에 어제 큐가 사라지지 않도록 여기 값이 기준입니다</span>
+          <span className="set-note">{t('settings.study.tzNote')}</span>
         </label>
       </Section>
 
-      <Section id="set-look" title="모양" plain="= 화면의 공정">
+      <Section id="set-look" title={t('settings.look.title')} plain={t('settings.look.plain')}>
         <div className="set-row">
-          <span className="set-k">공정</span>
+          <span className="set-k">{t('settings.look.process')}</span>
           <Switch
-            options={THEME_OPTIONS}
+            options={themeOptions()}
             value={appearance.theme}
-            label="주간반 · 야간반 전환"
+            label={t('settings.look.themeSwitch')}
             onChange={appearance.setTheme}
           />
           <Switch
-            options={TRIM_OPTIONS}
+            options={trimOptions()}
             value={appearance.trim}
-            label="인쇄 부속 보이기 · 숨기기"
+            label={t('settings.look.trimSwitch')}
             onChange={appearance.setTrim}
           />
         </div>
         <div className="set-row">
           <span className="set-k">{t('settings.look.motion')}</span>
           <Switch
-            options={MOTION_OPTIONS}
+            options={motionOptions()}
             value={appearance.motion}
             label={t('settings.look.motionSwitch')}
             onChange={appearance.setMotion}
@@ -378,41 +388,35 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
         <div className="set-row">
           <span className="set-k">{t('settings.look.locale')}</span>
           <Switch
-            options={LOCALE_OPTIONS}
+            options={localeOptions()}
             value={getLocale()}
             label={t('settings.look.localeSwitch')}
-            onChange={(v) => void onLocale(v).catch(() => setNote('표시 언어를 저장하지 못했습니다.'))}
+            onChange={(v) => void onLocale(v).catch(() => setNote(t('settings.localeFailed')))}
           />
         </div>
         <p className="set-note">{t('settings.look.localeNote')}</p>
-        <p className="set-note">
-          여기서 고른 것은 저장되어 다음에 열 때도 그대로입니다. 「부속 숨김」은 등록표시·절취선·
-          결·도장 회전만 끄고 글자와 배치는 1px 도 바꾸지 않습니다.
-        </p>
+        <p className="set-note">{t('settings.look.note')}</p>
       </Section>
 
-      <Section id="set-key" title="LLM 키" plain="= 자유 질문에 쓸 열쇠">
+      <Section id="set-key" title={t('settings.key.title')} plain={t('settings.key.plain')}>
         <KeyPanel />
       </Section>
 
-      <Section id="set-perf" title="성능" plain="= 이 컴퓨터에서 잰 시간">
+      <Section id="set-perf" title={t('settings.perf.title')} plain={t('settings.perf.plain')}>
         <PerfTable rows={perf} />
       </Section>
 
-      <Section id="set-data" title="데이터" plain="= 내 기록을 꺼내거나 지우기">
+      <Section id="set-data" title={t('settings.data.title')} plain={t('settings.data.plain')}>
         <fieldset className="set-fields">
-          <legend>내보낼 것</legend>
-          <p className="set-note">
-            스키마 번호·개념 숙련도·세션 요약·설정은 항상 담습니다. 아래 둘은 <b>내 코드와 내가
-            쓴 글</b>이라 기본으로 빼 둡니다.
-          </p>
+          <legend>{t('settings.data.legend')}</legend>
+          <RichText as="p" className="set-note" html={t('settings.data.note')} />
           <label className="set-check">
             <input
               type="checkbox"
               checked={opts.cardExcerpts}
               onChange={(e) => setOpts({ ...opts, cardExcerpts: e.currentTarget.checked })}
             />
-            카드 발췌(내 코드 줄)도 담기
+            {t('settings.data.excerpts')}
           </label>
           <label className="set-check">
             <input
@@ -420,57 +424,55 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
               checked={opts.t1Drafts}
               onChange={(e) => setOpts({ ...opts, t1Drafts: e.currentTarget.checked })}
             />
-            T1 필사 초안도 담기
+            {t('settings.data.drafts')}
           </label>
         </fieldset>
 
         <div className="set-acts">
           <FlatButton onClick={doExport} disabled={busy}>
-            내 기록 내보내기
+            {t('settings.data.export')}
           </FlatButton>
           <FlatButton onClick={() => void ipc.app.reveal('data')} ghost>
-            데이터 폴더 열기
+            {t('settings.data.openData')}
           </FlatButton>
           <FlatButton onClick={() => void ipc.app.reveal('logs')} ghost>
-            로그 폴더 열기
+            {t('settings.data.openLogs')}
           </FlatButton>
         </div>
-        <p className="set-note">
-          저장 위치를 묻지 않습니다 — 앱 데이터 폴더의 <code>exports/</code> 에 만들고 그 폴더를
-          엽니다. 거기서 원하는 곳으로 옮기면 됩니다.
-        </p>
+        <RichText as="p" className="set-note" html={t('settings.data.whereNote')} />
 
         <div className="set-wipe">
           {confirming ? (
             <>
-              <p className="set-warn">
-                <b>되돌릴 수 없습니다.</b> 학습 DB·백업·사전 캐시·로그·크래시 기록·설정과 키체인에
-                넣은 API 키를 지웁니다. 리포 폴더의 파일은 건드리지 않습니다.
-              </p>
+              <RichText as="p" className="set-warn" html={t('settings.data.wipeWarn')} />
               <div className="set-acts">
                 <FlatButton onClick={doWipe} disabled={busy}>
-                  {busy ? '지우는 중…' : '정말 전부 지웁니다'}
+                  {busy ? t('settings.data.wiping') : t('settings.data.wipeGo')}
                 </FlatButton>
                 <FlatButton onClick={() => setConfirming(false)} ghost>
-                  그만두기
+                  {t('settings.data.wipeCancel')}
                 </FlatButton>
               </div>
             </>
           ) : (
             <FlatButton onClick={() => setConfirming(true)} ghost>
-              전부 지우기
+              {t('settings.data.wipe')}
             </FlatButton>
           )}
         </div>
       </Section>
 
-      <Section id="set-privacy" title="프라이버시 노트" plain="= 무엇이 어디에 남는가">
-        {PRIVACY_NOTE.map((line) => (
+      <Section
+        id="set-privacy"
+        title={t('settings.privacy.title')}
+        plain={t('settings.privacy.plain')}
+      >
+        {privacyNote().map((line) => (
           <p key={line.slice(0, 12)}>{line}</p>
         ))}
       </Section>
 
-      <Section id="set-about" title="정보" plain="= 판 번호">
+      <Section id="set-about" title={t('settings.about.title')} plain={t('settings.about.plain')}>
         <dl className="set-about">
           <dt>Chickadee</dt>
           <dd>{version?.app ?? '—'}</dd>
@@ -480,7 +482,7 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
           <dd>{version?.sqlite ?? '—'}</dd>
           <dt>rustc</dt>
           <dd>{version?.rustc ?? '—'}</dd>
-          <dt>데이터 위치</dt>
+          <dt>{t('settings.about.dataDir')}</dt>
           <dd>
             <code>{paths?.dataDir ?? '—'}</code>
           </dd>
