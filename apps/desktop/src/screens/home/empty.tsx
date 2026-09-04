@@ -1,6 +1,7 @@
 import { t, type Locale } from '@chickadee/i18n';
 import { DeeLogo, DeeSprite, PressButton, Switch } from '@chickadee/ui';
 
+import { CloneField } from '../repos/CloneField.js';
 import './empty.css';
 
 export interface FirstRunProps {
@@ -42,6 +43,8 @@ export function FirstRun({ onPick, locale, onLocale }: FirstRunProps) {
           />
         </div>
         <PressButton onClick={onPick}>{t('firstRun.pick')}</PressButton>
+        {/* 리포가 이 컴퓨터에 없을 수도 있다 (D129) — 폴더 고르기 아래에 주소 한 줄. */}
+        <CloneField />
       </main>
     </div>
   );

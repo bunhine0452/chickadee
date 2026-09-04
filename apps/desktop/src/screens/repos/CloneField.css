@@ -1,0 +1,55 @@
+/* 주소 한 줄 (D129). 담는 쪽(첫 실행 판 · 서가 머리)이 이미 괘선과 바탕을 갖고 있으므로
+   여기서는 입력 한 줄과 곁말만 정한다 — 설정의 「LLM 키」 칸과 같은 규칙이다. */
+.clone-url {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+}
+
+.clone-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.clone-k {
+  flex: 0 0 auto;
+  color: var(--ink);
+  font-size: var(--fs-14);
+  font-weight: 600;
+}
+
+/* 붙여넣기가 주 입력이라 한 줄이 넉넉해야 한다. */
+.clone-in {
+  flex: 1 1 20em;
+  min-width: 12em;
+  padding: 5px 8px;
+  border: 1.5px solid var(--rule);
+  background: var(--stock);
+  color: var(--ink);
+  font-family: var(--f-mono);
+  font-size: var(--fs-14);
+}
+
+.clone-in:focus {
+  outline: 3px solid var(--t0);
+  outline-offset: 2px;
+}
+
+.clone-in:disabled {
+  background: var(--paper-3);
+  color: var(--ink-soft);
+}
+
+.clone-in::placeholder {
+  color: var(--ink-mute);
+}
+
+.clone-note {
+  max-width: var(--measure);
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: var(--fs-13);
+  line-height: var(--lh-body);
+}

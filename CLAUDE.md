@@ -51,7 +51,7 @@ README · 커밋 메시지 · PR · 이슈 답글 · 릴리스 노트 · 문서 
   되어 있는지의 답이고, §7 이 인계 규칙이다.
 - **문서를 고치기 전에 결정 등록부에 행을 먼저 올린다**(`docs/00-overview.md` §4.2.1, 다음 번호).
   등록부에 없는 변경은 리뷰에서 되돌린다. 체크리스트 항목 제목은 바꾸지 않는다.
-- **얇은 Rust.** `crates/**` + `apps/desktop/src-tauri/src/**` 합계 ≤ 2300줄(D68), 도메인 어휘
+- **얇은 Rust.** `crates/**` + `apps/desktop/src-tauri/src/**` 합계 ≤ 2800줄(D129), 도메인 어휘
   (concept·card·mastery·ink·fsrs·queue·session·grade·review) 금지, SQL 리터럴 금지.
   `bash scripts/check-rust-budget.sh` 가 CI 에서 강제한다.
 - **디자인 결정은 사용자 것이다.** `design/logo/chickadee-logo.svg` 와 목업 두 장의 시각은

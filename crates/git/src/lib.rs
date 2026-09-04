@@ -27,6 +27,10 @@ pub enum GitError {
     BlameTimeout { ms: u64 },
     #[error("path escapes the work tree")]
     BadPath(String),
+    #[error("only https:// is fetched")]
+    BadUrl,
+    #[error("there is already something at the destination")]
+    Occupied,
     #[error("libgit2: {}", .0.class() as i32)]
     Lib(#[from] git2::Error),
 }
@@ -50,6 +54,24 @@ impl Repo {
             .canonicalize()
             .map_err(|_| GitError::Bare)?;
         Ok(Repo { inner, root })
+    }
+
+    /// Copies the repository at `url` into `into` and opens it (D129). Only `https://`:
+    /// ssh would need keys, a local path is what `open` is for, and every extra scheme is
+    /// one more thing to trust. libgit2 runs no hooks, so nothing in what arrives executes
+    /// (06 §4.1) — it is read as data, like any other work tree.
+    ///
+    /// `into` must not exist. Writing into a folder that already holds something is how a
+    /// half-written tree gets mixed with someone else's files, and neither side survives.
+    pub fn clone_into(url: &str, into: &Path) -> Out<Repo> {
+        if !url.starts_with("https://") {
+            return Err(GitError::BadUrl);
+        }
+        if into.exists() {
+            return Err(GitError::Occupied);
+        }
+        git2::Repository::clone(url, into)?;
+        Repo::open(into)
     }
 
     #[must_use]

@@ -13,6 +13,15 @@ export const repos: Record<string, string> = {
   'repos.add': 'Add a repo',
   'repos.pickFolder': 'Choose a repo folder',
   'repos.pickNew': 'Choose the folder it moved to',
+
+  'repos.cloneLabel': 'git address',
+  'repos.clonePlaceholder': 'https://github.com/user/repo',
+  'repos.cloneGo': 'Fetch from address',
+  'repos.cloneBusy': 'Fetching…',
+  'repos.pickClone': 'Choose where to put it',
+  'repos.cloneNote':
+    'Paste an https address and Chickadee puts it under the folder you choose, named after '
+    + 'the repo, and registers it. A large repo takes a few minutes.',
   'repos.note':
     'Every repo keeps its own study record. Switching repos leaves a session where it was, '
     + 'and coming back picks it up at the same plate.',

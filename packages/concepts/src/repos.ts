@@ -31,6 +31,39 @@ const nameOf = (rootPath: string): string =>
   rootPath.replace(/[/\\]+$/, '').split(/[/\\]/).at(-1) ?? rootPath;
 
 /**
+ * 받을 수 있는 주소인가, 받으면 폴더 이름이 무엇인가 — `https://github.com/a/b.git` → `b`.
+ * 못 받을 주소면 `null` 이고, **화면은 폴더 대화상자를 열기 전에 이것부터 본다**.
+ *
+ * `https` 만 받는 이유는 Rust 쪽과 같다 (D129): ssh 는 열쇠가 필요하고 로컬 경로는
+ * 「리포 추가」가 하는 일이다. 경로 구분자나 `..` 가 섞인 이름을 거르는 이유는 그 이름이
+ * 곧 우리가 만들 폴더이기 때문이다.
+ */
+export function cloneTargetName(url: string): string | null {
+  if (!url.startsWith('https://')) return null;
+  const tail = url.replace(/\/+$/, '').split('/').at(-1) ?? '';
+  const name = tail.replace(/\.git$/i, '');
+  return /^[\w.][\w.-]*$/.test(name) && name !== '.' && name !== '..' ? name : null;
+}
+
+/**
+ * 주소로 받아서 그 자리를 돌려준다 (D129). **장부에는 아무것도 쓰지 않는다** — 받는 것과
+ * 등록하는 것은 다른 일이고, 등록은 폴더를 고른 길과 같은 `registerRepo` 로 모인다.
+ *
+ * 받을 자리는 `<고른 폴더>/<주소 끝 이름>` 이고 이미 있으면 Rust 가 거절한다. 경로를 여기서
+ * 만드는 이유는 Rust 에 「부모 폴더 아래 이름을 지어 만들라」를 넣지 않기 위해서다 —
+ * 그 규칙은 화면이 설명해야 하는 것이라 TS 쪽 일이다 (D65).
+ */
+export async function cloneRepo(url: string, parentDir: string): Promise<string> {
+  const name = cloneTargetName(url);
+  if (name === null) throw new IpcError('GIT_URL_UNSUPPORTED', 'https 주소가 아닙니다.', { url });
+  // 구분자는 부모 경로가 쓰던 것을 따른다 — Windows 의 `C:\a\b` 에 `/` 를 섞지 않는다.
+  const sep = parentDir.includes('\\') ? '\\' : '/';
+  const into = `${parentDir.replace(/[/\\]+$/, '')}${sep}${name}`;
+  const probe = await ipc.repo.clone(url, into);
+  return probe.rootPath;
+}
+
+/**
  * 폴더를 등록한다. 하위 폴더를 골라도 `repo_probe` 가 루트를 찾아 준다 (03 §1.1).
  * 커밋이 0개여도 열린다 — 워킹트리만으로 T0·T1 이 성립한다 (D44).
  */

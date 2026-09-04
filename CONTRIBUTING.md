@@ -136,7 +136,7 @@ that in CI and prints what it measured:
 
 | Rule | What fails |
 |---|---|
-| Line budget | more than 2,300 lines of Rust code across `crates/*/src` and `apps/desktop/src-tauri/src` (comments and blanks excluded) |
+| Line budget | more than 2,800 lines of Rust code across `crates/*/src` and `apps/desktop/src-tauri/src` (comments and blanks excluded) |
 | No domain vocabulary | `concept`, `card`, `mastery`, `ink`, `fsrs`, `queue`, `session`, `grade`, `review` in a Rust identifier or string |
 | No SQL literals | `SELECT`, `INSERT INTO`, `UPDATE`, `DELETE FROM`, `CREATE TABLE` — SQL lives in `packages/store-sql` and runs by catalog name |
 | No git binary | `Command::new("git")` — libgit2 does not execute hooks, and a repository is untrusted input |

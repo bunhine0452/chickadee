@@ -8,14 +8,14 @@
  * 등록·이동·삭제 자체는 `@chickadee/concepts` 의 `repos.ts` 에 이미 있다. 여기서는 부르기만
  * 한다 (D65).
  */
-import { relocateRepo, removeRepo } from '@chickadee/concepts';
+import { cloneRepo, cloneTargetName, relocateRepo, removeRepo } from '@chickadee/concepts';
 import { t } from '@chickadee/i18n';
-import { ipc } from '@chickadee/ipc-client';
+import { IpcError, ipc } from '@chickadee/ipc-client';
 import { dayKey, endOfDay } from '@chickadee/scheduler';
 import type { DayKey, RepoInfo } from '@chickadee/store-sql';
 
 import { loadSettings } from '../../data/settings.js';
-import { addRepo } from '../../flow.js';
+import { addRepo, report } from '../../flow.js';
 
 /** 서가 카드 한 장. `status` 는 열이 아니라 파생이다 (`concepts/repos.ts` 와 같은 규칙). */
 export interface RepoCard {
@@ -93,6 +93,30 @@ export async function probeMissing(cards: readonly RepoCard[]): Promise<number[]
 export async function pickFolder(): Promise<void> {
   const picked = await ipc.dialog.pickFolder(t('repos.pickFolder'));
   if (picked !== null) await addRepo(picked);
+}
+
+/**
+ * 주소로 받아 등록까지 (D129). 받을 **부모 폴더**를 고르게 하고 그 아래 주소 끝 이름으로
+ * 받는다 — 받은 코드가 사용자가 아는 자리에 남아야 지우는 것도 사용자가 할 수 있다.
+ *
+ * 받은 뒤는 폴더를 고른 길과 한 글자도 다르지 않다: `addRepo` 가 등록하고 인제스트를 연다.
+ * 돌려주는 값은 「무언가 들어왔나」이고, 대화상자를 닫았으면 `false` 이며 아무 일도 없다.
+ */
+export async function cloneFromUrl(url: string): Promise<boolean> {
+  // 못 받을 주소로 폴더 대화상자를 열지 않는다 — 고르고 나서 거절하면 두 걸음이 헛것이 된다.
+  if (cloneTargetName(url) === null) {
+    report(new IpcError('GIT_URL_UNSUPPORTED', 'https 주소가 아닙니다.', { url }), '리포 받기');
+    return false;
+  }
+  const parent = await ipc.dialog.pickFolder(t('repos.pickClone'));
+  if (parent === null) return false;
+  try {
+    await addRepo(await cloneRepo(url, parent));
+    return true;
+  } catch (e) {
+    report(e, '리포 받기');
+    return false;
+  }
 }
 
 /**

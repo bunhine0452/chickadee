@@ -7,6 +7,14 @@ export const ui: Record<string, string> = {
   'error.gitCommitNotFound.title': 'The history looks rewritten.',
   'error.gitCommitNotFound.detail': 'Reading the repo again.',
   'error.gitIo.title': 'Could not read the repo.',
+  'error.gitUrlUnsupported.title': 'Only https addresses are fetched.',
+  'error.gitUrlUnsupported.detail':
+    'Copy the HTTPS address from the Code button on GitHub. An ssh address (git@…) needs a key, '
+    + 'so it is not fetched yet.',
+  'error.gitDestOccupied.title': 'Something is already at that spot.',
+  'error.gitDestOccupied.detail':
+    'A folder of that name is already there. If you have the repo on disk already, add it with '
+    + 'Add a repo instead.',
   'error.logsHaveMore': 'The log has the details.',
   'error.parseLangUnsupported.title': 'No plates for this language yet.',
   'error.parseLangUnsupported.detail':

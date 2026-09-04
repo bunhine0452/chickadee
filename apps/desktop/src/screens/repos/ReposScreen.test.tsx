@@ -15,9 +15,14 @@ let gone: number[] = [];
 let relocated: number[] = [];
 let removed: { id: number; purge: boolean }[] = [];
 let picked = 0;
+let fetched: string[] = [];
 
 vi.mock('./data.js', () => ({
   loadShelf: () => Promise.resolve(cards),
+  cloneFromUrl: (url: string) => {
+    fetched.push(url);
+    return Promise.resolve(true);
+  },
   probeMissing: () => Promise.resolve(gone),
   pickFolder: () => {
     picked += 1;
@@ -62,12 +67,28 @@ beforeEach(() => {
   relocated = [];
   removed = [];
   picked = 0;
+  fetched = [];
   useUi.setState({ activeId: 1, session: null, screen: 'repos', toast: undefined });
 });
 
 afterEach(cleanup);
 
 describe('ReposScreen', () => {
+  it('주소를 치면 그 주소로 받는다 — 폴더 고르기 옆의 두 번째 문 (D129)', async () => {
+    const user = userEvent.setup();
+    render(<ReposScreen onBack={() => undefined} />);
+    await waitFor(() => expect(screen.getByText(/등록된 리포가 없습니다/)).toBeTruthy());
+
+    // 주소가 비어 있는 동안은 잠겨 있다.
+    expect(screen.getByRole('button', { name: '주소로 받기' })).toHaveProperty('disabled', true);
+    await user.type(screen.getByLabelText('git 주소'), 'https://github.com/me/cart-shop.git');
+    await user.click(screen.getByRole('button', { name: '주소로 받기' }));
+
+    expect(fetched).toEqual(['https://github.com/me/cart-shop.git']);
+    // 받고 나면 칸이 비어 다음 주소를 받을 수 있다.
+    await waitFor(() => expect(screen.getByLabelText('git 주소')).toHaveProperty('value', ''));
+  });
+
   it('리포가 0개면 빈 상태 한 문단만 낸다', async () => {
     render(<ReposScreen onBack={() => undefined} />);
     await waitFor(() => expect(screen.getByText(/등록된 리포가 없습니다/)).toBeTruthy());

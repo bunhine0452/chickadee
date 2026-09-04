@@ -48,6 +48,8 @@ impl From<chickadee_git::GitError> for IpcError {
             E::CommitNotFound(_) => "GIT_COMMIT_NOT_FOUND",
             E::BlameTimeout { .. } => "GIT_BLAME_TIMEOUT",
             E::BadPath(_) => "FS_NOT_FOUND",
+            E::BadUrl => "GIT_URL_UNSUPPORTED",
+            E::Occupied => "GIT_DEST_OCCUPIED",
             E::Lib(_) => "GIT_IO",
         };
         // No path or byte reaches the message — `Display` on these variants is

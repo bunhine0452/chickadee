@@ -14,6 +14,12 @@ export const ui = {
   'error.gitCommitNotFound.title': '히스토리가 바뀐 것 같습니다.',
   'error.gitCommitNotFound.detail': '리포를 다시 읽어 옵니다.',
   'error.gitIo.title': '리포를 읽지 못했습니다.',
+  'error.gitUrlUnsupported.title': 'https 주소만 받을 수 있습니다.',
+  'error.gitUrlUnsupported.detail':
+    'GitHub 의 「Code」 단추에서 HTTPS 주소를 복사해 주세요. ssh 주소(git@…)는 열쇠가 필요해 아직 받지 않습니다.',
+  'error.gitDestOccupied.title': '받을 자리에 이미 무언가 있습니다.',
+  'error.gitDestOccupied.detail':
+    '같은 이름의 폴더가 이미 있습니다. 이미 받아 둔 리포라면 「리포 추가」로 그 폴더를 고르면 됩니다.',
   // `GIT_IO` 와 `UNKNOWN` 이 같이 쓴다 — 한쪽만 고치고 싶어지면 그때 나눈다.
   'error.logsHaveMore': '자세한 내용은 로그에 있습니다.',
   'error.parseLangUnsupported.title': '아직 이 언어의 판이 없습니다.',

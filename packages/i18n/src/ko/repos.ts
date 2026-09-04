@@ -14,6 +14,16 @@ export const repos = {
   'repos.add': '리포 추가',
   'repos.pickFolder': '리포 폴더 고르기',
   'repos.pickNew': '옮긴 리포 폴더 고르기',
+
+  // 주소로 받기 (D129). 첫 실행과 서가가 같은 문구를 쓴다.
+  'repos.cloneLabel': 'git 주소',
+  'repos.clonePlaceholder': 'https://github.com/사용자/리포',
+  'repos.cloneGo': '주소로 받기',
+  'repos.cloneBusy': '받는 중…',
+  'repos.pickClone': '받을 자리 고르기',
+  'repos.cloneNote':
+    'https 주소를 붙여 넣으면 고른 폴더 아래에 리포 이름으로 받아서 그대로 등록합니다. '
+    + '큰 리포는 몇 분 걸립니다.',
   'repos.note':
     '리포마다 학습 기록이 따로 쌓입니다. 리포를 바꿔도 진행 중인 세션은 그 리포에 남아, '
     + '돌아오면 그 자리에서 이어 찍힙니다.',

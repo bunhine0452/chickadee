@@ -47,6 +47,13 @@ export const ipc = {
      * `repos.ts` 가 이것과 `repo.*` statement 로 조립한다 (D65).
      */
     probe: (path: string) => call<RepoProbe>('repo_probe', { path }),
+    /**
+     * 주소 하나를 받아 `into` 에 통째로 내려받고, 받은 것을 `probe` 와 같은 모양으로
+     * 돌려준다 (D129). `into` 는 **아직 없어야 하는 전체 경로**다 — 어디에 받을지 고르고
+     * 폴더 이름을 정하는 것은 TS 쪽 일이다(`@chickadee/concepts` 의 `cloneRepo`).
+     * 리포가 크면 분 단위로 걸린다.
+     */
+    clone: (url: string, into: string) => call<RepoProbe>('repo_clone', { url, into }),
   },
   ingest: {
     /**

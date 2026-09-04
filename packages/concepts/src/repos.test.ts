@@ -18,6 +18,8 @@ let db: SqliteDb;
 
 /** `repo_probe` 가 돌려줄 것. 테스트마다 갈아 끼운다. */
 let probe: (path: string) => { rootPath: string; fingerprint: string; headCommit: string | null };
+/** `repo_clone` 이 받은 인자. 받아 오기가 어떤 경로를 지었는지 여기서 본다. */
+let cloned: { url: string; into: string }[] = [];
 
 function run(name: string, params: unknown): unknown[] {
   const sql = (statements as Record<string, string>)[name];
@@ -41,13 +43,19 @@ vi.mock('@chickadee/ipc-client', () => ({
       batch: (ops: { name: string; params: unknown }[]) =>
         Promise.resolve(ops.map((op) => run(op.name, op.params)[0])),
     },
-    repo: { probe: (path: string) => Promise.resolve(probe(path)) },
+    repo: {
+      probe: (path: string) => Promise.resolve(probe(path)),
+      clone: (url: string, into: string) => {
+        cloned.push({ url, into });
+        return Promise.resolve(probe(into));
+      },
+    },
   },
   IpcError: FakeIpcError,
   on: () => Promise.resolve(() => undefined),
 }));
 
-const { listRepos, registerRepo, relocateRepo, removeRepo } = await import('./repos.js');
+const { cloneRepo, listRepos, registerRepo, relocateRepo, removeRepo } = await import('./repos.js');
 
 beforeEach(() => {
   db = new Database(':memory:');
@@ -56,11 +64,13 @@ beforeEach(() => {
   for (const m of [...migrations].sort((a, b) => a.version - b.version)) db.exec(m.sql);
   db.pragma('foreign_keys = ON');
   probe = () => ({ rootPath: '/work/cart-shop', fingerprint: 'root1', headCommit: 'head1' });
+  cloned = [];
 });
 
 describe('등록', () => {
   test('하위 폴더를 골라도 루트가 등록된다', async () => {
     probe = () => ({ rootPath: '/work/cart-shop', fingerprint: 'root1', headCommit: 'head1' });
+  cloned = [];
     const repo = await registerRepo('/work/cart-shop/src/features', T);
     expect(repo.rootPath).toBe('/work/cart-shop');
     expect(repo.name).toBe('cart-shop');
@@ -147,5 +157,31 @@ describe('삭제', () => {
     const repo = await registerRepo('/work/cart-shop', T);
     await removeRepo(repo.id, false, T);
     expect(db.prepare('SELECT COUNT(*) AS n FROM repo').get()).toEqual({ n: 1 });
+  });
+});
+
+describe('주소로 받기 (D129)', () => {
+  test('받을 자리는 「고른 폴더 / 주소 끝 이름」이고 `.git` 은 떼어 낸다', async () => {
+    await cloneRepo('https://github.com/me/cart-shop.git', '/work');
+    expect(cloned).toEqual([
+      { url: 'https://github.com/me/cart-shop.git', into: '/work/cart-shop' },
+    ]);
+  });
+
+  test('부모 경로가 쓰던 구분자를 따른다 — Windows 경로에 `/` 를 섞지 않는다', async () => {
+    await cloneRepo('https://github.com/me/cart-shop', 'C:\\work\\');
+    expect(cloned[0]?.into).toBe('C:\\work\\cart-shop');
+  });
+
+  test('장부에는 아무것도 쓰지 않는다 — 등록은 폴더를 고른 길과 같은 문으로 간다', async () => {
+    await cloneRepo('https://github.com/me/cart-shop', '/work');
+    expect(await listRepos()).toEqual([]);
+  });
+
+  test('폴더 이름이 될 수 없는 주소는 받지 않는다', async () => {
+    for (const url of ['https://github.com/me/..', 'git@github.com:me/cart-shop.git', 'not-a-url']) {
+      await expect(cloneRepo(url, '/work')).rejects.toMatchObject({ code: 'GIT_URL_UNSUPPORTED' });
+    }
+    expect(cloned).toEqual([]);
   });
 });

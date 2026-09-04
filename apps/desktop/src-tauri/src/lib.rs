@@ -35,6 +35,7 @@ pub fn run() {
             commands::maint::app_write_json,
             commands::maint::app_wipe,
             commands::repo::repo_probe,
+            commands::repo::repo_clone,
             commands::repo::file_read_lines,
             commands::repo::file_read_block,
             commands::repo::git_blame_lines,

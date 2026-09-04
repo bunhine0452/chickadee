@@ -35,4 +35,4 @@
 
 <!-- Only if this PR touches crates/** or apps/desktop/src-tauri/src/**. -->
 
-- [ ] `bash scripts/check-rust-budget.sh` passes. Lines now:      / 2300
+- [ ] `bash scripts/check-rust-budget.sh` passes. Lines now:      / 2800

@@ -23,13 +23,20 @@ function first(props: Partial<React.ComponentProps<typeof FirstRun>> = {}) {
 }
 
 describe('FirstRun', () => {
-  it('로고 · 한 문단 · 언어 고르기 · 버튼 하나뿐이다', () => {
+  it('로고 · 한 문단 · 언어 고르기 · 리포로 들어오는 문 둘', () => {
     render(first());
     expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Chickadee');
     expect(screen.getByText(/리포에는\s*아무것도 쓰지 않습니다/)).toBeTruthy();
-    // 언어 스위치는 `role=switch` 라 버튼 셈에 들지 않는다 — 버튼은 여전히 하나다.
-    expect(screen.getAllByRole('button')).toHaveLength(1);
+    // 언어 스위치는 `role=switch` 라 버튼 셈에 들지 않는다. 버튼 둘 = 폴더 고르기와
+    // 주소로 받기(D129) — 리포가 이 컴퓨터에 있을 수도, 없을 수도 있다.
+    expect(screen.getAllByRole('button')).toHaveLength(2);
     expect(screen.getByRole('switch')).toBeTruthy();
+    expect(screen.getByLabelText('git 주소')).toBeTruthy();
+  });
+
+  it('주소가 비어 있으면 「주소로 받기」가 잠겨 있다', () => {
+    render(first());
+    expect(screen.getByRole('button', { name: '주소로 받기' })).toHaveProperty('disabled', true);
   });
 
   it('「리포 등록」이 폴더 고르기를 부른다', async () => {

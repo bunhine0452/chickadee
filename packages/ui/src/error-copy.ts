@@ -54,6 +54,16 @@ const COPY: Record<IpcErrorCode, ErrorEntry> = {
     detail: 'error.logsHaveMore',
     action: 'reveal-logs',
   },
+  GIT_URL_UNSUPPORTED: {
+    title: 'error.gitUrlUnsupported.title',
+    detail: 'error.gitUrlUnsupported.detail',
+    action: null,
+  },
+  GIT_DEST_OCCUPIED: {
+    title: 'error.gitDestOccupied.title',
+    detail: 'error.gitDestOccupied.detail',
+    action: null,
+  },
   PARSE_LANG_UNSUPPORTED: {
     title: 'error.parseLangUnsupported.title',
     detail: 'error.parseLangUnsupported.detail',

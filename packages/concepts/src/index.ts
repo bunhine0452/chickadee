@@ -39,7 +39,7 @@ export { resolveImports } from './resolve-imports.js';
 export type {
   EdgeKind, FileImports, ResolveInput, ResolvedEdge, TsconfigPaths,
 } from './resolve-imports.js';
-export { registerRepo, listRepos, relocateRepo, removeRepo } from './repos.js';
+export { registerRepo, cloneRepo, cloneTargetName, listRepos, relocateRepo, removeRepo } from './repos.js';
 export { BLAME_BUDGET_MS, fillCommits } from './blame.js';
 export type { BlameOptions } from './blame.js';
 export { deriveRepo, materializeDict, recountUnknown, runIngest, writeUnitNodes } from './ingest.js';

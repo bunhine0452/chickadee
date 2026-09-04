@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 
 import { refreshRepos, report } from '../../flow.js';
 import { useUi } from '../../store.js';
+import { CloneField } from './CloneField.js';
 import { loadShelf, pickFolder, probeMissing, relocate, remove, type RepoCard } from './data.js';
 import './ReposScreen.css';
 
@@ -133,6 +134,9 @@ export function ReposScreen({ onBack }: ReposScreenProps) {
       </header>
 
       <p className="shelf-lede">{t('repos.note')}</p>
+
+      {/* 폴더 고르기 옆의 두 번째 문 (D129). 목록을 든 화면이라 받은 뒤 다시 읽는다. */}
+      <CloneField onDone={() => void reload()} />
 
       {cards === null ? (
         // 아직 못 읽은 한 프레임. 스피너를 두지 않는다 (정본 §3-7).
