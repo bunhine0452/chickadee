@@ -90,27 +90,31 @@ describe('목업 optchain — 지목형', () => {
     expect(made.payload.kind).toBe('point');
   });
 
-  test('정답은 목업과 같이 두 번째 보기(`?.`)다', () => {
-    expect(made.payload.answer).toBe(1);
-    expect(made.payload.why[1]).toBeNull();
+  test('정답 번호는 카드 시드가 정한다 (D128) — 목업은 두 번째였고 이 카드는 첫 번째다', () => {
+    // 목업은 `?.` 를 두 번째 보기로 그렸다. 그 자리를 규칙으로 굳히면 사전의 point 항목
+    // 26개 중 13개가 정답을 가운데 pick 에 두므로 정답이 **늘 2번**이 된다 (D128).
+    expect(made.payload.answer).toBe(0);
+    expect(made.payload.why[0]).toBeNull();
     expect(made.payload.options).toBeUndefined(); // 지목형의 보기는 코드 자체다
   });
 
-  test('짚는 자리는 코드 순서로 번호가 붙는다 — 목업과 다름: `profile` 이 들어가고 `\'손님\'` 이 빠진다', () => {
+  test('짚는 자리는 코드 순서로 번호가 붙는다 — 이 카드는 오답 셋이 전부 정답 뒤에 선다', () => {
     // 04 §1.1 오답 ①은 「사전 diag 가 있는 pick」이라 pick.3(`profile`)이 혼동 토큰보다 앞선다.
+    // 이 카드는 정답 **뒤에서만** 셋을 고르므로(D128 의 b=0) 앞에 있던 `res.user` 가 빠지고
+    // 순위 4위인 `'손님'` 이 들어온다 — 그 자리를 내주는 것이 정답 번호를 흩는 값이다.
     // 목업은 손으로 고른 것이라 `res.user · ?? · '손님'` 셋을 오답으로 뒀다.
     const focus = made.payload.lines.find((l) => l.n === 42);
     expect(focus).toEqual({
       n: 42,
       target: true,
       seg: [
-        { t: 'const nick = ' },
-        { t: 'res.user', pick: 1 },
-        { t: '?.', pick: 2 },
-        { t: 'profile', pick: 3 },
+        { t: 'const nick = res.user' },
+        { t: '?.', pick: 1 },
+        { t: 'profile', pick: 2 },
         { t: '?.nickname ' },
-        { t: '??', pick: 4 },
-        { t: " '손님'" },
+        { t: '??', pick: 3 },
+        { t: ' ' },
+        { t: "'손님'", pick: 4 },
       ],
     });
   });
@@ -326,6 +330,34 @@ describe('결정성과 생성 불가', () => {
       { ...leaky, lines },
     );
     expect('card' in out && out.leak).toBe(true);
+  });
+});
+
+describe('정답 번호 흩기 (D128)', () => {
+  /** 같은 사용처를 attempt 만 바꿔 여러 장 만든다 — 카드마다 시드가 다르다. */
+  const answersOverAttempts = (n: number): number[] => {
+    const out: number[] = [];
+    for (let attempt = 0; attempt < n; attempt += 1) {
+      const input = optchainSite();
+      const result = genPoint(
+        request({ concept: conceptOf('ts/optional-chaining'), ly: 1, sites: [input], attempt }),
+        input,
+      );
+      if (!isFailure(result)) out.push(result.card.payload.answer);
+    }
+    return out;
+  };
+
+  test('정답 번호가 한 값에 고정되지 않는다', () => {
+    const seen = new Set(answersOverAttempts(24));
+    expect(seen.size).toBeGreaterThan(1);
+    // 42행에서 `?.` **앞**에 설 수 있는 후보는 `res.user` 와 `nick` 둘이라 이 줄이 낼 수
+    // 있는 자리는 1·2·3번이다. 앞에 셋이 서는 줄에서는 4번까지 나온다.
+    expect([...seen].sort()).toEqual([0, 1, 2]);
+  });
+
+  test('같은 시드면 정답 번호도 같다 — 흩는 것은 난수가 아니라 시드다 (04 §0)', () => {
+    expect(answersOverAttempts(6)).toEqual(answersOverAttempts(6));
   });
 });
 
