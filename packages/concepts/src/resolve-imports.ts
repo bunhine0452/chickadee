@@ -256,12 +256,18 @@ function routeIndex(files: readonly FileImports[]): Map<string, string> {
       if (m === null) continue;
       // 경로 없는 애너테이션(`@GetMapping`)은 지정자가 애너테이션 **이름**이다 — 경로는 기본 경로다.
       const leaf = m[1] === undefined ? raw.specifier : '';
-      const key = `${(m[2] as string).toUpperCase()} ${joinRoute(base, leaf)}`;
+      const key = `${(m[2] as string).toUpperCase()} ${normPath(joinRoute(base, leaf))}`;
       if (!out.has(key)) out.set(key, file.path);
     }
   }
   return out;
 }
+
+/**
+ * 경로 변수를 자리표 하나로 접는다 — 프론트의 `${id}` 와 Spring 의 `{dreamId}` 는 같은 자리다.
+ * 접지 않으면 `` `/notices/${id}` `` 와 `/api/notices/{noticeId}` 가 영영 안 만난다.
+ */
+const normPath = (p: string): string => p.replace(/\$\{[^}]*\}|\{[^}]*\}/g, ':');
 
 /** `/api/auth` + `/login` → `/api/auth/login`. 양쪽 슬래시를 한 번만 남긴다. */
 function joinRoute(base: string, leaf: string): string {
@@ -282,7 +288,7 @@ function joinRoute(base: string, leaf: string): string {
  * 후보가 **둘 이상이면 아예 안 잇는다.** 틀린 간선은 없는 간선보다 나쁘다.
  */
 function routeHit(verb: string, spec: string, ctx: Ctx): Hit | null {
-  const path = spec.split(/[?#]/)[0] ?? '';
+  const path = normPath(spec.split(/[?#]/)[0] ?? '');
   const exact = ctx.routes.get(`${verb} ${path}`);
   if (exact !== undefined) return { to: exact, kind: 'http' };
 

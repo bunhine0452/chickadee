@@ -440,6 +440,48 @@ describe('java · Spring 라우트 (D159)', () => {
     expect(edges.find((e) => e.kind === 'http')?.to).toBe(CTRL);
   });
 
+  test('경로 변수를 자리표로 접어 템플릿 문자열과 잇는다', () => {
+    // 프론트 `` `/notices/${noticeId}` `` ↔ 서버 `@GetMapping("/{noticeId}")`.
+    // 안 접으면 이 둘은 영영 안 만난다 — 실리포에서 컨트롤러 셋이 그랬다.
+    const NOTICE = 'BACK/src/main/java/com/ssafy/app/controller/NoticeController.java';
+    const svc = 'FRONT/src/services/noticeService.js';
+    const edges = resolveImports({
+      paths: [NOTICE, svc],
+      files: [
+        { path: NOTICE, imports: [spec('/api/notices', 'route-base'), spec('/{noticeId}', 'route-get')] },
+        { path: svc, imports: [spec('/notices/${noticeId}', 'http-get')] },
+      ],
+    });
+    expect(edges.find((e) => e.kind === 'http')?.to).toBe(NOTICE);
+  });
+
+  test('클래스 기본 경로 안의 변수도 접는다', () => {
+    const RESULT = 'BACK/src/main/java/com/ssafy/app/controller/DreamResultController.java';
+    const svc = 'FRONT/src/services/dreamResultService.js';
+    const edges = resolveImports({
+      paths: [RESULT, svc],
+      files: [
+        { path: RESULT, imports: [spec('/api/dreams/{dreamId}/result', 'route-base'), spec('GetMapping', 'route-bare-get')] },
+        { path: svc, imports: [spec('/dreams/${dreamId}/result', 'http-get')] },
+      ],
+    });
+    expect(edges.find((e) => e.kind === 'http')?.to).toBe(RESULT);
+  });
+
+  test('어느 라우트와도 안 맞으면 간선을 지어내지 않는다', () => {
+    // 실리포에서 `api.get("/emotions/stats")` 가 이랬다 — 백엔드에 `stats` 매핑이 없다.
+    const EMO = 'BACK/src/main/java/com/ssafy/app/controller/EmotionController.java';
+    const svc = 'FRONT/src/services/x.js';
+    const edges = resolveImports({
+      paths: [EMO, svc],
+      files: [
+        { path: EMO, imports: [spec('/api/emotions', 'route-base'), spec('GetMapping', 'route-bare-get')] },
+        { path: svc, imports: [spec('/emotions/stats', 'http-get')] },
+      ],
+    });
+    expect(edges.filter((e) => e.kind === 'http')).toStrictEqual([]);
+  });
+
   test('접미 후보가 둘이면 안 잇는다', () => {
     const other = 'BACK/src/main/java/com/ssafy/app/controller/V2AuthController.java';
     const edges = resolveImports({
