@@ -84,3 +84,16 @@
 ((method_declaration (modifiers (marker_annotation name: (identifier) @import.source)))
  (#eq? @import.source "DeleteMapping")
  (#set! form "route-bare-delete"))
+
+; ── 같은 패키지 참조 (D163) ──────────────────────────────────────────
+; 자바는 같은 패키지의 클래스를 **`import` 없이** 쓴다. `JwtAuthenticationFilter` 가 `JwtUtil` 을
+; 그렇게 쓰고, 그래서 필터 체인이 어느 기능 폐포에도 안 붙었다 — 실측 20간선.
+;
+; 「모든 `type_identifier`」를 잡지 않는다. 타입은 자바 파일에 흔해서 캡처가 부풀고, 그중
+; 의존을 뜻하는 것은 **쓰이는 자리 다섯**이다. 못 푸는 이름(`String`·제네릭 인자·외부 타입)은
+; 파일이 없어 자연히 간선이 안 선다 — 이름으로 거르지 않는다 (`resolveJava`).
+((field_declaration type: (type_identifier) @import.source) (#set! form "same-package"))
+((formal_parameter type: (type_identifier) @import.source) (#set! form "same-package"))
+((local_variable_declaration type: (type_identifier) @import.source) (#set! form "same-package"))
+((object_creation_expression type: (type_identifier) @import.source) (#set! form "same-package"))
+((method_declaration type: (type_identifier) @import.source) (#set! form "same-package"))

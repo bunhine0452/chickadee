@@ -132,7 +132,7 @@ function resolveOne(lang: Lang, from: string, spec: string, ctx: Ctx): Hit | nul
   if (lang === 'go') return resolveGo(spec, ctx);
   if (lang === 'rs') return resolveRs(from, spec, ctx);
   if (lang === 'dart') return resolveDart(from, spec, ctx);
-  if (lang === 'java') return resolveJava(spec, ctx);
+  if (lang === 'java') return resolveJava(from, spec, ctx);
   // swift: 파일 import 가 없다. 타입 참조 휴리스틱은 캡처가 생기면 그때 붙인다.
   return null;
 }
@@ -319,7 +319,13 @@ function routeHit(verb: string, spec: string, ctx: Ctx): Hit | null {
  * 외부 의존(`org.springframework.…`)은 리포에 파일이 없어 자연히 안 걸린다.
  * 후보가 둘 이상이면 안 잇는다 — 모듈이 여럿인 리포에서 같은 패키지가 두 번 나올 수 있다.
  */
-function resolveJava(spec: string, ctx: Ctx): Hit | null {
+function resolveJava(from: string, spec: string, ctx: Ctx): Hit | null {
+  // 점이 없으면 **같은 패키지**의 이름이다 (D163). 자바는 패키지 경로가 곧 디렉터리라
+  // 패키지 선언을 파싱하지 않고 옆 파일을 본다 — 규칙이 하나 준다.
+  if (!spec.includes('.')) {
+    const at = `${dirOf(from)}/${spec}.java`;
+    return ctx.files.has(at) ? { to: at } : null;
+  }
   const tail = `/${spec.replace(/\./g, '/')}.java`;
   let found: string | null = null;
   for (const path of ctx.files) {

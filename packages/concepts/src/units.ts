@@ -146,6 +146,26 @@ export function entryUnits(edges: readonly ResolvedEdge[]): FeatureUnit[] {
     }
     return { name: featureName(entry), entry, files: [...seen].sort() };
   });
+  // 위로 한 단 (D163). 폐포는 진입점에서 **아래로만** 가는데, 기능의 일부인데 위쪽에 있는
+  // 것이 있다 — Spring 필터 체인이 그렇다(`JwtAuthenticationFilter` 가 `JwtUtil` 을 쓴다).
+  //
+  // **다만 이 기능만의 파일에서만 올라간다.** 무제한으로 올라가면 공유 부품이 통로가 된다 —
+  // 실측에서 `SecurityUtil` 을 일곱 기능이 쓰는 탓에 auth 가 19 → 48 이 되고 컨트롤러 아홉이
+  // 딸려 왔다. 자기 것에서만 올라가면 19 → 23 이고 새로 드는 넷이 전부 로그인의 것이다
+  // (필터 · 예외 처리기 · 프론트 스토어와 배럴).
+  const mine = new Map<string, number>();
+  for (const u of units) for (const f of u.files) mine.set(f, (mine.get(f) ?? 0) + 1);
+  const callers = new Map<string, string[]>();
+  for (const e of edges) callers.set(e.to, [...(callers.get(e.to) ?? []), e.from]);
+  for (const u of units) {
+    const grown = new Set(u.files);
+    for (const f of u.files) {
+      if (mine.get(f) !== 1) continue;
+      for (const caller of callers.get(f) ?? []) grown.add(caller);
+    }
+    u.files = [...grown].sort();
+  }
+
   // 이름이 같은 진입점 둘은 큰 쪽이 이긴다 — 홈의 대지 이름은 유일해야 한다.
   units.sort((a, b) => b.files.length - a.files.length || a.entry.localeCompare(b.entry));
   const byName = new Map<string, FeatureUnit>();

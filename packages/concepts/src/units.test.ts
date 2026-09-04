@@ -97,3 +97,38 @@ describe('기능 + 디렉터리 합치기 (D160)', () => {
     expect(unitsOf.get(CTRL)).toStrictEqual(['auth']);
   });
 });
+
+describe('위로 한 단 (D163)', () => {
+  const edge = (from: string, to: string, kind: 'static' | 'http' = 'static') =>
+    ({ from, to, kind, confidence: 'syntactic' as const });
+  const FE = 'FRONT/src/services/authService.js';
+  const CTRL = 'BACK/controller/AuthController.java';
+  const JWT = 'BACK/security/JwtUtil.java';
+  const FILTER = 'BACK/security/JwtAuthenticationFilter.java';
+
+  test('이 기능만의 파일을 쓰는 쪽은 기능에 든다 — 필터 체인이 그렇다', () => {
+    const units = entryUnits([edge(FE, CTRL, 'http'), edge(CTRL, JWT), edge(FILTER, JWT)]);
+    expect(units[0]?.files).toContain(FILTER);
+  });
+
+  test('여러 기능이 쓰는 파일에서는 안 올라간다 — 공유 부품이 통로가 되면 안 된다', () => {
+    // `UTIL` 을 두 기능이 쓴다. 그 위의 `OTHER` 는 어느 쪽 것도 아니다.
+    const FE2 = 'FRONT/src/services/noticeService.js';
+    const CTRL2 = 'BACK/controller/NoticeController.java';
+    const UTIL = 'BACK/util/SecurityUtil.java';
+    const OTHER = 'BACK/controller/RankingController.java';
+    const units = entryUnits([
+      edge(FE, CTRL, 'http'), edge(CTRL, UTIL),
+      edge(FE2, CTRL2, 'http'), edge(CTRL2, UTIL),
+      edge(OTHER, UTIL),
+    ]);
+    for (const u of units) expect(u.files).not.toContain(OTHER);
+  });
+
+  test('한 단만 올라간다 — 두 단 위는 안 든다', () => {
+    const BOOT = 'BACK/config/SecurityConfig.java';
+    const units = entryUnits([edge(FE, CTRL, 'http'), edge(CTRL, JWT), edge(FILTER, JWT), edge(BOOT, FILTER)]);
+    expect(units[0]?.files).toContain(FILTER);
+    expect(units[0]?.files).not.toContain(BOOT);
+  });
+});
