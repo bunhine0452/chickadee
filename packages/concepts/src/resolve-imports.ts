@@ -46,15 +46,20 @@ export interface ResolvedEdge {
 }
 
 /** 해석 결과 하나. `kind` 가 있으면 `form` 대신 그것이 이긴다 (http 엣지). */
-interface Hit { to: string; kind?: EdgeKind; }
+interface Hit { to: string; kind?: EdgeKind; confidence?: 'syntactic' | 'heuristic'; }
 
-type Lang = 'ts' | 'py' | 'go' | 'rs' | 'dart' | 'swift';
+type Lang = 'ts' | 'py' | 'go' | 'rs' | 'dart' | 'swift' | 'java';
 
 /** 확장자 → 언어. 표에 없는 확장자(`.sql` 등)는 엣지가 없다. */
 const LANG_OF: Readonly<Record<string, Lang>> = {
   ts: 'ts', tsx: 'ts', js: 'ts', jsx: 'ts', mjs: 'ts', cjs: 'ts',
-  py: 'py', go: 'go', rs: 'rs', dart: 'dart', swift: 'swift',
+  py: 'py', go: 'go', rs: 'rs', dart: 'dart', swift: 'swift', java: 'java',
 };
+
+/** `_imports.scm` 이 라우트로 내보내는 `form` 들 (D159). 이것들은 **나가는 엣지가 아니다.** */
+const ROUTE_FORM = /^route-/;
+/** 프론트가 부르는 자리. `http-post` → `POST`. */
+const HTTP_FORM = /^http-(get|post|put|patch|delete)$/;
 
 /** 상대 지정자에 붙여 보는 확장자. 순서가 곧 우선순위다 (04 §7.1). */
 const TS_EXT = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.d.ts'] as const;
@@ -67,6 +72,8 @@ const RS_DIR_MODULE = new Set(['mod', 'lib', 'main']);
 
 interface Ctx {
   files: ReadonlySet<string>;
+  /** `"POST /api/auth/login"` → 그 라우트를 선언한 파일 (D159). */
+  routes: ReadonlyMap<string, string>;
   /** go 패키지 디렉터리 → 그 패키지의 대표 파일. `resolveGo` 주석 참조. */
   goLead: ReadonlyMap<string, Hit>;
   tsconfig: TsconfigPaths | null; packageImports: Readonly<Record<string, string>> | null;
@@ -78,6 +85,7 @@ export function resolveImports(input: ResolveInput): ResolvedEdge[] {
   const ctx: Ctx = {
     files: new Set(input.paths),
     goLead: goLeadFiles(input.paths),
+    routes: routeIndex(input.files),
     tsconfig: input.tsconfig ?? null,
     packageImports: input.packageImports ?? null,
     goModule: input.goModule ?? null,
@@ -91,14 +99,19 @@ export function resolveImports(input: ResolveInput): ResolvedEdge[] {
     const lang = langOf(file.path);
     if (lang === null) continue;
     for (const raw of file.imports) {
-      const hit = resolveOne(lang, file.path, raw.specifier, ctx);
+      // 라우트 선언은 색인의 재료일 뿐 나가는 엣지가 아니다 (D159).
+      if (raw.form !== null && ROUTE_FORM.test(raw.form)) continue;
+      const http = raw.form !== null ? HTTP_FORM.exec(raw.form) : null;
+      const hit = http
+        ? routeHit((http[1] as string).toUpperCase(), raw.specifier, ctx)
+        : resolveOne(lang, file.path, raw.specifier, ctx);
       // 자기 자신을 가리키는 엣지는 지도에 그릴 것이 없다.
       if (hit === null || hit.to === file.path) continue;
       const kind = hit.kind ?? kindOf(raw.form);
       const key = `${file.path} ${hit.to} ${kind}`;
       if (seen.has(key)) continue;
       seen.add(key);
-      edges.push({ from: file.path, to: hit.to, kind, confidence: 'syntactic' });
+      edges.push({ from: file.path, to: hit.to, kind, confidence: hit.confidence ?? 'syntactic' });
     }
   }
   edges.sort(byEdge);
@@ -111,6 +124,7 @@ function resolveOne(lang: Lang, from: string, spec: string, ctx: Ctx): Hit | nul
   if (lang === 'go') return resolveGo(spec, ctx);
   if (lang === 'rs') return resolveRs(from, spec, ctx);
   if (lang === 'dart') return resolveDart(from, spec, ctx);
+  if (lang === 'java') return resolveJava(spec, ctx);
   // swift: 파일 import 가 없다. 타입 참조 휴리스틱은 캡처가 생기면 그때 붙인다.
   return null;
 }
@@ -222,6 +236,84 @@ function nextRoute(spec: string, ctx: Ctx): Hit | null {
     }
   }
   return null;
+}
+
+/**
+ * Spring 라우트 색인 (D159). `@RequestMapping("/api/auth")` 는 **클래스**에, `@PostMapping("/login")`
+ * 은 **메서드**에 붙어 있어 캡처 하나로 못 붙는다 — `_imports.scm` 이 `form` 으로 갈라 내보내고
+ * 여기서 파일 안에서 합친다. 자바는 파일 하나에 public 클래스 하나라 기본 경로도 하나다.
+ *
+ * 키에 HTTP 메서드를 넣는 이유: 경로만 맞고 메서드가 다른 짝을 잇지 않기 위해서다
+ * (`GET /api/auth/me` 와 `DELETE /api/auth/me` 는 다른 자리다 — 이 리포에 실제로 둘 다 있다).
+ */
+function routeIndex(files: readonly FileImports[]): Map<string, string> {
+  const out = new Map<string, string>();
+  for (const file of files) {
+    if (langOf(file.path) !== 'java') continue;
+    const base = file.imports.find((r) => r.form === 'route-base')?.specifier ?? '';
+    for (const raw of file.imports) {
+      const m = raw.form === null ? null : /^route-(bare-)?(get|post|put|patch|delete)$/.exec(raw.form);
+      if (m === null) continue;
+      // 경로 없는 애너테이션(`@GetMapping`)은 지정자가 애너테이션 **이름**이다 — 경로는 기본 경로다.
+      const leaf = m[1] === undefined ? raw.specifier : '';
+      const key = `${(m[2] as string).toUpperCase()} ${joinRoute(base, leaf)}`;
+      if (!out.has(key)) out.set(key, file.path);
+    }
+  }
+  return out;
+}
+
+/** `/api/auth` + `/login` → `/api/auth/login`. 양쪽 슬래시를 한 번만 남긴다. */
+function joinRoute(base: string, leaf: string): string {
+  const b = base.endsWith('/') ? base.slice(0, -1) : base;
+  const l = leaf === '' ? '' : leaf.startsWith('/') ? leaf : `/${leaf}`;
+  return `${b}${l}` === '' ? '/' : `${b}${l}`;
+}
+
+/**
+ * 프론트의 호출 → 그 라우트를 선언한 서버 파일 (D159 · `kind: 'http'`).
+ *
+ * 클라이언트는 **baseURL 을 뺀 경로**를 적는다 — `axios.create({ baseURL: "/api" })` 아래에서
+ * `api.post("/auth/login")` 은 서버의 `/api/auth/login` 이다. 설정을 읽는 대신 **접미 일치**로
+ * 잇는다: 설정 파일 형식(axios·fetch 래퍼·Vite proxy)마다 다른 것을 안 쫓아도 되고,
+ * 정확히 맞으면 그쪽이 먼저 이긴다.
+ *
+ * 접미로 이은 것은 `confidence: 'heuristic'` 이다 — 문자열이 우연히 겹칠 수 있다.
+ * 후보가 **둘 이상이면 아예 안 잇는다.** 틀린 간선은 없는 간선보다 나쁘다.
+ */
+function routeHit(verb: string, spec: string, ctx: Ctx): Hit | null {
+  const path = spec.split(/[?#]/)[0] ?? '';
+  const exact = ctx.routes.get(`${verb} ${path}`);
+  if (exact !== undefined) return { to: exact, kind: 'http' };
+
+  const prefix = `${verb} `;
+  let found: string | null = null;
+  for (const [key, to] of ctx.routes) {
+    if (!key.startsWith(prefix)) continue;
+    if (!key.slice(prefix.length).endsWith(path)) continue;
+    if (found !== null && found !== to) return null;
+    found = to;
+  }
+  return found === null ? null : { to: found, kind: 'http', confidence: 'heuristic' };
+}
+
+/**
+ * `com.ssafy.finalproject.service.AuthService` → `…/com/ssafy/finalproject/service/AuthService.java`.
+ *
+ * 소스 루트(`src/main/java`)를 설정에서 읽지 않는다 — 패키지 경로가 디렉터리 구조 그대로라
+ * **접미 일치**면 충분하고, 그래야 Maven·Gradle·평평한 배치를 규칙 하나로 덮는다.
+ * 외부 의존(`org.springframework.…`)은 리포에 파일이 없어 자연히 안 걸린다.
+ * 후보가 둘 이상이면 안 잇는다 — 모듈이 여럿인 리포에서 같은 패키지가 두 번 나올 수 있다.
+ */
+function resolveJava(spec: string, ctx: Ctx): Hit | null {
+  const tail = `/${spec.replace(/\./g, '/')}.java`;
+  let found: string | null = null;
+  for (const path of ctx.files) {
+    if (!path.endsWith(tail)) continue;
+    if (found !== null) return null;
+    found = path;
+  }
+  return found === null ? null : { to: found };
 }
 
 /**

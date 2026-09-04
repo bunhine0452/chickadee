@@ -355,3 +355,101 @@ describe('공통', () => {
     expect(edges).toStrictEqual([]);
   });
 });
+
+describe('java · Spring 라우트 (D159)', () => {
+  const CTRL = 'BACK/src/main/java/com/ssafy/app/controller/AuthController.java';
+  const SVC = 'BACK/src/main/java/com/ssafy/app/service/AuthService.java';
+  const FRONT = 'FRONT/src/services/authService.js';
+
+  /** 컨트롤러 하나 — 클래스 기본 경로 + 메서드 셋. */
+  const controller = (): RawImport[] => [
+    spec('com.ssafy.app.service.AuthService'),
+    spec('/api/auth', 'route-base'),
+    spec('/login', 'route-post'),
+    spec('/me', 'route-get'),
+    spec('/me', 'route-delete'),
+  ];
+
+  test('패키지 이름을 접미로 파일에 맞춘다 — 소스 루트를 설정에서 안 읽는다', () => {
+    const edges = one(CTRL, [spec('com.ssafy.app.service.AuthService')], { paths: [CTRL, SVC] });
+    expect(lines(edges)).toStrictEqual([`${CTRL} -> ${SVC} (static)`]);
+  });
+
+  test('외부 의존은 리포에 파일이 없어 엣지가 없다', () => {
+    const edges = one(CTRL, [spec('org.springframework.web.bind.annotation.RestController')], { paths: [CTRL] });
+    expect(edges).toStrictEqual([]);
+  });
+
+  test('같은 패키지가 두 모듈에 있으면 안 잇는다 — 틀린 간선은 없는 간선보다 나쁘다', () => {
+    const other = 'other/src/main/java/com/ssafy/app/service/AuthService.java';
+    const edges = one(CTRL, [spec('com.ssafy.app.service.AuthService')], { paths: [CTRL, SVC, other] });
+    expect(edges).toStrictEqual([]);
+  });
+
+  test('라우트 선언 자체는 나가는 엣지가 아니다', () => {
+    const edges = one(CTRL, [spec('/api/auth', 'route-base'), spec('/login', 'route-post')], { paths: [CTRL] });
+    expect(edges).toStrictEqual([]);
+  });
+
+  test('클래스 경로 + 메서드 경로를 합쳐 프론트 호출과 잇는다', () => {
+    const edges = resolveImports({
+      paths: [CTRL, SVC, FRONT],
+      files: [
+        { path: CTRL, imports: controller() },
+        { path: FRONT, imports: [spec('/api/auth/login', 'http-post')] },
+      ],
+    });
+    expect(lines(edges)).toContain(`${FRONT} -> ${CTRL} (http)`);
+    expect(edges.find((e) => e.kind === 'http')?.confidence).toBe('syntactic');
+  });
+
+  test('baseURL 만큼 짧게 적힌 경로는 접미로 잇고 heuristic 으로 표시한다', () => {
+    // 프론트는 `axios.create({ baseURL: "/api" })` 아래에서 `/auth/login` 이라고만 쓴다.
+    const edges = resolveImports({
+      paths: [CTRL, FRONT],
+      files: [
+        { path: CTRL, imports: controller() },
+        { path: FRONT, imports: [spec('/auth/login', 'http-post')] },
+      ],
+    });
+    const http = edges.find((e) => e.kind === 'http');
+    expect(http?.to).toBe(CTRL);
+    expect(http?.confidence).toBe('heuristic');
+  });
+
+  test('경로가 같아도 HTTP 메서드가 다르면 다른 자리다', () => {
+    // 이 리포에 `GET /api/auth/me` 와 `DELETE /api/auth/me` 가 실제로 둘 다 있다.
+    const edges = resolveImports({
+      paths: [CTRL, FRONT],
+      files: [
+        { path: CTRL, imports: [spec('/api/auth', 'route-base'), spec('/me', 'route-get')] },
+        { path: FRONT, imports: [spec('/auth/me', 'http-delete')] },
+      ],
+    });
+    expect(edges).toStrictEqual([]);
+  });
+
+  test('경로 없는 애너테이션은 클래스 기본 경로가 곧 라우트다', () => {
+    const edges = resolveImports({
+      paths: [CTRL, FRONT],
+      files: [
+        { path: CTRL, imports: [spec('/api/emotions', 'route-base'), spec('GetMapping', 'route-bare-get')] },
+        { path: FRONT, imports: [spec('/emotions', 'http-get')] },
+      ],
+    });
+    expect(edges.find((e) => e.kind === 'http')?.to).toBe(CTRL);
+  });
+
+  test('접미 후보가 둘이면 안 잇는다', () => {
+    const other = 'BACK/src/main/java/com/ssafy/app/controller/V2AuthController.java';
+    const edges = resolveImports({
+      paths: [CTRL, other, FRONT],
+      files: [
+        { path: CTRL, imports: [spec('/api/auth', 'route-base'), spec('/login', 'route-post')] },
+        { path: other, imports: [spec('/v2/auth', 'route-base'), spec('/login', 'route-post')] },
+        { path: FRONT, imports: [spec('/auth/login', 'http-post')] },
+      ],
+    });
+    expect(edges.filter((e) => e.kind === 'http')).toStrictEqual([]);
+  });
+});

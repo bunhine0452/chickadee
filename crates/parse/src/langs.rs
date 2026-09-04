@@ -26,6 +26,8 @@ pub const LANGS: &[(&str, Load)] = &[
     ("go", || tree_sitter_go::LANGUAGE.into()),
     #[cfg(feature = "lang-rust")]
     ("rust", || tree_sitter_rust::LANGUAGE.into()),
+    #[cfg(feature = "lang-java")]
+    ("java", || tree_sitter_java::LANGUAGE.into()),
 ];
 
 #[derive(Debug, Clone, Serialize)]

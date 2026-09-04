@@ -17,6 +17,7 @@ tree-sitter-sequel = { version = "0.3", optional = true }
 tree-sitter-python = { version = "0.23", optional = true }
 tree-sitter-go = { version = "0.23", optional = true }
 tree-sitter-rust = { version = "0.23", optional = true }
+tree-sitter-java = { version = "0.23", optional = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
 streaming-iterator = "0.1"
@@ -29,7 +30,10 @@ insta = "1.48.0"
 serde_json.workspace = true
 
 [features]
-default = ["lang-typescript", "lang-javascript", "lang-sql", "lang-python", "lang-go", "lang-rust"]
+default = [
+  "lang-typescript", "lang-javascript", "lang-sql", "lang-python", "lang-go", "lang-rust",
+  "lang-java",
+]
 lang-typescript = ["dep:tree-sitter-typescript"]
 lang-javascript = ["dep:tree-sitter-javascript"]
 # A community grammar that breaks the build can be dropped from a release
@@ -38,6 +42,8 @@ lang-sql = ["dep:tree-sitter-sequel"]
 lang-python = ["dep:tree-sitter-python"]
 lang-go = ["dep:tree-sitter-go"]
 lang-rust = ["dep:tree-sitter-rust"]
+# D159 — Spring 리포의 심장이 Java 다. 라우트 애너테이션에서 HTTP 간선이 나온다.
+lang-java = ["dep:tree-sitter-java"]
 
 [lints]
 workspace = true

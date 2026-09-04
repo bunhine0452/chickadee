@@ -1,0 +1,25 @@
+lang: java
+version: 0.1.0
+grammars: [java]
+# tree-sitter-java 0.23.5 의 `parser.c` 가 14 다. 대조는 시험이 한다
+# (`declared_grammar_abi_matches_the_linked_grammar`).
+grammar_abi: { java: 14 }
+
+extensions:
+  java: [.java]
+
+# 아직 개념이 없다 — 이 판(D159 첫 조각)이 여는 것은 **라우트 간선**이지 자바 어휘가 아니다.
+# 바닥 여덟은 `docs/curriculum/java.md` 가 이미 설계해 뒀고, 그것을 담는 것은 다음 판이다.
+essential: []
+
+alternatives: []
+
+thin_threshold: { min_files: 2, min_sites: 3, small_repo_files: 20 }
+
+diag_default:
+  point:
+    ko: "«{{pick}}»{{pick|josa:은,는}} {{role}} 자리입니다. {{concept}}{{concept|josa:은,는}} «{{answer}}» 입니다. {{rule}}"
+    en: "«{{pick}}» is the {{role}} slot. The {{concept}} is «{{answer}}». {{rule}}"
+  blank:
+    ko: "«{{pick}}»{{pick|josa:은,는}} 이 자리에 오지 않습니다. {{rule}}"
+    en: "«{{pick}}» does not go in this slot. {{rule}}"
