@@ -31,6 +31,8 @@ export interface MastheadProps {
   masthead: HomeMasthead;
   /** 설정 화면 열기 (05 §2.1 `settings`). */
   onSettings: () => void;
+  /** 「코스」 — 리포 전체를 범위로 코스를 연다 (D120). */
+  onCourse: () => void;
 }
 
 /**
@@ -40,7 +42,7 @@ export interface MastheadProps {
  * 만지는 것도 그쪽 한 곳뿐이다 — 설정 화면이 같은 스위치를 들고 있어서 둘이 각자 속성을
  * 세우면 나중에 켠 쪽이 이긴다. 값은 `settings` 테이블에 남아 재실행해도 유지된다 (E7).
  */
-export function Masthead({ repoName, today, streak, masthead, onSettings }: MastheadProps) {
+export function Masthead({ repoName, today, streak, masthead, onSettings, onCourse }: MastheadProps) {
   const { theme, trim, setTheme, setTrim } = useAppearance();
 
   return (
@@ -97,6 +99,9 @@ export function Masthead({ repoName, today, streak, masthead, onSettings }: Mast
           onChange={setTheme}
         />
         {/* 목업에는 이 자리가 없다 — 스위치 옆에 조용히 붙인다(로고와 지시서의 시각은 그대로). */}
+        <FlatButton onClick={onCourse} ghost>
+          {t('home.course')}
+        </FlatButton>
         <FlatButton onClick={onSettings} ghost>
           {t('home.settings')}
         </FlatButton>

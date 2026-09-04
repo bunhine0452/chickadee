@@ -207,4 +207,10 @@ export const core = {
   'settings.key.dropped': '키를 지웠습니다.',
   'settings.key.cannotStore': '이 컴퓨터에는 키를 넣지 못했습니다.',
   'settings.key.failed': '저장하지 못했습니다. 잠시 뒤 다시 시도해 주세요.',
+
+  // 시간 비례 진행바. 「칸」은 조판 단위가 아니라 시간 단위다 — en 은 step 으로 간다.
+  'queue.allDone': '{{n}}칸 모두 끝남',
+  'queue.at': '{{n}}칸 중 {{i}}번째 「{{label}}」, 전체의 {{percent}}%',
+  'queue.secs': '{{n}}초',
+  'queue.mins': '{{n}}분',
 } as const;

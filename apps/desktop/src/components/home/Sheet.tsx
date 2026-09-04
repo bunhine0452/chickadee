@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { t } from '@chickadee/i18n';
-import { Misreg, Reg, Stamp } from '@chickadee/ui';
+import { FlatButton, Misreg, Reg, Stamp } from '@chickadee/ui';
 
 import type { HomeSheet } from '../../screens/home/data';
 import { Guide } from './Guide';
@@ -21,6 +21,8 @@ export interface SheetProps {
   guide?: string | undefined;
   /** 상세의 「이 판 찍기」. */
   onPick?: ((conceptId: string) => void) | undefined;
+  /** 「이 대지 통째로 필사」 — 이 대지를 범위로 코스를 연다 (D120). */
+  onCourse?: ((unitId: number) => void) | undefined;
   /** 만기 문구의 기준 시각. 테스트는 고정값을 넣는다. */
   now?: number | undefined;
 }
@@ -46,7 +48,7 @@ function statusOf(sheet: HomeSheet, no: number): string {
  * `.sheet` — 대지 한 장(= 내 리포의 기능 하나)과 그 위의 스티커들.
  * 상세는 대지마다 하나만 열린다. 닫으면 포커스가 열었던 스티커로 돌아간다 (05 §5).
  */
-export function Sheet({ sheet, no, guide, onPick, now }: SheetProps) {
+export function Sheet({ sheet, no, guide, onPick, onCourse, now }: SheetProps) {
   const [openId, setOpenId] = useState<string | null>(null);
   const nodesRef = useRef<HTMLDivElement | null>(null);
   const headId = `sheet-${sheet.unitId}`;
@@ -90,6 +92,14 @@ export function Sheet({ sheet, no, guide, onPick, now }: SheetProps) {
           </div>
           <span className="sheet-status">{statusOf(sheet, no)}</span>
         </div>
+
+        {onCourse === undefined ? null : (
+          <div className="sheet-course">
+            <FlatButton onClick={() => onCourse(sheet.unitId)} ghost>
+              {t('home.sheetCourse')}
+            </FlatButton>
+          </div>
+        )}
 
         <div className="nodes" ref={nodesRef}>
           {sheet.nodes.map((node, i) => (

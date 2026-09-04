@@ -128,19 +128,13 @@ const isEnBody = (el: Element): boolean =>
   ((el.textContent ?? '').match(/[A-Za-z]/g) ?? []).length >= 40;
 
 /**
- * 아직 `t()` 를 거치지 않은 남의 자리. **이 목록은 늘리지 않는다** — 줄이려고 둔 것이다.
+ * 화면 전체의 글자. 예외 목록은 비어 있다 — 홈에서 `t()` 를 안 거치는 자리가 없다.
  *
- * `components/shell/TimeQueue.tsx` 의 라벨 목록이 시간 단위(`초`·`분`)와 진행 문장을
- * 직접 들고 있다. 그 파일은 이 세션의 소유가 아니라(`components/home` 이 아니다) 여기서는
- * 재는 자리에서만 빼고 보고한다. 그 파일이 카탈로그로 넘어오면 이 상수를 지우면 된다.
+ * 여기 예외를 다시 만들지 마라. `TimeQueue` 가 시간 단위(`초`·`분`)와 진행 문장을 직접
+ * 들고 있어 한동안 빠져 있었고, 그 자리는 `queue.*` 키로 넘어왔다.
  */
-const NOT_MINE = '.qlist[aria-hidden="true"]';
-
-/** 남의 자리를 뺀 나머지의 글자. `cloneNode` 라 화면은 건드리지 않는다. */
 function ownText(container: HTMLElement): string {
-  const copy = container.cloneNode(true) as HTMLElement;
-  for (const el of copy.querySelectorAll(NOT_MINE)) el.remove();
-  return copy.textContent ?? '';
+  return container.textContent ?? '';
 }
 
 beforeAll(() => {
@@ -212,9 +206,7 @@ describe('en 스모크 — 홈 · 인제스트 · components/home', () => {
     expect(screen.getByRole('button', { name: /Settings/ })).toBeTruthy();
 
     // 잰 것이 0건이면 위반도 0건이라 게이트가 소리 없이 통과한다 — 그 함정을 여기서 막는다.
-    const bodies = [...container.querySelectorAll(MEASURE_SELECTOR)]
-      .filter((el) => el.closest(NOT_MINE) === null)
-      .filter(isEnBody);
+    const bodies = [...container.querySelectorAll(MEASURE_SELECTOR)].filter(isEnBody);
     expect(bodies.length, 'en 본문으로 잡히는 요소가 0건이다 — 번역이 짧아 게이트가 헛돈다')
       .toBeGreaterThanOrEqual(9);
   });

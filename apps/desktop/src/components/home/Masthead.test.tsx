@@ -41,6 +41,7 @@ function setup(onSettings: () => void = () => undefined) {
       streak={7}
       masthead={MASTHEAD}
       onSettings={onSettings}
+      onCourse={() => undefined}
     />,
   );
 }

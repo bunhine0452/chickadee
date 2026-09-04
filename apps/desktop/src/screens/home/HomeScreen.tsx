@@ -40,6 +40,8 @@ export interface HomeScreenProps {
   onMake: (conceptId: string) => void;
   /** 노드 상세의 「이 판 찍기」. */
   onPick?: ((conceptId: string) => void) | undefined;
+  /** 코스 열기 (D120). 대지 카드는 그 대지를, 마스트헤드는 리포 전체를 범위로 준다. */
+  onCourse?: ((unitId: number | null) => void) | undefined;
   /** 만기 문구의 기준 시각. 테스트는 고정값을 넣는다. */
   now?: number | undefined;
 }
@@ -64,7 +66,8 @@ function guideMsg(sheets: readonly HomeSheet[]): string | null {
  * 않으므로 테스트가 픽스처 하나로 끝난다.
  */
 export function HomeScreen({
-  data, repoName, today, streak, today_, onSettings, reingest, onStart, onMake, onPick, now,
+  data, repoName, today, streak, today_, onSettings, reingest, onStart, onMake, onPick,
+  onCourse, now,
 }: HomeScreenProps) {
   const guide = guideMsg(data.sheets);
   const currentUnitId = data.sheets.find((s) => s.state === 'current')?.unitId ?? null;
@@ -85,6 +88,7 @@ export function HomeScreen({
         streak={streak}
         masthead={data.masthead}
         onSettings={onSettings}
+        onCourse={() => onCourse?.(null)}
       />
       {/* 초보 안내는 대지보다 위다 — 아래에 두면 스크롤해야 보이고, 그러면 안내가 아니다. */}
       <Newcomer flag={data.newcomerFlag} />
@@ -142,6 +146,7 @@ export function HomeScreen({
                     no={i + 1}
                     guide={sheet.unitId === currentUnitId && guide !== null ? guide : undefined}
                     onPick={onPick}
+                    {...(onCourse ? { onCourse: (unitId: number) => onCourse(unitId) } : {})}
                     now={now}
                   />
                 ))}

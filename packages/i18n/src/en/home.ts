@@ -225,4 +225,7 @@ export const home: Record<string, string> = {
   'home.todayDays': 'Printing record for the last {{n}} days',
   'home.todayStart': 'Start printing',
   'home.todayResume': 'Carry on · from plate {{n}}',
+
+  'home.sheetCourse': 'Copy this whole sheet',
+  'home.course': 'Course',
 };

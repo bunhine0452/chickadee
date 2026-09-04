@@ -1,3 +1,5 @@
+import { t } from '@chickadee/i18n';
+
 import './TimeQueue.css';
 
 /**
@@ -35,8 +37,13 @@ export interface TimeQueueProps {
 function describe(items: readonly QueueItem[], pos: number, share: number): string {
   const at = items[pos];
   const percent = Math.round(share * 100);
-  if (!at) return `${items.length}칸 모두 끝남`;
-  return `${items.length}칸 중 ${pos + 1}번째 「${at.label}」, 전체의 ${percent}%`;
+  if (!at) return t('queue.allDone', { n: String(items.length) });
+  return t('queue.at', {
+    n: String(items.length),
+    i: String(pos + 1),
+    label: at.label,
+    percent: String(percent),
+  });
 }
 
 export function TimeQueue({ items, pos, progress, labels }: TimeQueueProps) {
@@ -66,7 +73,11 @@ export function TimeQueue({ items, pos, progress, labels }: TimeQueueProps) {
                 {item.label}
                 {item.sub ? <small>{item.sub}</small> : null}
               </span>
-              <span className="min">{item.mins < 1 ? `${Math.round(item.mins * 60)}초` : `${item.mins}분`}</span>
+              <span className="min">
+                {item.mins < 1
+                  ? t('queue.secs', { n: String(Math.round(item.mins * 60)) })
+                  : t('queue.mins', { n: String(item.mins) })}
+              </span>
             </li>
           ))}
         </ul>

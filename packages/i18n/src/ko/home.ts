@@ -238,4 +238,9 @@ export const home = {
   'home.todayDays': '지난 {{n}}일 인쇄 기록',
   'home.todayStart': '인쇄 시작',
   'home.todayResume': '이어 찍기 · {{n}}번째 판부터',
+
+  // 코스 진입 (D120·D125). 코스는 일일 큐 밖이라 「인쇄 시작」 옆이 아니라 대지와
+  // 마스트헤드에 따로 선다 — 예산을 쓰는 문이 아니라는 것이 자리로 보여야 한다.
+  'home.sheetCourse': '이 대지 통째로 필사',
+  'home.course': '코스',
 } as const;

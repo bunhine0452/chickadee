@@ -207,4 +207,9 @@ export const core: Record<string, string> = {
   'settings.key.dropped': 'Key deleted.',
   'settings.key.cannotStore': 'Could not put the key on this computer.',
   'settings.key.failed': 'Could not save. Try again in a moment.',
+
+  'queue.allDone': 'All {{n}} steps done',
+  'queue.at': 'Step {{i}} of {{n}}, "{{label}}", {{percent}}% of the way',
+  'queue.secs': '{{n}}s',
+  'queue.mins': '{{n}} min',
 };

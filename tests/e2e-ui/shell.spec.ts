@@ -190,7 +190,9 @@ test('14 리포 등록 → 인제스트 진행 → 홈', async ({ page, app }) =
 
   await page.getByRole('button', { name: '리포 등록' }).click();
   await page.locator('.ingest').waitFor();
-  await expect(page.locator('.ingest-h')).toHaveText('fresh 을 읽는 중');
+  // 조사는 붙여 쓰고 받침으로 고른다 — 옛 문구는 `을` 을 띄어 쓰고 낱말과 무관하게
+  // 고정했다. 카탈로그의 `{{repo|josa:을,를}}` 가 둘 다 고쳤다 (D117).
+  await expect(page.locator('.ingest-h')).toHaveText('fresh을 읽는 중');
   // 스피너가 아니라 시간 비례 큐 4칸이다 (D47 · 정본 §3-5).
   const queue = page.locator('.ingest .queue');
   expect((await queueSpeech(queue)).cells).toBe(4);

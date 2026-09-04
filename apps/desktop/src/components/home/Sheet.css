@@ -119,3 +119,15 @@
 
   .nodes { justify-content: flex-start }
 }
+
+/*
+ * 「이 대지 통째로 필사」 — 코스 진입 (D120·D125).
+ *
+ * 오른쪽 끝에 혼자 선다. 「인쇄 시작」과 나란히 두지 않는 것은 코스가 일일 큐 밖이라
+ * 예산을 쓰지 않기 때문이다 — 두 문이 같은 줄에 있으면 같은 종류로 읽힌다.
+ */
+.sheet-course {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}

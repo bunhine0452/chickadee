@@ -1,4 +1,5 @@
 import { loadDict } from '@chickadee/dictionary';
+import { t } from '@chickadee/i18n';
 import type { Locale } from '@chickadee/i18n';
 import { log } from '@chickadee/ipc-client';
 import type { ConceptId, RepoInfo } from '@chickadee/store-sql';
@@ -191,6 +192,10 @@ export function App(): React.JSX.Element {
           onStart={() => void start(repo.id, repo.rootPath)}
           onMake={(conceptId) => void place('gap', repo, home, conceptId)}
           onPick={(conceptId) => void place('manual', repo, home, conceptId)}
+          onCourse={(unitId) => {
+            const scope = unitId === null ? { kind: 'repo' as const } : { kind: 'unit' as const, unitId };
+            if (!useUi.getState().openClone(scope)) useUi.getState().say(t('course.inSession'));
+          }}
         />
       </div>
       {inSession ? <SessionScreen repoId={repo.id} repoName={repo.name} /> : null}
