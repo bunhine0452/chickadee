@@ -2,7 +2,7 @@
 oculpm_plan: v1
 id: chickadee-i18n
 title: "언어 선택(한/영) — i18n 뼈대 · 문구 전수 · 사전 영문화"
-status: active
+status: done
 created: 2026-09-04
 updated: 2026-09-04
 owner: claude-code

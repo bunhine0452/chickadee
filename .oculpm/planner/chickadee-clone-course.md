@@ -2,7 +2,7 @@
 oculpm_plan: v1
 id: chickadee-clone-course
 title: "프로젝트 전체 클론 코스 — 리포 하나를 순서대로 통째로 필사"
-status: active
+status: done
 created: 2026-09-04
 updated: 2026-09-04
 owner: claude-code
