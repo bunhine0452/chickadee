@@ -4,10 +4,13 @@
  * 층을 가른 규칙: 문법 이름을 아는 것은 `exec-facts` 뿐이고(그래서 진짜 파스 트리로 잰다),
  * 이 파일은 그 결과만 받는다. 새 언어가 들어와도 여기는 안 고친다.
  *
- * **산문은 여기 없다.** 오답마다 「그것이 참이 되는 조건」(정본 §3-2)을 내야 하는데, 그 문장은
- * 사전이 대고 이 파일은 **왜 틀렸는지의 기계 코드**만 낸다. 다른 개념과 같은 구조다 — 산문이
- * 코드에 박히면 `dict:lint` 가 못 보고, 로케일도 못 탄다(D117).
+ * **산문은 i18n 이 댄다 — 사전이 아니다.** 오답마다 「그것이 참이 되는 조건」(정본 §3-2)을
+ * 내야 하는데, `WrongBecause` 네 이유는 **개념마다 다르지 않고 언어에도 매이지 않는다**
+ * (정의는 어느 언어에서도 실행이 아니다). 사전에 두면 개념 수만큼 같은 문장을 복제하게 된다.
+ * 생성기가 문항을 만드는 `arch/*`(T2)가 같은 이유로 진단을 카탈로그에 두는 선례다.
+ * 사전은 개념 산문(`dict`·`rule`·`ok`·`misconceptions`)만 댄다.
  */
+import { t, type MessageKey } from '@chickadee/i18n';
 import type { AstLite } from '@chickadee/store-sql';
 
 import type { ExecFacts } from './exec-facts.js';
@@ -92,4 +95,31 @@ export function buildFirstRun(input: FirstRunInput): ExecQuestion | null {
 
   const answer = picks.findIndex((p) => p.because === null);
   return { focus: answerLine, window, picks, answer };
+}
+
+/** 오답 이유 → 카탈로그 키. 문항 문구와 함께 로케일을 탄다 (D117). */
+const WHY_KEY: Readonly<Record<WrongBecause, MessageKey>> = {
+  definition: 'exec.whyDefinition',
+  runs: 'exec.whyRuns',
+  conditional: 'exec.whyConditional',
+  nested: 'exec.whyNested',
+};
+
+export interface RenderedExec {
+  q: string;
+  hint: string;
+  /** `picks` 와 같은 자리·같은 순서. 정답 자리는 `null` 이다 (`payload.why` 규약). */
+  why: (string | null)[];
+}
+
+/**
+ * 문항과 진단을 사람 말로. **카탈로그를 부르는 시점이 여기다** — 모듈이 열리는 시점은
+ * 로케일이 정해지는 시점보다 이르다(`t0-point.ts` 의 `roleName` 과 같은 이유).
+ */
+export function renderFirstRun(question: ExecQuestion): RenderedExec {
+  return {
+    q: t('exec.orderQ'),
+    hint: t('exec.orderHint'),
+    why: question.picks.map((p) => (p.because === null ? null : t(WHY_KEY[p.because]))),
+  };
 }

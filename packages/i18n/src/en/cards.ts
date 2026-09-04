@@ -139,5 +139,18 @@ export const cards: Record<string, string> = {
   't2.noRepoMap': 'the repo folds into a single «other» sheet — no repo map stands',
   't2.smallRepoMap': 'the repo map has only {{n}} nodes',
   't2.entryNone': 'doors cover more than half the map, or none at all (nodes {{n}})',
+  // ───────── Execution tracing (D151) ─────────
+  'exec.orderQ': 'Point at the line that runs <b>first</b> when this function is called.',
+  'exec.orderHint': 'Where it is defined, nothing has run yet.',
+  'exec.whyDefinition':
+    'That line is a <b>definition</b> — it makes a name and nothing more; the lines inside run '
+    + 'when something calls it. This is where reading order parts from running order.',
+  'exec.whyRuns':
+    'That line does <b>run</b> — just not first. Another line is reached before it.',
+  'exec.whyConditional':
+    'That line sits under a condition, so it <b>may</b> run. “Runs first” and “runs if” differ.',
+  'exec.whyNested':
+    'That line is inside an <b>inner function</b> — calling the outer one does not run it; '
+    + 'it runs when that inner function is called.',
   't2.roleNone': 'only {{n}} folders have a band the path pattern knows',
 };

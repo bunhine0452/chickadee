@@ -1,0 +1,44 @@
+schema: 1
+id: exec/order
+universal: null
+name: { ko: "실행 순서", en: "Execution order" }
+token: null
+grammars: []
+framework: null
+# T0 다 — 문항은 `t0-exec.ts` 가 AST 에서 계산하고 채점은 기존 지목형을 그대로 쓴다.
+# 새 트랙도 새 `card.kind` 도 만들지 않으므로 마이그레이션이 필요 없다 (D151).
+track_default: t0
+essential: false
+difficulty: 1
+prereq: []
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "파일을 읽는 순서와 코드가 도는 순서는 다르다."
+    en: "The order you read a file in is not the order it runs in."
+  why:
+    ko: >-
+      위에서 아래로 적혀 있으니 위에서 아래로 돌 것 같지만, 정의는 <b>이름만 만들어 두고</b>
+      안의 줄은 누가 부를 때까지 한 번도 돌지 않습니다. 그래서 파일을 처음부터 읽으면
+      「무엇이 언제 도는지」가 안 보여요. 부르는 자리를 찾아 거기서부터 따라가야 합니다.
+    en: >-
+      It is written top to bottom, so it looks like it runs top to bottom. But a definition
+      <b>only makes a name</b>; not one line inside it runs until something calls it. Read a file
+      from the top and “what runs when” stays hidden — you have to find the call and follow from there.
+  trace: []
+rule:
+  ko: "<b>정의는 실행이 아니다.</b> 도는 것은 부르는 자리이고, 그 안에서는 위에서 아래다."
+  en: "<b>Defining is not running.</b> The call site runs, and inside it the order is top to bottom."
+ok:
+  ko: >-
+    부르면 그 함수의 첫 줄부터 시작합니다. 조건 안의 줄은 조건이 참일 때만, 안쪽 함수의 줄은
+    그 함수를 따로 부를 때만 돕니다.
+  en: >-
+    A call starts at the function's first line. Lines under a condition run only when it holds;
+    lines in an inner function run only when that inner function is itself called.
+misconceptions:
+  - ko: "파일 맨 위 줄이 가장 먼저 돈다 — 그 줄이 정의라면 아무것도 안 돕니다."
+    en: "The top line of the file runs first — not if that line is a definition."
+  - ko: "조건 안의 줄도 순서에 낀다 — 그 줄은 「돌 수도 있다」이지 「먼저 돈다」가 아닙니다."
+    en: "A line under a condition takes its turn — it may run; that is not the same as running first."

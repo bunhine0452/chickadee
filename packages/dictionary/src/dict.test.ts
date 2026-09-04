@@ -54,10 +54,14 @@ describe('사전이 실제로 담고 있는 것', () => {
     }
   });
 
-  test('보편 개념은 쿼리가 없고 언어 개념은 쿼리가 있다', () => {
+  // 쿼리 없이 사는 네임스페이스 셋. `common/` 은 전이 축이고, `arch/`(D142)와 `exec/`(D151)는
+  // 문항을 그래프·AST 에서 **계산**한다 — 사전은 산문과 숙련도 키만 댄다.
+  const COMPUTED = ['common/', 'arch/', 'exec/'];
+
+  test('쿼리 없는 네임스페이스와 언어 개념이 정확히 갈린다', () => {
     for (const concept of dict.concepts.values()) {
-      const universal = concept.id.startsWith('common/') || concept.id.startsWith('arch/');
-      expect(concept.queries.length === 0).toBe(universal);
+      const computed = COMPUTED.some((p) => concept.id.startsWith(p));
+      expect(concept.queries.length === 0).toBe(computed);
     }
   });
 

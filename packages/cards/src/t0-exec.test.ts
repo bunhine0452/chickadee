@@ -12,7 +12,7 @@ import { describe, expect, test } from 'vitest';
 
 import type { AstLite } from '@chickadee/store-sql';
 import { blockOf, dialectOf, execFacts, lineIndex } from './exec-facts.js';
-import { buildFirstRun } from './t0-exec.js';
+import { buildFirstRun, renderFirstRun } from './t0-exec.js';
 import type { ExecFacts } from './exec-facts.js';
 
 const node = (start: number, kind = 'expression_statement'): AstLite =>
@@ -108,5 +108,25 @@ describe('진짜 코드에서 게이트가 닫힌다', () => {
     expect(buildFirstRun({
       facts: f, fn, at: lineIndex(''), window: { from: 1, to: 3 },
     })).toBeNull();
+  });
+});
+
+describe('사람 말로', () => {
+  test('진단이 picks 와 같은 자리에 오고 정답 자리는 비어 있다', () => {
+    const first = node(10);
+    const q = buildFirstRun({
+      facts: facts({ first, unconditional: [first, node(20)], conditional: [node(30)] }),
+      fn: node(0, 'function_declaration'),
+      at,
+      window: WINDOW,
+    });
+    if (!q) throw new Error('문항이 안 나왔다');
+    const r = renderFirstRun(q);
+    expect(r.why).toHaveLength(q.picks.length);
+    expect(r.why[q.answer]).toBeNull();
+    expect(r.why.filter((w) => w !== null)).toHaveLength(3);
+    // 정의 줄 진단은 「부를 때 돈다」를 말해야 한다 — 이 오해가 이 문항의 존재 이유다.
+    expect(r.why[0]).toContain('정의');
+    expect(r.q.length).toBeGreaterThan(0);
   });
 });
