@@ -82,3 +82,35 @@
   background: var(--t2);
   color: var(--on-t2);
 }
+
+/* 접힌 자리 (D141) — 창은 감싸는 블록이고, 20줄을 넘으면 초점 둘레만 펴 둔다.
+   줄번호 자리에는 번호 대신 `…` 가 선다: 접힌 줄은 번호가 하나가 아니다. */
+.code .ln.fold > i {
+  color: var(--ink-soft);
+  letter-spacing: .1em;
+}
+
+.code .ln.fold > span {
+  padding: 0 1em;
+  white-space: normal;
+}
+
+.code .unfold {
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  background: none;
+  color: var(--ink-soft);
+  font: inherit;
+  cursor: pointer;
+}
+
+.code .unfold:hover {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+
+.code .unfold:focus-visible {
+  outline: 3px solid var(--t0);
+  outline-offset: 2px;
+}

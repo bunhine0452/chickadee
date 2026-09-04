@@ -92,8 +92,15 @@ FROM review_log r JOIN session s ON s.id = r.session_id
 WHERE s.repo_id = :repoId AND r.track = :track;
 
 -- 그 트랙의 다음 판 — 단계가 남은 카드 우선, 없으면 아직 안 찍은 카드 (02 §5.3 2·3번).
+--
+-- `printedBefore` 는 「이 시각보다 전에 찍은 판만」이다 (D140). 이 조건이 없을 때
+-- `LIMIT 1` 은 카드가 한 행이라도 있으면 **늘 같은 행**을 줬고, 그래서 T2 는 리포당
+-- 평생 한 장이었다 — 은퇴 경로가 없으니 `prints=0` 인 판이 다시 생길 일도 없다.
+-- 결과가 비면 부르는 쪽이 한 장 더 굽는다(`data/graph.ts` 의 `bakeNextT2`).
+-- 창의 크기는 트랙이 정한다(`scheduler` 의 `REPRINT_GAP_DAYS` — T1 0일 · T2 7일):
+-- T1 의 3단계 페이딩은 같은 카드를 일부러 다시 부르므로 거르면 안 된다.
 -- @name queue.next_track_card
--- @params { repoId: number, track: string }
+-- @params { repoId: number, track: string, printedBefore: number }
 -- @row { id: number, repo_id: number, unit_id: number | null, track: string, kind: string, concept_id: string, level: number, site_id: number | null, file_id: number | null, commit_id: number | null, payload_json: string, snapshot_json: string | null, gen_version: number, content_hash: string, created_at: number, retired_at: number | null, prints: number, stage: number, est_min_ema: number | null }
 SELECT k.id, k.repo_id, k.unit_id, k.track, k.kind, k.concept_id, k.level, k.site_id,
        k.file_id, k.commit_id, k.payload_json, k.snapshot_json, k.gen_version,
@@ -102,4 +109,29 @@ SELECT k.id, k.repo_id, k.unit_id, k.track, k.kind, k.concept_id, k.level, k.sit
 FROM card k LEFT JOIN card_state t ON t.card_id = k.id
 WHERE k.repo_id = :repoId AND k.track = :track AND k.retired_at IS NULL
   AND COALESCE(t.is_suspended, 0) = 0
+  AND COALESCE(t.last_printed_at, 0) <= :printedBefore
 ORDER BY (COALESCE(t.prints, 0) = 0), COALESCE(t.last_printed_at, 0), k.id LIMIT 1;
+
+-- T2 를 구울 대지 목록 (02 §5.3 3번 · D140). 순서는 홈이 대지를 세우는 순서(`order_idx`)와
+-- 같아야 사용자가 「그 대지」로 읽는다.
+--
+-- `home.units` 를 쓰지 않는 이유는 둘이다. 그것은 대지 × 스티커라 대지 하나가 여러 행으로
+-- 오고, `unit_node` 를 INNER JOIN 하므로 개념 스티커가 아직 없는 대지는 통째로 빠진다.
+-- T2 의 지도는 `unit_file` 이 세우므로 스티커와 무관하다.
+-- @name queue.units
+-- @params { repoId: number }
+-- @row { id: number, name: string, root_path: string | null }
+SELECT u.id, u.name, u.root_path
+FROM unit u
+WHERE u.repo_id = :repoId
+  AND EXISTS (SELECT 1 FROM unit_file uf WHERE uf.unit_id = u.id)
+ORDER BY u.order_idx, u.id;
+
+-- 이미 구운 T2 판의 (대지, 종) — 다음에 무엇을 구울지 고르는 데만 쓴다 (D140).
+-- 은퇴한 판도 센다: 은퇴는 「그 조합을 다시 굽자」는 뜻이 아니라 「그 판이 낡았다」는 뜻이다.
+-- @name queue.t2_made
+-- @params { repoId: number }
+-- @row { unit_id: number, kind: string }
+SELECT DISTINCT k.unit_id, k.kind
+FROM card k
+WHERE k.repo_id = :repoId AND k.track = 't2' AND k.unit_id IS NOT NULL;

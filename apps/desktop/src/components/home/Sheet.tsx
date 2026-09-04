@@ -28,6 +28,9 @@ export interface SheetProps {
 }
 
 function metaOf(sheet: HomeSheet): string {
+  // 0장은 리포 경로도 파일도 없다 — 「경로 없음 · 파일 0개」는 참이지만 아무것도 알려주지
+  // 않는다. 대신 이 대지가 몇 장이고 끝이 있다는 것을 적는다 (D136).
+  if (sheet.zero) return t('home.zeroChapterMeta', { n: String(sheet.nodes.length) });
   return t('home.sheetMeta', {
     where: sheet.rootPath === null ? t('home.sheetNoPath') : sheet.rootPath,
     files: String(sheet.files),
@@ -82,16 +85,30 @@ export function Sheet({ sheet, no, guide, onPick, onCourse, now }: SheetProps) {
 
       <div className="sheet-in">
         <div className="sheet-head">
-          <Misreg className="sig" text={t('home.sheetSig', { n: String(no) })} />
+          <Misreg
+            className="sig"
+            text={sheet.zero ? t('home.zeroChapterSig') : t('home.sheetSig', { n: String(no) })}
+          />
           <div>
             <h2 className="sheet-h2" id={headId}>
               {sheet.name}
-              <span className="pl">{t('home.sheetFeature', { n: String(no) })}</span>
+              {sheet.zero ? null : (
+                <span className="pl">{t('home.sheetFeature', { n: String(no) })}</span>
+              )}
             </h2>
             <div className="sheet-meta">{metaOf(sheet)}</div>
           </div>
           <span className="sheet-status">{statusOf(sheet, no)}</span>
         </div>
+
+        {/* 0장의 도입 한 문단 — 몇 장이고 언제 끝나는지를 먼저 말한다 (D136). */}
+        {sheet.zero ? (
+          <p className="note sheet-lead">
+            {sheet.state === 'done'
+              ? t('home.zeroChapterDone')
+              : t('home.zeroChapterLead', { n: String(sheet.nodes.length) })}
+          </p>
+        ) : null}
 
         {onCourse === undefined ? null : (
           <div className="sheet-course">

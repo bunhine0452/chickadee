@@ -26,8 +26,9 @@ describe('Newcomer', () => {
     const notice = screen.getByRole('complementary', { name: '먼저 읽을 것' });
     expect(notice.querySelectorAll('button, a, input')).toHaveLength(0);
     expect(notice.textContent).toContain('잠기는 것은 없습니다');
-    // 외부 입문 자료 2개 (02 §6.4).
-    expect(notice.textContent).toContain('opentutorials.org');
-    expect(notice.textContent).toContain('cs50.harvard.edu');
+    // D147 전에는 외부 입문 자료 둘로 내보냈다. 이제는 **0장으로 데려간다** — 안내가
+    // 가리키는 곳이 앱 밖이 아니라 앱 안이라는 것이 그 결정의 요점이다.
+    expect(notice.textContent).toContain('0장');
+    expect(notice.textContent).not.toContain('opentutorials.org');
   });
 });

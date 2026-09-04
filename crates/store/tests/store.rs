@@ -323,3 +323,54 @@ fn wire_shapes_are_camel_case() {
 fn version_string_is_reported() {
     assert!(chickadee_store::sqlite_version().starts_with('3'));
 }
+
+/// 표를 다시 만드는 이행이 자식 행을 지우지 않는다 (D146).
+///
+/// SQLite 는 `DROP TABLE` 을 「모든 행을 지운다」로 다룬다. 외래키를 켜 둔 채 부모 표를
+/// 재생성하면 `ON DELETE CASCADE` 가 먼저 돌아 자식 행이 조용히 사라진다 — 이 리포에서는
+/// `card` 를 참조하는 표가 아홉이라 원장이 통째로 날아간다. 러너가 루프 밖에서 외래키를
+/// 끄는 것이 그것을 막는 유일한 자리다(`PRAGMA foreign_keys` 는 트랜잭션 안에서 무시된다).
+#[test]
+fn rebuilding_a_parent_table_keeps_child_rows() {
+    let steps = [
+        "CREATE TABLE parent (id INTEGER PRIMARY KEY, kind TEXT NOT NULL CHECK (kind IN ('a','b')));
+         CREATE TABLE kid (parent_id INTEGER NOT NULL REFERENCES parent(id) ON DELETE CASCADE);
+         INSERT INTO parent (id, kind) VALUES (1, 'a');
+         INSERT INTO kid (parent_id) VALUES (1);",
+        // CHECK 를 넓히려면 표를 다시 만드는 수밖에 없다 — ALTER 로는 못 고친다.
+        "CREATE TABLE parent_new (id INTEGER PRIMARY KEY, kind TEXT NOT NULL CHECK (kind IN ('a','b','c')));
+         INSERT INTO parent_new (id, kind) SELECT id, kind FROM parent;
+         DROP TABLE parent;
+         ALTER TABLE parent_new RENAME TO parent;",
+    ];
+    let cat = Catalog {
+        statements: [
+            ("kid.count", "SELECT COUNT(*) AS n FROM kid"),
+            ("parent.add", "INSERT INTO parent (id, kind) VALUES (9, :kind)"),
+        ]
+        .iter()
+        .map(|(k, v)| ((*k).to_owned(), (*v).to_owned()))
+        .collect(),
+        migrations: steps
+            .iter()
+            .enumerate()
+            .map(|(i, sql)| Migration {
+                version: i32::try_from(i).unwrap() + 1,
+                sql: (*sql).to_owned(),
+            })
+            .collect(),
+    };
+    let dir = TempDir::new().unwrap();
+    let store = Store::open(&db_path(&dir), cat).unwrap();
+
+    // 자식 행이 살아 있어야 한다. 외래키를 켜 둔 채 돌리면 여기가 0 이 된다.
+    let rows = store.query("kid.count", &Value::Null).unwrap();
+    assert_eq!(rows[0]["n"], json!(1));
+
+    // 넓힌 CHECK 는 실제로 넓어졌고, 밖의 값은 여전히 막힌다.
+    store.exec("parent.add", &json!({ "kind": "c" })).unwrap();
+    assert!(store.exec("parent.add", &json!({ "kind": "z" })).is_err());
+
+    // 이행이 끝나면 외래키는 다시 켜져 있어야 한다.
+    assert_eq!(store.info().unwrap().user_version, 2);
+}

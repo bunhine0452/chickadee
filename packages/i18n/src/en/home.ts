@@ -183,9 +183,19 @@ export const home: Record<string, string> = {
   'home.newcomerConfirmed':
     'A root-concept plate stalled two sessions running, with nothing below to step down to.',
   'home.newcomerBody':
-    'This app uses your own code as the textbook — if “variable” and '
-    + '“function” are themselves new, there is no textbook yet. CS50 '
-    + '(cs50.harvard.edu) first, and the plates here will read. Nothing is locked.',
+    'The root concepts have not stuck yet. Start with “Chapter 0 — the floor of this '
+    + 'language” on the home sheet: conditionals, functions and loops, pointed at through '
+    + 'the simplest lines in your own code. To go slower, switch Settings › Learning to '
+    + '“programming is new” and Chapter 0 gets longer. Nothing is locked.',
+
+  // ── Chapter 0 — the floor of this language (D136) ───────────────────────
+  'home.zeroChapter': 'Chapter 0 — the floor of this language',
+  'home.zeroChapterSig': 'Ch. 0',
+  'home.zeroChapterLead':
+    'This language is new to you. {{n}} plates from the roots first — two a day, '
+    + 'so four days. After that it is like any other sheet.',
+  'home.zeroChapterMeta': '{{n}} plates · a prologue with an end',
+  'home.zeroChapterDone': 'Chapter 0 is done. You can reopen it any time.',
 
   // ── Node sticker ────────────────────────────────────────────────────────
   'home.nodeLabel': '{{name}}. {{track}}. {{layer}}. {{state}}.',

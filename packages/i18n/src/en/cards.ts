@@ -12,6 +12,8 @@ export const cards: Record<string, string> = {
   't0.pointDiag': '«{{pick}}» sits in the {{role}} slot. The answer is «{{answer}}».',
 
   't0.noSiteInRepo': 'this grammar is used nowhere in the repo',
+  't0.syntheticFile': 'dictionary example',
+  't0.noExample': 'the dictionary has no usable example',
   't0.noSiteUsable': 'no usable site',
   't0.dropNoHole': 'this site has no hole (@hole)',
   't0.dropHoleTooShort': 'the hole is one character — too short for a blank',
@@ -113,4 +115,29 @@ export const cards: Record<string, string> = {
   't2.noRadiusTarget': 'no sheet file has an incoming arrow',
   't2.noFlowPath': 'no path runs through {{n}} or more files',
   't2.noDirectionPairs': 'fewer than {{n}} pairs to ask a direction about',
+
+  't2.entryQuestion': 'Which folder is the door this repo is entered through from outside?',
+  't2.entryHint': 'Pick on the map. There can be more than one.',
+  't2.entryStat': 'door',
+  't2.entrySecStat': 'looks like a door',
+  't2.entryCore': 'Nothing points at it, and it reaches into {{out}} folders.',
+  't2.entryCoreNamed':
+    '«{{name}}» — the file the outside calls sits here, and nothing points at it.',
+  't2.entrySec': '«{{name}}» sits here, but {{in}} folders inside the repo import this one.',
+  't2.entryTrap':
+    '{{in}} folders import this one. Being used a lot is not the same as being entered first.',
+  't2.entryHint1': 'There are {{n}} doors.',
+  't2.entryHint2': 'Look for a folder with no incoming arrow. The most-used folder is not the door.',
+  't2.entryHint3': 'The most-used one is «{{name}}» — that is a store room.',
+
+  't2.roleQuestion': 'Why does the «{{folder}}» folder exist?',
+  't2.roleHint': 'This folder is missing from the map. Choose which of the four rows it belongs to.',
+  't2.roleHint1': '{{in}} folders import this one, and this one imports {{out}}.',
+  't2.roleHint2': 'The importing side sits above. Only incoming arrows means the bottom row.',
+  't2.roleHint3': 'It holds {{n}} files.',
+
+  't2.noRepoMap': 'the repo folds into a single «other» sheet — no repo map stands',
+  't2.smallRepoMap': 'the repo map has only {{n}} nodes',
+  't2.entryNone': 'doors cover more than half the map, or none at all (nodes {{n}})',
+  't2.roleNone': 'only {{n}} folders have a band the path pattern knows',
 };

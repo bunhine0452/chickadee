@@ -2,8 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import { cx } from '@chickadee/ui';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
-/* 문법은 basic-languages 만 싣는다. **언어 서비스 워커(`ts.worker`)는 싣지 않는다** —
-   자동완성이 붙으면 필사가 재는 것이 사라진다 (05 §8). */
+/* 문법은 basic-languages 만 싣는다 — 여기 있는 여섯이 `monacoOptions.MONACO_LANGUAGES`
+   이고, 화면이 낼 수 있는 Monaco 언어 id 의 전부다 (05 §8).
+
+   **언어 서비스 워커(`ts.worker`)는 싣지 않는다** (D143). 값이 안 나온다: `tsWorker.js` 가
+   1,286,340 B gzip 으로 05 §1.3 의 Monaco 청크 예산 1.2 MB 를 워커 하나가 넘고, T1 이 주는
+   것은 tsconfig 도 `node_modules` 도 없는 12~40줄 떼어낸 블록이라 낼 수 있는 것이 「Cannot
+   find name」 융단뿐이며, TS/JS 전용이라 정본 §2 의 「전 언어 지원」 위에 못 고칠 불균형을
+   얹는다. 단어 기반 제안(L1)은 이 워커 없이 `editor.worker` 안에서 돈다. */
 import 'monaco-editor/esm/vs/basic-languages/typescript/typescript.contribution';
 import 'monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution';
 import 'monaco-editor/esm/vs/basic-languages/python/python.contribution';
@@ -12,16 +18,20 @@ import 'monaco-editor/esm/vs/basic-languages/rust/rust.contribution';
 import 'monaco-editor/esm/vs/basic-languages/sql/sql.contribution';
 
 import { measureSince } from '../../devtools/audit.js';
+import { emptyAssist, makeAssistTally } from './assist';
 import { PlainPad } from './PlainPad';
 import {
   cloneAriaLabel,
+  EDITOR_ASSIST_DEFAULT,
   LINE_HEIGHT,
   MIN_ROWS,
   SAVE_DEBOUNCE_MS,
   TAB_TEXT,
   optionsFor,
+  type EditorAssist,
 } from './monacoOptions';
 import { THEME_NAME, defineInkThemes, setInkTheme } from './monacoTheme';
+import type { AssistCount } from '@chickadee/grading';
 import type { InkTheme } from './monacoTheme';
 import type { CloneStage } from './Stepper';
 import './ClonePad.css';
@@ -46,6 +56,15 @@ export interface ClonePadProps {
   onPeek: (on: boolean) => void;
   onGrade: () => void;
   onDown: () => void;
+  /** 설정 「편집 보조」 (D143). 생략하면 단계에 맞춰 켠다. */
+  editorAssist?: EditorAssist | undefined;
+  /** 이어 세울 계수. 판을 떠났다 돌아오면 그때까지 센 것이 남는다. **마운트 때만** 읽는다. */
+  assistSeed?: AssistCount | undefined;
+  /**
+   * 이 판의 글자가 어디서 왔나 (D143). 자동 저장과 **같은 박자**로 부른다 — 타건마다
+   * 부르면 판 전체가 글쇠마다 다시 그려진다.
+   */
+  onAssist?: ((next: AssistCount) => void) | undefined;
   ariaLabel?: string | undefined;
   /** true 면 textarea 판을 그린다 (05 §8 마지막 문단). 기본값은 Monaco 다. */
   fallback?: boolean | undefined;
@@ -96,6 +115,7 @@ export function ClonePad(props: ClonePadProps) {
 
 function MonacoPad(props: ClonePadProps) {
   const { stage, grammar, theme, ticks } = props;
+  const editorAssist = props.editorAssist ?? EDITOR_ASSIST_DEFAULT;
   const label = props.ariaLabel ?? cloneAriaLabel();
 
   const hostRef = useRef<HTMLDivElement | null>(null);
@@ -124,7 +144,7 @@ function MonacoPad(props: ClonePadProps) {
     defineInkThemes();
 
     const editor = monaco.editor.create(host, {
-      ...optionsFor(at.stage),
+      ...optionsFor(at.stage, at.editorAssist ?? EDITOR_ASSIST_DEFAULT),
       ariaLabel: at.ariaLabel ?? cloneAriaLabel(),
       value: at.value,
       language: at.grammar,
@@ -133,7 +153,10 @@ function MonacoPad(props: ClonePadProps) {
     edRef.current = editor;
     tickRef.current = editor.createDecorationsCollection();
 
-    // ── 자동 저장 ──────────────────────────────────────────────────────────
+    // ── 자동 저장 · 글자가 어디서 왔나 ─────────────────────────────────────
+    // 계수는 변경마다 돌지만 **부모에게는 저장과 같은 박자로만** 알린다 (D143) —
+    // 타건마다 올리면 400ms 에 한 번이면 될 리렌더가 글쇠 수만큼 난다.
+    const tally = makeAssistTally(at.assistSeed ?? emptyAssist());
     let dirty = false;
     let timer: number | undefined;
     const flush = (): void => {
@@ -142,8 +165,11 @@ function MonacoPad(props: ClonePadProps) {
       if (!dirty) return;
       dirty = false;
       cb.current.onChange(editor.getValue());
+      cb.current.onAssist?.(tally.value);
     };
-    editor.onDidChangeModelContent(() => {
+    editor.onDidPaste(() => tally.armPaste());
+    editor.onDidChangeModelContent((e) => {
+      tally.onChanges(e.changes, e.isFlush);
       dirty = true;
       if (timer !== undefined) window.clearTimeout(timer);
       timer = window.setTimeout(flush, SAVE_DEBOUNCE_MS);
@@ -180,9 +206,11 @@ function MonacoPad(props: ClonePadProps) {
     });
     editor.onDidCompositionStart(() => {
       composing = true;
+      tally.setComposing(true);
     });
     editor.onDidCompositionEnd(() => {
       composing = false;
+      tally.setComposing(false);
       if (held === null) return;
       const line = held;
       held = null;
@@ -209,9 +237,13 @@ function MonacoPad(props: ClonePadProps) {
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => cb.current.onGrade());
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Period, () => cb.current.onDown());
     // Tab 을 우리가 잡지 않으면 포커스가 판 밖으로 나간다 (05 §7).
+    //
+    // 세 번째 인자가 **문맥**이다 (D143). 안 넘기면 이 명령이 문맥 무관하게 언제나 이겨
+    // 제안 위젯이 열려 있어도 2칸이 들어간다 — 제안을 **절대 수락할 수 없다.**
+    // `'!suggestWidgetVisible'` 로 「위젯이 없을 때만 2칸」이 된다.
     editor.addCommand(monaco.KeyCode.Tab, () => {
       editor.trigger('clonepad', 'type', { text: TAB_TEXT });
-    });
+    }, '!suggestWidgetVisible');
 
     editor.onDidFocusEditorText(() => setFocused(true));
     editor.onDidBlurEditorText(() => {
@@ -272,8 +304,8 @@ function MonacoPad(props: ClonePadProps) {
   }, [theme]);
 
   useEffect(() => {
-    edRef.current?.updateOptions({ ...optionsFor(stage), ariaLabel: label });
-  }, [stage, label]);
+    edRef.current?.updateOptions({ ...optionsFor(stage, editorAssist), ariaLabel: label });
+  }, [stage, label, editorAssist]);
 
   useEffect(() => {
     const model = edRef.current?.getModel() ?? null;

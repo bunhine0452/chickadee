@@ -5,8 +5,9 @@
  * `card` 에 넣고, 안 나오면 그 개념을 「판이 없는 문법」에 사유와 함께 남기는 것이 여기 일이다.
  */
 import {
-  generateKind, generateT0, isFailure, isNoPlate,
-  type FocusLine, type GenResult, type NoPlate, type OtherUse, type SiteInput, type T0Card,
+  generateKind, generateT0, isFailure, isNoPlate, makeSyntheticCard, windowOf,
+  type FocusLine, type GenResult, type LineWindow, type NoPlate, type OtherUse,
+  type SiteInput, type T0Card,
 } from '@chickadee/cards';
 import type { Dict } from '@chickadee/dictionary';
 import { ipc } from '@chickadee/ipc-client';
@@ -14,14 +15,19 @@ import { estMinFor, type Candidate } from '@chickadee/scheduler';
 import { fromConceptSiteRow, type ConceptId, type ConceptSite, type Layer } from '@chickadee/store-sql';
 
 import { makeT1Card } from './blocks.js';
-import { makeT2Card } from './graph.js';
+import { bakeNextT2 } from './graph.js';
 import type { CardMaker } from './session.js';
 
 /** 카드 하나에 볼 사용처 수. 사슬이 몇 번 미끄러져도 이 안에서 끝난다 (04 §1.4). */
 export const SITE_BUDGET = 6;
 /** 사다리 3단·`{{other.*}}` 에 쓸 다른 자리 수 (04 §2.4). */
 export const OTHER_USES = 3;
-/** 04 §1 — 맥락은 초점 ±4, 최대 9줄. */
+/**
+ * 창을 못 찾았을 때 읽는 폭이자 **언제나 읽어야 하는 최소 폭**이다.
+ *
+ * 창은 D141 부터 초점을 감싸는 블록이지만, `payload.promptLines` 는 창이 아무리 좁아도
+ * 초점 ±4 를 담아야 한다 (정본 §3-1 · D8). 그래서 읽는 범위는 창 ∪ 초점 ±4 다.
+ */
 export const CONTEXT_RADIUS = 4;
 
 export interface MakerDeps {
@@ -88,28 +94,20 @@ export function cardMaker(deps: MakerDeps): CardMaker {
     },
 
     async forUnit() {
-      // T2 는 개념이 아니라 **대지**에서 나온다 (04 §7.4 「범위 = 유닛 + 1-hop 이웃」) —
-      // 그 경로는 `data/graph.ts` 다. 대지를 고르는 규칙은 「오늘 걸 만한 것 중 첫 번째」이고,
-      // 순서는 `unit.order_idx` 다(홈이 대지를 세우는 순서와 같아야 「그 대지」로 읽힌다).
-      const units = await ipc.store.query('home.units', { repoId: deps.repoId });
-      const seen = new Set<number>();
-      for (const row of units) {
-        if (seen.has(row.unit_id)) continue;
-        seen.add(row.unit_id);
-        const made = await makeT2Card(
-          { repoId: deps.repoId, rootPath: deps.rootPath, now: deps.now },
-          { id: row.unit_id, name: row.name, rootPath: row.root_path },
-        );
-        if (made === null) continue;
-        return {
-          cardId: made.cardId,
-          conceptId: made.card.conceptId,
-          track: 't2' as const,
-          role: 'new' as const,
-          estMin: estMinFor('t2', 'new'),
-        };
-      }
-      return null;
+      // T2 는 개념이 아니라 **대지**에서 나온다 (04 §7.4) — 그 경로는 `data/graph.ts` 다.
+      // 무엇을 언제 굽는지(대지 × 종 회전 · 세션당 한 장)는 D140 대로 `bakeNextT2` 가 안다.
+      // 전에는 여기서 `home.units` 를 훑어 **늘 첫 대지**를 골랐고, 그 위에 큐가 이미 있는
+      // 카드만 돌려주는 문장이 겹쳐 판이 리포당 한 장에서 멈췄다.
+      const made = await bakeNextT2({
+        repoId: deps.repoId, rootPath: deps.rootPath, now: deps.now,
+      });
+      return made === null ? null : {
+        cardId: made.cardId,
+        conceptId: made.card.conceptId,
+        track: 't2' as const,
+        role: 'new' as const,
+        estMin: estMinFor('t2', 'new'),
+      };
     },
   };
 }
@@ -183,6 +181,61 @@ export async function makeCard(
   return id;
 }
 
+/**
+ * 합성 예제 판 한 장 (D137 · 방안 E-4).
+ *
+ * `makeCard` 가 판을 못 낸 개념에만 쓴다 — 사용처는 있는데 미지가 많아 아직 못 여는
+ * 자리다. `previewSiteId` 는 **필수**이고, 그 값이 곧 「곧 여기서 봅니다」의 대상이다.
+ * 예고할 자리가 없으면 이 함수를 부를 수 없다(타입이 막는다).
+ *
+ * 원장의 `card.site_id` 는 **NULL** 이다 — 대응하는 `concept_site` 행이 없다. 생성기가
+ * 쓰는 자리표(`SYNTHETIC_SITE_ID`)를 그대로 넣으면 외래키가 깨진다.
+ */
+export async function makeSyntheticPlate(
+  deps: MakerDeps,
+  conceptId: ConceptId,
+  previewSiteId: number,
+): Promise<number | null> {
+  const concept = deps.dict.concepts.get(conceptId);
+  if (concept === undefined) return null;
+
+  const result = makeSyntheticCard({
+    repoId: deps.repoId,
+    dictVersion: deps.dictVersion,
+    attempt: 0,
+    concept,
+    concepts: deps.dict.concepts,
+    ly: deps.layerOf(conceptId),
+    previewSiteId,
+    ...langDefaults(deps.dict, conceptId),
+  });
+  if (isFailure(result)) {
+    await noteNoPlate(deps.repoId, conceptId, result.reason);
+    return null;
+  }
+  const card = result.card;
+
+  await ipc.store.exec('card.insert', {
+    repoId: deps.repoId,
+    unitId: null,
+    track: 't0',
+    kind: card.kind,
+    conceptId,
+    level: 1,
+    siteId: null,
+    fileId: null,
+    commitId: null,
+    payloadJson: JSON.stringify(card.payload),
+    genVersion: 1,
+    contentHash: card.contentHash,
+    createdAt: deps.now,
+  });
+  const rows = await ipc.store.query('card.by_hash', {
+    repoId: deps.repoId, contentHash: card.contentHash,
+  });
+  return rows[0]?.id ?? null;
+}
+
 /** `GenResult` → `T0Card | NoPlate`. 실패 사유를 그대로 나른다. */
 function toCard(r: GenResult): T0Card | NoPlate {
   return isFailure(r) ? { noPlate: true, reason: r.reason } : r.card;
@@ -233,9 +286,13 @@ async function loadSiteInputs(
   }));
 
   const out: SiteInput[] = [];
+  const blocks = new Map<number, LineWindow[]>();
   for (const row of ordered) {
     const site = fromConceptSiteRow(row) as ConceptSite;
-    const lines = await readContext(deps.rootPath, row.path, row.line_start, row.excerpt);
+    const block = enclosingBlock(
+      await blocksOfFile(row.file_id, blocks), row.line_start,
+    );
+    const lines = await readContext(deps.rootPath, row.path, row.line_start, row.excerpt, block);
     const lineSites = await ipc.store.query('card.sites_on_line', {
       repoId: deps.repoId, fileId: row.file_id, lineStart: row.line_start,
       lineEnd: row.line_end, exceptId: row.id,
@@ -244,6 +301,7 @@ async function loadSiteInputs(
       site,
       path: row.path,
       lines,
+      ...(block === undefined ? {} : { block }),
       lineSites: lineSites.map((r) => fromConceptSiteRow(r) as ConceptSite),
       others: others.filter((o) => o.siteId !== row.id),
     });
@@ -252,20 +310,58 @@ async function loadSiteInputs(
 }
 
 /**
- * 초점 ±4 줄. 파일이 사라졌거나 못 읽으면 **`excerpt` 한 줄로 대신한다** — 앞뒤 맥락이 없는
- * 카드는 좁지만, 코드 줄이 아예 없는 카드는 빈 판이라 아무것도 못 묻는다.
+ * 한 파일의 살아 있는 블록 (02 `block`). 사용처 여섯이 같은 파일에 몰리는 일이 흔해
+ * 파일마다 한 번만 묻는다 — 새 statement 는 만들지 않았다. T1 이 쓰던 `block.by_file` 이
+ * 필요한 것(줄 범위)을 이미 준다 (D141).
+ */
+async function blocksOfFile(
+  fileId: number,
+  cache: Map<number, LineWindow[]>,
+): Promise<LineWindow[]> {
+  const hit = cache.get(fileId);
+  if (hit !== undefined) return hit;
+  let rows: LineWindow[] = [];
+  try {
+    const found = await ipc.store.query('block.by_file', { fileId });
+    rows = found.map((r) => ({ from: r.line_start, to: r.line_end }));
+  } catch {
+    // 블록을 못 읽어도 카드는 나와야 한다 — 창이 초점 ±2 로 떨어질 뿐이다.
+  }
+  cache.set(fileId, rows);
+  return rows;
+}
+
+/**
+ * 초점을 감싸는 **최소** 블록. 함수가 클래스 안에 있으면 함수가 이긴다 — 창은 「감싸는
+ * 최소 의미 단위」이지 「가장 바깥 단위」가 아니다 (D141). 감싸는 것이 없으면 `undefined`.
+ */
+function enclosingBlock(blocks: readonly LineWindow[], focus: number): LineWindow | undefined {
+  let best: LineWindow | undefined;
+  for (const b of blocks) {
+    if (b.from > focus || b.to < focus) continue;
+    if (best === undefined || b.to - b.from < best.to - best.from) best = b;
+  }
+  return best;
+}
+
+/**
+ * 창(감싸는 블록) ∪ 초점 ±4. 파일이 사라졌거나 못 읽으면 **`excerpt` 한 줄로 대신한다** —
+ * 앞뒤 맥락이 없는 카드는 좁지만, 코드 줄이 아예 없는 카드는 빈 판이라 아무것도 못 묻는다.
+ *
+ * `windowOf` 로 한 번 자르고 읽는다 — 373줄짜리 블록을 통째로 읽어 40줄만 쓰는 일을 막는다.
  */
 async function readContext(
   rootPath: string,
   relPath: string,
   focus: number,
   excerpt: string,
+  block?: LineWindow | undefined,
 ): Promise<FocusLine[]> {
-  const from = Math.max(1, focus - CONTEXT_RADIUS);
+  const win = windowOf(focus, block);
+  const from = Math.max(1, Math.min(win.from, focus - CONTEXT_RADIUS));
+  const to = Math.max(win.to, focus + CONTEXT_RADIUS);
   try {
-    const chunk = await ipc.file.readLines({
-      rootPath, relPath, from, to: focus + CONTEXT_RADIUS,
-    });
+    const chunk = await ipc.file.readLines({ rootPath, relPath, from, to });
     if (chunk.lines.length > 0) return chunk.lines.map((t, i) => ({ n: from + i, t }));
   } catch {
     // 아래 폴백으로 내려간다. 읽기 실패는 카드를 못 만들 이유가 아니다.

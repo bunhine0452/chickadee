@@ -16,7 +16,7 @@ import type { RungNo } from '../../components/session/ReprintLadder.js';
 import type { QueueItem } from '../../components/shell/TimeQueue.js';
 import { closeMark, markLiferOpen } from '../../devtools/audit.js';
 import {
-  buildProt, evalLine, type Question, type T1Result, type T2Result, type Tick,
+  buildProt, evalLine, type AssistCount, type Question, type T1Result, type T2Result, type Tick,
 } from '@chickadee/grading';
 import { baseName, loadLadder, rebuildPrompt, type LadderData } from '../../data/ladder.js';
 import { loadMastery, type Plate } from '../../data/session.js';
@@ -29,6 +29,7 @@ import {
   pauseSession, pressDunno, returnToParent, savePlate, type T2Answer,
 } from '../../session-flow.js';
 import { currentPlate, useUi } from '../../store.js';
+import { loadFirstMeetingConcepts, readFirstText } from '../../data/read-first.js';
 import { T0Plate } from './T0Plate.js';
 import { T1Plate, type T1View } from './T1Plate.js';
 import { MAX_HINTS, T2Plate, type T2View } from './T2Plate.js';
@@ -75,6 +76,9 @@ export interface SessionScreenProps {
   repoName: string;
 }
 
+/** 참조가 매 렌더 바뀌면 훅 의존성이 흔들린다 — 빈 집합은 하나만 만든다. */
+const EMPTY_SET: ReadonlySet<string> = new Set<string>();
+
 export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.JSX.Element | null {
   const session = useUi((s) => s.session);
   const plates = useUi((s) => s.plates);
@@ -98,6 +102,8 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
   const [lifer, setLifer] = useState<LiferView | null>(null);
   /** 첫 판을 함께 걷나 (D134). 설정을 읽기 전에는 띠를 내지 않는다 — 깜빡이면 안내가 아니다. */
   const [coach, setCoach] = useState(false);
+  /** 0장에 담긴 개념들 (D138). 세션을 열 때 한 번 긷고 「먼저 읽기」가 이것만 본다. */
+  const [firstMeeting, setFirstMeeting] = useState<ReadonlySet<string>>(EMPTY_SET);
   const [summary, setSummary] = useState<SummaryData | null>(null);
   /** Monaco 는 CSS 변수를 못 받아 테마를 hex 로 받는다 (05 §8) — 설정에서 한 번 읽는다. */
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
@@ -108,6 +114,8 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
   const [t1Draft, setT1Draft] = useState('');
   const [t1Ticks, setT1Ticks] = useState<Record<number, Tick>>({});
   const [t1Peeks, setT1Peeks] = useState(0);
+  /** 이 판의 글자가 어디서 왔나 (D143). 감점 없음 — 원장에 기록만 한다. */
+  const [t1Assist, setT1Assist] = useState<AssistCount | undefined>(undefined);
   const [t1Peeking, setT1Peeking] = useState(false);
   const [t1Downgraded, setT1Downgraded] = useState(false);
   const [t1SavedAt, setT1SavedAt] = useState<number | null>(null);
@@ -156,6 +164,17 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
       setCoach(!s.tutorialSeen);
     });
   }, []);
+
+  // 아직 한 겹도 안 올린 개념 (D138 · D150). 세션 한 번에 한 번만 긷고 그 값을 세션 내내
+  // 쓴다 — 겹은 하루 최대 +1 이라(D3) 도중에 바뀌어도 그 판은 이미 첫 만남이었다.
+  // 실패해도 세션은 그대로 돈다: 「먼저 읽기」가 안 열릴 뿐이다.
+  useEffect(() => {
+    let alive = true;
+    void loadFirstMeetingConcepts()
+      .then((set) => { if (alive) setFirstMeeting(set); })
+      .catch(() => undefined);
+    return () => { alive = false; };
+  }, [repoId]);
 
   // 판이 바뀌면 사다리는 접힌다 — 앞 판의 4단 입력이 다음 판에 따라오면 안 된다.
   useEffect(() => {
@@ -296,8 +315,11 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
     setT1Draft(draft);
     setT1SavedAt(Date.now());
     // 초안은 `session_item.state_json` 으로 내려간다 (05 §3 저장 5시점).
-    useUi.getState().patchState(pos, { t1Draft: draft, t1Stage, peeks: t1Peeks });
-  }, [pos, t1Stage, t1Peeks]);
+    useUi.getState().patchState(pos, {
+      t1Draft: draft, t1Stage, peeks: t1Peeks,
+      ...(t1Assist === undefined ? {} : { assist: t1Assist }),
+    });
+  }, [pos, t1Stage, t1Peeks, t1Assist]);
 
   const t1Grade = useCallback(async () => {
     const nonEmpty = t1Draft.split('\n').filter((l) => l.trim() !== '').length;
@@ -310,11 +332,12 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
     setT1Peeking(false);
     const graded = await gradeT1Plate({
       draft: t1Draft, stage: t1Stage, peeks: t1Peeks, downgraded: t1Downgraded,
+      ...(t1Assist === undefined ? {} : { assist: t1Assist }),
     });
     if (graded === null) return;
     setT1Graded(graded);
     setT1View('result');
-  }, [t1Draft, t1Stage, t1Peeks, t1Downgraded, t1Short]);
+  }, [t1Draft, t1Stage, t1Peeks, t1Assist, t1Downgraded, t1Short]);
 
   const t1Downgrade = useCallback(() => {
     if (t1Stage <= 1) return;
@@ -335,6 +358,7 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
       draft: t1Draft,
       stage: t1Stage,
       peeks: t1Peeks,
+      ...(t1Assist === undefined ? {} : { assist: t1Assist }),
       downgraded: t1Downgraded,
       elapsedMs: elapsed * 1000,
       appealed: t1Appealed,
@@ -344,7 +368,8 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
     // T1 은 마치는 즉시 다음 판으로 가므로 기록을 놓을 판정란이 없다 — 첫 기록은
     // 인쇄 완료의 「처음 기록한 문법」 칸이 나른다 (D131).
     await goNext();
-  }, [t1Graded, plate, t1Draft, t1Stage, t1Peeks, t1Downgraded, elapsed, t1Appealed, t1Why, goNext]);
+  }, [t1Graded, plate, t1Draft, t1Stage, t1Peeks, t1Assist, t1Downgraded, elapsed, t1Appealed,
+      t1Why, goNext]);
 
   // ── T2 (04 §7~§8). 고르기 → 채점 → 마치기. T1 과 같은 두 걸음이다.
   const t2Toggle = useCallback((path: string) => {
@@ -362,13 +387,16 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
   const t2Grade = useCallback(() => {
     const payload = plate?.payload.track === 't2' ? plate.payload : null;
     if (payload === null) return;
-    // 네 종이 서로 다른 것을 낸다 (D107). 「덜 골랐다」는 여기서 막지 않는다 —
+    // 여섯 종이 서로 다른 것을 낸다 (D107·D142). 「덜 골랐다」는 여기서 막지 않는다 —
     // 채점 단추의 자물쇠가 종마다 이미 그것을 안다(`T2Plate`).
+    // 폴더의 역할은 문항이 하나라 `t2Picks` 의 첫 칸을 쓴다 — 판 하나는 그중 하나만 채운다.
     const answer: T2Answer = payload.kind === 'flow'
       ? { kind: 'flow', ordered: t2Ordered }
       : payload.kind === 'direction'
         ? { kind: 'direction', picks: t2Picks as readonly (0 | 1 | 2 | 3)[] }
-        : { kind: payload.kind, selected: t2Sel };
+        : payload.kind === 'role'
+          ? { kind: 'role', pick: t2Picks[0] ?? null }
+          : { kind: payload.kind, selected: t2Sel };
     const graded = gradeT2Plate(answer, t2Hints);
     if (graded === null) return;
     setT2Graded(graded);
@@ -483,6 +511,8 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
             draft={t1Draft}
             onDraft={t1SaveDraft}
             peeks={t1Peeks}
+            {...(t1Assist === undefined ? {} : { assist: t1Assist })}
+            onAssist={setT1Assist}
             onPeek={t1Peek}
             peeking={t1Peeking}
             ticks={t1Ticks}
@@ -505,6 +535,9 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
             result={result}
             lifer={lifer}
             coach={coach && pos === 0}
+            readFirst={plate.payload.track !== 't0'
+              ? null
+              : readFirstText(plate.payload, plate.conceptId, firstMeeting)}
             payoff={carry !== null && carry.parentItemId === plate.id ? carry.payoff : null}
             ladder={ladder}
             ladderOpen={ladderOpen}
@@ -535,7 +568,8 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
               }
             }}
             onDunno={() => void openLadder()}
-            onJumpPrereq={(conceptId) => void jumpPrereq(dunnoId, conceptId as Plate['conceptId'])}
+            onJumpPrereq={(conceptId, previewSiteId) =>
+              void jumpPrereq(dunnoId, conceptId as Plate['conceptId'], previewSiteId)}
             onBack={() => void backFromPrereq(dunnoId)}
             onSubmit={(sel) => void submit(sel)}
             onNext={() => void goNext()}

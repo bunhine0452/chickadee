@@ -13,7 +13,7 @@ const NOW = Date.UTC(2026, 8, 3, 9, 0, 0);
 const SHEET: HomeSheet = {
   unitId: 2,
   name: '로그인 흐름',
-  rootPath: 'src/features/auth',
+  rootPath: 'src/features/auth', zero: false,
   files: 8,
   avgLayer: 2,
   state: 'current',
@@ -90,5 +90,39 @@ describe('Sheet', () => {
   it('길잡이 말풍선은 접근성 트리에 없다 — 같은 문구는 LiveRegion 이 읽는다', () => {
     render(<Sheet sheet={SHEET} no={2} guide="다음은 「옵셔널 체이닝」입니다." now={NOW} />);
     expect(screen.queryByText(/다음은 「옵셔널 체이닝」입니다/)?.closest('[aria-hidden="true"]')).toBeTruthy();
+  });
+});
+
+describe('0장 대지 (D136)', () => {
+  const ZERO: HomeSheet = {
+    ...SHEET, unitId: 9, name: '0장 — 이 언어의 바닥', rootPath: null, zero: true, files: 0,
+  };
+
+  it('머리가 몇 장이고 끝이 있다는 것을 말한다 — 「경로 없음 · 파일 0개」가 아니라', () => {
+    render(<Sheet sheet={ZERO} no={1} now={NOW} />);
+    expect(screen.getByText(/끝이 있는 프롤로그/)).toBeTruthy();
+    expect(screen.queryByText(/경로 없음/)).toBeNull();
+  });
+
+  it('도입 문단이 장수를 적는다 — 「과정」이 아니라는 약속이다', () => {
+    render(<Sheet sheet={ZERO} no={1} now={NOW} />);
+    const lead = screen.getByText(/이 언어를 처음 보시는군요/);
+    expect(lead.textContent).toContain(String(ZERO.nodes.length));
+    expect(lead.className).toContain('note');
+  });
+
+  it('다 찍으면 다시 열 수 있다고 말한다 — 사라지지 않는다', () => {
+    render(<Sheet sheet={{ ...ZERO, state: 'done' }} no={1} now={NOW} />);
+    expect(screen.getByText(/언제든 다시 열 수 있습니다/)).toBeTruthy();
+  });
+
+  it('「기능 N」 꼬리표를 달지 않는다 — 리포의 기능이 아니다', () => {
+    render(<Sheet sheet={ZERO} no={1} now={NOW} />);
+    expect(screen.queryByText(/기능 1/)).toBeNull();
+  });
+
+  it('보통 대지는 경로와 파일 수를 그대로 낸다', () => {
+    render(<Sheet sheet={SHEET} no={2} now={NOW} />);
+    expect(screen.getByText(/src\/features\/auth/)).toBeTruthy();
   });
 });

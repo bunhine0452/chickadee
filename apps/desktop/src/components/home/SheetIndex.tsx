@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { t } from '@chickadee/i18n';
 import { cx } from '@chickadee/ui';
 
-import type { HomeSheet } from '../../screens/home/data';
+import { sheetNo, type HomeSheet } from '../../screens/home/data';
 import './SheetIndex.css';
 
 export interface SheetIndexProps {
@@ -59,25 +59,30 @@ export function SheetIndex({ sheets, selected, onSelect }: SheetIndexProps) {
       {sheets.map((sheet, i) => {
         const { done, all } = progressOf(sheet);
         const on = sheet.unitId === selected;
+        // 0장은 리포의 기능이 아니라 프롤로그다 — 「N대」 판번호를 붙이지 않는다 (D136).
+        const no = sheetNo(sheets, i);
+        const sig = sheet.zero ? t('home.zeroChapterSig') : t('home.sheetSig', { n: String(no) });
         return (
           <button
             key={sheet.unitId}
             type="button"
             role="tab"
             id={`sx-${sheet.unitId}`}
-            className={cx('sx', on && 'on')}
+            className={cx('sx', on && 'on', sheet.zero && 'sx-zero')}
             data-state={sheet.state}
             aria-selected={on}
             aria-controls={`sheet-panel-${sheet.unitId}`}
             tabIndex={on ? 0 : -1}
             // 칩 안의 글자는 잘릴 수 있다 — 읽히는 이름은 언제나 온전한 한 줄이다.
-            aria-label={t('home.sheetChip', {
-              no: String(i + 1), name: sheet.name, done: String(done), all: String(all),
-            })}
+            aria-label={sheet.zero
+              ? `${sheet.name} · ${t('home.zeroChapterMeta', { n: String(all) })}`
+              : t('home.sheetChip', {
+                no: String(no), name: sheet.name, done: String(done), all: String(all),
+              })}
             onClick={() => onSelect(sheet.unitId)}
             onKeyDown={onKey}
           >
-            <span className="sx-no" aria-hidden="true">{t('home.sheetSig', { n: String(i + 1) })}</span>
+            <span className="sx-no" aria-hidden="true">{sig}</span>
             <span className="sx-name" aria-hidden="true">{sheet.name}</span>
             <span className="sx-count" aria-hidden="true">{done} / {all}</span>
             <span

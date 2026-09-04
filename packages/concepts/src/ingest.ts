@@ -19,6 +19,9 @@ import { resolveImports, type FileImports } from './resolve-imports.js';
 import { EXCLUDE_GLOBS, GENERATED_MARKERS, LIMITS } from './ingest-defaults.js';
 import { assignUnits } from './units.js';
 import { knownSet, unknownCount, type MasteryRow } from './unknown-rank.js';
+import {
+  ZERO_CHAPTER_ORDER, ZERO_CHAPTER_UNIT, shouldOpen as shouldOpenZeroChapter, zeroChapterPlates,
+} from './zero-chapter.js';
 
 /** `store_batch` 한 번의 상한 (01 §3.2). */
 
@@ -389,6 +392,83 @@ export async function recountUnknown(
   }));
   await inBatches(ops);
   return ops.length;
+}
+
+/**
+ * 원장의 겹 전량을 `MasteryRow` 로. `universal_id` 는 원장에 없으므로 사전에서 붙인다.
+ *
+ * 인제스트 뒤 계산(`recountUnknown` · `writeZeroChapter`)은 **실제 겹**을 봐야 한다 —
+ * 빈 배열을 넘기면 이미 배운 개념이 전부 「모르는 것」이 되어 미지 수가 부풀고, 0장이
+ * 그 언어를 이미 아는 사람에게도 열린다.
+ */
+export async function loadMastery(dict: Dict): Promise<MasteryRow[]> {
+  const rows = await ipc.store.query('review.mastery_all', {});
+  return rows.map((row) => ({
+    conceptId: row.concept_id,
+    layer: row.layer,
+    universalId: dict.concepts.get(row.concept_id)?.universal ?? null,
+  }));
+}
+
+/**
+ * 「0장 — 이 언어의 바닥」 대지를 갱신한다 (D136).
+ *
+ * `recountUnknown` **뒤에** 돌아야 한다 — 담을 판을 고르는 기준이 `unknown_count` 이고,
+ * 그 값을 채우는 것이 `recountUnknown` 이다. `writeUnitNodes` 뒤이기도 해야 한다: 그쪽이
+ * `derive.unit_nodes_clear` 로 이 리포의 스티커를 통째로 비운다.
+ *
+ * 대지를 **여는 것은 한 번뿐**이다(그 언어 essential 이 전부 0겹일 때). 그 뒤로는 이미
+ * 있는 대지의 스티커만 다시 쓴다 — 끝났다고 대지가 사라지지 않는다.
+ */
+export async function writeZeroChapter(
+  dict: Dict,
+  repoId: number,
+  mastery: readonly MasteryRow[],
+): Promise<number> {
+  const known = knownSet(mastery);
+  const layerOf = (id: string): number => (known.has(id) ? 1 : 0);
+  const existing = await ipc.store.query('derive.unit_manual_names', { repoId });
+  const opened = existing.some((row) => row.name === ZERO_CHAPTER_UNIT);
+
+  const essential = [...dict.langs.values()].flatMap((meta) => meta.essential);
+  if (!opened && !shouldOpenZeroChapter(essential, layerOf)) return 0;
+
+  const rows = await ipc.store.query('derive.sites_for_rank', { repoId });
+  const best = new Map<string, { siteId: number; unknown: number }>();
+  for (const row of rows) {
+    const at = best.get(row.concept_id);
+    if (at === undefined || row.unknown_count < at.unknown) {
+      best.set(row.concept_id, { siteId: row.id, unknown: row.unknown_count });
+    }
+  }
+
+  const plates = zeroChapterPlates({
+    essential,
+    prereqOf: (id) => dict.concepts.get(id)?.prereq ?? [],
+    bestSiteOf: (id) => {
+      const hit = best.get(id);
+      return hit === undefined
+        ? null
+        : { siteId: hit.siteId, unknown: hit.unknown, lineStart: 0, lineEnd: 0 };
+    },
+  });
+  // 판이 하나도 없으면 대지를 만들지 않는다 — 빈 대지는 색인 띠에서 죽은 칩이다.
+  if (plates.length === 0) return 0;
+
+  const ops: BatchOp[] = [{
+    name: 'derive.unit_manual_upsert',
+    params: { repoId, name: ZERO_CHAPTER_UNIT, orderIdx: ZERO_CHAPTER_ORDER },
+  }];
+  plates.forEach((plate, i) => {
+    ops.push({
+      name: 'derive.unit_node_insert',
+      params: {
+        repoId, name: ZERO_CHAPTER_UNIT, conceptId: plate.conceptId, track: 't0', nodeOrder: i,
+      },
+    });
+  });
+  await inBatches(ops);
+  return plates.length;
 }
 
 async function writeUnits(

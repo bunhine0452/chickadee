@@ -3,8 +3,10 @@
  *
  * 여기가 IPC 를 아는 유일한 앱 코드다 — 화면 컴포넌트는 props 만 본다.
  */
-import { fillCommits, listRepos, registerRepo, recountUnknown, runIngest, writeUnitNodes }
-  from '@chickadee/concepts';
+import {
+  fillCommits, listRepos, loadMastery, registerRepo, recountUnknown, runIngest, writeUnitNodes,
+  writeZeroChapter,
+} from '@chickadee/concepts';
 import { loadDict } from '@chickadee/dictionary';
 import { ipc, IpcError, log } from '@chickadee/ipc-client';
 import { dayKey } from '@chickadee/scheduler';
@@ -117,7 +119,13 @@ export async function ingest(mode: 'full' | 'incremental'): Promise<void> {
 
     const dict = loadDict();
     await writeUnitNodes(repo.id);
-    await recountUnknown(dict, repo.id, []);
+    // 빈 배열이 아니라 **원장의 실제 겹**이다. 재인제스트에서 `[]` 를 넘기면 이미 배운
+    // 개념이 전부 「모르는 것」이 되어 미지 수가 부풀고, 0장이 그 언어를 아는 사람에게도
+    // 열린다.
+    const mastery = await loadMastery(dict);
+    await recountUnknown(dict, repo.id, mastery);
+    // 0장은 미지 수를 보고 담을 판을 고르므로 `recountUnknown` 뒤다 (D136).
+    await writeZeroChapter(dict, repo.id, mastery);
     // 06 §6.3 — 이 실행이 무엇으로 읽혔는지를 지문으로 남긴다. 다음에 열 때 지금 빌드의
     // 값과 다르면 홈이 「재인제스트 필요」를 낸다. 실패해도 인제스트는 끝난 것이다.
     await stampRun(repo.id, dict, report_.sites)

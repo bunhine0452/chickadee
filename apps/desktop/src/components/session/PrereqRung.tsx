@@ -4,8 +4,12 @@ import type { InkLayer } from '@chickadee/ui';
 
 import './PrereqRung.css';
 
-/** 아래층 한 칸의 상태 — 비었나(gap) · 판이 아직 없나(none) · 이미 찍혔나(ok). */
-export type PrereqState = 'gap' | 'none' | 'ok';
+/**
+ * 아래층 한 칸의 상태 (D137).
+ * `gap` 내려갈 판이 있다 · `preview` 사용처는 있는데 판이 없다(사전 예제 + 예고) ·
+ * `none` 사용처가 없다(만들지 않는다) · `ok` 이미 찍혔다.
+ */
+export type PrereqState = 'gap' | 'preview' | 'none' | 'ok';
 
 /**
  * 아래층 한 줄.
@@ -22,6 +26,11 @@ export interface PrereqRow {
   state: PrereqState;
   /** 「3일 전 · 2겹」 같은 곁말. */
   note: string;
+  /**
+   * `state === 'preview'` 일 때 「곧 여기서 봅니다」로 가리킬 사용처 (D137 · 방안 E-4).
+   * 이 값이 없으면 합성 판을 내지 않는다 — 예고 없는 합성이 앱을 일반 튜토리얼로 만든다.
+   */
+  previewSiteId?: number | null;
 }
 
 export interface PrereqRungProps {
@@ -30,6 +39,9 @@ export interface PrereqRungProps {
   done: readonly string[];
   onJump?: ((row: PrereqRow) => void) | undefined;
 }
+
+/** 개념 이름은 `속성 접근 <code>.</code>` 처럼 서식이 섞여 있다 — 평문 문장에 넣을 때 벗긴다. */
+const stripTags = (html: string): string => html.replace(/<[^>]*>/g, '');
 
 /** 「모르겠어요」의 대부분은 이 개념이 어려워서가 아니라 아래층이 비어서다 (정본 §3-1). */
 function diagnosis(rows: readonly PrereqRow[], gaps: number): string {
@@ -47,6 +59,11 @@ function diagnosis(rows: readonly PrereqRow[], gaps: number): string {
 export function PrereqRung({ rows, done, onJump }: PrereqRungProps) {
   const isDone = (row: PrereqRow) => done.includes(row.conceptId);
   const gaps = rows.filter((r) => r.state === 'gap' && !isDone(r));
+  // 예고할 자리가 실제로 있는 것만. `previewSiteId` 가 없으면 합성을 내지 않는다.
+  const previews = rows.filter(
+    (r) => r.state === 'preview' && !isDone(r)
+      && r.previewSiteId !== null && r.previewSiteId !== undefined,
+  );
 
   return (
     <>
@@ -79,6 +96,14 @@ export function PrereqRung({ rows, done, onJump }: PrereqRungProps) {
                     {t('prereq.goDown')}
                   </PressButton>
                 )
+              ) : row.state === 'preview' ? (
+                seen ? (
+                  <Pill ghost>{t('prereq.beenThere')}</Pill>
+                ) : (
+                  <PressButton tone="blue" onClick={() => onJump?.(row)}>
+                    {t('prereq.goSimplest')}
+                  </PressButton>
+                )
               ) : row.state === 'none' ? (
                 <Pill ghost>{t('prereq.noPlate')}</Pill>
               ) : (
@@ -88,6 +113,14 @@ export function PrereqRung({ rows, done, onJump }: PrereqRungProps) {
           );
         })}
       </div>
+
+      {/* 합성 판이 서는 자리마다 「곧 네 코드 어디에서 본다」를 적는다 — 방안 E-4 의
+          조건이고, 이 문장이 없으면 합성 예제는 남의 예제일 뿐이다 (D137). */}
+      {previews.map((row) => (
+        <p key={row.conceptId} className="note prereq-preview">
+          {t('prereq.previewNote', { name: stripTags(row.n) })}
+        </p>
+      ))}
 
       {gaps.length === 0 ? null : (
         <RichText as="p" className="prereq-note" html={t('prereq.note')} />

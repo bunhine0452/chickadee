@@ -16,7 +16,7 @@ import { Sheet } from '../../components/home/Sheet';
 import { SheetIndex } from '../../components/home/SheetIndex';
 import { TodayPanel, type TodayPreview } from '../../components/home/TodayPanel';
 import { layerLabel } from '../../components/home/labels';
-import type { HomeData, HomeSheet } from './data';
+import { nextSheetNo, sheetNo, type HomeData, type HomeSheet } from './data';
 import './HomeScreen.css';
 
 export interface HomeScreenProps {
@@ -163,14 +163,14 @@ export function HomeScreen({
                   <Sheet
                     key={shown.unitId}
                     sheet={shown}
-                    no={shownAt + 1}
+                    no={sheetNo(data.sheets, shownAt)}
                     guide={shown.unitId === currentUnitId && guide !== null ? guide : undefined}
                     onPick={onPick}
                     {...(onCourse ? { onCourse: (unitId: number) => onCourse(unitId) } : {})}
                     now={now}
                   />
                 </div>
-                <Forecast pending={data.files} variant="later" nextNo={data.sheets.length + 1} />
+                <Forecast pending={data.files} variant="later" nextNo={nextSheetNo(data.sheets)} />
               </>
             )}
 

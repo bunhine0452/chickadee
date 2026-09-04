@@ -4,3 +4,12 @@
   position: relative;
   z-index: 20;
 }
+
+/* 0장의 「먼저 읽기」 한 줄 (D138). 질문(`.ask`)보다 조용해야 한다 — 이 줄은 읽을 것이고
+   질문이 이 판의 일이다. `.note` 의 `--measure` 36em·행간을 물려받는다. */
+.read-first {
+  margin: 0 0 12px;
+  padding-left: 12px;
+  border-left: 3px solid var(--rule);
+  color: var(--ink-soft);
+}

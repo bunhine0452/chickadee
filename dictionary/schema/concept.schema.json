@@ -366,6 +366,18 @@
           },
           "default": []
         },
+        "no_hole_reason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 8
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "why_gate": {
           "type": "object",
           "properties": {

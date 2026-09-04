@@ -131,3 +131,10 @@
   justify-content: flex-end;
   margin-top: 10px;
 }
+
+/* 0장의 도입 한 문단 (D136). 본문이라 `.note` 의 `--measure`·행간을 그대로 물려받고,
+   여기서는 스티커와의 간격만 준다. */
+.sheet-lead {
+  margin: 14px 0 0;
+  color: var(--ink);
+}

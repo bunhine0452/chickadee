@@ -135,6 +135,37 @@ meaning:
               - "const a = ''     // 길이 0 인 글자"
               - "const b =        // 적을 값이 없어 읽지 못한다"
 
+# 빈칸형을 못 내는 사유 (D145). 「아직 안 썼다」가 아니라 「이 문법에는 뚫을 구멍이 없다」다.
+no_hole_reason: >-
+  구멍에 들어갈 것이 값 자체다. 따옴표 안의 글자는 리포마다 다르고, 보기 넷을 세우려면 다른 문자열 셋을 지어내야 하는데 그중 무엇이 맞는지는 코드가 아니라 저자만 안다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행의 글자는 왜 이름이 아니라 따옴표 안에 있을까요?"
+    en: "Why do the characters on line {{site.line}} sit inside quotes instead of being a name?"
+  choices:
+    - t:
+        ko: "이 글자를 어딘가에서 찾지 말고 적힌 그대로 쓰라는 표시라서"
+        en: "Because the quotes say: do not look this up anywhere, use it exactly as written"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 따옴표를 지우면 이 줄이 무엇을 찾으려 들지도 한 줄에 적어 보세요."
+        en: "That is the direction. Add what this line would try to look up if the quotes were gone."
+    - t:
+        ko: "한글이라서 따옴표가 필요해서"
+        en: "Because it is Korean text and needs quotes"
+      ok: false
+      fb:
+        ko: "따옴표는 언어와 상관없습니다. 영어 낱말도 따옴표 없이 적으면 이름으로 읽힙니다."
+        en: "Quotes have nothing to do with language. An English word without quotes is read as a name too."
+    - t:
+        ko: "나중에 바꿀 값이라서"
+        en: "Because it is a value that will change later"
+      ok: false
+      fb:
+        ko: "바뀔 값이라면 오히려 이름에 묶습니다. 따옴표가 말하는 것은 「지금 여기 적힌 그대로」입니다."
+        en: "A value that will change is the kind you bind to a name. Quotes say “exactly what is written here, now”."
+
 queries:
   - { grammars: [typescript, tsx, javascript], file: ./string-literal.scm }
 

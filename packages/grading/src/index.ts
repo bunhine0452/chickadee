@@ -47,7 +47,7 @@ export { advanceThreshold, gradeT1, nextStage, toT1Detail, verdictOf } from './t
 export type { T1Input } from './t1-result.js';
 export { REASON_CODES, T1_ENGINE_VERSION } from './t1-types.js';
 export type {
-  AppealVerdict, Engine, Reason, ReasonCode, Status, T1Result, T1Row, Tick,
+  AppealVerdict, AssistCount, Engine, Reason, ReasonCode, Status, T1Result, T1Row, Tick,
 } from './t1-types.js';
 
 // T1 — 이의 (04 §5)
@@ -66,8 +66,8 @@ export {
 export type { Question, QuestionId, WhyCheck, WhyDraft, WhyPayload } from './t1-why.js';
 
 // T2 — 구조 채점 (04 §8.2·§8.3)
-export { gradeDirection, gradeFlow, gradePicks, toT2Detail } from './t2.js';
-export type { DirectionInput, FlowInput, PicksInput } from './t2.js';
+export { gradeDirection, gradeFlow, gradePicks, gradeRole, toT2Detail } from './t2.js';
+export type { DirectionInput, FlowInput, PicksInput, RoleInput } from './t2.js';
 export { cappedNote, foldedNote, T2_ENGINE_VERSION, unchangedNote } from './t2-types.js';
 export type { T2Detail, T2Payload, T2Result, T2Row, T2Tier } from './t2-types.js';
 export type { T2Kind as T2QuestionKind } from './t2-types.js';

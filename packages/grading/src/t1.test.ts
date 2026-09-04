@@ -17,7 +17,7 @@ import { align } from './t1-align.js';
 import { CATALOG, draftAppeal, issueUrl, patternKey, shapeSignature, suggest } from './t1-appeal.js';
 import { compareLine, evalLine, indentWidth, normalizeQuotes, sim } from './t1-line.js';
 import { buildProt, freeIdents, origIdents } from './t1-prot.js';
-import { gradeT1, nextStage, verdictOf } from './t1-result.js';
+import { gradeT1, nextStage, toT1Detail, verdictOf } from './t1-result.js';
 import { checkWhy, draftWhy, hasWord, pickQuestion } from './t1-why.js';
 
 /** 목업 `T1.original` — LoginForm 20줄. */
@@ -282,6 +282,39 @@ describe('점수와 판정 (04 §4.6)', () => {
     expect(r.pct).toBe(100);
     expect(r.verdict).toBe('advance');
     expect(r.n.exact).toBe(18);
+  });
+
+  test('편집 보조 계수는 점수를 한 자도 안 움직인다 (D143)', () => {
+    const base = grade(SAMPLE);
+    const withAssist = gradeT1({
+      blockId: 7,
+      stage: 2,
+      original: ORIGINAL,
+      user: SAMPLE,
+      grammar: 'tsx',
+      moduleDecls: MODULE_DECLS,
+      peeks: 0,
+      downgraded: false,
+      assist: { keyed: 120, assisted: 400, pasted: 900, accepted: 7 },
+      clock: () => 0,
+    });
+    // 보조가 손보다 많고 붙여넣기가 그 둘을 합친 것보다 많아도 판정은 같다.
+    expect({ ...withAssist, assist: undefined }).toStrictEqual({ ...base, assist: undefined });
+    expect(withAssist.assist).toEqual({ keyed: 120, assisted: 400, pasted: 900, accepted: 7 });
+  });
+
+  test('원장에 실릴 때도 peeks 옆에 그대로 간다 — 안 센 판에는 칸이 없다', () => {
+    const detail = toT1Detail(grade(SAMPLE), { text: '', pick: null }, []);
+    expect('assist' in detail).toBe(false);
+
+    const counted = gradeT1({
+      blockId: 7, stage: 2, original: ORIGINAL, user: SAMPLE, grammar: 'tsx',
+      moduleDecls: MODULE_DECLS, peeks: 2, downgraded: false, clock: () => 0,
+      assist: { keyed: 90, assisted: 10, pasted: 0, accepted: 1 },
+    });
+    const withDetail = toT1Detail(counted, { text: '', pick: null }, []);
+    expect(withDetail.assist).toEqual({ keyed: 90, assisted: 10, pasted: 0, accepted: 1 });
+    expect(withDetail.peeks).toBe(2);
   });
 });
 

@@ -63,6 +63,8 @@ export interface UiState {
    * **React 가 다시 그릴 이유**가 여기 있어야 부팅이 세운 언어가 첫 화면에 닿는다.
    */
   locale: Locale;
+  /** 첫 실행의 「프로그래밍이 처음인가요?」 답 (D147). 0장의 길이만 정한다. */
+  declaredNewcomer: boolean;
   repos: RepoInfo[];
   activeId: number | null;
   home: HomeData | null;
@@ -98,6 +100,7 @@ export interface SessionActions {
 export interface UiActions {
   go: (screen: Screen) => void;
   setLocale: (locale: Locale) => void;
+  setDeclaredNewcomer: (newcomer: boolean) => void;
   setRepos: (repos: RepoInfo[], activeId?: number | null) => void;
   /** 서가·스위처의 리포 전환 (D119 · 05 §2.4). 세션 중에는 아무것도 하지 않는다. */
   setActive: (repoId: number) => boolean;
@@ -132,6 +135,7 @@ const EMPTY: UiState & SessionState = {
   ...NO_SESSION,
   screen: 'first-run',
   locale: getLocale(),
+  declaredNewcomer: false,
   repos: [],
   activeId: null,
   home: null,
@@ -149,6 +153,7 @@ export const useUi = create<UiState & SessionState & UiActions & SessionActions>
   ...EMPTY,
   go: (screen) => set({ screen }),
   setLocale: (locale) => set({ locale }),
+  setDeclaredNewcomer: (declaredNewcomer) => set({ declaredNewcomer }),
   setRepos: (repos, activeId) =>
     set((s) => {
       // 보던 리포가 목록에서 사라졌으면(서가에서 지웠다) 첫 줄로 내려온다. 그대로 두면

@@ -694,12 +694,14 @@ FSRS-5 식(검증용, 구현은 `ts-fsrs`): `S′_recall = S·(e^{w8}(11−D)S^{
 ### 5.1 상수 (settings 로 덮어쓸 수 있음)
 
 ```ts
-export const EST_MIN = { t0_review: 0.5, t0_new: 2, t0_retry: 0.5, t0_prereq: 0.7, t2_review: 3, t2_new: 4 };
+export const EST_MIN = { t0_review: 0.6, t0_new: 2.1, t0_retry: 0.5, t0_prereq: 0.7, t2_review: 3, t2_new: 4 };
 export const t1Est = (lines: number, stage: 1|2|3) => clamp(7, 16, Math.round(lines * [0.35, 0.5, 0.65][stage - 1]));
 export const LIMIT = { budget_min: 15, min_budget: 10, hard_cap_min: 25, reviews_per_session: 20,
                        new_per_day: 2, t1_per_week: 2, t1_min_gap_days: 2, t2_gap_days: 2, retry_offset: 3 };
 ```
 카드에 `card_state.est_min_ema` 가 있으면 그 값을 쓴다(실측 EMA, α=0.3). 왜: T1 예상 9분이 실제 19분이면 진행바가 거짓이 되고 예산이 무너진다.
+
+T0 둘은 코드 창이 넓어지면서 `0.5 · 2` 에서 올렸다 (D141). 판에 보이는 코드가 「초점 ±2」(어디서나 5줄)에서 「초점을 감싸는 블록」으로 바뀌어 읽는 시간이 늘었고, 실측은 `t0_review` 0.58~0.67분 · `t0_new` 2.08~2.17분이다. 옛 값을 두면 만기 20건인 날 계획이 27.2분으로 부풀어 `DROP_ORDER` 가 새 T1 까지 잘라 낸다 — D140 이 방금 고친 「구조 판이 먼저 잘리지 않는다」가 다른 트랙에서 되풀이되는 것이다. 이 상수는 카드 은퇴 직후 며칠만 지배하고 그 뒤로는 EMA 가 덮는다.
 
 ### 5.2 입력
 
@@ -732,9 +734,12 @@ export function planSession(repo: number, now: number): PlannedItem[] {
     const c = db.nextT1Card(repo);                                     // 단계 미완 카드 우선, 없으면 새 함수
     if (c) items.push(item(c, c.state.prints ? 'review' : 'new', c.state.est_min_ema ?? t1Est(c.lines, c.state.stage)));
   }
-  // 3) T2 — 만기 T2 가 없고 간격이 찼으면 새 T2 1장
+  // 3) T2 — 만기 T2 가 없고 간격이 찼으면 새 T2 1장. 「새」가 말 그대로다(D140):
+  //    구워 두고 아직 안 쓴 판 → 없으면 안 구운 (대지, 종) 을 한 장 굽는다 → 다 구웠을
+  //    때만 7일 창 밖으로 나온 옛 판을 다시 낸다
   if (!items.some(i => i.track === 't2') && t2CadenceSays(repo, day)) {
-    const c = db.nextT2Card(repo); if (c) items.push(item(c, 'new', EST_MIN.t2_new));
+    const c = db.nextT2Card(repo, printedBefore) ?? bakeNextT2(repo);
+    if (c) items.push(item(c, c.state.prints ? 'review' : 'new', EST_MIN.t2_new));
   }
   // 4) 새 T0 — 하루 상한(세션 합산), §6 순위
   let newLeft = LIMIT.new_per_day - db.newCountToday(repo, day);
@@ -743,14 +748,20 @@ export function planSession(repo: number, now: number): PlannedItem[] {
     const c = getOrGenerateCard(repo, cand.concept_id, cand.best_site_id, 1);
     if (c) { items.push(item(c, 'new', EST_MIN.t0_new)); newLeft--; }
   }
-  // 5) 예산 맞추기 — 초과분은 새 T0 → 새 T2 → T1 순으로 뺀다. 만기 복습은 빼지 않는다(부채를 미루면 커진다)
-  fitBudget(items, budget * 1.15, ['new:t0', 'new:t2', 'new:t1']);
+  // 5) 예산 맞추기 — 초과분은 새 T0 → 새 T1 → 새 T2 순으로 뺀다. 만기 복습은 빼지 않는다(부채를 미루면 커진다)
+  fitBudget(items, budget * 1.15, ['new:t0', 'new:t1', 'new:t2']);
   // 6) 순서 — T0 복습 → T0 새 판 → T1 → T2 (짧은 것 먼저: 중간에 나가도 복습은 남는다. T2 3분은 마무리)
   return order(items, ['review:t0', 'new:t0', 'review:t1', 'new:t1', 'review:t2', 'new:t2']);
 }
 ```
 
 빈 상태: 만기도 새 후보도 없으면 세션을 만들지 않고 홈에 「오늘은 인쇄할 판이 없습니다 — 리포를 더 파거나 내일」을 보인다(강제로 채우지 않는다).
+
+**뺄 순서에서 새 T2 가 마지막인 이유** (D140). T2 자리는 이틀에 한 번이라 한 번 잘리면 그 판은 이틀 뒤에나 온다. T1 은 주 2회 리듬이라 같은 주에 자리가 또 있고, 새 T0 은 하루 상한 2장이라 내일 그대로 돌아온다. 만기 20건인 날의 산수 `0.5×20 + 7 + 4 + 2×2 = 25 > 15×1.15 = 17.25` 에서 옛 순서(`new:t0 → new:t2 → new:t1`)는 T0 둘과 **T2** 를 버려 14 를 만들었다 — 만기가 쌓인 사람일수록 구조 판을 못 봤다는 뜻이다. 새 순서는 T0 둘과 **T1** 을 버려 같은 14 를 만들고 T2 를 남긴다.
+
+**T2 회전** (D140). 2·3번의 `nextT1Card`·`nextT2Card` 는 `queue.next_track_card` 하나인데, 그 문장에 `printedBefore` 를 넣어 **최근에 찍은 판을 뺀다**. 창은 트랙이 정한다(`REPRINT_GAP_DAYS` — T1 0일 · T2 7일): T1 의 3단계 페이딩은 같은 카드를 일부러 다시 부르므로 거르면 안 되고, T2 에는 단계가 없다. 창을 7일로 둔 이유 셋 — ① 리듬을 재는 창(`track_cadence` 의 최근 7일)과 같은 창이라 큐의 「최근」이 하나다 ② `t2_gap_days = 2` 라 7일 안에 T2 자리는 최대 넷이고, 판 넉 장(= 대지 하나의 네 종)이면 언제나 창 밖의 것이 하나 있다 ③ 만기를 막지 않는다 — 만기 T2 는 1번의 `queue.due` → `pick_card` 로 오고 이 창은 그 경로를 안 건드린다(FSRS 기본 `w[2] = 3.173`일이라 창이 원장보다 늘 뒤에 선다).
+
+굽는 것은 **세션당 한 장**이다. 안 구운 `(대지, 종)` 은 `queue.t2_made` 로 알고, 순서는 **종이 바깥 고리**다 — 책임 배치를 리포의 모든 대지에 한 바퀴 돌린 뒤 영향 반경으로 내려간다(책임 배치만 실제 커밋을 정답지로 쓴다, 04 §8.1). 판 수는 1장에서 `대지 수 × 4` 까지 늘고 거기서 멈춘다. 일괄 생성은 금지다: 책임 배치 한 장이 `t2.commit_files` 를 후보 커밋 수(≤ 60)만큼 부르므로 20대지를 한 번에 훑으면 1,200 쿼리다.
 
 ### 5.4 시간 비례와 상한
 
@@ -820,6 +831,10 @@ function bestSite(repo, conceptId, known) {  // 미지 최소 → 줄 짧은 것
 카드 `level` 은 첫 노출 1(미지 ≤ 2 인 사용처), 2겹부터 2(미지 ≤ 3), 3겹부터 3(제한 없음). 복습 때 `pickCard` 가 `level=clamp(1,3,layer)` 카드를 고르고 없으면 그 자리에서 생성한다 — 같은 개념이 점점 복잡한 자기 코드로 나온다.
 
 **진짜 바닥(E-4)**: 후보 개념의 모든 사용처가 미지 ≥ 4 인데 선행이 하나도 남지 않았으면 합성 예제 카드(`site_id=NULL`, payload 에 `preview_site_id = bestSite`)를 만들고 본문에 「곧 `useCart.ts:27` 에서 이걸 봅니다」를 반드시 넣는다.
+
+**「0장 — 이 언어의 바닥」(D136)**: 그 언어 `essential` 중 **1겹 이상이 하나도 없으면** 대지 한 장을 앞에 붙인다 — `unit(source='manual')`, `order_idx < 0`, 이름은 안정 키 `__zero__`(라벨은 카탈로그가 낸다). 담는 것은 `essential ∩ prereqDepth ≤ 1` 중 **최대 8개**이고 순서는 ① 내 코드 사용처가 먼저(합성은 뒤) ② 선행 깊이 ③ 미지 ④ id 다. **리포에 사용처가 없는 개념은 담지 않는다** — 예고할 자리가 없으면 위 E-4 규칙을 지킬 수 없다(D137). 끝나는 조건은 셋 중 하나(8개가 모두 1겹 이상 · `newcomer_flag='none'` 이고 뿌리 4장 중 3장을 맞힌 세션 · 설정에서 끔)이고, 끝나도 대지는 완료 도장과 함께 남는다. 판단은 원장만 보고 하며 **사용자에게 묻지 않는다**(§6.4 와 같은 이유). 구현은 `packages/concepts/src/zero-chapter.ts`, 대지 쓰기는 `writeZeroChapter`(`recountUnknown` 뒤에 돈다 — 미지 수가 입력이다).
+
+TS 사전 기준 `prereqDepth ≤ 1` 이 정확히 8개다(깊이 0 넷 · 깊이 1 넷). 상한 8 은 그 실측이고, 하루 새 판 2장(§표 5)이라 **4일**이면 끝난다.
 
 ### 6.3 개념 전이
 
@@ -902,6 +917,21 @@ SELECT k.* FROM card k
 LEFT JOIN (SELECT card_id, MAX(reviewed_at) AS last FROM review_log GROUP BY card_id) l ON l.card_id = k.id
 WHERE k.repo_id = :repo AND k.concept_id = :concept AND k.retired_at IS NULL AND k.level = :level
 ORDER BY l.last ASC NULLS FIRST, k.id LIMIT 1;
+
+-- 그 트랙의 다음 판 (§5.3 2·3번). `printedBefore` 가 최근에 찍은 판을 뺀다 (D140) —
+-- 이 줄이 없으면 LIMIT 1 이 늘 같은 행을 준다
+SELECT k.*, COALESCE(t.prints,0) AS prints, COALESCE(t.stage,1) AS stage, t.est_min_ema
+FROM card k LEFT JOIN card_state t ON t.card_id = k.id
+WHERE k.repo_id = :repo AND k.track = :track AND k.retired_at IS NULL
+  AND COALESCE(t.is_suspended,0) = 0 AND COALESCE(t.last_printed_at,0) <= :printedBefore
+ORDER BY (COALESCE(t.prints,0) = 0), COALESCE(t.last_printed_at,0), k.id LIMIT 1;
+
+-- 다음에 구울 (대지, 종) 을 고르는 두 문장 (D140)
+SELECT u.id, u.name, u.root_path FROM unit u
+WHERE u.repo_id = :repo AND EXISTS (SELECT 1 FROM unit_file uf WHERE uf.unit_id = u.id)
+ORDER BY u.order_idx, u.id;
+SELECT DISTINCT k.unit_id, k.kind FROM card k
+WHERE k.repo_id = :repo AND k.track = 't2' AND k.unit_id IS NOT NULL;
 ```
 
 ### 7.3 사다리 3단 — 같은 개념, 다른 사용처

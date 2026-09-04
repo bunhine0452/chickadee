@@ -151,13 +151,44 @@ meaning:
               - "const p = fail()         // 조용하다"
               - "const v = await fail()   // 여기서 예외"
 
+# 빈칸형을 못 내는 사유 (D145). 「아직 안 썼다」가 아니라 「이 문법에는 뚫을 구멍이 없다」다.
+no_hole_reason: >-
+  await 를 지운 자리에 넣을 같은 종류의 낱말이 없다. 혼동 쌍인 .then 은 낱말 하나가 아니라 줄의 모양을 바꾸는 표기이고, try 는 감싸는 문이다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 결과를 기다렸다가 다음 줄로 갈까요?"
+    en: "Why does line {{site.line}} wait for the result before moving on?"
+  choices:
+    - t:
+        ko: "다음 줄이 그 값을 써야 해서, 값이 도착한 뒤에 이어져야 하기 때문"
+        en: "Because the next line uses that value, so it can only continue once the value has arrived"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 기다리지 않았다면 다음 줄이 무엇을 손에 쥐게 되는지도 적어 보세요."
+        en: "That is the direction. Add what the next line would be holding if it had not waited."
+    - t:
+        ko: "기다리면 더 안전해서"
+        en: "Because waiting is safer"
+      ok: false
+      fb:
+        ko: "기다림 자체가 안전을 주지는 않습니다. 기다리는 이유는 다음 줄이 그 값에 기대기 때문입니다."
+        en: "Waiting by itself buys no safety. The reason to wait is that the next line leans on the value."
+    - t:
+        ko: "이 함수가 <code>async</code> 라서"
+        en: "Because this function is <code>async</code>"
+      ok: false
+      fb:
+        ko: "<code>async</code> 는 기다릴 수 있게 열어 줄 뿐 기다리라고 시키지 않습니다. 기다릴지는 이 줄이 정합니다."
+        en: "<code>async</code> only opens the door to waiting; it does not order it. This line decides."
+
 queries:
   - { grammars: [typescript, tsx, javascript], file: ./async-await.scm }
 
 examples:
   - code: "async function load() { const res = await fetch(url) }"
-    expect: { sites: 2, form: async-fn, picks: { 1: "async", 2: "load" } }
+    expect: { sites: 2, form: async-fn, picks: { 1: "async", 2: "load", 3: "()" } }
   - code: "const save = async () => { await write(data) }"
-    expect: { sites: 2, form: async-arrow }
+    expect: { sites: 2, form: async-arrow, picks: { 1: "async", 3: "=>" } }
   - code: "function load() { return fetch(url) }"
     expect: none

@@ -71,6 +71,9 @@ const optchainSite = (): SiteInput => ({
   }),
   path: 'src/features/auth/useLogin.ts',
   lines: OPTCHAIN_LINES,
+  // 감싸는 블록 = `useLogin` 함수 (02 `block`). 픽스처는 그중 38~44 만 읽어 왔다 —
+  // 창은 블록이지만 판에 실리는 것은 **읽어 온 줄과의 교집합**이다 (D141).
+  block: { from: 13, to: 48 },
   // 같은 줄에 걸린 혼동 개념 — `??` 와 `'손님'` 이 여기서 후보로 들어온다 (04 §1.1).
   lineSites: [site({
     conceptId: 'ts/nullish-coalescing', lineStart: 42, form: 'binary',
@@ -128,12 +131,18 @@ describe('목업 optchain — 지목형', () => {
 
   test('혼동 개념 토큰의 진단은 그 개념의 한 줄 + 오해다 (04 §2.1)', () => {
     const why = made.payload.why[3];
-    expect(why?.t).toContain('<code>a ?? b</code> 는 <code>a</code> 가 없을 때만 <code>b</code>.');
+    // 문구를 하드코딩하지 않는다 — 사전 한 줄은 손질되는 글이고(D138 누설 정리가 이것을
+    // 한 번 고쳤다) 이 테스트가 재는 것은 **그 한 줄이 실렸는가**이지 그 문장 자체가 아니다.
+    const oneLiner = dict.concepts.get('ts/nullish-coalescing')?.dict.one_liner ?? '';
+    expect(oneLiner).not.toBe('');
+    expect(why?.t).toContain(oneLiner);
     expect(why?.t).toContain('falsy');
   });
 
-  test('맥락 줄은 ±2 다 — 목업과 다름: 목업 optchain 만 38~43행 여섯 줄이다', () => {
-    expect(made.payload.lines.map((l) => l.n)).toEqual([40, 41, 42, 43, 44]);
+  test('창은 감싸는 블록이다 (D141) — 목업 optchain 38~43 을 이제 덮는다', () => {
+    // 옛 고정 창(±2)은 40~44 다섯 줄이었다. 블록이 `useLogin` 이라 읽어 온 38~44 가 다 선다.
+    expect(made.payload.lines.map((l) => l.n)).toEqual([38, 39, 40, 41, 42, 43, 44]);
+    // 프롬프트는 창을 따라 넓어지지 않는다 — 초점 ±4 그대로다 (정본 §3-1 · D8).
     expect(made.payload.promptLines).toHaveLength(7); // 파일이 44행에서 끝난 픽스처
   });
 
@@ -159,6 +168,8 @@ const mapSite = (): SiteInput => ({
     picks: { 1: 'prev', 2: '(i) => (i.id === id ? { ...i, qty } : i)' },
   }),
   path: 'src/features/cart/useCart.ts',
+  // 목업 카드 2 가 그린 39~43 이 곧 `function setQty` 전체다 (A 조사 §1.5).
+  block: { from: 39, to: 43 },
   lines: numbered(37, [
     '',
     '',
@@ -227,6 +238,9 @@ const fnSite = (): SiteInput => ({
     picks: { 1: 'prev', 2: '[...prev, item]' }, ctx: { setter: 'setItems' },
   }),
   path: 'src/features/cart/useCart.ts',
+  // `function addItem` 은 26~28 셋뿐이다. 창의 바닥이 초점 ±2 라 목업이 손으로 끌어온
+  // `useState` 선언(24행 자리)까지 25~29 로 서고, 3줄로 쪼그라들지 않는다.
+  block: { from: 26, to: 28 },
   lines: numbered(24, [
     'const [items, setItems] = useState<Item[]>([])',
     '',
@@ -243,6 +257,8 @@ const undefSite = (): SiteInput => ({
     excerpt: 'undefined', picks: { 1: 'undefined' },
   }),
   path: 'src/features/auth/useLogin.ts',
+  // 감싸는 블록은 `useLogin` 함수고 픽스처는 그 머리만 읽었다.
+  block: { from: 13, to: 40 },
   lines: numbered(12, [
     'import { useState } from "react"',
     'export function useLogin() {',
@@ -382,5 +398,49 @@ describe('유형 선호', () => {
     expect(prefer(2)).toEqual(['blank', 'meaning', 'point']);
     expect(prefer(3)).toEqual(['meaning', 'blank', 'point']);
     expect(prefer(4)).toEqual(['meaning', 'blank', 'point']);
+  });
+});
+
+// ───────── 창 = 감싸는 블록 (D141) ─────────
+
+/** 30줄짜리 함수 안에 선 사용처 하나. 옛 고정 창이면 5줄만 보였을 자리다. */
+const wideSite = (block?: { from: number; to: number }): SiteInput => ({
+  site: site({
+    conceptId: 'ts/undefined-null', lineStart: 120, form: 'undefined',
+    excerpt: 'undefined', picks: { 1: 'undefined' },
+  }),
+  path: 'src/features/cart/useCart.ts',
+  ...(block === undefined ? {} : { block }),
+  lines: numbered(106, [
+    ...Array.from({ length: 14 }, (_, i) => `  const step${i} = i${i}`),
+    '  const found: Item | undefined = undefined',
+    ...Array.from({ length: 15 }, (_, i) => `  const tail${i} = t${i}`),
+  ]),
+});
+
+describe('창 = 감싸는 블록 (D141)', () => {
+  const wide = (block?: { from: number; to: number }) => card(request({
+    concept: conceptOf('ts/undefined-null'), ly: 0, sites: [wideSite(block)],
+  }));
+
+  test('감싸는 블록 전체가 판에 실린다 — 옛 고정 창이면 5줄이었다', () => {
+    const made = wide({ from: 106, to: 135 });
+    expect(made.payload.lines).toHaveLength(30);
+    expect(made.payload.lines[0]?.n).toBe(106);
+    expect(made.payload.lines[29]?.n).toBe(135);
+  });
+
+  test('창이 30줄이어도 프롬프트는 9줄 그대로다 (정본 §3-1 · D8)', () => {
+    expect(wide({ from: 106, to: 135 }).payload.promptLines).toHaveLength(9);
+    expect(wide().payload.promptLines).toHaveLength(9);
+  });
+
+  test('블록이 없으면 초점 ±2 로 떨어진다 — 창을 못 찾아도 판은 나온다', () => {
+    const made = wide();
+    expect(made.payload.lines.map((l) => l.n)).toEqual([118, 119, 120, 121, 122]);
+  });
+
+  test('창이 달라지면 `content_hash` 도 달라진다 — 옛 카드를 은퇴시켜야 하는 이유다', () => {
+    expect(wide({ from: 106, to: 135 }).contentHash).not.toBe(wide().contentHash);
   });
 });

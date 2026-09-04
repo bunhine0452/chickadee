@@ -1,12 +1,12 @@
 ((member_expression
    object: (_) @pick.1
-   optional_chain: (optional_chain) @pick.2
+   optional_chain: (optional_chain) @pick.2 @hole
    property: (_) @pick.3) @site
  (#set! form "member"))
 
 ((subscript_expression
    object: (_) @pick.1
-   optional_chain: (optional_chain) @pick.2
+   optional_chain: (optional_chain) @pick.2 @hole
    index: (_) @pick.3) @site
  (#set! form "subscript"))
 
@@ -14,7 +14,7 @@
 ; JS 문법은 같은 자리를 `optional_chain` 으로 둔다 — 구조가 다르므로 파일을 나눈다 (03 §3.2).
 ((call_expression
    function: (_) @pick.1
-   "?." @pick.2
+   "?." @pick.2 @hole
    arguments: (_) @pick.3) @site
  (#set! form "call"))
 

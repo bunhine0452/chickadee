@@ -1,0 +1,37 @@
+schema: 1
+id: arch/role
+universal: null
+name: { ko: "폴더의 역할", en: "What a folder is for" }
+token: null
+grammars: []
+framework: null
+track_default: t2
+essential: false
+difficulty: 3
+prereq: []
+confusions: []
+dict:
+  one_liner:
+    ko: "이 폴더가 <b>어느 층에 서 있나</b> — 화면인가, 기능인가, 통신인가, 공용인가."
+    en: "<b>Which layer this folder stands on</b> — screen, feature, action, or shared."
+  why:
+    ko: >-
+      새 파일을 어디에 둘지는 매일 생기는 결정입니다. 폴더마다 층이 정해져 있으면 「이건
+      통신이니까 여기」로 끝나지만, 정해져 있지 않으면 매번 새로 고민하고 결국 아무 데나
+      쌓입니다. 폴더 이름은 약속이고, 그 약속을 읽는 것이 리포를 읽는 것입니다.
+    en: >-
+      Where to put a new file is a decision you make every day. When each folder has a layer, it
+      ends at "this talks to the outside, so it goes here"; when it does not, you decide again every
+      time and things pile up anywhere. A folder name is a promise, and reading that promise is
+      reading the repo.
+  trace: []
+rule:
+  ko: "층은 화살표가 정한다 — <b>가져다 쓰는 쪽이 위, 쓰이는 쪽이 아래</b>다. 들어오기만 하고 나가지 않으면 맨 아래 공용이다."
+  en: >-
+    The arrows set the layer — <b>the importing side is above, the imported side below</b>. Only
+    incoming and nothing outgoing means the bottom, shared layer.
+ok:
+  ko: "층이 맞게 서 있으면 화살표가 전부 아래로 흐릅니다. 아래층이 위층을 가져다 쓰는 자리가 생기면 그 폴더의 역할이 흐려진 것입니다."
+  en: >-
+    When the layers stand right, every arrow runs downward. The moment a lower layer imports an
+    upper one, that folder's role has gone blurry.

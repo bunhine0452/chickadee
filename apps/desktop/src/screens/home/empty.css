@@ -46,6 +46,17 @@
   text-align: left;
 }
 
+/* 대상 경계 한 줄 (D139). 본문과 같은 조판이되 한 단 낮은 목소리다 — 경고가 아니라
+   안내이고, 읽고 그냥 등록해도 아무것도 안 막힌다. */
+.firstrun-scope {
+  max-width: var(--measure);
+  margin-top: 10px;
+  color: var(--ink-soft);
+  font-size: var(--fs-14);
+  line-height: var(--lh-body);
+  text-align: left;
+}
+
 .firstrun .press-btn { width: auto }
 
 /* 0단계 언어 고르기 (D117). 설정 화면의 `.set-row` 와 같은 리듬을 쓴다 — 첫 실행에서 본

@@ -46,7 +46,7 @@ export function genMeaning(req: T0Request, input: SiteInput): GenResult {
   return {
     card: finish(req, input, 'meaning', {
       track: 't0', kind: 'meaning', ...common,
-      lines: codeLines(input.lines, site.lineStart),
+      lines: codeLines(input.lines, site.lineStart, [], input.block),
       q, hint, options, answer: order.indexOf(0), why,
     }),
   };

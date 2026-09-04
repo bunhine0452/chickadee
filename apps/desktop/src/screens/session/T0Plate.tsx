@@ -47,6 +47,12 @@ export interface T0PlateProps {
   lifer: LiferNoteProps | null;
   /** 첫 판을 함께 걷는 안내 띠 (D134). 이 리포의 첫 세션 첫 판에서만 참이다. */
   coach: boolean;
+  /**
+   * 0장 판 위에 미리 펴는 사전 한 줄 (D138). **0장 대지의 판에서만** 값이 있다 —
+   * 전역으로 켜면 정본 §1 「가치는 설명이 아니라 강제된 능동 출력」과 부딪친다.
+   * 정답을 누설하는 한 줄은 `readFirstText` 가 이미 걸러 `null` 로 온다.
+   */
+  readFirst: string | null;
   ladder: LadderData | null;
   ladderOpen: boolean;
   rung: RungNo;
@@ -58,7 +64,7 @@ export interface T0PlateProps {
   onBuildPrompt: () => void;
   onCopyPrompt: () => void;
   onDunno: () => void;
-  onJumpPrereq: (conceptId: string) => void;
+  onJumpPrereq: (conceptId: string, previewSiteId: number | null) => void;
   onBack: () => void;
   onSubmit: (sel: number) => void;
   onNext: () => void;
@@ -203,6 +209,12 @@ export function T0Plate(props: T0PlateProps): React.JSX.Element | null {
         <CoachBand step={(answered ? 3 : sel === null ? 1 : 2) satisfies CoachStep} />
       )}
 
+      {/* 문제보다 먼저 읽는 한 줄 (D138). 이 언어가 처음이면 읽을 것을 얻으려고 먼저
+          막혀야 하는데, 0장 대지의 판에서만 그 순서를 뒤집는다. */}
+      {props.readFirst === null ? null : (
+        <p className="note read-first">{props.readFirst}</p>
+      )}
+
       <Ask q={payload.q} hint={payload.hint} />
 
       <CodePlate
@@ -250,7 +262,7 @@ export function T0Plate(props: T0PlateProps): React.JSX.Element | null {
           card={ladder.card}
           prereqDone={plate.state?.prereqDone ?? []}
           {...(ladder.nextWas === undefined ? {} : { nextWas: ladder.nextWas })}
-          onJump={(row) => props.onJumpPrereq(row.conceptId)}
+          onJump={(row) => props.onJumpPrereq(row.conceptId, row.previewSiteId ?? null)}
           ask={{
             text: props.stuck,
             onText: props.onStuck,

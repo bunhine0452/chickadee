@@ -160,12 +160,43 @@ meaning:
               - "`a${undefined}b`   // 'aundefinedb'"
               - "undefined + 'b'    // 'undefinedb'"
 
+# 빈칸형을 못 내는 사유 (D145). 「아직 안 썼다」가 아니라 「이 문법에는 뚫을 구멍이 없다」다.
+no_hole_reason: >-
+  뚫을 자리는 ${…} 안의 식인데 그 식은 리포마다 다른 값이라 보기 넷을 사전이 미리 적을 수 없다. 백틱과 따옴표의 차이는 낱말이 아니라 표기 전체라 빈칸 하나로 안 갈린다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 문자열을 이어 붙이지 않고 값을 안에 끼워 넣었을까요?"
+    en: "Why does line {{site.line}} slot the value inside the text instead of joining strings?"
+  choices:
+    - t:
+        ko: "완성된 문장의 모양이 코드에 그대로 보여서 무엇이 찍힐지 읽히기 때문"
+        en: "Because the finished sentence keeps its shape in the code, so you can read what will be printed"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 줄이 실제로 찍는 글자 한 예를 함께 적어 보세요."
+        en: "That is the direction. Add one example of the text this line actually prints."
+    - t:
+        ko: "이어 붙이기보다 빨라서"
+        en: "Because it is faster than joining"
+      ok: false
+      fb:
+        ko: "속도는 사실상 같습니다. 갈리는 것은 결과를 눈으로 그릴 수 있느냐입니다."
+        en: "Speed is effectively the same. What parts ways is whether you can picture the result."
+    - t:
+        ko: "따옴표 안에서는 값을 못 써서"
+        en: "Because a value cannot be used inside quotes"
+      ok: false
+      fb:
+        ko: "이어 붙이면 따옴표로도 씁니다. 백틱은 그 이어 붙임을 한 줄 안에 넣은 표기입니다."
+        en: "Joining works with quotes too. The backtick form is that same join, folded into one line."
+
 queries:
   - { grammars: [typescript, tsx, javascript], file: ./template-literal.scm }
 
 examples:
   - code: "const hello = `안녕, ${name}`"
-    expect: { sites: 1, form: interpolated, picks: { 1: "name", 2: "${name}" } }
+    expect: { sites: 1, form: interpolated, picks: { 1: "name", 2: "${name}", 3: "`" } }
   - code: "const label = `${count}개`"
     expect: { sites: 1, picks: { 1: "count" } }
   - code: "const plain = `한 줄`"

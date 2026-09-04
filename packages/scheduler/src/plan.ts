@@ -9,10 +9,22 @@ import type { ConceptId, PlannedItem, SessionItem, Track } from '@chickadee/stor
 
 export type Role = SessionItem['role'];
 
-/** 02 §5.1 — `settings` 로 덮어쓸 수 있다. */
+/**
+ * 02 §5.1 — `settings` 로 덮어쓸 수 있다.
+ *
+ * **T0 둘은 코드 창이 넓어지면서 올렸다 (D141).** 판에 보이는 코드가 「초점 ±2」(어디서나
+ * 5줄)에서 「초점을 감싸는 블록」으로 바뀌어 읽는 시간이 늘었다 — 실측은 `t0_review`
+ * 0.58~0.67분 · `t0_new` 2.08~2.17분이다. 옛 값(0.5 · 2)을 두면 만기 20건인 날 계획이
+ * 27.2분으로 부풀어 `DROP_ORDER` 가 새 T1 까지 잘라 낸다. 그러면 D140 이 방금 고친
+ * 「구조 판이 먼저 잘리지 않는다」가 다른 트랙에서 되풀이된다.
+ *
+ * 값은 실측 구간의 아래쪽이다 — 이 상수는 **첫 며칠만** 지배하고 그 뒤로는
+ * `card_state.est_min_ema` 가 덮는다(`estMinFor`). 카드 은퇴로 EMA 가 전부 NULL 이 된
+ * 직후가 그 며칠이라 이 값이 실제로 쓰인다.
+ */
 export const EST_MIN = {
-  t0_review: 0.5,
-  t0_new: 2,
+  t0_review: 0.6,
+  t0_new: 2.1,
   t0_retry: 0.5,
   t0_prereq: 0.7,
   t2_review: 3,
@@ -89,8 +101,32 @@ const ORDER: readonly SlotKey[] = [
   'review:t0', 'new:t0', 'review:t1', 'new:t1', 'review:t2', 'new:t2',
 ];
 
-/** 예산을 넘겼을 때 빼는 순서. **만기 복습은 이 목록에 없다.** */
-const DROP_ORDER: readonly SlotKey[] = ['new:t0', 'new:t2', 'new:t1'];
+/**
+ * 예산을 넘겼을 때 빼는 순서. **만기 복습은 이 목록에 없다.**
+ *
+ * 새 T2 가 마지막인 이유(D140): T2 는 하루 최대 한 장이고 간격이 2일이라 한 번 잘리면
+ * 그 판은 이틀 뒤에나 다시 온다. T1 은 주 2회 리듬이라 같은 주에 또 자리가 있고,
+ * 새 T0 은 하루 상한 2장이라 내일 그대로 돌아온다. 만기 20건인 날의 산수
+ * (`10 + 7 + 4 + 4 = 25 > 15 × 1.15`)에서 옛 순서는 T2 를 먼저 버렸고, 그래서
+ * 만기가 쌓인 사람일수록 구조 판을 영영 못 봤다.
+ */
+const DROP_ORDER: readonly SlotKey[] = ['new:t0', 'new:t1', 'new:t2'];
+
+/**
+ * 그 트랙의 판을 다시 찍기까지 띄우는 날수 (02 §5.3 2·3번 · D140).
+ *
+ * **T1 은 0** — 3단계 페이딩이 같은 카드를 일부러 다시 부른다(04 §3.2). 여기에 창을 두면
+ * 1단계에서 멈춘 필사가 일주일 뒤에야 2단계로 간다.
+ *
+ * **T2 는 7** — 세 가지가 이 값에 맞는다. ① `trackSlot` 이 리듬을 재는 창이 이미 최근
+ * 7일이라 큐의 「최근」이 하나로 남는다. ② `t2_gap_days = 2` 라 7일 안에 T2 자리는 최대
+ * 네 번이고, 판 네 장(= D107 이 대지 하나에 약속한 네 종)이면 언제나 창 밖의 것이 하나
+ * 있다. 네 장이 안 되면 결과가 비고, 그것이 곧 「한 장 더 구워라」 신호다 —
+ * 판 수는 리듬이 요구하는 만큼에서 저절로 멈춘다. ③ 진짜 만기를 막지 않는다: 만기 T2 는
+ * `queue.due` → `queue.pick_card` 로 오고 이 창은 그 경로를 건드리지 않는다. FSRS 기본
+ * `w[2] = 3.173`(첫 Good 의 안정도, 일)이라 7일 창은 원장보다 늘 뒤에 선다.
+ */
+export const REPRINT_GAP_DAYS = { t1: 0, t2: 7 } as const;
 
 const keyOf = (c: Candidate): SlotKey =>
   `${c.role === 'review' ? 'review' : 'new'}:${c.track}`;
@@ -143,7 +179,7 @@ const toPlanned = (c: Candidate): PlannedItem => ({
 });
 
 /**
- * 02 §5.3 5번. 초과분을 `새 T0 → 새 T2 → T1` 순으로 뺀다. 만기 복습은 빼지 않는다 —
+ * 02 §5.3 5번. 초과분을 `새 T0 → 새 T1 → 새 T2` 순으로 뺀다. 만기 복습은 빼지 않는다 —
  * 미룬 부채는 다음 날 더 커져서 돌아온다.
  */
 export function fitBudget(items: readonly Candidate[], budget: number): Candidate[] {

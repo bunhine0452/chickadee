@@ -10,6 +10,13 @@ export const core: Record<string, string> = {
     'Your own vibe-coded repo is the textbook. Register one and Chickadee reads its '
     + 'commits and files, lays a sheet per feature, and sets plates from the grammar your '
     + 'code actually uses. It only reads — nothing is written back to the repo.',
+  'firstRun.scope':
+    'It is fine if “variable” and “function” are new. The first session opens Chapter 0 — '
+    + 'the floor of this language — and works up from the simplest lines in your own code.',
+  'firstRun.newcomerQ': 'Is programming new to you?',
+  'firstRun.newcomerAsk': 'This only sets how long Chapter 0 runs. Nothing is locked.',
+  'firstRun.newcomerYes': 'It is new',
+  'firstRun.newcomerNo': 'I have coded',
   'firstRun.language': 'Display language',
   'firstRun.languageSwitch': 'Choose a display language — 한국어 · English',
   'firstRun.pick': 'Add a repo',
@@ -103,6 +110,14 @@ export const core: Record<string, string> = {
   'settings.study.rolloverNote': 'hour \u2014 before this counts as yesterday',
   'settings.study.newPerDay': 'New plates',
   'settings.study.newPerDayNote': 'per day (max 4)',
+  'settings.study.newcomer': 'Programming experience',
+  'settings.study.newcomerSwitch': 'Choose whether programming is new — It is new · I have coded',
+  'settings.study.newcomerYes': 'It is new',
+  'settings.study.newcomerNo': 'I have coded',
+  'settings.study.newcomerNote':
+    'Left on “It is new”, <b>Chapter 0 runs longer</b> — getting a few root plates right will not '
+    + 'close it, and it stays open until every concept in it has one layer. Nothing is locked, and '
+    + 'you can change this at any time.',
   'settings.study.coach': 'First-plate walkthrough',
   'settings.study.coachSwitch': 'First-plate walkthrough on · off',
   'settings.study.coachOn': 'On',

@@ -109,6 +109,22 @@ The bet is that reading is recognition, not knowledge. Explanations are somethin
 already gives you. What is missing is **forced active output** — so the app makes you
 produce, not read.
 
+### Where it starts you
+
+If the language is new to you, Chickadee starts from the simplest lines in your own repo and
+works up. The first session in a language opens a prologue — Chapter 0, the floor of this
+language — and it closes after 24 plates.
+
+If programming itself is new, the same prologue carries you. It opens at `if`, defining a
+function, `return`, comparison, reassignment and loops, and every one of those is already
+sitting in the app you shipped. First run asks once whether programming is new to you; the
+answer lives in Settings and you can change it any time. There is no placement test, and no
+plate outside Chapter 0 changes because of your answer.
+
+What it still cannot do is start you with no code at all. Your repo is the textbook, so you
+need one — vibe-coded is exactly the case this is built for. If you have not shipped anything
+yet, [CS50](https://cs50.harvard.edu) is a good place to get the first one.
+
 ## Three tracks, none of which run your code
 
 | Track | Problem | Graded by |

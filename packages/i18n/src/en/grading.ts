@@ -42,4 +42,5 @@ export const grading: Record<string, string> = {
   'grading.directionOneWay': '{{label}} — {{user}} is the side that imports.',
   'grading.directionBothNote': 'Both ways — they import each other. That is a cycle.',
   'grading.directionNoneNote': 'Unrelated — there is no import between them.',
+  'grading.roleNote': 'This folder belongs to the «{{label}}» row.',
 };

@@ -99,6 +99,46 @@ const DIRECTION_PAYLOAD = {
   hints: ['위쪽 층이 아래쪽 층을 가져다 씁니다.', '두 상자에 마우스를 올려 보세요.', '관계가 있는 쌍은 4개입니다.'],
 };
 
+/** 리포 지도 두 종 (04 §8.5 · D142) — 노드가 파일이 아니라 폴더다. */
+const APP = 'src/app/';
+const FEAT = 'src/features/cart/';
+const LIB = 'src/lib/';
+
+const REPO_BANDS = [
+  { l: '화면', s: 'app/' }, { l: '기능', s: 'features/' },
+  { l: '동작 · 통신', s: 'core/' }, { l: '공용 · 데이터', s: 'lib/' },
+];
+
+/** 진입점 — 정답지 모양이 책임 배치와 같아 화면도 같은 길을 탄다. */
+const ENTRY_PAYLOAD = {
+  ...NO_COMMIT,
+  kind: 'entry' as const,
+  q: '이 리포에서 밖에서 처음 들어오는 문은 어느 폴더인가요?',
+  hint: '지도에서 골라 보세요. 여럿일 수 있습니다.',
+  bands: REPO_BANDS,
+  files: [{ p: APP, r: 0, folded: 4 }, { p: FEAT, r: 1, folded: 5 }, { p: LIB, r: 3, folded: 6 }],
+  edges: [
+    [APP, FEAT, 'static'] as [string, string, 'static'],
+    [FEAT, LIB, 'static'] as [string, string, 'static'],
+  ],
+  core: { [APP]: ['문', '들어오는 화살표가 없고 1곳을 가져다 씁니다.'] as [string, string] },
+  sec: {},
+  trap: { [LIB]: '2곳이 이 폴더를 가져다 씁니다.', [FEAT]: '1곳이 이 폴더를 가져다 씁니다.' },
+  hints: ['문은 1곳입니다.', '들어오는 화살표가 없는 폴더를 찾으세요.', '가장 많이 쓰이는 곳은 «src/lib/» 입니다.'],
+};
+
+/** 폴더의 역할 — 물어보는 폴더는 지도에서 빠져 있다. 보기는 밴드 라벨 넷이다. */
+const ROLE_PAYLOAD = {
+  ...ENTRY_PAYLOAD,
+  kind: 'role' as const,
+  q: '«src/core/» 폴더는 왜 있나요?',
+  hint: '지도에는 이 폴더가 빠져 있습니다. 네 층 중 어디에 놓을지 고르세요.',
+  core: {},
+  trap: {},
+  hints: ['2개 폴더가 이 폴더를 가져다 씁니다.', '가져다 쓰는 쪽이 위층입니다.', '파일 3개가 들어 있습니다.'],
+  role: { folder: 'src/core/', answer: 2 },
+};
+
 const RESULT: T2Result = {
   kind: 'placement',
   pct: 50,
@@ -345,5 +385,90 @@ describe('의존성 방향 (04 §8.3 · D107)', () => {
   test('파일 칩은 안 뜬다 — 이 종의 답은 문항이다', () => {
     dir();
     expect(document.querySelector('.picked')).toBeNull();
+  });
+});
+
+describe('진입점 (04 §8.5 · D142)', () => {
+  const entryPlate = {
+    ...PLATE, kind: 'entry' as const, payload: ENTRY_PAYLOAD, nameKo: '진입점', token: 'repo',
+  };
+  const entry = (over: Partial<Props> = {}) => mount({ plate: entryPlate, ...over });
+
+  test('지도에서 폴더를 고르는 길이 그대로 열린다 — 칩도 뜬다', () => {
+    entry({ selected: [APP] });
+    expect(screen.getByLabelText('repo 의존 지도')).toBeTruthy();
+    expect(document.querySelector('.picked .chip')?.textContent).toContain('app');
+  });
+
+  test('판 머리가 이 종의 이름과 부제를 쓴다', () => {
+    entry();
+    expect(screen.getAllByText(/진입점/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/들어오는 화살표가 없는 폴더/).length).toBeGreaterThan(0);
+  });
+
+  test('하나도 안 고르면 채점이 잠긴다', () => {
+    const { spies } = entry({ selected: [] });
+    expect(screen.getByRole('button', { name: /채점하기/ }).hasAttribute('disabled')).toBe(true);
+    fireEvent.keyDown(document, { code: 'Enter' });
+    expect(spies.onGrade).not.toHaveBeenCalled();
+  });
+
+  test('하나라도 고르면 Enter 가 채점한다', () => {
+    const { spies } = entry({ selected: [APP] });
+    fireEvent.keyDown(document, { code: 'Enter' });
+    expect(spies.onGrade).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('폴더의 역할 (04 §8.5 · D142)', () => {
+  const rolePlate = {
+    ...PLATE, kind: 'role' as const, payload: ROLE_PAYLOAD, nameKo: '폴더의 역할', token: 'repo',
+  };
+  const role = (over: Partial<Props> = {}) => mount({ plate: rolePlate, ...over });
+
+  test('지도 한 장 + 4지 한 문항. 보기는 밴드 라벨 넷이다', () => {
+    role();
+    expect(screen.getByLabelText('repo 의존 지도')).toBeTruthy();
+    expect(document.querySelectorAll('.rquiz .choices')).toHaveLength(1);
+    expect([...document.querySelectorAll('.rquiz .ch .t')].map((el) => el.textContent))
+      .toEqual(['화면', '기능', '동작 · 통신', '공용 · 데이터']);
+  });
+
+  test('물어보는 폴더는 지도에 없고 보기 위에 상자로 선다', () => {
+    role();
+    expect(document.querySelector('.rquiz .rq-f')?.textContent).toBe('src/core/');
+    expect(document.querySelector('.map .nd[data-p="src/core/"]')).toBeNull();
+  });
+
+  test('파일 칩은 안 뜬다 — 이 종의 답은 문항이다', () => {
+    role();
+    expect(document.querySelector('.picked')).toBeNull();
+  });
+
+  test('안 고르면 채점이 잠기고, 고르면 열린다', () => {
+    const locked = role({ picks: [] });
+    expect(screen.getByRole('button', { name: /채점하기/ }).hasAttribute('disabled')).toBe(true);
+    fireEvent.keyDown(document, { code: 'Enter' });
+    expect(locked.spies.onGrade).not.toHaveBeenCalled();
+    cleanup();
+
+    const open = role({ picks: [2] });
+    expect(screen.getByRole('button', { name: /채점하기/ }).hasAttribute('disabled')).toBe(false);
+    fireEvent.keyDown(document, { code: 'Enter' });
+    expect(open.spies.onGrade).toHaveBeenCalledTimes(1);
+  });
+
+  test('보기를 고르면 첫 칸으로 간다 — 문항이 하나다', () => {
+    const onPick = vi.fn();
+    role({ picks: [], onPick });
+    fireEvent.click(document.querySelectorAll('.rquiz .ch')[2] as HTMLElement);
+    expect(onPick).toHaveBeenCalledWith(0, 2);
+  });
+
+  test('보기에 포커스가 있으면 판이 Enter 를 가로채지 않는다', () => {
+    const { spies, container } = role({ picks: [2] });
+    const choice = container.querySelector('.rquiz .ch') as HTMLElement;
+    fireEvent.keyDown(choice, { code: 'Enter', bubbles: true });
+    expect(spies.onGrade).not.toHaveBeenCalled();
   });
 });

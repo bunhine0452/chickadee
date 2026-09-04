@@ -52,6 +52,7 @@ export type CardKind =
   | 'meaning' | 'blank' | 'point'                                   // t0
   | 'transcribe'                                                    // t1
   | 'placement' | 'radius' | 'flow' | 'direction'                   // t2
+  | 'entry' | 'role'                                                // t2 — 리포 지도 (D142)
   | 'repair' | 'reimpl';                                            // t3 (payload 없음)
 
 export interface Card { id: number; repoId: number; unitId: number | null; track: Track; kind: CardKind; conceptId: ConceptId;
@@ -80,13 +81,17 @@ export type CardPayload =
   // D100 — 네 종이 한 모양을 나눠 쓴다. `commit` 이 없는 카드는 그래프만으로 만든 3종과
   // 커밋 부족 폴백(04 §8.3·§8.4)이고, `flow`·`pairs` 는 그 두 종의 정답지다.
   // `edges` 의 3번째 자리는 `import_edge.kind` — 05 가 `type` 을 점선, `http` 를 이중선으로 그린다.
-  | { track: 't2'; kind: 'placement' | 'radius' | 'flow' | 'direction'; q: string; hint: string;
+  | { track: 't2'; kind: 'placement' | 'radius' | 'flow' | 'direction' | 'entry' | 'role';
+      q: string; hint: string;
       bands: { l: string; s: string }[];
       files: { p: string; r: number; isNew?: boolean; folded?: number; cycle?: boolean }[];
       edges: [string, string, EdgeKind][];
       commit?: { h: string; d: string; m: string; n: string }; core: Record<string, [string, string]>;
       sec: Record<string, [string, string]>; trap: Record<string, string>; hints: string[];
-      flow?: { answer: string[]; deck: string[] }; pairs?: { a: string; b: string; answer: 0 | 1 | 2 | 3 }[] };
+      flow?: { answer: string[]; deck: string[] };
+      pairs?: { a: string; b: string; answer: 0 | 1 | 2 | 3 }[];
+      // D142 — 폴더 역할 4지. 보기는 `bands` 의 네 라벨이라 따로 싣지 않는다.
+      role?: { folder: string; answer: number } };
 
 /**
  * `session.plan_json` 의 원소. §8.2 는 `Session.plan: PlannedItem[]` 을 쓰면서 `PlannedItem` 을
@@ -102,7 +107,13 @@ export interface SessionItem { id: number; sessionId: number; pos: number; cardI
   role: 'review' | 'new' | 'retry' | 'prereq' | 'manual' | 'gap'; estMin: number; parentItemId: number | null;
   status: 'pending' | 'active' | 'done' | 'skipped' | 'removed'; elapsedS: number; state: ItemState | null; reviewLogId: number | null; createdAt: number; }
 export type ItemState = { sel?: number; answered?: boolean; dunno?: boolean; rung?: 1 | 2 | 3 | 4; jumped?: boolean; returned?: boolean;
-  prereqDone?: ConceptId[]; t1Draft?: string; t1Stage?: 1 | 2 | 3; peeks?: number; t2Sel?: string[]; hints?: number };
+  prereqDone?: ConceptId[]; t1Draft?: string; t1Stage?: 1 | 2 | 3; peeks?: number; t2Sel?: string[]; hints?: number;
+  /**
+   * 편집 보조가 앉힌 글자 (D143). `peeks` 와 같은 자리·같은 규칙 — **감점 없음, 기록만.**
+   * 초안(`t1Draft`)과 함께 살아야 한다: 판을 떠났다 돌아오면 그때까지 센 것이 남아야
+   * 「이 판의 글자가 어디서 왔나」가 판 하나 단위로 성립한다.
+   */
+  assist?: { keyed: number; assisted: number; pasted: number; accepted: number } };
 
 export interface ReviewLog { id: number; sessionId: number; sessionItemId: number; cardId: number; conceptId: ConceptId; track: Track;
   role: SessionItem['role']; reviewedAt: number; dayKey: DayKey; grade: Grade; ok: boolean; dunno: boolean; early: boolean;
@@ -112,7 +123,10 @@ export interface ReviewLog { id: number; sessionId: number; sessionItemId: numbe
 export type ReviewDetail =
   | { track: 't0'; sel: number; answer: number; kind: 'meaning' | 'blank' | 'point' }
   | { track: 't1'; meaning: number; total: number; exact: number; equiv: number; differ: number; missing: number; extra: number;
-      peeks: number; downgraded: boolean; stageBefore: 1|2|3; stageAfter: 1|2|3; appealedLines: number[]; whyText: string; whyPick: number | null }
+      peeks: number; downgraded: boolean;
+      /** 편집 보조가 앉힌 글자 (D143) — `peeks` 옆, 감점 없음. 없으면 안 재던 판본의 행이다. */
+      assist?: { keyed: number; assisted: number; pasted: number; accepted: number };
+      stageBefore: 1|2|3; stageAfter: 1|2|3; appealedLines: number[]; whyText: string; whyPick: number | null }
   | { track: 't2'; pct: number; found: string[]; missed: string[]; wrong: string[]; bonus: string[]; hints: number; more: boolean };
 
 export interface DunnoEvent { id: number; sessionItemId: number; reviewLogId: number | null; cardId: number; conceptId: ConceptId; at: number;
@@ -167,6 +181,13 @@ export interface Settings { budgetMin: number; tz: string; rolloverHour: number;
    * 얹힌다. 설정 「학습」에서 다시 거짓으로 돌릴 수 있다.
    */
   tutorialSeen: boolean;
+  /**
+   * 첫 실행에서 「프로그래밍이 처음인가요?」에 예라고 답했나 (D147). 참이면 0장이
+   * 뿌리 통과만으로 닫히지 않는다 — 늘려 놓은 24판이 나흘에 사라지는 것을 막는다.
+   * **레벨을 묻는 것이 아니라 대상 경계 안쪽인지만 묻는 한 문항이다** — 별도 배치고사를
+   * 만들지 않는다는 결정(방안 E-5)은 그대로다. 설정 「학습」에서 언제든 바꾼다.
+   */
+  declaredNewcomer: boolean;
   /**
    * 새 판을 만들 문법 사전 언어 (D122). **비면 전부 켜진 것**이다 — 빈 목록이
    * 「아무 언어도 안 함」이 되면 첫 실행에서 큐가 통째로 빈다. 표시 언어와 다른 축이다.

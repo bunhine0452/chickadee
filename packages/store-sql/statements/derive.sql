@@ -153,6 +153,22 @@ VALUES (:repoId, :name, :rootPath, 'dir', :orderIdx)
 ON CONFLICT (repo_id, name) DO UPDATE SET
   root_path = excluded.root_path, order_idx = excluded.order_idx;
 
+-- 리포 파일에 대응하지 않는 대지 — 지금은 「0장 — 이 언어의 바닥」 하나다 (D136).
+-- `name` 은 화면에 나오지 않는 안정 키다(라벨은 i18n 이 낸다). `order_idx` 를 음수로 두어
+-- 색인 띠 맨 앞에 선다.
+-- @name derive.unit_manual_upsert
+-- @params { repoId: number, name: string, orderIdx: number }
+-- @row void
+INSERT INTO unit (repo_id, name, root_path, source, order_idx)
+VALUES (:repoId, :name, NULL, 'manual', :orderIdx)
+ON CONFLICT (repo_id, name) DO UPDATE SET order_idx = excluded.order_idx;
+
+-- 이미 열려 있는 수동 대지. 0장을 **두 번 열지 않기** 위한 것이다 (D136).
+-- @name derive.unit_manual_names
+-- @params { repoId: number }
+-- @row { name: string }
+SELECT name FROM unit WHERE repo_id = :repoId AND source = 'manual';
+
 -- @name derive.unit_files_clear
 -- @params { repoId: number }
 -- @row void
@@ -176,10 +192,14 @@ INSERT OR IGNORE INTO unit_node (unit_id, concept_id, track, node_order)
 VALUES ((SELECT id FROM unit WHERE repo_id = :repoId AND name = :name), :conceptId, :track, :nodeOrder);
 
 -- 이번 인제스트에서 사라진 대지. 하위 행은 ON DELETE CASCADE 가 정리한다.
+-- `source='manual'` 은 리포 파일에서 나온 것이 아니므로 이 청소를 타지 않는다 (D136) —
+-- 0장 대지는 재인제스트를 건너서도 남는다.
 -- @name derive.unit_delete_missing
 -- @params { repoId: number, names: string[] }
 -- @row void
-DELETE FROM unit WHERE repo_id = :repoId AND name NOT IN (SELECT value FROM json_each(:names));
+DELETE FROM unit
+WHERE repo_id = :repoId AND source <> 'manual'
+  AND name NOT IN (SELECT value FROM json_each(:names));
 
 -- ───────── 구멍 지도 ─────────
 

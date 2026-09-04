@@ -21,6 +21,7 @@ const BUSY: Duration = Duration::from_millis(5_000);
 // PRAGMA 값은 낱말 대신 숫자로 준다 — rusqlite 가 낱말에 인용부호를 붙인다.
 // foreign_keys 는 ON(1), synchronous 는 NORMAL(1).
 const ON: i32 = 1;
+const OFF: i32 = 0;
 const NORMAL: i32 = 1;
 
 type Out<T> = Result<T, StoreError>;

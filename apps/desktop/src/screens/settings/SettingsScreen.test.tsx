@@ -174,6 +174,19 @@ describe('SettingsScreen', () => {
     expect(row).toBeUndefined();
   });
 
+  // D147 — `home.newcomerBody` 가 이 자리를 실명으로 가리킨다. 없으면 그 문구가 거짓말이다.
+  it('「프로그래밍이 처음」을 여기서 되돌릴 수 있다 — 첫 실행에서 물은 것을 잠그지 않는다', async () => {
+    const user = userEvent.setup();
+    await drawn();
+    await user.click(screen.getByRole('switch', { name: /프로그래밍이 처음인지 고르기/ }));
+
+    await waitFor(() => {
+      const row = db.prepare("SELECT value_json FROM settings WHERE key = 'declared_newcomer'")
+        .get() as { value_json: string } | undefined;
+      expect(row?.value_json).toBe('true');
+    });
+  });
+
   it('모션 감축도 <html> 을 세우고 저장한다 — 네 칸이 재실행에 남는다 (D122 · E7)', async () => {
     const user = userEvent.setup();
     await drawn();
@@ -185,6 +198,27 @@ describe('SettingsScreen', () => {
         { value_json: string } | undefined;
       expect(row?.value_json).toBe('"reduce"');
     });
+  });
+
+  it('편집 보조는 「단계에 맞춰」로 서고, 끄면 settings 테이블에 내려간다 (D143)', async () => {
+    const user = userEvent.setup();
+    await drawn();
+    const sw = screen.getByRole('switch', { name: '편집 보조' });
+    // 기본값은 매트릭스 그대로 — 스위치를 만든다고 기본을 끄로 내리지 않는다.
+    expect(db.prepare("SELECT value_json FROM settings WHERE key = 'editor_assist'").get())
+      .toBeUndefined();
+
+    await user.click(sw);
+    await waitFor(() => {
+      const row = db.prepare("SELECT value_json FROM settings WHERE key = 'editor_assist'").get() as
+        { value_json: string } | undefined;
+      expect(row?.value_json).toBe('"off"');
+    });
+  });
+
+  it('무엇을 잃는지 적는다 — 같은 85%가 다른 조건에서 나온 값이 된다', async () => {
+    await drawn();
+    expect(screen.getByText(/같은 85%가 서로 다른 조건에서 나온 값/)).toBeTruthy();
   });
 
   it('설정을 못 읽어도 화면은 기본값으로 뜬다 (01 §6)', async () => {

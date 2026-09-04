@@ -180,6 +180,37 @@ meaning:
               - "const { a } = {}           // undefined"
               - "const { a } = { a: null }  // null"
 
+# 빈칸형을 못 내는 사유 (D145). 「아직 안 썼다」가 아니라 「이 문법에는 뚫을 구멍이 없다」다.
+no_hole_reason: >-
+  뚫을 자리가 { a } 라는 모양 전체다. 안의 이름은 리포마다 다르고, 중괄호만 뚫으면 보기가 한 글자짜리 괄호 넷이 된다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 객체에서 쓸 것만 골라 이름으로 꺼냈을까요?"
+    en: "Why does line {{site.line}} pull out only the parts it uses, as names?"
+  choices:
+    - t:
+        ko: "아래 코드가 그 객체의 무엇에 기대는지를 이 줄 하나로 보이게 하려고"
+        en: "So one line shows what the code below leans on inside that object"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 객체에 없던 이름을 꺼내려 하면 어떻게 되는지도 적어 보세요."
+        en: "That is the direction. Add what happens if you pull out a name the object does not have."
+    - t:
+        ko: "객체 전체를 들고 다니면 무거워서"
+        en: "Because carrying the whole object is heavy"
+      ok: false
+      fb:
+        ko: "꺼내도 같은 값을 가리킵니다. 가벼워지는 것은 메모리가 아니라 읽는 사람의 머리입니다."
+        en: "The pulled-out names point at the same values. What gets lighter is the reader, not the memory."
+    - t:
+        ko: "점으로는 못 읽어서"
+        en: "Because a dot cannot read them"
+      ok: false
+      fb:
+        ko: "점으로도 읽습니다. 다만 어디에 기대는지가 여러 줄에 흩어집니다."
+        en: "A dot reads them fine. What it does is scatter the dependency across many lines."
+
 queries:
   - { grammars: [typescript, tsx, javascript], file: ./object-destructuring.scm }
 

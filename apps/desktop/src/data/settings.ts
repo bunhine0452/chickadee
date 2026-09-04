@@ -10,6 +10,7 @@ import { FSRS5_DEFAULT_W, DEFAULT_RETENTION, makeScheduler, type Scheduler } fro
 import { fromSettingsRows, type Settings } from '@chickadee/store-sql';
 import { useCallback, useEffect, useState } from 'react';
 
+import { EDITOR_ASSIST_DEFAULT, type EditorAssist } from '../components/t1/monacoOptions.js';
 import { measure } from '../devtools/audit.js';
 
 /**
@@ -46,6 +47,11 @@ export const DEFAULTS: Omit<Settings, 'tz'> = {
   locale: guessLocale(),
   // 아직 첫 판을 함께 걸어 본 적이 없다 (D134).
   tutorialSeen: false,
+  // 묻기 전에는 거짓이다 — 안 물어본 것을 「아니오」로 세지 않는다 (D147).
+  declaredNewcomer: false,
+  // 뿌리 넉 장 중 셋을 맞힌 세션이 **나온 적 있는가** (0장 종료 조건 ②, D136).
+  // `newcomerFlag` 로는 대신할 수 없다 — 그쪽 'none' 은 「아직 안 재 봤다」와 구별되지 않는다.
+  rootCleared: false,
   // 비면 전부 켜진 것이다 (D122).
   dictLangs: [],
 };
@@ -88,9 +94,64 @@ const KEY_OF: Record<keyof Settings, string> = {
   excludeGlobs: 'exclude_globs',
   locale: 'locale',
   tutorialSeen: 'tutorial_seen',
+  declaredNewcomer: 'declared_newcomer',
+  rootCleared: 'root_cleared',
   dictLangs: 'dict_langs',
   lastRepoId: 'last_repo_id',
 };
+
+// ───────── 편집 보조 (D143) ─────────
+
+/**
+ * `settings` 테이블의 키. **`Settings` 인터페이스에는 아직 없다** — `store-sql` 의
+ * `Settings`·`settingsSchema`·`SETTINGS_KEYS` 를 한꺼번에 늘리는 것은 02 §8.2 소관이라
+ * 별건으로 올려 두었다. 그때까지 이 값은 같은 테이블의 같은 규약으로 여기서 직접 읽고 쓴다:
+ * `fromSettingsRows` 가 「모르는 키는 건너뛴다」로 쓰여 있으므로(앞선 판본이 쓴 키를 오류로
+ * 만들지 않겠다는 뜻) 이 행이 다른 읽기를 깨뜨리지 않는다.
+ */
+const EDITOR_ASSIST_KEY = 'editor_assist';
+
+const isAssist = (v: unknown): v is EditorAssist => v === 'stage' || v === 'off';
+
+/**
+ * 못 읽으면 기본값이다 — 설정 한 칸 때문에 판이 안 열리면 안 된다.
+ *
+ * 캐시하지 않는다. 판마다 한 번 도는 작은 조회이고, 캐시를 두면 세션 도중에 설정을 바꾼
+ * 값이 다음 판에 안 실리거나 시험 사이에 값이 새는 두 가지 틀릴 자리가 생긴다.
+ */
+export async function loadEditorAssist(): Promise<EditorAssist> {
+  try {
+    const rows = await ipc.store.query('settings.get_all', {});
+    const row = rows.find((r) => r.key === EDITOR_ASSIST_KEY);
+    if (row === undefined) return EDITOR_ASSIST_DEFAULT;
+    const value: unknown = JSON.parse(row.value_json);
+    return isAssist(value) ? value : EDITOR_ASSIST_DEFAULT;
+  } catch {
+    return EDITOR_ASSIST_DEFAULT;
+  }
+}
+
+export async function saveEditorAssist(value: EditorAssist, now: number): Promise<void> {
+  await ipc.store.exec('settings.set', {
+    key: EDITOR_ASSIST_KEY,
+    valueJson: JSON.stringify(value),
+    updatedAt: now,
+  });
+}
+
+/**
+ * 판이 쓰는 읽기 전용 훅. 값이 늦게 와도 `ClonePad` 가 `updateOptions` 로 갈아 끼우므로
+ * 처음 한 프레임은 기본값으로 뜬다.
+ */
+export function useEditorAssist(): EditorAssist {
+  const [assist, setAssist] = useState<EditorAssist>(EDITOR_ASSIST_DEFAULT);
+  useEffect(() => {
+    let live = true;
+    void loadEditorAssist().then((v) => { if (live) setAssist(v); });
+    return () => { live = false; };
+  }, []);
+  return assist;
+}
 
 // ───────── 모양 (테마 · 부속) ─────────
 

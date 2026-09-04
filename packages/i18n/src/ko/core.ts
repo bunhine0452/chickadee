@@ -13,6 +13,19 @@ export const core = {
     '바이브 코딩으로 만든 내 코드가 교재입니다. 리포를 하나 등록하면 커밋과 파일을 읽어 '
     + '기능마다 대지를 깔고, 내 코드에 실제로 쓰인 문법부터 판을 짭니다. 읽기만 하고 '
     + '리포에는 아무것도 쓰지 않습니다.',
+  // 대상 경계 (D139 · 정본 §1 「앱이 그 사실을 정직하게 말한다」). 두 세션을 헛돌고 나서야
+  // 뜨던 `home.newcomer` 를 **첫 화면으로 당긴 것**이다. 외부 자료는 새로 고르지 않고
+  // `home.newcomerBody` 에 이미 실명으로 있는 둘을 그대로 쓴다. 묻지 않고 잠그지 않는다.
+  // D147 이 D139 의 전제를 뒤집었다 — 「대상이 아니다」가 아니라 「0장이 데려간다」다.
+  // 뒤집힌 것은 「묻지 않는다」 하나뿐이라 아래 한 문항은 **레벨이 아니라 경계 안쪽인지**만
+  // 묻는다. 답해도 잠기는 것은 없고 설정 「학습」에서 언제든 바꾼다.
+  'firstRun.scope':
+    '「변수」·「함수」가 처음이어도 됩니다. 첫 세션에 「0장 — 이 언어의 바닥」이 열려 '
+    + '조건문·함수·반복부터 내 코드의 가장 단순한 줄로 짚어 갑니다.',
+  'firstRun.newcomerQ': '프로그래밍이 처음이신가요?',
+  'firstRun.newcomerAsk': '0장을 얼마나 길게 열지만 정합니다. 잠기는 것은 없습니다.',
+  'firstRun.newcomerYes': '처음입니다',
+  'firstRun.newcomerNo': '해 봤습니다',
   'firstRun.language': '표시 언어',
   'firstRun.languageSwitch': '표시 언어 고르기 — 한국어 · English',
   'firstRun.pick': '리포 등록',
@@ -102,6 +115,15 @@ export const core = {
   'settings.study.rolloverNote': '시 — 이 시각 전은 어제로 셉니다',
   'settings.study.newPerDay': '새 판',
   'settings.study.newPerDayNote': '장/일 (상한 4)',
+  // 첫 실행에서 한 번 물은 것을 여기서 되돌릴 수 있어야 한다 (D147). `home.newcomerBody`
+  // 가 이 자리를 실명으로 가리키므로 없으면 문구가 거짓말이 된다.
+  'settings.study.newcomer': '프로그래밍 경험',
+  'settings.study.newcomerSwitch': '프로그래밍이 처음인지 고르기 — 처음입니다 · 해 봤습니다',
+  'settings.study.newcomerYes': '처음입니다',
+  'settings.study.newcomerNo': '해 봤습니다',
+  'settings.study.newcomerNote':
+    '「처음입니다」로 두면 <b>0장이 길어집니다</b> — 뿌리 판 몇 개를 맞혀도 0장이 닫히지 않고, '
+    + '담긴 개념을 전부 한 겹 올릴 때까지 열려 있습니다. 잠기는 것은 없고, 언제 바꿔도 됩니다.',
   'settings.study.coach': '첫 판 안내',
   'settings.study.coachSwitch': '첫 판 안내 켜기 · 끄기',
   'settings.study.coachOn': '켜기',

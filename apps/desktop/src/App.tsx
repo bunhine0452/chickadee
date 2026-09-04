@@ -158,6 +158,13 @@ export function App(): React.JSX.Element {
       <>
         <FirstRun
           onPick={() => void pickFolder()}
+          newcomer={ui.declaredNewcomer}
+          onNewcomer={(newcomer: boolean) => {
+            // 0장의 길이만 정하는 한 문항이다 (D147). 답은 바로 남기고 설정에서 바꾼다.
+            useUi.getState().setDeclaredNewcomer(newcomer);
+            void saveSetting('declaredNewcomer', newcomer, Date.now())
+              .catch(() => log.warn('프로그래밍 경험 답을 저장하지 못했다'));
+          }}
           locale={ui.locale}
           onLocale={(locale: Locale) => {
             // 첫 실행에서는 다시 그리기가 아니라 **그 자리에서** 바뀐다 — 고른 언어로

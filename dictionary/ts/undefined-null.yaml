@@ -138,6 +138,37 @@ meaning:
               - "const a = 1; a === null   // false"
               - "const b = null; b === null // true"
 
+# 빈칸형을 못 내는 사유 (D145). 「아직 안 썼다」가 아니라 「이 문법에는 뚫을 구멍이 없다」다.
+no_hole_reason: >-
+  「없음」을 적는 두 낱말이 한 개념 안에 있어 서로가 서로의 보기가 되는데, 빈칸형의 나머지 보기는 혼동 쌍의 토큰에서만 나온다(03 §4.4). 한 개념 안의 두 얼굴은 그 규칙으로 못 낸다 — 그 자리는 의미형이 맡는다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 「없음」을 이 낱말로 적었을까요?"
+    en: "Why does line {{site.line}} write “missing” with this particular word?"
+  choices:
+    - t:
+        ko: "사람이 비워 뒀다는 것과 아직 안 들어왔다는 것이 다른 뜻이라"
+        en: "Because “someone left it empty” and “nothing has arrived yet” are two different meanings"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 줄에서 어느 쪽인지, 그리고 읽는 사람이 그것을 알아야 하는 이유를 적어 보세요."
+        en: "That is the direction. Say which of the two this line means, and why the reader needs to know."
+    - t:
+        ko: "둘 중 아무거나 써도 같아서"
+        en: "Because either word does the same thing"
+      ok: false
+      fb:
+        ko: "실행은 비슷하게 흘러도 읽는 사람에게는 다릅니다. 하나는 사람의 결정이고 하나는 아직 없는 상태입니다."
+        en: "The run may look alike, but the reader sees two things: one is a decision, the other is an absence."
+    - t:
+        ko: "타입 때문에 어쩔 수 없어서"
+        en: "Because the type left no choice"
+      ok: false
+      fb:
+        ko: "둘 다 허용하는 자리가 많습니다. 그때 고르는 기준은 타입이 아니라 뜻입니다."
+        en: "Plenty of places allow both. What picks between them there is meaning, not the type."
+
 queries:
   - { grammars: [typescript, tsx, javascript], file: ./undefined-null.scm }
 

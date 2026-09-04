@@ -182,7 +182,7 @@ export function genPoint(req: T0Request, input: SiteInput): GenResult {
   return {
     card: finish(req, input, 'point', {
       track: 't0', kind: 'point', ...common,
-      lines: codeLines(input.lines, input.site.lineStart, spans),
+      lines: codeLines(input.lines, input.site.lineStart, spans, input.block),
       q, hint, answer: answerIndex, why,
     }),
   };

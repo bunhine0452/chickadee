@@ -56,6 +56,13 @@
   line-height: 1;
 }
 
+/* 0장 칩 — 판번호 자리가 「0장」이라 다른 칩보다 넓다 (D136). 색은 주지 않는다:
+   트랙 색은 의미가 정해져 있고 0장은 트랙이 아니다. */
+.sx-zero .sx-no {
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
 .sx[data-state="locked"] .sx-no { color: var(--ink-mute) }
 
 .sx-count {

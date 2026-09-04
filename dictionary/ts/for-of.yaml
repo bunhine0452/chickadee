@@ -166,6 +166,37 @@ meaning:
               - "[].length            // 0"
               - "[undefined].length   // 1"
 
+# 빈칸형을 못 내는 사유 (D145). 「아직 안 썼다」가 아니라 「이 문법에는 뚫을 구멍이 없다」다.
+no_hole_reason: >-
+  of 를 지운 자리에 넣을 낱말은 in 하나뿐이라 보기 넷이 안 나온다. in 은 개념으로 없어 진단을 붙일 자리도 없다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 자리 번호가 아니라 항목으로 돌까요?"
+    en: "Why does line {{site.line}} go round by item instead of by index?"
+  choices:
+    - t:
+        ko: "필요한 것이 항목 자체이고, 번호를 안 쓰면 잘못 셀 자리도 없어서"
+        en: "Because the item itself is what is needed, and with no index there is nothing to miscount"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 번호가 정말 필요해지는 경우를 하나 떠올려 함께 적어 보세요."
+        en: "That is the direction. Add one case where the index would genuinely be needed."
+    - t:
+        ko: "<code>for…of</code> 가 더 빨라서"
+        en: "Because <code>for…of</code> is faster"
+      ok: false
+      fb:
+        ko: "속도 차이는 이 자리에서 따질 만한 크기가 아닙니다. 갈리는 것은 번호를 손으로 다뤄야 하느냐입니다."
+        en: "The speed gap is not worth weighing here. What parts ways is whether you handle the index by hand."
+    - t:
+        ko: "번호로는 배열을 못 돌아서"
+        en: "Because an array cannot be walked by index"
+      ok: false
+      fb:
+        ko: "번호로도 돕니다. 다만 시작·끝·증가를 손으로 적어야 해서 어긋날 자리가 셋 늘어납니다."
+        en: "It can. You just write the start, the end and the step by hand — three more places to slip."
+
 queries:
   - { grammars: [typescript, tsx, javascript], file: ./for-of.scm }
 

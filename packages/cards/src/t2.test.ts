@@ -207,3 +207,113 @@ describe('결정성 (04 §9)', () => {
     expect(shuffled.contentHash).toBe(straight.contentHash);
   });
 });
+
+describe('리포 지도 두 종 (04 §7.5·§8.5 · D142)', () => {
+  /** 목업 지도를 리포 범위로 본 것 — 대지 밖 이웃까지 전부 「이 리포의 파일」이다. */
+  const repoFiles: GraphFile[] = PATHS.map(([path], i) => ({ fileId: i + 1, path, inUnit: true }));
+  const req = (kind: 'entry' | 'role', targetIndex = 0): T2Request => ({
+    repoId: 1, unitId: 1, unitName: 'cart', unitRoot: UNIT,
+    conceptId: 'arch/placement' as ConceptId, seed: 7, targetIndex,
+    files: repoFiles, edges, commits: [], filesOf: new Map(), recent: new Map(),
+  });
+
+  test('지도가 파일 12장 대신 폴더 여섯으로 접힌다', () => {
+    const made = generateT2(req('entry'), 'entry');
+    if (!isT2Card(made)) throw new Error(made.reason);
+    expect(made.payload.files.map((f) => f.p).sort()).toEqual([
+      'app/api/cart/', 'app/cart/', 'components/ui/', 'features/cart/', 'lib/', 'server/',
+    ]);
+    // 폴더 노드는 안에 든 파일 수를 배지로 든다.
+    expect(made.payload.files.every((f) => (f.folded ?? 0) > 0)).toBe(true);
+  });
+
+  test('진입점 — 정답은 들어오는 화살표가 없는 폴더이고 개념은 `arch/entry` 다', () => {
+    const made = generateT2(req('entry'), 'entry');
+    if (!isT2Card(made)) throw new Error(made.reason);
+    expect(made.kind).toBe('entry');
+    expect(made.conceptId).toBe('arch/entry');
+    expect(Object.keys(made.payload.core)).toEqual(['app/cart/']);
+    // 나머지는 전부 함정이고 사유가 붙는다 — 고른 것마다 왜 아닌지 말할 수 있어야 한다.
+    expect(Object.keys(made.payload.trap).sort()).toEqual([
+      'app/api/cart/', 'components/ui/', 'features/cart/', 'lib/', 'server/',
+    ]);
+    expect(made.payload.hints).toHaveLength(3);
+    expect(made.payload.commit).toBeUndefined();
+  });
+
+  test('많이 쓰이는 폴더는 정답이 아니다 — 그게 이 문제의 함정이다', () => {
+    // `lib/` 를 셋이 가져다 쓰게 만든다. 들어오는 화살표가 가장 많은 노드가 된다.
+    const hubbed: GraphEdge[] = [
+      ...edges,
+      { from: 'app/cart/page.tsx', to: 'lib/format.ts', kind: 'static', confidence: 'syntactic' },
+      { from: 'server/cartRepo.ts', to: 'lib/format.ts', kind: 'static', confidence: 'syntactic' },
+    ];
+    const made = generateT2({ ...req('entry'), edges: hubbed }, 'entry');
+    if (!isT2Card(made)) throw new Error(made.reason);
+    expect(made.payload.core['lib/']).toBeUndefined();
+    expect(made.payload.trap['lib/']).toContain('3');
+    // 마지막 힌트가 그 창고의 이름을 댄다.
+    expect(made.payload.hints[2]).toContain('lib/');
+  });
+
+  test('폴더 역할 — 정답은 밴드 색인이고 그 폴더는 지도에서 빠져 있다', () => {
+    const made = generateT2(req('role'), 'role');
+    if (!isT2Card(made)) throw new Error(made.reason);
+    expect(made.kind).toBe('role');
+    expect(made.conceptId).toBe('arch/role');
+    const role = made.payload.role;
+    expect(role).toBeDefined();
+    // 밴드 행 라벨이 곧 보기다 — 물어볼 폴더가 지도에 있으면 정답을 읽어 주는 셈이다.
+    expect(made.payload.files.some((f) => f.p === role!.folder)).toBe(false);
+    expect(made.payload.bands[role!.answer]?.l.length).toBeGreaterThan(0);
+    // 근거는 층 라벨이 아니라 방향 집계다.
+    expect(made.payload.hints[0]).toMatch(/\d+개 폴더가 이 폴더를 가져다 쓰고/);
+  });
+
+  test('폴더 역할은 04 §7.2 ① 로 층이 정해진 폴더에만 낸다', () => {
+    const made = generateT2(req('role'), 'role');
+    if (!isT2Card(made)) throw new Error(made.reason);
+    // `server/**` 는 04 §7.2 ① 이 「공용 · 데이터」로 못박은 이름이다.
+    // (`lib/`·`components/ui/` 는 이 지도에서 파일이 한 장뿐이라 `MIN_ROLE_MEMBERS` 에 걸린다.)
+    expect(made.payload.role?.folder).toBe('server/');
+    expect(made.payload.role?.answer).toBe(3);
+    // ② 깊이로 **추정된** 폴더는 물으면 안 된다 — 추정이 틀리면 신뢰가 한 번에 무너진다.
+    expect(made.payload.role?.folder).not.toBe('features/cart/');
+  });
+
+  test('후보가 떨어지면 같은 판을 두 번 굽지 않는다', () => {
+    const first = generateT2(req('role', 0), 'role');
+    expect(isT2Card(first)).toBe(true);
+    // 이 지도에서 04 §7.2 ① 이 이름을 아는 폴더는 몇 개뿐이다. 색인이 넘치면 판이 없다.
+    expect(isT2Card(generateT2(req('role', 9), 'role'))).toBe(false);
+  });
+
+  test('같은 요청을 두 번 구우면 deep-equal 이다 (04 §9)', () => {
+    for (const kind of ['entry', 'role'] as const) {
+      expect(generateT2(req(kind), kind)).toEqual(generateT2(req(kind), kind));
+    }
+  });
+
+  test('대지가 「기타」 하나뿐인 리포에는 내지 않는다 (#e-guard)', () => {
+    // 뿌리 바로 밑 파일들 — `assignUnits` 의 네 규칙이 전부 물지 않는다.
+    const flat = ['a.ts', 'b.ts', 'c.ts', 'd.ts', 'e.ts', 'f.ts', 'g.ts', 'h.ts'];
+    const flatFiles: GraphFile[] = flat.map((path, i) => ({ fileId: i + 1, path, inUnit: true }));
+    const flatEdges: GraphEdge[] = flat.slice(1).map((to, i) => ({
+      from: flat[i] as string, to, kind: 'static' as const, confidence: 'syntactic' as const,
+    }));
+    for (const kind of ['entry', 'role'] as const) {
+      const made = generateT2({ ...req(kind), files: flatFiles, edges: flatEdges }, kind);
+      expect(isT2Card(made)).toBe(false);
+    }
+  });
+
+  test('종을 안 주면 리포 지도 두 종은 나오지 않는다 — 입력이 대지 것이기 때문이다', () => {
+    const made = generateT2({
+      repoId: 1, unitId: 1, unitName: 'cart', unitRoot: UNIT,
+      conceptId: 'arch/placement' as ConceptId, seed: 7,
+      files, edges, commits: [], filesOf: new Map(), recent: new Map(),
+    });
+    if (!isT2Card(made)) throw new Error(made.reason);
+    expect(['entry', 'role']).not.toContain(made.kind);
+  });
+});

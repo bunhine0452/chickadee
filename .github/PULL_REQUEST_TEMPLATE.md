@@ -23,6 +23,22 @@
 - [ ] **CHANGELOG.** The commit subject is the line a user will read, or an entry is added
       by hand for anything the generated line would not explain.
 
+## Dictionary
+
+<!-- Delete this section if you did not touch dictionary/**. -->
+
+- [ ] **LLM draft declared.** If a model drafted any of this, say which files and which
+      fields here: ______ . Drafting is encouraged (`docs/03` §5.2) — a model is good at
+      `@hole`/`@pick.N` placement, `blank:` options and `why_gate:` wording. Shipping a draft
+      nobody ran is not. Tick this even when the answer is "none".
+- [ ] **A human checked the two things no checker can.** Every claim a `meaning:` option makes
+      about a value, and whether each "what would make that true" diagnosis is actually true.
+      `pnpm dict:lint`, `cargo test` and the `examples[].expect` comparison cover the rest —
+      see [Contributing](../CONTRIBUTING.md#what-checks-the-dictionary-and-what-does-not).
+- [ ] **The debt table did not go backwards.** `pnpm dict:lint` prints "사전 저작 부채". If you
+      filled a cell, raise the matching number in `DEBT_RATCHET`
+      (`packages/dictionary/src/dict.test.ts`) so it cannot slip back.
+
 ## Goldens, snapshots, IPC dumps
 
 <!-- Delete this section if none of them moved. -->

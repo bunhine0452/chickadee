@@ -46,6 +46,8 @@ export const session: Record<string, string> = {
   'plate.choices': 'Options',
   'plate.pickTargets': 'Where to point',
   'plate.hole': 'Hole',
+  'plate.foldMore': '… {{n}} more lines',
+  'plate.foldLess': 'Collapse',
   'plate.rule': 'Rule',
   'plate.afterLine': 'After this line',
   'plate.idleNote':
@@ -109,6 +111,14 @@ export const session: Record<string, string> = {
   'prereq.beenThere': '✓ Just came back from it',
   'prereq.goDown': '↳ Go down to this plate · 1 question · about 40s',
   'prereq.noPlate': 'No plate · “Make a plate” at home',
+  'prereq.goSimplest': '↳ See the simplest shape first · 1 question · about 40s',
+  'prereq.previewNote':
+    '{{name}} is in your code, but opening it now means several unfamiliar pieces at once. See the simplest shape first — that site comes back later today.',
+  'prereq.noteLayers': '{{n}} layers',
+  'prereq.noteUnprinted': 'not printed yet',
+  'prereq.noteAgain': '{{n}} layers — once more',
+  'prereq.notePreview': 'no plate yet',
+  'prereq.noteNoSite': 'not in your code yet',
   'prereq.printed': 'Printed',
   'prereq.note':
     'Going down does not lose this plate. When you finish the layer below you <b>come back '
@@ -182,10 +192,20 @@ export const session: Record<string, string> = {
   'clone.peekHold': 'hold = peek at the original',
   'clone.grade': 'grade',
   'clone.peekCount': 'Peeks at the original',
+  'clone.handPct': 'Typed by hand',
   'clone.editHint':
     'A hint costs nothing. It only signals that this plate should come around more often.',
   'clone.tooShort': 'Still short ({{n}} lines). Press again to grade it as it stands.',
   'clone.downgraded': 'One step easier — it is recorded, and nothing is deducted.',
+
+  'clone.assistLabel': 'Editor help',
+  'clone.assistSwitch': 'Editor help',
+  'clone.assistStage': 'By stage',
+  'clone.assistOff': 'All off',
+  'clone.assistNote':
+    'The default is <b>by stage</b>. Brackets and quotes close themselves in stages 1 and 2, never on the blank page. The list that offers back words already in this plate stays on at every stage.',
+  'clone.assistCost':
+    'Turning it off changes how much you type, not how the score is computed. But <b>the same 85% then comes from a different setup</b>, so appeals are grouped by which setting was on.',
 
   'clone.stage1Name': 'Copy it',
   'clone.stage1Sub': 'The original in front of you',
@@ -288,6 +308,10 @@ export const session: Record<string, string> = {
   'map.subRadius': 'Answer key = the arrows on the map · partial credit',
   'map.subFlow': 'Answer key = the path on the map',
   'map.subDirection': '5 questions · reading them off the map is fine',
+  'map.kindEntry': 'Entry point',
+  'map.kindRole': 'What a folder is for',
+  'map.subEntry': 'Answer key = folders with no incoming arrow · partial credit',
+  'map.subRole': '1 question · the folder in question is missing from the map',
   'map.sourceT2':
     '{{sub}} · {{files}} files · {{edges}} links · {{bands}} bands · an arrow always means '
     + '<b>imports</b>',

@@ -175,6 +175,37 @@ meaning:
               - "ok ? 'a' : 'b'   // 'a' 또는 'b'"
               - "'a' + 'b'        // 'ab'"
 
+# 빈칸형을 못 내는 사유 (D145). 「아직 안 썼다」가 아니라 「이 문법에는 뚫을 구멍이 없다」다.
+no_hole_reason: >-
+  물음표와 콜론이 각각 한 글자라 구멍의 최소 폭(2)에 못 미치고, 둘을 한 구멍으로 묶으면 사이의 「참일 때 값」까지 함께 지워진다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 <code>if</code> 문 대신 한 줄 식으로 갈랐을까요?"
+    en: "Why does line {{site.line}} branch with a one-line expression instead of an <code>if</code>?"
+  choices:
+    - t:
+        ko: "갈래마다 다른 일을 하는 게 아니라 값 하나를 고르는 일이라"
+        en: "Because the branches do not do different work; they pick one value"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 갈래 안에서 값을 고르는 일 말고 다른 일까지 해야 한다면 무엇이 달라질지 적어 보세요."
+        en: "That is the direction. Add what would change if a branch had to do more than pick a value."
+    - t:
+        ko: "<code>if</code> 문보다 빨라서"
+        en: "Because it is faster than an <code>if</code>"
+      ok: false
+      fb:
+        ko: "속도는 같습니다. 갈리는 것은 결과가 값이냐 동작이냐입니다."
+        en: "Speed is the same. What parts ways is whether the result is a value or an action."
+    - t:
+        ko: "이 자리에서는 <code>if</code> 를 쓸 수 없어서"
+        en: "Because an <code>if</code> cannot stand here"
+      ok: false
+      fb:
+        ko: "쓸 수는 있습니다 — 대신 이름을 먼저 만들고 갈래마다 대입해야 해서 줄이 늘어납니다."
+        en: "It can — you just have to make the name first and assign in each branch, which adds lines."
+
 queries:
   - { grammars: [typescript, tsx, javascript], file: ./conditional-ternary.scm }
 

@@ -12,7 +12,7 @@
  * 여기이고, 그 밖의 모든 조각은 세션이 쓰는 그 컴포넌트다.
  */
 import { t } from '@chickadee/i18n';
-import type { T1Result } from '@chickadee/grading';
+import type { AssistCount, T1Result } from '@chickadee/grading';
 import { FlatButton, Kbd, PressButton, RichText } from '@chickadee/ui';
 import { Suspense, lazy, useMemo, useRef, useState } from 'react';
 
@@ -26,6 +26,7 @@ import { RefPlate } from '../../components/t1/RefPlate.js';
 import { ScoreCard } from '../../components/t1/ScoreCard.js';
 import { SplitPane } from '../../components/t1/SplitPane.js';
 import { Stepper } from '../../components/t1/Stepper.js';
+import { useEditorAssist } from '../../data/settings.js';
 import { askHint, askText, tagOf, whyOf, wrongCount } from '../session/t1Copy.js';
 import type { CoursePlate } from './data.js';
 
@@ -35,10 +36,15 @@ const ClonePad = lazy(async () => {
   return { default: mod.ClonePad };
 });
 
-/** 경로 확장자 → Monaco 언어 id. `T1Plate.grammarOf` 와 같은 표다 (03 §2.1). */
-function monacoLang(path: string): string {
+/**
+ * 경로 확장자 → **Monaco 언어 id**. `T1Plate.grammarOf` 와 같은 표다.
+ *
+ * tree-sitter 문법 키(`session-flow.grammarOf`)와는 다른 표다 — Monaco 0.52 에 `'tsx'`
+ * 언어 id 는 없다. 자세한 근거는 `T1Plate.grammarOf` 의 주석.
+ */
+export function monacoLang(path: string): string {
   const ext = path.slice(path.lastIndexOf('.'));
-  if (ext === '.tsx' || ext === '.jsx') return 'tsx';
+  if (ext === '.tsx' || ext === '.jsx') return 'typescript';
   if (ext === '.ts' || ext === '.mts' || ext === '.cts') return 'typescript';
   if (ext === '.js' || ext === '.mjs' || ext === '.cjs') return 'javascript';
   if (ext === '.py') return 'python';
@@ -67,6 +73,9 @@ export interface CoursePlateViewProps {
   peeks: number;
   peeking: boolean;
   onPeek: (on: boolean) => void;
+  /** 이 조각의 글자가 어디서 왔나 (D143). 감점 없음 — `T1Plate` 와 같은 계약이다. */
+  assist?: AssistCount | undefined;
+  onAssist?: ((next: AssistCount) => void) | undefined;
   savedAt: number | null;
   onGrade: () => void;
   onDowngrade: () => void;
@@ -81,6 +90,8 @@ export function CoursePlateView(props: CoursePlateViewProps): React.JSX.Element 
   const { plate } = props;
   const payload = plate.payload;
   const [filter, setFilter] = useState<DiffFilterValue>('ne');
+  const [assist, setAssist] = useState<AssistCount | undefined>(props.assist);
+  const editorAssist = useEditorAssist();
   const curLine = useRef(0);
 
   const rows: DiffRow[] = useMemo(() => {
@@ -160,9 +171,20 @@ export function CoursePlateView(props: CoursePlateViewProps): React.JSX.Element 
                     onPeek={props.onPeek}
                     onGrade={props.onGrade}
                     onDown={props.onDowngrade}
+                    editorAssist={editorAssist}
+                    assistSeed={props.assist}
+                    onAssist={(next) => {
+                      setAssist(next);
+                      props.onAssist?.(next);
+                    }}
                   />
                 </Suspense>
-                <EdStatus lines={lines} savedAt={props.savedAt} peeks={props.peeks} />
+                <EdStatus
+                  lines={lines}
+                  savedAt={props.savedAt}
+                  peeks={props.peeks}
+                  assist={assist}
+                />
               </>
             )}
           />

@@ -56,4 +56,7 @@ export const grading = {
   'grading.directionOneWay': '{{label}} — 가져다 쓰는 쪽이 {{user}} 입니다.',
   'grading.directionBothNote': '양쪽 — 서로 가져다 씁니다. 순환입니다.',
   'grading.directionNoneNote': '무관 — 둘 사이에 import 가 없습니다.',
+
+  // D142 — 폴더 역할 4지의 정답 문장. 보기 라벨이 곧 지도의 층 이름이다.
+  'grading.roleNote': '이 폴더는 «{{label}}» 층입니다.',
 } as const;

@@ -270,7 +270,7 @@ export function shapeOf(text: string): string {
 function numberOccurrences(path: string, sites: DerivedSite[]): void {
   const seen = new Map<string, number>();
   for (const site of sites) {
-    const key = `${site.conceptId} ${site.shape}`;
+    const key = `${site.conceptId}\u0000${site.shape}`;
     const n = seen.get(key) ?? 0;
     seen.set(key, n + 1);
     site.occurrence = n;

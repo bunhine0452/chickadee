@@ -5,7 +5,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use rusqlite::Connection;
 
-use crate::{sqlite_msg, wrap, Migration, Out, StoreError};
+use crate::{sqlite_msg, wrap, Migration, Out, StoreError, OFF, ON};
 
 // 백업 보관 개수 (01 §7).
 const KEEP: usize = 3;
@@ -36,6 +36,34 @@ pub fn run(conn: &mut Connection, existing: Option<&Path>, list: &[Migration]) -
     if let Some(db) = existing {
         back_up(conn, db, from)?;
     }
+    // 표를 다시 만드는 이행은 외래키를 꺼야 한다 (D146). SQLite 는 표를 지우는 것을
+    // 「모든 행을 지운다」로 다루므로, 켜 둔 채 부모 표를 재생성하면 그것을 참조하는
+    // 표들의 행이 연쇄 삭제로 함께 사라진다. `foreign_keys` 는 **트랜잭션 안에서
+    // 무시되므로** 이행 파일이 스스로 끌 수 없고 루프 밖인 여기가 유일한 자리다.
+    // 대신 끝나고 `foreign_key_check` 로 확인한다 — 끄고 검사 안 하면 조용히 깨진다.
+    conn.pragma_update(None, "foreign_keys", OFF).map_err(wrap)?;
+    let out = apply(conn, from, pending);
+    conn.pragma_update(None, "foreign_keys", ON).map_err(wrap)?;
+    out?;
+    // pragma 호출로 센다 — 이 크레이트는 SQL 문자열을 갖지 않는다 (01 §1.1 · D41).
+    let mut broken = 0usize;
+    conn.pragma_query(None, "foreign_key_check", |_| {
+        broken += 1;
+        Ok(())
+    })
+    .map_err(wrap)?;
+    if broken > 0 {
+        return Err(StoreError::Migration {
+            from,
+            to: top,
+            src: format!("foreign_key_check: {broken}"),
+        });
+    }
+    Ok(())
+}
+
+/// 이행마다 트랜잭션 하나. 외래키는 부르는 쪽이 끄고 켠다.
+fn apply(conn: &mut Connection, from: i32, pending: Vec<&Migration>) -> Out<()> {
     for m in pending {
         let tx = conn.transaction().map_err(wrap)?;
         tx.execute_batch(&m.sql)

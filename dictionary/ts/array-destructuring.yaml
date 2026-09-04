@@ -12,8 +12,8 @@ confusions: [ts/index-access-pair, ts/object-destructuring]
 
 dict:
   one_liner:
-    ko: "<code>const [a, b] = xs</code> — <b>자리 순서</b>가 이름을 정한다."
-    en: "<code>const [a, b] = xs</code> — <b>the order of the slots</b> decides the names."
+    ko: "배열의 값을 <b>자리 순서</b>대로 여러 이름에 한 줄로 나눠 담는다."
+    en: "Spreads list values into several names at once, by slot order."
   why:
     ko: >-
       줄지어 있는 값에는 이름이 없고 자리만 있습니다. {{site.line}}행은 {{pick.3|code}} 의 첫째
@@ -175,6 +175,37 @@ meaning:
             code:
               - "const [a] = [1, 2]      // a 는 1, 2 는 그대로 남는다"
               - "const [a, b] = [1]      // b 는 undefined"
+
+# 빈칸형을 못 내는 사유 (D145). 「아직 안 썼다」가 아니라 「이 문법에는 뚫을 구멍이 없다」다.
+no_hole_reason: >-
+  뚫을 자리가 [a, b] 라는 모양 전체다. 안의 이름은 리포마다 다르고, 대괄호만 뚫으면 보기가 한 글자짜리 괄호 넷이 된다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 값을 한 번에 여러 이름으로 받았을까요?"
+    en: "Why does line {{site.line}} take the value apart into several names at once?"
+  choices:
+    - t:
+        ko: "돌려받은 것의 자리마다 뜻이 정해져 있어서, 그 뜻을 이름으로 바로 남기려고"
+        en: "Because each position in what came back has a fixed meaning, and the names record it right away"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 자리 순서가 바뀌면 무엇이 조용히 어긋나는지도 적어 보세요."
+        en: "That is the direction. Add what would quietly slip if the positions swapped."
+    - t:
+        ko: "이렇게 써야 배열을 받을 수 있어서"
+        en: "Because an array can only be taken this way"
+      ok: false
+      fb:
+        ko: "통째로 이름 하나에 받아도 됩니다. 그러면 아래에서 자리 번호로 부르게 되고, 번호의 뜻은 코드에 안 남습니다."
+        en: "One name for the whole thing works too. Then you call by index below, and the index keeps its meaning nowhere."
+    - t:
+        ko: "줄 수를 줄이려고"
+        en: "To use fewer lines"
+      ok: false
+      fb:
+        ko: "줄이 주는 것은 결과입니다. 얻은 것은 번호 대신 이름입니다."
+        en: "Fewer lines is the outcome. What you gained is names in place of numbers."
 
 queries:
   - { grammars: [typescript, tsx, javascript], file: ./array-destructuring.scm }

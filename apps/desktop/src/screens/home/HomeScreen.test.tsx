@@ -34,7 +34,7 @@ const DATA: HomeData = {
     {
       unitId: 1,
       name: '장바구니 담기 / 빼기',
-      rootPath: 'src/features/cart',
+      rootPath: 'src/features/cart', zero: false,
       files: 12,
       avgLayer: 3,
       state: 'done',
@@ -54,7 +54,7 @@ const DATA: HomeData = {
     {
       unitId: 2,
       name: '로그인 흐름',
-      rootPath: 'src/features/auth',
+      rootPath: 'src/features/auth', zero: false,
       files: 8,
       avgLayer: 1,
       state: 'current',
@@ -214,7 +214,7 @@ describe('HomeScreen', () => {
 
     draw({ ...DATA, newcomerFlag: 'confirmed' });
     const notice = screen.getByRole('complementary', { name: '먼저 읽을 것' });
-    expect(notice.textContent).toContain('내 코드를 교재로 씁니다');
+    expect(notice.textContent).toContain('0장 — 이 언어의 바닥');
     // 아무것도 잠그지 않는 것이 눈에 보여야 한다. 닫기 버튼은 두지 않는다(다시 켤 길이 없다).
     expect(notice.textContent).toContain('잠기는 것은 없습니다');
     expect(notice.querySelector('button')).toBeNull();

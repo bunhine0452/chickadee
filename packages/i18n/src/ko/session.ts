@@ -60,6 +60,8 @@ export const session = {
   'plate.choices': '보기',
   'plate.pickTargets': '짚을 곳',
   'plate.hole': '빈칸',
+  'plate.foldMore': '… {{n}}줄 더',
+  'plate.foldLess': '접기',
   'plate.rule': '규칙',
   'plate.afterLine': '이 줄이 끝난 뒤',
   'plate.idleNote':
@@ -119,6 +121,17 @@ export const session = {
   'prereq.beenThere': '✓ 방금 보고 왔습니다',
   'prereq.goDown': '↳ 이 판으로 내려가기 · 1문제 · 약 40초',
   'prereq.noPlate': '판 없음 · 홈에서 「판 만들기」',
+  // 합성 예제 (D137 · 방안 E-4). 사용처는 있는데 아직 못 여는 개념에 사전의 가장 단순한
+  // 모양을 먼저 보여 주고, **반드시** 내 코드의 어디에서 이걸 보게 되는지를 함께 적는다.
+  'prereq.goSimplest': '↳ 가장 단순한 모양으로 먼저 보기 · 1문제 · 약 40초',
+  'prereq.previewNote':
+    '{{name}}{{name|josa:은,는}} 내 코드에 있지만 지금 열면 모르는 문법이 여럿입니다. 가장 단순한 모양으로 먼저 보고, 그 자리는 오늘 안에 다시 만납니다.',
+  // 곁말 넷 (04 §2.4). 전에는 화면 코드에 한국어로 박혀 있었다 — D117 위반이었다.
+  'prereq.noteLayers': '{{n}}겹',
+  'prereq.noteUnprinted': '아직 안 찍음',
+  'prereq.noteAgain': '{{n}}겹 — 한 번 더',
+  'prereq.notePreview': '판이 없습니다',
+  'prereq.noteNoSite': '내 코드엔 아직 없습니다',
   'prereq.printed': '찍혀 있음',
   'prereq.note':
     '내려가도 지금 판은 사라지지 않습니다. 아래층을 마치면 <b>이 자리로 자동으로 돌아오고</b>, 돌아오면 이어보기 문단이 새로 열립니다.',
@@ -189,9 +202,20 @@ export const session = {
   'clone.peekHold': '누르고 있기 = 원본 잠깐 보기',
   'clone.grade': '채점',
   'clone.peekCount': '원본 본 횟수',
+  'clone.handPct': '손으로 앉힌 글자',
   'clone.editHint': '힌트는 감점이 아니라 이 판을 더 자주 보여줄 신호로만 쓰입니다.',
   'clone.tooShort': '아직 너무 짧습니다 ({{n}}줄). 한 번 더 누르면 그대로 채점합니다.',
   'clone.downgraded': '한 단계 쉽게 — 기록만 남고 감점은 없습니다.',
+
+  // 설정 「편집 보조」 (D143). 설정 화면의 문구지만 이 판의 어휘라 여기 둔다.
+  'clone.assistLabel': '편집 보조',
+  'clone.assistSwitch': '편집 보조',
+  'clone.assistStage': '단계에 맞춰',
+  'clone.assistOff': '전부 끄기',
+  'clone.assistNote':
+    '기본은 <b>단계에 맞춰</b>입니다. 괄호와 따옴표 자동 닫기는 1·2단계에만 켜고 백지에서는 끕니다. 이미 이 판에 친 낱말을 다시 내주는 제안 목록은 모든 단계에 켭니다.',
+  'clone.assistCost':
+    '끄면 타건 수가 늘 뿐 점수 계산은 한 자도 달라지지 않습니다. 다만 <b>같은 85%가 서로 다른 조건에서 나온 값</b>이 되므로, 판정 이의는 보조 상태별로 따로 모입니다.',
 
   'clone.stage1Name': '보고 치기',
   'clone.stage1Sub': '원본을 보면서 그대로',
@@ -287,6 +311,10 @@ export const session = {
   'map.subRadius': '정답지 = 지도의 화살표 방향 · 부분 점수',
   'map.subFlow': '정답지 = 지도의 경로',
   'map.subDirection': '5문항 · 지도를 보고 답해도 됩니다',
+  'map.kindEntry': '진입점',
+  'map.kindRole': '폴더의 역할',
+  'map.subEntry': '정답지 = 들어오는 화살표가 없는 폴더 · 부분 점수',
+  'map.subRole': '1문항 · 물어보는 폴더는 지도에서 빠져 있습니다',
   'map.sourceT2':
     '{{sub}} · 파일 {{files}} · 연결 {{edges}} · 층 {{bands}} · 화살표는 언제나 <b>가져다 쓴다(import)</b> 방향',
   'map.mapHint':

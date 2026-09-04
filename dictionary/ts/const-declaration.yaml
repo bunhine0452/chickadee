@@ -11,9 +11,12 @@ prereq: []
 confusions: []
 
 dict:
+  # 이 한 줄은 0장에서 문제보다 **먼저** 읽힌다 (D138). 그래서 정답 낱말(`const`)을
+  # 적지 않는다 — 적으면 「묶는 일을 맡은 낱말을 짚어라」가 읽기 확인 문제가 된다.
+  # 하는 일로 설명하는 편이 그 언어가 처음인 사람에게도 낫다.
   one_liner:
-    ko: "<code>const</code> 는 이름 하나에 값을 묶는다. 그 묶음은 다시 바꿀 수 없다."
-    en: "<code>const</code> binds a value to one name. That binding cannot be redone."
+    ko: "값 하나에 이름을 붙인다. 그 이름을 나중에 다른 값에 다시 묶을 수는 없다."
+    en: "Binds a value to one name. That name cannot later point at a different value."
   why:
     ko: >-
       이름이 없으면 같은 값을 쓸 때마다 다시 만들어야 하고, 이 줄이 무엇을 만드는 중인지도
@@ -171,13 +174,100 @@ meaning:
               - "const o = { a: 1 }; o.a = 2   // 된다"
               - "const o = { a: 1 }; o = {}    // TypeError"
 
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 이름 하나를 값에 <b>한 번</b> 묶습니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} binds one name to a value <b>once</b>.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "const", mono: true }
+      - t: "let"
+        mono: true
+        diag:
+          t:
+            ko: "<code>let</code> 도 이름을 묶습니다. 다른 점은 <b>나중에 다시 묶을 수 있다</b>는 것 하나예요. 이 이름에 다시 대입할 일이 없다면 <code>const</code> 가 읽는 사람에게 「여기서 정해지고 끝」이라는 사실을 더 알려 줍니다."
+            en: >-
+              <code>let</code> also binds a name. The one difference is that it <b>can be bound
+              again later</b>. When there is nothing to reassign, <code>const</code> tells the
+              reader one more thing: this is settled here and stays settled.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 다시 묶을 수 있나"
+              en: "The sharpest spot — can it be bound again"
+            code:
+              - "let x = 1;   x = 2   // 1 에서 2 로"
+              - "const y = 1; y = 2   // TypeError"
+      - t: "var"
+        mono: true
+        diag:
+          t:
+            ko: "<code>var</code> 는 중괄호를 넘어 함수 전체로 퍼집니다. <code>if</code> 블록 안에서 선언해도 블록 밖에서 읽히고, 선언 줄보다 위에서 읽으면 <code>undefined</code> 가 나와요."
+            en: >-
+              <code>var</code> spreads past the braces to the whole function. Declare it inside an
+              <code>if</code> block and it is still readable outside; read it above its own line and
+              you get <code>undefined</code>."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 어디까지 보이나"
+              en: "The sharpest spot — how far it is visible"
+            code:
+              - "if (a) { var v = 1 }   // 밖에서도 v 가 보인다"
+              - "if (a) { const c = 1 } // 밖에는 c 가 없다"
+      - t: "readonly"
+        mono: true
+        diag:
+          t:
+            ko: "<code>readonly</code> 는 클래스 필드나 타입 안에서 <b>속성</b>에 붙는 표시라 이 자리에는 오지 못합니다. 여기서 막는 것은 속성의 변경이 아니라 <b>이름을 다시 묶는 일</b>이에요."
+            en: >-
+              <code>readonly</code> marks a <b>property</b> inside a class or a type, so it cannot
+              stand here. What this line blocks is not a change to a property but <b>binding the
+              name again</b>.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 속성이냐 이름이냐"
+              en: "The sharpest spot — a property or a name"
+            code:
+              - "class C { readonly id = 1 }   // 속성에 붙는다"
+              - "const id = 1                  // 이름에 붙는다"
+
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 이 값에 이름을 붙였을까요?"
+    en: "Why does line {{site.line}} put a name on this value?"
+  choices:
+    - t:
+        ko: "아래에서 같은 값을 다시 쓰고, 이 줄이 무엇을 만드는 중인지 이름으로 남기려고"
+        en: "Because the same value is used again below, and the name records what this line is building"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이름이 없었다면 이 줄이 무엇을 만드는 중인지 어디에 적히는지도 함께 적어 보세요."
+        en: "That is the direction. Say also where it would be written down if the name were not here."
+    - t:
+        ko: "값을 못 바꾸게 얼려 두려고"
+        en: "To freeze the value so it cannot change"
+      ok: false
+      fb:
+        ko: "이름을 다시 못 묶게 할 뿐 값 안쪽은 그대로 바뀝니다. 얼리는 일과 묶는 일은 다릅니다."
+        en: "It only stops the name from being bound again; the inside of the value still changes. Freezing and binding are two different things."
+    - t:
+        ko: "타입 검사기가 이름을 요구해서"
+        en: "Because the type checker demands a name"
+      ok: false
+      fb:
+        ko: "타입 검사기는 이름을 요구하지 않습니다. 이름을 붙일지는 읽는 사람을 위한 선택입니다."
+        en: "The type checker demands no name. Whether to give one is a choice made for the reader."
+
 queries:
   - { grammars: [typescript, tsx, javascript], file: ./const-declaration.scm }
 
 examples:
   - code: "const total = 42"
-    expect: { sites: 1, form: const, picks: { 1: "const", 2: "total", 3: "42" } }
+    expect: { sites: 1, form: const, hole: "const", picks: { 1: "const", 2: "total", 3: "42" } }
   - code: "let count = 0"
-    expect: { sites: 1, form: let, picks: { 1: "let", 2: "count", 3: "0" } }
+    expect: { sites: 1, form: let, hole: "let", picks: { 1: "let", 2: "count", 3: "0" } }
   - code: "count = 1"
     expect: none

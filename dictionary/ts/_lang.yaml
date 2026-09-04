@@ -13,6 +13,17 @@ extensions:
 # 「필수 문법」 — 구멍 지도가 세는 대상이자 위상 정렬 동률 시의 순서다 (03 §6).
 essential:
   - ts/const-declaration
+  # D147 의 바닥 개념 여덟. 목록은 Exercism JS 트랙의 깊이 0~3 을 참고했고(D148) 선행은
+  # 우리가 다시 매긴다 — 그쪽 `prerequisites` 는 연습문제를 여는 조건이지 이해의 선행이
+  # 아니다. 여기 순서는 읽는 순서이고, 0장에 담기는 순서는 `prereq` 깊이가 정한다.
+  - ts/reassignment
+  - ts/boolean-literal
+  - ts/comparison
+  - ts/arithmetic
+  - ts/if-statement
+  - ts/while-loop
+  - ts/function-declaration
+  - ts/return-statement
   - ts/string-literal
   - ts/number-literal
   - ts/property-access

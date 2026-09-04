@@ -21,6 +21,8 @@ const mock = vi.hoisted(() => {
     setTheme: [] as string[],
     created: [] as unknown[],
     commands: [] as Array<[number, () => void]>,
+    /** `addCommand` 의 세 번째 인자(문맥). 제안 위젯과의 `Tab` 다툼이 여기서 갈린다. */
+    commandContext: {} as Record<number, string | undefined>,
     triggers: [] as Array<[string, string, unknown]>,
     updates: [] as unknown[],
     decorations: [] as unknown[][],
@@ -54,6 +56,7 @@ const mock = vi.hoisted(() => {
       clear: () => undefined,
     }),
     onDidChangeModelContent: on('content'),
+    onDidPaste: on('paste'),
     onDidChangeCursorPosition: on('cursor'),
     onDidCompositionStart: on('compStart'),
     onDidCompositionEnd: on('compEnd'),
@@ -62,7 +65,10 @@ const mock = vi.hoisted(() => {
     onDidFocusEditorText: on('focus'),
     onDidBlurEditorText: on('blur'),
     onDidContentSizeChange: on('size'),
-    addCommand: (key: number, fn: () => void) => state.commands.push([key, fn]),
+    addCommand: (key: number, fn: () => void, context?: string) => {
+      state.commands.push([key, fn]);
+      state.commandContext[key] = context;
+    },
     trigger: (source: string, command: string, payload: unknown) =>
       state.triggers.push([source, command, payload]),
     updateOptions: (options: unknown) => state.updates.push(options),
@@ -103,6 +109,7 @@ const mock = vi.hoisted(() => {
     state.setTheme.length = 0;
     state.created.length = 0;
     state.commands.length = 0;
+    state.commandContext = {};
     state.triggers.length = 0;
     state.updates.length = 0;
     state.decorations.length = 0;
@@ -129,7 +136,12 @@ import { tokens } from '../../styles/tokens';
 import { ClonePad, tickDecorations } from './ClonePad';
 import type { ClonePadProps } from './ClonePad';
 import { PlainPad, nextIndent } from './PlainPad';
-import { FIXED_OPTIONS, optionsFor } from './monacoOptions';
+// Vite 의 `?raw` — 이 파일의 소스를 글자 그대로 읽는다. `readFileSync` 는 jsdom 환경에서
+// `import.meta.url` 이 http URL 이라 못 쓴다.
+import clonePadSource from './ClonePad.tsx?raw';
+import { FIXED_OPTIONS, MONACO_LANGUAGES, assistFor, optionsFor } from './monacoOptions';
+import { grammarOf } from '../../screens/session/T1Plate';
+import { monacoLang } from '../../screens/clone/CoursePlateView';
 import { THEME_NAME, setInkTheme, themeData } from './monacoTheme';
 
 class FakeResizeObserver {
@@ -164,6 +176,11 @@ function props(over: Partial<ClonePadProps> = {}): ClonePadProps {
   };
 }
 
+/** `onDidChangeModelContent` 가 주는 모양 중 우리가 읽는 것만. */
+function change(text = 'x', rangeLength = 0, isFlush = false): unknown {
+  return { changes: [{ rangeLength, text }], isFlush };
+}
+
 /** Monaco 가 준 핸들러를 손으로 부른다. */
 function fire(name: string, arg?: unknown): void {
   for (const fn of mock.state.handlers[name] ?? []) fn(arg);
@@ -184,13 +201,7 @@ function created(): Record<string, unknown> {
 describe('optionsFor', () => {
   it('05 §8 「옵션 고정」 목록을 그대로 낸다', () => {
     const o = optionsFor(1);
-    expect(o.quickSuggestions).toBe(false);
-    expect(o.suggestOnTriggerCharacters).toBe(false);
-    expect(o.wordBasedSuggestions).toBe('off');
     expect(o.parameterHints).toEqual({ enabled: false });
-    expect(o.autoClosingBrackets).toBe('never');
-    expect(o.autoClosingQuotes).toBe('never');
-    expect(o.autoSurround).toBe('never');
     expect(o.formatOnType).toBe(false);
     expect(o.minimap).toEqual({ enabled: false });
     expect(o.folding).toBe(false);
@@ -222,10 +233,87 @@ describe('optionsFor', () => {
     });
   });
 
-  it('단계별 차이는 autoIndent 하나다 — 1·2단계 brackets, 3단계 none', () => {
-    expect(optionsFor(1).autoIndent).toBe('brackets');
-    expect(optionsFor(2).autoIndent).toBe('brackets');
-    expect(optionsFor(3).autoIndent).toBe('none');
+  it('제안을 켜도 Enter 는 절대 수락하지 않는다 (D143) — 필사 중 가장 위험한 오작동', () => {
+    for (const stage of [1, 2, 3] as const) {
+      expect(optionsFor(stage).acceptSuggestionOnEnter).toBe('off');
+      expect(optionsFor(stage).acceptSuggestionOnCommitCharacter).toBe(false);
+    }
+  });
+
+  it('L0a·L0b 는 3단계에서 꺼지고 L1 은 페이딩하지 않는다 (D143 매트릭스)', () => {
+    for (const stage of [1, 2] as const) {
+      const o = optionsFor(stage);
+      expect(o.autoIndent).toBe('brackets');
+      expect(o.autoClosingBrackets).toBe('languageDefined');
+      expect(o.autoClosingQuotes).toBe('languageDefined');
+      expect(o.autoSurround).toBe('languageDefined');
+    }
+    const blank = optionsFor(3);
+    expect(blank.autoIndent).toBe('none');
+    expect(blank.autoClosingBrackets).toBe('never');
+    expect(blank.autoClosingQuotes).toBe('never');
+    expect(blank.autoSurround).toBe('never');
+
+    // L1 은 세 단계 모두 같다 — 정보량 상한이 「이미 이 버퍼에 있는 낱말」이라 백지에서도
+    // 새는 것이 없고, 최종 텍스트가 같아 `pct` 가 구조적으로 안 움직인다.
+    for (const stage of [1, 2, 3] as const) {
+      const o = optionsFor(stage);
+      expect(o.wordBasedSuggestions).toBe('currentDocument');
+      expect(o.suggestOnTriggerCharacters).toBe(true);
+      expect(o.quickSuggestions).toEqual({ other: true, comments: false, strings: false });
+    }
+  });
+
+  it('한국어 주석 안에서는 제안 위젯을 아예 열지 않는다', () => {
+    expect(optionsFor(2).quickSuggestions).toMatchObject({ comments: false, strings: false });
+  });
+
+  it('설정이 off 면 세 층이 전부 꺼진다 — 0.1.0 까지의 동작', () => {
+    for (const stage of [1, 2, 3] as const) {
+      const o = optionsFor(stage, 'off');
+      expect(o.autoIndent).toBe('none');
+      expect(o.autoClosingBrackets).toBe('never');
+      expect(o.autoClosingQuotes).toBe('never');
+      expect(o.autoSurround).toBe('never');
+      expect(o.quickSuggestions).toBe(false);
+      expect(o.suggestOnTriggerCharacters).toBe(false);
+      expect(o.wordBasedSuggestions).toBe('off');
+    }
+  });
+
+  it('assistFor 가 규칙 한 줄을 그대로 낸다', () => {
+    expect(assistFor(1, 'stage')).toEqual({ indent: true, closing: true, suggest: true });
+    expect(assistFor(3, 'stage')).toEqual({ indent: false, closing: false, suggest: true });
+    expect(assistFor(1, 'off')).toEqual({ indent: false, closing: false, suggest: false });
+  });
+});
+
+/**
+ * `.tsx`/`.jsx` 에 `'tsx'` 를 주면 **모델이 조용히 plaintext 가 된다** — Monaco 0.52 에
+ * 그 언어 id 가 없기 때문이다. 표본 리포가 React 라 실제로 가장 자주 걸리던 길이었다.
+ */
+describe('Monaco 언어 id', () => {
+  it('화면 둘이 내는 id 는 ClonePad 가 싣는 여섯 안에만 있다', () => {
+    const paths = [
+      'a/b.tsx', 'a/b.jsx', 'a/b.ts', 'a/b.mts', 'a/b.cts', 'a/b.js', 'a/b.mjs', 'a/b.cjs',
+      'a/b.py', 'a/b.go', 'a/b.rs', 'a/b.sql', 'a/b.unknown', 'noext',
+    ];
+    for (const path of paths) {
+      expect(MONACO_LANGUAGES).toContain(grammarOf(path));
+      expect(MONACO_LANGUAGES).toContain(monacoLang(path));
+      expect(grammarOf(path)).toBe(monacoLang(path));
+    }
+  });
+
+  it('React 파일은 typescript 문법으로 칠한다 — tsx 라는 id 는 없다', () => {
+    expect(grammarOf('src/App.tsx')).toBe('typescript');
+    expect(grammarOf('src/App.jsx')).toBe('typescript');
+  });
+
+  it('MONACO_LANGUAGES 가 ClonePad 의 contribution import 와 같다', () => {
+    const loaded = [...clonePadSource.matchAll(/basic-languages\/([a-z]+)\/\1\.contribution/g)]
+      .map((m) => m[1]);
+    expect([...loaded].sort()).toEqual([...MONACO_LANGUAGES].sort());
   });
 });
 
@@ -297,7 +385,9 @@ describe('ClonePad — Monaco 에 무엇을 요구하는가', () => {
     expect(o['language']).toBe('python');
     expect(o['theme']).toBe(THEME_NAME.dark);
     expect(o['autoIndent']).toBe('none');
-    expect(o['quickSuggestions']).toBe(false);
+    // 백지라 자동 닫기는 꺼지고 제안은 남는다 (D143).
+    expect(o['autoClosingBrackets']).toBe('never');
+    expect(o['wordBasedSuggestions']).toBe('currentDocument');
     expect(o['ariaLabel']).toBe('필사 입력');
     expect(mock.state.themes.map(([name]) => name)).toEqual([THEME_NAME.light, THEME_NAME.dark]);
   });
@@ -338,6 +428,11 @@ describe('ClonePad — Monaco 에 무엇을 요구하는가', () => {
     expect(onDown).toHaveBeenCalledTimes(1);
     // Tab 은 포커스를 옮기지 않고 2칸을 넣는다.
     expect(mock.state.triggers).toEqual([['clonepad', 'type', { text: '  ' }]]);
+  });
+
+  it('Tab 은 제안 위젯이 없을 때만 2칸이다 (D143) — 문맥을 안 넘기면 제안을 못 받는다', () => {
+    render(<ClonePad {...props()} />);
+    expect(mock.state.commandContext[mock.api.KeyCode.Tab]).toBe('!suggestWidgetVisible');
   });
 
   it('틱이 바뀌면 데코레이션 묶음 하나를 갈아 끼운다', () => {
@@ -444,8 +539,8 @@ describe('ClonePad — Monaco 에 무엇을 요구하는가', () => {
     const onChange = vi.fn();
     render(<ClonePad {...props({ onChange })} />);
 
-    fire('content');
-    fire('content');
+    fire('content', change());
+    fire('content', change());
     vi.advanceTimersByTime(399);
     expect(onChange).not.toHaveBeenCalled();
     vi.advanceTimersByTime(1);
@@ -461,13 +556,13 @@ describe('ClonePad — Monaco 에 무엇을 요구하는가', () => {
     const onChange = vi.fn();
     const { unmount } = render(<ClonePad {...props({ onChange })} />);
 
-    fire('content');
+    fire('content', change());
     act(() => {
       fire('blur');
     });
     expect(onChange).toHaveBeenCalledTimes(1);
 
-    fire('content');
+    fire('content', change());
     unmount();
     expect(onChange).toHaveBeenCalledTimes(2);
   });
@@ -584,6 +679,65 @@ describe('PlainPad — 되돌림 스위치', () => {
     blank.selectionEnd = blank.value.length;
     fireEvent.keyDown(blank, { code: 'Enter' });
     expect(blank.value).toBe('  if (ok) {');
+  });
+
+  /**
+   * textarea 에 한 글자를 친 것처럼 값과 캐럿을 밀어 넣는다. 값을 직접 대입하면 React 의
+   * 값 추적기가 먼저 갱신돼 `onChange` 가 아예 안 뜬다 — `target` 으로 넘겨야 한다.
+   */
+  function type(box: HTMLTextAreaElement, ch: string): void {
+    const at = box.selectionStart;
+    const next = box.value.slice(0, at) + ch + box.value.slice(box.selectionEnd);
+    fireEvent.change(box, {
+      target: { value: next, selectionStart: at + 1, selectionEnd: at + 1 },
+    });
+  }
+
+  it('1·2단계는 괄호를 닫아 주고 3단계 백지는 닫지 않는다 (D143)', () => {
+    const { unmount } = render(<PlainPad {...props({ value: '', stage: 1 })} />);
+    const box = ta();
+    box.selectionStart = 0;
+    box.selectionEnd = 0;
+    type(box, '(');
+    expect(box.value).toBe('()');
+    expect(box.selectionStart).toBe(1);
+    unmount();
+
+    render(<PlainPad {...props({ value: '', stage: 3 })} />);
+    const blank = ta();
+    blank.selectionStart = 0;
+    blank.selectionEnd = 0;
+    type(blank, '(');
+    expect(blank.value).toBe('(');
+  });
+
+  it('닫는 짝 위는 지나간다 — 손으로 쳐도 두 개가 되지 않는다', () => {
+    render(<PlainPad {...props({ value: '', stage: 2 })} />);
+    const box = ta();
+    box.selectionStart = 0;
+    box.selectionEnd = 0;
+    type(box, '(');
+    type(box, ')');
+    expect(box.value).toBe('()');
+    expect(box.selectionStart).toBe(2);
+  });
+
+  it("낱말 한가운데서는 닫지 않는다 — don't 가 don''t 가 되면 안 된다", () => {
+    render(<PlainPad {...props({ value: 'dont', stage: 2 })} />);
+    const box = ta();
+    box.selectionStart = 3;
+    box.selectionEnd = 3;
+    type(box, "'");
+    expect(box.value).toBe("don't");
+  });
+
+  it('설정을 끄면 닫지 않는다', () => {
+    render(<PlainPad {...props({ value: '', stage: 1, editorAssist: 'off' })} />);
+    const box = ta();
+    box.selectionStart = 0;
+    box.selectionEnd = 0;
+    type(box, '{');
+    expect(box.value).toBe('{');
   });
 
   it('입력은 400ms 뒤에 저장되고 블러에서는 즉시 저장된다', () => {

@@ -11,7 +11,7 @@ afterEach(cleanup);
 const sheet = (unitId: number, name: string, done: number, all: number): HomeSheet => ({
   unitId,
   name,
-  rootPath: `src/${name}`,
+  rootPath: `src/${name}`, zero: false,
   files: 3,
   avgLayer: 2,
   state: done === all ? 'done' : 'current',
@@ -68,5 +68,41 @@ describe('SheetIndex', () => {
   it('대지가 0장이면 띠 자체를 내지 않는다', () => {
     const { container } = render(<SheetIndex sheets={[]} selected={null} onSelect={() => undefined} />);
     expect(container.querySelector('.sheet-index')).toBeNull();
+  });
+});
+
+describe('0장 칩 (D136)', () => {
+  const zero = (): HomeSheet => ({ ...sheet(0, '0장 — 이 언어의 바닥', 0, 8), zero: true });
+
+  it('판번호 대신 「0장」이 선다 — 리포의 기능이 아니라 프롤로그다', () => {
+    render(<SheetIndex sheets={[zero(), ...SHEETS]} selected={0} onSelect={vi.fn()} />);
+    const chips = screen.getAllByRole('tab');
+    expect(chips[0]?.textContent).toContain('0장');
+    expect(chips[0]?.textContent).not.toContain('1대');
+  });
+
+  it('읽히는 이름이 몇 장이고 끝이 있다는 것을 말한다', () => {
+    render(<SheetIndex sheets={[zero()]} selected={0} onSelect={vi.fn()} />);
+    const label = screen.getByRole('tab').getAttribute('aria-label') ?? '';
+    expect(label).toContain('0장 — 이 언어의 바닥');
+    expect(label).toContain('8');
+    expect(label).toContain('끝이 있는');
+  });
+
+  it('보통 대지는 그대로 「N대」다', () => {
+    render(<SheetIndex sheets={SHEETS} selected={1} onSelect={vi.fn()} />);
+    expect(screen.getAllByRole('tab')[0]?.textContent).toContain('1대');
+  });
+});
+
+describe('판번호 (D136)', () => {
+  const zero = (): HomeSheet => ({ ...sheet(0, '0장 — 이 언어의 바닥', 0, 8), zero: true });
+
+  it('0장은 번호를 먹지 않는다 — 첫 진짜 대지가 「1대」다', () => {
+    render(<SheetIndex sheets={[zero(), ...SHEETS]} selected={1} onSelect={vi.fn()} />);
+    const chips = screen.getAllByRole('tab');
+    expect(chips[1]?.textContent).toContain('1대');
+    expect(chips[2]?.textContent).toContain('2대');
+    expect(chips[3]?.textContent).toContain('3대');
   });
 });

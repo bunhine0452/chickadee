@@ -175,6 +175,13 @@ function conceptShape<T extends Localized>(make: (cap?: Cap) => z.ZodType<T, z.Z
       meaning: z.array(meaning).default([]),
       point: z.array(point).default([]),
       blank: z.array(blank).default([]),
+      /**
+       * 빈칸형을 **못 내는** 사유 (D145). `blank:` 와 `@hole` 을 둘 다 못 갖춘 `essential`
+       * 개념은 여기에 이유를 적는다. 「아직 안 썼다」와 「이 문법에는 뚫을 구멍이 없다」는
+       * 다른 상태인데 게이트는 그 둘을 구별할 수 없다 — 사람이 적어야 구별된다.
+       * 빈칸형이 이미 있는 개념에 남아 있으면 린트가 잡는다(`no-hole-reason-stale`).
+       */
+      no_hole_reason: z.string().min(8).nullable().default(null),
       why_gate: whyGate.optional(),
       queries: z.array(z.object({
         grammars: z.array(grammarSchema).min(1),

@@ -44,6 +44,33 @@ describe('SessionOverlay', () => {
   });
 
   describe('Esc 3단계 (05 §2.3)', () => {
+    it('⓪ 제안 위젯이 열려 있으면 아무 겹도 벗기지 않는다 (D143)', async () => {
+      const onExit = vi.fn();
+      const onCloseLadder = vi.fn();
+      const user = userEvent.setup();
+      render(<Stage ladderOpen onCloseLadder={onCloseLadder} onExit={onExit} />);
+
+      // Monaco 가 제안 목록을 띄운 상태. 이 리스너는 캡처 단계라 막지 않으면
+      // 위젯이 닫히는 대신 에디터 밖으로 튕긴다.
+      const widget = document.createElement('div');
+      widget.className = 'monaco-editor';
+      widget.innerHTML = '<div class="suggest-widget visible"></div>';
+      document.body.append(widget);
+
+      const box = screen.getByLabelText('막힌 지점');
+      box.focus();
+      await user.keyboard('{Escape}');
+
+      expect(document.activeElement).toBe(box);
+      expect(onCloseLadder).not.toHaveBeenCalled();
+      expect(onExit).not.toHaveBeenCalled();
+
+      // 위젯이 닫히면 그 다음 Esc 부터 사다리가 다시 돈다.
+      widget.remove();
+      await user.keyboard('{Escape}');
+      expect(document.activeElement).not.toBe(box);
+    });
+
     it('① 입력 중이면 입력에서만 빠져나온다', async () => {
       const onExit = vi.fn();
       const onCloseLadder = vi.fn();

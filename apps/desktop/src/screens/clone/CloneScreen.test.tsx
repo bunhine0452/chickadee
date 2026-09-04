@@ -56,6 +56,8 @@ vi.mock('./data.js', async (orig) => {
 vi.mock('../../data/settings.js', () => ({
   loadSettings: () => Promise.resolve({ theme: 'light' }),
   loadScheduler: () => Promise.resolve({}),
+  // 판이 편집 보조 설정을 스스로 읽는다 (D143). 이 화면의 시험은 그 값과 무관하다.
+  useEditorAssist: () => 'stage',
 }));
 
 vi.mock('../../flow.js', () => ({ report: () => undefined, todayKey: () => '2026-09-04' }));

@@ -10,6 +10,23 @@ import './SessionOverlay.css';
 const TABBABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
+/**
+ * 제안 위젯이 열려 있나 (05 §2.3 ⓪ · D143).
+ *
+ * 이 리스너는 **캡처 단계**라 Monaco 의 `Esc` 보다 먼저 돈다. 막지 않으면 위젯이 열린 채
+ * `Esc` 를 눌렀을 때 위젯이 닫히는 대신 에디터 밖으로 튕긴다 — 「한 번에 한 겹만 벗긴다」가
+ * 깨진다. 그래서 위젯이 있으면 **아무것도 하지 않고 지나간다**: 뒤이어 버블 단계에서
+ * Monaco 가 자기 위젯을 닫는다.
+ *
+ * `editor.createContextKey` 대신 DOM 을 보는 이유는 오버레이가 에디터 인스턴스를 모르기
+ * 때문이다 — 오버레이는 자기 안에 무엇이 걸려 있는지 모르는 채로 산다(그래서 `inert` 도
+ * 앱 셸의 몫이다). 클래스 이름은 Monaco 0.52 의 `suggestWidget.js` 가 `_show()` 에서
+ * 붙이는 것이다.
+ */
+function suggestOpen(): boolean {
+  return document.querySelector('.monaco-editor .suggest-widget.visible') !== null;
+}
+
 /** Esc 가 먼저 빠져나와야 하는 입력 (05 §2.3 ①). */
 function isTyping(el: Element | null): el is HTMLElement {
   if (!(el instanceof HTMLElement)) return false;
@@ -43,9 +60,9 @@ export interface SessionOverlayProps {
  * `.proof` — 전체화면 교정쇄 (05 §5 · 정본 §3-4).
  *
  * **Esc 의 유일한 주인이다.** 캡처 단계에서 한 번에 한 겹만 벗긴다 (05 §2.3):
- *   ① 입력 중이면 입력에서 빠져나오기 → ② 포커스가 사다리 안이면 사다리 접고
- *   「모르겠어요」로 → ③ 세션 나가기. LIFER 는 베일이 아니라 판정란 안이라 벗길 겹이
- *   아니다 (D131).
+ *   ⓪ 제안 위젯이 열려 있으면 Monaco 에게 넘기고 → ① 입력 중이면 입력에서 빠져나오기 →
+ *   ② 포커스가 사다리 안이면 사다리 접고 「모르겠어요」로 → ③ 세션 나가기.
+ *   LIFER 는 베일이 아니라 판정란 안이라 벗길 겹이 아니다 (D131).
  *
  * 포커스는 이 안에 갇힌다(첫/마지막 탭 가능 요소 순환). 홈 트리에 `inert` 를 거는 것은
  * 앱 셸의 몫이다 — 오버레이는 자기 밖의 DOM 을 모른다.
@@ -72,6 +89,9 @@ export function SessionOverlay({
       if (e.code !== 'Escape' || e.isComposing) return;
       const s = stateRef.current;
       const active = document.activeElement;
+
+      // ⓪ 제안 위젯이 열려 있으면 위젯만 닫는다 (D143). Monaco 에게 넘긴다.
+      if (suggestOpen()) return;
 
       // ① 입력에서 빠져나오기. **`blur()` 하지 않는다** — 포커스가 `<body>` 로 떨어지면
       // 05 §9 의 「포커스 유실」 게이트가 그 순간 깨지고, 다음 Esc 가 ②(사다리 접기)을

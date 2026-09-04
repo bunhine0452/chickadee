@@ -1,19 +1,19 @@
 ((member_expression
    object: (_) @pick.1
-   optional_chain: (optional_chain) @pick.2
+   optional_chain: (optional_chain) @pick.2 @hole
    property: (_) @pick.3) @site
  (#set! form "member"))
 
 ((subscript_expression
    object: (_) @pick.1
-   optional_chain: (optional_chain) @pick.2
+   optional_chain: (optional_chain) @pick.2 @hole
    index: (_) @pick.3) @site
  (#set! form "subscript"))
 
 ; JS 문법은 호출의 `?.` 도 `optional_chain` 노드다 — TS 판과 다른 유일한 패턴이다.
 ((call_expression
    function: (_) @pick.1
-   (optional_chain) @pick.2
+   (optional_chain) @pick.2 @hole
    arguments: (_) @pick.3) @site
  (#set! form "call"))
 

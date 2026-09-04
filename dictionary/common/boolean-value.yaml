@@ -1,0 +1,34 @@
+schema: 1
+id: common/boolean-value
+universal: null
+name: { ko: 참·거짓 값, en: Boolean value }
+token: null
+grammars: []
+essential: false
+difficulty: 1
+prereq: []
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "값이 둘뿐인 종류. 「그렇다」와 「아니다」 말고는 없다."
+    en: "A kind of value with only two members: it holds, or it does not."
+  why:
+    ko: >-
+      숫자와 글자는 값이 무한히 많지만 이 종류는 <b>둘뿐</b>입니다. 그래서 갈림길의 답으로
+      쓸 수 있어요 — 조건 자리에 오는 것은 결국 이 둘 중 하나로 좁혀진 물음입니다.
+    en: >-
+      Numbers and text have endless values; this kind has <b>two</b>. That is what makes it the
+      answer a fork can use — whatever sits in a condition narrows down to one of these two.
+  trace: []
+rule:
+  ko: "둘뿐이라서 갈림길의 답이 된다."
+  en: "Being two, and only two, is what lets it answer a fork."
+ok:
+  ko: "이 값은 참이거나 거짓이고, 그 사이는 없습니다."
+  en: "The value either holds or does not, with nothing in between."
+misconceptions:
+  - ko: "따옴표를 씌운 것도 같다 — 아니요. 글자가 되어 종류가 달라집니다."
+    en: "Quoting it is the same — no. It becomes text, a different kind of value."
+  - ko: "0 과 1 로 적어도 같다 — 셈에는 쓰이지만 종류가 다릅니다."
+    en: "Writing 0 and 1 is the same — those compute, but they are a different kind."

@@ -42,12 +42,30 @@ function stepUp(db: SqliteDb, m: { version: number; sql: string }): void {
   })();
 }
 
-/** `PRAGMA user_version` 보다 큰 순번만, 오름차순으로. */
+/**
+ * `PRAGMA user_version` 보다 큰 순번만, 오름차순으로.
+ *
+ * **외래키는 루프 밖에서 끈다** — Rust 러너(`crates/store/src/migrate.rs`)가 하는 그대로다
+ * (D146). 표를 다시 만드는 이행에서 켜 둔 채로 두면 `DROP TABLE` 이 `ON DELETE CASCADE` 를
+ * 먼저 돌려 자식 행이 조용히 사라진다. `PRAGMA foreign_keys` 는 트랜잭션 안에서 무시되므로
+ * 이행 파일이 스스로 끌 수 없고, 여기가 러너와 같은 자리다. 끝나고 `foreign_key_check` 로
+ * 확인하는 것까지 같아야 이 하네스가 러너의 대역 노릇을 한다.
+ */
 function runPending(db: SqliteDb): number[] {
   const from = Number((db.pragma('user_version', { simple: true }) as number | bigint) ?? 0);
   const pending = [...migrations].sort((a, b) => a.version - b.version)
     .filter((m) => m.version > from);
-  for (const m of pending) stepUp(db, m);
+  if (pending.length === 0) return [];
+  db.pragma('foreign_keys = OFF');
+  let broken: unknown[] = [];
+  try {
+    for (const m of pending) stepUp(db, m);
+    broken = db.pragma('foreign_key_check') as unknown[];
+  } finally {
+    // 되살리는 것만 `finally` 에 둔다 — 여기서 던지면 원래 오류가 가려진다.
+    db.pragma('foreign_keys = ON');
+  }
+  if (broken.length > 0) throw new Error(`foreign_key_check: ${broken.length}`);
   return pending.map((m) => m.version);
 }
 

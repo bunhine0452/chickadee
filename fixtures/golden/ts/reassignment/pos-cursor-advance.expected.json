@@ -1,0 +1,67 @@
+[
+  {
+    "queryId": "ts/reassignment",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "assign",
+    "startLine": 4,
+    "startCol": 2,
+    "endLine": 4,
+    "endCol": 17,
+    "nodeKind": "assignment_expression",
+    "inError": false
+  },
+  {
+    "queryId": "ts/reassignment",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "assign",
+    "startLine": 4,
+    "startCol": 2,
+    "endLine": 4,
+    "endCol": 8,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "ts/reassignment",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "assign",
+    "startLine": 4,
+    "startCol": 9,
+    "endLine": 4,
+    "endCol": 10,
+    "nodeKind": "=",
+    "inError": false
+  },
+  {
+    "queryId": "ts/reassignment",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "hole",
+    "form": "assign",
+    "startLine": 4,
+    "startCol": 9,
+    "endLine": 4,
+    "endCol": 10,
+    "nodeKind": "=",
+    "inError": false
+  },
+  {
+    "queryId": "ts/reassignment",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "assign",
+    "startLine": 4,
+    "startCol": 11,
+    "endLine": 4,
+    "endCol": 17,
+    "nodeKind": "identifier",
+    "inError": false
+  }
+]

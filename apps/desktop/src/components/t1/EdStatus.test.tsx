@@ -37,6 +37,26 @@ describe('EdStatus', () => {
     expect(container.textContent).not.toContain('감점');
   });
 
+  it('손으로 앉힌 글자를 백분율로 낸다 — 감점 문구는 없다 (D143)', () => {
+    const { container } = render(
+      <EdStatus
+        lines={12}
+        savedAt={null}
+        peeks={1}
+        assist={{ keyed: 88, assisted: 12, pasted: 0, accepted: 3 }}
+      />,
+    );
+    const spans = [...container.querySelectorAll('.ed-status > span')];
+    const hand = spans.find((el) => el.textContent?.startsWith('손으로 앉힌 글자'));
+    expect(hand?.textContent).toBe('손으로 앉힌 글자 88%');
+    expect(container.textContent).not.toContain('감점');
+  });
+
+  it('안 센 판에는 그 칸이 아예 없다 — 「0 %」와 「안 쟀다」는 다른 말이다', () => {
+    const { container } = render(<EdStatus lines={3} savedAt={null} peeks={0} />);
+    expect(container.textContent).not.toContain('손으로 앉힌 글자');
+  });
+
   it('키 안내 3개는 Kbd 로 찍는다', () => {
     const { container } = render(<EdStatus lines={0} savedAt={null} peeks={0} />);
     expect([...container.querySelectorAll('kbd.k')].map((el) => el.textContent)).toEqual(['Tab', '`', '⌘↵']);

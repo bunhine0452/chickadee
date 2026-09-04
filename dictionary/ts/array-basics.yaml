@@ -11,9 +11,11 @@ prereq: [ts/number-literal, ts/property-access]
 confusions: [ts/object-spread]
 
 dict:
+  # D138 — 0장에서 문제보다 먼저 읽히므로 자리 번호를 숫자로 적지 않는다. 세는 법이
+  # 곧 문항이다.
   one_liner:
-    ko: "대괄호 안에 값을 순서대로 담는다. 첫 자리는 0 번이다."
-    en: "Values go in square brackets, in order. The first slot is number 0."
+    ko: "여러 값을 대괄호 안에 순서대로 담는다. 자리마다 번호가 붙고, 번호는 맨 앞자리부터 센다."
+    en: "Values sit in square brackets, in order. Each slot is numbered from the first."
   why:
     ko: >-
       같은 종류의 값이 여럿이면 이름을 하나씩 붙일 수 없습니다. 배열은 순서를 붙여 한 이름에
@@ -155,6 +157,37 @@ meaning:
               - "xs[3]        // 읽기, 길이 그대로"
               - "xs[3] = 'd'  // 넣기, 길이가 4 가 된다"
 
+# 빈칸형을 못 내는 사유 (D145). 「아직 안 썼다」가 아니라 「이 문법에는 뚫을 구멍이 없다」다.
+no_hole_reason: >-
+  사용처 셋(리터럴·길이·자리 번호)의 뚫을 자리가 서로 다르다. 대괄호는 한 글자씩이고, length 를 지우면 그 자리에 넣을 같은 종류의 이름이 혼동 쌍에 없다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 값을 하나씩 두지 않고 배열에 담았을까요?"
+    en: "Why does line {{site.line}} hold the values in an array instead of one by one?"
+  choices:
+    - t:
+        ko: "개수가 미리 정해져 있지 않고, 순서가 뜻을 가지는 값들이라"
+        en: "Because the count is not fixed in advance and the order carries meaning"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 배열이 언제 길어지고 언제 짧아지는지도 한 줄에 적어 보세요."
+        en: "That is the direction. Add when this array grows and when it shrinks."
+    - t:
+        ko: "배열이 더 빨라서"
+        en: "Because an array is faster"
+      ok: false
+      fb:
+        ko: "속도가 이유가 되는 자리는 드뭅니다. 배열을 고르는 이유는 대개 개수와 순서입니다."
+        en: "Speed is rarely the reason. What usually picks an array is the count and the order."
+    - t:
+        ko: "값이 여러 개면 배열밖에 없어서"
+        en: "Because several values leave no option but an array"
+      ok: false
+      fb:
+        ko: "이름이 있는 여러 값이면 객체가 낫습니다. 배열은 이름이 아니라 자리로 부르는 자료입니다."
+        en: "Several named values fit an object better. An array is what you call by position, not by name."
+
 queries:
   - { grammars: [typescript, tsx, javascript], file: ./array-basics.scm }
 
@@ -164,6 +197,6 @@ examples:
   - code: "const first = xs[0]"
     expect: { sites: 1, form: index, picks: { 1: "xs", 2: "0" } }
   - code: "const n = xs.length"
-    expect: { sites: 1, form: length, picks: { 1: "xs", 2: "length" } }
+    expect: { sites: 1, form: length, picks: { 1: "xs", 2: "length", 3: "." } }
   - code: "const o = { done: true }"
     expect: none

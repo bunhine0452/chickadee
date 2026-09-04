@@ -2,7 +2,7 @@
 oculpm_plan: v1
 id: chickadee-v03-four-requests
 title: "0.3 요청 넷 — 클론 URL · 게이지 가독 · 창 크로뮴 · 정답 위치 편향"
-status: active
+status: done
 created: 2026-09-04
 updated: 2026-09-04
 owner: claude-code

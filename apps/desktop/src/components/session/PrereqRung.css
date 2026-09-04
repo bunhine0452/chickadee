@@ -52,3 +52,9 @@
 }
 
 .prereq-note { margin-top: 10px }
+
+/* 합성 판의 예고 한 줄 (D137). 본문이라 `.note` 의 `--measure`·행간을 물려받고,
+   여기서는 위 목록과의 간격만 준다. */
+.prereq-preview {
+  margin: 10px 0 0;
+}

@@ -11,7 +11,7 @@
 import { t, type MessageKey } from '@chickadee/i18n';
 import type { T2Result } from '@chickadee/grading';
 
-type Kind = 'placement' | 'radius' | 'flow' | 'direction';
+type Kind = 'placement' | 'radius' | 'flow' | 'direction' | 'entry' | 'role';
 
 /** 판 머리의 종별 이름. `card.kind` 그대로 온다. */
 const KIND_NAME_KEY: Record<Kind, MessageKey> = {
@@ -19,6 +19,9 @@ const KIND_NAME_KEY: Record<Kind, MessageKey> = {
   radius: 'map.kindRadius',
   flow: 'map.kindFlow',
   direction: 'map.kindDirection',
+  // D142 — 뒤의 둘은 지도가 리포 전체이고 노드가 폴더다 (04 §7.5·§8.5).
+  entry: 'map.kindEntry',
+  role: 'map.kindRole',
 };
 
 export const kindName = (kind: Kind): string => t(KIND_NAME_KEY[kind]);
@@ -29,6 +32,8 @@ const KIND_SUB_KEY: Record<Kind, MessageKey> = {
   radius: 'map.subRadius',
   flow: 'map.subFlow',
   direction: 'map.subDirection',
+  entry: 'map.subEntry',
+  role: 'map.subRole',
 };
 
 export const kindSub = (kind: Kind): string => t(KIND_SUB_KEY[kind]);
@@ -137,6 +142,17 @@ export function directionAsk(a: string, b: string): string {
  */
 export function directionOptions(a: string, b: string): [string, string, string, string] {
   return [`${a} → ${b}`, `${b} → ${a}`, t('grading.directionBoth'), t('grading.directionNone')];
+}
+
+// ───────── 폴더의 역할 (04 §8.5 · D142) ─────────
+
+/**
+ * 4지의 보기 — **지도의 밴드 행 라벨 넷 그대로**다. payload 에 보기를 따로 싣지 않는 이유가
+ * 이것이고(`payload.role.answer` 가 그 색인이다), 물어보는 폴더는 지도에서 빠져 있다.
+ * 층 이름은 리포마다 같은 말이라 카드에 굽지 않고 카탈로그에서 온다 (04 §7.2).
+ */
+export function roleOptions(bands: readonly { l: string }[]): { t: string }[] {
+  return bands.map((b) => ({ t: b.l }));
 }
 
 /** 아직 안 푼 문항 수. 채점 버튼이 잠긴 이유가 이 줄에 있다. */

@@ -9,8 +9,8 @@ export type { FsrsResult, GradeInput, Scheduler, SchedulerConfig, UsedGrade } fr
 export { EARLY_GRACE_MS, MAX_LAYER, applyOutcome, beginDay, isEligible, step } from './reducer.js';
 export type { LayerMove, LayerState, Outcome } from './reducer.js';
 export {
-  BUDGET_SLACK, EST_MIN, LIMIT, T1_STAGE_FACTOR, estMinFor, fitBudget, order, planSession,
-  plannedMin, t1CadenceSays, t1Est, t2CadenceSays,
+  BUDGET_SLACK, EST_MIN, LIMIT, REPRINT_GAP_DAYS, T1_STAGE_FACTOR, estMinFor, fitBudget, order,
+  planSession, plannedMin, t1CadenceSays, t1Est, t2CadenceSays,
 } from './plan.js';
 export type { Cadence, Candidate, DueConcept, PlanInput, Role } from './plan.js';
 export {

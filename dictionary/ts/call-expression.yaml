@@ -158,6 +158,37 @@ meaning:
               - "const a = console.log('x')   // undefined, 화면에는 찍힌다"
               - "const b = console.log        // 함수 자체, 아무것도 안 찍힌다"
 
+# 빈칸형을 못 내는 사유 (D145). 「아직 안 썼다」가 아니라 「이 문법에는 뚫을 구멍이 없다」다.
+no_hole_reason: >-
+  뚫을 자리가 괄호 쌍이고 그 안에는 인자가 들어 있다. 인자까지 지우면 무엇을 넘기던 줄인지가 사라지고, 여는 괄호만 지우면 보기가 한 글자짜리 넷이 된다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 이름만 적지 않고 괄호까지 붙였을까요?"
+    en: "Why does line {{site.line}} add parentheses instead of writing the name alone?"
+  choices:
+    - t:
+        ko: "함수 자체가 아니라 지금 돌린 결과가 필요해서"
+        en: "Because what is needed is the result of running it now, not the function itself"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 괄호를 지우면 이 줄의 이름에 무엇이 묶이는지도 적어 보세요."
+        en: "That is the direction. Add what the name on this line would hold if the parentheses were gone."
+    - t:
+        ko: "괄호가 없으면 문법이 깨져서"
+        en: "Because it would not parse without them"
+      ok: false
+      fb:
+        ko: "이름만 적어도 문법은 성립합니다. 그때 남는 것은 결과가 아니라 함수 그 자체입니다."
+        en: "The name alone parses fine. What you are left with is the function itself, not a result."
+    - t:
+        ko: "인자를 넘기려면 괄호가 필요해서"
+        en: "Because passing arguments needs parentheses"
+      ok: false
+      fb:
+        ko: "인자가 없어도 괄호는 붙입니다. 괄호가 말하는 것은 「지금 돌려라」입니다."
+        en: "Parentheses go on even with no arguments. What they say is “run it now”."
+
 queries:
   - { grammars: [typescript, tsx, javascript], file: ./call-expression.scm }
 

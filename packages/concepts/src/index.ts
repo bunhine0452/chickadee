@@ -33,6 +33,13 @@ export type {
   BestSite, NewCandidate, NewcomerFlag, NewcomerInput, RankInput, RankedConcept, RootResult,
   TransferSource,
 } from './new-rank.js';
+export {
+  ZERO_CHAPTER_MAX, ZERO_CHAPTER_MAX_DEPTH, ZERO_CHAPTER_ORDER, ZERO_CHAPTER_UNIT,
+  isDone as zeroChapterDone, rootCleared, shouldOpen as shouldOpenZeroChapter, zeroChapterPlates,
+} from './zero-chapter.js';
+export type {
+  ZeroChapterDoneInput, ZeroChapterInput, ZeroChapterPlate,
+} from './zero-chapter.js';
 export { topoOrder } from './prereq-graph.js';
 export type { GraphNode } from './prereq-graph.js';
 export { resolveImports } from './resolve-imports.js';
@@ -42,5 +49,8 @@ export type {
 export { registerRepo, cloneRepo, cloneTargetName, listRepos, relocateRepo, removeRepo } from './repos.js';
 export { BLAME_BUDGET_MS, fillCommits } from './blame.js';
 export type { BlameOptions } from './blame.js';
-export { deriveRepo, materializeDict, recountUnknown, runIngest, writeUnitNodes } from './ingest.js';
+export {
+  deriveRepo, loadMastery, materializeDict, recountUnknown, runIngest, writeUnitNodes,
+  writeZeroChapter,
+} from './ingest.js';
 export type { IngestOptions, IngestReport, Phase } from './ingest.js';

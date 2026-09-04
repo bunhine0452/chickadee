@@ -8,8 +8,9 @@ import { rankNewConcepts, knownSet, levelForLayer, transferFrom } from '@chickad
 import { langOf } from '@chickadee/dictionary';
 import { ipc } from '@chickadee/ipc-client';
 import {
-  LIMIT, dayKey, endOfDay, estMinFor, plannedMin, planSession, prereqAt, resumeOf, retryAt,
-  t1CadenceSays, t2CadenceSays, type Candidate, type DueConcept, type InsertAt, type Scheduler,
+  LIMIT, REPRINT_GAP_DAYS, dayKey, endOfDay, estMinFor, plannedMin, planSession, prereqAt,
+  resumeOf, retryAt, t1CadenceSays, t2CadenceSays,
+  type Candidate, type DueConcept, type InsertAt, type Scheduler,
 } from '@chickadee/scheduler';
 import {
   cardPayloadSchema, fromMasteryRow, itemStateSchema, parseJsonColumn, type CardKind,
@@ -70,6 +71,8 @@ export interface CardMaker {
 }
 
 const asLayer = (n: number): Layer => Math.max(0, Math.min(4, Math.trunc(n))) as Layer;
+
+const DAY_MS = 86_400_000;
 
 /** 만기 판정에 쓰는 오늘. 벽시계 규칙이다 (D54). */
 export function today(now: number, s: Pick<Settings, 'tz' | 'rolloverHour'>): DayKey {
@@ -196,8 +199,8 @@ async function buildQueue(
   void known;
 
   const [t1Slot, t2Slot] = await Promise.all([
-    trackSlot(repoId, 't1', day, maker),
-    trackSlot(repoId, 't2', day, maker),
+    trackSlot(repoId, 't1', day, maker, now),
+    trackSlot(repoId, 't2', day, maker, now),
   ]);
 
   // 포트는 동기라 카드를 미리 만들어 둔다 — 플래너 안에서 await 할 수 없다.
@@ -222,14 +225,26 @@ async function buildQueue(
 }
 
 /**
- * T1·T2 슬롯. 리듬이 「오늘 걸어라」고 할 때만 카드를 찾고, 없으면 **그 자리에서 만든다** —
- * 블록도 지도도 인제스트가 이미 써 뒀으므로(02 `block`·`import_edge`) 둘 다 언제든 굽는다.
+ * T1·T2 슬롯. 리듬이 「오늘 걸어라」고 할 때만 자리를 채운다.
+ *
+ * **두 트랙이 찾는 것이 다르다** — 02 §5.3 이 이미 다르게 적어 뒀고, D140 전에는 코드가
+ * 그 차이를 안 지켰다.
+ *
+ * · 2번 T1 은 「단계 미완 카드 우선, 없으면 새 함수」 — **이어서 칠 판**이다. 3단계
+ *   페이딩(04 §3.2)이 같은 카드를 일부러 다시 부르므로 있는 카드가 언제나 먼저다.
+ * · 3번 T2 는 「새 T2 1장」 — **아직 안 본 판**이다. 만기 복습은 `queue.due` 로 오므로
+ *   이 자리가 옛 판을 다시 낼 이유는 회전이 다 찼을 때뿐이다.
+ *
+ * 전에는 둘 다 「있는 카드 먼저」였고, `queue.next_track_card` 가 `LIMIT 1` 이라
+ * 카드가 한 장이라도 있으면 늘 그 한 장이었다. 그래서 `forUnit` 은 첫 판 뒤로 죽은
+ * 코드였고 D107 의 네 종은 한 번도 다 구워지지 않았다.
  */
 async function trackSlot(
   repoId: number,
   track: 't1' | 't2',
   day: DayKey,
   maker: CardMaker,
+  now: number,
 ): Promise<Candidate | null> {
   const since = shiftDay(day, -7);
   const rows = await ipc.store.query('queue.track_cadence', { repoId, track, sinceDay: since });
@@ -237,18 +252,30 @@ async function trackSlot(
   const says = track === 't1' ? t1CadenceSays(cadence) : t2CadenceSays(cadence);
   if (!says) return null;
 
-  const cards = await ipc.store.query('queue.next_track_card', { repoId, track });
+  const cards = await ipc.store.query('queue.next_track_card', {
+    repoId, track, printedBefore: now - REPRINT_GAP_DAYS[track] * DAY_MS,
+  });
   const card = cards[0];
-  if (card) {
-    return {
-      cardId: card.id,
-      conceptId: card.concept_id as ConceptId,
-      track,
-      role: card.prints > 0 ? 'review' : 'new',
-      estMin: estMinFor(track, card.prints > 0 ? 'review' : 'new', card.est_min_ema),
-    };
-  }
-  return track === 't1' ? maker.forBlock() : maker.forUnit();
+  const found: Candidate | null = card === undefined ? null : {
+    cardId: card.id,
+    conceptId: card.concept_id as ConceptId,
+    track,
+    role: card.prints > 0 ? 'review' : 'new',
+    estMin: estMinFor(track, card.prints > 0 ? 'review' : 'new', card.est_min_ema),
+  };
+
+  if (track === 't1') return found ?? maker.forBlock();
+
+  /*
+   * T2 — 구워 두고 아직 안 쓴 판이 있으면 그것, 없으면 **한 장 굽는다**(세션당 한 장).
+   * 다 구웠을 때만 7일 창 밖으로 나온 옛 판을 다시 낸다.
+   *
+   * 순서가 반대면(옛 판 먼저) 회전이 판 넉 장에서 멈춘다: 창이 7일이고 T2 자리가 이틀에
+   * 한 번이라 넷째 판을 구운 다음 날이면 첫 판이 이미 창 밖이고, 다섯째를 구울 날이
+   * 영영 오지 않는다. 대지 20짜리 리포에서 네 장은 「평생 한 장」보다 낫기만 할 뿐이다.
+   */
+  if (found?.role === 'new') return found;
+  return (await maker.forUnit()) ?? found;
 }
 
 const shiftDay = (day: string, delta: number): string => {

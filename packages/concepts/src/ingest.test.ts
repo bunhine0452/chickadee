@@ -44,7 +44,8 @@ vi.mock('@chickadee/ipc-client', () => ({
   IpcError: class extends Error {},
 }));
 
-const { deriveRepo, materializeDict, recountUnknown, writeUnitNodes } = await import('./ingest.js');
+const { deriveRepo, loadMastery, materializeDict, recountUnknown, writeUnitNodes,
+  writeZeroChapter } = await import('./ingest.js');
 
 const dict = loadDict();
 
@@ -247,6 +248,97 @@ describe('파생 한 바퀴', () => {
     const after = (db.prepare('SELECT unknown_count FROM concept_site LIMIT 1')
       .get() as { unknown_count: number }).unknown_count;
     expect(after).toBeLessThan(before);
+  });
+});
+
+describe('0장 — 이 언어의 바닥 (D136)', () => {
+  /**
+   * 뿌리 개념 사용처 하나. `seedFile` 이 심는 `ts/optional-chaining` 은 선행 깊이 2 라
+   * 0장에 들지 않는다 — 0장은 깊이 ≤ 1 만 담는다. 「내 코드에 기초 개념이 없는 게 아니라
+   * 묻혀 있다」(방안 E)를 그대로 옮기면 이 `const` 한 줄이 그 묻혀 있던 것이다.
+   */
+  function seedRoot(id: number, path: string, line: string): void {
+    db.prepare(statements['facts.file_upsert']).run(toSqliteBindings({
+      repoId: 1, path, lang: null, grammar: 'typescript', lineCount: 1, byteSize: line.length,
+      contentHash: `root-${id}`, headOid: `root-${id}`, isDirty: false, parseQuality: 'ok',
+      skipReason: null, updatedAt: T,
+    }));
+    const eq = line.indexOf('=');
+    const caps = [
+      { name: 'site', form: 'const', start: 0, end: line.length - 1, kind: 'lexical_declaration' },
+      { name: 'pick.1', form: 'const', start: 0, end: 5, kind: 'const' },
+      { name: 'pick.2', form: 'const', start: 6, end: eq - 1, kind: 'identifier' },
+      { name: 'pick.3', form: 'const', start: eq + 2, end: line.length - 1, kind: 'number' },
+    ];
+    for (const cap of caps) {
+      db.prepare(statements['facts.capture_insert']).run(toSqliteBindings({
+        repoId: 1, path, queryId: 'ts/const-declaration', matchId: id, patternIndex: 0,
+        name: cap.name, form: cap.form, nodeKind: cap.kind, inError: false,
+        startByte: cap.start, endByte: cap.end, startLine: 1, endLine: 1,
+        startCol: cap.start, endCol: cap.end, excerpt: line.slice(cap.start, cap.end),
+      }));
+    }
+  }
+
+  beforeEach(async () => {
+    await materializeDict(dict, T);
+    seedRoot(1, 'src/features/cart/limits.ts', 'const MAX = 10\n');
+    seedRoot(2, 'src/features/cart/page.ts', 'const MIN = 20\n');
+    seedRoot(3, 'src/features/cart/view.ts', 'const TOP = 30\n');
+    await deriveRepo(dict, options);
+    await writeUnitNodes(1);
+    await recountUnknown(dict, 1, []);
+  });
+
+  const manual = (): { id: number; order_idx: number } | undefined =>
+    db.prepare("SELECT id, order_idx FROM unit WHERE source = 'manual'").get() as
+      { id: number; order_idx: number } | undefined;
+
+  test('그 언어를 하나도 안 찍었으면 열린다', async () => {
+    const n = await writeZeroChapter(dict, 1, []);
+    expect(n).toBeGreaterThan(0);
+    const unit = manual();
+    expect(unit).toBeDefined();
+    // 색인 띠 맨 앞에 서야 한다 — `home.units` 가 order_idx 로 정렬한다.
+    expect(unit?.order_idx).toBeLessThan(0);
+  });
+
+  test('이미 그 언어를 찍었으면 열지 않는다', async () => {
+    const known = [...dict.langs.values()].flatMap((m) => m.essential)
+      .map((conceptId) => ({ conceptId, layer: 4, universalId: null }));
+    expect(await writeZeroChapter(dict, 1, known)).toBe(0);
+    expect(manual()).toBeUndefined();
+  });
+
+  test('한 번 열린 대지는 겹이 쌓여도 남는다 — 끝나도 사라지지 않는다', async () => {
+    await writeZeroChapter(dict, 1, []);
+    const before = manual()?.id;
+    const known = [...dict.langs.values()].flatMap((m) => m.essential)
+      .map((conceptId) => ({ conceptId, layer: 4, universalId: null }));
+    await writeZeroChapter(dict, 1, known);
+    expect(manual()?.id).toBe(before);
+  });
+
+  test('재인제스트가 0장 대지를 지우지 않는다', async () => {
+    await writeZeroChapter(dict, 1, []);
+    const before = manual()?.id;
+    // 파생을 한 바퀴 더 돈다 — `derive.unit_delete_missing` 이 여기서 돈다.
+    await deriveRepo(dict, options);
+    expect(manual()?.id).toBe(before);
+  });
+
+  test('담긴 개념은 전부 스티커가 된다', async () => {
+    const n = await writeZeroChapter(dict, 1, []);
+    const rows = db.prepare(
+      "SELECT concept_id, track FROM unit_node WHERE unit_id = ?",
+    ).all(manual()?.id) as { concept_id: string; track: string }[];
+    expect(rows).toHaveLength(n);
+    for (const row of rows) expect(row.track).toBe('t0');
+  });
+
+  test('원장의 실제 겹을 읽는다 — 빈 배열을 넘기지 않는다', async () => {
+    const rows = await loadMastery(dict);
+    expect(Array.isArray(rows)).toBe(true);
   });
 });
 

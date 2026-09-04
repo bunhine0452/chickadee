@@ -170,6 +170,37 @@ meaning:
               - "try { a(); b() } catch (e) { c() }"
               - "// 순서: a → c → 그다음 줄  (b 는 영영 건너뛴다)"
 
+# 빈칸형을 못 내는 사유 (D145). 「아직 안 썼다」가 아니라 「이 문법에는 뚫을 구멍이 없다」다.
+no_hole_reason: >-
+  이 개념은 낱말 하나가 아니라 try 와 catch 두 블록의 짝이다. try 만 뚫으면 남아 있는 catch 가 정답을 그대로 알려 준다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 이 부분만 따로 감쌌을까요?"
+    en: "Why does line {{site.line}} wrap just this part?"
+  choices:
+    - t:
+        ko: "여기서 일이 어긋나도 프로그램을 멈추지 않고 이어 갈 방법이 있어서"
+        en: "Because there is a way to carry on here without stopping the program when things go sideways"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 잡은 다음에 무엇을 하기로 했는지도 한 줄에 적어 보세요."
+        en: "That is the direction. Add what was decided to happen after it is caught."
+    - t:
+        ko: "감싸면 오류가 사라져서"
+        en: "Because wrapping makes the error go away"
+      ok: false
+      fb:
+        ko: "오류는 사라지지 않고 받을 자리가 생길 뿐입니다. 받은 뒤에 무엇을 할지가 이 줄의 뜻입니다."
+        en: "The error does not go away; a place to receive it appears. What happens next is the point."
+    - t:
+        ko: "함수 전체를 감싸는 것이 원칙이라"
+        en: "Because the rule is to wrap the whole function"
+      ok: false
+      fb:
+        ko: "넓게 감쌀수록 어디서 어긋났는지가 흐려집니다. 좁게 감싼 자리가 곧 「여기가 위험하다」는 표시입니다."
+        en: "The wider the wrap, the blurrier the origin. A narrow wrap is itself a mark saying “this part is risky”."
+
 queries:
   - { grammars: [typescript, tsx, javascript], file: ./try-catch.scm }
 

@@ -14,7 +14,7 @@ import { promote, type AstPair } from './t1-ast.js';
 import { compareLine } from './t1-line.js';
 import { buildProt, freeIdents, origIdents } from './t1-prot.js';
 import { judgeRenames } from './t1-rename.js';
-import type { Reason, ReasonCode, Status, T1Result, T1Row } from './t1-types.js';
+import type { AssistCount, Reason, ReasonCode, Status, T1Result, T1Row } from './t1-types.js';
 
 export { advanceThreshold };
 
@@ -32,6 +32,13 @@ export interface T1Input {
   /** 원본 잠깐 보기 횟수. 감점이 아니라 「더 자주 보여줄 신호」다 (04 §4.6). */
   peeks: number;
   downgraded: boolean;
+  /**
+   * 편집 보조가 앉힌 글자 (D143). **`peeks` 와 같은 규칙** — 감점 없음, 기록만.
+   * 아래 `gradeT1` 이 이 값을 그대로 실어 내보낼 뿐 **점수 계산에는 한 번도 읽지 않는다.**
+   * 골든(04 §9)이 그대로 통과해야 하고, 이의의 `patternKey`(04 §5)가 서로 다른 보조
+   * 조건에서 나온 판정을 섞지 않으려면 점수는 불변이어야 하기 때문이다.
+   */
+  assist?: AssistCount;
   /** 양쪽 AST. 없으면 정규식층만 돈다(언어 폴백). */
   ast?: AstPair;
   /** AST 를 못 쓴 이유 — 화면이 「이 언어는 글자 비교만 합니다」를 낼 근거 (04 §4.5). */
@@ -176,6 +183,7 @@ export function gradeT1(input: T1Input): T1Result {
     verdict: verdictOf(pct, passPct, swap),
     peeks: input.peeks,
     downgraded: input.downgraded,
+    ...(input.assist === undefined ? {} : { assist: input.assist }),
     engine: rows.some((r) => r.engine === 'ast') ? 'ast' : 'regex',
     elapsedMs: clock() - started,
     appeals: 0,
@@ -203,6 +211,7 @@ export function toT1Detail(
     extra: result.n.extra,
     peeks: result.peeks,
     downgraded: result.downgraded,
+    ...(result.assist === undefined ? {} : { assist: result.assist }),
     stageBefore: result.stage,
     stageAfter: nextStage(result.stage, result.verdict),
     appealedLines: [...appealedLines],

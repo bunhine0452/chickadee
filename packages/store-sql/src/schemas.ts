@@ -162,7 +162,7 @@ export const edgeKindSchema = z.enum(['static', 'type', 'dynamic', 'http']);
  */
 const t2PayloadSchema = z.object({
   track: z.literal('t2'),
-  kind: z.enum(['placement', 'radius', 'flow', 'direction']),
+  kind: z.enum(['placement', 'radius', 'flow', 'direction', 'entry', 'role']),
   q: z.string(),
   hint: z.string(),
   bands: z.array(z.object({ l: z.string(), s: z.string() })),
@@ -181,12 +181,24 @@ const t2PayloadSchema = z.object({
   pairs: z.array(z.object({
     a: z.string(), b: z.string(), answer: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3)]),
   })).optional(),
+  role: z.object({ folder: z.string(), answer: int() }).optional(),
 });
 
 /** `card.payload_json` (02 §8.2 · 05 가 그대로 렌더한다). */
 export const cardPayloadSchema = z.discriminatedUnion('track', [t0PayloadSchema, t1PayloadSchema, t2PayloadSchema]);
 
 // ───────── 세션 · 원장 ─────────
+
+/**
+ * 이 판의 글자가 어디서 왔나 (D143). 감점 없음 — 기록과 스케줄러 신호다.
+ *
+ * 스키마가 모르는 키는 **떼어 낸다**. 타입만 넣고 여기를 빠뜨리면 저장은 되는데 읽을 때
+ * 조용히 사라지고, `Covers<…>` 는 인터페이스가 스키마 출력을 확장하는 방향이라 컴파일도
+ * 안 깨진다 — 그래서 이 세 줄이 타입보다 먼저다.
+ */
+const assistCountSchema = z.object({
+  keyed: int(), assisted: int(), pasted: int(), accepted: int(),
+});
 
 /** `session_item.state_json` — 판 내부 진행. */
 export const itemStateSchema = z.object({
@@ -200,6 +212,7 @@ export const itemStateSchema = z.object({
   t1Draft: z.string().optional(),
   t1Stage: stageSchema.optional(),
   peeks: int().optional(),
+  assist: assistCountSchema.optional(),
   t2Sel: z.array(z.string()).optional(),
   hints: int().optional(),
 });
@@ -220,7 +233,8 @@ export const reviewDetailSchema = z.discriminatedUnion('track', [
   z.object({
     track: z.literal('t1'),
     meaning: z.number(), total: int(), exact: int(), equiv: int(), differ: int(), missing: int(), extra: int(),
-    peeks: int(), downgraded: z.boolean(), stageBefore: stageSchema, stageAfter: stageSchema,
+    peeks: int(), assist: assistCountSchema.optional(),
+    downgraded: z.boolean(), stageBefore: stageSchema, stageAfter: stageSchema,
     appealedLines: z.array(int()), whyText: z.string(), whyPick: int().nullable(),
   }),
   z.object({
@@ -283,6 +297,8 @@ export const settingsSchema = z.object({
   excludeGlobs: z.array(z.string()),
   locale: z.enum(['ko', 'en']),
   tutorialSeen: z.boolean(),
+  declaredNewcomer: z.boolean(),
+  rootCleared: z.boolean(),
   dictLangs: z.array(z.string()),
   lastRepoId: z.number().nullable(),
 });
@@ -308,6 +324,8 @@ export const SETTINGS_KEYS = {
   excludeGlobs: 'exclude_globs',
   locale: 'locale',
   tutorialSeen: 'tutorial_seen',
+  declaredNewcomer: 'declared_newcomer',
+  rootCleared: 'root_cleared',
   dictLangs: 'dict_langs',
   lastRepoId: 'last_repo_id',
 } as const satisfies Record<keyof Settings, string>;

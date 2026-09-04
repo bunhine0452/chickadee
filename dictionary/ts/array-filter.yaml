@@ -8,12 +8,12 @@ framework: null
 essential: true
 difficulty: 2
 prereq: [ts/arrow-function, ts/array-basics]
-confusions: [ts/array-map-immutable, ts/array-foreach]
+confusions: [ts/array-map-immutable, ts/array-foreach, ts/array-push-mutate]
 
 dict:
   one_liner:
-    ko: "<code>filter</code> 는 조건이 참인 항목만 남긴 새 배열을 만든다. 길이가 줄 수 있다."
-    en: "<code>filter</code> builds a new array of the items the condition keeps. It can be shorter."
+    ko: "조건이 참인 항목만 남긴 새 배열을 만든다. 길이가 줄 수 있다."
+    en: "Builds one new list holding only items the condition keeps. It can be shorter."
   why:
     ko: >-
       목록에서 「끝난 것만」 「내 것만」 을 보여 주려면 원본을 지우지 않고 <b>골라낸 새 배열</b>이
@@ -157,12 +157,99 @@ meaning:
               - "const a = [1,2]"
               - "a.filter(() => true) === a   // false"
 
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 조건을 통과한 것만 남긴 <b>새 배열</b>을 만듭니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} builds <b>a new array</b> holding only
+        what passes the condition.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "filter", mono: true }
+      - t: "map"
+        mono: true
+        diag:
+          t:
+            ko: "<code>map</code> 은 항목 수를 <b>그대로 두고</b> 값만 바꿉니다. 조건을 넘긴 콜백을 <code>map</code> 에 주면 <code>true</code>·<code>false</code> 가 든 같은 길이의 배열이 나와요."
+            en: >-
+              <code>map</code> <b>keeps the item count</b> and changes only the values. Hand a
+              condition callback to <code>map</code> and you get an array of the same length filled
+              with <code>true</code> and <code>false</code>.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 개수가 주나"
+              en: "The sharpest spot — does the count drop"
+            code:
+              - "[1,2,3].filter((n) => n > 1)   // [2, 3]"
+              - "[1,2,3].map((n) => n > 1)      // [false, true, true]"
+      - t: "forEach"
+        mono: true
+        diag:
+          t:
+            ko: "<code>forEach</code> 는 하나씩 돌기만 하고 <b>아무것도 돌려주지 않습니다</b>(<code>undefined</code>). 이 줄처럼 결과를 이름에 묶는 자리에서는 그 이름이 <code>undefined</code> 가 돼요."
+            en: >-
+              <code>forEach</code> only goes round one at a time and <b>hands nothing back</b>
+              (<code>undefined</code>). On a line like this one, which binds the result to a name,
+              that name would end up <code>undefined</code>.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 돌려주는 게 있나"
+              en: "The sharpest spot — is anything handed back"
+            code:
+              - "const a = xs.filter(f)    // 배열"
+              - "const b = xs.forEach(f)   // undefined"
+      - t: "push"
+        mono: true
+        diag:
+          t:
+            ko: "<code>push</code> 는 <b>원래 배열을 직접 늘리고</b> 새 길이(숫자)를 돌려줍니다. 골라내는 일이 아니라 덧붙이는 일이고, 원본이 그 자리에서 바뀌어요."
+            en: >-
+              <code>push</code> <b>grows the original array in place</b> and returns the new length,
+              a number. That is appending, not selecting, and the original changes right there.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 원본을 건드리나"
+              en: "The sharpest spot — does it touch the original"
+            code:
+              - "xs.filter(f)   // 원본 그대로, 새 배열"
+              - "xs.push(x)     // 원본이 길어진다"
+
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 항목을 지우지 않고 남길 것만 새로 모았을까요?"
+    en: "Why does line {{site.line}} gather what stays instead of removing what goes?"
+  choices:
+    - t:
+        ko: "원본은 그대로 두고, 이 자리에서 필요한 목록만 따로 얻으려고"
+        en: "To leave the original alone and get, right here, only the list this spot needs"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 원본이 나중에 다시 필요해지는 자리를 하나 떠올려 적어 보세요."
+        en: "That is the direction. Name one later spot where the original is needed again."
+    - t:
+        ko: "배열에서는 항목을 지울 수 없어서"
+        en: "Because items cannot be removed from an array"
+      ok: false
+      fb:
+        ko: "지울 수 있습니다(<code>splice</code>). 다만 그 배열을 보고 있는 쪽이 함께 바뀝니다."
+        en: "They can (<code>splice</code>). It just changes the array for everyone watching it."
+    - t:
+        ko: "<code>filter</code> 가 더 짧아서"
+        en: "Because <code>filter</code> is shorter"
+      ok: false
+      fb:
+        ko: "짧은 것은 결과입니다. 고르는 이유는 원본을 건드리지 않는다는 것입니다."
+        en: "Short is the outcome. The reason for choosing it is that the original is left untouched."
+
 queries:
   - { grammars: [typescript, tsx, javascript], file: ./array-filter.scm }
 
 examples:
   - code: "const open = tasks.filter((t) => !t.done)"
-    expect: { sites: 1, form: filter, picks: { 1: "tasks", 2: "filter" } }
+    expect: { sites: 1, form: filter, hole: "filter", picks: { 1: "tasks", 2: "filter" } }
   - code: "const mine = list.filter(x => x.owner === me)"
     expect: { sites: 1, picks: { 1: "list" } }
   - code: "const names = users.map((u) => u.name)"

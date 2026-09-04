@@ -53,7 +53,7 @@ const DATA: HomeData = {
     {
       unitId: 1,
       name: 'cart add / remove',
-      rootPath: 'src/features/cart',
+      rootPath: 'src/features/cart', zero: false,
       files: 12,
       avgLayer: 3,
       state: 'current',

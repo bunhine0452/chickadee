@@ -6,7 +6,7 @@
  * 한다. 이 파일이 하는 일은 세 화면을 잇고 키를 받는 것뿐이다.
  */
 import { FlatButton, Kbd, PressButton } from '@chickadee/ui';
-import { canAppeal, checkWhy, type Question, type T1Result } from '@chickadee/grading';
+import { canAppeal, checkWhy, type AssistCount, type Question, type T1Result } from '@chickadee/grading';
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { t, type MessageKey } from '@chickadee/i18n';
 
@@ -21,6 +21,7 @@ import { ScoreCard } from '../../components/t1/ScoreCard.js';
 import { SplitPane } from '../../components/t1/SplitPane.js';
 import { Stepper } from '../../components/t1/Stepper.js';
 import { WhyGate } from '../../components/t1/WhyGate.js';
+import { useEditorAssist } from '../../data/settings.js';
 import type { Plate } from '../../data/session.js';
 import type { PlateResult } from '../../store.js';
 import { askHint, askText, tagOf, whyOf, wrongCount } from './t1Copy.js';
@@ -60,6 +61,14 @@ export interface T1PlateProps {
   peeks: number;
   onPeek: (on: boolean) => void;
   peeking: boolean;
+  /**
+   * 이 판의 글자가 어디서 왔나 (D143). `peeks` 와 같은 규칙 — **감점 없음, 기록만.**
+   *
+   * 둘 다 선택이다. 값이 없으면 이 판이 자기 안에서만 세고(화면에는 그대로 보인다),
+   * 있으면 `ItemState.assist` 로 이어진다 — 그 저장·복원 배선은 `data/session.ts` 의 몫이다.
+   */
+  assist?: AssistCount | undefined;
+  onAssist?: ((next: AssistCount) => void) | undefined;
   ticks: Readonly<Record<number, '' | 'exact' | 'equiv' | 'differ'>>;
   onLeaveLine: (index: number, text: string) => void;
   onGrade: () => void;
@@ -78,6 +87,8 @@ export function T1Plate(props: T1PlateProps): React.JSX.Element | null {
   const payload = plate.payload.track === 't1' ? plate.payload : null;
   const [filter, setFilter] = useState<DiffFilterValue>('ne');
   const [revealed, setRevealed] = useState(false);
+  const [assist, setAssist] = useState<AssistCount | undefined>(props.assist);
+  const editorAssist = useEditorAssist();
   const curLine = useRef(0);
 
   const original = useMemo(() => payload?.original ?? [], [payload]);
@@ -198,9 +209,20 @@ export function T1Plate(props: T1PlateProps): React.JSX.Element | null {
                     onPeek={props.onPeek}
                     onGrade={props.onGrade}
                     onDown={props.onDowngrade}
+                    editorAssist={editorAssist}
+                    assistSeed={props.assist}
+                    onAssist={(next) => {
+                      setAssist(next);
+                      props.onAssist?.(next);
+                    }}
                   />
                 </Suspense>
-                <EdStatus lines={lines} savedAt={props.savedAt} peeks={props.peeks} />
+                <EdStatus
+                  lines={lines}
+                  savedAt={props.savedAt}
+                  peeks={props.peeks}
+                  assist={assist}
+                />
               </>
             )}
           />
@@ -291,10 +313,20 @@ export function T1Plate(props: T1PlateProps): React.JSX.Element | null {
   );
 }
 
-/** 경로 확장자 → Monaco 언어 id. `session-flow.grammarOf` 와 같은 표를 쓴다 (03 §2.1). */
-function grammarOf(path: string): string {
+/**
+ * 경로 확장자 → **Monaco 언어 id**.
+ *
+ * `session-flow.grammarOf` 와 **같은 표가 아니다.** 저쪽은 tree-sitter 문법 키(D19)라
+ * `.tsx` 에 `'tsx'` 를 주는 것이 맞지만, Monaco 0.52 에는 `'tsx'` 라는 언어 id 가 없다 —
+ * `basic-languages/typescript` 가 등록하는 것은 `'typescript'` 하나다. 등록 안 된 id 로
+ * `setModelLanguage` 를 부르면 모델이 plaintext 가 되어 **React 파일 필사의 2·3단계
+ * 구문 색이 통째로 죽는다.** 두 표를 「같다」고 적어 두었던 것이 이 버그의 출처다.
+ *
+ * 낼 수 있는 id 는 `ClonePad.tsx` 가 싣는 `basic-languages` 여섯뿐이다.
+ */
+export function grammarOf(path: string): string {
   const ext = path.slice(path.lastIndexOf('.'));
-  if (ext === '.tsx' || ext === '.jsx') return 'tsx';
+  if (ext === '.tsx' || ext === '.jsx') return 'typescript';
   if (ext === '.ts' || ext === '.mts' || ext === '.cts') return 'typescript';
   if (ext === '.js' || ext === '.mjs' || ext === '.cjs') return 'javascript';
   if (ext === '.py') return 'python';

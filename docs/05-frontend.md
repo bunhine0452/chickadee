@@ -105,11 +105,12 @@ interface UiSlice { screen: Screen; session: SessionState | null; lifer: LiferCa
 
 `SessionOverlay` 가 `keydown` 캡처 단계에서 Esc 를 **유일하게** 처리한다.
 
+0. `.monaco-editor .suggest-widget.visible` 이 있으면 → **아무것도 하지 않고 지나간다**. 뒤이어 버블 단계에서 Monaco 가 자기 제안 위젯을 닫는다 (D143). 이 단이 없으면 캡처 리스너가 위젯보다 먼저 돌아 위젯이 열린 채 Esc 를 누른 학습자가 에디터 밖으로 튕긴다.
 1. `document.activeElement` 가 `textarea`/`input`/Monaco 이면 → 오버레이 자신으로 포커스를 옮기고 끝(입력을 빠져나온다. `blur()` 하지 않는다 — D111).
 2. 사다리(`ReprintLadder`)가 열려 있고 **포커스가 사다리 안**이면 → 사다리를 접고 포커스를 「모르겠어요」 버튼으로.
 3. 그 외 → `session.persist()` 후 즉시 `ui.session = null`. **확인 모달 없음.** 토스트 「세션에서 나왔습니다. 진행은 저장됐습니다. 돌아오면 N번째 판부터」.
 
-1~2 는 "한 번에 한 겹만 벗긴다"이고, 목업의 `if (typing) blur` 를 한 겹 더 늘린 것이다. 「나가기」 버튼은 3 만 부른다. **LIFER 는 여기 없다** — 베일이 아니라 판정란 안의 기록이라 벗길 겹이 아니다 (D131).
+0~2 는 "한 번에 한 겹만 벗긴다"이고, 목업의 `if (typing) blur` 를 두 겹 더 늘린 것이다. 「나가기」 버튼은 3 만 부른다. **LIFER 는 여기 없다** — 베일이 아니라 판정란 안의 기록이라 벗길 겹이 아니다 (D131).
 
 ### 2.4 창 크기 · 다중 리포
 
@@ -254,6 +255,9 @@ interface SessionSlice {
 | `.gaps` `.gap` | `GapsPanel` | `gaps`, `onMake` | hot | 「판 만들기」 `<button>` | — |
 | `.panel.locked` | `LockedPanel` | `title`, `body` | — | `<section aria-labelledby>`; 「판이 없는 문법」 옆. T1 후보가 0이면 뜨고, 열리면 사라진다 (D96) | — |
 | `.sheet-index` `.sx` | `SheetIndex` | `sheets`, `selected`, `onSelect` | — | `role=tablist` · 칩은 `role=tab` (roving tabindex), 잘리는 이름 대신 `aria-label` 이 판번호·이름·진행을 든다 (D133) | `← →` 이동·자동 활성 · `Home`/`End` |
+| `.sx-zero` | `SheetIndex` | `sheet.zero` | — | 0장 칩 — 판번호 자리가 「0장」이고 **판번호를 먹지 않는다**(`sheetNo()` 가 0장을 건너뛰어 첫 진짜 대지가 언제나 1대다). 색은 주지 않는다: 트랙 색은 의미가 정해져 있고 0장은 트랙이 아니다 (D136) | 다른 칩과 같다 |
+| `.prereq-preview` | `PrereqRung` | `row.state==='preview'` · `row.previewSiteId` | — | 합성 판의 예고 한 줄 (D137 · 방안 E-4). `.note` 를 물려받아 `--measure` 36em 이다. **`previewSiteId` 가 없으면 그리지 않는다** — 예고할 자리가 없는 합성은 만들지 않는다. 이미 보고 온 개념도 되풀이하지 않는다. 개념 이름의 `<code>` 서식은 평문 문장에 넣기 전에 벗긴다 | 단추는 「가장 단순한 모양으로 먼저 보기」, 나머지는 `gap` 과 같다 |
+| `.sheet-lead` | `Sheet` | `sheet.zero` | — | 0장 도입 한 문단. `.note` 를 물려받아 `--measure` 36em·행간 1.7 이다. 몇 장이고 언제 끝나는지를 먼저 말하고, 끝나면 「언제든 다시 열 수 있습니다」로 바뀐다. 대지 머리의 `.sheet-meta` 도 0장에서는 경로·파일 수 대신 장수를 낸다 (D136) | — |
 | `.sheet` `.sheet-head` | `Sheet` | `no`, `title`, `meta`, `state:'done'\|'current'\|'locked'`, `avgLy`, `tilt` | — | `<article aria-labelledby>`, 색인이 고른 **한 장만** 그려지고 `role=tabpanel` 에 담긴다 (D133) | — |
 | `.rail` `.ps-rail` | `InkRail` | `ly`, `label`, `plus?` | plus on | `aria-hidden` (겹은 `Passes`·텍스트가 전달) | — |
 | `.node` | `Node` | `state`, `track`, `glyph`, `title`, `pass`, `seed`(dy/rot) | open | `<button aria-expanded>`; locked 는 `aria-disabled` (포커스 가능, 이유 설명). 잠긴 노드는 흔들지 않고 상세에 이유만 연다 | Enter/Space=상세 |
@@ -323,7 +327,9 @@ interface SessionSlice {
 | T0 사다리 | `←` `→` · `Home`/`End` | 단(tab) 이동, `Enter`/`Space` 로 열기 | tablist 관례 |
 | T0 아래층 | `B` (`KeyB`) | 답하지 않고 위로 | 아래층 아닐 때 무시 |
 | T1 편집 | `Enter` (에디터 밖) | 에디터로 포커스 | — |
-| T1 편집 | `Tab` | 2칸 들여쓰기 (**3단계에선 자동 들여쓰기만 제거, Tab 은 유지**)(확정) | 포커스 이동은 `Esc` 후 `Tab` |
+| T1 편집 | `Tab` | 2칸 들여쓰기 (**3단계에선 자동 들여쓰기만 제거, Tab 은 유지**)(확정). 제안 위젯이 열려 있으면 대신 제안을 수락한다 (D143) | `addCommand(KeyCode.Tab, …, '!suggestWidgetVisible')` — 문맥을 안 넘기면 이 명령이 언제나 이겨 제안을 영영 못 받는다. 포커스 이동은 `Esc` 후 `Tab` |
+| T1 편집 | `Enter` (제안 위젯이 열린 채) | **줄바꿈.** 제안을 수락하지 않는다 | `acceptSuggestionOnEnter:'off'` + `acceptSuggestionOnCommitCharacter:false` (D143). Monaco 기본값 `'on'` 을 그대로 두면 필사 중 줄바꿈이 조용히 식별자로 바뀐다 |
+| T1 편집 | `Esc` (제안 위젯이 열린 채) | 위젯만 닫는다 | §2.3 ⓪ |
 | T1 편집 | `` ` `` (`Backquote`) 홀드 | 원본 잠깐 보기 (keyup·window blur 에 해제) | 3단계(백지)에도 허용 — 횟수만 기록 |
 | T1 편집 | `⌘/Ctrl+Enter` | 채점 | — |
 | T1 편집 | `⌘/Ctrl+.` | 한 단계 쉽게 | — |
@@ -345,9 +351,21 @@ interface SessionSlice {
 
 ## 8. Monaco 통합 (T1)
 
-- **로드**: `monaco-editor/esm/vs/editor/editor.api` + `basic-languages/{typescript,javascript,python,rust,swift,dart,sql}/*.contribution` 만. **언어 서비스 워커(`ts.worker`)는 싣지 않는다** — 자동완성·IntelliSense 는 필사의 목적을 무너뜨린다. 워커는 `editor.worker?worker` 하나, `self.MonacoEnvironment = { getWorker: () => new EditorWorker() }`. 전부 번들이라 오프라인. `ClonePad` 는 `React.lazy` 로 T1 판을 걸 때만 내려온다(§1.3).
-- **옵션 고정**(`t1/monacoOptions.ts`): `quickSuggestions:false, suggestOnTriggerCharacters:false, wordBasedSuggestions:'off', parameterHints:{enabled:false}, autoClosingBrackets:'never', autoClosingQuotes:'never', autoSurround:'never', formatOnType:false, minimap:{enabled:false}, folding:false, glyphMargin:false, lineDecorationsWidth:14, lineNumbersMinChars:3, renderLineHighlight:'gutter', scrollBeyondLastLine:false, wordWrap:'off', links:false, contextmenu:false, occurrencesHighlight:'off', selectionHighlight:false, renderWhitespace:'none', fontFamily:'IBM Plex Mono', fontSize:16, lineHeight:30, fontLigatures:false, tabSize:2, insertSpaces:true, unicodeHighlight:{ambiguousCharacters:false, nonBasicASCII:false}, accessibilitySupport:'auto', ariaLabel:'필사 입력'`. `unicodeHighlight` 를 끄지 않으면 **한국어 주석 전체에 노란 테두리**가 생긴다.
-- **단계별 차이**: 1·2단계 `autoIndent:'keep'`(목업의 `{([` 뒤 2칸 들여쓰기는 `'brackets'`), 3단계(백지) `autoIndent:'none'` — Tab 은 남긴다(들여쓰기 자체가 학습 대상이지 자동화가 대상). `Tab` 은 `editor.addCommand(KeyCode.Tab, () => insert('  '))` 로 고정해 포커스가 밖으로 나가지 않게 한다.
+- **로드**: `monaco-editor/esm/vs/editor/editor.api` + `basic-languages/{typescript,javascript,python,go,rust,sql}/*.contribution` 만 — **여섯이고, 이 목록이 곧 화면이 낼 수 있는 언어 id 의 전부다**(`monacoOptions.MONACO_LANGUAGES`). Swift·Dart 는 아직 없다(`m1-03-swift-dart-sql` 로 보류). 등록 안 된 id 로 `setModelLanguage` 를 부르면 모델이 조용히 plaintext 가 되므로, 확장자 표는 반드시 이 여섯 안에서만 값을 내야 한다 — `.tsx`·`.jsx` 는 `'tsx'` 가 아니라 **`'typescript'`** 다(Monaco 0.52 에 `'tsx'` 라는 id 는 없다). tree-sitter 문법 키(`session-flow.grammarOf`, D19)와는 **다른 표**이고, 두 표를 「같다」고 적어 둔 것이 그 버그의 출처였다. **언어 서비스 워커(`ts.worker`)는 싣지 않는다** (D143) — 워커 하나가 1,286,340 B gzip 으로 §1.3 의 Monaco 청크 예산을 넘고, 떼어낸 12~40줄 블록에서는 「Cannot find name」 융단밖에 못 내며, TS/JS 전용이라 「전 언어 지원」 위에 못 고칠 불균형을 얹는다. 워커는 `editor.worker?worker` 하나, `self.MonacoEnvironment = { getWorker: () => new EditorWorker() }`. 전부 번들이라 오프라인. `ClonePad` 는 `React.lazy` 로 T1 판을 걸 때만 내려온다(§1.3).
+- **옵션 고정**(`t1/monacoOptions.ts`) — **층에 따라 갈리지 않는 값만** 여기 있다: `parameterHints:{enabled:false}, formatOnType:false, acceptSuggestionOnEnter:'off', acceptSuggestionOnCommitCharacter:false, minimap:{enabled:false}, folding:false, glyphMargin:false, lineDecorationsWidth:14, lineNumbersMinChars:3, renderLineHighlight:'gutter', scrollBeyondLastLine:false, wordWrap:'off', links:false, contextmenu:false, occurrencesHighlight:'off', selectionHighlight:false, renderWhitespace:'none', fontFamily:'IBM Plex Mono', fontSize:16, lineHeight:30, fontLigatures:false, tabSize:2, insertSpaces:true, unicodeHighlight:{ambiguousCharacters:false, nonBasicASCII:false}, accessibilitySupport:'auto', ariaLabel:'필사 입력'`. `unicodeHighlight` 를 끄지 않으면 **한국어 주석 전체에 노란 테두리**가 생긴다. `acceptSuggestionOnEnter` 는 Monaco 기본값이 `'on'` 이라 **못 박지 않으면 필사 중 줄바꿈이 조용히 제안으로 바뀐다** — 수락은 `Tab` 하나로만 한다.
+- **단계별 차이 = 편집 보조 세 층**(D143). 규칙 한 줄: **학습자가 고르지 않은 텍스트를 만드는 보조는 단계와 함께 페이딩하고, 이미 고른 텍스트의 타건 수만 줄이는 보조는 페이딩하지 않는다.**
+
+  | 층 | 옵션 | 1단계 | 2단계 | 3단계(백지) |
+  |---|---|---|---|---|
+  | L0a 자동 들여쓰기 | `autoIndent` | `'brackets'` | `'brackets'` | `'none'` |
+  | L0b 자동 닫기·surround | `autoClosingBrackets`·`autoClosingQuotes`·`autoSurround` | `'languageDefined'` | `'languageDefined'` | `'never'` |
+  | L1 단어 기반 제안 | `wordBasedSuggestions:'currentDocument'` · `quickSuggestions:{other:true,comments:false,strings:false}` · `suggestOnTriggerCharacters` | 켬 | 켬 | 켬 |
+
+  코스 판(`CoursePlateView`)은 1단계가 없고 나머지는 같은 표를 쓴다. 세션 1단계는 `PlainPad`(textarea)라 **제안 위젯을 못 단다** — 그 비대칭은 D93 을 지키느라 남긴 것이고, 1단계는 원본이 `RefPlate` 에 펼쳐져 있어 제안이 할 일이 가장 적은 단계이기도 하다. L0a·L0b 를 3단계에서 끄는 근거는 실측이다: 이 리포를 표본으로 세면 「닫힘만 있는 줄」이 TS 비공백 줄의 12.5 %·Rust 15.9 %·Python 4.0 % 이고, 04 §4.6 의 분모가 비공백 줄이라 그 몫이 곧 에디터가 채우는 점수인데, 실제로 공짜인 단계는 3단계뿐이다(1단계는 원본이 옆에 있고, 2단계는 04 §3.2 유지 집합이 닫힘 줄을 이미 잉크로 준다). 그리고 겹 4 는 3단계 통과에서만 나온다. L1 을 페이딩하지 않는 근거도 실측이다: 25줄 창 안에서 식별자 타건의 43.7 %를 줄이면서 **최종 텍스트를 한 자도 바꾸지 않아** `pct` 가 구조적으로 불변이고, 정보량 상한이 「이미 이 버퍼에 있는 낱말」이라 백지에서도 새는 것이 없다(`'currentDocument'` 로 못 박는 이유 — `'matchingDocuments'` 이상은 나중에 원본 판이 Monaco 모델이 되는 날 원본을 그대로 제안한다).
+
+  `Tab` 은 `editor.addCommand(KeyCode.Tab, () => insert('  '), '!suggestWidgetVisible')` — **세 번째 인자가 없으면** 이 명령이 문맥 무관하게 언제나 이겨 제안을 수락할 길이 사라진다.
+- **설정 「편집 보조」**: `stage`(기본) / `off` 둘. `off` 는 0.1.0 까지의 동작 그대로다. 값은 `settings` 테이블의 `editor_assist` 키에 있고(`data/settings.ts`), 설정 화면의 문구가 무엇을 잃는지 적는다 — 끄면 타건 수만 늘 뿐 점수 계산은 불변이지만 **같은 85 %가 서로 다른 조건에서 나온 값**이 되므로 이의(04 §5)는 보조 상태별로 따로 모아야 한다.
+- **글자가 어디서 왔나** (D143): `AssistCount{keyed, assisted, pasted, accepted}` 를 `peeks` 와 **같은 자리·같은 규칙**으로 센다 — 감점 없음, 기록만, 스케줄러 신호. 분류는 `components/t1/assist.ts` 에 있고 **감사가 아니라 추정**이다(0.52 공개 d.ts 에 `onDidType` 이 없어 변경의 모양으로 가른다). `EdStatus` 가 「손으로 앉힌 글자 N %」 한 항목으로 낸다. 붙여넣기도 여기서 처음 세어진다 — 그전에는 3단계 백지에 원본을 ⌘V 로 통째로 넣어도 어디에도 남지 않았다.
 - **테마**: `monaco.editor.defineTheme('ink-light'|'ink-dark')` 를 `tokens.ts`(§12 생성물)에서 만든다. Monaco 는 hex 만 받으므로 CSS 변수를 못 쓴다 — 테마 전환 시 `setTheme` 재호출. 매핑: `keyword`→`--blue-text`(bold) · `string`→`--pink-text` · `number`→`--yellow-text` · `comment`→`--ink-soft`(italic) · `delimiter`→`--ink-soft` · `type`/`identifier` 호출→`--ink`(bold 불가, 기본) · 배경 `editor.background`=`--stock` · 거터 `editorLineNumber.foreground`=`--ink-soft` · `editorGutter.background`=`--paper-3` · 커서 `--ink` · 선택 `--paper-3`. `.code` 판과 같은 색이어야 좌우가 같은 종이로 보인다.
 - **줄 단위 판정 데코레이션**: `editor.createDecorationsCollection()` 하나. 각 줄에 `{ range: 줄, options: { linesDecorationsClassName: 'gl-tick gl-exact' | 'gl-equiv' | 'gl-differ', isWholeLine:false } }`. CSS `.gl-tick{width:3px; margin-left:4px; background:...}` 로 목업의 거터 틱(정합 진홍 · 동등 청 · 어긋남 황갈)을 그린다. 범례 `EdStatus` 에 텍스트 병기.
 - **줄을 벗어날 때만 판정**: `onDidChangeCursorPosition(e)` 에서 `e.position.lineNumber !== prevLine` 일 때만 `onLeaveLine(prevLine - 1, model.getLineContent(prevLine))` → `04` 의 `evalLine` → 틱 갱신. `e.reason === CursorChangeReason.ContentFlush`(전체 교체)는 무시. IME 조합 중(`editor.onDidCompositionStart/End` 사이)엔 판정 보류.
@@ -406,6 +424,17 @@ interface SessionSlice {
 | `lifer:open` | 11~13 ms | 50 | 통과 |
 
 **리포가 다르면 `frame_p95` 를 비교하지 마라** — 노드 수가 곧 그 값이다(D81).
+
+**편집 보조를 켠 뒤** (D143 · Playwright WebKit = WKWebView **대리**, 릴리스 빌드 실측 아님. 하네스는 `min/vs` 로 Monaco 를 세우고 앱과 같은 옵션을 준다):
+
+| 무엇 | 값 | 판정 |
+|---|---|---|
+| 자동 닫기 × 한글 조합 | `"` 뒤에 닫는 따옴표가 앉은 채 조합해도 모델은 `s = "한"`, 캐럿은 닫는 따옴표 앞, `compositionend` 1회. 화면 캐럿 이동 px 가 **대조군(자동 닫기 off)과 완전히 같다** | 통과 |
+| 타이핑 중 `frame_p95` | 40줄 블록에 33자 · **18.0 ms** — 대조군도 18.0 ms | 차이 없음(둘 다 vsync 바닥 16.6 ms 에 붙어 있어 그 아래는 이 하네스로 못 가른다) |
+| 타건 → 첫 제안 목록 | 중앙 116 ms · p95 126 ms. 그중 **100 ms 는 Monaco 자신의 표시 지연**(`suggestWidget._show()` 의 `cancelAndSet(…, 100)` — 깜빡임 방지)이라 실제 작업은 약 16 ms | 새 mark 를 만들지 않았다(MARKS 6종은 §10 표의 것이다) |
+| 번들 | L0b·L1 **0 바이트** — 전부 `editor.api` 안에 이미 있다 | 통과 |
+
+`t1:monaco` 는 **아직 다시 재지 않았다.** 옵션 몇 개를 더 넘길 뿐 기여 집합이 늘지 않아 292~303 ms 가 그대로일 것으로 보지만, 그것은 예상이지 실측이 아니다 — 다음 릴리스 빌드에서 재고 이 표를 고친다.
 
 ---
 
