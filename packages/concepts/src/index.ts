@@ -11,6 +11,11 @@ export {
   EXCLUDE_DIRS, EXCLUDE_FILES, EXCLUDE_GLOBS, GENERATED_MARKERS, LIMITS,
   OVERSIZE_FILE_LINES, OVERSIZE_SITES_PER_CONCEPT, OVERSIZE_SITE_LINES, isTestPath,
 } from './ingest-defaults.js';
+export { commitOrder, courseOrder, depOrder, COMMIT_ORDER_MIN } from './clone-order.js';
+export type {
+  CourseEdge, CourseFile, CourseOrder, CourseStep, CourseUnit, CommitTouch, OrderInput,
+} from './clone-order.js';
+export { courseStage, keepCardStage, BLANK_FROM_LAYER, COURSE_STAGE } from './clone-fading.js';
 export { assignUnits, MIN_FILES_FOR_UNIT, OTHER_UNIT } from './units.js';
 export type { Assignment, UnitOf } from './units.js';
 export {

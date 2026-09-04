@@ -60,8 +60,16 @@ const migrations = readdirSync(join(PKG, 'migrations'))
   .sort()
   .map((f) => ({ version: Number(basename(f).slice(0, 4)), file: f, sql: readFileSync(join(PKG, 'migrations', f), 'utf8') }));
 if (migrations.length === 0) throw new Error('마이그레이션이 하나도 없다');
+if (migrations[0]?.version !== 1) throw new Error(`마이그레이션은 0001 부터다: ${migrations[0]?.file}`);
+// 번호는 **오름차순이고 겹치지 않으면** 된다. 「빈틈없이 연속」을 요구하면 갈래를 나눠
+// 병렬로 만드는 동안(각 갈래가 번호를 하나씩 예약한다) 아직 안 들어온 번호 때문에 카탈로그를
+// 만들 수 없다. 러너는 `user_version` 보다 큰 것만 순서대로 적용하므로 빈틈은 무해하고,
+// 「빠뜨린 마이그레이션」은 `migrate-seed.test.ts` 가 마이그레이션마다 시드 하나를 요구해 잡는다.
 migrations.forEach((m, i) => {
-  if (m.version !== i + 1) throw new Error(`마이그레이션 번호가 1부터 연속이 아니다: ${m.file}`);
+  const prev = migrations[i - 1];
+  if (prev !== undefined && m.version <= prev.version) {
+    throw new Error(`마이그레이션 번호가 오르지 않는다: ${prev.file} → ${m.file}`);
+  }
 });
 
 // Rust 가 기동 시 요구하는 이름 (01 §3.3 · D65). 하나라도 없으면 앱이 STORE_CATALOG_MISSING 으로 죽는다.
