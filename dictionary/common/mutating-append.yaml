@@ -9,12 +9,24 @@ difficulty: 2
 prereq: []
 confusions: []
 dict:
-  one_liner: "새 묶음을 만들지 않고 <b>있던 묶음</b>을 그 자리에서 늘리는 표기."
-  why: >-
-    가장 짧고 빠른 방법이라 어느 언어에나 있습니다. 대신 묶음이 <b>같은 것</b>인 채로 내용만 바뀌므로,
-    바뀐 걸 알아채는 쪽이 없다는 것이 대가예요.
+  one_liner:
+    ko: "새 묶음을 만들지 않고 <b>있던 묶음</b>을 그 자리에서 늘리는 표기."
+    en: "Grows <b>the group you already had</b>, in place, without making a new one."
+  why:
+    ko: >-
+      가장 짧고 빠른 방법이라 어느 언어에나 있습니다. 대신 묶음이 <b>같은 것</b>인 채로 내용만 바뀌므로,
+      바뀐 걸 알아채는 쪽이 없다는 것이 대가예요.
+    en: >-
+      It is the shortest and fastest way, so every language has it. The price is that the group
+      stays <b>the same one</b> while its contents change, so nothing on the other side notices the
+      change.
   trace: []
-rule: "원본이 바뀐다. 공유된 값이라면 이 사실이 곧 위험이다."
-ok: "있던 묶음을 그대로 늘립니다. 새 묶음은 생기지 않습니다."
+rule:
+  ko: "원본이 바뀐다. 공유된 값이라면 이 사실이 곧 위험이다."
+  en: "The original changes. If the value is shared, that fact is the danger."
+ok:
+  ko: "있던 묶음을 그대로 늘립니다. 새 묶음은 생기지 않습니다."
+  en: "It grows the group that was already there. No new group is made."
 misconceptions:
-  - "더한 결과가 새 묶음으로 나온다 — 나오지 않습니다."
+  - ko: "더한 결과가 새 묶음으로 나온다 — 나오지 않습니다."
+    en: "The result of adding comes back as a new group — it does not."

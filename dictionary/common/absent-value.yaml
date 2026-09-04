@@ -9,13 +9,25 @@ difficulty: 1
 prereq: []
 confusions: []
 dict:
-  one_liner: "「아직 안 넣음」과 「비우기로 함」은 다른 없음이다."
-  why: >-
-    없음을 하나로만 두는 언어도 있고 둘로 나누는 언어도 있습니다. 나눠 두면 「아직 응답이 안
-    왔다」와 「응답은 왔는데 값이 비어 있다」를 코드에서 구분할 수 있어요. 어느 쪽이든 공통점은
-    하나입니다 — <b>없는 값의 안을 읽으려 하면 그 자리에서 멈춘다</b>.
+  one_liner:
+    ko: "「아직 안 넣음」과 「비우기로 함」은 다른 없음이다."
+    en: "“Not set yet” and “set to empty” are two different kinds of absent."
+  why:
+    ko: >-
+      없음을 하나로만 두는 언어도 있고 둘로 나누는 언어도 있습니다. 나눠 두면 「아직 응답이 안
+      왔다」와 「응답은 왔는데 값이 비어 있다」를 코드에서 구분할 수 있어요. 어느 쪽이든 공통점은
+      하나입니다 — <b>없는 값의 안을 읽으려 하면 그 자리에서 멈춘다</b>.
+    en: >-
+      Some languages keep one absent value, others split it in two. Splitting it lets the code tell
+      “the response has not arrived” from “the response arrived and the value is empty”. Either way
+      one thing holds — <b>reading inside an absent value stops the program right there</b>.
   trace: []
-rule: "없는 값도 값이라 이름에 묶을 수는 있다. 다만 그 안은 읽을 수 없다."
-ok: "「없음」은 빈 글자나 0 과 다릅니다. 뒤의 둘은 있는 값이에요."
+rule:
+  ko: "없는 값도 값이라 이름에 묶을 수는 있다. 다만 그 안은 읽을 수 없다."
+  en: "An absent value is still a value, so a name can hold it. Its inside cannot be read."
+ok:
+  ko: "「없음」은 빈 글자나 0 과 다릅니다. 뒤의 둘은 있는 값이에요."
+  en: "Absent is not the empty string and not 0. Those two are values that are present."
 misconceptions:
-  - "0 이나 빈 글자도 없음이다 — 아니요. 조건문에서 거짓처럼 보일 뿐입니다."
+  - ko: "0 이나 빈 글자도 없음이다 — 아니요. 조건문에서 거짓처럼 보일 뿐입니다."
+    en: "0 and the empty string are absent too — no. They only look false in a condition."

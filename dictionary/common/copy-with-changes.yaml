@@ -9,14 +9,29 @@ difficulty: 2
 prereq: []
 confusions: []
 dict:
-  one_liner: "원본은 두고, 내용을 옮겨 담은 새 값에서 일부만 바꾼다."
-  why: >-
-    원본을 직접 고치면 그 값을 함께 보고 있던 다른 코드가 조용히 영향을 받습니다. 화면을 다시
-    그리는 장치들도 대개 「값이 새 것인가」로 판단해서, 안을 고친 것은 알아채지 못해요. 그래서
-    복사본을 만들고 거기서 바꿉니다. 표기는 언어마다 다르지만 규칙은 같습니다 —
-    <b>대개 한 겹만 복사된다</b>.
+  one_liner:
+    ko: "원본은 두고, 내용을 옮겨 담은 새 값에서 일부만 바꾼다."
+    en: "Leave the original alone; copy it into a new value and change part of that."
+  why:
+    ko: >-
+      원본을 직접 고치면 그 값을 함께 보고 있던 다른 코드가 조용히 영향을 받습니다. 화면을 다시
+      그리는 장치들도 대개 「값이 새 것인가」로 판단해서, 안을 고친 것은 알아채지 못해요. 그래서
+      복사본을 만들고 거기서 바꿉니다. 표기는 언어마다 다르지만 규칙은 같습니다 —
+      <b>대개 한 겹만 복사된다</b>.
+    en: >-
+      Change the original in place and other code watching that same value is quietly affected.
+      Machinery that redraws the screen usually decides by asking “is this a new value”, so a change
+      made inside goes unnoticed. That is why you make a copy and change the copy. The notation
+      differs by language but the rule holds — <b>usually only one layer is copied</b>.
   trace: []
-rule: "겹쳐 적으면 뒤가 이긴다. 그리고 복사는 대개 한 겹까지다."
-ok: "원본을 두고 새 값을 만드는 것이 불변 갱신입니다. 바뀐 것을 알아챌 수 있게 해 줘요."
+rule:
+  ko: "겹쳐 적으면 뒤가 이긴다. 그리고 복사는 대개 한 겹까지다."
+  en: "When keys overlap, the later one wins. And the copy usually goes one layer deep."
+ok:
+  ko: "원본을 두고 새 값을 만드는 것이 불변 갱신입니다. 바뀐 것을 알아챌 수 있게 해 줘요."
+  en: "Leaving the original and making a new value is an immutable update. It lets a change be noticed."
 misconceptions:
-  - "복사하면 안쪽까지 전부 새것이 된다 — 아니요. 안쪽은 원본과 같은 것을 가리킵니다."
+  - ko: "복사하면 안쪽까지 전부 새것이 된다 — 아니요. 안쪽은 원본과 같은 것을 가리킵니다."
+    en: >-
+      A copy makes everything inside new too — no. The inside still points at the same things as the
+      original.

@@ -9,13 +9,30 @@ difficulty: 2
 prereq: []
 confusions: []
 dict:
-  one_liner: "문장은 통째로 두고, 값이 들어갈 자리만 표시한다."
-  why: >-
-    글자와 값을 이어 붙이기로만 만들면 따옴표와 더하기가 번갈아 나와 문장의 모양이 코드에서
-    사라집니다. 끼워 넣기 표기는 문장을 그대로 두고 구멍만 뚫어요. 표기는 언어마다 다르지만,
-    <b>구멍 안만 계산되고 나머지는 글자 그대로</b>라는 규칙은 같습니다.
+  one_liner:
+    ko: "문장은 통째로 두고, 값이 들어갈 자리만 표시한다."
+    en: "Keeps the sentence whole and marks only the spots where values go."
+  why:
+    ko: >-
+      글자와 값을 이어 붙이기로만 만들면 따옴표와 더하기가 번갈아 나와 문장의 모양이 코드에서
+      사라집니다. 끼워 넣기 표기는 문장을 그대로 두고 구멍만 뚫어요. 표기는 언어마다 다르지만,
+      <b>구멍 안만 계산되고 나머지는 글자 그대로</b>라는 규칙은 같습니다.
+    en: >-
+      Build it only by joining text and values and the quotes and plus signs alternate until the
+      shape of the sentence disappears from the code. Interpolation leaves the sentence as it is and
+      punches holes in it. The notation differs by language, but the rule holds — <b>only the inside
+      of a hole is evaluated; the rest is text as written</b>.
   trace: []
-rule: "구멍 안만 계산된다. 바깥 글자는 적은 대로 남는다."
-ok: "끼워 넣기는 값을 글자로 바꿔 그 자리에 넣습니다. 문장의 모양이 코드에 그대로 보여요."
+rule:
+  ko: "구멍 안만 계산된다. 바깥 글자는 적은 대로 남는다."
+  en: "Only the inside of a hole is evaluated. The text outside stays as written."
+ok:
+  ko: "끼워 넣기는 값을 글자로 바꿔 그 자리에 넣습니다. 문장의 모양이 코드에 그대로 보여요."
+  en: >-
+    Interpolation turns the value into text and puts it in that spot. The shape of the sentence
+    stays visible in the code.
 misconceptions:
-  - "구멍에 넣을 값이 없으면 문장이 통째로 없어진다 — 아니요. 그 자리에만 「없음」이 글자로 박힙니다."
+  - ko: "구멍에 넣을 값이 없으면 문장이 통째로 없어진다 — 아니요. 그 자리에만 「없음」이 글자로 박힙니다."
+    en: >-
+      If a hole has no value the whole sentence disappears — no. Only that spot gets the word for
+      absent, as text.
