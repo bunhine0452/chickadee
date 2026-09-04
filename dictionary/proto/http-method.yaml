@@ -1,0 +1,42 @@
+schema: 1
+id: proto/http-method
+universal: null
+name: { ko: 무엇을 하러 왔는지 말하는 낱말, en: HTTP method }
+token: null
+grammars: []
+framework: null
+track_default: t0
+essential: false
+difficulty: 2
+prereq: []
+confusions: []
+dict:
+  one_liner:
+    ko: "같은 주소에 무엇을 하러 왔는지 낱말 하나로 말한다."
+    en: "One word says what you came to do at the same address."
+  why:
+    ko: >-
+      주소는 <b>무엇을</b>이고 이 낱말은 <b>무엇을 할지</b>입니다. 그래서 같은 주소가 읽기도
+      되고 지우기도 돼요 — 갈리는 것은 낱말 하나입니다. 그리고 낱말마다 <b>약속</b>이 다릅니다:
+      읽기는 몇 번을 해도 같아야 하고, 만들기는 두 번 하면 두 개가 생깁니다. 브라우저와 중간의
+      장치들이 그 약속을 믿고 캐시하거나 다시 보내므로, 약속을 어기면 <b>내 코드 밖에서</b> 사고가 납니다.
+    en: >-
+      The address says <b>what</b>; this word says <b>what to do with it</b>. The same address both
+      reads and deletes — one word tells them apart. And each word carries a <b>promise</b>: reading
+      may repeat with the same result, creating twice makes two. Browsers and the machines in between
+      trust those promises to cache and to retry, so breaking one causes trouble <b>outside your
+      code</b>.
+  trace: []
+rule:
+  ko: "<b>주소는 무엇을, 낱말은 무엇을 할지 말한다.</b> 낱말마다 되풀이해도 되는지가 다르다."
+  en: "<b>The address names the thing; the word names the act.</b> Each differs on whether it may repeat."
+ok:
+  ko: "같은 주소라도 낱말이 다르면 다른 일입니다. 서버는 그 짝으로 어느 코드를 부를지 정합니다."
+  en: "Same address, different word, different work. The server picks code by that pair."
+misconceptions:
+  - ko: "읽기로도 값을 바꿀 수 있다 — 문법은 되지만 약속을 어겨 캐시가 옛 답을 돌려줍니다."
+    en: "A read can change things — syntactically yes, but it breaks the promise and caches serve stale answers."
+  - ko: "만들기와 바꾸기는 아무거나 써도 된다 — 두 번 보냈을 때의 결과가 다릅니다."
+    en: "Create and update are interchangeable — they differ when the same request arrives twice."
+  - ko: "주소만 다르면 된다 — 낱말이 같으면 서버가 같은 코드를 부릅니다."
+    en: "Different addresses are enough — with the same word the server may route to the same code."

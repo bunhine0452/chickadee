@@ -1,0 +1,43 @@
+schema: 1
+id: proto/status-code
+universal: null
+name: { ko: 어떻게 됐는지 알리는 숫자, en: HTTP status code }
+token: null
+grammars: []
+framework: null
+track_default: t0
+essential: false
+difficulty: 2
+prereq: []
+confusions: []
+dict:
+  one_liner:
+    ko: "요청이 어떻게 끝났는지 숫자로 답한다. 앞자리가 종류를 말한다."
+    en: "A number says how the request ended. The first digit says what kind."
+  why:
+    ko: >-
+      본문을 읽기 전에 <b>숫자 하나로</b> 어떻게 됐는지 압니다. 앞자리가 종류예요 —
+      2로 시작하면 됐고, 4는 <b>보낸 쪽</b> 잘못, 5는 <b>받은 쪽</b> 잘못입니다. 이 구분이
+      중요한 이유는 고칠 곳이 갈리기 때문이에요: 4는 요청을 고치고 5는 서버를 고칩니다.
+      그리고 「없음」과 「권한 없음」을 가르는 것도 이 숫자입니다 — 본문에 한국어로 적어 두면
+      기계는 못 읽어요.
+    en: >-
+      Before reading the body you know how it went from <b>one number</b>. The first digit is the
+      kind — 2 means it worked, 4 means <b>the sender</b> was at fault, 5 means <b>the receiver</b>
+      was. The split matters because it says where to fix: 4 fixes the request, 5 fixes the server.
+      The same number also separates “not there” from “not allowed” — write that only in the body
+      and no machine can read it.
+  trace: []
+rule:
+  ko: "<b>앞자리가 종류다.</b> 4는 보낸 쪽, 5는 받은 쪽을 고쳐야 한다는 뜻이다."
+  en: "<b>The first digit is the kind.</b> 4 means fix the request; 5 means fix the server."
+ok:
+  ko: "숫자 하나로 어느 쪽을 고쳐야 하는지가 정해집니다. 본문은 그다음 이야기예요."
+  en: "One number settles which side to fix. The body is a later story."
+misconceptions:
+  - ko: "실패는 전부 500 이다 — 보낸 쪽 잘못이면 4로 시작하는 숫자를 줘야 합니다."
+    en: "Every failure is a 500 — when the sender is at fault the number must start with 4."
+  - ko: "본문에 오류라고 적으면 된다 — 기계는 숫자를 봅니다. 200 에 오류를 담으면 성공으로 셉니다."
+    en: "Saying “error” in the body is enough — machines read the number. An error inside a 200 counts as success."
+  - ko: "권한이 없으면 없다고 하면 된다 — 두 경우의 숫자가 다르고, 그 차이가 정보를 흘리기도 합니다."
+    en: "Absent and forbidden can share a number — they differ, and the difference can leak information."

@@ -5,7 +5,9 @@
  */
 import { describe, expect, test } from 'vitest';
 
-import { authoringDebt, debtTable, langSpecs, lintDict, loadDict, prereqClosure } from './index.js';
+import {
+  authoringDebt, debtTable, isComputed, langSpecs, lintDict, loadDict, prereqClosure,
+} from './index.js';
 
 // 프레임워크 사전은 감지 게이트 뒤에 있다 (D59) — 린트는 전부를 본다.
 const dict = loadDict({ dependencies: ['react'] });
@@ -54,14 +56,10 @@ describe('사전이 실제로 담고 있는 것', () => {
     }
   });
 
-  // 쿼리 없이 사는 네임스페이스 셋. `common/` 은 전이 축이고, `arch/`(D142)와 `exec/`(D151)는
-  // 문항을 그래프·AST 에서 **계산**한다 — 사전은 산문과 숙련도 키만 댄다.
-  const COMPUTED = ['common/', 'arch/', 'exec/'];
-
   test('쿼리 없는 네임스페이스와 언어 개념이 정확히 갈린다', () => {
+    // 접두어 목록은 `schema.ts` 의 `COMPUTED_NAMESPACES` 하나다 (D157 §7).
     for (const concept of dict.concepts.values()) {
-      const computed = COMPUTED.some((p) => concept.id.startsWith(p));
-      expect(concept.queries.length === 0).toBe(computed);
+      expect(concept.queries.length === 0).toBe(isComputed(concept.id));
     }
   });
 
@@ -104,16 +102,16 @@ describe('사전이 실제로 담고 있는 것', () => {
  * 것보다 나쁘다. 문법이 더 나은 길을 줄 때 채운다.
  */
 const DEBT_RATCHET: Record<string, number> = {
-  // 39 → **42** (D159, java 바닥 셋 — class-declaration · method-declaration · if-statement).
-  'blank-or-reason': 42,
-  'point-picks': 40,
-  'why-gate': 42,
+  // 39 → 42(java 바닥 셋) → 44(sql 바닥 둘) → **49**(java 바닥 여덟 완성).
+  'blank-or-reason': 49,
+  'point-picks': 45,
+  'why-gate': 49,
   // 6 → 11(D147) → 18(D148) → 26(D150) → **33**(D152, 파이썬 바닥 여덟). D150 이 「먼저 읽기」를
   // 0장 소속에서 「겹 0」으로 넓혀 `essential` 전량이 대상이 됐다. 새로 든 넷(`array-filter`
   // 의 `filter` · `array-map-immutable` 의 `map` · `arrow-function` 의 `=>` · 그리고
   // `array-destructuring` 은 영문 관사 `a` 가 정답 토큰과 겹쳤다)을 고쳐 채웠다.
-  // 33 → **36** (D159, java 바닥 셋).
-  'zero-one-liner': 36,
+  // 33 → 36(java 바닥 셋) → 38(sql 바닥 둘) → **42**(java 바닥 여덟 완성).
+  'zero-one-liner': 42,
 };
 
 describe('사전 저작 부채 (D145)', () => {

@@ -1,0 +1,155 @@
+schema: 1
+id: java/variable-declaration
+universal: common/variable-binding
+name: { ko: 타입 붙여 이름 만들기, en: Typed declaration }
+token: "int"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 1
+prereq: []
+confusions: []
+dict:
+  one_liner:
+    ko: "이름을 만들면서 무엇만 담을지 함께 정한다. 그 약속은 뒤로 못 바꾼다."
+    en: "Makes a name and settles what it may hold. That promise never changes."
+  why:
+    ko: >-
+      이름 <b>앞에</b> 종류가 옵니다. {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}}
+      「{{pick.2|code}}{{pick.2|josa:은,는}} 이것만 담는다」는 약속이고, 한 번 정하면 <b>이 이름이 사는 동안</b>
+      안 바뀝니다. 그래서 다른 종류를 넣으면 돌기 전에 컴파일러가 막아요 — 파이썬처럼 같은
+      이름에 아무거나 다시 넣을 수 없습니다.
+    en: >-
+      The kind comes <b>before</b> the name. On line {{site.line}}, {{pick.1|code}} is a promise
+      that {{pick.2|code}} holds only that, and once made it stands <b>for as long as the name
+      lives</b>. Put something else in and the compiler stops you before anything runs — unlike
+      Python, where the same name takes anything.
+  trace:
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 담을 종류를 정한다."
+      en: "{{pick.1|code}} settles what may be held."
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 그 이름이 된다."
+      en: "{{pick.2|code}} becomes that name."
+    - ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 처음 값으로 들어간다."
+      en: "{{pick.3|code}} goes in as the first value."
+rule:
+  ko: "<b>종류가 이름 앞에 온다.</b> 한 번 정한 종류는 그 이름이 사는 동안 안 바뀐다."
+  en: "<b>The kind comes before the name.</b> Once settled it holds for the name's whole life."
+result:
+  label: { ko: "{{pick.2}} 라는 이름", en: "a name called {{pick.2}}" }
+  value: "{{pick.3}}"
+  note: { ko: "이 종류만 담는다", en: "holds this kind only" }
+ok:
+  ko: "{{pick.2|code}} 라는 이름이 생겼고 {{pick.1|code}} 만 담습니다."
+  en: "A name {{pick.2|code}} now exists, and it holds only {{pick.1|code}}."
+payoff:
+  ko: "이걸 알면 컴파일러의 「종류가 안 맞는다」가 무엇을 말하는지 압니다 — 이 줄의 약속을 어겼다는 뜻이에요."
+  en: "This makes the compiler's “incompatible types” legible — it means this line's promise was broken."
+bridge:
+  ko: "파이썬은 이름에 아무거나 다시 넣습니다. 자바는 <b>미리 약속하게 하고</b> 그 약속을 지킵니다."
+  en: "Python lets a name take anything later. Java <b>makes you promise first</b> and then holds you to it."
+misconceptions:
+  - ko: "종류는 처음에만 맞으면 된다 — 뒤에 넣는 값도 전부 맞아야 합니다."
+    en: "The kind matters only at first — every later value must match too."
+  - ko: "<code>var</code> 를 쓰면 종류가 없다 — 컴파일러가 <b>정해 줄 뿐</b> 없어지지 않습니다."
+    en: "<code>var</code> means no kind — the compiler <b>works it out</b>; it does not vanish."
+no_hole_reason: >-
+  뚫을 자리가 담을 종류인데 그 글자가 사용처마다 다르다(`int`·`String`·`UserDao`). 빈칸형은 첫 보기가 구멍 원문과 같아야 해서(`t0-blank` 의 검사) 보기 넷을 사전에 고정할 수 없다. 같은 것을 짚기와 뜻으로 낸다.
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>담을 종류를 정하는 자리</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the place that settles what may be held</b>."
+    hint:
+      ko: "이름보다 <b>앞</b>에 있습니다."
+      en: "It stands <b>before</b> the name."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 이름은 무엇을 담을지 말하지 않아요 — 앞자리가 말합니다."
+          en: "{{pick.2|code}} is the <b>name</b>. A name says nothing about what it holds; the place before does."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 종류냐", en: "The sharpest spot — the name or the kind" }
+          code:
+            - "int n = 1;       // 숫자만"
+            - "String n = \"a\"; // 글자만"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>처음 값</b>입니다. 종류는 값이 아니라 앞자리가 정해요."
+          en: "{{pick.3|code}} is the <b>first value</b>. The kind is settled by the place in front, not by the value."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 약속이냐 첫 값이냐", en: "The sharpest spot — the promise or the first value" }
+          code:
+            - "int n = 1;"
+            - "//  ^약속  ^첫 값"
+meaning:
+  - q:
+      ko: "이 이름에 나중에 <b>다른 종류</b>를 넣으면 어떻게 될까요?"
+      en: "What if a <b>different kind</b> is put into this name later?"
+    hint:
+      ko: "약속은 이 줄에서 <b>한 번</b> 정해집니다."
+      en: "The promise is settled <b>once</b>, on this line."
+    options:
+      - t: { ko: "컴파일이 멈춘다 — 돌기 전에 막힌다", en: "It stops compiling — blocked before anything runs" }
+      - t: { ko: "그 이름의 종류가 새 값에 맞게 바뀐다", en: "The name's kind changes to fit the new value" }
+        diag:
+          t:
+            ko: "종류는 <b>이 줄에서 한 번</b> 정해지고 뒤로 안 움직입니다. 움직이는 언어도 있지만 자바는 아니에요."
+            en: "The kind is settled <b>once, here</b> and does not move. Some languages move it; Java does not."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 한 번이냐 그때그때냐", en: "The sharpest spot — once or each time" }
+            code:
+              - "n = 1; n = \"a\"   # 파이썬은 된다"
+              - "int n = 1; n = \"a\";  // 자바는 멈춘다"
+      - t: { ko: "실행하다가 멈춘다", en: "It stops while running" }
+        diag:
+          t:
+            ko: "돌기 <b>전에</b> 걸립니다. 이 약속을 지키는 것은 컴파일러의 일이에요."
+            en: "It is caught <b>before</b> running. Keeping this promise is the compiler's job."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 번역할 때냐 돌 때냐", en: "The sharpest spot — translating or running" }
+            code:
+              - "javac  // 여기서 멈춘다"
+              - "java   // 여기까지 못 간다"
+      - t: { ko: "값이 알아서 바뀌어 들어간다", en: "The value is converted to fit" }
+        diag:
+          t:
+            ko: "좁아지는 쪽으로는 <b>알아서 안 바꿉니다</b>. 넓어지는 쪽만 조용히 되고, 나머지는 손으로 적어야 해요."
+            en: "It does <b>not</b> convert when narrowing. Only widening happens quietly; the rest you write by hand."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 넓어지냐 좁아지냐", en: "The sharpest spot — widening or narrowing" }
+            code:
+              - "long x = 1;      // 조용히 된다"
+              - "int y = 1L;      // 멈춘다"
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 이 값을 <b>이름에 담아</b> 두었을까요?"
+    en: "Why does line {{site.line}} <b>put this value in a name</b>?"
+  choices:
+    - t:
+        ko: "아래에서 다시 쓰고, 이름이 이 값이 무엇인지 대신 말해 주기 때문"
+        en: "Because it is used again below, and the name says what the value is"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이름이 없었다면 이 값이 무엇인지 어디에 적히는지도 적어 보세요."
+        en: "That is the direction. Say where it would be written down without the name."
+    - t:
+        ko: "자바가 이름을 요구해서"
+        en: "Because Java demands a name"
+      ok: false
+      fb:
+        ko: "요구하지 않습니다. 값만 계산하고 버려도 됩니다 — 이름은 읽는 사람을 위한 선택이에요."
+        en: "It does not. A value may be computed and dropped; the name is a choice for the reader."
+    - t:
+        ko: "종류를 정하려고"
+        en: "To settle the kind"
+      ok: false
+      fb:
+        ko: "종류는 이름을 만드니까 따라오는 것입니다. 만든 이유는 <b>다시 쓰기 위해서</b>예요."
+        en: "The kind follows from making a name. The reason for making one is <b>using it again</b>."
+queries:
+  - { grammars: [java], file: ./variable-declaration.scm }
+examples:
+  - code: "class A { void f() { int n = 1; } }"
+    expect: { sites: 1, form: decl, picks: { 1: "int", 2: "n", 3: "1" } }
+  - code: "class A { void f() { n = 1; } }"
+    expect: none

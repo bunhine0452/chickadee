@@ -1,0 +1,128 @@
+schema: 1
+id: java/boolean-literal
+universal: common/boolean-value
+name: { ko: 참·거짓 값, en: Boolean literal }
+token: "true"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 1
+prereq: []
+confusions: []
+dict:
+  one_liner:
+    ko: "참과 거짓, 딱 두 값. 숫자와는 아예 다른 종류다."
+    en: "True and false, exactly two values, and not numbers at all."
+  why:
+    ko: >-
+      자바에서 참·거짓은 <b>숫자가 아닙니다</b>. <code>true == 1</code> 도
+      <code>(int) true</code> 도 컴파일이 안 돼요 — 파이썬의 <code>True + 1 == 2</code> 와
+      다릅니다. 그래서 조건 자리에 숫자를 적을 수 없고, 「0 이면 거짓」 같은 규칙도 없습니다.
+      두 종류를 <b>섞지 않는 것</b>이 이 언어의 선택이에요.
+    en: >-
+      Truth values in Java are <b>not numbers</b>. Neither <code>true == 1</code> nor
+      <code>(int) true</code> compiles — unlike Python's <code>True + 1 == 2</code>. So no number
+      may stand in a condition, and there is no “zero is false” rule. Keeping the two kinds
+      <b>unmixed</b> is this language's choice.
+  trace:
+    - ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 그 자체로 하나의 값이다."
+      en: "{{pick.1|code}} is a value all on its own."
+    - ko: "숫자로 바꿔서 쓸 수 없다."
+      en: "It cannot be turned into a number."
+    - ko: "조건 자리에는 이 종류만 온다."
+      en: "Only this kind may stand in a condition."
+rule:
+  ko: "<b>참·거짓은 숫자가 아니다.</b> 서로 바꿔 쓸 수 없고 섞이지도 않는다."
+  en: "<b>Truth values are not numbers.</b> Neither converts to the other, and they never mix."
+result:
+  label: { ko: "{{site.line}}행의 값", en: "the value on line {{site.line}}" }
+  value: "{{pick.1}}"
+  note: { ko: "숫자가 아니다", en: "not a number" }
+ok:
+  ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 참·거짓 종류의 값입니다. 숫자 자리에는 못 갑니다."
+  en: "{{pick.1|code}} is a value of the truth kind. It cannot go where a number goes."
+payoff:
+  ko: "이걸 알면 「왜 <code>if (count)</code> 가 안 되나」가 풀립니다 — 종류가 아예 다르기 때문이에요."
+  en: "This untangles “why won't <code>if (count)</code> compile” — the kinds are simply different."
+bridge:
+  ko: "파이썬에서 참은 1 처럼 셈에 낍니다. 자바에서는 <b>낄 자리가 없습니다</b>."
+  en: "In Python true joins arithmetic as 1. In Java there is <b>no place for it to join</b>."
+misconceptions:
+  - ko: "참은 1 이다 — 자바에서는 견줄 수도 바꿀 수도 없습니다."
+    en: "True is 1 — in Java it can be neither compared to nor converted into one."
+  - ko: "빈 값이나 0 도 거짓이다 — 거짓은 <code>false</code> 하나뿐입니다."
+    en: "Empty or zero is false — the only false is <code>false</code>."
+no_hole_reason: >-
+  이 개념의 사용처는 낱말 하나(`true` 또는 `false`)이고 정답이 사용처마다 갈린다. 빈칸형은 첫 보기가 구멍 원문과 같아야 해서(`t0-blank` 의 검사) 보기 넷을 사전에 고정할 수 없다. 뜻 고르기로 낸다.
+meaning:
+  - q:
+      ko: "이 값을 숫자와 견주면(<code>{{pick.1}} == 1</code>) 어떻게 될까요?"
+      en: "What if this value is weighed against a number (<code>{{pick.1}} == 1</code>)?"
+    hint:
+      ko: "자바는 두 종류를 <b>안 섞습니다</b>."
+      en: "Java <b>does not mix</b> the two kinds."
+    options:
+      - t: { ko: "컴파일이 멈춘다 — 견줄 수 없는 종류다", en: "It stops compiling — these kinds cannot be weighed" }
+      - t: { ko: "참이면 1 이라 참이 나온다", en: "True is 1, so it comes back true" }
+        diag:
+          t:
+            ko: "그 규칙은 C·파이썬의 것입니다. 자바는 참을 숫자로 <b>보지 않아서</b> 견주기 자체가 성립하지 않아요."
+            en: "That rule belongs to C and Python. Java <b>does not see</b> true as a number, so the weighing never forms."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 섞이느냐 갈리느냐", en: "The sharpest spot — mixed or separate" }
+            code:
+              - "True == 1    # 파이썬: 참"
+              - "true == 1    // 자바: 멈춘다"
+      - t: { ko: "거짓이 나온다", en: "It comes back false" }
+        diag:
+          t:
+            ko: "거짓이 나오려면 견주기가 <b>성립은 해야</b> 합니다. 여기서는 성립 자체가 안 돼요."
+            en: "Coming back false needs the weighing to <b>form at all</b>. Here it does not."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 답이 있느냐 물음이 안 서느냐", en: "The sharpest spot — an answer or no question" }
+            code:
+              - "error: incomparable types:"
+              - "       boolean and int"
+      - t: { ko: "경고만 뜨고 그냥 돈다", en: "It warns and runs anyway" }
+        diag:
+          t:
+            ko: "경고가 아니라 <b>오류</b>입니다. 자바는 이 자리에서 종류를 양보하지 않아요."
+            en: "It is an <b>error</b>, not a warning. Java gives no ground on the kind here."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 넘어가느냐 막느냐", en: "The sharpest spot — waved through or stopped" }
+            code:
+              - "// 경고 없음"
+              - "// 컴파일 오류"
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 숫자나 글자가 아니라 <b>참·거짓</b>을 골랐을까요?"
+    en: "Why does line {{site.line}} use a <b>truth value</b> rather than a number or text?"
+  choices:
+    - t:
+        ko: "여기서 답이 둘뿐이라서 — 셋째 경우를 만들 여지를 없앤다"
+        en: "Because there are only two answers here — it leaves no room for a third case"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 셋째 경우가 생긴다면 이 자리를 무엇으로 바꿔야 하는지도 적어 보세요."
+        en: "That is the direction. Say what this place would become if a third case appeared."
+    - t:
+        ko: "자바가 참·거짓을 요구해서"
+        en: "Because Java demands a truth value"
+      ok: false
+      fb:
+        ko: "조건 자리에서는 요구하지만, <b>여기에 무엇을 담을지</b>는 이 줄이 정했어요."
+        en: "It demands one in a condition, but <b>what to hold here</b> was this line's choice."
+    - t:
+        ko: "메모리를 아끼려고"
+        en: "To save memory"
+      ok: false
+      fb:
+        ko: "아끼는 양은 무시할 만합니다. 고른 이유는 <b>답이 둘뿐</b>이라서예요."
+        en: "The saving is negligible. It was chosen because <b>there are only two answers</b>."
+queries:
+  - { grammars: [java], file: ./boolean-literal.scm }
+examples:
+  - code: "class A { void f() { boolean ok = true; } }"
+    expect: { sites: 1, picks: { 1: "true" } }
+  - code: "class A { void f() { int n = 1; } }"
+    expect: none

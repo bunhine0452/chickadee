@@ -136,7 +136,8 @@ function checkConcept(concept: SourceConcept, dict: Dict, issues: LintIssue[]): 
   }
 
   // 사전 3층의 `trace` 는 사용자의 코드를 짚어야 한다 — 안 그러면 튜토리얼이 된다.
-  // 사용처가 없는 보편·구조 개념(`common/`·`arch/`)은 짚을 코드가 없으므로 제외한다.
+  // 사용처가 없는 개념(`COMPUTED_NAMESPACES`)은 짚을 코드가 없으므로 제외된다 —
+  // 쿼리가 없으면 이 검사 자체가 안 돈다.
   if (concept.queries.length > 0) {
     if (concept.grammars.length === 0) add('grammars-for-query', '쿼리가 있는데 grammars 가 비었다');
     if (!concept.dict.trace.some((t) => /\{\{(site|pick)\./.test(koOf(t)))) {

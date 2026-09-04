@@ -1,0 +1,48 @@
+schema: 1
+id: proto/jwt
+universal: null
+name: { ko: 서버가 기억하지 않는 출입증, en: JSON Web Token }
+token: null
+grammars: []
+framework: null
+track_default: t0
+essential: false
+difficulty: 3
+prereq: []
+confusions: []
+dict:
+  one_liner:
+    ko: "서명이 붙은 출입증. 서버가 아무것도 기억하지 않아도 확인된다."
+    en: "A signed pass. It checks out with the server remembering nothing."
+  why:
+    ko: >-
+      로그인한 뒤 다음 요청에서 「누구세요」를 다시 안 묻는 방법은 둘입니다. 서버가 <b>기억하거나</b>,
+      사용자가 <b>증명을 들고 다니거나</b>. 이것은 뒤쪽이에요 — 서버가 서명한 쪽지를 주고, 다음부터
+      브라우저가 그것을 머리에 붙여 보냅니다. 서버는 서명만 확인하면 되므로 <b>아무것도 저장하지
+      않습니다</b>. 그래서 서버를 여러 대로 늘려도 그대로 돌아가고, 대신 <b>한 번 준 것을 되물릴
+      수 없습니다</b> — 만료를 기다리거나 따로 목록을 둬야 해요.
+    en: >-
+      There are two ways to stop asking “who are you” on every request after a login. The server
+      <b>remembers</b>, or the user <b>carries proof</b>. This is the second — the server hands back
+      a slip it signed, and the browser attaches it to every later request. The server only checks
+      the signature, so it <b>stores nothing</b>. That is why more servers can be added freely, and
+      why <b>what was handed out cannot be taken back</b> — you wait for it to expire, or keep a
+      separate list.
+  trace: []
+rule:
+  ko: "<b>서명은 위조를 막을 뿐 내용을 감추지 않는다.</b> 안에 든 것은 누구나 읽을 수 있다."
+  en: "<b>A signature stops forgery; it does not hide.</b> Anyone can read what is inside."
+ok:
+  ko: >-
+    서버가 서명을 확인하고 「이 사람이 맞다」고 판단합니다. 그 판단에 데이터베이스는 안 봅니다.
+  en: >-
+    The server checks the signature and decides it is you. No database is read to decide that.
+misconceptions:
+  - ko: "안이 암호화돼 있다 — 서명만 돼 있고 내용은 그대로 읽힙니다. 비밀은 넣지 마세요."
+    en: "The inside is encrypted — it is only signed; the contents read plainly. Put no secrets in."
+  - ko: "로그아웃하면 곧바로 못 쓴다 — 서버가 기억하지 않으므로 만료 전까지는 여전히 쓰입니다."
+    en: "Logging out disables it at once — the server remembers nothing, so it works until it expires."
+  - ko: "브라우저가 알아서 붙여 준다 — 붙이는 코드를 사람이 적어야 합니다."
+    en: "The browser attaches it for you — someone writes the code that attaches it."
+  - ko: "길이가 짧으니 안전하다 — 안전을 정하는 것은 길이가 아니라 서명 열쇠입니다."
+    en: "It is short, so it is safe — safety comes from the signing key, not the length."

@@ -1,0 +1,254 @@
+schema: 1
+id: sql/null-check
+universal: null
+name: { ko: 값이 없는 자리 가려내기, en: Testing for absence }
+token: "IS"
+grammars: [sql]
+framework: null
+essential: true
+difficulty: 2
+prereq: []
+confusions: []
+
+dict:
+  one_liner:
+    ko: "값이 없는지 묻는 자리. 견주기 기호로는 이걸 못 묻는다."
+    en: "Asks whether a value is absent. A comparison sign cannot ask this."
+  why:
+    ko: >-
+      SQL 에서 「없음」은 값이 아니라 <b>모름</b>입니다. 모르는 것끼리 견주면 답도 모름이라
+      <code>= NULL</code> 은 참도 거짓도 아닌 <b>모름</b>을 냅니다 — 그리고 조건은 모름인 행을
+      버려요. 그래서 {{site.line}}행이 견주기 대신 이 낱말을 씁니다. 아무도 말려 주지 않고
+      <b>조용히 한 줄도 안 나오는</b> 것이 이 자리의 무서운 점입니다.
+    en: >-
+      In SQL absence is not a value but <b>unknown</b>. Weigh two unknowns and the answer is unknown,
+      so <code>= NULL</code> yields neither true nor false but <b>unknown</b> — and a filter throws
+      unknown rows away. That is why line {{site.line}} uses this word instead. Nothing says you were
+      mistaken; <b>no row comes back</b>, quietly.
+  trace:
+    - ko: "{{pick.2|code}} 의 값이 없는지 묻는다."
+      en: "It asks whether {{pick.2|code}} has no value."
+    - ko: "없으면 참, 있으면 거짓이다."
+      en: "Absent is true; present is false."
+    - ko: "모름이 남지 않으므로 행이 조용히 사라지지 않는다."
+      en: "No unknown is left, so no row vanishes quietly."
+
+rule:
+  ko: "<b>없음은 값이 아니라 모름이다.</b> 모름은 견줄 수 없어서 묻는 낱말이 따로 있다."
+  en: "<b>Absence is unknown, not a value.</b> Unknown cannot be weighed, so it has its own word."
+result:
+  label:
+    ko: "{{pick.2}}{{pick.2|josa:이,가}} 비었는가"
+    en: "is {{pick.2}} empty"
+  value: "{{pick.3}}"
+  note:
+    ko: "견주기로는 못 묻는다"
+    en: "a comparison cannot ask it"
+ok:
+  ko: >-
+    {{pick.2|code}} 에 값이 없는 행만 남습니다. 같은 것을 <code>=</code> 로 물었다면 한 줄도 안 나왔을 거예요.
+  en: >-
+    Only rows where {{pick.2|code}} has no value remain. Asked with <code>=</code>, none would have.
+payoff:
+  ko: >-
+    이걸 알면 「분명히 빈 값이 있는데 왜 안 나오지」가 풀립니다 — 대개 <code>= NULL</code> 로 물었기 때문이에요.
+  en: >-
+    This untangles “there are empty rows, why do none come back” — usually the question was <code>= NULL</code>.
+bridge:
+  ko: >-
+    보통의 언어는 <code>x == null</code> 이 참·거짓을 냅니다. SQL 은 <b>셋째 답</b>이 있어서 그 자리에
+    견주기를 쓰면 답이 사라집니다.
+  en: >-
+    Ordinary languages give true or false for <code>x == null</code>. SQL has a <b>third answer</b>,
+    and a comparison there makes the answer disappear.
+misconceptions:
+  - ko: "<code>= NULL</code> 은 오류다 — 오류가 아닙니다. 조용히 <b>아무 행도 안 맞습니다</b>."
+    en: "<code>= NULL</code> is an error — it is not. It quietly <b>matches no row</b>."
+  - ko: "빈 글자와 없음은 같다 — 다릅니다. 빈 글자는 값이고 없음은 값이 아닙니다."
+    en: "An empty string is absence — it is not. An empty string is a value; absence is not."
+  - ko: "없음끼리는 같다 — 모름끼리 견주면 답도 모름이라 같다고 안 나옵니다."
+    en: "Two absences are equal — weighing unknowns gives unknown, so they never come back equal."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>없음을 묻는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that asks about absence</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>묻는 대상</b>입니다. 무엇을 묻는지는 가운데 낱말이 정해요."
+          en: >-
+            {{pick.2|code}} is <b>what is asked about</b>. The word between decides what is asked.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 대상이냐 물음이냐"
+            en: "The sharpest spot — the subject or the question"
+          code:
+            - "deleted_date            -- 대상"
+            - "deleted_date IS NULL    -- 물음"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>없음</b> 자체입니다. 이것만 적어서는 물음이 되지 않아요."
+          en: >-
+            {{pick.3|code}} is <b>absence itself</b>. Written alone it asks nothing.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 없음이냐 없음을 묻기냐"
+            en: "The sharpest spot — absence or asking about it"
+          code:
+            - "NULL         -- 없음"
+            - "x IS NULL    -- 없는지 묻기"
+
+meaning:
+  - q:
+      ko: "같은 자리를 <code>=</code> 로 물으면 어떻게 될까요?"
+      en: "What if the same place is asked with <code>=</code>?"
+    hint:
+      ko: "SQL 의 답은 참·거짓 <b>둘이 아니라 셋</b>입니다."
+      en: "SQL has <b>three</b> answers, not two."
+    options:
+      - t:
+          ko: "한 행도 안 나온다 — 오류도 안 난다"
+          en: "No row comes back — and no error either"
+      - t:
+          ko: "값이 없는 행이 나온다"
+          en: "The rows with no value come back"
+        diag:
+          t:
+            ko: "그러려면 <b>모름 = 모름</b>이 참이어야 하는데 SQL 에서는 모름입니다. 모름인 행은 조건이 버려요."
+            en: >-
+              That needs <b>unknown = unknown</b> to be true, and in SQL it is unknown. A filter
+              throws unknown rows away.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 참이냐 모름이냐"
+              en: "The sharpest spot — true or unknown"
+            code:
+              - "x IS NULL   -- 참/거짓"
+              - "x = NULL    -- 모름 → 버려짐"
+      - t:
+          ko: "문법 오류로 멈춘다"
+          en: "It stops with a syntax error"
+        diag:
+          t:
+            ko: "문법은 <b>맞습니다</b>. 그래서 아무도 안 말려 주고, 결과가 비어 있는 것으로만 드러나요."
+            en: >-
+              The syntax is <b>fine</b>. Nothing warns you; it shows up only as an empty result.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 막히느냐 조용하냐"
+              en: "The sharpest spot — blocked or silent"
+            code:
+              - "-- 오류 메시지가 없다"
+              - "-- 결과만 0행"
+      - t:
+          ko: "모든 행이 나온다"
+          en: "Every row comes back"
+        diag:
+          t:
+            ko: "반대입니다. 모름은 참이 아니라서 조건을 통과하지 못하고 <b>전부 버려집니다</b>."
+            en: >-
+              The other way round. Unknown is not true, so nothing passes the filter and <b>all are
+              dropped</b>.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 전부냐 전무냐"
+              en: "The sharpest spot — all or none"
+            code:
+              - "WHERE x = NULL   -- 0행"
+              - "WHERE 1 = 1      -- 전부"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 값이 <b>없는지</b>를 묻습니다."
+      en: "Choose what goes in the blank. Line {{site.line}} asks whether a value is <b>absent</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "IS", mono: true }
+      - t: "LIKE"
+        mono: true
+        diag:
+          t:
+            ko: "<code>LIKE</code> 는 <b>글자 모양</b>을 견주는 자리라 없음을 못 묻습니다. 없음과 견주면 답이 모름이 돼요."
+            en: >-
+              <code>LIKE</code> weighs <b>the shape of text</b>, so it cannot ask about absence.
+              Weighed against absence the answer becomes unknown.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 모양이냐 있고 없음이냐"
+              en: "The sharpest spot — a shape or presence"
+            code:
+              - "name LIKE 'a%'    -- 모양"
+              - "name IS NULL      -- 없는지"
+      - t: "IN"
+        mono: true
+        diag:
+          t:
+            ko: "<code>IN</code> 은 <b>목록 안에 있는지</b>를 묻습니다. 목록에 없음을 넣어도 그 견주기가 모름이라 안 맞아요."
+            en: >-
+              <code>IN</code> asks whether a value is <b>in a list</b>. Put absence in the list and
+              that comparison is unknown, so it never matches.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 목록이냐 없음이냐"
+              en: "The sharpest spot — a list or absence"
+            code:
+              - "x IN (1, 2)      -- 목록"
+              - "x IN (NULL)      -- 안 맞는다"
+      - t: "AS"
+        mono: true
+        diag:
+          t:
+            ko: "<code>AS</code> 는 <b>별명을 붙이는</b> 자리라 묻는 자리가 아닙니다. 조건에는 오지 않아요."
+            en: >-
+              <code>AS</code> <b>gives a nickname</b>; it does not ask anything and never stands in a
+              condition.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 묻기냐 이름 붙이기냐"
+              en: "The sharpest spot — asking or naming"
+            code:
+              - "SELECT x AS n     -- 이름"
+              - "WHERE x IS NULL   -- 물음"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 <b>값이 없는 행</b>을 따로 가려낼까요?"
+    en: "Why does line {{site.line}} single out <b>rows with no value</b>?"
+  choices:
+    - t:
+        ko: "없음이 여기서는 뜻이 있어서 — 지워진 것·아직 안 한 것처럼 상태를 나타낸다"
+        en: "Because absence means something here — deleted, or not yet done, is a state"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 없음 대신 값을 넣어 그 상태를 나타냈다면 무엇이 달라지는지도 적어 보세요."
+        en: "That is the direction. Say what changes if a value marked that state instead of absence."
+    - t:
+        ko: "SQL 이 없음을 특별히 다뤄서"
+        en: "Because SQL treats absence specially"
+      ok: false
+      fb:
+        ko: "다루는 것은 맞지만 <b>왜 이 열이 비어 있는지</b>는 안 정해 줍니다. 그것이 이 설계의 선택이에요."
+        en: "It does, but not <b>why this column is empty</b>. That is a choice in the design."
+    - t:
+        ko: "빠르게 하려고"
+        en: "To make it faster"
+      ok: false
+      fb:
+        ko: "속도와는 무관합니다. 이 물음은 <b>맞는 행이 무엇인가</b>에 대한 것이에요."
+        en: "This has nothing to do with speed. It is about <b>which rows are the right ones</b>."
+
+queries:
+  - { grammars: [sql], file: ./null-check.scm }
+
+examples:
+  - code: "SELECT * FROM users WHERE deleted_date IS NULL"
+    expect: { sites: 1, form: isnull, hole: "IS", picks: { 1: "IS", 2: "deleted_date", 3: "NULL" } }
+  - code: "SELECT * FROM users WHERE deleted_date = NULL"
+    expect: none

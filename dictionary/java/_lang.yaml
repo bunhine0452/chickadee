@@ -8,12 +8,17 @@ grammar_abi: { java: 14 }
 extensions:
   java: [.java]
 
-# 바닥 여덟 (`docs/curriculum/java.md` §2). 순서는 읽는 순서이고 0장에 담기는 순서는
-# `prereq` 깊이가 정한다. 지금 선 것은 셋이고 나머지 다섯은 다음 판이다.
+# 바닥 여덟 (`docs/curriculum/java.md` §2) 전량. 순서는 읽는 순서이고 0장에 담기는 순서는
+# `prereq` 깊이가 정한다.
 essential:
   - java/class-declaration
-  - java/method-declaration
+  - java/variable-declaration
+  - java/assignment
+  - java/arithmetic
+  - java/boolean-literal
+  - java/comparison
   - java/if-statement
+  - java/method-declaration
 
 alternatives: []
 

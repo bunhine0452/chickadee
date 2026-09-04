@@ -37,6 +37,22 @@ export const grammarSchema = z.enum([
 ]);
 export type Grammar = z.infer<typeof grammarSchema>;
 
+/**
+ * 쿼리 없이 사는 네임스페이스 (D157 §7). 세 번은 각자 하드코딩했고 넷째에서 모았다.
+ *
+ * `common/` 은 전이 축, `arch/`(D142)·`exec/`(D151)는 문항을 그래프·AST 에서 **계산**하고,
+ * `cs/`(D157)·`proto/`(D159)는 문법이 아니라 기계와 규약이라 짚을 노드가 없다.
+ * 사전은 산문과 숙련도 키만 댄다.
+ *
+ * 새 네임스페이스를 여기 더하면 린트·시험이 함께 따라온다 — 세 곳에 흩어져 있을 때는
+ * 하나만 고치고 나머지를 잊는 것이 가능했다.
+ */
+export const COMPUTED_NAMESPACES = ['common/', 'arch/', 'exec/', 'cs/', 'proto/'] as const;
+
+/** 그 네임스페이스의 개념인가 — 쿼리도 사용처도 없다. */
+export const isComputed = (id: string): boolean =>
+  COMPUTED_NAMESPACES.some((prefix) => id.startsWith(prefix));
+
 /** 개념 id — `<lang>/<slug>` (03 §3.1). */
 export const conceptIdSchema = z.string().regex(/^[a-z][a-z0-9]*\/[a-z0-9][a-z0-9-]*$/);
 

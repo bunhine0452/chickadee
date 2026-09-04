@@ -12,3 +12,6 @@ export {
 export type {
   Concept, Grammar, LangMeta, Locale, Localized, SourceConcept, SourceLangMeta,
 } from './schema.js';
+
+/** 쿼리 없이 사는 네임스페이스 (D157 §7) — 접두어 목록이 여기 하나다. */
+export { COMPUTED_NAMESPACES, isComputed } from './schema.js';
