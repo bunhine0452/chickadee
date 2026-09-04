@@ -170,9 +170,21 @@
   height: 82px;
 }
 
+/* 크기를 **글자로 적는다**. `<svg>` 는 대체 요소(replaced element)라 `width`·`height` 가
+   `auto` 면 네 방향 `inset` 으로 늘어나는 대신 고유 크기(= 담는 상자의 100%)를 쓴다 —
+   그러면 상자는 82px 인데 자리는 `-7px` 로 밀려 링이 스티커보다 왼쪽 위로 7px 어긋난다.
+   엔진마다 다르게 처리하는 자리라(하네스의 두 엔진은 늘려 주고 앱의 WKWebView 는 안 늘렸다)
+   양쪽 `inset` 에 기대지 않고 폭·높이를 직접 준다. */
 .node[data-state="current"] .cut {
   position: absolute;
-  inset: -7px;
+
+  /* 가로는 스티커 둘레로 7px 씩, 세로는 위 5 · 아래 9 — **2px 내려 앉힌다**. 스티커는
+     `0 5px 0` 하드 그림자를 달고 있어 눈이 읽는 무게중심이 종이 원의 기하 중심보다
+     아래에 있다. 기하로 딱 맞추면 링이 살짝 떠 보인다 (사용자 확인). */
+  top: -5px;
+  left: -7px;
+  width: calc(100% + 14px);
+  height: calc(100% + 14px);
   pointer-events: none;
 }
 
