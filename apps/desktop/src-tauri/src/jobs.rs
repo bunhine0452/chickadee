@@ -486,9 +486,16 @@ fn extension_map(spec: &JobSpec) -> BTreeMap<String, &LangSpec> {
         .langs
         .iter()
         .flat_map(|l| l.extensions.iter().map(move |e| (e, l)));
-    pairs
-        .map(|(e, l)| (e.trim_start_matches('.').to_ascii_lowercase(), l))
-        .collect()
+    // One extension can be claimed by more than one language (D159: `.xml` is both
+    // the mapper's XML and the SQL inside it). `collect` would keep the last and the
+    // winner would depend on load order; the first wins instead, and it decides only
+    // the `file.grammar` column. Captures come from every grammar (`grammars_of`).
+    let mut out: BTreeMap<String, &LangSpec> = BTreeMap::new();
+    for (ext, lang) in pairs {
+        out.entry(ext.trim_start_matches('.').to_ascii_lowercase())
+            .or_insert(lang);
+    }
+    out
 }
 
 /// Every grammar that reads a given extension (D159).

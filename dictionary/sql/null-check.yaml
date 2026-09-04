@@ -3,7 +3,7 @@ id: sql/null-check
 universal: null
 name: { ko: 값이 없는 자리 가려내기, en: Testing for absence }
 token: "IS"
-grammars: [sql]
+grammars: [sql, mybatis_sql]
 framework: null
 essential: true
 difficulty: 2
@@ -245,7 +245,7 @@ why_gate:
         en: "This has nothing to do with speed. It is about <b>which rows are the right ones</b>."
 
 queries:
-  - { grammars: [sql], file: ./null-check.scm }
+  - { grammars: [sql, mybatis_sql], file: ./null-check.scm }
 
 examples:
   - code: "SELECT * FROM users WHERE deleted_date IS NULL"

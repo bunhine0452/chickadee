@@ -3,7 +3,7 @@ id: sql/from-table
 universal: null
 name: { ko: 어느 표에서 가져올지 대기, en: Naming the source }
 token: "FROM"
-grammars: [sql]
+grammars: [sql, mybatis_sql]
 framework: null
 essential: true
 difficulty: 1
@@ -207,7 +207,7 @@ why_gate:
         en: "Size is not the reason. <b>Where the answer is written</b> decides."
 
 queries:
-  - { grammars: [sql], file: ./from-table.scm }
+  - { grammars: [sql, mybatis_sql], file: ./from-table.scm }
 
 examples:
   - code: "SELECT * FROM users"

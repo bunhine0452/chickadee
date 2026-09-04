@@ -3,7 +3,7 @@ id: sql/comparison
 universal: common/comparison
 name: { ko: 두 값 견주기, en: Comparison }
 token: "="
-grammars: [sql]
+grammars: [sql, mybatis_sql]
 framework: null
 essential: true
 difficulty: 1
@@ -147,7 +147,7 @@ why_gate:
         ko: "요구하지 않습니다. 조건 없이 적으면 표 전체가 나올 뿐이에요."
         en: "It does not. With no condition the whole table comes back."
 queries:
-  - { grammars: [sql], file: ./comparison.scm }
+  - { grammars: [sql, mybatis_sql], file: ./comparison.scm }
 examples:
   - code: "SELECT * FROM users WHERE login_id = 'abc'"
     expect: { sites: 1, form: compare, hole: "=", picks: { 1: "=", 2: "login_id", 3: "'abc'" } }
