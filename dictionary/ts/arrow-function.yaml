@@ -13,7 +13,7 @@ confusions: [ts/call-expression]
 dict:
   one_liner:
     ko: "<code>=></code> 왼쪽은 받을 것, 오른쪽은 돌려줄 것. 함수를 값처럼 쓴다."
-    en: "Left of <code>=></code> is what it takes, right is what it gives. A function as a value."
+    en: "Left of <code>=></code> is what it takes, right is what it gives. Use it like a value."
   why:
     ko: >-
       함수를 값으로 쓸 수 있으면 「무엇을 할지」를 다른 함수에 넘길 수 있습니다.
