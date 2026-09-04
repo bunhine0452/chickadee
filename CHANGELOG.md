@@ -39,9 +39,23 @@ There is no automatic update — a new version is downloaded by hand.
 - **The fourth step of the ladder** assembles a prompt from the line you are stuck on plus
   four lines on each side — file base name only, no directory path, no repository name,
   no commit message. 0.1.0 builds it for you to copy and never sends it.
-- **Korean interface** on design tokens generated from the mockups: dark theme, reduced
-  motion honored, every screen reachable without a mouse, and one place per screen where
-  what just happened is read aloud — a sentence, not the whole panel.
+- **Two interface languages.** The first run asks for Korean or English and settings can
+  change it afterwards. The choice reaches the grammar dictionary too, so card text reads
+  in the language you picked; a concept with no English yet falls back to Korean rather
+  than leaving the panel blank. Korean is the canon — line length, word breaking and the
+  particle helper are tuned for it, and English carries its own line-length rule.
+- **A shelf for your repositories.** Register several and switch between them from the
+  masthead. The shelf is where one gets added, pointed at a folder that moved, or taken
+  out of the list. Mastery is counted per concept, so it follows you across repositories.
+- **Clone course.** Transcribe a repository in the order it was built — by commit where
+  there are enough of them, by dependency where there are not — in 12-to-40-line segments
+  graded by the same engine as T1. It runs outside the daily queue and leaves that budget
+  alone; what you get right still raises the concept's layer, and leaving mid-segment
+  keeps your draft.
+- **Interface** on design tokens generated from the mockups: dark theme, reduced motion
+  honored, excluded paths and the commit identities that decide which commits count as
+  yours, every screen reachable without a mouse, and one place per screen where what just
+  happened is read aloud — a sentence, not the whole panel.
 - **Downloads** for macOS (Apple silicon and Intel), Windows, and Linux (AppImage and
   `.deb`), with `SHA256SUMS.txt` attached to the release.
 
