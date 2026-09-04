@@ -72,7 +72,8 @@
               "cpp",
               "java",
               "c_sharp",
-              "vue"
+              "vue",
+              "xml"
             ]
           },
           "default": []
@@ -542,7 +543,8 @@
               "cpp",
               "java",
               "c_sharp",
-              "vue"
+              "vue",
+              "xml"
             ]
           },
           "minItems": 1
@@ -569,7 +571,8 @@
               "cpp",
               "java",
               "c_sharp",
-              "vue"
+              "vue",
+              "xml"
             ]
           }
         },
@@ -597,7 +600,8 @@
               "cpp",
               "java",
               "c_sharp",
-              "vue"
+              "vue",
+              "xml"
             ]
           }
         },

@@ -562,6 +562,7 @@ const GRAMMAR_BY_EXT: Readonly<Record<string, string>> = {
   // `.pyi` 가 빠져 있어 스텁이 `typescript` 로 폴백하고 있었다 — `py/_lang.yaml` 은
   // 처음부터 `python: [.py, .pyi]` 였다 (D156 조사).
   '.vue': 'vue',
+  '.xml': 'xml',
   '.py': 'python', '.pyi': 'python',
   '.go': 'go',
   '.rs': 'rust',

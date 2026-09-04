@@ -32,6 +32,8 @@ pub const LANGS: &[(&str, Load)] = &[
     // (`sfc.rs`). 문법 키를 따로 두는 이유는 파서 풀과 구간 지정이 그 키로 갈리기 때문이다.
     #[cfg(feature = "lang-javascript")]
     ("vue", || tree_sitter_javascript::LANGUAGE.into()),
+    #[cfg(feature = "lang-xml")]
+    ("xml", || tree_sitter_xml::LANGUAGE_XML.into()),
 ];
 
 #[derive(Debug, Clone, Serialize)]

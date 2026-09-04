@@ -495,3 +495,29 @@ describe('java · Spring 라우트 (D159)', () => {
     expect(edges.filter((e) => e.kind === 'http')).toStrictEqual([]);
   });
 });
+
+describe('mybatis 매퍼 (D159)', () => {
+  const DAO = 'BACK/src/main/java/com/ssafy/app/model/dao/UserDao.java';
+  const USER = 'BACK/src/main/java/com/ssafy/app/model/entity/User.java';
+  const MAP = 'BACK/src/main/resources/mapper/user/UserMapper.xml';
+
+  test('`namespace` 는 방향이 뒤집힌다 — DAO 를 열면 SQL 이 거기 있다', () => {
+    const edges = one(MAP, [spec('com.ssafy.app.model.dao.UserDao', 'mapper-of')], { paths: [DAO, MAP] });
+    expect(lines(edges)).toStrictEqual([`${DAO} -> ${MAP} (static)`]);
+  });
+
+  test('`type`·`resultType` 은 그대로다 — 매퍼가 그 타입을 쓴다', () => {
+    const edges = one(MAP, [spec('com.ssafy.app.model.entity.User')], { paths: [USER, MAP] });
+    expect(lines(edges)).toStrictEqual([`${MAP} -> ${USER} (static)`]);
+  });
+
+  test('점 없는 별칭(`string`·`map`)은 자바 파일로 안 풀려 엣지가 없다', () => {
+    const edges = one(MAP, [spec('string'), spec('map'), spec('long')], { paths: [DAO, USER, MAP] });
+    expect(edges).toStrictEqual([]);
+  });
+
+  test('뒤집힌 엣지도 자기 자신을 가리키면 버린다', () => {
+    const edges = one(MAP, [spec('com.ssafy.app.model.dao.UserDao', 'mapper-of')], { paths: [MAP] });
+    expect(edges).toStrictEqual([]);
+  });
+});

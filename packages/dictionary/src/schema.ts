@@ -32,6 +32,8 @@ export const grammarSchema = z.enum([
   'c', 'cpp', 'java', 'c_sharp',
   // Vue SFC. 문법이 따로 있는 게 아니라 자바스크립트를 `<script>` 구간에만 돌린다 (D159).
   'vue',
+  // MyBatis 매퍼. 속성값이 자바 클래스 이름이라 해석은 자바와 같은 규칙을 쓴다 (D159).
+  'xml',
 ]);
 export type Grammar = z.infer<typeof grammarSchema>;
 

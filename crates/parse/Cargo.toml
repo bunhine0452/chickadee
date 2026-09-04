@@ -18,6 +18,7 @@ tree-sitter-python = { version = "0.23", optional = true }
 tree-sitter-go = { version = "0.23", optional = true }
 tree-sitter-rust = { version = "0.23", optional = true }
 tree-sitter-java = { version = "0.23", optional = true }
+tree-sitter-xml = { version = "0.7", optional = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
 streaming-iterator = "0.1"
@@ -32,7 +33,7 @@ serde_json.workspace = true
 [features]
 default = [
   "lang-typescript", "lang-javascript", "lang-sql", "lang-python", "lang-go", "lang-rust",
-  "lang-java",
+  "lang-java", "lang-xml",
 ]
 lang-typescript = ["dep:tree-sitter-typescript"]
 lang-javascript = ["dep:tree-sitter-javascript"]
@@ -44,6 +45,8 @@ lang-go = ["dep:tree-sitter-go"]
 lang-rust = ["dep:tree-sitter-rust"]
 # D159 — Spring 리포의 심장이 Java 다. 라우트 애너테이션에서 HTTP 간선이 나온다.
 lang-java = ["dep:tree-sitter-java"]
+# MyBatis 매퍼가 XML 이고 그 안에 SQL 과 **자바 클래스 이름**이 산다 (D159).
+lang-xml = ["dep:tree-sitter-xml"]
 
 [lints]
 workspace = true

@@ -54,6 +54,8 @@ type Lang = 'ts' | 'py' | 'go' | 'rs' | 'dart' | 'swift' | 'java';
 const LANG_OF: Readonly<Record<string, Lang>> = {
   ts: 'ts', tsx: 'ts', js: 'ts', jsx: 'ts', mjs: 'ts', cjs: 'ts', vue: 'ts',
   py: 'py', go: 'go', rs: 'rs', dart: 'dart', swift: 'swift', java: 'java',
+  // MyBatis 매퍼의 속성값은 자바 패키지 경로다 — 해석기를 따로 두지 않는다 (D159).
+  xml: 'java',
 };
 
 /** `_imports.scm` 이 라우트로 내보내는 `form` 들 (D159). 이것들은 **나가는 엣지가 아니다.** */
@@ -108,10 +110,16 @@ export function resolveImports(input: ResolveInput): ResolvedEdge[] {
       // 자기 자신을 가리키는 엣지는 지도에 그릴 것이 없다.
       if (hit === null || hit.to === file.path) continue;
       const kind = hit.kind ?? kindOf(raw.form);
-      const key = `${file.path} ${hit.to} ${kind}`;
+      // MyBatis `namespace` 는 참조와 의존의 방향이 **반대**다 (D159). 글자는 매퍼가 DAO 를
+      // 가리키지만, 뜻은 「이 인터페이스의 실체가 여기 있다」라서 DAO 를 열면 SQL 이 여기 있다.
+      // 기능 경로가 DAO 에서 멈추지 않고 SQL 까지 가려면 이 하나를 뒤집어야 한다.
+      const flip = raw.form === 'mapper-of';
+      const from = flip ? hit.to : file.path;
+      const to = flip ? file.path : hit.to;
+      const key = `${from} ${to} ${kind}`;
       if (seen.has(key)) continue;
       seen.add(key);
-      edges.push({ from: file.path, to: hit.to, kind, confidence: hit.confidence ?? 'syntactic' });
+      edges.push({ from, to, kind, confidence: hit.confidence ?? 'syntactic' });
     }
   }
   edges.sort(byEdge);
