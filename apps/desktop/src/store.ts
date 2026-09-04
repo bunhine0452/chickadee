@@ -11,12 +11,13 @@ import { getLocale, type Locale } from '@chickadee/i18n';
 import type { ItemState, Layer, RepoInfo, Session } from '@chickadee/store-sql';
 import { create } from 'zustand';
 
+import type { CloneScope } from './data/clone.js';
 import type { Plate } from './data/session.js';
 import type { HomeData } from './screens/home/data.js';
 import type { IngestWarningRow } from './screens/ingest/IngestScreen.js';
 import type { Progress } from './screens/ingest/phases.js';
 
-export type Screen = 'first-run' | 'home' | 'ingest' | 'repos' | 'settings';
+export type Screen = 'first-run' | 'home' | 'ingest' | 'repos' | 'settings' | 'clone';
 
 /** 판 하나의 결과 — 채점 뒤 화면이 그리는 것 전부 (05 §3 `CardResult`). */
 export interface PlateResult {
@@ -65,6 +66,11 @@ export interface UiState {
   repos: RepoInfo[];
   activeId: number | null;
   home: HomeData | null;
+  /**
+   * 클론 코스가 열릴 범위 (D120). `screen === 'clone'` 일 때만 뜻이 있다 —
+   * 화면이 아니라 **어느 코스인지**를 나르는 값이라 `screen` 과 따로 둔다.
+   */
+  cloneScope: CloneScope | null;
   /** 인제스트 진행. 화면이 끝나면 비운다. */
   at: Progress | null;
   currentPath: string | undefined;
@@ -95,6 +101,12 @@ export interface UiActions {
   setRepos: (repos: RepoInfo[], activeId?: number | null) => void;
   /** 서가·스위처의 리포 전환 (D119 · 05 §2.4). 세션 중에는 아무것도 하지 않는다. */
   setActive: (repoId: number) => boolean;
+  /**
+   * 클론 코스를 연다 (D120). 홈의 대지 카드·마스트헤드·서가가 부르는 **한 문**이다 —
+   * 범위를 같이 넘기므로 화면에 따로 전달할 props 가 없다. 세션 중에는 열지 않는다
+   * (`false` 를 돌려주고 부른 쪽이 그 이유를 말한다).
+   */
+  openClone: (scope: CloneScope) => boolean;
   setHome: (home: HomeData | null) => void;
   beginIngest: () => void;
   step: (at: Progress, currentPath?: string) => void;
@@ -123,6 +135,7 @@ const EMPTY: UiState & SessionState = {
   repos: [],
   activeId: null,
   home: null,
+  cloneScope: null,
   at: null,
   currentPath: undefined,
   warnings: [],
@@ -168,6 +181,22 @@ export const useUi = create<UiState & SessionState & UiActions & SessionActions>
       return { activeId: repoId, home: null, screen: 'home' as Screen };
     });
     return moved;
+  },
+  /**
+   * 코스를 연다 (D120). 코스는 일일 큐 **밖**의 모드이므로 세션 오버레이가 아니라
+   * 별도 화면이다 — `screen` 을 바꾸고 홈은 그대로 뒤에 남지 않는다.
+   *
+   * 세션 중에는 열지 않는다. 이유는 `setActive` 와 같다: 원장에 남는 판이 어느 실행의
+   * 것인지가 도중에 흔들리면 안 된다.
+   */
+  openClone: (scope) => {
+    let opened = false;
+    set((s) => {
+      if (s.session !== null || s.activeId === null) return {};
+      opened = true;
+      return { screen: 'clone' as Screen, cloneScope: scope };
+    });
+    return opened;
   },
   beginIngest: () =>
     set({ screen: 'ingest', at: null, warnings: [], ingestDone: false, cancelling: false, error: undefined }),
