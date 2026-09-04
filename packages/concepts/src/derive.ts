@@ -44,6 +44,26 @@ export interface RawImport {
   line: number;
 }
 
+/**
+ * 같은 정의가 두 번 잡힌 것을 접는다 — **끝과 이름이 같으면 더 일찍 시작한 것만 남긴다.**
+ *
+ * 파이썬은 데코레이터가 붙으면 `decorated_definition`(바깥)과 `function_definition`(안쪽)이
+ * 둘 다 걸린다. 쿼리에 「부모가 X 가 아닌 것」이 없어서 `.scm` 에서 못 거른다.
+ * 둘은 끝나는 자리가 같고 이름도 같으므로 그 짝만 접으면 된다.
+ *
+ * 클래스와 그 안의 메서드는 **안 접힌다** — 끝이 같아도 이름이 다르다. 그 둘은 일부러
+ * 겹치게 두는 블록이다(TS 의 `class_declaration` + `method_definition` 과 같다).
+ */
+function outermostBlocks(blocks: readonly RawBlock[]): RawBlock[] {
+  const best = new Map<string, RawBlock>();
+  for (const b of blocks) {
+    const key = `${b.endByte}\u0000${b.name ?? ''}`;
+    const seen = best.get(key);
+    if (!seen || b.startByte < seen.startByte) best.set(key, b);
+  }
+  return [...best.values()];
+}
+
 /** `_blocks` 캡처 한 건. 분절과 AST 캐시는 M3 이 채운다. */
 export interface RawBlock {
   name: string | null;
@@ -122,7 +142,7 @@ export function deriveFile(
   mergeContexts(sites, contexts);
   countLineConcepts(sites);
   numberOccurrences(path, sites);
-  return { sites, imports, blocks };
+  return { sites, imports, blocks: outermostBlocks(blocks) };
 }
 
 function group(captures: readonly Capture[]): Match[] {

@@ -190,3 +190,7 @@ examples:
     expect: { sites: 1, form: arith, hole: "/", picks: { 1: "/", 2: "total", 3: "2" } }
   - code: "same = a == b"
     expect: none
+  # `//` 를 일부러 안 잡는다 — 이 개념의 규칙(「나누기는 늘 소수를 낸다」)이 몫 나누기에서
+  # 거짓이 되기 때문이다. 쿼리에서 빼는 결정을 여기서 못박는다 (`assignment` 의 `obj.attr` 과 같은 자리).
+  - code: "pages = total // size"
+    expect: none

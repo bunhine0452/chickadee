@@ -1,8 +1,9 @@
 lang: py
 version: 0.1.0
 grammars: [python]
-# **14 다.** 문법마다 다르고 ts 는 15 — 여기에 15 를 적으면 조용히 어긋난다 (D152).
-grammar_abi: 14
+# 문법마다 다르다 — tree-sitter-python 0.23.6 의 `parser.c` 가 14 다.
+# (예전 주석이 「ts 는 15」라고 적어 뒀는데 그 15 자체가 틀렸다 — typescript·tsx 는 14 다.)
+grammar_abi: { python: 14 }
 
 # 확장자 → 문법. 인제스트가 이 표로 파일을 고른다 (03 §2.1).
 extensions:

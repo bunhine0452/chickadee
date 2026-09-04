@@ -555,16 +555,30 @@ export async function finishT2Plate(
  * 정본이지만 채점 경로는 사전을 들고 있지 않을 수 있어(세션을 이어 찍으면 `maker` 가
  * `null` 이다) 표를 여기 좁게 둔다 — 모르면 `typescript` 로 두고, 그때 AST 층이 폴백한다.
  */
+const GRAMMAR_BY_EXT: Readonly<Record<string, string>> = {
+  '.tsx': 'tsx', '.jsx': 'tsx',
+  '.ts': 'typescript', '.mts': 'typescript', '.cts': 'typescript',
+  '.js': 'javascript', '.mjs': 'javascript', '.cjs': 'javascript',
+  // `.pyi` 가 빠져 있어 스텁이 `typescript` 로 폴백하고 있었다 — `py/_lang.yaml` 은
+  // 처음부터 `python: [.py, .pyi]` 였다 (D156 조사).
+  '.py': 'python', '.pyi': 'python',
+  '.go': 'go',
+  '.rs': 'rust',
+  '.sql': 'sql',
+  '.swift': 'swift',
+  '.dart': 'dart',
+  '.java': 'java',
+  '.cs': 'c_sharp',
+  '.cpp': 'cpp', '.cc': 'cpp', '.cxx': 'cpp',
+  '.hpp': 'cpp', '.hh': 'cpp', '.hxx': 'cpp',
+  // `.c` 는 확정이고 `.h` 는 아니다 — C++ 헤더도 `.h` 를 쓴다. 여기서는 리포를 못 보므로
+  // `c` 로 두고, 리포 단위 판정은 인제스트의 `LangSpec` 이 한다 (03 §2.1).
+  '.c': 'c', '.h': 'c',
+};
+
 export function grammarOf(path: string): string {
   const ext = path.slice(path.lastIndexOf('.'));
-  if (ext === '.tsx' || ext === '.jsx') return 'tsx';
-  if (ext === '.ts' || ext === '.mts' || ext === '.cts') return 'typescript';
-  if (ext === '.js' || ext === '.mjs' || ext === '.cjs') return 'javascript';
-  if (ext === '.py') return 'python';
-  if (ext === '.go') return 'go';
-  if (ext === '.rs') return 'rust';
-  if (ext === '.sql') return 'sql';
-  return 'typescript';
+  return GRAMMAR_BY_EXT[ext] ?? 'typescript';
 }
 
 // ───────── 사다리 (02 §4 · 04 §2.4) ─────────

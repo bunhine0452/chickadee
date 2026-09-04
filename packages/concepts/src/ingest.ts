@@ -71,6 +71,12 @@ export interface IngestOptions {
  * 네임스페이스는 `_lang.yaml` 이 있는 것만이 아니다: `common/`·`arch/` 는 개념만 있고
  * 문법에 매이지 않는다. 그래도 `concept.dict_version_id` 가 NOT NULL 이라 판 행은 필요하다.
  */
+/** 문법별 ABI 표를 순서에 안 흔들리는 문자열로. `{tsx:14,typescript:14}` → `"tsx=14,typescript=14"`. */
+function abiKey(abi: Readonly<Record<string, number>> | undefined): string {
+  if (!abi) return '0';
+  return Object.keys(abi).sort().map((g) => `${g}=${abi[g]}`).join(',');
+}
+
 export async function materializeDict(dict: Dict, now: number): Promise<void> {
   const spaces = new Set([...dict.langs.keys(), ...[...dict.concepts.keys()].map(langOf)]);
   const ops: BatchOp[] = [...spaces].sort().map((lang) => {
@@ -81,7 +87,9 @@ export async function materializeDict(dict: Dict, now: number): Promise<void> {
         lang,
         version: meta?.version ?? '0',
         // 번들 사전은 빌드 산출물이라 파일 해시 대신 버전·ABI 로 식별한다.
-        sha256: `${meta?.version ?? '0'}:${meta?.grammar_abi ?? 0}`,
+        // ABI 는 문법별 표라 **키를 정렬해** 넣는다 — 객체 순서가 바뀌면 같은 사전이
+        // 다른 해시를 얻어 재인제스트가 돈다.
+        sha256: `${meta?.version ?? '0'}:${abiKey(meta?.grammar_abi)}`,
         conceptCount: [...dict.concepts.keys()].filter((id) => langOf(id) === lang).length,
         loadedAt: now,
       },

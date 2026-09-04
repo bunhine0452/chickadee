@@ -4,11 +4,12 @@
  * 「끝이 있다」를 못박는 테스트가 이 파일의 요점이다 — 상한 8과 끝 조건 셋. 0장이
  * 「과정」으로 자라나려면 이 테스트들을 먼저 고쳐야 하고, 그때 D136 을 다시 읽게 된다.
  */
+import { loadDict } from '@chickadee/dictionary';
 import { describe, expect, test } from 'vitest';
 
-import type { BestSite, NewcomerFlag, RootResult } from './new-rank.js';
+import { prereqDepth, type BestSite, type NewcomerFlag, type RootResult } from './new-rank.js';
 import {
-  ZERO_CHAPTER_MAX, isDone, rootCleared, shouldOpen, zeroChapterPlates,
+  ZERO_CHAPTER_MAX, ZERO_CHAPTER_MAX_DEPTH, isDone, rootCleared, shouldOpen, zeroChapterPlates,
   type ZeroChapterInput, type ZeroChapterPlate,
 } from './zero-chapter.js';
 
@@ -169,5 +170,34 @@ describe('뿌리 통과', () => {
     expect(rootCleared([result(true, true), result(true), result(true), result(true)])).toBe(true);
     expect(rootCleared([result(true, true), result(true, true), result(true), result(true)]))
       .toBe(false);
+  });
+});
+
+describe('상한이 조용히 넘치지 않는다 (D156)', () => {
+  /**
+   * 언어마다 「0장 후보」(essential 중 선행 깊이 ≤ 2)가 상한을 넘지 않는가.
+   *
+   * 넘으면 `zeroChapterPlates` 가 `.slice(0, ZERO_CHAPTER_MAX)` 로 자르는데, 동점을 가르는
+   * 넷째 키가 **`conceptId` 알파벳순**이라 어느 개념이 프롤로그에 들어갈지를 **이름이 정한다.**
+   * D147 이 상한을 8→24 로 올리며 고른 근거가 「후보를 상한 언저리에 두어 *무엇을 자를까*가
+   * 임의의 문제가 되지 않게」였고, 이 시험이 그 근거를 지킨다.
+   *
+   * 열 언어 조사(D156)가 잰 바로는 C·Java·C#·Python 이 정확히 24 에 붙고 Swift 는 25 로 넘친다.
+   * 그 사전들이 들어오는 순간 여기서 걸리고, 그때 상한을 올릴지(24판 = 12일, D12)를 **결정한다.**
+   * 걸린 채로 지나가지 않는 것이 이 시험의 전부다.
+   */
+  test('언어마다 0장 후보가 상한 이하다 — 넘으면 이름이 프롤로그를 정한다', () => {
+    const dict = loadDict();
+    const over: string[] = [];
+    for (const [lang, meta] of dict.langs) {
+      const essential = meta.essential;
+      if (essential.length === 0) continue;
+      const depth = prereqDepth(essential, (id) => dict.concepts.get(id)?.prereq ?? []);
+      const candidates = essential.filter((id) => (depth.get(id) ?? 0) <= ZERO_CHAPTER_MAX_DEPTH);
+      if (candidates.length > ZERO_CHAPTER_MAX) {
+        over.push(`${lang}: ${candidates.length}/${ZERO_CHAPTER_MAX}`);
+      }
+    }
+    expect(over).toEqual([]);
   });
 });

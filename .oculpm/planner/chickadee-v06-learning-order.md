@@ -15,7 +15,7 @@ owner: claude-code
 - [x] exec/order · exec/unreachable — 실행 순서와 안 도는 줄. 둘 다 statement 순서와 return/throw 위치만 쓰므로 가장 단단하다 {#a-order}
 - [ ] state/mutation — 「이 줄 뒤 xs 는」. common/mutating-append ↔ map-transform 이 이미 갈라 둔 것을 정답지로 쓴다 {#a-state}
 - [ ] scope/visibility — 선언 노드와 사용 노드의 조상 블록 비교. AstLite 에 조상이 있는지 먼저 확인 {#a-scope}
-- [ ] 린트와 스키마 — 「보편 개념은 쿼리가 없다」가 common/·arch/ 접두어를 하드코딩한다(dict.test.ts). essential 이면 blank+@hole 을 요구하는 규칙도 이 네임스페이스에는 no_hole_reason 으로 {#a-lint}
+- [~] 린트와 스키마 — 「보편 개념은 쿼리가 없다」가 common/·arch/ 접두어를 하드코딩한다(dict.test.ts). essential 이면 blank+@hole 을 요구하는 규칙도 이 네임스페이스에는 no_hole_reason 으로 {#a-lint}
 - [ ] EVALS L5 갱신 — 추적층이 생기면 트랙 커버리지의 뜻이 바뀜다 {#a-evals}
 
 ## B · D152 — 파이썬 바닥 여덟 짝 {#b}
@@ -44,4 +44,6 @@ owner: claude-code
 | 2026-09-04T19:13:20+09:00 | #a-order | claude-code | ☐→~ | .oculpm/journal/20260904/Features_to_add/1913_feature_exec-order-question-builder.md | exec/order 출제층 완료(시험 5). exec/unreachable 은 실측으로 뺐다 — 238파일·함수 802개에서 0건이라 카드가 안 나온다. 남은 것은 사전 편찬과 배선 |
 | 2026-09-04T19:32:44+09:00 | #a-order | claude-code | ~→! | .oculpm/journal/20260904/Features_to_add/1928_feature_exec-lazy-baking-wired.md | 생성·조립·굽기 완료(커밋 4). 막힌 곳은 큐 진입 — queue.new_candidates 가 concept_site 를 JOIN 하고 kind='lang' 을 요구해 exec 이 둘 다 못 넘는다. UNION 가지 하나면 되지만 「새 판 2장」의 경쟁자를 바꾸는 문장이라 site_count 순위 영향 실측이 선행 |
 | 2026-09-04T19:45:06+09:00 | #a-order | claude-code | !→x | .oculpm/journal/20260904/Features_to_add/1928_feature_exec-lazy-baking-wired.md | D154 로 큐 진입까지 뚫음 — UNION 가지 + 랭커가 사용처 없는 후보를 경계 미지로 받는다. 어휘 판을 안 밀어내는 것을 순위 규칙으로 확인하고 넣음. 실제 SQLite 시험 3건(그 문장은 시험이 아예 없었다) |
+| 2026-09-04T20:54:57+09:00 | #a-lint | claude-code | ☐→~ | 20260904/Chores/2054_chore_ten-language-curriculum-and-cs-dictionary.md | D157 이 답을 확정 — COMPUTED 에 'cs/' 를 더해 넷으로(dict.test.ts:59 · lint.ts:139 · load.ts:82). 네 번째 추가라 접두어를 상수 하나로 모은다. 명세는 docs/curriculum/cs.md §7. 구현 미착수 |
+| 2026-09-04T20:56:53+09:00 | #a-state | claude-code | ☐→☐ | 20260904/Chores/2054_chore_ten-language-curriculum-and-cs-dictionary.md | Go 편이 세 번째 경우를 더한다 — append 가 용량에 따라 원본을 고치기도 새로 만들기도 해서 mutating-append ↔ map-transform 두 갈래로 안 갈린다. docs/curriculum/go.md §6 (전이 끊고 universal null 권고) |
 <!-- oculpm:plan-log end -->

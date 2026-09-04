@@ -116,7 +116,7 @@ describe('사전 저작 부채 (D145)', () => {
     lang: 'ts',
     version: '0.0.0',
     grammars: ['typescript'],
-    grammar_abi: 14,
+    grammar_abi: { typescript: 14 },
     extensions: { typescript: ['.ts'] },
     thin_threshold: { min_files: 1, min_sites: 1, small_repo_files: 1 },
     diag_default: { point: '짚은 자리', blank: '넣은 것' },

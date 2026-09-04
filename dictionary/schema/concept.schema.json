@@ -67,7 +67,11 @@
               "rust",
               "swift",
               "dart",
-              "sql"
+              "sql",
+              "c",
+              "cpp",
+              "java",
+              "c_sharp"
             ]
           },
           "default": []
@@ -532,15 +536,39 @@
               "rust",
               "swift",
               "dart",
-              "sql"
+              "sql",
+              "c",
+              "cpp",
+              "java",
+              "c_sharp"
             ]
           },
           "minItems": 1
         },
         "grammar_abi": {
-          "type": "integer",
-          "exclusiveMinimum": true,
-          "minimum": 0
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "exclusiveMinimum": true,
+            "minimum": 0
+          },
+          "propertyNames": {
+            "enum": [
+              "typescript",
+              "tsx",
+              "javascript",
+              "python",
+              "go",
+              "rust",
+              "swift",
+              "dart",
+              "sql",
+              "c",
+              "cpp",
+              "java",
+              "c_sharp"
+            ]
+          }
         },
         "extensions": {
           "type": "object",
@@ -561,7 +589,11 @@
               "rust",
               "swift",
               "dart",
-              "sql"
+              "sql",
+              "c",
+              "cpp",
+              "java",
+              "c_sharp"
             ]
           }
         },

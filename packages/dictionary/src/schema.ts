@@ -27,6 +27,9 @@ export type Locale = 'ko' | 'en';
 /** tree-sitter 문법 키 (D19). 사전 네임스페이스 `lang` 과 다른 축이다. */
 export const grammarSchema = z.enum([
   'typescript', 'tsx', 'javascript', 'python', 'go', 'rust', 'swift', 'dart', 'sql',
+  // D156 의 열 언어. `c_sharp` 은 tree-sitter 크레이트가 쓰는 키이고 사전 네임스페이스는
+  // `csharp` 이다 — `cs/` 를 기초 CS 사전이 가져갔다 (D157).
+  'c', 'cpp', 'java', 'c_sharp',
 ]);
 export type Grammar = z.infer<typeof grammarSchema>;
 
@@ -228,7 +231,13 @@ function langShape<T extends Localized>(text: z.ZodType<T, z.ZodTypeDef, T>) {
     lang: z.string().regex(/^[a-z][a-z0-9]*$/),
     version: z.string(),
     grammars: z.array(grammarSchema).min(1),
-    grammar_abi: z.number().int().positive(),
+    /**
+     * grammar → ABI. **숫자 하나가 아니다** — `ts` 는 `typescript`(14)·`tsx`(14)·
+     * `javascript`(15) 셋을 물고 있어 한 값으로 못 적는다. 값을 정하는 것은 언어가 아니라
+     * `Cargo.lock` 이 고정한 크레이트 버전이다(같은 문법도 버전이 다르면 갈린다).
+     * `dict.test.ts` 가 `parse_langs` 가 보고하는 실제 `abi` 와 대조한다.
+     */
+    grammar_abi: z.record(grammarSchema, z.number().int().positive()),
     /** grammar → 확장자. 인제스트의 `LangSpec` 이 여기서 나온다 (03 §2.1). */
     extensions: z.record(grammarSchema, z.array(z.string().regex(/^\.[a-z0-9.]+$/))),
     /** `package.json` 의존성으로 감지한다. 감지 실패 리포에서는 로드하지 않는다 (D59). */
