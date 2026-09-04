@@ -43,13 +43,13 @@ owner: claude-code
   - [x] tests/gates/design.spec.ts 행 길이 검사에 로케일 분기 + measure.allow.json 정리 {#i18n-typo-gate}
 
 ## P2 · 문구 전수 추출 (끝: 사전을 끘 앱의 모든 문구가 t() 를 거친다) {#p2}
-- [~] 화면 문구 — screens/ 6.8천 자 · 1일 {#i18n-extract-screens}
-  - [ ] screens/home (HomeScreen · data.ts · empty) {#i18n-extract-home}
-  - [ ] screens/ingest (phases 라벨 4칸 포함) {#i18n-extract-ingest}
-  - [ ] screens/settings (8절 + KeyPanel · PerfTable) {#i18n-extract-settings}
+- [x] 화면 문구 — screens/ 6.8천 자 · 1일 {#i18n-extract-screens}
+  - [x] screens/home (HomeScreen · data.ts · empty) {#i18n-extract-home}
+  - [x] screens/ingest (phases 라벨 4칸 포함) {#i18n-extract-ingest}
+  - [x] screens/settings (8절 + KeyPanel · PerfTable) {#i18n-extract-settings}
   - [x] screens/session (t1Copy · t2Copy · 세 판) {#i18n-extract-session}
-- [~] 컴포넌트 문구 — components/ 11.8천 자 · 1일 {#i18n-extract-components}
-  - [ ] components/home 16종(마스트헤드·패널·대지·라벨) {#i18n-extract-comp-home}
+- [x] 컴포넌트 문구 — components/ 11.8천 자 · 1일 {#i18n-extract-components}
+  - [x] components/home 16종(마스트헤드·패널·대지·라벨) {#i18n-extract-comp-home}
   - [x] components/plate · components/session (사다리 4단 문구 포함) {#i18n-extract-comp-plate}
   - [x] components/t1 · components/t2 {#i18n-extract-comp-t12}
 - [x] 프리미티브·오류 문구 · 0.5일 {#i18n-extract-ui}
@@ -69,12 +69,12 @@ owner: claude-code
 - [x] 사전 스키마·린트 확장 · 0.5일 (선행: D118) {#i18n-dict-schema}
   - [x] zod 를 문자열마다 `{ ko, en }` 유니온(스칼라 = ko)으로 넓히고 pnpm dict:schema 재생성 — *_en 접미 필드가 아니다(03 §4.4) {#i18n-dict-schema-fields}
   - [x] dict:lint — 조사 검사는 ko 에만 걸고 en 은 금지어·변수 참조만 검사 {#i18n-dict-schema-lint}
-- [~] 57 YAML 영문화 · 6일 {#i18n-dict-translate}
-  - [~] **먼저** dictionary/_glossary.en.yaml — 개념 이름 ko→en 용어집을 만들어 사용자가 확정한다. 나머지 문자열은 이 용어집에 고정해 번역한다 (사용자 결정 2026-09-04) {#i18n-dict-review}
-  - [ ] dictionary/common (보편 개념) {#i18n-dict-common}
-  - [ ] dictionary/ts · dictionary/react {#i18n-dict-ts-react}
-  - [ ] dictionary/arch (T2 개념 4종) {#i18n-dict-arch}
-  - [ ] 나머지 언어 사전 {#i18n-dict-rest}
+- [x] 57 YAML 영문화 · 6일 {#i18n-dict-translate}
+  - [x] **먼저** dictionary/_glossary.en.yaml — 개념 이름 ko→en 용어집을 만들어 사용자가 확정한다. 나머지 문자열은 이 용어집에 고정해 번역한다 (사용자 결정 2026-09-04) {#i18n-dict-review}
+  - [x] dictionary/common (보편 개념) {#i18n-dict-common}
+  - [x] dictionary/ts · dictionary/react {#i18n-dict-ts-react}
+  - [x] dictionary/arch (T2 개념 4종) {#i18n-dict-arch}
+  - [-] 나머지 언어 사전 {#i18n-dict-rest}
 - [x] loader 폴백과 고지 — en 결측 개념은 ko 로 내도로 보이고 그 사실을 판에 한 줄로 · 0.3일 {#i18n-dict-fallback}
 - [x] 0002 마이그레이션 · 0.5일 {#i18n-migration}
   - [x] concept.name_en ADD COLUMN — 원장은 추가만(02 §2.2) {#i18n-migration-ddl}
@@ -125,4 +125,13 @@ owner: claude-code
 | 2026-09-04T09:55:52+09:00 | #i18n-migration-ddl | claude-code | ☐→x |  |  |
 | 2026-09-04T09:55:53+09:00 | #i18n-migration-runner | claude-code | ☐→x |  |  |
 | 2026-09-04T09:55:55+09:00 | #i18n-dict-review | claude-code | ☐→~ |  | _glossary.en.yaml 초안 55행. 이름 충돌 3건·대문자 5건·의도적 차이 24쌍을 사용자가 확정해야 나머지가 돈다 |
+| 2026-09-04T11:17:09+09:00 | #i18n-extract-home | claude-code | ☐→x | 20260904/Features_to_add/1116_feature_parallel-v03-course-screen-i18n-dict.md | HomeScreen · data.ts · empty. ko/home.ts 147키 신설 |
+| 2026-09-04T11:17:11+09:00 | #i18n-extract-ingest | claude-code | ☐→x | 20260904/Features_to_add/1116_feature_parallel-v03-course-screen-i18n-dict.md | phases 4칸 포함. 제목의 조사를 josa 필터로 — 옛 문구는 띄어 쓰고 을 로 고정했다 |
+| 2026-09-04T11:17:14+09:00 | #i18n-extract-settings | claude-code | ☐→x | 20260904/Features_to_add/1116_feature_parallel-v03-course-screen-i18n-dict.md | 8절 + KeyPanel · PerfTable. **bold** 가 그대로 보이던 두 곳을 &lt;b&gt;+RichText 로 |
+| 2026-09-04T11:17:16+09:00 | #i18n-extract-comp-home | claude-code | ☐→x | 20260904/Features_to_add/1116_feature_parallel-v03-course-screen-i18n-dict.md | 16종 + 상위가 TimeQueue 를 queue.* 로. 화면 문구 2,513자 → 0 |
+| 2026-09-04T11:17:18+09:00 | #i18n-dict-review | claude-code | ~→x | 20260904/Features_to_add/1116_feature_parallel-v03-course-screen-i18n-dict.md | 사용자 확정 — status: confirmed, 규칙 셋을 rules: 로 파일에 박았다. name.en 5개 변경 |
+| 2026-09-04T11:17:19+09:00 | #i18n-dict-common | claude-code | ☐→x | 20260904/Features_to_add/1116_feature_parallel-v03-course-screen-i18n-dict.md | 22/22 · 113 문자열 |
+| 2026-09-04T11:17:24+09:00 | #i18n-dict-ts-react | claude-code | ☐→x | 20260904/Features_to_add/1116_feature_parallel-v03-course-screen-i18n-dict.md | ts 29/29 + react 2/2 · 875 문자열 |
+| 2026-09-04T11:17:26+09:00 | #i18n-dict-arch | claude-code | ☐→x | 20260904/Features_to_add/1116_feature_parallel-v03-course-screen-i18n-dict.md | 4/4 · 16 문자열 |
+| 2026-09-04T11:17:29+09:00 | #i18n-dict-rest | claude-code | ☐→- | 20260904/Features_to_add/1116_feature_parallel-v03-course-screen-i18n-dict.md | 남은 것이 없다 — dictionary/ 는 네 네임스페이스뿐이고 57 = 55 개념 + _lang 둘, 앞 세 항목이 다 덮었다. 다른 언어 사전(python·rust)은 아직 없다 |
 <!-- oculpm:plan-log end -->

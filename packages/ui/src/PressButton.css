@@ -53,8 +53,19 @@
   cursor: not-allowed;
 }
 
-/* 목업 ink-home.html: 버튼 안의 키 캡은 조금 더 얌전하다 */
-.press-btn kbd { font-size: var(--fs-13) }
+/*
+ * 목업 ink-home.html: 버튼 안의 키 캡은 조금 더 얌전하다.
+ *
+ * `opacity` 만 되돌린다. `shared.css` 의 `kbd.k` 가 `.8` 을 걸어 두는데, 이 버튼의 면은
+ * 채도가 높은 `--t1` 이라 `--on-t1`(4.73:1)이 합성되면서 **3.79:1** 로 떨어진다 — axe
+ * serious 다. `check-contrast.mjs` 는 토큰 쌍만 재고 opacity 합성을 모르므로 정적 게이트는
+ * 4.73 을 보고 통과시킨다(`--desk`·`--ink-mute` 와 같은 종류의 구멍). 캡의 크기·테두리·
+ * 서체는 목업 그대로다.
+ */
+.press-btn kbd {
+  font-size: var(--fs-13);
+  opacity: 1;
+}
 
 /* 야간반 글로우 — 05 §4.3 dark allowlist 6개 중 하나 */
 [data-theme="dark"] .press-btn:not([disabled]) {

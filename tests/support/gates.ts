@@ -110,9 +110,14 @@ export const motionOver = (page: Page, limitMs: number, exempt: readonly string[
 export const T1_SKIP = '첫날 큐는 새 판(T0)뿐이라 T1 판이 서지 않는다 — 시드에 `block` 은 18행 있다(D113)';
 export const T2_SKIP = 'tiny 시드에 커밋·import 간선이 없다 — makeT2Card() 가 null 이라 T2 판이 큐에 안 선다';
 
-/** 홈의 「인쇄 시작」. 마우스를 쓰지 않는다 — 포커스를 옮기고 Enter 를 친다. */
+/**
+ * 홈의 「인쇄 시작」. 마우스를 쓰지 않는다 — 포커스를 옮기고 Enter 를 친다.
+ *
+ * 이름을 로케일 둘 다로 받는다. 시드는 ko 를 못박지만 en 스모크(`en-smoke.spec.ts`)가
+ * 같은 걸음을 걷는다 — 여기가 ko 만 알면 그 스모크는 홈에서 30초를 기다리다 죽는다.
+ */
 export async function startSession(page: Page): Promise<void> {
-  const start = page.getByRole('button', { name: /인쇄 시작|이어 찍기/ });
+  const start = page.getByRole('button', { name: /인쇄 시작|이어 찍기|Start printing|Carry on/ });
   await start.waitFor();
   await start.focus();
   await page.keyboard.press('Enter');
@@ -158,7 +163,7 @@ const MAX_PLATES = 12;
  * 판을 답한 뒤 다시 넘긴다.
  */
 export async function toSummary(page: Page, app: AppDb): Promise<void> {
-  const done = page.locator('article.ps[aria-label="인쇄 완료"]');
+  const done = page.locator('article.ps[aria-label="인쇄 완료"], article.ps[aria-label="Printing done"]');
   for (let left = MAX_PLATES; left > 0; left -= 1) {
     await page.keyboard.press('Space');
     // 넘어갔으면 판정이 걷힌다 — 요약이 떠도 마찬가지다.
