@@ -219,6 +219,9 @@ export const home = {
   'home.detailClose': '닫기',
 
   // ── 대지 (components/home/Sheet.tsx) ─────────────────────────────────────
+  // 대지 색인 띠 (D133). 칩 안의 이름은 잘릴 수 있어 읽히는 이름은 따로 든다.
+  'home.sheetIndex': '대지 색인',
+  'home.sheetChip': '{{no}}대 · {{name}} · {{all}}개 중 {{done}}개 찍음',
   'home.sheetStamp': '인쇄 완료',
   'home.sheetSig': '{{n}}대',
   'home.sheetFeature': '기능 {{n}}',

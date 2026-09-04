@@ -60,12 +60,6 @@ export const COLOR_BAR_DAYS = 14;
 export const GAPS_LIMIT = 5;
 /** 「다시 찍을 개념」 줄 수. */
 export const RETAKE_LIMIT = 6;
-/**
- * 이보다 많으면 대지 목록에 윈도잉을 건다 (05 §10 · D81). 12 는 05 §10 의 「홈 시트 12장
- * 초과」 그대로다 — 그 아래에서는 화면 밖 대지가 거의 없어 가시성 판정 비용만 남는다.
- */
-export const WINDOW_SHEETS = 12;
-
 export type NodeState = 'done' | 'current' | 'locked' | 'open';
 
 export interface HomeNode {

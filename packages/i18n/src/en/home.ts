@@ -206,6 +206,8 @@ export const home: Record<string, string> = {
   'home.detailClose': 'Close',
 
   // ── Sheet ───────────────────────────────────────────────────────────────
+  'home.sheetIndex': 'Sheet index',
+  'home.sheetChip': 'Sheet {{no}} · {{name}} · {{done}} of {{all}} printed',
   'home.sheetStamp': 'PRINTED',
   'home.sheetSig': 'Sheet {{n}}',
   'home.sheetFeature': 'Feature {{n}}',

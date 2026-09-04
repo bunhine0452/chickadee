@@ -158,14 +158,28 @@ describe('HomeScreen', () => {
     expect(ticket.textContent).toContain('2026-09-03');
 
     expect(screen.getByRole('heading', { level: 1 }).textContent).toContain('cart-shop-web');
+    // 대지는 색인 띠에 다 서고 걸리는 것은 한 장이다 (D133).
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs).toHaveLength(2);
+    expect(tabs[0]?.getAttribute('aria-label')).toContain('장바구니 담기 / 빼기');
     const sheets = screen.getAllByRole('article');
-    expect(sheets).toHaveLength(2);
-    expect(sheets[0]?.textContent).toContain('장바구니 담기 / 빼기');
-    expect(sheets[1]?.textContent).toContain('로그인 흐름');
+    expect(sheets).toHaveLength(1);
+    // 처음 걸리는 것은 인쇄 중인 대지다.
+    expect(sheets[0]?.textContent).toContain('로그인 흐름');
 
     expect(screen.getByRole('list', { name: '판이 없는 문법' }).textContent).toContain('async / await');
-    expect(screen.getByRole('img', { name: /잉크 겹 5단계/ })).toBeTruthy();
     expect(screen.getByRole('img', { name: /지난 14일 잉크 농도/ })).toBeTruthy();
+  });
+
+  it('잉크 겹 패널은 접힌 채 열리고 제목 줄로 펼쳐진다 (D133)', async () => {
+    const user = userEvent.setup();
+    draw(DATA);
+
+    // 접힌 속은 지우지 않고 덮는다 — 접근성 트리에서만 사라진다.
+    expect(screen.queryByRole('img', { name: /잉크 겹 5단계/ })).toBeNull();
+
+    await user.click(screen.getByRole('button', { name: /잉크 겹/ }));
+    expect(screen.getByRole('img', { name: /잉크 겹 5단계/ })).toBeTruthy();
     expect(screen.getByRole('list', { name: '다시 찍을 개념' })).toBeTruthy();
   });
 

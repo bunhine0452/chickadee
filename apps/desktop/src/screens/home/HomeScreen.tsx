@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { t } from '@chickadee/i18n';
 import { DeeSprite, LiveRegion, RichText } from '@chickadee/ui';
 
@@ -12,9 +13,10 @@ import { Masthead } from '../../components/home/Masthead';
 import { Newcomer } from '../../components/home/Newcomer';
 import { Panel } from '../../components/home/Panel';
 import { Sheet } from '../../components/home/Sheet';
+import { SheetIndex } from '../../components/home/SheetIndex';
 import { TodayPanel, type TodayPreview } from '../../components/home/TodayPanel';
 import { layerLabel } from '../../components/home/labels';
-import { WINDOW_SHEETS, type HomeData, type HomeSheet } from './data';
+import type { HomeData, HomeSheet } from './data';
 import './HomeScreen.css';
 
 export interface HomeScreenProps {
@@ -70,7 +72,13 @@ export function HomeScreen({
   onCourse, now,
 }: HomeScreenProps) {
   const guide = guideMsg(data.sheets);
-  const currentUnitId = data.sheets.find((s) => s.state === 'current')?.unitId ?? null;
+  const currentUnitId = data.sheets.find((s) => s.state === 'current')?.unitId
+    ?? data.sheets[0]?.unitId ?? null;
+  // 색인에서 고른 대지. 아직 안 골랐으면 지금 인쇄 중인 대지가 걸린다 (D133).
+  const [picked, setPicked] = useState<number | null>(null);
+  const shownId = data.sheets.some((s) => s.unitId === picked) ? picked : currentUnitId;
+  const shownAt = data.sheets.findIndex((s) => s.unitId === shownId);
+  const shown = shownAt < 0 ? null : (data.sheets[shownAt] as HomeSheet);
   const printed = data.masthead.printed;
   const concepts = data.masthead.concepts;
 
@@ -115,12 +123,21 @@ export function HomeScreen({
               <TodayPanel today={today_} onStart={onStart} date={today} />
             )}
 
-            <Panel title={t('home.inkTitle')} plain={t('home.inkPlain')} tag={t('home.inkTag')}>
+            {/* 잉크 겹 척도는 매일 보는 것이 아니다 — 605px 을 제목 줄 하나로 접는다 (D133). */}
+            <Panel
+              title={t('home.inkTitle')}
+              plain={t('home.inkPlain')}
+              tag={t('home.inkTag')}
+              collapsible
+              defaultOpen={false}
+            >
               <InkScale counts={data.inkScale} />
               <RichText as="p" className="note" html={t('home.inkNote')} />
               <ConceptList rows={data.retake} now={now} />
             </Panel>
 
+            {/* 구멍 지도는 접지 않는다 — 「판 만들기」가 홈의 동작이고, 다른 화면의 문구가
+                (`prereq.noPlate`) 그 버튼을 가리킨다. */}
             <Panel title={t('home.gapsTitle')} plain={t('home.gapsPlain')}>
               <GapsPanel gaps={data.gaps} onMake={onMake} />
               <p className="note gaps-note">{t('home.gapsNote')}</p>
@@ -129,27 +146,30 @@ export function HomeScreen({
             </Panel>
           </aside>
 
-          {/* 12장을 넘으면 화면 밖 대지를 그리지 않는다 (D81 · 05 §10). 문턱 아래에서는
-              걸지 않는다 — 가시성 판정 비용만 남는다. */}
-          <div className="sheets" data-windowed={data.sheets.length > WINDOW_SHEETS ? 'on' : 'off'}>
-            {data.sheets.length === 0 ? (
+          {/* 대지 더미를 세로로 쌓지 않는다 — 색인 띠 한 줄과 걸린 한 장이다 (D133).
+              화면 밖 대지를 안 그리려고 걸었던 윈도잉(D81·D105)은 그릴 것 자체가
+              없어져 함께 걷었다. */}
+          <div className="sheets">
+            <SheetIndex sheets={data.sheets} selected={shownId} onSelect={setPicked} />
+
+            {shown === null ? (
               <>
                 <p className="note">{t('home.noSheets')}</p>
                 <Forecast pending={data.lastRun?.commits ?? 0} variant="cannot" />
               </>
             ) : (
               <>
-                {data.sheets.map((sheet, i) => (
+                <div id={`sheet-panel-${shown.unitId}`} role="tabpanel" aria-labelledby={`sx-${shown.unitId}`}>
                   <Sheet
-                    key={sheet.unitId}
-                    sheet={sheet}
-                    no={i + 1}
-                    guide={sheet.unitId === currentUnitId && guide !== null ? guide : undefined}
+                    key={shown.unitId}
+                    sheet={shown}
+                    no={shownAt + 1}
+                    guide={shown.unitId === currentUnitId && guide !== null ? guide : undefined}
                     onPick={onPick}
                     {...(onCourse ? { onCourse: (unitId: number) => onCourse(unitId) } : {})}
                     now={now}
                   />
-                ))}
+                </div>
                 <Forecast pending={data.files} variant="later" nextNo={data.sheets.length + 1} />
               </>
             )}

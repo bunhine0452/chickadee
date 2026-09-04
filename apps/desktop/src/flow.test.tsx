@@ -194,8 +194,8 @@ describe('리포 하나를 등록하면', () => {
     useUi.getState().go('home');
     render(<App />);
 
-    // 대지 한 장과 그 안의 스티커
-    expect(screen.getByText('cart')).toBeDefined();
+    // 대지 한 장과 그 안의 스티커. 이름은 색인 칩과 대지 머리 둘 다에 있다 (D133).
+    expect(screen.getAllByText('cart').length).toBeGreaterThan(0);
     expect(screen.getAllByText(/옵셔널 체이닝/).length).toBeGreaterThan(0);
     // 「판이 없는 문법」 — 내 코드엔 3곳 있는데 아직 판이 없다
     expect(screen.getByText(/판이 없는 문법/)).toBeDefined();
