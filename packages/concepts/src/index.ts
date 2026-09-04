@@ -59,3 +59,7 @@ export {
   writeZeroChapter,
 } from './ingest.js';
 export type { IngestOptions, IngestReport, Phase } from './ingest.js';
+
+/** 코스 (D162). */
+export { buildCourse } from './course.js';
+export type { Chapter, CourseOptions } from './course.js';
