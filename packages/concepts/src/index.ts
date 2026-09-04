@@ -63,3 +63,7 @@ export type { IngestOptions, IngestReport, Phase } from './ingest.js';
 /** 코스 (D162). */
 export { buildCourse } from './course.js';
 export type { Chapter, CourseOptions } from './course.js';
+
+/** 요청 한 줄기 — 2단 추적의 재료 (D162). */
+export { featurePath, requestPaths } from './path.js';
+export type { Hop } from './path.js';

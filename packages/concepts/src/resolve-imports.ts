@@ -43,6 +43,14 @@ export interface ResolveInput {
  */
 export interface ResolvedEdge {
   from: string; to: string; kind: EdgeKind; confidence: 'syntactic' | 'heuristic';
+  /**
+   * 이 간선을 만든 지정자가 적힌 줄 (`from` 기준 1-based).
+   *
+   * `import_edge` 에는 안 실린다 — 2단 추적 문항이 「어느 파일 **어느 줄**」을 묻는데
+   * 그 줄이 여기서만 나온다 (D162 · `docs/program/exercises.md` §2 `hop`).
+   * 뒤집힌 매퍼 간선(D159)에서는 `to` 쪽 파일의 줄이다 — 글자가 거기 적혀 있다.
+   */
+  line: number;
 }
 
 /** 해석 결과 하나. `kind` 가 있으면 `form` 대신 그것이 이긴다 (http 엣지). */
@@ -116,10 +124,14 @@ export function resolveImports(input: ResolveInput): ResolvedEdge[] {
       const flip = raw.form === 'mapper-of';
       const from = flip ? hit.to : file.path;
       const to = flip ? file.path : hit.to;
-      const key = `${from} ${to} ${kind}`;
+      // HTTP 간선은 **호출 자리마다** 다른 요청이다 — `authService.js` 는 같은 컨트롤러를
+      // 여섯 번 부르고 그 여섯이 로그인·회원가입·로그아웃…이다. 줄을 빼고 접으면 2단 추적이
+      // 「첫 번째 호출」을 로그인이라고 가르친다 (실측에서 12행 `signup` 이 그랬다).
+      // 정적 import 는 접는다 — 같은 파일을 두 번 import 해도 의존은 하나다.
+      const key = kind === 'http' ? `${from} ${to} http ${raw.line}` : `${from} ${to} ${kind}`;
       if (seen.has(key)) continue;
       seen.add(key);
-      edges.push({ from, to, kind, confidence: hit.confidence ?? 'syntactic' });
+      edges.push({ from, to, kind, confidence: hit.confidence ?? 'syntactic', line: raw.line });
     }
   }
   edges.sort(byEdge);

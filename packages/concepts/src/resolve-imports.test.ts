@@ -20,7 +20,7 @@ describe('ts/js (04 §7.1 1행)', () => {
   test('상대 지정자에 확장자를 붙여 푼다', () => {
     const edges = one('src/a.ts', [spec('./b')], { paths: ['src/a.ts', 'src/b.ts'] });
     expect(edges).toStrictEqual([
-      { from: 'src/a.ts', to: 'src/b.ts', kind: 'static', confidence: 'syntactic' },
+      { from: 'src/a.ts', to: 'src/b.ts', kind: 'static', confidence: 'syntactic', line: 1 },
     ]);
   });
 
@@ -110,6 +110,7 @@ describe('Next HTTP 엣지 (04 §7.1 2행)', () => {
         to: 'app/api/cart/route.ts',
         kind: 'http',
         confidence: 'syntactic',
+        line: 1,
       },
     ]);
   });
@@ -186,6 +187,7 @@ describe('go (04 §7.1 4행)', () => {
         to: 'internal/store/db.go',
         kind: 'static',
         confidence: 'syntactic',
+        line: 1,
       },
     ]);
   });
