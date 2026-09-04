@@ -4,10 +4,10 @@
 //! captures. It never opens a `.scm` file or a `.yaml` file — the caller hands it
 //! query text, and what a query means is decided in TS (D1 · D40).
 
-mod sfc;
 mod ast;
 mod langs;
 mod query;
+mod sfc;
 
 use std::cell::RefCell;
 use std::collections::HashMap;

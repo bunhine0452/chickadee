@@ -37,7 +37,10 @@ fn find(hay: &[u8], needle: &[u8], from: usize) -> Option<usize> {
 fn point_at(src: &[u8], at: usize) -> Point {
     let before = &src[..at.min(src.len())];
     let row = before.iter().filter(|&&b| b == b'\n').count();
-    let start = before.iter().rposition(|&b| b == b'\n').map_or(0, |i| i + 1);
+    let start = before
+        .iter()
+        .rposition(|&b| b == b'\n')
+        .map_or(0, |i| i + 1);
     Point::new(row, before.len() - start)
 }
 
@@ -47,9 +50,13 @@ pub(crate) fn tag_bodies(src: &[u8], open_tag: &[u8]) -> Vec<Range> {
     let mut out = Vec::new();
     let mut at = 0usize;
     while let Some(open) = find(src, open_tag, at) {
-        let Some(gt) = find(src, b">", open) else { break };
+        let Some(gt) = find(src, b">", open) else {
+            break;
+        };
         let start = gt + 1;
-        let Some(end) = find(src, b"</", start) else { break };
+        let Some(end) = find(src, b"</", start) else {
+            break;
+        };
         if end > start {
             out.push(Range {
                 start_byte: start,
@@ -81,9 +88,13 @@ pub(crate) fn statement_bodies(src: &[u8]) -> Vec<Range> {
         let Some(open) = TAGS.iter().filter_map(|t| find(src, t, at)).min() else {
             break;
         };
-        let Some(gt) = find(src, b">", open) else { break };
+        let Some(gt) = find(src, b">", open) else {
+            break;
+        };
         let start = gt + 1;
-        let Some(end) = find(src, b"</", start) else { break };
+        let Some(end) = find(src, b"</", start) else {
+            break;
+        };
         if end > start && !src[start..end].contains(&b'<') {
             out.push(Range {
                 start_byte: start,

@@ -135,7 +135,9 @@ fn declared_grammar_abi_matches_the_linked_grammar() {
 
         for grammar in &meta.grammars {
             // 이 빌드에 안 들어온 문법(피처 off)은 견줄 것이 없다.
-            let Some(abi) = linked.get(grammar) else { continue };
+            let Some(abi) = linked.get(grammar) else {
+                continue;
+            };
             assert_eq!(
                 meta.grammar_abi.get(grammar),
                 Some(abi),

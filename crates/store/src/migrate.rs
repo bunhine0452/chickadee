@@ -41,7 +41,8 @@ pub fn run(conn: &mut Connection, existing: Option<&Path>, list: &[Migration]) -
     // 표들의 행이 연쇄 삭제로 함께 사라진다. `foreign_keys` 는 **트랜잭션 안에서
     // 무시되므로** 이행 파일이 스스로 끌 수 없고 루프 밖인 여기가 유일한 자리다.
     // 대신 끝나고 `foreign_key_check` 로 확인한다 — 끄고 검사 안 하면 조용히 깨진다.
-    conn.pragma_update(None, "foreign_keys", OFF).map_err(wrap)?;
+    conn.pragma_update(None, "foreign_keys", OFF)
+        .map_err(wrap)?;
     let out = apply(conn, from, pending);
     conn.pragma_update(None, "foreign_keys", ON).map_err(wrap)?;
     out?;

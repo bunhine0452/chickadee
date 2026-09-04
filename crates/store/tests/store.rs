@@ -346,7 +346,10 @@ fn rebuilding_a_parent_table_keeps_child_rows() {
     let cat = Catalog {
         statements: [
             ("kid.count", "SELECT COUNT(*) AS n FROM kid"),
-            ("parent.add", "INSERT INTO parent (id, kind) VALUES (9, :kind)"),
+            (
+                "parent.add",
+                "INSERT INTO parent (id, kind) VALUES (9, :kind)",
+            ),
         ]
         .iter()
         .map(|(k, v)| ((*k).to_owned(), (*v).to_owned()))
