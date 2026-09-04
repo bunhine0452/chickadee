@@ -20,7 +20,9 @@ import { describe, expect, test } from 'vitest';
 /** 훑지 않는 곳. 생성물·의존성·바이너리 픽스처는 볼 것이 아니다. */
 const SKIP_DIRS = new Set([
   'node_modules', '.git', 'target', 'dist', 'fixtures', '.oculpm', 'coverage',
-  'test-results', 'playwright-report', '.claude',
+  // `.seed` 는 `pnpm test:seed` 가 만드는 SQLite 파일이 사는 곳이다. 소스가 아니고,
+  // 게다가 쓰는 중에는 `-journal` 이 나타났다 사라져 `statSync` 가 ENOENT 로 터진다.
+  'test-results', 'playwright-report', '.claude', '.seed',
 ]);
 
 /** 사람이 쓰는 텍스트 소스만. */

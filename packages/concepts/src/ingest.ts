@@ -15,9 +15,9 @@ import { type Identity } from './commits.js';
 import { reclassifyCommits } from './identities.js';
 import { deriveFile, type DerivedSite, type RawBlock } from './derive.js';
 import { buildGaps, type CountableSite } from './gaps.js';
-import { resolveImports, type FileImports } from './resolve-imports.js';
+import { resolveImports, type FileImports, type ResolvedEdge } from './resolve-imports.js';
 import { EXCLUDE_GLOBS, GENERATED_MARKERS, LIMITS } from './ingest-defaults.js';
-import { assignUnits } from './units.js';
+import { planUnits } from './units.js';
 import {
   innermostBlock, knownSet, lineIndex, unknownCount, windowUnknown,
   type LineIndex, type LineSpan, type MasteryRow, type WindowSite,
@@ -228,10 +228,10 @@ export async function deriveRepo(
     options.onProgress?.('derive', step, target.length, file.path);
   }
 
-  const edges = await writeEdges(repoId, files, imports, target.map((f) => f.id));
+  const { count: edges, resolved } = await writeEdges(repoId, files, imports, target.map((f) => f.id));
   await reclassifyCommits(repoId, options.identities ?? []);
   // 대지와 구멍은 리포 전체를 본다 — 증분이어도 「몇 파일 중 몇 곳」의 분모는 전체다.
-  const units = await writeUnits(repoId, files);
+  const units = await writeUnits(repoId, files, resolved);
   const gaps = await writeGaps(dict, repoId, files.length, now);
   return { sites: siteCount, blocks: blockCount, edges, gaps, units };
 }
@@ -278,7 +278,8 @@ async function writeEdges(
   // 경로는 싣지 않는다 (01 §6) — 개수만 남긴다.
   if (unknown > 0) log.info('가리키는 파일이 없는 import', { n: unknown });
   await inBatches(ops);
-  return ops.length - touched.length;
+  // 대지가 같은 것을 다시 풀지 않도록 해석 결과를 함께 돌려준다 (D160).
+  return { count: ops.length - touched.length, resolved };
 }
 
 /**
@@ -513,8 +514,10 @@ export async function writeZeroChapter(
 async function writeUnits(
   repoId: number,
   files: readonly { id: number; path: string }[],
+  edges: readonly ResolvedEdge[],
 ): Promise<number> {
-  const { units, byPath } = assignUnits(files.map((f) => f.path));
+  // 기능(진입점 폐포)이 먼저고 남은 것을 디렉터리 규칙이 받는다 (D160).
+  const { units, unitsOf } = planUnits(files.map((f) => f.path), edges);
   const ops: BatchOp[] = units.map((unit, i) => ({
     name: 'derive.unit_upsert',
     params: { repoId, name: unit.name, rootPath: unit.rootPath || null, orderIdx: i },
@@ -522,9 +525,10 @@ async function writeUnits(
   ops.push({ name: 'derive.unit_delete_missing', params: { repoId, names: units.map((u) => u.name) } });
   ops.push({ name: 'derive.unit_files_clear', params: { repoId } });
   for (const file of files) {
-    const name = byPath.get(file.path);
-    if (name === undefined) continue;
-    ops.push({ name: 'derive.unit_file_insert', params: { repoId, name, fileId: file.id } });
+    // 파일 하나가 대지 여럿에 든다 (D160). `unit_file` 의 기본키가 그것을 이미 허용한다.
+    for (const name of unitsOf.get(file.path) ?? []) {
+      ops.push({ name: 'derive.unit_file_insert', params: { repoId, name, fileId: file.id } });
+    }
   }
   await inBatches(ops);
   return units.length;
@@ -536,20 +540,24 @@ async function writeUnits(
  */
 export async function writeUnitNodes(repoId: number): Promise<number> {
   const sites = await ipc.store.query('derive.sites_for_rank', { repoId });
-  const files = await ipc.store.query('derive.files', { repoId });
-  const { byPath } = assignUnits(files.map((f) => f.path));
+  // 대지를 **다시 파생하지 않는다** — `writeUnits` 가 방금 쓴 것을 읽는다 (D160).
+  // 같은 규칙을 두 곳에서 돌리면 둘이 어긋날 자리가 생기고, 여기는 엣지도 못 본다.
+  const byPath = new Map<string, string[]>();
+  for (const row of await ipc.store.query('derive.unit_files', { repoId })) {
+    byPath.set(row.path, [...(byPath.get(row.path) ?? []), row.name]);
+  }
   const seen = new Set<string>();
   const ops: BatchOp[] = [];
   for (const site of sites) {
-    const unit = byPath.get(site.path);
-    if (unit === undefined) continue;
-    const key = `${unit}\u0000${site.concept_id}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    ops.push({
-      name: 'derive.unit_node_insert',
-      params: { repoId, name: unit, conceptId: site.concept_id, track: 't0', nodeOrder: seen.size },
-    });
+    for (const unit of byPath.get(site.path) ?? []) {
+      const key = `${unit}\u0000${site.concept_id}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      ops.push({
+        name: 'derive.unit_node_insert',
+        params: { repoId, name: unit, conceptId: site.concept_id, track: 't0', nodeOrder: seen.size },
+      });
+    }
   }
   await ipc.store.exec('derive.unit_nodes_clear', { repoId });
   await inBatches(ops);

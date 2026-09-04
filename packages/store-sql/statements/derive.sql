@@ -191,6 +191,19 @@ DELETE FROM unit_file WHERE unit_id IN (SELECT id FROM unit WHERE repo_id = :rep
 INSERT OR IGNORE INTO unit_file (unit_id, file_id)
 VALUES ((SELECT id FROM unit WHERE repo_id = :repoId AND name = :name), :fileId);
 
+-- 대지에 든 파일. `writeUnitNodes` 가 대지를 **다시 파생하지 않고** 방금 쓴 것을 읽는다 —
+-- 같은 규칙을 두 곳에서 돌리면 둘이 어긋날 자리가 생긴다.
+-- 파일 하나가 대지 여럿에 들 수 있다 (D160). `unit_file` 의 기본키가 `(unit_id, file_id)` 다.
+-- @name derive.unit_files
+-- @params { repoId: number }
+-- @row { name: string, path: string }
+SELECT u.name, f.path
+FROM unit_file uf
+JOIN unit u ON u.id = uf.unit_id
+JOIN file f ON f.id = uf.file_id
+WHERE u.repo_id = :repoId AND f.is_alive = 1
+ORDER BY u.name, f.path;
+
 -- @name derive.unit_nodes_clear
 -- @params { repoId: number }
 -- @row void

@@ -152,3 +152,64 @@ export function entryUnits(edges: readonly ResolvedEdge[]): FeatureUnit[] {
   for (const u of units) if (!byName.has(u.name)) byName.set(u.name, u);
   return [...byName.values()].sort((a, b) => a.name.localeCompare(b.name));
 }
+
+
+/** 기능 대지와 디렉터리 대지를 합친 것 (D160). */
+export interface UnitPlan {
+  /** 홈에 뜨는 순서 = `order_idx`. 기능이 먼저다. */
+  units: UnitOf[];
+  /** 파일 경로 → 대지 이름들. **N:M 이다** — 파일 하나가 기능 여럿에 든다. */
+  unitsOf: Map<string, string[]>;
+}
+
+/**
+ * 기능 대지(진입점 폐포)를 먼저 두고, **어느 기능에도 안 든 파일만** 디렉터리 규칙이 받는다.
+ *
+ * 두 규칙이 경쟁하지 않고 층을 나눈다 (D160). 기능이 못 보는 것 — Spring 필터 체인처럼
+ * 런타임에 엮이는 것 — 이 디렉터리 쪽으로 온다. 실측 리포에서 코드 121파일 중 31개가 그랬다.
+ *
+ * 이름이 겹치면 **기능이 이긴다.** 밀려난 디렉터리 대지의 파일은 「기타」로 간다 —
+ * `unit` 의 `UNIQUE (repo_id, name)` 때문에 같은 이름 둘을 세울 수 없다.
+ */
+export function planUnits(paths: readonly string[], edges: readonly ResolvedEdge[]): UnitPlan {
+  const known = new Set(paths);
+  const units: UnitOf[] = [];
+  const taken = new Set<string>();
+  const unitsOf = new Map<string, string[]>();
+
+  for (const feature of entryUnits(edges)) {
+    const mine = feature.files.filter((p) => known.has(p));
+    if (mine.length === 0) continue;
+    // 기능은 파일이 여러 갈래에 흩어져 있다(`BACK/…` 과 `FRONT/…`). 공통 뿌리가 없다.
+    units.push({ name: feature.name, rootPath: '' });
+    taken.add(feature.name);
+    for (const path of mine) unitsOf.set(path, [...(unitsOf.get(path) ?? []), feature.name]);
+  }
+
+  const rest = paths.filter((p) => !unitsOf.has(p));
+  if (rest.length === 0) return { units, unitsOf };
+
+  const dir = assignUnits(rest);
+  // **이 패스가 실제로 세운 이름**만 센다. `units` 를 그냥 보면 기능이 먼저 넣은 같은 이름에
+  // 걸려, 밀려나야 할 디렉터리 파일이 그 기능 안으로 들어간다.
+  const dirNames = new Set<string>();
+  const dropped: string[] = [];
+  for (const unit of dir.units) {
+    if (taken.has(unit.name)) continue;
+    units.push(unit);
+    taken.add(unit.name);
+    dirNames.add(unit.name);
+  }
+  for (const [path, name] of dir.byPath) {
+    if (dirNames.has(name)) unitsOf.set(path, [name]);
+    else dropped.push(path);
+  }
+  if (dropped.length > 0) {
+    if (!taken.has(OTHER_UNIT)) {
+      units.push({ name: OTHER_UNIT, rootPath: '' });
+      taken.add(OTHER_UNIT);
+    }
+    for (const path of dropped) unitsOf.set(path, [OTHER_UNIT]);
+  }
+  return { units, unitsOf };
+}

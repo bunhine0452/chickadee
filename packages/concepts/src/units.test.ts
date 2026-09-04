@@ -4,7 +4,7 @@
  */
 import { describe, expect, test } from 'vitest';
 
-import { entryUnits } from './units.js';
+import { OTHER_UNIT, entryUnits, planUnits } from './units.js';
 
 describe('기능 대지 — HTTP 진입점에서 도달하는 것 (D160)', () => {
   const edge = (from: string, to: string, kind: 'static' | 'http' = 'static') =>
@@ -54,5 +54,46 @@ describe('기능 대지 — HTTP 진입점에서 도달하는 것 (D160)', () =>
     const units = entryUnits([edge(a, CTRL, 'http'), edge(b, SVC, 'http'), edge(CTRL, SVC)]);
     expect(units).toHaveLength(1);
     expect(units[0]?.entry).toBe(a);
+  });
+});
+
+describe('기능 + 디렉터리 합치기 (D160)', () => {
+  const edge = (from: string, to: string, kind: 'static' | 'http' = 'static') =>
+    ({ from, to, kind, confidence: 'syntactic' as const });
+  const FE = 'FRONT/src/services/authService.js';
+  const CTRL = 'BACK/src/main/java/com/ssafy/app/controller/AuthController.java';
+  const SVC = 'BACK/src/main/java/com/ssafy/app/service/AuthService.java';
+  const CFG = 'BACK/src/main/java/com/ssafy/app/config/SecurityConfig.java';
+  const FILTER = 'BACK/src/main/java/com/ssafy/app/security/JwtAuthenticationFilter.java';
+  const BOOT = 'BACK/src/main/java/com/ssafy/app/Application.java';
+
+  test('기능이 먼저 서고 남은 것만 디렉터리 규칙이 받는다', () => {
+    const paths = [FE, CTRL, SVC, CFG, FILTER, BOOT];
+    const { units, unitsOf } = planUnits(paths, [edge(FE, CTRL, 'http'), edge(CTRL, SVC)]);
+    expect(units[0]?.name).toBe('auth');
+    expect(unitsOf.get(CTRL)).toStrictEqual(['auth']);
+    // 런타임에 엮이는 것은 어느 폐포에도 안 든다 — 디렉터리 쪽으로 온다.
+    expect(unitsOf.get(CFG)).toBeDefined();
+    expect(unitsOf.get(CFG)).not.toContain('auth');
+  });
+
+  test('덮이지 않은 파일이 하나도 안 사라진다', () => {
+    const paths = [FE, CTRL, SVC, CFG, FILTER, BOOT];
+    const { unitsOf } = planUnits(paths, [edge(FE, CTRL, 'http'), edge(CTRL, SVC)]);
+    for (const p of paths) expect(unitsOf.get(p)?.length ?? 0).toBeGreaterThan(0);
+  });
+
+  test('엣지가 없으면 예전과 같다 — 디렉터리 규칙만 돈다', () => {
+    const paths = ['src/cart/a.ts', 'src/cart/b.ts', 'src/cart/c.ts'];
+    const { units } = planUnits(paths, []);
+    expect(units.map((u) => u.name)).toStrictEqual(['cart']);
+  });
+
+  test('이름이 겹치면 기능이 이기고 밀려난 파일은 기타로 간다', () => {
+    const paths = [FE, CTRL, 'src/auth/x.ts', 'src/auth/y.ts', 'src/auth/z.ts'];
+    const { units, unitsOf } = planUnits(paths, [edge(FE, CTRL, 'http')]);
+    expect(units.filter((u) => u.name === 'auth')).toHaveLength(1);
+    expect(unitsOf.get('src/auth/x.ts')).toStrictEqual([OTHER_UNIT]);
+    expect(unitsOf.get(CTRL)).toStrictEqual(['auth']);
   });
 });

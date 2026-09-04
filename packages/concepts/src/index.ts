@@ -18,8 +18,8 @@ export type {
   CourseEdge, CourseFile, CourseOrder, CourseStep, CourseUnit, CommitTouch, OrderInput,
 } from './clone-order.js';
 export { courseStage, keepCardStage, BLANK_FROM_LAYER, COURSE_STAGE } from './clone-fading.js';
-export { assignUnits, entryUnits, MIN_FILES_FOR_UNIT, OTHER_UNIT } from './units.js';
-export type { FeatureUnit } from './units.js';
+export { assignUnits, entryUnits, planUnits, MIN_FILES_FOR_UNIT, OTHER_UNIT } from './units.js';
+export type { FeatureUnit, UnitPlan } from './units.js';
 export type { Assignment, UnitOf } from './units.js';
 export {
   chooseFirst, distinctShapes, innermostBlock, knownSet, lineIndex, unknownCount,
