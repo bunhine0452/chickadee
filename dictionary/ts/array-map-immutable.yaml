@@ -11,104 +11,207 @@ prereq: [ts/arrow-function, ts/array-basics, ts/object-spread]
 confusions: [ts/array-foreach, ts/array-filter, ts/array-push-mutate]
 
 dict:
-  one_liner: "<code>map</code> 은 항목마다 함수를 불러 새 배열을 만든다. 길이 같음, 원본 그대로."
-  why: >-
-    화면은 배열이 <b>새 것</b>일 때만 다시 그려집니다. 원본을 고치면(<code>push</code>) 바뀐 걸 모르고,
-    돌기만 하면(<code>forEach</code>) 새 배열이 없어요. {{site.line}}행은
-    {{pick.1|code}}{{pick.1|josa:을,를}} 두고 같은 길이의 새 배열을 받는 자리입니다.
+  one_liner:
+    ko: "<code>map</code> 은 항목마다 함수를 불러 새 배열을 만든다. 길이 같음, 원본 그대로."
+    en: "<code>map</code> calls a function per item to build a new array. Same length, original kept."
+  why:
+    ko: >-
+      화면은 배열이 <b>새 것</b>일 때만 다시 그려집니다. 원본을 고치면(<code>push</code>) 바뀐 걸 모르고,
+      돌기만 하면(<code>forEach</code>) 새 배열이 없어요. {{site.line}}행은
+      {{pick.1|code}}{{pick.1|josa:을,를}} 두고 같은 길이의 새 배열을 받는 자리입니다.
+    en: >-
+      The screen redraws only when the array is <b>a new one</b>. Change the original
+      (<code>push</code>) and it does not know anything changed; only go round
+      (<code>forEach</code>) and there is no new array. Line {{site.line}} is where you leave
+      {{pick.1|code}} alone and take back a new array of the same length.
   trace:
-    - "{{pick.1|code}} 의 첫 항목으로 {{pick.2|code}}{{pick.2|josa:을,를}} 부른다."
-    - "돌려준 값을 새 배열의 같은 자리에 넣는다. 항목마다 반복."
-    - "{{pick.1|code}}{{pick.1|josa:은,는}} 손대지 않고, 새 배열이 {{site.line}}행의 값이 된다."
+    - ko: "{{pick.1|code}} 의 첫 항목으로 {{pick.2|code}}{{pick.2|josa:을,를}} 부른다."
+      en: "{{pick.2|code}} is called with the first item of {{pick.1|code}}."
+    - ko: "돌려준 값을 새 배열의 같은 자리에 넣는다. 항목마다 반복."
+      en: "What it returns goes into the same slot of the new array. Repeat per item."
+    - ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 손대지 않고, 새 배열이 {{site.line}}행의 값이 된다."
+      en: "{{pick.1|code}} is left alone, and the new array becomes the value of line {{site.line}}."
 
-rule: "새 배열이 필요하면 <b>map</b>, 골라내려면 <b>filter</b>, 돌기만 하면 <b>forEach</b>. 원본을 바꾸는 <b>push</b> 는 상태에 쓰지 않는다."
+rule:
+  ko: "새 배열이 필요하면 <b>map</b>, 골라내려면 <b>filter</b>, 돌기만 하면 <b>forEach</b>. 원본을 바꾸는 <b>push</b> 는 상태에 쓰지 않는다."
+  en: >-
+    Need a new array, <b>map</b>; to pick, <b>filter</b>; to just go round, <b>forEach</b>.
+    <b>push</b> changes the original, so it is not for state.
 result:
-  label: "{{site.line}}행의 값"
+  label:
+    ko: "{{site.line}}행의 값"
+    en: "The value of line {{site.line}}"
   value: "{{pick.1}}{{pick.1|josa:과,와}} 길이가 같은 새 배열"
-  note: "원본은 그대로"
-ok: >-
-  <code>map</code> 은 항목마다 함수를 불러 <b>돌려준 값으로 새 배열</b>을 만듭니다. 길이는 같고
-  {{pick.1|code}}{{pick.1|josa:은,는}} 안 건드립니다.
-payoff: "원본을 두고 새 배열을 만드는 것이 「불변 갱신」이고, 화면이 바뀐 걸 알아채는 유일한 방법입니다."
-bridge: >-
-  화살표 함수 {{pick.2|code}}{{pick.2|josa:이,가}} <b>돌려주는 값</b>이 새 배열의 항목이 됩니다 —
-  돌려주는 게 없으면 <code>undefined</code> 로 찹니다.
+  note:
+    ko: "원본은 그대로"
+    en: "the original is unchanged"
+ok:
+  ko: >-
+    <code>map</code> 은 항목마다 함수를 불러 <b>돌려준 값으로 새 배열</b>을 만듭니다. 길이는 같고
+    {{pick.1|code}}{{pick.1|josa:은,는}} 안 건드립니다.
+  en: >-
+    <code>map</code> calls a function per item and builds <b>a new array out of what it returns</b>.
+    The length is the same and {{pick.1|code}} is not touched.
+payoff:
+  ko: "원본을 두고 새 배열을 만드는 것이 「불변 갱신」이고, 화면이 바뀐 걸 알아채는 유일한 방법입니다."
+  en: >-
+    Leaving the original and building a new array is what “immutable update” means, and it is the
+    only way the screen notices a change.
+bridge:
+  ko: >-
+    화살표 함수 {{pick.2|code}}{{pick.2|josa:이,가}} <b>돌려주는 값</b>이 새 배열의 항목이 됩니다 —
+    돌려주는 게 없으면 <code>undefined</code> 로 찹니다.
+  en: >-
+    <b>The value returned</b> by the arrow function {{pick.2|code}} becomes the item of the new
+    array — return nothing and it fills with <code>undefined</code>.
 misconceptions:
-  - "<code>map</code> 이 원본도 바꾼다 — 아니요. 콜백 안에서 항목 객체를 직접 고치지 않는 한 원본은 그대로."
-  - "<code>map</code> 콜백에 <code>return</code> 을 안 써도 된다 — 중괄호 몸체면 써야 한다."
+  - ko: "<code>map</code> 이 원본도 바꾼다 — 아니요. 콜백 안에서 항목 객체를 직접 고치지 않는 한 원본은 그대로."
+    en: >-
+      <code>map</code> changes the original too — no. Unless the callback edits the item object in
+      place, the original stays as it was.
+  - ko: "<code>map</code> 콜백에 <code>return</code> 을 안 써도 된다 — 중괄호 몸체면 써야 한다."
+    en: "A <code>map</code> callback does not need <code>return</code> — with a brace body it does."
 
 blank:
-  - q: "빈칸에 들어갈 것을 고르세요. 이 줄은 <b>같은 길이의 새 배열</b>을 만듭니다."
-    hint: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. 이 줄은 <b>같은 길이의 새 배열</b>을 만듭니다."
+      en: "Choose what goes in the blank. This line builds <b>a new array of the same length</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
     options:
       - { t: "map", mono: true }
       - t: "forEach"
         mono: true
         diag:
-          t: "<code>forEach</code> 는 하나씩 돌기만 하고 <b>아무것도 돌려주지 않습니다</b>(<code>undefined</code>). 돌면서 새 배열을 <b>받고 싶을 때</b>는 <code>map</code> 입니다."
+          t:
+            ko: "<code>forEach</code> 는 하나씩 돌기만 하고 <b>아무것도 돌려주지 않습니다</b>(<code>undefined</code>). 돌면서 새 배열을 <b>받고 싶을 때</b>는 <code>map</code> 입니다."
+            en: >-
+              <code>forEach</code> only goes round one at a time and <b>hands nothing back</b>
+              (<code>undefined</code>). When you want <b>to take a new array</b> out of going round,
+              that is <code>map</code>.
           edge:
-            h: "가장 날카로운 자리 — 돌려주는 게 있나"
+            h:
+              ko: "가장 날카로운 자리 — 돌려주는 게 있나"
+              en: "The sharpest spot — is anything handed back"
             code:
               - "[1, 2].forEach((n) => n * 2)   // undefined"
               - "[1, 2].map((n) => n * 2)       // [2, 4]"
       - t: "filter"
         mono: true
         diag:
-          t: "<code>filter</code> 는 <b>조건을 통과한 것만 남깁니다</b>. 길이가 줄 수 있어요. 여기서는 모든 항목을 그대로 두고 값만 바꾸니 길이가 같은 <code>map</code> 이 맞습니다.{{#other}} 항목을 <b>빼는</b> {{other.file.base}}:{{other.line}} 에서는 <code>filter</code> 가 맞아요.{{/other}}"
+          t:
+            ko: "<code>filter</code> 는 <b>조건을 통과한 것만 남깁니다</b>. 길이가 줄 수 있어요. 여기서는 모든 항목을 그대로 두고 값만 바꾸니 길이가 같은 <code>map</code> 이 맞습니다.{{#other}} 항목을 <b>빼는</b> {{other.file.base}}:{{other.line}} 에서는 <code>filter</code> 가 맞아요.{{/other}}"
+            en: >-
+              <code>filter</code> <b>keeps only what passes the condition</b>, so the length can
+              drop. Here every item stays and only the values change, so <code>map</code>, which
+              keeps the length, is the one.{{#other}} At {{other.file.base}}:{{other.line}}, which
+              <b>removes</b> items, <code>filter</code> is the one.{{/other}}
           edge:
-            h: "가장 날카로운 자리 — 같은 리포, 다른 줄"
+            h:
+              ko: "가장 날카로운 자리 — 같은 리포, 다른 줄"
+              en: "The sharpest spot — same repo, a different line"
             code:
               - "{{site.line}}행  {{pick.1}}.map((i) => ...)      // 길이 그대로"
               - "{{#other}}{{other.line}}행  {{other.text}}{{/other}}"
       - t: "push"
         mono: true
         diag:
-          t: "<code>push</code> 는 <b>원래 배열을 직접 바꾸고</b> 새 길이(숫자)를 돌려줍니다. 화면은 배열이 <b>새 것</b>일 때만 다시 그리니 이 줄은 아무 변화도 못 일으켜요."
+          t:
+            ko: "<code>push</code> 는 <b>원래 배열을 직접 바꾸고</b> 새 길이(숫자)를 돌려줍니다. 화면은 배열이 <b>새 것</b>일 때만 다시 그리니 이 줄은 아무 변화도 못 일으켜요."
+            en: >-
+              <code>push</code> <b>changes the original array in place</b> and returns the new
+              length, a number. The screen redraws only when the array is <b>a new one</b>, so this
+              line would cause no change at all.
           edge:
-            h: "가장 날카로운 자리 — 원본을 건드리나"
+            h:
+              ko: "가장 날카로운 자리 — 원본을 건드리나"
+              en: "The sharpest spot — does it touch the original"
             code:
               - "{{pick.1}}.push(x)     // 원본이 바뀌고, 돌려주는 건 길이"
               - "[...{{pick.1}}, x]     // 원본은 그대로, 새 배열"
 
 point:
-  - q: "{{site.line}}행에서 <b>새 배열의 항목 값을 정하는 것</b>을 짚어 보세요."
-    hint: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+  - q:
+      ko: "{{site.line}}행에서 <b>새 배열의 항목 값을 정하는 것</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>what decides the item values of the new array</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
     answer: pick.2
     diag:
       pick.1:
-        t: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>재료</b>입니다 — 읽기만 하고 그대로 남습니다. 새 배열에 무엇이 들어갈지는 뒤에 넘긴 함수가 <b>돌려주는 값</b>이 정해요."
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>재료</b>입니다 — 읽기만 하고 그대로 남습니다. 새 배열에 무엇이 들어갈지는 뒤에 넘긴 함수가 <b>돌려주는 값</b>이 정해요."
+          en: >-
+            {{pick.1|code}} is <b>the material</b> — it is only read and stays as it was. What goes
+            into the new array is settled by <b>the value returned</b> by the function passed after
+            it.
         edge:
-          h: "가장 날카로운 자리 — 재료와 만드는 법"
+          h:
+            ko: "가장 날카로운 자리 — 재료와 만드는 법"
+            en: "The sharpest spot — the material and how it is made"
           code:
             - "{{pick.1}}.map((i) => i.name)   // 항목은 name"
             - "{{pick.1}}.map((i) => i)        // 항목은 그대로"
 
 meaning:
-  - q: "{{site.line}}행이 끝난 뒤 {{pick.1|code}}{{pick.1|josa:은,는}} 어떻게 될까요?"
-    hint: "map 이 손대는 것과 손대지 않는 것."
+  - q:
+      ko: "{{site.line}}행이 끝난 뒤 {{pick.1|code}}{{pick.1|josa:은,는}} 어떻게 될까요?"
+      en: "After line {{site.line}} finishes, what happens to {{pick.1|code}}?"
+    hint:
+      ko: "map 이 손대는 것과 손대지 않는 것."
+      en: "What map touches and what it does not."
     options:
-      - t: "그대로다 — 새 배열이 따로 만들어진다"
-      - t: "항목이 바뀐다"
+      - t:
+          ko: "그대로다 — 새 배열이 따로 만들어진다"
+          en: "Unchanged — a new array is made separately"
+      - t:
+          ko: "항목이 바뀐다"
+          en: "The items change"
         diag:
-          t: "콜백이 <code>{ ...i, qty }</code> 처럼 <b>복사본</b>을 돌려주면 원본 항목은 그대로입니다. <code>i.qty = qty</code> 처럼 항목을 직접 고쳤다면 그 말이 맞아요."
+          t:
+            ko: "콜백이 <code>{ ...i, qty }</code> 처럼 <b>복사본</b>을 돌려주면 원본 항목은 그대로입니다. <code>i.qty = qty</code> 처럼 항목을 직접 고쳤다면 그 말이 맞아요."
+            en: >-
+              If the callback returns <b>a copy</b>, as <code>{ ...i, qty }</code> does, the
+              original items stay as they were. If it edited the item in place, as <code>i.qty =
+              qty</code> does, then that holds.
           edge:
-            h: "가장 날카로운 자리 — 복사냐 수정이냐"
+            h:
+              ko: "가장 날카로운 자리 — 복사냐 수정이냐"
+              en: "The sharpest spot — a copy or an edit"
             code:
               - "xs.map((i) => ({ ...i, qty }))             // 원본 그대로"
               - "xs.map((i) => { i.qty = qty; return i })   // 원본 항목이 바뀜"
-      - t: "길이가 줄어든다"
+      - t:
+          ko: "길이가 줄어든다"
+          en: "The length drops"
         diag:
-          t: "길이를 줄이는 건 <code>filter</code> 입니다. <code>map</code> 은 항목 수를 바꾸지 않아요."
+          t:
+            ko: "길이를 줄이는 건 <code>filter</code> 입니다. <code>map</code> 은 항목 수를 바꾸지 않아요."
+            en: >-
+              Dropping the length is <code>filter</code>. <code>map</code> does not change the item
+              count.
           edge:
-            h: "가장 날카로운 자리 — 개수를 바꾸나"
+            h:
+              ko: "가장 날카로운 자리 — 개수를 바꾸나"
+              en: "The sharpest spot — does it change the count"
             code:
               - "[1,2,3].map((n) => n > 1)      // [false, true, true]"
               - "[1,2,3].filter((n) => n > 1)   // [2, 3]"
-      - t: "<code>undefined</code> 가 된다"
+      - t:
+          ko: "<code>undefined</code> 가 된다"
+          en: "It becomes <code>undefined</code>"
         diag:
-          t: "<code>forEach</code> 의 결과를 대입했다면 그렇게 됩니다. <code>map</code> 은 항상 배열을 돌려줘요."
+          t:
+            ko: "<code>forEach</code> 의 결과를 대입했다면 그렇게 됩니다. <code>map</code> 은 항상 배열을 돌려줘요."
+            en: >-
+              That is so if you assigned the result of <code>forEach</code>. <code>map</code> always
+              hands back an array.
           edge:
-            h: "가장 날카로운 자리 — 돌려주는 것"
+            h:
+              ko: "가장 날카로운 자리 — 돌려주는 것"
+              en: "The sharpest spot — what is handed back"
             code:
               - "const a = xs.forEach(f)   // undefined"
               - "const b = xs.map(f)       // 배열"

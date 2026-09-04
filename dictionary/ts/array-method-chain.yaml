@@ -11,76 +11,154 @@ prereq: [ts/array-map-immutable, ts/array-filter, ts/property-access]
 confusions: [ts/for-of, ts/array-foreach]
 
 dict:
-  one_liner: "앞 단계가 돌려준 배열에 다음 단계를 이어 붙이는 표기. 왼쪽부터 차례로 흐른다."
-  why: >-
-    한 줄에 여러 단계가 붙어 있으면 어디서부터 읽어야 할지 헷갈립니다. 규칙은 하나예요 —
-    <b>왼쪽부터</b>입니다. {{site.line}}행은 {{pick.3|code}} 에서 시작해
-    {{pick.1|code}}{{pick.1|josa:을,를}} 거친 결과에 {{pick.2|code}}{{pick.2|josa:이,가}} 다시 붙습니다.
+  one_liner:
+    ko: "앞 단계가 돌려준 배열에 다음 단계를 이어 붙이는 표기. 왼쪽부터 차례로 흐른다."
+    en: "Each step attaches to the array the previous step returned. Flows from the left."
+  why:
+    ko: >-
+      한 줄에 여러 단계가 붙어 있으면 어디서부터 읽어야 할지 헷갈립니다. 규칙은 하나예요 —
+      <b>왼쪽부터</b>입니다. {{site.line}}행은 {{pick.3|code}} 에서 시작해
+      {{pick.1|code}}{{pick.1|josa:을,를}} 거친 결과에 {{pick.2|code}}{{pick.2|josa:이,가}} 다시 붙습니다.
+    en: >-
+      With several steps on one line it is easy to lose where to start reading. There is one rule —
+      <b>from the left</b>. Line {{site.line}} starts at {{pick.3|code}}, and {{pick.2|code}}
+      attaches again to the result that came through {{pick.1|code}}.
   trace:
-    - "{{pick.3|code}} 에 {{pick.1|code}}{{pick.1|josa:이,가}} 먼저 돌아 새 배열을 만든다."
-    - "그 새 배열에 {{pick.2|code}}{{pick.2|josa:이,가}} 붙어 다시 새 배열을 만든다."
-    - "{{site.line}}행의 값은 <b>마지막 단계</b>가 돌려준 것이다."
+    - ko: "{{pick.3|code}} 에 {{pick.1|code}}{{pick.1|josa:이,가}} 먼저 돌아 새 배열을 만든다."
+      en: "{{pick.1|code}} runs first over {{pick.3|code}} and makes a new array."
+    - ko: "그 새 배열에 {{pick.2|code}}{{pick.2|josa:이,가}} 붙어 다시 새 배열을 만든다."
+      en: "{{pick.2|code}} attaches to that new array and makes another new array."
+    - ko: "{{site.line}}행의 값은 <b>마지막 단계</b>가 돌려준 것이다."
+      en: "The value of line {{site.line}} is what <b>the last step</b> returned."
 
-rule: "<b>체인은 왼쪽부터 흐른다.</b> 각 단계는 앞 단계의 결과만 보고, 원본은 어느 단계도 건드리지 않는다."
+rule:
+  ko: "<b>체인은 왼쪽부터 흐른다.</b> 각 단계는 앞 단계의 결과만 보고, 원본은 어느 단계도 건드리지 않는다."
+  en: >-
+    <b>A chain flows from the left.</b> Each step sees only the result of the step before, and no
+    step touches the original.
 result:
-  label: "{{site.line}}행의 값"
+  label:
+    ko: "{{site.line}}행의 값"
+    en: "The value of line {{site.line}}"
   value: "{{pick.2}}{{pick.2|josa:이,가}} 돌려준 것"
-  note: "{{pick.3}}{{pick.3|josa:은,는}} 그대로"
-ok: >-
-  체인의 각 단계는 <b>앞 단계가 돌려준 값</b>에 붙습니다. 순서를 바꾸면 결과가 달라지는 이유가
-  이것이고, 원본은 어느 단계에서도 바뀌지 않아요.
-payoff: "「무엇을 고르고 무엇으로 바꾸는가」가 한 줄에 순서대로 남습니다 — 중간 변수를 만들지 않아도 읽힙니다."
-bridge: "{{pick.1|code}}{{pick.1|josa:이,가}} 배열을 돌려주기 때문에 그 뒤에 {{pick.2|code}}{{pick.2|josa:을,를}} 붙일 수 있습니다."
+  note:
+    ko: "{{pick.3}}{{pick.3|josa:은,는}} 그대로"
+    en: "{{pick.3}} is unchanged"
+ok:
+  ko: >-
+    체인의 각 단계는 <b>앞 단계가 돌려준 값</b>에 붙습니다. 순서를 바꾸면 결과가 달라지는 이유가
+    이것이고, 원본은 어느 단계에서도 바뀌지 않아요.
+  en: >-
+    Each step of a chain attaches to <b>the value the step before returned</b>. That is why changing
+    the order changes the result, and the original is not changed at any step.
+payoff:
+  ko: "「무엇을 고르고 무엇으로 바꾸는가」가 한 줄에 순서대로 남습니다 — 중간 변수를 만들지 않아도 읽힙니다."
+  en: >-
+    “What is picked and what it turns into” stays on one line in order — it reads without making an
+    intermediate variable.
+bridge:
+  ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 배열을 돌려주기 때문에 그 뒤에 {{pick.2|code}}{{pick.2|josa:을,를}} 붙일 수 있습니다."
+  en: "Because {{pick.1|code}} returns an array, {{pick.2|code}} can be attached after it."
 misconceptions:
-  - "오른쪽부터 읽는다 — 왼쪽부터입니다. 점은 「그 결과에 이어서」라는 뜻이에요."
-  - "단계 순서를 바꿔도 결과가 같다 — 고른 뒤 바꾸는 것과 바꾼 뒤 고르는 것은 다릅니다."
+  - ko: "오른쪽부터 읽는다 — 왼쪽부터입니다. 점은 「그 결과에 이어서」라는 뜻이에요."
+    en: "You read it from the right — from the left. The dot means “carrying on from that result”."
+  - ko: "단계 순서를 바꿔도 결과가 같다 — 고른 뒤 바꾸는 것과 바꾼 뒤 고르는 것은 다릅니다."
+    en: >-
+      Reordering the steps gives the same result — picking then changing is not the same as changing
+      then picking.
 
 point:
-  - q: "{{site.line}}행에서 <b>가장 먼저 도는 단계</b>를 짚어 보세요."
-    hint: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+  - q:
+      ko: "{{site.line}}행에서 <b>가장 먼저 도는 단계</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the step that runs first</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
     answer: pick.1
     diag:
       pick.2:
-        t: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>마지막</b> 단계입니다. 이 단계가 보는 것은 원본이 아니라 앞 단계가 이미 돌려준 배열이에요."
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>마지막</b> 단계입니다. 이 단계가 보는 것은 원본이 아니라 앞 단계가 이미 돌려준 배열이에요."
+          en: >-
+            {{pick.2|code}} is <b>the last</b> step. What it sees is not the original but the array
+            the step before already returned.
         edge:
-          h: "가장 날카로운 자리 — 무엇을 보고 도는가"
+          h:
+            ko: "가장 날카로운 자리 — 무엇을 보고 도는가"
+            en: "The sharpest spot — what it runs over"
           code:
             - "{{pick.3}}.{{pick.1}}(f).{{pick.2}}(g)   // g 는 f 의 결과를 본다"
             - "{{pick.3}}.{{pick.2}}(g)                 // g 가 원본을 본다"
       pick.3:
-        t: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>재료</b>입니다. 단계가 아니라 첫 단계가 받아 가는 값이에요."
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>재료</b>입니다. 단계가 아니라 첫 단계가 받아 가는 값이에요."
+          en: >-
+            {{pick.3|code}} is <b>the material</b>. It is not a step; it is the value the first step
+            takes.
         edge:
-          h: "가장 날카로운 자리 — 재료와 단계"
+          h:
+            ko: "가장 날카로운 자리 — 재료와 단계"
+            en: "The sharpest spot — the material and the step"
           code:
             - "{{pick.3}}.{{pick.1}}(f)   // 여기서 첫 단계가 돈다"
             - "{{pick.3}}                 // 아직 아무 단계도 돌지 않았다"
 
 meaning:
-  - q: "{{pick.2|code}} 에 넘긴 함수가 보는 값은 무엇일까요?"
-    hint: "체인은 왼쪽부터 흐릅니다."
+  - q:
+      ko: "{{pick.2|code}} 에 넘긴 함수가 보는 값은 무엇일까요?"
+      en: "What does the function passed to {{pick.2|code}} see?"
+    hint:
+      ko: "체인은 왼쪽부터 흐릅니다."
+      en: "A chain flows from the left."
     options:
-      - t: "{{pick.1|code}}{{pick.1|josa:이,가}} 돌려준 배열의 항목"
-      - t: "{{pick.3|code}} 의 항목 그대로"
+      - t:
+          ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 돌려준 배열의 항목"
+          en: "The items of the array {{pick.1|code}} returned"
+      - t:
+          ko: "{{pick.3|code}} 의 항목 그대로"
+          en: "The items of {{pick.3|code}}, unchanged"
         diag:
-          t: "원본을 보는 것은 <b>첫 단계</b>뿐입니다. 뒤 단계는 앞 단계가 이미 고르고 바꾼 결과를 받아요."
+          t:
+            ko: "원본을 보는 것은 <b>첫 단계</b>뿐입니다. 뒤 단계는 앞 단계가 이미 고르고 바꾼 결과를 받아요."
+            en: >-
+              Only <b>the first step</b> sees the original. Later steps take the result the step
+              before already picked and changed.
           edge:
-            h: "가장 날카로운 자리 — 몇 번째 단계인가"
+            h:
+              ko: "가장 날카로운 자리 — 몇 번째 단계인가"
+              en: "The sharpest spot — which step it is"
             code:
               - "[1,2,3].filter((n) => n > 1).map((n) => n * 10)   // [20, 30]"
               - "[1,2,3].map((n) => n * 10)                        // [10, 20, 30]"
-      - t: "두 단계가 동시에 본 값"
+      - t:
+          ko: "두 단계가 동시에 본 값"
+          en: "A value both steps saw at the same time"
         diag:
-          t: "두 단계가 한 번에 도는 것이 아니라 <b>앞 단계가 끝난 뒤</b> 뒤 단계가 돕니다. 중간 배열이 한 번 만들어져요."
+          t:
+            ko: "두 단계가 한 번에 도는 것이 아니라 <b>앞 단계가 끝난 뒤</b> 뒤 단계가 돕니다. 중간 배열이 한 번 만들어져요."
+            en: >-
+              The two steps do not run together; the later one runs <b>after the earlier one
+              finishes</b>. An intermediate array is made once.
           edge:
-            h: "가장 날카로운 자리 — 순서대로 돈다"
+            h:
+              ko: "가장 날카로운 자리 — 순서대로 돈다"
+              en: "The sharpest spot — they run in order"
             code:
               - "const mid = xs.filter(f)   // 먼저 여기까지"
               - "const out = mid.map(g)     // 그다음 여기"
-      - t: "원본이 아니라 원본의 복사본"
+      - t:
+          ko: "원본이 아니라 원본의 복사본"
+          en: "Not the original but a copy of it"
         diag:
-          t: "앞 단계가 <b>내용까지 같은 복사본</b>을 넘기는 건 아닙니다. 고르거나 바꾼 뒤의 배열이라 항목 수나 값이 달라져 있어요."
+          t:
+            ko: "앞 단계가 <b>내용까지 같은 복사본</b>을 넘기는 건 아닙니다. 고르거나 바꾼 뒤의 배열이라 항목 수나 값이 달라져 있어요."
+            en: >-
+              The step before does not hand over <b>a copy with the same contents</b>. It is the
+              array after picking or changing, so the item count or the values differ.
           edge:
-            h: "가장 날카로운 자리 — 복사냐 결과냐"
+            h:
+              ko: "가장 날카로운 자리 — 복사냐 결과냐"
+              en: "The sharpest spot — a copy or a result"
             code:
               - "[1,2,3].filter((n) => n > 2)   // [3]  (복사본이 아니다)"
               - "[...[1,2,3]]                   // [1,2,3]  (복사본)"

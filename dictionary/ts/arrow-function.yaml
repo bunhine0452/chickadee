@@ -11,80 +11,165 @@ prereq: [ts/const-declaration, ts/call-expression]
 confusions: [ts/call-expression]
 
 dict:
-  one_liner: "<code>=></code> 왼쪽은 받을 것, 오른쪽은 돌려줄 것. 함수를 값처럼 쓴다."
-  why: >-
-    함수를 값으로 쓸 수 있으면 「무엇을 할지」를 다른 함수에 넘길 수 있습니다.
-    {{site.line}}행의 화살표 함수는 이름 없이 그 자리에서 만들어져, 부르는 쪽이 정한 때에
-    {{pick.1|code}}{{pick.1|josa:을,를}} 받아 돌아갑니다.
+  one_liner:
+    ko: "<code>=></code> 왼쪽은 받을 것, 오른쪽은 돌려줄 것. 함수를 값처럼 쓴다."
+    en: "Left of <code>=></code> is what it takes, right is what it gives. A function as a value."
+  why:
+    ko: >-
+      함수를 값으로 쓸 수 있으면 「무엇을 할지」를 다른 함수에 넘길 수 있습니다.
+      {{site.line}}행의 화살표 함수는 이름 없이 그 자리에서 만들어져, 부르는 쪽이 정한 때에
+      {{pick.1|code}}{{pick.1|josa:을,를}} 받아 돌아갑니다.
+    en: >-
+      Once a function can be used as a value, “what to do” can be handed to another function. The
+      arrow function on line {{site.line}} is made right there without a name, and at a moment the
+      caller decides it takes {{pick.1|code}} and goes.
   trace:
-    - "{{site.line}}행에서는 함수를 <b>만들기만</b> 한다 — 아직 돌지 않는다."
-    - "부르는 쪽이 값을 넘기면 그 값이 {{pick.1|code}} 에 들어간다."
-    - "{{pick.3|code}}{{pick.3|josa:을,를}} 계산한 값이 그 호출의 결과가 된다."
+    - ko: "{{site.line}}행에서는 함수를 <b>만들기만</b> 한다 — 아직 돌지 않는다."
+      en: "Line {{site.line}} only <b>makes</b> the function — it does not run yet."
+    - ko: "부르는 쪽이 값을 넘기면 그 값이 {{pick.1|code}} 에 들어간다."
+      en: "When the caller passes a value, that value goes into {{pick.1|code}}."
+    - ko: "{{pick.3|code}}{{pick.3|josa:을,를}} 계산한 값이 그 호출의 결과가 된다."
+      en: "The value of {{pick.3|code}} becomes the result of that call."
 
-rule: "<b>몸체가 중괄호면 <code>return</code> 을 써야 하고, 중괄호가 없으면 그 식이 곧 돌려줄 값이다.</b>"
+rule:
+  ko: "<b>몸체가 중괄호면 <code>return</code> 을 써야 하고, 중괄호가 없으면 그 식이 곧 돌려줄 값이다.</b>"
+  en: >-
+    <b>With a brace body you have to write <code>return</code>; without braces the expression itself
+    is what comes back.</b>
 result:
-  label: "{{site.line}}행의 값"
+  label:
+    ko: "{{site.line}}행의 값"
+    en: "The value of line {{site.line}}"
   value: "아직 돌지 않은 함수"
-  note: "부르는 쪽이 정한 때에 돈다"
-ok: >-
-  <code>=></code> 왼쪽 {{pick.1|code}}{{pick.1|josa:이,가}} 받을 것이고, 오른쪽 {{pick.3|code}}{{pick.3|josa:이,가}} 돌려줄 것입니다.
-  {{site.line}}행은 그 함수를 <b>만들어 두는</b> 자리예요.
-payoff: >-
-  이 자리에서 함수를 만들 수 있으니 「무엇을 할지」를 인자로 넘길 수 있습니다.
-  <code>map</code> 이나 <code>filter</code> 가 그 힘 위에 서 있어요.
-bridge: >-
-  화살표 함수는 괄호가 붙어야 돕니다 — {{site.line}}행에서 만든 것을 누가 언제 부르는지가
-  다음 질문이에요.
+  note:
+    ko: "부르는 쪽이 정한 때에 돈다"
+    en: "it runs at a moment the caller decides"
+ok:
+  ko: >-
+    <code>=></code> 왼쪽 {{pick.1|code}}{{pick.1|josa:이,가}} 받을 것이고, 오른쪽 {{pick.3|code}}{{pick.3|josa:이,가}} 돌려줄 것입니다.
+    {{site.line}}행은 그 함수를 <b>만들어 두는</b> 자리예요.
+  en: >-
+    {{pick.1|code}} on the left of <code>=></code> is what it takes, and {{pick.3|code}} on the
+    right is what it gives. Line {{site.line}} is where that function is <b>made and set aside</b>.
+payoff:
+  ko: >-
+    이 자리에서 함수를 만들 수 있으니 「무엇을 할지」를 인자로 넘길 수 있습니다.
+    <code>map</code> 이나 <code>filter</code> 가 그 힘 위에 서 있어요.
+  en: >-
+    Because a function can be made right here, “what to do” can be passed as an argument.
+    <code>map</code> and <code>filter</code> stand on that.
+bridge:
+  ko: >-
+    화살표 함수는 괄호가 붙어야 돕니다 — {{site.line}}행에서 만든 것을 누가 언제 부르는지가
+    다음 질문이에요.
+  en: >-
+    An arrow function runs only when parentheses follow it — who calls what line {{site.line}} made,
+    and when, is the next question.
 misconceptions:
-  - "중괄호 몸체에서도 마지막 줄이 저절로 돌아온다 — 아니요. <code>return</code> 을 적어야 합니다."
-  - "화살표 함수는 짧게 쓰려고 있는 것이다 — 짧기도 하지만, 바깥 <code>this</code> 를 그대로 쓴다는 점이 더 큽니다."
+  - ko: "중괄호 몸체에서도 마지막 줄이 저절로 돌아온다 — 아니요. <code>return</code> 을 적어야 합니다."
+    en: >-
+      With a brace body the last line comes back on its own — no. You have to write
+      <code>return</code>.
+  - ko: "화살표 함수는 짧게 쓰려고 있는 것이다 — 짧기도 하지만, 바깥 <code>this</code> 를 그대로 쓴다는 점이 더 큽니다."
+    en: >-
+      Arrow functions exist to be short — they are short, but taking the surrounding
+      <code>this</code> as it is matters more.
 
 point:
-  - q: "{{site.line}}행에서 <b>받을 것과 돌려줄 것을 가르는 기호</b>를 짚어 보세요."
-    hint: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+  - q:
+      ko: "{{site.line}}행에서 <b>받을 것과 돌려줄 것을 가르는 기호</b>를 짚어 보세요."
+      en: >-
+        On line {{site.line}}, point at <b>the symbol that divides what it takes from what it
+        gives</b>.
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
     answer: pick.2
     diag:
       pick.1:
-        t: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>받을 자리</b>입니다. 아직 값이 없는 빈 이름이고, 부르는 쪽이 넘겨줄 때 채워져요."
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>받을 자리</b>입니다. 아직 값이 없는 빈 이름이고, 부르는 쪽이 넘겨줄 때 채워져요."
+          en: >-
+            {{pick.1|code}} is <b>the slot that takes</b>. It is an empty name with no value yet,
+            filled in when the caller passes one.
         edge:
-          h: "가장 날카로운 자리 — 받을 자리와 가르는 기호"
+          h:
+            ko: "가장 날카로운 자리 — 받을 자리와 가르는 기호"
+            en: "The sharpest spot — the taking slot and the dividing symbol"
           code:
             - "(n) => n * 2      // n 은 받을 자리"
             - "double(3)         // 그때 n 이 3 이 된다"
       pick.3:
-        t: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>돌려줄 값</b>입니다. 이 식이 함수의 결과가 되지만, 받을 것과 돌려줄 것을 가르는 일은 앞의 <code>=></code> 가 합니다."
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>돌려줄 값</b>입니다. 이 식이 함수의 결과가 되지만, 받을 것과 돌려줄 것을 가르는 일은 앞의 <code>=></code> 가 합니다."
+          en: >-
+            {{pick.3|code}} is <b>the value to give</b>. This expression becomes the function's
+            result, but dividing what it takes from what it gives is the job of the <code>=></code>
+            before it.
         edge:
-          h: "가장 날카로운 자리 — 중괄호가 있느냐"
+          h:
+            ko: "가장 날카로운 자리 — 중괄호가 있느냐"
+            en: "The sharpest spot — whether there are braces"
           code:
             - "(n) => n * 2            // 이 식이 결과"
             - "(n) => { return n * 2 } // 중괄호면 return 을 적는다"
 
 meaning:
-  - q: "{{site.line}}행이 실행되는 순간 {{pick.3|code}}{{pick.3|josa:은,는}} 계산될까요?"
-    hint: "함수를 만드는 것과 함수를 돌리는 것은 다른 일입니다."
+  - q:
+      ko: "{{site.line}}행이 실행되는 순간 {{pick.3|code}}{{pick.3|josa:은,는}} 계산될까요?"
+      en: "At the moment line {{site.line}} runs, is {{pick.3|code}} evaluated?"
+    hint:
+      ko: "함수를 만드는 것과 함수를 돌리는 것은 다른 일입니다."
+      en: "Making a function and running a function are different things."
     options:
-      - t: "계산되지 않는다 — 함수를 <b>만들어</b> 둘 뿐이고, 누가 부를 때 계산된다"
-      - t: "곧바로 계산된다"
+      - t:
+          ko: "계산되지 않는다 — 함수를 <b>만들어</b> 둘 뿐이고, 누가 부를 때 계산된다"
+          en: "It is not — the function is only <b>made</b>, and it is evaluated when someone calls it"
+      - t:
+          ko: "곧바로 계산된다"
+          en: "It is evaluated straight away"
         diag:
-          t: "<code>=></code> 없이 식만 적었다면 그 말이 맞습니다. 화살표가 붙는 순간 그 식은 「나중에 할 일」로 싸여요."
+          t:
+            ko: "<code>=></code> 없이 식만 적었다면 그 말이 맞습니다. 화살표가 붙는 순간 그 식은 「나중에 할 일」로 싸여요."
+            en: >-
+              That would hold if you had written the expression without <code>=></code>. The moment
+              the arrow is there, the expression is wrapped as “something to do later”.
           edge:
-            h: "가장 날카로운 자리 — 화살표가 있느냐"
+            h:
+              ko: "가장 날카로운 자리 — 화살표가 있느냐"
+              en: "The sharpest spot — whether there is an arrow"
             code:
               - "const a = n * 2         // 지금 계산"
               - "const b = () => n * 2   // 부를 때 계산"
-      - t: "한 번만 계산되고 그 값이 기억된다"
+      - t:
+          ko: "한 번만 계산되고 그 값이 기억된다"
+          en: "It is evaluated once and the value is remembered"
         diag:
-          t: "값을 기억해 두는 것은 별도의 장치가 있어야 합니다. 화살표 함수는 부를 때마다 몸체를 다시 계산해요."
+          t:
+            ko: "값을 기억해 두는 것은 별도의 장치가 있어야 합니다. 화살표 함수는 부를 때마다 몸체를 다시 계산해요."
+            en: >-
+              Remembering a value takes separate machinery. An arrow function evaluates its body
+              again on every call.
           edge:
-            h: "가장 날카로운 자리 — 부를 때마다 새로"
+            h:
+              ko: "가장 날카로운 자리 — 부를 때마다 새로"
+              en: "The sharpest spot — fresh on every call"
             code:
               - "const r = () => Math.random()"
               - "r() === r()   // 대개 false"
-      - t: "<code>undefined</code> 가 된다"
+      - t:
+          ko: "<code>undefined</code> 가 된다"
+          en: "It becomes <code>undefined</code>"
         diag:
-          t: "<code>undefined</code> 는 함수를 <b>돌린 뒤</b> 돌려줄 것이 없을 때 나옵니다. 만들기만 한 함수는 그 자체가 값이에요."
+          t:
+            ko: "<code>undefined</code> 는 함수를 <b>돌린 뒤</b> 돌려줄 것이 없을 때 나옵니다. 만들기만 한 함수는 그 자체가 값이에요."
+            en: >-
+              <code>undefined</code> comes out <b>after running</b> a function that has nothing to
+              give. A function that has only been made is itself a value.
           edge:
-            h: "가장 날카로운 자리 — 만든 것과 돌린 것"
+            h:
+              ko: "가장 날카로운 자리 — 만든 것과 돌린 것"
+              en: "The sharpest spot — the made and the run"
             code:
               - "const f = () => {}   // 함수"
               - "const v = f()        // undefined"
