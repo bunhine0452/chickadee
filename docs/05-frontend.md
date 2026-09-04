@@ -30,7 +30,8 @@ Chickadee 설계 문서 6편 중 다섯 번째. **목업 두 장(`design/ink-hom
 
 ### 1.2 Tauri 통합
 
-- `apps/desktop/src-tauri/tauri.conf.json` 핵심값: `app.windows[0]` = `{ width: 1360, height: 860, minWidth: 1000, minHeight: 680, visible: false, backgroundColor: "#D9CDB4", title: "Chickadee" }`. `visible:false` 로 만들고 폰트가 준비된 뒤 `getCurrentWindow().show()` 를 부른다(§10 FOUT). `backgroundColor` 는 `--desk` 와 같아야 야간반에서 흰 플래시가 없다(테마를 SQLite 에서 읽기 전 첫 프레임은 밝은 종이색 — 허용).
+- `apps/desktop/src-tauri/tauri.conf.json` 핵심값: `app.windows[0]` = `{ width: 1360, height: 860, minWidth: 1000, minHeight: 680, visible: false, backgroundColor: "#D9CDB4", title: "Chickadee", titleBarStyle: "Overlay", hiddenTitle: true }`. `visible:false` 로 만들고 폰트가 준비된 뒤 `getCurrentWindow().show()` 를 부른다(§10 FOUT). `backgroundColor` 는 `--desk` 와 같아야 야간반에서 흰 플래시가 없다(테마를 SQLite 에서 읽기 전 첫 프레임은 밝은 종이색 — 허용).
+- **창 크로뮴** (D126). `titleBarStyle: "Overlay"` + `hiddenTitle` 은 **macOS 전용**이고, 웹뷰가 제목 표시줄 자리까지 그린다 — 종이·책상 색이 창 끝까지 간다. 그 자리를 비우는 것은 CSS 한 벌이다: `main.tsx` 가 macOS 에서 `<html data-chrome="overlay">` 를 세우고, `styles/app.css` 가 `--chrome-top: 28px`(그 외 OS 는 `0px`) 로 `body` 에 위 여백을 준다. `position: fixed` 라 그 여백을 못 받는 세션 오버레이(`.proof`)만 `inset` 을 직접 받는다. 창을 잡아 끄는 자리는 `index.html` 의 `.chrome-drag`(`data-tauri-drag-region`) 한 줄이고, `#root` 밖에 있어 화면이 바뀌어도 그대로다. Windows·Linux 는 시스템 표시줄을 그대로 쓴다.
 - IPC 는 01 의 `@chickadee/ipc-client` 로만 부른다. `@tauri-apps/api/core` import 는 `packages/ipc-client` 밖에서 린트 금지(`no-restricted-imports: @tauri-apps/api/core`). 명령 이름(`repo_list`·`ingest_start`·`store_query`·`store_batch` 등)과 페이로드는 `01-architecture.md` 가 소유한다. 이 문서에서 `session.save()` · `session.resume()` · `home.load()` 처럼 점으로 적은 것은 **`apps/desktop/src/data/*.ts` 의 리포지토리 함수**로, `ipc.store.query/batch` 와 01 §3.4 statement 이름을 통해 `02` 의 `session`·`session_item` 테이블을 읽고 쓴다 — 전용 명령이 아니다.
 - 플러그인: `plugin-dialog`(리포 폴더 선택) · `plugin-clipboard-manager`(사다리 4단 「복사」 — WKWebView 의 `navigator.clipboard` 는 사용자 제스처 밖에서 거부된다) · `plugin-opener`(외부 입문 자료 링크) · `plugin-log`(성능 측정값을 파일로). `plugin-store` 는 쓰지 않는다 — 설정도 SQLite 한 곳.
 - CSP 는 `06` 소관이지만 프런트 전제는 이것: `default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; worker-src 'self' blob:`(06 §4.3 에 `worker-src` 가 반영됐다). `'unsafe-inline'` 은 Monaco 가 인라인 스타일을 주입하기 때문이고, 우리 코드는 인라인 `style=` 를 **CSS 변수 주입(`--w`, `--p`, `--tilt`) 에만** 쓴다.
@@ -81,7 +82,7 @@ Chickadee 설계 문서 6편 중 다섯 번째. **목업 두 장(`design/ink-hom
 | id | 이름 (은유 = 평문) | 목업 근거 | 내용 |
 |---|---|---|---|
 | `home` | 경로 홈 = 내 리포의 기능 지도 | `ink-home.html` | 마스트헤드(로고·작업 지시서·리포 전환·스위치 2) · 오늘의 인쇄(시간 비례 큐 + 목록 + 「인쇄 시작」) · 잉크 겹 척도 · 다시 찍을 개념 · 판이 없는 문법 · 대지(시트) 목록 · 미조판 예고 · 14일 컬러 바 |
-| `session` (오버레이) | 교정쇄 = 오늘의 세션 | `ink-session.html` | 작업 띠(큐·남은 시간·나가기) + 작업대(교정지 한 장). T0/T1/T2 판, 사다리, LIFER 베일, 인쇄 완료 요약 |
+| `session` (오버레이) | 교정쇄 = 오늘의 세션 | `ink-session.html` | 작업 띠(큐·남은 시간·나가기) + 작업대(교정지 한 장). T0/T1/T2 판, 사다리, 판정란(판정 · 첫 기록), 인쇄 완료 요약 |
 | `ingest` | 판 짜기 = 리포 읽는 중 | 없음 (신규) | 단계 4 = Rust `walk·parse·git·write` 를 「git 읽기」「파싱」 2칸으로, TS 파생 `derive`·`cards` 를 「개념 추출」「판 짜기」 2칸으로. blame 은 배경(표시 없음). **시간 비례 큐 컴포넌트로 재사용**해 표시. 스피너 금지. 취소 가능. 끝나면 `home` |
 | `repos` | 서가 = 등록한 리포 전부 | 없음 (신규) | 리포마다 카드 한 장: 이름 · 경로 · 상태 배지(`ok`·`missing`·`detached`) · 마지막 읽기 · 개념 수 · 겹 평균 · 오늘 만기. 목록은 `repo.overview` **한 번**으로 긷는다 — `listRepos()` 는 상태를 알려고 리포마다 `repo_probe` 를 부르므로 목록이 리포 수에 비례해 느려진다. 폴더가 아직 있는지는 **그린 뒤에** 확인해 `missing` 으로 고친다. 「리포 추가」는 첫 실행과 같은 폴더 대화상자고, `missing` 이면 「위치 알려주기」가 `relocateRepo` 를 부른다(첫 커밋이 다르면 거절). 「목록에서 빼기 / 전부 지우기」는 모달 없이 카드 안에서 **2단**으로 묻고, `purge` 여도 **카드는 은퇴만** 한다 — `review_log.card_id` 가 NOT NULL 이라 지우면 학습 기록이 끊긴다(D31). 확인 문구가 그 사실을 말한다. 여는 문은 마스트헤드 스위처의 「전부 보기」와 설정 「리포」 절 둘이다 (D119) |
 | `first-run` | 첫 실행 · 빈 상태 | 없음 (신규) | 리포가 0개: 로고 배지 + 한 문단 + **0단계 언어 고르기(한국어/English, D117)** + 「리포 등록」 버튼 하나. 고른 값은 `settings.locale` 로 그 자리에서 내려간다 — DB 는 `boot.ts` 가 리포 0개에서도 열어 둔다. 리포는 있는데 판이 0개(커밋 2개짜리 리포 등): 홈의 대지 자리에 `Forecast` 변형 「이 리포로는 T2 를 짤 수 없습니다 — 커밋 N개」 |
@@ -104,12 +105,11 @@ interface UiSlice { screen: Screen; session: SessionState | null; lifer: LiferCa
 
 `SessionOverlay` 가 `keydown` 캡처 단계에서 Esc 를 **유일하게** 처리한다.
 
-1. `document.activeElement` 가 `textarea`/`input`/Monaco 이면 → `blur()` 만 하고 끝(입력을 빠져나온다).
-2. LIFER 베일이 열려 있으면 → 베일만 닫는다(아무 키나 닫힘의 일부).
-3. 사다리(`ReprintLadder`)가 열려 있고 **포커스가 사다리 안**이면 → 사다리를 접고 포커스를 「모르겠어요」 버튼으로.
-4. 그 외 → `session.persist()` 후 즉시 `ui.session = null`. **확인 모달 없음.** 토스트 「세션에서 나왔습니다. 진행은 저장됐습니다. 돌아오면 N번째 판부터」.
+1. `document.activeElement` 가 `textarea`/`input`/Monaco 이면 → 오버레이 자신으로 포커스를 옮기고 끝(입력을 빠져나온다. `blur()` 하지 않는다 — D111).
+2. 사다리(`ReprintLadder`)가 열려 있고 **포커스가 사다리 안**이면 → 사다리를 접고 포커스를 「모르겠어요」 버튼으로.
+3. 그 외 → `session.persist()` 후 즉시 `ui.session = null`. **확인 모달 없음.** 토스트 「세션에서 나왔습니다. 진행은 저장됐습니다. 돌아오면 N번째 판부터」.
 
-1~3 은 "한 번에 한 겹만 벗긴다"이고, 목업의 `if (typing) blur` 를 두 겹 더 늘린 것이다. 「나가기」 버튼은 4 만 부른다.
+1~2 는 "한 번에 한 겹만 벗긴다"이고, 목업의 `if (typing) blur` 를 한 겹 더 늘린 것이다. 「나가기」 버튼은 3 만 부른다. **LIFER 는 여기 없다** — 베일이 아니라 판정란 안의 기록이라 벗길 겹이 아니다 (D131).
 
 ### 2.4 창 크기 · 다중 리포
 
@@ -119,6 +119,7 @@ interface UiSlice { screen: Screen; session: SessionState | null; lifer: LiferCa
 - 전환은 `repo.activeId` 만 바꾸고 `home` 을 비운다 — 홈이 `home.load(repoId)` 를 다시 부른다. 화면 상태는 파생 캐시라 부분 갱신보다 통째로 버리는 편이 싸고 틀릴 자리가 없다(§3). 진행 중 세션은 리포별로 저장되므로 다른 리포로 갔다 와도 이어 찍힌다.
 - 진입: 리포가 0개면 `first-run`, 1개 이상이면 **마지막으로 본 리포**의 홈으로 곧장 간다(`settings.lastRepoId`. 그 리포가 목록에 없으면 첫 줄). 저장은 `activeId` 가 바뀌는 자리 한 곳에서만 한다 — 스위처·서가·첫 등록이 모두 그리로 지나간다. 서가는 **스스로 열리지 않는다** — 스위처의 「전부 보기」나 설정 「리포」 절에서만 연다. 마지막 리포를 지우면 `setRepos` 가 다시 `first-run` 으로 떨어뜨린다.
 - 리포를 **추가하는 문은 서가 하나**다. 첫 리포를 넣고 나면 `first-run` 이 다시 뜨지 않으므로, 서가가 없으면 둘째 리포를 넣을 자리도 옮긴 리포를 다시 붙일 자리도 없다.
+- 그 문에는 **길이 둘** 있다 (D129): 폴더 고르기와 **git 주소**. 주소 쪽은 `CloneField` 한 컴포넌트이고 첫 실행 화면과 서가가 같은 것을 쓴다 — 리포가 이 컴퓨터에 아직 없을 수 있고, 그때 「먼저 터미널에서 클론해 오세요」는 이 앱이 없애려던 걸음이다. 받을 **부모 폴더**를 고르게 하고 그 아래 주소 끝 이름으로 받는다(받은 코드가 사용자가 아는 자리에 남아야 지우는 것도 사용자가 할 수 있다). 받은 뒤는 폴더를 고른 길과 한 줄도 다르지 않다 — `addRepo` 가 등록하고 인제스트 화면이 열린다. 진행률은 없다: 끝났나·실패했나 둘뿐이고, 그 다음은 시간 비례 큐가 말한다.
 
 ---
 
@@ -244,15 +245,16 @@ interface SessionSlice {
 | `.dee` `.dee-sticker` | `Dee` | `ly`, `symbol:'badge'\|'bird'\|'head'`, `size`, `motion?`, `sticker?` | hop/tilt/hang/peek/lifer | `aria-hidden` (§6) | — |
 | `.masthead` `.ticket` | `Masthead` | `repo`, `todayMins`, `streak`, `avgLy` | — | `<header>` | — |
 | `.jobband` | `JobBand` | `runNo`, `repo`, `queue`, `pos`, `elapsed` | — | `<header aria-label="작업 띠">` | — |
-| `.jq` `.queue` | `TimeQueue` | `items`, `pos`, `progress`, `labels?`, `compact?` | now/done/skip/review | `role=img aria-label`(순서·비율 문장) | — |
+| `.jq` `.queue` | `TimeQueue` | `items`, `pos`, `progress`, `labels?`, `compact?` | now/done/skip/review | `role=img aria-label`(순서·비율 문장) | 높이 18px, 아직 안 지난 칸은 빗금 (D127 — 목업의 14px·`opacity:.3` 을 벗어난다) |
 | `.board` `.legend` | `Board`, `Legend` | — | — | `<main>`, 범례 `aria-label` | — |
-| `.panel` | `Panel` | `title`, `plain`, `tag?` | — | `<section aria-labelledby>` | — |
+| `.panel` | `Panel` | `title`, `plain`, `tag?`, `collapsible?`, `defaultOpen?` | — | `<section aria-labelledby>`, 접이식이면 머리가 `<button aria-expanded aria-controls>` 이고 속은 `hidden` 으로만 덮인다 (D133) | — |
 | `.today-n` `.qlist` `.stampcard` | `TodayPanel`, `StampCard` | `today`, `streak`, `days` | — | 연속 인쇄는 숫자만(연출 없음) | Enter=인쇄 시작 |
 | `.inkscale`(구 `.ladder`) | `InkScale` | `counts:number[5]` | — | `role=img` | — |
 | `.conc` `.cn` | `ConceptList` | `rows` | soon | `<ul aria-label>` | — |
 | `.gaps` `.gap` | `GapsPanel` | `gaps`, `onMake` | hot | 「판 만들기」 `<button>` | — |
 | `.panel.locked` | `LockedPanel` | `title`, `body` | — | `<section aria-labelledby>`; 「판이 없는 문법」 옆. T1 후보가 0이면 뜨고, 열리면 사라진다 (D96) | — |
-| `.sheet` `.sheet-head` | `Sheet` | `no`, `title`, `meta`, `state:'done'\|'current'\|'locked'`, `avgLy`, `tilt` | — | `<article aria-labelledby>` | — |
+| `.sheet-index` `.sx` | `SheetIndex` | `sheets`, `selected`, `onSelect` | — | `role=tablist` · 칩은 `role=tab` (roving tabindex), 잘리는 이름 대신 `aria-label` 이 판번호·이름·진행을 든다 (D133) | `← →` 이동·자동 활성 · `Home`/`End` |
+| `.sheet` `.sheet-head` | `Sheet` | `no`, `title`, `meta`, `state:'done'\|'current'\|'locked'`, `avgLy`, `tilt` | — | `<article aria-labelledby>`, 색인이 고른 **한 장만** 그려지고 `role=tabpanel` 에 담긴다 (D133) | — |
 | `.rail` `.ps-rail` | `InkRail` | `ly`, `label`, `plus?` | plus on | `aria-hidden` (겹은 `Passes`·텍스트가 전달) | — |
 | `.node` | `Node` | `state`, `track`, `glyph`, `title`, `pass`, `seed`(dy/rot) | open | `<button aria-expanded>`; locked 는 `aria-disabled` (포커스 가능, 이유 설명). 잠긴 노드는 흔들지 않고 상세에 이유만 연다 | Enter/Space=상세 |
 | `.detail` | `NodeDetail` | `node`, `onGo`, `onClose` | open | `region`, 열리면 포커스 이동, Esc=닫기 | Esc |
@@ -273,7 +275,8 @@ interface SessionSlice {
 | `.acts` | `Acts` | `left`, `hint`, `right` | — | 동작 줄 | — |
 | `.reprint`(구 `.ladder`) | `ReprintLadder` | `rung`, `lyFrom`, `lyTo`, `card`, `prereqDone` | rung 1~4 | `<section aria-label>`; `.rungs role=tablist`, `.rung role=tab`, `.rung-body role=tabpanel` | §7 |
 | `.dict` `.prereq` `.uses` `.askbox` | `DictRung` `PrereqRung` `UsesRung` `AskRung` | `card`, `onJump`, `promptOut` | — | 점프 버튼·`textarea aria-label`·복사 | — |
-| `.lifer-veil` `.lifer-card` | `LiferVeil` | `card`, `serial`, `onClose` | typeout .56s | `role=dialog aria-label="처음 기록한 개념"`, 포커스 트랩(카드 자체), 아무 키·클릭 닫힘, 닫힐 때 포커스 복원 | any |
+| `.coach` | `CoachBand` | `step: 1\|2\|3` | — | `<aside aria-label="첫 판 안내">`. 걸음은 사용자의 동작으로만 넘어간다 — 넘기기 버튼이 없다 (D134) | — |
+| `.lifer-note` | `LiferNote` | `concept`, `code`, `where`, `serial` | typeout .56s (지연 .7s) | `FeedbackSlot` 안의 블록 — 대화상자가 아니고 포커스를 뺏지 않는다 (D131) | — |
 | `.done-head` `.tally` `.shifts` `.lifer-box` `.streak-line` `.hintbox` | `Summary` | `results`, `mins`, `streak`, `lifer?`, `tomorrow` | — | `<article>` | Enter=홈 |
 | `.stepper` `.step` | `Stepper` | `stage` | done/cur | `role=list` | — |
 | `.split` `.ref` `.ph` | `SplitPane`, `RefPlate` | `original`, `stage`, `show`, `peek` | peek | 가려진 줄 `aria-hidden`; peek 는 시각 전용 | — |
@@ -310,7 +313,7 @@ interface SessionSlice {
 | 홈 | `Enter` | 인쇄 시작 (포커스가 `main` 일 때만) | 버튼에 포커스면 그 버튼의 Enter |
 | 홈 | `Esc` | 열린 노드 상세 닫기 → 토스트 닫기 | 세션 없음 |
 | 홈 · 노드 | `Enter`/`Space` | 상세 토글 | — |
-| 세션 공통 | `Esc` | §2.3 4단계 | 유일한 주인 = `SessionOverlay` |
+| 세션 공통 | `Esc` | §2.3 3단계 | 유일한 주인 = `SessionOverlay` |
 | 세션 공통 | `⌘/Ctrl+,` | 설정 (세션 밖에서만) | 세션 중 무시 |
 | T0 미답 | `1~4` | 보기/토큰 고르기 | 사다리가 열려 **포커스가 사다리 안**이면 단(rung) 선택. 그 외 항상 보기 (확정) |
 | T0 지목형 | `←` `→` | 토큰 옮기기 | 보기형에서는 `↑↓` 가 라디오 이동 |
@@ -330,7 +333,6 @@ interface SessionSlice {
 | T2 | `H` (`KeyH`) | 힌트 1→3 | — |
 | T2 지도 | `Tab`/`Shift+Tab` · `Enter`/`Space` | 노드 이동·토글 | — |
 | T2 채점 후 · 요약 | `Enter`/`Space` | 다음 / 홈으로 | — |
-| LIFER | 아무 키·클릭 | 닫기 (수식키 단독 제외) | Esc 도 닫기만 |
 
 포커스 규칙:
 - 교정지 마운트 → `article.ps` 로 포커스(스크롤 0). 채점 → 포커스는 그대로, **오버레이의 `.vh#live` 가 한 줄로 읽는다**(D114 — `FeedbackSlot` 은 `aria-live` 를 들지 않는다. 판정란 전문은 문구 규약의 60자를 넘고, 홈의 `.vh#live` 는 `aria-modal` 에 가려 세션 중에는 못 쓴다). 사다리 열림 → 현재 단 `tab` 으로. 아래층 점프 → 새 교정지. 복귀 → `LinkPara`. 요약 → 「홈으로」 버튼. 세션 닫힘 → `returnFocusId`.
@@ -379,7 +381,7 @@ interface SessionSlice {
 | 항목 | 규칙 | 왜 |
 |---|---|---|
 | `filter` | **0개** (Stylelint 금지, `drop-shadow` 포함) | WebKit 은 filter 를 레이어마다 오프스크린 래스터. 목업이 이미 `box-shadow` 로 바꿨다 |
-| `backdrop-filter` | 0개 | LIFER 베일은 반투명 색만 |
+| `backdrop-filter` | 0개 | 반투명 겹을 쓰는 자리가 없다 (D131 로 LIFER 베일이 빠졌다) |
 | `mix-blend-mode` | 화면당 ≤ 12 요소: 워드마크 2 · 시트 판번호 N · 도장 ≤ 2 · 결 ≤ 3. 대지 12장 이상이면 판번호 어긋남을 `[data-trim]` 과 무관하게 끈다 | 블렌드는 격리 그룹을 만들어 그 조상까지 합성 비용 |
 | 흐림 `box-shadow` | 노드당 1개(`.die` 10px), 시트당 1개, 그 외 하드 섀도만 | 흐림 그림자는 transform 변화마다 재래스터 |
 | SVG `<use>` Dee | 움직이지 않는 스티커는 **그림 한 장**으로 굽는다(D115 — `deeImageUrl`). `<use>` 로 남는 것(움직이는 Dee)만 화면당 ≤ 40 인스턴스 | `<use>` 는 인스턴스마다 6 경로(수천 점) 재래스터, 캐시 없음 — 홈은 개념 줄마다 하나라 391개였다. 구운 그림은 판마다 한 번 디코드하고 나머지는 blit |
@@ -420,14 +422,14 @@ interface SessionSlice {
 | 3 | 3판 `?` 사다리 1~4단 | 겹 −1 · 오늘로 당김 표시 · 4단 프롬프트 생성·복사(mock clipboard) |
 | 4 | 2단 아래층 점프 → 답 → 자동 복귀 | 큐에 「아래층」 삽입 · 복귀 후 `LinkPara` 포커스 · 2단이 「방금 채움」 |
 | 5 | 아래층에서 `B` | 큐에서 빠짐 · 위 판 상태 유지 |
-| 6 | 새 판 첫 정합 → LIFER | 베일 열림 · 아무 키 닫힘 · 포커스 복원 · 세션 4번째부터 안 뜸 |
+| 6 | 새 판 첫 정합 → LIFER | 판정란 안에 기록(머리말·일련번호·채집지) · 판정문이 같이 읽힘 · 포커스는 다음 판 단추 · 세션 4번째부터 안 뜸 |
 | 7 | T1 예시 답안 채점 | 비공백 줄 기준 — 단언 숫자는 04 §9 골든 픽스처 값을 그대로 쓴다 |
 | 8 | T1 이의 → 왜 게이트 | 10자 미만 `disabled` · 코드 복사 거부 · 보기 → 자기 말 |
 | 9 | `` ` `` 홀드 / 해제 / window blur | `.ref.peek` 토글 · peeks 카운트 · 에디터 값 불변 |
 | 10 | T2 힌트 3 → 채점 → 이것도 맞다 | 새 파일 표시 · 놓침 깜빡임 3회 후 정지 · 커밋 출처 |
 | 11 | 요약 | 겹 이동 목록 · LIFER 박스 · 내일 예고 · Enter 홈 |
 | 12 | 야간반 + 부속 숨김 | 텍스트 박스 좌표 동일 · 대비 전수 |
-| 13 | Esc 4단계 | 입력 중 blur → 사다리 접기 → 나가기 → 홈 「이어 찍기」 → 재진입 N번째 판 |
+| 13 | Esc 3단계 | 입력에서 빠져나오기 → 사다리 접기 → 나가기 → 홈 「이어 찍기」 → 재진입 N번째 판 (D131 로 LIFER 겹이 빠졌다) |
 | 14 | 리포 등록 → 인제스트 진행 → 홈 | 단계 큐 · 취소 · 빈 상태 변형 |
 | 15 | 키보드만으로 1~13 | 마우스 0회 프로젝트 (`page.mouse` 금지 픽스처) |
 
@@ -457,7 +459,7 @@ interface SessionSlice {
 
 | 위험 | 신호 | 완화 |
 |---|---|---|
-| WKWebView 에서 SVG `<use>`·블렌드로 홈이 12ms 를 넘긴다 | §10 첫 실측 | 윈도잉 → 판번호 어긋남 끄기 → 결 `--grain-op:0` 순으로 강등, 예산은 유지 |
+| WKWebView 에서 SVG `<use>`·블렌드로 홈이 12ms 를 넘긴다 | §10 첫 실측 | 스티커를 그림 한 장으로 굽기(D115) → 판번호 어긋남 끄기 → 결 `--grain-op:0` 순으로 강등, 예산은 유지. 윈도잉은 D133 이 걷었다 — 대지가 한 장만 DOM 에 있다 |
 | Monaco 가 WKWebView 에서 IME(한국어 주석) 조합을 깨거나 마운트가 느리다 | 시나리오 7·9 webkit 실패 | `ClonePad` 인터페이스 뒤 textarea 구현으로 1단계만 폴백; 조합 중 판정 보류 |
 | Esc 가 두 주인을 갖게 된다(모달 지옥) | 새 오버레이 추가 PR | `SessionOverlay` 밖 `keydown` Escape 핸들러 린트 금지(`no-restricted-syntax`) |
 | 토큰 드리프트(디자인 ≠ 앱) | `sync-design --check` | CI 실패로 고정 |
@@ -486,9 +488,9 @@ interface SessionSlice {
 - [ ] 프리미티브 12종 + `dev/Gallery` — Pill·Passes·Kbd·PressButton·FlatButton·Switch·Reg·Stamp·Say·Toast·LiveRegion·Misreg, 단위 테스트 (선행: 토큰) · 2일
 - [ ] 홈 화면 — Masthead·RepoSwitcher·TodayPanel·TimeQueue·InkScale·ConceptList·GapsPanel·Sheet·Node·NodeDetail·Guide·Forecast·ColorBar, 픽스처 IPC, `home.load` (선행: 프리미티브, `02` 홈 쿼리 모양) · 3일
 - [ ] WKWebView 성능 첫 실측 — `?stress=48` 이식, `__audit.perf`, `performance.mark` 6종, macOS Web Inspector 절차 문서화, 예산 대비 결과 기록 (선행: 홈) · 1일
-- [ ] 세션 셸 — `SessionOverlay`(포커스 트랩·`inert`·Esc 4단계)·`JobBand`·`useSessionClock`·`session.save/resume`·키맵 디스패처(`e.code`) (선행: 프리미티브, `02` 세션 테이블) · 2~3일
+- [ ] 세션 셸 — `SessionOverlay`(포커스 트랩·`inert`·Esc 3단계)·`JobBand`·`useSessionClock`·`session.save/resume`·키맵 디스패처(`e.code`) (선행: 프리미티브, `02` 세션 테이블) · 2~3일
 - [ ] T0 판 — `ProofSheet`·`CodePlate`(hl·PickToken·Hole)·`Choices`·`FeedbackSlot`·`Acts`·`Crumb`, 채점은 `core.gradeT0` (선행: 세션 셸, `04` T0 규칙) · 2일
-- [ ] 다시 찍기 사다리·아래층·LIFER — `ReprintLadder` 4단·점프/복귀/`LinkPara`·`B`·`LiferVeil`·클립보드 플러그인 (선행: T0) · 2~3일
+- [ ] 다시 찍기 사다리·아래층·LIFER — `ReprintLadder` 4단·점프/복귀/`LinkPara`·`B`·`LiferNote`·클립보드 플러그인 (선행: T0) · 2~3일
 - [ ] 인쇄 완료 요약 — `Summary` 전부, 「오늘 판 다시 보기」= 읽기 전용 (선행: T0) · 1일
 - [ ] T1 `ClonePad` Monaco — 지연 로드·옵션·테마 2종·거터 틱·줄 이탈 판정·`` ` `` 홀드·자동 저장·`remeasureFonts`·`Stepper`·`RefPlate`·`ScoreCard`·`DiffRows`·`WhyGate` (선행: 세션 셸, `04` T1 엔진) · 3일
 - [ ] T2 `DependencyMap` — SVG 레이아웃·포트 분산·호버/포커스 강조·3티어 결과·커밋 출처, 13px 룰 맞춤 (선행: 세션 셸, `03` 그래프 모양) · 2일
