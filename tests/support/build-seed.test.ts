@@ -17,7 +17,10 @@ const require_ = createRequire(import.meta.url);
 const Database = require_('better-sqlite3') as new (path: string) => BetterSqlite3.Database;
 
 describe('브라우저 게이트의 시드', () => {
-  test('덤프에서 구우면 사용처와 카드 재료가 선다', async () => {
+  // 사전이 다섯 언어로 늘면서(D152·D156·D157) 굽는 데 vitest 기본 5초를 넘는다 — CI 러너에서
+  // 11.9초가 걸려 게이트가 빨갰다. 재는 것은 시간이 아니라 「시드에 무엇이 들었나」이므로
+  // 넉넉히 준다.
+  test('덤프에서 구우면 사용처와 카드 재료가 선다', { timeout: 120_000 }, async () => {
     const out = join(process.cwd(), SEED_PATH);
     await buildSeed(Database, out);
 

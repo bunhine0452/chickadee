@@ -23,6 +23,13 @@ interface SocketReport {
 describe('E1 첫 실행', () => {
   before(async () => {
     await waitForBoot();
+    // 첫 실행의 로케일 기본값은 `guessLocale()` 이라 **기계마다 다르다** (D117). CI 러너는
+    // en_US 라 온보딩이 영어로 뜨고, 아래 세 걸음은 한국어 문구를 못박으므로 여기서 한 번
+    // 맞춰 둔다 — 이것이 없어 main 에서도 E1 셋이 계속 빨갰다. 스위치는 ko↔en 토글이다.
+    const note = await shown('.firstrun-note');
+    if (!(await note.getText()).includes('읽기만 하고')) {
+      await (await shown('.firstrun-lang [role="switch"]')).click();
+    }
   });
 
   it('온보딩 화면이 뜬다 — 로고·한 문단·「리포 등록」 (05 §2.1 first-run)', async () => {
