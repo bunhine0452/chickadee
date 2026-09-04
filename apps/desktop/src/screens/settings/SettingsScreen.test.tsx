@@ -27,6 +27,8 @@ let revealed: string[] = [];
 let wiped = 0;
 let secretDeleted: string[] = [];
 let hasKey = false;
+/** 이 이름의 조회만 실패시킨다 — 「읽기 실패해도 화면은 산다」를 재는 자리. */
+let failQuery: string | null = null;
 
 function run(name: string, params: unknown): unknown[] {
   const sql = (statements as Record<string, string>)[name];
@@ -41,7 +43,9 @@ function run(name: string, params: unknown): unknown[] {
 vi.mock('@chickadee/ipc-client', () => ({
   ipc: {
     store: {
-      query: (name: string, params: unknown) => Promise.resolve(run(name, params)),
+      query: (name: string, params: unknown) => (name === failQuery
+        ? Promise.reject(new Error('읽기 실패'))
+        : Promise.resolve(run(name, params))),
       exec: (name: string, params: unknown) => Promise.resolve(run(name, params)[0]),
       info: () => Promise.resolve({ userVersion: 1, path: '', sizeBytes: 4096, wal: true }),
     },
@@ -106,6 +110,7 @@ beforeEach(() => {
   secretDeleted = [];
   wiped = 0;
   hasKey = false;
+  failQuery = null;
   seed();
 });
 
@@ -113,6 +118,7 @@ afterEach(() => {
   cleanup();
   document.documentElement.removeAttribute('data-theme');
   document.documentElement.removeAttribute('data-trim');
+  document.documentElement.removeAttribute('data-motion');
 });
 
 describe('SettingsScreen', () => {
@@ -165,6 +171,30 @@ describe('SettingsScreen', () => {
       { value_json: string } | undefined;
     // 9 는 하한 밖, 99 도 상한 밖 — 어느 쪽도 행을 만들지 않는다.
     expect(row).toBeUndefined();
+  });
+
+  it('모션 감축도 <html> 을 세우고 저장한다 — 네 칸이 재실행에 남는다 (D122 · E7)', async () => {
+    const user = userEvent.setup();
+    await drawn();
+    await user.click(screen.getByRole('switch', { name: '모션 시스템 따름 · 항상 줄이기' }));
+
+    expect(document.documentElement.getAttribute('data-motion')).toBe('reduce');
+    await waitFor(() => {
+      const row = db.prepare("SELECT value_json FROM settings WHERE key = 'motion'").get() as
+        { value_json: string } | undefined;
+      expect(row?.value_json).toBe('"reduce"');
+    });
+  });
+
+  it('설정을 못 읽어도 화면은 기본값으로 뜬다 (01 §6)', async () => {
+    // 한 조회만 넘어뜨린다. 화면이 통째로 빈 채 서는 것이 아니라 읽힌 것만 보여야 한다.
+    failQuery = 'settings.get_all';
+    render(<SettingsScreen onBack={vi.fn()} />);
+
+    await screen.findByText('설정을 다 읽지 못했습니다.');
+    // D12 기본값이 그대로 칸에 앉는다 — 못 읽었다고 0 이나 빈 칸이 되지 않는다.
+    expect((screen.getByRole('spinbutton', { name: /하루 예산/ }) as HTMLInputElement).value)
+      .toBe('15');
   });
 
   it('모양 스위치가 <html> 을 세우고 저장한다 (E7)', async () => {

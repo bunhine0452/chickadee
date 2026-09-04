@@ -43,42 +43,42 @@ owner: claude-code
   - [x] tests/gates/design.spec.ts 행 길이 검사에 로케일 분기 + measure.allow.json 정리 {#i18n-typo-gate}
 
 ## P2 · 문구 전수 추출 (끝: 사전을 끘 앱의 모든 문구가 t() 를 거친다) {#p2}
-- [ ] 화면 문구 — screens/ 6.8천 자 · 1일 {#i18n-extract-screens}
+- [~] 화면 문구 — screens/ 6.8천 자 · 1일 {#i18n-extract-screens}
   - [ ] screens/home (HomeScreen · data.ts · empty) {#i18n-extract-home}
   - [ ] screens/ingest (phases 라벨 4칸 포함) {#i18n-extract-ingest}
   - [ ] screens/settings (8절 + KeyPanel · PerfTable) {#i18n-extract-settings}
-  - [ ] screens/session (t1Copy · t2Copy · 세 판) {#i18n-extract-session}
-- [ ] 컴포넌트 문구 — components/ 11.8천 자 · 1일 {#i18n-extract-components}
+  - [x] screens/session (t1Copy · t2Copy · 세 판) {#i18n-extract-session}
+- [~] 컴포넌트 문구 — components/ 11.8천 자 · 1일 {#i18n-extract-components}
   - [ ] components/home 16종(마스트헤드·패널·대지·라벨) {#i18n-extract-comp-home}
-  - [ ] components/plate · components/session (사다리 4단 문구 포함) {#i18n-extract-comp-plate}
-  - [ ] components/t1 · components/t2 {#i18n-extract-comp-t12}
-- [ ] 프리미티브·오류 문구 · 0.5일 {#i18n-extract-ui}
-  - [ ] packages/ui/src/error-copy.ts — IpcError 코드별 문구 표 {#i18n-extract-errorcopy}
-  - [ ] announce · Toast · LiveRegion · Dee 문구 {#i18n-extract-primitives}
-- [ ] 카드 생성기 문구 — packages/cards 5.4천 자 · 0.8일 {#i18n-extract-cards}
-  - [ ] t0 3종(meaning · blank · point) {#i18n-extract-cards-t0}
-  - [ ] t1 스펙 카드 · 마스크 ·「…이어서」헤더 {#i18n-extract-cards-t1}
-  - [ ] t2 4종(배치 · 반경 · 흐름 · 방향)과 사유 템플릿 {#i18n-extract-cards-t2}
-  - [ ] 골든 픽스처는 ko 로 고정 — 하네스가 로케일을 ko 로 세우고 재생해 diff 0 {#i18n-extract-cards-golden}
-- [ ] 채점 피드백 문구 — packages/grading 3.9천 자 · 0.7일 {#i18n-extract-grading}
-  - [ ] t0 오답 문구·사다리 단별 문구 {#i18n-extract-grading-t0}
-  - [ ] t1 줄 판정·이의·왜 게이트 문항 {#i18n-extract-grading-t1}
-  - [ ] t2 티어별 문구와「이것도 맞다」 {#i18n-extract-grading-t2}
+  - [x] components/plate · components/session (사다리 4단 문구 포함) {#i18n-extract-comp-plate}
+  - [x] components/t1 · components/t2 {#i18n-extract-comp-t12}
+- [x] 프리미티브·오류 문구 · 0.5일 {#i18n-extract-ui}
+  - [x] packages/ui/src/error-copy.ts — IpcError 코드별 문구 표 {#i18n-extract-errorcopy}
+  - [x] announce · Toast · LiveRegion · Dee 문구 {#i18n-extract-primitives}
+- [x] 카드 생성기 문구 — packages/cards 5.4천 자 · 0.8일 {#i18n-extract-cards}
+  - [x] t0 3종(meaning · blank · point) {#i18n-extract-cards-t0}
+  - [x] t1 스펙 카드 · 마스크 ·「…이어서」헤더 {#i18n-extract-cards-t1}
+  - [x] t2 4종(배치 · 반경 · 흐름 · 방향)과 사유 템플릿 {#i18n-extract-cards-t2}
+  - [x] 골든 픽스처는 ko 로 고정 — 하네스가 로케일을 ko 로 세우고 재생해 diff 0 {#i18n-extract-cards-golden}
+- [x] 채점 피드백 문구 — packages/grading 3.9천 자 · 0.7일 {#i18n-extract-grading}
+  - [x] t0 오답 문구·사다리 단별 문구 {#i18n-extract-grading-t0}
+  - [x] t1 줄 판정·이의·왜 게이트 문항 {#i18n-extract-grading-t1}
+  - [x] t2 티어별 문구와「이것도 맞다」 {#i18n-extract-grading-t2}
 
 ## P3 · 사전 영문화와 마이그레이션 (끝: en 으로 열면 카드 본문까지 영어다) {#p3}
-- [ ] 사전 스키마·린트 확장 · 0.5일 (선행: D118) {#i18n-dict-schema}
-  - [ ] zod 를 문자열마다 `{ ko, en }` 유니온(스칼라 = ko)으로 넓히고 pnpm dict:schema 재생성 — *_en 접미 필드가 아니다(03 §4.4) {#i18n-dict-schema-fields}
-  - [ ] dict:lint — 조사 검사는 ko 에만 걸고 en 은 금지어·변수 참조만 검사 {#i18n-dict-schema-lint}
-- [ ] 57 YAML 영문화 · 6일 {#i18n-dict-translate}
-  - [ ] **먼저** dictionary/_glossary.en.yaml — 개념 이름 ko→en 용어집을 만들어 사용자가 확정한다. 나머지 문자열은 이 용어집에 고정해 번역한다 (사용자 결정 2026-09-04) {#i18n-dict-review}
+- [x] 사전 스키마·린트 확장 · 0.5일 (선행: D118) {#i18n-dict-schema}
+  - [x] zod 를 문자열마다 `{ ko, en }` 유니온(스칼라 = ko)으로 넓히고 pnpm dict:schema 재생성 — *_en 접미 필드가 아니다(03 §4.4) {#i18n-dict-schema-fields}
+  - [x] dict:lint — 조사 검사는 ko 에만 걸고 en 은 금지어·변수 참조만 검사 {#i18n-dict-schema-lint}
+- [~] 57 YAML 영문화 · 6일 {#i18n-dict-translate}
+  - [~] **먼저** dictionary/_glossary.en.yaml — 개념 이름 ko→en 용어집을 만들어 사용자가 확정한다. 나머지 문자열은 이 용어집에 고정해 번역한다 (사용자 결정 2026-09-04) {#i18n-dict-review}
   - [ ] dictionary/common (보편 개념) {#i18n-dict-common}
   - [ ] dictionary/ts · dictionary/react {#i18n-dict-ts-react}
   - [ ] dictionary/arch (T2 개념 4종) {#i18n-dict-arch}
   - [ ] 나머지 언어 사전 {#i18n-dict-rest}
-- [ ] loader 폴백과 고지 — en 결측 개념은 ko 로 내도로 보이고 그 사실을 판에 한 줄로 · 0.3일 {#i18n-dict-fallback}
-- [ ] 0002 마이그레이션 · 0.5일 {#i18n-migration}
-  - [ ] concept.name_en ADD COLUMN — 원장은 추가만(02 §2.2) {#i18n-migration-ddl}
-  - [ ] SCHEMA_VERSION · catalog 갱신, 백업·상위 버전 거부 경로 테스트 {#i18n-migration-runner}
+- [x] loader 폴백과 고지 — en 결측 개념은 ko 로 내도로 보이고 그 사실을 판에 한 줄로 · 0.3일 {#i18n-dict-fallback}
+- [x] 0002 마이그레이션 · 0.5일 {#i18n-migration}
+  - [x] concept.name_en ADD COLUMN — 원장은 추가만(02 §2.2) {#i18n-migration-ddl}
+  - [x] SCHEMA_VERSION · catalog 갱신, 백업·상위 버전 거부 경로 테스트 {#i18n-migration-runner}
 - [ ] en 스모크 게이트 · 0.5일 {#i18n-en-smoke}
   - [ ] E2E 3화면(첫 실행 · 홈 · 세션)을 en 으로 한 번 {#i18n-en-smoke-e2e}
   - [ ] 시각 기준선 40장은 ko 만 유지 — en 은 axe serious 0 과 행 길이만 재다 {#i18n-en-smoke-visual}
@@ -107,4 +107,22 @@ owner: claude-code
 | 2026-09-04T08:20:21+09:00 | #i18n-typo-attr | claude-code | ☐→x | .oculpm/journal/20260904/Features_to_add/0819_feature_i18n-skeleton-and-first-run-locale.md | applyLocale() 이 lang·data-locale 을 세우는 유일한 자리 |
 | 2026-09-04T08:20:27+09:00 | #i18n-typo-css | claude-code | ☐→x | .oculpm/journal/20260904/Features_to_add/0819_feature_i18n-skeleton-and-first-run-locale.md | reset.css 에 word-break:normal · --measure 30em (토큰 파일은 design:sync 것이라 손대지 않음) |
 | 2026-09-04T08:20:33+09:00 | #i18n-typo-gate | claude-code | ☐→x | .oculpm/journal/20260904/Features_to_add/0819_feature_i18n-skeleton-and-first-run-locale.md | MEASURE 로케일 표 + 0건 통과 구멍 막음 + allow 4→2 (D112 잔여 정리) |
+| 2026-09-04T09:55:26+09:00 | #i18n-extract-session | claude-code | ☐→x |  |  |
+| 2026-09-04T09:55:27+09:00 | #i18n-extract-comp-plate | claude-code | ☐→x |  |  |
+| 2026-09-04T09:55:29+09:00 | #i18n-extract-comp-t12 | claude-code | ☐→x |  |  |
+| 2026-09-04T09:55:33+09:00 | #i18n-extract-errorcopy | claude-code | ☐→x |  |  |
+| 2026-09-04T09:55:34+09:00 | #i18n-extract-primitives | claude-code | ☐→x |  | announce·Toast·LiveRegion·Dee 는 문구를 props 로만 받아 옮길 것이 없었다 |
+| 2026-09-04T09:55:36+09:00 | #i18n-extract-cards-t0 | claude-code | ☐→x |  | t0-point 의 josa 중복 출력 버그를 여기서 잡았다 |
+| 2026-09-04T09:55:38+09:00 | #i18n-extract-cards-t1 | claude-code | ☐→x |  |  |
+| 2026-09-04T09:55:39+09:00 | #i18n-extract-cards-t2 | claude-code | ☐→x |  |  |
+| 2026-09-04T09:55:41+09:00 | #i18n-extract-cards-golden | claude-code | ☐→x |  | 골든 63건이 재녹화 없이 통과 — 로케일 ko 고정 |
+| 2026-09-04T09:55:42+09:00 | #i18n-extract-grading-t0 | claude-code | ☐→x |  |  |
+| 2026-09-04T09:55:44+09:00 | #i18n-extract-grading-t1 | claude-code | ☐→x |  |  |
+| 2026-09-04T09:55:46+09:00 | #i18n-extract-grading-t2 | claude-code | ☐→x |  |  |
+| 2026-09-04T09:55:47+09:00 | #i18n-dict-schema-fields | claude-code | ☐→x |  | why_gate.help·diag.edge.h 도 열었다 — 안 열면 번역 불가 |
+| 2026-09-04T09:55:49+09:00 | #i18n-dict-schema-lint | claude-code | ☐→x |  | 태그·속성 검사는 en 에도 건다 — HTML 은 언어가 없다 |
+| 2026-09-04T09:55:50+09:00 | #i18n-dict-fallback | claude-code | ☐→x |  | 개념이 untranslated[] 로 어느 필드가 폴백했는지 들고 온다 |
+| 2026-09-04T09:55:52+09:00 | #i18n-migration-ddl | claude-code | ☐→x |  |  |
+| 2026-09-04T09:55:53+09:00 | #i18n-migration-runner | claude-code | ☐→x |  |  |
+| 2026-09-04T09:55:55+09:00 | #i18n-dict-review | claude-code | ☐→~ |  | _glossary.en.yaml 초안 55행. 이름 충돌 3건·대문자 5건·의도적 차이 24쌍을 사용자가 확정해야 나머지가 돈다 |
 <!-- oculpm:plan-log end -->
