@@ -1,7 +1,7 @@
 schema: 1
 id: common/text-literal
 universal: null
-name: { ko: 글자 값, en: Text literal }
+name: { ko: 글자 값, en: "Text value" }
 token: null
 grammars: []
 essential: false

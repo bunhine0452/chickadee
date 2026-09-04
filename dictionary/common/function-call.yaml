@@ -1,7 +1,7 @@
 schema: 1
 id: common/function-call
 universal: null
-name: { ko: 함수 부르기, en: Function call }
+name: { ko: 함수 부르기, en: "Calling a function" }
 token: null
 grammars: []
 essential: false

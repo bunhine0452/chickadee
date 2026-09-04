@@ -1,7 +1,7 @@
 schema: 1
 id: common/number-literal
 universal: null
-name: { ko: 숫자 값, en: Number literal }
+name: { ko: 숫자 값, en: "Number value" }
 token: null
 grammars: []
 essential: false

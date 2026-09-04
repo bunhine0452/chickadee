@@ -1,7 +1,7 @@
 schema: 1
 id: common/try-catch
 universal: null
-name: { ko: "터진 것을 받아 잇기", en: "Try and catch" }
+name: { ko: "터진 것을 받아 잇기", en: "Catching failures" }
 token: null
 grammars: []
 essential: false

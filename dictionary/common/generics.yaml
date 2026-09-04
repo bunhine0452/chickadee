@@ -1,7 +1,7 @@
 schema: 1
 id: common/generics
 universal: null
-name: { ko: "타입 자리 비워 두기", en: "Generics" }
+name: { ko: "타입 자리 비워 두기", en: "Type placeholders" }
 token: null
 grammars: []
 essential: false
