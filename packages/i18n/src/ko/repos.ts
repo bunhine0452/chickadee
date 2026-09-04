@@ -5,6 +5,9 @@
  * 문구가 아니라 병합이 일이 된다. 합치는 자리는 `ko.ts` 하나뿐이고 그 파일은 상위 세션이 소유한다.
  */
 export const repos = {
+  'repos.fromSettings': '서가에서 관리',
+  'repos.fromSettingsNote':
+    '추가·이동·삭제는 서가에서 합니다. 여기 목록은 읽기만 합니다.',
   'repos.title': '서가',
   'repos.plain': '= 등록한 리포 전부',
   'repos.back': '홈으로',

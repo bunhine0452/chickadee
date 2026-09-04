@@ -283,6 +283,7 @@ export const settingsSchema = z.object({
   excludeGlobs: z.array(z.string()),
   locale: z.enum(['ko', 'en']),
   dictLangs: z.array(z.string()),
+  lastRepoId: z.number().nullable(),
 });
 
 /**
@@ -306,6 +307,7 @@ export const SETTINGS_KEYS = {
   excludeGlobs: 'exclude_globs',
   locale: 'locale',
   dictLangs: 'dict_langs',
+  lastRepoId: 'last_repo_id',
 } as const satisfies Record<keyof Settings, string>;
 
 export type SettingsField = keyof typeof SETTINGS_KEYS;

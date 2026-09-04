@@ -29,6 +29,8 @@ function defaultTrim(): Settings['trim'] {
 
 /** D12 기본값. `settings` 에 행이 없을 때 쓰는 값이며 화면이 바꾸면 행이 생긴다. */
 export const DEFAULTS: Omit<Settings, 'tz'> = {
+  // 아직 아무 리포도 안 열었다 — 부팅이 첫 줄을 고른다 (D119).
+  lastRepoId: null,
   budgetMin: 15,
   rolloverHour: 4,
   desiredRetention: DEFAULT_RETENTION,
@@ -84,6 +86,7 @@ const KEY_OF: Record<keyof Settings, string> = {
   excludeGlobs: 'exclude_globs',
   locale: 'locale',
   dictLangs: 'dict_langs',
+  lastRepoId: 'last_repo_id',
 };
 
 // ───────── 모양 (테마 · 부속) ─────────

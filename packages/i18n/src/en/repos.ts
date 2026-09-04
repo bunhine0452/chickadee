@@ -4,6 +4,9 @@
  */
 
 export const repos: Record<string, string> = {
+  'repos.fromSettings': 'Manage in the shelf',
+  'repos.fromSettingsNote':
+    'Adding, relocating and removing happen in the shelf. This list only reads.',
   'repos.title': 'Shelf',
   'repos.plain': '= every repo you registered',
   'repos.back': 'Home',

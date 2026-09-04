@@ -80,6 +80,9 @@ ORDER BY l.last IS NOT NULL, l.last, k.id LIMIT 1;
 
 -- 트랙 리듬 (02 §5.2) — 최근 `sinceDay` 이후 그 트랙을 몇 번 마쳤고 마지막이 언제인가.
 -- T1 은 「최근 7일 < 2 이고 마지막 ≥ 2일 전」, T2 는 「마지막 ≥ 2일 전」이 조건이다.
+-- 코스(D120)가 남긴 행도 **일부러 함께 센다** — 이 규칙이 재는 것은 큐의 장부가 아니라
+-- 사람이 이번 주에 얼마나 필사했는가다(D123). 코스로 스무 조각을 친 주에 큐가 T1 을
+-- 또 얹으면 그 규칙의 뜻이 없어진다. `role` 로 가르고 싶으면 D123 을 먼저 다시 연다.
 -- @name queue.track_cadence
 -- @params { repoId: number, track: string, sinceDay: string }
 -- @row { recent: number, last_day: string | null }

@@ -275,6 +275,12 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
             ))}
           </ul>
         )}
+        <div className="set-acts">
+          <FlatButton onClick={() => useUi.getState().go('repos')} ghost>
+            {t('repos.fromSettings')}
+          </FlatButton>
+        </div>
+        <p className="set-note">{t('repos.fromSettingsNote')}</p>
         <p className="set-note">
           문법·쿼리·생성기·사전이 바뀌면 홈에 「재인제스트 필요」 배너가 뜹니다. 다시 읽어도{' '}
           <b>숙련도는 개념 단위라 그대로 남고</b> 카드와 사용처만 새로 만듭니다.

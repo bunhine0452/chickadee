@@ -37,6 +37,14 @@ export function App(): React.JSX.Element {
   // 지문 계산은 `parse_langs` 한 번을 부르므로 리포가 바뀔 때만 다시 잰다.
   const [reingest, setReingest] = useState(false);
 
+  // 지금 리포를 남긴다 (D119). 스위처·서가·첫 등록이 모두 `activeId` 를 거치므로
+  // 저장은 여기 한 곳이면 된다 — 세 화면에 같은 줄을 흩지 않는다.
+  useEffect(() => {
+    if (ui.activeId === null) return;
+    void saveSetting('lastRepoId', ui.activeId, Date.now())
+      .catch(() => log.warn('마지막 리포를 저장하지 못했다'));
+  }, [ui.activeId]);
+
   // 리포를 바꾸면 홈을 다시 읽는다. 화면 상태는 파생 캐시라 언제든 버릴 수 있다 (01 §5).
   useEffect(() => {
     if (ui.screen === 'home' && ui.home === null && ui.activeId !== null) void refreshHome();

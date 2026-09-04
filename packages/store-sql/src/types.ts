@@ -166,5 +166,10 @@ export interface Settings { budgetMin: number; tz: string; rolloverHour: number;
    * 새 판을 만들 문법 사전 언어 (D122). **비면 전부 켜진 것**이다 — 빈 목록이
    * 「아무 언어도 안 함」이 되면 첫 실행에서 큐가 통째로 빈다. 표시 언어와 다른 축이다.
    */
-  dictLangs: string[]; }
+  dictLangs: string[];
+  /**
+   * 마지막으로 연 리포 (D119 · 05 §2.4 진입 규칙). 다음에 켤 때 그 리포의 홈으로 바로
+   * 들어간다. 그 리포가 목록에서 사라졌으면 첫 줄로 내려온다 — 값이 화면을 막지 않는다.
+   */
+  lastRepoId: number | null; }
 // 기본값: newPerDay = 2, budgetMin = 15 (§5.1 LIMIT)
