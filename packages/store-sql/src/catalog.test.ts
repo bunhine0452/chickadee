@@ -12,9 +12,12 @@ describe('카탈로그', () => {
     expect(migrations.map((m) => m.version)).toEqual(migrations.map((_, i) => i + 1));
   });
 
-  it('0001 이 user_version 1 을 세운다', () => {
-    expect(migrations[0]?.sql).toMatch(/PRAGMA user_version = 1;/);
-    expect(SCHEMA_VERSION).toBe(1);
+  it('마이그레이션마다 자기 번호로 user_version 을 세운다', () => {
+    for (const m of migrations) {
+      expect(m.sql).toMatch(new RegExp(`PRAGMA user_version = ${m.version};`));
+    }
+    // SCHEMA_VERSION 은 목록의 마지막에서 파생된다 — 따로 세지 않는다.
+    expect(SCHEMA_VERSION).toBe(migrations[migrations.length - 1]?.version);
   });
 
   it('모든 statement 이름은 <group>.<snake_case> 다', () => {

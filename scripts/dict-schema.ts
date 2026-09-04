@@ -7,7 +7,7 @@ import { join } from 'node:path';
 
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
-import { conceptSchema, langMetaSchema } from '../packages/dictionary/src/schema.js';
+import { conceptSourceSchema, langMetaSourceSchema } from '../packages/dictionary/src/schema.js';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 
@@ -18,10 +18,12 @@ export function build(): string {
     title: 'Chickadee grammar dictionary',
     description:
       'Generated from packages/dictionary/src/schema.ts — do not edit by hand (D69). '
-      + 'Run `pnpm dict:schema` after changing the zod schema.',
+      + 'Run `pnpm dict:schema` after changing the zod schema. '
+      + 'Every human-readable string is either a plain string (read as Korean) or '
+      + '{ ko, en } (D118).',
     $defs: {
-      concept: zodToJsonSchema(conceptSchema, { target: 'jsonSchema2019-09' }),
-      lang: zodToJsonSchema(langMetaSchema, { target: 'jsonSchema2019-09' }),
+      concept: zodToJsonSchema(conceptSourceSchema, { target: 'jsonSchema2019-09' }),
+      lang: zodToJsonSchema(langMetaSourceSchema, { target: 'jsonSchema2019-09' }),
     },
   };
   return `${JSON.stringify(schema, null, 2)}\n`;

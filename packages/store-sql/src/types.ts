@@ -27,7 +27,7 @@ export type Track = 't0' | 't1' | 't2' | 't3';
 export type Grade = 1 | 2 | 3 | 4;                                 // Again Hard Good Easy
 export type Layer = 0 | 1 | 2 | 3 | 4;
 
-export interface Concept { id: ConceptId; lang: string; nameKo: string; token: string | null;
+export interface Concept { id: ConceptId; lang: string; nameKo: string; nameEn: string | null; token: string | null;
   kind: 'universal' | 'lang'; universalId: ConceptId | null; trackDefault: Track; dictVersionId: number; isRetired: boolean; }
 
 export interface ConceptSite { id: number; repoId: number; fileId: number; conceptId: ConceptId; siteKey: string;

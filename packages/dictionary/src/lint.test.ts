@@ -5,12 +5,13 @@
 import { describe, expect, test } from 'vitest';
 
 import { lintDict } from './lint.js';
-import { conceptSchema, type Concept } from './schema.js';
+import { resolveConcept } from './resolve.js';
+import { conceptSourceSchema, type SourceConcept } from './schema.js';
 import type { Dict } from './load.js';
 
 /** 문장 하나만 갈아 끼우는 최소 개념. 나머지는 스키마 기본값이 채운다. */
-function conceptWith(patch: Partial<Concept>): Concept {
-  return conceptSchema.parse({
+function conceptWith(patch: Partial<SourceConcept>): SourceConcept {
+  return conceptSourceSchema.parse({
     schema: 1,
     id: 'ts/x',
     name: { ko: '테스트', en: 'test' },
@@ -20,17 +21,19 @@ function conceptWith(patch: Partial<Concept>): Concept {
     ok: '맞습니다',
     queries: [{ grammars: ['typescript'], file: 'x.scm' }],
     ...patch,
-  }) as Concept;
+  }) as SourceConcept;
 }
 
-const dictOf = (concept: Concept): Dict => ({
+const dictOf = (concept: SourceConcept): Dict => ({
+  locale: 'ko',
   langs: new Map(),
-  concepts: new Map([[concept.id, concept]]),
+  concepts: new Map([[concept.id, resolveConcept(concept, 'ko')]]),
+  sources: new Map([[concept.id, concept]]),
   queries: new Map(),
   problems: [],
 });
 
-const rulesOf = (concept: Concept): string[] =>
+const rulesOf = (concept: SourceConcept): string[] =>
   lintDict(dictOf(concept)).map((i) => i.rule);
 
 describe('josa', () => {
@@ -72,5 +75,37 @@ describe('진단 문구', () => {
   test('「틀렸」류는 판정이지 진단이 아니다 (정본 §3-2)', () => {
     expect(rulesOf(conceptWith({ rule: '그건 틀렸습니다.' })))
       .toContain('diagnosis-not-verdict');
+  });
+});
+
+describe('언어별 검사 (D118)', () => {
+  test('조사 규칙은 ko 에만 건다 — 영어에 걸면 언제나 통과하는 죽은 규칙이 된다', () => {
+    const bad = conceptWith({ rule: { ko: '{{pick.1}}{{pick.1|josa:은,는}} 배열입니다.', en: '{{pick.1}} is an array.' } });
+    expect(rulesOf(bad)).not.toContain('josa-filter');
+  });
+
+  test('ko 쪽 조사 실수는 en 이 있어도 그대로 잡는다', () => {
+    const bad = conceptWith({ rule: { ko: '{{pick.1}} 은 배열입니다.', en: '{{pick.1}} is an array.' } });
+    expect(rulesOf(bad)).toContain('josa-filter');
+  });
+
+  test('en 의 판정 낱말을 잡는다 — 한국어 목록만 걸면 en 은 아무것도 안 걸린다', () => {
+    const bad = conceptWith({ rule: { ko: '규칙', en: "That is wrong." } });
+    expect(rulesOf(bad)).toContain('diagnosis-not-verdict');
+  });
+
+  test('en 의 템플릿 변수도 본다', () => {
+    const bad = conceptWith({ rule: { ko: '규칙', en: 'See {{nope}}.' } });
+    expect(rulesOf(bad).filter((r) => r === 'template-variable')).toHaveLength(1);
+  });
+
+  test('en 의 허용 밖 태그도 본다 — 렌더는 언어를 가리지 않는다 (06 §4.2)', () => {
+    const bad = conceptWith({ rule: { ko: '규칙', en: '<script>x</script>' } });
+    expect(rulesOf(bad)).toContain('html-tag');
+  });
+
+  test('어느 언어에서 걸렸는지 자리 이름에 남는다', () => {
+    const issues = lintDict(dictOf(conceptWith({ rule: { ko: '규칙', en: 'It failed.' } })));
+    expect(issues.find((i) => i.rule === 'diagnosis-not-verdict')?.detail).toContain('rule.en');
   });
 });

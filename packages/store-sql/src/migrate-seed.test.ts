@@ -153,6 +153,38 @@ describe('시드 DB 이행 (06 §6.1)', () => {
     }
   });
 
+  test('DB 가 최신보다 높으면 러너가 거부한다 — 이행할 것을 세는 자리가 같다 (db-newer)', () => {
+    // `crates/store/src/migrate.rs` 의 `from > top` 이 그 판단이고, 백업·거부의 실물은
+    // `crates/store/tests/store.rs` 가 가짜 카탈로그로 본다. 여기서는 **이 카탈로그가**
+    // 그 판단에 넘기는 값 — 최상단 번호와 미적용 목록 — 을 고정한다.
+    const { db, dir } = openCopy(SEED_NAME(SCHEMA_VERSION));
+    try {
+      db.pragma(`user_version = ${SCHEMA_VERSION + 1}`);
+      const from = Number(db.pragma('user_version', { simple: true }));
+      const top = Math.max(...migrations.map((m) => m.version));
+      expect(top).toBe(SCHEMA_VERSION);
+      expect(from > top).toBe(true);
+      // 거부 경로에 들어가므로 이행은 한 건도 돌지 않는다.
+      expect(migrations.filter((m) => m.version > from)).toEqual([]);
+    } finally {
+      db.close();
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test('한 판 낮은 DB 는 이행할 것이 남아 있다 — 러너가 백업을 뜨는 조건이다', () => {
+    // `migrate.rs` 는 `pending` 이 비지 않고 파일이 이미 있을 때만 백업한다 (01 §7).
+    const { db, dir } = openCopy(SEED_NAME(1));
+    try {
+      const from = Number(db.pragma('user_version', { simple: true }));
+      expect(migrations.filter((m) => m.version > from).map((m) => m.version))
+        .toEqual([2]);
+    } finally {
+      db.close();
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   test('실패한 마이그레이션은 통째로 롤백된다 — 반쯤 올라간 DB 로 열지 않는다', () => {
     const { db, dir } = openCopy(SEED_NAME(SCHEMA_VERSION));
     try {
@@ -168,6 +200,47 @@ describe('시드 DB 이행 (06 §6.1)', () => {
       const names = (db.prepare(statements['store.table_names']).all() as { name: string }[])
         .map((r) => r.name);
       expect(names).not.toContain('half');
+    } finally {
+      db.close();
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+/** 0002 그 자체 (D118). 원장은 추가만 — 열을 하나 더하고 아무 행도 건드리지 않는다. */
+describe('0002 — concept.name_en', () => {
+  const columns = (db: SqliteDb): string[] =>
+    (db.prepare('PRAGMA table_info(concept)').all() as { name: string }[]).map((c) => c.name);
+
+  test('v0001 을 올리면 name_en 이 생기고 name_ko 는 그대로 남는다', () => {
+    const { db, dir } = openCopy(SEED_NAME(1));
+    try {
+      expect(columns(db)).not.toContain('name_en');
+      const before = db.prepare('SELECT id, name_ko FROM concept ORDER BY id').all();
+
+      runPending(db);
+
+      expect(columns(db)).toContain('name_en');
+      expect(db.prepare('SELECT id, name_ko FROM concept ORDER BY id').all()).toEqual(before);
+      // 이행은 값을 지어내지 않는다 — 다음 인제스트가 사전에서 채운다.
+      const filled = db.prepare('SELECT COUNT(*) AS n FROM concept WHERE name_en IS NOT NULL')
+        .get() as { n: number };
+      expect(filled.n).toBe(0);
+    } finally {
+      db.close();
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test('열을 더하고 나면 사전 이름의 양쪽을 다 쓸 수 있다', () => {
+    const { db, dir } = openCopy(SEED_NAME(SCHEMA_VERSION));
+    try {
+      const id = (db.prepare('SELECT id FROM concept LIMIT 1').get() as { id: string }).id;
+      db.prepare('UPDATE concept SET name_en = ? WHERE id = ?').run('Optional chaining', id);
+      const row = db.prepare('SELECT name_ko, name_en FROM concept WHERE id = ?').get(id) as
+        { name_ko: string; name_en: string | null };
+      expect(row.name_en).toBe('Optional chaining');
+      expect(row.name_ko.length).toBeGreaterThan(0);
     } finally {
       db.close();
       rmSync(dir, { recursive: true, force: true });

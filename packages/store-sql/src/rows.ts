@@ -152,6 +152,9 @@ export function fromConceptRow(row: Row): Concept {
     id: r.conceptId('id'),
     lang: r.text('lang'),
     nameKo: r.text('name_ko'),
+    // 0002 가 더한 열 (D118). `derive.concept_upsert` 가 아직 안 싣고 있어 지금은 늘 NULL 이다 —
+    // 사전 영문화가 끝나고 화면이 en 이름을 읽을 때 그 statement 에 `name.en` 을 실으면 찬다.
+    nameEn: r.textOrNull('name_en'),
     token: r.textOrNull('token'),
     kind: r.oneOf('kind', ['universal', 'lang'] as const),
     universalId: r.conceptIdOrNull('universal_id'),

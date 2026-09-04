@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://chickadee.dev/schema/concept.schema.json",
   "title": "Chickadee grammar dictionary",
-  "description": "Generated from packages/dictionary/src/schema.ts — do not edit by hand (D69). Run `pnpm dict:schema` after changing the zod schema.",
+  "description": "Generated from packages/dictionary/src/schema.ts — do not edit by hand (D69). Run `pnpm dict:schema` after changing the zod schema. Every human-readable string is either a plain string (read as Korean) or { ko, en } (D118).",
   "$defs": {
     "concept": {
       "type": "object",
@@ -116,16 +116,54 @@
           "type": "object",
           "properties": {
             "one_liner": {
-              "type": "string",
-              "maxLength": 400
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 400
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ko": {
+                      "$ref": "#/properties/dict/properties/one_liner/anyOf/0"
+                    },
+                    "en": {
+                      "$ref": "#/properties/dict/properties/one_liner/anyOf/0"
+                    }
+                  },
+                  "required": [
+                    "ko"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
             },
             "why": {
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ko": {
+                      "$ref": "#/properties/dict/properties/why/anyOf/0"
+                    },
+                    "en": {
+                      "$ref": "#/properties/dict/properties/why/anyOf/0"
+                    }
+                  },
+                  "required": [
+                    "ko"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
             },
             "trace": {
               "type": "array",
               "items": {
-                "type": "string"
+                "$ref": "#/properties/dict/properties/why"
               },
               "default": []
             }
@@ -137,19 +175,19 @@
           "additionalProperties": false
         },
         "rule": {
-          "type": "string"
+          "$ref": "#/properties/dict/properties/why"
         },
         "result": {
           "type": "object",
           "properties": {
             "label": {
-              "type": "string"
+              "$ref": "#/properties/dict/properties/why"
             },
             "value": {
               "type": "string"
             },
             "note": {
-              "type": "string"
+              "$ref": "#/properties/dict/properties/why"
             }
           },
           "required": [
@@ -160,18 +198,18 @@
           "additionalProperties": false
         },
         "ok": {
-          "type": "string"
+          "$ref": "#/properties/dict/properties/why"
         },
         "payoff": {
-          "type": "string"
+          "$ref": "#/properties/dict/properties/why"
         },
         "bridge": {
-          "type": "string"
+          "$ref": "#/properties/dict/properties/why"
         },
         "misconceptions": {
           "type": "array",
           "items": {
-            "type": "string"
+            "$ref": "#/properties/dict/properties/why"
           },
           "default": []
         },
@@ -181,10 +219,10 @@
             "type": "object",
             "properties": {
               "q": {
-                "type": "string"
+                "$ref": "#/properties/dict/properties/why"
               },
               "hint": {
-                "type": "string"
+                "$ref": "#/properties/dict/properties/why"
               },
               "options": {
                 "type": "array",
@@ -192,7 +230,7 @@
                   "type": "object",
                   "properties": {
                     "t": {
-                      "type": "string"
+                      "$ref": "#/properties/dict/properties/why"
                     },
                     "mono": {
                       "type": "boolean"
@@ -201,14 +239,33 @@
                       "type": "object",
                       "properties": {
                         "t": {
-                          "type": "string",
-                          "maxLength": 1200
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "maxLength": 1200
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "ko": {
+                                  "$ref": "#/properties/meaning/items/properties/options/items/properties/diag/properties/t/anyOf/0"
+                                },
+                                "en": {
+                                  "$ref": "#/properties/meaning/items/properties/options/items/properties/diag/properties/t/anyOf/0"
+                                }
+                              },
+                              "required": [
+                                "ko"
+                              ],
+                              "additionalProperties": false
+                            }
+                          ]
                         },
                         "edge": {
                           "type": "object",
                           "properties": {
                             "h": {
-                              "type": "string"
+                              "$ref": "#/properties/dict/properties/why"
                             },
                             "code": {
                               "type": "array",
@@ -254,7 +311,7 @@
             "type": "object",
             "properties": {
               "q": {
-                "$ref": "#/properties/meaning/items/properties/q"
+                "$ref": "#/properties/dict/properties/why"
               },
               "hint": {
                 "$ref": "#/properties/meaning/items/properties/hint"
@@ -287,7 +344,7 @@
             "type": "object",
             "properties": {
               "q": {
-                "$ref": "#/properties/meaning/items/properties/q"
+                "$ref": "#/properties/dict/properties/why"
               },
               "hint": {
                 "$ref": "#/properties/meaning/items/properties/hint"
@@ -313,10 +370,10 @@
           "type": "object",
           "properties": {
             "q": {
-              "type": "string"
+              "$ref": "#/properties/dict/properties/why"
             },
             "help": {
-              "type": "string"
+              "$ref": "#/properties/dict/properties/why"
             },
             "choices": {
               "type": "array",
@@ -324,13 +381,13 @@
                 "type": "object",
                 "properties": {
                   "t": {
-                    "type": "string"
+                    "$ref": "#/properties/dict/properties/why"
                   },
                   "ok": {
                     "type": "boolean"
                   },
                   "fb": {
-                    "type": "string"
+                    "$ref": "#/properties/dict/properties/why"
                   }
                 },
                 "required": [
@@ -535,7 +592,26 @@
                 "$ref": "#/properties/essential/items"
               },
               "note": {
-                "type": "string"
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ko": {
+                        "$ref": "#/properties/alternatives/items/properties/note/anyOf/0"
+                      },
+                      "en": {
+                        "$ref": "#/properties/alternatives/items/properties/note/anyOf/0"
+                      }
+                    },
+                    "required": [
+                      "ko"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
               }
             },
             "required": [
@@ -576,10 +652,10 @@
           "type": "object",
           "properties": {
             "point": {
-              "type": "string"
+              "$ref": "#/properties/alternatives/items/properties/note"
             },
             "blank": {
-              "type": "string"
+              "$ref": "#/properties/alternatives/items/properties/note"
             }
           },
           "required": [
