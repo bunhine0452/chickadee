@@ -12,6 +12,8 @@ export { genPoint } from './t0-point.js';
 export { makeSyntheticCard, isSynthetic, SYNTHETIC_SITE_ID } from './t0-synthetic.js';
 export type { SyntheticRequest } from './t0-synthetic.js';
 export { buildFirstRun, makeExecCard, renderFirstRun, EXEC_SITE_ID } from './t0-exec.js';
+export { makeProtoCard, PROTO_SITE_ID } from './t0-proto.js';
+export type { ProtoRequest } from './t0-proto.js';
 export type { ExecPick, ExecQuestion, ExecRequest, WrongBecause } from './t0-exec.js';
 export {
   DIALECTS, blockOf, dialectOf, execFacts, functionsIn, lineIndex, statementsOf, terminatorAt,

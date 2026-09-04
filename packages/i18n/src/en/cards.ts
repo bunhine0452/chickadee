@@ -143,6 +143,7 @@ export const cards: Record<string, string> = {
   'exec.noGrammar': 'execution order cannot be read for this grammar yet',
   'exec.noFunction': 'no function definition in this block',
   'exec.noTrace': 'fewer than four lines to point at — the function is too short',
+  'proto.noEvidence': 'no evidence word appears in this block',
   'exec.orderQ': 'Point at the line that runs <b>first</b> when this function is called.',
   'exec.orderHint': 'Where it is defined, nothing has run yet.',
   'exec.whyDefinition':

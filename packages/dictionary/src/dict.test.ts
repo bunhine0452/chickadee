@@ -102,16 +102,16 @@ describe('사전이 실제로 담고 있는 것', () => {
  * 것보다 나쁘다. 문법이 더 나은 길을 줄 때 채운다.
  */
 const DEBT_RATCHET: Record<string, number> = {
-  // 39 → 42(java 바닥 셋) → 44(sql 바닥 둘) → **49**(java 바닥 여덟 완성).
-  'blank-or-reason': 49,
-  'point-picks': 45,
-  'why-gate': 49,
+  // 39 → 42(java 셋) → 44(sql 둘) → 49(java 여덟) → **50**(sql/comparison).
+  'blank-or-reason': 50,
+  'point-picks': 46,
+  'why-gate': 50,
   // 6 → 11(D147) → 18(D148) → 26(D150) → **33**(D152, 파이썬 바닥 여덟). D150 이 「먼저 읽기」를
   // 0장 소속에서 「겹 0」으로 넓혀 `essential` 전량이 대상이 됐다. 새로 든 넷(`array-filter`
   // 의 `filter` · `array-map-immutable` 의 `map` · `arrow-function` 의 `=>` · 그리고
   // `array-destructuring` 은 영문 관사 `a` 가 정답 토큰과 겹쳤다)을 고쳐 채웠다.
   // 33 → 36(java 바닥 셋) → 38(sql 바닥 둘) → **42**(java 바닥 여덟 완성).
-  'zero-one-liner': 42,
+  'zero-one-liner': 43,
 };
 
 describe('사전 저작 부채 (D145)', () => {

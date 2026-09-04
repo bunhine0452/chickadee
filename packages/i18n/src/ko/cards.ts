@@ -168,6 +168,7 @@ export const cards = {
   'exec.noGrammar': '이 문법은 아직 실행 순서를 못 읽는다',
   'exec.noFunction': '이 블록에 함수 정의가 없다',
   'exec.noTrace': '짚을 후보가 넷에 못 미친다 — 함수가 너무 짧다',
+  'proto.noEvidence': '근거 낱말이 이 블록에 안 보인다',
   'exec.orderQ': '이 함수를 부르면 <b>가장 먼저</b> 도는 줄을 짚어 보세요.',
   'exec.orderHint': '정의한 자리에서는 아직 아무것도 돌지 않습니다.',
   'exec.whyDefinition':

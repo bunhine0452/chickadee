@@ -9,7 +9,7 @@
  */
 import {
   generateT1, isT1Card, type BlockCandidate, type BlockConcept, type FocusLine, type T1Card,
-  makeExecCard,
+  makeExecCard, makeProtoCard,
 } from '@chickadee/cards';
 import type { Dict } from '@chickadee/dictionary';
 import { ipc, log, type AstLite } from '@chickadee/ipc-client';
@@ -315,6 +315,74 @@ export async function bakeNextExec(deps: BlockDeps): Promise<number | null> {
       });
       const cardId = rows[0]?.id;
       if (cardId !== undefined) return cardId;
+    }
+  }
+  return null;
+}
+
+
+/** 규약 개념은 접두어로 안다 — 사전이 `proto/` 하나에 모아 둔다 (D159). */
+const PROTO_PREFIX = 'proto/';
+
+/**
+ * 규약 카드를 **한 장** 굽는다 (D159 · `proto/`). 없으면 `null`.
+ *
+ * 추적(`bakeNextExec`)과 같은 모양이고 다른 것은 자리를 얻는 방법뿐이다 — 추적은 AST 를 보고
+ * 규약은 **근거 낱말**을 본다. 그래서 여기는 `originalAst` 를 안 부른다: 블록 원문만 있으면 된다.
+ *
+ * 블록마다 굽지 않는다(D140). 개념이 여럿이라 블록 하나에 여러 개념을 시도하되, 한 장이 나오면
+ * 곧바로 멈춘다 — 한 세션에 규약 판이 여러 장 필요하지 않다.
+ */
+export async function bakeNextProto(deps: BlockDeps): Promise<number | null> {
+  const concepts = [...deps.dict.concepts.values()]
+    .filter((c) => c.id.startsWith(PROTO_PREFIX) && c.evidence.length > 0);
+  if (concepts.length === 0) return null;
+
+  const groups = await loadCandidates(deps);
+  let tried = 0;
+  for (const { blocks } of groups) {
+    for (const block of blocks) {
+      if (tried >= EXEC_ATTEMPTS) return null;
+      tried += 1;
+      const lines: FocusLine[] = block.lines.map((t, i) => ({ n: block.lineStart + i, t }));
+
+      for (const concept of concepts) {
+        const out = makeProtoCard({
+          repoId: deps.repoId,
+          dictVersion: deps.dictVersion,
+          attempt: 0,
+          concept,
+          concepts: deps.dict.concepts,
+          ly: 0,
+          lines,
+          path: block.path,
+          window: { from: block.lineStart, to: block.lineEnd },
+          blockHash: block.textHash,
+        });
+        if ('reason' in out) continue;
+
+        // 같은 블록의 같은 개념은 `content_hash` UNIQUE 가 막는다 — 넣어 보고 조회한다.
+        await ipc.store.exec('card.insert', {
+          repoId: deps.repoId,
+          unitId: null,
+          track: 't0',
+          kind: out.card.kind,
+          conceptId: out.card.conceptId,
+          level: 1,
+          siteId: null,
+          fileId: block.fileId,
+          commitId: null,
+          payloadJson: JSON.stringify(out.card.payload),
+          genVersion: 1,
+          contentHash: out.card.contentHash,
+          createdAt: deps.now,
+        });
+        const rows = await ipc.store.query('card.by_hash', {
+          repoId: deps.repoId, contentHash: out.card.contentHash,
+        });
+        const cardId = rows[0]?.id;
+        if (cardId !== undefined) return cardId;
+      }
     }
   }
   return null;

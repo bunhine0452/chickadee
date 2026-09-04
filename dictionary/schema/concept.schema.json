@@ -372,6 +372,13 @@
           },
           "default": []
         },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
         "no_hole_reason": {
           "anyOf": [
             {

@@ -40,3 +40,43 @@ misconceptions:
     en: "Create and update are interchangeable — they differ when the same request arrives twice."
   - ko: "주소만 다르면 된다 — 낱말이 같으면 서버가 같은 코드를 부릅니다."
     en: "Different addresses are enough — with the same word the server may route to the same code."
+evidence: ["GetMapping", "PostMapping", "PutMapping", "DeleteMapping", "PatchMapping", "RequestMapping", ".get(", ".post(", ".put(", ".delete("]
+meaning:
+  - q:
+      ko: "{{site.line}}행의 낱말을 다른 것으로 바꾸면 <b>주소는 그대로인데</b> 무엇이 달라질까요?"
+      en: "Swap the word on line {{site.line}} and, with <b>the same address</b>, what changes?"
+    hint:
+      ko: "주소는 무엇을, 낱말은 무엇을 할지 말합니다."
+      en: "The address says what; the word says what to do."
+    options:
+      - t: { ko: "서버가 부르는 코드가 달라진다 — 다른 일이 된다", en: "The server routes to different code — it becomes different work" }
+      - t: { ko: "아무것도 안 달라진다 — 주소가 같으면 같은 일이다", en: "Nothing — the same address is the same work" }
+        diag:
+          t:
+            ko: "서버는 <b>주소와 낱말의 짝</b>으로 코드를 고릅니다. 낱말이 다르면 다른 짝이라 다른 코드가 돌아요."
+            en: "The server picks code by <b>the pair of address and word</b>. A different word is a different pair."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 주소만이냐 짝이냐", en: "The sharpest spot — the address alone or the pair" }
+            code:
+              - "GET  /dreams  → 읽기"
+              - "POST /dreams  → 만들기"
+      - t: { ko: "속도만 달라진다", en: "Only the speed changes" }
+        diag:
+          t:
+            ko: "속도와는 무관합니다. 낱말은 <b>무슨 일인지</b>를 말하고, 그에 따라 되풀이해도 되는지가 갈려요."
+            en: "Speed is unrelated. The word says <b>what the work is</b>, and that decides whether repeating is safe."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 빠르기냐 뜻이냐", en: "The sharpest spot — speed or meaning" }
+            code:
+              - "읽기: 두 번 해도 같다"
+              - "만들기: 두 번 하면 둘"
+      - t: { ko: "본문을 실을 수 있는지만 달라진다", en: "Only whether a body may be sent" }
+        diag:
+          t:
+            ko: "본문 여부는 <b>결과</b>지 이유가 아닙니다. 먼저 갈리는 것은 서버가 어느 코드를 부르는가예요."
+            en: "Carrying a body is a <b>consequence</b>, not the reason. What splits first is which code the server calls."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 본문이냐 어느 코드냐", en: "The sharpest spot — the body or the code" }
+            code:
+              - "낱말 → 어느 코드"
+              - "본문은 그 뒤의 이야기"

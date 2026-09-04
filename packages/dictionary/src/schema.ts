@@ -204,7 +204,13 @@ function conceptShape<T extends Localized>(make: (cap?: Cap) => z.ZodType<T, z.Z
        * 다른 상태인데 게이트는 그 둘을 구별할 수 없다 — 사람이 적어야 구별된다.
        * 빈칸형이 이미 있는 개념에 남아 있으면 린트가 잡는다(`no-hole-reason-stale`).
        */
-      no_hole_reason: z.string().min(8).nullable().default(null),
+      /**
+     * 이 개념이 그 코드에 있다는 **근거 낱말** (D159 `proto/`). 쿼리가 없는 개념은 짚을 노드가
+     * 없어서, 블록의 글자에 이 표시가 보이면 그 줄을 자리로 삼는다 (`t0-proto.ts`).
+     * 문법이 아니라 규약이라 노드로는 못 잡는다 — `Bearer` 는 어느 언어에서도 그냥 글자다.
+     */
+    evidence: z.array(z.string()).default([]),
+    no_hole_reason: z.string().min(8).nullable().default(null),
       why_gate: whyGate.optional(),
       queries: z.array(z.object({
         grammars: z.array(grammarSchema).min(1),

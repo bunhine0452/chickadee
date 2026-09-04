@@ -1,0 +1,155 @@
+schema: 1
+id: sql/comparison
+universal: common/comparison
+name: { ko: 두 값 견주기, en: Comparison }
+token: "="
+grammars: [sql]
+framework: null
+essential: true
+difficulty: 1
+prereq: []
+confusions: []
+dict:
+  one_liner:
+    ko: "두 값을 견준다. 같은 기호가 절에 따라 묻기도 넣기도 한다."
+    en: "Weighs two values. The same sign asks or assigns, by clause."
+  why:
+    ko: >-
+      SQL 에는 견주기 기호가 <b>하나</b>뿐입니다. 다른 언어가 <code>=</code> 와 <code>==</code>
+      로 갈라 둔 것을 SQL 은 안 갈라요 — 대신 <b>어느 절에 있는지</b>가 정합니다.
+      조건 절의 <code>=</code> 는 묻는 일이고, 값 바꾸는 절의 <code>=</code> 는 넣는 일입니다.
+      같은 기호를 보고 어느 쪽인지 알려면 <b>위를 봐야</b> 해요.
+    en: >-
+      SQL has <b>one</b> sign for weighing. What other languages split into <code>=</code> and
+      <code>==</code> stays single here — <b>the clause</b> decides instead. In a filter it asks; in
+      an updating clause it puts. To tell which, you have to <b>look up</b>.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:을,를}} 값으로 만든다."
+      en: "{{pick.2|code}} and {{pick.3|code}} become values."
+    - ko: "행마다 한 번씩 견준다."
+      en: "They are weighed once per row."
+    - ko: "참인 행만 남는다."
+      en: "Only rows where it holds remain."
+rule:
+  ko: "<b>기호는 하나고 뜻은 절이 정한다.</b> 조건에서는 묻고, 값 바꾸는 절에서는 넣는다."
+  en: "<b>One sign, and the clause gives it meaning.</b> It asks in a filter and puts in an update."
+result:
+  label: { ko: "{{site.line}}행의 물음", en: "the question on line {{site.line}}" }
+  value: "{{pick.2}} {{pick.1}} {{pick.3}}"
+  note: { ko: "행마다 한 번씩", en: "once per row" }
+ok:
+  ko: "행마다 한 번씩 견주어 참인 것만 남습니다. 표의 값은 그대로예요."
+  en: "It is weighed once per row and only the true ones remain. The table is unchanged."
+payoff:
+  ko: "이걸 알면 같은 <code>=</code> 가 어디서는 묻고 어디서는 넣는지 헷갈리지 않습니다 — 절을 보면 됩니다."
+  en: "This keeps the one <code>=</code> straight — look at the clause and you know which it is."
+bridge:
+  ko: "다른 언어는 기호를 갈라 뜻을 박아 둡니다. SQL 은 <b>자리로</b> 갈라요."
+  en: "Other languages split the sign to fix the meaning. SQL splits by <b>place</b>."
+misconceptions:
+  - ko: "<code>==</code> 를 써야 견주기다 — SQL 에서는 <code>=</code> 하나입니다."
+    en: "Weighing needs <code>==</code> — in SQL it is one <code>=</code>."
+  - ko: "없는 값도 이 기호로 견줄 수 있다 — 답이 모름이 되어 그 행이 조용히 빠집니다."
+    en: "Absence can be weighed with this sign — the answer becomes unknown and the row quietly drops."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>견주는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the sign that weighs</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 견줄 <b>한쪽</b>입니다. 대개 표의 열 이름이에요."
+          en: "{{pick.2|code}} is <b>one side</b>, usually a column of the table."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 열이냐 견주기냐", en: "The sharpest spot — a column or the weighing" }
+          code:
+            - "login_id           -- 열"
+            - "login_id = 'a'     -- 물음"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 견줄 <b>다른 쪽</b>입니다. 둘을 잇는 것이 가운데 기호예요."
+          en: "{{pick.3|code}} is <b>the other side</b>. The sign between joins them."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값이냐 견주기냐", en: "The sharpest spot — a value or the weighing" }
+          code:
+            - "'a'"
+            - "login_id = 'a'"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 두 값이 <b>같은지</b> 묻습니다."
+      en: "Choose what goes in the blank. Line {{site.line}} asks whether two values are <b>the same</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "=", mono: true }
+      - t: "=="
+        mono: true
+        diag:
+          t:
+            ko: "SQL 에는 이 모양이 <b>없습니다</b>. 견주기 기호는 하나뿐이고, 데이터베이스에 따라 문법 오류가 됩니다."
+            en: "SQL <b>has no</b> such form. There is one sign for weighing, and some databases reject this outright."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 기호가 하나냐 둘이냐", en: "The sharpest spot — one sign or two" }
+            code:
+              - "WHERE a = 1     -- SQL"
+              - "if (a == 1)     // 다른 언어"
+      - t: "!="
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>다른지</b>를 묻습니다. 남는 행이 정확히 뒤집혀요."
+            en: "That asks whether they <b>differ</b>. Exactly the opposite rows remain."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 같은가 다른가", en: "The sharpest spot — same or different" }
+            code:
+              - "a = 1     -- 1 인 행"
+              - "a != 1    -- 1 이 아닌 행"
+      - t: ">="
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>크기</b>를 묻는 자리라 같은지만 묻는 것과 다릅니다. 글자에 쓰면 사전 순으로 견줘요."
+            en: "That asks about <b>size</b>, which is not the same question. On text it compares in dictionary order."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 같음이냐 크기냐", en: "The sharpest spot — sameness or size" }
+            code:
+              - "a = 1     -- 딱 1"
+              - "a >= 1    -- 1 이상"
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 <b>이 열</b>로 견줄까요?"
+    en: "Why does line {{site.line}} weigh on <b>this column</b>?"
+  choices:
+    - t:
+        ko: "찾는 행을 이 열이 유일하게 가려내기 때문 — 다른 열로는 여럿이 걸린다"
+        en: "Because this column alone singles the row out — another would match several"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 열에 같은 값이 여럿이면 무엇이 달라지는지도 적어 보세요."
+        en: "That is the direction. Say what changes if this column repeats a value."
+    - t:
+        ko: "첫 번째 열이라서"
+        en: "Because it is the first column"
+      ok: false
+      fb:
+        ko: "순서와는 무관합니다. 고르는 이유는 <b>무엇을 가려내는가</b>예요."
+        en: "Order has nothing to do with it. The reason is <b>what it singles out</b>."
+    - t:
+        ko: "SQL 이 조건을 요구해서"
+        en: "Because SQL demands a condition"
+      ok: false
+      fb:
+        ko: "요구하지 않습니다. 조건 없이 적으면 표 전체가 나올 뿐이에요."
+        en: "It does not. With no condition the whole table comes back."
+queries:
+  - { grammars: [sql], file: ./comparison.scm }
+examples:
+  - code: "SELECT * FROM users WHERE login_id = 'abc'"
+    expect: { sites: 1, form: compare, hole: "=", picks: { 1: "=", 2: "login_id", 3: "'abc'" } }
+  - code: "SELECT * FROM users WHERE login_id = #{loginId}"
+    expect: none
