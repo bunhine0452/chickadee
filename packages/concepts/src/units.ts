@@ -8,11 +8,14 @@
  * `BACK/src/main/java/…` 가 전부 `src` 다음 조각인 `main` 으로 뭉친다 — 실측한 리포에서
  * 대지 하나가 백엔드 107파일을 통째로 삼켰다. {@link entryUnits} 가 그 답이다.
  */
+import { buildCourse } from './course.js';
 import type { ResolvedEdge } from './resolve-imports.js';
 
 export interface UnitOf {
   name: string;
   rootPath: string;
+  /** 기능 폐포에서 났나, 디렉터리 규칙에서 났나 (D162 `chapter.origin`). */
+  origin: 'entry' | 'dir';
 }
 
 /** 규칙 3번이 대지로 치지 않는 이름 — 기능이 아니라 창고다. */
@@ -32,26 +35,26 @@ function candidate(path: string): UnitOf | null {
   const parts = path.split('/');
   const at = parts.indexOf('features');
   if (at !== -1 && parts[at + 1] !== undefined && parts.length > at + 2) {
-    return { name: parts[at + 1] ?? '', rootPath: parts.slice(0, at + 2).join('/') };
+    return { name: parts[at + 1] ?? '', rootPath: parts.slice(0, at + 2).join('/'), origin: 'dir' };
   }
   for (const route of ['app', 'pages']) {
     const i = parts.indexOf(route);
     const seg = parts[i + 1];
     if (i !== -1 && seg !== undefined && parts.length > i + 2 && !NOT_A_ROUTE.has(seg)) {
-      return { name: seg, rootPath: parts.slice(0, i + 2).join('/') };
+      return { name: seg, rootPath: parts.slice(0, i + 2).join('/'), origin: 'dir' };
     }
   }
   const src = parts.indexOf('src');
   const under = parts[src + 1];
   if (src !== -1 && under !== undefined && parts.length > src + 2 && !NOT_A_UNIT.has(under)) {
-    return { name: under, rootPath: parts.slice(0, src + 2).join('/') };
+    return { name: under, rootPath: parts.slice(0, src + 2).join('/'), origin: 'dir' };
   }
   // 4번: 2단계 디렉터리. 파일 수 조건은 호출자가 본다.
   // 규칙 2·3 이 이름을 보고 물린 것(`api`·`lib`)을 여기서 되살리지 않는다 —
   // 그러면 앞의 규칙이 아무 일도 하지 않은 것이 된다.
   const second = parts[1];
   if (parts.length > 2 && second !== undefined && !NOT_A_UNIT.has(second) && !NOT_A_ROUTE.has(second)) {
-    return { name: second, rootPath: parts.slice(0, 2).join('/') };
+    return { name: second, rootPath: parts.slice(0, 2).join('/'), origin: 'dir' };
   }
   return null;
 }
@@ -88,7 +91,7 @@ export function assignUnits(paths: readonly string[]): Assignment {
     for (const path of mine) byPath.set(path, unit.name);
   }
   if (leftover.length > 0) {
-    units.push({ name: OTHER_UNIT, rootPath: '' });
+    units.push({ name: OTHER_UNIT, rootPath: '', origin: 'dir' });
     for (const path of leftover) byPath.set(path, OTHER_UNIT);
   }
   units.sort((a, b) => (a.name === OTHER_UNIT ? 1 : 0) - (b.name === OTHER_UNIT ? 1 : 0)
@@ -174,6 +177,11 @@ export function entryUnits(edges: readonly ResolvedEdge[]): FeatureUnit[] {
 }
 
 
+export interface PlanOptions {
+  /** `proto/` 개념의 근거 낱말. 1번 챕터를 사전이 고르는 데 쓴다 (D162). */
+  protoMarks?: readonly string[];
+}
+
 /** 기능 대지와 디렉터리 대지를 합친 것 (D160). */
 export interface UnitPlan {
   /** 홈에 뜨는 순서 = `order_idx`. 기능이 먼저다. */
@@ -191,17 +199,38 @@ export interface UnitPlan {
  * 이름이 겹치면 **기능이 이긴다.** 밀려난 디렉터리 대지의 파일은 「기타」로 간다 —
  * `unit` 의 `UNIQUE (repo_id, name)` 때문에 같은 이름 둘을 세울 수 없다.
  */
-export function planUnits(paths: readonly string[], edges: readonly ResolvedEdge[]): UnitPlan {
+export function planUnits(
+  paths: readonly string[],
+  edges: readonly ResolvedEdge[],
+  opts: PlanOptions = {},
+): UnitPlan {
   const known = new Set(paths);
   const units: UnitOf[] = [];
   const taken = new Set<string>();
   const unitsOf = new Map<string, string[]>();
 
-  for (const feature of entryUnits(edges)) {
+  // 챕터 순서를 여기서 매긴다 — `unit.order_idx` 가 곧 코스의 순서다 (D162).
+  //
+  // 규약 근거는 **경로**에서 찾는다. 인제스트의 TS 층에는 파일 본문이 없고(러스트가 읽어
+  // 캡처만 넘긴다) `sites_for_rank` 도 발췌를 안 준다. 실측 리포에서는 `JwtUtil.java` ·
+  // `JwtAuthenticationFilter.java` 둘이 걸려 본문으로 셀 때와 **같은 순서**가 나왔다.
+  // 이름에 안 드러나는 리포에서는 아무것도 안 걸리고 규칙(새로 여는 파일 적은 순)이 정한다.
+  const hits = new Map<string, number>();
+  const marks = opts.protoMarks ?? [];
+  const features = entryUnits(edges);
+  if (marks.length > 0) {
+    for (const u of features) {
+      for (const f of u.files) {
+        if (!hits.has(f)) hits.set(f, marks.filter((m) => f.includes(m)).length);
+      }
+    }
+  }
+
+  for (const feature of buildCourse(features, { protoHits: hits })) {
     const mine = feature.files.filter((p) => known.has(p));
     if (mine.length === 0) continue;
     // 기능은 파일이 여러 갈래에 흩어져 있다(`BACK/…` 과 `FRONT/…`). 공통 뿌리가 없다.
-    units.push({ name: feature.name, rootPath: '' });
+    units.push({ name: feature.name, rootPath: '', origin: 'entry' });
     taken.add(feature.name);
     for (const path of mine) unitsOf.set(path, [...(unitsOf.get(path) ?? []), feature.name]);
   }
@@ -226,7 +255,7 @@ export function planUnits(paths: readonly string[], edges: readonly ResolvedEdge
   }
   if (dropped.length > 0) {
     if (!taken.has(OTHER_UNIT)) {
-      units.push({ name: OTHER_UNIT, rootPath: '' });
+      units.push({ name: OTHER_UNIT, rootPath: '', origin: 'dir' });
       taken.add(OTHER_UNIT);
     }
     for (const path of dropped) unitsOf.set(path, [OTHER_UNIT]);

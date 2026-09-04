@@ -231,7 +231,7 @@ export async function deriveRepo(
   const { count: edges, resolved } = await writeEdges(repoId, files, imports, target.map((f) => f.id));
   await reclassifyCommits(repoId, options.identities ?? []);
   // 대지와 구멍은 리포 전체를 본다 — 증분이어도 「몇 파일 중 몇 곳」의 분모는 전체다.
-  const units = await writeUnits(repoId, files, resolved);
+  const units = await writeUnits(dict, repoId, files, resolved, now);
   const gaps = await writeGaps(dict, repoId, files.length, now);
   return { sites: siteCount, blocks: blockCount, edges, gaps, units };
 }
@@ -513,12 +513,16 @@ export async function writeZeroChapter(
 }
 
 async function writeUnits(
+  dict: Dict,
   repoId: number,
   files: readonly { id: number; path: string }[],
   edges: readonly ResolvedEdge[],
+  now: number,
 ): Promise<number> {
   // 기능(진입점 폐포)이 먼저고 남은 것을 디렉터리 규칙이 받는다 (D160).
-  const { units, unitsOf } = planUnits(files.map((f) => f.path), edges);
+  // 순서는 코스의 순서다 — `unit.order_idx` 가 곧 챕터 번호다 (D162).
+  const protoMarks = [...dict.concepts.values()].flatMap((c) => c.evidence);
+  const { units, unitsOf } = planUnits(files.map((f) => f.path), edges, { protoMarks });
   const ops: BatchOp[] = units.map((unit, i) => ({
     name: 'derive.unit_upsert',
     params: { repoId, name: unit.name, rootPath: unit.rootPath || null, orderIdx: i },
@@ -531,6 +535,15 @@ async function writeUnits(
       ops.push({ name: 'derive.unit_file_insert', params: { repoId, name, fileId: file.id } });
     }
   }
+  // 챕터 진도 (D162). 대지마다 한 행이고 **진도 열은 안 건드린다** — 다시 인제스트해도
+  // 배운 것이 안 지워진다. 대지가 서 있어야 꽂히므로 `unit_upsert` 뒤에 온다.
+  for (const unit of units) {
+    ops.push({
+      name: 'derive.chapter_upsert',
+      params: { repoId, name: unit.name, origin: unit.origin, updatedAt: now },
+    });
+  }
+  ops.push({ name: 'derive.chapter_delete_missing', params: { repoId } });
   await inBatches(ops);
   return units.length;
 }

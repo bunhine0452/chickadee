@@ -132,3 +132,42 @@ describe('위로 한 단 (D163)', () => {
     expect(units[0]?.files).not.toContain(BOOT);
   });
 });
+
+describe('코스 순서와 origin (D162)', () => {
+  const edge = (from: string, to: string, kind: 'static' | 'http' = 'static') =>
+    ({ from, to, kind, confidence: 'syntactic' as const });
+
+  test('기능은 origin=entry · 나머지는 dir', () => {
+    const FE = 'FRONT/src/services/authService.js';
+    const CTRL = 'BACK/controller/AuthController.java';
+    const paths = [FE, CTRL, 'src/cfg/a.ts', 'src/cfg/b.ts', 'src/cfg/c.ts'];
+    const { units } = planUnits(paths, [edge(FE, CTRL, 'http')]);
+    expect(units.find((u) => u.name === 'auth')?.origin).toBe('entry');
+    expect(units.find((u) => u.name === 'cfg')?.origin).toBe('dir');
+  });
+
+  test('규약 근거가 경로에 있는 기능이 1번이다', () => {
+    const A = 'FRONT/src/services/aService.js';
+    const B = 'FRONT/src/services/bService.js';
+    const PLAIN = 'BACK/controller/AController.java';
+    const JWT = 'BACK/security/JwtUtil.java';
+    const { units } = planUnits(
+      [A, B, PLAIN, JWT],
+      [edge(A, PLAIN, 'http'), edge(B, JWT, 'http')],
+      { protoMarks: ['Jwt'] },
+    );
+    expect(units[0]?.name).toBe('b');
+  });
+
+  test('근거가 없으면 규칙이 정한다 — 새로 여는 파일 적은 순', () => {
+    const A = 'FRONT/src/services/aService.js';
+    const B = 'FRONT/src/services/bService.js';
+    const A1 = 'BACK/a/One.java'; const A2 = 'BACK/a/Two.java'; const B1 = 'BACK/b/One.java';
+    const { units } = planUnits(
+      [A, B, A1, A2, B1],
+      [edge(A, A1, 'http'), edge(A1, A2), edge(B, B1, 'http')],
+      { protoMarks: ['없는낱말'] },
+    );
+    expect(units[0]?.name).toBe('b');
+  });
+});

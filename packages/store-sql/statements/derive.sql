@@ -191,6 +191,22 @@ DELETE FROM unit_file WHERE unit_id IN (SELECT id FROM unit WHERE repo_id = :rep
 INSERT OR IGNORE INTO unit_file (unit_id, file_id)
 VALUES ((SELECT id FROM unit WHERE repo_id = :repoId AND name = :name), :fileId);
 
+-- 챕터 진도 (D162). `unit` 과 1:1 이라 이름으로 찾아 꽂는다 — `unit_file_insert` 와 같은 수다.
+-- 진도(`stage_reached`·재검 열)는 **안 건드린다**: 다시 인제스트해도 배운 것이 안 지워진다.
+-- @name derive.chapter_upsert
+-- @params { repoId: number, name: string, origin: string, updatedAt: number }
+-- @row void
+INSERT INTO chapter (unit_id, origin, updated_at)
+VALUES ((SELECT id FROM unit WHERE repo_id = :repoId AND name = :name), :origin, :updatedAt)
+ON CONFLICT (unit_id) DO UPDATE SET origin = excluded.origin, updated_at = excluded.updated_at;
+
+-- 대지가 사라지면 챕터도 사라진다. `unit` 의 CASCADE 가 하지만 대지를 지우지 않고
+-- 이름만 바뀐 경우를 위해 남긴다.
+-- @name derive.chapter_delete_missing
+-- @params { repoId: number }
+-- @row void
+DELETE FROM chapter WHERE unit_id NOT IN (SELECT id FROM unit WHERE repo_id = :repoId);
+
 -- 대지에 든 파일. `writeUnitNodes` 가 대지를 **다시 파생하지 않고** 방금 쓴 것을 읽는다 —
 -- 같은 규칙을 두 곳에서 돌리면 둘이 어긋날 자리가 생긴다.
 -- 파일 하나가 대지 여럿에 들 수 있다 (D160). `unit_file` 의 기본키가 `(unit_id, file_id)` 다.
