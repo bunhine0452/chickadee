@@ -1,0 +1,29 @@
+lang: py
+version: 0.1.0
+grammars: [python]
+# **14 다.** 문법마다 다르고 ts 는 15 — 여기에 15 를 적으면 조용히 어긋난다 (D152).
+grammar_abi: 14
+
+# 확장자 → 문법. 인제스트가 이 표로 파일을 고른다 (03 §2.1).
+extensions:
+  python: [.py, .pyi]
+
+# 「필수 문법」 — 구멍 지도가 세는 대상이자 위상 정렬 동률 시의 순서다 (03 §6).
+# 바닥 여덟(D147 이 TS 에 깐 것과 같은 축)부터. 순서는 읽는 순서이고 0장에 담기는
+# 순서는 `prereq` 깊이가 정한다.
+# 아직 쓴 것만 올린다 — 목록에 있는데 개념 파일이 없으면 사전이 안 선다.
+essential:
+  - py/assignment
+  - py/if-statement
+
+alternatives: []
+
+thin_threshold: { min_files: 2, min_sites: 3, small_repo_files: 20 }
+
+diag_default:
+  point:
+    ko: "«{{pick}}»{{pick|josa:은,는}} {{role}} 자리입니다. {{concept}}{{concept|josa:은,는}} «{{answer}}» 입니다. {{rule}}"
+    en: "«{{pick}}» is the {{role}} slot. The {{concept}} is «{{answer}}». {{rule}}"
+  blank:
+    ko: "«{{pick}}»{{pick|josa:은,는}} 이 자리에 오지 않습니다. {{rule}}"
+    en: "«{{pick}}» does not go in this slot. {{rule}}"

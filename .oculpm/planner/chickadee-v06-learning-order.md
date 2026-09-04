@@ -12,7 +12,7 @@ owner: claude-code
 
 ## A · D151 — 빠진 추적층 (`dictionary/exec/`) {#a}
 - [x] t0-exec.ts — AstLite 에서 정답지를 뽑는다. **이것부터 짠다** — fork 가 재료가 있다는 것까지만 확인했고 생성기는 안 짜 봤다. 안정적이지 않으면 개념 목록을 줄인다 {#a-generator}
-- [!] exec/order · exec/unreachable — 실행 순서와 안 도는 줄. 둘 다 statement 순서와 return/throw 위치만 쓰므로 가장 단단하다 {#a-order}
+- [x] exec/order · exec/unreachable — 실행 순서와 안 도는 줄. 둘 다 statement 순서와 return/throw 위치만 쓰므로 가장 단단하다 {#a-order}
 - [ ] state/mutation — 「이 줄 뒤 xs 는」. common/mutating-append ↔ map-transform 이 이미 갈라 둔 것을 정답지로 쓴다 {#a-state}
 - [ ] scope/visibility — 선언 노드와 사용 노드의 조상 블록 비교. AstLite 에 조상이 있는지 먼저 확인 {#a-scope}
 - [ ] 린트와 스키마 — 「보편 개념은 쿼리가 없다」가 common/·arch/ 접두어를 하드코딩한다(dict.test.ts). essential 이면 blank+@hole 을 요구하는 규칙도 이 네임스페이스에는 no_hole_reason 으로 {#a-lint}
@@ -43,4 +43,5 @@ owner: claude-code
 | 2026-09-04T19:01:39+09:00 | #a-generator | claude-code | ☐→x | .oculpm/journal/20260904/Features_to_add/1901_feature_exec-facts-analysis-layer.md | 게이트 통과 — 분석층 exec-facts.ts 가 진짜 파스 트리 10건으로 검증됨. 개념 목록 안 줄인다. 익명 노드 버그 하나를 그 자리에서 잡음 |
 | 2026-09-04T19:13:20+09:00 | #a-order | claude-code | ☐→~ | .oculpm/journal/20260904/Features_to_add/1913_feature_exec-order-question-builder.md | exec/order 출제층 완료(시험 5). exec/unreachable 은 실측으로 뺐다 — 238파일·함수 802개에서 0건이라 카드가 안 나온다. 남은 것은 사전 편찬과 배선 |
 | 2026-09-04T19:32:44+09:00 | #a-order | claude-code | ~→! | .oculpm/journal/20260904/Features_to_add/1928_feature_exec-lazy-baking-wired.md | 생성·조립·굽기 완료(커밋 4). 막힌 곳은 큐 진입 — queue.new_candidates 가 concept_site 를 JOIN 하고 kind='lang' 을 요구해 exec 이 둘 다 못 넘는다. UNION 가지 하나면 되지만 「새 판 2장」의 경쟁자를 바꾸는 문장이라 site_count 순위 영향 실측이 선행 |
+| 2026-09-04T19:45:06+09:00 | #a-order | claude-code | !→x | .oculpm/journal/20260904/Features_to_add/1928_feature_exec-lazy-baking-wired.md | D154 로 큐 진입까지 뚫음 — UNION 가지 + 랭커가 사용처 없는 후보를 경계 미지로 받는다. 어휘 판을 안 밀어내는 것을 순위 규칙으로 확인하고 넣음. 실제 SQLite 시험 3건(그 문장은 시험이 아예 없었다) |
 <!-- oculpm:plan-log end -->
