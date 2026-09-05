@@ -303,7 +303,7 @@ Java 에 같은 것을 하려면 `spring/` 네임스페이스가 필요하고 **
 |---|---|---|---|
 | **0부** | 이 언어의 값과 식 | **19** | 위 축 여덟 |
 | **1부** | 흐름과 묶기 | **8** | `class-declaration` · `if-statement` · `method-declaration` · `return-statement` · `array` · `for-loop` · `for-each` · `import` |
-| **2부** | 객체 | **16** | §2 그대로 (`access-modifier` … `annotation`) |
+| **2부** | 객체 | **16** → **20** | §2 그대로 (`access-modifier` … `annotation`) + 2026-09-06 의 넷 (§13) |
 | **3부** | 프레임워크 | **15** | `spring/` 전량 (D176). 표본에서는 14 — `spring/bean-lifecycle` 이 안 선다 |
 
 **1부가 여덟으로 줄어든 것이 이 배치의 값이다.** 지금 1부는 「값·타입·조건·반복·메서드·배열」
@@ -317,9 +317,13 @@ Java 에 같은 것을 하려면 `spring/` 네임스페이스가 필요하고 **
 |---|---|---|
 | 0부 | 19 | **10** (마지막 날 1장) |
 | 1부 | 8 | 4 |
-| 2부 | 16 | 8 |
+| 2부 | 16 → **20** | 8 → **10** |
 | 3부 | 15 (표본 14) | 8 (표본 7) |
-| **합** | **58** (표본 **57**) | **29** |
+| **합** | **58** → **62** (표본 **61**) | **29** → **31** |
+
+2부의 넷은 2026-09-06 에 붙었다(§13) — 설계표(§4 #10 · §5 #26·#28·#32)에는 있는데 사전에
+없던 것들이다. 0부 19 는 그대로인데, 그중 둘(`string-concat`·`autoboxing`)이 이제 `essential`
+안에 있어 부 배치에 실제로 선다(§1.5.6).
 
 0부 이전은 §2 가 잰 **43판 = 22일**이었다. **0부가 더하는 것은 이레**(19판 중 다섯은 1부에서
 옮겨온 것이라 순증은 14판)다. 그 이레 뒤에 사용자는 「`7 / 2` 가 왜 `3` 인가」·「`Integer` 가 왜
@@ -403,6 +407,29 @@ I6 규약: 0부가 `essential` 에 새로 올리는 개념은 **언어당 12장�
 `java/autoboxing`(256곳 / 65파일). 둘 다 사용처가 넉넉해 **카드는 그대로 서고**, 빠지는 것은
 구멍 지도(03 §6)의 분모와 0장 후보뿐이다. 파이썬이 심화 열 개를 `essential` 밖에 둔 것과 같은
 판단이다(§5 의 반례). **12 ≤ 12 — 상한을 지킨다.**
+
+→ **되돌렸다 (2026-09-06). 둘을 `essential` 로 들이고 0부 신규는 열넷이 됐다.** 근거 셋.
+
+**① 「빠지는 것은 분모와 0장 후보뿐」이 사실이 아니었다.** `essential` 밖은 T1 블록 카드의
+대표가 못 된다 — `packages/cards/src/t1-block.ts` 의 `pickConcept` 가
+`opts.essential.has(k.conceptId)` 로 후보를 거른다(D27). 표본 99파일 중 **64파일**에 있는
+`java/autoboxing` 이 2단에서 한 번도 안 뜨는 상태였다. 구멍 지도(`buildGaps`)도 `essential` 만
+돈다. 세 자리가 함께 빠진다.
+
+**② 축 H 가 코스에 없는 문법에 기대고 있었다.** D187 ⑰ 이 축 H 의 대표 예를
+`new String("a") == "a"` 에서 **`Integer` 캐시**로 바꾸며 든 넷째 근거가 「선행이 0부 안에서
+닫힌다 — 축 F 의 `java/autoboxing` 에 기댄다」인데, 그 개념이 부 배치에 없으면 **0부가 코스
+어디에도 없는 문법에 기댄다.** `new` 를 뺀 이유와 같은 종류의 결함이고 더 크다 —
+`new` 는 2부에서라도 배우지만 이쪽은 어디서도 안 배웠다.
+`dictionary/java/reference-equality.yaml` 의 `prereq` 에 `java/autoboxing` 을 넣어 그 간선을
+실물로 세웠다.
+
+**③ 상한 12 의 남은 근거가 이 둘을 안 막는다.** 원래 근거(0장 상한 24)는 D184 로 폐지됐고
+남은 것은 저작 규모의 상한이다. 규약 8 이 적은 읽는 법은 「0부가 열둘을 넘으면 **값과 식**이
+아니라 **기초**를 삼키고 있는 것」인데, `1 + 2 + "a"` 가 왜 `"3a"` 인가와 `int` ↔ `Integer` 는
+둘 다 값과 식이지 흐름과 묶기가 아니다. **축은 여덟 그대로다** — [`README.md`](./README.md) §5 가
+적어 둔 두 읽는 법(「개념 열둘」 대 「축 여덟」) 중 뒤쪽을 골랐다는 뜻이고, **그 선택은 아직
+등록부에 없다.** 대가는 0부가 열아홉 판 = 열흘이 되는 것이고 그 수는 §1.5.4 가 이미 적어 둔 값이다.
 
 **0부의 판 수(19)와 이 12는 다른 수다.** 판은 **코스에서 며칠 걸리나**를 재고,
 12는 **0장 후보와 구멍 지도 분모가 얼마나 커지나**를 잰다. 이미 `essential`(29)에 있던 것을
@@ -558,14 +585,15 @@ I6 이 찾은 것: `packages/dictionary/src/schema.ts:29` 의 `grammarSchema` �
 ### 아직 안 세운 것
 
 1·2부에 있어야 하는데 지금 없는 것들이다. 다음 물결의 순서대로 적는다.
+**마지막 열이 2026-09-06 의 상태**다 — 일곱 중 여섯이 섰고 하나가 남았다.
 
-| id | 왜 필요한가 | 왜 아직 없나 |
-|---|---|---|
-| `java/string-literal` | 1부의 「값」이 숫자·참거짓뿐이다. 텍스트 블록 함정(§9 ⑥)도 여기 걸린다 | 짚을 자리가 한 노드뿐이라 `@pick` 셋을 못 채운다. 쿼리를 둘로 갈라야 한다 |
-| `java/reference-equality` | 오개념 1번(`==` 대 `.equals`)이 지금 `equals-hashcode` 의 `misconceptions` 에만 있다 | `==` 쿼리가 `java/comparison` 과 겹친다. 참조 타입만 고르려면 타입을 알아야 하는데 파서는 모른다 |
-| `java/map-and-set` | 컬렉션 자료구조를 「목록 하나」로만 가르치고 있다. 이 리포에 `Map<` 13곳 · `Set<` **0곳** | `collection-generic` 과 노드가 같아 갈라야 하고, 그 판단이 어휘가 아니라 **자료구조 선택**이라 `ds/`(D158 ③) 쪽일 수 있다 |
-| `java/main-method` · `java/string-concat` | 옛 §4 가 설계해 둔 것 | 저작이 밀렸다 |
-| `java/checked-exception` · `java/autoboxing` · `java/generics-erasure` · `java/final` | 심화 | 저작이 밀렸다 |
+| id | 왜 필요한가 | 왜 아직 없나 | 지금 |
+|---|---|---|---|
+| `java/string-literal` | 1부의 「값」이 숫자·참거짓뿐이다. 텍스트 블록 함정(§9 ⑥)도 여기 걸린다 | 짚을 자리가 한 노드뿐이라 `@pick` 셋을 못 채운다. 쿼리를 둘로 갈라야 한다 | **섰다** · 0부 축 C · 170곳/23파일 |
+| `java/reference-equality` | 오개념 1번(`==` 대 `.equals`)이 지금 `equals-hashcode` 의 `misconceptions` 에만 있다 | `==` 쿼리가 `java/comparison` 과 겹친다. 참조 타입만 고르려면 타입을 알아야 하는데 파서는 모른다 | **섰다** · 0부 축 H · 15곳/5파일. 겹침은 `.equals` 호출만 잡아 풀었다 |
+| `java/map-and-set` | 컬렉션 자료구조를 「목록 하나」로만 가르치고 있다. 이 리포에 `Map<` 13곳 · `Set<` **0곳** | `collection-generic` 과 노드가 같아 갈라야 하고, 그 판단이 어휘가 아니라 **자료구조 선택**이라 `ds/`(D158 ③) 쪽일 수 있다 | **안 세웠다.** 이유가 그대로 남아 있다 — 갈라야 할지가 `ds/` 결정이라 사전 세션이 못 정한다 |
+| `java/main-method` · `java/string-concat` | 옛 §4 가 설계해 둔 것 | 저작이 밀렸다 | **둘 다 섰다** · `main-method` 2부 · 1곳/1파일(얇다) · `string-concat` 0부 축 E · 16곳/9파일 |
+| `java/checked-exception` · `java/autoboxing` · `java/generics-erasure` · `java/final` | 심화 | 저작이 밀렸다 | **넷 다 섰다** · `autoboxing` 0부 축 F(246곳/64파일) · 나머지 셋은 2부. `generics-erasure` 만 **0곳** (§13 ABSENCE) |
 
 ---
 
@@ -988,3 +1016,108 @@ _multiline_string_literal)` 이라 `"""…"""` 도 같은 노드다. LLM 이 SQL
 이 파일이 903줄이라 §12 만 분리했다 → **[`java-learning.md`](./java-learning.md)**.
 그 문서 §12.4 가 §11 의 「`Integer` 캐시 — 확인 못 함」을 JLS 원문으로 닫았고,
 **§10 #13 의 「그 밖은 거짓이다」가 틀렸다**(명세는 정하지 않는다)는 정정을 함께 낸다.
+
+---
+
+## §13 실물이 된 것 — 실측 (2026-09-06)
+
+`dictionary/java/**` 를 센 값이다. 사용처는 `dictionary/java/*.scm` **마흔일곱**을 실제로
+컴파일해 표본 리포 `MonggleMonggle`(java **99파일**)에 돌린 것이고(`곳/파일`), 방법은
+`crates/parse/tests/` 에 임시 시험을 써서 `chickadee_parse::{compile, Spec}` 으로 세고 지운 것이다.
+`tree-sitter` CLI 는 안 썼다.
+
+### 장수와 줄 수
+
+| | 값 |
+|---|---|
+| 개념 YAML | **47** (0부 19 · 1부 8 · 2부 20 · 3부는 `spring/` 15) |
+| `essential` | **47** — 자바 개념 전량이다 |
+| YAML 줄 | **9,722** (`_lang.yaml` 포함). 한 장 평균 **206줄** |
+| `.scm` 줄 | **778** (시스템 쿼리 둘 포함) |
+| 쿼리 | **47** — 개념마다 하나 |
+| 골든 | 양성 **114** · 음성 **47**. 마흔일곱 장 전부 **양성 2 이상 · 음성 1 이상** |
+
+이번 판에서 더한 것 — 개념 넷(**928줄**) · 쿼리 넷 · 양성 골든 여덟 · 음성 넷,
+그리고 양성이 하나뿐이던 네 장(`class-declaration`·`for-each`·`if-statement`·
+`method-declaration`)에 한 장씩 보강했다.
+
+`dictionary/spring/` 15장은 **손대지 않았다.** 그 네임스페이스는 `COMPUTED_NAMESPACES`
+(`packages/dictionary/src/schema.ts`)라 `.scm` 이 없고, 골든(`examples[].expect`)을 대조하는
+시험(`crates/parse/tests/dictionary.rs`)이 `queries` 를 도는 구조라 **쿼리가 0이면 예시가
+아예 안 돌아간다.** 골든을 더해도 아무도 안 읽는다 — 그래서 안 더했다.
+(`spring/bean-lifecycle` 의 `examples` 둘도 같은 이유로 오늘은 놀고 있다.)
+
+### 새로 선 넷
+
+| id | 부 | 정본 | 사용처 | 판정 |
+|---|---|---|---|---|
+| `java/main-method` | 2 | §4 #10 | **1곳 / 1파일** | 얇다 — `FinalProjectApplication.java` 하나. 스프링 리포에 시작점이 하나인 것이 당연해서 이 수가 정상이다 |
+| `java/final` | 2 | §5 #32 | **52곳 / 31파일** | 내 코드에서 확인. 전부 `private final <Service>` 꼴 — 롬복 생성자 주입이 만드는 모양이다 |
+| `java/checked-exception` | 2 | §5 #26 | **4곳 / 3파일** | `thin_threshold`(min_files 2 · min_sites 3)를 겨우 넘는다. `SecurityConfig`·`JwtAuthenticationFilter`·`ImageService` |
+| `java/generics-erasure` | 2 | §5 #28 | **0곳 / 0파일** | 합성 + 「네 코드엔 없다」(`library`). 아래 ABSENCE |
+
+### 사용처 표 — 개념 마흔일곱 (`MonggleMonggle` java 99파일)
+
+| 개념 | 곳/파일 | | 개념 | 곳/파일 |
+|---|---|---|---|---|
+| `import` | 759 / 92 | | `stream-pipeline` | 15 / 7 |
+| `annotation` | 702 / 91 | | `try-catch` | 12 / 7 |
+| `access-modifier` | 580 / 89 | | `inheritance-override` | 12 / 10 |
+| `field-declaration` | 354 / 77 | | `constructor` | 10 / 10 |
+| `autoboxing` | 246 / 64 | | `interface` | 10 / 10 |
+| `variable-declaration` | 189 / 34 | | `assignment` | 8 / 4 |
+| `string-literal` | 170 / 23 | | `static` | 7 / 5 |
+| `method-declaration` | 119 / 38 | | `text-length` | 7 / 4 |
+| `return-statement` | 117 / 35 | | `checked-exception` | **4 / 3** |
+| `class-declaration` | 109 / 90 | | `integer-limit` | 2 / 1 |
+| `collection-generic` | 101 / 41 | | `array` | 1 / 1 |
+| `new-expression` | 97 / 22 | | `for-each` | 1 / 1 |
+| `null` | 65 / 15 | | `floating-type` | 1 / 1 |
+| `boolean-only-condition` | 57 / 16 | | `reference-binding` | 1 / 1 |
+| `if-statement` | 57 / 16 | | `main-method` | **1 / 1** |
+| `final` | **52 / 31** | | `abstract-class` | **0 / 0** |
+| `comparison` | 51 / 15 | | `equals-hashcode` | **0 / 0** |
+| `lambda` | 51 / 13 | | `explicit-conversion` | **0 / 0** |
+| `boolean-literal` | 27 / 15 | | `float-inexact` | **0 / 0** |
+| `value-bits` | 23 / 11 | | `for-loop` | **0 / 0** |
+| `operator-precedence` | 20 / 10 | | `generic-bound` | **0 / 0** |
+| `arithmetic` | 19 / 11 | | `generics-erasure` | **0 / 0** |
+| `string-concat` | 16 / 9 | | `implicit-conversion` | **0 / 0** |
+| `reference-equality` | 15 / 5 | | | |
+
+**0곳이 여덟이다** — 마흔일곱 중 **17%**. 앞 물결의 일곱에 `generics-erasure` 하나가 붙었다.
+`for-each`·`array`·`floating-type`·`reference-binding`·`integer-limit`·`main-method` 여섯은
+1~2곳이라 `thin_threshold` 아래다. **합쳐서 열넷(30%)이 내 코드로는 못 가르치는 자리**이고,
+D177 이 「합성이 정본」으로 연 문이 그만큼 쓰인다.
+
+### 파서 ERROR 비율
+
+`MonggleMonggle` 의 java 20파일(이름 오름차순 앞에서부터)을 파싱했다.
+
+| 잰 것 | 값 |
+|---|---|
+| 파일 | 20 |
+| `ERROR` 노드가 든 파일 | **0** (0%) |
+| `quality == "poor"` 인 파일 | **0** (0%) |
+
+`(ERROR) @site` 쿼리로 직접 셌다. 03 §2.3 의 경계(`POOR_SHARE_LIMIT` 0.20)와 견줄 것도 없이
+0이다 — `tree-sitter-java` 0.23.5 는 이 코드를 그대로 읽는다.
+
+### 문서와 어긋나 바꾼 자리
+
+| 어디 | 문서가 적은 것 | 실물 | 왜 |
+|---|---|---|---|
+| §1.5.6 「0부 상한」 | `string-concat`·`autoboxing` 을 `essential` 밖에 둔다 | **둘 다 `essential`.** 0부 신규가 14 | §1.5.6 에 근거 셋을 적어 뒀다. 요점은 `essential` 밖이 T1 블록 대표에서도 빠진다는 것과, 축 H 가 코스에 없는 문법에 기대고 있었다는 것 |
+| `reference-equality.yaml` 의 `why` | (D187 ⑰) 축 H 대표 예에서 `new` 를 뺐다 | 산문에 `new String("a") == "a"` 가 남아 있었다 | 지웠다. 이제 `Integer` 캐시 하나로 간다 |
+| `reference-equality.yaml` 의 `prereq` | §1.5.1 근거 ④ 「선행이 0부 안에서 닫힌다」 | 간선이 없었다 | `java/autoboxing` 을 선행으로 넣었다 |
+| §1.5.3 의 `string-concat` | 15곳 / 9파일 (정규식) | **16곳 / 9파일** (쿼리) | 정규식과 쿼리의 차이. §1.5.3 아래 표가 이미 16 으로 적어 뒀다 |
+| §5 #32 `java/final` 의 `universal` | `common/immutable-binding` **(신규)** | `null` | `common/` 34장에 그 개념이 없고 새 `common/` 은 사전 세션이 안 만든다(README §12 규약 4). 후보로만 냈다 |
+| §4 #10 `java/main-method` 의 `universal` | `common/entry-point` **(신규)** | `null` | 같은 이유 |
+
+### 안 만든 것
+
+| id | 왜 |
+|---|---|
+| `java/map-and-set` | §2 가 적은 이유가 그대로 남아 있다 — `collection-generic` 과 노드가 같아 갈라야 하는데, 그 판단이 어휘가 아니라 **자료구조 선택**이라 `ds/`(D158 ③)의 몫일 수 있다. 사전 세션이 정할 자리가 아니다 |
+| `common/entry-point` · `common/immutable-binding` | 새 `common/` 은 만들지 않는다(README §12 규약 4). 위 표에 후보로 남긴다 |
+| `dictionary/spring/**` 의 골든 | 쿼리가 없는 네임스페이스라 골든을 대조하는 시험이 안 돈다 (위 「장수와 줄 수」) |

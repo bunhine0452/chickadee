@@ -339,8 +339,10 @@ describe('0부 뒤의 작은 문제 층 (D186 ⑧ · D187 ⑧)', () => {
 
   const chapters = [{ name: 'auth', files: ['a'], order: 1, opens: ['a'] }] as unknown as Chapter[];
 
-  test('자바 0부 열일곱이 문제 열넷 중 여섯을 연다 — 나머지 여덟은 사유가 남는다', () => {
-    expect(part0).toHaveLength(17);
+  test('자바 0부 열아홉이 문제 열넷 중 여섯을 연다 — 나머지 여덟은 사유가 남는다', () => {
+    // 열일곱이었다. `java/string-concat`·`java/autoboxing` 둘이 `essential` 로 돌아와
+    // 열아홉이 됐다 (`dictionary/java/_lang.yaml` 머리 주석 · java.md §1.5.1 축 E·F).
+    expect(part0).toHaveLength(19);
     const e = entry();
     expect(e.plates).toBe(6);
     expect(e.drops).toHaveLength(8);

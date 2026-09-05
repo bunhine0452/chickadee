@@ -1,0 +1,230 @@
+schema: 1
+id: java/checked-exception
+# 2부 (`docs/curriculum/java.md` §5 #26). `universal: null` — 주류 언어 중 이 강제를 가진 것이
+# 자바뿐이라 보편형을 걸면 「잡거나 넘기거나를 문법이 시킨다」가 다른 언어로 전이된다.
+# 파이썬·JS·C#·Go 어디에도 그 규칙이 없다.
+universal: null
+name: { ko: 문법이 시키는 예외 처리, en: Checked exceptions }
+token: "throws"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 4
+prereq: [java/try-catch, java/inheritance-override, cs/error-vs-bug]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "터질 수 있다고 표시된 것은 잡거나 넘기거나 — 둘 중 하나를 문법이 시킨다."
+    en: "Catch it or hand it up — for these exceptions the grammar demands one."
+  why:
+    ko: >-
+      자바에는 예외가 두 갈래입니다. 한쪽은 <b>안 다뤄도 컴파일이 됩니다</b>
+      (<code>NullPointerException</code> 같은 것). 다른 한쪽은 <b>안 다루면 컴파일이 멈춥니다</b>.
+      뒤쪽을 만나면 길이 둘뿐이에요 — 이 자리에서 잡거나, {{site.line}}행처럼
+      {{pick.1|code}}{{pick.1|josa:으로,로}} <b>부른 쪽에 떠넘기거나</b>. 떠넘기면 부른 쪽이 같은 선택을 다시 합니다.
+      <b>주류 언어 중 이 강제를 가진 것은 자바뿐입니다.</b> 파이썬·자바스크립트·C#·Go 는 전부
+      안 시켜요. 그래서 LLM 이 뱉는 자바 코드에 뜻 없는
+      <code>try { … } catch (Exception e) { }</code> 가 쌓입니다 — 컴파일을 통과시키려고 잡고
+      아무것도 안 하는 것이고, 그건 「다뤘다」가 아니라 <b>삼킨 것</b>이에요.
+    en: >-
+      Java has two kinds of exception. One <b>compiles even if you ignore it</b> (things like
+      <code>NullPointerException</code>). The other <b>stops the compiler if you ignore it</b>.
+      Meeting the second kind leaves two roads — catch it here, or, as on line {{site.line}},
+      <b>hand it to the caller</b> with {{pick.1|code}}. Hand it on and the caller faces the same choice.
+      <b>Among mainstream languages only Java demands this.</b> Python, JavaScript, C# and Go do not.
+      That is why LLM-written Java piles up empty
+      <code>try { … } catch (Exception e) { }</code> blocks — caught to get past the compiler and
+      doing nothing, which is not handling it but <b>swallowing</b> it.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 안 잡고 넘기겠다는 표시다."
+      en: "The {{pick.1|code}} on line {{site.line}} says this method will not catch it."
+    - ko: "그래서 {{pick.2|code}}{{pick.2|josa:을,를}} 부르는 쪽이 같은 선택을 다시 한다."
+      en: "So whoever calls {{pick.2|code}} faces the same choice again."
+    - ko: "{{pick.4|code}}{{pick.4|josa:이,가}} 나오는 길과 예외로 끝나는 길이 함께 있다."
+      en: "There is a path where {{pick.4|code}} comes back and a path where an exception does."
+
+rule:
+  ko: "<b>잡거나 넘기거나 둘 중 하나다.</b> 넘기면 그 선택이 부른 쪽으로 옮겨 갈 뿐 사라지지 않는다."
+  en: "<b>Catch it or pass it on.</b> Passing moves the choice to the caller; it does not remove it."
+result:
+  label: { ko: "{{site.line}}행이 부른 쪽에 남기는 것", en: "what line {{site.line}} leaves to the caller" }
+  value: "{{pick.2}}{{pick.3}} {{pick.1}}"
+  note: { ko: "선택이 위로 올라간다", en: "the choice moves up" }
+ok:
+  ko: "{{pick.1|code}}{{pick.1|josa:을,를}} 짚었습니다. 이 메서드는 안 잡고 부른 쪽에 넘깁니다."
+  en: "You pointed at {{pick.1|code}}. This method does not catch; it hands it up."
+payoff:
+  ko: >-
+    이걸 알면 「왜 이 줄에서만 <code>try</code> 를 쓰라고 하지」가 풀립니다 — 그 줄이 부르는 것에
+    이 표시가 붙어 있어요.
+  en: >-
+    Knowing this untangles “why does only this line demand a <code>try</code>” — what that line calls
+    carries this mark.
+bridge:
+  ko: >-
+    파이썬은 무엇이 터질지 <b>문법이 안 적습니다</b>. 그래서 자유롭지만 <b>무엇이 터질 수 있는지</b>를
+    문서로만 알 수 있어요. 자바는 그 목록을 메서드 서명에 박아 둡니다.
+  en: >-
+    Python <b>does not write down</b> what may break, so it is freer but you learn <b>what can break</b>
+    only from the documentation. Java pins that list into the signature.
+misconceptions:
+  - ko: "모든 예외가 이 규칙을 받는다 — 두 갈래이고 한쪽은 안 다뤄도 컴파일됩니다."
+    en: "Every exception is checked — there are two kinds, and one compiles unhandled."
+  - ko: "이 표시를 적으면 예외가 사라진다 — 옮겨 갈 뿐입니다. 부른 쪽이 같은 선택을 다시 해요."
+    en: "Writing it makes the exception go away — it moves. The caller faces the same choice."
+  - ko: "빈 <code>catch</code> 로 잡으면 다룬 것이다 — 삼킨 것입니다. 터진 사실이 아무 데도 안 남아요."
+    en: "An empty <code>catch</code> counts as handling — it swallows. Nothing records that it broke."
+  - ko: "이 표시가 있으면 그 메서드는 반드시 터진다 — 터질 수 <b>있다</b>는 표시입니다."
+    en: "The mark means it will break — it means it <b>may</b> break."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>「나는 안 잡고 넘긴다」고 적은 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that says “I will not catch, I hand it up”</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.4:
+        t:
+          ko: >-
+            {{pick.4|code}}{{pick.4|josa:은,는}} <b>정상적으로 끝났을 때</b> 나오는 것입니다. 예외로 끝나는
+            길에서는 이 값이 아예 안 나와요 — 두 길이 따로 있습니다.
+          en: >-
+            {{pick.4|code}} is what comes back <b>when it ends normally</b>. On the exception path no
+            such value appears at all — the two paths are separate.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 정상 길이냐 예외 길이냐", en: "The sharpest spot — the normal path or the exception path" }
+          code:
+            - "정상: 값이 나온다"
+            - "예외: 값 대신 터진 것이 올라간다"
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 이름을 바꿔도 잡을지 넘길지는 안 바뀌어요 —
+            그것을 정하는 것은 서명 끝에 붙은 낱말입니다.
+          en: >-
+            {{pick.2|code}} is <b>the name</b>. Renaming changes nothing about catching or passing — the
+            word at the end of the signature settles that.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 약속이냐", en: "The sharpest spot — the name or the promise" }
+          code:
+            - "이름:    무엇이라 부르나"
+            - "끝 낱말: 부른 쪽이 무엇을 해야 하나"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} <b>받는 것</b>입니다. 무엇을 받든 예외를 잡을지 넘길지는
+            따로 적어야 해요.
+          en: >-
+            {{pick.3|code}} is <b>what it takes in</b>. Whatever comes in, catching or passing is written
+            separately.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 받는 것이냐 남기는 것이냐", en: "The sharpest spot — what comes in or what is left behind" }
+          code:
+            - "받는 것: 부른 쪽이 주는 것"
+            - "끝 낱말: 부른 쪽이 떠안는 것"
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행은 예외를 <b>여기서 안 잡고 부른 쪽에 넘긴다</b>고
+        적습니다.
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} says the exception is <b>not caught here but
+        handed to the caller</b>.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "throws", mono: true }
+      - t: "throw"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              한 글자 차이지만 자리가 다릅니다. 이건 <b>지금 여기서 터뜨리는</b> 문이라 메서드 몸통
+              안에 서고, 서명 끝에는 못 옵니다 — 하나는 <b>약속</b>이고 하나는 <b>행동</b>이에요.
+            en: >-
+              One letter apart, different slots. This one is a statement that <b>breaks right here</b>,
+              so it stands inside the body, never at the end of a signature — one is a <b>promise</b>,
+              the other an <b>act</b>.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 약속이냐 행동이냐", en: "The sharpest spot — a promise or an act" }
+            code:
+              - "서명 끝: 터질 수 있다는 약속"
+              - "몸통 안: 지금 터뜨린다"
+      - t: "catch"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이건 <b>여기서 잡는</b> 쪽입니다. 두 길 중 반대쪽이라 뜻이 정반대예요 — 잡으면 부른 쪽은
+              아무것도 안 해도 됩니다.
+            en: >-
+              This is the <b>catch it here</b> road — the other of the two, so the meaning inverts. Catch
+              it and the caller has nothing to do.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 여기서 잡냐 위로 넘기냐", en: "The sharpest spot — caught here or handed up" }
+            code:
+              - "여기서 잡는다: 부른 쪽은 모른다"
+              - "위로 넘긴다:  부른 쪽이 떠안는다"
+      - t: "extends"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이건 <b>물려받는다</b>는 낱말이라 클래스 이름 뒤에 섭니다. 예외 클래스들이 이 낱말로
+              계층을 이루는 건 맞지만, 그 계층은 <b>무엇이 잡히나</b>를 정하지 <b>넘길지</b>를 안 정해요.
+            en: >-
+              This word means <b>inherits</b> and stands after a class name. Exception classes do form a
+              hierarchy with it, but that hierarchy settles <b>what gets caught</b>, not whether it is passed on.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 계층이냐 선택이냐", en: "The sharpest spot — the hierarchy or the choice" }
+            code:
+              - "계층: 무엇이 무엇에 잡히나"
+              - "선택: 잡을까 넘길까"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행이 예외를 <b>여기서 안 잡고 넘긴</b> 이유는 무엇일까요?"
+    en: "Why does line {{site.line}} <b>hand the exception up</b> instead of catching it?"
+  choices:
+    - t:
+        ko: "여기서는 무엇을 해야 할지 모르고, 부른 쪽이 그 답을 알기 때문"
+        en: "Because there is no answer here, and the caller knows what to do"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 부른 쪽이 무엇을 알고 있는지도 적어 보세요."
+        en: "That is the direction. Now say what the caller knows that this place does not."
+    - t:
+        ko: "코드를 짧게 쓰려고"
+        en: "To keep the code short"
+      ok: false
+      fb:
+        ko: "짧아지는 것은 곁다리입니다. 기준은 <b>여기서 답할 수 있나</b>예요."
+        en: "Shorter is a side effect. The test is whether this place can answer at all."
+    - t:
+        ko: "넘기면 예외가 없어지기 때문"
+        en: "Because passing makes the exception disappear"
+      ok: false
+      fb:
+        ko: "없어지지 않습니다. 선택이 부른 쪽으로 올라갈 뿐이에요."
+        en: "Nothing disappears. The choice simply moves up to the caller."
+
+queries:
+  - { grammars: [java], file: ./checked-exception.scm }
+
+examples:
+  - code: "class A { public String save(String s) throws IOException { return s; } }"
+    expect:
+      sites: 1
+      form: throws
+      hole: "throws"
+      picks: { 1: "throws", 2: "save", 3: "(String s)", 4: "String" }
+  - code: "class A { void f(HttpServletRequest r) throws ServletException, IOException { } }"
+    expect: { sites: 1, form: throws, picks: { 1: "throws", 2: "f", 4: "void" } }
+  - code: "class A { public String save(String s) { return s; } }"
+    expect: none

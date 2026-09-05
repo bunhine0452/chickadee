@@ -12,19 +12,32 @@ extensions:
 # **0부와 1부는 합성 예제**, **2부는 합성 + 내 코드**, **3부는 내 코드 중심**(`spring/` · D176).
 # 여기 적힌 순서가 부 순서이고, 부 안의 순서는 §1.5.1 의 **축 A~H** 다.
 #
-# 0부 「이 언어의 값과 식」 열아홉 판 중 **열일곱**이 여기 있다. 빠진 둘은
-# `java/string-concat`(표본 16곳/9파일)과 `java/autoboxing`(246곳/64파일)이고, 0부가
-# `essential` 에 새로 올리는 것을 **열둘**로 묶는 상한 때문이다(`docs/curriculum/README.md`
-# §12 규약 8). 둘 다 사용처가 넉넉해 카드는 그대로 서고, 빠지는 것은 구멍 지도(03 §6)의
-# 분모와 0장 후보뿐이다.
+# 0부 「이 언어의 값과 식」 **열아홉 판 전부**가 여기 있다 (§1.5.1 축 A~H · §1.5.4 표).
+# 전에는 열일곱이었고 `java/string-concat`(표본 16곳/9파일)과 `java/autoboxing`
+# (246곳/64파일)이 「0부가 `essential` 에 새로 올리는 것 열둘」 상한 때문에 빠져 있었다.
+# 둘을 되돌린 근거 셋 —
+#   ① 축 H(`java/reference-equality`)의 대표 예가 `Integer` 캐시다(D187 ⑰). §1.5.1 이 그것을
+#      고른 넷째 근거가 「선행이 0부 안에서 닫힌다 — 축 F 의 `java/autoboxing` 에 기댄다」인데,
+#      그 개념이 부 배치에 없으면 0부가 **코스에 없는 문법**에 기댄다. `new` 를 뺀 이유와 같다.
+#   ② 빠지는 것이 「구멍 지도의 분모와 0장 후보뿐」이 아니었다. `essential` 밖은 T1 블록 카드의
+#      대표가 못 된다(`packages/cards/src/t1-block.ts` `pickConcept`) — 표본 99파일 중 64파일에
+#      있는 `autoboxing` 이 2단에서 한 번도 안 뜬다.
+#   ③ 상한 12 의 원래 근거(0장 상한 24)는 D184 로 폐지됐고, 남은 것은 저작 규모의 상한이다
+#      (README §12 규약 8). 그 규약이 스스로 적은 읽는 법 — 「0부가 열둘을 넘으면 값과 식이
+#      아니라 기초를 삼키고 있는 것」 — 으로 보면 둘 다 값과 식이다(`1 + 2 + "a"` · `int` ↔ `Integer`).
+# 대가: 0부 신규 `essential` 이 14 가 되어 12 를 넘는다. 축은 여덟 그대로다(README §5 가 적은
+# 두 읽는 법 중 「축 여덟」쪽을 고른 것이고, 그 결정은 아직 등록부에 없다).
 #
 # 1부 흐름과 묶기 여덟 — 0부가 값 축을 가져가서 「흐름과 묶기」만 남았다(§1.5.4).
 # 표본 `MonggleMonggle`(자바 99장)에서 `for (;;)` 는 **0곳**, for-each 는 **1곳**,
 # 배열은 **1곳**(`String[] args`)이다 — 내 코드만으로는 반복도 배열도 못 가르친다.
 #
-# 2부 객체 열여섯 — 한 판도 안 움직였다. `abstract-class`·`generic-bound`·`equals-hashcode`
-# 셋은 그 리포에 **0곳**이라 합성으로 가르치고 「네 코드엔 없다」를 명시한다(D158 <2>).
-# `annotation` 이 2부의 끝이고 3부의 문턱이다.
+# 2부 객체 **스무 판**. 열여섯은 D177 의 것이고 넷이 2026-09-06 에 붙었다 —
+# `main-method`(§4 #10) · `final`(§5 #32) · `checked-exception`(§5 #26) ·
+# `generics-erasure`(§5 #28). 넷 다 설계표에는 있는데 사전에 없던 것이다.
+# `abstract-class`·`generic-bound`·`equals-hashcode`·`generics-erasure` 넷은 그 리포에 **0곳**
+# 이라 합성으로 가르치고 「네 코드엔 없다」를 명시한다(D158 <2>).
+# `annotation` 이 2부의 끝이고 3부의 문턱이다 — 새 넷은 그 앞에 선다.
 essential:
   # 0부 축 A — 정수형과 그 한계
   - java/value-bits
@@ -42,9 +55,11 @@ essential:
   # 0부 축 E — 연산자와 우선순위
   - java/arithmetic
   - java/operator-precedence
+  - java/string-concat
   # 0부 축 F — 형 변환
   - java/implicit-conversion
   - java/explicit-conversion
+  - java/autoboxing
   # 0부 축 G — 대입과 이름
   - java/assignment
   - java/reference-binding
@@ -76,6 +91,11 @@ essential:
   - java/lambda
   - java/stream-pipeline
   - java/try-catch
+  # 2부 — 2026-09-06 에 붙은 넷 (§4 #10 · §5 #32·#26·#28)
+  - java/main-method
+  - java/final
+  - java/checked-exception
+  - java/generics-erasure
   - java/annotation
 alternatives: []
 
