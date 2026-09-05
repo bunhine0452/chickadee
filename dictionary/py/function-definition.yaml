@@ -190,5 +190,11 @@ queries:
 examples:
   - code: "def add(a, b):\n    return a + b"
     expect: { sites: 1, form: def, hole: "def", picks: { 1: "def", 2: "add", 3: "(a, b)" } }
+  # 매개변수가 없어도 같은 노드다 — 괄호는 이름의 일부가 아니라 자리 목록이다.
+  - code: "def reset():\n    return None"
+    expect: { sites: 1, form: def, hole: "def", picks: { 1: "def", 2: "reset", 3: "()" } }
+  # `async` 가 붙어도 정의하는 낱말은 그대로다. 붙는 것은 「부르면 코루틴이 나온다」 하나다.
+  - code: "async def read_item(item_id):\n    return item_id"
+    expect: { sites: 1, form: def, hole: "def", picks: { 1: "def", 2: "read_item", 3: "(item_id)" } }
   - code: "add = lambda a, b: a + b"
     expect: none

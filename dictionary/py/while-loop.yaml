@@ -192,5 +192,11 @@ queries:
 examples:
   - code: "while n > 0:\n    n -= 1"
     expect: { sites: 1, form: while, hole: "while", picks: { 1: "while", 2: "n > 0" } }
+  # 조건이 견주기일 필요는 없다 — 값을 그대로 두면 진릿값 판정이 그 자리를 진다.
+  - code: "while queue:\n    queue.pop()"
+    expect: { sites: 1, form: while, hole: "while", picks: { 1: "while", 2: "queue" } }
+  # 끝나는 줄이 안에 있는 꼴 — 조건이 늘 참이라 나가는 길을 몸통이 진다.
+  - code: "while True:\n    if done:\n        break"
+    expect: { sites: 1, form: while, hole: "while", picks: { 1: "while", 2: "True" } }
   - code: "if n > 0:\n    n -= 1"
     expect: none

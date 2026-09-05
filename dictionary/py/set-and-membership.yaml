@@ -1,0 +1,303 @@
+schema: 1
+id: py/set-and-membership
+universal: null
+name: { ko: 들어 있나 묻기, en: Membership and sets }
+token: "in"
+grammars: [python]
+framework: null
+essential: true
+difficulty: 2
+prereq: [py/list-literal, py/dict-literal, cs/set-vs-sequence]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "묶음 안에 그 값이 있는지 낱말 하나로 묻는다. 답은 참이나 거짓이다."
+    en: "Asks with one word whether a group holds a value. The answer is true or false."
+  why:
+    ko: >-
+      {{site.line}}행은 훑는 줄을 쓰지 않고 <b>낱말 하나</b>로 묻습니다. 그런데 같은 낱말이
+      {{pick.3|code}}의 종류에 따라 하는 일이 달라요 — 순서 있는 묶음이면 앞에서부터 <b>다 훑고</b>,
+      키로 찾는 묶음이나 집합이면 <b>안 훑습니다</b>.
+    en: >-
+      Line {{site.line}} asks with <b>one word</b> instead of a loop. But the same word does
+      different work depending on what {{pick.3|code}} is — an ordered group is <b>walked from the
+      front</b>, while a key-lookup group or a set is <b>not walked at all</b>.
+  trace:
+    - ko: "{{site.line}}행에서 {{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:이,가}} 먼저 값이 된다."
+      en: "On line {{site.line}}, {{pick.2|code}} and {{pick.3|code}} become values first."
+    - ko: "{{pick.3|code}} 안에 {{pick.2|code}}{{pick.2|josa:과,와}} 같은 값이 있는지 본다."
+      en: "It checks whether {{pick.3|code}} holds a value equal to {{pick.2|code}}."
+    - ko: "{{site.line}}행의 이 자리에 참이나 거짓 하나가 놓인다."
+      en: "One of true or false lands in this spot on line {{site.line}}."
+
+rule:
+  ko: "<b>묻는 낱말은 하나인데 드는 값은 종류마다 다르다.</b> 순서 있는 묶음만 앞에서부터 다 훑는다."
+  en: "<b>One word asks, but the cost differs by kind.</b> Only an ordered group is walked from the front."
+result:
+  label:
+    ko: "{{site.line}}행의 물음"
+    en: "the question on line {{site.line}}"
+  value: "참 또는 거짓"
+  note:
+    ko: "값이 아니라 판정이 나온다"
+    en: "a verdict comes out, not a value"
+ok:
+  ko: >-
+    {{pick.3|code}} 안에 {{pick.2|code}}{{pick.2|josa:과,와}} 같은 값이 있는지가 참·거짓 하나로 나왔습니다.
+    <b>같은 값</b>이면 참이라, 같은 자리에 있는지까지 묻는 것은 아니에요.
+  en: >-
+    Whether {{pick.3|code}} holds a value equal to {{pick.2|code}} came out as one verdict. It is
+    <b>equal value</b> that counts, not being the same object.
+payoff:
+  ko: >-
+    이걸 알면 큰 목록에서 느려지는 자리가 보입니다 — 목록에 물으면 항목 수만큼 훑고, 같은 물음을
+    되풀이하는 자리라면 집합으로 한 번 바꿔 두면 훑기가 사라져요.
+  en: >-
+    This shows where a big list slows down — asking a list walks every item, and if the same question
+    repeats, converting once to a set removes the walking.
+bridge:
+  ko: >-
+    <code>py/for-in</code> 의 같은 낱말은 <b>묻지 않고 꺼냅니다.</b> 글자는 같은데 앞에 무엇이
+    오느냐로 갈려요 — 갈림길 앞이면 묻기, 되풀이 앞이면 꺼내기입니다.
+  en: >-
+    The same word in <code>py/for-in</code> <b>takes rather than asks</b>. The character is the same;
+    what precedes it decides — a branch means asking, a loop means taking.
+misconceptions:
+  - ko: >-
+      키로 찾는 묶음에 물으면 값을 본다 — <b>키</b>를 봅니다. 값 쪽을 물으려면 값만 따로 꺼내
+      그것에 물어야 해요.
+    en: >-
+      Asking a key-lookup group looks at its values — it looks at its <b>keys</b>. To ask about
+      values you take the values out and ask those.
+  - ko: >-
+      집합과 목록은 담는 것이 같으니 같은 것이다 — 집합은 <b>중복이 사라지고 순서가 없습니다.</b>
+      담은 뒤 개수가 줄어 있을 수 있어요.
+    en: >-
+      A set and a list are the same because they hold the same things — a set <b>drops duplicates and
+      has no order</b>. What you put in may come out fewer.
+  - ko: >-
+      묶음이 크든 작든 드는 값은 같다 — 목록은 <b>항목 수만큼</b> 훑습니다. 집합·사전은 크기와
+      거의 무관해요.
+    en: >-
+      The cost is the same whatever the size — a list is walked <b>once per item</b>. A set or a
+      mapping is nearly independent of size.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>들어 있는지를 묻는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that asks whether it is held</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} <b>찾을 값</b>입니다. 값만으로는 물음이 안 서고,
+            어디에서 찾을지와 이어 주는 낱말이 가운데 있어요.
+          en: >-
+            {{pick.2|code}} is <b>the value being looked for</b>. A value alone asks nothing; the word
+            between joins it to where the looking happens.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 찾을 값과 묻는 일"
+            en: "The sharpest spot — the value and the asking"
+          code:
+            - '"name"                 # 값 하나'
+            - '"name" in payload      # 물음'
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} <b>찾을 곳</b>입니다. 이 값의 종류가 드는 값을 정하기는
+            하지만, 묻는 일 자체는 가운데 낱말이 해요.
+          en: >-
+            {{pick.3|code}} is <b>where the looking happens</b>. Its kind decides the cost, but the
+            asking itself is done by the word between.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 찾을 곳과 묻는 일"
+            en: "The sharpest spot — the place and the asking"
+          code:
+            - "payload                # 묶음 전체"
+            - '"name" in payload      # 참·거짓 하나'
+
+meaning:
+  - q:
+      ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 키로 찾는 묶음이면 {{site.line}}행은 무엇을 볼까요?"
+      en: "If {{pick.3|code}} is a key-lookup group, what does line {{site.line}} look at?"
+    hint:
+      ko: "그 묶음을 훑으면 무엇이 하나씩 나오는지 떠올려 봅니다."
+      en: "Recall what comes out one at a time when you walk that kind of group."
+    options:
+      - t:
+          ko: "키만 본다 — 값 쪽은 이 물음에 안 걸린다"
+          en: "It looks at keys only — values are not part of this question"
+      - t:
+          ko: "값만 본다"
+          en: "It looks at values only"
+        diag:
+          t:
+            ko: >-
+              값 쪽을 물으려면 값만 따로 꺼내 그것에 물어야 합니다. 그 묶음을 그냥 훑으면 나오는
+              것이 <b>키</b>라서, 이 낱말도 키를 봐요.
+            en: >-
+              To ask about values you take the values out and ask those. Walking that group yields
+              <b>keys</b>, and this word follows the same path.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 키와 값"
+              en: "The sharpest spot — keys and values"
+            code:
+              - '"a" in {"a": 1}            # True'
+              - '1 in {"a": 1}              # False'
+      - t:
+          ko: "키와 값을 둘 다 본다"
+          en: "It looks at both keys and values"
+        diag:
+          t:
+            ko: >-
+              둘 다 보면 키에 없고 값에 있는 것도 참이 됩니다. 그러면 「무엇을 물은 건지」가
+              그 줄에서 안 읽혀서, 파이썬은 <b>한쪽</b>으로 정해 두었어요.
+            en: >-
+              Looking at both would make a match on the value side count too, and then the line no
+              longer says what was asked. Python settles on <b>one side</b>.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 한쪽으로 정해 둔 것"
+              en: "The sharpest spot — settling on one side"
+            code:
+              - '1 in {"a": 1}              # False'
+              - '1 in {"a": 1}.values()     # True'
+      - t:
+          ko: "키를 앞에서부터 하나씩 훑어 본다"
+          en: "It walks the keys one at a time from the front"
+        diag:
+          t:
+            ko: >-
+              보는 것은 키가 맞지만 <b>훑지는 않습니다.</b> 키를 값으로 바꿔 자리를 바로 계산하므로,
+              묶음이 커져도 드는 값이 거의 안 늘어요.
+            en: >-
+              It is the keys, but they are <b>not walked</b>. A key is turned into a position
+              directly, so the cost barely grows with size.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 훑기와 바로 계산하기"
+              en: "The sharpest spot — walking and computing directly"
+            code:
+              - "x in big_list      # 항목 수만큼"
+              - "x in big_dict      # 크기와 거의 무관"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 {{pick.3|code}} 안에 {{pick.2|code}}{{pick.2|josa:이,가}} 있는지 묻습니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} asks whether {{pick.3|code}} holds
+        {{pick.2|code}}.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "in", mono: true }
+      - t: "=="
+        mono: true
+        diag:
+          t:
+            ko: >-
+              그 기호는 <b>두 값이 같은가</b>를 묻습니다. 값 하나와 묶음 하나를 견주면 종류가 달라
+              언제나 거짓이 나와요.
+            en: >-
+              That symbol asks whether <b>two values are equal</b>. Weighing one value against a whole
+              group compares different kinds, so it always comes out false.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 같은가와 들어 있나"
+              en: "The sharpest spot — equal to, and held by"
+            code:
+              - '"a" in ["a"]      # True'
+              - '"a" == ["a"]      # False'
+      - t: "has"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              파이썬에 그런 낱말은 <b>없습니다.</b> 다른 언어의 메서드 이름을 문법 자리에 쓴 것이고,
+              그 자리에서 문법이 안 맞아요.
+            en: >-
+              Python has no such word. It is another language's method name placed where grammar
+              goes, and the line does not hold together.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 문법 낱말과 메서드 이름"
+              en: "The sharpest spot — a grammar word and a method name"
+            code:
+              - '"a" in payload          # 파이썬'
+              - 'payload.has("a")        # 다른 언어'
+      - t: "contains"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              뜻은 맞지만 파이썬의 <b>문법 낱말이 아닙니다.</b> 묻는 일이 낱말 하나로 되어 있는 것이
+              이 언어의 선택이고, 그 낱말은 더 짧아요.
+            en: >-
+              The meaning fits, but it is <b>not the grammar word</b>. Python settles this question in
+              one word, and that word is shorter.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 뜻과 실제 낱말"
+              en: "The sharpest spot — the meaning and the actual word"
+            code:
+              - '"a" in payload'
+              - "payload.contains('a')   # AttributeError"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 훑는 줄을 안 쓰고 이 낱말로 물을까요?"
+    en: "Why does line {{site.line}} ask with this word instead of writing a loop?"
+  choices:
+    - t:
+        ko: "알고 싶은 것이 참·거짓 하나라서 — 어느 항목인지는 이 줄에 필요 없다"
+        en: "Because only a verdict is wanted — which item it was does not matter on this line"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 어느 항목인지가 필요한 줄이 이 파일에 따로 있는지도 찾아보세요."
+        en: "That is the direction. Look for a line in this file that does need which item it was."
+    - t:
+        ko: "훑는 줄보다 언제나 빨라서"
+        en: "Because it is always faster than a loop"
+      ok: false
+      fb:
+        ko: >-
+          목록에 물으면 결국 훑습니다. 빨라지는 것은 묶음을 집합이나 사전으로 바꿨을 때이고,
+          낱말 자체가 빠른 것은 아니에요.
+        en: >-
+          Asking a list still walks it. The speed comes from the group being a set or a mapping, not
+          from the word.
+    - t:
+        ko: "파이썬에 훑는 문법이 없어서"
+        en: "Because Python has no loop"
+      ok: false
+      fb:
+        ko: >-
+          있습니다. 안 쓴 것은 없어서가 아니라 이 줄이 <b>참·거짓 하나</b>만 필요로 해서예요.
+        en: >-
+          It has one. It is unused because this line needs only <b>a single verdict</b>, not because
+          it is missing.
+
+queries:
+  - { grammars: [python], file: ./set-and-membership.scm }
+
+examples:
+  - code: "if \"name\" in payload:\n    send(payload)"
+    expect: { sites: 1, form: member, hole: "in", picks: { 1: "in", 2: '"name"', 3: "payload" } }
+  - code: "if \"name\" not in payload:\n    send(payload)"
+    expect: { sites: 1, form: not-member, hole: "not in", picks: { 1: "not in", 2: '"name"', 3: "payload" } }
+  - code: 'tags = {"draft", "ready"}'
+    expect: { sites: 1, form: set, picks: { 1: "{", 2: '"draft"' } }
+  # 훑는 줄의 같은 낱말은 `for_statement` 의 토큰이라 노드가 다르다.
+  - code: "for row in rows:\n    send(row)"
+    expect: none
+  - code: "if a == b:\n    send(a)"
+    expect: none

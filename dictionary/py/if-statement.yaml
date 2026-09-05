@@ -193,5 +193,11 @@ queries:
 examples:
   - code: "if count > 0:\n    send()"
     expect: { sites: 1, form: if, hole: "if", picks: { 1: "if", 2: "count > 0" } }
+  # 뒤집기도 같은 갈림이다 — 조건이 참·거짓 하나로 좁혀지기만 하면 된다.
+  - code: "if not rows:\n    warn()"
+    expect: { sites: 1, form: if, hole: "if", picks: { 1: "if", 2: "not rows" } }
+  # 반대편 가지가 붙어도 갈림은 **하나**다 — `alternative` 는 선택 캡처라 사용처가 안 늘어난다.
+  - code: "if rows:\n    send()\nelse:\n    warn()"
+    expect: { sites: 1, form: if, hole: "if", picks: { 1: "if", 2: "rows" } }
   - code: "value = a if ok else b"
     expect: none

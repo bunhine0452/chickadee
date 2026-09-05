@@ -1,0 +1,301 @@
+schema: 1
+id: py/import
+universal: null
+name: { ko: 다른 파일 것 가져오기, en: Bringing in another file }
+token: "import"
+grammars: [python]
+framework: null
+essential: true
+difficulty: 2
+prereq: [py/call-expression, cs/linking]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "다른 파일의 이름을 이 파일에서 쓸 수 있게 한다. 그 파일이 그때 한 번 돈다."
+    en: "Makes names from another file usable here. That file runs once, right then."
+  why:
+    ko: >-
+      {{site.line}}행은 이름만 옮겨 오는 줄이 아닙니다. {{pick.2|code}}{{pick.2|josa:이,가}} 가리키는
+      파일이 <b>위에서 아래로 한 번 실행됩니다</b> — 그 파일 바닥에 적힌 일도 그때 일어나요.
+    en: >-
+      Line {{site.line}} does more than move a name over. The file {{pick.2|code}} names is
+      <b>run top to bottom, once</b> — anything written at its bottom happens then too.
+  trace:
+    - ko: "{{site.line}}행에서 {{pick.2|code}} 쪽 파일을 찾는다."
+      en: "On line {{site.line}}, the file that {{pick.2|code}} names is found."
+    - ko: "그 파일이 처음이라면 위에서 아래로 한 번 돈다. 두 번째부터는 안 돈다."
+      en: "If this is the first time, it runs top to bottom once. Later times it does not."
+    - ko: "그 파일이 만든 이름 중 {{pick.2|code}}{{pick.2|josa:이,가}} 가리키는 것이 이 파일에 놓인다."
+      en: "What {{pick.2|code}} names among the results is placed into this file."
+
+rule:
+  ko: "<b>가져오는 순간 그 파일이 한 번 돈다.</b> 두 번째부터는 이미 돈 결과를 그대로 쓴다."
+  en: "<b>Bringing a file in runs it once.</b> Every later time reuses what that first run produced."
+result:
+  label:
+    ko: "{{site.line}}행 아래의 {{pick.2}}"
+    en: "{{pick.2}} below line {{site.line}}"
+  value: "{{pick.2}} 의 이름들"
+  note:
+    ko: "그 파일이 한 번 돈 뒤의 상태"
+    en: "the state after that file has run once"
+ok:
+  ko: >-
+    {{pick.2|code}}의 이름을 이 파일에서 쓸 수 있게 됐습니다. 그 파일은 이 줄에서 한 번 돌았고,
+    같은 파일을 다른 데서 또 가져와도 다시 돌지 않아요.
+  en: >-
+    The names of {{pick.2|code}} are now usable here. That file ran once at this line, and bringing
+    it in elsewhere will not run it again.
+payoff:
+  ko: >-
+    이걸 알면 <code>if __name__ == "__main__":</code> 이 왜 있는지가 풀립니다 — 실행할 일을 파일
+    바닥에 그냥 적어 두면 <b>남이 가져올 때도 돕니다.</b> 그 줄이 「직접 돌릴 때만」을 가르는 문입니다.
+  en: >-
+    This explains why <code>if __name__ == "__main__":</code> exists — work written plainly at a
+    file's bottom <b>also runs when someone brings the file in</b>. That line separates “only when
+    run directly.”
+bridge:
+  ko: >-
+    <code>from</code> 을 앞에 붙이면 파일 이름 대신 <b>안의 이름 하나</b>가 옵니다. 어느 쪽이든
+    파일은 똑같이 한 번 돌고, 달라지는 것은 이 파일에서 무엇을 앞에 붙여 쓰느냐뿐이에요.
+  en: >-
+    Put <code>from</code> in front and <b>one name from inside</b> comes over instead of the file
+    name. Either way the file runs the same once; only what you write in front here changes.
+misconceptions:
+  - ko: >-
+      이름만 옮겨 오는 줄이다 — 그 파일이 <b>실제로 실행됩니다.</b> 화면에 뭔가 찍히거나 파일이
+      만들어지는 일이 이 줄에서 일어날 수 있어요.
+    en: >-
+      It only moves a name over — the file <b>actually runs</b>. Printing to the screen or creating
+      a file can happen at this very line.
+  - ko: >-
+      같은 파일을 여러 번 가져오면 여러 번 돈다 — <b>한 번만</b> 돕니다. 두 번째부터는 이미 만들어진
+      것을 그대로 쓰고, 그래서 그 파일의 상태가 프로그램 전체에 하나예요.
+    en: >-
+      Bringing the same file in twice runs it twice — it runs <b>once</b>. Later times reuse what
+      exists, which is why that file's state is shared across the whole program.
+  - ko: >-
+      순환하면 무조건 멈춘다 — 멈추는 자리는 <b>아직 안 만들어진 이름</b>을 그때 꺼낼 때입니다.
+      두 파일이 서로를 가져오는 것 자체는 성립할 수 있어요.
+    en: >-
+      A cycle always stops the program — it stops where a name that <b>does not exist yet</b> is
+      taken. Two files naming each other can hold together on its own.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>다른 파일을 이 파일로 데려오는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that brings another file into this one</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} <b>어느 파일인가</b>를 적은 자리입니다. 이름만으로는 아무 일도
+            안 나고, 데려오라고 말하는 낱말이 그 앞에 따로 있어요.
+          en: >-
+            {{pick.2|code}} says <b>which file</b>. A name on its own does nothing; the word before
+            it is what says to bring it.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 어느 파일과 데려오는 일"
+            en: "The sharpest spot — which file, and the bringing"
+          code:
+            - "os                # 이름일 뿐"
+            - "import os         # 데려온다"
+      pick.3:
+        t:
+          ko: >-
+            그 자리는 <b>어디서 찾을지</b>를 좁혀 주는 곳입니다. 좁히기만 하고 데려오지는 않아서,
+            데려오는 낱말이 뒤에 따로 붙어요.
+          en: >-
+            That spot narrows <b>where to look</b>. Narrowing alone brings nothing, so the bringing
+            word still follows it.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 좁히기와 데려오기"
+            en: "The sharpest spot — narrowing and bringing"
+          code:
+            - "from fastapi import FastAPI"
+            - "import fastapi              # 앞을 붙여 쓴다"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행이 가리키는 파일 바닥에 <code>print(\"hi\")</code> 가 적혀 있으면 어떻게 될까요?"
+      en: "What if the file line {{site.line}} names has <code>print(\"hi\")</code> at its bottom?"
+    hint:
+      ko: "가져오는 일이 <b>실행</b>인지 <b>복사</b>인지 생각해 봅니다."
+      en: "Ask whether bringing a file in is <b>running</b> it or <b>copying</b> it."
+    options:
+      - t:
+          ko: "이 줄에서 hi 가 찍힌다 — 그 파일이 위에서 아래로 한 번 돌기 때문"
+          en: "hi is printed at this line — because that file runs top to bottom once"
+      - t:
+          ko: "그 함수를 부를 때 찍힌다"
+          en: "It prints when that function is called"
+        diag:
+          t:
+            ko: >-
+              함수 <b>안</b>에 있는 줄이라면 그 말이 맞습니다. 파일 바닥에 그냥 적힌 줄은 함수 밖이라
+              파일이 도는 순간 함께 돌아요.
+            en: >-
+              That holds for a line <b>inside</b> a function. A line written plainly at the bottom is
+              outside every function, so it runs as the file runs.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 함수 안과 파일 바닥"
+              en: "The sharpest spot — inside a function and at a file's bottom"
+            code:
+              - "def f(): print(\"hi\")   # 부를 때"
+              - "print(\"hi\")            # 가져올 때"
+      - t:
+          ko: "아무 일도 안 일어난다 — 이름만 옮겨 오니까"
+          en: "Nothing happens — only a name moves over"
+        diag:
+          t:
+            ko: >-
+              옮기려면 그 파일이 <b>무엇을 만들었는지</b>부터 알아야 하고, 그것을 아는 방법은 돌려
+              보는 것뿐입니다. 그래서 가져오기는 늘 실행을 포함해요.
+            en: >-
+              To move a name over, Python has to know <b>what that file made</b>, and the only way to
+              know is to run it. Bringing a file in always includes running it.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 복사와 실행"
+              en: "The sharpest spot — copying and running"
+            code:
+              - "import config     # config.py 가 돈다"
+              - "config.LIMIT      # 그 실행이 만든 값"
+      - t:
+          ko: "이 파일을 직접 돌릴 때만 찍힌다"
+          en: "It prints only when this file is run directly"
+        diag:
+          t:
+            ko: >-
+              「직접 돌릴 때만」을 가르는 것은 <b>따로 적는 조건</b>입니다. 그 조건 없이 바닥에 적힌
+              줄은 가져올 때도 그대로 돌아요.
+            en: >-
+              “Only when run directly” comes from a <b>condition you write</b>. Without it, a line at
+              the bottom runs on the bringing too.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 조건이 있느냐"
+              en: "The sharpest spot — whether the condition is written"
+            code:
+              - "print(\"hi\")"
+              - "if __name__ == \"__main__\": print(\"hi\")"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 {{pick.2|code}}의 이름을 이 파일에서 쓰게 합니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} makes the names of {{pick.2|code}} usable
+        in this file.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "import", mono: true }
+      - t: "require"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              그것은 다른 언어의 <b>함수 이름</b>입니다. 파이썬에서는 문법 낱말이 그 일을 하고,
+              함수 이름을 적으면 「그런 이름 없다」로 멈춰요.
+            en: >-
+              That is a <b>function name</b> from another language. Python does this with a grammar
+              word; writing a function name stops with “no such name.”
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 문법이냐 함수냐"
+              en: "The sharpest spot — grammar or function"
+            code:
+              - "import os              # 문법"
+              - "require(\"os\")         # NameError"
+      - t: "include"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              그 낱말은 남의 파일 <b>글자를 그대로 이 자리에 붙이는</b> 일입니다. 여기서 일어나는 것은
+              붙이기가 아니라 그 파일을 한 번 돌리는 일이에요.
+            en: >-
+              That word <b>pastes another file's text</b> into this spot. What happens here is not
+              pasting but running that file once.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 붙이기와 돌리기"
+              en: "The sharpest spot — pasting and running"
+            code:
+              - "import config         # 돌린다"
+              - "#include <stdio.h>    # C 는 붙인다"
+      - t: "use"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              파이썬에 그런 낱말은 <b>없습니다.</b> 다른 언어의 낱말을 그대로 쓴 것이고, 그 자리에서
+              문법이 안 맞아 멈춰요.
+            en: >-
+              Python has no such word. It comes from another language, and the line does not hold
+              together, so it stops there.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 있는 낱말과 없는 낱말"
+              en: "The sharpest spot — a word that exists and one that does not"
+            code:
+              - "import os        # 파이썬"
+              - "use std::fs;     # 러스트"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 파일 맨 위에 있을까요?"
+    en: "Why does line {{site.line}} sit at the top of the file?"
+  choices:
+    - t:
+        ko: "아래 줄들이 그 이름을 쓰기 때문에 — 쓰기 전에 있어야 한다"
+        en: "Because the lines below use those names, and they must exist before use"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 이름을 처음 쓰는 줄이 어디인지도 짚어 보세요."
+        en: "That is the direction. Point also at the first line that uses one of those names."
+    - t:
+        ko: "파이썬이 맨 위만 읽어서"
+        en: "Because Python reads only the top of a file"
+      ok: false
+      fb:
+        ko: >-
+          파이썬은 파일을 위에서 아래로 다 읽습니다. 함수 안에 적어도 되고, 그러면 그 함수를
+          처음 부를 때 그 파일이 돌아요.
+        en: >-
+          Python reads the whole file top to bottom. This can sit inside a function, and then the
+          other file runs when that function is first called.
+    - t:
+        ko: "관례라서"
+        en: "Because that is the convention"
+      ok: false
+      fb:
+        ko: >-
+          관례이기도 하지만 그것만으로는 <b>왜</b>가 안 풀립니다. 아래에서 쓰는 이름이 위에 있어야
+          한다는 순서가 그 관례의 이유예요.
+        en: >-
+          It is a convention, but that alone does not answer <b>why</b>. The order — names used below
+          must exist above — is the reason behind the convention.
+
+queries:
+  - { grammars: [python], file: ./import.scm }
+
+examples:
+  - code: "import os"
+    expect: { sites: 1, form: plain, hole: "import", picks: { 1: "import", 2: "os" } }
+  - code: "import numpy as np"
+    expect: { sites: 1, form: alias, hole: "import", picks: { 1: "import", 2: "numpy", 3: "np" } }
+  - code: "from fastapi import FastAPI"
+    expect: { sites: 1, form: from, hole: "import", picks: { 1: "import", 2: "from", 3: "fastapi" } }
+  # 쓰는 자리는 사용처가 아니다 — 데려오는 줄만 잡는다.
+  - code: "path = os.path.join(base, name)"
+    expect: none

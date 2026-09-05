@@ -404,6 +404,25 @@ D177 규칙 ①(「개념마다 내 코드의 자리를 짚는다」)이 0부의
 | ⑦ | `py.md` §2 ⓐ 의 「대부분」 | → 곳수 (`self.x =` 463곳/56파일 · `+=` 180곳/42파일, `adelie`) | README §12 규약 9(수치 없는 주장 금지) |
 | ⑧ | `py.md` §9 #8 의 `cs/name-scope` | → **`cs/scope-and-lifetime`** | `dictionary/cs/` 43장에 `name-scope.yaml` 이 **없다.** [`cs.md`](./cs.md) §10.1 이 `name-scope`(py) 를 `cs/scope-and-lifetime` 으로 접은 뒤 py.md 가 안 따라갔다 — 「같은 기계에 여러 이름」을 막으려던 그 접기의 잔재다 |
 
+#### 사전이 실제로 진 것 — 2026-09-06
+
+0·1·2부 42장이 서면서 위 여덟 중 사전이 질 수 있는 것이 실물이 됐다. 어디에 들었는지 적는다.
+나머지는 이 사전의 소유가 아니라 그대로 남는다.
+
+| # | 상태 | 어디 |
+|---|---|---|
+| ① `reference-binding` 을 1부 `list-literal` 뒤로 | **섰다** | `_lang.yaml` 의 `essential` 순서 · `reference-binding.scm` 머리 주석 |
+| ② §9 #4 의 참조 정정 | **섰다** | `is-identity.yaml` 의 `misconceptions`·`scm` 주석이 공식 FAQ 와 3.8 경고를 근거로 든다 |
+| ③ 오개념 여섯 추가 | **여섯 중 여섯이 실렸다** — 대기였던 둘이 이번에 자리를 받았다. `OutsideInFunctionNesting` → `py/call-expression`, `SelfAssignable` → `py/class-definition` | 두 개념의 `misconceptions` |
+| ⑥ `py/default-argument` 의 `universal` 을 `null` 로 | **섰다** | `default-argument.yaml` — `common/default-parameter` 를 안 걸었다. 「정의 시점에 한 번」이 JS 의 「호출마다」와 다르므로 D4 전이가 틀린 것을 물려준다 |
+| ⑦ §2 ⓐ 의 「대부분」을 곳수로 | 문서 쪽 몫이라 안 건드렸다 | — |
+| ④⑤⑧ | 문서 쪽 몫 | — |
+
+**신청 하나가 남았다.** §11.3 의 `trace-table` 확장(칸에 상자 라벨 · 분할 일치 채점)이 없으면
+축 G 의 별칭 문항은 여전히 `value` 로만 낼 수 있다. 42장 중 그 확장을 기다리는 것은
+`py/reference-binding` · `py/list-append` 둘이고, 지금은 `meaning` 문항이 그 자리를 진다 —
+「담아 두었으니 그쪽은 안 바뀐다」를 값이 아니라 **뜻**으로 묻는다.
+
 #### 다른 문서에 내는 신청 — 이 문서가 안 고친다
 
 | 어디 | 무엇 |

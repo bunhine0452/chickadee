@@ -1,0 +1,299 @@
+schema: 1
+id: py/type-hint
+universal: null
+name: { ko: 종류 적어 두기, en: Type hint }
+token: ": int"
+grammars: [python]
+framework: null
+essential: true
+difficulty: 3
+prereq: [py/function-definition, py/number-literal, cs/static-vs-dynamic-typing]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "여기 올 값의 종류를 코드에 적어 둔다. 파이썬 자체는 그것을 검사하지 않는다."
+    en: "Writes down what kind of value belongs here. Python itself never checks it."
+  why:
+    ko: >-
+      같은 문법이 파일마다 <b>다른 일</b>을 합니다. {{site.line}}행의 {{pick.3|code}}{{pick.3|josa:은,는}}
+      파이썬에게는 주석이나 다름없지만, pydantic·FastAPI 같은 도구는 이것을 읽어서 <b>진짜로 검사하고
+      값을 바꿉니다</b>.
+    en: >-
+      One form does <b>different work</b> from file to file. To Python, {{pick.3|code}} on line
+      {{site.line}} is little more than a note; tools such as pydantic and FastAPI read it and
+      <b>really do check and convert</b>.
+  trace:
+    - ko: "{{site.line}}행에서 {{pick.2|code}}{{pick.2|josa:이,가}} 어떤 종류를 받을지가 적힌다."
+      en: "On line {{site.line}}, the kind {{pick.2|code}} is meant to take is written down."
+    - ko: "파이썬은 그 적힘을 따로 보관만 하고 값을 안 본다."
+      en: "Python only files that note away; it does not look at the value."
+    - ko: "그 적힘을 읽는 도구가 있으면 그때 {{pick.3|code}} 대로 검사한다."
+      en: "If a tool reads the note, checking against {{pick.3|code}} happens then."
+
+rule:
+  ko: "<b>파이썬은 이 적힘을 검사하지 않는다.</b> 검사하는 것은 그것을 읽기로 한 도구다."
+  en: "<b>Python does not check this note.</b> Whatever checks it is a tool that chose to read it."
+result:
+  label:
+    ko: "{{site.line}}행의 {{pick.2}}"
+    en: "{{pick.2}} on line {{site.line}}"
+  value: "적힌 종류는 {{pick.3}}"
+  note:
+    ko: "다른 종류가 와도 파이썬은 안 막는다"
+    en: "Python does not block another kind"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:이,가}} 어떤 종류를 받을 자리인지가 코드에 남았습니다. 다른 종류를
+    넣어도 파이썬은 <b>그대로 지나가요</b>.
+  en: >-
+    The code now records what kind {{pick.2|code}} is meant to take. Put another kind in and Python
+    <b>simply carries on</b>.
+payoff:
+  ko: >-
+    이걸 알면 「분명히 적어 뒀는데 왜 안 걸리지」가 풀립니다 — 걸러 주는 것은 파이썬이 아니라
+    <b>따로 돌리는 검사기</b>이거나 이 적힘을 읽는 라이브러리예요.
+  en: >-
+    This untangles “I wrote it down, why was it not caught” — the catching comes from a <b>checker
+    you run separately</b>, or from a library that reads the note.
+bridge:
+  ko: >-
+    자바·C 는 같은 적힘이 <b>컴파일 때 강제</b>됩니다. 파이썬은 안 강제하는 대신 그 적힘을 도구가
+    읽어 쓰는 길을 열어 두었어요 — 웹 API 의 입력 검사가 그 길입니다.
+  en: >-
+    In Java or C the same note is <b>enforced at compile time</b>. Python does not enforce it; it
+    leaves the note readable by tools instead — that is how a web API checks its input.
+misconceptions:
+  - ko: >-
+      적어 두면 다른 종류가 못 들어온다 — 파이썬은 <b>안 막습니다.</b> 적힘과 실제 값이 달라도
+      그 줄은 그대로 지나가요.
+    en: >-
+      Writing it down keeps other kinds out — Python <b>does not block them</b>. The line runs even
+      when the note and the value disagree.
+  - ko: >-
+      적힘이 값을 바꿔 준다 — 파이썬은 <b>안 바꿉니다.</b> 글자로 온 숫자를 숫자로 바꾸는 것은
+      그 적힘을 읽기로 한 라이브러리가 하는 일이에요.
+    en: >-
+      The note converts the value — Python <b>converts nothing</b>. Turning a numeric text into a
+      number is done by a library that chose to read the note.
+  - ko: >-
+      적힘이 없으면 종류가 없다 — 값에는 <b>언제나</b> 종류가 있습니다. 적힘은 사람과 도구를 위한
+      것이지 값의 종류를 만들지 않아요.
+    en: >-
+      Without a note there is no kind — a value <b>always</b> has one. The note is for readers and
+      tools; it does not give the value its kind.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>{{pick.2|code}}에 종류를 붙이는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that attaches a kind to {{pick.2|code}}</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} <b>종류가 붙는 이름</b>입니다. 이름만 있으면 종류가
+            안 적힌 것이고, 붙이는 일은 그 뒤의 기호가 해요.
+          en: >-
+            {{pick.2|code}} is <b>the name the kind attaches to</b>. A bare name carries no note; the
+            symbol after it does the attaching.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 이름과 붙은 종류"
+            en: "The sharpest spot — a name and an attached kind"
+          code:
+            - "item_id            # 적힘 없음"
+            - "item_id: int       # 적힘 있음"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} <b>적힌 종류</b>입니다. 종류 이름만 따로 두면 그냥 값
+            하나이고, 어느 이름에 붙는지를 정하는 것이 그 앞의 기호예요.
+          en: >-
+            {{pick.3|code}} is <b>the kind written down</b>. On its own a kind name is just a value;
+            the symbol before it says which name it attaches to.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 종류와 붙이는 일"
+            en: "The sharpest spot — the kind and the attaching"
+          code:
+            - "int                # 값 하나"
+            - "item_id: int       # 붙었다"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행에 적힌 종류와 <b>다른</b> 값이 실제로 오면 어떻게 될까요?"
+      en: "What happens if a value of a <b>different</b> kind actually arrives at line {{site.line}}?"
+    hint:
+      ko: "검사하는 쪽이 <b>누구</b>인지 먼저 정합니다."
+      en: "First settle <b>who</b> does the checking."
+    options:
+      - t:
+          ko: "파이썬은 그대로 지나간다 — 읽는 도구가 있을 때만 걸린다"
+          en: "Python carries on — it is caught only where a tool reads the note"
+      - t:
+          ko: "그 자리에서 멈춘다"
+          en: "It stops right there"
+        diag:
+          t:
+            ko: >-
+              멈추려면 <b>검사하는 쪽</b>이 있어야 합니다. 파이썬 자체는 그 적힘을 보관만 하고 값과
+              대조하지 않아서, 아무 일도 안 일어나요.
+            en: >-
+              Stopping needs <b>something that checks</b>. Python only files the note away and never
+              weighs it against the value, so nothing happens.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 보관과 대조"
+              en: "The sharpest spot — filing and checking"
+            code:
+              - "def f(n: int): return n"
+              - 'f("x")        # 그냥 돈다'
+      - t:
+          ko: "적힌 종류로 자동으로 바뀐다"
+          en: "It is converted to the written kind automatically"
+        diag:
+          t:
+            ko: >-
+              바꾸는 것은 <b>그 적힘을 읽기로 한 라이브러리</b>입니다. 웹 API 의 입력이 숫자로 오는 것이
+              그 라이브러리 덕이지 파이썬 덕이 아니에요.
+            en: >-
+              Converting is done by a <b>library that chose to read the note</b>. Web API input
+              arriving as a number is that library's doing, not Python's.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 파이썬과 라이브러리"
+              en: "The sharpest spot — Python and a library"
+            code:
+              - "def f(n: int): return type(n)"
+              - 'f("1")        # str 그대로'
+      - t:
+          ko: "경고 한 줄이 찍히고 계속 돈다"
+          en: "A warning is printed and it keeps running"
+        diag:
+          t:
+            ko: >-
+              경고도 <b>안 찍힙니다.</b> 파이썬은 그 적힘을 대조하지 않으므로 말할 것이 없고, 말해 주는
+              것은 따로 돌리는 검사기예요.
+            en: >-
+              There is <b>no warning either</b>. Python never weighs the note, so it has nothing to
+              say; a checker you run separately is what speaks.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 조용함과 검사기"
+              en: "The sharpest spot — silence and a checker"
+            code:
+              - "python app.py     # 아무 말 없다"
+              - "mypy app.py       # 여기서 말한다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 {{pick.2|code}}에 {{pick.3|code}} 라는 <b>종류를 적어 둡니다</b>."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} <b>writes the kind</b> {{pick.3|code}}
+        onto {{pick.2|code}}.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: ":", mono: true }
+      - t: "="
+        mono: true
+        diag:
+          t:
+            ko: >-
+              그 기호는 <b>값</b>을 넣습니다. 종류 이름을 값으로 넣으면 그 이름이 종류 자체를 가리키게
+              되어, 적어 두려던 뜻과 달라져요.
+            en: >-
+              That symbol puts a <b>value</b> in. Putting a kind name in makes the name point at the
+              kind itself, which is not what the note meant.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 값 넣기와 종류 적기"
+              en: "The sharpest spot — putting a value and noting a kind"
+            code:
+              - "item_id: int     # 적힘"
+              - "item_id = int    # int 를 가리킨다"
+      - t: "as"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              그 낱말은 <b>이름을 새로 붙이는</b> 자리입니다. 가져오기나 예외 받기에서 쓰이고,
+              종류를 적는 자리에 오면 문법이 안 맞아요.
+            en: >-
+              That word <b>gives something a new name</b>. It lives in bringing files in and catching
+              failures; in a kind-note slot the line does not hold together.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 이름 붙이기와 종류 적기"
+              en: "The sharpest spot — renaming and noting a kind"
+            code:
+              - "item_id: int"
+              - "import numpy as np    # 이름 붙이기"
+      - t: "::"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              그 기호는 <b>다른 언어</b>의 것입니다. 파이썬에서는 그 자리에서 문법이 안 맞아 줄이
+              성립하지 않아요.
+            en: >-
+              That symbol belongs to <b>another language</b>. In Python the line does not hold
+              together there.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 언어마다 다른 기호"
+              en: "The sharpest spot — one symbol per language"
+            code:
+              - "item_id: int       # 파이썬"
+              - "itemId :: Int      # 하스켈"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 검사도 안 하는 것을 왜 적어 둘까요?"
+    en: "Why does line {{site.line}} write down something that is never checked?"
+  choices:
+    - t:
+        ko: "읽는 사람과 도구에게 계약을 남기려고 — 검사기나 라이브러리가 그것을 읽어서 쓴다"
+        en: "To leave a contract for readers and tools — a checker or library reads and uses it"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 파일에서 그 적힘을 실제로 읽는 도구가 있는지도 찾아보세요."
+        en: "That is the direction. Look for a tool in this file that actually reads the note."
+    - t:
+        ko: "파이썬이 그 종류로 값을 바꿔 주기 때문에"
+        en: "Because Python converts the value to that kind"
+      ok: false
+      fb:
+        ko: "파이썬은 안 바꿉니다. 바꾸는 것은 그 적힘을 읽기로 한 라이브러리예요."
+        en: "Python converts nothing. A library that chose to read the note does the converting."
+    - t:
+        ko: "적어 두면 더 빨리 돌아서"
+        en: "Because it makes the code run faster"
+      ok: false
+      fb:
+        ko: >-
+          속도는 안 바뀝니다. 파이썬이 그 적힘을 실행에 쓰지 않으므로 재 보면 차이가 없어요.
+        en: >-
+          Speed does not change. Python does not use the note while running, so a measurement shows
+          no difference.
+
+queries:
+  - { grammars: [python], file: ./type-hint.scm }
+
+examples:
+  - code: "def read_item(item_id: int):\n    return item_id"
+    expect: { sites: 1, form: param, hole: ":", picks: { 1: ":", 2: "item_id", 3: "int" } }
+  - code: "def read_item(limit: int = 10):\n    return limit"
+    expect: { sites: 1, form: param-default, hole: ":", picks: { 1: ":", 2: "limit", 3: "int" } }
+  - code: "def read_item() -> Item:\n    return Item()"
+    expect: { sites: 1, form: return, hole: "->", picks: { 1: "->", 2: "read_item", 3: "Item" } }
+  - code: "class Item:\n    name: str"
+    expect: { sites: 1, form: field, hole: ":", picks: { 1: ":", 2: "name", 3: "str" } }
+  # 적힘이 없는 매개변수는 사용처가 아니다.
+  - code: "def read_item(item_id):\n    return item_id"
+    expect: none

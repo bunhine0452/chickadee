@@ -1,0 +1,299 @@
+schema: 1
+id: py/list-append
+universal: common/mutating-append
+name: { ko: 있던 목록에 직접 더하기, en: Growing a list in place }
+token: ".append"
+grammars: [python]
+framework: null
+essential: true
+difficulty: 2
+prereq: [py/list-literal, py/attribute-access, cs/aliasing]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "새 목록을 만들지 않고 있던 것을 고친다. 돌려주는 값은 없음이다."
+    en: "Changes the existing list rather than making a new one. It hands back absence."
+  why:
+    ko: >-
+      {{site.line}}행은 <b>{{pick.2|code}} 자체</b>를 고칩니다. 그 목록을 가리키던 다른 이름에서도
+      같이 늘어나고, 이 줄이 내놓는 값은 늘어난 목록이 아니라 「없음」이에요.
+    en: >-
+      Line {{site.line}} changes <b>{{pick.2|code}} itself</b>. Any other name pointing at that list
+      grows too, and what this line yields is absence, not the grown list.
+  trace:
+    - ko: "{{site.line}}행에서 {{pick.2|code}}{{pick.2|josa:이,가}} 가리키는 목록을 찾는다."
+      en: "On line {{site.line}}, the list {{pick.2|code}} points at is found."
+    - ko: "그 목록 끝에 값 하나가 붙는다 — 새 목록은 안 생긴다."
+      en: "One value is attached to its end — no new list appears."
+    - ko: "{{site.line}}행 자체가 내놓는 값은 없음이다."
+      en: "What line {{site.line}} itself yields is absence."
+
+rule:
+  ko: "<b>고치는 것은 있던 목록이고, 내놓는 값은 없음이다.</b> 그래서 그 결과를 다시 담으면 목록을 잃는다."
+  en: "<b>It edits the existing list and yields absence.</b> Keeping that result therefore loses the list."
+result:
+  label:
+    ko: "{{site.line}}행 뒤의 {{pick.2}}"
+    en: "{{pick.2}} after line {{site.line}}"
+  value: "한 칸 늘어난 같은 목록"
+  note:
+    ko: "같은 것을 가리키던 이름에서도 늘어난다"
+    en: "it grows for every name pointing at it"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:이,가}} 한 칸 늘었습니다. 새 목록이 아니라 <b>같은 목록</b>이라,
+    다른 이름이 그것을 가리키고 있었다면 그쪽에서도 늘어나 있어요.
+  en: >-
+    {{pick.2|code}} grew by one. It is <b>the same list</b>, not a new one, so if another name was
+    pointing at it, that one has grown too.
+payoff:
+  ko: >-
+    이걸 알면 「왜 내가 안 건드린 목록이 바뀌었지」가 풀립니다 — 넘겨 준 것은 복사본이 아니라
+    <b>같은 목록</b>이고, 받은 쪽이 이 줄을 쓰면 준 쪽에서도 바뀝니다.
+  en: >-
+    This untangles “why did a list I never touched change” — what was passed was <b>the same list</b>
+    rather than a copy, and this line inside the receiver changes it for the sender too.
+bridge:
+  ko: >-
+    <code>py/list-comprehension</code> 은 반대쪽입니다 — 있던 것을 안 고치고 <b>새 목록</b>을 냅니다.
+    같은 일을 두 방식으로 적을 수 있고, 갈리는 것은 원래 목록이 남느냐예요.
+  en: >-
+    <code>py/list-comprehension</code> is the other side — it leaves the original alone and makes a
+    <b>new list</b>. The same work, two ways; what differs is whether the original survives.
+misconceptions:
+  # py.md §9 #1 · `AssignmentCopiesObject`.
+  - ko: >-
+      다른 이름에 담아 두었으니 그쪽은 안 바뀐다 — 담는 일은 복사가 아니라 <b>화살표 하나 더</b>라,
+      둘 다 같은 목록을 봅니다.
+    en: >-
+      Keeping it in another name protects that one — keeping is not copying but <b>one more
+      arrow</b>, and both names see the same list.
+  - ko: >-
+      늘어난 목록이 돌아오니 다시 담아도 된다 — 돌아오는 것은 <b>없음</b>입니다. 다시 담으면 그
+      이름이 목록이 아니라 없음을 가리켜요.
+    en: >-
+      The grown list comes back so you can keep it — what comes back is <b>absence</b>. Keeping it
+      makes the name point at absence instead of a list.
+  - ko: >-
+      훑는 도중에 써도 된다 — 훑는 자리가 밀려서 같은 항목을 두 번 보거나 <b>끝나지 않을</b> 수
+      있습니다. 새 목록에 모으는 쪽이 안전해요.
+    en: >-
+      It is fine to use while walking the list — the walking position shifts, so items repeat or the
+      loop <b>never ends</b>. Collecting into a new list is safer.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>{{pick.2|code}} 자체를 고치는 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name that changes {{pick.2|code}} itself</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} <b>고쳐질 목록</b>입니다. 목록만으로는 아무 일도 안 나고,
+            무엇을 할지는 점 뒤의 이름이 정해요.
+          en: >-
+            {{pick.2|code}} is <b>the list being changed</b>. A list alone does nothing; the name
+            after the dot decides what happens to it.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 목록과 하는 일"
+            en: "The sharpest spot — the list and the doing"
+          code:
+            - "rows              # 목록 하나"
+            - "rows.append(v)    # 한 칸 늘어난다"
+      pick.3:
+        t:
+          ko: >-
+            그 기호는 <b>실제로 돌리는</b> 자리입니다. 돌리는 일은 맞지만 무엇을 돌릴지는 앞의 이름이
+            정하고, 목록을 고치는 뜻도 거기 들어 있어요.
+          en: >-
+            That symbol is what <b>actually runs</b> it. Running is right, but which work runs is
+            decided by the name before it, and that is where the changing lives.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 무엇을 돌리나"
+            en: "The sharpest spot — which work runs"
+          code:
+            - "rows.append(v)    # 늘린다"
+            - "rows.count(v)     # 세기만 한다"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행을 <code>{{pick.2}} = {{pick.2}}.{{pick.1}}(v)</code> 로 바꾸면 어떻게 될까요?"
+      en: "What if line {{site.line}} became <code>{{pick.2}} = {{pick.2}}.{{pick.1}}(v)</code>?"
+    hint:
+      ko: "이 줄이 <b>내놓는 값</b>이 무엇인지부터 봅니다."
+      en: "Start from what this line <b>yields</b>."
+    options:
+      - t:
+          ko: "그 이름이 목록이 아니라 없음을 가리키게 된다"
+          en: "The name ends up pointing at absence rather than a list"
+      - t:
+          ko: "늘어난 목록이 담긴다 — 결과가 같다"
+          en: "The grown list is kept — the result is the same"
+        diag:
+          t:
+            ko: >-
+              고치는 일은 일어나지만 이 줄이 <b>내놓는 값</b>은 목록이 아닙니다. 고치는 것과 값을
+              내놓는 것이 다른 일이고, 여기서는 앞의 것만 해요.
+            en: >-
+              The change does happen, but what this line <b>yields</b> is not the list. Changing and
+              yielding are different jobs, and this does only the first.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 고치기와 값 내놓기"
+              en: "The sharpest spot — changing and yielding"
+            code:
+              - "rows.append(v)          # rows 가 늘어난다"
+              - "rows = rows.append(v)   # rows 가 None 이 된다"
+      - t:
+          ko: "그 자리에서 멈춘다"
+          en: "It stops right there"
+        diag:
+          t:
+            ko: >-
+              멈추지 <b>않습니다.</b> 없음을 담는 일은 멀쩡한 대입이라, 문제는 그다음 줄에서 그 이름을
+              목록처럼 쓸 때 터져요.
+            en: >-
+              It does <b>not</b> stop. Keeping absence is a perfectly good putting; the trouble shows
+              up on the next line that treats the name as a list.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 터지는 줄이 밀린다"
+              en: "The sharpest spot — the failure moves to a later line"
+            code:
+              - "rows = rows.append(v)   # 지나간다"
+              - "rows.append(w)          # 여기서 터진다"
+      - t:
+          ko: "복사본이 만들어져 원래 목록은 안 바뀐다"
+          en: "A copy is made and the original list is left alone"
+        diag:
+          t:
+            ko: >-
+              복사는 <b>안 일어납니다.</b> 이 이름이 가리키던 목록이 그대로 늘어나고, 다만 이름이
+              없음 쪽으로 옮겨 가서 그 목록을 이 이름으로는 못 찾게 돼요.
+            en: >-
+              No copy is made. The list this name pointed at grows as before; the name simply moves
+              to absence, so that list is no longer reachable through it.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 목록은 남고 이름만 옮겨 간다"
+              en: "The sharpest spot — the list stays, the name moves"
+            code:
+              - "other = rows"
+              - "rows = rows.append(v)   # other 는 늘어나 있다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 {{pick.2|code}} 끝에 값 하나를 <b>붙입니다</b>."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} <b>attaches</b> one value to the end of
+        {{pick.2|code}}.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "append", mono: true }
+      - t: "push"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              그 이름은 다른 언어의 것입니다. 파이썬 목록에 그 이름은 <b>없어서</b> 점 오른쪽을 못
+              찾고 그 자리에서 멈춰요.
+            en: >-
+              That name belongs to another language. A Python list <b>has no such name</b>, so the
+              lookup after the dot stops right there.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 있는 이름과 없는 이름"
+              en: "The sharpest spot — a name that exists and one that does not"
+            code:
+              - "rows.append(v)     # 파이썬"
+              - "rows.push(v)       # AttributeError"
+      - t: "add"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              그 이름은 <b>집합</b>의 것입니다. 집합에는 끝이 없어서 「끝에 붙인다」가 성립하지 않고,
+              그래서 이름도 다릅니다.
+            en: >-
+              That name belongs to a <b>set</b>. A set has no end, so “attach to the end” does not
+              apply, and the name differs accordingly.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 끝이 있는 묶음과 없는 묶음"
+              en: "The sharpest spot — a group with an end and one without"
+            code:
+              - "rows.append(v)     # 목록"
+              - "tags.add(v)        # 집합"
+      - t: "extend"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              그 이름은 값 하나가 아니라 <b>묶음을 통째로</b> 이어 붙입니다. 값 하나를 넘기면 그것을
+              훑으려 해서, 글자를 넘기면 한 글자씩 들어가요.
+            en: >-
+              That name joins <b>a whole group</b> rather than one value. Hand it a single value and
+              it tries to walk it — hand it a text and the characters go in one by one.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 하나와 묶음"
+              en: "The sharpest spot — one value and a group"
+            code:
+              - 'rows.append("ab")   # ["ab"]'
+              - 'rows.extend("ab")   # ["a", "b"]'
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 새 목록을 만들지 않고 있던 것을 고칠까요?"
+    en: "Why does line {{site.line}} change the existing list rather than make a new one?"
+  choices:
+    - t:
+        ko: "그 목록을 이미 다른 데서 가리키고 있어서 — 새로 만들면 그쪽이 옛것을 계속 본다"
+        en: "Because something else already points at it — a new list would leave that one on the old"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 목록을 가리키는 다른 이름이 이 파일 어디에 있는지 찾아보세요."
+        en: "That is the direction. Find where else in this file that list is pointed at."
+    - t:
+        ko: "파이썬 목록은 새로 못 만들어서"
+        en: "Because a Python list cannot be made afresh"
+      ok: false
+      fb:
+        ko: "만들 수 있습니다 — 컴프리헨션이 그 자리예요. 여기서 안 만든 것은 다른 이유입니다."
+        en: "It can — a comprehension does exactly that. Not doing so here has another reason."
+    - t:
+        ko: "새로 만드는 것보다 늘 빨라서"
+        en: "Because it is always faster than making a new one"
+      ok: false
+      fb:
+        ko: >-
+          재 보지 않고 빠르다고 하면 근거가 안 섭니다. 그리고 새 목록을 만드는 편이 나은 자리도
+          있어요 — 원래 것을 남겨야 할 때입니다.
+        en: >-
+          Calling it faster without measuring leaves no ground. And a new list is the better choice
+          where the original must survive.
+
+queries:
+  - { grammars: [python], file: ./list-append.scm }
+
+examples:
+  - code: "rows.append(row)"
+    expect: { sites: 1, form: append, hole: "append", picks: { 1: "append", 2: "rows", 3: "(" } }
+  - code: "rows.extend(more)"
+    expect: { sites: 1, form: grow, hole: "extend", picks: { 1: "extend", 2: "rows", 3: "(" } }
+  - code: "rows.insert(0, row)"
+    expect: { sites: 1, form: grow, hole: "insert", picks: { 1: "insert", 2: "rows", 3: "(" } }
+  # `sort`·`pop` 은 사전·집합에도 있어 「목록을 고친다」가 그 줄에서 참인지 못 가린다 — 뺐다.
+  - code: "rows.sort()"
+    expect: none
+  - code: "rows = rows + [row]"
+    expect: none
