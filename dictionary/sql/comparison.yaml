@@ -160,3 +160,6 @@ examples:
     expect: { sites: 1, form: compare, hole: "=", picks: { 1: "=", 2: "login_id", 3: ":loginId" } }
   - code: "INSERT INTO users (login_id) VALUES ('abc')"
     expect: none
+  # 「모름인가」를 묻는 자리는 견주기가 아니다 — `sql/null-check` 의 땅이다.
+  - code: "SELECT * FROM cart WHERE closed_at IS NULL"
+    expect: none

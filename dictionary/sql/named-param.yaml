@@ -1,0 +1,196 @@
+schema: 1
+id: sql/named-param
+universal: null
+name: { ko: "값 자리 비워 두기", en: "Bound parameter" }
+token: ":name"
+grammars: [sql, mybatis_sql]
+framework: null
+essential: true
+difficulty: 1
+prereq: [sql/text-literal]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "값이 들어올 자리를 이름으로 비워 둔 표시. 채우는 것은 드라이버다."
+    en: "A named hole where a value will arrive. The driver, not the text, fills it."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}} 부분은 SQL 의 값이 아니라 <b>자리</b>입니다. 문장을 먼저
+      데이터베이스에 주고, 값은 그 뒤에 따로 건네요. 그래서 사용자가 무엇을 적어 보내든 그것은 언제나
+      <b>값 하나</b>로만 읽히고 문장의 모양을 못 바꿉니다 — 글자로 이어 붙였다면 바꿀 수 있습니다.
+      대신 이 자리는 <b>열 이름 자리에는 못 씁니다</b>. 문장의 모양은 미리 정해져 있어야 하니까요.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} is not a value in the SQL — it is a <b>slot</b>. The
+      statement goes to the database first and the value follows separately. Whatever a person types
+      therefore arrives as <b>one value</b> and cannot reshape the statement — string-joining would
+      let it. The price is that a slot <b>cannot stand where a column name goes</b>: the shape has to
+      be settled in advance.
+  trace:
+    - ko: "{{site.line}}행의 문장이 자리를 비운 채 먼저 건너간다."
+      en: "The statement on line {{site.line}} goes over first, with the slot still empty."
+    - ko: "{{pick.1|code}} 자리에 값이 따로 채워진다."
+      en: "The value is then supplied into the {{pick.1|code}} slot."
+    - ko: "{{pick.2|code}}{{pick.2|josa:과,와}} 견주는 것은 그 값이지 글자 문장이 아니다."
+      en: "What is compared with {{pick.2|code}} is that value, not spliced text."
+
+rule:
+  ko: "<b>자리는 값으로만 채워진다.</b> 문장의 모양은 값이 오기 전에 정해져 있다."
+  en: "<b>A slot only ever takes a value.</b> The statement's shape is settled before it arrives."
+result:
+  label: { ko: "비워 둔 자리", en: "the slot left open" }
+  value: "{{pick.1}}"
+  note: { ko: "값은 드라이버가 채운다", en: "the driver supplies the value" }
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:과,와}} 견줄 값이 문장 밖에서 들어오고, 문장 자체는 바뀌지 않습니다.
+  en: >-
+    The value compared with {{pick.2|code}} arrives from outside, and the statement itself is unchanged.
+payoff:
+  ko: >-
+    이걸 알면 왜 값을 글자로 이어 붙이면 안 되는지가 규칙이 아니라 이유로 남습니다.
+  en: >-
+    Knowing this, “do not splice values into the text” stops being a rule and becomes a reason.
+bridge:
+  ko: >-
+    다른 언어의 서식 문자열과 <b>겉이 닮았지만 정반대</b>입니다. 서식은 글자를 만들고 이것은 안 만들어요.
+  en: >-
+    It <b>looks like</b> a format string from another language and is the opposite: formatting builds
+    text; this never does.
+misconceptions:
+  - ko: "자리에 열 이름도 넣을 수 있다 — 값 자리에만 씁니다."
+    en: "A column name can go in a slot — slots hold values only."
+  - ko: "글자로 이어 붙이는 것과 결과가 같다 — 값이 문장을 바꿀 수 있느냐가 다릅니다."
+    en: "It is the same as splicing text — whether a value can reshape the statement differs."
+  - ko: "따옴표를 직접 씌워야 한다 — 씌우면 이름이 값의 일부가 됩니다."
+    en: "The slot must be quoted by hand — quoting makes the name part of the value."
+
+meaning:
+  - q:
+      ko: "{{pick.1|code}} 자리에 사용자가 SQL 조각을 적어 보내면 어떻게 될까요?"
+      en: "What if a person sends a piece of SQL into the {{pick.1|code}} slot?"
+    hint:
+      ko: "문장의 모양이 <b>언제</b> 정해지는지 생각해 보세요."
+      en: "Think about <b>when</b> the statement's shape is settled."
+    options:
+      - t:
+          ko: "그 조각이 통째로 값 하나로 읽힌다 — 문장은 그대로다"
+          en: "The whole piece reads as one value — the statement is unchanged"
+      - t:
+          ko: "그 조각이 문장에 이어 붙어 실행된다"
+          en: "The piece is spliced into the statement and runs"
+        diag:
+          t:
+            ko: >-
+              이어 붙이는 것은 <b>글자로 만들었을 때</b>의 일입니다. 자리는 글자를 안 만들어요.
+            en: >-
+              Splicing is what happens <b>when the text is built by hand</b>. A slot builds no text.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 자리냐 이어 붙이기냐", en: "The sharpest spot — a slot or a splice" }
+            code:
+              - "WHERE id = :id            -- 자리"
+              - "\"WHERE id = \" + input   -- 이어 붙이기"
+      - t:
+          ko: "그 자리가 조용히 비워진다"
+          en: "The slot is quietly left empty"
+        diag:
+          t:
+            ko: >-
+              값을 안 주면 <b>실행 전에</b> 걸립니다. 빈 채로 도는 일은 없어요.
+            en: >-
+              A slot with no value is caught <b>before the run</b>. Nothing runs half-filled.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 빈 값이냐 안 준 값이냐", en: "The sharpest spot — an empty value or no value" }
+            code:
+              - "-- 빈 글자도 값이다"
+              - "-- 안 준 것은 값이 아니다"
+      - t:
+          ko: "따옴표가 자동으로 씌워져 글자가 된다"
+          en: "Quotes are added automatically to make it text"
+        diag:
+          t:
+            ko: >-
+              값의 <b>타입은 준 대로</b>입니다. 수를 주면 수예요 — 따옴표를 씌우는 단계가 아예 없습니다.
+            en: >-
+              The value keeps <b>the type it was given</b>. A number stays a number — there is no
+              quoting step at all.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 글자로 만들기냐 값 그대로냐", en: "The sharpest spot — made into text or passed as is" }
+            code:
+              - "-- 값은 글자를 거치지 않는다"
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>문장 밖에서 채워지는</b> 자리를 짚어 보세요."
+      en: "On line {{site.line}}, point at the slot <b>filled from outside the statement</b>."
+    hint:
+      ko: "문장이 건너갈 때 이미 정해져 있던 것과 아닌 것을 갈라 보세요."
+      en: "Separate what was settled when the statement left from what was not."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} <b>열 이름</b>이라 문장이 건너가기 전에 정해져 있어야 합니다.
+          en: >-
+            {{pick.2|code}} is a <b>column name</b>, so it has to be settled before the statement leaves.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 값이냐", en: "The sharpest spot — a name or a value" }
+          code:
+            - "WHERE id = :id"
+            - "-- 왼쪽은 모양, 오른쪽은 값"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 견주는 <b>방법</b>이라 이것도 문장의 모양에 속합니다.
+          en: >-
+            {{pick.3|code}} is <b>how</b> the two are compared, which is also part of the shape.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 모양이냐 값이냐", en: "The sharpest spot — shape or value" }
+          code:
+            - "-- 모양은 미리 정해진다"
+            - "-- 값만 나중에 온다"
+
+no_hole_reason: >-
+  구멍에 넣을 정답이 하나로 안 정해진다 — 자리표의 글자가 사용처마다 다르고(`:id` · `#{userId}` ·
+  `${name}`) 무엇을 쓸지는 언어가 아니라 드라이버가 정한다. 그리고 이 문법에는 자리표 노드가 아예 없어
+  파스 전에 값으로 가려진다(`crates/parse/src/params.rs`) — 「이것은 자리표다」를 짚을 노드가 없다.
+  그래서 물어야 하는 것은 「어느 낱말이냐」가 아니라 「어느 자리가 밖에서 채워지느냐」이고, 지목형이 그것을 묻는다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 값을 <b>문장에 안 적고</b> 자리로 비워 뒀을까요?"
+    en: "Why does line {{site.line}} leave a slot instead of <b>writing the value in</b>?"
+  choices:
+    - t:
+        ko: "값이 문장의 모양을 못 바꾸게 하려고 — 글자로 이어 붙이면 바꿀 수 있다"
+        en: "So the value cannot reshape the statement — spliced text can"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그러면 열 이름을 자리로 못 쓰는 이유도 같은 문장으로 설명해 보세요."
+        en: "That is the direction. Now explain, in the same sentence, why a column name cannot be a slot."
+    - t:
+        ko: "같은 문장을 여러 번 쓰려고"
+        en: "To reuse the same statement many times"
+      ok: false
+      fb:
+        ko: "다시 쓰기도 하지만 그것은 <b>덤</b>입니다. 값이 모양을 못 바꾸게 하는 것이 먼저예요."
+        en: "Reuse is a <b>bonus</b>. Keeping the value out of the shape comes first."
+    - t:
+        ko: "문장이 짧아져서"
+        en: "Because the statement gets shorter"
+      ok: false
+      fb:
+        ko: "길이는 안 바뀝니다. 바뀌는 것은 <b>값이 어디로 들어오느냐</b>예요."
+        en: "The length is the same. What changes is <b>where the value enters</b>."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./named-param.scm }
+
+examples:
+  - code: "SELECT id FROM cart WHERE id = :cartId"
+    expect: { sites: 1, form: bind, picks: { 1: ":cartId", 2: "id", 3: "=" } }
+  - code: "SELECT id FROM cart WHERE qty > #{minQty}"
+    expect: { sites: 1, form: bind, picks: { 1: "#{minQty}", 2: "qty", 3: ">" } }
+  - code: "SELECT id FROM cart WHERE note = 'sent'"
+    expect: none

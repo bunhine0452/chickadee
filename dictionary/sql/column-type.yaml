@@ -185,5 +185,10 @@ examples:
     expect: { sites: 2, form: column-type, picks: { 1: "INTEGER", 2: "id", 3: "cart" } }
   - code: "CREATE TABLE item (sku TEXT)"
     expect: { sites: 1, form: column-type, picks: { 1: "TEXT", 2: "sku", 3: "item" } }
+  - code: "CREATE TABLE log (at DATETIME, msg TEXT)"
+    expect: { sites: 2, form: column-type, picks: { 1: "DATETIME", 2: "at", 3: "log" } }
   - code: "INSERT INTO cart (id) VALUES (1)"
+    expect: none
+  # 읽는 문장에는 타입이 글자로 없다 — 그것이 이 개념의 요점이다.
+  - code: "SELECT * FROM cart"
     expect: none

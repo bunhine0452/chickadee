@@ -250,5 +250,13 @@ queries:
 examples:
   - code: "SELECT * FROM users WHERE deleted_date IS NULL"
     expect: { sites: 1, form: isnull, hole: "IS", picks: { 1: "IS", 2: "deleted_date", 3: "NULL" } }
+  - code: "UPDATE cart SET ok = 1 WHERE closed_at IS NULL"
+    expect: { sites: 1, form: isnull, hole: "IS", picks: { 1: "IS", 2: "closed_at", 3: "NULL" } }
+  # 자리표가 섞여 있어도 이 자리는 그대로 잡힌다 (`crates/parse/src/params.rs`).
+  - code: "SELECT * FROM cart WHERE note IS NULL AND id = :cartId"
+    expect: { sites: 1, form: isnull, hole: "IS", picks: { 1: "IS", 2: "note", 3: "NULL" } }
   - code: "SELECT * FROM users WHERE deleted_date = NULL"
+    expect: none
+  # 뒤집은 판(`IS NOT`)은 다른 노드라 여기 안 걸린다 — 그쪽은 `sql/null-unknown` 이 든다.
+  - code: "SELECT * FROM cart WHERE closed_at IS NOT NULL"
     expect: none

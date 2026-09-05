@@ -1,0 +1,203 @@
+schema: 1
+id: sql/transaction
+universal: null
+name: { ko: "여러 문장을 한 덩어리로", en: "Transaction" }
+token: "BEGIN"
+grammars: [sql, mybatis_sql]
+framework: null
+essential: true
+difficulty: 4
+prereq: [sql/update-set, sql/insert-row, cs/race-condition]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "여러 문장을 한 덩어리로 묶는다. 반만 되는 일이 없어진다."
+    en: "Binds several statements into one block. Half-done stops being possible."
+  why:
+    ko: >-
+      문장 둘을 잇달아 보내면 <b>첫째만 되고 둘째가 안 되는</b> 상태가 실재합니다 — 돈이 빠졌는데 안 들어간
+      상태요. {{site.line}}행은 그 사이를 없앱니다: 덩어리 안의 {{pick.2|code}} 같은 문장들은 <b>다 되거나
+      하나도 안 되거나</b> 둘 중 하나예요. 닫는 낱말이 {{pick.3|code}} 이면 그때 한꺼번에 확정되고,
+      되돌리는 낱말이면 덩어리 안의 일이 <b>전부</b> 없던 일이 됩니다. 그리고 덩어리가 열려 있는 동안
+      바깥에서는 그 중간 상태가 안 보입니다.
+    en: >-
+      Send two statements in a row and the state where <b>the first took and the second did not</b> is
+      real — money left one place and never reached the other. Line {{site.line}} removes that gap: the
+      statements inside, such as {{pick.2|code}}, either <b>all take or none do</b>. When the closing
+      word is {{pick.3|code}} they are settled together; when it is the undoing word, <b>everything</b>
+      inside is as if it never happened. While the block is open, the half-state is invisible outside.
+  trace:
+    - ko: "{{site.line}}행이 덩어리를 연다."
+      en: "Line {{site.line}} opens the block."
+    - ko: "{{pick.2|code}} 같은 문장이 안에서 돈다 — 아직 바깥에 안 보인다."
+      en: "Statements like {{pick.2|code}} run inside, still invisible outside."
+    - ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 그 일을 한꺼번에 확정한다."
+      en: "{{pick.3|code}} settles all of it at once."
+
+rule:
+  ko: "<b>다 되거나 하나도 안 된다.</b> 닫는 낱말이 어느 쪽인지 정한다."
+  en: "<b>All or none.</b> The closing word decides which."
+result:
+  label: { ko: "덩어리를 닫는 낱말", en: "the word that closes the block" }
+  value: "{{pick.3}}"
+  note: { ko: "여기서 한꺼번에 정해진다", en: "everything settles here" }
+ok:
+  ko: >-
+    덩어리 안의 문장이 전부 확정되거나, 되돌리면 전부 없던 일이 됩니다.
+  en: >-
+    Every statement inside settles together, or, undone, none of them ever happened.
+payoff:
+  ko: >-
+    이걸 알면 「반만 저장된」 데이터가 왜 생기는지와 어떻게 안 생기게 하는지가 같이 풀립니다.
+  en: >-
+    Knowing this explains half-saved data and how to make it impossible, in one go.
+bridge:
+  ko: >-
+    다른 언어의 되돌리기 가능한 작업 묶음과 같습니다. 다른 것은 <b>여러 사람이 동시에 본다</b>는 것이에요.
+  en: >-
+    It is an undoable unit of work as elsewhere. What differs is that <b>several people watch at once</b>.
+misconceptions:
+  - ko: "덩어리 안의 문장이 다 돌면 이미 확정이다 — 닫는 낱말이 있어야 확정입니다."
+    en: "Once the inner statements run they are settled — only the closing word settles them."
+  - ko: "덩어리 안에서는 다른 사람이 못 읽는다 — 격리 수준에 따라 읽을 수 있습니다."
+    en: "Nobody can read inside the block — depending on the isolation level they can."
+  - ko: "되돌리면 자동으로 붙는 번호도 되돌아간다 — 대개 안 돌아갑니다."
+    en: "Undoing rewinds auto-assigned numbers too — usually it does not."
+
+meaning:
+  - q:
+      ko: "덩어리 안에서 문장 둘을 돌린 뒤 닫는 낱말 없이 연결이 끊기면 어떻게 될까요?"
+      en: "Two statements run inside the block, then the connection drops before the closing word — then what?"
+    hint:
+      ko: "<b>확정</b>이 언제 일어나는지 정하세요."
+      en: "Settle when the <b>settling</b> happens."
+    options:
+      - t:
+          ko: "둘 다 없던 일이 된다 — 확정 전이라서"
+          en: "Both are as if they never happened — nothing had settled"
+      - t:
+          ko: "돈 만큼은 남는다"
+          en: "Whatever ran is kept"
+        diag:
+          t:
+            ko: >-
+              돌았다는 것과 확정됐다는 것은 다릅니다. 확정은 <b>닫는 낱말</b>이 해요.
+            en: >-
+              Having run and having settled are different. Settling is the <b>closing word's</b> doing.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 돌았느냐 확정됐느냐", en: "The sharpest spot — ran or settled" }
+            code:
+              - "BEGIN; UPDATE ...;        -- 돌았다"
+              - "COMMIT;                   -- 확정됐다"
+      - t:
+          ko: "첫 문장만 남는다"
+          en: "Only the first is kept"
+        diag:
+          t:
+            ko: >-
+              「반만」이 바로 이 덩어리가 <b>없애려는 상태</b>입니다. 그 상태가 남으면 묶은 뜻이 없어요.
+            en: >-
+              “Half” is exactly the state this block <b>exists to remove</b>. Leaving it defeats the point.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 반이냐 전부냐", en: "The sharpest spot — half or all" }
+            code:
+              - "-- 반이 남으면 묶을 이유가 없다"
+      - t:
+          ko: "다음에 연결하면 이어서 돈다"
+          en: "It resumes on the next connection"
+        diag:
+          t:
+            ko: >-
+              덩어리는 <b>연결에 매여</b> 있습니다. 연결이 끊기면 그 덩어리도 거기서 끝나요.
+            en: >-
+              A block is <b>tied to its connection</b>. When that drops, the block ends there.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 연결이냐 서버냐", en: "The sharpest spot — the connection or the server" }
+            code:
+              - "-- 이어 붙는 덩어리는 없다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 여러 문장을 <b>한 덩어리로</b> 엽니다."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>opens</b> several statements as one block."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "BEGIN", mono: true }
+      - t: "COMMIT"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>COMMIT</code> 은 덩어리를 <b>닫는</b> 낱말입니다. 여는 자리와 닫는 자리가 반대예요.
+            en: >-
+              <code>COMMIT</code> is the word that <b>closes</b> a block. Opening and closing are opposite ends.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 여느냐 닫느냐", en: "The sharpest spot — opening or closing" }
+            code:
+              - "BEGIN;  ...  COMMIT;"
+      - t: "LOCK"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>LOCK</code> 은 <b>남이 못 건드리게</b> 하는 낱말이지 덩어리를 열지 않습니다.
+            en: >-
+              <code>LOCK</code> keeps <b>others out</b>; it does not open a block.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 막기냐 묶기냐", en: "The sharpest spot — blocking or binding" }
+            code:
+              - "LOCK TABLE cart"
+              - "BEGIN; ... COMMIT;"
+      - t: "ATOMIC"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>ATOMIC</code> 은 <b>성질을 부르는 말</b>이지 문장을 여는 낱말이 아닙니다.
+            en: >-
+              <code>ATOMIC</code> <b>names the property</b>; it is not a word that opens a statement.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 성질이냐 낱말이냐", en: "The sharpest spot — the property or the word" }
+            code:
+              - "-- 성질의 이름은 문법이 아니다"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 문장들을 <b>묶었을까요</b>? 하나씩 보내도 되는데요."
+    en: "Why does line {{site.line}} <b>bind</b> the statements? They could be sent one by one."
+  choices:
+    - t:
+        ko: "반만 된 상태가 실재해서 — 하나씩 보내면 그 상태가 밖에서 보인다"
+        en: "Because the half-done state is real — sent singly, it becomes visible outside"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 덩어리를 길게 열어 두면 무엇이 나빠지는지도 적어 보세요."
+        en: "That is the direction. Say what gets worse when the block is held open a long time."
+    - t:
+        ko: "한 번에 보내면 빨라서"
+        en: "Because sending them together is faster"
+      ok: false
+      fb:
+        ko: "빠르기도 하지만 덤입니다. 진짜 이유는 <b>중간 상태</b>예요."
+        en: "It is faster, but that is a bonus. The real reason is the <b>state in between</b>."
+    - t:
+        ko: "문장이 여러 개라서"
+        en: "Because there is more than one statement"
+      ok: false
+      fb:
+        ko: "여러 개여도 안 묶을 수 있습니다. 묶은 것은 <b>고른 것</b>이에요."
+        en: "Several can go unbound. Binding them was a <b>choice</b>."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./transaction.scm }
+
+examples:
+  - code: "BEGIN; UPDATE cart SET qty = 2; COMMIT;"
+    expect: { sites: 1, form: transaction, hole: "BEGIN", picks: { 1: "BEGIN", 2: "UPDATE cart SET qty = 2", 3: "COMMIT" } }
+  - code: "BEGIN; DELETE FROM cart; ROLLBACK;"
+    expect: { sites: 1, form: transaction, hole: "BEGIN", picks: { 1: "BEGIN", 2: "DELETE FROM cart", 3: "ROLLBACK" } }
+  - code: "UPDATE cart SET qty = 2"
+    expect: none

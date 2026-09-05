@@ -1,0 +1,207 @@
+schema: 1
+id: sql/subquery
+universal: null
+name: { ko: "괄호 안에 또 다른 조회", en: "Subquery" }
+token: "( SELECT"
+grammars: [sql, mybatis_sql]
+framework: null
+essential: true
+difficulty: 3
+prereq: [sql/select-list, sql/where-filter]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "괄호 안의 조회가 값 하나인지 표 하나인지는 놓인 자리가 정한다."
+    en: "One value or one table: the slot it stands in settles which."
+  why:
+    ko: >-
+      {{site.line}}행의 괄호 안은 그 자체로 완성된 조회입니다 — 표를 대고 열을 고르고 거를 수 있어요.
+      다른 것은 <b>결과가 어디로 가느냐</b>뿐입니다. 값 하나가 놓일 자리에 오면 결과가 한 줄 한 칸이어야 하고,
+      여러 값이 놓일 자리에 오면 한 열짜리 여러 줄이어야 하고, 표가 놓일 자리에 오면 표 그대로 쓰입니다.
+      같은 괄호가 자리에 따라 세 가지로 읽혀요 — 그리고 기대한 것보다 줄이 많으면 <b>거기서 멈춥니다</b>.
+    en: >-
+      Inside the brackets on line {{site.line}} is a complete query — it names a table, chooses
+      columns, filters. The only difference is <b>where its result goes</b>. In a slot for one value it
+      must come back one line, one slot; in a slot for many values, one column over many lines; in a
+      slot for a table, it is used as a table. The same brackets read three ways depending on the
+      slot — and more lines than the slot expects <b>stops it there</b>.
+  trace:
+    - ko: "{{pick.4|code}} 안의 조회가 {{pick.3|code}} 에서 {{pick.2|code}}{{pick.2|josa:을,를}} 낸다."
+      en: "The query inside {{pick.4|code}} yields {{pick.2|code}} from {{pick.3|code}}."
+    - ko: "그 결과가 {{site.line}}행의 바깥 자리에 놓인다."
+      en: "That result is placed in the outer slot on line {{site.line}}."
+    - ko: "자리가 값 하나를 기대하는데 줄이 여럿이면 거기서 멈춘다."
+      en: "If the slot expects one value and several lines come, it stops there."
+
+rule:
+  ko: "<b>놓인 자리가 뜻을 정한다.</b> 값 하나 · 값 여럿 · 표 하나 중 하나로 읽힌다."
+  en: "<b>The slot settles the meaning.</b> One value, many values, or one table."
+result:
+  label: { ko: "안쪽이 내는 것", en: "what the inside yields" }
+  value: "{{pick.2}}"
+  note: { ko: "바깥 자리가 모양을 요구한다", en: "the outer slot demands a shape" }
+ok:
+  ko: >-
+    안쪽 조회가 먼저 답을 내고, 그 답이 바깥 문장의 한 자리로 들어갑니다.
+  en: >-
+    The inner query answers first, and that answer fills one slot of the outer statement.
+payoff:
+  ko: >-
+    이걸 알면 「행이 하나보다 많다」는 멈춤이 어느 괄호에서 왔는지 바로 찾습니다.
+  en: >-
+    Knowing this, a “more than one row” stop points straight at the bracket that caused it.
+bridge:
+  ko: >-
+    다른 언어에서 함수 부르기를 인자 자리에 끼워 넣는 일과 같습니다. 다른 것은 <b>결과의 모양</b>을 자리가 요구한다는 것이에요.
+  en: >-
+    It is nesting a call inside an argument, as elsewhere. What differs is that the slot demands a
+    <b>shape</b> of the result.
+misconceptions:
+  - ko: "안쪽 조회가 언제나 값 하나를 낸다 — 자리에 따라 표일 수도 있습니다."
+    en: "The inner query always yields one value — depending on the slot it can be a table."
+  - ko: "안쪽에서 붙인 이름을 바깥에서 쓸 수 있다 — 그 이름은 괄호 안에서만 삽니다."
+    en: "A name made inside can be used outside — it lives inside the brackets only."
+  - ko: "안쪽이 0행이면 문장이 멈춘다 — 값 하나 자리에서는 모름이 됩니다."
+    en: "Zero inner rows stop the statement — in a one-value slot it becomes unknown."
+
+meaning:
+  - q:
+      ko: "값 하나가 놓일 자리의 괄호가 두 줄을 내면 어떻게 될까요?"
+      en: "The brackets in a one-value slot come back with two lines — then what?"
+    hint:
+      ko: "자리가 요구하는 <b>모양</b>과 실제 결과를 견줘 보세요."
+      en: "Compare the <b>shape</b> the slot demands with what came back."
+    options:
+      - t:
+          ko: "거기서 멈춘다 — 값 하나 자리에 둘을 넣을 수 없다"
+          en: "It stops there — two cannot go into a slot for one"
+      - t:
+          ko: "첫 줄이 쓰인다"
+          en: "The first line is used"
+        diag:
+          t:
+            ko: >-
+              「첫 줄」이 없습니다 — 줄 세우는 절이 없으면 순서가 없어요. 하나만 쓰려면 그렇게 적어야 합니다.
+            en: >-
+              There is no “first line” — without a clause that lines rows up there is no order. Taking one
+              has to be written.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 첫 줄이냐 멈춤이냐", en: "The sharpest spot — a first line or a stop" }
+            code:
+              - "(SELECT qty FROM item ...)"
+              - "(SELECT qty FROM item ... ORDER BY id LIMIT 1)"
+      - t:
+          ko: "두 줄이 이어 붙어 한 값이 된다"
+          en: "The two lines are joined into one value"
+        diag:
+          t:
+            ko: >-
+              이어 붙이려면 <b>접는 함수</b>를 적어야 합니다. 저절로 하나가 되지 않아요.
+            en: >-
+              Joining takes a <b>folding function</b>. Nothing collapses on its own.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 저절로냐 적어서냐", en: "The sharpest spot — by itself or written" }
+            code:
+              - "(SELECT MAX(qty) FROM item ...)   -- 하나가 된다"
+      - t:
+          ko: "바깥 행이 두 줄로 늘어난다"
+          en: "The outer row becomes two"
+        diag:
+          t:
+            ko: >-
+              줄을 늘리는 것은 <b>짝짓는 절</b>입니다. 값 자리의 괄호는 줄을 안 늘려요.
+            en: >-
+              Multiplying rows is what a <b>pairing clause</b> does. Brackets in a value slot do not.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값 자리냐 표 자리냐", en: "The sharpest spot — a value slot or a table slot" }
+            code:
+              - "WHERE qty = (SELECT ...)   -- 값"
+              - "FROM (SELECT ...) t        -- 표"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행의 괄호 안은 <b>그 자체로 완성된 조회</b>입니다."
+      en: "Choose what goes in the blank. The brackets on line {{site.line}} hold <b>a complete query</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "SELECT", mono: true }
+      - t: "VALUES"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>VALUES</code> 는 <b>적어 둔 값</b>을 늘어놓습니다 — 표에서 읽어 오지 않아요.
+            en: >-
+              <code>VALUES</code> lists <b>values written out</b> — it reads nothing from a table.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 읽어 오기냐 적어 두기냐", en: "The sharpest spot — reading or writing out" }
+            code:
+              - "(SELECT id FROM item)"
+              - "(VALUES (1), (2))"
+      - t: "EXISTS"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>EXISTS</code> 는 괄호 <b>앞</b>에 붙어 참거짓을 내는 낱말이라 괄호 안의 첫 낱말이 아닙니다.
+            en: >-
+              <code>EXISTS</code> stands <b>before</b> the brackets and yields a truth value; it is not
+              the first word inside.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 괄호 앞이냐 안이냐", en: "The sharpest spot — before the brackets or inside" }
+            code:
+              - "EXISTS (SELECT 1 FROM item)"
+      - t: "INCLUDE"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>INCLUDE</code> 는 이 언어에서 조회를 여는 낱말이 아닙니다 — 다른 파일을 부르는 문법 자체가 없어요.
+            en: >-
+              <code>INCLUDE</code> opens no query here — this language has no way to pull in another file
+              at all.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 파일이냐 조회냐", en: "The sharpest spot — a file or a query" }
+            code:
+              - "-- 파일을 부르는 문법이 없다"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 조회를 <b>괄호 안에</b> 넣었을까요? 두 문장으로 나눌 수도 있는데요."
+    en: "Why is the query <b>inside brackets</b> on line {{site.line}} instead of split into two statements?"
+  choices:
+    - t:
+        ko: "한 번에 답이 나와야 해서 — 나누면 그 사이에 값이 바뀔 수 있다"
+        en: "Because the answer must come in one go — split, the value can change in between"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 나눠도 되는 경우가 언제인지도 한 줄로 적어 보세요."
+        en: "That is the direction. In one line, say when splitting is fine."
+    - t:
+        ko: "괄호가 더 빨라서"
+        en: "Because brackets are faster"
+      ok: false
+      fb:
+        ko: "빠르기는 경우마다 다릅니다. 고르는 이유는 <b>사이에 아무 일도 못 끼게</b>예요."
+        en: "Speed varies. The reason is <b>letting nothing happen in between</b>."
+    - t:
+        ko: "문장을 두 번 보내면 안 돼서"
+        en: "Because two statements are not allowed"
+      ok: false
+      fb:
+        ko: "두 번 보내도 됩니다. 다른 것은 그 사이에 <b>다른 사람이 고칠 수 있다</b>는 것이에요."
+        en: "Two are allowed. What differs is that <b>someone else can change things in between</b>."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./subquery.scm }
+
+examples:
+  - code: "SELECT id FROM cart WHERE id IN (SELECT cart_id FROM item)"
+    expect: { sites: 1, form: subquery, hole: "SELECT", picks: { 1: "SELECT", 2: "cart_id", 3: "item", 4: "(" } }
+  - code: "SELECT id FROM cart WHERE qty > (SELECT AVG(qty) FROM cart)"
+    expect: { sites: 1, form: subquery, hole: "SELECT", picks: { 1: "SELECT", 2: "AVG(qty)", 3: "cart", 4: "(" } }
+  - code: "SELECT id FROM cart WHERE qty > 1"
+    expect: none

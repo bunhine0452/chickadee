@@ -232,5 +232,11 @@ examples:
     expect: { sites: 1, form: per-row, hole: "WHERE", picks: { 1: "WHERE", 2: "ok = 1", 3: "cart" } }
   - code: "UPDATE cart SET ok = 0 WHERE qty = 0"
     expect: { sites: 1, form: per-row, hole: "WHERE", picks: { 1: "WHERE", 2: "qty = 0", 3: "cart" } }
+  # 자리표가 값 자리에 있어도 조건 전체가 그대로 잡힌다 (`crates/parse/src/params.rs`).
+  - code: "SELECT * FROM cart WHERE id = :cartId"
+    expect: { sites: 1, form: per-row, hole: "WHERE", picks: { 1: "WHERE", 2: "id = :cartId", 3: "cart" } }
   - code: "SELECT * FROM cart"
+    expect: none
+  # 지우는 문장의 표는 `relation` 없이 바로 와서 이 패턴에 안 걸린다.
+  - code: "DELETE FROM cart WHERE qty = 0"
     expect: none

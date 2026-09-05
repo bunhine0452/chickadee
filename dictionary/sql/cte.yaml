@@ -1,0 +1,206 @@
+schema: 1
+id: sql/cte
+universal: common/variable-binding
+name: { ko: "조회에 이름 붙여 두기", en: "Named query" }
+token: "WITH"
+grammars: [sql, mybatis_sql]
+framework: null
+essential: true
+difficulty: 3
+prereq: [sql/subquery]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "조회에 이름을 붙여 아래에서 표처럼 쓴다. 그 이름은 이 문장 안에서만 산다."
+    en: "Names a query so it reads as a table below — for this statement only."
+  why:
+    ko: >-
+      {{site.line}}행은 조회 하나에 {{pick.2|code}} 라는 이름을 붙입니다. 그 뒤로 그 이름을 <b>표처럼</b>
+      쓸 수 있어요 — 표를 대는 절에 {{pick.3|code}} 라고 적으면 됩니다. 여기가 함정입니다:
+      <b>이름을 짓는 것만으로는 아무 일도 안 일어납니다.</b> 아래에서 그 이름을 적어야 쓰여요.
+      값이 있는 곳은 읽는 차례입니다 — 괄호를 위로 끌어올려 <b>읽는 차례를 도는 차례와 맞추는</b>
+      유일한 도구예요. 그리고 이 이름은 다음 문장에서 못 부릅니다.
+    en: >-
+      Line {{site.line}} gives one query the name {{pick.2|code}}. From there the name can be used
+      <b>as a table</b> — write {{pick.3|code}} in the clause that names sources. Here is the trap:
+      <b>naming it alone does nothing</b>. The name has to be written below to be used. Its value is in
+      reading order — it is the one tool that lifts a bracketed query to the top and <b>puts reading
+      order in step with run order</b>. And the name cannot be called from the next statement.
+  trace:
+    - ko: "{{site.line}}행이 괄호 안의 조회에 {{pick.2|code}} 라는 이름을 붙인다."
+      en: "Line {{site.line}} names the bracketed query {{pick.2|code}}."
+    - ko: "아래에서 {{pick.3|code}} 라고 적어야 그 결과가 쓰인다."
+      en: "Writing {{pick.3|code}} below is what puts the result to use."
+    - ko: "문장이 끝나면 그 이름은 사라진다."
+      en: "When the statement ends the name is gone."
+
+rule:
+  ko: "<b>이름은 이 문장 안에서만 산다.</b> 아래에서 적지 않으면 아무 일도 안 난다."
+  en: "<b>The name lives in this statement only.</b> Unwritten below, it does nothing."
+result:
+  label: { ko: "붙인 이름", en: "the name given" }
+  value: "{{pick.2}}"
+  note: { ko: "아래에서 적어야 쓰인다", en: "used only if written below" }
+ok:
+  ko: >-
+    {{pick.2|code}} 라는 이름이 서고, 아래에서 {{pick.3|code}} 자리에 그 결과가 표처럼 놓입니다.
+  en: >-
+    The name {{pick.2|code}} stands, and its result sits at {{pick.3|code}} below like a table.
+payoff:
+  ko: >-
+    이걸 알면 네 겹 괄호를 위에서 아래로 읽히는 문장으로 펴는 방법이 생깁니다.
+  en: >-
+    Knowing this gives you a way to unfold four nested brackets into a statement read top to bottom.
+bridge:
+  ko: >-
+    다른 언어에서 값에 이름을 붙여 두는 일과 같습니다. 다른 것은 <b>그 이름의 수명이 문장 하나</b>라는 것이에요.
+  en: >-
+    It is binding a name to a value, as elsewhere. What differs is that the name's life is <b>one
+    statement</b>.
+misconceptions:
+  - ko: "이름을 지으면 아래에서 저절로 쓰인다 — 표를 대는 절에 적어야 쓰입니다."
+    en: "Naming it makes it apply below — it has to be written into the clause that names sources."
+  - ko: "다음 문장에서도 그 이름을 쓸 수 있다 — 문장이 끝나면 사라집니다."
+    en: "The name works in the next statement — it disappears when the statement ends."
+  - ko: "이름을 붙이면 결과가 저장돼 한 번만 계산된다 — 그런 약속은 없습니다."
+    en: "Naming caches the result so it runs once — no such promise is made."
+
+meaning:
+  - q:
+      ko: "{{pick.2|code}} 라는 이름을 짓고 아래에서 한 번도 안 적으면 어떻게 될까요?"
+      en: "The name {{pick.2|code}} is defined and never written below — then what?"
+    hint:
+      ko: "이름을 <b>짓는 것</b>과 <b>쓰는 것</b>을 갈라 보세요."
+      en: "Separate <b>defining</b> a name from <b>using</b> it."
+    options:
+      - t:
+          ko: "아무 일도 안 일어난다 — 문장은 이름 없이 돈 것과 같다"
+          en: "Nothing happens — the statement runs as if it were never named"
+      - t:
+          ko: "그 조회가 먼저 돌고 결과가 바깥에 더해진다"
+          en: "That query runs first and its result is added to the outer one"
+        diag:
+          t:
+            ko: >-
+              이름은 <b>부를 수 있게</b> 할 뿐입니다. 부르지 않으면 결과가 갈 자리가 없어요.
+            en: >-
+              A name only makes something <b>callable</b>. Uncalled, its result has nowhere to go.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 짓기냐 쓰기냐", en: "The sharpest spot — defining or using" }
+            code:
+              - "WITH r AS (SELECT ...) SELECT id FROM cart"
+              - "WITH r AS (SELECT ...) SELECT id FROM r"
+      - t:
+          ko: "문장이 서지 않는다"
+          en: "The statement does not stand"
+        diag:
+          t:
+            ko: >-
+              안 쓴 이름은 <b>문제가 아닙니다</b>. 조용히 지나가는 것이 이 함정의 핵심이에요.
+            en: >-
+              An unused name is <b>not an error</b>. Passing quietly is the whole trap.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 거절이냐 무시냐", en: "The sharpest spot — refused or ignored" }
+            code:
+              - "-- 통과하고 아무 일도 안 한다"
+      - t:
+          ko: "그 이름의 표가 새로 만들어진다"
+          en: "A table by that name is created"
+        diag:
+          t:
+            ko: >-
+              표를 만들지 않습니다 — 이름은 <b>이 문장 안에서만</b> 살고 저장되지 않아요.
+            en: >-
+              No table is made — the name lives <b>inside this statement</b> and is never stored.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 문장 안이냐 저장이냐", en: "The sharpest spot — inside the statement or stored" }
+            code:
+              - "CREATE VIEW r AS SELECT ...   -- 저장된다"
+              - "WITH r AS (SELECT ...)        -- 안 남는다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 조회 하나에 <b>이름을 붙입니다</b>."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>names</b> one query."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "WITH", mono: true }
+      - t: "CREATE"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>CREATE</code> 로 만든 이름은 <b>저장돼 남습니다</b>. 여기 붙인 이름은 문장이 끝나면 사라져요.
+            en: >-
+              A name made with <code>CREATE</code> is <b>stored and stays</b>. This one dies with the statement.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 남느냐 사라지느냐", en: "The sharpest spot — kept or gone" }
+            code:
+              - "CREATE VIEW recent AS SELECT ..."
+              - "WITH recent AS (SELECT ...)"
+      - t: "USING"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>USING</code> 은 붙이는 절에서 <b>맞출 열</b>을 대는 낱말이라 이름을 짓지 않습니다.
+            en: >-
+              <code>USING</code> names the <b>column to match on</b> in a pairing clause; it defines nothing.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 이름 짓기냐 열 대기냐", en: "The sharpest spot — naming or matching" }
+            code:
+              - "JOIN item USING (cart_id)"
+              - "WITH recent AS (SELECT ...)"
+      - t: "DECLARE"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>DECLARE</code> 는 저장 프로시저 안에서 <b>변수</b>를 여는 낱말이고, 조회에 이름을 붙이지 않습니다.
+            en: >-
+              <code>DECLARE</code> opens a <b>variable</b> inside stored code; it does not name a query.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값이냐 조회냐", en: "The sharpest spot — a value or a query" }
+            code:
+              - "WITH recent AS (SELECT ...)"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 괄호 안의 조회를 <b>위로 끌어올려</b> 이름을 붙였을까요?"
+    en: "Why does line {{site.line}} <b>lift</b> the bracketed query to the top and name it?"
+  choices:
+    - t:
+        ko: "읽는 차례를 도는 차례와 맞추려고 — 안쪽 괄호는 먼저 도는데 나중에 읽힌다"
+        en: "To put reading order in step with run order — inner brackets run first but read last"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 같은 이름을 두 번 쓰면 두 번 도는지도 한 줄로 적어 보세요."
+        en: "That is the direction. In one line, say whether using the name twice runs it twice."
+    - t:
+        ko: "결과가 저장돼 빨라져서"
+        en: "Because the result is cached and it gets faster"
+      ok: false
+      fb:
+        ko: "저장된다는 약속이 없습니다. 값은 <b>읽는 차례</b>예요."
+        en: "Caching is not promised. The value is in <b>reading order</b>."
+    - t:
+        ko: "괄호를 못 겹쳐서"
+        en: "Because brackets cannot nest"
+      ok: false
+      fb:
+        ko: "겹칠 수 있습니다 — 겹칠수록 읽기 어려워지는 것이 문제예요."
+        en: "They can nest — that nesting gets unreadable is the problem."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./cte.scm }
+
+examples:
+  - code: "WITH recent AS (SELECT * FROM item) SELECT id FROM recent"
+    expect: { sites: 1, form: cte, hole: "WITH", picks: { 1: "WITH", 2: "recent", 3: "recent", 4: "AS" } }
+  - code: "WITH paid AS (SELECT id FROM cart) SELECT id FROM paid"
+    expect: { sites: 1, form: cte, hole: "WITH", picks: { 1: "WITH", 2: "paid", 3: "paid", 4: "AS" } }
+  - code: "SELECT id FROM cart"
+    expect: none

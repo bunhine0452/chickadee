@@ -1,0 +1,197 @@
+schema: 1
+id: sql/text-literal
+universal: common/text-literal
+name: { ko: "글자 값 적기", en: "Text literal" }
+token: "'…'"
+grammars: [sql, mybatis_sql]
+framework: null
+essential: true
+difficulty: 1
+prereq: [sql/value-and-name]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "작은따옴표에 싼 것만 값이다. 안 싸면 이름으로 읽힌다."
+    en: "Only what single quotes wrap is a value. Unwrapped, it reads as a name."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 작은따옴표에 싸여 있어서
+      <b>값</b>으로 읽힙니다. 같은 자리에 따옴표 없이 적으면 그것은 값이 아니라
+      <b>이름</b>이 돼요 — {{pick.2|code}} 처럼 데이터베이스가 아는 이름을 찾으라는 뜻입니다.
+      큰따옴표도 대개 이름 쪽이라, 값을 큰따옴표로 싸면 없는 이름을 찾다가 멈춥니다.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} is wrapped in single quotes, so it reads as a
+      <b>value</b>. Written in the same slot without quotes it becomes a <b>name</b> instead —
+      like {{pick.2|code}}, a name the database is asked to look up. Double quotes usually mean a
+      name too, so a value in double quotes sends it looking for a name that is not there.
+  trace:
+    - ko: "{{site.line}}행에서 {{pick.1|code}} 의 따옴표를 본다."
+      en: "The quotes around {{pick.1|code}} on line {{site.line}} are read first."
+    - ko: "따옴표가 있으므로 글자 그대로의 값이다."
+      en: "Quotes are there, so it is the characters themselves."
+    - ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 따옴표가 없으니 이름으로 찾는다."
+      en: "{{pick.2|code}} has no quotes, so it is looked up as a name."
+
+rule:
+  ko: "<b>따옴표가 값과 이름을 가른다.</b> 작은따옴표에 싸인 것만 글자 값이다."
+  en: "<b>Quotes split value from name.</b> Only single quotes make characters a value."
+result:
+  label: { ko: "값으로 읽히는 것", en: "read as a value" }
+  value: "{{pick.1}}"
+  note: { ko: "따옴표가 있어서", en: "because of the quotes" }
+ok:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:은,는}} 찾을 이름이 아니라 그 자리에 그대로 들어가는 글자입니다.
+  en: >-
+    {{pick.1|code}} is not a name to look up — it is the characters that go into that slot.
+payoff:
+  ko: >-
+    이걸 알면 이름을 못 찾겠다는 멈춤이 어디서 오는지 바로 보입니다 — 값에 따옴표를 안 씌운 자리예요.
+  en: >-
+    Knowing this, a “no such name” stop is easy to place — it is a value that was left unquoted.
+bridge:
+  ko: >-
+    다른 언어는 따옴표 종류가 취향입니다. 여기서는 종류가 <b>뜻</b>을 바꿔요 — 하나는 값, 하나는 이름.
+  en: >-
+    In other languages the kind of quote is taste. Here the kind changes <b>meaning</b> — one is a
+    value, the other a name.
+misconceptions:
+  - ko: "큰따옴표로도 글자 값을 적을 수 있다 — 표준에서 큰따옴표는 이름입니다."
+    en: "Double quotes also make a text value — in the standard they make a name."
+  - ko: "따옴표는 생략해도 된다 — 생략하면 값이 아니라 이름을 찾습니다."
+    en: "Quotes are optional — without them it looks up a name instead."
+  - ko: "sqlite 가 봐주니 어디서나 된다 — 그 봐주기는 sqlite 한 곳에만 있습니다."
+    en: "sqlite lets it pass, so it works everywhere — that leniency is sqlite's alone."
+
+meaning:
+  - q:
+      ko: "{{pick.1|code}} 의 작은따옴표를 큰따옴표로 바꾸면 어떻게 될까요?"
+      en: "What if the single quotes around {{pick.1|code}} become double quotes?"
+    hint:
+      ko: "따옴표 종류가 값이냐 이름이냐를 정합니다."
+      en: "The kind of quote decides value or name."
+    options:
+      - t:
+          ko: "그 글자를 이름으로 찾는다 — 그런 이름이 없으면 거기서 멈춘다"
+          en: "It looks the characters up as a name — no such name, and it stops there"
+      - t:
+          ko: "똑같이 값으로 읽힌다"
+          en: "It still reads as a value"
+        diag:
+          t:
+            ko: >-
+              sqlite 는 <b>이름을 못 찾을 때만</b> 값으로 봐줍니다. 그 봐주기가 없는 곳에서는
+              같은 문장이 멈춰요.
+            en: >-
+              sqlite falls back to a value <b>only when the name is missing</b>. Where that fallback
+              does not exist the same statement stops.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 봐주기냐 규칙이냐", en: "The sharpest spot — leniency or rule" }
+            code:
+              - "WHERE kind = 'sent'   -- 값"
+              - "WHERE kind = \"sent\"   -- 이름"
+      - t:
+          ko: "글자가 두 배로 들어간다"
+          en: "The characters go in twice"
+        diag:
+          t:
+            ko: "따옴표는 <b>개수</b>가 아니라 <b>종류</b>를 말합니다. 값이 늘어나지 않아요."
+            en: "Quotes say <b>which kind</b>, not <b>how many</b>. Nothing is duplicated."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 개수냐 종류냐", en: "The sharpest spot — count or kind" }
+            code:
+              - "'sent'   -- 값 하나"
+              - "\"sent\"   -- 이름 하나"
+      - t:
+          ko: "따옴표가 통째로 값에 들어간다"
+          en: "The quotes themselves become part of the value"
+        diag:
+          t:
+            ko: "감싸는 따옴표는 <b>표시</b>라 값에 안 들어갑니다. 값 안의 따옴표는 두 번 적어요."
+            en: >-
+              Wrapping quotes are a <b>marker</b> and stay out of the value. A quote inside a value is
+              written twice.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 감싸기냐 내용이냐", en: "The sharpest spot — wrapper or content" }
+            code:
+              - "'sent'     -- 값은 sent"
+              - "'it''s'    -- 값은 it's"
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>값</b>인 것을 짚어 보세요."
+      en: "On line {{site.line}}, point at the one that is a <b>value</b>."
+    hint:
+      ko: "따옴표에 싸여 있는지 보세요."
+      en: "Look for the one wrapped in quotes."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 따옴표가 없으므로 <b>이름</b>입니다 —
+            데이터베이스가 아는 자리를 가리켜요.
+          en: >-
+            {{pick.2|code}} has no quotes, so it is a <b>name</b> — it points at a slot the database
+            knows.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값이냐 이름이냐", en: "The sharpest spot — value or name" }
+          code:
+            - "note = 'sent'"
+            - "-- 왼쪽은 이름, 오른쪽은 값"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 값이 아니라 <b>값이 놓일 자리를 여는 낱말</b>입니다.
+          en: >-
+            {{pick.3|code}} is not a value — it is the word that <b>opens the slot a value goes into</b>.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값이냐 자리 표시냐", en: "The sharpest spot — a value or the slot marker" }
+          code:
+            - "VALUES (1, 'sent')"
+            - "-- 값은 괄호 안에 있다"
+
+no_hole_reason: >-
+  구멍에 들어갈 것이 낱말이 아니라 값 그 자체라 사용처마다 글자가 다르다. 이 개념이 물어야 하는 것은
+  「무엇이 값인가」이고, 그것은 지목형이 값과 이름을 나란히 두고 묻는다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 그 글자를 <b>따옴표에 쌌을까요</b>?"
+    en: "Why does line {{site.line}} <b>wrap</b> those characters in quotes?"
+  choices:
+    - t:
+        ko: "찾을 이름이 아니라 그대로 넣을 값이라서 — 안 싸면 이름을 찾으러 간다"
+        en: "Because it is a value to store, not a name to look up — unwrapped it goes looking"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그러면 같은 줄에서 따옴표가 없는 것이 무엇인지도 적어 보세요."
+        en: "That is the direction. Now say what on the same line has no quotes, and why."
+    - t:
+        ko: "글자는 원래 따옴표에 싸는 것이라서"
+        en: "Because characters are always quoted"
+      ok: false
+      fb:
+        ko: "규칙을 되풀이한 것이지 <b>왜</b>가 아닙니다. 안 쌌을 때 무슨 일이 나는지가 답이에요."
+        en: "That restates the rule, not the <b>why</b>. The answer is what happens unwrapped."
+    - t:
+        ko: "읽기 좋으라고"
+        en: "For readability"
+      ok: false
+      fb:
+        ko: "보기가 아니라 <b>뜻</b>이 달라집니다 — 값이냐 이름이냐가 갈려요."
+        en: "It is <b>meaning</b>, not looks — value or name is what changes."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./text-literal.scm }
+
+examples:
+  - code: "INSERT INTO cart (id, note) VALUES (1, 'sent')"
+    expect: { sites: 1, form: text-literal, picks: { 1: "'sent'", 2: "cart", 3: "VALUES" } }
+  - code: "UPDATE cart SET note = 'sent' WHERE id = 1"
+    expect: { sites: 1, form: text-literal, picks: { 1: "'sent'", 2: "note", 3: "=" } }
+  - code: "INSERT INTO cart (id, qty) VALUES (1, 2)"
+    expect: none
+  - code: "UPDATE cart SET note = :note WHERE id = 1"
+    expect: none

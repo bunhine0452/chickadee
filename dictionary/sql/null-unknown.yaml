@@ -230,5 +230,9 @@ examples:
     expect: { sites: 1, form: "null", hole: "NULL", picks: { 1: "NULL", 2: "closed_at", 3: "IS" } }
   - code: "SELECT * FROM cart WHERE closed_at IS NOT NULL"
     expect: { sites: 1, form: "null", hole: "NULL", picks: { 1: "NULL", 2: "closed_at", 3: "IS NOT" } }
+  - code: "UPDATE cart SET ok = 1 WHERE closed_at IS NULL"
+    expect: { sites: 1, form: "null", hole: "NULL", picks: { 1: "NULL", 2: "closed_at", 3: "IS" } }
   - code: "SELECT * FROM cart WHERE closed_at = NULL"
+    expect: none
+  - code: "SELECT * FROM cart WHERE note = 'x'"
     expect: none

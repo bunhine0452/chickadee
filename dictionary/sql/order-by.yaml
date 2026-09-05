@@ -1,0 +1,208 @@
+schema: 1
+id: sql/order-by
+universal: null
+name: { ko: "줄 세우기", en: "Ordering rows" }
+token: "ORDER BY"
+grammars: [sql, mybatis_sql]
+framework: null
+essential: true
+difficulty: 2
+prereq: [sql/select-list, sql/row-and-set, cs/text-encoding]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "결과에 순서를 붙이는 유일한 절. 안 쓰면 순서가 없다."
+    en: "The only clause that gives the result a sequence. Without it there is none."
+  why:
+    ko: >-
+      {{site.line}}행이 없으면 {{pick.3|code}} 의 행이 <b>어떤 순서로도</b> 나올 수 있습니다.
+      어제 넣은 순서대로 나왔다고 오늘도 그러리라는 약속이 없어요 — 곁표가 하나 생기거나 데이터가
+      늘면 그날 순서가 바뀝니다. 이 절은 {{pick.2|code}}{{pick.2|josa:을,를}} 기준으로 그 약속을 만듭니다.
+      기준이 글자면 순서는 <b>정렬 규칙</b>이 정해요 — 한글·대소문자·악센트가 어디로 갈지가 거기서 갈립니다.
+    en: >-
+      Without line {{site.line}} the rows of {{pick.3|code}} may come back in <b>any</b> sequence.
+      That yesterday's insertion order showed up is no promise for today — one more side table or
+      more data and the sequence changes. This clause makes that promise, keyed on {{pick.2|code}}.
+      When the key is text the sequence is settled by a <b>collation</b> — where Korean, case and
+      accents land is decided there.
+  trace:
+    - ko: "{{pick.3|code}} 의 행이 걸러진 뒤 여기 온다."
+      en: "The rows of {{pick.3|code}} arrive here after filtering."
+    - ko: "{{pick.2|code}}{{pick.2|josa:을,를}} 기준으로 줄을 세운다."
+      en: "They are lined up by {{pick.2|code}}."
+    - ko: "{{site.line}}행이 없었다면 이 줄 세우기가 아예 없다."
+      en: "Without line {{site.line}} there is no lining up at all."
+
+rule:
+  ko: "<b>순서는 이 절이 만든다.</b> 없으면 어떤 순서로도 나올 수 있다."
+  en: "<b>This clause makes the sequence.</b> Without it, any sequence is allowed."
+result:
+  label: { ko: "줄 세우는 기준", en: "the key it lines up by" }
+  value: "{{pick.2}}"
+  note: { ko: "이것이 없으면 순서가 없다", en: "without it there is no sequence" }
+ok:
+  ko: >-
+    {{pick.3|code}} 의 행이 {{pick.2|code}} 순으로 나옵니다. 이 절을 지우면 그 약속이 사라져요.
+  en: >-
+    The rows of {{pick.3|code}} come back in {{pick.2|code}} order. Delete the clause and the
+    promise goes with it.
+payoff:
+  ko: >-
+    이걸 알면 「어제까지 잘 나오던 순서가 왜 오늘 바뀌었지」가 풀립니다 — 약속한 적이 없었거든요.
+  en: >-
+    This untangles “why did the sequence change today” — it was never promised.
+bridge:
+  ko: >-
+    다른 언어는 목록에 이미 순서가 있고 줄 세우기는 그것을 바꿉니다. 여기서는 <b>순서를 처음 만드는</b> 일이에요.
+  en: >-
+    Elsewhere a list already has a sequence and sorting rearranges it. Here it <b>creates</b> the
+    sequence for the first time.
+misconceptions:
+  - ko: "안 써도 넣은 순서대로 나온다 — 그런 약속이 없습니다."
+    en: "Without it rows come back in insertion order — no such promise exists."
+  - ko: "이 절이 있으면 행이 줄어든다 — 순서만 정하고 행 수는 그대로입니다."
+    en: "This clause reduces rows — it only settles the sequence; the count is unchanged."
+  - ko: "글자 기준 순서는 어디서나 같다 — 정렬 규칙에 따라 다릅니다."
+    en: "Text order is the same everywhere — it depends on the collation."
+
+meaning:
+  - q:
+      ko: "{{site.line}}행을 지우면 결과가 어떻게 될까요?"
+      en: "What happens to the result if line {{site.line}} is deleted?"
+    hint:
+      ko: "행 <b>수</b>가 바뀌는지 <b>순서</b>가 바뀌는지 갈라 보세요."
+      en: "Separate a change in the <b>count</b> from a change in the <b>sequence</b>."
+    options:
+      - t:
+          ko: "같은 행이 그대로 나오되 순서를 약속받지 못한다"
+          en: "The same rows come back, but with no promised sequence"
+      - t:
+          ko: "행이 줄어든다"
+          en: "Fewer rows come back"
+        diag:
+          t:
+            ko: "줄 세우기는 <b>버리는 일이 아닙니다</b>. 행을 버리는 절은 따로 있어요."
+            en: "Lining up <b>drops nothing</b>. Dropping rows is another clause's job."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 순서냐 개수냐", en: "The sharpest spot — sequence or count" }
+            code:
+              - "ORDER BY qty   -- 순서"
+              - "WHERE qty > 0  -- 개수"
+      - t:
+          ko: "넣은 순서대로 나온다"
+          en: "They come back in insertion order"
+        diag:
+          t:
+            ko: >-
+              그렇게 <b>보일 수는</b> 있어도 약속은 아닙니다. sqlite 는 대개 내부 번호 순이라 더 잘 속아요 —
+              곁표가 하나 생기면 그날 바뀝니다.
+            en: >-
+              It may <b>look</b> that way, but it is not a promise. sqlite usually follows its internal
+              row number, which is more convincing — one new side table and it changes.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 보이는 것이냐 약속이냐", en: "The sharpest spot — what shows or what is promised" }
+            code:
+              - "-- 오늘 본 순서는 오늘의 것이다"
+              - "CREATE INDEX ...  -- 내일 달라진다"
+      - t:
+          ko: "아무 행도 안 나온다"
+          en: "Nothing comes back"
+        diag:
+          t:
+            ko: "이 절은 <b>있어도 없어도</b> 같은 행을 냅니다. 다른 것은 그 행들이 놓이는 차례예요."
+            en: "With or without it the <b>same rows</b> come back. Only their arrangement differs."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 집합이냐 차례냐", en: "The sharpest spot — the set or its arrangement" }
+            code:
+              - "-- 같은 행 모음"
+              - "-- 다른 차례"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 결과를 <b>줄 세웁니다</b>."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>lines the result up</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "ORDER", mono: true }
+      - t: "GROUP"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>GROUP</code> 은 같은 값끼리 <b>묶어서 행 수를 줄입니다</b>. 줄 세우기는 행 수를 안 바꿔요.
+            en: >-
+              <code>GROUP</code> folds equal values together and <b>reduces the row count</b>. Lining
+              up leaves the count alone.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 묶기냐 줄 세우기냐", en: "The sharpest spot — folding or lining up" }
+            code:
+              - "GROUP BY kind   -- 행이 준다"
+              - "ORDER BY kind   -- 행 수 그대로"
+      - t: "PARTITION"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>PARTITION</code> 은 창 함수 <b>안</b>에서 무리를 나누는 낱말이라 문장의 절이 아닙니다.
+            en: >-
+              <code>PARTITION</code> divides groups <b>inside</b> a window function; it is not a clause
+              of the statement.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 문장의 절이냐 함수 안이냐", en: "The sharpest spot — a clause or inside a function" }
+            code:
+              - "ORDER BY qty"
+              - "OVER (PARTITION BY kind)"
+      - t: "SORT"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>SORT</code> 는 이 언어의 낱말이 아닙니다 — 다른 도구에서 쓰는 이름이에요.
+            en: >-
+              <code>SORT</code> is not a word in this language — the name belongs to other tools.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 이 언어의 낱말이냐 아니냐", en: "The sharpest spot — a word of this language or not" }
+            code:
+              - "ORDER BY qty   -- 이 언어"
+              - "sort()         -- 다른 도구"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 {{pick.2|code}}{{pick.2|josa:을,를}} <b>기준</b>으로 골랐을까요?"
+    en: "Why does line {{site.line}} take {{pick.2|code}} as its <b>key</b>?"
+  choices:
+    - t:
+        ko: "화면이 그 순서를 약속해야 해서 — 기준이 바뀌면 화면의 뜻이 바뀐다"
+        en: "Because the screen promises that sequence — another key means another screen"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 기준 값이 같은 행이 여럿일 때 무엇이 순서를 정하는지도 적어 보세요."
+        en: "That is the direction. Say what settles the order when the key ties."
+    - t:
+        ko: "그 열에 곁표가 있어서"
+        en: "Because that column has a side table"
+      ok: false
+      fb:
+        ko: "곁표는 <b>속도</b>를 바꾸고 답은 안 바꿉니다. 기준은 뜻이 정해요."
+        en: "A side table changes <b>speed</b>, not the answer. Meaning picks the key."
+    - t:
+        ko: "첫 번째 열이라서"
+        en: "Because it is the first column"
+      ok: false
+      fb:
+        ko: "자리가 아니라 <b>무엇을 앞에 보여야 하나</b>가 정합니다."
+        en: "Position does not decide it — <b>what should come first</b> does."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./order-by.scm }
+
+examples:
+  - code: "SELECT id FROM cart ORDER BY qty DESC"
+    expect: { sites: 1, form: order-by, hole: "ORDER", picks: { 1: "ORDER", 2: "qty", 3: "cart", 4: "BY" } }
+  - code: "SELECT id FROM cart ORDER BY created_at"
+    expect: { sites: 1, form: order-by, hole: "ORDER", picks: { 1: "ORDER", 2: "created_at", 3: "cart", 4: "BY" } }
+  - code: "SELECT id FROM cart GROUP BY qty"
+    expect: none

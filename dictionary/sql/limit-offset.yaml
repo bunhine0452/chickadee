@@ -1,0 +1,205 @@
+schema: 1
+id: sql/limit-offset
+universal: null
+name: { ko: "몇 줄만 가져오기", en: "Limiting rows" }
+token: "LIMIT"
+grammars: [sql, mybatis_sql]
+framework: null
+essential: true
+difficulty: 2
+prereq: [sql/order-by, cs/set-vs-sequence]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "줄 수의 상한을 건다. 앞에 줄 세우는 절이 없으면 「아무 N개」다."
+    en: "Caps how many lines come back — never which ones."
+  why:
+    ko: >-
+      {{site.line}}행은 결과를 {{pick.2|code}} 줄로 자릅니다. 그런데 <b>어느</b> 줄이 남는지는 이 절이 안 정해요 —
+      정하는 것은 앞의 줄 세우는 절입니다. 그것이 없으면 남는 것은 「위에서 {{pick.2|code}} 개」가 아니라
+      「<b>아무</b> {{pick.2|code}} 개」이고, 오늘 본 줄이 내일도 그 줄이라는 약속이 없습니다.
+      곁표가 하나 생기거나 행이 늘면 그날 답이 바뀌어요. 그리고 {{pick.4|code}} 자리에 무엇을 골랐든
+      자르는 줄 수는 안 바뀝니다.
+    en: >-
+      Line {{site.line}} cuts the result to {{pick.2|code}} lines. But <b>which</b> lines survive is not
+      settled here — the lining-up clause before it settles that. Without one, what remains is not “the
+      top {{pick.2|code}}” but “<b>any</b> {{pick.2|code}}”, and today's lines are no promise for
+      tomorrow's. One new side table or more rows and the answer changes that day. Whatever
+      {{pick.4|code}} chooses, the cut stays the same size.
+  trace:
+    - ko: "{{pick.3|code}} 의 행이 걸러진 뒤 남는다."
+      en: "The rows of {{pick.3|code}} come through the filter."
+    - ko: "줄 세우는 절이 있으면 그 차례가 먼저 정해진다."
+      en: "If a lining-up clause is present, the arrangement is settled first."
+    - ko: "{{site.line}}행이 앞에서부터 {{pick.2|code}} 줄만 남긴다."
+      en: "Line {{site.line}} then keeps {{pick.2|code}} lines from the front."
+
+rule:
+  ko: "<b>몇 줄인지만 정한다.</b> 어느 줄인지는 줄 세우는 절이 정한다."
+  en: "<b>It settles how many, not which.</b> Which lines is the lining-up clause's job."
+result:
+  label: { ko: "남기는 줄 수", en: "lines kept" }
+  value: "{{pick.2}}"
+  note: { ko: "어느 줄인지는 안 정한다", en: "which lines is left open" }
+ok:
+  ko: >-
+    {{pick.2|code}} 줄만 남고, 그 줄들이 무엇인지는 앞의 차례가 정합니다.
+  en: >-
+    {{pick.2|code}} lines remain, and which ones is settled by the arrangement before it.
+payoff:
+  ko: >-
+    이걸 알면 「상위 10개」 화면이 어느 날 다른 10개를 보여 주는 사고의 원인이 보입니다.
+  en: >-
+    Knowing this, a “top 10” screen showing a different ten one day has a visible cause.
+bridge:
+  ko: >-
+    다른 언어에서 목록 앞쪽을 잘라 오는 일과 같습니다. 다른 것은 <b>앞쪽이라는 것이 없다</b>는 것이에요.
+  en: >-
+    It is taking the front of a list, as elsewhere. What differs is that <b>there is no front</b>.
+misconceptions:
+  - ko: "이 절만 있으면 상위 N 이 된다 — 줄 세우는 절이 있어야 상위입니다."
+    en: "This clause alone gives the top N — only with a lining-up clause is it the top."
+  - ko: "건너뛰기를 붙이면 겹치지 않는 쪽이 나온다 — 차례가 없으면 겹칠 수 있습니다."
+    en: "Adding a skip guarantees no overlap — without an arrangement pages can overlap."
+  - ko: "행이 그보다 적으면 멈춘다 — 있는 만큼만 나옵니다."
+    en: "Fewer rows than the cap is an error — it simply returns what there is."
+
+meaning:
+  - q:
+      ko: "줄 세우는 절 없이 {{pick.2|code}} 줄만 가져오는 화면을 두 번 열면 같은 줄이 나올까요?"
+      en: "Opening a screen twice that takes {{pick.2|code}} lines with no lining-up clause — same lines?"
+    hint:
+      ko: "같은 줄이 나온다는 <b>약속</b>이 어디서 오는지 찾아 보세요."
+      en: "Look for where a <b>promise</b> of the same lines would come from."
+    options:
+      - t:
+          ko: "같을 수도 다를 수도 있다 — 약속하는 절이 없다"
+          en: "It may or may not — no clause promises anything"
+      - t:
+          ko: "언제나 같다 — 데이터가 안 바뀌었으니까"
+          en: "Always the same — the data did not change"
+        diag:
+          t:
+            ko: >-
+              데이터가 그대로여도 <b>읽는 길</b>이 바뀌면 차례가 바뀝니다. 곁표 하나면 충분해요.
+            en: >-
+              Even with the same data, a changed <b>path</b> changes the arrangement. One side table is enough.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 데이터냐 읽는 길이냐", en: "The sharpest spot — the data or the path" }
+            code:
+              - "CREATE INDEX idx_cart_qty ON cart (qty)"
+              - "-- 그날부터 다른 줄이 온다"
+      - t:
+          ko: "언제나 넣은 순서대로 앞에서부터 나온다"
+          en: "Always from the front in insertion order"
+        diag:
+          t:
+            ko: >-
+              그렇게 <b>보일 수는</b> 있어도 약속이 아닙니다. sqlite 는 대개 내부 번호 순이라 더 잘 속아요.
+            en: >-
+              It may <b>look</b> that way; it is not promised. sqlite usually follows its internal row
+              number, which is more convincing.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 보이는 것이냐 약속이냐", en: "The sharpest spot — what shows or what is promised" }
+            code:
+              - "-- 오늘 본 것은 오늘의 것이다"
+      - t:
+          ko: "줄 수가 매번 달라진다"
+          en: "The number of lines varies each time"
+        diag:
+          t:
+            ko: >-
+              줄 <b>수</b>는 이 절이 정확히 정합니다. 안 정하는 것은 <b>어느</b> 줄이냐예요.
+            en: >-
+              The <b>count</b> is exactly what this clause settles. What it leaves open is <b>which</b> lines.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 몇 줄이냐 어느 줄이냐", en: "The sharpest spot — how many or which" }
+            code:
+              - "-- 수는 확정, 정체는 미정"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 결과를 <b>{{pick.2|code}} 줄</b>로 자릅니다."
+      en: "Choose what goes in the blank. Line {{site.line}} cuts the result to <b>{{pick.2|code}} lines</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "LIMIT", mono: true }
+      - t: "TOP"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>TOP</code> 은 <b>고르는 절 바로 뒤</b>에 붙는 방언 낱말이라 자리가 다릅니다.
+            en: >-
+              <code>TOP</code> is a dialect word that sits <b>right after the choosing clause</b>, not here.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 문장 끝이냐 앞이냐", en: "The sharpest spot — the end or the front" }
+            code:
+              - "SELECT TOP 10 id FROM cart"
+              - "SELECT id FROM cart LIMIT 10"
+      - t: "FETCH"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>FETCH</code> 는 <b>곁말이 더 필요한</b> 표준 표기의 일부라 혼자서는 줄 수를 못 정합니다.
+            en: >-
+              <code>FETCH</code> is part of a standard form that <b>needs more words</b>; alone it settles nothing.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 혼자 서느냐", en: "The sharpest spot — whether it stands alone" }
+            code:
+              - "FETCH FIRST 10 ROWS ONLY"
+              - "LIMIT 10"
+      - t: "SAMPLE"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>SAMPLE</code> 은 <b>무작위로 뽑는</b> 방언 낱말이라 줄 수의 상한과 다른 일을 합니다.
+            en: >-
+              <code>SAMPLE</code> is a dialect word for <b>drawing at random</b>, which is not capping a count.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 상한이냐 무작위냐", en: "The sharpest spot — a cap or a draw" }
+            code:
+              - "LIMIT 10   -- 상한"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 줄 수를 <b>잘랐을까요</b>?"
+    en: "Why does line {{site.line}} <b>cap</b> the number of lines?"
+  choices:
+    - t:
+        ko: "화면에 다 못 보여 주고 옮기는 값도 커져서 — 다음 쪽은 따로 부른다"
+        en: "Because the screen cannot show them all and the transfer grows — the next page is asked separately"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 다음 쪽이 겹치지 않으려면 무엇이 더 필요한지도 적어 보세요."
+        en: "That is the direction. Say what else is needed so the next page does not overlap."
+    - t:
+        ko: "행이 그만큼밖에 없어서"
+        en: "Because there are only that many rows"
+      ok: false
+      fb:
+        ko: "적으면 적은 대로 나옵니다. 자른 것은 <b>많을 때</b>를 대비한 것이에요."
+        en: "Fewer rows simply come back. The cap is for <b>when there are many</b>."
+    - t:
+        ko: "그래야 문장이 서서"
+        en: "Because the statement needs it"
+      ok: false
+      fb:
+        ko: "없어도 섭니다. 붙인 것은 <b>고른 것</b>이에요."
+        en: "It stands without one. Adding it was a <b>choice</b>."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./limit-offset.scm }
+
+examples:
+  - code: "SELECT id FROM cart LIMIT 10"
+    expect: { sites: 1, form: limit, hole: "LIMIT", picks: { 1: "LIMIT", 2: "10", 3: "cart", 4: "id" } }
+  - code: "SELECT id FROM cart ORDER BY qty LIMIT 10"
+    expect: { sites: 1, form: limit, hole: "LIMIT", picks: { 1: "LIMIT", 2: "10", 3: "cart", 4: "id" } }
+  - code: "SELECT id FROM cart"
+    expect: none
