@@ -1,0 +1,187 @@
+schema: 1
+id: rs/tail-expression
+# 1부 (`rs.md` §2 #8). 보편형은 `common/return-value`. Rust 에서 다시 배울 것은 `return` 을 대개
+# **안 쓴다**는 것 — 마지막 식에 세미콜론을 붙이면 반환값이 `()` 가 되어 E0308 로 멈춘다. 초심자가
+# 가장 자주 붙이는 한 글자다. 실측: 함수의 51% 가 꼬리식으로 값을 낸다(rust-axis §2.1 #8).
+universal: common/return-value
+name: { ko: 마지막 식이 답이다, en: The last expression is the answer }
+token: null
+grammars: [rust]
+framework: null
+essential: true
+difficulty: 1
+prereq: [rs/function-item]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "묶음의 마지막 줄에 세미콜론이 없으면 그 값이 묶음의 값이다. 붙이면 값은 () 가 된다."
+    en: "A block's last line without a semicolon is its value; with one it becomes ()."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 세미콜론이 <b>없습니다</b>. 그래서 문(statement)이 아니라
+      식(expression)이고, 묶음 {{pick.3|code}}…{{pick.2|code}} 의 <b>값</b>이 됩니다 — 함수 몸통이면 그것이
+      돌려주는 값이에요. 세미콜론을 붙이는 순간 그 줄은 「계산하고 버리는 문」이 되고 묶음의 값은 `()`
+      가 됩니다. 서명이 `-> i32` 인데 `()` 를 주니 E0308 — 초심자가 가장 자주 붙이는 한 글자가 이
+      오류의 출처입니다. 이 리포에서 함수 절반이 이렇게 값을 냅니다.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} has <b>no semicolon</b>. So it is an expression, not a
+      statement, and it becomes the <b>value</b> of the block {{pick.3|code}}…{{pick.2|code}} — for a
+      function body, the value returned. Add a semicolon and the line becomes “compute and discard,”
+      and the block's value turns into `()`. With `-> i32` in the signature that is E0308 — the single
+      character beginners add most often is where this error comes from. Half the functions in this repo
+      return a value this way.
+  trace:
+    - ko: "묶음이 위에서 아래로 돈다."
+      en: "The block runs top to bottom."
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 마지막이고 세미콜론이 없다 — 이것이 묶음의 값이다."
+      en: "{{pick.1|code}} on line {{site.line}} is last and has no semicolon — it is the block's value."
+    - ko: "{{pick.2|code}} 에서 묶음이 닫히며 그 값이 밖으로 나간다."
+      en: "The block closes at {{pick.2|code}} and that value goes out."
+
+rule:
+  ko: "<b>세미콜론이 없는 마지막 식이 묶음의 값이다.</b> 붙이면 () 이고, 서명과 안 맞으면 E0308 이다."
+  en: "<b>The last expression without a semicolon is the block's value.</b> With one it is (), and a mismatch with the signature is E0308."
+result:
+  label:
+    ko: "{{site.line}}행의 묶음이 내는 값"
+    en: "the value the block on line {{site.line}} yields"
+  value: "{{pick.1}}"
+  note:
+    ko: "세미콜론이 없어서 값이다"
+    en: "a value because there is no semicolon"
+ok:
+  ko: "{{pick.1|code}}{{pick.1|josa:이,가}}{{pick.1|josa:이,가}} 묶음의 값입니다 — 세미콜론이 없다는 것이 그 표시예요."
+  en: "{{pick.1|code}} is this block's value — the missing semicolon is the sign."
+payoff:
+  ko: "이걸 알면 「`-> i32` 인데 왜 `()` 를 줬다고 하나」(E0308)가 풀립니다 — 마지막 줄의 세미콜론입니다."
+  en: "This untangles “the signature says `-> i32`, why does it say I gave `()`” (E0308) — the semicolon on the last line."
+bridge:
+  ko: "파이썬·자바는 `return` 이 없으면 아무것도 안 돌려줍니다. Rust 는 마지막 식이 답이라 `return` 이 드뭅니다."
+  en: "Python and Java return nothing without `return`. In Rust the last expression is the answer, so `return` is rare."
+misconceptions:
+  - ko: "세미콜론은 있으나 없으나 같다 — 마지막 식의 세미콜론이 값을 `()` 로 바꿉니다(E0308)."
+    en: "The semicolon makes no difference — on the last expression it turns the value into `()` (E0308)."
+  - ko: "값을 돌려주려면 `return` 을 써야 한다 — 마지막 식이면 안 써도 됩니다. `return` 은 중간에서 나갈 때 써요."
+    en: "Returning a value needs `return` — not on the last expression. `return` is for leaving early."
+  - ko: "`if` 갈래 안의 마지막 식은 값이 아니다 — 값입니다. 그래서 두 갈래의 타입이 같아야 해요."
+    en: "The last expression inside an `if` arm is not a value — it is. That is why both arms must share a type."
+
+point:
+  - q:
+      ko: "{{site.line}}행 근처에서 <b>이 묶음의 값이 되는 식</b>을 짚어 보세요."
+      en: "Near line {{site.line}}, point at <b>the expression that becomes this block's value</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 묶음을 <b>닫는 괄호</b>입니다. 값은 그 앞의 마지막 식이에요."
+          en: "{{pick.2|code}} is the brace that <b>closes</b> the block. The value is the last expression before it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 괄호냐 식이냐", en: "The sharpest spot — the brace or the expression" }
+          code:
+            - "{ a + b }"
+            - "//  ^값     ^닫기"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 묶음을 <b>여는 괄호</b>입니다. 값은 여는 쪽이 아니라 닫히기 직전의 식이에요."
+          en: "{{pick.3|code}} is the brace that <b>opens</b> the block. The value is not at the opening but just before the close."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 처음이냐 끝이냐", en: "The sharpest spot — the start or the end" }
+          code:
+            - "{ let t = a; t + b }"
+            - "//                ^값은 끝에"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행의 {{pick.1|code}} 뒤에 <b>세미콜론을 붙이면</b> 어떻게 될까요?"
+      en: "What happens when a <b>semicolon is added</b> after {{pick.1|code}} on line {{site.line}}?"
+    hint:
+      ko: "묶음의 값이 무엇이 되는지 보세요."
+      en: "Watch what the block's value becomes."
+    options:
+      - t:
+          ko: "묶음의 값이 () 가 되고, 서명이 다른 타입이면 E0308 로 멈춘다"
+          en: "The block's value becomes (), and E0308 stops it when the signature says another type"
+      - t:
+          ko: "아무 것도 안 바뀐다"
+          en: "Nothing changes"
+        diag:
+          t:
+            ko: "바뀝니다. 세미콜론은 「계산하고 버려라」라서 값이 <b>사라져요</b>."
+            en: "It does change. A semicolon means “compute and discard,” so the value <b>vanishes</b>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 한 글자", en: "The sharpest spot — one character" }
+            code:
+              - "{ a + b }    // 값 a + b"
+              - "{ a + b; }   // 값 ()"
+      - t:
+          ko: "값이 그대로 돌려진다"
+          en: "The value is still returned"
+        diag:
+          t:
+            ko: "돌려지지 않습니다. 돌려주려면 세미콜론을 떼거나 앞에 `return` 을 적어야 해요."
+            en: "It is not. To return it, drop the semicolon or write `return` in front."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 둘 중 하나", en: "The sharpest spot — one of two" }
+            code:
+              - "a + b          // 된다"
+              - "return a + b;  // 된다"
+      - t:
+          ko: "실행 중에 오류가 난다"
+          en: "It fails at run time"
+        diag:
+          t:
+            ko: "실행까지 안 갑니다. 타입이 안 맞는 것은 <b>컴파일러</b>가 잡아요."
+            en: "It never runs. A type mismatch is caught by the <b>compiler</b>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 언제 막히나", en: "The sharpest spot — when it is blocked" }
+            code:
+              - "컴파일: E0308"
+              - "실행:   시작도 안 한다"
+
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 개념의 표시는 「없는 세미콜론」이라 뚫을 글자가 없다 — 빈칸에 세미콜론을
+  넣을지 말지를 묻는 판은 마지막 식 뒤의 빈 자리를 구멍으로 삼아야 하는데 그런 노드가 없다.
+  값을 묻는 판(`value`)이 「이 묶음의 값은?」으로 그 자리를 받는다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 <code>return</code> 을 <b>안 썼을까요</b>?"
+    en: "Why does line {{site.line}} <b>not</b> use <code>return</code>?"
+  choices:
+    - t:
+        ko: "마지막 식이 곧 값이라 낱말이 필요 없기 때문에 — return 은 중간에서 나갈 때만 쓴다"
+        en: "Because the last expression already is the value — return is for leaving in the middle"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 함수에 중간에서 나가는 줄이 있는지도 찾아보세요."
+        en: "That is the direction. Look for a line in this function that leaves early."
+    - t:
+        ko: "Rust 에 `return` 이 없어서"
+        en: "Because Rust has no `return`"
+      ok: false
+      fb:
+        ko: "있습니다. 안 쓴 것은 필요 없어서예요."
+        en: "It exists. It was left out because it was not needed."
+    - t:
+        ko: "`return` 이 느려서"
+        en: "Because `return` is slower"
+      ok: false
+      fb:
+        ko: "속도는 같습니다. 관용구의 차이예요."
+        en: "The speed is the same. It is idiom."
+
+queries:
+  - { grammars: [rust], file: ./tail-expression.scm }
+
+examples:
+  - code: "fn add(a: i32, b: i32) -> i32 { a + b }         // 값은 a + b"
+    expect: { sites: 1, form: tail, picks: { 1: "a + b", 2: "}", 3: "{" } }
+  - code: "fn name(&self) -> String { self.name.clone() }"
+    expect: { sites: 1, form: tail, picks: { 1: "self.name.clone()" } }
+  - code: "fn f() { run(); }                              // 세미콜론 — 값은 ()"
+    expect: none

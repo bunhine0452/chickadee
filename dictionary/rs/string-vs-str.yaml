@@ -1,0 +1,182 @@
+schema: 1
+id: rs/string-vs-str
+# 2부 (`rs.md` §3). 보편형은 없다 — 소유와 빌림의 차이가 **처음 눈에 보이는** 자리이고 대응물이 없다.
+# 선행에 `rs/char-and-byte` 가 붙는다(§0.4): `&str` 이 UTF-8 을 보증해서 바이트 색인이 막힌다.
+universal: null
+name: { ko: 가진 글자와 빌린 글자, en: Owned text and borrowed text }
+token: "String"
+grammars: [rust]
+framework: null
+essential: true
+difficulty: 3
+prereq: [rs/string-literal, rs/borrow-shared, cs/stack-and-heap, cs/text-encoding]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "글자에는 두 타입이 있다. 하나는 힙의 버퍼를 가진 것, 하나는 어딘가의 글자를 빌려 가리키는 조각이다."
+    en: "Text has two types: one owns a heap buffer, one borrows a slice from elsewhere."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 힙에 버퍼를 <b>가진</b> 글자입니다 — 늘릴 수 있고, 넘기면
+      주인이 옮겨 가요. 반대편의 `&str` 은 어딘가에 있는 글자의 <b>일부를 빌려 가리키는 조각</b>이라
+      늘릴 수 없고 원본보다 오래 못 삽니다. 큰따옴표는 후자이고 `String::from` 이 전자를 만듭니다.
+      함수 인자는 대개 `&str` 로 받는 것이 맞아요 — `String` 도 `&s` 로 넘기면 `&str` 이 됩니다(자동
+      역참조). 반대로 `&str` 을 `String` 자리에 넣으면 E0308 이고, 그때 `.to_string()` 이 필요합니다.
+      이 리포에서 `&str` 인자 1,196 대 `String` 인자 365 — 셋 중 둘이 빌립니다.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} is text that <b>owns</b> a heap buffer — it can grow, and
+      handing it over moves ownership. Its counterpart `&str` is <b>a slice that borrows part of text
+      living elsewhere</b>: it cannot grow and cannot outlive the original. Double quotes make the
+      latter; `String::from` makes the former. Parameters are usually right as `&str` — a `String`
+      passed as `&s` becomes `&str` on its own (auto-deref). The reverse, a `&str` where a `String` is
+      wanted, is E0308, and that is where `.to_string()` comes in. In this repo `&str` parameters
+      outnumber `String` ones 1,196 to 365 — two out of three borrow.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.2|code}}{{pick.2|josa:은,는}} {{pick.1|code}} 다 — 가졌는지 빌렸는지가 여기 적혀 있다."
+      en: "{{pick.2|code}} on line {{site.line}} is {{pick.1|code}} — owned or borrowed is written right here."
+    - ko: "가졌으면 늘리고 넘길 수 있고, 빌렸으면 읽기만 하고 원본보다 오래 못 산다."
+      en: "Owned may grow and be handed over; borrowed is read-only and dies before its source."
+    - ko: "둘 사이를 건너는 자리는 .to_string() 과 &s 두 곳뿐이다."
+      en: "Crossing between the two happens at just two spots: .to_string() and &s."
+
+rule:
+  ko: "<b>String 은 가진 것, &str 은 빌린 조각.</b> 받을 때는 &str, 가져야 하면 String, 건너려면 .to_string() 과 &s."
+  en: "<b>String owns, &str borrows a slice.</b> Take &str, own a String, and cross with .to_string() and &s."
+result:
+  label:
+    ko: "{{site.line}}행의 {{pick.2}}"
+    en: "{{pick.2}} on line {{site.line}}"
+  value: "{{pick.1}}"
+  note:
+    ko: "가졌나 빌렸나"
+    en: "owned or borrowed"
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} {{pick.1|code}} 입니다 — 그 한 낱말이 가졌는지 빌렸는지를 말합니다."
+  en: "{{pick.2|code}} is {{pick.1|code}} — that one word says whether it owns or borrows."
+payoff:
+  ko: "이걸 알면 「왜 `\"…\"` 를 String 자리에 못 넣고, 왜 String 은 `&s` 로 넘기나」가 함께 풀립니다."
+  en: "This untangles both “why can `\"…\"` not fill a String slot” and “why is a String passed as `&s`.”"
+bridge:
+  ko: "파이썬·JS 의 문자열은 하나입니다. Rust 는 <b>가진 것과 빌린 것</b>을 타입으로 갈라 소유권이 글자에서 처음 눈에 보입니다."
+  en: "Python and JS have one string. Rust splits <b>owned and borrowed</b> into types, so ownership first becomes visible in text."
+misconceptions:
+  - ko: "`String` 과 `&str` 은 같은 것의 두 이름이다 — 가진 버퍼와 빌린 조각입니다. `&str` 은 못 늘리고 `String` 은 함수 사이를 그냥 못 지나가요."
+    en: "`String` and `&str` are two names for one thing — an owned buffer and a borrowed slice. `&str` cannot grow; `String` does not pass between functions for free."
+  - ko: "인자는 `String` 으로 받는 게 안전하다 — 부르는 쪽이 매번 복사하거나 주인을 잃습니다. 읽기만 하면 `&str` 이에요."
+    en: "Taking `String` parameters is safer — callers must copy or give up ownership each time. For reading, `&str`."
+  - ko: "`&String` 과 `&str` 은 다른 타입이라 서로 못 넣는다 — `&String` 은 `&str` 자리에 그대로 갑니다(자동 역참조)."
+    en: "`&String` and `&str` are different types that never interchange — a `&String` goes straight into a `&str` slot (auto-deref)."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>가졌는지 빌렸는지를 말하는 타입</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the type that says owned or borrowed</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 가졌는지 빌렸는지는 이름이 아니라 옆의 타입이 말해요."
+          en: "{{pick.2|code}} is <b>the name</b>. Owned or borrowed is said by the type beside it, not the name."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 타입이냐", en: "The sharpest spot — the name or the type" }
+          code:
+            - "name: String   // 가졌다"
+            - "name: &str     // 빌렸다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 함수의 <b>인자 목록</b>이나 빌림 기호입니다. 가졌는지 빌렸는지는 타입 이름에 있어요."
+          en: "{{pick.3|code}} is the function's <b>parameter list</b> or the borrow symbol. Owned or borrowed is in the type name."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 어디에 적히나", en: "The sharpest spot — where it is written" }
+          code:
+            - "fn greet(name: String) -> String"
+            - "//             ^가졌다     ^가졌다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행의 글자는 <b>버퍼를 가진</b> 쪽입니다."
+      en: "Choose what goes in the blank. The text on line {{site.line}} is the <b>owning</b> kind."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "String", mono: true }
+      - t: "str"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>빌린 조각</b>의 타입이고 늘 `&` 뒤에 옵니다. 혼자서는 크기를 모르는 타입이라 그대로 못 써요."
+            en: "That is the <b>borrowed slice</b> type and always follows `&`. Alone it has no known size and cannot be used as is."
+          edge:
+            h: { ko: "가장 날카로운 자리 — & 가 있나", en: "The sharpest spot — is there an &" }
+            code:
+              - "name: &str      // 빌린 조각"
+              - "name: String    // 가진 버퍼"
+      - t: "char"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>글자 하나</b>입니다. 글자 여럿이 아니에요."
+            en: "That is <b>one character</b>. Not a run of text."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 하나냐 여럿이냐", en: "The sharpest spot — one or many" }
+            code:
+              - "let c: char = 'a';"
+              - "let s: String = String::from(\"abc\");"
+      - t: "Vec"
+        mono: true
+        diag:
+          t:
+            ko: "이건 아무 타입의 <b>목록</b>이라 항목 타입을 적어야 합니다. 글자로는 `Vec&lt;u8&gt;` 인데 UTF-8 보증이 없어요."
+            en: "That is a <b>list</b> of any type and needs an item type. For text it would be `Vec&lt;u8&gt;` — with no UTF-8 guarantee."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 보증이 있나", en: "The sharpest spot — is there a guarantee" }
+            code:
+              - "Vec<u8>    // 아무 바이트"
+              - "String     // UTF-8 이 보증된 바이트"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 `&str` 이 아니라 <b>가진 글자</b>로 적었을까요?"
+    en: "Why does line {{site.line}} use <b>owned text</b> rather than `&str`?"
+  choices:
+    - t:
+        ko: "이 글자를 저장하거나 늘리거나 원본보다 오래 살려야 해서 — 읽기만 한다면 빌린 조각으로 됐을 자리다"
+        en: "Because this text is stored, grown, or must outlive its source — for reading alone a borrowed slice would have done"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 값이 어디에 저장되거나 늘어나는지도 찾아보세요."
+        en: "That is the direction. Find where this value is stored or grows."
+    - t:
+        ko: "`&str` 은 함수에 못 넘겨서"
+        en: "Because `&str` cannot be passed to functions"
+      ok: false
+      fb:
+        ko: "넘깁니다 — 인자 셋 중 둘이 그거예요."
+        en: "It can — two of every three parameters are exactly that."
+    - t:
+        ko: "가진 글자가 더 빨라서"
+        en: "Because owned text is faster"
+      ok: false
+      fb:
+        ko: "반대입니다. 만들 때 힙을 잡아요."
+        en: "The other way round. Making one allocates on the heap."
+
+queries:
+  - { grammars: [rust], file: ./string-vs-str.scm }
+
+examples:
+  - code: "fn greet(name: String) -> String { name }       // 받고 돌려주는 것이 다 가진 글자"
+    expect: { sites: 2, form: string-return, hole: "String", picks: { 1: "String", 2: "greet", 3: "(name: String)" } }
+  - code: "fn shout(s: &str) -> usize { s.len() }          // 빌린 조각을 받는다 — 셋 중 둘이 이 모양"
+    expect: { sites: 1, form: str-param, picks: { 1: "str", 2: "s", 3: "&" } }
+  - code: "fn f() { let owned = String::from(\"hi\"); }     // 빌린 조각에서 가진 글자를 만든다"
+    expect: { sites: 1, form: string-make, picks: { 1: "String", 2: "from", 3: "(\"hi\")" } }
+  - code: "fn f() { let view = owned.as_str(); }           // 가진 것에서 빌린 꼴을 꺼낸다"
+    expect: { sites: 1, form: cross, picks: { 1: "as_str", 2: "owned", 3: "()" } }
+  - code: "fn f() { let n: i32 = 1; }                      // 글자가 아니다"
+    expect: none

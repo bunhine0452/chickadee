@@ -1,0 +1,173 @@
+schema: 1
+id: rs/return-statement
+# `essential` 이 아니다 — `_lang.yaml` 의 `alternatives` 가 `rs/tail-expression` 의 짝(「AI 가 대신
+# 쓴 것」)으로 이 개념을 든다(`rs.md` §2). 린트 `alternatives-exists` 가 실물을 요구해서 섰다.
+# 보편형은 걸지 않는다 — `common/return-value` 는 `rs/tail-expression` 이 받는다.
+universal: null
+name: { ko: 일찍 돌려주기, en: Returning early }
+token: "return"
+grammars: [rust]
+framework: null
+essential: false
+difficulty: 1
+prereq: [rs/function-item, rs/tail-expression]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "함수 중간에서 값을 들고 나간다. 마지막 줄에 쓰면 세미콜론 없는 식과 같은 뜻이다."
+    en: "Leaves mid-function with a value; on the last line it equals a bare expression."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} {{pick.2|code}}{{pick.2|josa:을,를}} 들고 <b>그 자리에서</b> 함수를 나갑니다.
+      Rust 에서는 마지막 식이 답이라 이 낱말은 대개 안 쓰고(이 리포 함수의 51% 가 꼬리식), 쓰는 자리는
+      <b>중간에서 나가는 곳</b>이에요 — 조건이 맞으면 일찍 끝내는 「가드」가 전형입니다. 마지막 줄에
+      적어도 틀리지는 않지만 관용구가 아니고, `clippy` 가 지적합니다. 「AI 가 대신 쓴 것」으로 이
+      개념이 등록된 이유가 그것이에요.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} leaves the function <b>right there</b>, carrying
+      {{pick.2|code}}. Since the last expression is the answer in Rust, this word is usually absent
+      (51% of functions in this repo end on a tail expression); where it appears is <b>a mid-function
+      exit</b> — the typical case is a guard that finishes early when a condition holds. Writing it on
+      the last line is allowed but not idiomatic either, and `clippy` flags it. That is why this
+      concept is registered as “what the AI wrote instead.”
+  trace:
+    - ko: "{{site.line}}행에 닿으면 {{pick.2|code}}{{pick.2|josa:이,가}} 값이 된다."
+      en: "When line {{site.line}} is reached, {{pick.2|code}} becomes a value."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 그 값을 들고 함수를 즉시 나간다 — 아래 줄은 안 돈다."
+      en: "{{pick.1|code}} leaves the function at once with that value — the lines below never run."
+    - ko: "마지막 줄이었다면 세미콜론 없는 식과 같은 결과다."
+      en: "On the last line the result would be the same as a bare expression."
+
+rule:
+  ko: "<b>중간에서 나갈 때만 쓴다.</b> 마지막 줄의 값은 세미콜론 없는 식으로 낸다."
+  en: "<b>Use it only to leave from the middle.</b> The last line's value is a bare expression."
+result:
+  label:
+    ko: "{{site.line}}행에서 나가는 값"
+    en: "the value leaving at line {{site.line}}"
+  value: "{{pick.2}}"
+  note:
+    ko: "여기서 함수가 끝난다"
+    en: "the function ends here"
+ok:
+  ko: "{{site.line}}행에서 {{pick.2|code}}{{pick.2|josa:을,를}} 들고 나갑니다. 그 아래는 이 경우에 안 돕니다."
+  en: "Line {{site.line}} leaves with {{pick.2|code}}. What follows does not run in this case."
+payoff:
+  ko: "이걸 알면 「`return` 이 없는데 값은 어디서 나오나」가 반대로 풀립니다 — 마지막 식이 그 자리예요."
+  en: "This untangles the reverse question, “there is no `return`, where does the value come from” — the last expression is that place."
+bridge:
+  ko: "파이썬·자바는 값을 돌려주려면 반드시 이 낱말을 씁니다. Rust 는 마지막 식이 답이라 중간 탈출에만 씁니다."
+  en: "Python and Java must use this word to return a value. Rust's last expression is the answer, so this word is for mid-function exits."
+misconceptions:
+  - ko: "값을 돌려주려면 반드시 써야 한다 — 마지막 식이면 안 써도 됩니다."
+    en: "Returning a value requires this word — not when it is the last expression."
+  - ko: "`return x` 와 `return x;` 는 다르다 — 같습니다. 이 낱말은 문맥과 무관하게 나가요."
+    en: "`return x` and `return x;` differ — they are the same. This word leaves regardless of context."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>함수를 그 자리에서 나가게 하는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that leaves the function right there</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 들고 나갈 <b>값</b>입니다. 나가게 하는 것은 앞의 낱말이에요."
+          en: "{{pick.2|code}} is the <b>value</b> carried out. The word before it does the leaving."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값이냐 나가기냐", en: "The sharpest spot — the value or the leaving" }
+          code:
+            - "0            // 값"
+            - "return 0;    // 값을 들고 나간다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 문을 닫는 <b>세미콜론</b>입니다. 있으나 없으나 나가는 것은 같아요."
+          en: "{{pick.3|code}} is the <b>semicolon</b> closing the statement. With or without it, the leaving is the same."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 세미콜론이 뜻을 안 바꾼다", en: "The sharpest spot — the semicolon changes nothing here" }
+          code:
+            - "return 0;"
+            - "return 0    // 같다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 함수를 <b>중간에서</b> 값과 함께 나갑니다."
+      en: "Choose what goes in the blank. Line {{site.line}} leaves the function <b>from the middle</b> with a value."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "return", mono: true }
+      - t: "break"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>되풀이</b>를 나갑니다. 함수는 안 나가요 — 되풀이 밖이면 컴파일 오류(E0268)."
+            en: "That leaves a <b>loop</b>, not the function — outside a loop it is E0268."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 되풀이냐 함수냐", en: "The sharpest spot — the loop or the function" }
+            code:
+              - "loop { break; }   // 되풀이를 나간다"
+              - "return 0;         // 함수를 나간다"
+      - t: "continue"
+        mono: true
+        diag:
+          t:
+            ko: "이건 되풀이의 <b>다음 바퀴</b>로 갑니다. 값을 들고 나가지 않아요."
+            en: "That jumps to the <b>next lap</b> of a loop. It carries no value out."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 나가기냐 건너뛰기냐", en: "The sharpest spot — leaving or skipping" }
+            code:
+              - "continue;    // 다음 바퀴"
+              - "return 0;    // 함수 끝"
+      - t: "yield"
+        mono: true
+        diag:
+          t:
+            ko: "Rust 안정판에 이 낱말은 <b>없습니다</b>. 예약만 돼 있어요."
+            en: "Stable Rust <b>has no</b> such word. It is only reserved."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 없는 낱말", en: "The sharpest spot — a word that is not there" }
+            code:
+              - "yield 0;     // 컴파일 안 됨"
+              - "return 0;"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 마지막 식으로 두지 않고 <b>이 낱말</b>을 썼을까요?"
+    en: "Why does line {{site.line}} use <b>this word</b> rather than leaving the value as the last expression?"
+  choices:
+    - t:
+        ko: "함수 중간이라 마지막 식이 될 수 없어서 — 조건이 맞으면 나머지를 건너뛰고 끝내는 자리다"
+        en: "Because it is mid-function and cannot be the last expression — a spot that skips the rest and finishes when a condition holds"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 줄이 마지막 줄이었다면 무엇으로 바꿔야 관용구인지도 적어 보세요."
+        en: "That is the direction. If this were the last line, say what the idiomatic form would be."
+    - t:
+        ko: "Rust 는 마지막 식으로 값을 못 내서"
+        en: "Because Rust cannot yield a value from the last expression"
+      ok: false
+      fb:
+        ko: "냅니다. 그것이 기본이에요."
+        en: "It can. That is the default."
+    - t:
+        ko: "이 낱말이 더 빨라서"
+        en: "Because this word is faster"
+      ok: false
+      fb:
+        ko: "속도는 같습니다."
+        en: "The speed is the same."
+
+queries:
+  - { grammars: [rust], file: ./return-statement.scm }
+
+examples:
+  - code: "fn f(n: i32) -> i32 { if n < 0 { return 0; } n }   // 가드 — 중간에서 나간다"
+    expect: { sites: 1, form: return, hole: "return", picks: { 1: "return", 2: "0", 3: ";" } }
+  - code: "fn f(n: i32) -> i32 { n }                         // 마지막 식 — rs/tail-expression"
+    expect: none

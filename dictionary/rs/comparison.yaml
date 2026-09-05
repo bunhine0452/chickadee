@@ -1,0 +1,177 @@
+schema: 1
+id: rs/comparison
+# 0부 축 H (`rs.md` §0.1 #8). 보편형은 `common/comparison`. Rust 에서 다시 배울 것은 **타입이 같아야
+# 견준다**는 것(`1i32 == 1u8` 은 E0308)과, 조건 안의 `=` 가 막히는 이유가 다르다는 것 — 대입식의 값이
+# `()` 라 `bool` 자리에 안 맞는다.
+universal: common/comparison
+name: { ko: 두 값 견주기, en: Comparing two values }
+token: "=="
+grammars: [rust]
+framework: null
+essential: true
+difficulty: 1
+prereq: [rs/boolean-literal, cs/type]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "두 값을 견주어 참·거짓 하나를 낸다. 견주려면 양쪽 타입이 같아야 한다."
+    en: "Weighs two values and yields one truth value. Both sides must be the same type."
+  why:
+    ko: >-
+      {{site.line}}행은 {{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:을,를}} {{pick.1|code}}{{pick.1|josa:으로,로}} 견주어
+      참·거짓 <b>하나</b>를 냅니다. 다른 언어라면 `1 == 1.0` 이 참이지만 Rust 는 <b>타입이 다르면
+      견주지 않습니다</b> — `1i32 == 1u8` 은 컴파일이 멈춰요(E0308). 조용히 맞춰 주는 대신 어느 쪽을
+      바꿀지 사람이 적게 합니다(`as`·`into`). 조건 안에 `=` 를 잘못 쓰면 막히는 이유도 다릅니다 —
+      「대입은 조건이 아니다」가 아니라, 대입식의 값이 `()` 라 참·거짓 자리에 <b>타입이 안 맞아서</b>예요.
+    en: >-
+      Line {{site.line}} weighs {{pick.2|code}} against {{pick.3|code}} with {{pick.1|code}} and yields
+      <b>one</b> truth value. Elsewhere `1 == 1.0` is true; Rust <b>does not compare different types</b> —
+      `1i32 == 1u8` stops the build (E0308). Instead of quietly adjusting, it makes you say which side
+      to convert (`as`, `into`). A stray `=` in a condition is refused for a different reason too — not
+      “assignment is not a condition,” but because the value of an assignment is `()`, <b>a type unfit</b>
+      for a truth slot.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:이,가}} 먼저 값이 된다 — 같은 타입이어야 한다."
+      en: "{{pick.2|code}} and {{pick.3|code}} become values first — of the same type."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 둘을 견주어 참·거짓을 낸다."
+      en: "{{pick.1|code}} weighs them and yields a truth value."
+    - ko: "그 참·거짓이 {{site.line}}행의 조건이나 이름으로 간다."
+      en: "That truth value goes to the condition or the name on line {{site.line}}."
+
+rule:
+  ko: "<b>견주기는 같은 타입끼리다.</b> 결과는 참·거짓 하나이고, 대입은 값이 () 라 조건에 못 온다."
+  en: "<b>Comparison is between equal types.</b> The result is one truth value; assignment yields () and cannot be a condition."
+result:
+  label:
+    ko: "{{site.line}}행의 견주기"
+    en: "the comparison on line {{site.line}}"
+  value: "{{pick.2}} {{pick.1}} {{pick.3}}"
+  note:
+    ko: "참 아니면 거짓"
+    en: "true or false"
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:을,를}} 견준 답 하나가 나옵니다."
+  en: "One answer comes out of weighing {{pick.2|code}} against {{pick.3|code}}."
+payoff:
+  ko: "이걸 알면 「길이와 숫자를 견줬는데 왜 막히나」(E0308)가 풀립니다 — 한쪽 타입을 적어 맞추면 됩니다."
+  en: "This untangles “why is comparing a length to a number refused” (E0308) — convert one side and it passes."
+bridge:
+  ko: "파이썬은 `1 == 1.0` 이 참이고 JS 는 `1 == '1'` 도 참입니다. Rust 는 둘 다 <b>컴파일이 안 됩니다</b>."
+  en: "Python says `1 == 1.0` is true; JS even says `1 == '1'`. Rust <b>compiles neither</b>."
+misconceptions:
+  - ko: "타입이 달라도 값이 같으면 참이다 — 견주기 자체가 안 됩니다(E0308). 먼저 한쪽을 바꿔야 해요."
+    en: "Equal values of different types compare as true — the comparison itself is refused (E0308). Convert one side first."
+  - ko: "조건 안의 `=` 는 대입이라 막는다 — 막는 이유는 타입입니다. 대입식의 값이 `()` 라 참·거짓 자리에 안 맞아요."
+    en: "A `=` in a condition is refused because it assigns — the reason is the type. An assignment's value is `()`, which does not fit a truth slot."
+  - ko: "실수는 견줄 수 없다 — 견줄 수 있습니다. 다만 근사값이라 같음은 대개 거짓이고, 정렬(`Ord`)만 없어요."
+    en: "Decimals cannot be compared — they can. Being approximate, equality is usually false, and only ordering (`Ord`) is missing."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>두 값을 견주는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that weighs the two values</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 견주어지는 <b>왼쪽 값</b>입니다. 값은 스스로 견주지 못하고, 가운데 기호가 견줘요."
+          en: "{{pick.2|code}} is the <b>left value</b> being weighed. A value does not weigh itself; the symbol between does."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값이냐 견주기냐", en: "The sharpest spot — the value or the weighing" }
+          code:
+            - "count          // 값 하나"
+            - "count == 0     // 참·거짓 하나"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>오른쪽 값</b>입니다. 왼쪽과 같은 타입이어야 하고, 견주는 것은 가운데 기호예요."
+          en: "{{pick.3|code}} is the <b>right value</b>. It must match the left one's type; the symbol between does the weighing."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 타입이 같은가", en: "The sharpest spot — same type" }
+          code:
+            - "n == 0u8       // n 이 u8 이면 된다"
+            - "n == 0.0       // n 이 정수면 E0308"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 두 값이 <b>같은지</b> 묻습니다."
+      en: "Choose what goes in the blank. Line {{site.line}} asks whether two values are <b>equal</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "==", mono: true }
+      - t: "="
+        mono: true
+        diag:
+          t:
+            ko: "기호 하나는 <b>넣기</b>입니다. 넣기의 값은 `()` 라 참·거짓 자리에 못 오고 컴파일이 멈춰요(E0308)."
+            en: "One symbol is <b>putting</b>. Its value is `()`, which cannot fill a truth slot, so the build stops (E0308)."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 묻기냐 넣기냐", en: "The sharpest spot — asking or putting" }
+            code:
+              - "if n == 0 { }   // 묻는다"
+              - "if n = 0 { }    // E0308"
+      - t: "!="
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>다른지</b> 묻는 기호입니다. 답이 정반대로 나와요."
+            en: "That asks whether they <b>differ</b>. The answer comes out reversed."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 같음이냐 다름이냐", en: "The sharpest spot — equal or different" }
+            code:
+              - "n == 0   // 0 이면 참"
+              - "n != 0   // 0 이면 거짓"
+      - t: "<="
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>순서</b>를 묻습니다. 같음도 포함하지만 작은 쪽도 참이라 물음이 달라요."
+            en: "That asks about <b>order</b>. It includes equality, but a smaller value is also true, so the question differs."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 같음이냐 순서냐", en: "The sharpest spot — equality or order" }
+            code:
+              - "n == 3   // 3 만 참"
+              - "n <= 3   // 3 이하 전부 참"
+
+why_gate:
+  q:
+    ko: "Rust 는 왜 타입이 다른 두 값을 <b>견주지 않을까요</b>?"
+    en: "Why does Rust <b>refuse to compare</b> two values of different types?"
+  choices:
+    - t:
+        ko: "어느 쪽을 어떻게 바꿔 견줄지가 여러 가지라, 그 선택을 코드에 적게 하려고"
+        en: "Because there are several ways to convert one side, and that choice should be written in the code"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 줄이라면 어느 쪽을 바꾸는 것이 맞는지도 적어 보세요."
+        en: "That is the direction. For this line, say which side should convert."
+    - t:
+        ko: "견주기가 느려져서"
+        en: "Because it would be slower"
+      ok: false
+      fb:
+        ko: "속도 문제가 아닙니다. 뜻이 하나로 안 정해져서예요."
+        en: "Not speed. The meaning is not settled."
+    - t:
+        ko: "Rust 에 형 변환이 없어서"
+        en: "Because Rust has no type conversion"
+      ok: false
+      fb:
+        ko: "있습니다 — 셋이나요(`as`·`From`·`TryFrom`). 자동으로 도는 것이 없을 뿐이에요."
+        en: "It has three (`as`, `From`, `TryFrom`). None of them runs on its own."
+
+queries:
+  - { grammars: [rust], file: ./comparison.scm }
+
+examples:
+  - code: "fn f() { if a == b { } }                       // 같은 타입끼리"
+    expect: { sites: 1, form: compare, hole: "==", picks: { 1: "==", 2: "a", 3: "b" } }
+  - code: "fn f() { let ok = count >= 3; }               // ok -> 참·거짓 (bool)"
+    expect: { sites: 1, form: compare, picks: { 1: ">=", 2: "count", 3: "3" } }
+  - code: "fn f() { let v: Vec<i32> = Vec::new(); }      // 타입 인자의 < 는 견주기가 아니다 (rs.md §8 ④)"
+    expect: none

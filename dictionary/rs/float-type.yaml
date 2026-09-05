@@ -1,0 +1,180 @@
+schema: 1
+id: rs/float-type
+# 0부 축 B (`rs.md` §0.1 #5). 보편형은 `common/float-literal` — 근사값이 되는 기계는 IEEE-754 하나라
+# 열 언어가 같은 값을 낸다. Rust 에서 다시 배울 것은 그 사실이 **타입 시스템에 드러난다**는 것
+# 하나다: `f64` 는 `Ord` 가 아니라 `PartialOrd` 라 `sort()` 가 안 된다.
+universal: common/float-literal
+name: { ko: 실수는 왜 안 떨어지나, en: Why decimals do not land }
+token: "f64"
+grammars: [rust]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cs/floating-point, cs/binary-representation]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "실수는 근사값이라 0.1 더하기 0.2 가 0.3 이 아니고, 그래서 실수 타입은 순서를 보증하지 않는다."
+    en: "Decimals are approximations, and the decimal types promise no total order."
+  why:
+    ko: >-
+      실수는 <b>2진 분수의 합</b>으로 저장됩니다. 10진수 <code>0.1</code> 은 그 합으로 정확히 못 적어서
+      저장되는 것은 가장 가까운 값이고, 둘을 더하면 <code>0.30000000000000004</code> 가 나옵니다 — 어느
+      언어든 같습니다. Rust 만의 결과가 하나 더 있어요. 「같지 않은 값」(NaN)이 자기 자신과도 안 같아서
+      {{pick.1|code}}{{pick.1|josa:은,는}} <b>전체 순서가 없는 타입</b>으로 정해져 있고, 그래서 실수 목록에
+      <code>sort()</code> 를 부르면 컴파일이 멈춥니다(E0277). 순서를 정하려면 견주기가 「있을 수도 없을
+      수도」라고 답하는 <code>partial_cmp</code> 를 손으로 씁니다.
+    en: >-
+      A decimal is stored as a <b>sum of binary fractions</b>. Base-ten <code>0.1</code> has no exact form
+      there, so what is stored is the nearest value, and two of them add up to
+      <code>0.30000000000000004</code> — in every language. Rust adds one consequence: since NaN is not
+      even equal to itself, {{pick.1|code}} is declared <b>a type without total order</b>, so
+      <code>sort()</code> on a list of decimals stops the build (E0277). To order them you write
+      <code>partial_cmp</code>, whose answer is “maybe, maybe not.”
+  trace:
+    - ko: "{{site.line}}행의 {{pick.2|code}}{{pick.2|josa:은,는}} 실수 타입이다 — 값은 근사값이다."
+      en: "{{pick.2|code}} on line {{site.line}} is a decimal — the value is an approximation."
+    - ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 같음도 순서도 절반만 보증한다(PartialEq · PartialOrd)."
+      en: "{{pick.1|code}} promises equality and order only halfway (PartialEq, PartialOrd)."
+    - ko: "그래서 이 값들의 목록에는 `sort()` 가 안 붙는다."
+      en: "So a list of these values does not take `sort()`."
+
+rule:
+  ko: "<b>실수는 근사값이고 순서가 부분적이다.</b> 같음 기호로 견주지 않고, 정렬은 partial_cmp 로 한다."
+  en: "<b>Decimals are approximate and only partially ordered.</b> Never compare with equality; sort through partial_cmp."
+result:
+  label:
+    ko: "{{site.line}}행의 {{pick.2}}"
+    en: "{{pick.2}} on line {{site.line}}"
+  value: "{{pick.1}}"
+  note:
+    ko: "근사값 · 순서는 부분적"
+    en: "approximate; partial order"
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 근사값을 담는 이름이고, 그 사실이 타입 {{pick.1|code}} 에 적혀 있습니다."
+  en: "{{pick.2|code}} holds an approximation, and the type {{pick.1|code}} says so."
+payoff:
+  ko: "이걸 알면 「왜 `sort()` 가 실수에서 컴파일이 안 되나」(E0277)가 풀립니다 — 언어가 근사값의 성질을 타입에 적어 둔 겁니다."
+  en: "This untangles “why does `sort()` refuse to compile on decimals” (E0277) — the language wrote the nature of approximations into the type."
+bridge:
+  ko: "파이썬·JS 도 같은 값을 냅니다. 다른 것은 Rust 가 그 성질을 <b>타입에</b> 적어 정렬을 막는다는 것뿐입니다."
+  en: "Python and JS print the same value. The only difference is that Rust writes the property <b>into the type</b> and blocks sorting."
+misconceptions:
+  - ko: "0.1 + 0.2 는 0.3 이다 — 어느 언어도 그 값을 안 냅니다. 저장되는 순간 가장 가까운 값으로 바뀌어요."
+    en: "0.1 + 0.2 is 0.3 — no language gives that. The values become their nearest neighbours as they are stored."
+  - ko: "`sort()` 가 안 되는 건 버그다 — NaN 이 자기 자신과 안 같아서 순서가 정의되지 않은 것이 타입에 적힌 겁니다."
+    en: "`sort()` refusing is a bug — NaN is not equal to itself, so the missing order is written into the type."
+  - ko: "정밀도가 높은 타입을 쓰면 정확해진다 — 자릿수만 늘어납니다. 근사값인 것은 같아요."
+    en: "The wider type is exact — only the digits grow. It is still an approximation."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>값이 근사값이라고 정하는 타입</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the type that makes the value an approximation</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 근사값인지는 이름이 아니라 옆의 타입이 정해요."
+          en: "{{pick.2|code}} is <b>the name</b>. Whether it is approximate is decided by the type beside it, not the name."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 타입이냐", en: "The sharpest spot — the name or the type" }
+          code:
+            - "let r: f64 = 1.0;   // 근사값"
+            - "let r: i64 = 1;     // 같은 이름, 정확한 값"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 들어가는 <b>값</b>입니다. 이 값이 근사값이 되는 이유는 타입에 있어요."
+          en: "{{pick.3|code}} is <b>the value</b> going in. Why it becomes approximate is in the type."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값이냐 담는 곳이냐", en: "The sharpest spot — the value or the container" }
+          code:
+            - "0.1            // 그 자체로 근사값"
+            - "let r: f64 = 0.1;"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>소수를 담는 64칸 실수</b> 이름을 세웁니다."
+      en: "Choose what goes in the blank. Line {{site.line}} sets up a <b>64-slot decimal</b> name."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "f64", mono: true }
+      - t: "i64"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>정수</b> 64칸입니다. 소수를 넣으면 컴파일이 멈춰요(E0308) — 정수와 실수는 서로 안 변합니다."
+            en: "That is a <b>whole number</b>, 64 slots. A fraction into it stops the build (E0308) — whole and decimal never convert on their own."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 정수냐 실수냐", en: "The sharpest spot — whole or decimal" }
+            code:
+              - "let r: f64 = 1.5;   // 된다"
+              - "let r: i64 = 1.5;   // E0308"
+      - t: "u64"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>부호 없는 정수</b>입니다. 소수도 음수도 못 담아요."
+            en: "That is an <b>unsigned whole number</b>. It takes neither fractions nor negatives."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 부호와 소수", en: "The sharpest spot — sign and fraction" }
+            code:
+              - "let r: f64 = -1.5;  // 된다"
+              - "let r: u64 = -1;    // E0600"
+      - t: "bool"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>참·거짓</b>입니다. 수가 아니라 셈도 못 해요."
+            en: "That is <b>true/false</b>. Not a number, so no arithmetic either."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 수냐 참·거짓이냐", en: "The sharpest spot — a number or a truth value" }
+            code:
+              - "let r: f64 = 0.5;"
+              - "let b: bool = true;"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행처럼 계산한 실수를 왜 <b>같음 기호로 견주면 안 될까요</b>?"
+    en: "Why should a computed decimal like the one on line {{site.line}} <b>not be compared with equality</b>?"
+  choices:
+    - t:
+        ko: "저장된 값이 사람이 적은 값과 마지막 자리에서 다를 수 있고, 같음 기호는 그 한 자리도 다르다고 보기 때문"
+        en: "Because the stored value can differ from what a person wrote in its last digit, and equality counts that digit"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그럼 무엇으로 견줄지도 한 줄로 적어 보세요."
+        en: "That is the direction. Add a line on what to compare with instead."
+    - t:
+        ko: "Rust 가 실수 견주기를 막아 놓아서"
+        en: "Because Rust forbids comparing decimals"
+      ok: false
+      fb:
+        ko: "막지 않습니다. `==` 는 컴파일되고 돕니다 — 다만 `Eq` 가 없어 정렬·해시 키로는 못 써요."
+        en: "It is not forbidden. `==` compiles and runs — only `Eq` is missing, so no sorting or hash keys."
+    - t:
+        ko: "실수 견주기가 느려서"
+        en: "Because comparing decimals is slow"
+      ok: false
+      fb:
+        ko: "속도 문제가 아닙니다. 값이 다르다는 것이 문제예요."
+        en: "Speed is not it. The problem is that the values differ."
+
+queries:
+  - { grammars: [rust], file: ./float-type.scm }
+
+examples:
+  - code: "fn f() { let ratio: f64 = 0.1 + 0.2; }        // ratio -> 0.30000000000000004"
+    expect: { sites: 2, form: float-let, hole: "f64", picks: { 1: "f64", 2: "ratio", 3: "0.1 + 0.2" } }
+  - code: "fn area(r: f32) -> f32 { r * r }               // r 은 32칸 실수"
+    expect: { sites: 1, form: float-param, picks: { 1: "f32", 2: "r" } }
+  - code: "fn f() { let ord = a.partial_cmp(&b); }       // ord -> Some(순서) 또는 None"
+    expect: { sites: 1, form: partial-cmp, picks: { 1: "partial_cmp", 2: "a", 3: "(&b)" } }
+  - code: "fn f() { let n: i32 = 1 + 2; }                 // 정수 — rs/integer-type"
+    expect: none

@@ -1,0 +1,178 @@
+schema: 1
+id: rs/clone
+# 2부 (`rs.md` §3). 보편형은 없다. AI 가 빌림 오류를 지우려고 가장 자주 넣는 한 줄 — ai-pm 1,150곳.
+# 왜 통하는지(값이 둘이 된다) 모르면 왜 느린지도, 왜 두 값이 갈라졌는지도 모른다. `_lang.yaml` 의
+# `alternatives` 가 `rs/borrow-shared` 의 짝으로 이 개념을 든다.
+universal: null
+name: { ko: 복사해서 벗어나기, en: Copying your way out }
+token: ".clone()"
+grammars: [rust]
+framework: null
+essential: true
+difficulty: 2
+prereq: [rs/move, cs/value-vs-reference]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "값을 통째로 하나 더 만든다. 옮김 오류는 사라지지만 그 뒤로 둘은 서로 모르는 다른 값이다."
+    en: "Makes a second whole copy; the move error goes, but the two values now diverge."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} {{pick.2|code}} 의 값을 <b>통째로 하나 더</b> 만듭니다 —
+      힙의 버퍼까지 새로 잡아서요. 그래서 원래 이름을 넘기지 않아도 되고 E0382 가 사라집니다. AI 가
+      빌림 오류 앞에서 가장 자주 넣는 한 줄이 이것이고(이 리포 1,150곳), 통하는 이유는 <b>값이 둘이
+      됐기</b> 때문이에요. 대가도 거기 있습니다. 한쪽을 고쳐도 다른 쪽은 그대로라 「같은 값을 둘이
+      본다」는 원래 의도가 조용히 깨지고, 큰 값이면 그만큼 복사 비용이 듭니다. 빌려서 될 자리였는지
+      먼저 묻는 것이 이 판의 요점이에요.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} makes <b>a second, whole copy</b> of {{pick.2|code}} — heap buffer
+      included. So the original need not be handed over and E0382 goes away. This is the line an AI adds
+      most often in front of a borrow error (1,150 sites in this repo), and it works because <b>there are
+      now two values</b>. That is also the price: change one and the other stays put, so an intended
+      “both see the same value” quietly breaks, and a large value costs that much to copy. The point of
+      this plate is to ask first whether a borrow would have done.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 값 하나의 주인이다."
+      en: "{{pick.2|code}} owns one value."
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 그 값을 통째로 복사해 새 값을 낸다."
+      en: "{{pick.1|code}} on line {{site.line}} copies the value whole and yields a new one."
+    - ko: "이제 값이 둘이다 — 한쪽을 고쳐도 다른 쪽은 모른다."
+      en: "Now there are two — changing one leaves the other unaware."
+
+rule:
+  ko: "<b>복제는 값을 둘로 만든다.</b> 옮김 오류는 사라지되 두 값은 갈라지고, 빌림으로 될 자리면 빌린다."
+  en: "<b>Cloning makes two values.</b> The move error goes, the values diverge; where a borrow would do, borrow."
+result:
+  label:
+    ko: "{{site.line}}행의 복제"
+    en: "the copy on line {{site.line}}"
+  value: "{{pick.2}}.{{pick.1}}{{pick.3}}"
+  note:
+    ko: "새 값 — 원래 것과 갈라진다"
+    en: "a new value — diverges from the original"
+ok:
+  ko: "{{pick.2|code}} 의 값이 하나 더 생겼습니다. 원래 이름은 그대로 살고, 둘은 이제 따로 갑니다."
+  en: "A second value of {{pick.2|code}} exists. The original name lives on, and the two go their own ways."
+payoff:
+  ko: "이걸 알면 「복제했더니 되긴 하는데 왜 한쪽만 바뀌나」가 풀립니다 — 값이 둘이라서요."
+  en: "This untangles “cloning made it work, but why does only one side change” — because there are two values."
+bridge:
+  ko: "파이썬 `b = a` 는 둘이 같은 것을 봅니다. Rust 의 복제는 그 반대라, 같은 것을 보게 하려면 빌림이나 `Rc` 가 답이에요."
+  en: "Python's `b = a` makes both see one thing. Rust's clone is the opposite; to share one thing, borrow or use `Rc`."
+misconceptions:
+  - ko: "복제를 붙이면 해결된다 — 오류는 사라지지만 값이 <b>둘</b>이 됩니다. 원래 의도(같은 값을 둘이 본다)는 조용히 깨져요."
+    en: "Adding a clone fixes it — the error goes, but now there are <b>two</b> values. The original intent (two names, one value) quietly breaks."
+  - ko: "복제는 싸다 — 힙의 버퍼까지 복사합니다. 목록·글자는 크기만큼 듭니다."
+    en: "Cloning is cheap — it copies the heap buffer too. Lists and text cost their size."
+  - ko: "복제한 값을 고치면 원본도 바뀐다 — 안 바뀝니다. 그것이 복제와 빌림의 차이예요."
+    en: "Changing the clone changes the original — it does not. That is the difference between a clone and a borrow."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>값을 하나 더 만드는 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name that makes a second value</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 복사되는 <b>원본</b>입니다. 원본은 그대로 있고, 하나 더 만드는 일은 뒤의 이름이 해요."
+          en: "{{pick.2|code}} is the <b>original</b> being copied. It stays as it is; the name after it makes the second."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 원본이냐 복제냐", en: "The sharpest spot — the original or the copy" }
+          code:
+            - "name            // 값 하나"
+            - "name.clone()    // 값 둘"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 호출의 <b>괄호</b>입니다. 무엇을 하는지는 그 앞의 이름에 있어요."
+          en: "{{pick.3|code}} is the call's <b>parentheses</b>. What happens is in the name before them."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 괄호냐 이름이냐", en: "The sharpest spot — the parentheses or the name" }
+          code:
+            - "name.clone()"
+            - "//   ^이름  ^괄호"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 값을 <b>통째로 하나 더</b> 만듭니다."
+      en: "Choose what goes in the blank. Line {{site.line}} makes <b>a second, whole copy</b> of a value."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "clone", mono: true }
+      - t: "borrow"
+        mono: true
+        diag:
+          t:
+            ko: "이건 `RefCell` 안의 값을 <b>실행 시에 빌리는</b> 이름입니다. 새 값을 만들지 않아요."
+            en: "That <b>borrows at run time</b> from a `RefCell`. It makes no new value."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 빌림이냐 복제냐", en: "The sharpest spot — a borrow or a copy" }
+            code:
+              - "cell.borrow()    // 빌린다"
+              - "name.clone()     // 하나 더"
+      - t: "as_ref"
+        mono: true
+        diag:
+          t:
+            ko: "이건 가진 것에서 <b>빌린 꼴</b>을 꺼냅니다. 값은 그대로 하나예요."
+            en: "That takes a <b>borrowed view</b> of what you own. Still one value."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값이 몇 개인가", en: "The sharpest spot — how many values" }
+            code:
+              - "name.as_ref()   // 값 하나, 빌린 꼴"
+              - "name.clone()    // 값 둘"
+      - t: "to_owned"
+        mono: true
+        diag:
+          t:
+            ko: "이것도 복사를 만들지만 <b>빌린 것에서 가진 것으로</b> 갈 때 쓰는 이름입니다. 가진 값에 부르면 복제와 같아요."
+            en: "That also copies, but it is the name for going <b>from borrowed to owned</b>. On an owned value it equals a clone."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 어디서 출발하나", en: "The sharpest spot — where it starts" }
+            code:
+              - "\"hi\".to_owned()   // &str → String"
+              - "name.clone()      // String → String"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 빌리지 않고 <b>복제했을까요</b>?"
+    en: "Why does line {{site.line}} <b>clone</b> instead of borrowing?"
+  choices:
+    - t:
+        ko: "받는 쪽이 값을 가져야 하거나(저장·다른 스레드) 빌림이 원본보다 오래 살아야 해서 — 아니라면 빌림으로 됐을 자리다"
+        en: "Because the receiver must own it (storing, another thread) or the borrow would outlive the original — otherwise a borrow would have done"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 자리의 받는 쪽이 값을 저장하는지 읽기만 하는지도 확인해 보세요."
+        en: "That is the direction. Check whether the receiver here stores the value or only reads it."
+    - t:
+        ko: "빌림은 Rust 에서 느려서"
+        en: "Because borrowing is slow in Rust"
+      ok: false
+      fb:
+        ko: "반대입니다. 복제가 크기만큼 듭니다."
+        en: "The other way round. Cloning costs the value's size."
+    - t:
+        ko: "복제하지 않으면 컴파일이 안 되어서"
+        en: "Because it would not compile otherwise"
+      ok: false
+      fb:
+        ko: "그 오류가 났을 수는 있습니다. 그런데 오류를 지우는 방법이 복제 하나는 아니에요 — 빌림이 먼저입니다."
+        en: "That error may have appeared. But cloning is not the only way to clear it — borrowing comes first."
+
+queries:
+  - { grammars: [rust], file: ./clone.scm }
+
+examples:
+  - code: "fn f() { let copy = name.clone(); }             // 값이 둘 — name 은 그대로 산다"
+    expect: { sites: 1, form: clone, hole: "clone", picks: { 1: "clone", 2: "name", 3: "()" } }
+  - code: "fn f() { let s = text.to_owned(); }             // 빌린 것에서 가진 것으로"
+    expect: { sites: 1, form: clone-alias, picks: { 1: "to_owned", 2: "text", 3: "()" } }
+  - code: "fn f() { let r = &name; }                       // 빌림 — 값은 하나"
+    expect: none

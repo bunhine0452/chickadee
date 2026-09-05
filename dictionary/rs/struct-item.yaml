@@ -1,0 +1,176 @@
+schema: 1
+id: rs/struct-item
+# 2부 (`rs.md` §3). 보편형은 없다 — `common/class-definition` 은 메서드와 상속을 품은 개념이고 Rust 의
+# 구조체는 **값 묶음**만이라 걸면 상속이 전이된다. 필드마다 타입이 있고 전부 채워야 만들어진다.
+universal: null
+name: { ko: 값 묶어 이름 붙이기, en: Bundling values under a name }
+token: "struct"
+grammars: [rust]
+framework: null
+essential: true
+difficulty: 2
+prereq: [rs/let-binding]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "필드 몇 개를 묶어 새 타입으로 만든다. 만들 때 필드를 전부 채워야 하고 메서드는 따로 붙인다."
+    en: "Bundles fields into a new type; fill all at creation, attach behaviour apart."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} {{pick.2|code}} 라는 <b>새 타입</b>을 세웁니다 — 안의 필드마다
+      타입이 있고 {{pick.3|code}}{{pick.3|josa:이,가}} 그 목록이에요. 만들 때는 필드를 <b>전부</b> 채워야 합니다(E0063).
+      「절반만 채운 값」이 존재할 수 없다는 뜻이고, 그래서 `None` 같은 빈칸이 필요하면 필드 타입을
+      `Option` 으로 적습니다. 다른 언어의 클래스와 다른 점은 여기에 <b>메서드가 없다</b>는 것 — 행동은
+      `impl` 블록으로 따로 붙이고(다음 판), 상속도 없어요. 필드를 밖에서 읽으려면 `pub` 이 있어야 합니다.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} sets up a <b>new type</b> named {{pick.2|code}} — each field
+      inside has a type, and {{pick.3|code}} is the list. On creation <b>every</b> field must be filled
+      (E0063). A half-filled value cannot exist, so when a blank is needed the field's type is written
+      as `Option`. Unlike a class elsewhere, <b>there are no methods here</b> — behaviour is attached in a
+      separate `impl` block (the next plate), and there is no inheritance. Reading a field from outside
+      needs `pub`.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}} 라는 타입을 세운다 — 필드는 {{pick.3|code}} 다."
+      en: "Line {{site.line}} sets up the type {{pick.2|code}} — the fields are {{pick.3|code}}."
+    - ko: "값을 만들 때 필드를 전부 채운다. 하나라도 빠지면 E0063."
+      en: "A value fills every field at creation. One missing is E0063."
+    - ko: "행동은 여기 없다 — impl 블록이 따로 붙인다."
+      en: "No behaviour here — a separate impl block attaches it."
+
+rule:
+  ko: "<b>구조체는 값 묶음이다.</b> 필드는 전부 채우고, 행동은 impl 로 따로, 상속은 없다."
+  en: "<b>A struct is a bundle of values.</b> Fill every field, attach behaviour in impl, and there is no inheritance."
+result:
+  label:
+    ko: "{{site.line}}행의 타입"
+    en: "the type on line {{site.line}}"
+  value: "{{pick.1}} {{pick.2}}"
+  note:
+    ko: "필드 묶음 — 메서드는 따로"
+    en: "a bundle of fields — methods elsewhere"
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 이제 {{pick.3|code}}{{pick.3|josa:을,를}} 가진 타입입니다. 값 하나가 그 필드를 전부 듭니다."
+  en: "{{pick.2|code}} is now a type with {{pick.3|code}}. One value carries all of those fields."
+payoff:
+  ko: "이걸 알면 「필드 하나 빠뜨렸는데 왜 안 만들어지나」(E0063)와 「메서드가 왜 여기 없나」가 함께 풀립니다."
+  en: "This untangles both “why does one missing field refuse to build” (E0063) and “why are the methods not here.”"
+bridge:
+  ko: "파이썬 클래스는 필드와 메서드를 한 곳에 두고 나중에 필드를 더 붙일 수도 있습니다. Rust 는 필드를 <b>여기서 못박고</b> 행동은 따로 둡니다."
+  en: "A Python class keeps fields and methods together and can grow fields later. Rust <b>pins the fields here</b> and keeps behaviour apart."
+misconceptions:
+  - ko: "필드를 나중에 채워도 된다 — 만들 때 전부 채워야 합니다(E0063). 빈칸이 필요하면 `Option` 이에요."
+    en: "Fields can be filled later — all at creation (E0063). For a blank, use `Option`."
+  - ko: "구조체에 메서드를 적는다 — 안에는 필드만 있습니다. 메서드는 `impl` 블록에 따로 적어요."
+    en: "Methods are written inside the struct — only fields go there. Methods live in a separate `impl` block."
+  - ko: "다른 구조체를 상속할 수 있다 — 없습니다. 공통 행동은 트레이트로, 공통 필드는 포함으로 풀어요."
+    en: "A struct can inherit from another — it cannot. Shared behaviour goes through traits, shared fields through composition."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>새 타입을 세우는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that sets up a new type</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 타입의 <b>이름</b>입니다. 이름은 값을 만들 때 쓰는 것이고, 타입을 세우는 것은 앞의 낱말이에요."
+          en: "{{pick.2|code}} is the type's <b>name</b>. The name is for making values; the word before it sets the type up."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 세우기냐 만들기냐", en: "The sharpest spot — defining or making" }
+          code:
+            - "struct Point { x: i32, y: i32 }   // 세운다"
+            - "Point { x: 1, y: 2 }              // 만든다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>필드 목록</b>입니다. 무엇을 묶는지이지 묶는 낱말이 아니에요."
+          en: "{{pick.3|code}} is the <b>field list</b>. It says what is bundled, not the bundling word."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 낱말이냐 목록이냐", en: "The sharpest spot — the word or the list" }
+          code:
+            - "struct Point { x: i32, y: i32 }"
+            - "// ^낱말       ^목록"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 필드를 묶은 <b>새 타입</b>을 세웁니다."
+      en: "Choose what goes in the blank. Line {{site.line}} sets up a <b>new type</b> bundling fields."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "struct", mono: true }
+      - t: "enum"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>갈래 중 하나</b>인 타입입니다. 필드를 동시에 다 갖는 것이 아니라 갈래 하나만 골라요."
+            en: "That is a type that is <b>one of several variants</b>. It does not hold all fields at once; it picks one variant."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 전부냐 하나냐", en: "The sharpest spot — all or one" }
+            code:
+              - "struct Point { x: i32, y: i32 }   // x 와 y"
+              - "enum Shape { Dot, Line }           // Dot 이거나 Line"
+      - t: "class"
+        mono: true
+        diag:
+          t:
+            ko: "Rust 에 이 낱말은 <b>없습니다</b>. 필드는 여기, 행동은 `impl` 에 따로 적어요."
+            en: "Rust <b>has no</b> such word. Fields go here; behaviour goes in a separate `impl`."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 없는 낱말", en: "The sharpest spot — a word that is not there" }
+            code:
+              - "class Point { }        // 다른 언어"
+              - "struct Point { }  impl Point { }"
+      - t: "type"
+        mono: true
+        diag:
+          t:
+            ko: "이건 있는 타입에 <b>다른 이름</b>을 붙입니다. 새 타입을 만들지 않아요."
+            en: "That gives an existing type <b>another name</b>. It makes no new type."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 새것이냐 별명이냐", en: "The sharpest spot — new or alias" }
+            code:
+              - "type Id = u32;            // 별명"
+              - "struct Id(u32);           // 새 타입"
+
+why_gate:
+  q:
+    ko: "Rust 는 왜 구조체에 <b>메서드를 함께 적지 않을까요</b>?"
+    en: "Why does Rust <b>not put methods inside</b> the struct?"
+  choices:
+    - t:
+        ko: "값의 모양과 행동을 갈라 두면 행동을 여러 impl 로 나눠 붙이고 트레이트로도 붙일 수 있어서"
+        en: "Because splitting shape from behaviour lets behaviour be attached in several impl blocks and through traits"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 타입에 붙은 impl 블록이 몇 개인지 세어 보세요."
+        en: "That is the direction. Count the impl blocks attached to this type."
+    - t:
+        ko: "구조체는 행동을 가질 수 없어서"
+        en: "Because a struct cannot have behaviour"
+      ok: false
+      fb:
+        ko: "가집니다. 적는 자리가 다를 뿐이에요."
+        en: "It can. Only the place differs."
+    - t:
+        ko: "메모리를 아끼려고"
+        en: "To save memory"
+      ok: false
+      fb:
+        ko: "메서드는 값에 저장되지 않습니다. 어느 언어든요."
+        en: "Methods are not stored in values, in any language."
+
+queries:
+  - { grammars: [rust], file: ./struct-item.scm }
+
+examples:
+  - code: "struct Point { x: i32, y: i32 }"
+    expect: { sites: 1, form: struct, hole: "struct", picks: { 1: "struct", 2: "Point", 3: "{ x: i32, y: i32 }" } }
+  - code: "fn f() { let p = Point { x: 1, y: 2 }; }         // 만든다 — 필드 전부"
+    expect: { sites: 1, form: make, picks: { 1: "{", 2: "Point", 3: "x: 1" } }
+  - code: "enum Shape { Dot }                              // 갈래 — rs/enum-item"
+    expect: none
