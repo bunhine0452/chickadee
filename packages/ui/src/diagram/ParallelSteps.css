@@ -1,0 +1,129 @@
+/* 나란한 걸음 — 레인이 열, 걸음이 행, 그리고 **레인 사이의 골에 간선**이 선다.
+   간선이 내용이라(채널 연산의 짝) 사다리 둘을 격자에 넣는 것과 다르다(go-learning.md §11.3.1). */
+.ps {
+  display: grid;
+  gap: var(--s-2) 0;
+  align-items: stretch;
+  justify-content: start;
+  min-width: min-content;
+}
+
+.ps-lane {
+  margin: 0 0 var(--s-1);
+  padding-bottom: var(--s-1);
+  border-bottom: 1px solid var(--border-strong);
+  font-family: var(--font-mono);
+  font-size: var(--fs-2);
+  font-weight: var(--fw-medium);
+  color: var(--text);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.ps-step {
+  display: grid;
+  gap: 1px;
+  align-content: center;
+  min-height: 2.4em;
+  padding: var(--s-1) var(--s-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+}
+
+.ps-step.veil {
+  border-style: dashed;
+  background: transparent;
+}
+
+.ps-code {
+  font-family: var(--font-mono);
+  font-size: var(--fs-2);
+  line-height: var(--lh-code);
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.ps-type {
+  min-height: 1em;
+  font-size: var(--fs-1);
+  color: var(--text-muted);
+}
+
+/* 간선 하나 — 골 안에서 두 걸음을 잇는다. 세로선 + 도착 쪽 촉이고, 촉은 테두리로 만든다. */
+.ps-edge {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ps-edge::before {
+  content: "";
+  position: absolute;
+  top: 1.2em;
+  bottom: 1.2em;
+  left: 50%;
+  width: 0;
+  border-left: 1px solid var(--border-strong);
+}
+
+.ps-edge::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  margin-left: -5px;
+  border-right: 5px solid transparent;
+  border-left: 5px solid transparent;
+}
+
+.ps-edge.down::after {
+  bottom: calc(1.2em - 6px);
+  border-top: 6px solid var(--border-strong);
+}
+
+.ps-edge.up::after {
+  top: calc(1.2em - 6px);
+  border-bottom: 6px solid var(--border-strong);
+}
+
+/* 같은 행끼리는 가로선이다 — 세로로 그릴 것이 없다. 촉이 도착 레인 쪽을 가리킨다. */
+.ps-edge.flat::before {
+  inset: 50% 0 auto;
+  width: auto;
+  border-top: 1px solid var(--border-strong);
+  border-left: 0;
+}
+
+.ps-edge.flat::after {
+  top: 50%;
+  margin-top: -5px;
+  margin-left: 0;
+  border-right: 0;
+  border-left: 0;
+}
+
+.ps-edge.flat.right::after {
+  right: 0;
+  left: auto;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 6px solid var(--border-strong);
+}
+
+.ps-edge.flat.left::after {
+  left: 0;
+  border-top: 5px solid transparent;
+  border-right: 6px solid var(--border-strong);
+  border-bottom: 5px solid transparent;
+}
+
+/* 간선 이름표 — 선 위에 앉고 바탕을 덮는다(`.vb-from` 과 같은 수법). */
+.ps-tag {
+  position: relative;
+  padding: 0 var(--s-1);
+  background: var(--surface);
+  font-size: var(--fs-1);
+  color: var(--text-muted);
+  white-space: nowrap;
+}

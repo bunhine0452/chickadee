@@ -25,19 +25,32 @@ export type { CalloutProps, CalloutTone } from './Callout';
 
 /* ───────── 그림 — 학습 내용을 나르는 다이어그램 (design/system/diagrams.md) ─────────
    장식이 아니라 본문이다. 정본 §6 자신이 「코드와 다이어그램이 가장 큰 요소」라고 적었다.
-   전부 값에서 결정론으로 나오고, `predict`/`reveal` 두 상태로 답을 흘리지 않는다. */
+   전부 값에서 결정론으로 나오고, `predict`/`reveal` 두 상태로 답을 흘리지 않는다.
+   문구는 `diagramLabels()` 로 `packages/i18n` 의 `diagram.*` 를 받는다 (D187 ⑳). */
 
 export {
   Diagram, BitField, EvalTree, ValueBox,
+  MemoryLine, BitOverlay, StackFrames, ConversionLadder, PermissionLine, QueueLadder, ParallelSteps,
   bitsOf, exactDecimal, describeBits, describeTree, describeFold, describeValues,
-  annotate, foldSteps, foldedText, isFolded,
-  BITS_LABELS_KO, DIAGRAM_LABELS_KO, withLabels,
+  describeMemory, describeOverlay, describeStack, describeLadder, describePermissions,
+  describeQueue, describeParallel,
+  annotate, foldSteps, foldedText, isFolded, slotNames, keptBits, kindLabel, channelLabel,
+  permName, permStateName,
+  BITS_LABELS_KO, DIAGRAM_LABELS_KO, withLabels, diagramLabels,
 } from './diagram';
 export type {
   BitFieldProps, BitsField, BitsFieldKind, BitsModel, BitsOptions,
+  BitOverlayModel, BitOverlayProps,
+  ChannelKind, ConversionEdge, ConversionKind, ConversionLadderModel, ConversionLadderProps, ConversionRung,
   DiagramLabels, DiagramNav, DiagramPhase, DiagramProps,
   EvalNode, EvalTreeModel, EvalTreeProps, FoldModel, FoldNode, FoldStep,
-  NumType, ValueBoxModel, ValueBoxProps, ValueCell, ValueStep,
+  MemoryLineModel, MemoryLineProps, MemorySlot, MemoryWindow,
+  NumType,
+  ParallelEdge, ParallelLane, ParallelStepsModel, ParallelStepsProps,
+  PermExpect, PermPlace, PermState, PermStep, PermissionLineModel, PermissionLineProps,
+  QueueLadderModel, QueueLadderProps,
+  StackFrame, StackFramesModel, StackFramesProps, StackStep, StackUnwind,
+  ValueBoxModel, ValueBoxProps, ValueCell, ValueStep,
 } from './diagram';
 
 /* ───────── 남은 것 — 새 시스템으로 다시 그렸고 호출처가 옮겨 가는 중 ───────── */

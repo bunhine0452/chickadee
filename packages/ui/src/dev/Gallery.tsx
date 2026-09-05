@@ -3,8 +3,14 @@ import type { ReactNode } from 'react';
 import { Button } from '../Button';
 import { Callout } from '../Callout';
 import { Card } from '../Card';
-import { BitField, EvalTree, ValueBox, bitsOf } from '../diagram';
-import type { EvalTreeModel, FoldModel, ValueBoxModel } from '../diagram';
+import {
+  BitField, BitOverlay, ConversionLadder, EvalTree, MemoryLine, ParallelSteps,
+  PermissionLine, QueueLadder, StackFrames, ValueBox, bitsOf, diagramLabels,
+} from '../diagram';
+import type {
+  ConversionLadderModel, EvalTreeModel, FoldModel, MemoryLineModel, ParallelStepsModel,
+  PermissionLineModel, QueueLadderModel, StackFramesModel, ValueBoxModel,
+} from '../diagram';
 import { Field } from '../Field';
 import { Progress } from '../Progress';
 import { Tag } from '../Tag';
@@ -101,6 +107,172 @@ const VARS: ValueBoxModel = {
   ],
 };
 
+/* ───────── 명세만 다섯 + 신청 여섯 (D187 ⑲) ─────────
+   전부 값에서 나온다. 아래 모델을 지우면 그림이 사라지지 무늬가 남지 않는다. */
+
+/** C 배열 — `a[i]` 의 주소가 `base + i × 4` 라 인덱스는 순번이 아니라 **거리**다. */
+const MEM_ARRAY: MemoryLineModel = {
+  base: '0x1000',
+  stride: 4,
+  slots: [
+    { addr: '0x1000', value: '10', name: 'a[0]' },
+    { addr: '0x1004', value: '20', name: 'a[1]' },
+    { addr: '0x1008', value: '30', name: 'a[2]' },
+    { addr: '0x100c', value: '40', name: 'a[3]' },
+  ],
+};
+
+/** Go 슬라이스 — 줄이 아니라 줄 위의 **창**이고, 그 위에 이름 둘이 얹혀 있다(별칭). */
+const MEM_SLICE: MemoryLineModel = {
+  base: '0x2000',
+  stride: 8,
+  slots: [
+    { addr: '0x2000', value: '1' },
+    { addr: '0x2008', value: '2', names: ['s[0]', 't[0]'] },
+    { addr: '0x2010', value: '3', names: ['s[1]', 't[1]'] },
+    { addr: '0x2018', value: '0' },
+    { addr: '0x2020', value: '0' },
+  ],
+  windows: [{ name: 's', from: 1, len: 2, cap: 4 }],
+};
+
+/** `300u32 as u8` 이 왜 44 인가 — 두 폭을 겹쳐 잘리는 자리를 보인다. */
+const OVERLAY = { from: bitsOf(300, 'u32'), to: bitsOf(44, 'u8'), keep: 8 };
+
+/** C++ — 프레임이 걷힐 때 **사라지는 순서대로 코드가 돈다**. */
+const FRAMES: StackFramesModel = {
+  steps: [
+    {
+      code: 'Widget w("a");',
+      frames: [{ fn: 'main', args: [], locals: [{ name: 'w', type: 'Widget', value: '"a"', changed: true, from: '"a"' }] }],
+    },
+    {
+      code: 'draw(w, 2);',
+      frames: [
+        { fn: 'main', args: [], locals: [{ name: 'w', type: 'Widget', value: '"a"' }] },
+        {
+          fn: 'draw',
+          args: [
+            { name: 'r', type: 'Widget&', value: '"a"' },
+            { name: 'n', type: 'int', value: '2' },
+          ],
+          locals: [{ name: 'buf', type: 'Buf', value: '8칸', changed: true, from: 'Buf(8)' }],
+        },
+      ],
+    },
+    {
+      code: 'throw Oops{};',
+      frames: [
+        { fn: 'main', args: [], locals: [{ name: 'w', type: 'Widget', value: '"a"' }] },
+        {
+          fn: 'draw',
+          args: [
+            { name: 'r', type: 'Widget&', value: '"a"' },
+            { name: 'n', type: 'int', value: '2' },
+          ],
+          locals: [{ name: 'buf', type: 'Buf', value: '8칸' }],
+        },
+      ],
+      unwind: [
+        { name: '~Buf buf', order: 1 },
+        { name: '~Widget w', order: 2 },
+      ],
+      note: '안쪽 프레임의 지역이 먼저, 선언의 역순으로 돈다.',
+    },
+  ],
+};
+
+/** 러스트 — 같은 두 타입 사이에 간선이 셋이고, 셋이 서로 다른 것을 약속한다. */
+const LADDER: ConversionLadderModel = {
+  rungs: [
+    { type: 'i64', value: '300' },
+    { type: 'i32', value: '300' },
+    { type: 'u8', value: '44', note: '하위 8비트만 남는다' },
+  ],
+  edges: [
+    { from: 1, to: 0, kind: 'widen', label: 'From', result: '300' },
+    { from: 1, to: 2, kind: 'narrow', label: 'as', result: '44' },
+    { from: 1, to: 2, kind: 'fallible', label: 'TryFrom', result: 'Err' },
+  ],
+};
+
+/** 러스트 E0502 — `v` 의 쓰기 권한이 빌림 동안 없다. 권한은 이름이 아니라 **자리**에 붙는다. */
+const PERMS: PermissionLineModel = {
+  steps: [
+    {
+      code: 'let mut v = vec![1, 2];',
+      places: [
+        { path: 'v', r: 'gained', w: 'gained', o: 'gained' },
+        { path: '*r', r: 'none', w: 'none', o: 'none' },
+      ],
+    },
+    {
+      code: 'let r = &v[0];',
+      places: [
+        { path: 'v', r: 'has', w: 'lost', o: 'lost' },
+        { path: '*r', r: 'gained', w: 'none', o: 'none' },
+      ],
+    },
+    {
+      code: 'v.push(3);',
+      places: [
+        { path: 'v', r: 'has', w: 'missing', o: 'lost' },
+        { path: '*r', r: 'has', w: 'none', o: 'none' },
+      ],
+      expects: [{ path: 'v', needs: ['r', 'w'] }],
+      note: '쓰기를 요구하는데 없다 — 여기서 거부된다.',
+    },
+    {
+      code: 'println!("{r}");',
+      places: [
+        { path: 'v', r: 'has', w: 'has', o: 'has' },
+        { path: '*r', r: 'lost', w: 'none', o: 'none' },
+      ],
+      expects: [{ path: '*r', needs: ['r'] }],
+    },
+  ],
+};
+
+/** JS — 줄기가 둘이라 「끝났다」가 두 번 온다. 마이크로태스크가 다 빠지고 나서 태스크 하나. */
+const QUEUE: QueueLadderModel = {
+  lanes: ['script', 'micro', 'task'],
+  fold: {
+    expr: "log('1'); setTimeout(f); Promise.resolve().then(g); log('2');",
+    steps: [
+      { code: "log('1')", type: 'script' },
+      { code: "log('2')", type: 'script' },
+      { code: 'g()', type: 'micro' },
+      { code: 'f()', type: 'task' },
+    ],
+  },
+};
+
+/** Go — 간선이 내용이다. 버퍼 없는 채널의 보냄이 받음보다 먼저인 것이 명세의 약속이다. */
+const LANES: ParallelStepsModel = {
+  lanes: [
+    {
+      name: 'main',
+      steps: [
+        { code: 'ch := make(chan int)', type: 'chan int' },
+        { code: 'go work(ch)', type: '' },
+        { code: 'v := <-ch', type: 'int' },
+        { code: 'fmt.Println(v)', type: '3' },
+      ],
+    },
+    {
+      name: 'work',
+      steps: [
+        { code: 'sum := 1 + 2', type: 'int' },
+        { code: 'ch <- sum', type: '' },
+      ],
+    },
+  ],
+  edges: [
+    { from: [0, 1], to: [1, 0], kind: 'wg', label: 'go' },
+    { from: [1, 1], to: [0, 2], kind: 'send' },
+  ],
+};
+
 function Slot({ cap, children }: { cap: string; children: ReactNode }) {
   return (
     <div className="g-slot">
@@ -126,6 +298,10 @@ function GalleryBody() {
   const [phase, setPhase] = useState<'predict' | 'reveal'>('reveal');
   const [fold, setFold] = useState(1);
   const [line, setLine] = useState(1);
+  const [frame, setFrame] = useState(2);
+  const [queue, setQueue] = useState(2);
+  // 화면이 `t()` 로 덮어쓰는 자리 — 진열대도 앱과 같은 길을 쓴다 (D187 ⑳).
+  const L = diagramLabels();
 
   return (
     <div className="gallery" data-theme={theme}>
@@ -244,6 +420,95 @@ function GalleryBody() {
             onStep={setLine}
             phase={phase}
             caption="대입은 상자로 내려오는 화살표 하나다. 상자는 그대로 있고 안의 값만 갈린다."
+          />
+        </div>
+      </Section>
+
+      <Section title="메모리 줄 — 배열이 왜 0부터인가">
+        <div style={{ flex: '1 1 100%', minWidth: 0 }}>
+          <MemoryLine
+            model={MEM_ARRAY}
+            phase={phase}
+            labels={L}
+            caption="a[i] 의 주소가 base + i × 4 다. 인덱스는 순번이 아니라 거리이고, 그래서 첫 칸이 0 이다."
+          />
+        </div>
+        <div style={{ flex: '1 1 100%', minWidth: 0 }}>
+          <MemoryLine
+            model={MEM_SLICE}
+            phase={phase}
+            labels={L}
+            caption="슬라이스는 줄이 아니라 줄 위의 창이다. 용량이 남으면 append 가 원본을 고친다. 같은 칸에 이름이 둘 붙은 것이 별칭이다."
+          />
+        </div>
+      </Section>
+
+      <Section title="겹친 비트 배열 — 300u32 as u8 이 왜 44 인가">
+        <div style={{ flex: '1 1 100%', minWidth: 0 }}>
+          <BitOverlay
+            model={OVERLAY}
+            phase={phase}
+            labels={L}
+            caption="두 폭이 한 격자를 쓴다. 아래 폭에 안 들어가는 윗자리가 그대로 떨어져 나간다 — 에러가 아니라 값이다."
+          />
+        </div>
+      </Section>
+
+      <Section title="스택 프레임 — 걷힐 때 무엇이 도나">
+        <div style={{ flex: '1 1 100%', minWidth: 0 }}>
+          <StackFrames
+            model={FRAMES}
+            step={frame}
+            onStep={setFrame}
+            phase={phase}
+            labels={L}
+            caption="맨 위가 지금 도는 프레임이다. C++ 은 프레임이 사라지는 순서대로 소멸자가 돈다."
+          />
+        </div>
+      </Section>
+
+      <Section title="타입 변환 사다리 — 값이 아니라 관계">
+        <div style={{ flex: '1 1 100%', minWidth: 0 }}>
+          <ConversionLadder
+            model={LADDER}
+            phase={phase}
+            labels={L}
+            caption="같은 두 타입 사이에 간선이 셋이다. From 은 잃는 것이 없고, as 는 잘리고, TryFrom 은 갈라진다."
+          />
+        </div>
+      </Section>
+
+      <Section title="권한 줄 — 자리마다 읽기·쓰기·소유">
+        <div style={{ flex: '1 1 100%', minWidth: 0 }}>
+          <PermissionLine
+            model={PERMS}
+            phase={phase}
+            labels={L}
+            caption="권한은 이름이 아니라 자리에 붙는다. v 와 *r 이 서로 다른 권한을 들고, 3번째 줄에서 v 의 쓰기가 없어 거부된다."
+          />
+        </div>
+      </Section>
+
+      <Section title="큐 사다리 — 두 줄이 비워지는 순서">
+        <div style={{ flex: '1 1 100%', minWidth: 0 }}>
+          <QueueLadder
+            model={QUEUE}
+            step={queue}
+            onStep={setQueue}
+            phase={phase}
+            labels={L}
+            caption="줄기를 열로 놓으면 마이크로태스크가 다 빠지고 나서 태스크 하나가 오는 것이 보인다."
+          />
+        </div>
+      </Section>
+
+      <Section title="나란한 걸음 — 간선이 곧 순서의 근거">
+        <div style={{ flex: '1 1 100%', minWidth: 0 }}>
+          <ParallelSteps
+            model={LANES}
+            phase={phase}
+            labels={L}
+            caption="레인 사이의 간선만이 순서를 정한다. 간선이 없는 두 걸음 사이에는 순서가 없다."
           />
         </div>
       </Section>

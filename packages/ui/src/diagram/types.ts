@@ -127,3 +127,197 @@ export interface ValueStep {
 export interface ValueBoxModel {
   steps: readonly ValueStep[];
 }
+
+/* ═══════════════ 메모리 줄 ═══════════════ */
+
+/**
+ * 줄 위의 칸 하나. **주소가 값의 일부다** — `a[i]` 가 왜 「거리 `i`」인지는 주소가 보여야
+ * 성립한다(`c-learning.md` §11.1 — 이 그림 하나가 C 오개념 여섯을 덮는다).
+ */
+export interface MemorySlot {
+  /** 소스에 적히는 그대로 — `'0x1000'`. 수로 안 받는 이유는 `BitsModel.literal` 과 같다. */
+  addr: string;
+  value: string;
+  /** 이름표 하나. `names` 가 있으면 이쪽은 무시된다. */
+  name?: string | undefined;
+  /**
+   * 이름표 **여럿** — 별칭. `b = a` 뒤에 두 이름이 한 칸을 가리키는 것을 그린다
+   * (py-learning.md §11.1 · ts-learning.md §11.1 이 같은 신청을 냈다).
+   * 값을 나란히 적으면 `[1, 2]` 와 `[1, 2]` 가 되어 별칭인지 복사인지 구별이 사라진다.
+   */
+  names?: readonly string[] | undefined;
+}
+
+/**
+ * 줄 위의 **창** — 슬라이스는 줄이 아니라 줄 위의 창이다(`go-learning.md` §11.1).
+ * `append` 가 원본을 고치나 마나는 `cap` 경계가 정한다.
+ */
+export interface MemoryWindow {
+  name: string;
+  /** 창이 시작하는 슬롯 인덱스. */
+  from: number;
+  /** 지금 길이 — 읽고 쓸 수 있는 칸 수. */
+  len: number;
+  /** 늘릴 수 있는 한계. `cap > len` 이면 그 사이가 「아직 안 쓴 자리」다. */
+  cap: number;
+}
+
+export interface MemoryLineModel {
+  /** 첫 칸의 주소. 캡션과 낭독 문장이 그대로 쓴다. */
+  base: string;
+  /** 칸 하나의 크기(바이트). `a[i]` 의 주소가 `base + i × stride` 인 것이 수업이다. */
+  stride: number;
+  slots: readonly MemorySlot[];
+  windows?: readonly MemoryWindow[] | undefined;
+}
+
+/* ═══════════════ 겹친 비트 배열 ═══════════════ */
+
+/**
+ * 두 폭의 **관계**. `300u32 as u8` 이 왜 44 인가 — 한 줄짜리 비트 배열로는 못 그린다
+ * (diagrams.md §3 상자). 아래 폭에 맞춰 위 폭을 겹쳐 **잘리는 자리**를 보인다.
+ */
+export interface BitOverlayModel {
+  from: BitsModel;
+  to: BitsModel;
+  /** 살아남는 하위 비트 수. 보통 `to.width` 이고, 다르면 그 수가 이긴다. */
+  keep: number;
+}
+
+/* ═══════════════ 스택 프레임 ═══════════════ */
+
+export interface StackFrame {
+  /** 함수 이름 — `'main'`. */
+  fn: string;
+  args: readonly ValueCell[];
+  locals: readonly ValueCell[];
+}
+
+/**
+ * 프레임이 걷힐 때 **도는 코드**. C 는 프레임이 사라지는 것이 전부라 이 칸이 없었고,
+ * C++ 은 사라지는 **순서대로 코드가 돈다**(`cpp-learning.md` §11.1).
+ */
+export interface StackUnwind {
+  name: string;
+  /** 1부터. 이 번호가 답이므로 `predict` 에서 이름이 가려지고 번호가 남는다. */
+  order: number;
+}
+
+export interface StackStep {
+  code: string;
+  /** 이 줄이 **끝난 뒤**의 전체 스냅숏. `ValueStep` 의 중첩판이다. */
+  frames: readonly StackFrame[];
+  unwind?: readonly StackUnwind[] | undefined;
+  note?: string | undefined;
+}
+
+export interface StackFramesModel {
+  steps: readonly StackStep[];
+}
+
+/* ═══════════════ 타입 변환 사다리 ═══════════════ */
+
+/**
+ * 간선의 종류. **값이 아니라 관계**라 모델에 따로 있다(diagrams.md §3 상자) —
+ * 비트 배열은 값 하나를 그리므로 관계를 못 그린다.
+ */
+export type ConversionKind = 'widen' | 'narrow' | 'fallible';
+
+export interface ConversionRung {
+  /** 타입 이름. `NumType` 이 아닌 이유는 `String`·`&str` 같은 칸도 서기 때문이다. */
+  type: string;
+  value: string;
+  note?: string | undefined;
+}
+
+export interface ConversionEdge {
+  /** `rungs` 의 인덱스. */
+  from: number;
+  to: number;
+  kind: ConversionKind;
+  /** 소스에 적히는 이름 — `'as'`·`'From'`·`'TryFrom'`. 언어마다 다르므로 데이터가 나른다. */
+  label?: string | undefined;
+  /** 이 간선을 지난 뒤의 값. 없으면 `to` 칸의 값이 곧 결과다. */
+  result?: string | undefined;
+}
+
+export interface ConversionLadderModel {
+  rungs: readonly ConversionRung[];
+  edges: readonly ConversionEdge[];
+}
+
+/* ═══════════════ 권한 줄 ═══════════════ */
+
+/**
+ * 한 자리가 한 권한에 대해 갖는 상태 다섯. **표기는 재구현이다** —
+ * Brown/Aquascope 의 `+`·`/`·채운 글자는 아이디어이지 지문이 아니다(`rs-learning.md` §11.1).
+ */
+export type PermState = 'has' | 'gained' | 'lost' | 'missing' | 'none';
+
+/**
+ * **place** — 대입 왼쪽에 올 수 있는 것 전부. 이름이 아니라 경로인 것이
+ * 「소유권 화살표」와의 유일한 구조 차이다: `x` 와 `*x` 와 `v[0]` 이 서로 다른 권한을 든다.
+ */
+export interface PermPlace {
+  path: string;
+  r: PermState;
+  w: PermState;
+  o: PermState;
+}
+
+/** 이 줄이 **무슨 권한을 요구하나**. 물음이라 `predict` 에서도 가려지지 않는다. */
+export interface PermExpect {
+  path: string;
+  needs: readonly ('r' | 'w' | 'o')[];
+}
+
+export interface PermStep {
+  code: string;
+  places: readonly PermPlace[];
+  expects?: readonly PermExpect[] | undefined;
+  note?: string | undefined;
+}
+
+export interface PermissionLineModel {
+  steps: readonly PermStep[];
+}
+
+/* ═══════════════ 큐 사다리 ═══════════════ */
+
+/**
+ * 걸음 사다리의 **배치판**(ts-learning.md §11.1). `FoldStep.type` 이 값이 아니라
+ * **어느 줄인가**(`script`·`micro`·`task`)이고, 그 줄이 열이 된다.
+ */
+export interface QueueLadderModel {
+  /** 열이 될 줄 이름. `fold.steps[i].type` 이 여기 있는 값과 맞아야 그 열에 선다. */
+  lanes: readonly string[];
+  fold: FoldModel;
+}
+
+/* ═══════════════ 나란한 걸음 ═══════════════ */
+
+/** 채널 연산이 만드는 간선의 종류. 색이 아니라 **이름**이 가른다(정본 §6). */
+export type ChannelKind = 'send' | 'recv' | 'wg' | 'mutex';
+
+export interface ParallelLane {
+  name: string;
+  steps: readonly FoldStep[];
+}
+
+/**
+ * 레인 사이의 간선. `[레인 인덱스, 걸음 인덱스]`.
+ * **간선이 내용이고 간선은 코드에서 계산된다**(채널 연산의 짝) — 그래서 이것은
+ * 「두 언어 나란히」와 달리 배치가 아니라 그림이다(`go-learning.md` §11.3.1).
+ */
+export interface ParallelEdge {
+  from: readonly [number, number];
+  to: readonly [number, number];
+  kind: ChannelKind;
+  /** 없으면 `kind` 의 이름표가 붙는다. */
+  label?: string | undefined;
+}
+
+export interface ParallelStepsModel {
+  lanes: readonly ParallelLane[];
+  edges: readonly ParallelEdge[];
+}

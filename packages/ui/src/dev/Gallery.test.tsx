@@ -22,6 +22,23 @@ describe('Gallery (DEV 전용)', () => {
     }
   });
 
+  it('그림 열을 모두 진열한다 — 셋(I2) + 일곱(D187 ⑲)', () => {
+    const { container } = render(<Gallery />);
+    for (const sel of [
+      '.bits', '.tree', '.fold', '.vb',
+      '.ml', '.ov', '.sf', '.cl', '.pl', '.ql', '.ps',
+    ]) {
+      expect(container.querySelector(sel), sel).not.toBeNull();
+    }
+    // 그림마다 한 문장 `aria-label` 과 표 대체가 붙는다 — 하나라도 비면 게이트가 아니다.
+    const figs = [...container.querySelectorAll('.dgm')];
+    expect(figs.length).toBeGreaterThanOrEqual(11);
+    for (const fig of figs) {
+      expect(fig.querySelector('[role="img"]')?.getAttribute('aria-label')).toBeTruthy();
+      expect(fig.querySelector('.dgm-alt table')).not.toBeNull();
+    }
+  });
+
   it('남은 프리미티브도 나란히 둔다', () => {
     const { container } = render(<Gallery />);
     // 리소 프리미티브(`.reg`·`.stamp`·`.say`·`.mr`)와 마스코트는 D182 로 사라졌다.
