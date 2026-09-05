@@ -1,0 +1,226 @@
+schema: 1
+id: ts/union-type
+universal: null
+name: { ko: 여럿 중 하나, en: Union type }
+token: "|"
+grammars: [typescript, tsx]
+framework: null
+essential: true
+difficulty: 2
+prereq: [ts/type-annotation]
+confusions: [ts/type-annotation]
+
+dict:
+  one_liner:
+    ko: "약속을 갈래로 적는다. 값 자체가 갈래가 되기도 한다."
+    en: "A promise written as branches. A value itself can be one of the branches."
+  why:
+    ko: >-
+      {{site.line}}행은 이 자리에 올 수 있는 것을 <b>목록으로</b> 적었습니다.
+      {{pick.1|code}}{{pick.1|josa:과,와}} {{pick.2|code}} 중 하나만 오고 그 밖의 것은 컴파일에서
+      걸려요. 갈래가 글자값이면 그 글자 말고는 못 옵니다.
+    en: >-
+      Line {{site.line}} writes what may arrive here as a <b>list</b>. Only {{pick.1|code}} or
+      {{pick.2|code}} may come; anything else is caught at compile time. When a branch is a literal
+      text, no other text fits.
+  trace:
+    - ko: "{{site.line}}행이 갈래 목록을 연다."
+      en: "Line {{site.line}} opens the list of branches."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 첫 갈래, {{pick.2|code}}{{pick.2|josa:이,가}} 그다음이다."
+      en: "{{pick.1|code}} is the first branch, {{pick.2|code}} the next."
+    - ko: "이 이름을 읽는 쪽은 둘 다일 수 있다고 보고 갈라 확인해야 한다."
+      en: "Whoever reads this name must assume either, and check which."
+
+rule:
+  ko: >-
+    <b>갈래가 여럿이면 공통으로 할 수 있는 일만 할 수 있다.</b> 한쪽에만 있는 것을 쓰려면 먼저
+    어느 쪽인지 가려야 한다.
+  en: >-
+    <b>With several branches you may only do what all of them allow.</b> To use what one branch
+    alone has, first settle which branch it is.
+result:
+  label:
+    ko: "{{site.line}}행이 허락하는 것"
+    en: "What line {{site.line}} allows"
+  value: "{{pick.1}} | {{pick.2}}"
+  note:
+    ko: "둘 중 하나"
+    en: "one of the two"
+ok:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:은,는}} 타입 이름일 수도, 값 하나일 수도 있습니다. 값이 그대로
+    타입이 되는 것이 이 언어의 자리예요.
+  en: >-
+    {{pick.1|code}} may be a type's name or a single value. A value doubling as a type is this
+    language's move.
+payoff:
+  ko: >-
+    상태 이름과 API 응답이 거의 다 이 모양으로 옵니다. 갈래를 읽으면 화면이 가질 수 있는 상태가
+    몇 개인지가 그 한 줄에서 세집니다.
+  en: >-
+    State names and API responses almost always arrive in this shape. Read the branches and one
+    line tells you how many states the screen can be in.
+bridge:
+  ko: >-
+    갈래를 가르는 방법이 다음 개념입니다 — <code>if</code> 한 줄이 아래에서 할 수 있는 일을
+    바꿔요.
+  en: >-
+    Settling which branch is the next concept — one <code>if</code> changes what the lines below
+    may do.
+misconceptions:
+  - ko: "갈래 중 아무거나 골라 쓸 수 있다 — 가르기 전에는 공통분만 됩니다."
+    en: "You can just use any branch — before settling, only the common part is available."
+  - ko: "갈래는 타입 이름만 온다 — 글자값·숫자값도 갈래가 됩니다."
+    en: "Branches must be type names — literal text and numbers are branches too."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>첫 갈래</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the first branch</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 세로 막대 <b>뒤</b>의 갈래입니다. 첫 갈래는 그
+            앞에 있어요.
+          en: >-
+            {{pick.2|code}} is the branch <b>after</b> the bar. The first one sits before it.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 막대의 어느 쪽인가"
+            en: "The sharpest spot — which side of the bar"
+          code:
+            - "type S = 'idle' | 'done'   // idle 이 첫 갈래"
+            - "type S = 'idle' | 'done'   // done 이 둘째"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 갈래 목록 전체에 붙인 <b>이름</b>입니다. 갈래는
+            등호 오른쪽에 있어요.
+          en: >-
+            {{pick.3|code}} is the <b>name</b> given to the list. The branches are right of the
+            equals sign.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 이름과 갈래"
+            en: "The sharpest spot — the name or the branches"
+          code:
+            - "type Status = 'idle' | 'done'"
+            - "//   ^이름        ^갈래들"
+
+meaning:
+  - q:
+      ko: >-
+        <code>let v: string | number</code> 다음 줄에서 <code>v.toUpperCase()</code> 를 적으면
+        어떻게 될까요?
+      en: >-
+        After <code>let v: string | number</code>, what happens if the next line writes
+        <code>v.toUpperCase()</code>?
+    hint:
+      ko: "두 갈래가 <b>둘 다</b> 할 수 있는 일만 허락됩니다."
+      en: "Only what <b>both</b> branches can do is allowed."
+    options:
+      - t:
+          ko: "컴파일에서 걸린다 — 숫자 쪽에는 그 이름이 없다"
+          en: "The compiler catches it — the number branch has no such name"
+      - t:
+          ko: "된다 — 글자일 때만 돌면 되니까"
+          en: "It works — it only runs when the value is text"
+        diag:
+          t:
+            ko: >-
+              컴파일러는 <b>돌기 전에</b> 봅니다. 그 줄에 무엇이 들어 있을지 모르니 두 갈래를 다
+              가정하고, 한쪽이 못 하면 막아요.
+            en: >-
+              The compiler looks <b>before</b> anything runs. Not knowing which branch is there, it
+              assumes both and blocks when one cannot.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 언제 보는가"
+              en: "The sharpest spot — when does it look"
+            code:
+              - "let v: string | number; v.toUpperCase()"
+              - "if (typeof v === 'string') v.toUpperCase()"
+      - t:
+          ko: "숫자가 글자로 바뀐 뒤 돈다"
+          en: "The number is turned into text first"
+        diag:
+          t:
+            ko: >-
+              갈래 목록은 바꾸지 않습니다. 무엇이 와도 되는지를 적을 뿐이고, 바꾸는 일은 부르는
+              코드가 해요.
+            en: >-
+              A branch list converts nothing. It says what may arrive; converting is done by code
+              you call.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 적는 것과 바꾸는 것"
+              en: "The sharpest spot — describing or converting"
+            code:
+              - "let v: string | number   // 적는다"
+              - "String(v).toUpperCase()  // 바꾼다"
+      - t:
+          ko: "돌아가는 중에 터진다"
+          en: "It blows up while running"
+        diag:
+          t:
+            ko: >-
+              그 줄은 애초에 컴파일을 못 넘습니다. 돌기 전에 걸리는 것이 갈래 목록을 적는 값이에요.
+            en: >-
+              That line never gets past compiling. Being caught before it runs is the payoff of
+              writing the branches down.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 컴파일과 실행"
+              en: "The sharpest spot — compile or run"
+            code:
+              - "let v: string | number   // 컴파일에서"
+              - "let v: any               // 실행에서"
+
+no_hole_reason: >-
+  갈래 하나를 지우면 남은 것이 그냥 타입 하나라 코드가 그대로 통과한다. 빈칸이 「없어도 되는 것」이
+  되므로 여기서는 갈래의 자리를 짚어 묻는다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 갈래를 여럿 적었을까요?"
+    en: "Why does line {{site.line}} write several branches?"
+  choices:
+    - t:
+        ko: "올 수 있는 것이 정말 여럿이라, 그 목록을 코드에 남기려고"
+        en: "Because several things really can arrive, and the list belongs in the code"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 갈래를 어디서 가르는지도 한 줄 적어 보세요."
+        en: "That is the direction. Add a line on where the branches get settled."
+    - t:
+        ko: "무엇이 올지 몰라서 아무거나 받으려고"
+        en: "Because it is unknown, so anything is accepted"
+      ok: false
+      fb:
+        ko: "아무거나 받는 것은 다른 표기입니다. 갈래 목록은 오히려 <b>목록 밖</b>을 막아요."
+        en: "Accepting anything is a different notation. A branch list blocks what is <b>off</b> the list."
+    - t:
+        ko: "값을 그 갈래들로 바꿔 두려고"
+        en: "To convert the value into those branches"
+      ok: false
+      fb:
+        ko: "바꾸는 일은 안 합니다. 무엇이 와도 되는지를 적을 뿐이에요."
+        en: "It converts nothing. It only records what may arrive."
+
+queries:
+  - { grammars: [typescript, tsx], file: ./union-type.scm }
+
+examples:
+  - code: "type Status = 'idle' | 'loading'"
+    expect: { sites: 1, form: alias, picks: { 1: "'idle'", 2: "'loading'", 3: "Status" } }
+  - code: "let v: string | number = 1"
+    expect: { sites: 1, form: annotation, picks: { 1: "string", 2: "number" } }
+  - code: "function pick(v: string | null) { return v }"
+    expect: { sites: 1, form: annotation, picks: { 1: "string", 2: "null" } }
+  - code: "let v: string = 'a'"
+    expect: none

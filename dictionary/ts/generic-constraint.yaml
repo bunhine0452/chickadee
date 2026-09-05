@@ -1,0 +1,194 @@
+schema: 1
+id: ts/generic-constraint
+universal: common/generics
+name: { ko: 타입 자리에 조건 걸기, en: Generic constraint }
+token: "T extends"
+grammars: [typescript, tsx]
+framework: null
+essential: false
+difficulty: 4
+prereq: [ts/generics, ts/interface-type]
+confusions: [ts/generics, ts/class-declaration]
+
+dict:
+  one_liner:
+    ko: "타입 자리를 비워 두되 「적어도 이 모양은 되어야 한다」를 함께 적는다."
+    en: "The type slot stays open, but with a floor: it must be at least this shape."
+  why:
+    ko: >-
+      비워 둔 자리에 무엇이든 오면 함수 안에서 아무것도 못 합니다. {{site.line}}행은
+      {{pick.1|code}} 자리에 {{pick.2|code}} 라는 <b>바닥</b>을 깔아, 그 바닥이 주는 것만큼은 안에서
+      쓸 수 있게 해요. 같은 낱말이 틀 선언에서는 상속이지만 여기서는 바닥입니다.
+    en: >-
+      If anything at all may fill an open slot, nothing can be done with it inside. Line
+      {{site.line}} lays a <b>floor</b> called {{pick.2|code}} under {{pick.1|code}}, so at least what
+      the floor gives is usable inside. The same word means inheritance on a class and a floor here.
+  trace:
+    - ko: "{{site.line}}행이 타입 자리 {{pick.1|code}}{{pick.1|josa:을,를}} 연다."
+      en: "Line {{site.line}} opens the type slot {{pick.1|code}}."
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 그 자리의 바닥이 된다."
+      en: "{{pick.2|code}} becomes the floor for that slot."
+    - ko: "부르는 쪽이 그 바닥을 만족하는 타입을 채운다."
+      en: "The calling side fills it with a type that meets the floor."
+
+rule:
+  ko: >-
+    <b>같은 낱말이 두 가지 일을 한다.</b> 틀 선언에서는 상속이고 타입 자리에서는
+    「적어도 이만큼」이다.
+  en: >-
+    <b>One word, two jobs.</b> On a class it is inheritance; in a type slot it is "at least this
+    much".
+result:
+  label:
+    ko: "{{site.line}}행의 바닥"
+    en: "The floor on line {{site.line}}"
+  value: "{{pick.1}} ≥ {{pick.2}}"
+  note:
+    ko: "이만큼은 되어야 한다"
+    en: "at least this much"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} 채워질 타입이 아니라 <b>채워질 수 있는 것의 조건</b>입니다.
+    실제 타입은 부르는 쪽이 정해요.
+  en: >-
+    {{pick.2|code}} is not the type that fills the slot but <b>the condition on what may</b>. The
+    actual type is decided by the caller.
+payoff:
+  ko: >-
+    라이브러리 타입 선언이 대부분 이 모양입니다. 바닥과 상속을 갈라 읽으면 낯선 선언도 절반은
+    읽혀요.
+  en: >-
+    Library type declarations mostly take this shape. Telling a floor from inheritance makes half of
+    an unfamiliar declaration readable.
+bridge:
+  ko: >-
+    바닥 대신 <b>기본값</b>을 주는 갈래도 있습니다 — 안 채우면 그것으로 채워져요.
+  en: >-
+    There is also the branch that gives a <b>default</b> — leave it unfilled and that fills it.
+misconceptions:
+  - ko: "이 낱말은 늘 상속이다 — 타입 자리에서는 「적어도 이만큼」입니다."
+    en: "This word always means inheritance — in a type slot it means \"at least this much\"."
+  - ko: "바닥으로 적은 것이 그 자리에 채워진다 — 채우는 것은 부르는 쪽입니다."
+    en: "The floor is what fills the slot — the caller fills it."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>바닥</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the floor</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: >-
+            {{pick.1|code}}{{pick.1|josa:은,는}} 비워 둔 <b>자리 이름</b>입니다. 바닥은 그 뒤에
+            적혀 있어요.
+          en: >-
+            {{pick.1|code}} is the <b>slot's name</b>. The floor is written after it.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 자리 이름과 바닥"
+            en: "The sharpest spot — the slot's name or the floor"
+          code:
+            - "function f<T extends Row>(x: T) {}"
+            - "//          ^자리   ^바닥"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 안 채웠을 때 쓰는 <b>기본값</b>입니다. 바닥과는
+            다른 갈래예요.
+          en: >-
+            {{pick.3|code}} is the <b>default</b> used when nothing fills the slot — a different
+            branch from a floor.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 바닥과 기본값"
+            en: "The sharpest spot — a floor or a default"
+          code:
+            - "<T extends Row>   // 바닥"
+            - "<T = Row>         // 기본값"
+
+meaning:
+  - q:
+      ko: >-
+        <code>function f&lt;T extends { id: number }&gt;(x: T)</code> 안에서 <code>x.name</code> 을
+        읽으면?
+      en: >-
+        Inside <code>function f&lt;T extends { id: number }&gt;(x: T)</code>, what about reading
+        <code>x.name</code>?
+    hint:
+      ko: "바닥이 주는 것까지만 안에서 쓸 수 있습니다."
+      en: "Only what the floor gives is usable inside."
+    options:
+      - t:
+          ko: "컴파일에서 걸린다 — 바닥에 그 이름이 없다"
+          en: "The compiler catches it — the floor has no such name"
+      - t:
+          ko: "된다 — 부르는 쪽이 그 이름을 가진 타입을 줄 수도 있다"
+          en: "It works — the caller may pass a type that has it"
+        diag:
+          t:
+            ko: >-
+              줄 수도 있다는 것으로는 부족합니다. 함수 안은 <b>어떤 호출에서도</b> 성립해야 해서
+              바닥까지만 허락돼요.
+            en: >-
+              "May" is not enough. The body must hold for <b>every</b> call, so only the floor is
+              allowed.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 어떤 호출에서도인가"
+              en: "The sharpest spot — must it hold for every call"
+            code:
+              - "f<{ id: number }>(x)          // name 이 없다"
+              - "f<{ id: number, name: string }>(x)"
+      - t:
+          ko: "<code>undefined</code> 가 나온다"
+          en: "It yields <code>undefined</code>"
+        diag:
+          t:
+            ko: >-
+              돌아가는 중에는 그렇겠지만 그 줄이 컴파일을 못 넘습니다. 바닥이 하는 일이 그것을
+              먼저 막는 것이에요.
+            en: >-
+              At run time perhaps, but the line never gets past compiling. Blocking it early is what
+              the floor is for.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 컴파일과 실행"
+              en: "The sharpest spot — compile or run"
+            code:
+              - "x.name   // 컴파일에서 걸린다"
+              - "// 실행까지 가지 않는다"
+      - t:
+          ko: "바닥에 그 이름이 자동으로 더해진다"
+          en: "The name is added to the floor automatically"
+        diag:
+          t:
+            ko: >-
+              바닥은 적은 그대로입니다. 늘리려면 선언을 고쳐야 해요.
+            en: >-
+              The floor is exactly what was written. Widening it takes an edit to the declaration.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 적은 것과 늘어나는 것"
+              en: "The sharpest spot — written or widened"
+            code:
+              - "<T extends { id: number }>"
+              - "<T extends { id: number, name: string }>"
+
+no_hole_reason: >-
+  바닥을 지우면 자리가 그냥 비어 버려서 코드가 통과한다. 빈칸이 「없어도 되는 것」이 되므로
+  여기서는 자리를 짚어 묻는다.
+
+queries:
+  - { grammars: [typescript, tsx], file: ./generic-constraint.scm }
+
+examples:
+  - code: "function keyOf<T extends Row>(x: T) { return x }"
+    expect: { sites: 1, form: constraint, picks: { 1: "T", 2: "Row" } }
+  - code: "function make<T extends object = Row>(x: T) { return x }"
+    expect: { sites: 2, form: constraint, picks: { 1: "T", 2: "object", 3: "Row" } }
+  - code: "function id<T>(x: T) { return x }"
+    expect: none

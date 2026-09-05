@@ -1,0 +1,187 @@
+schema: 1
+id: ts/require-call
+universal: null
+name: { ko: "require 로 들여오기", en: Bringing files in with require }
+token: "require()"
+grammars: [typescript, tsx, javascript, vue]
+framework: null
+essential: false
+difficulty: 2
+prereq: [ts/const-declaration, ts/call-expression]
+confusions: [ts/import-export]
+
+dict:
+  one_liner:
+    ko: "파일을 들여오는 옛 체계. 문이 아니라 <b>부르기</b>라서 아무 데서나 쓸 수 있다."
+    en: "The older way to pull a file in. A <b>call</b>, not a statement, so it goes anywhere."
+  why:
+    ko: >-
+      {{site.line}}행은 {{pick.3|code}}{{pick.3|josa:을,를}} 지금 읽어서 그 결과를 {{pick.1|code}} 에
+      담습니다. 표기법이 문이 아니라 부르기라서 <code>if</code> 안에도 함수 안에도 들어갈 수 있어요 —
+      그 자유가 이 체계와 새 체계를 가르는 자리입니다.
+    en: >-
+      Line {{site.line}} reads {{pick.3|code}} now and puts the result into {{pick.1|code}}. Being a
+      call rather than a statement, it can sit inside an <code>if</code> or inside a function — that
+      freedom is what separates this system from the newer one.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}}{{pick.2|josa:을,를}} 부른다."
+      en: "Line {{site.line}} calls {{pick.2|code}}."
+    - ko: "{{pick.3|code}} 파일이 돌고 내놓은 것이 값으로 돌아온다."
+      en: "The file {{pick.3|code}} runs and what it put out comes back as a value."
+    - ko: "그 값이 {{pick.1|code}}{{pick.1|josa:이,가}} 된다 — 이름을 옮긴 것이 아니라 값을 받은 것이다."
+      en: "That value becomes {{pick.1|code}} — a value received, not a name moved."
+
+rule:
+  ko: >-
+    <b>부르기라서 순서가 코드대로다.</b> 새 체계는 파일 맨 위로 끌어올려지지만 이쪽은 적힌 자리에서
+    돈다.
+  en: >-
+    <b>Being a call, it runs in written order.</b> The newer system is hoisted to the top of the
+    file; this one runs where it stands.
+result:
+  label:
+    ko: "{{site.line}}행이 받는 것"
+    en: "What line {{site.line}} receives"
+  value: "{{pick.1}} ← {{pick.3}}"
+  note:
+    ko: "이름이 아니라 값"
+    en: "a value, not a name"
+ok:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:은,는}} 보통 변수라서 다시 묶을 수도 있습니다. 새 체계로 들여온
+    이름과 달라지는 자리예요.
+  en: >-
+    {{pick.1|code}} is an ordinary variable and can even be rebound — a place where it differs from a
+    name brought in by the newer system.
+payoff:
+  ko: >-
+    한 리포에 두 체계가 섞여 있으면 파일마다 규칙이 다릅니다. 어느 쪽인지 알아보면 「왜 이 파일만
+    이렇게 생겼나」가 풀려요.
+  en: >-
+    With both systems in one repository, the rules differ file by file. Spotting which is which
+    settles "why does only this file look like that".
+bridge:
+  ko: >-
+    새 체계는 문이라 파일 맨 위에서만 쓸 수 있고, 대신 무엇을 들여오는지 <b>돌기 전에</b>
+    알 수 있습니다.
+  en: >-
+    The newer system is a statement, usable only at the top — and in exchange what comes in is known
+    <b>before anything runs</b>.
+misconceptions:
+  - ko: "두 체계는 같은 것이다 — 도는 시점과 다시 묶을 수 있는지가 다릅니다."
+    en: "The two systems are the same — they differ in when they run and whether they rebind."
+  - ko: "이쪽도 파일 맨 위로 끌어올려진다 — 적힌 자리에서 돕니다."
+    en: "This one is hoisted too — it runs where it stands."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>가져올 파일</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the file being pulled in</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.3
+    diag:
+      pick.1:
+        t:
+          ko: >-
+            {{pick.1|code}}{{pick.1|josa:은,는}} 받아 두는 <b>이름</b>입니다. 가져올 파일은 괄호
+            안에 있어요.
+          en: >-
+            {{pick.1|code}} is the <b>name</b> that receives. The file is inside the parentheses.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 받는 이름과 가져올 파일"
+            en: "The sharpest spot — the receiving name or the file"
+          code:
+            - "const store = require('./store')"
+            - "//    ^이름            ^파일"
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 부르는 <b>함수 이름</b>입니다. 가져올 파일은 그
+            인자예요.
+          en: >-
+            {{pick.2|code}} is the <b>function's name</b>. The file is its argument.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 함수 이름과 인자"
+            en: "The sharpest spot — the function's name or its argument"
+          code:
+            - "require('./store')"
+            - "//^이름     ^인자"
+
+meaning:
+  - q:
+      ko: "이 표기가 <code>if</code> 블록 안에 들어 있으면 무엇이 달라질까요?"
+      en: "What changes if this notation sits inside an <code>if</code> block?"
+    hint:
+      ko: "문과 부르기의 차이를 생각해 보세요."
+      en: "Think about the difference between a statement and a call."
+    options:
+      - t:
+          ko: "조건이 참일 때만 그 파일이 돈다"
+          en: "The file runs only when the condition holds"
+      - t:
+          ko: "그 자리에서 멈춘다 — 맨 위에서만 쓸 수 있다"
+          en: "It stops there — only the top of a file is allowed"
+        diag:
+          t:
+            ko: >-
+              맨 위만 되는 것은 새 체계 쪽입니다. 이쪽은 그냥 함수 부르기라 어디든 들어가요.
+            en: >-
+              Top-only is the newer system's rule. This one is just a function call and goes anywhere.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 문과 부르기"
+              en: "The sharpest spot — statement or call"
+            code:
+              - "if (dev) require('./mock')   // 된다"
+              - "if (dev) import './mock'     // 안 된다"
+      - t:
+          ko: "조건과 상관없이 파일 맨 위에서 돈다"
+          en: "It runs at the top regardless of the condition"
+        diag:
+          t:
+            ko: >-
+              끌어올려지는 것은 새 체계입니다. 이쪽은 적힌 자리에서 돌아요.
+            en: >-
+              Hoisting belongs to the newer system. This one runs where it stands.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 끌어올려지나"
+              en: "The sharpest spot — is it hoisted"
+            code:
+              - "import './a'    // 맨 위에서 돈다"
+              - "require('./a')  // 여기서 돈다"
+      - t:
+          ko: "파일이 두 번 돈다"
+          en: "The file runs twice"
+        diag:
+          t:
+            ko: >-
+              한 번 돌고 나면 결과가 남아, 다시 불러도 같은 것을 돌려줍니다.
+            en: >-
+              After the first run the result is kept; calling again hands back the same thing.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 몇 번 도나"
+              en: "The sharpest spot — how many runs"
+            code:
+              - "require('./a'); require('./a')"
+              - "// 파일은 한 번만 돈다"
+
+no_hole_reason: >-
+  이 표기의 차이는 지운 글자가 아니라 「어디에 놓일 수 있나」다. 한 줄 안에서 지울 조각을 만들면
+  다른 개념이 되므로 자리와 뜻으로 묻는다.
+
+queries:
+  - { grammars: [typescript, tsx, javascript, vue], file: ./require-call.scm }
+
+examples:
+  - code: "const store = require('./store')"
+    expect: { sites: 1, form: require, picks: { 1: "store", 2: "require", 3: "'./store'" } }
+  - code: "module.exports = { save }"
+    expect: { sites: 1, form: module-exports, picks: { 1: "module", 2: "exports", 3: "{ save }" } }
+  - code: "import { save } from './store'"
+    expect: none

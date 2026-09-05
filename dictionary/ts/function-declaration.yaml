@@ -257,5 +257,15 @@ examples:
       form: function
       hole: "function"
       picks: { 1: "function", 2: "add", 3: "(a, b)", 4: "{ return a + b }" }
+  - code: "async function loadRows(page) { return page }"
+    expect:
+      sites: 1
+      form: function
+      hole: "function"
+      picks: { 1: "function", 2: "loadRows", 3: "(page)", 4: "{ return page }" }
+  - code: "export function save() {}"
+    expect: { sites: 1, form: function, picks: { 2: "save", 3: "()" } }
   - code: "const add = (a, b) => a + b"
+    expect: none
+  - code: "const save = function () { return 1 }"
     expect: none

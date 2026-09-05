@@ -1,0 +1,189 @@
+schema: 1
+id: ts/this-binding
+universal: null
+name: { ko: "this 가 가리키는 것", en: this binding }
+token: "this"
+grammars: [typescript, tsx, javascript, vue]
+framework: null
+essential: false
+difficulty: 4
+prereq: [ts/class-declaration, ts/callback-argument, cs/call-stack]
+confusions: [ts/arrow-function, ts/class-declaration]
+
+dict:
+  one_liner:
+    ko: "정의한 자리가 아니라 <b>부른 자리</b>가 정한다. 점 앞에 있던 것이 그것이 된다."
+    en: "Not the defining site but <b>the call site</b> decides — what preceded the dot."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 코드를 적을 때 정해지지 않습니다.
+      부를 때 <b>점 앞에 무엇이 있었는지</b>가 그것을 정해요. 그래서 같은 함수를 변수에 담아 부르면
+      점 앞이 사라지고 {{pick.2|code}}{{pick.2|josa:을,를}} 못 찾습니다.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} is not settled when the line is written. What settles it
+      is <b>what stood before the dot</b> at the call. Put the same function in a variable and call
+      it, the dot is gone and {{pick.2|code}} is not found.
+  trace:
+    - ko: "{{site.line}}행은 {{pick.1|code}} 아래에서 {{pick.2|code}}{{pick.2|josa:을,를}} 읽는다."
+      en: "Line {{site.line}} reads {{pick.2|code}} under {{pick.1|code}}."
+    - ko: "그 값은 이 줄이 아니라 부르는 줄이 정한다."
+      en: "That value is decided by the calling line, not by this one."
+    - ko: "점 앞이 없으면 아무것도 안 가리키고 읽기가 거기서 멈춘다."
+      en: "With nothing before the dot it points at nothing and the read stops there."
+
+rule:
+  ko: >-
+    <b>화살표 함수에는 자기 것이 없다.</b> 화살표는 바깥에서 쓰던 것을 그대로 쓰므로 부른 자리가
+    바뀌어도 안 흔들린다.
+  en: >-
+    <b>An arrow function has none of its own.</b> It uses whatever the surrounding code used, so a
+    different call site does not shake it.
+result:
+  label:
+    ko: "{{site.line}}행에서 가리켜지는 것"
+    en: "What line {{site.line}} points at"
+  value: "{{pick.1}} → 부른 자리"
+  note:
+    ko: "정의가 아니라 호출"
+    en: "the call, not the definition"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} 그 가리켜진 것 <b>안</b>의 이름입니다. 가리켜진 것이 바뀌면
+    같은 줄이 다른 값을 읽어요.
+  en: >-
+    {{pick.2|code}} is a name <b>inside</b> whatever is pointed at. Change what is pointed at and the
+    same line reads a different value.
+payoff:
+  ko: >-
+    이 리포는 화살표로 짜여 있어 이 낱말이 드뭅니다. 그래도 남의 코드와 라이브러리 문서에는 가득해서,
+    모르면 그쪽을 못 읽어요.
+  en: >-
+    This repository is written with arrows, so the word is rare here. It fills other people's code and
+    library docs, though — not knowing it closes those off.
+bridge:
+  ko: >-
+    부른 자리를 <b>손으로 못박는</b> 메서드가 셋 있습니다 — 그 셋이 이 규칙의 예외가 아니라
+    규칙을 인정하고 쓰는 도구예요.
+  en: >-
+    Three methods <b>pin the call site by hand</b> — not exceptions to the rule but tools that accept
+    it.
+misconceptions:
+  - ko: "메서드를 변수에 담아 불러도 같다 — 점 앞이 사라져 달라집니다."
+    en: "Calling a method through a variable is the same — the dot is gone, so it differs."
+  - ko: "화살표 함수도 자기 것을 갖는다 — 바깥 것을 그대로 씁니다."
+    en: "An arrow function has its own — it uses the surrounding one."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>부른 자리가 정하는 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name the call site decides</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 점 <b>뒤</b>의 이름입니다. 부른 자리가 정하는 것은
+            점 앞이에요.
+          en: >-
+            {{pick.2|code}} is the name <b>after</b> the dot. What the call site decides is before it.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 점의 앞과 뒤"
+            en: "The sharpest spot — before or after the dot"
+          code:
+            - "this.count += 1"
+            - "//^부른 자리가 정한다  ^고정된 이름"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 표현식 <b>전체</b>입니다. 물은 것은 그 안의 앞쪽
+            이름이에요.
+          en: >-
+            {{pick.3|code}} is the <b>whole</b> expression. What was asked for is the name at its front.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 전체와 앞쪽 이름"
+            en: "The sharpest spot — the whole or its front"
+          code:
+            - "this.count   // 전체"
+            - "this         // 앞쪽 이름"
+
+meaning:
+  - q:
+      ko: "<code>const cb = obj.m; cb()</code> 에서 <code>cb</code> 안의 그 이름은 무엇을 가리킬까요?"
+      en: "In <code>const cb = obj.m; cb()</code>, what does that name inside <code>cb</code> point at?"
+    hint:
+      ko: "부를 때 점 앞에 무엇이 있었나요."
+      en: "What stood before the dot at the call?"
+    options:
+      - t:
+          ko: "아무것도 아니다 — 점 앞이 없어졌다"
+          en: "Nothing — the dot is gone"
+      - t:
+          ko: "<code>obj</code> 다 — 거기서 가져왔으니까"
+          en: "<code>obj</code> — that is where it came from"
+        diag:
+          t:
+            ko: >-
+              가져온 자리는 안 따라옵니다. 정하는 것은 <b>부른 줄</b>이고 그 줄에는 점이 없어요.
+            en: >-
+              Where it came from does not travel with it. The <b>calling line</b> decides, and that
+              line has no dot.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 가져온 자리와 부른 자리"
+              en: "The sharpest spot — where it came from or where it is called"
+            code:
+              - "obj.m()          // obj"
+              - "const cb = obj.m; cb()   // 아니다"
+      - t:
+          ko: "<code>cb</code> 다"
+          en: "<code>cb</code>"
+        diag:
+          t:
+            ko: >-
+              부른 이름 자체가 되지는 않습니다. 되는 것은 <b>점 앞</b>이고, 점이 없으면 아무것도 아니에요.
+            en: >-
+              It does not become the calling name. It becomes what is <b>before the dot</b>, and with
+              no dot, nothing.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 점이 있나"
+              en: "The sharpest spot — is there a dot"
+            code:
+              - "obj.m()   // 점이 있다"
+              - "cb()      // 점이 없다"
+      - t:
+          ko: "그 줄에서 멈춘다"
+          en: "It stops on that line"
+        diag:
+          t:
+            ko: >-
+              부르기 자체는 됩니다. 멈춘다면 그 안에서 없는 이름을 읽으려 할 때예요.
+            en: >-
+              The call itself goes through. Any stop comes from reading a missing name inside.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 부르기와 읽기"
+              en: "The sharpest spot — the call or the read"
+            code:
+              - "cb()               // 불린다"
+              - "// 안에서 읽을 때 멈춘다"
+
+no_hole_reason: >-
+  이 낱말을 지우면 그 줄이 다른 이름을 읽는 코드가 될 뿐이고, 차이는 한 줄 안이 아니라
+  <b>부르는 줄</b>에 있다. 그래서 자리와 뜻으로 묻는다.
+
+queries:
+  - { grammars: [typescript, tsx, javascript, vue], file: ./this-binding.scm }
+
+examples:
+  - code: "class Counter { up() { this.count += 1 } }"
+    expect: { sites: 1, form: this-member, picks: { 1: "this", 2: "count", 3: "this.count" } }
+  - code: "const bound = obj.m.bind(obj)"
+    expect: { sites: 1, form: rebind, picks: { 2: "bind", 3: "obj" } }
+  - code: "const up = () => count + 1"
+    expect: none
