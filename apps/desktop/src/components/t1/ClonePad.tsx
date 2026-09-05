@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { cx } from '@chickadee/ui';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
-/* 문법은 basic-languages 만 싣는다 — 여기 있는 여섯이 `monacoOptions.MONACO_LANGUAGES`
+/* 문법은 basic-languages 만 싣는다 — 여기 있는 일곱이 `monacoOptions.MONACO_LANGUAGES`
    이고, 화면이 낼 수 있는 Monaco 언어 id 의 전부다 (05 §8).
 
    **언어 서비스 워커(`ts.worker`)는 싣지 않는다** (D143). 값이 안 나온다: `tsWorker.js` 가
@@ -16,6 +16,7 @@ import 'monaco-editor/esm/vs/basic-languages/python/python.contribution';
 import 'monaco-editor/esm/vs/basic-languages/go/go.contribution';
 import 'monaco-editor/esm/vs/basic-languages/rust/rust.contribution';
 import 'monaco-editor/esm/vs/basic-languages/sql/sql.contribution';
+import 'monaco-editor/esm/vs/basic-languages/java/java.contribution';
 
 import { measureSince } from '../../devtools/audit.js';
 import { emptyAssist, makeAssistTally } from './assist';

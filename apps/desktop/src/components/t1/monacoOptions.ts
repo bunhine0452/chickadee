@@ -23,11 +23,11 @@ export const MIN_ROWS = 20;
  * 등록 안 된 언어 id 로 `setModelLanguage` 를 부르면 모델이 조용히 plaintext 가 된다
  * (`.tsx` 에 `'tsx'` 를 주던 버그가 그것이었다).
  *
- * 05 §8 의 목록도 이 여섯이어야 한다. Swift·Dart 는 `m1-03-swift-dart-sql` 로 보류 중이다.
+ * 05 §8 의 목록도 이 일곱이어야 한다. Swift·Dart 는 `m1-03-swift-dart-sql` 로 보류 중이다.
  * `ClonePad.test.tsx` 가 이 배열과 `ClonePad.tsx` 의 contribution import 를 대조한다.
  */
 export const MONACO_LANGUAGES = [
-  'typescript', 'javascript', 'python', 'go', 'rust', 'sql',
+  'typescript', 'javascript', 'python', 'go', 'rust', 'sql', 'java',
 ] as const;
 
 /**

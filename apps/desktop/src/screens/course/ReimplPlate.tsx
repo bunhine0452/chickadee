@@ -14,6 +14,7 @@ import type { InkLayer } from '@chickadee/ui';
 import { FlatButton, Kbd, PressButton, RichText } from '@chickadee/ui';
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 
+import { MONACO_LANGUAGES } from '../../components/t1/monacoOptions.js';
 import { Ask } from '../../components/plate/Ask.js';
 import { useUi } from '../../store.js';
 import { usePlateKeys } from './keys.js';
@@ -31,12 +32,10 @@ const FALLBACK = typeof window === 'undefined' || typeof (globalThis as { Resize
 
 const noop = (): void => undefined;
 
-/** 경로 확장자 → Monaco 언어 id. `ClonePad` 가 싣는 여섯 밖이면 typescript 로 그린다. */
+/** 경로 확장자 → Monaco 언어 id. `ClonePad` 가 싣는 일곱 밖이면 typescript 로 그린다. */
 function grammarOf(file: string, grammar: string): string {
-  if (grammar === 'python' || grammar === 'go' || grammar === 'rust' || grammar === 'sql') return grammar;
-  if (grammar === 'java') return 'java';
-  const ext = file.slice(file.lastIndexOf('.'));
-  return ext === '.tsx' || ext === '.jsx' ? 'typescript' : 'typescript';
+  void file;
+  return (MONACO_LANGUAGES as readonly string[]).includes(grammar) ? grammar : 'typescript';
 }
 
 export interface ReimplPlateProps {

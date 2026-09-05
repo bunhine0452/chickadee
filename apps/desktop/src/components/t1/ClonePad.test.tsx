@@ -131,6 +131,7 @@ vi.mock('monaco-editor/esm/vs/basic-languages/python/python.contribution', () =>
 vi.mock('monaco-editor/esm/vs/basic-languages/go/go.contribution', () => ({}));
 vi.mock('monaco-editor/esm/vs/basic-languages/rust/rust.contribution', () => ({}));
 vi.mock('monaco-editor/esm/vs/basic-languages/sql/sql.contribution', () => ({}));
+vi.mock('monaco-editor/esm/vs/basic-languages/java/java.contribution', () => ({}));
 
 import { tokens } from '../../styles/tokens';
 import { ClonePad, tickDecorations } from './ClonePad';

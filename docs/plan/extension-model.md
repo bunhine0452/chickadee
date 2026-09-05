@@ -125,7 +125,7 @@ typescript 로 그린다」고 적혀 있으나 코드는 그러지 않는다 �
 `.go`·`.rb`·`.astro` 만 든 디렉터리를 인제스트하면 이렇게 된다.
 
 ```
-langSpecs(dict)                 ← packages/dictionary/src/load.ts:262
+langSpecs(dict)                 ← packages/dictionary/src/load.ts:263
   .filter(extensions>0 && queries>0)   ← 쿼리 없는 문법은 여기서 사라진다
         ↓ 확장자 15개만 남는다
 extension_map(spec)             ← apps/desktop/src-tauri/src/jobs.rs:484
@@ -349,10 +349,11 @@ F1·F2·F3 의 결과가 각자 문서로 올 자리를 비워 둔다 → [`READ
 | 단계 | 주 언어가 읽히는 리포 | 읽히는 코드 파일 |
 |---|---|---|
 | 오늘 | **4 / 7** (ECC · MonggleMonggle · adelie · ai-pm) | 1,660 / 2,140 (78%) |
-| 3(러스트) 뒤 | **6 / 7** (+ PySpace · file_converter) | 1,991 / 2,140 (**93%**) |
-| 7(Astro) 뒤 | **7 / 7** (+ bunhine_web) | 2,017 / 2,140 (94%) |
+| 3(러스트) 뒤 | **6 / 7** (+ PySpace · file_converter) | 2,007 / 2,140 (**94%**) |
+| 7(Astro) 뒤 | **7 / 7** (+ bunhine_web) | 2,033 / 2,140 (95%) |
 
-**러스트 하나가 2개 리포와 331장을 연다** — 그리고 그 값에 드는 Rust 코드가 0줄이다.
+**러스트 하나가 리포 2개와 `.rs` 347장을 연다**(ai-pm 280 · file_converter 43 · ECC 16 ·
+PySpace 8) — 그리고 그 값에 드는 Rust 코드가 0줄이다.
 파이썬은 이미 열려 있으므로 F2 가 늘리는 것은 리포 수가 아니라 **깊이**다(`adelie` py 137장에
 개념 8장이 얹혀 있다).
 
