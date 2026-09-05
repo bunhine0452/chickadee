@@ -21,7 +21,7 @@ owner: claude-code
 - [x] ts — 2부 채우기(narrowing·union·class·prototype 등), parts/ts.ts {#l-ts}
 - [x] java — 0·1·2·3부 이미 섬. 남은 것(string-concat·autoboxing 자리, 골든 보강) 점검 {#l-java}
 - [x] sql — 바닥 남은 다섯 + 중심, parts/sql.ts {#l-sql}
-- [~] rs — 0부 11 + 1·2부 전량 신규(사전 0장 → 표본 ai-pm 280장), parts/rs.ts {#l-rs}
+- [x] rs — 0부 11 + 1·2부 전량 신규(사전 0장 → 표본 ai-pm 280장), parts/rs.ts {#l-rs}
 - [x] go — 0부 + 1·2부 전량 신규, 표본은 공개 리포, parts/go.ts {#l-go}
 - [x] c — 0부(기계 층) + 1·2부 전량 신규, 파서 ERROR 비율 실측, parts/c.ts {#l-c}
 - [~] cpp — 0부 + 1·2부 전량 신규, 파서 ERROR 비율 실측, parts/cpp.ts {#l-cpp}
@@ -66,4 +66,5 @@ owner: claude-code
 | 2026-09-06T04:47:41+09:00 | #l-go | claude-code | ~→x |  | 33장(0부 8·1부 5·2부 20) · 골든 79/33 · cli/cli 429파일 ERROR 1.6% · 병합 fb372bb · 래칫 217/199/217/208 |
 | 2026-09-06T04:48:58+09:00 | #l-c | claude-code | ~→x |  | 38장(0부 12·1부 8·2부 18) · 골든 116/62 · jq ERROR 17.8%(poor 3 빼면 0.44%) · 병합 2e22dc6 · 래칫 255/237/255/246 |
 | 2026-09-06T04:54:21+09:00 | #l-csharp | claude-code | ~→x |  | 35장(0부 8·1부 3·2부 24) · 골든 81/35 · eShopOnWeb ERROR 0% · ABSENCE 1 · 병합 ba6fa7e · 래칫 290/272/290/281 |
+| 2026-09-06T04:56:01+09:00 | #l-rs | claude-code | ~→x |  | 42장(0부 11·1부 7·2부 23) · 골든 105/44 · ai-pm 280 실측 · ABSENCE 1 · 병합 38c97e0 · 래칫 331/314/331/322 |
 <!-- oculpm:plan-log end -->

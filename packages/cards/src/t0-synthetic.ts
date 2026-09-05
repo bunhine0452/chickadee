@@ -130,6 +130,9 @@ const ABSENCE: Readonly<Record<string, AbsenceReason>> = {
   // C# 2부 — 표본 eShopOnWeb 254파일에서 0곳 (D190 csharp 세션). 자리를 다른 문법이 가져갔다 —
   // 같은 리포에 `switch` 가 한 번 나오는데 식이 아니라 문이고, 갈래는 `if` 142곳과 삼항 4곳이 쓴다.
   'csharp/switch-expression': 'idiom',
+  // Rust 2부 — `file_converter` 45파일 0곳 · `PySpace` 8파일 1곳 (D190 rs 세션). 리포가
+  // `forbid(unsafe_code)` 로 막는 관습이 그 자리를 가져갔다 — ai-pm 에는 6곳/4파일 있다.
+  'rs/unsafe-block': 'idiom',
   // 다른 문법이 자리를 가져갔다. 표본 리포에서 `for (;;)` 0곳 · for-each 1곳 · 배열 1곳이고,
   // 그 자리를 스트림(9곳)과 람다(53곳)가 다 쓴다.
   'java/for-loop': 'idiom',
