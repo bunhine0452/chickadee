@@ -1,0 +1,173 @@
+schema: 1
+id: cpp/exception-handling
+# 2부 §3 #22. `common/try-catch` 가 보편형이다 — 「터진 것을 받아 잇는다」까지 전이되고,
+# 「걷힐 때 사용자 코드가 돈다」는 C++ 쪽 어긋남이라 판에만 있다.
+universal: common/try-catch
+name: { ko: 터진 것을 받아 잇기, en: Exceptions }
+token: "catch"
+grammars: [cpp]
+framework: null
+essential: true
+difficulty: 4
+prereq: [cpp/destructor, cpp/reference-parameter]
+confusions: []
+dict:
+  one_liner:
+    ko: "던지면 잡는 자리까지 위로 올라가고, 지나온 자리의 정리가 전부 돈다."
+    en: "A throw climbs to the catching place, running every cleanup it passes."
+  why:
+    ko: >-
+      던진 값은 잡는 자리를 찾아 <b>위로 올라갑니다</b>. C++ 에서 특별한 것은 그 올라가는
+      길에서 <b>지나온 자리의 정리가 전부 돈다</b>는 것이에요 — 열려 있던 파일이 닫히고
+      잠금이 풀립니다. 나머지 아홉 언어에는 걷힐 때 도는 사용자 코드가 없어서, <b>그
+      순서를 묻는 문항은 C++ 에서만 성립합니다.</b>
+      함정이 하나 있습니다: 잡는 자리에서 참조를 안 붙이면 <b>값이 잘려 나갑니다</b> —
+      파생 쪽 정보가 없어진 채 기반 쪽만 남아요. 그래서 잡을 때는 참조로 잡습니다.
+    en: >-
+      A thrown value <b>climbs</b> looking for a catching place. What is special in C++ is that on
+      the way up <b>every cleanup it passes runs</b> — open files close, locks release. The other
+      nine languages have no user code running as the stack unwinds, so <b>a question about that
+      order stands only in C++</b>. One trap: catching without a reference <b>slices the value</b>
+      — the derived part is gone and only the base part remains. Which is why catching is done by
+      reference.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.2|code}} 안에서 던진 값이 위로 올라간다."
+      en: "A value thrown inside {{pick.2|code}} on line {{site.line}} climbs upward."
+    - ko: "지나온 자리의 정리가 만들어진 순서의 거꾸로로 돈다."
+      en: "The cleanups it passes run in reverse making order."
+    - ko: "{{pick.3|code}} 에 맞는 값이면 거기서 잡힌다."
+      en: "If the value fits {{pick.3|code}} it is caught there."
+rule:
+  ko: "<b>올라가는 길에 정리가 전부 돈다.</b> 잡을 때 참조를 빼면 값이 잘린다."
+  en: "<b>Every cleanup on the way up runs.</b> Catching without a reference slices the value."
+result:
+  label: { ko: "{{site.line}}행이 잡는 것", en: "what line {{site.line}} catches" }
+  value: "catch {{pick.3}}"
+  note: { ko: "참조를 빼면 잘린다", en: "without a reference it is sliced" }
+ok:
+  ko: "{{pick.3|code}} 에 맞는 값이면 여기서 잡히고 위로 안 올라갑니다."
+  en: "A value fitting {{pick.3|code}} is caught here and climbs no further."
+payoff:
+  ko: >-
+    이걸 알면 「던졌는데 파일이 왜 닫혔지」가 풀립니다 — 올라가면서 정리가 돌았어요.
+  en: >-
+    This untangles “it threw, so why did the file close” — cleanups ran on the way up.
+bridge:
+  ko: >-
+    자바·파이썬에도 잡는 문법은 있지만 <b>걷힐 때 도는 사용자 코드가 없습니다</b>.
+    그래서 정리를 다른 문법에 따로 적어야 해요.
+  en: >-
+    Java and Python have catching too, but <b>no user code runs as the stack unwinds</b>, so
+    cleanup has to be written in separate syntax.
+misconceptions:
+  # `cpp.md` §9 #7.
+  - ko: "던지면 정리가 안 되고 그냥 나간다 — 지나온 자리의 정리가 전부 돕니다."
+    en: "A throw skips cleanup — every cleanup it passes runs."
+  - ko: "값으로 잡아도 같다 — 참조를 빼면 파생 쪽이 잘려 나갑니다."
+    en: "Catching by value is the same — without a reference the derived part is sliced off."
+  - ko: "아무거나 던져도 된다 — 됩니다. 다만 잡는 쪽이 그 타입을 알아야 해요."
+    en: "Anything can be thrown — it can, but the catcher has to know that type."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>올라오던 값을 받는 자리</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the place that receives the climbing value</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>지켜보는 구간</b>입니다. 받는 자리는 그 뒤에 따로 있어요."
+          en: "{{pick.2|code}} is the <b>watched block</b>. The receiving place stands separately after it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 지켜보는 곳이냐 받는 곳이냐", en: "The sharpest spot — watching or receiving" }
+          code:
+            - "try { g(); }        // 지켜본다"
+            - "catch (...) { }     // 받는다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>무엇을 받을지</b>입니다. 받는 자리 자체는 그 앞의 낱말이에요."
+          en: "{{pick.3|code}} is <b>what it will receive</b>. The receiving place itself is the word before it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 무엇이냐 어디냐", en: "The sharpest spot — what or where" }
+          code:
+            - "catch (const std::exception& e)"
+            - "catch (int e)"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 올라오던 값을 <b>여기서 받습니다</b>."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>receives</b> the climbing value."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "catch", mono: true }
+      - t: "except"
+        mono: true
+        diag:
+          t:
+            ko: "이 낱말은 <b>파이썬</b>의 표기입니다. C++ 에는 없어서 그 자리에서 멈춰요."
+            en: "That word is <b>Python's</b>. C++ has none such and stops right there."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 어느 언어의 표기냐", en: "The sharpest spot — whose notation" }
+            code:
+              - "# Python: except ValueError:"
+              - "// C++: catch (const E& e)"
+      - t: "finally"
+        mono: true
+        diag:
+          t:
+            ko: "이 낱말은 C++ 에 <b>없습니다</b>. 필요 없어졌기 때문이에요 — 정리는 이름이 사라질 때 저절로 돕니다."
+            en: "That word <b>does not exist</b> in C++, because it became unnecessary: cleanup runs by itself when a name goes away."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 정리를 누가 하느냐", en: "The sharpest spot — who cleans up" }
+            code:
+              - "// Java: finally { file.close(); }"
+              - "// C++: ~File() 이 저절로 돈다"
+      - t: "throw"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>보내는</b> 쪽입니다. 받는 자리가 아니라 올라가기를 시작하는 자리예요."
+            en: "That is the <b>sending</b> side — where the climb begins, not where it is received."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 보내느냐 받느냐", en: "The sharpest spot — sending or receiving" }
+            code:
+              - "throw std::runtime_error(\"x\");"
+              - "catch (const std::exception& e)"
+why_gate:
+  q:
+    ko: "C++ 에는 왜 <b>정리 전용 낱말이 없을까요</b>?"
+    en: "Why does C++ have <b>no dedicated cleanup keyword</b>?"
+  choices:
+    - t:
+        ko: "정리가 타입 안에 들어 있고 이름이 사라질 때 저절로 돌기 때문 — 나가는 길이 몇이든 빠질 수가 없다"
+        en: "Because cleanup lives in the type and runs when a name goes — no exit path can skip it"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 방식이 안 통하는 자리도 하나 적어 보세요."
+        en: "That is the direction. Add one place where that approach does not reach."
+    - t:
+        ko: "정리가 필요 없어서"
+        en: "Because no cleanup is needed"
+      ok: false
+      fb:
+        ko: "필요합니다. 다만 그 일이 <b>다른 자리</b>로 옮겨 간 거예요."
+        en: "It is needed. The work simply moved <b>somewhere else</b>."
+    - t:
+        ko: "그 낱말이 아직 안 들어와서"
+        en: "Because the keyword has not arrived yet"
+      ok: false
+      fb:
+        ko: "제안됐지만 안 넣었습니다. 이미 있는 방식이 더 넓게 덮기 때문이에요."
+        en: "It was proposed and left out, because the existing approach covers more."
+queries:
+  - { grammars: [cpp], file: ./exception-handling.scm }
+examples:
+  - code: "void f() { try { g(); } catch (const std::exception& e) { } }   // 잡히면 위로 안 간다"
+    expect: { sites: 1, form: trycatch, hole: "catch", picks: { 1: "catch", 2: "{ g(); }", 3: "(const std::exception& e)" } }
+  - code: "void f() { throw std::runtime_error(\"x\"); }                    // 여기서 올라가기 시작한다"
+    expect: { sites: 1, form: throw }
+  - code: "void f() { g(); }                                              // 던지는 자리가 없다"
+    expect: none

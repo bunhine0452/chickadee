@@ -1,0 +1,144 @@
+schema: 1
+id: cpp/boolean-literal
+# 0부 §0.1 #7, 축 4. 보편형 `common/boolean-value` 는 「참과 거짓이라는 값이 있다」까지고,
+# 「정수와 서로 오간다」는 C++ 쪽 어긋남이라 판에만 있다 — 자바는 그 자리에서 컴파일을 멈춘다.
+universal: common/boolean-value
+name: { ko: 참·거짓 값, en: Boolean literal }
+token: "true"
+grammars: [cpp]
+framework: null
+essential: true
+difficulty: 1
+prereq: [cpp/variable-declaration, cs/type]
+confusions: []
+dict:
+  one_liner:
+    ko: "참과 거짓을 담는 타입이 따로 있는데, 수와 서로 조용히 오간다."
+    en: "There is a type for the two truth values, and numbers slide in and out of it."
+  why:
+    ko: >-
+      C++ 에는 참·거짓 타입이 <b>있습니다</b>. 그런데 그 타입은 수와 <b>서로 오갑니다</b> —
+      참은 1, 거짓은 0 으로 변하고, 반대로 0 이 아닌 수는 무엇이든 참이 됩니다. 그래서
+      <code>if (count)</code> 가 그냥 통과하고 <code>bool b = 2;</code> 도 통과하는데
+      그때 <code>b</code> 는 2 가 아니라 <b>참</b>입니다. {{site.line}}행처럼 값을 그대로 적은
+      줄에서는 안 헷갈리지만, 수가 오는 자리에서 이 규칙이 조용히 일합니다.
+    en: >-
+      C++ <b>does have</b> a truth type. But that type <b>slides into and out of</b> numbers —
+      true becomes 1, false becomes 0, and any non-zero number becomes true. So
+      <code>if (count)</code> simply passes, and <code>bool b = 2;</code> passes too, except that
+      <code>b</code> is then not 2 but <b>true</b>. A line like {{site.line}} that writes the
+      value plainly is clear; the rule works quietly wherever a number arrives instead.
+  trace:
+    - ko: "{{site.line}}행은 참·거짓 자리를 하나 잡는다."
+      en: "Line {{site.line}} claims one room for a truth value."
+    - ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 그 자리에 그대로 들어간다."
+      en: "{{pick.3|code}} goes into that room as written."
+    - ko: "같은 자리에 수가 와도 컴파일은 통과한다."
+      en: "A number arriving in the same room still compiles."
+rule:
+  ko: "<b>참은 하나가 아니다.</b> 0 이 아닌 수는 무엇이든 참으로 읽힌다."
+  en: "<b>True is not one value.</b> Any non-zero number reads as true."
+result:
+  label: { ko: "{{site.line}}행이 담은 것", en: "what line {{site.line}} stored" }
+  value: "{{pick.2}} = {{pick.3}}"
+  note: { ko: "수가 와도 통과한다", en: "a number would pass too" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 이제 참·거짓 둘 중 하나를 들고 있습니다."
+  en: "{{pick.2|code}} now holds one of the two truth values."
+payoff:
+  ko: >-
+    이걸 알면 「조건에 수를 넣었는데 왜 통과하지」가 풀립니다 — 0 이 아니면 참입니다.
+  en: >-
+    This untangles “I put a number in the condition and it passed” — non-zero is true.
+bridge:
+  ko: >-
+    자바는 같은 자리에서 <b>컴파일을 멈춥니다</b>. 파이썬은 빈 목록까지 거짓으로 칩니다.
+    C++ 은 그 사이 — 수만 조용히 오갑니다.
+  en: >-
+    Java <b>stops compiling</b> at the same spot. Python even counts an empty list as false.
+    C++ sits between: only numbers slide across quietly.
+misconceptions:
+  # `cpp.md` §0.1 #7 · §9.
+  - ko: "참·거짓 타입이 있으니 수는 못 온다 — 옵니다. 0 이 아니면 참이에요."
+    en: "There is a truth type so numbers cannot come — they can; non-zero is true."
+  - ko: "<code>bool b = 2;</code> 뒤에 <code>b</code> 는 2 다 — 참입니다. 수는 남지 않아요."
+    en: "After <code>bool b = 2;</code> the value is 2 — it is true; the number does not survive."
+  - ko: "빈 목록은 거짓이다 — 그건 파이썬 규칙입니다. C++ 은 수만 오갑니다."
+    en: "An empty list is false — that is Python's rule. In C++ only numbers cross."
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>참이라는 값</b>을 그대로 담습니다."
+      en: "Choose what goes in the blank. Line {{site.line}} stores <b>the value true</b> as written."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "true", mono: true }
+      - t: "1"
+        mono: true
+        diag:
+          t:
+            ko: "이것도 통과합니다 — 그리고 담기는 값도 같아요. 다만 <b>읽는 사람</b>에게는 수인지 참인지가 안 보입니다."
+            en: "That passes too, and stores the same value. What it costs is the <b>reader</b>: number or truth is no longer visible."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값이냐 읽힘이냐", en: "The sharpest spot — the value or the reading" }
+            code:
+              - "bool ok = true;   // 뜻이 보인다"
+              - "bool ok = 1;      // 같은 값, 안 보인다"
+      - t: "True"
+        mono: true
+        diag:
+          t:
+            ko: "첫 글자를 크게 쓴 것은 <b>파이썬</b>의 표기입니다. C++ 에서는 그런 이름이 없어 컴파일이 멈춰요."
+            en: "The capitalised form is <b>Python's</b>. There is no such name in C++, so it stops compiling."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 어느 언어의 표기냐", en: "The sharpest spot — whose notation" }
+            code:
+              - "# Python: True"
+              - "// C++: true"
+      - t: "null"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>없음</b> 쪽 낱말입니다. 참·거짓 자리에 오면 0 으로 읽혀 거짓이 되고, 뜻하려던 것과 반대가 돼요."
+            en: "That word is on the <b>absence</b> side. In a truth slot it reads as zero and becomes false — the opposite of what was meant."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 참이냐 없음이냐", en: "The sharpest spot — truth or absence" }
+            code:
+              - "bool ok = true;    // 참"
+              - "bool ok = nullptr; // 거짓 쪽으로 읽힌다"
+why_gate:
+  q:
+    ko: "참·거짓 타입이 있는데 왜 수가 <b>그 자리에 그냥 들어올까요</b>?"
+    en: "There is a truth type — why do numbers <b>walk into that slot anyway</b>?"
+  choices:
+    - t:
+        ko: "C 에서 물려받은 규칙이라서 — C 에는 참·거짓 타입이 없었고 0 이 아니면 참이었으니까"
+        en: "Because the rule came from C, which had no truth type and called anything non-zero true"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 물려받은 대가가 무엇인지도 한 줄로 적어 보세요."
+        en: "That is the direction. Add a line on what inheriting it costs."
+    - t:
+        ko: "참·거짓 타입이 사실은 수라서"
+        en: "Because the truth type really is a number"
+      ok: false
+      fb:
+        ko: "다른 타입입니다. 크기도 규칙도 따로 있고, <b>변환</b>이 둘을 잇는 거예요."
+        en: "It is a different type with its own size and rules; a <b>conversion</b> is what links them."
+    - t:
+        ko: "컴파일러가 검사를 안 해서"
+        en: "Because the compiler does not check"
+      ok: false
+      fb:
+        ko: "검사합니다. 검사한 결과가 「이 변환은 허용된다」인 것이 요점이에요."
+        en: "It does check. The point is that the check says “this conversion is allowed”."
+queries:
+  - { grammars: [cpp], file: ./boolean-literal.scm }
+examples:
+  - code: "void f() { bool ok = true; }              // ok -> true (bool)"
+    expect: { sites: 1, form: booldecl, hole: "true", picks: { 1: "bool", 2: "ok", 3: "true" } }
+  - code: "void f() { bool ok = 2; }                 // ok -> true (bool, 2 는 안 남는다)"
+    expect: { sites: 1, form: boolint, picks: { 1: "bool", 2: "ok", 3: "2" } }
+  - code: "void f() { int n = 1; }                   // 참·거짓 자리가 아니다"
+    expect: none

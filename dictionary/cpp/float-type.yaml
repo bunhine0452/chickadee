@@ -1,0 +1,173 @@
+schema: 1
+id: cpp/float-type
+# 0부 §0.1 #5, 축 2. 보편형은 `common/float-literal` 이다 — 근사값이 되는 기계는 IEEE-754
+# 하나라 열 언어가 같은 값을 낸다. C++ 에서 다시 배울 것은 **찍히는 자릿수**뿐이다.
+universal: common/float-literal
+name: { ko: 소수가 안 떨어진다, en: Fractions do not land }
+token: "0.1"
+grammars: [cpp]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cpp/variable-declaration, cs/floating-point, cs/binary-representation]
+confusions: []
+dict:
+  one_liner:
+    ko: "2진수로 못 적는 소수가 있어 저장된 값이 이미 사람이 적은 값과 다르다."
+    en: "Some fractions have no exact base-two form, so what is stored already differs."
+  why:
+    ko: >-
+      소수는 <b>2진 분수의 합</b>으로 저장됩니다. 10진수 <code>0.1</code> 은 그 합으로 정확히
+      못 적어요 — 10진수로 <code>1/3</code> 을 못 적는 것과 같은 일입니다. 그래서 담기는 값은
+      <code>0.1</code> 이 아니라 그것에 가장 가까운 값이고, 둘을 더하면
+      <code>0.30000000000000004</code> 가 됩니다. C++ 에서 이 사실이 <b>한 번 더 가려집니다</b> —
+      화면에 흘려보낼 때 기본 자릿수가 여섯이라 <code>0.3</code> 으로 찍혀요.
+      <code>setprecision(20)</code> 을 켜야 드러납니다.
+    en: >-
+      A fraction is stored as a <b>sum of binary fractions</b>. Base ten <code>0.1</code> has no
+      exact form there — the same way base ten cannot write <code>1/3</code>. What is held is not
+      <code>0.1</code> but the nearest value to it, and adding two of them gives
+      <code>0.30000000000000004</code>. In C++ the fact is <b>hidden once more</b>: the default
+      precision on the way to the screen is six digits, so it prints as <code>0.3</code>.
+      Turning on <code>setprecision(20)</code> is what shows it.
+  trace:
+    - ko: "{{site.line}}행의 값은 담기는 순간 가장 가까운 값으로 바뀐다."
+      en: "The value on line {{site.line}} becomes the nearest representable one as it goes in."
+    - ko: "{{pick.2|code}} 자리에 든 것은 사람이 적은 값이 아니다."
+      en: "What sits in {{pick.2|code}} is not what the person wrote."
+    - ko: "그 값으로 셈을 하면 결과도 10진수로 안 떨어진다."
+      en: "Computing with it gives a result that does not land in base ten either."
+rule:
+  ko: "<b>실수는 근사값이다.</b> 소수는 같음 기호로 견주지 않고 차이의 크기로 본다."
+  en: "<b>Decimals are approximations.</b> Compare by the size of the gap, not by equality."
+result:
+  label: { ko: "{{site.line}}행이 담은 값", en: "the value stored on line {{site.line}}" }
+  value: "{{pick.1}} {{pick.2}}"
+  note: { ko: "적힌 값이 아니라 가장 가까운 값", en: "the nearest value, not the written one" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 사람이 적은 값에 <b>가장 가까운</b> 값을 들고 있습니다."
+  en: "{{pick.2|code}} holds the value <b>nearest</b> to the one that was written."
+payoff:
+  ko: >-
+    이걸 알면 「합계가 맞는데 마지막 자리가 다르다」가 풀립니다 — 셈이 새는 게 아닙니다.
+  en: >-
+    This untangles “the total is right but the last digit is off” — nothing leaked.
+bridge:
+  ko: >-
+    파이썬·자바도 같은 기계라 같은 값이 나옵니다. C++ 만 다른 것은 <b>기본 자릿수가 여섯</b>
+    이라 어긋남이 화면에서 한 번 더 가려진다는 것이에요.
+  en: >-
+    Python and Java run the same machine and hold the same value. What is different in C++ is the
+    <b>six-digit default</b>, which hides the gap once more on its way to the screen.
+misconceptions:
+  # `cpp.md` §0.1 #5.
+  - ko: "찍힌 값이 담긴 값이다 — 기본 자릿수가 여섯이라 뒤가 잘려 보입니다."
+    en: "What is printed is what is held — the six-digit default cuts the tail off."
+  - ko: "더 넓은 타입을 쓰면 정확해진다 — 자릿수만 늘고 <code>0.1</code> 은 어느 폭에서도 안 떨어집니다."
+    en: "A wider type fixes it — it only adds digits; <code>0.1</code> lands at no width."
+  - ko: "C++ 의 셈이 새는 것이다 — 같은 기계면 어느 언어도 같은 값입니다."
+    en: "C++'s arithmetic leaks — on this machine every language holds the same value."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>근사값으로 담긴다는 것을 정하는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that makes it stored as an approximation</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 근사값이 되는 이유는 이름이 아니라 앞에 적은 타입이에요."
+          en: "{{pick.2|code}} is the <b>name</b>. What makes it an approximation is the type in front, not the name."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 타입이냐", en: "The sharpest spot — the name or the type" }
+          code:
+            - "int n = 1;      // 정확하다"
+            - "double d = 1;   // 근사값 자리다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 사람이 적은 <b>값</b>입니다. 그 값이 그대로 담기지 않는다는 것이 이 판이에요."
+          en: "{{pick.3|code}} is the <b>value the person wrote</b>. That it is not what gets stored is this plate."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 적은 값이냐 담긴 값이냐", en: "The sharpest spot — written or stored" }
+          code:
+            - "0.1              // 사람이 적은 것"
+            - "double d = 0.1;  // 가장 가까운 값이 든다"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>소수를 담는 자리</b>를 잡습니다."
+      en: "Choose what goes in the blank. Line {{site.line}} claims room for <b>a fraction</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "double", mono: true }
+      - t: "int"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>소수를 못 담는</b> 타입입니다. 소수를 넣으면 소수점 아래가 버려지고, 반올림이 아니라 그냥 잘려요."
+            en: "That type <b>holds no fraction</b>. Put one in and everything after the point is dropped — cut, not rounded."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 소수를 담느냐", en: "The sharpest spot — does it hold a fraction" }
+            code:
+              - "int n = 3.9;      // 3"
+              - "double d = 3.9;   // 3.9 에 가장 가까운 값"
+      - t: "bool"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>참·거짓</b> 타입이라 값이 둘뿐입니다. 소수를 넣으면 0 인지 아닌지로만 접혀요."
+            en: "That is the <b>true/false</b> type with two values. A fraction folds into “zero or not”."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값이 둘이냐", en: "The sharpest spot — are there only two values" }
+            code:
+              - "bool b = 0.5;     // 참 하나로 접힌다"
+              - "double d = 0.5;   // 0.5 에 가장 가까운 값"
+      - t: "auto"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>오른쪽을 보고 정하라</b>는 표시입니다. 소수 값이면 결과는 같지만, 값이 정수로 바뀌면 타입도 조용히 바뀌어요."
+            en: "That says <b>look right and decide</b>. With a fractional value the result matches, but change the value to a whole one and the type quietly changes too."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 타입을 못 박느냐", en: "The sharpest spot — is the type pinned" }
+            code:
+              - "auto d = 1;       // 정수가 된다"
+              - "double d = 1;     // 소수 자리 그대로"
+why_gate:
+  q:
+    ko: "계산한 소수를 왜 <b>같음 기호로 견주면 안 될까요</b>?"
+    en: "Why should a computed fraction <b>not be compared with equality</b>?"
+  choices:
+    - t:
+        ko: "담긴 값이 사람이 적은 값과 마지막 자리에서 다를 수 있고, 같음 기호는 그 한 자리도 다르다고 보기 때문"
+        en: "Because the stored value can differ in the last digit, and equality counts that digit"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그럼 무엇으로 견줄지도 한 줄로 적어 보세요."
+        en: "That is the direction. Add a line on what to compare with instead."
+    - t:
+        ko: "실수 견주기가 느려서"
+        en: "Because comparing decimals is slow"
+      ok: false
+      fb:
+        ko: "속도 문제가 아닙니다. 값이 다르다는 것이 문제예요."
+        en: "Speed is not it. The problem is that the values differ."
+    - t:
+        ko: "C++ 이 소수 견주기를 막아 놓아서"
+        en: "Because C++ forbids comparing fractions"
+      ok: false
+      fb:
+        ko: "막지 않습니다. 컴파일도 되고 돌기도 합니다 — 조건이 안 맞을 뿐이에요."
+        en: "It is not forbidden. It compiles and runs — the condition simply does not hold."
+queries:
+  - { grammars: [cpp], file: ./float-type.scm }
+examples:
+  - code: "void f() { double d = 0.1; }              // d -> 0.1 에 가장 가까운 값 (double)"
+    expect: { sites: 1, form: floatdecl, hole: "double", picks: { 1: "double", 2: "d", 3: "0.1" } }
+  - code: "void g(double ratio) { }                  // ratio -> 부른 쪽이 준 근사값 (double)"
+    expect: { sites: 1, form: floatparam, hole: "double", picks: { 1: "double", 2: "ratio" } }
+  - code: "void f() { int n = 1 + 2; }               // n -> 3 (int, 정확하다)"
+    expect: none

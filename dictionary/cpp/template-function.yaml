@@ -1,0 +1,146 @@
+schema: 1
+id: cpp/template-function
+# §4 심화 #25. `common/generics` 가 보편형이다 — 「타입 자리를 비워 둔다」까지 전이되고,
+# 「부르는 곳마다 새로 만들어진다」는 C++ 쪽 어긋남이라 판에만 있다. 자바는 지워 버리고
+# (`cs/erasure-and-reification`) C++ 은 찍어 낸다.
+universal: common/generics
+name: { ko: 타입 자리 비워 두기, en: Function template }
+token: "template"
+grammars: [cpp]
+framework: null
+essential: true
+difficulty: 4
+prereq: [cpp/function-definition, cpp/std-vector, cpp/reference-parameter, cs/erasure-and-reification]
+confusions: []
+dict:
+  one_liner:
+    ko: "타입 자리를 비워 두고, 부르는 곳마다 그 타입으로 함수를 새로 찍어 낸다."
+    en: "Leaves the type slot open and stamps out a new function at every use."
+  why:
+    ko: >-
+      {{site.line}}행은 함수를 하나 적은 것이 아니라 <b>함수를 찍어 내는 틀</b>을 적은
+      것입니다. 부르는 곳에서 타입이 정해지면 컴파일러가 그 타입으로 함수를 하나
+      <b>새로 만듭니다.</b> 여기서 두 가지가 따라옵니다. 첫째, 만들어지는 자리에 몸통이
+      보여야 해서 <b>몸통이 헤더에 있어야 합니다</b> — 선언만 헤더에 두는 보통 함수와
+      다른 자리예요. 둘째, 오류가 <b>틀을 적은 줄이 아니라 만들어진 자리</b>에서 나서
+      메시지가 길고 낯섭니다. 자바가 타입을 지워 버리는 것과 정반대입니다.
+    en: >-
+      Line {{site.line}} does not write one function; it writes a <b>mould that stamps functions
+      out</b>. When a use fixes the type, the compiler <b>makes a new function</b> for it. Two
+      things follow. First, the body has to be visible where the stamping happens, so <b>the body
+      lives in the header</b> — unlike an ordinary function, where only the declaration does.
+      Second, errors appear <b>where it was stamped, not where the mould was written</b>, which
+      makes the messages long and unfamiliar. It is the exact opposite of Java, which erases the type.
+  trace:
+    - ko: "{{site.line}}행은 아직 함수가 아니라 틀이다."
+      en: "Line {{site.line}} is not yet a function but a mould."
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 비워 둘 타입 자리를 적는다."
+      en: "{{pick.2|code}} writes the type slots left open."
+    - ko: "{{pick.3|code}}{{pick.3|josa:을,를}} 부르는 곳마다 함수가 하나씩 만들어진다."
+      en: "One function is made at each place {{pick.3|code}} is used."
+rule:
+  ko: "<b>부르는 곳마다 새로 만들어진다.</b> 그래서 몸통이 헤더에 있어야 한다."
+  en: "<b>A new one is made at every use.</b> Which is why the body lives in the header."
+result:
+  label: { ko: "{{site.line}}행이 만든 틀", en: "the mould made on line {{site.line}}" }
+  value: "{{pick.1}} {{pick.2}}"
+  note: { ko: "쓰는 곳마다 하나씩 찍힌다", en: "one is stamped per use" }
+ok:
+  ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 이제 타입마다 하나씩 만들어질 틀입니다."
+  en: "{{pick.3|code}} is now a mould that yields one function per type."
+payoff:
+  ko: >-
+    이걸 알면 「오류가 내가 안 쓴 줄에서 난다」가 풀립니다 — 만들어진 자리가 거기예요.
+  en: >-
+    This untangles “the error points at a line I never wrote” — that is where it was stamped.
+bridge:
+  ko: >-
+    자바는 타입을 <b>지우고</b> 함수 하나만 남깁니다. C++ 은 <b>찍어 내서</b> 타입마다
+    따로 남기고, 그래서 빠르지만 실행 파일이 커집니다.
+  en: >-
+    Java <b>erases</b> the type and keeps one function. C++ <b>stamps</b> and keeps one per type,
+    which is fast but makes the binary larger.
+misconceptions:
+  - ko: "함수 하나가 만들어진다 — 쓰는 타입마다 하나씩 만들어집니다."
+    en: "One function is made — one is made per type used."
+  - ko: "몸통을 소스 파일에 둬도 된다 — 만들어지는 자리에서 몸통이 안 보이면 이어지지 않습니다."
+    en: "The body may sit in a source file — if it is invisible where stamped, it never links."
+  - ko: "실행할 때 타입이 정해진다 — 컴파일할 때 정해집니다."
+    en: "The type is settled at run time — it is settled at compile time."
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>타입 자리를 비워 둔 틀</b>을 엽니다."
+      en: "Choose what goes in the blank. Line {{site.line}} opens a <b>mould with an open type slot</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "template", mono: true }
+      - t: "typename"
+        mono: true
+        diag:
+          t:
+            ko: "이 낱말은 <b>꺾쇠 안</b>에서 타입 자리 하나를 이름 짓는 데 씁니다. 틀을 여는 낱말은 그 앞에 따로 있어요."
+            en: "That word names one open type slot <b>inside the angle brackets</b>. The word that opens the mould stands before it."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 여는 낱말이냐 자리 이름이냐", en: "The sharpest spot — the opener or the slot name" }
+            code:
+              - "template <typename T>"
+              - "// 앞이 여는 낱말, 뒤가 자리 이름"
+      - t: "generic"
+        mono: true
+        diag:
+          t:
+            ko: "이 낱말은 C++ 에 없습니다. C# 쪽 어휘이고, 여기서는 그런 이름을 찾다가 멈춰요."
+            en: "That word does not exist in C++. It is C# vocabulary; here it stops while looking for such a name."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 어느 언어의 표기냐", en: "The sharpest spot — whose notation" }
+            code:
+              - "// C#: 꺾쇠만 붙인다"
+              - "// C++: template <typename T>"
+      - t: "auto"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>오른쪽을 보고 정하라</b>는 표시라 타입 자리를 비워 두는 것과 다릅니다. 함수마다 하나씩 찍어 내지도 않아요."
+            en: "That says <b>settle it from the right</b>, which is not the same as leaving a slot open, and it stamps nothing out."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 정하기냐 비워 두기냐", en: "The sharpest spot — settling or leaving open" }
+            code:
+              - "auto x = 3;             // 한 번 정한다"
+              - "template <typename T>   // 쓸 때마다 정해진다"
+why_gate:
+  q:
+    ko: "자바는 타입을 지우는데 C++ 은 왜 <b>타입마다 찍어 낼까요</b>?"
+    en: "Java erases the type — why does C++ <b>stamp one per type</b>?"
+  choices:
+    - t:
+        ko: "값을 상자에 안 넣고 그대로 쓰려고 — 정수 목록이면 정수가 그대로 이어 놓이고 셈도 그 타입 그대로다"
+        en: "To use values as they are rather than boxed — a list of numbers holds numbers in a row and computes on them directly"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 대가로 무엇이 커지는지도 적어 보세요."
+        en: "That is the direction. Add what grows in exchange."
+    - t:
+        ko: "지우는 방법을 몰라서"
+        en: "Because erasing was not known"
+      ok: false
+      fb:
+        ko: "고른 것입니다. 지우면 값마다 상자가 필요해져요."
+        en: "It was a choice. Erasing would force a box around every value."
+    - t:
+        ko: "컴파일이 빨라져서"
+        en: "Because it compiles faster"
+      ok: false
+      fb:
+        ko: "오히려 느려집니다. 얻는 것은 <b>실행 속도와 타입 그대로 쓰기</b>예요."
+        en: "It compiles slower. What is gained is <b>run speed and using types as they are</b>."
+queries:
+  - { grammars: [cpp], file: ./template-function.scm }
+examples:
+  - code: "template <typename T> T maxOf(T a, T b) { return a; }   // 타입마다 하나씩 찍힌다"
+    expect: { sites: 1, form: tmplfn, hole: "template", picks: { 1: "template", 2: "<typename T>", 3: "maxOf" } }
+  - code: "template <typename T> class Box { };                    // 클래스도 틀이 된다"
+    expect: { sites: 1, form: tmplclass, hole: "template", picks: { 1: "template", 3: "Box" } }
+  - code: "int maxOf(int a, int b) { return a; }                   // 틀이 아니라 함수 하나다"
+    expect: none

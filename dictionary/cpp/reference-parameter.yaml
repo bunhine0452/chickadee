@@ -1,0 +1,174 @@
+schema: 1
+id: cpp/reference-parameter
+# 2부 §3 #13. `universal: null` — §6 이 적은 그대로다. 파이썬·TS 의 「객체는 참조로 넘어간다」는
+# **선택이 없는 사실**이고 C++ 의 이 표기는 **줄마다 고르는 것**이다. 전이하면 거짓이 옳은
+# 것으로 옮겨 간다 (D4).
+universal: null
+name: { ko: 원본을 넘기기, en: Reference parameter }
+token: "&"
+grammars: [cpp]
+framework: null
+essential: true
+difficulty: 3
+prereq: [cpp/function-definition, cpp/std-vector, cpp/reference-binding]
+confusions: []
+dict:
+  one_liner:
+    ko: "이 한 글자가 있으면 원본이 넘어간다. 부르는 쪽에는 그 표시가 안 보인다."
+    en: "With this one symbol the original goes in — and the caller sees no sign of it."
+  why:
+    ko: >-
+      매개변수에 이 글자가 없으면 부른 쪽의 값이 <b>통째로 복사</b>돼 들어옵니다. 목록이면
+      원소 전부, 글자 묶음이면 글자 전부예요. 이 글자가 있으면 복사가 안 일어나고
+      <b>원본 자체</b>가 들어옵니다 — 안에서 고치면 부른 쪽이 바뀝니다.
+      여기가 C++ 을 읽기 어렵게 만드는 자리입니다: <b>부르는 쪽 <code>f(v)</code> 에는
+      아무 표시가 없어요.</b> `v` 가 바뀔지 아닐지는 정의부를 열어 봐야 압니다.
+      그래서 고칠 생각이 없으면 못 만진다는 약속을 함께 붙여, 읽는 사람에게 그것을 알립니다.
+    en: >-
+      Without this symbol on a parameter, the caller's value comes in as a <b>whole copy</b> —
+      every element of a list, every character of a run of text. With it, no copy happens and the
+      <b>original itself</b> comes in; editing inside changes the caller's value. This is the
+      spot that makes C++ hard to read: <b>the call site <code>f(v)</code> shows nothing.</b>
+      Whether `v` changes is written only in the definition. Which is why, with no intent to
+      edit, the not-to-touch promise is attached alongside — to tell the reader.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 복사를 막는다."
+      en: "On line {{site.line}}, {{pick.1|code}} stops the copy."
+    - ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 부른 쪽 값의 두 번째 이름이 된다."
+      en: "{{pick.2|code}} becomes a second name for the caller's value."
+    - ko: "몸통에서 고치면 부른 쪽이 바뀐다."
+      en: "Editing it in the body changes the caller's value."
+rule:
+  ko: "<b>이 글자가 있으면 원본, 없으면 복사본이다.</b> 부르는 쪽에는 어느 쪽인지 안 적힌다."
+  en: "<b>With it the original, without it a copy.</b> The call site never says which."
+result:
+  label: { ko: "{{site.line}}행이 받는 것", en: "what line {{site.line}} takes in" }
+  value: "{{pick.3}}{{pick.1}} {{pick.2}}"
+  note: { ko: "복사가 아니라 원본이다", en: "the original, not a copy" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 부른 쪽 값 그 자체입니다."
+  en: "{{pick.2|code}} is the caller's value itself."
+payoff:
+  ko: >-
+    이걸 알면 「함수에 넘겼는데 내 값이 바뀌었다」가 풀립니다 — 한 글자가 있었어요.
+  en: >-
+    This untangles “I passed it to a function and my value changed” — one symbol was there.
+bridge:
+  ko: >-
+    파이썬·자바에서는 이 선택이 <b>없습니다</b> — 객체면 언제나 원본이 갑니다. C++ 은
+    줄마다 고르게 했고, 그래서 부르는 쪽만 봐서는 못 읽습니다.
+  en: >-
+    In Python and Java there is <b>no such choice</b> — an object always goes as itself. C++ makes
+    it a per-line choice, so the call site alone cannot be read.
+misconceptions:
+  # `cpp.md` §9 #2.
+  - ko: "큰 값은 알아서 주소로 간다 — 이 글자가 없으면 통째로 복사됩니다."
+    en: "Big values go by address on their own — without this symbol they are copied whole."
+  - ko: "부르는 쪽을 보면 안다 — 안 보입니다. 정의부를 열어야 알아요."
+    en: "The call site tells you — it does not; the definition has to be opened."
+  - ko: "못 만진다는 약속을 붙이면 복사가 된다 — 여전히 원본입니다. 고치는 것만 막혀요."
+    en: "Adding the not-to-touch promise makes it a copy — it stays the original; only editing is blocked."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>복사를 막는 한 글자</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the one symbol that stops the copy</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>안에서 쓸 이름</b>입니다. 복사냐 아니냐는 그 앞의 한 글자가 정해요."
+          en: "{{pick.2|code}} is <b>the name used inside</b>. Copy or not is decided by the symbol in front."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 한 글자냐", en: "The sharpest spot — the name or the symbol" }
+          code:
+            - "void f(std::vector<int> v)"
+            - "void f(std::vector<int>& v)"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>받을 것의 타입</b>입니다. 같은 타입이라도 한 글자가 붙었느냐로 복사가 갈려요."
+          en: "{{pick.3|code}} is the <b>type taken in</b>. With the same type, one symbol decides whether it copies."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 타입이냐 한 글자냐", en: "The sharpest spot — the type or the symbol" }
+          code:
+            - "std::string s     // 복사"
+            - "std::string& s    // 원본"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>복사 없이 원본</b>을 받습니다."
+      en: "Choose what goes in the blank. Line {{site.line}} takes <b>the original with no copy</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "&", mono: true }
+      - t: "*"
+        mono: true
+        diag:
+          t:
+            ko: "이것도 복사를 막지만 <b>부르는 쪽에 표시가 남습니다</b> — 주소를 적어 넘겨야 하고, 아무것도 안 가리키는 상태가 될 수 있어요."
+            en: "That also stops the copy, but <b>the call site shows it</b> — an address must be written, and it can point at nothing."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 부르는 쪽에 보이느냐", en: "The sharpest spot — does the call site show it" }
+            code:
+              - "f(v);      // 참조로 받으면 이렇게"
+              - "f(&v);     // 주소로 받으면 이렇게"
+      - t: "&&"
+        mono: true
+        diag:
+          t:
+            ko: "기호 둘짜리는 <b>곧 사라질 값</b>만 받습니다. 이름이 있는 값을 그냥 넘기면 안 맞아요."
+            en: "The doubled symbol takes only a value <b>about to vanish</b>. Handing in a named value does not fit."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 이름이 있는 값이냐", en: "The sharpest spot — does the value have a name" }
+            code:
+              - "f(v);              // 이름이 있다"
+              - "f(std::move(v));   // 가져가도 된다는 표"
+      - t: "const"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>못 만진다는 약속</b>이지 복사를 막는 표시가 아닙니다. 이 낱말만 붙이면 여전히 복사돼요."
+            en: "That is a <b>promise not to touch</b>, not the mark that stops copying. With only this word it still copies."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 약속이냐 복사 막기냐", en: "The sharpest spot — a promise or stopping the copy" }
+            code:
+              - "const std::string s     // 복사되고 못 고친다"
+              - "const std::string& s    // 원본이고 못 고친다"
+why_gate:
+  q:
+    ko: "부르는 쪽에 표시가 없는데 왜 <b>이 표기를 그대로</b> 둘까요?"
+    en: "The call site shows nothing — why keep <b>this notation</b> anyway?"
+  choices:
+    - t:
+        ko: "쓰는 쪽이 보통 값과 똑같아 함수를 갈아 끼워도 부르는 코드를 안 고쳐도 되기 때문"
+        en: "Because it reads like an ordinary value, so swapping a function does not force the callers to change"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 대가를 규약으로 어떻게 메우는지도 적어 보세요."
+        en: "That is the direction. Add how convention pays for the cost."
+    - t:
+        ko: "포인터보다 빨라서"
+        en: "Because it is faster than a pointer"
+      ok: false
+      fb:
+        ko: "대개 같은 기계 코드가 나옵니다. 다른 것은 <b>쓰는 모양</b>이에요."
+        en: "The machine code is usually the same. What differs is <b>how it is written</b>."
+    - t:
+        ko: "표시를 붙이는 문법이 아직 없어서"
+        en: "Because the syntax for marking it does not exist yet"
+      ok: false
+      fb:
+        ko: "안 만든 것이 아니라 <b>안 붙이기로</b> 한 것입니다. 붙이면 갈아 끼울 때 부르는 쪽이 전부 바뀌어요."
+        en: "It was not missing but <b>left off on purpose</b>. Marking it would force every caller to change on a swap."
+queries:
+  - { grammars: [cpp], file: ./reference-parameter.scm }
+examples:
+  - code: "void f(std::vector<int>& v) { }           // v -> 부른 쪽 목록 그 자체"
+    expect: { sites: 1, form: byref, hole: "&", picks: { 1: "&", 2: "v", 3: "std::vector<int>" } }
+  - code: "void g(const std::string& s) { }          // s -> 부른 쪽 글자 그 자체, 못 고친다"
+    expect: { sites: 1, form: byref, hole: "&", picks: { 1: "&", 2: "s", 3: "std::string" } }
+  - code: "void h(std::vector<int> v) { }            // 원소가 전부 복사된다"
+    expect: none
