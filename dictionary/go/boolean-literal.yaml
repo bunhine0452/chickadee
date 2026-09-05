@@ -1,0 +1,264 @@
+schema: 1
+id: go/boolean-literal
+# 0부 축 4 (`go.md` §0.1 0-4). 보편형은 `common/boolean-value` **하나**다 —
+# `common/truthiness` 는 안 건다. Go 에는 「참으로 쳐지는 값」이라는 것이 아예 없어서,
+# 그 보편형을 걸면 다른 언어의 규칙이 이 언어로 전이된다 (D4).
+universal: common/boolean-value
+name: { ko: "참·거짓 값", en: "Boolean literal" }
+token: "true"
+grammars: [go]
+framework: null
+essential: true
+difficulty: 1
+prereq: [cs/type]
+confusions: []
+
+dict:
+  one_liner:
+    ko: >-
+      조건 자리에는 참·거짓 값만 온다. 0 이나 빈 글자가 참으로 쳐지지 않는다.
+    en: >-
+      Only a truth value goes in a condition. Zero and empty text do not count.
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.3|code}}{{pick.3|josa:은,는}} 값이 둘뿐인 타입의 값입니다. 요점은 값이 둘이라는 것이 아니라 <b>다른 것이
+      그 자리에 못 온다</b>는 것이에요. 파이썬·자바스크립트에서는 <code>if n:</code> 이 「0이 아니면」으로 읽히고 <code>if s:</code> 가 「비어
+      있지 않으면」으로 읽힙니다. Go 에서 <code>if n {</code> 는 돌지 않고 <b>컴파일이 멈춰요</b>. 그래서 조건을 적을 때 무엇과 견주는지를 반드시
+      손으로 적게 됩니다 — <code>if n != 0 {</code> 처럼요.
+    en: >-
+      The {{pick.3|code}} on line {{site.line}} is a value of a type that has exactly two of them. The
+      point is not that there are two, but that <b>nothing else may stand in that slot</b>. In Python
+      and JavaScript <code>if n:</code> reads as "if not zero" and <code>if s:</code> as "if not
+      empty". In Go <code>if n {</code> does not run — it <b>stops the compiler</b>. So a condition
+      always says by hand what it is weighing, as in <code>if n != 0 {</code>.
+  trace:
+    - ko: >-
+        {{site.line}}행은 값 {{pick.3|code}}{{pick.3|josa:을,를}} 놓는다.
+      en: >-
+        Line {{site.line}} puts the value {{pick.3|code}} down.
+    - ko: >-
+        그 값의 타입에는 값이 둘뿐이다.
+      en: >-
+        The type of that value has exactly two values.
+    - ko: >-
+        조건 자리에 올 수 있는 것은 이 타입뿐이다.
+      en: >-
+        This is the only type allowed where a condition goes.
+
+rule:
+  ko: >-
+    <b>조건 자리는 이 타입 전용이다.</b> 수도 글자도 묶음도 조건이 못 된다.
+  en: >-
+    <b>The condition slot takes this type only.</b> Numbers, text and collections are not
+    conditions.
+result:
+  label: { ko: "{{site.line}}행의 값", en: "the value on line {{site.line}}" }
+  value: "{{pick.3}}"
+  note: { ko: "이 타입에는 값이 둘뿐이다", en: "this type has exactly two values" }
+ok:
+  ko: >-
+    {{pick.3|code}}{{pick.3|josa:은,는}} 조건 자리에 그대로 놓을 수 있는 값입니다.
+  en: >-
+    {{pick.3|code}} is a value that can stand in a condition as it is.
+payoff:
+  ko: >-
+    이걸 알면 「왜 <code>if len(xs) {</code> 가 안 되나」가 풀립니다 — 길이는 수이지 참·거짓이 아닙니다.
+  en: >-
+    This untangles "why won't <code>if len(xs) {</code> compile" — a length is a number, not a truth
+    value.
+bridge:
+  ko: >-
+    파이썬은 빈 목록을 거짓으로 치고 자바스크립트는 빈 배열을 참으로 칩니다. Go 는 둘 다 안 하고 그 자리에서 멈춥니다.
+  en: >-
+    Python calls an empty list false, JavaScript calls an empty array true. Go does neither and
+    stops right there.
+misconceptions:
+  - ko: >-
+      0 은 거짓이고 그 밖은 참이다 — Go 에서 수는 조건이 못 됩니다. <code>if n {</code> 는 그 줄에서 멈춰요.
+    en: >-
+      Zero is false and everything else true — in Go a number is not a condition. <code>if n {</code>
+      stops on that line.
+  - ko: >-
+      빈 글자 묶음이 거짓이다 — 아닙니다. <code>s != ""</code> 를 손으로 적어야 합니다.
+    en: >-
+      Empty text is false — it is not. You write <code>s != ""</code> by hand.
+  - ko: >-
+      1 과 0 으로 바꿔 쓸 수 있다 — 못 바꿉니다. 서로 오가는 변환 자체가 없어요.
+    en: >-
+      It swaps with 1 and 0 — it does not. There is no conversion between them at all.
+
+point:
+  - q:
+      ko: >-
+        {{site.line}}행에서 <b>조건 자리에 그대로 놓을 수 있는 값</b>을 짚어 보세요.
+      en: >-
+        On line {{site.line}}, point at <b>the value that can stand in a condition as it is</b>.
+    hint: { ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다.", en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose." }
+    answer: pick.3
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 이름 자체는 참도 거짓도 아니고, 무엇을 담았느냐가 정해요.
+          en: >-
+            {{pick.2|code}} is the <b>name</b>. A name is neither true nor false by itself; what it holds
+            decides.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 값이냐", en: "The sharpest spot — the name or the value" }
+          code:
+            - "ok := true    // 이름은 ok, 값은 true"
+            - "if ok { }     // 담긴 값이 조건이 된다"
+
+meaning:
+  - q:
+      ko: >-
+        <code>n := 3</code> 뒤에 <code>if n { }</code> 라고 적으면 어떻게 될까요?
+      en: >-
+        After <code>n := 3</code>, what happens if you write <code>if n { }</code>?
+    options:
+      - t:
+          ko: >-
+            컴파일이 멈춘다 — 조건 자리에 수를 못 놓는다
+          en: >-
+            The compiler stops — a number cannot stand in a condition
+      - t:
+          ko: >-
+            3 은 0 이 아니니 참으로 쳐져 안이 돈다
+          en: >-
+            3 is not zero, so it counts as true and the body runs
+        diag:
+          t:
+            ko: >-
+              그건 파이썬·자바스크립트의 규칙입니다. Go 에는 「참으로 쳐진다」는 규칙이 아예 없어서 그 줄에서 멈춰요.
+            en: >-
+              That is the Python and JavaScript rule. Go has no notion of counting as true at all, so it stops
+              on that line.
+      - t:
+          ko: >-
+            돌기는 하는데 결과가 정해지지 않는다
+          en: >-
+            It runs, but the result is unspecified
+        diag:
+          t:
+            ko: >-
+              돌지 않습니다. 실행 전에 컴파일러가 타입을 보고 멈춰요 — 실행 때 정해지는 것이 아닙니다.
+            en: >-
+              It does not run. The compiler weighs the type and stops before execution — nothing is decided at
+              run time.
+      - t:
+          ko: >-
+            경고만 내고 무시된다
+          en: >-
+            It only warns and is ignored
+        diag:
+          t:
+            ko: >-
+              Go 는 이 자리에서 경고를 내지 않습니다. 타입이 안 맞으면 오류이고 빌드가 안 나와요.
+            en: >-
+              Go does not warn here. A type that does not fit is an error and no build comes out.
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>참·거짓</b> 값을 담는 이름을 세웁니다.
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} sets up a name that holds a <b>truth
+        value</b>.
+    hint: { ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다.", en: "Your choice is written into the code at once. Submit to have it marked." }
+    options:
+      - { t: "bool", mono: true }
+      - t: "int"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이건 <b>수</b> 타입입니다. 수를 담으면 조건 자리에 못 놓아요 — Go 는 0 을 거짓으로 치지 않습니다.
+            en: >-
+              That is a <b>number</b> type. A number cannot stand in a condition — Go does not call zero
+              false.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 수냐 참·거짓이냐", en: "The sharpest spot — a number or a truth value" }
+            code:
+              - "var n int = 1"
+              - "if n { }        // 멈춘다"
+      - t: "string"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이건 <b>글자 묶음</b>입니다. 비었는지 물으려면 <code>s != ""</code> 를 손으로 적어야 해요.
+            en: >-
+              That is <b>text</b>. Asking whether it is empty means writing <code>s != ""</code> by hand.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 글자냐 참·거짓이냐", en: "The sharpest spot — text or a truth value" }
+            code:
+              - "var s string = \"\""
+              - "if s { }        // 멈춘다"
+      - t: "byte"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이건 <b>한 바이트짜리 수</b>입니다. 이름이 짧아도 수는 수라서 조건 자리에 못 놓습니다.
+            en: >-
+              That is a <b>one-byte number</b>. A short name does not stop it being a number, so it cannot
+              stand in a condition.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 수냐 참·거짓이냐", en: "The sharpest spot — a number or a truth value" }
+            code:
+              - "var b byte = 1"
+              - "if b { }        // 멈춘다"
+
+why_gate:
+  q:
+    ko: >-
+      Go 는 왜 조건 자리에 <b>이 타입만</b> 받을까요?
+    en: >-
+      Why does Go accept <b>only this type</b> in a condition?
+  choices:
+    - t:
+        ko: >-
+          무엇과 견주는지가 코드에 적히게 되어, 읽는 사람이 규칙을 외우지 않아도 되기 때문
+        en: >-
+          Because it forces the comparison to be written down, so the reader needs no rule to memorise
+      ok: true
+      fb:
+        ko: >-
+          그 방향입니다. 언어마다 「참으로 쳐지는 것」이 다르다는 점도 함께 적어 보세요.
+        en: >-
+          That is the direction. Add that what counts as true differs from language to language.
+    - t:
+        ko: >-
+          타입 검사를 빠르게 하려고
+        en: >-
+          To make type checking faster
+      ok: false
+      fb:
+        ko: >-
+          속도 문제가 아닙니다. 「어떤 값이 참인가」를 언어가 정해 주지 않겠다는 결정이에요.
+        en: >-
+          Speed is not it. It is a decision not to have the language rule on which values count as true.
+    - t:
+        ko: >-
+          참·거짓이 수보다 메모리를 덜 써서
+        en: >-
+          Because a truth value uses less memory than a number
+      ok: false
+      fb:
+        ko: >-
+          메모리 문제가 아닙니다. 조건 자리의 규칙이지 크기의 규칙이 아니에요.
+        en: >-
+          Memory is not it. This is a rule about the condition slot, not about size.
+
+queries:
+  - { grammars: [go], file: ./boolean-literal.scm }
+
+examples:
+  - code: "func f() { verbose := true }"
+    expect: { sites: 1, form: short, picks: { 2: "verbose", 3: "true" } }
+  - code: "func f() { var quiet bool = false }"
+    expect: { sites: 1, form: vardecl, hole: "bool", picks: { 1: "bool", 2: "quiet", 3: "false" } }
+  - code: "func ok() bool { return true }"
+    expect: { sites: 1, form: ret, picks: { 3: "true" } }
+  - code: "func f() { var n int = 1 }"
+    expect: none

@@ -1,0 +1,278 @@
+schema: 1
+id: go/assignment
+# 0부 축 7 (`go.md` §0.1 0-7). `go.md` §0.5 가 §3 ⑨ `go/assignment` 와 §2 ② 
+# `go/var-zero-value` 를 **한 장으로 묶으라**고 정했다 — 그대로 묶었다.
+# 보편형은 `common/reassignment` 다(`go.md` §6). 이름을 만드는 쪽의 보편형
+# `common/variable-binding` 은 1부 `go/short-var-decl` 이 가져간다.
+universal: common/reassignment
+name: { ko: "이름에 값 넣기와 제로 값", en: "Assignment and the zero value" }
+token: "var"
+grammars: [go]
+framework: null
+essential: true
+difficulty: 1
+prereq: [cs/state, cs/value-vs-reference]
+confusions: []
+
+dict:
+  one_liner:
+    ko: >-
+      이름을 만드는 줄과 값을 다시 넣는 줄이 다르다. 만든 순간 제로 값이 든다.
+    en: >-
+      Making a name and putting a value in are different lines; making one fills it.
+  why:
+    ko: >-
+      Go 에는 <b>「아직 값이 없는 이름」이 없습니다</b>. {{site.line}}행처럼 {{pick.3|code}} 타입만 적고 값을 안 줘도
+      {{pick.2|code}}{{pick.2|josa:은,는}} 비어 있지 않아요 — 그 타입의 <b>제로 값</b>이 들어갑니다. 수는 <code>0</code>,
+      참·거짓은 <code>false</code>, 글자 묶음은 <code>""</code>, 포인터·슬라이스·맵·채널·함수·인터페이스는 <code>nil</code> 입니다.
+      이것이 편한 자리와 위험한 자리가 함께 옵니다: 수를 세는 이름은 초기화가 필요 없어 편하고, 맵은 제로 값이 <code>nil</code> 이라 <b>읽기는 되는데 쓰기는
+      그 자리에서 죽습니다</b>.
+    en: >-
+      Go has <b>no such thing as a name without a value</b>. Even when only the type {{pick.3|code}}
+      is written and no value is given, as on line {{site.line}}, {{pick.2|code}} is not empty — the
+      <b>zero value</b> of that type goes in. Numbers get <code>0</code>, truth values
+      <code>false</code>, text <code>""</code>, and pointers, slices, maps, channels, functions and
+      interfaces get <code>nil</code>. The convenience and the hazard arrive together: a counter needs
+      no initialising, while a map's zero value is <code>nil</code>, so <b>reading works and writing
+      dies on the spot</b>.
+  trace:
+    - ko: >-
+        {{site.line}}행은 이름 {{pick.2|code}}{{pick.2|josa:을,를}} 세운다.
+      en: >-
+        Line {{site.line}} sets up the name {{pick.2|code}}.
+    - ko: >-
+        {{pick.3|code}}{{pick.3|josa:이,가}} 그 이름이 담을 종류를 정한다.
+      en: >-
+        {{pick.3|code}} decides what kind of value it holds.
+    - ko: >-
+        값을 안 줘도 그 종류의 제로 값이 이미 들어 있다.
+      en: >-
+        With no value given, the zero value of that kind is already in.
+
+rule:
+  ko: >-
+    <b>선언하는 순간 값이 들어간다.</b> 비어 있는 이름은 이 언어에 없다.
+  en: >-
+    <b>Declaring fills it.</b> There is no empty name in this language.
+result:
+  label: { ko: "{{site.line}}행 아래의 {{pick.2}}", en: "{{pick.2}} below line {{site.line}}" }
+  value: "{{pick.3}} 의 제로 값"
+  note: { ko: "값을 안 줘도 비어 있지 않다", en: "not empty even with no value given" }
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} 이미 {{pick.3|code}} 의 제로 값을 담고 있습니다.
+  en: >-
+    {{pick.2|code}} already holds the zero value of {{pick.3|code}}.
+payoff:
+  ko: >-
+    이걸 알면 「선언만 한 맵에 넣었더니 죽는다」가 풀립니다 — 비어 있던 게 아니라 <code>nil</code> 이 들어 있었습니다.
+  en: >-
+    This untangles "I only declared the map and writing to it died" — it was not empty; it held
+    <code>nil</code>.
+bridge:
+  ko: >-
+    C# 는 값을 안 주고 읽으면 컴파일 오류를 냅니다. Go 는 오류 대신 제로 값을 넣고 그대로 돌려요.
+  en: >-
+    C# raises a compile error when an unassigned local is read. Go puts the zero value in and runs.
+misconceptions:
+  - ko: >-
+      타입만 적으면 비어 있다 — 그 타입의 제로 값이 이미 들어 있습니다.
+    en: >-
+      Writing only the type leaves it empty — the zero value of that type is already in.
+  - ko: >-
+      제로 값은 언제나 <code>0</code> 이다 — 종류마다 다릅니다. 맵·슬라이스·포인터는 <code>nil</code> 이에요.
+    en: >-
+      The zero value is always <code>0</code> — it differs by kind. Maps, slices and pointers get
+      <code>nil</code>.
+  - ko: >-
+      없는 이름에도 값을 넣을 수 있다 — 못 넣습니다. 만드는 줄과 넣는 줄이 갈려 있어요.
+    en: >-
+      You can put a value into a name that does not exist — you cannot. Making and putting are
+      separate lines.
+
+point:
+  - q:
+      ko: >-
+        {{site.line}}행에서 <b>이름을 만드는 낱말</b>을 짚어 보세요.
+      en: >-
+        On line {{site.line}}, point at <b>the word that makes the name</b>.
+    hint: { ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다.", en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose." }
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 만들어지는 <b>이름</b>입니다. 이름만 적어서는 아무것도 안 만들어져요.
+          en: >-
+            {{pick.2|code}} is the <b>name</b> being made. A bare name makes nothing.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 만드는 낱말이냐", en: "The sharpest spot — the name or the making word" }
+          code:
+            - "count            // 없는 이름이면 멈춘다"
+            - "var count int    // 이 줄이 만든다"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 담을 <b>종류</b>입니다. 종류는 제로 값이 무엇인지를 정하지만 이름을 만들지는 않아요.
+          en: >-
+            {{pick.3|code}} is the <b>kind</b> being held. It decides what the zero value is, but it does
+            not make the name.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 종류냐 만드는 낱말이냐", en: "The sharpest spot — the kind or the making word" }
+          code:
+            - "int              // 종류만"
+            - "var n int        // 이름이 생긴다"
+
+meaning:
+  - q:
+      ko: >-
+        <code>var m map[string]int</code> 뒤에 <code>m["a"] = 1</code> 이라고 적으면 어떻게 될까요?
+      en: >-
+        After <code>var m map[string]int</code>, what happens on <code>m["a"] = 1</code>?
+    options:
+      - t:
+          ko: >-
+            돌다가 그 줄에서 죽는다 — 제로 값이 <code>nil</code> 이라 쓸 자리가 없다
+          en: >-
+            It runs and dies on that line — the zero value is <code>nil</code>, so there is nowhere to write
+      - t:
+          ko: >-
+            빈 묶음이 이미 있으니 그냥 들어간다
+          en: >-
+            An empty collection is already there, so it just goes in
+        diag:
+          t:
+            ko: >-
+              빈 묶음과 <code>nil</code> 은 다릅니다. 빈 묶음을 만들려면 <code>make</code> 나 리터럴이 필요해요.
+            en: >-
+              An empty collection and <code>nil</code> are not the same. Making an empty one takes
+              <code>make</code> or a literal.
+      - t:
+          ko: >-
+            컴파일이 멈춘다
+          en: >-
+            The compiler stops
+        diag:
+          t:
+            ko: >-
+              컴파일은 통과합니다 — 타입은 맞아요. 죽는 것은 돌 때입니다.
+            en: >-
+              It compiles; the types line up. The dying happens at run time.
+      - t:
+          ko: >-
+            아무 일도 안 나고 조용히 넘어간다
+          en: >-
+            Nothing happens and it moves on quietly
+        diag:
+          t:
+            ko: >-
+              조용히 넘어가는 것은 <b>읽기</b>입니다. 쓰기는 죽어요 — 그 둘이 다르다는 것이 이 판의 요점입니다.
+            en: >-
+              Moving on quietly is what <b>reading</b> does. Writing dies — that difference is the plate.
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>타입만 적어</b> 이름을 만듭니다.
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} makes a name by <b>writing only the type</b>.
+    hint: { ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다.", en: "Your choice is written into the code at once. Submit to have it marked." }
+    options:
+      - { t: "var", mono: true }
+      - t: ":="
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 모양은 <b>오른쪽 값에서 타입을 알아냅니다</b>. 값을 안 적으면 알아낼 것이 없어 그 줄에서 멈춰요.
+            en: >-
+              That form <b>reads the type off the value on the right</b>. With no value there is nothing to
+              read, and it stops on that line.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 타입을 적나 값에서 읽나", en: "The sharpest spot — writing the type or reading it" }
+            code:
+              - "var n int      // 타입을 적었다"
+              - "n := 0         // 값에서 읽었다"
+      - t: "const"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 낱말은 <b>컴파일 때 값이 정해지는</b> 이름을 만듭니다. 값이 반드시 있어야 하고, 나중에 다시 넣을 수 없어요.
+            en: >-
+              That word makes a name whose value is <b>settled at compile time</b>. A value is required and
+              nothing can be put in later.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 다시 넣을 수 있나", en: "The sharpest spot — can a new value go in" }
+            code:
+              - "var n int = 1; n = 2"
+              - "const c = 1; c = 2   // 멈춘다"
+      - t: "="
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 기호는 <b>이미 있는 이름에만</b> 씁니다. 없는 이름에 쓰면 만들어 주지 않고 그 줄에서 멈춰요.
+            en: >-
+              That symbol works <b>only on a name that already exists</b>. On a new one it does not create
+              anything; it stops on that line.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 만드나 옮기나", en: "The sharpest spot — making or moving" }
+            code:
+              - "var n int   // 만든다"
+              - "n = 1       // 옮긴다"
+
+why_gate:
+  q:
+    ko: >-
+      Go 는 왜 선언한 이름에 <b>제로 값을 미리 넣어</b> 둘까요?
+    en: >-
+      Why does Go put a <b>zero value in</b> a name as soon as it is declared?
+  choices:
+    - t:
+        ko: >-
+          읽기 전에 값이 있음을 언어가 보장해서, 「무엇이 들었는지 모르는 이름」이라는 상태 자체를 없애기 때문
+        en: >-
+          Because the language guarantees a value before any read, so "a name of unknown contents" never
+          exists
+      ok: true
+      fb:
+        ko: >-
+          그 방향입니다. 그 보장을 안 하는 언어에서 무엇이 생기는지도 적어 보세요.
+        en: >-
+          That is the direction. Add what appears in a language that gives no such guarantee.
+    - t:
+        ko: >-
+          초기화를 안 적어도 되게 하려는 편의 때문
+        en: >-
+          For the convenience of skipping initialisation
+      ok: false
+      fb:
+        ko: >-
+          편의는 따라오는 것이고 이유는 아닙니다. 값이 없는 상태를 언어에서 없앤 것이 먼저예요.
+        en: >-
+          The convenience follows; it is not the reason. Removing the no-value state from the language
+          came first.
+    - t:
+        ko: >-
+          메모리를 미리 잡아 두려고
+        en: >-
+          To reserve the memory up front
+      ok: false
+      fb:
+        ko: >-
+          자리를 잡는 것과 값을 넣는 것은 다른 일입니다. 다른 언어도 자리는 잡되 값은 안 넣어요.
+        en: >-
+          Reserving room and putting a value in are different acts. Other languages reserve and leave it
+          unset.
+
+queries:
+  - { grammars: [go], file: ./assignment.scm }
+
+examples:
+  - code: "func f() { var attempts int }"
+    expect: { sites: 1, form: zero, hole: "var", picks: { 1: "var", 2: "attempts", 3: "int" } }
+  - code: "func f(n int) { n = 3 }"
+    expect: { sites: 1, form: assign, hole: "=", picks: { 1: "=", 2: "n", 3: "3" } }
+  - code: "func f() { n := 3 }"
+    expect: none

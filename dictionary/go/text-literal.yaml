@@ -1,0 +1,270 @@
+schema: 1
+id: go/text-literal
+# 0부 축 3 (`go.md` §0.1 0-3). 보편형은 `common/text-literal` 이다.
+# Go 에서 다시 배울 것은 **길이를 어느 쪽으로 세는가**다 — 바이트로 센다.
+universal: common/text-literal
+name: { ko: "글자 값 — 바이트와 rune", en: "Text literal — bytes and runes" }
+token: "\"…\""
+grammars: [go]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cs/text-encoding, cs/bit-and-byte]
+confusions: []
+
+dict:
+  one_liner:
+    ko: >-
+      글자 묶음은 바이트열이다. 길이를 세면 글자 수가 아니라 바이트 수가 나온다.
+    en: >-
+      A run of text is a sequence of bytes, so its length counts bytes, not letters.
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.3|code}}{{pick.3|josa:은,는}} 화면에는 글자로 보이지만 메모리에는 <b>바이트열</b>로 놓입니다. Go 는
+      소스 파일을 UTF-8 로 읽고, 한글 한 글자는 UTF-8 에서 <b>3바이트</b>예요. 그래서 <code>len("가나다")</code> 는 <code>3</code>
+      이 아니라 <code>9</code> 입니다. 대괄호로 하나 꺼내면 글자가 아니라 <b>바이트</b>가 나와요 — <code>"가나다"[0]</code> 은
+      <code>234</code> 입니다. 글자 단위로 도는 길은 하나뿐입니다: <code>range</code> 로 훑으면 rune 이 나옵니다.
+    en: >-
+      The {{pick.3|code}} on line {{site.line}} looks like letters on screen, but in memory it is a
+      <b>sequence of bytes</b>. Go reads source as UTF-8, and one Korean letter takes <b>three
+      bytes</b> there. So <code>len("가나다")</code> is <code>9</code>, not <code>3</code>. Taking one
+      item with brackets gives a <b>byte</b>, not a letter — <code>"가나다"[0]</code> is
+      <code>234</code>. There is one way to walk it by letter: walking it with <code>range</code>
+      yields runes.
+  trace:
+    - ko: >-
+        {{site.line}}행은 이름 {{pick.2|code}}{{pick.2|josa:을,를}} 세운다.
+      en: >-
+        Line {{site.line}} sets up the name {{pick.2|code}}.
+    - ko: >-
+        {{pick.3|code}}{{pick.3|josa:은,는}} 바이트열로 놓인다.
+      en: >-
+        {{pick.3|code}} is laid out as bytes.
+    - ko: >-
+        길이를 물으면 그 바이트 수가 나온다.
+      en: >-
+        Asking for the length gives that byte count.
+
+rule:
+  ko: >-
+    <b>길이는 바이트 수다.</b> 글자 수를 세려면 rune 으로 훑어야 한다.
+  en: >-
+    <b>Length is a byte count.</b> Counting letters means walking it as runes.
+result:
+  label: { ko: "{{site.line}}행의 글자 묶음", en: "the text on line {{site.line}}" }
+  value: "{{pick.2}} = {{pick.3}}"
+  note: { ko: "길이는 바이트로 센다", en: "the length counts bytes" }
+ok: { ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 이제 그 바이트열을 가리킵니다.", en: "{{pick.2|code}} now names that sequence of bytes." }
+payoff:
+  ko: >-
+    이걸 알면 「한글 세 글자인데 길이가 9 로 나온다」가 풀립니다 — 세는 단위가 달랐습니다.
+  en: >-
+    This untangles "three Korean letters, length nine" — the unit being counted was different.
+bridge:
+  ko: >-
+    파이썬 3 의 길이는 글자 수이고 자바는 UTF-16 단위입니다. 셋이 같은 글에 대해 서로 다른 수를 냅니다.
+  en: >-
+    Python 3 counts letters and Java counts UTF-16 units. The three give different numbers for the
+    same text.
+misconceptions:
+  - ko: >-
+      한 글자가 한 칸이다 — UTF-8 에서 한글은 3바이트, 이모지는 4바이트 이상입니다.
+    en: >-
+      One letter is one slot — in UTF-8 a Korean letter takes three bytes and an emoji four or more.
+  - ko: >-
+      대괄호로 꺼내면 글자가 나온다 — <b>바이트</b>가 나옵니다. 숫자로 찍혀요.
+    en: >-
+      Brackets give a letter — they give a <b>byte</b>, and it prints as a number.
+  - ko: >-
+      이어 붙이기 안에 값을 끼워 넣는 표기가 있다 — Go 에는 없습니다. <code>fmt.Sprintf</code> 라는 <b>함수 호출</b>이 그 자리를 합니다.
+    en: >-
+      There is a notation for putting values inside text — Go has none. A <b>function call</b>,
+      <code>fmt.Sprintf</code>, does that job.
+
+point:
+  - q:
+      ko: >-
+        {{site.line}}행에서 <b>글자 묶음의 타입을 적은 낱말</b>을 짚어 보세요.
+      en: >-
+        On line {{site.line}}, point at <b>the word naming the type of the text</b>.
+    hint: { ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다.", en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose." }
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 이름은 무엇이 담기는지를 안 정해요.
+          en: >-
+            {{pick.2|code}} is the <b>name</b>. A name does not decide what kind of value lands in it.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 타입이냐", en: "The sharpest spot — the name or the type" }
+          code:
+            - "var s string = \"가\""
+            - "var b []byte = []byte(\"가\")"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} <b>값</b>입니다. 이 값이 바이트로 놓이는 것은 맞지만, 어떤 종류인지를 적은 것은 앞의 낱말이에요.
+          en: >-
+            {{pick.3|code}} is the <b>value</b>. It is indeed laid out as bytes, but the word in front is
+            what says which kind it is.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값이냐 종류냐", en: "The sharpest spot — the value or the kind" }
+          code:
+            - "\"가\"                 // 값"
+            - "var s string = \"가\"   // 종류가 적혔다"
+
+meaning:
+  - q:
+      ko: >-
+        <code>len("가나다")</code> 는 무엇을 낼까요?
+      en: >-
+        What does <code>len("가나다")</code> give?
+    options:
+      - t:
+          ko: >-
+            9 — UTF-8 에서 한글 한 글자가 3바이트라 셋이면 아홉이다
+          en: >-
+            9 — one Korean letter is three UTF-8 bytes, so three of them make nine
+      - t:
+          ko: >-
+            3 — 글자가 셋이니까
+          en: >-
+            3 — there are three letters
+        diag:
+          t:
+            ko: >-
+              글자 수를 세는 것은 <code>utf8.RuneCountInString</code> 입니다. 길이 함수는 바이트를 세요.
+            en: >-
+              Counting letters is what <code>utf8.RuneCountInString</code> does. The length function counts
+              bytes.
+      - t:
+          ko: >-
+            6 — 한글은 2바이트니까
+          en: >-
+            6 — a Korean letter is two bytes
+        diag:
+          t:
+            ko: >-
+              2바이트는 UTF-16 의 셈입니다. Go 소스는 UTF-8 이라 한글이 3바이트예요.
+            en: >-
+              Two bytes is the UTF-16 count. Go source is UTF-8, where a Korean letter takes three.
+      - t:
+          ko: >-
+            정해져 있지 않다 — 기계마다 다르다
+          en: >-
+            It is not fixed — it varies by machine
+        diag:
+          t:
+            ko: >-
+              기계와 무관합니다. 소스 파일의 인코딩이 UTF-8 로 못 박혀 있어서 어디서 돌려도 같은 수가 나와요.
+            en: >-
+              The machine has nothing to do with it. Source encoding is pinned to UTF-8, so the number is the
+              same anywhere.
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>글자 묶음</b>을 담는 이름을 세웁니다.
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} sets up a name that holds <b>text</b>.
+    hint: { ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다.", en: "Your choice is written into the code at once. Submit to have it marked." }
+    options:
+      - { t: "string", mono: true }
+      - t: "rune"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이건 글자 <b>하나</b>입니다. 여러 글자를 담으려 하면 그 줄에서 멈춰요.
+            en: >-
+              That is <b>one</b> letter. Putting several in stops on that line.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 하나냐 묶음이냐", en: "The sharpest spot — one letter or a run" }
+            code:
+              - "var c rune = '가'"
+              - "var s string = \"가나다\""
+      - t: "byte"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이건 <b>한 바이트</b>입니다. 한글 한 글자도 3바이트라 여기 안 들어가요.
+            en: >-
+              That is <b>one byte</b>. Even a single Korean letter takes three, so it does not fit.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 바이트냐 글자냐", en: "The sharpest spot — a byte or a letter" }
+            code:
+              - "var b byte = 234"
+              - "var s string = \"가\""
+      - t: "int"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이건 <b>수</b> 타입입니다. 글자 묶음을 넣으려 하면 그 줄에서 멈춰요 — 저절로 바꿔 주는 자리가 Go 에는 없습니다.
+            en: >-
+              That is a <b>number</b> type. Putting text in stops on that line — Go converts nothing on its
+              own.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 수냐 글자냐", en: "The sharpest spot — a number or text" }
+            code:
+              - "var n int = 1"
+              - "var s string = \"1\""
+
+why_gate:
+  q:
+    ko: >-
+      Go 는 왜 글자 묶음의 길이를 <b>바이트</b>로 셀까요?
+    en: >-
+      Why does Go count the length of text in <b>bytes</b>?
+  choices:
+    - t:
+        ko: >-
+          메모리에 놓인 그대로를 세는 것이라 셈이 상수 시간이고, 인코딩 해석을 안 해도 되기 때문
+        en: >-
+          Because it counts what is actually laid out in memory, which takes constant time and needs no
+          decoding
+      ok: true
+      fb:
+        ko: >-
+          그 방향입니다. 그럼 글자 수가 필요할 때 무엇을 쓰는지도 적어 보세요.
+        en: >-
+          That is the direction. Add what to use when the letter count is what you need.
+    - t:
+        ko: >-
+          Go 가 한글을 고려하지 않아서
+        en: >-
+          Because Go did not consider non-Latin text
+      ok: false
+      fb:
+        ko: >-
+          고려한 결과입니다. rune 이라는 타입과 <code>range</code> 순회가 그 자리를 위해 따로 있어요.
+        en: >-
+          It is the result of considering it. The rune type and <code>range</code> iteration exist for
+          exactly that.
+    - t:
+        ko: >-
+          바이트와 글자가 어차피 같아서
+        en: >-
+          Because bytes and letters are the same anyway
+      ok: false
+      fb:
+        ko: >-
+          ASCII 안에서만 같습니다. 한글·이모지에서 갈라지고, 그 갈라짐이 이 판의 요점이에요.
+        en: >-
+          They coincide only inside ASCII. They part on Korean and emoji, and that parting is the whole
+          plate.
+
+queries:
+  - { grammars: [go], file: ./text-literal.scm }
+
+examples:
+  - code: "func f() { var host string = \"github.com\" }"
+    expect: { sites: 1, form: vardecl, hole: "string", picks: { 1: "string", 2: "host", 3: "\"github.com\"" } }
+  - code: "func f() { name := \"가나다\" }"
+    expect: { sites: 1, form: short, picks: { 2: "name", 3: "\"가나다\"" } }
+  - code: "func f(s string) { n := len(s) }"
+    expect: { sites: 1, form: len, hole: "len", picks: { 1: "len", 3: "s" } }
+  - code: "func f() { var n int = 3 }"
+    expect: none

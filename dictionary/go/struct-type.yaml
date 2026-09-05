@@ -1,0 +1,217 @@
+schema: 1
+id: go/struct-type
+# 2부 (`go.md` §3 ⑮). 보편형 자리가 **비어 있다** — `common/record-type` 이 후보로
+# 제안됐지만(`go.md` §6) 아직 없다. 만들지 않고 `null` 로 둔다 (README §12 규약 4).
+# 실측 1,406곳/321파일.
+universal: null
+name: { ko: "칸에 이름 붙여 묶기", en: "Struct type" }
+token: "struct"
+grammars: [go]
+framework: null
+essential: true
+difficulty: 2
+prereq: [go/assignment, cs/memory-layout]
+confusions: []
+
+dict:
+  one_liner:
+    ko: >-
+      칸 여럿에 이름을 붙여 값 하나로 묶는다. 대입하면 통째로 복사된다.
+    en: >-
+      Names several slots and binds them into one value; assigning copies all of it.
+  why:
+    ko: >-
+      {{site.line}}행은 {{pick.2|code}} 라는 새 타입을 세우고 그 안에 칸들을 적습니다. 요점은 묶는다는 것이 아니라 이 묶음이 <b>값</b>이라는 데
+      있어요 — 다른 이름에 넣으면 칸이 통째로 복사되고, 함수에 넘겨도 복사본이 갑니다. 그래서 안에서 칸을 고쳐도 밖은 안 바뀌어요. 메모리에도 칸들이 <b>줄지어</b>
+      놓입니다: 자바나 파이썬처럼 어딘가에 흩어진 객체를 가리키는 것이 아니라, 이 값 자체가 칸들의 연속입니다. 원본을 고치거나 큰 것을 안 베끼려면 주소를 명시적으로
+      넘깁니다.
+    en: >-
+      Line {{site.line}} sets up a new type named {{pick.2|code}} and lists its slots. The point is
+      not the grouping but that the group is a <b>value</b> — putting it in another name copies every
+      slot, and handing it to a function hands a copy. So changing a slot inside changes nothing
+      outside. In memory the slots sit <b>in a row</b>: this is not a reference to an object scattered
+      somewhere, as in Java or Python; the value itself is that run of slots. To change the original,
+      or to avoid copying something large, the address is handed over explicitly.
+  trace:
+    - ko: >-
+        {{site.line}}행은 새 타입 {{pick.2|code}}{{pick.2|josa:을,를}} 세운다.
+      en: >-
+        Line {{site.line}} sets up the new type {{pick.2|code}}.
+    - ko: >-
+        {{pick.3|code}} 안의 칸들이 그 값의 전부다.
+      en: >-
+        The slots inside {{pick.3|code}} are all there is to the value.
+    - ko: >-
+        이 타입의 값을 옮기면 칸이 통째로 복사된다.
+      en: >-
+        Moving a value of this type copies every slot.
+
+rule:
+  ko: >-
+    <b>이 묶음은 값이다.</b> 옮기면 복사되고, 원본을 고치려면 주소를 넘긴다.
+  en: >-
+    <b>This group is a value.</b> Moving it copies it; changing the original means handing over the
+    address.
+result:
+  label: { ko: "{{site.line}}행이 세운 타입", en: "the type set up on line {{site.line}}" }
+  value: "{{pick.2}}"
+  note: { ko: "옮기면 통째로 복사된다", en: "moving it copies the whole thing" }
+ok: { ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 이제 칸들을 묶은 하나의 값 타입입니다.", en: "{{pick.2|code}} is now one value type made of those slots." }
+payoff:
+  ko: >-
+    이걸 알면 「함수에 넘겨서 고쳤는데 밖에서 그대로다」가 풀립니다 — 복사본을 고쳤습니다.
+  en: >-
+    This untangles "I handed it over, changed it, and nothing changed outside" — the copy was
+    changed.
+bridge:
+  ko: >-
+    자바에서 <code>class</code> 로 만든 것은 힙에 살고 이름은 그것을 가리킵니다. Go 의 이 묶음은 이름 자리에 <b>그대로</b> 놓여요.
+  en: >-
+    In Java a <code>class</code> instance lives on the heap and the name points at it. In Go this
+    group sits <b>right where the name is</b>.
+misconceptions:
+  - ko: >-
+      다른 이름에 넣으면 같은 것을 가리킨다 — <b>복사</b>됩니다. 한쪽을 고쳐도 다른 쪽은 그대로예요.
+    en: >-
+      Putting it in another name shares it — it is <b>copied</b>. Changing one leaves the other alone.
+  - ko: >-
+      칸 이름을 소문자로 지어도 다른 패키지에서 보인다 — 안 보입니다. 첫 글자가 공개를 정해요.
+    en: >-
+      A lowercase slot name is still visible from another package — it is not. The first letter
+      decides.
+
+point:
+  - q:
+      ko: >-
+        {{site.line}}행에서 <b>새로 세워지는 타입의 이름</b>을 짚어 보세요.
+      en: >-
+        On line {{site.line}}, point at <b>the name of the type being set up</b>.
+    hint: { ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다.", en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose." }
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: >-
+            {{pick.1|code}}{{pick.1|josa:은,는}} 묶음의 <b>종류</b>를 말하는 낱말입니다. 이름은 그 앞에 있어요.
+          en: >-
+            {{pick.1|code}} is the word naming the <b>kind</b> of group. The name stands before it.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 종류냐 이름이냐", en: "The sharpest spot — the kind or the name" }
+          code:
+            - "struct                    // 종류"
+            - "type Options struct { }   // 이름은 Options"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} <b>칸들</b>입니다. 칸이 타입의 내용이지 타입의 이름은 아니에요.
+          en: >-
+            {{pick.3|code}} is the <b>slots</b>. The slots are the type's contents, not its name.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 내용이냐 이름이냐", en: "The sharpest spot — the contents or the name" }
+          code:
+            - "{ Web bool }              // 칸"
+            - "type Options struct { }   // 이름"
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>칸 여럿을 값 하나로</b> 묶는 타입을 세웁니다.
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} sets up a type that binds <b>several slots
+        into one value</b>.
+    hint: { ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다.", en: "Your choice is written into the code at once. Submit to have it marked." }
+    options:
+      - { t: "struct", mono: true }
+      - t: "interface"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 낱말은 <b>메서드 목록</b>을 적습니다. 칸을 담지 않고, 무엇을 할 수 있는지만 말해요.
+            en: >-
+              That word lists <b>methods</b>. It holds no slots and only says what can be done.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 담나 요구하나", en: "The sharpest spot — holding or requiring" }
+            code:
+              - "type O struct { Web bool }"
+              - "type R interface { Read() }"
+      - t: "map"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 낱말은 <b>열쇠로 찾는 묶음</b>을 만듭니다. 칸 이름이 미리 정해지지 않고 실행 때 늘어나요.
+            en: >-
+              That word makes a <b>lookup by key</b>. The slot names are not fixed in advance and grow at run
+              time.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 칸이 정해져 있나", en: "The sharpest spot — are the slots fixed" }
+            code:
+              - "type O struct { Web bool }"
+              - "m := map[string]bool{}"
+      - t: "func"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 낱말은 <b>부를 수 있는 것</b>을 만듭니다. 값을 담는 자리가 아니에요.
+            en: >-
+              That word makes something <b>callable</b>. It is not a place to hold values.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 담나 부르나", en: "The sharpest spot — holding or calling" }
+            code:
+              - "type O struct { Web bool }"
+              - "func run() { }"
+
+why_gate:
+  q:
+    ko: >-
+      Go 는 왜 이 묶음을 <b>가리키는 것이 아니라 값</b>으로 두었을까요?
+    en: >-
+      Why did Go make this group a <b>value</b> rather than a reference?
+  choices:
+    - t:
+        ko: >-
+          칸들이 메모리에 줄지어 놓여 어디에 무엇이 있는지가 정해지고, 무엇이 언제 복사되는지가 코드에 보이기 때문
+        en: >-
+          Because the slots sit in a row so their placement is settled, and what is copied when becomes
+          visible in the code
+      ok: true
+      fb:
+        ko: >-
+          그 방향입니다. 그럼 큰 묶음에서 그 결정이 무엇을 비싸게 하는지도 적어 보세요.
+        en: >-
+          That is the direction. Add what that decision makes expensive for a large group.
+    - t:
+        ko: >-
+          가비지 컬렉터를 안 쓰려고
+        en: >-
+          To avoid the garbage collector
+      ok: false
+      fb:
+        ko: >-
+          Go 에는 가비지 컬렉터가 있습니다. 이 묶음도 주소를 만들면 힙에 갈 수 있어요.
+        en: >-
+          Go has a garbage collector. This group can live on the heap too once its address is taken.
+    - t:
+        ko: >-
+          가리키는 방법이 없어서
+        en: >-
+          Because there is no way to reference it
+      ok: false
+      fb:
+        ko: >-
+          있습니다. 주소를 만들면 되고, 실코드에서 그렇게 많이 씁니다.
+        en: >-
+          There is. Taking its address does it, and real code does exactly that a great deal.
+
+queries:
+  - { grammars: [go], file: ./struct-type.scm }
+
+examples:
+  - code: "type Options struct { Web bool }"
+    expect: { sites: 1, form: decl, hole: "struct", picks: { 1: "struct", 2: "Options", 3: "{ Web bool }" } }
+  - code: "func f() { o := Options{} }"
+    expect: { sites: 1, form: lit, picks: { 2: "Options", 3: "{}" } }
+  - code: "type Reader interface { Read() }"
+    expect: none

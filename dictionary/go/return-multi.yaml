@@ -1,0 +1,225 @@
+schema: 1
+id: go/return-multi
+# 1부 (`go.md` §2 ⑧). 예외가 없는 언어라 **실패가 반환값으로 온다**.
+#
+# 쿼리는 값이 **정확히 둘**인 것만 잡는다 — 하나짜리 `return nil` 은 `go/nil` 의
+# 자리다. 실측 1,713곳/205파일.
+universal: common/return-value
+name: { ko: "값 여럿 돌려주기", en: "Returning several values" }
+token: "return"
+grammars: [go]
+framework: null
+essential: true
+difficulty: 2
+prereq: [go/func-declaration]
+confusions: []
+
+dict:
+  one_liner:
+    ko: >-
+      값을 둘 이상 돌려준다. 마지막 자리는 실패를 담는 자리로 쓰인다.
+    en: >-
+      It gives back two or more values, and the last slot carries the failure.
+  why:
+    ko: >-
+      Go 에는 <b>예외가 없습니다</b>. 함수가 잘못될 수 있으면 잘못을 던지지 않고 {{site.line}}행처럼 <b>값으로 돌려줘요</b> — 앞자리는 결과, 마지막
+      자리는 잘못입니다. 그래서 부르는 쪽은 값 둘을 받고, 잘못이 비어 있는지 보고 나서 결과를 씁니다. 이 규약의 값은 <b>잘못이 흐름을 끊지 않는다</b>는 데 있어요 —
+      어디서 어떻게 처리할지가 부른 자리에 그대로 적힙니다. 대가는 상용구입니다: 2023년 Go 개발자 설문에서 응답자의 43%가 「잘못 검사 상용구가 지겹다」고, 19%가
+      「통째로 무시하기 쉽다」고 답했습니다.
+    en: >-
+      Go has <b>no exceptions</b>. When something can go awry, nothing is thrown — it comes back as a
+      <b>value</b>, as on line {{site.line}}: the first slots carry the result and the last one
+      carries the fault. So the caller receives both, weighs whether the fault slot is empty, and only
+      then uses the result. What the convention buys is that <b>a fault does not cut the flow</b> —
+      where and how it is handled is written at the call site. What it costs is boilerplate: in the
+      2023 Go developer survey 43% of respondents said the checking boilerplate is tedious and 19%
+      that it is easy to ignore entirely.
+  trace:
+    - ko: >-
+        {{site.line}}행은 {{pick.2|code}}{{pick.2|josa:을,를}} 첫 자리에 놓는다.
+      en: >-
+        Line {{site.line}} puts {{pick.2|code}} in the first slot.
+    - ko: >-
+        {{pick.3|code}}{{pick.3|josa:은,는}} 마지막 자리에 놓인다.
+      en: >-
+        {{pick.3|code}} goes in the last slot.
+    - ko: >-
+        부른 자리는 두 값을 한꺼번에 받는다.
+      en: >-
+        The call site receives both at once.
+
+rule:
+  ko: >-
+    <b>마지막 자리가 잘못이다.</b> 앞자리 결과는 마지막 자리를 보고 나서 쓴다.
+  en: >-
+    <b>The last slot is the fault.</b> Use the earlier result only after weighing it.
+result:
+  label: { ko: "{{site.line}}행이 돌려주는 것", en: "what line {{site.line}} gives back" }
+  value: "{{pick.2}}, {{pick.3}}"
+  note: { ko: "둘이 한꺼번에 간다", en: "both travel together" }
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}} 둘이 한꺼번에 돌아갑니다.
+  en: >-
+    {{pick.2|code}} and {{pick.3|code}} go back together.
+payoff:
+  ko: >-
+    이걸 알면 「이 함수는 왜 값을 둘이나 주나」가 풀립니다 — 하나는 결과, 하나는 잘못입니다.
+  en: >-
+    This untangles "why does this give me two values" — one is the result, one is the fault.
+bridge:
+  ko: >-
+    자바·파이썬은 잘못을 <b>던져서</b> 흐름을 끊습니다. Go 는 값으로 돌려주고 흐름을 안 끊어요 — 대신 부르는 쪽이 매번 봐야 합니다.
+  en: >-
+    Java and Python <b>throw</b> and cut the flow. Go hands the fault back as a value and cuts
+    nothing — at the price of weighing it at every call.
+misconceptions:
+  - ko: >-
+      앞자리 값은 언제나 쓸 수 있다 — 마지막 자리가 비어 있지 않으면 앞자리는 대개 제로 값입니다.
+    en: >-
+      The earlier value is always usable — when the last slot is not empty the earlier one is usually
+      the zero value.
+  - ko: >-
+      마지막 자리를 안 보면 컴파일이 멈춘다 — 안 멈춥니다. 그래서 조용히 지나갈 수 있어요.
+    en: >-
+      Ignoring the last slot stops the compiler — it does not, which is why it can slip by quietly.
+  - ko: >-
+      돌려주는 값에 이름을 붙이면 자동으로 채워진다 — 이름은 제로 값으로 시작할 뿐이고 채우는 것은 몸통입니다.
+    en: >-
+      Naming the results fills them automatically — naming only starts them at the zero value; the
+      body fills them.
+
+point:
+  - q:
+      ko: >-
+        {{site.line}}행에서 <b>잘못을 담는 마지막 자리</b>를 짚어 보세요.
+      en: >-
+        On line {{site.line}}, point at <b>the last slot, the one carrying the fault</b>.
+    hint: { ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다.", en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose." }
+    answer: pick.3
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} <b>결과</b> 자리입니다. 잘못이 있으면 이 자리는 대개 제로 값이에요.
+          en: >-
+            {{pick.2|code}} is the <b>result</b> slot. When something went awry this slot is usually the
+            zero value.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 결과냐 잘못이냐", en: "The sharpest spot — the result or the fault" }
+          code:
+            - "return v, nil     // 결과가 앞"
+            - "return 0, e       // 잘못이 뒤"
+      pick.1:
+        t:
+          ko: >-
+            {{pick.1|code}}{{pick.1|josa:은,는}} 돌려주기를 <b>여는 낱말</b>입니다. 자리를 가리키지는 않아요.
+          en: >-
+            {{pick.1|code}} is the word that <b>opens</b> the giving back. It names no slot.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 여는 낱말이냐 자리냐", en: "The sharpest spot — the opening word or the slot" }
+          code:
+            - "return            // 여는 낱말"
+            - "v, e              // 두 자리"
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행은 값 둘을 <b>부른 자리로 돌려보냅니다</b>.
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} <b>sends two values back</b> to the caller.
+    hint: { ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다.", en: "Your choice is written into the code at once. Submit to have it marked." }
+    options:
+      - { t: "return", mono: true }
+      - t: "break"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 낱말은 <b>되풀이나 갈래를 빠져나갈</b> 뿐 값을 못 나릅니다. 함수는 그대로 이어져요.
+            en: >-
+              That word only <b>leaves a loop or a branch</b> and carries no value. The function keeps going.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값을 나르나 못 나르나", en: "The sharpest spot — carrying a value or not" }
+            code:
+              - "return v, e     // 값 둘이 간다"
+              - "break           // 아무것도 안 간다"
+      - t: "defer"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 낱말은 부르기를 <b>함수 끝으로 미룹니다</b>. 값을 돌려보내는 것이 아니에요.
+            en: >-
+              That word <b>postpones a call to the end of the function</b>. It sends nothing back.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 미루나 돌려보내나", en: "The sharpest spot — postponing or sending back" }
+            code:
+              - "return v, e"
+              - "defer f.Close()"
+      - t: "continue"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 낱말은 <b>다음 바퀴로</b> 넘어갑니다. 되풀이 안에서만 쓰이고 값을 안 날라요.
+            en: >-
+              That word jumps to the <b>next lap</b>. It lives only inside a loop and carries no value.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 되풀이 안이냐 함수 끝이냐", en: "The sharpest spot — inside a loop or at the end of a function" }
+            code:
+              - "return v, e"
+              - "continue"
+
+why_gate:
+  q:
+    ko: >-
+      Go 는 왜 잘못을 <b>던지지 않고 값으로</b> 돌려줄까요?
+    en: >-
+      Why does Go hand a fault back <b>as a value</b> instead of throwing it?
+  choices:
+    - t:
+        ko: >-
+          잘못이 흐름을 끊지 않아, 어디서 어떻게 다룰지가 부른 자리에 그대로 적히기 때문
+        en: >-
+          Because a fault does not cut the flow, so where and how it is handled is written at the call
+          site
+      ok: true
+      fb:
+        ko: >-
+          그 방향입니다. 그럼 그 대가로 무엇이 늘어나는지도 한 줄 적어 보세요.
+        en: >-
+          That is the direction. Add a line on what grows as the price.
+    - t:
+        ko: >-
+          던지는 것이 느려서
+        en: >-
+          Because throwing is slow
+      ok: false
+      fb:
+        ko: >-
+          속도가 이유는 아닙니다. 잘못이 보이는 자리를 바꾼 것이 요점이에요.
+        en: >-
+          Speed is not the reason. The point is where a fault becomes visible.
+    - t:
+        ko: >-
+          잘못이 드물어서
+        en: >-
+          Because faults are rare
+      ok: false
+      fb:
+        ko: >-
+          드물지 않습니다. 표본 리포에서 잘못 검사가 `if` 의 30%예요.
+        en: >-
+          They are not rare. In the sample repository the fault check is 30% of all conditionals.
+
+queries:
+  - { grammars: [go], file: ./return-multi.scm }
+
+examples:
+  - code: "func f(v int, e error) (int, error) { return v, e }"
+    expect: { sites: 1, form: two, hole: "return", picks: { 1: "return", 2: "v", 3: "e" } }
+  - code: "func f() (int, error) { return 0, nil }"
+    expect: { sites: 1, form: two, hole: "return", picks: { 1: "return", 2: "0", 3: "nil" } }
+  - code: "func f() error { return nil }"
+    expect: none

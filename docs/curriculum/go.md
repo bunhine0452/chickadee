@@ -609,3 +609,136 @@ tree-sitter 쿼리로 잡을 수 있는지. 타입 정보가 필요해 보이며
 
 800줄 상한을 넘어 [`go-learning.md`](./go-learning.md) 로 분리했다 — 기계 한 문장 · 교재 다섯의 순서 실측 ·
 좁혀야 통과하는 연습 다섯 · 고루틴 비결정이 `table` 의 배치인 이유 · 3부 0판이라는 구멍 · 바꿀 것 diff.
+
+---
+
+## §12 실물이 된 것 — 실측 (2026-09-06)
+
+이 절은 조사가 아니라 **`dictionary/go/` 를 센 값**이다. 위의 §0~§10 은 사전을 쓰기 전에
+적은 것이고, 여기는 쓰고 나서 잰 것이다. 어긋난 자리는 그대로 적는다.
+
+### §12.1 장수와 줄 수
+
+| 부 | 장 | 무엇 |
+|---|---:|---|
+| 0부 값과 식 | **8** | 공통 축 여덟 (§0.1 0-1~0-8). 어긋남 판을 따로 안 세웠다 |
+| 1부 흐름과 묶기 | **5** | §2 바닥 여덟 중 0부로 안 올라간 것 |
+| 2부 | **20** | §3 중심 남은 열둘 + §4 심화 여덟 |
+| 3부 | **0** | 프레임워크 네임스페이스가 없다 (§0.5) |
+| **합** | **33** | |
+
+| 항목 | 값 |
+|---|---:|
+| 개념 YAML | **33장 · 7,807줄** (한 장 평균 **237줄**) |
+| `_lang.yaml` | 115줄 |
+| `.scm` | **35장 · 609줄** (개념 33 + 시스템 둘) |
+| 골든 | **112** — 양성 **79** · 음성(`expect: none`) **33** |
+
+한 장 237줄은 README §11 의 첫 물결 실측(213줄)보다 11% 길다. `meaning:` 카드를 0부 여덟과
+슬라이스·`defer` 에 넣은 것이 그 차이다.
+
+### §12.2 개념 사용처 — `cli/cli` 429파일
+
+**사용자 리포에 `.go` 가 0장이다**(README §10). 아래는 전부 공개 표본 `cli/cli` 의
+`pkg/**` 비테스트 429파일(87,907줄)이고, 재는 방법은 §1 의 텍스트 grep 이 아니라
+**`chickadee_parse::{compile, scan}` 으로 `@site` 캡처를 센 것**이다(`crates/parse/tests/`
+에 임시 시험을 두고 쟀다가 지웠다). `in_error` 인 캡처는 뺐다.
+
+| 개념 | 곳 | 파일 | | 개념 | 곳 | 파일 |
+|---|---:|---:|---|---|---:|---:|
+| `selector` | **28,854** | 423 | | `error-wrap` | 808 | 191 |
+| `call-expression` | **14,298** | 419 | | `method-receiver` | 800 | 135 |
+| `short-var-decl` | 4,201 | 385 | | `text-literal` | 795 | 221 |
+| `if-statement` | 4,017 | 339 | | `func-declaration` | 756 | 248 |
+| `pointer` | 3,616 | 378 | | `range-loop` | 702 | 196 |
+| `package-visibility` | 3,341 | 258 | | `boolean-literal` | 603 | 186 |
+| `assignment` | 3,054 | 323 | | `nil-interface` | 495 | 247 |
+| `error-check` | **2,778** | **324 (76%)** | | `append` | 484 | 134 |
+| `equality` | 2,278 | 308 | | `slice` | 430 | 164 |
+| `return-multi` | 1,713 | 205 | | `type-conversion` | 280 | 118 |
+| `struct-type` | 1,406 | 321 | | `defer` | 188 | 98 |
+| `nil` | 862 | 276 | | `map-type` | 184 | 81 |
+| `func-literal` | 167 | 80 | | `integer-literal` | 100 | 58 |
+| `interface-implicit` | 93 | 69 | | `operator-precedence` | 73 | 37 |
+| `channel-select` | 73 | 19 | | `for-loop` | 42 | 27 |
+| `goroutine` | 39 | 19 | | `generics` | 13 | 6 |
+| `float-literal` | **3** | **3** | | | | |
+
+**0곳인 개념은 없다.** 가장 얇은 것이 `go/float-literal` 3곳/3파일이고, 그것도
+`thin_threshold`(min_sites 3 · min_files 2)를 간신히 넘는다.
+
+**§1 의 grep 과 어긋난 자리 넷.**
+
+| 개념 | §1 grep | 쿼리 실측 | 왜 |
+|---|---:|---:|---|
+| `error-check` | 2,284 | **2,778** | 쿼리가 `if v, err := f(); err != nil` 과 `…Err` 로 끝나는 이름까지 잡는다 |
+| `defer` | 191 | 188 | grep 은 문자열·주석 안의 낱말도 셌다 |
+| `goroutine` | 29 (`go func`) | 39 | 쿼리가 `go f()`·`go x.M()` 도 잡는다 |
+| `generics` | 10 | 13 | grep 은 `[T ` 라는 글자만 봤다 |
+
+**§0.4 가 「못 쟀다」고 적은 것은 그대로 못 쟀다** — 이 기계에 Go 툴체인이 여전히 없다
+(`which go` → not found, 2026-09-06). 위 수치는 **파싱**한 것이고 **실행**한 것이 아니다.
+
+### §12.3 파서 ERROR 비율 — 429파일 중 **7 (1.6%)**
+
+`00 §6-2` 의 셈대로 실코드를 파싱해 ERROR·MISSING 노드가 든 파일을 셌다.
+
+| 표본 | 파일 | ERROR 노드가 든 파일 | `quality: poor` |
+|---|---:|---:|---:|
+| `cli/cli` 앞 20파일 | 20 | **0 (0%)** | 0 |
+| `cli/cli` 전량 | 429 | **7 (1.6%)** | **0** |
+
+**원인을 하나로 좁혔다.** 일곱 파일의 ERROR 노드 텍스트가 전부
+`githubv4.String`·`githubv4.Boolean`·`)` 였고, 최소 재현은 **`new(pkg.T(x))` — `new` 의
+인자 자리에 든 타입 변환**이다(직접 파싱해 ERROR 1개 확인). 같은 파일의
+`(*githubv4.String)(nil)` 은 단독으로도 복합 리터럴 안에서도 ERROR 를 안 낸다.
+`quality` 는 429파일 전부 `ok` 라 인제스트에서 걸러지지 않는다.
+
+§8 이 적은 더 큰 위험은 그대로다 — **세미콜론 자동 삽입은 ERROR 를 안 낸다.** 여는 중괄호를
+다음 줄로 내린 파일은 다른 프로그램이 되는데 `parse_quality` 가 `ok` 를 낸다. ERROR 비율은
+「파서가 이 언어를 읽을 수 있나」의 근거이지 「이 파일이 옳은가」의 근거가 아니다.
+
+### §12.4 문서와 어긋나 바꾼 자리 여섯
+
+| # | 문서가 적은 것 | 실물 | 왜 |
+|---|---|---|---|
+| ① | `essential` **25** (§0.5 — §4 심화 여덟은 밖) | **33** | 부 배치가 `essential` 전량과 한 글자도 어긋나면 안 되는데(`parts/index.test.ts`) §4 여덟이 2부에 든다. 0장 적재량이 24 → 32 가 되지만 상한은 D184 로 폐지됐다 |
+| ② | 0-1·0-2 의 `universal` 은 `common/number-literal` (§0.2) | `common/integer-literal` · `common/float-literal` | D187 ④ 가 그 보편형을 쪼갰고 옛 것에 `superseded_by` 를 달았다. README §8 표가 정본이다 |
+| ③ | §7 의 `cs/` id 열하나 | 실제 45장의 id 로 옮겼다 | 문서의 `cs/value-and-reference`·`cs/contiguous-array`·`cs/integer-width`·`cs/hashing-unordered`·`cs/compile-and-link`·`cs/concurrency-model`·`cs/data-race` 일곱이 **사전에 없는 이름**이다. 각각 `value-vs-reference`·`contiguous-vs-linked`·`integer-overflow`+`bit-and-byte`·`hash-table`·`compile-and-run`·`concurrency-vs-parallelism`·`race-condition` 으로 걸었다 |
+| ④ | `alternatives` 의 gap 이 `go/range-loop` (§6) | gap 이 **`go/for-loop`** | 실측이 반대다 — range 훑기 702곳/196파일, 세 칸짜리 되풀이 42곳/27파일. 구멍이 나는 쪽은 세 칸짜리다. 나머지 셋(`error-wrap`·`error-check`·`channel-select`)은 「대신 쓴 표기」가 개념이 아니라 관용구·라이브러리라 가리킬 id 가 없어 안 넣었다 |
+| ⑤ | §4 심화의 차례 ㉕~㉜ | goroutine 을 nil-interface 뒤로, error-wrap 을 그 뒤로 옮겼다 | 문서 차례대로 두면 끝에 goroutine(39곳)·channel-select(73곳)·generics(13곳) 셋이 잇달아 얇아져 「얇은 판을 셋 이상 잇대지 않는다」를 어긴다 |
+| ⑥ | `go/nil-interface` 는 「쿼리로 못 잡음」 (§4 밀도 열) | 쿼리가 **있다** — 495곳/247파일 | 사고 자체((타입, 값) 둘)는 타입 정보라 여전히 못 잡는다. 대신 **그 사고가 일어날 수 있는 자리**(`error` 를 돌려주는 함수 · `error` 를 받는 인자)를 잡았다. §10 「확인 못 함」 ③ 은 그대로 남는다 |
+
+### §12.5 「같은 세 줄이 다섯 번」을 어떻게 피했나 (README §7 ②)
+
+문서가 예상한 문제는 `if`·`comparison`·`nil`·`return-multi`·`error-check` 다섯의 첫 노출이
+전부 `if err != nil` 이 되는 것이었다. **쿼리를 좁혀 넷을 갈랐다.**
+
+| 개념 | 무엇을 뺐나 | 남은 사용처 |
+|---|---|---:|
+| `go/error-check` | — (이 줄을 **전담**한다) | 2,778 |
+| `go/if-statement` | 조건에 `nil` 이 든 것 (`#not-match?`) | 4,017 |
+| `go/equality` | 양쪽 어디든 `nil` 인 것 (`#not-eq?`) | 2,278 |
+| `go/nil` | 견주기 전부, 그리고 값 둘짜리 `return` | 862 |
+| `go/return-multi` | 값이 **정확히 둘**인 것만 잡는다 | 1,713 |
+
+눈으로 확인했다 — `equality` 앞 20곳·`if-statement` 앞 12곳·`error-check` 앞 8곳·
+`nil` 앞 10곳에 겹치는 줄이 하나도 없다. `if` 7,669개 중 `error-check` 2,778 + `if-statement`
+4,017 = 6,795 이고, 차이 874 는 조건에 `nil` 이 들었는데 이름이 `err` 계열이 아닌 것들이다
+(두 개념 어디에도 안 든다 — 의도한 손실이다).
+
+**못 피한 겹침 둘은 남는다.** ⓐ `go/pointer` 의 칸 형태와 `go/package-visibility` 는 대문자로
+시작하는 포인터 칸(`IO *iostreams.IOStreams`)에서 같은 줄을 쓴다. ⓑ `go/func-declaration` 과
+`go/nil-interface` 는 `error` 하나를 돌려주는 함수에서 겹칠 뻔했고, `func-declaration` 쪽에서
+`#not-eq? "error"` 로 뺐다(838곳이 빠져 1,594 → 756).
+
+### §12.6 안 만든 것과 이유
+
+| 무엇 | 왜 |
+|---|---|
+| `common/key-value-map` · `common/record-type` (§6 신규 제안) | README §12 규약 4 — 새 `common/` 은 문서가 만들지 않는다. `go/map-type`·`go/struct-type` 은 `universal: null` 로 두고 후보로 보고했다 |
+| `common/type-cast` (README §9 「아직 비어 있는 것」) | 같은 이유. `go/type-conversion` 이 `universal: null` 이다 |
+| `go/nil-interface` 의 진짜 쿼리 | 타입 정보가 필요하다. §10 「확인 못 함」 ③ 그대로 |
+| `_imports.scm` 의 라우트 패턴 | Go 에는 애너테이션이 없고 경로가 `mux.HandleFunc("/x", h)` 처럼 그냥 인자라 HTTP 동사를 문법에서 못 읽는다. 억지로 잡으면 아무 문자열 인자나 라우트가 된다 |
+| 3부 | 프레임워크 네임스페이스 후보가 없다 (§0.5 · `go-learning.md` §11.5.3) |
+| `bits` 형식의 판 (§0.2) | I1 최종본이 `bits`·`predict` 를 내렸다(README §12 규약 6). 0-1 은 `blank`+`meaning` 으로, 0-2 는 `meaning` 으로 갔다 |

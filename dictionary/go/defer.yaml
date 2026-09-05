@@ -1,0 +1,277 @@
+schema: 1
+id: go/defer
+# 2부 · §4 심화 (`go.md` §4 ㉕). 실측 188곳/98파일.
+#
+# **제목이 「나중에 할 일 미뤄 두기」가 아니다** (D187 ⑰ · `go-learning.md` §11.4.3).
+# 미루기는 Swift 의 같은 낱말과 C# 의 `finally` 에도 있어 T1(이식)에서 탈락한다.
+# Go 만의 것은 **인자 평가 시점**이다 — Swift 의 것은 블록이라 인자를 안 받고,
+# 그래서 그쪽에는 이 물음이 성립하지 않는다.
+universal: null
+name: { ko: "인자는 지금 계산된다", en: "Defer evaluates its arguments now" }
+token: "defer"
+grammars: [go]
+framework: null
+essential: true
+difficulty: 3
+prereq: [go/call-expression, go/func-declaration, cs/call-stack]
+confusions: []
+
+dict:
+  one_liner:
+    ko: >-
+      부르는 일만 함수 끝으로 미룬다. 인자는 이 줄에서 계산돼 저장된다.
+    en: >-
+      Only the call is postponed to the end; the arguments are worked out here.
+  why:
+    ko: >-
+      {{site.line}}행은 {{pick.2|code}} 부르기를 이 함수가 끝날 때까지 미룹니다. 여기서 미뤄지는 것은 <b>부르는 일뿐</b>이에요 — 괄호 안의 인자는
+      이 줄에서 그대로 계산돼 저장됩니다. 그래서 아래에서 그 이름의 값을 바꿔도 미뤄 둔 부르기는 <b>옛 값</b>을 씁니다. 이것이 이 판이 「미루기」가 아니라 「지금
+      계산」인 이유예요. 그리고 미뤄 둔 것이 여럿이면 <b>역순</b>으로 돕니다 — 마지막에 적은 것이 먼저 돌아요. 지금 계산되는 것을 피하려면 <code>defer
+      func(){ … }()</code> 로 감싸 블록이 이름을 붙잡게 합니다.
+    en: >-
+      Line {{site.line}} postpones calling {{pick.2|code}} until this function ends. What is postponed
+      is <b>only the calling</b> — the arguments in the parentheses are worked out right here and
+      stored. So changing that name's value further down leaves the postponed call using the <b>old
+      value</b>. That is why this plate is "worked out now" rather than "postponed". Several postponed
+      calls run in <b>reverse order</b> — the last written runs first. To escape the now, wrap it as
+      <code>defer func(){ … }()</code> and let the block capture the name.
+  trace:
+    - ko: >-
+        {{site.line}}행에서 {{pick.3|code}} 안의 값이 <b>지금</b> 계산된다.
+      en: >-
+        The values inside {{pick.3|code}} are worked out <b>now</b>, on line {{site.line}}.
+    - ko: >-
+        {{pick.2|code}} 부르기만 함수 끝으로 미뤄진다.
+      en: >-
+        Only the calling of {{pick.2|code}} is postponed to the end of the function.
+    - ko: >-
+        미뤄 둔 것이 여럿이면 역순으로 돈다.
+      en: >-
+        Several postponed calls run in reverse order.
+
+rule:
+  ko: >-
+    <b>인자는 지금, 부르기는 나중.</b> 여럿이면 역순으로 돈다.
+  en: >-
+    <b>Arguments now, the call later.</b> Several of them run in reverse order.
+result:
+  label: { ko: "{{site.line}}행이 미룬 것", en: "what line {{site.line}} postpones" }
+  value: "{{pick.2}}{{pick.3}}"
+  note: { ko: "인자는 이미 계산됐다", en: "the arguments are already worked out" }
+ok:
+  ko: >-
+    {{pick.2|code}} 부르기가 함수 끝으로 미뤄졌고, 인자는 이미 계산됐습니다.
+  en: >-
+    Calling {{pick.2|code}} is postponed to the end, and its arguments are already worked out.
+payoff:
+  ko: >-
+    이걸 알면 「미뤄 둔 줄이 옛 값을 찍는다」가 풀립니다 — 인자가 그 줄에서 굳었습니다.
+  en: >-
+    This untangles "the postponed line printed the old value" — the argument froze on that line.
+bridge:
+  ko: >-
+    Swift 의 같은 낱말은 <b>블록</b>이라 인자를 안 받고 이름을 붙잡습니다 — 같은 물음의 답이 반대예요.
+  en: >-
+    The same word in Swift takes a <b>block</b>, receives no arguments and captures the name — the
+    same question, the opposite answer.
+misconceptions:
+  - ko: >-
+      인자도 함수 끝에 계산된다 — <b>이 줄에서</b> 계산돼 저장됩니다.
+    en: >-
+      The arguments are worked out at the end too — they are worked out <b>on this line</b> and
+      stored.
+  - ko: >-
+      미뤄 둔 것이 적은 순서대로 돈다 — <b>역순</b>입니다. 마지막에 적은 것이 먼저 돌아요.
+    en: >-
+      Postponed calls run in the order written — in <b>reverse</b>. The last written runs first.
+  - ko: >-
+      되풀이 안에 적으면 한 바퀴 끝에 돈다 — <b>함수</b>가 끝날 때 돕니다. 그래서 되풀이 안의 미루기는 쌓여요.
+    en: >-
+      Written inside a loop it runs at the end of a lap — it runs when the <b>function</b> ends, so
+      postponed calls pile up.
+
+point:
+  - q:
+      ko: >-
+        {{site.line}}행에서 <b>미뤄질 부르기의 이름</b>을 짚어 보세요.
+      en: >-
+        On line {{site.line}}, point at <b>the name of the call being postponed</b>.
+    hint: { ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다.", en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose." }
+    answer: pick.2
+    diag:
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} <b>인자 자리</b>입니다. 이 안의 값은 미뤄지지 않고 지금 계산돼요.
+          en: >-
+            {{pick.3|code}} is the <b>argument slot</b>. What is inside is not postponed; it is worked out
+            now.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 미뤄지나 지금이냐", en: "The sharpest spot — postponed or now" }
+          code:
+            - "defer p(i)        // i 는 지금"
+            - "defer p(i)        // p 는 나중"
+      pick.4:
+        t:
+          ko: >-
+            {{pick.4|code}}{{pick.4|josa:은,는}} 점 <b>왼쪽</b>입니다. 미뤄지는 부르기의 이름은 점 오른쪽이에요.
+          en: >-
+            {{pick.4|code}} stands <b>left of the dot</b>. The postponed call's name is to the right.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 점 왼쪽이냐 오른쪽이냐", en: "The sharpest spot — left of the dot or right" }
+          code:
+            - "f                 // 점 왼쪽"
+            - "defer f.Close()   // 미뤄지는 것은 Close"
+
+meaning:
+  - q:
+      ko: >-
+        <code>i := 0; defer p(i); i = 9</code> 를 지나 함수가 끝나면 무엇이 찍힐까요?
+      en: >-
+        After <code>i := 0; defer p(i); i = 9</code> and the function ends, what is printed?
+    options:
+      - t:
+          ko: >-
+            0 — 인자가 미루는 줄에서 이미 계산돼 저장됐다
+          en: >-
+            0 — the argument was worked out and stored on the postponing line
+      - t:
+          ko: >-
+            9 — 함수가 끝날 때 이름을 다시 읽는다
+          en: >-
+            9 — the name is read again when the function ends
+        diag:
+          t:
+            ko: >-
+              그건 <b>블록으로 감쌌을 때</b>의 답입니다. 인자로 넘긴 것은 그 줄에서 굳어요.
+            en: >-
+              That is the answer <b>when it is wrapped in a block</b>. Handed in as an argument, it freezes on
+              that line.
+      - t:
+          ko: >-
+            아무것도 안 찍힌다
+          en: >-
+            Nothing is printed
+        diag:
+          t:
+            ko: >-
+              미뤄 둔 부르기는 함수가 끝날 때 반드시 돕니다. 안 도는 것이 아니에요.
+            en: >-
+              A postponed call always runs when the function ends. It does not go unrun.
+      - t:
+          ko: >-
+            정해져 있지 않다
+          en: >-
+            It is unspecified
+        diag:
+          t:
+            ko: >-
+              명세가 인자 평가 시점을 못 박아 두었습니다. 정해져 있어요.
+            en: >-
+              The specification pins when arguments are evaluated. It is settled.
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행은 부르기를 <b>함수 끝으로</b> 미룹니다.
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} postpones the call <b>to the end of the
+        function</b>.
+    hint: { ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다.", en: "Your choice is written into the code at once. Submit to have it marked." }
+    options:
+      - { t: "defer", mono: true }
+      - t: "go"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 낱말은 <b>옆 갈래에서 바로</b> 돌립니다. 미루는 것이 아니라 띄우는 것이고, 함수가 끝나도 기다려 주지 않아요.
+            en: >-
+              That word runs it <b>on its own strand right away</b>. It launches rather than postpones, and
+              the function does not wait for it.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 미루나 띄우나", en: "The sharpest spot — postponing or launching" }
+            code:
+              - "defer f.Close()     // 끝에 돈다"
+              - "go f.Close()        // 지금 옆에서 돈다"
+      - t: "return"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 낱말은 함수를 <b>거기서 끝냅니다</b>. 아래 줄이 아예 안 돌아요.
+            en: >-
+              That word <b>ends the function right there</b>. The lines below never run.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 끝내나 미루나", en: "The sharpest spot — ending or postponing" }
+            code:
+              - "defer f.Close()"
+              - "return"
+      - t: "func"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 낱말은 <b>새 함수를 엽니다</b>. 미루려면 그 값을 그 자리에서 불러야 해요.
+            en: >-
+              That word <b>opens a new function</b>. Postponing it means calling that value right there.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 여나 미루나", en: "The sharpest spot — opening or postponing" }
+            code:
+              - "defer f.Close()"
+              - "defer func() { f.Close() }()"
+
+why_gate:
+  q:
+    ko: >-
+      Go 는 왜 인자를 <b>미루는 줄에서</b> 계산할까요?
+    en: >-
+      Why does Go work out the arguments <b>on the postponing line</b>?
+  choices:
+    - t:
+        ko: >-
+          그 줄을 읽는 순간 무엇이 넘어갈지가 정해져, 함수 끝까지 코드를 훑지 않아도 무엇이 정리될지 알 수 있기 때문
+        en: >-
+          Because what will be handed over is settled as you read that line, so what gets cleaned up is
+          known without scanning to the end
+      ok: true
+      fb:
+        ko: >-
+          그 방향입니다. 그럼 나중 값을 쓰고 싶을 때 무엇으로 감싸는지도 적어 보세요.
+        en: >-
+          That is the direction. Add what to wrap it in when the later value is wanted.
+    - t:
+        ko: >-
+          나중에 계산하면 느려서
+        en: >-
+          Because working them out later is slow
+      ok: false
+      fb:
+        ko: >-
+          속도 문제가 아닙니다. 어느 시점의 값을 쓰느냐의 문제예요.
+        en: >-
+          Speed is not it. It is a question of which moment's value is used.
+    - t:
+        ko: >-
+          나중에 계산할 방법이 없어서
+        en: >-
+          Because there is no way to work them out later
+      ok: false
+      fb:
+        ko: >-
+          있습니다. 블록으로 감싸면 그 안이 함수 끝에 읽혀요.
+        en: >-
+          There is. Wrapped in a block, the inside is read at the end.
+
+queries:
+  - { grammars: [go], file: ./defer.scm }
+
+examples:
+  - code: "func run(f File) { defer f.Close() }"
+    expect: { sites: 1, form: method, hole: "defer", picks: { 1: "defer", 2: "Close", 3: "()", 4: "f" } }
+  - code: "func run() { defer cleanup() }"
+    expect: { sites: 1, form: plain, hole: "defer", picks: { 1: "defer", 2: "cleanup", 3: "()" } }
+  - code: "func run(i int) { defer func() { println(i) }() }"
+    expect: { sites: 1, form: literal, hole: "defer", picks: { 1: "defer", 2: "()", 3: "{ println(i) }" } }
+  - code: "func run(f File) { f.Close() }"
+    expect: none

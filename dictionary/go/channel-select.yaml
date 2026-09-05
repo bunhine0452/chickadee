@@ -1,0 +1,220 @@
+schema: 1
+id: go/channel-select
+# 2부 · §4 심화 (`go.md` §4 ㉛). 실측 73곳/19파일 — 사전에서 가장 얇은 개념 둘 중 하나다.
+#
+# **사용처가 얇으면 카드가 안 나올 수 있다.** `bestSite` 가 미지 3 이하인 자리를
+# 요구하는데(`go.md` §1) 후보가 73곳뿐이라 못 고를 수 있다 — 그때는 합성이 정본이다.
+universal: null
+name: { ko: "채널로 주고받기", en: "Channels and select" }
+token: "chan"
+grammars: [go]
+framework: null
+essential: true
+difficulty: 4
+prereq: [go/goroutine, cs/race-condition]
+confusions: []
+
+dict:
+  one_liner:
+    ko: >-
+      갈래끼리 값을 주고받는 통로다. 받는 쪽이 없으면 보내는 쪽이 멈춘다.
+    en: >-
+      A pipe between strands; with nobody receiving, the sender stops and waits.
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 갈래 사이로 값을 나르는 통로를 만듭니다. 통로가 <b>기다림을 만든다</b>는
+      것이 요점이에요 — 버퍼 없는 통로에서는 받는 쪽이 실제로 받을 때까지 보내는 쪽이 멈춥니다. 그래서 이 통로는 값을 나르는 동시에 <b>순서를 정합니다</b>: 받기가
+      끝나기 전에는 보내기가 안 끝나므로, 「이것이 저것보다 먼저」라고 말할 수 있는 몇 안 되는 자리예요. 통로에 <b>방향</b>을 적을 수도 있어서, 함수가 받기만 하는지
+      보내기만 하는지를 서명에 담을 수 있습니다.
+    en: >-
+      The {{pick.1|code}} on line {{site.line}} makes a pipe that carries values between strands. The
+      point is that the pipe <b>creates waiting</b> — on an unbuffered pipe the sender stops until a
+      receiver actually takes the value. So the pipe carries values and <b>settles order</b> at the
+      same time: a send does not complete before its receive, which makes this one of the few places
+      where "this before that" can be said at all. A pipe can also carry a <b>direction</b>, so a
+      signature can say whether a function only receives or only sends.
+  trace:
+    - ko: >-
+        {{site.line}}행은 {{pick.3|code}}{{pick.3|josa:을,를}} 나르는 통로를 만든다.
+      en: >-
+        Line {{site.line}} makes a pipe that carries {{pick.3|code}}.
+    - ko: >-
+        버퍼가 없으면 받는 쪽이 받을 때까지 보내는 쪽이 멈춘다.
+      en: >-
+        Unbuffered, the sender stops until a receiver takes it.
+    - ko: >-
+        그 멈춤이 두 갈래 사이의 순서를 만든다.
+      en: >-
+        That stopping is what makes an order between two strands.
+
+rule:
+  ko: >-
+    <b>통로가 기다림을 만든다.</b> 버퍼 없는 통로에서는 받기가 끝나야 보내기가 끝난다.
+  en: >-
+    <b>The pipe creates the waiting.</b> Unbuffered, a send finishes only once the receive does.
+result:
+  label: { ko: "{{site.line}}행이 만든 통로", en: "the pipe made on line {{site.line}}" }
+  value: "{{pick.1}} {{pick.3}}"
+  note: { ko: "주고받기가 기다림을 만든다", en: "sending and receiving create the waiting" }
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} 이제 갈래 사이로 값을 나르는 통로입니다.
+  en: >-
+    {{pick.2|code}} is now a pipe carrying values between strands.
+payoff:
+  ko: >-
+    이걸 알면 「보냈는데 프로그램이 멈춰 있다」가 풀립니다 — 받는 쪽이 없습니다.
+  en: >-
+    This untangles "I sent and the program hangs" — nobody is receiving.
+bridge:
+  ko: >-
+    자바·C# 은 잠금으로 공유 자리를 지킵니다. Go 도 그 방법이 있지만, 통로는 <b>값을 옮겨</b> 공유 자체를 줄이는 쪽이에요.
+  en: >-
+    Java and C# guard a shared place with locks. Go has those too, but a pipe <b>moves the value</b>
+    and reduces the sharing itself.
+misconceptions:
+  - ko: >-
+      보내면 곧바로 다음 줄로 간다 — 버퍼가 없으면 받는 쪽이 받을 때까지 <b>멈춥니다</b>.
+    en: >-
+      A send moves on at once — unbuffered, it <b>stops</b> until a receiver takes it.
+  - ko: >-
+      비어 있는 통로에서 받으면 바로 돌아온다 — <b>기다립니다</b>. 아무도 안 보내면 영원히요.
+    en: >-
+      Receiving from an empty pipe returns at once — it <b>waits</b>, forever if nobody sends.
+
+point:
+  - q:
+      ko: >-
+        {{site.line}}행에서 <b>통로에 실릴 것의 종류</b>를 짚어 보세요.
+      en: >-
+        On line {{site.line}}, point at <b>the kind of thing the pipe carries</b>.
+    hint: { ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다.", en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose." }
+    answer: pick.3
+    diag:
+      pick.1:
+        t:
+          ko: >-
+            {{pick.1|code}}{{pick.1|josa:은,는}} 통로를 여는 <b>낱말</b>입니다. 실리는 것은 그 뒤에 적혀요.
+          en: >-
+            {{pick.1|code}} is the <b>word</b> that opens a pipe. What it carries is written after it.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 통로냐 실리는 것이냐", en: "The sharpest spot — the pipe or its cargo" }
+          code:
+            - "chan              // 통로"
+            - "chan int          // 실리는 것은 int"
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 통로의 <b>이름</b>입니다. 이름은 무엇이 실리는지를 안 정해요.
+          en: >-
+            {{pick.2|code}} is the pipe's <b>name</b>. A name does not settle the cargo.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 실리는 것이냐", en: "The sharpest spot — the name or the cargo" }
+          code:
+            - "done              // 이름"
+            - "chan int          // 실리는 것"
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행은 갈래 사이로 값을 나르는 <b>통로</b>를 만듭니다.
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} makes a <b>pipe</b> that carries values
+        between strands.
+    hint: { ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다.", en: "Your choice is written into the code at once. Submit to have it marked." }
+    options:
+      - { t: "chan", mono: true }
+      - t: "[]"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 기호는 <b>여럿을 보는 창</b>입니다. 값을 담을 뿐 기다림을 안 만들어요.
+            en: >-
+              That is a <b>window over many</b>. It holds values and creates no waiting.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 담나 나르나", en: "The sharpest spot — holding or carrying" }
+            code:
+              - "var done chan int      // 나른다"
+              - "var xs []int           // 담는다"
+      - t: "map"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 낱말은 <b>열쇠로 찾는 묶음</b>을 만듭니다. 갈래 사이의 기다림과 무관해요.
+            en: >-
+              That word makes a <b>lookup by key</b>. It has nothing to do with waiting between strands.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 찾나 나르나", en: "The sharpest spot — looking up or carrying" }
+            code:
+              - "var done chan int"
+              - "var m map[string]int"
+      - t: "func"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 낱말은 <b>부를 수 있는 값</b>을 만듭니다. 값을 나르는 통로가 아니에요.
+            en: >-
+              That word makes something <b>callable</b>, not a pipe that carries values.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 부르나 나르나", en: "The sharpest spot — calling or carrying" }
+            code:
+              - "var done chan int"
+              - "var h func()"
+
+why_gate:
+  q:
+    ko: >-
+      Go 는 왜 통로에 <b>기다림</b>을 붙였을까요?
+    en: >-
+      Why does a Go pipe carry <b>waiting</b> with it?
+  choices:
+    - t:
+        ko: >-
+          값을 옮기는 일과 순서를 정하는 일을 한 자리에 묶어, 공유 자리를 잠그지 않고도 「이것이 먼저」를 말할 수 있게 하기 때문
+        en: >-
+          Because moving a value and settling order become one act, so "this first" can be said without
+          locking a shared place
+      ok: true
+      fb:
+        ko: >-
+          그 방향입니다. 그럼 받는 쪽이 없을 때 무엇이 생기는지도 적어 보세요.
+        en: >-
+          That is the direction. Add what happens when nobody is receiving.
+    - t:
+        ko: >-
+          잠금이 없어서
+        en: >-
+          Because there are no locks
+      ok: false
+      fb:
+        ko: >-
+          있습니다. 표본 리포에서 잠금 쪽이 통로보다 더 많이 쓰여요.
+        en: >-
+          There are. In the sample repository locks are used more than pipes.
+    - t:
+        ko: >-
+          통로가 빨라서
+        en: >-
+          Because a pipe is faster
+      ok: false
+      fb:
+        ko: >-
+          잠금보다 느린 경우도 많습니다. 순서를 말할 수 있게 되는 것이 요점이에요.
+        en: >-
+          It is often slower than a lock. Being able to speak of order is the point.
+
+queries:
+  - { grammars: [go], file: ./channel-select.scm }
+
+examples:
+  - code: "func f() { var done chan int }"
+    expect: { sites: 1, form: decl, hole: "chan", picks: { 1: "chan", 2: "done", 3: "int" } }
+  - code: "func f() { c := make(chan bool) }"
+    expect: { sites: 1, form: make, hole: "chan", picks: { 1: "chan", 2: "make", 3: "bool" } }
+  - code: "func f(done chan int) { done <- 1 }"
+    expect: { sites: 1, form: send, hole: "<-", picks: { 1: "<-", 2: "done", 3: "1" } }
+  - code: "func f() { var xs []int }"
+    expect: none
