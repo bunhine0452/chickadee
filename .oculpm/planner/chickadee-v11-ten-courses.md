@@ -39,8 +39,8 @@ owner: claude-code
 - [x] 워크트리 브랜치 열을 순서대로 병합, 충돌은 공유 파일에서만 {#m-branches}
 - [x] 세션 보고의 ABSENCE 초안을 t0-synthetic.ts 표에 넣고 사유 시험 {#m-absence}
 - [x] docs/curriculum/README.md §4 상태표·§5 실측 갱신, 세션이 낸 등록부 초안에 번호 {#m-docs}
-- [ ] typecheck · lint · test:unit · dict:lint · cargo test · gates → 커밋 → 푸시 → CI 초록 {#m-verify}
-- [ ] 최종 보고 — 언어별 장수·골든·사용처 실측, 못 한 것 {#m-report}
+- [x] typecheck · lint · test:unit · dict:lint · cargo test · gates → 커밋 → 푸시 → CI 초록 {#m-verify}
+- [x] 최종 보고 — 언어별 장수·골든·사용처 실측, 못 한 것 {#m-report}
 
 <!-- oculpm:plan-log begin v1 -->
 | 시각 | 항목 | 에이전트 | 변화 | 일지 | 메모 |
@@ -77,4 +77,6 @@ owner: claude-code
 | 2026-09-06T05:07:21+09:00 | #a-outline | claude-code | ☐→x |  | 부 넷이 기능 챕터 앞에 서고 LangPartPanel 이 판마다 출처(내 코드·예고·사유)를 적음, 「이 판 풀기」→ pickCoursePlateNow → 세션 (커밋 cb6333b) |
 | 2026-09-06T05:07:30+09:00 | #a-nofiles | claude-code | ☐→x |  | AbsenceReason 'no-files' — 카드 payload 에 실리고 T0Plate 가 payload 를 먼저 읽음, t0.absentNoFiles ko/en, 정직성 게이트가 다섯을 셈 (커밋 cb6333b) |
 | 2026-09-06T05:07:39+09:00 | #a-tests | claude-code | ☐→x |  | lang-data.test(순수 부·언어 세기) · LangCourse.test(선택지·부 줄·패널·출처) · honesty 게이트 다섯 사유 · i18n ko/en 46키 (커밋 cb6333b · cadc268) |
+| 2026-09-06T06:14:07+09:00 | #m-verify | claude-code | ☐→x |  | typecheck · lint · 단위 2,645 · dict:lint · cargo 9벌(골든 진짜 6/6) · 게이트 206 · 푸시 810ca69 · CI 8잡 초록(run 33991958607). CI 가 잡은 셋(공유 target 골든 15건 · 센서스 타임아웃 · 선택 경쟁)과 둘(덤프 · 라이선스 표) 고침 |
+| 2026-09-06T06:14:16+09:00 | #m-report | claude-code | ☐→x |  | 최종 보고 — 열 언어 421장(사전 535장 97,726줄) · 언어 선택+부 목차 · D190·D191 · 못 한 것: 3부 아홉 언어 없음 · 표본 없는 다섯 언어 분모 0 · export-declaration 후속 · Monaco swift |
 <!-- oculpm:plan-log end -->
