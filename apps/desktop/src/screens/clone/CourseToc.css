@@ -167,3 +167,6 @@
 .ctoc-part[aria-current="step"] .ctoc-st {
   color: var(--t1-text);
 }
+
+/* 파일 이름 뒤의 폴더 — 잘려도 이름은 남는다 (D170 ⑧) */
+.ctoc-dir { color: var(--ink-soft) }

@@ -20,6 +20,9 @@
   gap: 22px;
   padding: 40px 18px 48px;
   overflow: auto;
+
+  /* 작업대 끝에서 휠이 홈으로 새지 않는다 — 뒤의 홈이 움직이면 「한 화면에 한 가지 일」이 깨진다 (D170 ②). */
+  overscroll-behavior: contain;
   scroll-behavior: smooth;
 }
 

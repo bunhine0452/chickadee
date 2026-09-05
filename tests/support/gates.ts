@@ -12,6 +12,7 @@ import { join } from 'node:path';
 import type { Page } from '@playwright/test';
 
 import { answerKeyOf, type AppDb } from './app-db.js';
+import { passT2Plate } from './ui.js';
 
 /**
  * 앱의 게이트 보고를 그대로 받는 모양. 앱 타입을 import 하지 않는 이유는 `tests/` 가
@@ -166,11 +167,19 @@ const MAX_PLATES = 12;
 export async function toSummary(page: Page, app: AppDb): Promise<void> {
   const done = page.locator('article.ps[aria-label="인쇄 완료"], article.ps[aria-label="Printing done"]');
   for (let left = MAX_PLATES; left > 0; left -= 1) {
+    // Space 뒤에 **판이 실제로 바뀔 때까지** 기다린다 — 요약이 서거나 교정지의 이름표가 달라질
+    // 때까지. `.fb.on` 만 보면 그 칸이 없는 T2 판에서 옛 판 위에 다음 걸음을 뗀다.
+    const prev = await page.locator('article.ps').first().getAttribute('aria-label');
     await page.keyboard.press('Space');
-    // 넘어갔으면 판정이 걷힌다 — 요약이 떠도 마찬가지다.
-    await page.locator('.fb.on').waitFor({ state: 'detached' });
+    await page.waitForFunction(
+      (was) => document.querySelector('article.ps[aria-label="인쇄 완료"], article.ps[aria-label="Printing done"]') !== null
+        || document.querySelector('article.ps')?.getAttribute('aria-label') !== was,
+      prev,
+    );
     await settled(page);
     if (await done.count() > 0) return;
+    // T2 지도 판은 보기 번호가 없다 (D140) — 상자 하나를 고르고 채점해 지나간다.
+    if (await passT2Plate(page)) continue;
     await submit(page, answerKey(app));
     await settleLifer(page);
   }

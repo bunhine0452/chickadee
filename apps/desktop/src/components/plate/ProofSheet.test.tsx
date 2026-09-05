@@ -82,3 +82,20 @@ describe('ProofSheet', () => {
     expect(src?.querySelector('script')).toBeNull();
   });
 });
+
+describe('ProofSheet — 판이 바뀌면 작업대는 맨 위다 (D170 ②)', () => {
+  it('앞 판이 내려 둔 스크롤을 0 으로 되돌리고 새 판으로 포커스를 옮긴다', () => {
+    const bench = document.createElement('main');
+    bench.className = 'bench';
+    document.body.appendChild(bench);
+    Object.defineProperty(bench, 'scrollTop', { value: 0, writable: true });
+
+    const { rerender } = render(<ProofSheet {...BASE} ly={[0, 0]} />, { container: bench });
+    bench.scrollTop = 138;
+    rerender(<ProofSheet {...BASE} no="4판" concept="숫자 리터럴" ly={[0, 0]} />);
+
+    expect(bench.scrollTop).toBe(0);
+    expect(document.activeElement).toBe(bench.querySelector('article.ps'));
+    bench.remove();
+  });
+});

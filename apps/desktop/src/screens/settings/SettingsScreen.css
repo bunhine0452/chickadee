@@ -362,3 +362,10 @@
   font-family: var(--f-mono);
   font-size: var(--fs-14);
 }
+
+/* 맨 아래 「홈으로」 (D170 ⑧) */
+.set-foot {
+  display: flex;
+  justify-content: flex-end;
+  margin: 24px 0 0;
+}

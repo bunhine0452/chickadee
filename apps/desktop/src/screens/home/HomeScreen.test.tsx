@@ -200,8 +200,8 @@ describe('HomeScreen', () => {
   it('대지가 0개여도 깨지지 않고 빈 상태를 말한다', () => {
     draw(EMPTY);
     expect(screen.queryAllByRole('article')).toHaveLength(0);
-    expect(screen.getByText(/아직 대지가 없습니다/)).toBeTruthy();
-    expect(screen.getByText(/이 리포로는 T2 를 짤 수 없습니다/)).toBeTruthy();
+    expect(screen.getByText(/대지(가|는) 없습니다/)).toBeTruthy();
+    expect(screen.getByText(/책임 배치 판은 아직 짤 수 없습니다/)).toBeTruthy();
     expect(screen.getByText(/판이 없는 문법이 없습니다/)).toBeTruthy();
     expect(screen.getByText(/다시 찍을 개념이 아직 없습니다/)).toBeTruthy();
     expect(screen.getByRole('img', { name: /지난 14일 잉크 농도/ })).toBeTruthy();

@@ -123,13 +123,16 @@
   gap: 10px;
 }
 
+/* 좁은 창(최소 1000×680)에서도 띠는 한 줄이다 — 나가기를 새 줄로 내리면 띠가 180px 가 되어
+   판이 그만큼 잘렸다 (D170 ⑦). 대신 브랜드 글자를 접는다. */
 @media (width <= 1080px) {
-  .jobband { grid-template-columns: auto minmax(0, 1fr) }
+  .jobband { gap: 14px }
 
-  .jb-ctl {
-    grid-column: 1 / -1;
-    justify-content: flex-end;
-  }
+  .jb-brand { padding-right: 12px }
+
+  .jb-sub { display: none }
+
+  .jb-title { font-size: var(--fs-24) }
 }
 
 @media (width <= 720px) {

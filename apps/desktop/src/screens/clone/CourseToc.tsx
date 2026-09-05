@@ -15,6 +15,10 @@ import { useEffect, useRef } from 'react';
 import type { TocPart, TocUnit } from './data.js';
 import './CourseToc.css';
 
+/** 좁은 목차에서는 파일 이름이 먼저다 — `src/ses…` 둘은 구별이 안 됐다 (D170 ⑧). */
+const baseName = (p: string): string => p.slice(p.lastIndexOf('/') + 1);
+const dirName = (p: string): string => (p.includes('/') ? p.slice(0, p.lastIndexOf('/')) : '');
+
 const STATUS_KEY = {
   pending: 'course.statusPending',
   active: 'course.statusActive',
@@ -95,7 +99,12 @@ export function CourseToc(props: CourseTocProps) {
                       <span className="ctoc-no">
                         {t('course.fileAt', { n: String(file.seq + 1) })}
                       </span>
-                      <code className="ctoc-path">{file.path}</code>
+                      <code className="ctoc-path" title={file.path}>
+                        {baseName(file.path)}
+                        {dirName(file.path) === '' ? null : (
+                          <span className="ctoc-dir"> · {dirName(file.path)}</span>
+                        )}
+                      </code>
                       <span className="ctoc-tally">
                         {file.total === 0
                           ? t('course.fileUncut')

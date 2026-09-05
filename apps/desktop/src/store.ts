@@ -9,6 +9,7 @@
  */
 import { getLocale, type Locale } from '@chickadee/i18n';
 import type { ItemState, Layer, RepoInfo, Session } from '@chickadee/store-sql';
+import { TOAST_MS } from '@chickadee/ui';
 import { create } from 'zustand';
 
 import type { CloneScope } from './data/clone.js';
@@ -149,6 +150,13 @@ const EMPTY: UiState & SessionState = {
   toast: undefined,
 };
 
+/**
+ * 토스트 시계 (D170 ③). `say()` 가 띄운 문구를 지우는 코드가 어디에도 없어 T2 채점 문구가
+ * 요약과 홈까지 따라왔다 — 목업의 `toast()` 는 3.6초 뒤 스스로 사라진다(`TOAST_MS`).
+ * 스토어가 시계를 들고 있는 이유는 부르는 자리가 여덟 곳이라서다: 자리마다 지우면 하나는 빠진다.
+ */
+let toastTimer: ReturnType<typeof setTimeout> | null = null;
+
 export const useUi = create<UiState & SessionState & UiActions & SessionActions>((set) => ({
   ...EMPTY,
   go: (screen) => set({ screen }),
@@ -210,7 +218,16 @@ export const useUi = create<UiState & SessionState & UiActions & SessionActions>
   warn: (row) => set((s) => ({ warnings: [...s.warnings, row] })),
   finishIngest: (error) => set({ ingestDone: true, cancelling: false, error }),
   cancel: () => set({ cancelling: true }),
-  say: (toast) => set({ toast }),
+  say: (toast) => {
+    if (toastTimer !== null) clearTimeout(toastTimer);
+    toastTimer = null;
+    set({ toast });
+    if (toast === undefined) return;
+    toastTimer = setTimeout(() => {
+      toastTimer = null;
+      set({ toast: undefined });
+    }, TOAST_MS);
+  },
   fail: (error) => set({ error }),
 
   // ───────── 세션 (05 §3) ─────────

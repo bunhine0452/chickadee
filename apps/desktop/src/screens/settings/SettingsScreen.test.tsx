@@ -141,7 +141,10 @@ describe('SettingsScreen', () => {
   it('홈으로 돌아간다', async () => {
     const user = userEvent.setup();
     const onBack = await drawn();
-    await user.click(screen.getByRole('button', { name: '홈으로' }));
+    // 위·아래 둘 다 「홈으로」다 (D170 ⑧) — 어느 쪽을 눌러도 같은 문이다.
+    const backs = screen.getAllByRole('button', { name: '홈으로' });
+    expect(backs).toHaveLength(2);
+    await user.click(backs[1] as HTMLElement);
     expect(onBack).toHaveBeenCalledTimes(1);
   });
 

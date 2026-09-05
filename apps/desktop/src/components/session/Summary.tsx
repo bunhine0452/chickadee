@@ -100,7 +100,12 @@ export function Summary({
 
   // 요약이 뜨면 포커스는 「홈으로」 버튼이다 (05 §7).
   useEffect(() => {
-    ref.current?.querySelector<HTMLButtonElement>('.acts .press-btn')?.focus();
+    const el = ref.current;
+    if (el === null) return;
+    // 마지막 판의 판정란까지 내려간 작업대를 되돌린다 — 안 그러면 요약의 머리가 띠 밑에 숨는다 (D170 ②).
+    const bench = el.closest<HTMLElement>('.bench');
+    if (bench !== null) bench.scrollTop = 0;
+    el.querySelector<HTMLButtonElement>('.acts .press-btn')?.focus({ preventScroll: true });
   }, []);
 
   // Enter = 홈으로. 버튼 위에서는 네이티브 활성화에 맡긴다 — 두 번 부르지 않는다.
@@ -183,7 +188,7 @@ export function Summary({
                   <Dee ly={row.lyTo} sticker />
                 </span>
                 <span className="nm">
-                  {row.concept} <code>{row.code}</code>
+                  {row.concept} {row.code === '' ? null : <code>{row.code}</code>}
                   <small>
                     <Pill track={row.track}>{row.track.toUpperCase()}</Pill> {names[row.lyFrom].k} →{' '}
                     {names[row.lyTo].k} · {moved(row.lyFrom, row.lyTo)}
@@ -205,7 +210,7 @@ export function Summary({
             <Dee ly={4} motion="hop" sticker />
             <div>
               <h4>
-                {t('summary.liferHeading')} {lifer.concept} <code>{lifer.code}</code>
+                {t('summary.liferHeading')} {lifer.concept} {lifer.code === '' ? null : <code>{lifer.code}</code>}
               </h4>
               <RichText as="p" html={lifer.where} />
             </div>

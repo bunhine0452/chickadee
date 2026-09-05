@@ -27,9 +27,9 @@ test('11 요약', async ({ page, app }) => {
   // 큐는 두 판이다 (D113) — 남은 판까지 답해야 요약이 뜬다.
   await finishSession(page, app.db);
 
-  // 겹 이동 목록 — %가 아니라 겹으로 센다. 답한 판마다 한 줄이다.
+  // 겹 이동 목록 — %가 아니라 겹으로 센다. 답한 판마다 한 줄이다 (T0 둘 + T2 하나, D140).
   const shift = page.locator(`${DONE} .shifts .shift`);
-  await expect(shift).toHaveCount(2);
+  await expect(shift).toHaveCount(3);
   await expect(shift.first()).toContainText('문자열 리터럴');
   await expect(shift.first().locator('small')).toContainText('미인쇄 → 애벌 · +1겹');
   await expect(shift.first().locator('.next')).toContainText('다음 인쇄');
@@ -152,7 +152,7 @@ test('13 Esc 3단계', async ({ page, app }) => {
   await resume.click();
   await page.locator(SHEET).waitFor();
   await expect(page.locator(SHEET)).toHaveAttribute('aria-label', /1판 · 문자열 리터럴/);
-  await expect(page.locator('.jq-h')).toContainText('지금 1 / 2');
+  await expect(page.locator('.jq-h')).toContainText('지금 1 / 3');
 });
 
 test('14 리포 등록 → 인제스트 진행 → 홈', async ({ page, app }) => {
@@ -175,15 +175,17 @@ test('14 리포 등록 → 인제스트 진행 → 홈', async ({ page, app }) =
   // 0단계 — 리포가 **0개인 상태에서** 언어를 고르면 그 자리에서 문구가 바뀌고 `settings`
   // 에 내려간다 (D117). 리포 없이 설정을 쓸 수 있다는 것이 이 걸음이 서는 조건이다 —
   // DB 는 `boot.ts` 가 이미 열어 두었고 첫 실행 화면은 그것만 있으면 된다.
-  await page.locator('.firstrun-lang [role="switch"]').click();
+  // 첫 화면에는 스위치가 둘이다 (D147 의 「프로그래밍이 처음인가요?」가 앞에 선다) — 언어 것을 집는다.
+  const lang = page.locator('.firstrun-lang [role="switch"][aria-label*="한국어 · English"]');
+  await lang.click();
   await expect(page.locator('.firstrun')).toContainText('nothing is written back to the repo');
   await expect
     .poll(() => (app.db.prepare("SELECT value_json AS v FROM settings WHERE key = 'locale'")
       .get() as { v: string } | undefined)?.v)
     .toBe('"en"');
 
-  // 다시 한국어로 — 이 시나리오의 나머지는 한국어 문구를 본다.
-  await page.locator('.firstrun-lang [role="switch"]').click();
+  // 다시 한국어로 — 이 시나리오의 나머지는 한국어 문구를 본다. 영어 화면에서는 라벨도 영어다.
+  await lang.click();
   await expect(page.locator('.firstrun')).toContainText('리포에는 아무것도 쓰지 않습니다');
 
   await page.getByRole('button', { name: '리포 등록' }).click();

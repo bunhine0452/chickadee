@@ -172,6 +172,7 @@ export function CoursePlateView(props: CoursePlateViewProps): React.JSX.Element 
                     onGrade={props.onGrade}
                     onDown={props.onDowngrade}
                     editorAssist={editorAssist}
+                    focusOnMount
                     assistSeed={props.assist}
                     onAssist={(next) => {
                       setAssist(next);

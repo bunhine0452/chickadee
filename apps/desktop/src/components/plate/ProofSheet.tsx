@@ -63,10 +63,16 @@ export function ProofSheet({
   const [from, to] = ly;
   const plus = plusLabel(from, to);
 
+  // 판이 걸리거나 **바뀔 때마다**. 앞 판의 판정란까지 내려간 작업대 스크롤이 남으면 새 판의
+  // 머리가 작업 띠 밑에 숨고, `focus()` 가 문서까지 밀면 종이가 신호등 밑으로 들어간다 (D170 ②).
   useEffect(() => {
     if (focusOnMount === false) return;
-    ref.current?.focus();
-  }, [focusOnMount]);
+    const el = ref.current;
+    if (el === null) return;
+    const bench = el.closest<HTMLElement>('.bench');
+    if (bench !== null) bench.scrollTop = 0;
+    el.focus({ preventScroll: true });
+  }, [focusOnMount, no, concept]);
 
   const style: CSSProperties | undefined =
     tilt === undefined ? undefined : ({ '--tilt': `${tilt}deg` } as CSSProperties);

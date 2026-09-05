@@ -15,9 +15,9 @@ describe('Forecast', () => {
     expect(screen.getByText('미조판')).toBeTruthy();
   });
 
-  it('cannot 은 T2 를 짤 수 없다고 정직하게 적는다', () => {
+  it('cannot 은 커밋이 필요한 종(책임 배치)만 못 짠다고 적는다 (D170 ⑤)', () => {
     render(<Forecast pending={2} variant="cannot" />);
-    expect(screen.getByText(/이 리포로는 T2 를 짤 수 없습니다/)).toBeTruthy();
+    expect(screen.getByText(/책임 배치 판은 아직 짤 수 없습니다/)).toBeTruthy();
     expect(screen.getByText('2개')).toBeTruthy();
     expect(screen.getByText('불가')).toBeTruthy();
   });

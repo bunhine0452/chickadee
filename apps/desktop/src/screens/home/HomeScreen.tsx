@@ -113,7 +113,9 @@ export function HomeScreen({
         plain={t('home.boardPlain')}
         note={
           <RichText
-            html={t('home.boardNote', { concepts: String(concepts), printed: String(printed) })}
+            html={data.sheets.length === 0
+              ? t('home.boardNoteNoSheets')
+              : t('home.boardNote', { concepts: String(concepts), printed: String(printed) })}
           />
         }
       >
@@ -154,7 +156,12 @@ export function HomeScreen({
 
             {shown === null ? (
               <>
-                <p className="note">{t('home.noSheets')}</p>
+                {/* 읽은 리포에는 왜 없는지를 말한다 — 「읽으면 깔립니다」는 읽으라는 말이 된다 (D170 ⑥). */}
+                <p className="note">
+                  {data.files > 0
+                    ? t('home.noSheetsRead', { n: String(data.files) })
+                    : t('home.noSheets')}
+                </p>
                 <Forecast pending={data.lastRun?.commits ?? 0} variant="cannot" />
               </>
             ) : (

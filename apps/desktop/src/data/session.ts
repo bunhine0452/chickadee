@@ -4,8 +4,10 @@
  * **원장이 곧 큐다**(D10) — 진행 상태를 담는 블롭이 따로 없고 `session` + `session_item`
  * 두 테이블이 전부다. 그래서 Esc 로 나갔다 돌아오면 이어 찍히고, 강제 종료 뒤에도 같다.
  */
+import { MAX_BLOCK_LINES, MAX_UNKNOWN_CONCEPTS, MIN_BLOCK_LINES } from '@chickadee/cards';
 import { rankNewConcepts, knownSet, levelForLayer, transferFrom } from '@chickadee/concepts';
 import { langOf } from '@chickadee/dictionary';
+import { t } from '@chickadee/i18n';
 import { ipc } from '@chickadee/ipc-client';
 import {
   LIMIT, REPRINT_GAP_DAYS, dayKey, endOfDay, estMinFor, plannedMin, planSession, prereqAt,
@@ -566,10 +568,12 @@ export async function previewToday(repoId: number, now: number): Promise<TodayPr
     };
   }
 
-  const [dueRows, candidates, newCount] = await Promise.all([
+  const [dueRows, candidates, newCount, t1Slot, t2Slot] = await Promise.all([
     ipc.store.query('queue.due', { repoId, eod, day, limit: LIMIT.reviews_per_session }),
     ipc.store.query('queue.new_candidates', { repoId }),
     ipc.store.query('queue.new_count_today', { repoId, day }),
+    previewSlot(repoId, 't1', day, now),
+    previewSlot(repoId, 't2', day, now),
   ]);
 
   const newLeft = Math.max(0, Math.min(
@@ -582,10 +586,56 @@ export async function previewToday(repoId: number, now: number): Promise<TodayPr
       sub: '복습', review: true,
     })),
     ...Array.from({ length: newLeft }, () => ({
-      kind: 't0', label: '새 판', mins: estMinFor('t0', 'new'), sub: '새 판', review: false,
+      kind: 't0', label: t('home.previewNewT0'), mins: estMinFor('t0', 'new'),
+      sub: t('session.roleNew'), review: false,
     })),
+    ...(t1Slot === null ? [] : [t1Slot]),
+    ...(t2Slot === null ? [] : [t2Slot]),
   ];
   return { items, mins: items.reduce((a, i) => a + i.mins, 0), resumeAt: null };
+}
+
+/**
+ * T1·T2 자리 미리보기 (D170 ④). `trackSlot` 과 같은 리듬을 보되 **굽지 않는다** — 재료가
+ * 있는지만 센다. 홈이 「2판 · 4분」이라 하고 세션이 「3판 · 8분」을 거는 것이 이 자리를 안 세어서였다.
+ *
+ * 근사인 자리: 구워 둔 판이 없으면 T1 은 열 수 있는 블록이, T2 는 파일이 붙은 대지가 있을 때
+ * 한 장으로 센다. 실제로 구워지는지는 `openSession` 이 정한다.
+ */
+async function previewSlot(
+  repoId: number,
+  track: 't1' | 't2',
+  day: DayKey,
+  now: number,
+): Promise<TodayPreviewData['items'][number] | null> {
+  const rows = await ipc.store.query('queue.track_cadence', {
+    repoId, track, sinceDay: shiftDay(day, -7),
+  });
+  const cadence = { recent: rows[0]?.recent ?? 0, lastDay: rows[0]?.last_day ?? null, today: day };
+  if (!(track === 't1' ? t1CadenceSays(cadence) : t2CadenceSays(cadence))) return null;
+
+  const cards = await ipc.store.query('queue.next_track_card', {
+    repoId, track, printedBefore: now - REPRINT_GAP_DAYS[track] * DAY_MS,
+  });
+  const card = cards[0];
+  if (card === undefined) {
+    if (track === 't1') {
+      const n = await ipc.store.query('block.openable', {
+        repoId, minLines: MIN_BLOCK_LINES, maxLines: MAX_BLOCK_LINES, maxUnknown: MAX_UNKNOWN_CONCEPTS,
+      });
+      if ((n[0]?.n ?? 0) === 0) return null;
+    } else if ((await ipc.store.query('queue.units', { repoId })).length === 0) {
+      return null;
+    }
+  }
+  const review = card !== undefined && card.prints > 0;
+  return {
+    kind: track,
+    label: t(track === 't1' ? 'home.previewT1' : 'home.previewT2'),
+    mins: estMinFor(track, review ? 'review' : 'new', card?.est_min_ema ?? null),
+    sub: t(review ? 'session.roleReview' : 'session.roleNew'),
+    review,
+  };
 }
 
 const toPreviewItem = (p: Plate) => ({

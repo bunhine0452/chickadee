@@ -560,6 +560,13 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
         </dl>
       </Section>
 
+      {/* 설정은 한 단으로 길다 — 맨 아래에서 다시 위로 올라가 「홈으로」를 찾게 하지 않는다 (D170 ⑧). */}
+      <p className="set-foot">
+        <FlatButton onClick={onBack} ghost>
+          {t('home.back')}
+        </FlatButton>
+      </p>
+
       <LiveRegion text={note} />
     </main>
   );

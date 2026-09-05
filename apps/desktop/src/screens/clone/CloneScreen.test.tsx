@@ -239,7 +239,7 @@ describe('목차 (clone-screen-toc)', () => {
 
     const nav = screen.getByLabelText('코스 목차');
     expect(nav.textContent).toContain('핵심');
-    expect(nav.textContent).toContain('src/a.ts');
+    expect(nav.textContent).toContain('a.ts · src');
     expect(nav.textContent).toContain('끝 · 91%');
     expect(nav.textContent).toContain('원본이 바뀜');
     expect(nav.textContent).toContain('0 / 1 파일');

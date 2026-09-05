@@ -113,6 +113,12 @@ export const home: Record<string, string> = {
     + 'Starting with the most frequent one covers several files at once.',
 
   'home.noSheets': 'No sheets yet. Reading the repo lays one sheet per feature.',
+  'home.noSheetsRead':
+    'Read {{n}} files, but no sheet yet — a folder needs at least three files to become one '
+    + 'feature sheet. Plates are still set; see “Today’s print” on the left.',
+  'home.boardNoteNoSheets':
+    'One unit is one real feature of your repo. This repo has no sheets yet, so concepts are '
+    + 'not counted per sheet.',
 
   // ── Masthead ────────────────────────────────────────────────────────────
   'home.brandLine': 'A print shop where your code is the textbook',
@@ -154,8 +160,9 @@ export const home: Record<string, string> = {
   // ── Forecast ────────────────────────────────────────────────────────────
   'home.forecastNext': 'Sheet {{n}} –',
   'home.forecastCannot':
-    '<b>This repo cannot carry T2 yet.</b> Structure questions need more commits. '
-    + 'There are <b>{{n}}</b> so far.',
+    '<b>No placement plate yet.</b> Its answer key is a real commit, and there are '
+    + '<b>{{n}}</b> so far. Radius, flow and direction plates come from import edges and join '
+    + 'today’s print.',
   'home.forecastLater':
     '<b>No plate set yet.</b> As commits build up the source is read again and sheets are '
     + 'added. <b>{{n}}</b> files have been read so far.',
@@ -236,6 +243,9 @@ export const home: Record<string, string> = {
   'home.todayList': 'Plates queued for today',
   'home.todayDays': 'Printing record for the last {{n}} days',
   'home.todayStart': 'Start printing',
+  'home.previewNewT0': 'New syntax plate',
+  'home.previewT1': 'One transcription',
+  'home.previewT2': 'One structure plate',
   'home.todayResume': 'Carry on · from plate {{n}}',
 
   'home.sheetCourse': 'Copy this whole sheet',

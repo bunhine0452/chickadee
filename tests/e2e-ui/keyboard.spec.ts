@@ -81,7 +81,7 @@ test('15 키보드만으로 1~13', async ({ page, app }) => {
   // ── 11. Space 로 다음. 남은 판까지 답하면 요약 (D113). Enter 로 홈.
   await finishSession(page, app.db);
   const done = page.locator('[aria-label="인쇄 완료"]');
-  await expect(done.locator('.shifts .shift')).toHaveCount(2);
+  await expect(done.locator('.shifts .shift')).toHaveCount(3);
   expect(await focusPath(page)).toContain('press-btn');
   await page.keyboard.press('Enter');
   await page.locator('.masthead').waitFor();

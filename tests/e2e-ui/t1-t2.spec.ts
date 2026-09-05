@@ -29,7 +29,7 @@ test('T1·T2 를 못 여는 이유가 홈에 적혀 있다', async ({ page, app 
 
   await expect(page.locator('.locked-panel')).toContainText('T1 필사');
   await expect(page.locator('.locked-panel')).toContainText('열립니다');
-  await expect(page.locator('.forecast')).toContainText('T2 를 짤 수 없습니다');
+  await expect(page.locator('.forecast')).toContainText('책임 배치 판은 아직 짤 수 없습니다');
   await expect(page.locator('.forecast')).toContainText('커밋은 0개');
 
   const counts = app.db

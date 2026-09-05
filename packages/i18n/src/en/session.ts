@@ -51,8 +51,8 @@ export const session: Record<string, string> = {
   'plate.rule': 'Rule',
   'plate.afterLine': 'After this line',
   'plate.idleNote':
-    'Verdict box — the verdict and the diagnosis land here once you answer. The space is '
-    + 'held open in advance, so answering never pushes the text above it down.',
+    'Verdict box — pick an answer and press Enter; whether it was right, why, and how many '
+    + 'ink layers it adds land here.',
   'plate.linkPara': 'Tie it back',
   'plate.linkNew': 'Just opened',
   'plate.linkHeading': '↩ Tie it back to what you just learned',

@@ -68,6 +68,11 @@ export interface ClonePadProps {
   ariaLabel?: string | undefined;
   /** true 면 textarea 판을 그린다 (05 §8 마지막 문단). 기본값은 Monaco 다. */
   fallback?: boolean | undefined;
+  /**
+   * 마운트하면 편집기로 포커스를 가져온다 (D170 ⑧). 코스는 판이 걸리는 순간 손이 편집기에
+   * 있어야 한다 — 그 전에는 포커스가 `<body>` 였다. 세션의 T1 판은 교정지가 먼저 받으므로 끈다.
+   */
+  focusOnMount?: boolean | undefined;
 }
 
 const TICK_CLASS: Record<Exclude<LineTick, ''>, string> = {
@@ -152,6 +157,7 @@ function MonacoPad(props: ClonePadProps) {
     });
     edRef.current = editor;
     tickRef.current = editor.createDecorationsCollection();
+    if (at.focusOnMount === true) editor.focus();
 
     // ── 자동 저장 · 글자가 어디서 왔나 ─────────────────────────────────────
     // 계수는 변경마다 돌지만 **부모에게는 저장과 같은 박자로만** 알린다 (D143) —

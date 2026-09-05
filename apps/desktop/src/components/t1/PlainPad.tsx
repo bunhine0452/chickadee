@@ -206,6 +206,9 @@ export function PlainPad(props: ClonePadProps) {
       </div>
       <textarea
         ref={taRef}
+        // 코스가 켠다 (D170 ⑧) — 판이 걸리는 순간 손이 편집기에 있어야 한다.
+        // eslint-disable-next-line jsx-a11y/no-autofocus
+        autoFocus={props.focusOnMount === true}
         value={text}
         rows={rows + 1}
         aria-label={label}

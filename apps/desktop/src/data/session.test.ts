@@ -367,10 +367,22 @@ describe('홈의 「오늘의 인쇄」 미리보기', () => {
   });
 
   test('찍을 것이 없으면 빈 미리보기다', async () => {
+    // 사용처가 없으면 T0·T1 재료가 없고, 파일이 붙은 대지가 없으면 T2 재료가 없다 (D170 ④).
     db.exec('DELETE FROM concept_site');
+    db.exec('DELETE FROM unit_file');
     const preview = await previewToday(1, T);
     expect(preview.items).toEqual([]);
     expect(preview.mins).toBe(0);
+  });
+
+  test('T2 자리를 센다 — 파일이 붙은 대지가 있으면 구조 한 판이 미리보기에 든다 (D170 ④)', async () => {
+    const units = db.prepare(
+      'SELECT COUNT(DISTINCT unit_id) AS n FROM unit_file',
+    ).get() as { n: number };
+    const preview = await previewToday(1, T);
+    expect(preview.items.some((i) => i.kind === 't2')).toBe(units.n > 0);
+    // 미리보기는 여전히 아무것도 굽지 않는다.
+    expect(db.prepare('SELECT COUNT(*) AS n FROM card').get()).toEqual({ n: 0 });
   });
 });
 
