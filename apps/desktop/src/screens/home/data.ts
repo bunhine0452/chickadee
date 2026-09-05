@@ -5,6 +5,7 @@
  * 값(`LY_COUNT`·`mins`·시트·노드)이 실데이터에서 어떤 이름으로 오는지를 고정한다.
  */
 import { MAX_BLOCK_LINES, MAX_UNKNOWN_CONCEPTS, MIN_BLOCK_LINES } from '@chickadee/cards';
+import { ZERO_CHAPTER_UNIT, zeroChapterDone } from '@chickadee/concepts';
 import { t, type MessageKey } from '@chickadee/i18n';
 import { ipc } from '@chickadee/ipc-client';
 import { shownLayerOf, type Scheduler } from '@chickadee/scheduler';
@@ -60,12 +61,6 @@ export const COLOR_BAR_DAYS = 14;
 export const GAPS_LIMIT = 5;
 /** 「다시 찍을 개념」 줄 수. */
 export const RETAKE_LIMIT = 6;
-/**
- * 이보다 많으면 대지 목록에 윈도잉을 건다 (05 §10 · D81). 12 는 05 §10 의 「홈 시트 12장
- * 초과」 그대로다 — 그 아래에서는 화면 밖 대지가 거의 없어 가시성 판정 비용만 남는다.
- */
-export const WINDOW_SHEETS = 12;
-
 export type NodeState = 'done' | 'current' | 'locked' | 'open';
 
 export interface HomeNode {
@@ -84,12 +79,30 @@ export interface HomeSheet {
   unitId: number;
   name: string;
   rootPath: string | null;
+  /** 「0장 — 이 언어의 바닥」인가 (D136). 색인 띠가 이 칩만 다르게 그린다. */
+  zero: boolean;
   files: number;
   /** 시트의 새 선명도 = 노드 겹의 내림 평균 (목업 `paintSheet`). */
   avgLayer: Layer;
   state: 'done' | 'current' | 'locked';
   nodes: HomeNode[];
 }
+
+/**
+ * 대지의 판번호 (1부터). **0장은 번호를 먹지 않는다** — 리포의 기능이 아니라 프롤로그라
+ * 「1대」는 언제나 첫 번째 진짜 대지다 (D136). 0장 자리에서 부르면 0 이 나온다.
+ */
+export function sheetNo(sheets: readonly HomeSheet[], index: number): number {
+  let n = 0;
+  for (let i = 0; i <= index && i < sheets.length; i += 1) {
+    if (sheets[i]?.zero !== true) n += 1;
+  }
+  return n;
+}
+
+/** 아직 안 깔린 다음 대지의 번호 — 미조판 예고가 쓴다. */
+export const nextSheetNo = (sheets: readonly HomeSheet[]): number =>
+  sheets.filter((s) => !s.zero).length + 1;
 
 export interface HomeGap {
   conceptId: string;
@@ -202,7 +215,11 @@ export async function loadHome(
   for (const row of scale) inkScale[asLayer(row.layer)] = row.n;
 
   const filesByUnit = new Map(unitFiles.map((r) => [r.name, r.files]));
-  const sheets = buildSheets(units, filesByUnit, prereqRows, fade);
+  const sheets = buildSheets(units, filesByUnit, prereqRows, {
+    newcomer: settings.newcomerFlag,
+    cleared: settings.rootCleared,
+    declaredNewcomer: settings.declaredNewcomer,
+  }, fade);
   const maxGap = Math.max(1, ...gapRows.map((g) => g.site_count));
   const first = counts[0];
   const run = runRows[0];
@@ -262,10 +279,20 @@ type PrereqRow = Awaited<ReturnType<typeof ipc.store.query<'home.node_prereqs'>>
  *
  * 잠긴 노드는 흔들지 않는다 — 상세에 이유만 연다 (D11).
  */
+/** 0장 대지 하나만 쓰는 원장 값 (D136 §끝나는 조건 · D147). 다른 대지는 안 본다. */
+interface ZeroChapterState {
+  newcomer: NewcomerFlag;
+  /** 뿌리 넉 장 중 셋을 맞힌 세션이 나온 적 있는가. `session-flow` 가 세션 끝에 박는다. */
+  cleared: boolean;
+  /** 첫 실행에서 「프로그래밍이 처음」이라고 답했는가. */
+  declaredNewcomer: boolean;
+}
+
 function buildSheets(
   rows: readonly UnitRow[],
   files: ReadonlyMap<string, number>,
   prereqRows: readonly PrereqRow[],
+  zero: ZeroChapterState,
   fade?: { scheduler: Scheduler; now: number },
 ): HomeSheet[] {
   const shownOf = new Map<string, Layer>();
@@ -300,10 +327,13 @@ function buildSheets(
 
   const sheets = new Map<number, HomeSheet>();
   for (const row of rows) {
+    // 0장의 `unit.name` 은 안정 키라 화면에 그대로 내면 안 된다 — 라벨은 카탈로그가 낸다.
+    const zero = row.source === 'manual' && row.name === ZERO_CHAPTER_UNIT;
     const sheet = sheets.get(row.unit_id) ?? {
       unitId: row.unit_id,
-      name: row.name,
+      name: zero ? t('home.zeroChapter') : row.name,
       rootPath: row.root_path,
+      zero,
       files: files.get(row.name) ?? 0,
       avgLayer: 0 as Layer,
       state: 'current' as const,
@@ -327,7 +357,23 @@ function buildSheets(
   for (const sheet of sheets.values()) {
     const sum = sheet.nodes.reduce((a, n) => a + n.shownLayer, 0);
     sheet.avgLayer = asLayer(sheet.nodes.length ? Math.floor(sum / sheet.nodes.length) : 0);
-    sheet.state = sheet.nodes.every((n) => n.state === 'done') ? 'done' : 'current';
+    // 0장만 끝나는 조건이 셋이다 (D136 · D147). 나머지 대지는 「전부 1겹」 하나뿐이라
+    // 여기서 갈라 둔다 — 0장에 「전부 1겹」만 걸면 그 언어를 이미 아는 사람이 전부를
+    // 다 찍어야 벗어난다 (상한은 D184 로 없어졌다).
+    const done = sheet.zero
+      ? zeroChapterDone({
+          plates: sheet.nodes.map((n) => ({
+            conceptId: n.conceptId, siteId: null, previewSiteId: null, depth: 0,
+          })),
+          layerOf: (id) => shownOf.get(id) ?? 0,
+          newcomer: zero.newcomer,
+          cleared: zero.cleared,
+          declaredNewcomer: zero.declaredNewcomer,
+          // 조건 ③ 「설정 「학습」에서 끔」의 스위치는 아직 없다 (D136). 생기면 여기 들어온다.
+          disabled: false,
+        })
+      : sheet.nodes.every((n) => n.state === 'done');
+    sheet.state = done ? 'done' : 'current';
     // 잠기지 않은 첫 미인쇄가 「지금 여기」다.
     const next = sheet.nodes.find((n) => n.state === 'open');
     if (next) next.state = 'current';

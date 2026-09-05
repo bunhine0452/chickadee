@@ -1,0 +1,174 @@
+schema: 1
+id: cpp/virtual-override
+# §4 심화 #27. `common/method-override` 는 **아직 없다** — 파이썬 · TS · Swift · Dart 넷에서
+# 성립하는 후보로 보고했고, 서면 그때 건다. C++ 쪽 어긋남은 「표시를 안 붙이면 실행할 때
+# 안 고른다」이고 그것이 나머지 넷과 정반대다.
+universal: null
+name: { ko: 같은 이름 다른 몸통, en: virtual and override }
+token: "virtual"
+grammars: [cpp]
+framework: null
+essential: true
+difficulty: 4
+prereq: [cpp/class-definition, cpp/destructor, cs/dynamic-dispatch]
+confusions: []
+dict:
+  one_liner:
+    ko: "표시를 붙여야 실행할 때 몸통을 고른다. 안 붙이면 적힌 타입이 이긴다."
+    en: "Only a marked function is chosen at run time; else the written type wins."
+  why:
+    ko: >-
+      파이썬·자바에서는 하위 타입이 같은 이름을 다시 적으면 <b>언제나</b> 그쪽이 불립니다.
+      C++ 은 반대예요 — 표시가 없으면 <b>적힌 타입 그대로</b> 부릅니다. 기반 타입 이름으로
+      들고 있으면 하위 쪽 몸통이 <b>안 불려요</b>. {{site.line}}행의 표시가 그 규칙을
+      뒤집습니다: 이 표시가 붙은 함수만 실행할 때 고릅니다.
+      가장 비싼 자리는 <b>끝날 때 도는 함수</b>입니다 — 거기에 이 표시가 없으면 기반 타입
+      이름으로 자리를 돌려줄 때 하위 쪽 정리가 안 돌고 조용히 샙니다.
+    en: >-
+      In Python and Java, a subtype rewriting the same name is <b>always</b> the one called. C++
+      is the reverse: with no mark it calls <b>exactly the written type's</b> version. Held under
+      the base type's name, the subtype's body is <b>never called</b>. The mark on line
+      {{site.line}} flips that rule: only a marked function is chosen at run time. The most
+      expensive place is <b>the end-of-life function</b> — without the mark there, releasing
+      through a base-type name skips the subtype's cleanup and leaks quietly.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 고르기를 실행할 때로 미룬다."
+      en: "On line {{site.line}}, {{pick.1|code}} defers the choosing to run time."
+    - ko: "{{pick.2|code}}{{pick.2|josa:을,를}} 부르면 그 값의 실제 타입을 본다."
+      en: "Calling {{pick.2|code}} looks at the value's actual type."
+    - ko: "표시가 없으면 적힌 타입 쪽 몸통이 돈다."
+      en: "With no mark the written type's body runs."
+rule:
+  ko: "<b>표시가 있어야 실행할 때 고른다.</b> 끝날 때 도는 함수에 빠지면 조용히 샌다."
+  en: "<b>Only a marked function is chosen at run time.</b> Missing on cleanup, it leaks quietly."
+result:
+  label: { ko: "{{site.line}}행이 고르는 때", en: "when line {{site.line}} chooses" }
+  value: "{{pick.1}} {{pick.3}} {{pick.2}}"
+  note: { ko: "실행할 때 실제 타입을 본다", en: "it looks at the actual type at run time" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 이제 값의 실제 타입에 따라 몸통이 골라집니다."
+  en: "The body of {{pick.2|code}} is now chosen by the value's actual type."
+payoff:
+  ko: >-
+    이걸 알면 「하위 쪽을 적었는데 기반 쪽이 불린다」가 풀립니다 — 표시가 없었어요.
+  en: >-
+    This untangles “I wrote the subtype version and the base one ran” — the mark was missing.
+bridge:
+  ko: >-
+    자바·파이썬은 <b>기본이 실행할 때 고르기</b>이고 막으려면 낱말을 붙입니다. C++ 은
+    정반대라 <b>붙여야 골라요</b>.
+  en: >-
+    Java and Python <b>choose at run time by default</b> and need a word to stop it. C++ is the
+    reverse: it <b>chooses only when marked</b>.
+misconceptions:
+  # `cpp.md` §9 #6 · #7.
+  - ko: "하위에서 같은 이름을 적으면 그쪽이 불린다 — 표시가 없으면 적힌 타입 쪽이 불립니다."
+    en: "Rewriting the name in a subtype makes it called — without the mark the written type wins."
+  - ko: "끝날 때 도는 함수는 알아서 이어진다 — 표시가 없으면 하위 쪽이 안 돌고 샙니다."
+    en: "Cleanup chains on its own — without the mark the subtype's is skipped and it leaks."
+  - ko: "두 번째 표시는 없어도 같다 — 결과는 같지만, 이름을 잘못 적으면 그 표시가 잡아 줍니다."
+    en: "The second mark is optional — the result matches, but it catches a mistyped name."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>고르기를 실행할 때로 미루는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that defers the choosing to run time</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>함수 이름</b>입니다. 같은 이름을 하위에 적어도 표시가 없으면 안 골라져요."
+          en: "{{pick.2|code}} is the <b>function's name</b>. Rewriting it in a subtype changes nothing without the mark."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 표시냐", en: "The sharpest spot — the name or the mark" }
+          code:
+            - "void draw();           // 적힌 타입이 이긴다"
+            - "virtual void draw();   // 실제 타입이 이긴다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>돌려줄 것</b>입니다. 고르기와는 상관이 없어요."
+          en: "{{pick.3|code}} is <b>what comes back</b>. It has nothing to do with the choosing."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 돌려줄 것이냐 고르기냐", en: "The sharpest spot — the result or the choosing" }
+          code:
+            - "virtual void draw();"
+            - "virtual int size() const;"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 몸통을 <b>실행할 때 고르게</b> 합니다."
+      en: "Choose what goes in the blank. Line {{site.line}} makes the body <b>chosen at run time</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "virtual", mono: true }
+      - t: "override"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>하위 쪽에 붙는</b> 확인 표시입니다. 기반 쪽에 미루기 표시가 없으면 이것만으로는 안 골라지고 컴파일도 멈춰요."
+            en: "That is a check mark that goes on <b>the subtype's side</b>. Without the deferring mark on the base it does not choose, and it stops compiling."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 기반이냐 하위냐", en: "The sharpest spot — base or subtype" }
+            code:
+              - "virtual void draw();       // 기반"
+              - "void draw() override;      // 하위"
+      - t: "static"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>객체 없이 부르는</b> 함수를 만듭니다. 고를 값 자체가 없어서 실행할 때 고르기와는 정반대예요."
+            en: "That makes a function called <b>without an object</b>. With no value to look at, it is the opposite of choosing at run time."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값이 있느냐", en: "The sharpest spot — is there a value" }
+            code:
+              - "virtual void draw();   // 값마다 다르다"
+              - "static void help();    // 값이 없다"
+      - t: "final"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>더 못 바꾸게</b> 막습니다. 이미 미루기가 켜진 함수에 붙는 것이라, 켜는 일은 안 해요."
+            en: "That <b>blocks further change</b>. It attaches to a function where deferring is already on, so it never turns it on."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 켜기냐 잠그기냐", en: "The sharpest spot — turning on or locking" }
+            code:
+              - "virtual void draw();          // 켠다"
+              - "void draw() override final;   // 잠근다"
+why_gate:
+  q:
+    ko: "다른 언어는 기본으로 고르는데 C++ 은 왜 <b>표시를 붙여야</b> 고를까요?"
+    en: "Other languages choose by default — why does C++ <b>need a mark</b>?"
+  choices:
+    - t:
+        ko: "고르려면 값마다 표를 하나 들고 다녀야 하기 때문 — 안 쓰는 타입까지 그 비용을 내지 않게 한 것이다"
+        en: "Because choosing needs a table carried by every value, and types that never need it should not pay"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 대가로 어떤 사고가 생기는지도 적어 보세요."
+        en: "That is the direction. Add what accident that choice creates."
+    - t:
+        ko: "상속을 안 쓰게 하려고"
+        en: "To discourage inheritance"
+      ok: false
+      fb:
+        ko: "막는 것이 아닙니다. <b>안 쓰는 타입이 비용을 안 내게</b> 한 것이에요."
+        en: "Nothing is discouraged. It is so that <b>types not using it pay nothing</b>."
+    - t:
+        ko: "컴파일러가 하위 타입을 못 찾아서"
+        en: "Because the compiler cannot find subtypes"
+      ok: false
+      fb:
+        ko: "찾습니다. 문제는 <b>실행할 때</b> 어느 것인지이고, 그건 표가 있어야 알아요."
+        en: "It can. The question is which one <b>at run time</b>, and that needs the table."
+queries:
+  - { grammars: [cpp], file: ./virtual-override.scm }
+examples:
+  - code: "class A { public: virtual void draw(); };      // 실제 타입에 따라 골라진다"
+    expect: { sites: 1, form: virtual, hole: "virtual", picks: { 1: "virtual", 2: "draw", 3: "void" } }
+  - code: "class B { public: void draw() override; };     // 하위 쪽 확인 표시"
+    expect: { sites: 1, form: override, hole: "override", picks: { 1: "override", 2: "draw", 3: "void" } }
+  - code: "class A { public: void draw(); };              // 적힌 타입이 이긴다"
+    expect: none

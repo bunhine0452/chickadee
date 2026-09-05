@@ -113,18 +113,29 @@ UPDATE concept_site SET is_alive = 0, updated_at = :updatedAt
 WHERE repo_id = :repoId AND file_id = :fileId AND is_alive = 1
   AND site_key NOT IN (SELECT value FROM json_each(:keys));
 
+-- `file_id` 는 창 계산이 쓴다 — 같은 파일 안 사용처끼리만 창을 나눠 가진다 (D155).
 -- @name derive.sites_for_rank
 -- @params { repoId: number }
--- @row { id: number, site_key: string, concept_id: string, path: string, line_start: number, line_end: number, uncovered_ratio: number, line_concepts_json: string, is_dirty: number, unknown_count: number }
-SELECT s.id, s.site_key, s.concept_id, f.path, s.line_start, s.line_end,
+-- @row { id: number, site_key: string, concept_id: string, file_id: number, path: string, line_start: number, line_end: number, uncovered_ratio: number, line_concepts_json: string, is_dirty: number, unknown_count: number }
+SELECT s.id, s.site_key, s.concept_id, s.file_id, f.path, s.line_start, s.line_end,
        s.uncovered_ratio, s.line_concepts_json, s.is_dirty, s.unknown_count
 FROM concept_site s JOIN file f ON f.id = s.file_id
 WHERE s.repo_id = :repoId AND s.is_alive = 1;
 
+-- 창의 바깥 테두리 — 사용처를 감싸는 블록 (D141 · D155). 리포 한 번에 다 긷고 파일별로
+-- 나눈다: 사용처마다 부르면 4,000번짜리 쿼리가 된다.
+-- @name derive.blocks_for_rank
+-- @params { repoId: number }
+-- @row { file_id: number, line_start: number, line_end: number }
+SELECT b.file_id, b.line_start, b.line_end
+FROM block b
+WHERE b.repo_id = :repoId AND b.is_alive = 1 AND b.rev IS NULL;
+
+-- 두 수는 같은 패스가 함께 쓴다 — 겹이 바뀌면 둘 다 바뀐다 (D155).
 -- @name derive.unknown_count_set
--- @params { repoId: number, siteKey: string, unknownCount: number }
+-- @params { repoId: number, siteKey: string, unknownCount: number, windowUnknown: number }
 -- @row void
-UPDATE concept_site SET unknown_count = :unknownCount
+UPDATE concept_site SET unknown_count = :unknownCount, window_unknown = :windowUnknown
 WHERE repo_id = :repoId AND site_key = :siteKey;
 
 -- 2차 패스가 blame 으로 사용처의 출처 커밋을 채운다 (03 §1.5).
@@ -153,6 +164,22 @@ VALUES (:repoId, :name, :rootPath, 'dir', :orderIdx)
 ON CONFLICT (repo_id, name) DO UPDATE SET
   root_path = excluded.root_path, order_idx = excluded.order_idx;
 
+-- 리포 파일에 대응하지 않는 대지 — 지금은 「0장 — 이 언어의 바닥」 하나다 (D136).
+-- `name` 은 화면에 나오지 않는 안정 키다(라벨은 i18n 이 낸다). `order_idx` 를 음수로 두어
+-- 색인 띠 맨 앞에 선다.
+-- @name derive.unit_manual_upsert
+-- @params { repoId: number, name: string, orderIdx: number }
+-- @row void
+INSERT INTO unit (repo_id, name, root_path, source, order_idx)
+VALUES (:repoId, :name, NULL, 'manual', :orderIdx)
+ON CONFLICT (repo_id, name) DO UPDATE SET order_idx = excluded.order_idx;
+
+-- 이미 열려 있는 수동 대지. 0장을 **두 번 열지 않기** 위한 것이다 (D136).
+-- @name derive.unit_manual_names
+-- @params { repoId: number }
+-- @row { name: string }
+SELECT name FROM unit WHERE repo_id = :repoId AND source = 'manual';
+
 -- @name derive.unit_files_clear
 -- @params { repoId: number }
 -- @row void
@@ -163,6 +190,35 @@ DELETE FROM unit_file WHERE unit_id IN (SELECT id FROM unit WHERE repo_id = :rep
 -- @row void
 INSERT OR IGNORE INTO unit_file (unit_id, file_id)
 VALUES ((SELECT id FROM unit WHERE repo_id = :repoId AND name = :name), :fileId);
+
+-- 챕터 진도 (D162). `unit` 과 1:1 이라 이름으로 찾아 꽂는다 — `unit_file_insert` 와 같은 수다.
+-- 진도(`stage_reached`·재검 열)는 **안 건드린다**: 다시 인제스트해도 배운 것이 안 지워진다.
+-- @name derive.chapter_upsert
+-- @params { repoId: number, name: string, origin: string, updatedAt: number }
+-- @row void
+INSERT INTO chapter (unit_id, origin, updated_at)
+VALUES ((SELECT id FROM unit WHERE repo_id = :repoId AND name = :name), :origin, :updatedAt)
+ON CONFLICT (unit_id) DO UPDATE SET origin = excluded.origin, updated_at = excluded.updated_at;
+
+-- 대지가 사라지면 챕터도 사라진다. `unit` 의 CASCADE 가 하지만 대지를 지우지 않고
+-- 이름만 바뀐 경우를 위해 남긴다.
+-- @name derive.chapter_delete_missing
+-- @params { repoId: number }
+-- @row void
+DELETE FROM chapter WHERE unit_id NOT IN (SELECT id FROM unit WHERE repo_id = :repoId);
+
+-- 대지에 든 파일. `writeUnitNodes` 가 대지를 **다시 파생하지 않고** 방금 쓴 것을 읽는다 —
+-- 같은 규칙을 두 곳에서 돌리면 둘이 어긋날 자리가 생긴다.
+-- 파일 하나가 대지 여럿에 들 수 있다 (D160). `unit_file` 의 기본키가 `(unit_id, file_id)` 다.
+-- @name derive.unit_files
+-- @params { repoId: number }
+-- @row { name: string, path: string }
+SELECT u.name, f.path
+FROM unit_file uf
+JOIN unit u ON u.id = uf.unit_id
+JOIN file f ON f.id = uf.file_id
+WHERE u.repo_id = :repoId AND f.is_alive = 1
+ORDER BY u.name, f.path;
 
 -- @name derive.unit_nodes_clear
 -- @params { repoId: number }
@@ -176,10 +232,14 @@ INSERT OR IGNORE INTO unit_node (unit_id, concept_id, track, node_order)
 VALUES ((SELECT id FROM unit WHERE repo_id = :repoId AND name = :name), :conceptId, :track, :nodeOrder);
 
 -- 이번 인제스트에서 사라진 대지. 하위 행은 ON DELETE CASCADE 가 정리한다.
+-- `source='manual'` 은 리포 파일에서 나온 것이 아니므로 이 청소를 타지 않는다 (D136) —
+-- 0장 대지는 재인제스트를 건너서도 남는다.
 -- @name derive.unit_delete_missing
 -- @params { repoId: number, names: string[] }
 -- @row void
-DELETE FROM unit WHERE repo_id = :repoId AND name NOT IN (SELECT value FROM json_each(:names));
+DELETE FROM unit
+WHERE repo_id = :repoId AND source <> 'manual'
+  AND name NOT IN (SELECT value FROM json_each(:names));
 
 -- ───────── 구멍 지도 ─────────
 

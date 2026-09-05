@@ -1,0 +1,200 @@
+schema: 1
+id: java/collection-generic
+universal: common/list
+name: { ko: 담는 상자와 그 안의 타입, en: Typed collections }
+token: "List<"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 3
+prereq: [java/new-expression, java/variable-declaration, cs/erasure-and-reification, cs/static-vs-dynamic-typing, cs/contiguous-vs-linked, cs/hash-table]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "바깥은 담는 상자, 각괄호 안은 담기는 것의 종류다."
+    en: "Outside is the container; inside the angle brackets is the kind of thing held."
+  why:
+    ko: >-
+      담는 상자만 적으면 「무엇이 들었나」를 꺼내 봐야 압니다. 각괄호에 <b>안의 종류</b>를 같이
+      적으면 꺼내기 전에 알 수 있고, 엉뚱한 것을 넣으려 할 때 컴파일러가 막아 줘요.
+      {{site.line}}행에서 {{pick.1|code}}{{pick.1|josa:은,는}} 담는 쪽이고
+      {{pick.2|code}}{{pick.2|josa:은,는}} 담기는 쪽입니다. 스프링 코드가 어려워 보이는 이유의 절반이
+      여기예요 — 각괄호가 겹겹이 쌓여 있을 뿐, 규칙은 <b>바깥은 담는 것 · 안은 담기는 것</b> 하나입니다.
+    en: >-
+      Write only the container and “what is inside” is knowable only by taking something out. Writing
+      the <b>inner kind</b> in the angle brackets tells you before you look, and the compiler blocks
+      anything that does not belong. On line {{site.line}}, {{pick.1|code}} is the holding side and
+      {{pick.2|code}} is the held side. Half of what makes Spring code look hard is here — the angle
+      brackets stack up, but the rule is one: <b>outside holds, inside is held</b>.
+  trace:
+    - ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 담는 쪽의 이름이다."
+      en: "{{pick.1|code}} names the holding side."
+    - ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 그 안에 들어갈 것의 종류다."
+      en: "{{pick.2|code}} is the kind of thing that goes inside."
+    - ko: "각괄호는 컴파일할 때만 있고 돌아갈 때는 지워진다."
+      en: "The angle brackets exist only at compile time and are erased when it runs."
+
+rule:
+  ko: "<b>각괄호는 컴파일할 때만 있다.</b> 돌아갈 때 안의 종류는 남지 않는다."
+  en: "<b>The angle brackets exist only at compile time.</b> The inner kind is gone at run time."
+ok:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:이,가}} 담고, 그 안에 들어갈 것이 {{pick.2|code}} 하나로 못박혀 있습니다.
+  en: >-
+    {{pick.1|code}} does the holding, and what may go inside is pinned to {{pick.2|code}}.
+payoff:
+  ko: >-
+    이걸 알면 <code>ResponseEntity&lt;LoginResponse&gt;</code> 같은 긴 타입이 두 조각으로 읽힙니다 —
+    <b>무엇으로 감쌌나</b>와 <b>무엇을 담았나</b>예요.
+  en: >-
+    Knowing this splits a long type like <code>ResponseEntity&lt;LoginResponse&gt;</code> in two —
+    <b>what wraps it</b> and <b>what it carries</b>.
+bridge:
+  ko: >-
+    파이썬·자바스크립트는 안의 종류를 <b>안 적어도</b> 됩니다. 자바는 적어야 하고, 그 대신 잘못
+    넣는 실수를 돌기 전에 잡습니다.
+  en: >-
+    Python and JavaScript need <b>no</b> inner kind. Java asks for one, and in exchange catches a mismatched
+    insertion before anything runs.
+misconceptions:
+  - ko: "각괄호 안의 종류가 실행할 때도 남아 있다 — 컴파일이 끝나면 지워집니다. 그래서 실행 중에 물어볼 수 없어요."
+    en: "The inner kind survives to run time — it is erased after compiling, so it cannot be asked about while running."
+  - ko: "원시 타입도 안에 넣을 수 있다 — 숫자·참거짓 같은 원시 타입은 못 들어갑니다. 감싼 이름을 써야 해요."
+    en: "A primitive fits inside — numbers and truth values do not. Their wrapper names must be used."
+  - ko: "왼쪽과 오른쪽에 같은 이름을 적어야 한다 — 왼쪽은 <b>무엇으로 쓸지</b>, 오른쪽은 <b>무엇으로 만들지</b>라 다를 수 있습니다."
+    en: "The two sides must name the same thing — the left says <b>what it is used as</b>, the right <b>what it is made as</b>. They may differ."
+  - ko: "길이를 재는 방법이 다 같다 — 셋이 다릅니다. 배열·글자·담는 상자가 각각 다른 이름으로 답해요."
+    en: "Length is asked the same way everywhere — three different ways. Arrays, strings and containers each answer to a different name."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>안에 담기는 것의 종류</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the kind of thing held inside</b>."
+    hint:
+      ko: "각괄호 <b>안</b>입니다."
+      en: "It is <b>inside</b> the angle brackets."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>담는 쪽</b>입니다. 담기는 것은 각괄호 안에 있어요."
+          en: "{{pick.1|code}} is the <b>holding side</b>. What is held sits inside the angle brackets."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 담는 쪽이냐 담기는 쪽이냐"
+            en: "The sharpest spot — the holder or the held"
+          code:
+            - "List<String> xs;"
+            - "// ^담는 쪽 ^담기는 쪽"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>이름</b>입니다. 종류는 이름보다 앞에 적혀 있어요."
+          en: "{{pick.3|code}} is the <b>name</b>. The kinds are written before it."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 종류냐 이름이냐"
+            en: "The sharpest spot — the kind or the name"
+          code:
+            - "타입: 이름보다 앞"
+            - "이름: 그다음"
+
+meaning:
+  - q:
+      ko: "각괄호 안에 적은 종류는 <b>실행할 때</b>도 남아 있을까요?"
+      en: "Does the kind written in the angle brackets survive <b>to run time</b>?"
+    hint:
+      ko: "이 표시는 컴파일러에게 하는 말입니다."
+      en: "This marking is spoken to the compiler."
+    options:
+      - t:
+          ko: "안 남는다 — 컴파일이 끝나면 지워진다"
+          en: "No — it is erased once compiling ends"
+      - t:
+          ko: "남는다 — 담긴 것의 종류를 물어볼 수 있다"
+          en: "Yes — the held kind can be asked about"
+        diag:
+          t:
+            ko: "물어보면 <b>담는 쪽</b>만 나옵니다. 안의 종류는 지워져서, 안이 다른 두 상자가 실행할 때는 같은 종류예요."
+            en: "Asking returns only the <b>holder</b>. The inner kind is erased, so two containers with different insides are the same kind at run time."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 컴파일 때냐 돌 때냐"
+              en: "The sharpest spot — compile time or run time"
+            code:
+              - "컴파일 때: 안의 종류를 본다"
+              - "돌 때:     담는 쪽만 남는다"
+      - t:
+          ko: "남지만 값을 넣어 본 뒤에만 알 수 있다"
+          en: "It survives, but is knowable only after something is put in"
+        diag:
+          t:
+            ko: "넣은 값의 종류는 값이 스스로 압니다. 각괄호에 적은 <b>약속</b>은 그것과 별개이고, 그 약속이 지워지는 거예요."
+            en: "A value knows its own kind. The <b>promise</b> written in the brackets is separate, and that promise is what is erased."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 값의 종류냐 약속이냐"
+              en: "The sharpest spot — a value's kind or the promise"
+            code:
+              - "값:   자기 종류를 안다"
+              - "약속: 컴파일이 끝나면 사라진다"
+      - t:
+          ko: "남지 않아서 잘못된 것을 넣어도 아무도 못 막는다"
+          en: "It does not survive, so nothing can stop a mismatched insertion"
+        diag:
+          t:
+            ko: "막는 쪽은 <b>컴파일러</b>입니다. 돌기 전에 걸리므로 지워지는 것과 막히는 것은 서로 어긋나지 않아요."
+            en: "The <b>compiler</b> is what stops it. It is caught before running, so erasure and blocking do not contradict."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 누가 언제 막나"
+              en: "The sharpest spot — who blocks, and when"
+            code:
+              - "막는 쪽: 컴파일러"
+              - "지워지는 때: 그 뒤"
+
+no_hole_reason: >-
+  빈칸의 정답이 사용처마다 갈린다 — 담는 쪽 이름이 List·Map·ResponseEntity 로 제각각이고,
+  안의 종류도 그 줄이 무엇을 다루느냐로 정해진다. 고정된 보기를 만들 수 없다.
+  같은 이유로 java/variable-declaration 도 빈칸을 안 낸다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행이 각괄호에 종류를 <b>적어 둔</b> 이유는 무엇일까요?"
+    en: "Why does line {{site.line}} <b>write</b> a kind in the angle brackets?"
+  choices:
+    - t:
+        ko: "꺼내 쓸 때마다 <b>무엇인지 확인하지 않아도</b> 되게 하려고 — 잘못 넣는 것도 돌기 전에 걸린다"
+        en: "So nothing has to be <b>checked on the way out</b> — and a mismatched insertion is caught before it runs"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 안 적었으면 어디서 확인해야 했을지도 적어 보세요."
+        en: "That is the direction. Add where the check would have had to happen instead."
+    - t:
+        ko: "메모리를 아끼려고"
+        en: "To save memory"
+      ok: false
+      fb:
+        ko: "실행할 때는 지워져서 메모리와 관계가 없습니다. 얻는 것은 <b>컴파일 때의 확인</b>이에요."
+        en: "It is erased at run time and touches no memory. What it buys is <b>a check at compile time</b>."
+    - t:
+        ko: "자바가 각괄호 없이는 담는 상자를 못 만들어서"
+        en: "Because Java cannot make a container without them"
+      ok: false
+      fb:
+        ko: "안 적어도 만들어집니다. 다만 꺼낼 때마다 무엇인지 확인해야 해요."
+        en: "It can be made without them. Then every value taken out has to be checked."
+
+queries:
+  - { grammars: [java], file: ./collection-generic.scm }
+
+examples:
+  - code: "void m() { List<String> roles = new ArrayList<>(); }"
+    expect:
+      sites: 1
+      form: local
+      picks: { 1: "List", 2: "String", 3: "roles" }
+  - code: "class C { private Map<String, Object> claims = null; }"
+    expect: { sites: 1, form: field, picks: { 1: "Map", 2: "String" } }
+  - code: "void m() { String role = \"USER\"; }"
+    expect: none

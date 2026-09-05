@@ -1,0 +1,32 @@
+{
+  "$why": "학습질 성질 게이트 셋의 문턱과 예외 (D186 ③). 문턱을 상수로 코드에 박지 않는 이유는 D181·D184 와 같다 — 수는 재는 것이지 막는 것이 아니고, 바꿀 때 근거를 같은 자리에 적게 하려는 것이다. 예외에는 만료일이 있어야 한다 (06 §2, 최대 90일).",
+  "thresholds": {
+    "minMyCodeShare": 0.5,
+    "$minMyCodeShare": "J2 가 자바로 잰 값이 0부 53% · 0·1·2부 70% 다(`docs/curriculum/java-learning.md` §N). 0.5 는 그 아래 첫 자리 — 절반을 못 넘기면 「내 코드가 교재」(정본 §1)가 이름뿐이다. 실측이 올라가면 이 수를 올린다(래칫).",
+    "minLadderLangs": 10,
+    "$minLadderLangs": "0부 사다리로 값 추적 판이 서는 언어 수. 카탈로그가 열 언어를 다 덮으므로 열이 정답이고, 하나라도 빠지면 그 언어의 2단에 값 굴리는 판이 없다는 뜻이다.",
+    "maxTraceMissingWithoutReason": 0,
+    "$maxTraceMissingWithoutReason": "못 구운 것은 괜찮고 **말 안 하는 것**이 안 된다 (D186 ④). 사유 없는 침묵은 0 이어야 한다.",
+    "maxDiagnosisNone": 0,
+    "$maxDiagnosisNone": "카탈로그 전 장에 siblings·variants·langAlt 중 하나 이상. 0 이 아니게 되는 순간 그 판은 「왜 틀렸는지 말 못 하는 판」이다.",
+    "minExprPerAxis": 3,
+    "$minExprPerAxis": "재출제가 「다른 식 같은 개념」이려면 개념당 식이 둘 이상이어야 하고(D187 ②), 축 하나가 개념 하나이므로 셋이면 두 번 다시 내도 안 겹친다."
+  },
+  "entries": [
+    {
+      "at": "sql/assignment",
+      "why": "SQL 에는 대입이 없다 — 여덟 축 중 하나가 아예 비는 것이 그 언어의 사실이고 `docs/curriculum/README.md` §8 이 그렇게 적었다. 사유는 `buildValueItems('sql').dropped` 에 세 줄로 남는다.",
+      "expires": "2026-12-01"
+    },
+    {
+      "at": "sql/float",
+      "why": "`0.1 + 0.2` 를 SQL 에서는 안 낸다 — sqlite3 셸이 값을 15자리로 줄여 찍어 「보인 것」과 「값」이 어긋난다(실측). 나머지 둘(0 나눗셈 · 실수 같음)은 선다.",
+      "expires": "2026-12-01"
+    },
+    {
+      "at": "swift/text",
+      "why": "스위프트는 문자열을 정수로 색인하지 않는다 — `String.Index` 를 거쳐야 한다. 그 자체가 축 3 의 교재라 억지로 낼 식을 만들지 않았다.",
+      "expires": "2026-12-01"
+    }
+  ]
+}

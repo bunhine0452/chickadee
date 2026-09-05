@@ -1,0 +1,125 @@
+schema: 1
+id: csharp/null-conditional
+universal: common/optional-chaining
+name: { ko: 없을 수 있는 값 건너뛰기, en: Null conditional }
+token: "?."
+grammars: [c_sharp]
+framework: null
+essential: true
+difficulty: 2
+prereq: [csharp/nullable-reference, csharp/member-access]
+confusions: []
+dict:
+  one_liner:
+    ko: "앞이 없음이면 뒤를 안 보고, 그 자리의 값도 없음이 된다."
+    en: "If the front is absent the rest is skipped, and the result is absent too."
+  why:
+    ko: >-
+      {{site.line}}행에서 {{pick.2|code}}{{pick.2|josa:이,가}} 없음이면 {{pick.3|code}}{{pick.3|josa:을,를}}
+      아예 <b>안 봅니다</b> — 그래서 예외가 안 나요. 대신 값이 없어졌으니 결과 타입이
+      <b>한 겹 바뀝니다</b>: 값 타입 멤버였다면 <code>int</code>가 아니라 <code>int?</code>가
+      나옵니다. 이 한 겹 때문에 뒤에서 <code>?? 0</code>을 붙이는 자리가 생기고,
+      그 둘이 같이 다니는 것이 C# 의 관용입니다.
+    en: >-
+      On line {{site.line}}, if {{pick.2|code}} is absent then {{pick.3|code}} is <b>not looked
+      at</b> at all, so no exception is raised. But the value is gone, so the result type gains
+      <b>one layer</b>: a value-type member yields <code>int?</code>, not <code>int</code>.
+      That layer is why <code>?? 0</code> so often follows, and the two travelling together is
+      the C# idiom.
+  trace:
+    - ko: "{{site.line}}행에서 {{pick.2|code}}{{pick.2|josa:을,를}} 먼저 본다."
+      en: "On line {{site.line}}, {{pick.2|code}} is looked at first."
+    - ko: "없음이면 {{pick.3|code}} 쪽으로 안 간다."
+      en: "If it is absent, it never reaches {{pick.3|code}}."
+    - ko: "결과 타입은 없음이 될 수 있는 쪽으로 한 겹 바뀐다."
+      en: "The result type gains a layer that allows absence."
+rule:
+  ko: "<b>앞이 없으면 뒤를 안 본다.</b> 그 대신 결과가 없음이 될 수 있는 타입이 된다."
+  en: "<b>Absent front, unread rest.</b> In exchange the result becomes a type that allows absence."
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 있을 때만 {{pick.3|code}} 쪽으로 갑니다."
+  en: "It reaches {{pick.3|code}} only when {{pick.2|code}} is present."
+payoff:
+  ko: "이걸 알면 「예외는 안 나는데 값이 없음이다」가 풀립니다 — 건너뛴 겁니다."
+  en: "This untangles “no exception but the value is absent” — it was skipped."
+bridge:
+  ko: >-
+    자바스크립트의 <code>?.</code>와 같은 기계입니다. 다른 것은 <b>타입이 한 겹 바뀐다</b>는
+    것 — 정적 타입이 있는 쪽에서만 눈에 보이는 결과입니다.
+  en: >-
+    Same machine as JavaScript's <code>?.</code>. What differs is the <b>extra type layer</b>,
+    visible only where there are static types.
+misconceptions:
+  # 출처 — `csharp.md` §3 ㉒.
+  - ko: "결과 타입이 그대로다 — 값 타입 멤버면 없음이 될 수 있는 쪽으로 바뀝니다."
+    en: "The result type is unchanged — on a value-type member it becomes the absence-allowing one."
+  - ko: "뒤쪽 부름이 그래도 한 번은 돈다 — 앞이 없음이면 아예 안 돕니다."
+    en: "The call behind it still runs once — with an absent front it does not run at all."
+  - ko: "사슬 중간에 붙이면 그 자리만 지킨다 — 그 뒤 사슬 전체가 통째로 건너뛰어집니다."
+    en: "Placed mid-chain it guards only that step — the whole rest of the chain is skipped."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>없으면 뒤를 안 보게 하는 표시</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the mark that skips the rest on absence</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>먼저 보는 값</b>입니다. 건너뛰게 만드는 것은 그 뒤의 표시예요."
+          en: "{{pick.2|code}} is the <b>value looked at first</b>. What causes the skip is the mark after it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값이냐 표시냐", en: "The sharpest spot — the value or the mark" }
+          code:
+            - "note.Length;     // 없으면 예외"
+            - "note?.Length;    // 없으면 건너뛴다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 건너뛸 <b>대상</b>입니다. 건너뛰게 하는 것은 앞의 표시입니다."
+          en: "{{pick.3|code}} is <b>what gets skipped</b>. What makes it skippable is the mark before it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 대상이냐 표시냐", en: "The sharpest spot — the target or the mark" }
+          code:
+            - "note?.Length;    // Length 를 건너뛴다"
+            - "?.               // 건너뛰게 하는 것"
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 표기의 표시는 물음표 **한 글자**이고(점은 `csharp/member-access` 의
+  것이다) 빈칸형은 두 글자 이상을 요구한다(`packages/cards/src/t0-blank.ts` 의 `MIN_HOLE`).
+  지목형이 같은 자리를 묻는다.
+why_gate:
+  q:
+    ko: "예외를 막아 주는데 왜 <b>아무 데나</b> 붙이면 안 될까요?"
+    en: "It prevents the exception — why <b>not</b> write it everywhere?"
+  choices:
+    - t:
+        ko: "없어서는 안 될 값까지 조용히 건너뛰어, 원인이 한참 뒤에서 없음으로 나타나기 때문"
+        en: "Because it also skips values that must be there, so the cause shows up much later as absence"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그럼 없으면 안 되는 자리에는 무엇을 적을지도 적어 보세요."
+        en: "That is the direction. Add what to write where absence must not be tolerated."
+    - t:
+        ko: "느려져서"
+        en: "Because it is slow"
+      ok: false
+      fb:
+        ko: "검사 하나 값입니다. 문제는 비용이 아니라 <b>원인이 늦게 드러나는 것</b>이에요."
+        en: "It costs one check. The problem is not cost but that <b>the cause surfaces late</b>."
+    - t:
+        ko: "컴파일러가 경고를 내서"
+        en: "Because the compiler warns"
+      ok: false
+      fb:
+        ko: "경고는 오히려 사라집니다. 그래서 더 위험해요."
+        en: "The warning goes away — which is what makes it riskier."
+queries:
+  - { grammars: [c_sharp], file: ./null-conditional.scm }
+examples:
+  - code: "class A { void F(string? note) { var n = note?.Length; } }"
+    expect: { sites: 1, form: member, picks: { 1: "?", 2: "note", 3: "Length" } }
+  - code: "class A { void F(User? user) { var s = user?.Name; } }"
+    expect: { sites: 1, form: member, picks: { 1: "?", 2: "user", 3: "Name" } }
+  - code: "class A { void F(string note) { var n = note.Length; } }"
+    expect: none

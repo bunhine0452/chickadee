@@ -1,0 +1,180 @@
+schema: 1
+id: rs/iterator-adapters
+# 2부 (`rs.md` §4 · §0.6 이 2부 뒤에 둔다). 보편형은 `common/map-transform`. Rust 에서 다시 배울 것은
+# 어댑터가 **아무것도 안 한다**는 것 — 소비자(`collect`·`for`·`sum`)가 오기 전엔 한 항목도 안 흐른다.
+# 기계는 `cs/eager-vs-lazy`.
+universal: common/map-transform
+name: { ko: 이어 붙여 바꾸기, en: Chaining transformations }
+token: ".map()"
+grammars: [rust]
+framework: null
+essential: true
+difficulty: 3
+prereq: [rs/for-in, rs/closure-capture, cs/eager-vs-lazy]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "걸음을 이어 붙여 변환을 적는다. 이어 붙이는 동안은 아무것도 안 돌고, 끝의 소비자가 와야 흐른다."
+    en: "Chained steps are only plans; items flow when the consumer at the end pulls."
+  why:
+    ko: >-
+      {{site.line}}행은 {{pick.2|code}} 에 {{pick.1|code}}{{pick.1|josa:을,를}} 이어 붙입니다. 파이썬의 리스트 컴프리헨션이 즉시
+      새 목록을 내는 것과 달리, 여기서는 <b>아무것도 안 돕니다</b> — `map` 도 `filter` 도 「이렇게
+      바꾸겠다」는 계획일 뿐이고 항목은 한 개도 안 흐릅니다. 흐르게 하는 것은 끝의 <b>소비자</b>예요:
+      `collect()` 가 목록으로 모으고, `sum()` 이 더하고, `for` 가 하나씩 꺼냅니다. 그래서 소비자 없는
+      사슬은 경고를 받고(`#[must_use]`), 무한한 걸음에 `take(3)` 을 붙여도 돼요. `collect()` 는 무엇으로
+      모을지 알아야 하니 왼쪽의 타입이나 `::&lt;Vec&lt;_&gt;&gt;` 이 필요합니다.
+    en: >-
+      Line {{site.line}} chains {{pick.1|code}} onto {{pick.2|code}}. Unlike a Python list comprehension,
+      which produces a new list at once, <b>nothing runs here</b> — `map` and `filter` are plans, “I will
+      change items this way,” and not one item flows. What makes them flow is the <b>consumer</b> at the
+      end: `collect()` gathers into a list, `sum()` adds, `for` pulls one at a time. So a chain without a
+      consumer draws a warning (`#[must_use]`), and `take(3)` on an endless walk is fine. `collect()`
+      needs to know what to gather into, hence the type on the left or a `::&lt;Vec&lt;_&gt;&gt;`.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 걸음(이터레이터)이다 — 아직 아무 항목도 안 흘렀다."
+      en: "{{pick.2|code}} is a walk (an iterator) — no item has flowed yet."
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 그 걸음에 변환을 하나 더 붙인다 — 계획만."
+      en: "{{pick.1|code}} on line {{site.line}} adds one more transformation to the walk — a plan only."
+    - ko: "끝의 소비자가 항목을 하나씩 당기고, 그때 붙여 둔 변환이 차례로 돈다."
+      en: "The consumer at the end pulls items one by one, and only then do the chained steps run in turn."
+
+rule:
+  ko: "<b>어댑터는 계획, 소비자가 실행이다.</b> collect·sum·for 가 와야 항목이 흐르고, 흐를 때는 한 항목씩 사슬을 다 지난다."
+  en: "<b>Adapters plan, consumers run.</b> Items flow only when collect, sum or for pulls, and each item passes the whole chain before the next."
+result:
+  label:
+    ko: "{{site.line}}행의 사슬"
+    en: "the chain on line {{site.line}}"
+  value: "{{pick.2}}.{{pick.1}}{{pick.3}}"
+  note:
+    ko: "소비자가 올 때까지 계획"
+    en: "a plan until a consumer arrives"
+ok:
+  ko: "{{pick.2|code}} 에 {{pick.1|code}}{{pick.1|josa:이,가}} 붙었습니다. 소비자가 당길 때 항목마다 이 변환이 돕니다."
+  en: "{{pick.1|code}} is attached to {{pick.2|code}}. When a consumer pulls, this transformation runs per item."
+payoff:
+  ko: "이걸 알면 「`map` 을 불렀는데 왜 아무 일도 안 나나」와 「무한 범위에 왜 `take` 가 되나」가 함께 풀립니다."
+  en: "This untangles both “I called `map`, why did nothing happen” and “why does `take` work on an endless range.”"
+bridge:
+  ko: "파이썬 컴프리헨션은 즉시 목록을 냅니다. Rust 의 사슬은 <b>당길 때</b> 돌고, 그래서 중간 목록이 안 생깁니다."
+  en: "A Python comprehension yields a list at once. A Rust chain runs <b>when pulled</b>, so no intermediate lists appear."
+misconceptions:
+  - ko: "`map` 을 부르면 바뀐 목록이 나온다 — 계획이 나옵니다. `collect()` 가 와야 목록이 돼요."
+    en: "Calling `map` gives a transformed list — it gives a plan. Only `collect()` makes a list."
+  - ko: "`map` 다음 `filter` 는 목록을 두 번 돈다 — 한 항목이 사슬을 <b>다 지난 뒤</b> 다음 항목이 옵니다. 한 번이에요."
+    en: "`map` then `filter` walks the list twice — one item passes <b>the whole chain</b> before the next. One pass."
+  - ko: "`collect()` 는 늘 Vec 을 만든다 — 왼쪽 타입이 정합니다. `HashMap`·`String` 으로도 모여요."
+    en: "`collect()` always makes a Vec — the type on the left decides. It gathers into a `HashMap` or a `String` too."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>걸음에 붙은 변환 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name of the step attached to the walk</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 변환이 붙는 <b>걸음</b>입니다. 걸음 자체는 아직 아무것도 안 바꿔요."
+          en: "{{pick.2|code}} is the <b>walk</b> the step attaches to. The walk itself changes nothing yet."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 걸음이냐 변환이냐", en: "The sharpest spot — the walk or the step" }
+          code:
+            - "items.iter()            // 걸음"
+            - "items.iter().map(f)     // 걸음 + 변환 계획"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 변환에 넘기는 <b>인자</b>입니다. 무엇을 하는 변환인지는 그 앞의 이름이에요."
+          en: "{{pick.3|code}} is the <b>argument</b> given to the step. What kind of step it is, the name before it says."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 인자냐", en: "The sharpest spot — the name or the argument" }
+          code:
+            - ".map(|x| x * 2)"
+            - "// ^이름 ^인자"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 사슬을 <b>목록으로 모아</b> 실행합니다."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>gathers the chain into a list</b> and runs it."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "collect", mono: true }
+      - t: "map"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>변환 계획</b>을 하나 더 붙입니다. 실행하지 않아요."
+            en: "That attaches <b>one more plan</b>. It runs nothing."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 계획이냐 실행이냐", en: "The sharpest spot — a plan or a run" }
+            code:
+              - ".map(f)      // 계획"
+              - ".collect()   // 실행 + 모음"
+      - t: "iter"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>걸음을 시작</b>하는 이름입니다. 사슬의 첫머리이지 끝이 아니에요."
+            en: "That <b>starts the walk</b>. It is the head of the chain, not the end."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 처음이냐 끝이냐", en: "The sharpest spot — the start or the end" }
+            code:
+              - "items.iter()…        // 시작"
+              - "…collect()           // 끝"
+      - t: "for_each"
+        mono: true
+        diag:
+          t:
+            ko: "이것도 소비자지만 <b>모으지 않습니다</b>. 항목마다 부수 효과만 내고 `()` 를 줘요."
+            en: "That is a consumer too, but it <b>gathers nothing</b>. It runs a side effect per item and gives `()`."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 모으나 버리나", en: "The sharpest spot — gather or discard" }
+            code:
+              - ".collect::<Vec<_>>()   // 목록"
+              - ".for_each(|x| …)       // ()"
+
+why_gate:
+  q:
+    ko: "Rust 는 왜 어댑터를 <b>당길 때 돌게</b> 했을까요?"
+    en: "Why do adapters in Rust run <b>only when pulled</b>?"
+  choices:
+    - t:
+        ko: "중간 목록을 안 만들고 한 항목씩 사슬을 지나게 하려고 — 무한한 걸음도 잘라 쓸 수 있다"
+        en: "So items pass the chain one at a time without intermediate lists — even an endless walk can be cut short"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 사슬의 소비자가 무엇인지 찾아보세요."
+        en: "That is the direction. Find this chain's consumer."
+    - t:
+        ko: "즉시 돌리면 컴파일이 안 되어서"
+        en: "Because running at once would not compile"
+      ok: false
+      fb:
+        ko: "컴파일 문제가 아닙니다. 설계 선택이에요."
+        en: "Not a compile issue — a design choice."
+    - t:
+        ko: "클로저가 느려서"
+        en: "Because closures are slow"
+      ok: false
+      fb:
+        ko: "반대입니다. 당길 때 도는 사슬이 대개 손으로 쓴 반복과 같은 속도예요."
+        en: "The other way round. A pulled chain usually runs as fast as a hand-written loop."
+
+queries:
+  - { grammars: [rust], file: ./iterator-adapters.scm }
+
+examples:
+  - code: "fn f() { let v: Vec<i32> = items.iter().map(|x| x * 2).collect(); }"
+    expect: { sites: 3, form: adapter, picks: { 1: "iter", 2: "items", 3: "()" } }
+  - code: "fn f() { let n = it.collect::<Vec<_>>(); }        // 터보피시로 모을 타입을 적었다"
+    expect: { sites: 1, form: collect-turbofish, hole: "collect", picks: { 1: "collect", 2: "it", 3: "<Vec<_>>" } }
+  - code: "fn f() { let total: i32 = nums.iter().sum(); }    // sum 이 당긴다"
+    expect: { sites: 2, form: adapter, picks: { 1: "iter", 2: "nums" } }
+  - code: "fn f() { for x in items { } }                   // 반복문 — rs/for-in"
+    expect: none

@@ -10,7 +10,7 @@ import './DependencyMap.css';
  * 배치 상수 — 04 §7.3 「결정론적 배치(목업 `t2.js` 상수)」.
  *
  * 목업의 `G` 와 하나만 다르다: **`NW` 178 → 196**. 05 §4.2 의 13px 하한이 목업의
- * `.nd .dir{12.5px}` 와 `.newtag{12px}` 를 막아 둘 다 `--fs-13` 으로 올라가는데, 그러면
+ * `.nd .dir{12.5px}` 와 `.newtag{12px}` 를 막아 둘 다 `--fs-1`(13px)로 올라가는데, 그러면
  * 상자 안 글이 넓어진다. 가장 긴 표본 이름 `QuantityStepper.tsx`(19자 × 14px 모노 = 159.6px,
  * 왼 여백 11 → 170.6px 에서 끝)가 178 폭에서는 판정 배지 자리(`NW−22` = 156)를 이미 밟고
  * 있었다 — 196 이면 배지가 174 에서 시작해 3.4px 이 남는다. 나머지 상수는 목업 그대로.
@@ -363,10 +363,10 @@ export function DependencyMap({
       <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} role="group" aria-label={label}>
         <defs>
           <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
-            <path d="M0 1 L9 5 L0 9 Z" fill="var(--ink-mute)" />
+            <path d="M0 1 L9 5 L0 9 Z" fill="var(--border-strong)" />
           </marker>
           <marker id="arK" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
-            <path d="M0 1 L9 5 L0 9 Z" fill="var(--ink)" />
+            <path d="M0 1 L9 5 L0 9 Z" fill="var(--text)" />
           </marker>
         </defs>
 

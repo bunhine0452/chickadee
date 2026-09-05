@@ -1,0 +1,51 @@
+/* D182 — 진행 막대. 진도는 숫자와 막대가 말한다(정본 §7 — 마스코트는 화면에서 내렸다).
+   찬 부분은 액센트 한 색이고, 상태를 말해야 할 때만 상태색으로 바꾼다. */
+.prog {
+  display: block;
+  width: 100%;
+}
+
+.prog .prog-track {
+  display: block;
+  overflow: hidden;
+  height: 8px;
+  border-radius: var(--r-sm);
+  background: var(--surface-3);
+}
+
+.prog.sm .prog-track { height: 4px }
+
+.prog.lg .prog-track { height: 12px }
+
+.prog .prog-fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width var(--dur-base) var(--ease);
+}
+
+.prog.ok .prog-fill { background: var(--ok) }
+
+.prog.warn .prog-fill { background: var(--warn) }
+
+.prog.bad .prog-fill { background: var(--bad) }
+
+/* 칸이 나뉜 판 — 「몇 개 중 몇 개」가 뜻인 자리(숙련도 단계·챕터 통과). */
+.prog.steps .prog-track {
+  display: flex;
+  gap: 2px;
+  background: transparent;
+}
+
+.prog.steps .prog-step {
+  flex: 1;
+  border-radius: var(--r-sm);
+  background: var(--surface-3);
+}
+
+.prog.steps .prog-step.on { background: var(--accent) }
+
+@media (prefers-reduced-motion: reduce) {
+  .prog .prog-fill { transition-duration: .001ms }
+}
+[data-motion="reduce"] .prog .prog-fill { transition-duration: .001ms }

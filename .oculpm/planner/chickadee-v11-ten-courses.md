@@ -1,0 +1,82 @@
+---
+oculpm_plan: v1
+id: chickadee-v11-ten-courses
+title: "1.1 열 언어 코스 — 언어를 고르고 기초부터 쭉 (D190)"
+status: active
+created: 2026-09-06
+updated: 2026-09-06
+owner: claude-code
+---
+
+사용자 요청 「언어를 선택하고 그 언어의 기초부터 쭉 학습하는 코스 — docs 의 열 언어 전부, 병렬 세션으로」. 기반(파서 넷·부 등록부)을 깔고 언어 열을 워크트리 세션 열로 저작한 뒤, 앱에 언어 선택과 부 목차를 붙이고 합류한다.
+
+## F · 기반 — 파서 넷 · 부 등록부 · D190 {#f-base}
+- [x] tree-sitter c·cpp·c_sharp·swift 링크 (lang-* 피처, GRAMMARS 표 true, ABI c15·cpp14·c_sharp15·swift15) {#f-grammars}
+- [x] packages/course/src/parts/<lang>.ts 열 장 + index.ts 등록부(COURSE_LANGS·PARTS_BY_LANG·partsOf) + 열 언어 대조 시험 {#f-parts}
+- [x] docs/00-overview.md §4.2.1 D190 행 + 플랜 생성 {#f-register}
+- [x] typecheck·lint·course/dictionary 시험·cargo test 초록 → 기반 커밋 {#f-commit}
+
+## L · 언어 열 — 워크트리 세션 하나씩 {#l-langs}
+- [x] py — 1부 남은 셋·2부 저작, parts/py.ts, 골든·린트·ABI 초록 {#l-py}
+- [x] ts — 2부 채우기(narrowing·union·class·prototype 등), parts/ts.ts {#l-ts}
+- [x] java — 0·1·2·3부 이미 섬. 남은 것(string-concat·autoboxing 자리, 골든 보강) 점검 {#l-java}
+- [x] sql — 바닥 남은 다섯 + 중심, parts/sql.ts {#l-sql}
+- [x] rs — 0부 11 + 1·2부 전량 신규(사전 0장 → 표본 ai-pm 280장), parts/rs.ts {#l-rs}
+- [x] go — 0부 + 1·2부 전량 신규, 표본은 공개 리포, parts/go.ts {#l-go}
+- [x] c — 0부(기계 층) + 1·2부 전량 신규, 파서 ERROR 비율 실측, parts/c.ts {#l-c}
+- [x] cpp — 0부 + 1·2부 전량 신규, 파서 ERROR 비율 실측, parts/cpp.ts {#l-cpp}
+- [x] csharp — 0부 + 1·2부 전량 신규, 파서 ERROR 비율 실측, parts/csharp.ts {#l-csharp}
+- [x] swift — 0부 + 1·2부 전량 신규, 파서 ERROR 비율 실측, parts/swift.ts {#l-swift}
+
+## A · 앱 — 언어 선택과 부 목차 {#a-app}
+- [x] 설정 키 courseLang (null = 리포 주 언어) — store-sql 스키마·기본값·화면 저장 {#a-setting}
+- [x] 코스 화면 머리의 언어 선택지 열 — 사전 장수·파서 여부·내 리포 파일 수를 함께 보인다 {#a-picker}
+- [x] 고른 언어의 부 목차(0·1·2·3부 + 연습 층)가 기능 챕터 앞에 서고, 판 한 장을 열면 기존 T0 세션으로 간다 {#a-outline}
+- [x] AbsenceReason 에 no-files — 고른 언어의 파일이 어느 리포에도 없을 때의 사유가 화면에 실린다 {#a-nofiles}
+- [x] 컴포넌트 시험 + 정직성 게이트(no-files 문구) + i18n ko/en {#a-tests}
+
+## M · 합류 {#m-merge}
+- [x] 워크트리 브랜치 열을 순서대로 병합, 충돌은 공유 파일에서만 {#m-branches}
+- [x] 세션 보고의 ABSENCE 초안을 t0-synthetic.ts 표에 넣고 사유 시험 {#m-absence}
+- [x] docs/curriculum/README.md §4 상태표·§5 실측 갱신, 세션이 낸 등록부 초안에 번호 {#m-docs}
+- [x] typecheck · lint · test:unit · dict:lint · cargo test · gates → 커밋 → 푸시 → CI 초록 {#m-verify}
+- [x] 최종 보고 — 언어별 장수·골든·사용처 실측, 못 한 것 {#m-report}
+
+<!-- oculpm:plan-log begin v1 -->
+| 시각 | 항목 | 에이전트 | 변화 | 일지 | 메모 |
+|---|---|---|---|---|---|
+| 2026-09-06T00:38:06+09:00 | #f-grammars | claude-code | ☐→x |  | tree-sitter-c 0.24.2 · cpp 0.23.4 · c-sharp 0.23.5 · swift 0.7.3 링크, ABI c15·cpp14·c_sharp15·swift15, GRAMMARS true, 린트 표본 dart 로. cargo test 초록 (커밋 1f8bda6) |
+| 2026-09-06T00:39:03+09:00 | #f-parts | claude-code | ☐→x |  | parts/{index,java,ts,py,sql,rs,go,c,cpp,csharp,swift}.ts + index.test.ts 25 시험 초록. JAVA_PARTS 재수출. ts 21/12/8 · py 18/6 · sql 8/3 분할 |
+| 2026-09-06T00:39:29+09:00 | #f-register | claude-code | ☐→x |  | D190 행(파서 넷 · 부 등록부 · 워크트리 저작 규약 · courseLang/no-files) + 플랜 v11 생성 |
+| 2026-09-06T00:40:46+09:00 | #f-commit | claude-code | ☐→x |  | typecheck·eslint·vitest(course/dictionary 95)·cargo test 초록, 커밋 1f8bda6. 열 세션 워크트리로 출발(rs·c Fable 포크, 나머지 Opus) |
+| 2026-09-06T00:48:21+09:00 | #l-py | claude-code | ☐→~ |  | Opus 워크트리 세션 출발 — 1부 남은 넷 + 2부 |
+| 2026-09-06T00:51:06+09:00 | #l-ts | claude-code | ☐→~ |  | Opus 워크트리 세션 출발 — 2부 완성 |
+| 2026-09-06T00:51:21+09:00 | #l-java | claude-code | ☐→~ |  | Opus 워크트리 세션 출발 — 심화 잔여 + 골든 감사 |
+| 2026-09-06T00:51:30+09:00 | #l-sql | claude-code | ☐→~ |  | Opus 워크트리 세션 출발 — 바닥 다섯 + 중심 16 + 심화 8 |
+| 2026-09-06T00:51:48+09:00 | #l-rs | claude-code | ☐→~ |  | Fable 포크 워크트리 세션 출발 — 0부 11 + 1·2부 전량 |
+| 2026-09-06T00:52:43+09:00 | #l-go | claude-code | ☐→~ |  | Opus 워크트리 세션 출발 — cli/cli 표본 |
+| 2026-09-06T00:53:05+09:00 | #l-c | claude-code | ☐→~ |  | Fable 포크 워크트리 세션 출발 — 기계 층 0부, 파서 ERROR 비율 실측 |
+| 2026-09-06T00:53:31+09:00 | #l-cpp | claude-code | ☐→~ |  | Opus 워크트리 세션 출발 — fmt/json 표본, ERROR 비율 실측 |
+| 2026-09-06T00:53:50+09:00 | #l-csharp | claude-code | ☐→~ |  | Opus 워크트리 세션 출발 — 공개 리포 표본, ERROR 비율 실측 |
+| 2026-09-06T00:54:14+09:00 | #l-swift | claude-code | ☐→~ |  | Opus 워크트리 세션 출발 — 커뮤니티 문법 ERROR 비율이 첫 발견 |
+| 2026-09-06T01:05:29+09:00 | #l-java | claude-code | ~→x |  | 47장(0부 19·1부 8·2부 20) · 골든 114/47 · string-concat·autoboxing 0부 복귀 · ERROR 0% · 병합 f69d8e1, 남은 것 map-and-set |
+| 2026-09-06T01:21:10+09:00 | #l-ts | claude-code | ~→x |  | 69장(0부 21·1부 13·2부 18) · 골든 164/84 · ERROR 0% · 병합 c2898f6 · 래칫 137/141/137/128 |
+| 2026-09-06T01:30:10+09:00 | #l-py | claude-code | ~→x |  | 42장(0부 18·1부 10·2부 14) · 골든 132/75 · ERROR 0% · 병합 06f68ca · 래칫 155/159/155/146 |
+| 2026-09-06T04:39:43+09:00 | #l-sql | claude-code | ~→x |  | 40장(0부 8·1부 8·2부 24) · 골든 90/55 · ABSENCE 6 · 병합 5dafc8f · 래칫 184/166/184/175 |
+| 2026-09-06T04:47:41+09:00 | #l-go | claude-code | ~→x |  | 33장(0부 8·1부 5·2부 20) · 골든 79/33 · cli/cli 429파일 ERROR 1.6% · 병합 fb372bb · 래칫 217/199/217/208 |
+| 2026-09-06T04:48:58+09:00 | #l-c | claude-code | ~→x |  | 38장(0부 12·1부 8·2부 18) · 골든 116/62 · jq ERROR 17.8%(poor 3 빼면 0.44%) · 병합 2e22dc6 · 래칫 255/237/255/246 |
+| 2026-09-06T04:54:21+09:00 | #l-csharp | claude-code | ~→x |  | 35장(0부 8·1부 3·2부 24) · 골든 81/35 · eShopOnWeb ERROR 0% · ABSENCE 1 · 병합 ba6fa7e · 래칫 290/272/290/281 |
+| 2026-09-06T04:56:01+09:00 | #l-rs | claude-code | ~→x |  | 42장(0부 11·1부 7·2부 23) · 골든 105/44 · ai-pm 280 실측 · ABSENCE 1 · 병합 38c97e0 · 래칫 331/314/331/322 |
+| 2026-09-06T04:57:14+09:00 | #l-cpp | claude-code | ~→x |  | 38장(0부 13·1부 3·2부 22) · 골든 77/38 · fmt+json ERROR 4.6%(매크로) · ABSENCE 1 · 병합 2fdaef3 · 래칫 369/348/369/360 |
+| 2026-09-06T05:02:39+09:00 | #l-swift | claude-code | ~→x |  | 37장(0부 8·1부 4·2부 25) · 골든 89/37 · IceCubesApp ERROR 1.6% · ABSENCE 1 · 병합 351d165 · 래칫 406/385/406/396(최종) |
+| 2026-09-06T05:04:56+09:00 | #m-branches | claude-code | ☐→x |  | 열 브랜치 순서대로 병합(java·ts·py·sql·go·c·csharp·rs·cpp·swift), 충돌 0. 언어 사전 421장 89,153줄 |
+| 2026-09-06T05:05:51+09:00 | #m-absence | claude-code | ☐→x |  | ABSENCE 16 → 27행(sql 6 · java·csharp·cpp·rs·swift 각 1), 사유 시험 초록 |
+| 2026-09-06T05:06:48+09:00 | #m-docs | claude-code | ☐→x |  | D191(열 세션의 결정 여덟) · README §4 상태 열 갱신 · §5 「열 언어가 실물을 냈다」 표 · course.md §3.4 |
+| 2026-09-06T05:07:04+09:00 | #a-setting | claude-code | ☐→x |  | Settings.courseLang(null = 리포 주 언어) — store-sql 스키마·SETTINGS_KEYS·DEFAULTS·KEY_OF, rows.test 왕복 (커밋 cb6333b) |
+| 2026-09-06T05:07:12+09:00 | #a-picker | claude-code | ☐→x |  | LangCourse.tsx — 열 언어 선택지(개념 수 · 내 파일 수 · 저작 전), 리포 주 언어 자동, 파일 없음/저작 전 문구 (커밋 cb6333b) |
+| 2026-09-06T05:07:21+09:00 | #a-outline | claude-code | ☐→x |  | 부 넷이 기능 챕터 앞에 서고 LangPartPanel 이 판마다 출처(내 코드·예고·사유)를 적음, 「이 판 풀기」→ pickCoursePlateNow → 세션 (커밋 cb6333b) |
+| 2026-09-06T05:07:30+09:00 | #a-nofiles | claude-code | ☐→x |  | AbsenceReason 'no-files' — 카드 payload 에 실리고 T0Plate 가 payload 를 먼저 읽음, t0.absentNoFiles ko/en, 정직성 게이트가 다섯을 셈 (커밋 cb6333b) |
+| 2026-09-06T05:07:39+09:00 | #a-tests | claude-code | ☐→x |  | lang-data.test(순수 부·언어 세기) · LangCourse.test(선택지·부 줄·패널·출처) · honesty 게이트 다섯 사유 · i18n ko/en 46키 (커밋 cb6333b · cadc268) |
+| 2026-09-06T06:14:07+09:00 | #m-verify | claude-code | ☐→x |  | typecheck · lint · 단위 2,645 · dict:lint · cargo 9벌(골든 진짜 6/6) · 게이트 206 · 푸시 810ca69 · CI 8잡 초록(run 33991958607). CI 가 잡은 셋(공유 target 골든 15건 · 센서스 타임아웃 · 선택 경쟁)과 둘(덤프 · 라이선스 표) 고침 |
+| 2026-09-06T06:14:16+09:00 | #m-report | claude-code | ☐→x |  | 최종 보고 — 열 언어 421장(사전 535장 97,726줄) · 언어 선택+부 목차 · D190·D191 · 못 한 것: 3부 아홉 언어 없음 · 표본 없는 다섯 언어 분모 0 · export-declaration 후속 · Monaco swift |
+<!-- oculpm:plan-log end -->

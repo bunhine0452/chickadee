@@ -1,0 +1,220 @@
+schema: 1
+id: csharp/text-literal
+# 0부 축 3. 보편형은 `common/text-literal`. C# 에서 다시 배울 것은 **따옴표 하나가 값형과
+# 참조형을 가른다**는 것과, 길이가 UTF-16 코드 단위로 센다는 것이다.
+universal: common/text-literal
+name: { ko: 글자 값과 글자 묶음, en: Text literal }
+token: "\"a\""
+grammars: [c_sharp]
+framework: null
+essential: true
+difficulty: 1
+prereq: [cs/text-encoding, cs/value-vs-reference]
+confusions: []
+dict:
+  one_liner:
+    ko: "따옴표 하나가 타입을 가른다 — 작은따옴표는 한 글자, 큰따옴표는 글자 묶음이다."
+    en: "One quote mark splits the type: single quote one letter, double quote a run."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 값의 <b>크기와 사는 곳</b>을 같이
+      정합니다. <code>char</code>는 UTF-16 코드 단위 <b>하나</b>짜리 값형이고,
+      <code>string</code>은 길이가 안 정해진 <b>참조형</b>이에요. 그래서
+      <code>'a'</code>와 <code>"a"</code>는 같은 글자인데 <b>다른 타입</b>입니다.
+      그리고 길이는 사람이 보는 글자 수가 아닙니다 — 실측 이모지 하나(👨‍👩‍👧‍👦)의
+      <code>Length</code>가 <b>11</b>입니다. 코드 단위를 세니까요.
+    en: >-
+      On line {{site.line}}, {{pick.1|code}} settles both the <b>size and the home</b> of the
+      value. <code>char</code> is a value type holding <b>one</b> UTF-16 code unit;
+      <code>string</code> is a <b>reference type</b> of no fixed length. So <code>'a'</code>
+      and <code>"a"</code> are the same letter in <b>different types</b>. And length is not
+      what a person sees — measured, one emoji (👨‍👩‍👧‍👦) has <code>Length</code> <b>11</b>,
+      because code units are what get counted.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}}{{pick.2|josa:을,를}} 글자를 담는 이름으로 세운다."
+      en: "Line {{site.line}} sets {{pick.2|code}} up as a name that holds text."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 한 글자짜리 값인지 글자 묶음인지 정한다."
+      en: "{{pick.1|code}} decides between one letter and a run of letters."
+    - ko: "묶음 쪽이면 이름이 담는 것은 글자가 아니라 글자가 있는 자리다."
+      en: "On the run side the name holds not the letters but where the letters live."
+rule:
+  ko: "<b>따옴표가 타입을 가른다.</b> 그리고 길이는 사람이 보는 글자 수가 아니라 코드 단위 수다."
+  en: "<b>The quote picks the type.</b> And length counts code units, not what a person sees."
+result:
+  label: { ko: "{{site.line}}행의 글자 이름", en: "the text name on line {{site.line}}" }
+  value: "{{pick.1}} {{pick.2}}"
+  note: { ko: "한 글자냐 묶음이냐가 여기서 갈린다", en: "one letter or a run is decided here" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 이제 정해진 모양으로 글자를 담는 이름입니다."
+  en: "{{pick.2|code}} now holds text in the shape that was chosen."
+payoff:
+  ko: "이걸 알면 「이모지 하나를 지웠는데 글자가 반쪽 남는다」가 풀립니다."
+  en: "This untangles “I deleted one emoji and half a character stayed.”"
+bridge:
+  ko: >-
+    파이썬에는 한 글자짜리 타입이 <b>없습니다</b> — 한 글자도 길이 1 인 문자열이에요.
+    C# 은 그 둘을 따옴표로 갈라 둡니다.
+  en: >-
+    Python has <b>no</b> single-letter type — one letter is a string of length one.
+    C# splits the two by the quote mark.
+misconceptions:
+  # 출처 — `csharp.md` §0.1 0-3 · §0.4 실측(.NET SDK 10.0.302, 2026-09-05).
+  - ko: "<code>Length</code>가 사람이 보는 글자 수다 — 실측 이모지 하나가 11 입니다. 코드 단위를 셉니다."
+    en: "<code>Length</code> counts what a person sees — measured, one emoji is 11. It counts code units."
+  - ko: "작은따옴표와 큰따옴표는 취향이다 — 타입이 갈립니다. 한쪽은 값형, 한쪽은 참조형이에요."
+    en: "Single and double quotes are a matter of taste — they split the type: one value, one reference."
+  - ko: "한글은 한 글자에 세 칸이다 — <code>Length</code>는 3 이 아니라 <b>3글자</b>를 냅니다. 세 칸은 UTF-8 바이트 수예요."
+    en: "Hangul takes three slots per letter — <code>Length</code> gives the letter count, not 9. Three is the UTF-8 byte count."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>한 글자인지 묶음인지 정하는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that decides one letter or a run</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 이름은 값의 모양을 안 바꿔요."
+          en: "{{pick.2|code}} is the <b>name</b>. A name does not shape the value."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 타입이냐", en: "The sharpest spot — the name or the type" }
+          code:
+            - "char c = 'a';       // 값 하나"
+            - "string c = \"a\";     // 같은 이름, 참조"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 처음 들어가는 <b>값</b>입니다. 따옴표 모양은 이 값 쪽에 있고, 타입을 적는 자리는 앞이에요."
+          en: "{{pick.3|code}} is the starting <b>value</b>. The quote shape sits with the value; the type is written in front."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값이냐 타입이냐", en: "The sharpest spot — the value or the type" }
+          code:
+            - "char c = 'a';"
+            - "string s = \"a\";"
+meaning:
+  - q:
+      ko: "{{site.line}}행의 값이 <code>\"가나다\"</code>라면 <code>Length</code>는 얼마일까요?"
+      en: "If the value on line {{site.line}} were <code>\"가나다\"</code>, what is <code>Length</code>?"
+    hint:
+      ko: "세는 것은 UTF-16 코드 단위입니다."
+      en: "What gets counted is UTF-16 code units."
+    options:
+      - t:
+          ko: "3 — 한글 한 글자가 코드 단위 하나라서"
+          en: "3 — each of these letters is one code unit"
+      - t:
+          ko: "9 — 한글 한 글자가 세 칸이라서"
+          en: "9 — each letter takes three slots"
+        diag:
+          t:
+            ko: "9 는 <b>UTF-8 바이트</b> 수입니다. <code>Length</code>는 UTF-16 코드 단위를 세므로 3 이에요."
+            en: "9 is the <b>UTF-8 byte</b> count. <code>Length</code> counts UTF-16 code units, so it is 3."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 바이트냐 코드 단위냐", en: "The sharpest spot — bytes or code units" }
+            code:
+              - "\"가나다\".Length              // 3"
+              - "Encoding.UTF8.GetByteCount  // 9"
+      - t:
+          ko: "1 — 한 낱말이라서"
+          en: "1 — it is one word"
+        diag:
+          t:
+            ko: "낱말을 세지 않습니다. 사람이 보는 덩어리를 세는 것은 <code>StringInfo</code> 쪽 일이에요."
+            en: "Words are not what gets counted. Counting what a person sees is <code>StringInfo</code>'s job."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 무엇을 세나", en: "The sharpest spot — what is counted" }
+            code:
+              - "\"👨‍👩‍👧‍👦\".Length            // 11"
+              - "StringInfo 로 세면          // 1"
+      - t:
+          ko: "값에 따라 다르고 미리 알 수 없다"
+          en: "It varies and cannot be known in advance"
+        diag:
+          t:
+            ko: "규칙은 정해져 있습니다 — 언제나 UTF-16 코드 단위 수예요. 미리 알 수 있습니다."
+            en: "The rule is fixed — always the UTF-16 code unit count. It is knowable in advance."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 규칙이 있나", en: "The sharpest spot — is there a rule" }
+            code:
+              - "\"abc\".Length     // 3"
+              - "\"가나다\".Length   // 3"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>글자 묶음</b>을 담는 이름을 세웁니다."
+      en: "Choose what goes in the blank. Line {{site.line}} sets up a name for a <b>run of characters</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "string", mono: true }
+      - t: "char"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>한 글자</b>짜리 값형이라 여러 글자를 못 담습니다. 큰따옴표를 넣으면 컴파일이 막아요."
+            en: "That is a <b>one-letter</b> value type and cannot hold several letters. A double-quoted value stops at compile time."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 하나냐 묶음이냐", en: "The sharpest spot — one or many" }
+            code:
+              - "char c = 'a';       // 된다"
+              - "char c = \"ab\";      // CS0029"
+      - t: "int"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>정수</b> 타입이라 글자를 못 담습니다. 글자를 넣으면 코드 번호로 바뀌는 것이 아니라 컴파일이 막아요."
+            en: "That is the <b>whole number</b> type and holds no text. Text does not silently become a code point — it stops at compile time."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 수냐 글자냐", en: "The sharpest spot — a number or text" }
+            code:
+              - "string s = \"12\";    // 글자"
+              - "int n = \"12\";       // CS0029"
+      - t: "bool"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>참·거짓</b> 타입이라 글자를 못 담습니다. 빈 글자 묶음도 거짓이 아니에요."
+            en: "That is the <b>true/false</b> type and holds no text. An empty run is not false either."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 글자냐 참·거짓이냐", en: "The sharpest spot — text or a truth value" }
+            code:
+              - "string s = \"\";      // 빈 묶음"
+              - "if (s) { }          // CS0029"
+why_gate:
+  q:
+    ko: "이 언어는 왜 한 글자짜리 타입을 <b>따로</b> 두었을까요?"
+    en: "Why does this language keep a <b>separate</b> type for one letter?"
+  choices:
+    - t:
+        ko: "한 글자는 크기가 정해져 있어 값 그대로 옮길 수 있고, 묶음은 크기를 몰라 자리를 가리켜야 하기 때문"
+        en: "One letter has a fixed size and can travel as a value; a run has no fixed size and must be pointed at"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그러면 묶음을 넘길 때 무엇이 복사되는지도 적어 보세요."
+        en: "That is the direction. Add what gets copied when a run is passed along."
+    - t:
+        ko: "옛 C 와의 호환을 위해 남겨 둔 것이라 새 코드에서는 안 쓴다"
+        en: "It is kept for C compatibility and unused in new code"
+      ok: false
+      fb:
+        ko: "지금도 씁니다. 한 글자씩 훑는 코드가 전부 이 타입을 받습니다."
+        en: "It is used today — every loop that walks one letter at a time takes this type."
+    - t:
+        ko: "길이 1 인 묶음과 완전히 같은 것이라 이름만 다르다"
+        en: "It is exactly a run of length one under another name"
+      ok: false
+      fb:
+        ko: "다릅니다. 한쪽은 값형이라 복사되고 다른 쪽은 참조형이라 자리를 가리킵니다."
+        en: "They differ: one is a value type and gets copied, the other is a reference and points at a place."
+queries:
+  - { grammars: [c_sharp], file: ./text-literal.scm }
+examples:
+  - code: "string name = \"hi\";                            // name -> \"hi\" (string, 참조형)"
+    expect: { sites: 1, form: textdecl, hole: "string", picks: { 1: "string", 2: "name", 3: "\"hi\"" } }
+  - code: "char initial = 'k';                            // initial -> 'k' (char, 값형)"
+    expect: { sites: 1, form: textdecl, hole: "char", picks: { 1: "char", 2: "initial", 3: "'k'" } }
+  - code: "class A { public string Title { get; set; } }  // Title -> null (string?)"
+    expect: { sites: 1, form: textprop, picks: { 1: "string", 2: "Title" } }
+  - code: "int n = 1;                                     // n -> 1 (int)"
+    expect: none

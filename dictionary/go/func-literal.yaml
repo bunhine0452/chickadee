@@ -1,0 +1,215 @@
+schema: 1
+id: go/func-literal
+# 2부 (`go.md` §3 ㉓). 실측 167곳/80파일.
+#
+# `go func(){}()` 는 안 잡는다 — 그 자리는 `go/goroutine` 의 것이다.
+universal: common/function-value
+name: { ko: "값으로서의 함수", en: "Function literal" }
+token: "func(){}"
+grammars: [go]
+framework: null
+essential: true
+difficulty: 2
+prereq: [go/func-declaration, cs/closure-capture]
+confusions: []
+
+dict:
+  one_liner:
+    ko: >-
+      이름 없는 함수가 값이다. 이름에 담기도 하고 인자로 넘어가기도 한다.
+    en: >-
+      A nameless function is a value: it can be put in a name or passed along.
+  why:
+    ko: >-
+      {{site.line}}행에서 {{pick.1|code}} 뒤에 이름이 없습니다. 이름이 없다는 것은 이것이 <b>선언이 아니라 값</b>이라는 뜻이에요 — 수나 글자
+      묶음처럼 이름에 담기고, 인자로 넘어가고, 돌려받을 수도 있습니다. 여기에 하나가 더 붙어요: 이 함수는 자기 밖의 이름을 <b>붙잡습니다</b>. 붙잡는 것은 그 순간의
+      값이 아니라 <b>이름 자체</b>라, 바깥에서 그 이름의 값이 나중에 바뀌면 안에서도 바뀐 값이 보입니다. 정렬 기준, 미루기, 옆 갈래 띄우기가 전부 이 값 위에 서요.
+    en: >-
+      There is no name after {{pick.1|code}} on line {{site.line}}. No name means this is a <b>value,
+      not a declaration</b> — it can be put in a name like a number or a piece of text, handed to a
+      function, and given back. One more thing comes with it: such a function <b>captures</b> names
+      from outside itself. What it captures is not the value at that moment but the <b>name</b>, so a
+      later change outside shows inside. Sort orders, postponed calls and side strands all stand on
+      this value.
+  trace:
+    - ko: >-
+        {{site.line}}행의 {{pick.1|code}} 뒤에 이름이 없다.
+      en: >-
+        There is no name after {{pick.1|code}} on line {{site.line}}.
+    - ko: >-
+        그래서 이것은 선언이 아니라 값이고 {{pick.2|code}} 에 담긴다.
+      en: >-
+        So this is a value rather than a declaration, and it goes into {{pick.2|code}}.
+    - ko: >-
+        {{pick.4|code}} 안은 부를 때 비로소 돈다.
+      en: >-
+        The inside of {{pick.4|code}} runs only when it is called.
+
+rule:
+  ko: >-
+    <b>이름이 없으면 값이다.</b> 밖의 이름은 값이 아니라 이름째로 붙잡힌다.
+  en: >-
+    <b>No name means a value.</b> What is captured from outside is the name itself, not its value at
+    the time.
+result:
+  label: { ko: "{{site.line}}행이 만든 값", en: "the value made on line {{site.line}}" }
+  value: "{{pick.2}}"
+  note: { ko: "부를 때 비로소 돈다", en: "it runs only when called" }
+ok: { ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 이제 부를 수 있는 값입니다.", en: "{{pick.2|code}} is now a value you can call." }
+payoff:
+  ko: >-
+    이걸 알면 「되풀이 안에서 만든 함수들이 전부 같은 값을 본다」가 풀립니다 — 이름을 붙잡았습니다.
+  en: >-
+    This untangles "every function made in the loop sees the same value" — the name was captured.
+bridge:
+  ko: >-
+    자바스크립트의 이름 없는 함수와 같은 자리입니다. 다른 것은 Go 가 그 값에도 <b>타입</b>을 요구한다는 것이에요.
+  en: >-
+    This is the same seat as a nameless function in JavaScript. What differs is that Go demands a
+    <b>type</b> for the value too.
+misconceptions:
+  - ko: >-
+      만드는 줄에서 한 번 돈다 — 안 돕니다. 값이 만들어질 뿐이고 부를 때 돌아요.
+    en: >-
+      The line that makes it runs it once — it does not. A value is made and it runs when called.
+  - ko: >-
+      밖의 이름은 만들 때의 값으로 굳는다 — <b>이름째로</b> 붙잡혀서 나중에 바뀌면 바뀐 값이 보입니다.
+    en: >-
+      The outside name freezes at its value when made — the <b>name</b> is captured, so a later change
+      shows.
+
+point:
+  - q:
+      ko: >-
+        {{site.line}}행에서 <b>이름 없는 함수를 여는 낱말</b>을 짚어 보세요.
+      en: >-
+        On line {{site.line}}, point at <b>the word that opens the nameless function</b>.
+    hint: { ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다.", en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose." }
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 그 값을 <b>받는 이름</b>입니다. 함수 자체의 이름은 아니에요 — 함수에는 이름이 없습니다.
+          en: >-
+            {{pick.2|code}} is the <b>name receiving</b> the value, not the function's own name — the
+            function has none.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 받는 이름이냐 여는 낱말이냐", en: "The sharpest spot — the receiving name or the opening word" }
+          code:
+            - "h := func() { }        // h 는 받는 이름"
+            - "func greet() { }       // greet 는 함수 이름"
+      pick.4:
+        t:
+          ko: >-
+            {{pick.4|code}}{{pick.4|josa:은,는}} <b>몸통</b>입니다. 몸통은 부를 때 돌고, 값을 여는 것은 앞의 낱말이에요.
+          en: >-
+            {{pick.4|code}} is the <b>body</b>. The body runs when called; the word in front opens the
+            value.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 몸통이냐 여는 낱말이냐", en: "The sharpest spot — the body or the opening word" }
+          code:
+            - "{ println(1) }         // 몸통"
+            - "func() { }             // 값이 열린다"
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>이름 없는 함수</b>를 값으로 만듭니다.
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} makes a <b>nameless function</b> as a value.
+    hint: { ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다.", en: "Your choice is written into the code at once. Submit to have it marked." }
+    options:
+      - { t: "func", mono: true }
+      - t: "=>"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 기호는 Go 에 <b>없습니다</b>. 자바스크립트에서 오는 손이 여기서 멈춰요.
+            en: >-
+              Go <b>does not have</b> this symbol. A hand trained on JavaScript stops here.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 기호가 있나 없나", en: "The sharpest spot — does the symbol exist" }
+            code:
+              - "h := func() { }"
+              - "h := () => { }        // 멈춘다"
+      - t: "struct"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 낱말은 <b>칸을 묶는</b> 타입을 엽니다. 부를 수 있는 값이 아니에요.
+            en: >-
+              That word opens a type that <b>binds slots</b>. It is not something callable.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 부르나 담나", en: "The sharpest spot — calling or holding" }
+            code:
+              - "h := func() { }"
+              - "o := struct{}{}"
+      - t: "go"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 낱말은 함수를 <b>옆 갈래에서</b> 돌립니다. 값을 만드는 것이 아니라 띄우는 것이에요.
+            en: >-
+              That word runs a function <b>on its own strand</b>. It launches rather than makes a value.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값을 만드나 띄우나", en: "The sharpest spot — making a value or launching" }
+            code:
+              - "h := func() { }"
+              - "go work()"
+
+why_gate:
+  q:
+    ko: >-
+      이 함수는 왜 밖의 이름을 <b>값이 아니라 이름째로</b> 붙잡을까요?
+    en: >-
+      Why does this capture the outside <b>name itself</b> rather than its value?
+  choices:
+    - t:
+        ko: >-
+          붙잡은 뒤에도 바깥과 같은 것을 보게 되어, 만들어 둔 함수가 나중 상태를 반영할 수 있기 때문
+        en: >-
+          Because it keeps looking at the same thing as the outside, so a function made earlier can
+          reflect a later state
+      ok: true
+      fb:
+        ko: >-
+          그 방향입니다. 그럼 그것이 되풀이 안에서 왜 함정이 되는지도 적어 보세요.
+        en: >-
+          That is the direction. Add why that becomes a trap inside a loop.
+    - t:
+        ko: >-
+          값을 복사하는 것이 느려서
+        en: >-
+          Because copying the value is slow
+      ok: false
+      fb:
+        ko: >-
+          속도 문제가 아닙니다. 무엇을 보느냐의 문제예요.
+        en: >-
+          Speed is not it. It is a question of what is being looked at.
+    - t:
+        ko: >-
+          값을 복사할 방법이 없어서
+        en: >-
+          Because there is no way to copy the value
+      ok: false
+      fb:
+        ko: >-
+          있습니다. 인자로 넘기면 그 순간의 값이 복사돼요.
+        en: >-
+          There is. Handing it in as an argument copies the value at that moment.
+
+queries:
+  - { grammars: [go], file: ./func-literal.scm }
+
+examples:
+  - code: "func f() { h := func() { println(1) } }"
+    expect: { sites: 1, form: bind, hole: "func", picks: { 1: "func", 2: "h", 3: "()", 4: "{ println(1) }" } }
+  - code: "func f(xs []int) { sort(xs, func(a int) bool { return true }) }"
+    expect: { sites: 1, form: arg, hole: "func", picks: { 1: "func", 2: "sort", 3: "(a int)" } }
+  - code: "func greet() { println(1) }"
+    expect: none

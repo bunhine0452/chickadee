@@ -26,6 +26,26 @@ export interface RankedConcept extends NewCandidate {
   best: BestSite;
 }
 
+/**
+ * 사용처 없이 카드가 이미 구워진 개념의 `siteId` (D154 · 추적 `exec/*`).
+ *
+ * `packages/cards` 의 `EXEC_SITE_ID` 와 **같은 값이어야 한다** — 의존 방향이 `cards → concepts`
+ * 라 여기서 그쪽을 부를 수 없어 다시 쓴다. 두 값이 어긋나면 큐가 카드를 못 찾으므로
+ * `packages/cards` 쪽 시험이 둘이 같은지 못박는다.
+ */
+export const CARD_ONLY_SITE_ID = -2;
+
+/**
+ * 사용처가 없는 후보의 자리 (D154). 미지를 **경계값**으로 준다 — 필터(`<= MAX_UNKNOWN_FOR_NEW`)는
+ * 통과하되 정렬에서는 같은 깊이의 어휘 개념 **뒤**에 선다.
+ *
+ * 왜 뒤인가: BRACElet 은 추적이 **쓰기**보다 앞선다고 하지 어휘보다 앞선다고 하지 않는다.
+ * 0장의 「어휘 뿌리 먼저」는 실측으로 고른 순서이고, 추적은 먼저 이름 붙일 줄 아는 코드에
+ * 대한 것이다. 추적을 더하되 이미 잰 곡선을 흔들지 않는다.
+ */
+const cardOnlyBest = (): BestSite =>
+  ({ siteId: CARD_ONLY_SITE_ID, unknown: MAX_UNKNOWN_FOR_NEW, lineStart: 0, lineEnd: 0 });
+
 export interface RankInput {
   candidates: readonly NewCandidate[];
   /** 개념 → 첫 노출 사용처. 없으면 `null` (사용처가 죽었을 수 있다). */
@@ -81,7 +101,9 @@ export function rankNewConcepts(input: RankInput): RankedConcept[] {
   const depth = prereqDepth(ids, input.prereqOf);
 
   return input.candidates
-    .map((c) => ({ ...c, best: input.bestSiteOf(c.conceptId) }))
+    // `siteCount === 0` 은 D154 가지에서만 나온다 — 첫 가지는 INNER JOIN 이라 늘 1 이상이다.
+    // 사용처가 그 사이에 죽어 `bestSiteOf` 가 `null` 인 경우(siteCount ≥ 1)는 그대로 걸러진다.
+    .map((c) => ({ ...c, best: c.siteCount === 0 ? cardOnlyBest() : input.bestSiteOf(c.conceptId) }))
     .filter((c): c is RankedConcept => c.best !== null && c.best.unknown <= MAX_UNKNOWN_FOR_NEW)
     .sort(
       (a, b) =>

@@ -1,0 +1,54 @@
+[
+  {
+    "queryId": "java/abstract-class",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "site",
+    "form": "method",
+    "startLine": 4,
+    "startCol": 4,
+    "endLine": 4,
+    "endCol": 41,
+    "nodeKind": "method_declaration",
+    "inError": false
+  },
+  {
+    "queryId": "java/abstract-class",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.1",
+    "form": "method",
+    "startLine": 4,
+    "startCol": 4,
+    "endLine": 4,
+    "endCol": 12,
+    "nodeKind": "abstract",
+    "inError": false
+  },
+  {
+    "queryId": "java/abstract-class",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "hole",
+    "form": "method",
+    "startLine": 4,
+    "startCol": 4,
+    "endLine": 4,
+    "endCol": 12,
+    "nodeKind": "abstract",
+    "inError": false
+  },
+  {
+    "queryId": "java/abstract-class",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.4",
+    "form": "method",
+    "startLine": 4,
+    "startCol": 18,
+    "endLine": 4,
+    "endCol": 27,
+    "nodeKind": "identifier",
+    "inError": false
+  }
+]

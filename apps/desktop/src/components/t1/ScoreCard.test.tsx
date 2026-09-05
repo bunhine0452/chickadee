@@ -25,16 +25,12 @@ describe('ScoreCard', () => {
     expect(p?.textContent).toContain('지역 변수명 일관 치환');
   });
 
-  it('알약 4개는 색과 낱말을 같이 낸다', () => {
+  it('수 넷은 이름과 숫자로만 갈린다 — 색으로 안 가른다 (D182)', () => {
     const { container } = render(<ScoreCard {...NUMBERS} verdict="repeat-soft" />);
-    const pills = [...container.querySelectorAll('.pills .pill')];
-    expect(pills.map((el) => el.textContent)).toEqual([
-      '정합 14',
-      '동등 3',
-      '어긋남 3',
-      '한 번 더 같은 단계를 권합니다',
-    ]);
-    expect(pills.map((el) => el.className)).toEqual(['pill t1', 'pill t0', 'pill t2', 'pill ghost']);
+    const rows = [...container.querySelectorAll('.score-nums > div')];
+    expect(rows.map((el) => el.textContent)).toEqual(['같음14', '같은 뜻3', '다름3']);
+    expect(container.querySelector('.score-verdict')?.textContent).toBe('한 번 더 같은 단계를 권합니다');
+    expect(container.querySelector('.pill')).toBeNull();
   });
 
   it('판정 문구 3종은 목업 그대로다', () => {
@@ -44,6 +40,6 @@ describe('ScoreCard', () => {
       '같은 단계를 한 번 더 하는 편이 빠릅니다',
     ]);
     const { container } = render(<ScoreCard {...NUMBERS} verdict="repeat" />);
-    expect(container.querySelector('.pill.ghost')?.textContent).toBe('같은 단계를 한 번 더 하는 편이 빠릅니다');
+    expect(container.querySelector('.score-verdict')?.textContent).toBe('같은 단계를 한 번 더 하는 편이 빠릅니다');
   });
 });

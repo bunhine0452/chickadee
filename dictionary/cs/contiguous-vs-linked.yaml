@@ -1,0 +1,86 @@
+schema: 1
+id: cs/contiguous-vs-linked
+universal: null
+name: { ko: "붙어 있나 흩어져 있나", en: "Contiguous or linked" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+track_default: t0
+essential: false
+difficulty: 3
+prereq: [cs/memory-address]
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "같은 목록이라도 메모리 배치가 다르면 빠른 연산이 다르다."
+    en: "One kind of list, two layouts, and different operations are fast."
+  why:
+    ko: >-
+      항목을 <b>나란히 붙여</b> 두면 몇 번째를 바로 셈으로 찾을 수 있습니다 — 시작 자리에서
+      항목 크기만큼 건너뛰면 되니까요. 대신 가운데에 하나 끼우려면 뒤를 전부 밀어야 합니다.
+      항목을 <b>흩어 두고 다음 자리를 적어</b> 두면 끼우기는 자리 두 개만 고치면 되지만,
+      몇 번째를 찾으려면 처음부터 따라가야 해요. 「목록」이라는 같은 이름 아래 두 배치가 있고,
+      <b>어느 연산이 싼지가 정반대</b>입니다. 자료구조를 고르는 일의 첫 갈림이 여기입니다.
+    en: >-
+      Lay items <b>side by side</b> and finding the nth is arithmetic — step from the start by the
+      item size. But inserting in the middle shifts everything after it. Scatter the items and
+      <b>write down where the next one is</b>, and inserting fixes two links, while finding the nth
+      means walking from the front. One name, two layouts, and <b>opposite operations are cheap</b>.
+      This is the first fork in choosing a data structure.
+  trace: []
+rule:
+  ko: "<b>붙여 두면 찾기가 싸고, 흩어 두면 끼우기가 싸다.</b> 둘 다 싼 배치는 없다."
+  en: "<b>Side by side is cheap to find; scattered is cheap to insert.</b> No layout is cheap at both."
+ok:
+  ko: >-
+    쓰는 연산이 무엇인지 세어 보고 고릅니다. 대부분 훑기만 한다면 붙여 둔 쪽이 대개 낫습니다.
+  en: >-
+    Count which operations you actually use and pick. If you mostly scan, side by side usually wins.
+misconceptions:
+  - ko: "흩어 둔 쪽이 언제나 유연하다 — 몇 번째를 자주 찾으면 훨씬 비쌉니다."
+    en: "Scattered is always more flexible — much costlier when you often index."
+  - ko: "붙여 둔 쪽은 크기를 못 늘린다 — 늘릴 수 있고, 늘릴 때 옮기는 비용이 듭니다."
+    en: "Side by side cannot grow — it can, at the cost of moving when it does."
+  - ko: "이름이 같으면 성능도 같다 — 이름은 <b>무엇을 하는지</b>이고 배치는 <b>얼마에</b>입니다."
+    en: "Same name, same performance — the name says what, the layout says at what price."
+meaning:
+  - q:
+      ko: "가운데에 항목을 자주 끼우는 코드가 아주 느립니다. <b>무엇을 봐야 하나요?</b>"
+      en: "Code that often inserts in the middle is very slow. <b>What do you look at?</b>"
+    hint:
+      ko: "끼우는 자리 뒤에 무슨 일이 나는지 생각해 봅니다."
+      en: "Think about what happens after the insertion point."
+    options:
+      - t: { ko: "항목이 나란히 붙어 있어 뒤를 전부 밀고 있는지", en: "Whether items sit side by side and everything after shifts" }
+      - t: { ko: "끼우는 값이 큰지", en: "Whether the inserted value is large" }
+        diag:
+          t:
+            ko: "끼우는 값 하나의 크기는 <b>한 번의 비용</b>입니다. 느린 이유는 뒤에 있는 항목 수에 비례해서예요."
+            en: "The inserted value's size is <b>a one-off cost</b>. The slowness scales with how many items follow."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 하나냐 뒤 전부냐", en: "The sharpest spot — one item or all after" }
+            code:
+              - "값 크기: 한 번"
+              - "밀기: 뒤 항목 수만큼"
+      - t: { ko: "목록이 정렬돼 있는지", en: "Whether the list is sorted" }
+        diag:
+          t:
+            ko: "정렬은 <b>어디에 끼울지</b>를 찾는 비용에 걸립니다 — 가까운 자리예요. 여기서 묻는 것은 자리를 찾은 뒤의 비용입니다."
+            en: "Sorting affects the cost of <b>finding where</b> to insert — close. Here the question is the cost after the spot is known."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 찾기냐 끼우기냐", en: "The sharpest spot — finding or inserting" }
+            code:
+              - "찾기: 정렬이 돕는다"
+              - "끼우기: 배치가 정한다"
+      - t: { ko: "항목 수가 몇 개인지", en: "How many items there are" }
+        diag:
+          t:
+            ko: "개수는 <b>얼마나 느린지</b>를 정하지만 <b>왜 느린지</b>는 배치가 정합니다. 흩어 둔 배치라면 개수가 많아도 끼우기는 쌉니다."
+            en: "The count sets <b>how slow</b>; the layout sets <b>why</b>. In a scattered layout, inserting stays cheap however many."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 크기냐 배치냐", en: "The sharpest spot — size or layout" }
+            code:
+              - "개수: 배수를 정한다"
+              - "배치: 어떤 연산이 배수를 타나"

@@ -66,3 +66,23 @@ describe('hl', () => {
     expect(hl(src)).toEqual(hl(src));
   });
 });
+
+describe('hl — 글자를 떨어뜨리지 않는다 (D170 ①)', () => {
+  const joined = (src: string): string => hl(src).map((tk) => tk.t).join('');
+
+  it('숫자 구분자·16진수·지수·BigInt 표기가 통째로 숫자 하나다', () => {
+    expect(marks('const DAY_MS = 86_400_000;')).toContain('n:86_400_000');
+    expect(marks('x = 0xFF + 1e3 + 10n')).toEqual(
+      expect.arrayContaining(['n:0xFF', 'n:1e3', 'n:10n']),
+    );
+  });
+
+  it('어떤 입력이든 조각을 이으면 원문이다 — 판이 보여 주는 코드가 곧 내 코드다', () => {
+    for (const src of [
+      'const DAY_MS = 86_400_000;', '0xFF', 'a1b2', '3.14.toFixed(1)', '한글 // 주석',
+      '`t${x}`', '', '   ', 'x = y ?? z',
+    ]) {
+      expect(joined(src)).toBe(src);
+    }
+  });
+});

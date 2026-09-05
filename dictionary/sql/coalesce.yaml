@@ -1,0 +1,204 @@
+schema: 1
+id: sql/coalesce
+universal: common/nullish-default
+name: { ko: "없을 때 채우기", en: "Default for absence" }
+token: "COALESCE"
+grammars: [sql, mybatis_sql]
+framework: null
+essential: true
+difficulty: 2
+prereq: [sql/null-check, cs/three-valued-logic]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "모르는 값을 아는 값으로 바꾼다. 이 언어에서는 연산자가 아니라 함수다."
+    en: "Turns an unknown into a known one — a function here, not an operator."
+  why:
+    ko: >-
+      {{site.line}}행은 {{pick.2|code}}{{pick.2|josa:이,가}}모름일 때 대신 쓸 값을 댑니다. 앞에서부터 <b>모름이 아닌 첫 인자</b>를
+      고르는 것이 이 함수가 하는 전부예요. 왜 필요한가 — 모름은 셈에서 <b>퍼지고</b> 견주기에서 <b>탈락하기</b>
+      때문입니다. 여기서 아는 값으로 바꿔 두면 그 뒤의 셈과 조건이 예상대로 돌아요. 대신 <b>0 으로 바꾼 것과
+      원래 0 이던 것을 구별할 수 없게</b> 됩니다 — 그것을 감수할지가 이 함수를 쓸지의 판단입니다.
+    en: >-
+      Line {{site.line}} names what to use when {{pick.2|code}} is unknown. Picking the <b>first
+      argument that is not unknown</b>, left to right, is all it does. Why it is needed: unknown
+      <b>spreads</b> through arithmetic and <b>drops out</b> of tests. Replacing it with a known value
+      here makes the arithmetic and tests behind it behave. The price is that <b>a substituted zero and
+      a real zero become indistinguishable</b> — whether that is acceptable is the decision.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}} 값을 먼저 본다."
+      en: "Line {{site.line}} reads {{pick.2|code}} first."
+    - ko: "모름이 아니면 그 값이 그대로 답이다."
+      en: "If it is not unknown, that value is the answer."
+    - ko: "모름이면 다음 인자로 넘어가 아는 값을 고른다."
+      en: "If it is, the next argument is taken instead."
+
+rule:
+  ko: "<b>앞에서부터 모름이 아닌 첫 값을 고른다.</b> 다 모름이면 결과도 모름이다."
+  en: "<b>The first argument that is not unknown wins.</b> All unknown gives unknown."
+result:
+  label: { ko: "먼저 보는 값", en: "the value looked at first" }
+  value: "{{pick.2}}"
+  note: { ko: "모름이면 다음으로 넘어간다", en: "unknown moves to the next" }
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:이,가}}있으면 그 값이, 없으면 뒤에 적은 값이 그 칸에 들어갑니다.
+  en: >-
+    Where {{pick.2|code}} has a value it wins; where it does not, the one written after it does.
+payoff:
+  ko: >-
+    이걸 알면 합계가 비어 나오던 문장을 어디서 고쳐야 하는지 한 자리로 좁힙니다.
+  en: >-
+    Knowing this narrows an empty total to a single place to fix.
+bridge:
+  ko: >-
+    다른 언어의 「없으면 기본값」 연산자와 같은 일입니다. 다른 것은 <b>함수라서 인자를 더 놓을 수 있다</b>는 것이에요.
+  en: >-
+    It is the “default if absent” operator elsewhere. Being a function, it takes <b>more than two</b>.
+misconceptions:
+  - ko: "빈 글자도 모름으로 쳐서 바꿔 준다 — 빈 글자는 아는 값이라 그대로 지나갑니다."
+    en: "An empty string counts as unknown — it is a known value and passes through."
+  - ko: "인자가 둘뿐이다 — 여럿을 놓고 앞에서부터 고를 수 있습니다."
+    en: "It takes only two — several can be listed and the first known one wins."
+  - ko: "이걸 쓰면 원래 값과 채운 값을 나중에 구별할 수 있다 — 구별이 사라집니다."
+    en: "The original and the substitute stay distinguishable — the distinction is gone."
+
+meaning:
+  - q:
+      ko: "{{pick.2|code}}{{pick.2|josa:이,가}}빈 글자일 때 이 함수는 그 값을 바꿔 줄까요?"
+      en: "When {{pick.2|code}} holds an empty string, does this function replace it?"
+    hint:
+      ko: "「비었다」와 「모른다」가 같은 것인지 먼저 정하세요."
+      en: "First settle whether “empty” and “unknown” are the same thing."
+    options:
+      - t:
+          ko: "안 바꾼다 — 빈 글자는 아는 값이다"
+          en: "No — an empty string is a known value"
+      - t:
+          ko: "바꾼다 — 값이 없는 것이나 마찬가지라서"
+          en: "Yes — it is as good as having no value"
+        diag:
+          t:
+            ko: >-
+              「길이가 0 인 글자」와 「값을 모름」은 다릅니다. 빈 글자를 함께 다루려면 조건을 하나 더 적어야 해요.
+            en: >-
+              “A string of length zero” and “no value known” are different. Covering both takes one more test.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 빈 값이냐 모름이냐", en: "The sharpest spot — empty or unknown" }
+            code:
+              - "COALESCE(note, 'none')"
+              - "CASE WHEN note IS NULL OR note = '' THEN 'none' ELSE note END"
+      - t:
+          ko: "0 으로 바꾼다"
+          en: "It becomes zero"
+        diag:
+          t:
+            ko: >-
+              이 함수는 <b>적어 준 값</b>만 씁니다. 0 을 쓰려면 0 을 적어야 해요.
+            en: >-
+              This function uses <b>only what is written</b>. Zero appears only if zero is written.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 정해진 기본값이 있느냐", en: "The sharpest spot — whether a built-in default exists" }
+            code:
+              - "COALESCE(qty, 0)"
+      - t:
+          ko: "문장이 서지 않는다"
+          en: "The statement does not stand"
+        diag:
+          t:
+            ko: >-
+              값의 타입이 맞기만 하면 <b>잘 섭니다</b>. 조용한 것이 이 함수의 성격이에요.
+            en: >-
+              With matching types it <b>stands fine</b>. Being quiet is this function's nature.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 안 서느냐 조용하냐", en: "The sharpest spot — refused or quiet" }
+            code:
+              - "-- 조용히 지나간다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 {{pick.2|code}}{{pick.2|josa:이,가}}<b>모를 때</b> 쓸 값을 댑니다."
+      en: "Choose what goes in the blank. Line {{site.line}} names what to use when {{pick.2|code}} is <b>unknown</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "COALESCE", mono: true }
+      - t: "NULLIF"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>NULLIF</code> 는 <b>반대 방향</b>입니다 — 두 값이 같으면 모름으로 만들어요.
+            en: >-
+              <code>NULLIF</code> runs <b>the other way</b> — equal values become unknown.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 채우기냐 비우기냐", en: "The sharpest spot — filling or emptying" }
+            code:
+              - "COALESCE(note, 'none')   -- 채운다"
+              - "NULLIF(note, '')         -- 비운다"
+      - t: "DEFAULT"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>DEFAULT</code> 는 표를 만들 때 <b>열에 붙이는</b> 낱말이라 읽는 식에는 못 씁니다.
+            en: >-
+              <code>DEFAULT</code> attaches <b>to a column</b> when the table is made; it cannot stand in a
+              reading expression.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 표 만들 때냐 읽을 때냐", en: "The sharpest spot — at creation or at read" }
+            code:
+              - "qty INTEGER DEFAULT 0    -- 만들 때"
+              - "COALESCE(qty, 0)         -- 읽을 때"
+      - t: "ISNULL"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>ISNULL</code> 은 방언마다 뜻이 갈립니다 — 어떤 곳에서는 참거짓 하나만 내요.
+            en: >-
+              <code>ISNULL</code> means different things per dialect — in some it only yields a truth value.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값을 내느냐 참거짓을 내느냐", en: "The sharpest spot — a value or a truth" }
+            code:
+              - "COALESCE(note, 'none')   -- 어디서나 같다"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 <b>읽을 때</b> 채울까요? 넣을 때 채워 둘 수도 있는데요."
+    en: "Why does line {{site.line}} fill <b>at read time</b> instead of storing a value up front?"
+  choices:
+    - t:
+        ko: "「모른다」는 사실 자체를 표에 남겨 두려고 — 넣을 때 채우면 그 사실이 사라진다"
+        en: "To keep “unknown” as a stored fact — filling at write time erases it"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 사실을 남긴 대가로 읽는 문장마다 무엇을 더 해야 하는지도 적어 보세요."
+        en: "That is the direction. Say what every reading statement pays for keeping that fact."
+    - t:
+        ko: "읽을 때 채우는 편이 빨라서"
+        en: "Because filling at read time is faster"
+      ok: false
+      fb:
+        ko: "느립니다 — 행마다 한 번씩 돌거든요. 고르는 이유는 <b>사실을 남기려고</b>예요."
+        en: "It is slower — once per row. The reason is <b>keeping the fact</b>."
+    - t:
+        ko: "넣을 때는 기본값을 못 정해서"
+        en: "Because a default cannot be set at write time"
+      ok: false
+      fb:
+        ko: "열에 기본값을 붙일 수 있습니다. 안 붙인 것이 <b>고른 것</b>이에요."
+        en: "A column can carry a default. Not attaching one was the <b>choice</b>."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./coalesce.scm }
+
+examples:
+  - code: "SELECT COALESCE(note, 'none') FROM cart"
+    expect: { sites: 1, form: coalesce, hole: "COALESCE", picks: { 1: "COALESCE", 2: "note", 3: ")" } }
+  - code: "SELECT IFNULL(note, 'none') FROM cart"
+    expect: { sites: 1, form: coalesce, hole: "IFNULL", picks: { 1: "IFNULL", 2: "note", 3: ")" } }
+  - code: "SELECT UPPER(note) FROM cart"
+    expect: none

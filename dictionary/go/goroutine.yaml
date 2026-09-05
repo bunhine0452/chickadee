@@ -1,0 +1,226 @@
+schema: 1
+id: go/goroutine
+# 2부 · §4 심화 (`go.md` §4 ㉚). 실측 **39곳/19파일** — 429파일 중 4.4% 다.
+#
+# Go 가 유명한 이유인 동시성이 애플리케이션 코드에는 **거의 없다**(`go.md` §1). 이
+# 개념이 가장 뒤에 오는 것은 교재 다섯 중 넷이 같은 순서이고(`go-learning.md` §11.2)
+# Exercism 트랙은 개념 트리에 아예 안 넣는다.
+universal: null
+name: { ko: "기다리지 않고 띄우기", en: "Goroutine" }
+token: "go"
+grammars: [go]
+framework: null
+essential: true
+difficulty: 3
+prereq: [go/func-literal, go/call-expression, cs/concurrency-vs-parallelism]
+confusions: []
+
+dict:
+  one_liner:
+    ko: >-
+      이 낱말을 붙이면 그 함수가 옆 갈래에서 돌고 다음 줄로 곧장 넘어간다.
+    en: >-
+      With this word in front, the function runs on its own strand and you move on.
+  why:
+    ko: >-
+      {{site.line}}행은 {{pick.2|code}} 부르기를 <b>옆 갈래</b>에 맡기고 곧장 다음 줄로 갑니다. 여기서 바뀌는 것은 <b>순서가 내 것이 아니게
+      된다</b>는 하나예요 — 이 줄 뒤로는 무엇이 먼저 끝나는지 코드가 정하지 않습니다. 그래서 두 가지가 따라옵니다. ① <b>기다리려면 따로 적어야 합니다</b> —
+      채널이나 대기 묶음이 그 자리예요. ② <b>주 갈래가 끝나면 남은 갈래는 결과 없이 죽습니다.</b> 실코드에서 이 낱말이 드문 것도 그래서입니다: `cli/cli`
+      429파일 중 19파일(4.4%)에만 있어요.
+    en: >-
+      Line {{site.line}} hands the call to {{pick.2|code}} to <b>its own strand</b> and moves straight
+      to the next line. What changes is one thing — <b>the order stops being yours</b>: past this line
+      the code does not settle what finishes first. Two things follow. ① <b>Waiting must be written
+      separately</b> — a channel or a wait group is where that goes. ② <b>When the main strand ends,
+      the remaining ones die with nothing to show.</b> That is part of why this word is rare in real
+      code: 19 of 429 files (4.4%) in `cli/cli`.
+  trace:
+    - ko: >-
+        {{site.line}}행은 {{pick.2|code}} 부르기를 옆 갈래에 맡긴다.
+      en: >-
+        Line {{site.line}} hands the call to {{pick.2|code}} to another strand.
+    - ko: >-
+        맡기자마자 다음 줄로 넘어간다 — 기다리지 않는다.
+      en: >-
+        It moves to the next line at once and does not wait.
+    - ko: >-
+        주 갈래가 끝나면 남은 갈래는 결과 없이 죽는다.
+      en: >-
+        When the main strand ends, the remaining ones die with nothing to show.
+
+rule:
+  ko: >-
+    <b>이 줄 뒤로는 순서가 내 것이 아니다.</b> 기다리려면 따로 적어야 한다.
+  en: >-
+    <b>Past this line the order is not yours.</b> Waiting has to be written.
+result:
+  label: { ko: "{{site.line}}행이 띄운 것", en: "what line {{site.line}} launches" }
+  value: "{{pick.2}}"
+  note: { ko: "기다리지 않는다", en: "nothing waits for it" }
+ok:
+  ko: >-
+    {{pick.2|code}} 부르기가 옆 갈래로 갔고 다음 줄이 곧바로 돕니다.
+  en: >-
+    The call to {{pick.2|code}} went to another strand and the next line runs at once.
+payoff:
+  ko: >-
+    이걸 알면 「띄웠는데 아무것도 안 찍힌다」가 풀립니다 — 주 갈래가 먼저 끝났습니다.
+  en: >-
+    This untangles "I launched it and nothing printed" — the main strand ended first.
+bridge:
+  ko: >-
+    자바스크립트의 비동기는 한 줄기 안에서 순서를 미루는 것이라 갈래가 하나입니다. 여기서는 갈래가 <b>정말 여럿</b>이라 같은 자리를 동시에 만질 수 있어요.
+  en: >-
+    Asynchrony in JavaScript defers order within one strand. Here the strands are <b>really
+    several</b>, so the same place can be touched at once.
+misconceptions:
+  - ko: >-
+      띄운 것이 끝날 때까지 기다린다 — 안 기다립니다. 다음 줄이 곧바로 돌아요.
+    en: >-
+      It waits for what it launched — it does not. The next line runs at once.
+  - ko: >-
+      주 갈래가 끝나도 남은 갈래는 마저 돈다 — <b>죽습니다</b>. 결과가 안 나와요.
+    en: >-
+      The remaining strands finish after the main one ends — they <b>die</b> and produce nothing.
+  - ko: >-
+      띄운 순서대로 끝난다 — 순서가 정해져 있지 않습니다.
+    en: >-
+      They finish in the order launched — no order is settled.
+
+point:
+  - q:
+      ko: >-
+        {{site.line}}행에서 <b>옆 갈래에서 돌 것</b>을 짚어 보세요.
+      en: >-
+        On line {{site.line}}, point at <b>what will run on its own strand</b>.
+    hint: { ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다.", en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose." }
+    answer: pick.2
+    diag:
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} <b>인자 자리</b>입니다. 인자는 이 줄에서 계산되고, 옆 갈래에서 도는 것은 부르기예요.
+          en: >-
+            {{pick.3|code}} is the <b>argument slot</b>. Arguments are worked out on this line; what runs on
+            the other strand is the call.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 인자냐 부르기냐", en: "The sharpest spot — the argument or the call" }
+          code:
+            - "go work(n)        // n 은 지금"
+            - "go work(n)        // work 가 옆에서"
+      pick.1:
+        t:
+          ko: >-
+            {{pick.1|code}}{{pick.1|josa:은,는}} 띄우는 <b>낱말</b>입니다. 낱말이 도는 것은 아니에요.
+          en: >-
+            {{pick.1|code}} is the <b>word</b> that launches. The word itself does not run.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 낱말이냐 도는 것이냐", en: "The sharpest spot — the word or what runs" }
+          code:
+            - "go                // 낱말"
+            - "work              // 도는 것"
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행은 부르기를 <b>옆 갈래에</b> 맡깁니다.
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} hands the call to <b>another strand</b>.
+    hint: { ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다.", en: "Your choice is written into the code at once. Submit to have it marked." }
+    options:
+      - { t: "go", mono: true }
+      - t: "defer"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 낱말은 <b>함수 끝으로 미룹니다</b>. 옆에서 도는 것이 아니라 나중에 같은 갈래에서 돌아요.
+            en: >-
+              That word <b>postpones to the end of the function</b>. It runs later on the same strand, not
+              beside it.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 옆이냐 나중이냐", en: "The sharpest spot — beside or later" }
+            code:
+              - "go work()         // 지금 옆에서"
+              - "defer work()      // 나중에 같은 갈래에서"
+      - t: "async"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 낱말은 Go 에 <b>없습니다</b>. 자바스크립트·C# 에서 오는 손이 여기서 멈춰요.
+            en: >-
+              Go <b>does not have</b> this word. A hand trained on JavaScript or C# stops here.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 낱말이 있나 없나", en: "The sharpest spot — does the word exist" }
+            code:
+              - "go work()"
+              - "async work()      // 멈춘다"
+      - t: "func"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 낱말은 <b>함수를 엽니다</b>. 여는 것과 띄우는 것은 다른 일이에요.
+            en: >-
+              That word <b>opens a function</b>. Opening and launching are different acts.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 여나 띄우나", en: "The sharpest spot — opening or launching" }
+            code:
+              - "go work()"
+              - "func work() { }"
+
+why_gate:
+  q:
+    ko: >-
+      Go 는 왜 띄운 갈래를 <b>기다려 주지 않을까요</b>?
+    en: >-
+      Why does Go <b>not wait</b> for a launched strand?
+  choices:
+    - t:
+        ko: >-
+          기다림을 언어가 정하면 어디서 기다릴지가 코드에서 사라져, 여럿을 동시에 띄우고 한 번에 모으는 모양이 불가능해지기 때문
+        en: >-
+          Because a built-in wait would hide where the waiting happens and rule out launching many and
+          gathering once
+      ok: true
+      fb:
+        ko: >-
+          그 방향입니다. 그럼 그 대가로 무엇을 손으로 적어야 하는지도 적어 보세요.
+        en: >-
+          That is the direction. Add what must then be written by hand.
+    - t:
+        ko: >-
+          기다리는 것이 느려서
+        en: >-
+          Because waiting is slow
+      ok: false
+      fb:
+        ko: >-
+          기다림 자체가 이유는 아닙니다. 어디서 기다릴지를 코드가 정하게 한 것이 요점이에요.
+        en: >-
+          Waiting itself is not the reason. Letting the code decide where to wait is.
+    - t:
+        ko: >-
+          갈래가 하나뿐이라서
+        en: >-
+          Because there is only one strand
+      ok: false
+      fb:
+        ko: >-
+          여럿입니다. 여럿이라서 기다림을 어디에 둘지가 결정거리가 돼요.
+        en: >-
+          There are several. Being several is what makes the placement of the wait a decision.
+
+queries:
+  - { grammars: [go], file: ./goroutine.scm }
+
+examples:
+  - code: "func f() { go work() }"
+    expect: { sites: 1, form: call, hole: "go", picks: { 1: "go", 2: "work", 3: "()" } }
+  - code: "func f(c Client) { go c.Poll() }"
+    expect: { sites: 1, form: method, hole: "go", picks: { 1: "go", 2: "Poll", 3: "()" } }
+  - code: "func f() { go func() { println(1) }() }"
+    expect: { sites: 1, form: lit, hole: "go", picks: { 1: "go", 2: "()", 3: "{ println(1) }" } }
+  - code: "func f() { work() }"
+    expect: none

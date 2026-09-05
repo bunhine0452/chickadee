@@ -1,0 +1,165 @@
+schema: 1
+id: java/text-length
+# 0부 축 C. `universal: null` — 파이썬은 코드 포인트로 세고(`len("가") == 1`) 자바·JS 는
+# 코드 단위로 센다. 자바만 글자 타입이 따로 있다 (§1.5.2).
+universal: null
+name: { ko: 글자와 길이, en: Characters and length }
+token: "length"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cs/text-encoding, cs/bit-and-byte]
+confusions: []
+dict:
+  one_liner:
+    ko: "글자 하나는 16비트 칸 하나다 — 사람이 보는 글자 하나와 다르다."
+    en: "One code unit is 16 bits — not always one symbol as a person sees it."
+  why:
+    ko: >-
+      자바의 글자 타입은 16비트 칸 <b>하나</b>입니다. 그래서 <code>"가".length()</code> 는 1
+      이지만 <code>"&#128512;".length()</code> 는 <b>2</b> 예요 — 이모지 하나가 칸 둘을 씁니다.
+      길이가 「사람이 세는 글자 수」가 아니라 <b>칸 수</b>라는 뜻입니다. 자르기도 같은 규칙을
+      따르므로, 이모지 한가운데를 자르면 글자가 깨집니다. 또 글자 타입은 <b>수</b>이기도 해서
+      <code>'a' + 'b'</code> 가 <code>"ab"</code> 가 아니라 <code>195</code> 입니다.
+    en: >-
+      Java's character type is <b>one</b> 16-bit slot. So <code>"가".length()</code> is 1 while
+      <code>"&#128512;".length()</code> is <b>2</b> — one emoji takes two slots. Length is a
+      <b>slot count</b>, not the number of symbols a person counts. Cutting follows the same
+      rule, so cutting through the middle of an emoji breaks it. The character type is also a
+      <b>number</b>, which is why <code>'a' + 'b'</code> is <code>195</code>, not
+      <code>"ab"</code>.
+  trace:
+    - ko: "{{site.line}}행은 {{pick.2|code}} 의 길이를 묻는다."
+      en: "Line {{site.line}} asks for the length of {{pick.2|code}}."
+    - ko: "돌아오는 수는 사람이 세는 글자 수가 아니라 16비트 칸의 수다."
+      en: "The number that comes back counts 16-bit slots, not symbols."
+    - ko: "이모지가 섞여 있으면 그 하나가 둘로 세어진다."
+      en: "If an emoji is in there, that one symbol counts as two."
+rule:
+  ko: "<b>길이는 16비트 칸의 수다.</b> 사람이 세는 글자 수와 늘 같지는 않다."
+  en: "<b>Length counts 16-bit slots.</b> That is not always the number of symbols."
+result:
+  label: { ko: "{{site.line}}행이 묻는 길이", en: "the length asked for on line {{site.line}}" }
+  value: "{{pick.2}}.{{pick.1}}"
+  note: { ko: "칸의 수가 돌아온다", en: "a slot count comes back" }
+ok:
+  ko: "{{pick.2|code}} 의 칸 수를 물었습니다 — 사람이 세는 글자 수와 다를 수 있어요."
+  en: "You asked for the slot count of {{pick.2|code}} — it may differ from the symbol count."
+payoff:
+  ko: "이걸 알면 「이모지를 넣었더니 길이가 2 씩 는다」가 풀립니다."
+  en: "This untangles “the length jumps by two whenever an emoji goes in”."
+bridge:
+  ko: "파이썬은 코드 포인트로 세서 이모지도 1 입니다. 자바·JS 는 칸으로 셉니다."
+  en: "Python counts code points, so an emoji is 1. Java and JS count slots."
+misconceptions:
+  - ko: "길이가 사람이 세는 글자 수다 — 칸의 수입니다. 이모지 하나가 둘로 세어집니다."
+    en: "Length is the symbol count — it is the slot count, and one emoji counts as two."
+  - ko: "글자 둘을 더하면 이어 붙는다 — 글자 타입은 수라서 더한 수가 나옵니다."
+    en: "Adding two characters joins them — the character type is a number, so you get a sum."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>칸의 수를 돌려주는 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name that returns the slot count</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 길이를 <b>재는 대상</b>입니다. 세는 일을 하는 것은 그 뒤에 붙은 이름이에요."
+          en: "{{pick.2|code}} is <b>what is measured</b>. The counting is done by the name after it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 대상이냐 묻는 이름이냐", en: "The sharpest spot — the subject or the name asked" }
+          code:
+            - "s;              // 묶음 자체"
+            - "s.length();     // 칸의 수"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 넘기는 <b>괄호</b>입니다. 안이 비어 있어도 세는 일을 하는 것은 이름 쪽이에요."
+          en: "{{pick.3|code}} is the <b>parentheses</b>. Even empty, the counting belongs to the name."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 괄호냐", en: "The sharpest spot — the name or the parentheses" }
+          code:
+            - "s.length();"
+            - "s.charAt(0);"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 {{pick.2|code}} 의 <b>칸 수</b>를 묻습니다."
+      en: "Choose what goes in the blank. Line {{site.line}} asks for the <b>slot count</b> of {{pick.2|code}}."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "length", mono: true }
+      - t: "charAt"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>그 자리의 칸 하나</b>를 꺼냅니다. 수가 아니라 글자 하나가 나오고, 자리 번호를 넘겨야 해요."
+            en: "That takes <b>one slot at a position</b>. It gives a character, not a count, and needs a position."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 개수냐 한 칸이냐", en: "The sharpest spot — the count or one slot" }
+            code:
+              - "s.length();     // 수"
+              - "s.charAt(0);    // 글자 하나"
+      - t: "size"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>모음</b>의 개수를 묻는 이름이라 글자 묶음에는 없습니다. 자바는 재는 이름을 자리마다 다르게 지어 뒀어요."
+            en: "That name asks a <b>collection</b> for its count and does not exist on text. Java names the measure differently in each place."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 묶음이냐 모음이냐", en: "The sharpest spot — text or a collection" }
+            code:
+              - "s.length();     // 글자 묶음"
+              - "list.size();    // 모음"
+      - t: "count"
+        mono: true
+        diag:
+          t:
+            ko: "이 이름은 글자 묶음에 없습니다. 자바에서 이 이름은 흐름의 개수를 세는 자리에 있어요."
+            en: "Text has no such name. In Java that name lives on a stream, counting what flowed through."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 묶음이냐 흐름이냐", en: "The sharpest spot — text or a stream" }
+            code:
+              - "s.length();"
+              - "xs.stream().count();"
+why_gate:
+  q:
+    ko: "{{site.line}}행이 돌려받는 수는 왜 <b>사람이 세는 글자 수와 다를 수</b> 있을까요?"
+    en: "Why can the number line {{site.line}} gets back <b>differ from the symbol count</b>?"
+  choices:
+    - t:
+        ko: "묶음이 16비트 칸의 줄이고, 어떤 글자는 칸 둘을 쓰기 때문"
+        en: "Because text is a row of 16-bit slots and some symbols take two of them"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그런 글자를 하나 들어 적어 보세요."
+        en: "That is the direction. Name one such symbol."
+    - t:
+        ko: "공백과 줄바꿈을 안 세기 때문"
+        en: "Because spaces and newlines are not counted"
+      ok: false
+      fb:
+        ko: "다 셉니다. 공백도 칸 하나예요."
+        en: "They are counted. A space is one slot too."
+    - t:
+        ko: "한글이 영어보다 자리를 더 쓰기 때문"
+        en: "Because Korean takes more room than English"
+      ok: false
+      fb:
+        ko: "한글 한 글자도 칸 하나입니다. 칸 둘을 쓰는 것은 훨씬 뒤쪽 글자들이에요."
+        en: "One Korean syllable is one slot. The two-slot symbols sit much further along."
+queries:
+  - { grammars: [java], file: ./text-length.scm }
+examples:
+  - code: "class A { void f(String s) { int n = s.length(); } }   // \"ab\".length() -> 2 (int)"
+    expect: { sites: 1, form: measure, hole: "length", picks: { 1: "length", 2: "s", 3: "()" } }
+  - code: "class A { void f() { char c = 'a'; } }                 // c -> 'a' (char, 16비트 한 칸)"
+    expect: { sites: 1, form: chardecl, picks: { 1: "char", 2: "c", 3: "'a'" } }
+  - code: "class A { void f(String s) { s.charAt(0); } }          // \"ab\".charAt(0) -> 'a' (char)"
+    expect: { sites: 1, form: measure, hole: "charAt", picks: { 1: "charAt", 2: "s" } }
+  - code: "class A { void f(java.util.List xs) { xs.size(); } }   // xs.size() -> 모음의 개수 (int)"
+    expect: none

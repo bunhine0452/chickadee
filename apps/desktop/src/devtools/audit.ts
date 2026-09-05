@@ -175,7 +175,6 @@ export interface Audit {
   measure: typeof gates.measure;
   measureViolations: typeof gates.measureViolations;
   motionOver: typeof gates.motionOver;
-  dee: typeof gates.dee;
   /** 활자·대비·행 길이를 한 번에. 화면마다 이것을 부른다. */
   gates: typeof gates.runGates;
 }
@@ -190,7 +189,6 @@ export function installAudit(search: string): boolean {
     measure: gates.measure,
     measureViolations: gates.measureViolations,
     motionOver: gates.motionOver,
-    dee: gates.dee,
     gates: gates.runGates,
   };
   return true;

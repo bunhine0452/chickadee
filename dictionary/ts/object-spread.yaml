@@ -3,11 +3,11 @@ id: ts/object-spread
 universal: common/copy-with-changes
 name: { ko: 객체 펼치기, en: Object spread }
 token: "..."
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 2
-prereq: [ts/property-access]
+prereq: [ts/property-access, cs/immutability]
 confusions: [ts/array-basics]
 
 dict:
@@ -160,12 +160,43 @@ meaning:
               - "const b = { ...a }   // a 는 그대로"
               - "a = {}               // 이래야 a 가 바뀐다"
 
+# 빈칸형을 못 내는 사유 (D145). 「아직 안 썼다」가 아니라 「이 문법에는 뚫을 구멍이 없다」다.
+no_hole_reason: >-
+  점 셋을 지우면 남는 것은 다른 기호가 아니라 「그 객체를 통째로 값으로 넣기」다. 넣을 토큰이 아니라 없는 상태라 보기가 안 된다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 원래 객체를 고치지 않고 펼쳐 복사했을까요?"
+    en: "Why does line {{site.line}} spread a copy instead of editing the original object?"
+  choices:
+    - t:
+        ko: "같은 객체를 보고 있는 쪽이 있어서, 바뀐 사실을 새 값으로 알려야 해서"
+        en: "Because something else is watching the same object, and the change has to arrive as a new value"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 누가 그 객체를 보고 있는지 짐작되면 그것도 적어 보세요."
+        en: "That is the direction. If you can guess who is watching that object, name them too."
+    - t:
+        ko: "복사가 더 빨라서"
+        en: "Because copying is faster"
+      ok: false
+      fb:
+        ko: "복사는 오히려 일이 늡니다. 그 값을 치르는 이유는 원본을 보고 있는 쪽이 있기 때문입니다."
+        en: "Copying adds work. The reason for paying that cost is the side that is watching the original."
+    - t:
+        ko: "객체는 고칠 수 없어서"
+        en: "Because objects cannot be edited"
+      ok: false
+      fb:
+        ko: "고칠 수 있습니다. 고치지 않기로 정한 것이고, 그 결정이 이 줄에 적혀 있습니다."
+        en: "They can be edited. Not editing was a decision, and this line is where it is written down."
+
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./object-spread.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./object-spread.scm }
 
 examples:
   - code: "const next = { ...state, done: true }"
-    expect: { sites: 1, form: object, picks: { 1: "state", 2: "..." } }
+    expect: { sites: 1, form: object, picks: { 1: "state", 2: "...", 3: "{" } }
   - code: "setUser({ ...user, name })"
     expect: { sites: 1, picks: { 1: "user" } }
   - code: "const o = { done: true }"

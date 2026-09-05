@@ -1,0 +1,167 @@
+/* 작은 문제 판 (D186 ⑧ · 정본 §6).
+ *
+ * 장식이 0 이다. 이 판에서 틀이 있는 것은 **코드 창과 케이스 표** 둘뿐이고, 색은 뜻에만
+ * 쓴다 — 틀린 케이스의 왼쪽 선 하나. 나머지는 선과 여백이다.
+ *
+ * 표는 다섯 열(케이스 · 넣는 것 · 나와야 하는 것 · 나온 것 · 판정)이고 가운데 셋이 코드다.
+ * 개행은 `⏎` 로 보이므로 칸이 한 줄로 유지되고, 넘치면 **표 안에서만** 가로로 흐른다 —
+ * 문서는 안 밀린다(`responsive.spec.ts` 가 재는 것이 그것이다). */
+
+.dr-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--code-bg);
+}
+
+.dr-cases {
+  min-width: max-content;
+  border-collapse: collapse;
+  color: var(--text);
+  font-size: var(--fs-2);
+  line-height: var(--lh-body);
+}
+
+/* 표의 이름은 화면에도 남긴다 — 「이 표가 무엇인가」는 스크린 리더만의 것이 아니다. */
+.dr-cap {
+  padding: var(--s-2) var(--s-3);
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: var(--fs-2);
+  text-align: left;
+}
+
+.dr-cases th,
+.dr-cases td {
+  padding: var(--s-2) var(--s-3);
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.dr-cases thead th {
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: var(--fs-2);
+  font-weight: var(--fw-bold);
+  word-break: keep-all;
+}
+
+.dr-cases tbody th {
+  background: var(--surface-2);
+  font-weight: var(--fw-normal);
+  white-space: nowrap;
+}
+
+.dr-cases code {
+  display: inline-block;
+  max-width: 24ch;
+  overflow: hidden;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-3);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+
+/* 틀린 케이스 — 색이 아니라 **왼쪽 선**이 먼저 말한다 (색맹 대비 게이트). */
+.dr-cases tbody tr.miss th {
+  box-shadow: inset 3px 0 0 var(--bad);
+  background: var(--bad-bg);
+}
+
+.dr-mark {
+  font-weight: var(--fw-medium);
+  white-space: nowrap;
+}
+
+.dr-failed,
+.dr-timeout {
+  color: var(--bad);
+}
+
+.dr-skipped {
+  color: var(--text-muted);
+}
+
+/* 통과한 뒤의 내 코드 — 더 안 고치므로 편집기가 아니라 글로 남는다. */
+.dr-mine {
+  padding: var(--s-3);
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--code-bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-3);
+  line-height: var(--lh-body);
+}
+
+/* 실행이 남긴 글 — 컴파일 오류와 예외. 접혀 있고 눌러야 펴진다. */
+.dr-log {
+  color: var(--text-muted);
+  font-size: var(--fs-2);
+}
+
+.dr-log summary {
+  cursor: pointer;
+}
+
+.dr-log pre {
+  margin-top: var(--s-2);
+  padding: var(--s-3);
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--code-bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-2);
+  white-space: pre-wrap;
+}
+
+.dr-took {
+  margin-top: var(--s-2);
+}
+
+/* `build` — 식 한 줄. 코드 창이 아니라 칸 하나다: 답이 한 식이라 줄이 늘어날 일이 없고,
+   창을 주면 여러 줄을 쓰라는 신호가 된다. */
+.dr-expr {
+  width: 100%;
+  max-width: 44ch;
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--accent);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-4);
+}
+
+.dr-expr:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+.dr-expr:disabled {
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+
+.dr-want {
+  color: var(--text-muted);
+  font-size: var(--fs-2);
+}
+
+.dr-want b,
+.dr-printed b {
+  color: var(--text);
+  font-family: var(--font-mono);
+}
+
+.dr-printed {
+  margin-top: var(--s-2);
+}

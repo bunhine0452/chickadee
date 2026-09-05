@@ -1,0 +1,224 @@
+schema: 1
+id: csharp/operator-precedence
+# 0부 축 5. 보편형은 `csharp.md` §0.2 가 적은 `common/arithmetic` 그대로다 — 이 판이 §2 ④
+# `csharp/arithmetic` 을 흡수했으므로(§0.5) C# 에서 그 보편형을 지는 판이 여기 하나다.
+#
+# **전이가 함정이 되는 자리**이기도 하다(§6 마지막 문단): 파이썬은 `5/2` 가 2.5 이고 C# 은
+# 2 다. 같은 보편형인데 답이 반대라 첫 정답이 Good 으로 잡힌다 — 그래서 `why` 와 오답
+# 진단에 그 차이를 박아 둔다.
+universal: common/arithmetic
+name: { ko: 먼저 묶이는 것, en: Operator precedence }
+token: "&&"
+grammars: [c_sharp]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cs/operator-precedence, csharp/boolean-literal]
+confusions: []
+dict:
+  one_liner:
+    ko: "괄호를 안 쓰면 식이 스스로 접히는 순서가 있고, 그 순서를 기호의 세기가 정한다."
+    en: "Without brackets an expression folds in a set order, by operator strength."
+  why:
+    ko: >-
+      {{site.line}}행은 기호가 둘 이상이라 <b>무엇이 먼저 묶이는지</b>가 결과를 정합니다.
+      {{pick.1|code}} 양쪽에 있는 {{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}
+      중 <b>세기가 큰 쪽이 먼저</b> 한 덩어리가 돼요. 실측 <code>2 + 3 * 4</code>는
+      <b>14</b>입니다. 그리고 C# 에는 다른 언어와 <b>답이 갈리는</b> 자리가 하나 있습니다 —
+      <code>1 &lt;&lt; 2 + 3</code>이 여기서는 <b>32</b>인데 고·스위프트에서는 <b>7</b>이에요.
+      자리 옮김이 더하기보다 <b>약해서</b>입니다.
+    en: >-
+      Line {{site.line}} has more than one operator, so <b>what binds first</b> decides the
+      result. Of {{pick.2|code}} and {{pick.3|code}} on either side of {{pick.1|code}}, the
+      <b>stronger</b> one becomes a lump first. Measured, <code>2 + 3 * 4</code> is <b>14</b>.
+      And one spot in C# <b>disagrees</b> with other languages — <code>1 &lt;&lt; 2 + 3</code>
+      is <b>32</b> here and <b>7</b> in Go and Swift, because the shift is <b>weaker</b> than
+      the addition.
+  trace:
+    - ko: "{{site.line}}행에서 세기가 큰 기호가 먼저 한 덩어리를 만든다."
+      en: "On line {{site.line}} the stronger operator makes its lump first."
+    - ko: "그 덩어리가 {{pick.1|code}} 한쪽 값이 된다."
+      en: "That lump becomes one side of {{pick.1|code}}."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 마지막에 접힌다."
+      en: "{{pick.1|code}} folds last."
+rule:
+  ko: "<b>세기가 큰 기호가 먼저 묶는다.</b> 괄호는 그 순서를 눈에 보이게 적는 일이다."
+  en: "<b>The stronger operator binds first.</b> Parentheses write that order down."
+result:
+  label: { ko: "{{site.line}}행의 식", en: "the expression on line {{site.line}}" }
+  value: "{{pick.2}} {{pick.1}} {{pick.3}}"
+  note: { ko: "접히는 순서가 결과를 정한다", en: "the folding order decides the result" }
+ok:
+  ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 양쪽이 값이 된 <b>뒤에</b> 접힙니다."
+  en: "{{pick.1|code}} folds <b>after</b> both sides have become values."
+payoff:
+  ko: "이걸 알면 「괄호를 하나 지웠더니 값이 달라진다」가 풀립니다 — 순서가 바뀐 겁니다."
+  en: "This untangles “I removed one bracket and the value changed” — the order moved."
+bridge:
+  ko: >-
+    같은 식이 언어마다 답이 다를 수 있습니다. <code>1 &lt;&lt; 2 + 3</code>이 C# 은 32,
+    고·스위프트는 7 이에요 — <b>기호가 아니라 세기표가 다릅니다.</b>
+  en: >-
+    The same expression can differ by language: <code>1 &lt;&lt; 2 + 3</code> is 32 in C# and
+    7 in Go and Swift — <b>the table, not the symbols, differs.</b>
+misconceptions:
+  # 출처 — `csharp.md` §0.1 0-5 · §0.4 실측(.NET SDK 10.0.302, 2026-09-05).
+  - ko: "왼쪽부터 차례로 접힌다 — 세기가 먼저입니다. <code>2 + 3 * 4</code>는 20 이 아니라 <b>14</b>예요."
+    en: "It folds left to right — strength comes first. <code>2 + 3 * 4</code> is <b>14</b>, not 20."
+  - ko: "자리 옮김이 더하기보다 세다 — C# 에서는 <b>약합니다</b>. <code>1 &lt;&lt; 2 + 3</code>이 32 입니다."
+    en: "Shifting binds tighter than adding — in C# it is <b>looser</b>. <code>1 &lt;&lt; 2 + 3</code> is 32."
+  - ko: "<code>||</code>가 <code>&amp;&amp;</code>보다 세다 — 반대입니다. 그래서 <code>a || b &amp;&amp; c</code>는 <code>a || (b &amp;&amp; c)</code>예요."
+    en: "<code>||</code> binds tighter than <code>&amp;&amp;</code> — the other way round, so <code>a || b &amp;&amp; c</code> is <code>a || (b &amp;&amp; c)</code>."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>가장 늦게 접히는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the operator that folds last</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 한쪽 <b>재료</b>입니다. 재료가 먼저 값이 되고, 접는 일은 가운데 기호가 해요."
+          en: "{{pick.2|code}} is one <b>input</b>. Inputs become values first; the operator between does the folding."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 재료냐 접는 기호냐", en: "The sharpest spot — an input or the fold" }
+          code:
+            - "2;             // 값 하나"
+            - "2 + 3 * 4;     // 14"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 다른 쪽 <b>재료</b>입니다. 이쪽이 먼저 한 덩어리가 되고 그다음이 가운데 기호예요."
+          en: "{{pick.3|code}} is the other <b>input</b>. It becomes a lump first, and the operator between comes after."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 먼저냐 나중이냐", en: "The sharpest spot — first or last" }
+          code:
+            - "3 * 4;         // 먼저 12"
+            - "2 + 12;        // 그다음 14"
+meaning:
+  - q:
+      ko: "괄호를 하나도 안 쓴 {{site.line}}행에서, 접히는 순서를 정하는 것은 무엇일까요?"
+      en: "With no parentheses on line {{site.line}}, what decides the folding order?"
+    hint:
+      ko: "코드에 안 적혀 있고 언어가 들고 있는 표입니다."
+      en: "It is not written in the code; the language carries a table."
+    options:
+      - t:
+          ko: "언어가 정한 기호별 세기 — 같은 세기끼리는 왼쪽부터"
+          en: "The language's strength table, with equal strengths going left to right"
+      - t:
+          ko: "왼쪽부터 차례로, 언제나"
+          en: "Left to right, always"
+        diag:
+          t:
+            ko: "같은 세기끼리는 그렇습니다. 세기가 다르면 오른쪽이 먼저 묶일 수 있어요 — <code>2 + 3 * 4</code>가 14 입니다."
+            en: "That holds at equal strength. When strengths differ the right side can bind first — <code>2 + 3 * 4</code> is 14."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 같은 세기냐 아니냐", en: "The sharpest spot — equal strength or not" }
+            code:
+              - "10 - 3 - 2;    // 5, 왼쪽부터"
+              - "2 + 3 * 4;     // 14, 오른쪽 먼저"
+      - t:
+          ko: "값의 크기 — 큰 수부터 접힌다"
+          en: "The size of the values — bigger numbers fold first"
+        diag:
+          t:
+            ko: "값은 순서에 관여하지 않습니다. 순서는 <b>기호</b>가 정하고, 그래서 컴파일 시각에 이미 정해져 있어요."
+            en: "Values take no part. The <b>operators</b> decide, which is why the order is settled at compile time."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값이냐 기호냐", en: "The sharpest spot — values or operators" }
+            code:
+              - "2 + 3 * 4;       // 14"
+              - "1000 + 2 * 3;    // 1006, 같은 순서"
+      - t:
+          ko: "줄바꿈과 들여쓰기"
+          en: "Line breaks and indentation"
+        diag:
+          t:
+            ko: "C# 에서 공백은 아무 뜻이 없습니다. 줄을 나눠도 접히는 순서는 그대로예요."
+            en: "Whitespace means nothing in C#. Breaking the line leaves the order unchanged."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 공백이 뜻이 있나", en: "The sharpest spot — does whitespace mean anything" }
+            code:
+              - "2 +"
+              - "  3 * 4;        // 여전히 14"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>양쪽이 다 참일 때만</b> 참입니다."
+      en: "Choose what goes in the blank. Line {{site.line}} is true <b>only when both sides are</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "&&", mono: true }
+      - t: "||"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>한쪽만</b> 참이어도 참입니다. 그리고 세기가 더 약해서, 같이 쓰면 이쪽이 늦게 접혀요."
+            en: "That is true when <b>either</b> side is. It also binds looser, so mixed together it folds later."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 양쪽이냐 한쪽이냐", en: "The sharpest spot — both or either" }
+            code:
+              - "true && false;   // False"
+              - "true || false;   // True"
+      - t: "&"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>비트</b>를 맞대는 기호라 오른쪽을 언제나 계산합니다. 앞이 거짓이어도 건너뛰지 않아요."
+            en: "That lines up <b>bits</b> and always evaluates the right side — it never skips."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 건너뛰나 안 뛰나", en: "The sharpest spot — skip or not" }
+            code:
+              - "a && F();    // a 가 거짓이면 F 는 안 돈다"
+              - "a & F();     // F 는 언제나 돈다"
+      - t: "=="
+        mono: true
+        diag:
+          t:
+            ko: "이건 두 값이 <b>같은지</b> 묻는 기호라 참·거짓 둘을 잇는 자리가 아닙니다."
+            en: "That asks whether two values are <b>the same</b>; it is not the spot that joins two truth values."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 잇기냐 견주기냐", en: "The sharpest spot — joining or comparing" }
+            code:
+              - "ok && ready;    // 둘 다 참인가"
+              - "ok == ready;    // 값이 같은가"
+why_gate:
+  q:
+    ko: "괄호를 안 써도 되는데 왜 <b>굳이 적을</b> 때가 있을까요?"
+    en: "Parentheses are optional here — why write them <b>anyway</b>?"
+  choices:
+    - t:
+        ko: "읽는 사람이 세기표를 외우고 있지 않아도 접히는 순서가 보이게 하려고"
+        en: "So the folding order is visible without the reader knowing the strength table"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 언어마다 표가 다른 자리도 함께 적어 보세요."
+        en: "That is the direction. Add the spot where the table differs by language."
+    - t:
+        ko: "괄호를 쓰면 더 빨리 돌아서"
+        en: "Because parentheses make it run faster"
+      ok: false
+      fb:
+        ko: "속도는 안 바뀝니다. 컴파일 시각에 같은 트리가 나옵니다."
+        en: "Speed does not change — the same tree comes out at compile time."
+    - t:
+        ko: "괄호가 없으면 컴파일이 막혀서"
+        en: "Because it stops compiling without them"
+      ok: false
+      fb:
+        ko: "막히지 않습니다. 돌기는 도는데 사람이 잘못 읽을 뿐이에요."
+        en: "It compiles fine and it runs — a person just reads it the other way."
+queries:
+  - { grammars: [c_sharp], file: ./operator-precedence.scm }
+examples:
+  - code: "bool ok = a && b;      // ok -> a 와 b 가 둘 다 참일 때만 참 (bool)"
+    expect: { sites: 1, form: shortcircuit, hole: "&&", picks: { 1: "&&", 2: "a", 3: "b" } }
+  - code: "int n = 2 + 3 * 4;     // n -> 14 (int)"
+    expect: { sites: 1, form: mixed, picks: { 1: "+", 2: "2", 3: "3 * 4" } }
+  - code: "int m = 1 << 2 + 3;    // m -> 32 (int) — Go·Swift 는 7"
+    expect: { sites: 1, form: shift, picks: { 1: "<<", 2: "1", 3: "2 + 3" } }
+  - code: "int k = 1 + 2;         // k -> 3 (int)"
+    expect: none

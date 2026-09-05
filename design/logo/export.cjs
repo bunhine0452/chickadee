@@ -2,12 +2,15 @@
    실행: node export.cjs   (playwright 가 필요: npx playwright install chromium) */
 const fs = require('node:fs'), path = require('node:path');
 function pw(){ try { return require('playwright'); } catch (e) {
+  try { return require('@playwright/test'); } catch (e2) { /* 아래 캐시를 마저 본다 */ }
   const cache = path.join(process.env.HOME || '', '.npm/_npx');
   for (const d of fs.existsSync(cache) ? fs.readdirSync(cache) : []) { const p = path.join(cache, d, 'node_modules/playwright'); if (fs.existsSync(p)) return require(p); }
   throw new Error('playwright 를 찾지 못했습니다: npm i playwright 또는 npx playwright install chromium'); } }
 const { chromium } = pw();
 const DIR = __dirname, PNG = path.join(DIR, 'png');
-const FILES = { badge: 'chickadee-logo-badge.svg', square: 'chickadee-logo-square.svg', favicon: 'chickadee-logo-favicon.svg', nobg: 'chickadee-logo-no-background.svg', master: 'chickadee-logo.svg' };
+const FILES = { badge: 'chickadee-logo-badge.svg', square: 'chickadee-logo-square.svg', favicon: 'chickadee-logo-favicon.svg', nobg: 'chickadee-logo-no-background.svg', macos: 'chickadee-logo-macos.svg', macos16: 'chickadee-logo-macos-16.svg', master: 'chickadee-logo.svg' };
+/* icns 가 요구하는 열 장 (16~512 와 각각의 @2x). 512@2x = 1024. */
+const ICNS = [[16,1],[16,2],[32,1],[32,2],[128,1],[128,2],[256,1],[256,2],[512,1],[512,2]];
 (async () => {
   const browser = await chromium.launch();
   fs.mkdirSync(PNG, { recursive: true });
@@ -19,6 +22,37 @@ const FILES = { badge: 'chickadee-logo-badge.svg', square: 'chickadee-logo-squar
   await exp(FILES.square, [1024, 512, 256], 'square');
   await exp(FILES.favicon, [64, 48, 32, 16], 'favicon');
   await exp(FILES.nobg, [1024, 512, 256, 128, 64, 32], 'nobg');
+  await exp(FILES.macos, [1024, 512, 256, 128, 64, 32], 'macos');
+  await exp(FILES.macos16, [32, 16], 'macos16');
+
+  /* 앱이 쓰는 PNG 도 같은 타일로 (D135). Windows 의 `icon.ico`·`Square*Logo.png` 는
+     정사각 그대로 둔다 — 그쪽 타일은 시스템이 배경을 깔아 주는 자리다. */
+  const ICONS = path.join(DIR, '..', '..', 'apps/desktop/src-tauri/icons');
+  for (const [from, to] of [['macos-1024', 'icon'], ['macos-256', '128x128@2x'], ['macos-128', '128x128'], ['macos-64', '64x64'], ['macos-32', '32x32']]) {
+    fs.copyFileSync(path.join(PNG, `${from}.png`), path.join(ICONS, `${to}.png`));
+  }
+
+  /* macOS 앱 아이콘 (D135) — iconset 열 장을 굽고 `iconutil` 로 icns 를 만든다.
+     iconutil 은 macOS 에만 있으므로 다른 OS 에서는 건너뛴다: icns 는 커밋된 산출물이다. */
+  if (process.platform === 'darwin') {
+    const svg = fs.readFileSync(path.join(DIR, FILES.macos), 'utf8');
+    /* 16px 슬롯만 머리 크롭이다 — 전신 배지는 16px 에서 3단 판정을 통과하지 못한다
+       (design/logo/README.md 「16px 판정」). 32px 부터는 배지 그대로. */
+    const svg16 = fs.readFileSync(path.join(DIR, FILES.macos16), 'utf8');
+    const set = path.join(DIR, 'Chickadee.iconset');
+    fs.rmSync(set, { recursive: true, force: true }); fs.mkdirSync(set, { recursive: true });
+    for (const [pt, scale] of ICNS) {
+      const px = pt * scale;
+      const p = await browser.newPage({ viewport: { width: px, height: px }, deviceScaleFactor: 1 });
+      await p.setContent(`<style>html,body{margin:0;background:transparent}svg{display:block;width:${px}px;height:${px}px}</style>` + (px < 32 ? svg16 : svg));
+      await p.screenshot({ path: path.join(set, `icon_${pt}x${pt}${scale === 2 ? '@2x' : ''}.png`), omitBackground: true });
+      await p.close();
+    }
+    const out = path.join(ICONS, 'icon.icns');
+    require('node:child_process').execFileSync('iconutil', ['-c', 'icns', set, '-o', out]);
+    fs.rmSync(set, { recursive: true, force: true });
+    console.log('icon.icns ←', FILES.macos);
+  }
 
   /* 대조 시트 + 16px 3단 판정 (캡→뺨→턱받이 : 먹→종이→먹 열 수와 흰 띠 높이) */
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 }, deviceScaleFactor: 2 });

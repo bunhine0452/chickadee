@@ -1,0 +1,173 @@
+schema: 1
+id: csharp/try-catch
+universal: common/try-catch
+name: { ko: 터진 것을 받아 잇기, en: Try-catch }
+token: "catch"
+grammars: [c_sharp]
+framework: null
+essential: true
+difficulty: 3
+prereq: [csharp/method-call, csharp/nullable-reference]
+confusions: []
+dict:
+  one_liner:
+    ko: "안에서 터진 것을 타입으로 골라 받고, 받은 자리에서 흐름을 다시 잇는다."
+    en: "What blows up inside is taken by type, and the flow resumes where it is taken."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.2|code}} 안에서 예외가 나면 그 아래는 안 돌고 {{pick.3|code}} 쪽으로
+      바로 갑니다. 무엇이 잡히는지는 <b>타입</b>이 정하고, 예외 타입에 상속 계층이 있어서
+      <code>catch (Exception e)</code>는 거의 다 삼킵니다. C# 에는 <b>검사 예외가 없습니다</b> —
+      메서드 시그니처에 무엇이 터질지 <b>안 적혀 있어서</b>, 어디를 감쌀지는 코드만 봐서는
+      못 찾고 문서나 실행으로 알아내야 해요. 자바와 갈리는 자리가 정확히 여기입니다.
+    en: >-
+      If an exception is raised inside {{pick.2|code}} on line {{site.line}}, the rest is
+      skipped and control goes straight to {{pick.3|code}}. What gets caught is settled by
+      <b>type</b>, and because exception types form a hierarchy, <code>catch (Exception e)</code>
+      swallows nearly everything. C# has <b>no checked exceptions</b>: a signature <b>does not
+      say</b> what can be raised, so where to wrap cannot be found from the code alone and has
+      to come from documentation or from running it. This is exactly where Java parts ways.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.2|code}}{{pick.2|josa:이,가}} 먼저 돈다."
+      en: "{{pick.2|code}} on line {{site.line}} runs first."
+    - ko: "안에서 터지면 남은 줄을 건너뛰고 {{pick.3|code}} 쪽을 본다."
+      en: "If it blows up, the rest is skipped and {{pick.3|code}} is consulted."
+    - ko: "타입이 맞으면 {{pick.5|code}}{{pick.5|josa:이,가}} 돌고 흐름이 이어진다."
+      en: "If the type matches, {{pick.5|code}} runs and the flow resumes."
+rule:
+  ko: "<b>무엇이 잡히는지는 타입이 정한다.</b> 그리고 무엇이 터질지는 시그니처에 안 적혀 있다."
+  en: "<b>Type decides what is caught.</b> And the signature does not say what can be raised."
+ok:
+  ko: "{{pick.2|code}} 안에서 터진 것이 {{pick.3|code}} 쪽에서 받아집니다."
+  en: "What blew up inside {{pick.2|code}} is taken at {{pick.3|code}}."
+payoff:
+  ko: "이걸 알면 「어디를 감싸야 하나」의 답이 코드에 없다는 것을 압니다 — 찾을 데가 다릅니다."
+  en: "This shows that “where do I wrap” has no answer in the code — you look elsewhere."
+bridge:
+  ko: >-
+    자바는 <code>throws</code>가 시그니처에 적혀 있어 컴파일러가 짚어 줍니다. C# 은 안 적혀서
+    <b>사람이 찾아야</b> 해요 — 같은 문법에 반대되는 습관이 붙습니다.
+  en: >-
+    Java writes <code>throws</code> in the signature and the compiler points at it. C# does
+    not, so <b>a person has to look</b> — the same syntax with the opposite habit.
+misconceptions:
+  # 출처 — `csharp.md` §4 ㉘ · §9.
+  - ko: "무엇이 터질지 시그니처에 적혀 있다 — C# 에는 검사 예외가 없어 안 적힙니다."
+    en: "The signature says what can be raised — C# has no checked exceptions, so it does not."
+  - ko: "모두 잡으면 안전하다 — 처리할 수 없는 것까지 삼켜 원인이 사라집니다."
+    en: "Catching everything is safe — it swallows what cannot be handled and hides the cause."
+  - ko: "잡으면 그 자리로 되돌아가 이어 돈다 — 터진 자리로는 안 돌아갑니다. 받은 자리에서 이어집니다."
+    en: "Catching resumes at the point of failure — it does not; it resumes where it was caught."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>터진 것을 받는 자리</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>where the failure is taken</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.3
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>지켜볼 구간</b>을 여는 낱말입니다. 받는 일은 뒤쪽이 해요."
+          en: "{{pick.1|code}} opens the <b>watched region</b>. The taking happens after it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 지켜보기냐 받기냐", en: "The sharpest spot — watching or taking" }
+          code:
+            - "try { Save(); }         // 지켜본다"
+            - "catch (IOException) { } // 받는다"
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 지켜볼 <b>몸통</b>입니다. 여기서 터지고, 받는 곳은 따로예요."
+          en: "{{pick.2|code}} is the watched <b>body</b>: the failure starts here and is taken elsewhere."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 터지는 곳이냐 받는 곳이냐", en: "The sharpest spot — where it breaks or where it is taken" }
+          code:
+            - "{ Save(); }         // 터질 수 있다"
+            - "catch { }           // 받는다"
+      pick.5:
+        t:
+          ko: "{{pick.5|code}}{{pick.5|josa:은,는}} 받은 <b>뒤에</b> 도는 몸통입니다. 받는 자리는 그 앞이에요."
+          en: "{{pick.5|code}} runs <b>after</b> it is taken. The taking is written before it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 받기냐 처리냐", en: "The sharpest spot — taking or handling" }
+          code:
+            - "catch (IOException e)   // 받는 자리"
+            - "{ Log(e); }             // 처리"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 안에서 터진 것을 <b>타입으로 골라 받습니다</b>."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>takes the failure by type</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "catch", mono: true }
+      - t: "finally"
+        mono: true
+        diag:
+          t:
+            ko: "이건 터지든 안 터지든 <b>언제나</b> 도는 자리라 받아 주지 않습니다. 예외는 계속 올라가요."
+            en: "That runs <b>either way</b> and takes nothing. The exception keeps travelling up."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 받나 정리하나", en: "The sharpest spot — taking or cleaning up" }
+            code:
+              - "catch (IOException) { }   // 여기서 멈춘다"
+              - "finally { }               // 올라간다"
+      - t: "throw"
+        mono: true
+        diag:
+          t:
+            ko: "이건 반대로 <b>올려 보내는</b> 낱말입니다. 받는 자리가 아니에요."
+            en: "That <b>sends one up</b> instead. It is not where one is taken."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 받기냐 보내기냐", en: "The sharpest spot — taking or sending" }
+            code:
+              - "catch (Exception e) { }"
+              - "throw new Exception();"
+      - t: "when"
+        mono: true
+        diag:
+          t:
+            ko: "이건 받는 자리에 <b>조건을 더 붙이는</b> 낱말이라 혼자서는 못 섭니다."
+            en: "That <b>adds a condition</b> to a taking clause and cannot stand alone."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 받기냐 조건이냐", en: "The sharpest spot — taking or a condition" }
+            code:
+              - "catch (E e) { }"
+              - "catch (E e) when (e.Code == 1) { }"
+why_gate:
+  q:
+    ko: "이 언어는 왜 무엇이 터질지 <b>시그니처에 안 적게</b> 했을까요?"
+    en: "Why does this language keep what can be raised <b>out of the signature</b>?"
+  choices:
+    - t:
+        ko: "적게 하면 부르는 쪽마다 목록이 번져, 처리할 생각도 없는 예외를 다시 적게 되기 때문"
+        en: "Because such a list spreads to every caller, making them re-declare failures they will not handle"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 대신 읽는 사람이 무엇을 잃는지도 적어 보세요."
+        en: "That is the direction. Add what the reader loses in exchange."
+    - t:
+        ko: "예외가 드물어서"
+        en: "Because exceptions are rare"
+      ok: false
+      fb:
+        ko: "드물지 않습니다. 파일·네트워크·파싱이 전부 이 길을 씁니다."
+        en: "They are not rare — files, networks and parsing all take this path."
+    - t:
+        ko: "컴파일러가 못 알아내서"
+        en: "Because the compiler cannot work it out"
+      ok: false
+      fb:
+        ko: "알아낼 수 있습니다. 자바가 그렇게 합니다 — 안 하기로 <b>고른</b> 것이에요."
+        en: "It could — Java does. C# <b>chose</b> not to."
+queries:
+  - { grammars: [c_sharp], file: ./try-catch.scm }
+examples:
+  - code: "class A { void F() { try { G(); } catch (Exception e) { } } }"
+    expect: { sites: 1, form: try, hole: "catch", picks: { 1: "try", 2: "{ G(); }", 3: "catch", 4: "Exception", 5: "{ }" } }
+  - code: "class A { void F() { try { G(); } catch { } } }"
+    expect: { sites: 1, form: try, hole: "catch", picks: { 1: "try", 3: "catch", 5: "{ }" } }
+  - code: "class A { void F() { G(); } }"
+    expect: none

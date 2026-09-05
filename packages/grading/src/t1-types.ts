@@ -57,6 +57,28 @@ export interface T1Row {
   appealed?: boolean;
 }
 
+/**
+ * 이 판의 글자가 어디서 왔나 (D143). **감점하지 않는다** — 기록이고 신호다.
+ * 정본 §3-1 의 `peeks` 선례를 그대로 복제한 것이라 자리도 규칙도 `peeks` 와 같다:
+ * 원장에 남고, 화면에 보이고, 스케줄러에는 「이 판을 더 자주 보여줄 신호」로만 들어간다.
+ *
+ * **이것은 감사가 아니라 추정이다.** Monaco 0.52 의 공개 d.ts 에는 `onDidType` 이 없어
+ * (`onDidPaste` 만 있다) 변경 하나하나를 모양으로 가르는 수밖에 없다 —
+ * `apps/desktop/src/components/t1/assist.ts` 의 분류표가 그 규칙이고, 붙여넣기와 조합은
+ * 별도 신호로 잡지만 그 밖의 「한 번에 여러 글자」는 전부 보조로 친다. 그래서 이 값으로
+ * 점수를 움직이면 안 된다.
+ */
+export interface AssistCount {
+  /** 손으로 앉힌 글자 (조합 중인 한글 포함). */
+  keyed: number;
+  /** 자동 닫기 · 자동 들여쓰기 · 제안 수락이 앉힌 글자. */
+  assisted: number;
+  /** 붙여넣기로 들어온 글자. */
+  pasted: number;
+  /** 제안을 수락한 횟수. */
+  accepted: number;
+}
+
 /** 04 §4.6 `T1Result`. */
 export interface T1Result {
   blockId: number;
@@ -73,6 +95,8 @@ export interface T1Result {
   verdict: 'advance' | 'repeat-soft' | 'repeat';
   peeks: number;
   downgraded: boolean;
+  /** 편집 보조가 앉힌 글자 (D143). 채점에 들어가지 않는다 — `pct` 는 이 값을 안 읽는다. */
+  assist?: AssistCount;
   /** 한 줄이라도 AST 가 판정했으면 `ast`. */
   engine: Engine;
   elapsedMs: number;
@@ -87,7 +111,7 @@ export type Tick = '' | 'exact' | 'equiv' | 'differ';
  * 대한 것인지」를 나중에 알 수 있게 한다 (04 §5). 규칙을 고치면 **올려라** — 골든이
  * 바뀌는 커밋이 곧 이 값이 바뀌는 커밋이다.
  */
-export const T1_ENGINE_VERSION = '1';
+export const T1_ENGINE_VERSION = '2';
 
 /** 이의를 접수할 수 있는 판정 (04 §5 — `differ` 행에서만). */
 export type AppealVerdict = 'differ' | 'missing' | 'extra' | 'wrong-pick';

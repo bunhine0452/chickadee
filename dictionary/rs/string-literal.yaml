@@ -1,0 +1,178 @@
+schema: 1
+id: rs/string-literal
+# 1부 (`rs.md` §3 첫 행 — §0.6 이 1부에 둔다). 보편형은 `common/text-literal`. Rust 에서 다시 배울 것은
+# 큰따옴표의 타입이 `String` 이 아니라 **`&'static str`** 이라는 것 — 소유한 글자가 필요하면
+# `.to_string()` 을 붙인다.
+universal: common/text-literal
+name: { ko: 글자 값, en: Text literal }
+token: "\"…\""
+grammars: [rust]
+framework: null
+essential: true
+difficulty: 1
+prereq: [rs/char-and-byte]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "큰따옴표 안의 글자는 프로그램에 박힌 조각을 빌린 것이다. 가지려면 따로 만들어야 한다."
+    en: "Double quotes borrow a slice baked into the program; to own it, make a copy."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.3|code}}{{pick.3|josa:은,는}} 프로그램 안에 박힌 글자 조각이고, 그 타입은
+      `String` 이 아니라 <b>`&'static str`</b> 입니다 — 「프로그램이 도는 내내 사는 조각을 빌린 것」이에요.
+      그래서 늘릴 수도 고칠 수도 없고, 함수가 `String` 을 받는 자리에 그대로 넣으면 E0308 이 납니다.
+      가진 글자가 필요하면 `.to_string()` 이나 `String::from` 으로 <b>복사해서 만들어야</b> 해요. 이 리포에
+      그 붙임이 834곳입니다. 작은따옴표는 글자 값이 아니라 글자 하나(`char`)예요.
+    en: >-
+      {{pick.3|code}} on line {{site.line}} is a slice of text baked into the program, and its type is not
+      `String` but <b>`&'static str`</b> — a borrow of a slice that lives as long as the program. So it
+      cannot grow or change, and passing it where a `String` is wanted is E0308. When you need owned
+      text you <b>make a copy</b> with `.to_string()` or `String::from`; this repo does that at 834
+      sites. Single quotes are not text but one character (`char`).
+  trace:
+    - ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 컴파일 때 프로그램에 박힌다."
+      en: "{{pick.3|code}} is baked into the program at compile time."
+    - ko: "{{site.line}}행의 {{pick.2|code}}{{pick.2|josa:은,는}} 그 조각을 빌려 가리킨다 — 타입은 &str 이다."
+      en: "{{pick.2|code}} on line {{site.line}} borrows and points at that slice — the type is &str."
+    - ko: "가진 글자가 필요하면 그 자리에서 복사해 새로 만든다."
+      en: "When owned text is needed, a copy is made right there."
+
+rule:
+  ko: "<b>큰따옴표는 빌린 조각이다.</b> 고치거나 넘겨 가지려면 String 으로 만들고, 작은따옴표는 글자 하나다."
+  en: "<b>Double quotes borrow a slice.</b> To change or hand it over, make a String; single quotes are one character."
+result:
+  label:
+    ko: "{{site.line}}행의 글자"
+    en: "the text on line {{site.line}}"
+  value: "{{pick.3}}"
+  note:
+    ko: "빌린 조각 — &str"
+    en: "a borrowed slice — &str"
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} {{pick.3|code}} 라는 조각을 빌려 가리킵니다. 고치려면 복사해서 가져야 해요."
+  en: "{{pick.2|code}} borrows and points at the slice {{pick.3|code}}. To change it, copy and own it."
+payoff:
+  ko: "이걸 알면 「왜 `\"…\"` 를 String 자리에 못 넣나」(E0308)가 풀립니다 — 빌린 조각과 가진 글자는 다른 타입입니다."
+  en: "This untangles “why can a `\"…\"` not go where a String is wanted” (E0308) — a borrowed slice and owned text are different types."
+bridge:
+  ko: "파이썬·JS 의 문자열은 종류가 하나입니다. Rust 는 <b>빌린 것과 가진 것</b> 둘이고 큰따옴표는 빌린 쪽이에요."
+  en: "Python and JS have one kind of string. Rust has <b>borrowed and owned</b>, and double quotes are the borrowed one."
+misconceptions:
+  - ko: "큰따옴표는 `String` 이다 — `&str` 입니다. `String` 이 필요하면 `.to_string()` 을 붙여요."
+    en: "Double quotes make a `String` — they make a `&str`. Add `.to_string()` for a `String`."
+  - ko: "작은따옴표도 글자 값이다 — 글자 <b>하나</b>(`char`)입니다. `'ab'` 는 컴파일이 안 돼요."
+    en: "Single quotes make text too — they make <b>one</b> character (`char`). `'ab'` does not compile."
+  - ko: "`+` 로 두 조각을 이을 수 있다 — 왼쪽이 `String` 이어야 합니다. `\"a\" + \"b\"` 는 E0369 예요."
+    en: "Two slices join with `+` — the left side must be a `String`. `\"a\" + \"b\"` is E0369."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>프로그램에 박힌 글자 조각</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the text slice baked into the program</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.3
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>이름을 만드는 낱말</b>입니다. 글자 조각은 그 오른쪽에 있어요."
+          en: "{{pick.1|code}} is <b>the word that makes the name</b>. The text slice is on its right."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 낱말이냐 값이냐", en: "The sharpest spot — the word or the value" }
+          code:
+            - "let greeting = \"hello\";"
+            - "// ^낱말         ^조각"
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 조각을 가리키는 <b>이름</b>입니다. 조각 자체는 따옴표 안이에요."
+          en: "{{pick.2|code}} is the <b>name</b> pointing at the slice. The slice itself is inside the quotes."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 조각이냐", en: "The sharpest spot — the name or the slice" }
+          code:
+            - "let greeting = \"hello\";"
+            - "//    ^이름       ^조각"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 빌린 조각을 <b>가진 글자로 복사</b>합니다."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>copies a borrowed slice into owned text</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "to_string", mono: true }
+      - t: "as_str"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>반대 방향</b>입니다 — 가진 글자에서 빌린 조각을 꺼내요. 조각에 부르면 아무 일도 안 납니다."
+            en: "That goes <b>the other way</b> — it borrows a slice out of owned text. On a slice it does nothing."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 방향", en: "The sharpest spot — direction" }
+            code:
+              - "\"hi\".to_string()   // &str → String"
+              - "owned.as_str()     // String → &str"
+      - t: "len"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>바이트 수</b>를 셉니다. 글자를 만들지 않아요."
+            en: "That counts <b>bytes</b>. It makes no text."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 세기냐 만들기냐", en: "The sharpest spot — counting or making" }
+            code:
+              - "\"hi\".len()          // 2"
+              - "\"hi\".to_string()    // String"
+      - t: "clone"
+        mono: true
+        diag:
+          t:
+            ko: "조각에 부르면 <b>조각이 하나 더</b> 나옵니다(`&str`). 가진 글자가 되지 않아요."
+            en: "On a slice this gives <b>another slice</b> (`&str`). It does not become owned text."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 무엇이 복제되나", en: "The sharpest spot — what gets copied" }
+            code:
+              - "\"hi\".clone()        // &str 그대로"
+              - "\"hi\".to_string()    // String"
+
+why_gate:
+  q:
+    ko: "Rust 는 왜 큰따옴표를 <b>가진 글자가 아니라 빌린 조각</b>으로 정했을까요?"
+    en: "Why did Rust make double quotes <b>a borrowed slice rather than owned text</b>?"
+  choices:
+    - t:
+        ko: "프로그램에 이미 박혀 있는 글자를 쓸 때마다 복사할 이유가 없어서 — 복사는 필요한 자리에서만 적게 한다"
+        en: "Because text already baked into the program need not be copied every time — copying is written only where needed"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 줄의 글자가 복사돼야 하는 자리인지도 판단해 보세요."
+        en: "That is the direction. Decide whether the text on this line needs copying at all."
+    - t:
+        ko: "가진 글자를 못 만들어서"
+        en: "Because it cannot make owned text"
+      ok: false
+      fb:
+        ko: "만듭니다. `String::from(\"…\")` 이 그거예요."
+        en: "It can. `String::from(\"…\")` is exactly that."
+    - t:
+        ko: "따옴표 안이 짧아서"
+        en: "Because the quoted text is short"
+      ok: false
+      fb:
+        ko: "길이와 무관합니다. 어디에 사느냐의 문제예요."
+        en: "Length is irrelevant. It is about where it lives."
+
+queries:
+  - { grammars: [rust], file: ./string-literal.scm }
+
+examples:
+  - code: "fn f() { let greeting = \"hello\"; }             // greeting: &str"
+    expect: { sites: 1, form: str-let, picks: { 1: "let", 2: "greeting", 3: "\"hello\"" } }
+  - code: "fn f() { let owned = \"hi\".to_string(); }       // owned: String — 복사했다"
+    expect: { sites: 1, form: str-own, hole: "to_string", picks: { 1: "to_string", 2: "\"hi\"", 3: "()" } }
+  - code: "const NAME: &str = \"chickadee\";               // 프로그램 내내 산다"
+    expect: { sites: 1, form: str-const, picks: { 1: "&str", 2: "NAME", 3: "\"chickadee\"" } }
+  - code: "fn f() { let c = 'a'; }                       // 글자 하나 — rs/char-and-byte"
+    expect: none

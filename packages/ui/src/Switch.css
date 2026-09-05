@@ -1,42 +1,39 @@
-/* 목업: design/src/ink/shared.css `.sw`
-   바꾼 것 — `.sw span.on` 의 황 원색·먹 리터럴을 --t2 / --on-t2 로,
-   야간반의 청 원색을 --t0 로 (05 §4.2 별칭만) */
+/* D182 — 두 갈래·세 갈래 스위치. 눌림 그림자와 이동을 걷고, 켜진 칸을 액센트 면으로. */
+
+/* 칸이 둘일 때(`role=switch`)와 셋일 때(`role=radiogroup`)가 같은 모양을 쓴다.
+   셋이면 폭이 한 칸 늘고, `en` 라벨은 한국어보다 길다 — 720 폭 설정 화면에서 그 줄이
+   넘치지 않도록 **칸이 줄을 바꾸게** 둔다. `.sw span` 은 `nowrap` 이라 칸 자체는 안 쪼개진다. */
 .sw {
   display: flex;
-  padding: 0;
-  border: 2.5px solid var(--rule);
-  background: var(--paper-3);
-  box-shadow: 3px 3px 0 var(--edge);
+  flex-wrap: wrap;
+  max-width: 100%;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
   color: inherit;
   font: inherit;
   cursor: pointer;
-  transition: transform .08s, box-shadow .08s;
 }
 
 .sw span {
-  padding: 6px 10px;
-  color: var(--ink-soft);
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
-  font-weight: 600;
-  letter-spacing: .08em;
+  padding: var(--s-1) var(--s-3);
+  border-radius: var(--r-sm);
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: var(--fs-2);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-tight);
   white-space: nowrap;
-  transition: background .12s, color .12s;
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
 }
-.sw span + span { border-left: 2.5px solid var(--rule) }
 
 .sw span.on {
-  background: var(--t2);
-  color: var(--on-t2);
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
-.sw:active {
-  transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0 var(--edge);
+@media (prefers-reduced-motion: reduce) {
+  .sw span { transition-duration: .001ms }
 }
-
-/* 야간반 — 05 §4.3 dark allowlist 6개 중 하나 */
-[data-theme="dark"] .sw span.on {
-  background: var(--t0);
-  color: var(--on-t0);
-}
+[data-motion="reduce"] .sw span { transition-duration: .001ms }

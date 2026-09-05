@@ -186,12 +186,14 @@ describe('buildPrereq — 2단 상태 판정 4갈래 (04 §2.4)', () => {
     [cid('ts/truthiness'), { layer: 1, cardId: null, inRepo: false }],
   ]);
 
-  it('known(ly ≥ 2) · gap(ly ≤ 1 + 카드 있음) · none(판 없음) · none(합성 예제)', () => {
+  it('known(ly ≥ 2) · gap(ly ≤ 1 + 카드 있음) · none(합성 예제) · none(판 없음)', () => {
     const rung = buildPrereq(card, facts);
     expect(rung.items.map((i) => i.status)).toEqual(['known', 'gap', 'none', 'none']);
     expect(rung.items[1]?.cardId).toBe(91);
-    expect(rung.items[2]?.none).toBe('no-plate');
-    expect(rung.items[3]?.none).toBe('synthetic');
+    // 리포에 사용처가 **있어야** 합성이다 — 그 자리가 곧 예고할 자리다 (D137 · E-4).
+    expect(rung.items[2]?.none).toBe('synthetic');
+    // 사용처가 없으면 예고할 자리가 없으므로 아무것도 만들지 않는다.
+    expect(rung.items[3]?.none).toBe('no-plate');
     expect(rung.items[0]?.ly).toBe(3);
     expect(rung.items[0]?.name).toBe('속성 접근 <code>.</code>');
   });
@@ -211,10 +213,10 @@ describe('buildPrereq — 2단 상태 판정 4갈래 (04 §2.4)', () => {
     expect(buildPrereq(t0Card({ prereq: [{ conceptId: cid('ts/member-access'), n: '.' }] }), allKnown).nowhereToGo).toBe(true);
   });
 
-  it('사실을 모르는 선행은 0겹 · 리포에 없음으로 본다', () => {
+  it('사실을 모르는 선행은 0겹 · 리포에 없음으로 본다 — 모르면 합성을 만들지 않는다', () => {
     const rung = buildPrereq(card);
     expect(rung.items.map((i) => i.status)).toEqual(['none', 'none', 'none', 'none']);
-    expect(rung.items[0]?.none).toBe('synthetic');
+    expect(rung.items[0]?.none).toBe('no-plate');
   });
 
   it('payoff 는 복귀 문단의 앞 절반으로 실려 나간다', () => {

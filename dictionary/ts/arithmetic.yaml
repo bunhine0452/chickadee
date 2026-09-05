@@ -1,0 +1,256 @@
+schema: 1
+id: ts/arithmetic
+universal: common/arithmetic
+name: { ko: 셈하기, en: Arithmetic }
+token: "+"
+grammars: [typescript, tsx, javascript, vue]
+framework: null
+essential: true
+difficulty: 1
+prereq: [cs/floating-point]
+# 빈칸 오답 셋이 이 셋의 토큰이다 (`===` · `=` · `&&`). number-literal 은 오답이 아니라 이웃이다.
+confusions: [ts/comparison, ts/reassignment, ts/logical-and-guard, ts/number-literal]
+
+dict:
+  one_liner:
+    ko: "값 둘로 새 값 하나를 셈해 만든다. 넣어 준 값은 그대로 남는다."
+    en: "Two values compute one new value; the ones you fed in stay as they were."
+  why:
+    ko: >-
+      셈은 값을 <b>고치는</b> 것이 아니라 <b>새로 만드는</b> 것입니다. {{site.line}}행은
+      {{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:으로,로}} 새 값을 만들 뿐, 둘 중 어느 것도 건드리지 않아요.
+      그래서 결과를 어딘가에 담지 않으면 그 자리에서 사라집니다.
+    en: >-
+      Computing does not <b>change</b> a value, it <b>makes a new one</b>. Line {{site.line}} makes
+      a new value out of {{pick.2|code}} and {{pick.3|code}} and touches neither. So unless the
+      result is put somewhere, it is gone the moment it appears.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:을,를}} 각각 값으로 만든다."
+      en: "{{pick.2|code}} and {{pick.3|code}} each become a value."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 그 둘로 새 값 하나를 만든다."
+      en: "{{pick.1|code}} makes one new value out of the two."
+    - ko: "그 값을 담지 않으면 그대로 사라진다."
+      en: "Unless that value is kept, it simply vanishes."
+
+rule:
+  ko: "<b>셈은 새 값을 만든다. 넣어 준 값을 고치지 않는다.</b>"
+  en: "<b>Arithmetic makes a new value. It does not edit the ones you fed in.</b>"
+result:
+  label:
+    ko: "{{site.line}}행의 셈"
+    en: "the sum on line {{site.line}}"
+  value: "{{pick.1}}"
+  note:
+    ko: "새 값이 따로 생긴다"
+    en: "a separate new value appears"
+ok:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:이,가}} {{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:으로,로}} 새 값 하나를 만듭니다.
+    {{pick.2|code}} 에 담긴 값은 그대로예요.
+  en: >-
+    {{pick.1|code}} makes one new value out of {{pick.2|code}} and {{pick.3|code}}. What
+    {{pick.2|code}} holds is untouched.
+payoff:
+  ko: >-
+    새 값이 생긴다는 것을 알면 「왜 계산했는데 안 바뀌지」가 풀립니다 — 담지 않았기 때문이에요.
+  en: >-
+    Once you see that a new value appears, “why did my calculation not stick” answers itself — it
+    was never kept.
+bridge:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:은,는}} 값을 만들고, 그 값에 이름을 붙이는 것은 선언이 하는 다른 일입니다.
+  en: >-
+    {{pick.1|code}} makes a value; putting a name on that value is the separate job a declaration does.
+misconceptions:
+  - ko: "왼쪽 값이 결과로 바뀐다 — 아니요. 새 값이 따로 생깁니다."
+    en: "The left value turns into the result — no. A separate new value appears."
+  - ko: "글자에도 같은 뜻이다 — 글자끼리는 이어 붙는 쪽이 됩니다."
+    en: "It means the same for text — with text, joining happens instead."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>두 값으로 새 값을 만드는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that makes a new value from the two</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 셈에 <b>넣는</b> 값입니다. 값은 스스로 셈하지 못하고, 셈은 가운데 기호가 합니다."
+          en: >-
+            {{pick.2|code}} is a value <b>fed into</b> the sum. A value cannot compute by itself; the
+            symbol between them does.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 값만으로는 아무 일도 안 난다"
+            en: "The sharpest spot — a value alone does nothing"
+          code:
+            - "a          // 값 하나일 뿐이다"
+            - "a + b      // 새 값이 나온다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 셈에 넣는 <b>다른 한쪽</b>입니다. 어느 쪽이든 만드는 일은 가운데 기호가 합니다."
+          en: >-
+            {{pick.3|code}} is the <b>other side</b> fed in. Either way, the making is done by the
+            symbol between them.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 값이냐 기호냐"
+            en: "The sharpest spot — a value or the symbol"
+          code:
+            - "2          // 값이다"
+            - "n * 2      // 값을 만든다"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행이 지나간 뒤 {{pick.2|code}} 에 담긴 값은 어떻게 될까요?"
+      en: "After line {{site.line}} has run, what has become of the value in {{pick.2|code}}?"
+    hint:
+      ko: "셈이 만드는 것은 <b>새 값</b>입니다."
+      en: "What arithmetic makes is a <b>new value</b>."
+    options:
+      - t:
+          ko: "그대로다 — 새 값이 따로 생길 뿐 넣어 준 값은 바뀌지 않는다"
+          en: "Unchanged — a separate new value appears and the inputs stay"
+      - t:
+          ko: "셈한 결과로 바뀐다"
+          en: "It becomes the result of the sum"
+        diag:
+          t:
+            ko: "그러려면 결과를 {{pick.2|code}} 에 <b>다시 넣는</b> 줄이 따로 있어야 합니다. 셈만으로는 아무 데도 담기지 않아요."
+            en: >-
+              For that there has to be a separate line <b>putting</b> the result back into
+              {{pick.2|code}}. Computing alone keeps it nowhere.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 만드는가 담는가"
+              en: "The sharpest spot — making or keeping"
+            code:
+              - "let n = 1; n + 1   // n 은 1 그대로"
+              - "let n = 1; n = n + 1   // 이제 n 이 2"
+      - t:
+          ko: "{{pick.3|code}}{{pick.3|josa:과,와}} 같아진다"
+          en: "It becomes the same as {{pick.3|code}}"
+        diag:
+          t:
+            ko: "셈은 양쪽을 같게 만들지 않습니다. 둘을 <b>재료로</b> 써서 세 번째 값을 만들 뿐이에요."
+            en: >-
+              Arithmetic does not level the two sides. It uses both as <b>ingredients</b> for a
+              third value.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 셋째 값이 생긴다"
+              en: "The sharpest spot — a third value appears"
+            code:
+              - "1 + 2   // 1 도 2 도 그대로, 3 이 새로 생긴다"
+      - t:
+          ko: "숫자가 아니었다면 오류로 멈춘다"
+          en: "If it was not a number it stops with an error"
+        diag:
+          t:
+            ko: "멈추지 않습니다 — 글자였다면 이어 붙고, 그래서 더 찾기 어렵습니다. 조용히 다른 일을 하는 쪽이에요."
+            en: >-
+              Nothing stops — text joins instead, which is harder to spot. It quietly does another job."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 멈추지 않는다"
+              en: "The sharpest spot — nothing stops"
+            code:
+              - "1 + 2       // 3"
+              - "\"1\" + 2   // \"12\" — 이어 붙는다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 값 둘로 <b>새 값 하나</b>를 만듭니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} makes <b>one new value</b> out of two.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "+", mono: true }
+      - t: "==="
+        mono: true
+        diag:
+          t:
+            ko: "이 기호는 <b>견주기</b>라 새 값 대신 참·거짓 하나가 나옵니다. 셈한 값이 필요한 자리에 넣으면 종류가 어긋나요."
+            en: >-
+              That symbol <b>weighs</b>, so a true-or-false comes out instead of a new value. Where
+              a computed value is needed, the kind does not fit.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 값이냐 판단이냐"
+              en: "The sharpest spot — a value or a judgement"
+            code:
+              - "1 + 2     // 3"
+              - "1 === 2   // false"
+      - t: "="
+        mono: true
+        diag:
+          t:
+            ko: "기호 하나짜리는 <b>넣는</b> 일이라 왼쪽이 이름이어야 합니다. 값 둘로 새 값을 만드는 자리가 아니에요."
+            en: >-
+              The single-symbol form <b>puts</b> a value in, so the left side must be a name. It is
+              not where two values make a third.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 만드는가 넣는가"
+              en: "The sharpest spot — making or putting"
+            code:
+              - "n + 1   // 새 값이 나온다"
+              - "n = 1   // n 이 1 이 된다"
+      - t: "&&"
+        mono: true
+        diag:
+          t:
+            ko: "이 기호는 <b>참·거짓 둘</b>을 묶는 자리입니다. 숫자에 쓰면 셈하지 않고 한쪽을 그대로 골라 내놓아요."
+            en: >-
+              That symbol joins <b>two true-or-false values</b>. On numbers it does not compute; it
+              simply picks one side and yields it.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 셈이 아니라 고르기"
+              en: "The sharpest spot — picking, not computing"
+            code:
+              - "2 + 3    // 5"
+              - "2 && 3   // 3 — 뒤쪽을 그대로 준다"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행의 셈 결과는 왜 이 자리에 적혀 있을까요?"
+    en: "Why does the result of line {{site.line}} appear right where it does?"
+  choices:
+    - t:
+        ko: "만든 값을 곧바로 쓸 자리가 여기여서 — 담아 두지 않으면 사라진다"
+        en: "Because this is where the new value is used — unkept, it vanishes"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 값을 나중에도 써야 한다면 무엇이 더 필요할지도 적어 보세요."
+        en: "That is the direction. Say also what you would need if the value were wanted later."
+    - t:
+        ko: "왼쪽 값을 고치려고"
+        en: "To edit the left value"
+      ok: false
+      fb:
+        ko: "셈은 고치지 않습니다. 고치려면 결과를 다시 넣는 줄이 따로 있어야 합니다."
+        en: "Arithmetic edits nothing. Editing needs a separate line that puts the result back."
+    - t:
+        ko: "숫자를 글자로 바꾸려고"
+        en: "To turn the number into text"
+      ok: false
+      fb:
+        ko: "종류를 바꾸는 것은 다른 일입니다. 여기서 하는 것은 값 둘로 새 값을 만드는 것입니다."
+        en: "Changing the kind is another job. What happens here is two values making a third."
+
+queries:
+  - { grammars: [typescript, tsx, javascript, vue], file: ./arithmetic.scm }
+
+examples:
+  - code: "const total = a + b"
+    expect: { sites: 1, form: arith, hole: "+", picks: { 1: "+", 2: "a", 3: "b" } }
+  - code: "const half = total / 2"
+    expect: { sites: 1, form: arith, hole: "/", picks: { 1: "/", 2: "total", 3: "2" } }
+  - code: "const same = a === b"
+    expect: none

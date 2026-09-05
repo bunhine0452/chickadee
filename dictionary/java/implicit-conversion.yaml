@@ -1,0 +1,159 @@
+schema: 1
+id: java/implicit-conversion
+# 0부 축 F. `universal: null` — 파이썬은 글자와 수를 안 섞고 JS 는 다 섞는다. 자바는
+# 「수 사이는 넓히기만 자동」이라 셋이 다 다르다 (§1.5.2 형 변환 행).
+universal: null
+name: { ko: 저절로 넓어지는 것, en: Widening on its own }
+token: "widen"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cs/type-conversion, cs/type]
+confusions: [java/explicit-conversion]
+dict:
+  one_liner:
+    ko: "좁은 값이 넓은 자리로 갈 때는 아무것도 안 적어도 된다."
+    en: "Going from a narrow type to a wider one needs nothing written."
+  why:
+    ko: >-
+      자바에는 타입 사다리가 있습니다 —
+      <code>byte</code> → <code>short</code> → <code>int</code> → <code>long</code> →
+      <code>float</code> → <code>double</code>. <b>사다리를 올라가는 쪽은 저절로</b> 됩니다.
+      잃는 것이 없기 때문이에요. 그래서 <code>double d = 1;</code> 이 그냥 되고
+      <code>1 + 2.0</code> 도 왼쪽이 조용히 올라가 <code>3.0</code> 이 됩니다.
+      내려가는 쪽은 값을 잃을 수 있어서 <b>사람이 적어야</b> 합니다 — 그것이 다음 판입니다.
+      규칙이지 예외가 아니고, 그래서 코드에 아무 표시도 안 남아요.
+    en: >-
+      Java has a type ladder —
+      <code>byte</code> → <code>short</code> → <code>int</code> → <code>long</code> →
+      <code>float</code> → <code>double</code>. <b>Going up happens on its own</b>, because
+      nothing is lost. So <code>double d = 1;</code> simply works, and in <code>1 + 2.0</code>
+      the left quietly climbs and the answer is <code>3.0</code>. Going down can lose value and
+      <b>has to be written</b> — that is the next plate. This is the rule, not an exception,
+      which is why no mark is left in the code.
+  trace:
+    - ko: "{{site.line}}행의 자리는 {{pick.1|code}} 인데 값은 그보다 좁다."
+      en: "The spot on line {{site.line}} is {{pick.1|code}} and the value is narrower."
+    - ko: "값 {{pick.3|code}}{{pick.3|josa:이,가}} 사다리를 한 칸 올라간다."
+      en: "The value {{pick.3|code}} climbs one rung of the ladder."
+    - ko: "잃는 것이 없어서 아무 표시도 안 적힌다."
+      en: "Nothing is lost, so nothing is written to mark it."
+rule:
+  ko: "<b>사다리를 올라가는 변환은 저절로 된다.</b> 잃는 것이 없어서 표시가 안 남는다."
+  en: "<b>Climbing the ladder happens on its own.</b> Nothing is lost, so nothing is marked."
+result:
+  label: { ko: "{{site.line}}행의 자리 타입", en: "the type of the spot on line {{site.line}}" }
+  value: "{{pick.1}} {{pick.2}}"
+  note: { ko: "값이 여기 맞춰 올라간다", en: "the value climbs to match" }
+ok:
+  ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 넓은 자리에 맞춰 올라갔습니다 — 잃은 것은 없어요."
+  en: "{{pick.3|code}} climbed to fit the wider spot, and nothing was lost."
+payoff:
+  ko: "이걸 알면 「왜 어떤 변환은 적어야 하고 어떤 건 안 적어도 되나」가 한 규칙으로 풀립니다."
+  en: "This makes “why is one conversion written and another not” one rule instead of two."
+bridge:
+  ko: "JS 는 글자와 수도 섞습니다. 자바는 <b>수 사이</b>에서만, 그것도 <b>올라갈 때만</b> 섞어요."
+  en: "JS mixes text with numbers. Java mixes only <b>among numbers</b>, and only <b>upward</b>."
+misconceptions:
+  - ko: "자바는 타입을 절대 안 바꿔 준다 — 올라가는 쪽은 늘 바꿔 줍니다. 안 바꿔 주는 것은 내려가는 쪽입니다."
+    en: "Java never converts for you — it always converts upward. It refuses only downward."
+  - ko: "올라가면 값이 그대로다 — 대개 그렇지만 아주 큰 정수를 실수로 올리면 마지막 자리를 잃습니다."
+    en: "Climbing keeps the value — usually, but a very large whole number climbing to decimal loses its last digits."
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 개념의 요점은 변환이 **코드에 안 적힌다**는 것이라, 뚫을 글자가 없다.
+  적히는 순간 그것은 다음 판(`java/explicit-conversion`)이 된다 — 여기서 빈칸을 만들면
+  가르치려는 것과 반대되는 판이 나온다.
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>값이 맞춰 올라갈 자리의 타입</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the type the value climbs to match</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 값이 어디까지 올라갈지는 이름이 아니라 앞에 적힌 타입이 정해요."
+          en: "{{pick.2|code}} is the <b>name</b>. How far the value climbs is set by the type in front, not by the name."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 타입이냐", en: "The sharpest spot — the name or the type" }
+          code:
+            - "double d = 1;    // 1.0 이 된다"
+            - "int d = 1;       // 1 그대로"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 올라가는 <b>값</b>입니다. 어디까지 올라갈지를 정하는 것은 자리 쪽이에요."
+          en: "{{pick.3|code}} is the <b>value</b> that climbs. Where it climbs to is set by the spot."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값이냐 자리냐", en: "The sharpest spot — the value or the spot" }
+          code:
+            - "1;              // 정수"
+            - "double d = 1;   // 같은 1 이 1.0 으로"
+meaning:
+  - q:
+      ko: "{{site.line}}행에서 값이 넓어지는데도 코드에 <b>표시가 안 남는</b> 이유는 무엇일까요?"
+      en: "Why is <b>no mark left</b> in the code on line {{site.line}} even though the value widens?"
+    options:
+      - t:
+          ko: "올라가는 변환은 값을 안 잃어서, 자바가 사람에게 확인받을 이유가 없기 때문"
+          en: "Because climbing loses nothing, so Java has no reason to ask the person to confirm"
+      - t:
+          ko: "자바가 모든 변환을 조용히 해 주기 때문"
+          en: "Because Java does every conversion quietly"
+        diag:
+          t:
+            ko: "그 답은 <b>JS</b> 에서 참입니다. 자바는 내려가는 변환을 조용히 안 해 줘요 — 그 자리에서는 사람이 적어야 합니다."
+            en: "That answer is true in <b>JS</b>. Java does not do the downward ones quietly — there a person must write it."
+      - t:
+          ko: "컴파일러가 값을 미리 계산해 두어서"
+          en: "Because the compiler works the value out ahead of time"
+        diag:
+          t:
+            ko: "미리 계산하는 것과는 다른 일입니다. 이름에 담긴 값이 실행 중에 정해져도 같은 규칙으로 올라가요."
+            en: "That is a different thing. The same climb happens when the value is only known while running."
+      - t:
+          ko: "두 타입의 칸 수가 같아서"
+          en: "Because the two types have the same slot count"
+        diag:
+          t:
+            ko: "칸 수가 다릅니다. 다르되 <b>넓은 쪽</b>이라 좁은 값이 그대로 들어갈 수 있는 것이에요."
+            en: "The counts differ. They differ in the direction of <b>wider</b>, which is why the narrow value still fits."
+why_gate:
+  q:
+    ko: "자바는 왜 <b>올라가는 변환만</b> 저절로 해 줄까요?"
+    en: "Why does Java do <b>only the upward conversions</b> for you?"
+  choices:
+    - t:
+        ko: "내려가는 쪽은 값을 잃을 수 있고, 잃는 결정을 언어가 대신 하면 조용한 버그가 되기 때문"
+        en: "Because going down can lose value, and letting the language decide that makes a silent bug"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 실제로 값이 잘리는 예를 하나 적어 보세요."
+        en: "That is the direction. Give one example where the value is actually cut."
+    - t:
+        ko: "올라가는 쪽이 계산이 빠르기 때문"
+        en: "Because going up computes faster"
+      ok: false
+      fb:
+        ko: "속도 문제가 아닙니다. 기준은 <b>값을 잃느냐</b>예요."
+        en: "Speed is not it. The test is <b>whether value is lost</b>."
+    - t:
+        ko: "내려가는 변환이 자바에 아예 없어서"
+        en: "Because Java has no downward conversion at all"
+      ok: false
+      fb:
+        ko: "있습니다. 다만 사람이 괄호로 적어야 하고, 그것이 다음 판이에요."
+        en: "It has one. It just has to be written in parentheses, and that is the next plate."
+queries:
+  - { grammars: [java], file: ./implicit-conversion.scm }
+examples:
+  - code: "class A { void f() { double d = 1; } }         // d -> 1.0 (double)"
+    expect: { sites: 1, form: widen, picks: { 1: "double", 2: "d", 3: "1" } }
+  - code: "class A { void f() { double s = 1 + 2.0; } }   // 1 + 2.0 -> 3.0 (double)"
+    expect: { sites: 1, form: promote, picks: { 1: "+", 2: "1", 3: "2.0" } }
+  - code: "class A { void f() { float g = 3; } }          // g -> 3.0 (float)"
+    expect: { sites: 1, form: widen, picks: { 1: "float", 2: "g", 3: "3" } }
+  - code: "class A { void f() { int n = 1 + 2; } }        // 1 + 2 -> 3 (int)"
+    expect: none

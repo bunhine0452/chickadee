@@ -1,0 +1,41 @@
+[
+  {
+    "queryId": "java/string-literal",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "site",
+    "form": "strarg",
+    "startLine": 7,
+    "startCol": 15,
+    "endLine": 7,
+    "endCol": 43,
+    "nodeKind": "method_invocation",
+    "inError": false
+  },
+  {
+    "queryId": "java/string-literal",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "pick.1",
+    "form": "strarg",
+    "startLine": 7,
+    "startCol": 23,
+    "endLine": 7,
+    "endCol": 26,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "java/string-literal",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "pick.3",
+    "form": "strarg",
+    "startLine": 7,
+    "startCol": 27,
+    "endLine": 7,
+    "endCol": 42,
+    "nodeKind": "string_literal",
+    "inError": false
+  }
+]

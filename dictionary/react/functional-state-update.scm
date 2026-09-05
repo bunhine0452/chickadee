@@ -5,6 +5,7 @@
    function: (identifier) @ctx.setter
    arguments: (arguments . (arrow_function
      parameters: (formal_parameters (required_parameter pattern: (identifier) @pick.1))
+     "=>" @pick.3
      body: (_) @pick.2))) @site
  (#match? @ctx.setter "^set[A-Z]")
  (#set! form "paren"))
@@ -14,6 +15,7 @@
    function: (identifier) @ctx.setter
    arguments: (arguments . (arrow_function
      parameter: (identifier) @pick.1
+     "=>" @pick.3
      body: (_) @pick.2))) @site
  (#match? @ctx.setter "^set[A-Z]")
  (#set! form "bare"))

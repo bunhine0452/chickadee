@@ -25,8 +25,8 @@ GROUP BY 1 ORDER BY 1;
 -- 대지 · 스티커 · 겹. 노드 상태(done/locked/current)는 TS 가 판정한다 (02 §7.1).
 -- @name home.units
 -- @params { repoId: number }
--- @row { unit_id: number, name: string, order_idx: number, root_path: string | null, concept_id: string, track: string, node_order: number, name_ko: string, token: string | null, layer: number, stability: number | null, last_review_at: number | null, state: number | null, due_at: number | null }
-SELECT u.id AS unit_id, u.name, u.order_idx, u.root_path,
+-- @row { unit_id: number, name: string, source: string, order_idx: number, root_path: string | null, concept_id: string, track: string, node_order: number, name_ko: string, token: string | null, layer: number, stability: number | null, last_review_at: number | null, state: number | null, due_at: number | null }
+SELECT u.id AS unit_id, u.name, u.source, u.order_idx, u.root_path,
        n.concept_id, n.track, n.node_order, c.name_ko, c.token,
        COALESCE(m.layer, 0) AS layer, m.stability, m.last_review_at, m.state, m.due_at
 FROM unit u
@@ -60,17 +60,22 @@ ORDER BY g.site_count DESC, g.concept_id LIMIT :limit;
 SELECT s.id, s.site_key, f.path, s.line_start, s.line_end, s.unknown_count, s.excerpt
 FROM concept_site s JOIN file f ON f.id = s.file_id
 WHERE s.repo_id = :repoId AND s.concept_id = :conceptId AND s.is_alive = 1
-ORDER BY s.unknown_count, (s.line_end - s.line_start), f.path LIMIT :limit;
+ORDER BY s.unknown_count, s.window_unknown, (s.line_end - s.line_start), f.path LIMIT :limit;
 
 -- 선행 개념 + 겹 + 카드 유무 — 사다리 2단의 `prereq[{s}]`.
 -- @name concept.prereqs
 -- @params { repoId: number, conceptId: string }
--- @row { prereq_id: string, name_ko: string, token: string | null, layer: number, has_card: number, has_site: number }
+-- `best_site_id` 는 합성 예제가 「곧 여기서 봅니다」로 예고할 자리다 (D137) — 미지가
+-- 가장 적은 살아 있는 사용처. 이 값이 NULL 이면 예고할 자리가 없으므로 합성도 만들지 않는다.
+-- @row { prereq_id: string, name_ko: string, token: string | null, layer: number, has_card: number, has_site: number, best_site_id: number | null }
 SELECT p.prereq_id, c.name_ko, c.token, COALESCE(m.layer, 0) AS layer,
        EXISTS (SELECT 1 FROM card k WHERE k.repo_id = :repoId AND k.concept_id = p.prereq_id
                AND k.retired_at IS NULL) AS has_card,
        EXISTS (SELECT 1 FROM concept_site s WHERE s.repo_id = :repoId
-               AND s.concept_id = p.prereq_id AND s.is_alive = 1) AS has_site
+               AND s.concept_id = p.prereq_id AND s.is_alive = 1) AS has_site,
+       (SELECT s.id FROM concept_site s WHERE s.repo_id = :repoId
+        AND s.concept_id = p.prereq_id AND s.is_alive = 1
+        ORDER BY s.unknown_count, s.window_unknown, s.id LIMIT 1) AS best_site_id
 FROM concept_prereq p
 JOIN concept c ON c.id = p.prereq_id
 LEFT JOIN mastery m ON m.concept_id = p.prereq_id
@@ -95,7 +100,7 @@ FROM mastery m JOIN concept c ON c.id = m.concept_id
 LEFT JOIN concept_site s ON s.id = (
   SELECT s2.id FROM concept_site s2
   WHERE s2.repo_id = :repoId AND s2.concept_id = m.concept_id AND s2.is_alive = 1
-  ORDER BY s2.unknown_count, (s2.line_end - s2.line_start), s2.id LIMIT 1)
+  ORDER BY s2.unknown_count, s2.window_unknown, (s2.line_end - s2.line_start), s2.id LIMIT 1)
 WHERE m.state <> 0
   AND EXISTS (SELECT 1 FROM card k WHERE k.repo_id = :repoId AND k.concept_id = m.concept_id
               AND k.retired_at IS NULL)

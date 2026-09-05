@@ -20,7 +20,7 @@ import type { Page } from '@playwright/test';
 import type { AppDb } from '../support/app-db.js';
 
 import {
-  allowedBySel, answerKey, closeLifer, gotoDev, loadAllow, runGates, startSession, submit,
+  allowedBySel, answerKey, gotoDev, loadAllow, runGates, settleLifer, startSession, submit,
   toSummary,
 } from '../support/gates.js';
 
@@ -108,7 +108,7 @@ test('en — 교정지와 요약', async ({ page, app }) => {
   await measureEn(page, 'T0 교정지', 1);
 
   await submit(page, answerKey(app));
-  await closeLifer(page);
+  await settleLifer(page);
   await toSummary(page, app);
   await measureEn(page, '요약', 3);
 });

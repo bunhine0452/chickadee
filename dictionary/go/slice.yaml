@@ -1,0 +1,275 @@
+schema: 1
+id: go/slice
+# 2부 (`go.md` §3 ⑯). 실측 430곳/164파일.
+#
+# **「슬라이스는 공유된다」로 넓게 적지 않는다** (D187 ⑰ · `go-learning.md` §11.3).
+# 넓게 적으면 C·C++ 의 포인터 별칭과 같은 문장이 되어 T1(이식)에서 탈락한다.
+# Go 만의 것은 **길이와 용량이 따로 있고, 창이 뒷배열을 공유한다**는 것이다.
+universal: common/list
+name: { ko: "뒷배열을 보는 창", en: "Slice — a window on a backing array" }
+token: "[]T"
+grammars: [go]
+framework: null
+essential: true
+difficulty: 2
+prereq: [go/assignment, go/integer-literal, cs/contiguous-vs-linked]
+confusions: []
+
+dict:
+  one_liner:
+    ko: >-
+      목록처럼 보이지만 뒷배열을 보는 창이다. 길이와 용량이 따로 있다.
+    en: >-
+      Looks like a list; it is a window on an array, with a length and a room count.
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.2|code}}{{pick.2|josa:은,는}} 값들을 <b>담고</b> 있는 것이 아니라, 어딘가 줄지어 놓인 배열의 <b>한
+      구간을 보고</b> 있습니다. 그 창이 나르는 것은 셋이에요 — 어디서 시작하나, 몇 개까지 보이나(길이), 뒤로 몇 개까지 자리가 있나(용량). 그래서 창을 잘라 다른
+      이름에 넣으면 <b>같은 배열의 다른 창</b>이 생기고, 한쪽에서 칸을 고치면 다른 쪽에서도 그 값이 보입니다. 길이는 <code>len</code>, 용량은
+      <code>cap</code> 으로 물어요. 이 둘이 다르다는 사실이 다음 판(`go/append`)에서 결정적으로 쓰입니다.
+    en: >-
+      The {{pick.2|code}} on line {{site.line}} does not <b>hold</b> the values; it <b>looks at a
+      stretch</b> of an array laid out somewhere. The window carries three things — where it starts,
+      how many are visible (the length), and how much room follows (the capacity). So slicing it into
+      another name makes <b>another window on the same array</b>, and a change through one shows
+      through the other. Ask for the length with <code>len</code> and the capacity with
+      <code>cap</code>. That those two differ is what the next plate, `go/append`, turns on.
+  trace:
+    - ko: >-
+        {{site.line}}행은 이름 {{pick.2|code}}{{pick.2|josa:을,를}} 세운다.
+      en: >-
+        Line {{site.line}} sets up the name {{pick.2|code}}.
+    - ko: >-
+        {{pick.1|code}}{{pick.1|josa:이,가}} 무엇이 줄지어 놓이는지를 정한다.
+      en: >-
+        {{pick.1|code}} decides what is laid out in the row.
+    - ko: >-
+        이름이 나르는 것은 값들이 아니라 <b>그 줄을 보는 창</b>이다.
+      en: >-
+        What the name carries is not the values but <b>a window on that row</b>.
+
+rule:
+  ko: >-
+    <b>이름은 창이고 값은 뒷배열에 있다.</b> 창을 잘라도 배열은 하나다.
+  en: >-
+    <b>The name is a window; the values live in the backing array.</b> Slicing makes another window,
+    not another array.
+result:
+  label: { ko: "{{site.line}}행이 세운 창", en: "the window set up on line {{site.line}}" }
+  value: "{{pick.2}}"
+  note: { ko: "길이와 용량이 따로 있다", en: "it has a length and a capacity, and they differ" }
+ok: { ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 이제 그 뒷배열을 보는 창입니다.", en: "{{pick.2|code}} is now a window on that backing array." }
+payoff:
+  ko: >-
+    이걸 알면 「잘라서 넘긴 쪽을 고쳤더니 원본이 바뀐다」가 풀립니다 — 배열이 하나입니다.
+  en: >-
+    This untangles "I changed the slice I handed over and the original changed" — there is one
+    array.
+bridge:
+  ko: >-
+    파이썬의 자르기는 <b>새 목록</b>을 만듭니다. Go 의 자르기는 새 창만 만들고 배열은 그대로 하나예요.
+  en: >-
+    Slicing in Python makes a <b>new list</b>. Slicing in Go makes only a new window; the array
+    stays one.
+misconceptions:
+  - ko: >-
+      잘라 넘기면 복사본이 간다 — <b>같은 뒷배열</b>의 다른 창이 갑니다. 한쪽을 고치면 다른 쪽이 바뀌어요.
+    en: >-
+      Slicing and handing it over hands a copy — it hands another window on <b>the same backing
+      array</b>. A change through one shows in the other.
+  - ko: >-
+      길이와 용량이 같다 — 다를 수 있습니다. 그 차이가 <code>append</code> 의 행동을 가릅니다.
+    en: >-
+      The length and the capacity are the same — they can differ, and that difference decides how
+      <code>append</code> behaves.
+  - ko: >-
+      이름이 값들을 담고 있다 — 담고 있는 것은 <b>어디서부터 몇 개까지</b>라는 정보뿐이에요.
+    en: >-
+      The name holds the values — it holds only <b>where from and how many</b>.
+
+point:
+  - q:
+      ko: >-
+        {{site.line}}행에서 <b>줄지어 놓일 것의 종류</b>를 적은 자리를 짚어 보세요.
+      en: >-
+        On line {{site.line}}, point at <b>where the kind of thing in the row is written</b>.
+    hint: { ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다.", en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose." }
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 창의 <b>이름</b>입니다. 이름은 무엇이 줄지어 놓이는지를 안 정해요.
+          en: >-
+            {{pick.2|code}} is the window's <b>name</b>. A name does not decide what lies in the row.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 종류냐", en: "The sharpest spot — the name or the kind" }
+          code:
+            - "xs                    // 이름"
+            - "var xs []int          // 종류는 []int"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 처음 넣는 <b>값들</b>입니다. 값이 몇 개든 종류는 앞에 적힌 것이에요.
+          en: >-
+            {{pick.3|code}} is the <b>starting values</b>. However many there are, the kind is what is
+            written in front.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값이냐 종류냐", en: "The sharpest spot — the values or the kind" }
+          code:
+            - "{1, 2}                // 값들"
+            - "[]int{1, 2}           // 종류가 앞"
+
+meaning:
+  - q:
+      ko: >-
+        <code>xs := []int{1, 2, 3}</code> 뒤에 <code>s := xs[1:3]</code> 하고 <code>s[0] = 9</code> 하면
+        <code>xs[1]</code> 은 무엇일까요?
+      en: >-
+        After <code>xs := []int{1, 2, 3}</code>, <code>s := xs[1:3]</code> and <code>s[0] = 9</code>,
+        what is <code>xs[1]</code>?
+    options:
+      - t:
+          ko: >-
+            9 — 두 이름이 같은 뒷배열의 다른 창이라 같은 칸을 만졌다
+          en: >-
+            9 — the two names are windows on the same backing array and touched the same slot
+      - t:
+          ko: >-
+            2 — 자를 때 복사본이 만들어졌다
+          en: >-
+            2 — slicing made a copy
+        diag:
+          t:
+            ko: >-
+              자르기는 복사하지 않습니다. 새로 생기는 것은 창뿐이고 배열은 하나예요.
+            en: >-
+              Slicing copies nothing. What is new is the window; the array stays one.
+      - t:
+          ko: >-
+            멈춘다 — 창 밖의 칸이라
+          en: >-
+            It stops — that slot is outside the window
+        diag:
+          t:
+            ko: >-
+              창 안입니다. <code>s[0]</code> 이 원본의 두 번째 칸이에요.
+            en: >-
+              It is inside. <code>s[0]</code> is the original's second slot.
+      - t:
+          ko: >-
+            정해져 있지 않다
+          en: >-
+            It is unspecified
+        diag:
+          t:
+            ko: >-
+              정해져 있습니다. 뒷배열이 하나라는 것이 명세의 규칙이에요.
+            en: >-
+              It is settled. One backing array is the rule in the specification.
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>길이가 정해지지 않은</b> 줄을 보는 창을 세웁니다.
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} sets up a window on a row of <b>no fixed
+        length</b>.
+    hint: { ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다.", en: "Your choice is written into the code at once. Submit to have it marked." }
+    options:
+      - { t: "[]int", mono: true }
+      - t: "[3]int"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이건 <b>길이가 붙박인 배열</b>입니다. 길이가 타입의 일부라 길이가 다르면 다른 타입이고, 옮기면 통째로 복사돼요.
+            en: >-
+              That is an <b>array with the length baked in</b>. The length is part of the type, so a different
+              length is a different type, and moving it copies everything.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 창이냐 붙박이냐", en: "The sharpest spot — a window or a fixed row" }
+            code:
+              - "var xs []int      // 창"
+              - "var a [3]int      // 붙박이 셋"
+      - t: "map[int]int"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이건 <b>열쇠로 찾는 묶음</b>입니다. 순서가 없고 훑을 때마다 차례가 달라질 수 있어요.
+            en: >-
+              That is a <b>lookup by key</b>. It has no order, and walking it can give a different order each
+              time.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 순서가 있나", en: "The sharpest spot — is there an order" }
+            code:
+              - "var xs []int          // 순서가 있다"
+              - "var m map[int]int     // 순서가 없다"
+      - t: "*int"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이건 <b>값 하나의 자리</b>를 가리킵니다. 여러 개를 훑을 수 없어요.
+            en: >-
+              That points at the <b>place of a single value</b>. It cannot be walked.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 하나냐 여럿이냐", en: "The sharpest spot — one or many" }
+            code:
+              - "var xs []int      // 여럿"
+              - "var p *int        // 하나"
+
+why_gate:
+  q:
+    ko: >-
+      Go 는 왜 창에 <b>길이와 용량을 따로</b> 둘까요?
+    en: >-
+      Why does a Go window carry <b>a length and a capacity separately</b>?
+  choices:
+    - t:
+        ko: >-
+          뒤에 남은 자리를 알면 값을 붙일 때 배열을 새로 잡을지 말지가 그 자리에서 정해지기 때문
+        en: >-
+          Because knowing the room left decides, right there, whether adding a value needs a new array
+      ok: true
+      fb:
+        ko: >-
+          그 방향입니다. 그럼 그 결정이 눈에 안 보일 때 무엇이 생기는지도 적어 보세요.
+        en: >-
+          That is the direction. Add what happens when that decision is invisible.
+    - t:
+        ko: >-
+          길이를 세는 것이 느려서
+        en: >-
+          Because counting the length is slow
+      ok: false
+      fb:
+        ko: >-
+          길이는 창에 적혀 있어 세지 않습니다. 용량이 따로 있는 이유는 다른 데 있어요.
+        en: >-
+          The length is written in the window and never counted. The capacity is there for another reason.
+    - t:
+        ko: >-
+          배열과 구별하려고
+        en: >-
+          To tell it apart from an array
+      ok: false
+      fb:
+        ko: >-
+          구별은 타입이 이미 합니다. 용량은 구별 표시가 아니라 자리가 얼마나 남았나예요.
+        en: >-
+          The type already tells them apart. The capacity is not a marker but a count of room left.
+
+queries:
+  - { grammars: [go], file: ./slice.scm }
+
+examples:
+  - code: "func f() { xs := []int{1, 2} }"
+    expect: { sites: 1, form: lit, hole: "[]int", picks: { 1: "[]int", 2: "xs", 3: "{1, 2}" } }
+  - code: "func f() { var names []string }"
+    expect: { sites: 1, form: decl, hole: "[]string", picks: { 1: "[]string", 2: "names" } }
+  - code: "func f(xs []int) { s := xs[1:3] }"
+    expect: { sites: 1, form: reslice, picks: { 2: "xs", 3: "1", 4: "3" } }
+  - code: "func f() { m := map[string]int{} }"
+    expect: none

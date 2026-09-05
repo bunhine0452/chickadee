@@ -82,6 +82,31 @@ describe('deriveFile', () => {
     expect(out.blocks[0]).toMatchObject({ name: 'load', lineStart: 3, lineEnd: 9 });
   });
 
+  test('데코레이터가 붙으면 바깥 하나만 남는다 — @ 줄이 블록에 든다', () => {
+    // 파이썬은 `decorated_definition`(바깥)과 `function_definition`(안쪽)이 둘 다 걸린다.
+    // 끝과 이름이 같으므로 접히고, 남는 것은 `@` 줄에서 시작하는 쪽이다.
+    const captures = [
+      cap({ queryId: '_blocks', matchId: 1, name: 'block.function', startLine: 8, endLine: 9, startByte: 100, endByte: 200 }),
+      cap({ queryId: '_blocks', matchId: 1, name: 'block.name', excerpt: 'read_item' }),
+      cap({ queryId: '_blocks', matchId: 2, name: 'block.function', startLine: 7, endLine: 9, startByte: 80, endByte: 200 }),
+      cap({ queryId: '_blocks', matchId: 2, name: 'block.name', excerpt: 'read_item' }),
+    ];
+    const { blocks } = deriveFile('app/main.py', captures);
+    expect(blocks).toHaveLength(1);
+    expect(blocks[0]).toMatchObject({ name: 'read_item', lineStart: 7, lineEnd: 9 });
+  });
+
+  test('클래스와 그 안의 메서드는 끝이 같아도 안 접힌다 — 이름이 다르다', () => {
+    const captures = [
+      cap({ queryId: '_blocks', matchId: 1, name: 'block.function', startLine: 1, endLine: 4, startByte: 0, endByte: 200 }),
+      cap({ queryId: '_blocks', matchId: 1, name: 'block.name', excerpt: 'Store' }),
+      cap({ queryId: '_blocks', matchId: 2, name: 'block.function', startLine: 3, endLine: 4, startByte: 60, endByte: 200 }),
+      cap({ queryId: '_blocks', matchId: 2, name: 'block.name', excerpt: 'save' }),
+    ];
+    const { blocks } = deriveFile('app/store.py', captures);
+    expect(blocks.map((b) => b.name).sort()).toEqual(['Store', 'save']);
+  });
+
   test('같은 모양의 두 번째부터 occurrence 가 오른다', () => {
     const q = 'ts/array-map-immutable';
     const captures = [

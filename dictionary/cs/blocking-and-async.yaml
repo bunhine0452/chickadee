@@ -1,0 +1,89 @@
+schema: 1
+id: cs/blocking-and-async
+universal: null
+name: { ko: "기다리는 동안 무엇을 하나", en: "Blocking and async" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+track_default: t0
+essential: false
+difficulty: 3
+prereq: [cs/call-stack]
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "기다림이 일꾼을 붙잡느냐 놓아 주느냐."
+    en: "Whether waiting holds the worker or lets it go."
+  why:
+    ko: >-
+      서버에 물어보고 답을 기다리는 동안, 일꾼은 두 가지 중 하나를 합니다.
+      <b>그 자리에 서서 기다리거나</b>, 「오면 알려 줘」를 남기고 <b>다른 일을 하러 가거나</b>.
+      앞의 방식은 읽기 쉽지만 기다리는 동안 그 일꾼이 아무것도 못 해요 — 화면이 멈추는 이유가 이것입니다.
+      뒤의 방식은 일꾼을 놓아 주는 대신 <b>코드가 이어서 안 읽힙니다</b>: 다음 줄이 답을 받은 뒤가 아니에요.
+      비동기 코드를 읽기 어려운 이유는 문법이 아니라 <b>읽는 순서와 도는 순서가 갈려서</b>입니다.
+    en: >-
+      While asking a server and waiting for an answer, a worker does one of two things: <b>stands
+      there waiting</b>, or leaves a “tell me when it comes” note and <b>goes to do something
+      else</b>. The first reads easily but the worker can do nothing meanwhile — that is a frozen
+      screen. The second frees the worker but <b>the code no longer reads in order</b>: the next
+      line is not after the answer. Async code is hard to read not for its syntax but because
+      <b>reading order and running order have parted</b>.
+  trace: []
+rule:
+  ko: "<b>기다림을 놓아 주면 다음 줄이 답 뒤가 아니다.</b> 읽는 순서와 도는 순서가 갈린다."
+  en: "<b>Release the wait and the next line is not after the answer.</b> Reading order parts from running order."
+ok:
+  ko: >-
+    기다리는 일을 남겨 두고 다른 일을 합니다. 답이 오면 남겨 둔 자리에서 이어지고,
+    그때까지 다른 일이 끼어들 수 있습니다.
+  en: >-
+    The wait is parked and other work proceeds. When the answer arrives it resumes at the parked
+    spot, and other work can have run in between.
+misconceptions:
+  - ko: "놓아 주면 더 빨라진다 — 한 가지 일은 안 빨라지고, 그 사이 다른 일이 될 뿐입니다."
+    en: "Releasing makes it faster — one task is no faster; other tasks simply get a turn."
+  - ko: "놓아 주면 동시에 여러 개가 돈다 — 일꾼이 하나면 여전히 하나씩입니다."
+    en: "Releasing runs things at once — with one worker it is still one at a time."
+  - ko: "기다림을 놓아 주면 순서가 사라진다 — 순서는 있고, 다음 줄에 없을 뿐입니다."
+    en: "Releasing loses the order — the order exists; it just is not the next line."
+meaning:
+  - q:
+      ko: "서버 응답을 기다리는 동안 화면이 통째로 멈췄습니다. <b>기다림이 무엇을 했나요?</b>"
+      en: "The whole screen froze while waiting for a server. <b>What did the wait do?</b>"
+    hint:
+      ko: "화면을 그리는 것도 누군가 해야 하는 일입니다."
+      en: "Drawing the screen is also work someone must do."
+    options:
+      - t: { ko: "화면을 그리던 일꾼을 그 자리에 붙잡아 뒀다", en: "It held the worker that draws the screen" }
+      - t: { ko: "서버가 느려서 응답이 안 왔다", en: "The server was slow to answer" }
+        diag:
+          t:
+            ko: "서버가 느린 것은 <b>기다림이 긴 이유</b>이고, 화면이 멈춘 이유는 그동안 일꾼이 묶여서예요. 놓아 줬다면 느려도 화면은 돕니다."
+            en: "A slow server explains <b>the length of the wait</b>; the freeze is the worker being held. Released, the screen keeps drawing however slow."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 왜 오래냐 왜 멈췄냐", en: "The sharpest spot — why long or why frozen" }
+            code:
+              - "느림: 기다림이 길다"
+              - "붙잡힘: 그동안 아무것도 못 한다"
+      - t: { ko: "그리는 코드에 결함이 있었다", en: "The drawing code had a defect" }
+        diag:
+          t:
+            ko: "그리는 코드는 <b>불릴 기회가 없었습니다</b>. 응답이 온 뒤에는 잘 그려진다면 그쪽 문제가 아니에요."
+            en: "The drawing code <b>never got a turn</b>. If it draws fine once the answer lands, it is not at fault."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 못 그렸나 못 불렸나", en: "The sharpest spot — drew badly or never ran" }
+            code:
+              - "응답 뒤: 잘 그린다"
+              - "기다리는 중: 불릴 기회가 없다"
+      - t: { ko: "일꾼이 여럿이라 서로 부딪혔다", en: "Several workers collided" }
+        diag:
+          t:
+            ko: "부딪히는 문제도 실제로 있지만 그건 <b>여럿이 같이 돌 때</b>의 이야기입니다. 여기서는 하나가 묶인 경우예요."
+            en: "Collisions are real, but they belong to <b>several running together</b>. Here one was held."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 하나가 묶였나 여럿이 겹쳤나", en: "The sharpest spot — one held or many overlapping" }
+            code:
+              - "하나 묶임: 아무것도 안 돈다"
+              - "여럿 겹침: 돌긴 도는데 결과가 갈린다"

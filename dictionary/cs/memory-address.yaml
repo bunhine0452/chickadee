@@ -1,0 +1,88 @@
+schema: 1
+id: cs/memory-address
+universal: null
+name: { ko: "값이 사는 자리에 번호가 있다", en: "Memory address" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+track_default: t0
+essential: false
+difficulty: 2
+prereq: [cs/bit-and-byte]
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "값 자체가 아니라, 값이 놓인 칸에 붙은 번호."
+    en: "Not the value, but the number on the slot it sits in."
+  why:
+    ko: >-
+      메모리는 번호가 매겨진 칸이 길게 늘어선 것입니다. 값을 담는다는 것은 <b>어느 칸에</b>
+      담는다는 뜻이고, 그 칸의 번호가 <b>주소</b>예요. 값을 들고 다니는 대신 주소만 들고 다닐 수 있는데,
+      그러면 큰 것을 옮기지 않아도 되고 여러 곳에서 같은 값을 볼 수 있습니다.
+      이 층을 모르면 「왜 저쪽에서 고쳤는데 이쪽이 바뀌나」·「왜 목록을 넘기는 것이 안 비싼가」가
+      각각 다른 수수께끼로 남습니다. 주소를 알면 셋 다 <b>한 가지 사실</b>입니다.
+    en: >-
+      Memory is a long row of numbered slots. Storing a value means storing it <b>in some slot</b>,
+      and that slot's number is its <b>address</b>. You can carry the address instead of the value:
+      nothing large has to move, and several places can see the same value. Without this layer,
+      “why did a change over there show up here” and “why is passing a list cheap” stay separate
+      puzzles. With addresses they are <b>one fact</b>.
+  trace: []
+rule:
+  ko: "<b>주소는 값이 아니라 자리다.</b> 자리를 넘기면 같은 값에 여럿이 닿는다."
+  en: "<b>An address is a place, not a value.</b> Pass the place and many can reach one value."
+ok:
+  ko: >-
+    언어가 주소를 감추기도 하고 그대로 보여 주기도 합니다. 감춘 언어에서도 자리를 넘기는
+    일은 그대로 일어나요 — 이름이 안 붙어 있을 뿐입니다.
+  en: >-
+    Some languages hide addresses, some show them. Passing a place happens either way; in the
+    hiding languages it simply has no name.
+misconceptions:
+  - ko: "주소를 직접 못 쓰는 언어에는 주소가 없다 — 감춰져 있을 뿐 그대로 있습니다."
+    en: "Languages that hide addresses do not have them — they are there, just hidden."
+  - ko: "주소가 같으면 값도 같다 — 맞습니다. 반대는 아닙니다: 값이 같아도 자리는 다를 수 있어요."
+    en: "Same address means same value — yes. Not the reverse: equal values can sit in different places."
+  - ko: "주소는 프로그램이 도는 내내 같다 — 값이 옮겨지면 주소도 바뀔 수 있습니다."
+    en: "An address is fixed for the whole run — values can be moved, and the address with them."
+meaning:
+  - q:
+      ko: "아주 큰 목록을 함수에 넘겼는데 비용이 거의 안 들었습니다. <b>무엇이 넘어갔나요?</b>"
+      en: "Passing a huge list to a function cost almost nothing. <b>What was passed?</b>"
+    hint:
+      ko: "옮겨야 할 것이 목록 전체였다면 비용이 들었을 것입니다."
+      en: "Moving the whole list would have cost something."
+    options:
+      - t: { ko: "목록이 놓인 자리의 번호 하나", en: "One number: the slot the list sits in" }
+      - t: { ko: "목록의 첫 항목만", en: "Only the first item of the list" }
+        diag:
+          t:
+            ko: "받는 쪽은 <b>목록 전체</b>를 볼 수 있습니다. 첫 항목만 넘겼다면 나머지에 닿을 길이 없어요."
+            en: "The receiver can see the <b>whole list</b>. With only the first item there would be no path to the rest."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 조각이냐 길이냐", en: "The sharpest spot — a piece or a path" }
+            code:
+              - "첫 항목: 나머지에 못 닿는다"
+              - "자리: 전체에 닿는다"
+      - t: { ko: "목록 전체가 복사됐는데 기계가 빨라서 안 느껴졌다", en: "The whole list was copied; the machine is just fast" }
+        diag:
+          t:
+            ko: "항목이 많아질수록 복사는 <b>눈에 띄게</b> 느려집니다. 크기와 무관하게 싸다면 복사가 아니에요."
+            en: "Copying gets <b>visibly</b> slower as items grow. Cost independent of size is not copying."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 크기에 비례하나", en: "The sharpest spot — does size matter" }
+            code:
+              - "복사: 항목 수에 비례"
+              - "자리: 항목 수와 무관"
+      - t: { ko: "목록의 이름", en: "The name of the list" }
+        diag:
+          t:
+            ko: "이름은 <b>내 코드 안에서만</b> 쓰는 글자입니다. 도는 동안 넘어가는 것은 자리예요."
+            en: "A name is text that exists <b>only in your source</b>. What travels at run time is a place."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 글자냐 자리냐", en: "The sharpest spot — text or place" }
+            code:
+              - "이름: 번역이 끝나면 사라진다"
+              - "자리: 돌 때 실제로 넘어간다"

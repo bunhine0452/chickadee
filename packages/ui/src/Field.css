@@ -1,0 +1,56 @@
+/* D182 — 라벨 · 입력 · 도움말/오류를 한 덩이로. **근접성**(spatial contiguity): 설명은
+   설명하는 것 바로 옆에 있어야 하고, 오류는 입력 아래에 붙어야 한다. 떨어져 있으면
+   학습자가 둘을 눈으로 잇는 데 작업 기억을 쓴다. */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  max-width: var(--measure);
+}
+
+.field > .field-label {
+  font-size: var(--fs-2);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-tight);
+  color: var(--text);
+}
+
+.field > .field-hint,
+.field > .field-error {
+  margin: 0;
+  font-size: var(--fs-2);
+  line-height: var(--lh-body);
+}
+
+.field > .field-hint { color: var(--text-muted) }
+
+.field > .field-error { color: var(--bad) }
+
+/* 입력은 뭐가 오든 같은 옷을 입는다 — 부르는 쪽이 <input> 을 그대로 넘겨도 된다. */
+.field input[type="text"],
+.field input[type="search"],
+.field input[type="url"],
+.field input[type="password"],
+.field textarea,
+.field select {
+  width: 100%;
+  min-height: 36px;
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: var(--fs-3);
+  line-height: var(--lh-body);
+}
+
+.field input::placeholder,
+.field textarea::placeholder { color: var(--text-faint) }
+
+.field.mono input,
+.field.mono textarea { font-family: var(--font-mono) }
+
+.field.invalid input,
+.field.invalid textarea,
+.field.invalid select { border-color: var(--bad) }

@@ -1,0 +1,94 @@
+schema: 1
+id: spring/bean-validation
+universal: null
+name: { ko: "들어온 값을 메서드 앞에서 검사하기", en: "Bean validation" }
+token: null
+grammars: []
+framework: spring
+# 짚을 노드가 없다 — 검사는 메서드가 불리기 전에 프레임워크가 한다 (D176).
+# 창은 근거 낱말이 보이는 블록과 자바 개념의 사용처에서 빌린다 (D157 ②).
+track_default: t0
+essential: false
+difficulty: 2
+prereq: [spring/controller-mapping]
+confusions: [spring/exception-handler]
+queries: []
+dict:
+  one_liner:
+    ko: "값에 붙인 조건을 메서드가 불리기 전에 검사한다."
+    en: "Conditions on the values are checked before the method is called."
+  why:
+    ko: >-
+      들어온 값이 비었는지 너무 긴지 검사하는 코드를 메서드 첫머리에 쓰면, 컨트롤러마다 같은
+      <code>if</code> 가 쌓입니다. 대신 조건을 <b>값을 담는 클래스의 필드에 표시로 붙여 두고</b>
+      메서드 쪽에는 「검사해 달라」는 표시 하나만 답니다. 검사는 <b>메서드가 불리기 전에</b>
+      끝나요 — 그래서 메서드 본문에 들어온 값은 이미 조건을 통과한 것입니다. 조건을 어기면
+      메서드는 <b>아예 안 불리고</b> 정해진 예외가 던져집니다. 그 예외를 받아 응답을 만드는 것은
+      또 다른 자리의 일입니다.
+    en: >-
+      Checking whether a value is empty or too long at the top of the method piles the same
+      <code>if</code> into every controller. Instead the conditions are <b>marks on the fields of
+      the class that carries the values</b>, and the method carries one mark saying 「check this」.
+      The check finishes <b>before the method is called</b> — so a value inside the body has already
+      passed. When a condition fails the method is <b>never called</b> and a fixed exception is
+      thrown. Turning that exception into a response is another place's job.
+  trace: []
+rule:
+  ko: "<b>검사는 메서드 앞에서 끝난다.</b> 어기면 본문은 한 줄도 안 돈다."
+  en: "<b>The check finishes before the method.</b> On failure the body never runs."
+ok:
+  ko: >-
+    조건을 다 통과한 값만 메서드 본문에 들어옵니다.
+    어긴 값은 본문에 닿기 전에 예외가 되어 나갑니다.
+  en: >-
+    Only values that passed every condition enter the body. A failing value becomes an exception
+    before it gets there.
+misconceptions:
+  - ko: "조건만 붙이면 검사된다 — 메서드 쪽에 검사하라는 표시도 있어야 합니다."
+    en: "Marking the fields is enough — the method also needs the mark asking for a check."
+  - ko: "검사에 걸려도 본문은 돈다 — 본문은 한 줄도 안 돕니다."
+    en: "The body still runs on failure — it does not run at all."
+  - ko: "검사가 응답 문구까지 만든다 — 예외를 받아 응답으로 바꾸는 자리는 따로 있습니다."
+    en: "The check also writes the response — turning it into a response is a separate place."
+  - ko: "애너테이션은 명령이다 — 표시일 뿐이고 검사기가 그것을 읽습니다."
+    en: "An annotation is a command — it is a mark the validator reads."
+evidence: ["@Valid", "@Validated", "@NotBlank", "@NotNull", "@Size(", "BindingResult", "MethodArgumentNotValidException"]
+meaning:
+  - q:
+      ko: "조건을 어긴 값이 들어왔습니다. <b>메서드 본문은 도나요?</b>"
+      en: "A value breaks a condition. <b>Does the method body run?</b>"
+    hint:
+      ko: "검사가 언제 끝나는지 보세요."
+      en: "Ask when the check finishes."
+    options:
+      - t: { ko: "안 돈다 — 검사가 메서드 앞에서 끝나고 예외가 던져진다", en: "No — the check finishes first and an exception is thrown" }
+      - t: { ko: "돈다 — 본문에서 검사 결과를 읽어 판단한다", en: "Yes — the body reads the result and decides" }
+        diag:
+          t:
+            ko: "결과를 받아 볼 수 있는 <b>다른 쓰기 방식</b>도 있습니다. 그 방식을 안 쓰면 본문은 안 돌아요."
+            en: "There is <b>another way to write it</b> that hands you the result. Without that way, the body does not run."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 받아 보나 안 받나", en: "The sharpest spot — result taken or not" }
+            code:
+              - "결과를 안 받으면: 본문 안 돈다"
+              - "결과를 받으면: 본문에서 판단"
+      - t: { ko: "돈다 — 검사는 본문이 끝난 뒤에 한다", en: "Yes — the check happens after the body" }
+        diag:
+          t:
+            ko: "본문 뒤에 검사하면 <b>이미 저장한 다음</b>이 됩니다. 그래서 검사는 앞에 둡니다."
+            en: "Checking after the body means checking <b>after it was already saved</b>. That is why the check comes first."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 앞이냐 뒤냐", en: "The sharpest spot — before or after" }
+            code:
+              - "앞: 저장 전에 막는다"
+              - "뒤: 이미 저장됐다"
+      - t: { ko: "값이 기본값으로 바뀌어 본문이 돈다", en: "The value is replaced by a default and the body runs" }
+        diag:
+          t:
+            ko: "값을 <b>고치지 않습니다</b>. 조건을 재기만 하고, 어기면 그대로 예외가 됩니다."
+            en: "It does not <b>change</b> the value. It only measures the condition, and a failure becomes an exception."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 재기냐 고치기냐", en: "The sharpest spot — measure or modify" }
+            code:
+              - "재기: 통과냐 아니냐"
+              - "고치기: 하지 않는다"

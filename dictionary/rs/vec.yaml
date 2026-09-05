@@ -1,0 +1,179 @@
+schema: 1
+id: rs/vec
+# 1부 (`rs.md` §3 · §0.6 이 1부에 둔다). 보편형은 `common/list`. Rust 에서 다시 배울 것은 길이가 변하는
+# 목록은 전부 이것이고 `[T; 3]` 배열과 **다른 타입**이라는 것, 그리고 `push` 하려면 `let mut` 이어야
+# 한다는 것 — 이름에 붙는 표시가 목록에도 그대로 적용된다.
+universal: common/list
+name: { ko: 순서 있는 목록, en: A growable list }
+token: "Vec"
+grammars: [rust]
+framework: null
+essential: true
+difficulty: 2
+prereq: [rs/let-binding, rs/mut-binding]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "길이가 변하는 목록. 항목은 전부 같은 타입이고, 늘리려면 이름에 바꿀 수 있다는 표시가 있어야 한다."
+    en: "A growing list of one item type; growing needs the changeable mark on the name."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 힙에 항목을 이어 담는 목록이고, 꺾쇠 안의 {{pick.2|code}}{{pick.2|josa:이,가}}
+      <b>항목의 타입</b>입니다 — 한 목록에 한 타입뿐이에요. 길이가 정해진 `[T; 3]` 배열과는 <b>다른
+      타입</b>이라 서로 못 넣습니다. 그리고 `push` 는 목록을 고치는 일이라 이름에 `mut` 이 있어야
+      해요(E0596) — 0부의 「바꿀 수 있음은 이름에 붙는다」가 목록에서 처음 실제로 걸리는 자리입니다.
+      만드는 법은 셋: `Vec::new()` · `vec![…]` · 이터레이터의 `collect()`.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} is a list that stores items back to back on the heap, and
+      {{pick.2|code}} inside the angle brackets is <b>the item type</b> — one type per list. It is
+      <b>a different type</b> from a fixed-length array `[T; 3]`, so the two do not interchange. And
+      `push` changes the list, so the name needs `mut` (E0596) — part 0's “changeability belongs to
+      the name” first bites here. Three ways to make one: `Vec::new()`, `vec![…]`, and `collect()` on
+      an iterator.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 목록 하나를 세운다 — 항목 타입은 {{pick.2|code}} 다."
+      en: "{{pick.1|code}} on line {{site.line}} sets up one list — the item type is {{pick.2|code}}."
+    - ko: "항목은 힙에 이어 놓이고 이름 쪽에는 시작·길이·용량 세 칸만 있다."
+      en: "Items sit back to back on the heap; the name holds only start, length and capacity."
+    - ko: "늘리면 자리가 모자랄 때 통째로 더 큰 곳으로 옮긴다 — 그래서 빌려 둔 자리가 무효가 된다."
+      en: "Growing may move everything to a bigger place — which is why borrowed positions go stale."
+
+rule:
+  ko: "<b>목록은 한 타입의 항목을 힙에 잇는다.</b> 늘리려면 mut, 배열과는 다른 타입이다."
+  en: "<b>A list strings items of one type on the heap.</b> Growing needs mut; an array is another type."
+result:
+  label:
+    ko: "{{site.line}}행의 목록"
+    en: "the list on line {{site.line}}"
+  value: "{{pick.1}}<{{pick.2}}>"
+  note:
+    ko: "항목 타입이 꺾쇠 안에 있다"
+    en: "the item type sits in the angle brackets"
+ok:
+  ko: "{{pick.1|code}}<{{pick.2}}> 는 {{pick.2|code}} 항목만 담는 목록입니다."
+  en: "{{pick.1|code}}<{{pick.2}}> is a list that holds only {{pick.2|code}} items."
+payoff:
+  ko: "이걸 알면 「`push` 가 왜 안 되나」(E0596)와 「배열을 왜 못 넣나」(E0308)가 함께 풀립니다."
+  en: "This untangles both “why is `push` refused” (E0596) and “why can an array not go here” (E0308)."
+bridge:
+  ko: "파이썬 리스트는 아무 타입이나 섞어 담고 늘 늘릴 수 있습니다. Rust 는 <b>한 타입</b>이고 늘리려면 <b>mut</b> 이에요."
+  en: "A Python list mixes types and always grows. Rust's holds <b>one type</b> and grows only under <b>mut</b>."
+misconceptions:
+  - ko: "배열 `[1, 2, 3]` 과 같은 것이다 — 다른 타입입니다. 배열은 길이가 타입의 일부예요."
+    en: "It is the same as the array `[1, 2, 3]` — a different type. An array's length is part of its type."
+  - ko: "`push` 는 늘 된다 — 이름에 `mut` 이 없으면 E0596 입니다."
+    en: "`push` always works — without `mut` on the name it is E0596."
+  - ko: "항목을 빌려 둔 채 `push` 해도 된다 — 옮겨질 수 있어 막힙니다(E0502). 빌림을 끝내고 늘려야 해요."
+    en: "You may `push` while an item is borrowed — it may move, so it is refused (E0502). End the borrow first."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>길이가 변하는 목록의 타입 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the type name of the growable list</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>항목의 타입</b>입니다. 목록이 무엇을 담는지이지 목록 자체가 아니에요."
+          en: "{{pick.2|code}} is <b>the item type</b>. It says what the list holds, not what the list is."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 목록이냐 항목이냐", en: "The sharpest spot — the list or the item" }
+          code:
+            - "Vec<i32>"
+            - "// ^목록 ^항목"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 항목 타입을 <b>여는 꺾쇠</b>입니다. 목록의 이름은 그 앞이에요."
+          en: "{{pick.3|code}} is the angle bracket that <b>opens</b> the item type. The list's name comes before it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 괄호냐", en: "The sharpest spot — the name or the bracket" }
+          code:
+            - "Vec<String>"
+            - "//  ^여는 꺾쇠"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>길이가 변하는 목록</b> 타입입니다."
+      en: "Choose what goes in the blank. Line {{site.line}} names a <b>growable list</b> type."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "Vec", mono: true }
+      - t: "Option"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>있거나 없거나</b>입니다. 항목 하나를 담을까 말까이지 여럿을 잇지 않아요."
+            en: "That is <b>present or absent</b>. It holds one item or none; it does not string many."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 여럿이냐 하나냐", en: "The sharpest spot — many or one" }
+            code:
+              - "Vec<i32>      // 0개 이상"
+              - "Option<i32>   // 0개 또는 1개"
+      - t: "Box"
+        mono: true
+        diag:
+          t:
+            ko: "이건 값 <b>하나</b>를 힙에 두는 상자입니다. 목록이 아니에요."
+            en: "That puts <b>one</b> value on the heap. It is not a list."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 하나냐 여럿이냐", en: "The sharpest spot — one or many" }
+            code:
+              - "Box<i32>   // 힙의 값 하나"
+              - "Vec<i32>   // 힙의 값 여럿"
+      - t: "String"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>글자</b>의 목록이라 항목 타입을 안 적습니다. 다른 항목은 못 담아요."
+            en: "That is a list of <b>text bytes</b> and takes no item type. It holds nothing else."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 꺾쇠가 있나", en: "The sharpest spot — is there an angle bracket" }
+            code:
+              - "Vec<u8>    // 바이트 목록"
+              - "String     // UTF-8 이 보증된 바이트 목록"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 배열이 아니라 <b>이 목록</b>을 썼을까요?"
+    en: "Why does line {{site.line}} use <b>this list</b> rather than an array?"
+  choices:
+    - t:
+        ko: "항목 수가 실행 중에 정해지거나 변하기 때문에 — 배열은 길이가 타입에 박힌다"
+        en: "Because the item count is decided or changed at run time — an array's length is baked into its type"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 목록이 어디에서 늘어나는지도 찾아보세요."
+        en: "That is the direction. Find where this list grows."
+    - t:
+        ko: "배열은 Rust 에 없어서"
+        en: "Because Rust has no arrays"
+      ok: false
+      fb:
+        ko: "있습니다 — `[i32; 3]`. 길이가 고정일 뿐이에요."
+        en: "It has them — `[i32; 3]`. Only the length is fixed."
+    - t:
+        ko: "목록이 더 빨라서"
+        en: "Because the list is faster"
+      ok: false
+      fb:
+        ko: "반대로 힙을 한 번 더 거칩니다. 길이가 변해야 하는 것이 이유예요."
+        en: "It actually goes through the heap once more. The reason is a changing length."
+
+queries:
+  - { grammars: [rust], file: ./vec.scm }
+
+examples:
+  - code: "fn f() { let v: Vec<i32> = Vec::new(); }      // 빈 목록 — i32 만 담는다"
+    expect: { sites: 2, form: vec-type, hole: "Vec", picks: { 1: "Vec", 2: "i32", 3: "<" } }
+  - code: "fn f() { let v = vec![1, 2, 3]; }             // 항목 셋으로 시작"
+    expect: { sites: 1, form: vec-macro, picks: { 1: "vec", 2: "[1, 2, 3]", 3: "!" } }
+  - code: "fn f() { names.push(n); }                     // names 는 mut 이어야 한다"
+    expect: { sites: 1, form: push, picks: { 1: "push", 2: "names", 3: "(n)" } }
+  - code: "fn f() { let a = [1, 2, 3]; }                 // 배열 — 다른 타입"
+    expect: none

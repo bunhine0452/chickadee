@@ -109,7 +109,7 @@ pub fn app_wipe(app: AppHandle, state: State<'_, AppState>) -> Result<(), IpcErr
     for f in ["chickadee.db", "chickadee.db-wal", "chickadee.db-shm"] {
         std::fs::remove_file(dir.join(f)).or_else(ok)?;
     }
-    for d in ["backups", "dict-cache", "logs", "exports"] {
+    for d in ["backups", "dict-cache", "logs", "exports", "run"] {
         std::fs::remove_dir_all(dir.join(d)).or_else(ok)?;
     }
     Ok(())

@@ -1,0 +1,41 @@
+[
+  {
+    "queryId": "java/annotation",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "marker",
+    "startLine": 4,
+    "startCol": 4,
+    "endLine": 4,
+    "endCol": 13,
+    "nodeKind": "marker_annotation",
+    "inError": false
+  },
+  {
+    "queryId": "java/annotation",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "marker",
+    "startLine": 4,
+    "startCol": 4,
+    "endLine": 4,
+    "endCol": 13,
+    "nodeKind": "marker_annotation",
+    "inError": false
+  },
+  {
+    "queryId": "java/annotation",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "marker",
+    "startLine": 4,
+    "startCol": 5,
+    "endLine": 4,
+    "endCol": 13,
+    "nodeKind": "identifier",
+    "inError": false
+  }
+]

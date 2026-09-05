@@ -1,0 +1,196 @@
+schema: 1
+id: swift/text-literal
+# 0부 축 3. 보편형은 `common/text-literal` — 「글자 묶음이라는 값이 있다」는 어디에나 있다.
+# Swift 에서 다시 배울 것은 **무엇을 한 글자로 세는가**이고, 그것이 이 장의 다리 문장이다.
+universal: common/text-literal
+name: { ko: 글자 값과 자소 뭉치, en: Text literal }
+token: "\"\""
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cs/text-encoding]
+confusions: []
+dict:
+  one_liner:
+    ko: "글자 묶음은 사람이 보는 글자 단위로 세고, 번호로는 한 글자를 못 꺼낸다."
+    en: "Text counts the characters a person sees, and no number can pull one out."
+  why:
+    ko: >-
+      Swift 의 글자 묶음은 바이트의 줄도 코드 단위의 줄도 아니라 <b>자소 뭉치</b>의 모음입니다.
+      자소 뭉치는 「사람이 한 글자로 보는 것」이에요 — 가족 이모지 하나는 안에 코드가 일곱 개,
+      바이트가 스물다섯 개 들어 있는데 길이는 <b>1</b> 입니다. 같은 이모지가 C# 에서는 11,
+      Go 에서는 25 로 세어집니다. 그리고 이 사실 때문에 <code>s[0]</code> 이 <b>빌드에서 막힙니다</b>:
+      몇 번째 자소 뭉치인지는 앞에서부터 세어 봐야 알 수 있어서, 번호로 곧장 짚는 표기를
+      Swift 는 아예 안 열어 뒀습니다.
+    en: >-
+      Text in Swift is neither a row of bytes nor a row of code units — it is a run of
+      <b>grapheme clusters</b>, the things a person reads as one character. One family emoji holds
+      seven scalars and twenty-five bytes, and its length is <b>1</b>. The same emoji counts as 11
+      in C# and 25 in Go. That fact is why <code>s[0]</code> <b>fails to build</b>: which cluster
+      is at position zero can only be known by walking from the front, so Swift never opened the
+      notation that jumps there by number.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 자소 뭉치의 모음이 된다."
+      en: "{{pick.1|code}} on line {{site.line}} becomes a run of grapheme clusters."
+    - ko: "길이를 물으면 사람이 보는 글자 수가 나온다."
+      en: "Asking for its length gives the number of characters a person sees."
+    - ko: "번호로 한 글자를 꺼내는 표기는 이 값에 없다."
+      en: "The notation that pulls one out by number does not exist for this value."
+rule:
+  ko: "<b>한 글자는 한 바이트가 아니다.</b> 세는 단위는 사람이 보는 글자이고, 번호로는 못 짚는다."
+  en: "<b>One character is not one byte.</b> The unit is what a person reads, and numbers cannot index it."
+result:
+  label: { ko: "{{site.line}}행의 글자 묶음", en: "the text on line {{site.line}}" }
+  value: "{{pick.1}}"
+  note: { ko: "길이는 자소 뭉치로 센다", en: "length counts grapheme clusters" }
+ok:
+  ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 자소 뭉치의 모음으로 담겼습니다."
+  en: "{{pick.1|code}} landed as a run of grapheme clusters."
+payoff:
+  ko: "이걸 알면 「이모지 하나를 지웠는데 화면이 깨진다」가 풀립니다 — 자른 단위가 글자가 아닌 겁니다."
+  en: "This untangles “I deleted one emoji and the screen broke” — the cut was not on a character."
+bridge:
+  ko: >-
+    C#·자바는 코드 단위로, Go 는 바이트로 셉니다. 같은 이모지 하나의 길이가 <b>1 · 11 · 25</b>
+    로 갈려요.
+  en: >-
+    C# and Java count code units, Go counts bytes. One emoji's length comes out <b>1, 11 or 25</b>.
+misconceptions:
+  # swift.md §0.1 0-3 · §0.3 — 실측(`"가나다"` 3/9/3/3 · 가족 이모지 1/25/11/7).
+  - ko: "번호로 첫 글자를 꺼낼 수 있다 — 빌드가 멈춥니다. 번호로 짚는 표기가 없어요."
+    en: "The first character comes out by number — the build stops. That notation does not exist."
+  - ko: "길이는 바이트 수다 — 사람이 보는 글자 수입니다. 바이트를 세는 자리는 따로 있어요."
+    en: "Length is a byte count — it is the count a person sees. Bytes have their own view."
+  - ko: "한글 한 글자는 한 바이트다 — 셋입니다. 그래도 길이는 1 로 셉니다."
+    en: "One Hangul syllable is one byte — it is three. Its length is still counted as 1."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>글자 묶음 값</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the text value</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>이거나 <b>부르는 이름</b>입니다. 값이 아니라 값을 받는 쪽이에요."
+          en: "{{pick.2|code}} is a <b>name</b> — the side that receives the value, not the value."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 값이냐", en: "The sharpest spot — the name or the value" }
+          code:
+            - "let title = \"가나다\""
+            - "Text(\"가나다\")"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>종류</b>입니다. 종류는 세는 단위를 정할 뿐 값 자체는 아니에요."
+          en: "{{pick.3|code}} is the <b>type</b>. It settles the counting unit; it is not the value."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 종류냐 값이냐", en: "The sharpest spot — the type or the value" }
+          code:
+            - "let a: String = \"가\""
+            - "let b: Character = \"가\""
+meaning:
+  - q:
+      ko: "{{site.line}}행의 글자 묶음에서 첫 글자를 <code>s[0]</code> 으로 꺼내면 어떻게 될까요?"
+      en: "What happens if the first character is pulled out with <code>s[0]</code>?"
+    options:
+      - t:
+          ko: "빌드가 그 줄에서 멈춘다 — 번호로 짚는 표기가 아예 없다"
+          en: "The build stops on that line — indexing by number does not exist"
+      - t:
+          ko: "첫 글자가 나온다"
+          en: "The first character comes out"
+        diag:
+          t:
+            ko: "다른 언어라면 그렇습니다. Swift 는 몇 번째 자소 뭉치인지 앞에서부터 세어야 알 수 있어서 그 표기를 안 열어 뒀어요."
+            en: "In other languages, yes. Swift walks from the front to find a cluster, so it never opened that notation."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 번호냐 걸음이냐", en: "The sharpest spot — an index or a walk" }
+            code:
+              - "s[0]                 // 빌드가 멈춘다"
+              - "Array(s)[0]          // 한 글자가 나온다"
+      - t:
+          ko: "첫 바이트가 나온다"
+          en: "The first byte comes out"
+        diag:
+          t:
+            ko: "바이트를 보는 자리는 따로 있고, 그쪽도 번호로 곧장 짚지는 않습니다. 기본 값에는 번호로 짚는 표기가 없어요."
+            en: "Bytes have their own view, and even there you do not jump by number. The plain value has no such notation."
+      - t:
+          ko: "돌다가 멈춘다"
+          en: "It stops while running"
+        diag:
+          t:
+            ko: "돌기 전에 막힙니다. 이 줄은 빌드 단계에서 걸리는 것이라 실행까지 가지도 않아요."
+            en: "It is caught before it runs. This line fails at build time and never reaches execution."
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>글자 묶음</b> 이름을 세웁니다."
+      en: "Choose what goes in the blank. Line {{site.line}} sets up a <b>text</b> name."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "String", mono: true }
+      - t: "Character"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>자소 뭉치 하나</b>입니다. 묶음이 아니라 한 글자라서 여러 글자를 넣으면 빌드가 멈춰요."
+            en: "That is <b>one grapheme cluster</b> — a single character, not a run. Put more than one in and the build stops."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 하나냐 묶음이냐", en: "The sharpest spot — one or a run" }
+            code:
+              - "let a: Character = \"가\""
+              - "let b: String = \"가나다\""
+      - t: "Int"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>정수</b> 종류라 글자를 못 담습니다. Swift 는 글자와 수를 서로 안 바꿔 줘요."
+            en: "That is the <b>whole number</b> type and holds no text. Swift never converts between the two on its own."
+      - t: "Bool"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>참·거짓</b> 종류입니다. 빈 글자 묶음이 거짓으로 쳐지는 언어가 있지만 Swift 는 그 둘을 안 섞어요."
+            en: "That is the <b>true/false</b> type. Some languages treat empty text as false; Swift never mixes the two."
+why_gate:
+  q:
+    ko: "Swift 는 왜 글자 묶음에 <b>번호로 짚는 표기를 안 열어</b> 두었을까요?"
+    en: "Why did Swift <b>never open indexing by number</b> on text?"
+  choices:
+    - t:
+        ko: "몇 번째 글자인지는 앞에서부터 세어야 알 수 있어서, 번호로 곧장 짚는 표기가 값싸 보이지만 안 싸기 때문"
+        en: "Because finding the n-th character means walking from the front, so an index that looks cheap is not"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그럼 앞에서부터 세는 표기는 무엇인지도 적어 보세요."
+        en: "That is the direction. Say which notation does the walking, too."
+    - t:
+        ko: "글자 묶음이 못 바뀌는 값이라서"
+        en: "Because text is an unchangeable value"
+      ok: false
+      fb:
+        ko: "못 바뀌는 값에도 읽기는 열 수 있습니다. 막힌 것은 쓰기가 아니라 <b>번호로 짚기</b>예요."
+        en: "Unchangeable values can still be read. What is closed is not writing but <b>indexing</b>."
+    - t:
+        ko: "Swift 가 배열과 글자를 헷갈리지 않게 하려고"
+        en: "So that arrays and text are not confused"
+      ok: false
+      fb:
+        ko: "헷갈림 문제가 아닙니다. 세는 단위가 자소 뭉치라 위치를 번호로 못 잡는 것이 이유예요."
+        en: "It is not about confusion. The unit is a cluster, so a position cannot be named by number."
+queries:
+  - { grammars: [swift], file: ./text-literal.scm }
+examples:
+  - code: "let title: String = \"가나다\""
+    expect: { sites: 1, form: strlit, hole: "String", picks: { 1: "\"가나다\"", 2: "title", 3: "String" } }
+  - code: "let greeting = \"안녕\""
+    expect: { sites: 1, form: strlit, picks: { 1: "\"안녕\"", 2: "greeting" } }
+  - code: "let v = Text(\"누르기\")"
+    expect: { sites: 1, form: strarg, picks: { 1: "\"누르기\"", 2: "Text" } }
+  - code: "let n = 42"
+    expect: none

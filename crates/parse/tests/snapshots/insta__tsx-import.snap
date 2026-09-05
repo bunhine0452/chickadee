@@ -8,3 +8,7 @@ _imports · quality=ok · lines=9
 m1 p0 @import.source   form=static          string                 1:24-1:31 inError=false
 m2 p0 @import.source   form=static          string                 2:30-2:45 inError=false
 m3 p0 @import.source   form=static          string                 3:26-3:36 inError=false
+m4 p10 @import.source   form=call-self       identifier             6:16-6:23 inError=false
+m5 p9 @ctx.recv        form=call            identifier             6:30-6:35 inError=false
+m5 p9 @import.source   form=call            property_identifier    6:36-6:42 inError=false
+m6 p10 @import.source   form=call-self       identifier             7:36-7:45 inError=false

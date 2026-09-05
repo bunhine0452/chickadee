@@ -1,0 +1,162 @@
+schema: 1
+id: java/arithmetic
+universal: common/arithmetic
+name: { ko: 셈하기, en: Arithmetic }
+token: "+"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 1
+# 0부 축 E (java.md §1.5.1). `cs/type` 이 「두 int 의 결과도 int」의 아래층이고,
+# `cs/operator-precedence` 는 `1 / 2 * 2.0` 이 왜 0.0 인가의 아래층이다.
+prereq: [cs/integer-overflow, cs/floating-point, cs/type, cs/operator-precedence]
+confusions: []
+dict:
+  one_liner:
+    ko: "두 값으로 새 값을 만든다. 넣어 준 값은 그대로 남는다."
+    en: "Makes a new value from two. Neither input is changed."
+  why:
+    ko: >-
+      자바의 셈은 <b>종류를 안 바꿉니다</b>. 정수끼리 더하면 정수고, 나누면 <b>소수를 버린</b>
+      정수예요 — <code>7 / 2</code> 가 <code>3</code> 입니다. 파이썬은 같은 자리에서
+      <code>3.5</code> 를 내요. 그래서 자바에서 「계산이 이상하다」는 대개 <b>종류가 정수라서</b>입니다.
+    en: >-
+      Arithmetic in Java <b>does not change the kind</b>. Two integers added give an integer, and
+      divided give an integer with <b>the fraction dropped</b> — <code>7 / 2</code> is
+      <code>3</code>. Python gives <code>3.5</code> there. So “the maths is off” in Java is usually
+      <b>because the kind is integer</b>.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:을,를}} 값으로 만든다."
+      en: "{{pick.2|code}} and {{pick.3|code}} become values."
+    - ko: "둘로 새 값 하나를 만든다."
+      en: "One new value is made from the two."
+    - ko: "넣어 준 두 값은 그대로다."
+      en: "Both inputs are left as they were."
+rule:
+  ko: "<b>셈은 새 값을 만들고 종류를 안 바꾼다.</b> 정수끼리 나누면 소수가 버려진다."
+  en: "<b>It makes a new value and keeps the kind.</b> Integer division drops the fraction."
+result:
+  label: { ko: "{{site.line}}행의 셈", en: "the arithmetic on line {{site.line}}" }
+  value: "{{pick.2}} {{pick.1}} {{pick.3}}"
+  note: { ko: "종류는 그대로다", en: "the kind is unchanged" }
+ok:
+  ko: "새 값 하나가 나왔고 {{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:은,는}} 그대로입니다."
+  en: "One new value came out, and {{pick.2|code}} and {{pick.3|code}} are untouched."
+payoff:
+  ko: "이걸 알면 「나눴는데 소수가 안 나온다」가 풀립니다 — 둘 다 정수라서예요."
+  en: "This untangles “I divided and got no fraction” — both sides were integers."
+bridge:
+  ko: "파이썬은 나누기가 늘 소수를 냅니다. 자바는 <b>넣은 종류를 지켜서</b> 정수면 정수를 냅니다."
+  en: "Python always divides into a decimal. Java <b>keeps the kind you gave it</b>."
+misconceptions:
+  - ko: "나누면 소수가 나온다 — 정수끼리면 소수가 버려집니다."
+    en: "Division gives a fraction — between integers the fraction is dropped."
+  - ko: "셈이 원래 값을 바꾼다 — 새 값을 만들 뿐 원래 값은 그대로입니다."
+    en: "Arithmetic changes the inputs — it makes a new value and leaves them alone."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>새 값을 만드는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that makes the new value</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>재료</b>입니다. 재료만으로는 새 값이 안 생겨요."
+          en: "{{pick.2|code}} is an <b>input</b>. Inputs alone make nothing new."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 재료냐 셈이냐", en: "The sharpest spot — an input or the arithmetic" }
+          code:
+            - "n;        // 그대로"
+            - "n + 1;    // 새 값"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 다른 쪽 <b>재료</b>입니다. 둘을 잇는 것이 가운데 기호예요."
+          en: "{{pick.3|code}} is the other <b>input</b>. The symbol between joins them."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 재료냐 잇는 것이냐", en: "The sharpest spot — an input or the joining" }
+          code:
+            - "1;"
+            - "n + 1;"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 두 값을 <b>더해</b> 새 값을 만듭니다."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>adds</b> two values into a new one."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "+", mono: true }
+      - t: "=="
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>견주기</b>라 참·거짓을 냅니다. 숫자를 기대한 자리에 참·거짓이 오면 컴파일이 멈춰요."
+            en: "That <b>weighs</b> and yields true or false. Where a number is expected that stops the compiler."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 숫자냐 참·거짓이냐", en: "The sharpest spot — a number or a truth value" }
+            code:
+              - "n + 1     // 숫자"
+              - "n == 1    // 참·거짓"
+      - t: "&&"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>참·거짓 둘을 잇는</b> 기호라 숫자에는 못 씁니다. 자바는 숫자와 참·거짓을 안 섞어요."
+            en: "That <b>joins two truth values</b> and cannot take numbers. Java does not mix the two."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 숫자냐 참·거짓이냐", en: "The sharpest spot — numbers or truth values" }
+            code:
+              - "a && b     // 참·거짓끼리"
+              - "n + 1      // 숫자끼리"
+      - t: "="
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>넣는</b> 기호입니다. 왼쪽이 이름이어야 하고, 새 값을 만드는 자리가 아니에요."
+            en: "That <b>puts a value in</b>. Its left side must be a name, and it makes nothing new."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 만들기냐 넣기냐", en: "The sharpest spot — making or putting" }
+            code:
+              - "n + 1;    // 값이 나온다"
+              - "n = 1;    // 이름이 바뀐다"
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 이 값을 <b>미리 계산해</b> 두었을까요?"
+    en: "Why does line {{site.line}} work this value out <b>ahead of time</b>?"
+  choices:
+    - t:
+        ko: "아래에서 같은 값을 쓰고, 한 번만 계산해야 두 곳이 어긋나지 않기 때문"
+        en: "Because it is used below, and computing once keeps two places from drifting"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 두 곳에서 따로 계산했다면 무엇이 어긋날 수 있는지도 적어 보세요."
+        en: "That is the direction. Say what could drift if it were computed twice."
+    - t:
+        ko: "자바가 셈을 미리 하게 해서"
+        en: "Because Java requires it up front"
+      ok: false
+      fb:
+        ko: "요구하지 않습니다. 쓰는 자리에서 바로 계산해도 됩니다 — 미리 둔 것이 선택이에요."
+        en: "It does not. It could be computed where it is used; doing it early is a choice."
+    - t:
+        ko: "숫자가 커서"
+        en: "Because the number is large"
+      ok: false
+      fb:
+        ko: "크기와는 무관합니다. 미리 두는 이유는 <b>몇 번 쓰이는가</b>예요."
+        en: "Size is not it. The reason is <b>how many times it is used</b>."
+queries:
+  - { grammars: [java], file: ./arithmetic.scm }
+examples:
+  # 값을 든 예 — 식 · 값 · 타입 (`docs/program/fundamentals.md` §8 의 재료).
+  - code: "class A { void f() { int q = 7 / 2; } }        // 7 / 2 -> 3 (int)"
+    expect: { sites: 1, form: arith, hole: "/", picks: { 1: "/", 2: "7", 3: "2" } }
+  - code: "class A { void f(int a) { int q = a % 2; } }   // -7 % 2 -> -1 (int)"
+    expect: { sites: 1, form: arith, hole: "%", picks: { 1: "%", 2: "a", 3: "2" } }
+  - code: "class A { void f(int a, int b) { int s = a + b; } }  // 1 + 2 -> 3 (int)"
+    expect: { sites: 1, form: arith, hole: "+", picks: { 1: "+", 2: "a", 3: "b" } }
+  - code: "class A { void f(int a, int b) { boolean t = a == b; } }  // 1 == 2 -> false (boolean)"
+    expect: none

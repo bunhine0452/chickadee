@@ -1,0 +1,199 @@
+schema: 1
+id: swift/property-wrapper
+universal: null
+name: { ko: 표시 하나로 저장 방식 바꾸기, en: Property wrapper }
+token: "@"
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 4
+prereq: [swift/generics, swift/struct-declaration]
+confusions: []
+dict:
+  one_liner:
+    ko: "이름 앞의 표시 하나가 그 값이 어디에 담기고 읽고 쓸 때 무슨 일이 나는지를 바꾼다."
+    en: "One marker before a name changes where the value lives and how it is read."
+  why:
+    ko: >-
+      이름 앞에 골뱅이와 타입 이름을 적으면, 그 이름의 <b>저장 자리와 읽기·쓰기 규칙이 통째로
+      바뀝니다.</b> 값은 그 타입 안에 담기고, 이름을 읽고 쓰는 일은 그 타입이 대신합니다.
+      화면 코드가 이 장치 위에 서 있습니다. 화면을 그리는 묶음은 <b>매번 새로 만들어지므로</b>
+      그 안의 이름은 매번 초깃값으로 돌아가야 정상이에요. 그런데 표시를 붙이면 값이
+      <b>묶음 바깥에</b> 보관돼서 다시 만들어져도 살아남습니다. 그리고 그 값이 바뀌면 화면을
+      다시 그리라고 알려 주죠.
+      그래서 표시 없는 이름과 표시 붙은 이름은 같은 줄처럼 보여도 <b>사는 곳이 다릅니다.</b>
+      표본 428파일에서 1,106곳/190파일 — 이 언어에서 다섯째로 흔합니다.
+    en: >-
+      Writing an at-sign and a type name in front of a name <b>replaces where the value is kept
+      and what reading and writing do.</b> The value lives inside that type, and access goes
+      through it.
+      Screen code stands on this device. A screen bundle is <b>remade every time</b>, so a plain
+      name inside it goes back to its starting value on every rebuild — which is correct. With the
+      marker the value is kept <b>outside the bundle</b> and survives the rebuild, and changing it
+      asks for a redraw.
+      So a marked name and an unmarked one look like the same line but <b>live in different
+      places.</b>
+      The sample has 1,106 across 190 files — the fifth commonest site in this language.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.2|code}}{{pick.2|josa:은,는}} 평범한 이름처럼 보인다."
+      en: "{{pick.2|code}} on line {{site.line}} looks like a plain name."
+    - ko: "{{pick.3|code}}{{pick.3|josa:과,와}} {{pick.1|code}}{{pick.1|josa:이,가}} 저장 자리를 바꾼다."
+      en: "{{pick.3|code}} and {{pick.1|code}} replace where it is kept."
+    - ko: "읽고 쓰는 일은 그 타입이 대신한다."
+      en: "Reading and writing go through that type."
+rule:
+  ko: "<b>표시가 저장 자리를 바꾼다.</b> 값은 이 묶음 안이 아니라 바깥에 산다."
+  en: "<b>The marker replaces the storage.</b> The value lives outside this bundle, not in it."
+result:
+  label: { ko: "{{site.line}}행의 이름", en: "the name on line {{site.line}}" }
+  value: "{{pick.3}}{{pick.1}} {{pick.2}}"
+  note: { ko: "값은 바깥에 보관된다", en: "the value is kept outside" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} {{pick.1|code}}{{pick.1|josa:이,가}} 정한 방식으로 담깁니다."
+  en: "{{pick.2|code}} is kept the way {{pick.1|code}} settles."
+payoff:
+  ko: "이걸 알면 「화면을 다시 그렸는데 값이 왜 남아 있지」가 풀립니다 — 바깥에 있는 겁니다."
+  en: "This untangles “the screen was rebuilt and the value survived” — it lives outside."
+bridge:
+  ko: >-
+    자바·C# 의 애너테이션은 <b>표시일 뿐</b>이고 저장 자리를 안 바꿉니다. Swift 는 이 표시가
+    저장 자리를 통째로 가져가요.
+  en: >-
+    Annotations in Java and C# are <b>markers only</b> and change no storage. In Swift this marker
+    takes the storage over.
+misconceptions:
+  # swift.md §9 ⑧.
+  - ko: "표시를 붙이면 값이 오래 남는다 — 값이 묶음 <b>바깥</b>에 보관되기 때문입니다."
+    en: "The marker makes the value last — the value is kept <b>outside</b> the bundle."
+  - ko: "표시는 그냥 꾸밈이다 — 저장 자리와 읽기·쓰기 규칙을 통째로 바꿉니다."
+    en: "The marker is decoration — it replaces the storage and the access rules."
+  - ko: "표시 없는 이름도 화면이 다시 그려질 때 살아남는다 — 매번 초깃값으로 돌아갑니다."
+    en: "An unmarked name survives a rebuild — it returns to its starting value each time."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>저장 방식을 정하는 타입 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the type name that settles how it is kept</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 어디에 담기는지는 앞의 표시가 정해요."
+          en: "{{pick.2|code}} is the <b>name</b>. Where it is kept is settled by the marker in front."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 표시냐", en: "The sharpest spot — the name or the marker" }
+          code:
+            - "@State private var n = 0   // 바깥에 남는다"
+            - "private var n = 0          // 매번 0 으로 돌아간다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 표시가 시작된다는 <b>기호</b>입니다. 방식을 정하는 것은 그 뒤의 타입 이름이에요."
+          en: "{{pick.3|code}} is the <b>sign</b> that a marker begins. The manner comes from the type name after it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 기호냐 타입이냐", en: "The sharpest spot — the sign or the type" }
+          code:
+            - "@State var n = 0"
+            - "@Published var n = 0   // 같은 기호, 다른 방식"
+meaning:
+  - q:
+      ko: "화면을 그리는 묶음이 다시 만들어질 때, 표시 없는 이름의 값은 어떻게 될까요?"
+      en: "When a screen bundle is remade, what happens to an unmarked name's value?"
+    options:
+      - t:
+          ko: "초깃값으로 돌아간다 — 묶음이 통째로 새로 만들어졌다"
+          en: "It returns to its starting value — the bundle is brand new"
+      - t:
+          ko: "이전 값이 그대로 남는다"
+          en: "The previous value survives"
+        diag:
+          t:
+            ko: "그건 표시를 붙였을 때의 답입니다. 표시가 없으면 값이 묶음 안에 있고, 묶음이 새로 만들어지면 함께 새로 시작해요."
+            en: "That is the marked case. Without the marker the value lives in the bundle, and a new bundle starts it over."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 안이냐 바깥이냐", en: "The sharpest spot — inside or outside" }
+            code:
+              - "@State var n = 0   // 남는다"
+              - "var n = 0          // 0 으로 돌아간다"
+      - t:
+          ko: "묶음이 다시 만들어지지 않는다"
+          en: "The bundle is not remade at all"
+        diag:
+          t:
+            ko: "다시 만들어집니다. 화면을 그리는 묶음은 값으로 도는 쪽이라 매번 새로 만들어 견주는 것이 이 구조의 전제예요."
+            en: "It is remade. Screen bundles are value types, remade and compared each time by design."
+      - t:
+          ko: "빌드가 멈춘다"
+          en: "The build stops"
+        diag:
+          t:
+            ko: "멈추지 않습니다 — 올바른 코드예요. 값이 조용히 돌아가는 것이 이 자리의 위험입니다."
+            en: "It does not — the code is valid. Quietly resetting is the danger here."
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행의 값은 <b>화면 묶음 바깥에 보관되고 바뀌면 다시 그립니다</b>."
+      en: "Choose what goes in the blank. The value on line {{site.line}} is <b>kept outside the screen bundle and redraws on change</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "State", mono: true }
+      - t: "Binding"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>남의 값을 빌려 쓰는</b> 쪽입니다. 스스로 보관하지 않고 값의 주인이 따로 있어요."
+            en: "That <b>borrows someone else's value</b>. It keeps nothing itself; the owner is elsewhere."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 주인이냐 빌린 것이냐", en: "The sharpest spot — owner or borrower" }
+            code:
+              - "@State private var n = 0"
+              - "@Binding var n: Int"
+      - t: "Environment"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>화면 나무 위쪽에서 내려온 값</b>을 읽는 쪽입니다. 이 줄에서 보관하지도, 초깃값을 적지도 않아요."
+            en: "That reads a value <b>handed down the screen tree</b>. This line neither keeps it nor gives it a start."
+      - t: "Published"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>상자 쪽 묶음 안</b>에서 쓰는 표시입니다. 값으로 도는 화면 묶음이 아니라 관찰되는 상자에 붙어요."
+            en: "That marker lives inside an <b>observable box</b>, not inside a value-type screen bundle."
+why_gate:
+  q:
+    ko: "화면 코드는 왜 <b>값을 묶음 바깥에</b> 두어야 할까요?"
+    en: "Why must screen code keep <b>the value outside the bundle</b>?"
+  choices:
+    - t:
+        ko: "화면을 그리는 묶음이 값으로 돌아 매번 새로 만들어지는데, 안에 둔 값은 그때마다 처음부터 시작하기 때문"
+        en: "Because a screen bundle is a value type remade every time, so anything inside starts over each rebuild"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 바깥에 둔 값이 바뀌면 무엇이 더 일어나는지도 적어 보세요."
+        en: "That is the direction. Say what else happens when the outside value changes, too."
+    - t:
+        ko: "바깥에 두면 메모리를 덜 써서"
+        en: "Because outside uses less memory"
+      ok: false
+      fb:
+        ko: "메모리 문제가 아닙니다. 묶음이 매번 새로 만들어진다는 것이 이유예요."
+        en: "Memory is not it. The bundle being remade every time is."
+    - t:
+        ko: "값으로 도는 묶음에는 이름을 못 넣어서"
+        en: "Because a value bundle cannot hold names"
+      ok: false
+      fb:
+        ko: "넣을 수 있습니다. 넣은 값이 <b>다시 만들어질 때 사라지는</b> 것이 문제예요."
+        en: "It can. The problem is that what is held <b>vanishes on rebuild</b>."
+queries:
+  - { grammars: [swift], file: ./property-wrapper.scm }
+examples:
+  - code: "struct V { @State private var count = 0 }"
+    expect: { sites: 1, form: wrapper, hole: "State", picks: { 1: "State", 2: "count", 3: "@" } }
+  - code: "class M { @Published var items = 0 }"
+    expect: { sites: 1, form: wrapper, hole: "Published", picks: { 1: "Published", 2: "items", 3: "@" } }
+  - code: "struct V { var count = 0 }"
+    expect: none

@@ -1,0 +1,92 @@
+schema: 1
+id: spring/request-dispatch
+universal: null
+name: { ko: "요청 하나가 메서드까지 가는 길", en: "Request dispatch" }
+token: null
+grammars: []
+framework: spring
+# 짚을 노드가 없다 — 배분하는 코드는 프레임워크 안에 있다 (D176). 창은 자바 개념에서 빌린다 (D157 ②).
+track_default: t0
+essential: false
+difficulty: 3
+prereq: [proto/servlet-filter-chain]
+confusions: [spring/controller-mapping]
+queries: []
+dict:
+  one_liner:
+    ko: "들어온 요청을 받아 알맞은 메서드를 찾아 부르는 하나가 있다."
+    en: "One thing takes each request, finds the right method, and calls it."
+  why:
+    ko: >-
+      들어오는 요청은 전부 <b>한 자리를 지납니다</b>. 그 자리가 주소와 방식을 보고 어느 메서드를
+      부를지 고르고, 요청 본문을 그 메서드가 받는 타입으로 바꾸고, 돌려받은 값을 다시 응답 본문으로
+      바꿉니다. 내가 쓴 컨트롤러 메서드는 <b>이 과정의 한가운데</b>에 있어요 — 앞에도 뒤에도
+      내가 안 쓴 코드가 있습니다. 그래서 「내 메서드가 안 불린다」의 답은 대개 메서드 안이 아니라
+      <b>고르는 단계</b>에 있고, 「값이 <code>null</code> 이다」의 답은 <b>바꾸는 단계</b>에 있습니다.
+    en: >-
+      Every incoming request passes <b>one place</b>. That place reads the path and the method,
+      picks which of your methods to call, converts the body into the type that method takes, and
+      converts the returned value back into a response body. Your controller method sits <b>in the
+      middle</b> — there is code you did not write on both sides. So 「my method is not called」
+      usually answers to the <b>picking step</b>, and 「the value is <code>null</code>」 to the
+      <b>converting step</b>.
+  trace: []
+rule:
+  ko: "<b>요청은 컨트롤러로 바로 가지 않는다.</b> 고르는 자리를 먼저 지난다."
+  en: "<b>A request does not go straight to a controller.</b> It passes the picker first."
+ok:
+  ko: >-
+    주소와 방식이 맞는 메서드가 하나 골라집니다. 본문은 그 메서드가 받는 타입으로 바뀌고,
+    돌려준 값은 응답 본문으로 바뀝니다.
+  en: >-
+    One method matching the path and the method is picked. The body becomes the type it takes, and
+    the returned value becomes the response body.
+misconceptions:
+  - ko: "요청이 컨트롤러 메서드로 바로 온다 — 고르고 바꾸는 단계가 앞에 있습니다."
+    en: "A request arrives at the controller method directly — picking and converting come first."
+  - ko: "돌려준 객체가 그대로 나간다 — 응답 본문으로 바꾸는 단계를 한 번 더 지납니다."
+    en: "The returned object goes out as is — one more conversion step happens."
+  - ko: "주소가 겹쳐도 먼저 쓴 것이 이긴다 — 고르지 못하면 뜰 때 멈춥니다."
+    en: "With duplicate paths the first one wins — an ambiguous pick stops the boot."
+  - ko: "메서드가 안 불리면 메서드 안을 봐야 한다 — 대개 고르는 단계의 문제입니다."
+    en: "If the method is not called, look inside it — usually the picking step is the answer."
+evidence: ["DispatcherServlet", "@RestController", "@Controller", "@ResponseBody", "HandlerMapping", "HandlerAdapter"]
+meaning:
+  - q:
+      ko: "요청을 보냈는데 컨트롤러 메서드가 <b>한 번도 안 불립니다.</b> 어디를 보나요?"
+      en: "A request is sent and the controller method is <b>never called</b>. Where do you look?"
+    hint:
+      ko: "메서드에 닿기 전에 지나는 단계가 있습니다."
+      en: "There are steps before the method is reached."
+    options:
+      - t: { ko: "어느 메서드를 부를지 고르는 단계 — 주소와 방식이 맞는지", en: "The step that picks the method — does the path and verb match" }
+      - t: { ko: "메서드 본문의 첫 줄", en: "The first line of the method body" }
+        diag:
+          t:
+            ko: "본문은 <b>불린 다음</b>의 이야기입니다. 한 번도 안 불렸다면 그 앞에서 갈린 것이에요."
+            en: "The body is what happens <b>after</b> the call. If it never ran, the split happened earlier."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 부르기 전이냐 후냐", en: "The sharpest spot — before or after the call" }
+            code:
+              - "안 불림: 고르는 단계"
+              - "불렸는데 이상: 본문"
+      - t: { ko: "돌려주는 타입", en: "The return type" }
+        diag:
+          t:
+            ko: "돌려주는 타입은 <b>나가는 쪽</b>을 정합니다. 들어오는 요청이 이 메서드에 배정되는지와는 다른 축이에요."
+            en: "The return type shapes what <b>goes out</b>. Whether the request is assigned here is a different axis."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 들어오기냐 나가기냐", en: "The sharpest spot — coming in or going out" }
+            code:
+              - "들어오기: 주소와 방식"
+              - "나가기: 돌려주는 타입"
+      - t: { ko: "데이터베이스 연결 설정", en: "The database connection settings" }
+        diag:
+          t:
+            ko: "연결은 메서드가 <b>돈 다음</b>에 쓰입니다. 안 불렸다면 아직 거기까지 가지도 않았어요."
+            en: "The connection is used <b>after</b> the method runs. If it never ran, nothing got that far."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 배정이냐 실행이냐", en: "The sharpest spot — assignment or execution" }
+            code:
+              - "배정: 주소를 본다"
+              - "실행: 그 뒤의 일"

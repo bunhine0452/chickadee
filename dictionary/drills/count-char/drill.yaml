@@ -1,0 +1,18 @@
+# 작은 문제 하나 (D186 ⑧). 지문은 우리가 썼고 케이스의 답은 reference.py 가 낸다.
+schema: 1
+id: count-char
+topic: text
+statement:
+  ko: "첫 줄에 글자 하나, 둘째 줄에 한 줄의 글이 주어집니다. 그 글에 그 글자가 몇 번 나오는지 출력하세요."
+  en: "The first line holds a single character, the second holds a line of text. Print how many times that character appears in the text."
+needs: [common/text-literal, common/iterate, cs/text-encoding]
+langs: [py, ts, java]
+cases:
+  - stdin: "a\nbanana\n"
+    stdout: "3\n"
+  - stdin: "x\nbanana\n"
+    stdout: "0\n"
+  - stdin: "가\n가나가나가\n"
+    stdout: "3\n"
+  - stdin: " \na b c\n"
+    stdout: "2\n"

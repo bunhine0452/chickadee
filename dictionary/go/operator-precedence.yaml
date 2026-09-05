@@ -1,0 +1,274 @@
+schema: 1
+id: go/operator-precedence
+# 0부 축 5 (`go.md` §0.1 0-5). 보편형은 `common/arithmetic` 이다.
+# Go 의 이항 연산자는 **다섯 단**뿐이라(C 는 15단) 표 전체가 평가 트리 한 장에 든다.
+# 다섯 단 중 C·자바·C# 과 어긋나는 자리가 하나 있고, 그것이 이 판의 요점이다.
+universal: common/arithmetic
+name: { ko: "무엇이 먼저 묶이나", en: "Operator precedence" }
+token: "<<"
+grammars: [go]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cs/operator-precedence, go/integer-literal]
+confusions: []
+
+dict:
+  one_liner:
+    ko: >-
+      괄호가 없으면 다섯 단짜리 표가 무엇을 먼저 묶을지 정한다.
+    en: >-
+      Without parentheses, a five-rung table decides what binds first.
+  why:
+    ko: >-
+      {{site.line}}행은 이항 연산자가 둘 이상이라 <b>묶는 차례</b>가 답을 정합니다. Go 의 이항 연산자는 다섯 단이에요 — 위에서부터 곱하기
+      무리(<code>* / % &lt;&lt; &gt;&gt; &amp; &amp;^</code>), 더하기 무리(<code>+ - | ^</code>), 견주기,
+      <code>&amp;&amp;</code>, <code>||</code> 입니다. 자리 옮김이 <b>더하기보다 위</b>라는 것이 C·자바·C# 에서 온 손이 틀리는
+      자리예요: <code>1 &lt;&lt; 2 + 3</code> 은 저 언어들에서 <code>32</code> 인데 Go 에서는 <b>7</b> 입니다.
+      {{pick.1|code}}{{pick.1|josa:이,가}} {{pick.2|code}} 보다 <b>나중에</b> 묶이는 것이 {{site.line}}행이 그렇게 읽히는
+      이유입니다.
+    en: >-
+      Line {{site.line}} has more than one binary operator, so <b>the order of binding</b> decides the
+      answer. Go has five rungs — from the top: the multiplying group (<code>* / % &lt;&lt; &gt;&gt;
+      &amp; &amp;^</code>), the adding group (<code>+ - | ^</code>), comparison,
+      <code>&amp;&amp;</code>, <code>||</code>. Shifting sitting <b>above</b> adding is where a hand
+      trained on C, Java or C# goes astray: <code>1 &lt;&lt; 2 + 3</code> is <code>32</code> there and
+      <b>7</b> in Go. {{pick.1|code}} binding <b>later</b> than {{pick.2|code}} is why line
+      {{site.line}} reads the way it does.
+  trace:
+    - ko: >-
+        {{site.line}}행에는 이항 연산자가 둘 이상이다.
+      en: >-
+        Line {{site.line}} has more than one binary operator.
+    - ko: >-
+        {{pick.2|code}}{{pick.2|josa:이,가}} 먼저 한 값으로 접힌다.
+      en: >-
+        {{pick.2|code}} folds into one value first.
+    - ko: >-
+        그 값과 {{pick.3|code}}{{pick.3|josa:을,를}} {{pick.1|code}}{{pick.1|josa:이,가}} 묶는다.
+      en: >-
+        Then {{pick.1|code}} binds that value with {{pick.3|code}}.
+
+rule:
+  ko: >-
+    <b>자리 옮김이 더하기보다 위다.</b> 다섯 단의 순서가 괄호 없는 식의 모양을 정한다.
+  en: >-
+    <b>Shifting binds tighter than adding.</b> The five rungs decide the shape of an unparenthesised
+    expression.
+result:
+  label: { ko: "{{site.line}}행의 식", en: "the expression on line {{site.line}}" }
+  value: "{{pick.2}} {{pick.1}} {{pick.3}}"
+  note: { ko: "가운데 기호가 가장 나중에 묶는다", en: "the middle symbol binds last" }
+ok: { ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 가장 나중에 묶는 기호입니다.", en: "{{pick.1|code}} is the symbol that binds last." }
+payoff:
+  ko: >-
+    이걸 알면 「C 에서 32 였는데 Go 에서 7 이 나온다」가 풀립니다 — 표가 다릅니다.
+  en: >-
+    This untangles "it was 32 in C and 7 in Go" — the tables differ.
+bridge:
+  ko: >-
+    C 는 15단이라 표를 외우는 것이 과제가 됩니다. Go 는 다섯 줄이라 한 장에 다 들어가고, 그중 한 줄만 다릅니다.
+  en: >-
+    C has fifteen rungs, so memorising the table is the task. Go has five lines that fit on one
+    page, and only one of them differs.
+misconceptions:
+  - ko: >-
+      왼쪽부터 차례로 계산된다 — 차례를 정하는 것은 위치가 아니라 <b>단</b>입니다.
+    en: >-
+      It runs left to right — what sets the order is the <b>rung</b>, not the position.
+  - ko: >-
+      자리 옮김이 더하기보다 아래다 — C·자바·C# 에서는 맞고 Go 에서는 <b>반대</b>입니다.
+    en: >-
+      Shifting binds looser than adding — true in C, Java and C#, and the <b>other way</b> in Go.
+  - ko: >-
+      괄호를 쓰면 값이 바뀐다 — 이미 그렇게 묶이고 있던 것을 눈에 보이게 할 뿐입니다.
+    en: >-
+      Parentheses change the value — they only make visible the binding that was already happening.
+
+point:
+  - q:
+      ko: >-
+        {{site.line}}행에서 <b>가장 나중에 묶는 기호</b>를 짚어 보세요.
+      en: >-
+        On line {{site.line}}, point at <b>the symbol that binds last</b>.
+    hint: { ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다.", en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose." }
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 이미 <b>한 값으로 접힌 쪽</b>입니다. 먼저 묶였다는 뜻이지 나중에 묶는다는 뜻이 아니에요.
+          en: >-
+            {{pick.2|code}} is the side that has <b>already folded into one value</b>. That means it bound
+            first, not last.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 먼저냐 나중이냐", en: "The sharpest spot — first or last" }
+          code:
+            - "1 << 2 + 3       // 7"
+            - "(1 << 2) + 3     // 같은 뜻"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 마지막에 묶이는 <b>재료</b>이지 묶는 기호가 아닙니다.
+          en: >-
+            {{pick.3|code}} is the <b>input</b> bound at the end, not the symbol doing the binding.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 재료냐 기호냐", en: "The sharpest spot — an input or the symbol" }
+          code:
+            - "3                // 재료"
+            - "1 << 2 + 3       // 기호가 둘이다"
+
+meaning:
+  - q:
+      ko: >-
+        Go 에서 <code>1 &lt;&lt; 2 + 3</code> 의 값은 무엇일까요?
+      en: >-
+        In Go, what is the value of <code>1 &lt;&lt; 2 + 3</code>?
+    options:
+      - t:
+          ko: >-
+            7 — 자리 옮김이 더하기보다 위라 <code>(1 &lt;&lt; 2) + 3</code> 으로 묶인다
+          en: >-
+            7 — shifting binds tighter than adding, so it groups as <code>(1 &lt;&lt; 2) + 3</code>
+      - t:
+          ko: >-
+            32 — <code>1 &lt;&lt; (2 + 3)</code> 으로 묶인다
+          en: >-
+            32 — it groups as <code>1 &lt;&lt; (2 + 3)</code>
+        diag:
+          t:
+            ko: >-
+              그건 C·자바·C# 의 표입니다. 그 셋에서는 자리 옮김이 더하기보다 <b>아래</b>라 그렇게 묶여요.
+            en: >-
+              That is the C, Java and C# table. In those three, shifting binds <b>looser</b> than adding, so
+              it groups that way.
+      - t:
+          ko: >-
+            정해져 있지 않다 — 컴파일러가 고른다
+          en: >-
+            It is unspecified — the compiler picks
+        diag:
+          t:
+            ko: >-
+              명세가 다섯 단을 못 박아 두어서 컴파일러가 고를 여지가 없습니다.
+            en: >-
+              The specification pins the five rungs, so the compiler has nothing to pick.
+      - t:
+          ko: >-
+            멈춘다 — 괄호가 없어서
+          en: >-
+            It stops — there are no parentheses
+        diag:
+          t:
+            ko: >-
+              괄호는 필수가 아닙니다. 없으면 표가 대신 묶어 주고, 그 표가 이 판의 내용이에요.
+            en: >-
+              Parentheses are not required. Without them the table binds instead, and that table is this
+              plate.
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행에서 <b>가장 나중에 묶는</b> 기호입니다.
+      en: >-
+        Choose what goes in the blank. It is the symbol on line {{site.line}} that <b>binds last</b>.
+    hint: { ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다.", en: "Your choice is written into the code at once. Submit to have it marked." }
+    options:
+      - { t: "+", mono: true }
+      - t: "*"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이건 곱하기 무리라 <b>가장 위 단</b>입니다. 여기 놓으면 왼쪽이 먼저 묶인 것이 아니라 이 기호가 먼저 묶게 돼요.
+            en: >-
+              That is in the multiplying group, the <b>top rung</b>. Put it here and this symbol binds first
+              instead of the left side.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 어느 단인가", en: "The sharpest spot — which rung" }
+            code:
+              - "1 << 2 + 3     // (1<<2) + 3"
+              - "1 << 2 * 3     // 1 << (2*3)"
+      - t: "&&"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이건 <b>넷째 단</b>이고 양쪽에 참·거짓 값을 요구합니다. 수 옆에 놓으면 그 줄에서 멈춰요.
+            en: >-
+              That is the <b>fourth rung</b> and it wants truth values on both sides. Next to a number it
+              stops on that line.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 수냐 참·거짓이냐", en: "The sharpest spot — numbers or truth values" }
+            code:
+              - "1 << 2 + 3        // 수"
+              - "ok && ready       // 참·거짓"
+      - t: "=="
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이건 <b>셋째 단</b>이고 값을 만드는 것이 아니라 참·거짓을 냅니다. 여기 놓으면 식의 종류가 바뀌어요.
+            en: >-
+              That is the <b>third rung</b>, and it makes a truth value rather than a number. Put it here and
+              the kind of the expression changes.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값을 만드나 견주나", en: "The sharpest spot — making a value or weighing one" }
+            code:
+              - "1 << 2 + 3     // 7"
+              - "1 << 2 == 4    // true"
+
+why_gate:
+  q:
+    ko: >-
+      {{site.line}}행은 왜 괄호 없이도 읽히는 걸까요?
+    en: >-
+      Why can line {{site.line}} be read without parentheses?
+  choices:
+    - t:
+        ko: >-
+          연산자마다 단이 정해져 있어 어느 쪽이 먼저 묶이는지가 코드 밖에서 이미 정해져 있기 때문
+        en: >-
+          Because each operator sits on a fixed rung, so which side binds first is settled outside the
+          code
+      ok: true
+      fb:
+        ko: >-
+          그 방향입니다. 그럼 그 단이 언어마다 다를 때 무엇이 위험한지도 적어 보세요.
+        en: >-
+          That is the direction. Add what goes astray when those rungs differ between languages.
+    - t:
+        ko: >-
+          Go 가 왼쪽부터 차례로 계산해서
+        en: >-
+          Because Go computes left to right
+      ok: false
+      fb:
+        ko: >-
+          왼쪽부터가 아닙니다. 위치가 아니라 단이 차례를 정해요 — 오른쪽 기호가 먼저 묶는 식이 흔합니다.
+        en: >-
+          It is not left to right. The rung sets the order, not the position — the right-hand symbol
+          binding first is common.
+    - t:
+        ko: >-
+          괄호가 없으면 컴파일러가 알아서 안전한 쪽을 골라서
+        en: >-
+          Because with no parentheses the compiler picks the safe reading
+      ok: false
+      fb:
+        ko: >-
+          고르지 않습니다. 명세의 표대로 하나로 정해지고, 그 하나가 사람의 기대와 다를 수 있어요.
+        en: >-
+          It picks nothing. The table in the specification settles on one reading, and that one can differ
+          from what a person expects.
+
+queries:
+  - { grammars: [go], file: ./operator-precedence.scm }
+
+examples:
+  - code: "func f() { n := 1 << 2 + 3 }"
+    expect: { sites: 1, form: left, hole: "+", picks: { 1: "+", 2: "1 << 2", 3: "3" } }
+  - code: "func f() { n := 1 + 2 * 3 }"
+    expect: { sites: 1, form: right, hole: "+", picks: { 1: "+", 2: "1", 3: "2 * 3" } }
+  - code: "func f() { n := 1 + 2 }"
+    expect: none

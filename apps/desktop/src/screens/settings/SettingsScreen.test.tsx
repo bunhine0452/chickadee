@@ -141,7 +141,10 @@ describe('SettingsScreen', () => {
   it('홈으로 돌아간다', async () => {
     const user = userEvent.setup();
     const onBack = await drawn();
-    await user.click(screen.getByRole('button', { name: '홈으로' }));
+    // 위·아래 둘 다 「홈으로」다 (D170 ⑧) — 어느 쪽을 눌러도 같은 문이다.
+    const backs = screen.getAllByRole('button', { name: '홈으로' });
+    expect(backs).toHaveLength(2);
+    await user.click(backs[1] as HTMLElement);
     expect(onBack).toHaveBeenCalledTimes(1);
   });
 
@@ -174,6 +177,19 @@ describe('SettingsScreen', () => {
     expect(row).toBeUndefined();
   });
 
+  // D147 — `home.newcomerBody` 가 이 자리를 실명으로 가리킨다. 없으면 그 문구가 거짓말이다.
+  it('「프로그래밍이 처음」을 여기서 되돌릴 수 있다 — 첫 실행에서 물은 것을 잠그지 않는다', async () => {
+    const user = userEvent.setup();
+    await drawn();
+    await user.click(screen.getByRole('switch', { name: /프로그래밍이 처음인지 고르기/ }));
+
+    await waitFor(() => {
+      const row = db.prepare("SELECT value_json FROM settings WHERE key = 'declared_newcomer'")
+        .get() as { value_json: string } | undefined;
+      expect(row?.value_json).toBe('true');
+    });
+  });
+
   it('모션 감축도 <html> 을 세우고 저장한다 — 네 칸이 재실행에 남는다 (D122 · E7)', async () => {
     const user = userEvent.setup();
     await drawn();
@@ -187,6 +203,27 @@ describe('SettingsScreen', () => {
     });
   });
 
+  it('편집 보조는 「단계에 맞춰」로 서고, 끄면 settings 테이블에 내려간다 (D143)', async () => {
+    const user = userEvent.setup();
+    await drawn();
+    const sw = screen.getByRole('switch', { name: '편집 보조' });
+    // 기본값은 매트릭스 그대로 — 스위치를 만든다고 기본을 끄로 내리지 않는다.
+    expect(db.prepare("SELECT value_json FROM settings WHERE key = 'editor_assist'").get())
+      .toBeUndefined();
+
+    await user.click(sw);
+    await waitFor(() => {
+      const row = db.prepare("SELECT value_json FROM settings WHERE key = 'editor_assist'").get() as
+        { value_json: string } | undefined;
+      expect(row?.value_json).toBe('"off"');
+    });
+  });
+
+  it('무엇을 잃는지 적는다 — 같은 85%가 다른 조건에서 나온 값이 된다', async () => {
+    await drawn();
+    expect(screen.getByText(/같은 85%가 서로 다른 조건에서 나온 값/)).toBeTruthy();
+  });
+
   it('설정을 못 읽어도 화면은 기본값으로 뜬다 (01 §6)', async () => {
     // 한 조회만 넘어뜨린다. 화면이 통째로 빈 채 서는 것이 아니라 읽힌 것만 보여야 한다.
     failQuery = 'settings.get_all';
@@ -198,13 +235,18 @@ describe('SettingsScreen', () => {
       .toBe('15');
   });
 
-  it('모양 스위치가 <html> 을 세우고 저장한다 (E7)', async () => {
+  it('밝기는 라디오 셋이고 고른 것이 <html> 을 세우고 저장한다 (E7 · D187 ⑫)', async () => {
     const user = userEvent.setup();
     await drawn();
-    await user.click(screen.getByRole('switch', { name: '주간반 · 야간반 전환' }));
+    // 기본은 「시스템 따름」이다 — 한 번도 안 고른 사람이 방의 밝기를 따른다.
+    expect(screen.getByRole('radio', { name: '시스템 따름' }).getAttribute('aria-checked')).toBe('true');
+    await user.click(screen.getByRole('radio', { name: '어둡게' }));
 
     expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
     await waitFor(() => {
+      const mode = db.prepare("SELECT value_json FROM settings WHERE key = 'theme_mode'").get() as
+        { value_json: string } | undefined;
+      expect(mode?.value_json).toBe('"dark"');
       const row = db.prepare("SELECT value_json FROM settings WHERE key = 'theme'").get() as
         { value_json: string } | undefined;
       expect(row?.value_json).toBe('"dark"');
@@ -294,7 +336,7 @@ describe('SettingsScreen', () => {
     const sec = screen.getByRole('region', { name: /프라이버시 노트/ });
     const text = sec.textContent ?? '';
     expect(text).toContain('당신의 코드는 이 컴퓨터를 떠나지 않습니다.');
-    expect(text).toContain('이 판은 인터넷을 아예 쓰지 않습니다');
+    expect(text).toContain('이 버전은 인터넷을 아예 쓰지 않습니다');
     expect(text).toContain('앱이 스스로 보내지 않습니다.');
     expect(text).toContain('사용 통계·오류 보고를 보내지 않고, 업데이트도 확인하지 않습니다.');
     expect(text).toContain('「설정 → 전부 지우기」로 모든 기록을 삭제할 수 있습니다.');

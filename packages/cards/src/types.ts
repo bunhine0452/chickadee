@@ -22,6 +22,12 @@ export interface FocusLine {
   t: string;
 }
 
+/** 줄 범위 하나. 1-based, 양끝 포함 — 02 `block.line_start`·`line_end` 와 같은 규약이다. */
+export interface LineWindow {
+  from: number;
+  to: number;
+}
+
 /** 같은 개념의 다른 사용처 — `payload.uses` 와 `{{other.*}}` 의 재료 (04 §2.4 3단). */
 export interface OtherUse {
   siteId: number;
@@ -35,8 +41,16 @@ export interface SiteInput {
   site: ConceptSite;
   /** 리포 상대 posix 경로. `file` 테이블의 `path` 다. */
   path: string;
-  /** 초점 ±4, ≤ 9줄. `payload.lines`(±2)와 `payload.promptLines`(±4)가 여기서 나온다. */
+  /**
+   * 부르는 쪽이 읽어 온 줄. **`block` ∪ 초점 ±4** 를 담아야 한다 — `payload.lines` 는
+   * 창(블록)에서, `payload.promptLines` 는 초점 ±4 에서 각각 잘려 나간다 (D141 · D8).
+   */
   lines: readonly FocusLine[];
+  /**
+   * 초점을 감싸는 최소 의미 단위 (02 `block`). 창이 이 범위다 — 없으면 초점 ±2 로 떨어진다
+   * (D141). 40줄을 넘으면 `windowOf` 가 초점을 가운데 두고 자른다.
+   */
+  block?: LineWindow | undefined;
   /** 같은 줄에 걸친 다른 개념의 사용처. 혼동 쌍의 토큰이 지목형 오답이 된다 (04 §1.1). */
   lineSites?: readonly ConceptSite[];
   /** 같은 개념의 다른 사용처. 첫 항목이 `{{other.*}}` 가 된다. */

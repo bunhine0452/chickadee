@@ -1,0 +1,54 @@
+[
+  {
+    "queryId": "py/reference-binding",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "site",
+    "form": "alias-part",
+    "startLine": 2,
+    "startCol": 4,
+    "endLine": 2,
+    "endCol": 25,
+    "nodeKind": "assignment",
+    "inError": false
+  },
+  {
+    "queryId": "py/reference-binding",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.2",
+    "form": "alias-part",
+    "startLine": 2,
+    "startCol": 4,
+    "endLine": 2,
+    "endCol": 11,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "py/reference-binding",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.1",
+    "form": "alias-part",
+    "startLine": 2,
+    "startCol": 12,
+    "endLine": 2,
+    "endCol": 13,
+    "nodeKind": "=",
+    "inError": false
+  },
+  {
+    "queryId": "py/reference-binding",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.3",
+    "form": "alias-part",
+    "startLine": 2,
+    "startCol": 14,
+    "endLine": 2,
+    "endCol": 25,
+    "nodeKind": "attribute",
+    "inError": false
+  }
+]

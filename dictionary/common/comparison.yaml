@@ -1,0 +1,34 @@
+schema: 1
+id: common/comparison
+universal: null
+name: { ko: 두 값 견주기, en: Comparison }
+token: null
+grammars: []
+essential: false
+difficulty: 1
+prereq: [common/boolean-value]
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "값 둘을 견주어 참·거짓 하나를 내놓는다. 값을 바꾸지는 않는다."
+    en: "Weighs two values and yields one true-or-false. It changes neither of them."
+  why:
+    ko: >-
+      갈림길에 필요한 것은 참·거짓 하나인데, 손에 있는 것은 대개 숫자나 글자입니다. 견주기가
+      그 사이를 잇습니다 — <b>값 둘이 들어가고 참·거짓 하나가 나옵니다.</b>
+    en: >-
+      A fork needs one true-or-false, but what you hold is usually a number or some text. Comparing
+      bridges the two — <b>two values go in, one true-or-false comes out.</b>
+  trace: []
+rule:
+  ko: "값 둘이 들어가고 참·거짓 하나가 나온다. 양쪽 값은 그대로 남는다."
+  en: "Two values in, one true-or-false out. Both values are left as they were."
+ok:
+  ko: "견준 결과가 조건 자리로 넘어가 갈림을 정합니다."
+  en: "The result of the weighing goes to the condition and decides the fork."
+misconceptions:
+  - ko: "견주면 값이 바뀐다 — 아니요. 새 값 하나가 생길 뿐 양쪽은 그대로입니다."
+    en: "Comparing changes the values — no. A new value appears; both sides stay."
+  - ko: "대입과 같은 기호다 — 다릅니다. 하나는 넣는 일, 하나는 견주는 일입니다."
+    en: "It is the same symbol as assignment — no. One puts a value in, one weighs two."

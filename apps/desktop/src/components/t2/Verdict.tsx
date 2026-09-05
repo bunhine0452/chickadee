@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 import { t } from '@chickadee/i18n';
-import { Misreg, RichText } from '@chickadee/ui';
+import { RichText } from '@chickadee/ui';
 
 import './Verdict.css';
 
@@ -26,8 +26,7 @@ export function verdictTitle(pct: number): string {
 /**
  * `.verdict` + `.meter` — 채점 결과의 머리 (05 §5).
  *
- * 큰 숫자는 `Misreg`(`.big.mr`) 를 지난다 — 목업 `resultHTML()` 의 어긋남 효과이고, 유령 판은
- * `::before` 의 `content` 라 접근성 트리에 아예 없다(글자가 두 번 읽히지 않는다).
+ * 큰 숫자는 그냥 숫자다 — 판 어긋남 효과는 D182 로 없앴다.
  *
  * 막대는 `role="img"` 다. 두 칸의 길이 비가 곧 정보라서 장식이 아니고, 그렇다고 눈금을 읽는
  * 물건도 아니다 — 바로 위 문장이 같은 수를 이미 낱말로 낸다 (05 §9).
@@ -35,7 +34,7 @@ export function verdictTitle(pct: number): string {
 export function Verdict({ pct, core, found, missed, wrong, bonus }: VerdictProps) {
   return (
     <div className="verdict">
-      <Misreg as="div" className="big" text={`${pct}%`} />
+      <div className="big">{`${pct}%`}</div>
       <div>
         <h4>{verdictTitle(pct)}</h4>
         <RichText

@@ -1,0 +1,88 @@
+schema: 1
+id: cs/immutability
+universal: null
+name: { ko: "안 바꾸고 새로 만들기", en: "Immutability" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+track_default: t0
+essential: false
+difficulty: 2
+prereq: [cs/aliasing]
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "고치는 대신 새로 만든다. 공유가 놀랄 일이 되는 것을 원천에서 없앤다."
+    en: "Make a new one instead of editing. Sharing stops being a surprise."
+  why:
+    ko: >-
+      같은 값을 여럿이 들고 있어도, <b>아무도 안 고치면</b> 놀랄 일이 없습니다.
+      그래서 고치는 대신 <b>고친 결과를 새로 만들어</b> 돌려주는 방식이 나왔어요.
+      원본을 든 쪽은 그대로 원본을 보고, 새 결과를 원하는 쪽만 새 것을 받습니다.
+      값이 <b>만들어진 뒤로 안 변한다</b>는 것을 믿을 수 있으면, 「지금 이 값이 뭐지」를
+      되짚을 일이 사라집니다. 대가는 새로 만드는 비용이고, 대개 되짚는 비용보다 쌉니다.
+    en: >-
+      Many holders of one value are harmless if <b>nobody writes</b>. Hence the style of returning
+      <b>a new value with the change applied</b> instead of editing in place. Holders of the
+      original keep seeing the original; only those who asked get the new one. Once you can trust
+      that a value <b>never changes after it is made</b>, retracing “what is this value now”
+      disappears. The price is the cost of making new ones, usually cheaper than the retracing.
+  trace: []
+rule:
+  ko: "<b>안 변하는 값은 되짚을 시점이 없다.</b> 만들어진 그때가 전부다."
+  en: "<b>An unchanging value has no moments to retrace.</b> Its making is its whole story."
+ok:
+  ko: >-
+    고친 결과가 필요하면 새 값을 받아 그것을 씁니다. 원본은 원본대로 남아 있고,
+    받은 쪽이 새 값을 안 쓰면 아무 일도 안 일어납니다.
+  en: >-
+    Need the change? Take the new value and use it. The original stays as it was, and if the
+    caller ignores the new one, nothing happened.
+misconceptions:
+  - ko: "새로 만들면 언제나 느리다 — 안 바뀌는 부분은 공유할 수 있어 대개 전부를 복사하지 않습니다."
+    en: "Making new is always slow — unchanged parts can be shared, so it is rarely a full copy."
+  - ko: "이름을 못 바꾸게 하면 값도 안 바뀐다 — 이름을 묶는 것과 안의 값을 묶는 것은 다릅니다."
+    en: "Freezing the name freezes the value — binding a name is not freezing what it holds."
+  - ko: "전부 안 바꾸게 해야 효과가 있다 — 자주 공유되는 값 몇 개만 바꿔도 효과가 큽니다."
+    en: "It only works if everything is immutable — the heavily shared few give most of the benefit."
+meaning:
+  - q:
+      ko: "같은 목록을 다섯 곳이 들고 있는데 아무도 안 놀랍니다. <b>무엇이 그것을 보장하나요?</b>"
+      en: "Five places hold the same list and nobody is surprised. <b>What guarantees that?</b>"
+    hint:
+      ko: "공유 자체는 그대로입니다. 그런데 왜 아무 일도 안 날까요."
+      en: "The sharing is still there. So why is nothing happening?"
+    options:
+      - t: { ko: "그 목록을 아무도 고치지 않고, 고칠 때는 새로 만든다", en: "Nobody edits it; changes make a new one" }
+      - t: { ko: "다섯 곳이 사실은 각자 복사본을 들고 있다", en: "The five actually hold their own copies" }
+        diag:
+          t:
+            ko: "복사본이면 공유가 아닙니다. 지금 묻는 것은 <b>공유한 채로</b> 안전한 경우예요."
+            en: "Copies are not sharing. The question is safety <b>while sharing</b>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 안 나누나 안 고치나", en: "The sharpest spot — not shared or not written" }
+            code:
+              - "복사: 공유를 없앤다"
+              - "안 고치기: 공유를 남긴 채 안전하다"
+      - t: { ko: "언어가 목록을 잠가 두었다", en: "The language locked the list" }
+        diag:
+          t:
+            ko: "언어가 도와주는 경우도 있지만 <b>규율만으로도</b> 됩니다. 잠금 장치 없이도 안 고치면 같은 결과예요."
+            en: "Some languages help, but <b>discipline alone</b> works. Without any lock, not writing gives the same result."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 장치냐 규율이냐", en: "The sharpest spot — mechanism or discipline" }
+            code:
+              - "장치: 어기면 막아 준다"
+              - "규율: 안 어기면 같은 결과"
+      - t: { ko: "다섯 곳이 읽기만 하고 쓸 일이 없어서", en: "The five only read and never write" }
+        diag:
+          t:
+            ko: "지금은 맞지만 <b>내일 하나가 쓰기 시작하면</b> 무너집니다. 새로 만드는 방식은 그때도 안 무너져요."
+            en: "True today, and it breaks <b>the day one of them writes</b>. Making new values holds even then."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 오늘의 사실이냐 성질이냐", en: "The sharpest spot — today's fact or a property" }
+            code:
+              - "안 쓴다: 지금의 사실"
+              - "새로 만든다: 계속 성립하는 성질"

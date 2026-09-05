@@ -1,0 +1,165 @@
+schema: 1
+id: csharp/record
+universal: common/copy-with-changes
+name: { ko: 값으로 견주는 타입, en: Record }
+token: "record"
+grammars: [c_sharp]
+framework: null
+essential: true
+difficulty: 3
+prereq: [csharp/property, csharp/value-vs-reference, csharp/equality]
+confusions: []
+dict:
+  one_liner:
+    ko: "참조형인데 견주기와 복사가 내용을 따라간다."
+    en: "A reference type whose comparison and copying follow the content instead."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 상자를 만들면서 <b>같음의 뜻을 바꿉니다.</b>
+      같은 것을 <code>class</code>로 적었다면 견주기가 「같은 객체인가」를 물었을 텐데,
+      여기서는 <b>내용</b>을 묻습니다. 실측 내용이 같은 두 값이 참으로 나와요. 그리고
+      <code>with</code>가 한 벌 더 붙습니다 — 원본을 안 건드리고 <b>몇 칸만 바꾼 새 값</b>을
+      만드는 표기입니다. DTO 가 한 줄인 것이 이 둘 덕입니다.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} makes a box and <b>redefines sameness</b>. Written
+      as a <code>class</code> the comparison would ask "same object"; here it asks about
+      <b>content</b>. Measured, two values with equal content compare true. A second piece
+      comes with it: <code>with</code>, which makes a <b>new value with a few slots changed</b>
+      and leaves the original alone. Those two are why a DTO fits on one line.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}}{{pick.2|josa:을,를}} 내용으로 견주는 타입으로 세운다."
+      en: "Line {{site.line}} sets {{pick.2|code}} up as a type compared by content."
+    - ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 그 내용의 목록이 된다."
+      en: "{{pick.3|code}} becomes the list of that content."
+    - ko: "그 목록이 같으면 두 값은 같다고 나온다."
+      en: "When that list matches, the two values compare equal."
+rule:
+  ko: "<b>이 낱말이 같음의 뜻을 내용으로 바꾼다.</b> 복사는 여전히 참조형 규칙을 따른다."
+  en: "<b>This word moves sameness to content.</b> Copying still follows the reference rule."
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 이제 내용이 같으면 같다고 나오는 타입입니다."
+  en: "{{pick.2|code}} now compares equal whenever the content matches."
+payoff:
+  ko: "이걸 알면 「같은 값인데 왜 여기서는 같다고 나오지」가 풀립니다 — 선언이 다릅니다."
+  en: "This untangles “why does this one compare equal” — the declaration differs."
+bridge:
+  ko: >-
+    자바 16 의 <code>record</code>가 같은 자리이고 견주기도 같습니다. 다른 것은
+    <code>with</code>가 <b>C# 쪽에만</b> 있다는 것이에요.
+  en: >-
+    Java 16's <code>record</code> occupies the same spot with the same comparison. What differs
+    is that <code>with</code> exists <b>only in C#</b>.
+misconceptions:
+  # 출처 — `csharp.md` §3 ㉔ · §9 ⑤.
+  - ko: "값형이다 — 기본은 참조형입니다. 값형으로 만들려면 <code>record struct</code>라고 적어야 합니다."
+    en: "It is a value type — by default it is a reference type. <code>record struct</code> makes it a value type."
+  - ko: "못 바꾸는 타입이다 — 위치 인자 쪽만 기본이 그렇고, 몸통에 쓰기 가능한 프로퍼티를 둘 수 있습니다."
+    en: "It is immutable — only the positional form is by default; a writable property can sit in the body."
+  - ko: "<code>with</code>가 원본을 고친다 — 원본은 그대로 두고 새 값을 냅니다."
+    en: "<code>with</code> edits the original — it leaves it alone and yields a new value."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>같음의 뜻을 내용으로 바꾸는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that moves sameness to content</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 이름은 견주기 규칙을 안 바꿔요."
+          en: "{{pick.2|code}} is the <b>name</b>. A name does not move the comparison rule."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 선언 낱말이냐", en: "The sharpest spot — the name or the declaring word" }
+          code:
+            - "class  Money(decimal V);   // False"
+            - "record Money(decimal V);   // True"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 견줄 <b>내용의 목록</b>입니다. 목록이 견주기를 하는 것이 아니라 앞 낱말이 그렇게 정합니다."
+          en: "{{pick.3|code}} is the <b>list of content</b> to compare. The list does not compare; the word in front says it should."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 목록이냐 선언이냐", en: "The sharpest spot — the list or the declaration" }
+          code:
+            - "class  M(int A, int B);   // 목록은 같다"
+            - "record M(int A, int B);   // 견주기가 다르다"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>내용이 같으면 같다</b>고 보는 타입을 만듭니다."
+      en: "Choose what goes in the blank. Line {{site.line}} makes a type that is <b>equal when its content is</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "record", mono: true }
+      - t: "class"
+        mono: true
+        diag:
+          t:
+            ko: "이건 견주기가 <b>같은 객체인가</b>를 묻습니다. 내용이 같아도 따로 만든 둘은 다르다고 나와요."
+            en: "That compares by <b>identity</b>. Two separately made values with equal content come out different."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 내용이냐 객체냐", en: "The sharpest spot — content or identity" }
+            code:
+              - "record M(int V);   // new M(1) == new M(1) 은 True"
+              - "class  M(int V);   // False"
+      - t: "struct"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>값형</b>이라 복사가 통째로 일어납니다. 견주기는 되지만 <code>with</code>가 안 붙어요."
+            en: "That is a <b>value type</b> and copies whole. Comparison works, but <code>with</code> does not come with it."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 복사냐 견주기냐", en: "The sharpest spot — copying or comparing" }
+            code:
+              - "record M(int V);   // with 가 된다"
+              - "struct M { int V; }"
+      - t: "interface"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>약속</b>이라 값을 담지 않습니다. 견줄 내용이 없어요."
+            en: "That is a <b>promise</b> and holds no value, so there is no content to compare."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 담나 약속하나", en: "The sharpest spot — holding or promising" }
+            code:
+              - "record M(int V);"
+              - "interface IM { int V { get; } }"
+why_gate:
+  q:
+    ko: "이 언어는 왜 <b>같음의 뜻이 다른</b> 상자를 따로 두었을까요?"
+    en: "Why is there a separate box whose <b>sameness means something else</b>?"
+  choices:
+    - t:
+        ko: "데이터를 나르는 값에는 「같은 객체인가」보다 「같은 내용인가」가 맞는 물음이라서"
+        en: "Because for data being carried, “same content” is the right question, not “same object”"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그럼 반대로 「같은 객체인가」가 맞는 자리도 하나 적어 보세요."
+        en: "That is the direction. Add one place where “same object” is the right question."
+    - t:
+        ko: "짧게 적으려고"
+        en: "To write less"
+      ok: false
+      fb:
+        ko: "짧아지는 것은 결과입니다. 바뀌는 것은 <b>견주기의 뜻</b>이에요."
+        en: "Brevity is a side effect. What changes is <b>what equality means</b>."
+    - t:
+        ko: "값형을 만들려고"
+        en: "To make a value type"
+      ok: false
+      fb:
+        ko: "기본은 참조형입니다. 값형으로 만들려면 낱말을 하나 더 적어야 해요."
+        en: "It is a reference type by default; making it a value type takes one more word."
+queries:
+  - { grammars: [c_sharp], file: ./record.scm }
+examples:
+  - code: "record Item(int Id, string Name);"
+    expect: { sites: 1, form: positional, hole: "record", picks: { 1: "record", 2: "Item", 3: "(int Id, string Name)" } }
+  - code: "record Money { public decimal Amount; }"
+    expect: { sites: 1, form: body, hole: "record", picks: { 1: "record", 2: "Money", 3: "{ public decimal Amount; }" } }
+  - code: "class A { void F() { var b = a with { Id = 2 }; } }"
+    expect: { sites: 1, form: with, picks: { 1: "with", 2: "a", 3: "Id = 2" } }
+  - code: "class Item { }"
+    expect: none

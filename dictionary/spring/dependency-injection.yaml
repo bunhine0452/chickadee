@@ -1,0 +1,95 @@
+schema: 1
+id: spring/dependency-injection
+universal: null
+name: { ko: "필요한 것을 밖에서 받기", en: "Dependency injection" }
+token: null
+grammars: []
+framework: spring
+# 짚을 노드가 없다 — 주입은 실행할 때 일어난다 (D176). 창은 자바 개념에서 빌린다 (D157 ②).
+track_default: t0
+essential: false
+difficulty: 2
+prereq: []
+confusions: [spring/bean-and-container]
+queries: []
+dict:
+  one_liner:
+    ko: "쓸 객체를 내가 만들지 않고 밖에서 받는다."
+    en: "You do not build what you use. It is handed to you."
+  why:
+    ko: >-
+      어떤 클래스가 다른 클래스를 쓰려면 그 객체가 있어야 합니다. 직접 <code>new</code> 로 만들면
+      <b>무엇을 쓸지 그 자리에서 정해집니다</b> — 나중에 다른 것으로 바꾸려면 그 줄을 고쳐야 하고,
+      시험할 때 가짜로 바꿔 끼울 수도 없어요. 그래서 만들지 않고 <b>받습니다</b>. 필드를
+      <code>final</code> 로 두고 생성자로 받으면, 무엇을 넣을지는 이 클래스 밖에서 정해집니다.
+      스프링에서 그 밖은 컨테이너이고, 컨테이너가 알맞은 객체를 찾아 생성자에 넣어 줍니다.
+      그래서 스프링 코드에는 <code>new</code> 가 드뭅니다.
+    en: >-
+      A class that uses another class needs that object. Building it with <code>new</code> means
+      <b>the choice is made right there</b> — swapping it later means editing that line, and a test
+      cannot put a stand-in in its place. So it is not built but <b>received</b>. Keep the field
+      <code>final</code> and take it in the constructor, and what goes in is decided outside this
+      class. In Spring that outside is the container, which finds a matching object and passes it
+      to the constructor. That is why Spring code rarely says <code>new</code>.
+  trace: []
+rule:
+  ko: "<b>만드는 자리와 쓰는 자리를 가른다.</b> 쓰는 쪽은 무엇이 들어올지 안 정한다."
+  en: "<b>Building and using are separated.</b> The user does not choose what arrives."
+ok:
+  ko: >-
+    생성자가 요구하는 타입을 컨테이너가 찾아 넣습니다. 필드가 <code>final</code> 이라
+    한 번 들어온 뒤에는 바뀌지 않습니다.
+  en: >-
+    The container finds the type the constructor asks for and passes it in. The field is
+    <code>final</code>, so once set it does not change.
+misconceptions:
+  - ko: "롬복이 객체를 만든다 — 롬복은 <b>생성자만</b> 만듭니다. 넣는 것은 스프링입니다."
+    en: "Lombok builds the object — Lombok makes only the <b>constructor</b>. Spring passes the value."
+  - ko: "주입받은 것은 매번 새 객체다 — 기본은 하나를 여럿이 나눠 씁니다."
+    en: "An injected object is new each time — by default one object is shared."
+  - ko: "<code>new</code> 를 쓰면 안 된다 — 값 객체는 <code>new</code> 로 만드는 것이 맞습니다."
+    en: "You must never use <code>new</code> — value objects are built with <code>new</code>."
+  - ko: "생성자가 없으니 못 만든다 — 롬복이 컴파일할 때 만들어 넣습니다."
+    en: "No constructor means it cannot be built — Lombok adds one at compile time."
+# `@AllArgsConstructor` 는 안 넣는다 — 표본 리포에서 44파일이 걸리는데 전부 DTO 이고
+# 롬복이 만든 값 객체의 생성자다. 주입이 아니라 값 만들기라 넓히면 챕터가 동점이 된다 (D166).
+evidence: ["@RequiredArgsConstructor", "@Autowired", "@Inject", "@Qualifier", "ObjectProvider"]
+meaning:
+  - q:
+      ko: "이 클래스에는 <code>new</code> 가 없는데 필드가 채워집니다. <b>누가 채우나요?</b>"
+      en: "This class has no <code>new</code>, yet the field is filled. <b>Who fills it?</b>"
+    hint:
+      ko: "생성자가 무엇을 요구하는지 보고, 그것을 넣어 주는 쪽을 찾으세요."
+      en: "Look at what the constructor asks for, then find who supplies it."
+    options:
+      - t: { ko: "스프링 컨테이너가 생성자로 넣어 준다", en: "The Spring container passes it to the constructor" }
+      - t: { ko: "자바가 필드 타입을 보고 자동으로 만든다", en: "Java sees the field type and makes it automatically" }
+        diag:
+          t:
+            ko: "자바는 타입만으로 객체를 만들지 않습니다. 누군가 <b>부르는 코드</b>가 있어야 하고, 여기서는 스프링이 그 코드예요."
+            en: "Java never makes an object from a type alone. Some <b>code has to call</b>, and here Spring is that code."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 언어냐 컨테이너냐", en: "The sharpest spot — the language or the container" }
+            code:
+              - "자바: 부르지 않으면 안 생긴다"
+              - "스프링: 시작할 때 부른다"
+      - t: { ko: "롬복이 객체까지 만들어 넣는다", en: "Lombok makes the object and puts it in" }
+        diag:
+          t:
+            ko: "롬복이 만드는 것은 <b>생성자 하나</b>입니다. 그 생성자에 무엇을 넣을지는 정하지 않아요."
+            en: "Lombok makes <b>one constructor</b>. It does not decide what goes into it."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 생성자냐 값이냐", en: "The sharpest spot — the constructor or the value" }
+            code:
+              - "롬복: 생성자를 만든다"
+              - "스프링: 그 생성자를 부른다"
+      - t: { ko: "필드가 <code>final</code> 이라 기본값이 들어간다", en: "The field is <code>final</code>, so a default goes in" }
+        diag:
+          t:
+            ko: "<code>final</code> 은 <b>한 번만 정한다</b>는 표시입니다. 무엇을 넣을지는 안 정하고, 안 넣으면 컴파일이 안 됩니다."
+            en: "<code>final</code> means <b>set once</b>. It does not choose a value, and leaving it unset does not compile."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 횟수냐 값이냐", en: "The sharpest spot — how often or what" }
+            code:
+              - "final: 한 번만 정한다"
+              - "값: 생성자가 받는다"

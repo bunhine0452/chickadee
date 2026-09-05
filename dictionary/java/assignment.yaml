@@ -1,0 +1,166 @@
+schema: 1
+id: java/assignment
+universal: common/reassignment
+name: { ko: 이름에 값 다시 넣기, en: Assignment }
+token: "="
+grammars: [java]
+framework: null
+essential: true
+difficulty: 1
+# 0부 축 G (java.md §1.5.1).
+prereq: [cs/state]
+confusions: []
+dict:
+  one_liner:
+    ko: "이미 있는 이름에 값을 다시 넣는다. 넣는 일 자체가 값을 낸다."
+    en: "Puts a value back into a name that exists. The putting itself yields a value."
+  why:
+    ko: >-
+      자바에서 넣는 일은 <b>식</b>입니다 — 넣고 나서 그 값을 그대로 내놓아요. 그래서
+      <code>a = b = 0</code> 이 되고, 조건 자리에 <code>if (done = true)</code> 라고 잘못 적어도
+      <b>컴파일이 통과합니다</b>. 파이썬은 이 자리를 아예 막고, 자바는 <code>boolean</code> 일
+      때만 통과시켜요 — 가장 잡기 어려운 자리가 여기입니다.
+    en: >-
+      In Java putting a value in is an <b>expression</b> — it hands that value straight back. So
+      <code>a = b = 0</code> works, and a slip like <code>if (done = true)</code> in a condition
+      <b>compiles</b>. Python blocks that place outright; Java lets it through when the type is
+      <code>boolean</code>, which is the hardest place of all to catch.
+  trace:
+    - ko: "{{pick.3|code}}{{pick.3|josa:을,를}} 먼저 값으로 만든다."
+      en: "{{pick.3|code}} becomes a value first."
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 그 값을 가리키게 한다."
+      en: "{{pick.2|code}} is made to hold it."
+    - ko: "넣은 값이 그대로 이 식의 값이 된다."
+      en: "The value put in is also this expression's value."
+rule:
+  ko: "<b>넣는 일이 값을 낸다.</b> 그래서 조건 자리에 잘못 적어도 컴파일이 지나갈 수 있다."
+  en: "<b>Putting a value in yields a value.</b> So a slip in a condition can compile."
+result:
+  label:
+    ko: "{{site.line}}행 뒤의 {{pick.2}}"
+    en: "{{pick.2}} after line {{site.line}}"
+  value: "{{pick.3}}"
+  note:
+    ko: "이 식의 값이기도 하다"
+    en: "also the value of this expression"
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 이제 {{pick.3|code}} 입니다. 그리고 이 줄 자체도 그 값을 냅니다."
+  en: "{{pick.2|code}} now holds {{pick.3|code}}. And the line itself yields that value too."
+payoff:
+  ko: "이걸 알면 「조건이 언제나 참인」 버그가 왜 조용한지 압니다 — 넣는 일이 값을 내서 조건이 돼 버립니다."
+  en: "This explains the silent always-true condition — putting a value in yields one, so it becomes the condition."
+bridge:
+  ko: "파이썬은 조건 자리의 <code>=</code> 를 아예 막습니다. 자바는 <code>boolean</code> 일 때만 지나갑니다."
+  en: "Python blocks <code>=</code> in a condition. Java lets it through when the type is <code>boolean</code>."
+misconceptions:
+  - ko: "넣는 줄은 값을 안 낸다 — 냅니다. 그래서 이어 붙일 수 있어요."
+    en: "A putting line yields nothing — it does, which is why it can be chained."
+  - ko: "조건 자리의 <code>=</code> 는 언제나 걸린다 — <code>boolean</code> 이면 통과합니다."
+    en: "<code>=</code> in a condition is always caught — with a <code>boolean</code> it compiles."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>값을 넣는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that puts the value in</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 이름은 스스로 값을 받지 못하고, 받게 하는 것이 가운데 기호예요."
+          en: "{{pick.2|code}} is <b>the name</b>. A name cannot take a value on its own; the symbol between does that."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 넣는 일이냐", en: "The sharpest spot — the name or the putting" }
+          code:
+            - "n;        // 아무 일도 없다"
+            - "n = 2;    // 값이 들어간다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 넣을 <b>값</b>입니다. 값은 어디로 갈지 모르고 그것을 정하는 것이 가운데 기호입니다."
+          en: "{{pick.3|code}} is the <b>value</b> to put in. A value does not know where it goes; the symbol between decides."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값이냐 넣는 일이냐", en: "The sharpest spot — the value or the putting" }
+          code:
+            - "2;        // 계산되고 사라진다"
+            - "n = 2;    // 이름에 남는다"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 이미 있는 이름에 값을 <b>다시 넣습니다</b>."
+      en: "Choose what goes in the blank. Line {{site.line}} puts a value <b>back</b> into a name that exists."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "=", mono: true }
+      - t: "=="
+        mono: true
+        diag:
+          t:
+            ko: "기호 둘짜리는 <b>견주기</b>라 묻기만 하고 넣지 않습니다. 답을 하나 만들고 아무 데도 안 담은 채 끝나요."
+            en: "The two-symbol form <b>weighs</b>: it asks, it does not put. It makes one answer and keeps it nowhere."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 넣는가 묻는가", en: "The sharpest spot — putting or asking" }
+            code:
+              - "n = 2;    // n 이 2 가 된다"
+              - "n == 2;   // n 은 그대로"
+      - t: "+="
+        mono: true
+        diag:
+          t:
+            ko: "이 모양은 <b>지금 값에 더한</b> 결과를 넣습니다. 옛 값을 재료로 쓰므로 뜻이 달라져요."
+            en: "That form puts back the result of <b>adding to what is there</b>, so it uses the old value and means something else."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 옛 값을 쓰는가", en: "The sharpest spot — is the old value used" }
+            code:
+              - "n = 2;    // 무조건 2"
+              - "n += 2;   // 있던 값 + 2"
+      - t: "->"
+        mono: true
+        diag:
+          t:
+            ko: "이 화살표는 <b>짧은 함수</b>를 여는 자리라 이름과 값 사이에 오지 않습니다."
+            en: "That arrow opens a <b>short function</b>; it does not stand between a name and a value."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 넣기냐 함수냐", en: "The sharpest spot — putting or a function" }
+            code:
+              - "n = 2;"
+              - "x -> x + 1"
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 새 이름을 만들지 않고 <b>있던 이름</b>에 다시 넣을까요?"
+    en: "Why does line {{site.line}} put into an <b>existing name</b> instead of making a new one?"
+  choices:
+    - t:
+        ko: "같은 것을 가리키는 이름이 하나여야 뒤에서 읽는 곳이 헷갈리지 않기 때문"
+        en: "Because one name for one thing keeps later readers from having to choose"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이름을 새로 만들었다면 아래 어느 줄을 같이 고쳐야 하는지도 적어 보세요."
+        en: "That is the direction. Say which lines below would also change if a new name were made."
+    - t:
+        ko: "메모리를 아끼려고"
+        en: "To save memory"
+      ok: false
+      fb:
+        ko: "이름 하나가 아끼는 자리는 거의 없습니다. 버는 것은 <b>읽는 사람의 혼동</b>이에요."
+        en: "One name saves almost nothing. What it buys is <b>less confusion for the reader</b>."
+    - t:
+        ko: "자바가 새 이름을 못 만들게 해서"
+        en: "Because Java forbids new names here"
+      ok: false
+      fb:
+        ko: "막지 않습니다. 새로 만들어도 되고, 안 만든 것이 이 줄의 선택입니다."
+        en: "It does not. A new name was allowed; not making one is this line's choice."
+queries:
+  - { grammars: [java], file: ./assignment.scm }
+examples:
+  # 값을 든 예 — 식 · 값 · 타입. 대입이 **식**이라 그 자체로도 값을 낸다.
+  - code: "class A { void f() { int n = 1; n = 2; } }         // n = 2 -> 2 (int)"
+    expect: { sites: 1, form: assign, hole: "=", picks: { 1: "=", 2: "n", 3: "2" } }
+  - code: "class A { void f(int n) { n = n + 1; } }           // n = 1 + 1 -> 2 (int)"
+    expect: { sites: 1, form: assign, hole: "=", picks: { 1: "=", 2: "n", 3: "n + 1" } }
+  - code: "class A { void f(boolean done) { done = true; } }  // done = true -> true (boolean)"
+    expect: { sites: 1, form: assign, hole: "=", picks: { 1: "=", 2: "done", 3: "true" } }
+  - code: "class A { void f() { int n = 1; } }                // 선언 — 다시 넣기가 아니다"
+    expect: none

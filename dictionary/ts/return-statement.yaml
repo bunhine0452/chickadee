@@ -1,0 +1,224 @@
+schema: 1
+id: ts/return-statement
+universal: common/return-value
+name: { ko: 값 돌려주기, en: return statement }
+token: "return"
+grammars: [typescript, tsx, javascript, vue]
+framework: null
+essential: true
+difficulty: 1
+prereq: [ts/function-declaration]
+# 빈칸 오답(break·throw·yield)은 개념으로 존재하지 않는 낱말이라 혼동 쌍으로 묶을 수 없다.
+# `ts/const-declaration`(오답 let·var·readonly)과 같은 자리다.
+confusions: []
+
+dict:
+  one_liner:
+    ko: "하던 일을 그 자리에서 끝내고, 부른 자리에 값 하나를 건넨다."
+    en: "Ends the work there and hands one value back to whoever called."
+  why:
+    ko: >-
+      두 가지가 <b>한꺼번에</b> 일어납니다 — {{site.line}}행 아래 줄은 실행되지 않고, 이 함수를
+      부른 자리가 {{pick.2|code}}{{pick.2|josa:이,가}} 됩니다. 건네지 않으면 부른 쪽은 결과를 받을 길이 없어요.
+    en: >-
+      Two things happen <b>at once</b> — the lines below line {{site.line}} do not run, and the
+      place that called this function becomes {{pick.2|code}}. Hand nothing back and the caller has
+      no way to get a result.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:을,를}} 먼저 값으로 만든다."
+      en: "{{pick.2|code}} becomes a value first."
+    - ko: "{{site.line}}행에서 이 함수가 끝난다."
+      en: "The function ends at line {{site.line}}."
+    - ko: "부른 자리에 그 값이 남는다."
+      en: "That value is what the call site is left with."
+
+rule:
+  ko: "<b>아래 줄은 돌지 않고, 부른 자리가 그 값이 된다.</b> 둘은 같이 일어난다."
+  en: "<b>The lines below do not run, and the call site becomes that value.</b> Both at once."
+result:
+  label:
+    ko: "{{site.line}}행이 건넨 값"
+    en: "the value handed back on line {{site.line}}"
+  value: "{{pick.2}}"
+  note:
+    ko: "여기서 끝난다"
+    en: "it ends here"
+ok:
+  ko: >-
+    이 함수는 {{site.line}}행에서 끝나고, 부른 자리에는 {{pick.2|code}}{{pick.2|josa:이,가}} 남습니다. 아래 줄이
+    있어도 돌지 않아요.
+  en: >-
+    The function ends at line {{site.line}}, and the call site is left with {{pick.2|code}}. Lines
+    below it, if any, do not run.
+payoff:
+  ko: >-
+    이걸 알면 「함수는 도는데 왜 값이 없지」가 풀립니다 — 건네는 줄이 없으면 부른 쪽에는
+    아무것도 안 남습니다.
+  en: >-
+    This is what answers “the function ran, so where is the value” — with no line handing one back,
+    the caller gets nothing.
+bridge:
+  ko: >-
+    함수를 부르는 자리는 그 자리에서 <b>값 하나</b>가 됩니다 — 그 값을 정하는 것이 {{site.line}}행이에요.
+  en: >-
+    A call becomes <b>one value</b> right where it stands — and line {{site.line}} is what decides
+    that value.
+misconceptions:
+  - ko: "화면에 찍는 것과 같다 — 다릅니다. 찍는 것은 보여 주고, 이것은 건넵니다."
+    en: "It is the same as printing — no. Printing shows; this hands a value over."
+  - ko: "아래 줄도 마저 돈다 — 아니요. 그 자리에서 끝납니다."
+    en: "The lines below still run — no. It ends right there."
+
+meaning:
+  - q:
+      ko: "{{site.line}}행 <b>아래에</b> 줄이 더 있다면 그 줄들은 어떻게 될까요?"
+      en: "If there are more lines <b>below</b> line {{site.line}}, what happens to them?"
+    hint:
+      ko: "이 낱말은 값을 건네는 동시에 <b>끝냅니다</b>."
+      en: "This word hands a value back and <b>ends</b> at the same time."
+    options:
+      - t:
+          ko: "실행되지 않는다 — 이 줄에서 함수가 끝난다"
+          en: "They do not run — the function ends on this line"
+      - t:
+          ko: "마저 실행되고 나서 값이 건네진다"
+          en: "They run first, and then the value is handed back"
+        diag:
+          t:
+            ko: "건네는 일과 끝내는 일이 <b>같이</b> 일어납니다. 아래 줄을 돌게 하려면 그 줄들이 이 줄보다 위에 있어야 해요."
+            en: >-
+              Handing back and ending happen <b>together</b>. To have those lines run, they must sit
+              above this one.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 위냐 아래냐"
+              en: "The sharpest spot — above or below"
+            code:
+              - "function f() { log(); return 1 }   // log 가 돈다"
+              - "function f() { return 1; log() }   // log 는 안 돈다"
+      - t:
+          ko: "값이 없을 때만 실행된다"
+          en: "They run only when there is no value"
+        diag:
+          t:
+            ko: "값이 있든 없든 끝나는 것은 같습니다. 값 없이 이 낱말만 적어도 그 자리에서 끝나요."
+            en: >-
+              It ends the same with or without a value. Written bare, it still ends right there.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 값의 유무와 끝남은 별개"
+              en: "The sharpest spot — the value and the ending are separate"
+            code:
+              - "return;  log()   // log 는 안 돈다"
+              - "return 1; log()  // 이것도 안 돈다"
+      - t:
+          ko: "다음에 이 함수를 부를 때 실행된다"
+          en: "They run the next time this function is called"
+        diag:
+          t:
+            ko: "다음에 불러도 <b>맨 위부터</b> 다시 시작합니다. 끝난 자리를 기억해 두었다가 이어 가지 않아요."
+            en: >-
+              The next call starts again <b>from the top</b>. It does not remember where it stopped
+              and carry on.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 늘 처음부터"
+              en: "The sharpest spot — always from the top"
+            code:
+              - "f(); f()   // 두 번 다 맨 위부터 돈다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 이 함수를 끝내면서 부른 자리에 <b>값 하나</b>를 건넵니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} ends the function and hands <b>one
+        value</b> back to the caller.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "return", mono: true }
+      - t: "break"
+        mono: true
+        diag:
+          t:
+            ko: "<code>break</code> 는 <b>되풀이나 갈래를 빠져나오는</b> 낱말이라 값을 건네지 않고, 함수를 끝내지도 않습니다. 빠져나온 다음 줄부터 계속 돌아요."
+            en: >-
+              <code>break</code> <b>leaves a loop or a branch</b>: it hands back no value and does
+              not end the function. Running carries on from the next line.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 함수를 끝내나 고리를 벗어나나"
+              en: "The sharpest spot — ending a function or leaving a loop"
+            code:
+              - "while (a) { break } log()    // log 가 돈다"
+              - "while (a) { return } log()   // log 는 안 돈다"
+      - t:
+          "throw"
+        mono: true
+        diag:
+          t:
+            ko: "<code>throw</code> 도 그 자리에서 끝내지만 <b>값을 건네는 것이 아니라 문제를 알립니다</b>. 부른 쪽은 값을 받는 대신 그 문제를 받아요."
+            en: >-
+              <code>throw</code> also ends there, but it <b>reports a problem instead of handing a
+              value</b>. The caller receives the problem, not a result.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 값이냐 문제냐"
+              en: "The sharpest spot — a value or a problem"
+            code:
+              - "const v = f()   // return 이면 v 에 값이 담긴다"
+              - "const v = f()   // throw 면 이 줄이 실행되지 않는다"
+      - t: "yield"
+        mono: true
+        diag:
+          t:
+            ko: "<code>yield</code> 는 값을 건네되 <b>끝내지 않고 멈춰 둡니다</b> — 다시 부르면 그 자리에서 이어 가요. 그리고 특별한 함수 안에서만 쓸 수 있습니다."
+            en: >-
+              <code>yield</code> hands a value over but <b>pauses instead of ending</b> — asked
+              again, it carries on from there. It also works only inside a special kind of function.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 끝내나 멈춰 두나"
+              en: "The sharpest spot — ending or pausing"
+            code:
+              - "return 1   // 끝난다, 다음엔 맨 위부터"
+              - "yield 1    // 멈춘다, 다음엔 그 자리부터"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 값을 화면에 찍지 않고 건넸을까요?"
+    en: "Why does line {{site.line}} hand the value over instead of printing it?"
+  choices:
+    - t:
+        ko: "부른 쪽이 그 값으로 무엇을 할지 정하게 하려고 — 찍으면 거기서 끝난다"
+        en: "So the caller decides what to do with it — printing ends the story there"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 같은 함수를 다른 자리에서 다르게 쓰려면 무엇이 필요한지도 적어 보세요."
+        en: "That is the direction. Say also what is needed to use the same function differently elsewhere."
+    - t:
+        ko: "화면에 찍는 것이 느려서"
+        en: "Because printing is slow"
+      ok: false
+      fb:
+        ko: "속도의 문제가 아닙니다. 찍으면 값이 밖으로 나가 버려 다른 계산에 쓸 수 없습니다."
+        en: "It is not about speed. Printed, the value leaves and no further computation can use it."
+    - t:
+        ko: "함수 안에서는 화면에 찍을 수 없어서"
+        en: "Because a function cannot print"
+      ok: false
+      fb:
+        ko: "찍을 수는 있습니다. 찍지 않은 이유는 이 함수가 결정을 부른 쪽에 넘기기 때문입니다."
+        en: "It can print. It does not because this function leaves the decision to its caller."
+
+queries:
+  - { grammars: [typescript, tsx, javascript, vue], file: ./return-statement.scm }
+
+examples:
+  - code: "function f() { return 1 }"
+    expect: { sites: 1, form: return, hole: "return", picks: { 1: "return", 2: "1" } }
+  - code: "function f() { return }"
+    expect: { sites: 1, form: return, hole: "return", picks: { 1: "return" } }
+  - code: "const x = 1"
+    expect: none

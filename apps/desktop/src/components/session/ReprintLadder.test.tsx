@@ -57,7 +57,7 @@ describe('ReprintLadder', () => {
 
   it('tablist · tab · tabpanel 로 짠다', () => {
     render(<Ladder rung={2} />);
-    expect(screen.getByRole('tablist', { name: '다시 찍기 4단' })).toBeTruthy();
+    expect(screen.getByRole('tablist', { name: '다시 풀기 4단' })).toBeTruthy();
     const tabs = screen.getAllByRole('tab');
     expect(tabs).toHaveLength(4);
     expect(tabs[1]?.getAttribute('aria-selected')).toBe('true');
@@ -67,8 +67,8 @@ describe('ReprintLadder', () => {
   it('겹이 내려가는 것을 이득으로 적는다', () => {
     const { container } = render(<Ladder />);
     const gain = container.querySelector('.ld-gain');
-    expect(gain?.textContent).toContain('3겹');
-    expect(gain?.textContent).toContain('2겹');
+    expect(gain?.textContent).toContain('3단계');
+    expect(gain?.textContent).toContain('2단계');
     expect(gain?.textContent).toContain('11일 뒤');
     expect(gain?.textContent).toContain('오늘 안에');
   });

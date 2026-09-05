@@ -1,0 +1,88 @@
+schema: 1
+id: cs/compile-and-run
+universal: null
+name: { ko: "번역하는 때와 도는 때", en: "Compile time and run time" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+track_default: t0
+essential: false
+difficulty: 2
+prereq: []
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "오류가 두 시점에 난다. 어느 쪽이냐가 무엇을 고칠지를 정한다."
+    en: "Errors arrive at two moments. Which one tells you what to fix."
+  why:
+    ko: >-
+      코드가 도는 데는 두 단계가 있습니다. 사람이 쓴 글을 기계가 읽을 수 있게 <b>번역하는 때</b>와,
+      번역된 것이 실제로 <b>도는 때</b>예요. 번역하는 때 나는 오류는 「이 글은 말이 안 된다」이고
+      코드만 봐도 알 수 있습니다. 도는 때 나는 오류는 「그 순간의 값이 그러면 안 된다」이고
+      <b>값이 없으면 재현이 안 됩니다</b>. 같은 「오류」라는 말을 쓰지만 고치는 방법이 정반대라,
+      메시지를 읽기 전에 어느 쪽인지부터 보는 것이 빠릅니다.
+    en: >-
+      Running code has two stages: <b>translating</b> what a person wrote into something the
+      machine can execute, and <b>executing</b> it. An error at translation says “this text does
+      not make sense” and is visible from the code alone. An error at execution says “the value at
+      that moment was not allowed” and <b>cannot be reproduced without the value</b>. The word
+      “error” covers both, but the fixes point in opposite directions — so check which one first.
+  trace: []
+rule:
+  ko: "<b>번역 때 오류는 코드에, 실행 때 오류는 값에 있다.</b> 찾을 곳이 다르다."
+  en: "<b>Translation errors live in the code, run errors live in the values.</b> Different places to look."
+ok:
+  ko: >-
+    번역이 통과했다는 것은 「글이 말이 된다」는 뜻이지 「하려던 일을 한다」는 뜻이 아닙니다.
+    통과한 뒤에도 도는 때의 오류는 그대로 남아 있습니다.
+  en: >-
+    Passing translation means “the text makes sense”, not “it does what you meant”. Run-time
+    errors are all still ahead of you.
+misconceptions:
+  - ko: "번역이 통과하면 코드가 맞다 — 통과는 말이 된다는 것이지 옳다는 것이 아닙니다."
+    en: "If it compiles it is correct — compiling means it parses, not that it is right."
+  - ko: "모든 언어에 번역 단계가 있다 — 도는 때에 한 줄씩 읽는 언어도 있습니다."
+    en: "Every language has a translation stage — some read a line at a time while running."
+  - ko: "도는 때 오류는 코드를 고쳐야만 없어진다 — 값을 다루는 경로를 더하는 것이 답일 때가 많습니다."
+    en: "A run-time error means the code is broken — often the answer is handling the value's path."
+meaning:
+  - q:
+      ko: "어떤 오류는 코드만 보고도 잡히고 어떤 오류는 그때의 값이 있어야 보입니다. <b>무엇이 둘을 가르나요?</b>"
+      en: "Some errors show from the code alone; others need the value of that moment. <b>What separates them?</b>"
+    hint:
+      ko: "번역할 때 기계는 아직 아무 값도 못 봅니다."
+      en: "While translating, the machine has seen no values yet."
+    options:
+      - t: { ko: "그 오류가 번역하는 때에 나는지, 도는 때에 나는지", en: "Whether the error is raised at translation or at execution" }
+      - t: { ko: "오류의 심각도 — 중요한 것이 먼저 나온다", en: "Severity — the important ones come first" }
+        diag:
+          t:
+            ko: "심각도는 순서를 안 정합니다. 아주 큰 문제도 <b>값이 있어야</b> 보이면 도는 때까지 안 나와요."
+            en: "Severity does not set the order. A serious problem that needs <b>a value</b> waits until run time."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 심각도냐 시점이냐", en: "The sharpest spot — severity or moment" }
+            code:
+              - "번역: 값 없이 아는 것"
+              - "실행: 값이 있어야 아는 것"
+      - t: { ko: "그 코드를 사람이 읽었는지 안 읽었는지", en: "Whether a person read that code or not" }
+        diag:
+          t:
+            ko: "사람이 읽는 것과 <b>기계가 언제 보는지</b>는 다른 축입니다. 아무도 안 읽은 코드도 번역 때 걸립니다."
+            en: "A person reading is a different axis from <b>when the machine looks</b>. Unread code is caught at translation all the same."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 누가 보나 언제 보나", en: "The sharpest spot — who looks or when" }
+            code:
+              - "번역: 기계가 글을 본다"
+              - "실행: 기계가 값을 본다"
+      - t: { ko: "타입을 적었는지 안 적었는지", en: "Whether types were written down or not" }
+        diag:
+          t:
+            ko: "타입을 적으면 번역 때 잡히는 것이 <b>늘어납니다</b> — 가까운 자리예요. 하지만 타입을 안 적어도 문법 오류는 번역 때 잡힙니다."
+            en: "Writing types <b>increases</b> what is caught at translation — close. But even without types, syntax errors are caught then."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 무엇을 옮기나", en: "The sharpest spot — what gets moved" }
+            code:
+              - "타입: 잡히는 양을 앞으로 옮긴다"
+              - "시점: 두 단계는 타입과 무관하게 있다"

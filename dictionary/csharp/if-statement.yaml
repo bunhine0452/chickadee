@@ -1,0 +1,164 @@
+schema: 1
+id: csharp/if-statement
+universal: common/conditional-branch
+name: { ko: 조건으로 흐름 나누기, en: If statement }
+token: "if"
+grammars: [c_sharp]
+framework: null
+essential: true
+difficulty: 1
+# `csharp.md` §0.5 가 「`if-statement` 의 prereq 를 `csharp/equality` 로 다시 건다」고 적었다.
+# §2 ⑥ 의 `csharp/boolean-literal` 은 그대로 두고 그것을 더한다 — 조건 자리가 참·거짓만
+# 받는다는 사실과, 그 참·거짓이 대개 견주기에서 온다는 사실이 둘 다 필요하다.
+prereq: [csharp/boolean-literal, csharp/equality]
+confusions: []
+dict:
+  one_liner:
+    ko: "괄호 안이 참일 때만 뒤가 돌고, 중괄호가 없으면 뒤의 한 문장만 딸려 온다."
+    en: "What follows runs only when the brackets hold; without braces, one statement."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.2|code}}{{pick.2|josa:은,는}} 반드시 참·거짓이어야 합니다 —
+      C# 에는 「참처럼 쳐지는 값」이 없어서 <code>if (count)</code>는 그 자리에서 막혀요.
+      그리고 <b>중괄호가 선택</b>이라는 것이 읽을 때 함정입니다. 안 쓰면 <b>다음 한 문장만</b>
+      딸려 오고, 들여쓰기는 아무 의미가 없어요. 두 줄을 딸려 보내려면 중괄호가 있어야 합니다.
+    en: >-
+      {{pick.2|code}} on line {{site.line}} has to be a truth value — C# has no notion of a
+      value that counts as true, so <code>if (count)</code> stops right there. The reading trap
+      is that <b>braces are optional</b>: without them <b>only the next statement</b> follows,
+      and indentation means nothing. Two lines need braces.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.2|code}}{{pick.2|josa:이,가}} 먼저 참·거짓 하나가 된다."
+      en: "{{pick.2|code}} on line {{site.line}} becomes one truth value first."
+    - ko: "참이면 {{pick.3|code}}{{pick.3|josa:이,가}} 돈다."
+      en: "If it holds, {{pick.3|code}} runs."
+    - ko: "거짓이면 그 자리를 통째로 건너뛴다."
+      en: "If it does not, that whole part is skipped."
+rule:
+  ko: "<b>조건은 참·거짓만 받는다.</b> 중괄호가 없으면 다음 한 문장만 딸려 온다."
+  en: "<b>The condition takes only a truth value.</b> Without braces, only the next statement follows."
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 참일 때만 {{pick.3|code}} 쪽으로 갑니다."
+  en: "Only when {{pick.2|code}} holds does it go into {{pick.3|code}}."
+payoff:
+  ko: "이걸 알면 「중괄호를 지웠더니 둘째 줄이 언제나 돈다」가 풀립니다."
+  en: "This untangles “I removed the braces and the second line always runs.”"
+bridge:
+  ko: >-
+    파이썬은 들여쓰기가 곧 딸려 오는 범위입니다. C# 은 들여쓰기를 <b>안 봅니다</b> —
+    중괄호가 없으면 한 문장뿐이에요.
+  en: >-
+    In Python the indentation is the block. C# <b>ignores</b> indentation — without braces it
+    is one statement.
+misconceptions:
+  # 출처 — `csharp.md` §9 ③ · §2 ⑥.
+  - ko: "조건 자리에 아무 값이나 온다 — 참·거짓만 옵니다(CS0029)."
+    en: "Any value can go in the condition — only a truth value can (CS0029)."
+  - ko: "들여쓴 줄이 다 딸려 온다 — 중괄호가 없으면 <b>한 문장</b>만입니다."
+    en: "Every indented line follows — without braces it is <b>one statement</b>."
+  - ko: "<code>else</code>는 가장 가까운 조건에 안 붙는다 — 가장 가까운 것에 붙습니다."
+    en: "An <code>else</code> does not attach to the nearest condition — it does."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>흐름을 나누는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that splits the flow</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 재는 <b>조건</b>입니다. 조건 혼자서는 흐름을 못 나눠요 — 참·거짓 하나가 될 뿐입니다."
+          en: "{{pick.2|code}} is the <b>condition</b> being weighed. On its own it splits nothing; it just becomes a truth value."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 조건이냐 나누는 낱말이냐", en: "The sharpest spot — the condition or the word" }
+          code:
+            - "ok;              // 값 하나"
+            - "if (ok) { }      // 흐름이 갈린다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 참일 때 도는 <b>몸통</b>입니다. 몸통은 자기가 언제 도는지 모릅니다."
+          en: "{{pick.3|code}} is the <b>body</b> that runs when it holds. The body does not know when that is."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 몸통이냐 나누는 낱말이냐", en: "The sharpest spot — the body or the word" }
+          code:
+            - "{ Save(); }          // 언제나 돈다"
+            - "if (ok) { Save(); }  // 참일 때만"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 괄호 안이 <b>참일 때만 한 번</b> 뒤를 돌립니다."
+      en: "Choose what goes in the blank. Line {{site.line}} runs what follows <b>once, only if</b> the parentheses hold."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "if", mono: true }
+      - t: "while"
+        mono: true
+        diag:
+          t:
+            ko: "이건 참인 <b>동안 되풀이</b>합니다. 조건이 안 바뀌면 끝나지 않아요."
+            en: "That repeats <b>while</b> it holds. If the condition never changes it does not end."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 한 번이냐 되풀이냐", en: "The sharpest spot — once or repeated" }
+            code:
+              - "if (ok) { Save(); }      // 한 번"
+              - "while (ok) { Save(); }   // 참인 동안"
+      - t: "for"
+        mono: true
+        diag:
+          t:
+            ko: "이건 괄호 안에 <b>칸이 셋</b>이라 조건 하나만 넣으면 컴파일이 막습니다."
+            en: "That wants <b>three slots</b> in the parentheses; one condition alone stops at compile time."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 칸이 하나냐 셋이냐", en: "The sharpest spot — one slot or three" }
+            code:
+              - "if (ok)"
+              - "for (int i = 0; i < n; i++)"
+      - t: "switch"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>여러 갈래</b>를 값으로 고르는 자리라 뒤에 갈래 목록이 와야 합니다."
+            en: "That picks among <b>several branches</b> by value and needs a list of them after it."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 두 갈래냐 여러 갈래냐", en: "The sharpest spot — two branches or many" }
+            code:
+              - "if (ok) { } else { }"
+              - "switch (n) { case 1: ... }"
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 조건을 <b>몸통 밖으로</b> 꺼내 적었을까요?"
+    en: "Why is the condition written <b>outside</b> the body on line {{site.line}}?"
+  choices:
+    - t:
+        ko: "몸통을 읽기 전에 「언제 도는가」를 먼저 알 수 있게 하려고"
+        en: "So the reader learns when it runs before reading what it does"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 조건이 몸통 안에 있었다면 무엇이 어려워지는지도 적어 보세요."
+        en: "That is the direction. Add what would get harder with the condition inside."
+    - t:
+        ko: "C# 문법이 그 자리 말고는 안 받아서"
+        en: "Because C# syntax allows nowhere else"
+      ok: false
+      fb:
+        ko: "문법의 사실이지 이유가 아닙니다. 왜 그렇게 정했는지를 적어야 합니다."
+        en: "That is the fact, not the reason. Say why it was designed that way."
+    - t:
+        ko: "조건을 한 번만 재게 하려고"
+        en: "So the condition is weighed only once"
+      ok: false
+      fb:
+        ko: "재는 횟수는 자리와 무관합니다. <code>while</code>은 같은 자리에서 매번 재요."
+        en: "How often it is weighed is unrelated to the position — <code>while</code> weighs the same spot each lap."
+queries:
+  - { grammars: [c_sharp], file: ./if-statement.scm }
+examples:
+  - code: "class A { void F(bool ok) { if (ok) { G(); } } }"
+    expect: { sites: 1, form: if, hole: "if", picks: { 1: "if", 2: "ok", 3: "{ G(); }" } }
+  - code: "class A { void F(bool ok) { if (ok) G(); else H(); } }"
+    expect: { sites: 1, form: if, picks: { 1: "if", 2: "ok", 3: "G();", 4: "H();" } }
+  - code: "class A { void F() { while (true) { } } }"
+    expect: none

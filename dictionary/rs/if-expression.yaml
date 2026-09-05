@@ -1,0 +1,177 @@
+schema: 1
+id: rs/if-expression
+# 1부 「문과 흐름」 (`rs.md` §2 #6). 보편형은 `common/conditional-branch`. Rust 에서 다시 배울 것은
+# 조건에 괄호가 없고 중괄호를 못 뺀다는 것, 그리고 **값을 낸다**는 것 — `? :` 가 없어
+# `let x = if c { 1 } else { 2 };` 가 그 자리다.
+universal: common/conditional-branch
+name: { ko: 조건으로 흐름 나누기, en: Branching on a condition }
+token: "if"
+grammars: [rust]
+framework: null
+essential: true
+difficulty: 1
+prereq: [rs/boolean-literal]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "조건이 참일 때만 그 묶음을 돌리고, 갈래 전체가 값 하나가 된다."
+    en: "Runs the block only when the condition holds, and the branch is a value."
+  why:
+    ko: >-
+      {{site.line}}행은 {{pick.2|code}}{{pick.2|josa:을,를}} 보고 참일 때만 {{pick.3|code}}{{pick.3|josa:으로,로}} 들어갑니다. 조건에
+      괄호가 없고 중괄호는 <b>못 뺍니다</b> — 한 줄짜리 갈래도 중괄호를 씁니다. 그리고 다른 언어와
+      다른 것 하나: 이 갈래 전체가 <b>값</b>이에요. `? :` 가 없는 대신 `let x = if c { 1 } else { 2 };`
+      처럼 그대로 이름에 넣습니다. 그러려면 두 갈래가 <b>같은 타입</b>이어야 하고, `else` 가 없으면
+      값은 `()` 예요.
+    en: >-
+      Line {{site.line}} looks at {{pick.2|code}} and enters {{pick.3|code}} only when it holds. The
+      condition has no parentheses and the braces <b>cannot be dropped</b> — even a one-line branch uses
+      them. One more difference: the whole branch is a <b>value</b>. There is no `? :`; instead
+      `let x = if c { 1 } else { 2 };` puts it straight into a name. For that both branches must be
+      <b>the same type</b>, and without `else` the value is `()`.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:을,를}} 먼저 판단한다 — 참·거짓 타입이어야 한다."
+      en: "{{pick.2|code}} is judged first — it must be a truth value."
+    - ko: "참이면 {{pick.3|code}}{{pick.3|josa:이,가}} 돌고 그 마지막 식이 갈래의 값이다."
+      en: "When it holds, {{pick.3|code}} runs and its last expression is the branch's value."
+    - ko: "거짓이면 다른 갈래로 가거나, 없으면 값 () 로 지나간다."
+      en: "Otherwise it takes the other branch, or passes with value () when there is none."
+
+rule:
+  ko: "<b>판단은 그 줄에서 한 번, 갈래는 값이다.</b> 괄호는 없고 중괄호는 필수다."
+  en: "<b>Judged once at that line; the branch is a value.</b> No parentheses, braces required."
+result:
+  label:
+    ko: "{{site.line}}행의 갈림"
+    en: "the branch at line {{site.line}}"
+  value: "{{pick.2}}"
+  note:
+    ko: "참일 때만 아래로 간다"
+    en: "only true goes below"
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 참이면 {{pick.3|code}}{{pick.3|josa:으로,로}} 들어갑니다. 거짓이면 그 묶음은 <b>한 줄도</b> 안 돕니다."
+  en: "When {{pick.2|code}} holds it enters {{pick.3|code}}. Otherwise <b>not one line</b> of that block runs."
+payoff:
+  ko: "이걸 알면 「왜 `if` 를 `let` 오른쪽에 쓰나」가 풀립니다 — 갈래가 값이라서요."
+  en: "This untangles “why is a branch sitting on the right of a binding” — because a branch is a value."
+bridge:
+  ko: "파이썬은 조건에 콜론과 들여쓰기, 자바는 괄호와 선택적 중괄호입니다. Rust 는 괄호 없음 · 중괄호 필수 · 값이 된다는 점이 다릅니다."
+  en: "Python uses a colon and indentation; Java parentheses and optional braces. Rust: no parentheses, braces required, and the result is a value."
+misconceptions:
+  - ko: "조건에 괄호를 쳐야 한다 — 없어도 되고, 치면 경고가 납니다."
+    en: "The condition needs parentheses — it does not, and adding them gives a warning."
+  - ko: "한 줄이면 중괄호를 빼도 된다 — 못 뺍니다. 컴파일이 멈춰요."
+    en: "One-line branches can drop the braces — they cannot. The build stops."
+  - ko: "수나 없음(`None`)도 조건이 된다 — 참·거짓만 옵니다(E0308). `if let Some(v) = opt` 로 갈라요."
+    en: "A number or `None` works as a condition — only truth values do (E0308). Take it apart with `if let Some(v) = opt`."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>흐름을 둘로 가르는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that splits the flow in two</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>판단할 물음</b>입니다. 물음은 스스로 흐름을 가르지 못해요."
+          en: "{{pick.2|code}} is <b>the question</b>. A question cannot split the flow by itself."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 물음만으로는 아무 일도 안 난다", en: "The sharpest spot — a question alone does nothing" }
+          code:
+            - "count > 0            // 참·거짓만 나온다"
+            - "if count > 0 { … }   // 그 답이 흐름을 가른다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 참일 때 <b>돌 묶음</b>입니다. 언제 도는지는 앞의 낱말이 정해요."
+          en: "{{pick.3|code}} is <b>the block to run</b> when it holds. When it runs is decided by the word in front."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 중괄호가 경계다", en: "The sharpest spot — braces are the boundary" }
+          code:
+            - "if ok {"
+            - "    send();   // 이 안만 갈래다"
+            - "}"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 조건이 참일 때만 아래 묶음을 <b>한 번</b> 돌립니다."
+      en: "Choose what goes in the blank. Line {{site.line}} runs the block below <b>once</b>, only when the condition holds."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "if", mono: true }
+      - t: "while"
+        mono: true
+        diag:
+          t:
+            ko: "<code>while</code> 도 같은 조건을 봅니다. 다른 점은 <b>거짓이 될 때까지 되풀이한다</b>는 것 하나예요."
+            en: "<code>while</code> reads the same condition. The one difference: it <b>repeats until false</b>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 한 번이냐 되풀이냐", en: "The sharpest spot — once or repeated" }
+            code:
+              - "if ok { step(); }      // 한 번"
+              - "while ok { step(); }   // 거짓이 될 때까지"
+      - t: "match"
+        mono: true
+        diag:
+          t:
+            ko: "<code>match</code> 는 값의 <b>모양</b>으로 여러 갈래를 냅니다. 참·거짓 하나로 둘로 가르는 자리에는 `if` 가 짧아요."
+            en: "<code>match</code> branches by a value's <b>shape</b> into many arms. For a two-way split on one truth value, `if` is shorter."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 둘이냐 여럿이냐", en: "The sharpest spot — two or many" }
+            code:
+              - "if ok { a } else { b }"
+              - "match cmd { Go => a, Stop => b }"
+      - t: "loop"
+        mono: true
+        diag:
+          t:
+            ko: "<code>loop</code> 는 조건 없이 <b>끝없이</b> 돕니다. `break` 가 나와야 멈춰요."
+            en: "<code>loop</code> runs <b>forever</b> with no condition. Only `break` stops it."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 조건이 있나", en: "The sharpest spot — is there a condition" }
+            code:
+              - "if ok { … }     // 조건 하나"
+              - "loop { … }      // 조건 없음"
+
+why_gate:
+  q:
+    ko: "Rust 는 왜 갈래를 <b>값으로</b> 만들었을까요?"
+    en: "Why did Rust make a branch <b>a value</b>?"
+  choices:
+    - t:
+        ko: "「조건에 따라 다른 값」을 이름 하나에 넣을 때 `? :` 같은 두 번째 문법이 필요 없게 하려고"
+        en: "So that “one value or another, depending on a condition” needs no second syntax like `? :`"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그러려면 두 갈래에 무슨 조건이 붙는지도 적어 보세요."
+        en: "That is the direction. Say what the two branches must then have in common."
+    - t:
+        ko: "값이 아니면 컴파일이 안 되어서"
+        en: "Because it would not compile otherwise"
+      ok: false
+      fb:
+        ko: "값을 안 써도 됩니다. 문 자리에 두면 그냥 갈래예요."
+        en: "You need not use the value. In statement position it is just a branch."
+    - t:
+        ko: "더 빠르게 돌게 하려고"
+        en: "To run faster"
+      ok: false
+      fb:
+        ko: "속도는 같습니다. 문법이 하나로 줄어든 거예요."
+        en: "The speed is the same. One piece of syntax is gone."
+
+queries:
+  - { grammars: [rust], file: ./if-expression.scm }
+
+examples:
+  - code: "fn f() { if count > 0 { send(); } }"
+    expect: { sites: 1, form: if, hole: "if", picks: { 1: "if", 2: "count > 0", 3: "{ send(); }" } }
+  - code: "fn f() { let x = if c { 1 } else { 2 }; }      // 갈래가 값이다"
+    expect: { sites: 1, form: if, picks: { 1: "if", 2: "c", 3: "{ 1 }", 4: "else { 2 }" } }
+  - code: "fn f() { let x = c.then(|| 1); }              // 갈래가 아니다"
+    expect: none

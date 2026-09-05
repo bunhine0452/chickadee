@@ -6,6 +6,7 @@
  * 개념 id 만 들고 있고(02 §8.2), 상태는 판을 걸 때 읽는다.
  */
 import { buildLadder, buildPrompt, type LadderInput } from '@chickadee/grading';
+import { t } from '@chickadee/i18n';
 import { ipc } from '@chickadee/ipc-client';
 import { applyOutcome, labelFor, type LayerState } from '@chickadee/scheduler';
 import type { CardPayload, ConceptId, Layer, Settings } from '@chickadee/store-sql';
@@ -24,18 +25,25 @@ export const KNOWN_LAYER = 2;
 const asLayer = (n: number): Layer => Math.max(0, Math.min(4, Math.trunc(n))) as Layer;
 
 /**
- * 04 §2.4 2단의 상태 4갈래를 3개로 좁힌 것 — 화면은 「내려갈 수 있나」만 구분하면 된다.
- * `none` 안의 두 경우(리포에 있으나 판 없음 / 리포에 아예 없음)는 곁말이 가른다.
+ * 04 §2.4 2단의 상태 (D137 이 넷으로 갈랐다).
+ *
+ * - `ok` 2겹 이상 — 안다
+ * - `gap` 카드가 있고 사용처가 있다 — **내려갈 수 있다**
+ * - `preview` 사용처는 있는데 아직 카드가 없다 — 사전 예제로 먼저 보여 주고 **그 사용처를
+ *   예고한다**(방안 E-4). 예고할 자리가 있는 유일한 경우다.
+ * - `none` 사용처가 없다 — 예고할 자리가 없으므로 아무것도 만들지 않는다
  */
 function stateOf(layer: number, hasCard: boolean, hasSite: boolean): PrereqState {
   if (layer >= KNOWN_LAYER) return 'ok';
-  return hasCard && hasSite ? 'gap' : 'none';
+  if (!hasSite) return 'none';
+  return hasCard ? 'gap' : 'preview';
 }
 
-function noteOf(layer: number, state: PrereqState, hasSite: boolean): string {
-  if (state === 'ok') return `${layer}겹`;
-  if (state === 'gap') return layer === 0 ? '아직 안 찍음' : `${layer}겹 — 한 번 더`;
-  return hasSite ? '판이 없습니다' : '내 코드엔 아직 없습니다';
+function noteOf(layer: number, state: PrereqState): string {
+  const n = String(layer);
+  if (state === 'ok') return t('prereq.noteLayers', { n });
+  if (state === 'gap') return layer === 0 ? t('prereq.noteUnprinted') : t('prereq.noteAgain', { n });
+  return state === 'preview' ? t('prereq.notePreview') : t('prereq.noteNoSite');
 }
 
 export interface LadderData {
@@ -94,7 +102,9 @@ export async function loadLadder(q: LadderQuery): Promise<LadderData> {
       n: r.name_ko,
       ly: layer,
       state,
-      note: noteOf(layer, state, r.has_site === 1),
+      note: noteOf(layer, state),
+      // 합성 판이 「곧 여기서 봅니다」로 가리킬 자리. `preview` 일 때만 있다 (D137).
+      previewSiteId: state === 'preview' ? r.best_site_id : null,
     };
   });
 

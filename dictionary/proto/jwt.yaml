@@ -1,0 +1,88 @@
+schema: 1
+id: proto/jwt
+universal: null
+name: { ko: 서버가 기억하지 않는 출입증, en: JSON Web Token }
+token: null
+grammars: []
+framework: null
+track_default: t0
+essential: false
+difficulty: 3
+prereq: []
+confusions: []
+dict:
+  one_liner:
+    ko: "서명이 붙은 출입증. 서버가 아무것도 기억하지 않아도 확인된다."
+    en: "A signed pass. It checks out with the server remembering nothing."
+  why:
+    ko: >-
+      로그인한 뒤 다음 요청에서 「누구세요」를 다시 안 묻는 방법은 둘입니다. 서버가 <b>기억하거나</b>,
+      사용자가 <b>증명을 들고 다니거나</b>. 이것은 뒤쪽이에요 — 서버가 서명한 쪽지를 주고, 다음부터
+      브라우저가 그것을 머리에 붙여 보냅니다. 서버는 서명만 확인하면 되므로 <b>아무것도 저장하지
+      않습니다</b>. 그래서 서버를 여러 대로 늘려도 그대로 돌아가고, 대신 <b>한 번 준 것을 되물릴
+      수 없습니다</b> — 만료를 기다리거나 따로 목록을 둬야 해요.
+    en: >-
+      There are two ways to stop asking “who are you” on every request after a login. The server
+      <b>remembers</b>, or the user <b>carries proof</b>. This is the second — the server hands back
+      a slip it signed, and the browser attaches it to every later request. The server only checks
+      the signature, so it <b>stores nothing</b>. That is why more servers can be added freely, and
+      why <b>what was handed out cannot be taken back</b> — you wait for it to expire, or keep a
+      separate list.
+  trace: []
+rule:
+  ko: "<b>서명은 위조를 막을 뿐 내용을 감추지 않는다.</b> 안에 든 것은 누구나 읽을 수 있다."
+  en: "<b>A signature stops forgery; it does not hide.</b> Anyone can read what is inside."
+ok:
+  ko: >-
+    서버가 서명을 확인하고 「이 사람이 맞다」고 판단합니다. 그 판단에 데이터베이스는 안 봅니다.
+  en: >-
+    The server checks the signature and decides it is you. No database is read to decide that.
+misconceptions:
+  - ko: "안이 암호화돼 있다 — 서명만 돼 있고 내용은 그대로 읽힙니다. 비밀은 넣지 마세요."
+    en: "The inside is encrypted — it is only signed; the contents read plainly. Put no secrets in."
+  - ko: "로그아웃하면 곧바로 못 쓴다 — 서버가 기억하지 않으므로 만료 전까지는 여전히 쓰입니다."
+    en: "Logging out disables it at once — the server remembers nothing, so it works until it expires."
+  - ko: "브라우저가 알아서 붙여 준다 — 붙이는 코드를 사람이 적어야 합니다."
+    en: "The browser attaches it for you — someone writes the code that attaches it."
+  - ko: "길이가 짧으니 안전하다 — 안전을 정하는 것은 길이가 아니라 서명 열쇠입니다."
+    en: "It is short, so it is safe — safety comes from the signing key, not the length."
+evidence: ["Jwt", "JWT", "jwt", "Bearer", "accessToken", "refreshToken"]
+meaning:
+  - q:
+      ko: "{{site.line}}행의 출입증을 서버가 준 뒤, 서버는 그것을 <b>어디에 적어 두나요</b>?"
+      en: "After the server hands out the pass on line {{site.line}}, <b>where does it record it</b>?"
+    hint:
+      ko: "서명만 확인하면 되는 것이 이 방식의 요점입니다."
+      en: "Checking only the signature is the whole point of this design."
+    options:
+      - t: { ko: "아무 데도 안 적는다 — 서명만 확인하면 된다", en: "Nowhere — checking the signature is enough" }
+      - t: { ko: "데이터베이스에 저장해 두고 매번 대조한다", en: "In a database, checked on every request" }
+        diag:
+          t:
+            ko: "그건 <b>기억하는 쪽</b> 방식입니다. 그 방식이면 로그아웃이 즉시 듣는 대신 요청마다 저장소를 봐야 해요."
+            en: "That is the <b>remembering</b> design. It makes logout instant, at the price of reading storage on every request."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 기억하나 안 하나", en: "The sharpest spot — remembering or not" }
+            code:
+              - "세션: 서버가 기억 → 로그아웃 즉시"
+              - "이 방식: 안 기억 → 만료까지 유효"
+      - t: { ko: "브라우저의 쿠키에 서버가 직접 적는다", en: "The server writes it into a browser cookie itself" }
+        diag:
+          t:
+            ko: "어디에 담을지는 <b>별개의 선택</b>입니다. 쿠키든 저장소든 담기는 곳일 뿐, 서버가 기억하는지와는 다른 문제예요."
+            en: "Where it is kept is a <b>separate choice</b>. Cookie or storage, that is only where it sits — not whether the server remembers."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 어디 담나 누가 기억하나", en: "The sharpest spot — where it is kept or who remembers" }
+            code:
+              - "담기는 곳: 쿠키 · localStorage"
+              - "기억 여부: 서버가 저장하나"
+      - t: { ko: "적어 둘 필요가 없도록 암호화해 둔다", en: "It is encrypted so nothing needs recording" }
+        diag:
+          t:
+            ko: "암호화가 아니라 <b>서명</b>입니다. 안은 누구나 읽을 수 있고, 막는 것은 <b>고치는 일</b>이에요."
+            en: "It is <b>signed</b>, not encrypted. Anyone can read the inside; what is prevented is <b>changing</b> it."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 감추기냐 위조 막기냐", en: "The sharpest spot — hiding or preventing forgery" }
+            code:
+              - "서명: 고치면 들킨다"
+              - "암호화: 못 읽는다 (이건 아님)"

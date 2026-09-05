@@ -11,6 +11,7 @@
  */
 import { createRequire } from 'node:module';
 
+import { t } from '@chickadee/i18n';
 import { migrations, statements, toSqliteBindings } from '@chickadee/store-sql';
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
@@ -178,10 +179,31 @@ describe('리포 하나를 등록하면', () => {
     const home = ui.home;
     expect(home).not.toBeNull();
     expect(home?.masthead.concepts).toBe(1);
-    expect(home?.sheets[0]?.name).toBe('cart');
-    expect(home?.sheets[0]?.nodes[0]?.conceptId).toBe('ts/optional-chaining');
+    // D147 로 0장이 깊이 2·상한 24 가 되면서 이 픽스처에서도 프롤로그가 선다. 색인 띠의
+    // 맨 앞(ZERO_CHAPTER_ORDER = -1)이 그 자리이므로 기능 대지는 이름으로 찾는다.
+    expect(home?.sheets[0]?.name).toBe(t('home.zeroChapter'));
+    const cart = home?.sheets.find((s) => s.name === 'cart');
+    expect(cart?.nodes[0]?.conceptId).toBe('ts/optional-chaining');
     expect(home?.gaps[0]?.siteCount).toBe(3);
     expect(home?.files).toBe(3);
+  });
+
+  // D147 — 0장 대지만 끝나는 조건이 셋이다(전부 1겹 · 뿌리 통과 · 설정에서 끔). 홈이
+  // `zeroChapterDone` 을 안 부르고 「전부 1겹」만 보면 아래 둘 다 'current' 가 되어 걸린다.
+  test('뿌리를 통과한 세션이 나왔으면 0장은 닫힌다 — 겹이 아직 0 이어도', async () => {
+    seedSetting('root_cleared', true);
+    await addRepo('/work/cart-shop');
+    const zero = useUi.getState().home?.sheets.find((s) => s.zero);
+    expect(zero?.nodes.every((n) => n.shownLayer === 0)).toBe(true);
+    expect(zero?.state).toBe('done');
+  });
+
+  test('스스로 초보라고 답했으면 뿌리를 통과해도 0장은 열려 있다', async () => {
+    seedSetting('root_cleared', true);
+    seedSetting('declared_newcomer', true);
+    await addRepo('/work/cart-shop');
+    const zero = useUi.getState().home?.sheets.find((s) => s.zero);
+    expect(zero?.state).toBe('current');
   });
 
   test('건너뛴 파일이 사유와 함께 남는다', async () => {
@@ -194,11 +216,11 @@ describe('리포 하나를 등록하면', () => {
     useUi.getState().go('home');
     render(<App />);
 
-    // 대지 한 장과 그 안의 스티커
-    expect(screen.getByText('cart')).toBeDefined();
+    // 대지 한 장과 그 안의 스티커. 이름은 색인 칩과 대지 머리 둘 다에 있다 (D133).
+    expect(screen.getAllByText('cart').length).toBeGreaterThan(0);
     expect(screen.getAllByText(/옵셔널 체이닝/).length).toBeGreaterThan(0);
     // 「판이 없는 문법」 — 내 코드엔 3곳 있는데 아직 판이 없다
-    expect(screen.getByText(/판이 없는 문법/)).toBeDefined();
+    expect(screen.getByText(/아직 안 배운 문법/)).toBeDefined();
     expect(screen.getByText(/번 등장/).textContent).toContain('3');
   });
 

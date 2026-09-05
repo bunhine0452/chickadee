@@ -3,7 +3,7 @@ id: ts/logical-or-default
 universal: common/nullish-default
 name: { ko: 「또는」으로 기본값 주기, en: Default with logical OR }
 token: "||"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: false
 difficulty: 2
@@ -180,7 +180,7 @@ meaning:
               - "Boolean('a')      // true"
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./logical-or-default.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./logical-or-default.scm }
 
 examples:
   - code: "const nick = user.name || '손님'"

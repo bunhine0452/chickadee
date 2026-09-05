@@ -1,0 +1,172 @@
+schema: 1
+id: swift/force-unwrap
+# `universal: null` — swift.md §6 「universal: null 로 둘 것」. Rust 의 같은 표기는 비슷하지만
+# TS 의 느낌표는 안 죽어서, 보편형을 걸면 D4 전이가 「없으면 죽는다」를 TS 로 실어 나른다.
+universal: null
+name: { ko: 있다고 보증하기, en: Force unwrap }
+token: "!"
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 2
+prereq: [swift/optional-type, cs/compile-and-run]
+confusions: []
+dict:
+  one_liner:
+    ko: "「여기 값이 있다」는 사람의 보증이고, 틀리면 그 줄에서 앱이 끝난다."
+    en: "It is a human promise that a value is there, and a broken promise ends the app."
+  why:
+    ko: >-
+      느낌표 하나는 검사가 아니라 <b>사람이 하는 약속</b>입니다 — 「이 자리에 값이 있다는 것을
+      내가 안다」. 컴파일러는 그 약속을 믿고 벗겨 줍니다.
+      약속이 틀리면 그 줄에서 <b>앱이 끝납니다.</b> 이것이 다른 벗기기와의 결정적 차이예요 —
+      나머지 셋은 비어 있을 때 갈 길을 코드에 적게 하는데, 이것은 갈 길을 안 적고 「빌 리가
+      없다」에 겁니다. 그래서 이 한 글자가 <b>앱이 죽는 가장 흔한 자리</b>입니다.
+      표본에서 65곳/35파일인데, 같은 리포에서 벗겨 이름 붙이기는 568곳입니다 — 쓰는 자리가
+      정말로 좁습니다.
+    en: >-
+      The exclamation mark is not a check but <b>a promise a person makes</b>: I know a value is
+      here. The compiler believes it and unwraps.
+      A broken promise <b>ends the app</b> on that line. That is the decisive difference from the
+      other unwrappings — the other three make the empty path explicit in the code; this one
+      writes no path and bets that emptiness cannot happen. So this one character is the
+      <b>commonest place an app dies</b>.
+      The sample has 65 of them across 35 files, against 568 uses of unwrap-and-bind in the same
+      repository — the honest place for it is narrow.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}}에 값이 있다고 보증한다."
+      en: "Line {{site.line}} promises that {{pick.2|code}} holds a value."
+    - ko: "보증이 맞으면 벗겨진 값으로 이어진다."
+      en: "If the promise holds, it continues with the unwrapped value."
+    - ko: "틀리면 그 줄에서 앱이 끝난다."
+      en: "If it does not, the app ends on that line."
+rule:
+  ko: "<b>느낌표는 검사가 아니라 보증이다.</b> 틀린 보증은 그 줄에서 끝난다."
+  en: "<b>The mark is a promise, not a check.</b> A broken promise ends there."
+result:
+  label: { ko: "{{site.line}}행의 보증", en: "the promise on line {{site.line}}" }
+  value: "{{pick.2}}{{pick.1}}"
+  note: { ko: "틀리면 그 줄에서 끝난다", en: "broken and it ends there" }
+ok:
+  ko: "{{pick.2|code}}에 값이 있다고 보고 벗겼습니다."
+  en: "{{pick.2|code}} was unwrapped on the promise that a value is there."
+payoff:
+  ko: "이걸 알면 「앱이 왜 여기서 죽지」가 풀립니다 — 보증이 틀린 겁니다."
+  en: "This untangles “why did the app die here” — the promise did not hold."
+bridge:
+  ko: >-
+    TS 의 같은 글자는 <b>안 죽습니다</b> — 타입 검사기에게만 하는 말이에요. Swift 는 돌면서
+    진짜로 확인하고 아니면 끝냅니다.
+  en: >-
+    The same character in TS <b>never dies</b> — it speaks only to the type checker. Swift checks
+    at run time and ends if the promise fails.
+misconceptions:
+  # swift.md §9 ②.
+  - ko: "느낌표는 없을 수 있는 값을 켜는 스위치다 — 「있다」는 보증이고 틀리면 끝납니다."
+    en: "The mark switches an optional on — it promises presence, and a broken promise ends things."
+  - ko: "없으면 「없음」이 그냥 넘어간다 — 넘어가지 않고 그 줄에서 끝납니다."
+    en: "Absence just passes through — it does not; the line ends the app."
+  - ko: "타입 검사기에게만 하는 말이다 — TS 이야기입니다. Swift 는 돌면서 확인해요."
+    en: "It only talks to the type checker — that is TS. Swift checks while running."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>값이 있다고 보증하는 표시</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the mark that promises a value is there</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>보증받는 쪽</b>입니다. 보증한다는 표시는 그 뒤에 붙어요."
+          en: "{{pick.2|code}} is <b>what is promised about</b>. The promise itself comes after it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 대상이냐 보증이냐", en: "The sharpest spot — the source or the promise" }
+          code:
+            - "u!.name    // 보증한다"
+            - "u?.name    // 보증하지 않는다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 보증 <b>뒤에</b> 오는 것입니다. 여기까지 오려면 앞의 보증이 맞아야 해요."
+          en: "{{pick.3|code}} comes <b>after</b> the promise. Reaching it requires the promise to have held."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 보증이냐 그다음이냐", en: "The sharpest spot — the promise or what follows" }
+          code:
+            - "u!.name"
+            - "u!.reload()"
+meaning:
+  - q:
+      ko: "보증한 자리에 값이 없으면 어떻게 될까요?"
+      en: "What happens when the promised value is not there?"
+    options:
+      - t:
+          ko: "그 줄에서 앱이 끝난다"
+          en: "The app ends on that line"
+      - t:
+          ko: "「없음」이 그대로 넘어간다"
+          en: "Absence passes through"
+        diag:
+          t:
+            ko: "넘기는 것은 건너뛰는 기호의 몫입니다. 이 표시는 넘기지 않고 <b>보증이 안 맞는다</b>고 판정해요."
+            en: "Passing through is the skipping symbol's job. This one does not pass — it declares the promise broken."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 건너뛰나 끝나나", en: "The sharpest spot — skip or end" }
+            code:
+              - "u?.name   // 비면 「없음」"
+              - "u!.name   // 비면 끝난다"
+      - t:
+          ko: "빌드가 멈춘다"
+          en: "The build stops"
+        diag:
+          t:
+            ko: "빌드는 통과합니다 — 컴파일러는 보증을 믿거든요. 그래서 이 자리의 위험이 돌 때까지 안 보여요."
+            en: "It builds fine — the compiler believes the promise. That is why the risk stays invisible until it runs."
+      - t:
+          ko: "기본값이 들어간다"
+          en: "A default value goes in"
+        diag:
+          t:
+            ko: "기본값을 넣는 표기는 따로 있습니다. 이 표시는 채우지 않고 끝내요."
+            en: "Filling a default has its own notation. This one fills nothing and ends."
+no_hole_reason: >-
+  구멍을 못 뚫는다. 정답이 느낌표 **한 글자**라 빈칸형이 생성 단계에서 떨어진다(`MIN_HOLE`).
+  두 글자로 넓히면 앞의 이름이나 뒤의 점이 함께 지워져 「무엇을 보증하나」가 같이 사라진다.
+  보증과 건너뛰기를 가르는 판은 뜻 고르기와 지목형이 진다.
+why_gate:
+  q:
+    ko: "이 표시를 쓰면 왜 <b>빌드는 통과하고</b> 돌다가 죽을까요?"
+    en: "Why does this mark <b>pass the build</b> and die at run time?"
+  choices:
+    - t:
+        ko: "값이 있는지는 돌아 봐야 알 수 있고, 이 표시는 그 확인을 사람이 이미 했다고 컴파일러에게 말하는 것이기 때문"
+        en: "Because presence is only knowable at run time, and the mark tells the compiler a person already checked"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그럼 그 확인을 코드에 남기는 표기는 무엇인지도 적어 보세요."
+        en: "That is the direction. Say which notation leaves that check in the code, too."
+    - t:
+        ko: "컴파일러가 이 표시를 못 읽어서"
+        en: "Because the compiler cannot read the mark"
+      ok: false
+      fb:
+        ko: "읽습니다 — 읽고 <b>믿는</b> 것이 이 표시의 뜻이에요."
+        en: "It reads it — reading and <b>believing</b> is what the mark means."
+    - t:
+        ko: "돌기 전에는 타입을 몰라서"
+        en: "Because types are unknown before running"
+      ok: false
+      fb:
+        ko: "타입은 압니다. 모르는 것은 그 순간 값이 <b>들어 있는지</b>예요."
+        en: "The type is known. What is unknown is whether a value is <b>in there</b> at that moment."
+queries:
+  - { grammars: [swift], file: ./force-unwrap.scm }
+examples:
+  - code: "func f() { let a = u!.name }"
+    expect: { sites: 1, form: force-nav, picks: { 1: "!", 2: "u", 3: "name" } }
+  - code: "let b = url!"
+    expect: { sites: 1, form: force-bind, picks: { 1: "!", 2: "url", 3: "b" } }
+  - code: "func f() { g(url!) }"
+    expect: { sites: 1, form: force-arg, picks: { 1: "!", 2: "url" } }
+  - code: "func f() { let c = u?.name }"
+    expect: none

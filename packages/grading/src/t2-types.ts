@@ -11,13 +11,14 @@
 import { t } from '@chickadee/i18n';
 import type { CardPayload, ReviewDetail } from '@chickadee/store-sql';
 
-/** 카드 한 장의 정답지·지도 (02 §8.2 · D100). 네 종이 한 모양을 나눠 쓴다. */
+/** 카드 한 장의 정답지·지도 (02 §8.2 · D100). 여섯 종이 한 모양을 나눠 쓴다. */
 export type T2Payload = Extract<CardPayload, { track: 't2' }>;
 
 /** 원장에 실리는 요약 (02 §8.2). */
 export type T2Detail = Extract<ReviewDetail, { track: 't2' }>;
 
-export type T2Kind = 'placement' | 'radius' | 'flow' | 'direction';
+// D142 — 뒤의 둘은 지도가 리포 전체이고 노드가 폴더다 (04 §8.5). 앞의 넷과 결과 모양은 같다.
+export type T2Kind = 'placement' | 'radius' | 'flow' | 'direction' | 'entry' | 'role';
 export type T2Tier = 'found' | 'missed' | 'wrong' | 'sec';
 
 /**

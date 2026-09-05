@@ -1,0 +1,18 @@
+# 작은 문제 하나 (D186 ⑧). 지문은 우리가 썼고 케이스의 답은 reference.py 가 낸다.
+schema: 1
+id: sum-to-n
+topic: loop
+statement:
+  ko: "정수 n(n ≥ 0)이 주어집니다. 1 부터 n 까지 모두 더한 값을 출력하세요."
+  en: "An integer n (n ≥ 0) is given. Print the sum of every number from 1 to n."
+needs: [common/loop-while, common/arithmetic, cs/integer-overflow]
+langs: [py, ts, java]
+cases:
+  - stdin: "10\n"
+    stdout: "55\n"
+  - stdin: "1\n"
+    stdout: "1\n"
+  - stdin: "0\n"
+    stdout: "0\n"
+  - stdin: "100000\n"
+    stdout: "5000050000\n"

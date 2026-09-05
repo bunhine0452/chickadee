@@ -1,0 +1,168 @@
+schema: 1
+id: swift/protocol-conformance
+universal: null
+name: { ko: 규약 지키기, en: Protocol conformance }
+token: ":"
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 3
+prereq: [swift/struct-declaration, cs/abstraction]
+confusions: []
+dict:
+  one_liner:
+    ko: "지켜야 할 목록을 이름으로 걸고, 안 지키면 그 자리에서 빌드가 멈춘다."
+    en: "A type names the list it keeps, and anything missing stops the build."
+  why:
+    ko: >-
+      규약은 「이런 것들이 있어야 한다」는 목록입니다. 타입 이름 뒤에 콜론과 규약 이름을 적으면
+      <b>그 목록을 지키겠다</b>는 선언이 되고, 빠뜨린 것이 있으면 빌드가 멈춥니다.
+      Swift 에서 헷갈리는 자리는 <b>상속과 똑같은 콜론</b>을 쓴다는 점입니다. 값으로 도는
+      묶음에는 상속이 없으므로 그쪽에서는 언제나 규약이고, 상자 쪽에서는 첫 이름이 부모일 수도
+      있어 <b>글자만 봐서는 못 가릅니다.</b>
+      화면을 그리는 코드가 이 표기 위에 서 있습니다 — 표본에서 787곳/315파일로 <b>가장 많은
+      파일</b>에 나타나는 개념이에요.
+    en: >-
+      A protocol is a list of what must exist. Writing a colon and the protocol's name after a
+      type declares that <b>the list will be kept</b>, and anything missing stops the build.
+      The confusing part is that it uses <b>the same colon as inheritance.</b> Value bundles cannot
+      inherit, so there it always means conformance; on the box side the first name may be a
+      parent, and <b>the letters alone cannot tell you.</b>
+      Screen-drawing code stands on this notation — 787 places across 315 files in the sample, the
+      concept present in <b>the most files</b>.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}} 라는 {{pick.3|code}}{{pick.3|josa:을,를}} 세운다."
+      en: "Line {{site.line}} sets up a {{pick.3|code}} called {{pick.2|code}}."
+    - ko: "콜론 뒤의 {{pick.1|code}}{{pick.1|josa:이,가}} 지킬 목록이다."
+      en: "{{pick.1|code}} after the colon is the list to keep."
+    - ko: "목록에 있는 것이 하나라도 빠지면 빌드가 멈춘다."
+      en: "Anything missing from that list stops the build."
+rule:
+  ko: "<b>콜론 뒤는 지킬 목록이다.</b> 값 쪽에서는 언제나 규약이고 상속이 아니다."
+  en: "<b>After the colon is the list to keep.</b> On the value side it is never inheritance."
+result:
+  label: { ko: "{{site.line}}행의 선언", en: "the declaration on line {{site.line}}" }
+  value: "{{pick.2}}: {{pick.1}}"
+  note: { ko: "빠뜨리면 빌드가 멈춘다", en: "anything missing stops the build" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} {{pick.1|code}} 의 목록을 지키겠다고 선언했습니다."
+  en: "{{pick.2|code}} declared that it keeps the list of {{pick.1|code}}."
+payoff:
+  ko: "이걸 알면 「이 메서드를 왜 꼭 만들어야 하지」가 풀립니다 — 목록에 있는 겁니다."
+  en: "This untangles “why must this method exist” — it is on the list."
+bridge:
+  ko: >-
+    자바는 규약과 상속에 <b>다른 낱말</b>을 씁니다. Swift 는 콜론 하나라 값 쪽인지 상자 쪽인지를
+    먼저 봐야 해요.
+  en: >-
+    Java uses <b>different words</b> for a contract and a parent. Swift uses one colon, so the
+    value-or-box question comes first.
+misconceptions:
+  - ko: "콜론 뒤는 부모다 — 값 쪽에서는 언제나 규약입니다."
+    en: "After the colon is a parent — on the value side it is always a contract."
+  - ko: "규약을 걸면 코드가 딸려 온다 — 목록만 옵니다. 몸통은 직접 적어야 해요."
+    en: "Conforming brings code with it — it brings a list; the bodies are yours to write."
+  - ko: "규약은 상자 쪽에만 건다 — 값 쪽에도 걸고, 화면 코드가 그 위에 서 있습니다."
+    en: "Contracts are for the box side — value types use them, and screen code stands on that."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>지켜야 할 목록의 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name of the list that must be kept</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 지키는 <b>쪽의 이름</b>입니다. 목록은 콜론 뒤에 있어요."
+          en: "{{pick.2|code}} names the type <b>doing</b> the keeping. The list is after the colon."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 지키는 쪽이냐 목록이냐", en: "The sharpest spot — the keeper or the list" }
+          code:
+            - "struct Row: View { }"
+            - "struct Cell: View { }   // 지키는 쪽만 다르다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 값으로 도는지 정하는 <b>낱말</b>입니다. 지킬 목록과는 다른 축이에요."
+          en: "{{pick.3|code}} is the <b>word</b> that settles value or box — a different axis from the list."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 종류냐 목록이냐", en: "The sharpest spot — the kind or the list" }
+          code:
+            - "struct Row: View { }"
+            - "enum Kind: Codable { }"
+meaning:
+  - q:
+      ko: "규약에 있는 것을 하나 빠뜨리면 어떻게 될까요?"
+      en: "What happens when one item on the contract is missing?"
+    options:
+      - t:
+          ko: "빌드가 멈추고 무엇이 빠졌는지 알려 준다"
+          en: "The build stops and says what is missing"
+      - t:
+          ko: "빠진 것은 기본 동작이 대신한다"
+          en: "The missing item falls back to a default"
+        diag:
+          t:
+            ko: "규약 쪽이 기본 몸통을 미리 적어 둔 경우에만 그렇습니다. 안 적었으면 빠진 채로는 빌드가 안 돼요."
+            en: "Only when the protocol itself supplied a default body. Otherwise a missing item does not build."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 기본이 있나", en: "The sharpest spot — is there a default" }
+            code:
+              - "protocol P { func hi() }"
+              - "extension P { func hi() { } }   // 기본이 생긴다"
+      - t:
+          ko: "돌다가 그 자리에서 멈춘다"
+          en: "It stops at that point while running"
+        diag:
+          t:
+            ko: "돌기 전에 걸립니다. 목록을 다 지켰는지는 빌드 단계에서 세어져요."
+            en: "It is caught before running. Keeping the whole list is counted at build time."
+      - t:
+          ko: "그 규약이 조용히 안 걸린다"
+          en: "The conformance is quietly dropped"
+        diag:
+          t:
+            ko: "조용히 넘어가지 않습니다. 선언한 이상 지켜야 하고, 아니면 그 줄에서 멈춰요."
+            en: "Nothing is dropped quietly. Once declared it has to be kept, or the line fails."
+no_hole_reason: >-
+  구멍을 못 뚫는다. 정답이 규약 이름인데 그 글자가 사용처마다 전부 다르고(표본 787곳에서
+  `View`·`Codable`·`Equatable`·`Identifiable` 등), 콜론 한 글자를 구멍으로 삼으면 빈칸형이
+  생성 단계에서 떨어진다(`MIN_HOLE`). 어느 쪽이 목록인지 묻는 판은 지목형이 진다.
+why_gate:
+  q:
+    ko: "Swift 는 왜 규약과 상속에 <b>같은 콜론</b>을 쓸까요?"
+    en: "Why does Swift use <b>the same colon</b> for contracts and for inheritance?"
+  choices:
+    - t:
+        ko: "둘 다 「이 타입을 그 이름으로도 쓸 수 있다」는 같은 약속이고, 값 쪽에는 상속이 없어 뜻이 하나로 정해지기 때문"
+        en: "Because both promise the type is usable under that name, and the value side has no inheritance to confuse it with"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 상자 쪽에서 그 뜻이 어떻게 갈리는지도 적어 보세요."
+        en: "That is the direction. Say how the meaning splits on the box side, too."
+    - t:
+        ko: "낱말을 줄이려고"
+        en: "To use fewer words"
+      ok: false
+      fb:
+        ko: "줄이기가 목적은 아닙니다. 두 약속이 같은 모양이라는 것이 이유예요."
+        en: "Fewer words is not the aim. The shared shape of the two promises is."
+    - t:
+        ko: "Swift 에 상속이 없어서"
+        en: "Because Swift has no inheritance"
+      ok: false
+      fb:
+        ko: "상자 쪽에는 있습니다. 없는 것은 값 쪽이에요."
+        en: "The box side has it. The value side is what does not."
+queries:
+  - { grammars: [swift], file: ./protocol-conformance.scm }
+examples:
+  - code: "struct Row: View { }"
+    expect: { sites: 1, form: conform, picks: { 1: "View", 2: "Row", 3: "struct" } }
+  - code: "enum Kind: Codable { case one }"
+    expect: { sites: 1, form: conform, picks: { 1: "Codable", 2: "Kind", 3: "enum" } }
+  - code: "protocol Shape: Drawable { }"
+    expect: { sites: 1, form: protocol-inherits, picks: { 1: "Drawable", 2: "Shape" } }
+  - code: "struct Row { }"
+    expect: none

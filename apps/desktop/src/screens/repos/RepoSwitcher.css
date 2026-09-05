@@ -1,53 +1,91 @@
-/* 리포 스위처 (05 §2.4). 칸 자체의 모양은 `Masthead.css` 의 `.repo-switch` 가 이미 들고
-   있다 — 여기 있는 것은 열렸을 때 뜨는 목록뿐이다. */
+/* 리포 스위처 (05 §2.4). 마스트헤드가 들고 있던 칸 모양(`.tk-v`·`.repo-switch`)이
+   D182 로 없어져 여기로 왔다 — 이 파일 하나가 칸과 목록을 다 정한다. */
 .repo-switch-wrap {
   position: relative;
+  min-width: 0;
+}
+
+.repo-switch {
+  appearance: none;
+  max-width: 100%;
+  padding: var(--s-1) var(--s-2);
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  background: transparent;
+  font: inherit;
+  font-family: var(--font-mono);
+  font-size: var(--fs-2);
+  color: var(--text);
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.repo-switch:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* 세션 중에는 못 바꾼다 — 어느 원장에 채점이 남는지가 도중에 흔들리면 안 된다. */
+.repo-switch:disabled {
+  color: var(--text-muted);
+  cursor: default;
+}
+
+.repo-switch:hover:not(:disabled) {
+  border-color: var(--border);
+  background: var(--surface-2);
 }
 
 .repo-switch-list {
   position: absolute;
-  z-index: 20;
-  top: calc(100% + 6px);
-  left: -8px;
+  z-index: 30;
+  top: calc(100% + var(--s-1));
+  left: 0;
   min-width: 14em;
   max-height: 18em;
   overflow-y: auto;
   margin: 0;
-  padding: 4px;
-  border: 2.5px solid var(--rule);
-  background: var(--paper);
-  box-shadow: 4px 5px 0 var(--edge), var(--lamp);
+  padding: var(--s-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-2);
   list-style: none;
 }
 
 .repo-switch-list:focus-visible {
-  outline: 3px solid var(--t0);
-  outline-offset: 2px;
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
 }
 
 .repo-switch-opt {
-  padding: 5px 9px;
-  color: var(--ink);
-  font-family: var(--f-mono);
-  font-size: var(--fs-14);
+  padding: var(--s-2) var(--s-3);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-2);
   cursor: default;
 }
 
 /* 방향키가 짚은 줄. 포커스는 listbox 에 있으므로 이 표시가 「지금 어디인지」의 전부다. */
 .repo-switch-opt[data-at="on"] {
-  background: var(--paper-3);
-  box-shadow: inset 3px 0 0 var(--t0);
+  background: var(--accent-weak);
+  box-shadow: inset 2px 0 0 var(--accent);
 }
 
 .repo-switch-opt[aria-selected="true"]::after {
   content: " ·";
-  color: var(--ink-soft);
+  color: var(--text-muted);
 }
 
 .repo-switch-all {
-  margin-top: 4px;
-  padding-top: 7px;
-  border-top: 1px dashed var(--rule);
-  font-family: var(--f-ui);
-  font-size: var(--fs-13);
+  margin-top: var(--s-1);
+  padding-top: var(--s-2);
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+  font-family: var(--font-ui);
+  font-size: var(--fs-2);
+  color: var(--text-muted);
 }

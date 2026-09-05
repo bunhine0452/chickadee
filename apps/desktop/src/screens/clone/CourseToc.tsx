@@ -15,6 +15,10 @@ import { useEffect, useRef } from 'react';
 import type { TocPart, TocUnit } from './data.js';
 import './CourseToc.css';
 
+/** 좁은 목차에서는 파일 이름이 먼저다 — `src/ses…` 둘은 구별이 안 됐다 (D170 ⑧). */
+const baseName = (p: string): string => p.slice(p.lastIndexOf('/') + 1);
+const dirName = (p: string): string => (p.includes('/') ? p.slice(0, p.lastIndexOf('/')) : '');
+
 const STATUS_KEY = {
   pending: 'course.statusPending',
   active: 'course.statusActive',
@@ -57,7 +61,7 @@ export function CourseToc(props: CourseTocProps) {
   const pct = props.files === 0 ? 0 : Math.round((props.filesDone / props.files) * 100);
 
   return (
-    <aside className="ctoc" aria-label={t('course.tocLabel')}>
+    <div className="ctoc">
       <div className="ctoc-head">
         <b className="ctoc-count">
           {t('course.tocCount', { done: String(props.filesDone), total: String(props.files) })}
@@ -66,6 +70,9 @@ export function CourseToc(props: CourseTocProps) {
           className="ctoc-bar"
           role="img"
           aria-label={t('course.tocPct', { n: String(pct) })}
+          // 찬 자리의 끝을 선으로 끊는다 (D127). 0·100 에서는 끊을 자리가 없다 —
+          // 0 에서 선이 남으면 「조금 찼다」로, 100 에서는 테두리가 두 겹으로 읽힌다.
+          data-fill={pct === 0 ? 'empty' : pct === 100 ? 'full' : 'part'}
           style={{ '--pct': `${pct}%` } as React.CSSProperties}
         >
           <i aria-hidden="true" />
@@ -92,7 +99,12 @@ export function CourseToc(props: CourseTocProps) {
                       <span className="ctoc-no">
                         {t('course.fileAt', { n: String(file.seq + 1) })}
                       </span>
-                      <code className="ctoc-path">{file.path}</code>
+                      <code className="ctoc-path" title={file.path}>
+                        {baseName(file.path)}
+                        {dirName(file.path) === '' ? null : (
+                          <span className="ctoc-dir"> · {dirName(file.path)}</span>
+                        )}
+                      </code>
                       <span className="ctoc-tally">
                         {file.total === 0
                           ? t('course.fileUncut')
@@ -128,6 +140,6 @@ export function CourseToc(props: CourseTocProps) {
           </li>
         ))}
       </ol>
-    </aside>
+    </div>
   );
 }

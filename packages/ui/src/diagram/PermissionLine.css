@@ -1,0 +1,138 @@
+/* 권한 줄 — 자리(place) × 권한 셋을 코드 줄을 따라 훑는다. 「소유권 화살표」의 교체판(D187 ⑲).
+   R/W/O 가 이미 글자라 색이 필요 없다(rs-learning.md §11.1) — 상태는 부호·면·테두리가 말하고
+   색은 「이번 줄에서 생겼다」와 「요구했는데 없다」 두 자리에만 거든다. */
+.pl {
+  display: grid;
+  gap: 2px var(--s-1);
+  align-items: stretch;
+  justify-content: start;
+  min-width: min-content;
+}
+
+.pl-corner {
+  border-bottom: 1px solid var(--border);
+}
+
+/* 자리 이름 — `x` · `*y` · `v[0]`. 이름이 아니라 **경로**인 것이 이 그림의 요점이다. */
+.pl-path {
+  padding: 0 var(--s-1) var(--s-1);
+  border-bottom: 1px solid var(--border-strong);
+  font-family: var(--font-mono);
+  font-size: var(--fs-2);
+  font-weight: var(--fw-medium);
+  color: var(--text);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.pl-perm {
+  padding-bottom: var(--s-1);
+  border-bottom: 1px solid var(--border);
+  font-size: var(--fs-1);
+  color: var(--text-muted);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.pl-no {
+  padding-right: var(--s-2);
+  font-size: var(--fs-1);
+  color: var(--text-faint);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.pl-code {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  align-items: baseline;
+  padding-right: var(--s-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-2);
+  line-height: var(--lh-code);
+  color: var(--text);
+  white-space: pre;
+}
+
+/* 이 줄이 요구하는 것 — 물음이라 `predict` 에서도 남는다. */
+.pl-need {
+  padding: 0 var(--s-1);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--r-sm);
+  font-family: var(--font-ui);
+  font-size: var(--fs-1);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* 권한 칸 하나. 다섯 상태가 **부호·면·테두리** 셋으로 갈린다 — 색만으로 말하지 않는다. */
+.pl-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.4em;
+  min-height: 1.9em;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  line-height: 1;
+  color: var(--text-faint);
+}
+
+/* 있음 — 면이 채워진다. */
+.pl-cell.has {
+  border-color: var(--border-strong);
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+/* 이번 줄에서 얻음 — 부호 `+` 와 액센트 테두리. 신호 주기가 붙는 유일한 상태다. */
+.pl-cell.gained {
+  border-color: var(--accent);
+  background: var(--accent-weak);
+  color: var(--text);
+  font-weight: var(--fw-medium);
+}
+
+/* 잃음 — 부호 `−`, 면이 빠진다. */
+.pl-cell.lost {
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+
+/* 요구했는데 없음 — 파선에 주의색. 「무엇이 거부되나」가 여기 한 칸에 있다. */
+.pl-cell.missing {
+  border-style: dashed;
+  border-color: var(--warn);
+  color: var(--warn);
+}
+
+/* 없음 — 가운데 점 하나. 테두리도 면도 없다. */
+.pl-cell.none {
+  color: var(--text-faint);
+}
+
+/* 예측 — 격자와 자리는 남고 상태가 사라진다. */
+.pl-cell.veil {
+  border-style: dashed;
+  border-color: var(--border);
+}
+
+/* 표기 풀이 — 배운 적 없는 규약이라 그림이 스스로 한 번 말한다. */
+.pl-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2) var(--s-4);
+  margin: var(--s-3) 0 0;
+  font-size: var(--fs-1);
+  color: var(--text-muted);
+}
+
+.pl-key-item {
+  display: flex;
+  gap: var(--s-1);
+  align-items: center;
+  white-space: nowrap;
+}

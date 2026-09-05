@@ -16,51 +16,55 @@ const QUEUE: QueueItem[] = [
 ];
 
 describe('JobBand', () => {
-  it('작업 띠 머리이고 목업 클래스를 그대로 붙인다', () => {
+  it('진행 띠이고 장식은 하나도 안 남았다 (D182)', () => {
     const { container } = render(<JobBand runNo="Run 08" repo="cart-shop-web" queue={QUEUE} pos={0} elapsed={0} />);
-    expect(screen.getByRole('banner', { name: '작업 띠' })).toBeTruthy();
-    for (const cls of ['.jobband', '.jb-brand', '.jb-title', '.jb-sub', '.jq-h', '.jq-labels', '.jb-ctl']) {
+    expect(screen.getByRole('banner', { name: '진행 띠' })).toBeTruthy();
+    for (const cls of ['.jobband', '.jb-line', '.jb-count', '.jb-what', '.jb-time', '.jb-ctl']) {
       expect(container.querySelector(cls), cls).not.toBeNull();
+    }
+    // 로고 · 디스플레이 제목 · 질감은 띠에서 내려갔다 (정본 §6·§7).
+    for (const cls of ['.jb-brand', '.jb-title', '.logo', '.grain', '.jq-labels']) {
+      expect(container.querySelector(cls), cls).toBeNull();
     }
   });
 
-  it('판 번호와 리포를 함께 적는다', () => {
+  it('리포 이름은 곁말로 남고 학습 회차는 낭독으로만 간다', () => {
     const { container } = render(<JobBand runNo="Run 08" repo="cart-shop-web" queue={QUEUE} pos={0} elapsed={0} />);
-    expect(container.querySelector('.jb-sub')?.textContent).toBe('Run 08 · cart-shop-web');
+    expect(container.querySelector('.jb-repo')?.textContent).toBe('cart-shop-web');
+    expect(container.querySelector('.jb-where .vh')?.textContent).toBe('Run 08');
   });
 
-  it('지금 몇 번째 판인지 세어 적는다', () => {
+  it('지금 몇 번째 문제인지 세어 적는다', () => {
     const { container } = render(<JobBand runNo="Run 08" repo="r" queue={QUEUE} pos={2} elapsed={0} />);
-    const head = container.querySelector('.jq-h');
+    const head = container.querySelector('.jb-where');
     expect(head?.textContent).toContain('3 / 4');
     expect(head?.textContent).toContain('formatPrice 필사');
-    expect(head?.textContent).toContain('(클론)');
+    expect(head?.textContent).toContain('클론');
   });
 
-  it('남은 시간은 지금 판의 경과를 빼고 센다', () => {
+  it('남은 시간은 지금 문제의 경과를 빼고 센다', () => {
     const { container } = render(<JobBand runNo="Run 08" repo="r" queue={QUEUE} pos={0} elapsed={0} />);
     // 0.7 + 0.5 + 9 + 4 = 14.2분 → 14분
-    expect(container.querySelector('.jq-h .time')?.textContent).toContain('약 14분');
+    expect(container.querySelector('.jb-time')?.textContent).toContain('약 14분');
 
     cleanup();
     const later = render(<JobBand runNo="Run 08" repo="r" queue={QUEUE} pos={2} elapsed={120} />);
     // 9 - 2 + 4 = 11분
-    expect(later.container.querySelector('.jq-h .time')?.textContent).toContain('약 11분');
+    expect(later.container.querySelector('.jb-time')?.textContent).toContain('약 11분');
   });
 
-  it('1분 미만 판은 초로 적는다', () => {
+  it('1분 미만 문제는 초로 적는다', () => {
     const { container } = render(<JobBand runNo="Run 08" repo="r" queue={QUEUE} pos={1} elapsed={0} />);
-    expect(container.querySelector('.jq-h .time')?.textContent).toContain('30초 판');
+    expect(container.querySelector('.jb-time')?.textContent).toContain('30초');
   });
 
-  it('다 찍으면 인쇄 완료로 바뀐다', () => {
+  it('다 풀면 학습 완료로 바뀐다', () => {
     const { container } = render(
       <JobBand runNo="Run 08" repo="r" queue={QUEUE} pos={4} elapsed={0} totalElapsed={900} />,
     );
-    const head = container.querySelector('.jq-h');
-    expect(head?.textContent).toContain('4 / 4');
-    expect(head?.textContent).toContain('인쇄 완료');
-    expect(head?.textContent).toContain('오늘 15분');
+    expect(container.querySelector('.jb-where')?.textContent).toContain('4 / 4');
+    expect(container.querySelector('.jb-where')?.textContent).toContain('오늘 학습 완료');
+    expect(container.querySelector('.jb-time')?.textContent).toContain('오늘 15분');
   });
 
   it('막대는 시간 비례이고 문장으로도 읽힌다 (정본 §3-5)', () => {
@@ -70,12 +74,10 @@ describe('JobBand', () => {
     expect(bar.getAttribute('aria-label')).toContain('formatPrice 필사');
   });
 
-  it('이름표는 2분 이상인 칸에만 붙고 너비는 --w 로만 들어간다', () => {
+  it('칸마다 이름을 또 적지 않는다 — 지금 무엇을 푸는지는 위 줄이 말한다 (D182)', () => {
     const { container } = render(<JobBand runNo="Run 08" repo="r" queue={QUEUE} pos={2} elapsed={0} />);
-    const labels = [...container.querySelectorAll<HTMLElement>('.jq-labels span')];
-    expect(labels.map((el) => el.textContent)).toEqual(['', '', 'formatPrice 필사', '책임 배치']);
-    expect(labels[2]?.style.getPropertyValue('--w')).toBe('9');
-    expect(labels[2]?.className).toContain('now');
+    expect(container.querySelector('.jq-labels')).toBeNull();
+    expect(container.querySelector('.jb-what')?.textContent).toContain('formatPrice 필사');
   });
 
   it('오른쪽 조작은 그대로 받아 낸다', () => {

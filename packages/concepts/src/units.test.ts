@@ -1,0 +1,202 @@
+/**
+ * 기능 대지 (D160). 디렉터리 규칙(`assignUnits`)의 시험은 `concepts.test.ts` 에 있다 —
+ * 여기는 HTTP 진입점에서 폐포를 뜨는 쪽만 본다.
+ */
+import { describe, expect, test } from 'vitest';
+
+import { OTHER_UNIT, entryUnits, planUnits } from './units.js';
+
+describe('기능 대지 — HTTP 진입점에서 도달하는 것 (D160)', () => {
+  const edge = (from: string, to: string, kind: 'static' | 'http' = 'static') =>
+    ({ from, to, kind, confidence: 'syntactic' as const, line: 1 });
+
+  const FE = 'FRONT/src/services/authService.js';
+  const CTRL = 'BACK/src/main/java/com/ssafy/app/controller/AuthController.java';
+  const SVC = 'BACK/src/main/java/com/ssafy/app/service/AuthService.java';
+  const DAO = 'BACK/src/main/java/com/ssafy/app/model/dao/UserDao.java';
+
+  test('진입점에서 따라간 폐포가 기능 하나다', () => {
+    const units = entryUnits([edge(FE, CTRL, 'http'), edge(CTRL, SVC), edge(SVC, DAO)]);
+    expect(units).toHaveLength(1);
+    expect(units[0]?.name).toBe('auth');
+    expect(units[0]?.files).toStrictEqual([CTRL, SVC, DAO, FE].sort());
+  });
+
+  test('이름은 진입 파일에서 뽑고 `Service` 접미는 뗀다', () => {
+    const units = entryUnits([edge('FRONT/src/services/rankingService.js', CTRL, 'http')]);
+    expect(units[0]?.name).toBe('ranking');
+  });
+
+  test('HTTP 엣지가 없으면 기능도 없다 — 정적 import 만으로는 진입점을 모른다', () => {
+    expect(entryUnits([edge(CTRL, SVC), edge(SVC, DAO)])).toStrictEqual([]);
+  });
+
+  test('파일 하나가 기능 여럿에 든다 — 1:1 로 접지 않는다', () => {
+    // 실측: 90파일 중 13개가 그랬다. `UserDao` 는 로그인이자 회원정보다.
+    const OTHER = 'FRONT/src/services/userService.js';
+    const OTHER_CTRL = 'BACK/src/main/java/com/ssafy/app/controller/UserController.java';
+    const units = entryUnits([
+      edge(FE, CTRL, 'http'), edge(CTRL, SVC), edge(SVC, DAO),
+      edge(OTHER, OTHER_CTRL, 'http'), edge(OTHER_CTRL, DAO),
+    ]);
+    expect(units.map((u) => u.name)).toStrictEqual(['auth', 'user']);
+    for (const u of units) expect(u.files).toContain(DAO);
+  });
+
+  test('사이클이 있어도 멈춘다', () => {
+    const units = entryUnits([edge(FE, CTRL, 'http'), edge(CTRL, SVC), edge(SVC, CTRL)]);
+    expect(units[0]?.files).toStrictEqual([CTRL, SVC, FE].sort());
+  });
+
+  test('이름이 같은 진입점 둘이면 큰 쪽이 이긴다', () => {
+    const a = 'FRONT/a/authService.js';
+    const b = 'FRONT/b/authService.js';
+    const units = entryUnits([edge(a, CTRL, 'http'), edge(b, SVC, 'http'), edge(CTRL, SVC)]);
+    expect(units).toHaveLength(1);
+    expect(units[0]?.entry).toBe(a);
+  });
+});
+
+describe('기능 + 디렉터리 합치기 (D160)', () => {
+  const edge = (from: string, to: string, kind: 'static' | 'http' = 'static') =>
+    ({ from, to, kind, confidence: 'syntactic' as const, line: 1 });
+  const FE = 'FRONT/src/services/authService.js';
+  const CTRL = 'BACK/src/main/java/com/ssafy/app/controller/AuthController.java';
+  const SVC = 'BACK/src/main/java/com/ssafy/app/service/AuthService.java';
+  const CFG = 'BACK/src/main/java/com/ssafy/app/config/SecurityConfig.java';
+  const FILTER = 'BACK/src/main/java/com/ssafy/app/security/JwtAuthenticationFilter.java';
+  const BOOT = 'BACK/src/main/java/com/ssafy/app/Application.java';
+
+  test('기능이 먼저 서고 남은 것만 디렉터리 규칙이 받는다', () => {
+    const paths = [FE, CTRL, SVC, CFG, FILTER, BOOT];
+    const { units, unitsOf } = planUnits(paths, [edge(FE, CTRL, 'http'), edge(CTRL, SVC)]);
+    expect(units[0]?.name).toBe('auth');
+    expect(unitsOf.get(CTRL)).toStrictEqual(['auth']);
+    // 런타임에 엮이는 것은 어느 폐포에도 안 든다 — 디렉터리 쪽으로 온다.
+    expect(unitsOf.get(CFG)).toBeDefined();
+    expect(unitsOf.get(CFG)).not.toContain('auth');
+  });
+
+  test('덮이지 않은 파일이 하나도 안 사라진다', () => {
+    const paths = [FE, CTRL, SVC, CFG, FILTER, BOOT];
+    const { unitsOf } = planUnits(paths, [edge(FE, CTRL, 'http'), edge(CTRL, SVC)]);
+    for (const p of paths) expect(unitsOf.get(p)?.length ?? 0).toBeGreaterThan(0);
+  });
+
+  test('엣지가 없으면 예전과 같다 — 디렉터리 규칙만 돈다', () => {
+    const paths = ['src/cart/a.ts', 'src/cart/b.ts', 'src/cart/c.ts'];
+    const { units } = planUnits(paths, []);
+    expect(units.map((u) => u.name)).toStrictEqual(['cart']);
+  });
+
+  test('이름이 겹치면 기능이 이기고 밀려난 파일은 기타로 간다', () => {
+    const paths = [FE, CTRL, 'src/auth/x.ts', 'src/auth/y.ts', 'src/auth/z.ts'];
+    const { units, unitsOf } = planUnits(paths, [edge(FE, CTRL, 'http')]);
+    expect(units.filter((u) => u.name === 'auth')).toHaveLength(1);
+    expect(unitsOf.get('src/auth/x.ts')).toStrictEqual([OTHER_UNIT]);
+    expect(unitsOf.get(CTRL)).toStrictEqual(['auth']);
+  });
+});
+
+describe('위로 한 단 (D163)', () => {
+  const edge = (from: string, to: string, kind: 'static' | 'http' = 'static') =>
+    ({ from, to, kind, confidence: 'syntactic' as const, line: 1 });
+  const FE = 'FRONT/src/services/authService.js';
+  const CTRL = 'BACK/controller/AuthController.java';
+  const JWT = 'BACK/security/JwtUtil.java';
+  const FILTER = 'BACK/security/JwtAuthenticationFilter.java';
+
+  test('이 기능만의 파일을 쓰는 쪽은 기능에 든다 — 필터 체인이 그렇다', () => {
+    const units = entryUnits([edge(FE, CTRL, 'http'), edge(CTRL, JWT), edge(FILTER, JWT)]);
+    expect(units[0]?.files).toContain(FILTER);
+  });
+
+  test('여러 기능이 쓰는 파일에서는 안 올라간다 — 공유 부품이 통로가 되면 안 된다', () => {
+    // `UTIL` 을 두 기능이 쓴다. 그 위의 `OTHER` 는 어느 쪽 것도 아니다.
+    const FE2 = 'FRONT/src/services/noticeService.js';
+    const CTRL2 = 'BACK/controller/NoticeController.java';
+    const UTIL = 'BACK/util/SecurityUtil.java';
+    const OTHER = 'BACK/controller/RankingController.java';
+    const units = entryUnits([
+      edge(FE, CTRL, 'http'), edge(CTRL, UTIL),
+      edge(FE2, CTRL2, 'http'), edge(CTRL2, UTIL),
+      edge(OTHER, UTIL),
+    ]);
+    for (const u of units) expect(u.files).not.toContain(OTHER);
+  });
+
+  test('한 단만 올라간다 — 두 단 위는 안 든다', () => {
+    const BOOT = 'BACK/config/SecurityConfig.java';
+    const units = entryUnits([edge(FE, CTRL, 'http'), edge(CTRL, JWT), edge(FILTER, JWT), edge(BOOT, FILTER)]);
+    expect(units[0]?.files).toContain(FILTER);
+    expect(units[0]?.files).not.toContain(BOOT);
+  });
+});
+
+describe('코스 순서와 origin (D162)', () => {
+  const edge = (from: string, to: string, kind: 'static' | 'http' = 'static') =>
+    ({ from, to, kind, confidence: 'syntactic' as const, line: 1 });
+
+  test('기능은 origin=entry · 나머지는 dir', () => {
+    const FE = 'FRONT/src/services/authService.js';
+    const CTRL = 'BACK/controller/AuthController.java';
+    const paths = [FE, CTRL, 'src/cfg/a.ts', 'src/cfg/b.ts', 'src/cfg/c.ts'];
+    const { units } = planUnits(paths, [edge(FE, CTRL, 'http')]);
+    expect(units.find((u) => u.name === 'auth')?.origin).toBe('entry');
+    expect(units.find((u) => u.name === 'cfg')?.origin).toBe('dir');
+  });
+
+  test('규약 근거가 경로에 있는 기능이 1번이다', () => {
+    const A = 'FRONT/src/services/aService.js';
+    const B = 'FRONT/src/services/bService.js';
+    const PLAIN = 'BACK/controller/AController.java';
+    const JWT = 'BACK/security/JwtUtil.java';
+    const { units } = planUnits(
+      [A, B, PLAIN, JWT],
+      [edge(A, PLAIN, 'http'), edge(B, JWT, 'http')],
+      { protoMarks: ['Jwt'] },
+    );
+    expect(units[0]?.name).toBe('b');
+  });
+
+  test('근거가 없으면 규칙이 정한다 — 새로 여는 파일 적은 순', () => {
+    const A = 'FRONT/src/services/aService.js';
+    const B = 'FRONT/src/services/bService.js';
+    const A1 = 'BACK/a/One.java'; const A2 = 'BACK/a/Two.java'; const B1 = 'BACK/b/One.java';
+    const { units } = planUnits(
+      [A, B, A1, A2, B1],
+      [edge(A, A1, 'http'), edge(A1, A2), edge(B, B1, 'http')],
+      { protoMarks: ['없는낱말'] },
+    );
+    expect(units[0]?.name).toBe('b');
+  });
+});
+
+describe('진입점 넓히기 (D168)', () => {
+  const FE = 'FRONT/src/services/fortuneService.js';
+  const CTRL = 'BACK/src/main/java/com/a/controller/FortuneController.java';
+  const SVC = 'BACK/src/main/java/com/a/service/FortuneService.java';
+  const PY = 'AI_API/main.py';
+  const SCHED = 'BACK/src/main/java/com/a/service/CoinSchedulerService.java';
+  const DAO = 'BACK/src/main/java/com/a/model/dao/UserDao.java';
+  const edge = (from: string, to: string, kind: 'static' | 'http' = 'static') =>
+    ({ from, to, kind, confidence: 'syntactic' as const, line: 1 });
+
+  test('서버가 서버를 부르는 자리는 진입점이 아니다 — 프론트 진입점에서 이미 닿는다', () => {
+    const units = entryUnits([edge(FE, CTRL, 'http'), edge(CTRL, SVC), edge(SVC, PY, 'http')]);
+    expect(units.map((u) => `${u.name}:${u.files.length}`)).toStrictEqual(['fortune:4']);
+  });
+
+  test('`@Scheduled` 파일은 HTTP 없이도 기능이다 — 이름은 층 접미를 벗기고 소문자로', () => {
+    const units = entryUnits([edge(SCHED, DAO)], [{ path: SCHED }]);
+    expect(units.map((u) => `${u.name}:${u.entry}`)).toStrictEqual([`coin:${SCHED}`]);
+  });
+
+  test('서로 닿는 두 진입점은 큰 쪽이 남는다', () => {
+    const a = 'FRONT/src/services/aService.js';
+    const b = 'FRONT/src/services/bService.js';
+    const extra = 'FRONT/src/x.js';
+    const units = entryUnits([edge(a, CTRL, 'http'), edge(b, CTRL, 'http'), edge(a, b), edge(b, a), edge(a, extra)]);
+    expect(units.map((u) => u.name)).toStrictEqual(['a']);
+  });
+});

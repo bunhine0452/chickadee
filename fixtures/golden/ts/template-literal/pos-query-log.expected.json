@@ -16,6 +16,19 @@
     "queryId": "ts/template-literal",
     "matchId": 1,
     "patternIndex": 0,
+    "name": "pick.3",
+    "form": "interpolated",
+    "startLine": 2,
+    "startCol": 9,
+    "endLine": 2,
+    "endCol": 10,
+    "nodeKind": "`",
+    "inError": false
+  },
+  {
+    "queryId": "ts/template-literal",
+    "matchId": 1,
+    "patternIndex": 0,
     "name": "pick.2",
     "form": "interpolated",
     "startLine": 3,
@@ -49,6 +62,19 @@
     "endLine": 5,
     "endCol": 3,
     "nodeKind": "template_string",
+    "inError": false
+  },
+  {
+    "queryId": "ts/template-literal",
+    "matchId": 2,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "interpolated",
+    "startLine": 2,
+    "startCol": 9,
+    "endLine": 2,
+    "endCol": 10,
+    "nodeKind": "`",
     "inError": false
   },
   {

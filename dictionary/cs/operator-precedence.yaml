@@ -1,0 +1,108 @@
+schema: 1
+id: cs/operator-precedence
+universal: null
+name: { ko: "괄호 없이 무엇이 먼저 묶이나", en: "Operator precedence" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+track_default: t0
+essential: false
+difficulty: 2
+prereq: []
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "식은 왼쪽부터 읽히지 않는다. 연산자마다 세기와 방향이 있다."
+    en: "An expression is not read left to right. Operators have strength and direction."
+  why:
+    ko: >-
+      <code>2 + 3 * 4</code> 는 <b>14</b> 지 20 이 아닙니다. 곱하기가 더 세서 먼저 묶이기
+      때문이에요. 세기만 있는 것이 아니라 <b>방향</b>도 있습니다 —
+      <code>2 ** 3 ** 2</code> 는 오른쪽부터 묶여 <b>512</b> 이고, 왼쪽부터 읽으면 64 가 나와요.
+      대입도 오른쪽부터라 <code>a = b = 1</code> 이 섭니다.
+      이것이 중요한 이유는 식이 <b>글자 줄이 아니라 나무</b>이기 때문입니다. 세기와 방향이
+      그 나무 모양을 정하고, 나무 모양이 계산 순서를 정하고, 계산 순서가 답을 정해요.
+      괄호는 그 나무를 눈에 보이게 적는 방법입니다.
+    en: >-
+      <code>2 + 3 * 4</code> is <b>14</b>, not 20, because multiplication binds tighter. Strength is
+      not the only axis — <b>direction</b> matters too: <code>2 ** 3 ** 2</code> groups from the
+      right and gives <b>512</b>, where reading left to right would give 64. Assignment groups from
+      the right as well, which is what makes <code>a = b = 1</code> stand. This matters because an
+      expression is <b>a tree, not a line of characters</b>. Strength and direction fix the tree,
+      the tree fixes the order of evaluation, and that order fixes the answer. Parentheses are how
+      you write the tree down.
+  trace: []
+rule:
+  ko: "<b>식은 나무다.</b> 세기가 가지를 정하고 방향이 같은 세기끼리의 순서를 정한다."
+  en: "<b>An expression is a tree.</b> Strength picks the branches; direction orders equal strengths."
+ok:
+  ko: >-
+    읽는 사람이 세기를 외우고 있으리라 기대하지 않는 편이 낫습니다. 괄호는 계산을 안 바꾸고
+    나무만 보이게 해요.
+  en: >-
+    It is safer not to assume the reader has the table memorised. Parentheses change no computation;
+    they only make the tree visible.
+misconceptions:
+  - ko: "식은 왼쪽부터 차례로 계산된다 — 2 + 3 * 4 는 14 입니다. 곱하기가 먼저 묶여요."
+    en: "An expression computes left to right — 2 + 3 * 4 is 14; multiplication binds first."
+  - ko: "세기만 알면 된다 — 2 ** 3 ** 2 는 512 입니다. 거듭제곱은 오른쪽부터 묶여요."
+    en: "Strength is all there is — 2 ** 3 ** 2 is 512; exponentiation groups from the right."
+  - ko: "묶이는 순서가 곧 계산되는 순서다 — 다릅니다. 어느 쪽 피연산자를 먼저 계산하는지는 언어가 따로 정해요."
+    en: >-
+      Grouping order is evaluation order — they differ. Which operand runs first is a separate rule
+      the language sets.
+meaning:
+  - q:
+      ko: "<code>2 + 3 * 4</code> 가 <code>14</code> 로 나옵니다. <b>무엇이 그 모양을 정한 건가요?</b>"
+      en: "<code>2 + 3 * 4</code> comes out <code>14</code>. <b>What fixed that shape?</b>"
+    hint:
+      ko: "두 연산자 중 어느 쪽이 자기 양옆을 먼저 잡았을까요."
+      en: "Which of the two operators grabbed its neighbours first?"
+    options:
+      - t:
+          ko: "곱하기가 더 세서 3 과 4 를 먼저 한 덩어리로 묶었다"
+          en: "Multiplication binds tighter, so it took 3 and 4 as one lump first"
+      - t:
+          ko: "오른쪽에 있는 연산자가 먼저 계산된다"
+          en: "The operator further right runs first"
+        diag:
+          t:
+            ko: "자리가 아니라 <b>세기</b>입니다. <code>2 * 3 + 4</code> 에서는 <b>왼쪽</b>이 먼저 묶여 10 이 나와요."
+            en: >-
+              Position is not the rule; <b>strength</b> is. In <code>2 * 3 + 4</code> the <b>left</b>
+              one binds first and the answer is 10.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 자리냐 세기냐", en: "The sharpest spot — position or strength" }
+            code:
+              - "2 + 3 * 4  → 14   (오른쪽이 먼저)"
+              - "2 * 3 + 4  → 10   (왼쪽이 먼저)"
+      - t:
+          ko: "괄호가 없으면 순서가 정해져 있지 않다"
+          en: "Without parentheses the order is undefined"
+        diag:
+          t:
+            ko: "묶이는 순서는 <b>완전히 정해져</b> 있습니다. 정해지지 않은 것은 그 다음 축인 <b>어느 쪽을 먼저 계산하나</b>예요."
+            en: >-
+              Grouping is <b>fully determined</b>. What can be undetermined is the next axis —
+              <b>which operand is evaluated first</b>.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 묶임이냐 계산 순서냐", en: "The sharpest spot — grouping or evaluation" }
+            code:
+              - "묶임:      2 + (3 * 4)  — 언제나 이 모양"
+              - "계산 순서: f() + g()    — 언어가 정한다"
+      - t:
+          ko: "덧셈이 뒤로 밀린 것은 이 언어의 관습이다"
+          en: "Pushing the addition later is this language's habit"
+        diag:
+          t:
+            ko: "열 언어가 <b>같은 세기</b>를 씁니다 — 산술 식의 이 부분은 언어를 옮겨도 안 바뀌어요."
+            en: >-
+              All ten languages use <b>the same strengths</b> here — this part of an arithmetic
+              expression does not change when you switch languages.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 언어 관습이냐 공통 규칙이냐", en: "The sharpest spot — a habit or a shared rule" }
+            code:
+              - "파이썬·자바·JS·C·Go: 2 + 3 * 4 → 14"
+              - "갈리는 것은 ** 의 방향 같은 가장자리다"

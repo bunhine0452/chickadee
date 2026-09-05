@@ -1,0 +1,94 @@
+schema: 1
+id: spring/exception-handler
+universal: null
+name: { ko: "던진 예외가 응답이 되는 자리", en: "Exception handler" }
+token: null
+grammars: []
+framework: spring
+# 짚을 노드가 없다 — 예외와 처리기를 잇는 것은 실행 중의 타입 대조다 (D176).
+# 창은 근거 낱말이 보이는 블록과 자바 개념의 사용처에서 빌린다 (D157 ②).
+track_default: t0
+essential: false
+difficulty: 3
+prereq: [spring/request-dispatch, proto/status-code]
+confusions: [spring/filter-vs-interceptor]
+queries: []
+dict:
+  one_liner:
+    ko: "던진 예외를 타입으로 받아 상태 코드와 본문으로 바꾸는 자리다."
+    en: "It catches an exception by type and turns it into a status and a body."
+  why:
+    ko: >-
+      서비스 안에서 <b>예외를 던지면</b> 그 자리에서 응답을 만들지 않습니다. 대신 한 군데 모아
+      둔 처리기가 그 예외를 <b>타입으로</b> 받아 상태 코드와 본문을 정합니다. 잇는 것은 이름도
+      호출도 아니고 <b>예외의 타입</b>이에요 — 던지는 파일과 받는 파일이 서로를 부르지 않는데도
+      이어지는 이유가 이것입니다. 이렇게 하면 컨트롤러마다 같은 <code>try</code> 를 쓰지 않아도
+      되고, 401 을 만드는 자리가 한 곳으로 모입니다. 대신 <b>처리기가 못 받는 예외</b>는 기본
+      규칙으로 나가서 대개 500 이 됩니다.
+    en: >-
+      Throwing <b>an exception</b> inside a service does not build a response there. A handler
+      collected in one place catches it <b>by type</b> and decides the status and the body. What
+      links them is not a name or a call but <b>the exception's type</b> — which is why the throwing
+      file and the catching file connect without calling each other. This keeps the same
+      <code>try</code> out of every controller and puts the place that makes a 401 in one spot. In
+      exchange, <b>an exception no handler catches</b> falls to the default and usually becomes 500.
+  trace: []
+rule:
+  ko: "<b>예외와 처리기를 잇는 것은 타입이다.</b> 이름도 호출도 아니다."
+  en: "<b>Type is what links an exception to its handler.</b> Not a name, not a call."
+ok:
+  ko: >-
+    던진 예외의 타입에 맞는 처리기가 골라집니다. 그 처리기가 상태 코드와 본문을 정하고
+    응답이 됩니다.
+  en: >-
+    A handler matching the thrown exception's type is picked. That handler decides the status and
+    the body, and the response goes out.
+misconceptions:
+  - ko: "처리기가 없으면 예외가 사라진다 — 기본 규칙으로 나가 대개 500 이 됩니다."
+    en: "Without a handler the exception vanishes — it falls to the default and usually becomes 500."
+  - ko: "컨트롤러마다 <code>try</code> 를 써야 한다 — 한 군데 모아 두면 안 써도 됩니다."
+    en: "Every controller needs a <code>try</code> — one collected place removes the need."
+  - ko: "앞의 자리에서 던진 예외도 여기로 온다 — 그 자리는 아직 이 바깥입니다."
+    en: "An exception from the earlier place lands here too — that place is still outside."
+  - ko: "애너테이션은 명령이다 — 표시일 뿐이고 스프링이 타입을 보고 고릅니다."
+    en: "An annotation is a command — it is a mark; Spring picks by type."
+evidence: ["@ExceptionHandler", "@RestControllerAdvice", "@ControllerAdvice", "ResponseStatusException", "@ResponseStatus"]
+meaning:
+  - q:
+      ko: "서비스가 던진 예외와 처리기는 서로를 안 부릅니다. <b>무엇이 둘을 잇나요?</b>"
+      en: "The service and the handler never call each other. <b>What links them?</b>"
+    hint:
+      ko: "처리기가 무엇을 적어 두고 기다리는지 보세요."
+      en: "Look at what the handler writes down and waits for."
+    options:
+      - t: { ko: "예외의 타입 — 같은 타입을 받는 처리기가 골라진다", en: "The exception's type — the handler taking that type is picked" }
+      - t: { ko: "예외에 담긴 메시지 글자", en: "The message text inside the exception" }
+        diag:
+          t:
+            ko: "메시지는 <b>사람에게 보여 줄 글</b>이고 고르는 데 안 쓰입니다. 메시지를 바꿔도 같은 처리기가 받아요."
+            en: "The message is <b>text for a human</b> and plays no part in picking. Change it and the same handler still catches."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 타입이냐 글자냐", en: "The sharpest spot — type or text" }
+            code:
+              - "타입: 고르는 기준"
+              - "메시지: 보여 줄 글"
+      - t: { ko: "같은 패키지에 있다는 것", en: "Being in the same package" }
+        diag:
+          t:
+            ko: "패키지는 상관없습니다. 처리기는 <b>한 군데 모여</b> 어느 패키지의 예외든 타입만 맞으면 받아요."
+            en: "The package does not matter. The handler is <b>collected in one place</b> and catches any package's exception when the type matches."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 자리냐 타입이냐", en: "The sharpest spot — location or type" }
+            code:
+              - "패키지: 상관없다"
+              - "타입: 맞아야 한다"
+      - t: { ko: "컨트롤러가 처리기를 주입받는 것", en: "The controller being injected with the handler" }
+        diag:
+          t:
+            ko: "컨트롤러는 처리기를 <b>모릅니다</b>. 예외가 컨트롤러 밖으로 나간 뒤에 스프링이 고르는 것이라 주입이 필요 없어요."
+            en: "The controller <b>does not know</b> the handler. Spring picks after the exception leaves the controller, so no injection is needed."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 주입이냐 밖에서 고르기냐", en: "The sharpest spot — injection or an outside pick" }
+            code:
+              - "컨트롤러: 던지고 끝"
+              - "스프링: 밖에서 고른다"

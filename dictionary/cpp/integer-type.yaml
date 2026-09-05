@@ -1,0 +1,175 @@
+schema: 1
+id: cpp/integer-type
+# 0부 §0.1 #3, 축 1. 보편형은 `common/integer-literal` 이다 — 「자릿수가 정해져 있다」까지는
+# 전이되고, 「그 자릿수를 구현이 정한다」는 C++·C 쪽 어긋남이라 판에만 있다.
+universal: common/integer-literal
+name: { ko: 정수의 폭과 부호, en: Integer types }
+token: "int"
+grammars: [cpp]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cpp/variable-declaration, cs/bit-and-byte, cs/binary-representation]
+confusions: []
+dict:
+  one_liner:
+    ko: "정수마다 담을 칸 수가 정해져 있는데, 그 칸 수를 언어가 아니라 구현이 정한다."
+    en: "Each whole-number type fixes a slot count, and the implementation picks it."
+  why:
+    ko: >-
+      {{site.line}}행이 정하는 것은 값이 아니라 <b>칸 수</b>입니다. 그런데 C++ 규격이
+      보장하는 것은 <code>sizeof(char)</code>가 1 이라는 것 하나뿐이고, 나머지는
+      「적어도 이만큼」만 정해 두었습니다 — 같은 코드가 다른 기계에서 다른 폭으로 돌 수
+      있다는 뜻이에요. 그래서 폭이 중요한 자리에는 <code>&lt;cstdint&gt;</code>의
+      <code>int32_t</code>처럼 <b>이름에 폭이 적힌 타입</b>을 씁니다. 부호도 같이 정해집니다 —
+      부호 없는 쪽은 음수를 못 담는 대신 같은 칸으로 두 배 큰 양수를 담아요.
+    en: >-
+      What line {{site.line}} fixes is not the value but the <b>slot count</b>. Yet the only
+      width the standard guarantees is that <code>sizeof(char)</code> is 1; the rest are
+      “at least this many” — the same code can run at a different width on another machine.
+      So where the width matters you write a type with the width <b>in its name</b>, such as
+      <code>int32_t</code> from <code>&lt;cstdint&gt;</code>. Sign is settled here too — the
+      unsigned side gives up negatives and holds twice the positive range in the same slots.
+  trace:
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 칸 수와 부호를 함께 정한다."
+      en: "{{pick.1|code}} fixes the slot count and the sign together."
+    - ko: "{{pick.2|code}} 라는 이름이 그 칸들을 부른다."
+      en: "The name {{pick.2|code}} refers to those slots."
+    - ko: "{{site.line}}행 뒤로 그 이름은 정해진 폭 밖의 값을 못 담는다."
+      en: "After line {{site.line}} that name cannot hold a value outside the fixed width."
+rule:
+  ko: "<b>타입이 칸 수를 정하되, 그 칸 수는 규격이 아니라 구현이 정한다.</b> 폭을 못 박으려면 이름에 적는다."
+  en: "<b>The type fixes the slots, but the implementation fixes the count.</b> Pin a width by writing it in the name."
+result:
+  label: { ko: "{{site.line}}행이 정한 폭", en: "the width fixed on line {{site.line}}" }
+  value: "{{pick.1}} {{pick.2}}"
+  note: { ko: "기계마다 달라질 수 있다", en: "it can differ per machine" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 이제 폭과 부호가 정해진 이름입니다."
+  en: "{{pick.2|code}} is now a name with a settled width and sign."
+payoff:
+  ko: >-
+    이걸 알면 「내 노트북에서는 되는데 서버에서 값이 달라진다」의 한 갈래가 풀립니다.
+  en: >-
+    This untangles one branch of “it works on my laptop but the number differs on the server”.
+bridge:
+  ko: >-
+    자바는 같은 자리를 <b>명세가 못 박습니다</b> — 어디서나 32칸이에요. 파이썬은 칸 자체가
+    없어 자릿수가 늘어납니다. C++ 은 셋 중 유일하게 <b>물어봐야</b> 압니다.
+  en: >-
+    Java <b>pins the same slot in its specification</b> — 32 everywhere. Python has no slots at
+    all and simply grows. C++ is the one of the three where you have to <b>ask</b>.
+misconceptions:
+  # `cpp.md` §0.1 #3.
+  - ko: "어디서나 32칸이다 — 규격이 보장하는 것은 <code>sizeof(char)</code>가 1 이라는 것뿐입니다."
+    en: "It is 32 slots everywhere — the only guarantee is that <code>sizeof(char)</code> is 1."
+  - ko: "부호 없는 쪽이 그냥 더 크다 — 같은 칸 수로 음수를 버리고 양수를 두 배 담는 겁니다."
+    en: "The unsigned side is just bigger — same slots, negatives dropped, twice the positive range."
+  - ko: "큰 수를 넣으면 칸이 늘어난다 — 안 늘어납니다. 넘칠 때 무슨 일이 나는지가 다음 판이에요."
+    en: "Bigger numbers get more slots — they do not. What happens when they run out is the next plate."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>칸 수와 부호를 정하는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that fixes the slot count and the sign</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 이름을 바꿔도 폭은 그대로예요."
+          en: "{{pick.2|code}} is the <b>name</b>. Change the name and the width is unchanged."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 폭이냐", en: "The sharpest spot — the name or the width" }
+          code:
+            - "short n = 1;      // 적어도 16칸"
+            - "long long n = 1;  // 적어도 64칸"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 처음 넣는 <b>값</b>입니다. 값이 작아도 폭은 앞의 낱말이 정한 만큼이에요."
+          en: "{{pick.3|code}} is the starting <b>value</b>. Small values still get the width the word in front asked for."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값이냐 폭이냐", en: "The sharpest spot — the value or the width" }
+          code:
+            - "short s = 1;      // 1 이지만 16칸"
+            - "long long b = 1;  // 같은 1, 64칸"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>부호 있는 보통 정수</b> 자리를 잡습니다."
+      en: "Choose what goes in the blank. Line {{site.line}} claims room for <b>an ordinary signed whole number</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "int", mono: true }
+      - t: "unsigned"
+        mono: true
+        diag:
+          t:
+            ko: "이건 음수를 <b>못 담는</b> 쪽입니다. 같은 칸 수로 양수만 두 배 담고, 음수를 넣으면 큰 양수로 읽혀요."
+            en: "That side <b>holds no negatives</b>. Same slots, twice the positive range, and a negative put in reads as a large positive."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 음수를 담느냐", en: "The sharpest spot — can it hold a negative" }
+            code:
+              - "int n = -1;         // -1"
+              - "unsigned n = -1;    // 아주 큰 양수"
+      - t: "double"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>소수를 담는</b> 타입입니다. 정수만 넣어도 값이 근사값으로 저장되고 나눗셈 결과도 달라져요."
+            en: "That type <b>holds fractions</b>. Even whole numbers are stored as approximations and division behaves differently."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 정수냐 소수냐", en: "The sharpest spot — whole or fractional" }
+            code:
+              - "int n = 7 / 2;      // 3"
+              - "double d = 7 / 2.0; // 3.5"
+      - t: "bool"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>참·거짓</b> 타입이라 담을 수 있는 값이 둘뿐입니다. 수를 넣으면 0 이 아닌 것은 전부 참 하나로 접혀요."
+            en: "That is the <b>true/false</b> type with just two values. Put a number in and everything non-zero folds into one truth."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 수냐 참·거짓이냐", en: "The sharpest spot — a number or a truth value" }
+            code:
+              - "int n = 2;          // 2"
+              - "bool b = 2;         // 참 하나로 접힌다"
+why_gate:
+  q:
+    ko: "폭이 중요한 자리에서는 왜 <b>이름에 폭이 적힌 타입</b>을 쓸까요?"
+    en: "Where the width matters, why use <b>a type with the width in its name</b>?"
+  choices:
+    - t:
+        ko: "보통 이름은 기계마다 폭이 달라질 수 있어서 — 파일 형식이나 프로토콜은 그 흔들림을 못 받아들이니까"
+        en: "Because the ordinary names can differ per machine, and a file format or protocol cannot take that wobble"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 흔들려도 되는 자리가 어디인지도 한 줄로 적어 보세요."
+        en: "That is the direction. Add a line on where the wobble is acceptable."
+    - t:
+        ko: "그쪽이 더 빠르게 도니까"
+        en: "Because it runs faster"
+      ok: false
+      fb:
+        ko: "속도 문제가 아닙니다. 같은 폭이면 같은 셈이고, 고른 이유는 <b>폭이 정해진다</b>는 것뿐이에요."
+        en: "Speed is not it. At the same width the arithmetic is the same; the reason is that <b>the width is pinned</b>."
+    - t:
+        ko: "보통 이름이 옛날 것이라 쓰면 안 되니까"
+        en: "Because the ordinary names are old and must not be used"
+      ok: false
+      fb:
+        ko: "금지된 것이 아닙니다. 폭이 안 중요한 자리에서는 보통 이름이 읽기 쉬워요."
+        en: "They are not forbidden. Where the width does not matter the ordinary names read better."
+queries:
+  - { grammars: [cpp], file: ./integer-type.scm }
+examples:
+  - code: "void f() { int n = 7; }                   // n -> 7 (int, 적어도 16칸)"
+    expect: { sites: 1, form: intdecl, hole: "int", picks: { 1: "int", 2: "n", 3: "7" } }
+  - code: "void f() { unsigned int u = 0u; }         // u -> 0 (unsigned int, 음수 없음)"
+    expect: { sites: 1, form: sized, hole: "unsigned int", picks: { 1: "unsigned int", 2: "u", 3: "0u" } }
+  - code: "void f() { int64_t big = 1; }             // big -> 1 (int64_t, 정확히 64칸)"
+    expect: { sites: 1, form: fixed, hole: "int64_t", picks: { 1: "int64_t", 2: "big", 3: "1" } }
+  - code: "void f() { double d = 1.5; }              // 실수는 다른 판이다"
+    expect: none

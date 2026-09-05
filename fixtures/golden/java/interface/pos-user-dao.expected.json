@@ -1,0 +1,67 @@
+[
+  {
+    "queryId": "java/interface",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "declare",
+    "startLine": 3,
+    "startCol": 0,
+    "endLine": 7,
+    "endCol": 1,
+    "nodeKind": "interface_declaration",
+    "inError": false
+  },
+  {
+    "queryId": "java/interface",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "declare",
+    "startLine": 3,
+    "startCol": 7,
+    "endLine": 3,
+    "endCol": 16,
+    "nodeKind": "interface",
+    "inError": false
+  },
+  {
+    "queryId": "java/interface",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "hole",
+    "form": "declare",
+    "startLine": 3,
+    "startCol": 7,
+    "endLine": 3,
+    "endCol": 16,
+    "nodeKind": "interface",
+    "inError": false
+  },
+  {
+    "queryId": "java/interface",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "declare",
+    "startLine": 3,
+    "startCol": 17,
+    "endLine": 3,
+    "endCol": 24,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "java/interface",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "declare",
+    "startLine": 3,
+    "startCol": 25,
+    "endLine": 7,
+    "endCol": 1,
+    "nodeKind": "interface_body",
+    "inError": false
+  }
+]

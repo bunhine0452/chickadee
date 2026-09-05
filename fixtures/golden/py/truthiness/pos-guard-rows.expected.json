@@ -1,0 +1,54 @@
+[
+  {
+    "queryId": "py/truthiness",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "bare-if",
+    "startLine": 2,
+    "startCol": 4,
+    "endLine": 3,
+    "endCol": 25,
+    "nodeKind": "if_statement",
+    "inError": false
+  },
+  {
+    "queryId": "py/truthiness",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "bare-if",
+    "startLine": 2,
+    "startCol": 4,
+    "endLine": 2,
+    "endCol": 6,
+    "nodeKind": "if",
+    "inError": false
+  },
+  {
+    "queryId": "py/truthiness",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "bare-if",
+    "startLine": 2,
+    "startCol": 7,
+    "endLine": 2,
+    "endCol": 11,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "py/truthiness",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "bare-if",
+    "startLine": 3,
+    "startCol": 8,
+    "endLine": 3,
+    "endCol": 25,
+    "nodeKind": "block",
+    "inError": false
+  }
+]

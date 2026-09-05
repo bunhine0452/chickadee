@@ -1,0 +1,18 @@
+# 작은 문제 하나 (D186 ⑧). 지문은 우리가 썼고 케이스의 답은 reference.py 가 낸다.
+schema: 1
+id: count-down
+topic: loop
+statement:
+  ko: "정수 n(n ≥ 0)이 주어집니다. n 부터 1 까지 한 줄에 하나씩 출력하세요. n 이 0 이면 아무것도 출력하지 않습니다."
+  en: "An integer n (n ≥ 0) is given. Print every number from n down to 1, one per line. Print nothing when n is 0."
+needs: [common/loop-while, common/iterate]
+langs: [py, ts, java]
+cases:
+  - stdin: "3\n"
+    stdout: "3\n2\n1\n"
+  - stdin: "1\n"
+    stdout: "1\n"
+  - stdin: "0\n"
+    stdout: ""
+  - stdin: "5\n"
+    stdout: "5\n4\n3\n2\n1\n"

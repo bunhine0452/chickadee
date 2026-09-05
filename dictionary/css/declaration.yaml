@@ -1,0 +1,157 @@
+schema: 1
+id: css/declaration
+universal: null
+name: { ko: 무엇을 어떻게 할지 한 줄, en: Declaration }
+token: ":"
+grammars: [css, vue_style]
+framework: null
+essential: true
+difficulty: 1
+prereq: []
+confusions: []
+dict:
+  one_liner:
+    ko: "속성 하나에 값 하나. 쌍점이 무엇을과 어떻게를 가른다."
+    en: "One property, one value. The colon parts what from how."
+  why:
+    ko: >-
+      CSS 는 <b>모르는 것을 조용히 버립니다</b>. 속성 이름을 잘못 적어도, 값의 단위를 빠뜨려도
+      멈추지 않고 그 줄만 없던 것으로 칩니다 — 오류도 경고도 없어요. 그래서 「분명히 적었는데
+      안 먹는다」의 대부분이 이 줄 하나의 오타입니다. 다른 언어라면 컴파일러가 잡아 줬을 것을
+      여기서는 <b>사람이 눈으로</b> 찾아야 합니다.
+    en: >-
+      CSS <b>drops quietly what it does not understand</b>. Misspell a property, leave a unit off a
+      value, and nothing stops — that line is simply treated as absent, with no error and no
+      warning. So “I wrote it and it does nothing” is usually a typo on one line like this. What a
+      compiler would have caught elsewhere, <b>a person has to see</b> here.
+  trace:
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 무엇을 바꿀지 정한다."
+      en: "{{pick.1|code}} says what is being changed."
+    - ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 어떻게 바꿀지 정한다."
+      en: "{{pick.3|code}} says how."
+    - ko: "둘 중 하나라도 모르는 것이면 이 줄은 없던 것이 된다."
+      en: "If either is unknown, the line is treated as absent."
+rule:
+  ko: "<b>모르는 속성·값은 조용히 버려진다.</b> 오류가 아니라 아무 일도 안 일어난다."
+  en: "<b>An unknown property or value is dropped in silence.</b> Not an error — simply nothing."
+result:
+  label: { ko: "{{pick.1}}{{pick.1|josa:이,가}} 정해진다", en: "{{pick.1}} is settled" }
+  value: "{{pick.3}}"
+  note: { ko: "모르는 값이면 무시된다", en: "an unknown value is ignored" }
+ok:
+  ko: "{{pick.1|code}}{{pick.1|josa:이,가}} {{pick.3|code}}{{pick.3|josa:으로,로}} 정해집니다. 둘 다 아는 것이어야 듣습니다."
+  en: "{{pick.1|code}} is set to {{pick.3|code}}. Both must be understood for it to take."
+payoff:
+  ko: "이걸 알면 「안 먹는 스타일」을 어디서 찾을지 압니다 — 오류가 없으니 <b>그 줄을 직접 봐야</b> 합니다."
+  en: "This says where to look when a style does nothing — there is no error, so <b>read the line</b>."
+bridge:
+  ko: "프로그래밍 언어는 모르는 이름에서 멈춥니다. CSS 는 <b>넘어갑니다</b> — 그것이 이 언어의 선택입니다."
+  en: "A programming language stops at a name it does not know. CSS <b>moves on</b> — that is its choice."
+misconceptions:
+  - ko: "잘못 적으면 오류가 난다 — 조용히 무시됩니다. 화면만 그대로예요."
+    en: "A mistake raises an error — it is ignored quietly. Only the screen stays unchanged."
+  - ko: "단위는 생략해도 된다 — <code>0</code> 말고는 단위가 없으면 그 줄이 버려집니다."
+    en: "Units are optional — apart from <code>0</code>, a value with no unit is dropped."
+  - ko: "위에 적은 것이 이긴다 — 같은 곳을 가리키면 대개 <b>뒤에</b> 적은 것이 이깁니다."
+    en: "The first one wins — for the same target it is usually the <b>later</b> one."
+no_hole_reason: >-
+  뚫을 자리가 속성 이름인데 그 글자가 사용처마다 다르다(`color`·`padding`·`display`). 빈칸형은 첫 보기가 구멍 원문과 같아야 해서(`t0-blank` 의 검사) 보기 넷을 사전에 고정할 수 없다. 가운데 쌍점은 한 글자라 지목형으로 간다.
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>무엇을 바꾸는지 말하는 자리</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the place that says what is changed</b>."
+    hint:
+      ko: "쌍점 <b>앞</b>에 있습니다."
+      en: "It stands <b>before</b> the colon."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "쌍점은 <b>가르는 표시</b>입니다. 무엇을 바꾸는지는 그 앞이 말해요."
+          en: "The colon is the <b>divider</b>. What is changed is said in front of it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 가르기냐 무엇이냐", en: "The sharpest spot — the divider or the what" }
+          code:
+            - "color: red;"
+            - "^^^^^ 무엇   ^^^ 어떻게"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>어떻게</b>입니다. 무엇을 바꾸는지는 쌍점 앞이 말해요."
+          en: "{{pick.3|code}} is the <b>how</b>. The what is said before the colon."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 무엇이냐 어떻게냐", en: "The sharpest spot — what or how" }
+          code:
+            - "padding: 8px;"
+            - "^^^^^^^ 무엇  ^^^ 어떻게"
+meaning:
+  - q:
+      ko: "{{pick.1|code}}{{pick.1|josa:을,를}} 있지도 않은 이름으로 잘못 적으면 어떻게 될까요?"
+      en: "What if {{pick.1|code}} is misspelled into a name that does not exist?"
+    hint:
+      ko: "CSS 에는 <b>멈추는 자리</b>가 없습니다."
+      en: "CSS has <b>nowhere to stop</b>."
+    options:
+      - t: { ko: "그 줄만 조용히 버려진다 — 오류도 경고도 없다", en: "That line alone is dropped, with no error and no warning" }
+      - t: { ko: "스타일 전체가 안 먹는다", en: "The whole stylesheet stops working" }
+        diag:
+          t:
+            ko: "버려지는 것은 <b>그 줄 하나</b>입니다. 나머지는 그대로 들어서, 오히려 어디가 잘못됐는지 찾기 어려워요."
+            en: "Only <b>that one line</b> is dropped. The rest still applies, which is what makes it hard to find."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 한 줄이냐 전체냐", en: "The sharpest spot — one line or everything" }
+            code:
+              - "colr: red;      /* 이 줄만 버려짐 */"
+              - "padding: 8px;   /* 이건 그대로 */"
+      - t: { ko: "브라우저 콘솔에 오류가 뜬다", en: "The browser console shows an error" }
+        diag:
+          t:
+            ko: "안 뜹니다. CSS 의 오류 처리는 「모르면 넘어간다」이고, 그래서 <b>아무도 말해 주지 않아요</b>."
+            en: "It does not. CSS handles the unknown by moving on, so <b>nothing tells you</b>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 알려 주느냐 조용하냐", en: "The sharpest spot — reported or silent" }
+            code:
+              - "// JS: ReferenceError"
+              - "/* CSS: 아무 말 없음 */"
+      - t: { ko: "비슷한 속성으로 알아서 고쳐 준다", en: "It is corrected to the nearest property" }
+        diag:
+          t:
+            ko: "고쳐 주지 않습니다. 이름이 정확히 맞아야 하고, 아니면 <b>없는 줄</b>입니다."
+            en: "Nothing is corrected. The name must match exactly, or the line <b>does not exist</b>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 고쳐 주기냐 버리기냐", en: "The sharpest spot — corrected or dropped" }
+            code:
+              - "colr → color 로 안 바뀐다"
+              - "그냥 없는 줄이 된다"
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 이 값을 <b>여기에</b> 적었을까요?"
+    en: "Why is this value written <b>here</b>, on line {{site.line}}?"
+  choices:
+    - t:
+        ko: "이 선택자가 가리키는 것에만 이 모양을 주려고 — 더 넓게 적으면 다른 것까지 바뀐다"
+        en: "To shape only what this selector points at — written wider it would move other things"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 줄을 더 바깥 규칙으로 옮기면 무엇이 같이 바뀌는지도 적어 보세요."
+        en: "That is the direction. Say what else would move if this line went to an outer rule."
+    - t:
+        ko: "CSS 가 이 속성을 요구해서"
+        en: "Because CSS requires this property"
+      ok: false
+      fb:
+        ko: "요구하지 않습니다. 안 적으면 기본값이 쓰일 뿐이에요."
+        en: "It does not. Left out, the default applies."
+    - t:
+        ko: "브라우저마다 다르게 보여서"
+        en: "Because browsers differ"
+      ok: false
+      fb:
+        ko: "그건 다른 문제입니다. 이 줄은 <b>무엇을 어떻게 보이게 할지</b>를 정한 것이에요."
+        en: "That is a separate matter. This line settles <b>what should look how</b>."
+queries:
+  - { grammars: [css, vue_style], file: ./declaration.scm }
+examples:
+  - code: ".card { color: red; }"
+    expect: { sites: 1, form: decl, picks: { 1: "color", 2: ":", 3: "red" } }
+  - code: ".card { }"
+    expect: none

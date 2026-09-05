@@ -1,0 +1,115 @@
+lang: go
+version: 0.1.0
+grammars: [go]
+# 값을 정하는 것은 언어가 아니라 `Cargo.lock` 이 고정한 크레이트다 — `tree-sitter-go 0.23.4`
+# 의 `parser.c` 가 `LANGUAGE_VERSION 14` 다. GitHub `master`(v0.25.8 생성)는 15 라, 저장소를
+# 보고 적으면 조용히 어긋난다 (`docs/curriculum/go.md` §8). 대조는 시험이 한다
+# (`declared_grammar_abi_matches_the_linked_grammar`).
+grammar_abi: { go: 14 }
+
+# 확장자 → 문법. Go 는 **하나뿐**이다 (`go.md` §1). `go.mod` 는 Go 소스가 아니라
+# 별도 문법이 필요하고, `resolveGo` 가 그것을 텍스트로 읽어 모듈 경로만 쓴다.
+extensions:
+  go: [.go]
+
+# 「필수 문법」 — 구멍 지도가 세는 대상이자 위상 정렬 동률 시의 순서다 (03 §6).
+#
+# **순서는 0부 → 1부 → 2부다** (`go.md` §0.5). 앞의 여덟이 0부 「이 언어의 값과 식」,
+# 다음 다섯이 1부 「흐름과 묶기」, 나머지 스물이 2부다. `packages/course/src/parts/go.ts`
+# 가 이 순서를 한 글자도 어긋나지 않게 옮기고 `parts/index.test.ts` 가 대조한다.
+#
+# **`go.md` §0.5 는 essential 을 25 로 셌다.** 거기서는 §4 심화 여덟이 `essential` 밖이었다.
+# 33 으로 늘린 이유는 부 배치 쪽 규칙이다 — 0·1·2부를 이으면 `essential` 전량이어야 하는데
+# (`parts/index.test.ts`), §4 여덟이 2부에 들어가므로 `essential` 에도 들어야 한다.
+# 어긋남은 `go.md` §11 실측 절에 적었다.
+#
+# 배열 규칙 하나 (`py/_lang.yaml`·`ts/_lang.yaml` 과 같다):
+#
+#   **사용처가 얇은 판을 셋 이상 잇대지 않는다.** 얇음의 선은 공개 표본 `cli/cli`
+#   (`pkg/**` 비테스트 429파일 · 87,907줄)에서 **사용처 100곳 미만**이다. 안 그러면
+#   「네 코드엔 없다」만 사흘 내리 나오고 D177 규칙 ①(개념마다 내 코드의 자리를 짚는다)이
+#   그동안 한 번도 안 걸린다.
+#
+# 얇은 일곱(2026-09-06 tree-sitter 실측, 곳/파일): float-literal 3/3 ·
+# operator-precedence 73/37 · for-loop 42/27 · interface-implicit 93/69 · goroutine 39/19 ·
+# channel-select 73/19 · generics 13/6. 아래에서 이 일곱은 두꺼운 판 사이에 **하나나 둘씩**
+# 놓인다 — 셋이 붙는 자리가 한 곳도 없다.
+#
+# **`go.md` §4 의 심화 여덟은 순서를 바꿨다.** 문서 차례(㉕~㉜)대로 두면 끝에 goroutine ·
+# channel-select · generics 셋이 잇달아 얇아진다. 그래서 두꺼운 둘(nil-interface ·
+# error-wrap)을 사이에 끼웠다.
+essential:
+  # ── 0부 「이 언어의 값과 식」 여덟 (go.md §0.1) ──────────────────────
+  - go/integer-literal       # 축 1
+  - go/float-literal         # 축 2 · 얇다 (3곳 — 합성이 정본이다)
+  - go/text-literal          # 축 3
+  - go/boolean-literal       # 축 4
+  - go/operator-precedence   # 축 5 · 얇다
+  - go/type-conversion       # 축 6
+  - go/assignment            # 축 7 (go.md §0.5 가 var-zero-value 와 한 장으로 묶었다)
+  - go/equality              # 축 8
+  # ── 1부 「흐름과 묶기」 다섯 (go.md §2) ─────────────────────────────
+  - go/short-var-decl
+  - go/if-statement
+  - go/for-loop              # 얇다 (42/27 — 반복의 자리는 range-loop 가 가져갔다)
+  - go/func-declaration
+  - go/return-multi
+  # ── 2부 (go.md §3 중심 남은 열둘) ───────────────────────────────────
+  - go/call-expression
+  - go/selector
+  - go/struct-type
+  - go/slice
+  - go/append
+  - go/map-type
+  - go/range-loop
+  - go/nil
+  - go/pointer
+  - go/method-receiver
+  - go/func-literal
+  - go/error-check
+  # ── 2부 (go.md §4 심화 여덟 — 순서는 위 배열 규칙이 바꿨다) ─────────
+  - go/defer
+  - go/package-visibility
+  - go/interface-implicit    # 얇다
+  - go/nil-interface
+  - go/goroutine             # 얇다
+  - go/error-wrap
+  - go/channel-select        # 얇다
+  - go/generics              # 얇다
+
+# 「AI 가 대신 쓴 것」 — 구멍 개념 ↔ 같은 일을 하는 다른 표기.
+#
+# `go.md` §6 이 넷을 적었는데 **한 짝만 사전으로 표현된다.** 나머지 셋의 「대신 쓴 표기」가
+# 개념이 아니라 관용구라 가리킬 id 가 없다:
+#   · `go/error-wrap` ↔ `fmt.Errorf("…: %v", err)` — 서식 한 글자 차이라 개념이 안 갈린다
+#   · `go/error-check` ↔ `v, _ := f()` — 「버리기」에 해당하는 개념이 없다
+#   · `go/channel-select` ↔ `sync.Mutex`·`WaitGroup` — 라이브러리라 문법 개념이 아니다
+#
+# 그리고 남은 한 짝은 **문서와 방향이 반대다.** `go.md` §6 은 gap 을 `go/range-loop` 로
+# 적었는데, 실측은 그 반대다 — `cli/cli` 429파일에서 range 훑기가 702곳/196파일이고
+# 세 칸짜리 되풀이는 42곳/27파일이다. 구멍이 나는 쪽은 세 칸짜리다.
+alternatives:
+  - gap: go/for-loop
+    present: go/range-loop
+    note:
+      ko: "세 칸짜리 되풀이 자리를 range 훑기가 가져갔습니다 (cli/cli: 42곳 대 702곳)."
+      en: "Range walking took the three-slot loop's seat (cli/cli: 42 sites against 702)."
+
+thin_threshold: { min_files: 2, min_sites: 3, small_repo_files: 20 }
+
+# 「네 코드엔 없다」 — 사용자 리포에 `.go` 가 **0장**이다 (README §10 실측).
+# 위 수치는 전부 공개 표본 `cli/cli` 의 것이고, 정본 §1 의 「내가 만든 코드가 교재」는
+# 사용자가 Go 리포를 가져올 때 비로소 선다 (`go-learning.md` §11.5.2).
+#
+# 그 표본에서도 사용처가 **얇은** 판이 일곱이고, 그중 `go/float-literal` 3곳/3파일은
+# `thin_threshold`(min_sites 3 · min_files 2)를 간신히 넘는다. 사유는 `scale` 이다 —
+# CLI 도구라 실수 셈이 안 생긴다. `packages/cards/src/t0-synthetic.ts` 의 `ABSENCE` 표는
+# 이 사전의 소유가 아니라 오케스트레이터가 넣는다.
+
+diag_default:
+  point:
+    ko: "«{{pick}}»{{pick|josa:은,는}} {{role}} 자리입니다. {{concept}}{{concept|josa:은,는}} «{{answer}}» 입니다. {{rule}}"
+    en: "«{{pick}}» is the {{role}} slot. The {{concept}} is «{{answer}}». {{rule}}"
+  blank:
+    ko: "«{{pick}}»{{pick|josa:은,는}} 이 자리에 오지 않습니다. {{rule}}"
+    en: "«{{pick}}» does not go in this slot. {{rule}}"

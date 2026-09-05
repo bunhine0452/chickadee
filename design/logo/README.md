@@ -11,9 +11,15 @@
 | `chickadee-logo-badge.svg` | 앱 안 · 스티커 · 어두운 바탕 | 링 바깥이 투명, 안쪽은 크림 원판. 메타데이터 제거 (19.9KB) |
 | `chickadee-logo-square.svg` | 앱 아이콘 · 소셜 정사각 | 원본과 같은 크림 정사각 바탕, 메타데이터만 제거 |
 | `chickadee-logo-favicon.svg` | 파비콘 · 16~32px | 같은 파일의 **머리 크롭**(viewBox `190 80 180 180`). 전신은 16px 에서 판독 불가 |
+| `chickadee-logo-macos.svg` | **macOS 앱 아이콘** (D135) | 애플 아이콘 격자 — 1024 캔버스 · 824 타일 · 반지름 22.5% 의 이어지는 모서리 · 둘레 100px 투명. 그림은 nobg 그대로, 크림 정사각이 같은 크림의 타일로 바뀐 것뿐 |
+| `chickadee-logo-macos-16.svg` | 위와 같은 타일 + **머리 크롭** | icns 의 16px 슬롯 전용. 32px 부터는 위 파일 |
 | `favicon.ico` | 브라우저 · Tauri | 16 · 32 · 48 |
 | `png/` | Tauri `icons/` · README · 스토어 | badge 1024~32 · square 1024~256 · favicon 64~16 · **nobg 1024~32(투명)** |
-| `export.cjs` | 위 PNG · `contact-sheet.png` · `verify.json` 재생성 | `node export.cjs` (Playwright Chromium 필요) |
+| `export.cjs` | 위 PNG · `contact-sheet.png` · `verify.json` · **앱 아이콘** 재생성 | `node export.cjs` (Playwright Chromium 필요) |
+
+## 앱 아이콘 재생성 (D135)
+
+`node design/logo/export.cjs` 한 줄이 전부다. macOS 에서 돌리면 `iconutil` 로 `icon.icns`(16~512 와 @2x 열 장)까지 만들고, 다른 OS 에서는 PNG 만 굽고 icns 는 커밋된 것을 그대로 둔다. 같이 덮어쓰는 것: `apps/desktop/src-tauri/icons/` 의 `icon.png`·`128x128.png`·`128x128@2x.png`·`64x64.png`·`32x32.png`. **Windows 의 `icon.ico` 와 `Square*Logo.png` 는 건드리지 않는다** — 그 타일은 시스템이 배경을 깔아 주는 자리라 여백을 넣으면 그림만 작아진다.
 
 팔레트 (원본 그대로): 종이 `#f6efdc` · 먹 `#1c1a17` · 청 `#374fc4` · 진홍 `#ec4882` · 머스터드 `#f0c032` · 황갈 `#e4bd84` · 회색 `#9ca7ad`.
 
@@ -25,6 +31,8 @@
 |---|---|---|---|
 | 배지 · 정사각 · 원본 | ✗ (1열) | – | ✓ 24열 · 뺨 18px |
 | **파비콘(머리 크롭)** | **✓ 4열 · 뺨 3px** | ✓ 8열 | ✓ 14열 |
+| macOS 타일(전신) | ✗ (0열) | – | ✓ 18열 · 뺨 14px |
+| **macOS 타일(머리 크롭)** | **✓ 4열 · 뺨 4px** | – | ✓ 13열 |
 
 → 32px 이상은 배지/정사각, 그 아래는 파비콘 크롭. 앱 안에서는 `ink-home.html` 마스트헤드(66px)와 `ink-session.html` 작업 띠(46px)에 배지를 쓴다. 파비콘은 두 페이지 모두 정적 data URI.
 

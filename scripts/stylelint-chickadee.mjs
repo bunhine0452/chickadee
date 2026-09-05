@@ -1,12 +1,17 @@
 /**
- * stylelint-chickadee — 05 §4.2 · §4.3 을 린트로 굳힌 4개 규칙.
+ * stylelint-chickadee — 정본 §6 을 린트로 굳힌 4개 규칙.
  *
- * 「왜」: 05 §4.3 마지막 줄 — 이 규칙들이 리뷰어 눈이 아니라 린트에 있어야 3주 뒤에도 산다.
+ * 「왜」: 이 규칙들이 리뷰어 눈이 아니라 린트에 있어야 3주 뒤에도 산다.
+ *
+ * **D182 로 셋 중 둘을 갈아 끼웠다.** 옛 규칙 둘(`track-alias-only`·`print-physics-scope`)은
+ * 리소그래프 원색과 인쇄 물리를 막던 것인데 그 토큰과 클래스가 통째로 사라져 **막을 것이
+ * 없어졌다** — 통과하는 규칙이 아니라 죽은 규칙이었다. 지키는 대상이 없는 규칙을 초록으로
+ * 두면 다음 사람이 그것이 아직 지켜지는 줄 안다.
  *
  *   chickadee/no-font-size-below-13   13px 하한. font-size 리터럴 < 13px 금지, var() 만 허용.
- *   chickadee/track-alias-only        styles/ 밖에서 --blue/--pink/--yellow 직접 참조 금지.
- *   chickadee/dark-selector-allowlist [data-theme="dark"] 는 tokens.css + 6개 컴포넌트만.
- *   chickadee/print-physics-scope     인쇄 물리는 본문 단(.ps-in 하위) 밖에만.
+ *   chickadee/no-retired-tokens       폐기된 리소 토큰(--paper·--ink·--t0·--verdict·…) 부활 금지.
+ *   chickadee/dark-selector-allowlist [data-theme="dark"] 는 토큰 파일에서만.
+ *   chickadee/no-decoration           장식 속성(질감·블렌드·drop-shadow·회전)은 어디서도 금지.
  */
 
 import path from 'node:path';
@@ -82,40 +87,39 @@ const noFontSizeBelow13 = definePlugin(
 
    컴포넌트 CSS 는 --t0/--t1/--t2(-deep/-text)·--on-t*·--verdict-* 만 쓴다.
    원색 직접 참조는 나중에 T1 색을 바꿀 때 판정 색까지 딸려 바뀌게 만든다.
-   styles/ 안(토큰 정의·리셋·물리)은 원색을 알아야 하므로 예외.
+   D182 가 이 이름들을 통째로 폐기했다. 값이 사라졌으므로 다시 쓰면 CSS 가 조용히
+   `unset` 이 되고 화면이 어긋난다 — 리뷰가 아니라 린트가 잡아야 하는 종류다.
+   토큰 파일 자신은 새 이름만 정의하므로 예외가 필요 없다.
    ════════════════════════════════════════════════════════════════════════ */
 
-const STYLES_DIR = path.join('apps', 'desktop', 'src', 'styles');
-const RAW_INKS = ['blue', 'pink', 'yellow'];
-const RAW_TOKENS = RAW_INKS.flatMap((c) => [`--${c}`, `--${c}-deep`, `--${c}-text`]);
+/** D182 가 지운 토큰의 접두어. 이 목록에 이름을 더하려면 정본 §6 을 먼저 고친다. */
+const RETIRED_PREFIXES = [
+  'paper', 'ink', 'stock', 'edge', 'lamp', 'grain', 'glow', 'verdict',
+  'desk', 'misreg', 'drop', 'f-poster', 'fs-poster', 'on-t', 'rule',
+  't0', 't1', 't2', 'blue', 'pink', 'yellow',
+];
+const RETIRED_RE = new RegExp(
+  `--(?:${RETIRED_PREFIXES.join('|')})(?![a-z0-9])[a-z0-9-]*`,
+  'g',
+);
 
-const aliasRuleName = 'chickadee/track-alias-only';
-const aliasMessages = utils.ruleMessages(aliasRuleName, {
-  rejectedUse: (token) =>
-    `원색 직접 참조: \`var(${token})\`. 컴포넌트는 --t0/--t1/--t2(-deep/-text) · --on-t* · ` +
-    `--verdict-* 만 씁니다 (${DOC} §4.2).`,
-  rejectedDefine: (token) =>
-    `원색 재정의: \`${token}\` 은 apps/desktop/src/styles/tokens.css 에서만 정의합니다 (${DOC} §4.2).`,
+const retiredRuleName = 'chickadee/no-retired-tokens';
+const retiredMessages = utils.ruleMessages(retiredRuleName, {
+  rejected: (token) =>
+    `폐기된 토큰 \`${token}\` (D182). 리소그래프 팔레트는 통째로 사라졌습니다 — ` +
+    `표면 --surface* · 글자 --text* · 액센트 --accent · 상태 --ok/--bad/--warn/--info 를 쓰세요.`,
 });
 
-const insideStyles = (file) => typeof file === 'string' && path.normalize(file).includes(STYLES_DIR);
-
-const trackAliasOnly = definePlugin(
-  aliasRuleName,
-  aliasMessages,
-  { url: `${DOC}#42`, fixable: false },
+const noRetiredTokens = definePlugin(
+  retiredRuleName,
+  retiredMessages,
+  { url: `${DOC}#4`, fixable: false },
   (root, result, ctx) => {
-    if (insideStyles(root.source?.input?.file)) return;
-
     root.walkDecls((decl) => {
-      if (RAW_TOKENS.includes(decl.prop)) {
-        report(result, ctx.ruleName, ctx.messages, decl, ctx.messages.rejectedDefine(decl.prop), decl.prop);
-      }
-      const re = /var\(\s*(--(?:blue|pink|yellow)(?:-deep|-text)?)\s*[,)]/g;
-      let m = re.exec(decl.value);
-      while (m !== null) {
-        report(result, ctx.ruleName, ctx.messages, decl, ctx.messages.rejectedUse(m[1]), m[1]);
-        m = re.exec(decl.value);
+      for (const text of [decl.prop, decl.value]) {
+        for (const m of String(text).matchAll(RETIRED_RE)) {
+          report(result, ctx.ruleName, ctx.messages, decl, ctx.messages.rejected(m[0]), m[0]);
+        }
       }
     });
   },
@@ -124,11 +128,12 @@ const trackAliasOnly = definePlugin(
 /* ════════════════════════════════════════════════════════════════════════
    3. chickadee/dark-selector-allowlist  (05 §4.3)
 
-   야간반은 반전이 아니라 다른 공정이다. 테마 분기는 토큰 한 곳에서 끝내고,
-   글로우가 필요한 6개 컴포넌트만 예외로 둔다.
+   어두운 화면은 반전이 아니라 다른 팔레트이다. 테마 분기는 토큰 한 곳에서 끝난다.
    ════════════════════════════════════════════════════════════════════════ */
 
-const DARK_ALLOWED_COMPONENTS = ['PressButton', 'Switch', 'TimeQueue', 'Node', 'Stamp', 'Crumb'];
+/* D182 — 테마 분기는 토큰 한 곳에서 끝난다. 예외 컴포넌트 여섯은 전부 사라졌거나
+   토큰만으로 서므로 목록을 비웠다. 다시 필요해지면 정본 §6 을 먼저 고친다. */
+const DARK_ALLOWED_COMPONENTS = [];
 const DARK_ALLOWED_FILES = ['tokens.css'];
 const DARK_SELECTOR = /\[data-theme\s*=\s*("dark"|'dark'|dark)\]/;
 
@@ -164,57 +169,50 @@ const darkSelectorAllowlist = definePlugin(
 );
 
 /* ════════════════════════════════════════════════════════════════════════
-   4. chickadee/print-physics-scope  (05 §4.3)
+   4. chickadee/no-decoration  (정본 §6 「장식 0」)
 
-   원칙 ①: 읽어야 하는 텍스트 위에는 잉크를 얹지 않는다.
-   인쇄 물리(mix-blend-mode · .mr · .grain)는 본문 단 밖에만 — 워드마크·판 번호·
-   도장·마스트헤드 바탕까지다.
+   D182 는 장식을 「기본 꺼짐」이 아니라 **없앴다**. 옛 규칙은 인쇄 물리를 본문 단 밖으로
+   밀어내는 것이었는데, 이제 밀어낼 곳이 없다 — 화면 어디에도 두지 않는다.
    ════════════════════════════════════════════════════════════════════════ */
 
-const BODY_COLUMN = ['ps-in', 'ask', 'fb', 'code', 'rung-body', 'drow'];
-const PHYSICS_CLASSES = ['mr', 'grain'];
-const PHYSICS_PROPS = ['mix-blend-mode'];
+/** 질감·겹침·번짐을 만드는 속성과 값. 값 쪽은 정규식으로 본다. */
+const DECOR_PROPS = ['mix-blend-mode', 'backdrop-filter'];
+const DECOR_VALUE_RE = /\b(repeating-(?:linear|radial|conic)-gradient|drop-shadow)\s*\(/;
+/** 기울기·회전은 장식이다. 각도가 0 이 아닌 rotate 만 잡는다. */
+const ROTATE_RE = /\brotate[XYZ]?\(\s*(-?[\d.]+)(deg|rad|turn|grad)/;
 
-const physicsRuleName = 'chickadee/print-physics-scope';
-const physicsMessages = utils.ruleMessages(physicsRuleName, {
-  rejectedDecl: (prop, selector) =>
-    `본문 단 안의 인쇄 물리: \`${prop}\` 를 \`${selector}\` 에 선언했습니다. ` +
-    `인쇄 물리는 본문 단(.${BODY_COLUMN.join(' · .')}) 밖에만 (${DOC} §4.3).`,
-  rejectedSelector: (cls, selector) =>
-    `본문 단 안의 인쇄 물리: \`.${cls}\` 를 \`${selector}\` 로 걸었습니다. ` +
-    `인쇄 물리는 본문 단(.${BODY_COLUMN.join(' · .')}) 밖에만 (${DOC} §4.3).`,
+const decorRuleName = 'chickadee/no-decoration';
+const decorMessages = utils.ruleMessages(decorRuleName, {
+  rejectedProp: (prop) =>
+    `장식 속성 \`${prop}\` (정본 §6 「장식 0」). 질감·겹침은 화면 어디에도 두지 않습니다.`,
+  rejectedValue: (what) =>
+    `장식 값 \`${what}\` (정본 §6 「장식 0」). 무늬와 번짐 대신 면과 선으로 말합니다.`,
+  rejectedRotate: (what) =>
+    `기울기 \`${what}\` (정본 §6 「장식 0」). 종이를 흉내 내는 회전은 없습니다.`,
 });
 
-const classesOf = (selector) => [...selector.matchAll(/\.([A-Za-z_][\w-]*)/g)].map((m) => m[1]);
-
-const printPhysicsScope = definePlugin(
-  physicsRuleName,
-  physicsMessages,
-  { url: `${DOC}#43`, fixable: false },
+const noDecoration = definePlugin(
+  decorRuleName,
+  decorMessages,
+  { url: `${DOC}#4`, fixable: false },
   (root, result, ctx) => {
-    root.walkRules((node) => {
-      const offending = node.selectors.find((s) => classesOf(s).some((c) => BODY_COLUMN.includes(c)));
-      if (!offending) return;
-
-      const physicsClass = classesOf(offending).find((c) => PHYSICS_CLASSES.includes(c));
-      if (physicsClass) {
-        report(
-          result,
-          ctx.ruleName,
-          ctx.messages,
-          node,
-          ctx.messages.rejectedSelector(physicsClass, offending),
-          `.${physicsClass}`,
-        );
+    root.walkDecls((decl) => {
+      const prop = decl.prop.toLowerCase();
+      if (DECOR_PROPS.includes(prop)) {
+        report(result, ctx.ruleName, ctx.messages, decl, ctx.messages.rejectedProp(prop), prop);
+        return;
       }
-
-      for (const child of node.nodes ?? []) {
-        if (child.type === 'decl' && PHYSICS_PROPS.includes(child.prop.toLowerCase())) {
-          report(result, ctx.ruleName, ctx.messages, child, ctx.messages.rejectedDecl(child.prop, offending));
-        }
+      const v = String(decl.value);
+      const hit = DECOR_VALUE_RE.exec(v);
+      if (hit) {
+        report(result, ctx.ruleName, ctx.messages, decl, ctx.messages.rejectedValue(hit[1]), hit[1]);
+      }
+      const rot = ROTATE_RE.exec(v);
+      if (rot && Number(rot[1]) !== 0) {
+        report(result, ctx.ruleName, ctx.messages, decl, ctx.messages.rejectedRotate(rot[0]), rot[0]);
       }
     });
   },
 );
 
-export default [noFontSizeBelow13, trackAliasOnly, darkSelectorAllowlist, printPhysicsScope];
+export default [noFontSizeBelow13, noRetiredTokens, darkSelectorAllowlist, noDecoration];

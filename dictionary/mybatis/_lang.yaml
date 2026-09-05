@@ -1,0 +1,26 @@
+lang: mybatis
+version: 0.1.0
+grammars: [xml]
+# tree-sitter-xml 0.7.0 의 `xml/src/parser.c` 가 14 다.
+grammar_abi: { xml: 14 }
+
+# MyBatis 매퍼는 `.xml` 이다. 이 표는 문법으로 키를 잡으므로(D19) 리포의 모든 `.xml` 이
+# 이 문법으로 읽히고, 매퍼가 아닌 XML 은 쿼리가 아무것도 안 잡아 조용히 지나간다.
+extensions:
+  xml: [.xml]
+
+# 개념이 없다 — 이 판이 여는 것은 **간선**이다. 매퍼가 자바 DAO 를 가리키는 것을 이어
+# 「이 기능의 SQL 이 어디 사는가」를 경로에 넣는다. SQL 어휘는 `dictionary/sql/` 의 몫이고
+# `docs/curriculum/sql.md` 가 설계해 뒀다.
+essential: []
+alternatives: []
+
+thin_threshold: { min_files: 2, min_sites: 3, small_repo_files: 20 }
+
+diag_default:
+  point:
+    ko: "«{{pick}}»{{pick|josa:은,는}} {{role}} 자리입니다. {{concept}}{{concept|josa:은,는}} «{{answer}}» 입니다. {{rule}}"
+    en: "«{{pick}}» is the {{role}} slot. The {{concept}} is «{{answer}}». {{rule}}"
+  blank:
+    ko: "«{{pick}}»{{pick|josa:은,는}} 이 자리에 오지 않습니다. {{rule}}"
+    en: "«{{pick}}» does not go in this slot. {{rule}}"

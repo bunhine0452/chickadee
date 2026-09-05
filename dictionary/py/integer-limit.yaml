@@ -1,0 +1,246 @@
+schema: 1
+id: py/integer-limit
+# 0부 축 A. `universal: null` — 다른 아홉에서 이 판의 답은 **반대**다(「가장 큰 값 다음이 가장
+# 작은 값」). 전이를 걸면 파이썬 학습자에게 참인 문장을 다음 언어에서 거짓으로 물려주거나
+# 그 반대가 된다. `py.md` §1.5.2 「이 표에서 파이썬이 혼자인 자리 둘」 ①.
+universal: null
+name: { ko: 정수에 한계가 없다, en: Integers with no ceiling }
+token: "**"
+grammars: [python]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cs/integer-overflow, cs/bit-and-byte]
+confusions: [py/value-bits, py/integer-division, py/arithmetic]
+
+dict:
+  one_liner:
+    ko: "자리가 모자라면 늘어난다. 그래서 큰 수에서 값이 뒤집히지 않는다."
+    en: "The row grows when it runs short, so a big number never flips over."
+  why:
+    ko: >-
+      대부분의 언어에서 정수는 <b>칸이 정해진 상자</b>입니다. 32칸이면 담을 수 있는 가장 큰 값이
+      <code>2147483647</code> 이고, 여기에 1 을 더하면 오류가 아니라 <code>-2147483648</code> 이
+      나와요 — 시곗바늘이 12 를 지나 1 로 가는 것과 같습니다.
+      파이썬은 그 상자를 <b>늘립니다</b>. {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 아무리 큰 값을
+      만들어도 자리가 따라 늘어나고, 그래서 뒤집히는 자리가 없어요.
+      <b>이것이 편한 것이 아니라 예외라는 점</b>이 이 판의 요점입니다. 「컴퓨터는 원래 이렇다」로
+      익히면 다음 언어에서 정확히 그 자리에서 막혀요.
+    en: >-
+      In most languages a whole number is a <b>box with a fixed number of slots</b>. With 32 slots
+      the largest value is <code>2147483647</code>, and adding 1 gives not an error but
+      <code>-2147483648</code> — the way a clock hand passes 12 and lands on 1. Python <b>grows</b>
+      the box instead. However large a value {{pick.1|code}} builds on line {{site.line}}, the slots
+      follow, so nothing wraps. <b>The point is that this is the exception, not the comfort.</b>
+      Learn it as "computers work this way" and the next language stops you at exactly this spot.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.2|code}}{{pick.2|josa:을,를}} 값 하나로 만든다."
+      en: "{{pick.2|code}} on line {{site.line}} becomes one value."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 그 값을 {{pick.3|code}} 만큼 거듭 곱한다."
+      en: "{{pick.1|code}} multiplies it by itself {{pick.3|code}} times."
+    - ko: "자리가 모자라면 늘려서 담는다. 넘치는 자리가 없다."
+      en: "If the slots run short they are added. There is nowhere to overflow."
+
+rule:
+  ko: >-
+    <b>파이썬 정수에는 자릿수 한계가 없다.</b> 다른 언어에서 값이 뒤집히던 자리가 여기서는
+    그냥 큰 수다.
+  en: >-
+    <b>A Python integer has no digit ceiling.</b> Where other languages wrap, this is simply a large
+    number.
+result:
+  label:
+    ko: "{{site.line}}행이 내놓는 것"
+    en: "What line {{site.line}} yields"
+  value: "{{pick.2}} {{pick.1}} {{pick.3}}"
+  note:
+    ko: "자리가 늘어난 수"
+    en: "a number whose slots grew"
+ok:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:이,가}} 만든 값이 아무리 커도 그대로 담깁니다. 같은 식을
+    자바에 옮기면 <b>다른 답</b>이 나와요.
+  en: >-
+    Whatever {{pick.1|code}} builds is held as it stands, however large. Move the same expression to
+    Java and <b>a different answer</b> comes out.
+payoff:
+  ko: >-
+    큰 수를 다룰 때 파이썬에서 안 겪던 문제를 다른 언어에서 겪는 이유가 여기 있습니다.
+    옮길 때 무엇을 확인해야 하는지를 알게 돼요.
+  en: >-
+    This is why large numbers cause trouble in another language that never showed up in Python. It
+    tells you what to check when you port.
+bridge:
+  ko: >-
+    소수는 반대입니다 — 자리를 안 늘리고 <b>정밀도</b>를 버려요. 그래서 큰 소수는 뒤집히는
+    대신 어긋납니다.
+  en: >-
+    Decimals do the opposite: they do not grow, they drop <b>precision</b>. A large decimal does not
+    wrap, it drifts.
+misconceptions:
+  - ko: >-
+      <code>2**100</code> 이 되니까 컴퓨터는 원래 큰 수를 다 담는다 — 파이썬만 그렇습니다.
+      자바·C·러스트는 정해진 칸을 넘으면 값이 뒤집혀요.
+    en: >-
+      <code>2**100</code> works, so computers just hold big numbers — only Python does. Java, C and
+      Rust wrap once the fixed slots are passed.
+  - ko: >-
+      한계가 없으니 아무리 커도 빠르다 — 자리가 늘면 셈도 느려집니다. 한계가 없는 것과
+      값이 싼 것은 다른 이야기예요.
+    en: >-
+      No ceiling means it stays fast — arithmetic slows as the slots grow. No ceiling and no cost
+      are different claims.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>자리를 늘리는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that makes the slots grow</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 거듭 곱해질 <b>밑</b>입니다. 값이 커지는 일은
+            가운데 기호가 해요.
+          en: >-
+            {{pick.2|code}} is the <b>base</b> being multiplied. The growing is done by the symbol
+            between.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 값과 하는 일"
+            en: "The sharpest spot — the value and the doing"
+          code:
+            - "2          # 값 하나일 뿐이다"
+            - "2 ** 100   # 자리가 서른 자리 넘게 늘어난다"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} <b>몇 번</b> 곱하느냐입니다. 자리를 늘리는
+            일 자체는 아니에요.
+          en: >-
+            {{pick.3|code}} says <b>how many times</b>. It is not the growing itself.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 몇 번이냐와 무엇을 하느냐"
+            en: "The sharpest spot — how many times, or what is done"
+          code:
+            - "2 ** 10    # 1024"
+            - "2 ** 100   # 자리가 훨씬 더 늘어난다"
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행은 왼쪽 값을 오른쪽 수만큼 <b>거듭 곱합니다</b>.
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} <b>multiplies the left value by itself</b>
+        as many times as the right says.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "**", mono: true }
+      - t: "<<"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 기호는 <b>비트 자리</b>를 옮깁니다. 밑이 2 일 때만 답이 우연히 만나고,
+              다른 밑에서는 갈려요.
+            en: >-
+              That symbol moves the <b>bit slots</b>. Only with a base of two do the answers happen
+              to meet; with another base they part.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 자리 옮기기와 거듭 곱하기"
+              en: "The sharpest spot — shifting slots or raising a power"
+            code:
+              - "3 ** 2     # 9"
+              - "3 << 2     # 12"
+      - t: "//"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 기호는 <b>몫 나누기</b>라 값이 작아집니다. 자리를 늘리는 것과 정반대 방향이에요.
+            en: >-
+              That symbol is <b>floor division</b>, so the value shrinks. It runs in the opposite
+              direction from growing.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 커지는가 작아지는가"
+              en: "The sharpest spot — growing or shrinking"
+            code:
+              - "2 ** 10    # 1024"
+              - "2 // 10    # 0"
+      - t: "+"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 기호는 <b>한 번 더합니다.</b> 자리가 늘어날 만큼 커지지 않고, 두 값이 2 일 때만
+              답이 우연히 만나요.
+            en: >-
+              That symbol <b>adds once</b>. It never grows enough to add slots, and the answers meet
+              only when both values are two.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 더하기냐 거듭 곱하기냐"
+              en: "The sharpest spot — adding or raising a power"
+            code:
+              - "2 ** 3     # 8"
+              - "2 + 3      # 5"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행처럼 큰 수를 만들어도 파이썬이 안 멈추는 것은 왜일까요?"
+    en: "Why does Python not stop even when line {{site.line}} builds a very large number?"
+  choices:
+    - t:
+        ko: "값을 담는 자리를 필요한 만큼 늘려서 — 칸이 미리 정해져 있지 않다"
+        en: "Because it adds as many slots as needed — the count is not fixed ahead"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 같은 식을 32칸짜리 정수를 쓰는 언어에 옮기면 무엇이 나올지도 적어 보세요."
+        en: >-
+          That is the direction. Add what the same expression yields in a language with 32-slot
+          integers.
+    - t:
+        ko: "요즘 컴퓨터의 수 상자가 충분히 커서"
+        en: "Because a number box on a modern machine is large enough"
+      ok: false
+      fb:
+        ko: >-
+          칸 수는 기계가 아니라 <b>언어</b>가 정합니다. 같은 기계에서 도는 자바가 32칸을 씁니다.
+        en: >-
+          The slot count is set by the <b>language</b>, not the machine. Java runs on the same
+          machine with 32 slots.
+    - t:
+        ko: "파이썬이 넘칠 것 같으면 소수로 바꿔 담아서"
+        en: "Because Python switches to a decimal when it is about to overflow"
+      ok: false
+      fb:
+        ko: >-
+          종류는 안 바뀝니다. 소수로 바뀌면 정밀도를 잃는데, 여기서는 자리만 늘고 값은 정확해요.
+        en: >-
+          The kind does not change. Switching to a decimal would lose precision; here only the slots
+          grow and the value stays exact.
+
+queries:
+  - { grammars: [python], file: ./integer-limit.scm }
+
+examples:
+  - code: "big = 2 ** 100         # 2 ** 100 -> 자리가 서른한 자리인 수 (int)"
+    expect: { sites: 1, form: power, hole: "**", picks: { 1: "**", 2: "2", 3: "100" } }
+  - code: "area = side ** 2       # 3 ** 2 -> 9 (int)"
+    expect: { sites: 1, form: power, hole: "**", picks: { 1: "**", 2: "side", 3: "2" } }
+  - code: "count = 10000000000000000000    # count -> 그대로 (int)"
+    expect: { sites: 1, form: huge, picks: { 1: "10000000000000000000" } }
+  - code: "width = n.bit_length()  # (255).bit_length() -> 8 (int)"
+    expect: { sites: 1, form: width, picks: { 1: "bit_length", 2: "n" } }
+  - code: "doubled = n * 2        # 6 * 2 -> 12 (int)"
+    expect: none
+  - code: "small = 999            # small -> 999 (int)"
+    expect: none

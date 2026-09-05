@@ -1,0 +1,197 @@
+schema: 1
+id: java/access-modifier
+universal: null
+name: { ko: 누가 볼 수 있나, en: Access modifier }
+token: "private"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 2
+prereq: [java/class-declaration, java/field-declaration]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "이름 앞의 낱말 하나가 「밖에서 이것을 볼 수 있는가」를 정한다."
+    en: "One word in front of a name settles whether the outside may see it."
+  why:
+    ko: >-
+      클래스 안의 이름은 두 종류입니다 — <b>남이 써도 되는 것</b>과 <b>안에서만 쓰는 것</b>.
+      그 둘을 갈라 적지 않으면 남이 안쪽 사정에 손을 대고, 그 뒤로는 안쪽을 고칠 때마다 남의
+      코드가 깨집니다. {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 그 갈림을 적어 둔
+      자리예요. 그리고 자바의 이 갈림은 <b>클래스</b> 단위입니다 — 객체 하나가 아니라요.
+      같은 클래스의 <b>다른</b> 인스턴스가 지닌 것도 그 안에서는 그대로 읽힙니다.
+    en: >-
+      Names inside a class come in two kinds — <b>ones others may use</b> and <b>ones used only
+      inside</b>. Leave them unsplit and outsiders reach into the internals, after which every
+      internal change breaks their code. {{pick.1|code}} on line {{site.line}} is where that split is
+      written down. And in Java the split is per <b>class</b>, not per object: what a <b>different</b>
+      instance of the same class holds is readable from inside all the same.
+  trace:
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 밖에서 이 이름을 볼 수 있는지를 정한다."
+      en: "{{pick.1|code}} settles whether this name is visible from outside."
+    - ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 그 규칙이 걸리는 이름이다."
+      en: "{{pick.3|code}} is the name the rule applies to."
+    - ko: "규칙을 어긴 자리는 실행 전에, 컴파일할 때 걸린다."
+      en: "A place that breaks the rule is caught at compile time, before anything runs."
+
+rule:
+  ko: "<b>갈림의 단위는 클래스다.</b> 같은 클래스 안에서는 다른 인스턴스의 것까지 보인다."
+  en: "<b>The unit of the split is the class.</b> Inside it, even another instance's internals are visible."
+ok:
+  ko: >-
+    {{pick.3|code}}{{pick.3|josa:은,는}} {{pick.1|code}}{{pick.1|josa:이,가}} 정한 만큼만 보입니다.
+    그 밖에서 손대면 컴파일이 멈춥니다.
+  en: >-
+    {{pick.3|code}} is visible exactly as far as {{pick.1|code}} allows. Reaching in from further out
+    stops the compiler.
+payoff:
+  ko: >-
+    이걸 알면 클래스를 열었을 때 <b>어디부터 읽을지</b>가 정해집니다 — 밖에서 쓰라고 열어 둔
+    것부터 읽고, 안쪽은 필요할 때 봅니다.
+  en: >-
+    Knowing this settles <b>where to start reading</b> a class — read what was opened for outside use
+    first, and go inside only when you need to.
+bridge:
+  ko: >-
+    파이썬은 이름 앞의 밑줄이 <b>약속</b>일 뿐이라 마음먹으면 다 만질 수 있습니다. 자바는
+    컴파일러가 막아요 — 약속이 아니라 규칙입니다.
+  en: >-
+    In Python a leading underscore is only a <b>convention</b>, so anything can be touched anyway.
+    Here the compiler blocks it — a rule, not a convention.
+misconceptions:
+  - ko: "안 보이게 하면 값이 숨겨진다 — 숨는 것은 <b>이름</b>이지 값이 아닙니다. 메모리에는 그대로 있어요."
+    en: "Hiding a name hides the value — what is hidden is the <b>name</b>, not the value. It sits in memory all the same."
+  - ko: "객체 하나에 갇힌다 — <b>클래스</b> 단위입니다. 같은 클래스의 다른 인스턴스 것도 안에서는 읽힙니다."
+    en: "It is sealed inside one object — the unit is the <b>class</b>. Another instance of the same class is readable from inside."
+  - ko: "아무것도 안 적으면 다 열린다 — 안 적으면 <b>같은 폴더</b>까지만 열립니다. 그것도 하나의 선택이에요."
+    en: "Writing nothing opens it to everyone — writing nothing opens it to the <b>same folder</b>. That is a choice too."
+  - ko: "밖에서 안 보이면 고쳐도 안전하다 — 같은 클래스 안의 코드는 여전히 다 보고 있습니다."
+    en: "Invisible outside means safe to change — code inside the same class still sees all of it."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>보이는 범위를 정하는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that sets how far it is visible</b>."
+    hint:
+      ko: "타입보다도 <b>앞</b>에 오는 낱말입니다."
+      en: "It stands even <b>before</b> the type."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>무엇을 담는지</b>를 말합니다. 누가 볼 수 있는지와는 다른 축이에요."
+          en: "{{pick.2|code}} says <b>what it holds</b>. That is a different axis from who may see it."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 무엇이냐 누구까지냐"
+            en: "The sharpest spot — what it is or how far it reaches"
+          code:
+            - "타입: 무엇을 담나"
+            - "앞 낱말: 누구까지 보이나"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>이름</b>입니다. 범위를 정하는 것은 그 앞의 낱말이에요."
+          en: "{{pick.3|code}} is the <b>name</b>. The reach is set by the word in front of it."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 이름이냐 범위냐"
+            en: "The sharpest spot — the name or the reach"
+          code:
+            - "private String secret;"
+            - "//      ^타입  ^이름"
+
+meaning:
+  - q:
+      ko: "같은 클래스의 <b>다른 인스턴스</b>가 지닌, 밖에 안 보이게 해 둔 값을 읽을 수 있을까요?"
+      en: "Can a hidden value held by <b>another instance</b> of the same class be read?"
+    hint:
+      ko: "자바에서 이 갈림의 단위는 객체가 아닙니다."
+      en: "In Java the unit of this split is not the object."
+    options:
+      - t:
+          ko: "읽을 수 있다 — 갈림의 단위가 클래스라서"
+          en: "Yes — the split is per class"
+      - t:
+          ko: "못 읽는다 — 객체마다 갇혀 있어서"
+          en: "No — each object is sealed off"
+        diag:
+          t:
+            ko: "그것은 다른 언어들의 규칙입니다. 자바는 <b>클래스</b>로 가르므로 같은 클래스 코드라면 남의 인스턴스도 들여다봅니다."
+            en: "That is another language's rule. Java splits by <b>class</b>, so code in the same class looks into another instance freely."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 클래스냐 객체냐"
+              en: "The sharpest spot — class or object"
+            code:
+              - "boolean same(User o) {"
+              - "  return this.pw.equals(o.pw); // 된다"
+      - t:
+          ko: "같은 메서드 안에서만 읽을 수 있다"
+          en: "Only inside the same method"
+        diag:
+          t:
+            ko: "메서드는 이 갈림의 단위가 아닙니다. 같은 클래스의 <b>어느 메서드</b>에서든 읽혀요."
+            en: "A method is not the unit here. <b>Any method</b> of the same class can read it."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 메서드냐 클래스냐"
+              en: "The sharpest spot — method or class"
+            code:
+              - "같은 클래스면 어느 메서드든 읽는다"
+      - t:
+          ko: "읽히기는 하는데 실행할 때 막힌다"
+          en: "It reads, but is blocked at run time"
+        diag:
+          t:
+            ko: "이 규칙은 <b>컴파일할 때</b> 걸립니다. 실행까지 가는 일이 없어요."
+            en: "This rule is enforced <b>at compile time</b>. It never reaches run time."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 번역할 때냐 돌 때냐"
+              en: "The sharpest spot — translating or running"
+            code:
+              - "javac: 여기서 막힌다"
+              - "java:  여기까지 안 온다"
+
+no_hole_reason: >-
+  빈칸의 정답이 사용처마다 갈린다 — 같은 자리에 public·private·protected 가 다 오고,
+  어느 것이 맞는지는 문법이 아니라 그 코드의 설계가 정한다. 보기를 고정할 수 없다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행이 이 이름을 <b>밖에서 못 보게</b> 한 이유는 무엇일까요?"
+    en: "Why does line {{site.line}} keep this name <b>out of outside view</b>?"
+  choices:
+    - t:
+        ko: "안쪽 사정을 나중에 <b>고칠 수 있게</b> 남겨 두려고 — 남이 쓰면 못 고친다"
+        en: "To keep the internals <b>changeable later</b> — once others use them, they cannot change"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 무엇을 고치고 싶어질지도 한 줄 적어 보세요."
+        en: "That is the direction. Add a line on what you might want to change."
+    - t:
+        ko: "값을 안전하게 감추려고 — 남이 못 보게"
+        en: "To hide the value safely so nobody can see it"
+      ok: false
+      fb:
+        ko: "감추는 것은 <b>이름</b>이고 값은 그대로 있습니다. 보안 장치가 아니에요."
+        en: "What is hidden is the <b>name</b>; the value is still there. This is not a security device."
+    - t:
+        ko: "자바가 그렇게 적기를 요구해서"
+        en: "Because Java requires it to be written that way"
+      ok: false
+      fb:
+        ko: "요구하지 않습니다. 아무것도 안 적어도 컴파일은 됩니다 — 적는 것은 선택이에요."
+        en: "It does not. Writing nothing still compiles — writing it is a choice."
+
+queries:
+  - { grammars: [java], file: ./access-modifier.scm }
+
+examples:
+  - code: "class C { private String secret = \"x\"; }"
+    expect: { sites: 1, form: field, picks: { 1: "private", 2: "String", 3: "secret" }}
+  - code: "class C { public int size() { return 1; }}"
+    expect: { sites: 1, form: method, picks: { 1: "public", 2: "int", 3: "size" }}
+  - code: "class C { int n = 1; }"
+    expect: none

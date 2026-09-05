@@ -1,0 +1,195 @@
+schema: 1
+id: sql/arithmetic
+universal: common/arithmetic
+name: { ko: "셈하기", en: "Arithmetic" }
+token: "-"
+grammars: [sql, mybatis_sql]
+framework: null
+essential: true
+difficulty: 1
+prereq: [sql/select-list, sql/implicit-cast]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "행마다 한 번씩 계산한다. 모르는 값이 끼면 답도 모름이 된다."
+    en: "Computed once per row. If an unknown joins in, the answer is unknown too."
+  why:
+    ko: >-
+      {{site.line}}행의 셈은 <b>행마다 한 번씩</b> 돕니다 — 한 번 적었을 뿐인데 행 수만큼 계산돼요.
+      두 가지가 다른 언어와 다릅니다. 첫째, {{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:이,가}} 둘 다 정수면
+      나눗셈이 <b>정수 나눗셈</b>이라 소수점 아래가 버려집니다. 둘째, 어느 한쪽이라도 값을 모르면
+      결과가 통째로 <b>모름</b>이 돼요 — 0 이 아니라 모름입니다. 그래서 합계가 조용히 비어 버립니다.
+    en: >-
+      The arithmetic on line {{site.line}} runs <b>once per row</b> — written once, computed as many
+      times as there are rows. Two things differ from other languages. First, when {{pick.2|code}}
+      and {{pick.3|code}} are both integers, division is <b>integer division</b> and the fraction is
+      thrown away. Second, if either side is unknown the whole result is <b>unknown</b> — not zero,
+      unknown. That is how a total quietly comes back empty.
+  trace:
+    - ko: "{{site.line}}행의 각 행에서 {{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:을,를}} 읽는다."
+      en: "On each row of line {{site.line}}, {{pick.2|code}} and {{pick.3|code}} are read."
+    - ko: "{{pick.1|code}}{{pick.1|josa:으로,로}} 두 값을 계산한다."
+      en: "They are combined with {{pick.1|code}}."
+    - ko: "한쪽이 모름이면 계산하지 않고 모름을 낸다."
+      en: "If either is unknown, no computing happens and unknown comes out."
+
+rule:
+  ko: "<b>행마다 한 번씩, 그리고 모름이 퍼진다.</b> 정수끼리의 나눗셈은 정수다."
+  en: "<b>Once per row, and unknown spreads.</b> Integer over integer stays an integer."
+result:
+  label: { ko: "이 행의 셈 결과", en: "the result on this row" }
+  value: "{{pick.2}} {{pick.1}} {{pick.3}}"
+  note: { ko: "한쪽이 모름이면 모름", en: "unknown if either side is" }
+ok:
+  ko: >-
+    행마다 값이 하나씩 나오고, 모르는 값이 낀 행에서는 결과도 모름입니다.
+  en: >-
+    One value comes out per row, and rows with an unknown produce an unknown.
+payoff:
+  ko: >-
+    이걸 알면 합계가 비어 나오는 사고가 어디서 시작됐는지 보입니다 — 모름이 낀 한 행이에요.
+  en: >-
+    Knowing this, an empty total is traceable to its start — one row with an unknown in it.
+bridge:
+  ko: >-
+    셈 자체는 어디서나 셈입니다. 다른 것은 <b>모름</b>이라는 셋째 값이 있다는 것이에요.
+  en: >-
+    Arithmetic is arithmetic anywhere. What differs is the third value: <b>unknown</b>.
+misconceptions:
+  - ko: "모르는 값은 0 으로 쳐서 계산한다 — 결과가 통째로 모름이 됩니다."
+    en: "An unknown counts as zero — the whole result becomes unknown."
+  - ko: "정수끼리 나누면 소수가 나온다 — 소수점 아래가 버려집니다."
+    en: "Integer over integer gives a decimal — the fraction is discarded."
+  - ko: "셈을 적으면 행마다 도는 문장을 따로 써야 한다 — 한 번 적으면 행마다 돕니다."
+    en: "A loop is needed to compute per row — written once, it already runs per row."
+
+meaning:
+  - q:
+      ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 어떤 행에서 값이 없다면 그 행의 결과는 무엇이 될까요?"
+      en: "If {{pick.3|code}} has no value on some row, what is that row's result?"
+    hint:
+      ko: "「없다」와 「0」이 같은 것인지 생각해 보세요."
+      en: "Think about whether “absent” and “zero” are the same thing."
+    options:
+      - t:
+          ko: "모름이 된다 — 셈 자체를 안 한다"
+          en: "It becomes unknown — no computing happens at all"
+      - t:
+          ko: "0 으로 쳐서 계산한다"
+          en: "It is treated as zero and computed"
+        diag:
+          t:
+            ko: >-
+              0 은 <b>아는 값</b>이고 없음은 <b>모르는 값</b>입니다. 0 으로 치려면 그렇게 적어야 해요.
+            en: >-
+              Zero is a <b>known</b> value; absence is an <b>unknown</b> one. Treating it as zero has to
+              be written.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 0 이냐 모름이냐", en: "The sharpest spot — zero or unknown" }
+            code:
+              - "qty - used"
+              - "qty - COALESCE(used, 0)"
+      - t:
+          ko: "그 행이 결과에서 빠진다"
+          en: "That row drops out of the result"
+        diag:
+          t:
+            ko: >-
+              행을 버리는 것은 <b>거르는 절</b>의 일입니다. 셈은 그 행에 모름을 채워 그대로 둡니다.
+            en: >-
+              Dropping rows is the <b>filtering clause's</b> job. Arithmetic leaves the row and puts an
+              unknown in it.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값이냐 행이냐", en: "The sharpest spot — the value or the row" }
+            code:
+              - "-- 행은 남고 칸이 빈다"
+      - t:
+          ko: "문장이 서지 않는다"
+          en: "The statement does not stand"
+        diag:
+          t:
+            ko: >-
+              모름은 값의 하나라 <b>문장이 서는 데는 문제가 없습니다</b>. 조용한 것이 이 개념의 요점이에요.
+            en: >-
+              Unknown is one of the values, so <b>the statement stands fine</b>. Being quiet is the point.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 안 서느냐 조용하냐", en: "The sharpest spot — refused or quiet" }
+            code:
+              - "-- 오류가 아니라 빈 칸이 나온다"
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>계산을 정하는</b> 자리를 짚어 보세요."
+      en: "On line {{site.line}}, point at what <b>settles the computation</b>."
+    hint:
+      ko: "값과 값 사이에서 무엇을 할지 정하는 것은 하나뿐입니다."
+      en: "Only one thing between the two values says what to do."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 계산의 <b>재료</b>이지 계산 방법이 아닙니다.
+          en: >-
+            {{pick.2|code}} is <b>material</b> for the computation, not the computation.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 재료냐 방법이냐", en: "The sharpest spot — material or method" }
+          code:
+            - "qty - used"
+            - "-- 가운데가 방법이다"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 오른쪽 <b>재료</b>입니다. 이 값이 모름이면 결과도 모름이 돼요.
+          en: >-
+            {{pick.3|code}} is the right-hand <b>material</b>. If it is unknown, so is the result.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 재료냐 방법이냐", en: "The sharpest spot — material or method" }
+          code:
+            - "qty - used"
+            - "-- 오른쪽도 재료다"
+
+no_hole_reason: >-
+  구멍이 될 자리가 연산자 한 글자뿐인데 한 글자짜리 구멍은 빈칸형이 안 받는다(`t0-blank.ts` 의 `MIN_HOLE`).
+  그리고 이 개념의 함정은 어느 기호냐가 아니라 「모름이 끼면 어떻게 되나」이므로 뜻 고르기가 그것을 묻는다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 이 셈을 <b>여기</b>에 적었을까요? 미리 계산해 둘 수도 있는데요."
+    en: "Why is this arithmetic written <b>here</b> on line {{site.line}} instead of stored ready-made?"
+  choices:
+    - t:
+        ko: "재료가 바뀌면 결과도 따라 바뀌어야 해서 — 미리 저장해 두면 어긋난다"
+        en: "So the result follows its inputs — a stored copy drifts out of step"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그럼에도 미리 저장해 두는 편이 나은 경우가 언제인지도 적어 보세요."
+        en: "That is the direction. Say when storing it ready-made is still the better trade."
+    - t:
+        ko: "여기 적어야 더 빨라서"
+        en: "Because it is faster here"
+      ok: false
+      fb:
+        ko: "미리 저장해 두는 편이 대개 더 빠릅니다. 여기 적는 이유는 <b>어긋나지 않게</b>예요."
+        en: "Storing it is usually faster. The reason to compute here is <b>staying in step</b>."
+    - t:
+        ko: "값을 저장할 열이 없어서"
+        en: "Because there is no column to store it in"
+      ok: false
+      fb:
+        ko: "열은 더할 수 있습니다. 안 더한 것이 <b>고른 것</b>이에요."
+        en: "A column can be added. Not adding one was the <b>choice</b>."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./arithmetic.scm }
+
+examples:
+  - code: "SELECT qty - used FROM cart"
+    expect: { sites: 1, form: arith, picks: { 1: "-", 2: "qty", 3: "used" } }
+  - code: "SELECT total * 2 FROM cart"
+    expect: { sites: 1, form: arith, picks: { 1: "*", 2: "total", 3: "2" } }
+  - code: "SELECT qty FROM cart WHERE qty > 2"
+    expect: none
+  - code: "SELECT COUNT(*) FROM cart"
+    expect: none

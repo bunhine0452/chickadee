@@ -1,0 +1,208 @@
+schema: 1
+id: sql/having
+universal: null
+name: { ko: "묶은 뒤에 거르기", en: "Filtering groups" }
+token: "HAVING"
+grammars: [sql, mybatis_sql]
+framework: null
+essential: true
+difficulty: 3
+prereq: [sql/where-filter, sql/group-by, cs/three-valued-logic]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "묶은 뒤에 묶음을 거른다. 여기서는 여러 행을 한꺼번에 볼 수 있다."
+    en: "Drops whole bundles after bundling. Here many rows can be weighed at once."
+  why:
+    ko: >-
+      거르는 자리가 <b>둘</b>인 이유는 보이는 것이 서로 다르기 때문입니다. 앞의 거르는 절은 행 하나만
+      보므로 「몇 개인가」를 못 묻고, {{site.line}}행의 이 자리는 묶음이 이미 만들어진 뒤라
+      {{pick.2|code}} 처럼 <b>여러 행을 봐야 아는 조건</b>을 물을 수 있어요. 순서가 뜻을 바꿉니다 —
+      앞에서 거르면 <b>세기 전에</b> 행이 빠지고, 여기서 거르면 <b>세고 난 뒤</b> 묶음이 빠집니다.
+      같은 조건이라도 두 자리의 답이 다릅니다.
+    en: >-
+      There are <b>two</b> filtering places because they see different things. The earlier one sees a
+      single row, so “how many” cannot be asked there; this one on line {{site.line}} comes after the
+      bundles exist, so a test like {{pick.2|code}} that <b>needs many rows</b> can be asked. The order
+      changes the meaning — filtering earlier removes rows <b>before counting</b>; filtering here
+      removes bundles <b>after counting</b>. The same test in the two places gives different answers.
+  trace:
+    - ko: "{{pick.4|code}} 절이 {{pick.3|code}} 값마다 묶음을 만든다."
+      en: "The {{pick.4|code}} clause bundles by each {{pick.3|code}} value."
+    - ko: "묶음마다 {{pick.2|code}} 조건을 잰다."
+      en: "Each bundle is weighed by {{pick.2|code}}."
+    - ko: "참인 묶음만 {{site.line}}행을 지나 남는다."
+      en: "Only bundles where it holds get past line {{site.line}}."
+
+rule:
+  ko: "<b>여기는 묶음을 거른다.</b> 앞에서 거르면 세기 전, 여기서 거르면 센 뒤다."
+  en: "<b>This filters bundles.</b> Earlier is before counting; here is after."
+result:
+  label: { ko: "묶음에 거는 조건", en: "the test on a bundle" }
+  value: "{{pick.2}}"
+  note: { ko: "센 뒤에 잰다", en: "weighed after counting" }
+ok:
+  ko: >-
+    {{pick.2|code}} 조건이 참인 묶음만 남고, 안에 있던 행은 이미 접힌 뒤입니다.
+  en: >-
+    Only bundles where {{pick.2|code}} holds remain, and their rows are already folded.
+payoff:
+  ko: >-
+    이걸 알면 같은 조건을 두 자리에 옮겨 봤을 때 답이 달라지는 이유를 말할 수 있습니다.
+  en: >-
+    Knowing this, you can say why moving one test between the two places changes the answer.
+bridge:
+  ko: >-
+    다른 언어에서 나눠 담은 뒤 조각을 걸러내는 일과 같습니다. 다른 것은 <b>거르는 자리가 둘</b>이라는 것이에요.
+  en: >-
+    It is sieving the buckets after a split, as elsewhere. What differs is that there are <b>two</b>
+    places to sieve.
+misconceptions:
+  - ko: "이 절은 앞의 거르는 절과 같은 일을 한다 — 보는 것이 행이냐 묶음이냐가 다릅니다."
+    en: "It does what the earlier filter does — one sees a row, the other a bundle."
+  - ko: "묶는 절 없이는 못 쓴다 — 표 전체가 한 묶음일 때도 씁니다."
+    en: "It needs a bundling clause — it also works when the whole table is one bundle."
+  - ko: "여기서 거르면 앞에서 거르는 것과 결과가 같다 — 세는 시점이 달라 답이 달라집니다."
+    en: "Filtering here equals filtering earlier — the counting moment differs, so the answers do."
+
+meaning:
+  - q:
+      ko: "「값이 큰 행만 세기」를 앞의 거르는 절에 적을 때와 {{site.line}}행에 적을 때는 무엇이 다를까요?"
+      en: "“Count only the large rows” written in the earlier filter versus on line {{site.line}} — what differs?"
+    hint:
+      ko: "행이 빠지는 시점이 <b>세기 전</b>인지 <b>센 뒤</b>인지 갈라 보세요."
+      en: "Separate whether rows leave <b>before</b> counting or after."
+    options:
+      - t:
+          ko: "앞에 적으면 작은 행이 세기 전에 빠지고, 여기 적으면 다 센 묶음이 통째로 빠진다"
+          en: "Earlier drops small rows before counting; here a fully counted bundle drops whole"
+      - t:
+          ko: "결과가 같다 — 조건이 같으니까"
+          en: "The results match — it is the same test"
+        diag:
+          t:
+            ko: >-
+              조건은 같아도 <b>재는 대상</b>이 다릅니다. 하나는 행, 하나는 묶음이에요.
+            en: >-
+              Same test, different <b>subject</b>. One weighs a row, the other a bundle.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 행이냐 묶음이냐", en: "The sharpest spot — a row or a bundle" }
+            code:
+              - "WHERE qty > 1 ... COUNT(*)"
+              - "... COUNT(*) ... HAVING COUNT(*) > 1"
+      - t:
+          ko: "여기 적으면 아무 일도 안 일어난다"
+          en: "Written here it does nothing"
+        diag:
+          t:
+            ko: >-
+              여기 적힌 조건도 <b>똑같이 거릅니다</b> — 다만 거르는 대상이 묶음이에요.
+            en: >-
+              A test here <b>filters just as much</b> — its subject is simply a bundle.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 거르냐 마느냐", en: "The sharpest spot — filtering or not" }
+            code:
+              - "HAVING COUNT(*) > 1   -- 묶음이 빠진다"
+      - t:
+          ko: "앞에 적으면 문장이 안 선다"
+          en: "Written earlier the statement does not stand"
+        diag:
+          t:
+            ko: >-
+              보통 열 조건이면 앞에서도 <b>잘 섭니다</b>. 안 서는 것은 접는 함수를 앞에 적었을 때예요.
+            en: >-
+              A plain column test <b>stands fine</b> earlier. What does not stand is a folding function there.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 보통 열이냐 접은 값이냐", en: "The sharpest spot — a plain column or a folded value" }
+            code:
+              - "WHERE qty > 1        -- 선다"
+              - "WHERE COUNT(*) > 1   -- 안 선다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 묶음을 <b>묶은 뒤</b>에 거릅니다."
+      en: "Choose what goes in the blank. Line {{site.line}} filters bundles <b>after</b> bundling."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "HAVING", mono: true }
+      - t: "WHERE"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>WHERE</code> 는 묶기 <b>전</b>에 행을 거릅니다 — 그 시점에는 셀 묶음이 아직 없어요.
+            en: >-
+              <code>WHERE</code> filters rows <b>before</b> bundling — at that point there is no bundle
+              to count.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 묶기 전이냐 뒤냐", en: "The sharpest spot — before or after bundling" }
+            code:
+              - "WHERE qty > 1        -- 행"
+              - "HAVING COUNT(*) > 1  -- 묶음"
+      - t: "FILTER"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>FILTER</code> 는 <b>접는 함수 하나</b>에만 붙는 곁절이라 묶음 전체를 못 버립니다.
+            en: >-
+              <code>FILTER</code> attaches to <b>one folding function</b>; it cannot drop a whole bundle.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 함수 하나냐 묶음이냐", en: "The sharpest spot — one function or the bundle" }
+            code:
+              - "COUNT(*) FILTER (WHERE qty > 1)"
+              - "HAVING COUNT(*) > 1"
+      - t: "QUALIFY"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>QUALIFY</code> 는 <b>창 함수</b> 결과를 거르는 방언 낱말이라 묶음의 자리가 아닙니다.
+            en: >-
+              <code>QUALIFY</code> is a dialect word for filtering <b>window function</b> results, not bundles.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 묶음이냐 창이냐", en: "The sharpest spot — bundles or windows" }
+            code:
+              - "HAVING COUNT(*) > 1"
+              - "QUALIFY ROW_NUMBER() OVER (...) = 1"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행의 조건은 왜 앞의 거르는 절이 아니라 <b>여기</b>에 있을까요?"
+    en: "Why does the test on line {{site.line}} live <b>here</b> and not in the earlier filter?"
+  choices:
+    - t:
+        ko: "여러 행을 봐야 알 수 있는 조건이라서 — 앞에서는 다른 행이 안 보인다"
+        en: "Because it needs many rows — the earlier place cannot see them"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 앞에서도 되는 조건을 굳이 여기 적으면 무엇이 나빠지는지도 적어 보세요."
+        en: "That is the direction. Say what gets worse when a test that could go earlier is put here."
+    - t:
+        ko: "묶는 절 뒤에는 여기밖에 못 적어서"
+        en: "Because after bundling there is nowhere else"
+      ok: false
+      fb:
+        ko: "자리의 제약이 아니라 <b>무엇을 봐야 하는가</b>가 이유입니다."
+        en: "Not a limit of placement — <b>what the test must see</b> is the reason."
+    - t:
+        ko: "여기가 더 빨라서"
+        en: "Because it is faster here"
+      ok: false
+      fb:
+        ko: "대개 반대입니다 — 앞에서 거를 수 있으면 앞이 쌉니다."
+        en: "Usually the opposite — if it can go earlier, earlier is cheaper."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./having.scm }
+
+examples:
+  - code: "SELECT kind FROM cart GROUP BY kind HAVING COUNT(*) > 1"
+    expect: { sites: 1, form: having, hole: "HAVING", picks: { 1: "HAVING", 2: "COUNT(*) > 1", 3: "kind", 4: "GROUP" } }
+  - code: "SELECT kind, SUM(qty) FROM cart GROUP BY kind HAVING SUM(qty) > 3"
+    expect: { sites: 1, form: having, hole: "HAVING", picks: { 1: "HAVING", 2: "SUM(qty) > 3", 3: "kind", 4: "GROUP" } }
+  - code: "SELECT kind FROM cart GROUP BY kind"
+    expect: none

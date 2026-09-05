@@ -1,0 +1,18 @@
+# 작은 문제 하나 (D186 ⑧). 지문은 우리가 썼고 케이스의 답은 reference.py 가 낸다.
+schema: 1
+id: float-not-exact
+topic: arithmetic
+statement:
+  ko: "한 줄에 실수 세 개가 주어집니다. 앞의 두 수를 더한 값이 셋째 수와 **정확히 같으면** yes 를, 아니면 no 를 출력하세요."
+  en: "One line holds three decimal numbers. Print yes if the first two added together are **exactly** the third, and no otherwise."
+needs: [common/float-literal, cs/floating-point]
+langs: [py, ts, java]
+cases:
+  - stdin: "0.1 0.2 0.3\n"
+    stdout: "no\n"
+  - stdin: "1.5 2.25 3.75\n"
+    stdout: "yes\n"
+  - stdin: "0.5 0.25 0.75\n"
+    stdout: "yes\n"
+  - stdin: "0.1 0.7 0.8\n"
+    stdout: "no\n"

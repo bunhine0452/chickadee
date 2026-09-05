@@ -1,0 +1,89 @@
+schema: 1
+id: cs/binary-representation
+universal: null
+name: { ko: "0과 1로만 적기", en: "Binary representation" }
+token: null
+grammars: []
+framework: null
+# `cs/` 는 문법 아래의 기계다 — 짚을 노드가 없어 쿼리가 없고, 창은 이 개념을 `prereq` 로
+# 가리키는 언어 개념에서 빌린다 (D157 · D167).
+track_default: t0
+essential: false
+difficulty: 1
+prereq: []
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "기계가 가진 것은 켜짐과 꺼짐 둘뿐이고, 나머지는 전부 그 묶음이다."
+    en: "A machine has on and off. Everything else is a bundle of those."
+  why:
+    ko: >-
+      화면의 숫자 <code>7</code>, 글자 「가」, 파란색 — 셋은 사람에게 전혀 다른 것이지만
+      기계 안에서는 <b>같은 종류의 물건</b>입니다. 켜짐·꺼짐이 늘어선 줄 하나예요.
+      다른 것은 그 줄을 <b>무엇으로 읽기로 약속했는지</b>뿐입니다. 그래서 이 층을 알면
+      「왜 소수가 딱 안 떨어지나」·「왜 글자 수와 바이트 수가 다르나」 같은 질문이
+      각각의 수수께끼가 아니라 <b>한 가지 사실의 여러 얼굴</b>로 보입니다.
+    en: >-
+      The number <code>7</code> on screen, the letter “A”, the colour blue — to a person these are
+      different kinds of thing. Inside the machine they are the <b>same kind</b>: one row of
+      on/off. What differs is only <b>what we agreed to read that row as</b>. Once you see this
+      layer, “why does a decimal not come out exact” and “why is the character count not the byte
+      count” stop being separate puzzles and become <b>one fact wearing different faces</b>.
+  trace: []
+rule:
+  ko: "<b>같은 줄도 읽는 약속이 다르면 다른 값이다.</b> 값은 비트에 있지 않고 약속에 있다."
+  en: "<b>The same row read under a different agreement is a different value.</b> The value lives in the agreement, not the bits."
+ok:
+  ko: >-
+    사람이 쓰는 십진수를 기계는 두 자리 체계로 바꿔 담습니다. 담을 때와 꺼낼 때 같은
+    약속을 쓰면 사람에게는 아무 일도 없었던 것처럼 보입니다.
+  en: >-
+    The decimal you type is stored in a two-symbol system. Store and read it under the same
+    agreement and, from the outside, nothing seems to have happened at all.
+misconceptions:
+  - ko: "기계 안에 숫자 7이 그대로 들어 있다 — 들어 있는 것은 약속에 따라 7로 읽히는 줄입니다."
+    en: "The number 7 sits inside the machine — what sits there is a row that reads as 7 under an agreement."
+  - ko: "이진수는 숫자 전용이다 — 글자·소리·색도 같은 줄로 담깁니다. 약속만 다릅니다."
+    en: "Binary is only for numbers — letters, sound and colour use the same rows, under other agreements."
+  - ko: "이진수를 쓰는 이유는 빠르기 때문이다 — 이유는 회로가 구별할 수 있는 상태가 둘이어서입니다."
+    en: "Binary is used because it is fast — it is used because a circuit can tell two states apart."
+meaning:
+  - q:
+      ko: "같은 비트 줄이 어떤 때는 숫자로, 어떤 때는 글자로 읽힙니다. <b>무엇이 그것을 정하나요?</b>"
+      en: "The same row of bits reads as a number here and a letter there. <b>What decides which?</b>"
+    hint:
+      ko: "줄 자체에는 「나는 숫자다」라고 적혀 있지 않습니다."
+      en: "The row itself does not carry a label saying “I am a number”."
+    options:
+      - t: { ko: "그 줄을 무엇으로 읽기로 한 약속", en: "The agreement about how to read that row" }
+      - t: { ko: "줄의 길이 — 짧으면 숫자, 길면 글자", en: "The length of the row — short is a number, long is a letter" }
+        diag:
+          t:
+            ko: "길이는 <b>얼마나 큰 값까지 담느냐</b>를 정할 뿐입니다. 한 바이트에도 숫자와 글자가 둘 다 들어갑니다."
+            en: "Length only sets <b>how large a value fits</b>. A single byte holds both numbers and letters."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 길이냐 약속이냐", en: "The sharpest spot — length or agreement" }
+            code:
+              - "01000001 → 숫자로 읽으면 65"
+              - "01000001 → 글자로 읽으면 A"
+      - t: { ko: "값을 담을 때 기계가 표시를 같이 붙여 둔다", en: "The machine stores a marker alongside the value" }
+        diag:
+          t:
+            ko: "표시를 들고 다니는 언어도 있지만 그것은 <b>언어의 선택</b>이지 비트의 성질이 아닙니다. 표시 없이 담는 언어에서도 값은 잘 읽힙니다."
+            en: "Some languages do carry a marker, but that is a <b>language's choice</b>, not a property of bits. Languages without markers read values just fine."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 비트냐 언어냐", en: "The sharpest spot — bits or language" }
+            code:
+              - "비트: 표시 없음"
+              - "언어: 표시를 붙이기도 한다"
+      - t: { ko: "0과 1의 개수 — 1이 많으면 글자다", en: "How many ones there are — many ones means a letter" }
+        diag:
+          t:
+            ko: "1의 개수는 값의 일부일 뿐입니다. 같은 개수로도 숫자와 글자가 다 나옵니다."
+            en: "The count of ones is just part of the value. The same count yields both numbers and letters."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 세는 것과 읽는 것", en: "The sharpest spot — counting or reading" }
+            code:
+              - "01000001 · 1이 둘 → 65 또는 A"
+              - "개수는 읽는 법을 안 정한다"

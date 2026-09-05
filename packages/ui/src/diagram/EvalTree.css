@@ -1,0 +1,149 @@
+/* 평가 트리 — 우선순위는 트리 모양이 이미 담고 있다. 선은 1px, 색은 「지금 접히는 마디」
+   한 자리에만. 마디가 많으면 틀(.dgm-view)이 가로로 스크롤되고 화면은 안 밀린다. */
+.tree {
+  display: flex;
+  justify-content: center;
+  min-width: min-content;
+  padding-bottom: var(--s-2);
+}
+
+.tn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.tn-box {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.4em;
+  min-height: 2.1em;
+  padding: var(--s-1) var(--s-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-3);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+/* 연산자 마디는 아직 안 접힌 것이다 — 테두리만. */
+.tn-box.op { font-weight: var(--fw-bold) }
+
+/* 접혀서 값이 된 마디. */
+.tn-box.val { background: var(--surface-3) }
+
+/* 방금 접힌 마디 하나. 신호 주기(de Koning 외 2017)가 여기 한 자리에만 붙는다. */
+.tn-box.now {
+  border-color: var(--accent);
+  background: var(--accent-weak);
+  font-weight: var(--fw-medium);
+}
+
+.tn-kids {
+  display: flex;
+  gap: var(--s-4);
+  margin-top: var(--s-3);
+}
+
+/* 부모에서 가로선까지 내려오는 짧은 선. */
+.tn.kids > .tn-box::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 1px;
+  height: var(--s-3);
+  background: var(--border-strong);
+}
+
+/* 자식 위의 가로선 — 바깥쪽 자식은 안쪽 절반만 그린다. */
+.tn-kids > .tn {
+  padding-top: var(--s-4);
+}
+
+.tn-kids > .tn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: var(--s-4);
+  background: var(--border-strong);
+}
+
+.tn-kids > .tn::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: calc(var(--s-4) / -2);
+  left: calc(var(--s-4) / -2);
+  height: 1px;
+  background: var(--border-strong);
+}
+
+.tn-kids > .tn:first-child::after { left: 50% }
+
+.tn-kids > .tn:last-child::after { right: 50% }
+
+/* 지금 식 한 줄 — 트리를 못 읽는 사람도 여기서 진행을 본다. */
+.tree-line {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-3);
+  line-height: var(--lh-code);
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+/* 걸음 사다리 — 트리를 못 실은 문항(`step` 형식의 `fold`)이 쓰는 낮은 해상도판.
+   같은 규약을 그대로 쓴다: 자리는 남고 값이 사라지며, 지금 걸음 하나에만 색이 붙는다. */
+.fold {
+  display: grid;
+  gap: var(--s-1);
+  min-width: min-content;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fold-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  gap: var(--s-3);
+  align-items: baseline;
+  min-height: 2.1em;
+  padding: var(--s-1) var(--s-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+}
+
+.fold-row.now {
+  border-color: var(--accent);
+  background: var(--accent-weak);
+}
+
+.fold-row.veil {
+  border-style: dashed;
+  background: transparent;
+}
+
+.fold-code {
+  font-family: var(--font-mono);
+  font-size: var(--fs-3);
+  line-height: var(--lh-code);
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.fold-type {
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  color: var(--text-muted);
+}

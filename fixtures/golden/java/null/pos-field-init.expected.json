@@ -1,0 +1,41 @@
+[
+  {
+    "queryId": "java/null",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": null,
+    "startLine": 4,
+    "startCol": 27,
+    "endLine": 4,
+    "endCol": 31,
+    "nodeKind": "null_literal",
+    "inError": false
+  },
+  {
+    "queryId": "java/null",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": null,
+    "startLine": 4,
+    "startCol": 27,
+    "endLine": 4,
+    "endCol": 31,
+    "nodeKind": "null_literal",
+    "inError": false
+  },
+  {
+    "queryId": "java/null",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "hole",
+    "form": null,
+    "startLine": 4,
+    "startCol": 27,
+    "endLine": 4,
+    "endCol": 31,
+    "nodeKind": "null_literal",
+    "inError": false
+  }
+]

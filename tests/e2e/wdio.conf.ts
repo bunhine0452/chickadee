@@ -59,6 +59,7 @@ export const config = {
     './specs/e6-escape.e2e.ts',
     './specs/e7-night.e2e.ts',
     './specs/e8-settings.e2e.ts',
+    './specs/e9-journey.e2e.ts',
   ],
 
   maxInstances: 1,

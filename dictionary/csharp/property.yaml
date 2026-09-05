@@ -1,0 +1,128 @@
+schema: 1
+id: csharp/property
+# `csharp.md` §6 이 `universal: null` 로 못박은 자리다 — 계산 프로퍼티는 다른 언어에도 있지만
+# 전부 몸체를 적는다. C# 이 가르치는 것은 「자동 프로퍼티가 **이름 없는 필드**를 하나 만든다」이고
+# 그 모양은 이 언어에만 있다.
+universal: null
+name: { ko: 필드처럼 보이는 메서드 둘, en: Property }
+token: "{ get; set; }"
+grammars: [c_sharp]
+framework: null
+essential: true
+difficulty: 2
+prereq: [csharp/class-declaration, csharp/member-access]
+confusions: []
+dict:
+  one_liner:
+    ko: "읽기와 쓰기를 메서드 둘로 두고, 쓰는 쪽에는 필드처럼 보이게 한다."
+    en: "Reading and writing become two methods that still look like a field outside."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.3|code}} 안에는 코드가 안 보이지만 <b>메서드가 둘</b> 있습니다.
+      그리고 컴파일러가 값을 담을 <b>이름 없는 필드</b>를 하나 만들어요 — 그 필드는 소스 어디에도
+      안 적혀 있습니다. 그래서 <code>x.N++</code>은 한 동작처럼 보여도 실제로는
+      「읽고·더하고·쓰기」 셋이라 <b>원자적이지 않습니다</b>. ASP.NET Core 모양의 코드에서
+      DTO·모델의 대부분이 이 모양이라 첫 화면에 많이 나옵니다.
+    en: >-
+      {{pick.3|code}} on line {{site.line}} shows no code, yet <b>two methods</b> are there.
+      The compiler also makes an <b>unnamed field</b> to hold the value — a field written
+      nowhere in the source. So <code>x.N++</code> looks like one step but is really read, add
+      and write, which means it is <b>not atomic</b>. In ASP.NET Core-shaped code most DTOs
+      and models are written this way, so it fills the first screen.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}}{{pick.2|josa:을,를}} 밖에서 쓸 이름으로 세운다."
+      en: "Line {{site.line}} sets {{pick.2|code}} up as the name seen from outside."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 그 자리에 오갈 값의 종류를 정한다."
+      en: "{{pick.1|code}} sets the kind of value that goes in and out."
+    - ko: "값은 소스에 안 적힌 필드에 담긴다."
+      en: "The value lands in a field that the source never names."
+rule:
+  ko: "<b>필드처럼 보이지만 메서드다.</b> 값은 소스에 안 적힌 필드에 담긴다."
+  en: "<b>It looks like a field and is a method.</b> The value sits in a field the source never names."
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 이제 밖에서 필드처럼 읽고 쓸 수 있습니다."
+  en: "{{pick.2|code}} can now be read and written from outside as if it were a field."
+payoff:
+  ko: "이걸 알면 「DTO 가 왜 한 줄짜리인가」가 풀립니다 — 메서드 둘이 접혀 있습니다."
+  en: "This untangles “why is a DTO one line” — two methods are folded into it."
+bridge:
+  ko: >-
+    자바는 같은 일을 <code>getX()</code>·<code>setX()</code> 두 메서드로 적습니다.
+    C# 은 그 둘을 접어 두었고, 그래서 <b>이 자리가 전이가 안 붙는 곳</b>입니다.
+  en: >-
+    Java writes the same thing as <code>getX()</code> and <code>setX()</code>. C# folds them,
+    which is why <b>nothing transfers here</b>.
+misconceptions:
+  # 출처 — `csharp.md` §3 ⑮.
+  - ko: "필드를 짧게 적은 것이다 — 메서드 둘이고, 값을 담는 필드는 따로 생깁니다."
+    en: "It is shorthand for a field — it is two methods, and a separate field holds the value."
+  - ko: "<code>x.N++</code>은 한 동작이다 — 읽기·더하기·쓰기 셋이라 원자적이지 않습니다."
+    en: "<code>x.N++</code> is one step — it is read, add and write, so it is not atomic."
+  - ko: "읽기 전용은 값을 못 바꾼다 — 만드는 자리(생성자·초기화)에서는 바꿉니다."
+    en: "A read-only one can never change — it can, where the object is being made."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>밖에서 쓰이는 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name used from outside</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 오갈 값의 <b>종류</b>입니다. 밖에서 부르는 이름은 그 뒤예요."
+          en: "{{pick.1|code}} is the <b>kind</b> of value that travels. The name used outside comes after it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 종류냐 이름이냐", en: "The sharpest spot — the kind or the name" }
+          code:
+            - "public string Name { get; set; }"
+            - "//     ^종류      ^이름"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>읽기·쓰기 두 메서드</b>가 접혀 있는 자리입니다. 밖에서 부르는 것은 앞의 이름이에요."
+          en: "{{pick.3|code}} is where the <b>two methods</b> are folded. What outside code names is the word before it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 접힌 메서드냐", en: "The sharpest spot — the name or the folded methods" }
+          code:
+            - "x.Name = \"a\";     // 이름으로 부른다"
+            - "{ get; set; }     // 안에서 도는 것"
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 개념의 구멍은 접근자 목록(`{ get; set; }`)인데 그것은 토큰 하나가
+  아니라 여러 토큰이라, 빈칸형이 보기 넷의 종류를 맞추는 검사(`sameKind`)에서 떨어진다
+  (`packages/cards/src/t0-blank.ts`). 대신 지목형이 「이름이냐 접힌 메서드냐」를 묻는다.
+why_gate:
+  q:
+    ko: "이 언어는 왜 메서드 둘을 <b>필드처럼</b> 보이게 접었을까요?"
+    en: "Why does this language fold two methods to <b>look like a field</b>?"
+  choices:
+    - t:
+        ko: "나중에 검사나 계산을 끼워 넣어도 쓰는 쪽 코드를 안 고치게 하려고"
+        en: "So a check or a computation can be slipped in later without touching callers"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 대가로 읽는 사람이 못 보게 되는 것도 적어 보세요."
+        en: "That is the direction. Add what the reader stops being able to see."
+    - t:
+        ko: "필드가 느려서"
+        en: "Because fields are slow"
+      ok: false
+      fb:
+        ko: "필드가 더 빠릅니다. 접은 이유는 속도가 아니라 <b>바꿀 자유</b>예요."
+        en: "Fields are faster. The reason is not speed but <b>freedom to change</b>."
+    - t:
+        ko: "직렬화에 필요해서"
+        en: "Because serialisation needs it"
+      ok: false
+      fb:
+        ko: "많은 도구가 이 모양을 요구하는 것은 맞지만 그것은 결과이지 이유가 아닙니다."
+        en: "Many tools do want this shape, but that is a consequence, not the reason."
+queries:
+  - { grammars: [c_sharp], file: ./property.scm }
+examples:
+  - code: "class A { public string Name { get; set; } }"
+    expect: { sites: 1, form: auto, picks: { 1: "string", 2: "Name", 3: "{ get; set; }" } }
+  - code: "class A { public int Age => 3; }"
+    expect: { sites: 1, form: expression, picks: { 1: "int", 2: "Age", 4: "=> 3" } }
+  - code: "class A { private int _n; }"
+    expect: none

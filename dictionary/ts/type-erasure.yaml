@@ -1,0 +1,198 @@
+schema: 1
+id: ts/type-erasure
+universal: null
+name: { ko: 타입은 돌기 전에 사라진다, en: Type erasure }
+token: "interface"
+grammars: [typescript, tsx]
+framework: null
+essential: false
+difficulty: 2
+prereq: [ts/type-annotation, cs/compile-and-run, cs/erasure-and-reification]
+confusions: [ts/type-annotation]
+
+dict:
+  one_liner:
+    ko: "적어 둔 약속은 컴파일에서 지워진다. 돌아가는 코드에는 한 글자도 안 남는다."
+    en: "The promises you wrote are deleted at compile time. Not one letter runs."
+  why:
+    ko: >-
+      {{site.line}}행은 <b>돌아가는 코드에 없습니다.</b> 컴파일러가 확인을 끝내고 이 줄을 통째로
+      지우기 때문이에요. 그래서 {{pick.1|code}}{{pick.1|josa:과,와}} 다른 모양이 실제로 들어와도 그 자리에서는
+      아무도 안 막습니다.
+    en: >-
+      Line {{site.line}} is <b>not in the code that runs.</b> The compiler finishes checking and
+      deletes the line whole. So when a shape unlike {{pick.1|code}} actually arrives, nothing there
+      stops it.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.1|code}} 라는 약속을 세운다."
+      en: "Line {{site.line}} sets up the promise called {{pick.1|code}}."
+    - ko: "컴파일러가 그 약속으로 다른 줄들을 확인한다."
+      en: "The compiler checks the other lines against it."
+    - ko: "확인이 끝나면 이 줄이 지워진다 — 남는 것은 확인의 결과뿐이다."
+      en: "Checking done, the line is deleted — only its verdict remains."
+
+rule:
+  ko: >-
+    <b>돌아가는 중에는 타입이 없다.</b> 값의 모양을 그때 확인하려면 확인하는 코드를 직접 적어야
+    한다.
+  en: >-
+    <b>There are no types at run time.</b> Checking a value's shape then takes code you write
+    yourself.
+result:
+  label:
+    ko: "{{site.line}}행이 실행에 남기는 것"
+    en: "What line {{site.line}} leaves in the running program"
+  value: "(없음)"
+  note:
+    ko: "확인만 하고 사라진다"
+    en: "it checks, then goes"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} 컴파일러만 읽습니다. 브라우저나 서버가 받는 파일에는
+    이 글자가 아예 없어요.
+  en: >-
+    {{pick.2|code}} is read only by the compiler. The file a browser or a server receives does not
+    contain these letters at all.
+payoff:
+  ko: >-
+    「타입을 적었는데 왜 서버 응답이 이상한 값으로 들어오나」의 답이 이 하나입니다. 경계에서는
+    확인하는 코드를 적어야 해요.
+  en: >-
+    This alone answers "I declared the type, so why did the response arrive odd". At the boundary
+    you have to write the check.
+bridge:
+  ko: >-
+    확인을 아예 끄는 표기도 있습니다 — 그쪽은 사라지는 것이 아니라 <b>컴파일러의 입을 막는</b>
+    것이에요.
+  en: >-
+    There is also a notation that switches checking off — that one does not vanish; it
+    <b>silences the compiler</b>.
+misconceptions:
+  - ko: "적어 둔 약속이 돌아가는 중에도 지켜진다 — 그때는 이미 지워졌습니다."
+    en: "The written promise is enforced while running — by then it is deleted."
+  - ko: "약속이 파일 크기를 늘린다 — 산출물에는 안 실립니다."
+    en: "Promises bloat the output file — they are not shipped."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>컴파일 뒤에 사라지는 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name that disappears after compiling</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 그 약속의 <b>안쪽</b>입니다. 사라지는 것은 이름과
+            안쪽을 합친 이 줄 전체예요.
+          en: >-
+            {{pick.2|code}} is the <b>inside</b> of the promise. What disappears is the whole line,
+            name and inside together.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 이름과 안쪽"
+            en: "The sharpest spot — the name or the inside"
+          code:
+            - "interface Row { id: number }"
+            - "//        ^이름     ^안쪽"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 「이 들여오기는 타입만이다」라는 표시입니다.
+            사라지는 대상의 이름은 그 뒤에 있어요.
+          en: >-
+            {{pick.3|code}} marks "this import is types only". The name of what disappears comes
+            after it.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 표시와 이름"
+            en: "The sharpest spot — the marker or the name"
+          code:
+            - "import type { Row } from './row'"
+            - "//     ^표시          ^출처"
+
+meaning:
+  - q:
+      ko: >-
+        <code>interface Row { id: number }</code> 를 적어 두고 서버가 <code>id</code> 를 글자로
+        보내면 어디서 걸릴까요?
+      en: >-
+        With <code>interface Row { id: number }</code> written, where is it caught if the server
+        sends <code>id</code> as text?
+    hint:
+      ko: "이 선언이 돌아가는 코드에 남아 있는지 생각해 보세요."
+      en: "Ask whether this declaration survives into the running code."
+    options:
+      - t:
+          ko: "아무 데서도 안 걸린다 — 확인하는 코드를 따로 적어야 한다"
+          en: "Nowhere — the check has to be written by hand"
+      - t:
+          ko: "받는 그 줄에서 걸린다"
+          en: "It is caught on the receiving line"
+        diag:
+          t:
+            ko: >-
+              그 줄에는 확인할 것이 없습니다. 선언은 이미 지워졌고, 값은 그냥 들어와요.
+            en: >-
+              Nothing on that line does any checking. The declaration is already deleted and the
+              value simply arrives.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 선언이 남아 있나"
+              en: "The sharpest spot — does the declaration survive"
+            code:
+              - "interface Row { id: number }   // 지워진다"
+              - "if (typeof r.id !== 'number')  // 남는다"
+      - t:
+          ko: "컴파일할 때 걸린다"
+          en: "The compiler catches it"
+        diag:
+          t:
+            ko: >-
+              컴파일러는 서버가 무엇을 보낼지 모릅니다. 소스에 안 적힌 것은 견줄 대상이 없어요.
+            en: >-
+              The compiler does not know what the server will send. What is not in the source has
+              nothing to compare against.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 소스에 있나 밖에서 오나"
+              en: "The sharpest spot — in the source or from outside"
+            code:
+              - "const r: Row = { id: '1' }   // 걸린다"
+              - "const r: Row = await res.json()  // 안 걸린다"
+      - t:
+          ko: "글자가 숫자로 바뀌어 들어온다"
+          en: "The text is turned into a number on the way in"
+        diag:
+          t:
+            ko: >-
+              바꾸는 코드는 아무도 안 냅니다. 선언은 확인만 하고 그것도 컴파일 시각에 끝나요.
+            en: >-
+              Nobody generates converting code. The declaration only checks, and even that ends at
+              compile time.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 확인인가 변환인가"
+              en: "The sharpest spot — checking or converting"
+            code:
+              - "interface Row { id: number }   // 확인"
+              - "Number(r.id)                   // 변환"
+
+no_hole_reason: >-
+  이 개념이 재는 것은 「이 줄이 실행에 남나」이고, 남지 않는다는 사실에는 뚫을 구멍이 없다.
+  글자 하나를 지우면 다른 선언이 될 뿐이라 자리와 뜻으로 묻는다.
+
+queries:
+  - { grammars: [typescript, tsx], file: ./type-erasure.scm }
+
+examples:
+  - code: "interface Row { id: number }"
+    expect: { sites: 1, form: interface, picks: { 1: "Row", 2: "{ id: number }" } }
+  - code: "type Id = string"
+    expect: { sites: 1, form: alias, picks: { 1: "Id", 2: "string" } }
+  - code: "import type { Row } from './row'"
+    expect: { sites: 1, form: type-import, picks: { 1: "'./row'", 3: "type" } }
+  - code: "const row = { id: 1 }"
+    expect: none

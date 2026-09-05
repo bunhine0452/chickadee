@@ -1,0 +1,225 @@
+schema: 1
+id: go/map-type
+# 2부 (`go.md` §3 ⑱). 보편형 자리가 **비어 있다** — `common/key-value-map` 이
+# 후보로 제안됐고(`go.md` §6, 다른 언어 다섯에서 성립) 아직 없다. 만들지 않고
+# `null` 로 둔다 (README §12 규약 4). 실측 271곳/109파일.
+universal: null
+name: { ko: "열쇠로 값 찾기", en: "Map" }
+token: "map[K]V"
+grammars: [go]
+framework: null
+essential: true
+difficulty: 2
+prereq: [go/assignment, go/text-literal, cs/hash-table]
+confusions: []
+
+dict:
+  one_liner:
+    ko: >-
+      열쇠로 값을 찾는 묶음이다. 없는 열쇠를 읽으면 제로 값이 나온다.
+    en: >-
+      A bundle looked up by key; reading a missing key gives the zero value.
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.2|code}}{{pick.2|josa:은,는}} {{pick.3|code}} 라는 열쇠로 값을 찾는 묶음입니다. 여기에 Go
+      특유의 자리가 셋 있어요. ① <b>없는 열쇠도 읽힙니다</b> — 오류가 아니라 값 타입의 제로 값이 나와요. 그래서 「없음」과 「제로 값이 들어 있음」이 구별되지 않고,
+      구별하려면 <code>v, ok := m[k]</code> 처럼 값을 <b>둘</b> 받아야 합니다. ② <b>순서가 없습니다</b> — 명세가 순회 순서를 정해 두지
+      않았고 런타임이 일부러 흔들어요. ③ <b>선언만 한 묶음은 쓰기가 죽습니다</b> — 제로 값이 <code>nil</code> 이라 읽기는 되고 쓰기는 그 자리에서
+      멈춰요.
+    en: >-
+      The {{pick.2|code}} on line {{site.line}} is looked up by {{pick.3|code}}. Three places here are
+      Go's own. ① <b>A missing key still reads</b> — not an error but the zero value of the value
+      type. So "absent" and "present and zero" are not told apart, and telling them apart takes
+      <b>two</b> values: <code>v, ok := m[k]</code>. ② <b>There is no order</b> — the specification
+      fixes no iteration order and the runtime shuffles it on purpose. ③ <b>A merely declared map dies
+      on a write</b> — its zero value is <code>nil</code>, so reading works and writing stops on the
+      spot.
+  trace:
+    - ko: >-
+        {{site.line}}행은 이름 {{pick.2|code}}{{pick.2|josa:을,를}} 세운다.
+      en: >-
+        Line {{site.line}} sets up the name {{pick.2|code}}.
+    - ko: >-
+        {{pick.3|code}}{{pick.3|josa:이,가}} 찾을 때 쓰는 열쇠의 종류다.
+      en: >-
+        {{pick.3|code}} is the kind of key used to look up.
+    - ko: >-
+        {{pick.4|code}}{{pick.4|josa:은,는}} 찾아 나오는 값의 종류다.
+      en: >-
+        {{pick.4|code}} is the kind of value that comes out.
+
+rule:
+  ko: >-
+    <b>없는 열쇠는 오류가 아니라 제로 값이다.</b> 있었는지는 값을 둘 받아야 안다.
+  en: >-
+    <b>A missing key is not an error but the zero value.</b> Whether it was there takes two values.
+result:
+  label: { ko: "{{site.line}}행이 세운 묶음", en: "the bundle set up on line {{site.line}}" }
+  value: "{{pick.2}}"
+  note: { ko: "없는 열쇠도 값을 낸다", en: "even a missing key yields a value" }
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} 이제 {{pick.3|code}} 열쇠로 {{pick.4|code}} 값을 찾는 묶음입니다.
+  en: >-
+    {{pick.2|code}} now looks up a {{pick.4|code}} by a {{pick.3|code}}.
+payoff:
+  ko: >-
+    이걸 알면 「값이 0 인데 없는 건지 0 인 건지 모르겠다」가 풀립니다 — 값을 둘 받으면 갈립니다.
+  en: >-
+    This untangles "is that zero absent or actually zero" — taking two values tells them apart.
+bridge:
+  ko: >-
+    파이썬은 없는 열쇠에 오류를 냅니다. Go 는 제로 값을 내고, 그래서 있었는지를 묻는 <b>두 값 받기</b>가 따로 있어요.
+  en: >-
+    Python raises on a missing key. Go yields the zero value, which is why a separate <b>two-value
+    form</b> exists to ask whether it was there.
+misconceptions:
+  - ko: >-
+      없는 열쇠를 읽으면 죽는다 — 제로 값이 나옵니다. 죽는 것은 <code>nil</code> 묶음에 <b>쓸</b> 때예요.
+    en: >-
+      Reading a missing key dies — it yields the zero value. What dies is <b>writing</b> to a
+      <code>nil</code> map.
+  - ko: >-
+      훑으면 넣은 순서로 나온다 — 순서가 정해져 있지 않고 순회마다 달라질 수 있습니다.
+    en: >-
+      Walking it gives insertion order — no order is fixed and it can differ between walks.
+
+point:
+  - q:
+      ko: >-
+        {{site.line}}행에서 <b>찾을 때 쓰는 열쇠 자리</b>를 짚어 보세요.
+      en: >-
+        On line {{site.line}}, point at <b>the key side, the one used to look up</b>.
+    hint: { ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다.", en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose." }
+    answer: pick.3
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 묶음의 <b>이름</b>입니다. 이름은 열쇠가 아니에요.
+          en: >-
+            {{pick.2|code}} is the bundle's <b>name</b>, not the key.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 열쇠냐", en: "The sharpest spot — the name or the key" }
+          code:
+            - "counts                      // 이름"
+            - "map[string]int              // 열쇠는 string"
+      pick.4:
+        t:
+          ko: >-
+            {{pick.4|code}}{{pick.4|josa:은,는}} <b>찾아 나오는</b> 쪽입니다. 찾을 때 쓰는 것은 대괄호 안에 있어요.
+          en: >-
+            {{pick.4|code}} is what <b>comes out</b>. What you look up by sits inside the brackets.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 넣는 쪽이냐 나오는 쪽이냐", en: "The sharpest spot — what goes in or what comes out" }
+          code:
+            - "map[string]int              // 열쇠는 string"
+            - "counts[\"a\"]                 // 나오는 것은 int"
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>글자로 수를 찾는</b> 묶음을 세웁니다.
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} sets up a bundle that <b>looks up a number by
+        text</b>.
+    hint: { ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다.", en: "Your choice is written into the code at once. Submit to have it marked." }
+    options:
+      - { t: "map[string]int", mono: true }
+      - t: "map[int]string"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이건 <b>수로 글자를 찾는</b> 묶음이라 양쪽이 뒤바뀌었습니다. 대괄호 안이 열쇠, 뒤가 나오는 값이에요.
+            en: >-
+              That looks up <b>text by a number</b> — the two sides are swapped. Inside the brackets is the
+              key; what follows is what comes out.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 어느 쪽이 열쇠냐", en: "The sharpest spot — which side is the key" }
+            code:
+              - "map[string]int    // 글자로 찾는다"
+              - "map[int]string    // 수로 찾는다"
+      - t: "[]int"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이건 <b>자리 번호로 찾는</b> 창입니다. 글자를 번호 자리에 넣으면 그 줄에서 멈춰요.
+            en: >-
+              That is a window <b>looked up by position</b>. Text in the position slot stops on that line.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 번호냐 열쇠냐", en: "The sharpest spot — a position or a key" }
+            code:
+              - "counts[\"a\"]        // 열쇠로"
+              - "xs[0]              // 번호로"
+      - t: "struct{ a int }"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이건 <b>칸 이름이 미리 정해진</b> 묶음입니다. 실행 때 열쇠를 새로 만들 수 없어요.
+            en: >-
+              That is a bundle whose <b>slot names are fixed in advance</b>. No new key can appear at run
+              time.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 칸이 정해져 있나", en: "The sharpest spot — are the slots fixed" }
+            code:
+              - "counts[k] = 1              // 열쇠가 늘어난다"
+              - "o.a = 1                    // 칸은 정해져 있다"
+
+why_gate:
+  q:
+    ko: >-
+      Go 는 왜 없는 열쇠에 <b>오류 대신 제로 값</b>을 낼까요?
+    en: >-
+      Why does Go give <b>the zero value instead of an error</b> for a missing key?
+  choices:
+    - t:
+        ko: >-
+          세는 코드처럼 「없으면 0 부터」인 자리가 흔해, 읽는 쪽이 매번 있는지 묻지 않아도 되기 때문
+        en: >-
+          Because "absent means start at zero" is common, as in counting, so the reader need not ask each
+          time
+      ok: true
+      fb:
+        ko: >-
+          그 방향입니다. 그럼 「없음」과 「0 이 들어 있음」을 갈라야 할 때 무엇을 쓰는지도 적어 보세요.
+        en: >-
+          That is the direction. Add what to use when absent and present-and-zero must be told apart.
+    - t:
+        ko: >-
+          오류를 만들 방법이 없어서
+        en: >-
+          Because there is no way to raise an error
+      ok: false
+      fb:
+        ko: >-
+          있습니다. <code>nil</code> 묶음에 쓰면 실제로 죽어요 — 읽기에 안 그러기로 한 것이 결정입니다.
+        en: >-
+          There is. Writing to a <code>nil</code> map does die — choosing not to do that on a read is the
+          decision.
+    - t:
+        ko: >-
+          찾기가 빨라져서
+        en: >-
+          Because it makes lookup faster
+      ok: false
+      fb:
+        ko: >-
+          속도는 같습니다. 없을 때 무엇을 내놓느냐만 다릅니다.
+        en: >-
+          The speed is the same. Only what comes back on a miss differs.
+
+queries:
+  - { grammars: [go], file: ./map-type.scm }
+
+examples:
+  - code: "func f() { var counts map[string]int }"
+    expect: { sites: 1, form: decl, hole: "map[string]int", picks: { 2: "counts", 3: "string", 4: "int" } }
+  - code: "func f() { seen := map[string]bool{} }"
+    expect: { sites: 1, form: lit, hole: "map[string]bool", picks: { 2: "seen", 3: "string", 4: "bool", 5: "{}" } }
+  - code: "func f(m map[string]int) { v, ok := m[\"a\"] }"
+    expect: { sites: 1, form: commaok, picks: { 2: "m", 3: "\"a\"", 5: "v", 6: "ok" } }
+  - code: "func f() { xs := []int{1} }"
+    expect: none

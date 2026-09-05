@@ -1,0 +1,52 @@
+/* D182 — 라벨 하나. **색은 뜻에만**이므로 기본은 중립이고, 뜻이 있는 자리에서만 상태 넷을
+   쓴다(정본 §6). 트랙·종류·범주는 색으로 가르지 않는다 — 글자가 가른다. */
+.tag {
+  display: inline-flex;
+  gap: var(--s-1);
+  align-items: center;
+  padding: 1px var(--s-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  font-weight: var(--fw-medium);
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.tag.ok {
+  border-color: transparent;
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+
+.tag.bad {
+  border-color: transparent;
+  background: var(--bad-bg);
+  color: var(--bad);
+}
+
+.tag.warn {
+  border-color: transparent;
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+
+.tag.info {
+  border-color: transparent;
+  background: var(--info-bg);
+  color: var(--info);
+}
+
+.tag.accent {
+  border-color: transparent;
+  background: var(--accent-weak);
+  color: var(--accent);
+}
+
+.tag.ghost {
+  background: transparent;
+  color: var(--text-faint);
+}

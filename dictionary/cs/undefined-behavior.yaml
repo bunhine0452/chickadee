@@ -1,0 +1,90 @@
+schema: 1
+id: cs/undefined-behavior
+universal: null
+name: { ko: "언어가 답을 약속하지 않는 자리", en: "Undefined behaviour" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+track_default: t0
+essential: false
+difficulty: 4
+prereq: [cs/memory-address]
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "어긋난 답이 나오는 것이 아니라 답이 없다. 무엇이 나와도 규칙 위반이 아니다."
+    en: "Not a bad answer — no answer. Anything at all keeps the rules."
+  why:
+    ko: >-
+      언어 규격은 「이렇게 쓰면 이렇게 된다」를 정합니다. 그런데 <b>정하지 않은 자리</b>가 있어요 —
+      규칙을 어긴 코드에 대해서는 아무것도 약속하지 않습니다. 이때 나오는 것은 「이상한 값」이 아니라
+      <b>무엇이든</b>입니다. 번역기가 「이 코드는 규칙을 지킬 것」을 전제로 최적화하기 때문에,
+      규칙을 어긴 코드의 일부가 <b>통째로 지워지는</b> 일도 일어나요. 그리고 그것이 규격 위반이 아닙니다.
+      그래서 「내 컴퓨터에서는 되던데」가 여기서는 아무 근거도 아닙니다 — 됐다는 것이
+      <b>맞다는 증거가 아니에요</b>.
+    en: >-
+      A language specification says “write this and that happens”. There are places it <b>does not
+      say</b> — for code that breaks the rules it promises nothing. What comes out is not “a
+      strange value” but <b>anything</b>. Because the translator optimises on the assumption that
+      the code obeys the rules, part of a rule-breaking program can be <b>removed entirely</b>, and
+      that is not a violation of the specification. So “it worked on my machine” carries no weight
+      here — working is <b>not evidence of correctness</b>.
+  trace: []
+rule:
+  ko: "<b>돌았다는 것이 맞다는 증거가 아니다.</b> 약속이 없으면 어떤 결과도 반례가 아니다."
+  en: "<b>It ran is not evidence it is right.</b> With no promise, no outcome is a counterexample."
+ok:
+  ko: >-
+    규칙 안에서 쓰면 결과가 정해져 있습니다. 규격이 정한 범위를 지키는 것이 이 자리를
+    피하는 유일한 방법이에요.
+  en: >-
+    Stay inside the rules and the outcome is defined. Staying within what the specification
+    defines is the only way to avoid this.
+misconceptions:
+  - ko: "돌아 보고 결과를 확인하면 된다 — 확인한 그 결과가 다음 번역에서 달라질 수 있습니다."
+    en: "Just run it and see — the result you saw can change on the next translation."
+  - ko: "최적화를 끄면 안전하다 — 규칙을 어긴 것은 그대로입니다."
+    en: "Turning off optimisation makes it safe — the rule is still broken."
+  - ko: "값이 이상하게 나오는 것뿐이다 — 코드가 지워지거나 검사가 사라지기도 합니다."
+    en: "It only gives odd values — code and checks can be removed outright."
+meaning:
+  - q:
+      ko: "규격이 정하지 않은 코드를 돌렸더니 검사 한 줄이 통째로 사라졌습니다. <b>이것이 규격 위반인가요?</b>"
+      en: "Code outside the specification ran and one check vanished entirely. <b>Is that a violation?</b>"
+    hint:
+      ko: "번역기는 「이 코드가 규칙을 지킨다」를 전제로 삼습니다."
+      en: "The translator assumes the code obeys the rules."
+    options:
+      - t: { ko: "아니다 — 약속이 없는 자리라 어떤 결과도 어긋난 것이 아니다", en: "No — with no promise, no outcome breaks it" }
+      - t: { ko: "그렇다 — 사람이 쓴 줄을 지우는 것은 허용되지 않는다", en: "Yes — removing a line a person wrote is not allowed" }
+        diag:
+          t:
+            ko: "지우는 것은 <b>규칙을 지킨 코드에서도</b> 늘 일어납니다 — 결과가 같으면 지워도 되니까요. 갈리는 것은 결과가 정해져 있느냐예요."
+            en: "Removal happens <b>even in rule-obeying code</b> — same result, fair game. What differs is whether the result was defined."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 지우기냐 약속이냐", en: "The sharpest spot — removal or promise" }
+            code:
+              - "규칙 안: 결과가 같아야 지운다"
+              - "규칙 밖: 같을 결과가 정의되지 않았다"
+      - t: { ko: "그렇다 — 번역기가 사람의 의도를 어겼다", en: "Yes — the translator went against the intent" }
+        diag:
+          t:
+            ko: "번역기가 보는 것은 <b>규격</b>이지 의도가 아닙니다. 의도를 전하려면 규격 안에서 써야 해요."
+            en: "The translator reads the <b>specification</b>, not intent. Conveying intent means writing inside the specification."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 의도냐 규격이냐", en: "The sharpest spot — intent or specification" }
+            code:
+              - "의도: 사람만 안다"
+              - "규격: 번역기가 지키는 것"
+      - t: { ko: "아니다 — 그 줄이 원래 필요 없었기 때문이다", en: "No — the line was unnecessary anyway" }
+        diag:
+          t:
+            ko: "필요해서 쓴 줄이었습니다. 지워진 이유는 <b>규칙을 어긴 코드에서는 그 줄이 참이라고 가정</b>됐기 때문이에요."
+            en: "The line was written because it was needed. It was removed because the rule-breaking code let it be <b>assumed true</b>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 필요 없었나 가정됐나", en: "The sharpest spot — unneeded or assumed" }
+            code:
+              - "필요 없음: 사람의 판단"
+              - "가정됨: 규칙 위반의 결과"

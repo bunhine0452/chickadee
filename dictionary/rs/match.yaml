@@ -1,0 +1,179 @@
+schema: 1
+id: rs/match
+# 2부 (`rs.md` §3). 보편형은 없다 — `rs.md` §6 이 `common/pattern-match` 를 신규 후보로 냈고(Swift·Python
+# 3.10·Dart 3 에서 성립) 아직 없다. 갈래를 빠뜨리면 **컴파일이 멈춘다**(E0004) — 다른 언어의 `switch`
+# 는 빠뜨려도 조용히 지나간다.
+universal: null
+name: { ko: 모양으로 갈라 꺼내기, en: Taking a value apart by shape }
+token: "match"
+grammars: [rust]
+framework: null
+essential: true
+difficulty: 2
+prereq: [rs/enum-item, rs/if-expression]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "값의 모양을 위에서부터 견주어 맞는 갈래 하나로 간다. 모든 모양을 다루지 않으면 컴파일이 멈춘다."
+    en: "Compares a shape against arms from the top and takes the first fit; cover all."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} {{pick.2|code}} 의 <b>모양</b>을 {{pick.3|code}} 의 갈래와 위에서부터
+      견주어 처음 맞는 곳으로 갑니다. 갈래의 모양에 이름을 적으면 안의 값이 <b>그 이름으로 꺼내집니다</b> —
+      `Some(v) => …` 의 `v` 처럼요. 다른 언어의 `switch` 와 다른 것은 <b>빠뜨릴 수 없다</b>는 것입니다.
+      갈래를 하나라도 안 다루면 컴파일이 멈춰요(E0004). 그래서 열거형에 갈래를 더하면 그것을 안 다룬
+      모든 자리가 빨개지고, 그것이 이 언어에서 「빠뜨린 경우」가 실행 시 오류로 새지 않는 이유예요.
+      전체가 값이라 `let x = match …` 도 됩니다.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} compares the <b>shape</b> of {{pick.2|code}} against the arms in
+      {{pick.3|code}} from the top and takes the first fit. Name a part of the shape in an arm and the
+      data inside <b>comes out under that name</b> — the `v` in `Some(v) => …`. What sets it apart from
+      `switch` elsewhere is that <b>nothing may be left out</b>: one uncovered variant stops the build
+      (E0004). So adding a variant to an enum turns every place that ignores it red, which is why a
+      forgotten case never leaks into a run-time error here. The whole thing is a value, so
+      `let x = match …` works too.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 값이 된다 — 갈래 있는 타입이다."
+      en: "{{pick.2|code}} becomes a value — of a type with variants."
+    - ko: "{{pick.3|code}} 의 갈래를 위에서부터 견주어 처음 맞는 곳의 오른쪽이 돈다."
+      en: "The arms in {{pick.3|code}} are tried from the top; the first fit's right side runs."
+    - ko: "모양에 적은 이름으로 안의 값이 꺼내지고, 그 오른쪽 값이 전체의 값이다."
+      en: "Names in the shape pull the inner data out, and that arm's value is the whole expression's value."
+
+rule:
+  ko: "<b>위에서부터 처음 맞는 갈래 하나.</b> 모양의 이름이 값을 꺼내고, 빠진 갈래는 컴파일 오류다."
+  en: "<b>The first fitting arm from the top, and only that one.</b> Names in the shape extract data; a missing arm is a compile error."
+result:
+  label:
+    ko: "{{site.line}}행의 가름"
+    en: "the dispatch on line {{site.line}}"
+  value: "{{pick.1}} {{pick.2}}"
+  note:
+    ko: "갈래 하나로 간다 — 전부 다뤄야 한다"
+    en: "one arm is taken — all must be covered"
+ok:
+  ko: "{{pick.2|code}} 의 모양에 맞는 갈래 하나가 돌고, 그 값이 이 식의 값입니다."
+  en: "The arm fitting the shape of {{pick.2|code}} runs, and its value is the value of this expression."
+payoff:
+  ko: "이걸 알면 「갈래를 하나 더했더니 왜 여기저기 컴파일이 안 되나」(E0004)가 풀립니다 — 그것이 이 언어가 사 준 겁니다."
+  en: "This untangles “I added one variant and now things refuse to compile” (E0004) — that is exactly what the language bought you."
+bridge:
+  ko: "자바의 `switch` 는 갈래를 빠뜨려도 조용합니다. Rust 는 <b>전부 다루지 않으면</b> 컴파일이 안 되고, 모양 안의 값도 꺼내 줍니다."
+  en: "Java's `switch` is silent about a missing case. Rust <b>refuses to build unless all are covered</b>, and pulls data out of the shape too."
+misconceptions:
+  - ko: "갈래를 빠뜨려도 나머지는 돈다 — 컴파일이 멈춥니다(E0004). 나머지를 뭉뚱그리려면 `_ =>` 를 적어요."
+    en: "A missing arm still runs — the build stops (E0004). To lump the rest, write `_ =>`."
+  - ko: "맞는 갈래가 여럿이면 다 돈다 — <b>처음 맞는 것 하나</b>만 돕니다. 순서가 뜻이에요."
+    en: "Several fitting arms all run — <b>only the first fit</b> does. Order carries meaning."
+  - ko: "값을 꺼내려면 따로 접근해야 한다 — 모양에 적은 이름이 값을 꺼냅니다. `Some(v)` 의 `v` 가 그거예요."
+    en: "Extracting data needs separate access — the name in the shape extracts it. That is the `v` in `Some(v)`."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>모양으로 갈래를 고르는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that picks an arm by shape</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 갈라지는 <b>값</b>입니다. 값은 스스로 갈래를 못 고르고, 고르는 일은 앞의 낱말이 해요."
+          en: "{{pick.2|code}} is the <b>value</b> being taken apart. A value cannot pick its own arm; the word in front does."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값이냐 가르기냐", en: "The sharpest spot — the value or the dispatch" }
+          code:
+            - "cmd                  // 값 하나"
+            - "match cmd { … }      // 갈래 하나로"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>갈래 목록</b>입니다. 어느 것으로 갈지는 앞의 낱말과 값의 모양이 정해요."
+          en: "{{pick.3|code}} is the <b>list of arms</b>. Which one is taken is decided by the word in front and the value's shape."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 목록이냐 고르기냐", en: "The sharpest spot — the list or the choosing" }
+          code:
+            - "match cmd { Go => run(), Stop => halt() }"
+            - "//         ^목록"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 값의 <b>모양</b>으로 여러 갈래 중 하나를 고릅니다."
+      en: "Choose what goes in the blank. Line {{site.line}} picks one of several arms by a value's <b>shape</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "match", mono: true }
+      - t: "switch"
+        mono: true
+        diag:
+          t:
+            ko: "Rust 에 이 낱말은 <b>없습니다</b>. 그리고 이 자리의 낱말은 값을 꺼내고 빠뜨림을 막아요 — `switch` 가 안 하는 둘."
+            en: "Rust <b>has no</b> such word. And the word here extracts data and forbids omissions — two things `switch` does not do."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 없는 낱말", en: "The sharpest spot — a word that is not there" }
+            code:
+              - "switch (cmd) { case Go: … }   // 다른 언어"
+              - "match cmd { Go => … }"
+      - t: "if"
+        mono: true
+        diag:
+          t:
+            ko: "이건 참·거짓 <b>하나</b>로 둘로 가릅니다. 모양으로 여럿을 가르지 않고 값도 안 꺼내요."
+            en: "That splits two ways on <b>one</b> truth value. It neither branches on shape nor extracts data."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 둘이냐 여럿이냐", en: "The sharpest spot — two or many" }
+            code:
+              - "if ok { a } else { b }"
+              - "match cmd { Go => a, Stop => b, Wait(n) => c(n) }"
+      - t: "case"
+        mono: true
+        diag:
+          t:
+            ko: "Rust 에 이 낱말은 <b>없습니다</b>. 갈래는 `모양 => 값` 으로 적어요."
+            en: "Rust <b>has no</b> such word. An arm is written `shape => value`."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 갈래의 모양", en: "The sharpest spot — the shape of an arm" }
+            code:
+              - "case Go:          // 다른 언어"
+              - "Go => run(),      // Rust"
+
+why_gate:
+  q:
+    ko: "Rust 는 왜 갈래를 빠뜨리면 <b>컴파일을 멈출까요</b>?"
+    en: "Why does Rust <b>stop the build</b> when an arm is missing?"
+  choices:
+    - t:
+        ko: "「그 경우는 안 온다」는 가정이 어긋났을 때 실행 시 조용히 새는 것을 막으려고 — 열거형에 갈래를 더할 때 특히"
+        en: "So that a mistaken “that case never happens” does not leak silently at run time — especially when a variant is added later"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 자리에 `_ =>` 가 있는지, 있다면 무엇을 삼키는지도 보세요."
+        en: "That is the direction. Check whether there is a `_ =>` here, and if so what it swallows."
+    - t:
+        ko: "갈래가 적어야 빨라서"
+        en: "Because fewer arms run faster"
+      ok: false
+      fb:
+        ko: "속도 문제가 아닙니다. 빠뜨린 경우의 문제예요."
+        en: "Not speed. Forgotten cases."
+    - t:
+        ko: "문법이 그렇게 생겨서"
+        en: "Because the grammar says so"
+      ok: false
+      fb:
+        ko: "문법이 아니라 검사입니다. 갈래를 다 다뤘는지를 컴파일러가 세요."
+        en: "Not grammar — a check. The compiler counts whether every variant is covered."
+
+queries:
+  - { grammars: [rust], file: ./match.scm }
+
+examples:
+  - code: "fn f() { match cmd { Cmd::Go => run(), Cmd::Stop => halt() } }"
+    expect: { sites: 3, form: match, hole: "match", picks: { 1: "match", 2: "cmd", 3: "{ Cmd::Go => run(), Cmd::Stop => halt() }" } }
+  - code: "fn f() { let n = match o { Some(v) => v, None => 0 }; }     // 전체가 값이다"
+    expect: { sites: 3, form: match, picks: { 1: "match", 2: "o" } }
+  - code: "fn f() { if let Some(x) = o { } }              // 갈래 하나만 — rs/option"
+    expect: none

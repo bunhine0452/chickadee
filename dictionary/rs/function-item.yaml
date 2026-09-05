@@ -1,0 +1,176 @@
+schema: 1
+id: rs/function-item
+# 1부 (`rs.md` §2 #7). 보편형은 `common/function-definition`. Rust 에서 다시 배울 것은 매개변수·반환
+# **타입을 반드시 적는다**는 것 — 추론이 함수 경계를 안 넘는다.
+universal: common/function-definition
+name: { ko: 함수 정의하기, en: Defining a function }
+token: "fn"
+grammars: [rust]
+framework: null
+essential: true
+difficulty: 1
+prereq: []
+confusions: []
+
+dict:
+  one_liner:
+    ko: "이름·매개변수·돌려줄 타입을 한 줄에 적고 몸통을 잇는다. 경계의 타입은 생략 못 한다."
+    en: "One line names it with parameters and return type; boundary types are required."
+  why:
+    ko: >-
+      {{site.line}}행은 {{pick.2|code}} 라는 함수를 세웁니다. 몸 안의 이름은 타입을 안 적어도 추론되지만,
+      <b>서명은 못 생략합니다</b> — {{pick.3|code}} 의 매개변수마다 타입이 있고, 돌려줄 것이 있으면
+      화살표 뒤에 적어요. 추론이 함수 경계를 안 넘게 한 선택이라, 서명만 읽으면 이 함수가 무엇을
+      받고 무엇을 주는지가 다 보입니다. 화살표가 없으면 돌려주는 값은 `()` 이고, 그것이 다음 판
+      (마지막 식이 답이다)의 E0308 로 이어집니다.
+    en: >-
+      Line {{site.line}} sets up a function named {{pick.2|code}}. Names inside the body get their types
+      inferred, but <b>the signature cannot be omitted</b> — every parameter in {{pick.3|code}} has a
+      type, and anything returned is written after the arrow. Inference deliberately stops at the
+      function boundary, so the signature alone tells you what goes in and what comes out. No arrow
+      means the return value is `()`, which leads to the E0308 of the next plate (the last expression
+      is the answer).
+  trace:
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} {{pick.2|code}} 라는 이름을 세운다."
+      en: "{{pick.1|code}} sets up the name {{pick.2|code}}."
+    - ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 받을 것을 타입과 함께 적는다."
+      en: "{{pick.3|code}} lists what it takes, each with a type."
+    - ko: "부르는 자리에서 {{pick.2|code}}{{pick.2|josa:은,는}} 서명대로만 받고 준다."
+      en: "At a call site {{pick.2|code}} takes and gives exactly as the signature says."
+
+rule:
+  ko: "<b>서명은 전부 적는다.</b> 매개변수마다 타입, 돌려주면 화살표 뒤에 타입. 안 적으면 () 를 준다."
+  en: "<b>The signature is written in full.</b> A type per parameter, a return type after the arrow; none means it gives ()."
+result:
+  label:
+    ko: "{{site.line}}행의 함수"
+    en: "the function on line {{site.line}}"
+  value: "{{pick.1}} {{pick.2}}{{pick.3}}"
+  note:
+    ko: "서명이 받고 주는 것을 다 말한다"
+    en: "the signature says everything taken and given"
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 이제 {{pick.3|code}}{{pick.3|josa:을,를}} 받아 서명에 적힌 것을 돌려주는 이름입니다."
+  en: "{{pick.2|code}} is now a name that takes {{pick.3|code}} and gives back what the signature says."
+payoff:
+  ko: "이걸 알면 「왜 매개변수 타입을 안 적으면 컴파일이 안 되나」(E0106)가 풀립니다 — 경계에서는 추론이 없어요."
+  en: "This untangles “why does a missing parameter type refuse to compile” (E0106) — there is no inference at the boundary."
+bridge:
+  ko: "파이썬은 `def f(a, b):` 로 타입 없이 세웁니다. Rust 는 경계의 타입을 <b>사람이 적게</b> 해서 서명이 문서가 됩니다."
+  en: "Python sets one up as `def f(a, b):` with no types. Rust makes you <b>write the boundary types</b>, so the signature is the document."
+misconceptions:
+  - ko: "매개변수 타입도 추론된다 — 안 됩니다. 몸 안의 `let` 만 추론돼요."
+    en: "Parameter types are inferred too — they are not. Only the body's `let` names are."
+  - ko: "화살표가 없으면 아무것도 안 돌려준다 — `()` 라는 값을 돌려줍니다. 그래서 타입이 안 맞을 수 있어요."
+    en: "No arrow means nothing is returned — it returns the value `()`. That is why types can mismatch."
+  - ko: "함수는 부르기 전에 정의돼야 한다 — 순서는 상관없습니다. 같은 모듈이면 어디든 돼요."
+    en: "A function must be defined before it is called — order does not matter within a module."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>함수를 세우는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that sets up a function</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 함수의 <b>이름</b>입니다. 이름은 부를 때 쓰는 것이고, 세우는 일은 앞의 낱말이 해요."
+          en: "{{pick.2|code}} is the function's <b>name</b>. The name is for calling; the word before it does the setting up."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 세우기냐 부르기냐", en: "The sharpest spot — defining or calling" }
+          code:
+            - "fn add(a: i32, b: i32) -> i32 { a + b }   // 세운다"
+            - "add(1, 2)                                // 부른다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>받을 것</b>의 목록입니다. 타입까지 적혀 있고, 함수를 세우는 것은 앞의 낱말이에요."
+          en: "{{pick.3|code}} is the list of <b>what it takes</b>, types included. The word in front sets the function up."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 받는 것과 세우는 것", en: "The sharpest spot — taking and defining" }
+          code:
+            - "fn add(a: i32, b: i32)"
+            - "// ^세움  ^받을 것"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 이름 붙은 <b>함수를 세웁니다</b>."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>sets up</b> a named function."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "fn", mono: true }
+      - t: "def"
+        mono: true
+        diag:
+          t:
+            ko: "파이썬의 낱말입니다. Rust 에는 <b>없어요</b> — 컴파일러가 이 이름을 모릅니다."
+            en: "That is Python's word. Rust <b>does not have it</b> — the compiler does not know the name."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 다른 언어의 낱말", en: "The sharpest spot — another language's word" }
+            code:
+              - "def add(a, b):      # 파이썬"
+              - "fn add(a: i32, b: i32) -> i32   // Rust"
+      - t: "func"
+        mono: true
+        diag:
+          t:
+            ko: "Go·Swift 의 낱말입니다. Rust 는 두 글자예요."
+            en: "That is Go's and Swift's word. Rust's has two letters."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 다른 언어의 낱말", en: "The sharpest spot — another language's word" }
+            code:
+              - "func add(a int, b int) int   // Go"
+              - "fn add(a: i32, b: i32) -> i32"
+      - t: "let"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>값에 이름을 묶는</b> 낱말입니다. 함수를 값으로 묶을 수는 있지만(클로저) 서명 있는 함수는 못 세워요."
+            en: "That <b>ties a name to a value</b>. It can bind a function value (a closure), but it cannot set up a signed function."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값이냐 항목이냐", en: "The sharpest spot — a value or an item" }
+            code:
+              - "let add = |a, b| a + b;   // 클로저"
+              - "fn add(a: i32, b: i32) -> i32 { a + b }"
+
+why_gate:
+  q:
+    ko: "Rust 는 왜 <b>서명의 타입을 추론하지 않을까요</b>?"
+    en: "Why does Rust <b>not infer signature types</b>?"
+  choices:
+    - t:
+        ko: "함수 하나를 고쳤을 때 오류가 그 함수 안에서 나게 하려고 — 경계가 추론되면 오류가 부르는 쪽으로 번진다"
+        en: "So that editing one function raises errors inside it — an inferred boundary would let errors spread to callers"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 함수의 서명만 보고 무엇을 받고 주는지 한 줄로 적어 보세요."
+        en: "That is the direction. From the signature alone, say what it takes and gives."
+    - t:
+        ko: "추론이 기술적으로 불가능해서"
+        en: "Because it is technically impossible"
+      ok: false
+      fb:
+        ko: "가능합니다. 다른 언어는 합니다 — 안 하기로 정한 거예요."
+        en: "It is possible; other languages do it. This was a choice."
+    - t:
+        ko: "컴파일을 빠르게 하려고"
+        en: "To compile faster"
+      ok: false
+      fb:
+        ko: "그것도 얻지만 이유는 아닙니다. 오류의 자리를 못박는 것이 이유예요."
+        en: "A side benefit, not the reason. Pinning where errors appear is the reason."
+
+queries:
+  - { grammars: [rust], file: ./function-item.scm }
+
+examples:
+  - code: "fn add(a: i32, b: i32) -> i32 { a + b }"
+    expect: { sites: 1, form: fn, hole: "fn", picks: { 1: "fn", 2: "add", 3: "(a: i32, b: i32)", 4: "i32", 5: "{ a + b }" } }
+  - code: "fn main() { }                                 // 화살표가 없다 — () 를 준다"
+    expect: { sites: 1, form: fn, picks: { 1: "fn", 2: "main", 3: "()", 5: "{ }" } }
+  - code: "struct A;"
+    expect: none

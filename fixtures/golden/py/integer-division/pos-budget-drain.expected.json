@@ -1,0 +1,67 @@
+[
+  {
+    "queryId": "py/integer-division",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "site",
+    "form": "floordiv-assign",
+    "startLine": 2,
+    "startCol": 4,
+    "endLine": 2,
+    "endCol": 14,
+    "nodeKind": "augmented_assignment",
+    "inError": false
+  },
+  {
+    "queryId": "py/integer-division",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.2",
+    "form": "floordiv-assign",
+    "startLine": 2,
+    "startCol": 4,
+    "endLine": 2,
+    "endCol": 8,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "py/integer-division",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.1",
+    "form": "floordiv-assign",
+    "startLine": 2,
+    "startCol": 9,
+    "endLine": 2,
+    "endCol": 12,
+    "nodeKind": "//=",
+    "inError": false
+  },
+  {
+    "queryId": "py/integer-division",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "hole",
+    "form": "floordiv-assign",
+    "startLine": 2,
+    "startCol": 9,
+    "endLine": 2,
+    "endCol": 12,
+    "nodeKind": "//=",
+    "inError": false
+  },
+  {
+    "queryId": "py/integer-division",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.3",
+    "form": "floordiv-assign",
+    "startLine": 2,
+    "startCol": 13,
+    "endLine": 2,
+    "endCol": 14,
+    "nodeKind": "integer",
+    "inError": false
+  }
+]

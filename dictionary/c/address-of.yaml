@@ -1,0 +1,253 @@
+schema: 1
+id: c/address-of
+# 2부 「포인터와 메모리」 (`docs/curriculum/c.md` §3 #17 · §0.6). `universal: null` — c.md §6 이
+# `common/take-address` 를 후보로 냈으나(Go `&x` · Rust `&x`) 아직 없다. 후보로 보고.
+# Gustedt(Modern C)의 「포인터를 매개변수로 위장해 먼저 소개한다」가 이 판이다(c-learning.md §11.2).
+universal: null
+name: { ko: 값의 자리 얻기, en: Address-of }
+token: "&x"
+grammars: [c]
+framework: null
+essential: true
+difficulty: 2
+prereq: [c/pointer-declaration, cs/memory-address, cs/value-vs-reference]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "이름 앞에 붙이면 값 대신 그 값이 놓인 자리의 번호를 낸다. 자리를 넘기면 원본이 바뀐다."
+    en: "Before a name it yields the number of the value's place, not the value."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} {{pick.2|code}} 의 값이 아니라 {{pick.2|code}}{{pick.2|josa:이,가}}
+      놓인 <b>자리의 번호</b>를 냅니다. 이것이 C 의 호출 규약을 한 줄로 설명해요 — 값을 넘기면
+      <b>복사</b>가 가고, 자리를 넘기면 <b>원본</b>이 갑니다. <code>scanf("%d", &amp;n)</code> 이 앞에
+      이 기호를 요구하는 이유가 그것입니다: 읽은 수를 <code>n</code> 의 자리에 써 넣어야 하니까요.
+      번호를 받은 쪽({{pick.3|code}})은 그 번호를 따라가 값을 읽거나 씁니다.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} yields not the value of {{pick.2|code}} but <b>the number of
+      the place</b> where {{pick.2|code}} lives. This explains C's calling convention in one line —
+      pass a value and a <b>copy</b> travels; pass a place and <b>the original</b> does. That is why
+      <code>scanf("%d", &amp;n)</code> demands this symbol: the number read has to be written into
+      <code>n</code>'s place. Whoever receives the number ({{pick.3|code}}) follows it to read or write
+      the value.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 기억 어딘가의 자리에 있고 그 자리에는 번호가 있다."
+      en: "{{pick.2|code}} lives at some place in memory, and that place has a number."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 값 대신 그 번호를 낸다."
+      en: "{{pick.1|code}} yields that number instead of the value."
+    - ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 번호를 받아 {{site.line}}행 뒤에서 그 자리를 읽거나 쓴다."
+      en: "{{pick.3|code}} takes the number and, after line {{site.line}}, reads or writes that place."
+
+rule:
+  ko: "<b>이 기호는 값이 아니라 자리를 낸다.</b> 자리를 넘기면 받는 쪽이 원본을 바꿀 수 있다."
+  en: "<b>This symbol yields a place, not a value.</b> Pass the place and the receiver can change the original."
+result:
+  label:
+    ko: "{{site.line}}행이 넘기는 것"
+    en: "what line {{site.line}} passes"
+  value: "{{pick.1}}{{pick.2}}"
+  note:
+    ko: "값이 아니라 번호"
+    en: "a number, not a value"
+ok:
+  ko: >-
+    {{pick.2|code}} 의 자리 번호가 {{pick.3|code}}{{pick.3|josa:으로,로}} 갔습니다 — 값이 아니라 원본의 자리예요.
+  en: >-
+    The number of {{pick.2|code}}'s place went to {{pick.3|code}} — the original's place, not a value.
+payoff:
+  ko: >-
+    이걸 알면 「함수 안에서 바꿨는데 밖도 바뀌었다」와 「안 바뀌었다」가 한 규칙으로 읽힙니다 — 자리를
+    넘겼느냐 값을 넘겼느냐예요.
+  en: >-
+    This makes “it changed outside too” and “it did not change” one rule — whether a place or a value
+    was passed.
+bridge:
+  ko: >-
+    파이썬은 목록을 넘기면 저절로 같은 객체가 갑니다. C 는 자리를 넘기려면 사람이 이 기호를 적어야
+    해요 — 저절로는 아무것도 안 갑니다.
+  en: >-
+    In Python passing a list sends the same object by itself. In C a person writes this symbol to
+    pass a place — nothing travels by itself.
+misconceptions:
+  # c.md §3 #17 · §9 #3·#4 — 규격에서 나온 사실이고 빈도 자료는 없다.
+  - ko: "이 기호는 값을 복사한다 — <b>자리의 번호</b>를 냅니다. 복사되는 것은 번호 하나뿐이에요."
+    en: "This symbol copies the value — it yields <b>the place's number</b>. Only that one number is copied."
+  - ko: "배열 앞에도 붙여야 넘어간다 — 배열 이름은 값으로 쓰이면 <b>저절로</b> 첫 칸의 번호가 됩니다. 붙이면 배열 전체의 자리라는 다른 타입이 돼요."
+    en: "It must go in front of an array too — an array name used as a value <b>becomes</b> the first slot's number by itself. With the symbol it is a different type, the place of the whole array."
+  - ko: "지역 이름의 자리를 돌려줘도 된다 — 함수가 끝나면 그 자리가 <b>사라집니다</b>. 번호만 남아 답이 없어요."
+    en: "Returning a local name's place is fine — the place <b>vanishes</b> when the function ends. Only the number remains, with no answer."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>값 대신 자리의 번호를 내는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that yields the place's number instead of the value</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 자리를 <b>얻히는 이름</b>입니다. 이름만 적으면 값이 나와요 — 번호를 내는 것은 앞의 기호입니다."
+          en: "{{pick.2|code}} is <b>the name whose place is taken</b>. The name alone yields the value — the symbol in front yields the number."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 값이냐 번호냐"
+            en: "The sharpest spot — the value or the number"
+          code:
+            - "n     /* 값 */"
+            - "&n    /* 자리의 번호 */"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 번호를 <b>받는 쪽</b>입니다. 받아서 따라갈 뿐 번호를 만들지는 않아요."
+          en: "{{pick.3|code}} is <b>the receiver</b> of the number. It follows it; it does not make it."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 만드는 쪽과 받는 쪽"
+            en: "The sharpest spot — who makes and who receives"
+          code:
+            - "scanf(\"%d\", &n);   /* & 가 만들고 scanf 가 받는다 */"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행에서 이 기호를 <b>빼고</b> {{pick.2|code}} 만 넘기면 받는 쪽은 무엇을 갖게 될까요?"
+      en: "Drop the symbol on line {{site.line}} and pass only {{pick.2|code}} — what does the receiver get?"
+    hint:
+      ko: "넘기는 것이 값이냐 자리냐가 답입니다."
+      en: "Whether a value or a place travels is the answer."
+    options:
+      - t:
+          ko: "값의 복사본 — 받는 쪽이 바꿔도 원본은 그대로다"
+          en: "A copy of the value — changes on the receiving side leave the original alone"
+      - t:
+          ko: "같은 자리 — 이름을 넘겼으니까"
+          en: "The same place — the name was passed"
+        diag:
+          t:
+            ko: "이름을 적으면 <b>값</b>이 나옵니다. 자리를 넘기려면 기호를 적어야 하고, 안 적으면 복사본이 가요."
+            en: "Writing the name yields <b>the value</b>. Passing the place needs the symbol; without it a copy travels."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 이름은 값이다"
+              en: "The sharpest spot — a name is a value"
+            code:
+              - "f(n)    /* 복사본 */"
+              - "f(&n)   /* 자리 */"
+      - t:
+          ko: "컴파일 오류"
+          en: "A compile error"
+        diag:
+          t:
+            ko: "받는 쪽이 값을 받게 돼 있으면 오류가 없습니다. 자리를 받게 돼 있으면 타입이 안 맞아 경고나 오류가 나요 — 둘 다 가능해서 <b>서명을 봐야</b> 합니다."
+            en: "If the receiver takes a value there is no error. If it takes a place the types clash and there is a warning or error — both are possible, so <b>read the signature</b>."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 서명이 정한다"
+              en: "The sharpest spot — the signature decides"
+            code:
+              - "void f(int x);    /* f(n) */"
+              - "void g(int *p);   /* g(&n) */"
+      - t:
+          ko: "쓰레기"
+          en: "Garbage"
+        diag:
+          t:
+            ko: "값은 멀쩡히 복사됩니다. 쓰레기가 되는 것은 <b>값 없이 만든</b> 이름을 넘길 때예요."
+            en: "The value is copied fine. Garbage appears when a name <b>made without a value</b> is passed."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 복사는 멀쩡하다"
+              en: "The sharpest spot — the copy is fine"
+            code:
+              - "int n = 3; f(n);   /* 3 이 간다 */"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 값 대신 <b>자리의 번호</b>를 넘깁니다."
+      en: "Choose what goes in the blank. Line {{site.line}} passes <b>the place's number</b> instead of the value."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "&", mono: true }
+      - t: "*"
+        mono: true
+        diag:
+          t:
+            ko: "식에서 별표는 <b>번호를 따라가 값을 꺼내는</b> 기호입니다. 방향이 반대예요 — 값에 붙이면 컴파일러가 막습니다."
+            en: "In an expression the star <b>follows a number to fetch the value</b>. The opposite direction — on a value the compiler blocks it."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 방향"
+              en: "The sharpest spot — the direction"
+            code:
+              - "&n    /* 값 → 번호 */"
+              - "*p    /* 번호 → 값 */"
+      - t: "@"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>C 에 없는 기호</b>입니다. 컴파일러가 못 읽어요."
+            en: "That is <b>not a C symbol</b>. The compiler cannot read it."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 없는 기호"
+              en: "The sharpest spot — a symbol C lacks"
+            code:
+              - "f(@n)   /* 오류 */"
+      - t: "&&"
+        mono: true
+        diag:
+          t:
+            ko: "둘짜리는 <b>「그리고」</b>입니다. 이름 앞에 혼자 오면 컴파일러가 못 읽어요."
+            en: "The doubled form is <b>“and”</b>. Standing alone before a name the compiler cannot read it."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 하나냐 둘이냐"
+              en: "The sharpest spot — one symbol or two"
+            code:
+              - "a && b   /* 그리고 */"
+              - "&n       /* 자리 */"
+
+why_gate:
+  q:
+    ko: "C 는 왜 자리를 넘기는 일을 <b>사람이 기호로 적게</b> 할까요?"
+    en: "Why does C make a person <b>write a symbol</b> to pass a place?"
+  choices:
+    - t:
+        ko: "기본이 복사라 부른 쪽의 값이 함수 안에서 바뀌는 일이 없고, 바뀌게 하려는 자리만 눈에 보이게 표시되기 때문"
+        en: "Because copying is the default so the caller's value never changes inside a function, and the spots meant to change it are marked visibly"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 표시가 없는 언어(파이썬)에서 무엇이 덜 보이는지도 적어 보세요."
+        en: "That is the direction. Say what is less visible in a language without that mark (Python)."
+    - t:
+        ko: "컴파일러가 자리를 저절로 못 넘겨서"
+        en: "Because the compiler cannot pass a place by itself"
+      ok: false
+      fb:
+        ko: "넘길 수 있습니다. 안 넘기는 것은 복사를 기본으로 둔 선택이에요."
+        en: "It could. Not doing so is the choice of copying as the default."
+    - t:
+        ko: "기호가 있으면 빨라서"
+        en: "Because the symbol makes it faster"
+      ok: false
+      fb:
+        ko: "속도가 아니라 표시입니다. 읽는 사람이 원본이 바뀔 자리를 보게 하려는 거예요."
+        en: "It is a mark, not speed. It lets the reader see where the original may change."
+
+queries:
+  - { grammars: [c], file: ./address-of.scm }
+
+examples:
+  - code: "int *p = &n;                    /* p -> n 의 자리 번호 */"
+    expect: { sites: 1, form: addr-init, hole: "&", picks: { 1: "&", 2: "n", 3: "p" } }
+  - code: "scanf(\"%d\", &n);              /* n 의 자리에 써 넣는다 */"
+    expect: { sites: 1, form: addr-arg, hole: "&", picks: { 1: "&", 2: "n", 3: "scanf" } }
+  - code: "p = &items[0];                  /* 첫 칸의 자리 */"
+    expect: { sites: 1, form: addr-assign, hole: "&", picks: { 1: "&", 2: "items[0]", 3: "p" } }
+  - code: "int both = a & b;               /* 비트 연산 — 다른 것이다 */"
+    expect: none
+  - code: "int *p;                         /* 선언 — 다른 판이다 */"
+    expect: none

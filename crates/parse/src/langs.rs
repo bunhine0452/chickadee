@@ -26,6 +26,32 @@ pub const LANGS: &[(&str, Load)] = &[
     ("go", || tree_sitter_go::LANGUAGE.into()),
     #[cfg(feature = "lang-rust")]
     ("rust", || tree_sitter_rust::LANGUAGE.into()),
+    #[cfg(feature = "lang-java")]
+    ("java", || tree_sitter_java::LANGUAGE.into()),
+    // Vue SFC. 문법이 따로 있는 것이 아니라 **자바스크립트를 `<script>` 구간에만** 돌린다
+    // (`sfc.rs`). 문법 키를 따로 두는 이유는 파서 풀과 구간 지정이 그 키로 갈리기 때문이다.
+    #[cfg(feature = "lang-javascript")]
+    ("vue", || tree_sitter_javascript::LANGUAGE.into()),
+    #[cfg(feature = "lang-xml")]
+    ("xml", || tree_sitter_xml::LANGUAGE_XML.into()),
+    // MyBatis 매퍼 안의 SQL. 문법은 sql 이고 읽는 자리만 문 본문으로 좁힌다 (`sfc.rs`).
+    #[cfg(feature = "lang-sql")]
+    ("mybatis_sql", || tree_sitter_sequel::LANGUAGE.into()),
+    #[cfg(feature = "lang-css")]
+    ("css", || tree_sitter_css::LANGUAGE.into()),
+    // `.vue` 의 `<style>`. 같은 css 문법을 그 구간에만 돌린다.
+    #[cfg(feature = "lang-css")]
+    ("vue_style", || tree_sitter_css::LANGUAGE.into()),
+    // D190 — the last four of the ten languages. Keys follow the crate names; the
+    // dictionary namespace for `c_sharp` is `csharp` (`cs/` belongs to the CS dictionary, D157).
+    #[cfg(feature = "lang-c")]
+    ("c", || tree_sitter_c::LANGUAGE.into()),
+    #[cfg(feature = "lang-cpp")]
+    ("cpp", || tree_sitter_cpp::LANGUAGE.into()),
+    #[cfg(feature = "lang-csharp")]
+    ("c_sharp", || tree_sitter_c_sharp::LANGUAGE.into()),
+    #[cfg(feature = "lang-swift")]
+    ("swift", || tree_sitter_swift::LANGUAGE.into()),
 ];
 
 #[derive(Debug, Clone, Serialize)]

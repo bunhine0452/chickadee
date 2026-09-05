@@ -1,0 +1,166 @@
+schema: 1
+id: csharp/interface
+# `csharp.md` §6 이 `common/interface-contract` 를 신규로 제안했는데 아직 `common/` 에 없다.
+# 없는 id 를 걸면 린트가 잡으므로 `null` 로 두고 후보로만 보고한다 — 다른 언어 근거는
+# TS `interface` · Go `interface` · Rust `trait` · Swift `protocol` 넷이다.
+universal: null
+name: { ko: 할 수 있는 일만 정하기, en: Interface }
+token: "interface"
+grammars: [c_sharp]
+framework: null
+essential: true
+difficulty: 3
+prereq: [cs/dynamic-dispatch, csharp/property, csharp/method-call]
+confusions: []
+dict:
+  one_liner:
+    ko: "무엇을 할 수 있는지만 적고 어떻게 하는지는 안 적는다."
+    en: "It writes down what can be done and says nothing about how."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.2|code}}{{pick.2|josa:은,는}} <b>약속의 목록</b>입니다.
+      {{pick.3|code}} 안에는 이름과 모양만 있고 몸통이 없어요. 그래서 이 이름을 받는 코드는
+      「무엇이 오는지」를 안 정하고 「무엇을 할 수 있는지」만 압니다 — ASP.NET Core 의
+      의존성 주입이 이 자리 위에 서 있습니다. 이름 앞의 <code>I</code>는 <b>문법이 아니라
+      관용</b>이고, 명시적 구현을 쓰면 그 메서드가 클래스 이름으로는 아예 안 보입니다.
+    en: >-
+      {{pick.2|code}} on line {{site.line}} is a <b>list of promises</b>. Inside
+      {{pick.3|code}} there are names and shapes and no bodies. Code that takes this name does
+      not settle what arrives, only what it can do — ASP.NET Core's dependency injection stands
+      on this spot. The <code>I</code> in front is <b>convention, not syntax</b>, and with an
+      explicit implementation the method disappears from the class name entirely.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}}{{pick.2|josa:을,를}} 약속 이름으로 세운다."
+      en: "Line {{site.line}} sets {{pick.2|code}} up as the name of a promise."
+    - ko: "{{pick.3|code}} 안의 것은 몸통 없이 모양만 적힌다."
+      en: "What is inside {{pick.3|code}} is written as shape only, with no body."
+    - ko: "그 약속을 지키는 타입이 나중에 몸통을 댄다."
+      en: "A type that keeps the promise supplies the body later."
+rule:
+  ko: "<b>모양만 적고 몸통은 안 적는다.</b> 받는 쪽은 무엇이 오는지 몰라도 된다."
+  en: "<b>Shape without a body.</b> The receiving side need not know what arrives."
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 이제 여러 타입이 지킬 수 있는 약속입니다."
+  en: "{{pick.2|code}} is now a promise several types can keep."
+payoff:
+  ko: "이걸 알면 「생성자에 아무도 안 넣었는데 값이 온다」의 절반이 풀립니다."
+  en: "This solves half of “nobody passed anything to the constructor, yet a value arrived.”"
+bridge:
+  ko: >-
+    고는 <b>적어 두지 않아도</b> 모양만 맞으면 약속을 지킨 것으로 봅니다. C# 은 지킨다고
+    <b>이름을 적어야</b> 해요 — 같은 개념에 반대되는 규칙입니다.
+  en: >-
+    Go treats a matching shape as keeping the promise <b>without declaring it</b>. C# requires
+    the type to <b>name</b> the promise — the same idea with the opposite rule.
+misconceptions:
+  # 출처 — `csharp.md` §4 ㉖.
+  - ko: "이름 앞의 <code>I</code>가 문법이다 — 관용일 뿐이고 없어도 됩니다."
+    en: "The <code>I</code> in front is syntax — it is only a convention and can be dropped."
+  - ko: "여기 적힌 메서드는 클래스에서 언제나 보인다 — 명시적 구현을 쓰면 클래스 이름으로 안 보입니다."
+    en: "A method written here is always visible on the class — an explicit implementation hides it."
+  - ko: "몸통을 아예 못 적는다 — C# 8 이후 기본 구현을 둘 수 있습니다."
+    en: "No body is ever allowed — since C# 8 a default implementation can sit here."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>약속의 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name of the promise</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>어떤 상자인가</b>를 정하는 낱말입니다. 이름은 그 뒤예요."
+          en: "{{pick.1|code}} says <b>what kind of box</b> it is. The name comes after."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 종류냐 이름이냐", en: "The sharpest spot — the kind or the name" }
+          code:
+            - "interface IClock { }   // 약속"
+            - "class     IClock { }   // 구현, 같은 이름"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 약속의 <b>목록</b>입니다. 부를 때 쓰는 것은 앞의 이름이에요."
+          en: "{{pick.3|code}} is the <b>list</b> of promises. What callers name is the word before it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 목록이냐", en: "The sharpest spot — the name or the list" }
+          code:
+            - "void F(IClock c)     // 이름으로 받는다"
+            - "{ int Now(); }       // 목록"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>몸통 없이 모양만</b> 적는 상자를 만듭니다."
+      en: "Choose what goes in the blank. Line {{site.line}} makes a box of <b>shapes without bodies</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "interface", mono: true }
+      - t: "class"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>몸통을 적는</b> 상자입니다. 몸통 없이 두려면 다른 낱말이 하나 더 필요해요."
+            en: "That box <b>carries bodies</b>. Leaving them out needs one more word."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 몸통이 있나", en: "The sharpest spot — is there a body" }
+            code:
+              - "interface I { int F(); }"
+              - "abstract class C { abstract int F(); }"
+      - t: "struct"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>값형</b> 상자라 몸통도 필드도 담습니다. 약속만 적는 자리가 아니에요."
+            en: "That is a <b>value type</b> box holding bodies and fields. It is not the promise-only spot."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값이냐 약속이냐", en: "The sharpest spot — a value or a promise" }
+            code:
+              - "interface I { int F(); }"
+              - "struct S { public int X; }"
+      - t: "record"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>데이터를 담는</b> 상자입니다. 약속이 아니라 값을 나르는 쪽이에요."
+            en: "That box <b>carries data</b>. It moves values rather than stating promises."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 약속이냐 데이터냐", en: "The sharpest spot — a promise or data" }
+            code:
+              - "interface I { int F(); }"
+              - "record R(int X);"
+why_gate:
+  q:
+    ko: "이 언어는 왜 <b>몸통 없는 이름</b>을 따로 두었을까요?"
+    en: "Why is there a <b>bodyless name</b> at all?"
+  choices:
+    - t:
+        ko: "쓰는 쪽이 무엇이 오는지 안 정해도 되게 해, 구현을 나중에 바꿔 끼울 수 있게 하려고"
+        en: "So callers need not settle what arrives, and the implementation can be swapped later"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 대가로 코드를 읽을 때 무엇이 어려워지는지도 적어 보세요."
+        en: "That is the direction. Add what gets harder to read in exchange."
+    - t:
+        ko: "여러 상속을 하려고"
+        en: "To allow multiple inheritance"
+      ok: false
+      fb:
+        ko: "여럿 지킬 수 있는 것은 결과입니다. 이유는 <b>구현을 안 정하는 것</b>이에요."
+        en: "Keeping several is a consequence. The reason is <b>leaving the implementation open</b>."
+    - t:
+        ko: "테스트를 쉽게 하려고"
+        en: "To make testing easier"
+      ok: false
+      fb:
+        ko: "테스트가 쉬워지는 것도 결과입니다. 바꿔 끼울 수 있어서 생기는 일이에요."
+        en: "Easier testing is also a consequence of being swappable."
+queries:
+  - { grammars: [c_sharp], file: ./interface.scm }
+examples:
+  - code: "interface IRepo { int Count(); }"
+    expect: { sites: 1, form: interface, hole: "interface", picks: { 1: "interface", 2: "IRepo", 3: "{ int Count(); }" } }
+  - code: "public interface IClock { }"
+    expect: { sites: 1, form: interface, picks: { 1: "interface", 2: "IClock", 3: "{ }" } }
+  - code: "class Repo { }"
+    expect: none

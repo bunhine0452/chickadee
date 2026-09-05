@@ -1,0 +1,111 @@
+schema: 1
+id: cs/type-conversion
+universal: null
+name: { ko: "다른 타입 둘이 만나면", en: "Type conversion" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+track_default: t0
+essential: false
+difficulty: 2
+prereq: [cs/type]
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "넓은 쪽으로 가면 조용하고, 좁은 쪽으로 가면 잃는다."
+    en: "Going wider is quiet; going narrower loses something."
+  why:
+    ko: >-
+      타입이 다른 둘이 한 식에서 만나면 <b>한쪽이 옮겨 가야</b> 합니다. 옮기는 방향이 두 가지예요.
+      <b>넓힘</b>은 담을 자리가 더 큰 쪽으로 가는 것이라 값이 그대로 살아남습니다 —
+      <code>int</code> 를 <code>double</code> 로 옮기면 3 은 3.0 이 돼요.
+      <b>좁힘</b>은 반대라 <b>잃습니다</b> — <code>(int) 3.9</code> 는 4 가 아니라 <b>3</b> 이고,
+      반올림이 아니라 소수 부분을 <b>버린</b> 것입니다.
+      그리고 옮기는 일을 <b>누가 시켰나</b>가 또 갈립니다. 언어가 알아서 하면 <b>암묵</b>,
+      내가 적으면 <b>명시</b>예요. 자바스크립트의 <code>1 + "2"</code> 가 <code>"12"</code> 가
+      되는 것은 암묵 변환이고, 자바는 같은 자리에서 컴파일을 멈춥니다.
+      <b>암묵 변환은 편한 만큼 조용해서</b>, 값이 어디서 바뀌었는지가 안 보입니다.
+    en: >-
+      When two different types meet in one expression, <b>one of them has to move</b>. There are two
+      directions. <b>Widening</b> goes toward the larger box and the value survives intact — moving
+      an <code>int</code> into a <code>double</code> turns 3 into 3.0. <b>Narrowing</b> goes the
+      other way and <b>loses</b> something: <code>(int) 3.9</code> is <b>3</b>, not 4, because the
+      fraction was <b>dropped</b>, not rounded. A second axis is <b>who asked for the move</b>. If
+      the language does it for you it is <b>implicit</b>; if you write it, <b>explicit</b>.
+      JavaScript turning <code>1 + "2"</code> into <code>"12"</code> is implicit, while Java stops
+      compiling at the same spot. <b>Implicit conversion is as quiet as it is convenient</b>, so
+      where the value changed is not visible.
+  trace: []
+rule:
+  ko: "<b>넓힘은 조용하고 좁힘은 잃는다.</b> 잃는 자리는 내가 적어야 보인다."
+  en: "<b>Widening is quiet, narrowing loses.</b> The lossy step is only visible if you write it."
+ok:
+  ko: >-
+    타입이 섞인 식에서 답이 이상하면 어느 쪽이 옮겨 갔는지부터 봅니다. 좁히는 자리는 적어
+    두는 편이 나중에 읽힙니다.
+  en: >-
+    When a mixed-type expression looks odd, first ask which side moved. Writing the narrowing step
+    down is what makes it readable later.
+misconceptions:
+  - ko: "좁힐 때 반올림한다 — (int) 3.9 는 3 입니다. 소수 부분을 버려요."
+    en: "Narrowing rounds — (int) 3.9 is 3; the fraction is dropped."
+  - ko: "타입이 다르면 언제나 오류다 — 넓히는 방향은 대개 아무 말 없이 통과합니다."
+    en: "Different types always error — the widening direction usually passes without a word."
+  - ko: "넓히면 아무것도 안 잃는다 — 큰 정수를 소수로 옮기면 자릿수를 잃습니다(2^53 위)."
+    en: "Widening loses nothing — a large whole number moved into a decimal loses digits above 2^53."
+meaning:
+  - q:
+      ko: "자바에서 <code>(int) 3.9</code> 가 <code>3</code> 으로 나옵니다. <b>무슨 일이 일어난 건가요?</b>"
+      en: "In Java <code>(int) 3.9</code> comes out <code>3</code>. <b>What happened?</b>"
+    hint:
+      ko: "옮겨 간 자리가 원래보다 넓은가요 좁은가요."
+      en: "Is the destination wider or narrower than the source?"
+    options:
+      - t:
+          ko: "좁은 쪽으로 옮기면서 소수 부분을 버렸다"
+          en: "Moving into the narrower box dropped the fraction"
+      - t:
+          ko: "가까운 정수로 반올림했다"
+          en: "It rounded to the nearest whole number"
+        diag:
+          t:
+            ko: "반올림이면 4 여야 합니다. <code>(int) -3.9</code> 가 -4 가 아니라 <b>-3</b> 인 것이 그 증거예요."
+            en: >-
+              Rounding would give 4. That <code>(int) -3.9</code> is <b>-3</b> and not -4 is the
+              evidence.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 반올림이냐 버림이냐", en: "The sharpest spot — round or drop" }
+            code:
+              - "(int)  3.9 →  3"
+              - "(int) -3.9 → -3   (0 쪽으로 버린다)"
+      - t:
+          ko: "3.9 가 애초에 3.9 가 아니었다"
+          en: "3.9 was never 3.9 to begin with"
+        diag:
+          t:
+            ko: >-
+              담긴 값은 3.9 에 아주 가깝습니다(<code>3.899999…</code>). 3 이 된 것은 그 오차가
+              아니라 <b>옮기는 규칙</b> 때문이에요 — 3.5 도 3 이 됩니다.
+            en: >-
+              The stored value is very close to 3.9 (<code>3.899999…</code>). It became 3 because of
+              <b>the move's rule</b>, not that error — 3.5 becomes 3 as well.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 근사값이냐 변환 규칙이냐", en: "The sharpest spot — the approximation or the rule" }
+            code:
+              - "(int) 3.5 → 3    오차와 무관하다"
+              - "(int) 3.0 → 3"
+      - t:
+          ko: "자바가 소수를 지원하지 않아서"
+          en: "Java does not support decimals"
+        diag:
+          t:
+            ko: "<code>double d = 3.9;</code> 는 그대로 3.9 입니다. 잃은 것은 <b>옮겨 간 자리</b>에서예요."
+            en: >-
+              <code>double d = 3.9;</code> stays 3.9. The loss happened <b>at the destination</b>.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 담기냐 옮기기냐", en: "The sharpest spot — storing or moving" }
+            code:
+              - "double d = 3.9;   → 3.9"
+              - "(int) d           → 3"

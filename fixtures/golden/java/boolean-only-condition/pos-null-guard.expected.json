@@ -1,0 +1,28 @@
+[
+  {
+    "queryId": "java/boolean-only-condition",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "ifcond",
+    "startLine": 5,
+    "startCol": 8,
+    "endLine": 7,
+    "endCol": 9,
+    "nodeKind": "if_statement",
+    "inError": false
+  },
+  {
+    "queryId": "java/boolean-only-condition",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "ifcond",
+    "startLine": 5,
+    "startCol": 12,
+    "endLine": 5,
+    "endCol": 24,
+    "nodeKind": "binary_expression",
+    "inError": false
+  }
+]

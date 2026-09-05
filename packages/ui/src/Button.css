@@ -1,0 +1,85 @@
+/* D182 — 버튼 하나, 변형 넷. 옛 `.flat-btn` · `.press-btn` 은 이 규칙을 얹어 쓴다.
+   면·테두리·그림자만 다르고 크기와 활자는 같다 — 「지금 할 일」은 색이 아니라 **위치와
+   크기**가 말한다(정본 §6 「하나의 초점」). */
+.btn {
+  display: inline-flex;
+  gap: var(--s-2);
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 var(--s-3);
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: var(--fs-3);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-tight);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+
+.btn[disabled] {
+  cursor: not-allowed;
+  opacity: .5;
+}
+
+.btn.sm {
+  min-height: 28px;
+  padding: 0 var(--s-2);
+  font-size: var(--fs-2);
+}
+
+.btn.lg {
+  min-height: 44px;
+  padding: 0 var(--s-5);
+  font-size: var(--fs-4);
+  font-weight: var(--fw-bold);
+}
+
+.btn.full { width: 100% }
+
+/* 화면에 하나. 지금 해야 할 일이다. */
+.btn.primary {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.btn.primary:hover:not([disabled]) { background: var(--accent-hover) }
+
+.btn.secondary {
+  border-color: var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+}
+.btn.secondary:hover:not([disabled]) { background: var(--surface-2) }
+
+.btn.ghost { color: var(--text-muted) }
+
+.btn.ghost:hover:not([disabled]) {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.btn.danger {
+  border-color: var(--bad);
+  background: var(--bad-bg);
+  color: var(--bad);
+}
+.btn.danger:hover:not([disabled]) { border-color: var(--bad) }
+
+/* 눌린 채로 유지되는 토글(「모르겠어요」). 벌이 아니므로 경고색을 쓰지 않는다 —
+   켜졌다는 사실만 액센트 연한 면으로 말한다 (정본 §3-1). */
+.btn[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent-weak);
+  color: var(--accent);
+}
+
+.btn kbd { opacity: 1 }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn { transition-duration: .001ms }
+}
+[data-motion="reduce"] .btn { transition-duration: .001ms }

@@ -1,0 +1,36 @@
+schema: 1
+id: common/conditional-branch
+universal: null
+name: { ko: 조건으로 흐름 나누기, en: Conditional branch }
+token: null
+grammars: []
+essential: false
+difficulty: 1
+prereq: []
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "조건이 참일 때만 그 아래 묶음을 실행하고, 거짓이면 통째로 건너뛴다."
+    en: "Runs the block below only when the condition holds; skips it whole otherwise."
+  why:
+    ko: >-
+      <b>값이 아니라 흐름</b>이 갈린다는 것이 핵심입니다. 여기서 갈린 두 길은 서로 다른 줄을
+      실행하고, 갈래마다 몇 줄이든 들어갈 수 있습니다. 조건으로 <b>값</b> 하나를 고르는
+      표기와는 하는 일이 다릅니다 — 그쪽은 자리 하나를 채우고, 이쪽은 실행할 줄을 정합니다.
+    en: >-
+      The point is that it splits <b>the flow</b>, not a value. The two paths run different lines,
+      and each path can hold as many lines as it needs. Picking one <b>value</b> with a condition
+      is a different job — that fills one slot, this decides which lines run.
+  trace: []
+rule:
+  ko: "조건을 먼저 판단하고, 참인 갈래의 줄만 실행한다."
+  en: "The condition is judged first, and only the taken branch's lines run."
+ok:
+  ko: "조건이 참이면 그 아래 묶음으로 들어가고, 아니면 묶음을 지나쳐 다음 줄로 갑니다."
+  en: "True goes into the block below; otherwise it steps past the block to the next line."
+misconceptions:
+  - ko: "거짓이면 프로그램이 멈춘다 — 아니요. 묶음만 건너뛰고 그 다음 줄부터 이어집니다."
+    en: "False stops the program — no. Only the block is skipped; the next line still runs."
+  - ko: "조건이 참이 될 때까지 기다린다 — 아니요. 판단은 그 줄에 닿았을 때 한 번뿐입니다."
+    en: "It waits until the condition turns true — no. It is judged once, when the line is reached."

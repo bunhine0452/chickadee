@@ -1,0 +1,196 @@
+schema: 1
+id: swift/if-let
+# `common/unwrap-binding` 은 아직 없다 — swift.md §6 이 신규 보편형으로 제안했고 규약 4 대로
+# 이 사전은 새 `common/` 을 만들지 않는다. `null` 로 두고 후보로 보고한다.
+universal: null
+name: { ko: 없음을 벗겨 이름 붙이기, en: Optional binding }
+token: "if let"
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 2
+prereq: [swift/optional-type, swift/if-statement]
+confusions: []
+dict:
+  one_liner:
+    ko: "값이 있을 때만 도는 묶음을 만들고, 그 안에서 쓸 새 이름을 함께 만든다."
+    en: "It runs a block only when a value is there, binding it to a fresh label."
+  why:
+    ko: >-
+      벗기는 표기 중 가장 흔한 것입니다 — 표본 428파일에서 568곳/130파일이에요.
+      한 줄이 두 가지 일을 합니다: 값이 있는지 보고, 있으면 <b>벗긴 값에 새 이름을 붙입니다.</b>
+      그 이름은 중괄호 안에서만 살고 나가면 사라집니다.
+      바깥 이름과 같은 글자를 쓰는 관습이 있어서 헷갈리는데, <b>안쪽은 다른 이름</b>입니다.
+      안쪽 이름은 벗겨진 타입이고 바깥 이름은 여전히 물음표가 붙은 타입이에요. 이름을 같게 쓴
+      경우 오른쪽을 아예 생략할 수도 있습니다.
+    en: >-
+      This is the commonest unwrapping notation — 568 places in 130 files of the 428-file sample.
+      One line does two jobs: it checks that a value is there and, if so, <b>binds a fresh name to
+      the unwrapped value.</b> That name lives inside the braces and is gone outside.
+      Writing the same letters as the outer name is the convention, which confuses people:
+      <b>the inner one is a different name.</b> Inside it has the unwrapped type; outside the name
+      still carries the question mark. When the letters match, the right-hand side may be dropped.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.3|code}}에 값이 있는지 본다."
+      en: "Line {{site.line}} checks whether {{pick.3|code}} holds a value."
+    - ko: "있으면 {{pick.2|code}} 라는 새 이름에 벗긴 값을 붙인다."
+      en: "If so, the unwrapped value is bound to the fresh name {{pick.2|code}}."
+    - ko: "그 이름은 중괄호 안에서만 산다."
+      en: "That name lives only inside the braces."
+rule:
+  ko: "<b>안쪽 이름은 새 이름이다.</b> 벗겨진 타입이고 블록을 나가면 사라진다."
+  en: "<b>The inner name is a new name.</b> It has the unwrapped type and ends with the block."
+result:
+  label: { ko: "{{site.line}}행 안쪽의 {{pick.2}}", en: "{{pick.2}} inside line {{site.line}}" }
+  value: "{{pick.3}}"
+  note: { ko: "벗겨진 타입이다", en: "the unwrapped type" }
+ok:
+  ko: "{{pick.3|code}}에 값이 있어 {{pick.2|code}}{{pick.2|josa:이,가}} 벗겨진 값을 가리킵니다."
+  en: "A value was there, so {{pick.2|code}} points at the unwrapped one."
+payoff:
+  ko: "이걸 알면 「같은 이름인데 안팎에서 타입이 다르다」가 풀립니다 — 다른 이름입니다."
+  en: "This untangles “same name, different type inside” — they are different names."
+bridge:
+  ko: >-
+    TS 는 견주는 식만 적어도 안쪽 타입이 좁혀집니다. Swift 는 <b>새 이름을 만들어</b>
+    그 일을 해요.
+  en: >-
+    TS narrows the type from the check alone. Swift does the same job by <b>making a new name</b>.
+misconceptions:
+  # swift.md §9 ③.
+  - ko: "안쪽 이름은 바깥 것이다 — 새 이름입니다. 바깥은 여전히 물음표가 붙어 있어요."
+    en: "The inner name is the outer one — it is new; the outer still carries the mark."
+  - ko: "벗기면 바깥 이름도 벗겨진다 — 안 벗겨집니다. 블록 밖에서는 그대로예요."
+    en: "Unwrapping changes the outer name too — it does not; outside it is unchanged."
+  - ko: "값이 비어 있으면 안쪽이 한 번 돌고 끝난다 — 한 번도 안 돕니다."
+    en: "An empty value runs the inside once — it never runs it."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>벗긴 값에 붙는 새 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the fresh name bound to the unwrapped value</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 이름을 <b>만든다는 낱말</b>입니다. 어떤 이름인지는 그 뒤에 적혀요."
+          en: "{{pick.1|code}} is the <b>word that makes a name</b>. Which name comes after it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 낱말이냐 이름이냐", en: "The sharpest spot — the word or the name" }
+          code:
+            - "if let name = u.name { }"
+            - "if let n = u.name { }     // 같은 값, 다른 이름"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>벗길 대상</b>입니다. 벗겨진 값이 붙는 이름은 왼쪽이에요."
+          en: "{{pick.3|code}} is <b>what gets unwrapped</b>. The name it binds to is on the left."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 대상이냐 새 이름이냐", en: "The sharpest spot — the source or the new name" }
+          code:
+            - "if let name = u.name { }   // 안쪽 name 은 새 이름"
+            - "u.name                     // 바깥은 여전히 물음표"
+meaning:
+  - q:
+      ko: "안쪽에서 만든 이름을 중괄호 밖에서 쓰면 어떻게 될까요?"
+      en: "What happens when the name made inside is used outside the braces?"
+    options:
+      - t:
+          ko: "그런 이름이 없다며 빌드가 멈춘다"
+          en: "The build stops — no such name exists there"
+      - t:
+          ko: "바깥의 같은 이름이 벗겨진 채로 쓰인다"
+          en: "The outer name of the same spelling is used, unwrapped"
+        diag:
+          t:
+            ko: "바깥 이름은 안 벗겨집니다. 안쪽 이름은 <b>따로 생긴 것</b>이고 블록과 함께 사라져요."
+            en: "The outer name is not unwrapped. The inner one is <b>separately made</b> and ends with the block."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 안이냐 밖이냐", en: "The sharpest spot — inside or outside" }
+            code:
+              - "if let name = u.name { use(name) }"
+              - "use(name)   // 빌드가 멈춘다"
+      - t:
+          ko: "비어 있으면 「없음」이 들어간 채로 쓰인다"
+          en: "It is used with absence in it when empty"
+        diag:
+          t:
+            ko: "비어 있으면 안쪽 자체가 안 돕니다. 그 이름은 값이 있을 때만 생겨요."
+            en: "When empty the inside never runs. That name only comes into being when a value is there."
+      - t:
+          ko: "돌다가 멈춘다"
+          en: "It stops while running"
+        diag:
+          t:
+            ko: "돌기 전에 막힙니다. 이름이 있는지 없는지는 빌드 단계에서 정해져요."
+            en: "It is caught before it runs. Whether a name exists is settled at build time."
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 벗긴 값에 <b>안 바뀌는 새 이름</b>을 붙입니다."
+      en: "Choose what goes in the blank. Line {{site.line}} binds the unwrapped value to a <b>fixed new name</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "let", mono: true }
+      - t: "var"
+        mono: true
+        diag:
+          t:
+            ko: "이 낱말도 씁니다 — 다만 <b>옮길 수 있는</b> 이름이 되고, 옮겨도 바깥 값은 안 바뀌어요."
+            en: "That word works too — it makes a name that <b>may move</b>, and moving it does not touch the outer value."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 옮기나 안 옮기나", en: "The sharpest spot — movable or not" }
+            code:
+              - "if let n = u.n { }   // 안 옮긴다"
+              - "if var n = u.n { }   // 옮길 수 있다"
+      - t: "case"
+        mono: true
+        diag:
+          t:
+            ko: "이 낱말은 <b>갈래 하나</b>를 짚습니다. 벗기기에도 쓰이지만 그때는 어떤 갈래인지까지 적어야 해요."
+            en: "That word names <b>one case</b>. It can unwrap too, but then which case has to be spelled out."
+      - t: "guard"
+        mono: true
+        diag:
+          t:
+            ko: "이 낱말은 <b>아니면 나가는</b> 모양을 엽니다. 성공한 값이 블록 <b>바깥</b>으로 나가는 것이 다른 점이에요."
+            en: "That word opens the <b>otherwise leave</b> shape. Its difference is that the value survives <b>outside</b> the block."
+why_gate:
+  q:
+    ko: "Swift 는 왜 벗긴 값에 <b>새 이름</b>을 붙이게 할까요?"
+    en: "Why does Swift bind the unwrapped value to a <b>new name</b>?"
+  choices:
+    - t:
+        ko: "벗겨진 타입과 안 벗겨진 타입이 다른데 한 이름이 두 타입을 오가면 어느 줄에서 어느 쪽인지가 안 보이기 때문"
+        en: "Because the two types differ, and one name shifting between them hides which is which on each line"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이름을 같은 글자로 쓰는 관습이 왜 생겼는지도 적어 보세요."
+        en: "That is the direction. Say why the convention reuses the same spelling, too."
+    - t:
+        ko: "새 이름이 더 빨라서"
+        en: "Because a new name is faster"
+      ok: false
+      fb:
+        ko: "속도 문제가 아닙니다. 타입이 갈린다는 것이 이유예요."
+        en: "Speed is not it. The split in types is."
+    - t:
+        ko: "바깥 이름을 바꿀 방법이 없어서"
+        en: "Because the outer name cannot be changed"
+      ok: false
+      fb:
+        ko: "바꿀 수야 있습니다. 안 바꾸기로 한 것이 결정이에요."
+        en: "It could be. Choosing not to is the decision."
+queries:
+  - { grammars: [swift], file: ./if-let.scm }
+examples:
+  - code: "func f() { if let name = u.name { g(name) } }"
+    expect: { sites: 1, form: iflet, hole: "let", picks: { 1: "let", 2: "name", 3: "u.name" } }
+  - code: "func f() { if var n = u.count { n += 1 } }"
+    expect: { sites: 1, form: iflet, hole: "var", picks: { 1: "var", 2: "n", 3: "u.count" } }
+  - code: "func f() { if let name { g(name) } }"
+    expect: { sites: 1, form: iflet-short, hole: "let", picks: { 1: "let", 2: "name" } }
+  - code: "func f() { if n > 0 { g() } }"
+    expect: none

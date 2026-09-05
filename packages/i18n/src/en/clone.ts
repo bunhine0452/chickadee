@@ -3,7 +3,7 @@ export const clone: Record<string, string> = {
   'course.title': 'Clone course',
   'course.plain': '= transcribe one repo, in order',
   'course.scopeRepo': 'Whole repo',
-  'course.scopeUnit': 'Sheet “{{name}}”',
+  'course.scopeUnit': 'Unit “{{name}}”',
   'course.modeCommit': 'In the order the commits built it',
   'course.modeDep': 'What gets imported comes first',
   'course.leave': 'Save and leave',
@@ -13,7 +13,7 @@ export const clone: Record<string, string> = {
   'course.tocCount': '{{done}} / {{total}} files',
   'course.tocCut': 'segments cut so far {{done}}/{{total}}',
   'course.tocPct': 'Course progress {{n}}%',
-  'course.noUnit': 'Outside any sheet',
+  'course.noUnit': 'Outside any unit',
   'course.fileAt': 'No. {{n}}',
   'course.fileCount': '{{done}}/{{total}}',
   'course.fileUncut': 'Opens into segments',
@@ -45,11 +45,11 @@ export const clone: Record<string, string> = {
   'course.next': 'Next segment',
   'course.nextLast': 'Finish the course',
   'course.doneTitle': 'Course finished',
-  'course.doneBody': 'You transcribed {{n}} segments. The ink layers already moved through the ledger.',
+  'course.doneBody': 'You transcribed {{n}} segments. Mastery has already moved.',
   'course.doneBack': 'Home',
   'course.noConceptNote':
-    'The dictionary knows no grammar in this segment, so no ink layer moves. Only the score is kept.',
+    'The dictionary knows no grammar in this segment, so mastery does not move. Only the score is kept.',
 
   'course.openOn': 'Open the course for “{{name}}”',
-  'course.inSession': 'A course cannot open while a run is printing. Leave the session first.',
+  'course.inSession': 'A course cannot open while a study session is running. Leave the session first.',
 };

@@ -1,0 +1,36 @@
+schema: 1
+id: common/class-definition
+universal: null
+name: { ko: 값과 하는 일을 한 이름에 묶기, en: Class definition }
+token: null
+grammars: []
+essential: false
+difficulty: 2
+prereq: [common/function-definition]
+confusions: []
+dict:
+  one_liner:
+    ko: "관련된 값과 그 값을 다루는 일을 한 이름 아래 묶는 틀."
+    en: "A form that binds related values and the work on them under one name."
+  why:
+    ko: >-
+      값이 흩어져 있으면 「이 값과 저 함수가 한 쌍」이라는 것을 사람이 기억해야 합니다. 묶어 두면
+      그 짝이 코드에 적힙니다. 언어가 갈리는 지점은 셋입니다 — 묶는 것이 <b>강제인지</b>,
+      안의 값을 밖에서 볼 수 있는지, 그리고 틀에서 찍어낸 것을 넘길 때 <b>복사되는지</b>.
+    en: >-
+      When values sit apart, a person has to remember that this value and that function belong
+      together. Bind them and the pairing is written down. Languages part ways at three points —
+      whether binding is <b>compulsory</b>, whether the inside is visible from outside, and whether
+      what the form stamps out is <b>copied</b> when it is passed.
+  trace: []
+rule:
+  ko: "<b>틀과 그 틀로 찍어낸 것은 다르다.</b> 틀은 하나고 찍어낸 것은 여럿이다."
+  en: "<b>The form and what it stamps out are not the same.</b> One form, many stampings."
+ok:
+  ko: "값과 그 값을 다루는 일이 한 이름 아래 있습니다. 그 이름이 곧 「무엇에 대한 코드인가」예요."
+  en: "Values and the work on them live under one name. That name is what the code is about."
+misconceptions:
+  - ko: "틀을 적으면 그 안이 바로 돈다 — 틀은 모양을 적어 둔 것이고, 도는 것은 찍어낸 뒤입니다."
+    en: "Writing the form runs what is inside — the form records a shape; running comes after stamping."
+  - ko: "틀 하나에 값도 하나다 — 찍어낸 것마다 자기 값을 따로 가집니다."
+    en: "One form means one set of values — each stamping carries its own."

@@ -1,0 +1,214 @@
+schema: 1
+id: py/arithmetic
+universal: common/arithmetic
+name: { ko: 셈하기, en: Arithmetic }
+token: "+"
+grammars: [python]
+framework: null
+essential: true
+difficulty: 1
+# `cs/operator-precedence` 는 `2 + 3 * 4` 가 접히는 순서를, `cs/type-conversion` 은 파이썬의
+# `/` 가 정수 둘에서도 소수를 내는 이유(암묵 넓힘)를 댄다 — 둘 다 D187 ⑥ 의 신설이고
+# 이 개념이 그 둘에 창을 빌려 준다 (D157 ②).
+prereq: [cs/floating-point, cs/operator-precedence, cs/type-conversion]
+# 빈칸 오답(== · = · and)이 개념으로 없거나 토큰이 안 맞아 혼동 쌍으로 못 묶는다.
+confusions: []
+
+dict:
+  one_liner:
+    ko: "값 둘로 새 값 하나를 셈해 만든다. 넣어 준 값은 그대로 남는다."
+    en: "Two values compute one new value; the ones you fed in stay as they were."
+  why:
+    ko: >-
+      셈은 값을 <b>고치는</b> 것이 아니라 <b>새로 만드는</b> 것입니다. {{site.line}}행은
+      {{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:으로,로}} 새 값을 만들 뿐 둘 중 어느 것도 안 건드려요.
+      파이썬에서 나누기는 딱 떨어져도 <b>소수</b>를 냅니다 — 버림이 필요하면 기호가 따로 있어요.
+    en: >-
+      Computing does not <b>change</b> a value, it <b>makes a new one</b>. Line {{site.line}} builds
+      a new value from {{pick.2|code}} and {{pick.3|code}} and touches neither. In Python division
+      yields a <b>decimal</b> even when it comes out even; flooring has its own symbol.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:을,를}} 각각 값으로 만든다."
+      en: "{{pick.2|code}} and {{pick.3|code}} each become a value."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 그 둘로 새 값 하나를 만든다."
+      en: "{{pick.1|code}} makes one new value out of the two."
+    - ko: "그 값을 담지 않으면 그대로 사라진다."
+      en: "Unless that value is kept, it simply vanishes."
+
+rule:
+  ko: "<b>셈은 새 값을 만든다. 넣어 준 값을 고치지 않는다.</b> 나누기는 늘 소수를 낸다."
+  en: "<b>It makes a new value and edits neither input.</b> Division always yields a decimal."
+result:
+  label:
+    ko: "{{site.line}}행의 셈"
+    en: "the sum on line {{site.line}}"
+  value: "{{pick.1}}"
+  note:
+    ko: "새 값이 따로 생긴다"
+    en: "a separate new value appears"
+ok:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:이,가}} {{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:으로,로}} 새 값 하나를 만듭니다.
+    {{pick.2|code}} 에 담긴 값은 그대로예요.
+  en: >-
+    {{pick.1|code}} makes one new value from {{pick.2|code}} and {{pick.3|code}}. What
+    {{pick.2|code}} holds is untouched.
+payoff:
+  ko: >-
+    새 값이 생긴다는 것을 알면 「왜 계산했는데 안 바뀌지」가 풀립니다 — 담지 않았기 때문이에요.
+  en: >-
+    Once you see a new value appears, “why did my calculation not stick” answers itself.
+bridge:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:은,는}} 값을 만들고, 그 값에 이름을 붙이는 것은 넣는 줄이 하는 다른 일입니다.
+  en: >-
+    {{pick.1|code}} makes a value; putting a name on it is the separate job of an assignment.
+misconceptions:
+  - ko: "왼쪽 값이 결과로 바뀐다 — 아니요. 새 값이 따로 생깁니다."
+    en: "The left value turns into the result — no. A separate new value appears."
+  - ko: "나누면 정수가 나온다 — 딱 떨어져도 소수가 나옵니다. 버림은 기호가 따로예요."
+    en: "Division gives a whole number — it gives a decimal even when even. Flooring has its own symbol."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>두 값으로 새 값을 만드는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that makes a new value from the two</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 셈에 <b>넣는</b> 값입니다. 값은 스스로 셈하지 못해요."
+          en: "{{pick.2|code}} is a value <b>fed into</b> the sum. A value cannot compute by itself."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 값만으로는 아무 일도 안 난다"
+            en: "The sharpest spot — a value alone does nothing"
+          code:
+            - "a          # 값 하나일 뿐이다"
+            - "a + b      # 새 값이 나온다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 넣는 <b>다른 한쪽</b>입니다. 만드는 일은 가운데 기호가 합니다."
+          en: "{{pick.3|code}} is the <b>other side</b> fed in. The making is done by the symbol between."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 값이냐 기호냐"
+            en: "The sharpest spot — a value or the symbol"
+          code:
+            - "2          # 값이다"
+            - "n * 2      # 값을 만든다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 값 둘로 <b>새 값 하나</b>를 만듭니다."
+      en: "Choose what goes in the blank. Line {{site.line}} makes <b>one new value</b> out of two."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "+", mono: true }
+      - t: "=="
+        mono: true
+        diag:
+          t:
+            ko: "이 기호는 <b>견주기</b>라 새 값 대신 참·거짓 하나가 나옵니다. 셈한 값이 필요한 자리에 넣으면 종류가 어긋나요."
+            en: >-
+              That symbol <b>weighs</b>, so a true-or-false comes out instead of a new value. Where
+              a computed value is needed, the kind does not fit.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 값이냐 판단이냐"
+              en: "The sharpest spot — a value or a judgement"
+            code:
+              - "1 + 2      # 3"
+              - "1 == 2     # False"
+      - t: "="
+        mono: true
+        diag:
+          t:
+            ko: "기호 하나짜리는 <b>넣는</b> 일이라 왼쪽이 이름이어야 하고, 줄 하나로 서야 합니다. 값 둘로 새 값을 만드는 자리가 아니에요."
+            en: >-
+              The single-symbol form <b>puts</b> a value in, so the left side must be a name and it
+              stands as a line. It is not where two values make a third.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 만드는가 넣는가"
+              en: "The sharpest spot — making or putting"
+            code:
+              - "n + 1      # 새 값이 나온다"
+              - "n = 1      # n 이 1 이 된다"
+      - t: "and"
+        mono: true
+        diag:
+          t:
+            ko: "이 낱말은 <b>참·거짓 둘</b>을 묶는 자리입니다. 숫자에 쓰면 셈하지 않고 한쪽을 그대로 골라 내놓아요."
+            en: >-
+              That word joins <b>two true-or-false values</b>. On numbers it does not compute; it
+              picks one side and yields it.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 셈이 아니라 고르기"
+              en: "The sharpest spot — picking, not computing"
+            code:
+              - "2 + 3      # 5"
+              - "2 and 3    # 3 — 뒤쪽을 그대로 준다"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행의 셈 결과는 왜 이 자리에 적혀 있을까요?"
+    en: "Why does the result of line {{site.line}} appear right where it does?"
+  choices:
+    - t:
+        ko: "만든 값을 곧바로 쓸 자리가 여기여서 — 담아 두지 않으면 사라진다"
+        en: "Because this is where the new value is used — unkept, it vanishes"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 값을 나중에도 써야 한다면 무엇이 더 필요할지도 적어 보세요."
+        en: "That is the direction. Say what you would need if the value were wanted later."
+    - t:
+        ko: "왼쪽 값을 고치려고"
+        en: "To edit the left value"
+      ok: false
+      fb:
+        ko: "셈은 고치지 않습니다. 고치려면 결과를 다시 넣는 줄이 따로 있어야 합니다."
+        en: "Arithmetic edits nothing. Editing needs a separate line that puts the result back."
+    - t:
+        ko: "숫자 종류를 바꾸려고"
+        en: "To change the kind of number"
+      ok: false
+      fb:
+        ko: "종류가 바뀌는 것은 나누기의 결과이지 셈을 하는 이유가 아닙니다."
+        en: "The kind changing is a result of division, not the reason for computing."
+
+queries:
+  - { grammars: [python], file: ./arithmetic.scm }
+
+examples:
+  - code: "total = price + shipping"
+    expect: { sites: 1, form: arith, hole: "+", picks: { 1: "+", 2: "price", 3: "shipping" } }
+  - code: "half = total / 2"
+    expect: { sites: 1, form: arith, hole: "/", picks: { 1: "/", 2: "total", 3: "2" } }
+  # 오른쪽이 계산 결과면 나누기를 잡는다 — 평균이 그 자리다.
+  - code: "avg = sum(xs) / len(xs)"
+    expect: { sites: 1, form: arith, hole: "/", picks: { 1: "/", 2: "sum(xs)", 3: "len(xs)" } }
+  - code: "same = a == b"
+    expect: none
+  # `//` 를 일부러 안 잡는다 — 이 개념의 규칙(「나누기는 늘 소수를 낸다」)이 몫 나누기에서
+  # 거짓이 되기 때문이다. 쿼리에서 빼는 결정을 여기서 못박는다 (`assignment` 의 `obj.attr` 과 같은 자리).
+  - code: "pages = total // size"
+    expect: none
+  # 아래 다섯이 2026-09-05 에 더한 음성이다. 셋은 `binary_operator` 인데 셈이 아니고
+  # (경로 결합·이어붙이기·되풀이·서식), 그 넷이 사용자 리포 실측 오검출의 전부였다.
+  - code: 'settings = base / "config.json"'
+    expect: none
+  - code: "log = root / name"
+    expect: none
+  - code: 'greeting = "hi " + name'
+    expect: none
+  - code: 'bar = "-" * 40'
+    expect: none
+  - code: 'label = "%s" % name'
+    expect: none

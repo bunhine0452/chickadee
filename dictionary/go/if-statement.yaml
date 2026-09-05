@@ -1,0 +1,229 @@
+schema: 1
+id: go/if-statement
+# 1부 (`go.md` §2 ⑤).
+#
+# **쿼리가 조건에 `nil` 이 든 것을 뺀다.** 안 빼면 `cli/cli` 의 `if` 7,669개 중
+# 2,284개(30%)가 `if err != nil` 이라 `go/error-check` 와 첫 노출이 같은 줄이 된다
+# (`README.md` §7 ②). 뺀 뒤 실측 4,017곳/339파일이다.
+universal: common/conditional-branch
+name: { ko: "조건으로 흐름 나누기", en: "If statement" }
+token: "if"
+grammars: [go]
+framework: null
+essential: true
+difficulty: 1
+prereq: [go/equality, go/boolean-literal]
+confusions: []
+
+dict:
+  one_liner:
+    ko: >-
+      조건이 참일 때만 중괄호 안이 돈다. 조건 자리에는 참·거짓 값만 온다.
+    en: >-
+      The braces run only when the test holds, and only a truth value may be the test.
+  why:
+    ko: >-
+      {{site.line}}행은 {{pick.2|code}}{{pick.2|josa:을,를}} 보고 참이면 {{pick.3|code}} 안으로 들어갑니다. Go 에서 이 문의
+      모양에는 규칙이 셋 붙어요. ① <b>조건에 괄호가 없습니다</b> — 붙여도 되지만 서식 도구가 지웁니다. ② <b>중괄호는 생략할 수 없습니다</b> — 한 줄짜리
+      몸통도 감싸야 해요. ③ <b>여는 중괄호가 조건과 같은 줄에 있어야 합니다.</b> 내리면 세미콜론이 자동으로 끼어들어 <b>다른 프로그램</b>이 되는데, 파서는 그것을
+      오류로 안 봐요. 그리고 조건 앞에 세미콜론으로 <b>짧은 문 하나</b>를 둘 수 있고, 거기서 만든 이름은 이 문 안에서만 삽니다.
+    en: >-
+      Line {{site.line}} reads {{pick.2|code}} and steps into {{pick.3|code}} when it holds. Three
+      rules shape this statement in Go. ① <b>The test takes no parentheses</b> — they are allowed and
+      the formatter removes them. ② <b>The braces cannot be dropped</b>, not even around a one-line
+      body. ③ <b>The opening brace must sit on the same line as the test.</b> Moved down, a semicolon
+      is inserted for you and the result is a <b>different program</b> that the parser does not flag.
+      A single <b>short statement</b> may also stand before the test, separated by a semicolon, and
+      names made there live only inside this statement.
+  trace:
+    - ko: >-
+        {{site.line}}행은 {{pick.2|code}}{{pick.2|josa:을,를}} 참·거짓 값으로 접는다.
+      en: >-
+        Line {{site.line}} folds {{pick.2|code}} into a truth value.
+    - ko: >-
+        참이면 {{pick.3|code}} 안으로 들어간다.
+      en: >-
+        When it holds, it steps into {{pick.3|code}}.
+    - ko: >-
+        거짓이면 그 블록을 통째로 건너뛴다.
+      en: >-
+        When it does not, the whole block is skipped.
+
+rule:
+  ko: >-
+    <b>조건 자리에는 참·거짓 값만 온다.</b> 여는 중괄호는 조건과 같은 줄이어야 한다.
+  en: >-
+    <b>Only a truth value may be the test.</b> The opening brace belongs on the same line as the
+    test.
+result:
+  label: { ko: "{{site.line}}행의 갈림", en: "the branch on line {{site.line}}" }
+  value: "{{pick.2}}"
+  note: { ko: "참일 때만 안이 돈다", en: "the body runs only when it holds" }
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:이,가}} 참이면 {{pick.3|code}} 안이 한 번 돕니다.
+  en: >-
+    When {{pick.2|code}} holds, {{pick.3|code}} runs once.
+payoff:
+  ko: >-
+    이걸 알면 「중괄호를 다음 줄로 내렸더니 아무 오류도 없이 다르게 돈다」가 풀립니다.
+  en: >-
+    This untangles "I moved the brace down and it runs differently with no error at all".
+bridge:
+  ko: >-
+    파이썬은 중괄호 대신 들여쓰기로 몸통을 정합니다. Go 는 들여쓰기에 뜻이 없고 대신 <b>줄바꿈 위치</b>에 뜻이 있어요.
+  en: >-
+    Python marks the body with indentation. In Go indentation means nothing and <b>where the line
+    breaks</b> means everything.
+misconceptions:
+  - ko: >-
+      조건에 아무 값이나 놓을 수 있다 — 참·거짓 값만 옵니다. 수나 글자 묶음을 놓으면 그 줄에서 멈춰요.
+    en: >-
+      Any value may be the test — only a truth value may. A number or text stops on that line.
+  - ko: >-
+      몸통이 한 줄이면 중괄호를 생략할 수 있다 — 못 합니다. 언제나 감싸야 해요.
+    en: >-
+      A one-line body may skip the braces — it may not. They are always required.
+  - ko: >-
+      중괄호를 어디에 두든 같다 — 다음 줄로 내리면 <b>다른 프로그램</b>이 되고 파서는 그것을 오류로 안 봅니다.
+    en: >-
+      The brace may sit anywhere — moved to the next line it becomes a <b>different program</b>, and
+      the parser does not flag it.
+
+point:
+  - q:
+      ko: >-
+        {{site.line}}행에서 <b>참일 때만 도는 블록</b>을 짚어 보세요.
+      en: >-
+        On line {{site.line}}, point at <b>the block that runs only when the test holds</b>.
+    hint: { ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다.", en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose." }
+    answer: pick.3
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} <b>조건</b>입니다. 조건은 도는 것이 아니라 참·거짓 하나로 접혀요.
+          en: >-
+            {{pick.2|code}} is the <b>test</b>. A test does not run; it folds into one truth value.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 접히는 것이냐 도는 것이냐", en: "The sharpest spot — what folds or what runs" }
+          code:
+            - "ok            // 참·거짓 하나로 접힌다"
+            - "{ n = 1 }     // 도는 쪽"
+      pick.1:
+        t:
+          ko: >-
+            {{pick.1|code}}{{pick.1|josa:은,는}} 갈림을 <b>여는 낱말</b>입니다. 낱말 자체는 돌지 않아요.
+          en: >-
+            {{pick.1|code}} is the word that <b>opens</b> the branch. The word itself does not run.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 여는 낱말이냐 도는 블록이냐", en: "The sharpest spot — the opening word or the running block" }
+          code:
+            - "if            // 여는 낱말"
+            - "{ n = 1 }     // 도는 블록"
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행은 조건이 참일 때만 안을 돌립니다.
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} runs its body only when the test holds.
+    hint: { ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다.", en: "Your choice is written into the code at once. Submit to have it marked." }
+    options:
+      - { t: "if", mono: true }
+      - t: "for"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 낱말은 <b>되풀이</b>를 엽니다. 조건이 참인 동안 계속 돌아서, 한 번만 돌아야 하는 자리에 쓰면 안 끝나요.
+            en: >-
+              That word opens a <b>loop</b>. It keeps going while the test holds, so where one pass is wanted
+              it never ends.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 한 번이냐 되풀이냐", en: "The sharpest spot — once or repeatedly" }
+            code:
+              - "if ok { n = 1 }     // 한 번"
+              - "for ok { n = 1 }    // 참인 동안 계속"
+      - t: "switch"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 낱말은 <b>여러 갈래</b>를 엽니다. 갈래를 <code>case</code> 로 적어야 하고, 블록 하나만 두면 그 줄에서 멈춰요.
+            en: >-
+              That word opens <b>several branches</b>. Each needs a <code>case</code>, and a lone block stops
+              on that line.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 갈래가 둘이냐 여럿이냐", en: "The sharpest spot — two branches or many" }
+            code:
+              - "if ok { }"
+              - "switch { case ok: }"
+      - t: "else"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 낱말은 <b>앞선 갈림에 붙는</b> 것이라 혼자 설 수 없습니다. 앞에 갈림이 없으면 그 줄에서 멈춰요.
+            en: >-
+              That word <b>attaches to a branch already there</b> and cannot stand alone. With nothing before
+              it, it stops on that line.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 혼자 서나 붙나", en: "The sharpest spot — standing alone or attaching" }
+            code:
+              - "if ok { }"
+              - "if ok { } else { }"
+
+why_gate:
+  q:
+    ko: >-
+      Go 는 왜 여는 중괄호를 <b>조건과 같은 줄</b>에 두라고 할까요?
+    en: >-
+      Why does Go want the opening brace <b>on the same line as the test</b>?
+  choices:
+    - t:
+        ko: >-
+          줄 끝에서 세미콜론이 자동으로 끼어들기 때문에, 내리면 조건과 블록이 갈라져 다른 프로그램이 되기 때문
+        en: >-
+          Because a semicolon is inserted at the end of a line, so moving the brace down splits test from
+          block into a different program
+      ok: true
+      fb:
+        ko: >-
+          그 방향입니다. 그럼 그 갈라짐이 왜 오류로 안 잡히는지도 한 줄 적어 보세요.
+        en: >-
+          That is the direction. Add a line on why that split is not caught as an error.
+    - t:
+        ko: >-
+          서식 취향을 하나로 맞추려고
+        en: >-
+          To settle on one brace style
+      ok: false
+      fb:
+        ko: >-
+          취향이 하나로 맞기는 하지만 이유는 문법입니다. 취향이면 다른 자리로 옮겨도 돌아야 하는데 안 돌아요.
+        en: >-
+          One style does result, but the reason is grammar. If it were taste the other placement would
+          still run, and it does not.
+    - t:
+        ko: >-
+          파서가 빨라지라고
+        en: >-
+          To make the parser faster
+      ok: false
+      fb:
+        ko: >-
+          속도 문제가 아닙니다. 같은 코드가 <b>다른 뜻</b>이 되는 문제예요.
+        en: >-
+          Speed is not it. The problem is that the same code takes on a <b>different meaning</b>.
+
+queries:
+  - { grammars: [go], file: ./if-statement.scm }
+
+examples:
+  - code: "func f(ok bool) { if ok { println(1) } }"
+    expect: { sites: 1, form: if, hole: "if", picks: { 1: "if", 2: "ok" } }
+  - code: "func f(g func() int) { if n := g(); n > 3 { println(n) } }"
+    expect: { sites: 1, form: ifinit, hole: "if", picks: { 1: "if", 2: "n > 3", 4: "n := g()" } }
+  - code: "func f(err error) { if err != nil { println(1) } }"
+    expect: none

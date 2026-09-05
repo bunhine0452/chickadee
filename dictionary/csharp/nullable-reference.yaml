@@ -1,0 +1,125 @@
+schema: 1
+id: csharp/nullable-reference
+universal: common/absent-value
+name: { ko: 없을 수 있다고 적어 두기, en: Nullable reference }
+token: "string?"
+grammars: [c_sharp]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cs/null-reference, csharp/assignment]
+confusions: []
+dict:
+  one_liner:
+    ko: "없을 수도 있다는 사실을 타입 옆에 적어 두고, 확인은 컴파일러가 한다."
+    en: "Possible absence is written next to the type, and the compiler does the check."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 물음표가 붙은 타입입니다.
+      <b>실행 시각에는 물음표가 없는 타입과 완전히 같은 것</b>이에요 — 물음표는 컴파일러에게
+      하는 말이고, 어긴다고 예외가 나지도 않고 <b>경고</b>만 납니다. 그래서 켜 두지 않으면
+      아무 일도 안 일어나고, 켜 두면 「여기서 없을 수 있다」를 코드가 스스로 말하게 됩니다.
+      TS 의 <code>strictNullChecks</code>와 같은 종류이고 자바의 <code>Optional</code>과는 다릅니다.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} is a type with a question mark. <b>At run time it is
+      exactly the same type as without it</b> — the mark speaks to the compiler, and breaking it
+      raises no exception, only a <b>warning</b>. Switched off, nothing happens; switched on,
+      the code says for itself where absence is possible. Same family as TypeScript's
+      <code>strictNullChecks</code>, and unlike Java's <code>Optional</code>.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}}{{pick.2|josa:을,를}} 없을 수 있는 값으로 세운다."
+      en: "Line {{site.line}} sets {{pick.2|code}} up as a value that may be absent."
+    - ko: "{{pick.1|code}} 옆의 물음표가 컴파일러에게 그 사실을 알린다."
+      en: "The mark beside {{pick.1|code}} tells the compiler as much."
+    - ko: "확인 없이 쓰면 경고가 뜨고, 실행 시각의 타입은 그대로다."
+      en: "Using it unchecked warns, and the runtime type is unchanged."
+rule:
+  ko: "<b>물음표는 컴파일러에게 하는 말이다.</b> 실행 시각의 타입은 하나도 안 바뀐다."
+  en: "<b>The mark speaks to the compiler.</b> The runtime type does not change at all."
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 이제 없을 수 있다고 적힌 이름입니다."
+  en: "{{pick.2|code}} is now a name written as possibly absent."
+payoff:
+  ko: "이걸 알면 「경고를 껐더니 예외가 난다」가 풀립니다 — 경고가 곧 검사였습니다."
+  en: "This untangles “I muted the warning and got an exception” — the warning was the check."
+bridge:
+  ko: >-
+    TS 와 같은 기계입니다 — 표시일 뿐 실행 시각을 안 바꿉니다. 자바는 <code>Optional</code>이라
+    <b>실제로 다른 타입</b>이라 이 자리가 안 겹칩니다.
+  en: >-
+    Same machine as TypeScript: a mark that does not change run time. Java uses
+    <code>Optional</code>, an <b>actually different type</b>, so this spot does not line up.
+misconceptions:
+  # 출처 — `csharp.md` §9 ④.
+  - ko: "이렇게 적으면 없음이 못 들어온다 — 들어옵니다. 경고만 나고 실행은 그대로예요."
+    en: "Writing it keeps absence out — it does not. It warns, and running is unchanged."
+  - ko: "물음표 없는 타입이면 안전하다 — 켜 두지 않은 프로젝트에서는 아무 검사도 안 합니다."
+    en: "A type without the mark is safe — in a project where it is off, nothing is checked at all."
+  - ko: "물음표가 실행 시각 타입을 바꾼다 — 참조형에서는 안 바꿉니다. 값형 쪽은 다른 이야기입니다."
+    en: "The mark changes the runtime type — not for reference types. Value types are another story."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>없을 수 있다고 적어 둔 타입</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the type written as possibly absent</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 이름을 어떻게 짓든 없을 수 있다는 사실은 타입에 적혀요."
+          en: "{{pick.2|code}} is the <b>name</b>. However it is spelled, the possibility of absence is written on the type."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 타입이냐", en: "The sharpest spot — the name or the type" }
+          code:
+            - "string  note;    // 없으면 경고"
+            - "string? note;    // 없어도 된다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 딸린 <b>값이나 몸통</b>입니다. 없을 수 있다는 표시는 타입 쪽에 있어요."
+          en: "{{pick.3|code}} is the attached <b>value or body</b>. The mark for absence sits on the type."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값이냐 타입이냐", en: "The sharpest spot — the value or the type" }
+          code:
+            - "string? s = null;   // 표시는 왼쪽"
+            - "string  s = null;   // 경고"
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 개념의 표시는 물음표 **한 글자**인데 빈칸형은 두 글자 이상을
+  요구하고(`packages/cards/src/t0-blank.ts` 의 `MIN_HOLE`), 타입 전체를 구멍으로 삼으면
+  사용처마다 글자가 달라 보기 넷을 못 고정한다. 지목형이 같은 자리를 묻는다.
+why_gate:
+  q:
+    ko: "실행 시각을 안 바꾸는데 왜 <b>굳이</b> 적을까요?"
+    en: "It changes nothing at run time — why write it <b>at all</b>?"
+  choices:
+    - t:
+        ko: "없을 수 있다는 사실이 사람의 머릿속이 아니라 코드에 남아, 컴파일러가 빠진 검사를 짚어 주게 하려고"
+        en: "So the possibility lives in the code, not in someone's head, and the compiler can point at missing checks"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 안 적었을 때 그 사실이 어디에 남는지도 적어 보세요."
+        en: "That is the direction. Add where that fact lives when it is not written."
+    - t:
+        ko: "예외를 막아 주니까"
+        en: "Because it prevents the exception"
+      ok: false
+      fb:
+        ko: "막지 않습니다. 경고를 무시하면 그대로 납니다."
+        en: "It does not prevent it — ignore the warning and it still happens."
+    - t:
+        ko: "빠르게 돌리려고"
+        en: "To make it run faster"
+      ok: false
+      fb:
+        ko: "실행 시각에 아무 코드도 안 생깁니다. 속도와 무관해요."
+        en: "No code is generated at run time; speed is unrelated."
+queries:
+  - { grammars: [c_sharp], file: ./nullable-reference.scm }
+examples:
+  - code: "class A { void F(string? note) { } }"
+    expect: { sites: 1, form: param, picks: { 1: "string?", 2: "note" } }
+  - code: "class A { public string? Title { get; set; } }"
+    expect: { sites: 1, form: property, picks: { 1: "string?", 2: "Title", 3: "{ get; set; }" } }
+  - code: "class A { void F(string note) { } }"
+    expect: none

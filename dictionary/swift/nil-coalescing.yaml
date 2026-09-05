@@ -1,0 +1,195 @@
+schema: 1
+id: swift/nil-coalescing
+universal: common/nullish-default
+name: { ko: 없을 때 채우기, en: Nil coalescing }
+token: "??"
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 2
+prereq: [swift/optional-type]
+confusions: []
+dict:
+  one_liner:
+    ko: "왼쪽에 값이 있으면 그것을, 없으면 오른쪽을 내고 결과에서 물음표가 한 겹 벗겨진다."
+    en: "It yields the left value if present, else the right, peeling one layer."
+  why:
+    ko: >-
+      벗기는 표기 중 <b>줄을 안 늘리는</b> 유일한 것입니다. 왼쪽에 값이 있으면 그 값을,
+      없으면 오른쪽을 냅니다. 요점은 결과의 타입이에요 — <b>물음표가 한 겹 벗겨집니다.</b>
+      그래서 이 식을 지나면 더는 벗길 필요가 없습니다.
+      「한 겹」이 중요합니다. 값 자체가 이미 없을 수 있는 사전에서 꺼내면 <b>두 겹</b>으로 오는데,
+      그때 이 기호 한 번은 바깥 한 겹만 벗깁니다. 바깥이 「있음」이면 안쪽 「없음」이 그대로
+      결과가 되어, 오른쪽에 적어 둔 값이 <b>안 쓰입니다</b>(실측). 「벗겼는데 왜 아직 없지」가
+      여기서 나옵니다.
+    en: >-
+      This is the only unwrapping notation that <b>adds no lines.</b> Present on the left yields
+      the left; absent yields the right. The point is the resulting type — <b>one layer of the
+      question mark is peeled off</b>, so past this expression nothing needs unwrapping.
+      "One layer" matters. A map whose values are themselves optional yields <b>two layers</b>,
+      and one use of this symbol peels only the outer one. If the outer layer is present, the
+      inner absence becomes the result and the fallback on the right is <b>never used</b>
+      (measured). "I unwrapped it and it is still absent" comes from here.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}}에 값이 있는지 본다."
+      en: "Line {{site.line}} checks whether {{pick.2|code}} holds a value."
+    - ko: "있으면 그 값이, 없으면 {{pick.3|code}}{{pick.3|josa:이,가}} 결과가 된다."
+      en: "Present yields it; absent yields {{pick.3|code}}."
+    - ko: "결과의 타입에서 물음표가 한 겹 벗겨진다."
+      en: "The result's type has one layer of the mark peeled off."
+rule:
+  ko: "<b>한 겹만 벗긴다.</b> 두 겹이면 바깥만 벗겨지고 오른쪽이 안 쓰인다."
+  en: "<b>Only one layer comes off.</b> With two, the outer peels and the right side goes unused."
+result:
+  label: { ko: "{{site.line}}행의 값", en: "the value on line {{site.line}}" }
+  value: "{{pick.2}} {{pick.1}} {{pick.3}}"
+  note: { ko: "물음표가 한 겹 벗겨진다", en: "one layer of the mark comes off" }
+ok:
+  ko: "{{pick.2|code}}에 값이 없으면 {{pick.3|code}}{{pick.3|josa:이,가}} 대신 나옵니다."
+  en: "When {{pick.2|code}} is absent, {{pick.3|code}} comes out instead."
+payoff:
+  ko: "이걸 알면 「채워 뒀는데 왜 안 채워지지」가 풀립니다 — 겹이 둘인 겁니다."
+  en: "This untangles “I set a fallback and it did not fill” — there were two layers."
+bridge:
+  ko: >-
+    TS 의 같은 기호와 동작이 같습니다. Swift 만의 것은 <b>결과 타입이 한 겹 벗겨지는 것이
+    눈에 보인다</b>는 점이에요.
+  en: >-
+    It behaves like the same symbol in TS. What is Swift's own is that <b>the peeled layer is
+    visible in the type</b>.
+misconceptions:
+  # swift-learning.md §11.3.2 — `y["k"] ?? 7` 이 `nil` 인 실측.
+  - ko: "겹이 몇이든 다 벗긴다 — <b>한 겹</b>만 벗깁니다."
+    en: "It peels every layer — it peels <b>one</b>."
+  - ko: "왼쪽이 비면 언제나 오른쪽이 나온다 — 두 겹이면 안쪽 「없음」이 그대로 나옵니다."
+    en: "Empty on the left always yields the right — with two layers the inner absence comes out."
+  - ko: "결과가 여전히 물음표를 단다 — 한 겹짜리면 벗겨져서 안 답니다."
+    en: "The result still carries the mark — for one layer it does not; the mark is gone."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>왼쪽이 비었을 때 나올 값</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>what comes out when the left is empty</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.3
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>기호</b>입니다. 어느 쪽이 나올지를 고르는 일만 하고 값 자체는 아니에요."
+          en: "{{pick.1|code}} is the <b>symbol</b>. It picks a side; it is not a value."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 기호냐 값이냐", en: "The sharpest spot — the symbol or the value" }
+          code:
+            - "name ?? \"손님\""
+            - "name ?? \"\"        // 채울 값만 다르다"
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>먼저 보는 쪽</b>입니다. 여기 값이 있으면 오른쪽은 아예 안 봐요."
+          en: "{{pick.2|code}} is the side <b>looked at first</b>. A value there means the right is never read."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 먼저냐 나중이냐", en: "The sharpest spot — first or fallback" }
+          code:
+            - "name ?? load()    // name 이 있으면 load 는 안 돈다"
+            - "load() ?? name"
+meaning:
+  - q:
+      ko: "값이 이미 없을 수 있는 사전에서 꺼낸 것에 이 기호를 한 번 쓰면 어떻게 될까요?"
+      en: "What comes out when this symbol is used once on a map whose values are themselves optional?"
+    options:
+      - t:
+          ko: "바깥 한 겹만 벗겨져 안쪽 「없음」이 결과가 된다"
+          en: "Only the outer layer peels and the inner absence becomes the result"
+      - t:
+          ko: "오른쪽 값이 나온다"
+          en: "The right-hand value comes out"
+        diag:
+          t:
+            ko: "그 답은 겹이 하나일 때 참입니다. 두 겹이면 바깥이 「있음」이라 오른쪽까지 안 가고, 실측으로 결과가 「없음」이에요."
+            en: "That holds for one layer. With two the outer is present, so the right is never reached — measured, the result is absence."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 한 겹이냐 두 겹이냐", en: "The sharpest spot — one layer or two" }
+            code:
+              - "x[\"k\"] ?? 7        // 한 겹이면 7"
+              - "y[\"k\"] ?? 7        // 두 겹이면 nil"
+      - t:
+          ko: "두 겹이 한 번에 벗겨진다"
+          en: "Both layers peel at once"
+        diag:
+          t:
+            ko: "한 번에 한 겹입니다. 두 겹을 벗기려면 기호를 두 번 쓰거나 사이에 값을 하나 더 적어야 해요."
+            en: "One layer per use. Peeling two means writing the symbol twice, or a value in between."
+      - t:
+          ko: "빌드가 멈춘다"
+          en: "The build stops"
+        diag:
+          t:
+            ko: "멈추지 않습니다 — 타입이 맞아떨어져서 조용히 도는 것이 이 자리의 위험이에요."
+            en: "It does not stop — the types line up, and running quietly is exactly the danger here."
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 왼쪽이 비었을 때 <b>오른쪽 값으로 채웁니다</b>."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>fills with the right value</b> when the left is empty."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "??", mono: true }
+      - t: "||"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>참·거짓</b>을 잇는 기호입니다. 양쪽이 참·거짓이어야 해서 없을 수 있는 값에 쓰면 빌드가 멈춰요."
+            en: "That joins <b>truth values</b>. Both sides must be truth values, so on a possibly-absent value the build stops."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 없음이냐 거짓이냐", en: "The sharpest spot — absence or falsehood" }
+            code:
+              - "name ?? \"손님\"    // 없을 때 채운다"
+              - "isOn || isReady    // 참·거짓끼리"
+      - t: "?."
+        mono: true
+        diag:
+          t:
+            ko: "이건 없을 수 있는 값을 <b>건너뛰는</b> 기호입니다. 채우지 않고, 결과가 여전히 물음표를 답니다."
+            en: "That <b>skips</b> a possibly-absent value. It fills nothing, and the result still carries the mark."
+      - t: "!"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>있다고 보증하는</b> 기호입니다. 없으면 채우는 게 아니라 그 줄에서 죽어요."
+            en: "That <b>guarantees presence</b>. When absent it does not fill — it dies on that line."
+why_gate:
+  q:
+    ko: "이 기호는 왜 <b>한 겹만</b> 벗길까요?"
+    en: "Why does this symbol peel <b>only one layer</b>?"
+  choices:
+    - t:
+        ko: "겹마다 채울 값이 다를 수 있어서, 몇 겹을 벗길지는 적는 사람이 정해야 하기 때문"
+        en: "Because each layer may want a different fallback, so how many peel is the writer's choice"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 두 겹을 벗기려면 무엇을 적어야 하는지도 적어 보세요."
+        en: "That is the direction. Say what has to be written to peel two, too."
+    - t:
+        ko: "여러 겹을 한 번에 벗기면 느려서"
+        en: "Because peeling many at once is slow"
+      ok: false
+      fb:
+        ko: "속도 문제가 아닙니다. 겹마다 다른 값을 채울 수 있다는 것이 이유예요."
+        en: "Speed is not it. Different fallbacks per layer are."
+    - t:
+        ko: "두 겹짜리가 실제로는 안 생겨서"
+        en: "Because two layers never really happen"
+      ok: false
+      fb:
+        ko: "생깁니다 — 값이 이미 없을 수 있는 사전이 그 자리예요."
+        en: "They do — a map whose values are already optional is exactly that place."
+queries:
+  - { grammars: [swift], file: ./nil-coalescing.scm }
+examples:
+  - code: "let shown = name ?? \"손님\""
+    expect: { sites: 1, form: coalesce, hole: "??", picks: { 1: "??", 2: "name", 3: "\"손님\"" } }
+  - code: "let n = count ?? 0"
+    expect: { sites: 1, form: coalesce, hole: "??", picks: { 1: "??", 2: "count", 3: "0" } }
+  - code: "let ok = isOn || isReady"
+    expect: none

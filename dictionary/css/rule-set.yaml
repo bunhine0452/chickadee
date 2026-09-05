@@ -1,0 +1,130 @@
+schema: 1
+id: css/rule-set
+universal: null
+name: { ko: 어디에 무엇을 적용할지, en: Rule set }
+token: "{"
+grammars: [css, vue_style]
+framework: null
+essential: true
+difficulty: 2
+prereq: [css/declaration]
+confusions: []
+dict:
+  one_liner:
+    ko: "어디에 적용할지 고르고, 무엇을 적용할지 묶어 둔다."
+    en: "Chooses where it applies, and holds what to apply."
+  why:
+    ko: >-
+      앞부분은 이름이 아니라 <b>조건</b>입니다. 「이 조건에 맞는 것 전부」라는 뜻이라, 지금 화면에
+      몇 개가 걸리는지는 <b>이 파일만 봐서는 모릅니다</b>. 그리고 여러 규칙이 같은 것을 가리킬 수
+      있어요 — 그때는 더 <b>구체적인</b> 조건이 이기고, 구체성이 같으면 <b>뒤에</b> 적은 것이
+      이깁니다. 「분명히 적었는데 안 먹는다」의 나머지 절반이 여기입니다.
+    en: >-
+      The front is not a name but a <b>condition</b>: everything matching it. How many things that
+      is right now <b>cannot be read from this file alone</b>. And several rules may point at the
+      same thing — then the more <b>specific</b> condition wins, and between equals the <b>later</b>
+      one does. That is the other half of “I wrote it and it does nothing”.
+  trace:
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 무엇에 적용할지 고른다."
+      en: "{{pick.1|code}} chooses what it applies to."
+    - ko: "{{pick.2|code}} 안의 줄이 고른 것 전부에 적용된다."
+      en: "The lines inside {{pick.2|code}} apply to all of them."
+    - ko: "같은 것을 가리키는 다른 규칙이 있으면 구체성과 순서로 갈린다."
+      en: "If another rule points at the same thing, specificity and order decide."
+rule:
+  ko: "<b>앞부분은 이름이 아니라 조건이다.</b> 겹치면 더 구체적인 것이, 같으면 뒤엣것이 이긴다."
+  en: "<b>The front is a condition, not a name.</b> More specific wins; between equals, the later."
+result:
+  label: { ko: "{{pick.1}} 에 걸리는 것", en: "whatever matches {{pick.1}}" }
+  value: "{{pick.1}}"
+  note: { ko: "몇 개인지는 이 파일로 모른다", en: "how many is not knowable here" }
+ok:
+  ko: "{{pick.1|code}} 에 걸리는 것 전부가 이 묶음을 받습니다. 하나일 수도 여럿일 수도 있어요."
+  en: "Everything matching {{pick.1|code}} takes this block — one thing, or many."
+payoff:
+  ko: "이걸 알면 「왜 저기까지 바뀌었지」가 풀립니다 — 조건이 생각보다 넓게 걸린 겁니다."
+  en: "This untangles “why did that change too” — the condition reached wider than you meant."
+bridge:
+  ko: "코드에서 이름은 하나를 가리킵니다. CSS 의 앞부분은 <b>조건</b>이라 몇 개든 가리킵니다."
+  en: "In code a name points at one thing. This front is a <b>condition</b> and points at any number."
+misconceptions:
+  - ko: "앞부분은 이름이라 하나만 걸린다 — 조건이라 맞는 것 전부가 걸립니다."
+    en: "The front is a name and matches one — it is a condition and matches all."
+  - ko: "먼저 적은 규칙이 이긴다 — 구체성이 같을 때는 <b>뒤엣것</b>이 이깁니다."
+    en: "The earlier rule wins — between equal specificity the <b>later</b> one does."
+  - ko: "규칙을 지우면 그 모양이 사라진다 — 다른 규칙이 같은 것을 가리키고 있었다면 그것이 드러납니다."
+    en: "Delete a rule and the look goes — if another rule pointed there, it surfaces instead."
+no_hole_reason: >-
+  뚫을 자리가 선택자인데 그 글자가 사용처마다 다르다(`.card`·`#main`·`button:hover`). 빈칸형은 첫 보기가 구멍 원문과 같아야 해서(`t0-blank` 의 검사) 보기 넷을 사전에 고정할 수 없다. 그리고 이 개념이 묻는 것은 낱말이 아니라 **얼마나 넓게 걸리는가**라 뜻 고르기가 맞다.
+meaning:
+  - q:
+      ko: "{{pick.1|code}} 에 걸리는 것이 화면에 <b>셋</b>이라면 이 묶음은 몇 번 적용될까요?"
+      en: "If <b>three</b> things on screen match {{pick.1|code}}, how many times does this block apply?"
+    hint:
+      ko: "앞부분은 이름이 아니라 <b>조건</b>입니다."
+      en: "The front is a <b>condition</b>, not a name."
+    options:
+      - t: { ko: "셋 다 — 조건에 맞는 것 전부에 적용된다", en: "All three — it applies to everything that matches" }
+      - t: { ko: "한 번 — 처음 걸린 것에만", en: "Once — only the first match" }
+        diag:
+          t:
+            ko: "「처음 하나」라는 규칙이 없습니다. 조건에 맞으면 <b>전부</b> 받아요 — 그래서 좁게 적는 것이 중요합니다."
+            en: "There is no “first one” rule. <b>Everything</b> matching takes it, which is why writing narrowly matters."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 하나냐 전부냐", en: "The sharpest spot — one or all" }
+            code:
+              - ".card { }   /* 카드가 셋이면 셋 다 */"
+              - "#main { }   /* id 는 보통 하나 */"
+      - t: { ko: "정해지지 않는다 — 브라우저마다 다르다", en: "It is unsettled — browsers differ" }
+        diag:
+          t:
+            ko: "이건 브라우저가 정하는 것이 아니라 <b>규칙에 적혀 있는</b> 것입니다. 조건에 맞는 것 전부예요."
+            en: "This is not up to the browser; it is <b>written in the rule</b>. Everything that matches."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 규칙이냐 구현이냐", en: "The sharpest spot — the rule or the implementation" }
+            code:
+              - "조건에 맞는 것 전부 — 명세다"
+              - "브라우저가 고르지 않는다"
+      - t: { ko: "셋 중 마지막 것에만", en: "Only the last of the three" }
+        diag:
+          t:
+            ko: "「뒤엣것이 이긴다」는 <b>규칙끼리</b> 겹칠 때의 이야기입니다. 걸리는 대상 사이에는 순서가 없어요."
+            en: "“The later one wins” is about <b>rules</b> overlapping. Among matched things there is no order."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 규칙 순서냐 대상 순서냐", en: "The sharpest spot — rule order or target order" }
+            code:
+              - "규칙 둘이 겹치면 → 뒤엣것"
+              - "대상이 셋이면 → 셋 다"
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 <b>이 조건</b>으로 골랐을까요?"
+    en: "Why does line {{site.line}} choose with <b>this condition</b>?"
+  choices:
+    - t:
+        ko: "이 모양을 받아야 할 것만 딱 걸리게 하려고 — 넓으면 엉뚱한 것까지 바뀐다"
+        en: "So only what should take this look is matched — wider, and other things move too"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 조건을 한 단계 넓히면 무엇이 더 걸리는지도 적어 보세요."
+        en: "That is the direction. Say what else gets caught if the condition widens by one step."
+    - t:
+        ko: "짧게 쓰려고"
+        en: "To keep it short"
+      ok: false
+      fb:
+        ko: "짧은 조건은 대개 <b>더 넓게</b> 걸립니다. 길이는 고르는 이유가 아니에요."
+        en: "A shorter condition usually reaches <b>wider</b>. Length is not the reason."
+    - t:
+        ko: "CSS 가 조건을 요구해서"
+        en: "Because CSS demands a condition"
+      ok: false
+      fb:
+        ko: "요구하는 것은 맞지만 <b>어느 조건인지</b>는 안 정해 줍니다. 그것이 이 줄의 선택이에요."
+        en: "It does demand one, but not <b>which</b>. That is this line's choice."
+queries:
+  - { grammars: [css, vue_style], file: ./rule-set.scm }
+examples:
+  - code: ".card { color: red; }"
+    expect: { sites: 1, form: rule, picks: { 1: ".card", 2: "{ color: red; }" } }
+  - code: "@media print { }"
+    expect: none

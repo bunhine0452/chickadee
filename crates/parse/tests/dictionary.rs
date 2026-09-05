@@ -108,6 +108,52 @@ fn there_is_at_least_one_language_to_check() {
     );
 }
 
+/// `_lang.yaml` 의 `grammar_abi` 가 실제로 링크된 문법의 ABI 와 같은가.
+///
+/// 이 값이 틀려도 앱은 **안 터진다** — `ingest.ts` 의 사전 판 캐시 키에만 쓰여서 캐시가
+/// 조용히 거짓말할 뿐이다. 그래서 시험이 유일한 방벽이고, 없는 동안 실제로 틀려 있었다:
+/// `ts/_lang.yaml` 이 `15` 하나를 적어 뒀는데 셋 중 `javascript` 에만 맞았다
+/// (typescript·tsx 는 14). 값을 정하는 것은 언어가 아니라 `Cargo.lock` 이 고정한 크레이트다.
+#[test]
+fn declared_grammar_abi_matches_the_linked_grammar() {
+    #[derive(Deserialize)]
+    struct Meta {
+        grammars: Vec<String>,
+        grammar_abi: BTreeMap<String, usize>,
+    }
+    let linked: BTreeMap<String, usize> = chickadee_parse::languages()
+        .into_iter()
+        .map(|l| (l.grammar, l.abi))
+        .collect();
+
+    for lang in langs() {
+        let dir = root().join(&lang);
+        let meta: Meta = serde_yaml::from_str(
+            &std::fs::read_to_string(dir.join("_lang.yaml")).expect("_lang.yaml"),
+        )
+        .expect("meta");
+
+        for grammar in &meta.grammars {
+            // 이 빌드에 안 들어온 문법(피처 off)은 견줄 것이 없다.
+            let Some(abi) = linked.get(grammar) else {
+                continue;
+            };
+            assert_eq!(
+                meta.grammar_abi.get(grammar),
+                Some(abi),
+                "{lang}/_lang.yaml: {grammar} 의 grammar_abi 가 {:?} 인데 링크된 문법은 {abi} 다",
+                meta.grammar_abi.get(grammar),
+            );
+        }
+        for g in meta.grammar_abi.keys() {
+            assert!(
+                meta.grammars.contains(g),
+                "{lang}/_lang.yaml: grammar_abi 에 grammars 밖의 {g} 가 있다",
+            );
+        }
+    }
+}
+
 #[test]
 fn every_system_query_compiles_for_every_grammar_of_its_language() {
     #[derive(Deserialize)]
@@ -150,31 +196,70 @@ fn every_concept_query_compiles_for_the_grammars_it_claims() {
     }
 }
 
+/// A query with its `;` comments and `"…"` string literals blanked out — only the query
+/// syntax is left, so an `@` in a comment (`@GetMapping`) or an anonymous node (`"@"`, the
+/// Python decorator sign) is not mistaken for a capture name.
+fn syntax_only(scm: &str) -> String {
+    let mut out = String::with_capacity(scm.len());
+    let mut in_string = false;
+    let mut in_comment = false;
+    let mut escaped = false;
+    for c in scm.chars() {
+        if in_comment {
+            if c == '\n' {
+                in_comment = false;
+                out.push(c);
+            }
+            continue;
+        }
+        if in_string {
+            if escaped {
+                escaped = false;
+            } else if c == '\\' {
+                escaped = true;
+            } else if c == '"' {
+                in_string = false;
+            }
+            continue;
+        }
+        match c {
+            ';' => in_comment = true,
+            '"' => in_string = true,
+            _ => out.push(c),
+        }
+    }
+    out
+}
+
 #[test]
 fn every_capture_name_is_one_the_pipeline_knows() {
     let allowed = regex_lite::Regex::new(CAPTURE).expect("regex");
+    let mut bad = Vec::new();
     for (file, concept) in concepts() {
         for entry in &concept.queries {
-            let scm = scm_of(&file, &concept, entry);
+            let scm = syntax_only(&scm_of(&file, &concept, entry));
             for name in scm.match_indices('@').filter_map(|(at, _)| {
                 scm[at + 1..]
                     .split(|c: char| !(c.is_ascii_alphanumeric() || c == '.' || c == '_'))
                     .next()
             }) {
-                assert!(
-                    allowed.is_match(name),
-                    "{}: @{name} 은 규약 밖이다",
-                    concept.id
-                );
+                if !allowed.is_match(name) {
+                    bad.push(format!("{}: @{name} 은 규약 밖이다", concept.id));
+                }
             }
         }
     }
+    assert!(bad.is_empty(), "{}", bad.join("\n"));
 }
 
 /// A pattern that matches nothing in any of its own examples is dead — that is the
 /// shape a silent grammar break takes (03 §5.1).
+/// Every mismatch at once, not the first one — ten languages share this test and one red
+/// golden must not hide the next ninety. The default panic hook still prints each mismatch
+/// as it happens (silencing it would also silence the other tests running alongside).
 #[test]
 fn no_pattern_is_dead_and_every_example_matches_what_it_says() {
+    let mut failures: Vec<String> = Vec::new();
     for (file, concept) in concepts() {
         if concept.examples.is_empty() {
             continue;
@@ -186,16 +271,32 @@ fn no_pattern_is_dead_and_every_example_matches_what_it_says() {
             for example in &concept.examples {
                 let caps = run(grammar, &concept.id, &scm, &example.code);
                 let sites = caps.iter().filter(|c| c.name == "site").count();
-                check(&concept.id, example, sites, &caps);
+                let outcome =
+                    std::panic::catch_unwind(|| check(&concept.id, example, sites, &caps));
+                if let Err(payload) = outcome {
+                    let msg = payload
+                        .downcast_ref::<String>()
+                        .cloned()
+                        .or_else(|| payload.downcast_ref::<&str>().map(|s| (*s).to_owned()))
+                        .unwrap_or_else(|| "(panic)".to_owned());
+                    failures.push(msg);
+                }
                 positive += sites;
             }
-            assert!(
-                positive > 0,
-                "{} ({grammar}): 어떤 예시에서도 매치가 없다 — 죽은 패턴이다",
-                concept.id
-            );
+            if positive == 0 {
+                failures.push(format!(
+                    "{} ({grammar}): 어떤 예시에서도 매치가 없다 — 죽은 패턴이다",
+                    concept.id
+                ));
+            }
         }
     }
+    assert!(
+        failures.is_empty(),
+        "골든 {}건이 어긋난다:\n\n{}",
+        failures.len(),
+        failures.join("\n\n")
+    );
 }
 
 fn check(id: &str, example: &Example, sites: usize, caps: &[Capture]) {

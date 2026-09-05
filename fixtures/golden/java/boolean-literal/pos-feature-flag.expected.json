@@ -1,0 +1,54 @@
+[
+  {
+    "queryId": "java/boolean-literal",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": null,
+    "startLine": 4,
+    "startCol": 30,
+    "endLine": 4,
+    "endCol": 35,
+    "nodeKind": "false",
+    "inError": false
+  },
+  {
+    "queryId": "java/boolean-literal",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": null,
+    "startLine": 4,
+    "startCol": 30,
+    "endLine": 4,
+    "endCol": 35,
+    "nodeKind": "false",
+    "inError": false
+  },
+  {
+    "queryId": "java/boolean-literal",
+    "matchId": 2,
+    "patternIndex": 0,
+    "name": "site",
+    "form": null,
+    "startLine": 7,
+    "startCol": 23,
+    "endLine": 7,
+    "endCol": 27,
+    "nodeKind": "true",
+    "inError": false
+  },
+  {
+    "queryId": "java/boolean-literal",
+    "matchId": 2,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": null,
+    "startLine": 7,
+    "startCol": 23,
+    "endLine": 7,
+    "endCol": 27,
+    "nodeKind": "true",
+    "inError": false
+  }
+]

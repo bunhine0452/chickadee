@@ -30,7 +30,8 @@ Chickadee 설계 문서 6편 중 다섯 번째. **목업 두 장(`design/ink-hom
 
 ### 1.2 Tauri 통합
 
-- `apps/desktop/src-tauri/tauri.conf.json` 핵심값: `app.windows[0]` = `{ width: 1360, height: 860, minWidth: 1000, minHeight: 680, visible: false, backgroundColor: "#D9CDB4", title: "Chickadee" }`. `visible:false` 로 만들고 폰트가 준비된 뒤 `getCurrentWindow().show()` 를 부른다(§10 FOUT). `backgroundColor` 는 `--desk` 와 같아야 야간반에서 흰 플래시가 없다(테마를 SQLite 에서 읽기 전 첫 프레임은 밝은 종이색 — 허용).
+- `apps/desktop/src-tauri/tauri.conf.json` 핵심값: `app.windows[0]` = `{ width: 1360, height: 860, minWidth: 1000, minHeight: 680, visible: false, backgroundColor: "#D9CDB4", title: "Chickadee", titleBarStyle: "Overlay", hiddenTitle: true }`. `visible:false` 로 만들고 폰트가 준비된 뒤 `getCurrentWindow().show()` 를 부른다(§10 FOUT). `backgroundColor` 는 `--desk` 와 같아야 야간반에서 흰 플래시가 없다(테마를 SQLite 에서 읽기 전 첫 프레임은 밝은 종이색 — 허용).
+- **창 크로뮴** (D126). `titleBarStyle: "Overlay"` + `hiddenTitle` 은 **macOS 전용**이고, 웹뷰가 제목 표시줄 자리까지 그린다 — 종이·책상 색이 창 끝까지 간다. 그 자리를 비우는 것은 CSS 한 벌이다: `main.tsx` 가 macOS 에서 `<html data-chrome="overlay">` 를 세우고, `styles/app.css` 가 `--chrome-top: 28px`(그 외 OS 는 `0px`) 로 `body` 에 위 여백을 준다. `position: fixed` 라 그 여백을 못 받는 세션 오버레이(`.proof`)만 `inset` 을 직접 받는다. 창을 잡아 끄는 자리는 `index.html` 의 `.chrome-drag`(`data-tauri-drag-region`) 한 줄이고, `#root` 밖에 있어 화면이 바뀌어도 그대로다. Windows·Linux 는 시스템 표시줄을 그대로 쓴다.
 - IPC 는 01 의 `@chickadee/ipc-client` 로만 부른다. `@tauri-apps/api/core` import 는 `packages/ipc-client` 밖에서 린트 금지(`no-restricted-imports: @tauri-apps/api/core`). 명령 이름(`repo_list`·`ingest_start`·`store_query`·`store_batch` 등)과 페이로드는 `01-architecture.md` 가 소유한다. 이 문서에서 `session.save()` · `session.resume()` · `home.load()` 처럼 점으로 적은 것은 **`apps/desktop/src/data/*.ts` 의 리포지토리 함수**로, `ipc.store.query/batch` 와 01 §3.4 statement 이름을 통해 `02` 의 `session`·`session_item` 테이블을 읽고 쓴다 — 전용 명령이 아니다.
 - 플러그인: `plugin-dialog`(리포 폴더 선택) · `plugin-clipboard-manager`(사다리 4단 「복사」 — WKWebView 의 `navigator.clipboard` 는 사용자 제스처 밖에서 거부된다) · `plugin-opener`(외부 입문 자료 링크) · `plugin-log`(성능 측정값을 파일로). `plugin-store` 는 쓰지 않는다 — 설정도 SQLite 한 곳.
 - CSP 는 `06` 소관이지만 프런트 전제는 이것: `default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; worker-src 'self' blob:`(06 §4.3 에 `worker-src` 가 반영됐다). `'unsafe-inline'` 은 Monaco 가 인라인 스타일을 주입하기 때문이고, 우리 코드는 인라인 `style=` 를 **CSS 변수 주입(`--w`, `--p`, `--tilt`) 에만** 쓴다.
@@ -40,7 +41,7 @@ Chickadee 설계 문서 6편 중 다섯 번째. **목업 두 장(`design/ink-hom
 | 항목 | 예산 | 비고 |
 |---|---|---|
 | 앱 JS (Monaco 제외) | ≤ 350 KB | React 19 + Zustand + 앱 코드. 초과 시 빌드 실패 |
-| Monaco 청크 | ≤ 1.2 MB, **T1 판을 걸 때 `import()`** | 홈·T0·T2 는 Monaco 를 내려받지 않는다 |
+| Monaco 청크 | ≤ 1.2 MB, **T1 문제를 걸 때 `import()`** | 홈·T0·T2 는 Monaco 를 내려받지 않는다 |
 | CSS | ≤ 60 KB | 목업 CSS 전량 ≈ 48 KB(비압축) |
 | 폰트 | ≤ 9 MB(비압축) | §1.4. 설치본 크기이지 로드 시간이 아니다. **실측 2.0 MB**(9파일, D55) |
 | 첫 화면(홈) 인터랙티브 | ≤ 400 ms (창 표시 후) | §10 |
@@ -53,7 +54,7 @@ Chickadee 설계 문서 6편 중 다섯 번째. **목업 두 장(`design/ink-hom
 |---|---|---|---|---|
 | IBM Plex Sans KR | `--f-ui` 본문·UI | 400 · 500 · 600 · 700 | `github.com/IBM/plex` 릴리스 zip 의 `woff2/` | SIL OFL 1.1, RFN "Plex" |
 | IBM Plex Mono | `--f-mono` 코드·라벨·큐 | 400 · 500 · 600 · 700 | 위와 동일 | SIL OFL 1.1 |
-| Black Han Sans | `--f-poster` 워드마크·판 번호·큰 숫자 | 400 | `github.com/google/fonts/ofl/blackhansans` | SIL OFL 1.1, RFN "Black Han Sans" |
+| Black Han Sans | `--f-poster` 워드마크·단원 번호·큰 숫자 | 400 | `github.com/google/fonts/ofl/blackhansans` | SIL OFL 1.1, RFN "Black Han Sans" |
 
 규칙:
 - **서브셋 없이 원본을 그대로 동봉한다.** Plex 두 벌은 IBM/plex 릴리스의 `fonts/complete/woff2/` 원본 woff2 다. Black Han Sans 는 상류에 woff2 가 없어 TTF 를 컨테이너만 woff2 로 바꿔 넣는다 — 글리프·`name` 테이블 불변이라 서브셋이 아니다(D55). OFL 은 수정본(서브셋 포함)에 예약 서체명(RFN)을 금지한다 — 이름을 바꾸면 `font-family` 토큰이 갈라지고, 사용자 코드 주석의 희귀 한글이 폴백 서체로 섞인다. 9 파일 실측 2.0 MB 는 설치본이 감당한다.
@@ -78,16 +79,16 @@ Chickadee 설계 문서 6편 중 다섯 번째. **목업 두 장(`design/ink-hom
 
 ### 2.1 화면 목록
 
-| id | 이름 (은유 = 평문) | 목업 근거 | 내용 |
+| id | 이름 | 목업 근거 | 내용 |
 |---|---|---|---|
-| `home` | 경로 홈 = 내 리포의 기능 지도 | `ink-home.html` | 마스트헤드(로고·작업 지시서·리포 전환·스위치 2) · 오늘의 인쇄(시간 비례 큐 + 목록 + 「인쇄 시작」) · 잉크 겹 척도 · 다시 찍을 개념 · 판이 없는 문법 · 대지(시트) 목록 · 미조판 예고 · 14일 컬러 바 |
-| `session` (오버레이) | 교정쇄 = 오늘의 세션 | `ink-session.html` | 작업 띠(큐·남은 시간·나가기) + 작업대(교정지 한 장). T0/T1/T2 판, 사다리, LIFER 베일, 인쇄 완료 요약 |
-| `ingest` | 판 짜기 = 리포 읽는 중 | 없음 (신규) | 단계 4 = Rust `walk·parse·git·write` 를 「git 읽기」「파싱」 2칸으로, TS 파생 `derive`·`cards` 를 「개념 추출」「판 짜기」 2칸으로. blame 은 배경(표시 없음). **시간 비례 큐 컴포넌트로 재사용**해 표시. 스피너 금지. 취소 가능. 끝나면 `home` |
-| `repos` | 서가 = 등록한 리포 전부 | 없음 (신규) | 리포마다 카드 한 장: 이름 · 경로 · 상태 배지(`ok`·`missing`·`detached`) · 마지막 읽기 · 개념 수 · 겹 평균 · 오늘 만기. 목록은 `repo.overview` **한 번**으로 긷는다 — `listRepos()` 는 상태를 알려고 리포마다 `repo_probe` 를 부르므로 목록이 리포 수에 비례해 느려진다. 폴더가 아직 있는지는 **그린 뒤에** 확인해 `missing` 으로 고친다. 「리포 추가」는 첫 실행과 같은 폴더 대화상자고, `missing` 이면 「위치 알려주기」가 `relocateRepo` 를 부른다(첫 커밋이 다르면 거절). 「목록에서 빼기 / 전부 지우기」는 모달 없이 카드 안에서 **2단**으로 묻고, `purge` 여도 **카드는 은퇴만** 한다 — `review_log.card_id` 가 NOT NULL 이라 지우면 학습 기록이 끊긴다(D31). 확인 문구가 그 사실을 말한다. 여는 문은 마스트헤드 스위처의 「전부 보기」와 설정 「리포」 절 둘이다 (D119) |
-| `first-run` | 첫 실행 · 빈 상태 | 없음 (신규) | 리포가 0개: 로고 배지 + 한 문단 + **0단계 언어 고르기(한국어/English, D117)** + 「리포 등록」 버튼 하나. 고른 값은 `settings.locale` 로 그 자리에서 내려간다 — DB 는 `boot.ts` 가 리포 0개에서도 열어 둔다. 리포는 있는데 판이 0개(커밋 2개짜리 리포 등): 홈의 대지 자리에 `Forecast` 변형 「이 리포로는 T2 를 짤 수 없습니다 — 커밋 N개」 |
+| `home` | 홈 — 내 리포의 기능 지도 | `ink-home.html` | 마스트헤드(로고·오늘 요약·리포 전환·스위치 2) · 오늘 할 것(시간 비례 큐 + 목록 + 「학습 시작」) · 숙련도 척도 · 다시 풀 개념 · 아직 안 배운 문법 · 단원 목록 · 아직 못 만든 문제 예고 · 14일 컬러 바 |
+| `session` (오버레이) | 오늘 학습 — 하루 세션 | `ink-session.html` | 진행 띠(큐·남은 시간·나가기) + 작업대(문제 한 장). T0/T1/T2 문제, 사다리, 채점 결과(판정 · 첫 기록), 학습 완료 요약 |
+| `ingest` | 리포 읽는 중 | 없음 (신규) | 단계 4 = Rust `walk·parse·git·write` 를 「git 읽기」「파싱」 2칸으로, TS 파생 `derive`·`cards` 를 「개념 추출」「문제 만들기」 2칸으로. blame 은 배경(표시 없음). **시간 비례 큐 컴포넌트로 재사용**해 표시. 스피너 금지. 취소 가능. 끝나면 `home` |
+| `repos` | 서가 — 등록한 리포 전부 | 없음 (신규) | 리포마다 카드 한 장: 이름 · 경로 · 상태 배지(`ok`·`missing`·`detached`) · 마지막 읽기 · 개념 수 · 평균 숙련도 · 오늘 만기. 목록은 `repo.overview` **한 번**으로 긷는다 — `listRepos()` 는 상태를 알려고 리포마다 `repo_probe` 를 부르므로 목록이 리포 수에 비례해 느려진다. 폴더가 아직 있는지는 **그린 뒤에** 확인해 `missing` 으로 고친다. 「리포 추가」는 첫 실행과 같은 폴더 대화상자고, `missing` 이면 「위치 알려주기」가 `relocateRepo` 를 부른다(첫 커밋이 다르면 거절). 「목록에서 빼기 / 전부 지우기」는 모달 없이 카드 안에서 **2단**으로 묻고, `purge` 여도 **카드는 은퇴만** 한다 — `review_log.card_id` 가 NOT NULL 이라 지우면 학습 기록이 끊긴다(D31). 확인 문구가 그 사실을 말한다. 여는 문은 마스트헤드 스위처의 「전부 보기」와 설정 「리포」 절 둘이다 (D119) |
+| `first-run` | 첫 실행 · 빈 상태 | 없음 (신규) | 리포가 0개: 로고 배지 + 한 문단 + **0단계 언어 고르기(한국어/English, D117)** + 「리포 등록」 버튼 하나. 고른 값은 `settings.locale` 로 그 자리에서 내려간다 — DB 는 `boot.ts` 가 리포 0개에서도 열어 둔다. 리포는 있는데 문제가 0개(커밋 2개짜리 리포 등): 홈의 단원 자리에 `Forecast` 변형 「책임 배치 문제는 아직 만들 수 없습니다 — 커밋 N개」 |
 | `newcomer` | 「프로그래밍이 처음」 안내 | `discussion` §1·§4 | 02/03 이 「바닥 아래 바닥」으로 판정하면 홈 상단에 정직한 안내 시트: 이 앱이 못 하는 것 · 외부 입문 자료 링크(`plugin-opener`) · 「그래도 계속」. 게이트가 아니라 안내 |
-| `settings` | 설정 | 없음 (신규) | **표시 언어(한국어/English, D117)** · 주간/야간/시스템 · 부속 숨김 · 모션 감축(시스템 따름/항상) · 하루 분량 10~25분 · LLM 키(선택, 저장은 `06`) · 문법 사전 언어(**끈 언어는 새 판에서만 빠진다**, D122) · **제외 글롭**(기본 목록에 더해진다, 03 §1.2 · D122) · 내 커밋 identity(`email·name` 목록, **커밋 author 상위 5명**을 첫 열기 때 자동 제안 — `git config` 는 읽지 않는다, D121 · 03 §1.2. 목록을 고치면 재인제스트 없이 `git_commit.kind`·`author_matched` 만 다시 쓴다) · 데이터 위치 · 서체 고지 |
-| `clone` | 클론 코스 = 리포 하나를 순서대로 통째로 필사 | 없음 (신규) | 왼쪽 목차(대지 → 파일 → 조각, 조각별 상태·진행률) + 오른쪽 판. 판은 세션의 T1 컴포넌트를 **조립해서** 쓰되 세션의 `T1Plate` 를 통째로 쓰지는 않는다 — `gradeCourseStep` 이 「왜」 답과 이의를 받지 않으므로 그 둘은 없다(D125). **오버레이가 아니라 홈을 대신하는 화면**이고 Esc 는 「저장 후 나가기」 한 겹이다. 진입 셋: 홈 대지 카드 「이 대지 통째로 필사」 · 마스트헤드 「코스」 · 서가 카드. 빈 상태는 코스가 서지 않는 이유를 셋으로 갈라 말한다. 페이딩은 2단계(뼈대만)가 기본이고 대표 개념이 겹 3 이상이면 3단계(백지) — 1단계는 코스에 없다 (D120) |
+| `settings` | 설정 | 없음 (신규) | **표시 언어(한국어/English, D117)** · 밝게/어둡게/시스템 · 장식 숨김(기본 숨김, D179) · 모션 감축(시스템 따름/항상) · 하루 분량 10~25분 · LLM 키(선택, 저장은 `06`) · 문법 사전 언어(**끈 언어는 새 문제에서만 빠진다**, D122) · **제외 글롭**(기본 목록에 더해진다, 03 §1.2 · D122) · 내 커밋 identity(`email·name` 목록, **커밋 author 상위 5명**을 첫 열기 때 자동 제안 — `git config` 는 읽지 않는다, D121 · 03 §1.2. 목록을 고치면 재인제스트 없이 `git_commit.kind`·`author_matched` 만 다시 쓴다) · 데이터 위치 · 서체 고지 |
+| `clone` | 클론 코스 — 리포 하나를 순서대로 통째로 필사 | 없음 (신규) | 왼쪽 목차(단원 → 파일 → 조각, 조각별 상태·진행률) + 오른쪽 문제. 문제는 세션의 T1 컴포넌트를 **조립해서** 쓰되 세션의 `T1Plate` 를 통째로 쓰지는 않는다 — `gradeCourseStep` 이 「왜」 답과 이의를 받지 않으므로 그 둘은 없다(D125). **오버레이가 아니라 홈을 대신하는 화면**이고 Esc 는 「저장 후 나가기」 한 겹이다. 진입 셋: 홈 단원 카드 「이 단원 통째로 필사」 · 마스트헤드 「코스」 · 서가 카드. 빈 상태는 코스가 서지 않는 이유를 셋으로 갈라 말한다. 페이딩은 2단계(뼈대만)가 기본이고 대표 개념이 숙련도 3단계 이상이면 3단계(백지) — 1단계는 코스에 없다 (D120) |
 
 ### 2.2 라우팅 = 상태, 라우터 없음
 
@@ -98,27 +99,28 @@ interface UiSlice { screen: Screen; session: SessionState | null; lifer: LiferCa
 
 - **세션 오버레이는 라우트가 아니라 상태다.** `session !== null` 이면 `SessionOverlay` 가 `position:fixed; inset:0` 으로 홈 위에 얹히고 홈 DOM 은 `inert` 가 된다. 왜: 라우터를 쓰면 브라우저 히스토리(뒤로가기)가 생기는데 데스크톱 앱엔 뒤로가기가 없고, Esc 의 주인이 둘이 된다(모달 지옥의 시작).
 - URL 쿼리는 **부팅 시 한 번만** 읽는다: `?dev=1`(검수 패널·`window.__audit`) · `?screen=settings` · `?session=fixture:run08&at=3`(E2E 전용, `import.meta.env.DEV` 에서만).
-- 화면 전환 시 포커스: `home` → `main[tabindex=-1]`, `session` 열림 → 교정지 `article.ps[tabindex=-1]`, 닫힘 → 열었던 버튼(「인쇄 시작」 또는 노드 상세의 「이 판 찍기」)으로 복원. 복원 대상은 `ui.returnFocusId` 에 저장.
+- 화면 전환 시 포커스: `home` → `main[tabindex=-1]`, `session` 열림 → 문제 `article.ps[tabindex=-1]`, 닫힘 → 열었던 버튼(「학습 시작」 또는 개념 상세의 「이 문제 풀기」)으로 복원. 복원 대상은 `ui.returnFocusId` 에 저장.
 
 ### 2.3 전체화면 세션의 이탈 규칙 (§3.4 를 코드로)
 
 `SessionOverlay` 가 `keydown` 캡처 단계에서 Esc 를 **유일하게** 처리한다.
 
-1. `document.activeElement` 가 `textarea`/`input`/Monaco 이면 → `blur()` 만 하고 끝(입력을 빠져나온다).
-2. LIFER 베일이 열려 있으면 → 베일만 닫는다(아무 키나 닫힘의 일부).
-3. 사다리(`ReprintLadder`)가 열려 있고 **포커스가 사다리 안**이면 → 사다리를 접고 포커스를 「모르겠어요」 버튼으로.
-4. 그 외 → `session.persist()` 후 즉시 `ui.session = null`. **확인 모달 없음.** 토스트 「세션에서 나왔습니다. 진행은 저장됐습니다. 돌아오면 N번째 판부터」.
+0. `.monaco-editor .suggest-widget.visible` 이 있으면 → **아무것도 하지 않고 지나간다**. 뒤이어 버블 단계에서 Monaco 가 자기 제안 위젯을 닫는다 (D143). 이 단이 없으면 캡처 리스너가 위젯보다 먼저 돌아 위젯이 열린 채 Esc 를 누른 학습자가 에디터 밖으로 튕긴다.
+1. `document.activeElement` 가 `textarea`/`input`/Monaco 이면 → 오버레이 자신으로 포커스를 옮기고 끝(입력을 빠져나온다. `blur()` 하지 않는다 — D111).
+2. 사다리(`ReprintLadder`)가 열려 있고 **포커스가 사다리 안**이면 → 사다리를 접고 포커스를 「모르겠어요」 버튼으로.
+3. 그 외 → `session.persist()` 후 즉시 `ui.session = null`. **확인 모달 없음.** 토스트 「세션에서 나왔습니다. 진행은 저장됐습니다. 돌아오면 N번째 문제부터」.
 
-1~3 은 "한 번에 한 겹만 벗긴다"이고, 목업의 `if (typing) blur` 를 두 겹 더 늘린 것이다. 「나가기」 버튼은 4 만 부른다.
+0~2 는 "한 번에 한 겹만 벗긴다"이고, 목업의 `if (typing) blur` 를 두 겹 더 늘린 것이다. 「나가기」 버튼은 3 만 부른다. **LIFER 는 여기 없다** — 베일이 아니라 채점 결과 안의 기록이라 벗길 겹이 아니다 (D131).
 
 ### 2.4 창 크기 · 다중 리포
 
-- (확정 — 00 D11) 최소 1000×680. 근거: T1 `.split` 은 `minmax(300px,1fr) 2px minmax(300px,1fr)` + 레일 46 + 패딩으로 860px 교정지가 필요하고, 작업 띠는 1080px 아래에서 2행으로 접힌다(목업 미디어 쿼리). 680 아래에서는 판정란 예약(118px)까지 보이지 않는다.
+- (개정 — D182) 최소 **720×600**. D11 의 1000×680 은 「T1 `.split` 이 두 단을 고집한다」는 전제 위에 있었고, 좁은 폭에서 단을 쌓는 규칙이 그 전제를 없앴다. 1440 폭 화면의 반쪽이 720 이라 그보다 크면 반쪽 타일링에서 창이 안 줄어든다. 옛 근거: T1 `.split` 은 `minmax(300px,1fr) 2px minmax(300px,1fr)` + 레일 46 + 패딩으로 860px 문제 폭이 필요하고, 진행 띠는 1080px 아래에서 2행으로 접힌다(목업 미디어 쿼리). 680 아래에서는 채점 결과 예약(118px)까지 보이지 않는다.
 - **리포를 다루는 길은 둘이다** (D119). 빠른 쪽이 마스트헤드의 스위처, 관리하는 쪽이 `repos` 화면(서가)이다. 홈은 그대로 활성 리포 하나만 본다.
 - 리포 전환: 마스트헤드 「리포」 칸이 `RepoSwitcher`(`button[aria-haspopup=listbox]` + `ul[role=listbox]`). 방향키 · Home · End 로 짚고 Enter 로 고르며 Esc 는 목록만 닫고 포커스를 칸으로 돌린다. 포커스는 `ul` 하나에 있고 어느 줄인지는 `aria-activedescendant` 가 말한다. 목록 끝의 「전부 보기」가 서가를 연다. **세션 중에는 전환 불가**(작업 띠에 리포명만).
 - 전환은 `repo.activeId` 만 바꾸고 `home` 을 비운다 — 홈이 `home.load(repoId)` 를 다시 부른다. 화면 상태는 파생 캐시라 부분 갱신보다 통째로 버리는 편이 싸고 틀릴 자리가 없다(§3). 진행 중 세션은 리포별로 저장되므로 다른 리포로 갔다 와도 이어 찍힌다.
 - 진입: 리포가 0개면 `first-run`, 1개 이상이면 **마지막으로 본 리포**의 홈으로 곧장 간다(`settings.lastRepoId`. 그 리포가 목록에 없으면 첫 줄). 저장은 `activeId` 가 바뀌는 자리 한 곳에서만 한다 — 스위처·서가·첫 등록이 모두 그리로 지나간다. 서가는 **스스로 열리지 않는다** — 스위처의 「전부 보기」나 설정 「리포」 절에서만 연다. 마지막 리포를 지우면 `setRepos` 가 다시 `first-run` 으로 떨어뜨린다.
 - 리포를 **추가하는 문은 서가 하나**다. 첫 리포를 넣고 나면 `first-run` 이 다시 뜨지 않으므로, 서가가 없으면 둘째 리포를 넣을 자리도 옮긴 리포를 다시 붙일 자리도 없다.
+- 그 문에는 **길이 둘** 있다 (D129): 폴더 고르기와 **git 주소**. 주소 쪽은 `CloneField` 한 컴포넌트이고 첫 실행 화면과 서가가 같은 것을 쓴다 — 리포가 이 컴퓨터에 아직 없을 수 있고, 그때 「먼저 터미널에서 클론해 오세요」는 이 앱이 없애려던 걸음이다. 받을 **부모 폴더**를 고르게 하고 그 아래 주소 끝 이름으로 받는다(받은 코드가 사용자가 아는 자리에 남아야 지우는 것도 사용자가 할 수 있다). 받은 뒤는 폴더를 고른 길과 한 줄도 다르지 않다 — `addRepo` 가 등록하고 인제스트 화면이 열린다. 진행률은 없다: 끝났나·실패했나 둘뿐이고, 그 다음은 시간 비례 큐가 말한다.
 
 ---
 
@@ -154,11 +156,11 @@ interface SessionSlice {
 }
 ```
 
-- **세션 저장/복구**(목업 `persist/restore` 승격): `session.save()` 를 (a) 판을 걸 때 (b) 채점 직후 (c) 큐가 바뀔 때 (d) 5초 tick 마다 (e) Esc 로 나갈 때 부른다. 저장 형태는 `02` 의 `session` 행 + `session_item` 행(`state_json` 에 그 판의 선택·사다리 단·T1 초안·`elapsed_s`) — `SessionSlice` 는 그 두 테이블의 메모리 사본이고 `slice ↔ rows` 변환은 `src/data/session.ts` 한 곳. 홈 진입 시 `session.resume(repoId)` 가 오늘의 미완 세션을 돌려주면 「인쇄 시작」이 「이어 찍기 · N번째 판부터」가 된다. 요약의 「오늘 판 다시 보기」는 `review_log` 를 읽기 전용으로 다시 그린다. `?reset=1` 은 DEV 전용.
-- **낙관적 갱신은 세션 안에서만**(write-behind). 홈은 하지 않는다 — 세션이 닫힐 때 `home.load` 를 다시 부르는 편이 대지 40장의 부분 갱신 버그보다 싸다.
-- 판정은 `@chickadee/grading`(`gradeT0`), 겹·큐 삽입(`pos+3`)·FSRS 는 `@chickadee/scheduler`(`applyOutcome`·`insertRetry`). 프런트는 `grading.gradeT0(card, choice)` → `scheduler.applyOutcome(mastery, outcome)` 순으로 부르고 결과를 store 에 넣은 뒤 IPC 로 저장한다. 규칙은 `02`·`04` 소관. **목업과 다름**: `t0.js:146` 은 다시 찍기 판 정답에도 `+1겹` 을 표시하지만 앱은 02 §3.3(회복만)을 따른다. `gain` 문구(「잉크 N겹 · 다음 인쇄 …」)는 `applyOutcome` 결과로만 그린다.
-- 타이머 `useSessionClock`: `document.visibilityState !== 'visible'` 이면 세지 않는다. 1초 tick 은 `session.elapsed[pos]` 만 바꾸고 구독자는 `TimeQueue`·남은 시간 텍스트 둘뿐이라 교정지는 리렌더되지 않는다(선택자로 보장, 테스트 고정).
-- 테마/부속/모션 설정은 SQLite `settings` 가 진실, 부팅 첫 프레임용으로 `localStorage['ink.theme'|'ink.trim']` 에 **읽기 전용 거울**만 둔다(목업 `bindSwitch` 키 이름 유지).
+- **세션 저장/복구**(목업 `persist/restore` 승격): `session.save()` 를 (a) 문제를 걸 때 (b) 채점 직후 (c) 큐가 바뀔 때 (d) 5초 tick 마다 (e) Esc 로 나갈 때 부른다. 저장 형태는 `02` 의 `session` 행 + `session_item` 행(`state_json` 에 그 판의 선택·사다리 단·T1 초안·`elapsed_s`) — `SessionSlice` 는 그 두 테이블의 메모리 사본이고 `slice ↔ rows` 변환은 `src/data/session.ts` 한 곳. 홈 진입 시 `session.resume(repoId)` 가 오늘의 미완 세션을 돌려주면 「학습 시작」이 「이어 풀기 · N번째 문제부터」가 된다. 요약의 「오늘 문제 다시 보기」는 `review_log` 를 읽기 전용으로 다시 그린다. `?reset=1` 은 DEV 전용.
+- **낙관적 갱신은 세션 안에서만**(write-behind). 홈은 하지 않는다 — 세션이 닫힐 때 `home.load` 를 다시 부르는 편이 단원 40개의 부분 갱신 버그보다 싸다.
+- 판정은 `@chickadee/grading`(`gradeT0`), 겹·큐 삽입(`pos+3`)·FSRS 는 `@chickadee/scheduler`(`applyOutcome`·`insertRetry`). 프런트는 `grading.gradeT0(card, choice)` → `scheduler.applyOutcome(mastery, outcome)` 순으로 부르고 결과를 store 에 넣은 뒤 IPC 로 저장한다. 규칙은 `02`·`04` 소관. **목업과 다름**: `t0.js:146` 은 다시 푸는 문제의 정답에도 `+1단계` 를 표시하지만 앱은 02 §3.3(회복만)을 따른다. `gain` 문구(「숙련도 N단계 · 다음 복습 …」)는 `applyOutcome` 결과로만 그린다.
+- 타이머 `useSessionClock`: `document.visibilityState !== 'visible'` 이면 세지 않는다. 1초 tick 은 `session.elapsed[pos]` 만 바꾸고 구독자는 `TimeQueue`·남은 시간 텍스트 둘뿐이라 문제 화면은 리렌더되지 않는다(선택자로 보장, 테스트 고정).
+- 테마/장식/모션 설정은 SQLite `settings` 가 진실, 부팅 첫 프레임용으로 `localStorage['ink.theme'|'ink.trim']` 에 **읽기 전용 거울**만 둔다(목업 `bindSwitch` 키 이름 유지).
 
 ---
 
@@ -166,7 +168,7 @@ interface SessionSlice {
 
 ### 4.1 토큰 표 (`styles/tokens.css` — 목업 `:root` / `[data-theme="dark"]` 전량)
 
-| 토큰 | 주간반 | 야간반 | 용도 | 텍스트 |
+| 토큰 | 밝게 | 어둡게 | 용도 | 텍스트 |
 |---|---|---|---|---|
 | `--desk` / `--desk-2` | #D9CDB4 / #CFC1A6 | #0B0908 / #050403 | body 배경 (책상) | ✗ |
 | `--paper` | #F7F1E3 | #1F1915 | 마스트헤드·대지·작업 띠·판정란 | 바탕 |
@@ -204,7 +206,7 @@ interface SessionSlice {
 | `--f-ui` · `--f-mono` · `--f-poster` | §1.4 스택 | 동일 | 서체 | — |
 | `--e-hop` · `--e-settle` · `--e-soft` | cubic-bezier 3종 | 동일 | 이징 | — |
 
-대비 수치는 이 문서를 쓰며 토큰값으로 직접 계산한 것이다(WCAG 2 상대 휘도). `--glow-*` 는 목업에서 야간반에만 정의돼 주간반에서 `var()` 가 무효값이 된다 — 주간반에 `transparent` 로 정의해 둔다.
+대비 수치는 이 문서를 쓰며 토큰값으로 직접 계산한 것이다(WCAG 2 상대 휘도). `--glow-*` 는 목업에서 어두운 테마에만 정의돼 밝은 테마에서 `var()` 가 무효값이 된다 — 밝은 테마에 `transparent` 로 정의해 둔다.
 
 ### 4.2 별칭 · 활자 · 행 길이 강제
 
@@ -213,22 +215,22 @@ interface SessionSlice {
 - **`--measure` 강제 선택자**는 목업 그대로: `p, li, dd, blockquote, .prose { max-width: var(--measure) }`, 해제는 `.u-nomeasure` 로만. 추가로 `.ask`·`.note`·`.fb p`·`.rung-body p` 는 이미 `p` 라 자동 적용. 코드 판(`.code`)·표·지도는 `p` 가 아니므로 자유.
 - `html{word-break:keep-all; line-break:strict; overflow-wrap:break-word}` 와 `code,kbd,pre{word-break:normal}` 은 `styles/reset.css` 에 그대로.
 
-### 4.3 주간반/야간반 · 부속 숨김 · 인쇄 물리 범위
+### 4.3 밝게/어둡게 · 장식 숨김 · 인쇄 물리 범위
 
-- 테마는 `<html data-theme="light|dark">` 하나로만 바뀐다(`system` 이면 `matchMedia` 구독). 야간반은 반전이 아니라 다른 공정이므로 **`[data-theme="dark"]` 선택자는 `tokens.css` 와 글로우가 필요한 6개 컴포넌트에만** 허용(Stylelint `chickadee/dark-selector-allowlist`: PressButton · Switch · TimeQueue · Node · Stamp · Crumb).
-- 부속 숨김 `<html data-trim="on">` 은 등록표시 · 기울기(`--tilt/--rot/--dy`) · 결 · 어긋남 · 절취선 · 도장 회전만 끈다. **텍스트·레이아웃은 1px 도 바뀌지 않는다** — Playwright 가 on/off 의 텍스트 박스 좌표를 비교해 고정한다. Linux(WebKitGTK)는 `data-trim` 기본 `on`(D12); macOS·Windows 는 `off`.
-- 인쇄 물리(`.mr` · `.grain` · `mix-blend-mode`)는 **본문 단 밖에만**: 워드마크 · 판 번호 `.sig` · `Stamp` · 마스트헤드/대지/작업 띠 바탕 결. `.ps-in` 하위(`.ask` `.fb` `.code` `.rung-body` `.drow`)에서 선언하면 Stylelint 오류. 왜: §6 ①이 리뷰어 눈이 아니라 린트에 있어야 3주 뒤에도 산다.
+- 테마는 `<html data-theme="light|dark">` 하나로만 바뀐다(`system` 이면 `matchMedia` 구독). 어두운 화면은 반전이 아니라 다른 팔레트이므로 **`[data-theme="dark"]` 선택자는 `tokens.css` 와 글로우가 필요한 6개 컴포넌트에만** 허용(Stylelint `chickadee/dark-selector-allowlist`: PressButton · Switch · TimeQueue · Node · Stamp · Crumb).
+- 장식 숨김 `<html data-trim="on">` 은 등록표시 · 기울기(`--tilt/--rot/--dy`) · 결 · 판번호 어긋남 · 절취선 · 도장 회전만 끈다. **텍스트·레이아웃은 1px 도 바뀌지 않는다** — Playwright 가 on/off 의 텍스트 박스 좌표를 비교해 고정한다. **기본값은 모든 플랫폼에서 `on`(꺼짐)이다** (D179 — `data/settings.ts` 의 `defaultTrim()`). D12 가 플랫폼으로 갈랐던 근거는 성능이었으나, 이제 근거는 화면의 주인이 누구냐다 — 코드와 다이어그램이 가장 큰 요소여야 하고 장식은 본문 단 밖에만 둔다. 켜고 싶은 사람이 스위치를 켠다. 스위치와 `applyTrim` 은 그대로다.
+- 인쇄 물리(`.mr` · `.grain` · `mix-blend-mode`)는 **본문 단 밖에만**: 워드마크 · 단원 번호 `.sig` · `Stamp` · 마스트헤드/단원/진행 띠 바탕 결. `.ps-in` 하위(`.ask` `.fb` `.code` `.rung-body` `.drow`)에서 선언하면 Stylelint 오류. 왜: §6 ①이 리뷰어 눈이 아니라 린트에 있어야 3주 뒤에도 산다.
 
 ---
 
 ## 5. 컴포넌트 목록
 
-디렉터리: `apps/desktop/src/components/{primitives,dee,plate,shell,home,session,t1,t2}`. 클래스명은 목업 그대로 두되 충돌 2건만 바꾼다 — 홈 `.ladder`(잉크 겹 척도) → `.inkscale`, 세션 `.ladder`(다시 찍기 사다리) → `.reprint`.
+디렉터리: `apps/desktop/src/components/{primitives,dee,plate,shell,home,session,t1,t2}`. **클래스명·컴포넌트 파일명은 목업 그대로 둔다** — D178 이 바꾼 것은 화면 문구뿐이고 `.ps`·`InkScale`·`ReprintLadder` 같은 이름은 이력이다. 충돌 2건만 바꾼다 — 홈 `.ladder`(숙련도 척도) → `.inkscale`, 세션 `.ladder`(다시 풀기 사다리) → `.reprint`.
 
 | 목업 클래스 | 컴포넌트 | props (핵심) | 상태 | 역할·접근성 | 키보드 |
 |---|---|---|---|---|---|
 | `.pill` | `Pill` | `track?`, `ghost?` | — | 텍스트 | — |
-| `.passes` `.n-pass` | `Passes` | `n: InkLayer`, `track` | — | `role=img` `aria-label="N겹"` | — |
+| `.passes` `.n-pass` | `Passes` | `n: InkLayer`, `track` | — | `role=img` `aria-label="숙련도 N단계"` | — |
 | `kbd.k` | `Kbd` | `keys: string` | — | `<kbd>` | — |
 | `.press-btn` | `PressButton` | `tone:'pink'\|'blue'`, `kbd?`, `disabled` | hover/active/`down`(제출 거부 때 120ms) | `<button>` | Enter/Space |
 | `.flat-btn` `.dunno` | `FlatButton` | `ghost?`, `variant:'dunno'`, `on?` | on | `<button>`; dunno 는 `aria-pressed` | Enter/Space |
@@ -244,25 +246,29 @@ interface SessionSlice {
 | `.dee` `.dee-sticker` | `Dee` | `ly`, `symbol:'badge'\|'bird'\|'head'`, `size`, `motion?`, `sticker?` | hop/tilt/hang/peek/lifer | `aria-hidden` (§6) | — |
 | `.masthead` `.ticket` | `Masthead` | `repo`, `todayMins`, `streak`, `avgLy` | — | `<header>` | — |
 | `.jobband` | `JobBand` | `runNo`, `repo`, `queue`, `pos`, `elapsed` | — | `<header aria-label="작업 띠">` | — |
-| `.jq` `.queue` | `TimeQueue` | `items`, `pos`, `progress`, `labels?`, `compact?` | now/done/skip/review | `role=img aria-label`(순서·비율 문장) | — |
+| `.jq` `.queue` | `TimeQueue` | `items`, `pos`, `progress`, `labels?`, `compact?` | now/done/skip/review | `role=img aria-label`(순서·비율 문장) | 높이 18px, 아직 안 지난 칸은 빗금 (D127 — 목업의 14px·`opacity:.3` 을 벗어난다) |
 | `.board` `.legend` | `Board`, `Legend` | — | — | `<main>`, 범례 `aria-label` | — |
-| `.panel` | `Panel` | `title`, `plain`, `tag?` | — | `<section aria-labelledby>` | — |
-| `.today-n` `.qlist` `.stampcard` | `TodayPanel`, `StampCard` | `today`, `streak`, `days` | — | 연속 인쇄는 숫자만(연출 없음) | Enter=인쇄 시작 |
+| `.panel` | `Panel` | `title`, `plain`, `tag?`, `collapsible?`, `defaultOpen?` | — | `<section aria-labelledby>`, 접이식이면 머리가 `<button aria-expanded aria-controls>` 이고 속은 `hidden` 으로만 덮인다 (D133) | — |
+| `.today-n` `.qlist` `.stampcard` | `TodayPanel`, `StampCard` | `today`, `streak`, `days` | — | 연속 학습은 숫자만(연출 없음) | Enter=학습 시작 |
 | `.inkscale`(구 `.ladder`) | `InkScale` | `counts:number[5]` | — | `role=img` | — |
 | `.conc` `.cn` | `ConceptList` | `rows` | soon | `<ul aria-label>` | — |
-| `.gaps` `.gap` | `GapsPanel` | `gaps`, `onMake` | hot | 「판 만들기」 `<button>` | — |
-| `.panel.locked` | `LockedPanel` | `title`, `body` | — | `<section aria-labelledby>`; 「판이 없는 문법」 옆. T1 후보가 0이면 뜨고, 열리면 사라진다 (D96) | — |
-| `.sheet` `.sheet-head` | `Sheet` | `no`, `title`, `meta`, `state:'done'\|'current'\|'locked'`, `avgLy`, `tilt` | — | `<article aria-labelledby>` | — |
-| `.rail` `.ps-rail` | `InkRail` | `ly`, `label`, `plus?` | plus on | `aria-hidden` (겹은 `Passes`·텍스트가 전달) | — |
+| `.gaps` `.gap` | `GapsPanel` | `gaps`, `onMake` | hot | 「문제 만들기」 `<button>` | — |
+| `.panel.locked` | `LockedPanel` | `title`, `body` | — | `<section aria-labelledby>`; 「아직 안 배운 문법」 옆. T1 후보가 0이면 뜨고, 열리면 사라진다 (D96) | — |
+| `.sheet-index` `.sx` | `SheetIndex` | `sheets`, `selected`, `onSelect` | — | `role=tablist` · 칩은 `role=tab` (roving tabindex), 잘리는 이름 대신 `aria-label` 이 단원 번호·이름·진행을 든다 (D133) | `← →` 이동·자동 활성 · `Home`/`End` |
+| `.sx-zero` | `SheetIndex` | `sheet.zero` | — | 0장 칩 — 번호 자리가 「0장」이고 **번호를 먹지 않는다**(`sheetNo()` 가 0장을 건너뛰어 첫 진짜 단원이 언제나 1단원이다). 색은 주지 않는다: 트랙 색은 의미가 정해져 있고 0장은 트랙이 아니다 (D136) | 다른 칩과 같다 |
+| `.prereq-preview` | `PrereqRung` | `row.state==='preview'` · `row.previewSiteId` | — | 합성 문제의 예고 한 줄 (D137 · 방안 E-4). `.note` 를 물려받아 `--measure` 36em 이다. **`previewSiteId` 가 없으면 그리지 않는다** — 예고할 자리가 없는 합성은 만들지 않는다. 이미 보고 온 개념도 되풀이하지 않는다. 개념 이름의 `<code>` 서식은 평문 문장에 넣기 전에 벗긴다 | 단추는 「가장 단순한 모양으로 먼저 보기」, 나머지는 `gap` 과 같다 |
+| `.sheet-lead` | `Sheet` | `sheet.zero` | — | 0장 도입 한 문단. `.note` 를 물려받아 `--measure` 36em·행간 1.7 이다. 몇 장이고 언제 끝나는지를 먼저 말하고, 끝나면 「언제든 다시 열 수 있습니다」로 바뀐다. 단원 머리의 `.sheet-meta` 도 0장에서는 경로·파일 수 대신 장수를 낸다 (D136) | — |
+| `.sheet` `.sheet-head` | `Sheet` | `no`, `title`, `meta`, `state:'done'\|'current'\|'locked'`, `avgLy`, `tilt` | — | `<article aria-labelledby>`, 색인이 고른 **한 장만** 그려지고 `role=tabpanel` 에 담긴다 (D133) | — |
+| `.rail` `.ps-rail` | `InkRail` | `ly`, `label`, `plus?` | plus on | `aria-hidden` (숙련도는 `Passes`·텍스트가 전달) | — |
 | `.node` | `Node` | `state`, `track`, `glyph`, `title`, `pass`, `seed`(dy/rot) | open | `<button aria-expanded>`; locked 는 `aria-disabled` (포커스 가능, 이유 설명). 잠긴 노드는 흔들지 않고 상세에 이유만 연다 | Enter/Space=상세 |
 | `.detail` | `NodeDetail` | `node`, `onGo`, `onClose` | open | `region`, 열리면 포커스 이동, Esc=닫기 | Esc |
 | `.guide` | `Guide` | `msg`, `motion` | — | `aria-hidden` | — |
 | `.forecast` | `Forecast` | `pending`, `variant:'later'\|'cannot'` | — | 텍스트 | — |
 | `.colorbar` `.cb` | `ColorBar` | `days14` | — | `role=img` + 셀 `title` | — |
-| `.proof` | `SessionOverlay` | store `session` | — | `role=dialog aria-modal=true aria-label="교정쇄"`, 홈 `inert`, Esc 주인 | §7 |
+| `.proof` | `SessionOverlay` | store `session` | — | `role=dialog aria-modal=true aria-label="오늘 학습"`, 홈 `inert`, Esc 주인 | §7 |
 | `.bench` | `Bench` | children | — | `<main>` 스크롤 컨테이너 | — |
 | `.ps` | `ProofSheet` | `no`, `track`, `concept`, `code`, `kind`, `source`, `ly:[from,to]`, `width:'normal'\|'wide'\|'xwide'`, `tilt` | sheetin .34s | `<article tabindex=-1>` 마운트 시 포커스 | — |
-| `.crumb` | `Crumb` | `depth:'아래층'\|'다시 찍기'`, `parent?`, `onBack?` | — | 텍스트 + 「위로」 버튼 | B |
+| `.crumb` | `Crumb` | `depth: 'prereq'\|'reprint'`(문구는 `session.rolePrereq`·`session.roleRetry`), `parent?`, `onBack?` | — | 텍스트 + 「위로」 버튼 | B |
 | `.ask` | `Ask` | `q`, `hint` | hint 갱신 | `<p>` (measure 적용) | — |
 | `.code` `.ln` | `CodePlate` | `lines: PlateLine[]`, `pickable?`, `selected?`, `verdict?` | pickable→graded | 보통 `<div>`; pickable 이면 `role=radiogroup aria-label="짚을 곳"` | ←→ 1~4 |
 | `.tk` | `PickToken` | `k`, `label` | sel/right/wrong | `<button role=radio aria-checked>` | — |
@@ -273,7 +279,8 @@ interface SessionSlice {
 | `.acts` | `Acts` | `left`, `hint`, `right` | — | 동작 줄 | — |
 | `.reprint`(구 `.ladder`) | `ReprintLadder` | `rung`, `lyFrom`, `lyTo`, `card`, `prereqDone` | rung 1~4 | `<section aria-label>`; `.rungs role=tablist`, `.rung role=tab`, `.rung-body role=tabpanel` | §7 |
 | `.dict` `.prereq` `.uses` `.askbox` | `DictRung` `PrereqRung` `UsesRung` `AskRung` | `card`, `onJump`, `promptOut` | — | 점프 버튼·`textarea aria-label`·복사 | — |
-| `.lifer-veil` `.lifer-card` | `LiferVeil` | `card`, `serial`, `onClose` | typeout .56s | `role=dialog aria-label="처음 기록한 개념"`, 포커스 트랩(카드 자체), 아무 키·클릭 닫힘, 닫힐 때 포커스 복원 | any |
+| `.coach` | `CoachBand` | `step: 1\|2\|3` | — | `<aside aria-label="첫 문제 안내">`. 걸음은 사용자의 동작으로만 넘어간다 — 넘기기 버튼이 없다 (D134) | — |
+| `.lifer-note` | `LiferNote` | `concept`, `code`, `where`, `serial` | typeout .56s (지연 .7s) | `FeedbackSlot` 안의 블록 — 대화상자가 아니고 포커스를 뺏지 않는다 (D131) | — |
 | `.done-head` `.tally` `.shifts` `.lifer-box` `.streak-line` `.hintbox` | `Summary` | `results`, `mins`, `streak`, `lifer?`, `tomorrow` | — | `<article>` | Enter=홈 |
 | `.stepper` `.step` | `Stepper` | `stage` | done/cur | `role=list` | — |
 | `.split` `.ref` `.ph` | `SplitPane`, `RefPlate` | `original`, `stage`, `show`, `peek` | peek | 가려진 줄 `aria-hidden`; peek 는 시각 전용 | — |
@@ -294,10 +301,10 @@ interface SessionSlice {
 - **스프라이트 1회 인라인.** `design/src/ink/mascot.svg.html` 의 `<svg width=0>` 블록을 `apps/desktop/src/assets/mascot.svg` 로 복사(§12)하고, `DeeSprite` 가 `?raw` 로 읽어 `AppShell` 최상단에 `dangerouslySetInnerHTML` 로 한 번 박는다(이 파일 하나만 린트 allowlist). 외부 파일 `<use href="mascot.svg#dee">` 는 WKWebView 에서 CSS 변수가 심볼 안으로 상속되지 않아 **판 변수가 죽는다** — 인라인이 유일한 방법이다.
 - 심볼 3종 + 로고: `#dee`(배지: 스티커·레일·범례·요약·판정 gain) · `#deeBird`(길잡이·횃대) · `#deeHead`(16~20px 전용, 파비콘 창) · `#logo`(고정색, 마스트헤드 66px·작업 띠 46px·요약 84px). `Dee` 는 `size < 24` 이면 자동으로 `head` 심볼로 바꾼다(16px 전신 판독 불합격이 로고 검증 기록).
 - **판 변수**: `.dee{--lpaper --lk --lg --lb --lt --lp --ly}` 와 `.dee[data-ly="0..4"]` 오버라이드를 `dee/dee.css` 에 그대로. `Dee` 는 `data-ly` 속성만 바꾼다 — React 는 SVG 를 다시 그리지 않고 브라우저가 변수 재평가만 한다(테스트: `ly` 변경 시 `<use>` 노드 동일성 유지).
-- **동작 클래스** `hop 520ms` · `tilt 700ms` · `hang(transition .55s)` · `peek` · `lifer 1.35s`. `useDeeMotion(ref, motion)` 이 목업 `deeDo` 를 옮긴다: 클래스 전부 제거 → `void el.offsetWidth` → 추가. `motion` 이 같은 값으로 연속 오면 `nonce` 를 올려 재생.
-  - 720ms 예산: `hop`·`tilt`·`hang` 은 예산 안. `lifer` 1.35s 는 §3.9 의 명시 예외. `peek` 은 목업에서 `infinite` — **§3.7 「상시 애니메이션 금지」 위반이므로 `iteration-count: 2`(3.2s)로 바꾼다**(확정, D11).
-  - 감축 모드: `@media (prefers-reduced-motion) , [data-motion="reduce"]` 에서 `animation-duration:.001ms` 로 **전환만 제거**하고 `hang` 의 최종 포즈(`rotate(180deg) scaleX(-1)`)와 `tilt` 의 `-9deg` 는 남는다(`animation-fill-mode: both` 가 이미 그렇게 한다). `hop`·`lifer` 는 원위치가 최종 포즈라 감축 시 아무 일도 없다 — 대신 도장·live 문구가 정보를 나른다.
-  - **타이핑 중 모션 0**: `session.typing`(Monaco/textarea 포커스 여부)이 true 이면 `Dee` 는 `motion` prop 을 무시하고 `Guide` 는 말풍선 텍스트만 바꾼다. T1 편집 화면의 길잡이는 마운트 시 한 번만 말하고 채점 전까지 침묵(목업 `'필사 중엔 조용히 있을게요'`).
+- **마스코트는 움직이지 않는다** (정본 §7 · D179). 동작 클래스 다섯(`hop`·`tilt`·`hang`·`peek`·`lifer`)과 `useDeeMotion` 훅, 그리고 그 감축 모드 블록을 `dee/dee.css` 와 `Dee.tsx` 에서 통째로 지웠다. `Dee` 가 받는 것은 `ly`·`symbol`·`size`·`sticker` 넷뿐이고 `motion`·`nonce` prop 은 없다.
+  - 그래서 720ms 예산에도, §3.7 「상시 애니메이션 금지」에도 마스코트가 걸릴 자리가 없다. `peek` 의 `infinite` 를 2회로 유한화하던 D11 의 예외와 `lifer` 1.35s 의 §3.9 명시 예외는 **가리킬 클래스가 사라져 죽은 항목**이다(`tests/gates/design.spec.ts` 의 `MOTION_EXEMPT` 에서 뺐다. `scripts/check-motion.mjs` 의 `EXCEPTIONS` 두 줄도 같은 이유로 지울 것 — 게이트는 초록이지만 남겨 두면 다음 사람이 그 애니메이션이 있는 줄 안다).
+  - **서는 자리는 셋뿐이다** — 빈 상태 · 완료 화면 · 표지. 진도 표시로는 쓰지 않는다(정본 §7 개정) — 진도는 `Passes` 막대와 숫자가 말한다.
+  - 타이핑 중 모션 0 은 그대로 산다(§3.9). 마스코트가 빠졌으므로 남은 대상은 전환·강조뿐이다.
 
 ---
 
@@ -307,10 +314,10 @@ interface SessionSlice {
 
 | 문맥 | 키 | 동작 | 충돌 해결 |
 |---|---|---|---|
-| 홈 | `Enter` | 인쇄 시작 (포커스가 `main` 일 때만) | 버튼에 포커스면 그 버튼의 Enter |
+| 홈 | `Enter` | 학습 시작 (포커스가 `main` 일 때만) | 버튼에 포커스면 그 버튼의 Enter |
 | 홈 | `Esc` | 열린 노드 상세 닫기 → 토스트 닫기 | 세션 없음 |
 | 홈 · 노드 | `Enter`/`Space` | 상세 토글 | — |
-| 세션 공통 | `Esc` | §2.3 4단계 | 유일한 주인 = `SessionOverlay` |
+| 세션 공통 | `Esc` | §2.3 3단계 | 유일한 주인 = `SessionOverlay` |
 | 세션 공통 | `⌘/Ctrl+,` | 설정 (세션 밖에서만) | 세션 중 무시 |
 | T0 미답 | `1~4` | 보기/토큰 고르기 | 사다리가 열려 **포커스가 사다리 안**이면 단(rung) 선택. 그 외 항상 보기 (확정) |
 | T0 지목형 | `←` `→` | 토큰 옮기기 | 보기형에서는 `↑↓` 가 라디오 이동 |
@@ -320,7 +327,9 @@ interface SessionSlice {
 | T0 사다리 | `←` `→` · `Home`/`End` | 단(tab) 이동, `Enter`/`Space` 로 열기 | tablist 관례 |
 | T0 아래층 | `B` (`KeyB`) | 답하지 않고 위로 | 아래층 아닐 때 무시 |
 | T1 편집 | `Enter` (에디터 밖) | 에디터로 포커스 | — |
-| T1 편집 | `Tab` | 2칸 들여쓰기 (**3단계에선 자동 들여쓰기만 제거, Tab 은 유지**)(확정) | 포커스 이동은 `Esc` 후 `Tab` |
+| T1 편집 | `Tab` | 2칸 들여쓰기 (**3단계에선 자동 들여쓰기만 제거, Tab 은 유지**)(확정). 제안 위젯이 열려 있으면 대신 제안을 수락한다 (D143) | `addCommand(KeyCode.Tab, …, '!suggestWidgetVisible')` — 문맥을 안 넘기면 이 명령이 언제나 이겨 제안을 영영 못 받는다. 포커스 이동은 `Esc` 후 `Tab` |
+| T1 편집 | `Enter` (제안 위젯이 열린 채) | **줄바꿈.** 제안을 수락하지 않는다 | `acceptSuggestionOnEnter:'off'` + `acceptSuggestionOnCommitCharacter:false` (D143). Monaco 기본값 `'on'` 을 그대로 두면 필사 중 줄바꿈이 조용히 식별자로 바뀐다 |
+| T1 편집 | `Esc` (제안 위젯이 열린 채) | 위젯만 닫는다 | §2.3 ⓪ |
 | T1 편집 | `` ` `` (`Backquote`) 홀드 | 원본 잠깐 보기 (keyup·window blur 에 해제) | 3단계(백지)에도 허용 — 횟수만 기록 |
 | T1 편집 | `⌘/Ctrl+Enter` | 채점 | — |
 | T1 편집 | `⌘/Ctrl+.` | 한 단계 쉽게 | — |
@@ -330,22 +339,33 @@ interface SessionSlice {
 | T2 | `H` (`KeyH`) | 힌트 1→3 | — |
 | T2 지도 | `Tab`/`Shift+Tab` · `Enter`/`Space` | 노드 이동·토글 | — |
 | T2 채점 후 · 요약 | `Enter`/`Space` | 다음 / 홈으로 | — |
-| LIFER | 아무 키·클릭 | 닫기 (수식키 단독 제외) | Esc 도 닫기만 |
 
 포커스 규칙:
-- 교정지 마운트 → `article.ps` 로 포커스(스크롤 0). 채점 → 포커스는 그대로, **오버레이의 `.vh#live` 가 한 줄로 읽는다**(D114 — `FeedbackSlot` 은 `aria-live` 를 들지 않는다. 판정란 전문은 문구 규약의 60자를 넘고, 홈의 `.vh#live` 는 `aria-modal` 에 가려 세션 중에는 못 쓴다). 사다리 열림 → 현재 단 `tab` 으로. 아래층 점프 → 새 교정지. 복귀 → `LinkPara`. 요약 → 「홈으로」 버튼. 세션 닫힘 → `returnFocusId`.
+- 문제 마운트 → `article.ps` 로 포커스(스크롤 0). 채점 → 포커스는 그대로, **오버레이의 `.vh#live` 가 한 줄로 읽는다**(D114 — `FeedbackSlot` 은 `aria-live` 를 들지 않는다. 채점 결과 전문은 문구 규약의 60자를 넘고, 홈의 `.vh#live` 는 `aria-modal` 에 가려 세션 중에는 못 쓴다). 사다리 열림 → 현재 단 `tab` 으로. 아래층 점프 → 새 문제. 복귀 → `LinkPara`. 요약 → 「홈으로」 버튼. 세션 닫힘 → `returnFocusId`.
 - `SessionOverlay` 는 포커스 트랩(첫/마지막 탭 가능 요소에서 순환). `LiferVeil` 은 그 안의 2중 트랩.
 - 토스트·길잡이·도장은 절대 포커스를 받지 않는다.
 
-**aria-live 문구 규약**(`a11y/announce.ts`): 한 곳(`ui.live`), `polite` 만. 형식 = `[상태]. [수치]. [다음 행동]`, 60자 이내, 은유엔 평문 병기(「정합 — 맞았습니다. 잉크 3겹. Space 로 다음.」). HTML 태그 제거(목업 `plain()`), 같은 문장을 연속 낭독하려면 30ms 비웠다 다시 채운다(목업 `live()`). 호버 설명·타이머 갱신·토스트의 부제는 live 로 보내지 않는다.
+**aria-live 문구 규약**(`a11y/announce.ts`): 한 곳(`ui.live`), `polite` 만. 형식 = `[상태]. [수치]. [다음 행동]`, 60자 이내, **평문만**(「맞았습니다. 숙련도 3단계 · 다음 복습 9월 14일. Space 로 다음.」). 병기가 필요 없어진 것이 D178 이다 — 「정합 — 맞았습니다. 잉크 3겹」의 앞 절이 통째로 빠지면서 60자 예산도 늘었다. 수치 절은 `session-flow.ts` 의 `gainText` 가 만든다(카탈로그 밖의 유일한 낭독 문구다). HTML 태그 제거(목업 `plain()`), 같은 문장을 연속 낭독하려면 30ms 비웠다 다시 채운다(목업 `live()`). 호버 설명·타이머 갱신·토스트의 부제는 live 로 보내지 않는다.
 
 ---
 
 ## 8. Monaco 통합 (T1)
 
-- **로드**: `monaco-editor/esm/vs/editor/editor.api` + `basic-languages/{typescript,javascript,python,rust,swift,dart,sql}/*.contribution` 만. **언어 서비스 워커(`ts.worker`)는 싣지 않는다** — 자동완성·IntelliSense 는 필사의 목적을 무너뜨린다. 워커는 `editor.worker?worker` 하나, `self.MonacoEnvironment = { getWorker: () => new EditorWorker() }`. 전부 번들이라 오프라인. `ClonePad` 는 `React.lazy` 로 T1 판을 걸 때만 내려온다(§1.3).
-- **옵션 고정**(`t1/monacoOptions.ts`): `quickSuggestions:false, suggestOnTriggerCharacters:false, wordBasedSuggestions:'off', parameterHints:{enabled:false}, autoClosingBrackets:'never', autoClosingQuotes:'never', autoSurround:'never', formatOnType:false, minimap:{enabled:false}, folding:false, glyphMargin:false, lineDecorationsWidth:14, lineNumbersMinChars:3, renderLineHighlight:'gutter', scrollBeyondLastLine:false, wordWrap:'off', links:false, contextmenu:false, occurrencesHighlight:'off', selectionHighlight:false, renderWhitespace:'none', fontFamily:'IBM Plex Mono', fontSize:16, lineHeight:30, fontLigatures:false, tabSize:2, insertSpaces:true, unicodeHighlight:{ambiguousCharacters:false, nonBasicASCII:false}, accessibilitySupport:'auto', ariaLabel:'필사 입력'`. `unicodeHighlight` 를 끄지 않으면 **한국어 주석 전체에 노란 테두리**가 생긴다.
-- **단계별 차이**: 1·2단계 `autoIndent:'keep'`(목업의 `{([` 뒤 2칸 들여쓰기는 `'brackets'`), 3단계(백지) `autoIndent:'none'` — Tab 은 남긴다(들여쓰기 자체가 학습 대상이지 자동화가 대상). `Tab` 은 `editor.addCommand(KeyCode.Tab, () => insert('  '))` 로 고정해 포커스가 밖으로 나가지 않게 한다.
+- **로드**: `monaco-editor/esm/vs/editor/editor.api` + `basic-languages/{typescript,javascript,python,go,rust,sql,java}/*.contribution` 만 — **일곱이고, 이 목록이 곧 화면이 낼 수 있는 언어 id 의 전부다**(`monacoOptions.MONACO_LANGUAGES`). Swift·Dart 는 아직 없다(`m1-03-swift-dart-sql` 로 보류). 등록 안 된 id 로 `setModelLanguage` 를 부르면 모델이 조용히 plaintext 가 되므로, 확장자 표는 반드시 이 일곱 안에서만 값을 내야 한다 — `.tsx`·`.jsx` 는 `'tsx'` 가 아니라 **`'typescript'`** 다(Monaco 0.52 에 `'tsx'` 라는 id 는 없다). tree-sitter 문법 키(`session-flow.grammarOf`, D19)와는 **다른 표**이고, 두 표를 「같다」고 적어 둔 것이 그 버그의 출처였다. **언어 서비스 워커(`ts.worker`)는 싣지 않는다** (D143) — 워커 하나가 1,286,340 B gzip 으로 §1.3 의 Monaco 청크 예산을 넘고, 떼어낸 12~40줄 블록에서는 「Cannot find name」 융단밖에 못 내며, TS/JS 전용이라 「전 언어 지원」 위에 못 고칠 불균형을 얹는다. 워커는 `editor.worker?worker` 하나, `self.MonacoEnvironment = { getWorker: () => new EditorWorker() }`. 전부 번들이라 오프라인. `ClonePad` 는 `React.lazy` 로 T1 판을 걸 때만 내려온다(§1.3).
+- **옵션 고정**(`t1/monacoOptions.ts`) — **층에 따라 갈리지 않는 값만** 여기 있다: `parameterHints:{enabled:false}, formatOnType:false, acceptSuggestionOnEnter:'off', acceptSuggestionOnCommitCharacter:false, minimap:{enabled:false}, folding:false, glyphMargin:false, lineDecorationsWidth:14, lineNumbersMinChars:3, renderLineHighlight:'gutter', scrollBeyondLastLine:false, wordWrap:'off', links:false, contextmenu:false, occurrencesHighlight:'off', selectionHighlight:false, renderWhitespace:'none', fontFamily:'IBM Plex Mono', fontSize:16, lineHeight:30, fontLigatures:false, tabSize:2, insertSpaces:true, unicodeHighlight:{ambiguousCharacters:false, nonBasicASCII:false}, accessibilitySupport:'auto', ariaLabel:'필사 입력'`. `unicodeHighlight` 를 끄지 않으면 **한국어 주석 전체에 노란 테두리**가 생긴다. `acceptSuggestionOnEnter` 는 Monaco 기본값이 `'on'` 이라 **못 박지 않으면 필사 중 줄바꿈이 조용히 제안으로 바뀐다** — 수락은 `Tab` 하나로만 한다.
+- **단계별 차이 = 편집 보조 세 층**(D143). 규칙 한 줄: **학습자가 고르지 않은 텍스트를 만드는 보조는 단계와 함께 페이딩하고, 이미 고른 텍스트의 타건 수만 줄이는 보조는 페이딩하지 않는다.**
+
+  | 층 | 옵션 | 1단계 | 2단계 | 3단계(백지) |
+  |---|---|---|---|---|
+  | L0a 자동 들여쓰기 | `autoIndent` | `'brackets'` | `'brackets'` | `'none'` |
+  | L0b 자동 닫기·surround | `autoClosingBrackets`·`autoClosingQuotes`·`autoSurround` | `'languageDefined'` | `'languageDefined'` | `'never'` |
+  | L1 단어 기반 제안 | `wordBasedSuggestions:'currentDocument'` · `quickSuggestions:{other:true,comments:false,strings:false}` · `suggestOnTriggerCharacters` | 켬 | 켬 | 켬 |
+
+  코스 판(`CoursePlateView`)은 1단계가 없고 나머지는 같은 표를 쓴다. 세션 1단계는 `PlainPad`(textarea)라 **제안 위젯을 못 단다** — 그 비대칭은 D93 을 지키느라 남긴 것이고, 1단계는 원본이 `RefPlate` 에 펼쳐져 있어 제안이 할 일이 가장 적은 단계이기도 하다. L0a·L0b 를 3단계에서 끄는 근거는 실측이다: 이 리포를 표본으로 세면 「닫힘만 있는 줄」이 TS 비공백 줄의 12.5 %·Rust 15.9 %·Python 4.0 % 이고, 04 §4.6 의 분모가 비공백 줄이라 그 몫이 곧 에디터가 채우는 점수인데, 실제로 공짜인 단계는 3단계뿐이다(1단계는 원본이 옆에 있고, 2단계는 04 §3.2 유지 집합이 닫힘 줄을 이미 잉크로 준다). 그리고 겹 4 는 3단계 통과에서만 나온다. L1 을 페이딩하지 않는 근거도 실측이다: 25줄 창 안에서 식별자 타건의 43.7 %를 줄이면서 **최종 텍스트를 한 자도 바꾸지 않아** `pct` 가 구조적으로 불변이고, 정보량 상한이 「이미 이 버퍼에 있는 낱말」이라 백지에서도 새는 것이 없다(`'currentDocument'` 로 못 박는 이유 — `'matchingDocuments'` 이상은 나중에 원본 판이 Monaco 모델이 되는 날 원본을 그대로 제안한다).
+
+  `Tab` 은 `editor.addCommand(KeyCode.Tab, () => insert('  '), '!suggestWidgetVisible')` — **세 번째 인자가 없으면** 이 명령이 문맥 무관하게 언제나 이겨 제안을 수락할 길이 사라진다.
+- **설정 「편집 보조」**: `stage`(기본) / `off` 둘. `off` 는 0.1.0 까지의 동작 그대로다. 값은 `settings` 테이블의 `editor_assist` 키에 있고(`data/settings.ts`), 설정 화면의 문구가 무엇을 잃는지 적는다 — 끄면 타건 수만 늘 뿐 점수 계산은 불변이지만 **같은 85 %가 서로 다른 조건에서 나온 값**이 되므로 이의(04 §5)는 보조 상태별로 따로 모아야 한다.
+- **글자가 어디서 왔나** (D143): `AssistCount{keyed, assisted, pasted, accepted}` 를 `peeks` 와 **같은 자리·같은 규칙**으로 센다 — 감점 없음, 기록만, 스케줄러 신호. 분류는 `components/t1/assist.ts` 에 있고 **감사가 아니라 추정**이다(0.52 공개 d.ts 에 `onDidType` 이 없어 변경의 모양으로 가른다). `EdStatus` 가 「손으로 앉힌 글자 N %」 한 항목으로 낸다. 붙여넣기도 여기서 처음 세어진다 — 그전에는 3단계 백지에 원본을 ⌘V 로 통째로 넣어도 어디에도 남지 않았다.
 - **테마**: `monaco.editor.defineTheme('ink-light'|'ink-dark')` 를 `tokens.ts`(§12 생성물)에서 만든다. Monaco 는 hex 만 받으므로 CSS 변수를 못 쓴다 — 테마 전환 시 `setTheme` 재호출. 매핑: `keyword`→`--blue-text`(bold) · `string`→`--pink-text` · `number`→`--yellow-text` · `comment`→`--ink-soft`(italic) · `delimiter`→`--ink-soft` · `type`/`identifier` 호출→`--ink`(bold 불가, 기본) · 배경 `editor.background`=`--stock` · 거터 `editorLineNumber.foreground`=`--ink-soft` · `editorGutter.background`=`--paper-3` · 커서 `--ink` · 선택 `--paper-3`. `.code` 판과 같은 색이어야 좌우가 같은 종이로 보인다.
 - **줄 단위 판정 데코레이션**: `editor.createDecorationsCollection()` 하나. 각 줄에 `{ range: 줄, options: { linesDecorationsClassName: 'gl-tick gl-exact' | 'gl-equiv' | 'gl-differ', isWholeLine:false } }`. CSS `.gl-tick{width:3px; margin-left:4px; background:...}` 로 목업의 거터 틱(정합 진홍 · 동등 청 · 어긋남 황갈)을 그린다. 범례 `EdStatus` 에 텍스트 병기.
 - **줄을 벗어날 때만 판정**: `onDidChangeCursorPosition(e)` 에서 `e.position.lineNumber !== prevLine` 일 때만 `onLeaveLine(prevLine - 1, model.getLineContent(prevLine))` → `04` 의 `evalLine` → 틱 갱신. `e.reason === CursorChangeReason.ContentFlush`(전체 교체)는 무시. IME 조합 중(`editor.onDidCompositionStart/End` 사이)엔 판정 보류.
@@ -361,12 +381,12 @@ interface SessionSlice {
 
 | 규칙 | 강제 장치 | 실패 시 |
 |---|---|---|
-| 대비 7:1 (종이 위 텍스트), 4.5:1 (잉크 배지 위) | ① `scripts/check-contrast.mjs` — `tokens.css` 를 파싱해 텍스트 토큰 5 × 바탕 4 × 테마 2 = 40 쌍을 정적으로 계산, `on-t*`×`t*` 6 쌍은 4.5 기준 ② Playwright 후 `__audit.contrast()` 런타임 전수 | CI 실패. 현재 `--yellow-text`/`--paper-3` 6.82 가 걸린다 (열린 질문 1) |
+| 대비 7:1 (종이 위 텍스트), 4.5:1 (색 배지 위) | ① `scripts/check-contrast.mjs` — `tokens.css` 를 파싱해 텍스트 토큰 5 × 바탕 4 × 테마 2 = 40 쌍을 정적으로 계산, `on-t*`×`t*` 6 쌍은 4.5 기준 ② Playwright 후 `__audit.contrast()` 런타임 전수 | CI 실패. 현재 `--yellow-text`/`--paper-3` 6.82 가 걸린다 (열린 질문 1) |
 | 13px 하한 | ① Stylelint 리터럴 룰(§4.2) ② `__audit.fonts()` 를 **SVG `<text>` 포함**으로 확장(`getBoundingClientRect` 로 가시성 판정, `offsetParent` 사용 금지) | CI 실패 |
 | 본문 행 길이 — **로케일마다 다르다**(D117) | `__audit.measure()` 승격 → `tests/gates/measure.spec.ts`: `.ask`·`.note`·`.fb p`·`.rung-body p`·`.board-note` 각각 **`ko` 는 30 ≤ chars ≤ 45**(좁은 패널 노트는 22 이상 허용 목록), **`en` 은 45 ≤ chars ≤ 68**(좁은 패널 33) — 실제 서체 advance 로 실측(목업의 표본 문장 방식). 하네스가 `<html data-locale>` 을 읽어 어느 쪽을 걸지 고른다. en 숫자의 근거: 같은 `--measure` 에서 한글 1자 ≈ 라틴 1.5자 폭이라 30~45 를 환산하면 45~68 이고, 통상 권장 범위(45~75) 안에 든다 | CI 실패 |
 | 감축 모션 | `[data-motion="reduce"]` 를 설정과 `matchMedia` 로 결정, Playwright `reducedMotion:'reduce'` 로 최종 포즈 스냅샷 | 스냅샷 diff |
-| 스크린리더 | jsx-a11y 린트 + §7 문구 규약 단위 테스트(`announce()` 출력이 60자·태그 없음·마침표 형식) + Playwright 에서 `role=status` 텍스트 순서 검증 | 테스트 실패 |
-| 색맹 | 트랙 색은 항상 `T0/T1/T2` 라벨과 같이(`Pill`·`.tag`·범례) — `TimeQueue` 막대는 `role=img` 문장 + 아래 목록/라벨이 정보를 나르고, 판정 틱 3색은 `EdStatus` 텍스트 범례와 `.rtag` 글자 태그가 따로 있다. 린트: `Passes`·`TimeQueue` 를 라벨 없이 쓰면 타입 오류(`label` 필수 prop) | 타입 오류 |
+| 스크린리더 | jsx-a11y 린트 + §7 문구 규약 단위 테스트(`announce()` 출력이 60자·태그 없음·마침표 형식·**은유 낱말 0**) + Playwright 에서 `role=status` 텍스트 순서 검증 | 테스트 실패 |
+| 색맹 | 트랙 색은 항상 `T0/T1/T2` 라벨과 같이(`Pill`·`.tag`·범례) — `TimeQueue` 막대는 `role=img` 문장 + 아래 목록/라벨이 정보를 나르고, 판정 틱 3색은 `EdStatus` 텍스트 범례(같음 · 같은 뜻 · 다름)와 `.rtag` 글자 태그가 따로 있다. 린트: `Passes`·`TimeQueue` 를 라벨 없이 쓰면 타입 오류(`label` 필수 prop) | 타입 오류 |
 | 피드백 슬롯 0px | Playwright: 제출 전후 `.ask` 의 `boundingBox().y` 동일 | 테스트 실패 |
 | 포커스 유실 | Playwright 각 전환 뒤 `document.activeElement` 가 `body` 가 아님을 단언 | 테스트 실패 |
 
@@ -379,23 +399,23 @@ interface SessionSlice {
 | 항목 | 규칙 | 왜 |
 |---|---|---|
 | `filter` | **0개** (Stylelint 금지, `drop-shadow` 포함) | WebKit 은 filter 를 레이어마다 오프스크린 래스터. 목업이 이미 `box-shadow` 로 바꿨다 |
-| `backdrop-filter` | 0개 | LIFER 베일은 반투명 색만 |
-| `mix-blend-mode` | 화면당 ≤ 12 요소: 워드마크 2 · 시트 판번호 N · 도장 ≤ 2 · 결 ≤ 3. 대지 12장 이상이면 판번호 어긋남을 `[data-trim]` 과 무관하게 끈다 | 블렌드는 격리 그룹을 만들어 그 조상까지 합성 비용 |
+| `backdrop-filter` | 0개 | 반투명 겹을 쓰는 자리가 없다 (D131 로 LIFER 베일이 빠졌다) |
+| `mix-blend-mode` | 화면당 ≤ 12 요소: 워드마크 2 · 단원 번호 N · 도장 ≤ 2 · 결 ≤ 3. 단원 12개 이상이면 번호 어긋남을 `[data-trim]` 과 무관하게 끈다 | 블렌드는 격리 그룹을 만들어 그 조상까지 합성 비용 |
 | 흐림 `box-shadow` | 노드당 1개(`.die` 10px), 시트당 1개, 그 외 하드 섀도만 | 흐림 그림자는 transform 변화마다 재래스터 |
-| SVG `<use>` Dee | 움직이지 않는 스티커는 **그림 한 장**으로 굽는다(D115 — `deeImageUrl`). `<use>` 로 남는 것(움직이는 Dee)만 화면당 ≤ 40 인스턴스 | `<use>` 는 인스턴스마다 6 경로(수천 점) 재래스터, 캐시 없음 — 홈은 개념 줄마다 하나라 391개였다. 구운 그림은 판마다 한 번 디코드하고 나머지는 blit |
-| 상시 애니메이션 | 0개 — `blink`(오늘 스탬프) · `spin`(현재 노드 링) · `peek` infinite 를 **정적/유한**으로 (확정: `blink` → 정적 점선 + 「오늘」 라벨, `spin` → 정지 점선 링, `peek` → 2회) | 컴포지터가 영원히 60Hz 로 깨어 노트북 배터리를 먹는다 |
+| SVG `<use>` Dee | 스티커는 **그림 한 장**으로 굽는다(D115 — `deeImageUrl`). D179 로 움직이는 Dee 자체가 없어졌고, `<use>` 로 남는 것은 스프라이트가 아직 문서에 없는 첫 프레임뿐이다 | `<use>` 는 인스턴스마다 6 경로(수천 점) 재래스터, 캐시 없음 — 홈은 개념 줄마다 하나라 391개였다. 구운 그림은 판마다 한 번 디코드하고 나머지는 blit |
+| 상시 애니메이션 | **0개, 그리고 이제 유한화한 것도 0개다** — `blink`(오늘 스탬프)는 정적 점선 + 「오늘」 라벨, `spin`(현재 노드 링)은 정지 점선 링, 마스코트 `peek` 은 클래스째 삭제(D179). `scripts/check-motion.mjs` 가 `infinite` 를 CSS 전수로 막는다 | 컴포지터가 영원히 60Hz 로 깨어 노트북 배터리를 먹는다 |
 | 노드 40+ 홈 | `Node` 는 `React.memo`, 시드(`--dy/--rot/--d`) 는 id 해시로 결정론 계산(리렌더 때 흔들리지 않게) | 가상 DOM 비용보다 스타일 재계산이 비싸다 |
-| 세션 타이머 | 1초 tick 이 교정지를 리렌더하지 않음(§3) | 60분 세션 3600회 리렌더 방지 |
+| 세션 타이머 | 1초 tick 이 문제 화면을 리렌더하지 않음(§3) | 60분 세션 3600회 리렌더 방지 |
 | 폰트 FOUT | `index.html` preload 4 + `font-display:block` + `document.fonts.ready`(300ms 타임아웃) 뒤 `root.render` → `getCurrentWindow().show()` | 창을 폰트 뒤에 보여주면 FOUT 자체가 없다 |
 | 측정 | `?dev=1` 에서 `__audit.perf(ms)`(목업 그대로: 스크롤+hover 교대, avg/p95/max/over16) 와 `performance.mark` 6종(`home:paint`, `session:mount`, `t0:grade`, `t1:monaco`, `theme:switch`, `lifer:open`) → `plugin-log` 파일. macOS 는 Safari › 개발 › 앱 이름으로 Web Inspector 타임라인 부착 | Tauri 릴리스엔 DevTools 가 없다 |
 
-예산(p95, 야간반 포함): 홈 48노드 스크롤+hover ≤ 12ms · 교정지 마운트 ≤ 50ms · T0 채점→판정란 ≤ 30ms · Monaco 마운트 ≤ 350ms(D94 — 250 에서 올렸다) · 테마 전환 ≤ 100ms · 창 표시 후 홈 인터랙티브 ≤ 400ms. **첫 실측을 체크리스트 3번 항목으로 잡고, 예산을 넘는 항목은 규칙을 강화하지 목표를 낮추지 않는다.**
+예산(p95, 어두운 테마 포함): 홈 48노드 스크롤+hover ≤ 12ms · 문제 마운트 ≤ 50ms · T0 채점→채점 결과 ≤ 30ms · Monaco 마운트 ≤ 350ms(D94 — 250 에서 올렸다) · 테마 전환 ≤ 100ms · 창 표시 후 홈 인터랙티브 ≤ 400ms. **첫 실측을 체크리스트 3번 항목으로 잡고, 예산을 넘는 항목은 규칙을 강화하지 목표를 낮추지 않는다.**
 
 **WKWebView 실측** (릴리스 빌드 · 격리된 데이터 디렉터리 · 창을 앞에 세운 채). 재는 절차는 `apps/desktop/src/devtools/audit.ts` 의 `HOW` 와 `devtools/perfRun.ts` 에 있다.
 
 | mark | 실측 | 예산 | |
 |---|---|---|---|
-| `frame_p95` | 19 ms (이 리포 · 대지 18 · 스티커 391 · **윈도잉 켜짐**) · 18 ms (`projectox-like`) | 12 | **D115 뒤 다시 재야 한다.** 윈도잉은 안 들었고(D105) 병목은 스티커의 `<use>` 였다 — 하네스 실측(Playwright WebKit · 스티커 1,600개 · 매 프레임 무효화)에서 프레임 p95 28 → 17 ms 로 스티커 0개와 같아졌다. 이 표의 19 ms 는 릴리스 빌드·이 리포에서 다시 재기 전까지 옛 값이다 |
+| `frame_p95` | 19 ms (이 리포 · 단원 18 · 개념 스티커 391 · **윈도잉 켜짐**) · 18 ms (`projectox-like`) | 12 | **D115 뒤 다시 재야 한다.** 윈도잉은 안 들었고(D105) 병목은 스티커의 `<use>` 였다 — 하네스 실측(Playwright WebKit · 스티커 1,600개 · 매 프레임 무효화)에서 프레임 p95 28 → 17 ms 로 스티커 0개와 같아졌다. 이 표의 19 ms 는 릴리스 빌드·이 리포에서 다시 재기 전까지 옛 값이다 |
 | `t1:monaco` | **292~303 ms** (n=2) | 350 | 통과 — 예산을 D94 로 올렸다. 1단계는 `PlainPad` 그대로(D93) |
 | `home:paint` | 106~156 ms (M4 실측 141) | 400 | 통과 |
 | `session:mount` | 3~6 ms | 50 | 통과 |
@@ -404,6 +424,17 @@ interface SessionSlice {
 | `lifer:open` | 11~13 ms | 50 | 통과 |
 
 **리포가 다르면 `frame_p95` 를 비교하지 마라** — 노드 수가 곧 그 값이다(D81).
+
+**편집 보조를 켠 뒤** (D143 · Playwright WebKit = WKWebView **대리**, 릴리스 빌드 실측 아님. 하네스는 `min/vs` 로 Monaco 를 세우고 앱과 같은 옵션을 준다):
+
+| 무엇 | 값 | 판정 |
+|---|---|---|
+| 자동 닫기 × 한글 조합 | `"` 뒤에 닫는 따옴표가 앉은 채 조합해도 모델은 `s = "한"`, 캐럿은 닫는 따옴표 앞, `compositionend` 1회. 화면 캐럿 이동 px 가 **대조군(자동 닫기 off)과 완전히 같다** | 통과 |
+| 타이핑 중 `frame_p95` | 40줄 블록에 33자 · **18.0 ms** — 대조군도 18.0 ms | 차이 없음(둘 다 vsync 바닥 16.6 ms 에 붙어 있어 그 아래는 이 하네스로 못 가른다) |
+| 타건 → 첫 제안 목록 | 중앙 116 ms · p95 126 ms. 그중 **100 ms 는 Monaco 자신의 표시 지연**(`suggestWidget._show()` 의 `cancelAndSet(…, 100)` — 깜빡임 방지)이라 실제 작업은 약 16 ms | 새 mark 를 만들지 않았다(MARKS 6종은 §10 표의 것이다) |
+| 번들 | L0b·L1 **0 바이트** — 전부 `editor.api` 안에 이미 있다 | 통과 |
+
+`t1:monaco` 는 **아직 다시 재지 않았다.** 옵션 몇 개를 더 넘길 뿐 기여 집합이 늘지 않아 292~303 ms 가 그대로일 것으로 보지만, 그것은 예상이지 실측이 아니다 — 다음 릴리스 빌드에서 재고 이 표를 고친다.
 
 ---
 
@@ -415,23 +446,23 @@ interface SessionSlice {
 
 | # | 시나리오 | 단언 |
 |---|---|---|
-| 1 | 홈 → 인쇄 시작 → 1판 정답 | 정합 도장 · `+1겹` · live 문구 · `.ask` y 불변 |
-| 2 | 2판 오답 | 어긋남 진단 + 날카로운 자리 코드 · 큐 5→6칸(다시 찍기 `pos+3`) |
-| 3 | 3판 `?` 사다리 1~4단 | 겹 −1 · 오늘로 당김 표시 · 4단 프롬프트 생성·복사(mock clipboard) |
+| 1 | 홈 → 학습 시작 → 1번 문제 정답 | 「같음」 도장 · `+1단계` · live 문구 · `.ask` y 불변 |
+| 2 | 2번 문제 오답 | 오답 진단 + 날카로운 자리 코드 · 큐 5→6칸(다시 풀기 `pos+3`) |
+| 3 | 3번 문제 `?` 사다리 1~4단 | 숙련도 −1단계 · 오늘로 당김 표시 · 4단 프롬프트 생성·복사(mock clipboard) |
 | 4 | 2단 아래층 점프 → 답 → 자동 복귀 | 큐에 「아래층」 삽입 · 복귀 후 `LinkPara` 포커스 · 2단이 「방금 채움」 |
-| 5 | 아래층에서 `B` | 큐에서 빠짐 · 위 판 상태 유지 |
-| 6 | 새 판 첫 정합 → LIFER | 베일 열림 · 아무 키 닫힘 · 포커스 복원 · 세션 4번째부터 안 뜸 |
+| 5 | 아래층에서 `B` | 큐에서 빠짐 · 위 문제 상태 유지 |
+| 6 | 새 문제 첫 정답 → LIFER | 채점 결과 안에 기록(머리말·일련번호·채집지) · 판정문이 같이 읽힘 · 포커스는 다음 문제 단추 · 세션 4번째부터 안 뜸 |
 | 7 | T1 예시 답안 채점 | 비공백 줄 기준 — 단언 숫자는 04 §9 골든 픽스처 값을 그대로 쓴다 |
 | 8 | T1 이의 → 왜 게이트 | 10자 미만 `disabled` · 코드 복사 거부 · 보기 → 자기 말 |
 | 9 | `` ` `` 홀드 / 해제 / window blur | `.ref.peek` 토글 · peeks 카운트 · 에디터 값 불변 |
 | 10 | T2 힌트 3 → 채점 → 이것도 맞다 | 새 파일 표시 · 놓침 깜빡임 3회 후 정지 · 커밋 출처 |
-| 11 | 요약 | 겹 이동 목록 · LIFER 박스 · 내일 예고 · Enter 홈 |
-| 12 | 야간반 + 부속 숨김 | 텍스트 박스 좌표 동일 · 대비 전수 |
-| 13 | Esc 4단계 | 입력 중 blur → 사다리 접기 → 나가기 → 홈 「이어 찍기」 → 재진입 N번째 판 |
+| 11 | 요약 | 숙련도 이동 목록 · LIFER 박스 · 내일 예고 · Enter 홈 |
+| 12 | 어둡게 + 장식 숨김 | 텍스트 박스 좌표 동일 · 대비 전수 |
+| 13 | Esc 3단계 | 입력에서 빠져나오기 → 사다리 접기 → 나가기 → 홈 「이어 풀기」 → 재진입 N번째 문제 (D131 로 LIFER 겹이 빠졌다) |
 | 14 | 리포 등록 → 인제스트 진행 → 홈 | 단계 큐 · 취소 · 빈 상태 변형 |
 | 15 | 키보드만으로 1~13 | 마우스 0회 프로젝트 (`page.mouse` 금지 픽스처) |
 
-- **시각 회귀**: `toHaveScreenshot` 골든 10장 × 주간/야간 × 엔진 2 = 40장. `animations:'disabled'`, `reducedMotion:'reduce'`, 폰트 로드 대기, 시드 고정(노드 지터·도장 각도). 임계 0.2%. 골든은 PR 에서 라벨 `visual-ok` 로만 갱신.
+- **시각 회귀**: `toHaveScreenshot` 골든 10장 × 밝게/어둡게 × 엔진 2 = 40장. `animations:'disabled'`, `reducedMotion:'reduce'`, 폰트 로드 대기, 시드 고정(노드 지터·도장 각도). 임계 0.2%. 골든은 PR 에서 라벨 `visual-ok` 로만 갱신.
 - 매 시나리오 뒤 `__audit.fonts/contrast/measure` 자동 실행(§9).
 
 ---
@@ -457,7 +488,7 @@ interface SessionSlice {
 
 | 위험 | 신호 | 완화 |
 |---|---|---|
-| WKWebView 에서 SVG `<use>`·블렌드로 홈이 12ms 를 넘긴다 | §10 첫 실측 | 윈도잉 → 판번호 어긋남 끄기 → 결 `--grain-op:0` 순으로 강등, 예산은 유지 |
+| WKWebView 에서 SVG `<use>`·블렌드로 홈이 12ms 를 넘긴다 | §10 첫 실측 | 스티커를 그림 한 장으로 굽기(D115) → 판번호 어긋남 끄기 → 결 `--grain-op:0` 순으로 강등, 예산은 유지. 윈도잉은 D133 이 걷었다 — 대지가 한 장만 DOM 에 있다 |
 | Monaco 가 WKWebView 에서 IME(한국어 주석) 조합을 깨거나 마운트가 느리다 | 시나리오 7·9 webkit 실패 | `ClonePad` 인터페이스 뒤 textarea 구현으로 1단계만 폴백; 조합 중 판정 보류 |
 | Esc 가 두 주인을 갖게 된다(모달 지옥) | 새 오버레이 추가 PR | `SessionOverlay` 밖 `keydown` Escape 핸들러 린트 금지(`no-restricted-syntax`) |
 | 토큰 드리프트(디자인 ≠ 앱) | `sync-design --check` | CI 실패로 고정 |
@@ -474,8 +505,8 @@ interface SessionSlice {
 3. **잠긴 노드 `shake`** — §3.7 「화면 흔들기」 금지의 범위에 요소 흔들기가 포함되는가. 제안: 흔들지 않고 상세에 이유만 연다. → 결정: D11 — 흔들지 않음.
 4. **T1 3단계 Tab** — 요구 사항의 「Tab/자동 들여쓰기(3단계에서 제거)」를 「자동 들여쓰기만 제거, Tab = 2칸 유지」로 해석했다. Tab 까지 빼면 포커스가 에디터 밖으로 나가 필사가 끊긴다. → 결정: D11 — Tab 유지.
 5. **아래층 키 `1~4` 소유** — 사다리 열림 + 포커스가 사다리 안일 때만 단 선택으로 해석했다. 「사다리가 열려 있으면 항상 단」 쪽이 단순하지만 미답 상태에서 보기를 고를 수 없게 된다. → 결정: D11 — 포커스가 사다리 안일 때만.
-6. **최소 창 1000×680** — Windows 노트북 1366×768 에서 작업표시줄 포함 시 680 이 빠듯하다. 640 으로 낮추면 판정란 예약이 화면 밖으로 밀리는 것을 허용해야 한다. → 결정: D11 — 1000×680.
-7. **홈 `Enter` = 인쇄 시작** — 스크린리더 사용자는 `Enter` 를 요소 활성화로 기대한다. 포커스가 `main` 일 때만으로 제한했지만, 아예 빼고 「인쇄 시작」 버튼 초기 포커스로 대체하는 안도 있다. → 결정: D11 — `main` 포커스일 때만.
+6. **최소 창** — D182 가 **720×600** 으로 내렸다(반쪽화면 요구). 세로는 스크롤이 답이고 세로 스크롤은 금지 목록에 없다. 옛 판단: Windows 노트북 1366×768 에서 작업표시줄 포함 시 680 이 빠듯하다. 640 으로 낮추면 판정란 예약이 화면 밖으로 밀리는 것을 허용해야 한다. → 결정: D11 — 1000×680.
+7. **홈 `Enter` = 학습 시작** — 스크린리더 사용자는 `Enter` 를 요소 활성화로 기대한다. 포커스가 `main` 일 때만으로 제한했지만, 아예 빼고 「학습 시작」 버튼 초기 포커스로 대체하는 안도 있다. → 결정: D11 — `main` 포커스일 때만.
 8. **정합/동등/어긋남 판정 색 별칭 `--verdict-*`** — 정본 §6 토큰 표에 없다. 컴포넌트가 `--pink/--blue` 를 직접 쓰는 것을 금지하려면 필요하다. → 결정: D11 — 신설.
 
 ## 구현 체크리스트
@@ -486,9 +517,9 @@ interface SessionSlice {
 - [ ] 프리미티브 12종 + `dev/Gallery` — Pill·Passes·Kbd·PressButton·FlatButton·Switch·Reg·Stamp·Say·Toast·LiveRegion·Misreg, 단위 테스트 (선행: 토큰) · 2일
 - [ ] 홈 화면 — Masthead·RepoSwitcher·TodayPanel·TimeQueue·InkScale·ConceptList·GapsPanel·Sheet·Node·NodeDetail·Guide·Forecast·ColorBar, 픽스처 IPC, `home.load` (선행: 프리미티브, `02` 홈 쿼리 모양) · 3일
 - [ ] WKWebView 성능 첫 실측 — `?stress=48` 이식, `__audit.perf`, `performance.mark` 6종, macOS Web Inspector 절차 문서화, 예산 대비 결과 기록 (선행: 홈) · 1일
-- [ ] 세션 셸 — `SessionOverlay`(포커스 트랩·`inert`·Esc 4단계)·`JobBand`·`useSessionClock`·`session.save/resume`·키맵 디스패처(`e.code`) (선행: 프리미티브, `02` 세션 테이블) · 2~3일
+- [ ] 세션 셸 — `SessionOverlay`(포커스 트랩·`inert`·Esc 3단계)·`JobBand`·`useSessionClock`·`session.save/resume`·키맵 디스패처(`e.code`) (선행: 프리미티브, `02` 세션 테이블) · 2~3일
 - [ ] T0 판 — `ProofSheet`·`CodePlate`(hl·PickToken·Hole)·`Choices`·`FeedbackSlot`·`Acts`·`Crumb`, 채점은 `core.gradeT0` (선행: 세션 셸, `04` T0 규칙) · 2일
-- [ ] 다시 찍기 사다리·아래층·LIFER — `ReprintLadder` 4단·점프/복귀/`LinkPara`·`B`·`LiferVeil`·클립보드 플러그인 (선행: T0) · 2~3일
+- [ ] 다시 찍기 사다리·아래층·LIFER — `ReprintLadder` 4단·점프/복귀/`LinkPara`·`B`·`LiferNote`·클립보드 플러그인 (선행: T0) · 2~3일
 - [ ] 인쇄 완료 요약 — `Summary` 전부, 「오늘 판 다시 보기」= 읽기 전용 (선행: T0) · 1일
 - [ ] T1 `ClonePad` Monaco — 지연 로드·옵션·테마 2종·거터 틱·줄 이탈 판정·`` ` `` 홀드·자동 저장·`remeasureFonts`·`Stepper`·`RefPlate`·`ScoreCard`·`DiffRows`·`WhyGate` (선행: 세션 셸, `04` T1 엔진) · 3일
 - [ ] T2 `DependencyMap` — SVG 레이아웃·포트 분산·호버/포커스 강조·3티어 결과·커밋 출처, 13px 룰 맞춤 (선행: 세션 셸, `03` 그래프 모양) · 2일

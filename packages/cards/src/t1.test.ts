@@ -69,8 +69,22 @@ const PREVENT_DEFAULT: Concept = conceptSchema.parse({
   },
 });
 
-const CONCEPTS: ReadonlyMap<string, Concept> =
-  new Map([...dict.concepts, [PREVENT_DEFAULT.id, PREVENT_DEFAULT]]);
+/**
+ * 번들 사전의 `why_gate` 를 **일부러 벗긴** 사본 + 가짜 개념 하나.
+ *
+ * 이 파일의 세 테스트가 「블록이 무는 개념 중 `why_gate` 를 가진 것은 `PREVENT_DEFAULT`
+ * 뿐」을 전제한다. 전에는 번들 사전에 `why_gate` 가 하나도 없어서 그 전제가 저절로
+ * 참이었는데, D145 로 사전을 채우면서 깨졌다 — `ts/const-declaration` 이 2행 `const` 에
+ * 걸려 7행의 `PREVENT_DEFAULT` 를 이긴다(`t1.ts` 의 `hits.sort` 가 줄 번호 오름차순).
+ * 전제를 테스트 안에 적어 두면 사전이 더 채워져도 안 깨진다.
+ */
+const CONCEPTS: ReadonlyMap<string, Concept> = new Map([
+  ...[...dict.concepts].map(([id, c]) => [id, { ...c, why_gate: undefined }] as const),
+  [PREVENT_DEFAULT.id, PREVENT_DEFAULT],
+]);
+/** 같은 이유로 벗긴 사본 — 「사전에 문항이 없으면 일반 템플릿」을 재는 자리가 쓴다. */
+const BARE: ReadonlyMap<string, Concept> =
+  new Map([...dict.concepts].map(([id, c]) => [id, { ...c, why_gate: undefined }]));
 const ESSENTIAL = new Set([...(dict.langs.get('ts')?.essential ?? []), PREVENT_DEFAULT.id]);
 
 function candidate(over: Partial<BlockCandidate> = {}): BlockCandidate {
@@ -137,7 +151,7 @@ describe('generateT1 — 목업 T1 판', () => {
   });
 
   test('왜 게이트 ④ — why_gate 가 없으면 일반 템플릿, 보기는 0개', () => {
-    const plain = request({ concepts: dict.concepts, essential: new Set(dict.langs.get('ts')?.essential ?? []) });
+    const plain = request({ concepts: BARE, essential: new Set(dict.langs.get('ts')?.essential ?? []) });
     const { why } = card(plain).payload;
     expect(why.q).toBe(genericWhyQ());
     expect(why.choices).toStrictEqual([]);
@@ -146,7 +160,7 @@ describe('generateT1 — 목업 T1 판', () => {
   });
 
   test('왜 게이트 — choices 는 3개 아니면 0개다 (grading 의 출처 구분)', () => {
-    for (const req of [request(), request({ concepts: dict.concepts, essential: new Set(dict.langs.get('ts')?.essential ?? []) })]) {
+    for (const req of [request(), request({ concepts: BARE, essential: new Set(dict.langs.get('ts')?.essential ?? []) })]) {
       expect([0, 3]).toContain(card(req).payload.why.choices.length);
     }
   });
@@ -156,7 +170,7 @@ describe('generateT1 — 목업 T1 판', () => {
       ...PREVENT_DEFAULT, why_gate: { ...PREVENT_DEFAULT.why_gate, q: '{{pick.1}} 는 왜 필요할까요?' },
     });
     const { why } = card(request({
-      concepts: new Map([...dict.concepts, [needsPick.id, needsPick]]),
+      concepts: new Map([...BARE, [needsPick.id, needsPick]]),
     })).payload;
     expect(why.q).toBe(genericWhyQ());
     expect(why.choices).toStrictEqual([]);

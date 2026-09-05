@@ -1,0 +1,41 @@
+[
+  {
+    "queryId": "java/inheritance-override",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "site",
+    "form": "override",
+    "startLine": 4,
+    "startCol": 4,
+    "endLine": 7,
+    "endCol": 5,
+    "nodeKind": "method_declaration",
+    "inError": false
+  },
+  {
+    "queryId": "java/inheritance-override",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.3",
+    "form": "override",
+    "startLine": 4,
+    "startCol": 5,
+    "endLine": 4,
+    "endCol": 13,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "java/inheritance-override",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.4",
+    "form": "override",
+    "startLine": 5,
+    "startCol": 18,
+    "endLine": 5,
+    "endCol": 26,
+    "nodeKind": "identifier",
+    "inError": false
+  }
+]

@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import type { RawImport } from './derive.js';
-import { resolveImports, type ResolveInput, type ResolvedEdge } from './resolve-imports.js';
+import { httpMisses, resolveImports, routeDecls, type ResolveInput, type ResolvedEdge } from './resolve-imports.js';
 
 /** `_imports` 캡처 한 건. 기본 `form` 은 `.scm` 이 가장 자주 내는 값이다. */
 const spec = (specifier: string, form: string | null = 'static'): RawImport =>
@@ -20,7 +20,7 @@ describe('ts/js (04 §7.1 1행)', () => {
   test('상대 지정자에 확장자를 붙여 푼다', () => {
     const edges = one('src/a.ts', [spec('./b')], { paths: ['src/a.ts', 'src/b.ts'] });
     expect(edges).toStrictEqual([
-      { from: 'src/a.ts', to: 'src/b.ts', kind: 'static', confidence: 'syntactic' },
+      { from: 'src/a.ts', to: 'src/b.ts', kind: 'static', confidence: 'syntactic', line: 1 },
     ]);
   });
 
@@ -110,6 +110,7 @@ describe('Next HTTP 엣지 (04 §7.1 2행)', () => {
         to: 'app/api/cart/route.ts',
         kind: 'http',
         confidence: 'syntactic',
+        line: 1,
       },
     ]);
   });
@@ -186,6 +187,7 @@ describe('go (04 §7.1 4행)', () => {
         to: 'internal/store/db.go',
         kind: 'static',
         confidence: 'syntactic',
+        line: 1,
       },
     ]);
   });
@@ -353,5 +355,230 @@ describe('공통', () => {
   test('자기 자신을 가리키는 엣지는 버린다', () => {
     const edges = one('src/a.ts', [spec('./a')], { paths: ['src/a.ts'] });
     expect(edges).toStrictEqual([]);
+  });
+});
+
+describe('java · Spring 라우트 (D159)', () => {
+  const CTRL = 'BACK/src/main/java/com/ssafy/app/controller/AuthController.java';
+  const SVC = 'BACK/src/main/java/com/ssafy/app/service/AuthService.java';
+  const FRONT = 'FRONT/src/services/authService.js';
+
+  /** 컨트롤러 하나 — 클래스 기본 경로 + 메서드 셋. */
+  const controller = (): RawImport[] => [
+    spec('com.ssafy.app.service.AuthService'),
+    spec('/api/auth', 'route-base'),
+    spec('/login', 'route-post'),
+    spec('/me', 'route-get'),
+    spec('/me', 'route-delete'),
+  ];
+
+  test('패키지 이름을 접미로 파일에 맞춘다 — 소스 루트를 설정에서 안 읽는다', () => {
+    const edges = one(CTRL, [spec('com.ssafy.app.service.AuthService')], { paths: [CTRL, SVC] });
+    expect(lines(edges)).toStrictEqual([`${CTRL} -> ${SVC} (static)`]);
+  });
+
+  test('외부 의존은 리포에 파일이 없어 엣지가 없다', () => {
+    const edges = one(CTRL, [spec('org.springframework.web.bind.annotation.RestController')], { paths: [CTRL] });
+    expect(edges).toStrictEqual([]);
+  });
+
+  test('같은 패키지가 두 모듈에 있으면 안 잇는다 — 틀린 간선은 없는 간선보다 나쁘다', () => {
+    const other = 'other/src/main/java/com/ssafy/app/service/AuthService.java';
+    const edges = one(CTRL, [spec('com.ssafy.app.service.AuthService')], { paths: [CTRL, SVC, other] });
+    expect(edges).toStrictEqual([]);
+  });
+
+  test('라우트 선언 자체는 나가는 엣지가 아니다', () => {
+    const edges = one(CTRL, [spec('/api/auth', 'route-base'), spec('/login', 'route-post')], { paths: [CTRL] });
+    expect(edges).toStrictEqual([]);
+  });
+
+  test('클래스 경로 + 메서드 경로를 합쳐 프론트 호출과 잇는다', () => {
+    const edges = resolveImports({
+      paths: [CTRL, SVC, FRONT],
+      files: [
+        { path: CTRL, imports: controller() },
+        { path: FRONT, imports: [spec('/api/auth/login', 'http-post')] },
+      ],
+    });
+    expect(lines(edges)).toContain(`${FRONT} -> ${CTRL} (http)`);
+    expect(edges.find((e) => e.kind === 'http')?.confidence).toBe('syntactic');
+  });
+
+  test('baseURL 만큼 짧게 적힌 경로는 접미로 잇고 heuristic 으로 표시한다', () => {
+    // 프론트는 `axios.create({ baseURL: "/api" })` 아래에서 `/auth/login` 이라고만 쓴다.
+    const edges = resolveImports({
+      paths: [CTRL, FRONT],
+      files: [
+        { path: CTRL, imports: controller() },
+        { path: FRONT, imports: [spec('/auth/login', 'http-post')] },
+      ],
+    });
+    const http = edges.find((e) => e.kind === 'http');
+    expect(http?.to).toBe(CTRL);
+    expect(http?.confidence).toBe('heuristic');
+  });
+
+  test('경로가 같아도 HTTP 메서드가 다르면 다른 자리다', () => {
+    // 이 리포에 `GET /api/auth/me` 와 `DELETE /api/auth/me` 가 실제로 둘 다 있다.
+    const edges = resolveImports({
+      paths: [CTRL, FRONT],
+      files: [
+        { path: CTRL, imports: [spec('/api/auth', 'route-base'), spec('/me', 'route-get')] },
+        { path: FRONT, imports: [spec('/auth/me', 'http-delete')] },
+      ],
+    });
+    expect(edges).toStrictEqual([]);
+  });
+
+  test('경로 없는 애너테이션은 클래스 기본 경로가 곧 라우트다', () => {
+    const edges = resolveImports({
+      paths: [CTRL, FRONT],
+      files: [
+        { path: CTRL, imports: [spec('/api/emotions', 'route-base'), spec('GetMapping', 'route-bare-get')] },
+        { path: FRONT, imports: [spec('/emotions', 'http-get')] },
+      ],
+    });
+    expect(edges.find((e) => e.kind === 'http')?.to).toBe(CTRL);
+  });
+
+  test('경로 변수를 자리표로 접어 템플릿 문자열과 잇는다', () => {
+    // 프론트 `` `/notices/${noticeId}` `` ↔ 서버 `@GetMapping("/{noticeId}")`.
+    // 안 접으면 이 둘은 영영 안 만난다 — 실리포에서 컨트롤러 셋이 그랬다.
+    const NOTICE = 'BACK/src/main/java/com/ssafy/app/controller/NoticeController.java';
+    const svc = 'FRONT/src/services/noticeService.js';
+    const edges = resolveImports({
+      paths: [NOTICE, svc],
+      files: [
+        { path: NOTICE, imports: [spec('/api/notices', 'route-base'), spec('/{noticeId}', 'route-get')] },
+        { path: svc, imports: [spec('/notices/${noticeId}', 'http-get')] },
+      ],
+    });
+    expect(edges.find((e) => e.kind === 'http')?.to).toBe(NOTICE);
+  });
+
+  test('클래스 기본 경로 안의 변수도 접는다', () => {
+    const RESULT = 'BACK/src/main/java/com/ssafy/app/controller/DreamResultController.java';
+    const svc = 'FRONT/src/services/dreamResultService.js';
+    const edges = resolveImports({
+      paths: [RESULT, svc],
+      files: [
+        { path: RESULT, imports: [spec('/api/dreams/{dreamId}/result', 'route-base'), spec('GetMapping', 'route-bare-get')] },
+        { path: svc, imports: [spec('/dreams/${dreamId}/result', 'http-get')] },
+      ],
+    });
+    expect(edges.find((e) => e.kind === 'http')?.to).toBe(RESULT);
+  });
+
+  test('어느 라우트와도 안 맞으면 간선을 지어내지 않는다', () => {
+    // 실리포에서 `api.get("/emotions/stats")` 가 이랬다 — 백엔드에 `stats` 매핑이 없다.
+    const EMO = 'BACK/src/main/java/com/ssafy/app/controller/EmotionController.java';
+    const svc = 'FRONT/src/services/x.js';
+    const edges = resolveImports({
+      paths: [EMO, svc],
+      files: [
+        { path: EMO, imports: [spec('/api/emotions', 'route-base'), spec('GetMapping', 'route-bare-get')] },
+        { path: svc, imports: [spec('/emotions/stats', 'http-get')] },
+      ],
+    });
+    expect(edges.filter((e) => e.kind === 'http')).toStrictEqual([]);
+  });
+
+  test('접미 후보가 둘이면 안 잇는다', () => {
+    const other = 'BACK/src/main/java/com/ssafy/app/controller/V2AuthController.java';
+    const edges = resolveImports({
+      paths: [CTRL, other, FRONT],
+      files: [
+        { path: CTRL, imports: [spec('/api/auth', 'route-base'), spec('/login', 'route-post')] },
+        { path: other, imports: [spec('/v2/auth', 'route-base'), spec('/login', 'route-post')] },
+        { path: FRONT, imports: [spec('/auth/login', 'http-post')] },
+      ],
+    });
+    expect(edges.filter((e) => e.kind === 'http')).toStrictEqual([]);
+  });
+});
+
+describe('mybatis 매퍼 (D159)', () => {
+  const DAO = 'BACK/src/main/java/com/ssafy/app/model/dao/UserDao.java';
+  const USER = 'BACK/src/main/java/com/ssafy/app/model/entity/User.java';
+  const MAP = 'BACK/src/main/resources/mapper/user/UserMapper.xml';
+
+  test('`namespace` 는 방향이 뒤집힌다 — DAO 를 열면 SQL 이 거기 있다', () => {
+    const edges = one(MAP, [spec('com.ssafy.app.model.dao.UserDao', 'mapper-of')], { paths: [DAO, MAP] });
+    expect(lines(edges)).toStrictEqual([`${DAO} -> ${MAP} (static)`]);
+  });
+
+  test('`type`·`resultType` 은 그대로다 — 매퍼가 그 타입을 쓴다', () => {
+    const edges = one(MAP, [spec('com.ssafy.app.model.entity.User')], { paths: [USER, MAP] });
+    expect(lines(edges)).toStrictEqual([`${MAP} -> ${USER} (static)`]);
+  });
+
+  test('점 없는 별칭(`string`·`map`)은 자바 파일로 안 풀려 엣지가 없다', () => {
+    const edges = one(MAP, [spec('string'), spec('map'), spec('long')], { paths: [DAO, USER, MAP] });
+    expect(edges).toStrictEqual([]);
+  });
+
+  test('뒤집힌 엣지도 자기 자신을 가리키면 버린다', () => {
+    const edges = one(MAP, [spec('com.ssafy.app.model.dao.UserDao', 'mapper-of')], { paths: [MAP] });
+    expect(edges).toStrictEqual([]);
+  });
+});
+
+describe('D168 — 파이썬 라우트 · 동사 미상 · 접두 규칙 · 라우트 없는 호출', () => {
+  const JAVA_SVC = 'BACK/src/main/java/com/a/service/FortuneService.java';
+  const PY = 'AI_API/main.py';
+  const PY_SVC = 'AI_API/services/comprehensive_service.py';
+  const FRONT = 'FRONT/src/services/fortuneService.js';
+  const CTRL = 'BACK/src/main/java/com/a/controller/FortuneController.java';
+
+  test('`.uri("/api/v1/…")` 가 FastAPI 의 `@app.post` 에 닿는다 — 동사는 몰라도 경로가 같다', () => {
+    const edges = resolveImports({
+      paths: [JAVA_SVC, PY],
+      files: [
+        { path: JAVA_SVC, imports: [{ specifier: '/api/v1/fortune/comprehensive', form: 'http-any', line: 38 }] },
+        { path: PY, imports: [{ specifier: '/api/v1/fortune/comprehensive', form: 'route-post', line: 94 }] },
+      ],
+    });
+    expect(edges).toStrictEqual([
+      { from: JAVA_SVC, to: PY, kind: 'http', confidence: 'syntactic', line: 38, toLine: 94 },
+    ]);
+  });
+
+  test('접미가 둘에 걸려도 접두가 포개지면 짧은 쪽 — `/api` 와 `/api/v1`', () => {
+    const edges = resolveImports({
+      paths: [FRONT, CTRL, PY],
+      files: [
+        { path: FRONT, imports: [{ specifier: '/fortune/comprehensive', form: 'http-post', line: 21 }] },
+        { path: CTRL, imports: [spec('/api/fortune', 'route-base'), { specifier: '/comprehensive', form: 'route-post', line: 37 }] },
+        { path: PY, imports: [{ specifier: '/api/v1/fortune/comprehensive', form: 'route-post', line: 94 }] },
+      ],
+    });
+    expect(lines(edges)).toStrictEqual([`${FRONT} -> ${CTRL} (http)`]);
+  });
+
+  test('파이썬은 스크립트가 있는 디렉터리도 루트다 — `AI_API/main.py` 의 `from services.x`', () => {
+    const edges = one(PY, [spec('services.comprehensive_service', 'from')], { paths: [PY, PY_SVC] });
+    expect(lines(edges)).toStrictEqual([`${PY} -> ${PY_SVC} (static)`]);
+  });
+
+  test('호출·스키마 캡처는 파일 간선이 아니다', () => {
+    const edges = one(JAVA_SVC, [
+      { specifier: 'user', form: 'local', line: 3, ctx: { type: 'User' } },
+      { specifier: 'findByLoginId', form: 'call', line: 4, ctx: { recv: 'userDao' } },
+      { specifier: 'users', form: 'ddl-table', line: 5 },
+    ], { paths: [JAVA_SVC, 'BACK/src/main/java/com/a/service/user.java'] });
+    expect(edges).toStrictEqual([]);
+  });
+
+  test('라우트 없는 호출과 부르는 곳 없는 라우트를 이름 붙여 돌려준다', () => {
+    const input = {
+      paths: [FRONT, CTRL],
+      files: [
+        { path: FRONT, imports: [{ specifier: '/emotions/stats', form: 'http-get', line: 65 }] },
+        { path: CTRL, imports: [spec('/api/emotions', 'route-base'), { specifier: '/list', form: 'route-get', line: 30 }] },
+      ],
+    };
+    expect(httpMisses(input)).toStrictEqual([{ path: FRONT, line: 65, verb: 'GET', route: '/emotions/stats' }]);
+    expect(routeDecls(input.files)).toStrictEqual([{ path: CTRL, line: 30, route: 'GET /api/emotions/list' }]);
   });
 });

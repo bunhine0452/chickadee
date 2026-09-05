@@ -1,0 +1,205 @@
+schema: 1
+id: sql/case-when
+universal: common/conditional-expression
+name: { ko: "조건으로 값 고르기", en: "Conditional value" }
+token: "CASE WHEN"
+grammars: [sql, mybatis_sql]
+framework: null
+essential: true
+difficulty: 2
+prereq: [sql/select-list, sql/comparison]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "조건에 따라 값 하나를 고른다. 갈래가 문이 아니라 값이다."
+    en: "Picks one value by a test. The branch here is a value, not a statement."
+  why:
+    ko: >-
+      이 언어에는 갈래를 여는 <b>문</b>이 없습니다. 그래서 갈래도 <b>값</b>이고, 값이 놓일 수 있는
+      자리에만 옵니다 — 열을 고르는 자리, 거르는 자리, 줄 세우는 자리요. {{site.line}}행은
+      {{pick.4|code}} 뒤의 {{pick.2|code}} 조건을 <b>행마다</b> 재고, 참이면 {{pick.3|code}} 쪽 값을 냅니다.
+      갈래를 여럿 적으면 <b>위에서부터</b> 처음 참인 것 하나만 쓰이고, 어느 갈래에도 안 걸린 행은
+      마지막 갈래가 없으면 <b>모름</b>이 됩니다 — 0 도 빈 글자도 아니에요.
+    en: >-
+      This language has no <b>statement</b> that opens a branch. So a branch is a <b>value</b> and can
+      stand only where a value can — choosing columns, filtering, lining up. Line {{site.line}} weighs
+      the {{pick.2|code}} test after {{pick.4|code}} <b>on every row</b>, and where it holds, the
+      {{pick.3|code}} side is the answer. With several branches only the <b>first</b> true one is used,
+      and a row that matches none becomes <b>unknown</b> unless a final branch is written — not zero,
+      not an empty string.
+  trace:
+    - ko: "{{site.line}}행이 한 행에서 {{pick.2|code}} 조건을 잰다."
+      en: "Line {{site.line}} weighs the {{pick.2|code}} test on one row."
+    - ko: "참이면 {{pick.3|code}} 쪽 값이 그 행의 답이다."
+      en: "Where it holds, the {{pick.3|code}} side is that row's answer."
+    - ko: "어느 갈래에도 안 걸리고 마지막 갈래가 없으면 모름이 된다."
+      en: "Matching none with no final branch leaves an unknown."
+
+rule:
+  ko: "<b>갈래가 값이다.</b> 위에서부터 처음 참인 갈래 하나만 쓰인다."
+  en: "<b>The branch is a value.</b> Only the first true branch, read downward, is used."
+result:
+  label: { ko: "이 행이 고르는 값", en: "the value this row picks" }
+  value: "{{pick.3}}"
+  note: { ko: "조건이 참일 때", en: "when the test holds" }
+ok:
+  ko: >-
+    조건이 참인 행에서는 {{pick.3|code}} 쪽 값이 나오고, 아닌 행은 다음 갈래로 넘어갑니다.
+  en: >-
+    Rows where the test holds take the {{pick.3|code}} side; the rest fall through to the next branch.
+payoff:
+  ko: >-
+    이걸 알면 갈래를 왜 열이 놓이는 자리에만 적을 수 있는지가 규칙이 아니라 이유로 남습니다.
+  en: >-
+    Knowing this, “branches only where a value fits” stops being a rule and becomes a reason.
+bridge:
+  ko: >-
+    다른 언어의 삼항 연산자와 같은 자리입니다. 다른 것은 <b>갈래를 여럿</b> 이어 붙일 수 있다는 것이에요.
+  en: >-
+    It stands where a ternary operator stands elsewhere. The difference is that <b>many branches</b>
+    can be chained.
+misconceptions:
+  - ko: "여러 갈래가 참이면 다 쓰인다 — 위에서부터 처음 하나만 쓰입니다."
+    en: "Every true branch applies — only the first one, read downward, does."
+  - ko: "안 걸린 행은 0 이 된다 — 마지막 갈래가 없으면 모름이 됩니다."
+    en: "Unmatched rows become zero — without a final branch they become unknown."
+  - ko: "이걸로 행을 거를 수 있다 — 값을 고를 뿐 행은 그대로입니다."
+    en: "Rows can be filtered with it — it picks a value; the rows stay."
+
+meaning:
+  - q:
+      ko: "갈래 둘을 적었는데 어느 쪽에도 안 걸리는 행이 있으면 그 칸에 무엇이 들어갈까요?"
+      en: "With two branches written and a row matching neither, what fills that slot?"
+    hint:
+      ko: "마지막 갈래를 <b>적었는지</b>가 갈림길입니다."
+      en: "Whether a final branch was <b>written</b> is the fork."
+    options:
+      - t:
+          ko: "모름이 들어간다 — 마지막 갈래를 안 적었으면"
+          en: "An unknown, when no final branch was written"
+      - t:
+          ko: "0 이 들어간다"
+          en: "A zero"
+        diag:
+          t:
+            ko: >-
+              0 은 <b>아는 값</b>이라 누군가 적어야 나옵니다. 안 적었으면 채워지는 것은 모름이에요.
+            en: >-
+              Zero is a <b>known</b> value; someone has to write it. Unwritten, what fills the slot is
+              unknown.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 0 이냐 모름이냐", en: "The sharpest spot — zero or unknown" }
+            code:
+              - "CASE WHEN qty > 0 THEN 1 END"
+              - "CASE WHEN qty > 0 THEN 1 ELSE 0 END"
+      - t:
+          ko: "첫 갈래의 값이 들어간다"
+          en: "The first branch's value"
+        diag:
+          t:
+            ko: >-
+              첫 갈래는 <b>조건이 참일 때만</b> 쓰입니다. 안 걸린 행에는 아무 갈래도 안 쓰여요.
+            en: >-
+              The first branch is used <b>only when its test holds</b>. An unmatched row uses none.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 걸림이냐 기본값이냐", en: "The sharpest spot — a match or a default" }
+            code:
+              - "-- 기본값은 마지막 갈래가 낸다"
+      - t:
+          ko: "그 행이 결과에서 빠진다"
+          en: "The row drops out of the result"
+        diag:
+          t:
+            ko: "값을 고르는 일과 행을 거르는 일은 다릅니다. 행은 그대로 남고 칸만 빕니다."
+            en: "Picking a value and filtering rows are different acts. The row stays; the slot empties."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값이냐 행이냐", en: "The sharpest spot — the value or the row" }
+            code:
+              - "-- 행 수는 안 바뀐다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 조건에 따라 <b>값 하나</b>를 고릅니다."
+      en: "Choose what goes in the blank. Line {{site.line}} picks <b>one value</b> by a test."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "CASE", mono: true }
+      - t: "IF"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>IF</code> 는 갈래를 여는 <b>문</b>의 이름입니다. 이 언어의 갈래는 문이 아니라 값이에요.
+            en: >-
+              <code>IF</code> names a branching <b>statement</b>. Branches here are values, not statements.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 문이냐 값이냐", en: "The sharpest spot — a statement or a value" }
+            code:
+              - "CASE WHEN qty > 0 THEN 1 END"
+              - "-- 값이 놓이는 자리에만 온다"
+      - t: "SWITCH"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>SWITCH</code> 는 다른 언어의 낱말이고, 여기서는 갈래마다 <b>조건</b>을 따로 적습니다.
+            en: >-
+              <code>SWITCH</code> belongs to other languages; here each branch carries <b>its own test</b>.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값 하나로 나누기냐 조건마다냐", en: "The sharpest spot — one value or a test each" }
+            code:
+              - "CASE WHEN a > 1 THEN ... WHEN b = 2 THEN ... END"
+      - t: "WHERE"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>WHERE</code> 는 <b>행</b>을 거릅니다. 여기는 행을 고르는 자리가 아니라 값을 고르는 자리예요.
+            en: >-
+              <code>WHERE</code> drops <b>rows</b>. This slot chooses a value, not which rows survive.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 행이냐 값이냐", en: "The sharpest spot — rows or a value" }
+            code:
+              - "WHERE qty > 0                    -- 행"
+              - "CASE WHEN qty > 0 THEN 1 END     -- 값"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 갈래를 <b>값</b>으로 적었을까요? 거르는 절로 나눌 수도 있는데요."
+    en: "Why is the branch on line {{site.line}} written as a <b>value</b> instead of splitting with a filter?"
+  choices:
+    - t:
+        ko: "행을 버리지 않고 표시만 달아야 해서 — 거르면 안 걸린 행이 결과에서 사라진다"
+        en: "Because the rows must stay and only be labelled — filtering would make the rest vanish"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 두 문장으로 나눠 붙이면 무엇이 더 드는지도 한 줄로 적어 보세요."
+        en: "That is the direction. In one line, say what splitting into two statements would cost."
+    - t:
+        ko: "이 언어에 갈래 문이 없어서"
+        en: "Because the language has no branching statement"
+      ok: false
+      fb:
+        ko: "맞는 사실이지만 <b>왜 이 자리에 갈래가 필요한가</b>는 아직 안 답했습니다."
+        en: "True, but it still does not say <b>why a branch is needed here</b>."
+    - t:
+        ko: "짧아서"
+        en: "Because it is shorter"
+      ok: false
+      fb:
+        ko: "길이가 아니라 <b>결과의 행 수</b>가 달라집니다."
+        en: "Not length — the <b>number of rows in the result</b> differs."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./case-when.scm }
+
+examples:
+  - code: "SELECT CASE WHEN qty > 0 THEN 'yes' ELSE 'no' END FROM cart"
+    expect: { sites: 1, form: case, hole: "CASE", picks: { 1: "CASE", 2: "qty > 0", 3: "'yes'", 4: "WHEN" } }
+  - code: "SELECT CASE WHEN qty > 0 THEN 1 WHEN qty = 0 THEN 2 ELSE 3 END FROM cart"
+    expect: { sites: 2, form: case, hole: "CASE", picks: { 1: "CASE", 2: "qty > 0", 3: "1", 4: "WHEN" } }
+  - code: "SELECT qty FROM cart"
+    expect: none

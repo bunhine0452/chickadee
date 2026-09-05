@@ -1,0 +1,187 @@
+schema: 1
+id: rs/question-mark
+# 2부 (`rs.md` §3). 보편형은 없다. 한 글자가 「실패면 나가고 아니면 값을 꺼낸다」를 다 한다 —
+# ai-pm 2,903곳, 스무 줄에 하나꼴. 빈칸은 안 낸다(한 글자 · `MIN_HOLE`).
+universal: null
+name: { ko: 실패면 여기서 나가기, en: Leave here on failure }
+token: "?"
+grammars: [rust]
+framework: null
+essential: true
+difficulty: 3
+prereq: [rs/result, rs/tail-expression]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "값 뒤의 물음표 한 글자가 됐으면 안의 값을 꺼내고, 안 됐으면 그 오류를 들고 함수를 나간다."
+    en: "One mark after a value extracts it on success, or leaves with the error."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.2|code}} 뒤에 붙은 {{pick.1|code}}{{pick.1|josa:은,는}} `match` 한 벌을 한 글자로 접은
+      것입니다 — 됐으면 안의 값이 그 자리의 값이 되고, 안 됐으면 <b>오류를 들고 이 함수를 그 자리에서
+      나갑니다</b>. 그래서 이 글자가 서는 함수의 반환 타입은 반드시 `Result`(또는 `Option`)여야 하고,
+      `main` 처럼 아닌 곳에 적으면 E0277 로 막혀요. 오류 타입이 다르면 `From` 으로 <b>자동 변환</b>됩니다 —
+      `Box&lt;dyn Error&gt;` 나 `anyhow` 가 흔한 이유예요. 이 리포에서 스무 줄에 하나가 이 글자이고, 그것이
+      Rust 오류 처리가 장황하지 않은 이유입니다.
+    en: >-
+      The {{pick.1|code}} after {{pick.2|code}} on line {{site.line}} folds a whole `match` into one
+      character — on success the inner value becomes the value at that spot; on failure it
+      <b>leaves this function right there, carrying the error</b>. So the function it stands in must
+      return a `Result` (or `Option`); in a plain `main` it is refused with E0277. A differing error type
+      is <b>converted automatically</b> through `From` — which is why `Box&lt;dyn Error&gt;` and `anyhow` are
+      common. One line in twenty in this repo carries this character, and that is why Rust's error
+      handling is not verbose.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 먼저 값이 된다 — Result 다."
+      en: "{{pick.2|code}} becomes a value first — a Result."
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 갈래를 본다 — Ok 면 안의 값, Err 면 즉시 return."
+      en: "{{pick.1|code}} on line {{site.line}} checks the variant — Ok yields the inner value, Err returns at once."
+    - ko: "나갈 때 오류는 이 함수의 오류 타입으로 바뀌어 나간다."
+      en: "On the way out the error is converted to this function's error type."
+
+rule:
+  ko: "<b>물음표는 실패를 위로 넘긴다.</b> Ok 면 값, Err 면 즉시 나가고, 서 있는 함수도 Result 를 돌려줘야 한다."
+  en: "<b>The question mark passes failure upward.</b> Ok yields the value, Err returns at once, and the enclosing function must return a Result too."
+result:
+  label:
+    ko: "{{site.line}}행의 자리"
+    en: "the spot on line {{site.line}}"
+  value: "{{pick.2}}{{pick.1}}"
+  note:
+    ko: "Ok 면 안의 값 · Err 면 나간다"
+    en: "Ok gives the inner value; Err leaves"
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 됐으면 안의 값이 여기 서고, 아니면 이 줄에서 함수가 오류를 들고 나갑니다."
+  en: "When {{pick.2|code}} succeeds its inner value stands here; otherwise the function leaves at this line with the error."
+payoff:
+  ko: "이걸 알면 「`?` 를 붙였더니 왜 `main` 에서 안 되나」(E0277)가 풀립니다 — 나갈 곳의 타입이 `Result` 여야 해서요."
+  en: "This untangles “why is `?` refused in `main`” (E0277) — the place it leaves to must return a `Result`."
+bridge:
+  ko: "자바의 예외는 적지 않아도 위로 올라갑니다. Rust 는 올릴 자리마다 <b>이 한 글자</b>를 적게 해서 실패의 길이 코드에 보입니다."
+  en: "A Java exception climbs without being written. Rust makes you write <b>this one character</b> at every hop, so the failure path is visible in the code."
+misconceptions:
+  - ko: "물음표는 값이 없으면 기본값을 준다 — 함수를 <b>나갑니다</b>. 기본값은 `unwrap_or` 예요."
+    en: "The question mark gives a default when there is nothing — it <b>leaves the function</b>. A default is `unwrap_or`."
+  - ko: "아무 함수에서나 쓸 수 있다 — 반환 타입이 `Result`·`Option` 이어야 합니다(E0277)."
+    en: "It works in any function — the return type must be `Result` or `Option` (E0277)."
+  - ko: "물음표가 오류를 삼킨다 — 삼키지 않고 <b>위로 넘깁니다</b>. 부르는 쪽이 받아요."
+    en: "The question mark swallows the error — it <b>passes it up</b>. The caller receives it."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>실패면 함수를 나가게 하는 글자</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the character that leaves the function on failure</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 실패할 수 있는 <b>값</b>입니다. 값은 스스로 함수를 못 나가고, 나가게 하는 것은 뒤의 한 글자예요."
+          en: "{{pick.2|code}} is the <b>value</b> that may fail. A value cannot leave the function by itself; the character after it does that."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값이냐 나가기냐", en: "The sharpest spot — the value or the leaving" }
+          code:
+            - "read(path)     // Result 그대로"
+            - "read(path)?    // Ok 면 값 · Err 면 나감"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 꺼낸 값을 받을 <b>이름</b>입니다. 꺼내는 일은 오른쪽 끝의 글자가 해요."
+          en: "{{pick.3|code}} is the <b>name</b> that receives the extracted value. The extracting is done by the character at the far right."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 글자냐", en: "The sharpest spot — the name or the character" }
+          code:
+            - "let text = read(path)?;"
+            - "//  ^이름              ^글자"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행의 {{pick.2|code}}{{pick.2|josa:이,가}} <b>Err 를 돌려주면</b> 어떻게 될까요?"
+      en: "What happens when {{pick.2|code}} on line {{site.line}} <b>returns Err</b>?"
+    hint:
+      ko: "물음표는 match 한 벌을 접은 것입니다."
+      en: "The question mark is a folded match."
+    options:
+      - t:
+          ko: "이 함수가 그 자리에서 그 오류를 들고 나간다 — 아래 줄은 안 돈다"
+          en: "This function leaves right there carrying that error — the lines below never run"
+      - t:
+          ko: "패닉한다"
+          en: "It panics"
+        diag:
+          t:
+            ko: "패닉하는 것은 `unwrap()` 입니다. 이 글자는 <b>돌려보냅니다</b> — 부르는 쪽이 받아요."
+            en: "Panicking is `unwrap()`. This character <b>returns</b> the error — the caller receives it."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 터지나 넘기나", en: "The sharpest spot — blow up or pass on" }
+            code:
+              - "read(path).unwrap()   // 패닉"
+              - "read(path)?           // return Err(…)"
+      - t:
+          ko: "기본값이 들어가고 계속 돈다"
+          en: "A default goes in and it continues"
+        diag:
+          t:
+            ko: "그건 `unwrap_or(기본값)` 입니다. 이 글자는 계속 돌지 않고 <b>나갑니다</b>."
+            en: "That is `unwrap_or(default)`. This character does not continue — it <b>leaves</b>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 계속이냐 나가기냐", en: "The sharpest spot — continue or leave" }
+            code:
+              - "read(path).unwrap_or(String::new())"
+              - "read(path)?"
+      - t:
+          ko: "컴파일이 멈춘다"
+          en: "Compiling stops"
+        diag:
+          t:
+            ko: "Err 는 실행 시의 값입니다. 컴파일이 멈추는 것은 이 함수의 반환 타입이 `Result` 가 <b>아닐 때</b>예요(E0277)."
+            en: "Err is a run-time value. The build stops only when this function's return type is <b>not</b> a `Result` (E0277)."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 언제 막히나", en: "The sharpest spot — when it is blocked" }
+            code:
+              - "fn f() -> Result<..> { read(p)? }   // 된다"
+              - "fn main() { read(p)? }              // E0277"
+
+no_hole_reason: >-
+  구멍을 못 뚫는다. `?` 가 한 글자라 빈칸형이 생성 단계에서 떨어진다(`MIN_HOLE` = 2). 「물음표냐
+  unwrap 이냐」는 뜻 묻기가 받는다 — 위의 진단이 그 물음이다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 `unwrap()` 대신 <b>이 글자</b>를 썼을까요?"
+    en: "Why does line {{site.line}} use <b>this character</b> instead of `unwrap()`?"
+  choices:
+    - t:
+        ko: "실패의 이유를 부르는 쪽에 넘겨 거기서 결정하게 하려고 — 여기서 터뜨리면 이유가 사라진다"
+        en: "To hand the reason for failure to the caller and let it decide — blowing up here would lose the reason"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 오류가 결국 어디에서 다뤄지는지 부르는 쪽을 따라가 보세요."
+        en: "That is the direction. Follow the callers to where this error is finally handled."
+    - t:
+        ko: "`unwrap()` 이 느려서"
+        en: "Because `unwrap()` is slower"
+      ok: false
+      fb:
+        ko: "속도는 같습니다. 실패할 때 무슨 일이 나느냐가 달라요."
+        en: "The speed is the same. What happens on failure differs."
+    - t:
+        ko: "`unwrap()` 은 `Result` 에 안 되어서"
+        en: "Because `unwrap()` does not work on `Result`"
+      ok: false
+      fb:
+        ko: "됩니다 — 이 리포에 2,797곳이나요. 실패면 패닉할 뿐이에요."
+        en: "It does — 2,797 sites in this repo. It simply panics on failure."
+
+queries:
+  - { grammars: [rust], file: ./question-mark.scm }
+
+examples:
+  - code: "fn f() -> Result<(), E> { let text = read(path)?; Ok(()) }   // Err 면 여기서 나간다"
+    expect: { sites: 2, form: try-let, picks: { 1: "?", 2: "read(path)", 3: "text" } }
+  - code: "fn f() -> Result<u32, E> { parse(s)?.checked_add(1).ok_or(E) }"
+    expect: { sites: 1, form: try, picks: { 1: "?", 2: "parse(s)" } }
+  - code: "fn f() { let text = read(path).unwrap(); }       // 지름길 — rs/result"
+    expect: none

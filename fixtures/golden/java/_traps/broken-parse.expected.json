@@ -1,0 +1,80 @@
+[
+  {
+    "queryId": "_traps",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "call",
+    "startLine": 8,
+    "startCol": 8,
+    "endLine": 8,
+    "endCol": 25,
+    "nodeKind": "method_invocation",
+    "inError": true
+  },
+  {
+    "queryId": "_traps",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "call",
+    "startLine": 8,
+    "startCol": 8,
+    "endLine": 8,
+    "endCol": 14,
+    "nodeKind": "identifier",
+    "inError": true
+  },
+  {
+    "queryId": "_traps",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "call",
+    "startLine": 8,
+    "startCol": 14,
+    "endLine": 8,
+    "endCol": 25,
+    "nodeKind": "argument_list",
+    "inError": true
+  },
+  {
+    "queryId": "_traps",
+    "matchId": 2,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "call",
+    "startLine": 8,
+    "startCol": 15,
+    "endLine": 8,
+    "endCol": 24,
+    "nodeKind": "method_invocation",
+    "inError": true
+  },
+  {
+    "queryId": "_traps",
+    "matchId": 2,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "call",
+    "startLine": 8,
+    "startCol": 15,
+    "endLine": 8,
+    "endCol": 19,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "_traps",
+    "matchId": 2,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "call",
+    "startLine": 8,
+    "startCol": 19,
+    "endLine": 8,
+    "endCol": 24,
+    "nodeKind": "argument_list",
+    "inError": false
+  }
+]

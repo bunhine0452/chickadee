@@ -1,0 +1,67 @@
+[
+  {
+    "queryId": "sql/null-unknown",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "null",
+    "startLine": 4,
+    "startCol": 30,
+    "endLine": 4,
+    "endCol": 48,
+    "nodeKind": "binary_expression",
+    "inError": false
+  },
+  {
+    "queryId": "sql/null-unknown",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "null",
+    "startLine": 4,
+    "startCol": 30,
+    "endLine": 4,
+    "endCol": 40,
+    "nodeKind": "field",
+    "inError": false
+  },
+  {
+    "queryId": "sql/null-unknown",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "null",
+    "startLine": 4,
+    "startCol": 41,
+    "endLine": 4,
+    "endCol": 43,
+    "nodeKind": "keyword_is",
+    "inError": false
+  },
+  {
+    "queryId": "sql/null-unknown",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "null",
+    "startLine": 4,
+    "startCol": 44,
+    "endLine": 4,
+    "endCol": 48,
+    "nodeKind": "keyword_null",
+    "inError": false
+  },
+  {
+    "queryId": "sql/null-unknown",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "hole",
+    "form": "null",
+    "startLine": 4,
+    "startCol": 44,
+    "endLine": 4,
+    "endCol": 48,
+    "nodeKind": "keyword_null",
+    "inError": false
+  }
+]

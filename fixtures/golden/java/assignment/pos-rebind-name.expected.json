@@ -1,0 +1,67 @@
+[
+  {
+    "queryId": "java/assignment",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "assign",
+    "startLine": 6,
+    "startCol": 8,
+    "endLine": 6,
+    "endCol": 24,
+    "nodeKind": "assignment_expression",
+    "inError": false
+  },
+  {
+    "queryId": "java/assignment",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "assign",
+    "startLine": 6,
+    "startCol": 8,
+    "endLine": 6,
+    "endCol": 11,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "java/assignment",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "assign",
+    "startLine": 6,
+    "startCol": 12,
+    "endLine": 6,
+    "endCol": 13,
+    "nodeKind": "=",
+    "inError": false
+  },
+  {
+    "queryId": "java/assignment",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "hole",
+    "form": "assign",
+    "startLine": 6,
+    "startCol": 12,
+    "endLine": 6,
+    "endCol": 13,
+    "nodeKind": "=",
+    "inError": false
+  },
+  {
+    "queryId": "java/assignment",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "assign",
+    "startLine": 6,
+    "startCol": 14,
+    "endLine": 6,
+    "endCol": 24,
+    "nodeKind": "method_invocation",
+    "inError": false
+  }
+]

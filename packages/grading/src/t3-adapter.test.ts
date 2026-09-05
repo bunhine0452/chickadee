@@ -4,8 +4,8 @@ import { runners } from './index.js';
 import { migrations } from '@chickadee/store-sql';
 
 describe('T3 자리', () => {
-  it('MVP 에서 러너는 비어 있다', () => {
-    expect(runners).toEqual([]);
+  it('러너는 자바 하나다 (D175 — MVP 의 빈 배열을 대신한다)', () => {
+    expect(runners.map((r) => r.id)).toEqual(['java']);
   });
 
   it('스키마가 track 열거형에 t3 를 예약해 둔다 (01 §9)', () => {

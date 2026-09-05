@@ -1,0 +1,176 @@
+schema: 1
+id: rs/boolean-literal
+# 0부 축 D (`rs.md` §0.1 #7). 보편형은 `common/boolean-value`. Rust 에서 다시 배울 것은 「무엇이 참으로
+# 쳐지나」의 답이 **없다**는 것이다 — 조건 자리에 이 타입만 온다(`if 1` 은 E0308).
+universal: common/boolean-value
+name: { ko: 참·거짓, en: Truth values }
+token: "bool"
+grammars: [rust]
+framework: null
+essential: true
+difficulty: 1
+prereq: [cs/type]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "참·거짓은 따로 있는 종류다. 조건 자리에는 그 종류만 오고, 수나 없음은 거짓으로 쳐지지 않는다."
+    en: "Truth values are their own kind; only that kind may stand in a condition."
+  why:
+    ko: >-
+      C 는 0 이 아니면 참이고, 파이썬은 빈 목록이 거짓입니다. Rust 에는 그 표가 <b>없습니다</b> —
+      조건 자리에 오는 것은 {{pick.1|code}} 하나뿐이라 <code>if 1</code> 도 <code>if opt</code> 도 컴파일이
+      멈춥니다(E0308). {{site.line}}행이 그 종류를 적은 자리예요. 「없을 수 있는 값」을 조건으로 쓰려면
+      <code>if let Some(v) = opt</code> 처럼 <b>모양을 갈라</b> 꺼내야 하고, 그것이 2부의 판입니다.
+    en: >-
+      In C anything non-zero is true; in Python an empty list is false. Rust <b>has no such table</b> —
+      the only thing allowed in a condition is {{pick.1|code}}, so both <code>if 1</code> and
+      <code>if opt</code> stop the build (E0308). Line {{site.line}} is where that kind is written. To
+      branch on a maybe-value you <b>take it apart by shape</b>, <code>if let Some(v) = opt</code>, which
+      is a plate in part 2.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.2|code}}{{pick.2|josa:은,는}} 참·거짓 종류다 — {{pick.1|code}}{{pick.1|josa:이,가}} 그렇게 정한다."
+      en: "{{pick.2|code}} on line {{site.line}} is of the truth kind — {{pick.1|code}} says so."
+    - ko: "그 값은 조건 자리에 그대로 올 수 있다."
+      en: "That value may stand in a condition as it is."
+    - ko: "수·글자·없음은 못 온다 — 먼저 견주거나 갈라야 한다."
+      en: "A number, text or absence may not — compare or take apart first."
+
+rule:
+  ko: "<b>조건에는 참·거짓만 온다.</b> 0 도 빈 것도 없음도 거짓이 아니라 타입 오류다."
+  en: "<b>Only truth values go in a condition.</b> Zero, empty and absent are not false — they are type errors."
+result:
+  label:
+    ko: "{{site.line}}행의 {{pick.2}}"
+    en: "{{pick.2}} on line {{site.line}}"
+  value: "{{pick.1}}"
+  note:
+    ko: "조건 자리에 올 수 있는 종류"
+    en: "the kind a condition accepts"
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 조건 자리에 그대로 둘 수 있는 값입니다."
+  en: "{{pick.2|code}} can be placed in a condition as it is."
+payoff:
+  ko: "이걸 알면 C 에서 온 사람의 첫 오류 「`if n` 이 왜 안 되나」(E0308)가 풀립니다 — 견주는 한 줄이 빠진 겁니다."
+  en: "This untangles the first error of anyone coming from C, “why is `if n` refused” (E0308) — one comparison is missing."
+bridge:
+  ko: "파이썬 `if items:` 는 빈 목록을 거짓으로 칩니다. Rust 는 `if items.is_empty()` 처럼 <b>묻는 줄</b>을 적게 합니다."
+  en: "Python's `if items:` treats an empty list as false. Rust makes you write <b>the question</b>, `if items.is_empty()`."
+misconceptions:
+  - ko: "0 이면 거짓이다 — 타입 오류입니다(E0308). 수는 조건에 못 옵니다."
+    en: "Zero is false — it is a type error (E0308). Numbers cannot stand in a condition."
+  - ko: "없음(`None`)은 거짓이다 — 역시 E0308. `if let Some(v) = opt` 로 모양을 갈라야 합니다."
+    en: "Absence (`None`) is false — E0308 as well. Take it apart with `if let Some(v) = opt`."
+  - ko: "참·거짓은 1 과 0 이다 — 정수로 바꾸려면 `as u8` 을 적어야 합니다. 반대 방향은 아예 안 돼요."
+    en: "Truth values are 1 and 0 — turning one into an integer needs `as u8`. The reverse is not allowed at all."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>참·거짓 종류를 적은 자리</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>where the truth kind is written</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 종류는 이름이 아니라 그 옆의 타입이나 값이 정해요."
+          en: "{{pick.2|code}} is <b>the name</b>. The kind is set by the type or value beside it, not by the name."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 종류냐", en: "The sharpest spot — the name or the kind" }
+          code:
+            - "fn ready() -> bool   // 참·거짓을 돌려준다"
+            - "fn ready() -> u8     // 같은 이름, 수를 돌려준다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>인자 자리</b>입니다. 종류는 그 뒤에 적혀 있어요."
+          en: "{{pick.3|code}} is the <b>parameter slot</b>. The kind is written after it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 인자냐 돌려주는 종류냐", en: "The sharpest spot — the parameters or the returned kind" }
+          code:
+            - "fn is_empty(n: usize) -> bool"
+            - "//          ^인자      ^종류"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>참·거짓을 돌려주는</b> 함수입니다."
+      en: "Choose what goes in the blank. Line {{site.line}} is a function that <b>returns a truth value</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "bool", mono: true }
+      - t: "u8"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>수</b>입니다. 조건 자리에 못 오고, 참·거짓과 서로 변하지도 않아요."
+            en: "That is a <b>number</b>. It cannot stand in a condition and never converts to or from a truth value."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 수냐 참·거짓이냐", en: "The sharpest spot — a number or a truth value" }
+            code:
+              - "if ready() { }   // bool 이면 된다"
+              - "if 1 { }         // E0308"
+      - t: "Option"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>없을 수 있는 값</b>입니다. 조건에 그대로 못 오고 `if let` 로 갈라야 해요."
+            en: "That is a <b>maybe-value</b>. It cannot stand in a condition; `if let` takes it apart."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 갈라야 한다", en: "The sharpest spot — it must be taken apart" }
+            code:
+              - "if opt { }                 // E0308"
+              - "if let Some(v) = opt { }   // 된다"
+      - t: "String"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>글자</b>입니다. 빈 글자도 거짓이 아니에요 — `is_empty()` 로 물어야 합니다."
+            en: "That is <b>text</b>. Even empty text is not false — ask with `is_empty()`."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 빈 것은 거짓이 아니다", en: "The sharpest spot — empty is not false" }
+            code:
+              - "if s { }              // E0308"
+              - "if s.is_empty() { }   // 된다"
+
+why_gate:
+  q:
+    ko: "Rust 는 왜 <code>if n</code> 처럼 수를 조건에 두는 것을 <b>막을까요</b>?"
+    en: "Why does Rust <b>refuse</b> a number in a condition, as in <code>if n</code>?"
+  choices:
+    - t:
+        ko: "「0 이 거짓」이라는 표를 언어가 안 두어서, 무엇을 묻는지를 코드가 적게 하려고"
+        en: "Because the language keeps no “zero is false” table, so the code must state what it asks"
+      ok: true
+      fb:
+        ko: "그 방향입니다. `if n` 이 물으려던 것이 `n != 0` 인지 `n > 0` 인지도 적어 보세요."
+        en: "That is the direction. Was `if n` asking `n != 0` or `n > 0`? Write it down."
+    - t:
+        ko: "수를 참·거짓으로 바꾸는 비용이 커서"
+        en: "Because converting a number to a truth value is costly"
+      ok: false
+      fb:
+        ko: "비용 문제가 아닙니다. 뜻이 둘 이상이라 안 정한 거예요."
+        en: "Not cost. The meaning is ambiguous, so it was left undefined."
+    - t:
+        ko: "Rust 에 참·거짓 타입이 없어서"
+        en: "Because Rust has no truth type"
+      ok: false
+      fb:
+        ko: "있습니다. 오히려 그 타입만 조건에 오게 한 거예요."
+        en: "It does. It is the only type allowed in a condition."
+
+queries:
+  - { grammars: [rust], file: ./boolean-literal.scm }
+
+examples:
+  - code: "fn is_empty(n: usize) -> bool { n == 0 }        // 참·거짓을 돌려준다"
+    expect: { sites: 1, form: bool-fn, hole: "bool", picks: { 1: "bool", 2: "is_empty", 3: "(n: usize)" } }
+  - code: "fn f() { let done = false; }                   // done -> false (bool)"
+    expect: { sites: 1, form: bool-let, picks: { 1: "false", 2: "done", 3: "let" } }
+  - code: "struct Flag { on: bool }                       // on -> 참·거짓 한 칸"
+    expect: { sites: 1, form: bool-field, picks: { 1: "bool", 2: "on" } }
+  - code: "fn f() { let n = 1; }                          // 수 — 조건에 못 온다"
+    expect: none

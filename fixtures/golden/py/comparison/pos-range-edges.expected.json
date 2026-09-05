@@ -1,0 +1,67 @@
+[
+  {
+    "queryId": "py/comparison",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "compare",
+    "startLine": 2,
+    "startCol": 11,
+    "endLine": 2,
+    "endCol": 21,
+    "nodeKind": "comparison_operator",
+    "inError": false
+  },
+  {
+    "queryId": "py/comparison",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "compare",
+    "startLine": 2,
+    "startCol": 11,
+    "endLine": 2,
+    "endCol": 16,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "py/comparison",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "compare",
+    "startLine": 2,
+    "startCol": 17,
+    "endLine": 2,
+    "endCol": 19,
+    "nodeKind": "!=",
+    "inError": false
+  },
+  {
+    "queryId": "py/comparison",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "hole",
+    "form": "compare",
+    "startLine": 2,
+    "startCol": 17,
+    "endLine": 2,
+    "endCol": 19,
+    "nodeKind": "!=",
+    "inError": false
+  },
+  {
+    "queryId": "py/comparison",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "compare",
+    "startLine": 2,
+    "startCol": 20,
+    "endLine": 2,
+    "endCol": 21,
+    "nodeKind": "integer",
+    "inError": false
+  }
+]

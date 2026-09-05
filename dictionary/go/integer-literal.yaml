@@ -1,0 +1,276 @@
+schema: 1
+id: go/integer-literal
+# 0부 축 1 (`docs/curriculum/README.md` §8 · `go.md` §0.1 0-1).
+# 보편형은 `common/integer-literal` 이다 — 자릿수가 정해져 있고 가장 큰 값 다음이
+# 가장 작은 값이라는 기계는 Go·자바·C 가 같다. Go 에서 다시 배울 것은 「적힌 숫자는
+# 아직 타입이 없다」 하나다.
+universal: common/integer-literal
+name: { ko: "정수 값과 그 폭", en: "Integer literal and its width" }
+token: "1"
+grammars: [go]
+framework: null
+essential: true
+difficulty: 1
+prereq: [cs/binary-representation, cs/bit-and-byte, cs/integer-overflow]
+confusions: []
+
+dict:
+  one_liner:
+    ko: >-
+      적힌 숫자는 아직 타입이 없다. 이름에 담기는 순간 자릿수가 정해진다.
+    en: >-
+      A written number has no type yet. Landing in a name is what fixes its width.
+  why:
+    ko: >-
+      Go 에서 소스에 적은 숫자는 <b>타입이 없는 상수</b>입니다. {{site.line}}행의 {{pick.3|code}}{{pick.3|josa:은,는}} 그 자체로는
+      자릿수가 없고, {{pick.2|code}}{{pick.2|josa:이,가}} 그것을 받는 순간 앞에 적힌 {{pick.1|code}}{{pick.1|josa:이,가}}
+      자릿수를 정합니다. 그래서 <code>var f float64 = 1</code> 은 되는데 <code>var n int32 = 1; var m int64 =
+      n</code> 은 멈춰요 — 앞의 <code>1</code> 은 아직 타입이 없고 뒤의 <code>n</code> 은 이미 있습니다. 그리고 자릿수가 정해지면 <b>가장
+      큰 값 다음이 가장 작은 값</b>이 됩니다.
+    en: >-
+      A number written in Go source is an <b>untyped constant</b>. On line {{site.line}}
+      {{pick.3|code}} has no width of its own; the width is fixed the moment {{pick.2|code}} takes it,
+      by the {{pick.1|code}} written in front. That is why <code>var f float64 = 1</code> works while
+      <code>var n int32 = 1; var m int64 = n</code> stops — the bare <code>1</code> has no type yet,
+      and <code>n</code> already has one. Once the width is fixed, <b>one past the largest value is
+      the smallest</b>.
+  trace:
+    - ko: >-
+        {{site.line}}행은 이름 {{pick.2|code}}{{pick.2|josa:을,를}} 세운다.
+      en: >-
+        Line {{site.line}} sets up the name {{pick.2|code}}.
+    - ko: >-
+        앞에 적힌 {{pick.1|code}}{{pick.1|josa:이,가}} 자릿수를 정한다.
+      en: >-
+        The {{pick.1|code}} in front fixes how many bits it gets.
+    - ko: >-
+        {{pick.3|code}}{{pick.3|josa:은,는}} 그 자릿수 안으로 들어간다.
+      en: >-
+        {{pick.3|code}} goes in inside that width.
+
+rule:
+  ko: >-
+    <b>적힌 숫자에는 타입이 없다.</b> 자릿수는 그것을 받는 이름의 타입이 정한다.
+  en: >-
+    <b>A written number has no type.</b> The name that takes it fixes the width.
+result:
+  label: { ko: "{{site.line}}행의 이름", en: "the name on line {{site.line}}" }
+  value: "{{pick.1}} {{pick.2}}"
+  note: { ko: "자릿수가 여기서 정해진다", en: "the width is fixed here" }
+ok: { ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 이제 자릿수가 정해진 이름입니다.", en: "{{pick.2|code}} is now a name with a fixed width." }
+payoff:
+  ko: >-
+    이걸 알면 「같은 1 인데 왜 여기선 되고 저기선 멈추나」가 풀립니다 — 리터럴이냐 이름이냐가 갈랐습니다.
+  en: >-
+    This untangles "the same 1 works here and stops there" — a literal and a name are not the same
+    thing.
+bridge:
+  ko: >-
+    파이썬에는 자릿수가 없어 <code>2**100</code> 도 그대로 담깁니다. Go 는 담기는 순간 자릿수를 못 박습니다.
+  en: >-
+    Python has no width, so <code>2**100</code> just fits. Go pins the width the moment a value
+    lands.
+misconceptions:
+  - ko: >-
+      <code>int</code> 와 <code>int64</code> 가 같다 — 64비트 기계에서 크기는 같아도 <b>다른 타입</b>이라 서로 못 섞습니다.
+    en: >-
+      <code>int</code> and <code>int64</code> are the same — the size may match on a 64-bit build, but
+      they are <b>different types</b> and do not mix.
+  - ko: >-
+      큰 수를 넣으면 자릿수가 늘어난다 — 안 늘어납니다. 넘치면 반대편 끝으로 돌아갑니다.
+    en: >-
+      A bigger number gets more bits — it does not. On overflow it wraps to the other end.
+  - ko: >-
+      소스에 적은 숫자에도 타입이 있다 — 담기기 전까지는 없습니다. 그래서 같은 <code>1</code> 이 실수 자리에도 들어갑니다.
+    en: >-
+      A number in the source already has a type — it does not until it lands. That is why the same
+      <code>1</code> also fits a decimal slot.
+
+point:
+  - q:
+      ko: >-
+        {{site.line}}행에서 <b>자릿수를 정하는 낱말</b>을 짚어 보세요.
+      en: >-
+        On line {{site.line}}, point at <b>the word that fixes the width</b>.
+    hint: { ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다.", en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose." }
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 이름을 길게 지어도 자릿수는 그대로예요.
+          en: >-
+            {{pick.2|code}} is the <b>name</b>. A longer name gets no more bits.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 타입이냐", en: "The sharpest spot — the name or the type" }
+          code:
+            - "var n int8   // 8칸"
+            - "var n int64  // 같은 이름, 64칸"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 담기는 <b>값</b>입니다. 값이 작아도 자릿수는 타입이 정한 만큼 잡혀요.
+          en: >-
+            {{pick.3|code}} is the <b>value</b> that lands. A small value still takes all the bits the type
+            asks for.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값이냐 자릿수냐", en: "The sharpest spot — the value or the width" }
+          code:
+            - "var n int8 = 0    // 8칸"
+            - "var m int64 = 0   // 64칸"
+
+meaning:
+  - q:
+      ko: >-
+        {{site.line}}행의 {{pick.3|code}}{{pick.3|josa:은,는}} 소스에 적힌 그대로일 때 타입이 무엇일까요?
+      en: >-
+        What is the type of {{pick.3|code}} on line {{site.line}}, as written in the source?
+    options:
+      - t:
+          ko: >-
+            아직 타입이 없다 — 받는 쪽이 정할 때까지 기다린다
+          en: >-
+            It has none yet — it waits for whatever takes it to decide
+      - t:
+          ko: >-
+            언제나 기계의 기본 정수 타입이다
+          en: >-
+            It is always the machine's default whole-number type
+        diag:
+          t:
+            ko: >-
+              그 말이 맞다면 <code>var f float64 = 1</code> 이 멈춰야 합니다. 안 멈춰요 — 받는 쪽이 실수면 실수로 들어갑니다.
+            en: >-
+              If that held, <code>var f float64 = 1</code> would stop. It does not — when the taker is a
+              decimal, it goes in as one.
+      - t:
+          ko: >-
+            적힌 자릿수만큼의 타입이다
+          en: >-
+            It is a type as wide as the digits written
+        diag:
+          t:
+            ko: >-
+              자릿수는 적힌 글자 수로 안 정해집니다. <code>1</code> 도 64칸 자리에 들어가고 <code>1000000</code> 도 8칸 자리에는 안 들어가요.
+            en: >-
+              Width is not read off the digits. <code>1</code> fits a 64-bit slot, and <code>1000000</code>
+              does not fit an 8-bit one.
+      - t:
+          ko: >-
+            문자열이다 — 소스에 글자로 적혀 있으니까
+          en: >-
+            It is text — it is written as characters in the source
+        diag:
+          t:
+            ko: >-
+              소스의 글자는 파서가 읽는 표기이고, 값은 수입니다. 둘을 섞으면 <code>1 + 1</code> 이 <code>11</code> 이 되어야 하는데 그렇지 않아요.
+            en: >-
+              The characters are notation the parser reads; the value is a number. If they were the same,
+              <code>1 + 1</code> would be <code>11</code>. It is not.
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>32칸짜리 정수</b> 이름을 세웁니다.
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} sets up a <b>32-bit whole number</b>.
+    hint: { ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다.", en: "Your choice is written into the code at once. Submit to have it marked." }
+    options:
+      - { t: "int32", mono: true }
+      - t: "float64"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이건 <b>실수</b> 타입이라 64칸을 쓰고 소수를 담습니다. 정수만 담는 자리에 쓰면 나눗셈의 답이 <code>3</code> 이 아니라 <code>3.5</code>
+              가 돼요.
+            en: >-
+              That is the <b>decimal</b> type — 64 bits that carry a fraction. In a whole-number slot,
+              division answers <code>3.5</code> instead of <code>3</code>.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 정수냐 실수냐", en: "The sharpest spot — whole or decimal" }
+            code:
+              - "var n int32 = 7 / 2     // 3"
+              - "var d float64 = 7.0 / 2  // 3.5"
+      - t: "string"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이건 <b>글자 묶음</b>이라 자릿수가 고정이 아닙니다. 글자 수만큼 자리를 쓰고, 셈 기호를 만나면 더하기가 아니라 잇기가 돼요.
+            en: >-
+              That is a <b>run of characters</b> and its size is not fixed. It grows with the text, and under
+              the plus sign it joins instead of adding.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 수냐 글자냐", en: "The sharpest spot — a number or text" }
+            code:
+              - "var n int32 = 1"
+              - "var s string = \"1\"   // 셈에 못 쓴다"
+      - t: "bool"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이건 <b>참·거짓</b> 타입이라 수를 못 담습니다. Go 에서 참·거짓은 수가 아니고 서로 오가지도 않아요.
+            en: >-
+              That is the <b>true/false</b> type and carries no number. In Go the two never convert into each
+              other.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 수냐 참·거짓이냐", en: "The sharpest spot — a number or a truth value" }
+            code:
+              - "var n int32 = 1"
+              - "var ok bool = true"
+
+why_gate:
+  q:
+    ko: >-
+      {{site.line}}행은 왜 값 앞에 <b>자릿수를 먼저</b> 적을까요?
+    en: >-
+      Why does line {{site.line}} write <b>the width first</b>, before the value?
+  choices:
+    - t:
+        ko: >-
+          컴파일러가 이 이름에 자리를 얼마나 잡을지 그 줄에서 정해야 해서
+        en: >-
+          Because the compiler has to settle how much room this name gets, right on that line
+      ok: true
+      fb:
+        ko: >-
+          그 방향입니다. 자리를 나중에 정하면 무엇을 못 정하는지도 한 줄 적어 보세요.
+        en: >-
+          That is the direction. Add a line on what could not be settled if the room came later.
+    - t:
+        ko: >-
+          Go 가 읽기 좋으라고 고른 순서라서
+        en: >-
+          Because Go picked that order to read nicely
+      ok: false
+      fb:
+        ko: >-
+          읽기 문제가 아닙니다. 값이 놓이기 전에 자리가 정해져야 해서 생긴 순서예요.
+        en: >-
+          It is not about reading. The order exists because the room is settled before any value lands.
+    - t:
+        ko: >-
+          값을 보면 자릿수를 알 수 있어서
+        en: >-
+          Because the value tells you the width
+      ok: false
+      fb:
+        ko: >-
+          값으로는 못 압니다. <code>1</code> 하나만 봐서는 8칸인지 64칸인지 안 나와요.
+        en: >-
+          The value cannot tell you. A bare <code>1</code> says nothing about 8 bits or 64.
+
+queries:
+  - { grammars: [go], file: ./integer-literal.scm }
+
+examples:
+  - code: "func f() { var n int32 = 1 }"
+    expect: { sites: 1, form: vardecl, hole: "int32", picks: { 1: "int32", 2: "n", 3: "1" } }
+  - code: "func f() { limit := 20 }"
+    expect: { sites: 1, form: short, picks: { 2: "limit", 3: "20" } }
+  - code: "const maxRetries = 3"
+    expect: { sites: 1, form: const, picks: { 2: "maxRetries", 3: "3" } }
+  - code: "func f() { var ratio float64 = 1.5 }"
+    expect: none

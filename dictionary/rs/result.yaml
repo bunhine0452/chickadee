@@ -1,0 +1,181 @@
+schema: 1
+id: rs/result
+# 2부 (`rs.md` §3). 보편형은 `common/try-catch` — 실패를 다루는 자리는 같고 Rust 에서 다시 배울 것은
+# 실패가 던져지지 않고 **반환값으로** 온다는 것이다. `try`/`catch` 가 없어 오류 경로가 서명에 다 적힌다.
+# `.unwrap()`·`.expect()` 도 여기 잡는다 — 오류 경로를 안 쓰려고 AI 가 가장 자주 넣는 것(ai-pm 2,797곳).
+universal: common/try-catch
+name: { ko: 실패가 값으로 온다, en: Failure arrives as a value }
+token: "Result"
+grammars: [rust]
+framework: null
+essential: true
+difficulty: 3
+prereq: [rs/enum-item, cs/error-vs-bug]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "실패는 던져지지 않고 돌려받는 값의 한 갈래다. 서명이 무엇이 잘못될 수 있는지를 적는다."
+    en: "Failure is not thrown; it comes back as a variant of the returned value."
+  why:
+    ko: >-
+      다른 언어는 실패를 <b>던지고</b>, 부르는 쪽은 서명만 봐서는 무엇이 날아올지 모릅니다. Rust 는
+      {{site.line}}행의 {{pick.1|code}} 처럼 <b>돌려주는 값에</b> 적습니다 — 됐으면 {{pick.2|code}}, 아니면 오류
+      값이에요. 그래서 실패를 무시할 수가 없습니다: 그 값을 갈라야 안의 것이 나오고, 안 가르면
+      컴파일러가 경고해요. 갈래 둘짜리 `enum` 이라 `Option` 과 같은 기계이고 다른 것은 「왜」를 든다는
+      것뿐입니다. `.unwrap()` 은 「실패면 터져라」라 갈라 보기를 건너뛰는 지름길이고, 이 리포에서
+      `?` 다음으로 흔한 자리(2,797곳)예요 — 시제품에서는 괜찮고 배포본에서는 이유가 사라집니다.
+    en: >-
+      Elsewhere failure is <b>thrown</b>, and a caller cannot tell from the signature what might fly at
+      them. Rust writes it <b>into the return value</b>, like {{pick.1|code}} on line {{site.line}} —
+      a {{pick.2|code}} when it went well, an error value otherwise. So failure cannot be ignored: you
+      take the value apart to get at what is inside, and the compiler warns if you do not. It is a
+      two-variant enum, the same machine as `Option`, differing only in carrying a <b>why</b>.
+      `.unwrap()` means “blow up on failure,” a shortcut past the check, and it is the second most common
+      spot in this repo after `?` (2,797 sites) — fine in a prototype, silent about reasons in production.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 「{{pick.2|code}} 이거나 오류」라고 적는다."
+      en: "{{pick.1|code}} on line {{site.line}} says “a {{pick.2|code}} or an error.”"
+    - ko: "부르는 쪽은 그 값을 갈라야 안의 것을 얻는다 — 던져지는 것은 없다."
+      en: "The caller takes the value apart to get what is inside — nothing is thrown."
+    - ko: "갈라지지 않은 값은 경고를 받고, ? 는 그 가름을 한 글자로 한다."
+      en: "An untouched value draws a warning, and ? does the split in one character."
+
+rule:
+  ko: "<b>실패는 반환값의 갈래다.</b> 서명이 오류 타입을 적고, 갈라야 값이 나오며, unwrap 은 실패면 패닉이다."
+  en: "<b>Failure is a variant of the return value.</b> The signature names the error type, extraction needs a split, and unwrap panics on failure."
+result:
+  label:
+    ko: "{{site.line}}행의 값"
+    en: "the value on line {{site.line}}"
+  value: "{{pick.1}}<{{pick.2}}, …>"
+  note:
+    ko: "됐거나 오류거나"
+    en: "fine or an error"
+ok:
+  ko: "{{pick.1|code}}<{{pick.2}}, …> 는 {{pick.2|code}}{{pick.2|josa:이,가}} 오거나 오류가 온다는 뜻입니다. 서명에 둘 다 적혀 있어요."
+  en: "{{pick.1|code}}<{{pick.2}}, …> means either a {{pick.2|code}} or an error arrives. The signature lists both."
+payoff:
+  ko: "이걸 알면 「왜 값 앞에 `?` 나 `match` 가 붙나」와 「`unwrap` 이 왜 터지나」가 함께 풀립니다."
+  en: "This untangles both “why is there a `?` or `match` before the value” and “why did `unwrap` blow up.”"
+bridge:
+  ko: "자바는 `throws` 를 적어도 `RuntimeException` 은 숨습니다. Rust 는 <b>모든</b> 실패가 반환 타입에 적혀 서명이 거짓말을 못 합니다."
+  en: "Java's `throws` still hides `RuntimeException`. In Rust <b>every</b> failure is in the return type, so a signature cannot lie."
+misconceptions:
+  - ko: "오류는 던져진다 — 돌려받는 값의 갈래입니다. `try`/`catch` 가 없어요."
+    en: "Errors are thrown — they are a variant of the returned value. There is no `try`/`catch`."
+  - ko: "`unwrap()` 은 값을 꺼내는 정상 방법이다 — 실패면 <b>패닉</b>합니다. 이유가 사라져요."
+    en: "`unwrap()` is the normal way to extract — on failure it <b>panics</b>, and the reason is lost."
+  - ko: "실패를 무시해도 된다 — 컴파일러가 안 쓴 값을 경고합니다(`#[must_use]`). 적어도 `let _ =` 로 버렸다고 적어야 해요."
+    en: "Failure can be ignored — the compiler warns about the unused value (`#[must_use]`). At least write `let _ =` to say it was dropped."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>실패가 값으로 온다고 적은 타입</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the type that says failure arrives as a value</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>됐을 때의 타입</b>입니다. 실패할 수 있다는 것은 그것을 감싼 바깥 타입이 말해요."
+          en: "{{pick.2|code}} is <b>the type on success</b>. That it may fail is said by the outer type around it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 안이냐 바깥이냐", en: "The sharpest spot — inside or outside" }
+          code:
+            - "i32                    // 늘 된다"
+            - "Result<i32, String>    // 안 될 수도"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 타입 인자를 여는 <b>꺾쇠</b>입니다. 실패를 든다고 말하는 것은 그 앞의 이름이에요."
+          en: "{{pick.3|code}} is the <b>angle bracket</b> opening the type arguments. The name before it says failure is carried."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 괄호냐", en: "The sharpest spot — the name or the bracket" }
+          code:
+            - "Result<i32, String>"
+            - "// ^이름 ^꺾쇠"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>실패할 수 있고 그 이유를 든</b> 값입니다."
+      en: "Choose what goes in the blank. Line {{site.line}} is a value that <b>may fail and carries the reason</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "Result", mono: true }
+      - t: "Option"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>있거나 없거나</b>입니다. 없는 <b>이유</b>를 못 들어요."
+            en: "That is <b>present or absent</b>. It cannot carry the <b>reason</b>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 이유가 있나", en: "The sharpest spot — is there a reason" }
+            code:
+              - "Option<u32>          // 없음"
+              - "Result<u32, Error>   // 왜 안 됐는지"
+      - t: "Vec"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>목록</b>입니다. 됐거나 안 됐거나가 아니에요."
+            en: "That is a <b>list</b>. Not fine-or-error."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 둘 중 하나냐 여럿이냐", en: "The sharpest spot — one of two or many" }
+            code:
+              - "Result<u32, E>   // 하나 또는 오류"
+              - "Vec<u32>         // 0개 이상"
+      - t: "Box"
+        mono: true
+        diag:
+          t:
+            ko: "이건 값을 <b>힙에</b> 두는 상자입니다. 오류 타입 자리에 `Box&lt;dyn Error&gt;` 로 오기는 하지만 갈래가 아니에요."
+            en: "That puts a value <b>on the heap</b>. It appears in the error slot as `Box&lt;dyn Error&gt;`, but it is not the variant type."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 어느 자리에 오나", en: "The sharpest spot — which slot it fills" }
+            code:
+              - "Result<u32, Box<dyn Error>>"
+              - "// ^갈래       ^오류 타입"
+
+why_gate:
+  q:
+    ko: "Rust 는 왜 실패를 던지지 않고 <b>돌려주게</b> 했을까요?"
+    en: "Why does Rust <b>return</b> failure rather than throw it?"
+  choices:
+    - t:
+        ko: "부르는 쪽이 서명만 보고 무엇이 잘못될 수 있는지 알고, 안 다루면 컴파일러가 지적하게 하려고"
+        en: "So a caller knows from the signature what can break, and the compiler flags it when it is not handled"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 함수의 오류 타입이 무엇인지, 부르는 쪽이 그것을 어떻게 다루는지도 보세요."
+        en: "That is the direction. See what this function's error type is and how the caller handles it."
+    - t:
+        ko: "던지기가 느려서"
+        en: "Because throwing is slow"
+      ok: false
+      fb:
+        ko: "그것도 사실이지만 이유는 아닙니다. 서명이 정직해지는 것이 이유예요."
+        en: "True as well, but not the reason. Honest signatures are."
+    - t:
+        ko: "Rust 에 예외가 없어서"
+        en: "Because Rust has no exceptions"
+      ok: false
+      fb:
+        ko: "없는 것은 결과입니다. 돌려주기로 정했기 때문에 던지기가 필요 없어진 거예요."
+        en: "That absence is the consequence. Because failure is returned, throwing was not needed."
+
+queries:
+  - { grammars: [rust], file: ./result.scm }
+
+examples:
+  - code: "fn parse(s: &str) -> Result<i32, String> { Err(s.to_string()) }"
+    expect: { sites: 2, form: result-type, hole: "Result", picks: { 1: "Result", 2: "i32", 3: "<" } }
+  - code: "fn f() { match r { Ok(v) => v, Err(e) => 0 } }      // 두 갈래를 다 다룬다"
+    expect: { sites: 2, form: arm, picks: { 1: "Ok", 2: "v", 3: "=>" } }
+  - code: "fn f() { let n = text.parse().unwrap(); }        // 실패면 패닉 — 지름길"
+    expect: { sites: 1, form: unwrap, picks: { 1: "unwrap", 2: "text.parse()", 3: "()" } }
+  - code: "fn f() { let x = Some(1); }                     // 없음 — rs/option"
+    expect: none

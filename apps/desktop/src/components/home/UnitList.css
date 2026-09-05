@@ -1,0 +1,240 @@
+.units {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-5);
+  display: grid;
+  gap: var(--s-3);
+  align-content: start;
+  min-width: 0;
+}
+
+.units-head h2 {
+  margin: 0;
+  font-size: var(--fs-3);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  color: var(--text);
+}
+
+.units-sum {
+  margin: var(--s-1) 0 0;
+  font-size: var(--fs-3);
+  color: var(--text-muted);
+  max-width: var(--measure);
+}
+
+.units-empty {
+  margin: 0;
+  max-width: var(--measure);
+  font-size: var(--fs-4);
+  line-height: var(--lh-body);
+  color: var(--text-muted);
+}
+
+.unit-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--s-1);
+}
+
+.unit {
+  border-top: 1px solid var(--border);
+  min-width: 0;
+}
+
+.unit:first-child {
+  border-top: 0;
+}
+
+/* 단원 한 줄 — 번호 · 이름 · 진행 · 막대. 이름 칸만 늘어난다. */
+.unit-h {
+  appearance: none;
+  width: 100%;
+  background: transparent;
+  border: 0;
+  border-radius: var(--r-sm);
+  padding: var(--s-3) var(--s-2);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    'no name count'
+    'bar bar bar';
+  align-items: baseline;
+  gap: var(--s-2) var(--s-3);
+}
+
+.unit-h:hover { background: var(--surface-2) }
+
+.unit-h:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+.unit-no {
+  grid-area: no;
+  font-size: var(--fs-1);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.unit-name {
+  grid-area: name;
+  font-size: var(--fs-3);
+  font-weight: var(--fw-medium);
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.unit-count {
+  grid-area: count;
+  font-size: var(--fs-2);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.unit-bar {
+  grid-area: bar;
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+
+.unit-bar::after {
+  content: '';
+  display: block;
+  height: 100%;
+  width: var(--fill, 0%);
+  background: var(--accent);
+}
+
+.unit[data-state='done'] .unit-bar::after { background: var(--ok) }
+
+.unit-body {
+  padding: 0 var(--s-2) var(--s-4);
+  display: grid;
+  gap: var(--s-3);
+  min-width: 0;
+}
+
+.unit-meta {
+  margin: 0;
+  font-size: var(--fs-1);
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.concepts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0;
+  min-width: 0;
+}
+
+/* 개념 한 줄. 좁아지면 이름만 남기고 나머지가 아래로 접힌다. */
+.cpt {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  align-items: baseline;
+  gap: var(--s-2) var(--s-3);
+  padding: var(--s-2) 0;
+  border-top: 1px dotted var(--border);
+  font-size: var(--fs-2);
+  min-width: 0;
+}
+
+.cpt-name {
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+/* 코드에 실제로 적히는 글자. 이름 옆에 곁들인다 — 색이 아니라 서체가 가른다. */
+.cpt-tok {
+  margin-left: var(--s-2);
+  padding: 0 var(--s-1);
+  border-radius: var(--r-sm);
+  background: var(--code-bg);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  color: var(--text-muted);
+}
+
+.cpt[data-state='locked'] .cpt-name { color: var(--text-muted) }
+
+.cpt-track,
+.cpt-layer,
+.cpt-state {
+  color: var(--text-muted);
+  white-space: nowrap;
+  font-size: var(--fs-1);
+}
+
+.cpt[data-state='current'] .cpt-state {
+  color: var(--accent);
+  font-weight: var(--fw-medium);
+}
+
+.cpt-go,
+.unit-course {
+  appearance: none;
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  padding: var(--s-1) var(--s-3);
+  font: inherit;
+  font-size: var(--fs-1);
+  color: var(--text);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.unit-course {
+  justify-self: start;
+  font-size: var(--fs-2);
+  padding: var(--s-2) var(--s-4);
+}
+
+.cpt-go:hover,
+.unit-course:hover { background: var(--surface-2) }
+
+.cpt-go:focus-visible,
+.unit-course:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* 좁은 창 — 개념 줄을 흐르게 두어 두 줄로 접는다. 잘리거나 겹치지 않는 것이 먼저다. */
+@media (width <= 900px) {
+  .cpt {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+  }
+
+  .cpt-name { flex: 1 1 100% }
+  .cpt-go { margin-left: auto }
+}
+
+@media (width <= 760px) {
+  .units { padding: var(--s-4) var(--s-3) }
+}
+
+/* 0장 안내 — 끝이 있는 프롤로그라는 약속 (D136). */
+.unit-lead {
+  margin: 0;
+  max-width: var(--measure);
+  font-size: var(--fs-4);
+  line-height: var(--lh-body);
+  color: var(--text);
+}

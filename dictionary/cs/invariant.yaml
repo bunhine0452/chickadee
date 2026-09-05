@@ -1,0 +1,89 @@
+schema: 1
+id: cs/invariant
+universal: null
+name: { ko: "언제나 참이어야 하는 것", en: "Invariant" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+track_default: t0
+essential: false
+difficulty: 3
+prereq: [cs/state]
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "「이 값은 절대 음수가 아니다」를 어디서 지키나."
+    en: "“This value is never negative” — where is that kept?"
+  why:
+    ko: >-
+      코드에는 <b>깨지면 안 되는 사실</b>이 있습니다. 잔액은 음수가 아니다, 목록은 정렬돼 있다,
+      이 두 값의 합은 언제나 100이다. 이런 사실은 대개 <b>아무 데도 안 적혀</b> 있고 머릿속에만 있어요.
+      그래서 나중에 온 사람이 모르고 깹니다. 지키는 자리는 셋 중 하나예요 —
+      <b>만들 때</b> 확인해서 깨진 값은 아예 못 만들게 하거나, <b>고칠 때마다</b> 확인하거나,
+      <b>읽을 때</b> 확인하거나. 앞으로 갈수록 확인할 자리가 줄고, 뒤로 갈수록 늘어납니다.
+    en: >-
+      Code carries <b>facts that must not break</b>: a balance is never negative, this list stays
+      sorted, these two always sum to 100. Such facts are usually <b>written nowhere</b> and live
+      in someone's head — which is how a later contributor breaks one. There are three places to
+      keep them: check <b>at creation</b> so a broken value cannot exist, check <b>at every
+      change</b>, or check <b>at every read</b>. The earlier you place it, the fewer places to
+      check; the later, the more.
+  trace: []
+rule:
+  ko: "<b>만들 때 지키면 한 곳이고 읽을 때 지키면 모든 곳이다.</b>"
+  en: "<b>Kept at creation it is one place; kept at reading it is everywhere.</b>"
+ok:
+  ko: >-
+    깨진 값을 아예 못 만들게 하면 그 뒤로는 확인이 필요 없습니다. 만드는 길이 하나여야
+    이 방법이 성립해요.
+  en: >-
+    Make broken values impossible to create and no later check is needed. This works only when
+    there is one way to create them.
+misconceptions:
+  - ko: "주석에 적어 두면 지켜진다 — 주석은 아무것도 막지 않습니다."
+    en: "A comment keeps it — a comment blocks nothing."
+  - ko: "읽을 때마다 확인하는 것이 안전하다 — 확인할 자리가 계속 늘어나 하나를 빠뜨립니다."
+    en: "Checking at every read is safest — the places multiply and one gets missed."
+  - ko: "테스트가 지켜 준다 — 테스트가 지나간 길에서만 지켜집니다."
+    en: "Tests keep it — only on the paths the tests take."
+meaning:
+  - q:
+      ko: "「잔액은 음수가 아니다」를 지키려 합니다. <b>어디에 두면 확인할 자리가 가장 적나요?</b>"
+      en: "You want to keep “the balance is never negative”. <b>Where does that need the fewest checks?</b>"
+    hint:
+      ko: "깨진 값이 <b>존재할 수 없으면</b> 확인할 것도 없습니다."
+      en: "If a broken value <b>cannot exist</b>, there is nothing to check."
+    options:
+      - t: { ko: "값을 만드는 자리 — 깨진 값은 아예 못 만들게 한다", en: "At creation — a broken value cannot be made" }
+      - t: { ko: "값을 읽는 자리마다", en: "At every place that reads it" }
+        diag:
+          t:
+            ko: "읽는 자리는 <b>계속 늘어납니다</b>. 새 화면 하나가 늘 때마다 확인도 하나 늘고, 언젠가 하나를 빠뜨려요."
+            en: "Reading sites <b>keep multiplying</b>. Every new screen adds a check, and one eventually goes missing."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 자리가 느나 그대로냐", en: "The sharpest spot — growing or fixed" }
+            code:
+              - "만들 때: 한 곳"
+              - "읽을 때: 화면마다"
+      - t: { ko: "값을 화면에 그리는 자리", en: "Where it is drawn on screen" }
+        diag:
+          t:
+            ko: "그리는 자리에서 걸러도 <b>저장된 값은 이미 깨져 있습니다</b>. 보이지 않을 뿐이에요."
+            en: "Filtering at the drawing site leaves <b>the stored value already broken</b> — merely unseen."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 감추나 막나", en: "The sharpest spot — hiding or preventing" }
+            code:
+              - "그릴 때: 안 보이게 한다"
+              - "만들 때: 존재하지 않게 한다"
+      - t: { ko: "테스트 안", en: "Inside the tests" }
+        diag:
+          t:
+            ko: "테스트는 <b>지나간 길에서만</b> 지켜 줍니다 — 새 경로가 생기면 그 길은 안 봅니다."
+            en: "Tests keep it <b>only on paths they take</b> — a new path is not watched."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 지나간 길이냐 모든 길이냐", en: "The sharpest spot — taken paths or all paths" }
+            code:
+              - "테스트: 지나간 길"
+              - "만들 때: 모든 길"

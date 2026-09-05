@@ -14,7 +14,7 @@ import { join } from 'node:path';
 
 import { describe, expect, test } from 'vitest';
 
-import { gradeDirection, gradeFlow, gradePicks } from './t2.js';
+import { gradeDirection, gradeFlow, gradePicks, gradeRole } from './t2.js';
 import type { T2Payload, T2Result } from './t2-types.js';
 
 interface Require {
@@ -29,9 +29,11 @@ interface Require {
 }
 
 type Answer =
-  | { kind: 'placement' | 'radius'; selected: string[] }
+  // 진입점(D142)은 노드가 폴더일 뿐 `gradePicks` 가 그대로 받는다 — 갈래를 따로 두지 않는다.
+  | { kind: 'placement' | 'radius' | 'entry'; selected: string[] }
   | { kind: 'flow'; ordered: string[] }
-  | { kind: 'direction'; picks: (0 | 1 | 2 | 3)[] };
+  | { kind: 'direction'; picks: (0 | 1 | 2 | 3)[] }
+  | { kind: 'role'; pick: number | null };
 
 interface Case {
   id: string;
@@ -52,6 +54,7 @@ function grade(one: Case): T2Result {
   if (one.answer.kind === 'direction') {
     return gradeDirection({ payload, picks: one.answer.picks, hints });
   }
+  if (one.answer.kind === 'role') return gradeRole({ payload, pick: one.answer.pick, hints });
   return gradePicks({ kind: one.answer.kind, payload, selected: one.answer.selected, hints });
 }
 

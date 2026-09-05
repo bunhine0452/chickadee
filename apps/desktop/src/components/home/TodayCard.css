@@ -1,0 +1,102 @@
+/* 홈의 하나의 초점. 화면에서 가장 크고 가장 진한 것이 여기다.
+   `section.today` 로 좁힌 이유: 코스 목차의 「오늘 챕터」 줄이 `li.cc-row.today` 라
+   맨 `.today` 로 두면 그 줄에 카드 테두리가 그려진다(실측). */
+section.today {
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-lg);
+  padding: var(--s-6);
+  display: grid;
+  gap: var(--s-4);
+}
+
+.today-k {
+  margin: 0;
+  font-size: var(--fs-2);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-tight);
+  color: var(--text-muted);
+}
+
+/* 문제 수와 분 — 홈에서 가장 큰 글자. 굵기와 크기로만 위계를 만든다. */
+.today-n {
+  margin: 0;
+  font-size: var(--fs-6);
+  font-weight: var(--fw-normal);
+  line-height: var(--lh-tight);
+  color: var(--text);
+}
+
+.today-n b {
+  font-weight: var(--fw-bold);
+}
+
+.today-go {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+}
+
+.today-streak {
+  margin: 0;
+  font-size: var(--fs-2);
+  color: var(--text-muted);
+}
+
+/* 오늘 나올 문제 — 자리 이름만. 물러나 있어야 하므로 본문보다 작고 흐리다. */
+.today-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--s-1);
+  border-top: 1px solid var(--border);
+  padding-top: var(--s-4);
+}
+
+/* 행은 산문이 아니다 — `reset.css` 의 `li{max-width:36em}` 이 걸리면 「새 문제」 이름표가
+   카드 한가운데에서 끝나고 오른쪽 절반이 빈다(실측: 2560 에서 1120px 카드 안 541px). */
+.today-list li {
+  display: grid;
+  grid-template-columns: 1.6em minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--s-2);
+  max-width: none;
+  font-size: var(--fs-2);
+  min-width: 0;
+}
+
+.tl-n {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.tl-name {
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.tl-sub {
+  color: var(--text-muted);
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+/* 오늘 할 것이 없는 날. 억지로 채우지 않는다 (정본 §3-7). */
+section.today-off {
+  border-color: var(--border);
+}
+
+.today-empty {
+  margin: 0;
+  max-width: var(--measure);
+  font-size: var(--fs-4);
+  color: var(--text-muted);
+  line-height: var(--lh-body);
+}
+
+@media (width <= 760px) {
+  section.today { padding: var(--s-5) var(--s-4) }
+  .today-n { font-size: var(--fs-5) }
+}

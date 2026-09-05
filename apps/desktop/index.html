@@ -1,19 +1,24 @@
 <!doctype html>
-<html lang="ko" data-theme="light">
+<html lang="ko">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Chickadee</title>
 
-    <!-- 서체 4개만 미리 받는다 — 본문 400·700, Mono 400, 포스터 400 (05 §1.4).
-         나머지 5개(500·600)는 필요한 화면에서 받는다. 네트워크 요청은 0 — 전부 번들 파일이다. -->
+    <!-- 서체 4개만 미리 받는다 — 본문 400·500·700, Mono 400 (05 §1.4 · D182).
+         나머지 4개는 필요한 화면에서 받는다. 네트워크 요청은 0 — 전부 번들 파일이다.
+         디스플레이 서체는 없다(D182·D183) — 큰 제목도 같은 Plex Sans KR 로 그린다. -->
     <link rel="preload" as="font" type="font/woff2" crossorigin href="/src/assets/fonts/IBMPlexSansKR-Regular.woff2" />
     <link rel="preload" as="font" type="font/woff2" crossorigin href="/src/assets/fonts/IBMPlexSansKR-Bold.woff2" />
     <link rel="preload" as="font" type="font/woff2" crossorigin href="/src/assets/fonts/IBMPlexMono-Regular.woff2" />
-    <link rel="preload" as="font" type="font/woff2" crossorigin href="/src/assets/fonts/BlackHanSans-Regular.woff2" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/src/assets/fonts/IBMPlexSansKR-Medium.woff2" />
   </head>
   <body>
     <div id="root"></div>
+    <!-- 창을 잡아 끄는 띠 (D126). macOS 에서만 높이가 생긴다(`--chrome-top`) — 다른 OS 에서는
+         0px 이라 아무것도 가리지 않는다. #root 밖에 두는 이유는 화면 여섯이 각자 뿌리를
+         갈아 끼워도 이 띠는 한 자리에 남아야 하기 때문이다. -->
+    <div class="chrome-drag" data-tauri-drag-region></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

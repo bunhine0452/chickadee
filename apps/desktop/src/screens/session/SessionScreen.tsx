@@ -4,25 +4,24 @@
  * **상태는 여기 있고 규칙은 없다.** 무엇을 쓸지는 `session-flow` 가, 무엇이 맞는지는
  * `@chickadee/grading` 이, 겹이 얼마나 오를지는 `@chickadee/scheduler` 가 정한다.
  */
-import { ipc } from '@chickadee/ipc-client';
+import { ipc, log } from '@chickadee/ipc-client';
 import { announce, FlatButton } from '@chickadee/ui';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { t } from '@chickadee/i18n';
 
 import { JobBand } from '../../components/session/JobBand.js';
 import { SessionOverlay } from '../../components/session/SessionOverlay.js';
-import { LiferVeil } from '../../components/session/LiferVeil.js';
 import { Summary } from '../../components/session/Summary.js';
 import type { RungNo } from '../../components/session/ReprintLadder.js';
 import type { QueueItem } from '../../components/shell/TimeQueue.js';
 import { closeMark, markLiferOpen } from '../../devtools/audit.js';
 import {
-  buildProt, evalLine, type Question, type T1Result, type T2Result, type Tick,
+  buildProt, evalLine, type AssistCount, type Question, type T1Result, type T2Result, type Tick,
 } from '@chickadee/grading';
 import { baseName, loadLadder, rebuildPrompt, type LadderData } from '../../data/ladder.js';
 import { loadMastery, type Plate } from '../../data/session.js';
 import type { Track } from '@chickadee/store-sql';
-import { loadSettings } from '../../data/settings.js';
+import { loadSettings, saveSetting, useResolvedTheme } from '../../data/settings.js';
 import { loadSummary, markLifersShown, type SummaryData } from '../../data/summary.js';
 import {
   answerPlate, backFromPrereq, completeSession, finishT1Plate, finishT2Plate, gradeT1Plate,
@@ -30,6 +29,7 @@ import {
   pauseSession, pressDunno, returnToParent, savePlate, type T2Answer,
 } from '../../session-flow.js';
 import { currentPlate, useUi } from '../../store.js';
+import { loadFirstMeetingConcepts, readFirstText } from '../../data/read-first.js';
 import { T0Plate } from './T0Plate.js';
 import { T1Plate, type T1View } from './T1Plate.js';
 import { MAX_HINTS, T2Plate, type T2View } from './T2Plate.js';
@@ -60,6 +60,7 @@ function grammarKeyOf(path: string): string {
 const asViewTrack = (t: Track): 't0' | 't1' | 't2' => (t === 't3' ? 't0' : t);
 
 /** LIFER 베일에 넘길 것. 시각은 부르는 쪽이 굳힌다 — 컴포넌트는 시계를 읽지 않는다. */
+/** 판정란 안에 놓이는 첫 기록 (D131). `LiferNote` 가 그대로 받는 모양이다. */
 interface LiferView { concept: string; code: string; where: string; serial: string }
 
 const toQueueItem = (p: Plate): QueueItem => ({
@@ -74,6 +75,9 @@ export interface SessionScreenProps {
   repoId: number;
   repoName: string;
 }
+
+/** 참조가 매 렌더 바뀌면 훅 의존성이 흔들린다 — 빈 집합은 하나만 만든다. */
+const EMPTY_SET: ReadonlySet<string> = new Set<string>();
 
 export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.JSX.Element | null {
   const session = useUi((s) => s.session);
@@ -96,9 +100,18 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
   const [ladder, setLadder] = useState<LadderData | null>(null);
   const [dunnoId, setDunnoId] = useState(0);
   const [lifer, setLifer] = useState<LiferView | null>(null);
+  /** 첫 판을 함께 걷나 (D134). 설정을 읽기 전에는 띠를 내지 않는다 — 깜빡이면 안내가 아니다. */
+  const [coach, setCoach] = useState(false);
+  /** 0장에 담긴 개념들 (D138). 세션을 열 때 한 번 긷고 「먼저 읽기」가 이것만 본다. */
+  const [firstMeeting, setFirstMeeting] = useState<ReadonlySet<string>>(EMPTY_SET);
   const [summary, setSummary] = useState<SummaryData | null>(null);
-  /** Monaco 는 CSS 변수를 못 받아 테마를 hex 로 받는다 (05 §8) — 설정에서 한 번 읽는다. */
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  /*
+   * Monaco 는 CSS 변수를 못 받아 테마를 hex 로 받는다 (05 §8). 값은 `<html data-theme>` 에서
+   * 읽는다 — `settings.theme` 은 **마지막으로 고른 것의 기록**이라 「시스템 따름」인 채
+   * 한 번도 안 고른 사람에게는 기본 `light` 가 들어 있고, 그러면 판은 어둡고 편집기만
+   * 밝은 화면이 난다 (실측 · S2 스크린샷).
+   */
+  const theme = useResolvedTheme();
 
   // ── T1 판 하나가 들고 있는 것 (05 §5 · 04 §4~§6). 판이 바뀌면 아래 효과가 비운다.
   const [t1View, setT1View] = useState<T1View>('edit');
@@ -106,6 +119,8 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
   const [t1Draft, setT1Draft] = useState('');
   const [t1Ticks, setT1Ticks] = useState<Record<number, Tick>>({});
   const [t1Peeks, setT1Peeks] = useState(0);
+  /** 이 판의 글자가 어디서 왔나 (D143). 감점 없음 — 원장에 기록만 한다. */
+  const [t1Assist, setT1Assist] = useState<AssistCount | undefined>(undefined);
   const [t1Peeking, setT1Peeking] = useState(false);
   const [t1Downgraded, setT1Downgraded] = useState(false);
   const [t1SavedAt, setT1SavedAt] = useState<number | null>(null);
@@ -149,8 +164,21 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
   }, []);
 
   useEffect(() => {
-    void loadSettings().then((s) => setTheme(s.theme));
+    void loadSettings().then((s) => {
+      setCoach(!s.tutorialSeen);
+    });
   }, []);
+
+  // 아직 한 겹도 안 올린 개념 (D138 · D150). 세션 한 번에 한 번만 긷고 그 값을 세션 내내
+  // 쓴다 — 겹은 하루 최대 +1 이라(D3) 도중에 바뀌어도 그 판은 이미 첫 만남이었다.
+  // 실패해도 세션은 그대로 돈다: 「먼저 읽기」가 안 열릴 뿐이다.
+  useEffect(() => {
+    let alive = true;
+    void loadFirstMeetingConcepts()
+      .then((set) => { if (alive) setFirstMeeting(set); })
+      .catch(() => undefined);
+    return () => { alive = false; };
+  }, [repoId]);
 
   // 판이 바뀌면 사다리는 접힌다 — 앞 판의 4단 입력이 다음 판에 따라오면 안 된다.
   useEffect(() => {
@@ -238,6 +266,7 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
     }
     useUi.getState().setCarry(null);
     useUi.getState().goTo(next);
+    setLifer(null);
   }, [session, plate, pos, plates.length, dunnoId]);
 
   const submit = useCallback(async (sel: number) => {
@@ -248,6 +277,12 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
       rungsOpened: ladderOpen ? [rung] : [],
     });
     if (answered === null || plate === null) return;
+    // 첫 판을 한 번 걸어 봤으면 다음부터는 띠가 안 뜬다. 띠 자체는 이 판이 끝날 때까지
+    // 남는다 — 3걸음(판정 읽기)이 아직 남았다 (D134).
+    if (coach) {
+      void saveSetting('tutorialSeen', true, Date.now())
+        .catch(() => log.warn('첫 판 안내 표시를 저장하지 못했다'));
+    }
     const shown = useUi.getState().liferShown;
     // 연출은 첫 성공이고 다시 찍기·아래층이 아닐 때만 (D76).
     if (answered.correct && answered.layer[1] > answered.layer[0] && answered.layer[0] === 0
@@ -264,7 +299,7 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
         serial: `#${String(shown).padStart(3, '0')}`,
       });
     }
-  }, [elapsed, ladderOpen, rung, plate]);
+  }, [elapsed, ladderOpen, rung, plate, coach]);
 
   /** 원본 블록의 PROT 집합. 거터가 줄마다 다시 만들면 0.2 ms 예산을 못 지킨다 (04 §4.5). */
   const t1Prot = useMemo(() => {
@@ -284,8 +319,11 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
     setT1Draft(draft);
     setT1SavedAt(Date.now());
     // 초안은 `session_item.state_json` 으로 내려간다 (05 §3 저장 5시점).
-    useUi.getState().patchState(pos, { t1Draft: draft, t1Stage, peeks: t1Peeks });
-  }, [pos, t1Stage, t1Peeks]);
+    useUi.getState().patchState(pos, {
+      t1Draft: draft, t1Stage, peeks: t1Peeks,
+      ...(t1Assist === undefined ? {} : { assist: t1Assist }),
+    });
+  }, [pos, t1Stage, t1Peeks, t1Assist]);
 
   const t1Grade = useCallback(async () => {
     const nonEmpty = t1Draft.split('\n').filter((l) => l.trim() !== '').length;
@@ -298,11 +336,12 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
     setT1Peeking(false);
     const graded = await gradeT1Plate({
       draft: t1Draft, stage: t1Stage, peeks: t1Peeks, downgraded: t1Downgraded,
+      ...(t1Assist === undefined ? {} : { assist: t1Assist }),
     });
     if (graded === null) return;
     setT1Graded(graded);
     setT1View('result');
-  }, [t1Draft, t1Stage, t1Peeks, t1Downgraded, t1Short]);
+  }, [t1Draft, t1Stage, t1Peeks, t1Assist, t1Downgraded, t1Short]);
 
   const t1Downgrade = useCallback(() => {
     if (t1Stage <= 1) return;
@@ -323,26 +362,18 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
       draft: t1Draft,
       stage: t1Stage,
       peeks: t1Peeks,
+      ...(t1Assist === undefined ? {} : { assist: t1Assist }),
       downgraded: t1Downgraded,
       elapsedMs: elapsed * 1000,
       appealed: t1Appealed,
       why: t1Why,
     });
     if (finished === null) return;
-    const shown = useUi.getState().liferShown;
-    if (finished.correct && finished.layer[1] > finished.layer[0] && finished.layer[0] === 0
-      && plate.role !== 'retry' && plate.role !== 'prereq' && shown <= 3) {
-      markLiferOpen();
-      const payload = plate.payload.track === 't1' ? plate.payload : null;
-      setLifer({
-        concept: t('session.conceptTranscribe', { name: plate.nameKo }),
-        code: payload?.fn ?? '',
-        where: t('session.liferWhereT1', { file: baseName(payload?.file ?? '') }),
-        serial: `#${String(shown).padStart(3, '0')}`,
-      });
-    }
+    // T1 은 마치는 즉시 다음 판으로 가므로 기록을 놓을 판정란이 없다 — 첫 기록은
+    // 인쇄 완료의 「처음 기록한 문법」 칸이 나른다 (D131).
     await goNext();
-  }, [t1Graded, plate, t1Draft, t1Stage, t1Peeks, t1Downgraded, elapsed, t1Appealed, t1Why, goNext]);
+  }, [t1Graded, plate, t1Draft, t1Stage, t1Peeks, t1Assist, t1Downgraded, elapsed, t1Appealed,
+      t1Why, goNext]);
 
   // ── T2 (04 §7~§8). 고르기 → 채점 → 마치기. T1 과 같은 두 걸음이다.
   const t2Toggle = useCallback((path: string) => {
@@ -360,13 +391,16 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
   const t2Grade = useCallback(() => {
     const payload = plate?.payload.track === 't2' ? plate.payload : null;
     if (payload === null) return;
-    // 네 종이 서로 다른 것을 낸다 (D107). 「덜 골랐다」는 여기서 막지 않는다 —
+    // 여섯 종이 서로 다른 것을 낸다 (D107·D142). 「덜 골랐다」는 여기서 막지 않는다 —
     // 채점 단추의 자물쇠가 종마다 이미 그것을 안다(`T2Plate`).
+    // 폴더의 역할은 문항이 하나라 `t2Picks` 의 첫 칸을 쓴다 — 판 하나는 그중 하나만 채운다.
     const answer: T2Answer = payload.kind === 'flow'
       ? { kind: 'flow', ordered: t2Ordered }
       : payload.kind === 'direction'
         ? { kind: 'direction', picks: t2Picks as readonly (0 | 1 | 2 | 3)[] }
-        : { kind: payload.kind, selected: t2Sel };
+        : payload.kind === 'role'
+          ? { kind: 'role', pick: t2Picks[0] ?? null }
+          : { kind: payload.kind, selected: t2Sel };
     const graded = gradeT2Plate(answer, t2Hints);
     if (graded === null) return;
     setT2Graded(graded);
@@ -389,7 +423,7 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
 
   const band = (
     <JobBand
-      runNo={`Run ${session.seqInDay}`}
+      runNo={t('band.runNo', { n: String(session.seqInDay) })}
       repo={repoName}
       queue={plates.map(toQueueItem)}
       pos={done ? plates.length : pos}
@@ -404,15 +438,13 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
     <div className="session-screen">
       <SessionShell
         band={band}
-        lifer={lifer}
-        onCloseLifer={() => setLifer(null)}
         ladderOpen={ladderOpen}
         onCloseLadder={() => setLadderOpen(false)}
         live={live}
       >
         {done && summary !== null ? (
           <Summary
-            runNo={`Run ${session.seqInDay}`}
+            runNo={t('band.runNo', { n: String(session.seqInDay) })}
             repo={repoName}
             date={session.dayKey}
             day={session.dayKey.slice(-2)}
@@ -483,6 +515,8 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
             draft={t1Draft}
             onDraft={t1SaveDraft}
             peeks={t1Peeks}
+            {...(t1Assist === undefined ? {} : { assist: t1Assist })}
+            onAssist={setT1Assist}
             onPeek={t1Peek}
             peeking={t1Peeking}
             ticks={t1Ticks}
@@ -503,6 +537,11 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
             plate={plate}
             no={pos + 1}
             result={result}
+            lifer={lifer}
+            coach={coach && pos === 0}
+            readFirst={plate.payload.track !== 't0'
+              ? null
+              : readFirstText(plate.payload, plate.conceptId, firstMeeting)}
             payoff={carry !== null && carry.parentItemId === plate.id ? carry.payoff : null}
             ladder={ladder}
             ladderOpen={ladderOpen}
@@ -533,7 +572,8 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
               }
             }}
             onDunno={() => void openLadder()}
-            onJumpPrereq={(conceptId) => void jumpPrereq(dunnoId, conceptId as Plate['conceptId'])}
+            onJumpPrereq={(conceptId, previewSiteId) =>
+              void jumpPrereq(dunnoId, conceptId as Plate['conceptId'], previewSiteId)}
             onBack={() => void backFromPrereq(dunnoId)}
             onSubmit={(sel) => void submit(sel)}
             onNext={() => void goNext()}
@@ -545,11 +585,8 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
   );
 }
 
-/** 오버레이는 자기 밖의 DOM 을 모른다 — LIFER 를 실제 요소로 바꿔 넘기는 것은 여기 몫이다. */
 function SessionShell(props: {
   band: React.ReactNode;
-  lifer: LiferView | null;
-  onCloseLifer: () => void;
   ladderOpen: boolean;
   onCloseLadder: () => void;
   live: string;
@@ -558,10 +595,6 @@ function SessionShell(props: {
   return (
     <SessionOverlay
       band={props.band}
-      {...(props.lifer
-        ? { lifer: <LiferVeil {...props.lifer} onClose={props.onCloseLifer} /> }
-        : {})}
-      onCloseLifer={props.onCloseLifer}
       ladderOpen={props.ladderOpen}
       onCloseLadder={props.onCloseLadder}
       live={props.live}

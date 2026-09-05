@@ -1,0 +1,125 @@
+schema: 1
+id: csharp/method-call
+universal: common/function-call
+name: { ko: 메서드 부르기, en: Method call }
+token: "()"
+grammars: [c_sharp]
+framework: null
+essential: true
+difficulty: 1
+prereq: [csharp/member-access, csharp/method-declaration]
+confusions: []
+dict:
+  one_liner:
+    ko: "괄호가 붙는 순간 그 자리에서 코드가 한 번 돈다."
+    en: "The moment brackets appear, code runs there once."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 「지금 돈다」의 표시입니다.
+      괄호가 없으면 이름만 가리키는 것이고 붙으면 그 자리에서 몸통이 한 번 돌아요.
+      C# 에서 한 가지가 더 있습니다 — <b>같은 이름의 메서드가 여럿</b>일 수 있고
+      (오버로딩), 어느 것이 불릴지는 넣은 값의 <b>타입</b>이 정합니다. 그래서 이름만
+      찾아서는 어느 몸통으로 가는지 모르고, 인자를 같이 봐야 합니다.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} is the mark that says "run now." Without brackets
+      the name is only pointed at; with them the body runs once, right there. One more thing
+      holds in C#: <b>several methods can share a name</b> (overloading), and which body runs
+      is settled by the <b>types</b> of what is passed. Searching the name alone will not tell
+      you where it goes — the arguments have to be read too.
+  trace:
+    - ko: "{{site.line}}행에서 {{pick.3|code}}{{pick.3|josa:이,가}} 부를 이름으로 찾아진다."
+      en: "On line {{site.line}}, {{pick.3|code}} is resolved as the name to call."
+    - ko: "{{pick.1|code}} 안의 값이 먼저 계산된다."
+      en: "The values inside {{pick.1|code}} are computed first."
+    - ko: "그 값들의 타입이 어느 몸통이 돌지 고른다."
+      en: "Their types pick which body runs."
+rule:
+  ko: "<b>괄호가 붙으면 그 자리에서 돈다.</b> 어느 몸통인지는 인자 타입이 고른다."
+  en: "<b>Brackets mean it runs there.</b> Which body runs is picked by the argument types."
+ok:
+  ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 한 번 돌고 그 결과가 이 자리의 값이 됩니다."
+  en: "{{pick.3|code}} runs once and its result becomes the value here."
+payoff:
+  ko: "이걸 알면 「이름을 찾았는데 몸통이 여럿이다」가 풀립니다 — 인자 타입을 보세요."
+  en: "This untangles “I found the name and there are several bodies” — read the argument types."
+bridge:
+  ko: >-
+    파이썬은 이름 하나에 몸통 하나입니다. C# 은 <b>이름 하나에 몸통 여럿</b>이라
+    부르는 줄만 봐서는 못 정하고 타입이 정해요.
+  en: >-
+    Python gives one body per name. C# allows <b>several bodies per name</b>, so the calling
+    line alone does not decide — the types do.
+misconceptions:
+  # 출처 — `csharp.md` §3 ⑬.
+  - ko: "같은 이름이면 같은 메서드다 — 인자 타입이 다르면 다른 몸통이 돕니다."
+    en: "Same name means same method — different argument types run a different body."
+  - ko: "괄호가 없어도 부른 것이다 — 괄호 없이 적으면 <b>이름만</b> 가리킵니다."
+    en: "It is called even without brackets — without them the name is only referred to."
+  - ko: "인자는 왼쪽부터 순서 없이 계산된다 — C# 은 <b>왼쪽부터 차례로</b> 계산합니다."
+    en: "Arguments are evaluated in no fixed order — C# evaluates them <b>left to right</b>."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>지금 코드가 돈다는 표시</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the mark that says code runs now</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>부름을 받는 상자</b>입니다. 상자만 적으면 아무것도 안 돌아요."
+          en: "{{pick.2|code}} is the <b>box being called on</b>. Written alone it runs nothing."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 상자냐 부르기냐", en: "The sharpest spot — the box or the call" }
+          code:
+            - "repo;              // 아무것도 안 돈다"
+            - "repo.Save(item);   // 몸통이 돈다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>이름</b>입니다. 이름만 적으면 가리키기만 하고 안 돕니다."
+          en: "{{pick.3|code}} is the <b>name</b>. Written alone it refers and does not run."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 부르기냐", en: "The sharpest spot — the name or the call" }
+          code:
+            - "Action a = Save;   // 가리키기만"
+            - "Save();            // 돈다"
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 개념의 구멍은 인자 목록이라 사용처마다 글자가 다르고
+  (`()` · `(item)` · `(id, ct)`), 빈칸형은 첫 보기가 구멍 원문과 **글자까지 같아야**
+  카드가 선다(`packages/cards/src/t0-blank.ts`). 보기 넷을 한 벌로 못 고정한다.
+why_gate:
+  q:
+    ko: "이 언어는 왜 <b>같은 이름</b>에 몸통을 여럿 두게 허락할까요?"
+    en: "Why does this language allow several bodies under <b>one name</b>?"
+  choices:
+    - t:
+        ko: "같은 일을 다른 재료로 할 때 이름을 새로 짓지 않아도 되게 하려고"
+        en: "So the same job on different inputs does not need a new name"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 대가로 코드를 읽을 때 무엇을 더 봐야 하는지도 적어 보세요."
+        en: "That is the direction. Add what the reader has to check in exchange."
+    - t:
+        ko: "이름을 짧게 쓰려고"
+        en: "To keep names short"
+      ok: false
+      fb:
+        ko: "길이 문제가 아닙니다. 같은 <b>뜻</b>에 같은 이름을 주려는 것이에요."
+        en: "Not about length — it is about giving the same <b>meaning</b> the same name."
+    - t:
+        ko: "실행 시각에 알아서 고르게 하려고"
+        en: "So it can be picked at run time"
+      ok: false
+      fb:
+        ko: "고르는 시각은 <b>컴파일</b>입니다. 실행 시각에 고르는 것은 재정의 쪽이에요."
+        en: "The choice is made at <b>compile</b> time. Choosing at run time is what overriding does."
+queries:
+  - { grammars: [c_sharp], file: ./method-call.scm }
+examples:
+  - code: "class A { void F() { repo.Save(item); } }"
+    expect: { sites: 1, form: call, picks: { 1: "(item)", 2: "repo", 3: "Save" } }
+  - code: "class A { void F() { Run(); } }"
+    expect: { sites: 1, form: call-self, picks: { 1: "()", 3: "Run" } }
+  - code: "int n = 1;"
+    expect: none

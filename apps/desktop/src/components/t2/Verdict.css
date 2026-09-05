@@ -1,40 +1,49 @@
-/* 목업: design/src/ink/session.css 의 `.verdict` · `.meter`.
-   바꾼 것 — 막대 두 칸의 원색을 별칭으로. 「찾음」 --pink → --verdict-exact,
-   「놓침」 --yellow → --verdict-differ-face 다. 막대는 색을 **면으로** 칠하는 자리라
-   선 이름(--verdict-differ = yellow-deep)이 아니라 면 이름을 쓴다 (D95 · 05 §4.2).
-   큰 숫자의 `.mr` 어긋남은 packages/ui 의 Misreg 가 들고 있다 — 여기서는 활자만 잡는다. */
+/* 구조 문제의 채점 머리 (D182). 큰 숫자는 어긋남 판을 지나지 않고, 디스플레이 서체도 없다 —
+   같은 읽기용 서체의 크기와 굵기로 만든다 (정본 §6). 막대 두 칸은 --ok / --bad-bg 다. */
 .verdict {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  gap: 18px;
+  gap: var(--s-5);
   align-items: center;
-  padding: 14px 18px;
-  border: 2.5px solid var(--rule);
-  background: var(--paper);
+  padding: var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
 }
 
 .verdict .big {
-  font-family: var(--f-poster);
-  font-size: var(--fs-poster);
-  line-height: .9;
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: var(--fs-6);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--lh-tight);
   white-space: nowrap;
 }
 
 .verdict h4 {
-  font-size: var(--fs-18);
-  font-weight: 700;
-  letter-spacing: -.025em;
+  font-size: var(--fs-4);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  word-break: keep-all;
 }
 
 .verdict p {
-  margin-top: 3px;
-  color: var(--ink-soft);
-  font-size: var(--fs-15);
+  max-width: var(--measure);
+  margin-top: var(--s-1);
+  color: var(--text-muted);
+  font-size: var(--fs-3);
+  line-height: var(--lh-body);
+  word-break: keep-all;
 }
 
 .verdict p b {
-  color: var(--ink);
-  font-weight: 700;
+  color: var(--text);
+  font-weight: var(--fw-medium);
+}
+
+@media (width <= 720px) {
+  .verdict { grid-template-columns: minmax(0, 1fr) }
 }
 
 .meter {
@@ -44,8 +53,8 @@
   height: 14px;
   margin-top: 8px;
   padding: 2px;
-  border: 2px solid var(--rule);
-  background: var(--paper-3);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
 }
 
 .meter i {
@@ -53,5 +62,5 @@
   flex: var(--w) 1 0;
 }
 
-.meter i.f { background: var(--verdict-exact) }
-.meter i.m { background: var(--verdict-differ-face) }
+.meter i.f { background: var(--ok) }
+.meter i.m { background: var(--bad-bg) }

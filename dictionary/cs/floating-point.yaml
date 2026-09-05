@@ -1,0 +1,88 @@
+schema: 1
+id: cs/floating-point
+universal: null
+name: { ko: "소수는 근사값이다", en: "Floating point" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+track_default: t0
+essential: false
+difficulty: 2
+prereq: [cs/binary-representation]
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "두 자리 체계로 정확히 못 적는 소수가 있어서, 더한 결과가 살짝 어긋난다."
+    en: "Some decimals cannot be written exactly in base two, so sums drift a little."
+  why:
+    ko: >-
+      십진수로 1÷3 을 적으면 0.333…이 끝없이 이어집니다. 어딘가에서 끊어야 하고, 끊는 순간
+      <b>정확한 값이 아니게</b> 돼요. 두 자리 체계에서는 0.1 이 그런 수입니다.
+      그래서 0.1 을 담은 순간부터 이미 아주 조금 다른 값이고, 몇 번 더하면 그 차이가 보입니다.
+      이것은 언어의 결함이 아니라 <b>유한한 자리에 무한한 소수를 담는</b> 일의 성질이에요.
+      그래서 소수는 <b>같은지</b>를 묻지 않고 <b>얼마나 가까운지</b>를 묻습니다.
+    en: >-
+      In base ten, 1÷3 is 0.333… forever. You must cut it somewhere, and the cut makes it
+      <b>no longer exact</b>. In base two, 0.1 is such a number. From the moment it is stored it is
+      already slightly different, and a few additions make the difference visible. This is not a
+      language defect but a property of <b>putting an endless decimal into finite slots</b>. Hence
+      you do not ask whether two decimals are equal but <b>how close</b> they are.
+  trace: []
+rule:
+  ko: "<b>소수는 같은지를 묻지 않고 가까운지를 묻는다.</b> 담긴 순간 이미 근사값이다."
+  en: "<b>Ask how close, not whether equal.</b> It was approximate the moment it was stored."
+ok:
+  ko: >-
+    화면에 보이는 것은 반올림한 글자입니다. 계산이 정확해야 하는 자리, 특히 돈은 소수 대신
+    정수로 세는 방법을 씁니다.
+  en: >-
+    What you see is a rounded rendering. Where exactness matters — money above all — count in
+    integers instead.
+misconceptions:
+  - ko: "언어가 계산을 안 맞게 한다 — 담는 방식의 성질이고 대부분의 언어가 같은 방식을 씁니다."
+    en: "The language computes badly — it is a property of the storage, shared by most languages."
+  - ko: "반올림하면 해결된다 — 보이는 것만 정리될 뿐 담긴 값은 그대로입니다."
+    en: "Rounding fixes it — it tidies the display, not the stored value."
+  - ko: "소수는 전부 부정확하다 — 0.5·0.25 처럼 정확히 담기는 소수도 있습니다."
+    en: "All decimals are inexact — 0.5 and 0.25 store exactly."
+meaning:
+  - q:
+      ko: "0.1 과 0.2 를 더한 값이 0.3 과 같지 않다고 나옵니다. <b>어디서 어긋난 건가요?</b>"
+      en: "Adding 0.1 and 0.2 does not equal 0.3. <b>Where did it drift?</b>"
+    hint:
+      ko: "더하기 전에 이미 무슨 일이 있었을까요."
+      en: "Something already happened before the addition."
+    options:
+      - t: { ko: "두 수를 담는 순간 이미 아주 조금 다른 값이었다", en: "Both were already slightly off the moment they were stored" }
+      - t: { ko: "더하는 계산이 반올림을 잘못했다", en: "The addition rounded badly" }
+        diag:
+          t:
+            ko: "덧셈은 <b>담긴 두 값을 정확히</b> 더합니다. 어긋남은 그 앞, 담을 때 생겼어요."
+            en: "The addition adds <b>the two stored values exactly</b>. The drift came earlier, at storage."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 담을 때냐 더할 때냐", en: "The sharpest spot — storing or adding" }
+            code:
+              - "담을 때: 0.1 이 딱 안 맞는다"
+              - "더할 때: 담긴 값끼리는 정확"
+      - t: { ko: "결과를 화면에 그리면서 글자가 바뀌었다", en: "The rendering changed the digits" }
+        diag:
+          t:
+            ko: "화면은 오히려 <b>보기 좋게 반올림</b>해서 차이를 감추는 쪽입니다. 비교는 담긴 값으로 해요."
+            en: "Rendering usually <b>rounds prettily</b> and hides the difference. Comparison uses the stored value."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 보이는 값이냐 담긴 값이냐", en: "The sharpest spot — shown or stored" }
+            code:
+              - "보이는 값: 반올림된 글자"
+              - "담긴 값: 비교가 보는 것"
+      - t: { ko: "이 언어가 소수를 잘 못 다룬다", en: "This language handles decimals poorly" }
+        diag:
+          t:
+            ko: "거의 모든 언어가 <b>같은 방식</b>을 씁니다. 언어를 바꿔도 같은 결과가 나와요."
+            en: "Nearly every language uses <b>the same scheme</b>. Switching languages gives the same result."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 언어냐 방식이냐", en: "The sharpest spot — language or scheme" }
+            code:
+              - "언어: 바꿔도 같다"
+              - "방식: 유한한 자리에 담는다"

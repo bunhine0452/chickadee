@@ -1,0 +1,248 @@
+schema: 1
+id: c/macro-define
+# 2부 뒤 「빌드와 규격」 (`docs/curriculum/c.md` §4 #29 · §0.6). `universal: null` — 컴파일 전의 글자
+# 치환은 C·C++ 의 것이다.
+universal: null
+name: { ko: 컴파일 전에 글자 바꿔치기, en: Macro define }
+token: "#define"
+grammars: [c]
+framework: null
+essential: true
+difficulty: 3
+prereq: [c/header-include, cs/compile-and-run]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "컴파일러가 보기 전에 이름을 글자로 바꿔친다. 함수처럼 생겨도 값이 아니라 글자를 넣는다."
+    en: "Swaps a name for text before compiling; even the function-like kind pastes text."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 「{{pick.2|code}}{{pick.2|josa:을,를}} 보면 뒤의 글자로
+      바꿔라」는 지시입니다. 컴파일러가 아니라 <b>전처리기</b>가 하는 일이라 타입도 값도 몰라요 —
+      그냥 <b>글자</b>입니다. 그래서 함수처럼 생긴 매크로가 함정이에요: <code>MAX(i++, j)</code> 는
+      <code>i++</code> 라는 글자가 몸통에 두 번 붙여 넣어져 <code>i</code> 가 <b>두 번</b> 늘어납니다.
+      몸통을 괄호로 감싸는 관습도 같은 이유 — <code>#define SQ(x) x*x</code> 에 <code>SQ(a+1)</code> 을
+      넣으면 <code>a+1*a+1</code> 이 되니까요. 그리고 매크로 안은 파서에게 불투명해서 도구가 못 봅니다.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} is the instruction “wherever you see {{pick.2|code}}, replace
+      it with the text after it”. The <b>preprocessor</b> does it, not the compiler, so it knows neither
+      types nor values — only <b>text</b>. That is why a function-like macro is a trap:
+      <code>MAX(i++, j)</code> pastes the text <code>i++</code> into the body twice, and <code>i</code>
+      grows <b>twice</b>. The habit of parenthesising the body has the same reason —
+      <code>#define SQ(x) x*x</code> with <code>SQ(a+1)</code> becomes <code>a+1*a+1</code>. And the
+      inside of a macro is opaque to the parser, so tools cannot see it.
+  trace:
+    - ko: "전처리기가 {{pick.2|code}}{{pick.2|josa:을,를}} 파일 전체에서 찾는다."
+      en: "The preprocessor looks for {{pick.2|code}} throughout the file."
+    - ko: "찾은 자리마다 {{pick.3|code}} 의 글자를 그대로 붙여 넣는다 — 인자도 글자로."
+      en: "At every spot it pastes the text of {{pick.3|code}} — arguments as text too."
+    - ko: "컴파일러는 {{site.line}}행이 아니라 바꿔친 뒤의 글자를 읽는다."
+      en: "The compiler reads the substituted text, not line {{site.line}}."
+
+rule:
+  ko: "<b>매크로는 글자 치환이다.</b> 인자는 계산되지 않고 붙여 넣어지며, 몸통은 괄호로 감싼다."
+  en: "<b>A macro is text substitution.</b> Arguments are pasted, not evaluated; wrap the body in parentheses."
+result:
+  label:
+    ko: "{{site.line}}행이 바꿔치는 이름"
+    en: "the name line {{site.line}} substitutes"
+  value: "{{pick.2}} → {{pick.3}}"
+  note:
+    ko: "글자 그대로"
+    en: "as text"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} 컴파일 전에 {{pick.3|code}} 의 글자로 바뀝니다.
+  en: >-
+    {{pick.2|code}} becomes the text of {{pick.3|code}} before compiling.
+payoff:
+  ko: >-
+    이걸 알면 「매크로에 <code>i++</code> 를 넣었더니 두 번 늘었다」가 풀립니다 — 값이 아니라 글자가
+    두 번 붙은 거예요.
+  en: >-
+    This untangles “I passed <code>i++</code> to a macro and it grew twice” — text was pasted twice,
+    not a value.
+bridge:
+  ko: >-
+    파이썬에는 컴파일 전에 글자를 바꾸는 단계가 없습니다. C 는 그 단계가 하나 더 있어서 함수처럼
+    생긴 것이 함수가 아닐 수 있어요.
+  en: >-
+    Python has no stage that rewrites text before compiling. C has one more stage, so what looks like
+    a function may not be one.
+misconceptions:
+  # c.md §4 #29 · §8 ④ — 규격에서 나온 사실이고 빈도 자료는 없다.
+  - ko: "괄호가 있으면 함수다 — <b>글자 치환</b>입니다. 인자는 계산되지 않고 붙여 넣어져요."
+    en: "Parentheses make it a function — it is <b>text substitution</b>. Arguments are pasted, not evaluated."
+  - ko: "<code>#define N 10;</code> 처럼 세미콜론을 붙인다 — 세미콜론까지 <b>글자에 들어가</b> 쓰는 자리마다 세미콜론이 하나 더 생깁니다."
+    en: "Write <code>#define N 10;</code> with a semicolon — the semicolon <b>becomes part of the text</b>, adding one at every use."
+  - ko: "매크로 몸통의 오류는 정의한 줄에서 난다 — <b>쓴 자리</b>에서 납니다. 바꿔친 뒤의 글자를 컴파일러가 보기 때문이에요."
+    en: "An error in a macro body appears on the defining line — it appears <b>where it is used</b>, because the compiler sees the substituted text."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>바꿔치기당하는 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name that gets substituted</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 바꿔치라는 <b>지시</b>입니다. 무엇을 바꿀지는 바로 뒤에 적혀 있어요."
+          en: "{{pick.1|code}} is <b>the instruction</b> to substitute. What to substitute is written right after it."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 지시와 이름"
+            en: "The sharpest spot — the instruction and the name"
+          code:
+            - "#define N 10   /* #define 이 지시, N 이 이름 */"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>바뀌어 들어갈 글자</b>거나 인자 목록입니다. 바꿔치기당하는 쪽이 아니라 대신 들어가는 쪽이에요."
+          en: "{{pick.3|code}} is <b>the text that goes in</b>, or the parameter list. It is what replaces, not what is replaced."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 나가는 것과 들어가는 것"
+            en: "The sharpest spot — what leaves and what enters"
+          code:
+            - "#define N 10   /* N 이 나가고 10 이 들어간다 */"
+
+meaning:
+  - q:
+      ko: "<code>#define SQ(x) x*x</code> 에 <code>SQ(a+1)</code> 을 쓰면 컴파일러는 무엇을 볼까요?"
+      en: "With <code>#define SQ(x) x*x</code>, write <code>SQ(a+1)</code> — what does the compiler see?"
+    hint:
+      ko: "인자는 값이 아니라 글자입니다."
+      en: "An argument is text, not a value."
+    options:
+      - t:
+          ko: "<code>a+1*a+1</code> — 글자가 그대로 들어가 곱하기가 먼저 묶인다"
+          en: "<code>a+1*a+1</code> — the text goes in as it is, and the multiplication binds first"
+      - t:
+          ko: "<code>(a+1)*(a+1)</code>"
+          en: "<code>(a+1)*(a+1)</code>"
+        diag:
+          t:
+            ko: "괄호는 <b>사람이 몸통에 적어야</b> 생깁니다. 전처리기는 글자만 붙여 넣고 아무것도 감싸지 않아요."
+            en: "Parentheses appear only if <b>a person writes them in the body</b>. The preprocessor pastes text and wraps nothing."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 괄호는 손으로"
+              en: "The sharpest spot — parentheses by hand"
+            code:
+              - "#define SQ(x) ((x)*(x))   /* 이렇게 적어야 */"
+      - t:
+          ko: "<code>a+1</code> 을 먼저 계산한 값의 제곱"
+          en: "The square of the value of <code>a+1</code>"
+        diag:
+          t:
+            ko: "계산은 <b>없습니다</b>. 전처리기는 값을 모르고 글자만 옮겨요 — 계산은 컴파일된 뒤 실행 때 일어납니다."
+            en: "There is <b>no</b> evaluation. The preprocessor knows no values and only moves text — evaluation happens at run time after compiling."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 값이 아니라 글자"
+              en: "The sharpest spot — text, not values"
+            code:
+              - "SQ(a+1)   /* 글자 a+1 이 두 번 */"
+      - t:
+          ko: "컴파일 오류"
+          en: "A compile error"
+        diag:
+          t:
+            ko: "완전히 합법입니다. 뜻이 다를 뿐이라 <b>조용히 틀리는</b> 자리예요."
+            en: "Fully legal. Only the meaning differs, so it <b>fails quietly</b>."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 조용히 틀린다"
+              en: "The sharpest spot — quiet failure"
+            code:
+              - "a+1*a+1   /* == a + a + 1 */"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 컴파일 전에 <b>이름을 글자로 바꿔칩니다</b>."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>substitutes a name with text</b> before compiling."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "#define", mono: true }
+      - t: "const"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>타입이 있는 이름</b>을 만드는 표시입니다. 컴파일러가 보고 검사하며, 글자를 바꿔치지 않아요. 이 줄의 모양(타입 없음 · 세미콜론 없음)에는 안 맞습니다."
+            en: "That marks <b>a typed name</b>. The compiler sees and checks it; nothing is substituted. It does not fit this line's shape (no type, no semicolon)."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 글자냐 이름이냐"
+              en: "The sharpest spot — text or a name"
+            code:
+              - "#define N 10       /* 글자 */"
+              - "const int N = 10;  /* 타입 있는 이름 */"
+      - t: "typedef"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>타입에 별명</b>을 붙이는 낱말입니다. 값을 붙이는 데는 못 쓰고, 세미콜론이 필요해요."
+            en: "That word gives <b>a type an alias</b>. It cannot attach a value, and it needs a semicolon."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 타입이냐 값이냐"
+              en: "The sharpest spot — a type or a value"
+            code:
+              - "typedef int N;   /* 타입 별명 */"
+      - t: "#include"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>파일을 붙여 넣는</b> 지시입니다. 뒤에 파일 이름이 와야 하고, 이름을 글자로 바꾸지 않아요."
+            en: "That directive <b>pastes a file</b>. A file name must follow, and no name is substituted."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 파일이냐 이름이냐"
+              en: "The sharpest spot — a file or a name"
+            code:
+              - "#include <stdio.h>"
+
+why_gate:
+  q:
+    ko: "C 는 왜 컴파일 앞에 <b>글자를 바꾸는 단계</b>를 따로 둘까요?"
+    en: "Why does C keep <b>a text-rewriting stage</b> before compiling?"
+  choices:
+    - t:
+        ko: "초기 C 에 상수 이름·인라인 함수·조건부 컴파일이 없어 그 셋을 컴파일러 밖의 단순한 글자 도구 하나로 해결했고, 그 도구가 그대로 남았기 때문"
+        en: "Because early C lacked named constants, inline functions and conditional compilation, solved all three with one simple text tool outside the compiler, and that tool stayed"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 요즘 C 에서 그 셋 중 무엇이 매크로 없이 되는지도 적어 보세요."
+        en: "That is the direction. Say which of the three modern C can do without macros."
+    - t:
+        ko: "글자 치환이 함수보다 빨라서"
+        en: "Because text substitution is faster than functions"
+      ok: false
+      fb:
+        ko: "그 이유도 있었지만 요즘은 <code>inline</code> 이 대신합니다. 남은 이유는 역사와 조건부 컴파일이에요."
+        en: "That was once a reason, but <code>inline</code> covers it now. What remains is history and conditional compilation."
+    - t:
+        ko: "컴파일러가 이름을 못 다뤄서"
+        en: "Because the compiler could not handle names"
+      ok: false
+      fb:
+        ko: "다룹니다. 전처리기는 컴파일러의 부족이 아니라 그 앞의 별도 도구예요."
+        en: "It can. The preprocessor is a separate tool in front, not a gap in the compiler."
+
+queries:
+  - { grammars: [c], file: ./macro-define.scm }
+
+examples:
+  - code: "#define N 10"
+    expect: { sites: 1, form: object, hole: "#define", picks: { 1: "#define", 2: "N", 3: "10" } }
+  - code: "#define MAX(a,b) ((a)>(b)?(a):(b))"
+    expect: { sites: 1, form: function-like, hole: "#define", picks: { 1: "#define", 2: "MAX", 3: "(a,b)" } }
+  - code: "#define UTIL_H                    /* 방벽의 표시 — 다른 판이다 */"
+    expect: none
+  - code: "const int N = 10;                 /* 타입 있는 이름 — 다른 판이다 */"
+    expect: none

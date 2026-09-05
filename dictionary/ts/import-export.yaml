@@ -1,0 +1,227 @@
+schema: 1
+id: ts/import-export
+universal: null
+name: { ko: 파일 사이로 이름 옮기기, en: import and export }
+token: "import"
+grammars: [typescript, tsx, javascript, vue]
+framework: null
+essential: true
+difficulty: 2
+prereq: [ts/const-declaration, cs/linking]
+confusions: [ts/require-call]
+
+dict:
+  one_liner:
+    ko: "다른 파일이 내놓은 이름을 이 파일로 들여온다. 값이 아니라 <b>이름</b>이 옮겨진다."
+    en: "A name from another file, brought in here — the name moves, not a value."
+  why:
+    ko: >-
+      한 파일 안에서 만든 이름은 그 파일 밖에서 안 보입니다. 그래서 내놓는 쪽이 표시를 하고,
+      쓰는 쪽이 {{site.line}}행처럼 적어 들여와요. {{pick.1|code}}{{pick.1|josa:은,는}} 여기서
+      쓸 이름이고 {{pick.2|code}}{{pick.2|josa:은,는}} 그 이름을 어디서 가져오는지입니다.
+    en: >-
+      A name made inside a file is invisible outside it. So the giving side marks it and the using
+      side writes a line like {{site.line}} to bring it in. {{pick.1|code}} is the name used here and
+      {{pick.2|code}} says where it comes from.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}}{{pick.2|josa:을,를}} 찾아 그 파일을 먼저 돌린다."
+      en: "Line {{site.line}} finds {{pick.2|code}} and runs that file first."
+    - ko: "그 파일이 내놓은 것 중 {{pick.1|code}}{{pick.1|josa:을,를}} 집어 온다."
+      en: "Out of what that file put out, {{pick.1|code}} is picked up."
+    - ko: "이 파일에서는 그 이름을 직접 만든 것처럼 쓴다."
+      en: "In this file the name is used as though it had been made here."
+
+rule:
+  ko: >-
+    <b>들여온 이름은 이 파일에서 다시 묶을 수 없다.</b> 가리키는 것을 바꾸는 일은 내놓은 쪽의
+    몫이다.
+  en: >-
+    <b>An imported name cannot be rebound here.</b> Changing what it points at belongs to the side
+    that put it out.
+result:
+  label:
+    ko: "{{site.line}}행이 이 파일에 세우는 것"
+    en: "What line {{site.line}} stands up in this file"
+  value: "{{pick.1}} ← {{pick.2}}"
+  note:
+    ko: "이름 하나"
+    en: "one name"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} 파일을 가리키는 글자입니다. 점으로 시작하면 이 파일
+    기준이고, 아니면 설치된 꾸러미를 찾아요.
+  en: >-
+    {{pick.2|code}} is text pointing at a file. Starting with a dot it is relative to this file;
+    otherwise an installed package is looked up.
+payoff:
+  ko: >-
+    AI 가 만든 앱은 파일이 여럿입니다. 「이 이름이 어디서 왔나」에 답할 수 있으면 낯선 함수를 만나도
+    정의로 곧장 갈 수 있어요.
+  en: >-
+    An AI-built app is many files. Being able to answer "where did this name come from" takes you
+    straight to a definition when you meet an unfamiliar function.
+bridge:
+  ko: >-
+    같은 리포에 <code>require</code> 로 들여오는 파일이 섞여 있을 수 있습니다 — 규칙이 다른 두
+    체계가 한 자리에 있는 것이에요.
+  en: >-
+    The same repository may also pull files in with <code>require</code> — two systems with
+    different rules sitting side by side.
+misconceptions:
+  - ko: "들여오면 값이 복사된다 — 이름 하나가 같은 것을 가리킬 뿐입니다."
+    en: "Importing copies the value — one name simply points at the same thing."
+  - ko: "적은 순서대로 파일이 돈다 — 들여온 파일이 <b>먼저</b> 돕니다."
+    en: "Files run in the order written — the imported file runs <b>first</b>."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>파일 사이를 오가는 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name that crosses the file boundary</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} <b>어디서</b> 가져오는지입니다. 쓸 이름은 그 앞에
+            적혀 있어요.
+          en: >-
+            {{pick.2|code}} says <b>where from</b>. The name to be used is written before it.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 이름과 출처"
+            en: "The sharpest spot — the name or the source"
+          code:
+            - "import { save } from './store'"
+            - "//        ^이름          ^출처"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 지금 파일이 <b>내놓는</b> 쪽입니다. 들여오는 이름은
+            반대 방향이에요.
+          en: >-
+            {{pick.3|code}} is what this file <b>puts out</b>. An imported name goes the other way.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 들여오나 내놓나"
+            en: "The sharpest spot — bringing in or putting out"
+          code:
+            - "import { save } from './store'   // 들여온다"
+            - "export function save() {}        // 내놓는다"
+
+meaning:
+  - q:
+      ko: >-
+        <code>import { count } from './store'</code> 뒤에 <code>count = 3</code> 을 적으면 어떻게
+        될까요?
+      en: >-
+        After <code>import { count } from './store'</code>, what if you write <code>count = 3</code>?
+    hint:
+      ko: "이 이름을 만든 것은 어느 파일인가요."
+      en: "Which file made this name?"
+    options:
+      - t:
+          ko: "그 자리에서 멈춘다 — 들여온 이름은 다시 묶을 수 없다"
+          en: "It stops there — an imported name cannot be rebound"
+      - t:
+          ko: "된다 — 이 파일의 변수니까"
+          en: "It works — it is this file's variable"
+        diag:
+          t:
+            ko: >-
+              이 파일에는 이름만 왔습니다. 만든 파일이 따로 있고, 그 자리를 바꾸는 일은 그쪽 몫이에요.
+            en: >-
+              Only the name came here. Another file made it, and changing that slot is that file's
+              business.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 만든 곳과 쓰는 곳"
+              en: "The sharpest spot — where it was made or where it is used"
+            code:
+              - "const count = 0   // 만든 파일"
+              - "import { count }  // 쓰는 파일"
+      - t:
+          ko: "저쪽 파일의 값도 같이 바뀐다"
+          en: "The other file's value changes too"
+        diag:
+          t:
+            ko: >-
+              바뀌는 방향은 그 반대입니다 — 내놓은 쪽이 바꾸면 이쪽에서 보이고, 이쪽에서는 못 바꿔요.
+            en: >-
+              The direction is the other way — a change on the giving side shows here, and this side
+              cannot make one.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 어느 쪽이 바꾸나"
+              en: "The sharpest spot — which side may change it"
+            code:
+              - "// store.ts 에서 바꾸면 여기서 보인다"
+              - "// 여기서 바꾸는 것은 안 된다"
+      - t:
+          ko: "새 이름이 하나 더 생긴다"
+          en: "One more name is created"
+        diag:
+          t:
+            ko: >-
+              새 이름을 만들려면 만드는 낱말을 적어야 합니다. 대입만 적으면 이미 있는 이름을 겨냥한
+              것이 돼요.
+            en: >-
+              Making a new name takes a declaring word. Assignment alone aims at a name that already
+              exists.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 만드나 겨냥하나"
+              en: "The sharpest spot — making or aiming"
+            code:
+              - "const count = 3   // 만든다"
+              - "count = 3         // 겨냥한다"
+
+no_hole_reason: >-
+  이 줄에서 지울 만한 것은 들여올 이름 자체이고, 그것을 지우면 물음이 「무엇을 가져오나」가 되어
+  코드가 답을 안 든다. 여기서 재는 것은 「이름과 출처가 어느 쪽인가」라 자리를 짚어 묻는다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 이름을 다른 파일에서 가져왔을까요?"
+    en: "Why does line {{site.line}} bring the name from another file?"
+  choices:
+    - t:
+        ko: "그 이름을 만든 곳이 한 군데뿐이라, 쓰는 곳마다 다시 만들지 않으려고"
+        en: "Because it is made in one place, so it is not remade wherever it is used"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 파일이 <b>또 무엇을</b> 내놓는지도 한 줄 적어 보세요."
+        en: "That is the direction. Add a line on <b>what else</b> that file puts out."
+    - t:
+        ko: "파일을 짧게 만들려고"
+        en: "To keep the file short"
+      ok: false
+      fb:
+        ko: "길이는 결과일 뿐입니다. 가져오는 이유는 그 이름의 정의가 저기 있기 때문이에요."
+        en: "Length is only a side effect. The reason is that the definition lives over there."
+    - t:
+        ko: "그 파일을 나중에 돌리려고"
+        en: "To run that file later"
+      ok: false
+      fb:
+        ko: "순서가 반대입니다 — 들여온 파일이 <b>먼저</b> 돕니다."
+        en: "The order is the other way — the imported file runs <b>first</b>."
+
+queries:
+  - { grammars: [typescript, tsx], file: ./import-export.scm }
+  - { grammars: [javascript, vue], file: ./import-export.js.scm }
+
+examples:
+  - code: "import { save } from './store'"
+    expect: { sites: 1, form: named, picks: { 1: "save", 2: "'./store'", 4: "import" } }
+  - code: "import React from 'react'"
+    expect: { sites: 1, form: default, picks: { 1: "React", 2: "'react'", 4: "import" } }
+  # 내보내기는 이 개념이 잡지 않는다 — 출처(pick.2)가 없어 산문이 안 선다. `ts/export-declaration` 의 몫.
+  - code: "export function save() { return 1 }"
+    expect: none
+  - code: "export const DAY_MS = 86_400_000;"
+    expect: none
+  - code: "const save = require('./store')"
+    expect: none

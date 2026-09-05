@@ -10,7 +10,6 @@ import {
   INK_RATIO, MEASURE, MIN_FONT_PX, PAPER_RATIO,
   MOTION_BUDGET_MS,
   contrastRatio, effectiveBg, hex, longestMs, measureViolations, over, parseColor, pathOf,
-  scanSilhouette,
 } from './gates.js';
 
 const WHITE = { r: 255, g: 255, b: 255, a: 1 };
@@ -98,52 +97,7 @@ describe('선택자 경로', () => {
   });
 });
 
-describe('16px 실루엣 — 열 훑기', () => {
-  const INK = [20, 18, 16];
-  const PAPER = [253, 250, 240];
-
-  /** `size×size` 래스터 한 장. `inkRows` 가 먹인 행, 나머지는 종이. */
-  const raster = (size: number, inkCols: readonly number[], inkRows: readonly number[]) => {
-    const data = new Uint8ClampedArray(size * size * 4);
-    for (let y = 0; y < size; y += 1) {
-      for (let x = 0; x < size; x += 1) {
-        const c = inkCols.includes(x) && inkRows.includes(y) ? INK : PAPER;
-        const i = (y * size + x) * 4;
-        data[i] = c[0] as number;
-        data[i + 1] = c[1] as number;
-        data[i + 2] = c[2] as number;
-        data[i + 3] = 255;
-      }
-    }
-    return data;
-  };
-
-  test('캡 → 뺨 → 턱받이 3단이 남은 열을 센다', () => {
-    // x 2~5 열이 먹(0,1) · 종이(2,3,4) · 먹(5,6) 3단을 갖는다.
-    const r = scanSilhouette(raster(8, [2, 3, 4, 5], [0, 1, 5, 6]), 8, 4, true, true);
-    expect(r.bandCols).toBe(4);
-    expect(r.cheekPx).toBe(3);
-    expect(r.pass).toBe(true);
-  });
-
-  test('뺨이 1px 로 뭉개지면 불합격이다 — 16px 에서 먼저 죽는 것이 흰 틈이다', () => {
-    const r = scanSilhouette(raster(8, [2, 3, 4, 5], [0, 1, 2, 4, 5, 6]), 8, 4, true, true);
-    expect(r.cheekPx).toBe(1);
-    expect(r.pass).toBe(false);
-  });
-
-  test('3단 열이 하나뿐이면 불합격이다', () => {
-    const r = scanSilhouette(raster(8, [3], [0, 1, 5, 6]), 8, 4, true, true);
-    expect(r.bandCols).toBe(1);
-    expect(r.pass).toBe(false);
-  });
-
-  test('사람이 볼 래스터를 같이 낸다 — 숫자만으로는 어디가 뭉갰는지 모른다', () => {
-    const r = scanSilhouette(raster(4, [1, 2], [0, 3]), 4, 4, true, true);
-    expect(r.ascii.split('\n')).toEqual(['.##.', '....', '....', '.##.']);
-    expect(r.darkPx).toBe(4);
-  });
-});
+// 실루엣 시험은 D182 로 사라졌다 — 마스코트가 화면에 없다.
 
 describe('모션 지속 파싱', () => {
   test('쉼표로 늘어선 값 중 가장 긴 것을 ms 로 읽는다', () => {

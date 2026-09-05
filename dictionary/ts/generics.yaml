@@ -7,7 +7,7 @@ grammars: [typescript, tsx]
 framework: null
 essential: true
 difficulty: 4
-prereq: [ts/call-expression, ts/array-basics]
+prereq: [ts/call-expression, ts/array-basics, cs/static-vs-dynamic-typing]
 confusions: [ts/array-map-immutable]
 
 dict:
@@ -153,13 +153,44 @@ meaning:
               - "function id<T>(v: T): T   // 넣은 타입이 그대로 나온다"
               - "function id(v: any): any  // 나오는 건 흐릿하다"
 
+# 빈칸형을 못 내는 사유 (D145). 「아직 안 썼다」가 아니라 「이 문법에는 뚫을 구멍이 없다」다.
+no_hole_reason: >-
+  뚫을 자리는 꺾쇠 안의 타입 이름인데 그 이름은 리포마다 다르다. 꺾쇠만 뚫으면 한 글자짜리 보기가 되고, 타입 이름을 뚫으면 「어느 타입이 맞나」가 문법이 아니라 그 코드의 도메인 문제가 된다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 타입을 여기서 직접 적어 줬을까요?"
+    en: "Why does line {{site.line}} spell the type out here?"
+  choices:
+    - t:
+        ko: "돌려받는 값의 타입이 인자만 보고는 정해지지 않는 자리라"
+        en: "Because the type of what comes back cannot be settled from the arguments alone"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 타입을 안 적었다면 다음 줄부터 무엇을 못 쓰게 되는지도 적어 보세요."
+        en: "That is the direction. Add what the lines below could no longer use if the type were left out."
+    - t:
+        ko: "타입을 적으면 실행이 빨라져서"
+        en: "Because writing the type speeds up the run"
+      ok: false
+      fb:
+        ko: "타입은 실행에 남지 않습니다. 남는 것은 다음 줄부터 무엇을 쓸 수 있는지입니다."
+        en: "Types are gone at run time. What stays is what the lines below are allowed to use."
+    - t:
+        ko: "제네릭 함수는 타입을 반드시 적어야 해서"
+        en: "Because a generic function always needs the type spelled out"
+      ok: false
+      fb:
+        ko: "인자에서 알아낼 수 있으면 안 적습니다. 적었다는 것은 알아낼 수 없었다는 뜻입니다."
+        en: "When the arguments give it away you leave it out. Spelling it out means they did not."
+
 queries:
   - { grammars: [typescript, tsx], file: ./generics.scm }
 
 examples:
   - code: "const box = wrap<User>(raw)"
-    expect: { sites: 1, form: call-type-args, picks: { 1: "wrap", 2: "User" } }
+    expect: { sites: 1, form: call-type-args, picks: { 1: "wrap", 2: "User", 3: "(raw)" } }
   - code: "const seen = new Set<string>()"
-    expect: { sites: 1, form: new-type-args, picks: { 2: "string" } }
+    expect: { sites: 1, form: new-type-args, picks: { 2: "string", 3: "()" } }
   - code: "const n = total + 1"
     expect: none

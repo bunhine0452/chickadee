@@ -8,3 +8,4 @@ ts/generics · quality=ok · lines=5
 m1 p2 @site            form=fn-type-params  function_declaration   2:7-4:1 inError=false
 m1 p2 @pick.2          form=fn-type-params  identifier             2:16-2:23 inError=false
 m1 p2 @pick.1          form=fn-type-params  type_identifier        2:24-2:25 inError=false
+m1 p2 @pick.3          form=fn-type-params  formal_parameters      2:26-2:37 inError=false

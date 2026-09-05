@@ -1,0 +1,274 @@
+schema: 1
+id: ts/operator-precedence
+universal: null
+name: { ko: 접히는 순서, en: The order it folds }
+token: "2 + 3 * 4"
+grammars: [typescript, tsx, javascript, vue]
+framework: null
+essential: true
+difficulty: 2
+prereq: [ts/arithmetic, ts/comparison, cs/operator-precedence]
+# 빈칸 오답 셋이 이 셋의 토큰이다 (`||` · `===` · `??`).
+confusions: [ts/logical-or-default, ts/comparison, ts/nullish-coalescing]
+
+dict:
+  one_liner:
+    ko: "식은 적힌 차례대로 읽히지 않는다. 센 기호가 먼저 묶인다."
+    en: "An expression is not read in the written order. The stronger symbol binds first."
+  why:
+    ko: >-
+      왼쪽부터 차례로 계산한다고 믿으면 {{site.line}}행의 답이 안 맞습니다. 기호마다
+      <b>세기</b>가 있어서 센 쪽이 먼저 한 덩어리로 묶이고, 그 덩어리가 하나의 값이 된 뒤에야
+      {{pick.1|code}} 차례가 와요.
+    en: >-
+      Believe it runs left to right and the answer on line {{site.line}} will not match. Each symbol has a
+      <b>strength</b>; the stronger one is bundled first, and only once that bundle is one value does
+      {{pick.1|code}} get its turn.
+  trace:
+    - ko: "{{site.line}}행에서 {{pick.3|code}}{{pick.3|josa:이,가}} 먼저 한 덩어리로 묶인다."
+      en: "On line {{site.line}}, {{pick.3|code}} is bundled first."
+    - ko: "그 덩어리가 값 하나가 된다."
+      en: "That bundle becomes a single value."
+    - ko: "그제야 {{pick.2|code}}{{pick.2|josa:과,와}} 그 값을 {{pick.1|code}}{{pick.1|josa:으로,로}} 묶는다."
+      en: "Only then are {{pick.2|code}} and that value joined by {{pick.1|code}}."
+
+rule:
+  ko: >-
+    <b>괄호가 없어도 순서는 있다.</b> 곱셈 쪽이 덧셈 쪽보다 세고, 그리고 쪽이 또는 쪽보다 세다.
+  en: >-
+    <b>There is an order even with no parentheses.</b> The multiplying family binds tighter than the
+    adding family, and “and” binds tighter than “or”.
+result:
+  label:
+    ko: "{{site.line}}행에서 먼저 묶이는 것"
+    en: "What line {{site.line}} bundles first"
+  value: "{{pick.3}}"
+  note:
+    ko: "한 덩어리가 되어 값 하나로 남는다"
+    en: "it becomes one bundle and stays as one value"
+ok:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:은,는}} <b>맨 마지막에</b> 일합니다. 더 센 기호가 먼저
+    묶여 값 하나가 되고, 그 값을 받아 쓰는 것이 이 기호예요.
+  en: >-
+    {{pick.1|code}} works <b>last</b>. The stronger symbol bundles first into one value, and this
+    symbol is the one that takes that value.
+payoff:
+  ko: >-
+    괄호를 어디에 넣을지가 여기서 정해집니다. 세기가 헷갈리는 자리에 괄호를 하나 넣으면
+    읽는 사람이 다시 생각할 일이 없어져요.
+  en: >-
+    Where to put parentheses is settled here. One pair in a spot where the strengths are unclear
+    saves the next reader from working it out again.
+bridge:
+  ko: >-
+    삼항 물음표도 같은 축입니다 — 그쪽은 세기가 가장 약해서, 중첩하면 오른쪽부터 묶여요.
+  en: >-
+    The question-mark form sits on the same axis — it binds weakest of all, so nested ones bundle
+    from the right.
+misconceptions:
+  - ko: "식은 왼쪽부터 차례로 계산된다 — 세기가 다르면 오른쪽이 먼저 묶입니다."
+    en: "An expression runs left to right — when the strengths differ, the right side bundles first."
+  - ko: "「또는」이 먼저 갈린다 — 「그리고」가 더 세서 먼저 한 덩어리가 됩니다."
+    en: "The “or” splits first — “and” is stronger and becomes a bundle first."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>가장 먼저 한 덩어리로 묶이는 부분</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the part that is bundled first</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.3
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>가장 나중에</b> 일하는 기호입니다. 먼저 묶이는 것은 그보다 센 기호가 붙잡고 있는 쪽이에요."
+          en: >-
+            {{pick.1|code}} is the symbol that works <b>last</b>. What is bundled first is the side
+            held by the stronger symbol.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 적힌 자리와 도는 차례"
+            en: "The sharpest spot — where it is written or when it runs"
+          code:
+            - "2 + 3 * 4     // 3 * 4 가 먼저"
+            - "(2 + 3) * 4   // 괄호가 차례를 뒤집는다"
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 이미 값 하나라 더 묶을 것이 없습니다. 묶이는 일은 기호 둘이 붙어 있는 쪽에서 일어나요."
+          en: >-
+            {{pick.2|code}} is already a single value, so there is nothing left to bundle. Bundling
+            happens where two symbols sit together.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 값과 덩어리"
+            en: "The sharpest spot — a value or a bundle"
+          code:
+            - "2 + 3 * 4     // 2 는 그대로"
+            - "3 * 4         // 이쪽이 덩어리다"
+
+meaning:
+  - q:
+      ko: "<code>a || b &amp;&amp; c</code> 는 어떻게 묶일까요?"
+      en: "How does <code>a || b &amp;&amp; c</code> bundle?"
+    hint:
+      ko: "「그리고」 쪽이 「또는」 쪽보다 셉니다."
+      en: "The “and” family binds tighter than the “or” family."
+    options:
+      - t:
+          ko: "<code>a || (b &amp;&amp; c)</code>"
+          en: "<code>a || (b &amp;&amp; c)</code>"
+      - t:
+          ko: "<code>(a || b) &amp;&amp; c</code>"
+          en: "<code>(a || b) &amp;&amp; c</code>"
+        diag:
+          t:
+            ko: "왼쪽부터 읽으면 그렇게 묶입니다. 세기를 보면 뒤쪽 둘이 먼저 한 덩어리가 되고, 그 덩어리가 앞의 값과 만나요."
+            en: >-
+              Read left to right it bundles that way. By strength the two on the right bundle first,
+              and that bundle then meets the value in front.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 두 묶음의 답이 다르다"
+              en: "The sharpest spot — the two bundlings give different answers"
+            code:
+              - "true || false && false    // true"
+              - "(true || false) && false  // false"
+      - t:
+          ko: "괄호가 없으니 왼쪽부터 차례로 계산된다"
+          en: "With no parentheses it just runs left to right"
+        diag:
+          t:
+            ko: "차례로 도는 것은 <b>같은 세기끼리</b>일 때입니다. 세기가 다르면 센 쪽이 먼저 묶여요."
+            en: >-
+              Running in order is what happens <b>between equal strengths</b>. When the strengths
+              differ, the stronger one bundles first.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 같은 세기인가"
+              en: "The sharpest spot — are the strengths equal"
+            code:
+              - "1 - 2 - 3       // (1 - 2) - 3, 같은 세기"
+              - "1 - 2 * 3       // 1 - (2 * 3)"
+      - t:
+          ko: "괄호가 없으면 읽지 못하고 멈춘다"
+          en: "With no parentheses it cannot be read and stops"
+        diag:
+          t:
+            ko: "멈추지 않습니다. 규칙이 이미 정해져 있어서 사람이 안 적어도 기계는 한 가지로 읽어요 — 그래서 조용히 어긋납니다."
+            en: >-
+              Nothing stops. The rule is already fixed, so the machine reads it one way even when
+              nobody wrote it down — which is why it goes off quietly.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 규칙은 이미 있다"
+              en: "The sharpest spot — the rule is already there"
+            code:
+              - "a || b && c        // 그대로 돈다"
+              - "a || (b && c)      // 같은 뜻, 읽기만 쉽다"
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>뒤쪽 둘을 먼저 묶고</b> 그 덩어리를
+        앞의 값과 만나게 합니다.
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} <b>bundles the two on the right first</b>
+        and lets that bundle meet the value in front.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "&&", mono: true }
+      - t: "||"
+        mono: true
+        diag:
+          t:
+            ko: "같은 기호를 두 번 쓰면 세기가 같아져서 <b>왼쪽부터 차례로</b> 묶입니다. 덩어리가 뒤쪽에 생기지 않아요."
+            en: >-
+              Use the same symbol twice and the strengths match, so it bundles <b>left to right</b>.
+              No bundle forms on the right.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 세기가 같으면 차례대로"
+              en: "The sharpest spot — equal strengths go in order"
+            code:
+              - "a || b && c     // a || (b && c)"
+              - "a || b || c     // (a || b) || c"
+      - t: "==="
+        mono: true
+        diag:
+          t:
+            ko: "견주기는 「또는」보다 세서 먼저 묶이기는 합니다. 다만 내는 것이 참·거짓 하나라 <b>값을 고르는</b> 일은 사라져요."
+            en: >-
+              Weighing does bind tighter than “or”, so it bundles first. What it yields is one
+              boolean, though, so <b>choosing a value</b> disappears.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 값이 남는가 참·거짓이 남는가"
+              en: "The sharpest spot — a value remains or a boolean remains"
+            code:
+              - "a || (b && c)     // c 가 그대로 나올 수 있다"
+              - "a || (b === c)    // true 나 false 만 나온다"
+      - t: "??"
+        mono: true
+        diag:
+          t:
+            ko: "이 기호는 「또는」과 <b>같은 줄에 못 섞습니다</b> — 괄호 없이 나란히 쓰면 읽는 단계에서 막혀요."
+            en: >-
+              That symbol <b>may not be mixed on the same line</b> with “or” — written side by side
+              without parentheses it is rejected while being read.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 섞을 수 없는 짝"
+              en: "The sharpest spot — a pair that may not be mixed"
+            code:
+              - "a || (b ?? c)     // 괄호가 있으면 된다"
+              - "a || b ?? c       // 읽는 단계에서 막힌다"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 괄호 없이 두 기호를 나란히 두었을까요?"
+    en: "Why does line {{site.line}} put two symbols side by side with no parentheses?"
+  choices:
+    - t:
+        ko: "언어가 정한 세기가 원하는 순서와 이미 같아서 — 괄호가 없어도 뜻이 하나다"
+        en: "Because the language's strengths already match the order wanted — one meaning, no parentheses needed"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그래도 괄호를 넣는 편이 나은 경우가 언제인지도 적어 보세요."
+        en: "That is the direction. Add when parentheses are still the better call."
+    - t:
+        ko: "괄호를 쓰면 느려져서"
+        en: "Because parentheses would be slower"
+      ok: false
+      fb:
+        ko: "괄호는 읽는 단계에서만 쓰이고 도는 코드는 같습니다. 갈리는 것은 사람이 읽는 속도입니다."
+        en: >-
+          Parentheses are used while reading and the running code is the same. What parts ways is how
+          fast a person reads it.
+    - t:
+        ko: "괄호를 쓰면 뜻이 달라져서"
+        en: "Because parentheses would change the meaning"
+      ok: false
+      fb:
+        ko: "세기대로 괄호를 넣으면 뜻이 똑같습니다. 달라지는 것은 세기와 <b>다르게</b> 넣었을 때입니다."
+        en: >-
+          Put the parentheses where the strengths already are and the meaning is identical. It
+          changes only when they go somewhere <b>else</b>.
+
+queries:
+  - { grammars: [typescript, tsx, javascript, vue], file: ./operator-precedence.scm }
+
+examples:
+  - code: "const total = base + rate * count"
+    expect: { sites: 1, form: mul-right, picks: { 1: "+", 2: "base", 3: "rate * count" } }
+  - code: "const ok = ready || open && loaded"
+    expect: { sites: 1, form: and-first, hole: "&&", picks: { 1: "||", 2: "ready", 3: "open && loaded" } }
+  - code: "const off = price * qty - fee"
+    expect: { sites: 1, form: mul-left, picks: { 1: "-", 2: "fee", 3: "price * qty" } }
+  - code: "const sum = a + b + c"
+    expect: none
+  - code: "const any = a || b"
+    expect: none

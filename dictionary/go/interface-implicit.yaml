@@ -1,0 +1,221 @@
+schema: 1
+id: go/interface-implicit
+# 2부 · §4 심화 (`go.md` §4 ㉗). 실측 93곳/69파일 — `go.md` §1 이 잰 「선언 92/69파일」과
+# 같다.
+#
+# **쿼리가 선언 쪽만 잡는다.** 어떤 타입이 이것을 만족하는지는 코드에 안 적혀 있어
+# 잡을 노드가 없다 — 그 사실 자체가 이 판의 내용이다.
+universal: null
+name: { ko: "적지 않고 만족하기", en: "Implicit interfaces" }
+token: "interface"
+grammars: [go]
+framework: null
+essential: true
+difficulty: 3
+prereq: [go/method-receiver, go/struct-type, cs/abstraction]
+confusions: []
+
+dict:
+  one_liner:
+    ko: >-
+      메서드 서명만 맞으면 만족한다. 만족한다고 적는 자리가 어디에도 없다.
+    en: >-
+      Matching the method signatures is enough; nowhere is the match written down.
+  why:
+    ko: >-
+      {{site.line}}행은 {{pick.2|code}} 라는 <b>할 수 있는 일의 목록</b>을 세웁니다. 자바·C# 이라면 어떤 클래스가 이것을 만족한다고 그 클래스
+      줄에 적어야 하는데, Go 에는 <b>적는 자리가 없어요</b> — 메서드 서명이 맞으면 그것으로 끝입니다. 그래서 이 목록을 누가 만족하는지 파일을 봐서는 모릅니다. 값은
+      <b>남이 만든 타입도 내 목록을 만족할 수 있다</b>는 것이고(그쪽 코드를 안 고쳐도 됩니다), 대가는 <b>이 목록을 고치면 어디가 깨지는지 컴파일 전에는
+      모른다</b>는 것입니다.
+    en: >-
+      Line {{site.line}} sets up {{pick.2|code}}, a <b>list of things that can be done</b>. In Java or
+      C# a class would have to say on its own line that it satisfies this; in Go <b>there is nowhere
+      to say it</b> — matching method signatures is the whole of it. So who satisfies this list cannot
+      be read off a file. What it buys is that <b>a type someone else wrote can satisfy your list</b>
+      without touching their code; what it costs is that <b>changing the list does not say what breaks
+      until the compiler runs</b>.
+  trace:
+    - ko: >-
+        {{site.line}}행은 {{pick.2|code}} 라는 목록을 세운다.
+      en: >-
+        Line {{site.line}} sets up the list called {{pick.2|code}}.
+    - ko: >-
+        {{pick.3|code}} 안이 요구하는 서명 전부다.
+      en: >-
+        The inside of {{pick.3|code}} is every signature it demands.
+    - ko: >-
+        어떤 타입이 이것을 만족하는지는 어디에도 안 적힌다.
+      en: >-
+        Which types satisfy it is written down nowhere.
+
+rule:
+  ko: >-
+    <b>만족한다고 적는 자리가 없다.</b> 서명이 맞으면 그것으로 끝이다.
+  en: >-
+    <b>There is nowhere to declare the match.</b> Matching signatures is the whole of it.
+result:
+  label: { ko: "{{site.line}}행이 세운 목록", en: "the list set up on line {{site.line}}" }
+  value: "{{pick.2}}"
+  note: { ko: "누가 만족하는지는 안 적힌다", en: "who satisfies it is not written down" }
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} 이제 서명만 맞으면 누구든 만족하는 목록입니다.
+  en: >-
+    {{pick.2|code}} is now a list anything with matching signatures satisfies.
+payoff:
+  ko: >-
+    이걸 알면 「이 타입이 왜 여기 들어가나」가 풀립니다 — 서명이 맞아서입니다.
+  en: >-
+    This untangles "why does this type fit here" — the signatures match.
+bridge:
+  ko: >-
+    자바·C# 은 클래스 줄에 만족을 적습니다. Go 는 안 적어서, 목록을 <b>쓰는 쪽</b>이 나중에 정의할 수 있어요.
+  en: >-
+    Java and C# declare the match on the class. Go does not, so the list can be defined later by
+    <b>whoever consumes it</b>.
+misconceptions:
+  - ko: >-
+      어딘가에 만족한다고 적어야 한다 — 적는 자리가 <b>없습니다</b>.
+    en: >-
+      The match must be declared somewhere — there is <b>nowhere</b> to declare it.
+  - ko: >-
+      만족하는 타입을 파일에서 찾을 수 있다 — 서명이 맞는지 하나하나 따져야 압니다. 코드에 표시가 없어요.
+    en: >-
+      The satisfying types can be found in the file — only by weighing signatures one by one. Nothing
+      marks them.
+
+point:
+  - q:
+      ko: >-
+        {{site.line}}행에서 <b>목록의 이름</b>을 짚어 보세요.
+      en: >-
+        On line {{site.line}}, point at <b>the name of the list</b>.
+    hint: { ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다.", en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose." }
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: >-
+            {{pick.1|code}}{{pick.1|josa:은,는}} 목록의 <b>종류</b>를 여는 낱말입니다. 이름은 그 앞에 있어요.
+          en: >-
+            {{pick.1|code}} is the word that opens the <b>kind</b> of list. The name stands before it.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 종류냐 이름이냐", en: "The sharpest spot — the kind or the name" }
+          code:
+            - "interface                       // 종류"
+            - "type Reader interface { }       // 이름은 Reader"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} <b>요구하는 서명들</b>입니다. 내용이지 이름이 아니에요.
+          en: >-
+            {{pick.3|code}} is the <b>signatures demanded</b> — the contents, not the name.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 내용이냐 이름이냐", en: "The sharpest spot — the contents or the name" }
+          code:
+            - "interface { Read() }            // 내용"
+            - "type Reader interface { }       // 이름"
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>할 수 있는 일의 목록</b>을 세웁니다.
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} sets up a <b>list of things that can be
+        done</b>.
+    hint: { ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다.", en: "Your choice is written into the code at once. Submit to have it marked." }
+    options:
+      - { t: "interface", mono: true }
+      - t: "struct"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 낱말은 <b>칸을 담는</b> 타입을 엽니다. 담는 것이 아니라 요구하는 자리라 뜻이 달라져요.
+            en: >-
+              That word opens a type that <b>holds slots</b>. This place demands rather than holds, so the
+              meaning changes.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 담나 요구하나", en: "The sharpest spot — holding or demanding" }
+            code:
+              - "type R interface { Read() }"
+              - "type O struct { Web bool }"
+      - t: "class"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 낱말은 Go 에 <b>없습니다</b>. 자바·C# 에서 오는 손이 여기서 멈춰요.
+            en: >-
+              Go <b>does not have</b> this word. A hand trained on Java or C# stops here.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 낱말이 있나 없나", en: "The sharpest spot — does the word exist" }
+            code:
+              - "type R interface { }"
+              - "class R { }              // 멈춘다"
+      - t: "map"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 낱말은 <b>열쇠로 찾는 묶음</b>을 만듭니다. 메서드 서명을 적는 자리가 아니에요.
+            en: >-
+              That word makes a <b>lookup by key</b>. It is not where method signatures go.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 서명이냐 값이냐", en: "The sharpest spot — signatures or values" }
+            code:
+              - "type R interface { Read() }"
+              - "type M map[string]int"
+
+why_gate:
+  q:
+    ko: >-
+      Go 는 왜 만족을 <b>적지 않게</b> 했을까요?
+    en: >-
+      Why does Go make the match <b>undeclared</b>?
+  choices:
+    - t:
+        ko: >-
+          쓰는 쪽이 필요한 목록을 나중에 정의할 수 있어, 남이 만든 타입을 안 고치고도 끼워 쓸 수 있기 때문
+        en: >-
+          Because the consumer can define the list later and fit in a type written elsewhere without
+          touching it
+      ok: true
+      fb:
+        ko: >-
+          그 방향입니다. 그럼 그 대가로 무엇을 잃는지도 한 줄 적어 보세요.
+        en: >-
+          That is the direction. Add a line on what is lost as the price.
+    - t:
+        ko: >-
+          적는 것이 길어서
+        en: >-
+          Because declaring it is verbose
+      ok: false
+      fb:
+        ko: >-
+          길이가 이유는 아닙니다. 누가 목록을 정의할 수 있느냐가 바뀌는 것이 요점이에요.
+        en: >-
+          Verbosity is not the reason. What changes is who may define the list.
+    - t:
+        ko: >-
+          컴파일러가 서명을 못 봐서
+        en: >-
+          Because the compiler cannot see the signatures
+      ok: false
+      fb:
+        ko: >-
+          봅니다. 보고 맞추는 것이 이 방식의 전부예요.
+        en: >-
+          It does. Seeing and matching them is the whole mechanism.
+
+queries:
+  - { grammars: [go], file: ./interface-implicit.scm }
+
+examples:
+  - code: "type Reader interface { Read() }"
+    expect: { sites: 1, form: decl, hole: "interface", picks: { 1: "interface", 2: "Reader", 3: "interface { Read() }" } }
+  - code: "type Closer interface { Close() error }"
+    expect: { sites: 1, form: decl, hole: "interface", picks: { 1: "interface", 2: "Closer" } }
+  - code: "type Options struct { Web bool }"
+    expect: none

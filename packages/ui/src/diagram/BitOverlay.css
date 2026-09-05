@@ -1,0 +1,79 @@
+/* 겹친 비트 배열 — 두 줄이 **한 격자**를 쓴다. 그래야 아래 폭이 위 폭의 하위 자리 바로
+   밑에 서고 「윗자리가 잘려서 44 가 된다」가 보인다. 두 `BitField` 를 나란히 놓는 것으로는
+   자리가 안 맞는다(diagrams.md §3).
+
+   열 간격이 1px 인 이유 — 32칸에 8px 씩 주면 여백만 250px 이고, 그러면 폭 720 에서
+   아래 폭이 화면 밖으로 밀려 **그림의 요점이 안 보인다.** 붙여 그리면 604px 에 다 들어간다. */
+.ov {
+  display: grid;
+  gap: var(--s-2) 1px;
+  align-items: center;
+  justify-content: start;
+  min-width: min-content;
+}
+
+/* 여기서는 접지 않는다. 접는 순간 위아래 자리가 어긋나 그림이 거짓말을 한다 —
+   D187 ⑳ 이 허락한 「52비트 720 접힘」은 비트 배열의 것이고 이 그림에는 안 온다. */
+.ov .bit {
+  min-width: .9em;
+  margin: 0;
+  font-size: var(--fs-1);
+}
+
+/* 넷마다 벌리는 여백은 격자 눈금을 어긋나게 하므로 여기서만 끈다 — 자리 세기는
+   아래 `.ov-mark` 두 구간이 대신한다(「잘림 24비트」·「남음 8비트」). */
+.ov .bit:nth-child(4n) {
+  margin-right: 0;
+}
+
+/* 떨어져 나가는 윗자리. 값은 그대로 보이고 **면이 빠진다** — 색이 아니라 면이 말한다. */
+.ov .bit.gone {
+  border-style: dashed;
+  border-color: var(--border);
+  background: transparent;
+  color: var(--text-faint);
+}
+
+ /* 이름표는 두 줄로 쌓는다 — 한 줄로 두면 이름 하나가 40px 를 먹고 그만큼 비트 줄이
+   화면 밖으로 밀린다. 여기서는 폭이 곧 내용이다. */
+.ov-name {
+  display: grid;
+  justify-items: end;
+  margin: 0;
+  padding-right: var(--s-1);
+  white-space: nowrap;
+}
+
+.ov-type {
+  font-family: var(--font-mono);
+  font-size: var(--fs-2);
+  font-weight: var(--fw-medium);
+  color: var(--text);
+}
+
+.ov-w {
+  font-size: var(--fs-1);
+  color: var(--text-muted);
+}
+
+/* 잘림·남음 구간 — 두 줄 사이에 놓여 경계가 어디인지를 말한다. */
+.ov-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.6em;
+  border-top: 1px solid var(--border);
+  font-size: var(--fs-1);
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+
+.ov-mark.keep {
+  border-top-color: var(--border-strong);
+  color: var(--text-muted);
+}
+
+.ov-val {
+  justify-self: start;
+  min-width: 0;
+}

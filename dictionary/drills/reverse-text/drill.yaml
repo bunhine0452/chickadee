@@ -1,0 +1,18 @@
+# 작은 문제 하나 (D186 ⑧). 지문은 우리가 썼고 케이스의 답은 reference.py 가 낸다.
+schema: 1
+id: reverse-text
+topic: text
+statement:
+  ko: "한 줄이 주어집니다. 그 줄의 글자 순서를 거꾸로 뒤집어 출력하세요."
+  en: "One line is given. Print it with the order of its characters reversed."
+needs: [common/text-literal, cs/text-encoding]
+langs: [py, ts, java]
+cases:
+  - stdin: "abc\n"
+    stdout: "cba\n"
+  - stdin: "한글\n"
+    stdout: "글한\n"
+  - stdin: "a\n"
+    stdout: "a\n"
+  - stdin: "ab cd\n"
+    stdout: "dc ba\n"

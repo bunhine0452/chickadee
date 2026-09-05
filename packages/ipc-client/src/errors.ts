@@ -1,6 +1,8 @@
 /** 01 §6 의 오류 코드 전량. Rust `IpcError.code` 와 1:1. */
 export const IPC_ERROR_CODES = [
   'GIT_NOT_REPO', 'GIT_BARE', 'GIT_COMMIT_NOT_FOUND', 'GIT_BLAME_TIMEOUT', 'GIT_IO',
+  // 받아 오기 (D129) — https 가 아닌 주소, 그리고 받을 자리에 이미 뭔가 있는 경우.
+  'GIT_URL_UNSUPPORTED', 'GIT_DEST_OCCUPIED',
   'PARSE_LANG_UNSUPPORTED', 'PARSE_QUERY_INVALID', 'PARSE_TOO_LARGE', 'PARSE_TIMEOUT', 'PARSE_TOO_DEEP',
   'STORE_ALREADY_OPEN', 'STORE_MIGRATION', 'STORE_CATALOG_MISSING', 'STORE_BUSY',
   'STORE_CONSTRAINT', 'STORE_CORRUPT',
@@ -13,6 +15,9 @@ export const IPC_ERROR_CODES = [
   // OS 비밀 저장소가 없거나 거부했다 (06 §3.5 · D109). Linux 에 Secret Service 가 없으면
   // 저장 자체가 이 코드로 실패하고, 화면은 그것으로 「저장할 수 없다」를 안다.
   'SECRET_STORE',
+  // 실행 러너 (D175). `RUN_SPAWN` 은 프로그램을 시작하지 못한 것 — 러너 탐지가 이것으로
+  // 「이 컴퓨터에 JDK 가 없다」를 안다. `RUN_IO` 는 시작한 뒤의 입출력 실패다.
+  'RUN_SPAWN', 'RUN_IO',
   'UNKNOWN',
 ] as const;
 export type IpcErrorCode = (typeof IPC_ERROR_CODES)[number];

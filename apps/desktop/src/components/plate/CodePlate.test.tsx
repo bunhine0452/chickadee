@@ -19,6 +19,13 @@ const PICK: CodeLine[] = [
 
 const BLANK: CodeLine[] = [{ n: 42, seg: [{ t: 'const n = cart' }, { hole: true }, { t: 'items;' }] }];
 
+/** 창이 감싸는 블록이 된 뒤의 판 (D141). 30줄이라 20줄 상한에 걸린다. */
+const LONG: CodeLine[] = Array.from({ length: 30 }, (_, i) => ({
+  n: 100 + i,
+  t: `const v${i} = ${i}`,
+  ...(i === 14 ? { target: true as const } : {}),
+}));
+
 /** 짚을 수 있는 토큰에 포커스를 준다 — 키는 라디오에서 묶음으로 올라간다. */
 function focusToken(root: HTMLElement, k: number): void {
   root.querySelector<HTMLButtonElement>(`.tk[data-k="${k}"]`)?.focus();
@@ -140,5 +147,110 @@ describe('CodePlate', () => {
     const hole = container.querySelector('.hole');
     expect(hole?.textContent).toBe('?.');
     expect(hole?.className).toContain('filled');
+  });
+});
+
+describe('CodePlate — 20줄 접기 (D141)', () => {
+  const visible = (root: HTMLElement) =>
+    [...root.querySelectorAll('.ln[data-n]')].map((el) => Number(el.getAttribute('data-n')));
+
+  it('20줄까지는 접지 않는다', () => {
+    const { container } = render(<CodePlate lines={LONG.slice(0, 20)} />);
+    expect(visible(container)).toHaveLength(20);
+    expect(container.querySelectorAll('.unfold')).toHaveLength(0);
+  });
+
+  it('20줄을 넘으면 초점 둘레 20줄만 펴 두고 나머지를 접는다', () => {
+    const { container } = render(<CodePlate lines={LONG} />);
+    const shown = visible(container);
+    expect(shown).toHaveLength(20);
+    expect(shown).toContain(114); // 초점
+    // 위아래로 갈라 접는다 — 한쪽으로 쏠리지 않는다.
+    expect(container.querySelectorAll('.unfold')).toHaveLength(2);
+    expect(shown[0]).toBe(105);
+    expect(shown[19]).toBe(124);
+  });
+
+  it('접힌 줄 수를 그대로 적는다 — 위 5줄 · 아래 5줄', () => {
+    const { container } = render(<CodePlate lines={LONG} />);
+    const labels = [...container.querySelectorAll('.unfold')].map((el) => el.textContent);
+    expect(labels).toEqual(['… 5줄 더', '… 5줄 더']);
+  });
+
+  it('초점이 맨 앞이면 위로는 접을 것이 없다', () => {
+    const head: CodeLine[] = LONG.map((l, i) => (
+      i === 0 ? { n: l.n, t: `const v${i} = ${i}`, target: true as const } : { n: l.n, t: `const v${i} = ${i}` }
+    ));
+    const { container } = render(<CodePlate lines={head} />);
+    expect(container.querySelectorAll('.unfold')).toHaveLength(1);
+    expect(visible(container)[0]).toBe(100);
+  });
+
+  it('펼치면 전부 보이고 접힘 자리 대신 접기 단추가 하나 남는다', async () => {
+    const user = userEvent.setup();
+    const { container } = render(<CodePlate lines={LONG} />);
+    await user.click(container.querySelector('.unfold') as HTMLElement);
+    expect(visible(container)).toHaveLength(30);
+    expect(container.querySelectorAll('.unfold:not(.less)')).toHaveLength(0);
+    expect(container.querySelector('.unfold.less')?.textContent).toBe('접기');
+  });
+
+  it('다시 접는다 — 편 판은 되돌아갈 길이 있다', async () => {
+    const user = userEvent.setup();
+    const { container } = render(<CodePlate lines={LONG} />);
+    await user.click(container.querySelector('.unfold') as HTMLElement);
+    await user.click(container.querySelector('.unfold.less') as HTMLElement);
+    expect(visible(container)).toHaveLength(20);
+    expect(container.querySelectorAll('.unfold')).toHaveLength(2);
+  });
+
+  it('접기도 키보드만으로 된다 — Space 로 펴고 Space 로 접는다 (05 §7)', async () => {
+    const user = userEvent.setup();
+    const { container } = render(<CodePlate lines={LONG} />);
+    await user.tab();
+    await user.keyboard('[Space]');
+    // 편 뒤 포커스가 접기 단추로 옮겨 간다 — 손이 그 자리에 그대로 있다.
+    expect(document.activeElement?.className).toContain('less');
+    await user.keyboard('[Space]');
+    expect(visible(container)).toHaveLength(20);
+    expect(document.activeElement?.className).toContain('unfold');
+    expect(document.activeElement?.className).not.toContain('less');
+  });
+
+  it('접을 수 없는 판에는 접기 단추도 없다', async () => {
+    const user = userEvent.setup();
+    const { container } = render(<CodePlate lines={LONG.slice(0, 20)} />);
+    await user.tab();
+    expect(container.querySelectorAll('.unfold')).toHaveLength(0);
+  });
+
+  it('키보드만으로 펼친다 — 탭으로 닿고 Space 로 펴진다 (05 §7)', async () => {
+    const user = userEvent.setup();
+    const { container } = render(<CodePlate lines={LONG} />);
+    await user.tab();
+    expect(document.activeElement?.className).toContain('unfold');
+    await user.keyboard('[Space]');
+    expect(visible(container)).toHaveLength(30);
+  });
+
+  it('펼침 단추의 키는 판 밖으로 새지 않는다 — Enter 가 「제출」로 올라가면 안 된다', async () => {
+    const onDocKey = vi.fn();
+    document.addEventListener('keydown', onDocKey);
+    const user = userEvent.setup();
+    const { container } = render(<CodePlate lines={LONG} pickable selected={null} />);
+    (container.querySelector('.unfold') as HTMLButtonElement).focus();
+    await user.keyboard('[Enter]');
+    document.removeEventListener('keydown', onDocKey);
+    expect(onDocKey).not.toHaveBeenCalled();
+    expect(visible(container)).toHaveLength(30);
+  });
+
+  it('짚을 토큰은 접힘 뒤로 숨지 않는다', () => {
+    const picky: CodeLine[] = LONG.map((l, i) => (i === 14
+      ? { n: l.n, target: true as const, seg: [{ t: 'const n = ' }, { t: 'cart', pick: 1 }] }
+      : l));
+    const { container } = render(<CodePlate lines={picky} pickable selected={null} />);
+    expect(container.querySelector('.tk[data-k="1"]')).not.toBeNull();
+    expect(screen.getAllByRole('radio')).toHaveLength(1);
   });
 });

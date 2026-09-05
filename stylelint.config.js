@@ -1,5 +1,5 @@
 /**
- * Stylelint — stylelint-config-standard + Chickadee 4개 규칙 (05 §4.2 · §4.3).
+ * Stylelint — stylelint-config-standard + Chickadee 4개 규칙 (정본 §6).
  *
  * 규칙은 scripts/stylelint-chickadee.mjs 에 있고 단위 테스트는
  * scripts/stylelint-chickadee.test.mjs 에 있다 (pnpm test:unit).
@@ -9,12 +9,12 @@ module.exports = {
   plugins: ['./scripts/stylelint-chickadee.mjs'],
   rules: {
     'chickadee/no-font-size-below-13': true,
-    'chickadee/track-alias-only': true,
+    'chickadee/no-retired-tokens': true,
     'chickadee/dark-selector-allowlist': true,
-    'chickadee/print-physics-scope': true,
+    'chickadee/no-decoration': true,
 
-    /* 목업에서 그대로 옮겨 온 CSS(05 §12 「그대로 옮기는 것」)는 legacy 표기를 쓴다.
-       표기를 modern/percentage 로 바꾸면 목업과 앱의 CSS 가 눈으로 대조되지 않는다. */
+    /* 목업(`design/`)에서 옮겨 온 CSS 가 legacy 표기를 쓴다. D182 로 앱은 목업을 안 따르지만
+       남은 파일이 있어 표기 규칙은 그대로 둔다. */
     'alpha-value-notation': null,
     'color-function-notation': null,
 

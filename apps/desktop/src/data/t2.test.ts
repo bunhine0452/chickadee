@@ -54,7 +54,16 @@ vi.mock('@chickadee/ipc-client', () => ({
 
 const { finishT2Plate, gradeT2Plate } = await import('../session-flow.js');
 const { useUi } = await import('../store.js');
-const { loadPlates } = await import('./session.js');
+const { loadPlates, openSession } = await import('./session.js');
+const {
+  bakeNextT2, BAKE_ATTEMPTS, REPO_TARGETS, T2_ORDER, T2_REPO_KINDS, t2Todo,
+} = await import('./graph.js');
+
+/**
+ * 이 픽스처가 실제로 구울 수 있는 종 (D142). 리포 지도 두 종은 `clone.course_files` 가
+ * 요구하는 `grammar`·`line_count` 가 이 시드에 없어 재료가 0건이다 — 대지 회전만 센다.
+ */
+const UNIT_KINDS = T2_ORDER.filter((k) => !T2_REPO_KINDS.includes(k));
 
 const P = {
   page: 'app/cart/page.tsx',
@@ -190,11 +199,11 @@ const rows = (sql: string): Record<string, unknown>[] =>
 
 const CORE = [P.stepper, P.hook, P.row, P.api, P.route, P.repo];
 
-beforeEach(async () => {
-  await open();
-});
-
 describe('T2 판 한 장 (04 §8 · 02 §4)', () => {
+  beforeEach(async () => {
+    await open();
+  });
+
   test('core 를 다 고르면 진급이고 원장에 그대로 남는다', async () => {
     const graded = gradeT2Plate({ kind: 'placement', selected: CORE }, 0);
     expect(graded?.pct).toBe(100);
@@ -322,5 +331,267 @@ describe('T2 판 한 장 (04 §8 · 02 §4)', () => {
     expect(state.answered).toBe(true);
     expect(state.hints).toBe(2);
     expect(state.t2Sel).toEqual([...CORE].sort());
+  });
+});
+
+// ───────── D140 · 회전 ─────────
+
+/**
+ * **큐가 같은 판만 주지 않는다는 증거** (D140 · `#b-rotate-test`).
+ *
+ * 고장은 둘이 겹쳐 있었다. `queue.next_track_card` 가 `LIMIT 1` 로 늘 같은 행을 줬고,
+ * 그래서 `forUnit` 은 첫 판이 구워진 뒤로 한 번도 불리지 않는 죽은 코드였다. 20대지짜리
+ * 리포에서 사용자가 평생 보는 구조 문제가 **한 장**이었다는 뜻이다.
+ *
+ * 여기서는 대지 셋짜리 리포를 세우고 세션을 여러 날 열어 판이 실제로 바뀌는지 본다.
+ * 판을 마치는 것은 흉내 낸다 — `card_state.last_printed_at` 을 그날로 올리는 것이
+ * `plate.ts` 가 판을 마칠 때 하는 일이고, 이 테스트가 보는 것은 채점이 아니라 큐다.
+ */
+const DAY = 86_400_000;
+const UNITS = 3;
+
+/** 대지 하나의 파일 사슬. 층이 있어야 흐름·방향이 나온다(04 §8.3). */
+const chainOf = (u: number): string[] => [
+  `app/u${u}/page.ts`,
+  `features/u${u}/Sheet.ts`,
+  `features/u${u}/Row.ts`,
+  `features/u${u}/Stepper.ts`,
+  `features/u${u}/useThing.ts`,
+  `features/u${u}/api.ts`,
+  `server/u${u}/repo.ts`,
+];
+
+function seedRepo(units: number): void {
+  db = new Database(':memory:');
+  for (const m of [...migrations].sort((a, b) => a.version - b.version)) db.exec(m.sql);
+  db.pragma('foreign_keys = ON');
+  db.prepare(
+    `INSERT INTO repo (id, root_path, name, fingerprint, added_at) VALUES (1, '/w/app', 'app', 'r', ?)`,
+  ).run(T);
+  db.prepare(
+    `INSERT INTO dictionary_version (id, lang, version, sha256, concept_count, loaded_at)
+     VALUES (1, 'arch', '1.0.0', 'x', 4, ?)`,
+  ).run(T);
+  db.prepare(`INSERT INTO settings (key, value_json, updated_at) VALUES ('tz', ?, ?)`)
+    .run(JSON.stringify(TZ), T);
+
+  const concept = db.prepare(
+    `INSERT INTO concept (id, lang, name_ko, token, kind, track_default, dict_version_id)
+     VALUES (?, 'arch', ?, NULL, 'universal', 't2', 1)`,
+  );
+  for (const [id, name] of [
+    ['arch/placement', '책임 배치'], ['arch/radius', '영향 반경'],
+    ['arch/flow', '흐름 추적'], ['arch/direction', '의존성 방향'],
+  ]) concept.run(id, name);
+
+  const file = db.prepare(
+    `INSERT INTO file (id, repo_id, path, updated_at) VALUES (?, 1, ?, ?)`,
+  );
+  const unit = db.prepare(
+    `INSERT INTO unit (id, repo_id, name, root_path, source, order_idx) VALUES (?, 1, ?, ?, 'dir', ?)`,
+  );
+  const unitFile = db.prepare(`INSERT INTO unit_file (unit_id, file_id) VALUES (?, ?)`);
+  const edge = db.prepare(
+    `INSERT INTO import_edge (repo_id, from_file_id, to_file_id, kind) VALUES (1, ?, ?, 'static')`,
+  );
+  const commit = db.prepare(
+    `INSERT INTO git_commit (id, repo_id, sha, parent_count, authored_at, message, files_n,
+                             insertions, deletions, is_reachable, kind, author_matched)
+     VALUES (?, 1, ?, 1, ?, ?, 4, 60, 8, 1, 'normal', 1)`,
+  );
+  const commitFile = db.prepare(
+    `INSERT INTO commit_file (commit_id, path, status, additions, deletions, touched_json)
+     VALUES (?, ?, ?, ?, 2, '[]')`,
+  );
+
+  let fileId = 0;
+  let commitId = 0;
+  for (let u = 1; u <= units; u += 1) {
+    const paths = chainOf(u);
+    const ids = paths.map((path) => {
+      fileId += 1;
+      file.run(fileId, path, T);
+      return fileId;
+    });
+    unit.run(u, `u${u}`, `features/u${u}`, u);
+    for (const id of ids) unitFile.run(u, id);
+    for (let i = 0; i + 1 < ids.length; i += 1) edge.run(ids[i], ids[i + 1]);
+
+    // 04 §8.1 은 후보 커밋 3건 이상을 요구한다 — 넷을 둔다.
+    for (let c = 1; c <= 4; c += 1) {
+      commitId += 1;
+      commit.run(commitId, `s${String(commitId).padStart(6, '0')}`, T - commitId * DAY,
+        `feat(u${u}): 기능 ${c} 을 더한다`);
+      // 대지 파일 넷 — 「소스 파일 3~12개」 안이다. 첫 커밋의 첫 파일만 새 파일.
+      for (let i = 0; i < 4; i += 1) {
+        commitFile.run(commitId, paths[i + 1] as string, c === 1 && i === 0 ? 'A' : 'M', 9 + i * 3);
+      }
+    }
+  }
+}
+
+const deps = { repoId: 1, rootPath: '/w/app', now: T };
+
+/** 판을 마친 흔적 — `plate.ts` 가 `card.state_upsert` 로 하는 일 중 큐가 보는 부분. */
+function markPrinted(cardId: number, at: number): void {
+  db.prepare(
+    `UPDATE card_state SET prints = prints + 1, last_printed_at = ? WHERE card_id = ?`,
+  ).run(at, cardId);
+}
+
+const madeSet = (): Set<string> => new Set(
+  (rows(`SELECT unit_id, kind FROM card WHERE track = 't2'`))
+    .map((r) => `${String(r.unit_id)}:${String(r.kind)}`),
+);
+
+describe('T2 회전 (D140 · 대지 3 × 종 4)', () => {
+  beforeEach(() => {
+    seedRepo(UNITS);
+  });
+
+  test('굽는 순서는 종이 바깥 고리다 — 책임 배치를 대지 전부에 먼저 돌린다', () => {
+    const units = [1, 2, 3].map((id) => ({ id, name: `u${id}`, rootPath: `features/u${id}` }));
+    const todo = t2Todo(units, new Set(['1:placement']));
+    // 대지 회전 넷 × 3 − 이미 구운 하나, 그리고 리포 지도 두 종의 상한(진입점 1 · 역할 3).
+    expect(todo).toHaveLength(UNITS * UNIT_KINDS.length - 1
+      + Math.min(UNITS, REPO_TARGETS.entry) + Math.min(UNITS, REPO_TARGETS.role));
+    expect(todo.slice(0, 3).map((x) => `${x.unit.id}:${x.kind}`))
+      .toEqual(['2:placement', '3:placement', '1:radius']);
+    // 리포 지도 종은 대지를 회전 커서로만 쓴다 — 몇 번째 후보인지는 `targetIndex` 가 든다.
+    expect(todo.filter((x) => x.kind === 'role').map((x) => x.targetIndex)).toEqual([0, 1, 2]);
+    expect(todo.filter((x) => x.kind === 'entry')).toHaveLength(1);
+  });
+
+  test('부를 때마다 새 (대지, 종) 이 하나씩 늘고 12장에서 멈춘다', async () => {
+    const seen: string[] = [];
+    for (let i = 0; i < UNITS * UNIT_KINDS.length + 2; i += 1) {
+      const made = await bakeNextT2(deps);
+      if (made === null) break;
+      const row = rows(`SELECT unit_id, kind FROM card WHERE id = ${made.cardId}`)[0]!;
+      seen.push(`${String(row.unit_id)}:${String(row.kind)}`);
+    }
+    // 한 번에 한 장씩만 굽는다 — 일괄 생성이면 첫 호출에서 12장이 들어와 있다.
+    expect(new Set(seen).size).toBe(seen.length);
+    expect(seen).toHaveLength(UNITS * UNIT_KINDS.length);
+    expect(seen.slice(0, 3)).toEqual(['1:placement', '2:placement', '3:placement']);
+    // 네 종이 다 나왔다 (D107 이 약속하고 한 번도 일어나지 않았던 것).
+    expect(new Set(seen.map((s) => s.split(':')[1]))).toEqual(new Set(UNIT_KINDS));
+    expect(await bakeNextT2(deps)).toBeNull();
+  });
+
+  test('세션당 한 장 — 한 번 부르면 카드가 딱 한 행 는다', async () => {
+    expect(rows(`SELECT id FROM card WHERE track = 't2'`)).toHaveLength(0);
+    await bakeNextT2(deps);
+    expect(rows(`SELECT id FROM card WHERE track = 't2'`)).toHaveLength(1);
+    await bakeNextT2(deps);
+    expect(rows(`SELECT id FROM card WHERE track = 't2'`)).toHaveLength(2);
+  });
+
+  test('한 대지도 판을 못 내면 시도는 BAKE_ATTEMPTS 에서 멈춘다', async () => {
+    // 엣지를 지우면 지도가 3노드에 못 미쳐 어느 종도 안 나온다 (D103 `two-commits` 와 같다).
+    db.prepare('DELETE FROM import_edge').run();
+    db.prepare('DELETE FROM commit_file').run();
+    expect(await bakeNextT2(deps)).toBeNull();
+    expect(rows(`SELECT id FROM card WHERE track = 't2'`)).toHaveLength(0);
+    expect(BAKE_ATTEMPTS).toBeGreaterThan(0);
+  });
+
+  test('`queue.next_track_card` 가 최근 7일 안에 찍은 판을 주지 않는다', async () => {
+    const first = await bakeNextT2(deps);
+    expect(first).not.toBeNull();
+    const printedBefore = (at: number): unknown[] =>
+      run('queue.next_track_card', { repoId: 1, track: 't2', printedBefore: at - 7 * DAY });
+
+    // 아직 안 찍었다 — 나온다.
+    expect(printedBefore(T)).toHaveLength(1);
+    markPrinted(first!.cardId, T);
+    // 오늘 찍었다 — 창 안이라 안 나온다. 이 한 줄이 「평생 한 장」을 끝낸다.
+    expect(printedBefore(T + 2 * DAY)).toHaveLength(0);
+    expect(printedBefore(T + 6 * DAY)).toHaveLength(0);
+    // 7일이 지나면 다시 돈다.
+    expect(printedBefore(T + 7 * DAY)).toHaveLength(1);
+  });
+
+  test('T1 은 걸러지지 않는다 — 3단계 페이딩이 같은 카드를 다시 부른다', () => {
+    db.prepare(
+      `INSERT INTO card (id, repo_id, track, kind, concept_id, level, payload_json, content_hash,
+                         created_at)
+       VALUES (900, 1, 't1', 'transcribe', 'arch/placement', 1, '{}', 'h900', ?)`,
+    ).run(T);
+    db.prepare(
+      `INSERT INTO card_state (card_id, prints, stage, last_printed_at) VALUES (900, 1, 2, ?)`,
+    ).run(T);
+    // `REPRINT_GAP_DAYS.t1 = 0` → `printedBefore = now` 라 어제 찍은 판도 그대로 나온다.
+    expect(run('queue.next_track_card', { repoId: 1, track: 't1', printedBefore: T + DAY }))
+      .toHaveLength(1);
+  });
+
+  test('세션을 여러 날 열면 판이 반복되지 않는다 (큐 전체 경로)', async () => {
+    const maker = {
+      forReview: () => Promise.resolve(null),
+      forNew: () => Promise.resolve(null),
+      forBlock: () => Promise.resolve(null),
+      forUnit: async () => {
+        const made = await bakeNextT2({ ...deps, now: deps.now });
+        return made === null ? null : {
+          cardId: made.cardId,
+          conceptId: made.card.conceptId,
+          track: 't2' as const,
+          role: 'new' as const,
+          estMin: 4,
+        };
+      },
+    };
+
+    const printed: number[] = [];
+    // T2 리듬은 2일 간격이라 이틀에 한 번 연다 (02 §5.2).
+    for (let d = 0; d < UNITS * UNIT_KINDS.length * 2; d += 2) {
+      const now = T + d * DAY;
+      deps.now = now;
+      const view = await openSession(1, now, maker);
+      if (view === null) break;
+      const plate = view.plates[0];
+      expect(plate?.track).toBe('t2');
+      printed.push(plate!.cardId);
+      markPrinted(plate!.cardId, now);
+      // 세션을 닫아야 다음 날이 새 큐를 짠다 (02 §5.6).
+      db.prepare(`UPDATE session SET status = 'done', ended_at = ? WHERE id = ?`)
+        .run(now, view.session.id);
+      db.prepare(`UPDATE session_item SET status = 'done' WHERE session_id = ?`)
+        .run(view.session.id);
+    }
+    deps.now = T;
+
+    // 고장 났을 때 이 배열은 [1,1,1,1,…] 이었다.
+    expect(printed).toHaveLength(UNITS * UNIT_KINDS.length);
+    expect(new Set(printed).size).toBe(printed.length);
+    expect(madeSet().size).toBe(UNITS * UNIT_KINDS.length);
+
+    // 대지 셋이 다 나왔고 종도 넷이 다 나왔다 (D107).
+    const shown = rows(
+      `SELECT unit_id, kind FROM card WHERE id IN (${printed.join(',')})`,
+    );
+    expect(new Set(shown.map((r) => r.unit_id)).size).toBe(UNITS);
+    expect(new Set(shown.map((r) => r.kind))).toEqual(new Set(UNIT_KINDS));
+  });
+
+  test('다 구운 뒤에는 7일 창 밖으로 나온 옛 판을 다시 낸다', async () => {
+    // 열두 조합을 미리 다 굽고 전부 한참 전에 찍은 것으로 둔다.
+    for (let i = 0; i < UNITS * UNIT_KINDS.length; i += 1) {
+      const made = await bakeNextT2(deps);
+      markPrinted(made!.cardId, T - (30 - i) * DAY);
+    }
+    expect(await bakeNextT2(deps)).toBeNull();
+
+    // 큐는 가장 오래 안 본 판을 준다 — 「굽는다」와 「다시 낸다」 사이 갈림이 여기다.
+    const next = run('queue.next_track_card', {
+      repoId: 1, track: 't2', printedBefore: T - 7 * DAY,
+    }) as { id: number; prints: number }[];
+    expect(next).toHaveLength(1);
+    expect(next[0]!.prints).toBe(1);
+    const oldest = rows(
+      `SELECT card_id FROM card_state ORDER BY last_printed_at LIMIT 1`,
+    )[0]!;
+    expect(next[0]!.id).toBe(oldest.card_id);
   });
 });

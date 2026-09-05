@@ -1,0 +1,172 @@
+schema: 1
+id: cpp/function-definition
+# 1부. `common/function-definition` 이 그대로 성립한다 — 갈리는 것은 「부르기 전에 위에
+# 보여야 한다」이고 그것이 헤더가 왜 있는지의 시작이다.
+universal: common/function-definition
+name: { ko: 함수 정의하기, en: Function definition }
+token: null
+grammars: [cpp]
+framework: null
+essential: true
+difficulty: 1
+prereq: [cpp/variable-declaration, cs/call-stack]
+confusions: []
+dict:
+  one_liner:
+    ko: "돌려줄 것을 먼저 적고, 받을 것을 괄호에 적고, 할 일을 중괄호에 적는다."
+    en: "What comes back is written first, what goes in next, and the work in braces."
+  why:
+    ko: >-
+      {{site.line}}행은 <b>돌려줄 것의 종류부터</b> 적습니다. 변수와 같은 순서예요 —
+      C++ 은 언제나 「무엇인지」가 「이름」보다 앞입니다. 여기에 C++ 만의 규칙이 하나
+      더 붙습니다: <b>부르기 전에 그 이름이 위에 보여야 합니다.</b> 컴파일러가 파일을
+      위에서 아래로 한 번만 훑기 때문에, 아래에 정의된 함수를 위에서 부르면 그 자리에서
+      멈춰요. 그래서 이름과 모양만 먼저 적어 두는 <b>선언</b>이 따로 있고,
+      그 선언들을 모아 둔 파일이 헤더입니다.
+    en: >-
+      Line {{site.line}} starts with <b>the kind of thing that comes back</b>. It is the same
+      order as a variable — in C++ “what it is” always precedes “the name”. One more rule is
+      C++'s own: <b>the name has to be visible above the call</b>. The compiler walks the file
+      top to bottom once, so calling a function defined further down stops right there. That is
+      why a <b>declaration</b> — name and shape only — exists on its own, and a file that
+      collects those declarations is a header.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 돌려줄 것의 종류를 정한다."
+      en: "On line {{site.line}}, {{pick.1|code}} fixes the kind of thing that comes back."
+    - ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 받을 것들의 이름과 종류를 적는다."
+      en: "{{pick.3|code}} writes the names and kinds of what goes in."
+    - ko: "{{pick.2|code}} 라는 이름으로 그 몸통을 부를 수 있다."
+      en: "The body can be called by the name {{pick.2|code}}."
+rule:
+  ko: "<b>돌려줄 것이 이름보다 앞이다.</b> 그리고 부르는 자리보다 이름이 위에 있어야 한다."
+  en: "<b>What comes back precedes the name.</b> And the name must appear above the call."
+result:
+  label: { ko: "{{site.line}}행이 세운 함수", en: "the function set up on line {{site.line}}" }
+  value: "{{pick.1}} {{pick.2}}{{pick.3}}"
+  note: { ko: "부르는 자리보다 위여야 한다", en: "must stand above the call" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 이제 부를 수 있는 이름입니다."
+  en: "{{pick.2|code}} is now a name that can be called."
+payoff:
+  ko: >-
+    이걸 알면 「이 이름이 없다고 나온다」가 풀립니다 — 부르는 자리보다 아래에 있었어요.
+  en: >-
+    This untangles “it says the name does not exist” — it stood below the call.
+bridge:
+  ko: >-
+    파이썬은 부를 때 이름을 찾으므로 순서가 자유롭습니다. C++ 은 <b>컴파일할 때</b> 찾아서
+    순서가 규칙이 되고, 헤더가 거기서 나와요.
+  en: >-
+    Python looks the name up when it calls, so order is free. C++ looks it up <b>at compile
+    time</b>, so order becomes a rule — and that is where headers come from.
+misconceptions:
+  - ko: "어디에 적어도 부를 수 있다 — 부르는 자리보다 위에 이름이 보여야 합니다."
+    en: "It can be called from anywhere — the name has to be visible above the call."
+  - ko: "선언과 정의가 같은 것이다 — 선언은 모양만, 정의는 몸통까지입니다."
+    en: "A declaration is the definition — a declaration is the shape; a definition has the body."
+  - ko: "돌려줄 것이 있는데 돌려주지 않으면 빈 값이 온다 — 무슨 일이 날지 정해져 있지 않습니다."
+    en: "Skipping the return gives an empty value — nothing is fixed about what happens."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>돌려줄 것의 종류를 정하는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that fixes what comes back</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>부를 때 쓰는 이름</b>입니다. 무엇이 돌아오는지는 그 앞의 낱말이 정해요."
+          en: "{{pick.2|code}} is <b>the name used to call it</b>. What comes back is fixed by the word in front."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 돌려줄 것이냐", en: "The sharpest spot — the name or the result" }
+          code:
+            - "int f();     // 수가 돌아온다"
+            - "void f();    // 아무것도 안 돌아온다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>받을 것들</b>입니다. 들어가는 쪽이고, 돌아오는 쪽은 그 앞이에요."
+          en: "{{pick.3|code}} is <b>what goes in</b>. That is the inbound side; the outbound one is in front."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 들어가는 쪽이냐 나오는 쪽이냐", en: "The sharpest spot — inbound or outbound" }
+          code:
+            - "int f(double d);   // 넣는 것은 소수"
+            - "int f(double d);   // 나오는 것은 정수"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행의 함수는 <b>아무것도 안 돌려줍니다</b>."
+      en: "Choose what goes in the blank. The function on line {{site.line}} <b>hands nothing back</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "void", mono: true }
+      - t: "int"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>수가 돌아온다</b>는 약속입니다. 약속해 놓고 안 돌려주면 무슨 일이 날지 정해져 있지 않아요."
+            en: "That promises <b>a number comes back</b>. Promise it and hand nothing back, and nothing is fixed about what happens."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 약속했느냐", en: "The sharpest spot — was it promised" }
+            code:
+              - "void f() { }        // 괜찮다"
+              - "int f() { }         // 답이 없다"
+      - t: "auto"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>몸통을 보고 정하라</b>는 표시입니다. 서기는 하지만 선언만 보고는 무엇이 돌아오는지 알 수 없어 헤더에서 곤란해져요."
+            en: "That says <b>settle it from the body</b>. It stands, but a declaration alone no longer says what comes back, which hurts in a header."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 선언만 보고 아느냐", en: "The sharpest spot — can a declaration alone tell" }
+            code:
+              - "void f();       // 선언으로 안다"
+              - "auto f();       // 몸통을 봐야 안다"
+      - t: "return"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>몸통 안</b>에서 값을 내보내는 낱말이라 함수 이름 앞에 안 옵니다. 자리가 아예 달라요."
+            en: "That word sends a value out from <b>inside the body</b>, so it never stands before the name. It is a different place entirely."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 머리냐 몸통이냐", en: "The sharpest spot — the head or the body" }
+            code:
+              - "int f() { return 1; }"
+              - "return f();    // 몸통 안이다"
+why_gate:
+  q:
+    ko: "이 언어는 왜 <b>선언과 정의를 따로</b>  둘까요?"
+    en: "Why does this language keep <b>declaration and definition apart</b>?"
+  choices:
+    - t:
+        ko: "부르는 쪽은 모양만 알면 되기 때문 — 몸통은 다른 파일에서 따로 번역해 나중에 이으면 된다"
+        en: "Because the caller only needs the shape — the body can be translated elsewhere and linked later"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 대가로 무엇을 두 번 적게 되는지도 적어 보세요."
+        en: "That is the direction. Add what has to be written twice in exchange."
+    - t:
+        ko: "컴파일러가 몸통을 못 읽어서"
+        en: "Because the compiler cannot read bodies"
+      ok: false
+      fb:
+        ko: "읽습니다. 문제는 <b>언제</b> 읽어야 하느냐예요."
+        en: "It can. The question is <b>when</b> it has to."
+    - t:
+        ko: "헤더 파일 형식이 그렇게 정해져서"
+        en: "Because the header file format demands it"
+      ok: false
+      fb:
+        ko: "순서가 거꾸로입니다. 선언이 따로 있으니까 헤더라는 파일이 생긴 거예요."
+        en: "That is backwards. Headers exist because declarations can stand alone."
+queries:
+  - { grammars: [cpp], file: ./function-definition.scm }
+examples:
+  - code: "void greet(int n) { }                     // greet -> 아무것도 안 돌려준다"
+    expect: { sites: 1, form: free, hole: "void", picks: { 1: "void", 2: "greet", 3: "(int n)" } }
+  - code: "int add(int a, int b) { return a + b; }   // add(1,2) -> 3 (int)"
+    expect: { sites: 1, form: free, hole: "int", picks: { 1: "int", 2: "add", 3: "(int a, int b)" } }
+  - code: "void greet(int n);                        // 선언은 몸통이 없다"
+    expect: none

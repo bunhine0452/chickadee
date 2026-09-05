@@ -1,0 +1,221 @@
+schema: 1
+id: ts/type-annotation
+universal: null
+name: { ko: 타입 적기, en: Type annotation }
+token: ": string"
+grammars: [typescript, tsx]
+framework: null
+essential: true
+difficulty: 1
+prereq: [ts/const-declaration, cs/static-vs-dynamic-typing]
+confusions: [ts/type-assertion]
+
+dict:
+  one_liner:
+    ko: "이름 뒤에 콜론으로 적는 약속. 값이 아니라 <b>무엇이 올 수 있는가</b>를 적는다."
+    en: "A promise written after a name with a colon — what may arrive, not what did."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.2|code}}{{pick.2|josa:은,는}} 값이 아닙니다. 실행되지도 않고
+      메모리를 쓰지도 않아요. 컴파일러가 <b>이 이름에 무엇이 들어와도 되는지</b>를 확인하는 데만
+      쓰고, 확인이 끝나면 지웁니다.
+    en: >-
+      {{pick.2|code}} on line {{site.line}} is not a value. It never runs and takes no memory. The
+      compiler uses it only to check <b>what may arrive at this name</b>, then deletes it.
+  trace:
+    - ko: "{{site.line}}행에서 {{pick.1|code}}{{pick.1|josa:이,가}} 이름으로 선다."
+      en: "Line {{site.line}} stands {{pick.1|code}} up as a name."
+    - ko: "{{pick.3|code}} 뒤의 {{pick.2|code}}{{pick.2|josa:이,가}} 그 이름의 약속이 된다."
+      en: "{{pick.2|code}} after {{pick.3|code}} becomes that name's promise."
+    - ko: "컴파일이 끝나면 이 자리는 통째로 사라진다 — 돌아가는 코드에는 없다."
+      en: "Once compiled, this whole spot is gone — it is not in the code that runs."
+
+rule:
+  ko: >-
+    <b>타입은 컴파일 시각에만 산다.</b> 적어 두면 어긋난 값을 미리 잡아 주지만, 돌아가는 중에는
+    아무도 지켜 주지 않는다.
+  en: >-
+    <b>A type lives only at compile time.</b> Written down it catches a mismatch early; while the
+    program runs, nobody is guarding it.
+result:
+  label:
+    ko: "{{site.line}}행이 약속하는 것"
+    en: "What line {{site.line}} promises"
+  value: "{{pick.1}} : {{pick.2}}"
+  note:
+    ko: "이름 하나에 약속 하나"
+    en: "one name, one promise"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} 값의 <b>이름이 아니라 종류</b>입니다. 같은 종류의 값이면
+    무엇이든 이 이름에 들어올 수 있어요.
+  en: >-
+    {{pick.2|code}} names a <b>kind, not a value</b>. Any value of that kind may come to this name.
+payoff:
+  ko: >-
+    TS 파일의 거의 모든 줄에 이 표시가 있습니다. 이것을 「값이 아니라 약속」으로 읽기 시작하면
+    빨간 줄이 무엇을 말하는지가 그 줄에서 바로 읽혀요.
+  en: >-
+    Almost every line of a TS file carries one. Once you read it as a promise instead of a value,
+    the red squiggle starts telling you what it means on the spot.
+bridge:
+  ko: >-
+    약속을 <b>여럿 중 하나</b>로 적으면 유니온이 되고, 그때부터는 <code>if</code> 한 줄이
+    아래에서 할 수 있는 일을 바꿉니다.
+  en: >-
+    Write the promise as <b>one of several</b> and it becomes a union — from there one
+    <code>if</code> changes what the lines below may do.
+misconceptions:
+  - ko: "타입을 적었으니 실행 중에도 확인해 준다 — 컴파일하면 사라집니다."
+    en: "Writing a type means it is checked while running — it disappears at compile time."
+  - ko: "타입이 값을 바꿔 준다 — 바꾸지 않습니다. 맞는지 보기만 해요."
+    en: "A type converts the value — it does not. It only looks."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>약속(타입)</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the promise (the type)</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: >-
+            {{pick.1|code}}{{pick.1|josa:은,는}} 이름입니다. 약속은 콜론 오른쪽에 적혀 있어요.
+          en: "{{pick.1|code}} is the name. The promise is written right of the colon."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 이름과 약속"
+            en: "The sharpest spot — the name or the promise"
+          code:
+            - "const n: number = 1   // n 이 이름"
+            - "const n: number = 1   // number 가 약속"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 이름과 약속을 잇는 기호일 뿐입니다. 약속은 그
+            뒤에 있어요.
+          en: >-
+            {{pick.3|code}} only joins the name to the promise. The promise comes after it.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 잇는 기호와 약속"
+            en: "The sharpest spot — the joiner or the promise"
+          code:
+            - "let s: string    // : 는 잇는 기호"
+            - "let s: string    // string 이 약속"
+
+meaning:
+  - q:
+      ko: >-
+        <code>const n: number = JSON.parse(text).count</code> 에서 서버가 글자를 보냈다면 어떻게
+        될까요?
+      en: >-
+        In <code>const n: number = JSON.parse(text).count</code>, what if the server sent text?
+    hint:
+      ko: "이 약속을 확인하는 쪽은 컴파일러입니다. 컴파일러가 <code>JSON.parse</code> 의 결과를 볼 수 있을까요."
+      en: "The compiler is what checks this promise. Can it see inside <code>JSON.parse</code>?"
+    options:
+      - t:
+          ko: "그대로 글자가 들어온다 — 돌아가는 중에는 아무도 안 막는다"
+          en: "The text comes right in — nobody blocks it while running"
+      - t:
+          ko: "숫자로 바꿔 준다"
+          en: "It is converted to a number"
+        diag:
+          t:
+            ko: >-
+              약속은 바꾸지 않습니다. 바꾸려면 <code>Number(...)</code> 처럼 <b>부르는 코드</b>를
+              적어야 해요 — 그것만 실행에 남습니다.
+            en: >-
+              A promise converts nothing. Converting takes <b>code you call</b>, like
+              <code>Number(...)</code> — and only that survives into the running program.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 약속과 부름"
+              en: "The sharpest spot — a promise or a call"
+            code:
+              - "const n: number = x   // 확인만"
+              - "const n = Number(x)   // 바꾼다"
+      - t:
+          ko: "그 줄에서 멈춘다"
+          en: "It stops on that line"
+        diag:
+          t:
+            ko: >-
+              멈추게 하려면 값을 보고 판단하는 코드가 있어야 합니다. 약속은 컴파일이 끝나면
+              사라져서 판단할 코드가 남지 않아요.
+            en: >-
+              Stopping needs code that inspects the value. The promise is gone after compiling, so
+              no such code remains.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 남는가 사라지는가"
+              en: "The sharpest spot — does it survive"
+            code:
+              - "const n: number = x        // 사라진다"
+              - "if (typeof x !== 'number') // 남는다"
+      - t:
+          ko: "컴파일할 때 걸린다"
+          en: "The compiler catches it"
+        diag:
+          t:
+            ko: >-
+              <code>JSON.parse</code> 의 결과는 컴파일러가 <code>any</code> 로 봅니다. 무엇이 올지
+              소스에 안 적혀 있어서 견줄 대상이 없어요.
+            en: >-
+              The compiler sees the result of <code>JSON.parse</code> as <code>any</code>. Nothing
+              in the source says what arrives, so there is nothing to compare against.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 소스에 적혀 있나"
+              en: "The sharpest spot — is it written in the source"
+            code:
+              - "const n: number = '7'          // 걸린다"
+              - "const n: number = JSON.parse(t) // 안 걸린다"
+
+no_hole_reason: >-
+  약속을 통째로 지우면 TS 가 값에서 타입을 추론해 버려서 빈칸이 「없어도 되는 것」이 된다.
+  여기서 재는 것은 「어느 쪽이 이름이고 어느 쪽이 약속인가」이고, 그것은 자리를 짚어 물어야 한다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 약속을 적어 두었을까요?"
+    en: "Why does line {{site.line}} write the promise down?"
+  choices:
+    - t:
+        ko: "어긋난 값이 여기까지 오면 컴파일에서 먼저 걸리게 하려고"
+        en: "So a mismatched value is caught at compile time before it gets here"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 확인이 <b>어디까지</b> 미치는지도 한 줄 적어 보세요."
+        en: "That is the direction. Add a line on <b>how far</b> that checking reaches."
+    - t:
+        ko: "값을 그 종류로 바꿔 두려고"
+        en: "To convert the value into that kind"
+      ok: false
+      fb:
+        ko: "바꾸는 일은 안 합니다. 바꾸려면 부르는 코드를 따로 적어야 해요."
+        en: "It converts nothing. Converting needs a call you write yourself."
+    - t:
+        ko: "돌아가는 중에 값이 맞는지 지켜보려고"
+        en: "To watch the value while the program runs"
+      ok: false
+      fb:
+        ko: "컴파일이 끝나면 이 자리는 사라집니다. 지켜볼 코드가 안 남아요."
+        en: "This spot is gone once compiled. No watching code is left."
+
+queries:
+  - { grammars: [typescript, tsx], file: ./type-annotation.scm }
+
+examples:
+  - code: "const count: number = 0"
+    expect: { sites: 1, form: declarator, picks: { 1: "count", 2: "number", 3: ":" } }
+  - code: "function greet(name: string) { return name }"
+    expect: { sites: 1, form: parameter, picks: { 1: "name", 2: "string" } }
+  - code: "function total(xs: number[]): number { return 0 }"
+    expect: { form: return, picks: { 1: "total", 2: "number" } }
+  - code: "const count = 0"
+    expect: none

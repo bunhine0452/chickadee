@@ -1,0 +1,191 @@
+schema: 1
+id: ts/any-unknown
+universal: null
+name: { ko: "any 와 unknown", en: any and unknown }
+token: "unknown"
+grammars: [typescript, tsx]
+framework: null
+essential: false
+difficulty: 4
+prereq: [ts/type-annotation, ts/narrowing]
+confusions: [ts/type-annotation, ts/type-assertion]
+
+dict:
+  one_liner:
+    ko: "둘 다 「모른다」인데 하나는 검사를 끄고 하나는 먼저 가리기를 시킨다."
+    en: "Both say \"unknown\", but one switches checking off and one demands you settle it."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 무엇이 올지 안 적은 자리입니다.
+      그런데 두 낱말의 결과가 정반대예요 — 한쪽은 그 값으로 <b>무엇이든 하게</b> 두고 그 흠이 옆
+      줄로 번지며, 다른 쪽은 가리기 전까지 <b>아무것도 못 하게</b> 막습니다.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} is a slot with no promise written. Yet the two words come
+      out opposite — one lets you do <b>anything</b> with the value and lets the hole spread to the
+      lines around, the other blocks <b>everything</b> until you settle what it is.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}} 에 「모른다」를 적는다."
+      en: "Line {{site.line}} writes \"unknown\" on {{pick.2|code}}."
+    - ko: "{{pick.1|code}} 자리가 어느 낱말인지가 그다음 줄들의 규칙을 정한다."
+      en: "Which of the two words {{pick.1|code}} is decides the rule for the lines after."
+    - ko: "가리기를 시키는 쪽이면 조건 한 줄이 있어야 그 값을 쓸 수 있다."
+      en: "With the demanding one, a condition must come first before the value can be used."
+
+rule:
+  ko: >-
+    <b>모름이 번지느냐 멈추느냐가 갈린다.</b> 검사를 끄는 쪽은 그 값을 만지는 줄마다 검사가
+    같이 꺼진다.
+  en: >-
+    <b>The split is whether unknowing spreads or halts.</b> The switching-off one takes the checking
+    with it into every line that touches the value.
+result:
+  label:
+    ko: "{{site.line}}행 아래에서 할 수 있는 일"
+    en: "What the lines below line {{site.line}} may do"
+  value: "{{pick.1}} → {{pick.2}}"
+  note:
+    ko: "낱말이 규칙을 가른다"
+    en: "the word decides the rule"
+ok:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:은,는}} 타입이 없다는 뜻이 아니라 <b>「무엇인지 아직 안 적었다」</b>는
+    표시입니다. 적기 전까지 무엇을 허락하느냐가 두 낱말의 차이예요.
+  en: >-
+    {{pick.1|code}} does not mean "no type" but <b>"not written down yet"</b>. What is permitted
+    before it is written is the whole difference.
+payoff:
+  ko: >-
+    응답을 받는 자리와 <code>catch</code> 의 이름이 이 둘 중 하나로 옵니다. 어느 쪽인지 알면
+    그 아래 줄들이 왜 그렇게 생겼는지가 보여요.
+  en: >-
+    Where responses arrive and where a <code>catch</code> names its value, one of these two shows
+    up. Knowing which explains the shape of the lines below.
+bridge:
+  ko: >-
+    가리기를 시키는 쪽에서 빠져나오는 길이 둘입니다 — 조건으로 <b>좁히거나</b>, 단언으로
+    <b>눌러 버리거나</b>.
+  en: >-
+    Out of the demanding one there are two exits — <b>narrow</b> with a condition, or <b>press it
+    down</b> with an assertion.
+misconceptions:
+  - ko: "둘 다 「아무거나」라 같다 — 한쪽은 쓰기 전에 가리기를 시킵니다."
+    en: "Both mean \"anything\", so they are the same — one demands settling first."
+  - ko: "검사를 끄는 쪽은 그 줄에서만 꺼진다 — 그 값을 따라 번집니다."
+    en: "Switching off affects only that line — it spreads along the value."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>「모른다」를 적은 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that writes \"unknown\"</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 그 약속을 받는 <b>이름</b>입니다. 낱말은 콜론 뒤에
+            있어요.
+          en: >-
+            {{pick.2|code}} is the <b>name</b> taking the promise. The word is after the colon.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 이름과 낱말"
+            en: "The sharpest spot — the name or the word"
+          code:
+            - "const v: unknown = res"
+            - "//    ^이름   ^낱말"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 함수의 <b>이름</b>입니다. 「모른다」는 돌려주는
+            자리에 적혀 있어요.
+          en: >-
+            {{pick.3|code}} is the function's <b>name</b>. The "unknown" is written where the return
+            goes.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 함수 이름과 돌려주는 약속"
+            en: "The sharpest spot — the function's name or the return promise"
+          code:
+            - "function parse(t: string): unknown {}"
+            - "//       ^이름              ^낱말"
+
+meaning:
+  - q:
+      ko: "<code>const v: unknown = res</code> 다음 줄에 <code>v.id</code> 를 적으면?"
+      en: "After <code>const v: unknown = res</code>, what about writing <code>v.id</code>?"
+    hint:
+      ko: "이 낱말이 무엇을 먼저 시키는지 생각해 보세요."
+      en: "Think about what this word demands first."
+    options:
+      - t:
+          ko: "컴파일에서 걸린다 — 무엇인지 먼저 가려야 한다"
+          en: "The compiler catches it — you must settle what it is first"
+      - t:
+          ko: "된다 — 모른다고 적었으니 아무거나 해도 된다"
+          en: "It works — it says unknown, so anything goes"
+        diag:
+          t:
+            ko: >-
+              그것은 다른 낱말의 규칙입니다. 이 낱말은 반대로, 가리기 전까지 아무것도 못 하게 해요.
+            en: >-
+              That is the other word's rule. This one does the opposite: nothing until it is settled.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 끄는가 시키는가"
+              en: "The sharpest spot — switching off or demanding"
+            code:
+              - "const v: any = res;     v.id   // 된다"
+              - "const v: unknown = res; v.id   // 걸린다"
+      - t:
+          ko: "<code>undefined</code> 가 나온다"
+          en: "It yields <code>undefined</code>"
+        diag:
+          t:
+            ko: >-
+              돌아가는 중이라면 그럴 수 있지만, 그 줄이 컴파일을 못 넘습니다.
+            en: >-
+              At run time perhaps, but the line never gets past compiling.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 컴파일과 실행"
+              en: "The sharpest spot — compile or run"
+            code:
+              - "v.id   // 컴파일에서 걸린다"
+              - "// 실행까지 안 간다"
+      - t:
+          ko: "그 값이 자동으로 가려진다"
+          en: "The value is settled automatically"
+        diag:
+          t:
+            ko: >-
+              가리는 것은 사람이 적는 조건 한 줄입니다. 컴파일러는 그 줄이 있어야 아래를 다시 셈해요.
+            en: >-
+              Settling is a condition you write. The compiler recomputes the lines below only when
+              that line exists.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 자동인가 적어야 하나"
+              en: "The sharpest spot — automatic or written"
+            code:
+              - "if (typeof v === 'object' && v) { }"
+              - "// 이 줄이 있어야 아래가 열린다"
+
+no_hole_reason: >-
+  낱말을 지우면 TS 가 값에서 타입을 추론해 버려서 「모른다」 자체가 사라진다.
+  여기서 재는 것은 「두 낱말 중 어느 쪽인가」이고, 그것은 자리와 뜻으로 물어야 한다.
+
+queries:
+  - { grammars: [typescript, tsx], file: ./any-unknown.scm }
+
+examples:
+  - code: "const v: unknown = res"
+    expect: { sites: 1, form: declarator, picks: { 1: "unknown", 2: "v" } }
+  - code: "function handle(e: any) { return e }"
+    expect: { sites: 1, form: parameter, picks: { 1: "any", 2: "e" } }
+  - code: "function parse(t: string): unknown { return t }"
+    expect: { sites: 1, form: return, picks: { 1: "unknown", 3: "parse" } }
+  - code: "const v: string = res"
+    expect: none

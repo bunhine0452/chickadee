@@ -1,0 +1,160 @@
+schema: 1
+id: java/reference-binding
+# 0부 축 G. `universal: null` — 파이썬은 이름이 늘 자리를 가리키고(값 복사가 없다), JS 도
+# 원시/객체가 갈리지만 「타입이 그 갈림을 적는다」가 없다. 자바는 **선언한 타입**이 규칙을 정한다.
+universal: null
+name: { ko: 값이 가나 자리가 가나, en: Value or address }
+token: "ref"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 3
+prereq: [cs/value-vs-reference, cs/aliasing, cs/stack-and-heap]
+confusions: [java/assignment]
+dict:
+  one_liner:
+    ko: "이름을 옮길 때 원시는 값이 가고 참조는 자리가 간다."
+    en: "Copying a name moves the value for a primitive and the address for a reference."
+  why:
+    ko: >-
+      <code>b = a</code> 는 늘 <b>복사</b>입니다. 무엇을 복사하느냐가 타입에 따라 갈릴 뿐이에요.
+      원시 타입이면 <b>값이</b> 복사되어 두 이름이 서로 무관해집니다. 참조 타입이면
+      <b>자리가</b> 복사되어 두 이름이 <b>같은 상자</b>를 가리켜요 — 한쪽으로 상자를 고치면
+      다른 쪽에서도 바뀝니다. 메서드에 넘길 때도 같은 규칙입니다. 그래서 「목록을 넘겼는데
+      원본이 바뀌었다」가 생겨요. 자바 1학년을 마친 학생 다섯 중 넷이 이 모형을 못 가진다는
+      측정이 있습니다(Ma 외 2007 — 객체 참조 대입의 생존 모형 17%).
+    en: >-
+      <code>b = a</code> is always a <b>copy</b>. What gets copied depends on the type. For a
+      primitive the <b>value</b> is copied and the two names go their own ways. For a reference
+      the <b>address</b> is copied and both names point at the <b>same box</b> — edit it
+      through one and the other sees it. Passing to a method follows the same rule, which is
+      where “I passed a list and the original changed” comes from. Four in five students who
+      finish a first year of Java lack this model (Ma et al. 2007 — 17% held a viable model of
+      object reference assignment).
+  trace:
+    - ko: "{{site.line}}행은 {{pick.3|code}} 의 내용을 {{pick.2|code}}{{pick.2|josa:으로,로}} 복사한다."
+      en: "Line {{site.line}} copies what is in {{pick.3|code}} into {{pick.2|code}}."
+    - ko: "타입 {{pick.1|code}}{{pick.1|josa:이,가}} 무엇이 복사되는지를 정한다."
+      en: "The type {{pick.1|code}} decides what gets copied."
+    - ko: "참조 타입이면 상자가 아니라 상자의 자리가 간다."
+      en: "For a reference type the address travels, not the box."
+rule:
+  ko: "<b>대입은 늘 복사다.</b> 원시면 값이, 참조면 상자의 자리가 복사된다."
+  en: "<b>Assignment always copies.</b> A primitive copies the value, a reference copies the address."
+result:
+  label: { ko: "{{site.line}}행의 복사", en: "the copy on line {{site.line}}" }
+  value: "{{pick.2}} = {{pick.3}}"
+  note: { ko: "무엇이 복사되는지는 타입이 정한다", en: "the type decides what is copied" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}} 사이에 복사가 한 번 일어났습니다."
+  en: "One copy happened between {{pick.2|code}} and {{pick.3|code}}."
+payoff:
+  ko: "이걸 알면 「메서드에 넘겼을 뿐인데 원본이 바뀌었다」가 풀립니다."
+  en: "This untangles “I only passed it to a method and the original changed”."
+bridge:
+  ko: "파이썬은 늘 자리를 가리켜 이 갈림이 없습니다. 자바는 <b>타입이</b> 갈림을 적습니다."
+  en: "Python always points at a place, so there is no split. In Java <b>the type</b> writes the split."
+misconceptions:
+  - ko: "메서드에 넘기면 복사본이 간다 — 참조 타입은 자리가 복사되어 같은 상자를 씁니다."
+    en: "Passing to a method sends a copy — for a reference type the address is copied and the box is shared."
+  - ko: "대입이 상자를 통째로 옮긴다 — 상자는 그 자리에 있고 자리 번호만 갑니다."
+    en: "Assignment moves the whole box — the box stays and only its address travels."
+  - ko: "이름 앞에 못 바꾸게 표시하면 안이 못 바뀐다 — 자리가 고정될 뿐 안은 바뀝니다."
+    en: "Marking a name unchangeable freezes the contents — it fixes the address, not the box."
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 개념의 정답은 코드에 적힌 한 글자가 아니라 **그 줄 뒤에 두 이름이
+  같은 상자를 보느냐**이고, 그 답은 값이 아니라 그림이다(메모리 줄). 구멍을 타입 자리에
+  뚫으면 그때 나오는 판은 `java/variable-declaration` 의 것이지 이 개념의 것이 아니다.
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>무엇이 복사되는지를 정하는 글자</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that decides what gets copied</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 받는 <b>이름</b>입니다. 값이 가느냐 자리가 가느냐는 이름이 아니라 앞에 적힌 타입이 정해요."
+          en: "{{pick.2|code}} is the receiving <b>name</b>. Whether a value or an address travels is set by the type in front."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 타입이냐", en: "The sharpest spot — the name or the type" }
+          code:
+            - "int b = a;           // 값이 복사된다"
+            - "int[] b = a;         // 자리가 복사된다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 주는 <b>이름</b>입니다. 이 이름은 복사 뒤에도 그대로 남아요 — 무엇이 남는지가 타입에 달렸습니다."
+          en: "{{pick.3|code}} is the giving <b>name</b>. It survives the copy — what survives depends on the type."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 주는 이름이냐 타입이냐", en: "The sharpest spot — the giving name or the type" }
+          code:
+            - "int b = a; a = 9;       // b 는 그대로"
+            - "int[] b = a; a[0] = 9;  // b 로도 보인다"
+meaning:
+  - q:
+      ko: "{{site.line}}행 다음 줄에서 한쪽을 고치면 다른 쪽은 어떻게 될까요?"
+      en: "If one side is edited on the next line after {{site.line}}, what happens to the other?"
+    options:
+      - t:
+          ko: "타입에 달렸다 — 원시면 서로 무관하고, 참조면 같은 상자라 함께 바뀐다"
+          en: "It depends on the type — primitives go their own ways, references share one box"
+      - t:
+          ko: "언제나 함께 바뀐다 — 이름 둘이 같은 값을 가리키므로"
+          en: "They always change together, since two names point at one value"
+        diag:
+          t:
+            ko: "그 답은 <b>파이썬</b>에 가깝습니다. 자바에서는 원시 타입이면 값이 복사되어 서로 무관해져요."
+            en: "That answer is closer to <b>Python</b>. In Java a primitive copies the value and the two go their own ways."
+      - t:
+          ko: "언제나 서로 무관하다 — 대입은 복사이므로"
+          en: "They are always independent, since assignment copies"
+        diag:
+          t:
+            ko: "복사인 것은 맞습니다. 다만 참조 타입에서 복사되는 것은 <b>상자가 아니라 자리</b>라 상자는 하나예요."
+            en: "The copy part is right. For a reference type what is copied is <b>the address, not the box</b>, so there is one box."
+      - t:
+          ko: "못 바꾼다 — 자바는 대입한 이름을 잠근다"
+          en: "Neither can change — Java locks an assigned name"
+        diag:
+          t:
+            ko: "잠그지 않습니다. 잠그려면 이름 앞에 표시를 적어야 하고, 그것도 <b>자리</b>만 잠가요."
+            en: "Nothing is locked. Locking takes a mark in front of the name, and even then it locks only <b>the address</b>."
+why_gate:
+  q:
+    ko: "{{site.line}}행처럼 이름 하나를 다른 이름에 넣는 줄은 왜 <b>필요할까요</b>?"
+    en: "Why is a line like {{site.line}}, putting one name into another, <b>needed at all</b>?"
+  choices:
+    - t:
+        ko: "같은 것을 다른 이름으로 부르려는 것이고, 참조 타입이면 그 둘이 같은 상자를 함께 쓰게 되기 때문"
+        en: "Because the same thing gets a second name, and for a reference type both then share one box"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 공유가 도움이 되는 자리와 위험한 자리를 하나씩 적어 보세요."
+        en: "That is the direction. Name one place the sharing helps and one where it hurts."
+    - t:
+        ko: "값을 안전하게 백업해 두려고"
+        en: "To keep a safe backup of the value"
+      ok: false
+      fb:
+        ko: "참조 타입에서는 백업이 안 됩니다 — 상자가 하나라 원본과 함께 바뀌어요."
+        en: "For a reference type it is no backup — one box, so it changes with the original."
+    - t:
+        ko: "자바가 값을 쓰기 전에 이름을 한 번 더 만들라고 해서"
+        en: "Because Java asks for one more name before a value is used"
+      ok: false
+      fb:
+        ko: "요구하지 않습니다. 이 줄은 선택이고, 그래서 무엇을 얻으려 했는지가 물음이 됩니다."
+        en: "It asks for no such thing. The line is a choice, which is why what it buys is the question."
+queries:
+  - { grammars: [java], file: ./reference-binding.scm }
+examples:
+  - code: "class A { void f(int a) { int b = a; } }                     // b -> a 의 값 사본 (int)"
+    expect: { sites: 1, form: alias, picks: { 1: "int", 2: "b", 3: "a" } }
+  - code: "class A { void f(java.util.List xs) { java.util.List ys = xs; } }  // ys -> xs 와 같은 상자 (List)"
+    expect: { sites: 1, form: alias, picks: { 2: "ys", 3: "xs" } }
+  - code: "class A { void f(int a, int b) { b = a; } }                  // b -> a 의 값 사본 (int)"
+    expect: { sites: 1, form: rebind, picks: { 1: "=", 2: "b", 3: "a" } }
+  - code: "class A { void f() { int n = 1; } }                          // n -> 1 (int)"
+    expect: none

@@ -19,14 +19,15 @@ import type { ConceptId } from '@chickadee/store-sql';
 
 import { contentHash } from './hash.js';
 import { GEN_VERSION } from './payload.js';
-import { buildGraph } from './t2-graph.js';
+import { buildGraph, repoMapStands } from './t2-graph.js';
 import { buildKey, candidates, question } from './t2-key.js';
 import {
-  buildDirection, buildFlow, buildRadius, DIRECTION_PAIRS, FLOW_MIN, type QuizInput,
+  buildDirection, buildEntry, buildFlow, buildRadius, buildRole, roleTargets,
+  DIRECTION_PAIRS, FLOW_MIN, type QuizInput,
 } from './t2-quiz.js';
 import type { NoPlate } from './types.js';
 import {
-  MIN_COMMITS_FOR_PLACEMENT,
+  MIN_COMMITS_FOR_PLACEMENT, MIN_REPO_NODES,
   type AnswerKey, type Band, type Graph, type T2Card, type T2Kind, type T2Payload,
   type T2Request,
 } from './t2-types.js';
@@ -37,13 +38,29 @@ const CONCEPT_OF: Record<T2Kind, string> = {
   radius: 'arch/radius',
   flow: 'arch/flow',
   direction: 'arch/direction',
+  entry: 'arch/entry',
+  role: 'arch/role',
 };
 
-/** 시도 순서. 앞의 것이 만들어지면 거기서 멈춘다. */
+/**
+ * 지도가 **리포 전체**인 종 (04 §7.5 · D142). 나머지 넷은 대지 + 1-hop 이다.
+ *
+ * 이 둘은 `req.files` 로 대지 파일이 아니라 **리포의 파일 전부**를 받는다 — 부르는 쪽이
+ * 무엇을 실어 보내는지 알아야 하므로 종을 안 주면 시도하지 않는다(아래 `ORDER` 참조).
+ */
+export const REPO_KINDS: readonly T2Kind[] = ['entry', 'role'];
+
+/**
+ * 종을 안 줬을 때의 시도 순서. 앞의 것이 만들어지면 거기서 멈춘다.
+ *
+ * **리포 지도 두 종은 여기 없다.** 그 둘은 입력이 대지가 아니라 리포 전체라, 대지 파일만
+ * 들어온 요청으로 굽으면 「대지 하나짜리 리포 지도」라는 거짓 그림이 나온다. 큐(D140 의
+ * `t2Todo`)가 종을 정해 부르는 경로에서만 나온다.
+ */
 const ORDER: T2Kind[] = ['placement', 'radius', 'flow', 'direction'];
 
 /**
- * 대지 하나로 T2 판 한 장을 굽는다. `kind` 를 주면 그 종만 시도한다.
+ * T2 판 한 장을 굽는다. `kind` 를 주면 그 종만 시도한다.
  *
  * 만들 수 없으면 `NoPlate` — 사유는 화면이 아니라 로그로 간다 (「판이 없는 문법」 패널은
  * 개념 단위이고 이것은 대지 단위다).
@@ -52,7 +69,9 @@ export function generateT2(req: T2Request, kind?: T2Kind): T2Card | NoPlate {
   const kinds = kind === undefined ? ORDER : [kind];
   const reasons: string[] = [];
   for (const one of kinds) {
-    const made = one === 'placement' ? placement(req) : quiz(req, one);
+    const made = one === 'placement' ? placement(req)
+      : one === 'entry' || one === 'role' ? repoMap(req, one)
+        : quiz(req, one);
     if ('payload' in made) return made;
     reasons.push(`${one}: ${made.reason}`);
   }
@@ -157,6 +176,65 @@ function quiz(req: T2Request, kind: Exclude<T2Kind, 'placement'>): T2Card | NoPl
     ...base, kind: 'direction', q: made.q, hint: made.hint,
     core: {}, sec: {}, trap: {}, hints: made.hints,
     pairs: made.pairs,
+  }, null);
+}
+
+// ───────── 리포 지도 두 종 (04 §7.5·§8.5 · D142) ─────────
+
+/**
+ * 「밖에서 처음 들어오는 문」과 「이 폴더는 왜 있나」.
+ *
+ * 지도는 `scope: 'repo'` 로 짓는다 — 노드가 파일이 아니라 대지·폴더다. 대지가 `기타`
+ * 하나뿐인 리포에서는 **아무것도 내지 않는다**: 접어도 한 덩어리라 「이 프로젝트는 이런
+ * 구조구나」가 나오지 않고, 안 서는 지도로 「틀렸습니다」를 내면 신뢰가 한 번에 무너진다.
+ *
+ * 폴더 역할은 지도를 **두 번** 짓는다. 밴드 행 라벨이 곧 4지의 보기라 물어볼 폴더가
+ * 지도에 그려져 있으면 정답을 읽어 주는 셈이다 — 첫 지도로 후보를 고르고, 그 폴더를 뺀
+ * 두 번째 지도를 굽는다. 책임 배치가 정답지를 지키려고 두 번 짓는 것과 같은 자리다.
+ */
+function repoMap(req: T2Request, kind: 'entry' | 'role'): T2Card | NoPlate {
+  const paths = req.files.map((f) => f.path);
+  if (!repoMapStands(paths)) return { noPlate: true, reason: t('t2.noRepoMap') };
+
+  const first = buildGraph({ files: req.files, edges: req.edges, unitRoot: '', scope: 'repo' });
+  if (first.files.length < MIN_REPO_NODES) {
+    return { noPlate: true, reason: t('t2.smallRepoMap', { n: String(first.files.length) }) };
+  }
+  const base = { track: 't2' as const, core: {}, sec: {}, trap: {} };
+
+  if (kind === 'entry') {
+    const made = buildEntry(first);
+    if (made === null) return { noPlate: true, reason: t('t2.entryNone', { n: String(first.files.length) }) };
+    return card('entry', req, {
+      ...base, kind: 'entry', q: made.q, hint: made.hint,
+      bands: first.bands, files: first.files, edges: first.edges,
+      core: made.core, sec: made.sec, trap: made.trap, hints: made.hints,
+    }, null);
+  }
+
+  const targets = roleTargets(first);
+  const target = targets[req.targetIndex ?? 0];
+  if (target === undefined) {
+    return { noPlate: true, reason: t('t2.roleNone', { n: String(targets.length) }) };
+  }
+  const drop = new Set([target.folder, ...(first.foldedOf[target.folder] ?? [])]);
+  const graph = buildGraph({
+    files: req.files.filter((f) => !drop.has(f.path)),
+    edges: req.edges.filter((e) => !drop.has(e.from) && !drop.has(e.to)),
+    unitRoot: '',
+    scope: 'repo',
+  });
+  // 뺀 폴더가 컸으면 남은 지도가 노드 둘로 주저앉는다 — 그림 없이 힌트 숫자만 남으면
+  // 「지도를 읽어라」가 아니라 「숫자를 외워라」가 된다.
+  if (graph.files.length * 2 < MIN_REPO_NODES) {
+    return { noPlate: true, reason: t('t2.smallRepoMap', { n: String(graph.files.length) }) };
+  }
+  const made = buildRole(target);
+  return card('role', req, {
+    ...base, kind: 'role', q: made.q, hint: made.hint,
+    bands: graph.bands, files: graph.files, edges: graph.edges,
+    hints: made.hints,
+    role: { folder: made.folder, answer: made.answer },
   }, null);
 }
 

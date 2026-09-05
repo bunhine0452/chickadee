@@ -1,0 +1,153 @@
+schema: 1
+id: ts/typeof-guard
+universal: null
+name: { ko: typeof 로 값 가르기, en: Guarding with typeof }
+token: "typeof x ==="
+grammars: [javascript, vue]
+framework: null
+essential: false
+difficulty: 2
+prereq: [ts/comparison, ts/if-statement]
+confusions: [ts/comparison]
+
+dict:
+  one_liner:
+    ko: "값의 종류를 글자로 물어 갈래를 가른다. 여기서 갈리는 것은 값이지 약속이 아니다."
+    en: "Ask a value's kind as text and split on it — the value splits, not a promise."
+  why:
+    ko: >-
+      이 파일에는 적어 둔 약속이 없어서, 무엇이 왔는지는 <b>돌아가는 중에</b> 물어야 합니다.
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} {{pick.2|code}} 의 종류를 글자로 내고,
+      그것을 {{pick.3|code}}{{pick.3|josa:과,와}} 견줘 갈래를 가릅니다.
+    en: >-
+      This file has no promises written down, so what arrived must be asked <b>while it runs</b>.
+      On line {{site.line}}, {{pick.1|code}} yields the kind of {{pick.2|code}} as text and compares
+      it with {{pick.3|code}} to split the branches.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}} 의 종류를 묻는다."
+      en: "Line {{site.line}} asks for the kind of {{pick.2|code}}."
+    - ko: "답이 글자로 나오고 {{pick.3|code}}{{pick.3|josa:과,와}} 견줘진다."
+      en: "The answer comes back as text and is weighed against {{pick.3|code}}."
+    - ko: "같으면 그 가지로, 아니면 다른 가지로 간다."
+      en: "Matching takes that branch; otherwise the other."
+
+rule:
+  ko: >-
+    <b>답은 글자 여덟 중 하나다</b> — <code>undefined bigint boolean number string symbol
+    function object</code>. 배열도 <code>null</code> 도 <code>object</code> 로 나온다.
+  en: >-
+    <b>The answer is one of eight strings</b> — <code>undefined bigint boolean number string symbol
+    function object</code>. Arrays and <code>null</code> both come back as <code>object</code>.
+result:
+  label:
+    ko: "{{site.line}}행이 견주는 것"
+    en: "What line {{site.line}} weighs"
+  value: "{{pick.1}} vs {{pick.3}}"
+  note:
+    ko: "글자 대 글자"
+    en: "text against text"
+ok:
+  ko: >-
+    {{pick.1|code}} 의 답은 값이 아니라 <b>글자</b>입니다. 그래서 오른쪽도 따옴표로 적힌 글자예요.
+  en: >-
+    The answer to {{pick.1|code}} is <b>text</b>, not a value. That is why the right side is quoted
+    text too.
+payoff:
+  ko: >-
+    같은 글자가 TS 파일에서는 타입을 좁힙니다. 두 자리를 갈라 읽으면 「이 리포는 왜 타입을 안
+    쓰고 매번 물어보나」가 한 줄로 보여요.
+  en: >-
+    The same glyphs narrow a type in a TS file. Reading the two apart shows in one line why this
+    repository keeps asking instead of declaring.
+bridge:
+  ko: >-
+    <code>null</code> 을 가르려면 이것만으로는 안 됩니다 — <code>typeof null</code> 이
+    <code>'object'</code> 라서 따로 견줘야 해요.
+  en: >-
+    Splitting off <code>null</code> takes more than this — <code>typeof null</code> is
+    <code>'object'</code>, so it needs its own comparison.
+misconceptions:
+  - ko: "<code>typeof null</code> 은 <code>'null'</code> 이다 — <code>'object'</code> 입니다."
+    en: "<code>typeof null</code> is <code>'null'</code> — it is <code>'object'</code>."
+  - ko: "배열은 <code>'array'</code> 로 나온다 — <code>'object'</code> 입니다."
+    en: "An array reports <code>'array'</code> — it reports <code>'object'</code>."
+
+meaning:
+  - q:
+      ko: "<code>typeof xs === 'object'</code> 가 참일 때 <code>xs</code> 로 가능한 것은?"
+      en: "When <code>typeof xs === 'object'</code> holds, what can <code>xs</code> be?"
+    hint:
+      ko: "답이 여덟 글자뿐이라 여러 종류가 한 글자에 몰립니다."
+      en: "Only eight answers exist, so several kinds crowd into one."
+    options:
+      - t:
+          ko: "묶음일 수도, 배열일 수도, <code>null</code> 일 수도 있다"
+          en: "A bundle, an array, or <code>null</code>"
+      - t:
+          ko: "묶음뿐이다"
+          en: "Only a bundle"
+        diag:
+          t:
+            ko: >-
+              배열도 같은 답을 냅니다. 배열인지 가리려면 <code>Array.isArray</code> 를 따로 불러야
+              해요.
+            en: >-
+              An array gives the same answer. Telling an array apart takes a separate call to
+              <code>Array.isArray</code>.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 묶음과 배열"
+              en: "The sharpest spot — bundle or array"
+            code:
+              - "typeof {} === 'object'   // true"
+              - "typeof [] === 'object'   // true"
+      - t:
+          ko: "<code>null</code> 은 아니다"
+          en: "Not <code>null</code>"
+        diag:
+          t:
+            ko: >-
+              <code>null</code> 도 같은 답을 냅니다. 첫 판의 버그가 표준에 그대로 남은 자리예요.
+            en: >-
+              <code>null</code> gives the same answer. A bug from the first release that stayed in
+              the standard.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 없음의 답"
+              en: "The sharpest spot — what absence answers"
+            code:
+              - "typeof null === 'object'      // true"
+              - "typeof undefined === 'object' // false"
+      - t:
+          ko: "함수일 수도 있다"
+          en: "It could be a function"
+        diag:
+          t:
+            ko: >-
+              함수는 따로 <code>'function'</code> 이라는 답을 갖습니다. 여덟 중 하나를 통째로
+              차지해요.
+            en: >-
+              A function has its own answer, <code>'function'</code>. It takes one of the eight all
+              to itself.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 함수의 답"
+              en: "The sharpest spot — what a function answers"
+            code:
+              - "typeof (() => 1) === 'function'  // true"
+              - "typeof {} === 'function'         // false"
+
+no_hole_reason: >-
+  가르는 글자를 지우면 남는 것이 그냥 견주기라 다른 개념이 이미 재고 있다.
+  여기서 재는 것은 「답이 무엇으로 나오나」이고, 그것은 뜻으로 물어야 한다.
+
+queries:
+  - { grammars: [javascript, vue], file: ./typeof-guard.scm }
+
+examples:
+  - code: "if (typeof v === 'string') { send(v) }"
+    expect: { sites: 1, form: typeof-eq, picks: { 1: "typeof v", 2: "v", 3: "'string'" } }
+  - code: "const ok = typeof cb !== 'function'"
+    expect: { sites: 1, form: typeof-eq, picks: { 2: "cb", 3: "'function'" } }
+  - code: "if (v === 'string') { send(v) }"
+    expect: none

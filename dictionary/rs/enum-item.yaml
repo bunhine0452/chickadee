@@ -1,0 +1,177 @@
+schema: 1
+id: rs/enum-item
+# 2부 (`rs.md` §3). 보편형은 없다 — Rust 의 `enum` 은 갈래마다 **값을 담는다**. `Option`·`Result` 가
+# 특별한 문법이 아니라 그냥 이 `enum` 임을 모르면 둘이 마법으로 보인다.
+universal: null
+name: { ko: 갈래마다 다른 값, en: One of several shapes }
+token: "enum"
+grammars: [rust]
+framework: null
+essential: true
+difficulty: 2
+prereq: [rs/struct-item]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "값이 여러 갈래 중 하나이고, 갈래마다 안에 다른 값을 담을 수 있다. 어느 갈래인지는 갈라 봐야 안다."
+    en: "A value is one of several variants, and each variant may carry its own data."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} {{pick.2|code}} 라는 타입을 세우는데, 그 값은 {{pick.3|code}} 의
+      갈래 중 <b>하나</b>입니다. 다른 언어의 열거형과 다른 것 — 갈래마다 <b>값을 담을 수 있어요</b>.
+      `Circle(f64)` 처럼요. 그래서 「없거나 값이거나」(`Option`)와 「됐거나 오류거나」(`Result`)가
+      특별한 문법이 아니라 그냥 이 `enum` 입니다. 어느 갈래인지는 값을 <b>갈라 봐야</b> 알고, 그것이
+      `match` 예요 — 갈래를 빠뜨리면 컴파일이 멈춥니다(E0004). 갈래를 하나 더 붙이면 그것을 안 다룬
+      모든 `match` 가 빨개지는데, 그것이 이 타입의 값입니다.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} sets up the type {{pick.2|code}}, whose value is <b>one</b> of the
+      variants in {{pick.3|code}}. Unlike enums elsewhere, each variant <b>may carry data</b>, like
+      `Circle(f64)`. That is why “absent or a value” (`Option`) and “fine or an error” (`Result`) are
+      not special syntax but plain enums. Which variant you hold, you learn by <b>taking it apart</b> —
+      that is `match`, and leaving a variant out stops the build (E0004). Add a variant and every
+      `match` that ignores it turns red; that is what this type buys you.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}}{{pick.2|josa:을,를}} 세운다 — 갈래는 {{pick.3|code}} 다."
+      en: "Line {{site.line}} sets up {{pick.2|code}} — the variants are {{pick.3|code}}."
+    - ko: "값 하나는 그중 딱 한 갈래이고, 그 갈래의 값을 안에 든다."
+      en: "One value is exactly one variant and carries that variant's data."
+    - ko: "갈래를 알려면 match 로 갈라야 하고, 빠뜨리면 E0004 다."
+      en: "To learn the variant you match on it; a missing arm is E0004."
+
+rule:
+  ko: "<b>값은 갈래 중 하나이고 갈래는 값을 든다.</b> 갈라 봐야 알고, 갈래를 빠뜨리면 컴파일이 멈춘다."
+  en: "<b>A value is one variant, and a variant carries data.</b> You take it apart to know, and a missing arm stops the build."
+result:
+  label:
+    ko: "{{site.line}}행의 타입"
+    en: "the type on line {{site.line}}"
+  value: "{{pick.1}} {{pick.2}}"
+  note:
+    ko: "갈래 중 하나"
+    en: "one of the variants"
+ok:
+  ko: "{{pick.2|code}} 의 값은 {{pick.3|code}} 중 한 갈래이고, 그 갈래가 든 값까지 함께 옵니다."
+  en: "A {{pick.2|code}} value is one variant of {{pick.3|code}}, and comes with that variant's data."
+payoff:
+  ko: "이걸 알면 `Option`·`Result` 가 마법이 아니라는 것이 보입니다 — 갈래 둘짜리 `enum` 이에요."
+  en: "This shows that `Option` and `Result` are not magic — they are two-variant enums."
+bridge:
+  ko: "C·자바의 열거형은 이름표 목록입니다. Rust 의 갈래는 <b>값을 들어서</b>, 클래스 계층이 하던 일을 갈래로 합니다."
+  en: "Enums in C and Java are lists of labels. Rust's variants <b>carry data</b>, doing what a class hierarchy did elsewhere."
+misconceptions:
+  - ko: "갈래는 이름표일 뿐이다 — 값을 <b>듭니다</b>. `Circle(f64)` 는 갈래 이름과 실수 하나예요."
+    en: "Variants are just labels — they <b>carry data</b>. `Circle(f64)` is a variant name plus one decimal."
+  - ko: "갈래를 빠뜨려도 나머지는 돈다 — 컴파일이 멈춥니다(E0004). 다른 언어의 `switch` 와 반대예요."
+    en: "A missing arm still runs the rest — the build stops (E0004). The opposite of `switch` elsewhere."
+  - ko: "`Option` 은 언어에 박힌 특별한 타입이다 — 표준 라이브러리의 평범한 `enum` 입니다. 직접 똑같이 만들 수 있어요."
+    en: "`Option` is a special built-in type — it is an ordinary enum in the standard library. You could write it yourself."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>갈래 있는 타입을 세우는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that sets up a type with variants</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 타입의 <b>이름</b>입니다. 갈래를 두는 낱말은 그 앞이에요."
+          en: "{{pick.2|code}} is the type's <b>name</b>. The word that gives it variants comes before."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 낱말이냐 이름이냐", en: "The sharpest spot — the word or the name" }
+          code:
+            - "enum Shape { Dot, Circle(f64) }"
+            - "// ^낱말 ^이름"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>갈래 목록</b>입니다. 값은 이 중 하나이고, 목록 자체가 타입을 세우지는 않아요."
+          en: "{{pick.3|code}} is the <b>list of variants</b>. A value is one of these; the list itself does not set the type up."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 낱말이냐 목록이냐", en: "The sharpest spot — the word or the list" }
+          code:
+            - "enum Shape { Dot, Circle(f64) }"
+            - "//           ^갈래 목록"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행의 값은 <b>갈래 중 하나</b>입니다."
+      en: "Choose what goes in the blank. A value on line {{site.line}} is <b>one of several variants</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "enum", mono: true }
+      - t: "struct"
+        mono: true
+        diag:
+          t:
+            ko: "이건 필드를 <b>전부 동시에</b> 갖는 타입입니다. 「둘 중 하나」가 아니에요."
+            en: "That holds <b>all fields at once</b>. It is not “one of.”"
+          edge:
+            h: { ko: "가장 날카로운 자리 — 전부냐 하나냐", en: "The sharpest spot — all or one" }
+            code:
+              - "struct P { x: i32, y: i32 }   // x 와 y"
+              - "enum S { A, B }               // A 이거나 B"
+      - t: "union"
+        mono: true
+        diag:
+          t:
+            ko: "이건 C 와 맞추는 <b>안전하지 않은</b> 겹침입니다. 어느 갈래인지 기억하지 않아 읽으려면 `unsafe` 예요."
+            en: "That is an <b>unsafe</b> overlay for C compatibility. It does not remember the variant, so reading needs `unsafe`."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 갈래를 기억하나", en: "The sharpest spot — does it remember the variant" }
+            code:
+              - "enum S { A(u32), B(f32) }    // 어느 쪽인지 안다"
+              - "union U { a: u32, b: f32 }   // 모른다 — unsafe"
+      - t: "type"
+        mono: true
+        diag:
+          t:
+            ko: "이건 있는 타입에 <b>별명</b>을 붙입니다. 갈래를 만들지 않아요."
+            en: "That gives an existing type an <b>alias</b>. It makes no variants."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 새것이냐 별명이냐", en: "The sharpest spot — new or alias" }
+            code:
+              - "type Id = u32;      // 별명"
+              - "enum Id { A, B }    // 새 타입"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 구조체 여럿이 아니라 <b>갈래 있는 타입 하나</b>로 적었을까요?"
+    en: "Why does line {{site.line}} use <b>one type with variants</b> rather than several structs?"
+  choices:
+    - t:
+        ko: "「이 값은 저 갈래들 중 하나」라는 사실을 타입에 적어 두면 갈래를 빠뜨린 코드를 컴파일러가 잡기 때문에"
+        en: "Because writing “this value is one of those” into the type lets the compiler catch code that forgets a variant"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 타입을 가르는 match 가 어디 있는지도 찾아보세요."
+        en: "That is the direction. Find the match that takes this type apart."
+    - t:
+        ko: "구조체 여럿은 메모리를 더 써서"
+        en: "Because several structs use more memory"
+      ok: false
+      fb:
+        ko: "메모리 문제가 아닙니다. 「하나뿐」이라는 사실을 컴파일러가 아느냐예요."
+        en: "Not memory. Whether the compiler knows “exactly one.”"
+    - t:
+        ko: "구조체는 상속이 안 되어서"
+        en: "Because structs cannot inherit"
+      ok: false
+      fb:
+        ko: "상속이 없는 것은 맞지만 그 자리를 채우는 것이 바로 이 타입이에요."
+        en: "True, there is no inheritance — and this type is what fills that spot."
+
+queries:
+  - { grammars: [rust], file: ./enum-item.scm }
+
+examples:
+  - code: "enum Shape { Dot, Circle(f64) }                 // Circle 은 실수 하나를 든다"
+    expect: { sites: 2, form: enum, hole: "enum", picks: { 1: "enum", 2: "Shape", 3: "{ Dot, Circle(f64) }" } }
+  - code: "enum Cmd { Go, Stop }                           // 값 없는 갈래 둘"
+    expect: { sites: 1, form: enum, picks: { 1: "enum", 2: "Cmd", 3: "{ Go, Stop }" } }
+  - code: "struct Dot;                                     // 갈래가 없다 — rs/struct-item"
+    expect: none

@@ -1,0 +1,244 @@
+schema: 1
+id: py/bool-op-value
+# 0부 축 E. `universal: null` — 자바의 `&&` 는 참·거짓만 내므로 이 조각이 아예 안 선다
+# (`py.md` §1.5.6 ②). 자바스크립트는 같은 일을 하지만 **거짓이 되는 목록**이 달라서
+# 같은 코드가 다른 답을 낸다. 묶으면 그 차이가 지워진다.
+universal: null
+name: { ko: 골라 내놓는 낱말, en: Words that hand back a value }
+token: "or"
+grammars: [python]
+framework: null
+essential: true
+difficulty: 2
+prereq: [py/truthiness]
+confusions: [py/comparison, py/arithmetic, py/is-identity]
+
+dict:
+  one_liner:
+    ko: "참·거짓을 내지 않는다. 양쪽 중 하나를 그대로 돌려준다."
+    en: "Not a boolean. One of the two sides is handed back just as it stands."
+  why:
+    ko: >-
+      이름만 보면 참·거짓을 만드는 낱말 같은데, 실제로 나오는 것은 <b>피연산자 하나</b>입니다.
+      왼쪽을 먼저 접어 보고, 답이 정해지면 <b>오른쪽은 아예 안 봅니다</b> —
+      그리고 그때까지 본 쪽의 값을 그대로 내놓아요.
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 그 자리입니다.
+      파이썬에는 「없을 때만 기본값」을 뜻하는 기호가 없어서 이 낱말이 그 몫을 집니다.
+      그래서 함정도 같이 옵니다 — 왼쪽이 <code>0</code>·빈 목록·빈 글자일 때도 기본값 쪽으로
+      넘어가요. 「없다」가 아니라 <b>「비었다」</b>가 기준이기 때문입니다.
+    en: >-
+      The word looks like it produces a true-or-false; what actually comes out is <b>one of the
+      operands</b>. The left side folds first, and once the answer is settled the <b>right side is
+      never looked at</b> — the value seen so far is handed back as it stands. {{pick.1|code}} on
+      line {{site.line}} is that spot. Python has no symbol meaning "default only when absent," so
+      this word takes the job, and the trap comes with it: <code>0</code>, an empty list and empty
+      text all fall through to the default. The test is not "absent" but <b>"empty."</b>
+  trace:
+    - ko: "{{site.line}}행의 {{pick.2|code}}{{pick.2|josa:을,를}} 먼저 값으로 만든다."
+      en: "{{pick.2|code}} on line {{site.line}} becomes a value first."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 그 값을 참·거짓 한쪽으로 접어 본다."
+      en: "{{pick.1|code}} folds that value to one side to see where it lands."
+    - ko: "답이 정해지면 오른쪽은 안 보고, 본 쪽의 값이 {{pick.3|code}} 자리로 간다."
+      en: "If that settles it the right side is skipped, and the value seen goes to {{pick.3|code}}."
+
+rule:
+  ko: >-
+    <b>참·거짓이 아니라 값이 나온다.</b> 기준은 「없다」가 아니라 「비었다」다.
+  en: >-
+    <b>A value comes out, not a true-or-false.</b> The test is "empty," not "absent."
+result:
+  label:
+    ko: "{{site.line}}행 뒤의 {{pick.3}}"
+    en: "{{pick.3}} after line {{site.line}}"
+  value: "{{pick.2}}"
+  note:
+    ko: "왼쪽이 비어 있으면 오른쪽 값이 간다"
+    en: "an empty left side sends the right value"
+ok:
+  ko: >-
+    {{pick.3|code}} 자리에 담기는 것은 참·거짓이 아니라 양쪽 중 <b>하나의 값</b>입니다.
+    무엇이 갈지는 {{pick.2|code}} 쪽이 비었는지가 정해요.
+  en: >-
+    What lands in {{pick.3|code}} is not a true-or-false but <b>one of the two values</b>. Which one
+    depends on whether {{pick.2|code}} is empty.
+payoff:
+  ko: >-
+    「기본값을 넣었는데 <code>0</code> 이 사라졌다」가 여기서 풀립니다.
+    <code>0</code> 을 지키려면 <b>없음인지</b>를 따로 물어야 해요.
+  en: >-
+    “I set a default and my <code>0</code> vanished” answers itself here. Keeping <code>0</code>
+    means asking <b>whether it is absent</b> instead.
+bridge:
+  ko: >-
+    자바스크립트에는 「없을 때만」을 뜻하는 기호가 따로 있습니다. 파이썬에는 없어서
+    이 낱말이 두 일을 겸하고, 그 겹침이 함정의 자리예요.
+  en: >-
+    JavaScript has a separate symbol for "only when absent." Python has none, so this word does both
+    jobs, and that overlap is where the trap sits.
+misconceptions:
+  - ko: >-
+      결과가 참·거짓이다 — 양쪽 중 하나의 <b>값</b>입니다. 조건 자리에서만 그것이 다시
+      참·거짓으로 접혀서 안 보일 뿐이에요.
+    en: >-
+      The result is a true-or-false — it is one of the two <b>values</b>. Only at a fork does it get
+      folded again, which is why it stays out of sight.
+  - ko: >-
+      「없을 때만 기본값」으로 쓴다 — <code>0</code> 과 빈 목록에서도 기본값 쪽으로 넘어갑니다.
+      기준이 「비었다」예요.
+    en: >-
+      It means "default only when absent" — <code>0</code> and an empty list fall through as well.
+      The test is "empty."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>둘 중 하나를 골라 내놓는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that picks one of the two and hands it back</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 먼저 접어 보는 <b>왼쪽 값</b>입니다.
+            고르는 일은 가운데 낱말이 해요.
+          en: >-
+            {{pick.2|code}} is the <b>left value</b> that gets folded first. The picking is done by
+            the word between.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 값과 고르는 일"
+            en: "The sharpest spot — a value and the picking"
+          code:
+            - "meta            # 값 하나일 뿐이다"
+            - "meta or {}      # 둘 중 하나가 나온다"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 고른 값이 <b>담기는 자리</b>입니다.
+            고르는 일 자체는 그 앞에서 끝나요.
+          en: >-
+            {{pick.3|code}} is <b>where the chosen value lands</b>. The picking finished before it
+            got there.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 고르기와 담기"
+            en: "The sharpest spot — choosing and storing"
+          code:
+            - "meta or {}      # 여기서 골라진다"
+            - "x = meta or {}  # 그 값이 여기 담긴다"
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행은 왼쪽이 비어 있으면 <b>오른쪽 값</b>을 씁니다.
+      en: >-
+        Choose what goes in the blank. On line {{site.line}}, an empty left side means <b>the right
+        value</b> is used.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "or", mono: true }
+      - t: "=="
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 기호는 <b>견줍니다.</b> 담기는 것이 양쪽 값이 아니라 참·거짓 하나가 되어서,
+              기본값이 어디에서도 안 나와요.
+            en: >-
+              That symbol <b>weighs</b>. What lands is a single true-or-false rather than either
+              value, so no default appears anywhere.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 고르기냐 견주기냐"
+              en: "The sharpest spot — choosing or weighing"
+            code:
+              - "meta or {}      # {} 또는 meta"
+              - "meta == {}      # True 또는 False"
+      - t: "+"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 기호는 <b>둘을 합칩니다.</b> 한쪽을 고르는 것이 아니라 양쪽을 다 쓰고,
+              종류가 안 맞으면 그 자리에서 멈춰요.
+            en: >-
+              That symbol <b>joins the two</b>. It uses both rather than choosing one, and mismatched
+              kinds stop it on the spot.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 고르기냐 합치기냐"
+              en: "The sharpest spot — choosing or joining"
+            code:
+              - "name or 'kim'   # 둘 중 하나"
+              - "name + 'kim'    # 이어 붙인 하나"
+      - t: "is"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 낱말은 <b>같은 자리인지</b>를 묻습니다. 참·거짓이 나와서 기본값 자리에는
+              못 쓰고, 없음을 가리는 데 쓰는 낱말이에요.
+            en: >-
+              That word asks <b>whether it is the same object</b>. A true-or-false comes out, so it
+              cannot serve as a default; it is the word for testing absence.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 값이냐 판단이냐"
+              en: "The sharpest spot — a value or a judgement"
+            code:
+              - "meta or {}         # 값이 나온다"
+              - "meta is None       # True 또는 False"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 기본값을 이렇게 적었을까요?"
+    en: "Why is the default on line {{site.line}} written this way?"
+  choices:
+    - t:
+        ko: "왼쪽이 비어 있을 때 오른쪽으로 넘어가게 하려고 — 한 줄로 끝난다"
+        en: "So an empty left side falls through to the right — it finishes in one line"
+      ok: true
+      fb:
+        ko: >-
+          그 방향입니다. 왼쪽에 <code>0</code> 이 올 수 있는지도 함께 적어 보세요 —
+          그때 이 줄이 원하지 않는 일을 합니다.
+        en: >-
+          That is the direction. Add whether <code>0</code> can arrive on the left — that is when
+          this line does something unwanted.
+    - t:
+        ko: "왼쪽이 없을 때만 오른쪽으로 넘어가서"
+        en: "Because it falls through only when the left is absent"
+      ok: false
+      fb:
+        ko: >-
+          없을 때만이 아닙니다. <code>0</code> 과 빈 목록에서도 넘어가고, 그 차이가 이 자리의
+          함정이에요.
+        en: >-
+          Not only when absent: <code>0</code> and an empty list fall through as well, and that gap
+          is the trap here.
+    - t:
+        ko: "두 값을 합치려고"
+        en: "To combine the two values"
+      ok: false
+      fb:
+        ko: "합치지 않습니다. 하나를 <b>고르고</b> 나머지는 버려요."
+        en: "Nothing is combined. One is <b>chosen</b> and the other is dropped."
+
+queries:
+  - { grammars: [python], file: ./bool-op-value.scm }
+
+examples:
+  - code: "meta = payload or {}          # None or {} -> {} (dict)"
+    expect: { sites: 1, form: kept, hole: "or", picks: { 1: "or", 2: "payload", 3: "meta" } }
+  - code: "return cached or fetch()      # None or fetch() -> fetch() 의 값"
+    expect: { sites: 1, form: returned, hole: "or", picks: { 1: "or", 2: "cached", 3: "return" } }
+  - code: "run(timeout=given or 30)      # 0 or 30 -> 30 (int)"
+    expect: { sites: 1, form: default, hole: "or", picks: { 1: "or", 2: "given", 3: "timeout" } }
+  - code: "meta = payload               # meta -> payload 가 가리키던 것"
+    expect: none
+  - code: "if cached and fresh:\n    use(cached)   # 조건 자리라 값이 안 보인다"
+    expect: none

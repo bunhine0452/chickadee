@@ -1,0 +1,131 @@
+schema: 1
+id: java/string-concat
+# 0부 축 E. `universal: null` — 자바에는 문자열 보간이 없다(JEP 430 철회). 파이썬의 f-string ·
+# TS 의 템플릿 리터럴이 서는 자리를 이 판이 진다 (§1.5.6 ①).
+universal: null
+name: { ko: 글자 잇기, en: Joining text }
+token: "str+"
+grammars: [java]
+framework: null
+# `essential` 밖이다 — 0부가 `essential` 에 새로 올리는 것은 열둘이 상한이고(README §12 규약 8),
+# 이 판은 표본 리포에 사용처가 16곳/9파일이라 카드는 그대로 선다. 빠지는 것은 구멍 지도의
+# 분모와 0장 후보뿐이다 (`docs/curriculum/java.md` §1.5.6).
+essential: false
+difficulty: 2
+prereq: [cs/text-encoding, cs/operator-precedence]
+confusions: [java/arithmetic]
+dict:
+  one_liner:
+    ko: "같은 기호가 더하기와 잇기를 겸하고, 왼쪽부터 접힌다."
+    en: "One symbol both adds and joins, and it folds from the left."
+  why:
+    ko: >-
+      한쪽이 글자 묶음이면 그 기호는 더하기가 아니라 <b>잇기</b>가 됩니다. 그런데 접히는 것은
+      <b>왼쪽부터</b>라 순서가 결과를 바꿔요 — <code>1 + 2 + "a"</code> 는 먼저 <code>3</code> 이
+      되어 <code>"3a"</code> 지만, <code>"a" + 1 + 2</code> 는 <code>"a1"</code> 을 거쳐
+      <code>"a12"</code> 가 됩니다. 같은 세 값인데 답이 다릅니다.
+      자바에는 <b>문자열 보간이 없어서</b>(JEP 430 철회) 이 자리를 피할 방법이 없어요 —
+      파이썬의 f-string 이나 JS 의 백틱이 하는 일을 이 기호가 다 합니다.
+    en: >-
+      When one side is text the symbol stops adding and starts <b>joining</b>. It folds
+      <b>from the left</b>, so order changes the answer — <code>1 + 2 + "a"</code> makes
+      <code>3</code> first and comes out <code>"3a"</code>, while <code>"a" + 1 + 2</code>
+      goes through <code>"a1"</code> to <code>"a12"</code>. Same three values, different
+      answers. Java has <b>no string interpolation</b> (JEP 430 was withdrawn), so this spot
+      cannot be avoided — the symbol does everything an f-string or a backtick would.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.1|code}} 한쪽에 글자 묶음이 있다."
+      en: "One side of the {{pick.1|code}} on line {{site.line}} is text."
+    - ko: "그래서 더하지 않고 이어 붙인다."
+      en: "So it joins instead of adding."
+    - ko: "여러 개가 이어져 있으면 왼쪽 것부터 차례로 접힌다."
+      en: "With several in a row, the leftmost folds first."
+rule:
+  ko: "<b>한쪽이 글자면 잇는다.</b> 그리고 왼쪽부터 접히므로 순서가 답을 바꾼다."
+  en: "<b>Text on one side means joining.</b> It folds from the left, so order changes the answer."
+result:
+  label: { ko: "{{site.line}}행의 잇기", en: "the join on line {{site.line}}" }
+  value: "{{pick.2}} {{pick.1}} {{pick.3}}"
+  note: { ko: "결과는 글자 묶음이다", en: "the result is text" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:이,가}} 한 묶음이 됐습니다."
+  en: "{{pick.2|code}} and {{pick.3|code}} became one run of text."
+payoff:
+  ko: "이걸 알면 「숫자를 더했는데 12 가 나온다」가 풀립니다 — 왼쪽이 이미 글자였어요."
+  en: "This untangles “I added numbers and got 12” — the left was already text."
+bridge:
+  ko: "파이썬·JS 는 보간 문법이 따로 있습니다. 자바는 이 기호 하나로 다 합니다."
+  en: "Python and JS have interpolation syntax. Java does it all with this one symbol."
+misconceptions:
+  - ko: "숫자가 섞이면 다 더한다 — 왼쪽부터 접히므로 어디서 글자가 끼어드느냐가 답을 바꿉니다."
+    en: "Numbers in the mix all get added — it folds from the left, so where text enters changes the answer."
+  - ko: "괄호를 안 써도 뜻은 같다 — 괄호를 치면 접히는 순서가 바뀌어 답이 달라집니다."
+    en: "Parentheses change nothing — they change the fold order, and that changes the answer."
+no_hole_reason: >-
+  구멍이 한 글자다. 잇는 기호는 `+` 하나뿐이라 구멍 폭이 1 이고, 생성기가 한 글자 구멍을
+  지목형으로 돌린다(`packages/cards/src/t0-blank.ts` 의 `MIN_HOLE`). 그래서 이 개념은
+  지목형과 뜻 고르기로 낸다 — 빈칸형을 억지로 만들면 그 판이 생성 단계에서 매번 떨어진다.
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>두 값을 한 묶음으로 만드는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that makes one run out of two values</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 왼쪽 <b>재료</b>입니다. 이것이 글자 묶음이라 잇기가 되는 것이고, 잇는 일 자체는 가운데 기호가 해요."
+          en: "{{pick.2|code}} is the left <b>input</b>. Being text is why this joins, but the joining is the symbol's job."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 재료냐 잇는 기호냐", en: "The sharpest spot — an input or the joining symbol" }
+          code:
+            - "\"n=\";"
+            - "\"n=\" + 1;"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 오른쪽 <b>재료</b>입니다. 수여도 왼쪽이 글자면 글자로 바뀌어 붙어요."
+          en: "{{pick.3|code}} is the right <b>input</b>. Even a number turns into text when the left is text."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 재료냐 잇는 기호냐", en: "The sharpest spot — an input or the joining symbol" }
+          code:
+            - "1 + 2;         // 3"
+            - "\"\" + 1 + 2;    // 12"
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 <b>글자 묶음을 왼쪽</b>에 두었을까요?"
+    en: "Why does line {{site.line}} put <b>the text on the left</b>?"
+  choices:
+    - t:
+        ko: "왼쪽부터 접히므로, 글자를 앞에 두면 뒤에 오는 값들이 차례로 글자가 되어 붙기 때문"
+        en: "Because it folds from the left, so text in front turns each following value into text as it goes"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 글자를 맨 뒤로 옮겼을 때 답이 어떻게 바뀌는지도 적어 보세요."
+        en: "That is the direction. Say how the answer changes if the text moves to the end."
+    - t:
+        ko: "자바가 글자를 왼쪽에 두라고 정해서"
+        en: "Because Java requires text on the left"
+      ok: false
+      fb:
+        ko: "요구하지 않습니다. 오른쪽에 둬도 컴파일되고, 다만 답이 달라져요."
+        en: "It does not. Text on the right compiles too — the answer simply differs."
+    - t:
+        ko: "왼쪽에 두는 편이 빠르기 때문"
+        en: "Because the left side is faster"
+      ok: false
+      fb:
+        ko: "속도 문제가 아닙니다. 자리에 따라 <b>값 자체</b>가 달라지는 자리예요."
+        en: "Speed is not it. The position changes <b>the value itself</b>."
+queries:
+  - { grammars: [java], file: ./string-concat.scm }
+examples:
+  - code: "class A { void f(int q) { String m = \"n=\" + q; } }   // \"n=\" + 1 -> \"n=1\" (String)"
+    expect: { sites: 1, form: concat-left, picks: { 1: "+", 2: "\"n=\"", 3: "q" } }
+  - code: "class A { void f(int q) { String m = q + \"!\"; } }    // 1 + \"!\" -> \"1!\" (String)"
+    expect: { sites: 1, form: concat-right, picks: { 1: "+", 2: "q", 3: "\"!\"" } }
+  - code: "class A { void f() { String m = \"a\" + 1; } }         // \"a\" + 1 -> \"a1\" (String)"
+    expect: { sites: 1, form: concat-left, picks: { 1: "+", 2: "\"a\"", 3: "1" } }
+  - code: "class A { void f(int a, int b) { int s = a + b; } }  // 1 + 2 -> 3 (int)"
+    expect: none

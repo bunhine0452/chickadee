@@ -1,13 +1,15 @@
-/* 목업 design/ink-home.html 의 `.queue`·`.qlist` 그대로 (05 §5).
-   단계가 지나간 칸은 옅어진다 — 남은 양이 눈에 먼저 들어와야 한다. */
+/* 목업 design/ink-home.html 의 `.queue`·`.qlist` (05 §5).
+   높이는 18px 이고(D127), 「아직 안 한 칸」은 `--surface-3` 한 면이다 — 빗금은 D182 가
+   걷었다. D179 — 칸의 트랙 3색을 **진행 한 색**으로 모았다. 칸의 너비는 여전히 예상 시간에
+   비례하고(정본 §3-5), 칸끼리는 2px 틈이 가른다. 무슨 트랙인지는 아래 목록의 라벨이 말한다. */
 .queue {
   display: flex;
   gap: 2px;
-  height: 14px;
+  height: 18px;
   padding: 2px;
   margin: 10px 0 8px;
-  border: 2px solid var(--rule);
-  background: var(--paper-3);
+  border: 2px solid var(--border);
+  background: var(--surface-3);
 }
 
 .queue i {
@@ -15,20 +17,20 @@
   height: 100%;
   min-width: 6px;
   flex: var(--w, 1) 1 0;
-  background: var(--paper-2);
+  background: var(--surface-2);
 }
 
-.queue i.t0 { background: var(--t0); }
-.queue i.t1 { background: var(--t1); }
-.queue i.t2 { background: var(--t2); }
+.queue i.t0,
+.queue i.t1,
+.queue i.t2 { background: var(--accent); }
 
-/* 다시 찍기·복습은 점무늬로 구분한다 — 색을 하나 더 만들지 않는다. */
-.queue i.review {
-  background-image: radial-gradient(rgb(0 0 0 / 34%) 1.1px, transparent 1.3px);
-  background-size: 4px 4px;
-}
+/* 복습은 액센트를 옅게 — 무늬가 아니라 농도로 가른다 (D182 「장식 0」). */
+.queue i.review { background: var(--accent-weak); }
 
-.queue i[data-state="later"] { opacity: 0.3; }
+/* 아직 안 한 칸. 빗금이었는데 걷었다 — 무늬가 진행바에서 장식으로 읽혔고, 남은 양은
+   면 하나로 충분히 말한다. `--surface-3` 은 칸 바탕(`--surface-2`)과 갈리므로 D127 이
+   `opacity: .3` 을 버린 이유(대비 1.4:1)도 그대로 피한다. */
+.queue i[data-state="later"] { background: var(--surface-3); }
 
 .qlist {
   display: flex;
@@ -38,23 +40,26 @@
   list-style: none;
 }
 
+/* 행은 산문이 아니다 — `reset.css` 의 `li{max-width:36em}` 이 걸리면 인제스트 화면의
+   시간 비례 목록이 1120px 칸 안에서 576px 로 눌리고 오른쪽이 텅 빈다(2560 실측). */
 .qi {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 10px;
   align-items: center;
+  max-width: none;
   padding: 6px 0;
-  border-top: 1px dashed var(--rule);
-  font-size: var(--fs-14);
+  border-top: 1px dashed var(--border);
+  font-size: var(--fs-2);
 }
 
 .qi:first-child { border-top: 0; }
-.qi[data-state="later"] { color: var(--ink-soft); }
+.qi[data-state="later"] { color: var(--text-muted); }
 
 .qi .nm {
   overflow: hidden;
-  color: var(--ink);
-  font-weight: 600;
+  color: var(--text);
+  font-weight: var(--fw-medium);
   letter-spacing: -0.015em;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -62,15 +67,15 @@
 
 .qi .nm small {
   margin-left: 5px;
-  color: var(--ink-soft);
+  color: var(--text-muted);
   font-weight: 400;
-  font-size: var(--fs-13);
+  font-size: var(--fs-1);
 }
 
 .qi .min {
-  color: var(--ink-soft);
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }

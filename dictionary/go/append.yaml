@@ -1,0 +1,226 @@
+schema: 1
+id: go/append
+# 2부 (`go.md` §3 ⑰). `common/mutating-append` 를 **안 건다** — 그 보편 개념의 한 줄은
+# 「원본이 바뀐다, 새 묶음은 안 생긴다」인데 Go 에서는 **둘 다** 일어난다(`go.md` §6).
+# TS `array-push-mutate` 에서 겹을 쌓은 사용자가 D4 로 물려받으면 틀린 실행 모델을
+# 물려받는다. `null` 로 두고 이 판이 「어느 쪽인지는 용량이 정한다」를 직접 가르친다.
+#
+# 실측 484곳/134파일.
+universal: null
+name: { ko: "붙이기 — 어느 쪽인지는 용량이 정한다", en: "Append — the capacity decides which happens" }
+token: "append"
+grammars: [go]
+framework: null
+essential: true
+difficulty: 2
+prereq: [go/slice, cs/contiguous-vs-linked]
+confusions: []
+
+dict:
+  one_liner:
+    ko: >-
+      뒤에 값을 붙이고 창을 돌려준다. 돌려받은 것을 안 담으면 아무 일도 안 난다.
+    en: >-
+      It adds to the end and gives a window back; not keeping it changes nothing.
+  why:
+    ko: >-
+      {{site.line}}행이 하는 일에는 두 갈래가 있고, 코드만 봐서는 어느 쪽인지 모릅니다. {{pick.2|code}} 의 <b>용량에 자리가 남아 있으면</b>
+      뒷배열의 다음 칸에 값을 적고 창의 길이만 늘립니다 — 그 배열을 보고 있던 다른 창에서도 그 값이 보여요. <b>자리가 모자라면</b> 더 큰 배열을 새로 잡아 옮겨
+      담고, 그때부터 두 창은 <b>다른 배열</b>을 봅니다. 같은 코드가 용량에 따라 다르게 도는 것이 이 판의 요점이에요. 그리고 어느 쪽이든 <b>돌려받은 창을 다시 담지
+      않으면</b> 아무 일도 안 난 것처럼 보입니다 — 원본 창의 길이는 안 늘어나니까요.
+    en: >-
+      What line {{site.line}} does forks in two, and the code alone does not say which. When
+      {{pick.2|code}} has <b>room left in its capacity</b>, the value is written into the next slot of
+      the backing array and only the window's length grows — and any other window on that array sees
+      it. When there is <b>no room</b>, a larger array is taken, everything is moved across, and from
+      then on the two windows look at <b>different arrays</b>. The same code running differently by
+      capacity is the plate. Either way, <b>not keeping the window that comes back</b> makes it look
+      as if nothing happened — the original window's length never grew.
+  trace:
+    - ko: >-
+        {{site.line}}행은 {{pick.2|code}} 의 용량에 자리가 남았는지를 먼저 본다.
+      en: >-
+        Line {{site.line}} first weighs whether {{pick.2|code}} has room left.
+    - ko: >-
+        남았으면 뒷배열의 다음 칸에 {{pick.3|code}}{{pick.3|josa:을,를}} 적는다.
+      en: >-
+        With room, {{pick.3|code}} is written into the next slot of the backing array.
+    - ko: >-
+        모자라면 새 배열을 잡아 옮겨 담고, 두 창이 갈라진다.
+      en: >-
+        Without room, a new array is taken, everything moves, and the two windows part.
+
+rule:
+  ko: >-
+    <b>용량이 남으면 원본을 고치고 모자라면 새 배열이 선다.</b> 돌려받은 창을 다시 담아야 길이가 늘어난다.
+  en: >-
+    <b>With room it edits the original; without room a new array appears.</b> Only keeping the
+    returned window grows the length.
+result:
+  label: { ko: "{{site.line}}행이 돌려주는 것", en: "what line {{site.line}} gives back" }
+  value: "{{pick.2}}"
+  note: { ko: "다시 담아야 길이가 는다", en: "the length grows only if it is kept" }
+ok: { ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 이제 한 칸 더 긴 창입니다.", en: "{{pick.2|code}} is now a window one slot longer." }
+payoff:
+  ko: >-
+    이걸 알면 「같은 코드가 어떤 때는 원본을 바꾸고 어떤 때는 안 바꾼다」가 풀립니다 — 용량이 갈랐습니다.
+  en: >-
+    This untangles "the same code changes the original sometimes and not others" — the capacity
+    decided.
+bridge:
+  ko: >-
+    파이썬·자바스크립트에서 뒤에 붙이기는 언제나 원본을 늘립니다. Go 는 늘릴 수도 있고 새로 만들 수도 있어서 <b>돌려받은 것을 담아야</b> 해요.
+  en: >-
+    In Python and JavaScript adding to the end always grows the original. Go may grow or may build
+    anew, so <b>what comes back must be kept</b>.
+misconceptions:
+  - ko: >-
+      부르기만 하면 늘어난다 — 돌려받은 창을 다시 담지 않으면 <b>아무 일도 안 납니다</b>.
+    en: >-
+      Calling it grows the list — <b>nothing happens</b> unless the returned window is kept.
+  - ko: >-
+      언제나 새 배열이 생긴다 — 용량이 남으면 원본 배열을 고칩니다.
+    en: >-
+      A new array always appears — with room left it edits the original array.
+  - ko: >-
+      언제나 원본이 바뀐다 — 용량이 모자라면 새 배열이 서고 원본은 그대로예요.
+    en: >-
+      The original always changes — without room a new array appears and the original stays.
+
+point:
+  - q:
+      ko: >-
+        {{site.line}}행에서 <b>뒤에 붙는 값</b>을 짚어 보세요.
+      en: >-
+        On line {{site.line}}, point at <b>the value being added to the end</b>.
+    hint: { ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다.", en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose." }
+    answer: pick.3
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 붙임을 <b>받는 창</b>입니다. 붙는 값은 그다음 자리에 있어요.
+          en: >-
+            {{pick.2|code}} is the <b>window being added to</b>. The value added stands in the slot after
+            it.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 받는 쪽이냐 붙는 값이냐", en: "The sharpest spot — the receiver or the value added" }
+          code:
+            - "xs                    // 받는 창"
+            - "append(xs, 3)         // 붙는 값은 3"
+      pick.1:
+        t:
+          ko: >-
+            {{pick.1|code}}{{pick.1|josa:은,는}} 붙이는 <b>함수 이름</b>입니다. 이름이 값은 아니에요.
+          en: >-
+            {{pick.1|code}} is the <b>name of the function</b> doing the adding, not a value.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 함수냐 값이냐", en: "The sharpest spot — the function or the value" }
+          code:
+            - "append                // 함수"
+            - "3                     // 값"
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행은 창 <b>뒤에 값을 붙이고 새 창을 돌려줍니다</b>.
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} <b>adds to the end and gives a window
+        back</b>.
+    hint: { ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다.", en: "Your choice is written into the code at once. Submit to have it marked." }
+    options:
+      - { t: "append", mono: true }
+      - t: "copy"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 함수는 <b>이미 있는 칸에 옮겨 담기만</b> 합니다. 길이를 안 늘려서 자리가 없으면 아무것도 안 들어가요.
+            en: >-
+              That function only <b>moves values into slots that already exist</b>. It grows nothing, so with
+              no room nothing lands.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 늘리나 옮기나", en: "The sharpest spot — growing or moving" }
+            code:
+              - "xs = append(xs, 3)     // 길이가 는다"
+              - "copy(xs, ys)           // 길이는 그대로"
+      - t: "len"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 함수는 <b>지금 보이는 개수</b>를 낼 뿐 아무것도 안 붙입니다.
+            en: >-
+              That function only reports <b>how many are visible</b> and adds nothing.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 묻나 바꾸나", en: "The sharpest spot — asking or changing" }
+            code:
+              - "xs = append(xs, 3)"
+              - "n := len(xs)"
+      - t: "make"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 함수는 <b>새 창을 처음부터</b> 만듭니다. 있는 창에 값을 붙이는 자리가 아니에요.
+            en: >-
+              That function makes a <b>fresh window from nothing</b>. It is not where a value is added to an
+              existing one.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 처음 만드나 붙이나", en: "The sharpest spot — creating or adding" }
+            code:
+              - "xs = append(xs, 3)"
+              - "xs = make([]int, 0, 8)"
+
+why_gate:
+  q:
+    ko: >-
+      이 함수는 왜 <b>돌려받은 창을 다시 담아야</b> 할까요?
+    en: >-
+      Why must the window this returns <b>be kept</b>?
+  choices:
+    - t:
+        ko: >-
+          새 배열이 서는 경우가 있어 창 자체가 달라질 수 있고, 부른 쪽의 이름은 그 사실을 스스로 알 방법이 없기 때문
+        en: >-
+          Because a new array can appear and the window itself can change, and the caller's name has no
+          way to learn that on its own
+      ok: true
+      fb:
+        ko: >-
+          그 방향입니다. 그럼 용량이 남은 경우에는 왜 안 담아도 값이 보이는지도 적어 보세요.
+        en: >-
+          That is the direction. Add why the value shows even unkept when there was room.
+    - t:
+        ko: >-
+          함수가 인자를 못 바꿔서
+        en: >-
+          Because a function cannot change its argument
+      ok: false
+      fb:
+        ko: >-
+          그 문장은 맞지만 이유의 절반입니다. 나머지는 배열이 새로 설 수 있다는 것이에요.
+        en: >-
+          True, but half the reason. The other half is that the array can be replaced.
+    - t:
+        ko: >-
+          돌려주는 값이 없으면 컴파일이 멈춰서
+        en: >-
+          Because ignoring the result stops the compiler
+      ok: false
+      fb:
+        ko: >-
+          안 멈춥니다. 그래서 이 함정이 조용해요.
+        en: >-
+          It does not, which is exactly why this trap is quiet.
+
+queries:
+  - { grammars: [go], file: ./append.scm }
+
+examples:
+  - code: "func f(xs []int) { xs = append(xs, 3) }"
+    expect: { sites: 1, form: reassign, hole: "append", picks: { 1: "append", 2: "xs", 3: "xs", 4: "=" } }
+  - code: "func f(xs []int) { ys := append(xs, 3) }"
+    expect: { sites: 1, form: bind, hole: "append", picks: { 1: "append", 2: "ys", 3: "xs" } }
+  - code: "func f(xs []int, ys []int) { copy(xs, ys) }"
+    expect: none

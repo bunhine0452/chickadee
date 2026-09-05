@@ -1,0 +1,80 @@
+[
+  {
+    "queryId": "java/null",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": null,
+    "startLine": 5,
+    "startCol": 21,
+    "endLine": 5,
+    "endCol": 25,
+    "nodeKind": "null_literal",
+    "inError": false
+  },
+  {
+    "queryId": "java/null",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": null,
+    "startLine": 5,
+    "startCol": 21,
+    "endLine": 5,
+    "endCol": 25,
+    "nodeKind": "null_literal",
+    "inError": false
+  },
+  {
+    "queryId": "java/null",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "hole",
+    "form": null,
+    "startLine": 5,
+    "startCol": 21,
+    "endLine": 5,
+    "endCol": 25,
+    "nodeKind": "null_literal",
+    "inError": false
+  },
+  {
+    "queryId": "java/null",
+    "matchId": 2,
+    "patternIndex": 0,
+    "name": "site",
+    "form": null,
+    "startLine": 5,
+    "startCol": 35,
+    "endLine": 5,
+    "endCol": 39,
+    "nodeKind": "null_literal",
+    "inError": false
+  },
+  {
+    "queryId": "java/null",
+    "matchId": 2,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": null,
+    "startLine": 5,
+    "startCol": 35,
+    "endLine": 5,
+    "endCol": 39,
+    "nodeKind": "null_literal",
+    "inError": false
+  },
+  {
+    "queryId": "java/null",
+    "matchId": 2,
+    "patternIndex": 0,
+    "name": "hole",
+    "form": null,
+    "startLine": 5,
+    "startCol": 35,
+    "endLine": 5,
+    "endCol": 39,
+    "nodeKind": "null_literal",
+    "inError": false
+  }
+]

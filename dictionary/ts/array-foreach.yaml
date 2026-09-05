@@ -3,7 +3,7 @@ id: ts/array-foreach
 universal: common/iterate
 name: { ko: "배열 훑기(forEach)", en: "Iterating with forEach" }
 token: "forEach"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: false
 difficulty: 2
@@ -163,7 +163,7 @@ meaning:
               - "xs.forEach(f).map(g)     // undefined 에는 map 이 없다"
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./array-foreach.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./array-foreach.scm }
 
 examples:
   - code: "rows.forEach((r) => send(r))"

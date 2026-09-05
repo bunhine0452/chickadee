@@ -1,0 +1,93 @@
+schema: 1
+id: spring/configuration-binding
+universal: null
+name: { ko: "설정 파일의 값이 코드로 들어오는 길", en: "Configuration binding" }
+token: null
+grammars: []
+framework: spring
+# 짚을 노드가 없다 — 값은 실행할 때 들어온다 (D176). 창은 자바 개념에서 빌린다 (D157 ②).
+track_default: t0
+essential: false
+difficulty: 2
+prereq: [spring/bean-and-container]
+confusions: [spring/dependency-injection]
+queries: []
+dict:
+  one_liner:
+    ko: "설정 파일에 적은 값이 시작할 때 필드로 들어온다."
+    en: "Values written in a settings file arrive in fields at startup."
+  why:
+    ko: >-
+      비밀 열쇠나 데이터베이스 주소를 코드에 직접 적으면 두 가지가 곤란해집니다.
+      <b>바꿀 때마다 다시 빌드해야 하고</b>, 그 값이 그대로 저장소에 올라갑니다. 그래서 값은
+      바깥 설정 파일에 두고 코드에는 <b>어디서 가져올지만</b> 적습니다. 시작할 때 스프링이 그 파일을
+      읽어 필드에 넣습니다. 값이 <b>없으면 뜰 때 멈춥니다</b> — 그래서 설정 실수는 요청이 들어온
+      뒤가 아니라 뜨는 순간 드러납니다. 여러 값을 묶어 클래스 하나로 받는 방법도 있고,
+      그 편이 값이 늘어날수록 낫습니다.
+    en: >-
+      Writing a secret key or a database address straight into the code costs twice: <b>every change
+      needs a rebuild</b>, and the value lands in the repository. So the value lives in an outside
+      settings file and the code says only <b>where to get it</b>. At startup Spring reads that file
+      and fills the field. A <b>missing value stops the boot</b> — which is why a settings mistake
+      shows the moment it starts, not after a request. Several values can also be received as one
+      class, which reads better as they multiply.
+  trace: []
+rule:
+  ko: "<b>값은 코드 밖에 둔다.</b> 코드에는 어디서 가져올지만 적는다."
+  en: "<b>Values live outside the code.</b> The code says only where to find them."
+ok:
+  ko: >-
+    시작할 때 설정 파일에서 값을 찾아 필드에 넣습니다.
+    같은 코드가 설정만 바꿔 다른 환경에서 돕니다.
+  en: >-
+    At startup the value is looked up in the settings file and put in the field. The same code runs
+    in another environment with only the settings changed.
+misconceptions:
+  - ko: "설정 파일에 있으니 안전하다 — 저장소에 함께 올라가면 코드에 적은 것과 같습니다."
+    en: "It is in a settings file, so it is safe — committed together, it is the same as hard-coding."
+  - ko: "값이 없으면 기본값으로 돈다 — 기본값을 적지 않았으면 뜰 때 멈춥니다."
+    en: "A missing value falls back to a default — without one written, the boot stops."
+  - ko: "값을 바꾸면 도는 중에 반영된다 — 다시 시작해야 반영됩니다."
+    en: "A changed value applies while running — it applies after a restart."
+  - ko: "애너테이션은 명령이다 — 표시일 뿐이고 시작할 때 스프링이 읽습니다."
+    en: "An annotation is a command — it is a mark Spring reads at startup."
+evidence: ["@Value(", "@ConfigurationProperties", "@PropertySource", "@Profile", "Environment"]
+meaning:
+  - q:
+      ko: "설정 파일에 그 값이 <b>없는 채로</b> 프로그램을 띄우면 어떻게 되나요?"
+      en: "The value is <b>missing</b> from the settings file. What happens at startup?"
+    hint:
+      ko: "값을 넣는 일이 언제 일어나는지 보세요."
+      en: "Ask when the value is put in."
+    options:
+      - t: { ko: "뜰 때 멈춘다 — 값을 넣는 일이 시작할 때 일어난다", en: "It stops at startup — filling happens then" }
+      - t: { ko: "그 필드가 <code>null</code> 인 채로 뜬다", en: "It starts with the field left <code>null</code>" }
+        diag:
+          t:
+            ko: "조용히 비워 두는 쪽이 더 위험합니다. 그래서 스프링은 <b>뜨는 자리에서 멈춰</b> 어느 값이 없는지 말합니다."
+            en: "Leaving it quietly empty is the more dangerous choice. So Spring <b>stops at boot</b> and names the missing value."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 멈추나 비우나", en: "The sharpest spot — stop or leave empty" }
+            code:
+              - "멈춘다: 어느 값인지 말한다"
+              - "비운다: 한참 뒤에 터진다"
+      - t: { ko: "첫 요청이 들어올 때 알게 된다", en: "You find out on the first request" }
+        diag:
+          t:
+            ko: "값을 넣는 일은 요청보다 <b>훨씬 앞</b>, 컨테이너가 빈을 만들 때 일어납니다."
+            en: "Filling happens <b>well before</b> any request, while the container builds beans."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 시작할 때냐 요청 때냐", en: "The sharpest spot — at startup or on request" }
+            code:
+              - "빈을 만들 때: 값을 넣는다"
+              - "요청: 그보다 나중"
+      - t: { ko: "컴파일이 안 된다", en: "It does not compile" }
+        diag:
+          t:
+            ko: "설정 파일은 컴파일 대상이 아닙니다. 자바 쪽은 <b>이름 하나를 글자로</b> 적을 뿐이라 컴파일러가 볼 것이 없어요."
+            en: "A settings file is not compiled. The Java side holds only <b>a name as text</b>, so the compiler has nothing to check."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 컴파일이냐 시작이냐", en: "The sharpest spot — compile or startup" }
+            code:
+              - "컴파일: 글자만 본다"
+              - "시작: 값을 찾는다"

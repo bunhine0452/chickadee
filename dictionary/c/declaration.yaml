@@ -1,0 +1,256 @@
+schema: 1
+id: c/declaration
+# 0부 축 G (`docs/curriculum/c.md` §0.1 #1 · §2 #1). 파이썬은 만들기와 옮기기가 같은 모양이고
+# TS 는 `const`/`let` 으로 가른다. C 는 **타입 이름**이 그 낱말이다.
+universal: common/variable-binding
+name: { ko: 타입 적고 이름 만들기, en: Declaration }
+token: "int"
+grammars: [c]
+framework: null
+essential: true
+difficulty: 1
+prereq: [cs/type, cs/state]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "타입 이름을 앞에 적으면 그 줄이 이름을 만든다. 값을 안 적으면 상자 안은 쓰레기다."
+    en: "The type name in front makes the name; no value means the box holds garbage."
+  why:
+    ko: >-
+      C 에는 만드는 낱말이 따로 없고 <b>타입 이름이 그 일을 합니다</b>. {{site.line}}행의
+      {{pick.1|code}}{{pick.1|josa:이,가}} {{pick.2|code}}{{pick.2|josa:을,를}} 만들고, 같은 이름을
+      뒤에서 다시 적는 줄은 <b>옮기기</b>예요. 그리고 값을 안 적은 지역 이름은 0 이 <b>아닙니다</b>
+      — 상자는 잡혔는데 안에 무엇이 들었는지는 아무도 정하지 않았고, 그것을 읽는 순간부터
+      프로그램은 답을 약속받지 못합니다. 0 이 되는 것은 파일 맨 바깥의 이름과 <code>static</code>
+      이름뿐이에요.
+    en: >-
+      C has no separate word for making a name — <b>the type name does that job</b>. On line
+      {{site.line}}, {{pick.1|code}} makes {{pick.2|code}}; a later line that writes the same name
+      again is a <b>move</b>. And a local name made without a value is <b>not</b> 0 — the box is
+      reserved, nobody decided what is in it, and from the moment it is read the program has no
+      promised answer. Only names at file level and <code>static</code> names start at 0.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 상자 하나를 잡는다 — 크기는 타입이 정한다."
+      en: "{{pick.1|code}} on line {{site.line}} reserves one box — the type fixes its size."
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 그 상자의 이름이 된다."
+      en: "{{pick.2|code}} becomes the name of that box."
+    - ko: "값이 적혀 있으면 그것이 들어가고, 없으면 상자 안은 정해지지 않은 채다."
+      en: "If a value is written it goes in; if not, the box's contents are undecided."
+
+rule:
+  ko: "<b>타입 이름이 만드는 낱말이다.</b> 값 없는 지역 이름은 0 이 아니라 정해지지 않은 값이다."
+  en: "<b>The type name is the making word.</b> A local name without a value is not 0 but undecided."
+result:
+  label:
+    ko: "{{site.line}}행이 만든 이름"
+    en: "the name made on line {{site.line}}"
+  value: "{{pick.1}} {{pick.2}}"
+  note:
+    ko: "타입이 상자를, 이름이 손잡이를 준다"
+    en: "the type gives the box, the name the handle"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} 이제 {{pick.1|code}} 크기의 상자를 가진 이름입니다. 아래에서
+    같은 이름이 나오면 그것은 만들기가 아니라 옮기기예요.
+  en: >-
+    {{pick.2|code}} is now a name with a box of size {{pick.1|code}}. The same name below is a move,
+    not a making.
+payoff:
+  ko: >-
+    이걸 알면 「같은 이름인데 왜 앞에는 타입이 있고 뒤에는 없나」가 풀립니다 — 앞은 만들고 뒤는 옮깁니다.
+  en: >-
+    This untangles “why does the type appear the first time and not the next” — the first makes, the
+    rest move.
+bridge:
+  ko: >-
+    파이썬은 만들기와 옮기기가 같은 모양이라 위를 봐야 압니다. C 는 타입 이름이 붙은 줄이
+    만드는 줄이라 그 줄만 보면 됩니다.
+  en: >-
+    Python writes making and moving the same way, so you look upward. In C the line with the type
+    name is the making line, and that line is enough.
+misconceptions:
+  # c.md §9 #2 — 규격에서 나온 사실이고 빈도 자료는 없다.
+  - ko: "값 없이 만든 이름은 0 이다 — 지역 이름은 <b>아무 값</b>이고, 읽는 순간 정의되지 않은 동작입니다. 0 은 파일 맨 바깥과 <code>static</code> 뿐이에요."
+    en: "A name made without a value is 0 — a local name holds <b>anything</b>, and reading it is undefined behaviour. Only file-level and <code>static</code> names start at 0."
+  - ko: "타입은 장식이고 이름이 값을 정한다 — 타입이 <b>상자 크기</b>를 정하고, 그 크기가 넘침과 잘림을 정합니다."
+    en: "The type is decoration and the name decides the value — the type fixes <b>the box size</b>, and that size decides overflow and truncation."
+  - ko: "같은 이름을 두 번 만들 수 있다 — 한 블록 안에서는 두 번째 줄이 컴파일을 멈춥니다."
+    en: "The same name can be made twice — inside one block the second line stops the compiler."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>이름을 만드는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that makes the name</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 만들어지는 <b>이름</b>입니다. 이름은 스스로 상자를 못 잡아요 — 앞의 낱말이 잡습니다."
+          en: "{{pick.2|code}} is <b>the name</b> being made. A name cannot reserve a box by itself — the word in front does."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 이름만 적으면"
+            en: "The sharpest spot — the name alone"
+          code:
+            - "x = 0;       /* 위에 없으면 컴파일 오류 */"
+            - "int x = 0;   /* 이 줄이 만든다 */"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 처음 들어가는 <b>값</b>입니다. 값은 빼도 이름은 만들어져요 — 상자 안이 정해지지 않을 뿐입니다."
+          en: "{{pick.3|code}} is the starting <b>value</b>. Drop it and the name is still made — only the box's contents stay undecided."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 값이냐 만들기냐"
+            en: "The sharpest spot — the value or the making"
+          code:
+            - "int x;       /* 만들어졌고 안은 쓰레기 */"
+            - "int x = 0;   /* 만들어졌고 안은 0 */"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행에서 값을 지우고 <code>{{pick.1}} {{pick.2}};</code> 만 남기면 {{pick.2|code}} 안에는 무엇이 있을까요?"
+      en: "Drop the value on line {{site.line}} and leave <code>{{pick.1}} {{pick.2}};</code> — what is inside {{pick.2|code}}?"
+    hint:
+      ko: "함수 안의 이름인지 파일 맨 바깥의 이름인지가 답을 가릅니다."
+      en: "Whether the name lives inside a function or at file level decides it."
+    options:
+      - t:
+          ko: "함수 안이면 아무 값 — 읽으면 답이 없다. 파일 맨 바깥이면 0"
+          en: "Inside a function, anything — reading it has no answer. At file level, 0"
+      - t:
+          ko: "언제나 0"
+          en: "Always 0"
+        diag:
+          t:
+            ko: "0 은 <b>파일 맨 바깥</b>과 <code>static</code> 에만 약속돼 있습니다. 함수 안의 상자는 잡히기만 하고 안은 안 정해져요."
+            en: "0 is promised only <b>at file level</b> and for <code>static</code>. Inside a function the box is reserved and its contents are not."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 어디에 만들었나"
+              en: "The sharpest spot — where it was made"
+            code:
+              - "int g;            /* 파일 바깥: 0 */"
+              - "void f(void) { int l; }   /* 안: 아무 값 */"
+      - t:
+          ko: "컴파일이 멈춘다"
+          en: "Compiling stops"
+        diag:
+          t:
+            ko: "값 없이 만드는 것은 C 에서 <b>허용</b>됩니다. 멈추는 것은 컴파일러가 아니라 그 값을 읽는 프로그램의 약속이에요."
+            en: "Making a name without a value is <b>allowed</b> in C. What breaks is not the compiler but the promise of the program that reads it."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 문법이냐 약속이냐"
+              en: "The sharpest spot — grammar or promise"
+            code:
+              - "int x;        /* 컴파일 된다 */"
+              - "printf(\"%d\", x);   /* 답을 약속하지 않는다 */"
+      - t:
+          ko: "빈 값이 들어간다"
+          en: "An empty value goes in"
+        diag:
+          t:
+            ko: "C 에는 「빈 값」이 없습니다. 상자는 언제나 비트로 차 있고, 안 정한 상자에는 <b>전에 있던 비트</b>가 그대로 있어요."
+            en: "C has no “empty value”. A box is always full of bits, and an undecided box keeps <b>whatever bits were there</b>."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 비어 있음은 없다"
+              en: "The sharpest spot — there is no empty"
+            code:
+              - "int x;   /* 전에 그 자리에 있던 비트 */"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>정수 하나를 담는 이름</b>을 만듭니다."
+      en: "Choose what goes in the blank. Line {{site.line}} makes <b>a name that holds one whole number</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "int", mono: true }
+      - t: "void"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>「없음」의 이름</b>이라 상자를 못 잡습니다. 돌려줄 것이 없는 함수 앞에만 서요."
+            en: "That is <b>the name for “nothing”</b> and cannot reserve a box. It stands only in front of a function that returns nothing."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 없음에는 상자가 없다"
+              en: "The sharpest spot — nothing gets no box"
+            code:
+              - "void x = 0;   /* 컴파일 오류 */"
+              - "void f(void) { }   /* 여기가 자리 */"
+      - t: "var"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>다른 언어의 낱말</b>입니다. C 컴파일러는 이 이름을 모르고, 모르는 이름이 앞에 오면 그 줄을 못 읽어요."
+            en: "That is <b>another language's word</b>. The C compiler does not know it, and an unknown name in front makes the line unreadable."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 만드는 낱말은 타입이다"
+              en: "The sharpest spot — the making word is a type"
+            code:
+              - "var x = 0;   /* 'var' 를 모른다 */"
+              - "int x = 0;"
+      - t: "return"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>값을 돌려주는</b> 낱말입니다. 이름을 만들지 않고, 함수 밖으로 값을 보내며 그 함수를 끝내요."
+            en: "That is the word that <b>hands a value back</b>. It makes no name; it sends a value out of the function and ends it."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 만들기냐 돌려주기냐"
+              en: "The sharpest spot — making or returning"
+            code:
+              - "return x = 0;   /* 이름이 안 생긴다 */"
+              - "int x = 0;"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 이름 앞에 <b>타입을 먼저</b> 적을까요?"
+    en: "Why does line {{site.line}} write <b>the type before</b> the name?"
+  choices:
+    - t:
+        ko: "컴파일러가 그 줄에서 상자 크기를 정해야 하고, C 에는 만드는 낱말이 따로 없어 타입이 그 일을 하기 때문"
+        en: "Because the compiler fixes the box size on that line, and C has no separate making word — the type does that job"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 상자 크기를 안 정하면 무엇을 못 정하는지도 한 줄로 적어 보세요."
+        en: "That is the direction. Add a line on what could not be decided without the box size."
+    - t:
+        ko: "읽기 좋으라고 정한 순서라서"
+        en: "Because the order was chosen to read nicely"
+      ok: false
+      fb:
+        ko: "읽기 문제가 아닙니다. 타입이 없으면 이 줄은 만들기가 아니라 옮기기로 읽힙니다."
+        en: "It is not about reading. Without the type, the line reads as a move, not a making."
+    - t:
+        ko: "값을 보면 타입을 알 수 있어서"
+        en: "Because the value tells you the type"
+      ok: false
+      fb:
+        ko: "값으로는 못 압니다. <code>0</code> 하나만 봐도 한 바이트일 수도 여덟 바이트일 수도 있어요."
+        en: "The value cannot tell you. A bare <code>0</code> may sit in one byte or in eight."
+
+queries:
+  - { grammars: [c], file: ./declaration.scm }
+
+examples:
+  # 값을 든 예 — 식 · 값 · 타입. 주석의 `/* 이름 -> 값 (타입) */` 이 그 세 칸이다.
+  - code: "int n = 7 / 2;          /* n -> 3 (int) */"
+    expect: { sites: 1, form: init, hole: "int", picks: { 1: "int", 2: "n", 3: "7 / 2" } }
+  - code: "int x;                  /* x -> 정해지지 않음 (int) */"
+    expect: { sites: 1, form: bare, hole: "int", picks: { 1: "int", 2: "x" } }
+  - code: "double ratio = 0.5;     /* ratio -> 0.5 (double) */"
+    expect: { sites: 1, form: init, hole: "double", picks: { 1: "double", 2: "ratio", 3: "0.5" } }
+  - code: "x = 3;                  /* 옮기기 — 만드는 줄이 아니다 */"
+    expect: none
+  - code: "int *p;                 /* 포인터 선언은 다른 판이다 */"
+    expect: none

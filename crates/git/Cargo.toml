@@ -10,7 +10,7 @@ publish = false
 [dependencies]
 # >= 0.21 only: the 0.20 line carries three open unsound advisories and this crate
 # parses repositories we do not trust (06 §4.1).
-git2 = { version = "0.21", default-features = false }
+git2 = { version = "0.21", default-features = false, features = ["https"] }
 serde = { workspace = true }
 thiserror = { workspace = true }
 

@@ -1,0 +1,197 @@
+schema: 1
+id: c/const
+# 2부 뒤 「빌드와 규격」 (`docs/curriculum/c.md` §4 #27 · §0.6). `universal: null` — 「별표의 어느 쪽에
+# 적느냐로 잠기는 대상이 바뀐다」는 포인터가 있는 언어의 것이다. 자바의 `final` 은 이름만 잠근다.
+universal: null
+name: { ko: 못 고치게 표시하기, en: const }
+token: "const"
+grammars: [c]
+framework: null
+essential: true
+difficulty: 3
+prereq: [c/declaration, c/dereference, cs/immutability]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "이 이름으로는 고칠 수 없다고 표시한다. 별표의 어느 쪽에 적느냐로 잠기는 것이 값인지 이름인지 갈린다."
+    en: "Marks a name as unchangeable; its side of the star decides what is locked."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 「이 이름으로는 <b>못 고친다</b>」는 표시입니다.
+      값 자체를 굳히는 것이 아니라 <b>이 손잡이</b>를 잠그는 거예요 — 같은 자리를 가리키는 다른 포인터로는
+      고칠 수 있습니다. 포인터에서는 별표의 <b>어느 쪽</b>에 적느냐가 갈립니다: <code>const char *s</code>
+      는 글자(가리키는 것)를 잠그고 <code>s</code> 자체는 다른 데로 옮길 수 있어요.
+      <code>char * const s</code> 는 반대로 <code>s</code> 를 잠그고 글자는 고칠 수 있습니다. 함수의 매개변수에
+      붙은 것은 「이 함수는 넘어온 것을 안 고친다」는 약속이고, 그래서 문자열 라이브러리의 서명에 가득해요.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} marks “<b>no changing</b> through this name”. It does not
+      freeze the value itself; it locks <b>this handle</b> — another pointer to the same place may
+      still change it. With pointers, <b>which side</b> of the star it sits on decides:
+      <code>const char *s</code> locks the characters (what is pointed at) while <code>s</code> itself
+      may move elsewhere; <code>char * const s</code> is the reverse — <code>s</code> is locked and the
+      characters may change. On a parameter it is the promise “this function does not change what it
+      was given”, which is why string library signatures are full of it.
+  trace:
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} {{pick.3|code}} 의 어느 쪽을 잠글지 정한다 — 별표 앞이면 가리키는 것, 뒤면 이름."
+      en: "{{pick.1|code}} decides which side of {{pick.3|code}} is locked — before the star, what is pointed at; after it, the name."
+    - ko: "컴파일러가 그 이름으로 고치는 줄을 막는다."
+      en: "The compiler blocks lines that change through that name."
+    - ko: "{{site.line}}행 아래에서 다른 손잡이로는 여전히 고칠 수 있다 — 잠긴 것은 손잡이다."
+      en: "Below line {{site.line}}, another handle can still change it — the lock is on the handle."
+
+rule:
+  ko: "<b>잠기는 것은 손잡이다.</b> 별표 앞이면 가리키는 것을, 별표 뒤면 이름을 잠근다."
+  en: "<b>What is locked is the handle.</b> Before the star it locks the target; after the star, the name."
+result:
+  label:
+    ko: "{{site.line}}행이 잠근 것"
+    en: "what line {{site.line}} locks"
+  value: "{{pick.1}} {{pick.2}} {{pick.3}}"
+  note:
+    ko: "이 손잡이로는 못 고친다"
+    en: "no changing through this handle"
+ok:
+  ko: >-
+    {{pick.3|code}}{{pick.3|josa:은,는}} {{pick.1|code}}{{pick.1|josa:이,가}} 잠근 쪽으로는 못 고치는 이름입니다.
+  en: >-
+    {{pick.3|code}} is a name that cannot change on the side {{pick.1|code}} locks.
+payoff:
+  ko: >-
+    이걸 알면 라이브러리 서명의 <code>const char *</code> 가 읽힙니다 — 「넘겨준 글자를 안 고친다」는
+    약속이에요.
+  en: >-
+    This makes <code>const char *</code> in library signatures readable — the promise “I do not change
+    the characters you gave me”.
+bridge:
+  ko: >-
+    자바의 <code>final</code> 은 이름만 잠급니다. C 는 별표의 위치로 값 쪽과 이름 쪽을 따로 잠글 수
+    있어요 — 포인터가 있어서 생기는 축입니다.
+  en: >-
+    Java's <code>final</code> locks only the name. C can lock the value side and the name side
+    separately by the star's position — an axis that exists because of pointers.
+misconceptions:
+  # c.md §4 #27 — 규격에서 나온 사실이고 빈도 자료는 없다.
+  - ko: "값을 굳힌다 — <b>손잡이</b>를 잠급니다. 같은 자리를 가리키는 다른 포인터로는 고칠 수 있어요."
+    en: "It freezes the value — it locks <b>the handle</b>. Another pointer to the same place can still change it."
+  - ko: "포인터에 붙이면 전부 잠긴다 — <b>별표의 어느 쪽</b>이냐로 하나만 잠깁니다. 둘 다 잠그려면 둘 다 적어요."
+    en: "On a pointer it locks everything — <b>which side of the star</b> decides one side. Lock both by writing both."
+  - ko: "컴파일 때 값을 넣어 준다 — 상수가 아니라 <b>표시</b>입니다. 배열 크기에는 못 쓰는 컴파일러도 있어요."
+    en: "It substitutes the value at compile time — it is <b>a mark</b>, not a constant. Some compilers reject it as an array size."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>못 고친다는 표시</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the mark that forbids changing</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>타입</b>입니다. 무엇인지를 말하지 고칠 수 있는지는 안 말해요."
+          en: "{{pick.2|code}} is <b>the type</b>. It says what it is, not whether it may change."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 타입과 표시"
+            en: "The sharpest spot — the type and the mark"
+          code:
+            - "const int n = 3;   /* int 가 타입, const 가 표시 */"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 잠기는 <b>이름 쪽</b>입니다. 표시는 그 앞에 따로 적혀 있어요."
+          en: "{{pick.3|code}} is <b>the name side</b> being locked. The mark is written separately before it."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 잠기는 것과 표시"
+            en: "The sharpest spot — what is locked and the mark"
+          code:
+            - "const char *s;   /* s 가 이름, const 가 글자를 잠근다 */"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 이 이름으로 <b>못 고친다고 표시</b>합니다."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>marks</b> that this name may not change."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "const", mono: true }
+      - t: "static"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>어디까지 보이고 언제까지 사는지</b>의 표시입니다. 고칠 수 있는지와 무관해요 — 붙여도 얼마든지 고쳐집니다."
+            en: "That marks <b>how far it is visible and how long it lives</b>. It says nothing about changing — with it, the name changes freely."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 수명이냐 잠금이냐"
+              en: "The sharpest spot — lifetime or lock"
+            code:
+              - "static int n;   /* 고칠 수 있다 */"
+              - "const int n;    /* 못 고친다 */"
+      - t: "volatile"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>「밖에서 바뀔 수 있으니 매번 다시 읽어라」</b>는 표시입니다. 잠그는 것이 아니라 정반대에 가까워요."
+            en: "That marks <b>“may change from outside, re-read every time”</b>. Not a lock — closer to the opposite."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 반대 방향"
+              en: "The sharpest spot — the opposite direction"
+            code:
+              - "volatile int flag;   /* 매번 읽는다 */"
+      - t: "final"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>자바의 낱말</b>입니다. C 에는 없어서 모르는 이름이라고 멈춰요."
+            en: "That is <b>Java's word</b>. C does not have it and stops on an unknown name."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 다른 언어의 낱말"
+              en: "The sharpest spot — another language's word"
+            code:
+              - "final int n = 3;   /* 오류 */"
+
+why_gate:
+  q:
+    ko: "C 는 왜 잠금을 값이 아니라 <b>손잡이</b>에 둘까요?"
+    en: "Why does C put the lock on <b>the handle</b> rather than the value?"
+  choices:
+    - t:
+        ko: "같은 바이트를 여러 이름이 가리킬 수 있는 언어라 값 자체를 잠글 방법이 없고, 「이 함수는 안 고친다」 같은 약속은 손잡이마다 따로 적어야 뜻이 서기 때문"
+        en: "Because several names may point at the same bytes, so the value itself cannot be locked, and a promise like “this function does not change it” only makes sense per handle"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그래서 잠금을 벗기는 캐스트가 왜 위험한지도 한 줄로 적어 보세요."
+        en: "That is the direction. Add a line on why a cast that strips the lock is dangerous."
+    - t:
+        ko: "값을 잠그는 기계 명령이 없어서"
+        en: "Because there is no machine instruction to lock a value"
+      ok: false
+      fb:
+        ko: "이유는 기계가 아니라 이름이 여럿일 수 있다는 언어의 모형이에요."
+        en: "The reason is not the machine but the language model where names may be many."
+    - t:
+        ko: "컴파일러가 더 빨리 검사하려고"
+        en: "So the compiler checks faster"
+      ok: false
+      fb:
+        ko: "속도가 아니라 뜻입니다. 손잡이마다 약속이 다를 수 있어서예요."
+        en: "It is meaning, not speed. Promises may differ per handle."
+
+queries:
+  - { grammars: [c], file: ./const.scm }
+
+examples:
+  - code: "const int limit = 10;             /* limit 로는 못 고친다 */"
+    expect: { sites: 1, form: const-value, hole: "const", picks: { 1: "const", 2: "int", 3: "limit = 10" } }
+  - code: "size_t len(const char *s);        /* 넘어온 글자를 안 고친다는 약속 */"
+    expect: { sites: 1, form: const-param, hole: "const", picks: { 1: "const", 2: "char", 3: "*s" } }
+  - code: "char * const fixed = buf;         /* fixed 는 못 옮기고 글자는 고친다 */"
+    expect: { sites: 1, form: const-pointer, hole: "const", picks: { 1: "const", 2: "char", 3: "fixed" } }
+  - code: "int n = 10;                       /* 표시 없음 — 다른 판이다 */"
+    expect: none

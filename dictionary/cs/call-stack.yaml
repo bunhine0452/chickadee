@@ -1,0 +1,87 @@
+schema: 1
+id: cs/call-stack
+universal: null
+name: { ko: "돌아올 곳을 쌓아 두기", en: "Call stack" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+track_default: t0
+essential: false
+difficulty: 2
+prereq: []
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "함수를 부르면 돌아올 자리가 쌓인다. 너무 쌓이면 넘친다."
+    en: "Every call stacks a place to return to. Stack too many and it spills."
+  why:
+    ko: >-
+      함수 안에서 다른 함수를 부르면, 기계는 <b>부르던 자리</b>를 적어 두고 갑니다.
+      그 함수가 끝나면 적어 둔 자리로 돌아와요. 부르기가 겹치면 적어 둔 자리도
+      겹겹이 쌓이고, 이 더미가 <b>스택</b>입니다. 오류 화면에 함수 이름이 줄줄이 나오는 것은
+      이 더미를 그대로 보여 주는 것이고, 재귀가 안 멈출 때 프로그램이 죽는 것은
+      <b>쌓을 자리가 다 떨어져서</b>입니다.
+    en: >-
+      When a function calls another, the machine writes down <b>where it was</b> and goes. When
+      that function ends it returns to the note. Nested calls stack nested notes, and the pile is
+      the <b>stack</b>. The list of function names on an error screen is that pile printed out,
+      and a runaway recursion kills the program because <b>there is no room left to stack</b>.
+  trace: []
+rule:
+  ko: "<b>나중에 부른 것이 먼저 끝난다.</b> 더미는 위에서부터 걷힌다."
+  en: "<b>The last call finishes first.</b> The pile is taken off the top."
+ok:
+  ko: >-
+    함수가 끝나면 그 칸은 통째로 걷힙니다. 그 안에서 만든 값도 함께 사라지고,
+    부르던 자리로 돌아가 다음 줄부터 이어집니다.
+  en: >-
+    When a function ends its slot is taken off whole. The values made inside go with it, and the
+    caller carries on from the next line.
+misconceptions:
+  - ko: "오류 화면의 맨 위 줄이 원인이다 — 맨 위는 <b>가장 마지막에 부른 곳</b>이지 원인이 아닐 수 있습니다."
+    en: "The top line of an error is the cause — the top is the <b>most recent call</b>, not necessarily the cause."
+  - ko: "재귀는 깊이와 상관없이 돈다 — 쌓을 자리에는 끝이 있습니다."
+    en: "Recursion runs to any depth — the room to stack has an end."
+  - ko: "함수가 끝나도 그 안의 값은 남는다 — 칸이 걷히면 그 안의 값도 같이 걷힙니다."
+    en: "Values inside a finished function stay — the slot goes and they go with it."
+meaning:
+  - q:
+      ko: "재귀 함수를 돌렸더니 프로그램이 멈췄습니다. <b>더미에서 무슨 일이 있었나요?</b>"
+      en: "A recursive function brought the program down. <b>What happened in the pile?</b>"
+    hint:
+      ko: "돌아올 자리를 적어 둘 곳에도 끝이 있습니다."
+      en: "The room for return notes runs out."
+    options:
+      - t: { ko: "돌아올 자리가 계속 쌓이다 더 쌓을 곳이 없어졌다", en: "Return slots kept stacking until there was no room" }
+      - t: { ko: "같은 함수를 여러 번 부르는 것이 금지돼 있다", en: "Calling the same function repeatedly is forbidden" }
+        diag:
+          t:
+            ko: "같은 함수를 여러 번 부르는 것 자체는 <b>아무 문제가 없습니다</b>. 문제는 끝나지 않은 채로 겹쳐 쌓이는 것이에요."
+            en: "Calling the same function many times is <b>fine</b>. The trouble is stacking calls that never finish."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 여러 번이냐 겹쳐서냐", en: "The sharpest spot — repeated or nested" }
+            code:
+              - "차례로 열 번: 더미가 안 쌓인다"
+              - "겹쳐서 열 번: 열 칸이 쌓인다"
+      - t: { ko: "값을 담을 자리가 모자랐다", en: "There was no room for the values" }
+        diag:
+          t:
+            ko: "값을 담을 자리도 좁아지지만 먼저 떨어지는 것은 <b>돌아올 자리</b>입니다. 값을 안 만드는 재귀도 똑같이 멈춰요."
+            en: "Room for values tightens too, but what runs out first is <b>the return slots</b>. A recursion that makes no values dies the same way."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값이냐 돌아올 자리냐", en: "The sharpest spot — values or return slots" }
+            code:
+              - "값 없는 재귀도 멈춘다"
+              - "쌓이는 것은 부른 자리다"
+      - t: { ko: "계산이 너무 오래 걸려 강제로 끊겼다", en: "It took too long and was cut off" }
+        diag:
+          t:
+            ko: "오래 걸리는 것과 <b>쌓을 자리가 떨어지는</b> 것은 다릅니다. 오래 걸리는 반복문은 멈추지 않고 계속 돕니다."
+            en: "Taking long and <b>running out of stack</b> are different. A slow loop just keeps going."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 시간이냐 더미냐", en: "The sharpest spot — time or pile" }
+            code:
+              - "반복문: 느려도 안 멈춘다"
+              - "재귀: 깊어지면 더미가 찬다"

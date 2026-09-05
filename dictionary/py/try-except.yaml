@@ -1,0 +1,304 @@
+schema: 1
+id: py/try-except
+universal: common/try-catch
+name: { ko: 터진 것을 받아 잇기, en: Catching a failure }
+token: "except"
+grammars: [python]
+framework: null
+essential: true
+difficulty: 3
+prereq: [py/call-expression, py/if-statement, cs/error-vs-bug]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "터져서 멈출 것을 받아 프로그램을 잇는다. 무엇을 받을지 종류를 적어야 한다."
+    en: "Catches what would otherwise stop the program. You must name the kind you take."
+  why:
+    ko: >-
+      {{site.line}}행은 <b>어느 종류</b>를 받을지를 적습니다. 종류를 안 적으면 사용자의 중단 신호와
+      메모리 부족까지 삼켜서, 프로그램이 멈춰야 할 자리에서 안 멈춰요 — 그래서 {{pick.3|code}}
+      자리가 비어 있으면 안 됩니다.
+    en: >-
+      Line {{site.line}} names <b>which kind</b> is taken. Leave the kind out and it swallows the
+      user's interrupt and running out of memory too, so the program keeps going where it should
+      stop — which is why the {{pick.3|code}} slot must not be empty.
+  trace:
+    - ko: "위쪽 블록이 돌다가 무언가 터진다."
+      en: "The block above runs and something fails."
+    - ko: "{{site.line}}행이 그 종류가 {{pick.3|code}}{{pick.3|josa:과,와}} 맞는지 본다."
+      en: "Line {{site.line}} checks whether its kind matches {{pick.3|code}}."
+    - ko: "맞으면 {{pick.2|code}}{{pick.2|josa:이,가}} 돌고, 안 맞으면 위로 계속 올라간다."
+      en: "If it matches, {{pick.2|code}} runs; if not, it keeps travelling upward."
+
+rule:
+  ko: "<b>받을 종류를 적어야 한다.</b> 안 맞는 것은 안 잡히고 부른 쪽으로 계속 올라간다."
+  en: "<b>You name the kind you take.</b> Anything else is left alone and keeps travelling to the caller."
+result:
+  label:
+    ko: "{{site.line}}행이 받는 것"
+    en: "what line {{site.line}} takes"
+  value: "{{pick.3}} 종류만"
+  note:
+    ko: "그 밖은 위로 올라간다"
+    en: "everything else travels upward"
+ok:
+  ko: >-
+    {{pick.3|code}} 종류가 터졌을 때만 {{pick.2|code}}{{pick.2|josa:이,가}} 돕니다. 다른 종류는
+    <b>여기서 안 멈추고</b> 부른 쪽으로 올라가요.
+  en: >-
+    {{pick.2|code}} runs only when a failure of kind {{pick.3|code}} happens. Other kinds are
+    <b>not stopped here</b>; they travel up to the caller.
+payoff:
+  ko: >-
+    이걸 알면 「왜 오류가 안 보이지」가 풀립니다 — 종류를 넓게 적은 자리가 그것을 삼키고 있고,
+    좁혀 적으면 삼키던 것이 다시 <b>화면에 나옵니다</b>.
+  en: >-
+    This untangles “where did the error go” — some place wrote the kind too broadly and swallowed
+    it. Narrow the kind and what was swallowed <b>shows up again</b>.
+bridge:
+  ko: >-
+    <code>py/if-statement</code> 는 <b>미리</b> 묻고 이쪽은 <b>터진 뒤에</b> 받습니다. 미리 물을 수
+    있는 것은 미리 묻는 편이 낫고, 미리 못 묻는 것 — 파일이 도중에 사라지는 일 같은 것 — 이 이쪽입니다.
+  en: >-
+    <code>py/if-statement</code> asks <b>beforehand</b>; this takes <b>after</b> the failure. Ask
+    beforehand where you can; this is for what cannot be asked in advance, such as a file vanishing
+    midway.
+misconceptions:
+  - ko: >-
+      종류를 안 적으면 모든 오류를 안전하게 잡는다 — <b>안전하지 않습니다.</b> 사용자의 중단 신호와
+      메모리 부족까지 삼켜서 멈춰야 할 때 안 멈춰요.
+    en: >-
+      Leaving the kind out catches everything safely — it is <b>not safe</b>. It swallows the user's
+      interrupt and running out of memory, so the program will not stop when it must.
+  - ko: >-
+      잡으면 그 줄부터 다시 돈다 — <b>안 돕니다.</b> 터진 줄부터 블록 끝까지는 건너뛰고, 이어지는
+      것은 잡은 쪽 블록이에요.
+    en: >-
+      Catching resumes at the failing line — it does <b>not</b>. The rest of that block is skipped
+      and what continues is the catching block.
+  - ko: >-
+      마지막 정리 블록은 돌아가는 줄 앞에서 끝난다 — <b>돌아가는 줄 뒤에도</b> 돕니다. 나가는 길이
+      무엇이든 그 블록은 지나가요.
+    en: >-
+      The cleanup block is skipped by a line that hands a value back — it runs <b>even then</b>.
+      Whatever the way out, that block is passed through.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>터진 것을 받는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that takes the failure</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} <b>받은 뒤에 할 일</b>입니다. 그 일이 돌려면 먼저 받아야
+            하고, 받는 일을 짓는 낱말이 그 앞에 있어요.
+          en: >-
+            {{pick.2|code}} is <b>what happens after the taking</b>. It runs only once something has
+            been taken, and the word before it does the taking.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 받기와 그 뒤"
+            en: "The sharpest spot — the taking and what follows"
+          code:
+            - "except ValueError:"
+            - "    log(e)       # 받은 뒤"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} <b>받을 종류</b>입니다. 종류만 적으면 아무 일도 안 나고,
+            그 종류를 받으라고 말하는 낱말이 그 앞에 있어요.
+          en: >-
+            {{pick.3|code}} is <b>the kind to take</b>. A kind on its own does nothing; the word
+            before it says to take it.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 종류와 받는 일"
+            en: "The sharpest spot — the kind and the taking"
+          code:
+            - "ValueError            # 이름 하나"
+            - "except ValueError:    # 받는다"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행이 적은 종류와 <b>다른</b> 것이 터지면 어떻게 될까요?"
+      en: "What happens if a failure of a <b>different</b> kind than line {{site.line}} names occurs?"
+    hint:
+      ko: "안 맞는 것은 <b>어디로</b> 가는지 생각해 봅니다."
+      en: "Think about <b>where</b> a non-matching failure goes."
+    options:
+      - t:
+          ko: "여기서 안 잡히고 부른 쪽으로 계속 올라간다"
+          en: "It is not taken here and keeps travelling to the caller"
+      - t:
+          ko: "여기서 잡히되 다른 종류로 바뀐다"
+          en: "It is taken here but changed into another kind"
+        diag:
+          t:
+            ko: >-
+              종류가 바뀌는 일은 <b>없습니다.</b> 적은 것과 맞는지만 보고, 안 맞으면 이 자리를
+              그냥 지나쳐요.
+            en: >-
+              Kinds are <b>never changed</b>. It is only weighed against what was written, and a
+              mismatch simply passes this spot by.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 맞느냐만 본다"
+              en: "The sharpest spot — matching is all it checks"
+            code:
+              - "except ValueError:"
+              - "# KeyError 는 여기 안 선다"
+      - t:
+          ko: "프로그램이 그 자리에서 조용히 끝난다"
+          en: "The program quietly ends there"
+        diag:
+          t:
+            ko: >-
+              조용히 끝나지 <b>않습니다.</b> 위로 올라가다 아무도 안 받으면 그때 화면에 자국을 남기고
+              멈추고, 그 자국이 어디서 터졌는지를 알려 줘요.
+            en: >-
+              It does <b>not</b> end quietly. If nobody takes it on the way up, it prints a trace and
+              stops — and that trace says where it began.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 조용함과 자국"
+              en: "The sharpest spot — silence and a trace"
+            code:
+              - "except ValueError: pass    # 조용하다"
+              - "# 안 잡히면 자국이 남는다"
+      - t:
+          ko: "아래에 적힌 다른 블록이 대신 잡는다"
+          en: "Another block written below takes it instead"
+        diag:
+          t:
+            ko: >-
+              아래에 <b>그 종류를 적은</b> 블록이 있으면 맞습니다. 그런 블록이 없으면 위로 올라가고,
+              그래서 종류를 여러 줄로 나눠 적는 코드가 흔해요.
+            en: >-
+              That holds if a block below <b>names that kind</b>. With none, it travels upward — which
+              is why several kinds are often written as several blocks.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 적힌 종류가 있느냐"
+              en: "The sharpest spot — whether the kind is named"
+            code:
+              - "except ValueError: ..."
+              - "except KeyError: ...      # 둘째 종류"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 터진 것 중 {{pick.3|code}} 종류를 <b>받습니다</b>."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} <b>takes</b> failures of kind
+        {{pick.3|code}}.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "except", mono: true }
+      - t: "catch"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              그 낱말은 <b>다른 언어</b>의 것입니다. 파이썬에는 그 문법이 없어서 그 자리에서
+              문법이 안 맞아요.
+            en: >-
+              That word belongs to <b>other languages</b>. Python has no such form, so the line does
+              not hold together there.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 언어마다 다른 낱말"
+              en: "The sharpest spot — one word per language"
+            code:
+              - "except ValueError:     # 파이썬"
+              - "catch (e) { }          # 다른 언어"
+      - t: "rescue"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              그 낱말도 <b>다른 언어</b>의 것입니다. 뜻은 같지만 파이썬이 고른 낱말이 아니라,
+              그 자리에서 「그런 이름 없다」로 읽혀요.
+            en: >-
+              That word also belongs to <b>another language</b>. The meaning matches, but it is not
+              the word Python chose, so it reads as “no such name.”
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 뜻과 실제 낱말"
+              en: "The sharpest spot — the meaning and the actual word"
+            code:
+              - "except ValueError:     # 파이썬"
+              - "rescue => e            # 루비"
+      - t: "finally"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              그 낱말은 <b>나가는 길마다 도는</b> 정리 블록입니다. 터졌든 안 터졌든 지나가므로,
+              무엇을 받을지 종류를 적을 자리가 없어요.
+            en: >-
+              That word opens a cleanup block that runs on <b>every way out</b>. It is passed through
+              whether or not anything broke, so it has no slot for naming a kind.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 받기와 정리"
+              en: "The sharpest spot — taking and cleaning up"
+            code:
+              - "except ValueError:  # 종류를 적는다"
+              - "finally:            # 못 적는다"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 미리 묻지 않고 터진 뒤에 받을까요?"
+    en: "Why does line {{site.line}} take the failure afterwards instead of asking beforehand?"
+  choices:
+    - t:
+        ko: "미리 물어도 그사이에 달라질 수 있어서 — 확인하고 쓰는 두 순간 사이에 틈이 있다"
+        en: "Because things can change in between — there is a gap between checking and using"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 위쪽 블록에서 실제로 터질 수 있는 줄이 어디인지도 짚어 보세요."
+        en: "That is the direction. Point also at the line above that can actually fail."
+    - t:
+        ko: "파이썬에 미리 묻는 문법이 없어서"
+        en: "Because Python cannot ask beforehand"
+      ok: false
+      fb:
+        ko: >-
+          있습니다 — 갈림길로 물으면 돼요. 여기서 안 쓴 것은 <b>미리 못 아는 일</b>이 섞여 있어서입니다.
+        en: >-
+          It can — a branch asks. It is unused here because <b>something unknowable in advance</b> is
+          mixed in.
+    - t:
+        ko: "오류는 무조건 잡아야 해서"
+        en: "Because every error must be caught"
+      ok: false
+      fb:
+        ko: >-
+          무조건은 아닙니다. 여기서 못 이어 갈 오류라면 안 잡고 위로 올려보내는 것이 맞고,
+          그때 자국이 남아야 원인을 찾아요.
+        en: >-
+          Not every one. A failure this place cannot recover from is better left to travel up, and the
+          trace it leaves is what finds the cause.
+
+queries:
+  - { grammars: [python], file: ./try-except.scm }
+
+examples:
+  - code: "try:\n    load()\nexcept FileNotFoundError:\n    warn()"
+    expect: { sites: 1, form: typed, hole: "except", picks: { 1: "except", 3: "FileNotFoundError" } }
+  - code: "try:\n    load()\nfinally:\n    close()"
+    expect: { sites: 1, form: finally, hole: "finally", picks: { 1: "finally" } }
+  - code: "raise HTTPException(404)"
+    expect: { sites: 1, form: raise, hole: "raise", picks: { 1: "raise", 2: "HTTPException(404)" } }
+  # 종류를 안 적은 블록은 안 잡는다 — 이 개념의 규칙(「종류를 적어야 한다」)이 거기서 거짓이 된다.
+  - code: "try:\n    load()\nexcept:\n    warn()"
+    expect: none
+  - code: "if ok:\n    load()"
+    expect: none

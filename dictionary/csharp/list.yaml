@@ -1,0 +1,125 @@
+schema: 1
+id: csharp/list
+universal: common/list
+name: { ko: 순서 있는 목록, en: List }
+token: "List<T>"
+grammars: [c_sharp]
+framework: null
+essential: true
+difficulty: 1
+prereq: [csharp/assignment, csharp/member-access]
+confusions: []
+dict:
+  one_liner:
+    ko: "각괄호 안이 담기는 것의 종류이고, 목록은 뒤로 늘어난다."
+    en: "What sits in the angle brackets is what it holds, and it grows at the end."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.2|code}}{{pick.2|josa:이,가}} <b>담기는 것의 종류</b>입니다.
+      그래서 꺼낸 값을 캐스트할 필요가 없고, 다른 종류를 넣으면 그 자리에서 막힙니다.
+      C# 에서 눈여겨볼 것은 <b>길이가 고정된 배열과 늘어나는 목록이 다른 타입</b>이라는 것 —
+      세는 이름부터 갈립니다(<code>Length</code> 대 <code>Count</code>). 그리고 이 각괄호는
+      실행 시각까지 <b>남아</b> 있어서, 자바와 달리 실행 중에도 무엇이 담기는지 알 수 있습니다.
+    en: >-
+      {{pick.2|code}} on line {{site.line}} is <b>what it holds</b>. Nothing needs casting on
+      the way out, and a value of another kind stops right there. Worth noting in C#: a
+      <b>fixed-length array and a growing list are different types</b>, down to the counting
+      name (<code>Length</code> versus <code>Count</code>). And these brackets <b>survive</b>
+      to run time, so unlike Java the element type is still known while running.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.3|code}}{{pick.3|josa:을,를}} 목록 이름으로 세운다."
+      en: "Line {{site.line}} sets {{pick.3|code}} up as a list name."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 담는 모양을 정한다."
+      en: "{{pick.1|code}} sets the shape of the container."
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 그 안에 담기는 것의 종류가 된다."
+      en: "{{pick.2|code}} becomes the kind of thing inside it."
+rule:
+  ko: "<b>각괄호 안이 담기는 종류다.</b> 배열과 목록은 다른 타입이고 세는 이름도 다르다."
+  en: "<b>The angle brackets say what it holds.</b> Array and list are different types, counted differently."
+ok:
+  ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 이제 {{pick.2|code}} 값만 담는 목록입니다."
+  en: "{{pick.3|code}} is now a list that holds only {{pick.2|code}} values."
+payoff:
+  ko: "이걸 알면 「배열에 왜 Add 가 없나」가 풀립니다 — 길이가 고정입니다."
+  en: "This untangles “why has an array no Add” — its length is fixed."
+bridge:
+  ko: >-
+    파이썬 리스트는 아무 종류나 담습니다. C# 은 담을 종류를 <b>미리 적어야</b> 하고,
+    자바와 달리 그 정보가 실행 시각까지 남습니다.
+  en: >-
+    A Python list holds anything. C# <b>declares</b> what goes in, and unlike Java that
+    information survives to run time.
+misconceptions:
+  # 출처 — `csharp.md` §3 ⑲ · §4 ㉗.
+  - ko: "배열과 같은 것이다 — 다른 타입입니다. 배열은 길이가 고정이고 <code>Add</code>가 없어요."
+    en: "It is the same as an array — a different type: an array has a fixed length and no <code>Add</code>."
+  - ko: "각괄호는 컴파일 때만 있다 — 자바는 그렇지만 C# 은 실행 시각까지 남습니다."
+    en: "The brackets exist only at compile time — true in Java, but in C# they survive to run time."
+  - ko: "세는 이름이 같다 — 배열은 <code>Length</code>, 목록은 <code>Count</code>입니다."
+    en: "They count the same way — an array uses <code>Length</code>, a list <code>Count</code>."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>담기는 것의 종류</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the kind of thing it holds</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>담는 모양</b>입니다. 담기는 종류는 각괄호 안이에요."
+          en: "{{pick.1|code}} is the <b>container shape</b>. What it holds is inside the brackets."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 그릇이냐 내용이냐", en: "The sharpest spot — the container or the content" }
+          code:
+            - "List<int>      // 그릇은 List"
+            - "List<int>      // 내용은 int"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>이름</b>입니다. 이름은 담기는 종류를 안 바꿔요."
+          en: "{{pick.3|code}} is the <b>name</b>. A name does not change what goes inside."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 내용이냐", en: "The sharpest spot — the name or the content" }
+          code:
+            - "List<int> names;      // 이름과 내용이 어긋날 수 있다"
+            - "List<string> names;"
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 개념의 구멍 후보는 바깥 이름인데 사용처마다 다르고
+  (`List`·`IReadOnlyList`·`ICollection`) 담기는 종류도 매번 달라, 빈칸형이 요구하는
+  「첫 보기가 구멍 원문과 같음」을 한 벌로 못 맞춘다(`packages/cards/src/t0-blank.ts`).
+why_gate:
+  q:
+    ko: "이 언어는 왜 담을 종류를 <b>미리 적게</b> 할까요?"
+    en: "Why does this language make you <b>declare</b> what goes in?"
+  choices:
+    - t:
+        ko: "꺼낼 때 무엇인지 이미 알아서, 캐스트도 실행 시각 확인도 안 하게 하려고"
+        en: "So what comes out is already known, needing neither a cast nor a run-time check"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 안 적는 언어에서는 꺼낸 뒤에 무엇을 해야 하는지도 적어 보세요."
+        en: "That is the direction. Add what has to happen after taking one out where it is not declared."
+    - t:
+        ko: "메모리를 아끼려고"
+        en: "To save memory"
+      ok: false
+      fb:
+        ko: "메모리 문제가 아닙니다. 값 타입에서 상자 하나를 아끼는 것은 그 결과예요."
+        en: "Not memory — saving a box for value types is a consequence."
+    - t:
+        ko: "목록을 정렬하려고"
+        en: "To sort the list"
+      ok: false
+      fb:
+        ko: "정렬과 무관합니다. 정렬은 견주는 방법이 있어야 하고 그것은 다른 이야기예요."
+        en: "Unrelated to sorting, which needs a comparison and is another story."
+queries:
+  - { grammars: [c_sharp], file: ./list.scm }
+examples:
+  - code: "class A { void F() { List<int> xs = new(); } }"
+    expect: { sites: 1, form: local, picks: { 1: "List", 2: "int", 3: "xs" } }
+  - code: "class A { public IReadOnlyList<Item> Items { get; } }"
+    expect: { sites: 1, form: property, picks: { 1: "IReadOnlyList", 2: "Item", 3: "Items" } }
+  - code: "class A { void F() { Dictionary<int, string> m = new(); } }"
+    expect: none

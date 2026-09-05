@@ -1,5 +1,5 @@
 import { t, type MessageKey } from '@chickadee/i18n';
-import { Pill, RichText } from '@chickadee/ui';
+import { RichText } from '@chickadee/ui';
 
 import './ScoreCard.css';
 
@@ -32,7 +32,7 @@ export interface ScoreCardProps {
  *
  * 「20분의 15」가 포스터 활자로 앉는다. 백분율을 크게 쓰지 않는 이유: 필사는 100% 일치가
  * 목적이 아니라서 「85%」는 합격선처럼 읽히고 「20분의 15」는 세어 본 숫자로 읽힌다.
- * 알약 4개(정합·동등·어긋남·권고)가 색과 낱말을 같이 낸다 (05 §9).
+ * 수 넷(같음·같은 뜻·다름·권고)이 이름과 숫자로만 선다 — 색으로 가르지 않는다 (정본 §6).
  */
 export function ScoreCard({ total, meaning, exact, equiv, wrong, verdict }: ScoreCardProps) {
   return (
@@ -43,12 +43,14 @@ export function ScoreCard({ total, meaning, exact, equiv, wrong, verdict }: Scor
       </div>
       <div>
         <RichText as="p" html={t('clone.scoreNote', { exact: String(exact) })} />
-        <div className="pills">
-          <Pill track="t1">{t('session.exact')} {exact}</Pill>
-          <Pill track="t0">{t('session.equiv')} {equiv}</Pill>
-          <Pill track="t2">{t('session.differ')} {wrong}</Pill>
-          <Pill ghost>{verdictText(verdict)}</Pill>
-        </div>
+        {/* 세 수는 색이 아니라 이름으로 갈린다 (정본 §6). */}
+        <dl className="score-nums">
+          <div><dt>{t('session.exact')}</dt><dd>{exact}</dd></div>
+          <div><dt>{t('session.equiv')}</dt><dd>{equiv}</dd></div>
+          <div><dt>{t('session.differ')}</dt><dd>{wrong}</dd></div>
+        </dl>
+        {/* 점수가 아니라 다음 행동이 결론이다 (정본 §3-3). */}
+        <p className="score-verdict">{verdictText(verdict)}</p>
       </div>
     </div>
   );

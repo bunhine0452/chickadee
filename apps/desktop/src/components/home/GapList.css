@@ -1,0 +1,122 @@
+.gaps-sec {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-5);
+  display: grid;
+  gap: var(--s-3);
+  align-content: start;
+  min-width: 0;
+}
+
+.gaps-head h2 {
+  margin: 0;
+  font-size: var(--fs-3);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  color: var(--text);
+}
+
+.gaps-sum {
+  margin: var(--s-1) 0 0;
+  font-size: var(--fs-3);
+  color: var(--text-muted);
+  max-width: var(--measure);
+}
+
+.gaps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0;
+  min-width: 0;
+}
+
+.gap {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: baseline;
+  gap: var(--s-3);
+  padding: var(--s-2) 0;
+  border-top: 1px dotted var(--border);
+  min-width: 0;
+}
+
+.gap:first-child { border-top: 0 }
+
+.gap .tok {
+  font-family: var(--font-mono);
+  font-size: var(--fs-2);
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.gap .cnt {
+  font-size: var(--fs-1);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.gap .cnt b {
+  font-weight: var(--fw-medium);
+  color: var(--text);
+}
+
+.gap .mk {
+  appearance: none;
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  padding: var(--s-1) var(--s-3);
+  font: inherit;
+  font-size: var(--fs-1);
+  color: var(--text);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.gap .mk:hover { background: var(--surface-2) }
+
+.gap .mk:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.gaps-empty,
+.gaps-note {
+  margin: 0;
+  max-width: var(--measure);
+  font-size: var(--fs-4);
+  line-height: var(--lh-body);
+  color: var(--text-muted);
+}
+
+/* 아직 안 열린 것 (D96). 아무것도 잠그지 않는 안내라 경고 색을 쓰지 않는다. */
+.gaps-locked {
+  border-top: 1px solid var(--border);
+  padding-top: var(--s-3);
+  display: grid;
+  gap: var(--s-1);
+  max-width: var(--measure);
+}
+
+.gaps-locked .gaps-locked-k {
+  display: block;
+  font-size: var(--fs-3);
+  font-weight: var(--fw-medium);
+  color: var(--text);
+}
+
+.gaps-locked p {
+  margin: 0;
+  font-size: var(--fs-4);
+  line-height: var(--lh-body);
+  color: var(--text-muted);
+}
+
+.gaps-locked .how { color: var(--text-muted) }
+
+@media (width <= 760px) {
+  .gaps-sec { padding: var(--s-4) var(--s-3) }
+}

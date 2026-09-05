@@ -42,6 +42,32 @@ export interface RawImport {
   specifier: string;
   form: string | null;
   line: number;
+  /**
+   * 같은 매치의 `@ctx.*` 캡처 (D168). 호출 그래프·스키마의 재료다 — `call` 의 수신자,
+   * `field` 의 타입, `ddl-column` 의 표 이름처럼 지정자 하나로는 못 싣는 짝.
+   * 없으면 생략한다 — 대부분의 import 지정자는 맥락이 없다.
+   */
+  ctx?: Record<string, string>;
+}
+
+/**
+ * 같은 정의가 두 번 잡힌 것을 접는다 — **끝과 이름이 같으면 더 일찍 시작한 것만 남긴다.**
+ *
+ * 파이썬은 데코레이터가 붙으면 `decorated_definition`(바깥)과 `function_definition`(안쪽)이
+ * 둘 다 걸린다. 쿼리에 「부모가 X 가 아닌 것」이 없어서 `.scm` 에서 못 거른다.
+ * 둘은 끝나는 자리가 같고 이름도 같으므로 그 짝만 접으면 된다.
+ *
+ * 클래스와 그 안의 메서드는 **안 접힌다** — 끝이 같아도 이름이 다르다. 그 둘은 일부러
+ * 겹치게 두는 블록이다(TS 의 `class_declaration` + `method_definition` 과 같다).
+ */
+function outermostBlocks(blocks: readonly RawBlock[]): RawBlock[] {
+  const best = new Map<string, RawBlock>();
+  for (const b of blocks) {
+    const key = `${b.endByte}\u0000${b.name ?? ''}`;
+    const seen = best.get(key);
+    if (!seen || b.startByte < seen.startByte) best.set(key, b);
+  }
+  return [...best.values()];
 }
 
 /** `_blocks` 캡처 한 건. 분절과 AST 캐시는 M3 이 채운다. */
@@ -51,6 +77,8 @@ export interface RawBlock {
   lineEnd: number;
   startByte: number;
   endByte: number;
+  /** `.scm` 의 `(#set! form …)` — `class`·`method`·`def`·`statement`. 없는 언어도 있다. */
+  form?: string | null;
 }
 
 export interface DeriveResult {
@@ -95,19 +123,30 @@ export function deriveFile(
 
   for (const match of matches) {
     if (match.queryId === '_imports') {
+      // 맥락은 매치 단위다 — 지정자가 둘인 매치는 없으므로(패턴마다 `@import.source` 하나)
+      // 같은 값을 그대로 싣는다 (D168).
+      const ctx: Record<string, string> = {};
+      for (const [name, cap] of match.ctx) ctx[name] = unquote(cap.excerpt);
+      const hasCtx = match.ctx.size > 0;
       for (const cap of match.imports) {
-        imports.push({ specifier: unquote(cap.excerpt), form: match.form, line: cap.startLine });
+        imports.push({
+          specifier: unquote(cap.excerpt), form: match.form, line: cap.startLine,
+          ...(hasCtx ? { ctx } : {}),
+        });
       }
       continue;
     }
     if (match.queryId === '_blocks') {
       if (match.blockRange) {
         blocks.push({
-          name: match.blockName?.excerpt ?? null,
+          // 매퍼의 이름은 속성값이라 따옴표째 온다(`"findByLoginId"`) — DAO 메서드 이름과 글자가
+          // 같아야 호출 그래프가 SQL 까지 닿는다 (D168).
+          name: match.blockName === null ? null : unquote(match.blockName.excerpt),
           lineStart: match.blockRange.startLine,
           lineEnd: match.blockRange.endLine,
           startByte: match.blockRange.startByte,
           endByte: match.blockRange.endByte,
+          form: match.form,
         });
       }
       continue;
@@ -122,13 +161,17 @@ export function deriveFile(
   mergeContexts(sites, contexts);
   countLineConcepts(sites);
   numberOccurrences(path, sites);
-  return { sites, imports, blocks };
+  return { sites, imports, blocks: outermostBlocks(blocks) };
 }
 
 function group(captures: readonly Capture[]): Match[] {
   const out = new Map<string, Match>();
   for (const cap of captures) {
-    const key = `${cap.queryId}#${cap.matchId}`;
+    // 매치 번호는 **스캔 한 번** 안에서만 유일하다. 한 파일에 문법이 여럿이면(`.xml` 의 xml +
+    // `mybatis_sql`, D159) 문법마다 1 부터 다시 세어 `_imports#1` 이 두 번 온다 — 패턴 번호를
+    // 키에 넣어 서로 다른 패턴의 매치가 한 덩이로 뭉치지 않게 한다 (D168). 구간별 번호 겹침은
+    // Rust 가 구간마다 번호를 이어 세어 막는다 (`scan_ranges`).
+    const key = `${cap.queryId}#${cap.matchId}#${cap.patternIndex}`;
     let match = out.get(key);
     if (!match) {
       match = {
@@ -270,7 +313,7 @@ export function shapeOf(text: string): string {
 function numberOccurrences(path: string, sites: DerivedSite[]): void {
   const seen = new Map<string, number>();
   for (const site of sites) {
-    const key = `${site.conceptId} ${site.shape}`;
+    const key = `${site.conceptId}\u0000${site.shape}`;
     const n = seen.get(key) ?? 0;
     seen.set(key, n + 1);
     site.occurrence = n;
@@ -295,7 +338,7 @@ export function siteKey(conceptId: string, path: string, shape: string, occurren
   return `${hi.toString(16).padStart(8, '0')}${lo.toString(16).padStart(8, '0')}`;
 }
 
-/** `'./x.js'` · `"./x.js"` → `./x.js` */
+/** `'./x.js'` · `"./x.js"` → `./x.js`. SQL 의 `` `users` `` 도 같은 규칙이다 (D169). */
 function unquote(text: string): string {
   const first = text.at(0);
   return first === "'" || first === '"' || first === '`' ? text.slice(1, -1) : text;

@@ -13,13 +13,13 @@ describe('DiffFilter', () => {
     const group = screen.getByRole('radiogroup', { name: '보기' });
     expect(group.className).toContain('sw');
     const radios = screen.getAllByRole('radio');
-    expect(radios.map((el) => el.textContent)).toEqual(['어긋남 + 동등만', '전체', '어긋남만']);
+    expect(radios.map((el) => el.textContent)).toEqual(['다름 + 같은 뜻만', '전체', '다름만']);
     expect(radios.map((el) => el.getAttribute('aria-checked'))).toEqual(['true', 'false', 'false']);
   });
 
   it('기본값은 「어긋남 + 동등만」 자리에 표시된다', () => {
     const { container } = render(<DiffFilter value="d" onChange={() => {}} />);
-    expect(container.querySelector('.sw span.on')?.textContent).toBe('어긋남만');
+    expect(container.querySelector('.sw span.on')?.textContent).toBe('다름만');
   });
 
   it('누르면 값을 올려보낸다', async () => {
@@ -34,7 +34,7 @@ describe('DiffFilter', () => {
     const onChange = vi.fn();
     const user = userEvent.setup();
     render(<DiffFilter value="ne" onChange={onChange} />);
-    screen.getByRole('radio', { name: '어긋남 + 동등만' }).focus();
+    screen.getByRole('radio', { name: '다름 + 같은 뜻만' }).focus();
     await user.keyboard('{ArrowRight}');
     expect(onChange).toHaveBeenLastCalledWith('all');
   });

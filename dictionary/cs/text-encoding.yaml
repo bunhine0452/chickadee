@@ -1,0 +1,88 @@
+schema: 1
+id: cs/text-encoding
+universal: null
+name: { ko: "글자와 바이트는 다르다", en: "Text encoding" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+track_default: t0
+essential: false
+difficulty: 2
+prereq: [cs/bit-and-byte]
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "「가」는 한 글자지만 담기는 묶음은 셋이다. 길이를 어느 쪽으로 세느냐가 갈린다."
+    en: "One Korean letter, three bytes. Which one you count is what differs."
+  why:
+    ko: >-
+      글자를 담으려면 번호를 매기고 그 번호를 비트 줄로 적어야 합니다. 영문 알파벳은
+      한 묶음이면 충분한데 한글·한자·이모지는 안 그래요. 그래서 <b>글자 수와 묶음 수가 갈립니다</b>.
+      어떤 언어는 길이를 물으면 글자 수를 세고, 어떤 언어는 묶음 수를 셉니다.
+      「길이가 3이라는데 한 글자인데요」·「가운데를 잘랐더니 글자가 깨졌다」가 전부 이 갈림이에요.
+      자를 때는 <b>글자 경계</b>를 봐야 하고, 담을 자리를 잴 때는 <b>묶음</b>을 봐야 합니다.
+    en: >-
+      Storing letters means numbering them and writing the numbers as bits. One byte suffices for
+      the Latin alphabet; Korean, Chinese and emoji need more. So <b>the character count and the
+      byte count part ways</b>. Some languages count characters when you ask for length, others
+      count bytes. “It says length 3 but it is one letter” and “cutting in the middle broke it”
+      are the same split. Cut on <b>character boundaries</b>; size storage in <b>bytes</b>.
+  trace: []
+rule:
+  ko: "<b>자를 때는 글자로, 담을 때는 바이트로 센다.</b> 반대로 하면 깨진다."
+  en: "<b>Cut by characters, size by bytes.</b> Swap them and it breaks."
+ok:
+  ko: >-
+    같은 약속으로 담고 같은 약속으로 읽으면 아무 일도 안 일어납니다. 문제가 되는 것은
+    담은 약속과 읽는 약속이 다를 때예요.
+  en: >-
+    Store and read under the same agreement and nothing happens. Trouble comes when the two
+    agreements differ.
+misconceptions:
+  - ko: "글자 하나가 한 바이트다 — 영문에서만 그렇습니다."
+    en: "One character is one byte — only for the Latin alphabet."
+  - ko: "길이가 같으면 같은 글이다 — 세는 단위가 다르면 같은 글도 길이가 다릅니다."
+    en: "Equal length means equal text — different units give the same text different lengths."
+  - ko: "글자가 깨지는 것은 폰트 문제다 — 대개 담은 약속과 읽는 약속이 다른 것입니다."
+    en: "Broken characters are a font problem — usually the storing and reading agreements differ."
+meaning:
+  - q:
+      ko: "한글 한 글자의 길이가 3이라고 나옵니다. <b>무엇을 센 값인가요?</b>"
+      en: "One Korean letter reports a length of 3. <b>What was counted?</b>"
+    hint:
+      ko: "화면에는 글자 하나가 보입니다. 그런데 담기는 것은요."
+      en: "The screen shows one letter. What was stored?"
+    options:
+      - t: { ko: "그 글자를 담는 데 쓰인 묶음의 수", en: "The number of byte-sized lumps used to store it" }
+      - t: { ko: "글자를 이루는 자음과 모음의 수", en: "The number of consonants and vowels in the letter" }
+        diag:
+          t:
+            ko: "자모로 나눠 세는 방식도 실제로 있어서 <b>가까운 자리</b>입니다. 다만 이 값은 담긴 묶음의 수예요 — 자모가 둘인 글자도 3이 나옵니다."
+            en: "Some schemes really do count jamo, so this is <b>close</b>. But this number is stored lumps — a two-jamo letter reports 3 as well."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 자모냐 묶음이냐", en: "The sharpest spot — jamo or lumps" }
+            code:
+              - "자모: 글자마다 둘 또는 셋"
+              - "묶음: 대개 셋으로 고정"
+      - t: { ko: "화면에서 차지하는 칸의 수", en: "How many columns it occupies on screen" }
+        diag:
+          t:
+            ko: "화면 칸도 따로 세는 값이지만 <b>담긴 크기와는 다른 축</b>입니다. 한글은 대개 두 칸이에요."
+            en: "Screen columns are a real count, on <b>a different axis</b> from storage. Korean usually takes two."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 보이는 폭이냐 담긴 크기냐", en: "The sharpest spot — display width or stored size" }
+            code:
+              - "폭: 대개 2"
+              - "묶음: 대개 3"
+      - t: { ko: "그 글자가 사전에서 몇 번째인지", en: "Its position in a character table" }
+        diag:
+          t:
+            ko: "번호는 <b>어느 글자인지</b>를 정하고 길이는 <b>그 번호를 적는 데 몇 묶음이 드는지</b>입니다."
+            en: "The number says <b>which letter</b>; the length says <b>how many lumps write that number</b>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 번호냐 적는 길이냐", en: "The sharpest spot — the number or its width" }
+            code:
+              - "번호: 어느 글자인가"
+              - "길이: 그 번호를 적는 묶음 수"

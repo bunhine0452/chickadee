@@ -1,0 +1,174 @@
+schema: 1
+id: cpp/char-and-byte
+# 0부 §0.1 #6, 축 3. `common/text-literal` 은 `cpp/std-string` 이 가져간다 — 여기서 가르치는
+# 것은 「글자 묶음」이 아니라 **한 글자가 한 바이트가 아니다**이고, 파이썬은 글자 수로 세고
+# 자바는 16비트 단위로 세어 셋이 서로 다른 답을 낸다. 전이하면 거짓이 전이된다 (D4).
+universal: null
+name: { ko: 글자와 바이트, en: Characters and bytes }
+token: "'a'"
+grammars: [cpp]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cpp/integer-type, cs/text-encoding, cs/bit-and-byte]
+confusions: []
+dict:
+  one_liner:
+    ko: "작은따옴표 하나는 바이트 한 개다. 그래서 길이를 세면 글자 수가 안 나온다."
+    en: "One quoted symbol is one byte, so counting the run does not count symbols."
+  why:
+    ko: >-
+      C++ 의 <code>char</code> 는 <b>한 바이트</b>이고, 한글 한 글자는 UTF-8 에서 <b>세 바이트</b>
+      입니다. 그래서 <code>std::string("가")</code> 의 길이는 1 이 아니라 3 이에요.
+      {{site.line}}행이 세는 것은 사람이 보는 글자가 아니라 <b>담긴 바이트</b>입니다.
+      부호도 정해져 있지 않습니다 — <code>char</code> 가 부호를 갖는지는 구현이 정해서
+      <code>char c = 200;</code> 이 −56 일 수도 200 일 수도 있어요. 바이트를 다룰 생각이면
+      <code>unsigned char</code> 라고 적는 것이 그 흔들림을 없애는 방법입니다.
+    en: >-
+      A <code>char</code> in C++ is <b>one byte</b>, and one Korean symbol is <b>three bytes</b>
+      in UTF-8. So the length of <code>std::string("가")</code> is 3, not 1. What line
+      {{site.line}} counts is not what a reader sees but the <b>bytes held</b>. The sign is not
+      settled either — whether <code>char</code> is signed is up to the implementation, so
+      <code>char c = 200;</code> may be −56 or 200. Writing <code>unsigned char</code> when you
+      mean bytes is how that wobble goes away.
+  trace:
+    - ko: "{{site.line}}행은 {{pick.2|code}} 안에 담긴 것을 센다."
+      en: "Line {{site.line}} counts what is held inside {{pick.2|code}}."
+    - ko: "세는 단위는 사람이 보는 글자가 아니라 바이트다."
+      en: "The unit is the byte, not the symbol a reader sees."
+    - ko: "한글이 섞여 있으면 그 수가 글자 수보다 크다."
+      en: "With Korean mixed in, that count is larger than the symbol count."
+rule:
+  ko: "<b>세는 단위는 바이트다.</b> 사람이 보는 글자 하나가 여러 칸을 쓴다."
+  en: "<b>The unit is the byte.</b> One symbol a reader sees takes several slots."
+result:
+  label: { ko: "{{site.line}}행이 센 것", en: "what line {{site.line}} counted" }
+  value: "{{pick.2}}.{{pick.1}}()"
+  note: { ko: "글자 수가 아니라 바이트 수", en: "bytes, not symbols" }
+ok:
+  ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 담긴 <b>바이트 수</b>를 돌려줍니다."
+  en: "{{pick.1|code}} hands back the number of <b>bytes</b> held."
+payoff:
+  ko: >-
+    이걸 알면 「한글 세 글자인데 9 가 나온다」가 풀립니다 — 세는 단위가 다릅니다.
+  en: >-
+    This untangles “three Korean symbols but it says 9” — the unit being counted differs.
+bridge:
+  ko: >-
+    파이썬은 글자 수로 세어 3 을 냅니다. 자바는 16비트 단위로 세어 3 이 나오고 이모지에서
+    갈리죠. C++ 은 <b>바이트</b>라 셋 중 가장 낮은 층에서 셉니다.
+  en: >-
+    Python counts symbols and says 3. Java counts 16-bit units and says 3, splitting on emoji.
+    C++ counts <b>bytes</b> — the lowest layer of the three.
+misconceptions:
+  # `cpp.md` §0.1 #6.
+  - ko: "길이가 글자 수다 — 바이트 수입니다. 한글 한 글자가 셋을 더해요."
+    en: "The length is the symbol count — it is the byte count; one Korean symbol adds three."
+  - ko: "<code>char</code> 는 언제나 부호가 있다 — 구현이 정합니다. 바이트를 뜻하면 부호 없는 쪽을 적으세요."
+    en: "<code>char</code> is always signed — the implementation decides. Write the unsigned one for bytes."
+  - ko: "작은따옴표와 큰따옴표가 같다 — 앞은 바이트 한 개, 뒤는 묶음이라 담기는 것이 다릅니다."
+    en: "Single and double quotes are the same — one is a byte, the other a run; what is held differs."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>바이트 수를 돌려주는 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name that hands back a byte count</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>세어지는 쪽</b>입니다. 무엇을 세는지는 뒤에 붙은 이름이 정해요."
+          en: "{{pick.2|code}} is <b>what gets counted</b>. What is counted is decided by the name attached after."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 세어지는 쪽이냐 세는 이름이냐", en: "The sharpest spot — the counted or the counter" }
+          code:
+            - "s;             // 아무것도 안 센다"
+            - "s.length();    // 바이트를 센다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>넘기는 것이 없다</b>는 표시입니다. 세는 일을 하는 것은 그 앞의 이름이에요."
+          en: "{{pick.3|code}} says <b>nothing is handed in</b>. The counting is done by the name before it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 빈 괄호냐 이름이냐", en: "The sharpest spot — the empty pair or the name" }
+          code:
+            - "s.length()     // 이름이 일을 한다"
+            - "s.substr(0, 3) // 넘긴 것이 있으면 다른 일이다"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 담긴 <b>바이트 수</b>를 묻습니다."
+      en: "Choose what goes in the blank. Line {{site.line}} asks for the <b>byte count</b> held."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "length", mono: true }
+      - t: "empty"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>비었는지만</b> 묻고 참·거짓을 돌려줍니다. 몇 바이트인지는 안 나와요."
+            en: "That only asks <b>whether it is empty</b> and hands back a truth value, not a count."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 수냐 참·거짓이냐", en: "The sharpest spot — a count or a truth value" }
+            code:
+              - "s.length();   // 3"
+              - "s.empty();    // 거짓"
+      - t: "capacity"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>미리 잡아 둔 자리</b>를 묻습니다. 담긴 것보다 크게 잡혀 있는 것이 보통이라 값이 안 맞아요."
+            en: "That asks about <b>room set aside in advance</b>. It is usually larger than what is held, so the number does not match."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 담긴 것이냐 잡아 둔 것이냐", en: "The sharpest spot — held or reserved" }
+            code:
+              - "s.length();     // 담긴 바이트"
+              - "s.capacity();   // 잡아 둔 자리"
+      - t: "at"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>몇 번째 바이트</b>를 꺼내는 자리라 번호를 넘겨야 합니다. 빈 괄호로는 안 서요."
+            en: "That pulls out <b>the byte at a position</b>, so a number has to be handed in. Empty parentheses do not stand."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 세느냐 꺼내느냐", en: "The sharpest spot — counting or pulling out" }
+            code:
+              - "s.length();   // 세기"
+              - "s.at(0);      // 꺼내기"
+why_gate:
+  q:
+    ko: "이 언어는 왜 <b>글자 수가 아니라 바이트 수</b>를 돌려줄까요?"
+    en: "Why does this language hand back <b>bytes rather than symbols</b>?"
+  choices:
+    - t:
+        ko: "담긴 것이 바이트 열이라서 — 글자 수를 세려면 인코딩 규칙을 알고 한 번 훑어야 하니까"
+        en: "Because what is held is a run of bytes — counting symbols needs the encoding rules and one pass"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 한 번 훑기가 왜 공짜가 아닌지도 적어 보세요."
+        en: "That is the direction. Add why that one pass is not free."
+    - t:
+        ko: "옛날 언어라 유니코드를 몰라서"
+        en: "Because it is an old language that does not know Unicode"
+      ok: false
+      fb:
+        ko: "압니다. 아는 것과 <b>기본 단위로 삼는 것</b>이 다를 뿐이에요."
+        en: "It does know. Knowing and <b>taking it as the default unit</b> are different things."
+    - t:
+        ko: "바이트 수가 글자 수와 언제나 같아서"
+        en: "Because bytes and symbols always match"
+      ok: false
+      fb:
+        ko: "영문만 있으면 같습니다. 한글·이모지가 섞이는 순간 갈라져요."
+        en: "They match for plain English. The moment Korean or emoji appear they split."
+queries:
+  - { grammars: [cpp], file: ./char-and-byte.scm }
+examples:
+  - code: "void f() { auto n = s.length(); }         // n -> 담긴 바이트 수 (한글 한 글자면 3)"
+    expect: { sites: 1, form: measure, hole: "length", picks: { 1: "length", 2: "s", 3: "()" } }
+  - code: "void f() { char c = 'a'; }                // c -> 97 (char, 한 바이트)"
+    expect: { sites: 1, form: chardecl, hole: "char", picks: { 1: "char", 2: "c", 3: "'a'" } }
+  - code: "void f() { auto n = v.size(); }           // 목록의 개수는 다른 판이다"
+    expect: none

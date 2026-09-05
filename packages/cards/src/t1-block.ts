@@ -50,11 +50,18 @@ export interface SegmentOptions {
 
 /** 「이어서」 헤더 줄인가. 주석 접두를 떼고 표시만 본다 — 접두는 언어가, 표시는 로케일이 정한다. */
 export const isContinuedHeader = (line: string): boolean =>
-  line.replace(/^\s*(\/\/|#)\s*/, '').trim() === t('t1.continued');
+  line.replace(/^\s*(\/\/|#|--)\s*/, '').trim() === t('t1.continued');
 
-/** 주석 접두. 04 §3.1 이 적은 `// …이어서` 는 ts 예시다 — py 는 `#` 다. */
+/**
+ * 주석 접두. 04 §3.1 이 적은 `// …이어서` 는 ts 예시다.
+ *
+ * 세 갈래다 — `#`(파이썬), `--`(SQL), 나머지는 `//`. SQL 이 `//` 를 받으면 「이어서」 헤더가
+ * 주석이 아니라 **구문 오류**가 되어 붙는다 (D156 조사).
+ */
+const COMMENT_PREFIX: Readonly<Record<string, string>> = { python: '#', sql: '--' };
+
 function commentPrefix(grammar: string): string {
-  return grammar === 'python' ? '#' : '//';
+  return COMMENT_PREFIX[grammar] ?? '//';
 }
 
 const indentOf = (line: string): number => (/^\s*/.exec(line)?.[0] ?? '').length;

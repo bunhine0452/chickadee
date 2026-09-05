@@ -1,0 +1,206 @@
+schema: 1
+id: sql/group-by
+universal: null
+name: { ko: "같은 값끼리 묶기", en: "Grouping rows" }
+token: "GROUP BY"
+grammars: [sql, mybatis_sql]
+framework: null
+essential: true
+difficulty: 3
+prereq: [sql/aggregate]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "같은 값의 행을 한 묶음으로 만든다. 이 뒤로 행은 묶음이 된다."
+    en: "Turns rows with equal values into one bundle. Past here, a row is a bundle."
+  why:
+    ko: >-
+      {{site.line}}행은 {{pick.3|code}} 의 행을 {{pick.2|code}} 값이 같은 것끼리 <b>한 묶음</b>으로 만듭니다.
+      이 절을 지난 뒤로 「행」이라는 말의 뜻이 바뀌어요 — 결과의 한 줄이 원래 행 하나가 아니라 묶음
+      하나입니다. 그래서 이 뒤에서 고를 수 있는 것은 <b>묶음을 대표하는 값</b>뿐입니다: 묶은 기준 열이거나,
+      묶음을 접어 만든 값이거나. 표준은 그 밖의 열을 거절하는데 <b>sqlite 는 묶음에서 아무 행이나 골라 줍니다</b> —
+      문장이 서고 결과가 나오는데 그 값이 어느 행 것인지는 아무도 약속하지 않습니다.
+    en: >-
+      Line {{site.line}} bundles the rows of {{pick.3|code}} by equal {{pick.2|code}}. Past this
+      clause the word “row” changes meaning — one line of the result is a bundle, not an original row.
+      So what can be chosen afterwards is limited to <b>values that represent a bundle</b>: the keys it
+      was bundled by, or something folded from it. The standard refuses anything else; <b>sqlite hands
+      back an arbitrary row from the bundle</b> — the statement stands, a result comes out, and nobody
+      promises which row it came from.
+  trace:
+    - ko: "{{pick.3|code}} 의 행이 걸러진 뒤 여기 온다."
+      en: "The rows of {{pick.3|code}} arrive here after filtering."
+    - ko: "{{pick.2|code}} 값이 같은 행끼리 한 묶음이 된다."
+      en: "Rows with equal {{pick.2|code}} become one bundle."
+    - ko: "{{site.line}}행 뒤에서 한 줄은 원래 행이 아니라 묶음이다."
+      en: "After line {{site.line}} a line is a bundle, not an original row."
+
+rule:
+  ko: "<b>이 뒤로 한 줄은 묶음이다.</b> 묶음을 대표하지 않는 열은 고를 수 없다."
+  en: "<b>Past here a line is a bundle.</b> A column that does not represent one cannot be chosen."
+result:
+  label: { ko: "묶는 기준", en: "the key it bundles by" }
+  value: "{{pick.2}}"
+  note: { ko: "같은 값이 한 줄이 된다", en: "equal values become one line" }
+ok:
+  ko: >-
+    {{pick.2|code}} 값마다 한 줄이 나오고, 그 줄의 다른 값은 묶음을 접어 만든 것입니다.
+  en: >-
+    One line per {{pick.2|code}} value, and its other values are folded from the bundle.
+payoff:
+  ko: >-
+    이걸 알면 sqlite 에서만 도는 문장이 왜 위험한지 압니다 — 답이 조용히 임의로 정해져요.
+  en: >-
+    Knowing this, a statement that only sqlite accepts reads as a risk — its answer is quietly arbitrary.
+bridge:
+  ko: >-
+    다른 언어에서 기준으로 목록을 나누는 일과 같습니다. 다른 것은 <b>나눈 뒤에는 조각을 못 편다</b>는 것이에요.
+  en: >-
+    It is splitting a list by a key as elsewhere. The difference is that <b>after the split the pieces
+    cannot be unfolded</b>.
+misconceptions:
+  - ko: "묶은 뒤에도 아무 열이나 고를 수 있다 — 묶음을 대표하는 값만 고를 수 있습니다."
+    en: "Any column can still be chosen after bundling — only values representing a bundle can."
+  - ko: "sqlite 가 받아 주니 옳은 문장이다 — 값이 어느 행 것인지 약속이 없습니다."
+    en: "sqlite accepts it, so it is correct — which row the value came from is unpromised."
+  - ko: "이 절이 행을 거른다 — 거르지 않고 묶습니다. 거르는 절은 따로 있어요."
+    en: "This clause filters rows — it bundles them; filtering is another clause."
+
+meaning:
+  - q:
+      ko: "{{pick.2|code}}{{pick.2|josa:으로,로}} 묶은 뒤 묶지 않은 다른 열을 그냥 고르면 어떻게 될까요?"
+      en: "After bundling by {{pick.2|code}}, what if a column that was not bundled is simply chosen?"
+    hint:
+      ko: "그 열의 값이 묶음 안에서 <b>하나로 정해지는지</b> 보세요."
+      en: "See whether that column has <b>one settled value</b> inside a bundle."
+    options:
+      - t:
+          ko: "표준은 거절하고 sqlite 는 묶음에서 아무 행이나 골라 준다"
+          en: "The standard refuses; sqlite hands back an arbitrary row from the bundle"
+      - t:
+          ko: "그 열의 값들이 이어 붙어 나온다"
+          en: "The column's values come back joined together"
+        diag:
+          t:
+            ko: >-
+              이어 붙이려면 <b>그렇게 접는 함수</b>를 적어야 합니다. 저절로 이어지지 않아요.
+            en: >-
+              Joining them takes a <b>folding function that says so</b>. Nothing joins on its own.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 저절로냐 적어서냐", en: "The sharpest spot — by itself or written" }
+            code:
+              - "GROUP_CONCAT(note)   -- 적어야 이어진다"
+      - t:
+          ko: "그 열의 첫 값이 나온다"
+          en: "The column's first value comes back"
+        diag:
+          t:
+            ko: >-
+              묶음 안에는 <b>첫 행이 없습니다</b> — 순서가 없어요. 그래서 「아무 행」이지 「첫 행」이 아닙니다.
+            en: >-
+              A bundle has <b>no first row</b> — there is no order. Hence “an arbitrary row”, not “the first”.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 첫 행이냐 아무 행이냐", en: "The sharpest spot — the first row or any row" }
+            code:
+              - "-- 순서가 없으니 첫째도 없다"
+      - t:
+          ko: "묶음이 풀려 원래 행이 다시 나온다"
+          en: "The bundle unfolds back into the original rows"
+        diag:
+          t:
+            ko: "묶기는 <b>되돌아가지 않습니다</b>. 원래 행이 필요하면 묶지 않아야 해요."
+            en: "Bundling <b>does not unwind</b>. Needing the original rows means not bundling."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 접기냐 펴기냐", en: "The sharpest spot — folding or unfolding" }
+            code:
+              - "-- 접은 뒤에 원래 행은 없다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 {{pick.2|code}} 값이 같은 행을 <b>한 묶음</b>으로 만듭니다."
+      en: "Choose what goes in the blank. Line {{site.line}} bundles rows with equal {{pick.2|code}}."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "GROUP", mono: true }
+      - t: "ORDER"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>ORDER</code> 는 <b>줄만 세웁니다</b> — 행 수는 그대로예요. 묶기는 행 수를 줄입니다.
+            en: >-
+              <code>ORDER</code> only <b>lines rows up</b> — the count stays. Bundling reduces it.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 차례냐 묶음이냐", en: "The sharpest spot — arrangement or bundles" }
+            code:
+              - "ORDER BY kind   -- 행 수 그대로"
+              - "GROUP BY kind   -- 행이 준다"
+      - t: "PARTITION"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>PARTITION</code> 은 창 함수 안에서 무리를 나누되 <b>행을 안 줄입니다</b>. 자리도 함수 안이에요.
+            en: >-
+              <code>PARTITION</code> divides inside a window function and <b>keeps every row</b>. Its
+              place is inside the function.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 줄이냐 안 줄이냐", en: "The sharpest spot — reducing or not" }
+            code:
+              - "OVER (PARTITION BY kind)   -- 행 수 그대로"
+              - "GROUP BY kind              -- 행이 준다"
+      - t: "DISTINCT"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>DISTINCT</code> 는 <b>중복만 접습니다</b> — 묶음을 만들지 않으니 접는 값을 붙일 수 없어요.
+            en: >-
+              <code>DISTINCT</code> only <b>collapses duplicates</b> — it makes no bundle, so nothing can
+              be folded over one.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 중복 접기냐 묶기냐", en: "The sharpest spot — collapsing or bundling" }
+            code:
+              - "SELECT DISTINCT kind FROM cart"
+              - "SELECT kind, COUNT(*) FROM cart GROUP BY kind"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 {{pick.2|code}} 기준으로 묶었을까요?"
+    en: "Why does line {{site.line}} bundle by {{pick.2|code}}?"
+  choices:
+    - t:
+        ko: "묶음마다 한 줄을 내야 해서 — 기준이 곧 결과의 줄 하나가 무엇인지다"
+        en: "Because one line per bundle is the answer — the key defines what a line is"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 기준을 하나 더 더하면 줄 수가 어떻게 되는지도 적어 보세요."
+        en: "That is the direction. Say what one more key does to the number of lines."
+    - t:
+        ko: "그 열에 값이 적어서"
+        en: "Because that column has few values"
+      ok: false
+      fb:
+        ko: "값의 가짓수는 결과 줄 수를 정할 뿐입니다. 고르는 이유는 <b>무엇을 세고 싶은가</b>예요."
+        en: "The number of values only sets how many lines. The reason is <b>what is being counted</b>."
+    - t:
+        ko: "접는 함수를 쓰려면 반드시 있어야 해서"
+        en: "Because a folding function requires it"
+      ok: false
+      fb:
+        ko: "접는 함수는 이 절 없이도 씁니다 — 표 전체가 한 묶음이 되지요."
+        en: "A folding function works without it — the whole table becomes one bundle."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./group-by.scm }
+
+examples:
+  - code: "SELECT kind, COUNT(*) FROM cart GROUP BY kind"
+    expect: { sites: 1, form: group-by, hole: "GROUP", picks: { 1: "GROUP", 2: "kind", 3: "cart", 4: "BY" } }
+  - code: "SELECT kind FROM cart GROUP BY kind HAVING COUNT(*) > 1"
+    expect: { sites: 1, form: group-by, hole: "GROUP", picks: { 1: "GROUP", 2: "kind", 3: "cart", 4: "BY" } }
+  - code: "SELECT kind FROM cart ORDER BY kind"
+    expect: none

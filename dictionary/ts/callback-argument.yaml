@@ -1,0 +1,224 @@
+schema: 1
+id: ts/callback-argument
+universal: common/function-value
+name: { ko: 나중에 부를 함수 넘기기, en: Passing a callback }
+token: "f(cb)"
+grammars: [typescript, tsx, javascript, vue]
+framework: null
+essential: true
+difficulty: 2
+prereq: [ts/arrow-function, ts/call-expression]
+confusions: [ts/call-expression]
+
+dict:
+  one_liner:
+    ko: "함수를 값처럼 넘긴다. 넘긴 그 함수는 <b>지금 안 돈다</b> — 받은 쪽이 나중에 부른다."
+    en: "A function handed over as a value — it does not run now; the receiver calls it."
+  why:
+    ko: >-
+      {{site.line}}행에서 {{pick.2|code}}{{pick.2|josa:은,는}} 값입니다. 괄호를 안 붙였으니 여기서
+      실행되지 않고, {{pick.1|code}}{{pick.1|josa:이,가}} 필요한 시점에 대신 불러 줘요. 그래서
+      「이 줄에서 무슨 일이 일어나나」와 「그 함수는 언제 도나」가 다른 물음이 됩니다.
+    en: >-
+      On line {{site.line}}, {{pick.2|code}} is a value. With no parentheses it does not run here;
+      {{pick.1|code}} calls it when the moment comes. So "what happens on this line" and "when does
+      that function run" become two different questions.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}}{{pick.2|josa:을,를}} 만들어 값으로 든다."
+      en: "Line {{site.line}} makes {{pick.2|code}} and holds it as a value."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 그 값을 받아 둔다 — 아직 안 부른다."
+      en: "{{pick.1|code}} takes that value and keeps it — no call yet."
+    - ko: "때가 되면 받은 쪽이 부르고, 그때서야 함수 안의 줄이 돈다."
+      en: "When the moment comes the receiver calls it, and only then do its lines run."
+
+rule:
+  ko: >-
+    <b>괄호가 지금 부르는 표시다.</b> 이름만 적으면 함수가 넘어가고, 괄호를 붙이면 그 자리에서
+    부른 뒤 결과가 넘어간다.
+  en: >-
+    <b>Parentheses are the mark of calling now.</b> The bare name hands the function over; with
+    parentheses it is called here and the result is what goes over.
+result:
+  label:
+    ko: "{{site.line}}행에서 넘어가는 것"
+    en: "What crosses over on line {{site.line}}"
+  value: "{{pick.2}} (아직 안 부름)"
+  note:
+    ko: "결과가 아니라 함수"
+    en: "the function, not its result"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} 값이라 변수에 담을 수도, 배열에 넣을 수도 있습니다.
+    함수가 값이라는 것이 이 자리에서 처음 눈에 보여요.
+  en: >-
+    {{pick.2|code}} is a value: it can sit in a variable or in an array. This is where a function
+    being a value first becomes visible.
+payoff:
+  ko: >-
+    타이머·이벤트 등록·배열 메서드가 전부 같은 모양입니다. 하나를 읽으면 나머지가 같은 규칙으로
+    읽혀요.
+  en: >-
+    Timers, event registration and array methods all share this shape. Read one and the rest read
+    by the same rule.
+bridge:
+  ko: >-
+    넘긴 함수가 <b>바깥 이름</b>을 쓰면 그때부터는 닫힘이 됩니다 — 그 이름이 나중에 바뀌면 함수가
+    보는 값도 바뀌어요.
+  en: >-
+    Once the handed-over function uses an <b>outside name</b>, it becomes a closure — change that
+    name later and what the function sees changes too.
+misconceptions:
+  - ko: "넘기려면 괄호를 붙여야 한다 — 붙이면 결과가 넘어갑니다."
+    en: "Handing it over needs parentheses — with them, the result goes instead."
+  - ko: "넘긴 함수는 넘긴 자리에서 돈다 — 받은 쪽이 부를 때 돕니다."
+    en: "The handed function runs where it was handed — it runs when the receiver calls it."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>넘어가는 함수</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the function being handed over</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: >-
+            {{pick.1|code}}{{pick.1|josa:은,는}} <b>지금</b> 불리는 쪽입니다. 넘어가는 함수는 그
+            괄호 안에 있어요.
+          en: >-
+            {{pick.1|code}} is what is called <b>now</b>. The function being handed over is inside
+            its parentheses.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 지금 부르는 것과 나중에 불릴 것"
+            en: "The sharpest spot — called now or called later"
+          code:
+            - "setTimeout(save, 100)   // setTimeout 은 지금"
+            - "setTimeout(save, 100)   // save 는 나중에"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 부름을 받는 <b>대상</b>입니다. 넘어가는 값은 괄호
+            안에 있어요.
+          en: >-
+            {{pick.3|code}} is the <b>receiver</b> of the call. The value handed over is inside the
+            parentheses.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 받는 쪽과 넘기는 값"
+            en: "The sharpest spot — the receiver or the handed value"
+          code:
+            - "el.addEventListener('click', run)"
+            - "//^받는 쪽             넘기는 값^"
+
+meaning:
+  - q:
+      ko: "<code>setTimeout(save(), 100)</code> 은 어떻게 될까요?"
+      en: "What does <code>setTimeout(save(), 100)</code> do?"
+    hint:
+      ko: "괄호가 붙어 있습니다. 그러면 무엇이 넘어갈까요."
+      en: "The parentheses are there. What crosses over then?"
+    options:
+      - t:
+          ko: "<code>save</code> 가 지금 돌고, 그 결과가 넘어간다"
+          en: "<code>save</code> runs now and its result is handed over"
+      - t:
+          ko: "100 밀리초 뒤에 <code>save</code> 가 돈다"
+          en: "<code>save</code> runs 100 ms later"
+        diag:
+          t:
+            ko: >-
+              그렇게 되려면 괄호를 <b>빼야</b> 합니다. 괄호가 붙으면 그 줄에서 먼저 돌고 남는 것은
+              돌려준 값이에요.
+            en: >-
+              For that the parentheses must be <b>dropped</b>. With them it runs on that line and
+              what remains is the returned value.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 괄호가 있나"
+              en: "The sharpest spot — are the parentheses there"
+            code:
+              - "setTimeout(save, 100)     // 나중에"
+              - "setTimeout(save(), 100)   // 지금"
+      - t:
+          ko: "그 줄에서 멈춘다"
+          en: "It stops on that line"
+        diag:
+          t:
+            ko: >-
+              멈추지 않습니다. 함수가 아닌 값을 받아 둔 채 시간이 지나고, 아무 일도 안 일어나요 —
+              소리 없이 어긋나는 자리입니다.
+            en: >-
+              It does not stop. A non-function value is kept, the time passes, and nothing happens —
+              this is where it goes off quietly.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 소리를 내나"
+              en: "The sharpest spot — does it speak up"
+            code:
+              - "setTimeout(save(), 100)   // 조용하다"
+              - "save.notThere()           // 소리를 낸다"
+      - t:
+          ko: "<code>save</code> 가 두 번 돈다"
+          en: "<code>save</code> runs twice"
+        diag:
+          t:
+            ko: >-
+              한 번만 돕니다. 괄호가 그 자리에서 한 번 부르고, 그 뒤에 부를 함수는 남지 않아요.
+            en: >-
+              It runs once. The parentheses call it there, and no function is left to call afterwards.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 몇 번 부르나"
+              en: "The sharpest spot — how many calls"
+            code:
+              - "setTimeout(save(), 100)   // 한 번"
+              - "setTimeout(save, 100)     // 한 번, 나중에"
+
+no_hole_reason: >-
+  이 자리의 차이는 지운 글자가 아니라 <b>붙어 있는 괄호</b>다. 괄호를 빈칸으로 만들면 그 줄이
+  파싱되지 않고, 괄호를 안 지우면 물을 것이 없다. 그래서 자리를 짚어 묻는다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 함수를 부르지 않고 넘겼을까요?"
+    en: "Why does line {{site.line}} hand the function over instead of calling it?"
+  choices:
+    - t:
+        ko: "언제 부를지를 받은 쪽이 정하게 하려고"
+        en: "So the receiver decides when to call it"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 받은 쪽이 <b>무엇을 인자로 주는지</b>도 한 줄 적어 보세요."
+        en: "That is the direction. Add a line on <b>what the receiver passes in</b>."
+    - t:
+        ko: "결과를 미리 계산해 두려고"
+        en: "To compute the result in advance"
+      ok: false
+      fb:
+        ko: "미리 계산하려면 괄호를 붙여야 합니다. 여기서는 아직 아무것도 안 돌았어요."
+        en: "Computing in advance needs the parentheses. Here nothing has run yet."
+    - t:
+        ko: "함수 이름을 짧게 쓰려고"
+        en: "To keep the function's name short"
+      ok: false
+      fb:
+        ko: "이름 길이는 안 바뀝니다. 바뀌는 것은 <b>도는 시점</b>이에요."
+        en: "The name's length does not change. What changes is <b>when it runs</b>."
+
+queries:
+  - { grammars: [typescript, tsx, javascript, vue], file: ./callback-argument.scm }
+
+examples:
+  - code: "setTimeout(() => save(draft), 100)"
+    expect: { sites: 1, form: plain, picks: { 1: "setTimeout", 2: "() => save(draft)" } }
+  - code: "el.addEventListener('click', function () { open() })"
+    expect: { sites: 1, form: event, picks: { 1: "addEventListener", 3: "el" } }
+  - code: "onSubmit(handleSave)"
+    expect: { sites: 1, form: by-name, picks: { 1: "onSubmit", 2: "handleSave" } }
+  - code: "watcher.on(() => reload())"
+    expect: { sites: 1, form: method, picks: { 1: "on", 2: "() => reload()", 3: "watcher" } }
+  - code: "xs.map((n) => n * 2)"
+    expect: none

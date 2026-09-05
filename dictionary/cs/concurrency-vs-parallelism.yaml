@@ -1,0 +1,90 @@
+schema: 1
+id: cs/concurrency-vs-parallelism
+universal: null
+name: { ko: "번갈아 하나 동시에 하나", en: "Concurrency and parallelism" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+track_default: t0
+essential: false
+difficulty: 3
+prereq: [cs/blocking-and-async]
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "한 일꾼이 번갈아 하는 것과 여러 일꾼이 같이 하는 것은 다른 문제다."
+    en: "One worker taking turns and several working at once are different problems."
+  why:
+    ko: >-
+      일 여럿을 <b>겹쳐서</b> 진행하는 것과 <b>같은 순간에</b> 하는 것은 다릅니다.
+      한 일꾼이 번갈아 하면 겹쳐 보이지만 어느 순간에도 <b>하나만</b> 돌아요.
+      일꾼이 여럿이면 진짜로 같은 순간에 둘이 돕니다. 이 구분이 실제로 걸리는 자리는
+      <b>기다림을 겹치면 얻는 것</b>과 <b>계산을 나누면 얻는 것</b>이 다르다는 점입니다.
+      기다림이 많은 일에 일꾼을 늘려도 안 빨라지고, 계산이 많은 일에 번갈아 하기를 넣어도 안 빨라져요.
+      「무엇을 겹칠 것인가」를 먼저 정해야 합니다.
+    en: >-
+      Making progress on several things <b>overlapping</b> is not the same as doing them <b>at the
+      same instant</b>. One worker taking turns looks overlapped, yet at any instant <b>only one</b>
+      runs. Several workers really do run at once. Where the distinction bites: overlapping
+      <b>waiting</b> buys something different from splitting <b>computation</b>. Adding workers to
+      a waiting-heavy job does not speed it up, and taking turns on a computation-heavy job does
+      not either. Decide what you are overlapping first.
+  trace: []
+rule:
+  ko: "<b>기다림은 겹쳐서 줄이고 계산은 나눠서 줄인다.</b> 서로 바꿔 쓰면 안 준다."
+  en: "<b>Overlap to cut waiting; split to cut computation.</b> Swap them and nothing shrinks."
+ok:
+  ko: >-
+    한 일꾼이 번갈아 해도 기다리는 시간은 겹칩니다. 계산을 줄이려면 일꾼을 늘리고 일을
+    나눠야 해요.
+  en: >-
+    One worker taking turns still overlaps the waiting. Cutting computation needs more workers and
+    a split of the work.
+misconceptions:
+  - ko: "번갈아 하면 두 배 빨라진다 — 계산이 많으면 안 빨라집니다."
+    en: "Taking turns doubles the speed — not for computation-heavy work."
+  - ko: "일꾼을 늘리면 언제나 빨라진다 — 나눌 수 없는 일은 안 빨라집니다."
+    en: "More workers is always faster — not for work that cannot be split."
+  - ko: "일꾼이 하나면 겹치는 문제가 없다 — 번갈아 하는 사이에 값이 바뀔 수 있습니다."
+    en: "One worker means no overlap problems — values can change between turns."
+meaning:
+  - q:
+      ko: "계산이 많은 일에 번갈아 하기를 넣었는데 안 빨라졌습니다. <b>왜인가요?</b>"
+      en: "Turn-taking was added to computation-heavy work and nothing got faster. <b>Why?</b>"
+    hint:
+      ko: "번갈아 해도 어느 순간에 도는 것은 몇 개인가요."
+      en: "While taking turns, how many run at any instant?"
+    options:
+      - t: { ko: "일꾼이 하나라 어느 순간에도 하나만 돈다", en: "One worker, so only one runs at any instant" }
+      - t: { ko: "번갈아 바꾸는 비용이 계산보다 커서", en: "Switching costs more than the computation" }
+        diag:
+          t:
+            ko: "바꾸는 비용도 있지만 <b>0이어도</b> 안 빨라집니다. 총 계산량이 그대로라서요."
+            en: "Switching costs something, but <b>even at zero</b> it would not speed up: the total computation is unchanged."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 비용이냐 총량이냐", en: "The sharpest spot — overhead or total" }
+            code:
+              - "비용 0이어도: 총량은 그대로"
+              - "일꾼 둘: 총량이 나뉜다"
+      - t: { ko: "번갈아 하기를 잘못 적어서", en: "The turn-taking was written incorrectly" }
+        diag:
+          t:
+            ko: "제대로 적어도 결과는 같습니다 — <b>겹칠 기다림이 없어서</b>예요. 기다림이 있는 일이었다면 효과가 났을 것입니다."
+            en: "Written correctly the result is the same — <b>there is no waiting to overlap</b>. On a waiting job it would have helped."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 무엇을 겹치나", en: "The sharpest spot — what is being overlapped" }
+            code:
+              - "기다림: 겹치면 준다"
+              - "계산: 겹쳐도 안 준다"
+      - t: { ko: "기계에 코어가 하나뿐이라서", en: "The machine has only one core" }
+        diag:
+          t:
+            ko: "코어가 여럿이어도 <b>일꾼을 안 늘리면</b> 안 빨라집니다. 번갈아 하기는 코어를 더 쓰는 방식이 아니에요."
+            en: "Even with many cores, <b>without more workers</b> nothing changes. Turn-taking is not a way to use more cores."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 코어냐 일꾼이냐", en: "The sharpest spot — cores or workers" }
+            code:
+              - "코어: 쓸 수 있는 자원"
+              - "일꾼: 실제로 나눠 도는 단위"

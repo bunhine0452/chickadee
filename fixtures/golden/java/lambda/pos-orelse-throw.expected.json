@@ -1,0 +1,67 @@
+[
+  {
+    "queryId": "java/lambda",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "lambda",
+    "startLine": 7,
+    "startCol": 33,
+    "endLine": 7,
+    "endCol": 76,
+    "nodeKind": "lambda_expression",
+    "inError": false
+  },
+  {
+    "queryId": "java/lambda",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "lambda",
+    "startLine": 7,
+    "startCol": 33,
+    "endLine": 7,
+    "endCol": 35,
+    "nodeKind": "formal_parameters",
+    "inError": false
+  },
+  {
+    "queryId": "java/lambda",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "lambda",
+    "startLine": 7,
+    "startCol": 36,
+    "endLine": 7,
+    "endCol": 38,
+    "nodeKind": "->",
+    "inError": false
+  },
+  {
+    "queryId": "java/lambda",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "hole",
+    "form": "lambda",
+    "startLine": 7,
+    "startCol": 36,
+    "endLine": 7,
+    "endCol": 38,
+    "nodeKind": "->",
+    "inError": false
+  },
+  {
+    "queryId": "java/lambda",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "lambda",
+    "startLine": 7,
+    "startCol": 39,
+    "endLine": 7,
+    "endCol": 76,
+    "nodeKind": "object_creation_expression",
+    "inError": false
+  }
+]

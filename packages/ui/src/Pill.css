@@ -1,33 +1,29 @@
-/* 목업: design/src/ink/shared.css `.pill` — 클래스명·선언 그대로 */
+/* D182 — `Tag` 로 옮기는 중(호출처 5곳). 트랙 3색 면은 D179 가 이미 걷었고,
+   여기서는 종이·먹 리터럴을 새 토큰으로 옮기고 모서리를 준다. */
 .pill {
   display: inline-block;
-  padding: 2px 7px;
-  border: 1.5px solid var(--rule);
-  color: var(--ink);
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
-  font-weight: 700;
-  letter-spacing: .04em;
-  line-height: 1.4;
+  padding: 1px var(--s-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  font-weight: var(--fw-medium);
+  letter-spacing: .02em;
+  line-height: 1.5;
   white-space: nowrap;
 }
 
-.pill.t0 {
-  background: var(--t0);
-  color: var(--on-t0);
-}
-
-.pill.t1 {
-  background: var(--t1);
-  color: var(--on-t1);
-}
-
+.pill.t0,
+.pill.t1,
 .pill.t2 {
-  background: var(--t2);
-  color: var(--on-t2);
+  background: var(--surface-3);
+  color: var(--text);
 }
 
 .pill.ghost {
+  border-color: transparent;
   background: transparent;
-  color: var(--ink-soft);
+  color: var(--text-faint);
 }

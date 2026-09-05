@@ -27,10 +27,26 @@ export interface LineCompare {
 const reason = (code: ReasonCode, detail?: string): Reason =>
   detail === undefined ? { code } : { code, detail };
 
-/** 들여쓰기 폭. 탭은 2칸으로 센다 — 원본이 탭이고 답안이 공백일 때 폭만 다른 것으로 본다. */
-export function indentWidth(line: string): number {
+/**
+ * 들여쓰기가 **블록 경계**인 문법 (D152 ⓑ · v06 `b-t1-indent`). 파이썬은 한 칸이 어긋나면
+ * 다른 프로그램이라, 폭 차이를 사유로만 남기고 넘어가면 채점이 틀린 답을 맞다고 한다.
+ * 나머지 문법에서는 중괄호가 경계를 지므로 폭은 보기의 문제이고 지금 규칙이 맞다.
+ */
+const INDENT_IS_STRUCTURE = new Set(['python']);
+
+/** 그 문법에서 탭 하나가 공백 몇 칸인가. 파이썬은 PEP 8 을 따라 4다 (D152 ⓑ). */
+const tabWidthOf = (grammar?: string): number =>
+  (grammar !== undefined && INDENT_IS_STRUCTURE.has(grammar) ? 4 : 2);
+
+/**
+ * 들여쓰기 폭. 탭은 기본 2칸으로 센다 — 원본이 탭이고 답안이 공백일 때 폭만 다른 것으로 본다.
+ * 파이썬은 4칸이다: 탭 하나를 공백 넷으로 적은 답안이 **같은 깊이**여야 하기 때문이고,
+ * 2로 세면 탭 한 번이 공백 둘과 같아져 실제로 다른 깊이가 같다고 나온다.
+ */
+export function indentWidth(line: string, grammar?: string): number {
   const lead = /^[\t ]*/.exec(line)?.[0] ?? '';
-  return [...lead].reduce((n, c) => n + (c === '\t' ? 2 : 1), 0);
+  const tab = tabWidthOf(grammar);
+  return [...lead].reduce((n, c) => n + (c === '\t' ? tab : 1), 0);
 }
 
 /** 주석 전용 줄인가 — 04 §4.2 2단계. 언어별 접두는 셋이면 충분하다(`//` `#` `--`). */
@@ -90,7 +106,12 @@ export const tokenText = (line: string): string[] => meaningful(tokenize(line)).
  * `prot` 는 원본 블록에서 미리 만든 PROT 집합이다(`buildProt`). 거터에서도 같은 집합을
  * 쓴다 — 줄마다 다시 만들면 한 줄 0.2 ms 예산을 못 지킨다.
  */
-export function compareLine(o: string, u: string, prot: ReadonlySet<string>): LineCompare {
+export function compareLine(
+  o: string,
+  u: string,
+  prot: ReadonlySet<string>,
+  grammar?: string,
+): LineCompare {
   const reasons: Reason[] = [];
   const maps: [string, string][] = [];
   const none = { maps, astCandidate: false } as const;
@@ -127,8 +148,21 @@ export function compareLine(o: string, u: string, prot: ReadonlySet<string>): Li
     return { status: 'differ', reasons: [reason('BLANK_MISMATCH')], ...none };
   }
 
-  // 5 · 들여쓰기 — 사유만 남기고 계속한다.
-  if (indentWidth(os.text) !== indentWidth(us.text)) reasons.push(reason('INDENT'));
+  // 5 · 들여쓰기 — 사유만 남기고 계속한다. 다만 들여쓰기가 블록 경계인 문법에서는
+  //     **깊이가 다르면 다른 프로그램**이라 여기서 끝난다 (D152 ⓑ). 탭·공백은 그 전에
+  //     같은 자로 재므로(`indentWidth`) 「탭이냐 공백이냐」만 다른 답안은 여기 안 걸린다.
+  const oIndent = indentWidth(os.text, grammar);
+  const uIndent = indentWidth(us.text, grammar);
+  if (oIndent !== uIndent) {
+    if (grammar !== undefined && INDENT_IS_STRUCTURE.has(grammar)) {
+      return {
+        status: 'differ',
+        reasons: [...reasons, reason('INDENT', `${oIndent} ↔ ${uIndent}`)],
+        ...none,
+      };
+    }
+    reasons.push(reason('INDENT'));
+  }
 
   let a = os.text.trim();
   let b = us.text.trim();
@@ -249,13 +283,14 @@ export function evalLine(
   text: string,
   original: readonly string[],
   prot: ReadonlySet<string>,
+  grammar?: string,
 ): 'exact' | 'equiv' | 'differ' | '' {
   if (text.trim() === '') return '';
   let best: 'equiv' | 'differ' = 'differ';
   const from = Math.max(0, index - GUTTER_WINDOW);
   const to = Math.min(original.length - 1, index + GUTTER_WINDOW);
   for (let j = from; j <= to; j += 1) {
-    const r = compareLine(original[j] as string, text, prot);
+    const r = compareLine(original[j] as string, text, prot, grammar);
     if (r.status === 'exact') return 'exact';
     if (r.status === 'equiv' || r.status === 'pending') best = 'equiv';
   }

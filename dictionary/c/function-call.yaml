@@ -1,0 +1,155 @@
+schema: 1
+id: c/function-call
+# 1부 「문과 흐름」 (`docs/curriculum/c.md` §3 #12 · §0.6). 보편형은 `common/function-call`.
+# C 라서 다른 것 — 부르려면 컴파일러가 먼저 알아야 하고, 넘기는 것은 **값의 복사**다.
+universal: common/function-call
+name: { ko: 함수 부르기, en: Function call }
+token: "f(x)"
+grammars: [c]
+framework: null
+essential: true
+difficulty: 1
+prereq: [c/function-definition, cs/call-stack, cs/value-vs-reference]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "이름 뒤에 괄호를 붙이면 그 함수가 돈다. 괄호 안의 값은 복사되어 넘어간다."
+    en: "A name with parentheses runs that function; what is inside is copied across."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 괄호 {{pick.2|code}}{{pick.2|josa:이,가}} 붙어서 <b>부르는
+      자리</b>가 됩니다. 괄호 안의 값은 <b>복사</b>되어 넘어가요 — 함수 안에서 그 이름을 바꿔도 부른
+      쪽의 값은 그대로입니다. 원본을 바꾸게 하려면 값 대신 <b>자리</b>(주소)를 넘겨야 하고,
+      <code>scanf("%d", &amp;n)</code> 의 <code>&amp;</code> 가 그 이유예요. 그리고 부르기 전에 컴파일러가
+      그 이름을 <b>알고 있어야</b> 합니다 — <code>printf</code> 는 언어의 낱말이 아니라
+      <code>stdio.h</code> 가 알려 주는 이름이고, 그래서 파일 첫 줄에 <code>#include</code> 가 있습니다.
+    en: >-
+      On line {{site.line}}, {{pick.1|code}} with the parentheses {{pick.2|code}} becomes <b>a call</b>.
+      What is inside the parentheses is <b>copied</b> across — change that name inside the function and
+      the caller's value stays as it was. To let the function change the original you pass a
+      <b>place</b> (an address) instead of a value; that is why <code>scanf("%d", &amp;n)</code> has
+      its <code>&amp;</code>. And before the call the compiler must already <b>know</b> the name —
+      <code>printf</code> is not a language word but a name announced by <code>stdio.h</code>, which is
+      why the file starts with <code>#include</code>.
+  trace:
+    - ko: "{{pick.2|code}} 안의 값들이 먼저 계산되고 복사된다."
+      en: "The values inside {{pick.2|code}} are computed first and copied."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 새 자리를 받아 그 복사본으로 돈다."
+      en: "{{pick.1|code}} gets a fresh place and runs on those copies."
+    - ko: "돌려준 값 하나가 {{site.line}}행의 이 자리에 놓이고, 그 자리는 사라진다."
+      en: "The one returned value lands in this spot on line {{site.line}}, and the place vanishes."
+
+rule:
+  ko: "<b>부르기는 복사다.</b> 원본을 바꾸려면 자리를 넘기고, 부르기 전에 컴파일러가 이름을 알아야 한다."
+  en: "<b>A call copies.</b> Pass a place to change the original, and the compiler must know the name first."
+result:
+  label:
+    ko: "{{site.line}}행의 부르기"
+    en: "the call on line {{site.line}}"
+  value: "{{pick.1}}{{pick.2}}"
+  note:
+    ko: "괄호 안은 복사되어 간다"
+    en: "what is inside is copied"
+ok:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:이,가}} {{pick.2|code}}{{pick.2|josa:을,를}} 복사해 받고 돌아왔습니다.
+  en: >-
+    {{pick.1|code}} took a copy of {{pick.2|code}} and came back.
+payoff:
+  ko: >-
+    이걸 알면 「함수 안에서 바꿨는데 밖은 그대로다」가 풀립니다 — 복사본을 바꾼 거예요.
+  en: >-
+    This untangles “I changed it inside the function but outside it is unchanged” — a copy was
+    changed.
+bridge:
+  ko: >-
+    파이썬은 이름이 가리키는 객체를 넘겨 함수 안에서 목록을 고치면 밖도 바뀝니다. C 는 값을
+    복사해 넘겨서, 밖을 바꾸려면 주소를 손으로 넘겨야 해요.
+  en: >-
+    Python passes the object a name points at, so fixing a list inside a function changes it outside.
+    C copies the value, so changing the outside means passing an address by hand.
+misconceptions:
+  # c.md §3 #12·#17 · §9 #4 — 규격에서 나온 사실이고 빈도 자료는 없다.
+  - ko: "함수 안에서 매개변수를 바꾸면 부른 쪽도 바뀐다 — <b>복사본</b>이 바뀝니다. 원본을 바꾸려면 주소를 넘겨요."
+    en: "Changing a parameter inside the function changes the caller's value — <b>the copy</b> changes. Pass an address to change the original."
+  - ko: "<code>printf</code> 는 C 의 낱말이다 — <b>라이브러리의 이름</b>입니다. <code>stdio.h</code> 가 알려 주지 않으면 컴파일러는 모릅니다."
+    en: "<code>printf</code> is a C word — it is <b>a library name</b>. Without <code>stdio.h</code> announcing it, the compiler does not know it."
+  - ko: "인자는 왼쪽부터 차례로 계산된다 — 순서는 <b>규격이 안 정합니다</b>. <code>f(i++, i++)</code> 는 답이 없어요."
+    en: "Arguments are evaluated left to right — the order is <b>unspecified by the standard</b>. <code>f(i++, i++)</code> has no answer."
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 개념이 짚는 낱말은 함수 이름인데 그 글자는 사용처마다 다르다
+  (`printf`·`malloc`·`add`). 빈칸형은 첫 옵션이 `@hole` 원문이어야 하는데 원문이 하나로
+  안 정해진다. 「부르기」의 모양 자체(괄호)는 낱말이 아니라 구두점이라 고르기가 안 된다.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>복사되어 넘어가는 부분</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the part that is copied across</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 부르는 <b>함수의 이름</b>입니다. 이름은 안 넘어가요 — 넘어가는 것은 괄호 안입니다."
+          en: "{{pick.1|code}} is <b>the name of the function</b> being called. The name does not travel — what is inside the parentheses does."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 이름이냐 괄호 안이냐"
+            en: "The sharpest spot — the name or the parentheses"
+          code:
+            - "add(1, 2)   /* add 는 이름, 1 과 2 가 넘어간다 */"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 넘어가는 값 중 <b>첫째</b>입니다. 넘어가는 것은 그것만이 아니라 괄호 안 전부예요."
+          en: "{{pick.3|code}} is <b>the first</b> of the values passed. What travels is not only that one but everything inside the parentheses."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 하나냐 전부냐"
+            en: "The sharpest spot — one or all"
+          code:
+            - "add(1, 2)   /* 1 만이 아니라 (1, 2) */"
+
+why_gate:
+  q:
+    ko: "C 는 왜 함수에 값을 <b>복사해서</b> 넘길까요?"
+    en: "Why does C pass values to a function <b>by copying</b> them?"
+  choices:
+    - t:
+        ko: "함수가 자기 자리(스택 프레임)만 보고 돌 수 있어야 부르는 쪽과 얽히지 않고, 원본을 건드릴 일은 주소를 넘겨 명시하게 두었기 때문"
+        en: "Because a function should run looking only at its own place (stack frame) without entangling the caller, and touching the original is made explicit by passing an address"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 큰 구조체를 복사해 넘기면 무엇이 비싸지는지도 적어 보세요."
+        en: "That is the direction. Say what becomes expensive when a large struct is copied across."
+    - t:
+        ko: "복사가 참조보다 빨라서"
+        en: "Because copying is faster than referencing"
+      ok: false
+      fb:
+        ko: "큰 값은 복사가 더 느립니다. 이유는 속도가 아니라 얽힘을 끊는 것이에요."
+        en: "For large values copying is slower. The reason is cutting entanglement, not speed."
+    - t:
+        ko: "참조를 만들 줄 몰라서"
+        en: "Because references could not be made"
+      ok: false
+      fb:
+        ko: "주소가 곧 참조입니다. 있는데 기본으로 안 쓴 거예요."
+        en: "An address is a reference. It exists; it is just not the default."
+
+queries:
+  - { grammars: [c], file: ./function-call.scm }
+
+examples:
+  - code: 'puts("hi");                     /* 헤더가 알려 준 이름 */'
+    expect: { sites: 1, form: call, picks: { 1: "puts", 2: '("hi")', 3: '"hi"' } }
+  - code: "int r = add(1, 2);              /* r -> 3 (int) */"
+    expect: { sites: 1, form: call, picks: { 1: "add", 2: "(1, 2)", 3: "1" } }
+  - code: "tick();                         /* 넘기는 것 없음 */"
+    expect: { sites: 1, form: call, picks: { 1: "tick", 2: "()" } }
+  - code: "int add(int a, int b);          /* 알리기 — 부르지 않는다 */"
+    expect: none
+  - code: "size_t n = sizeof(x);           /* sizeof 는 함수가 아니다 */"
+    expect: none

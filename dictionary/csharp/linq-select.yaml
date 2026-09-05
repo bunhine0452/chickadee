@@ -1,0 +1,161 @@
+schema: 1
+id: csharp/linq-select
+universal: common/map-transform
+name: { ko: 항목마다 바꿔 새로 만들기, en: Select }
+token: "Select"
+grammars: [c_sharp]
+framework: null
+essential: true
+difficulty: 3
+prereq: [csharp/lambda, csharp/list]
+confusions: []
+dict:
+  one_liner:
+    ko: "항목마다 바꿔서 개수가 같은 새 모음을 내고, 그 모음은 목록이 아니다."
+    en: "Each item is transformed into a new sequence of the same length, not a list."
+  why:
+    ko: >-
+      {{site.line}}행은 개수를 <b>안 바꿉니다</b> — 하나에 하나씩 대응하는 새 모음이 나와요.
+      요점은 그 결과가 <b>목록이 아니라는 것</b>입니다. <code>Count</code>도 자리 번호로
+      꺼내기도 없어서, 그것들을 쓰려면 <code>ToList()</code>를 붙여 목록으로 만들어야 합니다.
+      이 한 단계를 빠뜨리는 것이 흔한 자리이고, 그 이유는 다음 판(지연 실행)이 답합니다.
+    en: >-
+      Line {{site.line}} <b>does not change the count</b>: one item in, one item out. The point
+      is that the result is <b>not a list</b>. There is no <code>Count</code> and no indexing,
+      so using either means adding <code>ToList()</code> to make one. Missing that step is
+      common, and the reason is answered by the next plate on deferred execution.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.2|code}}{{pick.2|josa:이,가}} 훑을 대상이 된다."
+      en: "{{pick.2|code}} on line {{site.line}} becomes what will be walked."
+    - ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 항목 하나를 다른 값 하나로 바꾼다."
+      en: "{{pick.3|code}} turns one item into one other value."
+    - ko: "개수가 같은 새 모음이 나오고 그것은 목록이 아니다."
+      en: "A new sequence of the same length comes out, and it is not a list."
+rule:
+  ko: "<b>개수는 그대로, 내용만 바뀐다.</b> 결과는 목록이 아니라 훑을 수 있는 모음이다."
+  en: "<b>Same count, new contents.</b> The result is a walkable sequence, not a list."
+ok:
+  ko: "{{pick.2|code}} 안의 항목마다 {{pick.3|code}}{{pick.3|josa:을,를}} 거친 모음이 나옵니다."
+  en: "Out comes a sequence where each item of {{pick.2|code}} has passed through {{pick.3|code}}."
+payoff:
+  ko: "이걸 알면 「결과에 Count 가 없다」가 풀립니다 — 목록이 아닙니다."
+  en: "This untangles “the result has no Count” — it is not a list."
+bridge:
+  ko: >-
+    파이썬의 <code>map</code>과 같습니다. 그쪽도 목록이 아니고 훑어야 값이 나와요 —
+    붙이는 이름만 다릅니다(<code>list()</code> 대 <code>ToList()</code>).
+  en: >-
+    Same as Python's <code>map</code>, which is also not a list and yields on walking.
+    Only the wrapper name differs (<code>list()</code> versus <code>ToList()</code>).
+misconceptions:
+  # 출처 — `csharp.md` §4 ㉚ · §9 ⑧.
+  - ko: "결과가 목록이다 — 아닙니다. <code>Count</code>도 자리 번호 꺼내기도 없어요."
+    en: "The result is a list — it is not: no <code>Count</code>, no indexing."
+  - ko: "개수가 줄 수 있다 — 안 줍니다. 줄이는 것은 고르는 쪽 일이에요."
+    en: "The count can shrink — it cannot; shrinking is the filtering step's job."
+  - ko: "그 자리에서 다 계산된다 — 훑을 때 하나씩 계산됩니다."
+    en: "It computes everything right there — it computes one at a time on the walk."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>항목 하나를 다른 값으로 바꾸는 것</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>what turns one item into another value</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.3
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>바꾸라는 이름</b>입니다. 어떻게 바꿀지는 괄호 안이에요."
+          en: "{{pick.1|code}} is the <b>name that says transform</b>. How to transform is in the brackets."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 방법이냐", en: "The sharpest spot — the name or the recipe" }
+          code:
+            - "xs.Select(x => x * 2)"
+            - "//         ^방법"
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 훑을 <b>대상</b>입니다. 바꾸는 방법은 괄호 안에 있어요."
+          en: "{{pick.2|code}} is <b>what gets walked</b>. The recipe is in the brackets."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 대상이냐 방법이냐", en: "The sharpest spot — the source or the recipe" }
+          code:
+            - "xs.Select(x => x * 2)"
+            - "// ^대상       ^방법"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 항목마다 바꿔 <b>개수가 같은</b> 모음을 냅니다."
+      en: "Choose what goes in the blank. Line {{site.line}} transforms each item, keeping <b>the same count</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "Select", mono: true }
+      - t: "Where"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>골라내는</b> 쪽이라 개수가 줍니다. 항목의 내용은 그대로예요."
+            en: "That <b>filters</b>, so the count shrinks and the items themselves are unchanged."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 개수냐 내용이냐", en: "The sharpest spot — count or contents" }
+            code:
+              - "xs.Select(x => x * 2)   // 개수 같음"
+              - "xs.Where(x => x > 0)    // 개수 줄음"
+      - t: "Count"
+        mono: true
+        diag:
+          t:
+            ko: "이건 모음이 아니라 <b>수 하나</b>를 냅니다. 그리고 그 자리에서 모음을 다 훑어요."
+            en: "That yields <b>one number</b>, not a sequence — and it walks the whole thing right there."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 모음이냐 수냐", en: "The sharpest spot — a sequence or a number" }
+            code:
+              - "xs.Select(f)     // 모음"
+              - "xs.Count()       // 수 하나"
+      - t: "ToList"
+        mono: true
+        diag:
+          t:
+            ko: "이건 바꾸지 않고 <b>목록으로 굳히는</b> 쪽입니다. 그 자리에서 다 계산돼요."
+            en: "That does no transforming and <b>freezes it into a list</b>, computing everything there."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 바꾸나 굳히나", en: "The sharpest spot — transform or freeze" }
+            code:
+              - "xs.Select(f)     // 계획"
+              - "xs.ToList()      // 지금 돈다"
+why_gate:
+  q:
+    ko: "이 연산은 왜 결과를 <b>목록으로</b> 안 낼까요?"
+    en: "Why does this step <b>not</b> hand back a list?"
+  choices:
+    - t:
+        ko: "다 만들지 않고 필요할 때 하나씩 내면, 앞부분만 쓰는 경우에 나머지를 아예 안 만들기 때문"
+        en: "Because yielding one at a time skips building the rest when only the front is used"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 대신 두 번 훑으면 무엇이 일어나는지도 적어 보세요."
+        en: "That is the direction. Add what happens when it is walked twice."
+    - t:
+        ko: "목록이 무거워서"
+        en: "Because lists are heavy"
+      ok: false
+      fb:
+        ko: "무게 문제가 아닙니다. <b>만들지 않는 것</b>과 <b>가볍게 만드는 것</b>은 다릅니다."
+        en: "Not weight: <b>not building</b> and <b>building cheaply</b> are different things."
+    - t:
+        ko: "목록으로 만들면 원본이 바뀌어서"
+        en: "Because making a list would change the original"
+      ok: false
+      fb:
+        ko: "원본은 어느 쪽이든 그대로입니다. 갈리는 것은 <b>언제 계산되나</b>예요."
+        en: "The original is untouched either way. What splits is <b>when it computes</b>."
+queries:
+  - { grammars: [c_sharp], file: ./linq-select.scm }
+examples:
+  - code: "class A { void F(List<int> xs) { var r = xs.Select(x => x * 2); } }"
+    expect: { sites: 1, form: select, hole: "Select", picks: { 1: "Select", 2: "xs", 3: "x => x * 2" } }
+  - code: "class A { void F(List<Item> items) { var r = items.Select(i => i.Name); } }"
+    expect: { sites: 1, form: select, picks: { 1: "Select", 2: "items", 3: "i => i.Name" } }
+  - code: "class A { void F(List<int> xs) { var r = xs.Where(x => x > 0); } }"
+    expect: none

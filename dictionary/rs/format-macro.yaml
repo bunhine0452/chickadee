@@ -1,0 +1,179 @@
+schema: 1
+id: rs/format-macro
+# 1부 (`rs.md` §3 · §0.4 가 「문법만 미리 보이고 개념은 1부에서」로 둔 자리). 보편형은
+# `common/string-interpolation`. Rust 에서 다시 배울 것은 문자열을 만드는 관용구가 **매크로**라는 것과
+# `{}`·`{:?}`·`{name}` 이 각각 다른 트레이트를 부른다는 것. 매크로 안은 토큰 수프라(rs.md §8 ①)
+# 쿼리는 문자열 리터럴 토큰만 잡는다.
+universal: common/string-interpolation
+name: { ko: 문장에 값 끼워 넣기, en: Putting values into text }
+token: "format!"
+grammars: [rust]
+framework: null
+essential: true
+difficulty: 2
+prereq: [rs/string-literal]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "느낌표 붙은 이름이 틀 문자열의 중괄호에 값을 끼운다. 중괄호 안의 표시가 값을 어떻게 적을지 정한다."
+    en: "A name with a bang fills a template's braces; the brace contents set the form."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.3|code}}{{pick.3|josa:은,는}} 함수가 아니라 <b>매크로</b>입니다 — 컴파일 때
+      {{pick.2|code}}{{pick.2|josa:을,를}} 읽어 중괄호 수와 인자 수가 맞는지 확인하고 코드를 만들어요. 그래서 인자가
+      모자라면 실행이 아니라 <b>컴파일</b>에서 멈춥니다. 중괄호 안의 표시가 값을 적는 법을 정합니다 —
+      `{}` 는 사람에게 보이는 꼴(`Display`), `{:?}` 는 개발자용 꼴(`Debug`)이라 <b>다른 트레이트</b>를
+      부르고, `{name}` 은 같은 이름의 변수를 바로 끼워요. 구조체를 `{}` 로 찍으려면 `Display` 를
+      직접 써야 하고, 그것이 「왜 `{:?}` 만 되나」의 답입니다.
+    en: >-
+      {{pick.1|code}}{{pick.3|code}} on line {{site.line}} is not a function but a <b>macro</b> — at compile
+      time it reads {{pick.2|code}}, checks that the braces and the arguments line up, and generates code.
+      So a missing argument stops the <b>build</b>, not the run. What sits inside the braces decides how a
+      value is written — `{}` is the human form (`Display`), `{:?}` the developer form (`Debug`), two
+      <b>different traits</b>; `{name}` drops in the variable of that name. To print a struct with `{}` you
+      write `Display` yourself, which is the answer to “why does only `{:?}` work.”
+  trace:
+    - ko: "컴파일러가 {{pick.2|code}} 의 중괄호를 세고 인자 수와 맞춘다."
+      en: "The compiler counts the braces in {{pick.2|code}} and matches them to the arguments."
+    - ko: "값마다 중괄호 안의 표시대로 글자로 바뀐다 — {} 는 Display, {:?} 는 Debug."
+      en: "Each value becomes text as its braces say — {} through Display, {:?} through Debug."
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 그 글자를 만들거나 찍는다."
+      en: "{{pick.1|code}} on line {{site.line}} builds or prints that text."
+
+rule:
+  ko: "<b>틀은 컴파일 때 검사된다.</b> {} 는 Display, {:?} 는 Debug, {name} 은 변수 그대로."
+  en: "<b>The template is checked at compile time.</b> {} is Display, {:?} is Debug, {name} is the variable itself."
+result:
+  label:
+    ko: "{{site.line}}행의 틀"
+    en: "the template on line {{site.line}}"
+  value: "{{pick.2}}"
+  note:
+    ko: "중괄호마다 값 하나"
+    en: "one value per pair of braces"
+ok:
+  ko: "{{pick.2|code}} 의 중괄호에 값이 차례로 끼워져 글자 하나가 됩니다."
+  en: "Values are dropped into the braces of {{pick.2|code}} in order, making one piece of text."
+payoff:
+  ko: "이걸 알면 「왜 구조체는 `{}` 로 안 찍히나」(E0277)가 풀립니다 — `Display` 가 없어서고 `{:?}` 는 `Debug` 예요."
+  en: "This untangles “why will a struct not print with `{}`” (E0277) — no `Display`; `{:?}` uses `Debug`."
+bridge:
+  ko: "파이썬 f-문자열은 실행 중에 끼웁니다. Rust 는 <b>컴파일 때</b> 틀을 검사해서 인자 수가 틀리면 프로그램이 안 만들어져요."
+  en: "A Python f-string fills in at run time. Rust checks the template <b>at compile time</b>, so a mismatched argument count never builds."
+misconceptions:
+  - ko: "느낌표는 장식이다 — 매크로 표시입니다. 함수라면 못 하는 컴파일 시 검사가 여기서 돼요."
+    en: "The bang is decoration — it marks a macro. Compile-time checks a function could not do happen here."
+  - ko: "`{}` 와 `{:?}` 는 같은 것이다 — 다른 트레이트를 부릅니다. 구조체는 대개 `{:?}` 만 돼요."
+    en: "`{}` and `{:?}` are the same — they call different traits. A struct usually accepts only `{:?}`."
+  - ko: "`println!` 은 `String` 을 돌려준다 — 찍기만 하고 `()` 를 줍니다. 글자를 돌려받으려면 `format!` 이에요."
+    en: "`println!` returns a `String` — it prints and gives `()`. To get text back, use `format!`."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>값이 끼워질 틀</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the template the values go into</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 매크로의 <b>이름</b>입니다. 무엇을 만들지는 뒤의 틀이 정해요."
+          en: "{{pick.1|code}} is the macro's <b>name</b>. What gets built is decided by the template after it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 틀이냐", en: "The sharpest spot — the name or the template" }
+          code:
+            - "format!(\"{} items\", n)"
+            - "// ^이름   ^틀"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>매크로 표시</b>입니다. 틀은 그 뒤 괄호 안의 글자예요."
+          en: "{{pick.3|code}} is the <b>macro mark</b>. The template is the text inside the parentheses after it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 표시냐 틀이냐", en: "The sharpest spot — the mark or the template" }
+          code:
+            - "println!(\"{name}\")"
+            - "//     ^표시 ^틀"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 값을 끼운 글자를 <b>돌려받습니다</b>."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>gets back</b> text with values filled in."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "format", mono: true }
+      - t: "println"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>화면에 찍고</b> `()` 를 줍니다. 글자를 돌려받을 수 없어요."
+            en: "That <b>prints</b> and gives `()`. You cannot get the text back."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 돌려주나 찍나", en: "The sharpest spot — return or print" }
+            code:
+              - "let s = format!(\"{n}\");   // String"
+              - "println!(\"{n}\");          // ()"
+      - t: "print"
+        mono: true
+        diag:
+          t:
+            ko: "이것도 <b>찍기</b>입니다 — 줄바꿈만 없어요. 돌려주는 값은 `()` 예요."
+            en: "That <b>prints</b> too — just without a newline. It gives `()`."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 돌려주나 찍나", en: "The sharpest spot — return or print" }
+            code:
+              - "print!(\"{n}\");   // 찍는다"
+              - "format!(\"{n}\")   // 돌려준다"
+      - t: "write"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>어딘가에 써넣는</b> 매크로라 첫 인자가 받는 곳이고, 결과는 `Result` 예요."
+            en: "That <b>writes into something</b> — its first argument is the destination and the result is a `Result`."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 어디에 쓰나", en: "The sharpest spot — where it writes" }
+            code:
+              - "write!(out, \"{n}\")?;   // out 에"
+              - "format!(\"{n}\")         // 새 String"
+
+why_gate:
+  q:
+    ko: "Rust 는 왜 문자열 끼워 넣기를 함수가 아니라 <b>매크로</b>로 두었을까요?"
+    en: "Why is text formatting in Rust a <b>macro</b> rather than a function?"
+  choices:
+    - t:
+        ko: "틀의 중괄호 수와 인자 수·타입을 컴파일 때 맞춰 보려고 — 함수는 틀을 실행 중에야 읽는다"
+        en: "So the braces in the template can be matched against the arguments at compile time — a function reads the template only at run time"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 인자를 하나 빼면 어느 단계에서 무엇이 나는지도 적어 보세요."
+        en: "That is the direction. Say what happens, and at which stage, when one argument is removed."
+    - t:
+        ko: "함수로는 여러 인자를 못 받아서"
+        en: "Because a function cannot take several arguments"
+      ok: false
+      fb:
+        ko: "받습니다. 못 받는 것은 <b>개수가 정해지지 않은</b> 인자예요 — 그것도 이유의 절반이에요."
+        en: "It can. What it cannot take is a <b>variable number</b> of them — which is half the reason."
+    - t:
+        ko: "매크로가 더 빨라서"
+        en: "Because a macro is faster"
+      ok: false
+      fb:
+        ko: "속도는 같은 코드로 됩니다. 검사 시점이 다른 거예요."
+        en: "The generated code runs at the same speed. The difference is when it is checked."
+
+queries:
+  - { grammars: [rust], file: ./format-macro.scm }
+
+examples:
+  - code: "fn f() { let s = format!(\"{} items\", n); }     // s -> String"
+    expect: { sites: 1, form: format, hole: "format", picks: { 1: "format", 2: "\"{} items\"", 3: "!" } }
+  - code: "fn f() { println!(\"{name}\"); }                 // 변수 이름을 그대로 끼운다"
+    expect: { sites: 1, form: format, picks: { 1: "println", 2: "\"{name}\"", 3: "!" } }
+  - code: "fn f() { let v = vec![1]; }                    // 매크로지만 틀이 없다"
+    expect: none

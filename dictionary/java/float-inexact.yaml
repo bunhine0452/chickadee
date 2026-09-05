@@ -1,0 +1,158 @@
+schema: 1
+id: java/float-inexact
+# 0부 축 B. 보편형은 `common/float-literal` 이다 — 근사값이 되는 기계는 IEEE-754 하나라
+# 세 언어가 같은 값을 낸다. 자바에서 다시 배울 것은 정확한 소수의 대안뿐이다.
+universal: common/float-literal
+name: { ko: 소수가 안 떨어진다, en: Fractions do not land }
+token: "0.1"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cs/floating-point, cs/binary-representation]
+confusions: [java/floating-type, java/comparison]
+dict:
+  one_liner:
+    ko: "2진수로 못 적는 소수가 있어 0.1 과 0.2 를 더해도 0.3 이 아니다."
+    en: "Some fractions have no exact base-two form, so 0.1 and 0.2 do not make 0.3."
+  why:
+    ko: >-
+      실수는 <b>2진 분수의 합</b>으로 저장됩니다. 10진수 <code>0.1</code> 은 그 합으로 정확히
+      못 적어요 — 10진수로 <code>1/3</code> 을 못 적는 것과 같은 일입니다. 그래서 저장되는 값은
+      <code>0.1</code> 이 아니라 그것에 가장 가까운 값이고, 둘을 더하면
+      <code>0.30000000000000004</code> 가 나옵니다. 여기서 <b>소수를 같음 기호로 견주면</b>
+      조건이 안 맞아요. 돈이라면 1원이 사라집니다 — 그 자리에 <code>BigDecimal</code> 이 있는
+      이유가 이겁니다.
+    en: >-
+      A decimal number is stored as a <b>sum of binary fractions</b>. Base ten <code>0.1</code>
+      has no exact form there — the same way base ten cannot write <code>1/3</code>. What is
+      stored is the nearest value to <code>0.1</code>, and adding two of them gives
+      <code>0.30000000000000004</code>. So <b>comparing fractions with the equality sign</b>
+      fails. With money a won goes missing — that is why <code>BigDecimal</code> exists.
+  trace:
+    - ko: "{{site.line}}행의 두 값은 이미 그 자체로 근사값이다."
+      en: "The two values on line {{site.line}} are already approximations."
+    - ko: "{{pick.2|code}}{{pick.2|josa:을,를}} 담을 때 가장 가까운 값이 대신 들어갔다."
+      en: "When {{pick.2|code}} was stored, the nearest representable value went in."
+    - ko: "그 둘로 셈을 하니 결과도 10진수로 딱 떨어지지 않는다."
+      en: "Computing with those two gives a result that does not land in base ten either."
+rule:
+  ko: "<b>실수는 근사값이다.</b> 소수는 같음 기호로 견주지 않고 차이의 크기로 본다."
+  en: "<b>Decimals are approximations.</b> Compare them by the size of the gap, not by equality."
+result:
+  label: { ko: "{{site.line}}행의 실수 셈", en: "the decimal arithmetic on line {{site.line}}" }
+  value: "{{pick.2}} {{pick.1}} {{pick.3}}"
+  note: { ko: "결과는 10진수로 안 떨어진다", en: "the result does not land in base ten" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}} 둘 다 근사값이었습니다."
+  en: "Both {{pick.2|code}} and {{pick.3|code}} were already approximations."
+payoff:
+  ko: "이걸 알면 「합계가 0.30000000000000004 로 찍힌다」가 풀립니다 — 계산이 새는 게 아닙니다."
+  en: "This untangles “the total prints as 0.30000000000000004” — nothing leaked."
+bridge:
+  ko: "파이썬·JS 도 같은 기계라 같은 값이 나옵니다. 다른 것은 정확한 소수의 대안뿐입니다."
+  en: "Python and JS run the same machine and print the same value. Only the exact-decimal tool differs."
+misconceptions:
+  - ko: "자바의 셈이 새는 것이다 — 기계가 같은 언어면 다 같습니다. 2진수로 못 적는 값이라서예요."
+    en: "Java's arithmetic leaks — every language on this machine prints the same. The value has no base-two form."
+  - ko: "자릿수를 늘리면 정확해진다 — 넓은 타입도 근사값입니다. 자릿수만 늘어납니다."
+    en: "More digits fixes it — the wider type is still an approximation, only with more digits."
+  - ko: "0.3 이 정답이다 — 어느 언어도 그 값을 안 냅니다. 사람의 산수에서만 맞습니다."
+    en: "0.3 is the answer — no language gives it. It is right only in hand arithmetic."
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 개념의 정답은 코드에 적힌 글자가 아니라 **계산된 값**이고, 셈 기호를
+  구멍으로 삼으면 한 글자라 빈칸형이 생성 단계에서 떨어진다(`MIN_HOLE`). 값을 묻는 판은
+  기초 문항(`docs/program/fundamentals.md` §2 `value`)의 몫이다.
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>근사값끼리를 잇는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that joins two approximations</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>재료</b>입니다. 이 값 자체가 이미 근사값이지만, 결과를 만드는 것은 가운데 기호예요."
+          en: "{{pick.2|code}} is an <b>input</b>. It is already an approximation, but the symbol between makes the result."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 재료냐 셈이냐", en: "The sharpest spot — an input or the arithmetic" }
+          code:
+            - "0.1;          // 그 자체로 근사값"
+            - "0.1 + 0.2;    // 근사값 둘로 만든 값"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 다른 쪽 <b>재료</b>입니다. 둘을 잇는 것이 가운데 기호입니다."
+          en: "{{pick.3|code}} is the other <b>input</b>. The symbol between joins them."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 재료냐 잇는 것이냐", en: "The sharpest spot — an input or the joining" }
+          code:
+            - "0.2;"
+            - "0.1 + 0.2;"
+meaning:
+  - q:
+      ko: "{{site.line}}행의 결과는 왜 10진수로 딱 떨어지지 않을까요?"
+      en: "Why does the result on line {{site.line}} not land exactly in base ten?"
+    options:
+      - t:
+          ko: "두 값이 2진 분수로 정확히 안 적혀서, 저장된 것이 이미 가장 가까운 값이기 때문"
+          en: "Because neither value has an exact base-two form, so what was stored is already the nearest value"
+      - t:
+          ko: "자바의 셈이 반올림을 한 자리 잘못해서"
+          en: "Because Java's arithmetic rounds one digit off"
+        diag:
+          t:
+            ko: "셈은 규격대로입니다. 어긋난 것은 셈이 아니라 <b>저장</b>이에요 — 값이 들어가는 순간 이미 가장 가까운 값으로 바뀝니다."
+            en: "The arithmetic follows the standard. What shifted is <b>storage</b>, not arithmetic — the value became the nearest one as it went in."
+      - t:
+          ko: "칸 수가 모자라서 — 더 넓은 타입을 쓰면 0.3 이 나온다"
+          en: "The slots ran out — the wider type would give 0.3"
+        diag:
+          t:
+            ko: "넓혀도 안 나옵니다. 자릿수가 늘어날 뿐, <code>0.1</code> 은 어떤 자릿수에서도 2진 분수로 안 떨어져요."
+            en: "Widening does not help. It only adds digits; <code>0.1</code> has no exact base-two form at any width."
+      - t:
+          ko: "화면에 찍을 때 글자로 바꾸면서 어긋나서"
+          en: "Because printing turns it into text and drifts"
+        diag:
+          t:
+            ko: "찍기는 저장된 값을 그대로 보여 준 겁니다. 값 자체가 <code>0.3</code> 이 아니에요 — 견주어 봐도 안 같습니다."
+            en: "Printing showed exactly what was stored. The value itself is not <code>0.3</code> — a comparison says so too."
+why_gate:
+  q:
+    ko: "{{site.line}}행처럼 계산한 소수를 왜 <b>같음 기호로 견주면 안 될까요</b>?"
+    en: "Why should a computed fraction like the one on line {{site.line}} <b>not be compared with equality</b>?"
+  choices:
+    - t:
+        ko: "저장된 값이 사람이 적은 값과 마지막 자리에서 다를 수 있고, 같음 기호는 그 한 자리도 다르다고 보기 때문"
+        en: "Because the stored value can differ in the last digit from what a person wrote, and equality counts that digit"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그럼 무엇으로 견줄지도 한 줄로 적어 보세요."
+        en: "That is the direction. Add a line on what to compare with instead."
+    - t:
+        ko: "실수 견주기가 느려서"
+        en: "Because comparing decimals is slow"
+      ok: false
+      fb:
+        ko: "속도 문제가 아닙니다. 값이 다르다는 것이 문제예요."
+        en: "Speed is not it. The problem is that the values differ."
+    - t:
+        ko: "자바가 소수 견주기를 막아 놓아서"
+        en: "Because Java forbids comparing decimals"
+      ok: false
+      fb:
+        ko: "막지 않습니다. 컴파일도 되고 돌기도 합니다 — 조건이 안 맞을 뿐이에요."
+        en: "It is not forbidden. It compiles and runs — the condition simply does not hold."
+queries:
+  - { grammars: [java], file: ./float-inexact.scm }
+examples:
+  - code: "class A { void f() { double s = 0.1 + 0.2; } }   // s -> 0.30000000000000004 (double)"
+    expect: { sites: 1, form: floatop, picks: { 1: "+", 2: "0.1", 3: "0.2" } }
+  - code: "class A { void f() { double t = 1.5 * 3; } }     // t -> 4.5 (double)"
+    expect: { sites: 1, form: floatop, picks: { 1: "*", 2: "1.5", 3: "3" } }
+  - code: "class A { void f() { double d = 0.1; } }         // d -> 0.1 에 가장 가까운 값 (double)"
+    expect: { sites: 1, form: floatlit, picks: { 2: "d", 3: "0.1" } }
+  - code: "class A { void f() { int n = 1 + 2; } }          // n -> 3 (int)"
+    expect: none

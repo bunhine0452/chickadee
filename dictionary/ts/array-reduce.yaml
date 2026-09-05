@@ -1,0 +1,276 @@
+schema: 1
+id: ts/array-reduce
+universal: null
+name: { ko: 접어서 하나로, en: Folding with reduce }
+token: "reduce"
+grammars: [typescript, tsx, javascript, vue]
+framework: null
+essential: true
+difficulty: 3
+prereq: [ts/arrow-function, ts/array-basics]
+confusions: [ts/array-map-immutable, ts/array-filter, ts/array-foreach]
+
+dict:
+  one_liner:
+    ko: "여럿을 하나로 접는다. 넘기는 함수의 첫 인자는 항목이 아니라 <b>지금까지의 답</b>이다."
+    en: "Many folded into one. The passed function's first argument is the answer so far."
+  why:
+    ko: >-
+      {{site.line}}행은 {{pick.1|code}} 의 항목을 하나씩 보면서 <b>답을 들고 다닙니다.</b>
+      {{pick.3|code}}{{pick.3|josa:은,는}} 항목 하나만 받는 것이 아니라 그 답도 같이 받아요 —
+      그래서 인자가 둘입니다.
+    en: >-
+      Line {{site.line}} walks the items of {{pick.1|code}} while <b>carrying an answer along</b>.
+      {{pick.3|code}} does not take just an item; it takes that answer too — which is why it has two
+      parameters.
+  trace:
+    - ko: "{{site.line}}행이 답 하나를 들고 {{pick.1|code}} 의 첫 항목으로 간다."
+      en: "Line {{site.line}} takes one answer and steps to the first item of {{pick.1|code}}."
+    - ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 답과 항목으로 <b>새 답</b>을 만든다."
+      en: "{{pick.3|code}} makes a <b>new answer</b> out of the answer and the item."
+    - ko: "마지막 항목까지 그것을 되풀이하고, 남은 답 하나가 {{pick.2|code}} 의 값이 된다."
+      en: "That repeats to the last item, and the one answer left becomes the value of {{pick.2|code}}."
+
+rule:
+  ko: >-
+    <b>초깃값을 안 주면 첫 항목이 답의 자리를 맡는다.</b> 그러면 걷는 항목이 하나 줄고, 빈 배열에서는
+    그 자리에서 멈춘다.
+  en: >-
+    <b>Without a seed the first item takes the answer's place.</b> One fewer item is walked, and on
+    an empty array it stops right there.
+result:
+  label:
+    ko: "{{site.line}}행이 내는 것"
+    en: "What line {{site.line}} yields"
+  value: "{{pick.1}} → 값 하나"
+  note:
+    ko: "여럿에서 하나로"
+    en: "many into one"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} 새 배열을 안 냅니다. 배열이 아니라 <b>값 하나</b>가 나와요 —
+    수든 묶음이든 다시 배열이든, 접은 결과 하나입니다.
+  en: >-
+    {{pick.2|code}} yields no new array. What comes out is <b>one value</b> — a number, a bundle,
+    even another array, but one folded result.
+payoff:
+  ko: >-
+    AI 가 합계·개수·그룹핑을 거의 다 이 하나로 짭니다. 인자 둘의 뜻을 알면 그런 줄이 무엇을 세는지
+    한 번에 읽혀요.
+  en: >-
+    Sums, counts and groupings are nearly all written with this one call. Knowing what the two
+    parameters mean, such a line reads in one pass.
+bridge:
+  ko: >-
+    같은 합계를 <code>for…of</code> 로 쌓아 올릴 수도 있습니다 — 한쪽은 답을 접고 한쪽은 답을 쌓아요.
+  en: >-
+    The same sum can be piled up with <code>for…of</code> — one folds the answer, the other stacks it.
+misconceptions:
+  - ko: "첫 인자가 항목이다 — 지금까지의 답입니다. 항목은 둘째예요."
+    en: "The first parameter is the item — it is the answer so far. The item comes second."
+  - ko: "초깃값은 안 줘도 같다 — 빈 배열에서 갈립니다."
+    en: "The seed is optional and harmless — on an empty array the two part ways."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>접는 함수</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the folding function</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.3
+    diag:
+      pick.1:
+        t:
+          ko: >-
+            {{pick.1|code}}{{pick.1|josa:은,는}} 접히는 <b>대상</b>입니다. 접는 일을 하는 것은
+            괄호 안으로 넘긴 함수예요.
+          en: >-
+            {{pick.1|code}} is <b>what gets folded</b>. The folding is done by the function handed
+            into the parentheses.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 접히는 것과 접는 것"
+            en: "The sharpest spot — what is folded or what folds"
+          code:
+            - "xs.reduce((a, b) => a + b, 0)   // xs 가 접힌다"
+            - "xs.reduce((a, b) => a + b, 0)   // 화살표가 접는다"
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 부르는 이름입니다. 어떻게 접을지는 인자로 넘어와요.
+          en: >-
+            {{pick.2|code}} is the name being called. How to fold arrives as an argument.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 이름과 넘긴 함수"
+            en: "The sharpest spot — the name or the passed function"
+          code:
+            - "xs.reduce(fn, 0)   // reduce 는 이름"
+            - "xs.reduce(fn, 0)   // fn 이 접는다"
+
+meaning:
+  - q:
+      ko: "<code>[].reduce((a, b) => a + b)</code> 는 어떻게 될까요?"
+      en: "What does <code>[].reduce((a, b) => a + b)</code> do?"
+    hint:
+      ko: "초깃값이 없습니다. 그러면 답의 첫 자리는 누가 맡나요."
+      en: "There is no seed. Who then takes the answer's first place?"
+    options:
+      - t:
+          ko: "그 자리에서 멈춘다 — 맡을 첫 항목이 없다"
+          en: "It stops right there — no first item to take the place"
+      - t:
+          ko: "<code>0</code> 이 나온다"
+          en: "It yields <code>0</code>"
+        diag:
+          t:
+            ko: >-
+              <code>0</code> 은 아무도 안 정해 줍니다. 초깃값은 <b>적어야</b> 생기고, 안 적으면
+              첫 항목이 그 자리인데 빈 배열에는 첫 항목이 없어요.
+            en: >-
+              Nobody supplies <code>0</code>. A seed exists only when <b>written</b>; without one the
+              first item takes the place, and an empty array has none.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 초깃값이 있나"
+              en: "The sharpest spot — is there a seed"
+            code:
+              - "[].reduce((a, b) => a + b)      // 멈춘다"
+              - "[].reduce((a, b) => a + b, 0)   // 0"
+      - t:
+          ko: "<code>undefined</code> 가 나온다"
+          en: "It yields <code>undefined</code>"
+        diag:
+          t:
+            ko: >-
+              값을 못 낼 때 조용히 <code>undefined</code> 를 내는 메서드도 있지만 이것은 아닙니다.
+              이 자리는 소리를 내요.
+            en: >-
+              Some methods quietly yield <code>undefined</code> when they cannot answer; this is not
+              one of them. This spot speaks up.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 조용한가 소리 내는가"
+              en: "The sharpest spot — quiet or loud"
+            code:
+              - "[].find(f)          // undefined"
+              - "[].reduce(f)        // 멈춘다"
+      - t:
+          ko: "빈 배열이 나온다"
+          en: "It yields an empty array"
+        diag:
+          t:
+            ko: >-
+              배열을 내는 것은 새 배열을 만드는 쪽입니다. 여기서 나오는 것은 접은 결과 하나예요.
+            en: >-
+              Yielding an array is what the array-making side does. What comes out here is one
+              folded result.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 배열인가 값 하나인가"
+              en: "The sharpest spot — an array or one value"
+            code:
+              - "[].map(f)      // []"
+              - "[].reduce(f)   // 멈춘다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 여럿을 <b>값 하나</b>로 만듭니다."
+      en: "Choose what goes in the blank. Line {{site.line}} turns many into <b>one value</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "reduce", mono: true }
+      - t: "map"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>map</code> 은 항목마다 하나씩 바꿔 <b>같은 길이의 배열</b>을 냅니다. 값 하나로
+              줄이지 않아요.
+            en: >-
+              <code>map</code> changes each item and yields <b>an array of the same length</b>. It
+              does not shrink to one value.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 길이가 남는가"
+              en: "The sharpest spot — does the length survive"
+            code:
+              - "[1,2,3].map(n => n * 2)         // [2,4,6]"
+              - "[1,2,3].reduce((a,b) => a+b, 0) // 6"
+      - t: "filter"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>filter</code> 는 고르기만 합니다. 남는 것은 여전히 배열이라 값 하나가 안 돼요.
+            en: >-
+              <code>filter</code> only picks. What is left is still an array, never one value.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 고르는가 접는가"
+              en: "The sharpest spot — picking or folding"
+            code:
+              - "[1,2,3].filter(n => n > 1)      // [2,3]"
+              - "[1,2,3].reduce((a,b) => a+b, 0) // 6"
+      - t: "forEach"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>forEach</code> 는 값을 안 냅니다 — 늘 <code>undefined</code> 예요. 답을 받으려면
+              바깥 변수에 쌓아야 합니다.
+            en: >-
+              <code>forEach</code> yields nothing — always <code>undefined</code>. To get an answer
+              you must pile it into an outside variable.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 값을 내는가"
+              en: "The sharpest spot — does it yield a value"
+            code:
+              - "const s = [1,2].forEach(f)   // undefined"
+              - "const s = [1,2].reduce(f, 0) // 값"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 반복문 대신 접기를 골랐을까요?"
+    en: "Why does line {{site.line}} fold instead of looping?"
+  choices:
+    - t:
+        ko: "답을 바깥 변수에 쌓지 않고 식 하나로 끝내려고"
+        en: "To finish in one expression instead of piling the answer into an outside variable"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 초깃값이 있는지, 없다면 빈 배열에서 어떻게 되는지도 적어 보세요."
+        en: "That is the direction. Note whether there is a seed, and what an empty array does without one."
+    - t:
+        ko: "반복문보다 빠르니까"
+        en: "Because it is faster than a loop"
+      ok: false
+      fb:
+        ko: "속도는 갈리지 않습니다. 갈리는 것은 답이 어디에 사느냐예요."
+        en: "Speed does not part ways. What parts ways is where the answer lives."
+    - t:
+        ko: "원본 배열을 고치려고"
+        en: "To change the original array"
+      ok: false
+      fb:
+        ko: "원본은 그대로입니다. 고치는 것은 밀어 넣기 쪽이에요."
+        en: "The original is untouched. Changing it is what pushing does."
+
+queries:
+  - { grammars: [typescript, tsx, javascript, vue], file: ./array-reduce.scm }
+
+examples:
+  - code: "const total = xs.reduce((sum, n) => sum + n, 0)"
+    expect:
+      sites: 1
+      form: fold
+      hole: "reduce"
+      picks: { 1: "xs", 2: "reduce", 3: "(sum, n) => sum + n" }
+  - code: "const byId = rows.reduce((acc, r) => ({ ...acc, [r.id]: r }), {})"
+    expect: { sites: 1, form: fold, picks: { 1: "rows", 2: "reduce" } }
+  - code: "const doubled = xs.map((n) => n * 2)"
+    expect: none

@@ -1,0 +1,90 @@
+schema: 1
+id: proto/cors
+universal: null
+name: { ko: 다른 출처에서 부를 수 있는가, en: Cross-origin resource sharing }
+token: null
+grammars: []
+framework: null
+track_default: t0
+essential: false
+difficulty: 3
+prereq: []
+confusions: []
+dict:
+  one_liner:
+    ko: "다른 주소에서 온 화면의 요청을 받아 줄지, 서버가 머리글로 허락한다."
+    en: "The server says by header whether a page from another address may call."
+  why:
+    ko: >-
+      막는 것은 서버가 아니라 <b>브라우저</b>입니다. 화면을 내려 준 주소와 부르려는 주소가
+      다르면 브라우저가 답을 받아 놓고도 코드에 <b>안 넘겨 줍니다</b> — 서버 기록에는 요청이
+      멀쩡히 찍혀 있는데 화면에서는 실패로 보이는 이유예요. 풀려면 서버가 「이 출처는 괜찮다」는
+      머리글을 답에 붙여야 합니다. 그리고 개발할 때 이 문제가 <b>안 보이는</b> 경우가 있어요 —
+      개발 서버가 요청을 자기 주소로 받아 대신 전달하면 브라우저 눈에는 <b>같은 출처</b>가 되어,
+      서버 설정이 틀려 있어도 그대로 돌아갑니다. 배포하면 그때 처음 걸립니다.
+    en: >-
+      The blocker is not the server but the <b>browser</b>. When the address that served the page
+      differs from the address being called, the browser receives the answer and <b>refuses to hand
+      it to the code</b> — which is why the server log shows a clean request while the page reports a
+      failure. To open it, the server must attach a header saying this origin is fine. And during
+      development the problem can be <b>invisible</b>: if the dev server takes the request at its own
+      address and forwards it, the browser sees <b>one origin</b>, so a mistaken server setting still
+      works. It first shows up on deploy.
+  trace: []
+rule:
+  ko: "<b>막는 쪽은 브라우저다.</b> 서버는 허락을 머리글로 말할 뿐이고, 개발 서버가 대신 받으면 물음 자체가 사라진다."
+  en: "<b>The browser is what blocks.</b> The server only states permission in a header, and a forwarding dev server removes the question."
+ok:
+  ko: >-
+    서버가 이 출처를 허락하는 머리글을 붙이면 브라우저가 답을 코드에 넘깁니다.
+  en: >-
+    When the server attaches a header allowing this origin, the browser hands the answer to the code.
+misconceptions:
+  - ko: "서버가 요청을 거절한 것이다 — 서버는 받아서 답했습니다. 답을 안 넘긴 쪽이 브라우저예요."
+    en: "The server refused the request — it received and answered. The browser is what withheld the answer."
+  - ko: "화면 코드를 고치면 풀린다 — 허락은 <b>서버가 붙이는 머리글</b>이라 부르는 쪽에서 못 만듭니다."
+    en: "Fixing the page code solves it — permission is a header <b>the server attaches</b>; the caller cannot make it."
+  - ko: "개발할 때 잘 되니 설정이 맞다 — 개발 서버가 대신 받아 주면 같은 출처가 되어 물음이 사라집니다."
+    en: "It works in development, so the setting is right — a forwarding dev server makes it one origin and the question disappears."
+  - ko: "이것이 서버를 지켜 준다 — 지켜지는 것은 <b>브라우저 안의 사용자</b>입니다. 브라우저가 아닌 도구는 그대로 부릅니다."
+    en: "This protects the server — it protects <b>the user inside a browser</b>. Tools that are not browsers call it regardless."
+evidence: ["CorsRegistry", "addCorsMappings", "allowedOriginPatterns", "allowedOrigins", "allowCredentials", "CrossOrigin"]
+meaning:
+  - q:
+      ko: "{{site.line}}행의 설정이 어긋나 있는데도 개발 중에는 화면이 <b>잘 돌았다</b>면, 왜일까요?"
+      en: "If the setting on line {{site.line}} is off yet the page <b>worked</b> in development, why?"
+    hint:
+      ko: "개발 서버가 요청을 <b>자기 주소로</b> 받아 대신 전달하기도 합니다."
+      en: "A dev server can take the request <b>at its own address</b> and forward it."
+    options:
+      - t: { ko: "개발 서버가 대신 받아 같은 출처가 되어 이 물음이 안 생겼다", en: "The dev server took it, making one origin, so the question never arose" }
+      - t: { ko: "개발 중에는 브라우저가 이 검사를 안 한다", en: "Browsers skip this check during development" }
+        diag:
+          t:
+            ko: "브라우저는 개발인지 아닌지를 모릅니다. 같은 규칙을 늘 적용해요 — 달라진 것은 <b>주소</b>지 브라우저가 아닙니다."
+            en: "A browser does not know it is development. The same rule always applies — what changed is the <b>address</b>, not the browser."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 규칙이 쉬어 주나", en: "The sharpest spot — does the rule ever rest" }
+            code:
+              - "브라우저: 늘 같은 규칙"
+              - "달라진 것: 부르는 주소"
+      - t: { ko: "서버가 개발 환경에서는 모든 출처를 허락한다", en: "The server allows every origin in development" }
+        diag:
+          t:
+            ko: "그렇게 적어 두었다면 그것대로지만, 여기서는 설정이 <b>어긋난 채</b>였습니다. 요청이 서버 설정에 닿지도 않은 것이 답이에요."
+            en: "That would be one way to write it, but here the setting was <b>off</b>. The point is the request never depended on it."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 허락했나 안 물었나", en: "The sharpest spot — allowed, or never asked" }
+            code:
+              - "허락: 서버가 머리글을 붙임"
+              - "안 물음: 같은 출처라 검사가 없음"
+      - t: { ko: "브라우저가 답을 저장해 두었다가 그것을 썼다", en: "The browser had the answer stored and used that" }
+        diag:
+          t:
+            ko: "저장해 둔 답에도 같은 규칙이 걸립니다. 출처가 다르면 저장돼 있어도 코드에 안 넘어가요."
+            en: "A stored answer is held to the same rule. If the origin differs, being stored does not get it to the code."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 저장이 규칙을 비켜 가나", en: "The sharpest spot — does storage bypass the rule" }
+            code:
+              - "저장 여부와 무관"
+              - "출처가 같은가만 본다"

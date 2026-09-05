@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { KeyboardEvent } from 'react';
 import { t, type MessageKey } from '@chickadee/i18n';
-import { cx, Dee, RichText } from '@chickadee/ui';
+import { cx, RichText } from '@chickadee/ui';
 import type { InkLayer } from '@chickadee/ui';
 import type { DictLayer } from '@chickadee/store-sql';
 
@@ -150,7 +150,6 @@ export function ReprintLadder({
   return (
     <section ref={ref} className="reprint" aria-label={t('ladder.label')}>
       <div className="ld-head">
-        <Dee ly={lyTo} motion="hang" sticker />
         <div>
           <h3>{t('ladder.heading')}</h3>
           <RichText as="p" html={t('ladder.note')} />

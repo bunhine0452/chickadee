@@ -7,7 +7,7 @@
 import { describe, expect, test } from 'vitest';
 
 import { draftT2Appeal, pickRelation, PROMOTE_MIN, promoteToSec, t2PatternKey } from './t2-appeal.js';
-import { gradeDirection, gradeFlow, gradePicks, toT2Detail } from './t2.js';
+import { gradeDirection, gradeFlow, gradePicks, gradeRole, toT2Detail } from './t2.js';
 import { cappedNote, foldedNote, T2_ENGINE_VERSION, unchangedNote, type T2Payload } from './t2-types.js';
 
 const PAGE = 'app/cart/page.tsx';
@@ -306,6 +306,172 @@ describe('의존성 방향 (04 §8.3)', () => {
     expect(r.wrong).toEqual([]);
     expect(r.capped).toBeNull();
     expect(r.verdict).toBe('repeat');
+  });
+});
+
+// ───────── 리포 지도 두 종 (04 §8.5 · D142) ─────────
+
+const APP = 'src/app/';
+const CLI = 'src/cli/';
+const FEAT = 'src/features/cart/';
+const CORE = 'src/core/';
+const GEN = 'src/gen/';
+const LIB = 'src/lib/';
+
+/**
+ * 노드가 파일이 아니라 **폴더**다 (04 §7.5). 정답지 모양은 책임 배치와 똑같아서
+ * `gradePicks` 가 한 줄도 안 고치고 그대로 돈다 — 이 표가 그 사실의 증거다.
+ *
+ * 문 둘(`core`) · 문처럼 생긴 곳 하나(`sec`) · 나머지 셋(`trap`). `src/lib/` 가 들어오는
+ * 화살표 셋을 받는 창고라 이 문제의 대표 오답이다.
+ */
+const ENTRY: T2Payload = {
+  track: 't2',
+  kind: 'entry',
+  q: '이 리포에서 밖에서 처음 들어오는 문은 어느 폴더인가요?',
+  hint: '지도에서 골라 보세요. 여럿일 수 있습니다.',
+  bands: CART.bands,
+  files: [
+    { p: APP, r: 0, folded: 4 },
+    { p: CLI, r: 0, folded: 2 },
+    { p: FEAT, r: 1, folded: 5 },
+    { p: CORE, r: 2, folded: 3 },
+    { p: GEN, r: 3, folded: 30 },
+    { p: LIB, r: 3, folded: 6 },
+  ],
+  edges: [
+    [APP, FEAT, 'static'],
+    [APP, LIB, 'static'],
+    [CLI, CORE, 'static'],
+    [FEAT, CORE, 'static'],
+    [FEAT, LIB, 'static'],
+    [CORE, LIB, 'static'],
+    [CORE, GEN, 'type'],
+  ],
+  core: {
+    [APP]: ['문', '«page.tsx» — 밖에서 부르는 파일이 여기 있고 들어오는 화살표가 없습니다.'],
+    [CLI]: ['문', '들어오는 화살표가 없고 1곳을 가져다 씁니다.'],
+  },
+  sec: {
+    [FEAT]: ['문처럼 생긴 곳', '문 이름은 «index.ts» 인데 리포 안에서 1곳이 이 폴더를 가져다 씁니다.'],
+  },
+  trap: {
+    [CORE]: '2곳이 이 폴더를 가져다 씁니다. 많이 쓰이는 것과 처음 들어오는 것은 다릅니다.',
+    [GEN]: '1곳이 이 폴더를 가져다 씁니다. 많이 쓰이는 것과 처음 들어오는 것은 다릅니다.',
+    [LIB]: '3곳이 이 폴더를 가져다 씁니다. 많이 쓰이는 것과 처음 들어오는 것은 다릅니다.',
+  },
+  hints: [
+    '문은 2곳입니다.',
+    '들어오는 화살표가 없는 폴더를 찾으세요. 많이 쓰이는 폴더는 문이 아닙니다.',
+    '가장 많이 쓰이는 곳은 «src/lib/» 입니다 — 그건 창고입니다.',
+  ],
+};
+
+describe('진입점 (04 §8.5) — 채점 코드가 0줄이다', () => {
+  test('`gradePicks` 가 그대로 돈다 — 문 둘을 고르면 100 · advance', () => {
+    const r = gradePicks({ kind: 'entry', payload: ENTRY, selected: [APP, CLI], hints: 0 });
+    expect(r.kind).toBe('entry');
+    expect(r.pct).toBe(100);
+    expect(r.verdict).toBe('advance');
+    expect(r.found).toEqual([APP, CLI]);
+    expect(r.missed).toEqual([]);
+    expect(r.wrong).toEqual([]);
+    expect(r.capped).toBeNull();
+  });
+
+  test('문처럼 생긴 곳은 골라도 감점이 없다 — bonus 로 간다', () => {
+    const r = gradePicks({ kind: 'entry', payload: ENTRY, selected: [APP, CLI, FEAT], hints: 0 });
+    expect(r.pct).toBe(100);
+    expect(r.verdict).toBe('advance');
+    expect(r.bonus).toEqual([FEAT]);
+    expect(r.wrong).toEqual([]);
+  });
+
+  test('가장 많이 쓰이는 창고를 고르면 wrong 이고 사유가 trap 문장이다', () => {
+    const r = gradePicks({ kind: 'entry', payload: ENTRY, selected: [LIB], hints: 2 });
+    expect(r.pct).toBe(0);
+    expect(r.verdict).toBe('repeat');
+    expect(r.wrong).toEqual([LIB]);
+    expect(r.missed).toEqual([APP, CLI]);
+    expect(r.rows.find((x) => x.tier === 'wrong')?.note).toBe(ENTRY.trap[LIB]);
+    expect(r.hints).toBe(2);
+  });
+
+  test('폴더 노드여도 §7.4 접힘 사유가 뜨지 않는다 — 여기서는 접힌 폴더가 곧 보기다', () => {
+    const r = gradePicks({ kind: 'entry', payload: ENTRY, selected: [LIB, GEN], hints: 0 });
+    expect(r.rows.filter((x) => x.note === foldedNote())).toEqual([]);
+  });
+
+  test('지도를 통째로 고르면 100 이지만 wrong 상한이 진급을 막는다', () => {
+    const all = ENTRY.files.map((f) => f.p);
+    const r = gradePicks({ kind: 'entry', payload: ENTRY, selected: all, hints: 0 });
+    expect(r.pct).toBe(100);
+    expect(r.verdict).toBe('repeat-soft');
+    expect(r.capped).toBe(cappedNote());
+  });
+});
+
+// ───────── 폴더의 역할 (04 §8.5) ─────────
+
+const ROLE: T2Payload = {
+  ...ENTRY,
+  kind: 'role',
+  q: '«src/core/» 폴더는 왜 있나요?',
+  hint: '지도에는 이 폴더가 빠져 있습니다. 네 층 중 어디에 놓을지 고르세요.',
+  core: {},
+  sec: {},
+  trap: {},
+  files: ENTRY.files.filter((f) => f.p !== CORE),
+  role: { folder: CORE, answer: 2 },
+};
+
+describe('폴더의 역할 (04 §8.5)', () => {
+  test('맞히면 100 · advance 이고 결과 줄은 하나다', () => {
+    const r = gradeRole({ payload: ROLE, pick: 2, hints: 0 });
+    expect(r.kind).toBe('role');
+    expect(r.pct).toBe(100);
+    expect(r.verdict).toBe('advance');
+    expect(r.found).toEqual([CORE]);
+    expect(r.missed).toEqual([]);
+    expect(r.rows).toEqual([
+      { path: CORE, tier: 'found', stat: '동작 · 통신', note: '이 폴더는 «동작 · 통신» 층입니다.' },
+    ]);
+  });
+
+  test('틀리면 0 · repeat 이고 고른 보기가 결과 줄에 남는다', () => {
+    const r = gradeRole({ payload: ROLE, pick: 0, hints: 1 });
+    expect(r.pct).toBe(0);
+    expect(r.verdict).toBe('repeat');
+    expect(r.missed).toEqual([CORE]);
+    expect(r.rows[0]?.tier).toBe('missed');
+    expect(r.rows[0]?.stat).toBe('화면');
+    expect(r.hints).toBe(1);
+  });
+
+  test('안 고르면 고른 보기가 없다', () => {
+    const r = gradeRole({ payload: ROLE, pick: null, hints: 0 });
+    expect(r.rows[0]?.stat).toBeNull();
+    expect(r.pct).toBe(0);
+  });
+
+  test('4지선다라 wrong 이 없고 상한도 걸리지 않는다', () => {
+    for (const pick of [0, 1, 2, 3]) {
+      const r = gradeRole({ payload: ROLE, pick, hints: 0 });
+      expect(r.wrong).toEqual([]);
+      expect(r.bonus).toEqual([]);
+      expect(r.capped).toBeNull();
+    }
+  });
+
+  test('role 정답지가 없는 카드는 무엇을 골라도 0 이다', () => {
+    for (const pick of [0, 1, 2, 3, null]) {
+      expect(gradeRole({ payload: ENTRY, pick, hints: 0 }).pct).toBe(0);
+    }
+  });
+
+  test('같은 입력 두 번 → deep-equal (04 §9 결정성)', () => {
+    const input = { payload: ROLE, pick: 2, hints: 0 };
+    expect(gradeRole(input)).toEqual(gradeRole(input));
   });
 });
 

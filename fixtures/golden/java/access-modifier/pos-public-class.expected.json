@@ -1,0 +1,54 @@
+[
+  {
+    "queryId": "java/access-modifier",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "site",
+    "form": "class",
+    "startLine": 3,
+    "startCol": 0,
+    "endLine": 7,
+    "endCol": 1,
+    "nodeKind": "class_declaration",
+    "inError": false
+  },
+  {
+    "queryId": "java/access-modifier",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "pick.1",
+    "form": "class",
+    "startLine": 3,
+    "startCol": 0,
+    "endLine": 3,
+    "endCol": 6,
+    "nodeKind": "public",
+    "inError": false
+  },
+  {
+    "queryId": "java/access-modifier",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "pick.2",
+    "form": "class",
+    "startLine": 3,
+    "startCol": 7,
+    "endLine": 3,
+    "endCol": 12,
+    "nodeKind": "class",
+    "inError": false
+  },
+  {
+    "queryId": "java/access-modifier",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "pick.3",
+    "form": "class",
+    "startLine": 3,
+    "startCol": 13,
+    "endLine": 3,
+    "endCol": 25,
+    "nodeKind": "identifier",
+    "inError": false
+  }
+]

@@ -1,0 +1,18 @@
+# 작은 문제 하나 (D186 ⑧). 지문은 우리가 썼고 케이스의 답은 reference.py 가 낸다.
+schema: 1
+id: sum-two
+topic: io
+statement:
+  ko: "한 줄에 정수 두 개가 공백으로 주어집니다. 두 수의 합을 출력하세요."
+  en: "One line holds two integers separated by a space. Print their sum."
+needs: [common/integer-literal, common/arithmetic, cs/type-conversion]
+langs: [py, ts, java]
+cases:
+  - stdin: "3 4\n"
+    stdout: "7\n"
+  - stdin: "-7 2\n"
+    stdout: "-5\n"
+  - stdin: "0 0\n"
+    stdout: "0\n"
+  - stdin: "1000000 1000000\n"
+    stdout: "2000000\n"

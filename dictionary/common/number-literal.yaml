@@ -1,6 +1,14 @@
 schema: 1
 id: common/number-literal
 universal: null
+# **쪼개졌다 (D187 ④).** 정수와 실수는 담기는 방식도 넘칠 때의 행동도 다른데(`cs/integer-overflow`
+# 대 `cs/floating-point`) 보편형이 하나라 D4 전이가 그 둘을 한 겹으로 쌓았다. 새 참조는
+# `common/integer-literal` · `common/float-literal` 을 쓴다.
+#
+# **지우지 않는다.** 개념 id 는 원장 `concept` 행의 키이고 겹이 거기 쌓인다 — 지우면 이미
+# 배운 사람의 겹이 갈 곳을 잃는다. 기존 참조(`ts/number-literal` 의 `universal`)는 그대로 돌고,
+# 이 개념도 그대로 로드된다. 바뀌는 것은 **새로 걸 때 무엇을 가리키나** 하나다.
+superseded_by: [common/integer-literal, common/float-literal]
 name: { ko: 숫자 값, en: "Number value" }
 token: null
 grammars: []

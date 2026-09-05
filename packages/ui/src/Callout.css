@@ -1,0 +1,54 @@
+/* D182 — 한 문단짜리 알림. 아이콘·이모지 없이 **제목 글자**가 종류를 말한다
+   (정본 §6 — 색만으로 뜻을 나르지 않는다). 왼쪽 3px 선 하나가 눈에 걸리는 신호다. */
+.callout {
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border-strong);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  padding: var(--s-3) var(--s-4);
+  color: var(--text);
+}
+
+.callout > .callout-title {
+  margin: 0 0 var(--s-1);
+  font-size: var(--fs-2);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: .01em;
+}
+
+.callout > p {
+  margin: 0;
+  max-width: var(--measure);
+  font-size: var(--fs-3);
+  line-height: var(--lh-body);
+  color: var(--text-muted);
+}
+
+.callout.ok {
+  border-color: transparent;
+  border-left-color: var(--ok);
+  background: var(--ok-bg);
+}
+.callout.ok > .callout-title { color: var(--ok) }
+
+.callout.bad {
+  border-color: transparent;
+  border-left-color: var(--bad);
+  background: var(--bad-bg);
+}
+.callout.bad > .callout-title { color: var(--bad) }
+
+.callout.warn {
+  border-color: transparent;
+  border-left-color: var(--warn);
+  background: var(--warn-bg);
+}
+.callout.warn > .callout-title { color: var(--warn) }
+
+.callout.info {
+  border-color: transparent;
+  border-left-color: var(--info);
+  background: var(--info-bg);
+}
+.callout.info > .callout-title { color: var(--info) }

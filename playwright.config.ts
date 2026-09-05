@@ -30,7 +30,7 @@ export default defineConfig({
   snapshotPathTemplate: 'tests/visual/__screenshots__/linux/{projectName}/{arg}{ext}',
   use: {
     baseURL: `http://127.0.0.1:${PORT}`,
-    // 05 「열린 질문」 6 — 최소 창 1000×680. 게이트는 그 최소에서 잰다.
+    // 최소 창 720×600 (D182 — 반쪽화면이 깨지면 안 된다). 폭 게이트가 720~2560 을 훑는다.
     viewport: { width: 1360, height: 860 },
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',

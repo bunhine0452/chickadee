@@ -1,0 +1,306 @@
+schema: 1
+id: py/list-comprehension
+universal: common/map-transform
+name: { ko: 항목마다 바꿔 새로 만들기, en: Comprehension }
+token: "[x for"
+grammars: [python]
+framework: null
+essential: true
+difficulty: 3
+prereq: [py/for-in, py/list-literal]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "항목마다 식 하나를 돌려 새 묶음을 만든다. 원래 것은 그대로 남는다."
+    en: "Runs one expression over every item and builds a new group. The original stays."
+  why:
+    ko: >-
+      <b>읽는 순서와 도는 순서가 다릅니다.</b> {{site.line}}행에서 눈에 먼저 들어오는 것은
+      {{pick.2|code}} 이지만, 실제로는 {{pick.3|code}}{{pick.3|josa:이,가}} 항목을 하나 받은
+      <b>뒤에야</b> 그 식이 돕니다.
+    en: >-
+      <b>Reading order and running order differ.</b> What the eye meets first on line {{site.line}}
+      is {{pick.2|code}}, but that expression runs only <b>after</b> {{pick.3|code}} has taken one
+      item.
+  trace:
+    - ko: "{{site.line}}행에서 오른쪽 묶음이 항목을 하나 내놓는다."
+      en: "On line {{site.line}}, the group on the right yields one item."
+    - ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 그 항목을 가리킨다."
+      en: "{{pick.3|code}} points at that item."
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 그 항목으로 계산되어 새 묶음에 하나 쌓인다."
+      en: "{{pick.2|code}} is computed from it and one result is added to the new group."
+
+rule:
+  ko: "<b>결과 식이 앞에 적히고 뒤늦게 돈다.</b> 새 묶음이 나오고 원래 것은 안 바뀐다."
+  en: "<b>The result expression is written first and runs last.</b> A new group comes out; the original is untouched."
+result:
+  label:
+    ko: "{{site.line}}행이 만든 새 묶음"
+    en: "the new group made on line {{site.line}}"
+  value: "항목마다 계산한 {{pick.2}}"
+  note:
+    ko: "원래 묶음은 그대로"
+    en: "the original group is unchanged"
+ok:
+  ko: >-
+    항목마다 {{pick.2|code}}{{pick.2|josa:을,를}} 계산한 <b>새 묶음</b>이 나왔습니다. 원래 묶음은
+    한 칸도 안 바뀌었어요.
+  en: >-
+    A <b>new group</b> came out, holding {{pick.2|code}} computed for each item. The original group
+    did not change by one slot.
+payoff:
+  ko: >-
+    이걸 알면 세 줄짜리 되풀이가 한 줄로 접힙니다 — 빈 묶음을 만들고, 훑고, 하나씩 붙이던 셋이
+    여기서는 한 줄이고 <b>중간 이름이 안 생겨요.</b>
+  en: >-
+    This folds a three-line loop into one — making an empty group, walking, attaching one at a time
+    becomes a single line with <b>no intermediate name</b>.
+bridge:
+  ko: >-
+    <code>py/list-append</code> 는 반대쪽입니다 — 있던 것을 고치고 새것을 안 만듭니다. 원래 것을
+    남겨야 하면 이쪽, 이미 가리키던 데서도 바뀌어야 하면 그쪽이에요.
+  en: >-
+    <code>py/list-append</code> is the other side — it edits and makes nothing new. Use this one when
+    the original must survive, that one when other holders must see the change.
+misconceptions:
+  - ko: >-
+      앞의 식이 먼저 돈다 — <b>뒤의 훑기가 먼저</b>입니다. 항목이 없으면 앞의 식은 한 번도 안 돌아요.
+    en: >-
+      The expression in front runs first — the <b>walking behind it runs first</b>. With no items the
+      front expression never runs at all.
+  - ko: >-
+      원래 묶음이 바뀐다 — <b>새 묶음</b>이 따로 나옵니다. 원래 것은 그대로 있고, 그것을 안 담으면
+      새것이 그대로 버려져요.
+    en: >-
+      The original group changes — a <b>new group</b> comes out instead. The original stays, and if
+      you keep nothing the new one is simply dropped.
+  - ko: >-
+      대괄호를 괄호로 바꿔도 같다 — 괄호로 감싸면 목록이 아니라 <b>그때그때 하나씩</b> 내주는 것이
+      됩니다. 한 번 훑고 나면 비어 있어요.
+    en: >-
+      Swapping the brackets for parentheses changes nothing — parentheses give something that yields
+      <b>one item at a time</b>. Walk it once and it is spent.
+  # 걸러내기는 이 문법의 `if` 절이 겸한다 — `.filter()` 메서드가 파이썬에 없다 (py.md §3).
+  - ko: >-
+      걸러내려면 다른 문법이 필요하다 — 같은 괄호 안에 조건을 하나 더 적으면 됩니다. 파이썬에는
+      걸러내는 메서드가 <b>따로 없어요</b>.
+    en: >-
+      Filtering needs another form — one more condition inside the same brackets does it. Python has
+      <b>no separate filtering method</b>.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>먼저 도는 쪽을 여는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that opens the part which runs first</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} <b>결과 식</b>입니다. 눈에 먼저 들어오지만 항목을 받은
+            뒤에야 돌기 때문에, 도는 순서로는 마지막이에요.
+          en: >-
+            {{pick.2|code}} is <b>the result expression</b>. The eye meets it first, but it runs only
+            after an item has arrived — last in running order.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 읽는 순서와 도는 순서"
+            en: "The sharpest spot — reading order and running order"
+          code:
+            - "[r.name for r in rows]"
+            - "#  ③ 계산    ① 훑기 ② 받기"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} <b>항목을 받는 이름</b>입니다. 받는 일은 훑기가 시작된
+            뒤에 일어나고, 그 훑기를 여는 낱말이 그 앞에 있어요.
+          en: >-
+            {{pick.3|code}} is <b>the name that receives an item</b>. Receiving happens once walking
+            has begun, and the word that opens the walking sits before it.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 받는 이름과 훑기"
+            en: "The sharpest spot — the receiving name and the walking"
+          code:
+            - "r                       # 이름 하나"
+            - "[r.name for r in rows]  # 항목 수만큼"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행의 오른쪽 묶음이 비어 있으면 {{pick.2|code}}{{pick.2|josa:은,는}} 몇 번 계산될까요?"
+      en: "If the group on the right of line {{site.line}} is empty, how often is {{pick.2|code}} computed?"
+    hint:
+      ko: "무엇이 <b>먼저</b> 도는지 떠올려 봅니다."
+      en: "Recall which part runs <b>first</b>."
+    options:
+      - t:
+          ko: "한 번도 안 된다 — 빈 묶음이 하나 나온다"
+          en: "Not once — an empty group comes out"
+      - t:
+          ko: "한 번 계산되고 그 값 하나가 담긴다"
+          en: "It is computed once and that one value is kept"
+        diag:
+          t:
+            ko: >-
+              앞에 적혀 있어서 한 번은 돌 것 같지만, 그 식은 <b>항목이 있어야</b> 돕니다. 항목이 없으면
+              받을 것이 없어서 한 번도 안 돌아요.
+            en: >-
+              Being written in front makes it look like it runs once, but that expression needs
+              <b>an item</b>. With none, there is nothing to receive and it never runs.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 적힌 자리와 도는 조건"
+              en: "The sharpest spot — where it is written and when it runs"
+            code:
+              - "[1 for x in []]     # []"
+              - "[1 for x in [0]]    # [1]"
+      - t:
+          ko: "빈 묶음이라며 멈춘다"
+          en: "It stops, saying the group is empty"
+        diag:
+          t:
+            ko: >-
+              빈 묶음은 <b>정상</b>입니다. 훑을 것이 0개인 것과 훑을 묶음이 없는 것은 다른 일이고,
+              멈추는 것은 뒤쪽이에요.
+            en: >-
+              An empty group is <b>fine</b>. Zero items is not the same as no group at all; only the
+              latter stops.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 비어 있음과 없음"
+              en: "The sharpest spot — empty and absent"
+            code:
+              - "[x for x in []]       # []"
+              - "[x for x in None]     # TypeError"
+      - t:
+          ko: "없음이 하나 담긴 묶음이 나온다"
+          en: "A group holding one absence comes out"
+        diag:
+          t:
+            ko: >-
+              담을 것이 없으면 <b>아무것도 안 담습니다.</b> 항목 수만큼만 쌓이므로, 0개면 결과도
+              0개예요.
+            en: >-
+              With nothing to add, <b>nothing is added</b>. Results pile up once per item, so zero
+              items gives zero results.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 항목 수만큼만"
+              en: "The sharpest spot — one result per item"
+            code:
+              - "len([x for x in []])     # 0"
+              - "len([x for x in [1,2]])  # 2"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 오른쪽 묶음의 항목을 <b>하나씩</b> {{pick.3|code}}에 받습니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} takes items of the group on the right
+        <b>one at a time</b> into {{pick.3|code}}.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "for", mono: true }
+      - t: "while"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              그 낱말은 이 괄호 안에 <b>못 옵니다.</b> 여기 올 수 있는 것은 훑기와 걸러내기 둘뿐이고,
+              조건만 되풀이하는 문법은 자리가 없어요.
+            en: >-
+              That word <b>cannot appear</b> inside these brackets. Only walking and filtering fit
+              here; a form that just repeats on a condition has no place.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 괄호 안에 올 수 있는 것"
+              en: "The sharpest spot — what may appear inside"
+            code:
+              - "[x for x in xs]"
+              - "[x while x in xs]   # SyntaxError"
+      - t: "if"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              그 낱말도 이 괄호 안에 오지만 <b>걸러내는</b> 자리입니다. 걸러내려면 받을 이름이 이미
+              있어야 하고, 그 이름을 만드는 것은 다른 낱말이에요.
+            en: >-
+              That word does belong inside, but in the <b>filtering</b> slot. Filtering needs a name
+              that already holds an item, and another word makes that name.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 받기와 걸러내기"
+              en: "The sharpest spot — receiving and filtering"
+            code:
+              - "[x for x in xs if x.ok]"
+              - "[x if x.ok]           # SyntaxError"
+      - t: "each"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              파이썬에 그런 낱말은 <b>없습니다.</b> 다른 언어의 메서드 이름이고, 여기서는 문법이 안
+              맞아 그 줄이 성립하지 않아요.
+            en: >-
+              Python has no such word. It is another language's method name, and the line does not
+              hold together here.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 있는 낱말과 없는 낱말"
+              en: "The sharpest spot — a word that exists and one that does not"
+            code:
+              - "[x for x in xs]        # 파이썬"
+              - "xs.map(x => x)         # 다른 언어"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 되풀이 세 줄 대신 한 줄로 적었을까요?"
+    en: "Why is line {{site.line}} one line instead of a three-line loop?"
+  choices:
+    - t:
+        ko: "만드는 것이 새 묶음 하나뿐이라 — 중간 이름이 없으면 읽는 사람이 딴 데를 안 본다"
+        en: "Because only one new group is made — with no intermediate name the reader looks nowhere else"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 세 줄로 풀어 쓰면 어떤 이름이 하나 더 생기는지 적어 보세요."
+        en: "That is the direction. Write out the three-line version and name the extra name it needs."
+    - t:
+        ko: "한 줄이 더 빨라서"
+        en: "Because one line is faster"
+      ok: false
+      fb:
+        ko: >-
+          빠를 수도 있지만 재 봐야 압니다. 그리고 이 줄에서 바뀐 것은 속도가 아니라 <b>읽는 사람이
+          쫓아야 할 이름의 수</b>예요.
+        en: >-
+          It may be, but only a measurement says so. What changed here is not speed but <b>how many
+          names the reader has to follow</b>.
+    - t:
+        ko: "파이썬은 되풀이 세 줄을 못 써서"
+        en: "Because Python cannot write a three-line loop"
+      ok: false
+      fb:
+        ko: "쓸 수 있습니다. 둘 다 되고, 원래 묶음을 고칠지 새로 만들지가 갈리는 자리예요."
+        en: "It can. Both work; what differs is whether the original group is edited or a new one made."
+
+queries:
+  - { grammars: [python], file: ./list-comprehension.scm }
+
+examples:
+  - code: "names = [r.name for r in rows]"
+    expect: { sites: 1, form: list, hole: "for", picks: { 1: "for", 2: "r.name", 3: "r" } }
+  - code: "kept = [r for r in rows if r.ok]"
+    expect: { sites: 1, form: list, hole: "for", picks: { 1: "for", 2: "r", 3: "r", 4: "if r.ok" } }
+  - code: "byid = {r.id: r for r in rows}"
+    expect: { sites: 1, form: dict, hole: "for", picks: { 1: "for", 2: "r.id: r", 3: "r" } }
+  - code: "lazy = (r.name for r in rows)"
+    expect: { sites: 1, form: lazy, hole: "for", picks: { 1: "for", 2: "r.name", 3: "r" } }
+  # 되풀이문의 `for` 는 `for_statement` 라 노드가 다르다 — `py/for-in` 의 자리다.
+  - code: "for r in rows:\n    send(r)"
+    expect: none

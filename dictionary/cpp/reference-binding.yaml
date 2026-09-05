@@ -1,0 +1,221 @@
+schema: 1
+id: cpp/reference-binding
+# 0부 §0.1 #13, 신규. `common/` 에 대응이 없다 — 파이썬·자바에서 「이름 둘이 한 값」은
+# **선택이 없는 사실**이고 C++ 에서는 줄마다 고르는 것이다. 전이하면 틀린 것을 옳다고
+# 하게 된다 (§6 의 `reference-parameter` 와 같은 이유 · D4).
+universal: null
+name: { ko: 이름 둘이 한 값, en: Reference binding }
+token: "&"
+grammars: [cpp]
+framework: null
+essential: true
+difficulty: 3
+prereq: [cpp/variable-declaration, cs/value-vs-reference, cs/aliasing]
+confusions: []
+dict:
+  one_liner:
+    ko: "선언에 붙은 이 글자는 새 칸을 안 만든다. 그 이름은 오른쪽 값의 두 번째 이름이다."
+    en: "In a declaration this symbol claims no new room: the name becomes a second name."
+  why:
+    ko: >-
+      {{site.line}}행은 <b>칸을 안 만듭니다</b>. {{pick.2|code}}{{pick.2|josa:은,는}}
+      {{pick.3|code}} 의 두 번째 이름이 되고, 어느 쪽으로 고쳐도 같은 칸이 바뀝니다.
+      여기서 학습자가 가장 많이 미끄러지는 이유는 <b>같은 글자가 자리에 따라 뜻이 다르기</b>
+      때문이에요 — 선언에 붙으면 「두 번째 이름」이고, 식에 붙으면 「주소를 얻는다」입니다.
+      그리고 한 번 붙은 참조는 <b>다른 값으로 못 옮깁니다</b>. 나중에 넣는 것처럼 보이는
+      줄은 참조를 옮기는 것이 아니라 <b>가리키던 칸의 값을 바꾸는</b> 줄이에요.
+    en: >-
+      Line {{site.line}} <b>claims no room</b>. {{pick.2|code}} becomes a second name for
+      {{pick.3|code}}, and editing either one changes the same slot. What trips learners here is
+      that <b>the same symbol means different things in different places</b>: in a declaration it
+      is “a second name”, in an expression it is “take the address”. And once bound, a reference
+      <b>cannot be moved to another value</b>. A later line that looks like putting is not moving
+      the reference; it is <b>changing the value in the slot it names</b>.
+  trace:
+    - ko: "{{site.line}}행은 {{pick.3|code}} 의 칸을 그대로 둔다."
+      en: "Line {{site.line}} leaves the slot of {{pick.3|code}} where it is."
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 그 칸의 두 번째 이름이 된다."
+      en: "{{pick.2|code}} becomes a second name for that slot."
+    - ko: "어느 이름으로 고쳐도 같은 칸이 바뀐다."
+      en: "Editing through either name changes the same slot."
+rule:
+  ko: "<b>선언의 이 글자는 칸을 안 만든다.</b> 이름이 하나 더 붙을 뿐이고, 붙은 뒤에는 못 옮긴다."
+  en: "<b>In a declaration this symbol claims no room.</b> One more name is added, and it cannot move."
+result:
+  label: { ko: "{{site.line}}행이 만든 것", en: "what line {{site.line}} made" }
+  value: "{{pick.2}} -> {{pick.3}}"
+  note: { ko: "칸은 하나, 이름은 둘", en: "one slot, two names" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:은,는}} 같은 칸의 두 이름입니다."
+  en: "{{pick.2|code}} and {{pick.3|code}} are two names for one slot."
+payoff:
+  ko: >-
+    이걸 알면 「안 건드린 이름이 왜 바뀌었지」가 풀립니다 — 같은 칸이었어요.
+  en: >-
+    This untangles “a name I never touched changed” — it was the same slot.
+bridge:
+  ko: >-
+    러스트도 같은 글자를 쓰지만 <b>몇 개까지 붙일 수 있는지</b>를 규칙이 정합니다.
+    C 에는 이 표기가 없어 포인터로만 하고, 그래서 부르는 쪽에 표시가 남죠.
+  en: >-
+    Rust uses the same symbol but its rules fix <b>how many names may attach</b>. C has no such
+    notation and does it with pointers, which leaves a mark at the call site.
+misconceptions:
+  # `cpp.md` §9 #3.
+  - ko: "이 글자는 「주소를 얻는다」다 — 선언에 붙으면 <b>두 번째 이름</b>입니다. 식에 붙을 때만 주소예요."
+    en: "The symbol means “take the address” — in a declaration it means <b>a second name</b>."
+  - ko: "칸이 하나 더 생긴다 — 안 생깁니다. 이름만 하나 더 붙어요."
+    en: "One more slot appears — none does; only one more name attaches."
+  - ko: "나중에 다른 값으로 옮길 수 있다 — 못 옮깁니다. 그 줄은 가리키던 칸의 값을 바꿔요."
+    en: "It can be moved to another value later — it cannot; such a line changes the named slot."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>칸을 안 만들고 이름만 붙인다는 표시</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the mark that adds a name without claiming room</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>새로 붙는 이름</b>입니다. 칸을 만들지 말라고 시키는 것은 그 앞의 한 글자예요."
+          en: "{{pick.2|code}} is the <b>name being added</b>. What orders no room to be claimed is the symbol before it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 표시냐", en: "The sharpest spot — the name or the mark" }
+          code:
+            - "int r = x;    // 칸이 둘"
+            - "int& r = x;   // 칸이 하나"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>이미 있던 칸</b>입니다. 그 칸에 이름이 하나 더 붙는 거예요."
+          en: "{{pick.3|code}} is the <b>slot that already existed</b>. One more name attaches to it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 원래 칸이냐 붙이는 표시냐", en: "The sharpest spot — the slot or the mark" }
+          code:
+            - "x;            // 칸 하나"
+            - "int& r = x;   // 같은 칸, 이름 둘"
+meaning:
+  - q:
+      ko: "이 줄 뒤에 두 이름 중 하나로 값을 고치면 어떻게 될까요?"
+      en: "After this line, what happens if a value is changed through one of the two names?"
+    hint:
+      ko: "칸이 몇 개인지 먼저 세어 보세요."
+      en: "Count the slots first."
+    options:
+      - t:
+          ko: "다른 이름으로 읽어도 바뀐 값이 나온다 — 칸이 하나뿐이라서"
+          en: "Reading through the other name gives the changed value — there is only one slot"
+      - t:
+          ko: "다른 이름은 그대로다 — 값이 복사되었으니까"
+          en: "The other name is unchanged — the value was copied"
+        diag:
+          t:
+            ko: "복사는 이 글자가 <b>없을 때</b> 일어납니다. 붙어 있으면 칸이 하나뿐이라 복사할 것이 없어요."
+            en: "Copying happens when this symbol is <b>absent</b>. With it there, one slot exists and nothing is copied."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 한 글자가 있느냐", en: "The sharpest spot — is the symbol there" }
+            code:
+              - "int r = x;  r = 9;   // x 는 그대로"
+              - "int& r = x; r = 9;   // x 도 9"
+      - t:
+          ko: "값을 고치는 것이 막혀 컴파일이 멈춘다"
+          en: "Changing the value is blocked and it stops compiling"
+        diag:
+          t:
+            ko: "막는 것은 <b>못 만진다는 약속</b>을 함께 적었을 때입니다. 이 글자 하나만으로는 안 막혀요."
+            en: "Blocking comes from also writing the <b>promise not to touch</b>. This symbol alone blocks nothing."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 약속이 붙었느냐", en: "The sharpest spot — is the promise attached" }
+            code:
+              - "int& r = x;        // 고칠 수 있다"
+              - "const int& r = x;  // 못 고친다"
+      - t:
+          ko: "두 번째 이름이 다른 값으로 옮겨 간다"
+          en: "The second name moves to another value"
+        diag:
+          t:
+            ko: "못 옮깁니다. 그 줄은 옮기는 것이 아니라 <b>가리키던 칸의 값을 바꾸는</b> 줄이에요."
+            en: "It cannot move. Such a line does not move anything; it <b>changes the value in the named slot</b>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 옮기느냐 바꾸느냐", en: "The sharpest spot — moving or changing" }
+            code:
+              - "int& r = x;"
+              - "r = y;    // x 가 y 의 값이 된다"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>칸을 안 만들고</b> 이름만 하나 더 붙입니다."
+      en: "Choose what goes in the blank. Line {{site.line}} adds a name <b>without claiming room</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "&", mono: true }
+      - t: "*"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>주소를 담는 칸</b>을 만듭니다. 칸이 하나 더 생기고, 값을 보려면 별표를 다시 붙여 열어야 해요."
+            en: "That claims a <b>slot that holds an address</b>. One more slot appears, and the value needs the star again to open it."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 이름이냐 칸이냐", en: "The sharpest spot — a name or a slot" }
+            code:
+              - "int& r = x;   r = 9;"
+              - "int* p = &x;  *p = 9;"
+      - t: "&&"
+        mono: true
+        diag:
+          t:
+            ko: "기호 둘짜리는 <b>곧 사라질 값</b>에만 붙는 이름입니다. 이미 이름이 있는 값에는 안 붙어요."
+            en: "The doubled symbol names only a value <b>about to vanish</b>. It does not attach to one that already has a name."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 이름이 있는 값이냐", en: "The sharpest spot — does the value have a name" }
+            code:
+              - "int& a = x;        // 선다"
+              - "int&& b = x;       // 멈춘다"
+      - t: "const"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>못 만진다는 약속</b>이라 칸은 그대로 새로 생깁니다. 이름을 하나 더 붙이는 일은 안 해요."
+            en: "That is a <b>promise not to touch</b>, so a new slot is still claimed. It adds no second name."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 약속이냐 이름이냐", en: "The sharpest spot — a promise or a name" }
+            code:
+              - "const int c = x;   // 칸이 둘"
+              - "int& r = x;        // 칸이 하나"
+why_gate:
+  q:
+    ko: "포인터가 이미 있는데 왜 <b>이 표기를 따로</b> 만들었을까요?"
+    en: "Pointers already existed — why add <b>this notation</b> as well?"
+  choices:
+    - t:
+        ko: "쓰는 쪽이 보통 이름과 똑같아지게 하려고 — 별표를 붙여 여는 일이 없고, 빈 자리가 될 수 없다"
+        en: "So using it looks like an ordinary name — no star to open, and it can never be empty"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 대가로 <b>부르는 쪽에서 안 보이는 것</b>이 무엇인지도 적어 보세요."
+        en: "That is the direction. Add what the caller <b>can no longer see</b> in exchange."
+    - t:
+        ko: "포인터보다 빨라서"
+        en: "Because it is faster than a pointer"
+      ok: false
+      fb:
+        ko: "같은 기계 코드가 나오는 것이 보통입니다. 다른 것은 <b>읽는 사람이 보는 것</b>이에요."
+        en: "The machine code is usually the same. What differs is <b>what a reader sees</b>."
+    - t:
+        ko: "포인터를 없애려고"
+        en: "To do away with pointers"
+      ok: false
+      fb:
+        ko: "안 없앴습니다. 둘 다 남아 있고, 언제 무엇을 쓰는지가 이 언어의 읽기 문제예요."
+        en: "They stayed. Both exist, and knowing when to use which is part of reading this language."
+queries:
+  - { grammars: [cpp], file: ./reference-binding.scm }
+examples:
+  - code: "void f() { int& r = x; }                  // r -> x 그 자리 (이름 둘, 칸 하나)"
+    expect: { sites: 1, form: bind, hole: "&", picks: { 1: "&", 2: "r", 3: "x" } }
+  - code: "void f() { const std::string& s = name; }  // s -> name 그 자리, 못 고친다"
+    expect: { sites: 1, form: bind, hole: "&", picks: { 1: "&", 2: "s", 3: "name" } }
+  - code: "void f() { int r = x; }                   // 칸이 둘이다"
+    expect: none

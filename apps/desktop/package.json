@@ -13,6 +13,7 @@
   "dependencies": {
     "@chickadee/cards": "workspace:*",
     "@chickadee/concepts": "workspace:*",
+    "@chickadee/course": "workspace:*",
     "@chickadee/dictionary": "workspace:*",
     "@chickadee/grading": "workspace:*",
     "@chickadee/i18n": "workspace:*",

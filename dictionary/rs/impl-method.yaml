@@ -1,0 +1,177 @@
+schema: 1
+id: rs/impl-method
+# 2부 (`rs.md` §3). 보편형은 없다. 첫 인자가 `self`·`&self`·`&mut self` 중 무엇인지가 「이 메서드가 값을
+# 먹는가」를 정한다 — `into_`·`as_`·`to_` 이름 규칙의 근거. `impl Trait for` 는 `rs/impl-trait-for`.
+universal: null
+name: { ko: 값에 붙은 함수, en: Functions attached to a value }
+token: "impl"
+grammars: [rust]
+framework: null
+essential: true
+difficulty: 3
+prereq: [rs/struct-item, rs/borrow-shared, rs/function-item]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "타입에 행동을 붙이는 블록. 첫 인자가 자기 자신을 먹는지 빌리는지 고치는지를 적는다."
+    en: "Attaches behaviour to a type; the first parameter decides the value's fate."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} {{pick.2|code}} 에 <b>행동을 붙이는</b> 블록입니다. 안의
+      함수가 메서드가 되는 조건은 첫 인자가 자기 자신이라는 것이고, 그 자기 자신을 <b>어떻게 받느냐</b>가
+      이 언어의 요점이에요. `&self` 는 읽기만 빌리고, `&mut self` 는 고칠 수 있게 빌리고, `self` 는
+      값을 <b>먹습니다</b> — 부르고 나면 원래 이름은 못 씁니다. 이름 규칙이 거기서 나옵니다:
+      `as_…` 는 빌리고, `to_…` 는 복사하고, `into_…` 는 먹어요. 첫 인자가 없으면 메서드가 아니라
+      `Type::new()` 처럼 부르는 연관 함수입니다.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} is the block that <b>attaches behaviour</b> to {{pick.2|code}}.
+      A function inside becomes a method when its first parameter is the value itself, and <b>how it
+      receives</b> that value is the whole point. `&self` borrows to read, `&mut self` borrows to change,
+      `self` <b>consumes</b> — after the call the original name is gone. The naming convention follows:
+      `as_…` borrows, `to_…` copies, `into_…` consumes. With no such parameter it is not a method but an
+      associated function, called like `Type::new()`.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} {{pick.2|code}} 에 행동을 붙인다."
+      en: "{{pick.1|code}} on line {{site.line}} attaches behaviour to {{pick.2|code}}."
+    - ko: "안의 함수마다 첫 인자가 값을 먹는지 · 빌리는지 · 고치는지를 적는다."
+      en: "Each function inside says in its first parameter whether it consumes, borrows, or changes."
+    - ko: "부르는 자리 v.name() 에서 그 선택이 v 의 운명을 정한다."
+      en: "At the call site v.name(), that choice decides what happens to v."
+
+rule:
+  ko: "<b>메서드의 첫 인자가 값의 운명을 정한다.</b> self 는 먹고, &self 는 읽고, &mut self 는 고친다."
+  en: "<b>A method's first parameter decides the value's fate.</b> self consumes, &self reads, &mut self changes."
+result:
+  label:
+    ko: "{{site.line}}행의 블록"
+    en: "the block on line {{site.line}}"
+  value: "{{pick.1}} {{pick.2}}"
+  note:
+    ko: "행동이 여기 붙는다"
+    en: "behaviour is attached here"
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 이제 {{pick.3|code}} 안의 함수를 메서드로 가집니다."
+  en: "{{pick.2|code}} now has the functions inside {{pick.3|code}} as methods."
+payoff:
+  ko: "이걸 알면 「메서드를 불렀더니 왜 원래 값이 사라졌나」(E0382)가 풀립니다 — 첫 인자가 `self` 였던 겁니다."
+  en: "This untangles “I called a method and the original vanished” (E0382) — the first parameter was `self`."
+bridge:
+  ko: "파이썬의 `self` 는 늘 참조라 하나입니다. Rust 는 셋이고, 어느 것인지가 서명에 적혀 있어요."
+  en: "Python's `self` is always a reference — one kind. Rust has three, and the signature says which."
+misconceptions:
+  - ko: "`self` 와 `&self` 는 같은 것이다 — `self` 는 값을 <b>먹습니다</b>. 부르고 나면 원래 이름은 못 써요(E0382)."
+    en: "`self` and `&self` are the same — `self` <b>consumes</b> the value. After the call the original name is unusable (E0382)."
+  - ko: "`&self` 메서드로 필드를 고칠 수 있다 — 못 고칩니다(E0594). `&mut self` 여야 해요."
+    en: "A `&self` method can change a field — it cannot (E0594). It needs `&mut self`."
+  - ko: "`impl` 은 타입마다 하나다 — 여러 개여도 됩니다. 파일을 나눠 붙일 수도 있어요."
+    en: "One `impl` per type — there may be several, even across files."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>타입에 행동을 붙이는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that attaches behaviour to a type</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 행동을 <b>받는 타입</b>입니다. 붙이는 일은 앞의 낱말이 해요."
+          en: "{{pick.2|code}} is the type <b>receiving</b> the behaviour. The word before it does the attaching."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 받는 쪽이냐 붙이는 낱말이냐", en: "The sharpest spot — the receiver or the attaching word" }
+          code:
+            - "impl Point { … }"
+            - "// ^낱말 ^타입"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 붙는 <b>행동의 목록</b>입니다. 각 함수의 첫 인자를 보면 값을 먹는지 빌리는지 알아요."
+          en: "{{pick.3|code}} is the <b>list of behaviour</b> being attached. Each function's first parameter says whether it consumes or borrows."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 첫 인자", en: "The sharpest spot — the first parameter" }
+          code:
+            - "fn len(&self)      // 읽는다"
+            - "fn into_id(self)   // 먹는다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 타입에 <b>행동을 붙입니다</b>."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>attaches behaviour</b> to a type."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "impl", mono: true }
+      - t: "trait"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>약속</b>을 세우는 낱말입니다 — 무엇을 할 수 있어야 하는지만 적고 몸통은 대개 없어요."
+            en: "That sets up a <b>promise</b> — it lists what must be doable, usually without bodies."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 약속이냐 실물이냐", en: "The sharpest spot — the promise or the real thing" }
+            code:
+              - "trait Shape { fn area(&self) -> f64; }"
+              - "impl Circle { fn area(&self) -> f64 { … } }"
+      - t: "struct"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>필드</b>를 세우는 낱말입니다. 안에 함수를 못 적어요."
+            en: "That sets up <b>fields</b>. Functions cannot go inside it."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 모양이냐 행동이냐", en: "The sharpest spot — shape or behaviour" }
+            code:
+              - "struct Point { x: i32 }     // 모양"
+              - "impl Point { fn go(&self) {} }   // 행동"
+      - t: "mod"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>모듈</b>을 만듭니다. 안의 함수는 타입에 안 붙고 이름 공간에 들어가요."
+            en: "That makes a <b>module</b>. Functions inside are not attached to a type; they enter a namespace."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 타입이냐 이름 공간이냐", en: "The sharpest spot — a type or a namespace" }
+            code:
+              - "mod geo { fn area() {} }    // geo::area()"
+              - "impl Point { fn area(&self) {} }   // p.area()"
+
+why_gate:
+  q:
+    ko: "Rust 는 왜 자기 자신을 받는 법을 <b>셋으로</b> 갈랐을까요?"
+    en: "Why does Rust split the way a method takes its own value <b>into three</b>?"
+  choices:
+    - t:
+        ko: "메서드를 부르는 것도 값을 넘기거나 빌리는 일이라, 그 규칙을 메서드라고 예외로 두지 않으려고"
+        en: "Because calling a method is also handing over or borrowing a value, and methods should not be an exception to that rule"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 블록의 메서드 중 값을 먹는 것이 있는지 찾아보세요."
+        en: "That is the direction. Look for a method in this block that consumes the value."
+    - t:
+        ko: "메서드를 빠르게 부르려고"
+        en: "To call methods faster"
+      ok: false
+      fb:
+        ko: "속도 문제가 아닙니다. 소유권 규칙의 일관성이에요."
+        en: "Not speed. Consistency of ownership rules."
+    - t:
+        ko: "파이썬과 다르게 보이려고"
+        en: "To look different from Python"
+      ok: false
+      fb:
+        ko: "겉모습이 아닙니다. 부른 뒤 원래 값이 남느냐가 갈려요."
+        en: "Not looks. Whether the original survives the call differs."
+
+queries:
+  - { grammars: [rust], file: ./impl-method.scm }
+
+examples:
+  - code: "impl Point { fn norm(&self) -> f64 { 0.0 } }     // 읽기만 빌리는 메서드"
+    expect: { sites: 2, form: impl, hole: "impl", picks: { 1: "impl", 2: "Point", 3: "{ fn norm(&self) -> f64 { 0.0 } }" } }
+  - code: "impl Id { fn into_raw(self) -> u32 { self.0 } }   // 값을 먹는 메서드"
+    expect: { sites: 2, form: impl, picks: { 1: "impl", 2: "Id" } }
+  - code: "impl Display for Point { }                      // 트레이트 붙이기 — rs/impl-trait-for"
+    expect: none

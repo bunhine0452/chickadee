@@ -1,0 +1,41 @@
+[
+  {
+    "queryId": "java/interface",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "site",
+    "form": "implements",
+    "startLine": 3,
+    "startCol": 23,
+    "endLine": 3,
+    "endCol": 50,
+    "nodeKind": "super_interfaces",
+    "inError": false
+  },
+  {
+    "queryId": "java/interface",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.1",
+    "form": "implements",
+    "startLine": 3,
+    "startCol": 23,
+    "endLine": 3,
+    "endCol": 33,
+    "nodeKind": "implements",
+    "inError": false
+  },
+  {
+    "queryId": "java/interface",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.2",
+    "form": "implements",
+    "startLine": 3,
+    "startCol": 34,
+    "endLine": 3,
+    "endCol": 50,
+    "nodeKind": "type_identifier",
+    "inError": false
+  }
+]

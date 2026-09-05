@@ -1,0 +1,1 @@
+CREATE TABLE item (sku TEXT, qty INTEGER);

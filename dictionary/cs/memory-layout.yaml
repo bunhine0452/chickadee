@@ -1,0 +1,88 @@
+schema: 1
+id: cs/memory-layout
+universal: null
+name: { ko: "값이 나란히 놓이는 규칙", en: "Memory layout" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+track_default: t0
+essential: false
+difficulty: 4
+prereq: [cs/memory-address]
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "묶어 둔 값들의 크기 합보다 그 묶음이 더 큰 이유."
+    en: "Why a bundle can be larger than the sum of what it bundles."
+  why:
+    ko: >-
+      값을 여럿 묶어 두면 기계는 <b>아무 자리에나</b> 놓지 않습니다. 값마다 「이런 번호의 자리에서
+      시작해야 읽기 좋다」는 규칙이 있고, 그 규칙을 맞추려고 <b>사이에 빈 자리를 넣습니다</b>.
+      그래서 4바이트 하나와 1바이트 하나를 묶으면 5가 아니라 8이 되는 일이 생겨요.
+      순서를 바꿔 적기만 해도 크기가 달라지는 것이 이 때문입니다.
+      배치는 <b>메모리를 얼마나 쓰나</b>와 <b>얼마나 빨리 읽히나</b>를 동시에 정합니다.
+    en: >-
+      Bundle several values and the machine does not place them <b>just anywhere</b>. Each value
+      has a rule about which slot numbers it should start at to be read efficiently, and meeting
+      that rule <b>inserts blanks between them</b>. Bundle four bytes and one byte and you can get
+      eight, not five. Reordering the fields alone can change the size. Layout fixes both <b>how
+      much memory</b> and <b>how fast it reads</b>.
+  trace: []
+rule:
+  ko: "<b>크기의 합이 묶음의 크기가 아니다.</b> 사이의 빈 자리도 크기다."
+  en: "<b>The sum of the parts is not the size of the bundle.</b> The blanks count too."
+ok:
+  ko: >-
+    큰 값부터 적으면 빈 자리가 줄어드는 경우가 많습니다. 크기를 재 보고 순서를 바꾸는 것이
+    그래서 실제로 듣습니다.
+  en: >-
+    Writing larger fields first often shrinks the blanks. That is why measuring and reordering
+    actually works.
+misconceptions:
+  - ko: "묶음의 크기는 합이다 — 사이에 들어간 빈 자리가 빠져 있습니다."
+    en: "The bundle is the sum — the inserted blanks are missing from that count."
+  - ko: "순서는 성능에만 영향을 준다 — 크기 자체가 달라집니다."
+    en: "Order only affects speed — it changes the size itself."
+  - ko: "빈 자리는 낭비다 — 그 대가로 읽기가 빨라지고, 그래서 넣는 것입니다."
+    en: "The blanks are waste — they buy read speed, which is why they are there."
+meaning:
+  - q:
+      ko: "4바이트 하나와 1바이트 하나를 묶었더니 크기가 8이라고 나옵니다. <b>3은 무엇인가요?</b>"
+      en: "One four-byte and one one-byte field bundle to eight. <b>What are the other three?</b>"
+    hint:
+      ko: "값마다 시작해도 좋은 자리 번호가 정해져 있습니다."
+      en: "Each value has slot numbers it prefers to start at."
+    options:
+      - t: { ko: "규칙을 맞추려고 넣은 빈 자리", en: "Blanks inserted to satisfy the placement rule" }
+      - t: { ko: "묶음의 이름과 타입 정보", en: "The bundle's name and type information" }
+        diag:
+          t:
+            ko: "이름은 <b>번역이 끝나면 사라집니다</b>. 타입 정보를 같이 담는 언어도 있지만 이 크기 차이는 빈 자리예요."
+            en: "Names <b>disappear after translation</b>. Some languages do store type information, but this gap is padding."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 정보냐 빈 자리냐", en: "The sharpest spot — information or blanks" }
+            code:
+              - "이름: 실행 파일에 안 남는다"
+              - "빈 자리: 크기에 그대로 든다"
+      - t: { ko: "다음 묶음과 구분하는 표시", en: "A marker separating it from the next bundle" }
+        diag:
+          t:
+            ko: "구분은 <b>크기를 알면</b> 됩니다 — 표시가 필요 없어요. 늘어난 3은 안쪽 배치 때문입니다."
+            en: "Separation follows from <b>knowing the size</b> — no marker needed. The extra three is internal placement."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 바깥이냐 안쪽이냐", en: "The sharpest spot — outside or inside" }
+            code:
+              - "바깥: 크기로 구분된다"
+              - "안쪽: 필드 사이가 벌어졌다"
+      - t: { ko: "값이 커질 때를 대비한 여유", en: "Room reserved in case the values grow" }
+        diag:
+          t:
+            ko: "각 필드의 크기는 <b>정해져 있습니다</b> — 커질 일이 없어요. 벌어진 자리는 시작 번호를 맞추려는 것입니다."
+            en: "Each field's size is <b>fixed</b> — nothing grows. The gap exists to line up start positions."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 여유냐 정렬이냐", en: "The sharpest spot — slack or alignment" }
+            code:
+              - "여유: 크기가 변할 때 쓴다"
+              - "정렬: 시작 자리를 맞춘다"

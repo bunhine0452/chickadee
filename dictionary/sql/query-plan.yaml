@@ -1,0 +1,206 @@
+schema: 1
+id: sql/query-plan
+universal: null
+name: { ko: "고른 길 읽기", en: "Query plan" }
+token: "EXPLAIN"
+grammars: [sql, mybatis_sql]
+framework: null
+essential: true
+difficulty: 4
+prereq: [sql/join-inner, sql/index, cs/complexity]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "어떻게 할지를 안 적었으니 읽어야만 안다. 문장은 안 돌고 계획만 나온다."
+    en: "The how was never written, so it is read back. A plan comes; rows do not."
+  why:
+    ko: >-
+      이 언어에서는 <b>무엇을 원하는지</b>만 적고 어떻게 할지는 안 적습니다. 그러면 어떻게 할지는 누가
+      정하나 — 데이터베이스가 정하고, 그 결정은 코드 어디에도 안 보여요. {{site.line}}행이 하는 일은
+      <b>그 결정을 읽어 오는 것</b>입니다. {{pick.3|code}}{{pick.3|josa:을,를}} 처음부터 다 훑을지 곁표를 탈지, 표 둘을
+      어느 쪽부터 볼지가 여기서 드러나요. 명령형 언어에는 이런 층이 아예 없습니다 — 거기서는 어떻게 할지가
+      곧 코드니까요. 이 낱말을 붙이면 문장이 <b>안 돕니다</b>. 계획만 나오고 행은 안 나와요.
+    en: >-
+      Here you write <b>what you want</b> and never how. So who settles the how — the database does,
+      and that decision appears nowhere in the code. What line {{site.line}} does is <b>read that
+      decision back</b>. Whether {{pick.3|code}} is swept from the start or a side table is ridden, and
+      which of two tables is opened first, becomes visible. Imperative languages have no such layer —
+      there, the how <b>is</b> the code. With this word the statement <b>does not run</b>: a plan comes
+      back, rows do not.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}}{{pick.2|josa:으로,로}} 시작하는 문장을 계획만 세운다."
+      en: "Line {{site.line}} only plans the statement that starts with {{pick.2|code}}."
+    - ko: "{{pick.3|code}}{{pick.3|josa:을,를}} 어떻게 읽을지가 그 계획에 적힌다."
+      en: "How {{pick.3|code}} is to be read is written into that plan."
+    - ko: "행은 하나도 안 나온다 — 문장이 안 돌기 때문이다."
+      en: "Not one row comes back — the statement never runs."
+
+rule:
+  ko: "<b>결정을 읽어 오는 자리다.</b> 문장은 안 돌고 계획만 나온다."
+  en: "<b>This reads the decision back.</b> The statement does not run; a plan does."
+result:
+  label: { ko: "계획을 읽을 표", en: "the table the plan is about" }
+  value: "{{pick.3}}"
+  note: { ko: "행은 안 나온다", en: "no rows come back" }
+ok:
+  ko: >-
+    문장 대신 계획이 나오고, 그 계획이 {{pick.3|code}}{{pick.3|josa:을,를}} 어떻게 읽을지 말해 줍니다.
+  en: >-
+    A plan comes back instead of the statement's rows, saying how {{pick.3|code}} will be read.
+payoff:
+  ko: >-
+    이걸 알면 「왜 느린가」를 짐작 대신 읽어서 답할 수 있습니다.
+  en: >-
+    Knowing this, “why is it slow” is answered by reading rather than guessing.
+bridge:
+  ko: >-
+    다른 언어에는 이 층이 없습니다 — 어떻게 할지가 곧 코드라서 읽을 것이 따로 없어요.
+  en: >-
+    Other languages have no such layer — the how is the code, so there is nothing extra to read.
+misconceptions:
+  - ko: "이 낱말을 붙여도 문장이 돈다 — 안 돕니다. 계획만 나옵니다."
+    en: "The statement still runs with this word — it does not; only a plan comes back."
+  - ko: "계획이 늘 같다 — 데이터가 늘거나 곁표가 생기면 달라집니다."
+    en: "The plan is stable — it changes as data grows or a side table appears."
+  - ko: "계획에 시간이 적혀 있다 — 안 돌았으므로 실제 시간은 없습니다."
+    en: "The plan carries timings — nothing ran, so there is no real time in it."
+
+meaning:
+  - q:
+      ko: "같은 문장에 이 낱말을 붙여 두 달 뒤에 다시 읽으면 계획이 같을까요?"
+      en: "Read the plan of the same statement two months later — is it the same plan?"
+    hint:
+      ko: "계획을 정하는 것이 <b>문장</b>인지 <b>지금의 표</b>인지 갈라 보세요."
+      en: "Separate whether the plan comes from the <b>statement</b> or from the <b>table as it is</b>."
+    options:
+      - t:
+          ko: "다를 수 있다 — 데이터가 늘거나 곁표가 생기면 결정이 바뀐다"
+          en: "It can differ — more data or a new side table changes the decision"
+      - t:
+          ko: "같다 — 문장이 안 바뀌었으니까"
+          en: "The same — the statement did not change"
+        diag:
+          t:
+            ko: >-
+              결정은 문장만 보고 하는 것이 아닙니다 — <b>지금의 표</b>를 같이 봐요. 그래서 어제와 오늘이 다릅니다.
+            en: >-
+              The decision is not made from the statement alone — it reads <b>the table as it is</b>. That
+              is why yesterday and today differ.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 문장이냐 표냐", en: "The sharpest spot — the statement or the table" }
+            code:
+              - "-- 같은 문장, 다른 계획"
+      - t:
+          ko: "다르다 — 계획은 매번 무작위다"
+          en: "It differs — the plan is random each time"
+        diag:
+          t:
+            ko: >-
+              무작위가 아닙니다. <b>같은 조건</b>이면 같은 결정이 나오고, 조건이 바뀌면 바뀝니다.
+            en: >-
+              It is not random. <b>Same conditions, same decision</b>; changed conditions, changed decision.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 무작위냐 조건이냐", en: "The sharpest spot — random or conditional" }
+            code:
+              - "-- 결정은 조건의 함수다"
+      - t:
+          ko: "같다 — 계획이 표에 저장되니까"
+          en: "The same — the plan is stored on the table"
+        diag:
+          t:
+            ko: >-
+              계획은 표에 <b>안 저장됩니다</b>. 물을 때마다 그 자리에서 다시 정해져요.
+            en: >-
+              A plan is <b>not stored</b> on the table. It is settled afresh each time it is asked for.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 저장이냐 그때그때냐", en: "The sharpest spot — stored or settled fresh" }
+            code:
+              - "-- 물을 때마다 새로 정해진다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 문장을 돌리는 대신 <b>고른 길</b>을 읽어 옵니다."
+      en: "Choose what goes in the blank. Line {{site.line}} reads back <b>the chosen path</b> instead of running."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "EXPLAIN", mono: true }
+      - t: "ANALYZE"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>ANALYZE</code> 는 표의 <b>통계를 새로 모읍니다</b> — 계획을 읽어 오는 낱말이 아니에요.
+            en: >-
+              <code>ANALYZE</code> <b>gathers fresh statistics</b> about a table; it reads no plan back.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 재료냐 결정이냐", en: "The sharpest spot — the inputs or the decision" }
+            code:
+              - "ANALYZE cart          -- 재료를 모은다"
+              - "EXPLAIN SELECT ...    -- 결정을 읽는다"
+      - t: "DESCRIBE"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>DESCRIBE</code> 는 표의 <b>모양</b>을 보여 줍니다 — 어느 열이 있는지이지 어떻게 읽을지가 아니에요.
+            en: >-
+              <code>DESCRIBE</code> shows a table's <b>shape</b> — which columns it has, not how it is read.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 모양이냐 길이냐", en: "The sharpest spot — the shape or the path" }
+            code:
+              - "DESCRIBE cart"
+              - "EXPLAIN SELECT ..."
+      - t: "PROFILE"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>PROFILE</code> 은 <b>돌려 본 뒤</b>의 시간을 재는 방언 낱말이라 안 돌리는 이 자리와 다릅니다.
+            en: >-
+              <code>PROFILE</code> is a dialect word that measures time <b>after running</b>, which this
+              slot does not do.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 돌리느냐 마느냐", en: "The sharpest spot — running or not" }
+            code:
+              - "EXPLAIN SELECT ...   -- 안 돈다"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 <b>계획을 읽어</b> 볼까요? 시간을 재 봐도 되는데요."
+    en: "Why does line {{site.line}} <b>read the plan</b> instead of just timing the query?"
+  choices:
+    - t:
+        ko: "시간은 결과만 알려 주고 이유는 안 알려 줘서 — 계획에는 왜 그런지가 적혀 있다"
+        en: "Because a timing gives the outcome, not the reason — the plan says why"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그럼에도 시간을 같이 재야 하는 이유가 무엇인지도 적어 보세요."
+        en: "That is the direction. Say why timings are still worth taking alongside."
+    - t:
+        ko: "시간 재기가 어려워서"
+        en: "Because timing is hard"
+      ok: false
+      fb:
+        ko: "어렵지 않습니다. 다른 것은 <b>답이 아니라 이유</b>를 준다는 것이에요."
+        en: "It is not hard. What differs is that this gives <b>the reason, not the number</b>."
+    - t:
+        ko: "계획이 더 정확해서"
+        en: "Because the plan is more accurate"
+      ok: false
+      fb:
+        ko: "계획은 <b>안 돌린 예측</b>입니다. 정확함으로는 실제 시간이 이겨요."
+        en: "A plan is a <b>prediction that never ran</b>. For accuracy the real time wins."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./query-plan.scm }
+
+examples:
+  - code: "EXPLAIN SELECT id FROM cart"
+    expect: { sites: 1, form: explain, hole: "EXPLAIN", picks: { 1: "EXPLAIN", 2: "SELECT", 3: "cart" } }
+  - code: "EXPLAIN SELECT id FROM cart WHERE qty > 1"
+    expect: { sites: 1, form: explain, hole: "EXPLAIN", picks: { 1: "EXPLAIN", 2: "SELECT", 3: "cart" } }
+  - code: "SELECT id FROM cart"
+    expect: none

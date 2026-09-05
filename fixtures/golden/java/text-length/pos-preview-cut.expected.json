@@ -1,0 +1,67 @@
+[
+  {
+    "queryId": "java/text-length",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "site",
+    "form": "measure",
+    "startLine": 5,
+    "startCol": 19,
+    "endLine": 5,
+    "endCol": 32,
+    "nodeKind": "method_invocation",
+    "inError": false
+  },
+  {
+    "queryId": "java/text-length",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.2",
+    "form": "measure",
+    "startLine": 5,
+    "startCol": 19,
+    "endLine": 5,
+    "endCol": 23,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "java/text-length",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.1",
+    "form": "measure",
+    "startLine": 5,
+    "startCol": 24,
+    "endLine": 5,
+    "endCol": 30,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "java/text-length",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "hole",
+    "form": "measure",
+    "startLine": 5,
+    "startCol": 24,
+    "endLine": 5,
+    "endCol": 30,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "java/text-length",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.3",
+    "form": "measure",
+    "startLine": 5,
+    "startCol": 30,
+    "endLine": 5,
+    "endCol": 32,
+    "nodeKind": "argument_list",
+    "inError": false
+  }
+]

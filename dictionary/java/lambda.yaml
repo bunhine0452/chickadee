@@ -1,0 +1,249 @@
+schema: 1
+id: java/lambda
+universal: common/function-value
+name: { ko: 값이 된 메서드, en: Lambda }
+token: "->"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 3
+prereq: [java/interface, java/method-declaration]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "이름 없이 적어 넘기는 일거리. 부를 때가 아니라 넘길 때 적는다."
+    en: "Work written without a name and handed over, not called where it is written."
+  why:
+    ko: >-
+      메서드는 이름을 붙여 클래스 안에 두고 <b>부르는</b> 것입니다. 그런데 「이 목록을 훑으면서
+      <b>이 일</b>을 해라」처럼 일거리 자체를 넘겨야 하는 자리가 있어요. 그때마다 클래스를 만들고
+      이름을 붙이면 한 줄짜리 일에 열 줄이 듭니다. {{site.line}}행의 {{pick.1|code}} 왼쪽이 받는 것,
+      오른쪽이 하는 일입니다. 자바에서 이것이 서는 조건이 하나 있어요 — 받는 자리의 타입이
+      <b>할 일이 하나뿐인 목록</b>이어야 합니다. 그래서 같은 모양의 이 글이 자리마다 다른 타입 이름으로
+      불립니다.
+    en: >-
+      A method is named, kept in a class, and <b>called</b>. But some places need the work itself handed
+      over — “walk this list and do <b>this</b>”. Building a class and naming it each time costs ten
+      lines for one line of work. Left of {{pick.1|code}} on line {{site.line}} is what it receives;
+      right of it is what it does. Java attaches one condition: the receiving slot's type must be a
+      <b>list with exactly one ability</b>. So the same shape goes by a different type name in every slot.
+  trace:
+    - ko: "{{pick.2|code}} 자리가 이 일거리가 받는 것이다."
+      en: "{{pick.2|code}} is what this piece of work receives."
+    - ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 하는 일이고, 넘기는 시점에는 아직 안 돈다."
+      en: "{{pick.3|code}} is the work, and it has not run at the moment it is handed over."
+    - ko: "{{site.line}}행을 받는 자리의 타입이 할 일 하나짜리 목록이라야 이 글이 선다."
+      en: "This only stands when the slot receiving line {{site.line}} is a list with one ability."
+
+rule:
+  ko: "<b>넘길 때는 안 돈다.</b> 받은 쪽이 부를 때 돈다."
+  en: "<b>Handing it over does not run it.</b> It runs when the receiver calls it."
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:을,를}} 받아 {{pick.3|code}}{{pick.3|josa:을,를}} 하는 일거리입니다.
+    넘기는 시점에는 아직 안 돕니다.
+  en: >-
+    It is a piece of work that takes {{pick.2|code}} and does {{pick.3|code}}. At hand-over it has not
+    run yet.
+payoff:
+  ko: >-
+    이걸 알면 「이 줄이 언제 도나」를 물을 수 있게 됩니다 — 적힌 자리와 도는 자리가 <b>다른</b>
+    코드가 여기서 시작해요.
+  en: >-
+    Knowing this lets you ask “when does this line run” — code whose written place and running place
+    <b>differ</b> starts here.
+bridge:
+  ko: >-
+    파이썬·자바스크립트에서는 함수가 그냥 값입니다. 자바는 <b>타입이 있어야</b> 값이 되고, 그 타입이
+    「할 일 하나짜리 목록」이에요. 그래서 같은 글이 자리마다 다른 이름으로 불립니다.
+  en: >-
+    In Python and JavaScript a function is simply a value. In Java it becomes one only <b>with a type</b>,
+    and that type is a list with one ability — so the same text goes by different names per slot.
+misconceptions:
+  - ko: "적은 자리에서 바로 돈다 — <b>안 돕니다</b>. 받은 쪽이 부를 때 돌아요."
+    en: "It runs where it is written — it <b>does not</b>. It runs when the receiver calls it."
+  - ko: "바깥 변수를 마음대로 바꿀 수 있다 — 바깥 지역 변수는 <b>다시 안 넣는 것</b>만 담을 수 있습니다."
+    en: "Outer variables can be changed freely — only outer locals that are <b>never reassigned</b> may be captured."
+  - ko: "아무 자리에나 넘길 수 있다 — 받는 타입이 <b>할 일 하나짜리</b>여야 합니다."
+    en: "It can be passed anywhere — the receiving type must have <b>exactly one ability</b>."
+  - ko: "이름 없는 클래스와 <b>같은</b> 것이다 — 안의 <code>this</code> 가 다릅니다. 여기서는 바깥의 그것이에요."
+    en: "It is the <b>same</b> as an anonymous class — <code>this</code> differs: here it is the outer one."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>하는 일</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the work it does</b>."
+    hint:
+      ko: "화살표 <b>오른쪽</b>입니다."
+      en: "It is <b>right</b> of the arrow."
+    answer: pick.3
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>받는 것</b>입니다. 하는 일은 화살표 오른쪽이에요."
+          en: "{{pick.2|code}} is <b>what it receives</b>. The work is right of the arrow."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 받는 것이냐 하는 일이냐"
+            en: "The sharpest spot — what it takes or what it does"
+          code:
+            - "x -> x + 1"
+            - "// ^받는다 ^한다"
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 둘을 <b>가르는 표시</b>입니다. 하는 일은 그 오른쪽이에요."
+          en: "{{pick.1|code}} is <b>the divider</b>. The work is to its right."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 표시냐 일이냐"
+            en: "The sharpest spot — the divider or the work"
+          code:
+            - "왼쪽: 받는 것"
+            - "표시: 가른다"
+            - "오른쪽: 하는 일"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행을 넘기기만 하고 아무도 안 부르면 하는 일은 몇 번 돌까요?"
+      en: "If line {{site.line}} is handed over and nobody calls it, how many times does the work run?"
+    hint:
+      ko: "적는 것과 부르는 것이 같은 일인지 보세요."
+      en: "Ask whether writing and calling are the same act."
+    options:
+      - t:
+          ko: "한 번도 안 돈다"
+          en: "Never"
+      - t:
+          ko: "넘길 때 한 번 돈다"
+          en: "Once, at hand-over"
+        diag:
+          t:
+            ko: "넘기는 것은 <b>일거리를 건네는</b> 일입니다. 도는 것은 받은 쪽이 부를 때예요."
+            en: "Handing over passes <b>the work itself</b>. Running happens when the receiver calls."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 넘기기냐 부르기냐"
+              en: "The sharpest spot — handing over or calling"
+            code:
+              - "f(x -> g(x));  // 아직 안 돈다"
+      - t:
+          ko: "받는 쪽이 없으면 컴파일이 멈춘다"
+          en: "Without a receiver, compiling stops"
+        diag:
+          t:
+            ko: "받는 <b>타입</b>이 없으면 멈추는 것은 맞습니다. 다만 받아 두고 안 부르는 것은 문법상 아무 문제가 없어요."
+            en: "Without a receiving <b>type</b> it does stop. But receiving and never calling is perfectly legal."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 타입이 없나 안 부르나"
+              en: "The sharpest spot — no type or never called"
+            code:
+              - "타입 없음: 막힌다"
+              - "안 부름:   통과한다"
+      - t:
+          ko: "받는 쪽이 필요할 때마다 돈다 — 몇 번인지는 정해져 있다"
+          en: "It runs whenever the receiver needs it — a fixed number of times"
+        diag:
+          t:
+            ko: "몇 번인지는 <b>받은 쪽이</b> 정합니다. 이 줄에는 그 수가 안 적혀 있어요."
+            en: "How many times is settled by <b>the receiver</b>. That count is not written on this line."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 누가 횟수를 정하나"
+              en: "The sharpest spot — who settles the count"
+            code:
+              - "이 줄:   무엇을 하나"
+              - "받은 쪽: 몇 번 하나"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>받는 것</b>과 <b>하는 일</b>을 가릅니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} divides <b>what it takes</b> from <b>what it does</b>.
+    hint:
+      ko: "보기 넷은 전부 두 글자짜리 표시입니다."
+      en: "All four are two-character marks."
+    options:
+      - { t: "->", mono: true }
+      - t: "::"
+        mono: true
+        diag:
+          t:
+            ko: "<code>::</code> 는 <b>이미 있는 메서드</b>를 가리켜 넘길 때 씁니다. 하는 일을 여기서 적지 않아요."
+            en: "<code>::</code> points at an <b>existing method</b> to hand over. It writes no work here."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 적나 가리키나"
+              en: "The sharpest spot — writing or pointing"
+            code:
+              - "x -> f(x) : 여기 적는다"
+              - "Foo::f    : 있는 것을 가리킨다"
+      - t: "=>"
+        mono: true
+        diag:
+          t:
+            ko: "<code>=&gt;</code> 는 <b>자바스크립트</b>의 표시입니다. 자바는 등호를 안 씁니다."
+            en: "<code>=&gt;</code> is <b>JavaScript's</b> mark. Java uses no equals sign here."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 어느 언어냐"
+              en: "The sharpest spot — which language"
+            code:
+              - "JS:   x => x + 1"
+              - "자바: x -> x + 1"
+      - t: ">>"
+        mono: true
+        diag:
+          t:
+            ko: "<code>&gt;&gt;</code> 는 <b>숫자의 비트를 미는</b> 연산입니다. 일거리와 상관없어요."
+            en: "<code>&gt;&gt;</code> <b>shifts bits</b> of a number. It has nothing to do with work."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 셈이냐 일거리냐"
+              en: "The sharpest spot — arithmetic or work"
+            code:
+              - ">>: 비트를 민다"
+              - "->: 일거리를 가른다"
+
+why_gate:
+  q:
+    ko: "일거리를 <b>이름 없이</b> 적어 넘기게 한 것은 무엇을 얻으려고일까요?"
+    en: "<b>What is gained</b> by writing work without a name and handing it over?"
+  choices:
+    - t:
+        ko: "한 줄짜리 일에 <b>클래스 하나를 안 만들어도</b> 되게"
+        en: "So one line of work does <b>not need a whole class</b>"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 대신 그 일이 <b>언제</b> 도는지가 흐려진다는 것도 적어 보세요."
+        en: "That is the direction. Add that <b>when</b> it runs becomes less obvious in exchange."
+    - t:
+        ko: "더 빨리 돌게 하려고"
+        en: "To make it run faster"
+      ok: false
+      fb:
+        ko: "속도 얘기가 아닙니다. 줄어드는 것은 <b>적는 양</b>이에요."
+        en: "This is not about speed. What shrinks is <b>how much is written</b>."
+    - t:
+        ko: "메서드를 못 넘겨서"
+        en: "Because methods cannot be passed"
+      ok: false
+      fb:
+        ko: "있는 메서드를 가리켜 넘기는 표기도 따로 있습니다. 이것은 <b>없는 것을 그 자리에서</b> 적는 쪽이에요."
+        en: "There is a separate notation for pointing at an existing method. This one writes <b>a new one on the spot</b>."
+
+queries:
+  - { grammars: [java], file: ./lambda.scm }
+
+examples:
+  - code: "Runnable r = () -> print(1);"
+    expect:
+      sites: 1
+      form: lambda
+      hole: "->"
+      picks: { 1: "->", 2: "()", 3: "print(1)" }
+  - code: "names.forEach(System.out::println);"
+    expect: { sites: 1, form: method-ref, picks: { 4: "::" } }
+  - code: "Runnable r = new Runnable() { public void run() {} };"
+    expect: none

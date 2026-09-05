@@ -1,0 +1,161 @@
+schema: 1
+id: java/comparison
+universal: common/comparison
+name: { ko: 두 값 견주기, en: Comparison }
+token: "=="
+grammars: [java]
+framework: null
+essential: true
+difficulty: 1
+# 0부 축 H (java.md §1.5.1).
+prereq: [cs/identity-vs-equality]
+confusions: []
+dict:
+  one_liner:
+    ko: "두 값을 견주어 참·거짓을 낸다. 무엇을 견주는지가 종류마다 다르다."
+    en: "Weighs two values into true or false. What is weighed depends on the kind."
+  why:
+    ko: >-
+      기호 둘짜리는 숫자에서는 <b>값이 같은가</b>를 묻지만, 상자로 만든 것에서는
+      <b>같은 상자인가</b>를 묻습니다. 그래서 글자 둘이 똑같이 보여도 거짓이 나올 수 있어요 —
+      글자를 견주려면 <code>equals</code> 로 물어야 합니다. 그리고 <code>&lt;</code>·<code>&gt;</code>
+      는 숫자에만 쓸 수 있습니다.
+    en: >-
+      The two-symbol form asks <b>are the values equal</b> for numbers, but <b>are these the same
+      box</b> for anything boxed. So two strings that look identical can come back false — comparing
+      text needs <code>equals</code>. And <code>&lt;</code>, <code>&gt;</code> take numbers only.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:을,를}} 먼저 값으로 만든다."
+      en: "{{pick.2|code}} and {{pick.3|code}} become values first."
+    - ko: "종류에 따라 값을 견주거나 상자를 견준다."
+      en: "By kind, either the values or the boxes are weighed."
+    - ko: "참이나 거짓 하나가 나온다."
+      en: "One of true or false comes out."
+rule:
+  ko: "<b>숫자는 값을, 상자는 자리를 견준다.</b> 글자를 견주려면 <code>equals</code> 가 필요하다."
+  en: "<b>Numbers weigh values; boxes weigh places.</b> Text needs <code>equals</code>."
+result:
+  label: { ko: "{{site.line}}행의 물음", en: "the question on line {{site.line}}" }
+  value: "{{pick.2}} {{pick.1}} {{pick.3}}"
+  note: { ko: "참이나 거짓만 나온다", en: "only true or false" }
+ok:
+  ko: "참·거짓 하나가 나왔습니다. 양쪽 값은 그대로예요."
+  en: "One truth value came out. Both sides are unchanged."
+payoff:
+  ko: "이걸 알면 「같은 글자인데 왜 다르다고 하지」가 풀립니다 — 상자를 견줬기 때문이에요."
+  en: "This untangles “identical text, yet not equal” — the boxes were weighed, not the text."
+bridge:
+  ko: "파이썬·자바스크립트는 글자를 기호 둘로 견줘도 됩니다. 자바는 <b>상자를 견주므로</b> 안 됩니다."
+  en: "Python and JavaScript let two symbols compare text. Java <b>weighs boxes</b>, so it does not."
+misconceptions:
+  - ko: "글자는 기호 둘로 견주면 된다 — 같은 상자인지를 묻게 됩니다. <code>equals</code> 를 써야 해요."
+    en: "Two symbols compare text — they ask about the box. <code>equals</code> is needed."
+  - ko: "<code>&lt;</code> 로 글자를 견줄 수 있다 — 숫자에만 쓸 수 있어 컴파일이 멈춥니다."
+    en: "<code>&lt;</code> can order text — it takes numbers only and stops the compiler."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>견주는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that weighs</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 견줄 <b>한쪽</b>입니다. 견주는 일은 가운데 기호가 해요."
+          en: "{{pick.2|code}} is <b>one side</b>. The weighing is done by the symbol between."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값이냐 물음이냐", en: "The sharpest spot — a value or a question" }
+          code:
+            - "n;         // 값"
+            - "n == 2;    // 물음"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 견줄 <b>다른 쪽</b>입니다. 둘을 잇는 것이 가운데 기호예요."
+          en: "{{pick.3|code}} is <b>the other side</b>. The symbol between joins them."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 한쪽이냐 견주기냐", en: "The sharpest spot — a side or the weighing" }
+          code:
+            - "2;"
+            - "n == 2;"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 두 값이 <b>같은지</b> 묻습니다."
+      en: "Choose what goes in the blank. Line {{site.line}} asks whether two values are <b>the same</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "==", mono: true }
+      - t: "="
+        mono: true
+        diag:
+          t:
+            ko: "기호 하나짜리는 <b>넣는</b> 일입니다. 넣는 일도 값을 내서, 왼쪽이 참·거짓이면 조건으로 통과해 버려요."
+            en: "One symbol <b>puts a value in</b>. Putting yields a value too, so with a truth value on the left it passes as a condition."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 묻기냐 넣기냐", en: "The sharpest spot — asking or putting" }
+            code:
+              - "if (done == true)   // 묻는다"
+              - "if (done = true)    // 넣고 언제나 참"
+      - t: "!="
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>다른지</b>를 묻습니다. 답이 정확히 뒤집혀서 갈림이 반대로 갑니다."
+            en: "That asks whether they <b>differ</b>. The answer flips, and the branch goes the other way."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 같은가 다른가", en: "The sharpest spot — same or different" }
+            code:
+              - "n == 2   // 2 일 때 참"
+              - "n != 2   // 2 가 아닐 때 참"
+      - t: "<="
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>크기</b>를 묻는 자리라 숫자에만 쓸 수 있습니다. 상자에는 컴파일이 안 돼요."
+            en: "That asks about <b>size</b> and takes numbers only; on a boxed value it does not compile."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 같음이냐 크기냐", en: "The sharpest spot — sameness or size" }
+            code:
+              - "n == 2    // 같은가"
+              - "n <= 2    // 이하인가"
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 이 둘을 <b>견주어</b> 봐야 했을까요?"
+    en: "Why does line {{site.line}} need to <b>weigh</b> these two?"
+  choices:
+    - t:
+        ko: "아래 흐름이 이 답에 따라 갈리기 때문 — 견주지 않으면 무엇을 할지 정할 수 없다"
+        en: "Because the flow below turns on the answer — without it there is nothing to decide by"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 물음을 지우면 아래 어느 줄이 언제나 도는지도 적어 보세요."
+        en: "That is the direction. Say which lines below would always run without this question."
+    - t:
+        ko: "자바가 견주기를 요구해서"
+        en: "Because Java demands a comparison"
+      ok: false
+      fb:
+        ko: "요구하지 않습니다. 무엇을 견줄지는 이 줄이 정했어요."
+        en: "It does not. What to weigh was this line's choice."
+    - t:
+        ko: "값을 바꾸려고"
+        en: "To change a value"
+      ok: false
+      fb:
+        ko: "견주기는 아무것도 안 바꿉니다. 답 하나를 낼 뿐이에요."
+        en: "Weighing changes nothing. It only yields one answer."
+queries:
+  - { grammars: [java], file: ./comparison.scm }
+examples:
+  # 값을 든 예 — 식 · 값 · 타입. 견주기는 언제나 참·거짓을 낸다.
+  - code: "class A { void f(int n) { boolean t = n == 2; } }  // 2 == 2 -> true (boolean)"
+    expect: { sites: 1, form: compare, hole: "==", picks: { 1: "==", 2: "n", 3: "2" } }
+  - code: "class A { void f(int n) { boolean t = n < 2; } }   // 3 < 2 -> false (boolean)"
+    expect: { sites: 1, form: compare, hole: "<", picks: { 1: "<", 2: "n", 3: "2" } }
+  - code: "class A { void f(int n) { boolean t = n != 2; } }  // 3 != 2 -> true (boolean)"
+    expect: { sites: 1, form: compare, hole: "!=", picks: { 1: "!=", 2: "n", 3: "2" } }
+  - code: "class A { void f(int a, int b) { int s = a + b; } }  // 1 + 2 -> 3 (int, 셈이지 견주기가 아니다)"
+    expect: none

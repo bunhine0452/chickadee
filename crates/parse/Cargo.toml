@@ -17,6 +17,15 @@ tree-sitter-sequel = { version = "0.3", optional = true }
 tree-sitter-python = { version = "0.23", optional = true }
 tree-sitter-go = { version = "0.23", optional = true }
 tree-sitter-rust = { version = "0.23", optional = true }
+tree-sitter-java = { version = "0.23", optional = true }
+tree-sitter-xml = { version = "0.7", optional = true }
+tree-sitter-css = { version = "0.23", optional = true }
+# D190 — the last four of the ten languages (D156). Linked so that `c`·`cpp`·`csharp`·`swift`
+# dictionaries capture something; without a parser a dictionary passes lint and matches nothing.
+tree-sitter-c = { version = "0.24", optional = true }
+tree-sitter-cpp = { version = "0.23", optional = true }
+tree-sitter-c-sharp = { version = "0.23", optional = true }
+tree-sitter-swift = { version = "0.7", optional = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
 streaming-iterator = "0.1"
@@ -29,7 +38,11 @@ insta = "1.48.0"
 serde_json.workspace = true
 
 [features]
-default = ["lang-typescript", "lang-javascript", "lang-sql", "lang-python", "lang-go", "lang-rust"]
+default = [
+  "lang-typescript", "lang-javascript", "lang-sql", "lang-python", "lang-go", "lang-rust",
+  "lang-java", "lang-xml", "lang-css",
+  "lang-c", "lang-cpp", "lang-csharp", "lang-swift",
+]
 lang-typescript = ["dep:tree-sitter-typescript"]
 lang-javascript = ["dep:tree-sitter-javascript"]
 # A community grammar that breaks the build can be dropped from a release
@@ -38,6 +51,17 @@ lang-sql = ["dep:tree-sitter-sequel"]
 lang-python = ["dep:tree-sitter-python"]
 lang-go = ["dep:tree-sitter-go"]
 lang-rust = ["dep:tree-sitter-rust"]
+# D159 — Spring 리포의 심장이 Java 다. 라우트 애너테이션에서 HTTP 간선이 나온다.
+lang-java = ["dep:tree-sitter-java"]
+# MyBatis 매퍼가 XML 이고 그 안에 SQL 과 **자바 클래스 이름**이 산다 (D159).
+lang-xml = ["dep:tree-sitter-xml"]
+# `.vue` 의 `<style>` 과 `.css` (D159). 화면이 왜 그렇게 보이는지의 재료다.
+lang-css = ["dep:tree-sitter-css"]
+# D190 — the remaining four of the ten languages.
+lang-c = ["dep:tree-sitter-c"]
+lang-cpp = ["dep:tree-sitter-cpp"]
+lang-csharp = ["dep:tree-sitter-c-sharp"]
+lang-swift = ["dep:tree-sitter-swift"]
 
 [lints]
 workspace = true

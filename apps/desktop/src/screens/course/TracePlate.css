@@ -1,0 +1,135 @@
+/* 값 추적 격자 (D187 ⑱ · 정본 §6).
+ *
+ * 장식이 0 이다 — 선 하나와 칸 하나가 전부이고, 색은 뜻에만 쓴다(틀린 칸의 왼쪽 선).
+ * 코드 창(`StagePlate.css` 의 `.cc-window`)과 같은 종이·같은 눈금을 쓴다: 16px 등폭 ·
+ * 줄 번호는 표 왼쪽에 sticky · 넘치면 표 안에서만 가로로 흐른다.
+ *
+ * 720 폭: 열 다섯짜리 격자를 실제로 세워 재 봤다 — 「언제」 칸 20ch · 값 칸 6ch · 열 이름은
+ * 접힘. 표 너비 **650px** 이라 720 창(안쪽 670px)에 든다. 그래도 창은 남겨 둔다: 이름이 더
+ * 긴 열이 오면 표만 흐르고 **문서는 안 밀린다**(`responsive.spec.ts` 가 재는 것이 그것이다). */
+
+.course-run .cc-grid-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--code-bg);
+}
+
+.course-run .cc-grid {
+  min-width: max-content;
+  border-collapse: collapse;
+  color: var(--text);
+  font-size: var(--fs-4);
+  line-height: var(--lh-body);
+}
+
+/* 표의 이름은 화면에도 남긴다 — 스크린 리더만의 것이 아니라 「이 격자가 무엇인가」다. */
+.course-run .cc-grid-cap {
+  padding: var(--s-2) var(--s-3);
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: var(--fs-2);
+  text-align: left;
+}
+
+.course-run .cc-grid th,
+.course-run .cc-grid td {
+  padding: var(--s-2) var(--s-3);
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: middle;
+}
+
+/* 열 이름은 접힌다 — 「user 가 가리키는 상자」처럼 긴 이름이 다섯이면 720 에서 표가 넘친다.
+   접으면 720 에서도 다섯 열이 창 안에 든다(실측: 828px → 650px). */
+.course-run .cc-grid thead th {
+  max-width: 10ch;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: var(--fs-2);
+  font-weight: var(--fw-bold);
+  word-break: keep-all;
+}
+
+/* 「언제」 열 — 줄 번호와 그 줄의 코드. 가로로 밀어도 제자리에 남는다. */
+.course-run .cc-grid-when {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  max-width: 20ch;
+  background: var(--surface-2);
+  font-weight: var(--fw-normal);
+}
+
+.course-run .cc-grid tbody .cc-grid-when b {
+  display: inline-block;
+  min-width: 3ch;
+  margin-right: var(--s-2);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--fw-normal);
+}
+
+.course-run .cc-grid-when code {
+  display: inline-block;
+  max-width: 15ch;
+  overflow: hidden;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-3);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+
+.course-run .cc-cell {
+  min-width: 6ch;
+  font-family: var(--font-mono);
+  font-size: var(--fs-4);
+  white-space: nowrap;
+}
+
+/* 틀린 칸 — 색이 아니라 **왼쪽 선**이 먼저 말한다. 색맹 대비 게이트가 그것을 잰다. */
+.course-run .cc-cell.miss {
+  box-shadow: inset 3px 0 0 var(--bad);
+  background: var(--bad-bg);
+}
+
+.course-run .cc-cell-in {
+  width: 6ch;
+  padding: 2px var(--s-2);
+  border: 1px solid var(--accent);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-4);
+}
+
+.course-run .cc-cell-in:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+.course-run .cc-grid-legend {
+  margin-top: var(--s-2);
+}
+
+/* `order` 의 「왜 그 자리인가」 — 채점 뒤에만 펴진다. */
+.course-run .cc-facts {
+  margin-top: var(--s-3);
+  color: var(--text-muted);
+  font-size: var(--fs-2);
+}
+
+.course-run .cc-facts ol {
+  margin: var(--s-2) 0 0;
+  padding-left: var(--s-5);
+}
+
+.course-run .cc-facts code {
+  font-family: var(--font-mono);
+  color: var(--text);
+}

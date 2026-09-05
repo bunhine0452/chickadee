@@ -1,0 +1,84 @@
+lang: sql
+version: 0.1.0
+grammars: [sql, mybatis_sql]
+# tree-sitter-sequel 의 `parser.c` 가 14 다. 대조는 시험이 한다.
+# `mybatis_sql` 은 같은 sql 문법을 매퍼의 문 본문에만 돌리는 가상 문법이라 값이 같다.
+grammar_abi: { sql: 14, mybatis_sql: 14 }
+
+extensions:
+  sql: [.sql]
+  # MyBatis 매퍼. `.xml` 은 `mybatis` 사전도 잡는다 — 으뜸 문법(파일 행)은 먼저 온 쪽이고
+  # 캡처는 양쪽에서 다 나온다 (`jobs.rs` 의 `grammars_of`).
+  mybatis_sql: [.xml]
+
+# 순서는 0부 → 1부 → 2부이고 `packages/course/src/parts/sql.ts` 가 한 글자도 안 어긋나게 옮긴다
+# (`parts/index.test.ts` 가 대조한다). 정본은 `docs/curriculum/sql.md` §0.2(0부) · §2(1부) ·
+# §3·§4(2부)다.
+#
+# 자리표(`:name` · `#{name}`)는 **파서에게만** 같은 너비의 글자 값으로 가려진다
+# (`crates/parse/src/params.rs`). 그래서 `sql/comparison` 이 자리표가 있는 사용처를 빼지 않고도
+# 값 자리를 값이라고 가르친다 — 표본 리포 매퍼 9파일에서 6 → 53 사용처.
+#
+# 선행은 §0.2 의 표를 따르되 **한 칸만 다르다**: `sql/comparison` 에 0-5 와 0-6 을 둘 다 걸면
+# 깊이가 3 이 되어 D184 의 프롤로그(깊이 ≤ 2)에서 빠진다. 0-6 하나만 걸고 0-5 는
+# `sql/null-check` 쪽 사슬(0-3 → 0-4 → 0-5)에 남겼다.
+#
+# **`sql/normalization` 은 없다.** 표를 나누는 일에 구문이 없어서(`sql.md` §4 ㉜) 캡처 쿼리를
+# 쓸 수 없고, `sql/` 은 계산 네임스페이스가 아니라 쿼리 없는 개념을 못 든다
+# (`packages/dictionary/src/schema.ts` 의 `COMPUTED_NAMESPACES` · `dict.test.ts`).
+essential:
+  # ── 0부 「값 하나가 아니라 표 하나」 여덟 (sql.md §0.2) ──
+  - sql/row-and-set              # 0-1 단위는 행이다 · 얇음(선행 없음)
+  - sql/column-type              # 0-2 타입은 열에 붙는다 · 얇음
+  - sql/value-and-name           # 0-3 따옴표가 값과 이름을 가른다 · 얇음
+  - sql/null-unknown             # 0-4 없음이 아니라 모름
+  - sql/three-valued-comparison  # 0-5 견주기가 내는 답이 셋
+  - sql/implicit-cast            # 0-6 타입이 다르면 조용히 맞춘다
+  - sql/expression-per-row       # 0-7 식 하나가 행마다 한 번
+  - sql/clause-order             # 0-8 적는 순서와 도는 순서가 다르다
+  # ── 1부 「절을 읽기」 — 바닥 여덟 (sql.md §2) ──
+  - sql/text-literal             # 1 글자 값 적기
+  - sql/from-table               # 2 어느 표에서 가져올지 대기 · 얇음(선행 없음)
+  - sql/select-list              # 3 볼 열 고르기
+  - sql/comparison               # 4 두 값 견주기
+  - sql/where-filter             # 5 조건에 맞는 행만 남기기
+  - sql/null-check               # 6 값이 없는 자리 가려내기
+  - sql/order-by                 # 7 줄 세우기
+  - sql/update-set               # 8 있는 행의 값 바꾸기
+  # ── 2부 「중심 열여섯 + 심화」 (sql.md §3·§4) ──
+  - sql/insert-row               # 9  새 행 넣기
+  - sql/delete-row               # 10 행 지우기
+  - sql/named-param              # 11 값 자리 비워 두기
+  - sql/qualified-column         # 12 어느 표의 열인지 밝히기
+  - sql/arithmetic               # 13 셈하기
+  - sql/case-when                # 14 조건으로 값 고르기
+  - sql/join-inner               # 15 두 표를 짝지어 붙이기
+  - sql/join-left                # 16 짝이 없어도 왼쪽은 남기기
+  - sql/aggregate                # 17 여러 행을 한 값으로 접기
+  - sql/group-by                 # 18 같은 값끼리 묶기
+  - sql/having                   # 19 묶은 뒤에 거르기
+  - sql/subquery                 # 20 괄호 안에 또 다른 조회
+  - sql/exists                   # 21 있기만 하면 되는 조건
+  - sql/limit-offset             # 22 몇 줄만 가져오기
+  - sql/coalesce                 # 23 없을 때 채우기
+  - sql/on-conflict              # 24 없으면 넣고 있으면 고치기
+  - sql/self-join                # 24-a 같은 표를 두 번 적기 · 표본 사용처 0곳(합성이 정본)
+  - sql/cte                      # 25 조회에 이름 붙여 두기
+  - sql/window-function          # 26 접지 않고 이웃을 보기 · 표본 사용처 0곳
+  - sql/transaction              # 27 여러 문장을 한 덩어리로 · 표본 사용처 0곳
+  - sql/index                    # 28 찾는 시간만 줄이는 곁표
+  - sql/foreign-key              # 29 다른 표의 행을 가리키기
+  - sql/constraint-check         # 30 넣기 전에 막을 조건
+  - sql/query-plan               # 31 고른 길 읽기 · 표본 사용처 0곳
+
+alternatives: []
+
+thin_threshold: { min_files: 2, min_sites: 3, small_repo_files: 20 }
+
+diag_default:
+  point:
+    ko: "«{{pick}}»{{pick|josa:은,는}} {{role}} 자리입니다. {{concept}}{{concept|josa:은,는}} «{{answer}}» 입니다. {{rule}}"
+    en: "«{{pick}}» is the {{role}} slot. The {{concept}} is «{{answer}}». {{rule}}"
+  blank:
+    ko: "«{{pick}}»{{pick|josa:은,는}} 이 자리에 오지 않습니다. {{rule}}"
+    en: "«{{pick}}» does not go in this slot. {{rule}}"

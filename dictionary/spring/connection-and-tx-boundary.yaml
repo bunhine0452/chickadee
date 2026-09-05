@@ -1,0 +1,93 @@
+schema: 1
+id: spring/connection-and-tx-boundary
+universal: null
+name: { ko: "연결을 빌려 쓰는 구간", en: "Connection and transaction boundary" }
+token: null
+grammars: []
+framework: spring
+# 짚을 노드가 없다 — 경계는 프록시가 실행 중에 긋는다 (D176). 창은 자바 개념에서 빌린다 (D157 ②).
+track_default: t0
+essential: false
+difficulty: 4
+prereq: [spring/proxy-and-aop, cs/transaction-isolation]
+confusions: [spring/transaction-propagation]
+queries: []
+dict:
+  one_liner:
+    ko: "메서드가 시작할 때 연결을 빌리고 끝날 때 돌려준다."
+    en: "The method borrows a connection at the start and returns it at the end."
+  why:
+    ko: >-
+      데이터베이스와의 연결은 만들 때마다 비싸서, 미리 몇 개를 만들어 두고 <b>빌려 쓰고 돌려주는</b>
+      방식을 씁니다. 트랜잭션이 걸린 메서드가 시작하면 프록시가 연결 하나를 빌려 오고,
+      메서드 안에서 도는 모든 질의가 <b>같은 연결</b>을 씁니다. 메서드가 정상으로 끝나면 확정하고,
+      예외로 끝나면 되돌린 뒤 연결을 돌려줍니다. 그래서 <b>메서드 하나가 경계</b>예요.
+      이 경계가 길어지면 연결을 오래 붙들게 되고, 빌릴 것이 다 떨어지면 다른 요청이 기다립니다 —
+      느려지는 원인이 질의가 아니라 경계인 경우가 흔합니다.
+    en: >-
+      A database connection is expensive to open, so a few are made ahead and <b>borrowed and
+      returned</b>. When a transactional method starts, the proxy borrows one, and every query
+      inside uses <b>that same connection</b>. A normal return commits; an exception rolls back;
+      then the connection goes back. So <b>one method is the boundary</b>. A long boundary holds the
+      connection longer, and when none are left other requests wait — often the reason something is
+      slow is the boundary, not the query.
+  trace: []
+rule:
+  ko: "<b>경계는 메서드 하나다.</b> 그 안의 질의는 같은 연결에서 돈다."
+  en: "<b>The boundary is one method.</b> Every query inside runs on the same connection."
+ok:
+  ko: >-
+    메서드가 시작할 때 연결을 빌리고, 정상으로 끝나면 확정한 뒤 돌려줍니다.
+    예외로 끝나면 되돌린 뒤 돌려줍니다.
+  en: >-
+    The method borrows on entry, commits on a normal return, and hands the connection back. On an
+    exception it rolls back first.
+misconceptions:
+  - ko: "질의마다 연결을 새로 만든다 — 미리 만들어 둔 것을 빌려 씁니다."
+    en: "Each query opens a new connection — they are borrowed from a prepared set."
+  - ko: "읽기 전용이면 트랜잭션이 없다 — 있고, 표시가 하나 더 붙을 뿐입니다."
+    en: "Read-only means no transaction — there is one, with one more mark on it."
+  - ko: "메서드가 길어도 상관없다 — 그동안 연결을 붙들고 있습니다."
+    en: "A long method is fine — it holds the connection the whole time."
+  - ko: "예외를 잡아서 삼키면 확정된다 — 잡은 자리에 따라 되돌아갈 수 있습니다."
+    en: "Swallowing the exception commits it — depending on where it was caught, it can still roll back."
+evidence: ["readOnly =", "DataSource", "SqlSessionFactory", "PlatformTransactionManager", "@EnableTransactionManagement", "HikariDataSource"]
+meaning:
+  - q:
+      ko: "트랜잭션이 걸린 메서드 안에서 질의를 세 번 했습니다. <b>연결은 몇 개인가요?</b>"
+      en: "Three queries run inside one transactional method. <b>How many connections?</b>"
+    hint:
+      ko: "경계를 긋는 단위가 무엇인지 보세요."
+      en: "Ask what unit the boundary is drawn around."
+    options:
+      - t: { ko: "하나 — 메서드가 빌린 연결을 세 질의가 함께 쓴다", en: "One — the three queries share what the method borrowed" }
+      - t: { ko: "셋 — 질의마다 하나씩", en: "Three — one per query" }
+        diag:
+          t:
+            ko: "질의마다 빌리면 세 질의를 <b>하나로 묶을 수 없습니다</b>. 묶으려면 같은 연결이어야 하고, 그래서 경계가 메서드예요."
+            en: "Borrowing per query makes it impossible to <b>treat the three as one</b>. That needs one connection, which is why the boundary is the method."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 질의냐 메서드냐", en: "The sharpest spot — the query or the method" }
+            code:
+              - "질의마다: 묶을 수 없다"
+              - "메서드마다: 묶인다"
+      - t: { ko: "요청 하나에 하나 — 요청이 경계다", en: "One per request — the request is the boundary" }
+        diag:
+          t:
+            ko: "요청 하나가 트랜잭션 메서드를 <b>여럿 부를 수 있습니다</b>. 그러면 경계도 여럿이에요."
+            en: "One request can call <b>several</b> transactional methods, and then there are several boundaries."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 요청이냐 메서드냐", en: "The sharpest spot — the request or the method" }
+            code:
+              - "요청: 메서드를 여럿 부른다"
+              - "경계: 그 메서드마다"
+      - t: { ko: "설정한 개수만큼 — 미리 만들어 둔 수가 그대로 쓰인다", en: "As many as configured — the prepared count is used" }
+        diag:
+          t:
+            ko: "미리 만들어 둔 수는 <b>동시에 빌릴 수 있는 상한</b>입니다. 이 메서드 하나가 그것을 다 쓰는 것이 아니에요."
+            en: "The prepared count is <b>the ceiling on simultaneous borrowing</b>. One method does not take them all."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 상한이냐 이번 쓰임이냐", en: "The sharpest spot — the ceiling or this use" }
+            code:
+              - "상한: 동시에 몇 개까지"
+              - "이번: 하나를 빌린다"

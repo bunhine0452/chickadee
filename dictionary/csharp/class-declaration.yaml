@@ -1,0 +1,164 @@
+schema: 1
+id: csharp/class-declaration
+universal: common/class-definition
+name: { ko: 이름 붙인 타입 만들기, en: Class declaration }
+token: "class"
+grammars: [c_sharp]
+framework: null
+essential: true
+difficulty: 1
+prereq: [cs/abstraction]
+confusions: []
+dict:
+  one_liner:
+    ko: "값과 동작을 한 이름 아래 묶고, 이 언어의 코드는 전부 그 안에 산다."
+    en: "It gathers data and behaviour under one name, and all code lives inside one."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.2|code}}{{pick.2|josa:은,는}} 새 <b>타입 이름</b>입니다.
+      파이썬·자바스크립트에서는 함수 정의가 파일의 뿌리인데 C# 은 그 위에 <b>한 겹이 더</b>
+      있어요 — 모든 메서드와 필드가 이런 상자 안에 삽니다. 그래서 코드를 읽을 때
+      「이 이름은 어디 것인가」의 답이 언제나 있고, 같은 이름이 두 상자에 있어도 안 부딪힙니다.
+      최상위 문으로 짠 <code>Program.cs</code>도 컴파일러가 이 상자를 하나 만들어 감쌉니다.
+    en: >-
+      {{pick.2|code}} on line {{site.line}} is a new <b>type name</b>. In Python and JavaScript
+      a function definition is the root of a file; C# puts <b>one more layer</b> above it —
+      every method and field lives in a box like this. So "where does this name belong" always
+      has an answer, and the same name in two boxes does not collide. Even a
+      <code>Program.cs</code> written as top-level statements gets one of these boxes from the
+      compiler.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}}{{pick.2|josa:이,가}} 새 타입 이름임을 알린다."
+      en: "Line {{site.line}} announces {{pick.2|code}} as a new type name."
+    - ko: "{{pick.3|code}} 안의 것은 전부 그 이름에 속한다."
+      en: "Everything inside {{pick.3|code}} belongs to that name."
+    - ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 그 상자가 참조형임을 정한다."
+      en: "{{pick.1|code}} makes that box a reference type."
+rule:
+  ko: "<b>모든 코드가 타입 안에 산다.</b> 이 낱말로 만든 상자는 참조형이다."
+  en: "<b>All code lives inside a type.</b> A box made with this word is a reference type."
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 이제 다른 곳에서 타입으로 쓸 수 있는 이름입니다."
+  en: "{{pick.2|code}} is now a name usable as a type elsewhere."
+payoff:
+  ko: "이걸 알면 「이 메서드는 어디 것인가」가 늘 답이 있습니다 — 감싼 상자 이름입니다."
+  en: "This gives “whose method is this” a standing answer: the box that wraps it."
+bridge:
+  ko: >-
+    파이썬은 파일 하나가 그 자체로 담는 자리입니다. C# 은 <b>파일과 상자가 다른 축</b>이라
+    한 파일에 상자가 여럿일 수도, 한 상자가 파일 여럿에 흩어질 수도 있어요.
+  en: >-
+    In Python a file is itself the container. In C# <b>file and box are separate axes</b>:
+    one file can hold several boxes, and one box can be split across files.
+misconceptions:
+  # 출처 — `csharp.md` §3 ⑨ · §8 ⑦(partial).
+  - ko: "한 파일에 상자 하나여야 한다 — 여럿 둘 수 있고, <code>partial</code>이면 하나가 여러 파일에 흩어집니다."
+    en: "One file holds one box — a file can hold several, and <code>partial</code> splits one across files."
+  - ko: "이 낱말로 만든 것은 값처럼 복사된다 — 참조형이라 화살표만 갑니다."
+    en: "A box made with this word copies like a value — it is a reference type, so only the arrow travels."
+  - ko: "이름이 파일 이름과 같아야 한다 — C# 은 강제하지 않습니다. 관습일 뿐입니다."
+    en: "The name must match the file name — C# does not require it. It is only a convention."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>새 타입 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the new type name</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>어떤 상자인가</b>를 정하는 낱말입니다. 이름은 그 뒤에 옵니다."
+          en: "{{pick.1|code}} says <b>what kind of box</b> it is. The name comes after it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 종류냐 이름이냐", en: "The sharpest spot — the kind or the name" }
+          code:
+            - "class Cart { }       // 참조형"
+            - "struct Cart { }      // 값형, 같은 이름"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 상자 <b>안</b>입니다. 안이 비어 있어도 타입은 만들어져요."
+          en: "{{pick.3|code}} is <b>inside</b> the box. An empty inside still makes a type."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 안이냐 이름이냐", en: "The sharpest spot — the inside or the name" }
+          code:
+            - "class Cart { }        // 이름은 있다"
+            - "class { }             // 문법이 아니다"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>참조형</b> 상자를 하나 만듭니다."
+      en: "Choose what goes in the blank. Line {{site.line}} makes one <b>reference type</b> box."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "class", mono: true }
+      - t: "struct"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>값형</b> 상자입니다. 대입하면 화살표가 아니라 값 전체가 복사돼요."
+            en: "That is a <b>value type</b> box. Assigning it copies the whole value, not an arrow."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값이냐 참조냐", en: "The sharpest spot — value or reference" }
+            code:
+              - "class P { }    // 원본이 같이 바뀐다"
+              - "struct P { }   // 원본은 그대로"
+      - t: "interface"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>약속만</b> 적는 상자라 필드도 몸통도 못 둡니다. 만들 수도 없어요."
+            en: "That box holds only a <b>promise</b>: no fields, no bodies, and nothing to instantiate."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 만들 수 있나", en: "The sharpest spot — can it be made" }
+            code:
+              - "new Cart();     // 된다"
+              - "new ICart();    // 안 된다"
+      - t: "record"
+        mono: true
+        diag:
+          t:
+            ko: "이건 참조형이지만 <b>같음의 뜻이 다릅니다</b> — 견주기가 참조가 아니라 내용을 봅니다."
+            en: "That is a reference type but <b>equality means something else</b>: it compares content, not identity."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 같음의 뜻", en: "The sharpest spot — what equality means" }
+            code:
+              - "class  A(int X);   // a == b 는 False"
+              - "record A(int X);   // a == b 는 True"
+why_gate:
+  q:
+    ko: "이 언어는 왜 모든 코드를 <b>상자 안에</b> 두게 했을까요?"
+    en: "Why does this language keep all code <b>inside a box</b>?"
+  choices:
+    - t:
+        ko: "이름마다 속한 곳이 생겨, 같은 이름이 여럿이어도 어느 것인지 가릴 수 있게 하려고"
+        en: "So every name has a home, and repeated names can still be told apart"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 상자가 없을 때 이름이 겹치면 무엇이 일어나는지도 적어 보세요."
+        en: "That is the direction. Add what happens to colliding names without a box."
+    - t:
+        ko: "상자에 넣으면 빨라져서"
+        en: "Because boxing it makes it faster"
+      ok: false
+      fb:
+        ko: "속도와 무관합니다. 같은 코드가 어디 있든 같은 기계어가 나옵니다."
+        en: "Unrelated to speed — the same code compiles the same wherever it sits."
+    - t:
+        ko: "객체를 꼭 만들게 하려고"
+        en: "To force objects to be created"
+      ok: false
+      fb:
+        ko: "만들 필요는 없습니다. <code>static</code>만 든 상자도 그대로 씁니다."
+        en: "Nothing has to be created — a box of only <code>static</code> members is used as it is."
+queries:
+  - { grammars: [c_sharp], file: ./class-declaration.scm }
+examples:
+  - code: "class Order { }"
+    expect: { sites: 1, form: class, hole: "class", picks: { 1: "class", 2: "Order", 3: "{ }" } }
+  - code: "public class Cart { int n; }"
+    expect: { sites: 1, form: class, picks: { 1: "class", 2: "Cart", 3: "{ int n; }" } }
+  - code: "interface IRepo { }"
+    expect: none

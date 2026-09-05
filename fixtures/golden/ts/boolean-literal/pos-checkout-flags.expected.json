@@ -1,0 +1,80 @@
+[
+  {
+    "queryId": "ts/boolean-literal",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "true",
+    "startLine": 3,
+    "startCol": 16,
+    "endLine": 3,
+    "endCol": 20,
+    "nodeKind": "true",
+    "inError": false
+  },
+  {
+    "queryId": "ts/boolean-literal",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "true",
+    "startLine": 3,
+    "startCol": 16,
+    "endLine": 3,
+    "endCol": 20,
+    "nodeKind": "true",
+    "inError": false
+  },
+  {
+    "queryId": "ts/boolean-literal",
+    "matchId": 2,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "true",
+    "startLine": 4,
+    "startCol": 19,
+    "endLine": 4,
+    "endCol": 23,
+    "nodeKind": "true",
+    "inError": false
+  },
+  {
+    "queryId": "ts/boolean-literal",
+    "matchId": 2,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "true",
+    "startLine": 4,
+    "startCol": 19,
+    "endLine": 4,
+    "endCol": 23,
+    "nodeKind": "true",
+    "inError": false
+  },
+  {
+    "queryId": "ts/boolean-literal",
+    "matchId": 3,
+    "patternIndex": 1,
+    "name": "site",
+    "form": "false",
+    "startLine": 5,
+    "startCol": 15,
+    "endLine": 5,
+    "endCol": 20,
+    "nodeKind": "false",
+    "inError": false
+  },
+  {
+    "queryId": "ts/boolean-literal",
+    "matchId": 3,
+    "patternIndex": 1,
+    "name": "pick.1",
+    "form": "false",
+    "startLine": 5,
+    "startCol": 15,
+    "endLine": 5,
+    "endCol": 20,
+    "nodeKind": "false",
+    "inError": false
+  }
+]

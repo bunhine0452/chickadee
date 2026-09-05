@@ -1,0 +1,153 @@
+/* 스택 프레임 — 호출이 쌓이고 걷힌다. 맨 위가 지금 도는 프레임이라 배열의 뒤를 위에 그린다.
+   색은 「지금 이것」 한 자리(맨 위 프레임 · 이번 줄에서 바뀐 칸)에만 붙는다(정본 §6). */
+.sf {
+  display: grid;
+  gap: var(--s-3);
+  min-width: min-content;
+}
+
+.sf-code {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-3);
+  line-height: var(--lh-code);
+  color: var(--text);
+}
+
+.sf-stack {
+  display: grid;
+  gap: var(--s-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sf-frame {
+  display: grid;
+  gap: var(--s-1);
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+}
+
+/* 지금 도는 프레임 하나. 신호 주기는 한 화면에 하나다(README §1). */
+.sf-frame.top {
+  border-color: var(--accent);
+  background: var(--accent-weak);
+}
+
+.sf-fn {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-3);
+  font-weight: var(--fw-medium);
+  color: var(--text);
+}
+
+.sf-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  align-items: center;
+  margin: 0;
+}
+
+.sf-kind {
+  min-width: 3.5em;
+  font-size: var(--fs-1);
+  color: var(--text-muted);
+}
+
+.sf-cell {
+  display: flex;
+  gap: var(--s-2);
+  align-items: baseline;
+  padding: 0 var(--s-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+}
+
+.sf-cell.now {
+  border-color: var(--accent);
+}
+
+.sf-name {
+  display: flex;
+  gap: var(--s-1);
+  align-items: baseline;
+  font-family: var(--font-mono);
+  font-size: var(--fs-2);
+  color: var(--text-muted);
+}
+
+.sf-type {
+  font-family: var(--font-ui);
+  font-size: var(--fs-1);
+  color: var(--text-faint);
+}
+
+.sf-val {
+  display: inline-block;
+  min-width: 1.4em;
+  font-family: var(--font-mono);
+  font-size: var(--fs-3);
+  color: var(--text);
+}
+
+/* 걷힐 때 도는 것 — C++ 은 프레임이 사라지는 순서대로 코드가 돈다(cpp-learning.md §11.1). */
+.sf-unwind {
+  display: grid;
+  gap: var(--s-1);
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--border);
+}
+
+.sf-order {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sf-run {
+  display: flex;
+  gap: var(--s-2);
+  align-items: baseline;
+  padding: var(--s-1) var(--s-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+}
+
+/* 예측 — 자리와 번호는 남고 **무엇이 그 번호인지**가 사라진다. */
+.sf-run.veil {
+  border-style: dashed;
+  background: transparent;
+}
+
+.sf-num {
+  font-size: var(--fs-1);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.sf-run-name {
+  display: inline-block;
+  min-width: 4em;
+  font-family: var(--font-mono);
+  font-size: var(--fs-2);
+  color: var(--text);
+}
+
+.sf-note {
+  max-width: var(--measure);
+  margin: 0;
+  font-size: var(--fs-2);
+  line-height: var(--lh-body);
+  color: var(--text-muted);
+  word-break: keep-all;
+}

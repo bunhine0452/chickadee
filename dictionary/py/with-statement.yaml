@@ -1,0 +1,297 @@
+schema: 1
+id: py/with-statement
+universal: null
+name: { ko: 다 쓰면 알아서 닫기, en: Scoped cleanup }
+token: "with"
+grammars: [python]
+framework: null
+essential: true
+difficulty: 3
+prereq: [py/call-expression, py/try-except, cs/scope-and-lifetime]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "블록을 나가는 모든 길에서 정리가 돈다. 정리를 적는 것은 여는 쪽이다."
+    en: "Cleanup runs on every way out of the block. The opener wrote that cleanup."
+  why:
+    ko: >-
+      {{site.line}}행이 여는 블록은 <b>어떻게 나가든</b> 정리가 돕니다 — 값을 돌려주며 나가도,
+      터져서 튕겨 나가도. {{pick.2|code}}{{pick.2|josa:이,가}} 그 정리를 이미 적어 두었기 때문에
+      {{pick.3|code}} 안에는 닫는 줄이 없어요.
+    en: >-
+      The block line {{site.line}} opens runs its cleanup <b>however you leave</b> — handing a value
+      back, or being thrown out by a failure. {{pick.2|code}} already wrote that cleanup, which is
+      why {{pick.3|code}} holds no closing line.
+  trace:
+    - ko: "{{site.line}}행에서 {{pick.2|code}}{{pick.2|josa:이,가}} 열리고 들어갈 준비가 끝난다."
+      en: "On line {{site.line}}, {{pick.2|code}} is opened and entry is prepared."
+    - ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 돈다."
+      en: "{{pick.3|code}} runs."
+    - ko: "블록을 나가는 순간 정리가 돈다 — 나가는 길이 무엇이든 같다."
+      en: "Cleanup runs the moment the block is left — the same for every way out."
+
+rule:
+  ko: "<b>나가는 길이 무엇이든 정리가 돈다.</b> 그 정리는 쓰는 쪽이 아니라 여는 쪽이 적었다."
+  en: "<b>Cleanup runs on every way out.</b> It was written by the opener, not by the user."
+result:
+  label:
+    ko: "{{site.line}}행 블록을 나간 뒤"
+    en: "after leaving the block of line {{site.line}}"
+  value: "닫힌 {{pick.2}}"
+  note:
+    ko: "터져서 나가도 닫힌다"
+    en: "closed even when a failure throws you out"
+ok:
+  ko: >-
+    {{pick.3|code}}{{pick.3|josa:이,가}} 끝나면 {{pick.2|code}}{{pick.2|josa:이,가}} 닫힙니다. 블록 안에서
+    값을 돌려주며 나가도, 무언가 터져 튕겨 나가도 <b>같은 정리</b>가 돌아요.
+  en: >-
+    When {{pick.3|code}} ends, {{pick.2|code}} is closed. Handing a value back from inside, or being
+    thrown out by a failure, runs <b>the same cleanup</b>.
+payoff:
+  ko: >-
+    이걸 알면 「파일을 닫는 줄이 왜 없지」가 풀립니다 — 닫는 일이 <b>여는 쪽에 이미 적혀</b> 있고,
+    그래서 쓰는 쪽 코드에서 그 줄이 사라졌어요.
+  en: >-
+    This untangles “where is the line that closes the file” — closing is <b>already written by the
+    opener</b>, so it disappeared from the using side.
+bridge:
+  ko: >-
+    <code>py/try-except</code> 의 마지막 정리 블록과 <b>하는 일이 같습니다.</b> 다른 것은 누가
+    적느냐예요 — 그쪽은 쓰는 사람이 적고 이쪽은 여는 쪽이 이미 적어 두었습니다.
+  en: >-
+    It does <b>the same work</b> as the cleanup block in <code>py/try-except</code>. What differs is
+    who writes it — there the user does, here the opener already did.
+misconceptions:
+  - ko: >-
+      블록 안에서 값을 돌려주며 나가면 정리가 안 돈다 — <b>돕니다.</b> 나가는 길마다 도는 것이
+      이 문법이 존재하는 이유예요.
+    en: >-
+      Handing a value back from inside skips the cleanup — it <b>does not</b>. Running on every way
+      out is the whole reason this form exists.
+  - ko: >-
+      아무 값에나 쓸 수 있다 — 여닫는 규칙을 <b>미리 적어 둔 값</b>에만 됩니다. 안 적힌 값에 쓰면
+      그 자리에서 멈춰요.
+    en: >-
+      It works on any value — only on values that <b>declared how to open and close</b>. On others it
+      stops right there.
+  - ko: >-
+      정리는 터진 것을 삼킨다 — <b>안 삼킵니다.</b> 정리를 돌리고 나서 터진 것을 그대로 위로
+      올려보내요.
+    en: >-
+      The cleanup swallows the failure — it <b>does not</b>. It runs the cleanup and then lets the
+      failure travel on upward.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>나갈 때 정리가 돌게 만드는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that makes cleanup run on the way out</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} <b>열리는 것</b>입니다. 여는 일만으로는 닫히지 않고,
+            나갈 때 닫히게 만드는 것은 그 앞의 낱말이에요.
+          en: >-
+            {{pick.2|code}} is <b>what gets opened</b>. Opening alone does not close it; the word
+            before it is what closes it on the way out.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 열기와 닫히게 하기"
+            en: "The sharpest spot — opening and arranging the close"
+          code:
+            - 'f = open("a.txt")       # 안 닫힌다'
+            - 'with open("a.txt") as f:'
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} <b>안에서 할 일</b>입니다. 그 안에는 닫는 줄이 없고,
+            없는데도 닫히게 만드는 것이 첫 낱말이에요.
+          en: >-
+            {{pick.3|code}} is <b>the work inside</b>. It holds no closing line, and the first word is
+            what makes closing happen anyway.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 안에 없는 줄"
+            en: "The sharpest spot — the line that is not inside"
+          code:
+            - "    body = f.read()"
+            - "    # f.close() 가 없다"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행 블록 안에서 무언가 터지면 {{pick.2|code}}{{pick.2|josa:은,는}} 어떻게 될까요?"
+      en: "If something fails inside the block of line {{site.line}}, what happens to {{pick.2|code}}?"
+    hint:
+      ko: "정리가 도는 조건이 <b>몇 가지</b>인지 떠올려 봅니다."
+      en: "Recall <b>how many</b> ways out trigger the cleanup."
+    options:
+      - t:
+          ko: "닫힌다 — 그리고 터진 것은 위로 계속 올라간다"
+          en: "It is closed — and the failure keeps travelling upward"
+      - t:
+          ko: "안 닫힌 채로 남는다"
+          en: "It is left open"
+        diag:
+          t:
+            ko: >-
+              터져서 나가는 길도 <b>나가는 길</b>입니다. 그 길에서도 정리가 돌게 하려고 이 문법이
+              생겼고, 그것이 손으로 닫는 코드와 갈리는 자리예요.
+            en: >-
+              Being thrown out is <b>a way out too</b>. Making cleanup run on that path is exactly why
+              this form exists, and it is where it parts from closing by hand.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 터졌을 때"
+              en: "The sharpest spot — when something fails"
+            code:
+              - 'f = open("a"); boom(); f.close()   # 안 닫힌다'
+              - 'with open("a") as f: boom()        # 닫힌다'
+      - t:
+          ko: "닫히고 터진 것도 사라진다"
+          en: "It is closed and the failure disappears"
+        diag:
+          t:
+            ko: >-
+              정리는 <b>삼키지 않습니다.</b> 닫고 나서 터진 것을 그대로 위로 올려보내고, 삼키려면
+              받는 블록을 따로 적어야 해요.
+            en: >-
+              The cleanup <b>swallows nothing</b>. It closes and lets the failure travel on; swallowing
+              needs a taking block written separately.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 정리와 삼키기"
+              en: "The sharpest spot — cleaning up and swallowing"
+            code:
+              - "with open(p) as f: boom()   # 자국이 남는다"
+              - "try: ...\nexcept: pass      # 삼킨다"
+      - t:
+          ko: "블록이 처음부터 다시 돈다"
+          en: "The block runs again from the top"
+        diag:
+          t:
+            ko: >-
+              다시 도는 일은 <b>없습니다.</b> 이 문법이 하는 일은 나갈 때 정리 한 번이고, 되풀이는
+              전혀 다른 문법이에요.
+            en: >-
+              Nothing runs again. This form does one cleanup on the way out; repeating is an entirely
+              different form.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 한 번과 되풀이"
+              en: "The sharpest spot — once and repeating"
+            code:
+              - "with open(p) as f: ...    # 한 번"
+              - "for _ in range(3): ...    # 되풀이"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 블록을 나갈 때 {{pick.2|code}}{{pick.2|josa:을,를}} <b>알아서 닫습니다</b>."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} <b>closes</b> {{pick.2|code}} on the way
+        out of the block.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "with", mono: true }
+      - t: "using"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              그 낱말은 <b>다른 언어</b>의 것입니다. 하는 일은 같지만 파이썬이 고른 낱말이 아니라
+              그 자리에서 문법이 안 맞아요.
+            en: >-
+              That word belongs to <b>another language</b>. It does the same work, but it is not the
+              word Python chose, so the line does not hold together.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 언어마다 다른 낱말"
+              en: "The sharpest spot — one word per language"
+            code:
+              - "with open(p) as f:      # 파이썬"
+              - "using (var f = ...) { } # C#"
+      - t: "defer"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              그 낱말은 정리를 <b>함수가 끝날 때</b>로 미루는 다른 언어의 문법입니다. 이쪽은 블록
+              하나가 경계라, 정리가 도는 시점이 달라요.
+            en: >-
+              That word postpones cleanup to <b>the end of the function</b> in another language. Here
+              the boundary is one block, so the cleanup lands at a different moment.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 블록 끝과 함수 끝"
+              en: "The sharpest spot — end of block and end of function"
+            code:
+              - "with open(p) as f:      # 블록 끝"
+              - "defer f.Close()         # 함수 끝"
+      - t: "try"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              그 낱말은 <b>정리를 사람이 적어야</b> 합니다. 정리 블록을 따로 붙이면 같은 일이 되지만,
+              그 줄들이 쓰는 쪽 코드에 그대로 남아요.
+            en: >-
+              That word requires <b>you to write the cleanup</b>. Adding a cleanup block does the same
+              work, but those lines stay in the using side's code.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 누가 적나"
+              en: "The sharpest spot — who writes the cleanup"
+            code:
+              - "with open(p) as f: ..."
+              - "try: ...\nfinally: f.close()"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 닫는 줄을 안 적고 이 문법을 썼을까요?"
+    en: "Why does line {{site.line}} use this form instead of writing a closing line?"
+  choices:
+    - t:
+        ko: "블록 안에서 터지거나 값을 돌려주며 나가도 닫혀야 해서 — 손으로 적으면 그 길들이 빠진다"
+        en: "Because it must close even on a failure or an early return — writing it by hand misses those paths"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 블록 안에서 터질 수 있는 줄이 어디인지도 짚어 보세요."
+        en: "That is the direction. Point also at a line inside this block that can fail."
+    - t:
+        ko: "닫는 줄을 적으면 문법 오류라서"
+        en: "Because writing a closing line is a syntax error"
+      ok: false
+      fb:
+        ko: "적어도 됩니다 — 손으로 여닫는 코드도 돌아가요. 갈리는 것은 <b>빠지는 길</b>이 있느냐입니다."
+        en: "You may write it — opening and closing by hand works. What differs is whether a path gets missed."
+    - t:
+        ko: "이렇게 쓰면 더 빨라서"
+        en: "Because it runs faster this way"
+      ok: false
+      fb:
+        ko: >-
+          속도는 이 줄의 이유가 아닙니다. 바뀐 것은 <b>닫히는 것이 보장되는 길의 수</b>예요.
+        en: >-
+          Speed is not what this line is about. What changed is <b>how many paths are guaranteed to
+          close</b>.
+
+queries:
+  - { grammars: [python], file: ./with-statement.scm }
+
+examples:
+  - code: "with open(path) as f:\n    body = f.read()"
+    expect: { sites: 1, form: with, hole: "with", picks: { 1: "with", 2: "open(path) as f" } }
+  - code: "with lock:\n    count += 1"
+    expect: { sites: 1, form: with, hole: "with", picks: { 1: "with", 2: "lock" } }
+  # 손으로 여닫는 코드는 사용처가 아니다 — 나가는 길 하나에서만 닫힌다.
+  - code: "f = open(path)\nbody = f.read()\nf.close()"
+    expect: none
+  - code: "try:\n    load()\nfinally:\n    close()"
+    expect: none

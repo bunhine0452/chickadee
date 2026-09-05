@@ -1,0 +1,248 @@
+schema: 1
+id: c/sizeof
+# 2부 「포인터와 메모리」 (`docs/curriculum/c.md` §3 #22 · §0.6). `universal: null` — 바이트를 묻는
+# 낱말이 언어에 든 것은 C·C++·Rust(`size_of`) 뿐이고 파이썬·자바에는 없다.
+universal: null
+name: { ko: 몇 바이트인지 묻기, en: sizeof }
+token: "sizeof"
+grammars: [c]
+framework: null
+essential: true
+difficulty: 2
+prereq: [c/declaration, cs/bit-and-byte, cs/memory-layout]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "타입이나 값이 몇 바이트를 차지하는지 묻는다. 답은 컴파일할 때 정해져 실행 없이 나온다."
+    en: "Asks how many bytes a type or value takes; the answer is fixed at compile time."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} {{pick.2|code}}{{pick.2|josa:이,가}} 몇 바이트인지를
+      냅니다. 함수처럼 보이지만 <b>낱말</b>이고, 답은 실행이 아니라 <b>컴파일할 때</b> 정해져요 — 그래서
+      <code>sizeof(x++)</code> 는 <code>x</code> 를 안 늘립니다. 타입에 물으면 그 타입 한 칸의 크기,
+      배열에 물으면 칸 전부의 크기, 포인터에 물으면 <b>번호 한 칸</b>의 크기가 나와요. 마지막 것이
+      함정입니다 — 함수에 넘어온 배열은 이미 포인터라 <code>sizeof</code> 가 배열 크기를 안 냅니다.
+      <code>int</code> 의 답은 규격이 최소 2 만 약속하고 이 기계는 4 예요.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} yields how many bytes {{pick.2|code}} takes. It looks like a
+      function but is a <b>word</b>, and the answer is fixed <b>at compile time</b>, not at run time —
+      which is why <code>sizeof(x++)</code> does not increment <code>x</code>. Asked of a type it gives
+      one slot of that type; of an array, all its slots; of a pointer, <b>one number slot</b>. The last
+      is the trap — an array passed into a function is already a pointer, so <code>sizeof</code> does
+      not give the array's size. For <code>int</code> the standard promises at least 2 and this
+      machine says 4.
+  trace:
+    - ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 무슨 타입인지를 컴파일러가 본다 — 값은 안 본다."
+      en: "The compiler looks at what type {{pick.3|code}} is — not at its value."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 그 타입의 바이트 수를 상수로 낸다."
+      en: "{{pick.1|code}} yields that type's byte count as a constant."
+    - ko: "{{site.line}}행이 돌 때는 이미 수 하나가 놓여 있다 — 괄호 안은 실행되지 않는다."
+      en: "By the time line {{site.line}} runs, a number already sits there — the parentheses never run."
+
+rule:
+  ko: "<b>바이트 수를 컴파일할 때 묻는다.</b> 괄호 안은 실행되지 않고, 포인터에 물으면 번호 한 칸의 크기다."
+  en: "<b>Asks the byte count at compile time.</b> The parentheses never run, and a pointer answers with one number slot."
+result:
+  label:
+    ko: "{{site.line}}행이 묻는 크기"
+    en: "the size asked on line {{site.line}}"
+  value: "{{pick.1}}{{pick.2}}"
+  note:
+    ko: "이 기계에서의 바이트 수"
+    en: "bytes on this machine"
+ok:
+  ko: >-
+    {{pick.2|code}} 의 바이트 수가 {{site.line}}행에 상수로 놓였습니다.
+  en: >-
+    The byte count of {{pick.2|code}} sits on line {{site.line}} as a constant.
+payoff:
+  ko: >-
+    이걸 알면 「함수 안에서 배열 크기가 8 로 나온다」가 풀립니다 — 넘어온 것은 포인터라 번호 한 칸의
+    크기가 나온 거예요.
+  en: >-
+    This untangles “inside the function the array size comes out as 8” — what arrived was a pointer,
+    so one number slot's size came out.
+bridge:
+  ko: >-
+    파이썬은 값이 몇 바이트인지 묻는 낱말이 언어에 없습니다. C 는 바이트가 보이는 언어라 그 물음이
+    낱말로 있고, 그 답으로 칸을 빌립니다.
+  en: >-
+    Python has no language word asking how many bytes a value takes. C shows its bytes, so the question
+    is a word, and its answer is used to borrow slots.
+misconceptions:
+  # c.md §3 #22 · §9 #4·#13 — 규격에서 나온 사실이고 빈도 자료는 없다.
+  - ko: "함수다 — <b>낱말</b>입니다. 괄호는 타입 이름 때문에 필요할 뿐이고, 값에는 괄호 없이도 돼요."
+    en: "It is a function — it is a <b>word</b>. The parentheses are needed only for a type name; on a value they can be dropped."
+  - ko: "괄호 안이 실행된다 — 컴파일할 때 타입만 봅니다. <code>sizeof(x++)</code> 뒤에도 <code>x</code> 는 그대로예요."
+    en: "The parentheses run — only the type is looked at, at compile time. After <code>sizeof(x++)</code>, <code>x</code> is unchanged."
+  - ko: "배열 이름에 물으면 언제나 배열 크기다 — 함수 매개변수로 온 배열은 <b>포인터</b>라 번호 한 칸의 크기가 나옵니다."
+    en: "Asked of an array name it always gives the array size — an array that arrived as a parameter is <b>a pointer</b>, so one number slot's size comes out."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>바이트 수를 묻는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that asks the byte count</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>물음의 대상</b>입니다. 크기를 묻는 것은 앞의 낱말이고, 이것은 무엇의 크기냐를 말할 뿐이에요."
+          en: "{{pick.2|code}} is <b>what is asked about</b>. The word in front asks the size; this only says of what."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 묻는 쪽과 대상"
+            en: "The sharpest spot — the asker and the subject"
+          code:
+            - "sizeof(int)   /* sizeof 가 묻고, int 가 대상 */"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 괄호 <b>안의 것</b>입니다. 실행되지 않고 타입만 읽혀요 — 묻는 낱말은 괄호 앞에 있습니다."
+          en: "{{pick.3|code}} is <b>what is inside</b> the parentheses. It never runs; only its type is read — the asking word is before the parentheses."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 안은 실행되지 않는다"
+            en: "The sharpest spot — the inside never runs"
+          code:
+            - "sizeof(x++)   /* x 는 그대로 */"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행의 물음을 <b>함수 매개변수로 넘어온 배열</b>에 던지면 무엇이 나올까요?"
+      en: "Ask the question on line {{site.line}} of <b>an array that arrived as a function parameter</b> — what comes out?"
+    hint:
+      ko: "함수에 넘어올 때 배열은 무엇이 되나요."
+      en: "What does an array become when passed into a function."
+    options:
+      - t:
+          ko: "번호 한 칸의 크기 — 넘어온 것은 배열이 아니라 포인터다"
+          en: "The size of one number slot — what arrived is a pointer, not an array"
+      - t:
+          ko: "배열 전체의 크기"
+          en: "The whole array's size"
+        diag:
+          t:
+            ko: "배열 전체가 나오는 것은 배열이 <b>선언된 자리</b>에서입니다. 함수에는 첫 칸의 번호만 넘어와요."
+            en: "The whole array comes out <b>where it was declared</b>. Only the first slot's number arrives in a function."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 선언된 자리냐 넘어온 자리냐"
+              en: "The sharpest spot — where declared or where received"
+            code:
+              - "int a[3]; sizeof(a)          /* 12 */"
+              - "void f(int a[]) { sizeof(a) } /* 8 */"
+      - t:
+          ko: "칸 수"
+          en: "The slot count"
+        diag:
+          t:
+            ko: "이 낱말은 <b>바이트</b>를 냅니다. 칸 수는 바이트를 한 칸의 크기로 나눠야 나와요 — 그것도 선언된 자리에서만."
+            en: "This word yields <b>bytes</b>. The slot count comes from dividing by one slot's size — and only where declared."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 바이트냐 칸이냐"
+              en: "The sharpest spot — bytes or slots"
+            code:
+              - "sizeof(a) / sizeof(a[0])   /* 칸 수 */"
+      - t:
+          ko: "컴파일 오류"
+          en: "A compile error"
+        diag:
+          t:
+            ko: "오류가 <b>안 납니다</b>. 포인터의 크기가 조용히 나와요 — 그래서 함정입니다."
+            en: "There is <b>no</b> error. The pointer's size comes out quietly — which is why it is a trap."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 조용히 틀린다"
+              en: "The sharpest spot — quiet failure"
+            code:
+              - "sizeof(a)   /* 경고도 없이 8 */"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>몇 바이트인지</b> 묻습니다."
+      en: "Choose what goes in the blank. Line {{site.line}} asks <b>how many bytes</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "sizeof", mono: true }
+      - t: "strlen"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>글자 수</b>를 세는 라이브러리 함수입니다. 끝의 0 을 만날 때까지 실행하며 세고, 타입에는 못 물어요."
+            en: "That is a library function that counts <b>characters</b>. It runs until it meets the final 0, and cannot be asked about a type."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 바이트냐 글자냐"
+              en: "The sharpest spot — bytes or characters"
+            code:
+              - "sizeof(\"hi\")   /* 3 */"
+              - "strlen(\"hi\")   /* 2 */"
+      - t: "length"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>다른 언어의 이름</b>입니다. C 에는 그런 낱말이 없어서 모르는 이름이라고 멈춰요."
+            en: "That is <b>another language's name</b>. C has no such word and stops on an unknown name."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — C 에 없는 이름"
+              en: "The sharpest spot — a name C lacks"
+            code:
+              - "length(a)   /* 오류 */"
+      - t: "size"
+        mono: true
+        diag:
+          t:
+            ko: "C 에는 <code>size</code> 라는 낱말이 없습니다. 있는 것은 뒤에 <code>of</code> 가 붙은 하나뿐이에요."
+            en: "C has no word <code>size</code>. The only one ends in <code>of</code>."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 낱말 하나"
+              en: "The sharpest spot — one word"
+            code:
+              - "size(int)     /* 오류 */"
+              - "sizeof(int)"
+
+why_gate:
+  q:
+    ko: "C 는 왜 바이트 수를 실행 때가 아니라 <b>컴파일할 때</b> 정할까요?"
+    en: "Why does C fix the byte count <b>at compile time</b> rather than at run time?"
+  choices:
+    - t:
+        ko: "칸을 빌리는 양과 배열의 폭이 그 수로 정해지는데, 타입은 컴파일러가 이미 알고 있어 실행 없이 상수로 접을 수 있기 때문"
+        en: "Because how much to borrow and how wide an array is come from that number, and the compiler already knows the type, so it folds to a constant with no run"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 상수가 기계마다 달라질 수 있는 이유도 한 줄로 적어 보세요."
+        en: "That is the direction. Add a line on why that constant may differ per machine."
+    - t:
+        ko: "실행 때 재는 것이 느려서"
+        en: "Because measuring at run time is slow"
+      ok: false
+      fb:
+        ko: "속도보다 앞선 이유가 있습니다 — 컴파일러가 이미 아는 것을 실행 때 다시 물을 필요가 없어요."
+        en: "There is a reason before speed — what the compiler already knows need not be asked again at run time."
+    - t:
+        ko: "실행 때는 타입이 사라져서"
+        en: "Because types vanish at run time"
+      ok: false
+      fb:
+        ko: "그것은 결과이지 이유가 아닙니다. 타입이 사라지는 것도 이 수를 미리 접어 두었기 때문이에요."
+        en: "That is a consequence, not the reason. Types can vanish because this number was folded in advance."
+
+queries:
+  - { grammars: [c], file: ./sizeof.scm }
+
+examples:
+  - code: "size_t n = sizeof(int);          /* n -> 4 (이 기계) */"
+    expect: { sites: 1, form: of-type, hole: "sizeof", picks: { 1: "sizeof", 2: "int", 3: "int" } }
+  - code: "size_t k = sizeof(buf);          /* buf 가 배열이면 전체 바이트 */"
+    expect: { sites: 1, form: of-value, hole: "sizeof", picks: { 1: "sizeof", 2: "(buf)", 3: "buf" } }
+  - code: "size_t m = strlen(s);            /* 글자 수 — 다른 것이다 */"
+    expect: none

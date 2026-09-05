@@ -22,9 +22,9 @@ describe('Crumb', () => {
 
   it('다시 찍기는 위 판이 없고 기본 문구를 쓴다', () => {
     const { container } = render(<Crumb depth="reprint" />);
-    expect(container.querySelector('.crumb .depth')?.textContent).toBe('다시 찍기');
+    expect(container.querySelector('.crumb .depth')?.textContent).toBe('다시 풀기');
     expect(container.querySelector('.crumb .arr')).toBeNull();
-    expect(container.textContent).toContain('지난번에 어긋난 판입니다');
+    expect(container.textContent).toContain('지난번에 틀린 문제입니다');
   });
 
   it('「위로」 버튼은 onBack 이 있을 때만 나오고 B 를 함께 적는다', () => {

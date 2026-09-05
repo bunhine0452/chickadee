@@ -143,15 +143,6 @@ afterEach(() => {
 /** 교정지 안에서만 찾는다 — 작업 띠의 이름표가 같은 글자를 들고 있다. */
 const sheet = () => within(document.querySelector('.ps') as HTMLElement);
 
-/** LIFER 베일은 아무 키로 닫힌다. 열려 있는 동안은 모든 키를 먹으므로 먼저 치운다. */
-async function dismissLifer(user: ReturnType<typeof userEvent.setup>): Promise<void> {
-  if (document.querySelector('.lifer-card') === null) return;
-  await user.keyboard('[Enter]');
-  await waitFor(() => {
-    expect(document.querySelector('.lifer-card')).toBeNull();
-  });
-}
-
 describe('교정쇄 한 흐름', () => {
   test('고르기 → Enter → Space 세 번이면 판 한 장이 끝난다 (정본 §3-8)', async () => {
     const user = userEvent.setup();
@@ -167,18 +158,23 @@ describe('교정쇄 한 흐름', () => {
     await waitFor(() => {
       expect(document.querySelector('.fb')).toBeTruthy();
     });
-    expect(sheet().getByText('정합')).toBeTruthy();
+    expect(sheet().getByText('정답')).toBeTruthy();
 
     const log = db.prepare('SELECT concept_id, ok, layer_before, layer_after, grade FROM review_log').get();
     expect(log).toEqual({
       concept_id: 'ts/optional-chaining', ok: 1, layer_before: 0, layer_after: 1, grade: 2,
     });
 
-    // 개념 첫 성공이므로 LIFER 의식이 뜬다 (정본 §3-6). 아무 키로 닫힌다.
-    expect(document.querySelector('.lifer-card')).toBeTruthy();
+    // 개념 첫 성공이므로 첫 기록이 판정란 안에 남는다 (정본 §3-6 · D131).
+    expect(document.querySelector('.lifer-note')).toBeTruthy();
     expect(db.prepare('SELECT concept_id, shown_at FROM lifer').get())
       .toEqual({ concept_id: 'ts/optional-chaining', shown_at: T });
-    await dismissLifer(user);
+
+    // 첫 판이라 안내 띠가 얹혀 있고, 답한 뒤에는 3걸음(판정 읽기)으로 넘어가 있다 (D134).
+    expect(document.querySelector('.coach')?.textContent).toContain('3 / 3');
+    // 한 번 걸어 봤으므로 다음부터는 뜨지 않는다.
+    expect(db.prepare("SELECT value_json FROM settings WHERE key = 'tutorial_seen'").get())
+      .toEqual({ value_json: 'true' });
 
     // 카드 전환에 IPC 0회 (05 §10) — 다음 판의 문항은 이미 메모리에 있다.
     const before = calls;
@@ -187,6 +183,8 @@ describe('교정쇄 한 흐름', () => {
       expect(sheet().getByText('배열 map')).toBeTruthy();
     });
     expect(calls).toBe(before);
+    // 안내 띠는 첫 판에만 있다.
+    expect(document.querySelector('.coach')).toBeNull();
   });
 
   test('오답이면 진단이 뜨고 다시 찍기가 큐에 들어간다 (02 §4)', async () => {
@@ -197,7 +195,7 @@ describe('교정쇄 한 흐름', () => {
     await user.keyboard('[Enter]');
 
     await waitFor(() => {
-      expect(sheet().getByText('어긋남')).toBeTruthy();
+      expect(sheet().getByText('오답')).toBeTruthy();
     });
     expect(sheet().getByText(/멈추는 것이지 던지는 것이 아닙니다/)).toBeTruthy();
 
@@ -218,7 +216,6 @@ describe('교정쇄 한 흐름', () => {
       await waitFor(() => {
         expect(db.prepare('SELECT COUNT(*) AS n FROM review_log').get()).toEqual({ n: i + 1 });
       });
-      await dismissLifer(user);
       await user.keyboard('[Space]');
     }
 
@@ -243,7 +240,6 @@ describe('교정쇄 한 흐름', () => {
     });
 
     // Esc 는 한 번에 한 겹만 벗긴다 (05 §2.3) — 먼저 LIFER 베일, 그 다음 세션.
-    await dismissLifer(user);
     await user.keyboard('[Escape]');
     await waitFor(() => {
       expect(useUi.getState().session).toBeNull();

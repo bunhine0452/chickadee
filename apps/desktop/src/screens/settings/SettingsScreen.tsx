@@ -6,10 +6,14 @@ import { getLocale, t, type Locale } from '@chickadee/i18n';
 import { FlatButton, LiveRegion, RichText, Switch } from '@chickadee/ui';
 import { useEffect, useState } from 'react';
 
+import { EDITOR_ASSIST_DEFAULT, type EditorAssist } from '../../components/t1/monacoOptions.js';
 import {
   EXPORT_DEFAULTS, exportRecords, wipeAll, type ExportOptions,
 } from '../../data/maintenance.js';
-import { DEFAULTS, loadSettings, saveSetting, useAppearance } from '../../data/settings.js';
+import {
+  DEFAULTS, loadEditorAssist, loadSettings, saveEditorAssist, saveSetting, useAppearance,
+} from '../../data/settings.js';
+import { Page } from '../../components/shell/Page.js';
 import { useUi } from '../../store.js';
 import { DictLangPanel, type DictLang } from './DictLangPanel.js';
 import { GlobPanel } from './GlobPanel.js';
@@ -45,13 +49,34 @@ function activeRepoId(): number | null {
  * 먼저 굳어, 언어를 바꾼 뒤에도 옛 말이 남는다 (D117).
  */
 const themeOptions = () => [
+  { v: 'system' as const, label: t('settings.look.themeSystem') },
   { v: 'light' as const, label: t('settings.look.themeLight') },
   { v: 'dark' as const, label: t('settings.look.themeDark') },
 ];
 
-const trimOptions = () => [
-  { v: 'off' as const, label: t('settings.look.trimOff') },
-  { v: 'on' as const, label: t('settings.look.trimOn') },
+/**
+ * 프로그래밍이 처음인가 (D147). 첫 실행에서 한 번 묻고, 여기서 언제든 되돌린다 —
+ * `home.newcomerBody` 가 이 자리를 실명으로 가리키므로 없으면 그 문구가 거짓말이 된다.
+ * 배치고사가 아니다: 답이 정하는 것은 0장이 언제 닫히는가 하나뿐이고 잠그는 것은 없다.
+ */
+const newcomerOptions = () => [
+  { v: 'no' as const, label: t('settings.study.newcomerNo') },
+  { v: 'yes' as const, label: t('settings.study.newcomerYes') },
+];
+
+/** 첫 판 안내 (D134). 켜면 다음 세션의 첫 판에서 다시 함께 걷는다. */
+const coachOptions = () => [
+  { v: 'off' as const, label: t('settings.study.coachOff') },
+  { v: 'on' as const, label: t('settings.study.coachOn') },
+];
+
+/**
+ * 편집 보조 (D143). 기본은 「단계에 맞춰」다 — 끄는 쪽이 기본이면 만들지 않은 것과 같고,
+ * 켜는 쪽이 기본이라야 점수의 뜻이 한 벌로 유지된다.
+ */
+const assistOptions = () => [
+  { v: 'stage' as const, label: t('clone.assistStage') },
+  { v: 'off' as const, label: t('clone.assistOff') },
 ];
 
 const motionOptions = () => [
@@ -164,6 +189,7 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
   const [confirming, setConfirming] = useState(false);
   const [suggested, setSuggested] = useState<Identity[]>([]);
   const [dictLangs, setDictLangs] = useState<DictLang[]>([]);
+  const [assist, setAssist] = useState<EditorAssist>(EDITOR_ASSIST_DEFAULT);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState('');
 
@@ -171,16 +197,18 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
     let live = true;
     void (async () => {
       try {
-        const [s, repoRows, perfRows, v, p, langRows] = await Promise.all([
+        const [s, repoRows, perfRows, v, p, langRows, editorAssist] = await Promise.all([
           loadSettings(),
           ipc.store.query('repo.list', {}),
           ipc.store.query('perf.list', { limit: PERF_WINDOW }),
           ipc.app.version(),
           ipc.app.paths(),
           ipc.store.query('derive.dict_langs', {}),
+          loadEditorAssist(),
         ]);
         if (!live) return;
         setSettings(s);
+        setAssist(editorAssist);
         // 05 §2.1 「첫 열기 때 … author 상위 5명 자동 제안」. 이미 정해 둔 사람이 있으면
         // 부르지 않는다 — 커밋 전부를 읽는 쿼리다.
         if (s.identities.length === 0) {
@@ -229,6 +257,15 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
     );
   };
 
+  /** 편집 보조는 `Settings` 밖에 사는 값이라 자기 문으로 저장한다 (`data/settings.ts`). */
+  const putAssist = (next: EditorAssist): void => {
+    setAssist(next);
+    void saveEditorAssist(next, Date.now()).catch(() => {
+      log.warn('failed to save the editor assist setting');
+      setNote(t('settings.saveFailed'));
+    });
+  };
+
   const loadSuggestions = (): void => {
     const repoId = activeRepoId();
     if (repoId === null) return;
@@ -257,8 +294,8 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
   const s = settings ?? { ...DEFAULTS, tz: Intl.DateTimeFormat().resolvedOptions().timeZone };
 
   return (
-    <main className="settings" tabIndex={-1}>
-      <header className="set-head">
+    <Page className="settings" focusOnMount head={(
+      <header className="set-head l-row">
         <h1>
           {t('settings.title')}
           <span className="pl">{t('settings.plain')}</span>
@@ -267,6 +304,8 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
           {t('home.back')}
         </FlatButton>
       </header>
+    )}
+    >
 
       <Section id="set-repo" title={t('settings.repo.title')} plain={t('settings.repo.plain')}>
         {repos.length === 0 ? (
@@ -347,6 +386,37 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
         </div>
         <RichText as="p" className="set-note" html={t('settings.dictLangs.note')} />
         <p className="set-note">{t('settings.dictLangs.axis')}</p>
+        <div className="set-row">
+          <span className="set-k">{t('settings.study.newcomer')}</span>
+          <Switch
+            options={newcomerOptions()}
+            value={s.declaredNewcomer ? 'yes' : 'no'}
+            label={t('settings.study.newcomerSwitch')}
+            onChange={(v) => put('declaredNewcomer', v === 'yes')}
+          />
+        </div>
+        <RichText as="p" className="set-note" html={t('settings.study.newcomerNote')} />
+        <div className="set-row">
+          <span className="set-k">{t('settings.study.coach')}</span>
+          <Switch
+            options={coachOptions()}
+            value={s.tutorialSeen ? 'off' : 'on'}
+            label={t('settings.study.coachSwitch')}
+            onChange={(v) => put('tutorialSeen', v === 'off')}
+          />
+        </div>
+        <p className="set-note">{t('settings.study.coachNote')}</p>
+        <div className="set-row">
+          <span className="set-k">{t('clone.assistLabel')}</span>
+          <Switch
+            options={assistOptions()}
+            value={assist}
+            label={t('clone.assistSwitch')}
+            onChange={putAssist}
+          />
+        </div>
+        <RichText as="p" className="set-note" html={t('clone.assistNote')} />
+        <RichText as="p" className="set-note" html={t('clone.assistCost')} />
         <label className="set-row">
           <span className="set-k">{t('settings.study.tz')}</span>
           <input
@@ -364,17 +434,12 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
           <span className="set-k">{t('settings.look.process')}</span>
           <Switch
             options={themeOptions()}
-            value={appearance.theme}
+            value={appearance.themeMode}
             label={t('settings.look.themeSwitch')}
             onChange={appearance.setTheme}
           />
-          <Switch
-            options={trimOptions()}
-            value={appearance.trim}
-            label={t('settings.look.trimSwitch')}
-            onChange={appearance.setTrim}
-          />
         </div>
+        <p className="set-note">{t('settings.look.themeNote')}</p>
         <div className="set-row">
           <span className="set-k">{t('settings.look.motion')}</span>
           <Switch
@@ -489,7 +554,14 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
         </dl>
       </Section>
 
+      {/* 설정은 한 단으로 길다 — 맨 아래에서 다시 위로 올라가 「홈으로」를 찾게 하지 않는다 (D170 ⑧). */}
+      <p className="set-foot">
+        <FlatButton onClick={onBack} ghost>
+          {t('home.back')}
+        </FlatButton>
+      </p>
+
       <LiveRegion text={note} />
-    </main>
+    </Page>
   );
 }

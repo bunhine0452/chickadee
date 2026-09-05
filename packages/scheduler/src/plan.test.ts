@@ -77,7 +77,10 @@ describe('만기 복습', () => {
       pickCard: (conceptId) => candidate('t0', 'review', conceptId),
     }));
     expect(plan).toHaveLength(20);
-    expect(plannedMin(plan)).toBe(10); // 0.5 × 20 — 예산 10 을 딱 채운다
+    // 상수에서 끌어온다 — 값을 박아 두면 코드 창이 넓어질 때마다(D141) 이 줄이 썩는다.
+    expect(plannedMin(plan)).toBe(EST_MIN.t0_review * 20);
+    // 그리고 그 합이 예산을 넘어도 한 장도 안 뺀다는 것이 이 테스트의 요점이다.
+    expect(plannedMin(plan)).toBeGreaterThan(LIMIT.min_budget);
   });
 });
 
@@ -107,7 +110,7 @@ describe('새 판', () => {
 });
 
 describe('예산 맞추기 (§5.3 5번)', () => {
-  test('새 T0 → 새 T2 → T1 순으로 뺀다', () => {
+  test('새 T0 → 새 T1 → 새 T2 순으로 뺀다', () => {
     const items = [
       candidate('t0', 'review'),
       candidate('t1', 'new', 'ts/t1', 9),
@@ -115,9 +118,45 @@ describe('예산 맞추기 (§5.3 5번)', () => {
       candidate('t0', 'new', 'ts/n1'),
       candidate('t0', 'new', 'ts/n2'),
     ];
-    // 합 17.5 → 예산 10 이면 새 T0 둘(4), 새 T2(4) 를 빼고 9.5 가 남는다.
+    // 합 17.5 → 예산 10 이면 새 T0 둘(4), 새 T1(9) 을 빼고 4.5 가 남는다.
     const kept = fitBudget(items, 10);
-    expect(kept.map((i) => i.conceptId)).toEqual(['ts/x', 'ts/t1']);
+    expect(kept.map((i) => i.conceptId)).toEqual(['ts/x', 'ts/t2']);
+  });
+
+  /**
+   * D140 회귀 — 만기가 쌓인 날의 산수가 다시 뒤집히면 여기서 잡힌다.
+   *
+   * 만기 20건 + 새 T1 + 새 T2 + 새 T0 두 장의 합이 예산(15 × 1.15 = 17.25)을 넘는 날이다.
+   * 옛 순서(`new:t0 → new:t2 → new:t1`)는 T0 둘과 T2 를 빼 새 T2 를 없앴다. 새 순서는
+   * T0 둘과 T1 을 빼고 T2 를 남긴다. **숫자를 박지 않는다** — `EST_MIN` 은 코드 창이
+   * 바뀌면 함께 움직인다(D141). 이 테스트가 재는 것은 합계가 아니라 **빼는 순서**다.
+   */
+  test('만기 20건인 날에도 새 T2 가 남는다 (D140)', () => {
+    const rows = Array.from({ length: 20 }, (_, i) => due(`ts/c${String(i).padStart(2, '0')}`, i / 100));
+    const plan = planSession(input({
+      budgetMin: LIMIT.budget_min,
+      due: rows,
+      pickCard: (conceptId) => candidate('t0', 'review', conceptId),
+      newConcepts: [
+        { conceptId: cid('ts/n1'), bestSiteId: 1 },
+        { conceptId: cid('ts/n2'), bestSiteId: 2 },
+      ],
+      makeNewCard: (conceptId) => candidate('t0', 'new', conceptId),
+      t1Slot: candidate('t1', 'new', 'ts/t1', t1Est(20, 1)),
+      t2Slot: candidate('t2', 'new', 'arch/placement', EST_MIN.t2_new),
+    }));
+
+    // 잘리기 전 합이 실제로 예산을 넘는 상황이어야 이 테스트가 뜻이 있다.
+    const before = EST_MIN.t0_review * 20 + t1Est(20, 1) + EST_MIN.t2_new + EST_MIN.t0_new * 2;
+    expect(before).toBeGreaterThan(LIMIT.budget_min * BUDGET_SLACK);
+
+    expect(plan.filter((p) => p.track === 't2')).toHaveLength(1);
+    expect(plan.filter((p) => p.role === 'new' && p.track === 't0')).toHaveLength(0);
+    expect(plan.filter((p) => p.track === 't1')).toHaveLength(0);
+    // 만기 20건은 한 장도 안 빠진다.
+    expect(plan.filter((p) => p.role === 'review')).toHaveLength(20);
+    // 남는 것은 만기 20건 + T2 한 장뿐이다. 값이 아니라 **구성**을 적는다.
+    expect(plannedMin(plan)).toBe(EST_MIN.t0_review * 20 + EST_MIN.t2_new);
   });
 
   test('15 % 는 넘겨 둔다', () => {

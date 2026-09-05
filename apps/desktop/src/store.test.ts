@@ -3,7 +3,8 @@
  * 여기서 틀리면 화면이 남의 리포를 그리거나, 리포가 남았는데 첫 실행으로 떨어진다.
  */
 import type { RepoInfo } from '@chickadee/store-sql';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { TOAST_MS } from '@chickadee/ui';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useUi } from './store.js';
 
@@ -79,5 +80,36 @@ describe('setRepos', () => {
     useUi.getState().setRepos([]);
     expect(useUi.getState().activeId).toBeNull();
     expect(useUi.getState().screen).toBe('first-run');
+  });
+});
+
+describe('토스트 (D170 ③)', () => {
+  it('say() 로 띄운 문구는 TOAST_MS 뒤에 스스로 사라진다', () => {
+    vi.useFakeTimers();
+    try {
+      useUi.getState().say('채점했습니다');
+      expect(useUi.getState().toast).toBe('채점했습니다');
+      vi.advanceTimersByTime(TOAST_MS - 1);
+      expect(useUi.getState().toast).toBe('채점했습니다');
+      vi.advanceTimersByTime(1);
+      expect(useUi.getState().toast).toBeUndefined();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('연달아 부르면 마지막 문구의 시계만 남는다', () => {
+    vi.useFakeTimers();
+    try {
+      useUi.getState().say('첫째');
+      vi.advanceTimersByTime(TOAST_MS - 100);
+      useUi.getState().say('둘째');
+      vi.advanceTimersByTime(200);
+      expect(useUi.getState().toast).toBe('둘째');
+      vi.advanceTimersByTime(TOAST_MS);
+      expect(useUi.getState().toast).toBeUndefined();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

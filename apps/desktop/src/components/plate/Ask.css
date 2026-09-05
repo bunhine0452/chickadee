@@ -1,24 +1,30 @@
-/* 목업: design/src/ink/session.css `.ask` — 그대로. 본문은 조용하게. */
+/* 물음 (D182 · 정본 §6 「하나의 초점」).
+   화면에서 **가장 크고 가장 진한 글**이다 — 지금 해야 할 일이 이것 하나이기 때문이다.
+   행 길이는 --measure(한글 40자 안팎)로 묶고 `keep-all` 로 낱말을 안 쪼갠다. */
 .ask {
-  color: var(--ink);
-  font-size: var(--fs-18);
-  font-weight: 600;
-  letter-spacing: -.02em;
-  line-height: 1.55;
+  max-width: var(--measure);
+  color: var(--text);
+  font-size: var(--fs-5);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-tight);
+  word-break: keep-all;
 }
 
 .ask code {
-  padding: 0 5px;
-  border: 1.5px solid var(--rule);
-  background: var(--paper-3);
-  font-size: var(--fs-16);
-  font-weight: 600;
+  padding: 0 var(--s-1);
+  border-radius: var(--r-sm);
+  background: var(--surface-3);
+  font-family: var(--font-mono);
+  font-size: .88em;
+  font-weight: var(--fw-medium);
 }
 
+/* 힌트 — 물음보다 한참 물러난다. 읽지 않아도 문제가 성립해야 한다. */
 .ask small {
   display: block;
-  margin-top: 3px;
-  color: var(--ink-soft);
-  font-size: var(--fs-14);
-  font-weight: 400;
+  margin-top: var(--s-2);
+  color: var(--text-muted);
+  font-size: var(--fs-3);
+  font-weight: var(--fw-normal);
+  line-height: var(--lh-body);
 }

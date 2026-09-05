@@ -1,0 +1,67 @@
+[
+  {
+    "queryId": "sql/three-valued-comparison",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "connective",
+    "startLine": 1,
+    "startCol": 21,
+    "endLine": 1,
+    "endCol": 50,
+    "nodeKind": "where",
+    "inError": false
+  },
+  {
+    "queryId": "sql/three-valued-comparison",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "connective",
+    "startLine": 1,
+    "startCol": 27,
+    "endLine": 1,
+    "endCol": 34,
+    "nodeKind": "binary_expression",
+    "inError": false
+  },
+  {
+    "queryId": "sql/three-valued-comparison",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "connective",
+    "startLine": 1,
+    "startCol": 35,
+    "endLine": 1,
+    "endCol": 38,
+    "nodeKind": "keyword_and",
+    "inError": false
+  },
+  {
+    "queryId": "sql/three-valued-comparison",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "hole",
+    "form": "connective",
+    "startLine": 1,
+    "startCol": 35,
+    "endLine": 1,
+    "endCol": 38,
+    "nodeKind": "keyword_and",
+    "inError": false
+  },
+  {
+    "queryId": "sql/three-valued-comparison",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "connective",
+    "startLine": 1,
+    "startCol": 39,
+    "endLine": 1,
+    "endCol": 50,
+    "nodeKind": "binary_expression",
+    "inError": false
+  }
+]

@@ -1,0 +1,89 @@
+schema: 1
+id: cs/value-vs-reference
+universal: null
+name: { ko: "복사되나 같은 것을 가리키나", en: "Value or reference" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+# 아홉 언어가 이 개념을 `prereq` 로 가리킨다 (cs.md §8) — D4 전이의 최대 수혜다.
+track_default: t0
+essential: false
+difficulty: 2
+prereq: [cs/type]
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "넘길 때 값이 복사되는지, 값이 놓인 자리만 복사되는지."
+    en: "Passing copies the value, or copies only the place it sits."
+  why:
+    ko: >-
+      함수에 무엇을 넘기면 받는 쪽에는 <b>사본</b>이 생깁니다. 문제는 무엇의 사본이냐예요.
+      값 자체의 사본이면 받는 쪽에서 고쳐도 원본은 그대로입니다. 값이 <b>놓인 자리</b>의
+      사본이면, 사본을 따라가면 같은 값에 닿으니 고치면 양쪽이 다 바뀝니다.
+      「함수에 넘겼는데 원본이 바뀌었다」와 「넘긴 것을 고쳤는데 원본이 그대로다」가
+      둘 다 정상인 이유가 이것이고, 언어마다 어느 쪽인지가 다릅니다.
+    en: >-
+      Pass something to a function and the receiver gets a <b>copy</b>. The question is a copy of
+      what. A copy of the value itself: changes inside leave the original alone. A copy of the
+      <b>place the value sits</b>: following the copy reaches the same value, so a change shows on
+      both sides. That is why “I passed it and the original changed” and “I changed it and the
+      original did not” are both normal — and languages differ on which you get.
+  trace: []
+rule:
+  ko: "<b>사본이 생기는 것은 언제나 맞다.</b> 무엇의 사본인지가 갈린다."
+  en: "<b>A copy is always made.</b> What it is a copy of is what differs."
+ok:
+  ko: >-
+    작은 값은 대개 값 자체가 복사되고, 목록·객체처럼 큰 것은 자리가 복사됩니다.
+    그래서 숫자를 넘길 때와 목록을 넘길 때 결과가 다르게 보입니다.
+  en: >-
+    Small values are usually copied whole; lists and objects usually have their place copied.
+    So passing a number and passing a list behave differently.
+misconceptions:
+  - ko: "함수에 넘기면 원본은 안전하다 — 자리가 복사된 경우에는 안 그렇습니다."
+    en: "Passing protects the original — not when it is the place that was copied."
+  - ko: "이름을 새로 붙이면 새 값이다 — 자리를 가리키는 이름 둘은 한 값을 가리킵니다."
+    en: "A new name means a new value — two names can point at one value."
+  - ko: "언어가 정하는 것은 문법뿐이다 — 어느 쪽으로 넘기는지도 언어가 정합니다."
+    en: "Languages only decide syntax — they also decide which of the two you get."
+meaning:
+  - q:
+      ko: "값을 함수에 넘겼더니 함수 밖의 원본까지 바뀌었습니다. <b>복사된 것은 무엇인가요?</b>"
+      en: "You passed a value and the original outside changed too. <b>What was copied?</b>"
+    hint:
+      ko: "사본은 분명히 생겼습니다. 사본을 따라가면 어디에 닿나요."
+      en: "A copy was certainly made. Where does following it land?"
+    options:
+      - t: { ko: "값이 놓인 자리 — 따라가면 같은 값에 닿는다", en: "The place it sits — following it reaches the same value" }
+      - t: { ko: "아무것도 복사되지 않고 원본이 그대로 넘어갔다", en: "Nothing was copied; the original went across" }
+        diag:
+          t:
+            ko: "넘길 때는 <b>언제나 무언가가 복사됩니다</b>. 복사된 것이 자리여서 같은 값에 닿을 뿐이에요."
+            en: "Passing <b>always copies something</b>. Here the copy was of the place, so both land on the same value."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 복사 여부냐 대상이냐", en: "The sharpest spot — whether or what" }
+            code:
+              - "언제나: 사본이 생긴다"
+              - "갈리는 것: 무엇의 사본인가"
+      - t: { ko: "값 자체가 복사됐는데 함수가 원본을 따로 찾아갔다", en: "The value was copied and the function found the original separately" }
+        diag:
+          t:
+            ko: "함수는 <b>받은 것 말고는 모릅니다</b>. 원본에 닿았다면 받은 것이 이미 그 길이었다는 뜻이에요."
+            en: "A function knows <b>only what it was given</b>. Reaching the original means what it was given was already that path."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 받은 것이 무엇이었나", en: "The sharpest spot — what was handed over" }
+            code:
+              - "받은 것이 값: 원본에 못 닿는다"
+              - "받은 것이 자리: 원본에 닿는다"
+      - t: { ko: "값이 커서 복사가 생략됐다", en: "The value was large so the copy was skipped" }
+        diag:
+          t:
+            ko: "크기 때문에 <b>자리를 복사하도록 설계</b>한 언어가 많지만, 결정은 크기가 아니라 언어의 규칙입니다. 작은 것도 자리로 넘기는 언어가 있어요."
+            en: "Many languages copy the place <b>because things are large</b>, but the rule is the language's, not the size's. Some pass small things by place too."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 크기냐 규칙이냐", en: "The sharpest spot — size or rule" }
+            code:
+              - "크기: 설계의 동기"
+              - "규칙: 실제로 정하는 것"

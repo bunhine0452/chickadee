@@ -1,0 +1,88 @@
+schema: 1
+id: cs/deadlock
+universal: null
+name: { ko: "서로를 기다리며 멈추기", en: "Deadlock" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+track_default: t0
+essential: false
+difficulty: 4
+prereq: [cs/race-condition]
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "아무도 멈추지 않았는데 아무것도 안 도는 상태."
+    en: "Nothing crashed and nothing moves."
+  why:
+    ko: >-
+      값을 안전하게 만지려고 「내가 쓰는 동안 기다려」를 걸면, 이번에는 <b>기다림이 서로를 향할</b> 수 있습니다.
+      A 가 첫째를 잡고 둘째를 기다리는데 B 가 둘째를 잡고 첫째를 기다리면, 둘 다 영원히 기다립니다.
+      오류 메시지가 없어서 <b>찾기가 특히 어렵습니다</b> — 로그는 조용하고 화면만 안 움직여요.
+      막는 방법은 대개 하나입니다: <b>잡는 순서를 정해 두는 것</b>. 모두가 같은 순서로 잡으면
+      기다림이 원을 그리지 않습니다.
+    en: >-
+      Guarding a value with “wait while I write” can turn the waiting <b>toward each other</b>. A
+      holds the first and waits for the second while B holds the second and waits for the first,
+      and both wait forever. With no error message this is <b>especially hard to find</b> — logs
+      are quiet, the screen simply stops. The usual defence is one thing: <b>fix the order of
+      acquisition</b>. If everyone takes them in the same order, the waiting cannot form a circle.
+  trace: []
+rule:
+  ko: "<b>같은 순서로 잡으면 원이 안 생긴다.</b> 원이 없으면 서로 못 기다린다."
+  en: "<b>Take them in one order and no circle forms.</b> No circle, no mutual wait."
+ok:
+  ko: >-
+    잡는 순서를 정해 두면 늦게 온 쪽이 기다렸다가 차례로 진행합니다. 기다림은 있지만
+    원을 그리지 않아요.
+  en: >-
+    With a fixed order, the later party waits and then proceeds. There is still waiting, but it
+    does not close a circle.
+misconceptions:
+  - ko: "멈췄으니 어딘가 오류가 났다 — 아무 오류 없이 멈춥니다."
+    en: "It stopped, so something errored — it stops with no error at all."
+  - ko: "기다리는 시간을 짧게 주면 해결된다 — 원을 없앤 것이 아니라 늦춘 것입니다."
+    en: "A short timeout solves it — that delays the circle, it does not remove it."
+  - ko: "일꾼이 하나면 안 생긴다 — 자기가 잡은 것을 다시 기다리는 모양도 있습니다."
+    en: "One worker cannot deadlock — waiting on what you already hold is a shape of it."
+meaning:
+  - q:
+      ko: "프로그램이 오류 없이 멈춰 있고 로그도 조용합니다. <b>무엇을 확인해야 하나요?</b>"
+      en: "The program is stopped with no error and quiet logs. <b>What do you check?</b>"
+    hint:
+      ko: "멈춘 것이 아니라 기다리고 있는 것일 수 있습니다."
+      en: "It may not be stopped but waiting."
+    options:
+      - t: { ko: "서로가 잡은 것을 기다리며 기다림이 원을 그리는지", en: "Whether the waits form a circle over what each holds" }
+      - t: { ko: "예외가 조용히 삼켜졌는지", en: "Whether an exception was swallowed" }
+        diag:
+          t:
+            ko: "삼켜진 예외도 조용하지만 그때는 <b>다음 줄로 넘어갑니다</b>. 아예 안 움직이는 것은 기다리고 있다는 표시예요."
+            en: "A swallowed exception is quiet too, but then execution <b>moves on</b>. Not moving at all is the tell of waiting."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 넘어갔나 서 있나", en: "The sharpest spot — moved on or standing" }
+            code:
+              - "삼킴: 다음 줄이 돈다"
+              - "기다림: 그 줄에 서 있다"
+      - t: { ko: "무한 반복에 빠졌는지", en: "Whether it fell into an endless loop" }
+        diag:
+          t:
+            ko: "무한 반복이면 <b>기계가 바쁩니다</b>. 여기서는 아무도 일을 안 하고 있어요."
+            en: "An endless loop keeps <b>the machine busy</b>. Here nobody is doing any work."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 바쁘나 놀고 있나", en: "The sharpest spot — busy or idle" }
+            code:
+              - "무한 반복: 사용률이 높다"
+              - "서로 기다림: 사용률이 낮다"
+      - t: { ko: "메모리가 모자라 멈췄는지", en: "Whether it ran out of memory" }
+        diag:
+          t:
+            ko: "메모리가 모자라면 대개 <b>메시지를 남기고</b> 끝납니다. 조용히 서 있는 것은 다른 모양이에요."
+            en: "Running out of memory usually <b>leaves a message</b> and ends. Standing quietly is a different shape."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 끝났나 서 있나", en: "The sharpest spot — ended or standing" }
+            code:
+              - "메모리: 대개 메시지를 남기고 끝난다"
+              - "기다림: 끝나지 않고 서 있다"

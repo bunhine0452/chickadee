@@ -1,0 +1,188 @@
+schema: 1
+id: rs/borrow-shared
+# 2부 (`rs.md` §3). 보편형은 없다 — `&` 는 C 의 주소 연산자가 아니라 **읽을 권한을 잠시 빌리는** 것이고
+# 대응물이 다른 언어에 없다(§6). 기계는 `cs/value-vs-reference`·`cs/memory-address` 가 댄다.
+# 실측에서 가장 두꺼운 개념이다 — ai-pm 9,474곳(인자 6,207 · 서명 2,636).
+universal: null
+name: { ko: 잠깐 빌려 읽기, en: Borrowing to read }
+token: "&"
+grammars: [rust]
+framework: null
+essential: true
+difficulty: 2
+prereq: [rs/let-binding, cs/value-vs-reference, cs/memory-address]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "값을 넘기지 않고 읽을 권한만 잠시 빌려 준다. 빌린 쪽이 사는 동안 주인은 값을 옮기지 못한다."
+    en: "Lends the right to read; the owner keeps the value but cannot move it yet."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} {{pick.2|code}}{{pick.2|josa:을,를}} <b>빌려 줍니다</b> — 주인이
+      옮겨 가지 않아 아래에서 {{pick.2|code}}{{pick.2|josa:을,를}} 계속 쓸 수 있어요. C 에서 온 사람은 이것을 「주소를
+      얻는다」로 읽는데, Rust 에서는 <b>권한</b>의 문제입니다: 빌린 동안 읽기 권한이 빌린 쪽으로 가고,
+      빌림이 끝나면 돌아옵니다. 그래서 빌려 준 동안 주인은 값을 옮기거나 없앨 수 없어요(E0505) —
+      빌린 쪽이 사라진 값을 읽는 일, 곧 매달린 포인터를 컴파일러가 막는 겁니다. 읽기 빌림은 몇 개든
+      동시에 있을 수 있고, 이 리포에서 빌림의 97% 가 읽기입니다(`&mut` 는 2.6%).
+    en: >-
+      {{pick.1|code}} on line {{site.line}} <b>lends</b> {{pick.2|code}} — ownership does not move, so
+      {{pick.2|code}} stays usable below. Someone from C reads this as “take the address,” but in Rust it
+      is about <b>permission</b>: while lent, the right to read goes to the borrower and comes back when
+      the borrow ends. So while it is lent the owner cannot move or drop the value (E0505) — the
+      compiler is preventing a borrower from reading a vanished value, the dangling pointer. Any number
+      of read borrows may coexist, and in this repo 97% of borrows are reads (`&mut` is 2.6%).
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 값의 주인이다."
+      en: "{{pick.2|code}} owns the value."
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 읽을 권한을 빌려 준다 — 주인은 그대로다."
+      en: "{{pick.1|code}} on line {{site.line}} lends the right to read — the owner stays."
+    - ko: "빌린 쪽이 사는 동안 {{pick.2|code}}{{pick.2|josa:은,는}} 옮겨지지 않고, 끝나면 권한이 돌아온다."
+      en: "While the borrower lives {{pick.2|code}} cannot move; when it ends the permission returns."
+
+rule:
+  ko: "<b>& 는 읽을 권한을 빌린다.</b> 여럿이 동시에 빌릴 수 있고, 빌린 동안 주인은 값을 못 옮긴다."
+  en: "<b>& borrows the right to read.</b> Many may borrow at once, and while lent the owner cannot move the value."
+result:
+  label:
+    ko: "{{site.line}}행 아래의 {{pick.2}}"
+    en: "{{pick.2}} below line {{site.line}}"
+  value: "{{pick.1}}{{pick.2}}"
+  note:
+    ko: "주인은 그대로 — 계속 쓸 수 있다"
+    en: "still owned — still usable"
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 빌려 줬을 뿐 넘긴 것이 아닙니다. 아래에서 그대로 씁니다."
+  en: "{{pick.2|code}} was lent, not handed over. It remains usable below."
+payoff:
+  ko: "이걸 알면 「함수에 넘겼더니 왜 그 뒤로 못 쓰나」(E0382)의 답이 보입니다 — 넘기지 말고 빌려 주면 됩니다."
+  en: "This shows the way out of “I passed it to a function and now I cannot use it” (E0382) — lend instead of handing over."
+bridge:
+  ko: "C 의 `&x` 는 주소를 얻고 그것으로 무엇이든 합니다. Rust 의 `&x` 는 <b>읽기만</b> 빌리고, 몇 개까지인지를 컴파일러가 셉니다."
+  en: "C's `&x` takes an address and does anything with it. Rust's `&x` lends <b>reading only</b>, and the compiler counts how many."
+misconceptions:
+  - ko: "`&` 는 C 의 주소 연산자다 — 주소를 얻는 게 아니라 <b>읽을 권한을 잠시 빌리는</b> 것입니다. 빌린 동안 주인은 값을 못 옮겨요."
+    en: "`&` is C's address operator — it does not take an address, it <b>borrows the right to read</b>. While lent, the owner cannot move the value."
+  - ko: "빌린 것으로 값을 고칠 수 있다 — 읽기만 됩니다(E0596). 고치려면 `&mut` 로 따로 빌려요."
+    en: "A borrow lets you change the value — reading only (E0596). Changing needs a separate `&mut` borrow."
+  - ko: "빌림은 하나만 된다 — 읽기 빌림은 <b>몇 개든</b> 됩니다. 하나뿐인 것은 `&mut` 이에요."
+    en: "Only one borrow is allowed — read borrows may be <b>any number</b>. Only `&mut` is limited to one."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>넘기지 않고 빌려 주는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that lends instead of handing over</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 빌려지는 <b>값의 이름</b>입니다. 이름만 적으면 넘기는 것이고, 빌려 주는 것은 앞의 기호예요."
+          en: "{{pick.2|code}} is the <b>name of the value</b> being lent. The bare name hands it over; the symbol in front lends it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 한 글자 차이", en: "The sharpest spot — one character" }
+          code:
+            - "show(name);    // 넘긴다 — 아래에서 E0382"
+            - "show(&name);   // 빌려 준다 — 아래에서 쓴다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 빌린 것을 <b>받는 쪽</b>입니다. 빌려 주기로 정한 것은 인자 앞의 기호예요."
+          en: "{{pick.3|code}} is the <b>receiving side</b>. The decision to lend is the symbol in front of the argument."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 받는 쪽이냐 빌려 주는 표시냐", en: "The sharpest spot — the receiver or the lending mark" }
+          code:
+            - "show(&name)"
+            - "// ^받는 쪽 ^빌려 주는 표시"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행이 {{pick.2|code}}{{pick.2|josa:을,를}} 빌려 주는 동안 <b>{{pick.2|code}}{{pick.2|josa:을,를}} 다른 이름에 옮기면</b> 어떻게 될까요?"
+      en: "While line {{site.line}} lends {{pick.2|code}}, what happens if <b>{{pick.2|code}} is moved into another name</b>?"
+    hint:
+      ko: "빌린 쪽이 아직 살아 있습니다."
+      en: "The borrower is still alive."
+    options:
+      - t:
+          ko: "컴파일이 멈춘다 — 빌려 준 동안 주인은 값을 못 옮긴다 (E0505)"
+          en: "Compiling stops — while lent, the owner cannot move the value (E0505)"
+      - t:
+          ko: "옮겨지고 빌린 쪽은 옛 자리를 계속 읽는다"
+          en: "It moves and the borrower keeps reading the old place"
+        diag:
+          t:
+            ko: "그것이 <b>매달린 포인터</b>이고 C 에서 나는 UB 입니다. Rust 는 그 줄을 컴파일하지 않아요."
+            en: "That is a <b>dangling pointer</b>, C's UB. Rust does not compile that line."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 막는 것이 무엇인가", en: "The sharpest spot — what is being blocked" }
+            code:
+              - "let r = &s; let t = s; use(r);   // E0505"
+      - t:
+          ko: "빌린 쪽도 함께 새 이름을 따라간다"
+          en: "The borrower follows to the new name"
+        diag:
+          t:
+            ko: "빌림은 이름에 붙지 않고 <b>값의 자리</b>에 붙습니다. 옮기면 자리가 바뀌니 따라갈 수 없어요."
+            en: "A borrow attaches to <b>the value's place</b>, not the name. Moving changes the place; it cannot follow."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 이름이냐 자리냐", en: "The sharpest spot — the name or the place" }
+            code:
+              - "let r = &s;   // s 의 자리를 빌렸다"
+              - "let t = s;    // 자리가 옮겨진다 — 막힌다"
+      - t:
+          ko: "값이 복사된다"
+          en: "The value is copied"
+        diag:
+          t:
+            ko: "복사는 타입이 Copy 일 때만이고, 그 경우엔 애초에 옮김이 아니라 막히지도 않습니다. 이 물음은 Copy 가 아닌 값에 대한 거예요."
+            en: "Copying happens only for Copy types, and then it is not a move and nothing is blocked. This question is about a non-Copy value."
+          edge:
+            h: { ko: "가장 날카로운 자리 — Copy 냐 아니냐", en: "The sharpest spot — Copy or not" }
+            code:
+              - "let r = &n; let m = n;   // n: i32 — 복사, 된다"
+              - "let r = &s; let t = s;   // s: String — E0505"
+
+no_hole_reason: >-
+  구멍을 못 뚫는다. `&` 가 한 글자라 빈칸형이 생성 단계에서 떨어진다(`MIN_HOLE` = 2). 「& 를
+  붙일까 말까」는 지목형과 뜻 묻기가 받는다 — 위의 진단이 그 물음이다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 넘기지 않고 <b>빌려 줬을까요</b>?"
+    en: "Why does line {{site.line}} <b>lend</b> rather than hand over?"
+  choices:
+    - t:
+        ko: "받는 쪽이 읽기만 하고, 이 값을 아래에서 다시 써야 하기 때문에 — 넘기면 이 이름이 닫힌다"
+        en: "Because the receiver only reads, and the value is needed again below — handing over would close this name"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 아래에서 {{pick.2|code}}{{pick.2|josa:이,가}} 다시 쓰이는 줄을 찾아보세요."
+        en: "That is the direction. Find the line below where {{pick.2|code}} is used again."
+    - t:
+        ko: "빌리는 것이 더 빨라서"
+        en: "Because borrowing is faster"
+      ok: false
+      fb:
+        ko: "큰 값이면 그렇기도 하지만 이유는 아닙니다. 아래에서 다시 써야 하는 것이 이유예요."
+        en: "Sometimes, for large values, but that is not the reason. Needing it again below is."
+    - t:
+        ko: "Rust 는 값을 넘길 수 없어서"
+        en: "Because Rust cannot hand values over"
+      ok: false
+      fb:
+        ko: "넘길 수 있습니다 — `&` 를 빼면 넘겨요. 그러면 이 이름이 닫힙니다."
+        en: "It can — drop the `&` and it hands over. Then this name closes."
+
+queries:
+  - { grammars: [rust], file: ./borrow-shared.scm }
+
+examples:
+  - code: "fn f() { show(&name); }                        // 빌려 준다 — 아래에서 name 을 쓴다"
+    expect: { sites: 1, form: borrow-arg, picks: { 1: "&", 2: "name", 3: "show" } }
+  - code: "fn len_of(s: &String) -> usize { s.len() }      // 서명에 적힌 빌림"
+    expect: { sites: 1, form: borrow-param, picks: { 1: "&", 2: "s", 3: "String" } }
+  - code: "fn f() { let r = &name; }                      // 빌린 것에 이름을 붙였다"
+    expect: { sites: 1, form: borrow-let, picks: { 1: "&", 2: "r", 3: "let" } }
+  - code: "fn f() { show(&mut name); }                    // 고칠 수 있게 빌림 — rs/borrow-mut"
+    expect: none

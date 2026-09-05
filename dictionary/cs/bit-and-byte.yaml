@@ -1,0 +1,87 @@
+schema: 1
+id: cs/bit-and-byte
+universal: null
+name: { ko: "자리와 묶음", en: "Bits and bytes" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+track_default: t0
+essential: false
+difficulty: 1
+prereq: [cs/binary-representation]
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "여덟 자리를 한 덩이로 세고, 덩이가 몇 개냐가 담을 수 있는 크기를 정한다."
+    en: "Eight slots make one lump, and the number of lumps sets what fits."
+  why:
+    ko: >-
+      자리 하나는 켜짐·꺼짐 둘 중 하나입니다. 자리가 여덟이면 경우의 수가 256이고,
+      그 여덟을 한 덩이로 세기로 약속한 것이 <b>바이트</b>예요. 여기서 바로 따라 나오는
+      것이 <b>크기에는 끝이 있다</b>는 사실입니다. 자리를 늘리면 담을 수 있는 범위가
+      늘고, 안 늘리면 어느 값에서 <b>더 담을 자리가 없어집니다</b>.
+      정수가 어느 순간 뒤집히는 것도, 파일 크기를 KB·MB 로 세는 것도 전부 이 셈입니다.
+    en: >-
+      One slot is on or off. Eight slots give 256 possibilities, and agreeing to count those eight
+      as one lump is a <b>byte</b>. What follows immediately is that <b>size has an end</b>. More
+      slots widen the range; without more slots, some value <b>has nowhere left to go</b>.
+      An integer flipping over, and file sizes counted in KB and MB, are the same arithmetic.
+  trace: []
+rule:
+  ko: "<b>자리 수가 범위를 정한다.</b> 자리를 안 늘리면 범위도 안 늘어난다."
+  en: "<b>The slot count fixes the range.</b> No more slots, no more range."
+ok:
+  ko: >-
+    작은 값을 담을 때는 자리가 남습니다. 남은 자리는 0으로 채워지고 값은 그대로예요.
+    모자랄 때만 문제가 됩니다.
+  en: >-
+    A small value leaves slots to spare. The spare slots hold zeros and the value is unchanged.
+    Only running out is a problem.
+misconceptions:
+  - ko: "바이트가 크면 값이 크다 — 바이트 수는 <b>담을 수 있는 범위</b>이지 지금 든 값이 아닙니다."
+    en: "More bytes means a bigger value — the byte count is the <b>range that fits</b>, not the value held."
+  - ko: "글자 하나가 한 바이트다 — 그것은 영문 알파벳에서만 맞습니다."
+    en: "One character is one byte — that holds only for the Latin alphabet."
+  - ko: "자리는 필요하면 늘어난다 — 늘려 주는 언어가 있고 안 늘리는 언어가 있습니다."
+    en: "Slots grow when needed — some languages grow them, others do not."
+meaning:
+  - q:
+      ko: "정수 하나를 4바이트에 담기로 했습니다. <b>이 결정이 정하는 것</b>은 무엇인가요?"
+      en: "An integer is stored in four bytes. <b>What does that decision fix</b>?"
+    hint:
+      ko: "자리가 정해지면 경우의 수도 정해집니다."
+      en: "Fix the slots and you fix how many cases there are."
+    options:
+      - t: { ko: "담을 수 있는 값의 범위 — 그 밖은 못 담는다", en: "The range of values that fit — nothing outside it" }
+      - t: { ko: "계산이 얼마나 정확한가", en: "How accurate the arithmetic is" }
+        diag:
+          t:
+            ko: "정수는 범위 안에서 <b>언제나 정확합니다</b>. 정확도가 문제가 되는 것은 소수 쪽이고 그건 다른 이야기예요."
+            en: "Integers are <b>always exact</b> inside the range. Accuracy is a question for decimals, a different story."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 범위냐 정확도냐", en: "The sharpest spot — range or accuracy" }
+            code:
+              - "정수: 범위 안에서 정확"
+              - "소수: 범위와 별개로 근사"
+      - t: { ko: "계산 속도 — 자리가 많으면 느리다", en: "Speed — more slots is slower" }
+        diag:
+          t:
+            ko: "속도 차이는 있어도 이 결정이 <b>먼저 정하는 것</b>은 범위입니다. 4바이트를 고르는 이유는 대개 담을 값의 크기예요."
+            en: "There is some speed difference, but what this decision fixes <b>first</b> is range. Four bytes is usually chosen for the size of the values."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 먼저 정해지는 것", en: "The sharpest spot — what is fixed first" }
+            code:
+              - "정해지는 것: 담을 수 있는 값"
+              - "따라오는 것: 다루는 비용"
+      - t: { ko: "그 값이 메모리 어디에 놓이는지", en: "Where in memory the value sits" }
+        diag:
+          t:
+            ko: "어디에 놓이는지는 <b>따로 정해지는 일</b>입니다. 크기는 「얼마나 넓은 칸이 필요한가」이고 위치는 「그 칸이 어디인가」예요."
+            en: "Where it sits is decided <b>separately</b>. Size asks how wide a slot is needed; position asks where that slot is."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 크기냐 위치냐", en: "The sharpest spot — size or position" }
+            code:
+              - "크기: 4바이트"
+              - "위치: 어느 주소에 놓였나"

@@ -1,0 +1,174 @@
+schema: 1
+id: swift/optional-type
+# `common/absent-value` 를 쓴다 — swift.md §6 의 판정 그대로다. 그 개념의 핵심 문장이
+# 「없는 값의 안을 읽으려 하면 그 자리에서 멈춘다」이고 Swift 의 강제 해제 크래시가 정확히
+# 그것이다. 다시 배울 것은 「여기서는 없음이 타입에 적힌다」 한 장이고 그것이 다리 문장이다.
+universal: common/absent-value
+name: { ko: 없을 수 있는 값, en: Optional type }
+token: "?"
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 2
+prereq: [swift/assignment, cs/null-reference]
+confusions: []
+dict:
+  one_liner:
+    ko: "「없음」이 값의 상태가 아니라 타입에 적히고, 벗기기 전에는 안을 못 쓴다."
+    en: "Absence lives in the type, not the value, and must be unwrapped before use."
+  why:
+    ko: >-
+      많은 언어에서 「없음」은 <b>어떤 값에나 들어올 수 있는 상태</b>입니다. 그래서 어느 이름이
+      비어 있을 수 있는지 코드만 봐서는 모르고, 비어 있는 것을 만졌을 때 돌다가 죽습니다.
+      Swift 는 그것을 <b>타입에 적었습니다.</b> 물음표가 붙은 타입과 안 붙은 타입은 <b>다른
+      타입</b>이고, 붙은 쪽은 벗기기 전에는 안의 값처럼 못 씁니다. 그래서 어디가 비어 있을 수
+      있는지가 코드에 보이고, 안 벗기고 쓰면 <b>돌기 전에</b> 걸립니다.
+      대가는 벗기는 표기를 배워야 한다는 것이고, 그것이 다음 다섯 장입니다.
+    en: >-
+      In many languages absence is <b>a state any value may fall into.</b> Which names can be
+      empty is invisible in the code, and touching an empty one kills the program at run time.
+      Swift <b>wrote it into the type.</b> A type with the question mark and one without are
+      <b>different types</b>, and the marked one cannot be used as the value inside until it is
+      unwrapped. So where emptiness can happen is visible, and using it unwrapped is caught
+      <b>before it runs.</b>
+      The cost is learning the unwrapping notations, which is the next five plates.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.2|code}}{{pick.2|josa:은,는}} {{pick.1|code}} 타입이다."
+      en: "{{pick.2|code}} on line {{site.line}} has the type {{pick.1|code}}."
+    - ko: "그 타입은 {{pick.3|code}}{{pick.3|josa:과,와}} 다른 타입이다."
+      en: "That type is not the same type as {{pick.3|code}}."
+    - ko: "벗기기 전에는 안의 값처럼 못 쓴다."
+      en: "Until it is unwrapped it cannot be used as the value inside."
+rule:
+  ko: "<b>물음표가 붙은 타입은 다른 타입이다.</b> 벗겨야 안의 값이 된다."
+  en: "<b>The marked type is a different type.</b> Unwrapping is what yields the value inside."
+result:
+  label: { ko: "{{site.line}}행의 타입", en: "the type on line {{site.line}}" }
+  value: "{{pick.1}}"
+  note: { ko: "안의 값과 다른 타입이다", en: "not the same type as the value inside" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} {{pick.1|code}} 이고, 벗겨야 {{pick.3|code}}{{pick.3|josa:이,가}} 됩니다."
+  en: "{{pick.2|code}} is {{pick.1|code}}; unwrapping is what makes it {{pick.3|code}}."
+payoff:
+  ko: "이걸 알면 「왜 이 줄에 물음표가 붙었나」가 풀립니다 — 비어 있을 수 있는 자리입니다."
+  en: "This untangles “why is there a question mark here” — that place can be empty."
+bridge:
+  ko: >-
+    자바·JS 는 「없음」을 어떤 값에나 들어올 수 있는 상태로 둡니다. Swift 는 <b>타입에 적어</b>
+    돌기 전에 걸러요.
+  en: >-
+    Java and JS let absence fall into any value. Swift <b>writes it into the type</b> and catches
+    it before running.
+misconceptions:
+  # swift.md §9 ① · §3 ⑤ 「옵셔널은 겹친다」 (실측).
+  - ko: "비어 있을 수도 있는 같은 타입이다 — <b>다른 타입</b>입니다. 그래서 그냥 못 섞어요."
+    en: "It is the same type that might be empty — it is a <b>different type</b>, so it does not mix."
+  - ko: >-
+      한 겹뿐이다 — <b>겹칩니다.</b> 값이 이미 없을 수 있는 사전에서 꺼내면 두 겹으로 와요.
+    en: >-
+      There is only one layer — <b>they nest.</b> A map whose values are already optional yields
+      two layers.
+  - ko: "비어 있으면 거짓으로 쳐진다 — 조건 자리에 그대로는 못 옵니다."
+    en: "Empty counts as false — it cannot stand in a condition at all."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>없을 수 있다는 것을 적은 타입</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the type that says this can be absent</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 없을 수 있다는 사실은 이름이 아니라 타입에 적혀요."
+          en: "{{pick.2|code}} is the <b>name</b>. Possible absence is written in the type, not the name."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 타입이냐", en: "The sharpest spot — the name or the type" }
+          code:
+            - "var a: User?    // 없을 수 있다"
+            - "var a: User     // 언제나 있다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>안에 든 타입</b>입니다. 벗긴 뒤에 되는 것이지 지금 타입은 아니에요."
+          en: "{{pick.3|code}} is the <b>type inside</b> — what it becomes after unwrapping, not what it is now."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 겉이냐 안이냐", en: "The sharpest spot — outside or inside" }
+          code:
+            - "let a: User? = nil"
+            - "let b: User = a    // 빌드가 멈춘다"
+meaning:
+  - q:
+      ko: "물음표가 붙은 값을 안 벗기고 안의 값처럼 쓰면 어떻게 될까요?"
+      en: "What happens when a marked value is used as the value inside without unwrapping?"
+    options:
+      - t:
+          ko: "빌드가 그 줄에서 멈춘다 — 다른 타입이라서"
+          en: "The build stops on that line — it is a different type"
+      - t:
+          ko: "값이 있으면 되고 없으면 돌다가 죽는다"
+          en: "It works when present and dies at run time when absent"
+        diag:
+          t:
+            ko: "자바·JS 가 그렇습니다. Swift 는 그 갈림을 <b>돌기 전에</b> 막아서, 죽는 자리는 보증하는 표기를 손으로 적었을 때만 남아요."
+            en: "That is Java and JS. Swift blocks it <b>before running</b>; the dying case remains only where a guarantee was written by hand."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 언제 걸리나", en: "The sharpest spot — when it is caught" }
+            code:
+              - "let n: Int? = nil"
+              - "n + 1     // 빌드가 멈춘다"
+      - t:
+          ko: "없으면 저절로 빈 값이 들어간다"
+          en: "Absence silently becomes an empty value"
+        diag:
+          t:
+            ko: "저절로 채워지지 않습니다. 없을 때 채울 값은 손으로 적어야 하고, 그 표기가 따로 있어요."
+            en: "Nothing is filled in. A fallback has to be written, and it has its own notation."
+      - t:
+          ko: "경고만 붙고 돈다"
+          en: "It warns and runs"
+        diag:
+          t:
+            ko: "경고가 아니라 멈춤입니다. 타입이 다르니 그 자리에 놓을 수가 없어요."
+            en: "Not a warning but a stop. Different types cannot stand in the same place."
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 개념의 정답은 「물음표가 붙었나」인데 붙은 타입 이름은 사용처마다 다르고
+  (`String?` · `User?` · `[Item]?`), 물음표 한 글자만 구멍으로 삼으면 빈칸형이 생성 단계에서
+  떨어진다(`MIN_HOLE`). 벗기는 표기를 고르는 판은 `swift/if-let`·`swift/nil-coalescing` 이 진다.
+why_gate:
+  q:
+    ko: "Swift 는 왜 「없음」을 값의 상태가 아니라 <b>타입에</b> 적었을까요?"
+    en: "Why did Swift write absence <b>into the type</b> instead of leaving it a state of the value?"
+  choices:
+    - t:
+        ko: "어느 자리가 비어 있을 수 있는지가 코드에 보이고, 안 벗기고 쓴 자리를 돌기 전에 전부 찾을 수 있기 때문"
+        en: "Because it makes the emptiable places visible and lets every unwrapped use be found before running"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 대신 코드에 늘어나는 것이 무엇인지도 적어 보세요."
+        en: "That is the direction. Say what the code gains in bulk, too."
+    - t:
+        ko: "없는 값이 메모리를 덜 써서"
+        en: "Because an absent value uses less memory"
+      ok: false
+      fb:
+        ko: "메모리 문제가 아닙니다. 언제 걸리느냐가 이유예요."
+        en: "Memory is not it. When it gets caught is."
+    - t:
+        ko: "Swift 에 비어 있는 값이 없어서"
+        en: "Because Swift has no empty value"
+      ok: false
+      fb:
+        ko: "있습니다 — 「없음」이라는 값이 있어요. 그것이 아무 타입에나 들어가지 못하게 한 것이 결정입니다."
+        en: "It has one. The decision was to stop it fitting into any type."
+queries:
+  - { grammars: [swift], file: ./optional-type.scm }
+examples:
+  - code: "class A { var owner: Node? }"
+    expect: { sites: 1, form: optprop, picks: { 1: "Node?", 2: "owner", 3: "Node" } }
+  - code: "func f(u: User?) { }"
+    expect: { sites: 1, form: optparam, picks: { 1: "User?", 2: "u", 3: "User" } }
+  - code: "func find() -> Item? { nil }"
+    expect: { sites: 1, form: optreturn, picks: { 1: "Item?", 2: "find", 3: "Item" } }
+  - code: "class A { var owner: Node }"
+    expect: none

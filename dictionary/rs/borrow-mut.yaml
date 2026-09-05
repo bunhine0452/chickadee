@@ -1,0 +1,181 @@
+schema: 1
+id: rs/borrow-mut
+# 2부 (`rs.md` §3). 보편형은 없다. 같은 값에 `&mut` 는 하나뿐이고 `&` 와 겹치지도 않는다 — E0499·E0502
+# 의 자리이고, 그 규칙의 존재 이유가 `cs/aliasing` 한 장이다(rust-axis §2.2). 실측: 읽기 빌림의 2.6%.
+universal: null
+name: { ko: 고칠 수 있게 빌리기, en: Borrowing to change }
+token: "&mut"
+grammars: [rust]
+framework: null
+essential: true
+difficulty: 3
+prereq: [rs/borrow-shared, rs/mut-binding, cs/aliasing]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "고칠 권한을 빌려 준다. 그동안 그 값은 다른 어떤 빌림도 받지 못한다 — 읽기조차."
+    en: "Lends the right to change. Meanwhile the value takes no other borrow at all."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} {{pick.2|code}}{{pick.2|josa:을,를}} <b>고칠 수 있게</b> 빌려 줍니다. 읽기 빌림과
+      다른 것은 하나뿐인데 그것이 이 언어의 심장이에요 — <b>동시에 하나만</b> 됩니다. 고치는 손이 둘이면
+      한쪽이 옮긴 값을 다른 쪽이 읽고, 고치는 손과 읽는 눈이 함께 있으면 읽는 중에 값이 바뀝니다.
+      그것이 `cs/aliasing` 이 말하는 「이름 둘이 한 값을 가리키면」의 사고이고, E0499(고침 둘) 와
+      E0502(고침 + 읽기)가 정확히 그 자리를 막습니다. 주인 쪽 이름에도 `mut` 이 있어야 해요 —
+      고칠 권한은 없는 데서 빌려 줄 수 없으니까요(E0596).
+    en: >-
+      {{pick.1|code}} on line {{site.line}} lends {{pick.2|code}} <b>for changing</b>. It differs from a
+      read borrow in one way, and that way is the heart of the language — <b>only one at a time</b>. Two
+      changing hands would let one move a value while the other reads it; a changing hand next to a
+      reading eye would let the value shift mid-read. That is the accident `cs/aliasing` describes,
+      “two names, one value,” and E0499 (two changers) and E0502 (a changer plus a reader) block exactly
+      that spot. The owner's name needs `mut` as well — you cannot lend a permission you do not have
+      (E0596).
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 값의 주인이고 이름에 mut 이 있다."
+      en: "{{pick.2|code}} owns the value and carries mut."
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 고칠 권한을 빌려 준다 — 그동안 다른 빌림은 전부 막힌다."
+      en: "{{pick.1|code}} on line {{site.line}} lends the right to change — every other borrow is blocked meanwhile."
+    - ko: "빌림이 끝나면 권한이 돌아오고 다시 읽기 빌림이 여럿 될 수 있다."
+      en: "When it ends the permission returns and many read borrows are possible again."
+
+rule:
+  ko: "<b>고치는 빌림은 한 번에 하나다.</b> 읽기와도 안 겹치고, 주인 이름에 mut 이 있어야 빌려 줄 수 있다."
+  en: "<b>One changing borrow at a time.</b> It never overlaps a read, and the owner's name must carry mut to lend it."
+result:
+  label:
+    ko: "{{site.line}}행의 빌림"
+    en: "the borrow on line {{site.line}}"
+  value: "{{pick.3}}{{pick.1}} {{pick.2}}"
+  note:
+    ko: "하나뿐 — 읽기와도 안 겹친다"
+    en: "the only one — no read alongside"
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 지금 고쳐지는 중입니다. 이 빌림이 끝날 때까지 다른 손은 못 닿아요."
+  en: "{{pick.2|code}} is being changed. Until this borrow ends, no other hand can reach it."
+payoff:
+  ko: "이걸 알면 E0499·E0502 가 스타일 규칙이 아니라는 것이 보입니다 — 둘 다 「읽는 중에 바뀐다」를 막은 겁니다."
+  en: "This shows that E0499 and E0502 are not style rules — both block “changed while being read.”"
+bridge:
+  ko: "C++ 참조는 몇 개든 값을 고칩니다. Rust 는 고치는 참조를 <b>하나로</b> 세고, 그 셈이 컴파일 오류로 나옵니다."
+  en: "C++ references change a value in any number. Rust counts changing references <b>to one</b>, and that count shows up as compile errors."
+misconceptions:
+  - ko: "`mut` 은 「이 값이 변한다」는 뜻이다 — <b>권한</b>입니다. `let mut v` 를 `&v` 로 넘기면 받은 쪽은 못 고쳐요."
+    en: "`mut` means “this value changes” — it is a <b>permission</b>. Pass `let mut v` as `&v` and the receiver cannot change it."
+  - ko: "읽기 빌림이 있어도 고치는 빌림을 더할 수 있다 — 안 됩니다(E0502). 읽는 중에 바뀌면 안 되니까요."
+    en: "A changing borrow can be added next to a read borrow — it cannot (E0502). Nothing may change mid-read."
+  - ko: "`.clone()` 을 붙이면 해결된다 — 오류는 사라지지만 고친 것이 원본에 안 갑니다. 의도가 깨져요."
+    en: "Adding `.clone()` fixes it — the error goes, but the change never reaches the original. The intent breaks."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>고칠 권한을 빌린다는 표시</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the mark that borrows the right to change</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 빌려지는 <b>값의 이름</b>입니다. 고칠 수 있게 빌리는지는 그 앞의 표시가 정해요."
+          en: "{{pick.2|code}} is the <b>name of the value</b> being lent. Whether it is lent for changing is decided by the mark in front."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 표시냐", en: "The sharpest spot — the name or the mark" }
+          code:
+            - "&items       // 읽기만"
+            - "&mut items   // 고칠 수 있게"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>빌림 자체</b>의 기호입니다. 읽기 빌림에도 같은 기호가 있어요 — 고침을 정하는 것은 그 뒤의 낱말입니다."
+          en: "{{pick.3|code}} is the symbol of <b>borrowing itself</b>. A read borrow has it too — what makes it a changing one is the word after."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 기호냐 낱말이냐", en: "The sharpest spot — the symbol or the word" }
+          code:
+            - "&items"
+            - "&mut items"
+            - "// ^같은 기호 ^다른 낱말"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 값을 <b>고칠 수 있게</b> 빌려 줍니다."
+      en: "Choose what goes in the blank. Line {{site.line}} lends a value <b>for changing</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "mut", mono: true }
+      - t: "ref"
+        mono: true
+        diag:
+          t:
+            ko: "이건 패턴 안에서 <b>빌려서 묶으라</b>는 표시입니다. `&` 뒤에는 못 와요."
+            en: "That tells a pattern to <b>bind by borrowing</b>. It cannot follow `&`."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 어디에 오나", en: "The sharpest spot — where it goes" }
+            code:
+              - "let ref r = x;   // 패턴 자리"
+              - "&mut x           // 빌림 자리"
+      - t: "const"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>원시 포인터</b>의 낱말입니다 — `*const T`. 빌림에는 안 붙어요."
+            en: "That belongs to <b>raw pointers</b> — `*const T`. It does not go on a borrow."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 빌림이냐 원시 포인터냐", en: "The sharpest spot — a borrow or a raw pointer" }
+            code:
+              - "&mut x       // 빌림"
+              - "*const T     // 원시 포인터 타입"
+      - t: "move"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>클로저</b>가 값을 가져가게 하는 낱말입니다. 빌림을 고칠 수 있게 만들지 않아요."
+            en: "That makes a <b>closure</b> take values. It does not make a borrow changeable."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 클로저냐 빌림이냐", en: "The sharpest spot — a closure or a borrow" }
+            code:
+              - "move || x + 1   // 클로저"
+              - "&mut x          // 빌림"
+
+why_gate:
+  q:
+    ko: "Rust 는 왜 고치는 빌림을 <b>하나로</b> 제한할까요?"
+    en: "Why does Rust limit changing borrows <b>to one</b>?"
+  choices:
+    - t:
+        ko: "이름 둘이 한 값을 가리키면 한쪽의 고침이 다른 쪽의 읽기를 깨기 때문에 — 그 사고를 컴파일 단계에서 없앤다"
+        en: "Because two names on one value let one side's change break the other's read — that accident is removed at compile time"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 함수에서 같은 값을 읽는 다른 이름이 있는지도 찾아보세요."
+        en: "That is the direction. Look for another name in this function that reads the same value."
+    - t:
+        ko: "고치는 빌림이 느려서"
+        en: "Because changing borrows are slow"
+      ok: false
+      fb:
+        ko: "속도 문제가 아닙니다. 두 손이 한 값을 고치는 것이 문제예요."
+        en: "Not speed. Two hands changing one value is the problem."
+    - t:
+        ko: "메모리를 아끼려고"
+        en: "To save memory"
+      ok: false
+      fb:
+        ko: "메모리는 같습니다. 값은 하나뿐이니까요."
+        en: "Memory is the same — there is one value."
+
+queries:
+  - { grammars: [rust], file: ./borrow-mut.scm }
+
+examples:
+  - code: "fn f() { push_one(&mut items); }               // 고칠 수 있게 빌려 준다"
+    expect: { sites: 1, form: borrow-mut, hole: "mut", picks: { 1: "mut", 2: "items", 3: "&" } }
+  - code: "fn push_one(v: &mut Vec<i32>) { v.push(1); }   // 서명에 적힌 고치는 빌림"
+    expect: { sites: 1, form: borrow-mut-param, picks: { 1: "mut", 2: "v", 3: "&" } }
+  - code: "impl C { fn bump(&mut self) { self.n += 1; } }  // 자기 자신을 고치는 메서드"
+    expect: { sites: 1, form: mut-self, picks: { 1: "mut", 2: "self", 3: "&" } }
+  - code: "fn f() { show(&items); }                       // 읽기 빌림 — rs/borrow-shared"
+    expect: none

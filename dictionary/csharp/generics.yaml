@@ -1,0 +1,129 @@
+schema: 1
+id: csharp/generics
+universal: common/generics
+name: { ko: 타입 자리 비워 두기, en: Generics }
+token: "<T>"
+grammars: [c_sharp]
+framework: null
+essential: true
+difficulty: 4
+# `csharp.md` §6 이 자바와 이 보편형을 공유하되 **위험하다**고 적었다 — 자바는 소거이고
+# C# 은 실행 시각까지 남는다. 보편형은 공유하고 그 차이를 산문과 오답 진단에 박는다.
+prereq: [cs/erasure-and-reification, csharp/method-call, csharp/list]
+confusions: []
+dict:
+  one_liner:
+    ko: "타입 자리를 이름으로 비워 두고, 쓰는 쪽이 채운다."
+    en: "A type slot is left open under a name, and the caller fills it in."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.2|code}}{{pick.2|josa:은,는}} 아직 정해지지 않은 <b>타입의 이름</b>입니다.
+      쓰는 쪽이 채우면 그 자리가 그 타입이 되고, 같은 코드를 타입마다 다시 안 적어도 돼요.
+      C# 에서 결정적으로 다른 것은 <b>그 정보가 실행 시각까지 남는다</b>는 것입니다 —
+      자바는 지워지지만 C# 은 남아서, 실행 중에도 무엇이 채워졌는지 물을 수 있고
+      값 타입에는 <b>타입마다 전용 코드</b>가 따로 나옵니다.
+    en: >-
+      {{pick.2|code}} on line {{site.line}} is a <b>name for a type</b> that is not settled yet.
+      The caller fills it, that slot becomes that type, and the same code need not be rewritten
+      per type. What decisively differs in C# is that <b>the information survives to run
+      time</b>: Java erases it, C# keeps it, so the filled type can be asked about while
+      running and value types get <b>their own compiled code per type</b>.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.1|code}}{{pick.1|josa:을,를}} 타입 자리를 가진 이름으로 세운다."
+      en: "Line {{site.line}} sets {{pick.1|code}} up as a name with an open type slot."
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 그 자리의 이름이 된다."
+      en: "{{pick.2|code}} becomes the name of that slot."
+    - ko: "쓰는 쪽이 채우면 {{pick.3|code}} 안에서 그 타입으로 읽힌다."
+      en: "Once the caller fills it, {{pick.3|code}} reads it as that type."
+rule:
+  ko: "<b>타입이 인자가 된다.</b> 그리고 C# 에서는 그 인자가 실행 시각까지 남는다."
+  en: "<b>A type becomes an argument.</b> And in C# that argument survives to run time."
+ok:
+  ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 이제 타입을 받아 쓰는 이름입니다."
+  en: "{{pick.1|code}} is now a name that takes a type."
+payoff:
+  ko: "이걸 알면 「같은 코드를 타입마다 복사하지 않아도 되나」가 풀립니다."
+  en: "This untangles “must I copy this code per type” — you need not."
+bridge:
+  ko: >-
+    자바는 각괄호가 컴파일 뒤 <b>지워집니다</b>. C# 은 남아서 <code>typeof(T)</code>도
+    <code>new T[]</code>도 되고, 자바에서 3겹인 사람이 여기서 가장 크게 어긋납니다.
+  en: >-
+    Java <b>erases</b> the brackets after compiling. C# keeps them, so <code>typeof(T)</code>
+    and <code>new T[]</code> both work — the biggest mismatch for hands coming from Java.
+misconceptions:
+  # 출처 — `csharp.md` §9 ⑫ · §6.
+  - ko: "자바처럼 지워진다 — 실행 시각까지 남습니다. <code>typeof(T)</code>도 <code>new T[]</code>도 됩니다."
+    en: "It erases like Java — it survives to run time; <code>typeof(T)</code> and <code>new T[]</code> both work."
+  - ko: "값 타입도 상자에 담긴다 — 타입마다 전용 코드가 나와 상자가 안 생깁니다."
+    en: "Value types get boxed — code is compiled per type, so no box appears."
+  - ko: "무엇이든 채울 수 있다 — 제약을 걸면 채울 수 있는 것이 좁아집니다."
+    en: "Anything can fill it — a constraint narrows what may."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>아직 정해지지 않은 타입의 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name of the type not yet settled</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>상자나 메서드의 이름</b>입니다. 비어 있는 타입 자리는 각괄호 안이에요."
+          en: "{{pick.1|code}} is the <b>name of this box or method</b>. The open type slot is inside the brackets."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 상자 이름이냐 타입 자리냐", en: "The sharpest spot — the box name or the slot" }
+          code:
+            - "class Box<T> { }"
+            - "//    ^이름  ^타입 자리"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 그 자리를 <b>쓰는 곳</b>입니다. 이름을 정하는 자리는 각괄호 안이에요."
+          en: "{{pick.3|code}} is where the slot is <b>used</b>. Where it is named is inside the brackets."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름 짓기냐 쓰기냐", en: "The sharpest spot — naming or using" }
+          code:
+            - "class Box<T> { public T Value; }"
+            - "//        ^짓는다      ^쓴다"
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 개념의 구멍 후보는 타입 변수 이름인데 사용처마다 다르고
+  (`T`·`TEntity`·`TKey`) 한 벌의 보기로 못 고정한다 — 빈칸형은 첫 보기가 구멍 원문과
+  같아야 카드가 선다(`packages/cards/src/t0-blank.ts`). 지목형이 같은 자리를 묻는다.
+why_gate:
+  q:
+    ko: "이 언어는 왜 타입 정보를 <b>실행 시각까지</b> 남겼을까요?"
+    en: "Why does this language keep the type information <b>until run time</b>?"
+  choices:
+    - t:
+        ko: "채워진 타입을 실행 중에도 물을 수 있고, 값 타입을 상자에 안 담아도 되게 하려고"
+        en: "So the filled type can be asked about while running, and value types need no box"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 대가로 무엇이 늘어나는지도 적어 보세요."
+        en: "That is the direction. Add what grows in exchange."
+    - t:
+        ko: "옛 코드와의 호환 때문에"
+        en: "For compatibility with older code"
+      ok: false
+      fb:
+        ko: "오히려 반대입니다. 자바가 호환 때문에 지우는 쪽을 골랐어요."
+        en: "The opposite: Java chose erasure for compatibility."
+    - t:
+        ko: "컴파일이 빨라져서"
+        en: "Because it compiles faster"
+      ok: false
+      fb:
+        ko: "타입마다 코드가 나오므로 오히려 늘어납니다. 얻는 것은 속도가 아니라 <b>정보</b>예요."
+        en: "Code is emitted per type, so it grows. What is gained is <b>information</b>, not speed."
+queries:
+  - { grammars: [c_sharp], file: ./generics.scm }
+examples:
+  - code: "class Box<T> { public T Value; }"
+    expect: { sites: 1, form: type, picks: { 1: "Box", 2: "T", 3: "{ public T Value; }" } }
+  - code: "interface IRepo<TEntity> { }"
+    expect: { sites: 1, form: interface, picks: { 1: "IRepo", 2: "TEntity", 3: "{ }" } }
+  - code: "class A { T First<T>(List<T> xs) { return xs[0]; } }"
+    expect: { sites: 1, form: method, picks: { 1: "First", 2: "T", 3: "T" } }
+  - code: "class Box { }"
+    expect: none

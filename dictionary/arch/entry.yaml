@@ -1,0 +1,36 @@
+schema: 1
+id: arch/entry
+universal: null
+name: { ko: "진입점", en: "Entry point" }
+token: null
+grammars: []
+framework: null
+track_default: t2
+essential: false
+difficulty: 3
+prereq: []
+confusions: []
+dict:
+  one_liner:
+    ko: "밖에서 이 프로그램을 <b>처음 부르는 자리</b>."
+    en: "The place the outside <b>calls first</b>."
+  why:
+    ko: >-
+      처음 보는 리포에서 제일 먼저 찾아야 하는 것이 문입니다. 문을 찾으면 거기서부터 따라 읽을
+      수 있고, 못 찾으면 파일 목록을 위에서부터 훑게 돼요. 문은 대개 프레임워크가 이름으로
+      정합니다 — 웹이면 `page`, 앱이면 `main`, 라이브러리면 `index` 입니다.
+    en: >-
+      In a repo you have never seen, the door is the first thing to find. Find it and you can read
+      forward from there; miss it and you end up scanning the file list from the top. The door is
+      usually named by the framework — `page` on the web, `main` in an app, `index` in a library.
+  trace: []
+rule:
+  ko: "들어오는 화살표가 없고 나가는 화살표만 있는 쪽이 문이다. <b>많이 쓰이는 쪽은 문이 아니라 창고다.</b>"
+  en: >-
+    The door has no incoming arrows and only outgoing ones. <b>The heavily used side is not a door
+    but a store room.</b>
+ok:
+  ko: "문에서 시작해 화살표를 따라가면 리포가 하는 일이 순서대로 나옵니다. 반대로 창고에서 시작하면 아무 데도 못 갑니다."
+  en: >-
+    Start at the door and follow the arrows and what the repo does comes out in order. Start at the
+    store room and you go nowhere.

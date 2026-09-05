@@ -1,0 +1,174 @@
+schema: 1
+id: cpp/new-delete
+# §4 심화 #28. `universal: null` — §6 이 적은 그대로다. C 의 자리 잡기와 **일부러** 안 묶는다:
+# 여기서는 만들 때·끝날 때 도는 함수가 함께 불리고, 그 차이가 개념의 전부인데 전이가 그것을
+# 지운다 (D4).
+universal: null
+name: { ko: 손으로 잡고 손으로 놓기, en: new and delete }
+token: "new"
+grammars: [cpp]
+framework: null
+essential: true
+difficulty: 4
+prereq: [cpp/constructor, cpp/destructor, cs/stack-and-heap]
+confusions: []
+dict:
+  one_liner:
+    ko: "블록이 끝나도 안 사라지는 자리를 잡는다. 놓는 일은 사람이 적어야 한다."
+    en: "Claims room that survives the block; releasing it has to be written by hand."
+  why:
+    ko: >-
+      보통 이름은 중괄호가 닫힐 때 사라집니다. 그보다 <b>오래 살아야 하는</b> 값은
+      {{site.line}}행처럼 따로 자리를 잡아야 해요. C 의 자리 잡기와 다른 점이 하나 있습니다 —
+      이 낱말은 자리만 잡는 것이 아니라 <b>만들 때 도는 함수를 함께 부릅니다</b>. 짝이 되는
+      낱말도 <b>끝날 때 도는 함수를 먼저 부르고</b> 자리를 돌려줘요.
+      그래서 C 의 것과 섞으면 안 됩니다. 그리고 놓는 줄을 사람이 적어야 하므로, 나가는 길이
+      여럿이면 한 갈래에서 반드시 빠집니다 — 그 문제의 답이 <b>소유를 타입에 적는 쪽</b>이에요.
+    en: >-
+      An ordinary name goes away at the closing brace. A value that must <b>live longer</b> needs
+      room claimed apart, as on line {{site.line}}. One thing differs from C's way of claiming
+      room: this word does not only claim, it <b>also runs the making function</b>. Its partner
+      word <b>runs the end-of-life function first</b> and then hands the room back. So the two
+      styles must not be mixed. And because the releasing line is written by hand, one exit path
+      always misses it — the answer to that is <b>writing ownership into the type</b>.
+  trace:
+    - ko: "{{site.line}}행은 블록보다 오래 사는 자리를 잡는다."
+      en: "Line {{site.line}} claims room that outlives the block."
+    - ko: "{{pick.2|code}} 의 만들 때 도는 함수가 거기서 돈다."
+      en: "The making function of {{pick.2|code}} runs there."
+    - ko: "놓는 줄을 안 적으면 그 자리는 프로그램이 끝날 때까지 남는다."
+      en: "With no releasing line, the room stays until the program ends."
+rule:
+  ko: "<b>자리를 잡으면서 만들 때 도는 함수를 부른다.</b> 놓는 줄은 사람이 적어야 한다."
+  en: "<b>Claiming also runs the making function.</b> The releasing line is written by hand."
+result:
+  label: { ko: "{{site.line}}행이 잡은 자리", en: "the room claimed on line {{site.line}}" }
+  value: "{{pick.1}} {{pick.2}}{{pick.3}}"
+  note: { ko: "블록이 끝나도 안 사라진다", en: "it survives the block" }
+ok:
+  ko: "{{pick.2|code}} 하나가 블록보다 오래 사는 자리에 만들어졌습니다."
+  en: "One {{pick.2|code}} was made in room that outlives the block."
+payoff:
+  ko: >-
+    이걸 알면 「오래 돌수록 메모리가 는다」가 풀립니다 — 놓는 줄이 어딘가에서 빠졌어요.
+  en: >-
+    This untangles “memory grows the longer it runs” — a releasing line was missed somewhere.
+bridge:
+  ko: >-
+    자바·파이썬은 놓는 일을 <b>런타임이 대신</b> 합니다. C++ 은 사람이 적거나, 소유를
+    타입에 적어 이름이 사라질 때 자동으로 돌게 해요.
+  en: >-
+    Java and Python let the <b>runtime</b> do the releasing. C++ has you write it, or write
+    ownership into the type so it runs when the name goes away.
+misconceptions:
+  # `cpp.md` §9 #4.
+  - ko: "놓는 줄이 그 이름을 지운다 — 이름은 그대로 남고 가리키던 자리만 돌아갑니다."
+    en: "The releasing line erases the name — the name stays and only the room goes back."
+  - ko: "C 의 자리 잡기와 섞어도 된다 — 만들 때·끝날 때 도는 함수가 안 불려서 안 됩니다."
+    en: "It can be mixed with C's way — it cannot; the making and end-of-life functions never run."
+  - ko: "여러 개를 잡았을 때도 놓는 낱말이 같다 — 대괄호를 붙인 짝으로만 놓아야 합니다."
+    en: "Many at once release the same way — they need the bracketed partner form."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>블록보다 오래 사는 자리를 잡는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that claims room outliving the block</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>무엇을 만들지</b>입니다. 어디에 만들지를 정하는 것은 앞의 낱말이에요."
+          en: "{{pick.2|code}} is <b>what gets made</b>. Where it is made comes from the word in front."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 무엇이냐 어디냐", en: "The sharpest spot — what or where" }
+          code:
+            - "W w;          // 블록이 끝나면 사라진다"
+            - "new W();      // 안 사라진다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>만들 때 넘기는 것들</b>입니다. 자리를 잡는 일과는 별개예요."
+          en: "{{pick.3|code}} is <b>what is handed in while making</b>, separate from the claiming."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 넘기는 것이냐 잡는 낱말이냐", en: "The sharpest spot — the arguments or the claiming" }
+          code:
+            - "new W(1);     // 1 을 넘긴다"
+            - "new W();      // 안 넘긴다"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>블록보다 오래 사는</b> 자리를 잡습니다."
+      en: "Choose what goes in the blank. Line {{site.line}} claims room that <b>outlives the block</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "new", mono: true }
+      - t: "malloc"
+        mono: true
+        diag:
+          t:
+            ko: "이건 C 의 자리 잡기라 <b>만들 때 도는 함수를 안 부릅니다</b>. 자리는 생기는데 안이 채워지지 않아요."
+            en: "That is C's way of claiming and <b>never runs the making function</b>. The room appears but nothing fills it."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 만들기까지 하느냐", en: "The sharpest spot — does it also make" }
+            code:
+              - "new W();               // 만들어진다"
+              - "(W*)malloc(sizeof(W))  // 자리만 생긴다"
+      - t: "delete"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>돌려주는</b> 쪽입니다. 순서가 반대라 잡지 않은 자리를 돌려주려 하면 무슨 일이 날지 정해져 있지 않아요."
+            en: "That is the <b>giving-back</b> side. The order is reversed, and releasing room never claimed leaves nothing fixed about what happens."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 잡느냐 놓느냐", en: "The sharpest spot — claiming or releasing" }
+            code:
+              - "W* p = new W();"
+              - "delete p;"
+      - t: "make_unique"
+        mono: true
+        diag:
+          t:
+            ko: "이건 잡으면서 <b>누가 놓을지까지</b> 정합니다. 답으로 더 나은 자리가 많지만, 지금 판이 묻는 것은 손으로 잡는 낱말이에요."
+            en: "That claims and also settles <b>who releases it</b>. It is the better choice in most code, but this plate asks for the hand-taking word."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 손으로냐 타입으로냐", en: "The sharpest spot — by hand or by type" }
+            code:
+              - "W* p = new W();                    // 손으로 놓아야 한다"
+              - "auto p = std::make_unique<W>();    // 저절로 놓인다"
+why_gate:
+  q:
+    ko: "요즘 코드는 왜 이 낱말을 <b>직접 안 쓰려고</b> 할까요?"
+    en: "Why does modern code <b>avoid writing this word directly</b>?"
+  choices:
+    - t:
+        ko: "놓는 줄을 사람이 적어야 해서 — 나가는 길이 여럿이면 한 갈래에서 반드시 빠진다"
+        en: "Because the releasing line is written by hand, and with several exits one path always misses it"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그럼 대신 무엇을 쓰는지도 한 줄로 적어 보세요."
+        en: "That is the direction. Add a line on what is used instead."
+    - t:
+        ko: "이 낱말이 느려서"
+        en: "Because the word is slow"
+      ok: false
+      fb:
+        ko: "대신 쓰는 것도 안에서 같은 일을 합니다. 다른 것은 <b>누가 놓는가</b>예요."
+        en: "The replacement does the same thing inside. What differs is <b>who releases it</b>."
+    - t:
+        ko: "요즘 표준에서 없어져서"
+        en: "Because the modern standard removed it"
+      ok: false
+      fb:
+        ko: "그대로 있습니다. 소유를 적는 타입들도 안에서 이 낱말을 씁니다."
+        en: "It is still there. The ownership types use this word inside."
+queries:
+  - { grammars: [cpp], file: ./new-delete.scm }
+examples:
+  - code: "void f() { W* p = new W(1); }             // p -> 블록보다 오래 사는 W"
+    expect: { sites: 1, form: new, hole: "new", picks: { 1: "new", 2: "W", 3: "(1)" } }
+  - code: "void f() { delete p; }                    // 끝날 때 도는 함수가 먼저 돈다"
+    expect: { sites: 1, form: delete, picks: { 2: "p" } }
+  - code: "void f() { W w; }                         // 블록이 끝나면 사라진다"
+    expect: none

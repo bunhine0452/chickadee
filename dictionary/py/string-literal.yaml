@@ -1,0 +1,243 @@
+schema: 1
+id: py/string-literal
+universal: common/text-literal
+name: { ko: 글자 값, en: Text literal }
+token: '"'
+grammars: [python]
+framework: null
+essential: true
+difficulty: 1
+prereq: [cs/text-encoding]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "따옴표로 감싼 값. 어느 따옴표를 썼는지는 값에 안 남는다."
+    en: "A value wrapped in quotes. Which quote was used leaves no trace in the value."
+  why:
+    ko: >-
+      파이썬의 따옴표는 넷입니다 — 작은 것·큰 것, 그리고 각각을 셋씩 겹친 것.
+      넷이 <b>같은 값</b>을 만들어요. {{site.line}}행이 {{pick.2|code}}{{pick.2|josa:으로,로}} 열고
+      {{pick.3|code}}{{pick.3|josa:으로,로}} 닫았는데, 다른 따옴표로 바꿔 적어도 담기는 값은 그대로입니다.
+      겹친 것은 <b>줄바꿈을 그대로 담기</b> 위한 것이지 다른 종류가 아니에요.
+      한 가지 함정이 있습니다 — 두 글자 값을 <b>연산자 없이 붙여 쓰면</b> 하나로 이어집니다.
+      목록에서 콤마 하나가 빠지면 항목 둘이 조용히 한 값이 되는 자리가 여기예요.
+    en: >-
+      Python has four quotes: single, double, and each of those tripled. All four make <b>the same
+      value</b>. Line {{site.line}} opens with {{pick.2|code}} and closes with {{pick.3|code}}, and
+      swapping in another quote leaves the stored value untouched. The tripled form exists to
+      <b>hold line breaks</b>, not to make a different kind. One trap comes with it: two text values
+      written <b>side by side with no operator</b> join into one. A missing comma in a list quietly
+      turns two entries into one value.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.2|code}}{{pick.2|josa:이,가}} 값의 시작을 알린다."
+      en: "{{pick.2|code}} on line {{site.line}} marks where the value begins."
+    - ko: "{{pick.1|code}} 안쪽이 그대로 값이 된다 — 따옴표 자체는 값에 안 들어간다."
+      en: "What sits inside {{pick.1|code}} becomes the value; the quotes themselves do not."
+    - ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 닫으면 그 자리에 글자 값 하나가 있다."
+      en: "{{pick.3|code}} closes it, and one text value stands there."
+
+rule:
+  ko: >-
+    <b>따옴표 넷이 같은 값을 만든다.</b> 붙여 쓴 두 값은 연산자 없이 하나로 이어진다.
+  en: >-
+    <b>Four quotes make the same value.</b> Two values written side by side join with no operator.
+result:
+  label:
+    ko: "{{site.line}}행의 글자 값"
+    en: "the text value on line {{site.line}}"
+  value: "{{pick.1}}"
+  note:
+    ko: "따옴표는 값에 안 들어간다"
+    en: "the quotes are not part of it"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}} 사이가 값입니다. 따옴표를 바꿔 적어도 담기는 것은
+    같아요 — 갈리는 것은 <b>안쪽에 무엇을 쓸 수 있느냐</b>뿐입니다.
+  en: >-
+    The value lies between {{pick.2|code}} and {{pick.3|code}}. Swapping the quote changes nothing
+    stored; only <b>what can be written inside</b> parts ways.
+payoff:
+  ko: >-
+    「따옴표를 왜 섞어 쓰나」가 풀립니다 — 안쪽에 큰따옴표가 있으면 바깥을 작은 것으로
+    두면 되고, 그게 전부예요.
+  en: >-
+    “Why are the quotes mixed” answers itself: a double quote inside means a single quote outside,
+    and that is the whole rule.
+bridge:
+  ko: >-
+    앞에 글자 하나가 붙으면 다른 개념이 됩니다 — 중괄호가 식이 되는 쪽과, 역슬래시를
+    글자로 두는 쪽이 각각 따로 있어요.
+  en: >-
+    One letter in front makes it another concept: one form turns braces into expressions, another
+    keeps backslashes as plain characters.
+misconceptions:
+  - ko: >-
+      작은따옴표와 큰따옴표는 다른 종류다 — 값은 완전히 같습니다. 바깥 따옴표는
+      <b>안쪽에 무엇이 오느냐</b>로 고르는 것뿐이에요.
+    en: >-
+      Single and double quotes make different kinds — the values are identical. The outer quote is
+      chosen by <b>what goes inside</b>, nothing more.
+  - ko: >-
+      겹따옴표 셋은 주석이다 — 값입니다. 함수 첫 줄에 이름 없이 놓인 것을 파이썬이
+      설명문으로 읽을 뿐, 문법으로는 글자 값 하나예요.
+    en: >-
+      A tripled quote is a comment — it is a value. Python reads an unnamed one at the top of a
+      function as documentation, but by grammar it is a single text value.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>값이 시작되는 자리</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>where the value begins</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: >-
+            {{pick.1|code}}{{pick.1|josa:은,는}} <b>담긴 것</b>입니다. 이것만으로는 값인지
+            이름인지 알 수 없고, 그것을 정하는 표시가 앞뒤에 있어요.
+          en: >-
+            {{pick.1|code}} is <b>what is held</b>. On its own it could be a value or a name; the
+            marks around it decide which.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 표시가 있느냐 없느냐"
+            en: "The sharpest spot — with the mark or without"
+          code:
+            - 'name       # 이름이다'
+            - '"name"     # 글자 값이다'
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} <b>끝</b>을 알립니다. 시작을 알리는 것은
+            같은 모양의 앞쪽이에요.
+          en: >-
+            {{pick.3|code}} marks the <b>end</b>. The same shape at the front marks the start.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 여는 쪽과 닫는 쪽"
+            en: "The sharpest spot — opening or closing"
+          code:
+            - '"ab"       # 앞이 열고 뒤가 닫는다'
+            - '"ab        # 안 닫으면 그 자리에서 멈춘다'
+
+meaning:
+  - q:
+      ko: "<code>xs = [\"a\" \"b\", \"c\"]</code> 에서 <code>len(xs)</code> 는 어떻게 될까요?"
+      en: "In <code>xs = [\"a\" \"b\", \"c\"]</code>, what does <code>len(xs)</code> give?"
+    hint:
+      ko: "콤마가 몇 개인지 세어 보세요."
+      en: "Count the commas."
+    options:
+      - t:
+          ko: "2 — 앞의 둘이 붙어 한 값이 되었다"
+          en: "2 — the first two joined into one value"
+      - t:
+          ko: "3 — 따옴표 묶음이 셋이니까"
+          en: "3 — there are three quoted chunks"
+        diag:
+          t:
+            ko: >-
+              묶음은 셋이 맞습니다. 그런데 항목을 나누는 것은 따옴표가 아니라 <b>콤마</b>이고,
+              콤마는 하나뿐이에요.
+            en: >-
+              Three chunks, yes. What separates entries is the <b>comma</b>, not the quotes, and
+              there is only one.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 묶음이냐 콤마냐"
+              en: "The sharpest spot — chunks or commas"
+            code:
+              - '["a" "b", "c"]     # 항목 둘'
+              - '["a", "b", "c"]    # 항목 셋'
+      - t:
+          ko: "그 자리에서 멈춘다 — 콤마가 빠졌으니까"
+          en: "It stops there — a comma is missing"
+        diag:
+          t:
+            ko: >-
+              멈추지 않습니다. 붙여 쓴 두 값을 잇는 것이 <b>문법으로 허용</b>돼 있어서,
+              조용히 항목 하나가 줄어든 채로 지나가요.
+            en: >-
+              Nothing stops. Joining two adjacent values is <b>allowed by the grammar</b>, so the
+              list quietly comes out one entry shorter.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 멈추느냐 조용하냐"
+              en: "The sharpest spot — stopping or staying quiet"
+            code:
+              - '"a" "b"            # "ab"'
+              - '"a" + "b"          # "ab" — 같은 값, 다른 길'
+      - t:
+          ko: "1 — 셋이 다 붙는다"
+          en: "1 — all three join"
+        diag:
+          t:
+            ko: >-
+              붙는 것은 <b>콤마가 없는 이웃</b>끼리입니다. 셋째 앞에는 콤마가 있어서
+              그쪽은 따로 남아요.
+            en: >-
+              Only neighbours <b>with no comma between</b> join. A comma stands before the third, so
+              it stays on its own.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 콤마가 있는 이웃과 없는 이웃"
+              en: "The sharpest spot — neighbours with a comma and without"
+            code:
+              - '["a" "b", "c"]     # ["ab", "c"]'
+              - '["a" "b" "c"]      # ["abc"]'
+
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 개념의 표시는 따옴표 한 글자라 빈칸형이 생성 단계에서 떨어지고
+  (`MIN_HOLE`), 안쪽 글자를 구멍으로 삼으면 사용처마다 정답이 달라 첫 보기를 사전에
+  고정할 수 없다. 여는 자리를 묻는 일은 지목형이, 붙여 쓰기의 함정은 뜻 고르기가 한다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 이 값을 따옴표로 감쌌을까요?"
+    en: "Why is the value on line {{site.line}} wrapped in quotes?"
+  choices:
+    - t:
+        ko: "글자 그대로를 값으로 쓰려고 — 감싸지 않으면 이름으로 읽힌다"
+        en: "To use the letters themselves as a value — unwrapped they read as a name"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 감싸지 않았을 때 무슨 일이 일어나는지도 한 줄로 적어 보세요."
+        en: "That is the direction. Add in one line what happens when it is left unwrapped."
+    - t:
+        ko: "화면에 찍을 값이라서"
+        en: "Because it is meant to be printed"
+      ok: false
+      fb:
+        ko: >-
+          찍든 안 찍든 감쌉니다. 감싸기는 <b>글자냐 이름이냐</b>를 가르는 표시이지 쓰임새가
+          아니에요.
+        en: >-
+          It is wrapped whether printed or not. The wrapping marks <b>letters or a name</b>, not a
+          purpose.
+    - t:
+        ko: "안에 빈칸이 있어서"
+        en: "Because it contains a space"
+      ok: false
+      fb:
+        ko: "빈칸이 없어도 감쌉니다. 빈칸은 이 표시가 필요한 여러 이유 중 하나일 뿐이에요."
+        en: "It is wrapped without a space too. A space is only one of the reasons this mark helps."
+
+queries:
+  - { grammars: [python], file: ./string-literal.scm }
+
+examples:
+  - code: 'name = "kim"           # name -> "kim" (str)'
+    expect: { sites: 1, form: double, picks: { 1: "kim", 2: '"', 3: '"' } }
+  - code: "mode = 'read'          # mode -> 'read' (str)"
+    expect: { sites: 1, form: single, picks: { 1: "read", 2: "'", 3: "'" } }
+  # 붙여 쓴 둘은 `string` 이 둘이라 사용처도 둘이다 — 쿼리가 이어짐을 따로 안 잡는다(scm 주석).
+  - code: 'msg = "hi " "there"    # msg -> "hi there" (str)'
+    expect: { sites: 2, form: double }
+  - code: "count = 3              # count -> 3 (int)"
+    expect: none
+  - code: 'greeting = f"hi {name}"   # greeting -> "hi kim" (str)'
+    expect: none

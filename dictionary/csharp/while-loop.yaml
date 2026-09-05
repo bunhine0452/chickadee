@@ -1,0 +1,163 @@
+schema: 1
+id: csharp/while-loop
+universal: common/loop-while
+name: { ko: 조건이 참인 동안 되풀이, en: While loop }
+token: "while"
+grammars: [c_sharp]
+framework: null
+essential: true
+difficulty: 2
+prereq: [csharp/equality, csharp/if-statement]
+confusions: []
+dict:
+  one_liner:
+    ko: "조건을 매 바퀴 앞에서 재고, 참인 동안 몸통을 되풀이한다."
+    en: "The test is read before each lap, and the body repeats as long as it holds."
+  why:
+    ko: >-
+      {{site.line}}행은 {{pick.2|code}}{{pick.2|josa:을,를}} <b>매 바퀴 시작에</b> 봅니다.
+      그래서 처음부터 거짓이면 몸통은 <b>한 번도</b> 안 돌아요. 조건 자리에 오는 것은 참·거짓뿐이라
+      <code>while (n)</code>은 컴파일이 막습니다. 그리고 조건을 <b>뒤에서</b> 재는 짝
+      (<code>do…while</code>)이 따로 있어서 그쪽은 몸통이 <b>적어도 한 번</b> 돕니다 —
+      같은 개념의 다른 자리입니다.
+    en: >-
+      Line {{site.line}} reads {{pick.2|code}} <b>at the start of every lap</b>, so a test that
+      is false from the outset runs the body <b>never</b>. Only a truth value stands in the
+      condition, so <code>while (n)</code> stops at compile time. There is also a partner that
+      reads the test <b>at the end</b> (<code>do…while</code>), where the body runs
+      <b>at least once</b> — the same concept in another position.
+  trace:
+    - ko: "{{site.line}}행에서 {{pick.2|code}}{{pick.2|josa:을,를}} 먼저 잰다."
+      en: "On line {{site.line}}, {{pick.2|code}} is read first."
+    - ko: "참이면 {{pick.3|code}}{{pick.3|josa:이,가}} 한 바퀴 돈다."
+      en: "If it holds, {{pick.3|code}} runs one lap."
+    - ko: "바퀴가 끝나면 다시 조건으로 돌아온다."
+      en: "At the end of the lap it comes back to the test."
+rule:
+  ko: "<b>조건은 매 바퀴 앞에서 잰다.</b> 처음부터 거짓이면 몸통은 한 번도 안 돈다."
+  en: "<b>The test is read before every lap.</b> False from the outset means the body never runs."
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 참인 동안 {{pick.3|code}}{{pick.3|josa:이,가}} 되풀이됩니다."
+  en: "While {{pick.2|code}} holds, {{pick.3|code}} repeats."
+payoff:
+  ko: "이걸 알면 「왜 끝나지 않나」가 풀립니다 — 조건에 걸린 값이 안 바뀌는 겁니다."
+  en: "This untangles “why does it never end” — nothing the test reads is changing."
+bridge:
+  ko: >-
+    파이썬도 같은 모양인데 조건 자리에 <b>아무 값이나</b> 옵니다. C# 은 참·거짓만 받아서
+    <code>while (items)</code>가 안 돼요.
+  en: >-
+    Python has the same shape but lets <b>any value</b> stand in the test. C# takes only a
+    truth value, so <code>while (items)</code> does not compile.
+misconceptions:
+  # 출처 — `csharp.md` §3 ⑱ · §9 ③.
+  - ko: "몸통은 적어도 한 번은 돈다 — 조건이 처음부터 거짓이면 한 번도 안 돕니다."
+    en: "The body runs at least once — false from the outset means never."
+  - ko: "조건 자리에 수를 놓을 수 있다 — 참·거짓만 옵니다(CS0029)."
+    en: "A number can stand in the test — only a truth value can (CS0029)."
+  - ko: "몸통 안에서 조건 값을 바꾸면 그 자리에서 바로 끝난다 — 바퀴가 끝나야 다시 잽니다."
+    en: "Changing the tested value ends it immediately — the test is read again only at the next lap."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>매 바퀴 앞에서 재는 것</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>what is read before every lap</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>되풀이하라는 낱말</b>입니다. 재는 것은 그 뒤 괄호 안이에요."
+          en: "{{pick.1|code}} is the <b>word that says repeat</b>. What is read is inside the brackets after it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 낱말이냐 조건이냐", en: "The sharpest spot — the word or the test" }
+          code:
+            - "while (n > 0)     // 재는 것은 n > 0"
+            - "while            // 낱말만으로는 못 잰다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 되풀이되는 <b>몸통</b>입니다. 몸통은 자기가 몇 바퀴 도는지 모릅니다."
+          en: "{{pick.3|code}} is the <b>body</b> that repeats. It does not know how many laps it gets."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 몸통이냐 조건이냐", en: "The sharpest spot — the body or the test" }
+          code:
+            - "{ n--; }          // 몸통"
+            - "n > 0             // 몇 바퀴인지 정하는 것"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 조건이 <b>참인 동안 되풀이</b>합니다."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>repeats while</b> the test holds."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "while", mono: true }
+      - t: "if"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>한 번만</b> 재고 한 번만 돕니다. 되풀이가 안 돼요."
+            en: "That reads the test <b>once</b> and runs once. Nothing repeats."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 한 번이냐 되풀이냐", en: "The sharpest spot — once or repeated" }
+            code:
+              - "if (n > 0) { n--; }      // 한 번"
+              - "while (n > 0) { n--; }   // 0 까지"
+      - t: "for"
+        mono: true
+        diag:
+          t:
+            ko: "이건 괄호 안에 <b>칸이 셋</b>이라 조건 하나만 넣으면 컴파일이 막습니다."
+            en: "That wants <b>three slots</b> in the brackets; one test alone stops at compile time."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 칸이 하나냐 셋이냐", en: "The sharpest spot — one slot or three" }
+            code:
+              - "while (n > 0)"
+              - "for (int i = 0; i < n; i++)"
+      - t: "foreach"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>모음을 훑는</b> 자리라 괄호 안에 조건이 아니라 「하나씩 무엇에서」가 와야 합니다."
+            en: "That <b>walks a collection</b>, so the brackets take “one at a time from what”, not a test."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 조건이냐 모음이냐", en: "The sharpest spot — a test or a collection" }
+            code:
+              - "while (n > 0)"
+              - "foreach (var x in xs)"
+why_gate:
+  q:
+    ko: "이 언어는 왜 조건을 <b>몸통 앞</b>에서 재는 모양을 기본으로 두었을까요?"
+    en: "Why is reading the test <b>before</b> the body the default shape?"
+  choices:
+    - t:
+        ko: "몸통이 한 번도 안 돌아야 맞는 경우가 더 흔해서 — 빈 모음을 도는 자리가 그렇다"
+        en: "Because running zero times is more often right — walking an empty collection, for one"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 반대 모양이 맞는 자리도 하나 적어 보세요."
+        en: "That is the direction. Add one place where the other shape is right."
+    - t:
+        ko: "앞에서 재는 쪽이 빨라서"
+        en: "Because reading first is faster"
+      ok: false
+      fb:
+        ko: "속도는 같습니다. 다른 것은 <b>0 바퀴가 가능한가</b>뿐이에요."
+        en: "Speed is the same. What differs is only <b>whether zero laps is possible</b>."
+    - t:
+        ko: "뒤에서 재는 모양이 없어서"
+        en: "Because there is no shape that reads it last"
+      ok: false
+      fb:
+        ko: "있습니다. <code>do…while</code>이 그것이고 몸통이 적어도 한 번 돕니다."
+        en: "There is: <code>do…while</code>, whose body runs at least once."
+queries:
+  - { grammars: [c_sharp], file: ./while-loop.scm }
+examples:
+  - code: "class A { void F(int n) { while (n > 0) { n--; } } }"
+    expect: { sites: 1, form: while, hole: "while", picks: { 1: "while", 2: "n > 0", 3: "{ n--; }" } }
+  - code: "class A { void F(int n) { do { n--; } while (n > 0); } }"
+    expect: { sites: 1, form: do-while, picks: { 1: "do", 2: "n > 0", 3: "{ n--; }" } }
+  - code: "class A { void F() { if (true) { } } }"
+    expect: none

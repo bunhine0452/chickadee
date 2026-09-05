@@ -43,21 +43,48 @@ export interface ResolveInput {
  */
 export interface ResolvedEdge {
   from: string; to: string; kind: EdgeKind; confidence: 'syntactic' | 'heuristic';
+  /**
+   * 라우트가 **선언된** 줄 (`to` 기준 1-based). HTTP 간선에만 있다.
+   *
+   * 2단 추적의 둘째 칸이 이것을 쓴다 — 없으면 `import` 줄을 가리키게 되고, 그러면 로그인과
+   * 회원가입이 같은 칸을 보게 된다. 라우트 줄이면 둘이 갈린다 (D162).
+   */
+  toLine?: number;
+  /**
+   * 이 간선을 만든 지정자가 적힌 줄 (`from` 기준 1-based).
+   *
+   * `import_edge` 에는 안 실린다 — 2단 추적 문항이 「어느 파일 **어느 줄**」을 묻는데
+   * 그 줄이 여기서만 나온다 (D162 · `docs/program/exercises.md` §2 `hop`).
+   * 뒤집힌 매퍼 간선(D159)에서는 `to` 쪽 파일의 줄이다 — 글자가 거기 적혀 있다.
+   */
+  line: number;
 }
 
 /** 해석 결과 하나. `kind` 가 있으면 `form` 대신 그것이 이긴다 (http 엣지). */
-interface Hit { to: string; kind?: EdgeKind; }
+interface Hit { to: string; kind?: EdgeKind; confidence?: 'syntactic' | 'heuristic'; toLine?: number }
 
-type Lang = 'ts' | 'py' | 'go' | 'rs' | 'dart' | 'swift';
+type Lang = 'ts' | 'py' | 'go' | 'rs' | 'dart' | 'swift' | 'java';
 
 /** 확장자 → 언어. 표에 없는 확장자(`.sql` 등)는 엣지가 없다. */
 const LANG_OF: Readonly<Record<string, Lang>> = {
-  ts: 'ts', tsx: 'ts', js: 'ts', jsx: 'ts', mjs: 'ts', cjs: 'ts',
-  py: 'py', go: 'go', rs: 'rs', dart: 'dart', swift: 'swift',
+  ts: 'ts', tsx: 'ts', js: 'ts', jsx: 'ts', mjs: 'ts', cjs: 'ts', vue: 'ts',
+  py: 'py', go: 'go', rs: 'rs', dart: 'dart', swift: 'swift', java: 'java',
+  // MyBatis 매퍼의 속성값은 자바 패키지 경로다 — 해석기를 따로 두지 않는다 (D159).
+  xml: 'java',
 };
 
+/** `_imports.scm` 이 라우트로 내보내는 `form` 들 (D159). 이것들은 **나가는 엣지가 아니다.** */
+const ROUTE_FORM = /^route-/;
+/**
+ * 호출 그래프·스키마의 재료 (D168 · D169). 파일 간선이 아니라 `calls.ts`·`schema.ts` 가 읽는다 —
+ * 여기서 경로로 풀면 `user` 라는 지역 변수가 `user.java` 를 찾아 나선다.
+ */
+const GRAPH_FORM = /^(field|local|call|call-self|entry-scheduled|column-of|ddl-[a-z]+|reads-table)$/;
+/** 프론트가 부르는 자리. `http-post` → `POST`. `http-any` 는 동사 미상(`.uri("…")`, D168). */
+const HTTP_FORM = /^http-(get|post|put|patch|delete|any)$/;
+
 /** 상대 지정자에 붙여 보는 확장자. 순서가 곧 우선순위다 (04 §7.1). */
-const TS_EXT = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.d.ts'] as const;
+const TS_EXT = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.vue', '.d.ts'] as const;
 /** ESM 출력 규약상 소스가 아니라 **결과물** 이름으로 적히는 확장자. */
 const JS_OUT_EXT = ['.js', '.jsx', '.mjs', '.cjs'] as const;
 /** Next 라우트가 앉는 자리. `src/` 배치를 공식으로 허용하므로 둘 다 본다. */
@@ -67,6 +94,8 @@ const RS_DIR_MODULE = new Set(['mod', 'lib', 'main']);
 
 interface Ctx {
   files: ReadonlySet<string>;
+  /** `"POST /api/auth/login"` → 그 라우트를 선언한 파일과 줄 (D159 · D162). */
+  routes: ReadonlyMap<string, RouteAt>;
   /** go 패키지 디렉터리 → 그 패키지의 대표 파일. `resolveGo` 주석 참조. */
   goLead: ReadonlyMap<string, Hit>;
   tsconfig: TsconfigPaths | null; packageImports: Readonly<Record<string, string>> | null;
@@ -78,6 +107,7 @@ export function resolveImports(input: ResolveInput): ResolvedEdge[] {
   const ctx: Ctx = {
     files: new Set(input.paths),
     goLead: goLeadFiles(input.paths),
+    routes: routeIndex(input.files),
     tsconfig: input.tsconfig ?? null,
     packageImports: input.packageImports ?? null,
     goModule: input.goModule ?? null,
@@ -91,14 +121,32 @@ export function resolveImports(input: ResolveInput): ResolvedEdge[] {
     const lang = langOf(file.path);
     if (lang === null) continue;
     for (const raw of file.imports) {
-      const hit = resolveOne(lang, file.path, raw.specifier, ctx);
+      // 라우트 선언은 색인의 재료일 뿐 나가는 엣지가 아니다 (D159). 호출·스키마 캡처도 그렇다.
+      if (raw.form !== null && (ROUTE_FORM.test(raw.form) || GRAPH_FORM.test(raw.form))) continue;
+      const http = raw.form !== null ? HTTP_FORM.exec(raw.form) : null;
+      const hit = http
+        ? routeHit((http[1] as string).toUpperCase(), raw.specifier, ctx)
+        : resolveOne(lang, file.path, raw.specifier, ctx);
       // 자기 자신을 가리키는 엣지는 지도에 그릴 것이 없다.
       if (hit === null || hit.to === file.path) continue;
       const kind = hit.kind ?? kindOf(raw.form);
-      const key = `${file.path} ${hit.to} ${kind}`;
+      // MyBatis `namespace` 는 참조와 의존의 방향이 **반대**다 (D159). 글자는 매퍼가 DAO 를
+      // 가리키지만, 뜻은 「이 인터페이스의 실체가 여기 있다」라서 DAO 를 열면 SQL 이 여기 있다.
+      // 기능 경로가 DAO 에서 멈추지 않고 SQL 까지 가려면 이 하나를 뒤집어야 한다.
+      const flip = raw.form === 'mapper-of';
+      const from = flip ? hit.to : file.path;
+      const to = flip ? file.path : hit.to;
+      // HTTP 간선은 **호출 자리마다** 다른 요청이다 — `authService.js` 는 같은 컨트롤러를
+      // 여섯 번 부르고 그 여섯이 로그인·회원가입·로그아웃…이다. 줄을 빼고 접으면 2단 추적이
+      // 「첫 번째 호출」을 로그인이라고 가르친다 (실측에서 12행 `signup` 이 그랬다).
+      // 정적 import 는 접는다 — 같은 파일을 두 번 import 해도 의존은 하나다.
+      const key = kind === 'http' ? `${from} ${to} http ${raw.line}` : `${from} ${to} ${kind}`;
       if (seen.has(key)) continue;
       seen.add(key);
-      edges.push({ from: file.path, to: hit.to, kind, confidence: 'syntactic' });
+      edges.push({
+        from, to, kind, confidence: hit.confidence ?? 'syntactic', line: raw.line,
+        ...(hit.toLine === undefined ? {} : { toLine: hit.toLine }),
+      });
     }
   }
   edges.sort(byEdge);
@@ -111,6 +159,7 @@ function resolveOne(lang: Lang, from: string, spec: string, ctx: Ctx): Hit | nul
   if (lang === 'go') return resolveGo(spec, ctx);
   if (lang === 'rs') return resolveRs(from, spec, ctx);
   if (lang === 'dart') return resolveDart(from, spec, ctx);
+  if (lang === 'java') return resolveJava(from, spec, ctx);
   // swift: 파일 import 가 없다. 타입 참조 휴리스틱은 캡처가 생기면 그때 붙인다.
   return null;
 }
@@ -225,6 +274,154 @@ function nextRoute(spec: string, ctx: Ctx): Hit | null {
 }
 
 /**
+ * Spring 라우트 색인 (D159). `@RequestMapping("/api/auth")` 는 **클래스**에, `@PostMapping("/login")`
+ * 은 **메서드**에 붙어 있어 캡처 하나로 못 붙는다 — `_imports.scm` 이 `form` 으로 갈라 내보내고
+ * 여기서 파일 안에서 합친다. 자바는 파일 하나에 public 클래스 하나라 기본 경로도 하나다.
+ *
+ * 키에 HTTP 메서드를 넣는 이유: 경로만 맞고 메서드가 다른 짝을 잇지 않기 위해서다
+ * (`GET /api/auth/me` 와 `DELETE /api/auth/me` 는 다른 자리다 — 이 리포에 실제로 둘 다 있다).
+ */
+/** 라우트가 선언된 자리. 줄은 2단 추적의 둘째 칸이 쓴다 (D162). */
+interface RouteAt { path: string; line: number }
+
+function routeIndex(files: readonly FileImports[]): Map<string, RouteAt> {
+  const out = new Map<string, RouteAt>();
+  // 같은 라우트가 두 파일에 선언돼 있으면(서비스 사본 둘) **짧은 경로 · 사전순**이 이긴다 —
+  // 입력 순서가 아니라 규칙이 정해야 같은 리포에 같은 답이 나온다 (04 §9).
+  const ordered = [...files].sort((a, b) => a.path.length - b.path.length || cmp(a.path, b.path));
+  for (const file of ordered) {
+    const lang = langOf(file.path);
+    // 자바(Spring)와 파이썬(FastAPI·Flask)이 라우트를 선언한다 (D159 · D168).
+    if (lang !== 'java' && lang !== 'py') continue;
+    const base = file.imports.find((r) => r.form === 'route-base')?.specifier ?? '';
+    for (const raw of file.imports) {
+      const m = raw.form === null ? null : /^route-(bare-)?(get|post|put|patch|delete)$/.exec(raw.form);
+      if (m === null) continue;
+      // 경로 없는 애너테이션(`@GetMapping`)은 지정자가 애너테이션 **이름**이다 — 경로는 기본 경로다.
+      const leaf = m[1] === undefined ? raw.specifier : '';
+      const key = `${(m[2] as string).toUpperCase()} ${normPath(joinRoute(base, leaf))}`;
+      if (!out.has(key)) out.set(key, { path: file.path, line: raw.line });
+    }
+  }
+  return out;
+}
+
+/**
+ * 경로 변수를 자리표 하나로 접는다 — 프론트의 `${id}` 와 Spring 의 `{dreamId}` 는 같은 자리다.
+ * 접지 않으면 `` `/notices/${id}` `` 와 `/api/notices/{noticeId}` 가 영영 안 만난다.
+ */
+const normPath = (p: string): string => p.replace(/\$\{[^}]*\}|\{[^}]*\}/g, ':');
+
+/** `/api/auth` + `/login` → `/api/auth/login`. 양쪽 슬래시를 한 번만 남긴다. */
+function joinRoute(base: string, leaf: string): string {
+  const b = base.endsWith('/') ? base.slice(0, -1) : base;
+  const l = leaf === '' ? '' : leaf.startsWith('/') ? leaf : `/${leaf}`;
+  return `${b}${l}` === '' ? '/' : `${b}${l}`;
+}
+
+/**
+ * 프론트의 호출 → 그 라우트를 선언한 서버 파일 (D159 · `kind: 'http'`).
+ *
+ * 클라이언트는 **baseURL 을 뺀 경로**를 적는다 — `axios.create({ baseURL: "/api" })` 아래에서
+ * `api.post("/auth/login")` 은 서버의 `/api/auth/login` 이다. 설정을 읽는 대신 **접미 일치**로
+ * 잇는다: 설정 파일 형식(axios·fetch 래퍼·Vite proxy)마다 다른 것을 안 쫓아도 되고,
+ * 정확히 맞으면 그쪽이 먼저 이긴다.
+ *
+ * 접미로 이은 것은 `confidence: 'heuristic'` 이다 — 문자열이 우연히 겹칠 수 있다.
+ * 후보가 **둘 이상이면 아예 안 잇는다.** 틀린 간선은 없는 간선보다 나쁘다.
+ */
+function routeHit(verb: string, spec: string, ctx: Ctx): Hit | null {
+  const path = normPath(spec.split(/[?#]/)[0] ?? '');
+  // 동사 미상(`ANY`, D168 의 `.uri("…")`)이면 어느 동사든 경로가 정확히 같은 것 하나를 찾는다.
+  const verbs = verb === 'ANY' ? ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] : [verb];
+  let exact: RouteAt | null = null;
+  for (const v of verbs) {
+    const at = ctx.routes.get(`${v} ${path}`);
+    if (at === undefined) continue;
+    if (exact !== null && exact.path !== at.path) return null;
+    exact = at;
+  }
+  if (exact !== null) return { to: exact.path, kind: 'http', toLine: exact.line };
+
+  // 접미가 맞는 것이 여럿이면 — 한쪽의 접두가 다른 쪽 접두의 **앞부분**일 때만 짧은 쪽을 고른다.
+  // `/fortune/comprehensive` 에 Spring 의 `/api/…` 와 FastAPI 의 `/api/v1/…` 가 걸리면 `/api` 다:
+  // 클라이언트가 뺀 baseURL 은 둘의 공통 부분이고, 더 긴 쪽은 그 밑의 다른 서비스다.
+  // 접두가 서로 무관하면(`/api` 와 `/v2`) 안 잇는다 — 틀린 간선은 없는 간선보다 나쁘다.
+  const hits: { at: RouteAt; prefix: string }[] = [];
+  for (const [key, at] of ctx.routes) {
+    const space = key.indexOf(' ');
+    if (!verbs.includes(key.slice(0, space))) continue;
+    const route = key.slice(space + 1);
+    if (!route.endsWith(path)) continue;
+    if (hits.some((h) => h.at.path === at.path)) continue;
+    hits.push({ at, prefix: route.slice(0, route.length - path.length) });
+  }
+  if (hits.length === 0) return null;
+  const shortest = hits.reduce((a, b) => (b.prefix.length < a.prefix.length ? b : a));
+  const nested = hits.every((h) => h === shortest || (h.prefix.startsWith(shortest.prefix) && h.prefix !== shortest.prefix));
+  return nested
+    ? { to: shortest.at.path, kind: 'http', confidence: 'heuristic', toLine: shortest.at.line }
+    : null;
+}
+
+/** 라우트가 없는 HTTP 호출 (D168 `dead.ts`). `resolveImports` 가 조용히 버리는 것을 이름 붙여 돌려준다. */
+export interface HttpMiss { path: string; line: number; verb: string; route: string }
+
+/**
+ * 프론트(또는 서버)가 부르는데 **어느 라우트에도 안 닿는** 호출. 실측 리포의 `GET /emotions/stats`
+ * 가 그것이다 — 서버에 그 경로가 없고, 부르는 쪽은 죽은 갈래를 모른 채 산다.
+ */
+export function httpMisses(input: ResolveInput): HttpMiss[] {
+  const routes = routeIndex(input.files);
+  const ctx: Ctx = {
+    files: new Set(input.paths), goLead: new Map(), routes, tsconfig: null, packageImports: null,
+    goModule: null, pyRoots: [''],
+  };
+  const out: HttpMiss[] = [];
+  for (const file of input.files) {
+    for (const raw of file.imports) {
+      const http = raw.form !== null ? HTTP_FORM.exec(raw.form) : null;
+      if (http === null) continue;
+      const verb = (http[1] as string).toUpperCase();
+      if (routeHit(verb, raw.specifier, ctx) !== null) continue;
+      out.push({ path: file.path, line: raw.line, verb, route: raw.specifier });
+    }
+  }
+  return out.sort((a, b) => cmp(a.path, b.path) || a.line - b.line);
+}
+
+/** 라우트가 선언된 자리 전부 — 부르는 곳이 없는 라우트를 세는 재료다 (D168 `dead.ts`). */
+export function routeDecls(files: readonly FileImports[]): { path: string; line: number; route: string }[] {
+  return [...routeIndex(files)].map(([route, at]) => ({ path: at.path, line: at.line, route }))
+    .sort((a, b) => cmp(a.path, b.path) || a.line - b.line);
+}
+
+/**
+ * `com.ssafy.finalproject.service.AuthService` → `…/com/ssafy/finalproject/service/AuthService.java`.
+ *
+ * 소스 루트(`src/main/java`)를 설정에서 읽지 않는다 — 패키지 경로가 디렉터리 구조 그대로라
+ * **접미 일치**면 충분하고, 그래야 Maven·Gradle·평평한 배치를 규칙 하나로 덮는다.
+ * 외부 의존(`org.springframework.…`)은 리포에 파일이 없어 자연히 안 걸린다.
+ * 후보가 둘 이상이면 안 잇는다 — 모듈이 여럿인 리포에서 같은 패키지가 두 번 나올 수 있다.
+ */
+function resolveJava(from: string, spec: string, ctx: Ctx): Hit | null {
+  // 점이 없으면 **같은 패키지**의 이름이다 (D163). 자바는 패키지 경로가 곧 디렉터리라
+  // 패키지 선언을 파싱하지 않고 옆 파일을 본다 — 규칙이 하나 준다.
+  if (!spec.includes('.')) {
+    const at = `${dirOf(from)}/${spec}.java`;
+    return ctx.files.has(at) ? { to: at } : null;
+  }
+  const tail = `/${spec.replace(/\./g, '/')}.java`;
+  let found: string | null = null;
+  for (const path of ctx.files) {
+    if (!path.endsWith(tail)) continue;
+    if (found !== null) return null;
+    found = path;
+  }
+  return found === null ? null : { to: found };
+}
+
+/**
  * `import a.b` · `from a.b import c` → `a/b/c.py` → `a/b.py` → `a/b/__init__.py`.
  *
  * 지정자가 모듈까지인지(`a.b`) 이름까지인지(`a.b.c`) 캡처만 보고는 알 수 없다. 그래서
@@ -247,7 +444,9 @@ function resolvePy(from: string, spec: string, ctx: Ctx): Hit | null {
     const hit = firstHit(pyCandidates(segs).map((c) => under(root, c)), ctx);
     if (hit !== null) return hit;
   }
-  return null;
+  // 스크립트가 있는 디렉터리도 루트다 — 파이썬은 `sys.path[0]` 이 그것이라 `AI_API/main.py` 의
+  // `from services.x import y` 가 `AI_API/services/x.py` 다. 설정 없이 가장 흔한 배치를 덮는다 (D168).
+  return firstHit(pyCandidates(segs).map((c) => under(dirOf(from), c)), ctx);
 }
 
 function pyCandidates(segs: readonly string[]): string[] {

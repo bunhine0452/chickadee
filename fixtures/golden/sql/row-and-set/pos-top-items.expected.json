@@ -1,0 +1,67 @@
+[
+  {
+    "queryId": "sql/row-and-set",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "limit",
+    "startLine": 2,
+    "startCol": 2,
+    "endLine": 4,
+    "endCol": 8,
+    "nodeKind": "from",
+    "inError": false
+  },
+  {
+    "queryId": "sql/row-and-set",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "limit",
+    "startLine": 2,
+    "startCol": 7,
+    "endLine": 2,
+    "endCol": 11,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "sql/row-and-set",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "limit",
+    "startLine": 4,
+    "startCol": 1,
+    "endLine": 4,
+    "endCol": 6,
+    "nodeKind": "keyword_limit",
+    "inError": false
+  },
+  {
+    "queryId": "sql/row-and-set",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "hole",
+    "form": "limit",
+    "startLine": 4,
+    "startCol": 1,
+    "endLine": 4,
+    "endCol": 6,
+    "nodeKind": "keyword_limit",
+    "inError": false
+  },
+  {
+    "queryId": "sql/row-and-set",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "limit",
+    "startLine": 4,
+    "startCol": 7,
+    "endLine": 4,
+    "endCol": 8,
+    "nodeKind": "literal",
+    "inError": false
+  }
+]

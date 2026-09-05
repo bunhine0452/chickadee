@@ -1,0 +1,252 @@
+schema: 1
+id: py/truthiness
+universal: common/truthiness
+name: { ko: 값 자체로 판단하기, en: Judging by the value itself }
+token: "if x:"
+grammars: [python]
+framework: null
+essential: true
+difficulty: 2
+prereq: [py/boolean-literal]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "갈림길에 아무 값이나 올 수 있다. 비어 있으면 안 들어간다."
+    en: "Any value may stand at a fork. When it is empty the branch is skipped."
+  why:
+    ko: >-
+      갈림길은 참·거짓 하나를 원하는데, 파이썬은 <b>아무 값이나</b> 받고 그 자리에서 한쪽으로
+      접습니다. 접는 규칙은 짧아요 — <b>비어 있으면 거짓</b>입니다. 빈 목록·빈 글자·<code>0</code>·
+      <code>None</code> 이 거짓이고 나머지가 참이에요.
+      {{site.line}}행이 {{pick.1|code}} 값을 그대로 놓은 것이 그래서입니다.
+      「있으면」이라고 읽히는 자리이고, 실제로 사용자 리포 둘(파일 202개)에서 이 모양이 688곳인데
+      <code>== True</code> 로 적은 자리는 <b>한 곳도 없습니다.</b>
+      다만 <code>0</code> 이 뜻 있는 값일 때 이 규칙이 물립니다 —
+      「값이 없다」와 「값이 0 이다」가 여기서 같은 쪽으로 접혀요.
+    en: >-
+      A fork wants one true-or-false, and Python accepts <b>any value</b>, folding it to one side on
+      the spot. The rule is short: <b>empty is false</b>. An empty list, empty text, <code>0</code>
+      and <code>None</code> are false; everything else is true. That is why line {{site.line}} places
+      {{pick.1|code}} bare. It reads as "if there is any," and across two sample repositories (202
+      files) this shape appears 688 times while <code>== True</code> appears <b>not once</b>. The
+      rule bites when <code>0</code> is a meaningful value: "absent" and "zero" fold the same way.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.3|code}} 뒤에 {{pick.1|code}} 값이 그대로 놓인다."
+      en: "After {{pick.3|code}} on line {{site.line}}, the value {{pick.1|code}} stands bare."
+    - ko: "파이썬이 그 값을 참·거짓 한쪽으로 접는다 — 비어 있으면 거짓이다."
+      en: "Python folds that value to one side: empty means false."
+    - ko: "참 쪽이면 {{pick.2|code}} 안으로 들어가고, 아니면 통째로 건너뛴다."
+      en: "On the true side it enters {{pick.2|code}}; otherwise the whole block is skipped."
+
+rule:
+  ko: >-
+    <b>비어 있으면 거짓이다.</b> 그래서 「없다」와 「0 이다」가 같은 쪽으로 접힌다.
+  en: >-
+    <b>Empty means false.</b> That is why "absent" and "zero" fold to the same side.
+result:
+  label:
+    ko: "{{site.line}}행의 판단"
+    en: "the judgement on line {{site.line}}"
+  value: "{{pick.1}}"
+  note:
+    ko: "값이 그대로 조건이 된다"
+    en: "the value is the condition"
+ok:
+  ko: >-
+    {{pick.1|code}} 값이 비어 있지 않으면 {{pick.2|code}} 안으로 들어갑니다. 참·거짓으로
+    바꿔 적지 않아도 되는 것이 이 자리의 규칙이에요.
+  en: >-
+    If {{pick.1|code}} is not empty, the run enters {{pick.2|code}}. Not having to convert it to a
+    true-or-false is the rule here.
+payoff:
+  ko: >-
+    「있으면 처리한다」가 한 줄로 적히는 이유가 여기 있습니다. 대신 <code>0</code> 이
+    올 수 있는 자리에서는 무엇과 견주는지를 적어야 해요.
+  en: >-
+    This is why "handle it if there is any" fits on one line. Where <code>0</code> can arrive,
+    though, the comparison has to be written out.
+bridge:
+  ko: >-
+    자바는 이 규칙이 <b>없습니다</b> — 조건 자리에 참·거짓 말고는 못 오고, 목록을 놓으면
+    컴파일이 멈춰요. 자바스크립트는 규칙이 있는데 <b>목록이 참</b>이라 답이 반대입니다.
+  en: >-
+    Java has <b>no such rule</b>: only a true-or-false may stand at a fork, and a list stops the
+    compiler. JavaScript has the rule but an <b>empty array is true</b>, so the answer flips.
+misconceptions:
+  - ko: >-
+      참·거짓을 보려면 <code>== True</code> 로 적어야 한다 — 오히려 반대입니다. 사용자 리포
+      둘에서 그 표기는 <b>0곳</b>이고 값을 그대로 놓은 자리가 688곳이에요.
+    en: >-
+      Checking truth needs <code>== True</code> — the opposite holds. Across two sample repositories
+      that spelling appears <b>0 times</b> and the bare value 688 times.
+  - ko: >-
+      「비어 있으면 거짓」은 어디서나 같다 — 자바스크립트에서 빈 목록은 <b>참</b>입니다.
+      같은 코드가 언어를 옮기면 조용히 반대로 돌아요.
+    en: >-
+      "Empty is false" holds everywhere — in JavaScript an empty array is <b>true</b>. The same code
+      quietly reverses when it moves languages.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>참·거짓으로 접히는 값</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the value that gets folded to true or false</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 판단이 참일 때 <b>도는 쪽</b>입니다.
+            접히는 것은 갈림길에 놓인 값이에요.
+          en: >-
+            {{pick.2|code}} is <b>what runs</b> when the judgement comes out true. What gets folded
+            is the value at the fork.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 판단과 그 결과"
+            en: "The sharpest spot — the judgement and its consequence"
+          code:
+            - "if rows:        # 여기서 접힌다"
+            - "    save(rows)  # 접힌 뒤에 도는 곳"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 갈림길이 <b>시작된다는 표시</b>입니다.
+            무엇을 접느냐는 그 뒤에 놓인 값이 정해요.
+          en: >-
+            {{pick.3|code}} marks that a fork <b>begins</b>. What gets folded is decided by the
+            value written after it.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 표시와 값"
+            en: "The sharpest spot — the marker and the value"
+          code:
+            - "if rows:        # 표시는 늘 같다"
+            - "if not rows:    # 갈리는 것은 뒤쪽이다"
+
+meaning:
+  - q:
+      ko: "<code>count = 0</code> 일 때 <code>if count:</code> 와 <code>if count is not None:</code> 는 어떻게 갈릴까요?"
+      en: "With <code>count = 0</code>, how do <code>if count:</code> and <code>if count is not None:</code> part?"
+    hint:
+      ko: "「비어 있다」와 「없다」는 다른 물음입니다."
+      en: "“Empty” and “absent” are different questions."
+    options:
+      - t:
+          ko: "앞쪽은 안 들어가고 뒤쪽은 들어간다"
+          en: "The first skips, the second enters"
+      - t:
+          ko: "둘 다 안 들어간다 — <code>0</code> 은 없는 값이니까"
+          en: "Both skip — <code>0</code> is an absent value"
+        diag:
+          t:
+            ko: >-
+              <code>0</code> 은 <b>있는 값</b>입니다. 거짓 쪽으로 접힐 뿐이고, 「없음」과는
+              다른 것이에요 — 뒤쪽 물음이 그 차이를 봅니다.
+            en: >-
+              <code>0</code> is a <b>value that is there</b>. It merely folds to the false side,
+              which is not the same as absent — the second question looks at exactly that gap.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 없음과 비어 있음"
+              en: "The sharpest spot — absent or empty"
+            code:
+              - "bool(0)          # False"
+              - "0 is not None    # True"
+      - t:
+          ko: "둘 다 들어간다 — <code>0</code> 도 값이니까"
+          en: "Both enter — <code>0</code> is a value too"
+        diag:
+          t:
+            ko: >-
+              값인 것은 맞습니다. 그런데 앞쪽 물음은 「있느냐」가 아니라 <b>비었느냐</b>를
+              묻고, <code>0</code> 은 그 규칙에서 빈 쪽이에요.
+            en: >-
+              A value, yes. The first question asks not whether it is there but <b>whether it is
+              empty</b>, and by that rule <code>0</code> counts as empty.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 있느냐와 비었느냐"
+              en: "The sharpest spot — present or empty"
+            code:
+              - "if 0:            # 안 들어간다"
+              - "if [0]:          # 들어간다 — 목록은 안 비었다"
+      - t:
+          ko: "앞쪽은 그 자리에서 멈춘다 — 참·거짓이 아니어서"
+          en: "The first stops there — it is not a true-or-false"
+        diag:
+          t:
+            ko: >-
+              멈추는 언어는 <b>자바</b>입니다. 파이썬은 아무 값이나 받고 접기 때문에,
+              멈추지 않는 것이 오히려 이 자리의 어려움이에요.
+            en: >-
+              The language that stops is <b>Java</b>. Python takes any value and folds it, and not
+              stopping is precisely what makes this spot hard.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 받느냐 막느냐"
+              en: "The sharpest spot — accepted or refused"
+            code:
+              - "if 0:            # 파이썬은 돈다"
+              - "if (0)           # 자바는 컴파일이 멈춘다"
+
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 개념의 요점은 조건 자리에 **아무것도 안 적혀 있다**는 것이라 지울 글자가
+  없다. 갈림길의 낱말을 구멍으로 삼으면 그때 나오는 판은 `py/if-statement` 의 것이고, 값을
+  구멍으로 삼으면 정답이 사용처마다 달라 첫 보기를 사전에 고정할 수 없다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 무엇과도 견주지 않았을까요?"
+    en: "Why does line {{site.line}} compare against nothing?"
+  choices:
+    - t:
+        ko: "「있으면」이 곧 물음이어서 — 비어 있는지만 보면 된다"
+        en: "Because the question is “if there is any” — emptiness is all that matters"
+      ok: true
+      fb:
+        ko: >-
+          그 방향입니다. 이 자리에 <code>0</code> 이 올 수 있는지도 함께 적어
+          보세요 — 그때 답이 갈립니다.
+        en: >-
+          That is the direction. Add whether <code>0</code> can arrive here — that is where the
+          answer parts.
+    - t:
+        ko: "짧게 쓰려고 — 견주어 적어도 뜻은 같다"
+        en: "For brevity — spelling out the comparison means the same"
+      ok: false
+      fb:
+        ko: >-
+          뜻이 같지 않은 자리가 있습니다. <code>0</code> 과 <code>None</code> 을 견주면
+          답이 갈려요.
+        en: >-
+          There are spots where the meaning differs. Comparing against <code>0</code> and against
+          <code>None</code> give different answers.
+    - t:
+        ko: "파이썬이 견주기를 안 받아서"
+        en: "Because Python does not accept comparisons here"
+      ok: false
+      fb:
+        ko: >-
+          받습니다. 견주기를 써야 하는 자리도 따로 있고, 그것을 가르는 것이 이 판이에요.
+        en: >-
+          It does. There are spots that need the comparison, and telling the two apart is what this
+          plate is for.
+
+queries:
+  - { grammars: [python], file: ./truthiness.scm }
+
+examples:
+  - code: "if rows:\n    save(rows)          # rows -> [] 면 안 들어간다 (bool)"
+    expect: { sites: 1, form: bare-if, picks: { 1: "rows", 3: "if" } }
+  - code: "if not rows:\n    return None      # not [] -> True (bool)"
+    expect: { sites: 1, form: negate, picks: { 1: "rows", 2: "not", 3: "if" } }
+  - code: "while queue:\n    pop(queue)       # queue -> [] 면 멈춘다 (bool)"
+    expect: { sites: 1, form: bare-while, picks: { 1: "queue", 3: "while" } }
+  - code: "if count == 0:\n    return None      # count == 0 -> True (bool)"
+    expect: none
+  - code: "if is_ready(job):\n    run(job)        # is_ready(job) -> True (bool)"
+    expect: none

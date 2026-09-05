@@ -1,0 +1,226 @@
+schema: 1
+id: ts/interface-type
+universal: null
+name: { ko: 모양에 이름 붙이기, en: interface and type alias }
+token: "interface"
+grammars: [typescript, tsx]
+framework: null
+essential: true
+difficulty: 2
+prereq: [ts/type-annotation, ts/object-literal]
+confusions: [ts/object-literal]
+
+dict:
+  one_liner:
+    ko: "묶음의 모양에 이름을 붙여 여러 곳에서 쓴다. 값이 아니라 모양이다."
+    en: "A bundle's shape given a name and reused. A shape, not a value."
+  why:
+    ko: >-
+      같은 모양을 여러 자리에 적으면 한 곳만 고쳤을 때 나머지가 어긋납니다. {{site.line}}행은 그
+      모양에 {{pick.1|code}}{{pick.1|josa:이,가}}라는 이름을 붙여 두고, 쓰는 자리에서는 그 이름만
+      적어요. {{pick.2|code}}{{pick.2|josa:은,는}} 그 모양이 갖는 이름표이고
+      {{pick.3|code}}{{pick.3|josa:은,는}} 그 이름표의 약속입니다.
+    en: >-
+      Writing the same shape in several places means one edit leaves the rest out of step. Line
+      {{site.line}} gives that shape the name {{pick.1|code}}, and the using sites write only the
+      name. {{pick.2|code}} is a label the shape carries and {{pick.3|code}} is that label's promise.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.1|code}}{{pick.1|josa:이,가}}라는 이름으로 모양을 연다."
+      en: "Line {{site.line}} opens a shape under the name {{pick.1|code}}."
+    - ko: "{{pick.2|code}} 이름표에 {{pick.3|code}} 약속이 붙는다."
+      en: "The label {{pick.2|code}} takes the promise {{pick.3|code}}."
+    - ko: "컴파일이 끝나면 이 선언은 사라지고, 확인만 남는다."
+      en: "Once compiled the declaration is gone; only the checking it did remains."
+
+rule:
+  ko: >-
+    <b>이름이 아니라 모양이 맞으면 들어간다.</b> 이름이 다른 두 선언이라도 필드가 같으면 서로
+    대입된다.
+  en: >-
+    <b>Fitting is by shape, not by name.</b> Two differently named declarations with the same fields
+    are assignable to each other.
+result:
+  label:
+    ko: "{{site.line}}행이 세우는 것"
+    en: "What line {{site.line}} stands up"
+  value: "{{pick.1}} = { {{pick.2}}: {{pick.3}} … }"
+  note:
+    ko: "값이 아니라 모양"
+    en: "a shape, not a value"
+ok:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:은,는}} 값이 아니라 <b>모양의 이름</b>입니다. 그래서 그 이름으로는
+    아무것도 못 부르고, 타입 자리에만 설 수 있어요.
+  en: >-
+    {{pick.1|code}} is the <b>name of a shape</b>, not a value. Nothing can be called on it; it may
+    stand only where a type stands.
+payoff:
+  ko: >-
+    AI 는 컴포넌트마다 이 선언을 하나씩 냅니다. 이것이 값이 아니라는 것을 알면 파일 위쪽 절반이
+    한 번에 읽혀요.
+  en: >-
+    An AI writes one of these per component. Knowing it is not a value makes the top half of the
+    file read in one pass.
+bridge:
+  ko: >-
+    낱말이 둘인데 차이가 하나 있습니다 — <code>interface</code> 만 나중에 같은 이름으로 다시 열어
+    덧붙일 수 있어요.
+  en: >-
+    Two words, one difference — only <code>interface</code> can be reopened later under the same
+    name and added to.
+misconceptions:
+  - ko: "이름이 다르면 서로 못 넣는다 — 모양이 같으면 들어갑니다."
+    en: "Different names cannot be swapped — same shape, and they can."
+  - ko: "선언한 모양이 돌아가는 중에도 지켜진다 — 컴파일하면 사라집니다."
+    en: "The declared shape is enforced while running — it disappears at compile time."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>모양의 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the shape's name</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 모양 <b>안쪽</b>의 이름표입니다. 모양 전체의 이름은
+            중괄호 앞에 있어요.
+          en: >-
+            {{pick.2|code}} is a label <b>inside</b> the shape. The whole shape's name sits before
+            the brace.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 모양의 이름과 안쪽 이름표"
+            en: "The sharpest spot — the shape's name or an inner label"
+          code:
+            - "interface Props { id: number }"
+            - "//        ^모양 이름  ^안쪽 이름표"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 그 이름표에 붙은 <b>약속</b>입니다. 모양 전체의
+            이름과는 다른 층이에요.
+          en: >-
+            {{pick.3|code}} is the <b>promise</b> on that label — a different layer from the shape's
+            own name.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 모양의 이름과 필드의 약속"
+            en: "The sharpest spot — the shape's name or a field's promise"
+          code:
+            - "interface Props { id: number }"
+            - "//        ^이름          ^약속"
+
+meaning:
+  - q:
+      ko: >-
+        <code>interface A { id: number }</code> 와 <code>interface B { id: number }</code> 가 있을 때
+        <code>A</code> 자리에 <code>B</code> 값을 넣으면?
+      en: >-
+        Given <code>interface A { id: number }</code> and <code>interface B { id: number }</code>,
+        what if a <code>B</code> value goes where <code>A</code> is expected?
+    hint:
+      ko: "이 언어가 무엇을 보고 맞다고 하는지 생각해 보세요."
+      en: "Think about what this language looks at to decide fit."
+    options:
+      - t:
+          ko: "들어간다 — 필드가 같으면 이름이 달라도 된다"
+          en: "It fits — same fields, and the names may differ"
+      - t:
+          ko: "안 된다 — 이름이 다르니까"
+          en: "It does not — the names differ"
+        diag:
+          t:
+            ko: >-
+              이름을 보는 언어도 있습니다. 여기서는 <b>필드가 맞는지</b>만 봐요 — 자바나 C# 을 먼저
+              배운 사람이 가장 크게 헷갈리는 자리입니다.
+            en: >-
+              Some languages do look at names. Here only <b>the fields</b> are checked — the spot
+              that trips people coming from Java or C# hardest.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 이름을 보나 모양을 보나"
+              en: "The sharpest spot — names or shapes"
+            code:
+              - "interface A { id: number }"
+              - "interface B { id: number }   // 서로 들어간다"
+      - t:
+          ko: "필드가 하나라도 더 많으면 안 된다"
+          en: "One extra field and it fails"
+        diag:
+          t:
+            ko: >-
+              이미 변수에 담긴 값이면 더 많아도 들어갑니다. 막히는 것은 <b>바로 적은 묶음</b>일 때뿐이에요.
+            en: >-
+              A value already held in a variable fits even with extra fields. Only a <b>bundle
+              written on the spot</b> is blocked.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 변수인가 바로 적은 묶음인가"
+              en: "The sharpest spot — a variable or a literal"
+            code:
+              - "const b: B = { id: 1, x: 2 }   // 막힌다"
+              - "const a: A = b                 // 들어간다"
+      - t:
+          ko: "돌아가는 중에 확인해 준다"
+          en: "It is checked while running"
+        diag:
+          t:
+            ko: >-
+              이 선언은 컴파일하면 사라집니다. 돌아가는 중에 모양을 보려면 확인하는 코드를 직접
+              적어야 해요.
+            en: >-
+              The declaration disappears at compile time. Checking a shape while running takes code
+              you write yourself.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 남는가 사라지는가"
+              en: "The sharpest spot — does it survive"
+            code:
+              - "interface A { id: number }   // 사라진다"
+              - "if (typeof v.id === 'number') // 남는다"
+
+no_hole_reason: >-
+  모양의 이름을 지우면 그 줄이 파싱되지 않고, 필드 하나를 지우면 다른 모양이 될 뿐 물음이 안 생긴다.
+  여기서 재는 것은 「이름과 모양이 어느 층인가」라 자리를 짚어 묻는다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 모양에 이름을 붙였을까요?"
+    en: "Why does line {{site.line}} give the shape a name?"
+  choices:
+    - t:
+        ko: "같은 모양을 여러 자리에서 쓰는데 한 곳에서만 고치려고"
+        en: "Because the same shape is used in several places and should be edited in one"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 이름을 쓰는 자리가 <b>몇 군데</b>인지도 세어 보세요."
+        en: "That is the direction. Count <b>how many</b> places use this name."
+    - t:
+        ko: "그 모양의 값을 하나 만들어 두려고"
+        en: "To make one value of that shape"
+      ok: false
+      fb:
+        ko: "값은 안 생깁니다. 컴파일이 끝나면 이 줄은 남지도 않아요."
+        en: "No value appears. After compiling this line does not even remain."
+    - t:
+        ko: "다른 모양이 못 들어오게 이름으로 막으려고"
+        en: "To block other shapes by name"
+      ok: false
+      fb:
+        ko: "이름으로 막지 않습니다. 필드가 맞으면 이름이 달라도 들어와요."
+        en: "Names block nothing. Matching fields get in whatever the name."
+
+queries:
+  - { grammars: [typescript, tsx], file: ./interface-type.scm }
+
+examples:
+  - code: "interface Props { id: number }"
+    expect: { sites: 1, form: interface, picks: { 1: "Props", 2: "id", 3: "number" } }
+  - code: "type Row = { title: string; done: boolean }"
+    expect: { sites: 1, form: alias, picks: { 1: "Row", 2: "title", 3: "string" } }
+  - code: "const props = { id: 1 }"
+    expect: none

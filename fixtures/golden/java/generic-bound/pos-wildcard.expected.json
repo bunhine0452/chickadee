@@ -1,0 +1,67 @@
+[
+  {
+    "queryId": "java/generic-bound",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "site",
+    "form": "wildcard",
+    "startLine": 6,
+    "startCol": 27,
+    "endLine": 6,
+    "endCol": 43,
+    "nodeKind": "wildcard",
+    "inError": false
+  },
+  {
+    "queryId": "java/generic-bound",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.4",
+    "form": "wildcard",
+    "startLine": 6,
+    "startCol": 27,
+    "endLine": 6,
+    "endCol": 28,
+    "nodeKind": "?",
+    "inError": false
+  },
+  {
+    "queryId": "java/generic-bound",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.1",
+    "form": "wildcard",
+    "startLine": 6,
+    "startCol": 29,
+    "endLine": 6,
+    "endCol": 36,
+    "nodeKind": "extends",
+    "inError": false
+  },
+  {
+    "queryId": "java/generic-bound",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "hole",
+    "form": "wildcard",
+    "startLine": 6,
+    "startCol": 29,
+    "endLine": 6,
+    "endCol": 36,
+    "nodeKind": "extends",
+    "inError": false
+  },
+  {
+    "queryId": "java/generic-bound",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.5",
+    "form": "wildcard",
+    "startLine": 6,
+    "startCol": 37,
+    "endLine": 6,
+    "endCol": 43,
+    "nodeKind": "type_identifier",
+    "inError": false
+  }
+]

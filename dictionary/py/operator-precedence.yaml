@@ -1,0 +1,239 @@
+schema: 1
+id: py/operator-precedence
+# 0부 축 E. `universal: null` — 세기 표가 언어마다 다르고, 파이썬의 `and`/`or` 는 값을 내는데
+# 자바의 `&&` 는 참·거짓만 낸다. 같은 이름으로 묶으면 그 차이가 지워진다 (`py.md` §1.5.6 ②).
+universal: null
+name: { ko: 접히는 순서, en: How an expression folds }
+token: "and"
+grammars: [python]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cs/operator-precedence]
+confusions: [py/bool-op-value, py/comparison, py/arithmetic]
+
+dict:
+  one_liner:
+    ko: "식은 왼쪽부터 읽히지 않는다. 연산자마다 세기가 있어 센 쪽이 먼저 묶인다."
+    en: "An expression is not read left to right. Each operator has a strength."
+  why:
+    ko: >-
+      괄호가 없으면 순서를 정하는 것은 <b>세기</b>입니다. 곱하기가 더하기보다 세서
+      <code>2 + 3 * 4</code> 는 <code>20</code> 이 아니라 <code>14</code> 예요.
+      {{site.line}}행의 {{pick.3|code}} 부분이 먼저 접히고, 그 결과를
+      {{pick.1|code}}{{pick.1|josa:이,가}} 받습니다.
+      낱말 연산자도 같은 표에 있습니다 — <code>and</code> 가 <code>or</code> 보다 세요.
+      그래서 <code>a or b and c</code> 는 오른쪽 둘이 먼저 묶입니다.
+      한 자리만 규칙이 반대입니다. 거듭제곱은 <b>오른쪽부터</b> 접혀서
+      <code>2 ** 3 ** 2</code> 가 <code>64</code> 가 아니라 <code>512</code> 예요.
+    en: >-
+      With no parentheses, order is set by <b>strength</b>. Multiplication is stronger than addition,
+      so <code>2 + 3 * 4</code> is <code>14</code>, not <code>20</code>. On line {{site.line}} the
+      {{pick.3|code}} part folds first and {{pick.1|code}} takes the result. Word operators sit in
+      the same table: <code>and</code> is stronger than <code>or</code>, so in
+      <code>a or b and c</code> the right pair binds first. One spot runs the other way: raising to a
+      power folds <b>from the right</b>, which makes <code>2 ** 3 ** 2</code> come out
+      <code>512</code>, not <code>64</code>.
+  trace:
+    - ko: "{{site.line}}행에서 세기가 센 {{pick.3|code}} 부분을 먼저 접는다."
+      en: "On line {{site.line}} the stronger part, {{pick.3|code}}, folds first."
+    - ko: "{{pick.2|code}}{{pick.2|josa:과,와}} 그 결과가 남는다."
+      en: "{{pick.2|code}} and that result are what remain."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 남은 둘을 마지막으로 접는다."
+      en: "{{pick.1|code}} folds the two that are left, last."
+
+rule:
+  ko: >-
+    <b>센 연산자가 먼저 묶인다.</b> 곱하기가 더하기보다 세고, 거듭제곱만 오른쪽부터 접힌다.
+  en: >-
+    <b>The stronger operator binds first.</b> Multiplication beats addition, and only powers fold
+    from the right.
+result:
+  label:
+    ko: "{{site.line}}행이 접히는 순서"
+    en: "the folding order on line {{site.line}}"
+  value: "{{pick.2}} {{pick.1}} ({{pick.3}})"
+  note:
+    ko: "괄호는 안 적혀 있어도 이렇게 묶인다"
+    en: "the grouping holds even unwritten"
+ok:
+  ko: >-
+    {{pick.3|code}} 쪽이 먼저 값이 되고, {{pick.1|code}}{{pick.1|josa:이,가}} 마지막에 접습니다.
+    괄호를 적어 두면 읽는 사람이 이 표를 외우지 않아도 돼요.
+  en: >-
+    {{pick.3|code}} becomes a value first, and {{pick.1|code}} folds last. Writing the parentheses
+    spares the reader from memorising the table.
+payoff:
+  ko: >-
+    「분명 맞게 적었는데 값이 이상하다」의 절반이 이 자리입니다. 괄호 하나로 끝나는 문제예요.
+  en: >-
+    Half of “I wrote it right and the value is odd” lives here, and one pair of parentheses ends it.
+bridge:
+  ko: >-
+    낱말 연산자는 접히는 순서만이 아니라 <b>내놓는 것</b>도 다릅니다 — 참·거짓이 아니라
+    피연산자 하나를 돌려줘요.
+  en: >-
+    Word operators differ not only in folding order but in <b>what they hand back</b>: one of the
+    operands, not a true-or-false.
+misconceptions:
+  - ko: >-
+      식은 왼쪽부터 차례로 계산된다 — 세기 표가 순서를 정합니다. 왼쪽부터인 것은
+      <b>같은 세기</b>일 때뿐이에요.
+    en: >-
+      An expression is computed left to right — the strength table sets the order. Left to right
+      holds only <b>within the same strength</b>.
+  - ko: >-
+      거듭제곱도 왼쪽부터다 — 이것만 오른쪽부터입니다.
+      <code>2 ** 3 ** 2</code> 는 <code>512</code> 예요.
+    en: >-
+      Powers fold left to right too — this one alone folds from the right.
+      <code>2 ** 3 ** 2</code> is <code>512</code>.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>가장 마지막에 접히는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that folds last</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 접히기를 <b>기다리는 값</b>입니다. 순서를
+            정하는 것은 기호의 세기예요.
+          en: >-
+            {{pick.2|code}} is a value <b>waiting to be folded</b>. The order is set by the
+            operators' strength.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 값과 순서"
+            en: "The sharpest spot — a value and the order"
+          code:
+            - "2 + 3 * 4      # 14"
+            - "(2 + 3) * 4    # 20"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} <b>먼저</b> 접히는 쪽입니다. 마지막에 접는
+            기호는 세기가 더 약한 쪽이에요.
+          en: >-
+            {{pick.3|code}} folds <b>first</b>. The symbol that folds last is the weaker one.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 먼저냐 나중이냐"
+            en: "The sharpest spot — first or last"
+          code:
+            - "2 + 3 * 4      # 3 * 4 가 먼저"
+            - "2 * 3 + 4      # 2 * 3 이 먼저"
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행은 오른쪽 둘이 <b>먼저 묶이는</b> 식입니다.
+      en: >-
+        Choose what goes in the blank. On line {{site.line}} the right pair <b>binds first</b>.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "and", mono: true }
+      - t: "or"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 낱말은 세기가 <b>더 약합니다.</b> 여기 두면 오른쪽 둘이 먼저 묶이지 않고
+              왼쪽부터 차례로 접혀요.
+            en: >-
+              That word is the <b>weaker</b> of the two. Put here, the right pair no longer binds
+              first and the folding runs from the left.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 센 낱말과 약한 낱말"
+              en: "The sharpest spot — the stronger word and the weaker"
+            code:
+              - "a or b and c    # a or (b and c)"
+              - "a or b or c     # (a or b) or c"
+      - t: "=="
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 기호는 <b>견줍니다.</b> 세기가 낱말 연산자보다 세서 오히려 먼저 묶이고,
+              내놓는 것도 참·거짓 하나예요.
+            en: >-
+              That symbol <b>weighs</b>. It is stronger than the word operators, so it binds earlier,
+              and what it yields is a single true-or-false.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 묶는가 견주는가"
+              en: "The sharpest spot — binding or weighing"
+            code:
+              - "a or b and c    # 값 하나가 나온다"
+              - "a == b == c     # 연쇄로 읽힌다"
+      - t: "+"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 기호는 <b>셈합니다.</b> 세기가 낱말 연산자보다 훨씬 세서 가장 먼저 묶이고,
+              참·거짓을 다루는 자리가 아니에요.
+            en: >-
+              That symbol <b>computes</b>. It is far stronger than the word operators, so it binds
+              earliest, and it is not where true-or-false is handled.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 세기 표의 위와 아래"
+              en: "The sharpest spot — the top and bottom of the table"
+            code:
+              - "a + b and c     # (a + b) and c"
+              - "a or b and c    # a or (b and c)"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행에 괄호를 적어 두면 무엇이 좋아질까요?"
+    en: "What would writing the parentheses on line {{site.line}} improve?"
+  choices:
+    - t:
+        ko: "읽는 사람이 세기 표를 몰라도 되고 — 값은 그대로다"
+        en: "The reader needs no strength table, and the value stays the same"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 괄호를 안 적었을 때 어느 자리에서 오해가 나는지도 적어 보세요."
+        en: "That is the direction. Add where the misreading happens when they are left off."
+    - t:
+        ko: "값이 달라져서 — 괄호가 순서를 바꾼다"
+        en: "The value changes — the parentheses reorder it"
+      ok: false
+      fb:
+        ko: >-
+          이미 그 순서로 접히고 있어서 값은 안 바뀝니다. 괄호가 바꾸는 것은 <b>읽는 비용</b>이에요.
+        en: >-
+          It already folds in that order, so the value does not move. What parentheses change is the
+          <b>cost of reading</b>.
+    - t:
+        ko: "계산이 빨라져서"
+        en: "The computation gets faster"
+      ok: false
+      fb:
+        ko: "속도는 같습니다. 괄호는 실행이 아니라 <b>사람</b>을 위한 것이에요."
+        en: "The speed is identical. Parentheses are for <b>people</b>, not for the run."
+
+queries:
+  - { grammars: [python], file: ./operator-precedence.scm }
+
+examples:
+  - code: "total = base + count * price       # 2 + 3 * 4 -> 14 (int)"
+    expect: { sites: 1, form: mul-right, picks: { 1: "+", 2: "base", 3: "count * price" } }
+  - code: "total = count * price + base       # 3 * 4 + 2 -> 14 (int)"
+    expect: { sites: 1, form: mul-left, picks: { 1: "+", 2: "base", 3: "count * price" } }
+  - code: "ok = cached or fresh and valid     # a or (b and c) -> 하나의 값"
+    expect: { sites: 1, form: and-first, hole: "and", picks: { 1: "or", 2: "cached" } }
+  - code: "n = 2 ** 3 ** 2                    # 2 ** 3 ** 2 -> 512 (int)"
+    expect: { sites: 1, form: right-assoc, picks: { 1: "**", 2: "2" } }
+  - code: "total = (base + count) * price     # (2 + 3) * 4 -> 20 (int)"
+    expect: none
+  - code: "total = base + count               # 2 + 3 -> 5 (int)"
+    expect: none

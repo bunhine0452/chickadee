@@ -1,0 +1,71 @@
+/* 처음 만난 개념의 기록 (정본 §3-6 · D131 · D182).
+   컨페티가 아니라 **영구 기록**이다 — 개념 이름 · 채집지(파일·줄) · 일련번호.
+   D179 로 마스코트를, D182 로 도장을 뺐다. 남은 연출은 일련번호가 찍히는 한 번뿐이다. */
+.lifer-note {
+  margin-top: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+}
+
+.lifer-k {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  font-weight: var(--fw-bold);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.lifer-note h5 {
+  margin-top: var(--s-1);
+  font-size: var(--fs-4);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  word-break: keep-all;
+}
+
+.lifer-note h5 code {
+  font-family: var(--font-mono);
+  font-size: .88em;
+  font-weight: var(--fw-medium);
+  color: var(--text-muted);
+}
+
+.lifer-note p {
+  margin-top: var(--s-1);
+  color: var(--text-muted);
+  font-size: var(--fs-2);
+  line-height: var(--lh-body);
+  word-break: keep-all;
+}
+
+.lifer-note p b {
+  color: var(--text);
+  font-weight: var(--fw-medium);
+}
+
+/* 일련번호가 찍히는 소리 — 영구 기록이라는 것을 눈으로 말한다. 200ms 상한 안이다. */
+.lifer-serial {
+  width: 0;
+  margin-top: var(--s-1);
+  overflow: hidden;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  letter-spacing: .04em;
+  white-space: nowrap;
+  animation: typeout 200ms steps(22) forwards;
+}
+
+@keyframes typeout {
+  to { width: 100% }
+}
+
+/* 감축 모드 — 최종 포즈(다 찍힌 번호)는 남긴다 (05 §6). */
+@media (prefers-reduced-motion: reduce) {
+  .lifer-serial { animation-duration: .001ms }
+}
+
+[data-motion="reduce"] .lifer-serial { animation-duration: .001ms }

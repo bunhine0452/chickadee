@@ -3,11 +3,11 @@ id: ts/array-method-chain
 universal: common/map-transform
 name: { ko: "배열 메서드 체인", en: "Array method chain" }
 token: ".map().filter()"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 3
-prereq: [ts/array-map-immutable, ts/array-filter, ts/property-access]
+prereq: [ts/array-map-immutable, ts/array-filter, ts/property-access, cs/complexity]
 confusions: [ts/for-of, ts/array-foreach]
 
 dict:
@@ -163,8 +163,39 @@ meaning:
               - "[1,2,3].filter((n) => n > 2)   // [3]  (복사본이 아니다)"
               - "[...[1,2,3]]                   // [1,2,3]  (복사본)"
 
+# 빈칸형을 못 내는 사유 (D145). 「아직 안 썼다」가 아니라 「이 문법에는 뚫을 구멍이 없다」다.
+no_hole_reason: >-
+  이 개념이 가리키는 것은 낱말 하나가 아니라 두 단이 이어진 모양이다. 한 단의 이름만 뚫으면 그건 그 단의 개념(map·filter) 문제이지 이어 붙임의 문제가 아니다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 여러 단계를 한 줄에 이어 붙였을까요?"
+    en: "Why does line {{site.line}} chain several steps into one line?"
+  choices:
+    - t:
+        ko: "각 단계가 다음 단계의 재료라, 중간에 이름을 두면 그 순서가 오히려 흐려져서"
+        en: "Because each step is material for the next, and a name in the middle blurs that order"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 단계가 더 늘어나면 언제 중간 이름을 두는 편이 나은지도 적어 보세요."
+        en: "That is the direction. Add when a middle name becomes the better call as steps pile up."
+    - t:
+        ko: "한 줄이면 더 빨라서"
+        en: "Because one line runs faster"
+      ok: false
+      fb:
+        ko: "단계마다 배열을 한 번씩 새로 만드니 일은 오히려 늡니다. 얻는 것은 읽는 순서입니다."
+        en: "Each step builds a fresh array, so there is more work, not less. What you gain is reading order."
+    - t:
+        ko: "중간 이름을 지을 수 없어서"
+        en: "Because middle names are not possible"
+      ok: false
+      fb:
+        ko: "지을 수 있습니다. 단계가 길어지면 오히려 이름을 두는 편이 낫습니다."
+        en: "They are. Once the chain gets long, naming the middle is usually better."
+
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./array-method-chain.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./array-method-chain.scm }
 
 examples:
   - code: "const top = users.filter((u) => u.ok).map((u) => u.name)"

@@ -1,0 +1,246 @@
+schema: 1
+id: py/float-inexact
+# 0부 축 B. 보편형은 `common/float-literal` — 근사값이 되는 기계는 IEEE-754 하나라 열 언어가
+# 같은 값을 낸다. 파이썬에서 다시 배울 것은 정확한 소수의 대안(`decimal`)과, 견주는 법뿐이다.
+universal: common/float-literal
+name: { ko: 소수가 안 떨어진다, en: Fractions do not land }
+token: "0.1"
+grammars: [python]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cs/floating-point, cs/binary-representation]
+confusions: [py/comparison, py/integer-division]
+
+dict:
+  one_liner:
+    ko: "두 자리 체계로 정확히 못 적는 소수가 있다. 담을 때 이미 어긋난다."
+    en: "Some fractions have no exact base-two form. They drift as they are stored."
+  why:
+    ko: >-
+      소수는 <b>2진 분수의 합</b>으로 저장됩니다. 십진의 <code>0.1</code> 은 그 합으로 정확히
+      안 만들어져서, 담기는 순간 <b>가장 가까운 값</b>으로 바뀌어요. 그래서
+      <code>0.1 + 0.2</code> 가 <code>0.30000000000000004</code> 입니다 — 셈이 어긋난 것이 아니라
+      담을 때 이미 어긋나 있었어요.
+      {{site.line}}행의 {{pick.1|code}} 자리에서 그 어긋남이 한 번 더 쌓입니다. 소수를
+      <code>==</code> 로 견주는 습관이 여기서 조용히 깨지고, 대신 「충분히 가까운가」를 묻게 돼요.
+    en: >-
+      A decimal is stored as a <b>sum of base-two fractions</b>. Decimal <code>0.1</code> has no
+      exact form in that sum, so storing it already swaps in <b>the nearest value</b>. That is why
+      <code>0.1 + 0.2</code> gives <code>0.30000000000000004</code> — the arithmetic did not drift;
+      it was already off when stored. At {{pick.1|code}} on line {{site.line}} that drift piles up
+      once more. Comparing decimals with <code>==</code> quietly breaks here, and the question
+      becomes whether two values are close enough.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:을,를}} 가장 가까운 2진 값으로 담는다 — 이때 이미 어긋난다."
+      en: "{{pick.2|code}} is stored as the nearest base-two value, and drifts right there."
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 그 근사값끼리 셈한다."
+      en: "{{pick.1|code}} on line {{site.line}} computes with those approximations."
+    - ko: "결과도 가장 가까운 값으로 담긴다. 어긋남이 한 겹 더 쌓인다."
+      en: "The result is stored as the nearest value too, adding one more layer of drift."
+
+rule:
+  ko: >-
+    <b>담을 때 이미 어긋난다.</b> 소수끼리 같은지는 견주지 말고 「충분히 가까운가」를 묻는다.
+  en: >-
+    <b>The drift happens at storage time.</b> Do not ask whether two decimals are equal; ask whether
+    they are close enough.
+result:
+  label:
+    ko: "{{site.line}}행의 셈"
+    en: "the arithmetic on line {{site.line}}"
+  value: "{{pick.2}} {{pick.1}} {{pick.3}}"
+  note:
+    ko: "가장 가까운 값"
+    en: "the nearest representable value"
+ok:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:이,가}} 근사값 둘로 새 근사값 하나를 만듭니다. 화면에
+    십진으로 다시 찍을 때 그 차이가 보이거나 안 보일 뿐이에요.
+  en: >-
+    {{pick.1|code}} makes one approximation out of two. Whether the gap shows depends on how the
+    value is printed back in decimal.
+payoff:
+  ko: >-
+    「돈 계산이 1원씩 어긋난다」의 답이 여기 있습니다. 정확한 십진이 필요하면 표준
+    라이브러리에 그 자료형이 따로 있어요.
+  en: >-
+    “The money is off by one unit” answers itself here. When exact decimal arithmetic is needed, the
+    standard library has a type for it.
+bridge:
+  ko: >-
+    정수는 반대입니다 — 자리를 늘려 <b>정확하게</b> 담고, 대신 다른 언어에서는 그 자리가
+    모자라면 값이 뒤집혀요.
+  en: >-
+    Whole numbers do the opposite: they grow to stay <b>exact</b>, and in other languages they wrap
+    once the slots run out.
+misconceptions:
+  - ko: >-
+      <code>0.1 + 0.2</code> 가 <code>0.3</code> 이 아닌 것은 파이썬의 결함이다 —
+      자바·자바스크립트·C 도 같은 값을 냅니다. 언어가 아니라 <b>저장 방식</b>의 성질이에요.
+    en: >-
+      <code>0.1 + 0.2</code> missing <code>0.3</code> is a Python flaw — Java, JavaScript and C give
+      the same value. It is a property of <b>how the value is stored</b>, not of the language.
+  - ko: >-
+      반올림해서 견주면 해결된다 — 자리를 잘라 <b>보이지 않게</b> 할 뿐입니다. 쌓이는 곳에서는
+      그대로 어긋나요.
+    en: >-
+      Rounding before comparing settles it — it only cuts the digits <b>out of sight</b>. Where the
+      values accumulate the drift stays.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>근사값끼리를 잇는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that joins the approximations</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 이미 어긋난 채로 담긴 <b>값</b>입니다. 어긋남은
+            여기서 생겼고, 셈은 그것을 이어받을 뿐이에요.
+          en: >-
+            {{pick.2|code}} is a <b>value</b> already stored off. The drift began here; the
+            arithmetic only carries it forward.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 담을 때냐 셈할 때냐"
+            en: "The sharpest spot — at storage or at arithmetic"
+          code:
+            - "0.1                # 이미 0.1 이 아니다"
+            - "0.1 + 0.2          # 어긋남이 한 겹 더"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 넣는 <b>다른 한쪽</b>입니다. 두 근사값을 잇는
+            일은 가운데 기호가 해요.
+          en: >-
+            {{pick.3|code}} is the <b>other side</b> fed in. Joining the two approximations is done
+            by the symbol between.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 값이냐 기호냐"
+            en: "The sharpest spot — a value or the symbol"
+          code:
+            - "0.2                # 값이다"
+            - "0.1 + 0.2          # 값을 만든다"
+
+meaning:
+  - q:
+      ko: "<code>0.1 + 0.2 == 0.3</code> 은 어떻게 될까요?"
+      en: "How does <code>0.1 + 0.2 == 0.3</code> come out?"
+    hint:
+      ko: "세 값이 각각 담길 때 무슨 일이 있었는지를 먼저 보세요."
+      en: "Start from what happened as each of the three values was stored."
+    options:
+      - t:
+          ko: "거짓 — 왼쪽이 <code>0.3</code> 보다 아주 조금 크다"
+          en: "False — the left side sits a hair above <code>0.3</code>"
+      - t:
+          ko: "참 — 십진으로 보면 양쪽이 같으니까"
+          en: "True — in decimal both sides read the same"
+        diag:
+          t:
+            ko: >-
+              화면에 찍히는 십진은 <b>가장 짧게 되돌린 글자</b>입니다. 담긴 2진 값은 서로
+              달라서, 견주기는 그 다른 값을 봅니다.
+            en: >-
+              What prints in decimal is <b>the shortest text that reads back</b>. The stored base-two
+              values differ, and the comparison looks at those.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 찍히는 글자와 담긴 값"
+              en: "The sharpest spot — the printed text and the stored value"
+            code:
+              - "print(0.1 + 0.2)   # 0.30000000000000004"
+              - "print(0.3)         # 0.3"
+      - t:
+          ko: "파이썬이 소수 견주기를 막아서 그 자리에서 멈춘다"
+          en: "Python blocks decimal comparison and stops right there"
+        diag:
+          t:
+            ko: >-
+              멈추지 않습니다. 조용히 거짓이 나오는 것이 이 자리의 어려움이에요 — 멈추면
+              오히려 금방 찾았을 겁니다.
+            en: >-
+              It does not stop. Quietly yielding false is what makes this hard; stopping would have
+              made it easy to find.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 조용하다"
+              en: "The sharpest spot — it is quiet"
+            code:
+              - "0.1 + 0.2 == 0.3   # False"
+              - "0.5 + 0.25 == 0.75 # True — 이쪽은 딱 떨어진다"
+      - t:
+          ko: "실행할 때마다 답이 달라진다"
+          en: "The answer changes from run to run"
+        diag:
+          t:
+            ko: >-
+              같은 기계에서는 늘 같은 답이 나옵니다. 규칙이 정해져 있어서 어긋남도
+              <b>늘 같은 만큼</b>이에요.
+            en: >-
+              On the same machine the answer never varies. The rule is fixed, so the drift is
+              <b>always the same amount</b>.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 무작위냐 정해진 규칙이냐"
+              en: "The sharpest spot — random or a fixed rule"
+            code:
+              - "0.1 + 0.2          # 늘 0.30000000000000004"
+              - "0.1.hex()          # '0x1.999999999999ap-4'"
+
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 개념의 정답은 코드에 적힌 글자가 아니라 **계산된 값**이고, 셈 기호를
+  구멍으로 삼으면 한 글자라 빈칸형이 생성 단계에서 떨어진다(`MIN_HOLE`). 값을 묻는 판은
+  기초 문항(`docs/program/fundamentals.md` §2 `value`)의 몫이다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행의 결과를 그대로 견주면 왜 위험할까요?"
+    en: "Why is it risky to compare the result of line {{site.line}} directly?"
+  choices:
+    - t:
+        ko: "담길 때 이미 가장 가까운 값으로 바뀌어서 — 같아 보여도 다른 값이다"
+        en: "Because storing already swapped in the nearest value — alike on screen, different inside"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그러면 이 자리에서 무엇을 대신 물어야 할지도 적어 보세요."
+        en: "That is the direction. Add what should be asked here instead."
+    - t:
+        ko: "소수 셈이 느려서"
+        en: "Because decimal arithmetic is slow"
+      ok: false
+      fb:
+        ko: "속도는 이 자리의 문제가 아닙니다. 갈리는 것은 <b>값이 정확한가</b>입니다."
+        en: "Speed is not the issue here. What parts ways is <b>whether the value is exact</b>."
+    - t:
+        ko: "파이썬이 소수를 문자열로 담아서"
+        en: "Because Python stores decimals as text"
+      ok: false
+      fb:
+        ko: >-
+          문자열이 아니라 <b>2진 분수의 합</b>입니다. 문자열이었다면 오히려 어긋나지 않았을 거예요.
+        en: >-
+          Not text but a <b>sum of base-two fractions</b>. Text would in fact not have drifted.
+
+queries:
+  - { grammars: [python], file: ./float-inexact.scm }
+
+examples:
+  - code: "total = 0.1 + 0.2      # 0.1 + 0.2 -> 0.30000000000000004 (float)"
+    expect: { sites: 1, form: floatop, picks: { 1: "+", 2: "0.1", 3: "0.2" } }
+  - code: "budget = size * 0.05   # 100 * 0.05 -> 5.0 (float)"
+    expect: { sites: 1, form: floatop, picks: { 1: "*", 2: "0.05", 3: "size" } }
+  - code: "shown = round(rate, 2) # round(0.30000000000000004, 2) -> 0.3 (float)"
+    expect: { sites: 1, form: round, picks: { 1: "round", 2: "rate" } }
+  - code: "near = math.isclose(a, b)   # isclose(0.1 + 0.2, 0.3) -> True (bool)"
+    expect: { sites: 1, form: isclose, picks: { 1: "isclose", 3: "math" } }
+  - code: "count = a + b          # 1 + 2 -> 3 (int)"
+    expect: none
+  - code: "pages = total // size  # 7 // 2 -> 3 (int)"
+    expect: none

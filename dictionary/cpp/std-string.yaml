@@ -1,0 +1,171 @@
+schema: 1
+id: cpp/std-string
+# 2부 §3 #10. `common/text-literal` 이 보편형이다 — 「글자 묶음이라는 값이 있다」까지 전이되고,
+# 「대입이 복사다」는 C++ 쪽 어긋남이라 판에만 있다.
+universal: common/text-literal
+name: { ko: 글자 묶음 값, en: std::string }
+token: "std::string"
+grammars: [cpp]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cpp/namespace-qualification, cpp/char-and-byte]
+confusions: []
+dict:
+  one_liner:
+    ko: "글자 묶음이 값이라 대입하면 통째로 복사되고, 견주기도 내용을 본다."
+    en: "Text is a value: putting it copies the whole run, and matching reads contents."
+  why:
+    ko: >-
+      C 에서 글자 묶음은 <b>주소</b>였습니다 — 대입하면 주소만 옮겨 가고, 견주면 주소끼리
+      견주죠. C++ 의 이 타입은 <b>값</b>입니다. 그래서 {{site.line}}행 같은 줄에서
+      대입은 글자를 전부 새 자리에 옮겨 놓고, 견주기는 내용이 같은지 봅니다.
+      대가는 <b>복사 비용</b>이에요 — 함수에 그냥 넘기면 글자가 전부 다시 놓입니다.
+      그래서 실코드는 「고칠 생각이 없다」는 자리에 못 만진다는 약속과 참조를 함께 붙입니다.
+    en: >-
+      In C a run of text was an <b>address</b>: putting it moved the address, and matching
+      compared addresses. This C++ type is a <b>value</b>. So on a line like {{site.line}} a
+      putting lays every character out again, and matching asks whether the contents agree.
+      The price is the <b>copy</b>: hand one to a function plainly and every character is laid
+      out again. Which is why real code attaches the not-to-touch promise and a reference
+      wherever it has no intention of editing.
+  trace:
+    - ko: "{{site.line}}행은 글자 묶음 하나를 담을 값 자리를 잡는다."
+      en: "Line {{site.line}} claims value room for one run of text."
+    - ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 주소가 아니라 내용을 든다."
+      en: "{{pick.3|code}} holds contents, not an address."
+    - ko: "이 이름을 다른 곳에 넘기면 글자가 전부 다시 놓인다."
+      en: "Handing this name elsewhere lays every character out again."
+rule:
+  ko: "<b>글자 묶음은 값이다.</b> 넘기면 복사되고, 견주면 내용을 본다."
+  en: "<b>Text is a value.</b> Handing it over copies; matching reads the contents."
+result:
+  label: { ko: "{{site.line}}행이 잡은 값", en: "the value claimed on line {{site.line}}" }
+  value: "{{pick.2}}::{{pick.1}} {{pick.3}}"
+  note: { ko: "주소가 아니라 내용이다", en: "contents, not an address" }
+ok:
+  ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 글자 내용을 직접 든 값입니다."
+  en: "{{pick.3|code}} is a value that holds the characters themselves."
+payoff:
+  ko: >-
+    이걸 알면 「글자를 견줬는데 왜 안 같지」가 풀립니다 — C 에서는 주소를 견줬어요.
+  en: >-
+    This untangles “I compared the text and it did not match” — in C addresses were compared.
+bridge:
+  ko: >-
+    파이썬·자바에서 글자 묶음은 <b>못 바꾸는 값</b>이라 복사가 안 보입니다. C++ 은 바꿀 수
+    있는 값이라 복사가 비용으로 드러나요.
+  en: >-
+    In Python and Java text is an <b>unchangeable value</b>, so the copy stays invisible. In C++
+    it can be changed, so the copy shows up as a cost.
+misconceptions:
+  - ko: "넘기면 주소만 간다 — 참조라고 안 적으면 글자가 전부 다시 놓입니다."
+    en: "Handing it over moves an address — unless a reference is written, every character is laid out again."
+  - ko: "견주기가 주소를 본다 — 내용을 봅니다. 주소를 보는 것은 C 쪽이에요."
+    en: "Matching compares addresses — it compares contents; addresses are the C side."
+  - ko: "길이가 글자 수다 — 바이트 수입니다."
+    en: "The length is the symbol count — it is the byte count."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>값을 직접 든다는 것을 정하는 타입 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the type name that makes it hold the value itself</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 그 이름이 사는 <b>통</b>입니다. 값이냐 주소냐는 통이 아니라 뒤의 타입 이름이 정해요."
+          en: "{{pick.2|code}} is the <b>box</b> the name lives in. Value or address is decided by the type name after it, not the box."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 통이냐 타입이냐", en: "The sharpest spot — the box or the type" }
+          code:
+            - "std::string s;     // 값을 든다"
+            - "const char* s;     // 주소를 든다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>이름</b>입니다. 이름을 바꿔도 값이냐 주소냐는 안 바뀌어요."
+          en: "{{pick.3|code}} is the <b>name</b>. Changing it does not change value-or-address."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 타입이냐", en: "The sharpest spot — the name or the type" }
+          code:
+            - "std::string a;"
+            - "std::string b;     // 같은 규칙"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>글자 내용을 직접 드는</b> 자리를 잡습니다."
+      en: "Choose what goes in the blank. Line {{site.line}} claims room that <b>holds the text itself</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "string", mono: true }
+      - t: "string_view"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>남의 글자를 들여다보는 창</b>입니다. 복사를 안 해서 싸지만, 원본이 사라지면 창이 가리키던 곳도 사라져요."
+            en: "That is a <b>window onto someone else's text</b>. It copies nothing and is cheap, but when the original goes the window points at nothing."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값이냐 창이냐", en: "The sharpest spot — a value or a window" }
+            code:
+              - "std::string s = t;       // 내용을 든다"
+              - "std::string_view v = t;  // t 가 살아 있어야 한다"
+      - t: "vector"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>목록</b>이라 무엇을 담을지 꺾쇠 안에 적어야 합니다. 글자 전용 편의 함수도 없어요."
+            en: "That is a <b>list</b> and needs what it holds written in angle brackets. It also lacks the text-specific helpers."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 글자 전용이냐 일반 목록이냐", en: "The sharpest spot — text or a general list" }
+            code:
+              - "std::string s = \"hi\";"
+              - "std::vector<char> v;"
+      - t: "char"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>한 바이트</b>입니다. 여러 글자를 담을 수 없고, 한글 한 글자도 못 담아요."
+            en: "That is <b>one byte</b>. It cannot hold several characters — not even one Korean symbol."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 하나냐 묶음이냐", en: "The sharpest spot — one or a run" }
+            code:
+              - "char c = 'a';"
+              - "std::string s = \"ab\";"
+why_gate:
+  q:
+    ko: "C 는 주소로 했는데 C++ 은 왜 <b>값</b>으로 만들었을까요?"
+    en: "C used an address — why did C++ make it a <b>value</b>?"
+  choices:
+    - t:
+        ko: "누가 그 글자를 놓아 줄지가 값이면 저절로 정해지기 때문 — 이름이 사라질 때 자기 자리를 스스로 놓는다"
+        en: "Because a value settles who releases the text — when the name goes, it releases its own room"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 대신 무엇이 비싸지는지도 한 줄로 적어 보세요."
+        en: "That is the direction. Add a line on what becomes expensive in exchange."
+    - t:
+        ko: "주소보다 빨라서"
+        en: "Because a value is faster than an address"
+      ok: false
+      fb:
+        ko: "넘길 때는 더 느립니다. 얻은 것은 속도가 아니라 <b>누가 놓는가</b>의 답이에요."
+        en: "Handing one over is slower. What was gained is not speed but an answer to <b>who releases it</b>."
+    - t:
+        ko: "C 의 표기를 못 쓰게 하려고"
+        en: "To stop people using C's notation"
+      ok: false
+      fb:
+        ko: "그대로 쓸 수 있습니다. 둘이 한 파일에 섞여 있는 것이 실제 코드예요."
+        en: "It still works. Real code has both in one file."
+queries:
+  - { grammars: [cpp], file: ./std-string.scm }
+examples:
+  - code: "void f() { std::string name = \"kim\"; }    // name -> \"kim\" (내용을 든다)"
+    expect: { sites: 1, form: strdecl, hole: "string", picks: { 1: "string", 2: "std", 3: "name" } }
+  - code: "void g(std::string s) { }                 // s -> 부른 쪽 글자의 복사본"
+    expect: { sites: 1, form: strparam, hole: "string", picks: { 1: "string", 2: "std", 3: "s" } }
+  - code: "void f() { const char* p = \"kim\"; }       // 주소를 드는 C 쪽 표기다"
+    expect: none

@@ -31,7 +31,10 @@ export interface PrereqFacts {
   layer: Layer;
   /** 즉석 `prereqOnly` 카드를 만들 수 있으면 그 카드 id, 못 만들면 `null`. */
   cardId: number | null;
-  /** 리포에 사용처가 있나. 없으면 합성 예제 + 「곧 네 코드 어디에서」 예고. */
+  /**
+   * 리포에 사용처가 있나. **있어야** 합성 예제를 만든다 — 예고할 자리가 그 사용처다
+   * (D137 · 방안 E-4). 없으면 「판 없음」이고 카드를 만들지 않는다.
+   */
   inRepo: boolean;
 }
 
@@ -43,7 +46,11 @@ export interface PrereqRung {
   ly: Layer;
   status: PrereqStatus;
   cardId?: number;
-  /** `status === 'none'` 일 때만. `no-plate` = 리포에 있으나 판을 못 만듦, `synthetic` = 리포에 없음. */
+  /**
+   * `status === 'none'` 일 때만. `synthetic` = 리포에 사용처는 있는데 아직 못 여는 것 —
+   * 사전 예제로 먼저 보여 주고 그 사용처를 예고한다. `no-plate` = 리포에 사용처가 없어
+   * 예고할 자리가 없는 것 — 아무것도 만들지 않는다 (D137).
+   */
   none?: 'no-plate' | 'synthetic';
 }
 
@@ -123,7 +130,10 @@ export function buildDict(card: T0Card): DictLayer[] {
 /**
  * 선행 개념마다 상태 하나 (04 §2.4).
  * `known`(ly ≥ 2) · `gap`(ly ≤ 1 이고 카드 생성 가능) · `none`(그 밖).
- * `none` 은 다시 둘로 갈린다 — 리포에 있으나 판을 못 만들면 「판 없음」, 리포에 없으면 합성 예제 예고.
+ * `none` 은 다시 둘로 갈린다 — **리포에 사용처가 있으면 합성 예제 + 그 자리 예고**,
+ * 없으면 「판 없음」이다. 예고할 자리가 없는 합성은 만들지 않는다 (D137 · 방안 E-4).
+ * 이 방향이 한때 반대로 적혀 있었다: 사용처가 없을 때 합성을 내면 「곧 네 코드 어디에서
+ * 이걸 보게 된다」의 **어디**가 없어 E-4 의 조건을 지킬 수 없다.
  */
 export function buildPrereq(
   card: T0Card,
@@ -140,7 +150,7 @@ export function buildPrereq(
       name: p.n,
       ly,
       status: 'none',
-      none: fact?.inRepo ? 'no-plate' : 'synthetic',
+      none: fact?.inRepo === true ? 'synthetic' : 'no-plate',
     };
   });
   const gapCount = items.filter((i) => i.status === 'gap').length;

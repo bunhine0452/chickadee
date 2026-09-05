@@ -1,0 +1,163 @@
+schema: 1
+id: csharp/interpolated-string
+universal: common/string-interpolation
+name: { ko: 문장에 값 끼워 넣기, en: Interpolated string }
+token: "$\"…\""
+grammars: [c_sharp]
+framework: null
+essential: true
+difficulty: 2
+prereq: [csharp/text-literal, csharp/member-access]
+confusions: []
+dict:
+  one_liner:
+    ko: "앞의 기호 하나가 이 글자 묶음을 값이 들어가는 틀로 바꾼다."
+    en: "One mark in front turns this run of characters into a frame that takes values."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 없으면 {{pick.3|code}}{{pick.3|josa:은,는}}
+      <b>글자 그대로</b> 남습니다. 오류가 안 나고 로그에 중괄호가 찍히는 것으로 끝나요 —
+      그래서 이 자리는 조용히 어긋나는 자리입니다. 붙어 있으면 중괄호 안이 <b>식</b>으로
+      계산되고, 그 값이 글자로 바뀌어 자리에 들어갑니다. 안에 들어갈 수 있는 것은 이름만이
+      아니라 셈도 부름도 됩니다.
+    en: >-
+      Without {{pick.1|code}} on line {{site.line}}, {{pick.3|code}} stays <b>as written</b>.
+      No error is raised; the braces simply show up in the log — which is why this spot slips
+      by. With the mark in front, what is inside the braces is evaluated as an
+      <b>expression</b>, turned into text and dropped into place. What goes inside is not only
+      a name: arithmetic and calls work too.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 글자 묶음을 틀로 만든다."
+      en: "{{pick.1|code}} on line {{site.line}} turns this run into a frame."
+    - ko: "{{pick.3|code}} 안이 식으로 계산된다."
+      en: "What is inside {{pick.3|code}} is evaluated as an expression."
+    - ko: "그 값이 글자로 바뀌어 {{pick.2|code}} 옆에 놓인다."
+      en: "The value becomes text and lands beside {{pick.2|code}}."
+rule:
+  ko: "<b>앞의 기호가 있어야 중괄호가 자리가 된다.</b> 없으면 글자 그대로 남고 오류도 안 난다."
+  en: "<b>The mark in front is what makes braces a slot.</b> Without it they stay text, silently."
+ok:
+  ko: "{{pick.3|code}} 자리에 계산된 값이 글자로 들어갑니다."
+  en: "The computed value lands as text in the {{pick.3|code}} slot."
+payoff:
+  ko: "이걸 알면 「로그에 중괄호가 그대로 찍힌다」가 풀립니다 — 앞 기호가 빠졌습니다."
+  en: "This untangles “the log printed the braces” — the mark in front is missing."
+bridge:
+  ko: >-
+    파이썬의 f-문자열과 같은 기계이고 빠뜨렸을 때의 결과도 같습니다 — <b>조용히 글자로 남습니다.</b>
+    자바에는 이 문법이 없어 이어붙이기나 서식 메서드를 씁니다.
+  en: >-
+    Same machine as Python's f-string, with the same failure: <b>it quietly stays text</b>.
+    Java has no such syntax and uses joining or a format method instead.
+misconceptions:
+  # 출처 — `csharp.md` §3 ⑭.
+  - ko: "앞 기호를 빠뜨리면 오류가 난다 — 안 납니다. 중괄호가 글자 그대로 남습니다."
+    en: "Missing the mark raises an error — it does not. The braces stay as text."
+  - ko: "중괄호 안에는 이름만 넣을 수 있다 — 셈도 부름도 조건식도 들어갑니다."
+    en: "Only a name fits in the braces — arithmetic, calls and conditionals fit too."
+  - ko: "중괄호 자체를 못 적는다 — 두 번 겹쳐 적으면 글자로 나옵니다."
+    en: "A literal brace cannot be written — doubling it prints one."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>이 묶음을 틀로 만드는 표시</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the mark that turns this run into a frame</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 그대로 남는 <b>글자</b>입니다. 이 부분은 틀이든 아니든 안 바뀌어요."
+          en: "{{pick.2|code}} is <b>plain text</b> that stays put whether or not this is a frame."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 그대로냐 자리냐", en: "The sharpest spot — kept or filled" }
+          code:
+            - "$\"total {n}\"    // total 은 그대로"
+            - "$\"total {n}\"    // {n} 만 채워진다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 값이 들어갈 <b>자리</b>입니다. 자리를 자리로 만들어 주는 것은 앞의 표시예요."
+          en: "{{pick.3|code}} is the <b>slot</b> a value fills. What makes it a slot is the mark in front."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 자리냐 표시냐", en: "The sharpest spot — the slot or the mark" }
+          code:
+            - "\"total {n}\"     // 글자 그대로"
+            - "$\"total {n}\"    // 값이 들어간다"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 중괄호 안의 값을 <b>글자에 끼워 넣습니다</b>."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>drops values into the text</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "$", mono: true }
+      - t: "@\""
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>역슬래시를 글자로</b> 두는 표시라 값은 안 끼웁니다. 경로를 적을 때 쓰는 것이에요."
+            en: "That keeps <b>backslashes literal</b> and inserts nothing. It is for writing paths."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값이냐 역슬래시냐", en: "The sharpest spot — values or backslashes" }
+            code:
+              - "$\"n={n}\"        // 값이 들어간다"
+              - "@\"C:\\tmp\"       // 그대로 남는다"
+      - t: "\""
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>그냥 글자 묶음</b>이라 중괄호가 그대로 남습니다. 오류가 안 나서 눈에 안 띄어요."
+            en: "That is <b>plain text</b> and the braces stay. No error is raised, so it goes unseen."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 표시가 있나 없나", en: "The sharpest spot — mark or no mark" }
+            code:
+              - "\"n={n}\"         // n={n}"
+              - "$\"n={n}\"        // n=3"
+      - t: "'"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>한 글자</b>짜리 값의 따옴표라 여러 글자를 못 담습니다."
+            en: "That quotes a <b>single letter</b> and cannot hold several."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 하나냐 묶음이냐", en: "The sharpest spot — one or many" }
+            code:
+              - "'a'             // char"
+              - "$\"a{n}\"        // string"
+why_gate:
+  q:
+    ko: "이어붙이기로도 되는데 왜 <b>틀</b>을 따로 두었을까요?"
+    en: "Joining works too — why is there a <b>frame</b> form?"
+  choices:
+    - t:
+        ko: "완성된 문장의 모양이 코드에 그대로 보여, 어디에 무엇이 들어가는지 읽기 쉬워서"
+        en: "Because the finished sentence is visible in the code, so it is clear what goes where"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이어붙이기로 적었을 때 무엇이 안 보이는지도 적어 보세요."
+        en: "That is the direction. Add what stops being visible when it is written as joining."
+    - t:
+        ko: "이어붙이기보다 언제나 빨라서"
+        en: "Because it is always faster than joining"
+      ok: false
+      fb:
+        ko: "언제나는 아닙니다. 되풀이 안에서는 전용 버퍼 쪽이 빠릅니다."
+        en: "Not always — inside a loop a dedicated buffer is faster."
+    - t:
+        ko: "이어붙이기가 없어져서"
+        en: "Because joining was removed"
+      ok: false
+      fb:
+        ko: "그대로 있습니다. 둘 다 쓰이고, 고르는 근거는 읽기예요."
+        en: "It is still there. Both are used, and the choice is about reading."
+queries:
+  - { grammars: [c_sharp], file: ./interpolated-string.scm }
+examples:
+  - code: "class A { void F(int n) { var s = $\"n={n}\"; } }"
+    expect: { sites: 1, form: interp, picks: { 1: "$", 2: "n=", 3: "{n}" } }
+  - code: "class A { void F(int a) { var t = $\"total {a} done\"; } }"
+    expect: { sites: 1, form: interp, picks: { 1: "$", 2: "total ", 3: "{a}" } }
+  - code: "var u = \"plain\";"
+    expect: none

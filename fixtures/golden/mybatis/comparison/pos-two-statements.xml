@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mapper namespace="shop.ItemMapper">
+  <select id="findBySku" resultType="Item">
+    SELECT sku, qty FROM item WHERE sku = #{sku}
+  </select>
+  <update id="setQty">
+    UPDATE item SET qty = #{qty} WHERE sku = #{sku}
+  </update>
+</mapper>

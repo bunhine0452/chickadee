@@ -1,0 +1,93 @@
+[
+  {
+    "queryId": "java/try-catch",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "try",
+    "startLine": 5,
+    "startCol": 8,
+    "endLine": 10,
+    "endCol": 9,
+    "nodeKind": "try_statement",
+    "inError": false
+  },
+  {
+    "queryId": "java/try-catch",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "try",
+    "startLine": 5,
+    "startCol": 8,
+    "endLine": 5,
+    "endCol": 11,
+    "nodeKind": "try",
+    "inError": false
+  },
+  {
+    "queryId": "java/try-catch",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "try",
+    "startLine": 5,
+    "startCol": 12,
+    "endLine": 8,
+    "endCol": 9,
+    "nodeKind": "block",
+    "inError": false
+  },
+  {
+    "queryId": "java/try-catch",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "try",
+    "startLine": 8,
+    "startCol": 10,
+    "endLine": 8,
+    "endCol": 15,
+    "nodeKind": "catch",
+    "inError": false
+  },
+  {
+    "queryId": "java/try-catch",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "hole",
+    "form": "try",
+    "startLine": 8,
+    "startCol": 10,
+    "endLine": 8,
+    "endCol": 15,
+    "nodeKind": "catch",
+    "inError": false
+  },
+  {
+    "queryId": "java/try-catch",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.4",
+    "form": "try",
+    "startLine": 8,
+    "startCol": 17,
+    "endLine": 8,
+    "endCol": 26,
+    "nodeKind": "catch_type",
+    "inError": false
+  },
+  {
+    "queryId": "java/try-catch",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.5",
+    "form": "try",
+    "startLine": 8,
+    "startCol": 30,
+    "endLine": 10,
+    "endCol": 9,
+    "nodeKind": "block",
+    "inError": false
+  }
+]

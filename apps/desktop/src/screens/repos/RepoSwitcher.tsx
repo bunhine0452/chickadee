@@ -100,7 +100,7 @@ export function RepoSwitcher({ repoName }: RepoSwitcherProps) {
         ref={button}
         type="button"
         id="tk-repo-v"
-        className="tk-v mono repo-switch"
+        className="repo-switch"
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls="repo-switch-list"

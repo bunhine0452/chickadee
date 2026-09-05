@@ -1,0 +1,29 @@
+.notice {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-4);
+  display: grid;
+  gap: var(--s-2);
+  max-width: var(--measure);
+}
+
+.notice-k {
+  font-size: var(--fs-2);
+  font-weight: var(--fw-medium);
+  color: var(--text);
+}
+
+.notice p {
+  margin: 0;
+  font-size: var(--fs-4);
+  line-height: var(--lh-body);
+  color: var(--text-muted);
+}
+
+.notice p b {
+  font-weight: var(--fw-medium);
+  color: var(--text);
+}
+
+.notice .why { color: var(--text-muted) }

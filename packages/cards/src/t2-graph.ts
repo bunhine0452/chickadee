@@ -6,6 +6,7 @@
  * 같은 지도가 나와야 한다. 좌표는 내지 않는다. 밴드 행 `r` 과 「밴드 안 몇 번째인가」
  * (= `files` 배열 순서)까지가 여기 몫이고 기하 상수는 05 의 `DependencyMap` 이 가진다 (D97).
  */
+import { assignUnits, OTHER_UNIT } from '@chickadee/concepts';
 import type { EdgeKind } from '@chickadee/store-sql';
 
 import { bandNames, BANDS, MAX_NODES } from './t2-types.js';
@@ -23,16 +24,27 @@ const ENTRY_RE = /^(?:page|main|index)\.[A-Za-z0-9]+$/;
 /** SCC 축약 DAG 의 한 노드. `id` 는 대표 경로(멤버 중 사전순 첫 번째)다. */
 export interface Scc { id: string; members: string[] }
 
+/**
+ * 지도의 범위 (04 §7.4·§7.5).
+ *
+ * `unit` 은 대지 + 1-hop 이웃이고 노드가 파일이다 — 04 §7.4 가 정한 기본값이다.
+ * `repo` 는 리포 전체이고 노드가 **대지·폴더**다 (D142). 파일 2,000장을 24 노드에 넣으려면
+ * 뺄 것을 고르는 수밖에 없는데, 접으면 아무것도 빼지 않고 리포 전체 모양이 남는다.
+ */
+export type GraphScope = 'unit' | 'repo';
+
 /** `buildGraph` 입력. `t2.unit_files` · `t2.edges` 를 경로로 옮긴 것 + 정답지 힌트. */
 export interface GraphInput {
   files: readonly GraphFile[];
   edges: readonly GraphEdge[];
-  /** 대지 뿌리 경로 (`unit.root_path`). 대지 진입점 판정에 쓴다. */
+  /** 대지 뿌리 경로 (`unit.root_path`). 대지 진입점 판정에 쓴다. `repo` 범위에서는 빈 문자열. */
   unitRoot: string;
   /** 접으면 안 되는 경로 — 정답지(core·sec)에 든 파일 (04 §7.4). */
   keep?: readonly string[];
   /** 그 커밋에서 새로 생긴 파일 → `isNew` 배지. */
   newFiles?: readonly string[];
+  /** 기본은 `unit`. */
+  scope?: GraphScope;
 }
 
 /** 내부용 엣지. `confidence` 는 지도 모양에 영향이 없어 여기서 떨군다. */
@@ -154,7 +166,7 @@ const TOP_DIRS: Record<string, Band> = {
  * `app/api/**\/route.*` 를 `app/**` 뒤에 두면 API 라우트가 「화면」이 되고 `components/ui/**`
  * 를 `components/**` 뒤에 두면 공용 버튼이 「기능」이 된다. 목업의 12개 파일이 이 순서라야 맞다.
  */
-function patternBand(path: string): Band | null {
+export function patternBand(path: string): Band | null {
   const p = path.startsWith(SRC_PREFIX) ? path.slice(SRC_PREFIX.length) : path;
   const segs = p.split('/');
   const base = segs[segs.length - 1] ?? '';
@@ -172,6 +184,101 @@ function patternBand(path: string): Band | null {
   if (/Api\.[^./]+$/.test(base)) return 2;
   if (base.startsWith('schema')) return 3;
   return null;
+}
+
+// ───────── 리포 지도 (04 §7.5 · D142) ─────────
+
+/**
+ * 폴더 노드의 04 §7.2 ① 패턴 층. 파일용 `patternBand` 와 다른 점은 하나다 — **마지막**
+ * `src/` 까지를 벗긴다.
+ *
+ * 04 §7.2 의 패턴은 리포 뿌리에 매달려 있는데 모노리포의 폴더 노드는
+ * `apps/desktop/src/components/` 라서 앞을 안 벗기면 `components/**` 가 통째로 논다
+ * (실측: `apps/desktop/src` 다섯 노드 전부 미매칭). 파일 쪽 규칙은 **건드리지 않는다** —
+ * 이미 구운 카드의 밴드가 바뀌면 `contentHash` 가 전량 달라진다.
+ */
+export function folderBand(folder: string): Band | null {
+  const at = folder.lastIndexOf(`/${SRC_PREFIX}`);
+  const tail = at === -1 ? '' : folder.slice(at + 1 + SRC_PREFIX.length);
+  return patternBand(tail === '' ? folder : tail);
+}
+
+/**
+ * 안에 든 파일들이 **가장 많이** 앉은 층. 04 §7.2 ① 이 폴더 이름을 모를 때 쓴다.
+ *
+ * 최댓값도 최솟값도 아닌 이유는 둘 다 파일 하나에 끌려가기 때문이다 — 최댓값은 `.tsx`
+ * 넷과 `types.ts` 하나가 든 기능 폴더를 통째로 「공용 · 데이터」로 가라앉히고(실측: 여섯
+ * 노드 중 넷), 최솟값은 아무도 안 가져다 쓰는 파일 하나(깊이 0 → 「화면」)가 폴더를
+ * 꼭대기로 끌어올린다. 동점이면 위쪽 — 아래로 밀 일은 `relax` 가 민다.
+ */
+const modeBand = (bands: readonly Band[]): Band => {
+  const n = new Map<Band, number>();
+  for (const b of bands) n.set(b, (n.get(b) ?? 0) + 1);
+  return [...n.entries()].sort((a, b) => b[1] - a[1] || a[0] - b[0])[0]?.[0] ?? 0;
+};
+
+/**
+ * 파일 하나가 어느 폴더 노드로 접히는가. 접을 자리가 없으면(리포 뿌리 바로 밑 파일) 없다.
+ *
+ * **새 휴리스틱을 만들지 않는다.** 대지 판정은 `assignUnits`(03 §6.5 · D29) 그대로 — 홈이
+ * 인쇄 시트를 세는 규칙과 지도가 폴더를 세는 규칙이 갈라지면 같은 리포의 두 그림이
+ * 서로 다른 이야기를 한다. 어느 대지에도 안 드는 파일(`기타`, 뿌리 경로가 없다)만 제
+ * 디렉터리로 접는다.
+ */
+export function repoFolders(paths: readonly string[]): Map<string, string> {
+  const { units, byPath } = assignUnits([...paths]);
+  const rootOf = new Map(units.map((u) => [u.name, u.rootPath]));
+  const out = new Map<string, string>();
+  for (const path of paths) {
+    const root = rootOf.get(byPath.get(path) ?? '') ?? '';
+    // 대지 이름이 같은 뿌리 둘(`app/cart/` 와 `features/cart/`)은 `assignUnits` 에서 한
+    // 이름으로 합쳐지고 뿌리는 먼저 본 쪽이 이긴다. 그 뿌리 **밑에 있지 않은** 파일까지
+    // 거기 접으면 폴더 노드가 제 안에 없는 파일을 품는다 — 그때는 제 디렉터리로 접는다.
+    const under = root !== '' && (path === root || path.startsWith(`${root}/`));
+    const dir = under ? root : dirOf(path);
+    if (dir !== '') out.set(path, `${dir}/`);
+  }
+  return out;
+}
+
+/**
+ * 이 리포에서 지도가 서는가 (D142).
+ *
+ * 대지가 `기타` 하나뿐이면 — `assignUnits` 의 네 규칙이 전부 물지 않았거나 2단계
+ * 디렉터리가 `MIN_FILES_FOR_UNIT` 에 못 미쳤다는 뜻이다 — 접어 봐야 「기타」 한 덩어리라
+ * 「이 프로젝트는 이런 구조구나」가 나오지 않는다. 지도가 안 서는 리포에 지도 문제를
+ * 내면 틀린 지도를 정답이라고 우기게 된다.
+ */
+export function repoMapStands(paths: readonly string[]): boolean {
+  return assignUnits([...paths]).units.some((u) => u.name !== OTHER_UNIT);
+}
+
+/**
+ * 엣지 종의 세기. 폴더 쌍은 선 하나로 접는데, 같은 두 폴더 사이에 `static` 과 `type` 이
+ * 둘 다 있으면 **실제로 실행되는 쪽**이 이긴다 — 점선으로 그려 놓고 「타입만 가져온다」고
+ * 하면 거짓말이다.
+ */
+const KIND_RANK: readonly EdgeKind[] = ['static', 'http', 'dynamic', 'type'];
+
+/** 파일 엣지를 폴더 쌍으로 집계한다. 쌍마다 한 선, 종은 가장 센 것. */
+function foldEdges(
+  edges: readonly Edge[],
+  moved: ReadonlyMap<string, string>,
+  alive: ReadonlySet<string>,
+): Edge[] {
+  const best = new Map<string, Edge>();
+  for (const e of edges) {
+    const from = moved.get(e.from) ?? e.from;
+    const to = moved.get(e.to) ?? e.to;
+    if (from === to || !alive.has(from) || !alive.has(to)) continue;
+    const key = `${from} ${to}`;
+    const had = best.get(key);
+    if (had === undefined || KIND_RANK.indexOf(e.kind) < KIND_RANK.indexOf(had.kind)) {
+      best.set(key, { from, to, kind: e.kind });
+    }
+  }
+  return [...best.values()]
+    .sort((a, b) => byPathAsc(a.from, b.from) || byPathAsc(a.to, b.to));
 }
 
 /** SCC 축약 DAG 에서 뿌리로부터의 최장 경로 (04 §7.2 ②). 대지 진입점은 언제나 깊이 0. */
@@ -282,7 +389,7 @@ export function buildGraph(input: GraphInput): Graph {
 
   // 1. 순환 — 크기 > 1 인 SCC 의 멤버.
   const { sccs, of, out } = condense(paths, edges);
-  const cycles = new Set<string>();
+  let cycles = new Set<string>();
   for (const scc of sccs) if (scc.members.length > 1) for (const m of scc.members) cycles.add(m);
 
   // 2. 고립 — in=out=0 은 지도에서 뺀다. 진입점은 남긴다(04 §7.2). 정답지 파일도 남긴다:
@@ -308,22 +415,81 @@ export function buildGraph(input: GraphInput): Graph {
   }
   const depth = sccDepths(sccs, out, root);
   for (const p of live) if (!fixed.has(p)) band.set(p, clampBand(depth.get(of.get(p) ?? p) ?? 0));
-  // `band ≥ 모든 importer 의 band`. 패턴 밴드는 고정이라 안 움직인다. 이 규칙은 올리기만
-  // 하고 밴드는 0..3 이므로 네 바퀴 안에 더 오를 곳이 없다.
-  for (let round = 0; round < BANDS; round += 1) {
-    let moved = false;
-    for (const e of edges) {
-      const from = band.get(e.from);
-      const to = band.get(e.to);
-      if (fixed.has(e.to) || from === undefined || to === undefined || to >= from) continue;
-      band.set(e.to, from);
-      moved = true;
+  // `band ≥ 모든 importer 의 band`. 패턴 밴드는 고정이라 안 움직인다. 이 규칙은 내리기만
+  // 하고(밴드 번호는 커지기만 한다) 밴드는 0..3 이므로 네 바퀴 안에 더 내려갈 곳이 없다.
+  // 접기(3-5) 뒤에 폴더 노드로 한 번 더 돌린다 — 층 규칙은 노드가 무엇이든 같다.
+  const relax = (holdPattern: boolean): void => {
+    for (let round = 0; round < BANDS; round += 1) {
+      let moved = false;
+      for (const e of edges) {
+        const from = band.get(e.from);
+        const to = band.get(e.to);
+        if ((holdPattern && fixed.has(e.to)) || from === undefined || to === undefined
+          || to >= from) continue;
+        band.set(e.to, from);
+        moved = true;
+      }
+      if (!moved) break;
     }
-    if (!moved) break;
+  };
+  relax(true);
+
+  // 접힌 폴더 노드 → 그 안의 파일. 3-5(리포 지도)와 4(24 노드 상한)가 같은 표를 쓴다.
+  const foldedOf: Record<string, string[]> = {};
+
+  // 3-5. 리포 지도 — 노드가 파일이 아니라 대지·폴더다 (04 §7.5 · D142).
+  //
+  //      **밴드가 정해진 뒤에 접는다.** 폴더 경로에 `patternBand` 를 다시 물으면
+  //      `src/features/cart/` 처럼 04 §7.2 ① 이 이름으로 모르는 폴더가 통째로 깊이
+  //      폴백으로 떨어진다 — 안에 있는 `*.tsx` 는 패턴이 「기능」이라고 이미 말했는데도.
+  //      층은 안에 든 파일들의 층에서 나와야 한다.
+  if (input.scope === 'repo') {
+    const moved = repoFolders(live);
+    if (moved.size > 0) {
+      for (const p of live) {
+        const folder = moved.get(p);
+        if (folder === undefined) continue;
+        const bucket = foldedOf[folder];
+        if (bucket) bucket.push(p);
+        else foldedOf[folder] = [p];
+      }
+      // 폴더의 층 — 04 §7.2 ① 이 **폴더 이름**을 아는 경우(`lib/`·`components/`·`hooks/`·
+      // `app/**`)에는 그것이 이기고, 모르면 안에 든 파일이 앉은 가장 위 층에서 시작한다.
+      // 안 파일들의 최댓값을 쓰면 `.tsx` 넷과 `types.ts` 하나가 든 기능 폴더가 통째로
+      // 「공용 · 데이터」로 가라앉는다 — 실측에서 여섯 노드 중 넷이 그렇게 됐다.
+      // 아래로 밀 일이 있으면 `relax` 가 민다. 폴더는 고정하지 않는다: 패턴이 말한 층과
+      // 지도가 앉힌 층이 **갈리는 것을 보이게** 두어야 「왜 있나」 문제의 게이트가 일한다.
+      for (const [folder, inside] of Object.entries(foldedOf)) {
+        inside.sort(byPathAsc);
+        band.set(folder, folderBand(folder)
+          ?? modeBand(inside.map((m) => band.get(m) ?? 0)));
+      }
+      live = [...new Set(live.map((p) => moved.get(p) ?? p))].sort(byPathAsc);
+      edges = foldEdges(edges, moved, new Set(live));
+      relax(false);
+
+      // 고립을 폴더 단위로 다시 센다. 폴더 안에서 닫힌 import 는 접히면서 자기 고리가 되어
+      // 사라지므로, 파일로는 고립이 아니었던 폴더가 폴더로는 고립일 수 있다.
+      const deg = degrees(edges);
+      live = live.filter((p) => {
+        const d = deg.get(p);
+        if (d !== undefined && (d.i > 0 || d.o > 0)) return true;
+        offMap += foldedOf[p]?.length ?? 1;
+        delete foldedOf[p];
+        return false;
+      });
+      edges = normalizeEdges(edges, new Set(live));
+
+      // 순환도 폴더 단위로 다시 센다. 한 폴더 안에서 닫힌 파일 순환은 「두 폴더가 서로를
+      // 가져다 쓴다」가 아니다 — `⟲` 배지가 지도가 말하는 것과 다른 이야기를 하면 안 된다.
+      cycles = new Set<string>();
+      for (const scc of condense(live, edges).sccs) {
+        if (scc.members.length > 1) for (const m of scc.members) cycles.add(m);
+      }
+    }
   }
 
   // 4. 24 노드 상한 ① — 대지 밖 노드를 디렉터리로 접는다 (04 §7.4).
-  const foldedOf: Record<string, string[]> = {};
   if (live.length > MAX_NODES) {
     const groups = new Map<string, string[]>();
     for (const p of live) {

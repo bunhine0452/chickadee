@@ -1,0 +1,41 @@
+[
+  {
+    "queryId": "py/list-literal",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "site",
+    "form": "tuple",
+    "startLine": 2,
+    "startCol": 11,
+    "endLine": 2,
+    "endCol": 17,
+    "nodeKind": "tuple",
+    "inError": false
+  },
+  {
+    "queryId": "py/list-literal",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "pick.2",
+    "form": "tuple",
+    "startLine": 2,
+    "startCol": 12,
+    "endLine": 2,
+    "endCol": 13,
+    "nodeKind": "integer",
+    "inError": false
+  },
+  {
+    "queryId": "py/list-literal",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "pick.1",
+    "form": "tuple",
+    "startLine": 2,
+    "startCol": 13,
+    "endLine": 2,
+    "endCol": 14,
+    "nodeKind": ",",
+    "inError": false
+  }
+]

@@ -1,0 +1,204 @@
+schema: 1
+id: sql/join-inner
+universal: null
+name: { ko: "두 표를 짝지어 붙이기", en: "Inner join" }
+token: "JOIN"
+grammars: [sql, mybatis_sql]
+framework: null
+essential: true
+difficulty: 2
+prereq: [sql/comparison, sql/qualified-column, cs/cardinality]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "짝이 맞는 조합을 전부 만든다. 옆으로 이어 붙이는 것이 아니다."
+    en: "Makes every matching pair. It is not laying two tables side by side."
+  why:
+    ko: >-
+      {{site.line}}행이 하는 일은 <b>이어 붙이기가 아니라 짝짓기</b>입니다. {{pick.2|code}} 의 행 하나를
+      {{pick.3|code}} 의 모든 행과 견줘 보고, {{pick.4|code}} 뒤의 조건이 참인 조합만 남겨요.
+      그래서 오른쪽에 짝이 둘이면 왼쪽 행 하나가 <b>두 줄</b>이 됩니다 — 결과의 행 수가 어느 쪽 행 수와도
+      다를 수 있어요. 조건을 아예 안 적으면 막아 주지 않고 <b>모든 조합</b>을 냅니다.
+    en: >-
+      Line {{site.line}} does not append — it <b>pairs</b>. Each row of {{pick.2|code}} is weighed
+      against every row of {{pick.3|code}}, and only the pairs where the test after {{pick.4|code}}
+      holds survive. So a left row with two matches on the right becomes <b>two rows</b> — the result's
+      row count can differ from both sides. Leave the test out and nothing stops it: <b>every</b>
+      combination comes back.
+  trace:
+    - ko: "{{pick.2|code}} 의 행 하나를 집는다."
+      en: "One row of {{pick.2|code}} is taken."
+    - ko: "{{pick.3|code}} 의 행과 견줘 조건이 참인 것만 짝짓는다."
+      en: "It is weighed against rows of {{pick.3|code}} and paired where the test holds."
+    - ko: "짝이 둘이면 그 행이 결과에서 두 줄이 된다."
+      en: "Two matches make that row two rows in the result."
+
+rule:
+  ko: "<b>짝이 맞는 조합을 전부 만든다.</b> 짝이 둘이면 그 행이 둘이 된다."
+  en: "<b>Every matching pair is made.</b> Two matches make the row twice."
+result:
+  label: { ko: "붙이는 표", en: "the table brought in" }
+  value: "{{pick.3}}"
+  note: { ko: "짝이 맞는 조합만", en: "matching pairs only" }
+ok:
+  ko: >-
+    조건이 참인 조합만 남고, 짝이 없는 {{pick.2|code}} 의 행은 결과에 안 옵니다.
+  en: >-
+    Only pairs where the test holds survive; rows of {{pick.2|code}} with no match do not appear.
+payoff:
+  ko: >-
+    이걸 알면 「행이 왜 늘었지」와 「행이 왜 줄었지」가 같은 한 가지로 설명됩니다.
+  en: >-
+    Knowing this, “why did rows multiply” and “why did rows vanish” have one explanation.
+bridge:
+  ko: >-
+    다른 언어에는 이 일에 해당하는 낱말이 없습니다 — 두 목록을 돌며 짝을 만드는 코드를 직접 써야 해요.
+  en: >-
+    Other languages have no word for this — you write the two loops that build the pairs yourself.
+misconceptions:
+  - ko: "두 표가 옆으로 이어 붙는다 — 짝이 맞는 조합이 전부 만들어집니다."
+    en: "The two tables are laid side by side — every matching pair is built."
+  - ko: "조건을 안 적으면 알아서 이어 준다 — 모든 조합이 나옵니다."
+    en: "Without a test it links them for you — every combination comes back."
+  - ko: "결과의 행 수는 왼쪽 표와 같다 — 늘 수도 줄 수도 있습니다."
+    en: "The result has as many rows as the left table — it can grow or shrink."
+
+meaning:
+  - q:
+      ko: "{{pick.3|code}} 에 짝이 둘인 {{pick.2|code}} 의 행이 있으면 결과가 어떻게 될까요?"
+      en: "A row of {{pick.2|code}} has two matches in {{pick.3|code}} — what does the result look like?"
+    hint:
+      ko: "이 절이 만드는 것이 <b>조합</b>이라는 데서 출발해 보세요."
+      en: "Start from the fact that this clause builds <b>pairs</b>."
+    options:
+      - t:
+          ko: "그 행이 두 줄이 된다 — 짝마다 한 줄"
+          en: "That row becomes two — one per pair"
+      - t:
+          ko: "한 줄로 남고 오른쪽 값 둘이 한 칸에 들어간다"
+          en: "It stays one row with both right-hand values in one slot"
+        diag:
+          t:
+            ko: >-
+              한 칸에 값을 여럿 담는 자리가 없습니다. 여럿을 하나로 만들려면 <b>따로 접어야</b> 해요.
+            en: >-
+              No slot holds several values. Folding many into one has to be <b>asked for separately</b>.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 줄이 늘어나느냐 칸이 늘어나느냐", en: "The sharpest spot — more rows or a fuller slot" }
+            code:
+              - "JOIN item ON ...                 -- 줄이 는다"
+              - "GROUP BY cart.id                 -- 접어야 하나가 된다"
+      - t:
+          ko: "첫 번째 짝만 쓰인다"
+          en: "Only the first match is used"
+        diag:
+          t:
+            ko: >-
+              「첫 번째」라는 것이 없습니다 — 짝에는 순서가 없어요. 하나만 쓰려면 그렇게 적어야 합니다.
+            en: >-
+              There is no “first” — pairs have no order. Taking one has to be written.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 순서가 있느냐", en: "The sharpest spot — whether order exists" }
+            code:
+              - "-- 순서를 정하는 절이 없으면 첫째도 없다"
+      - t:
+          ko: "그 행이 통째로 빠진다"
+          en: "The row drops entirely"
+        diag:
+          t:
+            ko: >-
+              빠지는 것은 짝이 <b>하나도 없을</b> 때입니다. 둘이면 반대로 늘어나요.
+            en: >-
+              Dropping happens when there is <b>no</b> match. Two matches do the opposite.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 0개냐 2개냐", en: "The sharpest spot — none or two" }
+            code:
+              - "-- 0개면 사라지고 2개면 늘어난다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 {{pick.3|code}} 의 행을 <b>짝지어</b> 붙입니다."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>pairs in</b> rows of {{pick.3|code}}."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "JOIN", mono: true }
+      - t: "UNION"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>UNION</code> 은 두 결과를 <b>위아래로</b> 잇습니다 — 열이 안 늘고 행만 늘어요.
+            en: >-
+              <code>UNION</code> stacks two results <b>vertically</b> — rows grow, columns do not.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 옆이냐 아래냐", en: "The sharpest spot — sideways or downward" }
+            code:
+              - "JOIN item ON ...   -- 열이 는다"
+              - "UNION SELECT ...   -- 행이 는다"
+      - t: "MERGE"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>MERGE</code> 는 읽는 낱말이 아니라 <b>넣거나 고치는</b> 문장의 낱말입니다.
+            en: >-
+              <code>MERGE</code> is not a reading word — it belongs to statements that <b>write</b>.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 읽기냐 쓰기냐", en: "The sharpest spot — reading or writing" }
+            code:
+              - "SELECT ... JOIN ...   -- 읽기"
+              - "MERGE INTO ...        -- 쓰기"
+      - t: "APPLY"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>APPLY</code> 는 왼쪽 행마다 <b>다른 조회</b>를 돌리는 방언 낱말이라 조건으로 짝짓지 않습니다.
+            en: >-
+              <code>APPLY</code> is a dialect word that runs <b>a query per left row</b>; it does not
+              pair on a test.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 조건으로 짝짓기냐 행마다 돌리기냐", en: "The sharpest spot — pairing on a test or running per row" }
+            code:
+              - "JOIN item ON cart.id = item.cart_id"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 두 표를 <b>따로 두고</b> 여기서 짝지을까요? 한 표에 다 담을 수도 있는데요."
+    en: "Why are the two tables <b>kept apart</b> and paired here, rather than stored as one?"
+  choices:
+    - t:
+        ko: "같은 사실을 한 곳에만 두려고 — 한 표에 담으면 같은 값이 행마다 되풀이된다"
+        en: "To keep one fact in one place — one table would repeat the same value on every row"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 대가로 읽을 때마다 무엇을 더 해야 하는지도 적어 보세요."
+        en: "That is the direction. Say what every read then has to do in exchange."
+    - t:
+        ko: "표가 작아야 빨라서"
+        en: "Because smaller tables are faster"
+      ok: false
+      fb:
+        ko: "짝짓기에는 값이 듭니다. 나눠 둔 이유는 속도가 아니라 <b>같은 사실을 두 번 두지 않기</b>예요."
+        en: "Pairing costs. The reason to split is not speed — it is <b>not storing a fact twice</b>."
+    - t:
+        ko: "한 표에 열을 그만큼 못 넣어서"
+        en: "Because one table cannot hold that many columns"
+      ok: false
+      fb:
+        ko: "열은 넣을 수 있습니다. 문제는 <b>같은 값이 행마다 되풀이된다</b>는 것이에요."
+        en: "The columns would fit. The problem is <b>the same value repeating on every row</b>."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./join-inner.scm }
+
+examples:
+  - code: "SELECT * FROM cart JOIN item ON cart.id = item.cart_id"
+    expect: { sites: 1, form: join, hole: "JOIN", picks: { 1: "JOIN", 2: "cart", 3: "item", 4: "ON" } }
+  - code: "SELECT * FROM cart ct JOIN item it ON ct.id = it.cart_id"
+    expect: { sites: 1, form: join, hole: "JOIN", picks: { 1: "JOIN", 2: "cart", 3: "item", 4: "ON" } }
+  - code: "SELECT * FROM cart LEFT JOIN item ON cart.id = item.cart_id"
+    expect: none

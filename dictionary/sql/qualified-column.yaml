@@ -1,0 +1,191 @@
+schema: 1
+id: sql/qualified-column
+universal: null
+name: { ko: "어느 표의 열인지 밝히기", en: "Qualified column" }
+token: "t.col"
+grammars: [sql, mybatis_sql]
+framework: null
+essential: true
+difficulty: 1
+prereq: [sql/from-table]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "점 왼쪽은 표, 오른쪽은 그 표의 열. 안으로 들어가는 표시가 아니다."
+    en: "Left of the dot is a table, right is its column. Nothing is being entered."
+  why:
+    ko: >-
+      {{site.line}}행의 점은 <b>안으로 들어가는 표시가 아닙니다</b>. {{pick.2|code}} 안을 뒤져
+      {{pick.1|code}}{{pick.1|josa:을,를}} 찾는 것이 아니라, 「{{pick.1|code}} 라는 이름이 어느 표 것인가」를 고르는 표시예요.
+      표를 둘 이상 붙이면 같은 이름의 열이 양쪽에 있을 수 있고, 그때 이 표시가 없으면 어느 쪽인지
+      정할 수 없어 문장이 서지 않습니다. 왼쪽 이름이 별명이면 그 별명은 <b>그 문장 안에서만</b> 삽니다.
+    en: >-
+      The dot on line {{site.line}} <b>does not go inside anything</b>. It is not searching
+      {{pick.2|code}} for {{pick.1|code}}; it settles “which table does the name {{pick.1|code}}
+      belong to”. Join two tables and the same column name can live on both sides, and without this
+      marker there is no way to choose — the statement does not stand. When the left name is a
+      nickname it lives <b>only inside that statement</b>.
+  trace:
+    - ko: "{{site.line}}행에서 점의 왼쪽 {{pick.2|code}}{{pick.2|josa:이,가}} 표를 고른다."
+      en: "On line {{site.line}} the left side {{pick.2|code}} picks the table."
+    - ko: "오른쪽 {{pick.1|code}}{{pick.1|josa:이,가}} 그 표의 열 이름이다."
+      en: "The right side {{pick.1|code}} is a column name of that table."
+    - ko: "이 표시가 없으면 같은 이름이 양쪽에 있을 때 고를 수 없다."
+      en: "Without this marker a name on both sides cannot be chosen between."
+
+rule:
+  ko: "<b>점은 소속을 고른다.</b> 안으로 들어가는 것이 아니라 어느 표 것인지 정한다."
+  en: "<b>The dot picks ownership.</b> It does not enter — it settles which table owns the name."
+result:
+  label: { ko: "이 열의 표", en: "the table this column belongs to" }
+  value: "{{pick.2}}"
+  note: { ko: "별명이면 그 문장 안에서만 산다", en: "a nickname lives only in this statement" }
+ok:
+  ko: >-
+    {{pick.1|code}} 라는 이름이 {{pick.2|code}} 것으로 정해지고, 다른 표의 같은 이름은 안 걸립니다.
+  en: >-
+    The name {{pick.1|code}} is settled as {{pick.2|code}}'s, and the same name elsewhere is not touched.
+payoff:
+  ko: >-
+    이걸 알면 표를 붙였을 때 「이름이 모호하다」는 멈춤이 무슨 말인지 바로 압니다.
+  en: >-
+    Knowing this, an “ambiguous name” stop after a join reads immediately.
+bridge:
+  ko: >-
+    다른 언어에서 점은 <b>안으로</b> 들어갑니다. 여기서는 <b>옆으로</b> 골라요 — 소속을 정하는 표시예요.
+  en: >-
+    Elsewhere a dot reaches <b>inward</b>. Here it chooses <b>sideways</b> — it marks ownership.
+misconceptions:
+  - ko: "점이 표 안의 값을 꺼낸다 — 어느 표의 열인지 고르는 표시입니다."
+    en: "The dot pulls a value out of a table — it picks which table owns the column."
+  - ko: "별명은 다음 문장에서도 쓸 수 있다 — 그 문장 안에서만 삽니다."
+    en: "A nickname works in the next statement too — it lives only inside its own."
+  - ko: "표가 하나면 붙일 필요가 없으니 뜻도 없다 — 뜻은 같고 필요만 없습니다."
+    en: "With one table it is pointless, so it means nothing — it means the same; it is just not needed."
+
+meaning:
+  - q:
+      ko: "표 둘을 붙였는데 양쪽에 {{pick.1|code}} 라는 열이 있고 이 표시를 안 쓰면 어떻게 될까요?"
+      en: "Two tables are joined, both have a column {{pick.1|code}}, and the marker is left off — then what?"
+    hint:
+      ko: "데이터베이스가 <b>고를 수 있는지</b>를 생각해 보세요."
+      en: "Think about whether the database <b>can choose</b>."
+    options:
+      - t:
+          ko: "어느 쪽인지 정할 수 없어 문장이 서지 않는다"
+          en: "It cannot settle which one, so the statement does not stand"
+      - t:
+          ko: "왼쪽 표의 열이 쓰인다"
+          en: "The left table's column is used"
+        diag:
+          t:
+            ko: >-
+              <b>먼저 적힌 쪽</b>이라는 규칙이 없습니다. 그런 규칙이 있으면 표 차례만 바꿔도 답이 바뀌겠지요.
+            en: >-
+              There is no rule that <b>the one written first</b> wins. If there were, reordering the
+              tables would change the answer.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 규칙이냐 거절이냐", en: "The sharpest spot — a rule or a refusal" }
+            code:
+              - "SELECT id FROM cart JOIN item ON ..."
+              - "SELECT cart.id FROM cart JOIN item ON ..."
+      - t:
+          ko: "두 열이 합쳐진 값이 나온다"
+          en: "The two columns come back merged"
+        diag:
+          t:
+            ko: "같은 이름이어도 <b>다른 열</b>입니다. 합쳐지는 일은 없어요."
+            en: "Same name, <b>different columns</b>. Nothing merges."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 이름이냐 열이냐", en: "The sharpest spot — the name or the column" }
+            code:
+              - "-- 이름이 같다고 같은 열이 아니다"
+      - t:
+          ko: "둘 다 결과에 나온다"
+          en: "Both appear in the result"
+        diag:
+          t:
+            ko: >-
+              둘 다 보려면 <b>둘 다 적어야</b> 합니다. 하나만 적은 이름이 둘로 늘지 않아요.
+            en: >-
+              To see both, <b>both must be written</b>. One name does not become two.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 하나 적기냐 둘 적기냐", en: "The sharpest spot — writing one or two" }
+            code:
+              - "SELECT cart.id, item.id FROM ..."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>표</b>를 가리키는 쪽을 짚어 보세요."
+      en: "On line {{site.line}}, point at the side that names a <b>table</b>."
+    hint:
+      ko: "점의 어느 쪽이 소속이고 어느 쪽이 열인지 갈라 보세요."
+      en: "Separate which side of the dot is ownership and which is the column."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: >-
+            {{pick.1|code}}{{pick.1|josa:은,는}} <b>열</b>입니다 — 점의 오른쪽이 그 표 안의 이름이에요.
+          en: >-
+            {{pick.1|code}} is the <b>column</b> — the right of the dot names something inside that table.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 표냐 열이냐", en: "The sharpest spot — the table or the column" }
+          code:
+            - "cart.qty"
+            - "-- 왼쪽 표, 오른쪽 열"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 둘을 잇는 <b>표시</b>이고, 표를 가리키는 것은 그 왼쪽입니다.
+          en: >-
+            {{pick.3|code}} is the <b>marker</b> joining the two; the table is on its left.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 표시냐 이름이냐", en: "The sharpest spot — the marker or the name" }
+          code:
+            - "cart.qty"
+            - "-- 표시는 이름이 아니다"
+
+no_hole_reason: >-
+  구멍을 뚫을 자리가 점 하나뿐인데 한 글자짜리 구멍은 빈칸형이 안 받는다(`t0-blank.ts` 의 `MIN_HOLE`).
+  그리고 물어야 하는 것은 「어느 낱말이 오나」가 아니라 「점의 어느 쪽이 표인가」다 — 지목형이 그 둘을
+  나란히 두고 묻는다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 열 이름 앞에 <b>표를 붙였을까요</b>?"
+    en: "Why does line {{site.line}} <b>prefix</b> the column with a table?"
+  choices:
+    - t:
+        ko: "같은 이름이 다른 표에도 있을 수 있어서 — 안 붙이면 어느 쪽인지 정할 근거가 없다"
+        en: "Because the name may live on another table too — unprefixed there is nothing to settle it"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 표가 하나뿐일 때도 붙이면 무엇이 좋아지는지도 적어 보세요."
+        en: "That is the direction. Say what prefixing buys even when there is only one table."
+    - t:
+        ko: "표 이름을 적어야 문장이 서서"
+        en: "Because a statement needs the table name written"
+      ok: false
+      fb:
+        ko: "표가 하나면 안 붙여도 섭니다. 붙인 것은 <b>고른 것</b>이에요."
+        en: "With one table it stands unprefixed. Prefixing was a <b>choice</b>."
+    - t:
+        ko: "그래야 그 표만 읽어서"
+        en: "So that only that table is read"
+      ok: false
+      fb:
+        ko: "어느 표를 읽을지는 <b>표를 대는 절</b>이 정합니다. 이 표시는 이름의 소속만 정해요."
+        en: "Which tables are read is settled by the clause that names them. This marks ownership only."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./qualified-column.scm }
+
+examples:
+  - code: "SELECT ct.qty FROM cart ct"
+    expect: { sites: 1, form: qualified, picks: { 1: "qty", 2: "ct", 3: "." } }
+  - code: "SELECT cart.qty FROM cart JOIN item ON cart.id = item.cart_id"
+    expect: { sites: 3, form: qualified, picks: { 1: "qty", 2: "cart", 3: "." } }
+  - code: "SELECT qty FROM cart"
+    expect: none

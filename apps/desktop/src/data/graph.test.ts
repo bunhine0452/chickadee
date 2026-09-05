@@ -262,4 +262,60 @@ describe('two-commits — 반례 픽스처 (06 §1.2 · D36)', () => {
       expect(isT2Card(made)).toBe(false);
     }
   });
+
+  test('리포 지도 두 종도 나오지 않는다 — 대지가 「기타」 하나뿐이다 (D142)', () => {
+    const paths = dump.files.map((f) => f.path);
+    const files: GraphFile[] = paths.map((path, i) => ({ fileId: i + 1, path, inUnit: true }));
+    for (const kind of ['entry', 'role'] as const) {
+      const made = generateT2({
+        repoId: 1, unitId: 1, unitName: '기타', unitRoot: '',
+        conceptId: 'arch/placement' as ConceptId, seed: 7,
+        files, edges: [], commits: [], filesOf: new Map(), recent: new Map(),
+      }, kind);
+      expect(isT2Card(made)).toBe(false);
+    }
+  });
+});
+
+/**
+ * 리포 지도 (04 §7.5 · D142) — 같은 덤프를 **대지가 아니라 리포**로 본다.
+ *
+ * 여기서 재는 것은 하나다: 파일 N 이 노드 M 으로 접히는가, 그리고 M 이 24 아래인가.
+ * 「이 프로젝트는 이런 구조구나」는 사람이 30초에 훑는 그림이라 노드 수가 곧 그 그림이다.
+ */
+describe('projectox-like — 리포 전체가 폴더 지도로 접힌다', () => {
+  const dump = load('projectox-like');
+  const paths = dump.files.map((f) => f.path);
+  const edges = resolveImports({ paths, files: importsOf(dump) });
+  const files: GraphFile[] = paths.map((path, i) => ({ fileId: i + 1, path, inUnit: true }));
+  const req = (targetIndex = 0): Parameters<typeof generateT2>[0] => ({
+    repoId: 1, unitId: 1, unitName: '기타', unitRoot: '',
+    conceptId: 'arch/placement' as ConceptId, seed: 7, targetIndex,
+    files, edges, commits: [], filesOf: new Map(), recent: new Map<number, string[]>(),
+  });
+
+  test('파일 69장 → 노드 여섯. 24 상한을 접기가 저절로 지킨다', () => {
+    expect(paths.length).toBe(69);
+    const graph = buildGraph({ files, edges, unitRoot: '', scope: 'repo' });
+    expect(graph.files.length).toBe(6);
+    expect(graph.files.length).toBeLessThanOrEqual(24);
+    // 파일 30장짜리 폴더가 노드 하나로 접힌다 — 24 상한이 뺄 것을 고를 일이 없다.
+    expect(Math.max(...graph.files.map((f) => f.folded ?? 0))).toBeGreaterThan(20);
+    const folded = Object.values(graph.foldedOf).reduce((n, xs) => n + xs.length, 0);
+    expect(folded + graph.offMap).toBe(paths.length);
+  });
+
+  test('폴더 역할이 나온다 — 그리고 물어본 폴더는 지도에서 빠져 있다', () => {
+    const made = generateT2(req(), 'role');
+    if (!isT2Card(made)) throw new Error(made.reason);
+    const role = made.payload.role;
+    expect(role?.folder).toBe('src/app/');
+    expect(role?.answer).toBe(0);
+    expect(made.payload.files.some((f) => f.p === role?.folder)).toBe(false);
+  });
+
+  test('진입점은 이 리포에서 안 나온다 — 들어오는 화살표가 없는 폴더가 넷이다', () => {
+    // 정답이 지도의 절반이면 아무 데나 찍어도 맞는다. 안 내는 것이 맞는 답이다.
+    expect(isT2Card(generateT2(req(), 'entry'))).toBe(false);
+  });
 });

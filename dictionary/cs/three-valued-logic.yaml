@@ -1,0 +1,90 @@
+schema: 1
+id: cs/three-valued-logic
+universal: null
+name: { ko: "참·거짓·모름", en: "Three-valued logic" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+# SQL 편이 밀어낸 것 (cs.md §10.2).
+track_default: t0
+essential: false
+difficulty: 3
+prereq: [common/boolean-value, cs/null-reference]
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "「모름」이 값에 섞이면 참·거짓만으로는 답이 안 나온다."
+    en: "Once “unknown” enters the values, true and false no longer suffice."
+  why:
+    ko: >-
+      나이를 모르는 사람이 스무 살보다 많은가요. 참도 거짓도 아니고 <b>모름</b>입니다.
+      값에 「모름」이 섞이면 비교의 답도 셋이 돼요. 여기서 나오는 결과가 처음에는 이상해 보입니다 —
+      모르는 값과 모르는 값을 비교해도 <b>같다고 안 나옵니다</b>. 모르는 것 둘이 같은지는
+      역시 모르는 일이니까요. 조건을 걸어 거른 결과에서 「모름」인 줄이 통째로 빠지는 것도,
+      부정을 씌워도 안 돌아오는 것도 여기서 나옵니다. 「모름」은 <b>따로 물어야</b> 합니다.
+    en: >-
+      Is someone whose age you do not know older than twenty? Not true, not false —
+      <b>unknown</b>. Once “unknown” is among the values, comparisons have three answers. The
+      results look strange at first: two unknowns compared do <b>not come back equal</b>, because
+      whether two unknowns match is itself unknown. This is why rows that are unknown drop out of
+      a filtered result, and why negating the condition does not bring them back. “Unknown” must
+      be <b>asked about separately</b>.
+  trace: []
+rule:
+  ko: "<b>모름은 거짓이 아니다.</b> 거르면 빠지고 부정을 씌워도 안 돌아온다."
+  en: "<b>Unknown is not false.</b> It drops out of a filter and negation does not bring it back."
+ok:
+  ko: >-
+    값이 있는 줄끼리는 참·거짓 둘로 갈립니다. 「모름」인 줄만 따로 물어서 어느 쪽으로
+    보낼지 정하면 됩니다.
+  en: >-
+    Rows with values split into true and false as usual. Ask about the unknown rows separately and
+    decide where they belong.
+misconceptions:
+  - ko: "모름은 거짓과 같다 — 거짓이면 부정했을 때 돌아옵니다. 모름은 안 돌아와요."
+    en: "Unknown equals false — false comes back under negation. Unknown does not."
+  - ko: "모름 둘을 비교하면 같다 — 둘이 같은지도 모르는 일입니다."
+    en: "Two unknowns compare equal — whether they match is itself unknown."
+  - ko: "조건을 뒤집으면 나머지 전부가 나온다 — 「모름」인 줄은 양쪽 다 빠집니다."
+    en: "Negating a condition returns the rest — unknown rows fall out of both sides."
+meaning:
+  - q:
+      ko: "조건을 걸고, 그 조건을 뒤집어서도 걸었는데 두 결과를 합쳐도 전체가 안 됩니다. <b>어디로 갔나요?</b>"
+      en: "A condition and its negation, combined, do not cover everything. <b>Where did the rest go?</b>"
+    hint:
+      ko: "참도 거짓도 아닌 답이 나오는 줄이 있습니다."
+      en: "Some rows answer neither true nor false."
+    options:
+      - t: { ko: "값이 「모름」인 줄들이 양쪽 모두에서 빠졌다", en: "Rows whose value is unknown fell out of both" }
+      - t: { ko: "조건을 뒤집는 표기가 잘못됐다", en: "The negation was written incorrectly" }
+        diag:
+          t:
+            ko: "표기가 맞아도 같은 일이 납니다 — <b>모름을 부정해도 모름</b>이라서요."
+            en: "Correct notation gives the same outcome — <b>negating unknown is still unknown</b>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 표기냐 값이냐", en: "The sharpest spot — notation or value" }
+            code:
+              - "참·거짓: 뒤집으면 나머지"
+              - "모름: 뒤집어도 모름"
+      - t: { ko: "그 줄들이 지워졌다", en: "Those rows were deleted" }
+        diag:
+          t:
+            ko: "줄은 그대로 있습니다. 조건 없이 세어 보면 여전히 있어요 — 조건이 <b>안 통과시킨</b> 것입니다."
+            en: "The rows are there. Count without a condition and they show — the condition simply <b>did not pass</b> them."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 없나 안 통과하나", en: "The sharpest spot — gone or not passing" }
+            code:
+              - "조건 없이: 전부 보인다"
+              - "조건 걸면: 모름이 빠진다"
+      - t: { ko: "두 조건이 겹쳐서 서로 지웠다", en: "The two conditions overlapped and cancelled" }
+        diag:
+          t:
+            ko: "겹쳤다면 합계가 <b>전체보다 많아야</b> 합니다. 모자란 것은 어느 쪽도 안 잡은 줄이 있다는 뜻이에요."
+            en: "Overlap would make the total <b>exceed</b> the whole. Falling short means some rows were caught by neither."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 많나 모자라나", en: "The sharpest spot — too many or too few" }
+            code:
+              - "겹침: 합이 전체보다 많다"
+              - "모름: 합이 전체보다 적다"

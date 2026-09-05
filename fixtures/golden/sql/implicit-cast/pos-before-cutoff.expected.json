@@ -1,0 +1,54 @@
+[
+  {
+    "queryId": "sql/implicit-cast",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "size-compare",
+    "startLine": 1,
+    "startCol": 26,
+    "endLine": 1,
+    "endCol": 49,
+    "nodeKind": "binary_expression",
+    "inError": false
+  },
+  {
+    "queryId": "sql/implicit-cast",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "size-compare",
+    "startLine": 1,
+    "startCol": 26,
+    "endLine": 1,
+    "endCol": 36,
+    "nodeKind": "field",
+    "inError": false
+  },
+  {
+    "queryId": "sql/implicit-cast",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "size-compare",
+    "startLine": 1,
+    "startCol": 37,
+    "endLine": 1,
+    "endCol": 38,
+    "nodeKind": "<",
+    "inError": false
+  },
+  {
+    "queryId": "sql/implicit-cast",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "size-compare",
+    "startLine": 1,
+    "startCol": 39,
+    "endLine": 1,
+    "endCol": 49,
+    "nodeKind": "literal",
+    "inError": false
+  }
+]

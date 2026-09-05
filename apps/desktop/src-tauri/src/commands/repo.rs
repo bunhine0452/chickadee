@@ -46,6 +46,27 @@ pub struct Block {
     pub text: String,
 }
 
+/// Copies a remote repository into `into` and reports it the way `repo_probe` does —
+/// the ledger side stays in TS (D65), so this writes nothing but the work tree itself.
+/// `into` is a full path the caller built; it must not exist yet (D129).
+///
+/// Blocking work on a pool thread: libgit2 has no async form and this one call can run
+/// for minutes on a large repository.
+#[tauri::command]
+pub async fn repo_clone(url: String, into: String) -> Result<RepoProbe, IpcError> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let repo = Repo::clone_into(&url, Path::new(&into))?;
+        let (fingerprint, head_commit) = repo.identity()?;
+        Ok(RepoProbe {
+            root_path: repo.root().to_string_lossy().into_owned(),
+            fingerprint,
+            head_commit,
+        })
+    })
+    .await
+    .map_err(|_| IpcError::new("GIT_IO", "the copy did not finish", true))?
+}
+
 /// Finds the work tree root above `path` and reports its identity. Registering,
 /// listing, moving and removing are built on top of this in TS.
 #[tauri::command]

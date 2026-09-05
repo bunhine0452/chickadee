@@ -6,7 +6,10 @@ import { buildGaps, HOT_COUNT, type CountableSite } from './gaps.js';
 import { isTestPath } from './ingest-defaults.js';
 import { topoOrder } from './prereq-graph.js';
 import { assignUnits, OTHER_UNIT } from './units.js';
-import { chooseFirst, knownSet, unknownCount } from './unknown-rank.js';
+import {
+  chooseFirst, innermostBlock, knownSet, lineIndex, unknownCount, windowRange, windowUnknown,
+  type WindowSite,
+} from './unknown-rank.js';
 
 function commit(over: Partial<CommitFacts> = {}): CommitFacts {
   return {
@@ -213,6 +216,78 @@ describe('첫 노출 고르기', () => {
 
   test('사용처가 없으면 없다고 답한다', () => {
     expect(chooseFirst([])).toBeNull();
+  });
+});
+
+describe('창의 미지 (D155)', () => {
+  // 실제로 나갔던 판을 그대로 옮겼다 — `App.tsx:86` 의 `56` 은 초점 줄이 깨끗한데
+  // (같은 줄의 개념은 `ts/function-declaration` 하나) 창은 12줄짜리 함수 전체다.
+  const spark: WindowSite[] = [
+    { conceptId: 'ts/function-declaration', lineStart: 86, lineEnd: 97 },
+    { conceptId: 'ts/number-literal', lineStart: 86, lineEnd: 86 },
+    { conceptId: 'ts/if-statement', lineStart: 87, lineEnd: 87 },
+    { conceptId: 'ts/comparison', lineStart: 87, lineEnd: 87 },
+    { conceptId: 'ts/return-statement', lineStart: 87, lineEnd: 87 },
+    { conceptId: 'ts/const-declaration', lineStart: 88, lineEnd: 88 },
+    { conceptId: 'ts/call-expression', lineStart: 88, lineEnd: 88 },
+    { conceptId: 'ts/arrow-function', lineStart: 91, lineEnd: 91 },
+    { conceptId: 'ts/template-literal', lineStart: 91, lineEnd: 91 },
+  ];
+  // `TerminalView.tsx:23` 의 `9` — 최상위 상수라 감싸는 블록이 없다.
+  const consts: WindowSite[] = [
+    { conceptId: 'ts/const-declaration', lineStart: 22, lineEnd: 22 },
+    { conceptId: 'ts/string-literal', lineStart: 22, lineEnd: 22 },
+    { conceptId: 'ts/const-declaration', lineStart: 23, lineEnd: 23 },
+    { conceptId: 'ts/number-literal', lineStart: 23, lineEnd: 23 },
+    { conceptId: 'ts/const-declaration', lineStart: 24, lineEnd: 24 },
+    { conceptId: 'ts/number-literal', lineStart: 24, lineEnd: 24 },
+  ];
+  const nothingKnown = (): number => 0;
+
+  test('창은 감싸는 블록 ∪ 초점 ±2 이고, 블록이 없으면 초점 ±2 다', () => {
+    expect(windowRange(86, { from: 86, to: 97 })).toEqual({ from: 84, to: 97 });
+    expect(windowRange(23)).toEqual({ from: 21, to: 25 });
+  });
+
+  test('감싸는 블록 중 가장 안쪽을 고른다', () => {
+    const blocks = [{ from: 1, to: 200 }, { from: 86, to: 97 }, { from: 300, to: 400 }];
+    expect(innermostBlock(blocks, 90)).toEqual({ from: 86, to: 97 });
+    expect(innermostBlock(blocks, 350)).toEqual({ from: 300, to: 400 });
+    expect(innermostBlock(blocks, 250)).toBeUndefined();
+  });
+
+  test('초점 줄이 같이 깨끗해도 창이 갈라 준다 — 이것이 없어 큰 파일이 늘 이겼다', () => {
+    const inSpark = windowUnknown(
+      { conceptId: 'ts/number-literal', lineStart: 86 },
+      { from: 86, to: 97 }, lineIndex(spark), nothingKnown,
+    );
+    const atTop = windowUnknown(
+      { conceptId: 'ts/number-literal', lineStart: 23 },
+      undefined, lineIndex(consts), nothingKnown,
+    );
+    expect(inSpark).toBe(8);
+    expect(atTop).toBe(2);
+    expect(atTop).toBeLessThan(inSpark);
+  });
+
+  test('자기 개념은 세지 않고, 아는 개념도 세지 않는다', () => {
+    const known = new Set(['ts/const-declaration', 'ts/string-literal']);
+    const layerOf = (id: string): number => (known.has(id) ? 1 : 0);
+    expect(windowUnknown(
+      { conceptId: 'ts/number-literal', lineStart: 23 },
+      undefined, lineIndex(consts), layerOf,
+    )).toBe(0);
+  });
+
+  test('창에 걸치기만 하는 사용처도 센다 — 창 안에 글자가 보인다', () => {
+    const sites: WindowSite[] = [
+      { conceptId: 'ts/number-literal', lineStart: 10, lineEnd: 10 },
+      { conceptId: 'ts/array-method-chain', lineStart: 8, lineEnd: 12 },
+    ];
+    expect(windowUnknown(
+      { conceptId: 'ts/number-literal', lineStart: 10 },
+      undefined, lineIndex(sites), nothingKnown,
+    )).toBe(1);
   });
 });
 

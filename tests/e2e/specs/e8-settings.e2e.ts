@@ -32,11 +32,11 @@ describe('E8 설정', () => {
   before(async () => {
     await waitForBoot();
     await shown('.today');
-    const buttons = await (await shown('header.masthead')).$$('button.flat-btn');
+    const buttons = await (await shown('header.masthead')).$$('nav.mh-nav button.mh-link');
     for (const button of buttons) {
       if ((await button.getText()) === '설정') { await button.click(); break; }
     }
-    await shown('main.settings');
+    await shown('main.l-page.settings');
   });
 
   it('앱이 격리된 데이터 폴더를 쓰고 있다', async () => {

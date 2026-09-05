@@ -1,0 +1,217 @@
+schema: 1
+id: ts/truthy-falsy
+universal: common/truthiness
+name: { ko: 참 같은 값 거짓 같은 값, en: Truthy and falsy }
+token: "if (x)"
+grammars: [typescript, tsx, javascript, vue]
+framework: null
+essential: true
+difficulty: 2
+prereq: [ts/boolean-literal]
+confusions: [ts/boolean-literal, ts/comparison]
+
+dict:
+  one_liner:
+    ko: "갈림길은 참·거짓이 아닌 값도 받는다. 거짓이 되는 값은 정해진 여섯뿐이다."
+    en: "A fork takes values that are not booleans, and only six of them count as false."
+  why:
+    ko: >-
+      조건 자리에 무엇을 놓든 언어가 참·거짓으로 읽어 줍니다. 그래서 {{site.line}}행처럼
+      {{pick.1|code}} 하나만 놓아도 코드가 돌아요. 문제는 <b>무엇이 거짓이 되는지</b>가
+      직관과 다르다는 것입니다 — 빈 배열도 빈 객체도 참입니다.
+    en: >-
+      Whatever is put in a condition, the language reads it as true or false. That is why
+      {{pick.1|code}} alone on line {{site.line}} runs at all. The catch is <b>which values count as
+      false</b>: an empty array is true, and so is an empty object.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.1|code}} 의 값을 그대로 꺼낸다."
+      en: "Line {{site.line}} takes the value of {{pick.1|code}} as it is."
+    - ko: "그 값이 정해진 여섯 중 하나면 거짓, 아니면 참이 된다."
+      en: "If that value is one of the six it counts as false; otherwise it counts as true."
+    - ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 참일 때만 실행된다 — 값 자체는 아무것도 안 바뀐다."
+      en: "{{pick.2|code}} runs only in the true case — the value itself is unchanged."
+
+rule:
+  ko: >-
+    <b>거짓이 되는 값은 여섯뿐이다</b> — <code>false</code> · <code>0</code> · 빈 문자열 ·
+    <code>null</code> · <code>undefined</code> · <code>NaN</code>. 나머지는 전부 참이다.
+  en: >-
+    <b>Only six values count as false</b> — <code>false</code>, <code>0</code>, the empty string,
+    <code>null</code>, <code>undefined</code>, <code>NaN</code>. Everything else counts as true.
+result:
+  label:
+    ko: "{{site.line}}행이 읽는 것"
+    en: "What line {{site.line}} reads"
+  value: "{{pick.1}}"
+  note:
+    ko: "참·거짓으로 읽힌 값"
+    en: "a value read as true or false"
+ok:
+  ko: >-
+    {{pick.1|code}} 의 값이 여섯 중 하나면 갈림길이 안 열리고, 아니면 열립니다.
+    <b>비어 있음</b>과 <b>없음</b>은 다른 것이라 빈 배열은 참이에요.
+  en: >-
+    If the value of {{pick.1|code}} is one of the six the fork stays shut; otherwise it opens.
+    <b>Empty</b> and <b>absent</b> are different, so an empty array counts as true.
+payoff:
+  ko: >-
+    「값이 있으면」이라는 뜻으로 이 모양을 쓰면 <code>0</code> 과 빈 문자열이 조용히
+    빠집니다 — 수량 0 이 안 저장되는 버그가 여기서 나와요.
+  en: >-
+    Use this shape to mean “if there is a value” and <code>0</code> and the empty string quietly
+    fall out — the bug where a quantity of zero never saves comes from here.
+bridge:
+  ko: >-
+    「없음」만 거르고 싶으면 견주기를 쓰거나 없음 전용 기호를 씁니다 — 그쪽은 여섯이 아니라
+    둘만 봅니다.
+  en: >-
+    To filter only absence, weigh the value or use the absence-only symbol — that one looks at two
+    values, not six.
+misconceptions:
+  - ko: "빈 배열은 거짓이다 — 참입니다. 비었는지 보려면 개수를 봐야 해요."
+    en: "An empty array is false — it is true. To see whether it is empty, look at its count."
+  - ko: "<code>0</code> 은 값이 있는 것이다 — 값은 있지만 여기서는 거짓 쪽으로 읽힙니다."
+    en: "<code>0</code> is a present value — it is present, but here it reads as false."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>참·거짓으로 읽히는 값</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the value that is read as true or false</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>참일 때 할 일</b>입니다. 읽히는 것은 그 앞의 값이고, 이쪽은 결과로 실행될 뿐이에요."
+          en: >-
+            {{pick.2|code}} is <b>what to do in the true case</b>. What gets read is the value before
+            it; this part only runs as a result.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 읽히는 것과 실행되는 것"
+            en: "The sharpest spot — what is read or what runs"
+          code:
+            - "if (list) { draw() }   // list 가 읽힌다"
+            - "if (0) { draw() }      // draw 는 안 돈다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 갈림길을 <b>여는 낱말</b>입니다. 무엇을 보고 갈릴지는 괄호 안의 값이 정해요."
+          en: >-
+            {{pick.3|code}} is the <b>word that opens</b> the fork. What the fork looks at is the
+            value inside the parentheses.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 여는 낱말과 보는 값"
+            en: "The sharpest spot — the opening word or the value looked at"
+          code:
+            - "if (list) { }     // list 를 본다"
+            - "if (!list) { }    // 뒤집어 본다"
+
+meaning:
+  - q:
+      ko: "<code>const items = []</code> 뒤에 <code>if (items)</code> 는 어떻게 될까요?"
+      en: "After <code>const items = []</code>, what does <code>if (items)</code> do?"
+    hint:
+      ko: "거짓이 되는 값은 정해진 여섯뿐입니다."
+      en: "Only six values count as false."
+    options:
+      - t:
+          ko: "열린다 — 빈 배열도 참이다"
+          en: "It opens — an empty array counts as true"
+      - t:
+          ko: "안 열린다 — 비어 있으니까"
+          en: "It stays shut — it is empty"
+        diag:
+          t:
+            ko: "파이썬이라면 그 말이 맞습니다. 여기서는 거짓이 되는 여섯에 「빈 것」이 없어서, 비었어도 참이에요."
+            en: >-
+              In Python that holds. Here the six do not include “empty”, so an empty array still
+              counts as true.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 비어 있음은 거짓이 아니다"
+              en: "The sharpest spot — empty is not false"
+            code:
+              - "if ([]) { }            // 열린다"
+              - "if ([].length) { }     // 안 열린다"
+      - t:
+          ko: "배열은 조건에 못 놓아서 멈춘다"
+          en: "An array cannot go in a condition, so it stops"
+        diag:
+          t:
+            ko: "자바라면 그 말이 맞습니다 — 거기서는 참·거짓 말고는 조건에 못 옵니다. 여기서는 무엇이든 놓을 수 있어요."
+            en: >-
+              In Java that holds — nothing but a boolean may go in a condition there. Here anything
+              may.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 놓을 수 있느냐"
+              en: "The sharpest spot — whether it may go there at all"
+            code:
+              - "if ([]) { }        // 그대로 돈다"
+              - "if ('') { }        // 안 열린다"
+      - t:
+          ko: "안의 값에 따라 갈린다"
+          en: "It depends on what is inside"
+        diag:
+          t:
+            ko: "안의 값은 안 봅니다. 배열이라는 것 하나로 참이 되고, 안이 비었는지는 개수를 따로 봐야 알아요."
+            en: >-
+              What is inside is never looked at. Being an array is enough to count as true; whether
+              it is empty takes a separate look at the count.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 겉과 속"
+              en: "The sharpest spot — the outside or the inside"
+            code:
+              - "if ([0]) { }       // 열린다"
+              - "if ([]) { }        // 역시 열린다"
+
+no_hole_reason: >-
+  조건 자리에 놓인 것이 값 그 자체라 지울 기호가 없다. 이 개념이 재는 것은 어느 기호를 쓰느냐가
+  아니라 「그 값이 여섯 중 하나인가」이고, 그것은 값 하나를 짚거나 답을 적어야 물어진다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 견주지 않고 값을 그대로 조건에 두었을까요?"
+    en: "Why does line {{site.line}} put the value in the condition without weighing it?"
+  choices:
+    - t:
+        ko: "값이 있으면 지나가게 하려고 — 짧게 적히지만 거짓 여섯이 함께 걸린다"
+        en: "To let it through when there is a value — short to write, but the six come along"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 값이 <code>0</code> 이나 빈 문자열이 될 수 있는지도 적어 보세요."
+        en: "That is the direction. Add whether that value can be <code>0</code> or the empty string."
+    - t:
+        ko: "견주기를 쓰면 느려져서"
+        en: "Because weighing would be slower"
+      ok: false
+      fb:
+        ko: "속도는 갈리지 않습니다. 갈리는 것은 어느 값들이 통과하느냐입니다."
+        en: "Speed does not part ways. What parts ways is which values get through."
+    - t:
+        ko: "조건 자리에는 참·거짓만 놓을 수 있어서"
+        en: "Because only a boolean may go in a condition"
+      ok: false
+      fb:
+        ko: "그것은 자바의 규칙입니다. 여기서는 무엇이든 놓을 수 있고, 그래서 여섯을 외워야 합니다."
+        en: >-
+          That is Java's rule. Here anything may go there, which is why the six have to be known.
+
+queries:
+  - { grammars: [typescript, tsx, javascript, vue], file: ./truthy-falsy.scm }
+
+examples:
+  - code: "if (items) { draw(items) }"
+    expect: { sites: 1, form: bare-if, picks: { 1: "items", 2: "{ draw(items) }", 3: "if" } }
+  - code: "if (user.name) { greet() }"
+    expect: { sites: 1, form: bare-if, picks: { 1: "user.name", 2: "{ greet() }", 3: "if" } }
+  - code: "const empty = !text"
+    expect: { sites: 1, form: negate, picks: { 1: "text", 2: "!" } }
+  - code: "if (count > 0) { draw() }"
+    expect: none
+  - code: "const total = a + b"
+    expect: none

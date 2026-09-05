@@ -1,0 +1,187 @@
+schema: 1
+id: ts/string-concat
+universal: null
+name: { ko: "+ 로 글자 잇기", en: Joining text with + }
+token: "'a' + b"
+grammars: [typescript, tsx, javascript, vue]
+framework: null
+essential: false
+difficulty: 1
+prereq: [ts/string-literal, ts/arithmetic]
+confusions: [ts/template-literal, ts/arithmetic]
+
+dict:
+  one_liner:
+    ko: "같은 기호가 더하기이자 잇기다. 한쪽이 글자면 잇기 쪽으로 기운다."
+    en: "One sign is both adding and joining. With one side text, it leans to joining."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.2|code}}{{pick.2|josa:은,는}} 수를 더할 때 쓰는 기호와 <b>같은
+      글자</b>입니다. 그런데 한쪽이 글자면 다른 쪽까지 글자로 바꾸고 이어 붙여요 — 이 언어에서
+      더하기가 조용히 어긋나는 자리가 여기입니다.
+    en: >-
+      {{pick.2|code}} on line {{site.line}} is <b>the same glyph</b> used for adding numbers. But with
+      one side text, the other is turned into text and the two are joined — this is where addition
+      quietly goes astray in this language.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.1|code}}{{pick.1|josa:과,와}} {{pick.3|code}}{{pick.3|josa:을,를}} 만난다."
+      en: "Line {{site.line}} brings {{pick.1|code}} and {{pick.3|code}} together."
+    - ko: "한쪽이 글자라 다른 쪽도 글자로 바뀐다."
+      en: "One side being text, the other is turned into text."
+    - ko: "둘이 이어 붙어 글자 하나가 된다."
+      en: "The two are joined into one piece of text."
+
+rule:
+  ko: >-
+    <b>다른 셈 기호들은 반대로 기운다.</b> 빼기·곱하기는 글자를 수로 밀어 넣고, 안 되면
+    <code>NaN</code> 을 낸다.
+  en: >-
+    <b>The other arithmetic signs lean the other way.</b> Minus and times push text toward numbers,
+    and yield <code>NaN</code> when they cannot.
+result:
+  label:
+    ko: "{{site.line}}행이 내는 것"
+    en: "What line {{site.line}} yields"
+  value: "{{pick.1}} + {{pick.3}} → 글자"
+  note:
+    ko: "수가 아니라 글자"
+    en: "text, not a number"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} 하나뿐인데 하는 일이 둘입니다. 어느 쪽인지는 양옆의 값이
+    정해요.
+  en: >-
+    {{pick.2|code}} is one sign doing two jobs. Which one is decided by the values on either side.
+payoff:
+  ko: >-
+    같은 리포에 백틱 표기와 이 표기가 섞여 있으면 어느 쪽이 먼저 쓰였는지가 보입니다.
+    합계가 <code>'11'</code> 로 나오는 버그도 여기서 나와요.
+  en: >-
+    With backticks and this notation mixed in one repository you can see which came first. The bug
+    where a total comes out as <code>'11'</code> starts here too.
+bridge:
+  ko: >-
+    같은 일을 백틱으로 적으면 <b>어느 자리가 값인지</b>가 눈에 보입니다 — 그것이 그 표기가 생긴
+    이유예요.
+  en: >-
+    Writing the same thing with backticks makes <b>which slot is a value</b> visible — that is why
+    that notation exists.
+misconceptions:
+  - ko: "이 기호는 늘 더하기다 — 한쪽이 글자면 잇기입니다."
+    en: "This sign always adds — with one side text it joins."
+  - ko: "글자에 수를 곱하면 반복된다 — <code>NaN</code> 이 나옵니다."
+    en: "Multiplying text by a number repeats it — it yields <code>NaN</code>."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>두 값을 잇는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the sign joining the two</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: >-
+            {{pick.1|code}}{{pick.1|josa:은,는}} 이어지는 <b>왼쪽 값</b>입니다. 잇는 기호는 두 값
+            사이에 있어요.
+          en: >-
+            {{pick.1|code}} is the <b>left value</b>. The joining sign sits between the two.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 값과 기호"
+            en: "The sharpest spot — a value or the sign"
+          code:
+            - "'hi ' + name"
+            - "//  ^값  ^기호"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 이어지는 <b>오른쪽 값</b>입니다. 기호는 그 앞이에요.
+          en: >-
+            {{pick.3|code}} is the <b>right value</b>. The sign comes before it.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 오른쪽 값과 기호"
+            en: "The sharpest spot — the right value or the sign"
+          code:
+            - "'hi ' + name"
+            - "//      ^기호 ^값"
+
+meaning:
+  - q:
+      ko: "<code>'3' - 1</code> 과 <code>'3' + 1</code> 은 각각 무엇이 될까요?"
+      en: "What do <code>'3' - 1</code> and <code>'3' + 1</code> each give?"
+    hint:
+      ko: "두 기호가 서로 반대쪽으로 기웁니다."
+      en: "The two signs lean opposite ways."
+    options:
+      - t:
+          ko: "<code>2</code> 와 <code>'31'</code>"
+          en: "<code>2</code> and <code>'31'</code>"
+      - t:
+          ko: "둘 다 <code>2</code> 와 <code>4</code> — 글자가 수로 바뀐다"
+          en: "<code>2</code> and <code>4</code> — text becomes a number both times"
+        diag:
+          t:
+            ko: >-
+              빼기 쪽은 맞습니다. 더하기 기호만 글자 쪽으로 기울어서, 한쪽이 글자면 이어 붙여요.
+            en: >-
+              The minus is right. Only the plus leans toward text, joining when one side is text.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 어느 기호가 기우나"
+              en: "The sharpest spot — which sign leans"
+            code:
+              - "'3' - 1   // 2"
+              - "'3' + 1   // '31'"
+      - t:
+          ko: "둘 다 <code>'31'</code> 과 <code>'31'</code>"
+          en: "<code>'31'</code> and <code>'31'</code>"
+        diag:
+          t:
+            ko: >-
+              이어 붙이는 것은 더하기 기호뿐입니다. 다른 셈 기호는 글자를 수로 밀어 넣어요.
+            en: >-
+              Only the plus joins. The other arithmetic signs push text toward numbers.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 더하기와 나머지"
+              en: "The sharpest spot — the plus or the rest"
+            code:
+              - "'3' + 1   // '31'"
+              - "'3' * 2   // 6"
+      - t:
+          ko: "둘 다 그 자리에서 멈춘다"
+          en: "Both stop right there"
+        diag:
+          t:
+            ko: >-
+              이 언어는 안 멈춥니다. 멈추는 것은 파이썬 같은 언어의 규칙이에요 — 여기서는 조용히
+              한쪽을 바꿉니다.
+            en: >-
+              This language does not stop. Stopping is the rule in a language like Python; here one
+              side is quietly changed.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 멈추나 바꾸나"
+              en: "The sharpest spot — stopping or converting"
+            code:
+              - "'3' + 1   // '31'"
+              - "# 파이썬이라면 여기서 멈춘다"
+
+no_hole_reason: >-
+  기호를 빈칸으로 만들면 셈 개념이 이미 재고 있는 물음이 되고, 값을 빈칸으로 만들면 답이 하나로
+  안 좁혀진다. 여기서 재는 것은 「어느 쪽으로 기우나」라 뜻으로 묻는다.
+
+queries:
+  - { grammars: [typescript, tsx, javascript, vue], file: ./string-concat.scm }
+
+examples:
+  - code: "const msg = 'hi ' + name"
+    expect: { sites: 1, form: left-text, picks: { 1: "'hi '", 2: "+", 3: "name" } }
+  - code: "const path = base + '/rows'"
+    expect: { sites: 1, form: right-text, picks: { 1: "base", 2: "+", 3: "'/rows'" } }
+  - code: "const n = a + b"
+    expect: none

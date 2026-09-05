@@ -1,0 +1,167 @@
+schema: 1
+id: csharp/deferred-execution
+# `csharp.md` §6 이 `common/lazy-sequence` 를 신규로 제안했는데 아직 `common/` 에 없다.
+# 없는 id 를 걸면 린트가 잡으므로 `null` 로 두고 후보로만 보고한다 — 다른 언어 근거는
+# 파이썬 제너레이터 · Rust `Iterator` 어댑터 · JS 제너레이터 셋이다.
+universal: null
+name: { ko: 계산 계획을 들고 있기, en: Deferred execution }
+token: "IEnumerable"
+grammars: [c_sharp]
+framework: null
+essential: true
+difficulty: 4
+prereq: [cs/eager-vs-lazy, csharp/linq-where, csharp/foreach-loop]
+confusions: []
+dict:
+  one_liner:
+    ko: "값이 아니라 계산 방법을 들고 있다가, 훑을 때 비로소 돈다."
+    en: "It holds a recipe rather than values, and runs only when walked."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 「이미 만들어진 값들」이 아니라
+      <b>계산 계획</b>입니다. 그래서 앞에 붙은 <code>Where</code>·<code>Select</code>는
+      그 자리에서 <b>아무것도 안 돕니다</b> — <code>foreach</code>·<code>ToList()</code>·
+      <code>Count()</code>가 돌리고, <b>두 번 훑으면 두 번 돕니다</b>. 데이터베이스 질의라면
+      두 번 나가요. 여기서 나오는 두 가지 사고가 사실은 하나입니다 — 「왜 안 돌지」와
+      「왜 두 번 돌지」.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} is not "values already made" but a <b>plan</b>. So a
+      <code>Where</code> or <code>Select</code> in front <b>does nothing</b> there;
+      <code>foreach</code>, <code>ToList()</code> and <code>Count()</code> are what run it, and
+      <b>walking it twice runs it twice</b> — twice to the database if that is the source. The
+      two classic surprises are really one: "why did it not run" and "why did it run twice".
+  trace:
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 계획을 담는 타입이다."
+      en: "{{pick.1|code}} on line {{site.line}} is a type that holds a plan."
+    - ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 그 계획을 가리키는 이름이 된다."
+      en: "{{pick.3|code}} becomes the name pointing at that plan."
+    - ko: "누군가 훑기 전까지 {{pick.2|code}} 값은 하나도 안 만들어진다."
+      en: "Until something walks it, not one {{pick.2|code}} value is made."
+rule:
+  ko: "<b>계획이지 값이 아니다.</b> 훑을 때 돌고, 두 번 훑으면 두 번 돈다."
+  en: "<b>A plan, not values.</b> It runs on the walk, and twice if walked twice."
+ok:
+  ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 아직 아무것도 안 만든 계획입니다."
+  en: "{{pick.3|code}} is a plan that has made nothing yet."
+payoff:
+  ko: "이걸 알면 「왜 질의가 두 번 나가지」가 풀립니다 — 두 번 훑은 겁니다."
+  en: "This untangles “why did the query go out twice” — it was walked twice."
+bridge:
+  ko: >-
+    파이썬 제너레이터와 같은 기계인데 <b>답이 하나 갈립니다</b> — 파이썬 제너레이터는
+    한 번 훑으면 소진돼 두 번째가 비고, C# 쪽은 다시 처음부터 돕니다.
+  en: >-
+    Same machine as a Python generator with <b>one answer flipped</b>: a Python generator is
+    consumed and the second walk is empty, while this one starts over.
+misconceptions:
+  # 출처 — `csharp.md` §9 ⑧ · §4 ㉛.
+  - ko: "그 줄에서 이미 다 돌았다 — 계획만 만들어졌습니다."
+    en: "It already ran on that line — only a plan was made."
+  - ko: "두 번 훑어도 한 번만 돈다 — 두 번 돕니다. 질의면 두 번 나가요."
+    en: "Walking twice runs it once — it runs twice, and queries go out twice."
+  - ko: "값을 이미 들고 있으니 원본이 바뀌어도 그대로다 — 훑을 때 원본을 다시 봅니다."
+    en: "It already holds the values, so source changes do not show — it re-reads the source on the walk."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>아직 안 돈 계획임을 알리는 타입</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the type that says this is an unrun plan</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 나올 <b>값의 종류</b>입니다. 언제 도는지는 바깥 이름이 말해요."
+          en: "{{pick.2|code}} is the <b>kind of value</b> that will come out. When it runs is said by the outer name."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 내용이냐 그릇이냐", en: "The sharpest spot — the content or the container" }
+          code:
+            - "List<int>          // 이미 있다"
+            - "IEnumerable<int>   // 아직 없다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>이름</b>입니다. 이름은 언제 도는지를 안 바꿔요."
+          en: "{{pick.3|code}} is the <b>name</b>. A name does not change when it runs."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 타입이냐", en: "The sharpest spot — the name or the type" }
+          code:
+            - "IEnumerable<int> r = q;   // 계획"
+            - "List<int>        r = q;   // 컴파일 오류"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>아직 안 돈 계획</b>을 담습니다."
+      en: "Choose what goes in the blank. Line {{site.line}} holds a <b>plan that has not run</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "IEnumerable", mono: true }
+      - t: "List"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>이미 만들어진</b> 값들입니다. 담기려면 그 자리에서 다 계산돼야 해요."
+            en: "That holds values <b>already made</b>: everything has to be computed to fill it."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 계획이냐 값이냐", en: "The sharpest spot — a plan or values" }
+            code:
+              - "IEnumerable<int> q = xs.Where(p);   // 안 돈다"
+              - "List<int> l = xs.Where(p).ToList(); // 돈다"
+      - t: "IQueryable"
+        mono: true
+        diag:
+          t:
+            ko: "이것도 계획이지만 <b>데이터베이스로 번역될</b> 계획입니다. 메모리 위의 모음에는 안 맞아요."
+            en: "That is also a plan, but one <b>translated to a database</b>. It does not fit an in-memory source."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 어디서 도나", en: "The sharpest spot — where it runs" }
+            code:
+              - "IEnumerable<int>   // 이 프로세스에서"
+              - "IQueryable<int>    // 데이터베이스에서"
+      - t: "Task"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>아직 안 온 값</b>이라 기다리는 쪽입니다. 훑는 쪽이 아니에요."
+            en: "That is a <b>value not yet arrived</b>, something to await rather than walk."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 훑나 기다리나", en: "The sharpest spot — walking or awaiting" }
+            code:
+              - "foreach (var x in q)   // 훑는다"
+              - "await t;               // 기다린다"
+why_gate:
+  q:
+    ko: "이 언어는 왜 계산을 <b>미루는</b> 타입을 기본으로 냈을까요?"
+    en: "Why is a type that <b>defers</b> the work the default result here?"
+  choices:
+    - t:
+        ko: "여러 단계를 이어 붙여도 한 번만 훑으면 되고, 앞부분만 쓰면 나머지를 안 만들기 때문"
+        en: "So chained steps still take one walk, and using only the front skips building the rest"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 대신 사람이 조심해야 할 것이 무엇인지도 적어 보세요."
+        en: "That is the direction. Add what a person then has to watch for."
+    - t:
+        ko: "메모리를 아끼려고"
+        en: "To save memory"
+      ok: false
+      fb:
+        ko: "결과는 맞지만 절반입니다. 아끼는 것은 메모리만이 아니라 <b>안 하는 계산</b>이에요."
+        en: "True but half: what is saved is not only memory but <b>work not done</b>."
+    - t:
+        ko: "질의를 여러 번 보내려고"
+        en: "To send the query several times"
+      ok: false
+      fb:
+        ko: "그건 부작용이고 대개 막고 싶은 쪽입니다. 그래서 <code>ToList()</code>가 있어요."
+        en: "That is a side effect and usually the thing to avoid — hence <code>ToList()</code>."
+queries:
+  - { grammars: [c_sharp], file: ./deferred-execution.scm }
+examples:
+  - code: "class A { IEnumerable<int> F() { return xs; } }"
+    expect: { sites: 1, form: returns, hole: "IEnumerable", picks: { 1: "IEnumerable", 2: "int", 3: "F" } }
+  - code: "class A { void F() { IQueryable<Item> q = db.Items; } }"
+    expect: { sites: 1, form: local, hole: "IQueryable", picks: { 1: "IQueryable", 2: "Item", 3: "q" } }
+  - code: "class A { List<int> F() { return xs; } }"
+    expect: none

@@ -1,0 +1,207 @@
+schema: 1
+id: sql/constraint-check
+universal: null
+name: { ko: "넣기 전에 막을 조건", en: "Check constraint" }
+token: "CHECK"
+grammars: [sql, mybatis_sql]
+framework: null
+essential: true
+difficulty: 2
+prereq: [sql/comparison, sql/insert-row, cs/invariant]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "표에 새겨 두는 조건. 어긋나는 값은 아예 못 들어온다."
+    en: "A condition carved into the table. A value that breaks it never gets in."
+  why:
+    ko: >-
+      {{site.line}}행은 {{pick.2|code}} 열이 <b>언제나 지켜야 할 조건</b>을 표에 새깁니다. 거르는 절이
+      「이미 있는 행 중에서 고르기」라면 이것은 「<b>들어오는 것을 막기</b>」예요 — 어긋나는 값은 저장되지
+      않으므로, 읽는 문장은 그 조건이 참이라고 <b>믿고</b> 써도 됩니다. 그것이 이 한 줄의 값입니다.
+      대가는 sqlite 에서 큽니다: 나중에 조건만 바꿀 수가 없어서 <b>표를 새로 만들어 옮겨야</b> 합니다.
+      모름은 이 조건을 통과합니다 — 참이 아니라 모름이라 막지 않아요.
+    en: >-
+      Line {{site.line}} carves into the table a condition {{pick.2|code}} <b>must always satisfy</b>.
+      If a filtering clause picks among rows already there, this <b>keeps rows out</b> — a breaking
+      value is never stored, so reading statements may <b>trust</b> the condition. That trust is what
+      the line buys. In sqlite the price is high: the condition cannot be altered later, so <b>the
+      table has to be rebuilt and copied</b>. And an unknown passes: it is not true, but it is not
+      false either, so nothing refuses it.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}} 열에 {{pick.3|code}} 조건을 새긴다."
+      en: "Line {{site.line}} carves {{pick.3|code}} onto {{pick.2|code}}."
+    - ko: "행을 넣거나 고칠 때마다 그 조건을 잰다."
+      en: "Every write weighs that condition."
+    - ko: "거짓이면 거절되고, 모름이면 통과한다."
+      en: "False is refused; unknown passes."
+
+rule:
+  ko: "<b>거짓만 막는다.</b> 모름은 통과하므로 값이 비어 있을 수 있다."
+  en: "<b>Only false is refused.</b> Unknown passes, so the slot can still be empty."
+result:
+  label: { ko: "새기는 조건", en: "the condition carved" }
+  value: "{{pick.3}}"
+  note: { ko: "모름은 막지 않는다", en: "unknown is not refused" }
+ok:
+  ko: >-
+    {{pick.3|code}}{{pick.3|josa:을,를}} 어기는 값은 저장되지 않고, 읽는 쪽은 그 조건을 믿고 씁니다.
+  en: >-
+    A value breaking {{pick.3|code}} is never stored, and readers may rely on the condition.
+payoff:
+  ko: >-
+    이걸 알면 읽는 코드에서 「혹시 몰라」 다시 확인하는 줄을 어디까지 지울 수 있는지 압니다.
+  en: >-
+    Knowing this tells you how many “just in case” checks the reading code can lose.
+bridge:
+  ko: >-
+    다른 언어의 불변식 검사와 같습니다. 다른 것은 <b>기계가 저장 직전에 대신 잰다</b>는 것이에요.
+  en: >-
+    It is an invariant check as elsewhere. What differs is that <b>the machine weighs it at write
+    time</b>.
+misconceptions:
+  - ko: "이 조건이 있으면 값이 비지 않는다 — 모름은 통과합니다."
+    en: "With this condition the slot is never empty — unknown passes."
+  - ko: "나중에 조건만 고칠 수 있다 — sqlite 는 표를 새로 만들어 옮겨야 합니다."
+    en: "The condition can be altered later — in sqlite the table must be rebuilt and copied."
+  - ko: "이미 든 행도 다시 검사된다 — 새로 들어오고 고쳐지는 행만 검사됩니다."
+    en: "Existing rows are rechecked — only incoming and updated rows are."
+
+meaning:
+  - q:
+      ko: "{{pick.2|code}} 열에 값을 안 주고 행을 넣으면 이 조건이 막을까요?"
+      en: "A row is written with no value for {{pick.2|code}} — does this condition refuse it?"
+    hint:
+      ko: "조건이 내는 답이 셋이라는 데서 출발하세요."
+      en: "Start from the fact that the condition has three possible answers."
+    options:
+      - t:
+          ko: "안 막는다 — 답이 거짓이 아니라 모름이라서"
+          en: "It does not — the answer is unknown, not false"
+      - t:
+          ko: "막는다 — 조건을 만족하지 못했으니까"
+          en: "It does — the condition was not satisfied"
+        diag:
+          t:
+            ko: >-
+              「만족 못 함」에는 거짓과 모름이 있습니다. 이 조건은 <b>거짓만</b> 막아요.
+            en: >-
+              “Not satisfied” splits into false and unknown. This condition refuses <b>false only</b>.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 거짓이냐 모름이냐", en: "The sharpest spot — false or unknown" }
+            code:
+              - "CHECK (qty >= 0)"
+              - "qty INTEGER NOT NULL CHECK (qty >= 0)"
+      - t:
+          ko: "0 이 대신 들어간다"
+          en: "A zero goes in instead"
+        diag:
+          t:
+            ko: >-
+              값을 채우는 것은 <b>기본값</b>이 하는 일이고, 조건은 채우지 않습니다.
+            en: >-
+              Filling a value is what a <b>default</b> does; a condition fills nothing.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 막기냐 채우기냐", en: "The sharpest spot — refusing or filling" }
+            code:
+              - "qty INTEGER DEFAULT 0 CHECK (qty >= 0)"
+      - t:
+          ko: "행은 들어가고 그 조건이 꺼진다"
+          en: "The row goes in and the condition switches off"
+        diag:
+          t:
+            ko: >-
+              조건은 <b>꺼지지 않습니다</b>. 다음 행에도 그대로 걸려요.
+            en: >-
+              The condition does not <b>switch off</b>. The next row meets it just the same.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 한 번이냐 언제나냐", en: "The sharpest spot — once or always" }
+            code:
+              - "-- 조건은 행마다 다시 걸린다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 {{pick.2|code}} 열에 <b>언제나 참이어야 할 조건</b>을 새깁니다."
+      en: "Choose what goes in the blank. Line {{site.line}} carves an <b>always-true condition</b> onto {{pick.2|code}}."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "CHECK", mono: true }
+      - t: "WHERE"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>WHERE</code> 는 <b>이미 있는 행</b> 중에서 고릅니다. 들어오는 값을 막지 않아요.
+            en: >-
+              <code>WHERE</code> picks among <b>rows already there</b>. It keeps nothing out.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 고르기냐 막기냐", en: "The sharpest spot — picking or refusing" }
+            code:
+              - "WHERE qty >= 0        -- 읽을 때"
+              - "CHECK (qty >= 0)      -- 넣을 때"
+      - t: "ASSERT"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>ASSERT</code> 는 이 언어에서 열에 붙는 낱말이 아닙니다 — 표에 새기는 낱말은 따로 있어요.
+            en: >-
+              <code>ASSERT</code> attaches to no column here — another word carves into a table.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 이 언어의 낱말이냐 아니냐", en: "The sharpest spot — a word of this language or not" }
+            code:
+              - "-- 낱말은 표준이 정한 것뿐이다"
+      - t: "HAVING"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>HAVING</code> 은 <b>묶은 뒤</b> 묶음을 거르는 조회의 낱말입니다. 표를 만드는 자리가 아니에요.
+            en: >-
+              <code>HAVING</code> filters bundles <b>after bundling</b> in a query; it belongs to no table
+              definition.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 조회냐 표냐", en: "The sharpest spot — a query or a table" }
+            code:
+              - "HAVING COUNT(*) > 1"
+              - "CHECK (qty >= 0)"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 이 조건을 <b>표에</b> 새겼을까요? 넣기 전에 코드가 재도 되는데요."
+    en: "Why is this condition carved <b>into the table</b> rather than weighed by code before writing?"
+  choices:
+    - t:
+        ko: "표를 고치는 길이 하나가 아니라서 — 새겨 두면 어느 길로 들어와도 지켜진다"
+        en: "Because more than one path writes — carved in, every path is held to it"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그러면 이 조건이 모름을 왜 안 막는지도 한 줄로 적어 보세요."
+        en: "That is the direction. In one line, say why it does not refuse an unknown."
+    - t:
+        ko: "코드보다 정확해서"
+        en: "Because it is more accurate than code"
+      ok: false
+      fb:
+        ko: "정확함이 아니라 <b>빠져나갈 길</b>의 문제입니다."
+        en: "It is not accuracy — it is about <b>ways around it</b>."
+    - t:
+        ko: "코드에 조건을 적을 자리가 없어서"
+        en: "Because code has nowhere to put the condition"
+      ok: false
+      fb:
+        ko: "적을 자리는 많습니다 — 많다는 것이 문제예요."
+        en: "There are many such places — that there are many is the problem."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./constraint-check.scm }
+
+examples:
+  - code: "CREATE TABLE cart (qty INTEGER CHECK (qty >= 0))"
+    expect: { sites: 1, form: check, hole: "CHECK", picks: { 1: "CHECK", 2: "qty", 3: "qty >= 0" } }
+  - code: "CREATE TABLE cart (kind TEXT CHECK (kind IN ('a', 'b')))"
+    expect: { sites: 1, form: check, hole: "CHECK", picks: { 1: "CHECK", 2: "kind", 3: "kind IN ('a', 'b')" } }
+  - code: "CREATE TABLE cart (qty INTEGER)"
+    expect: none

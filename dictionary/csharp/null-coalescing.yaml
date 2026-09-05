@@ -1,0 +1,161 @@
+schema: 1
+id: csharp/null-coalescing
+universal: common/nullish-default
+name: { ko: 없을 때 채우기, en: Null coalescing }
+token: "??"
+grammars: [c_sharp]
+framework: null
+essential: true
+difficulty: 2
+prereq: [csharp/nullable-reference]
+confusions: []
+dict:
+  one_liner:
+    ko: "왼쪽이 없음일 때만 오른쪽을 쓰고, 빈 글자와 0 은 그대로 통과한다."
+    en: "The right side is used only on absence; empty text and zero pass through."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} <b>없음 하나만</b> 봅니다.
+      자바스크립트의 <code>||</code>처럼 「거짓 같은 값」을 다 걸러 내지 않아요 — 빈 글자 묶음도
+      <code>0</code>도 왼쪽 값 그대로 갑니다. 그리고 왼쪽이 없음이 아니면 오른쪽은
+      <b>계산조차 안 합니다</b>. 그래서 오른쪽에 무거운 부름을 두어도 대개는 안 돌아요.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} looks at <b>absence only</b>. Unlike JavaScript's
+      <code>||</code> it does not filter every falsy value: empty text and <code>0</code> go
+      through as the left value. And when the left side is present, the right side is
+      <b>not even evaluated</b>, so a heavy call there usually never runs.
+  trace:
+    - ko: "{{site.line}}행에서 {{pick.2|code}}{{pick.2|josa:을,를}} 먼저 본다."
+      en: "On line {{site.line}}, {{pick.2|code}} is looked at first."
+    - ko: "없음이 아니면 그 값이 그대로 결과가 된다."
+      en: "If it is not absent, that value is the result."
+    - ko: "없음일 때만 {{pick.3|code}}{{pick.3|josa:이,가}} 계산된다."
+      en: "Only when it is absent does {{pick.3|code}} get evaluated."
+rule:
+  ko: "<b>없음만 걸린다.</b> 왼쪽이 있으면 오른쪽은 계산조차 안 한다."
+  en: "<b>Only absence triggers it.</b> With the left side present the right is never evaluated."
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 없음일 때만 {{pick.3|code}} 쪽이 쓰입니다."
+  en: "{{pick.3|code}} is used only when {{pick.2|code}} is absent."
+payoff:
+  ko: "이걸 알면 「빈 문자열이 왜 기본값으로 안 바뀌지」가 풀립니다 — 없음이 아닙니다."
+  en: "This untangles “why did empty text not fall back” — it is not absence."
+bridge:
+  ko: >-
+    자바스크립트의 <code>??</code>와 같은 기계입니다. <code>||</code>와는 다릅니다 —
+    그쪽은 <code>0</code>과 빈 글자도 걸러 냅니다.
+  en: >-
+    Same machine as JavaScript's <code>??</code>, and unlike <code>||</code>, which also
+    filters <code>0</code> and empty text.
+misconceptions:
+  # 출처 — `csharp.md` §3 ㉑.
+  - ko: "빈 문자열도 걸린다 — 없음만 걸립니다. 빈 글자는 그대로 통과해요."
+    en: "Empty text triggers it — only absence does; empty text passes through."
+  - ko: "<code>0</code>도 걸린다 — 안 걸립니다. 값이 있는 것이니까요."
+    en: "<code>0</code> triggers it — it does not; zero is a present value."
+  - ko: "오른쪽은 언제나 계산된다 — 왼쪽이 있으면 안 계산합니다."
+    en: "The right side is always evaluated — not when the left side is present."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>없을 때만 쓰이는 쪽</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the side used only on absence</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.3
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>고르는 기호</b>입니다. 없을 때 쓰이는 값은 그 오른쪽이에요."
+          en: "{{pick.1|code}} is the <b>choosing symbol</b>. The value used on absence is to its right."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 고르기냐 값이냐", en: "The sharpest spot — choosing or the value" }
+          code:
+            - "note ?? \"none\"    // none 이 기본값"
+            - "??                // 고르는 자리"
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>먼저 보는 쪽</b>입니다. 있으면 이쪽이 그대로 결과가 돼요."
+          en: "{{pick.2|code}} is the side <b>looked at first</b>. When present it is the result."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 먼저냐 기본값이냐", en: "The sharpest spot — first or fallback" }
+          code:
+            - "note ?? \"none\";    // note 가 있으면 note"
+            - "note ?? \"none\";    // 없으면 none"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 왼쪽이 <b>없을 때만</b> 오른쪽을 씁니다."
+      en: "Choose what goes in the blank. Line {{site.line}} uses the right side <b>only on absence</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "??", mono: true }
+      - t: "||"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>참·거짓</b>끼리만 쓰는 기호라 다른 타입에는 컴파일이 막습니다."
+            en: "That joins <b>truth values</b> only; on other types it stops at compile time."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 없음이냐 참·거짓이냐", en: "The sharpest spot — absence or truth" }
+            code:
+              - "note ?? \"none\";    // string"
+              - "ok || ready;       // bool 만"
+      - t: "&&"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>둘 다 참인가</b>를 묻는 기호입니다. 기본값을 고르는 자리가 아니에요."
+            en: "That asks whether <b>both</b> hold. It is not the spot that picks a fallback."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 고르기냐 묻기냐", en: "The sharpest spot — choosing or asking" }
+            code:
+              - "note ?? \"none\";    // 값이 나온다"
+              - "ok && ready;       // 참·거짓이 나온다"
+      - t: "?."
+        mono: true
+        diag:
+          t:
+            ko: "이건 없을 때 <b>건너뛰는</b> 기호라 기본값을 못 채웁니다. 결과가 그대로 없음이에요."
+            en: "That <b>skips</b> on absence and fills in nothing. The result is still absent."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 채우나 건너뛰나", en: "The sharpest spot — fill or skip" }
+            code:
+              - "note ?? \"none\";     // 값이 채워진다"
+              - "note?.Length;       // 없으면 없음"
+why_gate:
+  q:
+    ko: "이 언어는 왜 <b>없음만</b> 걸리는 기호를 따로 두었을까요?"
+    en: "Why is there a symbol that triggers on <b>absence only</b>?"
+  choices:
+    - t:
+        ko: "<code>0</code>과 빈 글자는 사람이 일부러 넣은 값이라, 없음과 같이 취급하면 값을 잃기 때문"
+        en: "Because <code>0</code> and empty text are deliberate values, and lumping them with absence loses them"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 둘을 같이 걸러 냈을 때 무엇이 사라지는지도 적어 보세요."
+        en: "That is the direction. Add what disappears when the two are filtered together."
+    - t:
+        ko: "짧게 적으려고"
+        en: "To write less"
+      ok: false
+      fb:
+        ko: "짧아지는 것은 결과입니다. 갈리는 것은 <b>무엇을 없음으로 보나</b>예요."
+        en: "Brevity is a side effect. What splits is <b>what counts as absence</b>."
+    - t:
+        ko: "참·거짓 기호가 모자라서"
+        en: "Because there were not enough truth operators"
+      ok: false
+      fb:
+        ko: "이건 참·거짓 기호가 아닙니다. 값을 고르는 기호예요."
+        en: "This is not a truth operator; it picks a value."
+queries:
+  - { grammars: [c_sharp], file: ./null-coalescing.scm }
+examples:
+  - code: "class A { void F(string? note) { var name = note ?? \"none\"; } }"
+    expect: { sites: 1, form: coalesce, hole: "??", picks: { 1: "??", 2: "note", 3: "\"none\"" } }
+  - code: "class A { void F(string? note) { note ??= \"none\"; } }"
+    expect: { sites: 1, form: coalesce-assign, picks: { 1: "??=", 2: "note", 3: "\"none\"" } }
+  - code: "class A { void F(string note) { var name = note; } }"
+    expect: none

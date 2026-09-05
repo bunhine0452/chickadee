@@ -253,9 +253,26 @@ export async function tabTo(page: Page, selector: string, limit = 40): Promise<v
   throw new Error(`${key} 로 ${selector} 에 닿지 못했다 (${limit}번 눌렀다)`);
 }
 
-/** 리포를 0개로 만든다 — 첫 실행 화면(빈 상태)에서 시작해야 하는 시나리오가 쓴다. */
 /** 요약까지 걸어 볼 수 있는 판 수의 상한. 넘으면 큐가 안 줄고 있다는 뜻이다. */
 const MAX_PLATES = 12;
+
+/**
+ * 지금 걸린 판이 T2 지도 판이면 **마우스 없이** 채점하고 참을 돌려준다 (D140 — 첫날부터 한 장
+ * 굽는다). 보기 번호가 없으니 파일 상자 하나를 고르고 채점한다. 맞고 틀리고는 헬퍼의 관심이
+ * 아니다 — 요약까지 가는 것이 목적이다. T2 가 아니면 아무것도 안 하고 거짓이다.
+ */
+export async function passT2Plate(page: Page): Promise<boolean> {
+  if (await page.locator('.map .nd').count() === 0) return false;
+  // 판이 놓이는 0.3초 동안은 안이 안 보이고(`.ps` 진입 전환), 안 보이는 것은 Tab 에 안 걸린다.
+  await page.locator('.map .nd').first().waitFor({ state: 'visible' });
+  await page.waitForTimeout(400);
+  await tabTo(page, '.map .nd');
+  await page.keyboard.press('Enter');
+  await tabTo(page, '.acts .press-btn');
+  await page.keyboard.press('Enter');
+  await page.locator('.map .nd.missed, .map .nd.ok, .map .nd.wrong').first().waitFor();
+  return true;
+}
 
 /**
  * 지금 판을 마친 뒤, **남은 판을 다 답하고** 요약까지 간다 (05 §3).
@@ -267,19 +284,22 @@ export async function finishSession(
   page: Page,
   db: import('better-sqlite3').Database,
 ): Promise<void> {
-  const done = page.locator('[aria-label="인쇄 완료"]');
+  const done = page.locator('[aria-label="오늘 학습 완료"]');
   for (let left = MAX_PLATES; left > 0; left -= 1) {
+    // Space 뒤에 **판이 실제로 바뀔 때까지** 기다린다 — 요약이 서거나 교정지의 이름표가 달라질 때까지.
+    // 앞서는 `.fb.on` 이 사라지는 것만 봤는데, T2 판에는 그 칸이 없어 옛 판 위에서 다음 걸음을 뗐다.
+    const prev = await page.locator('article.ps').first().getAttribute('aria-label');
     await page.keyboard.press('Space');
-    await page.locator('.fb.on').waitFor({ state: 'detached' });
+    await page.waitForFunction(
+      (was) => document.querySelector('[aria-label="오늘 학습 완료"]') !== null
+        || document.querySelector('article.ps')?.getAttribute('aria-label') !== was,
+      prev,
+    );
     if (await done.count() > 0) return;
+    if (await passT2Plate(page)) continue;
     await page.keyboard.press(`Digit${answerKeyOf(db)}`);
     await page.keyboard.press('Enter');
     await page.locator('.fb.on').waitFor();
-    const veil = page.locator('.lifer-veil');
-    if (await veil.count() > 0) {
-      await page.keyboard.press('KeyG');
-      await veil.waitFor({ state: 'detached' });
-    }
   }
   throw new Error(`판 ${MAX_PLATES}장을 답했는데도 요약이 안 떴다 — 큐가 안 줄고 있다`);
 }

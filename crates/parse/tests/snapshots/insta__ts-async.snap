@@ -8,12 +8,14 @@ ts/async-await · quality=ok · lines=13
 m1 p2 @site            form=async-fn        function_declaration   1:0-4:1 inError=false
 m1 p2 @pick.1          form=async-fn        async                  1:0-1:5 inError=false
 m1 p2 @pick.2          form=async-fn        identifier             1:15-1:25 inError=false
+m1 p2 @pick.3          form=async-fn        formal_parameters      1:25-1:38 inError=false
 m2 p0 @site            form=await           await_expression       2:14-2:46 inError=false
 m2 p0 @pick.1          form=await           await                  2:14-2:19 inError=false
 m2 p0 @pick.2          form=await           call_expression        2:20-2:46 inError=false
 m3 p2 @site            form=async-fn        function_declaration   6:7-12:1 inError=false
 m3 p2 @pick.1          form=async-fn        async                  6:7-6:12 inError=false
 m3 p2 @pick.2          form=async-fn        identifier             6:22-6:34 inError=false
+m3 p2 @pick.3          form=async-fn        formal_parameters      6:34-6:50 inError=false
 m4 p0 @site            form=await           await_expression       9:14-9:35 inError=false
 m4 p0 @pick.1          form=await           await                  9:14-9:19 inError=false
 m4 p0 @pick.2          form=await           call_expression        9:20-9:35 inError=false

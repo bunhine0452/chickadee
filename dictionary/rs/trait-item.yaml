@@ -1,0 +1,179 @@
+schema: 1
+id: rs/trait-item
+# 2부 끝 (`rs.md` §4). 보편형은 없다 — `rs.md` §6 이 `common/interface-contract` 를 신규 후보로 냈고
+# (TS `interface` · Go `interface` · Swift `protocol`) 아직 없다. 타입이 아니라 **행동**으로 경계를
+# 긋기 시작하는 자리. 표본 리포 넷 합쳐 `trait` 선언 9개 — **합성이 정본**이다(rust-axis §2.1).
+universal: null
+name: { ko: 할 수 있는 일로 묶기, en: Grouping by what a type can do }
+token: "trait"
+grammars: [rust]
+framework: null
+essential: true
+difficulty: 4
+prereq: [rs/impl-method]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "타입이 아니라 할 수 있는 일의 목록으로 경계를 긋는다. 어떤 타입이든 그 목록을 채우면 그 자리에 설 수 있다."
+    en: "A boundary drawn by abilities, not type; any type filling the list fits there."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} {{pick.2|code}} 라는 <b>약속</b>을 세웁니다 — {{pick.3|code}} 안의
+      서명들을 채우는 타입은 누구든 「{{pick.2|code}}{{pick.2|josa:을,를}} 할 줄 안다」고 쳐요. 상속이 없는 이 언어에서
+      「공통점」을 적는 유일한 길이고, `Display`·`Clone`·`Iterator` 가 전부 이것입니다. 두 가지 쓰임이
+      있어요: 제네릭 경계(`T: Shape`)로 쓰면 컴파일 때 타입마다 코드가 복제되고, `dyn Shape` 로 쓰면
+      실행 시 표를 봅니다(`cs/dynamic-dispatch`). 표본 리포에서는 직접 세운 것이 아홉 개뿐이라 — 쓰는
+      쪽보다 <b>구현하는 쪽</b>(`impl … for`)이 훨씬 많고, 그것이 다음 판이에요.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} sets up a <b>promise</b> named {{pick.2|code}} — any type that
+      fills the signatures in {{pick.3|code}} counts as “knowing how to {{pick.2|code}}.” In a language
+      without inheritance this is the only way to write down what types share, and `Display`, `Clone`
+      and `Iterator` are all of this kind. It is used two ways: as a generic bound (`T: Shape`) the code is
+      duplicated per type at compile time; as `dyn Shape` a table is consulted at run time
+      (`cs/dynamic-dispatch`). The sample repos define only nine of their own — <b>implementing</b> one
+      (`impl … for`) is far more common than declaring one, and that is the next plate.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}}{{pick.2|josa:을,를}} 세운다 — 채워야 할 서명이 {{pick.3|code}} 에 있다."
+      en: "Line {{site.line}} sets up {{pick.2|code}} — the signatures to fill are in {{pick.3|code}}."
+    - ko: "어떤 타입이 impl 로 그 서명을 다 채우면 그 타입은 {{pick.2|code}} 다."
+      en: "When a type fills every signature through impl, that type is a {{pick.2|code}}."
+    - ko: "받는 쪽은 타입 이름 대신 {{pick.2|code}}{{pick.2|josa:을,를}} 적어 어느 타입이든 받는다."
+      en: "A receiver writes {{pick.2|code}} instead of a type name and accepts any of them."
+
+rule:
+  ko: "<b>트레이트는 행동의 약속이다.</b> 채우면 그 자리에 설 수 있고, 경계로 쓰면 컴파일 시, dyn 으로 쓰면 실행 시에 갈린다."
+  en: "<b>A trait is a promise of behaviour.</b> Fill it to stand in the slot; as a bound it resolves at compile time, as dyn at run time."
+result:
+  label:
+    ko: "{{site.line}}행의 약속"
+    en: "the promise on line {{site.line}}"
+  value: "{{pick.1}} {{pick.2}}"
+  note:
+    ko: "채우는 타입은 누구든"
+    en: "any type that fills it"
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 이제 타입이 아니라 <b>할 수 있는 일</b>의 이름입니다. 채우는 타입은 몇이든 됩니다."
+  en: "{{pick.2|code}} is now the name of <b>an ability</b>, not a type. Any number of types may fill it."
+payoff:
+  ko: "이걸 알면 「상속이 없는데 공통 동작을 어떻게 적나」가 풀립니다 — 이것이 그 자리예요."
+  en: "This untangles “without inheritance, how is shared behaviour written” — this is that place."
+bridge:
+  ko: "TS 의 `interface` 와 자바의 인터페이스가 가장 가깝습니다. 다른 점은 <b>남의 타입에도</b> 나중에 붙일 수 있다는 것이에요."
+  en: "TS's `interface` and Java's interface are the closest. The difference: it can be attached <b>to someone else's type</b>, later."
+misconceptions:
+  - ko: "트레이트는 클래스의 부모다 — 필드가 없고 상속도 없습니다. 행동의 약속일 뿐이에요."
+    en: "A trait is a parent class — it has no fields and no inheritance. It is a promise of behaviour."
+  - ko: "한 타입에 트레이트는 하나다 — 몇 개든 붙습니다. `Debug`·`Clone`·`PartialEq` 가 한 구조체에 흔히 같이 붙어요."
+    en: "One trait per type — any number attach. `Debug`, `Clone` and `PartialEq` commonly sit on one struct."
+  - ko: "`dyn Trait` 와 `T: Trait` 는 같다 — 하나는 실행 시 표, 하나는 컴파일 시 복제입니다. 크기와 속도가 달라요."
+    en: "`dyn Trait` and `T: Trait` are the same — one is a run-time table, the other compile-time duplication. Size and speed differ."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>행동의 약속을 세우는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that sets up a promise of behaviour</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 약속의 <b>이름</b>입니다. 약속을 세우는 낱말은 그 앞이에요."
+          en: "{{pick.2|code}} is the promise's <b>name</b>. The word that sets it up comes before."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 낱말이냐 이름이냐", en: "The sharpest spot — the word or the name" }
+          code:
+            - "trait Shape { … }"
+            - "// ^낱말 ^이름"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 채워야 할 <b>서명 목록</b>입니다. 목록이 약속을 세우지는 않아요."
+          en: "{{pick.3|code}} is the <b>list of signatures</b> to fill. The list itself does not set up the promise."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 낱말이냐 목록이냐", en: "The sharpest spot — the word or the list" }
+          code:
+            - "trait Shape { fn area(&self) -> f64; }"
+            - "//            ^목록"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>할 수 있는 일의 약속</b>을 세웁니다."
+      en: "Choose what goes in the blank. Line {{site.line}} sets up <b>a promise of abilities</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "trait", mono: true }
+      - t: "impl"
+        mono: true
+        diag:
+          t:
+            ko: "이건 약속을 <b>채우는</b> 쪽입니다. 세우는 쪽이 아니에요."
+            en: "That <b>fills</b> a promise. It does not set one up."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 세우기냐 채우기냐", en: "The sharpest spot — declaring or filling" }
+            code:
+              - "trait Shape { fn area(&self) -> f64; }      // 세운다"
+              - "impl Shape for Circle { fn area(&self) -> f64 { … } }   // 채운다"
+      - t: "interface"
+        mono: true
+        diag:
+          t:
+            ko: "Rust 에 이 낱말은 <b>없습니다</b>. 같은 자리를 다섯 글자 낱말이 맡아요."
+            en: "Rust <b>has no</b> such word. A five-letter word holds that place."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 없는 낱말", en: "The sharpest spot — a word that is not there" }
+            code:
+              - "interface Shape { }   // 다른 언어"
+              - "trait Shape { }"
+      - t: "struct"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>필드</b>를 세우는 낱말입니다. 안에 서명을 못 적어요."
+            en: "That sets up <b>fields</b>. Signatures cannot go inside it."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 모양이냐 행동이냐", en: "The sharpest spot — shape or behaviour" }
+            code:
+              - "struct Circle { r: f64 }"
+              - "trait Shape { fn area(&self) -> f64; }"
+
+why_gate:
+  q:
+    ko: "Rust 는 왜 상속 대신 <b>이 약속</b>을 두었을까요?"
+    en: "Why does Rust have <b>this promise</b> instead of inheritance?"
+  choices:
+    - t:
+        ko: "공통점을 「무엇이다」가 아니라 「무엇을 할 수 있다」로 적으면 남의 타입에도 나중에 붙일 수 있고 여럿을 섞을 수 있어서"
+        en: "Because writing what types share as “can do” rather than “is a” lets it attach to foreign types later and lets several combine"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 약속을 채우는 타입이 이 리포에 몇 개인지 세어 보세요."
+        en: "That is the direction. Count how many types in this repo fill this promise."
+    - t:
+        ko: "상속이 느려서"
+        en: "Because inheritance is slow"
+      ok: false
+      fb:
+        ko: "속도 문제가 아닙니다. 붙이는 방향과 섞임의 문제예요."
+        en: "Not speed. Direction of attachment and combination."
+    - t:
+        ko: "상속을 구현하기 어려워서"
+        en: "Because inheritance is hard to implement"
+      ok: false
+      fb:
+        ko: "어렵지 않습니다. 안 넣기로 정한 거예요."
+        en: "It is not hard. It was left out on purpose."
+
+queries:
+  - { grammars: [rust], file: ./trait-item.scm }
+
+examples:
+  - code: "trait Shape { fn area(&self) -> f64; }          // 서명만 — 채우는 것은 impl"
+    expect: { sites: 2, form: trait, hole: "trait", picks: { 1: "trait", 2: "Shape", 3: "{ fn area(&self) -> f64; }" } }
+  - code: "fn draw(s: &dyn Shape) { }                     // 실행 시에 갈리는 자리"
+    expect: { sites: 1, form: dyn, picks: { 1: "dyn", 2: "Shape" } }
+  - code: "struct Shape;                                   // 타입 — rs/struct-item"
+    expect: none

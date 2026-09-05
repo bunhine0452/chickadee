@@ -1,0 +1,182 @@
+schema: 1
+id: cpp/constructor
+# 2부 §3 #16. `common/constructor` 는 **아직 없다** — 파이썬 `__init__` · TS `constructor` ·
+# Swift `init` 넷에서 성립하는 후보로 보고했고, 서면 그때 건다.
+universal: null
+name: { ko: 만들어질 때 하는 일, en: Constructor }
+token: null
+grammars: [cpp]
+framework: null
+essential: true
+difficulty: 3
+prereq: [cpp/class-definition]
+confusions: []
+dict:
+  one_liner:
+    ko: "타입 이름과 같은 이름을 쓰고 돌려줄 것을 안 적는 함수다. 만들 때 한 번 돈다."
+    en: "A function named after the type, with nothing written as a result. It runs once."
+  why:
+    ko: >-
+      {{site.line}}행의 함수는 다른 함수와 두 가지가 다릅니다 — 이름이 <b>타입 이름과 같고</b>,
+      돌려줄 것을 적는 자리가 <b>아예 없습니다</b>. 그 둘이 「이건 만들 때 도는 함수다」라는
+      표시예요. 여기서 C++ 만의 규칙이 하나 붙습니다: 이름 뒤에 쌍점을 찍고 적는 목록은
+      <b>대입이 아니라 만들기</b>입니다. 몸통 안에서 넣는 것과 결과가 다를 수 있어요 —
+      몸통에 들어가기 전에 이미 멤버들이 한 번 만들어지기 때문입니다.
+      그리고 그 목록이 도는 <b>순서는 적은 순서가 아니라 멤버를 선언한 순서</b>입니다.
+    en: >-
+      The function on line {{site.line}} differs from others in two ways: its name is <b>the
+      type's name</b>, and there is <b>no place at all</b> to write what comes back. Those two
+      are the mark that says “this runs when one is made”. One rule is C++'s own: the list
+      written after a colon is <b>construction, not putting</b>. It can differ in outcome from
+      putting inside the body, because the members are already built once before the body starts.
+      And that list runs <b>in the order the members were declared, not the order written</b>.
+  trace:
+    - ko: "{{site.line}}행은 {{pick.1|code}} 타입 하나가 만들어질 때 돈다."
+      en: "Line {{site.line}} runs when one {{pick.1|code}} is made."
+    - ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 만들 때 받는 것들이다."
+      en: "{{pick.2|code}} is what it takes in while making one."
+    - ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 돌기 전에 멤버들이 먼저 만들어진다."
+      en: "The members are made before {{pick.3|code}} runs."
+rule:
+  ko: "<b>이름이 타입 이름과 같고 돌려줄 것이 없다.</b> 초기화 목록은 대입이 아니라 만들기다."
+  en: "<b>Named after the type, with no result.</b> The colon list constructs; it does not put."
+result:
+  label: { ko: "{{site.line}}행이 만드는 것", en: "what line {{site.line}} makes" }
+  value: "{{pick.1}}{{pick.2}}"
+  note: { ko: "멤버가 먼저, 몸통이 나중", en: "members first, body after" }
+ok:
+  ko: "{{pick.1|code}} 하나가 만들어질 때 이 몸통이 한 번 돕니다."
+  en: "This body runs once whenever one {{pick.1|code}} is made."
+payoff:
+  ko: >-
+    이걸 알면 「초기화 목록 순서를 바꿨는데 값이 그대로다」가 풀립니다 — 선언 순서가 이깁니다.
+  en: >-
+    This untangles “I reordered the colon list and nothing changed” — declaration order wins.
+bridge:
+  ko: >-
+    파이썬은 정해진 이름 하나를 쓰고 자바는 타입 이름을 씁니다. C++ 이 더한 것은
+    <b>몸통 앞에 멤버를 만드는 자리</b>가 따로 있다는 것이에요.
+  en: >-
+    Python uses one fixed name and Java uses the type's name. What C++ adds is a separate place,
+    <b>before the body</b>, where the members are built.
+misconceptions:
+  - ko: "쌍점 뒤 목록은 대입이다 — 만들기입니다. 몸통에서 넣는 것과 결과가 다를 수 있어요."
+    en: "The colon list puts values — it constructs. The outcome can differ from putting in the body."
+  - ko: "목록에 적은 순서대로 돈다 — 멤버를 선언한 순서로 돕니다."
+    en: "It runs in the order written — it runs in the order the members were declared."
+  - ko: "안 적으면 아무 일도 안 난다 — 컴파일러가 하나 만들어 줍니다."
+    en: "Write none and nothing happens — the compiler makes one for you."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>이 함수가 만들 때 도는 것임을 알려주는 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name that marks this as the making function</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>받을 것들</b>입니다. 만들 때 도는 함수라는 표시는 그 앞의 이름이에요."
+          en: "{{pick.2|code}} is <b>what it takes in</b>. The mark that it runs on making is the name in front."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 받는 것이냐 이름이냐", en: "The sharpest spot — the inputs or the name" }
+          code:
+            - "Widget(int x) { }     // 만들 때 돈다"
+            - "void set(int x) { }   // 아무 때나 부른다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>몸통</b>입니다. 몸통은 보통 함수에도 있어서 표시가 못 돼요."
+          en: "{{pick.3|code}} is the <b>body</b>. Ordinary functions have bodies too, so it marks nothing."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 몸통이냐 이름이냐", en: "The sharpest spot — the body or the name" }
+          code:
+            - "Widget() { }          // 이름이 타입과 같다"
+            - "void reset() { }      // 다르다"
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 판의 정답은 **타입 이름 그 자체**라 리포마다 글자가 다르고, 그러면
+  오답 셋을 뜻 있게 만들 수 없다 — 아무 이름이나 넣으면 「그건 다른 함수다」 하나로 셋이
+  같은 진단을 낸다. 이 판이 묻는 것은 낱말 고르기가 아니라 **왜 그 이름이어야 하는가**이고
+  그것은 뜻 고르기와 관문이 진다.
+meaning:
+  - q:
+      ko: "쌍점 뒤에 적는 목록과 몸통 안에서 넣는 것은 무엇이 다를까요?"
+      en: "What is the difference between the colon list and putting inside the body?"
+    hint:
+      ko: "멤버가 언제 만들어지는지 먼저 세어 보세요."
+      en: "Work out when the members are made."
+    options:
+      - t:
+          ko: "목록은 멤버를 만드는 자리이고, 몸통에서 넣는 것은 이미 만들어진 멤버를 고치는 것이다"
+          en: "The list makes the members; putting in the body edits members already made"
+      - t:
+          ko: "둘은 완전히 같고 목록 쪽이 짧게 쓰는 방법이다"
+          en: "They are identical and the list is just shorthand"
+        diag:
+          t:
+            ko: "결과가 갈리는 자리가 있습니다 — 만들기만 되고 <b>넣기는 안 되는</b> 멤버(참조나 못 만지는 멤버)는 목록으로만 세워져요."
+            en: "They part where a member can be <b>made but not put into</b> — a reference or an untouchable member stands only through the list."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 넣을 수 있느냐", en: "The sharpest spot — can it be put into" }
+            code:
+              - "Widget(int& r) : r_(r) { }   // 선다"
+              - "Widget(int& r) { r_ = r; }   // 멈춘다"
+      - t:
+          ko: "목록은 컴파일할 때만 돌고 몸통은 실행할 때 돈다"
+          en: "The list runs at compile time and the body at run time"
+        diag:
+          t:
+            ko: "둘 다 실행할 때 돕니다. 다른 것은 <b>순서</b>예요 — 목록이 먼저, 몸통이 나중입니다."
+            en: "Both run at run time. What differs is the <b>order</b>: the list first, the body after."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 언제냐 순서냐", en: "The sharpest spot — when or in what order" }
+            code:
+              - "// 목록 -> 몸통 순서로 돈다"
+              - "// 둘 다 실행할 때다"
+      - t:
+          ko: "목록에 적은 순서대로 돌고 몸통은 순서가 없다"
+          en: "The list runs in written order and the body has no order"
+        diag:
+          t:
+            ko: "목록은 <b>멤버를 선언한 순서</b>로 돕니다. 적은 순서와 다르면 컴파일러가 경고를 내죠. 몸통은 적은 순서대로 돌아요."
+            en: "The list runs in the order the <b>members were declared</b>; a different written order draws a warning. The body runs as written."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 적은 순서냐 선언 순서냐", en: "The sharpest spot — written or declared order" }
+            code:
+              - "int a_; int b_;"
+              - "T() : b_(1), a_(b_) { }   // a_ 가 먼저 돈다"
+why_gate:
+  q:
+    ko: "이 함수는 왜 <b>돌려줄 것을 적는 자리가 없을까요</b>?"
+    en: "Why does this function have <b>no place to write a result</b>?"
+  choices:
+    - t:
+        ko: "돌려주는 것이 이미 정해져 있기 때문 — 만들어진 그 값 자체이고, 다른 것을 돌려줄 방법이 없어야 한다"
+        en: "Because what comes back is already fixed — the thing just made, and no other result may be possible"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 만들다가 실패하면 무엇으로 알리는지도 한 줄로 적어 보세요."
+        en: "That is the direction. Add a line on how a failure during making is reported."
+    - t:
+        ko: "돌려줄 것이 없어서"
+        en: "Because nothing comes back"
+      ok: false
+      fb:
+        ko: "값 하나가 나옵니다 — 만들어진 그 대상이에요. 적을 자리가 없는 것뿐입니다."
+        en: "One value does come out — the thing that was made. There is simply no place to write it."
+    - t:
+        ko: "문법을 짧게 하려고"
+        en: "To make the syntax shorter"
+      ok: false
+      fb:
+        ko: "짧게 하려고 뺀 것이 아니라 <b>고를 것이 없어서</b> 뺀 자리입니다."
+        en: "It was not dropped for brevity but because <b>there is nothing to choose</b>."
+queries:
+  - { grammars: [cpp], file: ./constructor.scm }
+examples:
+  - code: "class W { public: W(int x) : x_(x) { } int x_; };   // W(1) -> x_ 가 1 인 W"
+    expect: { sites: 1, form: ctor, picks: { 1: "W", 2: "(int x)", 3: "{ }" } }
+  - code: "class W { public: W(int x); };                      // 모양만 적고 몸통은 밖에"
+    expect: { sites: 1, form: ctor-decl, picks: { 1: "W", 2: "(int x)" } }
+  - code: "class W { public: void set(int x) { } };            // 보통 멤버 함수다"
+    expect: none

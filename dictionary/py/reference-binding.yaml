@@ -1,0 +1,259 @@
+schema: 1
+id: py/reference-binding
+# **0부가 아니라 1부다** (`py-learning.md` §11.6 ① · D187 ⑰). 별칭은 가변 객체가 있어야
+# 관찰된다 — `a = 1; b = a; b = 2` 로는 아무 일도 안 일어난다. 그래서 선행이 `py/list-literal`
+# 이고 `_lang.yaml` 의 순서도 그 뒤다. Think Python 10장(리스트)이 참조 의미론을 절로 세운
+# 유일한 교재이고 그 자리도 리스트다 (§11.2 ③).
+#
+# `universal: null` — 파이썬에는 **원시 값이 하나도 없다**(데이터 모델 3.1). 자바·JS 는
+# 「원시는 상자, 객체는 화살표」 이중 기계라 같은 문장이 절반만 참이 된다 (§11.3 #1′).
+universal: null
+name: { ko: 이름은 가리킨다, en: A name points }
+token: "b = a"
+grammars: [python]
+framework: null
+essential: true
+difficulty: 2
+prereq: [py/list-literal, cs/value-vs-reference, cs/aliasing]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "이름은 값을 담지 않는다. 넣는 줄은 화살표를 옮길 뿐이다."
+    en: "A name does not hold a value. Assigning only moves an arrow."
+  why:
+    ko: >-
+      파이썬 명세는 넣는 줄을 「이름을 값에 <b>묶는다</b>」로 적습니다 — 담는다가 아니에요.
+      상태는 둘입니다: 이름표 묶음과 값 창고. {{site.line}}행은 {{pick.3|code}}{{pick.3|josa:이,가}} 가리키던 곳에
+      {{pick.2|code}} 라는 이름표를 <b>하나 더</b> 붙입니다. 값은 복사되지 않아요.
+      복사가 아니라는 것은 <b>고칠 수 있는 값</b>에서만 보입니다. 목록을 한쪽 이름으로 늘리면
+      다른 쪽에서도 늘어나 있어요. 수·글자로는 아무 일도 안 일어나서, 이 사실이 오래
+      안 보인 채로 남습니다.
+      파이썬에서 이 기계에 <b>예외가 없다</b>는 것이 다른 언어와 갈리는 자리입니다.
+      자바는 <code>int</code> 가 화살표 없는 값이고 자바스크립트도 원시가 그런데,
+      파이썬은 <code>1</code> 도 창고에 있는 값이에요.
+    en: >-
+      The Python specification calls assignment "<b>binding</b> a name to a value" — not holding one.
+      There are two states: a set of name tags and a store of values. Line {{site.line}} pins the tag
+      {{pick.2|code}} onto whatever {{pick.3|code}} already pointed at — <b>one more tag</b>, no copy.
+      That it is not a copy shows only with values that <b>can change</b>: grow a list through one
+      name and it has grown through the other. With numbers and text nothing happens at all, which is
+      why the fact stays invisible for a long time. What sets Python apart is that this machine has
+      <b>no exceptions</b>. Java's <code>int</code> is a value with no arrow and so are JavaScript's
+      primitives, while in Python even <code>1</code> lives in the store.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.3|code}}{{pick.3|josa:이,가}} 가리키는 곳을 찾는다."
+      en: "The place {{pick.3|code}} points at on line {{site.line}} is looked up."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 그 자리에 {{pick.2|code}} 이름표를 하나 더 붙인다."
+      en: "{{pick.1|code}} pins one more tag, {{pick.2|code}}, onto that same place."
+    - ko: "값은 복사되지 않는다. 이름 둘이 같은 것을 본다."
+      en: "Nothing is copied. Two names now look at one thing."
+
+rule:
+  ko: >-
+    <b>넣는 줄은 화살표를 옮긴다.</b> 값이 복사되지 않으므로 한쪽에서 고친 것이 다른 쪽에서 보인다.
+  en: >-
+    <b>Assignment moves an arrow.</b> Nothing is copied, so a change through one name shows through
+    the other.
+result:
+  label:
+    ko: "{{site.line}}행 뒤의 {{pick.2}}"
+    en: "{{pick.2}} after line {{site.line}}"
+  value: "{{pick.3}}"
+  note:
+    ko: "같은 것을 가리킨다"
+    en: "pointing at the same thing"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:이,가}} 같은 것을 가리킵니다. 값을 복사하려면
+    복사를 <b>따로 적어야</b> 해요.
+  en: >-
+    {{pick.2|code}} and {{pick.3|code}} point at one thing. Copying the value takes a <b>separate
+    line</b> that says so.
+payoff:
+  ko: >-
+    「안 건드린 목록이 왜 바뀌었나」가 여기서 풀립니다 — 건드린 목록과 같은 것이었어요.
+  en: >-
+    “Why did the list I never touched change” answers itself: it was the same list you did touch.
+bridge:
+  ko: >-
+    같은 것인지 견주는 낱말이 이 화살표를 <b>직접</b> 봅니다. 값 견주기로는 복사본과
+    같은 것을 구별할 수 없어요.
+  en: >-
+    The word that weighs sameness looks at this arrow <b>directly</b>. Weighing values cannot tell a
+    copy from the original.
+misconceptions:
+  - ko: >-
+      넣는 줄이 값을 복사한다 — 화살표만 하나 더 생깁니다. 목록을 한쪽에서 늘리면
+      다른 쪽에서도 늘어나 있어요.
+    en: >-
+      Assignment copies the value — only one more arrow appears. Grow the list through one name and
+      it has grown through the other.
+  - ko: >-
+      수는 다르게 다뤄진다 — 같은 기계입니다. 다만 수는 <b>고칠 수 없어서</b> 화살표가
+      둘이어도 아무 일이 안 보일 뿐이에요.
+    en: >-
+      Numbers are handled differently — the machine is the same. Numbers simply <b>cannot change</b>,
+      so two arrows show nothing.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>이름표를 하나 더 붙이는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that pins one more tag</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 새로 붙는 <b>이름표</b>입니다. 붙이는 일은
+            가운데 기호가 하고, 가리킬 곳은 오른쪽이 정해요.
+          en: >-
+            {{pick.2|code}} is the <b>tag</b> being pinned. The pinning is done by the symbol
+            between, and where it points is set by the right side.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 이름표와 붙이는 일"
+            en: "The sharpest spot — the tag and the pinning"
+          code:
+            - "b              # 이름표 하나"
+            - "b = a          # 그것을 a 의 자리에 붙인다"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 이미 붙어 있던 <b>다른 이름표</b>입니다.
+            값이 아니라 이름이라, 그 자리를 찾는 일부터 일어나요.
+          en: >-
+            {{pick.3|code}} is <b>another tag</b> already pinned. It is a name, not a value, so the
+            first step is finding what it points at.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 값이냐 이름이냐"
+            en: "The sharpest spot — a value or a name"
+          code:
+            - "b = [1, 2]     # 새 목록이 생긴다"
+            - "b = a          # 있던 것을 가리킨다"
+
+meaning:
+  - q:
+      ko: "<code>a = [1]</code> · <code>b = a</code> · <code>b.append(2)</code> 다음 <code>a</code> 는 어떻게 될까요?"
+      en: "After <code>a = [1]</code>, <code>b = a</code>, <code>b.append(2)</code>, what is <code>a</code>?"
+    hint:
+      ko: "둘째 줄에서 목록이 몇 개가 되었는지 세어 보세요."
+      en: "Count how many lists exist after the second line."
+    options:
+      - t:
+          ko: "<code>[1, 2]</code> — 목록은 하나뿐이다"
+          en: "<code>[1, 2]</code> — there is only one list"
+      - t:
+          ko: "<code>[1]</code> — 둘째 줄에서 복사됐다"
+          en: "<code>[1]</code> — the second line copied it"
+        diag:
+          t:
+            ko: >-
+              복사하는 줄이 없습니다. 이름표만 하나 더 붙었고, 목록은 <b>처음부터 끝까지
+              하나</b>예요.
+            en: >-
+              No line copies anything. One more tag was pinned, and the list stayed <b>one from
+              beginning to end</b>.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 붙이기와 복사"
+              en: "The sharpest spot — pinning and copying"
+            code:
+              - "b = a          # 목록은 하나"
+              - "b = a[:]       # 여기서 둘이 된다"
+      - t:
+          ko: "<code>[2]</code> — 더한 값이 덮어쓴다"
+          en: "<code>[2]</code> — the added value overwrites"
+        diag:
+          t:
+            ko: >-
+              덮어쓰지 않습니다. 뒤에 <b>더하는</b> 일이라 원래 값 옆에 붙고, 목록이 하나라
+              그 결과가 양쪽에서 보여요.
+            en: >-
+              Nothing is overwritten. The value is <b>appended</b> beside the first, and since there
+              is one list the result shows through both names.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 더하기와 덮어쓰기"
+              en: "The sharpest spot — appending and overwriting"
+            code:
+              - "b.append(2)    # [1, 2]"
+              - "b = [2]        # 새 목록을 가리키게 된다"
+      - t:
+          ko: "그 자리에서 멈춘다 — 이름 둘이 한 목록을 못 본다"
+          en: "It stops there — two names cannot share one list"
+        diag:
+          t:
+            ko: >-
+              막지 않습니다. 이름 여럿이 한 값을 보는 것이 <b>기본 동작</b>이고, 막는 규칙이
+              없다는 것이 이 자리의 어려움이에요.
+            en: >-
+              Nothing blocks it. Several names sharing one value is the <b>default behaviour</b>,
+              and the absence of any guard is what makes this hard.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 막느냐 그냥 도느냐"
+              en: "The sharpest spot — guarded or simply allowed"
+            code:
+              - "b = a          # 조용히 지나간다"
+              - "a is b         # True — 같은 것이다"
+
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 개념의 정답은 코드에 적힌 한 글자가 아니라 **그 줄 뒤에 이름 둘이
+  같은 것을 보느냐**이고, 그 답은 값이 아니라 그림이다(메모리 줄). 넣는 기호를 구멍으로
+  삼으면 한 글자라 빈칸형이 생성 단계에서 떨어지고(`MIN_HOLE`), 그때 나오는 판은
+  `py/assignment` 의 것이지 이 개념의 것이 아니다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행 뒤에 두 이름이 같은 것을 가리키는 것이 왜 문제가 될 수 있을까요?"
+    en: "Why can two names pointing at one thing after line {{site.line}} become a problem?"
+  choices:
+    - t:
+        ko: "한쪽으로 고치면 다른 쪽에서도 보여서 — 안 건드린 이름이 바뀐다"
+        en: "Because a change through one shows through the other — a name you never touched moves"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 줄의 값이 고칠 수 있는 것인지도 함께 적어 보세요 — 그때만 보입니다."
+        en: >-
+          That is the direction. Add whether the value here can change at all — that is the only
+          case where it shows.
+    - t:
+        ko: "메모리를 두 배로 써서"
+        en: "Because it uses twice the memory"
+      ok: false
+      fb:
+        ko: >-
+          오히려 덜 씁니다 — 복사가 없어서 값은 하나예요. 갈리는 것은 <b>누가 고칠 수 있나</b>입니다.
+        en: >-
+          It uses less: with no copy there is one value. What parts ways is <b>who can change
+          it</b>.
+    - t:
+        ko: "이름 하나가 지워지면 값도 사라져서"
+        en: "Because deleting one name drops the value"
+      ok: false
+      fb:
+        ko: >-
+          다른 이름표가 남아 있으면 값도 남습니다. 값이 사라지는 것은 <b>가리키는 이름이
+          하나도 없을 때</b>예요.
+        en: >-
+          While another tag remains, so does the value. It goes only when <b>no name points at it</b>.
+
+queries:
+  - { grammars: [python], file: ./reference-binding.scm }
+
+examples:
+  - code: "b = a                    # b -> a 가 가리키던 목록 (list)"
+    expect: { sites: 1, form: alias, picks: { 1: "=", 2: "b", 3: "a" } }
+  - code: "rows = self.items        # rows -> self.items 가 가리키던 목록 (list)"
+    expect: { sites: 1, form: alias-part, picks: { 1: "=", 2: "rows", 3: "self.items" } }
+  - code: "current = state.value    # current -> state.value 가 가리키던 것"
+    expect: { sites: 1, form: alias-part, picks: { 1: "=", 2: "current", 3: "state.value" } }
+  - code: "b = a[:]                 # b -> 새 목록 (list)"
+    expect: none
+  - code: "b = [1, 2]               # b -> 새 목록 (list)"
+    expect: none

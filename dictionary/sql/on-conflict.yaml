@@ -1,0 +1,196 @@
+schema: 1
+id: sql/on-conflict
+universal: null
+name: { ko: "없으면 넣고 있으면 고치기", en: "Upsert" }
+token: "ON CONFLICT"
+grammars: [sql, mybatis_sql]
+framework: null
+essential: true
+difficulty: 3
+prereq: [sql/update-set, sql/insert-row, cs/race-condition]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "먼저 찾아보고 없으면 넣기를 한 문장으로 쓴다. 부딪힐 제약이 있어야 돈다."
+    en: "Look-then-write as one statement. It needs a constraint to collide with."
+  why:
+    ko: >-
+      「먼저 찾아보고 없으면 넣는다」를 두 문장으로 쓰면 그 사이에 <b>다른 사람이 넣을 수 있습니다</b>.
+      찾을 때는 없었는데 넣을 때는 있는 거예요. {{site.line}}행은 그 둘을 한 문장으로 묶어 사이를 없앱니다.
+      대신 조건이 하나 붙어요 — <b>부딪힐 제약이 표에 적혀 있어야</b> 합니다. 같은 값을 두 번 못 넣게 하는
+      제약이 없으면 부딪히는 일 자체가 없어서 {{pick.1|code}} 뒤가 <b>한 번도 안 돌고</b>, 같은 행이
+      조용히 두 줄이 됩니다.
+    en: >-
+      Written as two statements, “look, then write if absent” leaves a gap where <b>someone else can
+      write</b> — absent when looked at, present when written. Line {{site.line}} folds the two into
+      one and removes the gap. One condition comes with it: <b>a constraint must be declared on the
+      table</b> to collide with. With nothing forbidding the duplicate there is no collision, the part
+      after {{pick.1|code}} <b>never runs</b>, and the same row quietly becomes two.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}} 에 행을 넣어 본다."
+      en: "Line {{site.line}} tries to add a row to {{pick.2|code}}."
+    - ko: "제약에 부딪히면 {{pick.1|code}} 뒤의 길로 간다."
+      en: "On a collision with the constraint, the path after {{pick.1|code}} is taken."
+    - ko: "부딪힐 제약이 없으면 그 길은 한 번도 안 돈다."
+      en: "With no constraint to collide with, that path never runs."
+
+rule:
+  ko: "<b>제약이 있어야 부딪힌다.</b> 부딪힘이 없으면 고치는 길이 안 돈다."
+  en: "<b>No constraint, no collision.</b> Without one the updating path never runs."
+result:
+  label: { ko: "넣는 표", en: "the table written to" }
+  value: "{{pick.2}}"
+  note: { ko: "제약에 부딪히면 길이 갈린다", en: "a collision forks the path" }
+ok:
+  ko: >-
+    {{pick.2|code}} 에 같은 행이 없으면 들어가고, 있으면 넣는 대신 고쳐집니다.
+  en: >-
+    With no such row in {{pick.2|code}} it goes in; with one, it is changed instead of added.
+payoff:
+  ko: >-
+    이걸 알면 같은 행이 두 줄로 쌓이는 사고가 제약이 없어서라는 것을 바로 짚습니다.
+  en: >-
+    Knowing this, duplicate rows piling up point straight at a missing constraint.
+bridge:
+  ko: >-
+    다른 언어에서 「키가 있으면 고치고 없으면 넣기」와 같습니다. 다른 것은 <b>사이에 아무도 못 끼어든다</b>는 것이에요.
+  en: >-
+    It is “put if absent, else update” from elsewhere. What differs is that <b>nothing can slip in
+    between</b>.
+misconceptions:
+  - ko: "제약이 없어도 알아서 찾아본다 — 부딪힐 것이 없으면 그냥 또 넣습니다."
+    en: "It looks first even with no constraint — with nothing to collide with it just adds again."
+  - ko: "두 문장으로 나눠 써도 결과가 같다 — 사이에 다른 사람이 넣을 수 있습니다."
+    en: "Two statements give the same result — someone else can write in the gap."
+  - ko: "고치는 길에서 새 값을 그냥 적으면 된다 — 넣으려던 값을 가리키는 이름이 따로 있습니다."
+    en: "Just write the new value in the updating path — a name for the incoming value exists for that."
+
+meaning:
+  - q:
+      ko: "같은 값을 두 번 못 넣게 하는 제약이 표에 없다면 {{site.line}}행은 어떻게 될까요?"
+      en: "With no constraint forbidding the duplicate, what does line {{site.line}} do?"
+    hint:
+      ko: "「부딪힘」이 <b>무엇에</b> 부딪히는 것인지 정하세요."
+      en: "Settle <b>what</b> the collision collides with."
+    options:
+      - t:
+          ko: "부딪힘이 없어 그냥 또 들어간다 — 같은 행이 두 줄이 된다"
+          en: "Nothing collides, so it is added again — the same row becomes two"
+      - t:
+          ko: "이 문장이 알아서 같은 행을 찾아 고쳐 준다"
+          en: "The statement finds the same row and updates it"
+        diag:
+          t:
+            ko: >-
+              무엇이 「같은 행」인지 정하는 것은 <b>제약</b>입니다. 제약이 없으면 같음의 기준도 없어요.
+            en: >-
+              What counts as “the same row” is settled by a <b>constraint</b>. Without one there is no
+              standard of sameness.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 기준이 있느냐", en: "The sharpest spot — whether a standard exists" }
+            code:
+              - "UNIQUE (user_id, day)"
+              - "-- 이것이 같음을 정한다"
+      - t:
+          ko: "문장이 서지 않는다"
+          en: "The statement does not stand"
+        diag:
+          t:
+            ko: >-
+              문법으로는 <b>옳은 문장</b>입니다 — 조용히 아무 일도 안 하는 것이 이 함정의 핵심이에요.
+            en: >-
+              The statement is <b>well formed</b>; that it quietly does nothing is the trap.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 문법이냐 뜻이냐", en: "The sharpest spot — the form or the meaning" }
+            code:
+              - "-- 통과하고 조용히 쌓인다"
+      - t:
+          ko: "첫 행을 덮어쓴다"
+          en: "The first row is overwritten"
+        diag:
+          t:
+            ko: >-
+              「첫 행」이 없습니다 — 순서가 없어요. 그리고 덮어쓰려면 <b>어느 행인지</b>가 정해져야 합니다.
+            en: >-
+              There is no “first row” — no order exists. And overwriting needs <b>which row</b> settled.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 순서냐 제약이냐", en: "The sharpest spot — order or constraint" }
+            code:
+              - "-- 순서가 아니라 제약이 정한다"
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>부딪힘</b>을 말하는 낱말을 짚어 보세요."
+      en: "On line {{site.line}}, point at the word that names the <b>collision</b>."
+    hint:
+      ko: "무엇이 이미 있을 때 길이 갈리는지 보세요."
+      en: "Look for what forks the path when something is already there."
+    answer: pick.1
+    diag:
+      pick.4:
+        t:
+          ko: >-
+            {{pick.4|code}}{{pick.4|josa:은,는}} 뒤에 조건을 붙이는 <b>이음말</b>이라 부딪힘 자체를 말하지 않습니다.
+          en: >-
+            {{pick.4|code}} is a <b>connector</b> that introduces what follows; it does not name the collision.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이음말이냐 사건이냐", en: "The sharpest spot — a connector or the event" }
+          code:
+            - "ON CONFLICT DO NOTHING"
+            - "-- 사건은 뒤 낱말이다"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 부딪힌 <b>뒤에 무엇을 할지</b>를 여는 낱말입니다.
+          en: >-
+            {{pick.3|code}} opens <b>what to do after</b> the collision, not the collision itself.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 사건이냐 처리냐", en: "The sharpest spot — the event or the response" }
+          code:
+            - "ON CONFLICT DO UPDATE SET ..."
+            - "-- 앞이 사건, 뒤가 처리"
+
+no_hole_reason: >-
+  구멍에 넣을 정답이 방언마다 다르다 — sqlite·Postgres 는 `CONFLICT`, MySQL 은 `DUPLICATE KEY` 다.
+  하나를 정답으로 못박으면 다른 방언의 실제 코드에서 거짓이 된다. 그리고 sqlite 의 대상 괄호 판
+  (`ON CONFLICT (열) DO …`)은 이 문법이 못 읽어 사용처가 반쪽이다(`docs/curriculum/sql.md` §8).
+  물어야 하는 것은 낱말이 아니라 「무엇에 부딪히나」이고, 지목형이 그것을 묻는다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 찾기와 넣기를 <b>한 문장</b>으로 묶었을까요?"
+    en: "Why does line {{site.line}} fold looking and writing into <b>one statement</b>?"
+  choices:
+    - t:
+        ko: "두 문장 사이에 다른 사람이 같은 행을 넣을 수 있어서"
+        en: "Because someone else can write the same row in the gap between two statements"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 「같은 행」을 무엇이 정하는지도 한 줄로 적어 보세요."
+        en: "That is the direction. In one line, say what defines “the same row”."
+    - t:
+        ko: "문장을 한 번만 보내면 빨라서"
+        en: "Because one round trip is faster"
+      ok: false
+      fb:
+        ko: "빠르기도 하지만 그것은 덤입니다. 진짜 이유는 <b>사이가 없어진다</b>는 것이에요."
+        en: "It is faster, but that is a bonus. The real reason is that <b>the gap disappears</b>."
+    - t:
+        ko: "넣기 문장으로는 못 고쳐서"
+        en: "Because an adding statement cannot update"
+      ok: false
+      fb:
+        ko: "고치는 문장을 따로 쓰면 됩니다. 그 사이가 문제예요."
+        en: "A separate updating statement would work. The gap between is the problem."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./on-conflict.scm }
+
+examples:
+  - code: "INSERT INTO cart (id) VALUES (1) ON CONFLICT DO NOTHING"
+    expect: { sites: 1, form: upsert, picks: { 1: "CONFLICT", 2: "cart", 3: "DO", 4: "ON" } }
+  - code: "INSERT INTO cart (id) VALUES (1) ON DUPLICATE KEY UPDATE qty = 2"
+    expect: { sites: 1, form: upsert, picks: { 1: "DUPLICATE", 2: "cart", 3: "KEY", 4: "ON" } }
+  - code: "INSERT INTO cart (id) VALUES (1)"
+    expect: none

@@ -1,0 +1,252 @@
+schema: 1
+id: c/arithmetic
+# 0부 축 E (`docs/curriculum/c.md` §0.1 #9 · §2 #3). 보편형은 `common/arithmetic`. C 라서 다른 것
+# 하나 — 양쪽이 정수면 나누기도 정수다. 파이썬은 딱 떨어져도 소수를 낸다(정확히 반대).
+universal: common/arithmetic
+name: { ko: 셈하기, en: Arithmetic }
+token: "/"
+grammars: [c]
+framework: null
+essential: true
+difficulty: 1
+prereq: [cs/integer-overflow, c/number-literal]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "정수끼리 나누면 소수점 아래를 버린다. 0 쪽으로 자르므로 음수도 0 에 가까운 쪽으로 간다."
+    en: "Two whole numbers divide to a whole number, cut toward zero even when negative."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 양쪽 타입을 보고 <b>어느 셈을 할지</b> 정합니다.
+      {{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:이,가}} 둘 다 정수면 답도 정수예요 —
+      <code>7 / 2</code> 는 3.5 가 아니라 <b>3</b> 이고, 소수점 아래는 버려집니다. 버리는 방향은
+      <b>0 쪽</b>이라 <code>-7 / 2</code> 는 −4 가 아니라 <b>−3</b> 이에요(C99 이후 규격). 한쪽이라도
+      실수면 실수 셈이 됩니다. 그러니 소수를 원하면 재료 하나에 점을 찍어야 하고, 결과를 실수
+      상자에 넣는 것은 이미 늦습니다.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} looks at both types to decide <b>which arithmetic</b> to
+      run. If {{pick.2|code}} and {{pick.3|code}} are both whole numbers the answer is whole too —
+      <code>7 / 2</code> is not 3.5 but <b>3</b>, and the fraction is dropped. The cut goes
+      <b>toward zero</b>, so <code>-7 / 2</code> is <b>−3</b>, not −4 (the standard since C99). If
+      either side is a decimal, it becomes decimal arithmetic. So to keep the fraction, put a dot on
+      one of the inputs; storing the result in a decimal box is already too late.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:이,가}} 먼저 값이 된다 — 타입까지."
+      en: "{{pick.2|code}} and {{pick.3|code}} become values first — types included."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 두 타입을 보고 정수 셈인지 실수 셈인지 고른다."
+      en: "{{pick.1|code}} looks at the two types and picks whole or decimal arithmetic."
+    - ko: "{{site.line}}행의 결과는 그 셈의 타입이다 — 상자에 넣는 것은 그다음이다."
+      en: "The result on line {{site.line}} has that arithmetic's type — putting it in a box comes after."
+
+rule:
+  ko: "<b>양쪽이 정수면 정수 셈이다.</b> 나누기는 0 쪽으로 자르고, 상자의 타입은 셈을 못 바꾼다."
+  en: "<b>Two whole numbers make whole arithmetic.</b> Division cuts toward zero; the box's type cannot change the arithmetic."
+result:
+  label:
+    ko: "{{site.line}}행의 셈"
+    en: "the arithmetic on line {{site.line}}"
+  value: "{{pick.2}} {{pick.1}} {{pick.3}}"
+  note:
+    ko: "타입은 재료가 정한다"
+    en: "the inputs fix the type"
+ok:
+  ko: >-
+    {{pick.2|code}} {{pick.1|code}} {{pick.3|code}}{{pick.3|josa:은,는}} 재료의 타입으로 셈한 값입니다.
+  en: >-
+    {{pick.2|code}} {{pick.1|code}} {{pick.3|code}} is computed in the inputs' type.
+payoff:
+  ko: >-
+    이걸 알면 「평균이 늘 정수로 나온다」가 풀립니다 — 합과 개수가 둘 다 정수라 나누기가 정수였던 거예요.
+  en: >-
+    This untangles “the average always comes out whole” — the sum and the count were both whole, so
+    the division was whole.
+bridge:
+  ko: >-
+    파이썬의 나누기는 딱 떨어져도 소수를 냅니다. C 는 정확히 반대라, 파이썬을 아는 사람이 C 에서
+    가장 먼저 틀리는 자리예요.
+  en: >-
+    Python's division yields a decimal even when it divides evenly. C is the exact opposite — the
+    first spot where someone coming from Python trips.
+misconceptions:
+  # c.md §0.1 #9 · §9 #8 — 규격에서 나온 사실이고 빈도 자료는 없다.
+  - ko: "7 을 2 로 나누면 3.5 다 — 둘 다 정수라 <b>3</b> 입니다. 소수점 아래는 버려져요."
+    en: "7 divided by 2 is 3.5 — both are whole, so it is <b>3</b>. The fraction is dropped."
+  - ko: "음수 나누기는 내림이다 — <b>0 쪽으로 자릅니다</b>. −7 을 2 로 나누면 −4 가 아니라 −3 이에요."
+    en: "Negative division rounds down — it <b>cuts toward zero</b>. −7 over 2 is −3, not −4."
+  - ko: "결과를 실수 상자에 넣으면 소수가 살아난다 — 셈은 상자에 닿기 <b>전에</b> 끝납니다. 재료에 점을 찍어야 해요."
+    en: "Storing the result in a decimal box revives the fraction — the arithmetic finishes <b>before</b> the box. Put a dot on an input instead."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>두 값을 셈으로 잇는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that joins the two values in arithmetic</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 왼쪽 <b>재료</b>입니다. 타입은 이것이 정하지만, 셈을 하는 것은 가운데 기호예요."
+          en: "{{pick.2|code}} is the left <b>input</b>. It fixes the type, but the symbol between does the arithmetic."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 재료냐 셈이냐"
+            en: "The sharpest spot — an input or the arithmetic"
+          code:
+            - "7;        /* 값 하나 */"
+            - "7 / 2;    /* 셈 */"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 오른쪽 <b>재료</b>입니다. 여기에 점을 찍으면 셈 전체가 실수가 돼요 — 그래도 셈은 가운데 기호가 합니다."
+          en: "{{pick.3|code}} is the right <b>input</b>. A dot here turns the whole arithmetic decimal — yet the symbol between still does the arithmetic."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 점 하나가 셈을 바꾼다"
+            en: "The sharpest spot — one dot changes the arithmetic"
+          code:
+            - "7 / 2      /* 3 */"
+            - "7 / 2.0    /* 3.5 */"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행의 결과를 <code>double</code> 상자에 넣으면 소수점 아래가 살아날까요?"
+      en: "Put the result of line {{site.line}} into a <code>double</code> box — does the fraction survive?"
+    hint:
+      ko: "셈이 끝나는 때와 상자에 넣는 때를 갈라 생각합니다."
+      en: "Separate when the arithmetic ends from when the box is filled."
+    options:
+      - t:
+          ko: "재료가 둘 다 정수면 안 살아난다 — 셈은 상자 전에 정수로 끝났다"
+          en: "Not if both inputs are whole — the arithmetic ended as a whole number before the box"
+      - t:
+          ko: "살아난다 — 상자가 실수니까"
+          en: "Yes — the box is decimal"
+        diag:
+          t:
+            ko: "상자는 <b>받기만</b> 합니다. 정수 셈이 3 을 낸 뒤 3.0 으로 넣을 뿐, 잃은 0.5 는 돌아오지 않아요."
+            en: "The box only <b>receives</b>. Whole arithmetic yields 3, the box stores 3.0, and the lost 0.5 never comes back."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 셈이 먼저다"
+              en: "The sharpest spot — the arithmetic comes first"
+            code:
+              - "double d = 7 / 2;     /* 3.0 */"
+              - "double d = 7 / 2.0;   /* 3.5 */"
+      - t:
+          ko: "컴파일러가 경고하고 막는다"
+          en: "The compiler warns and blocks"
+        diag:
+          t:
+            ko: "막지 않습니다. 정수를 실수 상자에 넣는 것은 조용한 넓히기라 경고도 대개 없어요 — 그래서 눈에 안 띕니다."
+            en: "It does not block. Putting a whole number into a decimal box is a quiet widening, usually with no warning — which is why it goes unnoticed."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 조용하다"
+              en: "The sharpest spot — it is quiet"
+            code:
+              - "double d = 7 / 2;   /* 경고 없음, 3.0 */"
+      - t:
+          ko: "반올림된 값이 들어간다"
+          en: "A rounded value goes in"
+        diag:
+          t:
+            ko: "반올림이 아니라 <b>버림</b>입니다. 3.5 였을 것이 3 으로 잘리고, 3.9 였을 것도 3 이에요."
+            en: "Not rounding but <b>truncation</b>. What would be 3.5 is cut to 3, and so is what would be 3.9."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 반올림이 아니다"
+              en: "The sharpest spot — not rounding"
+            code:
+              - "39 / 10   /* 3, 4 가 아니다 */"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 두 정수를 <b>나눕니다</b>."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>divides</b> two whole numbers."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "/", mono: true }
+      - t: "//"
+        mono: true
+        diag:
+          t:
+            ko: "이건 파이썬의 정수 나누기이지만 C 에서는 <b>주석의 시작</b>입니다. 그 뒤 줄 끝까지가 사라져 컴파일이 멈춰요."
+            en: "That is Python's whole-number division, but in C it <b>starts a comment</b>. The rest of the line vanishes and compiling stops."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 같은 글자, 다른 언어"
+              en: "The sharpest spot — same characters, other language"
+            code:
+              - "int n = 7 // 2;   /* '2;' 가 주석이 된다 */"
+      - t: "%"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>나머지</b>입니다. 7 과 2 에서 3 이 아니라 1 을 내요."
+            en: "That is <b>the remainder</b>. From 7 and 2 it yields 1, not 3."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 몫이냐 나머지냐"
+              en: "The sharpest spot — quotient or remainder"
+            code:
+              - "7 / 2   /* 3 */"
+              - "7 % 2   /* 1 */"
+      - t: "\\"
+        mono: true
+        diag:
+          t:
+            ko: "역슬래시는 <b>셈 기호가 아닙니다</b>. 줄 잇기와 이스케이프에만 쓰여서, 그 자리에 오면 컴파일러가 못 읽어요."
+            en: "The backslash is <b>not an arithmetic symbol</b>. It only continues lines and escapes characters, so the compiler cannot read it there."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 방향이 다르다"
+              en: "The sharpest spot — the slash leans the other way"
+            code:
+              - "7 \\ 2   /* 오류 */"
+              - "7 / 2"
+
+why_gate:
+  q:
+    ko: "C 는 왜 정수끼리의 나누기를 <b>정수로</b> 둘까요?"
+    en: "Why does C keep division of two whole numbers <b>whole</b>?"
+  choices:
+    - t:
+        ko: "기계의 정수 나누기 명령이 몫과 나머지를 정수로 내고, C 는 그 명령을 그대로 드러내기 때문"
+        en: "Because the machine's integer-divide instruction yields a whole quotient and remainder, and C exposes that instruction as it is"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 규칙이 편한 자리 하나(색인 셈)와 무는 자리 하나(평균)를 적어 보세요."
+        en: "That is the direction. Name one spot where the rule helps (index arithmetic) and one where it bites (averages)."
+    - t:
+        ko: "실수 셈이 느려서 피하려고"
+        en: "To avoid slow decimal arithmetic"
+      ok: false
+      fb:
+        ko: "속도가 아니라 모형입니다. 재료가 정수면 정수 명령을 쓴다는 규칙이고, 실수가 필요하면 재료에 점을 찍습니다."
+        en: "It is the model, not speed. Whole inputs use the whole instruction; when a decimal is wanted, an input gets a dot."
+    - t:
+        ko: "옛날 C 에 실수가 없어서"
+        en: "Because early C had no decimals"
+      ok: false
+      fb:
+        ko: "처음부터 있었습니다. 규칙은 「재료의 타입이 셈을 고른다」이고 그것은 지금도 같아요."
+        en: "They were there from the start. The rule is “the inputs' type picks the arithmetic”, and it has not changed."
+
+queries:
+  - { grammars: [c], file: ./arithmetic.scm }
+
+examples:
+  - code: "int n = 7 / 2;          /* n -> 3 (int) */"
+    expect: { sites: 1, form: div, hole: "/", picks: { 1: "/", 2: "7", 3: "2" } }
+  - code: "int neg = -7 / 2;       /* neg -> -3 (int) */"
+    expect: { sites: 1, form: div, hole: "/", picks: { 1: "/", 2: "-7", 3: "2" } }
+  - code: "int m = a + b;          /* m -> a 와 b 의 합 (int) */"
+    expect: { sites: 1, form: arith, hole: "+", picks: { 1: "+", 2: "a", 3: "b" } }
+  - code: "int r = n % 10;         /* r -> 마지막 자릿수 (int) */"
+    expect: { sites: 1, form: arith, hole: "%", picks: { 1: "%", 2: "n", 3: "10" } }
+  - code: "int ok = a < b;         /* 견주기 — 다른 판이다 */"
+    expect: none
