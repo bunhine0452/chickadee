@@ -61,7 +61,7 @@ export function CourseToc(props: CourseTocProps) {
   const pct = props.files === 0 ? 0 : Math.round((props.filesDone / props.files) * 100);
 
   return (
-    <aside className="ctoc" aria-label={t('course.tocLabel')}>
+    <div className="ctoc">
       <div className="ctoc-head">
         <b className="ctoc-count">
           {t('course.tocCount', { done: String(props.filesDone), total: String(props.files) })}
@@ -140,6 +140,6 @@ export function CourseToc(props: CourseTocProps) {
           </li>
         ))}
       </ol>
-    </aside>
+    </div>
   );
 }

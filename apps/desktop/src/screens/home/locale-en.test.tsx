@@ -160,6 +160,7 @@ describe('en 스모크 — 홈 · 인제스트 · components/home', () => {
         }}
         onStart={() => undefined}
         onSettings={() => undefined}
+        onRepos={() => undefined}
         onMake={() => undefined}
         onPick={() => undefined}
         reingest
@@ -193,6 +194,7 @@ describe('en 스모크 — 홈 · 인제스트 · components/home', () => {
         today="2026-09-03"
         streak={4}
         onSettings={() => undefined}
+        onRepos={() => undefined}
         onMake={() => undefined}
         onPick={() => undefined}
         reingest
@@ -201,13 +203,16 @@ describe('en 스모크 — 홈 · 인제스트 · components/home', () => {
     );
 
     // 카탈로그를 거친다는 것을 몇 자리에서 못 박는다 — 폴백으로 ko 가 오면 여기서 갈린다.
-    expect(screen.getByText('Mastery')).toBeTruthy();
+    expect(screen.getByText('Units')).toBeTruthy();
     expect(screen.getByText('Grammar not covered yet')).toBeTruthy();
     expect(screen.getByRole('button', { name: /Settings/ })).toBeTruthy();
 
     // 잰 것이 0건이면 위반도 0건이라 게이트가 소리 없이 통과한다 — 그 함정을 여기서 막는다.
+    // 하한이 9 → 6 으로 내려갔다: D182 가 홈에서 패널 다섯(숙련도 사다리·14일 막대·
+    // 다시 풀 개념·미조판 예고·개념 상세)을 뺐다. 재는 요소가 **0 이 아닌 것**이 이
+    // 단언의 요점이고, 남은 여섯은 안내문 둘·빈 상태·설명문 셋이다.
     const bodies = [...container.querySelectorAll(MEASURE_SELECTOR)].filter(isEnBody);
     expect(bodies.length, 'en 본문으로 잡히는 요소가 0건이다 — 번역이 짧아 게이트가 헛돈다')
-      .toBeGreaterThanOrEqual(9);
+      .toBeGreaterThanOrEqual(6);
   });
 });

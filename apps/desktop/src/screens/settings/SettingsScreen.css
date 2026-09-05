@@ -1,77 +1,67 @@
-/* 설정 (05 §2.1). 목업이 없는 화면이라 홈의 패널 규칙(`.panel` · `.note`)을 그대로 쓴다 —
-   2.5px 괘선 · `--paper-2` 바탕 · 종이 두께 그림자. 인쇄 물리(결·어긋남)는 쓰지 않는다:
-   설정은 본문을 읽는 화면이고 05 §4.3 이 물리를 본문 단 밖으로만 허용한다. */
-.settings {
-  max-width: 52em;
-  margin: 0 auto;
-  padding: 32px 24px 64px;
-}
-
+/* 설정 (05 §2.1 · 정본 §6). 섹션 하나가 카드 하나이고, 색은 상태(경고·오답)에만 쓴다.
+   폭·여백은 `components/shell/Page` 가 정한다 — 한 단으로 길고, 넓어져도 본문 폭은
+   그대로이며 여백만 는다. */
 .set-head {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
   align-items: baseline;
   justify-content: space-between;
-  margin-bottom: 20px;
-  padding-bottom: 12px;
-  border-bottom: 2.5px solid var(--rule);
+  padding-bottom: var(--s-3);
+  border-bottom: 1px solid var(--border);
 }
 
 .set-head h1 {
   margin: 0;
-  color: var(--ink);
-  font-family: var(--f-poster);
-  font-synthesis-weight: none;
-  font-size: var(--fs-24);
-  font-weight: 400;
-  letter-spacing: -0.02em;
+  color: var(--text);
+  font-size: var(--fs-6);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: -0.015em;
 }
 
 .settings .pl {
-  margin-left: 8px;
-  color: var(--ink-soft);
-  font-family: var(--f-ui);
-  font-size: var(--fs-13);
-  font-weight: 400;
+  margin-left: var(--s-2);
+  color: var(--text-muted);
+  font-size: var(--fs-3);
+  font-weight: var(--fw-normal);
   letter-spacing: 0;
 }
 
 .set-sec {
-  margin-bottom: 18px;
-  padding: 15px 16px 16px;
-  border: 2.5px solid var(--rule);
-  background: var(--paper-2);
-  box-shadow: 4px 5px 0 var(--edge), var(--lamp);
+  margin-bottom: var(--s-4);
+  padding: var(--s-5);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  min-width: 0;
 }
 
 .set-sec h2 {
-  margin: 0 0 12px;
-  color: var(--ink);
-  font-size: var(--fs-16);
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  margin: 0 0 var(--s-3);
+  color: var(--text);
+  font-size: var(--fs-5);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: -0.01em;
 }
 
 .set-sec p {
-  margin: 0 0 8px;
+  margin: 0 0 var(--s-2);
   max-width: var(--measure);
-  color: var(--ink);
-  font-size: var(--fs-15);
+  color: var(--text);
+  font-size: var(--fs-4);
   line-height: var(--lh-body);
 }
 
 .set-sec p:last-child { margin-bottom: 0 }
 
 .set-note {
-  color: var(--ink-soft);
-  font-size: var(--fs-13);
+  color: var(--text-muted);
+  font-size: var(--fs-2);
   line-height: var(--lh-body);
 }
 
 .set-empty {
-  color: var(--ink-soft);
-  font-size: var(--fs-14);
+  color: var(--text-muted);
+  font-size: var(--fs-4);
 }
 
 /* ───────── 값 한 줄 ───────── */
@@ -79,34 +69,43 @@
 .set-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: var(--s-2) var(--s-3);
   align-items: center;
-  padding: 7px 0;
-  border-bottom: 1px dashed var(--rule);
+  padding: var(--s-2) 0;
+  border-bottom: 1px solid var(--border);
+  min-width: 0;
 }
 
 .set-row:last-of-type { border-bottom: 0 }
 
 .set-k {
-  flex: 0 0 7.5em;
-  color: var(--ink);
-  font-size: var(--fs-14);
-  font-weight: 600;
+  flex: 0 0 8.5em;
+  color: var(--text);
+  font-size: var(--fs-3);
+  font-weight: var(--fw-medium);
 }
 
 .set-num,
 .set-text {
-  padding: 5px 8px;
-  border: 1.5px solid var(--rule);
-  background: var(--stock);
-  color: var(--ink);
-  font-family: var(--f-mono);
-  font-size: var(--fs-14);
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-3);
   font-variant-numeric: tabular-nums;
 }
 
+
 .set-num { width: 6em }
 .set-text { width: 14em }
+
+.set-num:focus-visible,
+.set-text:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
 
 /* ───────── 리포 목록 ───────── */
 
@@ -119,24 +118,27 @@
 .set-repos li {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 10px;
+  gap: var(--s-1) var(--s-3);
   align-items: baseline;
-  padding: 6px 0;
-  border-bottom: 1px dashed var(--rule);
+  padding: var(--s-2) 0;
+  border-bottom: 1px solid var(--border);
+  min-width: 0;
 }
 
 .set-repos b {
-  color: var(--ink);
-  font-size: var(--fs-15);
+  color: var(--text);
+  font-size: var(--fs-3);
+  font-weight: var(--fw-medium);
 }
 
 .set-repos code,
 .set-about code {
   overflow: hidden;
   max-width: 100%;
-  color: var(--ink-soft);
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
+  min-width: 0;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -150,118 +152,122 @@
 .set-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--fs-13);
+  font-size: var(--fs-1);
 }
 
 .set-table caption {
-  margin-bottom: 6px;
-  color: var(--ink-soft);
-  font-size: var(--fs-13);
+  margin-bottom: var(--s-2);
+  color: var(--text-muted);
+  font-size: var(--fs-2);
   text-align: left;
 }
 
 .set-table th,
 .set-table td {
-  padding: 5px 8px;
-  border-bottom: 1px solid var(--rule);
+  padding: var(--s-2) var(--s-2);
+  border-bottom: 1px solid var(--border);
   text-align: right;
+  white-space: nowrap;
 }
 
 .set-table thead th,
 .set-table tbody th {
-  color: var(--ink);
+  color: var(--text);
   text-align: left;
 }
 
 .set-table thead th {
-  border-bottom: 1.5px solid var(--rule);
-  color: var(--ink-soft);
-  font-family: var(--f-mono);
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  border-bottom: 1px solid var(--border-strong);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-weight: var(--fw-medium);
 }
 
 .set-table td {
-  color: var(--ink);
-  font-family: var(--f-mono);
+  color: var(--text);
+  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
 
 /* 예산을 넘은 줄. 색면이 아니라 왼쪽 굵은 선이다 — 표에 색을 칠하면 숫자가 안 읽힌다. */
 .set-table tr[data-over="on"] th[scope="row"] {
-  box-shadow: inset 3px 0 0 var(--t1);
-  padding-left: 6px;
+  box-shadow: inset 3px 0 0 var(--bad);
+  padding-left: var(--s-2);
 }
 
 /* ───────── 데이터 ───────── */
 
 .set-fields {
-  margin: 0 0 12px;
-  padding: 10px 12px;
-  border: 1.5px solid var(--rule);
-  background: var(--paper-3);
+  margin: 0 0 var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  min-width: 0;
 }
 
 .set-fields legend {
-  padding: 0 6px;
-  color: var(--ink);
-  font-size: var(--fs-14);
-  font-weight: 600;
+  padding: 0 var(--s-2);
+  color: var(--text);
+  font-size: var(--fs-3);
+  font-weight: var(--fw-medium);
 }
 
 .set-check {
   display: flex;
-  gap: 8px;
+  gap: var(--s-2);
   align-items: center;
-  padding: 4px 0;
-  color: var(--ink);
-  font-size: var(--fs-14);
+  padding: var(--s-1) 0;
+  color: var(--text);
+  font-size: var(--fs-3);
 }
 
 .set-acts {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin: 10px 0;
+  gap: var(--s-2);
+  margin: var(--s-3) 0;
 }
 
 .set-wipe {
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px dashed var(--rule);
+  margin-top: var(--s-4);
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--border);
 }
 
 /* 되돌릴 수 없는 동작의 확인 단계. 모달이 아니라 그 자리에서 펼친다 (정본 §3-4·§3-9). */
 .set-warn {
-  padding: 10px 12px;
-  border: 2px solid var(--t1);
-  background: var(--paper-3);
-  color: var(--ink);
-  font-size: var(--fs-14);
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--bad);
+  border-radius: var(--r-sm);
+  background: var(--bad-bg);
+  color: var(--text);
+  font-size: var(--fs-4);
 }
 
-.set-warn b { color: var(--t1-text) }
+.set-warn b { color: var(--bad) }
 
 /* ───────── 정보 ───────── */
 
 .set-about {
   display: grid;
-  grid-template-columns: 9em 1fr;
-  gap: 4px 12px;
+  grid-template-columns: 9em minmax(0, 1fr);
+  gap: var(--s-1) var(--s-3);
   margin: 0;
 }
 
 .set-about dt {
-  color: var(--ink-soft);
-  font-size: var(--fs-13);
+  color: var(--text-muted);
+  font-size: var(--fs-2);
 }
 
 .set-about dd {
   margin: 0;
-  color: var(--ink);
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
+  min-width: 0;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-2);
+  overflow-wrap: anywhere;
 }
 
 /* 내 커밋 identity (D121). 설정의 다른 줄은 「이름 — 값」 한 줄인데 이 칸은 목록·입력·제안
@@ -272,13 +278,13 @@
 
 .ident {
   display: grid;
-  gap: 8px;
-  margin-top: 6px;
+  gap: var(--s-2);
+  margin-top: var(--s-2);
 }
 
 .ident-list {
   display: grid;
-  gap: 4px;
+  gap: var(--s-1);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -286,20 +292,23 @@
 
 .ident-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
-  gap: 8px;
+  gap: var(--s-2);
   max-width: none;
+  min-width: 0;
 }
 
 .ident-mail {
-  color: var(--ink);
-  font-family: var(--f-mono);
-  font-size: var(--fs-14);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-3);
+  overflow-wrap: anywhere;
 }
 
 .ident-name {
-  color: var(--ink-soft);
-  font-size: var(--fs-14);
+  color: var(--text-muted);
+  font-size: var(--fs-3);
 }
 
 .ident-add,
@@ -307,66 +316,79 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: var(--s-2);
 }
 
 .ident-f {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--s-2);
 }
 
-/* 「어긋남」 색을 그대로 쓴다 — 입력이 형식과 맞지 않는다는 뜻이 판정의 그것과 같고,
-   원색 직접 참조는 05 §4.2 가 막는다. 대비는 check:contrast 가 이미 재 둔 값이다. */
+/* 형식이 안 맞는다는 뜻이라 상태 색 「오답」을 그대로 쓴다 (정본 §6 — 색은 뜻에만). */
 .ident-err {
-  color: var(--verdict-differ-text);
+  color: var(--bad);
 }
 
 /* 제외 글롭 (D122). 여러 줄 상자 하나 — 새 색도 새 치수도 만들지 않는다. */
 .globs {
   display: grid;
-  gap: 6px;
-  margin-top: 6px;
+  gap: var(--s-2);
+  margin-top: var(--s-2);
 }
 
 .globs-in {
   width: 100%;
   max-width: 32em;
-  padding: 6px 8px;
-  border: 2px solid var(--rule);
-  background: var(--stock);
-  color: var(--ink);
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-2);
   line-height: var(--lh-body);
   resize: vertical;
+}
+
+.globs-in:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
 }
 
 /* 문법 사전 언어 (D122). */
 .dictlangs {
   display: grid;
-  gap: 4px;
-  margin: 6px 0 0;
+  gap: var(--s-1);
+  margin: var(--s-2) 0 0;
   padding: 0;
   list-style: none;
 }
 
 .dictlang {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
-  gap: 8px;
+  gap: var(--s-2);
 }
 
 .dictlang-k {
   min-width: 4em;
-  color: var(--ink);
-  font-family: var(--f-mono);
-  font-size: var(--fs-14);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-3);
 }
 
 /* 맨 아래 「홈으로」 (D170 ⑧) */
 .set-foot {
   display: flex;
   justify-content: flex-end;
-  margin: 24px 0 0;
+  margin: var(--s-5) 0 0;
+}
+
+@media (width <= 760px) {
+  .set-head h1 { font-size: var(--fs-5); }
+  .set-sec { padding: var(--s-4) var(--s-3); }
+  .set-k { flex: 1 1 100%; }
+  .set-about { grid-template-columns: minmax(0, 1fr); }
 }

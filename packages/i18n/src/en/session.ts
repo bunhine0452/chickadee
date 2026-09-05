@@ -48,6 +48,8 @@ export const session: Record<string, string> = {
   'plate.hole': 'Hole',
   'plate.foldMore': '… {{n}} more lines',
   'plate.foldLess': 'Collapse',
+  'plate.tagRight': 'Correct',
+  'plate.tagWrong': 'Wrong',
   'plate.rule': 'Rule',
   'plate.afterLine': 'After this line',
   'plate.idleNote':
@@ -62,14 +64,10 @@ export const session: Record<string, string> = {
     'You got this question wrong last time. The diagnosis stays — <b>pick again</b>.',
   'plate.layerN': 'level {{n}}',
   'plate.layerPlus': '+{{n}} level',
-  'plate.layerMinus': '−{{n}} level',
-  'plate.railVertical': '{{no}} · level {{n}} · {{name}}',
-  'plate.inkLabel': '{{track}} · mastery level {{n}}',
 
   'band.label': 'Progress bar',
   'band.title': 'Today’s study',
   'band.runNo': 'Session {{n}}',
-  'band.now': 'Now',
   'band.seconds': '{{n}}s',
   'band.minutes': '{{n}} min',
   'band.today': 'Today {{time}}',
@@ -158,9 +156,7 @@ export const session: Record<string, string> = {
     + 'bar up top counts what is left.',
   'lifer.label': 'First concept on record',
   'lifer.kicker': 'First record · LIFER',
-  'lifer.stamp': 'First sighting',
 
-  'summary.railVertical': '{{runNo}} · done',
   'summary.line': 'You did {{printed}} questions and it took {{mins}} minutes. That is about right.',
   'summary.tallyPrinted': 'Questions done',
   'summary.tallyTime': 'Time taken',

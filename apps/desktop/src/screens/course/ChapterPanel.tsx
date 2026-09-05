@@ -84,18 +84,18 @@ export function ChapterPanel(props: ChapterPanelProps): React.JSX.Element {
       ) : (
         <div className="cc-acts">
           {props.isDue ? (
-            <PressButton tone="pink" disabled={props.busy} onClick={props.onRecheck}>
+            <PressButton disabled={props.busy} onClick={props.onRecheck}>
               {t('chapter.recheckBtn')}
             </PressButton>
           ) : null}
 
           {next === 1 ? (
             vocabAll ? (
-              <PressButton tone="blue" disabled={props.busy} onClick={props.onJudgeReading}>
+              <PressButton disabled={props.busy} onClick={props.onJudgeReading}>
                 {t('chapter.readingBtn')}
               </PressButton>
             ) : gateN > 0 ? (
-              <PressButton tone="blue" disabled={props.busy} onClick={props.onGate}>
+              <PressButton disabled={props.busy} onClick={props.onGate}>
                 {t('chapter.gateBtn', { n: String(gateN) })}
               </PressButton>
             ) : (
@@ -107,7 +107,7 @@ export function ChapterPanel(props: ChapterPanelProps): React.JSX.Element {
             startable === null ? (
               <p className="note">{t('chapter.noCards')}</p>
             ) : (
-              <PressButton tone="blue" disabled={props.busy} onClick={() => props.onStart(startable)}>
+              <PressButton disabled={props.busy} onClick={() => props.onStart(startable)}>
                 {t('chapter.startStage', {
                   stage: t(stageKey(startable)),
                   n: String(c.counts[startable]),

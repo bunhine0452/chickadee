@@ -158,7 +158,7 @@ describe('교정쇄 한 흐름', () => {
     await waitFor(() => {
       expect(document.querySelector('.fb')).toBeTruthy();
     });
-    expect(sheet().getByText('같음')).toBeTruthy();
+    expect(sheet().getByText('정답')).toBeTruthy();
 
     const log = db.prepare('SELECT concept_id, ok, layer_before, layer_after, grade FROM review_log').get();
     expect(log).toEqual({
@@ -195,7 +195,7 @@ describe('교정쇄 한 흐름', () => {
     await user.keyboard('[Enter]');
 
     await waitFor(() => {
-      expect(sheet().getByText('다름')).toBeTruthy();
+      expect(sheet().getByText('오답')).toBeTruthy();
     });
     expect(sheet().getByText(/멈추는 것이지 던지는 것이 아닙니다/)).toBeTruthy();
 

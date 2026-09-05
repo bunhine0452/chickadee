@@ -1,6 +1,7 @@
 import { t, type MessageKey } from '@chickadee/i18n';
 import { FlatButton, LiveRegion } from '@chickadee/ui';
 
+import { Page } from '../../components/shell/Page.js';
 import { TimeQueue } from '../../components/shell/TimeQueue.js';
 import { BOX_COUNT, boxes, DONE, positionOf, type Progress } from './phases.js';
 import './IngestScreen.css';
@@ -55,7 +56,7 @@ export function IngestScreen(props: IngestScreenProps) {
   const heading = props.done ? t('ingest.done') : t('ingest.reading', { repo: props.repoName });
 
   return (
-    <main className="ingest" tabIndex={-1}>
+    <Page className="ingest">
       <h1 className="ingest-h">{heading}</h1>
       <p className="ingest-sub">
         {props.error
@@ -101,6 +102,6 @@ export function IngestScreen(props: IngestScreenProps) {
       <LiveRegion
         text={props.done ? t('ingest.saidDone') : t('ingest.saidStep', { label: box?.label ?? '' })}
       />
-    </main>
+    </Page>
   );
 }

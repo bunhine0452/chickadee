@@ -14,6 +14,7 @@ import type { ConceptId, StageNo } from '@chickadee/store-sql';
 import { FlatButton, PressButton } from '@chickadee/ui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { Page, Split } from '../../components/shell/Page.js';
 import { TimeQueue, type QueueItem } from '../../components/shell/TimeQueue.js';
 import { loadSettings } from '../../data/settings.js';
 import { report, todayKey } from '../../flow.js';
@@ -219,14 +220,18 @@ export function CourseScreen(props: CourseScreenProps): React.JSX.Element {
   return (
     <>
       <div inert={run !== null ? true : undefined}>
-        <main className="cc chapters" tabIndex={-1}>
-          <header className="cc-head">
-            <h1>{t('chapter.title')}<span className="pl">{t('chapter.plain')}</span></h1>
-            <p className="cc-repo">{props.repoName}</p>
-            <div className="cc-head-act">
-              <FlatButton ghost onClick={props.onBack}>{t('chapter.back')}</FlatButton>
-            </div>
-          </header>
+        <Page
+          className="cc chapters"
+          head={(
+            <header className="cc-head l-row">
+              <h1>{t('chapter.title')}<span className="pl">{t('chapter.plain')}</span></h1>
+              <p className="cc-repo">{props.repoName}</p>
+              <div className="cc-head-act l-push">
+                <FlatButton ghost onClick={props.onBack}>{t('chapter.back')}</FlatButton>
+              </div>
+            </header>
+          )}
+        >
 
           {data === null ? (
             <div className="cc-wait" aria-busy="true" />
@@ -236,17 +241,21 @@ export function CourseScreen(props: CourseScreenProps): React.JSX.Element {
               <p className="note">{t('chapter.emptyPlain')}</p>
             </section>
           ) : (
-            <div className="cc-body">
-              <ChapterToc
-                chapters={data.chapters}
-                selected={selected}
-                todayUnitId={data.todayUnitId}
-                due={dueSet}
-                dead={data.dead}
-                onSelect={(id) => useCourse.getState().select(id)}
-              />
-
-              <section className="cc-work">
+            <Split
+              sticky
+              sideLabel={t('chapter.tocLabel')}
+              side={(
+                <ChapterToc
+                  chapters={data.chapters}
+                  selected={selected}
+                  todayUnitId={data.todayUnitId}
+                  due={dueSet}
+                  dead={data.dead}
+                  onSelect={(id) => useCourse.getState().select(id)}
+                />
+              )}
+            >
+              <div className="cc-work l-stack">
                 <section className="cc-today" aria-label={t('chapter.today')}>
                   <h2>{t('chapter.today')}<span className="pl">{t('chapter.todayPlain')}</span></h2>
                   {data.plan.length === 0 ? (
@@ -258,7 +267,7 @@ export function CourseScreen(props: CourseScreenProps): React.JSX.Element {
                         {t('chapter.todayMin', { n: String(data.plan.length), min: String(todayMin) })}
                         {data.plan.every((i) => i.kind === 'recheck') ? ` — ${t('chapter.todayRecheckOnly')}` : ''}
                       </p>
-                      <PressButton tone="pink" disabled={busy} onClick={startToday}>{t('chapter.startToday')}</PressButton>
+                      <PressButton disabled={busy} onClick={startToday}>{t('chapter.startToday')}</PressButton>
                     </>
                   )}
                 </section>
@@ -296,10 +305,10 @@ export function CourseScreen(props: CourseScreenProps): React.JSX.Element {
                     onRecheck={() => void recheck(chapter)}
                   />
                 )}
-              </section>
-            </div>
+              </div>
+            </Split>
           )}
-        </main>
+        </Page>
       </div>
 
       {run === null ? null : (

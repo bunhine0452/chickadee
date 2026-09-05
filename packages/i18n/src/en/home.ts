@@ -62,19 +62,12 @@ export const home: Record<string, string> = {
   'home.trackT2': 'T2 Structure',
   'home.trackT3': 'T3',
 
-  'home.run0': 'Level 0',
-  'home.run1': 'Level 1',
-  'home.run2': 'Level 2',
-  'home.run3': 'Level 3',
-  'home.run4': 'Level 4',
 
   // ── Mastery and due labels ──────────────────────────────────────────────
   'home.layerLabel': '{{n}} · {{k}}',
   'home.layerN': 'Level {{n}}',
   'home.layerText': 'Mastery {{n}} of 4 · {{k}} · {{plain}}',
   'home.layerTextShort': 'Mastery {{n}} of 4',
-  'home.railLabel': 'Unit {{no}} · avg {{run}}',
-  'home.passesLabel': '{{track}} · mastery level {{n}}',
 
   'home.dueNone': 'Not scheduled',
   'home.dueToday': 'Today',
@@ -83,27 +76,14 @@ export const home: Record<string, string> = {
   'home.dueWeeks': 'In {{n}} weeks',
 
   // ── Home screen ─────────────────────────────────────────────────────────
-  'home.guide': '“{{name}}” is next. {{layer}}.',
 
   'home.reingestTitle': 'Needs re-reading',
-  'home.reingestPlain': '= the repo has to be read again',
   'home.reingestNote':
     'One of the grammar, queries, card generator or dictionary changed. Reading the repo '
     + 'again rebuilds the cards and their sites — <b>the mastery you earned stays, '
     + 'because it belongs to the concept</b>.',
 
-  'home.boardTitle': '<em>{{repo}}</em> units',
-  'home.boardPlain': '= the feature map of your repo',
-  'home.boardNote':
-    'One unit is one real feature of your repo. Of the {{concepts}} concepts pulled from '
-    + 'your commits and files, <b>{{printed}} are learned</b>.',
 
-  'home.inkTitle': 'Mastery',
-  'home.inkPlain': '= how much has stuck',
-  'home.inkTag': 'Level 4 = learned',
-  'home.inkNote':
-    'Mastery counts <b>times you got it right after a gap</b>, not <b>times you got it '
-    + 'right</b>. Pressing “No idea” drops one level and brings the question back sooner.',
 
   'home.gapsTitle': 'Grammar not covered yet',
   'home.gapsPlain': '= in your code, no question for it yet',
@@ -114,62 +94,36 @@ export const home: Record<string, string> = {
   'home.noSheets': 'No units yet. Reading the repo makes one unit per feature.',
   'home.noSheetsRead':
     'Read {{n}} files, but no unit yet — a folder needs at least three files to become one '
-    + 'feature. Questions are still written; see “Today’s plan” on the left.',
-  'home.boardNoteNoSheets':
-    'One unit is one real feature of your repo. This repo has no units yet, so concepts are '
-    + 'not counted per unit.',
+    + 'feature. Questions are still written; see “Today’s plan” above.',
 
   // ── Masthead ────────────────────────────────────────────────────────────
-  'home.brandLine': 'Your own code is the textbook',
-  'home.ticket': 'Today at a glance',
   'home.tkRepo': 'Repo',
-  'home.tkDate': 'Date',
-  'home.tkStreak': 'Study streak',
-  'home.tkDay': 'd',
-  'home.tkInk': 'Average mastery',
-  'home.tkAvgLayer': 'level',
   'home.settings': 'Settings',
+  'home.repos': 'Repos',
+  'home.nav': 'Main navigation',
 
   // ── Mastery scale ───────────────────────────────────────────────────────
-  'home.inkScaleSaid': 'Mastery, five levels. {{parts}}.',
-  'home.inkScalePart': '{{n}} {{k}} {{count}}',
   // 한국어는 수 뒤에 세는 말이 붙고 영어는 붙지 않는다. 빈 값은 폴백을 타지 않는다.
-  'home.countUnit': '',
 
   // ── Colour bar ──────────────────────────────────────────────────────────
-  'home.barTitle': 'Last 14 days · time studied',
-  'home.barNote': 'One cell is a day. Darker means a longer session.',
-  'home.barSaid': 'Time studied over 14 days. {{printed}} days, {{total}} minutes.',
-  'home.barToday': 'Today',
-  'home.barDaysAgo': '{{n}} days ago',
-  'home.barCell': '{{when}} · {{amount}}',
-  'home.barRest': 'rest',
-  'home.mins': '{{n}} min',
 
   // ── Concepts to redo ────────────────────────────────────────────────────
-  'home.retake': 'Concepts to do again',
-  'home.retakeEmpty': 'Nothing to do again yet. The first question fills this in.',
 
   // ── Forecast ────────────────────────────────────────────────────────────
-  'home.forecastNext': 'Unit {{n}} –',
-  'home.forecastCannot':
-    '<b>No placement question yet.</b> Its answer key is a real commit, and there are '
-    + '<b>{{n}}</b> so far. Radius, flow and direction questions come from import edges and '
-    + 'join today’s plan.',
-  'home.forecastLater':
-    '<b>No question written yet.</b> As commits build up the source is read again and units '
-    + 'are added. <b>{{n}}</b> files have been read so far.',
-  'home.forecastMarkCannot': 'not yet',
-  'home.forecastMarkLater': 'in progress',
 
   // ── Gaps panel ──────────────────────────────────────────────────────────
+  // ── Not available yet: ownership placement (D170 ⑤) ────────────────────
+  'home.forecastTitle': 'Ownership-placement questions',
+  'home.forecastCannot':
+    'The answer key is a real commit, and this repo has <b>{{n}}</b> of them. Blast-radius, '
+    + 'flow and direction questions come from import edges and do show up in today\u2019s plan.',
+
   'home.gapsEmpty': 'No gaps. Every piece of grammar in your code has a question.',
   'home.gapsCount': '<b>{{n}}</b> uses',
   'home.gapsMake': 'Make a question',
   'home.gapsMakeFor': 'Make a question for {{label}}',
 
   // ── Not open yet ────────────────────────────────────────────────────────
-  'home.locked': 'Not open yet',
   'home.lockedTitle': 'T1 transcription',
   'home.lockedBody':
     'This opens once some of the repo’s grammar has stuck. Right now every block has '
@@ -198,44 +152,30 @@ export const home: Record<string, string> = {
   'home.zeroChapterDone': 'Chapter 0 is done. You can reopen it any time.',
 
   // ── Concept node ────────────────────────────────────────────────────────
-  'home.nodeLabel': '{{name}}. {{track}}. {{layer}}. {{state}}.',
   'home.stateDone': 'learned',
   'home.stateCurrent': 'you are here',
   'home.stateLocked': 'no question yet',
   'home.stateOpen': 'up next',
 
   // ── Concept detail ──────────────────────────────────────────────────────
-  'home.detail': '{{name}} detail',
-  'home.detailTitleLocked': '{{name}} — no question yet',
-  'home.detailLockedBody':
-    'The question before this one comes first. Answer it and this concept opens right '
-    + 'away. The order comes from how the concepts depend on each other.',
-  'home.detailDone': 'Level 4, so it is learned. It drops a level in time and comes back then.',
-  'home.detailNext': 'Next review is {{due}}. Getting it right makes level {{n}}.',
   'home.detailGo': 'Answer this question',
-  'home.detailClose': 'Close',
 
   // ── Unit ────────────────────────────────────────────────────────────────
-  'home.sheetIndex': 'Unit list',
-  'home.sheetChip': 'Unit {{no}} · {{name}} · {{done}} of {{all}} learned',
-  'home.sheetStamp': 'DONE',
+  'home.unitsTitle': 'Units',
+  'home.unitsSummary': 'Learned {{learned}} of {{concepts}} concepts',
   'home.sheetSig': 'Unit {{n}}',
-  'home.sheetFeature': 'Feature {{n}}',
   'home.sheetNoPath': 'no path',
   'home.sheetMeta': '{{where}} · {{files}} files · {{concepts}} concepts',
-  'home.sheetStatusLocked': 'Unit {{n}} first',
-  'home.sheetStatusPrinting': 'In progress {{done}} / {{all}}',
 
   // ── Today's plan ────────────────────────────────────────────────────────
   'home.todayTitle': 'Today’s plan',
-  'home.todayPlain': '= the questions for today',
   'home.todayEmpty':
     'No questions for today. Dig into the repo some more, or come back tomorrow — '
     + 'nothing gets padded out to fill the time.',
   'home.todayCount': '<b>{{plates}}</b> questions · about <b>{{mins}}</b> min',
   'home.todayList': 'Questions queued for today',
-  'home.todayDays': 'Study record for the last {{n}} days',
   'home.todayStart': 'Start studying',
+  'home.todayStreak': '{{n}} days in a row',
   'home.previewNewT0': 'New syntax question',
   'home.previewT1': 'One transcription',
   'home.previewT2': 'One structure question',

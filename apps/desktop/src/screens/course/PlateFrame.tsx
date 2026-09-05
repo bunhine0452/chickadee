@@ -15,6 +15,7 @@ import { Acts } from '../../components/plate/Acts.js';
 import { FeedbackSlot, type FeedbackState } from '../../components/plate/FeedbackSlot.js';
 import { ProofSheet } from '../../components/plate/ProofSheet.js';
 import { queueKindOf, stageKey, typeKey, type StageCardView } from './run.js';
+import './StagePlate.css';
 
 export interface PlateFrameProps {
   card: StageCardView;
@@ -66,9 +67,6 @@ export function PlateFrame(props: PlateFrameProps): React.JSX.Element {
         {...(verdict === null
           ? {}
           : {
-              stamp: verdict.ok
-                ? { text: t('session.exact'), tone: 'pink' as const }
-                : { text: t('session.differ'), tone: 'blue' as const },
               title: verdict.ok ? t('session.right') : t('session.wrong'),
               body: (verdict.ok ? verdict.okText : verdict.diagnosis) ?? verdict.rule ?? verdict.okText ?? '',
               ...(verdict.rule === null ? {} : { rule: verdict.rule }),

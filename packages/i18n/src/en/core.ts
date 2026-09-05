@@ -74,20 +74,16 @@ export const core: Record<string, string> = {
   'settings.look.localeNote':
     'Changing the language redraws the screen. Anything not translated yet shows in Korean.',
 
-  // ── Look: the two switches the masthead shares ──────────────────────────
+  // ── Look ───────────────────────────────────────────────────────────────
   'settings.look.title': 'Look',
-  'settings.look.plain': '= screen brightness and decoration',
+  'settings.look.plain': '= screen brightness and motion',
   'settings.look.process': 'Screen',
   'settings.look.themeLight': 'Light',
   'settings.look.themeDark': 'Dark',
   'settings.look.themeSwitch': 'Light \u00b7 dark',
-  'settings.look.trimOff': 'Decoration shown',
-  'settings.look.trimOn': 'Decoration hidden',
-  'settings.look.trimSwitch': 'Show \u00b7 hide decoration',
   'settings.look.note':
-    'What you pick here is saved and comes back next time. \u201cDecoration hidden\u201d drops '
-    + 'only the background texture and the tilt \u2014 not one pixel of the type or the '
-    + 'layout.',
+    'What you pick here is saved and comes back next time. Changing the brightness moves '
+    + 'nothing \u2014 not one pixel of the type or the layout.',
 
   // ── Screen heading and section titles ──────────────────────────────────
   'settings.title': 'Settings',

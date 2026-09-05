@@ -6,7 +6,7 @@ import type { ConceptId, RepoInfo } from '@chickadee/store-sql';
 import { Toast } from '@chickadee/ui';
 import { useEffect, useState } from 'react';
 
-import type { TodayPreview } from './components/home/TodayPanel.js';
+import type { TodayPreview } from './components/home/TodayCard.js';
 import { currentBuild, ingestFingerprint, needsReingest } from './data/maintenance.js';
 import { applyLocale, saveSetting } from './data/settings.js';
 import { makePlateFor, pickPlateNow, type ManualResult } from './data/manual.js';
@@ -223,6 +223,7 @@ export function App(): React.JSX.Element {
           streak={0}
           {...(today ? { today_: today } : {})}
           onSettings={() => useUi.getState().go('settings')}
+          onRepos={() => useUi.getState().go('repos')}
           reingest={reingest}
           onStart={() => void start(repo.id, repo.rootPath)}
           onMake={(conceptId) => void place('gap', repo, home, conceptId)}

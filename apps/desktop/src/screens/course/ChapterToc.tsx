@@ -49,7 +49,8 @@ export function ChapterToc(props: ChapterTocProps): React.JSX.Element {
           onClick={() => props.onSelect(c.unitId)}
         >
           <span className="cc-no">{no}</span>
-          <span className="cc-name">{c.name}</span>
+          {/* 좁은 칸에서 줄여 보이므로 온전한 이름은 `title` 로 남긴다 (layout.css `.u-truncate`). */}
+          <span className="cc-name u-truncate" title={c.name}>{c.name}</span>
           <span className="cc-st">{statusOf(c, props.due)}</span>
         </button>
       </li>
@@ -57,14 +58,13 @@ export function ChapterToc(props: ChapterTocProps): React.JSX.Element {
   };
 
   return (
-    <aside className="cc-toc" aria-label={t('chapter.tocLabel')}>
+    <div className="cc-toc">
       <div className="cc-toc-head">
         <b>{t('chapter.count', { done: String(passed), total: String(entry.length) })}</b>
         <div
           className="cc-bar"
           role="img"
           aria-label={t('chapter.pct', { n: String(pct) })}
-          data-fill={pct === 0 ? 'empty' : pct === 100 ? 'full' : 'part'}
           style={{ '--pct': `${pct}%` } as React.CSSProperties}
         >
           <i aria-hidden="true" />
@@ -100,6 +100,6 @@ export function ChapterToc(props: ChapterTocProps): React.JSX.Element {
           </button>
         </li>
       </ol>
-    </aside>
+    </div>
   );
 }

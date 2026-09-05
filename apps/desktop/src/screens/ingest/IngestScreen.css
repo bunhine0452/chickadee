@@ -1,60 +1,68 @@
-/* 판 짜기 화면 (05 §2.1). 스피너가 없는 대신 시간 비례 큐가 전부를 말한다. */
-.ingest {
-  max-width: var(--measure);
-  margin: 0 auto;
-  padding: 48px 24px;
+/* 리포 읽는 중 (05 §2.1). 스피너가 없는 대신 시간 비례 큐가 전부를 말한다.
+   화면에 있는 것은 셋이다 — 무엇을 하고 있나 · 얼마나 왔나 · 그만둘 수 있나.
+
+   폭·여백은 `components/shell/Page` 가 정한다. */
+.ingest .l-page-body {
+  display: grid;
+  gap: var(--gap);
+  align-content: start;
+  min-width: 0;
 }
 
 .ingest-h {
-  margin: 0 0 6px;
-  color: var(--ink);
-  font-family: var(--f-poster);
-  font-synthesis-weight: none;
-  font-size: var(--fs-24);
-  font-weight: 400;
-  letter-spacing: -0.02em;
+  margin: 0;
+  color: var(--text);
+  font-size: var(--fs-6);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: -0.015em;
   word-break: keep-all;
 }
 
 .ingest-sub {
-  margin: 0 0 18px;
-  color: var(--ink-soft);
-  font-size: var(--fs-14);
+  margin: 0;
+  max-width: var(--measure);
+  color: var(--text-muted);
+  font-size: var(--fs-4);
+  line-height: var(--lh-body);
   word-break: keep-all;
 }
 
 .ingest-now {
   display: flex;
-  gap: 8px;
+  gap: var(--s-2);
   align-items: baseline;
-  min-height: 20px;
-  margin: 0 0 18px;
-  color: var(--ink-soft);
-  font-size: var(--fs-13);
+  min-height: 1.5em;
+  margin: 0;
+  min-width: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-2);
 }
 
 /* 경로는 리포 상대다 — 절대 경로는 화면에도 로그에도 나가지 않는다 (01 §6). */
 .ingest-path {
   overflow: hidden;
-  color: var(--ink);
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
+  min-width: 0;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-2);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .ingest-skips {
-  margin: 0 0 18px;
-  padding: 10px 12px;
-  border: 1.5px solid var(--rule);
-  background: var(--paper-2);
+  margin: 0;
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
 }
 
 .ingest-skips h2 {
-  margin: 0 0 6px;
-  color: var(--ink);
-  font-size: var(--fs-14);
-  font-weight: 600;
+  margin: 0 0 var(--s-2);
+  color: var(--text);
+  font-size: var(--fs-3);
+  font-weight: var(--fw-medium);
 }
 
 .ingest-skips ul {
@@ -65,24 +73,30 @@
 
 .ingest-skips li {
   display: flex;
-  gap: 8px;
+  gap: var(--s-2);
   align-items: baseline;
-  padding: 3px 0;
-  font-size: var(--fs-13);
+  padding: var(--s-1) 0;
+  font-size: var(--fs-2);
+  min-width: 0;
 }
 
 .ingest-skips code {
   overflow: hidden;
-  color: var(--ink);
-  font-family: var(--f-mono);
+  min-width: 0;
+  color: var(--text);
+  font-family: var(--font-mono);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.ingest-skips span { color: var(--ink-soft); }
+.ingest-skips span { color: var(--text-muted) }
 
 .ingest-more {
-  margin: 6px 0 0;
-  color: var(--ink-soft);
-  font-size: var(--fs-13);
+  margin: var(--s-2) 0 0;
+  color: var(--text-muted);
+  font-size: var(--fs-2);
+}
+
+@media (width <= 760px) {
+  .ingest-h { font-size: var(--fs-5); }
 }

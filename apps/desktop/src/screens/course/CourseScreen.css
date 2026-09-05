@@ -1,70 +1,49 @@
-/* 코스 화면 (D171). 클론 코스(`CloneScreen.css`)와 같은 패널 규칙 — 2.5px 괘선 · 종이 바탕 ·
-   종이 두께 그림자. 책상(`--desk`) 위에 글자를 바로 놓지 않는다: 머리·목차·패널이 전부 종이
-   위에 선다. 단 오버레이는 `ProofSheet` 가 자기 종이를 들고 온다. */
-.cc {
+/* 코스 화면 (D171 · 정본 §6). 머리 한 줄 · 챕터 목차 · 일하는 단 하나다.
+   좁아지면 목차가 본문 위로 접혀 쌓이고, 넓어지면 본문이 늘어나는 대신 여백이 는다.
+
+   단 오버레이(`.cc-pick`·`.cc-window`·`.cc-editor`·`.cc-done`·`.cc-stuck` …)의 규칙은
+   여기 없다 — `StagePlate.css` 가 `.course-run` 아래로 가져갔다(G4).
+   폭·여백·쌓임은 `components/shell/Page`·`Split` 이 정한다 (G2). */
+.cc .l-page-body {
   display: grid;
-  gap: 16px;
-  padding: 20px 22px 40px;
-  grid-template-rows: auto 1fr;
+  gap: var(--gap);
+  align-content: start;
+  min-width: 0;
 }
 
 .cc:focus-visible {
-  outline: 3px solid var(--t0);
-  outline-offset: 3px;
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 
 .cc-head {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 16px;
   align-items: baseline;
-  padding: 14px 18px;
-  border: 2.5px solid var(--rule);
-  background: var(--paper);
-  box-shadow: 6px 7px 0 var(--edge), var(--lamp);
+  padding-bottom: var(--s-3);
+  border-bottom: 1px solid var(--border);
 }
 
 .cc-head h1 {
   margin: 0;
-  color: var(--ink);
-  font-family: var(--f-poster);
-  font-weight: 400;
-  font-synthesis-weight: none;
-  font-size: var(--fs-poster-s);
+  color: var(--text);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-6);
   line-height: var(--lh-tight);
+  letter-spacing: -0.015em;
 }
 
 .cc-head .pl,
 .cc-today .pl {
-  margin-left: 10px;
-  color: var(--ink-soft);
-  font-family: var(--f-ui);
-  font-size: var(--fs-14);
-  font-weight: 400;
+  margin-left: var(--s-2);
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: var(--fs-3);
+  font-weight: var(--fw-normal);
 }
 
 .cc-repo {
   margin: 0;
-  color: var(--ink-soft);
-  font-size: var(--fs-14);
-}
-
-.cc-head-act {
-  margin-left: auto;
-}
-
-/* 2단. 목차는 고정 폭이다 — 패널이 바뀌어도 눈이 목차에서 떨어지지 않는다. */
-.cc-body {
-  display: grid;
-  gap: 16px;
-  align-items: start;
-  grid-template-columns: 300px minmax(0, 1fr);
-}
-
-.cc-work {
-  display: grid;
-  gap: 16px;
-  min-width: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-2);
 }
 
 .cc-wait {
@@ -73,58 +52,61 @@
 
 .cc-empty {
   display: grid;
-  gap: 12px;
+  gap: var(--s-3);
   max-width: var(--measure);
-  padding: 32px 30px;
-  border: 2.5px solid var(--rule);
-  background: var(--paper);
-  box-shadow: 6px 7px 0 var(--edge), var(--lamp);
+  padding: var(--s-6);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
 }
 
 /* ───────── 목차 ───────── */
 .cc-toc {
-  padding: 14px 0 18px;
-  border: 2.5px solid var(--rule);
-  background: var(--paper);
-  box-shadow: 6px 7px 0 var(--edge), var(--lamp);
+  padding: var(--s-4) 0;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  min-width: 0;
+}
+
+/* 좁은 창에서 목차가 본문 위로 쌓이면 세로로 길다 — 그때만 높이를 자른다. */
+@media (width < 900px) {
+  .cc-toc {
+    max-height: 22em;
+    overflow-y: auto;
+  }
 }
 
 .cc-toc-head {
   display: grid;
-  gap: 8px;
-  padding: 0 16px 12px;
-  border-bottom: 1.5px solid var(--rule);
-  color: var(--ink);
-  font-size: var(--fs-14);
+  gap: var(--s-2);
+  padding: 0 var(--s-4) var(--s-3);
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  font-size: var(--fs-3);
 }
 
 .cc-bar {
   position: relative;
-  height: 14px;
-  border: 2px solid var(--rule);
-  background:
-    radial-gradient(circle, var(--ink-mute) 1px, transparent 1.5px) 0 0 / 6px 6px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--surface-3);
+  overflow: hidden;
 }
 
 .cc-bar i {
   position: absolute;
   inset: 0 auto 0 0;
   width: var(--pct);
-  background: var(--t1);
-}
-
-.cc-bar[data-fill="part"] i {
-  border-right: 2px solid var(--rule);
+  background: var(--accent);
 }
 
 .cc-toc h3 {
-  margin: 14px 16px 6px;
-  color: var(--ink-soft);
-  font-family: var(--f-ui);
-  font-size: var(--fs-13);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  margin: var(--s-4) var(--s-4) var(--s-1);
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: var(--fs-1);
+  font-weight: var(--fw-medium);
 }
 
 .cc-rows {
@@ -136,42 +118,44 @@
 .cc-rowbtn {
   display: grid;
   width: 100%;
-  padding: 8px 16px;
+  padding: var(--s-2) var(--s-4);
   border: 0;
   background: transparent;
-  color: var(--ink);
+  color: var(--text);
   font: inherit;
-  font-size: var(--fs-15);
+  font-size: var(--fs-3);
   text-align: left;
   cursor: pointer;
   grid-template-columns: 3.2em minmax(0, 1fr) auto;
-  gap: 8px;
+  gap: var(--s-2);
   align-items: baseline;
 }
 
+.cc-rowbtn:hover { background: var(--surface-2) }
+
 .cc-rowbtn:focus-visible {
-  outline: 3px solid var(--t0);
-  outline-offset: -3px;
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
 }
 
 .cc-row.cur .cc-rowbtn {
-  background: var(--paper-2);
-  box-shadow: inset 4px 0 0 var(--t1);
+  background: var(--accent-weak);
+  box-shadow: inset 3px 0 0 var(--accent);
 }
 
 .cc-row.locked .cc-rowbtn {
-  color: var(--ink-soft);
+  color: var(--text-muted);
 }
 
 .cc-no {
-  color: var(--ink-soft);
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
 }
 
 .cc-row.today .cc-no {
-  color: var(--t1-text);
-  font-weight: 700;
+  color: var(--accent);
+  font-weight: var(--fw-medium);
 }
 
 .cc-name {
@@ -181,8 +165,8 @@
 }
 
 .cc-st {
-  color: var(--ink-soft);
-  font-size: var(--fs-13);
+  color: var(--text-muted);
+  font-size: var(--fs-1);
   white-space: nowrap;
 }
 
@@ -190,21 +174,23 @@
 .cc-today,
 .cc-panel {
   display: grid;
-  gap: 10px;
-  padding: 16px 18px 18px;
-  border: 2.5px solid var(--rule);
-  background: var(--paper);
-  box-shadow: 6px 7px 0 var(--edge), var(--lamp);
+  gap: var(--s-3);
+  padding: var(--s-5);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  min-width: 0;
 }
+
+/* 오늘 15분이 이 화면의 하나의 초점이다 — 테두리 한 단 진하게 (정본 §6). */
+.cc-today { border-color: var(--border-strong) }
 
 .cc-today h2,
 .cc-panel-head h2 {
   margin: 0;
-  color: var(--ink);
-  font-family: var(--f-poster);
-  font-weight: 400;
-  font-synthesis-weight: none;
-  font-size: var(--fs-24);
+  color: var(--text);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-5);
   line-height: var(--lh-tight);
 }
 
@@ -216,21 +202,22 @@
 }
 
 .cc-panel-head .pl {
-  color: var(--ink-soft);
-  font-size: var(--fs-14);
+  color: var(--text-muted);
+  font-size: var(--fs-2);
 }
 
 .cc-panel-st {
   margin-left: auto;
-  color: var(--t1-text);
-  font-size: var(--fs-14);
-  font-weight: 700;
+  color: var(--accent);
+  font-size: var(--fs-3);
+  font-weight: var(--fw-medium);
 }
 
 .cc-progress {
   margin: 0;
-  color: var(--ink);
-  font-size: var(--fs-16);
+  color: var(--text);
+  font-size: var(--fs-5);
+  font-weight: var(--fw-medium);
 }
 
 .cc-acts {
@@ -241,289 +228,32 @@
 }
 
 .cc-paths,
-.cc-zero,
-.cc-files {
-  color: var(--ink);
-  font-size: var(--fs-14);
+.cc-zero {
+  color: var(--text);
+  font-size: var(--fs-2);
 }
 
 .cc-paths summary,
-.cc-zero summary,
-.cc-files summary {
-  color: var(--ink-soft);
+.cc-zero summary {
+  color: var(--text-muted);
   cursor: pointer;
 }
 
 .cc-paths ul,
 .cc-zero ul,
-.cc-files ul,
 .cc-dead {
-  margin: 8px 0 0;
+  margin: var(--s-2) 0 0;
   padding-left: 1.2em;
 }
 
 .cc-paths li,
 .cc-dead li {
-  margin: 4px 0;
+  margin: var(--s-1) 0;
 }
 
 .cc-paths small,
-.cc-dead small,
-.cc-pick small {
-  color: var(--ink-soft);
-}
-
-/* ───────── 판 안의 것들 ───────── */
-.cc-reason {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1.5px solid var(--rule);
-}
-
-.cc-folded,
-.cc-commit,
-.cc-answer {
-  margin: 0 0 10px;
-}
-
-.cc-picks {
-  display: grid;
-  gap: 8px;
-  margin: 0 0 12px;
-  padding: 0;
-  list-style: none;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-}
-
-.cc-pick {
-  display: grid;
-  width: 100%;
-  padding: 8px 10px;
-  border: 2px solid var(--rule);
-  background: var(--paper);
-  color: var(--ink);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  gap: 2px;
-}
-
-.cc-pick code {
-  font-family: var(--f-mono);
-  font-size: var(--fs-14);
-}
-
-.cc-pick small {
-  font-size: var(--fs-13);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.cc-pick.on {
-  box-shadow: inset 0 0 0 2px var(--t1);
-}
-
-.cc-pick.right {
-  border-color: var(--verdict-exact);
-}
-
-.cc-pick.wrong {
-  border-color: var(--verdict-differ);
-}
-
-.cc-pick:disabled {
-  cursor: default;
-}
-
-.cc-window {
-  margin: 0 0 12px;
-  padding: 10px 12px;
-  border: 2px solid var(--rule);
-  background: var(--paper-2);
-  font-family: var(--f-mono);
-  font-size: var(--fs-14);
-  line-height: 1.85;
-  list-style: none;
-  overflow-x: auto;
-}
-
-.cc-window li {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  white-space: pre;
-}
-
-.cc-window li.target {
-  background: var(--paper-3);
-}
-
-.cc-ln {
-  min-width: 3ch;
-  color: var(--ink-soft);
-  text-align: right;
-  user-select: none;
-}
-
-.cc-line {
-  flex: 1;
-  min-width: 0;
-  padding: 2px 6px;
-  border: 2px solid var(--t1);
-  background: var(--paper);
-  color: var(--ink);
-  font: inherit;
-  resize: none;
-}
-
-.cc-inserted {
-  margin: 0 0 8px;
-  padding: 8px 12px;
-  border: 2px dashed var(--t1);
-  background: var(--paper);
-  color: var(--ink);
-  font-family: var(--f-mono);
-  font-size: var(--fs-14);
-  white-space: pre-wrap;
-}
-
-.cc-slot {
-  padding: 2px 8px;
-  border: 1.5px solid var(--rule);
-  background: var(--paper);
-  color: var(--ink-soft);
-  font: inherit;
-  font-family: var(--f-ui);
-  font-size: var(--fs-13);
-  cursor: pointer;
-}
-
-.cc-slot.on {
-  border-color: var(--t1);
-  color: var(--t1-text);
-  font-weight: 700;
-}
-
-.cc-editor,
-.cc-prompt {
-  width: 100%;
-  margin: 0 0 12px;
-  padding: 10px 12px;
-  border: 2px solid var(--rule);
-  background: var(--paper);
-  color: var(--ink);
-  font-family: var(--f-mono);
-  font-size: var(--fs-14);
-  line-height: 1.85;
-  resize: vertical;
-}
-
-.cc-mine {
-  white-space: pre-wrap;
-}
-
-.cc-spec {
-  display: grid;
-  gap: 6px;
-  margin: 0 0 12px;
-  color: var(--ink);
-  font-size: var(--fs-14);
-}
-
-.cc-spec dt {
-  color: var(--ink-soft);
-  font-weight: 700;
-}
-
-.cc-spec dd {
-  margin: 0;
-}
-
-.cc-spec pre,
-.cc-files pre {
-  margin: 0;
-  padding: 8px 12px;
-  border: 1.5px solid var(--rule);
-  background: var(--paper-2);
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
-  overflow-x: auto;
-}
-
-.cc-handoff {
-  display: grid;
-  gap: 8px;
-  margin: 0 0 12px;
-}
-
-/* 막힘 패널 — 사다리와 같은 자리, 같은 종이. `reprint` 클래스는 Esc ② 의 판정용이다. */
-.cc-stuck {
-  display: grid;
-  gap: 10px;
-  margin: 12px 0;
-  padding: 14px 16px;
-  border: 2.5px solid var(--t0);
-  background: var(--paper);
-  color: var(--ink);
-}
-
-.cc-stuck:focus-visible {
-  outline: 3px solid var(--t0);
-  outline-offset: 3px;
-}
-
-.cc-stuck h3 {
-  margin: 0;
-  font-family: var(--f-ui);
-  font-size: var(--fs-16);
-}
-
-.cc-stuck .note {
-  margin: 0;
-}
-
-/* 단 판정 카드 */
-.cc-done {
-  display: grid;
-  gap: 12px;
-  max-width: var(--measure);
-  padding: 22px 26px;
-  border: 2.5px solid var(--rule);
-  background: var(--paper);
-  color: var(--ink);
-  box-shadow: 6px 7px 0 var(--edge), var(--lamp);
-}
-
-.cc-done h2 {
-  margin: 0;
-  font-family: var(--f-poster);
-  font-weight: 400;
-  font-synthesis-weight: none;
-  font-size: var(--fs-24);
-  line-height: var(--lh-tight);
-}
-
-.cc-tally {
-  margin: 0;
-  font-size: var(--fs-18);
-}
-
-.cc-tally .pass {
-  color: var(--verdict-exact-text);
-  font-weight: 700;
-}
-
-.cc-tally .fail {
-  color: var(--verdict-differ-text);
-  font-weight: 700;
-}
-
-.cc-done-acts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
+.cc-dead small {
+  color: var(--text-muted);
 }
 
 .cc-empty .note,
@@ -532,8 +262,11 @@
   max-width: var(--measure);
 }
 
-/* 오버레이 껍데기 — `.proof` 가 fixed 라 이 상자는 흐름에서 빠진다. */
-.course-run {
-  position: relative;
-  z-index: 20;
+@media (width <= 760px) {
+  .cc-head h1 { font-size: var(--fs-5); }
+
+  .cc-today,
+  .cc-panel {
+    padding: var(--s-4) var(--s-3);
+  }
 }

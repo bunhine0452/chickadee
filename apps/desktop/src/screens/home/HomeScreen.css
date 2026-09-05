@@ -1,28 +1,32 @@
-/* 목업: design/ink-home.html 의 앱 프레임(`.press`) · 본문 2단(`.cols`) · 대지 더미(`.sheets`). */
+/* 홈 (정본 §6). 위에서 아래로 셋이다 — 오늘 할 것 · 단원 · 아직 안 배운 문법.
+   폭·여백·쌓임은 `components/shell/Page` 와 `styles/layout.css`(G2)가 정한다 —
+   여기서는 단 하한만 그 이름으로 덮는다. */
 .press {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 22px 24px 48px;
-}
-
-.cols {
-  display: grid;
-  grid-template-columns: 326px minmax(0, 1fr);
-  gap: 26px;
-  align-items: start;
-  margin-top: 22px;
-}
-
-.sheets {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--text);
 }
 
-@media (width <= 1080px) {
-  .cols { grid-template-columns: 1fr }
+/* 맨 윗줄이 창 폭을 다 쓰고 붙박이라 `<main>` 밖에 선다. 그래서 `.l-page` 의
+   `min-height: 100dvh` 를 여기서 푼다 — 안 그러면 맨 윗줄 높이만큼 늘 세로로 넘친다. */
+.home {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding-top: var(--s-5);
 }
 
-@media (width <= 640px) {
-  .press { padding: 12px 12px 40px }
+.home .l-page-body {
+  display: grid;
+  gap: var(--gap);
+  align-content: start;
+}
+
+/* 단원과 문법은 무게가 비슷한 두 덩이다 — 좁으면 한 단, 넓으면 두 단.
+   하한 22rem 은 개념 줄(이름 + 숙련도 + 상태)이 접히지 않는 최소 폭이다. */
+.home-sub {
+  --col-min: 22rem;
+
+  align-items: start;
 }

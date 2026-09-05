@@ -17,6 +17,7 @@ import type { Layer } from '@chickadee/store-sql';
 import { FlatButton, Kbd, RichText } from '@chickadee/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { Page, Split } from '../../components/shell/Page.js';
 import { loadSettings } from '../../data/settings.js';
 import { report } from '../../flow.js';
 import { useUi } from '../../store.js';
@@ -294,8 +295,8 @@ export function CloneScreen(props: CloneScreenProps): React.JSX.Element {
   }, [view, onNext]);
 
   return (
-    <main className="course" tabIndex={-1}>
-      <header className="course-head">
+    <Page className="course" head={(
+      <header className="course-head l-row">
         <h1>
           {t('course.title')}
           <span className="pl">{t('course.plain')}</span>
@@ -310,13 +311,14 @@ export function CloneScreen(props: CloneScreenProps): React.JSX.Element {
             ? ''
             : ` · ${run.mode === 'commit' ? t('course.modeCommit') : t('course.modeDep')}`}
         </p>
-        <div className="course-head-act">
+        <div className="course-head-act l-push">
           <FlatButton onClick={leave} ghost>
             {t('course.leave')} <Kbd keys="Esc" />
           </FlatButton>
         </div>
       </header>
-
+    )}
+    >
       {empty !== null ? (
         <section className="course-empty">
           <h2>{t('course.emptyTitle')}</h2>
@@ -324,22 +326,24 @@ export function CloneScreen(props: CloneScreenProps): React.JSX.Element {
           <FlatButton onClick={onBack}>{t('course.emptyBack')}</FlatButton>
         </section>
       ) : (
-        <div className="course-body">
-          {toc === null ? (
+        <Split
+          sticky
+          sideLabel={t('course.tocLabel')}
+          side={toc === null
             // 아직 못 읽은 한 프레임. 스피너를 두지 않는다 (정본 §3-7).
-            <aside className="ctoc" aria-busy="true" />
-          ) : (
-            <CourseToc
-              units={toc.units}
-              files={toc.files}
-              filesDone={toc.filesDone}
-              cut={toc.cut}
-              cutDone={toc.cutDone}
-              curId={plate?.step.id ?? null}
-              curSeq={plate?.step.seq ?? null}
-            />
-          )}
-
+            ? <div className="ctoc" aria-busy="true" />
+            : (
+              <CourseToc
+                units={toc.units}
+                files={toc.files}
+                filesDone={toc.filesDone}
+                cut={toc.cut}
+                cutDone={toc.cutDone}
+                curId={plate?.step.id ?? null}
+                curSeq={plate?.step.seq ?? null}
+              />
+            )}
+        >
           <div className="course-work">
             {finished ? (
               <CourseDone n={toc?.cutDone ?? 0} onBack={onBack} />
@@ -384,9 +388,9 @@ export function CloneScreen(props: CloneScreenProps): React.JSX.Element {
               />
             )}
           </div>
-        </div>
+        </Split>
       )}
-    </main>
+    </Page>
   );
 }
 

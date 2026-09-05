@@ -62,6 +62,9 @@ export const session = {
   'plate.hole': '빈칸',
   'plate.foldMore': '… {{n}}줄 더',
   'plate.foldLess': '접기',
+  // 판정 이름표 — 판정 덩어리 맨 앞에 붙는 한 낱말 (D182). 도장을 대신한다.
+  'plate.tagRight': '정답',
+  'plate.tagWrong': '오답',
   'plate.rule': '규칙',
   'plate.afterLine': '이 줄이 끝난 뒤',
   // 학습자에게는 무엇이 적힐지만 말한다 — 「미리 비워 둔 자리라 위쪽 글이 밀리지 않는다」는
@@ -76,15 +79,11 @@ export const session = {
   'plate.crumbReprintNote': '지난번에 틀린 문제입니다. 진단은 그대로 두고 <b>다시 고릅니다</b>.',
   'plate.layerN': '{{n}}단계',
   'plate.layerPlus': '+{{n}}단계',
-  'plate.layerMinus': '−{{n}}단계',
-  'plate.railVertical': '{{no}} · {{n}}단계 · {{name}}',
-  'plate.inkLabel': '{{track}} · 숙련도 {{n}}단계',
 
   // ───────── 진행 띠 ─────────
   'band.label': '진행 띠',
   'band.title': '오늘 학습',
   'band.runNo': '{{n}}번째 학습',
-  'band.now': '지금',
   'band.seconds': '{{n}}초',
   'band.minutes': '{{n}}분',
   'band.today': '오늘 {{time}}',
@@ -171,10 +170,8 @@ export const session = {
   // ───────── 첫 기록 ─────────
   'lifer.label': '처음 기록한 개념',
   'lifer.kicker': '첫 기록 · LIFER',
-  'lifer.stamp': '첫 관찰',
 
   // ───────── 학습 완료 ─────────
-  'summary.railVertical': '{{runNo}} · 완료',
   'summary.line': '{{printed}}문제를 풀었고 {{mins}}분 걸렸습니다. 이 정도가 딱 좋습니다.',
   'summary.tallyPrinted': '푼 문제',
   'summary.tallyTime': '걸린 시간',

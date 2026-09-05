@@ -1,0 +1,77 @@
+/* 화면 맨 위 한 줄. 높이는 고정이고 내용이 늘어도 줄이 늘지 않는다 —
+   좁아지면 리포 칸이 먼저 줄고(min-width 0), 그다음 이동 단추가 아래로 내려간다. */
+.masthead {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.mh-in {
+  --gap: var(--s-4);
+
+  align-items: center;
+  padding: var(--s-3) var(--pad-x);
+}
+
+.mh-name {
+  flex: 0 0 auto;
+  font-size: var(--fs-3);
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.mh-repo {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-2);
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.mh-repo-k {
+  flex: 0 0 auto;
+  font-size: var(--fs-1);
+  color: var(--text-muted);
+}
+
+.mh-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--s-1);
+  flex: 0 0 auto;
+}
+
+.mh-link {
+  appearance: none;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: var(--r-sm);
+  padding: var(--s-2) var(--s-3);
+  font: inherit;
+  font-size: var(--fs-2);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.mh-link:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.mh-link:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+/* 좁은 창 — `.l-row` 가 이미 줄을 바꾼다. 여기서는 리포 칸을 아랫줄로 내리기만 한다. */
+@media (width <= 640px) {
+  .mh-in { row-gap: var(--s-2); }
+
+  .mh-repo {
+    order: 3;
+    flex-basis: 100%;
+  }
+}

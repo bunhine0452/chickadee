@@ -10,6 +10,6 @@
 .read-first {
   margin: 0 0 12px;
   padding-left: 12px;
-  border-left: 3px solid var(--rule);
-  color: var(--ink-soft);
+  border-left: 3px solid var(--border);
+  color: var(--text-muted);
 }

@@ -1,0 +1,376 @@
+/* 코스 단 판의 모양 (D182 · 정본 §6).
+ *
+ * 규칙은 전부 `.course-run` 안으로 묶는다. 같은 `cc-*` 이름이 `CourseScreen.css`(목차 화면)
+ * 에도 남아 있는데, 그 파일은 목차 세션의 것이고 여기는 단 오버레이의 것이다 — 두 칸
+ * 특이도(`.course-run .cc-window`)라 번들 순서와 무관하게 이쪽이 이긴다. 옛 규칙이 지워지면
+ * 이 파일만 남고 화면은 그대로다.
+ *
+ * 여기 있는 모양은 T0 판(`components/plate/**`)과 **같은 재료**다 — 코드 창 하나에만 틀이
+ * 있고, 보기는 auto-fit 격자이고, 판정은 왼쪽 선과 낱말이다. 학습자가 1단에서 5단으로
+ * 올라갈 때 화면이 다시 배우게 하지 않는다. */
+
+/* 오버레이 껍데기 — `.proof` 가 fixed 라 이 상자는 흐름에서 빠진다. */
+.course-run {
+  position: relative;
+  z-index: 20;
+}
+
+/* ───────── 코드 창 — 2·3·4단의 「어느 줄인가」 ─────────
+   T0 의 `.code` 와 같은 값이다: 16px · 1.85 · 줄번호 sticky · 가로 스크롤은 창 안에. */
+.course-run .cc-window {
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--code-bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-4);
+  line-height: var(--lh-code);
+  list-style: none;
+}
+
+.course-run .cc-window li {
+  display: flex;
+  gap: 0;
+  align-items: stretch;
+  min-width: max-content;
+  white-space: pre;
+}
+
+.course-run .cc-window li.target {
+  background: var(--surface-3);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+/* 줄번호는 가로로 밀어도 제자리에 남는다 — 「몇 행」을 묻는 문제의 답이 화면에서 안 사라진다. */
+.course-run .cc-ln {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 3.2em;
+  padding: 0 .9em 0 0;
+  border-right: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  user-select: none;
+}
+
+.course-run .cc-window li > :not(.cc-ln) { padding: 0 1em }
+
+.course-run .cc-window li.target .cc-ln {
+  background: var(--surface-3);
+  color: var(--text);
+  font-weight: var(--fw-bold);
+}
+
+/* 4단 한 줄 편집 — 창 안에서 그 줄만 입력칸이 된다. */
+.course-run .cc-line {
+  flex: 1;
+  min-width: 0;
+  margin: 2px 1em;
+  padding: 0 var(--s-2);
+  border: 1px solid var(--accent);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  resize: none;
+}
+
+.course-run .cc-line:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+.course-run .cc-inserted {
+  margin: 0;
+  padding: var(--s-2) var(--s-4);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+  background: var(--accent-weak);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-3);
+  line-height: var(--lh-code);
+  white-space: pre-wrap;
+}
+
+/* ───────── 보기 — T0 의 `.choices` 와 같은 격자 ───────── */
+.course-run .cc-picks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: var(--s-3);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.course-run .cc-pick {
+  display: grid;
+  gap: var(--s-1);
+  width: 100%;
+  min-width: 0;
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-4);
+  line-height: var(--lh-body);
+  text-align: left;
+  word-break: keep-all;
+  cursor: pointer;
+  transition: border-color var(--dur-fast), background var(--dur-fast);
+}
+
+.course-run .cc-pick:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+}
+
+.course-run .cc-pick:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.course-run .cc-pick code {
+  font-family: var(--font-mono);
+  font-size: .92em;
+}
+
+.course-run .cc-pick small {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: var(--fs-2);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.course-run .cc-pick.on {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+  background: var(--accent-weak);
+}
+
+.course-run .cc-pick.right {
+  border-color: var(--ok);
+  box-shadow: inset 0 0 0 1px var(--ok);
+  background: var(--ok-bg);
+}
+
+.course-run .cc-pick.wrong {
+  border-color: var(--bad);
+  box-shadow: inset 0 0 0 1px var(--bad);
+  background: var(--bad-bg);
+}
+
+.course-run .cc-pick:disabled { cursor: default }
+
+.course-run .cc-slot {
+  padding: 2px var(--s-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: var(--fs-2);
+  cursor: pointer;
+}
+
+.course-run .cc-slot.on {
+  border-color: var(--accent);
+  background: var(--accent-weak);
+  color: var(--accent);
+  font-weight: var(--fw-bold);
+}
+
+/* ───────── 5단 편집기 · 프롬프트 ─────────
+   백지 재구현은 이 화면에서 가장 오래 머무는 자리다. 코드 창과 같은 종이·같은 눈금이라야
+   왼쪽의 사양과 오른쪽의 내 답이 한 벌로 읽힌다. */
+.course-run .cc-editor,
+.course-run .cc-prompt {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--code-bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-4);
+  line-height: var(--lh-code);
+  tab-size: 2;
+  resize: vertical;
+}
+
+.course-run .cc-editor:focus-visible,
+.course-run .cc-prompt:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+.course-run .cc-mine { white-space: pre-wrap }
+
+.course-run .cc-spec {
+  display: grid;
+  gap: var(--s-2);
+  margin: 0;
+  color: var(--text);
+  font-size: var(--fs-3);
+  line-height: var(--lh-body);
+}
+
+.course-run .cc-spec dt {
+  color: var(--text-muted);
+  font-size: var(--fs-2);
+  font-weight: var(--fw-bold);
+}
+
+.course-run .cc-spec dd {
+  max-width: var(--measure);
+  margin: 0;
+  word-break: keep-all;
+}
+
+.course-run .cc-spec pre,
+.course-run .cc-files pre {
+  min-width: 0;
+  margin: 0;
+  padding: var(--s-2) var(--s-4);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--code-bg);
+  font-family: var(--font-mono);
+  font-size: var(--fs-3);
+  line-height: var(--lh-code);
+}
+
+.course-run .cc-handoff {
+  display: grid;
+  gap: var(--s-2);
+  min-width: 0;
+  margin: 0;
+}
+
+/* ───────── 곁글 ───────── */
+.course-run .cc-reason {
+  margin-top: var(--s-4);
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--border);
+}
+
+.course-run .cc-folded,
+.course-run .cc-commit,
+.course-run .cc-answer,
+.course-run .cc-exec,
+.course-run .cc-oneliner,
+.course-run .cc-justpassed {
+  max-width: var(--measure);
+  margin: 0;
+}
+
+.course-run .cc-files {
+  color: var(--text);
+  font-size: var(--fs-3);
+}
+
+.course-run .cc-files summary {
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.course-run .cc-files ul {
+  margin: var(--s-2) 0 0;
+  padding-left: 1.2em;
+}
+
+/* ───────── 막힘 패널 — 「모르겠어요」의 처방 ─────────
+   사다리와 같은 자리, 같은 종이. `reprint` 클래스는 Esc ② 의 판정용이라 남긴다. */
+.course-run .cc-stuck {
+  display: grid;
+  gap: var(--s-3);
+  min-width: 0;
+  margin: 0;
+  padding: var(--s-4);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.course-run .cc-stuck:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.course-run .cc-stuck h3 {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: var(--fs-4);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+}
+
+.course-run .cc-stuck .note { margin: 0 }
+
+/* ───────── 단 판정 카드 ───────── */
+.course-run .cc-done {
+  display: grid;
+  gap: var(--s-4);
+  max-width: min(100%, 640px);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--text);
+}
+
+.course-run .cc-done h2 {
+  margin: 0;
+  font-size: var(--fs-6);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  word-break: keep-all;
+}
+
+/* 통과·미통과는 낱말이 먼저고 색이 뒤다 — 색맹 대비로 굵기도 함께 바뀐다. */
+.course-run .cc-tally {
+  margin: 0;
+  font-size: var(--fs-5);
+  font-variant-numeric: tabular-nums;
+}
+
+.course-run .cc-tally .pass {
+  color: var(--ok);
+  font-weight: var(--fw-bold);
+}
+
+.course-run .cc-tally .fail {
+  color: var(--bad);
+  font-weight: var(--fw-bold);
+}
+
+.course-run .cc-done-acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  align-items: center;
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--border);
+}
+
+.course-run .cc-empty { max-width: var(--measure) }

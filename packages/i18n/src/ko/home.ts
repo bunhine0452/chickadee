@@ -73,19 +73,12 @@ export const home = {
   'home.trackT3': 'T3',
 
   // 단원 레일에 세로로 서는 짧은 이름. `home.layer*K` 와 같은 다섯 단계다.
-  'home.run0': '0단계',
-  'home.run1': '1단계',
-  'home.run2': '2단계',
-  'home.run3': '3단계',
-  'home.run4': '4단계',
 
   // ── 숙련도·만기 라벨 (components/home/labels.ts) ─────────────────────────
   'home.layerLabel': '{{n}} · {{k}}',
   'home.layerN': '{{n}}단계',
   'home.layerText': '숙련도 {{n}} / 4 · {{k}} · {{plain}}',
   'home.layerTextShort': '숙련도 {{n}} / 4',
-  'home.railLabel': '{{no}}단원 · 평균 {{run}}',
-  'home.passesLabel': '{{track}} · 숙련도 {{n}}단계',
 
   // 02 §3.5 `labelFor(due)`. 표는 라벨 근사이고 결정은 FSRS 가 한다.
   'home.dueNone': '예정 없음',
@@ -95,26 +88,13 @@ export const home = {
   'home.dueWeeks': '{{n}}주 뒤',
 
   // ── 홈 화면 (screens/home/HomeScreen.tsx) ────────────────────────────────
-  'home.guide': '다음은 「{{name}}」입니다. {{layer}}.',
 
   'home.reingestTitle': '재인제스트 필요',
-  'home.reingestPlain': '= 리포를 다시 읽어야 합니다',
   'home.reingestNote':
     '문법·쿼리·카드 생성기·문법 사전 중 하나가 바뀌었습니다. 리포를 다시 읽으면 카드와 '
     + '사용처를 새로 만듭니다 — <b>익힌 숙련도는 개념에 붙어 있어 그대로 남습니다</b>.',
 
-  'home.boardTitle': '<em>{{repo}}</em> 단원',
-  'home.boardPlain': '= 내 리포의 기능 지도',
-  'home.boardNote':
-    '단원 하나가 내 리포의 실제 기능 하나입니다. 커밋과 파일에서 뽑은 개념 {{concepts}}개 중 '
-    + '<b>{{printed}}개</b>를 배웠습니다.',
 
-  'home.inkTitle': '숙련도',
-  'home.inkPlain': '= 얼마나 익혔나',
-  'home.inkTag': '4단계 = 다 익힘',
-  'home.inkNote':
-    '숙련도는 <b>맞힌 횟수</b>가 아니라 <b>시간을 두고 다시 맞힌 횟수</b>로 쌓입니다. '
-    + '「모르겠어요」를 누르면 한 단계 내려가고 그만큼 빨리 다시 나옵니다.',
 
   'home.gapsTitle': '아직 안 배운 문법',
   'home.gapsPlain': '= 내 코드엔 있는데 아직 문제로 안 나온 문법',
@@ -127,66 +107,42 @@ export const home = {
   // 단원 하나는 한 폴더에 파일 셋(`MIN_FILES_FOR_UNIT`)부터다.
   'home.noSheetsRead':
     '파일 {{n}}개를 읽었지만 단원은 없습니다 — 한 폴더에 파일이 세 개는 있어야 기능 하나가 '
-    + '됩니다. 문제는 그래도 만들어집니다. 왼쪽 「오늘 할 것」을 보세요.',
-  'home.boardNoteNoSheets':
-    '단원 하나가 내 리포의 실제 기능 하나입니다. 이 리포에는 아직 단원이 없어 개념을 단원 '
-    + '단위로 세지 않습니다.',
+    + '됩니다. 문제는 그래도 만들어집니다. 위의 「오늘 할 것」을 보세요.',
 
   // ── 마스트헤드 (components/home/Masthead.tsx) ────────────────────────────
-  'home.brandLine': '내 코드가 교재입니다',
-  'home.ticket': '오늘 요약',
   'home.tkRepo': '리포',
-  'home.tkDate': '날짜',
-  'home.tkStreak': '연속 학습',
-  'home.tkDay': '일',
-  'home.tkInk': '평균 숙련도',
-  'home.tkAvgLayer': '단계',
   'home.settings': '설정',
+  'home.repos': '서가',
+  'home.nav': '주요 이동',
 
   // ── 숙련도 척도 (components/home/InkScale.tsx) ───────────────────────────
   // 색면 대신 문장이 정보를 나른다 (05 §9).
-  'home.inkScaleSaid': '숙련도 다섯 단계. {{parts}}.',
-  'home.inkScalePart': '{{n}} {{k}} {{count}}개',
   // 세는 말. 한국어는 수 뒤에 단위가 붙고 영어는 붙지 않아 `en` 이 빈 문자열이다 —
   // 빈 값은 폴백을 타지 않는다(`undefined` 만 폴백한다).
-  'home.countUnit': '개',
 
   // ── 컬러 바 (components/home/ColorBar.tsx) ───────────────────────────────
-  'home.barTitle': '지난 14일 · 학습량',
-  'home.barNote': '칸 하나가 하루. 색이 진할수록 오래 공부했습니다.',
-  'home.barSaid': '지난 14일 학습량. 공부한 날 {{printed}}일, 모두 {{total}}분.',
-  'home.barToday': '오늘',
-  'home.barDaysAgo': '{{n}}일 전',
-  'home.barCell': '{{when}} · {{amount}}',
-  'home.barRest': '쉼',
-  'home.mins': '{{n}}분',
 
   // ── 다시 풀 개념 (components/home/ConceptList.tsx) ───────────────────────
-  'home.retake': '다시 풀 개념',
-  'home.retakeEmpty': '다시 풀 개념이 아직 없습니다. 첫 문제를 풀면 여기에 쌓입니다.',
 
   // ── 아직 못 만든 문제 예고 (components/home/Forecast.tsx) ─────────────────
-  'home.forecastNext': '{{n}}단원 ~',
   // 커밋이 필요한 것은 책임 배치 한 종뿐이다 — 영향 반경·흐름·방향은 import 관계로 만들어져
   // 세션에 실제로 나온다. 「T2 를 낼 수 없다」는 그 문제 옆에서 거짓말이었다 (D170 ⑤).
-  'home.forecastCannot':
-    '<b>책임 배치 문제는 아직 만들 수 없습니다.</b> 정답지가 실제 커밋인데 지금 커밋은 '
-    + '<b>{{n}}개</b>입니다. import 관계로 만드는 영향 반경·흐름·방향 문제는 오늘 할 것에 '
-    + '섞입니다.',
-  'home.forecastLater':
-    '<b>아직 문제가 만들어지지 않았습니다.</b> 커밋이 쌓이면 소스를 다시 읽어 단원을 '
-    + '자동으로 늘립니다. 지금 읽은 파일은 <b>{{n}}개</b>입니다.',
-  'home.forecastMarkCannot': '불가',
-  'home.forecastMarkLater': '준비 중',
 
   // ── 아직 안 배운 문법 (components/home/GapsPanel.tsx) ─────────────────────
+  // ── 아직 못 하는 것 · 책임 배치 (D170 ⑤) ─────────────────────────────────
+  // 커밋이 필요한 것은 책임 배치 한 종뿐이다 — 영향 반경·흐름·방향은 import 관계로
+  // 만들어져 오늘 할 것에 실제로 섞인다.
+  'home.forecastTitle': '책임 배치 문제',
+  'home.forecastCannot':
+    '정답지가 실제 커밋인데 이 리포의 커밋은 <b>{{n}}개</b>입니다. import 관계로 만드는 '
+    + '영향 반경·흐름·방향 문제는 오늘 할 것에 섞입니다.',
+
   'home.gapsEmpty': '아직 안 배운 문법이 없습니다. 내 코드의 문법은 모두 문제로 나왔습니다.',
   'home.gapsCount': '<b>{{n}}</b>번 등장',
   'home.gapsMake': '문제 만들기',
   'home.gapsMakeFor': '{{label}} 문제 만들기',
 
   // ── 아직 안 열린 것 (components/home/LockedPanel.tsx · D96) ──────────────
-  'home.locked': '아직 안 열린 것',
   'home.lockedTitle': 'T1 필사',
   'home.lockedBody':
     '이 리포의 문법을 조금 익힌 뒤에 열립니다. 지금은 어느 블록을 봐도 처음 보는 문법이 '
@@ -216,45 +172,31 @@ export const home = {
   'home.zeroChapterDone': '0장을 마쳤습니다. 언제든 다시 열 수 있습니다.',
 
   // ── 개념 (components/home/Node.tsx) ──────────────────────────────────────
-  'home.nodeLabel': '{{name}}. {{track}}. {{layer}}. {{state}}.',
   'home.stateDone': '익힘',
   'home.stateCurrent': '지금 여기',
   'home.stateLocked': '아직 문제가 없음',
   'home.stateOpen': '다음 차례',
 
   // ── 개념 상세 (components/home/NodeDetail.tsx) ───────────────────────────
-  'home.detail': '{{name}} 상세',
-  'home.detailTitleLocked': '{{name}} — 아직 문제가 없습니다',
-  'home.detailLockedBody':
-    '이 개념은 앞 문제가 먼저입니다. 앞 문제를 풀면 바로 열립니다. 순서는 개념의 선행 '
-    + '관계에서 나옵니다.',
-  'home.detailDone': '4단계라 다 익혔습니다. 시간이 지나면 한 단계 내려가고 그때 다시 나옵니다.',
-  'home.detailNext': '다음 복습은 {{due}}입니다. 맞히면 {{n}}단계가 됩니다.',
   'home.detailGo': '이 문제 풀기',
-  'home.detailClose': '닫기',
 
   // ── 단원 (components/home/Sheet.tsx) ─────────────────────────────────────
   // 단원 색인 띠 (D133). 칩 안의 이름은 잘릴 수 있어 읽히는 이름은 따로 든다.
-  'home.sheetIndex': '단원 목록',
-  'home.sheetChip': '{{no}}단원 · {{name}} · {{all}}개 중 {{done}}개 익힘',
-  'home.sheetStamp': '완료',
+  'home.unitsTitle': '단원',
+  'home.unitsSummary': '개념 {{concepts}}개 중 {{learned}}개를 배웠습니다',
   'home.sheetSig': '{{n}}단원',
-  'home.sheetFeature': '기능 {{n}}',
   'home.sheetNoPath': '경로 없음',
   'home.sheetMeta': '{{where}} · 파일 {{files}}개 · 개념 {{concepts}}개',
-  'home.sheetStatusLocked': '{{n}}단원을 먼저',
-  'home.sheetStatusPrinting': '학습 중 {{done}} / {{all}}',
 
   // ── 오늘 할 것 (components/home/TodayPanel.tsx) ──────────────────────────
   'home.todayTitle': '오늘 할 것',
-  'home.todayPlain': '= 오늘 풀 문제',
   'home.todayEmpty':
     '오늘은 풀 문제가 없습니다. 리포를 더 파거나 내일 다시 오세요 — 없는 것을 억지로 '
     + '채우지 않습니다.',
   'home.todayCount': '<b>{{plates}}</b>문제 · 약 <b>{{mins}}</b>분',
   'home.todayList': '오늘 나올 문제',
-  'home.todayDays': '지난 {{n}}일 학습 기록',
   'home.todayStart': '학습 시작',
+  'home.todayStreak': '연속 {{n}}일',
   // 미리보기의 자리 이름 (D170 ④). 개념 이름은 세션이 열려야 정해지므로 자리만 말한다.
   'home.previewNewT0': '새 문법 문제',
   'home.previewT1': '필사 한 문제',

@@ -80,19 +80,17 @@ export const core = {
   'settings.look.localeNote':
     '언어를 바꾸면 화면을 다시 그립니다. 번역이 없는 문구는 한국어로 나옵니다.',
 
-  // ── 모양 절의 스위치 두 벌. 마스트헤드가 같은 두 벌을 쓴다 — 키는 하나씩만 둔다.
+  // ── 모양 절. D182 가 장식을 없애면서 「장식 보이기·숨기기」 스위치가 빠졌다 —
+  // 끌 수 있는 스위치가 있다는 것은 켤 값이 있다는 뜻인데 없다(정본 §6).
   'settings.look.title': '모양',
-  'settings.look.plain': '= 화면 밝기와 장식',
+  'settings.look.plain': '= 화면 밝기와 움직임',
   'settings.look.process': '화면',
   'settings.look.themeLight': '밝게',
   'settings.look.themeDark': '어둡게',
   'settings.look.themeSwitch': '밝게 · 어둡게 전환',
-  'settings.look.trimOff': '장식 보임',
-  'settings.look.trimOn': '장식 숨김',
-  'settings.look.trimSwitch': '장식 보이기 · 숨기기',
   'settings.look.note':
-    '여기서 고른 것은 저장되어 다음에 열 때도 그대로입니다. 「장식 숨김」은 배경 무늬와 '
-    + '기울기만 끄고 글자와 배치는 1px 도 바꾸지 않습니다.',
+    '여기서 고른 것은 저장되어 다음에 열 때도 그대로입니다. 밝기를 바꿔도 글자와 배치는 '
+    + '1px 도 바뀌지 않습니다.',
 
   // ── 화면 머리와 절 제목 (05 §2.1 — 은유 옆에 평문) ───────────────────────
   'settings.title': '설정',

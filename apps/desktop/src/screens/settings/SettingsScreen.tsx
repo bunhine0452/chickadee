@@ -13,6 +13,7 @@ import {
 import {
   DEFAULTS, loadEditorAssist, loadSettings, saveEditorAssist, saveSetting, useAppearance,
 } from '../../data/settings.js';
+import { Page } from '../../components/shell/Page.js';
 import { useUi } from '../../store.js';
 import { DictLangPanel, type DictLang } from './DictLangPanel.js';
 import { GlobPanel } from './GlobPanel.js';
@@ -50,11 +51,6 @@ function activeRepoId(): number | null {
 const themeOptions = () => [
   { v: 'light' as const, label: t('settings.look.themeLight') },
   { v: 'dark' as const, label: t('settings.look.themeDark') },
-];
-
-const trimOptions = () => [
-  { v: 'off' as const, label: t('settings.look.trimOff') },
-  { v: 'on' as const, label: t('settings.look.trimOn') },
 ];
 
 /**
@@ -297,8 +293,8 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
   const s = settings ?? { ...DEFAULTS, tz: Intl.DateTimeFormat().resolvedOptions().timeZone };
 
   return (
-    <main className="settings" tabIndex={-1}>
-      <header className="set-head">
+    <Page className="settings" head={(
+      <header className="set-head l-row">
         <h1>
           {t('settings.title')}
           <span className="pl">{t('settings.plain')}</span>
@@ -307,6 +303,8 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
           {t('home.back')}
         </FlatButton>
       </header>
+    )}
+    >
 
       <Section id="set-repo" title={t('settings.repo.title')} plain={t('settings.repo.plain')}>
         {repos.length === 0 ? (
@@ -439,12 +437,6 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
             label={t('settings.look.themeSwitch')}
             onChange={appearance.setTheme}
           />
-          <Switch
-            options={trimOptions()}
-            value={appearance.trim}
-            label={t('settings.look.trimSwitch')}
-            onChange={appearance.setTrim}
-          />
         </div>
         <div className="set-row">
           <span className="set-k">{t('settings.look.motion')}</span>
@@ -568,6 +560,6 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
       </p>
 
       <LiveRegion text={note} />
-    </main>
+    </Page>
   );
 }
