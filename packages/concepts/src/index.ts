@@ -39,7 +39,7 @@ export type {
   TransferSource,
 } from './new-rank.js';
 export {
-  ZERO_CHAPTER_MAX, ZERO_CHAPTER_MAX_DEPTH, ZERO_CHAPTER_ORDER, ZERO_CHAPTER_UNIT,
+  ZERO_CHAPTER_MAX_DEPTH, ZERO_CHAPTER_ORDER, ZERO_CHAPTER_UNIT,
   isDone as zeroChapterDone, rootCleared, shouldOpen as shouldOpenZeroChapter, zeroChapterPlates,
 } from './zero-chapter.js';
 export type {

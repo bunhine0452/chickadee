@@ -1,15 +1,16 @@
 /**
  * 「0장 — 이 언어의 바닥」 (D136 · D137).
  *
- * 「끝이 있다」를 못박는 테스트가 이 파일의 요점이다 — 상한 8과 끝 조건 셋. 0장이
- * 「과정」으로 자라나려면 이 테스트들을 먼저 고쳐야 하고, 그때 D136 을 다시 읽게 된다.
+ * 「끝이 있다」를 못박는 테스트가 이 파일의 요점이다 — 끝 조건 셋과, 후보를 **자르지
+ * 않는다**는 것(D184). 0장이 「과정」으로 자라나려면 이 테스트들을 먼저 고쳐야 하고, 그때
+ * D136 을 다시 읽게 된다.
  */
 import { loadDict } from '@chickadee/dictionary';
 import { describe, expect, test } from 'vitest';
 
 import { prereqDepth, type BestSite, type NewcomerFlag, type RootResult } from './new-rank.js';
 import {
-  ZERO_CHAPTER_MAX, ZERO_CHAPTER_MAX_DEPTH, isDone, rootCleared, shouldOpen, zeroChapterPlates,
+  ZERO_CHAPTER_MAX_DEPTH, isDone, rootCleared, shouldOpen, zeroChapterPlates,
   type ZeroChapterInput, type ZeroChapterPlate,
 } from './zero-chapter.js';
 
@@ -96,11 +97,10 @@ describe('담기는 판', () => {
     expect(plates.map((p) => p.conceptId)).toEqual(['ts/b', 'ts/a', 'ts/up']);
   });
 
-  test('상한 24 를 넘지 않는다 — 유한하다는 것이 이 대지의 조건이다', () => {
+  test('후보를 자르지 않는다 — 60개면 60장이다 (D184)', () => {
     const ids = Array.from({ length: 60 }, (_, i) => `ts/c${String(i).padStart(2, '0')}`);
     const best = Object.fromEntries(ids.map((id) => [id, site(0)]));
-    expect(zeroChapterPlates(input(ids, best))).toHaveLength(ZERO_CHAPTER_MAX);
-    expect(ZERO_CHAPTER_MAX).toBe(24);
+    expect(zeroChapterPlates(input(ids, best))).toHaveLength(60);
   });
 });
 
@@ -173,31 +173,30 @@ describe('뿌리 통과', () => {
   });
 });
 
-describe('상한이 조용히 넘치지 않는다 (D156)', () => {
+describe('상한이 없다 — 후보가 전부 든다 (D184)', () => {
   /**
-   * 언어마다 「0장 후보」(essential 중 선행 깊이 ≤ 2)가 상한을 넘지 않는가.
+   * D156 의 시험은 「후보가 상한 24 를 넘으면 알파벳순 동점 키가 프롤로그를 정한다」를 막았다.
+   * 상한을 폐지하면서(D184) 그 전제가 사라졌다 — 자르지 않으니 무엇을 자를지 이름이 정할 일이
+   * 없다. 대신 실제 사전의 크기로 「전부 든다」를 못박는다: 언어마다 essential ∧ 깊이 ≤ 2 인
+   * 개념 수와 0장 판 수가 같아야 한다. 누가 상한을 다시 넣으면 여기서 걸린다.
    *
-   * 넘으면 `zeroChapterPlates` 가 `.slice(0, ZERO_CHAPTER_MAX)` 로 자르는데, 동점을 가르는
-   * 넷째 키가 **`conceptId` 알파벳순**이라 어느 개념이 프롤로그에 들어갈지를 **이름이 정한다.**
-   * D147 이 상한을 8→24 로 올리며 고른 근거가 「후보를 상한 언저리에 두어 *무엇을 자를까*가
-   * 임의의 문제가 되지 않게」였고, 이 시험이 그 근거를 지킨다.
-   *
-   * 열 언어 조사(D156)가 잰 바로는 C·Java·C#·Python 이 정확히 24 에 붙고 Swift 는 25 로 넘친다.
-   * 그 사전들이 들어오는 순간 여기서 걸리고, 그때 상한을 올릴지(24판 = 12일, D12)를 **결정한다.**
-   * 걸린 채로 지나가지 않는 것이 이 시험의 전부다.
+   * 판 수 자체는 세되 강제하지 않는다(D181 이 Rust 줄 수에 한 것과 같다). 첫 기능 챕터까지의
+   * 날수는 상수가 아니라 커리큘럼 문서(`docs/curriculum/<lang>.md` §1.5)가 정한다.
    */
-  test('언어마다 0장 후보가 상한 이하다 — 넘으면 이름이 프롤로그를 정한다', () => {
+  test('언어마다 0장 판 수 = essential ∧ 깊이 ≤ 2 인 개념 수', () => {
     const dict = loadDict();
-    const over: string[] = [];
+    const mismatch: string[] = [];
     for (const [lang, meta] of dict.langs) {
       const essential = meta.essential;
       if (essential.length === 0) continue;
-      const depth = prereqDepth(essential, (id) => dict.concepts.get(id)?.prereq ?? []);
+      const prereqOf = (id: string): string[] => dict.concepts.get(id)?.prereq ?? [];
+      const depth = prereqDepth(essential, prereqOf);
       const candidates = essential.filter((id) => (depth.get(id) ?? 0) <= ZERO_CHAPTER_MAX_DEPTH);
-      if (candidates.length > ZERO_CHAPTER_MAX) {
-        over.push(`${lang}: ${candidates.length}/${ZERO_CHAPTER_MAX}`);
+      const plates = zeroChapterPlates({ essential, bestSiteOf: () => site(0), prereqOf });
+      if (plates.length !== candidates.length) {
+        mismatch.push(`${lang}: ${plates.length} 장 / 후보 ${candidates.length}`);
       }
     }
-    expect(over).toEqual([]);
+    expect(mismatch).toEqual([]);
   });
 });

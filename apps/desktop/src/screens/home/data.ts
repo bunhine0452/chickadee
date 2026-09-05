@@ -358,8 +358,8 @@ function buildSheets(
     const sum = sheet.nodes.reduce((a, n) => a + n.shownLayer, 0);
     sheet.avgLayer = asLayer(sheet.nodes.length ? Math.floor(sum / sheet.nodes.length) : 0);
     // 0장만 끝나는 조건이 셋이다 (D136 · D147). 나머지 대지는 「전부 1겹」 하나뿐이라
-    // 여기서 갈라 둔다 — 0장에 「전부 1겹」만 걸면 그 언어를 이미 아는 사람이 24판을
-    // 다 찍어야 벗어난다.
+    // 여기서 갈라 둔다 — 0장에 「전부 1겹」만 걸면 그 언어를 이미 아는 사람이 전부를
+    // 다 찍어야 벗어난다 (상한은 D184 로 없어졌다).
     const done = sheet.zero
       ? zeroChapterDone({
           plates: sheet.nodes.map((n) => ({
