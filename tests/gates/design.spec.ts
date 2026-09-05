@@ -1,5 +1,6 @@
 /**
- * 06 §2 디자인 품질 게이트 — 활자 하한 · 대비 · 본문 행 길이 · 16px 실루엣 · 모션 상한.
+ * 06 §2 디자인 품질 게이트 — 활자 하한 · 대비 · 본문 행 길이 · 모션 상한.
+ * 실루엣 게이트는 D182 로 사라졌다(마스코트가 화면에 없다).
  *
  * 재는 코드는 앱 안(`devtools/gates.ts`)에 있고 여기서는 **화면을 열어 부르기만** 한다.
  * 06 §2 가 정한 순회는 홈 · T0 · T1 · T2 · 요약 · 야간반 여섯이다. `fixtures/ipc/tiny` 로
@@ -9,7 +10,7 @@ import { test, expect } from '../support/fixture.js';
 import type { Page } from '@playwright/test';
 
 import {
-  T1_SKIP, T2_SKIP, allowedBySel, deeSilhouette, gotoDev, loadAllow, motionOver, settleLifer,
+  T1_SKIP, T2_SKIP, allowedBySel, gotoDev, loadAllow, motionOver, settleLifer,
   runGates, startSession, submit, toNight, toShelf, toSummary, answerKey,
 } from '../support/gates.js';
 import type { AppDb } from '../support/app-db.js';
@@ -90,26 +91,9 @@ for (const screen of SCREENS) {
 test.skip(`T1 클론 코딩 — 건너뜀: ${T1_SKIP}`, () => {});
 test.skip(`T2 구조 — 건너뜀: ${T2_SKIP}`, () => {});
 
-test('16px 실루엣 — 캡–뺨–턱받이 3단 열 ≥ 2 · 뺨 띠 ≥ 2px', async ({ page, app: _app }) => {
-  await gotoDev(page);
-  const r = await deeSilhouette(page, 16, 4);
-  // 실패했을 때 사람이 보는 것은 숫자가 아니라 래스터다.
-  expect(r.pass, `3단 열 ${r.bandCols} · 뺨 ${r.cheekPx}px\n${r.ascii}`).toBe(true);
-  expect(r.bandCols).toBeGreaterThanOrEqual(2);
-  expect(r.cheekPx).toBeGreaterThanOrEqual(2);
-});
-
-/**
- * 06 §2 가 고정한 4건 — `#deeHead` 와 배지 24 · 32px. 16px 만 보면 큰 크기에서 판이
- * 뭉개지는 것을 놓친다.
- */
-test('실루엣 — 24 · 32px 배지도 3단이 산다', async ({ page, app: _app }) => {
-  await gotoDev(page);
-  for (const size of [24, 32]) {
-    const r = await deeSilhouette(page, size, 4);
-    expect(r.pass, `${size}px · 3단 열 ${r.bandCols} · 뺨 ${r.cheekPx}px\n${r.ascii}`).toBe(true);
-  }
-});
+/* 마스코트 실루엣 게이트 둘(16px · 24·32px)은 **지웠다** — D182 가 마스코트를 화면에서
+   내렸으므로 잴 대상이 없다. 죽은 게이트를 초록으로 두면 다음 사람이 그 그림이 아직
+   화면에 있다고 읽는다. `deeSilhouette` 헬퍼와 `__audit.dee` 도 쓰는 이가 없어졌다. */
 
 /**
  * 모션 상한 720ms (06 §2). **정적 전수는 `scripts/check-motion.mjs` 가 이미 본다** —

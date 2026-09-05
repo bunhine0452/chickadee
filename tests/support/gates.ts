@@ -37,10 +37,6 @@ export interface GateReport {
   measureViolations: MeasureRow[];
   pass: boolean;
 }
-export interface DeeReport {
-  size: number; ly: number; smallMark: boolean; headMark: boolean;
-  bandCols: number; cheekPx: number; darkPx: number; pass: boolean; ascii: string;
-}
 export interface MotionRow { sel: string; kind: 'animation' | 'transition'; ms: number; name: string }
 
 // ───────── 다리 ─────────
@@ -75,7 +71,6 @@ export async function gotoDev(page: Page): Promise<void> {
 /** 페이지 안에서 본 `window.__audit`. 여기 없는 이름을 부르면 그 자리에서 터진다. */
 interface AuditHandle {
   gates: () => GateReport;
-  dee: (size: number, ly: number, small: boolean, head: boolean) => Promise<DeeReport>;
   motionOver: (limitMs: number, exempt: readonly string[]) => MotionRow[];
 }
 type WithAudit = typeof globalThis & { __audit: AuditHandle };
@@ -83,13 +78,6 @@ type WithAudit = typeof globalThis & { __audit: AuditHandle };
 /** 활자·대비·행 길이 한 벌 (06 §2 표의 앞 세 줄). */
 export const runGates = (page: Page): Promise<GateReport> =>
   page.evaluate(() => (globalThis as WithAudit).__audit.gates());
-
-/** 16px 실루엣 — `audit.dee(16, 4, true, true)` 그대로 (06 §2). */
-export const deeSilhouette = (page: Page, size = 16, ly = 4): Promise<DeeReport> =>
-  page.evaluate(
-    ([s, l]) => (globalThis as WithAudit).__audit.dee(s, l, true, true),
-    [size, ly] as const,
-  );
 
 /** 살아 있는 문서에서 상한을 넘은 모션. 정적 전수는 `scripts/check-motion.mjs` 가 본다. */
 export const motionOver = (page: Page, limitMs: number, exempt: readonly string[])

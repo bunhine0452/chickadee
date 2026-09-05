@@ -24,6 +24,8 @@
     "dict:schema": "tsx scripts/dict-schema.ts",
     "check:motion": "node scripts/check-motion.mjs",
     "test:gates": "pnpm test:seed && playwright test tests/gates",
+    "test:responsive": "pnpm test:seed && playwright test tests/gates/responsive.spec.ts",
+    "test:glyph": "pnpm test:seed && playwright test tests/gates/glyph.spec.ts",
     "test:visual": "pnpm test:seed && playwright test tests/visual",
     "test:e2e-ui": "pnpm test:seed && playwright test tests/e2e-ui",
     "version:sync": "node scripts/sync-version.mjs",
