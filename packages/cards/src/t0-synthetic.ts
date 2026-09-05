@@ -136,6 +136,10 @@ const ABSENCE: Readonly<Record<string, AbsenceReason>> = {
   // C++ 2부 — 표본 fmt 47 + nlohmann/json 480 파일에서 `auto [` 0곳 (D190 cpp 세션). 둘 다 C++11 을
   // 바닥 표준으로 지켜 C++17 문법을 안 쓴다 — 그 자리를 `first`/`second` 와 반복자 역참조가 가져갔다.
   'cpp/structured-binding': 'idiom',
+  // Swift 2부 — 표본 IceCubesApp 428파일에서 `weak var`·`unowned` 0곳 (D190 swift 세션). 그 자리를
+  // `[weak self]` 캡처 목록(10곳/5파일)이 가져갔다 — 상태를 `@Observable` 클래스와 값 타입이 들어
+  // 서로를 가리키는 저장 속성이 안 생긴다. 428파일은 작지 않으므로 `scale` 이 아니다.
+  'swift/arc-weak': 'idiom',
   // 다른 문법이 자리를 가져갔다. 표본 리포에서 `for (;;)` 0곳 · for-each 1곳 · 배열 1곳이고,
   // 그 자리를 스트림(9곳)과 람다(53곳)가 다 쓴다.
   'java/for-loop': 'idiom',

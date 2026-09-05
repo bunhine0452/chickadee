@@ -213,16 +213,18 @@ const DEBT_RATCHET: Record<string, number> = {
   // → **290**(csharp 합류 — 사전 0장에서 35장, essential 35. one_liner 281, point-picks 272/273).
   // → **331**(rs 합류 — 사전 0장에서 42장, essential 41. one_liner 322, point-picks 314/315).
   // → **369**(cpp 합류 — 사전 0장에서 38장, essential 38. one_liner 360, point-picks 348/349).
-  'blank-or-reason': 369,
-  'point-picks': 348,
-  'why-gate': 369,
+  // → **406**(swift 합류 — 사전 0장에서 37장, essential 37. 열 언어 전부 합류한 값. one_liner 396,
+  //   point-picks 385/386 — 남은 하나는 여전히 `ts/call-expression`).
+  'blank-or-reason': 406,
+  'point-picks': 385,
+  'why-gate': 406,
   // 6 → 11(D147) → 18(D148) → 26(D150) → **33**(D152, 파이썬 바닥 여덟). D150 이 「먼저 읽기」를
   // 0장 소속에서 「겹 0」으로 넓혀 `essential` 전량이 대상이 됐다. 새로 든 넷(`array-filter`
   // 의 `filter` · `array-map-immutable` 의 `map` · `arrow-function` 의 `=>` · 그리고
   // `array-destructuring` 은 영문 관사 `a` 가 정답 토큰과 겹쳤다)을 고쳐 채웠다.
   // 33 → 36(java 바닥 셋) → 38(sql 바닥 둘) → 42(java 바닥 여덟 완성) → 57(D166) → **65**(D177).
   // 111 → **117**(셋째 물결의 자바 몫 여섯. 위와 같은 단서가 붙는다).
-  'zero-one-liner': 360,
+  'zero-one-liner': 396,
 };
 
 describe('사전 저작 부채 (D145)', () => {

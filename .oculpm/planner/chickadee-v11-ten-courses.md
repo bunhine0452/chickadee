@@ -26,7 +26,7 @@ owner: claude-code
 - [x] c — 0부(기계 층) + 1·2부 전량 신규, 파서 ERROR 비율 실측, parts/c.ts {#l-c}
 - [x] cpp — 0부 + 1·2부 전량 신규, 파서 ERROR 비율 실측, parts/cpp.ts {#l-cpp}
 - [x] csharp — 0부 + 1·2부 전량 신규, 파서 ERROR 비율 실측, parts/csharp.ts {#l-csharp}
-- [~] swift — 0부 + 1·2부 전량 신규, 파서 ERROR 비율 실측, parts/swift.ts {#l-swift}
+- [x] swift — 0부 + 1·2부 전량 신규, 파서 ERROR 비율 실측, parts/swift.ts {#l-swift}
 
 ## A · 앱 — 언어 선택과 부 목차 {#a-app}
 - [ ] 설정 키 courseLang (null = 리포 주 언어) — store-sql 스키마·기본값·화면 저장 {#a-setting}
@@ -68,4 +68,5 @@ owner: claude-code
 | 2026-09-06T04:54:21+09:00 | #l-csharp | claude-code | ~→x |  | 35장(0부 8·1부 3·2부 24) · 골든 81/35 · eShopOnWeb ERROR 0% · ABSENCE 1 · 병합 ba6fa7e · 래칫 290/272/290/281 |
 | 2026-09-06T04:56:01+09:00 | #l-rs | claude-code | ~→x |  | 42장(0부 11·1부 7·2부 23) · 골든 105/44 · ai-pm 280 실측 · ABSENCE 1 · 병합 38c97e0 · 래칫 331/314/331/322 |
 | 2026-09-06T04:57:14+09:00 | #l-cpp | claude-code | ~→x |  | 38장(0부 13·1부 3·2부 22) · 골든 77/38 · fmt+json ERROR 4.6%(매크로) · ABSENCE 1 · 병합 2fdaef3 · 래칫 369/348/369/360 |
+| 2026-09-06T05:02:39+09:00 | #l-swift | claude-code | ~→x |  | 37장(0부 8·1부 4·2부 25) · 골든 89/37 · IceCubesApp ERROR 1.6% · ABSENCE 1 · 병합 351d165 · 래칫 406/385/406/396(최종) |
 <!-- oculpm:plan-log end -->
