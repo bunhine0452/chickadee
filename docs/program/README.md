@@ -116,22 +116,25 @@ CSS 는 **읽기 단에서 뺐다**. 사용처가 css 6,524 대 java 577 이라 
 
 ## 7. 착수 전에 등록부에 올릴 것
 
-D162 는 방향만 정했다. 구현하려면 행이 더 필요하다.
+D162 는 방향만 정했다. 구현에 필요했던 행은 2026-09-05 에 전부 올라갔다 — 병렬 세션 여덟, D164~D172.
 
-| 무엇 | 왜 결정인가 |
-|---|---|
-| 문항 체계 교체 (16유형) | 04 전체를 갈아엎는다 |
-| `card.kind` 다섯 추가 + `card.stage_no` | DDL. 지금 열둘이고 `repair`·`reimpl` 은 이미 예약돼 있다 |
-| **`appeal.track` CHECK 확장** | 지금 `('t1','t2')` 라 4·5단 이의가 **저장이 안 된다** |
-| `chapter` · `stage_log` 두 표 | 마이그레이션 0007 |
-| `entryUnits` 원소를 바이트 범위로 | D160 을 고친다 |
-| 자바 같은 패키지 참조 | `_imports.scm` + `resolveJava` |
+| 무엇 | 왜 결정인가 | 행 |
+|---|---|---|
+| 문항 체계 교체 (16유형) | 04 전체를 갈아엎는다 | D164 (`packages/cards/src/stage*.ts` · `packages/grading/src/stage.ts`) |
+| `card.kind` 다섯 추가 + `card.stage_no` | DDL. 열둘이었고 `repair`·`reimpl` 은 예약돼 있었다 | D164 (마이그레이션 0008) |
+| **`appeal.track` CHECK 확장** | `('t1','t2')` 라 4·5단 이의가 저장이 안 됐다 | D164 (0008) |
+| `chapter` · `stage_log` 두 표 | 마이그레이션 0007 | D165 (통과 판정·재검·오늘 15분 — `progress.ts`·`course-plan.ts`) |
+| `entryUnits` 원소를 바이트 범위로 | D160 을 고친다 | D168 (`request_path`·`request_hop`, `path.ranges_by_unit`) |
+| 자바 같은 패키지 참조 | `_imports.scm` + `resolveJava` | D163 |
+| 코드에 없는 규약 다섯 · 자바 관문 0 | 1·3단이 안 선다 | D166 (`proto/` 7 · `java/` 13) · D167 (`cs/` 43) |
+| 스키마 · 죽은 갈래 · 굽기 배선 · 화면 | 부록·졸업·앱 | D169 · D172 (`packages/course`) · D171 (`screens/course/`) |
 
 ---
 
 ## 8. 검증 못 한 것
 
 - **이 코스를 사람이 실제로 통과하는지 안 재 봤다.** 51일은 `EST_MIN` 에서 유도한 값이고 실측이 아니다.
+- 기계로 잰 것은 있다 — `MonggleMonggle` 로그인 챕터에서 2단 14 · 3단 5 · 4단 3 · 5단 3 장이 구워진다(D172, `packages/course/src/measure.test.ts`). 1단 `twin` 과 `cs/` 는 개념 캡처가 든 덤프가 없어 실리포에서 못 쟀다.
 - 4단 「제약 채점」이 실제 답안에서 거짓 어긋남을 얼마나 내는지 안 쟀다. T1 사다리의 실측(골든)은
   필사 기준이라 편집 기준으로는 다시 재야 한다.
 - 병렬 넷이 서로를 안 보고 썼다. 겹치는 판단(예: 4단의 필수 여부)은 이 문서가 조정했지만

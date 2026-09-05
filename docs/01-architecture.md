@@ -62,13 +62,14 @@
 | `cards` | `packages/cards` | `ConceptUse`, 파일 블록, 커밋 사실 | `T0Card / T1Card / T2Card` | concepts · store-sql · dictionary(D72) |
 | `scheduler` | `packages/scheduler` | `Mastery`, `ReviewLog`, 오늘 시각 | `TodayQueue`, 잉크 겹 전이, FSRS 간격 | store-sql · concepts(D72) · ts-fsrs |
 | `grading` | `packages/grading` | 답안 + 카드 (+ `AstLite`) | `Verdict` | ipc-client(parse) · store-sql(D72) |
+| `course` | `packages/course` | 챕터 id, 요청 줄기·스키마·커밋 행, `Dict` | `StageRequest` 조립 → 코스 카드 굽기(`bakeCourse`·`ensureChapterBaked`·`bakeSiteless`), 줄기 접기, 두 판 diff | cards · concepts · store-sql (D172 — `cards → concepts` 라 인제스트가 생성기를 못 부르므로 그 위에 둔 층) |
 | `ui` | `packages/ui` + `apps/desktop/src` | 위 전부 | DOM | 위 전부 (invoke 직접 호출 금지) |
 
 의존 방향 규칙(어기면 lint 실패 — `eslint no-restricted-imports` + `dependency-cruiser`, Rust 는 `Cargo.toml` 로 자연 강제):
 
 ```
 Rust:  app(ipc) → git | parse | store       (셋은 서로 의존 금지)
-TS:    ui → cards | scheduler | grading → concepts → dictionary | store-sql → ipc-client → @tauri-apps/api
+TS:    ui → course → cards | scheduler | grading → concepts → dictionary | store-sql → ipc-client → @tauri-apps/api
        cards | grading | concepts → text                    (text 는 아무것도 의존하지 않는다)
 ```
 
