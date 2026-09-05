@@ -6,7 +6,7 @@
  * 고르면 난이도 곡선이 파생된다(정본 §4). `const MAX = 10` 은 적격이고
  * `const [c, setC] = useState(0)` 은 부적격인 이유가 이 한 함수에 있다.
  */
-import { prereqClosure, type Dict } from '@chickadee/dictionary';
+import { isComputed, prereqClosure, type Dict } from '@chickadee/dictionary';
 
 /** 잉크 겹 0~4. 0 은 미인쇄 = 아직 모르는 것. */
 export type LayerOf = (conceptId: string) => number;
@@ -131,9 +131,14 @@ export function windowUnknown(
 }
 
 export function unknownCount(site: RankableSite, layerOf: LayerOf, dict: Dict): number {
+  // Prerequisites from the computed namespaces (`cs/`·`proto/`·…) are what lies *under* the
+  // syntax, not what is needed to read the line — they have no site of their own and are
+  // reached through the ladder and the site-less queue branch (D154·D157). Counting them
+  // here would push ordinary lines over `MAX_UNKNOWN_FOR_NEW` the moment the dictionary
+  // links a language concept to the machine beneath it (D173).
   const candidates = new Set([
     ...site.lineConcepts,
-    ...prereqClosure(dict, site.conceptId, PREREQ_DEPTH),
+    ...[...prereqClosure(dict, site.conceptId, PREREQ_DEPTH)].filter((id) => !isComputed(id)),
   ]);
   candidates.delete(site.conceptId);
   let n = [...candidates].filter((id) => layerOf(id) === 0).length;

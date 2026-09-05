@@ -26,7 +26,8 @@ test('01 홈 → 인쇄 시작 → 1판 정답', async ({ page, app }) => {
   await openHome(page);
 
   // 오늘의 인쇄가 판 수와 분을 먼저 말한다 (정본 §3-5).
-  await expect(page.locator('.today .today-n')).toHaveText(/2판 · 약 \d+분/);
+  // T0 둘 + 구조 한 판 — 홈 미리보기가 세션이 실제로 거는 수와 같다 (D140 · D170 ④).
+  await expect(page.locator('.today .today-n')).toHaveText(/3판 · 약 \d+분/);
   await expect(page.locator('.today .press-btn')).toContainText('인쇄 시작');
 
   await page.getByRole('button', { name: /인쇄 시작/ }).click();
@@ -65,7 +66,7 @@ test('02 2판 오답', async ({ page, app }) => {
   // 진단이 「고른 그것이 참이 되는 조건」을 말하는가, 다시 찍기가 큐에 들어가는가.
   await startPrinting(page);
   const queue = page.locator('.jobband .queue');
-  expect((await queueSpeech(queue)).cells).toBe(2);
+  expect((await queueSpeech(queue)).cells).toBe(3);
 
   const wrong = (answerKeyOf(app.db) % 4) + 1;
   await page.locator(`.ch[data-k="${wrong}"]`).click();
@@ -80,16 +81,16 @@ test('02 2판 오답', async ({ page, app }) => {
 
   // 큐가 한 칸 늘고 새 칸은 「지나온 것」 무늬다. 05 §11 은 5→6칸이라 적었으나
   // 그것은 5판짜리 큐의 수치이고, 규칙은 「다시 찍기 한 장이 들어간다」이다.
-  await expect.poll(async () => (await queueSpeech(queue)).cells).toBe(3);
+  await expect.poll(async () => (await queueSpeech(queue)).cells).toBe(4);
   await expect(page.locator('.jobband .queue i.review')).toHaveCount(1);
 
   // 원장 쪽 사실 — 부모를 가리키는 `retry` 행이 뒤에 붙었다 (02 §4 · `retryAt` = pos+3, 큐 끝에서 잘림).
   const rows = app.db
     .prepare('SELECT pos, role, parent_item_id AS parent FROM session_item ORDER BY pos')
     .all() as { pos: number; role: string; parent: number | null }[];
-  expect(rows.map((r) => r.role)).toEqual(['new', 'new', 'retry']);
-  expect(rows[2]?.parent).toBe(1);
-  expect(rows[2]?.pos).toBeGreaterThan(rows[0]?.pos ?? 0);
+  expect(rows.map((r) => r.role)).toEqual(['new', 'new', 'new', 'retry']);
+  expect(rows[3]?.parent).toBe(1);
+  expect(rows[3]?.pos).toBeGreaterThan(rows[0]?.pos ?? 0);
 });
 
 test('03 3판 `?` 사다리 1~4단', async ({ page }) => {
@@ -113,12 +114,13 @@ test('03 3판 `?` 사다리 1~4단', async ({ page }) => {
   await expect(ladder.locator('.rung-body h4')).toHaveText(/사전 3층/);
   await expect(ladder.locator('.rung-body .dict > div')).toHaveCount(3);
 
-  // 2단 — 아래층 진단. 첫 판의 `ts/string-literal` 은 **뿌리 개념이라 선행이 없다**(D113 뒤).
-  // 그때 화면은 줄 대신 「아래층은 모두 찍혀 있습니다」 진단을 낸다 — 그것을 확인한다.
+  // 2단 — 아래층 진단. 첫 판의 `ts/string-literal` 은 언어 선행이 없는 뿌리 개념이고,
+  // 그 아래에 깔린 기계 `cs/text-encoding` 하나만 선행으로 달려 있다(D167). 시드에는 그
+  // 판이 없으므로 줄 하나가 「아직 안 찍힘」으로 뜬다 — 뿌리라도 아래층이 비어 있지 않다.
   await ladder.locator('.rung[data-r="2"]').click();
   await expect(ladder.locator('.rung-body h4')).toHaveText(/아래층 진단/);
-  await expect(ladder.locator('.rung-body .prereq .pq')).toHaveCount(0);
-  await expect(ladder.locator('.rung-body p')).toContainText('아래층은 모두 찍혀 있습니다');
+  await expect(ladder.locator('.rung-body .prereq .pq')).toHaveCount(1);
+  await expect(ladder.locator('.rung-body .prereq .pq')).toContainText('글자와 바이트는 다르다');
 
   // 3단 — 같은 문법이 쓰인 다른 자리. 지금 보고 있는 줄은 빠진다.
   await ladder.locator('.rung[data-r="3"]').click();
