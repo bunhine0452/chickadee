@@ -1,0 +1,257 @@
+/*
+ * 배치 층 (정본 §6 · D182) — **폭 720~2560 · 높이 600 이상에서 깨지지 않는 뼈대.**
+ *
+ * 사용자 요구가 그대로 수치다: 「전체화면, 반쪽화면 이런 상태에서도 디자인이 깨지면 안 돼」.
+ * 1440 폭 모니터를 반으로 타일링하면 720 이고, 27인치 전체 화면이 2560 이다.
+ *
+ * 이 파일이 정하는 것은 **자리**뿐이다 — 색·활자·모양은 `tokens.css` 가 정하고 여기서는
+ * 그 이름만 쓴다. 규칙 셋이 전부다.
+ *
+ *   ① 본문은 `--measure` 를 넘지 않는다.       넓은 창에서 한 줄이 90자가 되면 눈이 줄을 잃는다.
+ *   ② 넓어지면 **여백이 늘고 단이 는다.**       본문 상자가 늘어나는 것이 아니다.
+ *   ③ 좁아지면 옆 패널이 **위아래로 쌓인다.**   가로로 밀려나 잘리지 않는다.
+ *
+ * 규칙을 **어길 수 없게** 만드는 자리가 두 곳이다. 격자·플렉스의 자식에 `min-width: 0`
+ * 을 걸어 두는 것(칸이 내용에 밀려 부풀지 않는다)과, 넓은 내용은 자기 상자 안에서
+ * 가로로 구르게 하는 것(`.u-scroll-x`). 실측: 이 둘이 없어 720 폭 코스 화면에서
+ * `document.scrollWidth` 가 998 이었다 — 창보다 278px 넓다.
+ *
+ * 지키는 자는 `tests/gates/responsive.spec.ts` 다. 여기 규칙을 고치면 그 게이트가 먼저 말한다.
+ */
+
+/*
+ * ── 브레이크포인트 ────────────────────────────────────────────────────────────
+ *
+ * 셋뿐이다. 더 두면 사이 폭마다 다른 화면이 되고, 그것을 다 볼 사람이 없다.
+ *
+ *   좁음   < 900px    한 단. 옆 패널은 본문 위나 아래로 쌓인다. (720 반쪽 타일링이 여기다)
+ *   보통   900~1400   옆 패널 + 본문 두 단. 목업이 상정한 폭이다.
+ *   넓음   > 1400px   여백이 늘고(가운데 정렬), 격자는 단이 는다.
+ *
+ * 경계값의 근거: 900 은 `--sidebar-w`(264) + `--measure`(36em ≈ 576px) + 여백 두 벌이
+ * 겨우 서는 폭이고, 1400 은 `--content-max`(1120) 에 좌우 여백 140px 씩이 붙는 폭이다.
+ * 그보다 넓어지면 늘릴 것이 본문이 아니라 여백밖에 없다.
+ *
+ * CSS 에는 아직 `@custom-media` 가 없다 — 숫자를 여기 한 번 적어 두고, 고칠 때는
+ * 이 파일 안의 세 자리를 함께 고친다.
+ */
+
+:root {
+  /* 화면 좌우 여백과 칸 사이. 브레이크포인트마다 갈린다. */
+  --pad-x: var(--s-4);
+  --pad-y: var(--s-5);
+  --gap: var(--s-4);
+
+  /* 옆 패널 폭. 화면이 좁히고 싶으면 자기 자리에서 이 이름만 덮는다. */
+  --l-side-w: var(--sidebar-w);
+
+  /*
+   * 격자가 쓸 수 있는 최대 폭. 본문(`--content-max`)보다 넓다 — 카드가 늘어서는 자리는
+   * 행 길이 규칙이 걸리지 않으므로 넓은 창에서 단을 늘리는 편이 여백만 늘리는 것보다 낫다.
+   */
+  --content-max-wide: 1600px;
+
+  /* 한 단의 최소 폭. `.l-cols` 가 이 값으로 몇 단인지를 스스로 정한다. */
+  --col-min: 300px;
+}
+
+@media (width >= 900px) {
+  :root {
+    --pad-x: var(--s-5);
+    --pad-y: var(--s-6);
+    --gap: var(--s-5);
+  }
+}
+
+@media (width >= 1400px) {
+  :root {
+    --pad-x: var(--s-6);
+    --gap: var(--s-6);
+  }
+}
+
+/*
+ * 낮은 창(600~680)에서는 세로 여백을 깎는다. 600px 높이에 머리말·본문·바닥글을 세우려면
+ * 위아래로 버릴 수 있는 것이 여백뿐이다 — 활자를 줄이면 13px 하한(06 §2)을 깬다.
+ */
+@media (height <= 700px) {
+  :root { --pad-y: var(--s-4); }
+}
+
+/* ── 뼈대 ──────────────────────────────────────────────────────────────────── */
+
+/*
+ * 화면 하나의 바깥 상자. 각 화면의 `<main>` 이 이것을 쓴다.
+ *
+ * `min-height: 100dvh` 는 `100vh` 가 아니다 — 창 크로뮴(D126)이 위에 28px 을 먹으면
+ * `100vh` 는 그만큼 넘쳐 세로 스크롤이 늘 생긴다.
+ */
+.l-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 100dvh;
+  padding: var(--pad-y) var(--pad-x);
+}
+
+/*
+ * 가운데 정렬 상자. **넓어지면 여백이 는다**는 규칙 ② 가 사는 곳이 여기다.
+ * 이것 없이 `max-width` 만 걸면 내용이 왼쪽에 붙고 2560 폭에서 오른쪽 1400px 이 죽는다
+ * (실측: 코스 화면이 그랬다).
+ */
+.l-wrap {
+  width: 100%;
+  max-width: var(--content-max);
+  margin-inline: auto;
+}
+
+/* 카드·목록처럼 행 길이 규칙이 안 걸리는 격자는 더 넓게 쓴다. */
+.l-wrap-wide { max-width: var(--content-max-wide); }
+
+/* 창을 꽉 채우는 화면(편집기 같은 것). 그래도 좌우 여백은 `.l-page` 가 준다. */
+.l-wrap-full { max-width: none; }
+
+/*
+ * 옆 패널 + 본문. 좁음에서는 한 단으로 쌓인다 — **가로로 밀려나지 않는다**가 규칙 ③ 이다.
+ *
+ * `minmax(0, 1fr)` 이 핵심이다. 그냥 `1fr` 로 두면 격자 칸의 최소 폭이 `auto`(= 내용의
+ * 최소 폭)라, 안에 긴 경로나 코드 한 줄이 들어오는 순간 칸이 부풀어 창을 넘는다.
+ */
+.l-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--gap);
+  align-items: start;
+  min-height: 0;
+}
+
+.l-split > * { min-width: 0; }
+
+@media (width >= 900px) {
+  .l-split {
+    grid-template-columns: var(--l-side-w) minmax(0, 1fr);
+  }
+
+  /* 옆 패널이 오른쪽인 화면. 좁음에서는 어차피 한 단이라 순서만 바뀐다. */
+  .l-split-side-end { grid-template-columns: minmax(0, 1fr) var(--l-side-w); }
+}
+
+/* 좁음에서 옆 패널을 본문 **아래**로 보낸다(목차보다 문제가 먼저인 화면). */
+@media (width < 900px) {
+  .l-split-stack-last > .l-side { order: 2; }
+}
+
+/* 따라 붙는 것은 `.l-side-sticky` 뿐이고, 그것도 보통·넓음에서만이다. */
+.l-side { min-width: 0; }
+
+@media (width >= 900px) {
+  .l-side-sticky {
+    position: sticky;
+    top: var(--pad-y);
+    max-height: calc(100dvh - (var(--pad-y) * 2));
+    overflow-y: auto;
+  }
+}
+
+/*
+ * 단이 스스로 느는 격자 — 규칙 ② 의 「단이 는다」쪽.
+ * 1400 폭에서 3단, 2560 폭에서 5단이 된다(`--col-min: 300px` 기준).
+ */
+.l-cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(var(--col-min), 100%), 1fr));
+  gap: var(--gap);
+}
+
+.l-cols > * { min-width: 0; }
+
+/* 위아래로 쌓는 기본 리듬. `--gap` 을 덮어 촘촘하게 쓸 수 있다. */
+.l-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  min-width: 0;
+}
+
+/*
+ * 가로로 흐르다가 자리가 없으면 줄을 바꾸는 줄. 머리말의 제목 + 단추 묶음이 이것이다 —
+ * `flex-wrap: nowrap` 이면 720 에서 단추가 창 밖으로 나간다(실측: 코스 머리말 `.stepper`
+ * 가 right 773 / 창 720).
+ */
+.l-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+  align-items: center;
+  min-width: 0;
+}
+
+.l-row > * { min-width: 0; }
+
+/* 오른쪽으로 밀어 두는 묶음. 줄이 바뀌면 그냥 다음 줄 왼쪽에 선다. */
+.l-row > .l-push { margin-inline-start: auto; }
+
+/* ── 유틸리티 ──────────────────────────────────────────────────────────────── */
+
+/* 본문 행 길이 (규칙 ①). `reset.css` 가 `p·li` 에 이미 걸지만, 그 밖의 상자에도 필요하다. */
+.u-measure { max-width: var(--measure); }
+
+/*
+ * 넓은 내용은 **자기 상자 안에서** 구른다. 표·코드·다이어그램이 이것을 쓴다 —
+ * 이것이 없으면 그 내용이 창을 밀어 페이지 전체에 가로 스크롤이 생긴다.
+ */
+.u-scroll-x {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+/*
+ * 한 줄로 줄여 보인다. **`title` 이나 `aria-label` 을 반드시 함께 단다** — 줄인 글을
+ * 되찾을 길이 없으면 그냥 잃어버린 글이고, `responsive.spec.ts` 가 그것을 잘림으로 센다.
+ */
+.u-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+/* 격자·플렉스 칸이 내용에 밀려 부푸는 것을 막는다. 가로 스크롤 사고의 첫째 원인이다. */
+.u-minw0 { min-width: 0; }
+
+/* ── 넘칠 수 없는 것들 ─────────────────────────────────────────────────────── */
+
+/*
+ * 폭이 내용에 달린 요소들. 「깨지지 않는다」를 규칙이 아니라 **불가능**으로 만든다.
+ * `:where()` 라 특이도가 0 이다 — 화면이 자기 자리에서 언제든 덮어쓸 수 있다.
+ */
+:where(img, svg, video, canvas, iframe) {
+  max-width: 100%;
+  height: auto;
+}
+
+:where(pre, table) { max-width: 100%; }
+
+/* 표는 스스로 구른다 — 칸이 여덟인 표는 720 폭에서 어차피 안 들어간다. */
+:where(pre) { overflow-x: auto; }
+
+/*
+ * ── 글자 무결성 (D183) ────────────────────────────────────────────────────────
+ *
+ * 굵기가 하나뿐인 서체에 `bold` 가 걸리면 브라우저가 굵기를 **합성**한다. 획이 많은
+ * 한글에서 그 결과가 검은 상자였다 — 「오▮ 15▮」·「▮그인」. 그때는 규칙 21곳에 굵기를
+ * 못박아 막았는데, 그것은 **그 21곳만** 막는다.
+ *
+ * 여기서 한 번에 끈다. 합성이 꺼지면 없는 굵기를 부른 자리는 가장 가까운 실린 굵기로
+ * 그려진다 — 화면이 조용히 덜 굵어질 뿐 덩어리가 되지 않는다.
+ * `tests/gates/glyph.spec.ts` 가 보이는 글자마다 이 값을 확인한다.
+ *
+ * 자리는 배치가 아니라 활자다 — `fonts.css` 가 같은 줄을 갖게 되면 여기서 지운다.
+ */
+html {
+  font-synthesis-weight: none;
+  font-synthesis-small-caps: none;
+}

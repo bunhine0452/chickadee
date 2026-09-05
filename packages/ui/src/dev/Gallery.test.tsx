@@ -15,39 +15,24 @@ describe('Gallery (DEV 전용)', () => {
     }
   });
 
-  it('프리미티브 12종을 모두 진열한다', () => {
+  it('D182 프리미티브 여섯을 모두 진열한다', () => {
     const { container } = render(<Gallery />);
-    const classes = [
-      '.pill',
-      '.passes',
-      'kbd.k',
-      '.press-btn',
-      '.flat-btn',
-      '.sw',
-      '.reg',
-      '.stamp',
-      '.say',
-      '.toast',
-      '.vh#live',
-      '.mr',
-    ];
-    for (const sel of classes) {
+    for (const sel of ['.btn.primary', '.card', '.field', '.tag.ok', '.prog', '.callout.bad']) {
       expect(container.querySelector(sel), sel).not.toBeNull();
     }
   });
 
-  it('Dee 를 겹 0~4 로 나란히 놓는다', () => {
+  it('남은 프리미티브도 나란히 둔다', () => {
     const { container } = render(<Gallery />);
-    for (const ly of [0, 1, 2, 3, 4]) {
-      // 움직이지 않는 스티커는 그림 한 장으로 구워진다 (D115) — 겹은 `data-ly` 로 남는다.
-      expect(container.querySelector(`[data-ly="${ly}"]`)).not.toBeNull();
+    // 리소 프리미티브(`.reg`·`.stamp`·`.say`·`.mr`)와 마스코트는 D182 로 사라졌다.
+    for (const sel of ['.pill', '.passes', 'kbd.k', '.press-btn', '.flat-btn', '.sw', '.toast', '.vh#live']) {
+      expect(container.querySelector(sel), sel).not.toBeNull();
     }
   });
 
-  it('테마·부속 스위치가 살아 있다', () => {
+  it('테마 스위치가 살아 있다', () => {
     render(<Gallery />);
-    expect(screen.getByRole('switch', { name: '주간반 · 야간반' })).not.toBeNull();
-    expect(screen.getByRole('switch', { name: '부속 보임 · 숨김' })).not.toBeNull();
+    expect(screen.getByRole('switch', { name: '밝게 · 어둡게' })).not.toBeNull();
     expect(screen.getByRole('radiogroup', { name: '판정 거르개' })).not.toBeNull();
   });
 });

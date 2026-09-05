@@ -1,11 +1,17 @@
 #!/usr/bin/env node
 /**
- * check-contrast.mjs — 정적 대비 게이트 (05 §9 첫 줄, 06 §2)
+ * check-contrast.mjs — 정적 대비 게이트 (D182 · 정본 §6 · 05 §9 · 06 §2)
  *
  * `apps/desktop/src/styles/tokens.css` 를 파싱해 WCAG 2 상대 휘도로 대비를 계산한다.
- *   · 텍스트 토큰 5 × 바탕 4 × 테마 2 = 40쌍 → 7:1
- *   · --on-t* × --t* 6쌍 → 4.5:1
- *   · --ink-mute · --ink-faint 는 **텍스트 금지** — 텍스트 집합에 없음을 단언한다(7:1 로 재지 않는다)
+ * 층은 넷이고 기준이 각각 다르다 — **왜 다른지를 이름이 말한다.**
+ *
+ *   본문 7:1     --text · --text-muted 를 모든 바탕 위에서. 정본 §6 의 「대비 7:1」이 이것이다.
+ *   보조 4.5:1   --text-faint 는 본문에 못 쓴다(README 금지 목록). 캡션·비활성 라벨 전용이라
+ *                기준이 AA 이고, 대신 **재기는 잰다** — 옛 시스템은 --ink-mute/--ink-faint 를
+ *                「텍스트 금지」라고 적어 두고 아무 수치도 재지 않았다(D182 가 그것을 뒤집는다).
+ *   뜻 7:1       액센트 하나와 상태 넷을 자기 배경 색과 중립 표면 위에서. 색이 뜻을 나르므로
+ *                본문과 같은 기준을 받는다. 코드 구문 강조 여섯도 여기 든다(정본 §6 의 예외).
+ *   UI 3:1       --focus · --border-strong. 글자가 아니라 테두리라 WCAG 1.4.11 기준이다.
  *
  * 예외는 `apps/desktop/src/styles/contrast.allow.json` 에만 둔다.
  * 06 §2: allowlist 항목은 **만료일 필수(최대 90일)**. 만료됐거나 만료일이 없으면 실패한다 —
@@ -23,20 +29,36 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const TOKENS_CSS = 'apps/desktop/src/styles/tokens.css';
 const ALLOW_JSON = 'apps/desktop/src/styles/contrast.allow.json';
 
-const TEXT_TOKENS = ['--ink', '--ink-soft', '--blue-text', '--pink-text', '--yellow-text'];
-const BG_TOKENS = ['--paper', '--paper-2', '--paper-3', '--stock'];
-/** 05 §4.1: 괘선·점선·하프톤 전용. 텍스트로 쓰면 린트가 막는다. */
-const TEXT_FORBIDDEN = ['--ink-mute', '--ink-faint'];
-const INK_BADGE_PAIRS = [
-  ['--on-t0', '--t0'],
-  ['--on-t1', '--t1'],
-  ['--on-t2', '--t2'],
-  // 판정 「면」 — 트랙 색과 독립이므로 따로 잰다 (D95).
-  ['--on-verdict-differ', '--verdict-differ-face'],
-];
+/** 중립 표면 넷. 본문이 얹힐 수 있는 자리는 이것뿐이다. */
+const SURFACES = ['--bg', '--surface', '--surface-2', '--surface-3'];
+/** 뜻이 있는 바탕 — 상태 넷의 연한 면과 액센트 연한 면. 여기에도 본문이 얹힌다. */
+const TINTS = ['--accent-weak', '--ok-bg', '--bad-bg', '--warn-bg', '--info-bg'];
+/** 코드 판 바탕. 구문 강조 여섯이 이 위에 앉는다. */
+const CODE_BG = '--code-bg';
 
-const PAPER_MIN = 7;
-const INK_MIN = 4.5;
+const BODY_TEXT = ['--text', '--text-muted'];
+const SECONDARY_TEXT = ['--text-faint'];
+/** 뜻을 나르는 색 — 액센트 하나 + 상태 넷. 자기 tint 와 중립 표면 위에서 잰다. */
+const MEANING = [
+  { fg: '--accent', own: '--accent-weak' },
+  { fg: '--ok', own: '--ok-bg' },
+  { fg: '--bad', own: '--bad-bg' },
+  { fg: '--warn', own: '--warn-bg' },
+  { fg: '--info', own: '--info-bg' },
+];
+const SYNTAX = ['--syn-key', '--syn-str', '--syn-num', '--syn-com', '--syn-type', '--syn-fn'];
+/** 색면 위에 얹는 글자 — 배지·버튼 라벨이라 AA(4.5) 가 기준이다. */
+const ON_FILL = [
+  ['--on-accent', '--accent'],
+  ['--text-inverse', '--accent'],
+];
+/** 글자가 아닌 UI 경계 (WCAG 1.4.11). */
+const UI_STROKE = ['--focus', '--border-strong'];
+
+const BODY_MIN = 7;
+const SECONDARY_MIN = 4.5;
+const FILL_MIN = 4.5;
+const STROKE_MIN = 3;
 const ALLOW_MAX_DAYS = 90;
 
 /* ───────── 토큰 파싱 ───────── */
@@ -61,7 +83,7 @@ function readCustomProps(css, selector) {
   return props;
 }
 
-/** `var(--x)` 별칭을 끝까지 푼다 (--t0: var(--blue) 등). */
+/** `var(--x)` 별칭을 끝까지 푼다 (옛 이름 별칭 한 판이 아직 남아 있다). */
 function resolve(map, token, seen = new Set()) {
   const raw = map[token];
   if (raw === undefined) throw new Error(`토큰이 없습니다: ${token}`);
@@ -159,14 +181,25 @@ function themeMaps(css) {
 
 function buildPairs() {
   const pairs = [];
+  const all = [...SURFACES, ...TINTS, CODE_BG];
   for (const theme of ['light', 'dark']) {
-    for (const fg of TEXT_TOKENS) {
-      for (const bg of BG_TOKENS) {
-        pairs.push({ theme, fg, bg, min: PAPER_MIN, kind: '종이 위 텍스트' });
-      }
+    for (const fg of BODY_TEXT) {
+      for (const bg of all) pairs.push({ theme, fg, bg, min: BODY_MIN, kind: '본문' });
     }
-    for (const [fg, bg] of INK_BADGE_PAIRS) {
-      pairs.push({ theme, fg, bg, min: INK_MIN, kind: '잉크 배지 위' });
+    for (const fg of SECONDARY_TEXT) {
+      for (const bg of all) pairs.push({ theme, fg, bg, min: SECONDARY_MIN, kind: '보조 라벨' });
+    }
+    for (const { fg, own } of MEANING) {
+      for (const bg of [...SURFACES, own]) pairs.push({ theme, fg, bg, min: BODY_MIN, kind: '뜻을 나르는 색' });
+    }
+    for (const fg of SYNTAX) {
+      pairs.push({ theme, fg, bg: CODE_BG, min: BODY_MIN, kind: '코드 구문 강조' });
+    }
+    for (const [fg, bg] of ON_FILL) {
+      pairs.push({ theme, fg, bg, min: FILL_MIN, kind: '색면 위 글자' });
+    }
+    for (const fg of UI_STROKE) {
+      for (const bg of SURFACES) pairs.push({ theme, fg, bg, min: STROKE_MIN, kind: 'UI 경계' });
     }
   }
   return pairs;
@@ -176,16 +209,6 @@ async function main() {
   const css = await readFile(path.join(ROOT, TOKENS_CSS), 'utf8');
   const maps = themeMaps(css);
   const { byPair, problems } = await readAllowlist();
-
-  // 텍스트 금지 토큰이 텍스트 집합에 섞이지 않았는지 단언한다 (05 §4.1 「✗ 린트」).
-  for (const token of TEXT_FORBIDDEN) {
-    if (TEXT_TOKENS.includes(token)) {
-      problems.push(`${token} 은 텍스트 금지 토큰입니다 — 괘선·점선·하프톤 전용이라 7:1 대상이 아닙니다 (05 §4.1).`);
-    }
-    if (maps.light[token] === undefined || maps.dark[token] === undefined) {
-      problems.push(`${token} 이 tokens.css 에 없습니다 — 삭제됐다면 이 목록도 고치세요.`);
-    }
-  }
 
   const rows = buildPairs().map((p) => {
     const fgv = resolve(maps[p.theme], p.fg);
@@ -203,20 +226,21 @@ async function main() {
     else failed.push(r);
   }
 
-  const worst = [...rows].sort((a, b) => a.ratio / a.min - b.ratio / b.min).slice(0, 3);
-  const yellowOnPaper3 = rows.find((r) => r.name === 'light --yellow-text on --paper-3');
+  const byKind = new Map();
+  for (const r of rows) {
+    const at = byKind.get(r.kind) ?? { n: 0, min: r.min, worst: r };
+    at.n += 1;
+    if (r.ratio / r.min < at.worst.ratio / at.worst.min) at.worst = r;
+    byKind.set(r.kind, at);
+  }
 
   console.log(`대비 검사 — ${TOKENS_CSS}`);
-  console.log(`  종이 위 텍스트 ${rows.filter((r) => r.min === PAPER_MIN).length}쌍 ≥ ${PAPER_MIN}:1`);
-  console.log(`  잉크 배지 위   ${rows.filter((r) => r.min === INK_MIN).length}쌍 ≥ ${INK_MIN}:1`);
-  console.log(`  텍스트 금지    ${TEXT_FORBIDDEN.join(' · ')} (검사 대상 아님)`);
-  if (yellowOnPaper3) {
+  for (const [kind, at] of byKind) {
     console.log(
-      `  D11 확인       --yellow-text(${yellowOnPaper3.fgv}) on --paper-3(${yellowOnPaper3.bgv}) = ` +
-        `${yellowOnPaper3.ratio.toFixed(2)}:1 → ${yellowOnPaper3.ratio >= PAPER_MIN ? '통과' : '실패'}`,
+      `  ${kind.padEnd(14)} ${String(at.n).padStart(3)}쌍 ≥ ${at.min}:1` +
+        `   가장 빠듯: ${at.worst.name} ${at.worst.ratio.toFixed(2)}:1`,
     );
   }
-  console.log(`  가장 빠듯한 3쌍: ${worst.map((r) => `${r.name} ${r.ratio.toFixed(2)}:1`).join(' · ')}`);
   for (const e of excused) {
     console.log(`  예외 적용      ${e.name} ${e.ratio.toFixed(2)}:1 — ${e.allow.reason} (만료 ${e.allow.expires})`);
   }

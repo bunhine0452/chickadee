@@ -1,11 +1,11 @@
-/* 목업: design/src/ink/shared.css `kbd.k` */
+/* D182 — 키 캡. `opacity` 로 흐리게 만들던 것을 걷었다: 흐린 글자는 대비 게이트가
+   못 재는 자리를 만든다(옛 PressButton 주석이 3.79:1 을 자백했다). 이제 토큰 색이다. */
 kbd.k {
-  padding: 0 5px;
-  border: 1.5px solid currentcolor;
-  border-radius: 2px;
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
-  font-weight: 600;
-  line-height: 1.4;
-  opacity: .8;
+  padding: 0 var(--s-1);
+  border: 1px solid currentcolor;
+  border-radius: var(--r-sm);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  font-weight: var(--fw-medium);
+  line-height: 1.5;
 }

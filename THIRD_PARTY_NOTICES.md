@@ -15,24 +15,27 @@ exceptions.
 
 ## Bundled fonts
 
-Three font families are bundled in the application binary (`apps/desktop/src/assets/fonts/`).
-They are not subsetted and they are not fetched over the network at runtime.
+Two font families are bundled in the application binary (`apps/desktop/src/assets/fonts/`),
+8 files and 1.80 MB uncompressed. They are not subsetted and they are not fetched over the
+network at runtime.
 
 | Font | Weights | Copyright | License | Full text |
 |---|---|---|---|---|
 | IBM Plex Sans KR | 400 · 500 · 600 · 700 | © 2017 IBM Corp., Reserved Font Name "Plex" | SIL OFL 1.1 | `apps/desktop/src/assets/fonts/OFL-Plex.txt` |
 | IBM Plex Mono | 400 · 500 · 600 · 700 | © 2017 IBM Corp., Reserved Font Name "Plex" | SIL OFL 1.1 | `apps/desktop/src/assets/fonts/OFL-Plex.txt` |
-| Black Han Sans | 400 | © 2015 The Black Han Sans Project Authors (https://github.com/zesstype/Black-Han-Sans) | SIL OFL 1.1 | `apps/desktop/src/assets/fonts/OFL-BlackHanSans.txt` |
+
+Black Han Sans was removed in 2026-09 along with the display type role that used it. Its
+files and its copy of the OFL are gone from the tree.
 
 The OFL obligations this project is under:
 
-- The license text ships with the fonts. Both files above are in the repository and in the
-  application bundle.
+- The license text ships with the fonts. `OFL-Plex.txt` is in the repository and in the
+  application bundle, and it covers both families.
 - The fonts are not sold on their own. They are bundled inside a larger work.
-- Neither font is modified, so no Reserved Font Name has to change. Black Han Sans was
-  converted from TTF to WOFF2 without dropping a glyph or touching the `name` table;
-  `apps/desktop/src/assets/fonts/README.md` records the command and the glyph count.
-- The exact download URLs for re-fetching every file are in that same README.
+- Neither family is modified — no glyph is dropped and the `name` table is untouched — so no
+  Reserved Font Name has to change.
+- The exact download URLs for re-fetching every file are in
+  `apps/desktop/src/assets/fonts/README.md`.
 
 ## npm packages
 

@@ -4,14 +4,19 @@
  * Google 에 요청이 나가며, CDN 서브셋은 열 때마다 글리프가 바뀌어 행 길이 실측이 흔들린다.
  *
  * 파일은 서브셋 없이 원본 그대로 동봉한다 — OFL 은 수정본(서브셋 포함)에 예약 서체명(RFN)을
- * 금지한다. 이름을 바꾸면 --f-ui 토큰이 갈라지고, 사용자 코드 주석의 희귀 한글이 폴백 서체로 섞인다.
- * 출처·라이선스는 ../assets/fonts/README.md · OFL-Plex.txt · OFL-BlackHanSans.txt.
+ * 금지한다. 이름을 바꾸면 --font-ui 토큰이 갈라지고, 사용자 코드 주석의 희귀 한글이 폴백 서체로 섞인다.
+ * 출처·라이선스는 ../assets/fonts/README.md · OFL-Plex.txt.
+ *
+ * **디스플레이 서체는 없다** (D182 · D183 · 정본 §6). Black Han Sans 를 지웠다 — 굵기가 400
+ * 하나뿐이라 h1~h3 의 기본 굵게가 합성 굵게를 불러 한글 제목이 검은 상자가 됐고(D183),
+ * 애초에 한글 음절 2,581/11,172 자만 덮어 나머지는 폴백으로 샜다. 큰 제목은 이제 같은
+ * 서체(Plex Sans KR)의 크기와 굵기로 만든다.
  *
  * font-display: block — 폴백으로 그려지는 순간이 없어야 한다(05 §10 게이트).
- * index.html 이 Sans 400 · Sans 700 · Mono 400 · Poster 400 네 파일을 preload 한다.
+ * index.html 이 Sans 400 · Sans 500 · Sans 700 · Mono 400 네 파일을 preload 한다.
  */
 
-/* ───────── IBM Plex Sans KR — --f-ui 본문·UI ───────── */
+/* ───────── IBM Plex Sans KR — --font-ui 본문·UI·제목 ───────── */
 @font-face {
   font-family: "IBM Plex Sans KR";
   font-style: normal;
@@ -44,7 +49,7 @@
   src: url("../assets/fonts/IBMPlexSansKR-Bold.woff2") format("woff2");
 }
 
-/* ───────── IBM Plex Mono — --f-mono 코드·라벨·큐 ───────── */
+/* ───────── IBM Plex Mono — --font-mono 코드·키·수치 ───────── */
 @font-face {
   font-family: "IBM Plex Mono";
   font-style: normal;
@@ -75,13 +80,4 @@
   font-weight: 700;
   font-display: block;
   src: url("../assets/fonts/IBMPlexMono-Bold.woff2") format("woff2");
-}
-
-/* ───────── Black Han Sans — --f-poster 워드마크·판 번호·큰 숫자 ───────── */
-@font-face {
-  font-family: "Black Han Sans";
-  font-style: normal;
-  font-weight: 400;
-  font-display: block;
-  src: url("../assets/fonts/BlackHanSans-Regular.woff2") format("woff2");
 }

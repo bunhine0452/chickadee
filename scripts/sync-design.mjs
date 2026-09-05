@@ -1,13 +1,16 @@
 #!/usr/bin/env node
 /**
- * sync-design.mjs — 디자인 토큰 단일 출처 → 앱 (05 §12, D41)
+ * sync-design.mjs — 디자인 토큰 단일 출처 → 앱 (D182 · 정본 §6 · 05 §12)
  *
- * `design/src/ink/tokens.css` 가 원본이고 **읽기 전용**이다. 같은 파일을 목업 두 장도
- * `design/src/ink/build.py` 로 인라인한다 — 목업과 앱이 한 파일에서 갈라진다.
- *   design/src/ink/tokens.css      :root{…} / [data-theme="dark"]{…}  → apps/desktop/src/styles/tokens.css
+ * `design/system/tokens.css` 가 원본이고 **읽기 전용**이다.
+ *   design/system/tokens.css       :root{…} / [data-theme="dark"]{…}  → apps/desktop/src/styles/tokens.css
  *                                                                     → apps/desktop/src/styles/tokens.ts
- *   design/src/ink/mascot.svg.html                                    → apps/desktop/src/assets/mascot.svg
  * 를 생성한다. 어느 경우에도 design/ 아래를 쓰지 않는다.
+ *
+ * 출처가 `design/src/ink/tokens.css` 에서 옮겨 왔다(D182). 그 파일은 목업 두 장
+ * (`design/ink-home.html` · `ink-session.html`)의 것으로 남았고 — 목업은 정본 §8 이 이력으로
+ * 내렸다 — 앱은 더 이상 읽지 않는다. 마스코트 SVG 복사는 그대로다: 화면에서는 내려갔지만
+ * (D182 · 정본 §7) `DeeSprite` 가 아직 그 파일을 읽는다.
  *
  *   node scripts/sync-design.mjs           생성 (pnpm design:sync)
  *   node scripts/sync-design.mjs --check   디스크와 바이트 단위 비교, 다르면 exit 1 (pnpm design:check)
@@ -22,21 +25,18 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
-const SRC_TOKENS = 'design/src/ink/tokens.css';
-const SRC_MASCOT = 'design/src/ink/mascot.svg.html';
+const SRC_TOKENS = 'design/system/tokens.css';
 const OUT_CSS = 'apps/desktop/src/styles/tokens.css';
 const OUT_TS = 'apps/desktop/src/styles/tokens.ts';
-const OUT_MASCOT = 'apps/desktop/src/assets/mascot.svg';
 
 const SYNC_CMD = 'pnpm design:sync';
 
 /* ══════════════════════════════════════════════════════════════════════════
    오버라이드 표 — **비어 있다**.
 
-   D52 가 이 표를 둔 이유는 D11 이 정한 토큰 넷이 아직 목업에 없었기 때문이다.
-   05 「목업 정리」가 그 넷과 D95 의 면 색 둘을 `design/src/ink/tokens.css` 안으로
-   옮겼으므로 얹을 것이 없다. 값이 바뀌면 tokens.css 를 고친다 — 이 표는 「앱만 다르게
-   가야 하는데 목업을 아직 못 고친다」는 예외에만 쓰고, 쓸 때는 결정 등록부에 행을 올린다.
+   D182 로 원본이 `design/system/tokens.css` 가 되었고, 앱이 쓰는 값은 전부 그 파일에 있다.
+   이 표는 「앱만 다르게 가야 하는데 원본을 아직 못 고친다」는 예외에만 쓰고, 쓸 때는 결정
+   등록부에 행을 올린다.
 
    op: 'set'    값 교체 (mockupValue 가 실제와 다르면 실패)
        'add'    원본에 없는 토큰 추가 (블록 끝에 모아 넣는다)
@@ -45,13 +45,9 @@ const SYNC_CMD = 'pnpm design:sync';
 const OVERRIDES = [];
 
 const BLOCKS = [
-  { theme: 'light', selector: ':root', title: '토큰 : 주간반 (밝은 종이)' },
-  { theme: 'dark', selector: '[data-theme="dark"]', title: '토큰 : 야간반 (어두운 판지에 형광 잉크)' },
+  { theme: 'light', selector: ':root', title: '토큰 : 밝게' },
+  { theme: 'dark', selector: '[data-theme="dark"]', title: '토큰 : 어둡게' },
 ];
-
-// 야간 작업 램프. 원본에서 야간 토큰 블록 바로 뒤에 오는 규칙이고
-// [data-theme="dark"] 선택자는 tokens.css 에서만 허용되므로(05 §4.3) 여기 함께 싣는다.
-const DARK_BODY_SELECTOR = '[data-theme="dark"] body';
 
 /* ───────── 원본 파싱 ───────── */
 
@@ -187,11 +183,11 @@ function renderItems(items) {
   return out.join('\n');
 }
 
-function renderCss(itemsByTheme, darkBody) {
+function renderCss(itemsByTheme) {
   const head = [
     '/* 생성 파일 — 직접 고치지 마세요.',
     ` * 원본:   ${SRC_TOKENS} 의 :root{…} · [data-theme="dark"]{…}`,
-    ' * 생성기: scripts/sync-design.mjs (05 §12 — 목업 두 장도 같은 원본을 인라인한다)',
+    ' * 생성기: scripts/sync-design.mjs (05 §12 · D182)',
     ` * 갱신:   ${SYNC_CMD}   /   검사: pnpm design:check (CI 드리프트 게이트)`,
     ' */',
     '',
@@ -202,9 +198,7 @@ function renderCss(itemsByTheme, darkBody) {
     parts.push(`${b.selector} {\n${renderItems(itemsByTheme[b.theme])}\n}`);
     parts.push('');
   }
-  parts.push('/* ───────── 야간 작업 램프 — 대지를 비추는 빛 하나 (05 §4.3: 다크 선택자는 tokens.css 에만) ───────── */');
-  parts.push(`${DARK_BODY_SELECTOR} {\n${renderItems(darkBody)}\n}`);
-  return `${parts.join('\n')}\n`;
+  return `${parts.join('\n')}`;
 }
 
 /** 값에 큰따옴표(서체 스택)가 흔하므로 작은따옴표로 감싼다. */
@@ -240,36 +234,20 @@ function renderTs(itemsByTheme) {
 
 /* ───────── 마스코트 ───────── */
 
-/**
- * 마스코트는 **그대로 복사**한다 (05 §12 「그대로 옮기는 것」, D42).
- * DeeSprite 가 인라인으로 심는 조각이라 손대지 않는다 — 원본은 읽기만 한다.
- */
-function copyMascot(html) {
-  if (!html.includes('<svg') || !html.includes('</svg>')) {
-    throw new Error(`마스코트 원본에 <svg> 가 없습니다: ${SRC_MASCOT}`);
-  }
-  return html;
-}
-
 /* ───────── 실행 ───────── */
 
 async function build() {
   const html = await readFile(path.join(ROOT, SRC_TOKENS), 'utf8');
   const itemsByTheme = {};
   for (const b of BLOCKS) itemsByTheme[b.theme] = parseBlock(extractBlock(html, b.selector));
-  const darkBody = parseBlock(extractBlock(html, DARK_BODY_SELECTOR));
-
   const log = [];
   applyOverrides(itemsByTheme, log);
-
-  const mascotSrc = await readFile(path.join(ROOT, SRC_MASCOT), 'utf8');
 
   return {
     log,
     files: [
-      [OUT_CSS, renderCss(itemsByTheme, darkBody)],
+      [OUT_CSS, renderCss(itemsByTheme)],
       [OUT_TS, renderTs(itemsByTheme)],
-      [OUT_MASCOT, copyMascot(mascotSrc)],
     ],
   };
 }
@@ -313,7 +291,7 @@ async function main() {
     return;
   }
 
-  console.log(`원본: ${SRC_TOKENS} · ${SRC_MASCOT} (읽기 전용)`);
+  console.log(`원본: ${SRC_TOKENS}`);
   if (log.length > 0) {
     console.log(`오버라이드 ${log.length}건 적용:`);
     for (const line of log) console.log(line);

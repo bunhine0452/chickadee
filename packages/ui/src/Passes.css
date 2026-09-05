@@ -1,30 +1,29 @@
-/* 목업: design/src/ink/shared.css `.passes` + ink-home.html `.n-pass`
-   바꾼 것 — 켜진 칸의 트랙 3색을 **진행 한 색**으로 (D179 · 정본 §6 「색은 상태에만」).
-   트랙 이름은 옆의 `Pill` 글자가 말한다 — 막대가 나르는 것은 진행 하나다. */
+/* D182 — `Progress` 의 `steps` 판과 같은 모양으로 맞췄다(호출처 9곳이라 클래스는 남긴다).
+   켜진 칸은 액센트 한 색이다 — 트랙 이름은 옆의 글자가 말한다(D179). */
 .passes {
   display: inline-flex;
-  gap: 2.5px;
+  gap: 2px;
   vertical-align: middle;
 }
 
 .passes i {
   display: block;
-  width: 9px;
-  height: 16px;
-  border: 1.5px solid var(--rule);
-  background: var(--paper-3);
+  width: 10px;
+  height: 12px;
+  border-radius: var(--r-sm);
+  background: var(--surface-3);
 }
-.passes i.on { background: var(--state-progress) }
+.passes i.on { background: var(--accent) }
 
 .n-pass {
   display: flex;
-  gap: 2.5px;
+  gap: 2px;
 }
 
 .n-pass i {
   width: 8px;
-  height: 12px;
-  border: 1.5px solid var(--rule);
-  background: var(--paper-2);
+  height: 8px;
+  border-radius: var(--r-sm);
+  background: var(--surface-3);
 }
-.n-pass i.on { background: var(--state-progress) }
+.n-pass i.on { background: var(--accent) }

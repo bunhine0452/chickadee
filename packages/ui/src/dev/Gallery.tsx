@@ -1,18 +1,18 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
-import { Dee } from '../dee/Dee';
-import { DeeSprite } from '../dee/DeeSprite';
+import { Button } from '../Button';
+import { Callout } from '../Callout';
+import { Card } from '../Card';
+import { Field } from '../Field';
+import { Progress } from '../Progress';
+import { Tag } from '../Tag';
 import { FlatButton } from '../FlatButton';
 import { Kbd } from '../Kbd';
 import { LiveRegion } from '../LiveRegion';
-import { Misreg } from '../Misreg';
 import { Passes } from '../Passes';
 import { Pill } from '../Pill';
 import { PressButton } from '../PressButton';
-import { Reg } from '../Reg';
 import { RichText } from '../RichText';
-import { Say } from '../Say';
-import { Stamp } from '../Stamp';
 import { Switch } from '../Switch';
 import { Toast } from '../Toast';
 import type { InkLayer, Track } from '../types';
@@ -28,6 +28,22 @@ import './tokens.css';
  */
 
 const TRACKS: readonly Track[] = ['t0', 't1', 't2'];
+
+/** 색 견본 — 이 시스템이 쓰는 색은 이게 전부다(코드 구문 강조 여섯 제외). */
+const SWATCHES: ReadonlyArray<readonly [string, string]> = [
+  ['--bg', '바탕'],
+  ['--surface', '면'],
+  ['--surface-2', '면 2'],
+  ['--surface-3', '면 3'],
+  ['--border', '테두리'],
+  ['--text', '글자'],
+  ['--text-muted', '글자 2차'],
+  ['--accent', '액센트'],
+  ['--ok', '정답'],
+  ['--bad', '오답'],
+  ['--warn', '주의'],
+  ['--info', '잠김'],
+];
 const LAYERS: readonly InkLayer[] = [0, 1, 2, 3, 4];
 
 function Slot({ cap, children }: { cap: string; children: ReactNode }) {
@@ -50,33 +66,22 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 
 function GalleryBody() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  const [trim, setTrim] = useState<'off' | 'on'>('off');
   const [dunno, setDunno] = useState(false);
   const [toastOn, setToastOn] = useState(true);
 
   return (
-    <div className="gallery" data-theme={theme} data-trim={trim}>
-      <DeeSprite />
+    <div className="gallery" data-theme={theme}>
       <h1>UI 진열대</h1>
 
-      <Section title="테마 · 부속">
+      <Section title="테마">
         <Switch
           options={[
-            { v: 'light', label: '주간반' },
-            { v: 'dark', label: '야간반' },
+            { v: 'light', label: '밝게' },
+            { v: 'dark', label: '어둡게' },
           ]}
           value={theme}
-          label="주간반 · 야간반"
+          label="밝게 · 어둡게"
           onChange={setTheme}
-        />
-        <Switch
-          options={[
-            { v: 'off', label: '부속 보임' },
-            { v: 'on', label: '부속 숨김' },
-          ]}
-          value={trim}
-          label="부속 보임 · 숨김"
-          onChange={setTrim}
         />
         <Switch
           options={[
@@ -90,7 +95,116 @@ function GalleryBody() {
         />
       </Section>
 
-      <Section title="Pill">
+      <Section title="색 — 표면 · 글자 · 액센트 하나 · 상태 넷">
+        {SWATCHES.map(([token, name]) => (
+          <span key={token} className="g-swatch">
+            <span className="g-chip" style={{ background: `var(${token})` }} />
+            {name}
+          </span>
+        ))}
+      </Section>
+
+      <Section title="활자 — 7단 · 읽기용 하나 + 코드용 하나">
+        {([1, 2, 3, 4, 5, 6, 7] as const).map((n) => (
+          <span key={n} className="g-type" style={{ fontSize: `var(--fs-${n})` }}>
+            <span>다형성을 배운다 Aa 123</span>
+          </span>
+        ))}
+        <div className="g-code">
+          <span style={{ color: 'var(--syn-key)' }}>const</span>{' '}
+          <span style={{ color: 'var(--syn-fn)' }}>find</span>{' = ('}
+          <span style={{ color: 'var(--syn-type)' }}>User</span>
+          {') => '}
+          <span style={{ color: 'var(--syn-str)' }}>&quot;ok&quot;</span>
+          {'; '}
+          <span style={{ color: 'var(--syn-num)' }}>42</span>{' '}
+          <span style={{ color: 'var(--syn-com)' }}>// 이 줄이 무엇인가</span>
+        </div>
+      </Section>
+
+      <Section title="Button">
+        <Slot cap="primary">
+          <Button variant="primary" kbd="Enter">채점하기</Button>
+        </Slot>
+        <Slot cap="secondary">
+          <Button>닫기</Button>
+        </Slot>
+        <Slot cap="ghost">
+          <Button variant="ghost">건너뛰기</Button>
+        </Slot>
+        <Slot cap="danger">
+          <Button variant="danger">리포 지우기</Button>
+        </Slot>
+        <Slot cap="pressed">
+          <Button pressed={dunno} onClick={() => setDunno(!dunno)}>모르겠어요</Button>
+        </Slot>
+        <Slot cap="disabled">
+          <Button variant="primary" disabled>채점하기</Button>
+        </Slot>
+        <Slot cap="lg">
+          <Button variant="primary" size="lg">다음 단</Button>
+        </Slot>
+        <Slot cap="sm">
+          <Button size="sm">되돌리기</Button>
+        </Slot>
+      </Section>
+
+      <Section title="Tag">
+        <Slot cap="neutral"><Tag>2단 추적</Tag></Slot>
+        <Slot cap="accent"><Tag tone="accent">진행 중</Tag></Slot>
+        <Slot cap="ok"><Tag tone="ok">통과</Tag></Slot>
+        <Slot cap="bad"><Tag tone="bad">틀림</Tag></Slot>
+        <Slot cap="warn"><Tag tone="warn">다시 풀기</Tag></Slot>
+        <Slot cap="info"><Tag tone="info">잠김</Tag></Slot>
+        <Slot cap="ghost"><Tag ghost>새 문제</Tag></Slot>
+      </Section>
+
+      <Section title="Progress">
+        <Slot cap="0.35">
+          <Progress value={35} label="오늘 학습 35% 진행" />
+        </Slot>
+        <Slot cap="steps 3/5">
+          <Progress value={3} max={5} label="다섯 단 중 3단" steps />
+        </Slot>
+        <Slot cap="ok">
+          <Progress value={100} tone="ok" label="챕터 통과" />
+        </Slot>
+      </Section>
+
+      <Section title="Card">
+        <Card title="로그인" aside={<Tag tone="ok">통과</Tag>}>
+          <p>파일 스물둘 · 요청 한 줄기. 다음은 3단 예측입니다.</p>
+        </Card>
+        <Card tone="inset" pad="sm">
+          <p>인셋 면 — 코드 아닌 보조 판.</p>
+        </Card>
+        <Card lift="float" pad="sm">
+          <p>떠 있는 면 — 모달·팝오버에만.</p>
+        </Card>
+      </Section>
+
+      <Section title="Callout">
+        <Callout title="맞았습니다" tone="ok">
+          <p>숙련도 3단계. Space 로 다음.</p>
+        </Callout>
+        <Callout title="당신이 고른 그것이 참이 되는 조건" tone="bad">
+          <p>필드가 <code>static</code> 이라면 인스턴스마다 값이 갈리지 않습니다.</p>
+        </Callout>
+        <Callout title="러너가 없습니다" tone="warn">
+          <p>JDK 를 못 찾아 5단은 게이트에서 빠집니다.</p>
+        </Callout>
+      </Section>
+
+      <Section title="Field">
+        <Field label="리포 주소" hint="로컬 경로도 됩니다.">
+          {(a) => <input type="text" placeholder="/Users/me/project" {...a} />}
+        </Field>
+        <Field label="API 키" error="키를 읽을 수 없습니다." mono>
+          {(a) => <input type="password" {...a} />}
+        </Field>
+      </Section>
+
+      <Section title="Pill (→ Tag 로 옮기는 중)">
         {TRACKS.map((t) => (
           <Slot key={t} cap={t}>
             <Pill track={t}>{t.toUpperCase()}</Pill>
@@ -104,7 +218,7 @@ function GalleryBody() {
         </Slot>
       </Section>
 
-      <Section title="Passes">
+      <Section title="Passes (→ Progress steps 로 옮기는 중)">
         {LAYERS.map((n) => (
           <Slot key={n} cap={`n=${n}`}>
             <Passes n={n} track="t0" label={`T0 · 잉크 ${n}겹`} />
@@ -127,7 +241,7 @@ function GalleryBody() {
         </Slot>
       </Section>
 
-      <Section title="PressButton">
+      <Section title="PressButton (→ Button primary 로 옮기는 중)">
         <Slot cap="pink">
           <PressButton kbd="Enter">인쇄 시작</PressButton>
         </Slot>
@@ -144,7 +258,7 @@ function GalleryBody() {
         </Slot>
       </Section>
 
-      <Section title="FlatButton">
+      <Section title="FlatButton (→ Button 으로 옮기는 중)">
         <Slot cap="기본">
           <FlatButton>닫기</FlatButton>
         </Slot>
@@ -158,39 +272,12 @@ function GalleryBody() {
         </Slot>
       </Section>
 
-      <Section title="Reg · Stamp · Misreg (인쇄 물리 — 본문 단 밖)">
-        <Slot cap="reg">
-          <Reg />
-        </Slot>
-        <Slot cap="reg.hit">
-          <Reg hit />
-        </Slot>
-        <Slot cap="정합">
-          <Stamp text="정합" sub="EXACT" hit />
-        </Slot>
-        <Slot cap="동등">
-          <Stamp text="동등" sub="EQUIV" tone="blue" rotate={5} />
-        </Slot>
-        <Slot cap="어긋남">
-          <Stamp text="어긋남" sub="DIFFER" tone="yellow" rotate={-9} />
-        </Slot>
-        <Slot cap="big">
-          <Stamp text="인쇄 완료" big />
-        </Slot>
-        <Slot cap="misreg">
-          <Misreg as="b" text="5판" />
-        </Slot>
-      </Section>
-
-      <Section title="Say · Toast · LiveRegion · RichText">
-        <Slot cap="say">
-          <Say>다음은 이 판이에요</Say>
-        </Slot>
+      <Section title="Toast · LiveRegion · RichText">
         <Slot cap="toast">
           <FlatButton onClick={() => setToastOn(!toastOn)}>토스트 {toastOn ? '끄기' : '켜기'}</FlatButton>
         </Slot>
         <Slot cap="live">
-          <LiveRegion text="정합 — 맞았습니다. 잉크 3겹. Space 로 다음." />
+          <LiveRegion text="정답입니다. 숙련도 3단계. Space 로 다음." />
           <span>(화면에는 안 보인다)</span>
         </Slot>
         <Slot cap="rich">
@@ -198,27 +285,7 @@ function GalleryBody() {
         </Slot>
       </Section>
 
-      <Section title="Dee — 겹 0~4">
-        {LAYERS.map((ly) => (
-          <Slot key={ly} cap={`ly=${ly}`}>
-            <Dee ly={ly} size={64} sticker />
-          </Slot>
-        ))}
-      </Section>
-
-      <Section title="Dee — 심볼 · 크기">
-        <Slot cap="badge 64">
-          <Dee ly={4} size={64} />
-        </Slot>
-        <Slot cap="bird 56">
-          <Dee ly={4} symbol="bird" size={56} />
-        </Slot>
-        <Slot cap="head 18">
-          <Dee ly={4} symbol="badge" size={18} />
-        </Slot>
-      </Section>
-
-      <Toast msg="세션에서 나왔습니다." sub="진행은 저장됐습니다. 돌아오면 3번째 판부터" on={toastOn} />
+      <Toast msg="학습에서 나왔습니다." sub="진행은 저장됐습니다. 돌아오면 3번째 문제부터" on={toastOn} />
     </div>
   );
 }
