@@ -1,0 +1,146 @@
+schema: 1
+id: cpp/class-definition
+# 2부 §3 #15. `common/class-definition` 이 이미 있어 그대로 건다 (§6 이 「신규 후보」로 적었는데
+# 그 사이에 섰다). 「두 낱말의 유일한 차이가 기본 접근」은 C++ 쪽 어긋남이라 판에만 있다.
+universal: common/class-definition
+name: { ko: 값과 하는 일 묶기, en: Class definition }
+token: "class"
+grammars: [cpp]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cpp/variable-declaration, cpp/function-definition, cs/abstraction]
+confusions: []
+dict:
+  one_liner:
+    ko: "값과 그 값으로 하는 일을 한 타입에 묶는다. 두 낱말의 차이는 기본 접근뿐이다."
+    en: "Ties values and their work into one type; the words differ in default access."
+  why:
+    ko: >-
+      {{site.line}}행은 <b>새 타입</b>을 만듭니다. 안에 값을 담을 자리와 그 값으로 하는
+      일을 함께 적어서, 밖에서는 「무엇을 할 수 있는가」만 보이게 하는 것이 목적이에요.
+      C++ 에서 흔히 헷갈리는 것은 이 낱말과 짝 낱말의 차이인데 — <b>기본 접근 하나뿐</b>입니다.
+      이 낱말로 열면 안이 <b>기본으로 감춰지고</b>, 짝 낱말로 열면 <b>기본으로 열립니다</b>.
+      그 밖에는 상속도 멤버 함수도 똑같이 됩니다. 실코드는 값만 담는 묶음에 짝 낱말을,
+      감출 것이 있는 타입에 이 낱말을 쓰는 쪽으로 갈립니다.
+    en: >-
+      Line {{site.line}} makes a <b>new type</b>. Room for values and the work done on them are
+      written together so that, from outside, only “what can be done” shows. What confuses people
+      in C++ is how this word differs from its partner — <b>only in default access</b>. Open with
+      this word and the inside is <b>hidden by default</b>; open with the partner and it is
+      <b>open by default</b>. Everything else — inheritance, member functions — is identical.
+      Real code tends to use the partner for plain bundles of values and this word where
+      something is hidden.
+  trace:
+    - ko: "{{site.line}}행은 {{pick.2|code}} 라는 타입을 만든다."
+      en: "Line {{site.line}} makes a type called {{pick.2|code}}."
+    - ko: "{{pick.3|code}} 안에 값 자리와 하는 일이 함께 적힌다."
+      en: "Inside {{pick.3|code}} the value rooms and the work are written together."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 그 안의 기본 접근을 정한다."
+      en: "{{pick.1|code}} fixes the default access inside."
+rule:
+  ko: "<b>두 낱말의 차이는 기본 접근뿐이다.</b> 하나는 감춤이 기본, 하나는 열림이 기본이다."
+  en: "<b>The two words differ only in default access.</b> One hides by default, one opens."
+result:
+  label: { ko: "{{site.line}}행이 만든 타입", en: "the type made on line {{site.line}}" }
+  value: "{{pick.1}} {{pick.2}}"
+  note: { ko: "안은 기본으로 감춰진다", en: "the inside is hidden by default" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 이제 값과 하는 일을 함께 가진 타입입니다."
+  en: "{{pick.2|code}} is now a type that carries values and the work together."
+payoff:
+  ko: >-
+    이걸 알면 「멤버에 못 닿는다고 나온다」가 풀립니다 — 기본이 감춤이었어요.
+  en: >-
+    This untangles “it says the member is unreachable” — the default was hidden.
+bridge:
+  ko: >-
+    파이썬에는 감춤이 <b>규약</b>일 뿐이고 자바는 멤버마다 적습니다. C++ 은 여는 낱말이
+    기본값을 정하고, 그래서 낱말 선택이 곧 설계 신호예요.
+  en: >-
+    In Python hiding is only a <b>convention</b>; Java writes it per member. In C++ the opening
+    word sets the default, so the choice of word is itself a design signal.
+misconceptions:
+  - ko: "짝 낱말은 C 의 그것과 같다 — C++ 에서는 멤버 함수도 상속도 됩니다."
+    en: "The partner word is C's — in C++ it takes member functions and inheritance too."
+  - ko: "두 낱말이 성능이 다르다 — 같습니다. 기본 접근만 달라요."
+    en: "The two words differ in speed — they do not; only the default access differs."
+  - ko: "안에 적은 것은 밖에서 다 보인다 — 이 낱말로 열면 기본이 감춤입니다."
+    en: "Everything inside is visible outside — with this word the default is hidden."
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 안이 <b>기본으로 감춰지는</b> 타입을 엽니다."
+      en: "Choose what goes in the blank. Line {{site.line}} opens a type whose inside is <b>hidden by default</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "class", mono: true }
+      - t: "struct"
+        mono: true
+        diag:
+          t:
+            ko: "이 낱말도 같은 것을 만들지만 안이 <b>기본으로 열립니다</b>. 감출 것이 있으면 감춤 표시를 손으로 적어야 해요."
+            en: "That word makes the same thing but the inside is <b>open by default</b>. Hiding then has to be written by hand."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 기본이 감춤이냐 열림이냐", en: "The sharpest spot — hidden or open by default" }
+            code:
+              - "class A { int x; };    // x 는 감춰진다"
+              - "struct A { int x; };   // x 는 열려 있다"
+      - t: "namespace"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>이름을 묶는 통</b>이라 타입이 안 만들어집니다. 값을 담을 수도, 만들 수도 없어요."
+            en: "That makes a <b>box for names</b>, not a type. Nothing is held and nothing is constructed."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 타입이냐 통이냐", en: "The sharpest spot — a type or a box" }
+            code:
+              - "class A { };       // A a; 가 된다"
+              - "namespace A { }    // A a; 는 안 된다"
+      - t: "enum"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>정해진 값들에 이름</b>을 붙입니다. 값 자리도 하는 일도 안 담아요."
+            en: "That names <b>a fixed set of values</b>. It holds no rooms and no work."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 묶음이냐 값 목록이냐", en: "The sharpest spot — a bundle or a value list" }
+            code:
+              - "class A { int x; };"
+              - "enum class C { Red };"
+why_gate:
+  q:
+    ko: "안을 왜 <b>기본으로 감출까요</b>?"
+    en: "Why is the inside <b>hidden by default</b>?"
+  choices:
+    - t:
+        ko: "밖에서 닿을 수 있는 것이 적을수록 안을 고쳐도 밖이 안 깨지기 때문"
+        en: "Because the less the outside can reach, the less breaks when the inside is changed"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 대가로 무엇이 늘어나는지도 한 줄로 적어 보세요."
+        en: "That is the direction. Add a line on what grows in exchange."
+    - t:
+        ko: "감춰야 빨라서"
+        en: "Because hiding makes it faster"
+      ok: false
+      fb:
+        ko: "속도는 같습니다. 접근 표시는 컴파일할 때만 보는 것이에요."
+        en: "The speed is the same. Access marks are read only at compile time."
+    - t:
+        ko: "감춘 값은 아무도 못 읽어서"
+        en: "Because hidden values cannot be read at all"
+      ok: false
+      fb:
+        ko: "안에서는 읽습니다. 막는 것은 <b>밖에서 닿는 길</b>이에요."
+        en: "Inside they are read. What is blocked is <b>the path from outside</b>."
+queries:
+  - { grammars: [cpp], file: ./class-definition.scm }
+examples:
+  - code: "class Widget { int x_; };                 // x_ -> 감춰진다 (class 의 기본)"
+    expect: { sites: 1, form: class, hole: "class", picks: { 1: "class", 2: "Widget", 3: "{ int x_; }" } }
+  - code: "struct Point { int x; int y; };           // x -> 열려 있다 (struct 의 기본)"
+    expect: { sites: 1, form: struct, hole: "struct", picks: { 1: "struct", 2: "Point" } }
+  - code: "namespace app { }                         // 통은 타입이 아니다"
+    expect: none

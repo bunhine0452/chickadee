@@ -1,0 +1,171 @@
+schema: 1
+id: cpp/destructor
+# 2부 §3 #17. `universal: null` — §6 이 적은 그대로다. 결정적 소멸을 가진 언어가 C++·Rust
+# 둘뿐이라 보편형을 걸 곳이 없다. 파이썬의 비슷한 이름은 **시점이 안 정해져** 있어 다른 기계다.
+universal: null
+name: { ko: 끝날 때 하는 일, en: Destructor }
+token: "~"
+grammars: [cpp]
+framework: null
+essential: true
+difficulty: 3
+prereq: [cpp/constructor, cs/scope-and-lifetime, cs/stack-and-heap]
+confusions: []
+dict:
+  one_liner:
+    ko: "이름이 사라지는 자리에서 아무 줄도 없이 저절로 불린다."
+    en: "Called on its own, with no line written, where the name goes away."
+  why:
+    ko: >-
+      {{site.line}}행의 함수는 <b>부르는 줄이 아무 데도 없습니다.</b> 그 값의 이름이
+      사라지는 자리 — 중괄호가 닫히는 곳 — 에서 저절로 돌아요. 그래서 파일을 닫고
+      잠금을 풀고 자리를 돌려주는 일이 이 안에 들어가면, 그 일이 <b>빠질 수가 없습니다.</b>
+      돌아가는 <b>순서는 만들어진 순서의 거꾸로</b>이고, 예외로 빠져나갈 때도 그대로 돕니다.
+      이 하나가 C++ 이 자원 관리를 언어에 얹은 방식 전부예요.
+    en: >-
+      The function on line {{site.line}} has <b>no calling line anywhere</b>. It runs by itself
+      where the value's name goes away — at the closing brace. So if closing a file, releasing a
+      lock or handing room back lives inside it, <b>it cannot be skipped</b>. The <b>order is the
+      reverse of the making order</b>, and it still runs when leaving by a thrown value. This one
+      thing is the whole of how C++ put resource management into the language.
+  trace:
+    - ko: "{{site.line}}행은 그 값의 이름이 사라질 때 돈다."
+      en: "Line {{site.line}} runs when the value's name goes away."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 붙어 있어야 그 함수임이 표시된다."
+      en: "{{pick.1|code}} is what marks it as that function."
+    - ko: "{{pick.3|code}} 안의 일은 빠질 수 없다."
+      en: "The work inside {{pick.3|code}} cannot be skipped."
+rule:
+  ko: "<b>부르는 줄이 없다.</b> 이름이 사라지는 자리에서 만들어진 순서의 거꾸로로 돈다."
+  en: "<b>No line calls it.</b> It runs where the name goes, in reverse making order."
+result:
+  label: { ko: "{{site.line}}행이 도는 때", en: "when line {{site.line}} runs" }
+  value: "~{{pick.2}}"
+  note: { ko: "이름이 사라지는 자리", en: "where the name goes away" }
+ok:
+  ko: "{{pick.2|code}} 하나가 사라질 때 이 몸통이 저절로 돕니다."
+  en: "This body runs by itself whenever one {{pick.2|code}} goes away."
+payoff:
+  ko: >-
+    이걸 알면 「정리하는 줄이 아무 데도 없는데 정리가 된다」가 풀립니다.
+  en: >-
+    This untangles “nothing anywhere cleans up, yet it is cleaned up”.
+bridge:
+  ko: >-
+    파이썬은 <b>언제 불릴지 안 정해져</b> 있어서 정리를 다른 문법에 맡깁니다. 자바도
+    같고요. C++ 은 시점이 정해져 있어 정리를 타입 안에 넣을 수 있습니다.
+  en: >-
+    In Python <b>when it is called is not fixed</b>, so cleanup is left to other syntax; Java is
+    the same. In C++ the moment is fixed, so cleanup can live inside the type.
+misconceptions:
+  # `cpp.md` §9 #6.
+  - ko: "부르는 줄을 적어야 돈다 — 아무 줄도 없이 돕니다."
+    en: "It needs a calling line — it runs with none."
+  - ko: "만들어진 순서대로 돈다 — 거꾸로 돕니다."
+    en: "It runs in making order — it runs in reverse."
+  - ko: "기반 타입 이름으로 자리를 돌려주면 파생 쪽도 돈다 — <code>virtual</code> 이 없으면 안 돕니다."
+    en: "Releasing through the base type runs the derived one too — not without <code>virtual</code>."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>끝날 때 도는 함수임을 알리는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that marks the end-of-life function</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>타입 이름</b>입니다. 만들 때 도는 함수도 같은 이름을 써서, 가르는 것은 앞의 기호예요."
+          en: "{{pick.2|code}} is the <b>type's name</b>. The making function uses the same name, so what tells them apart is the symbol in front."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 기호냐", en: "The sharpest spot — the name or the symbol" }
+          code:
+            - "Widget() { }     // 만들 때"
+            - "~Widget() { }    // 사라질 때"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>몸통</b>입니다. 몸통만으로는 언제 도는지 알 수 없어요."
+          en: "{{pick.3|code}} is the <b>body</b>. A body alone never says when it runs."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 몸통이냐 도는 때냐", en: "The sharpest spot — the body or the moment" }
+          code:
+            - "void close() { }   // 부를 때"
+            - "~Widget() { }      // 사라질 때"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>사라질 때 도는</b> 함수를 엽니다."
+      en: "Choose what goes in the blank. Line {{site.line}} opens the function that <b>runs on going away</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "~", mono: true }
+      - t: "!"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>참·거짓을 뒤집는</b> 기호입니다. 이름 앞에 오면 이름이 아니라 식이 되어 그 자리에서 멈춰요."
+            en: "That symbol <b>flips a truth value</b>. In front of a name it makes an expression, not a name, and stops there."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 이름이냐 식이냐", en: "The sharpest spot — a name or an expression" }
+            code:
+              - "~Widget() { }    // 이름이다"
+              - "!ok              // 식이다"
+      - t: "delete"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>자리를 돌려주는</b> 낱말입니다. 순서가 반대예요 — 이 낱말이 먼저 끝날 때 도는 함수를 부르고, 그다음에 자리를 돌려줍니다."
+            en: "That word <b>hands room back</b>. The order is the other way: it first calls the end-of-life function, then releases the room."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 자리 돌려주기냐 끝나기냐", en: "The sharpest spot — releasing room or ending" }
+            code:
+              - "delete p;        // 먼저 ~T() 를 부른다"
+              - "~T() { }         // 그 함수 자신"
+      - t: "finalize"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>자바</b>의 이름이고, 거기서는 언제 불릴지 안 정해져 있습니다. C++ 은 시점이 정해져 있어 아예 다른 기계예요."
+            en: "That is <b>Java's</b> name, and there the moment is not fixed. In C++ the moment is fixed — a different machine entirely."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 시점이 정해졌느냐", en: "The sharpest spot — is the moment fixed" }
+            code:
+              - "// Java: 언제 불릴지 모른다"
+              - "// C++: 중괄호가 닫힐 때"
+why_gate:
+  q:
+    ko: "정리를 왜 <b>부르는 줄 없이</b> 돌게 만들었을까요?"
+    en: "Why is cleanup made to run <b>with no calling line</b>?"
+  choices:
+    - t:
+        ko: "빠뜨릴 방법을 없애려고 — 중간에 값을 돌려주든 예외로 빠져나가든 나가는 길이면 언제나 돈다"
+        en: "To remove any way to skip it — it runs on every way out, whether by return or by a thrown value"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 대신 조심할 것 하나도 적어 보세요."
+        en: "That is the direction. Add one thing to be careful of in exchange."
+    - t:
+        ko: "부르는 줄을 적기 귀찮아서"
+        en: "Because writing the call is tedious"
+      ok: false
+      fb:
+        ko: "귀찮음이 아니라 <b>빠뜨림</b>이 문제였습니다. 나가는 길이 여럿이면 사람이 반드시 하나를 놓쳐요."
+        en: "Tedium was not the problem; <b>omission</b> was. With many ways out, one always gets missed."
+    - t:
+        ko: "메모리를 자동으로 관리하려고"
+        en: "To manage memory automatically"
+      ok: false
+      fb:
+        ko: "메모리만이 아닙니다. 파일·잠금·연결도 같은 자리에서 정리돼요."
+        en: "Not only memory — files, locks and connections are released at the same place."
+queries:
+  - { grammars: [cpp], file: ./destructor.scm }
+examples:
+  - code: "class W { public: ~W() { } };             // W 가 사라질 때 이 몸통이 돈다"
+    expect: { sites: 1, form: dtor, hole: "~", picks: { 1: "~", 2: "W", 3: "{ }" } }
+  - code: "class W { public: ~W(); };                // 모양만 적고 몸통은 밖에"
+    expect: { sites: 1, form: dtor-decl, hole: "~", picks: { 1: "~", 2: "W" } }
+  - code: "class W { public: void close() { } };     // 부르는 줄이 있어야 도는 함수다"
+    expect: none

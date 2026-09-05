@@ -1,0 +1,221 @@
+schema: 1
+id: cpp/overflow
+# 0부 §0.1 #4, 축 1. `common/` 에 대응이 없다 — 파이썬은 자릿수가 늘어나고 자바는 언제나
+# 감싸고 러스트는 디버그에서 멈춘다. 같은 이름으로 전이하면 셋 중 무엇이든 거짓이 된다 (D4).
+universal: null
+name: { ko: 자리가 모자라면, en: Overflow }
+token: "MAX"
+grammars: [cpp]
+framework: null
+essential: true
+difficulty: 3
+prereq: [cpp/integer-type, cs/integer-overflow, cs/undefined-behavior]
+confusions: []
+dict:
+  one_liner:
+    ko: "칸이 모자라면 부호 없는 값은 처음으로 돌아가고, 부호 있는 값은 답이 없어진다."
+    en: "Out of slots: the unsigned side returns to zero, the signed side has no answer."
+  why:
+    ko: >-
+      C++20 이 정수의 <b>표현</b>을 2의 보수로 못 박았습니다. 그래서 「넘침도 정해졌다」로
+      읽기 쉬운데, 정해진 것은 표현이지 <b>넘침이 아닙니다</b>. 부호 없는 쪽만 「칸 수만큼
+      돌아간다」가 규격에 적혀 있고, 부호 있는 쪽은 여전히 <b>무슨 일이 일어날지 정해져
+      있지 않은</b> 자리예요 — 컴파일러가 「넘치지 않는다」를 전제로 최적화해도 됩니다.
+      그래서 이 판의 정답은 값이 아니라 <b>「답이 없다」</b>이고, {{site.line}}행처럼 한계를
+      이름으로 부르는 줄이 그 경계를 코드에 드러내는 몇 안 되는 자리입니다.
+    en: >-
+      C++20 pinned the <b>representation</b> of integers to two's complement. It is easy to read
+      that as “so overflow is settled too”, but what was settled is the representation, <b>not
+      the overflow</b>. Only the unsigned side has “wraps by the slot count” written in the
+      standard; the signed side is still a place where <b>nothing is fixed about what happens</b>
+      — the compiler may optimise assuming it never overflows. So the answer here is not a value
+      but <b>“there is no answer”</b>, and a line like {{site.line}} that names the limit is one
+      of the few places where the edge shows in the code.
+  trace:
+    - ko: "{{site.line}}행은 그 타입이 담을 수 있는 <b>가장 끝 값</b>을 부른다."
+      en: "Line {{site.line}} asks for the <b>farthest value</b> the type can hold."
+    - ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 어느 쪽 끝인지를 정한다."
+      en: "{{pick.1|code}} says which end."
+    - ko: "그 값에서 한 칸만 더 가면 부호 있는 쪽은 답이 없어진다."
+      en: "One step past that value the signed side loses its answer."
+rule:
+  ko: "<b>부호 없는 쪽은 돌아가고 부호 있는 쪽은 답이 없다.</b> 표현이 정해진 것과 넘침이 정해진 것은 다르다."
+  en: "<b>Unsigned wraps; signed has no answer.</b> A settled representation is not a settled overflow."
+result:
+  label: { ko: "{{site.line}}행이 부른 한계", en: "the limit named on line {{site.line}}" }
+  value: "{{pick.3}}::{{pick.1}}"
+  note: { ko: "한 칸만 더 가면 경계 밖이다", en: "one step past this is over the edge" }
+ok:
+  ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 그 타입이 담을 수 있는 끝 값을 돌려줍니다."
+  en: "{{pick.1|code}} hands back the farthest value that type can hold."
+payoff:
+  ko: >-
+    이걸 알면 「-O2 로 켰더니 결과가 달라졌다」가 풀립니다 — 넘침을 전제로 최적화된 겁니다.
+  en: >-
+    This untangles “turning on -O2 changed the result” — it was optimised assuming no overflow.
+bridge:
+  ko: >-
+    러스트는 디버그에서 <b>멈추고</b> 릴리스에서 감쌉니다. 둘 다 정해져 있어요.
+    C++ 은 부호 있는 쪽에서만 답을 안 정합니다.
+  en: >-
+    Rust <b>stops</b> in a debug build and wraps in a release one — both settled. C++ leaves the
+    answer unsettled only on the signed side.
+misconceptions:
+  # `cpp.md` §0.1 #4 · §0.2.
+  - ko: "C++20 이 넘침을 정했다 — 정한 것은 표현입니다. 부호 있는 넘침은 여전히 답이 없어요."
+    en: "C++20 settled overflow — it settled the representation. Signed overflow is still unsettled."
+  - ko: "넘치면 언제나 음수가 된다 — 부호 없는 쪽은 0 으로 돌아가고, 부호 있는 쪽은 무엇이든 될 수 있습니다."
+    en: "Overflow always turns negative — unsigned returns to zero and signed may become anything."
+  - ko: "한 번 돌려 봐서 값이 나오면 그게 답이다 — 답이 없는 자리에서는 그 한 번이 근거가 못 됩니다."
+    en: "If one run prints a value that is the answer — where none is fixed, one run proves nothing."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>어느 쪽 끝인지를 정하는 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name that says which end</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 그 이름들이 사는 <b>이름공간</b>입니다. 어느 쪽 끝인지는 안 정해요."
+          en: "{{pick.2|code}} is the <b>namespace</b> these names live in. It says nothing about which end."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 어디 사느냐 무엇을 묻느냐", en: "The sharpest spot — where it lives or what it asks" }
+          code:
+            - "std::numeric_limits<int>::max()"
+            - "std::numeric_limits<int>::min()"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>물어보는 창구</b>의 이름입니다. 창구는 같고 묻는 끝만 갈려요."
+          en: "{{pick.3|code}} is the name of the <b>counter you ask at</b>. The counter is the same; only the end differs."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 창구냐 묻는 끝이냐", en: "The sharpest spot — the counter or the end asked for" }
+          code:
+            - "numeric_limits<int>::max()   // 위쪽 끝"
+            - "numeric_limits<int>::min()   // 아래쪽 끝"
+meaning:
+  - q:
+      ko: "부호 있는 정수가 담을 수 있는 끝을 <b>한 칸 넘으면</b> 어떻게 될까요?"
+      en: "What happens when a signed whole number goes <b>one step past</b> its end?"
+    hint:
+      ko: "C++20 이 정한 것은 표현이었지 넘침이 아니었습니다."
+      en: "What C++20 settled was the representation, not the overflow."
+    options:
+      - t:
+          ko: "무슨 일이 일어날지 정해져 있지 않다 — 컴파일러가 「안 넘친다」를 전제로 코드를 고쳐도 된다"
+          en: "Nothing is fixed — the compiler may rewrite the code assuming it never happens"
+      - t:
+          ko: "반대쪽 끝으로 돌아간다"
+          en: "It returns to the other end"
+        diag:
+          t:
+            ko: "그건 <b>부호 없는</b> 쪽 규칙입니다. 부호 있는 쪽에서 그 값이 나올 수도 있지만, 그건 정해진 것이 아니라 이번 컴파일이 그렇게 된 것뿐이에요."
+            en: "That is the <b>unsigned</b> rule. The signed side may print that value, but it is not fixed — it is just how this build turned out."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 부호가 있느냐", en: "The sharpest spot — is there a sign" }
+            code:
+              - "unsigned u = 4294967295u; u + 1;  // 0 으로 돌아간다"
+              - "int n = 2147483647; n + 1;        // 답이 없다"
+      - t:
+          ko: "실행이 멈추고 오류를 낸다"
+          en: "It stops and reports an error"
+        diag:
+          t:
+            ko: "C++ 은 검사를 안 넣습니다. 멈추는 것은 러스트의 디버그 빌드이고, 여기서는 <b>아무 말 없이</b> 지나가는 것이 보통이에요."
+            en: "C++ inserts no check. Stopping is what a Rust debug build does; here it usually passes <b>without a word</b>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 검사가 있느냐", en: "The sharpest spot — is there a check" }
+            code:
+              - "// Rust: 디버그에서 멈춘다"
+              - "// C++: 아무 말이 없다"
+      - t:
+          ko: "값이 더 넓은 타입으로 자동으로 옮겨 간다"
+          en: "The value moves to a wider type on its own"
+        diag:
+          t:
+            ko: "폭은 그 줄에서 이미 정해졌습니다. 넓어지는 언어는 파이썬이고, 여기서는 칸 수가 안 늘어나요."
+            en: "The width was already settled on that line. Python is the language that grows; here the slot count never does."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 칸이 느느냐", en: "The sharpest spot — do the slots grow" }
+            code:
+              - "# Python: 2**100 도 담긴다"
+              - "// C++: 칸 수는 그대로다"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 그 타입의 <b>위쪽 끝</b>을 묻습니다."
+      en: "Choose what goes in the blank. Line {{site.line}} asks for the type's <b>upper end</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "max", mono: true }
+      - t: "min"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>아래쪽 끝</b>입니다. 부호 있는 타입에서는 음수가 나오고, 부호 없는 타입에서는 0 이 나와요."
+            en: "That is the <b>lower end</b>. On a signed type it is negative; on an unsigned one it is zero."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 어느 쪽 끝이냐", en: "The sharpest spot — which end" }
+            code:
+              - "numeric_limits<int>::max()   // 위쪽"
+              - "numeric_limits<int>::min()   // 아래쪽"
+      - t: "size"
+        mono: true
+        diag:
+          t:
+            ko: "그런 이름은 여기 없습니다. 칸 수를 묻고 싶으면 <code>digits</code> 나 <code>sizeof</code> 쪽이에요."
+            en: "There is no such name here. To ask about the slot count you want <code>digits</code> or <code>sizeof</code>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 끝 값이냐 칸 수냐", en: "The sharpest spot — the end value or the slot count" }
+            code:
+              - "numeric_limits<int>::max()      // 끝 값"
+              - "numeric_limits<int>::digits     // 칸 수"
+      - t: "count"
+        mono: true
+        diag:
+          t:
+            ko: "그런 이름도 여기 없습니다. 이 창구가 답하는 것은 <b>담을 수 있는 값의 경계</b>이지 개수가 아니에요."
+            en: "No such name either. What this counter answers is the <b>edge of the values it can hold</b>, not a count."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 경계냐 개수냐", en: "The sharpest spot — an edge or a count" }
+            code:
+              - "numeric_limits<int>::max()   // 경계"
+              - "v.size()                     // 개수"
+why_gate:
+  q:
+    ko: "이 판은 왜 <b>정답을 값으로 두지 않을까요</b>?"
+    en: "Why does this plate <b>not put a value in the answer</b>?"
+  choices:
+    - t:
+        ko: "답이 정해져 있지 않은 자리라서 — 값을 정답으로 두면 「돌려 보니 그 값이더라」를 규칙으로 가르치게 되니까"
+        en: "Because nothing is fixed there — a value as the answer would teach “it printed that once” as a rule"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그럼 무엇을 물어야 하는지도 한 줄로 적어 보세요."
+        en: "That is the direction. Add a line on what should be asked instead."
+    - t:
+        ko: "값을 계산하기 어려워서"
+        en: "Because the value is hard to compute"
+      ok: false
+      fb:
+        ko: "어렵지 않습니다. 계산은 되는데 그 계산이 <b>보장되지 않는다</b>는 것이 요점이에요."
+        en: "It is not hard. It computes fine — the point is that the computation is <b>not guaranteed</b>."
+    - t:
+        ko: "기계마다 값이 달라서"
+        en: "Because the value differs per machine"
+      ok: false
+      fb:
+        ko: "같은 기계, 같은 컴파일러에서도 최적화 켜기만 바꾸면 달라질 수 있습니다."
+        en: "Even on one machine with one compiler it can differ when optimisation is turned on."
+queries:
+  - { grammars: [cpp], file: ./overflow.scm }
+examples:
+  - code: "void f() { int m = std::numeric_limits<int>::max(); }   // m -> int 의 위쪽 끝"
+    expect: { sites: 1, form: limit, hole: "max", picks: { 1: "max", 2: "std", 3: "numeric_limits" } }
+  - code: "void f() { unsigned int u = 0u; }                       // u -> 0 (넘치면 돌아간다)"
+    expect: { sites: 1, form: wraps, picks: { 1: "unsigned int", 2: "u", 3: "0u" } }
+  - code: "void f() { int n = 1; }                                 // 한계가 안 보이는 줄"
+    expect: none

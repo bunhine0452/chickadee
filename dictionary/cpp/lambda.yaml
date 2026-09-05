@@ -1,0 +1,172 @@
+schema: 1
+id: cpp/lambda
+# §4 심화 #24. `common/function-value` 가 보편형이다 — 「함수가 값이 된다」까지 전이되고,
+# 「무엇을 복사하고 무엇을 빌릴지 적는다」는 C++ 쪽 어긋남이라 판에만 있다.
+universal: common/function-value
+name: { ko: 그 자리에서 만든 함수, en: Lambda }
+token: "[]"
+grammars: [cpp]
+framework: null
+essential: true
+difficulty: 3
+prereq: [cpp/function-definition, cpp/auto, cpp/reference-parameter, cs/closure-capture]
+confusions: []
+dict:
+  one_liner:
+    ko: "이름 없이 그 자리에서 만드는 함수다. 대괄호 안이 밖의 값을 어떻게 들일지 정한다."
+    en: "A nameless function made on the spot; brackets say how outside values enter."
+  why:
+    ko: >-
+      {{site.line}}행은 함수를 <b>값처럼</b> 만듭니다. 다른 언어의 같은 문법과 다른 점이
+      하나 있어요 — <b>밖의 값을 어떻게 들일지 대괄호 안에 적어야 합니다.</b>
+      복사로 들이면 그 순간의 값이 안에 새로 놓이고, 빌려서 들이면 원본을 그대로 가리켜요.
+      여기가 C++ 의 가장 위험한 자리 중 하나입니다: 빌려서 들인 함수가 <b>원본보다 오래
+      살면</b> 가리키던 자리가 이미 사라진 뒤입니다. 그래서 나중에 부를 함수를 만들 때는
+      복사로 들이는 것이 규약이에요.
+    en: >-
+      Line {{site.line}} makes a function <b>as a value</b>. One thing differs from the same
+      syntax elsewhere: <b>how outside values come in has to be written in the brackets</b>.
+      Taken by copy, the value at that instant is laid out inside; taken by borrowing, the
+      original itself is named. This is one of C++'s most dangerous places: if a borrowing
+      function <b>outlives the original</b>, what it names is already gone. Which is why taking
+      by copy is the convention for a function to be called later.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 밖의 값을 어떻게 들일지 정한다."
+      en: "On line {{site.line}}, {{pick.1|code}} fixes how outside values come in."
+    - ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 부를 때 받을 것들이다."
+      en: "{{pick.2|code}} is what it takes when called."
+    - ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 부를 때 도는 몸통이다."
+      en: "{{pick.3|code}} is the body that runs when called."
+rule:
+  ko: "<b>대괄호가 밖의 값을 어떻게 들일지 정한다.</b> 빌려서 들이면 원본보다 오래 살면 안 된다."
+  en: "<b>The brackets fix how outside values come in.</b> Borrowed, it must not outlive them."
+result:
+  label: { ko: "{{site.line}}행이 만든 함수", en: "the function made on line {{site.line}}" }
+  value: "{{pick.1}}{{pick.2}}"
+  note: { ko: "밖의 값을 어떻게 들였나", en: "how the outside came in" }
+ok:
+  ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 정한 방식으로 밖의 값이 안에 들어옵니다."
+  en: "Outside values come in the way {{pick.1|code}} specified."
+payoff:
+  ko: >-
+    이걸 알면 「나중에 불렀더니 엉뚱한 값이 나온다」가 풀립니다 — 빌린 원본이 사라졌어요.
+  en: >-
+    This untangles “calling it later gave nonsense” — the borrowed original was gone.
+bridge:
+  ko: >-
+    파이썬·JS 는 밖의 값을 <b>알아서 들입니다</b> — 고를 것이 없죠. C++ 은 고르게 했고,
+    그 선택이 수명 문제를 사람에게 넘깁니다.
+  en: >-
+    Python and JS take outside values <b>automatically</b> — nothing to choose. C++ makes it a
+    choice, and that choice hands the lifetime problem to the person.
+misconceptions:
+  - ko: "밖의 값이 저절로 들어온다 — 대괄호에 적어야 들어옵니다."
+    en: "Outside values come in on their own — they come in only if the brackets say so."
+  - ko: "빌려서 들이는 쪽이 언제나 낫다 — 나중에 부를 함수면 원본이 이미 사라져 있을 수 있어요."
+    en: "Borrowing is always better — for a later call the original may already be gone."
+  - ko: "복사로 들이면 안에서 고칠 수 있다 — 기본은 못 고칩니다. 고치려면 따로 표시해야 해요."
+    en: "Taken by copy it can be edited inside — by default it cannot; a separate mark is needed."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>밖의 값을 어떻게 들일지 적는 자리</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the place that says how outside values come in</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>부를 때 받을 것들</b>입니다. 밖의 값과는 다른 통로예요."
+          en: "{{pick.2|code}} is <b>what it takes when called</b> — a different channel from the outside values."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 부를 때냐 만들 때냐", en: "The sharpest spot — at call or at make" }
+          code:
+            - "[n](int x) { }   // n 은 만들 때 들어온다"
+            - "[n](int x) { }   // x 는 부를 때 들어온다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>몸통</b>입니다. 몸통은 무엇이 들어와 있는지 정하지 않아요."
+          en: "{{pick.3|code}} is the <b>body</b>. It does not decide what came in."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 몸통이냐 들이는 자리냐", en: "The sharpest spot — the body or the intake" }
+          code:
+            - "[](int x) { return x; }   // 밖의 값이 없다"
+            - "[n](int x) { return n; }  // n 이 들어왔다"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 밖의 값을 <b>빌려서</b> 들입니다."
+      en: "Choose what goes in the blank. Line {{site.line}} takes outside values <b>by borrowing</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "[&]", mono: true }
+      - t: "[=]"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>복사로</b> 들입니다. 만드는 순간의 값이 안에 새로 놓여서, 밖에서 값을 바꿔도 안은 그대로예요."
+            en: "That takes them <b>by copy</b>. The value at the moment of making is laid out inside, so changing it outside does not reach in."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 복사냐 빌림이냐", en: "The sharpest spot — copy or borrow" }
+            code:
+              - "[=]{ return n; }   // 만들 때의 n"
+              - "[&]{ return n; }   // 부를 때의 n"
+      - t: "[]"
+        mono: true
+        diag:
+          t:
+            ko: "이건 밖의 값을 <b>하나도 안 들입니다</b>. 몸통에서 밖의 이름을 쓰면 그 자리에서 멈춰요."
+            en: "That takes <b>nothing</b> from outside. Using an outside name in the body stops right there."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 들이느냐 마느냐", en: "The sharpest spot — take or not" }
+            code:
+              - "[]{ return n; }    // 멈춘다"
+              - "[&]{ return n; }   // 선다"
+      - t: "[this]"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>지금 객체 하나</b>만 빌립니다. 그 객체의 멤버는 되는데 지역 이름은 안 들어와요."
+            en: "That borrows only <b>the current object</b>. Its members are reachable, but local names are not."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 멤버냐 지역 이름이냐", en: "The sharpest spot — members or locals" }
+            code:
+              - "[this]{ return x_; }   // 멤버는 된다"
+              - "[this]{ return n; }    // 지역은 안 된다"
+why_gate:
+  q:
+    ko: "다른 언어는 알아서 들이는데 C++ 은 왜 <b>적게 했을까요</b>?"
+    en: "Other languages take them automatically — why does C++ <b>make you write it</b>?"
+  choices:
+    - t:
+        ko: "복사냐 빌림이냐가 값을 얼마나 옮기는지와 얼마나 오래 사는지를 함께 정하기 때문 — 둘 다 사람이 정해야 하는 문제다"
+        en: "Because copy-or-borrow fixes both how much is moved and how long it must live — both are the person's call"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 자동으로 하는 언어가 그 대신 무엇을 치르는지도 적어 보세요."
+        en: "That is the direction. Add what the automatic languages pay instead."
+    - t:
+        ko: "컴파일러가 밖의 이름을 못 찾아서"
+        en: "Because the compiler cannot find outside names"
+      ok: false
+      fb:
+        ko: "찾습니다. 못 정하는 것은 <b>어떻게 들일지</b>예요."
+        en: "It finds them. What it cannot settle is <b>how they should come in</b>."
+    - t:
+        ko: "대괄호 문법을 쓸 자리가 필요해서"
+        en: "Because the bracket syntax needed a use"
+      ok: false
+      fb:
+        ko: "문법이 먼저가 아니라 <b>고를 것이 있어서</b> 자리가 생긴 겁니다."
+        en: "The syntax did not come first; the place exists because <b>there is a choice</b>."
+queries:
+  - { grammars: [cpp], file: ./lambda.scm }
+examples:
+  - code: "void f() { auto g = [&](int x) { return x + n; }; }   // n 을 빌려서 들인다"
+    expect: { sites: 1, form: lambda, hole: "[&]", picks: { 1: "[&]", 2: "(int x)", 3: "{ return x + n; }" } }
+  - code: "void f() { auto g = [n] { return n; }; }              // n 을 복사해서 들인다"
+    expect: { sites: 1, form: lambda-bare, hole: "[n]", picks: { 1: "[n]", 3: "{ return n; }" } }
+  - code: "int add(int a, int b) { return a + b; }               // 이름 있는 함수다"
+    expect: none

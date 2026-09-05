@@ -1,0 +1,170 @@
+schema: 1
+id: cpp/std-vector
+# 2부 §3 #11. `common/list` 이 보편형이다 — 「순서 있는 목록」까지 전이되고,
+# 「넘기면 원소가 전부 복사된다」는 C++ 쪽 어긋남이라 판에만 있다.
+universal: common/list
+name: { ko: 늘어나는 목록, en: std::vector }
+token: "std::vector"
+grammars: [cpp]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cpp/namespace-qualification, cpp/variable-declaration, cs/memory-layout]
+confusions: []
+dict:
+  one_liner:
+    ko: "원소가 메모리에 붙어 있고, 값으로 넘기면 그 전부가 다시 놓인다."
+    en: "Elements sit in a row, and handing the list over lays them all out again."
+  why:
+    ko: >-
+      이 목록은 원소를 <b>메모리에 이어서</b> 담습니다. 그래서 번호로 꺼내는 것이 빠르고,
+      끝에 붙이는 것도 대개 쌉니다 — 다만 잡아 둔 자리가 다 차면 <b>더 큰 자리를 잡아
+      전부 옮깁니다.</b> 그리고 이것이 <b>값</b>이라 {{site.line}}행처럼 그냥 넘기면
+      원소가 전부 다시 놓여요. 원소가 백만 개면 백만 번입니다.
+      실코드가 함수 자리에 못 만진다는 약속과 참조를 붙이는 이유가 그것입니다.
+    en: >-
+      This list holds its elements <b>next to each other in memory</b>. So reaching one by
+      number is fast, and adding at the end is usually cheap — except that when the reserved
+      room fills up it <b>claims larger room and moves everything</b>. And because it is a
+      <b>value</b>, handing it over plainly, as on line {{site.line}}, lays every element out
+      again. A million elements means a million times. That is why real code attaches the
+      not-to-touch promise and a reference at function boundaries.
+  trace:
+    - ko: "{{site.line}}행은 원소를 이어 담을 목록 하나를 세운다."
+      en: "Line {{site.line}} sets up one list that holds its elements in a row."
+    - ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 무엇을 담을지 정한다."
+      en: "{{pick.3|code}} fixes what it holds."
+    - ko: "이 이름을 값으로 넘기면 원소가 전부 다시 놓인다."
+      en: "Handing this name over by value lays every element out again."
+rule:
+  ko: "<b>원소가 이어 놓인다.</b> 그래서 번호 꺼내기가 빠르고, 값으로 넘기면 전부 복사된다."
+  en: "<b>Elements sit in a row.</b> Reaching by number is fast; handing it over copies them all."
+result:
+  label: { ko: "{{site.line}}행이 세운 목록", en: "the list set up on line {{site.line}}" }
+  value: "{{pick.2}}::{{pick.1}}{{pick.3}}"
+  note: { ko: "값으로 넘기면 전부 복사", en: "handed over by value, all copied" }
+ok:
+  ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 원소를 이어 담고 필요하면 스스로 늘어납니다."
+  en: "{{pick.1|code}} holds its elements in a row and grows itself when it must."
+payoff:
+  ko: >-
+    이걸 알면 「원소를 늘렸더니 옛 주소가 안 맞는다」가 풀립니다 — 전부 옮겨 갔어요.
+  en: >-
+    This untangles “after growing it the old addresses are stale” — everything moved.
+bridge:
+  ko: >-
+    파이썬 리스트는 이름 둘이 <b>같은 목록</b>을 가리킵니다. 여기서는 넘길 때마다 벌이
+    하나씩 늘어나요.
+  en: >-
+    A Python list has two names pointing at <b>one list</b>. Here each hand-over adds a copy.
+misconceptions:
+  - ko: "넘기면 주소만 간다 — 참조라고 안 적으면 원소가 전부 복사됩니다."
+    en: "Handing it over moves an address — unless a reference is written, every element is copied."
+  - ko: "끝에 붙이는 것은 언제나 싸다 — 잡아 둔 자리가 차면 전부 옮깁니다."
+    en: "Adding at the end is always cheap — when the reserved room fills, everything moves."
+  - ko: "원소를 가리키던 것은 계속 맞다 — 늘어나면서 옮겨 가면 안 맞습니다."
+    en: "Pointers into it stay valid — after a move on growth they do not."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>무엇을 담을지 정하는 자리</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the place that fixes what it holds</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.3
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>어떤 그릇인지</b>를 정합니다. 무엇을 담을지는 그 뒤 꺾쇠 안이에요."
+          en: "{{pick.1|code}} fixes <b>which container</b> it is. What it holds is inside the angle brackets after it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 그릇이냐 내용물이냐", en: "The sharpest spot — the container or the contents" }
+          code:
+            - "std::vector<int>     // 그릇은 목록"
+            - "std::vector<double>  // 담는 것만 다르다"
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 그 이름이 사는 <b>통</b>입니다. 담을 것과는 상관이 없어요."
+          en: "{{pick.2|code}} is the <b>box</b> the name lives in. It says nothing about the contents."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 통이냐 내용물이냐", en: "The sharpest spot — the box or the contents" }
+          code:
+            - "std::vector<int>     // std 는 통"
+            - "std::vector<Widget>  // 내용물이 다르다"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>늘어나는 목록</b>을 세웁니다."
+      en: "Choose what goes in the blank. Line {{site.line}} sets up <b>a list that grows</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "vector", mono: true }
+      - t: "array"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>개수를 미리 못 박은</b> 그릇이라 안 늘어납니다. 개수를 꺾쇠 안에 함께 적어야 해요."
+            en: "That container <b>pins the count in advance</b> and never grows. The count goes inside the brackets too."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 늘어나느냐", en: "The sharpest spot — does it grow" }
+            code:
+              - "std::array<int, 3> a;   // 셋 고정"
+              - "std::vector<int> v;     // 늘어난다"
+      - t: "list"
+        mono: true
+        diag:
+          t:
+            ko: "이건 원소가 <b>흩어져</b> 있고 서로를 가리킵니다. 번호로 꺼내는 것이 느리고, 대신 가운데 끼워 넣기가 싸요."
+            en: "There the elements are <b>scattered</b> and point at each other. Reaching by number is slow, but inserting in the middle is cheap."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 이어져 있느냐", en: "The sharpest spot — are they in a row" }
+            code:
+              - "v[100];    // 이어져 있어 빠르다"
+              - "// list 는 100 번 따라가야 한다"
+      - t: "map"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>열쇠로 찾는</b> 그릇이라 꺾쇠 안이 둘입니다. 번호 순서가 아니라 열쇠 순서로 담겨요."
+            en: "That container is <b>looked up by key</b>, so the brackets hold two types. It is ordered by key, not by position."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 번호냐 열쇠냐", en: "The sharpest spot — a position or a key" }
+            code:
+              - "std::vector<int> v;         // 번호"
+              - "std::map<std::string,int> m; // 열쇠"
+why_gate:
+  q:
+    ko: "이 목록은 왜 자리가 차면 <b>전부 옮길</b>까요?"
+    en: "Why does this list <b>move everything</b> when its room fills up?"
+  choices:
+    - t:
+        ko: "원소가 이어 붙어 있어야 번호 꺼내기가 한 번에 되기 때문 — 이어짐을 지키려면 더 넓은 자리로 통째로 가야 한다"
+        en: "Because reaching by number in one step needs them in a row, and keeping that row means moving to wider room"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 옮김이 얼마나 자주 일어나는지도 한 줄로 적어 보세요."
+        en: "That is the direction. Add a line on how often that move happens."
+    - t:
+        ko: "메모리를 아끼려고"
+        en: "To save memory"
+      ok: false
+      fb:
+        ko: "오히려 잠깐 두 벌이 됩니다. 지키는 것은 자리가 아니라 <b>이어짐</b>이에요."
+        en: "For a moment there are two copies. What is preserved is not memory but <b>the row</b>."
+    - t:
+        ko: "원소를 정렬하려고"
+        en: "To sort the elements"
+      ok: false
+      fb:
+        ko: "순서는 안 바뀝니다. 자리만 옮겨 가요."
+        en: "The order does not change. Only the room does."
+queries:
+  - { grammars: [cpp], file: ./std-vector.scm }
+examples:
+  - code: "void f() { std::vector<int> v; }          // v -> 빈 목록 (원소가 이어 놓인다)"
+    expect: { sites: 1, form: vecdecl, hole: "vector", picks: { 1: "vector", 2: "std", 3: "<int>" } }
+  - code: "void g(std::vector<int> v) { }            // v -> 부른 쪽 목록의 복사본"
+    expect: { sites: 1, form: vecparam, hole: "vector", picks: { 1: "vector", 2: "std", 3: "<int>" } }
+  - code: "void f() { std::string s; }               // 글자 묶음은 다른 판이다"
+    expect: none

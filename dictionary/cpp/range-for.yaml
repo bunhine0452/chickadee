@@ -1,0 +1,170 @@
+schema: 1
+id: cpp/range-for
+# 2부 §3 #12. `common/iterate` 가 보편형이다 — 「하나씩 훑는다」까지 전이되고,
+# 「한 글자로 복사냐 아니냐가 갈린다」는 C++ 쪽 어긋남이라 판에만 있다.
+universal: common/iterate
+name: { ko: 하나씩 훑기, en: Range-based for }
+token: ":"
+grammars: [cpp]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cpp/std-vector, cpp/reference-binding]
+confusions: []
+dict:
+  one_liner:
+    ko: "목록을 처음부터 끝까지 훑는다. 참조를 안 붙이면 매 바퀴 항목이 복사된다."
+    en: "Walks a list end to end; without a reference each lap copies the item."
+  why:
+    ko: >-
+      {{site.line}}행은 목록을 처음부터 끝까지 훑습니다. 번호를 안 세도 되고 끝을 넘길
+      일도 없어요. 그런데 <b>한 글자</b>가 이 줄의 뜻을 바꿉니다 — 항목 이름에 참조를
+      안 붙이면 매 바퀴 항목이 <b>복사</b>돼서, 안에서 고쳐도 원본이 안 바뀌고 원소가
+      크면 값이 계속 다시 놓입니다. 고칠 생각이 없으면 참조에 못 만진다는 약속까지
+      붙이는 것이 실코드의 모양이에요.
+    en: >-
+      Line {{site.line}} walks the list from start to end. No counting, no walking past the end.
+      But <b>one symbol</b> changes what the line means: without a reference on the item name,
+      each lap <b>copies</b> the item — edits inside do not reach the original, and with large
+      elements the value is laid out again and again. Where there is no intent to edit, real
+      code attaches the not-to-touch promise to that reference as well.
+  trace:
+    - ko: "{{site.line}}행은 {{pick.2|code}} 의 처음부터 끝까지 간다."
+      en: "Line {{site.line}} goes from the start of {{pick.2|code}} to its end."
+    - ko: "매 바퀴 {{pick.1|code}}{{pick.1|josa:이,가}} 다음 항목을 가리킨다."
+      en: "Each lap {{pick.1|code}} names the next item."
+    - ko: "참조가 없으면 그 항목은 복사본이다."
+      en: "With no reference that item is a copy."
+rule:
+  ko: "<b>참조 한 글자가 복사냐 아니냐를 정한다.</b> 안 붙이면 안에서 고쳐도 원본은 그대로다."
+  en: "<b>One reference symbol decides copy or not.</b> Without it, edits never reach the original."
+result:
+  label: { ko: "{{site.line}}행이 훑는 것", en: "what line {{site.line}} walks" }
+  value: "{{pick.3}} {{pick.1}} : {{pick.2}}"
+  note: { ko: "참조가 없으면 복사본이다", en: "with no reference it is a copy" }
+ok:
+  ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 매 바퀴 다음 항목을 가리킵니다."
+  en: "{{pick.1|code}} names the next item on each lap."
+payoff:
+  ko: >-
+    이걸 알면 「반복 안에서 고쳤는데 목록이 그대로다」가 풀립니다 — 복사본을 고쳤어요.
+  en: >-
+    This untangles “I edited inside the loop and the list is unchanged” — a copy was edited.
+bridge:
+  ko: >-
+    파이썬은 항목이 언제나 <b>원본을 가리킵니다</b> — 고를 것이 없죠. C++ 은 줄마다 고르게
+    했고, 그 선택이 한 글자에 실려 있습니다.
+  en: >-
+    In Python the item always <b>names the original</b> — there is nothing to choose. C++ makes
+    it a per-line choice, and that choice rides on one symbol.
+misconceptions:
+  - ko: "안에서 고치면 목록이 바뀐다 — 참조를 안 붙였으면 복사본을 고친 겁니다."
+    en: "Editing inside changes the list — without a reference a copy was edited."
+  - ko: "훑는 중에 원소를 더해도 된다 — 자리가 옮겨 가면 훑던 자리가 어긋납니다."
+    en: "Adding while walking is fine — if the room moves, the walking position goes stale."
+  - ko: "이 모양은 세 칸짜리 되풀이의 줄임말이다 — 처음과 끝을 그릇이 정해 주는 다른 문법입니다."
+    en: "It is shorthand for the three-slot loop — it is different syntax where the container gives start and end."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>매 바퀴 항목을 가리키는 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name that holds each lap's item</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>훑을 그릇</b>입니다. 매 바퀴 값을 받는 것은 왼쪽 이름이에요."
+          en: "{{pick.2|code}} is the <b>container being walked</b>. The name on the left receives each lap's value."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 그릇이냐 항목이냐", en: "The sharpest spot — the container or the item" }
+          code:
+            - "for (auto x : v)   // v 는 그릇"
+            - "for (auto x : v)   // x 는 항목"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>항목의 타입</b>입니다. 복사냐 아니냐는 그 뒤에 참조가 붙었는지로 갈려요."
+          en: "{{pick.3|code}} is the <b>item's type</b>. Copy or not is decided by whether a reference follows it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 타입이냐 항목 이름이냐", en: "The sharpest spot — the type or the item name" }
+          code:
+            - "for (auto x : v)    // 복사"
+            - "for (auto& x : v)   // 원본"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 왼쪽 이름에 <b>그릇의 항목을 차례로</b> 넣습니다."
+      en: "Choose what goes in the blank. Line {{site.line}} feeds <b>the container's items in turn</b> to the name on the left."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: ":", mono: true }
+      - t: ";"
+        mono: true
+        diag:
+          t:
+            ko: "쌍반점은 <b>세 칸짜리 되풀이</b>의 칸 나눔입니다. 그 모양은 시작·조건·한 바퀴 끝을 사람이 다 적어야 해요."
+            en: "The semicolon divides the slots of the <b>three-slot loop</b>, where start, test and per-lap step are all written by hand."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 그릇이 정하느냐 사람이 적느냐", en: "The sharpest spot — the container decides or you write it" }
+            code:
+              - "for (auto x : v)"
+              - "for (int i = 0; i < n; i++)"
+      - t: "in"
+        mono: true
+        diag:
+          t:
+            ko: "이 낱말은 <b>파이썬</b>의 표기입니다. C++ 에는 그런 낱말이 없어 그 자리에서 멈춰요."
+            en: "That word is <b>Python's</b> notation. C++ has no such word and stops right there."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 어느 언어의 표기냐", en: "The sharpest spot — whose notation" }
+            code:
+              - "# Python: for x in v:"
+              - "// C++: for (auto x : v)"
+      - t: "="
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>넣기</b>라 항목 하나를 한 번 넣고 끝납니다. 훑을 처음과 끝이 어디인지 아무 데도 안 적혀요."
+            en: "That <b>puts</b> one item once and ends. Nowhere does it say where the walk starts and ends."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 한 번이냐 훑기냐", en: "The sharpest spot — once or a walk" }
+            code:
+              - "auto x = v;        // 목록 전체를 복사"
+              - "for (auto x : v)   // 하나씩"
+why_gate:
+  q:
+    ko: "번호를 세는 되풀이가 있는데 왜 <b>이 모양을</b> 따로 만들었을까요?"
+    en: "A counting loop already exists — why add <b>this shape</b>?"
+  choices:
+    - t:
+        ko: "끝을 넘길 방법 자체를 없애려고 — 처음과 끝을 그릇이 대므로 사람이 셀 일이 없다"
+        en: "To remove the way to walk past the end — the container gives start and end, so nothing is counted by hand"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그래도 남는 위험이 하나 있는데 그것도 적어 보세요."
+        en: "That is the direction. One danger still remains — add that too."
+    - t:
+        ko: "번호 세는 되풀이보다 빨라서"
+        en: "Because it is faster than the counting loop"
+      ok: false
+      fb:
+        ko: "대개 같은 기계 코드가 나옵니다. 없앤 것은 시간이 아니라 <b>실수의 종류</b>예요."
+        en: "The machine code is usually the same. What was removed is not time but <b>a class of slip</b>."
+    - t:
+        ko: "번호를 못 쓰게 하려고"
+        en: "To stop people using indices"
+      ok: false
+      fb:
+        ko: "번호가 필요하면 그대로 씁니다. 필요 없을 때 안 쓰게 한 것이 요점이에요."
+        en: "Where an index is needed it is still used. The point is not to need one otherwise."
+queries:
+  - { grammars: [cpp], file: ./range-for.scm }
+examples:
+  - code: "void f() { for (auto x : v) { g(x); } }        // x -> 매 바퀴 항목의 복사본"
+    expect: { sites: 1, form: range, hole: ":", picks: { 1: "x", 2: "v", 3: "auto" } }
+  - code: "void f() { for (const auto& x : v) { g(x); } } // x -> 항목 그 자리, 못 고친다"
+    expect: { sites: 1, form: range, hole: ":", picks: { 1: "& x", 2: "v", 3: "auto" } }
+  - code: "void f() { for (int i = 0; i < n; i++) { } }   // 세 칸짜리는 다른 판이다"
+    expect: none

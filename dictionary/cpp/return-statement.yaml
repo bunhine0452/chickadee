@@ -1,0 +1,144 @@
+schema: 1
+id: cpp/return-statement
+# 1부. `common/return-value` 가 그대로 성립한다 — 갈리는 것은 「안 돌려주면 무엇이 오나」이고,
+# 파이썬은 없음 값을 주는데 C++ 은 답을 안 정한다.
+universal: common/return-value
+name: { ko: 값 돌려주기, en: return }
+token: "return"
+grammars: [cpp]
+framework: null
+essential: true
+difficulty: 1
+prereq: [cpp/function-definition]
+confusions: []
+dict:
+  one_liner:
+    ko: "몸통을 그 자리에서 끝내고 값을 하나 내보낸다. 뒤의 줄들은 안 돈다."
+    en: "Ends the body right there and sends one value out; the lines after do not run."
+  why:
+    ko: >-
+      {{site.line}}행은 두 가지를 함께 합니다 — <b>몸통을 끝내고</b>, 값을 하나
+      <b>내보냅니다</b>. 그래서 이 줄 아래의 코드는 돌지 않아요. C++ 에서 여기 붙는
+      규칙이 하나 있습니다: 돌려줄 것이 있다고 적어 놓고 이 줄 없이 몸통이 끝나면
+      <b>무슨 일이 날지 정해져 있지 않습니다.</b> 파이썬처럼 빈 값이 오는 것이 아니라,
+      부른 쪽이 받는 것이 무엇인지 규격이 안 정한 자리예요. 그리고 값을 내보낼 때
+      대개 <b>복사</b>가 한 번 일어납니다.
+    en: >-
+      Line {{site.line}} does two things at once — it <b>ends the body</b> and <b>sends one
+      value out</b>. So nothing below this line runs. One rule attaches here in C++: if a
+      function promises something back and the body ends without this line, <b>nothing is fixed
+      about what happens</b>. Unlike Python there is no empty value; the standard simply does not
+      say what the caller receives. And sending a value out usually costs one <b>copy</b>.
+  trace:
+    - ko: "{{site.line}}행에서 몸통이 끝난다."
+      en: "The body ends at line {{site.line}}."
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 부른 쪽으로 나간다."
+      en: "{{pick.2|code}} goes out to the caller."
+    - ko: "이 줄 아래의 코드는 안 돈다."
+      en: "Nothing below this line runs."
+rule:
+  ko: "<b>여기서 몸통이 끝난다.</b> 돌려준다고 적고 안 돌려주면 답이 정해져 있지 않다."
+  en: "<b>The body ends here.</b> Promise a value, skip it, and nothing is fixed."
+result:
+  label: { ko: "{{site.line}}행이 내보낸 값", en: "the value sent out on line {{site.line}}" }
+  value: "{{pick.2}}"
+  note: { ko: "여기서 몸통이 끝난다", en: "the body ends here" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 부른 쪽으로 나가고 몸통은 끝납니다."
+  en: "{{pick.2|code}} goes out to the caller and the body ends."
+payoff:
+  ko: >-
+    이걸 알면 「이 아래 줄이 왜 안 돌지」가 풀립니다 — 위에서 이미 끝났어요.
+  en: >-
+    This untangles “why does the line below never run” — it already ended above.
+bridge:
+  ko: >-
+    파이썬은 이 줄을 안 적어도 <b>빈 값</b>이 옵니다. C++ 은 돌려준다고 적어 놓고 안
+    돌려주면 답 자체를 안 정해요.
+  en: >-
+    In Python skipping this line still yields an <b>empty value</b>. In C++ promising one and
+    skipping it leaves the answer unfixed.
+misconceptions:
+  - ko: "안 적으면 빈 값이 온다 — 무슨 일이 날지 정해져 있지 않습니다."
+    en: "Skipping it gives an empty value — nothing is fixed about what happens."
+  - ko: "이 줄 아래도 돈다 — 안 돕니다. 몸통이 그 자리에서 끝나요."
+    en: "Lines below still run — they do not; the body ends right there."
+  - ko: "내보내는 값은 그대로 넘어간다 — 대개 복사가 한 번 일어납니다."
+    en: "The value is handed over as is — usually one copy happens."
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 몸통을 끝내며 값을 <b>내보냅니다</b>."
+      en: "Choose what goes in the blank. Line {{site.line}} ends the body and <b>sends a value out</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "return", mono: true }
+      - t: "break"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>가장 가까운 되풀이나 갈래</b>만 끝냅니다. 함수는 그대로 이어 돌고 값도 안 나가요."
+            en: "That ends only the <b>nearest loop or branch</b>. The function keeps running and no value goes out."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 되풀이냐 함수냐", en: "The sharpest spot — a loop or the function" }
+            code:
+              - "for (;;) { break; }   // 되풀이만 끝난다"
+              - "return 1;             // 함수가 끝난다"
+      - t: "continue"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>이번 바퀴만</b> 건너뜁니다. 되풀이 밖에 적으면 컴파일이 멈춰요."
+            en: "That skips only <b>this lap</b>. Written outside a loop it stops compiling."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 한 바퀴냐 몸통 전체냐", en: "The sharpest spot — one lap or the whole body" }
+            code:
+              - "continue;   // 다음 바퀴로"
+              - "return 1;   // 몸통이 끝난다"
+      - t: "throw"
+        mono: true
+        diag:
+          t:
+            ko: "이것도 몸통을 끝내지만 <b>받는 쪽이 다릅니다</b> — 부른 쪽이 값을 받는 것이 아니라 잡는 자리를 찾아 위로 올라가요."
+            en: "That also ends the body but <b>lands elsewhere</b> — instead of the caller receiving a value it climbs looking for a catching place."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값이냐 던지기냐", en: "The sharpest spot — a value or a throw" }
+            code:
+              - "return 1;                        // 값이 나간다"
+              - "throw std::runtime_error(\"x\");   // 잡는 자리를 찾는다"
+why_gate:
+  q:
+    ko: "값을 안 돌려주고 몸통이 끝났을 때, 이 언어는 왜 <b>답을 안 정할까요</b>?"
+    en: "When the body ends without a value, why does this language <b>fix no answer</b>?"
+  choices:
+    - t:
+        ko: "검사를 넣으면 모든 함수가 비용을 내기 때문 — 안 일어난다고 보고 그 비용을 안 내기로 한 것이다"
+        en: "Because a check would cost every function — the language assumes it never happens and skips the cost"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그럼 그 검사를 누가 대신 하는지도 적어 보세요."
+        en: "That is the direction. Add who does that check instead."
+    - t:
+        ko: "빈 값이라는 것이 이 언어에 없어서"
+        en: "Because this language has no empty value"
+      ok: false
+      fb:
+        ko: "있습니다 — 「돌려줄 것이 없다」는 타입이 따로 있어요. 문제는 <b>약속을 어겼을 때</b>입니다."
+        en: "It has one — there is a type for “nothing comes back”. The issue is <b>breaking the promise</b>."
+    - t:
+        ko: "컴파일러가 그 경우를 못 알아봐서"
+        en: "Because the compiler cannot spot that case"
+      ok: false
+      fb:
+        ko: "대개 알아보고 경고까지 냅니다. 오류로 안 올리는 것이 규격의 선택이에요."
+        en: "It usually spots it and even warns. Not raising it to an error is the standard's choice."
+queries:
+  - { grammars: [cpp], file: ./return-statement.scm }
+examples:
+  - code: "int f() { return 1; }                     // f() -> 1 (int)"
+    expect: { sites: 1, form: value, hole: "return", picks: { 1: "return", 2: "1" } }
+  - code: "void f() { return; }                      // f() -> 아무것도 안 나간다"
+    expect: { sites: 1, form: bare, hole: "return", picks: { 1: "return" } }
+  - code: "int f() { int n = 1; }                    // 돌려준다고 적고 안 돌려줬다"
+    expect: none

@@ -1,0 +1,174 @@
+schema: 1
+id: cpp/std-optional
+# §4 심화 #31. `common/absent-value` 가 보편형이다 — 「없을 수도 있다」까지 전이되고,
+# 「뒤늦게 와서 옛 방식 셋이 남아 있다」는 C++ 쪽 어긋남이라 판에만 있다.
+universal: common/absent-value
+name: { ko: 없을 수도 있는 값, en: std::optional }
+token: "std::optional"
+grammars: [cpp]
+framework: null
+essential: true
+difficulty: 3
+prereq: [cpp/namespace-qualification, cpp/return-statement]
+confusions: []
+dict:
+  one_liner:
+    ko: "값이 있을 수도 없을 수도 있다는 것을 타입에 적는다. 없음이 특별한 값이 아니다."
+    en: "The type says a value may be missing; absence is not a special value."
+  why:
+    ko: >-
+      「없음」을 적는 방법이 이 언어에는 <b>넷</b> 있습니다. 특별한 값을 하나 정해 두거나
+      (−1 · 빈 글자), 아무 데도 안 가리키는 주소를 쓰거나, 참·거짓을 따로 돌려주거나,
+      {{site.line}}행처럼 <b>타입에 적는</b> 것이죠. 앞의 셋은 <b>읽는 사람이 규칙을
+      알아야</b> 하고 컴파일러가 안 도와줍니다 — −1 을 그냥 써도 아무 말이 없어요.
+      마지막 것은 <b>꺼내기 전에 물어보게</b> 만듭니다. 다만 물어보지 않고 꺼내는 것도
+      막지는 않아서, 그 자리는 무슨 일이 날지 정해져 있지 않습니다.
+      C++17 에 왔기 때문에 실코드에는 넷이 전부 섞여 있어요.
+    en: >-
+      This language has <b>four</b> ways to say “missing”: reserve a special value (−1, empty
+      text), use an address pointing nowhere, hand back a separate truth value, or — as on line
+      {{site.line}} — <b>write it in the type</b>. The first three need <b>the reader to know the
+      rule</b> and the compiler helps with none of them: using −1 directly draws no complaint.
+      The last makes you <b>ask before taking</b>. It does not forbid taking without asking, and
+      that spot leaves nothing fixed about what happens. Because it arrived in C++17, real code
+      has all four mixed together.
+  trace:
+    - ko: "{{site.line}}행의 타입은 값이 없을 수도 있다고 말한다."
+      en: "The type on line {{site.line}} says the value may be missing."
+    - ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 있을 때 담기는 것이다."
+      en: "{{pick.3|code}} is what is held when there is one."
+    - ko: "꺼내기 전에 있는지 물어봐야 한다."
+      en: "Before taking it, one has to ask whether it is there."
+rule:
+  ko: "<b>없음이 타입에 적힌다.</b> 꺼내기 전에 물어보게 만드는 것이 그 값이다."
+  en: "<b>Absence is written in the type.</b> Its worth is that you must ask before taking."
+result:
+  label: { ko: "{{site.line}}행의 타입", en: "the type on line {{site.line}}" }
+  value: "{{pick.2}}::{{pick.1}}{{pick.3}}"
+  note: { ko: "없을 수도 있다", en: "it may be missing" }
+ok:
+  ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 있을 수도 없을 수도 있다는 것이 타입에 적혔습니다."
+  en: "The type now says {{pick.3|code}} may or may not be there."
+payoff:
+  ko: >-
+    이걸 알면 「−1 이면 없다는 뜻이라는 것을 어떻게 알지」가 풀립니다 — 타입에 적으면 됩니다.
+  en: >-
+    This untangles “how would anyone know −1 means missing” — write it in the type.
+bridge:
+  ko: >-
+    Swift 는 <b>처음부터</b> 이것을 언어에 넣었고 물어보지 않으면 컴파일이 멈춥니다.
+    C++ 은 뒤늦게 와서 <b>막지는 않아요</b>.
+  en: >-
+    Swift put this in the language <b>from the start</b> and stops compiling if you do not ask.
+    C++ arrived late and <b>does not block it</b>.
+misconceptions:
+  - ko: "없으면 안이 0 이다 — 안이 아예 만들어지지 않은 상태입니다."
+    en: "When missing the inside is zero — the inside was never made at all."
+  - ko: "물어보지 않고 꺼내면 멈춘다 — 안 멈춥니다. 무슨 일이 날지 정해져 있지 않아요."
+    en: "Taking without asking stops — it does not; nothing is fixed about what happens."
+  - ko: "아무 데도 안 가리키는 주소와 같다 — 그쪽은 주소가 필요한데 이건 값에도 붙습니다."
+    en: "It is the same as a nowhere address — that needs an address; this attaches to values too."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>값이 없을 수도 있다고 말하는 타입 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the type name that says the value may be missing</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 그 이름이 사는 <b>통</b>입니다. 없을 수 있다는 말은 뒤의 이름이 해요."
+          en: "{{pick.2|code}} is the <b>box</b> the name lives in. Saying it may be missing is the name's job."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 통이냐 타입이냐", en: "The sharpest spot — the box or the type" }
+          code:
+            - "std::optional<int>   // 없을 수 있다"
+            - "std::vector<int>     // 개수가 0 일 뿐이다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>있을 때 담기는 것</b>입니다. 없을 수 있다는 말은 그 앞의 이름이 해요."
+          en: "{{pick.3|code}} is <b>what is held when there is one</b>. The may-be-missing part is the name before it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 담기는 것이냐 없을 수 있음이냐", en: "The sharpest spot — the held or the missing" }
+          code:
+            - "std::optional<int>"
+            - "std::optional<std::string>"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 값이 <b>없을 수도 있다</b>고 타입에 적습니다."
+      en: "Choose what goes in the blank. Line {{site.line}} writes in the type that a value <b>may be missing</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "optional", mono: true }
+      - t: "vector"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>목록</b>이라 개수가 0 일 수 있을 뿐입니다. 「하나 있거나 없거나」를 뜻하려고 쓰면 읽는 사람이 개수를 세게 돼요."
+            en: "That is a <b>list</b>; its count may simply be zero. Used to mean “one or none”, it makes readers count instead."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 개수냐 있고 없음이냐", en: "The sharpest spot — a count or presence" }
+            code:
+              - "std::optional<int> o;   // 하나 또는 없음"
+              - "std::vector<int> v;     // 0개 이상"
+      - t: "variant"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>여러 타입 중 하나</b>를 담습니다. 없음을 뜻하려면 빈 타입을 하나 끼워 넣어야 해서 읽기가 나빠져요."
+            en: "That holds <b>one of several types</b>. Meaning absence needs an empty type wedged in, which reads worse."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 없음이냐 여럿 중 하나냐", en: "The sharpest spot — absence or one-of-many" }
+            code:
+              - "std::optional<int> o;"
+              - "std::variant<std::monostate, int> v;"
+      - t: "unique_ptr"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>소유</b>를 적는 타입이고, 없음은 곁다리로 따라올 뿐입니다. 값 하나를 담자고 자리를 따로 잡게 돼요."
+            en: "That writes <b>ownership</b>, with absence only tagging along. It claims separate room just to hold one value."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 없음이냐 소유냐", en: "The sharpest spot — absence or ownership" }
+            code:
+              - "std::optional<int> o;    // 값 옆에 붙는다"
+              - "std::unique_ptr<int> p;  // 자리를 따로 잡는다"
+why_gate:
+  q:
+    ko: "−1 을 「없음」으로 정해 쓰면 되는데 왜 <b>타입에 적을까요</b>?"
+    en: "Using −1 as “missing” works — why <b>write it in the type</b>?"
+  choices:
+    - t:
+        ko: "−1 이 없음이라는 규칙이 코드 어디에도 안 적혀서 — 타입에 적으면 부르는 쪽이 안 물어보고 못 쓴다"
+        en: "Because nowhere in the code does it say −1 means missing — in the type, a caller cannot use it without asking"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그래도 남는 구멍이 하나 있는데 그것도 적어 보세요."
+        en: "That is the direction. One hole still remains — add that too."
+    - t:
+        ko: "−1 을 담을 수 없는 타입이 있어서"
+        en: "Because some types cannot hold −1"
+      ok: false
+      fb:
+        ko: "그것도 맞지만 더 큰 문제는 <b>규칙이 코드에 안 적힌다</b>는 거예요."
+        en: "True, but the larger problem is that <b>the rule is written nowhere in the code</b>."
+    - t:
+        ko: "타입에 적는 쪽이 빨라서"
+        en: "Because writing it in the type is faster"
+      ok: false
+      fb:
+        ko: "오히려 참·거짓 하나만큼 커집니다. 얻는 것은 속도가 아니라 <b>규칙이 코드에 남는 것</b>이에요."
+        en: "It is a truth value larger. What is gained is not speed but <b>the rule living in the code</b>."
+queries:
+  - { grammars: [cpp], file: ./std-optional.scm }
+examples:
+  - code: "std::optional<int> find();                // 없을 수도 있는 정수를 돌려준다"
+    expect: { sites: 1, form: optdecl, hole: "optional", picks: { 1: "optional", 2: "std", 3: "<int>" } }
+  - code: "void g(std::optional<int> o) { }          // 없을 수도 있는 값을 받는다"
+    expect: { sites: 1, form: optparam, hole: "optional", picks: { 1: "optional", 2: "std", 3: "<int>" } }
+  - code: "std::vector<int> all();                   // 개수가 0 일 수 있을 뿐이다"
+    expect: none

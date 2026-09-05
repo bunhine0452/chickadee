@@ -1,0 +1,174 @@
+schema: 1
+id: cpp/operator-overload
+# §4 심화 #26. `common/operator-overload` 는 **아직 없다** — 파이썬 `__add__` · Swift 연산자
+# 함수 · Rust `impl Add` 셋에서 성립하는 후보로 보고했고, 서면 그때 건다.
+universal: null
+name: { ko: 연산자에 뜻 붙이기, en: Operator overloading }
+token: "operator"
+grammars: [cpp]
+framework: null
+essential: true
+difficulty: 4
+prereq: [cpp/class-definition, cpp/reference-parameter, cpp/stream-output]
+confusions: []
+dict:
+  one_liner:
+    ko: "기호가 무슨 일을 할지 타입이 정한다. 다만 묶이는 세기는 못 바꾼다."
+    en: "The type decides what a symbol does — though it cannot change the strength."
+  why:
+    ko: >-
+      {{site.line}}행은 <b>기호에 뜻을 붙이는 함수</b>입니다. 이름 자리에 기호가 오고,
+      그 뒤로는 보통 함수와 같아요. 이 하나가 앞에서 본 것들을 설명합니다 —
+      글자 묶음이 <code>==</code> 로 내용을 견주는 것도, 흐름에 <code>&lt;&lt;</code> 로
+      내보내는 것도 전부 이 문법으로 적혀 있어요. 못 바꾸는 것이 셋 있습니다:
+      <b>묶이는 세기</b>, <b>받는 값의 개수</b>, 그리고 <b>새 기호를 만드는 것</b>.
+      그래서 뜻을 붙일 때는 원래 기호가 주는 기대를 안 깨는 것이 규약입니다 —
+      <code>+</code> 가 값을 바꿔 버리면 읽는 사람이 매번 정의부를 열어야 해요.
+    en: >-
+      Line {{site.line}} is a <b>function that gives a symbol a meaning</b>. A symbol stands where
+      the name goes; after that it is an ordinary function. This one thing explains what came
+      before: text comparing contents with <code>==</code>, and values going out on a stream with
+      <code>&lt;&lt;</code>, are both written with this syntax. Three things cannot be changed:
+      <b>the grouping strength</b>, <b>how many values it takes</b>, and <b>inventing a new
+      symbol</b>. So the convention is not to break what the original symbol promises — if
+      <code>+</code> edits a value, every reader has to open the definition.
+  trace:
+    - ko: "{{site.line}}행은 {{pick.1|code}} 라는 이름의 함수를 세운다."
+      en: "Line {{site.line}} sets up a function named {{pick.1|code}}."
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 기호 양쪽에 오는 값들이다."
+      en: "{{pick.2|code}} is what stands on the two sides of the symbol."
+    - ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 그 기호를 쓴 식의 값이 된다."
+      en: "{{pick.3|code}} becomes the value of an expression using that symbol."
+rule:
+  ko: "<b>뜻은 타입이 정하고 세기는 못 바꾼다.</b> 새 기호를 만들 수도 없다."
+  en: "<b>The type sets the meaning; the strength is fixed.</b> No new symbols may be invented."
+result:
+  label: { ko: "{{site.line}}행이 붙인 뜻", en: "the meaning attached on line {{site.line}}" }
+  value: "{{pick.3}} {{pick.1}}{{pick.2}}"
+  note: { ko: "세기는 원래 자리 그대로", en: "the strength stays as it was" }
+ok:
+  ko: "이제 그 타입에 {{pick.1|code}} 의 기호를 쓰면 이 몸통이 돕니다."
+  en: "Using that symbol on the type now runs this body."
+payoff:
+  ko: >-
+    이걸 알면 「내가 안 만든 타입에 + 가 왜 되지」가 풀립니다 — 누가 뜻을 붙여 놨어요.
+  en: >-
+    This untangles “why does + work on a type I did not write” — someone attached a meaning.
+bridge:
+  ko: >-
+    파이썬은 정해진 이름의 메서드로 같은 일을 합니다. 자바는 <b>아예 막았고요</b> —
+    그래서 큰 수 셈이 전부 메서드 호출이에요.
+  en: >-
+    Python does the same through methods with fixed names. Java <b>forbids it outright</b>, which
+    is why big-number arithmetic there is all method calls.
+misconceptions:
+  - ko: "묶이는 세기도 정할 수 있다 — 못 정합니다. 원래 자리의 세기 그대로예요."
+    en: "The grouping strength can be set — it cannot; the original strength stays."
+  - ko: "새 기호를 만들 수 있다 — 이미 있는 기호에만 뜻을 붙입니다."
+    en: "New symbols can be invented — meanings attach only to existing ones."
+  - ko: "받는 값의 개수를 바꿀 수 있다 — 기호마다 정해져 있습니다."
+    en: "The number of values taken can change — each symbol fixes it."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>뜻을 붙일 기호를 적은 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name that says which symbol gets the meaning</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>기호 양쪽에 오는 값들</b>입니다. 어떤 기호인지는 앞의 이름이 정해요."
+          en: "{{pick.2|code}} is <b>what stands on the two sides</b>. Which symbol it is comes from the name in front."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값들이냐 기호냐", en: "The sharpest spot — the values or the symbol" }
+          code:
+            - "operator==(const W& a, const W& b)"
+            - "operator<(const W& a, const W& b)"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>그 식의 값</b>입니다. 견주기면 참·거짓이고 셈이면 새 값이에요."
+          en: "{{pick.3|code}} is <b>the expression's value</b>: a truth value for a comparison, a new value for arithmetic."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 결과냐 기호냐", en: "The sharpest spot — the result or the symbol" }
+          code:
+            - "bool operator==(...)   // 참·거짓"
+            - "W operator+(...)       // 새 W"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>같은지 묻는 기호</b>에 뜻을 붙입니다."
+      en: "Choose what goes in the blank. Line {{site.line}} gives meaning to <b>the equality symbol</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "operator==", mono: true }
+      - t: "operator="
+        mono: true
+        diag:
+          t:
+            ko: "기호 하나짜리는 <b>넣기</b>에 뜻을 붙입니다. 견주기가 아니라 복사·이동이 도는 자리라 하는 일이 완전히 달라요."
+            en: "The single symbol attaches meaning to <b>putting</b>. That is where copying or moving runs, not comparing — a different job entirely."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 묻느냐 넣느냐", en: "The sharpest spot — asking or putting" }
+            code:
+              - "bool operator==(...)   // 참·거짓"
+              - "W& operator=(...)      // 자기를 돌려준다"
+      - t: "operator<<"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>흐름으로 내보내기</b>에 뜻을 붙입니다. 왼쪽이 흐름이라 견주기와 받는 값이 달라요."
+            en: "That attaches meaning to <b>sending into a stream</b>. Its left side is a stream, so what it takes differs from a comparison."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 견주기냐 내보내기냐", en: "The sharpest spot — comparing or sending" }
+            code:
+              - "bool operator==(const W&, const W&)"
+              - "std::ostream& operator<<(std::ostream&, const W&)"
+      - t: "equals"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>보통 함수 이름</b>이라 기호에 뜻이 안 붙습니다. 자바에서는 그 이름이 정본이지만 여기서는 그냥 함수예요."
+            en: "That is an <b>ordinary function name</b> and attaches to no symbol. In Java it is the canonical name; here it is just a function."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 기호냐 이름이냐", en: "The sharpest spot — a symbol or a name" }
+            code:
+              - "a == b;         // 기호에 뜻이 붙었다"
+              - "a.equals(b);    // 함수를 부른다"
+why_gate:
+  q:
+    ko: "뜻은 바꾸게 하면서 왜 <b>세기는 못 바꾸게</b> 할까요?"
+    en: "Meaning may change — why <b>not the strength</b>?"
+  choices:
+    - t:
+        ko: "세기가 타입마다 달라지면 같은 식이 타입에 따라 다르게 묶여서 — 타입을 알기 전에는 식을 못 읽게 된다"
+        en: "Because per-type strength would group the same expression differently — no one could read it before knowing the types"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그럼 뜻을 붙일 때 지켜야 할 규약도 한 줄로 적어 보세요."
+        en: "That is the direction. Add a line on the convention to follow when attaching a meaning."
+    - t:
+        ko: "세기를 바꾸는 문법이 아직 없어서"
+        en: "Because there is no syntax for it yet"
+      ok: false
+      fb:
+        ko: "안 만든 것이 아니라 <b>안 만들기로</b> 한 것입니다. 표가 하나여야 식이 읽혀요."
+        en: "It was not omitted but <b>refused</b>. One table is what keeps expressions readable."
+    - t:
+        ko: "컴파일러가 느려져서"
+        en: "Because the compiler would slow down"
+      ok: false
+      fb:
+        ko: "속도 문제가 아닙니다. 사람이 못 읽게 되는 것이 문제예요."
+        en: "Speed is not it. The problem is that people could no longer read the code."
+queries:
+  - { grammars: [cpp], file: ./operator-overload.scm }
+examples:
+  - code: "bool operator==(const W& a, const W& b) { return true; }   // a == b 가 이 몸통이 된다"
+    expect: { sites: 1, form: opdef, hole: "operator==", picks: { 1: "operator==", 3: "bool" } }
+  - code: "class W { public: bool operator==(const W& o) const; };    // 멤버로 적은 것"
+    expect: { sites: 1, form: opfield, hole: "operator==", picks: { 1: "operator==", 3: "bool" } }
+  - code: "bool same(const W& a, const W& b) { return true; }         // 보통 함수다"
+    expect: none

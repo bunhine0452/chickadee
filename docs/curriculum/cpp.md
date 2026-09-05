@@ -483,3 +483,140 @@ curl -sL https://raw.githubusercontent.com/tree-sitter/tree-sitter-cpp/v0.23.4/s
 800줄 상한에는 안 걸리지만 C·Rust 와 같은 자리에 두려고 [`cpp-learning.md`](./cpp-learning.md) 로 분리했다 — C 의 기계에 무엇이 더해졌나 ·
 PPP3 대 learncpp 의 포인터 배치 · 복사 횟수 세기가 T1 을 통과하는 이유 · 소멸 순서가 「C++ 특유」가
 아닌 이유 · 「C++ 은 코스를 열지 않는다」 판단 · 바꿀 것 diff.
+
+---
+
+## §12 실물이 된 것 — 실측 (2026-09-06)
+
+이 절만 저작 세션이 쓴다. 위의 §0~§11 은 명세이고 여기는 **그 명세가 실제로 무엇이 됐나**다.
+
+### §12.1 수치
+
+| 무엇 | 값 |
+|---|---|
+| 개념 YAML | **38장** — 0부 13 · 1부 3 · 2부 22 · 3부 0 |
+| YAML 줄 수 | 6,705 (개념당 평균 176) |
+| `.scm` | 40개 (개념 38 + `_imports` · `_blocks`), 814줄, 패턴 **105개** |
+| 골든 | 양성 **77** · 음성(`expect: none`) **38** — 개념마다 양성 2 이상 + 음성 1 |
+| `essential` | 38 전량. 0·1·2부를 이으면 `_lang.yaml` 의 `essential` 과 한 글자도 안 어긋난다 |
+| 0부 신규 `essential` | **7** (`integer-type`·`overflow`·`float-type`·`char-and-byte`·`operator-precedence`·`conversion`·`reference-binding`) — README §12 규약 8 의 상한 열둘 안 |
+| `blank`+`@hole` 또는 `no_hole_reason` | 38/38 (`constructor` 하나만 사유, 나머지 37은 빈칸형) |
+| `why_gate` | 38/38 |
+| `universal` 를 건 개념 | 17/38 (45%). §6 이 예상한 17 과 같은 수인데 **구성이 다르다** — 아래 §12.4 |
+
+### §12.2 표본 — 공개 리포 둘, 527파일
+
+사용자 리포에 C++ 이 **0장**이라(§0.7) 공개 리포 둘을 스크래치패드에 얕게 클론해 읽기만 했다.
+`fmtlib/fmt`(`.cc` 47장)와 `nlohmann/json`(`.cpp`·`.hpp` 480장), 합 **527파일**.
+재는 방법은 `crates/parse/tests/` 에 임시 시험을 하나 써서 `chickadee_parse::{compile, scan}` 으로
+`@site` 캡처를 센 것이고, **재고 나서 지웠다**. `tree-sitter` CLI 는 안 썼다.
+
+| 개념 | fmt 곳/파일 | json 곳/파일 |
+|---|---|---|
+| `cpp/namespace-qualification` | 6681/44 | 27621/425 |
+| `cpp/comparison` | 834/31 | 9967/196 |
+| `cpp/return-statement` | 1938/30 | 8432/168 |
+| `cpp/const-qualifier` | 1026/29 | 3762/229 |
+| `cpp/operator-precedence` | 390/22 | 3564/109 |
+| `cpp/if-statement` | 674/26 | 2905/136 |
+| `cpp/function-definition` | 855/36 | 2607/408 |
+| `cpp/stream-output` | 622/5 | 2428/279 |
+| `cpp/conversion` | 492/20 | 2359/98 |
+| `cpp/auto` | 486/33 | 1738/131 |
+| `cpp/reference-parameter` | 397/19 | 1784/131 |
+| `cpp/assignment` | 407/23 | 1645/107 |
+| `cpp/variable-declaration` | 481/24 | 1124/113 |
+| `cpp/std-vector` | 129/12 | 1335/91 |
+| `cpp/constructor` | 730/26 | 396/49 |
+| `cpp/template-function` | 101/19 | 979/61 |
+| `cpp/integer-type` | 378/26 | 642/98 |
+| `cpp/boolean-literal` | 109/5 | 829/50 |
+| `cpp/std-string` | 186/15 | 542/96 |
+| `cpp/class-definition` | 176/16 | 456/82 |
+| `cpp/move` | 27/10 | 437/34 |
+| `cpp/operator-overload` | 46/10 | 337/21 |
+| `cpp/range-for` | 10/3 | 353/57 |
+| `cpp/virtual-override` | 99/5 | 125/11 |
+| `cpp/lambda` | 27/10 | 196/40 |
+| `cpp/rule-of-five` | 10/4 | 193/30 |
+| `cpp/arithmetic` | 23/6 | 169/41 |
+| `cpp/new-delete` | 102/10 | 72/26 |
+| `cpp/exception-handling` | 64/20 | 101/54 |
+| `cpp/reference-binding` | 51/6 | 73/26 |
+| `cpp/float-type` | 26/8 | 74/23 |
+| `cpp/overflow` | 30/9 | 26/14 |
+| `cpp/enum-class` | 9/5 | 33/18 |
+| `cpp/smart-pointer` | 16/5 | 26/6 |
+| `cpp/char-and-byte` | 26/2 | 8/4 |
+| `cpp/destructor` | 14/3 | 12/7 |
+| `cpp/std-optional` | **0/0** | 13/5 |
+| `cpp/structured-binding` | **0/0** | **0/0** |
+
+**0곳인 개념은 하나다** — `cpp/structured-binding`. 527파일에 `auto [` 가 **한 곳도 없다**
+(정규식으로 따로 세어 확인했다). 두 라이브러리 다 C++11 을 바닥으로 잡고 있어서 C++17 문법을
+안 쓴다. 사유는 `idiom` 이다 — 문법이 없어서가 아니라 그 리포들이 옛 표준을 지켜야 해서다.
+`cpp/std-optional` 은 fmt 에서 0곳이지만 json 에서 13곳/5파일이라 전체로는 부재가 아니다.
+
+**`thin_threshold`(min_files 2 · min_sites 3)를 못 넘는 개념은 그 하나뿐이다.** 가장 얇은 넷
+(`char-and-byte` 34/6 · `destructor` 26/10 · `smart-pointer` 42/11 · `std-optional` 13/5)은 전부 넘는다.
+
+**`cpp/namespace-qualification` 34,302곳은 오탐이 아니라 이 언어의 모양이다.** `std::` 가 파일마다
+수십 번 나오는 것이 §1 이 적은 그대로이고, 469/527파일에 나온다.
+
+### §12.3 파서 ERROR 비율 — 처음 쓰는 파서의 근거 (00 §6-2)
+
+`tree-sitter-cpp` **0.23.4**, `grammar_abi: 14`(릴리스 태그의 `LANGUAGE_VERSION`, §8 이 적은 값과 같다).
+
+| 표본 | ERROR 비율 |
+|---|---|
+| 실코드 **20파일**(527에서 고르게 뽑음) | **1/20 = 5%** |
+| 전체 **527파일** | **24/527 = 4.6%** |
+
+두 값이 붙어 있으므로 20파일 표본이 전체를 대표한다. **템플릿 때문에 나쁠 것이라는 §8 의 걱정은
+안 맞았다** — 24곳 중 템플릿이 원인인 것은 0곳이다. 실제로 무는 것은 셋이다.
+
+1. **네임스페이스를 여는 매크로 — 11/24.** nlohmann/json 의 `NLOHMANN_JSON_NAMESPACE_BEGIN` 이
+   `namespace nlohmann { inline namespace … {` 로 펴지는데, 전처리기가 안 돌아서(§8 ④) 여는
+   중괄호가 없는 이름 하나로 보인다. 그 뒤 파일 전체가 ERROR 영역이 된다. `json.hpp`
+   (24,000줄 넘는 단일 헤더)가 여기 든다.
+2. **C++20 모듈 — 1곳.** `fmt/src/fmt.cc` 의 `module;` · `export module fmt;` 는 0.23.4 에 노드가
+   없다(§8 끝이 리플렉션에 대해 적은 것과 같은 자리).
+3. **몸통을 여는 테스트 매크로 — 나머지.** gtest 의 `TEST(a, b) { … }` · `GTEST_CHECK_(…) << …`
+   처럼 매크로가 문법 구조를 만드는 자리다.
+
+셋 다 **매크로가 문법을 만드는 자리**이고, 「템플릿을 못 읽는다」와는 다른 문제다. 사용자 리포처럼
+매크로로 네임스페이스를 열지 않는 보통 코드에서는 비율이 더 낮을 것으로 보이지만 **안 쟀다** —
+잰 것은 이 두 리포뿐이다.
+
+### §12.4 쿼리 정밀도 — 눈으로 본 두 자리
+
+README §6 #13(`py/arithmetic` 83% 오탐)과 같은 검사를 의심 가는 둘에 돌렸다. 각각 **20곳을
+눈으로 봤다**.
+
+| 쿼리 | 결과 | 한 일 |
+|---|---|---|
+| `enum-class` 의 값 사용처(`Color::Red`) | **20곳 중 19곳이 오탐** — 전부 클래스의 정적 멤버(`UnitTest::GetInstance` · `FilePath::MakeFileName`)였다. 844곳/35파일 | **패턴을 지웠다.** 정적으로는 통 이름이 열거 타입인지 클래스인지 못 가른다. 남은 것은 선언 자리 하나이고 42곳/23파일이라 `thin_threshold` 를 넘는다 |
+| `stream-output` 의 이어 붙임(`a << b << c`) | **20곳 전부 참** — gtest·fmt 의 로그 줄이었다. 비트 밀기가 겹친 자리는 한 곳도 없었다 | 그대로 뒀다. 다만 네 칸짜리 사슬이 **3곳으로 세어진다** — 2,237곳은 그만큼 부푼 수다 |
+
+### §12.5 문서와 어긋나 바꾼 자리
+
+| 어디 | 문서 | 실물 | 왜 |
+|---|---|---|---|
+| **부 배치** | §0.6 이 네 부(0 값과 식 13 · 1 문과 표준 라이브러리 9 · 2 객체와 소유 12 · 3 일반화 4) | **0부 13 · 1부 3 · 2부 22 · 3부 0** | 3부 자리는 **프레임워크 사전 전량이거나 비어 있어야** 한다(`parts/index.test.ts`). C++ 에는 그 사전이 없어 3부가 비고, §0.6 의 3부 넷과 1부의 여섯이 2부로 내려왔다. 절 → 부 대응은 §0.1 → 0부, §2 → 1부, §3·§4 → 2부다 |
+| **확장자** | §1 이 `.c++`·`.h++`·`.ipp`·`.tpp`·`.inl` 까지 열한 개 | **여섯** — `.cpp .cc .cxx .hpp .hh .hxx` | ⓐ 확장자 정규식(`^\.[a-z0-9.]+$`)이 `+` 를 안 받는다 ⓑ `.h` 는 C 쪽에 두었다(§8 의 「리포에 `.cpp` 가 있으면 cpp」 판정은 인제스트의 몫인데 지금 표는 파일마다 문법 하나를 고정으로 준다 — 두 사전이 같은 확장자를 걸면 마지막 것이 조용히 이긴다) |
+| **`cpp/char-and-byte` 의 `universal`** | README §8 축 3 은 `common/text-literal` | **`null`** | 한 언어에서 한 보편형은 한 개념만 건다(java·py 가 그렇다). `common/text-literal` 은 §6 이 지정한 `cpp/std-string` 이 가져갔고, 이 판이 가르치는 것은 「글자 묶음」이 아니라 **바이트로 센다**라 파이썬(글자 수)·자바(16비트 단위)와 답이 갈린다 — 전이하면 거짓이 전이된다 |
+| **`cpp/comparison` 쿼리** | §8 ①이 `==`·`!=`·`<=`·`>=` 넷으로 제한하라고 함 | 그대로 넷 | 어긋남이 아니라 반영. `<`·`>` 단독은 템플릿 각괄호와 안 갈린다 |
+| **`alternatives`** | §3 끝이 일곱 쌍 | **한 쌍** (`smart-pointer` ↔ `new-delete`) | 나머지 여섯은 `present` 쪽이 `c/` 인데 그 사전이 아직 없다. 린트 `alternatives-exists` 가 없는 id 를 잡는다 — `c/` 가 서면 그때 여섯을 올린다 |
+
+### §12.6 안 만든 것과 이유
+
+- **`c/` 와 문법을 공유하는 개념**(§6 의 「`grammars: [c, cpp]`」 제안). `c/` 사전이 이 워크트리에
+  없어서 못 걸었다. §6 이 적은 **순서 위험**(cpp 가 먼저 나면 겹치는 개념을 cpp 에 만들게 된다)은
+  피했다 — 여기 든 38 중 `c/` 로 승격할 만한 것(`include-directive`·`pointer-declaration`·
+  `macro-define`·`for-loop`·`array-index`·`sizeof`)은 **하나도 안 만들었다**.
+- **`cs/signed-and-unsigned`**(§0.5 가 43→44 로 제안). `cs/` 는 이 세션 범위 밖이라
+  `cpp/integer-type`·`cpp/conversion` 의 선행을 `cs/bit-and-byte`·`cs/type-conversion` 으로 걸었다.
+- **§0.1·§2~§4 표의 「반영 · 어디」 열.** 세 표에 열을 더하면 여덟~아홉 열이 열~열하나가 된다.
+  대응은 이 절의 §12.2 표와 `_lang.yaml` 의 `essential` 주석으로 대신했다.
+- **`meaning` 문항.** 38 중 넷(`overflow`·`conversion`·`reference-binding`·`constructor`)에만
+  넣었다. 스키마가 요구하지 않고, 나머지는 지목형·빈칸형·관문 셋으로 판이 선다.

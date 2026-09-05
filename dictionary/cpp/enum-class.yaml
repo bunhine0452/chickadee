@@ -1,0 +1,171 @@
+schema: 1
+id: cpp/enum-class
+# 2부 §3 #23. `common/enum` 은 **아직 없다** — TS · Swift · Rust · Dart 넷에서 성립하는
+# 후보로 보고했고, 서면 그때 건다.
+universal: null
+name: { ko: 정해진 값들에 이름 붙이기, en: enum class }
+token: "enum class"
+grammars: [cpp]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cpp/class-definition, cpp/integer-type]
+confusions: []
+dict:
+  one_liner:
+    ko: "값이 몇 개뿐인 타입을 만든다. 뒤에 붙은 낱말이 정수로 변하는 것을 막는다."
+    en: "Makes a type with a few named values that never turn into numbers."
+  why:
+    ko: >-
+      C 에서 물려받은 모양은 이름만 붙이고 <b>속은 그냥 정수</b>였습니다. 그래서 서로 다른
+      두 목록의 값을 견줄 수 있었고, 수와 더할 수도 있었어요 — 뜻이 없는 셈이 조용히
+      통과했습니다. {{site.line}}행의 낱말 하나가 그 둘을 막습니다: <b>정수로 안 변하고</b>,
+      이름이 <b>그 타입 안에 갇힙니다.</b> 그래서 값을 쓸 때마다 타입 이름을 앞에 적어야
+      하는데, 그 수고가 곧 「어느 목록의 값인지」가 코드에 남는다는 뜻이에요.
+    en: >-
+      The shape inherited from C attached names but the insides were <b>plain numbers</b>. Values
+      from two unrelated lists could be compared, and added to numbers — meaningless arithmetic
+      passed quietly. The single word on line {{site.line}} blocks both: it <b>does not turn into
+      a number</b>, and the names are <b>shut inside the type</b>. So the type's name has to be
+      written before each value, and that small cost is exactly what keeps “which list is this
+      from” visible in the code.
+  trace:
+    - ko: "{{site.line}}행은 {{pick.3|code}} 라는 타입을 만든다."
+      en: "Line {{site.line}} makes a type called {{pick.3|code}}."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 정수로 변하는 것을 막는다."
+      en: "{{pick.1|code}} stops it turning into a number."
+    - ko: "값 이름은 그 타입 안에 갇혀 밖에서 그냥 못 쓴다."
+      en: "The value names are shut inside the type and cannot be used bare outside."
+rule:
+  ko: "<b>정수로 안 변하고 이름이 갇힌다.</b> 값을 쓸 때 타입 이름을 앞에 적는다."
+  en: "<b>No number conversion, names shut in.</b> The type's name precedes each value."
+result:
+  label: { ko: "{{site.line}}행이 만든 타입", en: "the type made on line {{site.line}}" }
+  value: "{{pick.2}} {{pick.1}} {{pick.3}}"
+  note: { ko: "수와 섞이지 않는다", en: "it does not mix with numbers" }
+ok:
+  ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 정해진 값들만 갖는 타입입니다."
+  en: "{{pick.3|code}} is a type with only its listed values."
+payoff:
+  ko: >-
+    이걸 알면 「다른 목록의 값을 견줬는데 통과한다」가 풀립니다 — 낱말이 빠졌어요.
+  en: >-
+    This untangles “comparing values from two lists compiled” — the word was missing.
+bridge:
+  ko: >-
+    자바의 같은 것은 <b>객체</b>라 메서드도 가집니다. 러스트의 것은 <b>값을 안에 담을 수</b>
+    있고요. C++ 의 이것은 셋 중 가장 얇습니다 — 이름 붙은 값 목록 하나예요.
+  en: >-
+    Java's version is an <b>object</b> and carries methods. Rust's can <b>hold values inside</b>.
+    C++'s is the thinnest of the three: one list of named values.
+misconceptions:
+  - ko: "값을 수로 쓸 수 있다 — 낱말이 붙으면 못 씁니다. 적으려면 사람이 변환을 적어야 해요."
+    en: "The values can be used as numbers — not with this word; a conversion has to be written."
+  - ko: "이름을 그냥 적어도 된다 — 타입 이름을 앞에 적어야 합니다."
+    en: "The names can be written bare — the type's name has to come first."
+  - ko: "값에 데이터를 담을 수 있다 — 못 담습니다. 그건 러스트 쪽이에요."
+    en: "Values can carry data — they cannot; that is Rust's side."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>정수로 변하는 것을 막는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that stops the number conversion</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>값 목록을 연다</b>는 낱말입니다. 이것만 있으면 C 의 것과 같아 정수로 그냥 변해요."
+          en: "{{pick.2|code}} is the word that <b>opens a list of values</b>. Alone it behaves like C's and turns into a number."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 목록이냐 막기냐", en: "The sharpest spot — the list or the blocking" }
+          code:
+            - "enum C { Red };         // 정수로 변한다"
+            - "enum class C { Red };   // 안 변한다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>타입 이름</b>입니다. 이름을 바꿔도 변환을 막는 것은 앞의 낱말이에요."
+          en: "{{pick.3|code}} is the <b>type's name</b>. Rename it and the blocking is still the word in front."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 막는 낱말이냐", en: "The sharpest spot — the name or the blocker" }
+          code:
+            - "enum class Color { };"
+            - "enum class State { };"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>정수로 안 변하는</b> 값 목록을 만듭니다."
+      en: "Choose what goes in the blank. Line {{site.line}} makes a value list that <b>never becomes a number</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "class", mono: true }
+      - t: "struct"
+        mono: true
+        diag:
+          t:
+            ko: "이 낱말도 같은 자리에 서고 <b>결과가 같습니다</b>. 다만 실코드가 거의 안 써서, 읽는 사람이 낯설어해요."
+            en: "That word also stands here with <b>the same result</b>. Real code almost never uses it, so a reader finds it unfamiliar."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 되느냐 읽히느냐", en: "The sharpest spot — valid or familiar" }
+            code:
+              - "enum class C { };    // 흔한 표기"
+              - "enum struct C { };   // 같은 뜻, 드물다"
+      - t: "const"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>못 만진다는 약속</b>이라 이 자리에 안 옵니다. 목록의 값은 원래 못 바꿔요."
+            en: "That is a <b>promise not to touch</b> and does not stand here. The listed values were never changeable."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 약속이냐 변환 막기냐", en: "The sharpest spot — a promise or blocking conversion" }
+            code:
+              - "enum class C { Red };"
+              - "const int n = 1;"
+      - t: "final"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>더 물려주지 못하게</b> 막는 낱말이라 클래스 쪽 자리입니다. 값 목록은 원래 물려줄 것이 없어요."
+            en: "That word blocks <b>further inheritance</b> and belongs to classes. A value list has nothing to inherit."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 상속이냐 변환이냐", en: "The sharpest spot — inheritance or conversion" }
+            code:
+              - "class A final { };"
+              - "enum class C { };"
+why_gate:
+  q:
+    ko: "값 이름을 왜 <b>타입 안에 가둘까요</b>?"
+    en: "Why are the value names <b>shut inside the type</b>?"
+  choices:
+    - t:
+        ko: "짧은 이름들이 서로 부딪히기 때문 — 여러 목록이 <code>Red</code> 를 갖고 있으면 어느 것인지 알 수 없다"
+        en: "Because short names collide — several lists may each have <code>Red</code> and nothing says which"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 대가로 코드가 길어지는데 그것이 왜 값이 있는지도 적어 보세요."
+        en: "That is the direction. Add why the extra length is worth paying."
+    - t:
+        ko: "이름을 감추려고"
+        en: "To hide the names"
+      ok: false
+      fb:
+        ko: "감추는 것이 아닙니다 — 타입 이름을 앞에 적으면 누구나 씁니다."
+        en: "Nothing is hidden — write the type's name first and anyone can use them."
+    - t:
+        ko: "컴파일이 빨라져서"
+        en: "Because it compiles faster"
+      ok: false
+      fb:
+        ko: "속도와는 상관없습니다. 막는 것은 <b>이름 부딪힘</b>이에요."
+        en: "Speed is unrelated. What is blocked is a <b>name collision</b>."
+queries:
+  - { grammars: [cpp], file: ./enum-class.scm }
+examples:
+  - code: "enum class Color { Red, Green };          // Color::Red -> 수가 아니다"
+    expect: { sites: 1, form: enumclass, hole: "class", picks: { 1: "class", 2: "enum", 3: "Color" } }
+  - code: "enum class State : int { On, Off };       // 담는 폭을 적어도 규칙은 같다"
+    expect: { sites: 1, form: enumclass, hole: "class", picks: { 1: "class", 2: "enum", 3: "State" } }
+  - code: "enum Plain { A, B };                      // C 에서 물려받은 모양이다"
+    expect: none

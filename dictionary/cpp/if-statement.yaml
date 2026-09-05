@@ -1,0 +1,170 @@
+schema: 1
+id: cpp/if-statement
+# 1부. `common/conditional-branch` 가 그대로 성립한다 — 갈리는 것은 「무엇이 참으로 쳐지나」
+# 이고 그 판은 `cpp/boolean-literal` 이 진다.
+universal: common/conditional-branch
+name: { ko: 조건으로 흐름 나누기, en: if statement }
+token: "if"
+grammars: [cpp]
+framework: null
+essential: true
+difficulty: 1
+prereq: [cpp/comparison]
+confusions: []
+dict:
+  one_liner:
+    ko: "괄호 안이 참일 때만 뒤가 돈다. 중괄호를 빼면 뒤의 한 문장만 붙는다."
+    en: "Runs only when the brackets hold; with no braces, only one statement."
+  why:
+    ko: >-
+      {{site.line}}행의 괄호 안이 먼저 값이 되고, 그 값이 참으로 읽히면 뒤가 돕니다.
+      C++ 에서 여기 붙는 함정은 <b>들여쓰기에 아무 뜻이 없다</b>는 것이에요 — 중괄호를
+      안 적으면 <b>바로 다음 한 문장</b>만 조건에 걸리고, 그 아래 줄들은 들여썼든 아니든
+      언제나 돕니다. 파이썬을 먼저 배운 사람이 여기서 미끄러집니다.
+      그리고 괄호 안은 참·거짓이 아니어도 됩니다 — 0 이 아닌 수는 무엇이든 참이에요.
+    en: >-
+      What is inside the brackets on line {{site.line}} becomes a value first, and if that value
+      reads as true, what follows runs. The trap here is that <b>indentation means nothing</b>:
+      with no braces only the <b>very next statement</b> is under the condition, and the lines
+      below it run every time, indented or not. Anyone who learned Python first slips here.
+      The brackets need not hold a truth value either — any non-zero number is true.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.2|code}}{{pick.2|josa:이,가}} 먼저 값이 된다."
+      en: "On line {{site.line}}, {{pick.2|code}} becomes a value first."
+    - ko: "그 값이 참으로 읽히면 {{pick.3|code}} 쪽이 돈다."
+      en: "If that value reads as true, {{pick.3|code}} runs."
+    - ko: "중괄호가 없으면 거기에 붙는 것은 한 문장뿐이다."
+      en: "Without braces only one statement is attached there."
+rule:
+  ko: "<b>중괄호가 없으면 한 문장만 붙는다.</b> 들여쓰기는 컴파일러가 안 본다."
+  en: "<b>With no braces only one statement attaches.</b> The compiler never reads indentation."
+result:
+  label: { ko: "{{site.line}}행이 가른 갈래", en: "the branch split on line {{site.line}}" }
+  value: "{{pick.2}}"
+  note: { ko: "참으로 읽히면 뒤가 돈다", en: "reads as true and the rest runs" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 참으로 읽히면 뒤가 돕니다."
+  en: "If {{pick.2|code}} reads as true, what follows runs."
+payoff:
+  ko: >-
+    이걸 알면 「조건 안에 넣었는데 왜 늘 돌지」가 풀립니다 — 중괄호가 없었어요.
+  en: >-
+    This untangles “I put it under the condition and it still always runs” — no braces.
+bridge:
+  ko: >-
+    파이썬은 <b>들여쓰기가 곧 묶음</b>이라 이 실수가 생길 수 없습니다. C++ 은 들여쓰기를
+    안 보므로 중괄호가 유일한 근거예요.
+  en: >-
+    In Python <b>indentation is the grouping</b>, so this slip cannot happen. C++ never reads
+    indentation, so braces are the only evidence.
+misconceptions:
+  - ko: "들여쓴 줄들이 다 붙는다 — 중괄호가 없으면 한 문장만 붙습니다."
+    en: "Every indented line attaches — with no braces only one statement does."
+  - ko: "괄호 안은 참·거짓이어야 한다 — 0 이 아닌 수도 참으로 읽힙니다."
+    en: "The brackets need a truth value — any non-zero number reads as true."
+  - ko: "조건 안에서는 값을 못 바꾼다 — 바꿀 수 있고, 그래서 넣기를 실수로 적을 수 있어요."
+    en: "Nothing can change inside a condition — it can, which is how a putting slips in."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>참일 때만 도는 쪽</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the part that runs only when it holds</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.3
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>가른다는 표시</b>입니다. 도는 것은 그 뒤에 붙은 쪽이에요."
+          en: "{{pick.1|code}} is the <b>mark that splits</b>. What runs is the part attached after it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 표시냐 도는 쪽이냐", en: "The sharpest spot — the mark or what runs" }
+          code:
+            - "if (ok) go();     // go() 가 도는 쪽"
+            - "if (ok) ;         // 도는 것이 없다"
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>물어보는 값</b>입니다. 이 값 자체는 안 돌고 참·거짓으로만 읽혀요."
+          en: "{{pick.2|code}} is the <b>value being asked about</b>. It does not run; it is only read as true or false."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 묻는 값이냐 도는 쪽이냐", en: "The sharpest spot — the tested value or what runs" }
+          code:
+            - "if (n) f();       // n 은 읽히기만 한다"
+            - "if (n) n = 0;     // 도는 것은 뒤쪽이다"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 괄호 안이 <b>참일 때만</b> 뒤를 돌립니다."
+      en: "Choose what goes in the blank. Line {{site.line}} runs what follows <b>only when</b> the brackets hold."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "if", mono: true }
+      - t: "while"
+        mono: true
+        diag:
+          t:
+            ko: "이건 참인 <b>동안 되풀이</b>합니다. 안에서 조건이 안 바뀌면 끝나지 않아요."
+            en: "That <b>repeats while</b> it holds. If nothing inside changes the test, it never ends."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 한 번이냐 되풀이냐", en: "The sharpest spot — once or repeatedly" }
+            code:
+              - "if (ok) f();      // 한 번"
+              - "while (ok) f();   // 참인 동안"
+      - t: "elif"
+        mono: true
+        diag:
+          t:
+            ko: "이 낱말은 C++ 에 없습니다. <b>파이썬</b>의 표기이고, 여기서는 <code>else if</code> 두 낱말로 적어요."
+            en: "That word does not exist in C++. It is <b>Python's</b>; here it is written as two words, <code>else if</code>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 어느 언어의 표기냐", en: "The sharpest spot — whose notation" }
+            code:
+              - "# Python: elif x:"
+              - "// C++: else if (x)"
+      - t: "switch"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>값 하나를 여러 갈래로</b> 가릅니다. 참·거짓이 아니라 정수나 열거값을 받고, 갈래마다 <code>case</code> 를 적어요."
+            en: "That splits <b>one value into many branches</b>. It takes a whole number or an enumerated value, and each branch is written as a <code>case</code>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 두 갈래냐 여러 갈래냐", en: "The sharpest spot — two branches or many" }
+            code:
+              - "if (n == 1) f();"
+              - "switch (n) { case 1: f(); }"
+why_gate:
+  q:
+    ko: "중괄호를 안 써도 되는데 왜 <b>대부분의 코드가 늘 적을까요</b>?"
+    en: "Braces are optional — why does <b>most code write them anyway</b>?"
+  choices:
+    - t:
+        ko: "줄을 하나 더 붙일 때 조용히 조건 밖으로 나가기 때문 — 고치는 사람이 매번 그 함정을 밟는다"
+        en: "Because adding one more line silently falls outside the condition, and every editor hits that trap"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 함정이 실제로 사고를 낸 사례를 아는 대로 한 줄 적어 보세요."
+        en: "That is the direction. Add a line on any real incident that trap caused."
+    - t:
+        ko: "중괄호가 있으면 더 빨라서"
+        en: "Because braces make it faster"
+      ok: false
+      fb:
+        ko: "같은 기계 코드가 나옵니다. 다른 것은 <b>다음 사람이 고칠 때</b>예요."
+        en: "The machine code is the same. What differs is <b>when the next person edits it</b>."
+    - t:
+        ko: "중괄호 없이 쓰면 경고가 나서"
+        en: "Because omitting them warns"
+      ok: false
+      fb:
+        ko: "기본으로는 경고가 안 납니다. 규약으로 정하는 자리예요."
+        en: "By default nothing warns. It is settled by convention instead."
+queries:
+  - { grammars: [cpp], file: ./if-statement.scm }
+examples:
+  - code: "void f() { if (ok) { go(); } }            // ok 가 참이면 go()"
+    expect: { sites: 1, form: if, hole: "if", picks: { 1: "if", 2: "ok", 3: "{ go(); }" } }
+  - code: "void f() { if (n > 0) go(); }             // 중괄호가 없다 — 한 문장만 붙는다"
+    expect: { sites: 1, form: if, hole: "if", picks: { 1: "if", 3: "go();" } }
+  - code: "void f() { while (ok) { go(); } }         // 되풀이는 다른 판이다"
+    expect: none
