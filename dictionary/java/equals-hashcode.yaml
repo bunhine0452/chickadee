@@ -1,0 +1,237 @@
+schema: 1
+id: java/equals-hashcode
+universal: null
+name: { ko: 「같다」를 직접 정하기, en: equals and hashCode }
+token: "equals"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 4
+prereq: [java/comparison, java/inheritance-override]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "안 정하면 「같은 상자냐」를 묻는다. 정하면 「내용이 같냐」로 바뀐다."
+    en: "Undefined, it asks “the same box?”. Defined, it becomes “the same contents?”."
+  why:
+    ko: >-
+      아이디가 같은 사용자 둘을 만들어 견주면 자바는 기본적으로 <b>거짓</b>을 냅니다 — 안 정했으면
+      「같다」의 뜻이 「같은 상자냐」거든요. {{site.line}}행은 그 뜻을 <b>내용</b>으로 바꿉니다.
+      그런데 여기서 끝내면 절반만 고친 것입니다. 짝을 이루는 것이 하나 더 있고,
+      그것을 안 고치면 <b>방금 넣은 것을 다시 못 찾는</b> 상자가 생겨요. 찾는 쪽은 「내용이 같냐」를
+      묻기 전에 <b>줄여 놓은 숫자</b>로 갈 자리를 먼저 고르는데, 그 숫자를 안 고쳤으면 상자마다
+      다른 숫자가 나와 아예 다른 칸을 뒤집니다.
+    en: >-
+      Compare two users with the same id and Java says <b>false</b> by default — undefined, “equal”
+      means “the same box”. Line {{site.line}} changes that meaning to <b>contents</b>. Stopping here
+      fixes only half of it. There is a partner, and leaving it alone produces a container that
+      <b>cannot find what was just put in</b>: lookup picks a bucket from a <b>reduced number</b>
+      before it ever asks about contents, and an unchanged number differs per box, so it searches
+      another bucket entirely.
+  trace:
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 「같다」의 뜻을 이 클래스에서 다시 정한다."
+      en: "{{pick.1|code}} redefines what “equal” means for this class."
+    - ko: "{{pick.2|code}} 자리로 견줄 상대가 들어온다."
+      en: "The other side to compare arrives through {{pick.2|code}}."
+    - ko: "{{site.line}}행만 고치고 짝을 놔두면 해시로 찾는 상자가 깨진다."
+      en: "Fixing only line {{site.line}} and leaving the partner alone breaks hash-based containers."
+
+rule:
+  ko: "<b>둘은 한 쌍이다.</b> 내용이 같으면 줄여 놓은 숫자도 같아야 한다."
+  en: "<b>The two are a pair.</b> Equal contents must give the same reduced number."
+ok:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:이,가}} 「같다」를 내용으로 바꿉니다. 짝을 같이 고쳐야 찾는 쪽도
+    맞아요.
+  en: >-
+    {{pick.1|code}} turns “equal” into contents. Fixing the partner too is what keeps lookup right.
+payoff:
+  ko: >-
+    이걸 알면 「넣었는데 왜 없다고 하지」의 답이 보입니다 — 찾는 쪽이 <b>내용을 보기 전에</b>
+    숫자로 칸을 고르기 때문이에요.
+  en: >-
+    Knowing this answers “I put it in, why is it missing” — lookup picks a bucket from the number
+    <b>before it looks at contents</b>.
+bridge:
+  ko: >-
+    파이썬의 <code>__eq__</code> 와 <code>__hash__</code>, 러스트의 <code>PartialEq</code> 와
+    <code>Hash</code> 가 같은 쌍입니다. 짝을 맞춰야 한다는 규칙도 같아요.
+  en: >-
+    Python's <code>__eq__</code> and <code>__hash__</code>, Rust's <code>PartialEq</code> and
+    <code>Hash</code> are the same pair, under the same rule.
+misconceptions:
+  - ko: "<code>==</code> 가 내용을 견주고 이 메서드가 상자를 견준다 — <b>반대</b>입니다. 그리고 이 메서드도 <b>안 정했으면</b> 상자를 견줍니다."
+    en: "<code>==</code> compares contents and this method compares boxes — it is <b>the opposite</b>, and undefined this one compares boxes too."
+  - ko: "하나만 고쳐도 된다 — 짝을 놔두면 해시로 찾는 상자가 <b>방금 넣은 것을 못 찾습니다</b>."
+    en: "Fixing one is enough — leaving the partner breaks lookup: it <b>cannot find what was just put in</b>."
+  - ko: "숫자가 같으면 같은 것이다 — 아닙니다. 숫자가 같아도 <b>내용을 한 번 더</b> 견줍니다."
+    en: "Same number means same thing — no. Even with the same number, <b>contents are compared again</b>."
+  - ko: "글자가 같은 두 값은 <code>==</code> 로 참이다 — 참일 때도 있고 아닐 때도 있습니다. 그것이 이 쌍이 필요한 이유예요."
+    en: "Two values with the same text are <code>==</code> — sometimes, sometimes not. That is why this pair exists."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>「같다」의 뜻을 다시 정하는 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name that redefines “equal”</b>."
+    hint:
+      ko: "괄호 <b>앞</b>에 오는 이름입니다."
+      en: "It is the name <b>before</b> the parentheses."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>견줄 상대가 들어오는 자리</b>입니다. 이름은 그 앞이에요."
+          en: "{{pick.2|code}} is <b>where the other side arrives</b>. The name sits before it."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 이름이냐 받는 자리냐"
+            en: "The sharpest spot — the name or the parameter"
+          code:
+            - "public boolean equals(Object o)"
+            - "//             ^이름  ^받는 자리"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행만 고치고 짝을 그대로 두면 해시로 찾는 상자에서 무엇이 일어날까요?"
+      en: "Fixing only line {{site.line}} and leaving its partner alone — what happens in a hash-based container?"
+    hint:
+      ko: "찾는 쪽이 무엇을 먼저 보는지 생각해 보세요."
+      en: "Think about what lookup reads first."
+    options:
+      - t:
+          ko: "방금 넣은 것을 못 찾는다"
+          en: "What was just put in cannot be found"
+      - t:
+          ko: "느려질 뿐 결과는 맞는다"
+          en: "It only gets slower; the result stays right"
+        diag:
+          t:
+            ko: "느려지는 것은 <b>숫자가 겹칠 때</b>입니다. 지금은 아예 <b>다른 칸</b>을 뒤져 없다고 답해요."
+            en: "Slowness is what happens when numbers <b>collide</b>. Here it searches <b>a different bucket</b> and reports missing."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 느려지나 못 찾나"
+              en: "The sharpest spot — slower or missing"
+            code:
+              - "겹침:   느리다"
+              - "안 맞음: 없다고 답한다"
+      - t:
+          ko: "컴파일이 멈춘다"
+          en: "Compiling stops"
+        diag:
+          t:
+            ko: "문법으로는 아무 문제가 없습니다. <b>조용히 틀리는</b> 것이 이 자리의 어려움이에요."
+            en: "Grammatically nothing objects. <b>Being quietly off</b> is the difficulty here."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 막히나 조용하나"
+              en: "The sharpest spot — blocked or silent"
+            code:
+              - "javac: 통과한다"
+      - t:
+          ko: "짝이 자동으로 따라 고쳐진다"
+          en: "The partner is fixed automatically"
+        diag:
+          t:
+            ko: "자동으로 따라가지 않습니다. 둘은 <b>따로 적는</b> 메서드예요."
+            en: "It does not follow. They are <b>two separately written</b> methods."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 따라가나 따로냐"
+              en: "The sharpest spot — coupled or separate"
+            code:
+              - "둘 다 손으로 적는다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 이 클래스에서 <b>「같다」의 뜻</b>을 다시 정합니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} redefines <b>what “equal” means</b> for this
+        class.
+    hint:
+      ko: "보기 넷은 전부 물려받아 다시 쓸 수 있는 이름입니다."
+      en: "All four are names that can be inherited and rewritten."
+    options:
+      - { t: "equals", mono: true }
+      - t: "hashCode"
+        mono: true
+        diag:
+          t:
+            ko: "<code>hashCode</code> 는 <b>짝</b>입니다 — 값을 숫자 하나로 줄이는 쪽이에요. 「같냐」를 답하지는 않습니다."
+            en: "<code>hashCode</code> is <b>the partner</b> — it reduces a value to one number. It does not answer “equal?”."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 답하나 줄이나"
+              en: "The sharpest spot — answering or reducing"
+            code:
+              - "equals:   같냐고 답한다"
+              - "hashCode: 숫자로 줄인다"
+      - t: "compareTo"
+        mono: true
+        diag:
+          t:
+            ko: "<code>compareTo</code> 는 <b>순서</b>를 답합니다 — 앞이냐 뒤냐. 같냐만 묻는 자리가 아니에요."
+            en: "<code>compareTo</code> answers <b>order</b> — before or after. It is not the equality slot."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 같냐냐 순서냐"
+              en: "The sharpest spot — equality or order"
+            code:
+              - "compareTo: -1 · 0 · 1"
+              - "equals:    참 · 거짓"
+      - t: "toString"
+        mono: true
+        diag:
+          t:
+            ko: "<code>toString</code> 은 <b>글자로 바꾸는</b> 쪽입니다. 견주는 일과 상관없어요."
+            en: "<code>toString</code> turns it <b>into text</b>. It has nothing to do with comparing."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 견주기냐 보여 주기냐"
+              en: "The sharpest spot — comparing or showing"
+            code:
+              - "toString: 사람이 읽는 글"
+              - "equals:   같냐"
+
+why_gate:
+  q:
+    ko: "「같다」의 뜻을 <b>기본으로 정해 주지 않고</b> 클래스마다 적게 한 것은 무엇을 위해서일까요?"
+    en: "<b>Why</b> leave “equal” undefined by default and make each class write it?"
+  choices:
+    - t:
+        ko: "무엇이 같은지는 <b>그 클래스만</b> 아는 일이라서"
+        en: "Because <b>only that class</b> knows what makes two of them the same"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그래서 무엇을 함께 적어야 하는지도 적어 보세요."
+        en: "That is the direction. Add what must be written alongside as a result."
+    - t:
+        ko: "자바가 값을 견줄 수 없어서"
+        en: "Because Java cannot compare values"
+      ok: false
+      fb:
+        ko: "견줄 수 있습니다. 무엇을 견줄지가 <b>정해지지 않았을</b> 뿐이에요."
+        en: "It can. What to compare is simply <b>not settled</b>."
+    - t:
+        ko: "빠르게 하려고"
+        en: "For speed"
+      ok: false
+      fb:
+        ko: "속도 얘기가 아닙니다. <b>뜻</b>을 누가 정하느냐예요."
+        en: "This is not about speed but about <b>who settles the meaning</b>."
+
+queries:
+  - { grammars: [java], file: ./equals-hashcode.scm }
+
+examples:
+  - code: "class U { public boolean equals(Object o) { return true; } }"
+    expect:
+      sites: 1
+      form: equals
+      hole: "equals"
+      picks: { 1: "equals", 2: "(Object o)" }
+  - code: "class U { public int hashCode() { return 1; } }"
+    expect: { sites: 1, form: hashCode, picks: { 1: "hashCode" } }
+  - code: "class U { public String toString() { return \"u\"; } }"
+    expect: none

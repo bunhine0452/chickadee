@@ -9,8 +9,12 @@ import { loadDict } from '@chickadee/dictionary';
 import type { ConceptId } from '@chickadee/store-sql';
 import { describe, expect, test } from 'vitest';
 
-import { SYNTHETIC_SITE_ID, isSynthetic, makeSyntheticCard } from './t0-synthetic.js';
+import {
+  ABSENCE_MESSAGE_KEY, SYNTHETIC_SITE_ID, absenceReason, isSynthetic, makeAbsentCard,
+  makeSyntheticCard,
+} from './t0-synthetic.js';
 import { isFailure } from './types.js';
+import type { AbsenceReason } from './t0-synthetic.js';
 
 const dict = loadDict();
 const PREVIEW = 4242;
@@ -132,5 +136,58 @@ describe('개념 id 는 브랜드를 유지한다', () => {
     const out = makeSyntheticCard(req('ts/number-literal'));
     if (isFailure(out)) throw new Error(out.reason);
     expect(out.card.conceptId).toBe('ts/number-literal' as ConceptId);
+  });
+});
+
+/**
+ * 「네 코드엔 없다」 (D177 · D158 ②). 잠금은 안 풀렸고 **문이 하나 더 났다** — 열쇠가
+ * `previewSiteId` 에서 `absent` 로 바뀔 뿐, 열쇠 없이 부를 수 있는 문은 여전히 없다.
+ */
+describe('리포에 아예 없는 개념 (D177)', () => {
+  const absentReq = (conceptId: string, absent: AbsenceReason) => {
+    const { previewSiteId, ...rest } = req(conceptId);
+    expect(previewSiteId).toBe(PREVIEW);
+    return { ...rest, absent };
+  };
+
+  test('예고 없이도 판이 선다 — 대신 사유가 필수다', () => {
+    const out = makeAbsentCard(absentReq('java/abstract-class', 'scale'));
+    expect(isFailure(out)).toBe(false);
+  });
+
+  test('없는 자리를 예고하지 않는다 — previewSiteId 가 비어 있다', () => {
+    const out = makeAbsentCard(absentReq('java/generic-bound', 'library'));
+    if (isFailure(out)) throw new Error(out.reason);
+    expect(out.card.payload.previewSiteId).toBeUndefined();
+  });
+
+  test('사유는 선택이 아니라 필수 인자다', () => {
+    const { previewSiteId, ...without } = req('java/abstract-class');
+    expect(previewSiteId).toBe(PREVIEW);
+    // @ts-expect-error absent 없이는 부를 수 없다 (D177 — D137 과 같은 잠금).
+    expect(() => makeAbsentCard(without)).toBeTypeOf('function');
+  });
+
+  test('표본 리포에 0곳인 자바 개념 셋이 실제로 카드가 된다', () => {
+    // 이 셋이 D177 의 시험이다 — `MonggleMonggle` 자바 99장에서 `abstract class` 0곳 ·
+    // `<T extends …>` 0곳 · `equals`/`hashCode` 재정의 0곳이다. 안 서면 「내 코드에 없는
+    // 것을 가르친다」가 말뿐이 된다.
+    for (const id of ['java/abstract-class', 'java/generic-bound', 'java/equals-hashcode']) {
+      const reason = absenceReason(id);
+      expect(reason, id).not.toBeNull();
+      const out = makeAbsentCard(absentReq(id, reason as AbsenceReason));
+      expect(isFailure(out), id).toBe(false);
+    }
+  });
+
+  test('사유를 못 대는 개념은 표에 없다 — 사유 없이 열리는 문은 두지 않는다', () => {
+    expect(absenceReason('java/class-declaration')).toBeNull();
+    expect(absenceReason('ts/const-declaration')).toBeNull();
+  });
+
+  test('사유 넷은 전부 문구 키를 갖는다 — 화면이 펼 것이 비어 있지 않다', () => {
+    const reasons: AbsenceReason[] = ['framework', 'library', 'scale', 'idiom'];
+    for (const r of reasons) expect(ABSENCE_MESSAGE_KEY[r]).toMatch(/^t0\.absent/);
+    expect(new Set(Object.values(ABSENCE_MESSAGE_KEY)).size).toBe(reasons.length);
   });
 });

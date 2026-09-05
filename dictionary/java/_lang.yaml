@@ -8,15 +8,21 @@ grammar_abi: { java: 14 }
 extensions:
   java: [.java]
 
-# 바닥 여덟 (`docs/curriculum/java.md` §2) 전량 + 관문 0 과 OOP 축 (D166). 순서는 읽는
-# 순서이고 0장에 담기는 순서는 `prereq` 깊이가 정한다.
+# 정식 자바 코스 3부 (D177 · `docs/curriculum/java.md` §2). 부마다 교재가 다르다 —
+# **1부는 합성 예제**, **2부는 합성 + 내 코드**, **3부는 내 코드 중심**(`spring/` · D176).
+# 여기 적힌 순서가 부 순서이고, 부 안의 순서는 `prereq` 깊이가 정한다.
 #
-# 뒤의 열셋은 「로그인 챕터의 첫 파일이 열리는 최소 사전」이다 (`docs/program/course.md` §3.1).
-# `AuthController.java` 104줄에서 바닥 여덟이 잡는 것은 넷뿐이고, 못 읽히던 것이
-# 애너테이션(백엔드 718회)·제네릭(111회)·`import`·접근 제어자·롬복이 지운 생성자였다.
-# 순서는 파일을 위에서 아래로 읽는 차례를 따른다 — 맨 위의 `import`, 그다음 클래스에 붙는
-# 낱말들, 필드, 만들기, 그리고 흐름과 표시.
+# 1부 바닥 열셋 — 변수·타입·조건·반복·메서드·배열. 이 부의 개념은 리포에 사용처가 없어도
+# 가르친다. 표본 `MonggleMonggle`(자바 99장)에서 `for (;;)` 는 **0곳**, for-each 는 **1곳**,
+# 배열은 **1곳**(`String[] args`)이다 — 내 코드만으로는 반복도 배열도 못 가르친다.
+#
+# 2부 객체 열여섯 — 클래스와 객체·생성·상속과 오버라이드·인터페이스·다형성·캡슐화·
+# 컬렉션과 제네릭·예외. `abstract-class`·`generic-bound`·`equals-hashcode` 셋은 그 리포에
+# **0곳**이라 합성으로 가르치고 「네 코드엔 없다」를 명시한다(D158 ②).
+# `annotation` 이 2부의 끝이고 3부의 문턱이다 — 표시는 자바 문법이지만 그 표시가 런타임에
+# 하는 일은 자바에 안 적혀 있다.
 essential:
+  # 1부 바닥
   - java/class-declaration
   - java/variable-declaration
   - java/assignment
@@ -25,17 +31,26 @@ essential:
   - java/comparison
   - java/if-statement
   - java/method-declaration
+  - java/return-statement
+  - java/array
+  - java/for-loop
+  - java/for-each
   - java/import
+  # 2부 객체
   - java/access-modifier
   - java/field-declaration
   - java/new-expression
   - java/constructor
   - java/static
   - java/null
-  - java/for-loop
   - java/collection-generic
   - java/interface
   - java/inheritance-override
+  - java/abstract-class
+  - java/generic-bound
+  - java/equals-hashcode
+  - java/lambda
+  - java/stream-pipeline
   - java/try-catch
   - java/annotation
 

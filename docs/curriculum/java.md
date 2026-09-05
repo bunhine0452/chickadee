@@ -1,7 +1,11 @@
-# Java 커리큘럼 조사
+# Java 커리큘럼 — 정식 코스 3부
 
-네임스페이스 `java` · 대상 파일 `docs/curriculum/java.md` · 조사일 2026-09-04.
-사전(`dictionary/java/**`)은 아직 없다. 이 문서는 그것을 짜기 전의 판단 기록이다.
+네임스페이스 `java` · 조사일 2026-09-04 · **3부로 재편 2026-09-05 (D177)**.
+
+이 문서는 두 겹이다. **§2 가 코스의 정본**이고 — 무엇을 어느 부에서 어떤 교재로 가르치는가 —
+§3~§5 는 그 부에 담기는 개념의 설계표, §6 이하는 그것을 짜기 전의 조사 기록이다.
+2026-09-05 개정에서 옛 「기초 / 중심 / 심화」 세 절이 §2 의 부 배치로 대체됐고 그 뒤 절 번호가
+하나씩 밀렸다(옛 §5 → 지금 §6 …).
 
 ---
 
@@ -46,9 +50,133 @@ Java 에 같은 것을 하려면 `spring/` 네임스페이스가 필요하고 **
 `lang` 과 `grammar` 가 우연히 같다(D19 의 예외가 아니라 우연이다 — `ts`↔`typescript` 처럼 갈릴 일이 없을 뿐).
 `.jsh`(JShell)·`.jsp`·`.kt` 는 이 문법이 아니다.
 
+
 ---
 
-## §2 기초 — 바닥 여덟
+## §2 코스 3부 — 무엇을 어느 부에서 가르치나
+
+정본 §4 · D177. **별도 입문 과정을 만들지 않는다**와 **교재는 내 코드뿐**이 사용자 결정으로
+폐기됐다. 뒤집은 근거는 취향이 아니라 셈이다 — 표본 리포 `MonggleMonggle`(자바 99장)에서:
+
+| 무엇 | 곳 | 파일 |
+|---|---|---|
+| `for (;;)` 세 칸짜리 되풀이 | **0** | 0 |
+| for-each | **1** | 1 |
+| 배열 `[]` | **1** (`String[] args` 하나) | 1 |
+| `abstract class` | **0** | 0 |
+| 제네릭 경계 `<T extends …>` · 와일드카드 `? extends` | **0** | 0 |
+| `equals`/`hashCode` 재정의 | **0** | 0 |
+| `Set<` · `switch` · `instanceof` · `enum` · `char` | **각 0** | 0 |
+| `implements` | 1 | 1 |
+| `extends` | 9 (그중 8이 예외 계층) | 9 |
+| `->` 람다 | 53 | 14 |
+| `.stream()` | 9 | 7 |
+| `.equals(` 호출 | 15 | 5 |
+| `return` | 118 | 35 |
+
+읽는 법은 이렇다. **이 리포만으로 「반복」을 가르치면 교재가 한 줄이고, 「배열」도 한 줄이고,
+「상속 계층」은 예외 클래스 여덟 줄이 전부다.** 반복의 자리를 스트림과 람다가 다 가져갔기
+때문이고, 그것은 이 리포가 이상해서가 아니라 요즘 자바가 그렇게 쓰이기 때문이다.
+그래서 교재를 둘로 나눈다.
+
+| 부 | 교재 | 담기는 것 | 판 |
+|---|---|---|---|
+| **1부 바닥** | **합성 예제** | 변수·타입·조건·반복·메서드·배열 | 13 |
+| **2부 객체** | 합성 + 내 코드 | 클래스와 객체 · 생성 · 상속과 오버라이드 · 인터페이스 · 다형성 · 캡슐화 · 컬렉션과 제네릭 · 예외 | 16 |
+| **3부 프레임워크** | **내 코드 중심** | 의존성 주입 · 빈 생명주기 · 프록시와 AOP · 트랜잭션 전파 · 요청 디스패치 · 필터와 인터셉터 · 영속성 매핑 | 15 (`spring/` · D176) |
+
+3부가 끝나면 코스는 **내 리포의 기능 챕터**로 넘어간다(`docs/program/course.md` §2).
+
+### 규칙 셋
+
+**① 개념마다 내 코드의 자리를 짚는다.** 합성으로 배운 뒤 「네 리포의 여기가 그것이다」가
+반드시 따라붙는다. 자리가 없으면 **「네 코드엔 없다」를 명시하고 왜 없는지를 함께 낸다** —
+그것 자체가 공학 문항이다(D158 ②). 사유는 넷뿐이고 개념마다 다르지 않아 사전이 아니라
+생성기 카탈로그에 있다(`packages/cards/src/t0-synthetic.ts` 의 `AbsenceReason`):
+
+| 사유 | 뜻 | 이 리포의 실물 |
+|---|---|---|
+| `framework` | 프레임워크가 대신 만들어 준다 | 롬복이 지운 생성자 · `@EqualsAndHashCode` |
+| `library` | 이미 있는 것을 부르지 직접 짜지 않는다 | 제네릭 경계 |
+| `scale` | 이 규모에서는 필요가 안 생겼다 | 추상 클래스 계층 |
+| `idiom` | 다른 문법이 그 자리를 가져갔다 | `for (;;)` ← 스트림·for-each |
+
+**② 3부는 내 코드가 먼저다.** 합성은 그 모양이 내 코드에 **없을 때만**. 프레임워크가 묻는
+것은 「이 표시가 런타임에 무엇을 하나」이고 그 답이 실물로 내 코드에 있기 때문이다. 1·2부는
+반대다 — 바닥 문법은 이 리포에 없거나 한 줄뿐이라 합성이 정본이고 내 코드가 확인이다.
+
+**③ 순서는 개념 그래프의 위상 정렬**이고 부 안에서 선행이 먼저다. `topoOrder` 를 그대로 쓴다.
+
+### 부 배치
+
+`dictionary/java/_lang.yaml` 의 `essential` 순서가 곧 1·2부의 순서이고,
+`packages/course/src/curriculum.ts` 의 `JAVA_PARTS` 가 같은 목록을 든다. 시험이 둘을 대조한다.
+
+**1부 바닥 열셋** — `class-declaration` · `variable-declaration` · `assignment` · `arithmetic` ·
+`boolean-literal` · `comparison` · `if-statement` · `method-declaration` · **`return-statement`** ·
+**`array`** · `for-loop` · **`for-each`** · `import`.
+
+**2부 객체 열여섯** — `access-modifier` · `field-declaration` · `new-expression` · `constructor` ·
+`static` · `null` · `collection-generic` · `interface` · `inheritance-override` ·
+**`abstract-class`** · **`generic-bound`** · **`equals-hashcode`** · **`lambda`** ·
+**`stream-pipeline`** · `try-catch` · `annotation`.
+
+**3부 프레임워크 열다섯** — `spring/` 전량(D176). 스프링이 아닌 자바 리포에서는 이 사전이
+로드되지 않아 3부가 0판이고, 코스는 2부에서 기능 챕터로 넘어간다.
+
+굵은 여덟이 D177 이 새로 세운 개념이다. 셋(`abstract-class`·`generic-bound`·`equals-hashcode`)은
+표본 리포에 **0곳**이라 그 자체가 규칙 ①의 시험이다 — 이 셋이 카드로 서면 「내 코드에 없는
+것을 가르친다」가 실물로 증명되고, 안 서면 3부까지 갈 것도 없이 D177 이 실패한 것이다.
+
+### 표본 리포에서 실제로 서는 목차 (2026-09-05 실측)
+
+`MonggleMonggle` 에 대고 `buildCurriculum` → `courseOutline` 을 돌린 결과다. 자리 판정은
+자바 99장에 대한 정규식 근사이고(파서 CLI 가 없다) 3부는 `spring/` 의 `evidence` 낱말을 센 것이다.
+
+| 목차 | 판 | 내 코드 | 「네 코드엔 없다」 | 안 서는 것 |
+|---|---|---|---|---|
+| 1부 바닥 | 13 | 12 | 1 (`for-loop` · `idiom`) | — |
+| 2부 객체 | 16 | 13 | 3 (`abstract-class` `scale` · `generic-bound` `library` · `equals-hashcode` `framework`) | — |
+| 3부 프레임워크 | **14** | 14 | 0 | **1 — `spring/bean-lifecycle`** |
+| **1 로그인 챕터** | 관문 ≤ 6 + 다섯 단 | 24파일 · 요청 6 | — | — |
+
+**부 셋 43판 = 22일**(하루 새 판 2장 · D12), 그 뒤로 기능 챕터가 이어진다.
+
+읽을 것 셋.
+
+**① 부가 자바 어휘를 다 흡수해 로그인 챕터의 관문에 자바가 0개다.** 남는 것은 js·SQL·
+규약(`proto/`)·기계(`cs/`)뿐이다 — `chapterGates` 의 `taught` 가 그 뺄셈이다.
+
+**② 「네 코드엔 없다」가 네 자리에 실제로 선다.** 이 넷이 D177 의 시험이고, 옛 방식(리포가
+쓰는 문법만)이었다면 넷 다 코스에 없었을 것이다.
+
+**③ `spring/bean-lifecycle` 은 판이 안 선다.** 근거 낱말이 이 리포에 **0곳**이고, `spring/` 은
+쿼리가 없는 네임스페이스라 합성으로 돌릴 `examples[]` 도 없다. 자리도 사유도 못 대면 만들지
+않는다는 규칙이 그대로 걸린 것이다. 고치는 길은 둘 — `evidence` 를 넓히거나(`@PostConstruct`
+밖의 낱말) `spring/` 개념에 `examples[]` 를 다는 것이고, 둘 다 `dictionary/spring/**` 쪽 일이다.
+
+### 다형성은 개념 하나가 아니다
+
+정본 §4 의 2부 목록에 「다형성」이 있는데 개념으로 세우지 않았다. 짚을 노드가 없기 때문이다 —
+다형성은 `inheritance-override` · `interface` · `abstract-class` 셋이 **함께** 만드는 성질이고,
+「어느 몸이 불릴지가 실행 때 정해진다」는 문법이 아니라 기계라 `cs/dynamic-dispatch`(§9)의
+자리다. 그래서 이 축은 셋의 문항이 나눠 지고, 기계 층은 아직 미착수다.
+
+### 아직 안 세운 것
+
+1·2부에 있어야 하는데 지금 없는 것들이다. 다음 물결의 순서대로 적는다.
+
+| id | 왜 필요한가 | 왜 아직 없나 |
+|---|---|---|
+| `java/string-literal` | 1부의 「값」이 숫자·참거짓뿐이다. 텍스트 블록 함정(§9 ⑥)도 여기 걸린다 | 짚을 자리가 한 노드뿐이라 `@pick` 셋을 못 채운다. 쿼리를 둘로 갈라야 한다 |
+| `java/reference-equality` | 오개념 1번(`==` 대 `.equals`)이 지금 `equals-hashcode` 의 `misconceptions` 에만 있다 | `==` 쿼리가 `java/comparison` 과 겹친다. 참조 타입만 고르려면 타입을 알아야 하는데 파서는 모른다 |
+| `java/map-and-set` | 컬렉션 자료구조를 「목록 하나」로만 가르치고 있다. 이 리포에 `Map<` 13곳 · `Set<` **0곳** | `collection-generic` 과 노드가 같아 갈라야 하고, 그 판단이 어휘가 아니라 **자료구조 선택**이라 `ds/`(D158 ③) 쪽일 수 있다 |
+| `java/main-method` · `java/string-concat` | 옛 §4 가 설계해 둔 것 | 저작이 밀렸다 |
+| `java/checked-exception` · `java/autoboxing` · `java/generics-erasure` · `java/final` | 심화 | 저작이 밀렸다 |
+
+---
+
+## §3 1부에 담기는 것 — 설계표 (바닥 여덟 + 그 뒤 다섯)
 
 | # | id | name.ko / en | token | universal | diff | prereq | 이 언어라서 다른 것 |
 |---|---|---|---|---|---|---|---|
@@ -69,17 +197,17 @@ Java 에 같은 것을 하려면 `spring/` 네임스페이스가 필요하고 **
 | 낱말 | 어디로 | 깊이 |
 |---|---|---|
 | `void` | `java/method-declaration` — **바닥 여덟** | 1 |
-| `public` | `java/access-modifier` — §3 | 2 |
-| `static` | `java/static` — §3 | 2 |
+| `public` | `java/access-modifier` — §4 | 2 |
+| `static` | `java/static` — §4 | 2 |
 | `String[]` | **개념으로 세우지 않았다.** 33개 어디에도 배열이 없다 | — |
 | `args` | 개념으로 세우지 않았다. 매개변수는 `method-declaration` 안에서 다룬다 | — |
 
-배열을 뺀 것은 실수가 아니라 자리가 없어서다(§5 의 24/24). Exercism Java 트랙은 `arrays` 를
+배열을 뺀 것은 실수가 아니라 자리가 없어서다(§6 의 24/24). Exercism Java 트랙은 `arrays` 를
 깊이 낮은 자리에 두고 LLM Java 도 `String[]`·`int[]` 를 쓰므로 **다음 물결의 1순위**다.
 다섯을 다 바닥 여덟에 넣으면 여덟 중 다섯을 첫 화면 해설에 쓰게 되고 `if`·`return`·셈하기가
 밀려난다. 대신 **`java/class-declaration` 하나**를 바닥에 넣어 「모든 코드는 상자 안에 있다」만
-세우고, `java/main-method` 는 §3 에 두되 **선행을 `method-declaration` 하나로만 매겨 깊이 2 에
-앉힌다**(§5). 그 카드의 일은 다섯 낱말을 다 설명하는 것이 아니라 「넷은 나중에 배운다, 지금 알 것은
+세우고, `java/main-method` 는 §4 에 두되 **선행을 `method-declaration` 하나로만 매겨 깊이 2 에
+앉힌다**(§6). 그 카드의 일은 다섯 낱말을 다 설명하는 것이 아니라 「넷은 나중에 배운다, 지금 알 것은
 여기서 시작한다는 것 하나」를 말하는 것이다.
 
 **Java 21+ 가 이 문제를 바꿨나 — 명세로는 바꿨고, 실물로는 안 바꿨다.**
@@ -94,16 +222,16 @@ JEP 445(21 프리뷰) → 463(22) → 477(23) → 495(24) → 512(25 정식)의 
 ### 바닥에서 뺀 것과 그 이유
 
 - **`while`** — 파이썬 바닥 여덟에는 있었다. Java 로 나오는 LLM 코드에서 `while` 은 드물고
-  `for (int i…)`·for-each·스트림이 그 자리를 다 가져간다. §3 의 `java/for-loop` 에 `common/loop-while`
+  `for (int i…)`·for-each·스트림이 그 자리를 다 가져간다. §4 의 `java/for-loop` 에 `common/loop-while`
   을 붙여 전이는 살렸다.
 - **`return`** — 「안 적으면 컴파일이 멈춘다」는 좋은 Java 사실이지만(파이썬은 조용히 `None` 을 보낸다)
-  선행이 `method-declaration` 이라 깊이 2 다. 여덟 자리를 쓰지 않아도 0장에 든다. §3 으로 옮겼다.
+  선행이 `method-declaration` 이라 깊이 2 다. 여덟 자리를 쓰지 않아도 0장에 든다. §4 으로 옮겼다.
 - **`String` 리터럴** — 「작은따옴표는 글자 한 개」라는 Java 사실이 있어 개념으로는 서지만
   깊이 0 이라 여덟 자리를 안 써도 0장 맨 앞에 온다.
 
 ---
 
-## §3 중심
+## §4 2부에 담기는 것 — 설계표 (중심)
 
 | # | id | name.ko / en | token | universal | diff | prereq | 이 언어라서 다른 것 · 없으면 왜 못 읽나 |
 |---|---|---|---|---|---|---|---|
@@ -127,7 +255,7 @@ JEP 445(21 프리뷰) → 463(22) → 477(23) → 495(24) → 512(25 정식)의 
 
 ---
 
-## §4 심화
+## §5 심화 — 2부 뒤쪽과 아직 안 세운 것
 
 | # | id | name.ko / en | token | universal | diff | prereq | 이 언어라서 다른 것 |
 |---|---|---|---|---|---|---|---|
@@ -143,7 +271,7 @@ JEP 445(21 프리뷰) → 463(22) → 477(23) → 495(24) → 512(25 정식)의 
 
 ---
 
-## §5 prereq 그래프와 0장 적재량
+## §6 prereq 그래프와 적재량 (0장 → 1·2부)
 
 `ZERO_CHAPTER_MAX = 24` · `ZERO_CHAPTER_MAX_DEPTH = 2`(`packages/concepts/src/zero-chapter.ts`).
 
@@ -164,7 +292,7 @@ JEP 445(21 프리뷰) → 463(22) → 477(23) → 495(24) → 512(25 정식)의 
 
 **그런데 이 수치는 마진이 0 이다.** 24/24 라 자르는 규칙이 한 번도 일하지 않고, 개념 하나만
 더해도 그때부터 「무엇을 자를까」가 임의의 문제가 된다(D147 이 상한 8·깊이 1 을 고를 때 피하려던
-바로 그 상태다). 실제로 사전을 짤 때는 `java/array`(§2 가 미룬 `String[]`)·`java/method-call`·
+바로 그 상태다). 실제로 사전을 짤 때는 `java/array`(§3 가 미룬 `String[]`)·`java/method-call`·
 `java/field-access`·`java/ternary`·`java/number-literal`·`java/switch` 가 더 붙고 전부 깊이 ≤ 2 다.
 그래서 **한 개라도 더하기 전에 깊이 2 의 12개 중 무엇을 3 으로 내릴지를 먼저 정해야 한다.**
 후보는 `static`(필드와 메서드 둘 다 선행) 과 `interface`(`inheritance-override` 를 선행으로 내리면
@@ -193,15 +321,40 @@ JEP 445(21 프리뷰) → 463(22) → 477(23) → 495(24) → 512(25 정식)의 
 전이가 아니라 오개념으로 다뤄야 하고, 그러려면 개념 자리가 있어야 한다. `universal` 은 `null` 이다
 — `common/` 에 짝이 될 보편형이 아직 없다.
 
-깊이는 0 이라 §5 의 층 표에서 깊이 0 이 5 → 6, 깊이 ≤ 2 의 합이 24 → 25 가 된다. §5 가 「마진이
+깊이는 0 이라 §6 의 층 표에서 깊이 0 이 5 → 6, 깊이 ≤ 2 의 합이 24 → 25 가 된다. §6 가 「마진이
 0 이라 하나만 더해도 무엇을 자를지가 임의의 문제가 된다」고 적어 둔 그 자리에 실제로 하나가
 더해진 것이다. 다만 D166 이 채운 것은 0장이 아니라 **챕터 앞의 어휘 관문**(`course.md` §3.2)이고
 관문 0 의 상한은 12판이라, 자르는 규칙이 도는 자리도 거기다. 깊이 2 의 12개 중 무엇을 3 으로
 내릴지는 여전히 안 정했다.
 
+
+### D177 이후 — 실제 사전으로 다시 잰 것 (2026-09-05)
+
+위 표는 **설계한 33개** 기준이다. 사전에 실제로 들어간 것으로 다시 재면 이렇다
+(`_lang.yaml` 의 `essential` 29개, 깊이는 `prereqDepth` 가 그 집합 안에서만 센다).
+
+| 깊이 | 개수 | 개념 |
+|---|---|---|
+| 0 | 8 | `class-declaration` · `variable-declaration` · `assignment` · `arithmetic` · `boolean-literal` · `comparison` · `if-statement` · `import` |
+| 1 | 4 | `method-declaration` · `for-loop` · `field-declaration` · `new-expression` |
+| 2 | 9 | `return-statement` · `array` · `access-modifier` · `constructor` · `static` · `null` · `collection-generic` · `interface` · `inheritance-override` |
+| 3 | 7 | `for-each` · `abstract-class` · `generic-bound` · `equals-hashcode` · `lambda` · `try-catch` · `annotation` |
+| 4 | 1 | `stream-pipeline` |
+
+**깊이 ≤ 2 = 21개**로 상한 24 아래다. 조사 때의 24/24 와 다른 이유는 둘이다 — 설계표에만
+있고 사전에는 없는 것이 넷(`main-method`·`string-literal`·`string-concat`·`reference-equality`)이고,
+`comparison`·`if-statement` 의 선행이 `cs/` 로 가 있어 자바 집합 안에서는 깊이 0 이다.
+
+**그래서 `ZERO_CHAPTER_MAX = 24` 는 손대지 않았다.** 이 상한이 하던 일 —
+「무엇을 자를까가 임의의 문제가 되지 않게 한다」 — 을 이제 **부 배치가 대신 한다.
+1·2부는 29개 전량을 담고 자르지 않는다.** 자르는 규칙이 도는 자리는 챕터 관문 하나뿐이고,
+그쪽 상한은 챕터당 6판 · 코스 전체 40판이다(`packages/course/src/curriculum.ts`).
+0장 자체는 코스 밖 대지로 남아 있고 이 언어에서는 21판을 담는다 — 부와 겹치지만 세는 자리가
+달라 상한이 서로를 안 건드린다.
+
 ---
 
-## §6 `common/` 재사용 대 신규
+## §7 `common/` 재사용 대 신규
 
 ### 재사용 — 18개
 
@@ -275,7 +428,7 @@ JEP 445(21 프리뷰) → 463(22) → 477(23) → 495(24) → 512(25 정식)의 
 
 ---
 
-## §7 `cs/` 로 밀어낼 것
+## §8 `cs/` 로 밀어낼 것
 
 문법이 아니라 기계·이론인 것. id 와 한 줄 정의, 그리고 **Java 의 어느 개념이 이것을 필요로 하는가**.
 
@@ -297,7 +450,7 @@ JEP 445(21 프리뷰) → 463(22) → 477(23) → 495(24) → 512(25 정식)의 
 
 ---
 
-## §8 tree-sitter 현실
+## §9 tree-sitter 현실
 
 | 항목 | 값 | 확인 방법 |
 |---|---|---|
@@ -378,7 +531,7 @@ _multiline_string_literal)` 이라 `"""…"""` 도 같은 노드다. LLM 이 SQL
 
 ---
 
-## §9 오개념
+## §10 오개념
 
 `misconceptions:` 와 오답 `diag` 가 이 표를 그대로 쓴다. 항목 이름은 progmiscon.org 의 Java 목록
 55건에서 **이름만** 가져왔다(D148 ⑤ 대로 산문은 안 가져온다). 「실제로는」 줄은 우리가 쓴다.
@@ -405,7 +558,7 @@ _multiline_string_literal)` 이라 `"""…"""` 도 같은 노드다. LLM 이 SQL
 
 ---
 
-## §10 근거와 출처
+## §11 근거와 출처
 
 | 무엇 | URL | 확인 상태 |
 |---|---|---|

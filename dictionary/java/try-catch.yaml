@@ -7,7 +7,7 @@ grammars: [java]
 framework: null
 essential: true
 difficulty: 3
-prereq: [java/inheritance-override]
+prereq: [java/inheritance-override, spring/exception-handler]
 confusions: []
 
 dict:

@@ -7,7 +7,7 @@ grammars: [java]
 framework: null
 essential: true
 difficulty: 4
-prereq: [java/interface, java/method-declaration]
+prereq: [java/interface, java/method-declaration, spring/proxy-and-aop, spring/component-scan]
 confusions: []
 
 dict:

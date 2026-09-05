@@ -7,7 +7,7 @@ grammars: [java]
 framework: null
 essential: true
 difficulty: 1
-prereq: [cs/invariant, cs/dynamic-dispatch]
+prereq: [cs/invariant, cs/dynamic-dispatch, spring/component-scan]
 confusions: []
 
 dict:

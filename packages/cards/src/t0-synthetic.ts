@@ -1,15 +1,25 @@
 /**
- * 합성 예제 카드 (D137 · 02 §6.2 「진짜 바닥(E-4)」 · 방안 E-4).
+ * 합성 예제 카드 (D137 · D158 · **D177** · 02 §6.2 「진짜 바닥(E-4)」 · 방안 E-4).
  *
  * 내 코드의 사용처가 전부 미지 4 이상이라 아직 못 여는 개념에, 사전이 들고 있는 **가장
  * 단순한 모양**을 먼저 보여 준다. 재료는 `concept.examples[].code` + `expect.picks` 이고
  * ts 사전은 28/28 이 이미 갖고 있다 — **LLM 을 부르지 않는다.**
  *
- * 이 파일의 계약 하나가 나머지 전부보다 중요하다: **`previewSiteId` 는 선택이 아니라 필수
- * 인자다.** 방안 E-4 는 합성 예제에 「반드시 '곧 네 코드 어디에서 이걸 보게 된다'를 함께
+ * 이 파일의 계약 하나가 나머지 전부보다 중요하다: **문을 여는 열쇠가 없으면 카드를 만들지
+ * 않는다.** 방안 E-4 는 합성 예제에 「반드시 '곧 네 코드 어디에서 이걸 보게 된다'를 함께
  * 예고할 것 — 없으면 앱이 일반 튜토리얼로 변질된다」고 조건을 걸었는데, 조건이 문서에만
- * 있으면 지켜지지 않는다. 그래서 타입이 강제한다. 리포에 사용처가 없어 예고할 자리가 없는
- * 개념은 **카드를 만들지 않는다.**
+ * 있으면 지켜지지 않는다. 그래서 타입이 강제한다.
+ *
+ * **문은 이제 둘이고 열쇠도 둘이다** (D177 이 D158 ② 를 실물로 옮긴 자리).
+ *
+ * | 문 | 리포 사정 | 열쇠 |
+ * |---|---|---|
+ * | {@link makeSyntheticCard} | 자리는 **있는데** 아직 미지가 많아 못 연다 | `previewSiteId` — 「곧 여기서 봅니다」 |
+ * | {@link makeAbsentCard} | 자리가 **아예 없다** | `absent` — 「네 코드엔 없다」 + 왜 없나 |
+ *
+ * 열쇠를 하나로 합치지 않은 이유가 이 파일의 요점이다 — 두 상황은 사용자에게 **다른 말**을
+ * 해야 한다. 하나는 예고이고 하나는 부재의 사유다. 열쇠가 하나면 둘이 섞이고, 섞이면
+ * D137 이 막으려던 「예고 없는 합성」이 「사유 없는 합성」의 얼굴로 되돌아온다.
  */
 import { t } from '@chickadee/i18n';
 import type { Concept } from '@chickadee/dictionary';
@@ -35,6 +45,81 @@ export const isSynthetic = (siteId: number): boolean => siteId === SYNTHETIC_SIT
 export interface SyntheticRequest extends Omit<T0Request, 'sites' | 'previewSiteId'> {
   /** 「곧 여기서 봅니다」로 예고할 내 코드의 사용처. 없으면 만들지 않는다 (E-4). */
   previewSiteId: number;
+}
+
+/**
+ * 「네 코드엔 없다」의 **사유** 네 갈래 (D158 ② · D177).
+ *
+ * 사유가 사전이 아니라 여기 있는 이유는 `exec/order` 의 선례와 같다 — 이 넷은 **개념마다
+ * 다르지 않고 언어에도 안 매인다.** 「라이브러리가 이미 그 일을 한다」는 자바에서도
+ * 파이썬에서도 참이고, 사전에 두면 개념 수 × 언어 수만큼 같은 문장을 복제하게 된다.
+ * 개념마다 다른 것 — 최소 예제와 문항 — 은 사전의 `examples[]` 에 그대로 남는다.
+ *
+ * | 값 | 뜻 | 자바 예 |
+ * |---|---|---|
+ * | `framework` | 프레임워크가 대신 만들어 준다 | 롬복이 지운 생성자 · `@EqualsAndHashCode` |
+ * | `library` | 이미 있는 것을 부르지 직접 짜지 않는다 | 정렬 · 제네릭 경계 |
+ * | `scale` | 이 리포 규모에서는 필요가 안 생겼다 | 추상 클래스 계층 |
+ * | `idiom` | 다른 문법이 그 자리를 가져갔다 | `for (;;)` ← 스트림·for-each |
+ */
+export type AbsenceReason = 'framework' | 'library' | 'scale' | 'idiom';
+
+/**
+ * 사유 넷의 i18n 키. **문구는 `packages/i18n` 이 대고 이 파일은 키만 안다** — 카탈로그의
+ * 자리는 여기가 아니라 거기다(`exec/order` 의 `renderFirstRun` 과 같은 모양).
+ *
+ * 지금은 그 키 넷이 아직 없어서 `t()` 로 부르지 않는다. 화면이 이 값을 받아 자기 쪽에서
+ * 편다 — 없는 키를 여기서 부르면 타입이 떨어지고, 떨어뜨리지 않으려고 문구를 이 파일에
+ * 베껴 두면 카탈로그가 둘이 된다.
+ */
+export const ABSENCE_MESSAGE_KEY: Record<AbsenceReason, string> = {
+  framework: 't0.absentFramework',
+  library: 't0.absentLibrary',
+  scale: 't0.absentScale',
+  idiom: 't0.absentIdiom',
+};
+
+/**
+ * 개념 → 「없다면 왜 없나」. **없다는 사실은 리포가 정하고**(사용처가 0인가) **사유는 이 표가
+ * 정한다.** 둘을 갈라 둔 것이 이 표의 요점이다 — 사유는 리포마다 달라지지 않는다.
+ *
+ * 표에 없는 개념은 {@link makeAbsentCard} 를 못 부른다. 사유 없이 열리는 문은 두지 않는다
+ * (D137 이 `previewSiteId` 로 세운 잠금과 같은 규칙).
+ */
+const ABSENCE: Readonly<Record<string, AbsenceReason>> = {
+  // 스프링·롬복이 소스에서 지워 버린 것. 표본 리포에서 `@RequiredArgsConstructor` 29파일.
+  'java/constructor': 'framework',
+  'java/equals-hashcode': 'framework',
+  // 부르기만 하지 직접 짜지 않는 것. 표본 리포에서 `<T extends …>` 0곳 · `? extends` 0곳.
+  'java/generic-bound': 'library',
+  // 이 규모에서는 계층이 안 생겼다. 표본 리포에서 `abstract class` 0곳,
+  // `extends` 9곳 중 8곳이 예외 계층이다.
+  'java/abstract-class': 'scale',
+  // 다른 문법이 자리를 가져갔다. 표본 리포에서 `for (;;)` 0곳 · for-each 1곳 · 배열 1곳이고,
+  // 그 자리를 스트림(9곳)과 람다(53곳)가 다 쓴다.
+  'java/for-loop': 'idiom',
+  'java/for-each': 'idiom',
+  'java/array': 'idiom',
+  // 이 규모에서는 여닫을 자원이 없다. 표본 리포의 빈이 전부 생성자 주입만 쓰는 무상태
+  // 서비스라 `@PostConstruct`·`@PreDestroy`·`InitializingBean`·`@Scope`·`@Lazy` 가 0곳이고,
+  // 낱말을 더 넓히면 `spring/bean-and-container` 의 자리를 짚게 된다 (D176).
+  'spring/bean-lifecycle': 'scale',
+};
+
+/**
+ * 이 개념이 리포에 없을 때 댈 사유. 없으면 `null` 이고, 그때는 카드를 만들지 않는다.
+ */
+export const absenceReason = (conceptId: string): AbsenceReason | null =>
+  ABSENCE[conceptId] ?? null;
+
+/**
+ * 리포에 사용처가 **아예 없는** 개념의 요청. `previewSiteId` 자리에 사유가 들어간다 —
+ * 예고할 자리가 없으니 예고 대신 「왜 네 코드엔 없나」를 낸다. 그것 자체가 공학 문항이다
+ * (D158 ②).
+ */
+export interface AbsentRequest extends Omit<T0Request, 'sites' | 'previewSiteId'> {
+  /** 「네 코드엔 없다」의 사유. 없으면 만들지 않는다. */
+  absent: AbsenceReason;
 }
 
 /** 합성 사용처의 `site_key` — 시드가 여기서 나오므로 개념마다 안정적이어야 한다. */
@@ -111,12 +196,36 @@ function siteFromExample(concept: Concept, at: number): SiteInput | null {
  * 여기를 고칠 필요가 없다.
  */
 export function makeSyntheticCard(req: SyntheticRequest): GenResult {
+  return bakeFromExamples(req);
+}
+
+/**
+ * 리포에 자리가 **아예 없는** 개념의 카드 한 장 (D177 · D158 ②).
+ *
+ * 구워지는 방식은 {@link makeSyntheticCard} 와 같다 — 재료는 같은 `examples[]` 이고
+ * 카드 생성기는 이것이 합성인지 모른다. 다른 것은 화면이 그 옆에 무엇을 붙이느냐다:
+ * 합성은 「곧 네 코드 여기서 봅니다」를, 이쪽은 「네 코드엔 없다 — {@link AbsenceReason}」를
+ * 붙인다. `previewSiteId` 는 **넘기지 않는다**. 없는 자리를 예고하면 그것이 거짓말이다.
+ *
+ * 1·2부가 이 문으로 선다. 표본 리포에서 `abstract-class`·`generic-bound`·`equals-hashcode`
+ * 는 0곳이고, 이 문이 없으면 그 셋은 영영 못 가르친다.
+ */
+export function makeAbsentCard(req: AbsentRequest): GenResult {
+  return bakeFromExamples(req);
+}
+
+/**
+ * 사전 예제로 카드를 굽는 공통 몸통. 두 문이 이것을 나눠 쓰고, 갈리는 것은 `previewSiteId`
+ * 하나다 — {@link AbsentRequest} 에는 그 필드가 없으므로 `undefined` 로 내려간다.
+ */
+function bakeFromExamples(req: SyntheticRequest | AbsentRequest): GenResult {
   const reasons: string[] = [];
+  const preview = 'previewSiteId' in req ? req.previewSiteId : undefined;
 
   for (let at = 0; at < req.concept.examples.length; at += 1) {
     const input = siteFromExample(req.concept, at);
     if (input === null) continue;
-    const full: T0Request = { ...req, sites: [input], previewSiteId: req.previewSiteId };
+    const full: T0Request = { ...req, sites: [input], ...(preview === undefined ? {} : { previewSiteId: preview }) };
     for (const kind of prefer(req.ly)) {
       const out = generateKind(full, kind, input);
       // 누설(정답이 맥락 줄에 또 보임)은 합성에서 미루지 않는다 — 예제가 한 줄이라 물릴

@@ -7,7 +7,7 @@ grammars: [java]
 framework: null
 essential: true
 difficulty: 2
-prereq: [java/class-declaration, java/variable-declaration]
+prereq: [java/class-declaration, java/variable-declaration, spring/dependency-injection]
 confusions: []
 
 dict:

@@ -1,0 +1,246 @@
+schema: 1
+id: java/generic-bound
+universal: null
+name: { ko: 타입 자리에 올 것의 위, en: Generic bound }
+token: "extends"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 4
+prereq: [java/collection-generic, java/interface]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "빈 타입 자리에 아무거나 못 오게 위를 하나 정한다."
+    en: "It sets a ceiling so the open type slot cannot take just anything."
+  why:
+    ko: >-
+      타입 자리를 비워 두면 무엇이든 들어옵니다. 그러면 그 안에서 <b>할 수 있는 일이 거의 없어요</b> —
+      들어온 것이 무엇인지 모르니 이름 붙은 어떤 일도 못 시킵니다. {{site.line}}행은 그 자리에
+      {{pick.1|code}}{{pick.1|josa:을,를}} 붙여 위를 하나 정합니다 — 「{{pick.3|code}} 아래 것만
+      온다」고요. 그 한 줄 덕분에 안에서 {{pick.3|code}}{{pick.3|josa:이,가}} 할 줄 아는 일을 그대로
+      시킬 수 있습니다. <b>자유를 줄여서 할 수 있는 일을 늘리는</b> 거래입니다.
+    en: >-
+      An open type slot takes anything, and then <b>almost nothing can be done</b> with it — with no
+      idea what arrived, no named work can be asked of it. Line {{site.line}} attaches {{pick.1|code}}
+      to set one ceiling: “only what sits under {{pick.3|code}} may come”. That one line is what lets
+      the inside ask for whatever {{pick.3|code}} knows how to do. It is a trade: <b>less freedom for
+      more that can be done</b>.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 아직 정해지지 않은 타입의 이름이다."
+      en: "{{pick.2|code}} is the name of a type not yet settled."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 그 자리의 위를 {{pick.3|code}}(으)로 못박는다."
+      en: "{{pick.1|code}} nails the ceiling of that slot to {{pick.3|code}}."
+    - ko: "{{site.line}}행 아래에서는 {{pick.3|code}}{{pick.3|josa:이,가}} 할 줄 아는 일을 그대로 쓸 수 있다."
+      en: "Below line {{site.line}}, whatever {{pick.3|code}} can do is available as it is."
+
+rule:
+  ko: "<b>위를 정하면 그 아래 것만 온다.</b> 대신 그 위가 할 줄 아는 일을 안에서 쓸 수 있다."
+  en: "<b>A ceiling admits only what sits under it.</b> In exchange, what the ceiling can do is usable inside."
+ok:
+  ko: >-
+    {{pick.2|code}} 자리에는 {{pick.3|code}} 아래 것만 옵니다. 그래서 안에서 그것이 할 줄 아는 일을
+    시킬 수 있어요.
+  en: >-
+    The {{pick.2|code}} slot admits only what sits under {{pick.3|code}}, so its work can be asked for
+    inside.
+payoff:
+  ko: >-
+    이걸 알면 「왜 여기는 각괄호 안이 비어 있고 저기는 낱말이 하나 더 있나」가 보입니다 — 안에서
+    <b>무엇을 시키려 했는가</b>가 그 차이예요.
+  en: >-
+    Knowing this shows why one pair of angle brackets is bare and another has an extra word — the
+    difference is <b>what the inside meant to ask for</b>.
+bridge:
+  ko: >-
+    파이썬·타입스크립트에도 같은 뜻의 자리가 있습니다(<code>TypeVar(bound=…)</code> ·
+    <code>T extends …</code>). 자바에서 헷갈리는 것은 <b>같은 낱말이 상속에도 쓰인다</b>는 것뿐이에요.
+  en: >-
+    Python and TypeScript have the same slot (<code>TypeVar(bound=…)</code>, <code>T extends …</code>).
+    What confuses in Java is only that <b>the same word is used for inheritance</b>.
+misconceptions:
+  - ko: "여기 쓰인 낱말이 상속을 뜻한다 — 여기서는 <b>위를 정하는</b> 뜻입니다. 할 줄 아는 것의 목록에도 같은 낱말을 써요."
+    en: "This word means inheritance here — here it <b>sets a ceiling</b>. The same word is used even for a list of abilities."
+  - ko: "여러 개는 못 적는다 — <code>&amp;</code> 로 이어 여럿 적을 수 있습니다."
+    en: "Only one can be written — several can be joined with <code>&amp;</code>."
+  - ko: "위를 정하면 실행할 때도 그 정보가 남는다 — <b>각괄호 안은 컴파일 때만</b> 있습니다."
+    en: "The ceiling survives to run time — <b>the angle brackets exist only while compiling</b>."
+  - ko: "받는 자리의 <code>?</code> 와 같은 것이다 — 하나는 <b>선언</b> 쪽, 하나는 <b>받는</b> 쪽입니다. 이름을 쓸 수 있느냐가 달라요."
+    en: "It is the same as <code>?</code> in a parameter — one is on the <b>declaring</b> side, one on the <b>receiving</b> side. Whether the name is usable differs."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>위로 정해진 것</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>what was set as the ceiling</b>."
+    hint:
+      ko: "낱말 <b>뒤</b>에 오는 이름입니다."
+      en: "It is the name that follows the word."
+    answer: pick.3
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>아직 안 정해진 자리의 이름</b>입니다. 위는 그 뒤에 적혀요."
+          en: "{{pick.2|code}} is <b>the name of the unsettled slot</b>. The ceiling is written after it."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 자리 이름이냐 위냐"
+            en: "The sharpest spot — the slot's name or the ceiling"
+          code:
+            - "<T extends Number>"
+            - "// ^자리 이름 ^위"
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>위를 정한다는 표시</b>입니다. 정해진 것은 그 뒤예요."
+          en: "{{pick.1|code}} is <b>the mark that a ceiling is set</b>. What was set follows it."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 표시냐 이름이냐"
+            en: "The sharpest spot — the mark or the name"
+          code:
+            - "표시: 위를 정한다"
+            - "뒤:   무엇으로 정했나"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행처럼 위를 정하면 <b>안에서</b> 무엇이 달라질까요?"
+      en: "With a ceiling set as on line {{site.line}}, what changes <b>inside</b>?"
+    hint:
+      ko: "안에서 그것이 무엇인지 얼마나 아는지 보세요."
+      en: "Ask how much the inside knows about what arrived."
+    options:
+      - t:
+          ko: "위가 할 줄 아는 일을 그대로 시킬 수 있다"
+          en: "Whatever the ceiling can do becomes available"
+      - t:
+          ko: "더 빨리 돈다"
+          en: "It runs faster"
+        diag:
+          t:
+            ko: "속도는 그대로입니다. 각괄호 안은 <b>실행할 때 지워지거든요</b>."
+            en: "The speed is unchanged — the angle brackets are <b>erased before it runs</b>."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 번역할 때냐 돌 때냐"
+              en: "The sharpest spot — translating or running"
+            code:
+              - "각괄호: 번역할 때만 있다"
+      - t:
+          ko: "아무것도 안 달라진다 — 적어 두는 문서일 뿐이다"
+          en: "Nothing changes — it is documentation"
+        diag:
+          t:
+            ko: "문서가 아니라 <b>검사</b>입니다. 위 아래가 아닌 것을 넣으면 컴파일이 멈춰요."
+            en: "It is a <b>check</b>, not documentation. Passing something not under the ceiling stops the compile."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 적어만 두나 막나"
+              en: "The sharpest spot — merely noted or enforced"
+            code:
+              - "위 밖의 것: javac 가 막는다"
+      - t:
+          ko: "그 자리에 아무것도 못 오게 된다"
+          en: "Nothing may come into the slot at all"
+        diag:
+          t:
+            ko: "막는 것이 아니라 <b>좁히는</b> 것입니다. 위 아래 것은 전부 올 수 있어요."
+            en: "It narrows rather than blocks — everything under the ceiling may still come."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 좁히기냐 막기냐"
+              en: "The sharpest spot — narrowing or blocking"
+            code:
+              - "Number 아래: Integer · Long · Double …"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>타입 자리에 올 것의 위</b>를 정합니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} sets <b>the ceiling for what may fill the type
+        slot</b>.
+    hint:
+      ko: "보기 넷은 전부 타입 이름 사이에 설 수 있는 낱말입니다."
+      en: "All four can stand between type names."
+    options:
+      - { t: "extends", mono: true }
+      - t: "implements"
+        mono: true
+        diag:
+          t:
+            ko: "<code>implements</code> 는 <b>클래스 선언</b>에서만 씁니다. 각괄호 안에서는 목록이든 틀이든 위를 정하는 낱말이 하나예요."
+            en: "<code>implements</code> appears only in a class declaration. Inside angle brackets one word sets the ceiling, list or mould alike."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 클래스 선언이냐 각괄호 안이냐"
+              en: "The sharpest spot — a class declaration or inside the brackets"
+            code:
+              - "class A implements B {}"
+              - "<T extends B>"
+      - t: "super"
+        mono: true
+        diag:
+          t:
+            ko: "<code>super</code> 는 반대 방향입니다 — <b>아래</b>를 정해요. 그리고 선언 쪽에서는 못 씁니다."
+            en: "<code>super</code> points the other way — it sets a <b>floor</b>, and cannot be used on the declaring side."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 위냐 아래냐"
+              en: "The sharpest spot — ceiling or floor"
+            code:
+              - "? extends: 위를 정한다"
+              - "? super:   아래를 정한다"
+      - t: "instanceof"
+        mono: true
+        diag:
+          t:
+            ko: "<code>instanceof</code> 는 <b>돌면서</b> 무엇인지 묻는 낱말입니다. 각괄호 안은 돌기 전이에요."
+            en: "<code>instanceof</code> asks what something is <b>while running</b>. Angle brackets are settled before that."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 돌기 전이냐 도는 중이냐"
+              en: "The sharpest spot — before running or while running"
+            code:
+              - "각괄호:     번역할 때"
+              - "instanceof: 돌 때"
+
+why_gate:
+  q:
+    ko: "타입 자리를 <b>비워 두지 않고</b> 위를 하나 정하는 것은 무엇을 얻으려고일까요?"
+    en: "<b>What is gained</b> by setting a ceiling instead of leaving the type slot bare?"
+  choices:
+    - t:
+        ko: "안에서 그것에게 <b>이름 붙은 일을 시킬 수 있게</b>"
+        en: "So <b>named work can be asked of it</b> inside"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 대신 무엇을 못 받게 됐는지도 적어 보세요."
+        en: "That is the direction. Add what can no longer be accepted in exchange."
+    - t:
+        ko: "실행할 때 종류를 확인하려고"
+        en: "To check the kind at run time"
+      ok: false
+      fb:
+        ko: "실행할 때는 이 정보가 <b>없습니다</b>. 확인은 번역할 때 끝나요."
+        en: "At run time this information is <b>gone</b>. The check finishes while translating."
+    - t:
+        ko: "각괄호를 비워 두면 컴파일이 안 돼서"
+        en: "Because bare angle brackets do not compile"
+      ok: false
+      fb:
+        ko: "비워 둬도 됩니다. 그때 못 하게 되는 일이 있을 뿐이에요."
+        en: "Bare compiles fine. It just leaves work that cannot be done."
+
+queries:
+  - { grammars: [java], file: ./generic-bound.scm }
+
+examples:
+  - code: "class Box<T extends Number> { T v; }"
+    expect:
+      sites: 1
+      form: bound
+      hole: "extends"
+      picks: { 1: "extends", 2: "T", 3: "Number" }
+  - code: "void sum(List<? extends Number> xs) {}"
+    expect: { sites: 1, form: wildcard, picks: { 1: "extends", 4: "?", 5: "Number" } }
+  - code: "class Box<T> { T v; }"
+    expect: none

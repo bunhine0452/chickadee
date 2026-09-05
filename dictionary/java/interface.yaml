@@ -7,7 +7,7 @@ grammars: [java]
 framework: null
 essential: true
 difficulty: 3
-prereq: [java/class-declaration, java/method-declaration]
+prereq: [java/class-declaration, java/method-declaration, spring/repository-pattern, cs/dynamic-dispatch]
 confusions: []
 
 dict:
