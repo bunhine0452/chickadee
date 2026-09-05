@@ -1,0 +1,50 @@
+/* 그림의 틀 — 장식이 아니라 본문이다(diagrams.md §1). 면과 선으로만 말하고,
+   색은 「지금 이것」한 자리에만 쓴다(정본 §6 신호 주기). */
+.dgm {
+  display: grid;
+  gap: var(--s-3);
+  margin: 0;
+}
+
+.dgm-view {
+  overflow-x: auto;
+  padding: var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+}
+
+.dgm-nav {
+  display: flex;
+  gap: var(--s-2);
+  align-items: center;
+}
+
+.dgm-at {
+  font-family: var(--font-mono);
+  font-size: var(--fs-2);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+.dgm-cap {
+  max-width: var(--measure);
+  font-size: var(--fs-2);
+  line-height: var(--lh-body);
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+  word-break: keep-all;
+}
+
+/* 표 대체 — 화면에서만 숨긴다. `display:none` 이면 낭독기도 못 읽는다. */
+.dgm-alt {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

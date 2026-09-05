@@ -23,6 +23,23 @@ export type { ProgressProps, ProgressTone } from './Progress';
 export { Callout } from './Callout';
 export type { CalloutProps, CalloutTone } from './Callout';
 
+/* ───────── 그림 — 학습 내용을 나르는 다이어그램 (design/system/diagrams.md) ─────────
+   장식이 아니라 본문이다. 정본 §6 자신이 「코드와 다이어그램이 가장 큰 요소」라고 적었다.
+   전부 값에서 결정론으로 나오고, `predict`/`reveal` 두 상태로 답을 흘리지 않는다. */
+
+export {
+  Diagram, BitField, EvalTree, ValueBox,
+  bitsOf, exactDecimal, describeBits, describeTree, describeFold, describeValues,
+  annotate, foldSteps, foldedText, isFolded,
+  BITS_LABELS_KO, DIAGRAM_LABELS_KO, withLabels,
+} from './diagram';
+export type {
+  BitFieldProps, BitsField, BitsFieldKind, BitsModel, BitsOptions,
+  DiagramLabels, DiagramNav, DiagramPhase, DiagramProps,
+  EvalNode, EvalTreeModel, EvalTreeProps, FoldModel, FoldNode, FoldStep,
+  NumType, ValueBoxModel, ValueBoxProps, ValueCell, ValueStep,
+} from './diagram';
+
 /* ───────── 남은 것 — 새 시스템으로 다시 그렸고 호출처가 옮겨 가는 중 ───────── */
 
 export { Pill } from './Pill';

@@ -3,6 +3,8 @@ import type { ReactNode } from 'react';
 import { Button } from '../Button';
 import { Callout } from '../Callout';
 import { Card } from '../Card';
+import { BitField, EvalTree, ValueBox, bitsOf } from '../diagram';
+import type { EvalTreeModel, FoldModel, ValueBoxModel } from '../diagram';
 import { Field } from '../Field';
 import { Progress } from '../Progress';
 import { Tag } from '../Tag';
@@ -46,6 +48,59 @@ const SWATCHES: ReadonlyArray<readonly [string, string]> = [
 ];
 const LAYERS: readonly InkLayer[] = [0, 1, 2, 3, 4];
 
+/* 그림은 값에서 나온다 — 아래 셋은 손으로 그린 것이 아니라 이 데이터의 결과다. */
+const EXPR: EvalTreeModel = {
+  expr: '2 + 3 * 4',
+  root: {
+    kind: 'op',
+    op: '+',
+    result: '14',
+    kids: [
+      { kind: 'leaf', text: '2' },
+      {
+        kind: 'op',
+        op: '*',
+        result: '12',
+        kids: [
+          { kind: 'leaf', text: '3' },
+          { kind: 'leaf', text: '4' },
+        ],
+      },
+    ],
+  },
+};
+
+/* 문항 형식 `step` 의 payload(`fold: FoldStep[]`) 를 그대로 받는 낮은 해상도판. */
+const FOLD: FoldModel = {
+  expr: '7 / 2',
+  steps: [
+    { code: '7 / 2', type: 'int / int' },
+    { code: '3', type: 'int' },
+  ],
+};
+
+const VARS: ValueBoxModel = {
+  steps: [
+    { code: 'int x = 3;', cells: [{ name: 'x', type: 'int', value: '3', changed: true, from: '3' }] },
+    {
+      code: 'int y = x + 1;',
+      cells: [
+        { name: 'x', type: 'int', value: '3' },
+        { name: 'y', type: 'int', value: '4', changed: true, from: 'x + 1' },
+      ],
+      note: '오른쪽을 먼저 셈하고 나서 이름표를 붙인다.',
+    },
+    {
+      code: 'x = y * 2;',
+      cells: [
+        { name: 'x', type: 'int', value: '8', changed: true, from: 'y * 2' },
+        { name: 'y', type: 'int', value: '4' },
+      ],
+      note: 'x 의 상자는 그대로이고 안의 값만 갈린다.',
+    },
+  ],
+};
+
 function Slot({ cap, children }: { cap: string; children: ReactNode }) {
   return (
     <div className="g-slot">
@@ -68,6 +123,9 @@ function GalleryBody() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [dunno, setDunno] = useState(false);
   const [toastOn, setToastOn] = useState(true);
+  const [phase, setPhase] = useState<'predict' | 'reveal'>('reveal');
+  const [fold, setFold] = useState(1);
+  const [line, setLine] = useState(1);
 
   return (
     <div className="gallery" data-theme={theme}>
@@ -119,6 +177,74 @@ function GalleryBody() {
           {'; '}
           <span style={{ color: 'var(--syn-num)' }}>42</span>{' '}
           <span style={{ color: 'var(--syn-com)' }}>// 이 줄이 무엇인가</span>
+        </div>
+      </Section>
+
+      <Section title="그림 — 학습 내용을 나르는 다이어그램 (장식이 아니라 본문)">
+        <Switch
+          options={[
+            { v: 'predict', label: '예측' },
+            { v: 'reveal', label: '공개' },
+          ]}
+          value={phase}
+          label="예측 · 공개"
+          onChange={setPhase}
+        />
+      </Section>
+
+      <Section title="비트 배열 — 0.1 은 왜 안 떨어지나">
+        <div style={{ flex: '1 1 100%', minWidth: 0 }}>
+          <BitField
+            model={bitsOf(0.1, 'f64')}
+            phase={phase}
+            caption="double 하나에 0.1 을 담으면 실제로 담기는 것은 0.1 이 아니다. 55자리가 그 차이다."
+          />
+        </div>
+        <div style={{ flex: '1 1 320px', minWidth: 0 }}>
+          <BitField model={bitsOf(-1, 'i32')} phase={phase} caption="int -1 — 2의 보수는 전부 1 이다." />
+        </div>
+        <div style={{ flex: '1 1 320px', minWidth: 0 }}>
+          <BitField
+            model={bitsOf(2_147_483_648, 'i32')}
+            phase={phase}
+            caption="int 의 폭을 한 칸 넘으면 값이 감긴다 — 에러가 아니라 값이다."
+          />
+        </div>
+      </Section>
+
+      <Section title="평가 트리 — 2 + 3 * 4 가 접히는 순서">
+        <div style={{ flex: '1 1 100%', minWidth: 0 }}>
+          <EvalTree
+            model={EXPR}
+            step={fold}
+            onStep={setFold}
+            phase={phase}
+            caption="곱셈이 덧셈보다 먼저 접힌다. 우선순위는 규칙이 아니라 트리 모양이다."
+          />
+        </div>
+      </Section>
+
+      <Section title="걸음 사다리 — 트리를 못 실은 문항이 쓰는 같은 그림">
+        <div style={{ flex: '1 1 100%', minWidth: 0 }}>
+          <EvalTree
+            fold={FOLD}
+            step={fold}
+            onStep={setFold}
+            phase={phase}
+            caption="자바의 7 / 2 는 3 이다. 나누기가 정수 둘을 만나면 결과도 정수다."
+          />
+        </div>
+      </Section>
+
+      <Section title="값 상자 — 변수는 이름표가 붙은 상자다">
+        <div style={{ flex: '1 1 100%', minWidth: 0 }}>
+          <ValueBox
+            model={VARS}
+            step={line}
+            onStep={setLine}
+            phase={phase}
+            caption="대입은 상자로 내려오는 화살표 하나다. 상자는 그대로 있고 안의 값만 갈린다."
+          />
         </div>
       </Section>
 
