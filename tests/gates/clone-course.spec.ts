@@ -69,9 +69,20 @@ async function toCourse(page: Page, app: AppDb): Promise<void> {
 
   await gotoDev(page);
   await toShelf(page);
-  await page.getByRole('button', { name: /코스 열기$/ }).first().click();
-  // 판까지 서야 잰 것이 있다 — 머리만 뜬 화면을 재면 「검사 0건」에 가까워진다.
-  await page.locator('main.course .ctoc-part, main.course .course-empty').first().waitFor();
+  // CI's Linux WebKit sometimes takes the click before the button's handler is live and the
+  // course never opens — the same race `toShelf` retries for. Retry the click, not the wait:
+  // a longer timeout would hide a slow open, and this gate measures typography, not speed.
+  const opened = page.locator('main.course .ctoc-part, main.course .course-empty').first();
+  for (let attempt = 0; ; attempt += 1) {
+    await page.getByRole('button', { name: /코스 열기$/ }).first().click();
+    try {
+      // 판까지 서야 잰 것이 있다 — 머리만 뜬 화면을 재면 「검사 0건」에 가까워진다.
+      await opened.waitFor({ timeout: 6_000 });
+      break;
+    } catch (e) {
+      if (attempt >= 4) throw e;
+    }
+  }
   await page.evaluate(() => document.fonts.ready);
 }
 
