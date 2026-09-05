@@ -1,0 +1,94 @@
+schema: 1
+id: spring/proxy-and-aop
+universal: null
+name: { ko: "내 객체 대신 나가는 프록시", en: "Proxy and AOP" }
+token: null
+grammars: []
+framework: spring
+# 짚을 노드가 없다 — 프록시는 소스에 없고 실행할 때 만들어진다 (D176).
+# 창은 근거 낱말이 보이는 블록과 자바 개념의 사용처에서 빌린다 (D157 ②).
+track_default: t0
+essential: false
+difficulty: 4
+prereq: [spring/bean-and-container, cs/dynamic-dispatch]
+confusions: [spring/dependency-injection]
+queries: []
+dict:
+  one_liner:
+    ko: "스프링은 내 객체 대신 프록시를 내준다. 애너테이션을 읽는 것은 그 프록시다."
+    en: "Spring hands out a proxy instead of your object. The proxy reads annotations."
+  why:
+    ko: >-
+      <code>@Transactional</code> 이 붙은 메서드를 보면 그 메서드가 트랜잭션을 여는 것처럼 보입니다.
+      아닙니다. 스프링은 그 클래스와 <b>같은 모양의 객체를 하나 더 만들어</b> 컨테이너에 넣습니다.
+      그것이 프록시입니다. 다른 코드가 받아 가는 것은 내가 쓴 객체가 아니라 이 프록시이고,
+      프록시는 메서드를 부르기 <b>앞뒤에 자기 일을 끼워 넣은 다음</b> 진짜 객체를 부릅니다.
+      트랜잭션을 열고 닫는 것도, 로그를 남기는 것도, 캐시를 보는 것도 전부 그 앞뒤에서 일어나요.
+      그래서 <b>프록시를 안 지나면 애너테이션은 아무 일도 하지 않습니다</b>.
+    en: >-
+      A method with <code>@Transactional</code> looks like it opens the transaction itself.
+      It does not. Spring builds <b>a second object of the same shape</b> and puts that in the
+      container. That is the proxy. What other code receives is the proxy, not the object you
+      wrote, and the proxy <b>slots its own work in before and after</b> before calling the real
+      object. Opening and closing a transaction, writing a log, reading a cache — all of it
+      happens in that gap. So <b>an annotation does nothing when the proxy is not passed</b>.
+  trace: []
+rule:
+  ko: "<b>애너테이션은 명령이 아니라 표시다.</b> 그것을 읽는 프록시를 지나야 일이 일어난다."
+  en: "<b>An annotation is a mark, not a command.</b> Work happens only through the proxy that reads it."
+ok:
+  ko: >-
+    다른 클래스가 이 빈을 주입받아 메서드를 부르면 그 호출은 프록시를 지납니다.
+    프록시가 먼저 자기 일을 하고 내가 쓴 메서드를 부릅니다.
+  en: >-
+    When another class is injected with this bean and calls the method, the call goes through the
+    proxy. The proxy does its own work first, then calls the method you wrote.
+misconceptions:
+  - ko: "애너테이션은 명령이다 — 표시일 뿐입니다. 읽는 쪽이 없으면 주석과 다르지 않습니다."
+    en: "An annotation is a command — it is a mark. With nothing reading it, it is a comment."
+  - ko: "같은 클래스 안에서 불러도 똑같이 돈다 — <code>this</code> 로 부르면 프록시를 안 지납니다."
+    en: "A call inside the same class behaves the same — calling on <code>this</code> skips the proxy."
+  - ko: "프록시는 내 소스에 있다 — 실행할 때 만들어지고 소스에는 없습니다."
+    en: "The proxy is in my source — it is made at run time and is not in the source."
+  - ko: "<code>private</code> 메서드에도 붙일 수 있다 — 프록시가 덮을 수 없어 표시만 남습니다."
+    en: "It works on a <code>private</code> method — the proxy cannot cover it, so only the mark stays."
+evidence: ["@Transactional", "@Aspect", "@Around", "@Async", "@Cacheable", "@EnableAspectJAutoProxy", "AopContext"]
+meaning:
+  - q:
+      ko: "애너테이션이 붙은 메서드에서 그 애너테이션의 일은 <b>누가 하나요?</b>"
+      en: "For an annotated method, <b>who does the annotation's work?</b>"
+    hint:
+      ko: "그 메서드를 부를 때 사이에 무엇이 하나 더 있습니다."
+      en: "There is one more thing between the caller and that method."
+    options:
+      - t: { ko: "스프링이 만든 프록시가 메서드 앞뒤에서 한다", en: "A proxy Spring made, before and after the method" }
+      - t: { ko: "자바가 애너테이션을 보고 직접 실행한다", en: "Java runs the annotation itself" }
+        diag:
+          t:
+            ko: "자바는 애너테이션을 <b>보관만</b> 합니다. 읽고 무언가 하는 쪽은 언제나 따로 있고, 여기서는 스프링이에요."
+            en: "Java only <b>keeps</b> the annotation. Something else always reads it and acts, and here that is Spring."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 보관이냐 실행이냐", en: "The sharpest spot — kept or run" }
+            code:
+              - "자바: 표시를 남긴다"
+              - "스프링: 그 표시를 읽고 감싼다"
+      - t: { ko: "컴파일할 때 그 코드가 메서드 안에 들어간다", en: "The compiler inserts the code into the method" }
+        diag:
+          t:
+            ko: "컴파일 산출물을 열어 보면 메서드 본문은 내가 쓴 그대로입니다. 끼워 넣기는 <b>실행할 때</b> 프록시가 합니다."
+            en: "Open the compiled class and the body is what you wrote. The insertion happens <b>at run time</b>, in the proxy."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 컴파일이냐 실행이냐", en: "The sharpest spot — compile time or run time" }
+            code:
+              - "컴파일 뒤: 본문 그대로"
+              - "실행 중: 프록시가 감싼 뒤"
+      - t: { ko: "그 클래스를 상속한 자식 클래스가 한다", en: "A subclass of that class does it" }
+        diag:
+          t:
+            ko: "프록시가 상속으로 만들어지는 경우도 있지만 그것은 <b>만드는 방법</b>입니다. 내가 쓴 자식 클래스가 하는 일은 아니에요."
+            en: "A proxy is sometimes built by subclassing, but that is <b>how it is made</b>. It is not a subclass you wrote."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 내가 쓴 상속이냐 만들어진 대리냐", en: "The sharpest spot — your subclass or a generated stand-in" }
+            code:
+              - "내 자식 클래스: 소스에 있다"
+              - "프록시: 실행할 때 생긴다"

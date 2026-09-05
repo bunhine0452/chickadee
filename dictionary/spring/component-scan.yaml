@@ -1,0 +1,95 @@
+schema: 1
+id: spring/component-scan
+universal: null
+name: { ko: "패키지를 훑어 빈을 찾기", en: "Component scan" }
+token: null
+grammars: []
+framework: spring
+# 짚을 노드가 없다 — 훑기는 시작할 때 일어난다 (D176). 창은 자바 개념에서 빌린다 (D157 ②).
+track_default: t0
+essential: false
+difficulty: 2
+prereq: [spring/bean-and-container]
+confusions: [spring/bean-and-container]
+queries: []
+dict:
+  one_liner:
+    ko: "시작할 때 패키지를 훑어 표시가 붙은 클래스를 빈으로 만든다."
+    en: "At startup it scans packages and turns marked classes into beans."
+  why:
+    ko: >-
+      컨테이너에 무엇을 넣을지 목록을 손으로 적으면 클래스가 늘 때마다 그 목록도 고쳐야 합니다.
+      대신 스프링은 <b>정해진 패키지 아래를 전부 훑어</b> <code>@Service</code> ·
+      <code>@Component</code> 같은 표시가 붙은 클래스를 찾아 빈으로 만듭니다. 훑기 시작점은
+      <code>@SpringBootApplication</code> 이 붙은 클래스가 있는 <b>패키지</b>이고, 그 아래만 봅니다.
+      그래서 <b>클래스를 그 바깥에 두면 표시를 붙여도 빈이 안 됩니다</b> — 「분명히 붙였는데 주입이
+      안 된다」의 흔한 원인이 이것이에요. 표시 이름이 여럿인 것은 사람이 읽기 위해서이고,
+      컨테이너에는 넷이 똑같이 보입니다.
+    en: >-
+      Writing the container's contents by hand means editing that list every time a class appears.
+      Instead Spring <b>scans everything under a fixed package</b> and turns classes marked
+      <code>@Service</code> or <code>@Component</code> into beans. Scanning starts at the
+      <b>package</b> holding the class marked <code>@SpringBootApplication</code>, and only below it.
+      So <b>a class outside that package is not a bean even when marked</b> — a common cause of
+      「the mark is there but nothing is injected」. The several mark names are for human readers;
+      to the container all four look the same.
+  trace: []
+rule:
+  ko: "<b>훑는 범위 밖은 표시를 붙여도 안 걸린다.</b> 시작 클래스의 패키지가 그 범위다."
+  en: "<b>Outside the scanned range a mark does nothing.</b> The range is the start class's package."
+ok:
+  ko: >-
+    시작 클래스의 패키지 아래에 있고 표시가 붙어 있으면 빈이 됩니다.
+    그 뒤로는 다른 곳에서 타입으로 주입받을 수 있습니다.
+  en: >-
+    A marked class below the start class's package becomes a bean. From then on other code can
+    receive it by type.
+misconceptions:
+  - ko: "<code>@Service</code> 와 <code>@Component</code> 는 하는 일이 다르다 — 컨테이너에는 같습니다."
+    en: "<code>@Service</code> and <code>@Component</code> behave differently — to the container they are the same."
+  - ko: "표시만 붙이면 어디에 두든 빈이 된다 — 훑는 범위 안이어야 합니다."
+    en: "A mark makes a bean anywhere — it must be inside the scanned range."
+  - ko: "애너테이션은 명령이다 — 표시일 뿐이고 훑는 쪽이 그것을 읽습니다."
+    en: "An annotation is a command — it is a mark, read by the scan."
+  - ko: "빈이 안 되면 컴파일에서 알려 준다 — 컴파일은 지나가고 뜰 때 알게 됩니다."
+    en: "A missing bean shows at compile time — it compiles fine and shows at startup."
+evidence: ["@Component", "@Service", "@Repository", "@ComponentScan", "@SpringBootApplication"]
+meaning:
+  - q:
+      ko: "표시를 붙였는데 주입이 안 됩니다. <b>가장 먼저 볼 것</b>은 무엇인가요?"
+      en: "The mark is there but nothing is injected. <b>What is the first thing to check?</b>"
+    hint:
+      ko: "훑기가 어디서 시작해 어디까지 내려가는지 보세요."
+      en: "Look at where the scan starts and how far down it goes."
+    options:
+      - t: { ko: "그 클래스가 시작 클래스의 패키지 아래에 있는지", en: "Whether the class sits below the start class's package" }
+      - t: { ko: "표시 이름을 <code>@Component</code> 로 바꿨는지", en: "Whether the mark was changed to <code>@Component</code>" }
+        diag:
+          t:
+            ko: "이름을 바꿔도 달라지지 않습니다. 넷은 컨테이너에 같은 뜻이고, 갈라 놓은 것은 <b>사람이 읽기 위해서</b>예요."
+            en: "Changing the name changes nothing. The four mean the same to the container; they differ <b>for human readers</b>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 이름이냐 자리냐", en: "The sharpest spot — the name or the place" }
+            code:
+              - "이름: 넷이 같다"
+              - "자리: 범위 안이어야 한다"
+      - t: { ko: "생성자를 직접 적었는지", en: "Whether the constructor was written by hand" }
+        diag:
+          t:
+            ko: "생성자는 <b>받는 쪽</b>의 문제입니다. 여기서 안 되는 것은 그 클래스가 애초에 컨테이너에 안 들어간 것일 수 있어요."
+            en: "The constructor is about <b>receiving</b>. What fails here may be that the class never entered the container."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 넣기냐 받기냐", en: "The sharpest spot — putting in or taking out" }
+            code:
+              - "훑기: 컨테이너에 넣는다"
+              - "생성자: 거기서 꺼내 받는다"
+      - t: { ko: "그 클래스를 <code>public</code> 으로 바꿨는지", en: "Whether the class was made <code>public</code>" }
+        diag:
+          t:
+            ko: "접근 제어자는 이 문제와 <b>다른 축</b>입니다. 같은 패키지가 아니면 못 쓰는 것이지, 빈이 되고 안 되고는 훑는 범위가 정해요."
+            en: "Access control is a <b>different axis</b>. It limits who can use the class; whether it becomes a bean is set by the scan range."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 볼 수 있나 훑었나", en: "The sharpest spot — visible or scanned" }
+            code:
+              - "접근 제어자: 누가 쓸 수 있나"
+              - "훑는 범위: 빈이 되나"

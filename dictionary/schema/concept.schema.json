@@ -632,16 +632,43 @@
           "default": null
         },
         "detect": {
-          "type": "object",
-          "properties": {
-            "dependency": {
-              "type": "string"
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "dependency": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "dependency"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "manifest": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "minItems": 1
+                },
+                "contains": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "manifest",
+                "contains"
+              ],
+              "additionalProperties": false
             }
-          },
-          "required": [
-            "dependency"
-          ],
-          "additionalProperties": false
+          ]
         },
         "essential": {
           "type": "array",

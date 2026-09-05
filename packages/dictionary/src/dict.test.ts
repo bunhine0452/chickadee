@@ -10,7 +10,18 @@ import {
 } from './index.js';
 
 // 프레임워크 사전은 감지 게이트 뒤에 있다 (D59) — 린트는 전부를 본다.
-const dict = loadDict({ dependencies: ['react'] });
+// 프레임워크 사전 둘을 **켜고** 검사한다. 감지에 걸리지 않으면 `react/`·`spring/` 이 아예
+// 로드되지 않아 CI 가 그 사전을 한 번도 안 본다 — 린트·부채·참조 검사가 전부 조용히 비껴간다.
+// `spring/` 은 `package.json` 이 아니라 **빌드 매니페스트 원문**으로 감지된다 (D176).
+//
+// **주의**: `java/` 개념 여섯이 `spring/` 을 `prereq` 로 가리킨다 (D176 의 빌림 · D177).
+// 스프링이 없는 자바 리포에서 그 선행은 로드되지 않은 id 를 가리키게 되고, `prereqClosure`
+// 는 없는 id 를 조용히 건너뛴다. 그래도 되는 이유는 `prereq` 가 **문법 이해의 선행**이지
+// 잠금이 아니기 때문이지만, `cs/`(언제나 로드된다)와 달리 이쪽은 조건부라 여기서 명시한다.
+const dict = loadDict({
+  dependencies: ['react'],
+  manifests: { 'build.gradle': "implementation 'org.springframework.boot:spring-boot-starter-web'" },
+});
 
 describe('번들 사전', () => {
   test('스키마를 어긴 파일이 없다', () => {
@@ -120,6 +131,30 @@ describe('사전이 실제로 담고 있는 것', () => {
     expect(loadDict({ dependencies: ['react'] }).concepts.has('react/functional-state-update')).toBe(true);
   });
 
+  /**
+   * 조건부 선행 (D176 · D177). `java/` 여섯이 `spring/*` 을 `prereq` 로 가리키는데
+   * 프레임워크 사전은 감지 게이트 뒤에 있다 — 스프링이 아닌 자바 리포에서 그 id 는 로드된
+   * 사전에 **없다**. 사다리 2단의 아래층 목록은 못 찾은 id 를 그 id 그대로 한 줄로 그리므로
+   * (`packages/cards/src/payload.ts` 의 `prereqOf`), 로더가 걸러야 화면에 안 샌다.
+   *
+   * 지우는 것이 아니라 거르는 것이다 — 아래 둘째 단언이 그 자리다.
+   */
+  test('로드 안 된 사전을 가리키는 선행은 떨어진다 (D176)', () => {
+    const withoutSpring = loadDict();
+    expect(withoutSpring.concepts.has('spring/proxy-and-aop')).toBe(false);
+    const bare = withoutSpring.concepts.get('java/annotation');
+    expect(bare?.prereq).not.toContain('spring/proxy-and-aop');
+    for (const concept of withoutSpring.concepts.values()) {
+      for (const ref of [...concept.prereq, ...concept.confusions]) {
+        expect(withoutSpring.concepts.has(ref), `${concept.id} → ${ref}`).toBe(true);
+      }
+    }
+    // 스프링 리포에서는 그대로 걸린다.
+    expect(dict.concepts.get('java/annotation')?.prereq).toContain('spring/proxy-and-aop');
+    // 원문은 안 건드린다 — 린트의 `reference-exists` 가 오타를 잡는 자리가 거기다.
+    expect(withoutSpring.sources.get('java/annotation')?.prereq).toContain('spring/proxy-and-aop');
+  });
+
   test('시스템 쿼리는 문법마다 하나씩 등록된다', () => {
     for (const grammar of ['typescript', 'tsx', 'javascript']) {
       expect(dict.queries.has(`_imports::${grammar}`)).toBe(true);
@@ -149,16 +184,16 @@ describe('사전이 실제로 담고 있는 것', () => {
  */
 const DEBT_RATCHET: Record<string, number> = {
   // 39 → 42(java 셋) → 44(sql 둘) → 49(java 여덟) → 50(sql/comparison) → 52(css 둘)
-  // → **65**(D166, java 관문 0 과 OOP 축 열셋).
-  'blank-or-reason': 65,
-  'point-picks': 59,
-  'why-gate': 65,
+  // → 65(D166, java 관문 0 과 OOP 축 열셋) → **73**(D177, 정식 자바 코스 3부의 자바 개념 여덟).
+  'blank-or-reason': 73,
+  'point-picks': 67,
+  'why-gate': 73,
   // 6 → 11(D147) → 18(D148) → 26(D150) → **33**(D152, 파이썬 바닥 여덟). D150 이 「먼저 읽기」를
   // 0장 소속에서 「겹 0」으로 넓혀 `essential` 전량이 대상이 됐다. 새로 든 넷(`array-filter`
   // 의 `filter` · `array-map-immutable` 의 `map` · `arrow-function` 의 `=>` · 그리고
   // `array-destructuring` 은 영문 관사 `a` 가 정답 토큰과 겹쳤다)을 고쳐 채웠다.
-  // 33 → 36(java 바닥 셋) → 38(sql 바닥 둘) → 42(java 바닥 여덟 완성) → **57**(D166).
-  'zero-one-liner': 57,
+  // 33 → 36(java 바닥 셋) → 38(sql 바닥 둘) → 42(java 바닥 여덟 완성) → 57(D166) → **65**(D177).
+  'zero-one-liner': 65,
 };
 
 describe('사전 저작 부채 (D145)', () => {

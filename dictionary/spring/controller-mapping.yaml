@@ -1,0 +1,91 @@
+schema: 1
+id: spring/controller-mapping
+universal: null
+name: { ko: "주소를 메서드에 배정하기", en: "Controller mapping" }
+token: null
+grammars: []
+framework: spring
+# 짚을 노드가 없다 — 배정은 시작할 때 표로 만들어진다 (D176). 창은 자바 개념에서 빌린다 (D157 ②).
+track_default: t0
+essential: false
+difficulty: 2
+prereq: [spring/request-dispatch, proto/http-method]
+confusions: [proto/rest-resource]
+queries: []
+dict:
+  one_liner:
+    ko: "어느 주소와 방식이 어느 메서드로 갈지를 표시로 적어 둔다."
+    en: "Marks say which path and verb go to which method."
+  why:
+    ko: >-
+      주소와 메서드를 잇는 표는 시작할 때 한 번 만들어집니다. 재료는 <b>클래스에 붙은 표시와
+      메서드에 붙은 표시</b>이고, 둘은 <b>이어 붙습니다</b> — 클래스에 <code>/api/auth</code> 가
+      있고 메서드에 <code>/login</code> 이 있으면 실제 주소는 <code>/api/auth/login</code> 입니다.
+      한쪽만 보면 주소를 틀리게 읽어요. 방식도 함께 봅니다 — 같은 주소라도 보내는 방식이 다르면
+      다른 메서드로 갑니다. 그래서 <b>주소가 맞는데 안 불린다</b>면 대개 방식이 다른 것입니다.
+    en: >-
+      The table linking paths to methods is built once at startup. Its material is <b>the mark on
+      the class and the mark on the method</b>, and the two <b>join</b> — a class with
+      <code>/api/auth</code> and a method with <code>/login</code> make
+      <code>/api/auth/login</code>. Reading only one side leaves out half the path. The verb counts too:
+      the same path with a different verb goes to a different method. So <b>a matching path that is
+      still not called</b> usually means the verb differs.
+  trace: []
+rule:
+  ko: "<b>주소는 클래스와 메서드의 표시가 이어 붙은 것이다.</b> 한쪽만 보면 안 맞는다."
+  en: "<b>A path is the class mark joined to the method mark.</b> One side alone is not the path."
+ok:
+  ko: >-
+    클래스 표시와 메서드 표시를 이어 붙인 주소가 이 메서드의 주소입니다.
+    방식까지 맞아야 이 메서드로 옵니다.
+  en: >-
+    The class mark joined to the method mark is this method's path. The verb has to match too.
+misconceptions:
+  - ko: "메서드에 적힌 주소가 전부다 — 클래스에 적힌 앞부분이 이어 붙습니다."
+    en: "The method's path is the whole path — the class prefix joins in front."
+  - ko: "주소만 맞으면 불린다 — 보내는 방식도 같아야 합니다."
+    en: "A matching path is enough — the verb has to match as well."
+  - ko: "표시는 주석 같은 것이다 — 시작할 때 표를 만드는 재료입니다."
+    en: "The mark is like a comment — it is the material for the startup table."
+  - ko: "주소가 겹치면 나중 것이 이긴다 — 고를 수 없으면 뜰 때 멈춥니다."
+    en: "A duplicate path lets the later one win — an ambiguous pick stops the boot."
+evidence: ["@RequestMapping", "@GetMapping", "@PostMapping", "@PutMapping", "@DeleteMapping", "@PathVariable", "@RequestParam"]
+meaning:
+  - q:
+      ko: "클래스에 <code>/api/auth</code>, 메서드에 <code>/login</code> 이 적혀 있습니다. <b>실제 주소</b>는?"
+      en: "The class says <code>/api/auth</code> and the method says <code>/login</code>. <b>What is the path?</b>"
+    hint:
+      ko: "두 표시가 어떻게 만나는지 보세요."
+      en: "Look at how the two marks meet."
+    options:
+      - t: { ko: "<code>/api/auth/login</code> — 둘이 이어 붙는다", en: "<code>/api/auth/login</code> — the two join" }
+      - t: { ko: "<code>/login</code> — 메서드에 적힌 것이 이긴다", en: "<code>/login</code> — the method's mark wins" }
+        diag:
+          t:
+            ko: "메서드 표시는 <b>뒷부분</b>입니다. 클래스 표시를 덮지 않아요 — 그래서 컨트롤러 하나의 주소가 전부 같은 앞부분을 씁니다."
+            en: "The method mark is the <b>tail</b>. It does not replace the class mark — that is how one controller shares a prefix."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 덮나 이어 붙나", en: "The sharpest spot — replace or join" }
+            code:
+              - "클래스: 앞부분"
+              - "메서드: 뒷부분"
+      - t: { ko: "둘 다 따로 듣는다 — 주소가 두 개다", en: "Both work separately — there are two paths" }
+        diag:
+          t:
+            ko: "표는 <b>이어 붙인 하나</b>만 담습니다. <code>/api/auth</code> 로 보내면 이 메서드에 안 옵니다."
+            en: "The table holds only the <b>joined</b> one. A call to <code>/api/auth</code> does not reach this method."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 하나냐 둘이냐", en: "The sharpest spot — one or two" }
+            code:
+              - "표에 든 것: 이어 붙인 하나"
+              - "앞부분만: 배정 없음"
+      - t: { ko: "<code>/api/auth</code> — 클래스에 적힌 것이 이긴다", en: "<code>/api/auth</code> — the class mark wins" }
+        diag:
+          t:
+            ko: "클래스 표시는 <b>앞부분일 뿐</b>이라 그 자체로는 주소가 아닙니다. 뒷부분이 있어야 하나의 주소가 됩니다."
+            en: "The class mark is <b>only a prefix</b> and is not a path by itself. It needs the tail to be one."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 앞부분이냐 온전한 주소냐", en: "The sharpest spot — prefix or full path" }
+            code:
+              - "앞부분: 혼자서는 배정 없음"
+              - "이어 붙인 뒤: 배정된다"

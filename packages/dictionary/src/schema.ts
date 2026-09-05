@@ -46,12 +46,14 @@ export type Grammar = z.infer<typeof grammarSchema>;
  *
  * `common/` 은 전이 축, `arch/`(D142)·`exec/`(D151)는 문항을 그래프·AST 에서 **계산**하고,
  * `cs/`(D157)·`proto/`(D159)는 문법이 아니라 기계와 규약이라 짚을 노드가 없다.
+ * `spring/`(D176)은 프레임워크가 **런타임에** 하는 일이라 소스에 노드가 없다 — 여기만
+ * `_lang.yaml` 을 갖는데, 감지 게이트(D59)를 적을 자리가 그 파일뿐이기 때문이다.
  * 사전은 산문과 숙련도 키만 댄다.
  *
  * 새 네임스페이스를 여기 더하면 린트·시험이 함께 따라온다 — 세 곳에 흩어져 있을 때는
  * 하나만 고치고 나머지를 잊는 것이 가능했다.
  */
-export const COMPUTED_NAMESPACES = ['common/', 'arch/', 'exec/', 'cs/', 'proto/'] as const;
+export const COMPUTED_NAMESPACES = ['common/', 'arch/', 'exec/', 'cs/', 'proto/', 'spring/'] as const;
 
 /** 그 네임스페이스의 개념인가 — 쿼리도 사용처도 없다. */
 export const isComputed = (id: string): boolean =>
@@ -270,9 +272,22 @@ function langShape<T extends Localized>(text: z.ZodType<T, z.ZodTypeDef, T>) {
     grammar_abi: z.record(grammarSchema, z.number().int().positive()),
     /** grammar → 확장자. 인제스트의 `LangSpec` 이 여기서 나온다 (03 §2.1). */
     extensions: z.record(grammarSchema, z.array(z.string().regex(/^\.[a-z0-9.]+$/))),
-    /** `package.json` 의존성으로 감지한다. 감지 실패 리포에서는 로드하지 않는다 (D59). */
+    /**
+     * 프레임워크 사전의 감지 신호. 감지 실패 리포에서는 로드하지 않는다 (D59).
+     *
+     * 두 모양이다 — `dependency` 는 `package.json` 의 의존성 이름이고(`react`),
+     * `manifest`+`contains` 는 **빌드 매니페스트 원문에 그 글자가 보이는가**다
+     * (`build.gradle` 에 `spring-boot`, D176). 자바에는 `package.json` 이 없어서
+     * 앞의 것 하나로는 스프링을 못 잡는다. 판정은 `load.ts` 의 `detected` 하나다.
+     */
     framework: z.string().nullable().default(null),
-    detect: z.object({ dependency: z.string() }).strict().optional(),
+    detect: z.union([
+      z.object({ dependency: z.string().min(1) }).strict(),
+      z.object({
+        manifest: z.array(z.string().min(1)).min(1),
+        contains: z.string().min(1),
+      }).strict(),
+    ]).optional(),
     essential: z.array(conceptIdSchema).default([]),
     alternatives: z.array(z.object({
       gap: conceptIdSchema,
