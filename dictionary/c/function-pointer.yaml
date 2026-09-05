@@ -1,0 +1,210 @@
+schema: 1
+id: c/function-pointer
+# 2부 뒤 「빌드와 규격」 (`docs/curriculum/c.md` §4 #31 · §0.6). 보편형은 `common/function-value` —
+# 함수를 값으로 넘기는 일은 열 언어에 다 있다. C 라서 다른 것은 선언의 모양(안에서 밖으로)뿐이다.
+universal: common/function-value
+name: { ko: 함수를 값으로 담기, en: Function pointer }
+token: "(*f)()"
+grammars: [c]
+framework: null
+essential: true
+difficulty: 4
+prereq: [c/dereference, c/function-call, c/typedef, cs/dynamic-dispatch]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "함수가 놓인 자리의 번호를 이름에 담는다. 선언은 안에서 밖으로 읽는다 — 이름, 포인터, 받는 것, 내는 것."
+    en: "Holds a function's place in a name; read the declaration inside out."
+  why:
+    ko: >-
+      함수도 기억 어딘가에 놓인 바이트라 <b>자리의 번호</b>가 있습니다. {{site.line}}행의 {{pick.2|code}}{{pick.2|josa:은,는}}
+      그 번호를 담는 이름이에요 — 값처럼 넘기고 표에 넣고 나중에 부를 수 있습니다. 선언이 낯선 이유는
+      <b>안에서 밖으로</b> 읽어야 해서예요: 괄호 안의 {{pick.2|code}}{{pick.2|josa:은,는}} 포인터, 그것이 가리키는 것은
+      {{pick.3|code}}{{pick.3|josa:을,를}} 받아 {{pick.1|code}}{{pick.1|josa:을,를}} 내는 함수. 괄호를 빼면
+      「함수가 포인터를 낸다」로 뒤집혀요. 부를 때는 <code>(*f)(x)</code> 로 열어 부르거나 그냥
+      <code>f(x)</code> — C 는 둘 다 받습니다. <code>qsort</code> 의 비교 함수, 구조체 안의 콜백이 이 모양이에요.
+    en: >-
+      A function is bytes somewhere in memory too, so it has <b>a place with a number</b>.
+      {{pick.2|code}} on line {{site.line}} is a name that holds that number — it can be passed like a
+      value, put in a table and called later. The declaration is strange because it reads <b>inside
+      out</b>: inside the parentheses {{pick.2|code}} is a pointer, and what it points at is a function
+      taking {{pick.3|code}} and yielding {{pick.1|code}}. Drop the parentheses and it flips to “a
+      function yielding a pointer”. To call, open it with <code>(*f)(x)</code> or just
+      <code>f(x)</code> — C accepts both. <code>qsort</code>'s comparator and callbacks inside
+      structs have this shape.
+  trace:
+    - ko: "괄호 안에서 {{pick.2|code}}{{pick.2|josa:이,가}} 먼저 읽힌다 — 포인터다."
+      en: "Inside the parentheses {{pick.2|code}} is read first — a pointer."
+    - ko: "밖으로 나오며 {{pick.3|code}}{{pick.3|josa:을,를}} 받고 {{pick.1|code}}{{pick.1|josa:을,를}} 내는 함수를 가리킨다고 읽힌다."
+      en: "Moving outward it reads as pointing at a function taking {{pick.3|code}} and yielding {{pick.1|code}}."
+    - ko: "{{site.line}}행 아래에서 그 이름에 함수의 자리를 넣고, 나중에 부른다."
+      en: "Below line {{site.line}} a function's place goes into that name, and it is called later."
+
+rule:
+  ko: "<b>안에서 밖으로 읽는다.</b> 이름이 포인터이고, 가리키는 것이 함수이며, 괄호가 그 순서를 지킨다."
+  en: "<b>Read inside out.</b> The name is a pointer, what it points at is a function, and the parentheses keep that order."
+result:
+  label:
+    ko: "{{site.line}}행의 함수 포인터"
+    en: "the function pointer on line {{site.line}}"
+  value: "{{pick.1}} (*{{pick.2}}){{pick.3}}"
+  note:
+    ko: "이름 → 포인터 → 함수"
+    en: "name, pointer, function"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} {{pick.3|code}}{{pick.3|josa:을,를}} 받아 {{pick.1|code}}{{pick.1|josa:을,를}} 내는
+    함수의 자리를 담는 이름입니다.
+  en: >-
+    {{pick.2|code}} is a name holding the place of a function that takes {{pick.3|code}} and yields
+    {{pick.1|code}}.
+payoff:
+  ko: >-
+    이걸 알면 <code>qsort(a, n, sizeof a[0], cmp)</code> 의 마지막 인자가 읽힙니다 — 함수의 자리를
+    넘긴 거예요.
+  en: >-
+    This makes the last argument of <code>qsort(a, n, sizeof a[0], cmp)</code> readable — a
+    function's place was passed.
+bridge:
+  ko: >-
+    파이썬은 함수가 그냥 값이라 이름을 넘기면 됩니다. C 도 넘길 수 있지만 그것을 담는 이름을 안에서
+    밖으로 선언해야 해요 — 모양이 어렵지 뜻은 같습니다.
+  en: >-
+    In Python a function is simply a value, so you pass its name. C can pass it too, but the name that
+    holds it is declared inside out — the shape is hard, the meaning the same.
+misconceptions:
+  # c.md §4 #31 — 규격에서 나온 사실이고 빈도 자료는 없다.
+  - ko: "<code>int *f(int)</code> 가 함수 포인터다 — 그것은 <b>포인터를 내는 함수</b>입니다. 괄호 <code>(*f)</code> 가 있어야 포인터예요."
+    en: "<code>int *f(int)</code> is a function pointer — that is <b>a function yielding a pointer</b>. Only with <code>(*f)</code> is it a pointer."
+  - ko: "부를 때 꼭 별표로 열어야 한다 — <code>f(x)</code> 도 됩니다. C 가 <b>둘 다</b> 받아요."
+    en: "It must be opened with a star to call — <code>f(x)</code> works too. C accepts <b>both</b>."
+  - ko: "함수는 값이 아니라 넘길 수 없다 — 함수의 <b>자리</b>를 넘깁니다. 그것이 이 이름이에요."
+    en: "A function is not a value and cannot be passed — its <b>place</b> is passed. That is what this name holds."
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 개념의 요점은 낱말이 아니라 **선언자의 겹침 모양**(괄호 안의 별표)이고,
+  구두점은 빈칸형의 옵션이 못 된다. 낱말을 고르는 문항은 `c/typedef`·`c/dereference` 가 맡는다.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>함수의 자리를 담는 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name that holds the function's place</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 가리키는 함수가 <b>내는 것</b>이거나 여는 별표입니다. 담는 이름은 괄호 안에 있어요."
+          en: "{{pick.1|code}} is <b>what the pointed-at function yields</b>, or the opening star. The holding name is inside the parentheses."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 바깥과 안"
+            en: "The sharpest spot — outside and inside"
+          code:
+            - "int (*fp)(int)   /* int 는 밖, fp 가 안 */"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 가리키는 함수가 <b>받는 것</b>입니다. 이름이 아니라 모양의 일부예요."
+          en: "{{pick.3|code}} is <b>what the pointed-at function takes</b>. Part of the shape, not the name."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 받는 것과 이름"
+            en: "The sharpest spot — what it takes and the name"
+          code:
+            - "int (*fp)(int)   /* (int) 는 받는 것 */"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행에서 괄호를 빼고 <code>{{pick.1}} *{{pick.2}}{{pick.3}}</code> 라고 적으면 무엇이 될까요?"
+      en: "Drop the parentheses on line {{site.line}} and write <code>{{pick.1}} *{{pick.2}}{{pick.3}}</code> — what does it become?"
+    hint:
+      ko: "뒤에 붙는 괄호가 앞의 별표보다 셉니다."
+      en: "The trailing parentheses bind tighter than the leading star."
+    options:
+      - t:
+          ko: "포인터를 내는 함수의 알림 — 함수 포인터가 아니다"
+          en: "An announcement of a function yielding a pointer — not a function pointer"
+      - t:
+          ko: "같은 것 — 괄호는 장식이다"
+          en: "The same thing — the parentheses are decoration"
+        diag:
+          t:
+            ko: "괄호가 <b>순서</b>를 바꿉니다. 없으면 뒤의 괄호가 먼저 붙어 「함수」가 되고, 별표는 그 함수가 내는 것에 붙어요."
+            en: "The parentheses change <b>the order</b>. Without them the trailing parentheses attach first, making “a function”, and the star attaches to what it yields."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 괄호가 순서다"
+              en: "The sharpest spot — the parentheses are the order"
+            code:
+              - "int (*f)(int)   /* 포인터 */"
+              - "int *f(int)     /* 함수 */"
+      - t:
+          ko: "컴파일 오류"
+          en: "A compile error"
+        diag:
+          t:
+            ko: "완전히 합법입니다. 다른 뜻의 <b>알림</b>이 될 뿐이라 조용히 틀려요."
+            en: "Fully legal. It becomes <b>an announcement</b> with another meaning, so it fails quietly."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 조용히 틀린다"
+              en: "The sharpest spot — quiet failure"
+            code:
+              - "int *f(int);   /* 알림 */"
+      - t:
+          ko: "int 를 가리키는 포인터"
+          en: "A pointer to an int"
+        diag:
+          t:
+            ko: "뒤의 괄호 때문에 <b>함수</b>가 됩니다. 포인터가 되는 것은 그 함수가 내는 값이에요."
+            en: "The trailing parentheses make it <b>a function</b>. What becomes a pointer is the value the function yields."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 뒤에 붙는 것이 먼저"
+              en: "The sharpest spot — the trailing part binds first"
+            code:
+              - "int *f(int)   /* f 는 함수 */"
+
+why_gate:
+  q:
+    ko: "C 는 왜 함수 포인터 선언을 <b>안에서 밖으로</b> 읽게 만들었을까요?"
+    en: "Why does C make a function-pointer declaration read <b>inside out</b>?"
+  choices:
+    - t:
+        ko: "선언이 「이 이름을 이렇게 쓰면 이 타입이 나온다」는 모양이라, <code>(*f)(x)</code> 가 int 를 낸다는 것을 그대로 적으면 그 모양이 되기 때문"
+        en: "Because a declaration mirrors “using the name this way yields this type”, and writing that <code>(*f)(x)</code> yields an int gives exactly this shape"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 모양을 읽기 쉽게 하려고 사람들이 무엇을 쓰는지(<code>typedef</code>)도 적어 보세요."
+        en: "That is the direction. Say what people use to make the shape readable (<code>typedef</code>)."
+    - t:
+        ko: "파서가 그 모양밖에 못 읽어서"
+        en: "Because the parser can read only that shape"
+      ok: false
+      fb:
+        ko: "파서의 한계가 아니라 규칙입니다. 「쓰는 모양이 곧 선언」이에요."
+        en: "It is a rule, not a parser limit. “The way you use it is the declaration.”"
+    - t:
+        ko: "함수 포인터를 못 쓰게 하려고"
+        en: "To discourage function pointers"
+      ok: false
+      fb:
+        ko: "막으려는 것이 아닙니다. 어렵게 보이는 것은 규칙의 부작용이에요."
+        en: "Not to discourage. The difficulty is a side effect of the rule."
+
+queries:
+  - { grammars: [c], file: ./function-pointer.scm }
+
+examples:
+  - code: "int (*fp)(int) = helper;          /* fp -> helper 의 자리 */"
+    expect: { sites: 1, form: declare-init, picks: { 1: "int", 2: "fp", 3: "(int)" } }
+  - code: "typedef int (*cmp_fn)(const void *, const void *);"
+    expect: { sites: 1, form: typedef, picks: { 1: "int", 2: "cmp_fn", 3: "(const void *, const void *)" } }
+  - code: "void each(int *xs, void (*visit)(int)) { }   /* 콜백을 받는다 */"
+    expect: { sites: 1, form: param, picks: { 1: "void", 2: "visit", 3: "(int)" } }
+  - code: "int r = (*fp)(3);                 /* 열어서 부른다 */"
+    expect: { sites: 1, form: call-deref, picks: { 1: "*", 2: "fp", 3: "(3)" } }
+  - code: "int *f(int);                      /* 포인터를 내는 함수 — 다른 판이다 */"
+    expect: none

@@ -1,0 +1,216 @@
+schema: 1
+id: c/overflow
+# 0부 축 A 신규 (`docs/curriculum/c.md` §0.1 #5 · §0.3). `universal: null` — 넘침의 답이 언어마다
+# 다르다. 자바·C# 은 감기고, 파이썬은 커지고, Rust 는 디버그에서 패닉하고, C 는 **부호 있는 쪽에
+# 답이 없다.** 보편형을 걸면 어느 답이든 거짓으로 전이된다 (D4).
+universal: null
+name: { ko: 자리가 모자라면, en: Overflow }
+token: "INT_MAX"
+grammars: [c]
+framework: null
+essential: true
+difficulty: 3
+prereq: [cs/integer-overflow, cs/undefined-behavior, c/integer-type]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "부호 없는 정수는 넘치면 처음으로 되돌아간다. 부호 있는 정수의 넘침은 답이 없다."
+    en: "Unsigned whole numbers wrap around; a signed overflow has no answer at all."
+  why:
+    ko: >-
+      칸이 정해져 있으니 가장 큰 값 다음이 있어야 하는데, C 는 그 「다음」을 <b>둘로 갈라</b> 정했습니다.
+      부호 없는 타입은 2ⁿ 으로 나눈 나머지로 <b>되돌아갑니다</b> — 규격이 그렇게 약속했어요.
+      부호 있는 타입은 <b>아무것도 약속하지 않습니다</b>. {{site.line}}행의 {{pick.2|code}}
+      {{pick.1|code}} {{pick.3|code}} 처럼 부호 있는 값이 끝을 넘으면 답은 −2147483648 이 아니라
+      「없음」이고, 컴파일러는 「넘침은 없다」를 전제로 그 앞뒤의 검사 코드를 지워도 됩니다.
+      그래서 넘침을 <code>if (x + 1 &lt; x)</code> 로 잡으려는 코드가 통째로 사라지기도 해요.
+    en: >-
+      With a fixed number of slots there has to be a “next” after the largest value, and C settles that
+      “next” <b>in two different ways</b>. Unsigned types <b>wrap</b> to the remainder modulo 2ⁿ — the
+      standard promises it. Signed types are <b>promised nothing</b>. When a signed value runs past its
+      end, as in {{pick.2|code}} {{pick.1|code}} {{pick.3|code}} on line {{site.line}}, the answer is
+      not −2147483648 but “none”, and the compiler may assume “overflow never happens” and delete the
+      checking code around it. That is how a check like <code>if (x + 1 &lt; x)</code> vanishes
+      entirely.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}} 둘 다 정해진 칸 수 안의 값이다."
+      en: "{{pick.2|code}} and {{pick.3|code}} are both values inside a fixed number of slots."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 그 칸 수를 넘는 값을 만들려 한다."
+      en: "{{pick.1|code}} tries to make a value that needs more slots than that."
+    - ko: "부호 없는 타입이면 되돌아간 값이 되고, 부호 있는 타입이면 {{site.line}}행 뒤로는 약속이 없다."
+      en: "Unsigned, it becomes the wrapped value; signed, nothing is promised from line {{site.line}} on."
+
+rule:
+  ko: "<b>부호 없는 넘침은 되돌아가고, 부호 있는 넘침은 답이 없다.</b> 「아무 값」이 아니라 「약속 없음」이다."
+  en: "<b>Unsigned overflow wraps; signed overflow has no answer.</b> Not “any value” — “no promise”."
+result:
+  label:
+    ko: "{{site.line}}행의 셈"
+    en: "the arithmetic on line {{site.line}}"
+  value: "{{pick.2}} {{pick.1}} {{pick.3}}"
+  note:
+    ko: "부호에 따라 되돌아가거나 약속이 없다"
+    en: "wraps or is unpromised, by sign"
+ok:
+  ko: >-
+    {{pick.2|code}} {{pick.1|code}} {{pick.3|code}}{{pick.3|josa:은,는}} 칸의 끝을 건드리는 셈입니다. 부호를
+    보면 어느 쪽인지 정해져요.
+  en: >-
+    {{pick.2|code}} {{pick.1|code}} {{pick.3|code}} is arithmetic that touches the end of the slots. The
+    sign says which case it is.
+payoff:
+  ko: >-
+    이걸 알면 「넘침 검사를 넣었는데 안 걸린다」가 풀립니다 — 컴파일러가 그 검사를 지웠을 수 있어요.
+    검사는 넘치기 <b>전에</b> 해야 합니다.
+  en: >-
+    This untangles “I added an overflow check and it never fires” — the compiler may have deleted it.
+    The check has to happen <b>before</b> the overflow.
+bridge:
+  ko: >-
+    자바는 부호 있는 넘침도 되돌아간다고 명세가 정합니다. Rust 는 디버그 빌드에서 멈춰요.
+    C 만 「답이 없다」를 답으로 둡니다.
+  en: >-
+    Java's specification says signed overflow wraps too. Rust stops in a debug build. Only C keeps
+    “no answer” as the answer.
+misconceptions:
+  # c.md §9 #10 · #12 · #15 — 규격에서 나온 사실이고 빈도 자료는 없다.
+  - ko: "정수는 넘치면 되돌아간다 — <b>부호 없는 쪽만</b> 그렇습니다. 부호 있는 넘침은 규격이 답을 안 정했어요."
+    en: "Whole numbers wrap on overflow — <b>only unsigned ones</b>. Signed overflow has no answer in the standard."
+  - ko: "답이 없다는 것은 아무 값이나 나온다는 뜻이다 — <b>프로그램 전체의 약속</b>이 사라진다는 뜻입니다. 넘침 앞의 검사 코드가 지워질 수도 있어요."
+    en: "No answer means any value comes out — it means <b>the whole program's promise</b> is gone. Even the check before the overflow may be deleted."
+  - ko: "컴파일러마다 다를 뿐이다 — <b>같은 컴파일러에서도</b> 최적화 수준마다 다릅니다. 이식성 문제가 아니에요."
+    en: "It only differs per compiler — it differs <b>within one compiler</b> across optimisation levels. It is not a portability issue."
+  - ko: "돌려 보니 −2147483648 이 나왔으니 그것이 답이다 — 그 값이 나오는 실행이 있을 뿐, <b>약속받은 것은 아닙니다</b>."
+    en: "I ran it and got −2147483648, so that is the answer — some runs produce it, but it is <b>not promised</b>."
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 개념의 정답은 코드에 적힌 글자가 아니라 「이 식은 답을 약속하지 않는다」
+  이고(c.md §0.3 ①), 셈 기호를 구멍으로 삼으면 한 글자라 빈칸형이 생성 단계에서 떨어진다
+  (`MIN_HOLE`). 값을 묻는 판은 기초 문항(`fundamentals.md` §2 `value`)의 몫이다.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>칸의 끝을 넘길 수 있는 셈 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the arithmetic symbol that can run past the end of the slots</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>재료</b>입니다. 그 값 자체는 칸 안에 있어요 — 끝을 넘기는 것은 가운데 기호가 만드는 새 값입니다."
+          en: "{{pick.2|code}} is an <b>input</b>. That value fits its slots — what runs past the end is the new value the symbol between makes."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 재료냐 셈이냐"
+            en: "The sharpest spot — an input or the arithmetic"
+          code:
+            - "INT_MAX;          /* 칸 안의 가장 큰 값 */"
+            - "INT_MAX + 1;      /* 칸 밖 — 답이 없다 */"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 다른 쪽 <b>재료</b>입니다. 작아 보여도 상대가 끝에 있으면 한 칸이 모자라요."
+          en: "{{pick.3|code}} is the other <b>input</b>. Small as it looks, one slot is missing once the other side sits at the end."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 작은 값이 넘긴다"
+            en: "The sharpest spot — a small value tips it over"
+          code:
+            - "INT_MAX + 0;      /* 그대로 */"
+            - "INT_MAX + 1;      /* 한 칸이 모자란다 */"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행의 값이 <b>부호 있는</b> 타입이고 끝을 넘기면, 그 뒤의 프로그램은 무엇을 약속받을까요?"
+      en: "If the value on line {{site.line}} is <b>signed</b> and runs past its end, what is the rest of the program promised?"
+    hint:
+      ko: "「아무 값」과 「약속 없음」은 다른 모형입니다."
+      en: "“Any value” and “no promise” are different models."
+    options:
+      - t:
+          ko: "아무것도 — 그 줄 앞뒤의 코드까지 컴파일러가 「넘침은 없다」를 전제로 바꿀 수 있다"
+          en: "Nothing — the compiler may rewrite code before and after that line on the premise “overflow never happens”"
+      - t:
+          ko: "되돌아간 값이 나온다"
+          en: "The wrapped value comes out"
+        diag:
+          t:
+            ko: "되돌아가는 것은 <b>부호 없는</b> 타입의 약속입니다. 부호 있는 타입에서 그 값이 나오는 실행이 있어도 약속은 아니에요."
+            en: "Wrapping is the promise of <b>unsigned</b> types. A signed run may produce that value, but it is not promised."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 부호가 가른다"
+              en: "The sharpest spot — the sign decides"
+            code:
+              - "UINT_MAX + 1u   /* 0 — 약속됨 */"
+              - "INT_MAX + 1     /* 약속 없음 */"
+      - t:
+          ko: "실행이 멈춘다"
+          en: "The program stops"
+        diag:
+          t:
+            ko: "C 는 <b>안 멈춥니다</b>. 멈추는 것은 Rust 의 디버그 빌드예요. C 는 그냥 계속 돌고, 무엇을 하는지가 약속되지 않을 뿐입니다."
+            en: "C does <b>not</b> stop. Stopping is what a Rust debug build does. C keeps running; what it does is simply unpromised."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 멈춤이냐 침묵이냐"
+              en: "The sharpest spot — a stop or silence"
+            code:
+              - "x = INT_MAX + 1;   /* 계속 돈다 */"
+      - t:
+          ko: "그 줄만 틀리고 나머지는 그대로다"
+          en: "Only that line is off; the rest stays intact"
+        diag:
+          t:
+            ko: "약속이 사라지는 것은 <b>프로그램 전체</b>입니다. 지워지는 코드가 넘친 줄보다 <b>앞</b>에 있을 수도 있어요."
+            en: "The promise is lost for <b>the whole program</b>. The deleted code may sit <b>before</b> the overflowing line."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 앞의 코드도 간다"
+              en: "The sharpest spot — even earlier code goes"
+            code:
+              - "if (x + 1 < x) return;   /* 통째로 지워질 수 있다 */"
+              - "x = x + 1;"
+
+why_gate:
+  q:
+    ko: "C 는 왜 부호 있는 넘침의 답을 <b>정하지 않았을까요</b>?"
+    en: "Why did C <b>leave signed overflow undecided</b>?"
+  choices:
+    - t:
+        ko: "「넘침은 없다」를 전제로 두면 컴파일러가 셈과 반복을 더 단순한 기계 코드로 바꿀 수 있고, 규격이 그 자유를 컴파일러에 준 것이기 때문"
+        en: "Because assuming “overflow never happens” lets the compiler turn arithmetic and loops into simpler machine code, and the standard gave the compiler that freedom"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 자유의 대가를 프로그래머가 어떻게 치르는지도 한 줄로 적어 보세요."
+        en: "That is the direction. Add a line on how the programmer pays for that freedom."
+    - t:
+        ko: "옛날 기계가 2의 보수를 안 써서"
+        en: "Because old machines did not use two's complement"
+      ok: false
+      fb:
+        ko: "그 역사가 있긴 하지만, 표현이 하나로 굳은 지금도 넘침은 답이 없습니다. 이유는 최적화의 자유예요."
+        en: "That history exists, but overflow stays unpromised even now that the representation is fixed. The reason is optimisation freedom."
+    - t:
+        ko: "넘침이 실제로는 일어나지 않아서"
+        en: "Because overflow never actually happens"
+      ok: false
+      fb:
+        ko: "일어납니다. 규격이 안 정한 것은 「안 일어난다」가 아니라 「일어나면 약속이 없다」예요."
+        en: "It happens. What the standard left out is not “it never occurs” but “if it occurs, nothing is promised”."
+
+queries:
+  - { grammars: [c], file: ./overflow.scm }
+
+examples:
+  - code: "int w = INT_MAX + 1;              /* w -> 약속 없음 (int) */"
+    expect: { sites: 1, form: limit, picks: { 1: "+", 2: "INT_MAX", 3: "1" } }
+  - code: "unsigned u = UINT_MAX + 1u;       /* u -> 0 (unsigned int, 되돌아감) */"
+    expect: { sites: 1, form: limit, picks: { 1: "+", 2: "UINT_MAX", 3: "1u" } }
+  - code: "unsigned lo = x & 0xFF;           /* lo -> x 의 아래 8칸 (unsigned int) */"
+    expect: { sites: 1, form: mask, picks: { 1: "&", 2: "x", 3: "0xFF" } }
+  - code: "int n = 7 + 2;                    /* 칸 안의 셈 — 다른 판이다 */"
+    expect: none
+  - code: "int big = INT_MAX;                /* 값 하나 — 셈이 아니다 */"
+    expect: none

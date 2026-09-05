@@ -1,0 +1,261 @@
+schema: 1
+id: c/integer-type
+# 0부 축 A 신규 (`docs/curriculum/c.md` §0.1 #4). `common/` 에 대응이 없다 — 자바는 칸 수를 명세가
+# 못 박고(`java/value-bits`) C 는 **최소만** 약속한다. 보편형을 걸면 어느 쪽 사실이든 다른 쪽에
+# 거짓으로 전이된다 (D4).
+#
+# `cs/` 선행 둘 중 **`cs/signed-and-unsigned` 는 45장에 없다**(c.md §0.5). 있는 것만 건다.
+universal: null
+name: { ko: 정수의 폭과 부호, en: Integer width and sign }
+token: "int"
+grammars: [c]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cs/bit-and-byte, cs/binary-representation, c/number-literal]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "정수 타입은 칸 수와 부호를 정하는데, 규격은 최소만 약속한다. 정확한 폭은 재거나 이름에 적는다."
+    en: "Whole-number types fix slots and sign; the standard promises only a minimum."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} {{pick.2|code}} 상자의 <b>칸 수와 읽는 법</b>을
+      정합니다. 그런데 자바와 달리 C 규격은 <code>int</code> 를 「<b>최소 16비트</b>」라고만 약속해요.
+      요즘 기계에서는 거의 다 32비트지만 그것은 기계의 사정이지 약속이 아닙니다. 폭을 아는 길은 둘 —
+      <code>sizeof</code> 로 재거나, <code>int32_t</code> 처럼 폭이 이름에 적힌 타입을 쓰거나.
+      그리고 <code>unsigned</code> 가 붙으면 같은 칸을 <b>음수 없이</b> 읽어서, 같은 비트가 다른
+      수가 됩니다.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} fixes <b>how many slots</b> the {{pick.2|code}} box has
+      and <b>how they are read</b>. Unlike Java, though, the C standard promises only that
+      <code>int</code> is “<b>at least 16 bits</b>”. On today's machines it is almost always 32, but
+      that is the machine's business, not a promise. Two ways to know the width — measure it with
+      <code>sizeof</code>, or use a type like <code>int32_t</code> that spells its width. And with
+      <code>unsigned</code> the same slots are read <b>without negatives</b>, so the same bits become a
+      different number.
+  trace:
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} {{pick.2|code}} 에 칸 몇 개를 줄지 정한다 — 이 기계에서."
+      en: "{{pick.1|code}} decides how many slots {{pick.2|code}} gets — on this machine."
+    - ko: "부호 낱말이 있으면 맨 앞 칸이 부호가 아니라 값의 일부가 된다."
+      en: "With the sign word, the first slot is part of the value instead of the sign."
+    - ko: "{{site.line}}행 아래에서 {{pick.2|code}}{{pick.2|josa:은,는}} 그 칸 수 안에서만 산다 — 넘치면 다음 판이다."
+      en: "Below line {{site.line}}, {{pick.2|code}} lives inside that many slots — overflow is the next plate."
+
+rule:
+  ko: "<b>규격은 최소만 약속한다.</b> 정확한 폭은 재거나 이름에 적고, 부호 낱말이 읽는 법을 바꾼다."
+  en: "<b>The standard promises only a minimum.</b> Measure the width or spell it; the sign word changes the reading."
+result:
+  label:
+    ko: "{{site.line}}행의 상자"
+    en: "the box on line {{site.line}}"
+  value: "{{pick.1}} {{pick.2}}"
+  note:
+    ko: "칸 수는 이 기계의 값이다"
+    en: "the slot count is this machine's"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} {{pick.1|code}}{{pick.1|josa:이,가}} 지금 기계에서 정한 칸 수를
+    가진 이름입니다.
+  en: >-
+    {{pick.2|code}} is a name with as many slots as {{pick.1|code}} gets on this machine.
+payoff:
+  ko: >-
+    이걸 알면 「다른 컴퓨터에서 값이 달라졌다」의 한 갈래가 보입니다 — 폭이 약속이 아니라 기계의
+    사정이었던 겁니다.
+  en: >-
+    This shows one branch of “the value changed on another computer” — the width was the machine's
+    business, not a promise.
+bridge:
+  ko: >-
+    자바는 칸 수를 명세가 못 박아 어디서나 같습니다. C 는 최소만 약속하고 나머지는 기계에 맡겨요 —
+    그래서 폭을 이름에 적는 타입이 따로 생겼습니다.
+  en: >-
+    Java pins the slot count in its specification, the same everywhere. C promises a minimum and
+    leaves the rest to the machine — which is why types that spell their width exist.
+misconceptions:
+  # c.md §0.1 #4 · §9 #11 — 규격에서 나온 사실이고 빈도 자료는 없다.
+  - ko: "int 는 어디서나 32비트다 — 규격이 약속한 것은 <b>최소 16비트</b>뿐입니다. 32 는 이 기계의 값이에요."
+    en: "int is 32 bits everywhere — the standard promises only <b>at least 16</b>. 32 is this machine's value."
+  - ko: "unsigned 는 값을 크게 만든다 — 값이 아니라 <b>읽는 법</b>을 바꿉니다. 같은 비트가 음수 없이 큰 수로 읽혀요."
+    en: "unsigned makes the value bigger — it changes <b>the reading</b>, not the value. The same bits are read as a large number with no negatives."
+  - ko: "char 는 글자 타입이라 정수가 아니다 — <b>한 바이트 정수</b>입니다. 규격이 크기를 1 로 못 박은 유일한 타입이에요."
+    en: "char is a character type, not a whole number — it is <b>a one-byte whole number</b>, the only type whose size the standard pins at 1."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>칸 수와 부호를 정하는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that fixes the slot count and the sign</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 이름은 칸 수를 안 바꿔요 — 길게 지어도 상자는 그대로입니다."
+          en: "{{pick.2|code}} is <b>the name</b>. A name does not change the slot count — a longer name gets no more slots."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 이름이냐 타입이냐"
+            en: "The sharpest spot — the name or the type"
+          code:
+            - "int n;        /* 이 기계에서 32칸 */"
+            - "int64_t n;    /* 같은 이름, 64칸 */"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 처음 들어가는 <b>값</b>입니다. 값이 작아도 칸은 타입이 정한 만큼 잡혀요."
+          en: "{{pick.3|code}} is the starting <b>value</b>. Small values still get all the slots the type asks for."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 값이냐 칸이냐"
+            en: "The sharpest spot — the value or the slots"
+          code:
+            - "int n = 0;      /* 0 이어도 32칸 */"
+            - "uint8_t b = 0;  /* 8칸 */"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 몇 바이트인지 <b>코드만 보고</b> 알 수 있을까요?"
+      en: "Can you tell <b>from the code alone</b> how many bytes {{pick.1|code}} on line {{site.line}} takes?"
+    hint:
+      ko: "규격이 약속한 것과 이 기계의 값을 갈라서 생각합니다."
+      en: "Separate what the standard promises from what this machine does."
+    options:
+      - t:
+          ko: "폭이 이름에 적힌 타입이 아니면 모른다 — 규격은 최소만 약속하고, 정확한 값은 sizeof 로 잰다"
+          en: "Not unless the type spells its width — the standard promises a minimum, and sizeof measures the exact value"
+      - t:
+          ko: "int 는 4 바이트로 정해져 있다"
+          en: "int is fixed at 4 bytes"
+        diag:
+          t:
+            ko: "4 는 <b>이 기계의 값</b>입니다. 규격은 최소 2 바이트만 약속해요 — 그래서 폭이 중요한 코드는 <code>int32_t</code> 를 씁니다."
+            en: "4 is <b>this machine's value</b>. The standard promises only 2 — which is why width-sensitive code uses <code>int32_t</code>."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 약속이냐 기계냐"
+              en: "The sharpest spot — the promise or the machine"
+            code:
+              - "sizeof(int)       /* 규격: ≥ 2, 여기: 4 */"
+              - "sizeof(int32_t)   /* 어디서나 4 */"
+      - t:
+          ko: "값을 보면 안다"
+          en: "The value tells you"
+        diag:
+          t:
+            ko: "값은 칸 수를 안 말합니다. 0 은 한 바이트 상자에도 여덟 바이트 상자에도 들어가요."
+            en: "The value says nothing about slots. 0 fits a one-byte box and an eight-byte box alike."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 값에는 폭이 없다"
+              en: "The sharpest spot — a value has no width"
+            code:
+              - "char a = 0;   /* 1 바이트 */"
+              - "long b = 0;   /* 이 기계에서 8 바이트 */"
+      - t:
+          ko: "컴파일러가 정하므로 늘 같다"
+          en: "The compiler decides, so it is always the same"
+        diag:
+          t:
+            ko: "컴파일러와 기계마다 <b>다를 수 있습니다</b>. 그래서 같은 코드가 다른 기계에서 다른 값을 낼 수 있어요."
+            en: "It <b>can differ</b> across compilers and machines. That is how the same code can produce different values elsewhere."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 늘 같지 않다"
+              en: "The sharpest spot — not always the same"
+            code:
+              - "long   /* 어떤 기계 4, 어떤 기계 8 */"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>정수 하나를 담는 상자</b>를 잡습니다."
+      en: "Choose what goes in the blank. Line {{site.line}} reserves <b>a box for one whole number</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "int", mono: true }
+      - t: "float"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>실수</b> 타입입니다. 정수를 넣으면 근사값으로 바뀌고, 나누기가 소수를 내요 — 정수 상자와 다른 기계입니다."
+            en: "That is the <b>decimal</b> type. A whole number becomes an approximation in it, and division yields fractions — a different machine from the whole-number box."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 정수냐 실수냐"
+              en: "The sharpest spot — whole or decimal"
+            code:
+              - "int n = 7 / 2;      /* 3 */"
+              - "float f = 7 / 2;    /* 3.0 — 셈은 이미 정수였다 */"
+      - t: "void"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>「없음」의 이름</b>이라 상자를 못 잡습니다. 돌려줄 것이 없는 함수 앞에만 서요."
+            en: "That is <b>the name for “nothing”</b> and cannot reserve a box. It stands only in front of a function that returns nothing."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 없음에는 상자가 없다"
+              en: "The sharpest spot — nothing gets no box"
+            code:
+              - "void n = 0;   /* 컴파일 오류 */"
+      - t: "bool"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>참·거짓</b> 상자라 어떤 값을 넣어도 0 아니면 1 로 접힙니다. 수를 담는 자리가 아니에요."
+            en: "That is a <b>true/false</b> box: whatever goes in folds to 0 or 1. It is not a place for a number."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 수냐 참·거짓이냐"
+              en: "The sharpest spot — a number or a truth value"
+            code:
+              - "bool b = 7;   /* 1 */"
+              - "int n = 7;    /* 7 */"
+
+why_gate:
+  q:
+    ko: "C 규격은 왜 {{pick.1|code}} 의 폭을 <b>못 박지 않고 최소만</b> 약속할까요?"
+    en: "Why does the C standard <b>promise only a minimum</b> for the width of {{pick.1|code}} instead of pinning it?"
+  choices:
+    - t:
+        ko: "C 가 8비트 MCU 부터 64비트 서버까지 도는 언어라, 기계마다 가장 빠른 폭이 다르고 그것을 컴파일러가 고르게 두기 때문"
+        en: "Because C runs from 8-bit microcontrollers to 64-bit servers, the fastest width differs per machine, and the compiler is left to pick it"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 대가로 프로그래머가 해야 하는 일이 무엇인지도 적어 보세요."
+        en: "That is the direction. Say what the programmer has to do in return."
+    - t:
+        ko: "규격을 쓴 사람들이 정하는 것을 잊어서"
+        en: "Because the standard's authors forgot to decide"
+      ok: false
+      fb:
+        ko: "잊은 것이 아니라 고른 것입니다. 못 박으면 어떤 기계에서는 느린 폭을 강요하게 돼요."
+        en: "Not forgotten but chosen. Pinning it would force a slow width on some machines."
+    - t:
+        ko: "폭이 프로그램에 영향을 안 줘서"
+        en: "Because width does not affect programs"
+      ok: false
+      fb:
+        ko: "줍니다. 넘치는 값과 잘리는 값이 폭에서 정해져요 — 그래서 폭이 중요한 코드는 이름에 폭을 적습니다."
+        en: "It does. Overflow and truncation are decided by width — which is why width-sensitive code spells it in the name."
+
+queries:
+  - { grammars: [c], file: ./integer-type.scm }
+
+examples:
+  - code: "int n = 7 / 2;                 /* n -> 3 (int, 이 기계에서 32칸) */"
+    expect: { sites: 1, form: named, hole: "int", picks: { 1: "int", 2: "n", 3: "7 / 2" } }
+  - code: "unsigned count = 0;            /* count -> 0 (unsigned int, 음수 없음) */"
+    expect: { sites: 1, form: sized, hole: "unsigned", picks: { 1: "unsigned", 2: "count", 3: "0" } }
+  - code: "uint8_t flags;                 /* flags -> 정해지지 않음 (8칸) */"
+    expect: { sites: 1, form: named-bare, hole: "uint8_t", picks: { 1: "uint8_t", 2: "flags" } }
+  - code: "int main(int argc, char *argv[]) { return 0; }   /* argc 는 int */"
+    expect: { sites: 1, form: param, hole: "int", picks: { 1: "int", 2: "argc" } }
+  - code: "double d = 1.5;                /* 실수 — 다른 판이다 */"
+    expect: none
+  - code: "float f = 0.1;                 /* 실수 — 다른 판이다 */"
+    expect: none

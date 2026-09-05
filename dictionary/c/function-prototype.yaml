@@ -1,0 +1,206 @@
+schema: 1
+id: c/function-prototype
+# 2부 뒤 「빌드와 규격」 (`docs/curriculum/c.md` §4 #26 · §0.6). `universal: null` — 「알림과 정의가
+# 둘로 갈라지고 오류가 나는 단계가 다르다」는 C·C++ 의 것이다.
+universal: null
+name: { ko: 먼저 알리고 나중에 채우기, en: Function prototype }
+token: "int f(int);"
+grammars: [c]
+framework: null
+essential: true
+difficulty: 3
+prereq: [c/function-definition, cs/linking, cs/compile-and-run]
+confusions: [c/function-definition]
+
+dict:
+  one_liner:
+    ko: "몸통 없이 머리만 적어 컴파일러에게 함수의 모양을 먼저 알린다. 채우는 것은 다른 자리다."
+    en: "The head alone, no body, so the compiler learns the shape before it is filled."
+  why:
+    ko: >-
+      C 컴파일러는 파일을 <b>위에서 아래로 한 번</b> 읽으므로, 부르는 줄이 정의보다 앞이면 그 이름을
+      몰라요. {{site.line}}행은 {{pick.2|code}}{{pick.2|josa:을,를}} 몸통 없이 <b>알리기만</b> 합니다 — 무엇을
+      받고({{pick.3|code}}) 무엇을 돌려주는지({{pick.1|code}})만 적고 끝에 세미콜론이에요. 그래서 같은
+      함수가 두 번 적힙니다: 헤더에 알림, 어느 `.c` 에 정의. 둘이 어긋나면 컴파일러가 잡지만,
+      알림만 있고 정의가 <b>어디에도 없으면</b> 컴파일은 통과하고 <b>링크</b>에서 「없는 이름」으로
+      터져요 — 오류가 나는 단계가 다르다는 것이 이 판의 요점입니다.
+    en: >-
+      A C compiler reads a file <b>top to bottom, once</b>, so a call above the definition meets an
+      unknown name. Line {{site.line}} only <b>announces</b> {{pick.2|code}}, with no body — what it
+      takes ({{pick.3|code}}), what it returns ({{pick.1|code}}), and a semicolon at the end. So the
+      same function is written twice: the announcement in a header, the definition in some `.c`. If
+      the two disagree the compiler catches it, but if there is an announcement and the definition is
+      <b>nowhere</b>, compiling passes and <b>linking</b> fails on “undefined name” — the point of this
+      plate is that the error comes at a different stage.
+  trace:
+    - ko: "컴파일러가 {{site.line}}행에서 {{pick.2|code}} 의 모양을 기억한다 — 몸통은 없다."
+      en: "At line {{site.line}} the compiler memorises the shape of {{pick.2|code}} — no body."
+    - ko: "아래에서 {{pick.2|code}}{{pick.2|josa:을,를}} 부르면 {{pick.3|code}}{{pick.3|josa:과,와}} {{pick.1|code}}{{pick.1|josa:으로,로}} 검사만 한다."
+      en: "A call to {{pick.2|code}} below is checked only against {{pick.3|code}} and {{pick.1|code}}."
+    - ko: "정의는 링커가 다른 파일에서 찾는다 — 못 찾으면 그때 터진다."
+      en: "The linker looks for the definition in another file — and fails only then if it is missing."
+
+rule:
+  ko: "<b>알림과 정의는 둘이다.</b> 알림이 없으면 컴파일에서, 정의가 없으면 링크에서 터진다."
+  en: "<b>Announcement and definition are two things.</b> No announcement fails at compile time; no definition fails at link time."
+result:
+  label:
+    ko: "{{site.line}}행이 알리는 함수"
+    en: "the function announced on line {{site.line}}"
+  value: "{{pick.1}} {{pick.2}}{{pick.3}};"
+  note:
+    ko: "몸통은 다른 자리"
+    en: "the body lives elsewhere"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} 이제 부를 수 있는 이름입니다 — 몸통은 링커가 찾아 잇습니다.
+  en: >-
+    {{pick.2|code}} is now a callable name — the linker finds and connects its body.
+payoff:
+  ko: >-
+    이걸 알면 「컴파일은 됐는데 undefined reference 가 뜬다」가 풀립니다 — 알림은 있고 정의를 링크에
+    안 넣은 거예요.
+  en: >-
+    This untangles “it compiled but I get undefined reference” — the announcement exists and the
+    definition was not linked in.
+bridge:
+  ko: >-
+    파이썬은 이름을 부를 때 찾으므로 미리 알릴 것이 없습니다. C 는 한 번 훑는 컴파일러라 앞에 알려야
+    하고, 그 알림을 헤더가 나릅니다.
+  en: >-
+    Python looks a name up when called, so nothing is announced ahead. C's compiler makes one pass,
+    so announcing comes first, and headers carry the announcements.
+misconceptions:
+  # c.md §4 #26 — 규격에서 나온 사실이고 빈도 자료는 없다.
+  - ko: "알림만 있어도 컴파일이 멈춘다 — <b>통과합니다</b>. 멈추는 것은 링크예요."
+    en: "An announcement alone stops the compiler — it <b>passes</b>. What stops is the link."
+  - ko: "정의가 뒤에 있어도 알림 없이 부를 수 있다 — 옛 규칙으로 int 를 돌려준다고 <b>짐작</b>하거나 오류입니다. 알려야 해요."
+    en: "A later definition can be called without an announcement — by an old rule the compiler <b>guesses</b> int, or errors. Announce it."
+  - ko: "매개변수 이름까지 같아야 한다 — 이름은 <b>안 봅니다</b>. 타입과 개수만 맞으면 돼요."
+    en: "Parameter names must match too — names are <b>ignored</b>. Only types and count must match."
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 개념이 알림과 정의를 가르는 글자는 끝의 세미콜론인데 한 글자라 빈칸형이
+  생성 단계에서 떨어진다(`MIN_HOLE`). 돌려줄 타입이나 이름은 사용처마다 달라 첫 옵션이 하나로
+  안 정해진다.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>알려지는 함수의 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name of the function being announced</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 돌려줄 <b>타입</b>입니다. 알림의 일부이지만 이름은 아니에요."
+          en: "{{pick.1|code}} is <b>the return type</b>. Part of the announcement, but not the name."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 타입과 이름"
+            en: "The sharpest spot — the type and the name"
+          code:
+            - "int add(int, int);   /* int 는 타입, add 가 이름 */"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>받는 것</b>입니다. 알림에서는 이름을 빼도 되고 타입만 남아요."
+          en: "{{pick.3|code}} is <b>what it takes</b>. In an announcement the names may be dropped, leaving only types."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 이름은 안 본다"
+            en: "The sharpest spot — names are ignored"
+          code:
+            - "int add(int a, int b);   /* == int add(int, int); */"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행의 알림은 있는데 {{pick.2|code}} 의 <b>정의가 어느 파일에도 없으면</b> 어느 단계에서 멈출까요?"
+      en: "The announcement on line {{site.line}} exists but {{pick.2|code}} is <b>defined in no file</b> — at which stage does it stop?"
+    hint:
+      ko: "컴파일러는 알림만 봅니다."
+      en: "The compiler sees only the announcement."
+    options:
+      - t:
+          ko: "링크 — 컴파일은 통과하고 링커가 이름을 못 찾는다"
+          en: "Link — compiling passes and the linker cannot find the name"
+      - t:
+          ko: "컴파일 — 몸통이 없으니까"
+          en: "Compile — there is no body"
+        diag:
+          t:
+            ko: "컴파일러는 <b>모양</b>만 필요합니다. 몸통은 다른 파일에 있을 수 있어 컴파일러가 안 찾아요 — 찾는 것은 링커입니다."
+            en: "The compiler needs only <b>the shape</b>. The body may live in another file, so the compiler does not look for it — the linker does."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 누가 찾나"
+              en: "The sharpest spot — who looks"
+            code:
+              - "gcc -c a.c     /* 통과 */"
+              - "gcc a.o        /* undefined reference */"
+      - t:
+          ko: "실행 — 부를 때 없다고 한다"
+          en: "Run time — it complains when called"
+        diag:
+          t:
+            ko: "실행 파일이 <b>아예 안 만들어집니다</b>. 링커가 먼저 멈춰요 — 파이썬과 다른 자리입니다."
+            en: "No executable is <b>even produced</b>. The linker stops first — unlike Python."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 실행 전에"
+              en: "The sharpest spot — before running"
+            code:
+              - "ld: undefined reference to `add'"
+      - t:
+          ko: "안 멈춘다 — 알림이 있으니 된다"
+          en: "It does not stop — the announcement is enough"
+        diag:
+          t:
+            ko: "알림은 <b>약속</b>일 뿐입니다. 약속만 있고 실체가 없으면 링커가 잇지 못해요."
+            en: "An announcement is only <b>a promise</b>. With the promise but no substance, the linker cannot connect it."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 약속과 실체"
+              en: "The sharpest spot — the promise and the substance"
+            code:
+              - "int add(int, int);   /* 약속 */"
+
+why_gate:
+  q:
+    ko: "C 는 왜 함수를 <b>두 번</b>(알림과 정의) 적게 할까요?"
+    en: "Why does C have a function written <b>twice</b> (announcement and definition)?"
+  choices:
+    - t:
+        ko: "컴파일러가 파일 하나를 한 번 훑으며 부르는 자리의 타입을 검사해야 하는데, 정의가 다른 파일에 있을 수 있어 모양만 따로 나를 것이 필요했기 때문"
+        en: "Because the compiler checks call sites' types in one pass over one file, and the definition may live in another file, so the shape alone needed a separate carrier"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 모양을 나르는 파일이 무엇인지도 적어 보세요."
+        en: "That is the direction. Name the file that carries the shape."
+    - t:
+        ko: "두 번 적으면 오타를 잡기 쉬워서"
+        en: "Because writing it twice catches typos"
+      ok: false
+      fb:
+        ko: "부수 효과일 뿐입니다. 이유는 파일 하나씩 한 번 훑는 컴파일 모형이에요."
+        en: "Only a side effect. The reason is the one-pass, one-file compile model."
+    - t:
+        ko: "함수가 커서 나누려고"
+        en: "To split a large function"
+      ok: false
+      fb:
+        ko: "크기와 무관합니다. 한 줄짜리 함수도 알림이 필요해요."
+        en: "Size is irrelevant. Even a one-line function needs an announcement."
+
+queries:
+  - { grammars: [c], file: ./function-prototype.scm }
+
+examples:
+  - code: "int add(int a, int b);            /* 알림 — 몸통은 다른 자리 */"
+    expect: { sites: 1, form: proto, picks: { 1: "int", 2: "add", 3: "(int a, int b)" } }
+  - code: "char *dup(const char *s);         /* 포인터를 돌려주는 알림 */"
+    expect: { sites: 1, form: proto-ptr, picks: { 1: "char", 2: "dup", 3: "(const char *s)" } }
+  - code: "int add(int a, int b) { return a + b; }   /* 정의 — 다른 판이다 */"
+    expect: none
+  - code: "int n = add(1, 2);                /* 부르기 — 다른 판이다 */"
+    expect: none

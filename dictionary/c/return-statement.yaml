@@ -1,0 +1,197 @@
+schema: 1
+id: c/return-statement
+# 1부 「문과 흐름」 (`docs/curriculum/c.md` §2 #8 · §0.6). 보편형은 `common/return-value`.
+# C 라서 다른 것 — 안 적으면 조용히 쓰레기가 가고, `main` 의 값은 프로그램의 종료 코드다.
+universal: common/return-value
+name: { ko: 값 돌려주기, en: return statement }
+token: "return"
+grammars: [c]
+framework: null
+essential: true
+difficulty: 1
+prereq: [c/function-definition, cs/call-stack]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "값 하나를 부른 쪽에 주고 함수를 끝낸다. 안 적으면 오류가 아니라 쓰레기가 간다."
+    en: "Hands one value to the caller and ends the function; left out, garbage goes."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} {{pick.2|code}}{{pick.2|josa:을,를}} 값으로 접어 부른
+      쪽에 <b>주고</b>, 그 자리에서 함수를 <b>끝냅니다</b> — 뒤에 줄이 더 있어도 안 돌아요. 머리에
+      적은 타입과 맞지 않으면 조용히 변환되고, 값을 돌려준다고 적어 놓고 이 줄 없이 끝에 닿으면
+      <b>쓰레기</b>가 갑니다 — 파이썬처럼 「없음」이 가는 게 아니라 답이 없어요. <code>main</code> 에서는
+      이 값이 프로그램의 <b>종료 코드</b>라 셸이 읽습니다. 0 이 「잘 끝났다」예요.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} folds {{pick.2|code}} to a value, <b>hands it</b> to the
+      caller and <b>ends</b> the function right there — later lines do not run. If it does not match
+      the type in the head it is converted quietly, and if a function that promises a value reaches its
+      end without this line, <b>garbage</b> goes back — not “nothing” as in Python, but no answer. In
+      <code>main</code> this value is the program's <b>exit code</b>, read by the shell. 0 means “ended
+      well”.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 값 하나로 접힌다."
+      en: "{{pick.2|code}} folds to one value."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 그 값을 부른 자리에 두고 함수를 끝낸다 — {{pick.3|code}} 뒤는 안 돈다."
+      en: "{{pick.1|code}} leaves that value at the call site and ends the function — nothing after {{pick.3|code}} runs."
+    - ko: "{{site.line}}행이 있던 자리는 통째로 사라지고 값만 남는다."
+      en: "The place line {{site.line}} lived in vanishes whole; only the value remains."
+
+rule:
+  ko: "<b>돌려주기는 함수를 끝낸다.</b> 안 적으면 쓰레기가 가고, main 의 값은 종료 코드다."
+  en: "<b>Returning ends the function.</b> Left out, garbage goes back; main's value is the exit code."
+result:
+  label:
+    ko: "{{site.line}}행이 돌려주는 값"
+    en: "the value line {{site.line}} hands back"
+  value: "{{pick.2}}"
+  note:
+    ko: "여기서 함수가 끝난다"
+    en: "the function ends here"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:이,가}} 부른 쪽으로 갔고 함수는 {{site.line}}행에서 끝났습니다.
+  en: >-
+    {{pick.2|code}} went to the caller and the function ended on line {{site.line}}.
+payoff:
+  ko: >-
+    이걸 알면 「함수가 이상한 값을 돌려준다」의 한 갈래가 보입니다 — 어느 갈래에서 이 줄 없이 끝에
+    닿은 거예요.
+  en: >-
+    This shows one branch of “the function returns a strange value” — some path reached the end
+    without this line.
+bridge:
+  ko: >-
+    파이썬은 이 줄이 없으면 조용히 <code>None</code> 이 갑니다. C 는 조용히 <b>쓰레기</b>가 가요 —
+    조용한 것은 같고 가는 것이 다릅니다.
+  en: >-
+    Without this line Python quietly sends <code>None</code>. C quietly sends <b>garbage</b> — equally
+    quiet, with a different thing on the way back.
+misconceptions:
+  # c.md §2 #8 — 규격에서 나온 사실이고 빈도 자료는 없다.
+  - ko: "돌려주기를 안 적으면 0 이 간다 — <b>쓰레기</b>가 갑니다. 규격은 답을 안 정했어요(main 만 예외로 0)."
+    en: "Leave the return out and 0 goes back — <b>garbage</b> goes. The standard fixes no answer (except main, which gives 0)."
+  - ko: "돌려준 뒤의 줄도 돈다 — 이 줄에서 함수가 <b>끝납니다</b>. 뒤의 줄은 그 갈래에서는 안 돌아요."
+    en: "Lines after the return still run — the function <b>ends</b> on this line. Later lines do not run on that path."
+  - ko: "지역 배열을 돌려주면 배열이 간다 — 가는 것은 <b>주소 하나</b>이고 그 자리는 이미 사라졌습니다."
+    en: "Returning a local array sends the array — what goes is <b>one address</b>, and its place is already gone."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>부른 쪽으로 가는 값</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the value that goes back to the caller</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>돌려주라는 낱말</b>입니다. 스스로 값은 아니고, 옆의 식을 접어 보내며 함수를 끝내요."
+          en: "{{pick.1|code}} is <b>the word that says return</b>. It is not a value itself; it folds the expression beside it, sends it, and ends the function."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 낱말과 값"
+            en: "The sharpest spot — the word and the value"
+          code:
+            - "return a + b;   /* return 은 낱말, a + b 가 값 */"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 문장을 <b>닫는 글자</b>입니다. 이 뒤로는 그 갈래에서 아무것도 안 돌아요."
+          en: "{{pick.3|code}} is <b>the character that closes</b> the statement. After it, nothing on that path runs."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 닫는 글자 뒤는 없다"
+            en: "The sharpest spot — nothing after the closer"
+          code:
+            - "return 0;"
+            - "puts(\"never\");   /* 안 돈다 */"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 값 하나를 <b>부른 쪽에 주고 끝냅니다</b>."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>hands one value to the caller and ends</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "return", mono: true }
+      - t: "break"
+        mono: true
+        diag:
+          t:
+            ko: "<code>break</code> 는 <b>되풀이나 switch 를</b> 빠져나올 뿐 함수를 끝내지 않고 값도 안 줍니다. 뒤에 값을 적으면 오류예요."
+            en: "<code>break</code> only leaves <b>a loop or a switch</b>; it neither ends the function nor gives a value. A value after it is an error."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 무엇을 빠져나오나"
+              en: "The sharpest spot — what it leaves"
+            code:
+              - "break;      /* 되풀이 밖으로 */"
+              - "return 0;   /* 함수 밖으로 */"
+      - t: "exit"
+        mono: true
+        diag:
+          t:
+            ko: "<code>exit</code> 는 함수가 아니라 <b>프로그램 전체</b>를 끝내는 라이브러리 함수입니다. 부른 쪽으로 돌아가지 않아요."
+            en: "<code>exit</code> is a library function that ends <b>the whole program</b>, not the function. It never returns to the caller."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 함수냐 프로그램이냐"
+              en: "The sharpest spot — the function or the program"
+            code:
+              - "exit(0);    /* 프로그램 끝 */"
+              - "return 0;   /* 이 함수만 끝 */"
+      - t: "continue"
+        mono: true
+        diag:
+          t:
+            ko: "<code>continue</code> 는 되풀이의 <b>다음 바퀴로</b> 건너뜁니다. 값을 주지도, 함수를 끝내지도 않아요."
+            en: "<code>continue</code> jumps to <b>the next lap</b> of a loop. It gives no value and ends no function."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 건너뛰기냐 끝내기냐"
+              en: "The sharpest spot — skipping or ending"
+            code:
+              - "continue;   /* 다음 바퀴 */"
+
+why_gate:
+  q:
+    ko: "C 는 왜 돌려주기를 빠뜨려도 <b>막지 않고 쓰레기</b>를 보낼까요?"
+    en: "Why does C <b>send garbage instead of blocking</b> when the return is left out?"
+  choices:
+    - t:
+        ko: "모든 갈래가 값을 돌려주는지 검사하려면 흐름을 다 따라가야 하고, 초기 C 는 그 검사를 컴파일러에 안 시켰으며 규격은 그 자리를 「약속 없음」으로 남겼기 때문"
+        en: "Because checking that every path returns a value means following all control flow, early C did not ask the compiler to do that, and the standard left the spot “unpromised”"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 요즘 컴파일러가 그 자리에서 무엇을 해 주는지도 적어 보세요."
+        en: "That is the direction. Say what a modern compiler does at that spot."
+    - t:
+        ko: "쓰레기가 0 보다 유용해서"
+        en: "Because garbage is more useful than 0"
+      ok: false
+      fb:
+        ko: "유용한 것이 아닙니다. 검사를 안 한 자리에 남은 비트가 갈 뿐이에요."
+        en: "It is not useful. Whatever bits were left go back because nobody checked."
+    - t:
+        ko: "값 없는 함수와 구별하려고"
+        en: "To tell it apart from a function with no value"
+      ok: false
+      fb:
+        ko: "구별은 머리의 타입이 합니다. 쓰레기는 구별이 아니라 검사의 부재예요."
+        en: "The head's type does that. Garbage is not a distinction but the absence of a check."
+
+queries:
+  - { grammars: [c], file: ./return-statement.scm }
+
+examples:
+  - code: "return a + b;                   /* 합을 주고 끝난다 */"
+    expect: { sites: 1, form: return, hole: "return", picks: { 1: "return", 2: "a + b", 3: ";" } }
+  - code: "return 0;                       /* main 이면 종료 코드 0 */"
+    expect: { sites: 1, form: return, hole: "return", picks: { 1: "return", 2: "0" } }
+  - code: "int x = 0;                      /* 돌려주기가 아니다 */"
+    expect: none
+  - code: "break;                          /* 되풀이 밖으로 — 다른 것이다 */"
+    expect: none

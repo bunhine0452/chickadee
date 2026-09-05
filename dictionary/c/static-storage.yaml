@@ -1,0 +1,251 @@
+schema: 1
+id: c/static-storage
+# 2부 뒤 「빌드와 규격」 (`docs/curriculum/c.md` §4 #32 · §0.6). `universal: null` — 한 낱말이 자리에
+# 따라 「보임」과 「수명」 두 뜻을 갖는 것은 C 의 것이다.
+universal: null
+name: { ko: 파일 안에만 두거나 값을 남기기, en: static storage }
+token: "static"
+grammars: [c]
+framework: null
+essential: true
+difficulty: 3
+prereq: [c/declaration, c/function-definition, c/header-include, cs/scope-and-lifetime, cs/stack-and-heap]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "같은 낱말이 자리에 따라 다른 일을 한다. 파일 맨 바깥에서는 밖에서 안 보이게, 함수 안에서는 값이 남게."
+    en: "By position: at file level it hides the name; in a function it keeps the value."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 어디에 적혔느냐로 뜻이 갈립니다. 파일 <b>맨 바깥</b>의
+      이름이나 함수에 붙으면 「이 파일 밖에서는 <b>안 보인다</b>」예요 — 링커가 다른 파일의 같은 이름과
+      안 잇고, 헤더에 알릴 필요도 없습니다. 함수 <b>안</b>의 이름에 붙으면 「부를 때마다 새로 만들지
+      말고 <b>값을 남겨라</b>」예요 — 첫 부름에서 0 으로 한 번 만들어지고, 함수가 돌아가도 안 사라져
+      다음 부름이 그 값을 봅니다. 두 뜻이 한 낱말인 것은 역사이고, 읽을 때는 <b>자리</b>를 먼저 봐야 해요.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} means different things by where it is written. On a name
+      or function at <b>file level</b> it means “<b>invisible</b> outside this file” — the linker does
+      not connect it to the same name in another file, and no header needs to announce it. On a name
+      <b>inside</b> a function it means “do not make it anew each call — <b>keep the value</b>” — made
+      once at 0 on the first call, it survives the return and the next call sees it. That two meanings
+      share one word is history; when reading, look at <b>the position</b> first.
+  trace:
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 어디에 있나 — {{site.line}}행이 파일 맨 바깥인가 함수 안인가."
+      en: "Where is {{pick.1|code}} — is line {{site.line}} at file level or inside a function."
+    - ko: "맨 바깥이면 {{pick.3|code}}{{pick.3|josa:은,는}} 같은 파일에서만 보인다."
+      en: "At file level, {{pick.3|code}} is visible only in this file."
+    - ko: "함수 안이면 {{pick.3|code}}{{pick.3|josa:은,는}} 함수가 돌아가도 남아 다음 부름에 이어진다."
+      en: "Inside a function, {{pick.3|code}} survives the return and carries into the next call."
+
+rule:
+  ko: "<b>자리가 뜻을 정한다.</b> 맨 바깥에서는 보임을 좁히고, 함수 안에서는 수명을 늘린다."
+  en: "<b>The position decides the meaning.</b> At file level it narrows visibility; inside a function it lengthens the lifetime."
+result:
+  label:
+    ko: "{{site.line}}행의 표시"
+    en: "the mark on line {{site.line}}"
+  value: "{{pick.1}} {{pick.2}} {{pick.3}}"
+  note:
+    ko: "보임이냐 수명이냐는 자리가 정한다"
+    en: "visibility or lifetime, by position"
+ok:
+  ko: >-
+    {{pick.3|code}}{{pick.3|josa:은,는}} {{pick.1|code}}{{pick.1|josa:이,가}} 자리에 따라 정한 대로 — 파일 안에만
+    보이거나 값이 남는 이름입니다.
+  en: >-
+    {{pick.3|code}} is, as {{pick.1|code}} decides by position, a name either visible only in this
+    file or one whose value persists.
+payoff:
+  ko: >-
+    이걸 알면 「함수를 다시 불렀는데 값이 이어진다」와 「다른 파일에서 이 이름이 안 보인다」가 한
+    낱말로 풀립니다.
+  en: >-
+    This untangles both “I called the function again and the value carried over” and “this name is
+    invisible from another file” with one word.
+bridge:
+  ko: >-
+    파이썬은 모듈 안의 이름이 기본으로 밖에서 보이고 함수 안의 값은 남지 않습니다. C 는 둘 다
+    한 낱말로 뒤집어요 — 그래서 자리를 봐야 합니다.
+  en: >-
+    In Python a module-level name is visible outside by default, and a value inside a function does
+    not persist. C flips both with one word — which is why the position matters.
+misconceptions:
+  # c.md §4 #32 — 규격에서 나온 사실이고 빈도 자료는 없다.
+  - ko: "붙이면 값을 못 고친다 — 고칠 수 있습니다. 못 고치게 하는 것은 <code>const</code> 예요."
+    en: "It makes the value unchangeable — it does not. <code>const</code> does that."
+  - ko: "함수 안의 표시는 부를 때마다 0 으로 되돌린다 — <b>첫 부름에 한 번</b>만 0 이고 그 뒤로는 남은 값입니다."
+    en: "Inside a function it resets to 0 each call — it is 0 <b>once, on the first call</b>, and the kept value after that."
+  - ko: "파일 맨 바깥의 표시는 값을 남기는 뜻이다 — 맨 바깥의 이름은 어차피 프로그램 내내 삽니다. 거기서는 <b>보임</b>을 좁히는 뜻이에요."
+    en: "At file level it means keep the value — a file-level name lives the whole program anyway. There it narrows <b>visibility</b>."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>자리에 따라 뜻이 갈리는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word whose meaning depends on its position</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>타입</b>입니다. 무엇인지를 말하지 어디까지 보이고 언제까지 사는지는 안 말해요."
+          en: "{{pick.2|code}} is <b>the type</b>. It says what it is, not how far it is seen or how long it lives."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 타입과 표시"
+            en: "The sharpest spot — the type and the mark"
+          code:
+            - "static int n;   /* int 가 타입, static 이 표시 */"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 표시를 <b>받는 이름</b>입니다. 뜻을 갈리게 하는 것은 앞의 낱말과 그 자리예요."
+          en: "{{pick.3|code}} is <b>the name that receives</b> the mark. What splits the meaning is the word in front and its position."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 이름과 표시"
+            en: "The sharpest spot — the name and the mark"
+          code:
+            - "static int calls;   /* calls 가 이름 */"
+
+meaning:
+  - q:
+      ko: "함수 안에 <code>static int calls = 0; calls++;</code> 가 있고 그 함수를 <b>세 번</b> 부르면 <code>calls</code> 는 무엇일까요?"
+      en: "A function holds <code>static int calls = 0; calls++;</code> and is called <b>three times</b> — what is <code>calls</code>?"
+    hint:
+      ko: "함수 안의 표시는 수명을 늘립니다."
+      en: "Inside a function the mark lengthens the lifetime."
+    options:
+      - t:
+          ko: "3 — 한 번 만들어져 부름마다 남는다"
+          en: "3 — made once, kept across calls"
+      - t:
+          ko: "1 — 부를 때마다 0 에서 시작한다"
+          en: "1 — it starts at 0 on each call"
+        diag:
+          t:
+            ko: "그것은 표시 <b>없는</b> 지역 이름입니다. 표시가 붙으면 첫 부름에만 0 이고 그 뒤로는 남은 값이에요."
+            en: "That is a local name <b>without</b> the mark. With it, 0 happens only on the first call and the kept value after."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 남느냐 사라지느냐"
+              en: "The sharpest spot — kept or gone"
+            code:
+              - "int calls = 0;          /* 매번 0 */"
+              - "static int calls = 0;   /* 한 번만 0 */"
+      - t:
+          ko: "컴파일 오류 — 함수 안에는 못 쓴다"
+          en: "A compile error — not allowed inside a function"
+        diag:
+          t:
+            ko: "함수 안에서도 <b>됩니다</b>. 그 자리에서는 수명을 늘리는 뜻이에요."
+            en: "It <b>works</b> inside a function too. There it means a longer lifetime."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 두 자리 다 된다"
+              en: "The sharpest spot — both positions work"
+            code:
+              - "void f(void) { static int n; }   /* 된다 */"
+      - t:
+          ko: "정해지지 않는다"
+          en: "Undecided"
+        diag:
+          t:
+            ko: "표시가 붙은 이름은 값을 안 적어도 <b>0 으로 시작</b>합니다. 쓰레기가 드는 것은 표시 없는 지역 이름이에요."
+            en: "A marked name <b>starts at 0</b> even without a value. Garbage appears in unmarked local names."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 0 이 약속된다"
+              en: "The sharpest spot — 0 is promised"
+            code:
+              - "static int n;   /* 0 */"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 이름을 <b>이 파일 안에만 두거나 값을 남깁니다</b>."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>keeps the name to this file, or keeps its value</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "static", mono: true }
+      - t: "extern"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>정반대</b>입니다. 「이 이름은 다른 파일에 있다」는 알림이라 정의를 만들지 않아요."
+            en: "That is <b>the opposite</b>. It announces “this name lives in another file” and makes no definition."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 안이냐 밖이냐"
+              en: "The sharpest spot — inside or outside"
+            code:
+              - "static int n;   /* 이 파일 안에만 */"
+              - "extern int n;   /* 다른 파일에 있다 */"
+      - t: "const"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>못 고친다</b>는 표시입니다. 보임도 수명도 안 바꿔요."
+            en: "That marks <b>no changing</b>. It changes neither visibility nor lifetime."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 잠금이냐 수명이냐"
+              en: "The sharpest spot — lock or lifetime"
+            code:
+              - "const int n = 1;   /* 못 고친다, 수명은 그대로 */"
+      - t: "auto"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>「보통 지역 이름」</b>의 표시라 아무도 안 적습니다. 값이 안 남고 밖에서 안 보이는 것은 원래의 규칙이에요."
+            en: "That marks <b>“an ordinary local name”</b>, so nobody writes it. No kept value and no outside visibility is the default rule anyway."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 기본값의 이름"
+              en: "The sharpest spot — the name of the default"
+            code:
+              - "auto int n;   /* == int n; */"
+
+why_gate:
+  q:
+    ko: "C 는 왜 「파일 안에만」과 「값을 남긴다」를 <b>한 낱말</b>로 둘까요?"
+    en: "Why does C use <b>one word</b> for both “file-only” and “keep the value”?"
+  choices:
+    - t:
+        ko: "둘 다 「프로그램 내내 사는 자리(정적 저장)」에 두는 일이라 기계 쪽 뜻이 하나이고, 맨 바깥의 이름은 어차피 그 자리에 있어 그 낱말이 보임 쪽 뜻을 하나 더 얻었기 때문"
+        en: "Because both put the name in the place that lives the whole program (static storage), so the machine-side meaning is one, and file-level names already live there, so the word picked up the visibility meaning on top"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 읽는 사람이 그래서 무엇을 먼저 봐야 하는지도 적어 보세요."
+        en: "That is the direction. Say what the reader therefore has to look at first."
+    - t:
+        ko: "낱말을 아끼려고"
+        en: "To save a keyword"
+      ok: false
+      fb:
+        ko: "결과적으로 그렇지만 이유는 기계의 자리가 하나라는 것이에요."
+        en: "That is the effect, but the reason is that the machine's place is one."
+    - t:
+        ko: "우연히 겹쳐서"
+        en: "By coincidence"
+      ok: false
+      fb:
+        ko: "우연이 아닙니다. 둘 다 정적 저장이라는 한 자리의 일이에요."
+        en: "Not coincidence. Both are about one place — static storage."
+
+queries:
+  - { grammars: [c], file: ./static-storage.scm }
+
+examples:
+  - code: "static int counter = 0;           /* 이 파일 안에서만 보인다 */"
+    expect: { sites: 1, form: file-scope, hole: "static", picks: { 1: "static", 2: "int", 3: "counter = 0" } }
+  - code: "void tick(void) { static int calls; calls++; }   /* 부름마다 남는다 */"
+    expect: { sites: 1, form: local, hole: "static", picks: { 1: "static", 2: "int", 3: "calls" } }
+  - code: "static int helper(int a) { return a * 2; }       /* 이 파일 안의 함수 */"
+    expect: { sites: 1, form: function, hole: "static", picks: { 1: "static", 2: "int", 3: "helper" } }
+  - code: "int shared = 0;                   /* 표시 없음 — 다른 판이다 */"
+    expect: none
+  - code: "extern int shared;                /* 반대 방향 — 안 잡는다 */"
+    expect: none

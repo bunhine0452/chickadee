@@ -1,0 +1,257 @@
+schema: 1
+id: c/if-statement
+# 1부 「문과 흐름」 (`docs/curriculum/c.md` §2 #5 · §0.6). 보편형은 `common/conditional-branch`.
+# C 라서 다른 것 — 들여쓰기가 아무 뜻도 없고 중괄호를 안 써도 된다. 그러면 다음 **한 문장만** 딸린다.
+universal: common/conditional-branch
+name: { ko: 조건으로 갈라 실행하기, en: if statement }
+token: "if"
+grammars: [c]
+framework: null
+essential: true
+difficulty: 1
+prereq: [c/truthiness]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "괄호 안이 0 이 아니면 다음 문장이 돈다. 중괄호가 없으면 딸리는 것은 딱 한 문장이다."
+    en: "Runs the next statement when the parentheses are not 0; braces, or one."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} {{pick.2|code}}{{pick.2|josa:을,를}} 보고 0 이 아니면
+      {{pick.3|code}}{{pick.3|josa:을,를}} 돌립니다. C 에서 조심할 것은 <b>묶음의 경계</b>예요 — 들여쓰기는
+      아무 뜻도 없고, 중괄호가 없으면 갈래에 딸리는 것은 <b>다음 한 문장뿐</b>입니다. 두 줄을 들여
+      써 놓아도 둘째 줄은 조건과 무관하게 언제나 돌아요. 눈에 보이는 묶음과 실제 묶음이 여기서
+      갈라지고, 그래서 한 문장짜리 갈래에도 중괄호를 치는 팀 규칙이 흔합니다.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} looks at {{pick.2|code}} and, if it is not 0, runs
+      {{pick.3|code}}. What needs care in C is <b>where the group ends</b> — indentation means nothing,
+      and without braces the branch owns <b>exactly one statement</b>. Indent two lines and the second
+      still runs every time, regardless of the condition. The visible group and the real group part
+      ways here, which is why many teams brace even one-statement branches.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 값으로 접힌다 — 0 이냐만 본다."
+      en: "{{pick.2|code}} folds to a value — only whether it is 0 matters."
+    - ko: "0 이 아니면 {{pick.3|code}}{{pick.3|josa:이,가}} 돈다. 중괄호가 없으면 그 한 문장뿐이다."
+      en: "If it is not 0, {{pick.3|code}} runs. Without braces, that one statement only."
+    - ko: "{{site.line}}행의 갈래가 끝나면 그다음 문장은 조건과 상관없이 돈다."
+      en: "After the branch on line {{site.line}} ends, the next statement runs regardless of the condition."
+
+rule:
+  ko: "<b>갈래에 딸리는 것은 중괄호 안, 없으면 한 문장이다.</b> 들여쓰기는 컴파일러에게 아무 뜻도 없다."
+  en: "<b>The branch owns what is in the braces, or one statement without them.</b> Indentation means nothing to the compiler."
+result:
+  label:
+    ko: "{{site.line}}행의 갈래"
+    en: "the branch on line {{site.line}}"
+  value: "{{pick.1}} {{pick.2}}"
+  note:
+    ko: "0 이 아니면 든다"
+    en: "taken unless 0"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:이,가}} 0 이 아닐 때만 {{pick.3|code}}{{pick.3|josa:이,가}} 돕니다.
+  en: >-
+    {{pick.3|code}} runs only when {{pick.2|code}} is not 0.
+payoff:
+  ko: >-
+    이걸 알면 「들여 썼는데 왜 매번 도나」가 풀립니다 — 중괄호가 없어 둘째 줄이 갈래 밖이었던 거예요.
+  en: >-
+    This untangles “I indented it, so why does it run every time” — without braces the second line
+    was outside the branch.
+bridge:
+  ko: >-
+    파이썬은 들여쓰기가 곧 묶음입니다. C 는 들여쓰기를 안 보고 중괄호만 보며, 없으면 한 문장이에요 —
+    파이썬에서 온 사람이 두 번째로 틀리는 자리입니다.
+  en: >-
+    In Python indentation is the group. C ignores indentation and reads only braces, one statement
+    without them — the second spot where someone from Python trips.
+misconceptions:
+  # c.md §2 #5 — 규격에서 나온 사실이고 빈도 자료는 없다.
+  - ko: "들여 쓴 줄은 전부 갈래 안이다 — 중괄호가 없으면 <b>첫 문장만</b> 갈래 안입니다. 나머지는 매번 돌아요."
+    en: "Every indented line is inside the branch — without braces <b>only the first statement</b> is. The rest run every time."
+  - ko: "조건에는 참·거짓만 온다 — 어떤 수든 옵니다. 0 이 아니면 들어가요."
+    en: "Only true or false goes in the condition — any number does. It enters unless 0."
+  - ko: "조건 뒤의 세미콜론은 아무 뜻이 없다 — <code>if (x);</code> 는 <b>빈 문장</b>이 갈래고, 그다음 줄은 언제나 돕니다."
+    en: "A semicolon after the condition means nothing — in <code>if (x);</code> the <b>empty statement</b> is the branch, and the next line always runs."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>0 이 아닐 때만 도는 부분</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the part that runs only when not 0</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.3
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 갈래를 <b>여는 낱말</b>입니다. 스스로는 아무것도 안 돌리고 조건을 보라고 시켜요."
+          en: "{{pick.1|code}} is <b>the word that opens</b> the branch. It runs nothing itself; it tells the machine to look at the condition."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 여는 낱말과 도는 부분"
+            en: "The sharpest spot — the opening word and the running part"
+          code:
+            - "if (n) n--;   /* if 는 열고, n-- 가 돈다 */"
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>조건</b>입니다. 언제나 계산되고, 0 인지에 따라 뒤가 돌지를 정해요 — 그 자체가 도는 부분은 아닙니다."
+          en: "{{pick.2|code}} is <b>the condition</b>. It is always evaluated and decides whether what follows runs — it is not the running part itself."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 언제나 계산되는 쪽"
+            en: "The sharpest spot — the side that always runs"
+          code:
+            - "if (f()) g();   /* f 는 늘, g 는 조건부 */"
+      pick.4:
+        t:
+          ko: "{{pick.4|code}}{{pick.4|josa:은,는}} <b>0 일 때</b> 도는 쪽입니다. 방향이 반대예요."
+          en: "{{pick.4|code}} is the side that runs <b>when it is 0</b>. The direction is reversed."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 어느 쪽이 도나"
+            en: "The sharpest spot — which side runs"
+          code:
+            - "if (x) a(); else b();   /* x 가 0 이면 b */"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행의 갈래에 중괄호 없이 <b>두 줄</b>을 들여 쓰면 둘째 줄은 언제 돌까요?"
+      en: "Indent <b>two lines</b> under the branch on line {{site.line}} without braces — when does the second run?"
+    hint:
+      ko: "컴파일러는 들여쓰기를 안 봅니다."
+      en: "The compiler does not look at indentation."
+    options:
+      - t:
+          ko: "언제나 — 갈래에 딸리는 것은 첫 문장뿐이다"
+          en: "Always — the branch owns only the first statement"
+      - t:
+          ko: "조건이 0 이 아닐 때만 — 들여 썼으니까"
+          en: "Only when the condition is not 0 — it is indented"
+        diag:
+          t:
+            ko: "들여쓰기는 <b>사람에게만</b> 뜻이 있습니다. 컴파일러는 중괄호만 보고, 없으면 한 문장으로 끊어요."
+            en: "Indentation means something <b>only to people</b>. The compiler reads only braces and cuts at one statement without them."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 들여쓰기는 문법이 아니다"
+              en: "The sharpest spot — indentation is not grammar"
+            code:
+              - "if (x)"
+              - "    a();"
+              - "    b();   /* 늘 돈다 */"
+      - t:
+          ko: "컴파일 오류 — 두 문장은 중괄호가 필요하다"
+          en: "A compile error — two statements need braces"
+        diag:
+          t:
+            ko: "오류가 <b>안 납니다</b>. 그래서 위험해요 — 둘째 줄은 갈래 밖의 평범한 문장으로 읽힙니다."
+            en: "There is <b>no</b> error. That is what makes it dangerous — the second line reads as an ordinary statement outside the branch."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 조용히 통과한다"
+              en: "The sharpest spot — it passes quietly"
+            code:
+              - "if (x) a(); b();   /* 합법 */"
+      - t:
+          ko: "한 번도 안 돈다"
+          en: "Never"
+        diag:
+          t:
+            ko: "안 돌 이유가 없습니다. 갈래 밖의 문장이라 조건과 무관하게 <b>매번</b> 돌아요."
+            en: "There is no reason not to. It is a statement outside the branch and runs <b>every time</b>, condition or not."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 밖이면 늘"
+              en: "The sharpest spot — outside means always"
+            code:
+              - "b();   /* 조건과 무관 */"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 조건을 보고 <b>한 번</b> 갈립니다."
+      en: "Choose what goes in the blank. Line {{site.line}} looks at a condition and splits <b>once</b>."
+    hint:
+      ko: "보기 넷은 전부 괄호를 달고 같은 자리에 설 수 있는 낱말입니다."
+      en: "All four take parentheses and can stand in the same slot."
+    options:
+      - { t: "if", mono: true }
+      - t: "while"
+        mono: true
+        diag:
+          t:
+            ko: "<code>while</code> 은 조건이 0 이 될 때까지 <b>되풀이</b>합니다. 한 번 갈리는 것이 아니라 계속 돌아요."
+            en: "<code>while</code> <b>repeats</b> until the condition becomes 0. It does not split once; it keeps going."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 한 번이냐 되풀이냐"
+              en: "The sharpest spot — once or repeated"
+            code:
+              - "if (n) n--;      /* 한 번 */"
+              - "while (n) n--;   /* 0 까지 */"
+      - t: "for"
+        mono: true
+        diag:
+          t:
+            ko: "<code>for</code> 는 괄호 안에 <b>세 칸</b>을 두고 되풀이합니다. 한 칸짜리 조건과는 모양부터 달라요."
+            en: "<code>for</code> repeats with <b>three slots</b> in its parentheses. Its shape differs from a one-slot condition."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 한 칸이냐 세 칸이냐"
+              en: "The sharpest spot — one slot or three"
+            code:
+              - "if (n > 0)"
+              - "for (i = 0; i < n; i++)"
+      - t: "switch"
+        mono: true
+        diag:
+          t:
+            ko: "<code>switch</code> 는 <b>값이 무엇인지</b>로 여러 갈래를 냅니다. 0 이냐가 아니라 어느 값이냐를 봐요."
+            en: "<code>switch</code> branches by <b>what the value is</b>. It asks which value, not whether it is 0."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 0 이냐 어느 값이냐"
+              en: "The sharpest spot — zero or which value"
+            code:
+              - "switch (day) { case 1: … }"
+
+why_gate:
+  q:
+    ko: "C 는 왜 갈래의 묶음을 <b>들여쓰기가 아니라 중괄호</b>로 정할까요?"
+    en: "Why does C mark a branch's group with <b>braces rather than indentation</b>?"
+  choices:
+    - t:
+        ko: "컴파일러가 공백을 전부 버리고 읽어서 묶음의 경계를 글자로 적어야 하고, 한 문장짜리 갈래는 그 글자마저 생략하게 둔 것이기 때문"
+        en: "Because the compiler discards all whitespace, so a group's edge must be written in characters, and a one-statement branch was allowed to drop even those"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 생략이 만드는 함정을 한 줄로 적어 보세요."
+        en: "That is the direction. Add a line on the trap that omission creates."
+    - t:
+        ko: "중괄호가 들여쓰기보다 보기 좋아서"
+        en: "Because braces look nicer than indentation"
+      ok: false
+      fb:
+        ko: "모양의 문제가 아닙니다. 공백을 버리는 컴파일러에게 경계를 알리는 유일한 길이에요."
+        en: "It is not about looks. It is the only way to tell a whitespace-discarding compiler where the edge is."
+    - t:
+        ko: "파이썬보다 먼저 나와서"
+        en: "Because it came before Python"
+      ok: false
+      fb:
+        ko: "순서가 이유는 아닙니다. 같은 시대의 다른 언어도 다른 선택을 했어요."
+        en: "Order is not the reason. Other languages of the same era chose differently."
+
+queries:
+  - { grammars: [c], file: ./if-statement.scm }
+
+examples:
+  - code: "if (n > 0) { n--; }              /* 중괄호 안이 갈래 */"
+    expect: { sites: 1, form: if-block, hole: "if", picks: { 1: "if", 2: "(n > 0)", 3: "{ n--; }" } }
+  - code: "if (n > 0) n--;                  /* 한 문장만 갈래 */"
+    expect: { sites: 1, form: if-bare, hole: "if", picks: { 1: "if", 2: "(n > 0)", 3: "n--;" } }
+  - code: "if (a) x = 1; else x = 2;        /* 0 이면 else 쪽 */"
+    expect: { sites: 1, form: if-bare, hole: "if", picks: { 2: "(a)", 3: "x = 1;", 4: "else x = 2;" } }
+  - code: "while (n) n--;                   /* 되풀이 — 다른 판이다 */"
+    expect: none

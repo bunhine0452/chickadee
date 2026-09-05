@@ -1,0 +1,268 @@
+schema: 1
+id: c/for-loop
+# 1부 「문과 흐름」 (`docs/curriculum/c.md` §3 #14 · §0.6). `universal: null` — c.md §6 이
+# `common/counted-loop` 를 후보로 냈으나 아직 없다(Go·JS·파이썬 `range` 가 같은 결이다). 후보로 보고.
+# Exercism C 트랙 연습 85개에서 `while` 계열 1건 · `for` 가 압도적(§10) — 중심에 두는 근거다.
+universal: null
+name: { ko: 세어 가며 되풀이, en: for loop }
+token: "for"
+grammars: [c]
+framework: null
+essential: true
+difficulty: 2
+prereq: [c/assignment, c/comparison, cs/bounds]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "괄호 안이 세 칸이다 — 시작 · 계속할 조건 · 한 바퀴 끝에 할 일. 세 칸이 각각 다른 때에 돈다."
+    en: "Three slots: start, the test to keep going, and the step at each lap's end."
+  why:
+    ko: >-
+      되풀이가 언제 끝나는지 알려면 <b>셋</b>을 알아야 합니다 — 어디서 시작하고, 언제까지 돌고, 한
+      바퀴마다 무엇이 달라지나. {{site.line}}행은 그 셋을 한 줄에 모아 둡니다. 도는 때가 각각 달라요 —
+      {{pick.2|code}}{{pick.2|josa:은,는}} 처음 한 번, {{pick.3|code}}{{pick.3|josa:은,는}} 매 바퀴 <b>앞</b>,
+      {{pick.4|code}}{{pick.4|josa:은,는}} 매 바퀴 <b>뒤</b>. C 에서 조심할 자리는 조건 칸의 <b>등호</b>입니다 —
+      칸이 n 개인 배열을 <code>i &lt;= n</code> 으로 돌면 마지막 바퀴가 배열 밖을 읽고, 아무도 안 막아요.
+    en: >-
+      To know when a loop ends you need <b>three things</b> — where it starts, how long it goes, and
+      what changes each lap. Line {{site.line}} gathers all three on one line. Each runs at a different
+      time — {{pick.2|code}} once at the start, {{pick.3|code}} <b>before</b> every lap,
+      {{pick.4|code}} <b>after</b> every lap. The spot to watch in C is the <b>equals sign</b> in the
+      test slot — walk an n-slot array with <code>i &lt;= n</code> and the last lap reads past the
+      array, and nobody stops it.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 딱 한 번 돈다."
+      en: "{{pick.2|code}} runs exactly once."
+    - ko: "{{pick.3|code}}{{pick.3|josa:을,를}} 보고 0 이 아니면 {{pick.5|code}}{{pick.5|josa:이,가}} 한 바퀴 돈다."
+      en: "{{pick.3|code}} is read, and if it is not 0, {{pick.5|code}} runs a lap."
+    - ko: "바퀴가 끝날 때마다 {{pick.4|code}}{{pick.4|josa:이,가}} 돌고 {{site.line}}행의 조건으로 돌아간다."
+      en: "At the end of each lap {{pick.4|code}} runs and it goes back to the test on line {{site.line}}."
+
+rule:
+  ko: "<b>조건은 매 바퀴 앞에, 갱신은 매 바퀴 뒤에.</b> 조건 칸의 등호 하나가 배열 밖을 읽게 한다."
+  en: "<b>The test before every lap, the step after.</b> One equals sign in the test slot reads past the array."
+result:
+  label:
+    ko: "{{site.line}}행의 되풀이"
+    en: "the loop on line {{site.line}}"
+  value: "{{pick.1}} ({{pick.2}} {{pick.3}}; {{pick.4}})"
+  note:
+    ko: "세 칸이 다른 때에 돈다"
+    en: "three slots, three times"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:이,가}} 한 번, 그다음부터 {{pick.3|code}}{{pick.3|josa:이,가}} 0 이 아닌 동안
+    {{pick.5|code}}{{pick.5|josa:과,와}} {{pick.4|code}}{{pick.4|josa:이,가}} 번갈아 돕니다.
+  en: >-
+    {{pick.2|code}} once, then while {{pick.3|code}} is not 0, {{pick.5|code}} and {{pick.4|code}} take
+    turns.
+payoff:
+  ko: >-
+    이걸 알면 「배열 끝에서 엉뚱한 값이 나온다」의 첫 용의자가 보입니다 — 조건 칸의 등호예요.
+  en: >-
+    This names the first suspect for “garbage at the end of the array” — the equals sign in the test
+    slot.
+bridge:
+  ko: >-
+    파이썬은 범위를 만들어 하나씩 훑고, 배열 밖은 오류로 막습니다. C 는 세 칸을 사람이 적고 밖을
+    읽어도 안 막아요 — 그래서 등호 하나가 사고가 됩니다.
+  en: >-
+    Python walks a range and blocks reads past the end with an error. C has you write the three slots
+    and does not block out-of-range reads — which is why one equals sign becomes an accident.
+misconceptions:
+  # c.md §3 #14 · §9 #8 — 규격에서 나온 사실이고 빈도 자료는 없다.
+  - ko: "가운데 칸이 「몇 번 돌지」다 — <b>계속할 조건</b>입니다. 0 이 아닌 동안 도는 것이지 횟수가 아니에요."
+    en: "The middle slot is “how many times” — it is <b>the test to keep going</b>, not a count."
+  - ko: "칸이 n 개면 <code>i &lt;= n</code> 까지 돈다 — 마지막 칸의 번호는 <b>n − 1</b> 입니다. 등호를 붙이면 배열 밖을 읽어요."
+    en: "With n slots, run to <code>i &lt;= n</code> — the last slot's number is <b>n − 1</b>. The equals sign reads past the array."
+  - ko: "첫 칸에서 만든 이름은 밖에서도 쓴다 — 괄호 안에서 만들었으면 <b>이 되풀이 안</b>에서만 삽니다(C99 이후)."
+    en: "The name made in the first slot is usable outside — made in the parentheses, it lives only <b>inside this loop</b> (since C99)."
+  - ko: "마지막 칸은 몸통보다 먼저 돈다 — 한 바퀴가 <b>끝난 뒤</b>에 돕니다."
+    en: "The last slot runs before the body — it runs <b>after</b> a lap."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>매 바퀴 끝에 도는 칸</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the slot that runs at the end of each lap</b>."
+    hint:
+      ko: "괄호 안 세 칸 중 <b>마지막</b>입니다."
+      en: "It is the <b>last</b> of the three slots in the parentheses."
+    answer: pick.4
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>딱 한 번</b> 도는 첫 칸입니다. 매 바퀴 도는 것이 아니에요."
+          en: "{{pick.2|code}} is the first slot and runs <b>exactly once</b>, not every lap."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 한 번이냐 매 바퀴냐"
+            en: "The sharpest spot — once or every lap"
+          code:
+            - "첫 칸:   시작할 때 한 번"
+            - "셋째 칸: 바퀴마다 한 번"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>계속할지 묻는</b> 칸입니다. 매 바퀴 보긴 하지만 바꾸는 일은 안 해요."
+          en: "{{pick.3|code}} is the slot that <b>asks whether to continue</b>. It is read each lap but changes nothing."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 묻기냐 바꾸기냐"
+            en: "The sharpest spot — asking or changing"
+          code:
+            - "가운데 칸: 0 인지 묻는다"
+            - "셋째 칸:   값을 바꾼다"
+      pick.5:
+        t:
+          ko: "{{pick.5|code}}{{pick.5|josa:은,는}} <b>몸통</b>입니다. 괄호 밖에 있어요."
+          en: "{{pick.5|code}} is the <b>body</b>. It sits outside the parentheses."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 괄호 안이냐 밖이냐"
+            en: "The sharpest spot — inside or outside the parentheses"
+          code:
+            - "괄호 안: 세 칸"
+            - "괄호 밖: 몸통"
+
+meaning:
+  - q:
+      ko: "칸이 n 개인 배열을 {{site.line}}행처럼 돌 때 조건을 <code>i &lt;= n</code> 으로 적으면 마지막 바퀴는 어디를 읽을까요?"
+      en: "Walking an n-slot array like line {{site.line}}, write the test as <code>i &lt;= n</code> — where does the last lap read?"
+    hint:
+      ko: "칸 번호는 0 부터 시작합니다."
+      en: "Slot numbers start at 0."
+    options:
+      - t:
+          ko: "배열 밖 — n 번 칸은 없고, C 는 그 읽기를 막지 않는다"
+          en: "Past the array — there is no slot n, and C does not block the read"
+      - t:
+          ko: "마지막 칸 — 딱 맞게 끝난다"
+          en: "The last slot — it ends exactly right"
+        diag:
+          t:
+            ko: "마지막 칸의 번호는 <b>n − 1</b> 입니다. 등호가 붙으면 그다음 번호까지 한 바퀴 더 돌아요."
+            en: "The last slot's number is <b>n − 1</b>. With the equals sign there is one more lap, to the next number."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 0 부터 세면 끝은 n − 1"
+              en: "The sharpest spot — count from 0 and the end is n − 1"
+            code:
+              - "int a[3];   /* a[0] a[1] a[2] */"
+              - "i <= 3      /* a[3] 까지 간다 */"
+      - t:
+          ko: "오류가 나서 멈춘다"
+          en: "It stops with an error"
+        diag:
+          t:
+            ko: "C 는 배열 밖 읽기를 <b>막지 않습니다</b>. 옆 칸의 무언가가 나오거나 나중에 엉뚱한 데서 터져요."
+            en: "C does <b>not</b> block reads past an array. Something from the next slot comes out, or it blows up later somewhere else."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 아무도 안 막는다"
+              en: "The sharpest spot — nobody stops it"
+            code:
+              - "a[3]   /* 컴파일 되고 돈다 */"
+      - t:
+          ko: "0 번 칸을 한 번 더 읽는다"
+          en: "It reads slot 0 once more"
+        diag:
+          t:
+            ko: "되돌아가지 않습니다. 번호는 계속 <b>커지고</b>, n 번 칸은 배열 바깥이에요."
+            en: "It does not wrap. The number keeps <b>growing</b>, and slot n is outside the array."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 되돌아가지 않는다"
+              en: "The sharpest spot — no wrapping"
+            code:
+              - "i: 0 1 2 3   /* 3 은 밖 */"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 괄호 안에 <b>세 칸</b>을 두고 되풀이합니다."
+      en: "Choose what goes in the blank. Line {{site.line}} repeats with <b>three slots</b> in its parentheses."
+    hint:
+      ko: "보기 넷은 전부 괄호를 달고 같은 자리에 설 수 있는 낱말입니다."
+      en: "All four take parentheses and can stand in the same slot."
+    options:
+      - { t: "for", mono: true }
+      - t: "while"
+        mono: true
+        diag:
+          t:
+            ko: "<code>while</code> 의 괄호 안은 <b>한 칸</b>입니다. 시작과 매 바퀴 할 일은 밖에 흩어져요."
+            en: "<code>while</code> takes <b>one slot</b>. The start and the per-lap step scatter outside it."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 한 칸이냐 세 칸이냐"
+              en: "The sharpest spot — one slot or three"
+            code:
+              - "int i = 0; while (i < 3) { i++; }"
+      - t: "if"
+        mono: true
+        diag:
+          t:
+            ko: "<code>if</code> 는 <b>한 번</b> 갈릴 뿐 되풀이하지 않습니다. 괄호 안도 한 칸이에요."
+            en: "<code>if</code> splits <b>once</b> and does not repeat. Its parentheses hold one slot too."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 한 번이냐 되풀이냐"
+              en: "The sharpest spot — once or repeated"
+            code:
+              - "if (i < 3)   /* 한 번 */"
+      - t: "foreach"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>다른 언어의 낱말</b>입니다. C 에는 원소를 하나씩 꺼내 주는 되풀이가 없어서 번호로 세어 갑니다."
+            en: "That is <b>another language's word</b>. C has no loop that hands you each element, so you count by number."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — C 는 번호로 센다"
+              en: "The sharpest spot — C counts by number"
+            code:
+              - "foreach (x in a)   /* 오류 */"
+              - "for (i = 0; i < n; i++)"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행이 셋을 <b>한 줄에 모아</b> 둔 것은 무엇을 위해서일까요?"
+    en: "What is gained by line {{site.line}} <b>gathering the three on one line</b>?"
+  choices:
+    - t:
+        ko: "몸통을 안 읽고도 <b>몇 바퀴 도는지</b>를 셀 수 있게 하려고"
+        en: "So <b>how many laps</b> can be counted without reading the body"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 되풀이가 몇 바퀴 도는지도 세어 보세요."
+        en: "That is the direction. Count how many laps this one runs."
+    - t:
+        ko: "빠르게 돌게 하려고"
+        en: "To make it run faster"
+      ok: false
+      fb:
+        ko: "속도는 같습니다. 달라지는 것은 <b>읽는 사람</b>이 아는 것이에요."
+        en: "The speed is the same. What changes is what <b>the reader</b> knows."
+    - t:
+        ko: "C 에 다른 되풀이가 없어서"
+        en: "Because C has no other loop"
+      ok: false
+      fb:
+        ko: "다른 모양이 있습니다. 이 모양을 고른 것은 선택이에요."
+        en: "Other shapes exist. Choosing this one is a choice."
+
+queries:
+  - { grammars: [c], file: ./for-loop.scm }
+
+examples:
+  - code: "for (int i = 0; i < n; i++) { sum += a[i]; }"
+    expect:
+      sites: 1
+      form: for
+      hole: "for"
+      picks: { 1: "for", 2: "int i = 0;", 3: "i < n", 4: "i++", 5: "{ sum += a[i]; }" }
+  - code: "for (i = n; i > 0; i--) total += i;"
+    expect: { sites: 1, form: for, picks: { 2: "i = n", 3: "i > 0", 4: "i--" } }
+  - code: "for (;;) break;                 /* 칸이 비었다 — 안 잡는다 */"
+    expect: none
+  - code: "while (i < n) i++;              /* 한 칸 — 다른 판이다 */"
+    expect: none

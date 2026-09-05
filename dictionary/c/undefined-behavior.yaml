@@ -1,0 +1,213 @@
+schema: 1
+id: c/undefined-behavior
+# 2부 뒤 「빌드와 규격」 (`docs/curriculum/c.md` §4 #34 · §0.6). 0부의 `c/overflow` 는 UB 를 한 자리에서
+# 보여 주고, 이 판은 「규격이 답을 안 정한다」는 개념 자체다 — 같은 사실의 두 층(§0.4). `universal: null`
+# — 답이 없는 것이 답인 언어는 C·C++ 뿐이다(c-learning.md §11.3 ④).
+universal: null
+name: { ko: 규격이 답을 안 정한 자리, en: Undefined behaviour }
+token: "UB"
+grammars: [c]
+framework: null
+essential: true
+difficulty: 4
+prereq: [c/overflow, c/dereference, c/array-decay, c/conversion, cs/undefined-behavior]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "규격이 답을 안 정한 자리에서 컴파일러는 무엇을 해도 된다. 틀리면 멈추는 게 아니라 약속이 사라진다."
+    en: "Where the standard fixes no answer, the compiler may do anything at all."
+  why:
+    ko: >-
+      C 규격은 어떤 자리에 <b>일부러 답을 안 적었습니다</b> — 부호 있는 넘침, 배열 밖 읽기, 한 식에서
+      같은 이름 두 번 고치기, 죽은 자리 열기. {{site.line}}행의 {{pick.2|code}} {{pick.1|code}}
+      {{pick.3|code}}{{pick.3|josa:이,가}} 그런 자리예요. 「아무 값이나 나온다」가 아닙니다 — 컴파일러는 「이 일은
+      일어나지 않는다」를 <b>전제로</b> 코드를 바꿀 수 있고, 그래서 넘침을 잡으려는 <code>if</code> 가
+      통째로 지워지기도 해요. 지워지는 코드가 그 줄보다 <b>앞</b>에 있을 수도 있습니다. 컴파일러마다가
+      아니라 <b>같은 컴파일러의 최적화 수준마다</b> 달라지고, 그 다름이 「답이 없다」의 증거예요.
+    en: >-
+      The C standard <b>deliberately leaves some spots unanswered</b> — signed overflow, reading past
+      an array, changing one name twice in one expression, opening a dead place. {{pick.2|code}}
+      {{pick.1|code}} {{pick.3|code}} on line {{site.line}} is such a spot. It is not “any value comes
+      out” — the compiler may rewrite code <b>on the premise</b> “this never happens”, which is how an
+      <code>if</code> meant to catch overflow gets deleted whole. The deleted code may sit <b>before</b>
+      that line. It differs not per compiler but <b>per optimisation level of one compiler</b>, and that
+      difference is the evidence for “no answer”.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} {{pick.1|code}}{{pick.1|josa:을,를}} 지나며 규격 밖으로 나간다."
+      en: "{{pick.2|code}} passes through {{pick.1|code}} and steps outside the standard."
+    - ko: "그 순간부터 {{site.line}}행 앞뒤의 어느 줄도 약속받지 못한다."
+      en: "From that moment no line before or after {{site.line}} is promised anything."
+    - ko: "같은 소스를 다른 최적화로 돌리면 다른 결과가 나온다 — 그것이 증거다."
+      en: "The same source under another optimisation level gives another result — that is the evidence."
+
+rule:
+  ko: "<b>답이 없다는 것이 답이다.</b> 「아무 값」이 아니라 「약속 없음」이고, 검사는 그 자리 앞에서 해야 한다."
+  en: "<b>Having no answer is the answer.</b> Not “any value” but “no promise”, and the check must come before that spot."
+result:
+  label:
+    ko: "{{site.line}}행의 약속"
+    en: "the promise on line {{site.line}}"
+  value: "{{pick.2}} {{pick.1}} {{pick.3}}"
+  note:
+    ko: "없다"
+    en: "none"
+ok:
+  ko: >-
+    {{site.line}}행은 규격이 답을 안 정한 자리입니다 — 돌려 본 값은 증거가 아니라 한 실행일 뿐이에요.
+  en: >-
+    Line {{site.line}} is a spot the standard leaves unanswered — a value from one run is a single run,
+    not evidence.
+payoff:
+  ko: >-
+    이걸 알면 「디버그에서는 되고 릴리스에서는 안 된다」가 풀립니다 — 답이 없는 자리를 최적화가 다르게
+    접은 거예요.
+  en: >-
+    This untangles “it works in debug and breaks in release” — an unanswered spot was folded differently
+    by optimisation.
+bridge:
+  ko: >-
+    파이썬·자바는 틀리면 예외로 멈춥니다. Rust 는 디버그에서 멈추고 릴리스에서 감싸요. C 는 멈추지도
+    감싸지도 않고 약속을 접습니다 — 열 언어 중 이런 자리는 C 뿐이에요.
+  en: >-
+    Python and Java stop with an exception. Rust stops in debug and wraps in release. C neither stops
+    nor wraps; it withdraws the promise — the only one of the ten languages with such spots.
+misconceptions:
+  # c.md §9 #12 · #15 · c-learning.md §11.4 — 규격에서 나온 사실이고 빈도 자료는 없다.
+  - ko: "컴파일이 되면 맞는 코드다 — 답 없는 자리가 있으면 최적화가 <b>검사 코드를 지우기도</b> 합니다."
+    en: "If it compiles it is correct — with an unanswered spot, optimisation may <b>delete the checking code</b>."
+  - ko: "이식성 문제다 — <b>같은 컴파일러의 최적화 수준마다</b> 다릅니다. 기계를 바꾸지 않아도 달라져요."
+    en: "It is a portability issue — it differs <b>per optimisation level of one compiler</b>. No change of machine needed."
+  - ko: "돌려 봐서 나온 값이 답이다 — 그 값이 나오는 <b>한 실행</b>이 있을 뿐입니다. 약속받은 것은 없어요."
+    en: "The value I got by running is the answer — there is only <b>one run</b> that produced it. Nothing was promised."
+  - ko: "검사 코드가 있으면 안전하다 — 검사가 답 없는 자리 <b>뒤</b>에 있으면 지워질 수 있습니다. 앞에서 해야 해요."
+    en: "A check makes it safe — a check placed <b>after</b> the unanswered spot may be deleted. It has to come before."
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 개념의 정답은 코드의 글자가 아니라 「이 식은 답을 약속하지 않는다」이고
+  (c.md §0.3 ①), 셈 기호를 구멍으로 삼으면 한 글자라 빈칸형이 생성 단계에서 떨어진다(`MIN_HOLE`).
+  판정은 기초 문항의 `value` 가 「약속 없음」을 한 값으로 접어 받는다(`fundamentals.md` §3.2 행 하나).
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>약속이 사라지는 자리의 기호나 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol or name where the promise ends</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 그 자리에 <b>들어가는 쪽</b>입니다. 이름이나 값 자체는 규격 안에 있어요 — 규격 밖으로 나가는 것은 가운데의 일입니다."
+          en: "{{pick.2|code}} is <b>what goes into</b> that spot. The name or value itself is within the standard — what steps outside is the operation in the middle."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 재료와 일"
+            en: "The sharpest spot — the input and the act"
+          code:
+            - "x;        /* 규격 안 */"
+            - "x = x++;  /* 규격 밖 */"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 다른 쪽 <b>재료</b>입니다. 같은 이름이 두 번 나오거나 길이 없는 원본인 것이 문제이지, 재료 하나가 문제는 아니에요."
+          en: "{{pick.3|code}} is the other <b>input</b>. The problem is the same name twice, or a source with no length — not one input alone."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 둘이 만나서"
+            en: "The sharpest spot — the two together"
+          code:
+            - "strcpy(dst, src);   /* src 의 길이를 아무도 안 본다 */"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행 <b>뒤에</b> 「넘쳤나」를 검사하는 <code>if</code> 를 두면 안전해질까요?"
+      en: "Put an <code>if</code> that checks “did it overflow” <b>after</b> line {{site.line}} — is it safe now?"
+    hint:
+      ko: "컴파일러는 「일어나지 않는다」를 전제로 합니다."
+      en: "The compiler assumes “it never happens”."
+    options:
+      - t:
+          ko: "아니다 — 컴파일러가 그 검사를 통째로 지울 수 있다. 검사는 넘치기 전에 해야 한다"
+          en: "No — the compiler may delete that check whole. The check has to come before the overflow"
+      - t:
+          ko: "안전하다 — 검사가 있으니까"
+          en: "Safe — there is a check"
+        diag:
+          t:
+            ko: "답 없는 자리 <b>뒤</b>의 검사는 「그 일은 안 일어난다」는 전제 아래 <b>지워질 수 있습니다</b>. 실제로 지워지는 것이 관찰돼요."
+            en: "A check <b>after</b> the unanswered spot may be <b>deleted</b> under the premise “it never happens”. This is observed in practice."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 뒤의 검사는 사라진다"
+              en: "The sharpest spot — the later check vanishes"
+            code:
+              - "x = x + 1; if (x < old) …   /* 지워질 수 있다 */"
+              - "if (x < INT_MAX) x = x + 1; /* 앞에서 */"
+      - t:
+          ko: "디버그 빌드에서만 안전하다"
+          en: "Safe only in a debug build"
+        diag:
+          t:
+            ko: "디버그에서 <b>돌아가는 것</b>과 <b>약속받은 것</b>은 다릅니다. 최적화가 꺼져 지워지지 않았을 뿐이에요."
+            en: "<b>Running</b> in debug and <b>being promised</b> are different. It simply was not deleted because optimisation was off."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 돌아감과 약속"
+              en: "The sharpest spot — running and promised"
+            code:
+              - "-O0: 검사가 남는다   -O2: 지워진다"
+      - t:
+          ko: "컴파일 오류가 나서 알려 준다"
+          en: "A compile error tells you"
+        diag:
+          t:
+            ko: "오류가 <b>안 납니다</b>. 좋은 컴파일러가 경고를 낼 수는 있지만 규격은 아무것도 요구하지 않아요."
+            en: "There is <b>no</b> error. A good compiler may warn, but the standard requires nothing."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 조용하다"
+              en: "The sharpest spot — silence"
+            code:
+              - "x = x++;   /* 경고: 순서가 정해지지 않은 수정 */"
+
+why_gate:
+  q:
+    ko: "C 규격은 왜 어떤 자리의 답을 <b>일부러 안 정할까요</b>?"
+    en: "Why does the C standard <b>deliberately leave</b> some spots unanswered?"
+  choices:
+    - t:
+        ko: "그 자리마다 답을 정하면 모든 기계에서 그 답을 내도록 검사 코드를 넣어야 하는데, C 는 그 비용을 안 얹고 「프로그래머가 거기 안 간다」를 전제로 가장 빠른 코드를 내기로 했기 때문"
+        en: "Because fixing an answer at each spot would require checking code on every machine to produce it, and C chose to add no such cost, emitting the fastest code on the premise “the programmer never goes there”"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 전제가 깨졌을 때 무엇을 잃는지도 한 줄로 적어 보세요."
+        en: "That is the direction. Add a line on what is lost when that premise breaks."
+    - t:
+        ko: "규격을 쓴 사람들이 정하는 것을 잊어서"
+        en: "Because the standard's authors forgot"
+      ok: false
+      fb:
+        ko: "잊은 것이 아니라 고른 것입니다. 「정의되지 않음」은 규격에 낱말로 적혀 있어요."
+        en: "Not forgotten but chosen. “Undefined” is a term written in the standard."
+    - t:
+        ko: "기계마다 결과가 달라 정할 수 없어서"
+        en: "Because results differ per machine and cannot be fixed"
+      ok: false
+      fb:
+        ko: "그것은 「구현 정의」라는 다른 종류입니다. 답 없음은 기계와 무관하게 약속을 접는 것이에요."
+        en: "That is a different kind, “implementation-defined”. Undefined withdraws the promise regardless of machine."
+
+queries:
+  - { grammars: [c], file: ./undefined-behavior.scm }
+
+examples:
+  - code: "x = x++;                          /* 한 식에서 x 를 두 번 고친다 — 답 없음 */"
+    expect: { sites: 1, form: double-modify, picks: { 1: "=", 2: "x", 3: "x" } }
+  - code: "if (x + 1 < x) x = 0;             /* 넘친 뒤의 검사 — 지워질 수 있다 */"
+    expect: { sites: 1, form: overflow-check, picks: { 1: "<", 2: "x", 3: "x" } }
+  - code: "strcpy(dst, src);                 /* dst 의 길이를 아무도 안 본다 */"
+    expect: { sites: 1, form: unbounded, picks: { 1: "strcpy", 2: "dst", 3: "src" } }
+  - code: "x = y++;                          /* 다른 이름 — 답이 있다 */"
+    expect: none
+  - code: "strncpy(dst, src, n);             /* 길이를 본다 — 안 잡는다 */"
+    expect: none

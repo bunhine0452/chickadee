@@ -1,0 +1,248 @@
+schema: 1
+id: c/header-include
+# 2부 뒤 「빌드와 규격」 (`docs/curriculum/c.md` §4 #25 · §0.6). `universal: null` — 글자를 복사하는
+# 모듈 시스템은 C·C++ 뿐이다. 다른 언어의 import 로 전이시키면 「두 번 넣으면 두 번 생긴다」가 안 옮겨 간다.
+universal: null
+name: { ko: 다른 파일을 그 자리에 붙여 넣기, en: Header include }
+token: "#include"
+grammars: [c]
+framework: null
+essential: true
+difficulty: 2
+prereq: [c/function-call, c/function-prototype, cs/compile-and-run]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "다른 파일의 글자를 그 줄 자리에 통째로 복사한다. 불러오기가 아니라 붙여 넣기다."
+    en: "Copies another file's text into that line, whole. Not an import — a paste."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} {{pick.2|code}} 파일의 글자를 <b>그 자리에 통째로
+      붙여 넣습니다</b>. 컴파일러가 보기 전에 전처리기가 하는 일이라, 컴파일러는 그 줄 대신 헤더의
+      내용 전체를 봐요. 그래서 헤더에는 함수의 <b>정의</b>가 아니라 <b>알림</b>(프로토타입)이 들어
+      있습니다 — 정의를 넣으면 붙여 넣는 파일마다 같은 함수가 생겨 링크에서 충돌해요. 그리고
+      두 번 붙여 넣으면 정의가 두 번 생기므로 모든 헤더의 첫 줄에 「이미 붙였으면 건너뛰어라」
+      (<code>#ifndef</code>)가 붙습니다. 꺾쇠는 시스템 자리를, 따옴표는 내 파일 옆을 먼저 찾아요.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} <b>pastes the whole text</b> of {{pick.2|code}} into that
+      spot. The preprocessor does it before the compiler looks, so the compiler sees the header's
+      entire contents instead of that line. That is why a header holds <b>announcements</b>
+      (prototypes), not <b>definitions</b> of functions — a definition would appear in every file that
+      pastes it and collide at link time. And since pasting twice makes two definitions, every header
+      starts with “skip me if already pasted” (<code>#ifndef</code>). Angle brackets look in the system
+      places first; quotes look next to your own file first.
+  trace:
+    - ko: "전처리기가 {{pick.2|code}} 파일을 찾아 연다."
+      en: "The preprocessor finds and opens the file {{pick.2|code}}."
+    - ko: "{{pick.1|code}} 줄이 그 파일의 글자 전체로 바뀐다."
+      en: "The {{pick.1|code}} line is replaced with that file's entire text."
+    - ko: "컴파일러는 {{site.line}}행 대신 붙여 넣어진 글자를 읽는다 — 원래 줄은 안 남는다."
+      en: "The compiler reads the pasted text instead of line {{site.line}} — the original line is gone."
+
+rule:
+  ko: "<b>붙여 넣기다.</b> 헤더에는 알림만 두고, 두 번 붙는 것은 방벽으로 막는다."
+  en: "<b>It is a paste.</b> Headers hold only announcements, and a guard blocks a second paste."
+result:
+  label:
+    ko: "{{site.line}}행이 붙여 넣는 것"
+    en: "what line {{site.line}} pastes"
+  value: "{{pick.1}} {{pick.2}}"
+  note:
+    ko: "글자 그대로, 그 자리에"
+    en: "the text itself, right there"
+ok:
+  ko: >-
+    {{pick.2|code}} 의 글자가 {{site.line}}행 자리에 통째로 들어왔습니다.
+  en: >-
+    The text of {{pick.2|code}} came into the spot of line {{site.line}}, whole.
+payoff:
+  ko: >-
+    이걸 알면 「헤더에 함수를 썼더니 링크가 터진다」와 「왜 헤더마다 ifndef 가 있나」가 한 번에 풀립니다.
+  en: >-
+    This untangles both “I wrote a function in a header and the link broke” and “why does every
+    header have ifndef”.
+bridge:
+  ko: >-
+    파이썬의 <code>import</code> 는 모듈을 한 번만 읽어 이름을 잇습니다. C 는 글자를 복사할 뿐이라
+    두 번 넣으면 두 번 생기고, 그것을 사람이 막아요.
+  en: >-
+    Python's <code>import</code> reads a module once and binds names. C only copies text, so a second
+    paste makes a second copy, and a person blocks it.
+misconceptions:
+  # c.md §4 #25 — 규격에서 나온 사실이고 빈도 자료는 없다.
+  - ko: "import 와 같다 — <b>글자 복사</b>입니다. 헤더의 글자가 그 자리에 그대로 들어와요."
+    en: "It is the same as import — it is <b>a text copy</b>. The header's text lands in that spot as it is."
+  - ko: "헤더에 함수를 정의해도 된다 — 붙여 넣는 파일마다 같은 함수가 생겨 <b>링크에서 충돌</b>합니다. 헤더에는 알림만 둬요."
+    en: "Defining a function in a header is fine — every file that pastes it gets the same function and they <b>collide at link time</b>. Headers hold announcements only."
+  - ko: "<code>#ifndef</code> 는 장식이다 — 두 번 붙여 넣기를 막는 <b>방벽</b>입니다. 없으면 정의가 두 번 생겨요."
+    en: "<code>#ifndef</code> is decoration — it is <b>the guard</b> against a second paste. Without it definitions appear twice."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>붙여 넣어지는 파일</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the file being pasted</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 붙여 넣으라는 <b>지시</b>입니다. 무엇을 붙일지는 그 뒤에 적혀 있어요."
+          en: "{{pick.1|code}} is <b>the instruction</b> to paste. What to paste is written after it."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 지시와 대상"
+            en: "The sharpest spot — the instruction and its subject"
+          code:
+            - "#include <stdio.h>   /* #include 가 지시, <stdio.h> 가 파일 */"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 방벽의 <b>표시</b>입니다 — 「이미 붙였다」를 적어 두는 줄. 붙여 넣는 파일이 아니에요."
+          en: "{{pick.3|code}} is <b>the mark</b> of the guard — the line that records “already pasted”. It is not the file being pasted."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 방벽과 파일"
+            en: "The sharpest spot — the guard and the file"
+          code:
+            - "#ifndef UTIL_H"
+            - "#define UTIL_H   /* 표시 */"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행의 파일에 <b>함수 정의</b>가 들어 있고 두 소스 파일이 그 헤더를 붙여 넣으면 무엇이 일어날까요?"
+      en: "If the file on line {{site.line}} holds <b>a function definition</b> and two source files paste that header, what happens?"
+    hint:
+      ko: "붙여 넣기는 복사입니다."
+      en: "A paste is a copy."
+    options:
+      - t:
+          ko: "같은 함수가 두 파일에 생겨 링크가 「중복 정의」로 멈춘다"
+          en: "The same function appears in both files and the link stops on “duplicate definition”"
+      - t:
+          ko: "한 번만 생긴다 — 컴파일러가 알아서 합친다"
+          en: "It appears once — the compiler merges them"
+        diag:
+          t:
+            ko: "컴파일러는 파일 하나씩 따로 봅니다. 합치는 것은 <b>링커</b>이고, 링커는 같은 이름 둘을 보면 멈춰요."
+            en: "The compiler sees one file at a time. Merging is <b>the linker's</b> job, and the linker stops on two of the same name."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 파일마다 따로"
+              en: "The sharpest spot — one file at a time"
+            code:
+              - "a.c: int f(void){…}   /* 복사 1 */"
+              - "b.c: int f(void){…}   /* 복사 2 */"
+      - t:
+          ko: "방벽이 막아 준다"
+          en: "The guard blocks it"
+        diag:
+          t:
+            ko: "방벽은 <b>한 파일 안에서</b> 두 번 붙는 것을 막습니다. 다른 파일에는 각각 한 번씩 붙고, 그 둘이 링크에서 만나요."
+            en: "The guard blocks a second paste <b>within one file</b>. Each other file still pastes once, and those meet at link time."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 방벽의 범위"
+              en: "The sharpest spot — the guard's reach"
+            code:
+              - "#ifndef   /* 파일 하나 안에서만 */"
+      - t:
+          ko: "아무 일도 없다"
+          en: "Nothing"
+        diag:
+          t:
+            ko: "컴파일은 되고 <b>링크</b>에서 멈춥니다. 오류가 나는 단계가 다르다는 것이 요점이에요."
+            en: "It compiles and stops at <b>link</b> time. The point is that the error comes at a different stage."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 어느 단계냐"
+              en: "The sharpest spot — which stage"
+            code:
+              - "ld: duplicate symbol f"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 다른 파일의 글자를 <b>그 자리에 붙여 넣습니다</b>."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>pastes another file's text</b> into that spot."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "#include", mono: true }
+      - t: "import"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>파이썬·자바의 낱말</b>입니다. C 에는 없고, 전처리기 지시는 <code>#</code> 으로 시작해요."
+            en: "That is <b>Python's and Java's word</b>. C does not have it; preprocessor directives start with <code>#</code>."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 다른 언어의 낱말"
+              en: "The sharpest spot — another language's word"
+            code:
+              - "import stdio;   /* 오류 */"
+      - t: "#import"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>표준 C 가 아닙니다</b>. 일부 컴파일러의 확장이라 다른 컴파일러에서는 못 읽어요."
+            en: "That is <b>not standard C</b>. It is an extension of some compilers and unreadable to others."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 표준이 아니다"
+              en: "The sharpest spot — not standard"
+            code:
+              - "#import <stdio.h>   /* 이식성 없음 */"
+      - t: "using"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>C++·C# 의 낱말</b>입니다. C 컴파일러는 모르는 이름이라고 멈춰요."
+            en: "That is <b>a C++ and C# word</b>. The C compiler stops on an unknown name."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — C 에 없는 낱말"
+              en: "The sharpest spot — a word C lacks"
+            code:
+              - "using stdio;   /* 오류 */"
+
+why_gate:
+  q:
+    ko: "C 는 왜 모듈을 잇는 대신 <b>글자를 붙여 넣는</b> 방식을 쓸까요?"
+    en: "Why does C <b>paste text</b> instead of linking modules?"
+  choices:
+    - t:
+        ko: "컴파일러가 파일 하나씩 따로 보게 만들어졌고, 다른 파일의 함수를 부르려면 그 알림을 이 파일 안에 글자로 갖다 놓는 것이 가장 단순한 길이었기 때문"
+        en: "Because the compiler was built to see one file at a time, and the simplest way to call another file's function was to bring its announcement into this file as text"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 단순함의 대가 둘(두 번 붙기 · 헤더에 정의 넣기)도 적어 보세요."
+        en: "That is the direction. Name the two costs of that simplicity (pasting twice, defining in a header)."
+    - t:
+        ko: "모듈 시스템을 만들 줄 몰라서"
+        en: "Because nobody knew how to build a module system"
+      ok: false
+      fb:
+        ko: "만들 줄 몰라서가 아니라 단순한 쪽을 고른 것입니다. 파일 하나씩 보는 컴파일러의 모형이에요."
+        en: "Not inability but a choice of the simpler way. It fits a compiler that sees one file at a time."
+    - t:
+        ko: "붙여 넣기가 빨라서"
+        en: "Because pasting is faster"
+      ok: false
+      fb:
+        ko: "오히려 느립니다 — 같은 헤더가 파일마다 다시 읽혀요. 이유는 속도가 아니라 모형입니다."
+        en: "It is slower — the same header is re-read per file. The reason is the model, not speed."
+
+queries:
+  - { grammars: [c], file: ./header-include.scm }
+
+examples:
+  - code: "#include <stdio.h>"
+    expect: { sites: 1, form: system, hole: "#include", picks: { 1: "#include", 2: "<stdio.h>" } }
+  - code: "#include \"util.h\""
+    expect: { sites: 1, form: local, hole: "#include", picks: { 1: "#include", 2: "\"util.h\"" } }
+  - code: "#ifndef UTIL_H\n#define UTIL_H\nint add(int a, int b);\n#endif"
+    expect: { sites: 1, form: guard, picks: { 1: "#ifndef", 2: "UTIL_H", 3: "#define" } }
+  - code: "int add(int a, int b);            /* 알림 — 다른 판이다 */"
+    expect: none

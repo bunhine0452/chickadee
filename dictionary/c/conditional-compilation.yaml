@@ -1,0 +1,252 @@
+schema: 1
+id: c/conditional-compilation
+# 2부 뒤 「빌드와 규격」 (`docs/curriculum/c.md` §4 #30 · §0.6). `universal: null` — Rust `#[cfg]`·Go
+# 빌드 태그는 **항목 단위**라 갈래가 온전한 구문이고, C 는 **글자 범위**라 구문 중간을 자른다(§6).
+# 전이시키면 「양쪽이 다 온전하다」는 틀린 기대가 옮겨 간다.
+universal: null
+name: { ko: 갈래 하나만 컴파일하기, en: Conditional compilation }
+token: "#ifdef"
+grammars: [c]
+framework: null
+essential: true
+difficulty: 4
+prereq: [c/macro-define, c/header-include]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "한 파일에 두 갈래를 다 적고 컴파일 때 하나만 남긴다. 어느 쪽이 사는지는 빌드 옵션이 정한다."
+    en: "Both branches sit in one file; compiling keeps one, and the build decides which."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 실행 때의 갈래가 아니라 <b>컴파일 때의 갈래</b>입니다.
+      {{pick.2|code}}{{pick.2|josa:이,가}} 정의돼 있느냐로 전처리기가 한쪽 글자를 <b>지우고</b> 다른 쪽만
+      컴파일러에 넘겨요. 그래서 파일에는 두 갈래가 다 적혀 있어도 실행 파일에는 하나만 있고,
+      어느 쪽인지는 코드가 아니라 <b>빌드 옵션</b>(<code>-DWIN32</code>)이 정합니다. 읽는 사람의 함정은
+      둘 — 지워진 갈래의 오류는 컴파일러가 안 보고, 갈래가 문장 중간을 자르면 파서까지 무너져요.
+      헤더 첫 줄의 방벽도 이 지시로 만든 것입니다.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} is not a run-time branch but <b>a compile-time branch</b>.
+      Depending on whether {{pick.2|code}} is defined, the preprocessor <b>deletes</b> one side's text
+      and hands only the other to the compiler. So the file holds both branches, the executable holds
+      one, and which one is decided not by code but by <b>the build options</b>
+      (<code>-DWIN32</code>). Two traps for the reader — errors in the deleted branch are never seen by
+      the compiler, and a branch that cuts through the middle of a statement breaks even the parser.
+      The guard at the top of a header is built from this directive too.
+  trace:
+    - ko: "전처리기가 {{pick.2|code}}{{pick.2|josa:이,가}} 정의됐는지 본다 — 빌드 옵션과 앞의 정의들이 답이다."
+      en: "The preprocessor checks whether {{pick.2|code}} is defined — build options and earlier defines answer."
+    - ko: "{{pick.1|code}} 갈래와 {{pick.3|code}} 중 한쪽 글자가 지워진다."
+      en: "One side's text — the {{pick.1|code}} branch or {{pick.3|code}} — is deleted."
+    - ko: "컴파일러는 {{site.line}}행의 조건을 못 본다. 남은 글자만 본다."
+      en: "The compiler never sees the condition on line {{site.line}}. It sees only what remained."
+
+rule:
+  ko: "<b>컴파일 때의 갈래다.</b> 한쪽 글자가 지워지고, 어느 쪽인지는 빌드 옵션이 정한다."
+  en: "<b>A compile-time branch.</b> One side's text is deleted, and the build options decide which."
+result:
+  label:
+    ko: "{{site.line}}행의 갈래"
+    en: "the branch on line {{site.line}}"
+  value: "{{pick.1}} {{pick.2}}"
+  note:
+    ko: "실행 파일에는 하나만 남는다"
+    en: "only one survives into the executable"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:이,가}} 정의됐는지에 따라 {{site.line}}행 아래의 한 갈래만 컴파일됩니다.
+  en: >-
+    Only one branch below line {{site.line}} is compiled, depending on whether {{pick.2|code}} is defined.
+payoff:
+  ko: >-
+    이걸 알면 「이 코드는 왜 내 기계에서만 다르게 도나」의 한 갈래가 보입니다 — 빌드마다 다른 글자가
+    컴파일된 거예요.
+  en: >-
+    This shows one cause of “why does this code behave differently only on my machine” — each build
+    compiled different text.
+bridge:
+  ko: >-
+    Rust 의 <code>#[cfg]</code> 는 항목 하나를 통째로 넣고 빼서 양쪽이 온전합니다. C 는 글자 범위를
+    자르므로 문장 중간에서도 갈릴 수 있어요 — 그래서 파서가 무너질 수 있습니다.
+  en: >-
+    Rust's <code>#[cfg]</code> includes or excludes a whole item, so both sides stay well-formed. C cuts
+    a text range, so it can split mid-statement — which is why a parser can break.
+misconceptions:
+  # c.md §4 #30 · §8 ②③ — 규격에서 나온 사실이고 빈도 자료는 없다.
+  - ko: "실행 때 갈린다 — <b>컴파일 때</b> 갈립니다. 실행 파일에는 한쪽만 있어요."
+    en: "It branches at run time — it branches <b>at compile time</b>. The executable holds one side only."
+  - ko: "지워진 갈래도 컴파일러가 검사한다 — <b>안 봅니다</b>. 그쪽의 오류는 그 옵션으로 빌드할 때까지 숨어 있어요."
+    en: "The deleted branch is still checked — it is <b>never seen</b>. Its errors hide until a build with that option."
+  - ko: "어느 갈래가 사는지는 코드를 읽으면 안다 — <b>빌드 옵션</b>을 봐야 합니다. 코드만으로는 못 정해요."
+    en: "Reading the code tells you which branch lives — you need <b>the build options</b>. Code alone cannot decide."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>어느 갈래가 살지를 정하는 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name that decides which branch lives</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 갈래를 <b>여는 지시</b>입니다. 무엇을 보고 정하는지는 그 뒤의 이름이에요."
+          en: "{{pick.1|code}} is <b>the directive that opens</b> the branch. What it looks at to decide is the name after it."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 지시와 이름"
+            en: "The sharpest spot — the directive and the name"
+          code:
+            - "#ifdef WIN32   /* #ifdef 가 지시, WIN32 가 이름 */"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>다른 쪽 갈래</b>입니다. 이름이 정의되지 않았을 때 사는 쪽이지 정하는 쪽이 아니에요."
+          en: "{{pick.3|code}} is <b>the other branch</b>. It is what lives when the name is undefined, not what decides."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 정하는 쪽과 사는 쪽"
+            en: "The sharpest spot — the decider and the survivor"
+          code:
+            - "#else   /* 정의 안 됐을 때의 갈래 */"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행의 지워지는 갈래에 <b>문법 오류</b>가 있으면 어떻게 될까요?"
+      en: "If the deleted branch under line {{site.line}} contains <b>a syntax error</b>, what happens?"
+    hint:
+      ko: "컴파일러는 남은 글자만 봅니다."
+      en: "The compiler sees only what remained."
+    options:
+      - t:
+          ko: "아무 일도 없다 — 컴파일러가 그 글자를 안 본다. 그 옵션으로 빌드할 때 드러난다"
+          en: "Nothing — the compiler never sees that text. It shows up when built with that option"
+      - t:
+          ko: "컴파일 오류가 난다"
+          en: "A compile error"
+        diag:
+          t:
+            ko: "오류는 <b>안 납니다</b>. 그 갈래는 전처리기가 지워서 컴파일러에 안 닿아요 — 그래서 한쪽만 늘 빌드하는 팀은 다른 쪽이 썩습니다."
+            en: "There is <b>no</b> error. The preprocessor deleted that branch and the compiler never sees it — which is why the other side rots for a team that always builds one way."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 안 보이는 갈래"
+              en: "The sharpest spot — the unseen branch"
+            code:
+              - "#ifdef WIN32"
+              - "int x = ;   /* 리눅스 빌드에서는 안 보인다 */"
+              - "#endif"
+      - t:
+          ko: "실행 때 멈춘다"
+          en: "It stops at run time"
+        diag:
+          t:
+            ko: "실행 파일에 <b>그 글자가 없습니다</b>. 실행이 아니라 다른 옵션으로 컴파일할 때 드러나요."
+            en: "The executable <b>does not contain that text</b>. It shows not at run time but when compiled with the other option."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 실행 파일에 없다"
+              en: "The sharpest spot — not in the executable"
+            code:
+              - "gcc -DWIN32 …   /* 그때 드러난다 */"
+      - t:
+          ko: "경고만 난다"
+          en: "Only a warning"
+        diag:
+          t:
+            ko: "경고도 <b>없습니다</b>. 지워진 글자는 컴파일러에게 존재하지 않아요."
+            en: "<b>No</b> warning either. Deleted text does not exist for the compiler."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 존재하지 않는다"
+              en: "The sharpest spot — it does not exist"
+            code:
+              - "/* 지워진 뒤에는 빈 자리 */"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 이름이 <b>정의됐을 때만</b> 아래 갈래를 컴파일합니다."
+      en: "Choose what goes in the blank. Line {{site.line}} compiles the branch below <b>only when the name is defined</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "#ifdef", mono: true }
+      - t: "#if"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>값</b>을 봅니다. 이름이 정의만 되고 값이 비면 0 으로 읽혀 갈래가 안 살아요 — 「정의됐나」와 「값이 0 이 아니냐」는 다른 물음입니다."
+            en: "That looks at <b>a value</b>. A name that is defined but empty reads as 0 and the branch dies — “is it defined” and “is it non-zero” are different questions."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 정의냐 값이냐"
+              en: "The sharpest spot — defined or non-zero"
+            code:
+              - "#define X"
+              - "#ifdef X   /* 산다 */"
+              - "#if X      /* 0 — 죽는다 */"
+      - t: "if"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>실행 때</b>의 갈래입니다. 양쪽이 다 컴파일되고, 정의 여부를 볼 수도 없어요."
+            en: "That is <b>a run-time</b> branch. Both sides are compiled, and it cannot see whether a name is defined."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 컴파일 때냐 실행 때냐"
+              en: "The sharpest spot — compile time or run time"
+            code:
+              - "if (WIN32)   /* 이름이 없으면 오류 */"
+      - t: "#ifndef"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>정의 안 됐을 때</b> 갈래를 살립니다. 방향이 반대예요 — 방벽에 쓰는 쪽입니다."
+            en: "That keeps the branch <b>when the name is undefined</b>. The opposite direction — the one guards use."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 방향"
+              en: "The sharpest spot — the direction"
+            code:
+              - "#ifndef UTIL_H   /* 아직 없을 때 */"
+
+why_gate:
+  q:
+    ko: "C 는 왜 갈래를 실행 때가 아니라 <b>컴파일 때</b> 지울까요?"
+    en: "Why does C delete a branch <b>at compile time</b> rather than at run time?"
+  choices:
+    - t:
+        ko: "기계·운영체제마다 다른 코드(다른 헤더 · 다른 시스템 호출)는 다른 쪽에서 컴파일조차 안 되므로, 실행 때 고르는 것으로는 부족하고 글자를 아예 빼야 하기 때문"
+        en: "Because code that differs per machine or OS (other headers, other system calls) does not even compile on the other side, so choosing at run time is not enough — the text has to go"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 방식의 대가(안 보이는 갈래가 썩는다)도 적어 보세요."
+        en: "That is the direction. Add the cost of that approach (the unseen branch rots)."
+    - t:
+        ko: "실행 때 갈래가 느려서"
+        en: "Because run-time branches are slow"
+      ok: false
+      fb:
+        ko: "속도가 첫 이유는 아닙니다. 다른 쪽 코드가 아예 안 컴파일된다는 것이 이유예요."
+        en: "Speed is not the first reason. The reason is that the other side's code does not compile at all."
+    - t:
+        ko: "실행 때는 이름이 사라져서"
+        en: "Because names vanish at run time"
+      ok: false
+      fb:
+        ko: "결과이지 이유가 아닙니다. 컴파일 전에 갈라야 하는 것은 코드가 이식되지 않기 때문이에요."
+        en: "That is a consequence, not the reason. Splitting before compiling is needed because the code does not port."
+
+queries:
+  - { grammars: [c], file: ./conditional-compilation.scm }
+
+examples:
+  - code: "#ifdef WIN32\nint plat = 1;\n#else\nint plat = 2;\n#endif"
+    expect: { sites: 1, form: ifdef, hole: "#ifdef", picks: { 1: "#ifdef", 2: "WIN32" } }
+  - code: "#if LIMIT > 5\nint big = 1;\n#endif"
+    expect: { sites: 1, form: if, hole: "#if", picks: { 1: "#if", 2: "LIMIT > 5" } }
+  - code: "#ifndef UTIL_H\n#define UTIL_H\n#endif"
+    expect: { sites: 1, form: ifdef, hole: "#ifndef", picks: { 1: "#ifndef", 2: "UTIL_H" } }
+  - code: "if (plat) x = 1;                  /* 실행 때의 갈래 — 다른 판이다 */"
+    expect: none

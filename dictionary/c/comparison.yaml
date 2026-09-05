@@ -1,0 +1,255 @@
+schema: 1
+id: c/comparison
+# 0부 축 H (`docs/curriculum/c.md` §0.1 #10 · §2 #4). 보편형은 `common/comparison`. C 라서 다른 것 —
+# 결과가 참·거짓 타입이 아니라 `int` 0 또는 1 이다.
+universal: common/comparison
+name: { ko: 견주기, en: Comparison }
+token: "=="
+grammars: [c]
+framework: null
+essential: true
+difficulty: 1
+prereq: [cs/type, c/arithmetic]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "두 값을 견준 결과는 참·거짓 타입이 아니라 정수 0 아니면 1 이다. 그래서 수처럼 쓸 수 있다."
+    en: "Comparing yields the whole number 0 or 1, not a truth type."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} {{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}
+      {{pick.3|josa:을,를}} 견주어 <b>정수</b>를 냅니다 — 맞으면 1, 아니면 0 이에요. C 에는 참·거짓
+      타입이 없어서 이 값은 그냥 <code>int</code> 이고, 그래서 <code>int ok = (a == b);</code> 처럼
+      상자에 넣거나 <code>count += (x &gt; 0);</code> 처럼 셈에 쓸 수 있습니다. 조건 자리에서는 이
+      0 과 1 이 「0 이냐」 규칙으로 읽힐 뿐이에요. 그리고 기호 하나짜리는 <b>넣기</b>라 견주기가
+      아닙니다 — 조건 안에서도 막히지 않으니 글자 수를 세어 읽어야 합니다.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} compares {{pick.2|code}} with {{pick.3|code}} and yields a
+      <b>whole number</b> — 1 if it holds, 0 if not. C has no truth type, so this value is just an
+      <code>int</code>, which is why it can go into a box as in <code>int ok = (a == b);</code> or into
+      arithmetic as in <code>count += (x &gt; 0);</code>. In a condition, that 0 or 1 is read by the
+      “is it 0” rule. And the single-symbol form is <b>putting</b>, not comparing — it is not blocked
+      even inside a condition, so you read by counting symbols.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:이,가}} 먼저 값이 된다."
+      en: "{{pick.2|code}} and {{pick.3|code}} become values first."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 둘을 견주어 1 아니면 0 을 낸다."
+      en: "{{pick.1|code}} compares them and yields 1 or 0."
+    - ko: "{{site.line}}행의 결과는 int 다 — 조건이든 상자든 셈이든 그 수가 간다."
+      en: "The result on line {{site.line}} is an int — that number goes into the condition, the box or the arithmetic."
+
+rule:
+  ko: "<b>견주기는 0 아니면 1 인 정수를 낸다.</b> 기호 둘이 견주고 기호 하나는 넣는다."
+  en: "<b>Comparison yields the whole number 0 or 1.</b> Two symbols compare; one symbol puts."
+result:
+  label:
+    ko: "{{site.line}}행의 견주기"
+    en: "the comparison on line {{site.line}}"
+  value: "{{pick.2}} {{pick.1}} {{pick.3}}"
+  note:
+    ko: "값은 0 또는 1, 타입은 int"
+    en: "0 or 1, typed int"
+ok:
+  ko: >-
+    {{pick.2|code}} {{pick.1|code}} {{pick.3|code}}{{pick.3|josa:은,는}} 0 또는 1 이 되는 정수 식입니다.
+  en: >-
+    {{pick.2|code}} {{pick.1|code}} {{pick.3|code}} is a whole-number expression that becomes 0 or 1.
+payoff:
+  ko: >-
+    이걸 알면 <code>count += (x &gt; 0);</code> 같은 줄이 읽힙니다 — 조건이 아니라 0 이나 1 을 더하는
+    셈이에요.
+  en: >-
+    This makes a line like <code>count += (x &gt; 0);</code> readable — not a condition but arithmetic
+    that adds 0 or 1.
+bridge:
+  ko: >-
+    자바는 견준 결과가 참·거짓 타입이라 수에 못 더합니다. C 는 처음부터 수라 더할 수 있어요 —
+    편리하지만 넣기와 헷갈릴 때 아무도 안 막습니다.
+  en: >-
+    In Java a comparison yields the truth type and cannot be added to a number. In C it is a number
+    from the start — convenient, but nobody stops you when it is confused with putting.
+misconceptions:
+  # c.md §0.1 #10 · §9 #7 — 규격에서 나온 사실이고 빈도 자료는 없다.
+  - ko: "견준 결과는 참·거짓 타입이다 — <b>int 0 또는 1</b> 입니다. 상자에 넣고 셈에 쓸 수 있어요."
+    en: "A comparison yields a truth type — it yields <b>int 0 or 1</b>, which can be stored and added."
+  - ko: "조건 안의 기호 하나짜리는 오류다 — <b>넣기</b>이고 컴파일됩니다. 넣은 값이 조건이 돼요."
+    en: "A single symbol inside a condition is an error — it is <b>putting</b>, and it compiles. The value put in becomes the condition."
+  - ko: "1 이 아닌 참은 없다 — 견주기는 1 만 내지만, 조건은 <b>0 이 아닌 모든 수</b>를 참으로 봅니다."
+    en: "There is no true other than 1 — comparison yields only 1, but a condition treats <b>every non-zero number</b> as true."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>두 값을 견주는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that compares the two values</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 견주어지는 <b>왼쪽 값</b>입니다. 값은 스스로 견주지 않아요 — 가운데 기호가 견줍니다."
+          en: "{{pick.2|code}} is <b>the left value</b> being compared. A value does not compare itself — the symbol between does."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 값이냐 견주기냐"
+            en: "The sharpest spot — the value or the comparing"
+          code:
+            - "a;        /* 값 하나 */"
+            - "a == b;   /* 0 또는 1 */"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 견주어지는 <b>오른쪽 값</b>입니다. 두 값 사이에서 0 또는 1 을 만드는 것은 가운데 기호예요."
+          en: "{{pick.3|code}} is <b>the right value</b> being compared. What makes 0 or 1 between the two is the symbol in the middle."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 상대냐 견주기냐"
+            en: "The sharpest spot — the other side or the comparing"
+          code:
+            - "b;"
+            - "a == b;"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행의 견주기를 그대로 <code>int ok = ({{pick.2}} {{pick.1}} {{pick.3}});</code> 에 넣으면 <code>ok</code> 에는 무엇이 들어갈까요?"
+      en: "Put the comparison from line {{site.line}} into <code>int ok = ({{pick.2}} {{pick.1}} {{pick.3}});</code> — what goes into <code>ok</code>?"
+    hint:
+      ko: "견주기의 결과에는 타입이 있습니다."
+      en: "The result of a comparison has a type."
+    options:
+      - t:
+          ko: "1 아니면 0 — 견주기는 int 를 낸다"
+          en: "1 or 0 — a comparison yields an int"
+      - t:
+          ko: "컴파일 오류 — 참·거짓을 정수에 못 넣는다"
+          en: "A compile error — a truth value cannot go into an int"
+        diag:
+          t:
+            ko: "그것은 <b>자바의 규칙</b>입니다. C 에는 참·거짓 타입이 없고 견주기는 처음부터 int 를 내요."
+            en: "That is <b>Java's rule</b>. C has no truth type, and a comparison yields an int from the start."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 자바와 다르다"
+              en: "The sharpest spot — unlike Java"
+            code:
+              - "int ok = (a == b);   /* C: 된다 */"
+      - t:
+          ko: "왼쪽 값이 들어간다"
+          en: "The left value goes in"
+        diag:
+          t:
+            ko: "왼쪽 값이 들어가는 것은 <b>기호 하나짜리</b>일 때입니다. 둘짜리는 견주고 그 결과 0 또는 1 만 남겨요."
+            en: "The left value goes in with the <b>single symbol</b>. The doubled one compares and leaves only 0 or 1."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 하나냐 둘이냐"
+              en: "The sharpest spot — one symbol or two"
+            code:
+              - "ok = a;         /* a 가 들어간다 */"
+              - "ok = (a == b);  /* 0 또는 1 */"
+      - t:
+          ko: "차이가 들어간다"
+          en: "The difference goes in"
+        diag:
+          t:
+            ko: "차이를 내는 것은 <b>빼기</b>입니다. 견주기는 얼마나 다른지가 아니라 다른지만 말해요 — 0 아니면 1."
+            en: "What yields the difference is <b>subtraction</b>. Comparison says only whether they differ, not by how much — 0 or 1."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 얼마나가 아니라 인지"
+              en: "The sharpest spot — whether, not how much"
+            code:
+              - "a - b    /* 차이 */"
+              - "a != b   /* 0 또는 1 */"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 두 값이 <b>같은지 묻습니다</b>."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>asks whether</b> two values are equal."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "==", mono: true }
+      - t: "="
+        mono: true
+        diag:
+          t:
+            ko: "기호 하나짜리는 <b>넣기</b>입니다. 묻지 않고 오른쪽 값을 왼쪽에 넣으며, 조건 안에서도 컴파일돼요 — 그래서 조용히 틀립니다."
+            en: "The single symbol is <b>putting</b>. It asks nothing, puts the right value into the left, and compiles even inside a condition — which is why it fails quietly."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 묻기냐 넣기냐"
+              en: "The sharpest spot — asking or putting"
+            code:
+              - "if (x == 0)   /* 묻는다 */"
+              - "if (x = 0)    /* 넣는다 */"
+      - t: "==="
+        mono: true
+        diag:
+          t:
+            ko: "기호 셋짜리는 <b>자바스크립트의 것</b>입니다. C 에는 없어서 컴파일러가 못 읽어요 — C 의 견주기는 둘로 끝납니다."
+            en: "The triple symbol is <b>JavaScript's</b>. C does not have it and the compiler cannot read it — C's comparison stops at two."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 둘이면 된다"
+              en: "The sharpest spot — two is enough"
+            code:
+              - "a === b   /* 오류 */"
+              - "a == b"
+      - t: "<>"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>SQL·파스칼의 「다르다」</b>입니다. C 의 「다르다」는 느낌표로 시작해요."
+            en: "That is <b>“differs” in SQL and Pascal</b>. C's “differs” starts with an exclamation mark."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 다른 언어의 기호"
+              en: "The sharpest spot — another language's symbol"
+            code:
+              - "a <> b   /* 오류 */"
+              - "a != b"
+
+why_gate:
+  q:
+    ko: "C 는 왜 견주기의 답을 참·거짓 타입이 아니라 <b>정수</b>로 둘까요?"
+    en: "Why does C make a comparison yield <b>a whole number</b> instead of a truth type?"
+  choices:
+    - t:
+        ko: "기계의 견주기 명령이 결과를 수로 내고, C 는 그 위에 타입을 하나 더 얹지 않아 조건·셈·상자 어디에나 그대로 쓰기 때문"
+        en: "Because the machine's compare instruction yields a number, and C adds no extra type on top, so the result goes straight into conditions, arithmetic and boxes"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 선택이 만드는 함정 하나(기호 하나짜리)도 적어 보세요."
+        en: "That is the direction. Name the trap that choice creates (the single symbol)."
+    - t:
+        ko: "참·거짓 타입을 만들 줄 몰라서"
+        en: "Because nobody knew how to make a truth type"
+      ok: false
+      fb:
+        ko: "만들 줄 몰라서가 아니라 안 얹은 것입니다. 나중에 <code>_Bool</code> 이 생겨도 견주기는 여전히 int 를 내요."
+        en: "Not inability but a choice not to add one. Even after <code>_Bool</code>, comparison still yields an int."
+    - t:
+        ko: "정수가 참·거짓보다 빨라서"
+        en: "Because whole numbers are faster than truth values"
+      ok: false
+      fb:
+        ko: "속도가 아니라 층의 문제입니다. 타입을 하나 덜 두어 변환이 없는 거예요."
+        en: "It is about layers, not speed. One fewer type means no conversion."
+
+queries:
+  - { grammars: [c], file: ./comparison.scm }
+
+examples:
+  - code: "int ok = (a == b);        /* ok -> 0 또는 1 (int) */"
+    expect: { sites: 1, form: compare, hole: "==", picks: { 1: "==", 2: "a", 3: "b" } }
+  - code: "if (n < 10) n++;          /* n < 10 -> 0 또는 1 (int) */"
+    expect: { sites: 1, form: compare, hole: "<", picks: { 1: "<", 2: "n", 3: "10" } }
+  - code: "count += (x > 0);         /* 0 이나 1 을 더한다 */"
+    expect: { sites: 1, form: compare, hole: ">", picks: { 1: ">", 2: "x", 3: "0" } }
+  - code: "if (x = 0) x = 2;         /* 넣기 — 다른 판이다 */"
+    expect: none
+  - code: "int m = a + b;            /* 셈 — 다른 판이다 */"
+    expect: none

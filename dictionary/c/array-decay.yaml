@@ -1,0 +1,152 @@
+schema: 1
+id: c/array-decay
+# 2부 「포인터와 메모리」 (`docs/curriculum/c.md` §3 #23 · §0.6). `universal: null` — Go 슬라이스도
+# Rust 배열도 붕괴하지 않는다. 전이시키면 틀린 기대가 옮겨 간다.
+universal: null
+name: { ko: 배열이 주소로 바뀌기, en: Array decay }
+token: "f(a)"
+grammars: [c]
+framework: null
+essential: true
+difficulty: 3
+prereq: [c/array-declaration, c/address-of, c/function-call, cs/value-vs-reference]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "배열 이름을 값으로 쓰면 첫 칸의 주소로 바뀐다. 함수에 넘기면 칸들이 아니라 그 주소가 간다."
+    en: "As a value, an array name turns into its first slot's address; that travels."
+  why:
+    ko: >-
+      배열 이름은 배열인데, <b>값으로 쓰이는 자리</b>에서는 첫 칸의 주소로 <b>바뀝니다</b>. 그래서 함수에
+      배열을 넘기면 칸들이 복사되는 것이 아니라 주소 하나가 가고, {{site.line}}행처럼 매개변수를
+      대괄호로 적어도 {{pick.2|code}}{{pick.2|josa:은,는}} <b>포인터</b>예요 — 함수 안의 <code>sizeof</code> 가
+      배열 크기를 안 내고 칸 수를 따로 넘겨야 하는 이유가 이것입니다. 바뀌는 것은 <b>자리에서
+      일어나는 일</b>이지 정체가 아니에요. 선언된 자리에서 <code>sizeof(a)</code> 는 여전히 배열
+      전체이고, 그 차이를 이용한 것이 <code>sizeof(a) / sizeof(a[0])</code> 로 칸 수를 세는 관용구입니다.
+    en: >-
+      An array name is an array, but <b>where a value is expected</b> it <b>turns into</b> the first
+      slot's address. So passing an array into a function copies no slots — one address travels — and
+      even with brackets in the parameter, as on line {{site.line}}, {{pick.2|code}} is <b>a pointer</b>.
+      That is why <code>sizeof</code> inside the function does not give the array size and the count
+      has to be passed separately. The change is <b>something that happens at a spot</b>, not the
+      name's identity: where it was declared, <code>sizeof(a)</code> is still the whole array, and the
+      idiom <code>sizeof(a) / sizeof(a[0])</code> counts the slots by using exactly that difference.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 값이 필요한 자리에 놓인다."
+      en: "{{pick.2|code}} is placed where a value is expected."
+    - ko: "그 자리에서 배열은 첫 칸의 주소로 바뀐다 — 칸들은 그대로 있다."
+      en: "At that spot the array turns into the first slot's address — the slots stay where they are."
+    - ko: "{{site.line}}행 아래에서 그 주소로 칸에 닿지만, 칸이 몇 개인지는 주소가 모른다."
+      en: "Below line {{site.line}}, that address reaches the slots, but it does not know how many there are."
+
+rule:
+  ko: "<b>값 자리의 배열은 첫 칸 주소다.</b> 주소는 칸 수를 모르고, 선언된 자리에서만 배열이 배열이다."
+  en: "<b>An array in a value spot is its first slot's address.</b> The address knows no count; only where declared is an array an array."
+result:
+  label:
+    ko: "{{site.line}}행에서 넘어가는 것"
+    en: "what travels on line {{site.line}}"
+  value: "{{pick.2}}"
+  note:
+    ko: "칸이 아니라 첫 칸의 주소"
+    en: "not the slots but the first slot's address"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} 여기서 배열이 아니라 첫 칸의 주소입니다 — 칸 수는 따로 알아야 해요.
+  en: >-
+    {{pick.2|code}} is here the first slot's address, not an array — the count has to be known separately.
+payoff:
+  ko: >-
+    이걸 알면 「왜 배열 함수마다 길이를 따로 받나」가 풀립니다 — 주소에는 칸 수가 없어서예요.
+  en: >-
+    This untangles “why does every array function take a length” — an address carries no count.
+bridge:
+  ko: >-
+    파이썬의 목록은 길이를 알고 통째로 넘어갑니다. Go 의 슬라이스는 길이를 들고 다녀요. C 의 배열은
+    주소로 바뀌며 길이를 잃습니다 — 그래서 사람이 들고 다닙니다.
+  en: >-
+    A Python list knows its length and travels whole. A Go slice carries its length. A C array turns
+    into an address and loses it — so a person carries it.
+misconceptions:
+  # c.md §9 #4 · #13 — 규격에서 나온 사실이고 빈도 자료는 없다.
+  - ko: "배열을 넘기면 배열이 간다 — <b>첫 칸의 주소</b>만 갑니다. 함수 안의 <code>sizeof</code> 는 주소의 크기예요."
+    en: "Passing an array sends the array — only <b>the first slot's address</b> goes. <code>sizeof</code> inside is the address's size."
+  - ko: "배열 이름은 포인터다 — <b>배열</b>이고 값 자리에서만 주소로 <b>바뀝니다</b>. 선언된 자리의 <code>sizeof</code> 가 그 증거예요."
+    en: "The array name is a pointer — it is <b>an array</b> that <b>turns into</b> an address only in a value spot. <code>sizeof</code> where declared is the proof."
+  - ko: "매개변수의 대괄호가 배열을 받게 한다 — 대괄호를 적어도 <b>포인터</b>입니다. 컴파일러가 그렇게 읽어요."
+    en: "Brackets on a parameter make it receive an array — even with brackets it is <b>a pointer</b>. The compiler reads it that way."
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 개념은 낱말이 아니라 **자리에서 일어나는 변환**이라 코드에 그것을 적은
+  글자가 없다 — 배열 이름이 그대로 서 있을 뿐이다. 낱말을 고르는 문항은 `c/sizeof` 와
+  `c/address-of` 가 맡는다.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>배열처럼 보이지만 주소인 것</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>what looks like an array but is an address</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 칸 하나의 <b>타입</b>이거나 <b>셈 기호</b>입니다. 주소로 바뀌는 것은 배열 이름이에요."
+          en: "{{pick.1|code}} is <b>the type</b> of one slot or <b>an arithmetic symbol</b>. What turns into an address is the array name."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 타입이 아니라 이름"
+            en: "The sharpest spot — the name, not the type"
+          code:
+            - "void f(int xs[])   /* xs 가 포인터 */"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 배열 전체의 <b>바이트 수</b>입니다 — 선언된 자리라 아직 배열이에요. 바뀌는 자리가 아닙니다."
+          en: "{{pick.3|code}} is <b>the byte count</b> of the whole array — still an array here, where it was declared. Not the spot where it changes."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 선언된 자리는 배열"
+            en: "The sharpest spot — where declared, still an array"
+          code:
+            - "sizeof(buf)   /* 배열 전체 */"
+
+why_gate:
+  q:
+    ko: "C 는 왜 배열을 함수에 <b>통째로 복사하지 않고</b> 주소로 바꿔 넘길까요?"
+    en: "Why does C pass an array as an address <b>instead of copying it whole</b>?"
+  choices:
+    - t:
+        ko: "배열이 크면 복사가 비싸고, 첫 칸 주소와 칸 수만 있으면 함수가 모든 칸에 닿을 수 있어 그 둘을 넘기는 것으로 충분하기 때문"
+        en: "Because copying a large array is expensive, and with the first slot's address plus a count a function can reach every slot, so passing those two is enough"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 대가로 사람이 늘 함께 넘겨야 하는 것도 적어 보세요."
+        en: "That is the direction. Name what a person must always pass along in return."
+    - t:
+        ko: "배열은 복사할 수 없어서"
+        en: "Because arrays cannot be copied"
+      ok: false
+      fb:
+        ko: "덩이 안에 넣으면 복사됩니다. 안 하는 것은 선택이에요."
+        en: "Inside a block they are copied. Not doing it is a choice."
+    - t:
+        ko: "주소가 배열보다 안전해서"
+        en: "Because an address is safer than an array"
+      ok: false
+      fb:
+        ko: "덜 안전합니다 — 칸 수를 잃으니까요. 이유는 안전이 아니라 비용이에요."
+        en: "It is less safe — the count is lost. The reason is cost, not safety."
+
+queries:
+  - { grammars: [c], file: ./array-decay.scm }
+
+examples:
+  - code: "void take(int xs[], int k) { xs[0] = k; }   /* xs 는 포인터 */"
+    expect: { sites: 1, form: param-array, picks: { 1: "int", 2: "xs" } }
+  - code: "size_t n = sizeof(buf) / sizeof(buf[0]);   /* 선언된 자리에서만 되는 셈 */"
+    expect: { sites: 1, form: count, picks: { 1: "/", 2: "buf", 3: "sizeof(buf)" } }
+  - code: "int buf[3];                                /* 선언 — 다른 판이다 */"
+    expect: none
+  - code: "void f(int *xs) { }                        /* 포인터로 적었다 — 바뀔 것이 없다 */"
+    expect: none

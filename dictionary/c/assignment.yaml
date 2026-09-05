@@ -1,0 +1,251 @@
+schema: 1
+id: c/assignment
+# 0부 축 G (`docs/curriculum/c.md` §0.1 #2 · §2 #2). 만드는 줄(`c/declaration`)과 갈라 둔다 —
+# 파이썬이 둘을 합친 것(D152 ⓐ)과 거울이다. 언어가 가르므로 사전도 가른다.
+universal: common/reassignment
+name: { ko: 이름에 값 다시 넣기, en: Assignment }
+token: "="
+grammars: [c]
+framework: null
+essential: true
+difficulty: 1
+prereq: [c/declaration, cs/state]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "이미 만든 이름에 값을 다시 넣는다. 넣는 식 자체도 값이라 조건 자리에 올 수 있다."
+    en: "Puts a new value into an existing name; the putting is itself a value."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 만드는 줄이 아니라 <b>옮기는 줄</b>입니다 —
+      {{pick.2|code}}{{pick.2|josa:은,는}} 위에서 타입과 함께 만들어졌고, 여기서는 상자 안의 값만
+      바뀝니다. 그리고 C 에서 이 식은 <b>값을 냅니다</b>: 넣은 값이 곧 식의 값이에요. 그래서
+      <code>if (x = 0)</code> 이 컴파일됩니다 — 견주는 것이 아니라 0 을 넣고, 그 0 이 조건이 되어
+      갈래가 영영 안 들어가요. 파이썬은 그 자리를 문법 오류로 막고, C 는 경고만 냅니다.
+    en: >-
+      The {{pick.1|code}} on line {{site.line}} is a <b>moving line</b>, not a making one —
+      {{pick.2|code}} was made above with its type, and here only the value in its box changes. And in
+      C this expression <b>yields a value</b>: what was put in is the value of the expression. That is
+      why <code>if (x = 0)</code> compiles — it does not compare, it puts 0 in, and that 0 becomes the
+      condition, so the branch never runs. Python blocks that spot as a syntax error; C only warns.
+  trace:
+    - ko: "{{pick.3|code}}{{pick.3|josa:을,를}} 먼저 값으로 만든다."
+      en: "{{pick.3|code}} becomes a value first."
+    - ko: "{{pick.2|code}} 상자의 옛 값을 그 값으로 덮는다."
+      en: "The old value in the {{pick.2|code}} box is overwritten with it."
+    - ko: "{{site.line}}행의 식 전체도 그 값이다 — 조건 자리에 있으면 그 값이 참·거짓을 정한다."
+      en: "The whole expression on line {{site.line}} is that value too — in a condition, it decides true or false."
+
+rule:
+  ko: "<b>넣기는 값을 낸다.</b> 조건 안의 넣기는 막히지 않고, 넣은 값이 그대로 조건이 된다."
+  en: "<b>Putting yields a value.</b> Putting inside a condition is not blocked; the value put in becomes the condition."
+result:
+  label:
+    ko: "{{site.line}}행 아래의 {{pick.2}}"
+    en: "{{pick.2}} below line {{site.line}}"
+  value: "{{pick.3}}"
+  note:
+    ko: "상자는 그대로, 안의 값만 바뀐다"
+    en: "same box, new contents"
+ok:
+  ko: >-
+    {{pick.2|code}} 상자에 이제 {{pick.3|code}}{{pick.3|josa:이,가}} 들어 있습니다. 상자 자체는 위에서
+    만든 그대로예요.
+  en: >-
+    The {{pick.2|code}} box now holds {{pick.3|code}}. The box itself is the one made above.
+payoff:
+  ko: >-
+    이걸 알면 「조건이 늘 거짓이다」의 흔한 원인 하나가 보입니다 — 조건 안에 기호 하나짜리 넣기가
+    들어가 있는 겁니다.
+  en: >-
+    This shows one frequent cause of “the condition is always false” — a single-symbol putting sits
+    inside the condition.
+bridge:
+  ko: >-
+    파이썬은 조건 안의 넣기를 문법으로 막습니다. C 는 넣기가 값을 내는 식이라 어디든 올 수 있고,
+    막는 것은 컴파일러의 경고뿐이에요.
+  en: >-
+    Python blocks putting inside a condition by grammar. In C putting is an expression with a value,
+    so it can go anywhere, and only a compiler warning stands in the way.
+misconceptions:
+  # c.md §9 #7 — 규격에서 나온 사실이고 빈도 자료는 없다.
+  - ko: "조건 안의 기호 하나짜리 넣기는 문법 오류다 — <b>컴파일됩니다</b>. 넣은 값이 조건이 될 뿐이에요."
+    en: "A single-symbol putting inside a condition is a syntax error — <b>it compiles</b>. The value put in simply becomes the condition."
+  - ko: "넣기는 문이라 값이 없다 — C 에서는 <b>식</b>이고 넣은 값을 냅니다. 그래서 <code>a = b = 0;</code> 이 한 줄에 됩니다."
+    en: "Putting is a statement with no value — in C it is an <b>expression</b> that yields the value put in. That is why <code>a = b = 0;</code> works on one line."
+  - ko: "만든 적 없는 이름에도 넣을 수 있다 — 타입 없이 처음 나온 이름은 컴파일을 멈춥니다."
+    en: "You can put into a name never made — a name that first appears without a type stops the compiler."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>값을 상자에 넣는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that puts the value into the box</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 값을 <b>받는 이름</b>입니다. 이름은 스스로 무엇을 담을지 못 정하고, 가운데 기호가 정해요."
+          en: "{{pick.2|code}} is <b>the name that receives</b>. A name cannot decide what to hold; the symbol between does."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 이름만으로는 아무 일도 없다"
+            en: "The sharpest spot — a name alone does nothing"
+          code:
+            - "x;        /* 값을 읽고 버린다 */"
+            - "x = 5;    /* 이 줄이 넣는다 */"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 들어갈 <b>값</b>입니다. 값은 어디로 갈지 모르고, 그것을 정하는 것이 가운데 기호예요."
+          en: "{{pick.3|code}} is <b>the value</b> going in. A value does not know where it goes; the symbol between decides."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 값이냐 넣는 일이냐"
+            en: "The sharpest spot — the value or the putting"
+          code:
+            - "5;        /* 계산되고 사라진다 */"
+            - "x = 5;    /* 상자에 남는다 */"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행의 넣기를 <code>if ({{pick.2}} = 0)</code> 처럼 조건 안에 두면 어떻게 될까요?"
+      en: "Put the putting on line {{site.line}} inside a condition, like <code>if ({{pick.2}} = 0)</code> — what happens?"
+    hint:
+      ko: "넣는 식의 값이 무엇인지가 답입니다."
+      en: "The value of the putting expression is the answer."
+    options:
+      - t:
+          ko: "컴파일되고, 0 이 들어가며, 조건은 0 이라 갈래가 안 돈다"
+          en: "It compiles, 0 goes in, and the condition is 0 so the branch never runs"
+      - t:
+          ko: "컴파일러가 멈춘다"
+          en: "The compiler stops"
+        diag:
+          t:
+            ko: "C 는 이것을 <b>막지 않습니다</b>. 넣기가 값을 내는 식이라 조건 자리에 올 수 있고, 컴파일러는 경고만 내요."
+            en: "C does <b>not</b> block this. Putting is a value-yielding expression, so it fits in a condition; the compiler only warns."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 막힘이냐 경고냐"
+              en: "The sharpest spot — blocked or warned"
+            code:
+              - "if (x = 0) { }   /* 경고: 넣기를 견주기로 쓴 것 아닌가 */"
+      - t:
+          ko: "0 과 견주어 참·거짓을 낸다"
+          en: "It compares with 0 and yields true or false"
+        diag:
+          t:
+            ko: "견주는 기호는 <b>둘짜리</b>입니다. 하나짜리는 넣고, 넣은 값이 곧 조건이에요 — 견주기는 한 번도 안 일어납니다."
+            en: "The comparing symbol is <b>doubled</b>. The single one puts, and the value put in is the condition — no comparison ever happens."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 하나냐 둘이냐"
+              en: "The sharpest spot — one symbol or two"
+            code:
+              - "if (x == 0)   /* 견준다 */"
+              - "if (x = 0)    /* 넣는다 */"
+      - t:
+          ko: "실행할 때 멈춘다"
+          en: "It stops at run time"
+        diag:
+          t:
+            ko: "멈출 이유가 없습니다. 값 0 을 넣고 조건 0 으로 갈래를 건너뛸 뿐 — 그래서 <b>조용히 틀리는</b> 자리예요."
+            en: "There is nothing to stop for. It puts 0 in and skips the branch on condition 0 — which is why this spot <b>fails quietly</b>."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 조용히 틀린다"
+              en: "The sharpest spot — quiet failure"
+            code:
+              - "if (x = 0) puts(\"never\");   /* 아무 일 없이 지나간다 */"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 이미 있는 이름에 값을 <b>넣습니다</b>."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>puts</b> a value into an existing name."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "=", mono: true }
+      - t: "=="
+        mono: true
+        diag:
+          t:
+            ko: "기호 둘짜리는 <b>견주기</b>라 묻기만 하고 넣지 않습니다. 이 줄은 0 아니면 1 을 만들어 놓고 버린 채 끝나요."
+            en: "The two-symbol form <b>compares</b>: it asks, it does not put. The line makes a 0 or 1 and throws it away."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 넣는가 묻는가"
+              en: "The sharpest spot — putting or asking"
+            code:
+              - "x = 5;    /* x 가 5 가 된다 */"
+              - "x == 5;   /* x 는 그대로 */"
+      - t: "+="
+        mono: true
+        diag:
+          t:
+            ko: "이 모양은 <b>옛 값에 더한</b> 결과를 넣습니다. 옛 값을 읽으므로 값 없이 만든 이름이면 읽는 순간부터 답이 없어요."
+            en: "That form puts back <b>the old value plus this</b>. It reads the old value, so on a name made without one there is no answer from that read on."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 옛 값이 필요한가"
+              en: "The sharpest spot — is the old value needed"
+            code:
+              - "int x; x = 5;    /* 된다 */"
+              - "int x; x += 5;   /* 쓰레기에 5 를 더한다 */"
+      - t: "!="
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>다르냐고 묻는</b> 기호입니다. 넣지 않고 0 아니면 1 을 낼 뿐이에요."
+            en: "That symbol <b>asks whether they differ</b>. It puts nothing and only yields 0 or 1."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 묻기냐 넣기냐"
+              en: "The sharpest spot — asking or putting"
+            code:
+              - "x != 5;   /* 0 또는 1, 버려진다 */"
+              - "x = 5;"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 {{pick.2|code}}{{pick.2|josa:을,를}} 새로 만들지 않고 <b>값만 바꿀까요</b>?"
+    en: "Why does line {{site.line}} <b>change only the value</b> of {{pick.2|code}} instead of making a new name?"
+  choices:
+    - t:
+        ko: "상자는 위에서 이미 잡혔고, 같은 상자를 계속 써야 아래 줄들이 그 이름으로 최신 값을 읽을 수 있기 때문"
+        en: "Because the box was reserved above, and the lines below read the latest value through that same name only if the same box is kept"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 새로 만들면 아래 줄이 어느 상자를 읽게 되는지도 적어 보세요."
+        en: "That is the direction. Say which box the lines below would read if a new name were made."
+    - t:
+        ko: "C 가 이름을 두 번 만드는 것을 허용하지 않아서"
+        en: "Because C forbids making a name twice"
+      ok: false
+      fb:
+        ko: "한 블록 안에서는 그렇지만, 그것이 이유가 아닙니다. 이유는 같은 상자를 이어 쓰려는 것이에요."
+        en: "True inside one block, but that is not the reason. The reason is to keep using the same box."
+    - t:
+        ko: "값을 바꾸는 쪽이 더 빨라서"
+        en: "Because changing the value is faster"
+      ok: false
+      fb:
+        ko: "속도 문제가 아닙니다. 새 상자를 만들면 옛 상자를 읽는 줄이 낡은 값을 보게 되는 것이 문제예요."
+        en: "Speed is not it. A new box would leave the lines that read the old box looking at a stale value."
+
+queries:
+  - { grammars: [c], file: ./assignment.scm }
+
+examples:
+  - code: "int x = 0; x = 5;               /* x -> 5 (int) */"
+    expect: { sites: 1, form: assign, hole: "=", picks: { 1: "=", 2: "x", 3: "5" } }
+  - code: "int x; if (x = 0) x = 2;         /* 조건이 0 이라 갈래가 안 돈다 */"
+    expect: { sites: 2, form: assign, hole: "=", picks: { 1: "=", 2: "x", 3: "0" } }
+  - code: "int n = 7;                      /* 만드는 줄 — 다른 판이다 */"
+    expect: none
+  - code: "int x = 0; int ok = (x == 0);   /* 견주기 — 넣지 않는다 */"
+    expect: none
