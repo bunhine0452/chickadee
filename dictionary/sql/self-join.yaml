@@ -5,9 +5,9 @@ name: { ko: 같은 표를 두 번 적기, en: Self join }
 token: "JOIN"
 grammars: [sql, mybatis_sql]
 framework: null
-essential: false
+essential: true
 difficulty: 3
-prereq: [sql/from-table, sql/comparison]
+prereq: [sql/from-table, sql/comparison, sql/qualified-column]
 confusions: []
 
 dict:
@@ -242,5 +242,9 @@ examples:
     expect: { sites: 1, form: self-join, hole: "JOIN", picks: { 1: "JOIN", 2: "staff", 3: "s", 4: "m" }, ctx: { other: "staff" } }
   - code: "SELECT s.name FROM staff s LEFT JOIN staff m ON s.boss_id = m.id"
     expect: { sites: 1, form: self-join, hole: "JOIN" }
+  - code: "SELECT a.id FROM node a JOIN node b ON a.parent = b.id"
+    expect: { sites: 1, form: self-join, hole: "JOIN", picks: { 1: "JOIN", 2: "node", 3: "a", 4: "b" }, ctx: { other: "node" } }
   - code: "SELECT s.name FROM staff s JOIN dept d ON s.dept_id = d.id"
+    expect: none
+  - code: "SELECT s.name FROM staff s"
     expect: none

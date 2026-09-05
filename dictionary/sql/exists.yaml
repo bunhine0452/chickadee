@@ -1,0 +1,206 @@
+schema: 1
+id: sql/exists
+universal: null
+name: { ko: "있기만 하면 되는 조건", en: "Existence test" }
+token: "EXISTS"
+grammars: [sql, mybatis_sql]
+framework: null
+essential: true
+difficulty: 3
+prereq: [sql/subquery]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "안쪽에 행이 하나라도 있는지만 본다. 무엇을 골랐는지는 안 본다."
+    en: "Asks only whether the inside has any row at all. What it chose is never read."
+  why:
+    ko: >-
+      {{site.line}}행이 묻는 것은 <b>있느냐 없느냐</b> 하나입니다. 안쪽에서 {{pick.2|code}}{{pick.2|josa:을,를}} 골랐든
+      다른 것을 골랐든 답이 같아요 — 그래서 관용적으로 아무 값이나 적습니다. 이 절의 값은
+      <b>모름이 없습니다</b>: 행이 있으면 참, 없으면 거짓이라 둘뿐이에요. 그래서 「없는 것 찾기」를
+      값 목록으로 물으면 목록에 모름이 하나만 섞여도 결과가 0행이 되는데, 이 절로 물으면 그러지 않습니다.
+    en: >-
+      Line {{site.line}} asks one thing: <b>is there any</b>. Whether the inside chose {{pick.2|code}}
+      or anything else, the answer is the same — which is why a constant is the idiom. This test has
+      <b>no unknown</b>: a row makes it true, no row makes it false, and that is all. So “find the ones
+      that are not there” asked through a value list collapses to zero rows the moment one unknown
+      slips into the list; asked this way, it does not.
+  trace:
+    - ko: "{{site.line}}행이 안쪽 조회를 {{pick.3|code}} 에서 돌린다."
+      en: "Line {{site.line}} runs the inner query over {{pick.3|code}}."
+    - ko: "행이 하나라도 나오면 그 자리에서 참이 된다."
+      en: "One row is enough — it becomes true right there."
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 무엇이든 답은 안 바뀐다."
+      en: "Whatever {{pick.2|code}} is, the answer does not change."
+
+rule:
+  ko: "<b>있느냐만 묻는다.</b> 참 아니면 거짓이고 모름이 없다."
+  en: "<b>It asks only whether any exists.</b> True or false, never unknown."
+result:
+  label: { ko: "찾아보는 표", en: "the table looked into" }
+  value: "{{pick.3}}"
+  note: { ko: "한 행이면 충분하다", en: "one row is enough" }
+ok:
+  ko: >-
+    {{pick.3|code}} 에 맞는 행이 하나라도 있으면 참이고, 하나도 없으면 거짓입니다.
+  en: >-
+    One matching row in {{pick.3|code}} makes it true; none makes it false.
+payoff:
+  ko: >-
+    이걸 알면 「없는 것 찾기」가 값 목록에서 0행이 되는 사고를 이 절 하나로 피할 수 있습니다.
+  en: >-
+    Knowing this, the “find what is missing” collapse in a value list is avoided by this one clause.
+bridge:
+  ko: >-
+    다른 언어에서 「하나라도 맞나」를 묻는 것과 같습니다. 다른 것은 <b>답에 모름이 없다</b>는 것이에요.
+  en: >-
+    It is “does any match” as elsewhere. What differs is that the answer is <b>never unknown</b>.
+misconceptions:
+  - ko: "안쪽에서 고른 값이 결과에 쓰인다 — 안 쓰입니다. 있는지만 봅니다."
+    en: "The inner chosen value is used — it is not; only presence is read."
+  - ko: "안쪽 행을 다 세어야 안다 — 하나 찾으면 거기서 멈춥니다."
+    en: "Every inner row must be counted — one match and it stops."
+  - ko: "부정형도 모름 때문에 0행이 될 수 있다 — 이 절에는 모름이 없습니다."
+    en: "The negated form can collapse on unknowns too — this test has no unknown."
+
+meaning:
+  - q:
+      ko: "{{pick.2|code}} 자리를 다른 열로 바꾸면 결과가 어떻게 달라질까요?"
+      en: "What changes in the result if {{pick.2|code}} is replaced with another column?"
+    hint:
+      ko: "이 절이 <b>무엇을</b> 읽는지 먼저 정하세요."
+      en: "First settle <b>what</b> this test reads."
+    options:
+      - t:
+          ko: "안 달라진다 — 고른 값을 아예 안 본다"
+          en: "Nothing changes — the chosen value is never read"
+      - t:
+          ko: "그 열의 값이 조건에 쓰인다"
+          en: "That column's value is used in the test"
+        diag:
+          t:
+            ko: >-
+              값을 쓰려면 <b>값을 내는 자리</b>여야 합니다. 이 절은 값 대신 있고 없음을 냅니다.
+            en: >-
+              Using a value takes a slot that <b>yields</b> one. This test yields presence, not a value.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값이냐 있음이냐", en: "The sharpest spot — a value or presence" }
+            code:
+              - "EXISTS (SELECT 1 FROM item ...)"
+              - "(SELECT qty FROM item ...)"
+      - t:
+          ko: "그 열이 모름이면 조건도 모름이 된다"
+          en: "If the column is unknown the test goes unknown"
+        diag:
+          t:
+            ko: >-
+              읽지 않는 값은 답에 못 끼어듭니다. 이 절의 답은 <b>참 아니면 거짓</b>뿐이에요.
+            en: >-
+              A value that is never read cannot reach the answer. This test is <b>true or false</b> only.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값이 답에 닿느냐", en: "The sharpest spot — whether the value reaches the answer" }
+            code:
+              - "-- 안쪽 값은 답에 안 닿는다"
+      - t:
+          ko: "그 열이 결과 표에 붙는다"
+          en: "That column is attached to the result table"
+        diag:
+          t:
+            ko: >-
+              안쪽 열을 결과에 붙이려면 <b>짝짓는 절</b>로 가져와야 합니다. 이 절은 열을 안 가져와요.
+            en: >-
+              Bringing an inner column out takes a <b>pairing clause</b>. This test brings none.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 조건이냐 붙이기냐", en: "The sharpest spot — a test or a join" }
+            code:
+              - "EXISTS (...)     -- 조건"
+              - "JOIN item ON ... -- 열이 붙는다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 {{pick.3|code}} 에 맞는 행이 <b>하나라도 있는지</b>만 봅니다."
+      en: "Choose what goes in the blank. Line {{site.line}} asks only whether {{pick.3|code}} has <b>any</b> match."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "EXISTS", mono: true }
+      - t: "IN"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>IN</code> 은 안쪽이 낸 <b>값 목록</b>과 견줍니다 — 그래서 목록에 모름이 섞이면 답이 흔들려요.
+            en: >-
+              <code>IN</code> compares against the <b>list of values</b> the inside yields, so an unknown
+              in the list unsettles the answer.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값 목록이냐 있음이냐", en: "The sharpest spot — a value list or presence" }
+            code:
+              - "id IN (SELECT cart_id FROM item)"
+              - "EXISTS (SELECT 1 FROM item ...)"
+      - t: "ANY"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>ANY</code> 는 <b>견주는 기호와 함께</b> 써야 뜻이 서고, 혼자서는 있고 없음을 못 묻습니다.
+            en: >-
+              <code>ANY</code> means something only <b>next to a comparison</b>; alone it cannot ask about
+              presence.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 혼자 서느냐", en: "The sharpest spot — whether it stands alone" }
+            code:
+              - "qty > ANY (SELECT qty FROM item)"
+              - "EXISTS (SELECT 1 FROM item)"
+      - t: "HAS"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>HAS</code> 는 이 언어의 낱말이 아닙니다 — 있고 없음을 묻는 낱말은 따로 정해져 있어요.
+            en: >-
+              <code>HAS</code> is not a word here — another word is fixed for asking about presence.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 이 언어의 낱말이냐 아니냐", en: "The sharpest spot — a word of this language or not" }
+            code:
+              - "-- 낱말은 표준이 정한 것뿐이다"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 값 목록으로 견주지 않고 <b>있는지</b>만 물을까요?"
+    en: "Why does line {{site.line}} ask about <b>presence</b> instead of comparing to a value list?"
+  choices:
+    - t:
+        ko: "목록에 모름이 하나만 섞여도 부정형의 답이 0행이 되어서"
+        en: "Because one unknown in the list collapses the negated answer to zero rows"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그럼에도 값 목록이 나은 경우가 언제인지도 적어 보세요."
+        en: "That is the direction. Say when a value list is still the better choice."
+    - t:
+        ko: "값 목록이 느려서"
+        en: "Because a value list is slower"
+      ok: false
+      fb:
+        ko: "빠르기는 경우마다 다르고 대개 비슷합니다. 다른 것은 <b>답</b>이에요."
+        en: "Speed varies and is often the same. What differs is the <b>answer</b>."
+    - t:
+        ko: "안쪽에서 고를 열이 없어서"
+        en: "Because there is no column to choose inside"
+      ok: false
+      fb:
+        ko: "고를 열은 있습니다 — <b>안 읽을</b> 뿐이에요."
+        en: "There is one — it is simply <b>never read</b>."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./exists.scm }
+
+examples:
+  - code: "SELECT id FROM cart c WHERE EXISTS (SELECT 1 FROM item i WHERE i.cart_id = c.id)"
+    expect: { sites: 1, form: exists, hole: "EXISTS", picks: { 1: "EXISTS", 2: "1", 3: "item" } }
+  - code: "SELECT id FROM cart c WHERE NOT EXISTS (SELECT id FROM item i WHERE i.cart_id = c.id)"
+    expect: { sites: 1, form: exists, hole: "EXISTS", picks: { 1: "EXISTS", 2: "id", 3: "item" } }
+  - code: "SELECT id FROM cart WHERE qty > 1"
+    expect: none

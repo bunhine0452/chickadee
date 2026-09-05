@@ -188,5 +188,10 @@ examples:
     expect: { sites: 1, form: text-value, picks: { 1: "'open'", 2: "status", 3: "=" } }
   - code: "SELECT * FROM cart WHERE status = \"open\""
     expect: none
+  - code: "SELECT * FROM cart WHERE kind = 'a'"
+    expect: { sites: 1, form: text-value, picks: { 1: "'a'", 2: "kind", 3: "=" } }
   - code: "SELECT * FROM cart WHERE qty = 3"
+    expect: none
+  # 자리표는 파서에게만 값으로 가려지고 `#match?` 는 원문을 본다 — 따옴표 이야기가 아니라 안 걸린다.
+  - code: "SELECT * FROM cart WHERE kind = :kind"
     expect: none

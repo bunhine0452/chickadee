@@ -1,0 +1,197 @@
+schema: 1
+id: sql/aggregate
+universal: null
+name: { ko: "여러 행을 한 값으로 접기", en: "Aggregate" }
+token: "COUNT("
+grammars: [sql, mybatis_sql]
+framework: null
+essential: true
+difficulty: 2
+prereq: [sql/select-list, sql/null-check]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "여러 행을 값 하나로 접는다. 결과의 행 수가 입력과 달라지는 자리다."
+    en: "Folds many rows into one value — the one place the row count changes."
+  why:
+    ko: >-
+      지금까지의 절은 행을 <b>하나씩 따로</b> 봤습니다. {{site.line}}행의 {{pick.1|code}} 부분은 다릅니다 —
+      행을 <b>다 모아 놓고</b> 값 하나를 냅니다. 그래서 결과의 행 수가 입력의 행 수와 달라지는 유일한 자리예요.
+      그리고 접을 때 <b>모르는 값은 안 셉니다</b>: 별표를 주면 행을 세지만 열을 주면 그 열이 모름인 행은
+      빠집니다. 같은 표에서 두 수가 다르게 나오는 것이 그 때문이에요.
+    en: >-
+      Every clause so far looked at rows <b>one at a time</b>. The {{pick.1|code}} part of line
+      {{site.line}} does not — it <b>gathers them</b> and yields a single value. That makes it the one
+      place where the result's row count parts from the input's. And when it folds, <b>unknowns are
+      not counted</b>: a star counts rows, but a column skips rows where that column is unknown.
+      That is why two counts on the same table can disagree.
+  trace:
+    - ko: "{{site.line}}행까지 남은 행이 모두 모인다."
+      en: "Every row still standing at line {{site.line}} is gathered."
+    - ko: "{{pick.2|code}} 자리의 값이 하나씩 접힌다."
+      en: "The values at {{pick.2|code}} are folded one by one."
+    - ko: "그 자리가 열이면 모름인 행은 접히지 않는다."
+      en: "When that slot is a column, rows where it is unknown are not folded in."
+
+rule:
+  ko: "<b>행을 모아 값 하나를 낸다.</b> 열을 세면 모름인 행은 안 센다."
+  en: "<b>Rows are gathered into one value.</b> Counting a column skips its unknown rows."
+result:
+  label: { ko: "접은 값 하나", en: "the one folded value" }
+  value: "{{pick.1}}({{pick.2}})"
+  note: { ko: "행 수가 여기서 바뀐다", en: "the row count changes here" }
+ok:
+  ko: >-
+    모인 행에서 값 하나가 나오고, 그 값은 모름인 행을 빼고 만들어집니다.
+  en: >-
+    The gathered rows yield one value, built without the rows that are unknown.
+payoff:
+  ko: >-
+    이걸 알면 별표로 센 수와 열로 센 수가 왜 다른지 바로 설명됩니다.
+  en: >-
+    Knowing this, a star's count and a column's count differ for a reason you can state.
+bridge:
+  ko: >-
+    다른 언어에서 모음을 값 하나로 접는 일과 같습니다. 다른 것은 <b>모름을 건너뛴다</b>는 규칙이에요.
+  en: >-
+    It is folding a collection into one value as elsewhere. The added rule is that <b>unknowns are
+    skipped</b>.
+misconceptions:
+  - ko: "별표로 세나 열로 세나 같다 — 열로 세면 모름인 행이 빠집니다."
+    en: "A star and a column count the same — a column skips unknown rows."
+  - ko: "접은 값과 보통 열을 아무렇게나 섞어 고를 수 있다 — 묶는 절이 있어야 뜻이 섭니다."
+    en: "A folded value and a plain column mix freely — only a grouping clause makes that mean anything."
+  - ko: "행이 하나도 없으면 0 이 나온다 — 세는 함수만 0 이고 나머지는 모름입니다."
+    en: "With no rows the answer is zero — only counting gives zero; the rest give unknown."
+
+meaning:
+  - q:
+      ko: "행 100개 중 어떤 열이 30개에서 값이 없다면, 별표로 센 수와 그 열로 센 수는 어떻게 다를까요?"
+      en: "Of 100 rows a column is unknown in 30 — how do a star's count and that column's count differ?"
+    hint:
+      ko: "접을 때 모름을 <b>세는지</b> 생각해 보세요."
+      en: "Think about whether folding <b>counts</b> unknowns."
+    options:
+      - t:
+          ko: "별표는 100, 그 열은 70 이 나온다"
+          en: "The star gives 100 and the column gives 70"
+      - t:
+          ko: "둘 다 100 이 나온다"
+          en: "Both give 100"
+        diag:
+          t:
+            ko: >-
+              열을 세는 것은 <b>그 열에 값이 있는 행</b>을 세는 일입니다. 별표만 행 자체를 세요.
+            en: >-
+              Counting a column counts <b>rows where that column has a value</b>. Only a star counts the
+              rows themselves.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 행이냐 값이냐", en: "The sharpest spot — rows or values" }
+            code:
+              - "COUNT(*)      -- 행"
+              - "COUNT(note)   -- 값이 있는 행"
+      - t:
+          ko: "둘 다 70 이 나온다"
+          en: "Both give 70"
+        diag:
+          t:
+            ko: >-
+              별표는 어떤 열도 안 봅니다 — 그래서 모름이 있어도 <b>행 수 그대로</b>예요.
+            en: >-
+              A star looks at no column, so unknowns leave the <b>row count untouched</b>.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 열을 보느냐 마느냐", en: "The sharpest spot — whether a column is read" }
+            code:
+              - "-- 별표는 열을 고르지 않는다"
+      - t:
+          ko: "그 열로 세면 모름이라 값이 안 나온다"
+          en: "Counting that column gives no value at all"
+        diag:
+          t:
+            ko: >-
+              세는 함수는 모름을 <b>건너뛸 뿐</b> 모름을 내지 않습니다. 셋 다 모름이면 0 이 나와요.
+            en: >-
+              Counting <b>skips</b> unknowns; it never returns one. All unknown gives zero.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 건너뛰기냐 퍼지기냐", en: "The sharpest spot — skipped or spread" }
+            code:
+              - "COUNT(note)   -- 0 이 나온다"
+              - "SUM(note)     -- 모름이 나온다"
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>행 수를 바꾸는</b> 자리를 짚어 보세요."
+      en: "On line {{site.line}}, point at what <b>changes the row count</b>."
+    hint:
+      ko: "행을 모아 값 하나로 만드는 것이 무엇인지 보세요."
+      en: "Look for the thing that gathers rows into one value."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} <b>무엇을 접을지</b>이지 접는 일 자체가 아닙니다.
+            여기가 열이면 모름인 행이 빠져요.
+          en: >-
+            {{pick.2|code}} says <b>what</b> is folded, not that folding happens. When it is a column,
+            unknown rows fall out.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 접는 것이냐 접히는 것이냐", en: "The sharpest spot — the folder or the folded" }
+          code:
+            - "COUNT(note)"
+            - "-- 괄호 안은 재료다"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 재료를 감싸는 <b>표시</b>이고, 접는 일은 그 앞의 이름이 합니다.
+          en: >-
+            {{pick.3|code}} is the <b>bracket</b> around the material; the name before it does the folding.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 표시냐 이름이냐", en: "The sharpest spot — the bracket or the name" }
+          code:
+            - "COUNT(note)"
+            - "-- 이름이 무엇을 하는지 정한다"
+
+no_hole_reason: >-
+  구멍에 넣을 정답이 하나로 안 정해진다 — 접는 함수의 이름이 사용처마다 다르고(`COUNT` · `SUM` ·
+  `AVG` · `MIN` · `MAX`) 어느 것을 쓰느냐는 이 개념이 묻는 것이 아니다. 물어야 하는 것은
+  「어디서 행 수가 바뀌나」이고, 그것은 지목형이 접는 이름과 접히는 재료를 나란히 두고 묻는다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 행을 <b>접어서</b> 낼까요? 행을 다 보내고 밖에서 세도 되는데요."
+    en: "Why does line {{site.line}} <b>fold</b> the rows instead of sending them all out to be counted?"
+  choices:
+    - t:
+        ko: "필요한 것이 수 하나라서 — 행을 다 보내면 옮기는 값만 커지고 답은 같다"
+        en: "Because one number is all that is wanted — sending every row moves more and answers the same"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그럼에도 행을 다 받아야 하는 경우가 언제인지도 적어 보세요."
+        en: "That is the direction. Say when every row still has to come back."
+    - t:
+        ko: "밖에서는 셀 수 없어서"
+        en: "Because it cannot be counted outside"
+      ok: false
+      fb:
+        ko: "밖에서도 셉니다. 여기서 접는 이유는 <b>옮기는 양</b>이에요."
+        en: "It can be. The reason to fold here is <b>how much is moved</b>."
+    - t:
+        ko: "행이 너무 많아서"
+        en: "Because there are too many rows"
+      ok: false
+      fb:
+        ko: "행이 적어도 같은 선택을 합니다. 기준은 <b>필요한 것이 무엇인가</b>예요."
+        en: "The same choice holds for few rows. The measure is <b>what is needed</b>."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./aggregate.scm }
+
+examples:
+  - code: "SELECT COUNT(*) FROM cart"
+    expect: { sites: 1, form: aggregate, picks: { 1: "COUNT", 2: "*", 3: "(" } }
+  - code: "SELECT SUM(qty) FROM cart"
+    expect: { sites: 1, form: aggregate, picks: { 1: "SUM", 2: "qty", 3: "(" } }
+  - code: "SELECT UPPER(note) FROM cart"
+    expect: none

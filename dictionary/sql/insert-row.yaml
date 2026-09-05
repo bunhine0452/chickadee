@@ -1,0 +1,203 @@
+schema: 1
+id: sql/insert-row
+universal: common/mutating-append
+name: { ko: "새 행 넣기", en: "Inserting a row" }
+token: "INSERT INTO"
+grammars: [sql, mybatis_sql]
+framework: null
+essential: true
+difficulty: 1
+prereq: [sql/text-literal, sql/from-table]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "표에 행을 하나 더한다. 열 이름을 안 적으면 표에 적힌 차례로 들어간다."
+    en: "Adds one row to a table. Name no columns and the table's own order decides."
+  why:
+    ko: >-
+      {{site.line}}행은 {{pick.2|code}} 에 행을 <b>더합니다</b>. 있던 행은 그대로 있고 사본도 안 생겨요 —
+      표가 그 자리에서 커집니다. 값이 어느 열로 가는지는 <b>열 이름을 적었는지</b>가 정합니다.
+      안 적으면 표를 만들 때의 차례를 그대로 따라가는데, 나중에 열이 하나 늘거나 차례가 바뀌면
+      같은 문장이 <b>다른 열</b>에 값을 넣게 되고 그것이 오류로 안 잡힐 수 있습니다.
+    en: >-
+      Line {{site.line}} <b>adds</b> a row to {{pick.2|code}}. The rows already there stay and no
+      copy is made — the table grows in place. Which column a value lands in is settled by
+      <b>whether the column names are written</b>. Without them the order the table was created in is
+      followed, so one added column later and the same statement puts values in <b>different
+      columns</b> — often with nothing to flag it.
+  trace:
+    - ko: "{{pick.4|code}} 뒤의 {{pick.2|code}}{{pick.2|josa:이,가}} 대상 표다."
+      en: "{{pick.2|code}} after {{pick.4|code}} is the target table."
+    - ko: "{{pick.3|code}} 뒤의 괄호가 새 행 하나의 값이다."
+      en: "The brackets after {{pick.3|code}} hold the values of one new row."
+    - ko: "{{site.line}}행이 끝나면 표에 행이 하나 늘어 있다."
+      en: "When line {{site.line}} is done the table has one more row."
+
+rule:
+  ko: "<b>표가 그 자리에서 커진다.</b> 열 이름을 안 적으면 차례가 짝을 정한다."
+  en: "<b>The table grows in place.</b> Without column names, position makes the pairing."
+result:
+  label: { ko: "행이 느는 표", en: "the table that grows" }
+  value: "{{pick.2}}"
+  note: { ko: "행 하나만큼", en: "by one row" }
+ok:
+  ko: >-
+    {{pick.2|code}} 에 행이 하나 늘고, 있던 행은 하나도 안 바뀝니다.
+  en: >-
+    {{pick.2|code}} gains one row, and not one existing row changes.
+payoff:
+  ko: >-
+    이걸 알면 열을 하나 더한 뒤 값이 엉뚱한 칸에 들어가는 사고의 자리가 보입니다.
+  en: >-
+    Knowing this, you can spot where adding a column sends values into slots nobody meant.
+bridge:
+  ko: >-
+    있던 묶음에 직접 더하는 일과 같습니다. 사본이 안 생긴다는 것까지 같아요.
+  en: >-
+    It is appending to a collection in place. That no copy is made is the same too.
+misconceptions:
+  - ko: "같은 값이 이미 있으면 안 들어간다 — 막는 제약이 없으면 그대로 또 들어갑니다."
+    en: "A duplicate value is refused — with no constraint it goes in again."
+  - ko: "열 이름은 적어도 그만이다 — 안 적으면 차례가 짝을 정합니다."
+    en: "Column names are optional decoration — without them position decides the pairing."
+  - ko: "없는 표에는 새로 만들어 준다 — 안 만들고 거기서 멈춥니다."
+    en: "A missing table is created — it is not; it stops there."
+
+meaning:
+  - q:
+      ko: "열 이름 목록을 빼고 값만 적은 문장에서, 표에 열이 하나 늘면 어떻게 될까요?"
+      en: "In a statement with values but no column list, what happens when the table gains a column?"
+    hint:
+      ko: "값과 열을 짝지어 주는 것이 <b>이름</b>인지 <b>차례</b>인지 보세요."
+      en: "See whether <b>names</b> or <b>positions</b> pair values with columns."
+    options:
+      - t:
+          ko: "차례가 밀려 값이 다른 열로 들어가거나 문장이 안 선다"
+          en: "Positions shift, so values land in other columns or the statement stops standing"
+      - t:
+          ko: "새 열은 비워 두고 나머지는 그대로 들어간다"
+          en: "The new column is left empty and the rest go in as before"
+        diag:
+          t:
+            ko: >-
+              그것은 <b>열 이름을 적었을 때</b>의 일입니다. 이름이 없으면 짝을 맞출 근거가 차례뿐이에요.
+            en: >-
+              That is what happens <b>when the column names are written</b>. Without them, position is
+              the only basis for pairing.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 이름이냐 차례냐", en: "The sharpest spot — names or positions" }
+            code:
+              - "INSERT INTO cart (id, qty) VALUES (1, 2)"
+              - "INSERT INTO cart VALUES (1, 2)"
+      - t:
+          ko: "이름이 비슷한 열을 찾아 넣어 준다"
+          en: "It finds a similarly named column"
+        diag:
+          t:
+            ko: "이름을 <b>추측하지 않습니다</b>. 적힌 이름이 없으면 남는 근거는 자리뿐이에요."
+            en: "Nothing <b>guesses</b> a name. With no name written, position is all that is left."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 추측이냐 자리냐", en: "The sharpest spot — guessing or position" }
+            code:
+              - "-- 짝을 맞추는 근거는 둘 중 하나다"
+      - t:
+          ko: "옛 문장은 그대로 두고 새 열만 따로 채운다"
+          en: "Old statements keep working and only the new column is filled elsewhere"
+        diag:
+          t:
+            ko: >-
+              문장은 <b>실행할 때마다</b> 지금의 표를 봅니다. 옛 모양을 기억해 두지 않아요.
+            en: >-
+              A statement looks at the table <b>as it is now</b>, every run. It remembers no old shape.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 적힌 때냐 도는 때냐", en: "The sharpest spot — when written or when run" }
+            code:
+              - "ALTER TABLE cart ADD COLUMN kind TEXT"
+              - "-- 그다음 실행부터 다르다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 {{pick.2|code}} 에 <b>새 행</b>을 더합니다."
+      en: "Choose what goes in the blank. Line {{site.line}} adds a <b>new row</b> to {{pick.2|code}}."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "INSERT", mono: true }
+      - t: "UPDATE"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>UPDATE</code> 는 <b>있는 행</b>의 값을 덮어씁니다. 행 수가 늘지 않아요.
+            en: >-
+              <code>UPDATE</code> overwrites values in <b>rows that exist</b>. The row count does not grow.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 더하기냐 덮어쓰기냐", en: "The sharpest spot — adding or overwriting" }
+            code:
+              - "INSERT INTO cart ... VALUES ...   -- 행이 는다"
+              - "UPDATE cart SET qty = 2          -- 행 수 그대로"
+      - t: "CREATE"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>CREATE</code> 는 <b>표 자체</b>를 만듭니다. 행이 아니라 담을 그릇을 만드는 낱말이에요.
+            en: >-
+              <code>CREATE</code> makes the <b>table itself</b> — the container, not a row in it.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 그릇이냐 내용이냐", en: "The sharpest spot — the container or its contents" }
+            code:
+              - "CREATE TABLE cart (id INTEGER)"
+              - "INSERT INTO cart (id) VALUES (1)"
+      - t: "APPEND"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>APPEND</code> 는 이 언어의 낱말이 아닙니다 — 「끝에 붙인다」가 아니라 「모음에 더한다」예요.
+            en: >-
+              <code>APPEND</code> is not a word here — nothing goes “at the end”; it joins an unordered set.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 끝이냐 모음이냐", en: "The sharpest spot — an end or a set" }
+            code:
+              - "-- 순서가 없으니 끝도 없다"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 열 이름을 <b>적었을까요</b>?"
+    en: "Why does line {{site.line}} <b>write out</b> the column names?"
+  choices:
+    - t:
+        ko: "표의 열이 나중에 늘어도 같은 값이 같은 열로 가게 하려고"
+        en: "So the same value still lands in the same column after the table gains one"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이름을 안 적었을 때 무엇이 짝을 정하는지도 적어 보세요."
+        en: "That is the direction. Say what makes the pairing when the names are left out."
+    - t:
+        ko: "적지 않으면 문장이 안 서서"
+        en: "Because the statement does not stand without them"
+      ok: false
+      fb:
+        ko: "안 적어도 섭니다. 그래서 <b>조용히</b> 어긋나는 것이 문제예요."
+        en: "It stands without them. That it drifts <b>quietly</b> is the problem."
+    - t:
+        ko: "읽기 좋으라고"
+        en: "For readability"
+      ok: false
+      fb:
+        ko: "읽기도 좋지만 진짜 값은 <b>표가 바뀐 뒤</b>에 드러납니다."
+        en: "It does read better, but the real value shows <b>after the table changes</b>."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./insert-row.scm }
+
+examples:
+  - code: "INSERT INTO cart (id, note) VALUES (1, 'sent')"
+    expect: { sites: 1, form: insert, hole: "INSERT", picks: { 1: "INSERT", 2: "cart", 3: "VALUES", 4: "INTO" } }
+  - code: "INSERT INTO cart VALUES (1, 'sent')"
+    expect: { sites: 1, form: insert, hole: "INSERT", picks: { 1: "INSERT", 2: "cart", 3: "VALUES", 4: "INTO" } }
+  - code: "DELETE FROM cart WHERE id = 1"
+    expect: none

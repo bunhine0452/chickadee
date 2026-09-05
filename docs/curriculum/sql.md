@@ -727,3 +727,182 @@ D184 의 프롤로그에 그대로 든다.
 **골든** — `fixtures/golden/sql/` 에 개념 아홉 × (양성 2~3 · 음성 1~2), `fixtures/golden/mybatis/` 에 둘.
 `sql` 디렉터리는 이제 **사전의 `.scm` 을 그대로 돌린다**(`crates/parse/tests/support/mod.rs` 의 `lang`)
 — 옆에 `.query.scm` 을 두면 그쪽이 먼저다.
+
+---
+
+## §13 실물이 된 것 — 실측 (2026-09-06)
+
+§12 는 첫 물결(0부 여덟 + `sql/self-join`)이 남긴 수치다. 이 절은 **둘째 물결**이 남긴 것 —
+§2 의 바닥 여덟을 채우고 §3 의 중심 열여섯과 §4 의 심화를 저작해 `essential` 을 0부 → 1부 → 2부로
+세운 결과다. 안 만든 것도 적는다.
+
+### §13.1 장수와 줄 수
+
+| | 개념 YAML | 줄 | 쿼리 `.scm` |
+|---|---:|---:|---:|
+| 0부 (§0.2) — 첫 물결 | 8 | 1,764 | 8 |
+| 1부 (§2 바닥 여덟) | 8 | 1,708 | 8 |
+| 2부 (§3 중심 16 + `self-join` + §4 심화 7) | 24 | 4,928 | 24 |
+| **합** | **40** | **8,400** | **40** + 시스템 둘(`_imports`·`_blocks`) |
+| 이번 판에 새로 쓴 것 | 28 | **5,736** | 28 |
+
+한 장 **210줄**이다(8,400 / 40). README §11 이 첫 물결에서 잰 213줄과 세 줄 차이다.
+`_lang.yaml` 84줄과 `.scm` 382줄은 위 수에 안 들어 있다.
+
+**골든은 145개** — 양성 90 · 음성 55. 개념마다 양성 2 이상 · 음성 1 이상이다.
+자리표(`:name` · `#{name}`)가 든 골든은 **12개**로, 양성 열(`comparison` 2 · `named-param` 2 ·
+`from-table` · `null-check` · `clause-order` · `expression-per-row` · `implicit-cast` ·
+`three-valued-comparison`)과 음성 둘(`value-and-name` · `text-literal` — 자리표가 따옴표 값이
+**아니라는 것**을 못박는다)이다. `crates/parse/src/params.rs` 의 가리기 경로가 이 열둘로 시험된다.
+
+### §13.2 선행 깊이 — 0장 후보는 15판이다
+
+| 깊이 | 개수 | 개념 |
+|---|---:|---|
+| 0 | 4 | row-and-set · column-type · value-and-name · from-table |
+| 1 | 5 | null-unknown · implicit-cast · expression-per-row · text-literal · qualified-column |
+| 2 | 6 | three-valued-comparison · clause-order · comparison · null-check · insert-row · named-param |
+| 3 | 5 | select-list · join-inner · coalesce · self-join · constraint-check |
+| 4 | 7 | where-filter · order-by · arithmetic · case-when · join-left · aggregate · foreign-key |
+| 5 | 7 | update-set · delete-row · group-by · subquery · limit-offset · window-function · index |
+| 6 | 6 | having · exists · on-conflict · cte · transaction · query-plan |
+
+**깊이 ≤ 2 = 15/40.** §5 가 조사 때 잰 14 와 한 판 차이다 — §0.2 의 0부 선행을 그대로 걸고
+§2 의 선행 열을 그대로 걸었더니 그 수가 나왔다. 조사와 실물이 맞은 자리다.
+
+§5 는 이 얕음의 이유를 「SQL 에는 평평한 어휘 층이 없고 절이 사슬로 늘어선다」로 적었는데,
+40판을 다 세우고 나니 그 사슬이 **깊이 6까지** 이어진다. `having` 이 depth 5 라던 §5 의 예측은
+0부가 앞에 붙어 6 이 됐다(`row-and-set → expression-per-row → clause-order → select-list →
+aggregate` 대신 `… → where-filter → group-by → having` 쪽이 더 길다).
+
+### §13.3 표본 리포별 사용처 — 곳(파일)
+
+방법: 임시 시험 하나를 `crates/parse/tests/` 에 두고 `chickadee_parse::{compile, scan}` 으로
+사전의 `.scm` 을 그대로 돌려 `@site` 캡처를 셌다. **끝나고 지웠다.** 표본 리포는 읽기만 했다.
+`.sql` 은 문법 `sql`, 매퍼 XML 은 `mybatis_sql`(문 본문 구간만)이다.
+「이 리포 `.sql` 71」은 명령문 18 · 이행 9 · **골든 픽스처 44**를 합친 수다 — 픽스처는 한두 줄짜리라
+파일 수는 부풀고 곳수는 거의 안 는다. 앞 두 묶음만 세는 §1·§12 의 수치와 여기 수치가 다른 이유가 그것이다.
+
+| 개념 | ai-pm `.sql` 33 | Monggle `.sql` 27 | Monggle 매퍼 `.xml` 20 | 이 리포 `.sql` 71 |
+|---|---:|---:|---:|---:|
+| `qualified-column` | 7 (1) | 116 (4) | 26 (1) | **1,232 (24)** |
+| `comparison` | 7 (4) | 330 (24) | 53 (8) | 510 (48) |
+| `column-type` | **350 (25)** | 222 (3) | 0 (0) | 490 (10) |
+| `text-literal` | 0 (0) | **4,925 (23)** | 0 (0) | 19 (10) |
+| `named-param` | 0 (0) | 0 (0) | 43 (8) | 244 (15) |
+| `expression-per-row` | 1 (1) | 168 (24) | 37 (8) | 225 (43) |
+| `from-table` | 3 (2) | 172 (22) | 23 (9) | 218 (57) |
+| `select-list` | 0 (0) | 30 (8) | 23 (9) | 151 (53) |
+| `order-by` | 0 (0) | 28 (4) | 9 (6) | 131 (23) |
+| `clause-order` · `where-filter` | 0 (0) | 24 (8) | 22 (8) | 127 (38) |
+| `three-valued-comparison` | 0 (0) | 148 (16) | 19 (8) | 105 (20) |
+| `update-set` | 0 (0) | 4 (2) | 36 (7) | 114 (13) |
+| `foreign-key` | 28 (16) | 10 (1) | 0 (0) | 101 (6) |
+| `index` | 62 (19) | 0 (0) | 0 (0) | 69 (8) |
+| `join-inner` | 2 (1) | 2 (2) | 0 (0) | 66 (19) |
+| `subquery` | 1 (1) | 142 (18) | 0 (0) | 57 (16) |
+| `constraint-check` | 7 (6) | 0 (0) | 0 (0) | 55 (6) |
+| `aggregate` | 0 (0) | 16 (6) | 7 (4) | 51 (16) |
+| `insert-row` | 0 (0) | 55 (21) | 8 (8) | 49 (17) |
+| `implicit-cast` | 5 (3) | 0 (0) | 2 (2) | 42 (21) |
+| `value-and-name` | 0 (0) | 138 (14) | 0 (0) | 42 (25) |
+| `null-unknown` | 0 (0) | 8 (2) | 23 (6) | 36 (18) |
+| `coalesce` | 0 (0) | 2 (2) | 0 (0) | 34 (9) |
+| `row-and-set` | 0 (0) | 138 (14) | 2 (2) | 31 (16) |
+| `limit-offset` | 0 (0) | 0 (0) | 2 (2) | 25 (15) |
+| `delete-row` | 5 (2) | 2 (2) | 2 (2) | 24 (7) |
+| `join-left` | 0 (0) | 4 (4) | 2 (1) | 23 (11) |
+| `null-check` | 0 (0) | 6 (2) | 22 (6) | 22 (12) |
+| `on-conflict` | 0 (0) | 0 (0) | 1 (1) | 22 (7) |
+| `group-by` | 0 (0) | 2 (2) | 2 (1) | 19 (12) |
+| `exists` | 0 (0) | **0 (0)** | **0 (0)** | 18 (8) |
+| `arithmetic` | 0 (0) | 120 (4) | 2 (2) | 15 (9) |
+| `case-when` | 0 (0) | 4 (2) | 0 (0) | 5 (5) |
+| `cte` | 0 (0) | **0 (0)** | **0 (0)** | 5 (2) |
+| `self-join` | 0 (0) | **0 (0)** | **0 (0)** | 3 (3) |
+| `having` | 0 (0) | 0 (0) | 2 (1) | 1 (1) |
+| `query-plan` | **0 (0)** | **0 (0)** | **0 (0)** | **0 (0)** |
+| `transaction` | **0 (0)** | **0 (0)** | **0 (0)** | **0 (0)** |
+| `window-function` | **0 (0)** | **0 (0)** | **0 (0)** | **0 (0)** |
+
+**표본 둘(ai-pm + MonggleMonggle) 합쳐 0곳인 것은 여섯**이다 — `exists` · `cte` · `self-join` ·
+`query-plan` · `transaction` · `window-function`. 그중 셋(`query-plan`·`transaction`·
+`window-function`)은 **이 리포에서도 0곳**이다. §0.3 이 「바이브 코딩으로 나온 SQL 은 고급 구문을
+안 쓴다」고 적은 자리가 표본 셋으로 넓혀도 그대로다.
+
+**놀란 자리 둘.**
+① `qualified-column` 이 이 리포에서 1,232곳으로 최다다 — §3 ⑫ 가 조사 때 820곳으로 셌던 것을
+점 하나마다 세니 그렇게 됐다. 「점이 안으로 들어가는 것이 아니다」를 가르칠 재료는 남아돈다.
+② `text-literal` 이 MonggleMonggle `.sql` 에서 4,925곳이다. 이것은 SQL 의 성질이 아니라
+**mysqldump 가 만든 자료 덤프**의 성질이다 — `INSERT … VALUES` 한 줄에 글자 값이 수십 개 들어간다.
+카드가 그 자리에서만 구워지면 학습자가 덤프만 보게 되므로, 사용처 고르기(`bestSite`)가 파일
+종류를 보는지는 이 세션이 **안 쟀다**.
+
+### §13.4 파서가 실코드를 읽나 — 20파일 실측
+
+`chickadee_parse::scan` 의 `quality`(`POOR_BYTE_RATIO = 0.05`)로 쟀다. 파일 이름순 앞 20개다.
+
+| 표본 | poor / 20 | 전체 파일 |
+|---|---:|---:|
+| `ai-pm` `.sql` | **1** (`002_chunks.sql`) | 33 |
+| `MonggleMonggle` `.sql` | **2** (`change_role_by_user_id.sql` 둘) | 27 |
+| `MonggleMonggle` 매퍼 `.xml` (`mybatis_sql`) | **0** | 20 |
+
+**ERROR 노드로 다시 세면 그림이 다르다** — `ai-pm` 20파일 중 **14파일에 ERROR 25개**,
+`MonggleMonggle` `.sql` 20파일 중 **20파일에 ERROR 199개**다. §8 이 적은 그대로 관문은 통과하고
+트리는 군데군데 망가진다. 원인은 둘 다 **자리표가 아니다**(`params.rs` 가 가린다):
+
+- `ai-pm` — `AUTOINCREMENT` · `CREATE VIRTUAL TABLE … USING vec0(…)` · `CREATE TRIGGER … BEGIN … END`.
+  §8 의 목록 그대로다.
+- `MonggleMonggle` `.sql` — mysqldump 특유의 것들이다. 20파일 안에 `/*!40101 … */` 버전 주석 126곳 ·
+  열 `COMMENT` 86곳 · `COLLATE` 60곳 · `SET @…` 39곳 · `USE …` 17곳 ·
+  `ON UPDATE CURRENT_TIMESTAMP` 12곳. sql-learning §11.5.2 ② 가 「막는 것 일곱」으로 센 목록과 같다.
+
+**매퍼가 가장 깨끗하다(poor 0).** 문 본문만 잘라 파싱하므로 덤프도 DDL 도 안 들어온다 —
+「내 코드가 교재」에 가장 잘 맞는 재료가 매퍼라는 §11.5.3 의 판단이 파서 쪽에서도 확인됐다.
+
+### §13.5 문서와 어긋나 바꾼 자리
+
+| 문서가 적은 것 | 실물 | 왜 |
+|---|---|---|
+| §8 ② 「`sql/on-conflict`·`sql/transaction` 은 문법이 고쳐질 때까지 사전에 올리지 않는다」 | **둘 다 올렸다** | 직접 파싱해 보니 `ON CONFLICT DO NOTHING`·`ON CONFLICT DO UPDATE SET`·`ON DUPLICATE KEY UPDATE` 와 `BEGIN; …; COMMIT/ROLLBACK;` 은 **ERROR 0**이다. 못 읽는 것은 sqlite 의 **대상 괄호 판**(`ON CONFLICT (열)`)과 `START TRANSACTION`·`SAVEPOINT` 뿐이라, 쿼리 주석에 그 사각지대를 적고 올렸다 |
+| §8 ② 「`sql/named-param` 은 그대로 보류 — 가르칠 노드가 없다」 | **올렸다** | 노드는 여전히 없다. 대신 `#match?` 술어가 **원문**을 보므로(`params.rs` 가 파서에게만 가린다) `^[:#$]` 로 자리표를 도로 알아본다. 사용처가 이 리포 244곳/15파일 · 매퍼 43곳/8파일이다 |
+| §4 ㉜ `sql/normalization` | **안 만들었다** | 표를 나누는 일에 구문이 없어 캡처 쿼리를 못 쓴다. `sql/` 은 계산 네임스페이스가 아니라 쿼리 없는 개념을 못 든다(`schema.ts` 의 `COMPUTED_NAMESPACES` · `dict.test.ts` 가 「쿼리 없는 네임스페이스와 언어 개념이 정확히 갈린다」로 못박는다). §4 의 여덟이 **일곱**이 됐다 |
+| §4 ㉛ `sql/query-plan` 의 token `EXPLAIN QUERY PLAN` | 쿼리는 **한 낱말 판만** 잡는다 | 세 낱말 판은 뒤 둘이 `(ERROR)` 가 된다(§8). `EXPLAIN SELECT …` 는 ERROR 0 이라 그쪽으로 잡고, 사각지대를 `query-plan.scm` 주석에 적었다 |
+| §7 「`cs/search-tree` 가 `index`·`query-plan` 을 받는다」 | **`cs/complexity` 로 걸었다** | `cs/search-tree` 는 cs.md §10.3 에서 **보류 그대로**라 45장 안에 없다. 규약 5 대로 없는 장은 안 만들고 있는 장으로 걸었다 |
+| §2 의 `common/ordering` · §3 의 `common/aggregate` · `common/exists-any` | **`universal: null`** | 셋 다 `dictionary/common/` 34장 안에 없다. 규약 4 대로 새 `common/` 을 만들지 않고 후보로만 남긴다 |
+| §5 「깊이 ≤ 2 = 14」 | **15** | §0.2 의 0부 선행과 §2 의 선행 열을 그대로 걸어 나온 값이다. 조사와 한 판 차이 |
+
+**선행을 문서와 다르게 건 자리 하나.** §12.5 가 `sql/comparison` 에서 쓴 규칙(깊이가 3 이 되면
+프롤로그에서 빠지므로 선행 하나를 옆 사슬에 남긴다)을 이번에는 **안 썼다.** §2 의 선행 열을 그대로
+걸면 1부 여덟 중 넷(`select-list`·`where-filter`·`order-by`·`update-set`)이 깊이 3~5 가 되어
+프롤로그에서 빠지는데, 그것이 맞다고 판단했다 — 근거는 sql-learning §11.1 이다: §9 오개념 열둘을
+설명하는 것이 **0부의 다섯 조각**이므로 프롤로그에 와야 하는 것은 0부이지 절이 아니다.
+대가는 프롤로그가 15판(§5 의 예상 14)이라는 것이고, 나머지 25판은 정규 큐에서 깊이순으로 나온다.
+
+### §13.6 안 만든 것
+
+| 무엇 | 왜 |
+|---|---|
+| `sql/normalization` (§4 ㉜) | 구문이 없어 캡처 쿼리를 못 쓴다(위 §13.5). 스키마 전체를 봐야 하는 개념이라 `arch/` 나 `cs/` 층의 물음에 가깝다 |
+| 새 `common/` 셋 (`ordering`·`aggregate`·`exists-any`) | 규약 4 — 문서가 새 보편형을 만들지 않는다. 후보로만 남긴다 |
+| `cs/search-tree` | 규약 5 — `cs/` 는 `cs.md` 의 몫이고 그 장은 보류 상태다 |
+| 새 그림 넷 (행 격자 · 진리표 3×3 · 절 파이프 · 곱 격자) | 규약 7 — 신청만 한다. §0.5 의 신청이 그대로 살아 있고, 이번 판의 `join-inner`·`join-left`·`aggregate` 가 곱 격자를 한 번 더 요구한다 |
+| `sql/limit-offset` 의 건너뛰기(`OFFSET`) 전용 판 | 표본 셋에서 `OFFSET` 이 0곳이라 따로 개념을 세울 근거가 없다. 문항 안에서 산문으로만 다룬다 |
+
+### §13.7 문항 형식 — 2단이 「결과 표 먼저 적기」인 것의 반영
+
+sql-learning §11.3.1 이 SQL 의 2단을 「경로 추적이 아니라 **행의 소멸 추적**」으로 다시 잡았다.
+사전은 형식 셋(`meaning`·`point`·`blank`)만 낼 수 있으므로 그 축을 **문항의 물음말**로 옮겼다 —
+사용처의 값을 묻는 대신 **결과가 어떻게 달라지나**를 묻는다.
+
+- 행 수를 묻는 판 — `select-list`(폭이냐 행 수냐) · `join-inner`(짝이 둘이면 몇 줄) ·
+  `join-left`(뒤에 조건을 걸면) · `aggregate`(별표와 열의 수가 다르다) · `group-by`(묶은 뒤 무엇을 고르나) ·
+  `window-function`(접기와 견주기) · `limit-offset`(같은 줄이 다시 나오나).
+- 「없음/모름」이 답을 바꾸는 판 — `arithmetic` · `coalesce` · `constraint-check` · `exists` · `join-left`.
+- 「조용히 통과한다」를 못박는 판 — `update-set`·`delete-row`(조건을 빼면) · `on-conflict`(제약이 없으면) ·
+  `foreign-key`(제약이 꺼져 있으면) · `cte`(이름을 안 쓰면) · `index`(지워도 시험이 통과한다).
+
+**`trace-table` 과 결과 표 격자는 이 세션이 안 만들었다** — 둘 다 `packages/cards` 의 형식이고
+사전이 낼 수 있는 것이 아니다. 위 물음들은 그 형식이 생기면 그대로 옮겨 갈 수 있게 「몇 줄이 되나」·
+「어느 절이 그 행을 지웠나」로 적혀 있다.

@@ -190,5 +190,11 @@ examples:
     expect: { sites: 1, form: size-compare, picks: { 1: "<", 2: "created_at", 3: "100" } }
   - code: "SELECT * FROM cart WHERE qty >= '18'"
     expect: { sites: 1, form: size-compare, picks: { 1: ">=", 2: "qty", 3: "'18'" } }
+  # 자리표는 값으로 잡히므로 크기 비교가 그대로 선다 (`crates/parse/src/params.rs`).
+  - code: "SELECT * FROM cart WHERE qty > #{minQty}"
+    expect: { sites: 1, form: size-compare, picks: { 1: ">", 2: "qty", 3: "#{minQty}" } }
   - code: "SELECT * FROM cart WHERE status = 'open'"
+    expect: none
+  # 같은지만 묻는 자리는 안 잡는다 — 크고 작음에서만 변환이 순서를 뒤집는다.
+  - code: "SELECT * FROM cart WHERE qty <> 3"
     expect: none

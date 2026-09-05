@@ -1,0 +1,210 @@
+schema: 1
+id: sql/join-left
+universal: null
+name: { ko: "짝이 없어도 왼쪽은 남기기", en: "Left join" }
+token: "LEFT JOIN"
+grammars: [sql, mybatis_sql]
+framework: null
+essential: true
+difficulty: 3
+prereq: [sql/null-check, sql/join-inner, cs/cardinality]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "짝이 없는 왼쪽 행도 남긴다. 그 자리의 오른쪽 열은 모름으로 채워진다."
+    en: "Keeps left rows with no match. Their right-hand columns come back unknown."
+  why:
+    ko: >-
+      {{site.line}}행은 {{pick.2|code}} 의 행을 <b>하나도 안 버립니다</b>. {{pick.3|code}} 에 짝이 없으면
+      그 행의 오른쪽 열이 <b>모름</b>으로 채워진 채 남아요. 여기서 함정이 하나 생깁니다 — 그 뒤에
+      거르는 절에 오른쪽 열 조건을 적으면, 모름은 참이 아니므로 <b>그 행이 탈락합니다</b>.
+      왼쪽을 남기려고 이 낱말을 썼는데 결과가 짝 있는 행만 남아, 낱말만 남고 뜻은 사라져요.
+      짝 없는 행을 남기려면 그 조건이 거르는 절이 아니라 <b>짝짓는 조건</b> 쪽에 있어야 합니다.
+    en: >-
+      Line {{site.line}} <b>throws away no row</b> of {{pick.2|code}}. Where {{pick.3|code}} has no
+      match, the right-hand columns come back <b>unknown</b> and the row stays. That opens a trap: put
+      a test on a right-hand column in the filtering clause afterwards and unknown is not true, so
+      <b>the row is dropped</b>. The word was written to keep the left side, and the result keeps only
+      matched rows — the word stays, the meaning is gone. To keep unmatched rows the test has to live
+      in the <b>pairing condition</b>, not the filter.
+  trace:
+    - ko: "{{pick.2|code}} 의 행을 하나씩 {{pick.3|code}} 의 행과 견준다."
+      en: "Rows of {{pick.2|code}} are weighed one by one against {{pick.3|code}}."
+    - ko: "짝이 있으면 붙이고, 없으면 오른쪽 열을 모름으로 채운다."
+      en: "A match is joined on; no match fills the right-hand columns with unknown."
+    - ko: "{{site.line}}행 뒤의 거르는 절이 그 모름을 버리면 이 절의 뜻이 사라진다."
+      en: "If a filter after line {{site.line}} drops those unknowns, this clause has no effect left."
+
+rule:
+  ko: "<b>왼쪽은 다 남는다.</b> 짝이 없으면 오른쪽 열이 모름으로 채워진다."
+  en: "<b>Every left row stays.</b> With no match the right-hand columns are unknown."
+result:
+  label: { ko: "짝이 없어도 남는 쪽", en: "the side kept without a match" }
+  value: "{{pick.2}}"
+  note: { ko: "오른쪽 열은 모름이 된다", en: "the right-hand columns go unknown" }
+ok:
+  ko: >-
+    {{pick.2|code}} 의 행이 전부 남고, 짝이 없는 행에서는 {{pick.3|code}} 쪽 값이 모름입니다.
+  en: >-
+    Every row of {{pick.2|code}} stays; where there is no match the {{pick.3|code}} side is unknown.
+payoff:
+  ko: >-
+    이걸 알면 「낱말은 그대로인데 왜 짝 있는 행만 나오지」가 한 줄로 풀립니다.
+  en: >-
+    This untangles “the word is still there, so why only matched rows” in one line.
+bridge:
+  ko: >-
+    다른 언어에서 짝을 못 찾았을 때 빈 값을 넣어 두는 일과 같습니다. 다른 것은 그 빈 값이 <b>모름</b>이라는 것이에요.
+  en: >-
+    It is the placeholder you drop in when a lookup misses elsewhere. The difference is that the
+    placeholder is <b>unknown</b>.
+misconceptions:
+  - ko: "이 낱말을 쓰면 뒤에 무엇을 적어도 왼쪽이 다 남는다 — 오른쪽 열 조건이 그 행을 버립니다."
+    en: "With this word every left row survives whatever follows — a test on a right column drops it."
+  - ko: "짝이 없으면 오른쪽 열이 0 이나 빈 글자가 된다 — 모름이 됩니다."
+    en: "No match makes the right columns zero or empty — they become unknown."
+  - ko: "왼쪽 행 수와 결과 행 수가 늘 같다 — 오른쪽에 짝이 둘이면 늘어납니다."
+    en: "The result always has the left table's row count — two matches on the right and it grows."
+
+meaning:
+  - q:
+      ko: "{{site.line}}행 뒤에 거르는 절로 {{pick.3|code}} 쪽 열 조건을 걸면 어떻게 될까요?"
+      en: "What if a filter after line {{site.line}} tests a column from {{pick.3|code}}?"
+    hint:
+      ko: "짝이 없는 행에서 그 열의 값이 <b>무엇</b>인지 먼저 정하세요."
+      en: "First settle <b>what</b> that column holds on an unmatched row."
+    options:
+      - t:
+          ko: "짝 없는 행이 탈락해 사실상 짝 있는 행만 남는다"
+          en: "Unmatched rows drop, so in effect only matched rows remain"
+      - t:
+          ko: "짝 없는 행은 조건을 건너뛰고 남는다"
+          en: "Unmatched rows skip the test and stay"
+        diag:
+          t:
+            ko: >-
+              거르는 절은 <b>모든 행</b>에 조건을 겁니다. 건너뛰는 행이 따로 없어요.
+            en: >-
+              The filter applies its test to <b>every</b> row. No row is skipped.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 건너뛰기냐 모두 재기냐", en: "The sharpest spot — skipping or weighing all" }
+            code:
+              - "LEFT JOIN item ON ... WHERE item.kind = 'a'"
+              - "LEFT JOIN item ON ... AND item.kind = 'a'"
+      - t:
+          ko: "모름이 거짓으로 바뀌어 조건이 참이 된다"
+          en: "Unknown flips to false, which makes the test true"
+        diag:
+          t:
+            ko: >-
+              모름은 거짓이 <b>아니고</b>, 참도 아닙니다. 거르는 절이 남기는 것은 참뿐이에요.
+            en: >-
+              Unknown is <b>not</b> false, and not true either. A filter keeps only what is true.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 셋째 값이 있느냐", en: "The sharpest spot — whether a third value exists" }
+            code:
+              - "-- 참 · 거짓 · 모름"
+      - t:
+          ko: "문장이 서지 않는다"
+          en: "The statement does not stand"
+        diag:
+          t:
+            ko: >-
+              문법으로는 <b>완전히 옳은 문장</b>입니다. 조용히 뜻만 달라지는 것이 이 함정의 핵심이에요.
+            en: >-
+              The statement is <b>perfectly well formed</b>. That only the meaning changes, quietly, is
+              the whole trap.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 문법이냐 뜻이냐", en: "The sharpest spot — the form or the meaning" }
+            code:
+              - "-- 문법은 통과하고 결과가 바뀐다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 짝이 없어도 {{pick.2|code}} 의 행을 <b>남깁니다</b>."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>keeps</b> rows of {{pick.2|code}} even unmatched."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "LEFT", mono: true }
+      - t: "INNER"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>INNER</code> 는 짝이 <b>있는</b> 조합만 남깁니다. 짝 없는 왼쪽 행이 사라져요.
+            en: >-
+              <code>INNER</code> keeps only pairs that <b>matched</b>. Unmatched left rows disappear.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 남기냐 버리냐", en: "The sharpest spot — kept or dropped" }
+            code:
+              - "LEFT JOIN item ON ...    -- 왼쪽 다 남는다"
+              - "INNER JOIN item ON ...   -- 짝만 남는다"
+      - t: "CROSS"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>CROSS</code> 는 조건 없이 <b>모든 조합</b>을 만듭니다. 왼쪽을 남기는 이야기가 아니에요.
+            en: >-
+              <code>CROSS</code> builds <b>every</b> combination with no test. It is not about keeping
+              the left side.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 조건이 있느냐", en: "The sharpest spot — whether a test exists" }
+            code:
+              - "CROSS JOIN item          -- 조건 없음"
+              - "LEFT JOIN item ON ...    -- 조건 있음"
+      - t: "OUTER"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>OUTER</code> 하나로는 <b>어느 쪽을 남기는지</b>가 안 정해집니다. 방향을 대는 낱말이 필요해요.
+            en: >-
+              <code>OUTER</code> alone does not say <b>which side</b> is kept. A word for the direction
+              is still needed.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 방향이 있느냐", en: "The sharpest spot — whether a direction is given" }
+            code:
+              - "LEFT OUTER JOIN item ON ..."
+              - "-- OUTER 는 곁말이다"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 짝이 없는 행까지 <b>남기려고</b> 할까요?"
+    en: "Why does line {{site.line}} go out of its way to <b>keep</b> unmatched rows?"
+  choices:
+    - t:
+        ko: "「없음」도 답이라서 — 짝이 없는 행이 사라지면 그 사실을 화면이 못 보여 준다"
+        en: "Because “none” is an answer too — drop those rows and the screen cannot show it"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 「없음」을 세려면 어느 열을 세야 하는지도 적어 보세요."
+        en: "That is the direction. Say which column must be counted to count those “none”s."
+    - t:
+        ko: "짝 있는 것만 남기면 느려서"
+        en: "Because keeping only matches is slower"
+      ok: false
+      fb:
+        ko: "대개 반대입니다. 고르는 이유는 <b>보여 줘야 하는 사실</b>이에요."
+        en: "Usually the opposite. The reason is <b>a fact that must be shown</b>."
+    - t:
+        ko: "오른쪽 표가 비어 있어서"
+        en: "Because the right table is empty"
+      ok: false
+      fb:
+        ko: "비어 있지 않아도 씁니다. 문제는 <b>어떤 행에는 짝이 없다</b>는 것이에요."
+        en: "It is used on full tables too. The point is that <b>some rows have no match</b>."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./join-left.scm }
+
+examples:
+  - code: "SELECT * FROM cart LEFT JOIN item ON cart.id = item.cart_id"
+    expect: { sites: 1, form: left-join, hole: "LEFT", picks: { 1: "LEFT", 2: "cart", 3: "item", 4: "JOIN" } }
+  - code: "SELECT * FROM cart ct LEFT JOIN item it ON ct.id = it.cart_id"
+    expect: { sites: 1, form: left-join, hole: "LEFT", picks: { 1: "LEFT", 2: "cart", 3: "item", 4: "JOIN" } }
+  - code: "SELECT * FROM cart JOIN item ON cart.id = item.cart_id"
+    expect: none

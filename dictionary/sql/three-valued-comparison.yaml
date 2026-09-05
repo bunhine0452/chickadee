@@ -230,5 +230,11 @@ examples:
     expect: { sites: 1, form: connective, hole: "AND", picks: { 1: "AND", 2: "qty > 0", 3: "closed_at IS NULL" } }
   - code: "SELECT * FROM cart WHERE qty > 0 AND ok = 1"
     expect: { sites: 1, form: connective, hole: "AND" }
+  # 자리표가 한쪽에 있어도 잇는 낱말은 그대로 잡힌다 (`crates/parse/src/params.rs`).
+  - code: "SELECT * FROM cart WHERE qty > 0 AND id = :cartId"
+    expect: { sites: 1, form: connective, hole: "AND", picks: { 1: "AND", 2: "qty > 0", 3: "id = :cartId" } }
   - code: "SELECT * FROM cart WHERE qty > 0"
+    expect: none
+  # `OR` 은 일부러 안 잡는다 — 구멍의 원문이 하나여야 보기 넷이 고정된다.
+  - code: "SELECT * FROM cart WHERE qty > 0 OR ok = 1"
     expect: none

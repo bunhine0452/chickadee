@@ -212,5 +212,12 @@ queries:
 examples:
   - code: "SELECT * FROM users"
     expect: { sites: 1, form: from, hole: "FROM", picks: { 1: "FROM", 2: "users" } }
+  # 자리표가 있어도 이 절은 그대로 잡힌다 — 자리표는 파스 전에 값으로 가려진다
+  # (`crates/parse/src/params.rs`).
+  - code: "SELECT id FROM cart WHERE id = :cartId"
+    expect: { sites: 1, form: from, hole: "FROM", picks: { 1: "FROM", 2: "cart" } }
   - code: "INSERT INTO users (a) VALUES (1)"
+    expect: none
+  # 지우는 문장의 표는 `relation` 없이 바로 온다 — 그쪽은 `sql/delete-row` 의 땅이다.
+  - code: "DELETE FROM cart"
     expect: none

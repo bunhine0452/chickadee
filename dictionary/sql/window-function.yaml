@@ -1,0 +1,204 @@
+schema: 1
+id: sql/window-function
+universal: null
+name: { ko: "접지 않고 이웃을 보기", en: "Window function" }
+token: "OVER"
+grammars: [sql, mybatis_sql]
+framework: null
+essential: true
+difficulty: 4
+prereq: [sql/order-by, sql/aggregate]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "이웃 행의 값을 보되 행을 접지 않는다. 행 수가 그대로 남는다."
+    en: "Reads neighbouring rows without folding any. The row count survives."
+  why:
+    ko: >-
+      접는 함수는 여러 행을 값 하나로 만들면서 <b>행을 없앱니다</b>. {{site.line}}행의 {{pick.1|code}} 뒤에
+      무리를 대면 같은 계산을 하되 <b>행이 그대로 남습니다</b> — 각 행 옆에 그 행이 속한 무리의 값이 붙어요.
+      그래서 「내 값과 우리 무리의 평균을 나란히 보기」가 한 문장이 됩니다. 접어서는 못 하는 일이에요.
+      대신 이 값은 거르는 절에서 <b>못 씁니다</b> — 무리를 만들려면 남은 행이 정해져 있어야 하는데,
+      거르는 절은 그보다 먼저 돕니다.
+    en: >-
+      A folding function turns many rows into one value and <b>removes the rows</b>. Name a group after
+      {{pick.1|code}} on line {{site.line}} and the same computation happens while <b>every row
+      stays</b> — each carries its group's value alongside. That makes “my value next to my group's
+      average” one statement, which folding cannot do. The price: this value <b>cannot be used in the
+      filtering clause</b> — a group needs the surviving rows settled, and filtering runs before that.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.3|code}}{{pick.3|josa:으로,로}} 무리를 나눈다."
+      en: "Line {{site.line}} divides groups by {{pick.3|code}}."
+    - ko: "무리마다 {{pick.2|code}} 계산을 한다."
+      en: "The {{pick.2|code}} computation runs per group."
+    - ko: "그 값이 행을 안 없애고 각 행 옆에 붙는다."
+      en: "The value is attached beside each row, removing none."
+
+rule:
+  ko: "<b>행을 안 없앤다.</b> 무리의 값이 각 행 옆에 붙는다."
+  en: "<b>No row is removed.</b> The group's value is attached to each of them."
+result:
+  label: { ko: "무리를 나누는 규칙", en: "how groups are divided" }
+  value: "{{pick.3}}"
+  note: { ko: "행 수는 안 바뀐다", en: "the row count does not change" }
+ok:
+  ko: >-
+    행이 그대로 남고, 각 행에 그 행이 속한 무리의 {{pick.2|code}} 값이 하나씩 붙습니다.
+  en: >-
+    Every row stays, each carrying its own group's {{pick.2|code}} value.
+payoff:
+  ko: >-
+    이걸 알면 「내 값과 평균을 같이 보여 줘」를 두 번 조회하지 않고 한 번에 씁니다.
+  en: >-
+    Knowing this, “show my value beside the average” takes one query instead of two.
+bridge:
+  ko: >-
+    다른 언어에서 목록을 두 번 돌아 합계를 먼저 구하고 다시 붙이는 일과 같습니다. 여기서는 한 번에 돼요.
+  en: >-
+    Elsewhere you walk the list twice — once for the total, once to attach it. Here one pass does it.
+misconceptions:
+  - ko: "접는 함수와 같아서 행이 줄어든다 — 행 수가 그대로 남습니다."
+    en: "Like folding, it reduces rows — the row count is untouched."
+  - ko: "이 값으로 거르는 절에서 조건을 걸 수 있다 — 그 절이 먼저 돌아서 못 씁니다."
+    en: "The value can be tested in the filtering clause — that clause runs earlier, so it cannot."
+  - ko: "무리를 안 대면 아무 일도 안 한다 — 표 전체가 한 무리가 됩니다."
+    en: "Without a group named it does nothing — the whole table becomes one group."
+
+meaning:
+  - q:
+      ko: "같은 계산을 접는 함수로 쓸 때와 {{site.line}}행처럼 쓸 때 결과의 행 수는 어떻게 다를까요?"
+      en: "Same computation as a folding function versus as on line {{site.line}} — how do the row counts differ?"
+    hint:
+      ko: "행을 <b>없애는지</b>가 갈림길입니다."
+      en: "Whether rows are <b>removed</b> is the fork."
+    options:
+      - t:
+          ko: "접으면 무리마다 한 줄, 이렇게 쓰면 원래 행이 다 남는다"
+          en: "Folding gives one line per group; this way every original row stays"
+      - t:
+          ko: "둘 다 무리마다 한 줄이 된다"
+          en: "Both give one line per group"
+        diag:
+          t:
+            ko: >-
+              무리마다 한 줄로 만드는 것은 <b>묶는 절</b>이 하는 일입니다. 여기서는 묶지 않아요.
+            en: >-
+              One line per group is what a <b>bundling clause</b> does. Nothing is bundled here.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 묶느냐 마느냐", en: "The sharpest spot — bundled or not" }
+            code:
+              - "GROUP BY kind             -- 줄이 준다"
+              - "OVER (PARTITION BY kind)  -- 줄이 그대로"
+      - t:
+          ko: "둘 다 원래 행이 다 남는다"
+          en: "Both keep every original row"
+        diag:
+          t:
+            ko: >-
+              접는 함수는 <b>행을 없애면서</b> 값을 만듭니다. 그것이 접는다는 말의 뜻이에요.
+            en: >-
+              A folding function makes its value <b>by removing rows</b>. That is what folding means.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 접기의 뜻", en: "The sharpest spot — what folding means" }
+            code:
+              - "SELECT AVG(qty) FROM cart   -- 한 줄"
+      - t:
+          ko: "이렇게 쓰면 행이 무리 수만큼 늘어난다"
+          en: "This way the rows multiply by the number of groups"
+        diag:
+          t:
+            ko: >-
+              늘어나지 않습니다 — <b>그대로</b>예요. 늘리는 것은 짝짓는 절의 일입니다.
+            en: >-
+              Nothing multiplies — the count is <b>unchanged</b>. Multiplying is a pairing clause's doing.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 그대로냐 늘어나냐", en: "The sharpest spot — unchanged or multiplied" }
+            code:
+              - "-- 행 수는 입력 그대로다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 행을 <b>안 없애고</b> 무리의 값을 붙입니다."
+      en: "Choose what goes in the blank. Line {{site.line}} attaches a group's value <b>without removing rows</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "OVER", mono: true }
+      - t: "GROUP"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>GROUP</code> 은 무리마다 <b>한 줄</b>로 접습니다. 원래 행이 남지 않아요.
+            en: >-
+              <code>GROUP</code> folds each group into <b>one line</b>. The original rows do not survive.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 접기냐 붙이기냐", en: "The sharpest spot — folding or attaching" }
+            code:
+              - "GROUP BY kind"
+              - "OVER (PARTITION BY kind)"
+      - t: "WITHIN"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>WITHIN</code> 은 <b>차례를 요구하는 몇몇 함수</b>에만 붙는 곁말이라 창을 여는 낱말이 아닙니다.
+            en: >-
+              <code>WITHIN</code> attaches to <b>a few order-sensitive functions</b>; it does not open a window.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 창이냐 곁말이냐", en: "The sharpest spot — a window or a modifier" }
+            code:
+              - "WITHIN GROUP (ORDER BY qty)"
+              - "OVER (PARTITION BY kind)"
+      - t: "ACROSS"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>ACROSS</code> 는 이 언어의 낱말이 아닙니다 — 창을 여는 낱말은 하나로 정해져 있어요.
+            en: >-
+              <code>ACROSS</code> is not a word here — one fixed word opens a window.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 이 언어의 낱말이냐 아니냐", en: "The sharpest spot — a word of this language or not" }
+            code:
+              - "-- 낱말은 표준이 정한 것뿐이다"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 접지 않고 <b>행을 남기며</b> 무리 값을 붙일까요?"
+    en: "Why does line {{site.line}} attach a group value <b>keeping the rows</b> instead of folding?"
+  choices:
+    - t:
+        ko: "행 하나의 값과 무리의 값을 나란히 봐야 해서 — 접으면 행 하나가 사라진다"
+        en: "Because a row's value must sit beside its group's — folding loses the row"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 값으로 거를 수 없는 이유도 한 줄로 적어 보세요."
+        en: "That is the direction. In one line, say why this value cannot be filtered on."
+    - t:
+        ko: "접는 것보다 빨라서"
+        en: "Because it is faster than folding"
+      ok: false
+      fb:
+        ko: "대개 더 비쌉니다 — 차례를 만들어야 하거든요. 고르는 이유는 <b>보여 줄 것</b>이에요."
+        en: "It usually costs more — an arrangement has to be built. The reason is <b>what must be shown</b>."
+    - t:
+        ko: "묶는 절을 못 써서"
+        en: "Because the bundling clause is unavailable"
+      ok: false
+      fb:
+        ko: "쓸 수 있습니다 — 쓰면 행이 사라지는 것이 문제예요."
+        en: "It is available — that using it loses the rows is the problem."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./window-function.scm }
+
+examples:
+  - code: "SELECT ROW_NUMBER() OVER (ORDER BY qty) FROM cart"
+    expect: { sites: 1, form: window, hole: "OVER", picks: { 1: "OVER", 2: "ROW_NUMBER", 3: "(ORDER BY qty)" } }
+  - code: "SELECT AVG(qty) OVER (PARTITION BY kind) FROM cart"
+    expect: { sites: 1, form: window, hole: "OVER", picks: { 1: "OVER", 2: "AVG", 3: "(PARTITION BY kind)" } }
+  - code: "SELECT AVG(qty) FROM cart"
+    expect: none

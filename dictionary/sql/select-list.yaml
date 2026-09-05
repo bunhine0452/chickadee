@@ -1,0 +1,205 @@
+schema: 1
+id: sql/select-list
+universal: common/map-transform
+name: { ko: "볼 열 고르기", en: "Choosing columns" }
+token: "SELECT"
+grammars: [sql, mybatis_sql]
+framework: null
+essential: true
+difficulty: 1
+prereq: [sql/from-table, sql/clause-order, cs/declarative-vs-imperative]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "무엇을 볼지 대는 절. 한 번 적은 식이 행 수만큼 적용된다."
+    en: "Names what to look at. One expression written once, applied to every row."
+  why:
+    ko: >-
+      {{site.line}}행의 이 절은 {{pick.3|code}} 의 행에서 <b>{{pick.2|code}} 만</b> 남긴 새 표를
+      만듭니다. 행을 고르는 것이 아니라 <b>열</b>을 고르는 자리예요 — 행 수는 그대로고 폭만 바뀝니다.
+      그리고 여기 적은 식은 <b>행마다 한 번씩</b> 계산됩니다. 그래서 반복문을 적을 자리가 없어요.
+    en: >-
+      This clause on line {{site.line}} makes a new table from the rows of {{pick.3|code}} keeping
+      <b>only {{pick.2|code}}</b>. It picks <b>columns</b>, not rows — the row count stays and only
+      the width changes. And an expression written here is computed <b>once per row</b>. That is why
+      there is nowhere to write a loop.
+  trace:
+    - ko: "{{pick.3|code}} 의 행이 먼저 놓인다."
+      en: "The rows of {{pick.3|code}} are laid out first."
+    - ko: "{{site.line}}행이 그 행마다 {{pick.2|code}}{{pick.2|josa:을,를}} 계산한다."
+      en: "Line {{site.line}} computes {{pick.2|code}} for each of them."
+    - ko: "행 수는 그대로이고 열만 {{pick.2|code}}{{pick.2|josa:으로,로}} 좁혀진 표가 나온다."
+      en: "The same number of rows comes back, narrowed to {{pick.2|code}}."
+
+rule:
+  ko: "<b>열을 고르는 자리다.</b> 한 번 적은 식이 행마다 한 번씩 계산된다."
+  en: "<b>This is where columns are chosen.</b> One expression, computed once per row."
+result:
+  label: { ko: "결과의 열", en: "columns of the result" }
+  value: "{{pick.2}}"
+  note: { ko: "행 수는 안 바뀐다", en: "the row count does not change" }
+ok:
+  ko: >-
+    {{pick.3|code}} 의 행이 그대로 오고, 각 행에서 {{pick.2|code}} 만 남습니다.
+  en: >-
+    The rows of {{pick.3|code}} come through unchanged, and each keeps only {{pick.2|code}}.
+payoff:
+  ko: >-
+    이걸 알면 「행을 줄이려는데 왜 안 줄지」가 풀립니다 — 이 절은 폭만 바꾸거든요.
+  en: >-
+    This untangles “why do the rows not shrink” — this clause only changes the width.
+bridge:
+  ko: >-
+    다른 언어에서 목록을 하나씩 바꿔 새 목록을 만드는 일과 같습니다. 다른 것은 <b>도는 문장이 없다</b>는 것뿐이에요.
+  en: >-
+    It is the same as turning a list into a new list item by item elsewhere. The difference is that
+    <b>there is no loop to write</b>.
+misconceptions:
+  - ko: "여기 적은 것이 행을 고른다 — 열을 고릅니다. 행은 아래 절이 거릅니다."
+    en: "What is written here picks rows — it picks columns. Rows are filtered by a clause below."
+  - ko: "맨 위에 적혔으니 맨 먼저 돈다 — 표를 대고 거른 뒤에 돕니다."
+    en: "Written at the top, so it runs first — it runs after the table and the filter."
+  - ko: "여기서 붙인 별명을 아래 어디서나 쓸 수 있다 — 거르는 절에서는 못 씁니다."
+    en: "A nickname made here works anywhere below — not in the filtering clause."
+
+meaning:
+  - q:
+      ko: "{{pick.2|code}} 자리에 열을 하나 더 적으면 결과가 어떻게 달라질까요?"
+      en: "What changes if one more column is written in the {{pick.2|code}} slot?"
+    hint:
+      ko: "이 절이 바꾸는 것이 <b>행 수</b>인지 <b>폭</b>인지 생각해 보세요."
+      en: "Think about whether this clause changes the <b>row count</b> or the <b>width</b>."
+    options:
+      - t:
+          ko: "행 수는 그대로고 열이 하나 늘어난다"
+          en: "The row count stays and one more column appears"
+      - t:
+          ko: "행이 두 배가 된다"
+          en: "The rows double"
+        diag:
+          t:
+            ko: >-
+              행을 늘리는 것은 표를 <b>짝지어 붙일 때</b>입니다. 열을 더 고르는 것은 폭만 늘려요.
+            en: >-
+              Rows multiply when tables are <b>paired up</b>. Choosing one more column only widens.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 폭이냐 행 수냐", en: "The sharpest spot — width or rows" }
+            code:
+              - "SELECT id, qty FROM cart   -- 폭이 는다"
+              - "FROM cart, item            -- 행이 는다"
+      - t:
+          ko: "행이 그만큼 걸러진다"
+          en: "That many rows are filtered out"
+        diag:
+          t:
+            ko: "거르는 일은 <b>다른 절</b>이 합니다. 이 절에는 거르는 힘이 없어요."
+            en: "Filtering is <b>another clause's</b> job. This one has no power to drop rows."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 고르기냐 거르기냐", en: "The sharpest spot — choosing or filtering" }
+            code:
+              - "SELECT id, qty   -- 고르기"
+              - "WHERE qty > 0    -- 거르기"
+      - t:
+          ko: "그 열이 없으면 조용히 빈칸이 채워진다"
+          en: "If the column is missing, a blank is quietly filled in"
+        diag:
+          t:
+            ko: >-
+              없는 열은 <b>문장이 서기 전</b>에 걸립니다. 빈칸으로 넘어가지 않아요.
+            en: >-
+              A missing column is caught <b>before the statement stands</b>. Nothing is filled in.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 없는 열이냐 없는 값이냐", en: "The sharpest spot — no column or no value" }
+            code:
+              - "SELECT nope FROM cart   -- 문장이 안 선다"
+              - "SELECT note FROM cart   -- 값이 없을 수는 있다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>무엇을 볼지</b>를 댑니다."
+      en: "Choose what goes in the blank. Line {{site.line}} names <b>what to look at</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "SELECT", mono: true }
+      - t: "SHOW"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>SHOW</code> 는 표의 <b>목록·구조</b>를 보는 방언 명령이라 열을 고르는 자리에 안 옵니다.
+            en: >-
+              <code>SHOW</code> is a dialect command for listing <b>tables and shapes</b>, not for
+              choosing columns.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 내용이냐 구조냐", en: "The sharpest spot — contents or shape" }
+            code:
+              - "SELECT id FROM cart   -- 내용"
+              - "SHOW TABLES           -- 구조"
+      - t: "RETURN"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>RETURN</code> 은 <b>부른 곳으로 값을 돌려주는</b> 낱말입니다. 여기에는 부른 곳이 없어요.
+            en: >-
+              <code>RETURN</code> hands a value <b>back to a caller</b>. There is no caller here.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 표를 정의하기냐 값을 돌려주기냐", en: "The sharpest spot — defining a table or returning a value" }
+            code:
+              - "-- 조회는 결과 표의 정의다"
+              - "-- 돌려주는 곳이 없다"
+      - t: "GET"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>GET</code> 은 이 언어의 낱말이 아닙니다 — 한 건을 집어 오는 이름은 다른 도구들의 것이에요.
+            en: >-
+              <code>GET</code> is not a word in this language — fetching one item by that name belongs
+              to other tools.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 표를 묻기냐 한 건 집기냐", en: "The sharpest spot — asking a table or fetching one item" }
+            code:
+              - "SELECT * FROM cart WHERE id = 1"
+              - "-- 늘 표가 나온다, 한 건이어도"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 <b>{{pick.2|code}}</b> 만 골랐을까요?"
+    en: "Why does line {{site.line}} choose <b>{{pick.2|code}}</b> and nothing else?"
+  choices:
+    - t:
+        ko: "그 열만 있으면 답이 되고, 나머지는 옮기는 값만 늘려서"
+        en: "Because those columns answer it, and the rest only add bytes to move"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 별표로 다 가져올 때 무엇이 나빠지는지도 한 줄로 적어 보세요."
+        en: "That is the direction. In one line, say what gets worse when a star takes everything."
+    - t:
+        ko: "표에 그 열밖에 없어서"
+        en: "Because the table has no other columns"
+      ok: false
+      fb:
+        ko: "표의 열 수와 고른 열 수는 따로입니다. 골랐다는 것 자체가 <b>선택</b>이에요."
+        en: "The table's columns and the chosen ones are separate. Choosing is itself a <b>choice</b>."
+    - t:
+        ko: "SQL 이 열 이름을 요구해서"
+        en: "Because SQL demands column names"
+      ok: false
+      fb:
+        ko: "별표를 적어도 됩니다. 그러니 요구가 아니라 <b>고른 것</b>이에요."
+        en: "A star is allowed. So it is not a demand — it is a <b>choice</b>."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./select-list.scm }
+
+examples:
+  - code: "SELECT id, qty FROM cart"
+    expect: { sites: 1, form: select-list, hole: "SELECT", picks: { 1: "SELECT", 2: "id, qty", 3: "cart" } }
+  - code: "SELECT * FROM cart WHERE ok = 1"
+    expect: { sites: 1, form: select-list, hole: "SELECT", picks: { 1: "SELECT", 2: "*", 3: "cart" } }
+  - code: "INSERT INTO cart (id) VALUES (1)"
+    expect: none

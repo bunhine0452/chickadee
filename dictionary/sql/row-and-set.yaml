@@ -229,5 +229,10 @@ examples:
     expect: { sites: 1, form: limit, hole: "LIMIT", picks: { 1: "LIMIT", 2: "10", 3: "users" } }
   - code: "SELECT id FROM users ORDER BY id LIMIT 10"
     expect: { sites: 1, form: limit }
+  - code: "SELECT id FROM cart LIMIT 5"
+    expect: { sites: 1, form: limit, hole: "LIMIT", picks: { 1: "LIMIT", 2: "5", 3: "cart" } }
   - code: "SELECT id FROM users"
+    expect: none
+  # 줄 세우기만으로는 몇 줄인지 안 정해진다 — 이 개념이 아니다.
+  - code: "SELECT id FROM cart ORDER BY id"
     expect: none

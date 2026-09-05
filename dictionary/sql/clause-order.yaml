@@ -206,5 +206,10 @@ examples:
     expect: { sites: 1, form: clause-order, picks: { 1: "SELECT", 2: "FROM", 3: "WHERE", 4: "id" } }
   - code: "SELECT id, qty FROM cart WHERE qty > 0"
     expect: { sites: 1, form: clause-order, picks: { 1: "SELECT", 2: "FROM", 3: "WHERE", 4: "id, qty" } }
+  # 자리표가 들어와도 절 셋은 그대로 잡힌다 (`crates/parse/src/params.rs`).
+  - code: "SELECT id FROM cart WHERE id = #{cartId}"
+    expect: { sites: 1, form: clause-order, picks: { 1: "SELECT", 2: "FROM", 3: "WHERE", 4: "id" } }
   - code: "SELECT id FROM cart"
+    expect: none
+  - code: "SELECT id FROM cart ORDER BY id"
     expect: none
