@@ -1,0 +1,221 @@
+schema: 1
+id: go/error-check
+# 2부 (`go.md` §3 ㉔). **Go 에서 가장 흔한 세 줄** — `cli/cli` 429파일에서 2,778곳/
+# 324파일(76%)이다. 텍스트 grep(`if err != nil` 2,284곳)보다 큰 것은 이 쿼리가
+# `if v, err := f(); err != nil` 과 `Err` 로 끝나는 이름까지 잡기 때문이다.
+#
+# 이 개념이 그 줄을 **전담한다** — `go/if-statement`·`go/equality` 는 조건에 `nil` 이
+# 든 것을 빼고, `go/nil` 은 견주기를 뺀다 (`README.md` §7 ②).
+universal: null
+name: { ko: "실패를 값으로 받아 확인하기", en: "Checking the returned error" }
+token: "if err != nil"
+grammars: [go]
+framework: null
+essential: true
+difficulty: 2
+prereq: [go/if-statement, go/return-multi, go/nil]
+confusions: []
+
+dict:
+  one_liner:
+    ko: >-
+      실패는 던져지지 않고 마지막 반환값으로 온다. 안 봐도 컴파일이 안 멈춘다.
+    en: >-
+      A failure is not thrown; it arrives as the last value, unchecked and all.
+  why:
+    ko: >-
+      {{site.line}}행은 앞 줄이 돌려준 마지막 값이 비어 있는지 봅니다. 이 세 줄이 Go 코드의 얼굴이 된 이유는 <b>예외가 없어서</b>예요 — 잘못이 흐름을
+      끊고 위로 튀어 오르지 않으니, 부르는 쪽이 매번 손으로 봐야 합니다. 값은 분명해요: 어디서 무엇이 잘못될 수 있는지가 코드에 전부 적힙니다. 대가도 분명합니다: <b>안
+      보고 지나가도 컴파일이 안 멈춥니다.</b> 2023년 Go 개발자 설문에서 응답자의 19%가 「잘못을 통째로 무시하기 쉽다」를 문제로 꼽았어요. 가장 흔한 줄이자 가장
+      조용한 함정입니다.
+    en: >-
+      Line {{site.line}} weighs whether the last value from the line above is empty. These three lines
+      became the face of Go code because there are <b>no exceptions</b> — a fault does not cut the
+      flow and fly upward, so the caller weighs it by hand every time. The gain is plain: where
+      something can go awry is written out everywhere it can. So is the price: <b>skipping the check
+      still compiles.</b> In the 2023 Go developer survey 19% of respondents named "easy to ignore
+      errors entirely" as a problem. The most common line in the language is also its quietest trap.
+  trace:
+    - ko: >-
+        앞 줄이 값과 잘못을 함께 돌려주었다.
+      en: >-
+        The line above gave back a value and a fault together.
+    - ko: >-
+        {{site.line}}행은 {{pick.2|code}}{{pick.2|josa:이,가}} 비어 있는지 본다.
+      en: >-
+        Line {{site.line}} weighs whether {{pick.2|code}} is empty.
+    - ko: >-
+        비어 있지 않으면 {{pick.5|code}} 안으로 들어간다.
+      en: >-
+        When it is not, it steps into {{pick.5|code}}.
+
+rule:
+  ko: >-
+    <b>실패는 값으로 온다.</b> 안 보고 지나가도 컴파일이 안 멈춘다.
+  en: >-
+    <b>A failure arrives as a value.</b> Skipping the check still compiles.
+result:
+  label: { ko: "{{site.line}}행의 확인", en: "the check on line {{site.line}}" }
+  value: "{{pick.2}} {{pick.1}} {{pick.3}}"
+  note: { ko: "비어 있지 않으면 안이 돈다", en: "not empty means the body runs" }
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:이,가}} 비어 있지 않으면 {{pick.5|code}} 안이 돕니다.
+  en: >-
+    When {{pick.2|code}} is not empty, {{pick.5|code}} runs.
+payoff:
+  ko: >-
+    이걸 알면 「잘못이 어디로 갔나」가 풀립니다 — 아무 데도 안 갔고 그 줄에 값으로 있습니다.
+  en: >-
+    This untangles "where did the fault go" — nowhere; it is right there as a value.
+bridge:
+  ko: >-
+    자바·파이썬은 잘못이 위로 튀어 올라 어디서 잡히는지 안 보입니다. Go 는 안 튀는 대신 <b>줄마다</b> 적혀요.
+  en: >-
+    In Java and Python a fault flies upward and where it lands is invisible. Go's does not fly, and
+    is written on <b>every line</b> instead.
+misconceptions:
+  - ko: >-
+      잘못이 있으면 앞 값은 쓸 수 없다 — 대개 제로 값이라 <b>쓸 수는 있고</b> 뜻이 없습니다. 그래서 조용해요.
+    en: >-
+      A fault makes the earlier value unusable — it is usually the zero value, so it <b>can</b> be
+      used and means nothing. Hence the quiet.
+  - ko: >-
+      안 보고 지나가면 컴파일이 멈춘다 — 안 멈춥니다. 값 하나를 밑줄로 버리면 끝이에요.
+    en: >-
+      Skipping the check stops the compiler — it does not. Throwing the value away with an underscore
+      is enough.
+
+point:
+  - q:
+      ko: >-
+        {{site.line}}행에서 <b>실패를 담고 있는 이름</b>을 짚어 보세요.
+      en: >-
+        On line {{site.line}}, point at <b>the name carrying the failure</b>.
+    hint: { ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다.", en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose." }
+    answer: pick.2
+    diag:
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} <b>비어 있음</b>을 뜻하는 값입니다. 실패를 담고 있는 쪽은 왼쪽이에요.
+          en: >-
+            {{pick.3|code}} is the value meaning <b>empty</b>. What carries the failure stands on the left.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 담은 쪽이냐 견주는 값이냐", en: "The sharpest spot — the carrier or what it is weighed against" }
+          code:
+            - "err                 // 담은 쪽"
+            - "nil                 // 견주는 값"
+      pick.5:
+        t:
+          ko: >-
+            {{pick.5|code}}{{pick.5|josa:은,는}} 실패일 때 도는 <b>블록</b>입니다. 담고 있는 이름은 조건 안에 있어요.
+          en: >-
+            {{pick.5|code}} is the <b>block</b> that runs on failure. The carrying name sits in the test.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 조건이냐 블록이냐", en: "The sharpest spot — the test or the block" }
+          code:
+            - "err != nil          // 조건"
+            - "{ return err }      // 블록"
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행은 실패가 <b>있는지</b> 봅니다.
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} weighs whether a failure is <b>there</b>.
+    hint: { ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다.", en: "Your choice is written into the code at once. Submit to have it marked." }
+    options:
+      - { t: "!=", mono: true }
+      - t: "=="
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 기호는 <b>비어 있을 때</b> 참이 됩니다. 실패일 때 도는 블록에 쓰면 갈래가 뒤집혀요.
+            en: >-
+              That is true <b>when it is empty</b>. In a block meant for failure the branch is inverted.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 있을 때냐 없을 때냐", en: "The sharpest spot — present or absent" }
+            code:
+              - "if err != nil { return err }"
+              - "if err == nil { return err }   // 뒤집혔다"
+      - t: "="
+        mono: true
+        diag:
+          t:
+            ko: >-
+              기호 하나짜리는 <b>넣는</b> 것이라 참·거짓이 안 나옵니다. 조건 자리에 놓으면 그 줄에서 멈춰요.
+            en: >-
+              The single-symbol form <b>puts</b> and yields no truth value. In a test it stops on that line.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 넣나 견주나", en: "The sharpest spot — putting or weighing" }
+            code:
+              - "if err != nil { }"
+              - "if err = nil { }     // 멈춘다"
+      - t: ">"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 기호는 <b>크기</b>를 묻습니다. 실패 값에는 크기 견주기가 없어 그 줄에서 멈춰요.
+            en: >-
+              That asks about <b>order</b>. A failure value has no ordering, so it stops on that line.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 견줄 수 있나", en: "The sharpest spot — is it comparable that way" }
+            code:
+              - "if err != nil { }"
+              - "if err > nil { }     // 멈춘다"
+
+why_gate:
+  q:
+    ko: >-
+      Go 는 왜 이 확인을 <b>강제하지 않을까요</b>?
+    en: >-
+      Why does Go <b>not force</b> this check?
+  choices:
+    - t:
+        ko: >-
+          잘못을 다루는 방식이 자리마다 다르고, 강제하면 뜻 없는 확인이 늘어 진짜 확인과 구별이 안 되기 때문
+        en: >-
+          Because how a fault is handled differs by place, and forcing it would breed empty checks that
+          are indistinguishable from real ones
+      ok: true
+      fb:
+        ko: >-
+          그 방향입니다. 그럼 강제하지 않은 대가가 실측에서 어떻게 나타나는지도 적어 보세요.
+        en: >-
+          That is the direction. Add how the price of not forcing shows up in measurements.
+    - t:
+        ko: >-
+          확인이 느려서
+        en: >-
+          Because the check is slow
+      ok: false
+      fb:
+        ko: >-
+          견주기 하나입니다. 속도가 이유는 아니에요.
+        en: >-
+          It is one comparison. Speed is not the reason.
+    - t:
+        ko: >-
+          잘못이 드물어서
+        en: >-
+          Because faults are rare
+      ok: false
+      fb:
+        ko: >-
+          표본 리포에서 이 줄이 파일의 76%에 있습니다. 드물지 않아요.
+        en: >-
+          In the sample repository this line appears in 76% of files. Not rare.
+
+queries:
+  - { grammars: [go], file: ./error-check.scm }
+
+examples:
+  - code: "func f(err error) error { if err != nil { return err } ; return nil }"
+    expect: { sites: 1, form: check, hole: "!=", picks: { 1: "!=", 2: "err", 3: "nil", 4: "if" } }
+  - code: "func f(g func() error) { if err := g(); err != nil { println(1) } }"
+    expect: { sites: 1, form: check, hole: "!=", picks: { 1: "!=", 2: "err", 3: "nil", 4: "if" } }
+  - code: "func f(ok bool) { if ok { println(1) } }"
+    expect: none

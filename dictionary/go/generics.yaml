@@ -1,0 +1,210 @@
+schema: 1
+id: go/generics
+# 2부 · §4 심화 (`go.md` §4 ㉜). 실측 **13곳/6파일** — 사전에서 가장 얇다.
+# 1.18 에서야 들어와 아직 실코드에 적다(`go.md` §1 이 잰 10곳/5파일과 같은 자리).
+universal: common/generics
+name: { ko: "타입 자리 비워 두기", en: "Type parameters" }
+token: "[T any]"
+grammars: [go]
+framework: null
+essential: true
+difficulty: 4
+prereq: [go/func-declaration, go/slice, cs/erasure-and-reification]
+confusions: []
+
+dict:
+  one_liner:
+    ko: >-
+      타입 자리를 비워 두고 부르는 쪽이 채운다. 메서드에는 못 붙인다.
+    en: >-
+      A type slot left blank for the caller to fill; methods cannot have one.
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.2|code}}{{pick.2|josa:은,는}} 어떤 타입에도 쓰이도록 자리를 비워 둡니다. 비워 두는 자리는 대괄호 안에 적고,
+      부르는 쪽이 넘기는 값에서 대개 저절로 채워져요. 비운 자리에 아무거나 들어가면 안이 무엇을 할 수 있는지 모르므로, 대괄호 안에 <b>제약</b>을 함께 적습니다 —
+      「무엇이든」이라고 적으면 그 값으로 할 수 있는 일이 거의 없고, 「견줄 수 있는 것」이라고 적으면 견주기가 됩니다. 제한이 하나 있어요: <b>메서드에는 못
+      붙입니다.</b> 함수와 타입에만 오고, 그래서 어떤 설계는 함수 쪽으로 밀려납니다.
+    en: >-
+      The {{pick.2|code}} on line {{site.line}} leaves a slot blank so it serves any type. The blank
+      goes in the brackets, and the caller's value usually fills it without being told. Since anything
+      landing there would leave the body unable to do much, a <b>constraint</b> is written in the
+      brackets too — say "anything" and almost nothing can be done with the value; say "comparable"
+      and comparison becomes available. One restriction comes with it: <b>methods cannot have one.</b>
+      Only functions and types can, which pushes some designs toward functions.
+  trace:
+    - ko: >-
+        {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 비워 둔 자리와 그 제약이다.
+      en: >-
+        The {{pick.1|code}} on line {{site.line}} is the blank slot and its constraint.
+    - ko: >-
+        {{pick.3|code}} 안에서 그 자리를 타입처럼 쓴다.
+      en: >-
+        Inside {{pick.3|code}} that slot is used as a type.
+    - ko: >-
+        부르는 쪽이 넘기는 값에서 대개 저절로 채워진다.
+      en: >-
+        The caller's value usually fills it without being told.
+
+rule:
+  ko: >-
+    <b>비운 자리에는 제약이 따라붙는다.</b> 함수와 타입에만 오고 메서드에는 안 온다.
+  en: >-
+    <b>A blank slot comes with a constraint.</b> Functions and types may have one; methods may not.
+result:
+  label: { ko: "{{site.line}}행이 비운 자리", en: "the slot left blank on line {{site.line}}" }
+  value: "{{pick.1}}"
+  note: { ko: "부르는 쪽이 채운다", en: "the caller fills it" }
+ok: { ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 이제 여러 타입에 쓰이는 함수입니다.", en: "{{pick.2|code}} is now a function that serves several types." }
+payoff: { ko: "이걸 알면 「같은 함수를 타입마다 베껴 쓰던 것」을 하나로 줄일 수 있습니다.", en: "This lets one function replace the copies written per type." }
+bridge:
+  ko: >-
+    자바의 것은 실행 때 타입이 지워지고 C# 은 남습니다. Go 는 컴파일 때 모양별로 찍어 내는 쪽에 가까워요.
+  en: >-
+    Java erases the type at run time and C# keeps it. Go sits nearer to stamping out a copy per
+    shape at compile time.
+misconceptions:
+  - ko: >-
+      메서드에도 붙일 수 있다 — <b>못 붙입니다</b>. 함수와 타입에만 옵니다.
+    en: >-
+      Methods can have one — they <b>cannot</b>. Only functions and types may.
+  - ko: >-
+      제약 없이 두면 아무 일이나 할 수 있다 — 반대입니다. 제약이 없으면 그 값으로 할 수 있는 일이 거의 없어요.
+    en: >-
+      Leaving off the constraint allows anything — the reverse. Without one, almost nothing can be
+      done with the value.
+
+point:
+  - q:
+      ko: >-
+        {{site.line}}행에서 <b>비워 둔 타입 자리</b>를 짚어 보세요.
+      en: >-
+        On line {{site.line}}, point at <b>the blank type slot</b>.
+    hint: { ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다.", en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose." }
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 함수의 <b>이름</b>입니다. 이름은 타입 자리를 안 비워요.
+          en: >-
+            {{pick.2|code}} is the function's <b>name</b>. A name leaves no type slot blank.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 비운 자리냐", en: "The sharpest spot — the name or the blank" }
+          code:
+            - "first                       // 이름"
+            - "func first[T any](…)        // 비운 자리"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} <b>받는 칸</b>입니다. 비운 자리를 <b>쓰는</b> 곳이지 비우는 곳이 아니에요.
+          en: >-
+            {{pick.3|code}} is the <b>parameter list</b>. It <b>uses</b> the blank rather than declaring it.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 비우는 곳이냐 쓰는 곳이냐", en: "The sharpest spot — where it is declared or where it is used" }
+          code:
+            - "[T any]                     // 비우는 곳"
+            - "(xs []T)                    // 쓰는 곳"
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>어떤 타입에도 쓰이도록</b> 자리를 비웁니다.
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} leaves a slot blank so it <b>serves any
+        type</b>.
+    hint: { ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다.", en: "Your choice is written into the code at once. Submit to have it marked." }
+    options:
+      - { t: "[T any]", mono: true }
+      - t: "(T any)"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              둥근 괄호는 <b>받는 값</b>을 적는 칸입니다. 여기 쓰면 비운 타입 자리가 아니라 이름이 <code>T</code> 인 인자가 하나 생겨요.
+            en: >-
+              Round brackets are where <b>values received</b> are written. Used here they make a parameter
+              named <code>T</code> rather than a blank type slot.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 타입 자리냐 값 칸이냐", en: "The sharpest spot — a type slot or a value slot" }
+            code:
+              - "func first[T any](xs []T)     // 타입 자리"
+              - "func first(T any)             // 값 칸"
+      - t: "[T]"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              제약을 안 적으면 그 줄에서 멈춥니다. 비운 자리에는 <b>제약이 반드시</b> 따라붙어요.
+            en: >-
+              Leaving the constraint out stops on that line. A blank slot <b>always</b> carries one.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 제약이 필요하나", en: "The sharpest spot — is a constraint required" }
+            code:
+              - "[T any]"
+              - "[T]                        // 멈춘다"
+      - t: "[]T"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 모양은 <b>여럿을 보는 창</b>입니다. 자리를 비우는 것이 아니라 이미 있는 자리를 쓰는 쪽이에요.
+            en: >-
+              That shape is a <b>window over many</b>. It uses a slot rather than declaring one.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 비우나 쓰나", en: "The sharpest spot — declaring or using" }
+            code:
+              - "[T any]                    // 비운다"
+              - "[]T                        // 쓴다"
+
+why_gate:
+  q:
+    ko: >-
+      Go 는 왜 비운 자리에 <b>제약</b>을 함께 적게 할까요?
+    en: >-
+      Why does Go require a <b>constraint</b> alongside the blank slot?
+  choices:
+    - t:
+        ko: >-
+          안에서 그 값으로 무엇을 할 수 있는지가 부르기 전에 정해져, 부르는 쪽이 아니라 정의하는 줄에서 잘못이 걸리기 때문
+        en: >-
+          Because what the body may do with the value is settled before any call, so a mistake is caught
+          at the definition rather than at the call
+      ok: true
+      fb:
+        ko: >-
+          그 방향입니다. 그럼 제약을 「무엇이든」으로 두면 무엇이 남는지도 적어 보세요.
+        en: >-
+          That is the direction. Add what remains possible when the constraint is "anything".
+    - t:
+        ko: >-
+          적지 않으면 느려서
+        en: >-
+          Because leaving it out is slow
+      ok: false
+      fb:
+        ko: >-
+          속도 문제가 아닙니다. 안 적으면 아예 컴파일이 안 돼요.
+        en: >-
+          Speed is not it. Leaving it out does not compile at all.
+    - t:
+        ko: >-
+          제약이 문서 노릇을 해서
+        en: >-
+          Because the constraint serves as documentation
+      ok: false
+      fb:
+        ko: >-
+          문서 노릇도 하지만 그건 결과입니다. 안에서 무엇을 할 수 있는지를 정하는 것이 먼저예요.
+        en: >-
+          It does read as documentation, but that is a result. Settling what the body may do comes first.
+
+queries:
+  - { grammars: [go], file: ./generics.scm }
+
+examples:
+  - code: "func first[T any](xs []T) T { return xs[0] }"
+    expect: { sites: 1, form: func, hole: "[T any]", picks: { 1: "[T any]", 2: "first", 3: "(xs []T)" } }
+  - code: "type Set[T comparable] struct { m map[T]bool }"
+    expect: { sites: 1, form: type, hole: "[T comparable]", picks: { 1: "[T comparable]", 2: "Set" } }
+  - code: "func first(xs []int) int { return xs[0] }"
+    expect: none

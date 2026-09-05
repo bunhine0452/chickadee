@@ -1,0 +1,233 @@
+schema: 1
+id: go/short-var-decl
+# 1부 (`go.md` §2 ①). 0부에 안 올라간 이유가 §0.5 에 있다 — 재선언·가리기는
+# 스코프 규칙이지 값이 아니다.
+#
+# 쿼리는 **왼쪽 이름이 정확히 하나**인 것만 잡는다. 이름이 둘인 `v, err := f()` 는
+# `go.md` §8 ② 의 「묶인 노드」 문제이고, 그 자리는 `go/return-multi` 와
+# `go/error-check` 가 받는다. 실측 4,201곳/385파일 (`cli/cli` 429파일).
+universal: common/variable-binding
+name: { ko: "이름 만들며 값 넣기", en: "Short variable declaration" }
+token: ":="
+grammars: [go]
+framework: null
+essential: true
+difficulty: 2
+prereq: [go/assignment, cs/scope-and-lifetime]
+confusions: []
+
+dict:
+  one_liner:
+    ko: >-
+      이름을 만들면서 값을 넣는다. 타입은 오른쪽 값에서 읽는다.
+    en: >-
+      It makes a name and puts a value in; the type is read off the right side.
+  why:
+    ko: >-
+      {{site.line}}행은 이름 {{pick.2|code}}{{pick.2|josa:을,를}} 만들고 {{pick.3|code}}{{pick.3|josa:을,를}}
+      넣습니다. 타입을 안 적어도 되는 것은 오른쪽 값이 이미 타입을 알고 있어서예요. 여기에 <b>두 가지 함정</b>이 붙습니다. 첫째, 같은 블록에 이름이 이미 있고 왼쪽에
+      새 이름이 하나라도 있으면 <b>새로 만들지 않고 값만 들어갑니다</b> — <code>v, err := f()</code> 를 이어 쓸 수 있는 이유이자, 이미 있는
+      <code>err</code> 이 조용히 덮이는 이유입니다. 둘째, <b>안쪽 블록</b>에서 쓰면 반대로 바깥 이름을 <b>가립니다</b> — 안에서 넣은 값이 밖으로 안
+      나가요.
+    en: >-
+      Line {{site.line}} makes the name {{pick.2|code}} and puts {{pick.3|code}} in. No type is
+      written because the value on the right already knows one. <b>Two traps</b> come with it. First,
+      when a name already exists in the same block and at least one name on the left is new, nothing
+      is made — <b>the value simply goes in</b>. That is why <code>v, err := f()</code> can be written
+      over and over, and why an existing <code>err</code> is quietly overwritten. Second, inside an
+      <b>inner block</b> it does the opposite and <b>shadows</b> the outer name — what goes in inside
+      never leaves.
+  trace:
+    - ko: >-
+        {{site.line}}행은 {{pick.3|code}}{{pick.3|josa:을,를}} 먼저 값으로 만든다.
+      en: >-
+        Line {{site.line}} turns {{pick.3|code}} into a value first.
+    - ko: >-
+        그 값의 타입이 {{pick.2|code}} 의 타입이 된다.
+      en: >-
+        The type of that value becomes the type of {{pick.2|code}}.
+    - ko: >-
+        {{site.line}}행 아래로 {{pick.2|code}}{{pick.2|josa:은,는}} 그 값이다.
+      en: >-
+        Below line {{site.line}}, {{pick.2|code}} is that value.
+
+rule:
+  ko: >-
+    <b>이 블록에 이미 있으면 만들지 않고 넣기만 한다.</b> 안쪽 블록이면 반대로 바깥을 가린다.
+  en: >-
+    <b>If the name already lives in this block, nothing is made — the value just goes in.</b> In an
+    inner block it shadows the outer one instead.
+result:
+  label: { ko: "{{site.line}}행 아래의 {{pick.2}}", en: "{{pick.2}} below line {{site.line}}" }
+  value: "{{pick.3}}"
+  note: { ko: "타입은 오른쪽에서 읽었다", en: "the type came from the right side" }
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} 이제 {{pick.3|code}} 의 값이자 그 타입입니다.
+  en: >-
+    {{pick.2|code}} is now that value and its type.
+payoff:
+  ko: >-
+    이걸 알면 「안에서 고쳤는데 밖에서 안 바뀐다」가 풀립니다 — 안쪽에서 같은 이름을 새로 만든 겁니다.
+  en: >-
+    This untangles "I changed it inside and nothing changed outside" — the inner block made a new
+    name of the same spelling.
+bridge:
+  ko: >-
+    파이썬에는 만들기와 넣기를 가르는 낱말이 아예 없습니다. Go 는 기호 둘로 갈랐어요 — 같은 축의 정반대 답입니다.
+  en: >-
+    Python has no word separating making from putting. Go split it with two symbols — the opposite
+    answer on the same axis.
+misconceptions:
+  - ko: >-
+      이 기호는 언제나 새 이름을 만든다 — 같은 블록에 이미 있고 왼쪽에 새 이름이 하나라도 있으면 <b>넣기만</b> 합니다.
+    en: >-
+      This symbol always makes a new name — when the name already exists in the block and at least one
+      name on the left is new, it only <b>puts</b>.
+  - ko: >-
+      안쪽 블록에서 쓰면 바깥 이름이 바뀐다 — <b>가려집니다</b>. 안쪽에 같은 이름이 새로 생기고 바깥은 그대로예요.
+    en: >-
+      Using it in an inner block changes the outer name — it <b>shadows</b> it. A new inner name
+      appears and the outer one is untouched.
+  - ko: >-
+      함수 밖에서도 쓸 수 있다 — 못 씁니다. 패키지 수준의 이름은 <code>var</code> 로만 만들어요.
+    en: >-
+      It works outside a function — it does not. Package-level names are made only with
+      <code>var</code>.
+
+point:
+  - q:
+      ko: >-
+        {{site.line}}행에서 <b>이름을 만들면서 값을 넣는 기호</b>를 짚어 보세요.
+      en: >-
+        On line {{site.line}}, point at <b>the symbol that makes a name and puts a value in</b>.
+    hint: { ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다.", en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose." }
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 만들어지는 <b>이름</b>입니다. 이름 혼자로는 아무 일도 안 나요.
+          en: >-
+            {{pick.2|code}} is the <b>name</b> being made. A name alone does nothing.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 만드는 기호냐", en: "The sharpest spot — the name or the making symbol" }
+          code:
+            - "limit           // 없는 이름이면 멈춘다"
+            - "limit := 20     // 이 줄이 만든다"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 들어갈 <b>값</b>입니다. 값이 타입을 알려 주기는 하지만 이름을 만들지는 않아요.
+          en: >-
+            {{pick.3|code}} is the <b>value</b> going in. It supplies the type but does not make the name.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값이냐 만드는 기호냐", en: "The sharpest spot — the value or the making symbol" }
+          code:
+            - "20              // 값 하나"
+            - "limit := 20     // 이름이 남는다"
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>이름을 만들면서</b> 값을 넣습니다.
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} <b>makes a name</b> and puts a value in.
+    hint: { ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다.", en: "Your choice is written into the code at once. Submit to have it marked." }
+    options:
+      - { t: ":=", mono: true }
+      - t: "="
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 기호는 <b>이미 있는 이름에만</b> 씁니다. 없는 이름에 쓰면 그 줄에서 멈춰요.
+            en: >-
+              That symbol works <b>only on a name that already exists</b>. On a new one it stops on that line.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 만드나 옮기나", en: "The sharpest spot — making or moving" }
+            code:
+              - "limit := 20     // 만든다"
+              - "limit = 30      // 옮긴다"
+      - t: "=="
+        mono: true
+        diag:
+          t:
+            ko: >-
+              기호 둘짜리는 <b>견주기</b>라 묻기만 하고 넣지 않습니다. 줄 하나로 서 있으면 결과를 아무 데도 안 담은 채 끝나요.
+            en: >-
+              The two-symbol form <b>weighs</b>: it asks and does not put. Standing alone as a line, it ends
+              without keeping the answer.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 넣나 묻나", en: "The sharpest spot — putting or asking" }
+            code:
+              - "limit := 20     // 이름이 생긴다"
+              - "limit == 20     // 참·거짓이 난다"
+      - t: "var"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 낱말은 <b>타입을 적는 쪽</b>입니다. 함수 안에서 값까지 줄 수도 있지만, 이 자리에서 쓰려면 기호가 아니라 문장 전체를 바꿔야 해요.
+            en: >-
+              That word is the form where <b>the type is written</b>. It can carry a value too, but using it
+              here means rewriting the whole statement, not swapping a symbol.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 기호냐 낱말이냐", en: "The sharpest spot — a symbol or a word" }
+            code:
+              - "limit := 20"
+              - "var limit int = 20"
+
+why_gate:
+  q:
+    ko: >-
+      Go 는 왜 <b>만드는 기호</b>와 <b>넣는 기호</b>를 갈라 놓았을까요?
+    en: >-
+      Why did Go split the <b>making</b> symbol from the <b>putting</b> symbol?
+  choices:
+    - t:
+        ko: >-
+          이 줄이 새 이름을 세우는 줄인지 있는 이름을 옮기는 줄인지가 위를 안 읽어도 보이기 때문
+        en: >-
+          Because you can see whether the line sets up a new name or moves an existing one without reading
+          upward
+      ok: true
+      fb:
+        ko: >-
+          그 방향입니다. 그럼 같은 블록에서 이 기호가 넣기만 하는 예외도 함께 적어 보세요.
+        en: >-
+          That is the direction. Add the exception where this symbol only puts, inside the same block.
+    - t:
+        ko: >-
+          타입을 안 적어도 되게 하려고
+        en: >-
+          So the type can be left out
+      ok: false
+      fb:
+        ko: >-
+          타입 생략은 오른쪽 값이 해 주는 일이고, 기호를 둘로 가른 것과는 다른 문제예요.
+        en: >-
+          Leaving the type out is what the right-hand value does; splitting the symbols is a separate
+          matter.
+    - t:
+        ko: >-
+          짧게 쓰려고
+        en: >-
+          To write less
+      ok: false
+      fb:
+        ko: >-
+          짧기는 하지만 이유는 아닙니다. <code>var</code> 도 값과 함께 쓰면 한 줄이에요.
+        en: >-
+          It is shorter, but that is not the reason. <code>var</code> with a value is also one line.
+
+queries:
+  - { grammars: [go], file: ./short-var-decl.scm }
+
+examples:
+  - code: "func f() { limit := 20 }"
+    expect: { sites: 1, form: short, hole: ":=", picks: { 1: ":=", 2: "limit", 3: "20" } }
+  - code: "func f(g func() string) { host := g() }"
+    expect: { sites: 1, form: short, hole: ":=", picks: { 1: ":=", 2: "host", 3: "g()" } }
+  - code: "func f(g func() (int, error)) { v, err := g() }"
+    expect: none

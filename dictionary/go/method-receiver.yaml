@@ -1,0 +1,222 @@
+schema: 1
+id: go/method-receiver
+# 2부 (`go.md` §3 ㉒). 실측 800곳/135파일 — 포인터 리시버가 압도적이다.
+#
+# **메서드 집합을 이 판에 묶었다** (D187 ⑰ · `go-learning.md` §11.3):
+# 「타입 `T` 의 메서드 집합에 `*T` 리시버 메서드가 안 든다」가 T1(이식)을 통과하는
+# 유일한 인터페이스 물음이라, `go.md` §9 ⑩ 과 한 판으로 둔다.
+universal: null
+name: { ko: "타입에 함수 붙이기", en: "Method with a receiver" }
+token: "func (r T)"
+grammars: [go]
+framework: null
+essential: true
+difficulty: 2
+prereq: [go/func-declaration, go/struct-type, go/pointer]
+confusions: []
+
+dict:
+  one_liner:
+    ko: >-
+      이름 앞에 받는 값을 하나 더 적은 함수다. 자리로 받으면 원본을 만진다.
+    en: >-
+      A function with one extra value before the name; a place touches the original.
+  why:
+    ko: >-
+      {{site.line}}행은 {{pick.4|code}} 라는 함수를 만드는데, 이름 <b>앞</b>에 칸이 하나 더 있습니다. 그 칸이 「무엇에 붙는 함수인가」를 말해요.
+      여기서 갈리는 것이 판의 전부입니다 — 값으로 받으면 <b>복사본</b>이 들어와서 안에서 칸을 고쳐도 원본이 안 바뀌고, 자리로 받으면 <b>원본</b>을 만집니다.
+      실코드는 자리 쪽이 압도적이에요(`cli/cli` 에서 597 대 123). 그리고 규칙이 하나 더 붙습니다: <b>타입 자체의 메서드 집합에는 자리로 받는 메서드가 안
+      듭니다.</b> 그래서 자리로 받는 메서드로 인터페이스를 만족시키려면 값이 아니라 자리를 넘겨야 해요.
+    en: >-
+      Line {{site.line}} makes a function called {{pick.4|code}}, with one extra slot <b>before</b>
+      the name. That slot says what the function hangs on. Everything in this plate turns on one fork
+      — taking a <b>value</b> brings in a copy, so changing a slot inside leaves the original alone;
+      taking a <b>place</b> touches the original. Real code leans hard on places (597 to 123 in
+      `cli/cli`). One further rule comes with it: <b>the method set of the type itself does not
+      include methods that take a place.</b> So satisfying an interface with such a method means
+      handing over the place, not the value.
+  trace:
+    - ko: >-
+        {{site.line}}행의 {{pick.2|code}}{{pick.2|josa:이,가}} 함수가 받는 값이다.
+      en: >-
+        The {{pick.2|code}} on line {{site.line}} is what this function receives.
+    - ko: >-
+        {{pick.1|code}}{{pick.1|josa:이,가}} 있으면 원본을, 없으면 복사본을 받는다.
+      en: >-
+        With {{pick.1|code}} it receives the original; without it, a copy.
+    - ko: >-
+        {{pick.4|code}}{{pick.4|josa:은,는}} 그 타입에 붙은 이름이 된다.
+      en: >-
+        {{pick.4|code}} becomes a name hanging on that type.
+
+rule:
+  ko: >-
+    <b>자리로 받으면 원본, 값으로 받으면 복사본이다.</b> 타입의 메서드 집합에는 자리로 받는 것이 안 든다.
+  en: >-
+    <b>Take a place and you touch the original; take a value and you touch a copy.</b> The type's
+    own method set excludes the place-taking ones.
+result:
+  label: { ko: "{{site.line}}행이 붙인 것", en: "what line {{site.line}} hangs on the type" }
+  value: "{{pick.4}}"
+  note: { ko: "받는 칸이 원본인지 복사본인지 정한다", en: "the receiving slot settles original or copy" }
+ok: { ko: "{{pick.4|code}}{{pick.4|josa:은,는}} 이제 그 타입에 붙은 함수입니다.", en: "{{pick.4|code}} is now a function hanging on that type." }
+payoff:
+  ko: >-
+    이걸 알면 「메서드 안에서 칸을 고쳤는데 밖에서 그대로다」가 풀립니다 — 값으로 받았습니다.
+  en: >-
+    This untangles "I changed a slot in the method and nothing changed outside" — it took a value.
+bridge:
+  ko: >-
+    자바에서 메서드는 클래스 <b>안</b>에 적히고 받는 것이 늘 원본입니다. Go 는 밖에 적고 원본인지 복사본인지를 <b>줄마다</b> 고르게 해요.
+  en: >-
+    In Java a method is written <b>inside</b> the class and always gets the original. Go writes it
+    outside and lets each line choose original or copy.
+misconceptions:
+  - ko: >-
+      값으로 받아도 칸을 고치면 원본이 바뀐다 — <b>복사본</b>이라 안 바뀝니다.
+    en: >-
+      Even a value receiver's slot change reaches the original — it is a <b>copy</b> and does not.
+  - ko: >-
+      자리로 받는 메서드를 만들면 타입 자체도 그 인터페이스를 만족한다 — 안 합니다. 값이 아니라 <b>자리</b>를 넘겨야 해요.
+    en: >-
+      Defining a place-taking method makes the type itself satisfy the interface — it does not. The
+      <b>place</b> must be handed over, not the value.
+
+point:
+  - q:
+      ko: >-
+        {{site.line}}행에서 <b>이 함수가 받는 값의 이름</b>을 짚어 보세요.
+      en: >-
+        On line {{site.line}}, point at <b>the name of the value this function receives</b>.
+    hint: { ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다.", en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose." }
+    answer: pick.2
+    diag:
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 받는 값의 <b>종류</b>입니다. 종류이지 이름이 아니에요.
+          en: >-
+            {{pick.3|code}} is the <b>kind</b> of value received, not its name.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 종류냐", en: "The sharpest spot — the name or the kind" }
+          code:
+            - "func (c *Client) Do()     // 이름은 c"
+            - "func (c *Client) Do()     // 종류는 Client"
+      pick.4:
+        t:
+          ko: >-
+            {{pick.4|code}}{{pick.4|josa:은,는}} 붙는 <b>함수의 이름</b>입니다. 받는 값은 그 앞 괄호 안에 있어요.
+          en: >-
+            {{pick.4|code}} is the <b>function's</b> name. What it receives sits in the parentheses before
+            it.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 받는 것이냐 붙는 것이냐", en: "The sharpest spot — the receiver or the method" }
+          code:
+            - "(c *Client)              // 받는 것"
+            - "Do                       // 붙는 것"
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행은 메서드가 <b>원본을 만지게</b> 합니다.
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} lets the method <b>touch the original</b>.
+    hint: { ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다.", en: "Your choice is written into the code at once. Submit to have it marked." }
+    options:
+      - { t: "*", mono: true }
+      - t: "&"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 기호는 <b>값 앞에 붙어 자리를 만듭니다</b>. 타입을 적는 자리에는 안 와요.
+            en: >-
+              That symbol <b>stands before a value to take its place</b>. It does not appear where a type is
+              written.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 타입이냐 값이냐", en: "The sharpest spot — a type or a value" }
+            code:
+              - "func (c *Client) Do()    // 타입 자리"
+              - "f(&client)               // 값 앞"
+      - t: "[]"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 기호는 <b>여럿을 보는 창</b>을 뜻합니다. 받는 것이 여럿이 되어 뜻이 달라져요.
+            en: >-
+              That symbol means a <b>window over many</b>. The receiver would become many and the meaning
+              changes.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 하나냐 여럿이냐", en: "The sharpest spot — one or many" }
+            code:
+              - "func (c *Client) Do()"
+              - "func (c []Client) Do()"
+      - t: "..."
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 기호는 <b>인자를 몇 개든</b> 받는다는 표시입니다. 받는 칸에는 못 씁니다.
+            en: >-
+              That marks a parameter that takes <b>any number</b> of arguments. It cannot stand in the
+              receiving slot.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 받는 칸이냐 인자 칸이냐", en: "The sharpest spot — the receiving slot or a parameter" }
+            code:
+              - "func (c *Client) Do()"
+              - "func Do(xs ...int)"
+
+why_gate:
+  q:
+    ko: >-
+      Go 는 왜 메서드를 클래스 안이 아니라 <b>타입 밖</b>에 적게 할까요?
+    en: >-
+      Why does Go write a method <b>outside</b> the type instead of inside a class?
+  choices:
+    - t:
+        ko: >-
+          받는 것이 원본인지 복사본인지를 메서드마다 고를 수 있고, 남이 만든 타입에도 내 패키지에서 이름을 붙일 수 있기 때문
+        en: >-
+          Because each method can choose original or copy, and a name can be hung on a type from your own
+          package
+      ok: true
+      fb:
+        ko: >-
+          그 방향입니다. 그럼 그 자유가 인터페이스 만족에서 무엇을 까다롭게 하는지도 적어 보세요.
+        en: >-
+          That is the direction. Add what that freedom complicates about satisfying an interface.
+    - t:
+        ko: >-
+          클래스가 없어서
+        en: >-
+          Because there are no classes
+      ok: false
+      fb:
+        ko: >-
+          클래스가 없는 것은 <b>결과</b>이지 이유가 아닙니다. 메서드를 밖에 두기로 한 결정이 먼저예요.
+        en: >-
+          Having no classes is the <b>result</b>, not the reason. Deciding to put methods outside came
+          first.
+    - t:
+        ko: >-
+          컴파일이 빨라져서
+        en: >-
+          Because it compiles faster
+      ok: false
+      fb:
+        ko: >-
+          속도 이야기가 아닙니다. 무엇을 받느냐를 고르는 자유가 요점이에요.
+        en: >-
+          This is not about speed. The point is the freedom to choose what is received.
+
+queries:
+  - { grammars: [go], file: ./method-receiver.scm }
+
+examples:
+  - code: "func (c *Client) Do() { }"
+    expect: { sites: 1, form: ptr, hole: "*", picks: { 1: "*", 2: "c", 3: "Client", 4: "Do" } }
+  - code: "func (p Point) X() int { return 0 }"
+    expect: { sites: 1, form: value, picks: { 2: "p", 3: "Point", 4: "X" } }
+  - code: "func Do(c Client) { }"
+    expect: none

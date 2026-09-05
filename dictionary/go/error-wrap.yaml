@@ -1,0 +1,219 @@
+schema: 1
+id: go/error-wrap
+# 2부 · §4 심화 (`go.md` §4 ㉙). 실측 808곳/191파일 — `go.md` §1 의 grep(`%w` 486곳)보다
+# 큰 것은 이 쿼리가 서식 문자열이 든 `Errorf` 부르기를 전부 잡기 때문이다.
+# 구멍이 **서식 문자열**인 것이 이 판의 요점이다 — `%w` 냐 `%v` 냐가 전부다.
+universal: null
+name: { ko: "실패를 감싸 올려보내기", en: "Wrapping errors" }
+token: "%w"
+grammars: [go]
+framework: null
+essential: true
+difficulty: 4
+prereq: [go/error-check, go/text-literal]
+confusions: []
+
+dict:
+  one_liner:
+    ko: >-
+      실패를 문장으로 감싸 올려보낸다. 서식에 무엇을 적었나가 안쪽을 살린다.
+    en: >-
+      It wraps a failure in a sentence; the format decides if the inside survives.
+  why:
+    ko: >-
+      {{site.line}}행은 아래쪽에서 온 실패에 문장을 덧붙여 위로 올려보냅니다. 여기서 {{pick.1|code}} 안에 무엇을 적었느냐가 결정적이에요.
+      <code>%w</code> 로 적으면 안쪽 값이 <b>그대로 들어가 남고</b>, 위에서 <code>errors.Is</code>·<code>errors.As</code>
+      로 벗겨 낼 수 있습니다. <code>%v</code> 로 적으면 안쪽 값이 <b>글자로 눌려</b> 문장은 똑같은데 안이 사라져요. 화면에 찍히는 것이 같아서
+      <b>눈으로는 구별이 안 됩니다</b> — 「어떤 실패였는지 위에서 판정하는 코드」가 조용히 안 걸리게 되는 자리입니다.
+    en: >-
+      Line {{site.line}} adds a sentence to a failure from below and sends it upward. What is written
+      inside {{pick.1|code}} decides everything. With <code>%w</code> the inner value <b>goes in and
+      stays</b>, and code above can peel it back with <code>errors.Is</code> or
+      <code>errors.As</code>. With <code>%v</code> the inner value is <b>flattened to text</b>: the
+      sentence reads the same and the inside is gone. What prints is identical, so <b>the eye cannot
+      tell them apart</b> — this is where code that decides which failure it was quietly stops
+      matching.
+  trace:
+    - ko: >-
+        아래쪽에서 실패 {{pick.3|code}}{{pick.3|josa:이,가}} 올라왔다.
+      en: >-
+        A failure, {{pick.3|code}}, came up from below.
+    - ko: >-
+        {{site.line}}행은 {{pick.1|code}} 서식으로 문장을 덧붙인다.
+      en: >-
+        Line {{site.line}} adds a sentence using {{pick.1|code}}.
+    - ko: >-
+        서식에 무엇을 적었나가 안쪽이 남을지를 정한다.
+      en: >-
+        What the format says decides whether the inside survives.
+
+rule:
+  ko: >-
+    <b>감싼 것만 벗겨진다.</b> 서식을 잘못 적으면 문장은 같고 안이 사라진다.
+  en: >-
+    <b>Only what was wrapped can be peeled.</b> The other verb keeps the sentence and loses the
+    inside.
+result:
+  label: { ko: "{{site.line}}행이 올려보내는 것", en: "what line {{site.line}} sends upward" }
+  value: "{{pick.2}}({{pick.1}}, {{pick.3}})"
+  note: { ko: "안쪽이 남는지는 서식이 정한다", en: "the format decides whether the inside survives" }
+ok: { ko: "안쪽 실패가 문장 안에 담겨 위로 올라갑니다.", en: "The inner failure travels upward inside the sentence." }
+payoff:
+  ko: >-
+    이걸 알면 「같은 문장인데 판정이 안 걸린다」가 풀립니다 — 안쪽이 눌렸습니다.
+  en: >-
+    This untangles "same sentence, and the match no longer fires" — the inside was flattened.
+bridge:
+  ko: >-
+    자바의 예외는 원인을 <b>객체로</b> 물고 올라갑니다. Go 는 문장 안에 넣고, 넣었는지 아닌지가 <b>서식 한 글자</b>에 달렸어요.
+  en: >-
+    A Java exception carries its cause <b>as an object</b>. Go puts it inside a sentence, and
+    whether it is really in there hangs on <b>one letter of the format</b>.
+misconceptions:
+  - ko: >-
+      문장이 같으면 같은 실패다 — 안쪽이 남았는지는 서식이 정합니다. 찍히는 글자는 같아요.
+    en: >-
+      The same sentence means the same failure — whether the inside survived is set by the format. The
+      printed text is identical.
+  - ko: >-
+      감싸면 원래 실패를 잃는다 — <code>%w</code> 로 감싸면 <b>남습니다</b>. 벗겨 낼 수 있어요.
+    en: >-
+      Wrapping loses the original — with <code>%w</code> it <b>stays</b> and can be peeled back.
+
+point:
+  - q:
+      ko: >-
+        {{site.line}}행에서 <b>감싸질 실패</b>를 짚어 보세요.
+      en: >-
+        On line {{site.line}}, point at <b>the failure being wrapped</b>.
+    hint: { ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다.", en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose." }
+    answer: pick.3
+    diag:
+      pick.1:
+        t:
+          ko: >-
+            {{pick.1|code}}{{pick.1|josa:은,는}} <b>서식</b>입니다. 무엇을 어떻게 담을지를 적을 뿐 감싸질 값은 아니에요.
+          en: >-
+            {{pick.1|code}} is the <b>format</b>. It says how to hold things and is not the value being
+            wrapped.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 서식이냐 값이냐", en: "The sharpest spot — the format or the value" }
+          code:
+            - "\"open %s: %w\"       // 서식"
+            - "err                  // 감싸질 값"
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 부르는 <b>함수 이름</b>입니다. 감싸질 값은 인자 쪽에 있어요.
+          en: >-
+            {{pick.2|code}} is the <b>function's name</b>. The wrapped value is in the arguments.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 함수냐 값이냐", en: "The sharpest spot — the function or the value" }
+          code:
+            - "Errorf               // 함수"
+            - "err                  // 값"
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행은 안쪽 실패를 <b>벗겨 낼 수 있게</b> 감쌉니다.
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} wraps the inner failure so it can be <b>peeled
+        back</b>.
+    hint: { ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다.", en: "Your choice is written into the code at once. Submit to have it marked." }
+    options:
+      - { t: "\"open %s: %w\"", mono: true }
+      - t: "\"open %s: %v\""
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 서식은 안쪽을 <b>글자로 눌러</b> 담습니다. 찍히는 문장은 같은데 위에서 판정하는 코드가 안 걸려요.
+            en: >-
+              That format <b>flattens the inside to text</b>. What prints is the same and code above stops
+              matching.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 남기나 누르나", en: "The sharpest spot — keeping or flattening" }
+            code:
+              - "fmt.Errorf(\"open: %w\", err)   // 벗겨진다"
+              - "fmt.Errorf(\"open: %v\", err)   // 안 벗겨진다"
+      - t: "\"open %s: %s\""
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 서식도 안쪽을 <b>글자로</b> 담습니다. 게다가 실패 값이 글자 묶음이 아니라 뜻이 어긋나요.
+            en: >-
+              That format also holds the inside <b>as text</b>, and a failure value is not text, so the intent
+              drifts.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값이냐 글자냐", en: "The sharpest spot — the value or its text" }
+            code:
+              - "\"open: %w\""
+              - "\"open: %s\""
+      - t: "\"open %s\""
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 서식에는 안쪽을 담을 자리가 <b>아예 없습니다</b>. 실패가 문장에서 사라져요.
+            en: >-
+              That format has <b>no slot at all</b> for the inside. The failure vanishes from the sentence.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 자리가 있나", en: "The sharpest spot — is there a slot" }
+            code:
+              - "\"open %s: %w\""
+              - "\"open %s\""
+
+why_gate:
+  q:
+    ko: >-
+      Go 는 왜 감싸기를 <b>서식 한 글자</b>로 정하게 했을까요?
+    en: >-
+      Why does Go decide wrapping by <b>one letter of a format</b>?
+  choices:
+    - t:
+        ko: >-
+          감싸는 일과 문장을 만드는 일이 같은 부르기 하나로 끝나, 실패를 올려보내는 코드가 한 줄로 남기 때문
+        en: >-
+          Because wrapping and composing the sentence become one call, so sending a failure upward stays
+          one line
+      ok: true
+      fb:
+        ko: >-
+          그 방향입니다. 그럼 그 대가로 어떤 사고가 조용해지는지도 적어 보세요.
+        en: >-
+          That is the direction. Add which mistake goes quiet as the price.
+    - t:
+        ko: >-
+          따로 함수를 만들 수 없어서
+        en: >-
+          Because a separate function was impossible
+      ok: false
+      fb:
+        ko: >-
+          만들 수 있습니다. 실제로 그렇게 하는 라이브러리가 여럿이에요.
+        en: >-
+          It is possible, and several libraries do exactly that.
+    - t:
+        ko: >-
+          서식이 더 빨라서
+        en: >-
+          Because a format is faster
+      ok: false
+      fb:
+        ko: >-
+          속도 문제가 아닙니다. 한 부르기로 묶은 것이 요점이에요.
+        en: >-
+          Speed is not it. Folding it into one call is.
+
+queries:
+  - { grammars: [go], file: ./error-wrap.scm }
+
+examples:
+  - code: "func f(name string, err error) error { return fmt.Errorf(\"open %s: %w\", name, err) }"
+    expect: { sites: 1, form: wrap, hole: "\"open %s: %w\"", picks: { 1: "\"open %s: %w\"", 2: "Errorf", 3: "name", 4: "fmt" } }
+  - code: "func f(err error) error { return fmt.Errorf(\"read: %w\", err) }"
+    expect: { sites: 1, form: wrap, hole: "\"read: %w\"", picks: { 1: "\"read: %w\"", 2: "Errorf", 3: "err", 4: "fmt" } }
+  - code: "func f(x int) { fmt.Println(x) }"
+    expect: none

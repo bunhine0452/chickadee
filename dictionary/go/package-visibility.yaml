@@ -1,0 +1,220 @@
+schema: 1
+id: go/package-visibility
+# 2부 · §4 심화 (`go.md` §4 ㉖). 실측 3,341곳/258파일.
+#
+# **구조체 칸 이름에서만 잡는다.** 타입 선언은 `go/struct-type`·`go/interface-implicit`
+# 이, 함수 이름은 `go/func-declaration` 이 이미 사이트로 쓴다 (`README.md` §7 ②).
+universal: null
+name: { ko: "첫 글자로 공개 정하기", en: "Exported names" }
+token: "Name"
+grammars: [go]
+framework: null
+essential: true
+difficulty: 3
+prereq: [go/struct-type, cs/scope-and-lifetime]
+confusions: []
+
+dict:
+  one_liner:
+    ko: >-
+      첫 글자가 대문자면 패키지 밖에서 보인다. 공개를 정하는 낱말이 따로 없다.
+    en: >-
+      A capital first letter is what makes a name visible outside the package.
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 첫 글자가 대문자입니다. 그것이 이 이름을 <b>패키지 밖에서 볼 수 있게</b>
+      하는 전부예요 — 공개·비공개를 적는 낱말이 이 언어에 없습니다. 그래서 이름을 고치는 것이 곧 접근 범위를 고치는 것이고, 첫 글자를 소문자로 바꾸면 그 이름을 쓰던 다른
+      패키지가 전부 멈춥니다. 값은 <b>선언 줄만 보면 범위를 안다</b>는 것이고, 대가는 이름과 범위가 <b>한 글자에 묶인다</b>는 것입니다 — 글자만 보고 「왜
+      대문자지」를 알 수 없어요.
+    en: >-
+      The {{pick.1|code}} on line {{site.line}} starts with a capital, and that is all it takes to
+      make the name <b>visible outside the package</b> — this language has no word for public or
+      private. So renaming is changing the reach: lowercase the first letter and every other package
+      that used it stops compiling. What it buys is that <b>the declaration line alone tells you the
+      reach</b>; what it costs is that name and reach are <b>tied to one letter</b>, and the letter
+      alone never says why.
+  trace:
+    - ko: >-
+        {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 첫 글자가 대문자다.
+      en: >-
+        The {{pick.1|code}} on line {{site.line}} starts with a capital.
+    - ko: >-
+        그래서 이 이름은 패키지 밖에서 보인다.
+      en: >-
+        So this name is visible outside the package.
+    - ko: >-
+        소문자로 바꾸면 밖에서 안 보이게 된다.
+      en: >-
+        Lowercase it and it becomes invisible outside.
+
+rule:
+  ko: >-
+    <b>첫 글자가 범위를 정한다.</b> 공개를 적는 낱말이 따로 없다.
+  en: >-
+    <b>The first letter sets the reach.</b> There is no separate word for it.
+result:
+  label: { ko: "{{site.line}}행의 이름", en: "the name on line {{site.line}}" }
+  value: "{{pick.1}} {{pick.2}}"
+  note: { ko: "첫 글자가 범위를 정한다", en: "the first letter sets the reach" }
+ok: { ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 패키지 밖에서도 보이는 이름입니다.", en: "{{pick.1|code}} is a name visible outside the package too." }
+payoff:
+  ko: >-
+    이걸 알면 「이름만 바꿨는데 다른 패키지가 멈춘다」가 풀립니다 — 범위를 바꿨습니다.
+  en: >-
+    This untangles "I only renamed it and another package stopped compiling" — the reach changed.
+bridge:
+  ko: >-
+    자바·C# 은 <code>public</code>·<code>private</code> 를 적습니다. Go 는 그 낱말을 없애고 <b>이름의 첫 글자</b>에 그 일을
+    맡겼어요.
+  en: >-
+    Java and C# write <code>public</code> and <code>private</code>. Go dropped those words and gave
+    the job to <b>the first letter of the name</b>.
+misconceptions:
+  - ko: >-
+      단계가 여럿이다 — <b>둘</b>뿐입니다. 패키지 밖에서 보이나 안 보이나예요.
+    en: >-
+      There are several levels — there are <b>two</b>: visible outside the package or not.
+  - ko: >-
+      같은 패키지의 다른 파일에서는 대문자여야 보인다 — 같은 패키지 안이면 소문자도 보입니다.
+    en: >-
+      Another file in the same package needs the capital — inside one package lowercase is visible
+      too.
+
+point:
+  - q:
+      ko: >-
+        {{site.line}}행에서 <b>패키지 밖에서 보이는지를 정하는 이름</b>을 짚어 보세요.
+      en: >-
+        On line {{site.line}}, point at <b>the name whose spelling settles the reach</b>.
+    hint: { ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다.", en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose." }
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 담기는 값의 <b>종류</b>입니다. 종류는 범위를 안 정해요.
+          en: >-
+            {{pick.2|code}} is the <b>kind</b> of value held. A kind does not set the reach.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 종류냐", en: "The sharpest spot — the name or the kind" }
+          code:
+            - "Web bool         // 밖에서 보인다"
+            - "web bool         // 안 보인다"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 곁에 붙은 <b>꼬리표</b>입니다. JSON 이름을 정할 뿐 패키지 범위와는 무관해요.
+          en: >-
+            {{pick.3|code}} is an attached <b>tag</b>. It names a JSON field and has nothing to do with
+            package reach.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 꼬리표냐 이름이냐", en: "The sharpest spot — the tag or the name" }
+          code:
+            - "Web bool `json:\"web\"`"
+            - "web bool `json:\"web\"`   // 밖에선 안 보인다"
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행의 칸은 <b>패키지 밖에서 보여야</b> 합니다.
+      en: >-
+        Choose what goes in the blank. The slot on line {{site.line}} must be <b>visible outside the
+        package</b>.
+    hint: { ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다.", en: "Your choice is written into the code at once. Submit to have it marked." }
+    options:
+      - { t: "Web", mono: true }
+      - t: "web"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              첫 글자가 소문자면 <b>패키지 안에서만</b> 보입니다. JSON 으로 내보낼 때도 이 칸이 통째로 빠져요.
+            en: >-
+              A lowercase first letter is visible <b>inside the package only</b>. Encoding to JSON drops the
+              slot entirely.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 대문자냐 소문자냐", en: "The sharpest spot — capital or lowercase" }
+            code:
+              - "Web bool         // 밖에서 보인다"
+              - "web bool         // 안 보인다"
+      - t: "_Web"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              밑줄로 시작하면 첫 글자가 대문자가 <b>아니라서</b> 밖에서 안 보입니다. 이 언어에 밑줄 규약은 없어요.
+            en: >-
+              Starting with an underscore means the first letter is <b>not</b> a capital, so it stays
+              invisible. There is no underscore convention here.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 무엇이 첫 글자냐", en: "The sharpest spot — which letter is first" }
+            code:
+              - "Web bool"
+              - "_Web bool        // 안 보인다"
+      - t: "publicWeb"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이름에 낱말을 붙여도 첫 글자가 소문자면 <b>안 보입니다</b>. 뜻이 아니라 글자가 정해요.
+            en: >-
+              Spelling out the word does not help while the first letter is lowercase — the letter decides,
+              not the meaning.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 뜻이냐 글자냐", en: "The sharpest spot — meaning or spelling" }
+            code:
+              - "Web bool"
+              - "publicWeb bool   // 안 보인다"
+
+why_gate:
+  q:
+    ko: >-
+      Go 는 왜 공개 여부를 <b>이름의 첫 글자</b>로 정할까요?
+    en: >-
+      Why does Go set visibility by <b>the first letter of the name</b>?
+  choices:
+    - t:
+        ko: >-
+          쓰는 자리마다 이름만 보면 밖의 것인지 안의 것인지 알 수 있어, 선언을 찾아가지 않아도 되기 때문
+        en: >-
+          Because every use site says from the name alone whether it comes from outside, so the
+          declaration need not be found
+      ok: true
+      fb:
+        ko: >-
+          그 방향입니다. 그럼 그 결정이 이름 바꾸기를 왜 비싸게 만드는지도 적어 보세요.
+        en: >-
+          That is the direction. Add why that decision makes renaming expensive.
+    - t:
+        ko: >-
+          낱말을 적는 것이 귀찮아서
+        en: >-
+          Because writing the word is tedious
+      ok: false
+      fb:
+        ko: >-
+          귀찮음이 이유는 아닙니다. 쓰는 자리에서 읽힌다는 것이 요점이에요.
+        en: >-
+          Tedium is not the reason. Being readable at the use site is.
+    - t:
+        ko: >-
+          단계를 여럿 두기 어려워서
+        en: >-
+          Because several levels would be hard to build
+      ok: false
+      fb:
+        ko: >-
+          어렵지 않습니다. 단계를 <b>둘</b>로 줄인 것이 결정이에요.
+        en: >-
+          It would not be hard. Cutting the levels to <b>two</b> is the decision.
+
+queries:
+  - { grammars: [go], file: ./package-visibility.scm }
+
+examples:
+  - code: "type Options struct { Web bool }"
+    expect: { sites: 1, form: field, hole: "Web", picks: { 1: "Web", 2: "bool" } }
+  - code: "type Job struct { ID string `json:\"id\"` }"
+    expect: { sites: 1, form: tagged, hole: "ID", picks: { 1: "ID", 2: "string", 3: "`json:\"id\"`" } }
+  - code: "type Options struct { web bool }"
+    expect: none

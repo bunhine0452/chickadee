@@ -1,0 +1,172 @@
+schema: 1
+id: go/call-expression
+# 2부 (`go.md` §3 ⑬). 실측 14,298곳/419파일 — 이 사전에서 둘째로 두꺼운 개념이다.
+#
+# 빈칸형이 없다. 사유는 `no_hole_reason` 에 적었다.
+universal: common/function-call
+name: { ko: "함수 부르기", en: "Calling a function" }
+token: "f()"
+grammars: [go]
+framework: null
+essential: true
+difficulty: 1
+prereq: [go/func-declaration, cs/value-vs-reference]
+confusions: []
+
+dict:
+  one_liner:
+    ko: >-
+      함수를 부르는 식이다. 인자는 언제나 값 복사로 건너간다.
+    en: >-
+      This calls a function, and every argument crosses over as a copy.
+  why:
+    ko: >-
+      {{site.line}}행은 {{pick.2|code}}{{pick.2|josa:을,를}} 부르고 {{pick.3|code}}{{pick.3|josa:을,를}} 넘깁니다.
+      Go 에서 인자는 <b>예외 없이 값 복사</b>예요 — 넘긴 쪽의 값은 부른 함수가 무엇을 하든 안 바뀝니다. 그런데 이 문장이 슬라이스·맵·채널에서 오해를 낳아요: 그
+      셋도 복사되는 것이 맞지만 <b>복사되는 것이 손잡이</b>라서, 복사본이 가리키는 곳은 원본과 같습니다. 그래서 「값 복사인데 왜 바뀌지」가 생겨요. 부른 쪽의
+      <b>이름</b>이 다른 값을 가리키게 하려면 주소를 명시적으로 넘겨야 합니다.
+    en: >-
+      Line {{site.line}} calls {{pick.2|code}} and hands it {{pick.3|code}}. In Go an argument is
+      <b>always a copy</b> — the caller's value is untouched whatever the callee does. That sentence
+      misleads on slices, maps and channels: those are copied too, but <b>what is copied is a
+      handle</b>, so the copy points at the same place as the original. Hence "it was a copy, so why
+      did it change". To make the caller's <b>name</b> point at a different value, the address must be
+      handed over explicitly.
+  trace:
+    - ko: >-
+        {{site.line}}행은 {{pick.3|code}}{{pick.3|josa:을,를}} 먼저 값으로 접는다.
+      en: >-
+        Line {{site.line}} folds {{pick.3|code}} into a value first.
+    - ko: >-
+        그 값의 <b>복사본</b>이 {{pick.2|code}} 안으로 들어간다.
+      en: >-
+        A <b>copy</b> of that value goes into {{pick.2|code}}.
+    - ko: >-
+        부른 쪽의 값은 그대로 남는다.
+      en: >-
+        The caller's value stays as it was.
+
+rule:
+  ko: >-
+    <b>인자는 언제나 복사다.</b> 손잡이를 복사하면 가리키는 곳은 같다.
+  en: >-
+    <b>Arguments are always copies.</b> Copy a handle and it still points at the same place.
+result:
+  label: { ko: "{{site.line}}행의 부르기", en: "the call on line {{site.line}}" }
+  value: "{{pick.2}}({{pick.3}})"
+  note: { ko: "인자는 복사본으로 간다", en: "the argument travels as a copy" }
+ok: { ko: "{{pick.3|code}}{{pick.3}} 복사본이 {{pick.2|code}} 안으로 갔습니다.", en: "A copy of {{pick.3|code}} went into {{pick.2|code}}." }
+payoff:
+  ko: >-
+    이걸 알면 「복사본이라는데 왜 원본이 바뀌나」가 풀립니다 — 복사된 것이 손잡이인 경우입니다.
+  en: >-
+    This untangles "it was a copy, so why did the original change" — what got copied was a handle.
+bridge:
+  ko: >-
+    파이썬은 이름이 객체를 가리킬 뿐이라 복사라는 말 자체가 안 쓰입니다. Go 는 언제나 복사하고, 무엇을 복사하느냐만 다릅니다.
+  en: >-
+    In Python a name only points, so the word copy hardly applies. Go always copies; what differs is
+    what gets copied.
+misconceptions:
+  - ko: >-
+      슬라이스를 넘기면 복사본이 간다 — 손잡이가 복사되고 <b>뒷배열은 같습니다</b>. 안에서 고치면 밖에서도 보여요.
+    en: >-
+      Handing over a slice hands over a copy — the handle is copied and <b>the backing array is
+      shared</b>. A change inside shows outside.
+  - ko: >-
+      구조체를 넘기면 안에서 고친 것이 보인다 — 안 보입니다. 통째로 복사돼요.
+    en: >-
+      Handing over a struct lets the callee's changes show — it does not. The whole thing is copied.
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 개념에서 물을 것은 「무엇을 부르나」가 아니라 「인자가 어떻게 건너가나」인데, 그 답은 코드에 적힌 글자가 아니라 <b>부른 뒤의 값</b>이다.
+  부르는 이름을 구멍으로 삼으면 대신 넣을 후보가 그 파일의 다른 함수 이름들이 되어, 문법이 아니라 어휘를 묻는 문항이 된다. 값을 묻는 판은 기초
+  문항(`docs/program/fundamentals.md` §2 `value`)의 몫이다.
+
+point:
+  - q:
+      ko: >-
+        {{site.line}}행에서 <b>불리는 것의 이름</b>을 짚어 보세요.
+      en: >-
+        On line {{site.line}}, point at <b>the name of what is being called</b>.
+    hint: { ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다.", en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose." }
+    answer: pick.2
+    diag:
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 넘어가는 <b>인자</b>입니다. 인자는 건너가는 값이지 불리는 것이 아니에요.
+          en: >-
+            {{pick.3|code}} is the <b>argument</b> handed over. An argument is a value that crosses, not the
+            thing being called.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 부르는 쪽이냐 건너가는 쪽이냐", en: "The sharpest spot — the callee or what crosses" }
+          code:
+            - "greet             // 불리는 것"
+            - "greet(name)       // name 은 건너간다"
+      pick.4:
+        t:
+          ko: >-
+            {{pick.4|code}}{{pick.4|josa:은,는}} 점 <b>왼쪽</b>입니다. 무엇에 붙은 함수인지를 말할 뿐 불리는 이름은 점 오른쪽이에요.
+          en: >-
+            {{pick.4|code}} is what stands <b>left of the dot</b>. It says which thing the function hangs
+            on; the called name is to the right.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 점 왼쪽이냐 오른쪽이냐", en: "The sharpest spot — left of the dot or right" }
+          code:
+            - "fmt               // 점 왼쪽"
+            - "fmt.Println(x)    // 불리는 것은 Println"
+
+why_gate:
+  q:
+    ko: >-
+      Go 는 왜 인자를 <b>예외 없이 복사</b>할까요?
+    en: >-
+      Why does Go copy <b>every</b> argument?
+  choices:
+    - t:
+        ko: >-
+          부르는 쪽의 이름이 부른 함수 때문에 다른 값을 가리키는 일이 없어, 호출 한 줄을 읽고 무엇이 안 바뀌는지 알 수 있기 때문
+        en: >-
+          Because a caller's name never comes to point at something else because of the callee, so one
+          line of the call says what is safe
+      ok: true
+      fb:
+        ko: >-
+          그 방향입니다. 그럼 슬라이스에서 그 문장이 왜 덜 편안한지도 적어 보세요.
+        en: >-
+          That is the direction. Add why the sentence is less comfortable for slices.
+    - t:
+        ko: >-
+          복사가 주소를 넘기는 것보다 빨라서
+        en: >-
+          Because copying is faster than handing over an address
+      ok: false
+      fb:
+        ko: >-
+          큰 구조체는 오히려 느립니다. 그래서 큰 것에는 주소를 손으로 넘겨요.
+        en: >-
+          For a large struct it is slower. That is why the address is handed over by hand for large
+          values.
+    - t:
+        ko: >-
+          주소를 넘기는 방법이 없어서
+        en: >-
+          Because there is no way to hand over an address
+      ok: false
+      fb:
+        ko: >-
+          있습니다. 주소를 만드는 기호가 따로 있고, 그것을 <b>손으로</b> 적게 한 것이 결정이에요.
+        en: >-
+          There is. A symbol for taking an address exists, and requiring it to be written <b>by hand</b>
+          is the decision.
+
+queries:
+  - { grammars: [go], file: ./call-expression.scm }
+
+examples:
+  - code: "func f(name string) { greet(name) }"
+    expect: { sites: 1, form: plain, picks: { 2: "greet", 3: "name" } }
+  - code: "func f(x int) { fmt.Println(x) }"
+    expect: { sites: 1, form: method, picks: { 2: "Println", 3: "x", 4: "fmt" } }
+  - code: "func f() { g() }"
+    expect: none

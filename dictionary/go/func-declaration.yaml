@@ -1,0 +1,226 @@
+schema: 1
+id: go/func-declaration
+# 1부 (`go.md` §2 ⑦).
+#
+# 쿼리가 **반환이 `error` 하나뿐인 함수를 뺀다** — 그 자리는 `go/nil-interface` 의
+# 것이다(`README.md` §7 ②). 뺀 뒤 실측 756곳/248파일이고, 뺀 것이 838곳이다.
+universal: common/function-definition
+name: { ko: "함수 정의하기", en: "Function declaration" }
+token: "func"
+grammars: [go]
+framework: null
+essential: true
+difficulty: 1
+prereq: [cs/call-stack]
+confusions: []
+
+dict:
+  one_liner:
+    ko: >-
+      함수를 만드는 줄이다. 타입이 이름 뒤에 오고 돌려줄 것은 괄호 뒤에 붙는다.
+    en: >-
+      This line makes a callable. Types come after names, results after them.
+  why:
+    ko: >-
+      {{site.line}}행은 {{pick.2|code}}{{pick.2|josa:이,가}} 라는 이름의 함수를 만듭니다. Go 의 순서가 C·자바와 반대라는 것이 눈에 먼저
+      들어와요 — 저 언어들은 <code>int add(int a, int b)</code> 처럼 <b>타입이 앞</b>이고, Go 는 <code>func add(a int, b
+      int) int</code> 처럼 <b>이름이 앞</b>입니다. 읽는 방향이 왼쪽에서 오른쪽으로 일정해지는 것이 그 대가로 얻는 것이에요. 인자 여럿이 타입 하나를 나눠 쓸
+      수도 있습니다 — <code>func add(a, b int)</code> 는 <b>둘 다</b> <code>int</code> 라는 뜻이지 <code>a</code> 의
+      타입이 빠진 것이 아닙니다.
+    en: >-
+      Line {{site.line}} makes a callable named {{pick.2|code}}. The order is the reverse of C and
+      Java, and that is what strikes the eye first — those write <code>int add(int a, int b)</code>
+      with the <b>type first</b>, while Go writes <code>func add(a int, b int) int</code> with the
+      <b>name first</b>. What it buys is a reading direction that stays left to right. Several
+      parameters may also share one type — <code>func add(a, b int)</code> means <b>both</b> are
+      <code>int</code>, not that <code>a</code> lost its type.
+  trace:
+    - ko: >-
+        {{site.line}}행은 이름 {{pick.2|code}}{{pick.2|josa:을,를}} 세운다.
+      en: >-
+        Line {{site.line}} sets up the name {{pick.2|code}}.
+    - ko: >-
+        {{pick.3|code}}{{pick.3|josa:이,가}} 받을 것을 적는다.
+      en: >-
+        {{pick.3|code}} lists what it takes.
+    - ko: >-
+        {{pick.4|code}} 안은 부를 때 비로소 돈다.
+      en: >-
+        The inside of {{pick.4|code}} runs only when it is called.
+
+rule:
+  ko: >-
+    <b>이름이 앞, 타입이 뒤다.</b> 돌려줄 것은 괄호 뒤에 적는다.
+  en: >-
+    <b>Name first, type after.</b> What comes back is written after the parentheses.
+result:
+  label: { ko: "{{site.line}}행이 세운 것", en: "what line {{site.line}} sets up" }
+  value: "{{pick.2}}{{pick.3}}"
+  note: { ko: "부를 때 비로소 돈다", en: "it runs only when called" }
+ok: { ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 이제 부를 수 있는 이름입니다.", en: "{{pick.2|code}} is now a name that can be called." }
+payoff:
+  ko: >-
+    이걸 알면 「<code>func add(a, b int)</code> 에서 <code>a</code> 의 타입이 어디 갔나」가 풀립니다 — 둘이 하나를 나눠 씁니다.
+  en: >-
+    This untangles "where did <code>a</code>'s type go in <code>func add(a, b int)</code>" — the two
+    share one.
+bridge:
+  ko: >-
+    C·자바는 타입을 먼저 적습니다. Go 는 뒤로 옮겨서, 함수든 이름이든 <b>왼쪽부터 오른쪽으로</b> 같은 방향으로 읽히게 했어요.
+  en: >-
+    C and Java write the type first. Go moved it after so that a name and a callable both read
+    <b>left to right</b>.
+misconceptions:
+  - ko: >-
+      <code>func add(a, b int)</code> 에서 <code>a</code> 는 타입이 없다 — 둘 다 <code>int</code> 입니다. 타입 하나를 나눠
+      쓴 거예요.
+    en: >-
+      In <code>func add(a, b int)</code>, <code>a</code> has no type — both are <code>int</code>; they
+      share one.
+  - ko: >-
+      돌려줄 것을 안 적으면 아무거나 돌려줄 수 있다 — 안 적으면 <b>아무것도</b> 못 돌려줍니다.
+    en: >-
+      Writing no result means anything may come back — writing none means <b>nothing</b> may.
+  - ko: >-
+      만드는 줄에서 몸통이 한 번 돈다 — 안 돕니다. 부를 때만 돌아요.
+    en: >-
+      The body runs once at the declaration — it does not. It runs only when called.
+
+point:
+  - q:
+      ko: >-
+        {{site.line}}행에서 <b>받을 것을 적은 자리</b>를 짚어 보세요.
+      en: >-
+        On line {{site.line}}, point at <b>the place that lists what it takes</b>.
+    hint: { ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다.", en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose." }
+    answer: pick.3
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 이름은 부를 때 쓰는 것이고 받을 것을 적지는 않아요.
+          en: >-
+            {{pick.2|code}} is the <b>name</b>. A name is what you call it by; it does not list what it
+            takes.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 받는 칸이냐", en: "The sharpest spot — the name or the taking slot" }
+          code:
+            - "greet                 // 이름"
+            - "greet(name string)    // 받는 칸"
+      pick.4:
+        t:
+          ko: >-
+            {{pick.4|code}}{{pick.4|josa:은,는}} <b>몸통</b>입니다. 몸통은 받은 것을 쓰는 곳이지 받을 것을 적는 곳이 아니에요.
+          en: >-
+            {{pick.4|code}} is the <b>body</b>. The body uses what came in; it does not list it.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 받는 칸이냐 몸통이냐", en: "The sharpest spot — the taking slot or the body" }
+          code:
+            - "(name string)         // 받는 칸"
+            - "{ println(name) }     // 몸통"
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>부를 수 있는 것</b>을 만듭니다.
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} makes something that can be <b>called</b>.
+    hint: { ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다.", en: "Your choice is written into the code at once. Submit to have it marked." }
+    options:
+      - { t: "func", mono: true }
+      - t: "type"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 낱말은 <b>새 타입</b>을 만듭니다. 부를 수 있는 것이 아니라 값의 모양을 적는 자리예요.
+            en: >-
+              That word makes a <b>new type</b>. It describes the shape of a value rather than something
+              callable.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 부르나 담나", en: "The sharpest spot — calling or holding" }
+            code:
+              - "func greet() { }"
+              - "type Greeter struct { }"
+      - t: "var"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 낱말은 <b>이름</b>을 만듭니다. 함수를 담을 수는 있지만 그러려면 오른쪽에 함수 값을 줘야 해요.
+            en: >-
+              That word makes a <b>name</b>. It can hold a callable, but only if a callable value is given on
+              the right.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 만드나 담나", en: "The sharpest spot — making or holding" }
+            code:
+              - "func greet() { }"
+              - "var greet = func() { }"
+      - t: "return"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 낱말은 <b>몸통 안</b>에서 값을 돌려주는 자리입니다. 무언가를 만들지 않아요.
+            en: >-
+              That word gives a value back from <b>inside a body</b>. It makes nothing.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 만드나 돌려주나", en: "The sharpest spot — making or giving back" }
+            code:
+              - "func greet() { }"
+              - "return 1"
+
+why_gate:
+  q:
+    ko: >-
+      Go 는 왜 타입을 <b>이름 뒤</b>에 적을까요?
+    en: >-
+      Why does Go write the type <b>after</b> the name?
+  choices:
+    - t:
+        ko: >-
+          이름이 언제나 앞이라 무엇이 선언되는지가 먼저 읽히고, 타입이 복잡해져도 읽는 방향이 안 뒤집히기 때문
+        en: >-
+          Because the name always comes first, so what is being declared reads first and the direction
+          does not flip as types grow complex
+      ok: true
+      fb:
+        ko: >-
+          그 방향입니다. 타입이 복잡한 예를 하나 떠올려 두 순서로 적어 보세요.
+        en: >-
+          That is the direction. Take one complex type and write it in both orders.
+    - t:
+        ko: >-
+          C 와 다르게 보이려고
+        en: >-
+          To look unlike C
+      ok: false
+      fb:
+        ko: >-
+          닮고 안 닮고가 이유는 아닙니다. 이 순서로 얻는 것이 읽는 방향의 일관성이에요.
+        en: >-
+          Resemblance is not the reason. What this order buys is a consistent reading direction.
+    - t:
+        ko: >-
+          컴파일러가 이름을 먼저 알아야 해서
+        en: >-
+          Because the compiler must see the name first
+      ok: false
+      fb:
+        ko: >-
+          컴파일러는 어느 순서든 읽습니다. 이 결정은 사람이 읽는 쪽의 것이에요.
+        en: >-
+          The compiler reads either order. This decision is for the human reader.
+
+queries:
+  - { grammars: [go], file: ./func-declaration.scm }
+
+examples:
+  - code: "func greet(name string) { println(name) }"
+    expect: { sites: 1, form: void, hole: "func", picks: { 1: "func", 2: "greet", 3: "(name string)" } }
+  - code: "func total(xs []int) int { return 0 }"
+    expect: { sites: 1, form: one, hole: "func", picks: { 1: "func", 2: "total", 3: "(xs []int)", 5: "int" } }
+  - code: "func open(p string) (int, error) { return 0, nil }"
+    expect: { sites: 1, form: many, hole: "func", picks: { 1: "func", 2: "open", 3: "(p string)" } }
+  - code: "func close(p string) error { return nil }"
+    expect: none

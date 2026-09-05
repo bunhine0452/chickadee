@@ -1,0 +1,217 @@
+schema: 1
+id: go/nil-interface
+# 2부 · §4 심화 (`go.md` §4 ㉘). 실측 495곳/247파일.
+#
+# **쿼리가 사고 자체를 못 잡는다.** (타입, 값) 둘이라는 사실은 타입 정보라 문법에
+# 안 보인다 — `go.md` §10 「확인 못 함」 ③ 이 그것이다. 대신 그 사고가 **일어날 수
+# 있는 자리**(값이 인터페이스 타입으로 들어가는 칸)를 잡는다.
+universal: null
+name: { ko: "비었는데 비지 않은 것", en: "The non-nil nil interface" }
+token: "!= nil"
+grammars: [go]
+framework: null
+essential: true
+difficulty: 4
+prereq: [go/interface-implicit, go/nil, cs/dynamic-dispatch]
+confusions: []
+
+dict:
+  one_liner:
+    ko: >-
+      이 자리에 담기는 것은 타입과 값 둘이다. 값이 비어도 타입이 남는다.
+    en: >-
+      This slot holds a type and a value; the value can empty and the type stay.
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}} 자리는 <b>목록 타입</b>입니다. 목록 타입의 값은 하나가 아니라 <b>둘</b>이에요 — 안에 든 것이 어떤
+      타입인지, 그리고 그 값이 무엇인지. 여기에 함정이 있습니다: 어떤 타입의 <b>빈 자리</b>를 이 칸에 넣으면 값은 비어 있는데 타입은 남습니다. 그러면 이 칸을
+      「비었나」로 견주었을 때 <b>비지 않았다</b>고 나와요. 실무에서 이것이 나타나는 모양이 정해져 있습니다: 함수가 구체 타입을 돌려주게 적어 두고 그 값을 이 칸에
+      담으면, 잘못이 없는데도 확인이 걸립니다. 그래서 잘못을 돌려주는 함수는 <b>구체 타입이 아니라 이 목록 타입으로</b> 돌려주게 적습니다.
+    en: >-
+      The {{pick.1|code}} slot on line {{site.line}} is an <b>interface type</b>. A value of such a
+      type is not one thing but <b>two</b> — which type is inside, and what that value is. Here is the
+      trap: put some type's <b>empty place</b> into this slot and the value is empty while the type
+      remains. Weighing the slot for emptiness then says <b>not empty</b>. In practice this takes one
+      shape: a function written to give back a concrete type, whose value is then put in this slot,
+      trips the check even when nothing went awry. That is why a function that reports a fault is
+      written to give back <b>this interface type, not a concrete one</b>.
+  trace:
+    - ko: >-
+        {{site.line}}행의 {{pick.1|code}} 자리는 타입과 값 둘을 담는다.
+      en: >-
+        The {{pick.1|code}} slot on line {{site.line}} holds a type and a value.
+    - ko: >-
+        어떤 타입의 빈 자리를 담으면 값만 비고 타입은 남는다.
+      en: >-
+        Put some type's empty place in and only the value empties; the type stays.
+    - ko: >-
+        그 상태로 「비었나」를 물으면 비지 않았다고 나온다.
+      en: >-
+        Asked whether it is empty in that state, it answers no.
+
+rule:
+  ko: >-
+    <b>목록 타입은 타입과 값 둘이다.</b> 값이 비어도 타입이 남으면 비지 않은 것이다.
+  en: >-
+    <b>An interface value is a type and a value.</b> An empty value with a type left is not empty.
+result:
+  label: { ko: "{{site.line}}행의 자리", en: "the slot on line {{site.line}}" }
+  value: "{{pick.1}}"
+  note: { ko: "타입과 값 둘이 든다", en: "it holds a type and a value" }
+ok: { ko: "이 자리는 타입과 값 둘을 담습니다.", en: "This slot holds a type and a value." }
+payoff:
+  ko: >-
+    이걸 알면 「잘못이 없는데 확인에 걸린다」가 풀립니다 — 타입이 남아 있습니다.
+  en: >-
+    This untangles "nothing went awry and the check still fired" — the type stayed.
+bridge:
+  ko: >-
+    자바의 <code>null</code> 은 참조 하나라 이 함정이 없습니다. Go 는 목록 타입의 값이 <b>둘</b>이라 생기는 자리예요.
+  en: >-
+    Java's <code>null</code> is a single reference and has no such trap. This one comes of an
+    interface value being <b>two</b> things.
+misconceptions:
+  - ko: >-
+      빈 자리를 담으면 이 칸도 빈 것이다 — 타입이 남아서 <b>비지 않았다</b>고 나옵니다.
+    en: >-
+      Putting an empty place in makes the slot empty — the type stays and it reads <b>not empty</b>.
+  - ko: >-
+      이 함정은 문법을 보면 보인다 — 안 보입니다. 타입 정보가 있어야 알 수 있어요.
+    en: >-
+      The trap is visible in the syntax — it is not. Only type information reveals it.
+
+point:
+  - q:
+      ko: >-
+        {{site.line}}행에서 <b>타입과 값 둘을 담는 자리</b>를 짚어 보세요.
+      en: >-
+        On line {{site.line}}, point at <b>the slot that holds a type and a value</b>.
+    hint: { ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다.", en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose." }
+    answer: pick.1
+    diag:
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 함수의 <b>이름</b>입니다. 이름은 무엇이 담기는지를 안 정해요.
+          en: >-
+            {{pick.3|code}} is the function's <b>name</b>. A name does not settle what is held.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 담는 자리냐", en: "The sharpest spot — the name or the holding slot" }
+          code:
+            - "open                      // 이름"
+            - "func open() error         // 담는 자리는 error"
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 받는 <b>이름</b>입니다. 타입과 값 둘을 담는다는 성질은 옆의 타입이 정해요.
+          en: >-
+            {{pick.2|code}} is the receiving <b>name</b>. Holding two things is a property of the type
+            beside it.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 타입이냐", en: "The sharpest spot — the name or the type" }
+          code:
+            - "e                         // 이름"
+            - "e error                   // 타입"
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행의 칸은 <b>타입과 값 둘</b>을 담습니다.
+      en: >-
+        Choose what goes in the blank. The slot on line {{site.line}} holds <b>a type and a value</b>.
+    hint: { ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다.", en: "Your choice is written into the code at once. Submit to have it marked." }
+    options:
+      - { t: "error", mono: true }
+      - t: "string"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이건 <b>글자 묶음</b>이라 값 하나만 담습니다. 안에 어떤 타입이 들었는지를 따로 안 나릅니다.
+            en: >-
+              That is <b>text</b> and holds one value. It carries no separate note of which type is inside.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 하나냐 둘이냐", en: "The sharpest spot — one thing or two" }
+            code:
+              - "var e error       // 타입과 값"
+              - "var s string      // 값 하나"
+      - t: "int"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이건 <b>수</b>라 값 하나만 담습니다. 비었는지를 견줄 대상도 없어요.
+            en: >-
+              That is a <b>number</b> and holds one value. There is nothing to weigh emptiness against either.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 비었는지 물을 수 있나", en: "The sharpest spot — can emptiness be asked" }
+            code:
+              - "var e error       // 물을 수 있다"
+              - "var n int         // 물을 수 없다"
+      - t: "*Error"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이건 <b>자리</b>라 값 하나만 담습니다. 이것을 목록 타입 칸에 넣는 것이 바로 이 판의 함정이에요.
+            en: >-
+              That is a <b>place</b> and holds one value. Putting one of these into an interface slot is this
+              plate's trap itself.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 구체 타입이냐 목록 타입이냐", en: "The sharpest spot — a concrete type or an interface" }
+            code:
+              - "func f() error { }"
+              - "func f() *Error { }      // 함정"
+
+why_gate:
+  q:
+    ko: >-
+      이 칸은 왜 <b>둘</b>을 담을까요?
+    en: >-
+      Why does this slot hold <b>two</b> things?
+  choices:
+    - t:
+        ko: >-
+          어떤 코드가 돌지 실행 때 정해지므로, 값 옆에 어느 타입인지가 따라다녀야 하기 때문
+        en: >-
+          Because which code runs is settled at run time, so which type it is must travel alongside the
+          value
+      ok: true
+      fb:
+        ko: >-
+          그 방향입니다. 그럼 그 둘 중 하나만 비었을 때 무슨 일이 생기는지도 적어 보세요.
+        en: >-
+          That is the direction. Add what happens when only one of the two is empty.
+    - t:
+        ko: >-
+          값이 클 수 있어서
+        en: >-
+          Because the value can be large
+      ok: false
+      fb:
+        ko: >-
+          크기 문제가 아닙니다. 어느 타입인지를 실행 때 알아야 하는 것이 이유예요.
+        en: >-
+          Size is not it. Needing to know which type at run time is.
+    - t:
+        ko: >-
+          가비지 컬렉터 때문에
+        en: >-
+          Because of the garbage collector
+      ok: false
+      fb:
+        ko: >-
+          수집기와 무관합니다. 실행 때 어느 코드를 부를지 정하는 데 타입이 필요해요.
+        en: >-
+          The collector has nothing to do with it. The type is needed to choose which code to call.
+
+queries:
+  - { grammars: [go], file: ./nil-interface.scm }
+
+examples:
+  - code: "func open(p string) error { return nil }"
+    expect: { sites: 1, form: result, picks: { 1: "error", 3: "open" } }
+  - code: "func handle(e error) { }"
+    expect: { sites: 1, form: param, hole: "error", picks: { 1: "error", 2: "e" } }
+  - code: "func open(p string) *Error { return nil }"
+    expect: none

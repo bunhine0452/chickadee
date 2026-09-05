@@ -1,0 +1,209 @@
+schema: 1
+id: go/selector
+# 2부 (`go.md` §3 ⑭). 실측 28,854곳/423파일 — 이 사전에서 가장 두꺼운 개념이다.
+#
+# **패키지와 필드를 문법으로 못 가른다** (`go.md` §8 ③). `fmt.Println` 과 `x.Name` 이
+# 같은 노드다. 가르려면 `_imports.scm` 이 낸 패키지 이름 집합과 대조해야 하는데 그
+# 대조를 쿼리 층에서 할 자리가 없다 — 그래서 **둘을 한 판으로 가르친다**.
+universal: common/member-access
+name: { ko: "점 찍어 꺼내기", en: "Selector" }
+token: "."
+grammars: [go]
+framework: null
+essential: true
+difficulty: 1
+prereq: [go/struct-type, go/call-expression]
+confusions: []
+
+dict:
+  one_liner: { ko: "점 하나가 패키지의 이름도 꺼내고 값의 칸도 꺼낸다", en: "One dot reaches into a package and into a value alike" }
+  why:
+    ko: >-
+      {{site.line}}행의 점은 {{pick.2|code}} 에서 {{pick.3|code}}{{pick.3|josa:을,를}} 꺼냅니다. Go 에서 이 기호가 하는 일이
+      <b>둘</b>이라는 것이 요점이에요 — 왼쪽이 <b>패키지 이름</b>이면 그 패키지가 내놓은 것을 꺼내는 것이고, 왼쪽이 <b>값</b>이면 그 값의 칸이나 메서드를
+      꺼내는 것입니다. 코드만 봐서는 못 가르고, 파일 맨 위의 import 목록을 봐야 알아요. 그리고 C·C++ 과 달리 <b>화살표 기호가 없습니다</b>: 왼쪽이
+      포인터여도 점 하나로 따라 들어갑니다.
+    en: >-
+      The dot on line {{site.line}} reaches {{pick.3|code}} out of {{pick.2|code}}. The point is that
+      this symbol does <b>two jobs</b> — when the left side is a <b>package name</b> it reaches what
+      that package exports, and when the left side is a <b>value</b> it reaches a field or a method.
+      The code alone does not tell them apart; the import list at the top of the file does. And unlike
+      C and C++ there is <b>no arrow</b>: even when the left side is a pointer, one dot follows it
+      through.
+  trace:
+    - ko: >-
+        {{site.line}}행의 왼쪽 {{pick.2|code}}{{pick.2|josa:이,가}} 무엇인지를 먼저 정한다.
+      en: >-
+        First settle what the left side, {{pick.2|code}}, is.
+    - ko: >-
+        점이 그 안에서 {{pick.3|code}}{{pick.3|josa:을,를}} 꺼낸다.
+      en: >-
+        The dot reaches {{pick.3|code}} out of it.
+    - ko: >-
+        왼쪽이 포인터여도 점 하나로 따라 들어간다.
+      en: >-
+        Even a pointer is followed through by the same single dot.
+
+rule:
+  ko: >-
+    <b>같은 점이 두 일을 한다.</b> 왼쪽이 패키지인지 값인지는 import 목록이 정한다.
+  en: >-
+    <b>One dot, two jobs.</b> Whether the left side is a package or a value is settled by the import
+    list.
+result:
+  label: { ko: "{{site.line}}행이 꺼낸 것", en: "what line {{site.line}} reaches" }
+  value: "{{pick.2}}.{{pick.3}}"
+  note: { ko: "왼쪽이 무엇인지는 위를 봐야 안다", en: "what the left side is takes a look upward" }
+ok: { ko: "{{pick.2|code}} 안의 {{pick.3|code}}{{pick.3|josa:을,를}} 꺼냈습니다.", en: "It reached {{pick.3|code}} inside {{pick.2|code}}." }
+payoff:
+  ko: >-
+    이걸 알면 「이 이름이 우리 코드인지 남의 패키지인지」를 위를 보고 가릴 수 있습니다.
+  en: >-
+    This lets you tell our code from someone's package by looking upward.
+bridge:
+  ko: >-
+    C·C++ 은 포인터에 화살표를 씁니다. Go 는 기호를 하나로 줄이고 그 대신 왼쪽이 무엇인지를 사람이 알아야 하게 했어요.
+  en: >-
+    C and C++ use an arrow for pointers. Go cut it to one symbol and left it to the reader to know
+    what stands on the left.
+misconceptions:
+  - ko: >-
+      점 왼쪽은 언제나 값이다 — <b>패키지 이름</b>일 수도 있습니다. 그때는 값이 아니에요.
+    en: >-
+      The left of the dot is always a value — it may be a <b>package name</b>, which is not a value.
+  - ko: >-
+      포인터에는 다른 기호를 쓴다 — 같은 점을 씁니다. 화살표가 이 언어에 없어요.
+    en: >-
+      Pointers need a different symbol — the same dot is used. There is no arrow in this language.
+
+point:
+  - q:
+      ko: >-
+        {{site.line}}행에서 <b>꺼내지는 이름</b>을 짚어 보세요.
+      en: >-
+        On line {{site.line}}, point at <b>the name being reached</b>.
+    hint: { ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다.", en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose." }
+    answer: pick.3
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 점 <b>왼쪽</b>입니다. 어디에서 꺼내는지를 말할 뿐 꺼내지는 것은 오른쪽이에요.
+          en: >-
+            {{pick.2|code}} stands <b>left of the dot</b>. It says where to reach into; what is reached is
+            on the right.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 어디서냐 무엇을이냐", en: "The sharpest spot — where from or what" }
+          code:
+            - "opts              // 어디서"
+            - "opts.Web          // 무엇을"
+      pick.1:
+        t:
+          ko: >-
+            {{pick.1|code}}{{pick.1|josa:은,는}} <b>꺼내는 기호</b>입니다. 기호 자체가 이름은 아니에요.
+          en: >-
+            {{pick.1|code}} is the <b>reaching symbol</b>. The symbol itself is not a name.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 기호냐 이름이냐", en: "The sharpest spot — the symbol or the name" }
+          code:
+            - ".                 // 기호"
+            - "opts.Web          // 이름은 Web"
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행은 왼쪽 안에서 이름 하나를 <b>꺼냅니다</b>.
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} <b>reaches</b> one name out of what stands on
+        the left.
+    hint: { ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다.", en: "Your choice is written into the code at once. Submit to have it marked." }
+    options:
+      - { t: ".", mono: true }
+      - t: "->"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 기호는 Go 에 <b>없습니다</b>. 왼쪽이 포인터여도 점 하나로 따라 들어가요.
+            en: >-
+              Go <b>does not have</b> this symbol. Even a pointer is followed through with a single dot.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 기호가 있나 없나", en: "The sharpest spot — does the symbol exist" }
+            code:
+              - "p.Name        // 포인터여도 점"
+              - "p->Name       // 멈춘다"
+      - t: "::"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 기호도 Go 에 <b>없습니다</b>. 패키지 안의 이름도 점으로 꺼내요.
+            en: >-
+              Go <b>does not have</b> this one either. Names inside a package are reached with the dot too.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 패키지도 점이냐", en: "The sharpest spot — does the package also use the dot" }
+            code:
+              - "fmt.Println(x)"
+              - "fmt::Println(x)   // 멈춘다"
+      - t: "[]"
+        mono: true
+        diag:
+          t: { ko: "이 기호는 <b>자리 번호나 열쇠</b>로 꺼냅니다. 이름으로 꺼내는 자리가 아니에요.", en: "That reaches by <b>position or key</b>, not by name." }
+          edge:
+            h: { ko: "가장 날카로운 자리 — 이름이냐 번호냐", en: "The sharpest spot — by name or by position" }
+            code:
+              - "opts.Web          // 이름으로"
+              - "xs[0]             // 번호로"
+
+why_gate:
+  q:
+    ko: >-
+      Go 는 왜 패키지와 값에 <b>같은 기호</b>를 쓸까요?
+    en: >-
+      Why does Go use the <b>same symbol</b> for a package and for a value?
+  choices:
+    - t:
+        ko: >-
+          둘 다 「이름 공간 안에서 이름 하나를 꺼낸다」는 같은 일이고, 기호를 나누면 무엇이 패키지인지를 코드마다 다시 표시해야 하기 때문
+        en: >-
+          Because both are "reach one name out of a namespace", and splitting the symbol would mean
+          marking what is a package at every use
+      ok: true
+      fb:
+        ko: >-
+          그 방향입니다. 그럼 그 대가로 읽는 사람이 무엇을 확인해야 하는지도 적어 보세요.
+        en: >-
+          That is the direction. Add what the reader must check as the price.
+    - t:
+        ko: >-
+          기호가 모자라서
+        en: >-
+          Because symbols ran out
+      ok: false
+      fb:
+        ko: >-
+          모자라지 않습니다. 실제로 다른 기호를 쓰는 언어가 여럿이에요.
+        en: >-
+          They did not. Several languages do use a different symbol.
+    - t:
+        ko: >-
+          패키지가 사실은 값이라서
+        en: >-
+          Because a package really is a value
+      ok: false
+      fb:
+        ko: >-
+          값이 아닙니다. 변수에 담을 수도, 인자로 넘길 수도 없어요.
+        en: >-
+          It is not. A package cannot be put in a variable or handed to a function.
+
+queries:
+  - { grammars: [go], file: ./selector.scm }
+
+examples:
+  - code: "func f(opts Options) { b := opts.Web }"
+    expect: { sites: 1, form: sel, hole: ".", picks: { 1: ".", 2: "opts", 3: "Web" } }
+  - code: "func f(x int) { fmt.Println(x) }"
+    expect: { sites: 1, form: sel, hole: ".", picks: { 1: ".", 2: "fmt", 3: "Println" } }
+  - code: "func f(xs []int) { n := xs[0] }"
+    expect: none
