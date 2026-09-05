@@ -106,7 +106,7 @@ export function CourseScreen(props: CourseScreenProps): React.JSX.Element {
       if (!alive || bake === null) return;
       const n = bake.stages.reduce((s, st) => s + st.baked, 0);
       if (n > 0) useCourse.getState().bump();
-    }).catch((e: unknown) => report(e, '코스 판 굽기'));
+    }).catch((e: unknown) => report(e, '코스 문제 굽기'));
     return () => { alive = false; };
   }, [selected, repoId, rootPath, dict]);
 

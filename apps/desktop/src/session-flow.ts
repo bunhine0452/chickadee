@@ -73,7 +73,7 @@ export async function startSession(repoId: number, rootPath: string): Promise<bo
     useUi.getState().beginSession(view.session, view.plates, view.pos);
     return true;
   } catch (e) {
-    report(e, '인쇄 시작');
+    report(e, '학습 시작');
     return false;
   }
 }
@@ -419,7 +419,7 @@ export async function finishT1Plate(
     if (finished.ceremony) useUi.getState().countLifer();
     return outcome;
   } catch (e) {
-    report(e, '필사 판 마무리');
+    report(e, '필사 문제 마무리');
     return null;
   }
 }
@@ -545,7 +545,7 @@ export async function finishT2Plate(
     if (finished.ceremony) useUi.getState().countLifer();
     return outcome;
   } catch (e) {
-    report(e, '구조 판 마무리');
+    report(e, '구조 문제 마무리');
     return null;
   }
 }

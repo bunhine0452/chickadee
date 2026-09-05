@@ -58,38 +58,44 @@ describe('chickadee/no-font-size-below-13', () => {
   });
 });
 
-/* ═════════ chickadee/track-alias-only ═════════ */
+/* ═════════ chickadee/no-retired-tokens ═════════ */
 
-describe('chickadee/track-alias-only', () => {
-  const RULE = 'chickadee/track-alias-only';
-  const COMPONENT = path.join(ROOT, 'packages', 'ui', 'src', 'Stamp.css');
-  const STYLES = path.join(ROOT, 'apps', 'desktop', 'src', 'styles', 'tokens.css');
+describe('chickadee/no-retired-tokens', () => {
+  const RULE = 'chickadee/no-retired-tokens';
+  const COMPONENT = path.join(ROOT, 'packages', 'ui', 'src', 'Card.css');
 
-  test('컴포넌트가 var(--pink) 를 직접 쓰면 걸린다', async () => {
-    const found = await lint(RULE, '.gl.exact { background: var(--pink); }', COMPONENT);
+  test('폐기된 리소 토큰을 쓰면 걸린다', async () => {
+    const found = await lint(RULE, '.x { background: var(--paper-2); }', COMPONENT);
     expect(found).toHaveLength(1);
-    expect(found[0].text).toContain('--pink');
+    expect(found[0].text).toContain('--paper-2');
   });
 
-  test('-deep · -text 변형도 걸린다', async () => {
-    const found = await lint(RULE, '.a { color: var(--yellow-text); border-color: var(--blue-deep); }', COMPONENT);
+  test('트랙 색과 판정 색도 걸린다', async () => {
+    const found = await lint(RULE, '.x { color: var(--t1); border-color: var(--verdict-exact); }', COMPONENT);
     expect(found).toHaveLength(2);
   });
 
-  test('컴포넌트에서 원색을 재정의해도 걸린다', async () => {
-    const found = await lint(RULE, '.a { --pink: #FF2E7E; }', COMPONENT);
+  test('재정의해도 걸린다 — 이름을 되살리는 것이 가장 위험하다', async () => {
+    const found = await lint(RULE, '.x { --ink: #14171A; }', COMPONENT);
     expect(found).toHaveLength(1);
-    expect(found[0].text).toContain('재정의');
+    expect(found[0].text).toContain('--ink');
   });
 
-  test('트랙 별칭 · on-t* · verdict-* 는 통과한다', async () => {
-    const code = '.pill { background: var(--t1); color: var(--on-t1); border-color: var(--t1-deep); }\n' +
-      '.rtag { color: var(--verdict-exact); }';
+  test('토큰 파일도 예외가 아니다 — 정의가 사라진 것이 요점이다', async () => {
+    const styles = path.join(ROOT, 'apps', 'desktop', 'src', 'styles', 'tokens.css');
+    const found = await lint(RULE, ':root { --paper: #fff; }', styles);
+    expect(found).toHaveLength(1);
+  });
+
+  test('새 이름은 통과한다', async () => {
+    const code = '.x { background: var(--surface-2); color: var(--text-muted); border-color: var(--border); }\n' +
+      '.y { color: var(--ok); background: var(--accent-weak); }';
     expect(await lint(RULE, code, COMPONENT)).toEqual([]);
   });
 
-  test('styles/ 안(토큰 정의)에서는 원색을 써도 된다', async () => {
-    expect(await lint(RULE, ':root { --t1: var(--pink); }', STYLES)).toEqual([]);
+  test('접두어가 같아도 다른 이름이면 통과한다', async () => {
+    // `--t1` 은 폐기됐지만 `--text` 는 아니다. 경계가 글자 단위로 서야 한다.
+    expect(await lint(RULE, '.x { color: var(--text); }', COMPONENT)).toEqual([]);
   });
 });
 
@@ -106,55 +112,62 @@ describe('chickadee/dark-selector-allowlist', () => {
   });
 
   test('tokens.css 는 통과한다', async () => {
-    const code = '[data-theme="dark"] { --ink: #F3EADB; }';
+    const code = '[data-theme="dark"] { --text: #E8EBEF; }';
     expect(await lint(RULE, code, p('apps', 'desktop', 'src', 'styles', 'tokens.css'))).toEqual([]);
   });
 
-  test('글로우가 필요한 6개 컴포넌트는 통과한다', async () => {
-    for (const name of ['PressButton', 'Switch', 'TimeQueue', 'Node', 'Stamp', 'Crumb']) {
-      const code = `[data-theme="dark"] .x { box-shadow: 0 0 12px var(--glow-t0); }`;
-      expect(await lint(RULE, code, p('packages', 'ui', 'src', `${name}.css`))).toEqual([]);
+  test('예외 컴포넌트는 이제 없다 — 테마 분기는 토큰 한 곳에서 끝난다 (D182)', async () => {
+    for (const name of ['PressButton', 'Switch', 'TimeQueue', 'Crumb']) {
+      const code = '[data-theme="dark"] .x { box-shadow: 0 0 12px var(--accent); }';
+      const found = await lint(RULE, code, p('packages', 'ui', 'src', `${name}.css`));
+      expect(found, name).toHaveLength(1);
     }
   });
 
   test('다크 선택자가 없으면 어느 파일이든 통과한다', async () => {
-    expect(await lint(RULE, '.masthead { background: var(--paper); }', p('packages', 'ui', 'src', 'Masthead.css'))).toEqual([]);
+    expect(await lint(RULE, '.masthead { background: var(--surface); }', p('packages', 'ui', 'src', 'Masthead.css'))).toEqual([]);
   });
 });
 
-/* ═════════ chickadee/print-physics-scope ═════════ */
+/* ═════════ chickadee/no-decoration ═════════ */
 
-describe('chickadee/print-physics-scope', () => {
-  const RULE = 'chickadee/print-physics-scope';
+describe('chickadee/no-decoration', () => {
+  const RULE = 'chickadee/no-decoration';
 
-  test('본문 단 안의 mix-blend-mode 는 걸린다', async () => {
-    const found = await lint(RULE, '.fb p { mix-blend-mode: multiply; }');
+  test('mix-blend-mode 는 어디서든 걸린다', async () => {
+    const found = await lint(RULE, '.sig { mix-blend-mode: multiply; }');
     expect(found).toHaveLength(1);
     expect(found[0].text).toContain('mix-blend-mode');
   });
 
-  test('.ps-in 하위에 .grain 을 걸면 걸린다', async () => {
-    const found = await lint(RULE, '.ps-in .grain { isolation: isolate; }');
+  test('반복 그러데이션(질감·빗금)은 걸린다', async () => {
+    const found = await lint(RULE, '.q { background-image: repeating-linear-gradient(-45deg, transparent 0 3px, #eee 3px 6px); }');
     expect(found).toHaveLength(1);
-    expect(found[0].text).toContain('.grain');
+    expect(found[0].text).toContain('repeating-linear-gradient');
   });
 
-  test('.rung-body 안의 .mr 도 걸린다', async () => {
-    const found = await lint(RULE, '.rung-body .mr::before { content: ""; }');
+  test('drop-shadow 필터는 걸린다', async () => {
+    const found = await lint(RULE, '.x { filter: drop-shadow(0 2px 2px #000); }');
     expect(found).toHaveLength(1);
-    expect(found[0].text).toContain('.mr');
   });
 
-  test('본문 단 밖(판 번호 .sig)의 인쇄 물리는 통과한다', async () => {
-    expect(await lint(RULE, '.sig .mr::before { mix-blend-mode: var(--blend); }')).toEqual([]);
+  test('0 이 아닌 회전은 걸린다', async () => {
+    const found = await lint(RULE, '.stamp { transform: rotate(-5deg); }');
+    expect(found).toHaveLength(1);
+    expect(found[0].text).toContain('rotate');
   });
 
-  test('본문 단 안이라도 인쇄 물리가 아니면 통과한다', async () => {
-    expect(await lint(RULE, '.ask { max-width: var(--measure); color: var(--ink); }')).toEqual([]);
+  test('rotate(0deg) 는 통과한다 — 되돌리는 선언까지 막지 않는다', async () => {
+    expect(await lint(RULE, '.x { transform: rotate(0deg); }')).toEqual([]);
+  });
+
+  test('평범한 면·선·그림자는 통과한다', async () => {
+    const code = '.card { background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-1); }';
+    expect(await lint(RULE, code)).toEqual([]);
   });
 });
 
-/* ═════════ 실제 산출물이 4개 규칙을 다 통과한다 ═════════ */
+/* ═════════ 실제 산출물이 네 규칙을 다 통과한다 ═════════ */
 
 describe('apps/desktop/src/styles/*.css', () => {
   test('생성·이식한 스타일시트에 규칙 위반이 없다', async () => {

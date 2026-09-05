@@ -85,7 +85,7 @@ export function App(): React.JSX.Element {
     return () => cancelAnimationFrame(id);
   }, [inSession, ui.screen]);
 
-  // 세션이 닫히면 오늘의 인쇄를 다시 읽는다 — 부분 갱신보다 통째로 다시 읽는 편이 싸다 (05 §3).
+  // 세션이 닫히면 오늘 할 것을 다시 읽는다 — 부분 갱신보다 통째로 다시 읽는 편이 싸다 (05 §3).
   useEffect(() => {
     if (ui.activeId === null || inSession) return;
     void (async () => {
@@ -93,7 +93,7 @@ export function App(): React.JSX.Element {
         const preview = await previewToday(ui.activeId as number, Date.now());
         setToday({ ...preview, streak: 0, days: ui.home?.days ?? [] });
       } catch (e) {
-        report(e, '오늘의 인쇄');
+        report(e, '오늘 할 것');
       }
     })();
   }, [ui.activeId, inSession, ui.home]);
@@ -245,7 +245,7 @@ export function App(): React.JSX.Element {
   );
 }
 
-/** 「인쇄 시작」. 큐가 비면 세션을 열지 않고 그 이유를 말한다 (02 §5.3). */
+/** 「학습 시작」. 큐가 비면 세션을 열지 않고 그 이유를 말한다 (02 §5.3). */
 async function start(repoId: number, rootPath: string): Promise<void> {
   const opened = await startSession(repoId, rootPath);
   if (!opened) {
