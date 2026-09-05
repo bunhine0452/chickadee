@@ -36,8 +36,8 @@ owner: claude-code
 - [ ] 컴포넌트 시험 + 정직성 게이트(no-files 문구) + i18n ko/en {#a-tests}
 
 ## M · 합류 {#m-merge}
-- [ ] 워크트리 브랜치 열을 순서대로 병합, 충돌은 공유 파일에서만 {#m-branches}
-- [ ] 세션 보고의 ABSENCE 초안을 t0-synthetic.ts 표에 넣고 사유 시험 {#m-absence}
+- [x] 워크트리 브랜치 열을 순서대로 병합, 충돌은 공유 파일에서만 {#m-branches}
+- [x] 세션 보고의 ABSENCE 초안을 t0-synthetic.ts 표에 넣고 사유 시험 {#m-absence}
 - [ ] docs/curriculum/README.md §4 상태표·§5 실측 갱신, 세션이 낸 등록부 초안에 번호 {#m-docs}
 - [ ] typecheck · lint · test:unit · dict:lint · cargo test · gates → 커밋 → 푸시 → CI 초록 {#m-verify}
 - [ ] 최종 보고 — 언어별 장수·골든·사용처 실측, 못 한 것 {#m-report}
@@ -69,4 +69,6 @@ owner: claude-code
 | 2026-09-06T04:56:01+09:00 | #l-rs | claude-code | ~→x |  | 42장(0부 11·1부 7·2부 23) · 골든 105/44 · ai-pm 280 실측 · ABSENCE 1 · 병합 38c97e0 · 래칫 331/314/331/322 |
 | 2026-09-06T04:57:14+09:00 | #l-cpp | claude-code | ~→x |  | 38장(0부 13·1부 3·2부 22) · 골든 77/38 · fmt+json ERROR 4.6%(매크로) · ABSENCE 1 · 병합 2fdaef3 · 래칫 369/348/369/360 |
 | 2026-09-06T05:02:39+09:00 | #l-swift | claude-code | ~→x |  | 37장(0부 8·1부 4·2부 25) · 골든 89/37 · IceCubesApp ERROR 1.6% · ABSENCE 1 · 병합 351d165 · 래칫 406/385/406/396(최종) |
+| 2026-09-06T05:04:56+09:00 | #m-branches | claude-code | ☐→x |  | 열 브랜치 순서대로 병합(java·ts·py·sql·go·c·csharp·rs·cpp·swift), 충돌 0. 언어 사전 421장 89,153줄 |
+| 2026-09-06T05:05:51+09:00 | #m-absence | claude-code | ☐→x |  | ABSENCE 16 → 27행(sql 6 · java·csharp·cpp·rs·swift 각 1), 사유 시험 초록 |
 <!-- oculpm:plan-log end -->
