@@ -215,5 +215,12 @@ queries:
 examples:
   - code: "class A { void save(String s) { run(); } }"
     expect: { sites: 1, form: method, picks: { 1: "void", 2: "save", 3: "(String s)", 4: "{ run(); }" } }
+  # 돌려줄 타입이 `void` 가 아닌 모양. 빈칸을 안 내는 이유가 여기 보인다 — 짚는 자리의
+  # 글자가 사용처마다 다르다.
+  - code: "class A { public List<String> names(int n) { return List.of(); } }"
+    expect:
+      sites: 1
+      form: method
+      picks: { 1: "List<String>", 2: "names", 3: "(int n)", 4: "{ return List.of(); }" }
   - code: "class A { A() {} }"
     expect: none

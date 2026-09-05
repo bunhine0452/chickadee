@@ -1,0 +1,257 @@
+schema: 1
+id: java/generics-erasure
+# 2부 (`docs/curriculum/java.md` §5 #28). 보편형은 `common/generics` — 그 자리를 여는 것은
+# 어느 언어에나 있고, 자바에서 다른 것은 **실행 때 지워진다**는 뒤쪽 절반이다.
+universal: common/generics
+name: { ko: 타입 자리 비워 두기와 지워짐, en: Generics and erasure }
+token: "<T>"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 4
+prereq: [java/collection-generic, java/generic-bound, cs/erasure-and-reification]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "각괄호로 종류 자리를 비워 두면 컴파일러만 그것을 보고, 돌 때는 남지 않는다."
+    en: "Angle brackets open a slot for a kind. Only the compiler ever sees it."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} <b>종류를 나중에 정하겠다</b>는 선언입니다. 쓰는 쪽에서
+      <code>Box&lt;String&gt;</code> 이라고 적으면 그 자리가 채워지고, 컴파일러가 그때부터
+      <b>넣는 것과 꺼내는 것을 대조</b>합니다.
+      자바에서 특별한 것은 그다음입니다 — <b>컴파일이 끝나면 그 자리가 지워집니다</b>.
+      돌아가는 프로그램에는 <code>Box&lt;String&gt;</code> 도 <code>Box&lt;Integer&gt;</code> 도
+      없고 <code>Box</code> 하나만 있어요. 그래서 실행 중에는 「이 상자가 무슨 종류를 담기로
+      했었나」를 물을 수가 없고, <code>instanceof</code> 로 그것을 묻는 코드는
+      <b>컴파일이 멈춥니다</b>. 종류 자리로 배열을 새로 만드는 것도 같은 이유로 막힙니다.
+      <b>검사는 컴파일 때 다 끝나고, 실행에는 그 흔적이 안 남습니다.</b>
+    en: >-
+      The {{pick.1|code}} on line {{site.line}} declares that <b>the kind is settled later</b>. Writing
+      <code>Box&lt;String&gt;</code> at the use site fills the slot, and from then on the compiler
+      <b>checks what goes in against what comes out</b>.
+      What is unusual in Java comes next: <b>after compiling, the slot is erased</b>. The running
+      program has no <code>Box&lt;String&gt;</code> and no <code>Box&lt;Integer&gt;</code> — only
+      <code>Box</code>. So at run time you cannot ask what kind this box agreed to hold, and code that
+      asks with <code>instanceof</code> <b>does not compile</b>. Making a new array of the slot's kind
+      is barred for the same reason.
+      <b>The checking finishes at compile time and leaves no trace in the run.</b>
+  trace:
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} {{pick.2|code}} 에 비워 둔 자리를 연다."
+      en: "The {{pick.1|code}} on line {{site.line}} opens an empty slot on {{pick.2|code}}."
+    - ko: "쓰는 쪽이 그 자리를 채우면 컴파일러가 넣고 꺼내는 것을 대조한다."
+      en: "When a use site fills it, the compiler checks what goes in against what comes out."
+    - ko: "컴파일이 끝나면 그 자리는 지워지고 {{pick.2|code}} 하나만 남는다."
+      en: "After compiling the slot is erased and only {{pick.2|code}} remains."
+
+rule:
+  ko: "<b>자리는 컴파일러의 것이다.</b> 검사가 끝나면 지워져서, 돌 때는 그 종류를 물을 수 없다."
+  en: "<b>The slot belongs to the compiler.</b> It is erased after checking, so the kind cannot be asked at run time."
+result:
+  label: { ko: "{{site.line}}행이 여는 자리", en: "the slot line {{site.line}} opens" }
+  value: "{{pick.4}} {{pick.2}}{{pick.1}}"
+  note: { ko: "돌 때는 남지 않는다", en: "nothing of it survives the run" }
+ok:
+  ko: "{{pick.1|code}}{{pick.1|josa:을,를}} 짚었습니다. 이 자리는 컴파일러만 보고 실행에는 안 남습니다."
+  en: "You pointed at {{pick.1|code}}. Only the compiler sees this slot; the run does not."
+payoff:
+  ko: >-
+    이걸 알면 「왜 이 줄만 <code>instanceof</code> 를 못 쓰지」와 「왜 그 종류로 배열을 못 만들지」가
+    같은 하나로 풀립니다 — 물어볼 것이 <b>이미 지워졌어요</b>.
+  en: >-
+    Knowing this collapses “why can't I use <code>instanceof</code> here” and “why can't I make an
+    array of that kind” into one answer — what you would ask about <b>is already erased</b>.
+bridge:
+  ko: >-
+    C# 은 그 자리를 <b>실행 때도 들고 있습니다</b> — 같은 문법처럼 보이는데
+    <code>typeof(T)</code> 를 물을 수 있어요. 자바에서 그 물음이 안 되는 이유가 이 판입니다.
+  en: >-
+    C# <b>keeps the slot at run time</b> — the syntax looks alike, yet <code>typeof(T)</code> can be
+    asked. This plate is why that question has no answer in Java.
+misconceptions:
+  - ko: >-
+      실행 중에 담기로 한 종류를 물을 수 있다 — 지워져서 못 묻습니다. 그 물음을 적으면 컴파일이
+      멈춰요.
+    en: >-
+      The agreed kind can be asked at run time — it is erased, so it cannot. Writing that question
+      stops the compiler.
+  - ko: >-
+      종류마다 다른 상자가 만들어진다 — 상자는 하나입니다. 종류가 다른 둘은 <b>같은</b> 상자예요.
+    en: >-
+      A different box is made per kind — there is one box. Two different kinds are the <b>same</b> box.
+  - ko: >-
+      각괄호는 어디에 서든 같은 뜻이다 — 선언 쪽은 자리를 <b>열고</b> 쓰는 쪽은 그 자리를
+      <b>채웁니다</b>. 반대 방향이에요.
+    en: >-
+      Angle brackets mean one thing everywhere — at a declaration they <b>open</b> a slot, at a use
+      site they <b>fill</b> it. Opposite directions.
+  - ko: >-
+      지워지니까 검사도 안 한다 — 검사는 다 합니다. 다만 <b>컴파일할 때</b> 끝내고 실행으로
+      안 넘겨요.
+    en: >-
+      Erased means unchecked — it is fully checked, only <b>at compile time</b>, and nothing is handed
+      to the run.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>종류를 나중에 정하겠다고 비워 둔 자리</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the slot left empty for a kind to be settled later</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 이름은 컴파일 뒤에도 남아요 —
+            지워지는 것은 이름이 아니라 그 뒤에 붙은 자리입니다.
+          en: >-
+            {{pick.2|code}} is <b>the name</b>, and the name survives compiling. What is erased is the
+            slot behind it, not the name.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 남는 것이냐 지워지는 것이냐", en: "The sharpest spot — what survives or what is erased" }
+          code:
+            - "Box       // 실행 때 남는다"
+            - "Box<T>    // 각괄호는 안 남는다"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} <b>몸통</b>입니다. 몸통 안에서 그 자리를 쓸 수는 있지만,
+            자리를 <b>여는</b> 것은 몸통 앞에서 한 번 일어나요.
+          en: >-
+            {{pick.3|code}} is <b>the body</b>. The slot can be used inside it, but <b>opening</b> the
+            slot happens once, before the body.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 여는 데냐 쓰는 데냐", en: "The sharpest spot — where it opens or where it is used" }
+          code:
+            - "여는 곳: 이름 바로 뒤 한 번"
+            - "쓰는 곳: 몸통 안 여러 번"
+      pick.4:
+        t:
+          ko: >-
+            {{pick.4|code}}{{pick.4|josa:은,는}} <b>무엇을 세우나</b>입니다. 종류 자리를 여는 것과는 다른
+            축이라, 이 낱말이 있어도 각괄호가 없으면 자리는 안 열려요.
+          en: >-
+            {{pick.4|code}} says <b>what is being declared</b>. That is a different axis — with this word
+            and no angle brackets, no slot opens.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 무엇을 세우냐 자리를 여냐", en: "The sharpest spot — what is declared or whether a slot opens" }
+          code:
+            - "class Box    // 자리가 없다"
+            - "class Box<T> // 자리가 하나"
+
+meaning:
+  - q:
+      ko: >-
+        {{site.line}}행이 연 자리를 <b>실행 중에</b> 물어보면 어떻게 될까요? (「이 상자는 무슨
+        종류를 담기로 했었나」)
+      en: >-
+        What happens if the slot line {{site.line}} opens is asked about <b>at run time</b> (“what kind
+        did this box agree to hold”)?
+    hint:
+      ko: "컴파일이 끝난 뒤 그 자리가 어디에 남아 있는지를 생각해 보세요."
+      en: "Think about where that slot still exists after compiling ends."
+    options:
+      - t:
+          ko: "물을 수 없다 — 그 자리는 컴파일이 끝나면서 지워졌다"
+          en: "It cannot be asked — the slot was erased when compiling ended"
+      - t:
+          ko: "물을 수 있고 처음 넣은 값의 종류가 나온다"
+          en: "It can be asked, and the kind of the first value comes back"
+        diag:
+          t:
+            ko: >-
+              값의 종류는 물을 수 있지만 그건 <b>다른 물음</b>입니다. 상자가 <b>담기로 약속한</b>
+              종류는 상자 어디에도 안 적혀 있어요 — 빈 상자면 물을 값조차 없습니다.
+            en: >-
+              A value's kind can be asked, but that is <b>a different question</b>. The kind the box
+              <b>agreed</b> to hold is written nowhere on the box — and an empty box has no value to ask.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값의 종류냐 자리의 종류냐", en: "The sharpest spot — the value's kind or the slot's kind" }
+            code:
+              - "값:   지금 들어 있는 것"
+              - "자리: 담기로 했던 것 (지워졌다)"
+      - t:
+          ko: "물을 수 있고 종류마다 다른 상자가 하나씩 나온다"
+          en: "It can be asked, and one distinct box per kind comes back"
+        diag:
+          t:
+            ko: >-
+              상자는 <b>하나</b>입니다. 종류가 다른 둘이 실행 중에는 같은 상자라, 「어느 쪽이냐」를
+              가를 근거가 아예 없어요.
+            en: >-
+              There is <b>one</b> box. At run time two different kinds are the same box, so there is
+              nothing to tell them apart with.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 상자가 여럿이냐 하나냐", en: "The sharpest spot — many boxes or one" }
+            code:
+              - "컴파일 때: 종류마다 다른 약속"
+              - "실행 때:   상자 하나"
+      - t:
+          ko: "물으면 실행하다가 그 줄에서 멈춘다"
+          en: "Asking makes it stop at that line while running"
+        diag:
+          t:
+            ko: >-
+              실행까지 안 갑니다. 그 물음을 적는 순간 <b>컴파일이</b> 멈춰요 — 답이 없다는 것을
+              컴파일러가 먼저 압니다.
+            en: >-
+              It never reaches run time. Writing the question <b>stops the compiler</b> — it already
+              knows there is no answer.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 번역할 때냐 돌 때냐", en: "The sharpest spot — translating or running" }
+            code:
+              - "javac: 여기서 막는다"
+              - "java:  여기까지 못 온다"
+
+no_hole_reason: >-
+  구멍의 정답이 각괄호 한 쌍이고 오답 셋도 전부 각괄호 꼴이라, 보기 넷이 「글자 모양이 어떻게
+  다른가」만 묻게 된다. 이 판이 묻는 것은 모양이 아니라 그 자리가 실행 때 남느냐다. 게다가
+  보기 글은 사전 문장이라 06 §4.2 의 태그 검사를 받는데 각괄호가 태그로 읽힌다. 짚기와 뜻으로 낸다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행이 종류 자리를 <b>비워 둔</b> 이유는 무엇일까요?"
+    en: "Why does line {{site.line}} leave the kind slot <b>empty</b>?"
+  choices:
+    - t:
+        ko: "같은 코드를 종류마다 다시 쓰지 않으면서도 넣고 꺼내는 것을 컴파일러가 대조하게 하려고"
+        en: "So the same code serves every kind while the compiler still checks what goes in and out"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 자리를 안 비우고 <code>Object</code> 로 뒀다면 무엇을 잃는지도 적어 보세요."
+        en: "That is the direction. Now say what would be lost by using <code>Object</code> instead."
+    - t:
+        ko: "실행할 때 종류를 보고 더 빠른 코드를 고르려고"
+        en: "So the run can pick faster code after seeing the kind"
+      ok: false
+      fb:
+        ko: "실행할 때는 그 자리가 없습니다. 이 자리가 하는 일은 전부 컴파일 때 끝나요."
+        en: "At run time the slot is gone. Everything this slot does finishes at compile time."
+    - t:
+        ko: "무엇이든 담을 수 있게 하려고"
+        en: "So it can hold anything at all"
+      ok: false
+      fb:
+        ko: >-
+          무엇이든 담는 것은 <code>Object</code> 로도 됩니다. 이 자리가 더 하는 일은 <b>꺼낼 때
+          다시 확인 안 해도 되게</b> 하는 것이에요.
+        en: >-
+          <code>Object</code> already holds anything. What this slot adds is that <b>nothing has to be
+          re-checked on the way out</b>.
+
+queries:
+  - { grammars: [java], file: ./generics-erasure.scm }
+
+examples:
+  - code: "class Box<T> { T value; }"
+    expect:
+      sites: 1
+      form: class
+      picks: { 1: "<T>", 2: "Box", 3: "{ T value; }", 4: "class" }
+  - code: "class A { static <T> T first(List<T> xs) { return xs.get(0); } }"
+    expect: { sites: 1, form: method, picks: { 1: "<T>", 2: "first", 3: "(List<T> xs)", 4: "T" } }
+  - code: "class A { void f() { List<String> xs = new ArrayList<>(); } }"
+    expect: none

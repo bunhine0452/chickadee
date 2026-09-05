@@ -9,7 +9,9 @@ grammars: [java]
 framework: null
 essential: true
 difficulty: 2
-prereq: [cs/identity-vs-equality, cs/value-vs-reference]
+# `java/autoboxing` 이 선행인 것은 이 판의 대표 예가 `Integer` 캐시이기 때문이다
+# (D187 ⑰ · java.md §1.5.1 근거 ④ 「선행이 0부 안에서 닫힌다」). 축 F 가 축 H 보다 앞이다.
+prereq: [java/autoboxing, cs/identity-vs-equality, cs/value-vs-reference]
 confusions: []
 dict:
   one_liner:
@@ -18,7 +20,8 @@ dict:
   why:
     ko: >-
       참조 타입에서 <code>==</code> 는 <b>같은 상자인가</b>를 묻습니다. 내용이 같아도 상자가
-      둘이면 거짓이에요 — <code>new String("a") == "a"</code> 가 거짓인 이유입니다.
+      둘이면 거짓입니다. 상자를 손으로 만드는 문법은 아직 안 배웠으니, 자바가 <b>대신
+      만들어 주는</b> 자리로 봅니다 — 정수를 상자에 담을 때예요.
       내용을 묻는 것은 따로 있는 메서드고, 그것이 이 판입니다.
       <b>상자 타입에서는 이 자리가 더 미끄럽습니다.</b> 자바는 작은 정수를 상자로 만들 때
       미리 만들어 둔 것을 돌려주도록 <b>−128~127 범위만</b> 규격이 요구합니다(JLS 5.1.7).
@@ -27,7 +30,8 @@ dict:
       내용으로 견줍니다.
     en: >-
       For reference types <code>==</code> asks <b>whether it is the same box</b>. Same contents
-      in two boxes is false — that is why <code>new String("a") == "a"</code> is false. Asking
+      in two boxes is false. The grammar for making a box by hand has not been met yet, so look at
+      the place where Java <b>makes one for you</b> — putting a whole number into a box. Asking
       about contents is a separate method, and that is this plate.
       <b>With box types the spot gets slipperier.</b> The specification requires cached boxes
       <b>only for −128 through 127</b> (JLS 5.1.7). Inside that range <code>==</code> comes out

@@ -206,5 +206,11 @@ examples:
       sites: 1
       form: for-each
       picks: { 1: "for", 2: "String", 3: "name", 4: "names" }
+  # 표본 리포의 유일한 for-each 와 같은 모양 — 담긴 것이 객체이고 몸통이 그 값을 쓴다.
+  - code: "for (Emotion e : emotions) { total += e.score(); }"
+    expect:
+      sites: 1
+      form: for-each
+      picks: { 1: "for", 2: "Emotion", 3: "e", 4: "emotions" }
   - code: "for (int i = 0; i < 3; i++) { print(i); }"
     expect: none

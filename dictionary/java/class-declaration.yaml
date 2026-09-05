@@ -256,5 +256,11 @@ queries:
 examples:
   - code: "class Store {}"
     expect: { sites: 1, form: class, hole: "class", picks: { 1: "class", 2: "Store", 3: "{}" } }
+  # 앞에 낱말이 붙어도 같은 자리다 — `modifiers` 는 형제라 패턴이 안 흔들린다.
+  - code: "public class Store { void save() {} }"
+    expect:
+      sites: 1
+      form: class
+      picks: { 1: "class", 2: "Store", 3: "{ void save() {} }" }
   - code: "interface Store {}"
     expect: none

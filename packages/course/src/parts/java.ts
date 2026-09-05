@@ -20,18 +20,21 @@ import type { PartAssignment } from '../curriculum.js';
  */
 export const JAVA_PARTS: readonly PartAssignment[] = [
   {
-    // 0부 「이 언어의 값과 식」 — 축 A~H (java.md §1.5.1). 열아홉 판 중 열일곱이
-    // `essential` 이고, `java/string-concat`·`java/autoboxing` 둘은 0부의 `essential`
-    // 상한 열둘 때문에 밖에 있다. 둘은 이 목록에도 안 든다 — 이 상수는 `essential` 과
-    // 한 글자도 어긋나면 안 되고, 그 대조를 시험이 한다.
+    // 0부 「이 언어의 값과 식」 — 축 A~H (java.md §1.5.1). **열아홉 판 전부**가 여기 있다.
+    // 전에는 열일곱이었고 `java/string-concat`·`java/autoboxing` 둘이 0부의 `essential`
+    // 상한 열둘 때문에 밖에 있었다. 되돌린 근거는 `dictionary/java/_lang.yaml` 머리 주석에
+    // 셋으로 적혀 있고, 짧게는 이것이다 — 축 H(`reference-equality`)의 대표 예가 `Integer`
+    // 캐시인데(D187 ⑰) 그 선행인 축 F 의 `autoboxing` 이 부 배치에 없으면 0부가 **코스에
+    // 없는 문법**에 기댄다. 이 상수는 `essential` 과 한 글자도 어긋나면 안 되고, 그 대조를
+    // 시험이 한다.
     part: 0,
     concepts: [
       'java/value-bits', 'java/variable-declaration', 'java/integer-limit',
       'java/floating-type', 'java/float-inexact',
       'java/string-literal', 'java/text-length',
       'java/boolean-literal', 'java/boolean-only-condition',
-      'java/arithmetic', 'java/operator-precedence',
-      'java/implicit-conversion', 'java/explicit-conversion',
+      'java/arithmetic', 'java/operator-precedence', 'java/string-concat',
+      'java/implicit-conversion', 'java/explicit-conversion', 'java/autoboxing',
       'java/assignment', 'java/reference-binding',
       'java/comparison', 'java/reference-equality',
     ],
@@ -44,12 +47,17 @@ export const JAVA_PARTS: readonly PartAssignment[] = [
     ],
   },
   {
+    // 2부 객체 스무 판. 열여섯은 D177 의 것이고 넷(`main-method`·`final`·`checked-exception`·
+    // `generics-erasure`)이 2026-09-06 에 붙었다 — java.md §4 #10 · §5 #32·#26·#28 이 설계해
+    // 두고 사전이 없던 것이다. `annotation` 은 그대로 2부의 끝이자 3부의 문턱이라 새 넷이 그
+    // 앞에 선다.
     part: 2,
     concepts: [
       'java/access-modifier', 'java/field-declaration', 'java/new-expression', 'java/constructor',
       'java/static', 'java/null', 'java/collection-generic', 'java/interface',
       'java/inheritance-override', 'java/abstract-class', 'java/generic-bound',
       'java/equals-hashcode', 'java/lambda', 'java/stream-pipeline', 'java/try-catch',
+      'java/main-method', 'java/final', 'java/checked-exception', 'java/generics-erasure',
       'java/annotation',
     ],
   },

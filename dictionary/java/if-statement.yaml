@@ -258,5 +258,12 @@ queries:
 examples:
   - code: "if (n > 3) { save(); }"
     expect: { sites: 1, form: if, hole: "if", picks: { 1: "if", 2: "(n > 3)", 3: "{ save(); }" } }
+  # 갈래가 둘인 모양 — `alternative` 가 붙어 `@pick.4` 가 채워진다. 조건이 단락 평가라
+  # 왼쪽이 거짓이면 오른쪽을 안 부르는 것도 같은 줄에서 보인다 (§10 오개념 12).
+  - code: "if (s != null && s.length() > 0) { save(s); } else { skip(); }"
+    expect:
+      sites: 1
+      form: if
+      picks: { 1: "if", 2: "(s != null && s.length() > 0)", 3: "{ save(s); }", 4: "{ skip(); }" }
   - code: "while (n > 3) { n--; }"
     expect: none
