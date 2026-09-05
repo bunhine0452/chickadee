@@ -25,7 +25,7 @@ const card: StageCardView = {
 
 const wrong: StageVerdict = {
   ok: false, pct: 0, diagnosis: 'soft delete 를 안 봤다', okText: cut.ok, rule: cut.rule,
-  detail: { kind: 'choice', sel: 1, answer: 0, reasonOk: null },
+  detail: { kind: 'choice', sel: 1, answer: 0, reasonOk: null }, gated: true, run: null,
 };
 
 function mount(verdict: StageVerdict | null, onGrade = vi.fn(), onNext = vi.fn()) {

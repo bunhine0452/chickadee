@@ -1,13 +1,20 @@
 /**
- * 코스 문항 채점 (D164 · `docs/program/exercises.md` §2·§3) — 16유형이 `gradeStage` 하나로 온다.
+ * 코스 문항 채점 (D164·D180 · `docs/program/exercises.md` §2·§3) — 16유형이 `gradeStage` 하나로 온다.
  *
- * 새 판정기는 거의 없다. 선택형은 인덱스 하나, `hop` 은 `gradeFlow`, `caller` 는 `gradePicks`,
- * `exec` 은 `gradeT0`, 4·5단은 T1 사다리(`compareLine`·`gradeT1`)다. 여기가 더하는 것은 셋 —
- * ① 단의 통과 규칙(2단은 전부 맞음 · `mastery.md` §3.2) ② `patch-place` 의 스코프 검사
- * (실행 없이 여러 답을 허용하는 유일한 장치) ③ `reimpl-layer` 의 연결 검사 ⓑⓒⓓ.
+ * 1~3단은 정적으로 끝난다. **4·5단은 실행이 판정한다** (D180 · 정본 §2). 그래서 이 파일이
+ * 돌려주는 4·5단 판정은 **아직 끝난 것이 아니다** — `gated: false` 로 나가고, 러너가 돈 뒤
+ * `mergeRun` 이 최종 판정을 만든다.
  *
- * 순수 함수다 — IPC 도 SQL 도 부르지 않는다. `stage_log` 에 적는 것은 진도(D165)의 몫이고
- * 여기서는 판정만 돌려준다.
+ * 우선순위는 하나다 — **테스트가 이긴다.** 테스트가 통과하면 AST 제약이 어긋나도 정답이고,
+ * 실패하면 제약을 다 맞혀도 오답이다. 근거는 오류의 방향이다: 사다리는 참조 답 하나와의 동등을
+ * 재므로 「맞는데 틀렸다」쪽으로만 틀리고(`exercises.md` §3), 그 한 번이 뒤의 맞는 판정까지 못
+ * 믿게 만든다. 실행은 반대쪽 오류만 낸다.
+ *
+ * 5단은 **원본과 줄을 견주지 않는다** (D180). 주는 것은 시그니처와 `mustHold` 이고 남은 정적
+ * 검사는 `reimpl-layer` 의 연결 검사뿐이다. 테스트가 없으면 그 판은 채점하지 않는다.
+ *
+ * 순수 함수다 — IPC 도 SQL 도 프로세스도 부르지 않는다. 실행은 러너(`runner.ts`)가 하고,
+ * `stage_log` 에 적는 것은 진도(D165)의 몫이다.
  */
 import { t } from '@chickadee/i18n';
 import type { CardPayload } from '@chickadee/store-sql';
@@ -41,12 +48,13 @@ export type StageDetail =
   | { kind: 'line'; compare: LineCompare }
   | { kind: 'place'; at: number; target: number; reason: 'exact' | 'scope-ok' | 'before-decl' | 'after-use' | 'off' }
   | { kind: 't1'; result: T1Result; links: { name: string; ok: boolean }[] }
+  | { kind: 'links'; links: { name: string; ok: boolean }[] }
   | { kind: 'handoff'; prompt: string }
   | { kind: 'wrong-shape' };
 
 export interface StageVerdict {
   ok: boolean;
-  /** 표시값. `handoff` 는 `null`. */
+  /** 표시값. 채점하지 않는 판(`handoff` · 테스트 없는 5단)은 `null`. */
   pct: number | null;
   /** 오답 진단 — 「그것이 참이 되는 조건」. 정답이면 `null`. */
   diagnosis: string | null;
@@ -54,6 +62,24 @@ export interface StageVerdict {
   okText: string | null;
   rule: string | null;
   detail: StageDetail;
+  /**
+   * 이 판정이 챕터 통과 셈에 드는가 (D180). 1~3단은 언제나 `true`. 4·5단은 실행이 끝나야
+   * `true` 가 되고, 러너가 없거나 뽑힌 테스트가 없으면 `false` 로 남아 게이트에서 빠진다.
+   */
+  gated: boolean;
+  /** 실행 결과. 안 돌렸으면 `null`. */
+  run: StageRun | null;
+}
+
+/**
+ * 러너의 결과 중 판정이 보는 것 (D180). C1 의 `RunResult` 가 이 모양을 **구조적으로** 만족하므로
+ * 여기서 그 타입을 import 하지 않는다 — 채점은 실행 배관을 모른 채로 순수하게 남는다.
+ */
+export interface StageRun {
+  status: 'passed' | 'failed' | 'error' | 'no-runner' | 'timeout';
+  passed: number;
+  failed: number;
+  failures: readonly { test: string; message: string }[];
 }
 
 export interface StageOptions {
@@ -65,8 +91,27 @@ export interface StageOptions {
   clock?: () => number;
 }
 
-const wrongShape = (): StageVerdict =>
-  ({ ok: false, pct: 0, diagnosis: t('grading.stageWrongShape'), okText: null, rule: null, detail: { kind: 'wrong-shape' } });
+const wrongShape = (): StageVerdict => ({
+  ok: false, pct: 0, diagnosis: t('grading.stageWrongShape'), okText: null, rule: null,
+  detail: { kind: 'wrong-shape' }, gated: true, run: null,
+});
+
+/** 이 판의 판정용 테스트. 4·5단만 든다. */
+export function testsOf(payload: CardPayload): readonly { path: string; text: string }[] {
+  if (payload.track !== 't3') return [];
+  if (payload.kind !== 'repair' && payload.kind !== 'reimpl') return [];
+  return payload.tests ?? [];
+}
+
+/**
+ * 실행으로 판정할 판인가 (D180). `handoff` 는 채점이 없고, 뽑힌 테스트가 없으면 실행해도
+ * 판정할 것이 없다 — 그때는 게이트 밖이다.
+ */
+export function needsRun(payload: CardPayload): boolean {
+  if (payload.track !== 't3') return false;
+  if (payload.kind === 'reimpl' && payload.type === 'handoff') return false;
+  return testsOf(payload).length > 0;
+}
 
 export function gradeStage(payload: CardPayload, answer: StageAnswer, opts: StageOptions = {}): StageVerdict {
   switch (payload.track) {
@@ -76,7 +121,7 @@ export function gradeStage(payload: CardPayload, answer: StageAnswer, opts: Stag
       return {
         ok: verdict.correct, pct: verdict.correct ? 100 : 0,
         diagnosis: verdict.diag?.t ?? null, okText: verdict.ok, rule: verdict.rule,
-        detail: { kind: 't0', verdict },
+        detail: { kind: 't0', verdict }, gated: true, run: null,
       };
     }
     case 't2':
@@ -85,7 +130,7 @@ export function gradeStage(payload: CardPayload, answer: StageAnswer, opts: Stag
       return wrongShape();
     case 't3':
       if (payload.kind === 'repair') return gradeRepair(payload, answer, opts);
-      if (payload.kind === 'reimpl') return gradeReimpl(payload, answer, opts);
+      if (payload.kind === 'reimpl') return gradeReimpl(payload, answer);
       return gradeChoice(payload, answer);
     default:
       return wrongShape();
@@ -108,6 +153,7 @@ function gradeChoice(payload: Choice, answer: StageAnswer): StageVerdict {
   return {
     ok, pct: ok ? 100 : placeOk ? 50 : 0, diagnosis, okText: payload.ok, rule: payload.rule,
     detail: { kind: 'choice', sel: answer.sel, answer: payload.answer, reasonOk },
+    gated: true, run: null,
   };
 }
 
@@ -122,7 +168,7 @@ function gradeTrace(payload: Extract<CardPayload, { track: 't2' }>, answer: Stag
     return {
       ok, pct: result.pct,
       diagnosis: ok ? null : t('grading.stageHopPartial', { pct: String(result.pct) }),
-      okText: null, rule: null, detail: { kind: 't2', result },
+      okText: null, rule: null, detail: { kind: 't2', result }, gated: true, run: null,
     };
   }
   if (payload.kind === 'radius') {
@@ -134,7 +180,7 @@ function gradeTrace(payload: Extract<CardPayload, { track: 't2' }>, answer: Stag
     const ok = result.missed.length === 0 && result.wrong.length === 0;
     return {
       ok, pct: result.pct, diagnosis: ok ? null : t('grading.stageCallerPartial'),
-      okText: null, rule: null, detail: { kind: 't2', result },
+      okText: null, rule: null, detail: { kind: 't2', result }, gated: true, run: null,
     };
   }
   return wrongShape();
@@ -193,7 +239,12 @@ export function checkPlace(lines: readonly string[], inserted: string, at: numbe
   return constrained ? { ok: true, reason: 'scope-ok' } : { ok: false, reason: 'off', line: target };
 }
 
+/**
+ * 4단 수정. AST 제약(스코프 검사·줄 비교)이 **정적 판정**을 내지만 그것으로 끝이 아니다 —
+ * 실행할 테스트가 있으면 `gated: false` 로 나가고 `mergeRun` 이 최종 판정을 만든다 (D180 ①).
+ */
 function gradeRepair(payload: Repair, answer: StageAnswer, opts: StageOptions): StageVerdict {
+  const gated = !needsRun(payload);
   if (payload.type === 'patch-place') {
     if (answer.kind !== 'place') return wrongShape();
     const check = checkPlace(payload.lines, payload.expected[0] ?? '', answer.at, payload.target);
@@ -206,6 +257,7 @@ function gradeRepair(payload: Repair, answer: StageAnswer, opts: StageOptions): 
       ok: check.ok, pct: check.ok ? 100 : 0, diagnosis,
       okText: check.reason === 'scope-ok' ? t('grading.stagePlaceOk') : null, rule: null,
       detail: { kind: 'place', at: answer.at, target: payload.target, reason: check.reason },
+      gated, run: null,
     };
   }
   if (answer.kind !== 'lines') return wrongShape();
@@ -213,7 +265,10 @@ function gradeRepair(payload: Repair, answer: StageAnswer, opts: StageOptions): 
     const expected = payload.expected[0] ?? '';
     const user = answer.lines[payload.target] ?? '';
     if (user.trim() === '') {
-      return { ok: false, pct: 0, diagnosis: t('grading.stagePatchNoLine'), okText: null, rule: null, detail: { kind: 'line', compare: compareLine(expected, user, new Set()) } };
+      return {
+        ok: false, pct: 0, diagnosis: t('grading.stagePatchNoLine'), okText: null, rule: null,
+        detail: { kind: 'line', compare: compareLine(expected, user, new Set()) }, gated, run: null,
+      };
     }
     const prot = buildProt({ original: [expected], grammar: payload.grammar });
     const compare = compareLine(expected, user, prot);
@@ -222,7 +277,7 @@ function gradeRepair(payload: Repair, answer: StageAnswer, opts: StageOptions): 
       ok, pct: ok ? 100 : 0,
       diagnosis: ok ? null : t('grading.stagePatchDiffer', { reason: compare.reasons.map((r) => r.code).join(', ') || 'DIFFER' }),
       okText: ok ? t('grading.stagePatchOk') : null, rule: null,
-      detail: { kind: 'line', compare },
+      detail: { kind: 'line', compare }, gated, run: null,
     };
   }
   // rollback — 창 전체를 이전 모양과 견준다 (T1 사다리, 3단계 기준).
@@ -230,7 +285,7 @@ function gradeRepair(payload: Repair, answer: StageAnswer, opts: StageOptions): 
   const ok = result.verdict === 'advance';
   return {
     ok, pct: result.pct, diagnosis: null, okText: ok ? t('grading.stagePatchOk') : null, rule: null,
-    detail: { kind: 't1', result, links: [] },
+    detail: { kind: 't1', result, links: [] }, gated, run: null,
   };
 }
 
@@ -253,26 +308,82 @@ export function checkLinks(links: readonly string[], user: readonly string[]): {
   return links.map((name) => ({ name, ok: hasWord(text, name) }));
 }
 
-function gradeReimpl(payload: Reimpl, answer: StageAnswer, opts: StageOptions): StageVerdict {
+/**
+ * 5단 재구현 (D180 ②). **원본과 줄을 견주지 않는다** — 그것이 필사이고, 백지에서 구성하는
+ * 능력을 안 잰다. 여기 남는 정적 검사는 `reimpl-layer` 의 연결 검사(「층 사이의 계약은
+ * 이름이다」) 하나이고, 판정은 실행이 한다.
+ *
+ * 테스트가 없으면 **채점하지 않는다** — `handoff` 와 같은 자리다. 원문(`payload.original`)은
+ * 화면이 채점 뒤 펼쳐 보이는 참고 자료이지 정답지가 아니다.
+ */
+function gradeReimpl(payload: Reimpl, answer: StageAnswer): StageVerdict {
   if (payload.type === 'handoff') {
     const mine = answer.kind === 'handoff' || answer.kind === 'lines' ? (answer.lines ?? []) : [];
     return {
       ok: true, pct: null, diagnosis: null, okText: t('grading.stageHandoff'), rule: null,
       detail: { kind: 'handoff', prompt: buildHandoffPrompt(payload, mine) },
+      gated: false, run: null,
     };
   }
   if (answer.kind !== 'lines') return wrongShape();
-  const result = ladder(payload.original, answer.lines, payload.grammar, opts);
   const links = payload.type === 'reimpl-layer' ? checkLinks(payload.links, answer.lines) : [];
   const broken = links.find((l) => !l.ok);
-  const ok = result.verdict === 'advance' && broken === undefined;
+  const empty = answer.lines.join('').trim() === '';
+  if (!needsRun(payload)) {
+    // 실행이 없으면 판정할 것이 없다. 연결 검사만 알려 주고 게이트에서 빠진다.
+    return {
+      ok: true, pct: null,
+      diagnosis: broken === undefined ? null : t('grading.stageLinkMissing', { name: broken.name }),
+      okText: t('grading.stageNoTests'), rule: null,
+      detail: { kind: 'links', links }, gated: false, run: null,
+    };
+  }
   return {
-    ok, pct: result.pct,
+    ok: broken === undefined && !empty, pct: null,
     diagnosis: broken === undefined ? null : t('grading.stageLinkMissing', { name: broken.name }),
-    okText: links.length > 0 ? t('grading.stageLinks', { ok: String(links.filter((l) => l.ok).length), n: String(links.length) }) : null,
-    rule: null,
-    detail: { kind: 't1', result, links },
+    okText: links.length > 0
+      ? t('grading.stageLinks', { ok: String(links.filter((l) => l.ok).length), n: String(links.length) })
+      : null,
+    rule: null, detail: { kind: 'links', links }, gated: false, run: null,
   };
+}
+
+/**
+ * 실행 결과를 정적 판정 위에 얹는다 (D180 ①) — **테스트가 이긴다.**
+ *
+ * `passed` 면 제약이 어긋나도 정답이고 `failed`·`error`·`timeout` 이면 제약을 맞혔어도 오답이다.
+ * `no-runner` 만 예외다 — 그것은 오답이 아니라 「이 단을 게이트에서 뺀다」는 신호라서, 정적
+ * 판정을 그대로 두고 `gated: false` 로 남긴다.
+ */
+export function mergeRun(base: StageVerdict, run: StageRun): StageVerdict {
+  const failure = run.failures[0];
+  switch (run.status) {
+    case 'no-runner':
+      return { ...base, run, gated: false, okText: base.okText ?? t('grading.stageNoRunner') };
+    case 'passed':
+      return {
+        ...base, run, gated: true, ok: true, pct: 100, diagnosis: null,
+        okText: base.ok
+          ? t('grading.stageRunPassed', { n: String(run.passed) })
+          : t('grading.stageRunPassedOffSpec', { n: String(run.passed) }),
+      };
+    case 'failed':
+      return {
+        ...base, run, gated: true, ok: false, pct: 0, okText: null,
+        diagnosis: failure === undefined
+          ? t('grading.stageRunFailed', { n: String(run.failed) })
+          : t('grading.stageRunFailedAt', { test: failure.test, message: failure.message }),
+      };
+    case 'timeout':
+      return { ...base, run, gated: true, ok: false, pct: 0, okText: null, diagnosis: t('grading.stageRunTimeout') };
+    default:
+      return {
+        ...base, run, gated: true, ok: false, pct: 0, okText: null,
+        diagnosis: failure === undefined
+          ? t('grading.stageRunError')
+          : t('grading.stageRunFailedAt', { test: failure.test, message: failure.message }),
+      };
+  }
 }
 
 /**

@@ -54,7 +54,7 @@ const M: Materials = {
   blocks: [{ path: SVC, blockId: 9, name: 'login', from: 76, to: 79, hash: 'h', ast: null }],
   bindings: [{ path: MAPPER, line: 15, column: 'role', property: 'role', entity: 'com.x.entity.User', entityPath: ENTITY, table: 'users' }],
   columns: [{ table: 'users', column: 'role', path: DDL, line: 14 }],
-  commits: [], layerOf: () => 0,
+  commits: [], tests: [], layerOf: () => 0,
 };
 
 describe('deriveNames — 이름이 정해지고 옮겨지고 읽히는 자리', () => {

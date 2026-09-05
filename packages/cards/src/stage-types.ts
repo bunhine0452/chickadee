@@ -108,6 +108,25 @@ export interface Hunk {
   lines: readonly HunkLine[];
 }
 
+/**
+ * 판정용 테스트 한 장 (D180). `RunSpec.tests` 로 러너에 그대로 넘어간다.
+ *
+ * `source` 는 어디서 나왔나다 — `commit` 은 그 `fix:` 커밋이 같이 고친 테스트, `repo` 는
+ * 대상 클래스와 이름이 맞는 리포 테스트, `contract` 는 원본 공개 메서드의 계약으로 생성한 것.
+ * 화면이 「무엇이 판정했나」를 이 값으로 말한다.
+ */
+export interface JudgeTest {
+  path: string;
+  text: string;
+  source: 'commit' | 'repo' | 'contract';
+}
+
+/** 리포에 이미 있는 테스트 파일 하나 — 추출의 재료. `bake.ts` 가 읽어 넘긴다. */
+export interface StageTestFile {
+  path: string;
+  text: string;
+}
+
 /** 4단의 정답지 — 실제 커밋. `fix` 여부는 생성기가 제목으로 가른다. */
 export interface StageCommit {
   id: number;
@@ -137,6 +156,8 @@ export interface StageRequest {
   names?: readonly NameUse[];
   responseKeys?: readonly ResponseKey[];
   commits?: readonly StageCommit[];
+  /** 리포의 테스트 파일 — 4·5단 판정용 테스트를 여기서 먼저 찾는다 (D180). */
+  tests?: readonly StageTestFile[];
   /** 유형별 개념 id 덮어쓰기. 기본값은 `STAGE_CONCEPTS`. */
   conceptIds?: Partial<Record<StageType, ConceptId>>;
 }

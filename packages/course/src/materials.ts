@@ -8,7 +8,7 @@
  */
 import type {
   FocusLine, Hop, LineWindow, NameUse, ResponseKey, StageBlock, StageCommit, StageEdge, StageFile,
-  StageRequest, StageSite,
+  StageRequest, StageSite, StageTestFile,
 } from './deps.js';
 import type { Concept } from '@chickadee/dictionary';
 import type { AstLite } from '@chickadee/ipc-client';
@@ -67,6 +67,8 @@ export interface Materials {
   bindings: readonly BindingRow[];
   columns: readonly ColumnRow[];
   commits: readonly StageCommit[];
+  /** 리포의 테스트 파일 — 4·5단 판정용 테스트의 재료 (D180). */
+  tests: readonly StageTestFile[];
   layerOf: (conceptId: string) => number;
 }
 
@@ -256,5 +258,6 @@ export function assembleStageRequest(m: Materials): StageRequest {
     names: deriveNames(m),
     responseKeys: deriveResponseKeys(m),
     commits: m.commits,
+    tests: m.tests,
   };
 }

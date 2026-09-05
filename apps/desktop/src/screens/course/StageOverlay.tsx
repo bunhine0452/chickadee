@@ -10,7 +10,9 @@
  * 저장 지점을 늘리면 `stage_log` 의 「판정한 순간」이라는 뜻이 흐려진다.
  */
 import { stuckAction, type Advance, type RecheckGrade } from '@chickadee/concepts';
-import { buildHandoffPrompt, gradeStage, type StageAnswer, type StageVerdict } from '@chickadee/grading';
+import {
+  buildHandoffPrompt, gradeStage, mergeRun, needsRun, type StageAnswer, type StageVerdict,
+} from '@chickadee/grading';
 import { t } from '@chickadee/i18n';
 import { ipc } from '@chickadee/ipc-client';
 import { labelFor } from '@chickadee/scheduler';
@@ -28,12 +30,15 @@ import { CallerPlate } from './CallerPlate.js';
 import { ChoicePlate } from './ChoicePlate.js';
 import {
   conceptName, conceptOneLiner, dictNow, finishRecheck, finishStage, foldChapter, openCourseSession,
-  queueConceptPlate, type JudgeDeps,
+  queueConceptPlate, runStageAnswer, type JudgeDeps,
 } from './data.js';
 import { HopPlate } from './HopPlate.js';
 import { ReimplPlate } from './ReimplPlate.js';
 import { RepairPlate } from './RepairPlate.js';
-import { foldFlow, plannedMin, queueKindOf, stageKey, tally, typeKey, type RunSpec, type StageCardView } from './run.js';
+import {
+  foldFlow, plannedMin, queueKindOf, stageKey, tally, typeKey,
+  type RunPhase, type RunSpec, type StageCardView,
+} from './run.js';
 import { StageDone } from './StageDone.js';
 import { StuckPanel, type StuckView } from './StuckPanel.js';
 import { useCourse } from './store.js';
@@ -90,6 +95,7 @@ export function StageOverlay(props: StageOverlayProps): React.JSX.Element {
   const [stuck, setStuck] = useState<StuckView | null>(null);
   const [done, setDone] = useState<Done | null>(null);
   const [layers, setLayers] = useState<ReadonlyMap<ConceptId, Layer>>(new Map());
+  const [phases, setPhases] = useState<Record<number, RunPhase>>({});
   const [elapsed, setElapsed] = useState(0);
   const startedRef = useRef(Date.now());
   const cardStartRef = useRef(Date.now());
@@ -107,6 +113,7 @@ export function StageOverlay(props: StageOverlayProps): React.JSX.Element {
     setDunno(0);
     setStuck(null);
     setDone(null);
+    setPhases({});
     startedRef.current = Date.now();
     cardStartRef.current = Date.now();
     setElapsed(0);
@@ -154,11 +161,35 @@ export function StageOverlay(props: StageOverlayProps): React.JSX.Element {
     return { sessionId, dayKey: props.dayKey, now };
   }, [props.repoId, props.dayKey]);
 
+  /**
+   * 채점 — 1~3단은 여기서 끝나고, **4·5단은 실행이 최종 판정을 만든다** (D180). 정적 판정을
+   * 먼저 세워 판정란을 채우고(빈 화면으로 기다리지 않는다), 러너가 끝나면 `mergeRun` 이
+   * 그 위에 얹는다. 러너가 없으면 `no-runner` 로 돌아오고 그 판은 게이트에서 빠진다.
+   */
   const grade = useCallback((answer: StageAnswer) => {
     if (card === null || verdict !== null) return;
+    const at = pos;
     const v = gradeStage(card.payload, answer);
-    setVerdicts((prev) => ({ ...prev, [pos]: v }));
-  }, [card, verdict, pos]);
+    setVerdicts((prev) => ({ ...prev, [at]: v }));
+    if (!needsRun(card.payload)) return;
+    setPhases((prev) => ({ ...prev, [at]: { kind: 'running' } }));
+    void runStageAnswer({ repoId: props.repoId, rootPath: props.rootPath, payload: card.payload, answer })
+      .then((run) => {
+        if (run === null) {
+          setPhases((prev) => ({ ...prev, [at]: { kind: 'off' } }));
+          return;
+        }
+        setPhases((prev) => ({ ...prev, [at]: { kind: 'done', run } }));
+        setVerdicts((prev) => {
+          const base = prev[at];
+          return base === undefined ? prev : { ...prev, [at]: mergeRun(base, run) };
+        });
+      })
+      .catch((e: unknown) => {
+        report(e, '단 실행');
+        setPhases((prev) => ({ ...prev, [at]: { kind: 'off' } }));
+      });
+  }, [card, verdict, pos, props.repoId, props.rootPath]);
 
   const finish = useCallback(async (finalVerdicts: Record<number, StageVerdict>) => {
     if (finishingRef.current) return;
@@ -169,12 +200,12 @@ export function StageOverlay(props: StageOverlayProps): React.JSX.Element {
       if (spec.kind === 'recheck') {
         const traceOk = finalVerdicts[0]?.ok === true;
         const predictOk = finalVerdicts[1]?.ok === true;
-        const r = await finishRecheck(d, spec.row, spec.hasRepair, { traceOk, predictOk, durationMs });
+        const r = await finishRecheck(d, spec.row, { hasRepair: spec.hasRepair, hasRun: spec.hasRun }, { traceOk, predictOk, durationMs });
         setDone({ advance: r.advance, grade: r.grade, asked: 2, correct: (traceOk ? 1 : 0) + (predictOk ? 1 : 0) });
         return;
       }
       const tl = tally(cards, finalVerdicts);
-      const advance = await finishStage(d, spec.row, spec.hasRepair, {
+      const advance = await finishStage(d, spec.row, { hasRepair: spec.hasRepair, hasRun: spec.hasRun }, {
         unitId: spec.unitId, stage: spec.stage, asked: tl.asked, correct: tl.correct, durationMs,
         detail: { cards: cards.map((c, i) => ({ id: c.id, type: c.type, ok: finalVerdicts[i]?.ok ?? null, pct: finalVerdicts[i]?.pct ?? null })) },
       });
@@ -189,12 +220,14 @@ export function StageOverlay(props: StageOverlayProps): React.JSX.Element {
 
   const next = useCallback(() => {
     if (verdict === null) return;
+    // 실행 중이면 기다린다 — 아직 최종 판정이 아니다.
+    if (phases[pos]?.kind === 'running') return;
     if (pos + 1 < cards.length) {
       setPos(pos + 1);
       return;
     }
     void finish(verdicts);
-  }, [verdict, pos, cards.length, finish, verdicts]);
+  }, [verdict, pos, cards.length, finish, verdicts, phases]);
 
   const pressDunno = useCallback(() => {
     if (card === null || done !== null) return;
@@ -318,9 +351,9 @@ export function StageOverlay(props: StageOverlayProps): React.JSX.Element {
         ) : card.type === 'caller' ? (
           <CallerPlate {...plateProps} />
         ) : card.stageNo === 4 ? (
-          <RepairPlate {...plateProps} />
+          <RepairPlate {...plateProps} phase={phases[pos] ?? { kind: 'off' }} />
         ) : card.stageNo === 5 ? (
-          <ReimplPlate {...plateProps} theme={props.theme} />
+          <ReimplPlate {...plateProps} theme={props.theme} phase={phases[pos] ?? { kind: 'off' }} />
         ) : (
           <ChoicePlate {...plateProps} />
         )}

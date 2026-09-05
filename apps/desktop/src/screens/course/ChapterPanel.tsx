@@ -122,6 +122,7 @@ export function ChapterPanel(props: ChapterPanelProps): React.JSX.Element {
       )}
 
       {target === 3 && c.row.stageReached >= 3 && c.counts[4] === 0 ? <p className="note">{t('chapter.stage4None')}</p> : null}
+      {target === 5 ? <p className="note">{t('chapter.targetRun')}</p> : null}
       {next === 5 ? <p className="note">{t('chapter.stage5Note')}</p> : null}
 
       {gate !== null && gate.cut > 0 && next === 1 && !vocabAll ? (

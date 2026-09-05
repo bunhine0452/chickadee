@@ -9,8 +9,11 @@ export { generateKind, generateT0, prefer } from './t0.js';
 export { genBlank } from './t0-blank.js';
 export { genMeaning } from './t0-meaning.js';
 export { genPoint } from './t0-point.js';
-export { makeSyntheticCard, isSynthetic, SYNTHETIC_SITE_ID } from './t0-synthetic.js';
-export type { SyntheticRequest } from './t0-synthetic.js';
+export {
+  ABSENCE_MESSAGE_KEY, absenceReason, isSynthetic, makeAbsentCard, makeSyntheticCard,
+  SYNTHETIC_SITE_ID,
+} from './t0-synthetic.js';
+export type { AbsenceReason, AbsentRequest, SyntheticRequest } from './t0-synthetic.js';
 export { buildFirstRun, makeExecCard, renderFirstRun, EXEC_SITE_ID } from './t0-exec.js';
 export { makeProtoCard, PROTO_SITE_ID } from './t0-proto.js';
 export type { ProtoRequest } from './t0-proto.js';
@@ -69,11 +72,18 @@ export {
 } from './stage-choice.js';
 export { buildCallers, buildExecs, buildHops, layerOf, splitHops, MAX_CALLER, MAX_EXEC, MAX_HOP } from './stage-trace.js';
 export {
-  buildReimpls, buildRepairs, fixSubject, linksBetween, MAX_PER_TYPE, MAX_REIMPL_LINES, MIN_REIMPL_LINES,
+  buildReimpls, buildRepairs, fixSubject, linksBetween, signatureOf, MAX_PER_TYPE, MAX_REIMPL_LINES,
+  MIN_REIMPL_LINES,
 } from './stage-edit.js';
 export { finishStage, hopOrder, identsOf, nodeId, stageSeed, STAGE_CONCEPTS } from './stage-common.js';
 export { KIND_OF, STAGE_OF } from './stage-types.js';
 export type {
-  Hunk, HunkLine, NameUse, ResponseKey, StageBlock, StageCard, StageCommit, StageDrop, StageEdge, StageFile,
-  StageRequest, StageResult, StageSite, StageType,
+  Hunk, HunkLine, JudgeTest, NameUse, ResponseKey, StageBlock, StageCard, StageCommit, StageDrop, StageEdge,
+  StageFile, StageRequest, StageResult, StageSite, StageTestFile, StageType,
 } from './stage-types.js';
+// 판정용 테스트 (D180)
+export {
+  commitTests, contractTest, isTestPath, javaFqn, judgeTests, namedTests, parseJavaSignature, simpleName,
+  springTests, JUDGE_PACKAGE,
+} from './stage-tests.js';
+export type { JudgeTestInput, MethodContract } from './stage-tests.js';

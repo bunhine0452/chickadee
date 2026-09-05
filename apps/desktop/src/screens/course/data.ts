@@ -15,6 +15,7 @@ import {
   EST_RECHECK_MIN, planCourseDay, recheckGrade, recheckTally, scheduleRecheck,
   type CourseItem, type RecheckItem, type StageItem,
 } from '@chickadee/scheduler';
+import { detectRunner, needsRun, runTests, testsOf, type StageAnswer, type StageRun } from '@chickadee/grading';
 import { fromCardRow, type ConceptId, type StageNo } from '@chickadee/store-sql';
 
 import { pickPlateNow } from '../../data/manual.js';
@@ -22,7 +23,9 @@ import { loadScheduler, loadSettings } from '../../data/settings.js';
 import { startSession } from '../../session-flow.js';
 import { useUi } from '../../store.js';
 import { planGates, type Gate } from './gate.js';
-import { EST_GATE_MIN, toView, type StageCardView } from './run.js';
+import {
+  EST_GATE_MIN, answerWindow, runLangOf, spliceWindow, toView, type StageCardView,
+} from './run.js';
 
 /** 코스 판정에 필요한 만큼의 챕터 한 장. `chapter.list` + 단마다 판 수 + 어휘 겹. */
 export interface ChapterView {
@@ -37,6 +40,12 @@ export interface ChapterView {
   /** 이 챕터에 붙은 어휘(t0 개념)와 그중 1겹 이상인 것. 1단의 통과선이다 (mastery.md §3.2). */
   vocab: { total: number; inked: number; zero: ConceptId[] };
   hasRepair: boolean;
+  /**
+   * 이 챕터의 5단을 실행으로 판정할 수 있나 (D180). 러너가 탐지됐고 5단 판이 서 있으면 참이다.
+   * 판마다 판정용 테스트가 실렸는지는 판을 걸 때 다시 본다 — 하나도 없으면 그 단은 셈에서 빠지고
+   * (`tally`) 통과선이 4로 내려앉는다.
+   */
+  hasRun: boolean;
   /** 앞 챕터가 아직 통과 전이라 닫혀 있나. 해금은 열이 아니라 순서다 (`chapter.today`). */
   locked: boolean;
 }
@@ -63,9 +72,13 @@ const STAGES: readonly StageNo[] = [1, 2, 3, 4, 5];
  * 스무 번이고, 목차를 열 때 한 번이다.
  */
 export async function loadCourse(
-  repoId: number, dayKey: string, now: number,
+  repoId: number, dayKey: string, now: number, rootPath?: string,
 ): Promise<CourseData> {
   const settings = await loadSettings();
+  // 러너 탐지 — 없는 것은 오류가 아니라 「4·5단을 게이트에서 뺀다」는 신호다 (정본 §5 ①).
+  const runnerOk = rootPath === undefined
+    ? false
+    : await detectRunner(repoId, rootPath).then((p) => p.ok).catch(() => false);
   const [rows, todayRows, dueRows, dead] = await Promise.all([
     ipc.store.query('chapter.list', { repoId }),
     ipc.store.query('chapter.today', { repoId, dayKey }),
@@ -96,6 +109,7 @@ export async function loadCourse(
       row, deferredDay: r.deferred_day, counts,
       vocab: { total: layerRows.length, inked: layerRows.length - zero.length, zero },
       hasRepair: counts[4] > 0,
+      hasRun: runnerOk && counts[5] > 0,
       locked,
     });
   }
@@ -249,7 +263,7 @@ export async function judgeReading(deps: JudgeDeps, chapter: ChapterView): Promi
       asked: empty ? 1 : t.asked, correct: empty ? 1 : t.correct, durationMs: 0,
       detail: { kind: 'reading', asked: t.asked, correct: t.correct },
     },
-    kind: 'first', hasRepair: chapter.hasRepair,
+    kind: 'first', hasRepair: chapter.hasRepair, hasRun: chapter.hasRun,
   });
 }
 
@@ -265,11 +279,13 @@ export interface StageOutcome {
 }
 
 export async function finishStage(
-  deps: JudgeDeps, row: ChapterProgress, hasRepair: boolean, outcome: StageOutcome,
+  deps: JudgeDeps, row: ChapterProgress, gate: { hasRepair: boolean; hasRun: boolean }, outcome: StageOutcome,
 ): Promise<Advance> {
+  // 5단인데 실행으로 판정한 판이 하나도 없으면 통과선을 4로 내린다 — 아니면 챕터가 막힌다 (D180).
+  const hasRun = gate.hasRun && !(outcome.stage === 5 && outcome.asked === 0);
   return recordStageResult({
     sessionId: deps.sessionId, dayKey: deps.dayKey, now: deps.now, row,
-    result: outcome, kind: 'first', hasRepair,
+    result: outcome, kind: 'first', hasRepair: gate.hasRepair, hasRun,
   });
 }
 
@@ -281,7 +297,7 @@ export interface RecheckOutcome {
 
 /** 재검 한 번 — 등급은 `recheckGrade`, 일정은 `scheduleRecheck`(FSRS 그대로), 원장은 `recordStageResult`. */
 export async function finishRecheck(
-  deps: JudgeDeps, row: ChapterProgress, hasRepair: boolean, outcome: RecheckOutcome,
+  deps: JudgeDeps, row: ChapterProgress, gate: { hasRepair: boolean; hasRun: boolean }, outcome: RecheckOutcome,
 ): Promise<{ advance: Advance; grade: RecheckGrade }> {
   const settings = await loadSettings();
   const scheduler = await loadScheduler(deps.now, settings.desiredRetention);
@@ -294,7 +310,7 @@ export async function finishRecheck(
       unitId: row.unitId, stage: 2, asked: tally.asked, correct: tally.correct,
       durationMs: outcome.durationMs, detail: { kind: 'recheck', ...outcome },
     },
-    kind: 'recheck', hasRepair, recheck: { grade, schedule },
+    kind: 'recheck', hasRepair: gate.hasRepair, hasRun: gate.hasRun, recheck: { grade, schedule },
   });
   return { advance, grade };
 }
@@ -312,7 +328,43 @@ export async function queueConceptPlate(
 }
 
 /** 통과선 — 화면의 「3단까지가 통과」 문구가 이것을 본다. */
-export const targetOf = (chapter: ChapterView): 3 | 4 => passTarget(chapter.hasRepair);
+export const targetOf = (chapter: ChapterView): 3 | 4 | 5 => passTarget(chapter.hasRepair, chapter.hasRun);
+
+// ───────── 4·5단 실행 (D180) ─────────
+
+/** 러너에 주는 시간 상한. 그레이들 첫 실행은 느리다 — 넘으면 러너가 죽인다. */
+export const RUN_TIMEOUT_MS = 180_000;
+/** 파일 하나를 통째로 읽는 상한(줄). 넘는 파일은 실행 대상으로 안 쓴다. */
+const RUN_FILE_MAX_LINES = 20_000;
+
+/**
+ * 학습자의 답을 원본 파일에 끼워 넣고 판정용 테스트와 함께 돌린다 (D180).
+ *
+ * 원본 리포에는 쓰지 않는다 — 러너가 임시 작업본을 만든다(정본 §5 ②). 실행할 수 없는 판
+ * (테스트가 없다 · 러너가 모르는 언어 · 답 모양이 안 맞는다)은 `null` 이고, 그때 그 판은
+ * 정적 판정 그대로 게이트 밖에 남는다.
+ */
+export async function runStageAnswer(input: {
+  repoId: number;
+  rootPath: string;
+  payload: Parameters<typeof answerWindow>[0];
+  answer: StageAnswer;
+}): Promise<StageRun | null> {
+  if (!needsRun(input.payload)) return null;
+  const win = answerWindow(input.payload, input.answer);
+  if (win === null) return null;
+  const lang = runLangOf(win.grammar);
+  if (lang === null) return null;
+  const chunk = await ipc.file.readLines({ rootPath: input.rootPath, relPath: win.file, from: 1, to: RUN_FILE_MAX_LINES });
+  const text = spliceWindow(chunk.lines, win);
+  return runTests({
+    repoId: input.repoId,
+    lang,
+    files: [{ path: win.file, text }],
+    tests: testsOf(input.payload).map((t) => ({ path: t.path, text: t.text })),
+    timeoutMs: RUN_TIMEOUT_MS,
+  });
+}
 
 /** 개념 이름 한 줄. 사전에 없으면 id 그대로 — 화면이 빈 칸을 내지 않는다. */
 export function conceptName(dict: Dict, conceptId: string): string {

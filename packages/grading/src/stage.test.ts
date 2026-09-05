@@ -6,7 +6,9 @@ import { describe, expect, test } from 'vitest';
 
 import type { CardPayload } from '@chickadee/store-sql';
 
-import { buildHandoffPrompt, checkLinks, checkPlace, declaredName, gradeStage } from './stage.js';
+import {
+  buildHandoffPrompt, checkLinks, checkPlace, declaredName, gradeStage, mergeRun, needsRun,
+} from './stage.js';
 
 const CHOICE: CardPayload = {
   track: 't3', kind: 'cut', stage: 3, file: 'BACK/src/main/resources/mapper/UserMapper.xml', focus: 35,
@@ -74,6 +76,17 @@ describe('2단 · 전부 맞아야 통과', () => {
 });
 
 describe('4단 · 수정', () => {
+  test('테스트가 실려 있으면 정적 판정은 게이트에 안 든다 — 실행이 끝나야 든다 (D180 ①)', () => {
+    const tests = [{ path: 'BACK/src/test/java/chickadee/judge/T.java', text: 'class T {}', source: 'contract' as const }];
+    const bare = gradeStage(repair({}), { kind: 'lines', lines: ['int a = 1;', 'String role = user.getRole();', 'use(role);'] });
+    expect(bare.gated).toBe(true);
+    const withTests = gradeStage(repair({ tests }), { kind: 'lines', lines: ['int a = 1;', 'String role = user.getRole();', 'use(role);'] });
+    expect(withTests.gated).toBe(false);
+    // 제약을 다 맞혔어도 테스트가 실패하면 오답이다.
+    const beaten = mergeRun({ ...withTests, ok: true }, { status: 'failed', passed: 0, failed: 1, failures: [] });
+    expect(beaten.ok).toBe(false);
+  });
+
   test('patch-line — 참조 답과 같은 뜻이면 통과 (따옴표·공백 차이는 동등)', () => {
     const card = repair({});
     expect(gradeStage(card, { kind: 'lines', lines: ['int a = 1;', 'String role = user.getRole();', 'use(role);'] }).ok).toBe(true);
@@ -126,21 +139,56 @@ describe('5단 · 재구현', () => {
     question: '«generateToken» 의 본문을 써 보세요.', promptLines: ['a', 'b', 'c'], blockId: 11, ...over,
   });
 
-  test('reimpl-spec — 원본과 동등하면 통과', () => {
+  test('테스트가 없으면 채점하지 않는다 — 원본과 줄을 견주지 않는다 (D180 ②)', () => {
     const card = reimpl({});
-    const same = gradeStage(card, { kind: 'lines', lines: ['public String generateToken(Long userId) {', '    Date now = new Date();', '    return build(userId, now);', '}'] });
-    expect(same.ok).toBe(true);
-    expect(same.pct).toBe(100);
-    expect(gradeStage(card, { kind: 'lines', lines: ['public String generateToken(Long userId) {', '}'] }).ok).toBe(false);
+    // 원본과 글자 하나 안 닮은 답이어도 「틀렸다」가 아니다. 잴 것이 없으므로 게이트 밖이다.
+    const mine = gradeStage(card, { kind: 'lines', lines: ['public String generateToken(Long id) {', '  return jwt(id);', '}'] });
+    expect(mine.pct).toBeNull();
+    expect(mine.gated).toBe(false);
+    expect(needsRun(card)).toBe(false);
+    // 원본을 그대로 베껴도 더 나은 점수가 없다 — 필사에 상이 없다.
+    const copied = gradeStage(card, { kind: 'lines', lines: ['public String generateToken(Long userId) {', '    Date now = new Date();', '    return build(userId, now);', '}'] });
+    expect(copied.pct).toBeNull();
+    expect(copied.gated).toBe(false);
   });
 
-  test('reimpl-layer — 사다리를 통과해도 연결 이름이 빠지면 못 넘는다', () => {
+  test('reimpl-layer — 연결 이름이 빠지면 진단이 붙는다 (남은 정적 검사 하나)', () => {
     const card = reimpl({ type: 'reimpl-layer', links: ['build', 'findByLoginId'] });
-    const out = gradeStage(card, { kind: 'lines', lines: ['public String generateToken(Long userId) {', '    Date now = new Date();', '    return build(userId, now);', '}'] });
-    expect(out.ok).toBe(false);
+    const out = gradeStage(card, { kind: 'lines', lines: ['public String generateToken(Long userId) {', '    return build(userId, now);', '}'] });
     expect(out.diagnosis).toContain('findByLoginId');
-    expect(out.okText).toBe('연결 검사 1/2');
     expect(checkLinks(['build', 'builder'], ['x = build(1);'])).toEqual([{ name: 'build', ok: true }, { name: 'builder', ok: false }]);
+  });
+
+  test('테스트가 있으면 실행이 판정한다 — 테스트가 제약을 이긴다 (D180 ①)', () => {
+    const tests = [{ path: 'BACK/src/test/java/chickadee/judge/T.java', text: 'class T {}', source: 'contract' as const }];
+    const card = reimpl({ type: 'reimpl-layer', links: ['build', 'findByLoginId'], tests });
+    expect(needsRun(card)).toBe(true);
+    const base = gradeStage(card, { kind: 'lines', lines: ['public String generateToken(Long userId) {', '    return build(userId, now);', '}'] });
+    expect(base.gated).toBe(false);
+
+    // 연결 검사가 어긋났어도 테스트가 통과하면 정답이다.
+    const passed = mergeRun(base, { status: 'passed', passed: 2, failed: 0, failures: [] });
+    expect(passed.ok).toBe(true);
+    expect(passed.gated).toBe(true);
+    expect(passed.pct).toBe(100);
+
+    // 반대로 테스트가 실패하면 오답이고, 첫 실패가 진단이 된다.
+    const failed = mergeRun(base, {
+      status: 'failed', passed: 1, failed: 1,
+      failures: [{ test: 'AuthServiceLoginContractTest.contractHolds', message: 'expected LoginResponse' }],
+    });
+    expect(failed.ok).toBe(false);
+    expect(failed.gated).toBe(true);
+    expect(failed.diagnosis).toContain('AuthServiceLoginContractTest');
+
+    // 러너가 없으면 오답이 아니라 게이트 밖이다.
+    const none = mergeRun(base, { status: 'no-runner', passed: 0, failed: 0, failures: [] });
+    expect(none.gated).toBe(false);
+    expect(none.ok).toBe(base.ok);
+
+    // 빌드 실패·시간 초과는 오답이고 게이트에 든다.
+    expect(mergeRun(base, { status: 'error', passed: 0, failed: 0, failures: [] })).toMatchObject({ ok: false, gated: true });
+    expect(mergeRun(base, { status: 'timeout', passed: 0, failed: 0, failures: [] })).toMatchObject({ ok: false, gated: true });
   });
 
   test('handoff — 채점 없음, 프롬프트는 파일 이름만 · 앞뒤 4줄 · 내 답 · 물음', () => {

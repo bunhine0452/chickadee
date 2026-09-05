@@ -8,7 +8,7 @@
  */
 import type { StageType } from '@chickadee/cards';
 import { FOLD_HOPS, type ChapterProgress } from '@chickadee/concepts';
-import type { StageVerdict } from '@chickadee/grading';
+import type { StageAnswer, StageRun, StageVerdict } from '@chickadee/grading';
 import type { MessageKey } from '@chickadee/i18n';
 import type { Card, CardKind, CardPayload, ConceptId, StageNo } from '@chickadee/store-sql';
 
@@ -31,6 +31,8 @@ export interface RunSpec {
   stage: StageNo;
   kind: 'first' | 'recheck';
   hasRepair: boolean;
+  /** 이 챕터의 5단을 실행으로 판정할 수 있나 (D180). 러너가 탐지된 리포에서만 참이다. */
+  hasRun: boolean;
   row: ChapterProgress;
   cards: StageCardView[];
 }
@@ -90,8 +92,9 @@ const TYPE_KEY = {
 export const typeKey = (type: StageType): MessageKey => TYPE_KEY[type];
 
 /**
- * 단의 셈 — 원장에 남길 `asked`·`correct`. `handoff` 는 채점이 없으므로 **묻지 않은 것**으로
- * 센다: 넣으면 5단이 늘 미달이고, 5단은 어차피 통과 게이트가 아니다(README §3).
+ * 단의 셈 — 원장에 남길 `asked`·`correct`. **판정이 게이트에 들지 않는 판은 묻지 않은 것으로
+ * 센다** (D180): `handoff` 는 채점이 없고, 4·5단은 러너나 판정용 테스트가 없으면 실행으로
+ * 판정하지 못한다. 넣으면 그 단이 영원히 미달이고 챕터가 막힌다.
  */
 export function tally(
   cards: readonly StageCardView[],
@@ -100,11 +103,69 @@ export function tally(
   let asked = 0;
   let correct = 0;
   cards.forEach((c, i) => {
-    if (c.type === 'handoff') return;
+    const v = verdicts[i];
+    if (c.type === 'handoff' || v === undefined || !v.gated) return;
     asked += 1;
-    if (verdicts[i]?.ok === true) correct += 1;
+    if (v.ok) correct += 1;
   });
   return { asked, correct };
+}
+
+// ───────── 4·5단 실행 (D180) ─────────
+
+/** 실행 상태 한 판 — 화면이 이것만 본다. */
+export type RunPhase =
+  | { kind: 'off' }
+  | { kind: 'running' }
+  | { kind: 'done'; run: StageRun };
+
+/** tree-sitter 문법 → 러너 언어. 지금 어댑터는 자바 하나다 (D175). */
+export function runLangOf(grammar: string): 'java' | null {
+  return grammar === 'java' ? 'java' : null;
+}
+
+/** 답을 적용한 파일 창 — 파일 기준 1-based `from` 부터 `count` 줄을 `lines` 로 바꾼다. */
+export interface AnswerWindow {
+  file: string;
+  grammar: string;
+  from: number;
+  count: number;
+  lines: string[];
+}
+
+/**
+ * 학습자의 답을 **파일 창**으로 옮긴다. 러너는 파일 전문을 받으므로 창을 원본에 끼워
+ * 넣어야 하고, 그 끼우는 자리를 정하는 것이 이 함수다. 모양이 안 맞으면 `null` — 그때는
+ * 실행하지 않는다.
+ */
+export function answerWindow(payload: CardPayload, answer: StageAnswer): AnswerWindow | null {
+  if (payload.track !== 't3') return null;
+  if (payload.kind === 'repair') {
+    const base = { file: payload.file, grammar: payload.grammar, from: payload.from, count: payload.lines.length };
+    if (payload.type === 'patch-place') {
+      if (answer.kind !== 'place') return null;
+      const lines = [...payload.lines];
+      lines.splice(answer.at, 0, payload.expected[0] ?? '');
+      return { ...base, lines };
+    }
+    if (answer.kind !== 'lines') return null;
+    return { ...base, lines: [...answer.lines] };
+  }
+  if (payload.kind === 'reimpl' && payload.type !== 'handoff') {
+    if (answer.kind !== 'lines') return null;
+    return {
+      file: payload.file, grammar: payload.grammar, from: payload.from,
+      count: payload.original.length, lines: [...answer.lines],
+    };
+  }
+  return null;
+}
+
+/** 원본 전문에 창을 끼운다. `from` 은 1-based. */
+export function spliceWindow(full: readonly string[], win: AnswerWindow): string {
+  const head = full.slice(0, Math.max(0, win.from - 1));
+  const tail = full.slice(Math.max(0, win.from - 1) + win.count);
+  return [...head, ...win.lines, ...tail].join('\n');
 }
 
 /** 예산 총량 — 큐 바의 분모. */

@@ -6,14 +6,17 @@
  * `card.insert_stage` 로 넣는다. 같은 `content_hash` 는 `ON CONFLICT DO NOTHING` 이라 증분
  * 인제스트가 같은 챕터를 다시 굽지 않는다 — `changes` 가 0 이면 건너뛴 것이다.
  *
- * 사용처 없는 개념(규약 `proto/` · 기계 `cs/`)은 `bakeSiteless` 가 같은 재료 위에서 굽는다 —
- * D154 가 연 큐 가지에 처음으로 카드가 든다.
+ * 사용처 없는 개념(규약 `proto/` · 프레임워크 `spring/` · 기계 `cs/`)은 `bakeSiteless` 가 같은
+ * 재료 위에서 굽는다 — D154 가 연 큐 가지에 카드가 든다. 도는 네임스페이스는
+ * `COMPUTED_NAMESPACES` 하나가 정한다(D176) — 자기 생성기가 있는 셋만 뺀다.
  */
 import {
-  GEN_VERSION, buildCourseCards, genMeaning, isFailure, makeProtoCard,
+  GEN_VERSION, buildCourseCards, genMeaning, isFailure, isTestPath, makeProtoCard,
 } from '@chickadee/cards';
-import type { FocusLine, LineWindow, SiteInput, StageDrop, StageEdge, StageSite } from '@chickadee/cards';
-import { langOf, type Dict } from '@chickadee/dictionary';
+import type {
+  FocusLine, LineWindow, SiteInput, StageDrop, StageEdge, StageSite, StageTestFile,
+} from '@chickadee/cards';
+import { COMPUTED_NAMESPACES, langOf, type Dict } from '@chickadee/dictionary';
 import { ipc, type AstLite } from '@chickadee/ipc-client';
 import { astLiteSchema, fromConceptSiteRow, type ConceptId, type StageNo } from '@chickadee/store-sql';
 import { fnv1a32 } from '@chickadee/text';
@@ -56,14 +59,35 @@ export interface SitelessBake {
   proto: number;
   cs: number;
   skipped: number;
-  /** 빌릴 창이 없어 못 구운 `cs/` — 결함이 아니라 cs.md §2 ③ 이다. */
+  /** 네임스페이스별로 새로 들어간 판. `proto`·`cs` 는 여기서 뽑은 값이다. */
+  byNamespace: Record<string, number>;
+  /** 빌릴 창이 없어 못 구운 개념 — 결함이 아니라 cs.md §2 ③ 이다. */
   noWindow: string[];
 }
+
+/**
+ * 사용처 없는 개념을 이 파일이 굽는 네임스페이스 (D176). `COMPUTED_NAMESPACES` 가 단일 출처이고,
+ * **자기 생성기가 따로 있는 셋만 뺀다** — `exec/` 는 `t0-exec` 이 실행 사실에서 굽고, `common/`·
+ * `arch/` 는 언어 개념의 `universal` 축이 나른다. 네임스페이스가 늘면 여기를 다시 안 고친다.
+ */
+const SELF_BAKED = new Set(['common/', 'arch/', 'exec/']);
+export const SITELESS_NAMESPACES: readonly string[] = COMPUTED_NAMESPACES
+  .filter((ns) => !SELF_BAKED.has(ns)).map((ns) => ns.slice(0, -1));
 
 /** 4단 정답지로 볼 커밋 수. 실측에서 fix 커밋은 기능당 한 자리다. */
 const FIX_COMMITS = 20;
 /** 커밋 두 판을 읽는 상한(줄). 넘으면 그 파일의 diff 는 내지 않는다. */
 const DIFF_MAX_LINES = 3_000;
+/**
+ * 클래스 머리 창의 줄 수 상한 (D176). 줄기의 칸은 **메서드 본문**이라 클래스·필드에 붙은
+ * 애너테이션이 그 창 밖이다 — 실측(MonggleMonggle): `spring/` 15개 중 근거 낱말이 메서드
+ * 본문에서 걸리는 것은 3개뿐이고 11개는 `@Service`·`@RequiredArgsConstructor`·`@Mapper` 처럼
+ * 첫 메서드 앞에만 있다. 그래서 첫 칸 앞의 창을 블록으로 하나 더 세운다.
+ */
+const HEAD_MAX_LINES = 60;
+/** 판정용 테스트로 읽어 둘 리포 테스트 파일 수·크기 상한 (D180). 스프링 리포의 테스트는 짧다. */
+const TEST_FILES_MAX = 40;
+const TEST_LINES_MAX = 600;
 
 /** 앱의 `session-flow.ts` 와 같은 값 — 언어별 사전 판을 이름순으로 잇는다. */
 export function dictVersionOf(dict: Dict): string {
@@ -227,7 +251,9 @@ export async function loadMaterials(deps: BakeDeps, unitId: number, unitName: st
     if (c.parent_sha === null) continue;
     const files: StageCommit['files'][number][] = [];
     for (const cf of await ipc.store.query('t2.commit_files', { commitId: c.id })) {
-      if (!pathFiles.has(cf.path) || cf.status !== 'M') continue;
+      // 경로 위 파일 + 그 커밋이 같이 고친 테스트 파일. 뒤엣것이 판정용 테스트의 첫 갈래다 (D180 ③ⓐ).
+      if (cf.status !== 'M') continue;
+      if (!pathFiles.has(cf.path) && !isTestPath(cf.path)) continue;
       const f = byPath.get(cf.path);
       if (f === undefined || f.line_count > DIFF_MAX_LINES) continue;
       const before = await readRange(rootPath, cf.path, 1, DIFF_MAX_LINES, c.parent_sha);
@@ -239,9 +265,19 @@ export async function loadMaterials(deps: BakeDeps, unitId: number, unitName: st
     if (files.length > 0) commits.push({ id: c.id, sha: c.sha, date: isoDate(c.authored_at), message: c.message, files });
   }
 
+  // 리포의 테스트 파일 — 이름이 맞는 것을 4·5단 판정지로 쓴다 (D180 ③ⓑ). 통째로 읽는다.
+  const tests: StageTestFile[] = [];
+  for (const f of all.filter((x) => isTestPath(x.path)).slice(0, TEST_FILES_MAX)) {
+    if (f.line_count > TEST_LINES_MAX) continue;
+    const lines = await readRange(rootPath, f.path, 1, TEST_LINES_MAX);
+    if (lines.length === 0) continue;
+    tests.push({ path: f.path, text: lines.map((l) => l.t).join('\n') });
+  }
+
   return {
     repoId, unitId, unitName, dictVersion: dictVersionOf(dict), attempt: deps.attempt ?? 0,
     concepts: dict.concepts, files: [...texts.values()], paths, edges, sites, blocks, bindings, columns, commits,
+    tests,
     layerOf: (id) => layer.get(id) ?? 0,
   };
 }
@@ -305,18 +341,24 @@ async function insertT0(
 }
 
 /**
- * 사용처 없는 개념의 판 (D172 ⑤). 규약은 줄기 위 블록의 근거 낱말로, 기계는 빌린 창으로.
- * 둘 다 `track = 't0'` 이라 D154 의 큐 가지가 집는다.
+ * 사용처 없는 개념의 판 (D172 ⑤ · D176). 갈래는 **개념이 든 재료**가 정한다 — 근거 낱말이
+ * 있으면 그 낱말이 보이는 블록이 자리이고(`proto/`·`spring/`), 낱말도 없으면 자기를 선행으로
+ * 가리키는 언어 개념의 창을 빌린다(`cs/`). 둘 다 `track = 't0'` 이라 D154 의 큐 가지가 집는다.
  */
 export async function bakeSiteless(deps: BakeDeps): Promise<SitelessBake> {
   const { repoId, rootPath, dict } = deps;
-  const out: SitelessBake = { proto: 0, cs: 0, skipped: 0, noWindow: [] };
+  const out: SitelessBake = { proto: 0, cs: 0, skipped: 0, byNamespace: {}, noWindow: [] };
+  const bump = (id: string): void => {
+    const ns = langOf(id) ?? '?';
+    out.byNamespace[ns] = (out.byNamespace[ns] ?? 0) + 1;
+  };
   const all: FileRow[] = await ipc.store.query('derive.files', { repoId });
   const byPath = new Map(all.map((f) => [f.path, f]));
   const byId = new Map(all.map((f) => [f.id, f]));
   const base = { repoId, dictVersion: dictVersionOf(dict), attempt: deps.attempt ?? 0, concepts: dict.concepts, ly: 0 };
+  const mine = new Set(SITELESS_NAMESPACES);
 
-  // 규약 — 줄기의 칸이 곧 블록이다. 리포 전체 줄기를 한 번만 읽는다.
+  // 줄기의 칸이 곧 블록이다. 리포 전체 줄기를 한 번만 읽는다 — 두 갈래가 같이 쓴다.
   const hops: MethodHop[][] = [];
   for (const p of await ipc.store.query('path.list_by_repo', { repoId })) {
     hops.push(toMethodHops(await ipc.store.query('path.hops', { pathId: p.id })));
@@ -332,42 +374,71 @@ export async function bakeSiteless(deps: BakeDeps): Promise<SitelessBake> {
       if (lines.length > 0) blocks.push({ path: h.path, window: { from: h.lineStart, to: h.lineEnd }, lines, hash: String(fnv1a32(key)) });
     }
   }
-  for (const concept of [...dict.concepts.values()].filter((c) => langOf(c.id) === 'proto').sort((a, b) => a.id.localeCompare(b.id))) {
+
+  // 클래스 머리 — 첫 칸 앞. 프레임워크의 근거 낱말은 메서드 본문이 아니라 여기 붙는다.
+  const firstHop = new Map<string, number>();
+  for (const chain of hops) {
+    for (const h of chain) {
+      const at = firstHop.get(h.path);
+      if (at === undefined || h.lineStart < at) firstHop.set(h.path, h.lineStart);
+    }
+  }
+  for (const [path, start] of [...firstHop.entries()].sort(([a], [b]) => a.localeCompare(b))) {
+    if (start <= 1) continue;
+    const to = start - 1;
+    const from = Math.max(1, to - HEAD_MAX_LINES + 1);
+    const lines = await readRange(rootPath, path, from, to);
+    if (lines.length > 0) blocks.push({ path, window: { from, to }, lines, hash: String(fnv1a32(`${path}:head:${from}-${to}`)) });
+  }
+
+  // 갈래 ①  **근거 낱말**이 있는 개념 — 그 낱말이 보이는 블록이 자리다 (`proto/`·`spring/`).
+  const baked = new Set<string>();
+  const evidenced = [...dict.concepts.values()]
+    .filter((c) => mine.has(langOf(c.id) ?? '') && c.evidence.length > 0)
+    .sort((a, b) => a.id.localeCompare(b.id));
+  for (const concept of evidenced) {
     const block = evidenceBlock(concept, blocks);
     if (block === null) continue;
     const made = makeProtoCard({ ...base, concept, lines: block.lines, path: block.path, window: block.window, blockHash: block.hash });
     if (isFailure(made)) continue;
+    baked.add(concept.id);
     const ok = await insertT0(deps, made.card, byPath.get(block.path)?.id ?? null);
-    if (ok) out.proto += 1; else out.skipped += 1;
+    if (ok) bump(concept.id); else out.skipped += 1;
   }
 
-  // 기계 — 자기를 선행으로 가리키는 언어 개념의 창을 빌린다.
-  for (const [target, langIds] of lenders(dict.concepts)) {
-    const concept = dict.concepts.get(target);
-    if (concept === undefined) continue;
-    const candidates: LenderSite[] = [];
-    for (const lenderId of langIds.slice(0, 6)) {
-      for (const row of await ipc.store.query('card.sites_for_concept', { repoId, conceptId: lenderId, limit: 3 })) {
-        candidates.push({ conceptId: lenderId, site: fromConceptSiteRow(row), path: row.path });
+  // 갈래 ②  낱말도 없는 개념 — 자기를 선행으로 가리키는 언어 개념의 창을 **빌린다** (`cs/`).
+  for (const ns of SITELESS_NAMESPACES) {
+    for (const [target, langIds] of lenders(dict.concepts, ns)) {
+      const concept = dict.concepts.get(target);
+      if (concept === undefined || baked.has(target)) continue;
+      const candidates: LenderSite[] = [];
+      for (const lenderId of langIds.slice(0, 6)) {
+        for (const row of await ipc.store.query('card.sites_for_concept', { repoId, conceptId: lenderId, limit: 3 })) {
+          candidates.push({ conceptId: lenderId, site: fromConceptSiteRow(row), path: row.path });
+        }
       }
+      const lender = pickLender(candidates);
+      if (lender === null) { out.noWindow.push(target); continue; }
+      const file = byId.get(lender.site.fileId);
+      const enclosing = file === undefined ? undefined : (await ipc.store.query('block.by_file', { fileId: file.id }))
+        .filter((b) => b.line_start <= lender.site.lineStart && lender.site.lineStart <= b.line_end)
+        .sort((a, b) => (a.line_end - a.line_start) - (b.line_end - b.line_start))[0];
+      const win: LineWindow | undefined = enclosing === undefined ? undefined : { from: enclosing.line_start, to: enclosing.line_end };
+      const from = Math.max(1, Math.min(win?.from ?? lender.site.lineStart, lender.site.lineStart - 4));
+      const to = Math.max(win?.to ?? lender.site.lineStart, lender.site.lineStart + 4);
+      const lines = await readRange(rootPath, lender.path, from, to);
+      if (lines.length === 0) { out.noWindow.push(target); continue; }
+      const input: SiteInput = borrowedInput(target, lender, lines, win);
+      const made = genMeaning({ ...base, concept, sites: [input] }, input);
+      if (isFailure(made)) continue;
+      baked.add(target);
+      const ok = await insertT0(deps, made.card, lender.site.fileId);
+      if (ok) bump(target); else out.skipped += 1;
     }
-    const lender = pickLender(candidates);
-    if (lender === null) { out.noWindow.push(target); continue; }
-    const file = byId.get(lender.site.fileId);
-    const enclosing = file === undefined ? undefined : (await ipc.store.query('block.by_file', { fileId: file.id }))
-      .filter((b) => b.line_start <= lender.site.lineStart && lender.site.lineStart <= b.line_end)
-      .sort((a, b) => (a.line_end - a.line_start) - (b.line_end - b.line_start))[0];
-    const win: LineWindow | undefined = enclosing === undefined ? undefined : { from: enclosing.line_start, to: enclosing.line_end };
-    const from = Math.max(1, Math.min(win?.from ?? lender.site.lineStart, lender.site.lineStart - 4));
-    const to = Math.max(win?.to ?? lender.site.lineStart, lender.site.lineStart + 4);
-    const lines = await readRange(rootPath, lender.path, from, to);
-    if (lines.length === 0) { out.noWindow.push(target); continue; }
-    const input: SiteInput = borrowedInput(target, lender, lines, win);
-    const made = genMeaning({ ...base, concept, sites: [input] }, input);
-    if (isFailure(made)) continue;
-    const ok = await insertT0(deps, made.card, lender.site.fileId);
-    if (ok) out.cs += 1; else out.skipped += 1;
   }
+
+  out.proto = out.byNamespace['proto'] ?? 0;
+  out.cs = out.byNamespace['cs'] ?? 0;
   return out;
 }
 

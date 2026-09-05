@@ -1,6 +1,7 @@
 // 코스 카드 굽기 (D172). `ui → course → cards | concepts` — 01 §2 의 층에 하나 더 선다.
 export {
   bakeChapter, bakeCourse, bakeSiteless, dictVersionOf, ensureChapterBaked, loadMaterials,
+  SITELESS_NAMESPACES,
 } from './bake.js';
 export type { BakeDeps, ChapterBake, SitelessBake, StageTally } from './bake.js';
 export {
@@ -13,3 +14,11 @@ export type { HopKind, HopRow, LineRange } from './hops.js';
 export { lineDiff, DIFF_CELLS, DIFF_CONTEXT } from './diff.js';
 export { borrowedInput, evidenceBlock, lenders, pickLender } from './borrow.js';
 export type { LenderSite } from './borrow.js';
+export {
+  COURSE_GATE_MAX, GATE_PER_CHAPTER, JAVA_PARTS, buildCurriculum, chapterGates, courseOutline,
+  foldsPart1,
+} from './curriculum.js';
+export type {
+  ChapterGate, CurriculumInput, CurriculumPart, CurriculumPlate, FoldInput, GateInput,
+  OutlineEntry, OutlineInput, PartAssignment, PartNo,
+} from './curriculum.js';

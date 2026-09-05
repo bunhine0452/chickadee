@@ -68,7 +68,7 @@ export function CourseScreen(props: CourseScreenProps): React.JSX.Element {
   useEffect(() => {
     if (inSession) return undefined;
     let alive = true;
-    void loadCourse(repoId, dayKey, Date.now()).then((d) => {
+    void loadCourse(repoId, dayKey, Date.now(), rootPath).then((d) => {
       if (!alive) return;
       setData(d);
       const s = useCourse.getState();
@@ -77,7 +77,7 @@ export function CourseScreen(props: CourseScreenProps): React.JSX.Element {
       }
     }).catch((e: unknown) => report(e, '코스 읽기'));
     return () => { alive = false; };
-  }, [repoId, dayKey, version, inSession]);
+  }, [repoId, rootPath, dayKey, version, inSession]);
 
   useEffect(() => {
     if (selected === null || selected === GRAD_ID) {
@@ -157,7 +157,10 @@ export function CourseScreen(props: CourseScreenProps): React.JSX.Element {
         useUi.getState().say(t('chapter.noCards'));
         return;
       }
-      const spec: RunSpec = { unitId: c.unitId, unitName: c.name, stage, kind: 'first', hasRepair: c.hasRepair, row: c.row, cards };
+      const spec: RunSpec = {
+        unitId: c.unitId, unitName: c.name, stage, kind: 'first',
+        hasRepair: c.hasRepair, hasRun: c.hasRun, row: c.row, cards,
+      };
       useCourse.getState().startRun(spec);
     } catch (e) {
       report(e, '단 열기');
@@ -174,7 +177,10 @@ export function CourseScreen(props: CourseScreenProps): React.JSX.Element {
         useUi.getState().say(t('chapter.noCards'));
         return;
       }
-      const spec: RunSpec = { unitId: c.unitId, unitName: c.name, stage: 2, kind: 'recheck', hasRepair: c.hasRepair, row: c.row, cards };
+      const spec: RunSpec = {
+        unitId: c.unitId, unitName: c.name, stage: 2, kind: 'recheck',
+        hasRepair: c.hasRepair, hasRun: c.hasRun, row: c.row, cards,
+      };
       useCourse.getState().startRun(spec);
     } catch (e) {
       report(e, '재검 열기');

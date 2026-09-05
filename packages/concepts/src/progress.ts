@@ -100,13 +100,21 @@ export function readingTally(
 }
 
 /**
- * 챕터 통과에 필요한 단 (`mastery.md` §3.2 · D165).
+ * 챕터 통과에 필요한 단 (정본 §2 「챕터 통과」 · D165 · D180).
+ *
+ * 정본의 식 그대로다 — **1·2·3 ∧ (문항을 구울 수 있으면 4) ∧ (러너가 있으면 5)**.
  *
  * **4단을 못 굽는 챕터는 3단까지가 통과다.** 4단 문항은 커밋 원장(`fix:` 의 diff)에서 나오고
  * 커밋이 적은 리포에는 그 재료가 없다 — 통과선을 4로 고정하면 그런 리포의 코스가 통째로
  * 빈다. 대가는 통과선이 챕터마다 달라지는 것이고, 그것이 `mastery.md` §8 의 사용자 결정 자리다.
+ *
+ * **5단은 실행으로만 게이트에 든다** (D180). `hasRun` 은 「이 챕터의 5단을 실제로 돌려
+ * 판정할 수 있다」 — 러너가 탐지됐고 판정용 테스트를 든 5단 판이 있다는 뜻이다. 실행이 없으면
+ * 5단은 재구현을 해 보는 자리로 남고 통과선에는 안 든다. 실행 없이 5단을 게이트에 넣으면
+ * 판정이 다시 원본과의 줄 비교가 되고, 그것이 D180 이 걷어낸 필사다.
  */
-export function passTarget(hasRepair: boolean): 3 | 4 {
+export function passTarget(hasRepair: boolean, hasRun = false): 3 | 4 | 5 {
+  if (hasRun) return 5;
   return hasRepair ? 4 : 3;
 }
 
@@ -116,6 +124,8 @@ export interface AdvanceInput {
   kind: StageKind;
   /** 이 챕터에 4단 문항을 구울 수 있나. */
   hasRepair: boolean;
+  /** 이 챕터의 5단을 실행으로 판정할 수 있나 (D180). */
+  hasRun?: boolean;
   now: number;
   /** 재검일 때만 — 등급과 FSRS 가 낸 다음 일정. */
   recheck?: { grade: RecheckGrade; schedule: ChapterSchedule };
@@ -149,7 +159,7 @@ export function advance(input: AdvanceInput): Advance {
     stageReached = Math.max(0, stageReached - 1);
   }
 
-  const target = passTarget(input.hasRepair);
+  const target = passTarget(input.hasRepair, input.hasRun ?? false);
   const wasPassed = row.passedAt !== null;
   const justPassed = !wasPassed && stageReached >= target;
   const schedule = input.recheck?.schedule;
@@ -235,6 +245,8 @@ export interface RecordInput {
   result: StageResult;
   kind: StageKind;
   hasRepair: boolean;
+  /** 이 챕터의 5단을 실행으로 판정할 수 있나 (D180). */
+  hasRun?: boolean;
   recheck?: { grade: RecheckGrade; schedule: ChapterSchedule };
 }
 

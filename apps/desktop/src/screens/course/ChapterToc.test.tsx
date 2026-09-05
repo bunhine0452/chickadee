@@ -13,7 +13,7 @@ const chapter = (over: Partial<ChapterView> & { unitId: number; name: string }):
     dueAt: null, lastReviewAt: null, reps: 0, lapses: 0,
   },
   deferredDay: null, counts: { 1: 0, 2: 1, 3: 1, 4: 0, 5: 0 },
-  vocab: { total: 3, inked: 1, zero: [] }, hasRepair: false, locked: false,
+  vocab: { total: 3, inked: 1, zero: [] }, hasRepair: false, hasRun: false, locked: false,
   ...over,
 });
 

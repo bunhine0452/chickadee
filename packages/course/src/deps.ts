@@ -4,6 +4,6 @@
  */
 export type {
   FocusLine, LineWindow, NameUse, ResponseKey, StageBlock, StageCard, StageCommit, StageDrop, StageEdge,
-  StageFile, StageRequest, StageResult, StageSite, StageType,
+  StageFile, StageRequest, StageResult, StageSite, StageTestFile, StageType,
 } from '@chickadee/cards';
 export type { Hop, MethodHop } from '@chickadee/concepts';

@@ -85,6 +85,21 @@ describe('챕터 통과', () => {
       row, result: result(stage, 1, ok ? 1 : 0), kind: 'first', hasRepair, now: T,
     });
 
+  test('러너가 있으면 5단까지가 통과다 (D180 ④)', () => {
+    expect(passTarget(false, true)).toBe(5);
+    expect(passTarget(true, true)).toBe(5);
+
+    const run = (row: ChapterProgress, stage: 1 | 2 | 3 | 4 | 5) =>
+      advance({ row, result: result(stage, 1, 1), kind: 'first', hasRepair: true, hasRun: true, now: T });
+    let row = fresh();
+    for (const stage of [1, 2, 3, 4] as const) row = run(row, stage).next;
+    // 4단까지 다 맞혔어도 실행이 있는 챕터는 아직 통과가 아니다.
+    expect(row.passedAt).toBeNull();
+    const fifth = run(row, 5);
+    expect(fifth.justPassed).toBe(true);
+    expect(fifth.next.stageReached).toBe(5);
+  });
+
   test('4단을 못 굽는 챕터는 3단까지가 통과다 (D165 기본값)', () => {
     expect(passTarget(false)).toBe(3);
     expect(passTarget(true)).toBe(4);

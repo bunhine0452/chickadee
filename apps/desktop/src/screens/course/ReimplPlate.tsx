@@ -3,9 +3,11 @@
  * (채점 없음, 프롬프트를 들고 나간다). 편집기는 T1 의 것(`ClonePad`, Monaco 지연 로드)이다 —
  * 시험 환경(jsdom)에서는 textarea 판으로 물러선다.
  *
- * 5단은 통과 게이트가 아니다 (README §3). 문항은 내되 판정은 참고값이다.
+ * **판정은 테스트 통과다** (D180) — 원본과 줄을 견주지 않는다. 러너가 있고 판정용 테스트가
+ * 뽑혔으면 5단이 통과 게이트에 들고(정본 §2), 없으면 재구현을 해 보는 자리로 남는다.
+ * 원문은 채점 뒤 접힌 채로 펼쳐 볼 수 있다 — 정답지가 아니라 견주어 볼 참고 자료다.
  */
-import type { StageAnswer, StageVerdict } from '@chickadee/grading';
+import { needsRun, type StageAnswer, type StageVerdict } from '@chickadee/grading';
 import { t } from '@chickadee/i18n';
 import { ipc } from '@chickadee/ipc-client';
 import type { InkLayer } from '@chickadee/ui';
@@ -16,7 +18,8 @@ import { Ask } from '../../components/plate/Ask.js';
 import { useUi } from '../../store.js';
 import { usePlateKeys } from './keys.js';
 import { PlateFrame, sourceOf } from './PlateFrame.js';
-import type { StageCardView } from './run.js';
+import { RunStrip } from './RunStrip.js';
+import type { RunPhase, StageCardView } from './run.js';
 
 const ClonePad = lazy(async () => {
   const mod = await import('../../components/t1/ClonePad.js');
@@ -48,6 +51,8 @@ export interface ReimplPlateProps {
   onGrade: (answer: StageAnswer) => void;
   onNext: () => void;
   onDunno: () => void;
+  /** 실행 상태 (D180). 5단의 판정이 여기서 온다. */
+  phase: RunPhase;
   after?: React.ReactNode;
 }
 
@@ -118,6 +123,7 @@ export function ReimplPlate(props: ReimplPlateProps): React.JSX.Element | null {
       )}
     >
       <Ask q={reimpl.question} hint={t('chapter.reimplSig')} />
+      {answered && !isHandoff ? <RunStrip phase={props.phase} needsRun={needsRun(p)} /> : null}
       <dl className="cc-spec">
         <dt>{t('chapter.reimplSig')}</dt>
         <dd><pre><code>{reimpl.signature.join('\n')}</code></pre></dd>
@@ -140,7 +146,15 @@ export function ReimplPlate(props: ReimplPlateProps): React.JSX.Element | null {
       </dl>
 
       {answered ? (
-        <pre className="cc-editor cc-mine"><code>{draft}</code></pre>
+        <>
+          <pre className="cc-editor cc-mine"><code>{draft}</code></pre>
+          {isHandoff ? null : (
+            <details className="cc-files">
+              <summary>{t('chapter.execOrigin')}</summary>
+              <pre><code>{reimpl.original.join('\n')}</code></pre>
+            </details>
+          )}
+        </>
       ) : (
         <Suspense fallback={<div className="editor" aria-busy="true" />}>
           <ClonePad

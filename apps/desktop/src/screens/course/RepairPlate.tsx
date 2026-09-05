@@ -5,8 +5,11 @@
  *
  * `patch-place` 는 줄 사이의 자리 단추를 고른다 — 정답은 하나가 아니다(`checkPlace` 의
  * 스코프 검사). 그래서 채점 뒤 「이 자리도 맞다」가 진단 대신 뜬다.
+ *
+ * **판정은 실행이 한다** (D180). AST 제약은 먼저 뜨는 정적 판정이고, 테스트가 돌아오면 그것이
+ * 이긴다. `RunStrip` 이 실행 상태 넷(실행 중·통과·실패·러너 없음)을 싣는다.
  */
-import type { StageAnswer, StageVerdict } from '@chickadee/grading';
+import { needsRun, type StageAnswer, type StageVerdict } from '@chickadee/grading';
 import { t } from '@chickadee/i18n';
 import type { InkLayer } from '@chickadee/ui';
 import { cx, Kbd, PressButton, RichText } from '@chickadee/ui';
@@ -15,7 +18,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { Ask } from '../../components/plate/Ask.js';
 import { usePlateKeys } from './keys.js';
 import { PlateFrame, sourceOf } from './PlateFrame.js';
-import type { StageCardView } from './run.js';
+import { RunStrip } from './RunStrip.js';
+import type { RunPhase, StageCardView } from './run.js';
 
 export interface RepairPlateProps {
   card: StageCardView;
@@ -28,6 +32,8 @@ export interface RepairPlateProps {
   onGrade: (answer: StageAnswer) => void;
   onNext: () => void;
   onDunno: () => void;
+  /** 실행 상태 (D180). 4단은 테스트 통과가 최종 판정이다. */
+  phase: RunPhase;
   after?: React.ReactNode;
 }
 
@@ -97,6 +103,7 @@ export function RepairPlate(props: RepairPlateProps): React.JSX.Element | null {
       )}
     >
       <Ask q={repair.q} hint={t('chapter.repairGoal', { goal: repair.goal })} />
+      {answered ? <RunStrip phase={props.phase} needsRun={needsRun(p)} /> : null}
       <p className="note cc-commit">
         <RichText html={t('chapter.repairCommit', { h: repair.commit.h, d: repair.commit.d, m: repair.commit.m })} />
       </p>

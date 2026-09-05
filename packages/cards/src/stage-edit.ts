@@ -2,9 +2,13 @@
  * 편집형 — 4단 수정(`patch-line`·`patch-place`·`rollback`) · 5단 재구현(`reimpl-spec`·
  * `reimpl-layer`·`handoff`) (D164 · `exercises.md` §2·§3).
  *
- * 4단의 정답지는 **실제 `fix:` 커밋의 hunk** 다 — 사람이 실제로 고친 것이라 지어낼 필요가 없다
- * (README §2 「테스트 통과의 대안은 커밋 원장」). 5단은 블록 원문이 참조 답이고 채점은 T1 사다리다.
- * 둘 다 **문법이 없는 언어에서는 안 낸다** (§3 — AST 승격이 선택이 아니다).
+ * 4단의 정답지는 **실제 `fix:` 커밋의 hunk** 다 — 사람이 실제로 고친 것이라 지어낼 필요가 없다.
+ * 5단은 시그니처와 `mustHold` 만 주고 **원본과 줄을 견주지 않는다** (D180) — 원문(`original`)은
+ * 채점 뒤 펼쳐 보는 참고 자료로만 실린다. 둘 다 **문법이 없는 언어에서는 안 낸다**
+ * (§3 — AST 승격이 선택이 아니다).
+ *
+ * 두 판 다 `tests` 를 든다 — 실행 판정의 정답지이고 `stage-tests.ts` 가 리포에서 뽑는다(D180).
+ * 빈 배열이면 그 판은 실행으로 판정하지 않고 게이트에서 빠진다.
  *
  * 4단 막힘의 프롬프트 창은 앞뒤 4줄 그대로다(정본 §3-1 ④). `promptLines` 가 그 창이다.
  */
@@ -14,8 +18,9 @@ import type { CardPayload } from '@chickadee/store-sql';
 
 import { PROMPT_WINDOW } from './lines.js';
 import { finishStage, hopOrder, identsOf } from './stage-common.js';
+import { judgeTests } from './stage-tests.js';
 import type {
-  Hunk, HunkLine, StageBlock, StageCard, StageCommit, StageDrop, StageFile, StageRequest,
+  Hunk, HunkLine, JudgeTest, StageBlock, StageCard, StageCommit, StageDrop, StageFile, StageRequest,
 } from './stage-types.js';
 import { buildSpec } from './t1-spec.js';
 import { baseName } from './vars.js';
@@ -69,6 +74,7 @@ export function buildRepairs(req: StageRequest): { cards: StageCard[]; drops: St
         const plus = hunk.lines.filter((l) => l.sign === '+');
         const minus = hunk.lines.filter((l) => l.sign === '-');
         const keyBase = `${commit.sha}:${f.path}:${hunk.oldStart}`;
+        const tests = judgeTests({ file: f.path, commit, repoTests: req.tests ?? [] });
 
         if (done.line < MAX_PER_TYPE && plus.length === 1 && minus.length === 1) {
           const before = side(hunk, [' ', '-']);
@@ -77,7 +83,7 @@ export function buildRepairs(req: StageRequest): { cards: StageCard[]; drops: St
             track: 't3', kind: 'repair', type: 'patch-line', stage: 4, file: f.path, grammar, goal, commit: meta,
             q: t('stage.patchLineQ', { goal, line: String(hunk.oldStart + target) }),
             lines: before, from: hunk.oldStart, target, expected: [(plus[0] as HunkLine).text],
-            promptLines: around(before, target),
+            promptLines: around(before, target), tests,
           };
           cards.push(finishStage({ req, type: 'patch-line', key: `${keyBase}#line`, fileId: file.fileId, commitId: commit.id, payload }));
           done.line += 1;
@@ -91,7 +97,7 @@ export function buildRepairs(req: StageRequest): { cards: StageCard[]; drops: St
             track: 't3', kind: 'repair', type: 'patch-place', stage: 4, file: f.path, grammar, goal, commit: meta,
             q: t('stage.patchPlaceQ', { text: (plus[0] as HunkLine).text.trim() }),
             lines, from: hunk.newStart, target: idx, expected: [(plus[0] as HunkLine).text],
-            promptLines: around(lines, idx),
+            promptLines: around(lines, idx), tests,
           };
           cards.push(finishStage({ req, type: 'patch-place', key: `${keyBase}#place`, fileId: file.fileId, commitId: commit.id, payload }));
           done.place += 1;
@@ -105,7 +111,7 @@ export function buildRepairs(req: StageRequest): { cards: StageCard[]; drops: St
             track: 't3', kind: 'repair', type: 'rollback', stage: 4, file: f.path, grammar, goal, commit: meta,
             q: t('stage.rollbackQ', { goal }),
             lines: after, from: hunk.newStart, target, expected: before,
-            promptLines: around(after, target),
+            promptLines: around(after, target), tests,
           };
           cards.push(finishStage({ req, type: 'rollback', key: `${keyBase}#back`, fileId: file.fileId, commitId: commit.id, payload }));
           done.back += 1;
@@ -136,6 +142,20 @@ function candidates(req: StageRequest): { block: StageBlock; file: StageFile }[]
     .sort((a, b) => b.block.concepts.length - a.block.concepts.length
       || (a.block.window.to - a.block.window.from) - (b.block.window.to - b.block.window.from)
       || (order.get(a.block.path) ?? 0) - (order.get(b.block.path) ?? 0));
+}
+
+/**
+ * 시그니처 줄. `buildSpec` 의 마스크 규칙에 자바 갈래가 없어 자바 블록은 빈 배열이 온다
+ * (`t1-mask.ts` 의 `rulesFor` — 그 규칙을 고치면 T1 골든이 전부 바뀌므로 여기서 받는다).
+ * 그때는 블록 첫머리에서 본문이 열리는 줄까지를 시그니처로 본다.
+ */
+export function signatureOf(spec: readonly string[], original: readonly string[]): string[] {
+  if (spec.length > 0) return [...spec];
+  const limit = Math.min(original.length, 3);
+  for (let i = 0; i < limit; i += 1) {
+    if (/[{:]\s*$/.test(original[i] ?? '')) return original.slice(0, i + 1);
+  }
+  return original.slice(0, 1);
 }
 
 const promptAt = (file: StageFile, from: number): string[] =>
@@ -190,10 +210,12 @@ export function buildReimpls(req: StageRequest): { cards: StageCard[]; drops: St
     const original = blockLines(file, block);
     const spec = buildSpec({ lines: original, grammar: block.grammar, concepts: block.concepts, dict: req.concepts, path: block.path });
     const fn = block.name as string;
+    const signature = signatureOf(spec.signature, original);
+    const tests: JudgeTest[] = judgeTests({ file: block.path, signature, repoTests: req.tests ?? [] });
     const base: Omit<Reimpl, 'type' | 'question' | 'links' | 'context'> = {
       track: 't3', kind: 'reimpl', stage: 5, file: block.path, grammar: block.grammar, fn,
-      original, from: block.window.from, signature: spec.signature, mustHold: spec.mustHold,
-      promptLines: promptAt(file, block.window.from), blockId: block.blockId,
+      original, from: block.window.from, signature, mustHold: spec.mustHold,
+      promptLines: promptAt(file, block.window.from), blockId: block.blockId, tests,
     };
     cards.push(finishStage({
       req, type: 'reimpl-spec', key: block.hash, fileId: file.fileId,
@@ -222,10 +244,13 @@ export function buildReimpls(req: StageRequest): { cards: StageCard[]; drops: St
       req, type: 'reimpl-layer', key: block.hash, fileId: file.fileId,
       payload: {
         track: 't3', kind: 'reimpl', type: 'reimpl-layer', stage: 5, file: block.path, grammar: block.grammar, fn,
-        original, from: block.window.from, signature: spec.signature, mustHold: spec.mustHold,
+        original, from: block.window.from, signature: signatureOf(spec.signature, original), mustHold: spec.mustHold,
         links: layered.links, context: layered.context,
         question: t('stage.reimplLayerQ', { file: baseName(block.path), fn }),
         promptLines: promptAt(file, block.window.from), blockId: block.blockId,
+        tests: judgeTests({
+          file: block.path, signature: signatureOf(spec.signature, original), repoTests: req.tests ?? [],
+        }),
       },
     }));
   }

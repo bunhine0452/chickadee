@@ -10,8 +10,8 @@ import { dirname, join } from 'node:path';
 
 import { describe, expect, test } from 'vitest';
 
-import { buildCourseCards, fnv1a64, genMeaning, isFailure, makeProtoCard } from '@chickadee/cards';
-import type { StageCommit, StageEdge, StageSite } from '@chickadee/cards';
+import { buildCourseCards, fnv1a64, genMeaning, isFailure, isTestPath, makeProtoCard } from '@chickadee/cards';
+import type { StageCommit, StageEdge, StageSite, StageTestFile } from '@chickadee/cards';
 import {
   buildCallGraph, deriveFile, entryUnits, extractSchema, methodPaths, resolveImports,
   type DerivedSite, type EntrySeed, type FileBlocks, type FileImports, type MethodHop, type RawBlock,
@@ -32,6 +32,22 @@ const OUT = process.env['COURSE_OUT'] ?? join(process.cwd(), '.seed', 'course-me
 const CHAPTER = process.env['COURSE_CHAPTER'] ?? 'auth';
 
 interface DumpRow { path: string; grammar: string; quality: string; captures: Capture[] }
+
+/** 4·5단 판이 든 판정용 테스트를 갈래별로 센다 (D180). */
+function judgeTally(results: readonly { cards: readonly { payload: unknown }[] }[]): string {
+  const by = new Map<string, number>();
+  let plates = 0;
+  for (const r of results) {
+    for (const c of r.cards) {
+      const p = c.payload as { tests?: { source: string }[] };
+      if (p.tests === undefined) continue;
+      plates += 1;
+      for (const t of p.tests) by.set(t.source, (by.get(t.source) ?? 0) + 1);
+    }
+  }
+  const parts = [...by.entries()].sort().map(([k, n]) => `${k} ${n}`);
+  return `${plates}판 · ${parts.length === 0 ? '0장' : parts.join(' · ')}`;
+}
 
 const git = (args: string[]): string => execFileSync('git', ['-C', ROOT as string, ...args], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
 
@@ -150,7 +166,8 @@ describe.skipIf(DUMP === undefined || ROOT === undefined)('실측 — 코스 카
       const files: StageCommit['files'][number][] = [];
       for (const row of git(['diff-tree', '--no-commit-id', '--name-status', '-r', sha]).trim().split('\n')) {
         const [status, path] = row.split('\t');
-        if (status !== 'M' || path === undefined || !hopFiles.has(path)) continue;
+        if (status !== 'M' || path === undefined) continue;
+        if (!hopFiles.has(path) && !isTestPath(path)) continue;
         const before = git(['show', `${parents}:${path}`]).split('\n');
         const after = git(['show', `${sha}:${path}`]).split('\n');
         const hunks = lineDiff(before, after);
@@ -161,9 +178,16 @@ describe.skipIf(DUMP === undefined || ROOT === undefined)('실측 — 코스 카
       if (commits.length >= 20) break;
     }
 
+    // 리포의 테스트 파일 — 4·5단 판정용 테스트의 재료 (D180 ③).
+    const repoTests: StageTestFile[] = paths.filter(isTestPath).flatMap((p) => {
+      const text = readFile(p);
+      return text === null ? [] : [{ path: p, text: text.join('\n') }];
+    });
+
     const m: Materials = {
       repoId: 1, unitId: 1, unitName: CHAPTER, dictVersion: dictVersionOf(dict), attempt: 0, concepts: dict.concepts,
-      files: [...texts.values()], paths: stagePaths, edges, sites, blocks, bindings, columns, commits, layerOf: () => 0,
+      files: [...texts.values()], paths: stagePaths, edges, sites, blocks, bindings, columns, commits,
+      tests: repoTests, layerOf: () => 0,
     };
     const req = assembleStageRequest(m);
     const results = buildCourseCards(req);
@@ -213,6 +237,7 @@ describe.skipIf(DUMP === undefined || ROOT === undefined)('실측 — 코스 카
       `- 파일 ${paths.length} · 기능 ${features.length}(${features.map((u) => `${u.name} ${u.files.length}`).join(' · ')})`,
       `- ${CHAPTER}: 파일 ${unit.files.length} · 읽은 파일 ${texts.size} · 줄기 ${method.length}(등뼈 ${stagePaths.length}, 2칸 이상) · 간선 ${edges.length} · 사용처 ${sites.length} · 블록 ${blocks.length} · 바인딩 ${bindings.length} · fix 커밋 ${commits.length}`,
       `- 이름 자리 ${req.names?.length ?? 0} · 응답 키 ${req.responseKeys?.map((k) => `${k.key}(${k.reads.length})`).join(' ') ?? ''}`,
+      `- 리포 테스트 파일 ${repoTests.length} · 4·5단 판정용 테스트 ${judgeTally(results)}`,
       '',
       '| 단 | 유형 | 장 | 못 낸 사유 |',
       '|---|---|---|---|',
