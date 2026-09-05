@@ -185,6 +185,41 @@ export interface ProcOut {
   durationMs: number;
 }
 
+/**
+ * `sql_run` (D175 를 SQL 로). Rust 는 문장 목록과 상한만 안다 — 무엇을 세우고 무엇을 묻고
+ * 결과 표가 맞는지는 `@chickadee/grading` 의 `sql-runner.ts` 가 정한다.
+ *
+ * 데이터베이스는 **메모리에만** 선다. 학습자 리포의 파일을 열지 않으므로 작업본을 지우고
+ * 말고 할 것이 없고, 문장이 잘못돼도 고장 낼 원본이 없다.
+ */
+export interface AskSpec {
+  /** 데이터베이스를 세우는 문장들 — 스키마와 시드. 순서대로 돈다. */
+  setup: string[];
+  /** 결과 표를 받을 문장들. 첫 실패에서 멈춘다. */
+  asks: string[];
+  timeoutMs: number;
+  /** 표 하나의 행 상한. 넘으면 `truncated` 로 표시된 채 잘려 온다. */
+  maxRows: number;
+}
+
+export interface SqlTable {
+  columns: string[];
+  /** `null` 은 **없는 값**이다 — 빈 글자와 다르고, 이 층이 가르치는 것이 그 차이다. */
+  rows: (string | null)[][];
+  truncated: boolean;
+}
+
+export interface AskOut {
+  /** `asks` 하나마다 하나. 도중에 실패하면 그보다 짧다. */
+  tables: SqlTable[];
+  /** 음수면 `setup` 의 (−n−1)번째, 0 이상이면 `asks` 의 그 번째가 실패했다. */
+  failedAt: number | null;
+  /** 엔진이 한 말. 부른 쪽이 보낸 글에 대한 것이라 그대로 돌아온다. */
+  message: string | null;
+  timedOut: boolean;
+  durationMs: number;
+}
+
 export interface ReadLinesReq { rootPath: string; relPath: string; from: number; to: number; rev?: string }
 export interface ReadBlockReq { rootPath: string; relPath: string; startByte: number; endByte: number; rev?: string }
 

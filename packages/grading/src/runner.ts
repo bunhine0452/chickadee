@@ -13,15 +13,29 @@
 import type { RepoId } from '@chickadee/ipc-client';
 
 import { detectJava, runJava } from './java-runner.js';
+import { detectSql, runSql, type SqlCase, type SqlDialect } from './sql-runner.js';
 
+export type RunLang = 'java' | 'sql';
 export type RunStatus = 'passed' | 'failed' | 'error' | 'no-runner' | 'timeout';
 
-/** 러너를 못 켠 이유. 화면 문구는 `run.reason.*` 키로 붙는다 (평문, 정본 §6). */
-export type RunnerReason = 'no-jdk' | 'no-gradle-wrapper' | 'unsupported-lang' | 'not-detected';
+/**
+ * 러너를 못 켠 이유. 화면 문구는 `run.reason.*` 키로 붙는다 (평문, 정본 §6).
+ *
+ * `dialect-*` 는 SQL 에서 처음 생긴 갈래다 — **러너는 언어마다 하나가 아니라 방언마다
+ * 하나**이고(정본 §5), 이 앱이 든 것은 sqlite 하나다. 표본 리포의 MySQL 덤프는 여기서
+ * 안 돈다는 사실을 화면이 그대로 말해야 한다 (D186 ④).
+ */
+export type RunnerReason =
+  | 'no-jdk'
+  | 'no-gradle-wrapper'
+  | 'unsupported-lang'
+  | 'not-detected'
+  | 'dialect-unsupported'
+  | 'no-fixture-db';
 
 export interface RunSpec {
   repoId: RepoId;
-  lang: 'java';
+  lang: RunLang;
   /** 학습자 답안. 임시 작업본에 덮어쓴다 — 원본 리포는 읽기만 한다. */
   files: { path: string; text: string }[];
   /** 판정용 테스트. 답안과 같은 자리에 함께 놓인다. */
@@ -32,6 +46,12 @@ export interface RunSpec {
    * 기본은 **거짓**이다 — 허락 없이 네트워크를 쓰지 않고, 대신 `askDownload` 로 묻는다.
    */
   allowDownload?: boolean;
+  /** `lang: 'sql'` 일 때의 방언. 이 앱이 든 것은 하나다 (정본 §5). */
+  dialect?: SqlDialect;
+  /** `lang: 'sql'` 일 때 데이터베이스를 세우는 문장들 — 스키마와 시드. */
+  db?: string[];
+  /** `lang: 'sql'` 일 때 판정할 문항들. 하나가 쿼리 하나와 기대 표 하나다. */
+  cases?: SqlCase[];
 }
 
 /**
@@ -55,6 +75,11 @@ export interface RunResult {
   passed: number;
   failed: number;
   failures: RunFailure[];
+  /**
+   * 러너가 없거나 방언이 안 맞을 때의 사유. `status === 'no-runner'` 일 때만 실린다 —
+   * 화면이 「러너 없음」 대신 **왜 없는지**를 말해야 한다 (D186 ④).
+   */
+  reason?: RunnerReason;
   /** 상한을 넘으면 **뒤를 남기고** 앞을 자른다 — 실패 원인은 끝에 있다. */
   log: string;
   durationMs: number;
@@ -70,6 +95,8 @@ export interface RunnerProbe {
   reason?: RunnerReason;
   jdk?: string;
   gradle?: string;
+  /** SQL 러너가 켜졌을 때 어느 방언인지. 화면이 「sqlite 로 돌린 결과」라고 말할 근거다. */
+  dialect?: SqlDialect;
 }
 
 /** 화면과 원장에 담기는 로그 상한. Rust 가 이미 스트림당 128 KiB 에서 자른다. */
@@ -99,16 +126,36 @@ export function forgetRunners(): void {
 }
 
 /** 실행 없이 답할 수 있는 결과 하나 — 셀 것이 없을 때의 기본값. */
-export function emptyResult(status: RunStatus, log = '', durationMs = 0): RunResult {
-  return { status, passed: 0, failed: 0, failures: [], log, durationMs };
+export function emptyResult(status: RunStatus, reason?: RunnerReason | string, durationMs = 0): RunResult {
+  // 자바 쪽은 이 자리에 로그를 넘겨 왔고 SQL 쪽은 사유를 넘긴다 — 둘 다 사람이 읽는
+  // 한 줄이라 로그에 싣고, 아는 사유면 `reason` 으로도 올린다.
+  const known = REASONS.has(reason as RunnerReason);
+  return {
+    status,
+    passed: 0,
+    failed: 0,
+    failures: [],
+    log: known ? '' : reason ?? '',
+    durationMs,
+    ...(known ? { reason: reason as RunnerReason } : {}),
+  };
 }
+
+const REASONS = new Set<RunnerReason>([
+  'no-jdk', 'no-gradle-wrapper', 'unsupported-lang', 'not-detected',
+  'dialect-unsupported', 'no-fixture-db',
+]);
 
 /**
  * 리포 하나에 러너가 있는지 본다. **없는 것은 오류가 아니다** — 4·5단을 게이트에서
  * 빼라는 신호이고, 설치를 강요하지 않는다 (정본 §5 ①).
  */
-export async function detectRunner(repoId: RepoId, rootPath: string): Promise<RunnerProbe> {
-  const probe = await detectJava(rootPath);
+export async function detectRunner(
+  repoId: RepoId,
+  rootPath: string,
+  lang: RunLang = 'java',
+): Promise<RunnerProbe> {
+  const probe = lang === 'sql' ? await detectSql() : await detectJava(rootPath);
   rememberRunner(repoId, rootPath, probe);
   return probe;
 }
@@ -118,7 +165,8 @@ export async function detectRunner(repoId: RepoId, rootPath: string): Promise<Ru
  * 돈다 — 그 전에 부르면 `no-runner` 다.
  */
 export async function runTests(spec: RunSpec): Promise<RunResult> {
-  if (spec.lang !== 'java') return emptyResult('no-runner');
+  if (spec.lang === 'sql') return runSql(spec);
+  if (spec.lang !== 'java') return emptyResult('no-runner', 'unsupported-lang');
   const seen = known.get(spec.repoId);
   if (!seen?.probe.ok) return emptyResult('no-runner');
   return runJava(spec, seen.rootPath);

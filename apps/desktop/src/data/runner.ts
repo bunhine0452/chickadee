@@ -36,6 +36,8 @@ const REASON: Record<RunnerReason, MessageKey> = {
   'no-gradle-wrapper': 'run.reason.noGradleWrapper',
   'unsupported-lang': 'run.reason.unsupportedLang',
   'not-detected': 'run.reason.notDetected',
+  'dialect-unsupported': 'run.reason.dialectUnsupported',
+  'no-fixture-db': 'run.reason.noFixtureDb',
 };
 
 export function reasonKey(reason: RunnerReason): MessageKey {

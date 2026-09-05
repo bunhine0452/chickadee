@@ -27,6 +27,8 @@ export const run: Record<string, string> = {
   'run.reason.noGradleWrapper': 'This repo has no Gradle wrapper (gradlew).',
   'run.reason.unsupportedLang': 'There is no runner for this language yet.',
   'run.reason.notDetected': 'Not checked yet.',
+  'run.reason.dialectUnsupported': 'This app carries one database, SQLite. This statement is another dialect and does not run here.',
+  'run.reason.noFixtureDb': 'There is no data to run against. The tables are here but the rows are empty.',
 
   'run.detected': 'JDK {{jdk}} · Gradle {{gradle}}',
   'run.detectedJdk': 'JDK {{jdk}}',

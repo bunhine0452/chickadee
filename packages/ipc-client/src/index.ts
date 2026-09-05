@@ -5,7 +5,7 @@ import { devPanel } from './devpanel.js';
 import { IpcError, toIpcError } from './errors.js';
 import type { BatchOp, ParamsOf, RowOf, StatementName } from './statements.js';
 import type {
-  AppPaths, AppVersion, BlameHunk, Block, Catalog, ExecInfo, IngestDone, IngestProgress,
+  AppPaths, AppVersion, AskOut, AskSpec, BlameHunk, Block, Catalog, ExecInfo, IngestDone, IngestProgress,
   FileDiff, IngestSpec, JobId, LangInfo, LinesChunk, ProcOut, ProcSpec, ReadBlockReq,
   ReadLinesReq, RepoProbe, SnippetReq, SnippetResult, StoreInfo,
 } from './types.js';
@@ -153,6 +153,16 @@ export const ipc = {
    */
   t3: {
     run: (spec: ProcSpec) => call<ProcOut>('t3_run', { spec }),
+  },
+  /**
+   * 임시 sqlite 하나를 세우고 묻는다 (D175 를 SQL 로). 여기는 **엔진 한 겹**이고,
+   * 무엇을 세울지·기대 표와 맞는지는 `@chickadee/grading` 의 `runSql` 이 정한다.
+   *
+   * 잘못 적힌 문장은 오류가 아니다 — `failedAt` 과 `message` 로 돌아온다. 오류로 던지는
+   * 것은 엔진 자체를 못 연 경우(`RUN_IO`)뿐이다.
+   */
+  sql: {
+    run: (spec: AskSpec) => call<AskOut>('sql_run', { spec }),
   },
 } as const;
 

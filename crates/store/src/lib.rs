@@ -4,6 +4,9 @@
 //! 이름 붙은 문장, JSON 매개변수, JSON 행뿐이다.
 
 mod migrate;
+// 학습자가 쓴 SQL 을 임시 sqlite 에 돌린다 (D175 의 러너를 SQL 로). `Store` 와 달리
+// 카탈로그에 없는 문장을 받지만, 파일을 안 열고 메모리에만 산다.
+pub mod run;
 
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};

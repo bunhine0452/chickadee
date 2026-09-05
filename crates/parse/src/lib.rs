@@ -6,6 +6,7 @@
 
 mod ast;
 mod langs;
+mod params;
 mod query;
 mod sfc;
 
@@ -55,10 +56,15 @@ pub fn scan(src: &[u8], queries: &Queries, max_bytes: usize) -> Result<Scan, Par
             max: max_bytes,
         });
     }
+    // The parser reads the blanked bytes; every query, predicate and excerpt reads the
+    // original ones. Both buffers are the same length, so the offsets a node carries mean
+    // the same thing in either (`params.rs`).
+    let blanked = params::blanked(&queries.grammar, src);
+    let feed = blanked.as_deref().unwrap_or(src);
     if sfc::is_embedded(&queries.grammar) {
-        return scan_ranges(src, queries);
+        return scan_ranges(src, feed, queries);
     }
-    with_tree(&queries.grammar, src, |tree| Ok(queries.run(tree, src)))
+    with_tree(&queries.grammar, feed, |tree| Ok(queries.run(tree, src)))
 }
 
 /// One parse per embedded range.
@@ -68,7 +74,7 @@ pub fn scan(src: &[u8], queries: &Queries, max_bytes: usize) -> Result<Scan, Par
 /// wrong for a `MyBatis` mapper, where each statement is its own SQL, and for a Vue
 /// file with both `<script>` and `<script setup>`. Parsing them one at a time costs
 /// a parse per range and gives each its own tree.
-fn scan_ranges(src: &[u8], queries: &Queries) -> Result<Scan, ParseError> {
+fn scan_ranges(src: &[u8], feed: &[u8], queries: &Queries) -> Result<Scan, ParseError> {
     // `bytecount` 를 들이지 않는다 — 파일 하나를 여는 길에 한 번 도는 셈이고,
     // 크레이트 하나가 그 값보다 비싸다 (01 §1.1 얇은 Rust).
     #[allow(clippy::naive_bytecount)]
@@ -76,7 +82,7 @@ fn scan_ranges(src: &[u8], queries: &Queries) -> Result<Scan, ParseError> {
     let mut captures = Vec::new();
     let mut quality = "ok";
     for range in sfc::ranges_for(&queries.grammar, src) {
-        let one = with_tree_ranged(&queries.grammar, src, Some(&[range]), |tree| {
+        let one = with_tree_ranged(&queries.grammar, feed, Some(&[range]), |tree| {
             Ok(queries.run(tree, src))
         })?;
         if one.quality == "poor" {

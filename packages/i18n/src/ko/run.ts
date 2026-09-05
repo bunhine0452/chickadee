@@ -39,6 +39,9 @@ export const run = {
   'run.reason.noGradleWrapper': '이 리포에 Gradle 래퍼(gradlew)가 없습니다.',
   'run.reason.unsupportedLang': '이 언어를 돌리는 러너가 아직 없습니다.',
   'run.reason.notDetected': '아직 확인하지 않았습니다.',
+  // 러너는 언어마다 하나가 아니라 **방언마다** 하나다 (정본 §5). 이 앱이 든 것은 하나다.
+  'run.reason.dialectUnsupported': '이 앱이 든 데이터베이스는 SQLite 하나입니다. 이 문장은 다른 방언이라 여기서는 안 돕니다.',
+  'run.reason.noFixtureDb': '돌려 볼 데이터가 없습니다. 표는 있는데 행이 비어 있어요.',
 
   // ───────── 곁들이 ─────────
   'run.detected': 'JDK {{jdk}} · Gradle {{gradle}}',

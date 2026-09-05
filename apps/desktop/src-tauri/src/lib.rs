@@ -31,6 +31,7 @@ pub fn run() {
             commands::app::app_paths,
             commands::app::app_version,
             commands::proc::t3_run,
+            commands::sqlrun::sql_run,
             commands::maint::secret_set,
             commands::maint::secret_delete,
             commands::maint::secret_has,
