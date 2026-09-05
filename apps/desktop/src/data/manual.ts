@@ -15,7 +15,9 @@ import type { ConceptId, DayKey, Layer, Track } from '@chickadee/store-sql';
 import { report } from '../flow.js';
 import { startSession } from '../session-flow.js';
 import { useUi } from '../store.js';
-import { makeCard, type MakerDeps } from './cards.js';
+import type { AbsenceReason } from '@chickadee/cards';
+
+import { makeAbsentPlate, makeCard, makeSyntheticPlate, type MakerDeps } from './cards.js';
 import { insertPlate, levelFor, loadMastery, loadPlates, today, type Plate } from './session.js';
 import { loadSettings } from './settings.js';
 
@@ -69,6 +71,36 @@ export function makePlateFor(req: ManualRequest): Promise<ManualResult> {
 
 const made = (cardId: number | null): { id: number; track: Track } | null =>
   cardId === null ? null : { id: cardId, track: 't0' };
+
+/** 언어 코스의 판 한 장이 어디서 오나 (D190). 셋 중 하나이고 순서대로 본다. */
+export interface CoursePlateRequest extends ManualRequest {
+  /** 자리는 있는데 미지가 많아 아직 못 여는 판의 예고 자리 (D137). */
+  previewSiteId: number | null;
+  /** 자리가 아예 없을 때의 사유 (D177 · D190). */
+  absent: AbsenceReason | null;
+}
+
+/**
+ * 「이 판 풀기」 — 언어 코스(D190)의 판. 내 코드의 자리가 있으면 그 자리로, 자리는 있는데
+ * 아직 못 열면 합성 + 예고로, 자리가 아예 없으면 「네 코드엔 없다」로 만든다. 셋 다 이미
+ * 구워진 카드가 있으면 그것을 다시 쓴다 — `pickPlateNow` 와 같은 규칙이다.
+ */
+export function pickCoursePlateNow(req: CoursePlateRequest): Promise<ManualResult> {
+  return place(req, 'manual', async (deps, layer) => {
+    const level = levelFor(layer);
+    const rows = await ipc.store.query('queue.pick_card', {
+      repoId: req.repoId, conceptId: req.conceptId, level,
+    });
+    const found = rows[0];
+    if (found) return { id: found.id, track: found.track as Track };
+    if (req.siteId !== null) return made(await makeCard(deps, req.conceptId, req.siteId, level));
+    if (req.previewSiteId !== null) {
+      return made(await makeSyntheticPlate(deps, req.conceptId, req.previewSiteId));
+    }
+    if (req.absent !== null) return made(await makeAbsentPlate(deps, req.conceptId, req.absent));
+    return null;
+  });
+}
 
 /** 카드 한 장을 확보하는 방법. 두 동사의 차이는 이것뿐이다. */
 type Resolve = (deps: MakerDeps, layer: Layer) => Promise<{ id: number; track: Track } | null>;

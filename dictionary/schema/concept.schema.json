@@ -79,11 +79,11 @@
               "mybatis_sql",
               "css",
               "vue_style",
-              "swift",
-              "dart",
               "c",
               "cpp",
-              "c_sharp"
+              "c_sharp",
+              "swift",
+              "dart"
             ]
           },
           "default": []
@@ -560,11 +560,11 @@
               "mybatis_sql",
               "css",
               "vue_style",
-              "swift",
-              "dart",
               "c",
               "cpp",
-              "c_sharp"
+              "c_sharp",
+              "swift",
+              "dart"
             ]
           },
           "minItems": 1
@@ -591,11 +591,11 @@
               "mybatis_sql",
               "css",
               "vue_style",
-              "swift",
-              "dart",
               "c",
               "cpp",
-              "c_sharp"
+              "c_sharp",
+              "swift",
+              "dart"
             ]
           }
         },
@@ -623,11 +623,11 @@
               "mybatis_sql",
               "css",
               "vue_style",
-              "swift",
-              "dart",
               "c",
               "cpp",
-              "c_sharp"
+              "c_sharp",
+              "swift",
+              "dart"
             ]
           }
         },

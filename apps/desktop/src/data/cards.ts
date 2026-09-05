@@ -5,10 +5,11 @@
  * `card` 에 넣고, 안 나오면 그 개념을 「판이 없는 문법」에 사유와 함께 남기는 것이 여기 일이다.
  */
 import {
-  generateKind, generateT0, isFailure, isNoPlate, makeSyntheticCard, windowOf,
+  generateKind, generateT0, isFailure, isNoPlate, makeAbsentCard, makeSyntheticCard, windowOf,
   type FocusLine, type GenResult, type LineWindow, type NoPlate, type OtherUse,
   type SiteInput, type T0Card,
 } from '@chickadee/cards';
+import type { AbsenceReason } from '@chickadee/cards';
 import { CARD_ONLY_SITE_ID } from '@chickadee/concepts';
 import type { Dict } from '@chickadee/dictionary';
 import { ipc } from '@chickadee/ipc-client';
@@ -219,6 +220,60 @@ export async function makeSyntheticPlate(
     concepts: deps.dict.concepts,
     ly: deps.layerOf(conceptId),
     previewSiteId,
+    ...langDefaults(deps.dict, conceptId),
+  });
+  if (isFailure(result)) {
+    await noteNoPlate(deps.repoId, conceptId, result.reason);
+    return null;
+  }
+  const card = result.card;
+
+  await ipc.store.exec('card.insert', {
+    repoId: deps.repoId,
+    unitId: null,
+    track: 't0',
+    kind: card.kind,
+    conceptId,
+    level: 1,
+    siteId: null,
+    fileId: null,
+    commitId: null,
+    payloadJson: JSON.stringify(card.payload),
+    genVersion: 1,
+    contentHash: card.contentHash,
+    createdAt: deps.now,
+  });
+  const rows = await ipc.store.query('card.by_hash', {
+    repoId: deps.repoId, contentHash: card.contentHash,
+  });
+  return rows[0]?.id ?? null;
+}
+
+/**
+ * 「네 코드엔 없다」 판 한 장 (D177 · D190).
+ *
+ * 리포에 사용처가 **아예 없는** 개념에만 쓴다 — 예고할 자리가 없으니 예고 대신 사유를 낸다.
+ * 사유는 부르는 쪽이 정한다: 개념의 성질(`absenceReason` 표)이거나, 고른 언어의 파일이
+ * 리포에 없다는 사실(`no-files`)이다. 사유 없이 부를 수 없다(타입이 막는다).
+ *
+ * 원장의 `card.site_id` 는 `makeSyntheticPlate` 와 같은 이유로 **NULL** 이다.
+ */
+export async function makeAbsentPlate(
+  deps: MakerDeps,
+  conceptId: ConceptId,
+  absent: AbsenceReason,
+): Promise<number | null> {
+  const concept = deps.dict.concepts.get(conceptId);
+  if (concept === undefined) return null;
+
+  const result = makeAbsentCard({
+    repoId: deps.repoId,
+    dictVersion: deps.dictVersion,
+    attempt: 0,
+    concept,
+    concepts: deps.dict.concepts,
+    ly: deps.layerOf(conceptId),
+    absent,
     ...langDefaults(deps.dict, conceptId),
   });
   if (isFailure(result)) {

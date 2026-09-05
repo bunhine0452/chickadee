@@ -264,7 +264,7 @@ const SETTINGS: Settings = {
   t1PerWeek: 2, newcomerFlag: 'suspect', theme: 'dark', trim: 'on', motion: 'reduce',
   identities: [{ email: 'me@example.com', name: '나' }], excludeGlobs: ['dist/**', '**/*.min.js'],
   locale: 'en', tutorialSeen: true, declaredNewcomer: false, rootCleared: true,
-  dictLangs: ['ts', 'py'], lastRepoId: 3,
+  dictLangs: ['ts', 'py'], courseLang: 'rs', lastRepoId: 3,
 };
 
 // ───────── 적재 ─────────

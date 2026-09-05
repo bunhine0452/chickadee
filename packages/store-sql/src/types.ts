@@ -83,7 +83,9 @@ export type CardPayload =
       ok: string; rule: string; result?: { label: string; value: string; note: string };
       dict?: DictLayer[]; prereq: { conceptId: ConceptId; n: string }[]; uses: { siteId: number; f: string; l: number }[];
       promptLines: string[];                                    // focus±4, 사다리 4단(프롬프트)용
-      payoff?: string; bridge?: string; transferFrom?: ConceptId; previewSiteId?: number }   // 합성 예제일 때 「곧 여기서 본다」
+      payoff?: string; bridge?: string; transferFrom?: ConceptId; previewSiteId?: number;   // 합성 예제일 때 「곧 여기서 본다」
+      /** 「네 코드엔 없다」의 사유 (D177 · D190). `no-files` 는 리포가 정해 표에 없으므로 카드에 실린다. */
+      absent?: 'framework' | 'library' | 'scale' | 'idiom' | 'no-files' }
   | { track: 't1'; kind: 'transcribe'; blockId: number; file: string; fn: string; original: string[];
       show2: number[];
       why: { line: number; q: string; help: string; choices: { t: string; ok: boolean; fb: string }[] } }
@@ -290,5 +292,12 @@ export interface Settings { budgetMin: number; tz: string; rolloverHour: number;
    * 마지막으로 연 리포 (D119 · 05 §2.4 진입 규칙). 다음에 켤 때 그 리포의 홈으로 바로
    * 들어간다. 그 리포가 목록에서 사라졌으면 첫 줄로 내려온다 — 값이 화면을 막지 않는다.
    */
+  /**
+   * 코스로 배울 언어 (D190). `null` 이면 리포의 주 언어를 따른다 — 사용자가 고르기 전의
+   * 답이고, 고르면 그 언어의 부(0·1·2·3부)가 코스 앞에 선다. 사전 네임스페이스와 같은 글자다
+   * (`py`·`java`·`rs` …). 리포에 그 언어의 파일이 없어도 막지 않는다 — 판은 전부 합성이고
+   * 사유(`no-files`)를 화면이 말한다.
+   */
+  courseLang: string | null;
   lastRepoId: number | null; }
 // 기본값: newPerDay = 2, budgetMin = 15 (§5.1 LIMIT)

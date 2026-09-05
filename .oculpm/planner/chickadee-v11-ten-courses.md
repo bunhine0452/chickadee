@@ -11,17 +11,17 @@ owner: claude-code
 사용자 요청 「언어를 선택하고 그 언어의 기초부터 쭉 학습하는 코스 — docs 의 열 언어 전부, 병렬 세션으로」. 기반(파서 넷·부 등록부)을 깔고 언어 열을 워크트리 세션 열로 저작한 뒤, 앱에 언어 선택과 부 목차를 붙이고 합류한다.
 
 ## F · 기반 — 파서 넷 · 부 등록부 · D190 {#f-base}
-- [ ] tree-sitter c·cpp·c_sharp·swift 링크 (lang-* 피처, GRAMMARS 표 true, ABI c15·cpp14·c_sharp15·swift15) {#f-grammars}
-- [ ] packages/course/src/parts/<lang>.ts 열 장 + index.ts 등록부(COURSE_LANGS·PARTS_BY_LANG·partsOf) + 열 언어 대조 시험 {#f-parts}
-- [ ] docs/00-overview.md §4.2.1 D190 행 + 플랜 생성 {#f-register}
-- [ ] typecheck·lint·course/dictionary 시험·cargo test 초록 → 기반 커밋 {#f-commit}
+- [x] tree-sitter c·cpp·c_sharp·swift 링크 (lang-* 피처, GRAMMARS 표 true, ABI c15·cpp14·c_sharp15·swift15) {#f-grammars}
+- [x] packages/course/src/parts/<lang>.ts 열 장 + index.ts 등록부(COURSE_LANGS·PARTS_BY_LANG·partsOf) + 열 언어 대조 시험 {#f-parts}
+- [x] docs/00-overview.md §4.2.1 D190 행 + 플랜 생성 {#f-register}
+- [x] typecheck·lint·course/dictionary 시험·cargo test 초록 → 기반 커밋 {#f-commit}
 
 ## L · 언어 열 — 워크트리 세션 하나씩 {#l-langs}
-- [ ] py — 1부 남은 셋·2부 저작, parts/py.ts, 골든·린트·ABI 초록 {#l-py}
-- [ ] ts — 2부 채우기(narrowing·union·class·prototype 등), parts/ts.ts {#l-ts}
-- [ ] java — 0·1·2·3부 이미 섬. 남은 것(string-concat·autoboxing 자리, 골든 보강) 점검 {#l-java}
-- [ ] sql — 바닥 남은 다섯 + 중심, parts/sql.ts {#l-sql}
-- [ ] rs — 0부 11 + 1·2부 전량 신규(사전 0장 → 표본 ai-pm 280장), parts/rs.ts {#l-rs}
+- [~] py — 1부 남은 셋·2부 저작, parts/py.ts, 골든·린트·ABI 초록 {#l-py}
+- [~] ts — 2부 채우기(narrowing·union·class·prototype 등), parts/ts.ts {#l-ts}
+- [~] java — 0·1·2·3부 이미 섬. 남은 것(string-concat·autoboxing 자리, 골든 보강) 점검 {#l-java}
+- [~] sql — 바닥 남은 다섯 + 중심, parts/sql.ts {#l-sql}
+- [~] rs — 0부 11 + 1·2부 전량 신규(사전 0장 → 표본 ai-pm 280장), parts/rs.ts {#l-rs}
 - [ ] go — 0부 + 1·2부 전량 신규, 표본은 공개 리포, parts/go.ts {#l-go}
 - [ ] c — 0부(기계 층) + 1·2부 전량 신규, 파서 ERROR 비율 실측, parts/c.ts {#l-c}
 - [ ] cpp — 0부 + 1·2부 전량 신규, 파서 ERROR 비율 실측, parts/cpp.ts {#l-cpp}
@@ -45,4 +45,13 @@ owner: claude-code
 <!-- oculpm:plan-log begin v1 -->
 | 시각 | 항목 | 에이전트 | 변화 | 일지 | 메모 |
 |---|---|---|---|---|---|
+| 2026-09-06T00:38:06+09:00 | #f-grammars | claude-code | ☐→x |  | tree-sitter-c 0.24.2 · cpp 0.23.4 · c-sharp 0.23.5 · swift 0.7.3 링크, ABI c15·cpp14·c_sharp15·swift15, GRAMMARS true, 린트 표본 dart 로. cargo test 초록 (커밋 1f8bda6) |
+| 2026-09-06T00:39:03+09:00 | #f-parts | claude-code | ☐→x |  | parts/{index,java,ts,py,sql,rs,go,c,cpp,csharp,swift}.ts + index.test.ts 25 시험 초록. JAVA_PARTS 재수출. ts 21/12/8 · py 18/6 · sql 8/3 분할 |
+| 2026-09-06T00:39:29+09:00 | #f-register | claude-code | ☐→x |  | D190 행(파서 넷 · 부 등록부 · 워크트리 저작 규약 · courseLang/no-files) + 플랜 v11 생성 |
+| 2026-09-06T00:40:46+09:00 | #f-commit | claude-code | ☐→x |  | typecheck·eslint·vitest(course/dictionary 95)·cargo test 초록, 커밋 1f8bda6. 열 세션 워크트리로 출발(rs·c Fable 포크, 나머지 Opus) |
+| 2026-09-06T00:48:21+09:00 | #l-py | claude-code | ☐→~ |  | Opus 워크트리 세션 출발 — 1부 남은 넷 + 2부 |
+| 2026-09-06T00:51:06+09:00 | #l-ts | claude-code | ☐→~ |  | Opus 워크트리 세션 출발 — 2부 완성 |
+| 2026-09-06T00:51:21+09:00 | #l-java | claude-code | ☐→~ |  | Opus 워크트리 세션 출발 — 심화 잔여 + 골든 감사 |
+| 2026-09-06T00:51:30+09:00 | #l-sql | claude-code | ☐→~ |  | Opus 워크트리 세션 출발 — 바닥 다섯 + 중심 16 + 심화 8 |
+| 2026-09-06T00:51:48+09:00 | #l-rs | claude-code | ☐→~ |  | Fable 포크 워크트리 세션 출발 — 0부 11 + 1·2부 전량 |
 <!-- oculpm:plan-log end -->

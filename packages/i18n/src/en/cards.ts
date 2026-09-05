@@ -26,6 +26,10 @@ export const cards: Record<string, string> = {
   't0.absentIdiom':
     'This is not in your code — another idiom took the job. Seeing the original shape here '
     + 'is what makes the one your code picked readable.',
+  't0.absentNoFiles':
+    'The repos you registered have no files in this language — so every plate in this course is a '
+    + 'dictionary example. Register a repo written in it and the same concepts come back at the '
+    + 'places in your own code.',
   't0.syntheticFile': 'dictionary example',
   't0.syntheticSource': 'Dictionary example — <b>not a line lifted from your code</b>',
   't0.noExample': 'the dictionary has no usable example',

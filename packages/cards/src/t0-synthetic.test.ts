@@ -185,8 +185,9 @@ describe('리포에 아예 없는 개념 (D177)', () => {
     expect(absenceReason('ts/const-declaration')).toBeNull();
   });
 
-  test('사유 넷은 전부 문구 키를 갖는다 — 화면이 펼 것이 비어 있지 않다', () => {
-    const reasons: AbsenceReason[] = ['framework', 'library', 'scale', 'idiom'];
+  test('사유 다섯은 전부 문구 키를 갖는다 — 화면이 펼 것이 비어 있지 않다', () => {
+    // 넷 + `no-files` (D190 — 리포에 그 언어의 파일이 없다).
+    const reasons: AbsenceReason[] = ['framework', 'library', 'scale', 'idiom', 'no-files'];
     for (const r of reasons) expect(ABSENCE_MESSAGE_KEY[r]).toMatch(/^t0\.absent/);
     expect(new Set(Object.values(ABSENCE_MESSAGE_KEY)).size).toBe(reasons.length);
   });

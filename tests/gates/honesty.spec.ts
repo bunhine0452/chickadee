@@ -90,23 +90,26 @@ function runnerReasons(): string[] {
 
 // ───────── ① 「네 코드엔 없다」 ─────────
 
-test('① 사전 예제 판의 문구가 살아 있다 — 「네 코드엔 없다」 사유 넷 + 출처 줄', () => {
+test('① 사전 예제 판의 문구가 살아 있다 — 「네 코드엔 없다」 사유 다섯 + 출처 줄', () => {
   const bad = [
     't0.absentFramework', 't0.absentLibrary', 't0.absentScale', 't0.absentIdiom',
+    't0.absentNoFiles',
     't0.syntheticSource',
   ].flatMap(assertLive);
   expect(bad, bad.join('\n')).toEqual([]);
 });
 
-test('① 사유 표와 문구 표가 같은 넷을 든다', () => {
+test('① 사유 표와 문구 표가 같은 다섯을 든다', () => {
   const src = readFileSync(join(ROOT, 'packages/cards/src/t0-synthetic.ts'), 'utf8');
   const at = src.indexOf('export type AbsenceReason');
   const body = src.slice(at, src.indexOf(';', at));
   const reasons = [...body.matchAll(/'([^']+)'/g)].map((m) => m[1] as string);
-  expect(reasons.length).toBe(4);
-  // 화면이 든 표(`T0Plate` 의 `ABSENT_KEY`)에 그 넷이 다 있어야 한다.
+  // 넷 + `no-files` (D190 — 리포에 그 언어의 파일이 없다).
+  expect(reasons.length).toBe(5);
+  // 화면이 든 표(`T0Plate` 의 `ABSENT_KEY`)에 그 다섯이 다 있어야 한다. `no-files` 는 따옴표
+  // 키라 `'no-files':` 로 적힌다.
   const plate = readFileSync(join(ROOT, 'apps/desktop/src/screens/session/T0Plate.tsx'), 'utf8');
-  const missing = reasons.filter((r) => !plate.includes(`${r}:`));
+  const missing = reasons.filter((r) => !plate.includes(`${r}:`) && !plate.includes(`'${r}':`));
   expect(missing, `T0Plate 의 사유 표에 없다: ${missing.join(' · ')}`).toEqual([]);
 });
 

@@ -275,3 +275,101 @@
    `.cc-today` 가 격자라 그냥 두면 단추가 칸 너비를 다 먹어 2560 에서 1120px 짜리 단추가 된다.
    위 여백은 격자의 `gap`(12px)이 이미 준다 — 여기서 더하지 않는다. */
 .cc-today > .press-btn { justify-self: start }
+
+/* ───────── 언어 코스 (D190) — 목차 위의 선택지와 부 넷 ───────── */
+.cc-lang {
+  padding: var(--s-4) 0 var(--s-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  min-width: 0;
+}
+
+.cc-lang h3 {
+  margin: 0 var(--s-4) var(--s-2);
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: var(--fs-1);
+  font-weight: var(--fw-medium);
+}
+
+.cc-lang-pick {
+  display: grid;
+  gap: var(--s-1);
+  padding: 0 var(--s-4);
+}
+
+.cc-lang-k {
+  color: var(--text-muted);
+  font-size: var(--fs-2);
+}
+
+.cc-lang select {
+  width: 100%;
+  min-width: 0;
+  padding: var(--s-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-3);
+}
+
+.cc-lang select:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.cc-lang .note {
+  margin: var(--s-2) var(--s-4) 0;
+  font-size: var(--fs-2);
+}
+
+.cc-lang .cc-rows {
+  margin-top: var(--s-2);
+}
+
+/* 부 패널의 판 목록 — 이름 · 출처 · 단추 */
+.cc-plates {
+  display: grid;
+  gap: var(--s-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cc-plate {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: var(--s-3);
+  align-items: center;
+  padding: var(--s-2) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.cc-plate:last-child {
+  border-bottom: 0;
+}
+
+.cc-plate-name {
+  color: var(--text);
+  font-size: var(--fs-3);
+}
+
+.cc-plate-st {
+  color: var(--text-muted);
+  font-size: var(--fs-2);
+  white-space: nowrap;
+}
+
+@media (width < 600px) {
+  .cc-plate {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .cc-plate-st {
+    grid-column: 1 / -1;
+    white-space: normal;
+  }
+}

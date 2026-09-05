@@ -17,7 +17,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { focusOrFallback } from '../../components/session/focus.js';
 import { Page, Split } from '../../components/shell/Page.js';
 import { TimeQueue, type QueueItem } from '../../components/shell/TimeQueue.js';
-import { loadSettings, useResolvedTheme } from '../../data/settings.js';
+import { pickCoursePlateNow } from '../../data/manual.js';
+import { loadSettings, saveSetting, useResolvedTheme } from '../../data/settings.js';
 import { ingest, report, todayKey } from '../../flow.js';
 import { useUi } from '../../store.js';
 import { ChapterPanel } from './ChapterPanel.js';
@@ -26,6 +27,9 @@ import {
   dictNow, judgeReading, loadCourse, loadPaths, loadRanges, loadRecheckCards, loadStageCards,
   openCourseSession, openGate, type ChapterView, type CourseData, type PathRow, type RangeRow,
 } from './data.js';
+import { LangCourse, partId, partOfId } from './LangCourse.js';
+import { LangPartPanel } from './LangPartPanel.js';
+import { loadLangCourse, type LangCourseData, type LangPlateView } from './lang-data.js';
 import { stageKey, type RunSpec } from './run.js';
 import { StageOverlay } from './StageOverlay.js';
 import { useCourse } from './store.js';
@@ -90,6 +94,9 @@ export function CourseScreen(props: CourseScreenProps): React.JSX.Element {
   const run = useCourse((s) => s.run);
   const inSession = useUi((s) => s.session !== null);
   const [data, setData] = useState<CourseData | null>(null);
+  const [lang, setLang] = useState<LangCourseData | null>(null);
+  /** 언어를 바꾸면 언어 코스만 다시 읽는다 — 챕터는 안 바뀐다. */
+  const [langVersion, setLangVersion] = useState(0);
   const [paths, setPaths] = useState<PathRow[]>([]);
   const [ranges, setRanges] = useState<RangeRow[]>([]);
   const [busy, setBusy] = useState(false);
@@ -111,15 +118,31 @@ export function CourseScreen(props: CourseScreenProps): React.JSX.Element {
       if (!alive) return;
       setData(d);
       const s = useCourse.getState();
-      if (s.selected === null || (s.selected !== GRAD_ID && !d.chapters.some((c) => c.unitId === s.selected))) {
+      // 음수는 졸업·부의 선택값이라 챕터 목록에 없어도 되돌리지 않는다.
+      if (s.selected === null || (s.selected >= 0 && !d.chapters.some((c) => c.unitId === s.selected))) {
         s.select(d.todayUnitId ?? d.chapters[0]?.unitId ?? null);
       }
     }).catch((e: unknown) => report(e, '코스 읽기'));
     return () => { alive = false; };
   }, [repoId, rootPath, dayKey, version, inSession]);
 
+  // 언어 코스 — 고른 언어의 부 넷 (D190). 세션이 닫힐 때 겹이 올랐으니 함께 다시 읽는다.
   useEffect(() => {
-    if (selected === null || selected === GRAD_ID) {
+    if (inSession) return undefined;
+    let alive = true;
+    void loadLangCourse(repoId, dict).then((l) => {
+      if (!alive) return;
+      setLang(l);
+      // 기능 챕터가 없는 리포에서는 부가 코스의 전부다 — 첫 부를 편다.
+      const s = useCourse.getState();
+      const first = l.parts.find((p) => p.plates.length > 0);
+      if (s.selected === null && first !== undefined) s.select(partId(first.part));
+    }).catch((e: unknown) => report(e, '언어 코스 읽기'));
+    return () => { alive = false; };
+  }, [repoId, dict, version, langVersion, inSession]);
+
+  useEffect(() => {
+    if (selected === null || selected < 0) {
       setPaths([]);
       setRanges([]);
       return undefined;
@@ -137,7 +160,7 @@ export function CourseScreen(props: CourseScreenProps): React.JSX.Element {
   // 구웠으면 `null` 이라 아무 일도 없다. 새로 구워졌을 때만 다시 읽는다 — 0장이 나온 챕터를
   // 고를 때마다 다시 구우면 재료 읽기가 헛돈다.
   useEffect(() => {
-    if (selected === null || selected === GRAD_ID || bakeTried.has(selected)) return undefined;
+    if (selected === null || selected < 0 || bakeTried.has(selected)) return undefined;
     bakeTried.add(selected);
     let alive = true;
     void ensureChapterBaked({ repoId, rootPath, dict, now: Date.now() }, selected).then((bake) => {
@@ -164,6 +187,8 @@ export function CourseScreen(props: CourseScreenProps): React.JSX.Element {
   }, [data, run]);
 
   const chapter = data?.chapters.find((c) => c.unitId === selected) ?? null;
+  const partNo = partOfId(selected);
+  const part = partNo === null ? null : lang?.parts.find((p) => p.part === partNo) ?? null;
   const dueSet = useMemo(() => new Set(data?.due.map((d) => d.unitId) ?? []), [data]);
   const gap = data === null ? { kind: 'other' as const } : todayGap(data);
 
@@ -266,6 +291,37 @@ export function CourseScreen(props: CourseScreenProps): React.JSX.Element {
   const hasNext = useCallback((stage: StageNo): boolean =>
     (chapter?.counts[stage] ?? 0) > 0, [chapter]);
 
+  /** 언어를 고른다. `null` 은 리포의 주 언어로 되돌리는 것이다 (D190). */
+  const pickLang = useCallback(async (next: string | null) => {
+    setBusy(true);
+    try {
+      await saveSetting('courseLang', next, Date.now());
+      useCourse.getState().select(null);
+      setLangVersion((v) => v + 1);
+    } catch (e) {
+      report(e, '언어 고르기');
+    } finally {
+      setBusy(false);
+    }
+  }, []);
+
+  /** 「이 판 풀기」 — 내 코드의 자리 · 합성 + 예고 · 「네 코드엔 없다」 셋 중 하나로 연다. */
+  const openPlate = useCallback(async (plate: LangPlateView) => {
+    setBusy(true);
+    try {
+      const r = await pickCoursePlateNow({
+        repoId, rootPath, conceptId: plate.conceptId as ConceptId,
+        siteId: plate.siteId, previewSiteId: plate.previewSiteId, absent: plate.absent,
+      });
+      const { say } = useUi.getState();
+      say(!r.ok ? t('chapter.plateFailed') : r.reused ? t('chapter.plateReused') : t('chapter.plateOpened'));
+    } catch (e) {
+      report(e, '이 판 풀기');
+    } finally {
+      setBusy(false);
+    }
+  }, [repoId, rootPath]);
+
   const todayItems: QueueItem[] = (data?.plan ?? []).map((i) => (i.kind === 'recheck'
     ? { kind: 't2', label: t('chapter.qRecheck'), mins: i.estMin, review: true }
     : { kind: i.stage === 1 ? 't0' : i.stage >= 4 ? 't1' : 't2', label: t(stageKey(i.stage)), mins: i.estMin }));
@@ -290,27 +346,33 @@ export function CourseScreen(props: CourseScreenProps): React.JSX.Element {
 
           {data === null ? (
             <div className="cc-wait" aria-busy="true" />
-          ) : data.chapters.length === 0 ? (
-            <section className="cc-empty">
-              <p><b>{t('chapter.empty')}</b></p>
-              <p className="note">{t('chapter.emptyPlain')}</p>
-            </section>
           ) : (
             <Split
               sticky
               sideLabel={t('chapter.tocLabel')}
               side={(
-                <ChapterToc
-                  chapters={data.chapters}
-                  selected={selected}
-                  todayUnitId={data.todayUnitId}
-                  due={dueSet}
-                  dead={data.dead}
-                  onSelect={(id) => useCourse.getState().select(id)}
-                />
+                <div className="l-stack">
+                  {/* 언어 코스가 먼저 선다 — 부 넷이 끝나면 기능 챕터다 (정본 §4 · D190). */}
+                  <LangCourse
+                    data={lang}
+                    selected={selected}
+                    busy={busy}
+                    onPickLang={(l) => void pickLang(l)}
+                    onSelect={(id) => useCourse.getState().select(id)}
+                  />
+                  <ChapterToc
+                    chapters={data.chapters}
+                    selected={selected}
+                    todayUnitId={data.todayUnitId}
+                    due={dueSet}
+                    dead={data.dead}
+                    onSelect={(id) => useCourse.getState().select(id)}
+                  />
+                </div>
               )}
             >
               <div className="cc-work l-stack">
+                {data.chapters.length === 0 ? null : (
                 <section className="cc-today" aria-label={t('chapter.today')}>
                   <h2>{t('chapter.today')}<span className="pl">{t('chapter.todayPlain')}</span></h2>
                   {data.plan.length === 0 ? (
@@ -338,8 +400,11 @@ export function CourseScreen(props: CourseScreenProps): React.JSX.Element {
                     </>
                   )}
                 </section>
+                )}
 
-                {selected === GRAD_ID ? (
+                {part !== null ? (
+                  <LangPartPanel part={part} busy={busy} onOpen={(p) => void openPlate(p)} />
+                ) : selected === GRAD_ID ? (
                   <section className="cc-panel cc-grad" aria-label={t('chapter.grad')}>
                     <header className="cc-panel-head"><h2>{t('chapter.grad')}</h2></header>
                     <p className="note">{t('chapter.gradPlain')}</p>
@@ -356,7 +421,14 @@ export function CourseScreen(props: CourseScreenProps): React.JSX.Element {
                       </ul>
                     )}
                   </section>
-                ) : chapter === null ? null : (
+                ) : chapter === null ? (
+                  data.chapters.length === 0 ? (
+                    <section className="cc-empty">
+                      <p><b>{t('chapter.empty')}</b></p>
+                      <p className="note">{t('chapter.emptyPlain')}</p>
+                    </section>
+                  ) : null
+                ) : (
                   <ChapterPanel
                     chapter={chapter}
                     gate={data.gates.get(chapter.unitId) ?? null}

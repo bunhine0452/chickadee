@@ -129,6 +129,12 @@ const t0PayloadSchema = z.object({
   bridge: z.string().optional(),
   transferFrom: conceptIdSchema.optional(),
   previewSiteId: int().optional(),
+  /**
+   * 「네 코드엔 없다」의 사유 (D177 · D190). 사유 표(`packages/cards` `ABSENCE`)는 개념마다
+   * 고정인데 `no-files`(리포에 그 언어의 파일이 없다)만은 **리포가 정하는 사유**라 카드에
+   * 실어야 화면이 안다. 나머지 넷은 표에서 다시 찾을 수 있어 실려도 되고 안 실려도 된다.
+   */
+  absent: z.enum(['framework', 'library', 'scale', 'idiom', 'no-files']).optional(),
 });
 
 const t1PayloadSchema = z.object({
@@ -437,6 +443,7 @@ export const settingsSchema = z.object({
   declaredNewcomer: z.boolean(),
   rootCleared: z.boolean(),
   dictLangs: z.array(z.string()),
+  courseLang: z.string().nullable(),
   lastRepoId: z.number().nullable(),
 });
 
@@ -464,6 +471,7 @@ export const SETTINGS_KEYS = {
   declaredNewcomer: 'declared_newcomer',
   rootCleared: 'root_cleared',
   dictLangs: 'dict_langs',
+  courseLang: 'course_lang',
   lastRepoId: 'last_repo_id',
 } as const satisfies Record<keyof Settings, string>;
 

@@ -61,8 +61,12 @@ export interface SyntheticRequest extends Omit<T0Request, 'sites' | 'previewSite
  * | `library` | 이미 있는 것을 부르지 직접 짜지 않는다 | 정렬 · 제네릭 경계 |
  * | `scale` | 이 리포 규모에서는 필요가 안 생겼다 | 추상 클래스 계층 |
  * | `idiom` | 다른 문법이 그 자리를 가져갔다 | `for (;;)` ← 스트림·for-each |
+ * | `no-files` | 리포에 **그 언어의 파일이 없다** (D190) | 자바 리포에서 Rust 코스를 열었다 |
+ *
+ * `no-files` 만은 개념의 성질이 아니라 **리포와 고른 언어의 관계**다 — 그래서 아래
+ * {@link ABSENCE} 표에는 없고, 부르는 쪽이 리포의 언어를 보고 넘긴다(`absenceOf`).
  */
-export type AbsenceReason = 'framework' | 'library' | 'scale' | 'idiom';
+export type AbsenceReason = 'framework' | 'library' | 'scale' | 'idiom' | 'no-files';
 
 /**
  * 사유 넷의 i18n 키. **문구는 `packages/i18n` 이 대고 이 파일은 키만 안다** — 카탈로그의
@@ -77,6 +81,7 @@ export const ABSENCE_MESSAGE_KEY: Record<AbsenceReason, string> = {
   library: 't0.absentLibrary',
   scale: 't0.absentScale',
   idiom: 't0.absentIdiom',
+  'no-files': 't0.absentNoFiles',
 };
 
 /**
@@ -224,7 +229,10 @@ export function makeSyntheticCard(req: SyntheticRequest): GenResult {
  * 는 0곳이고, 이 문이 없으면 그 셋은 영영 못 가르친다.
  */
 export function makeAbsentCard(req: AbsentRequest): GenResult {
-  return bakeFromExamples(req);
+  const out = bakeFromExamples(req);
+  if (isFailure(out)) return out;
+  // 사유를 카드에 싣는다 — `no-files` 는 리포가 정하는 사유라 표에서 되찾을 수 없다 (D190).
+  return { ...out, card: { ...out.card, payload: { ...out.card.payload, absent: req.absent } } };
 }
 
 /**

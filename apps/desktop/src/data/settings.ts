@@ -53,6 +53,8 @@ export const DEFAULTS: Omit<Settings, 'tz'> = {
   rootCleared: false,
   // 비면 전부 켜진 것이다 (D122).
   dictLangs: [],
+  // 고르기 전에는 리포의 주 언어를 따른다 (D190).
+  courseLang: null,
 };
 
 export async function loadSettings(): Promise<Settings> {
@@ -96,6 +98,7 @@ const KEY_OF: Record<keyof Settings, string> = {
   declaredNewcomer: 'declared_newcomer',
   rootCleared: 'root_cleared',
   dictLangs: 'dict_langs',
+  courseLang: 'course_lang',
   lastRepoId: 'last_repo_id',
 };
 

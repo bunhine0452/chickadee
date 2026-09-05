@@ -47,6 +47,7 @@ const roleName = (role: keyof typeof ROLE_KEY): string => t(ROLE_KEY[role]);
 const ABSENT_KEY = {
   framework: 't0.absentFramework', library: 't0.absentLibrary',
   scale: 't0.absentScale', idiom: 't0.absentIdiom',
+  'no-files': 't0.absentNoFiles',
 } as const satisfies Record<AbsenceReason, MessageKey>;
 
 /**
@@ -199,8 +200,11 @@ export function T0Plate(props: T0PlateProps): React.JSX.Element | null {
 
   // 합성 판은 「내 코드」가 아니다 — 그 자리에 파일 경로를 적으면 판 머리가 거짓말을 한다.
   // 리포에 자리가 **아예 없는** 개념이면 왜 없는지까지 적는다 (D186 ④).
+  // 사유는 카드에 실린 것이 먼저다 — `no-files` 는 리포가 정해 표에 없다 (D190).
   const synthetic = syntheticPlate(plate);
-  const absent: AbsenceReason | null = synthetic ? absenceReason(plate.conceptId) : null;
+  const absent: AbsenceReason | null = synthetic
+    ? (payload.absent ?? absenceReason(plate.conceptId))
+    : null;
 
   const state: FeedbackState = result === null ? 'idle' : result.correct ? 'right' : 'wrong';
   const diag = result === null ? null : payload.why[result.sel] ?? null;
