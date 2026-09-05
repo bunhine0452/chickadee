@@ -7,4 +7,5 @@
 
 ; 값 없이 나가는 줄 — 돌려줄 것이 없다고 적은 함수에서만 맞다.
 ((return_statement "return" @pick.1 @hole) @site
+ (#match? @site "^return\\s*;$")
  (#set! form "bare"))

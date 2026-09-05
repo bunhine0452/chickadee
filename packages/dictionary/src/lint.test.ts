@@ -4,7 +4,7 @@
  */
 import { describe, expect, test } from 'vitest';
 
-import { authoringDebt, lintDict, type DebtCheck } from './lint.js';
+import { authoringDebt, lintDict, type DebtCheck, revealsToken } from './lint.js';
 import { resolveConcept } from './resolve.js';
 import { conceptSourceSchema, langMetaSchema, type LangMeta, type SourceConcept } from './schema.js';
 import type { Dict } from './load.js';
@@ -277,5 +277,19 @@ describe('사전 저작 부채 (D145)', () => {
       };
       expect(check(authoringDebt(dict), 'zero-one-liner').gaps).toEqual([]);
     });
+  });
+});
+
+describe('정답이 새는지 보는 자 (`revealsToken`)', () => {
+  test('`$` 한 글자는 줄 끝이 아니라 글자다 — 없는 문장에서 새지 않고 있는 문장에서 샌다', () => {
+    expect(revealsToken('앞의 기호 하나가 이 글자 묶음을 값이 들어가는 틀로 바꾼다.', '$')).toBe(false);
+    expect(revealsToken('One mark in front turns this into a frame.', '$')).toBe(false);
+    expect(revealsToken('앞에 $ 하나를 붙인다', '$')).toBe(true);
+    expect(revealsToken('write $"n={n}" here', '$')).toBe(true);
+  });
+
+  test('낱말 토큰은 낱말 경계로 본다', () => {
+    expect(revealsToken('let 이 이름을 만든다', 'let')).toBe(true);
+    expect(revealsToken('letter 가 아니다', 'let')).toBe(false);
   });
 });

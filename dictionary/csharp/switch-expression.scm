@@ -3,5 +3,5 @@
 ((switch_expression
    . (_) @pick.2
    "switch" @pick.1 @hole
-   (switch_expression_arm) @pick.3) @site
+   . (switch_expression_arm) @pick.3) @site
  (#set! form "switch-expr"))

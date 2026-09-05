@@ -19,6 +19,18 @@
  (#set! form "sized"))
 
 ; 폭을 이름에 못 박은 것 — `<cstdint>`. 폭이 중요하면 이렇게 적는 것이 정답이다.
+; tree-sitter-cpp 0.23.4 는 `int64_t`·`size_t` 를 `type_identifier` 가 아니라 **`primitive_type`** 으로
+; 읽는다(2026-09-06 실측 — 첫 판이 `type_identifier` 만 걸어 골든이 0곳이었다). 둘 다 건다.
+((declaration
+   type: (primitive_type) @pick.1 @hole
+   declarator: (init_declarator
+     declarator: (identifier) @pick.2
+     value: (_) @pick.3)) @site
+ (#any-of? @pick.1
+   "int8_t" "int16_t" "int32_t" "int64_t"
+   "uint8_t" "uint16_t" "uint32_t" "uint64_t" "size_t")
+ (#set! form "fixed"))
+
 ((declaration
    type: (type_identifier) @pick.1 @hole
    declarator: (init_declarator

@@ -331,7 +331,10 @@ export function revealsToken(text: string, token: string): boolean {
   if (token === '') return false;
   const bare = text.replace(TAG, '').replace(/[.,](?=\s|$)/g, '');
   if (/^[\w$]+$/.test(token)) {
-    return new RegExp(`(^|[^\\w$])${token}([^\\w$]|$)`).test(bare);
+    // `$` 를 그대로 넣으면 정규식의 「줄 끝」이 되어 아무 문장이나 새는 것으로 찍힌다 —
+    // C# 보간 문자열의 구멍(`$`)이 2026-09-06 에 그것을 밟았다.
+    const literal = token.replace(/\$/g, '\\$');
+    return new RegExp(`(^|[^\\w$])${literal}([^\\w$]|$)`).test(bare);
   }
   return bare.includes(token);
 }

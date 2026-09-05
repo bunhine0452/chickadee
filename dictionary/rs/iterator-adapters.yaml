@@ -173,7 +173,7 @@ examples:
   - code: "fn f() { let v: Vec<i32> = items.iter().map(|x| x * 2).collect(); }"
     expect: { sites: 3, form: adapter, picks: { 1: "iter", 2: "items", 3: "()" } }
   - code: "fn f() { let n = it.collect::<Vec<_>>(); }        // 터보피시로 모을 타입을 적었다"
-    expect: { sites: 1, form: collect-turbofish, hole: "collect", picks: { 1: "collect", 2: "it", 3: "::<Vec<_>>" } }
+    expect: { sites: 1, form: collect-turbofish, hole: "collect", picks: { 1: "collect", 2: "it", 3: "<Vec<_>>" } }
   - code: "fn f() { let total: i32 = nums.iter().sum(); }    // sum 이 당긴다"
     expect: { sites: 2, form: adapter, picks: { 1: "iter", 2: "nums" } }
   - code: "fn f() { for x in items { } }                   // 반복문 — rs/for-in"

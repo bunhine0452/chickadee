@@ -33,6 +33,7 @@ const allow = JSON.parse(
   readFileSync(join(process.cwd(), 'tests/gates/quality.allow.json'), 'utf8'),
 ) as QualityAllow;
 
+// 사전 535장(열 언어 · D190)을 다 세는 센서스라 기본 5초를 넘긴다 — CI 우분투에서 8초를 쟀다(2026-09-06).
 test('학습질 — 내 코드 비율 · 2단 값 추적 · 오답 진단 (D186 ③)', async () => {
   const report = await runQualityCensus();
   // eslint-disable-next-line no-console -- 게이트의 값이 이 표다 (06 §2 · D181).
@@ -69,4 +70,4 @@ test('학습질 — 내 코드 비율 · 2단 값 추적 · 오답 진단 (D186 
   const exempt = new Set(allow.entries.map((e) => e.at));
   expect(report.axisGaps.filter((g) => !exempt.has(g)), '축에 식이 셋에 못 미치는데 사유가 없다').toEqual([]);
   expect(thresholds.minExprPerAxis).toBe(3);
-});
+}, 120_000);

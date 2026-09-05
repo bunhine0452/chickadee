@@ -12,7 +12,7 @@ import { ensureChapterBaked } from '@chickadee/course';
 import { t } from '@chickadee/i18n';
 import type { ConceptId, StageNo } from '@chickadee/store-sql';
 import { FlatButton, PressButton } from '@chickadee/ui';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { focusOrFallback } from '../../components/session/focus.js';
 import { Page, Split } from '../../components/shell/Page.js';
@@ -95,6 +95,13 @@ export function CourseScreen(props: CourseScreenProps): React.JSX.Element {
   const inSession = useUi((s) => s.session !== null);
   const [data, setData] = useState<CourseData | null>(null);
   const [lang, setLang] = useState<LangCourseData | null>(null);
+  /**
+   * 두 읽기(챕터 · 언어 코스)가 서로의 결과를 본다 — 첫 선택은 **챕터가 있으면 챕터**이고, 부는
+   * 기능 챕터가 없는 리포에서만 자동으로 펴진다. 상태 대신 ref 를 보는 이유는 두 효과가 어느
+   * 순서로 끝날지 모르기 때문이다(CI 우분투에서 언어 코스가 먼저 끝나 부 0 이 챕터를 가렸다).
+   */
+  const dataRef = useRef<CourseData | null>(null);
+  const langRef = useRef<LangCourseData | null>(null);
   /** 언어를 바꾸면 언어 코스만 다시 읽는다 — 챕터는 안 바뀐다. */
   const [langVersion, setLangVersion] = useState(0);
   const [paths, setPaths] = useState<PathRow[]>([]);
@@ -117,10 +124,18 @@ export function CourseScreen(props: CourseScreenProps): React.JSX.Element {
     void loadCourse(repoId, dayKey, Date.now(), rootPath).then((d) => {
       if (!alive) return;
       setData(d);
+      dataRef.current = d;
       const s = useCourse.getState();
-      // 음수는 졸업·부의 선택값이라 챕터 목록에 없어도 되돌리지 않는다.
-      if (s.selected === null || (s.selected >= 0 && !d.chapters.some((c) => c.unitId === s.selected))) {
-        s.select(d.todayUnitId ?? d.chapters[0]?.unitId ?? null);
+      const firstPart = langRef.current?.parts.find((p) => p.plates.length > 0);
+      if (d.chapters.length > 0) {
+        // 챕터가 있으면 챕터가 먼저다 — 언어 코스가 먼저 끝나 부를 골라 뒀어도 되돌린다.
+        // 졸업(-1)은 그대로 두고, 챕터 목록에 없는 챕터 id 도 되돌린다.
+        const stale = s.selected === null || partOfId(s.selected) !== null
+          || (s.selected >= 0 && !d.chapters.some((c) => c.unitId === s.selected));
+        if (stale) s.select(d.todayUnitId ?? d.chapters[0]?.unitId ?? null);
+      } else if (s.selected === null && firstPart !== undefined) {
+        // 기능 챕터가 없는 리포에서는 부가 코스의 전부다 — 첫 부를 편다.
+        s.select(partId(firstPart.part));
       }
     }).catch((e: unknown) => report(e, '코스 읽기'));
     return () => { alive = false; };
@@ -133,10 +148,14 @@ export function CourseScreen(props: CourseScreenProps): React.JSX.Element {
     void loadLangCourse(repoId, dict).then((l) => {
       if (!alive) return;
       setLang(l);
-      // 기능 챕터가 없는 리포에서는 부가 코스의 전부다 — 첫 부를 편다.
+      langRef.current = l;
+      // 기능 챕터가 없는 리포에서만 첫 부를 편다 — 챕터 읽기가 아직이면 그쪽이 정한다.
       const s = useCourse.getState();
       const first = l.parts.find((p) => p.plates.length > 0);
-      if (s.selected === null && first !== undefined) s.select(partId(first.part));
+      const d = dataRef.current;
+      if (d !== null && d.chapters.length === 0 && s.selected === null && first !== undefined) {
+        s.select(partId(first.part));
+      }
     }).catch((e: unknown) => report(e, '언어 코스 읽기'));
     return () => { alive = false; };
   }, [repoId, dict, version, langVersion, inSession]);

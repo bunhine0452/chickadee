@@ -3,5 +3,5 @@
 ((switch_statement
    "switch" @pick.1 @hole
    expr: (_) @pick.2
-   (switch_entry) @pick.3) @site
+   . (switch_entry) @pick.3) @site
  (#set! form "switch"))

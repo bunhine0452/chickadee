@@ -14,8 +14,10 @@
  (#set! form "stream-and"))
 
 ; 단락 평가 — `&&` 가 `||` 보다 세다.
+; `&&` 가 `||` 보다 먼저 묶인다 — 둘이 섞인 식만 우선순위 문항이다. 안쪽의 `a && b` 를 따로 잡으면
+; 같은 줄이 두 자리가 된다(2026-09-06 골든).
 ((binary_expression
-   left: (_) @pick.2
-   operator: ["&&" "||"] @pick.1 @hole
+   left: (binary_expression operator: "&&") @pick.2
+   operator: "||" @pick.1 @hole
    right: (_) @pick.3) @site
  (#set! form "shortcircuit"))

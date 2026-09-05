@@ -92,7 +92,7 @@ blank:
       ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
       en: "Your choice is written into the code at once. Submit to have it marked."
     options:
-      - { t: "$\"", mono: true }
+      - { t: "$", mono: true }
       - t: "@\""
         mono: true
         diag:
@@ -156,8 +156,8 @@ queries:
   - { grammars: [c_sharp], file: ./interpolated-string.scm }
 examples:
   - code: "class A { void F(int n) { var s = $\"n={n}\"; } }"
-    expect: { sites: 1, form: interp, picks: { 1: "$\"", 2: "n=", 3: "{n}" } }
+    expect: { sites: 1, form: interp, picks: { 1: "$", 2: "n=", 3: "{n}" } }
   - code: "class A { void F(int a) { var t = $\"total {a} done\"; } }"
-    expect: { sites: 1, form: interp, picks: { 1: "$\"", 2: "total ", 3: "{a}" } }
+    expect: { sites: 1, form: interp, picks: { 1: "$", 2: "total ", 3: "{a}" } }
   - code: "var u = \"plain\";"
     expect: none

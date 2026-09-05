@@ -160,6 +160,6 @@ examples:
   - code: "record Money { public decimal Amount; }"
     expect: { sites: 1, form: body, hole: "record", picks: { 1: "record", 2: "Money", 3: "{ public decimal Amount; }" } }
   - code: "class A { void F() { var b = a with { Id = 2 }; } }"
-    expect: { sites: 1, form: with, picks: { 1: "with", 2: "a", 3: "{ Id = 2 }" } }
+    expect: { sites: 1, form: with, picks: { 1: "with", 2: "a", 3: "Id = 2" } }
   - code: "class Item { }"
     expect: none

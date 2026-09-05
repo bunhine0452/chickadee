@@ -29,16 +29,16 @@ owner: claude-code
 - [x] swift — 0부 + 1·2부 전량 신규, 파서 ERROR 비율 실측, parts/swift.ts {#l-swift}
 
 ## A · 앱 — 언어 선택과 부 목차 {#a-app}
-- [ ] 설정 키 courseLang (null = 리포 주 언어) — store-sql 스키마·기본값·화면 저장 {#a-setting}
-- [ ] 코스 화면 머리의 언어 선택지 열 — 사전 장수·파서 여부·내 리포 파일 수를 함께 보인다 {#a-picker}
-- [ ] 고른 언어의 부 목차(0·1·2·3부 + 연습 층)가 기능 챕터 앞에 서고, 판 한 장을 열면 기존 T0 세션으로 간다 {#a-outline}
-- [ ] AbsenceReason 에 no-files — 고른 언어의 파일이 어느 리포에도 없을 때의 사유가 화면에 실린다 {#a-nofiles}
-- [ ] 컴포넌트 시험 + 정직성 게이트(no-files 문구) + i18n ko/en {#a-tests}
+- [x] 설정 키 courseLang (null = 리포 주 언어) — store-sql 스키마·기본값·화면 저장 {#a-setting}
+- [x] 코스 화면 머리의 언어 선택지 열 — 사전 장수·파서 여부·내 리포 파일 수를 함께 보인다 {#a-picker}
+- [x] 고른 언어의 부 목차(0·1·2·3부 + 연습 층)가 기능 챕터 앞에 서고, 판 한 장을 열면 기존 T0 세션으로 간다 {#a-outline}
+- [x] AbsenceReason 에 no-files — 고른 언어의 파일이 어느 리포에도 없을 때의 사유가 화면에 실린다 {#a-nofiles}
+- [x] 컴포넌트 시험 + 정직성 게이트(no-files 문구) + i18n ko/en {#a-tests}
 
 ## M · 합류 {#m-merge}
 - [x] 워크트리 브랜치 열을 순서대로 병합, 충돌은 공유 파일에서만 {#m-branches}
 - [x] 세션 보고의 ABSENCE 초안을 t0-synthetic.ts 표에 넣고 사유 시험 {#m-absence}
-- [ ] docs/curriculum/README.md §4 상태표·§5 실측 갱신, 세션이 낸 등록부 초안에 번호 {#m-docs}
+- [x] docs/curriculum/README.md §4 상태표·§5 실측 갱신, 세션이 낸 등록부 초안에 번호 {#m-docs}
 - [ ] typecheck · lint · test:unit · dict:lint · cargo test · gates → 커밋 → 푸시 → CI 초록 {#m-verify}
 - [ ] 최종 보고 — 언어별 장수·골든·사용처 실측, 못 한 것 {#m-report}
 
@@ -71,4 +71,10 @@ owner: claude-code
 | 2026-09-06T05:02:39+09:00 | #l-swift | claude-code | ~→x |  | 37장(0부 8·1부 4·2부 25) · 골든 89/37 · IceCubesApp ERROR 1.6% · ABSENCE 1 · 병합 351d165 · 래칫 406/385/406/396(최종) |
 | 2026-09-06T05:04:56+09:00 | #m-branches | claude-code | ☐→x |  | 열 브랜치 순서대로 병합(java·ts·py·sql·go·c·csharp·rs·cpp·swift), 충돌 0. 언어 사전 421장 89,153줄 |
 | 2026-09-06T05:05:51+09:00 | #m-absence | claude-code | ☐→x |  | ABSENCE 16 → 27행(sql 6 · java·csharp·cpp·rs·swift 각 1), 사유 시험 초록 |
+| 2026-09-06T05:06:48+09:00 | #m-docs | claude-code | ☐→x |  | D191(열 세션의 결정 여덟) · README §4 상태 열 갱신 · §5 「열 언어가 실물을 냈다」 표 · course.md §3.4 |
+| 2026-09-06T05:07:04+09:00 | #a-setting | claude-code | ☐→x |  | Settings.courseLang(null = 리포 주 언어) — store-sql 스키마·SETTINGS_KEYS·DEFAULTS·KEY_OF, rows.test 왕복 (커밋 cb6333b) |
+| 2026-09-06T05:07:12+09:00 | #a-picker | claude-code | ☐→x |  | LangCourse.tsx — 열 언어 선택지(개념 수 · 내 파일 수 · 저작 전), 리포 주 언어 자동, 파일 없음/저작 전 문구 (커밋 cb6333b) |
+| 2026-09-06T05:07:21+09:00 | #a-outline | claude-code | ☐→x |  | 부 넷이 기능 챕터 앞에 서고 LangPartPanel 이 판마다 출처(내 코드·예고·사유)를 적음, 「이 판 풀기」→ pickCoursePlateNow → 세션 (커밋 cb6333b) |
+| 2026-09-06T05:07:30+09:00 | #a-nofiles | claude-code | ☐→x |  | AbsenceReason 'no-files' — 카드 payload 에 실리고 T0Plate 가 payload 를 먼저 읽음, t0.absentNoFiles ko/en, 정직성 게이트가 다섯을 셈 (커밋 cb6333b) |
+| 2026-09-06T05:07:39+09:00 | #a-tests | claude-code | ☐→x |  | lang-data.test(순수 부·언어 세기) · LangCourse.test(선택지·부 줄·패널·출처) · honesty 게이트 다섯 사유 · i18n ko/en 46키 (커밋 cb6333b · cadc268) |
 <!-- oculpm:plan-log end -->

@@ -15,6 +15,6 @@
 ((field_declaration
    name: (field_identifier) @pick.1 @hole
    type: (_) @pick.2
-   tag: (interpreted_string_literal) @pick.3) @site
+   tag: [(raw_string_literal) (interpreted_string_literal)] @pick.3) @site
  (#match? @pick.1 "^[A-Z]")
  (#set! form "tagged"))

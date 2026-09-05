@@ -21,8 +21,10 @@
    right: (_) @pick.3) @site
  (#set! form "floatop"))
 
+; 왼쪽이 실수가 아닐 때만 — 둘 다 실수인 `0.1 + 0.2` 를 두 자리로 세지 않는다(2026-09-06 골든).
 ((binary_expression
-   left: (_) @pick.2
+   left: [(identifier) (selector_expression) (call_expression) (index_expression)
+          (int_literal) (parenthesized_expression) (unary_expression) (binary_expression)] @pick.2
    operator: ["+" "-" "*" "/"] @pick.1
    right: (float_literal) @pick.3) @site
  (#set! form "floatop"))
