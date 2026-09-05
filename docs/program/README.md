@@ -17,6 +17,7 @@
 | [`mastery.md`](./mastery.md) | 진도와 평가 — 잉크 겹·FSRS 를 어디로 내리나 |
 | [`chapter-login.md`](./chapter-login.md) | 첫 챕터 실물 — 로그인을 5단 끝까지 |
 | [`fundamentals.md`](./fundamentals.md) | **기초 문항의 형식** — 4지선다를 버리고 값을 적게 한다(`value`·`step`·`table`·`build`). 열 언어 공통 |
+| [`pedagogy.md`](./pedagogy.md) | **근거** — 프로그래밍 교육 연구에서 재현된 것 20개와 다섯 단·형식 넷의 대조. 언어별 문서가 「이 언어 특유」를 주장할 때의 시험 셋 |
 
 ---
 
