@@ -19,7 +19,7 @@ export type {
 } from './clone-order.js';
 export { courseStage, keepCardStage, BLANK_FROM_LAYER, COURSE_STAGE } from './clone-fading.js';
 export { assignUnits, entryUnits, planUnits, MIN_FILES_FOR_UNIT, OTHER_UNIT } from './units.js';
-export type { FeatureUnit, UnitPlan } from './units.js';
+export type { EntrySeed, FeatureUnit, UnitPlan } from './units.js';
 export type { Assignment, UnitOf } from './units.js';
 export {
   chooseFirst, distinctShapes, innermostBlock, knownSet, lineIndex, unknownCount,
@@ -64,6 +64,22 @@ export type { IngestOptions, IngestReport, Phase } from './ingest.js';
 export { buildCourse } from './course.js';
 export type { Chapter, CourseOptions } from './course.js';
 
-/** 요청 한 줄기 — 2단 추적의 재료 (D162). */
-export { featurePath, requestPaths } from './path.js';
-export type { Hop } from './path.js';
+/** 요청 한 줄기 — 2단 추적의 재료 (D162). 메서드 단위 줄기와 등뼈는 D168. */
+export { featurePath, methodPaths, requestPaths, trunk } from './path.js';
+export type { Hop, MethodHop } from './path.js';
+
+/** 블록 단위 호출 그래프 · 스키마 (D168 · D169) — 코스 굽기(D172)가 순수 파이프라인으로 쓴다. */
+export { buildCallGraph, MODULE_BLOCK } from './calls.js';
+export type { BlockRef, CallEdge, CallGraph, CallGraphInput, CallKind, EntryPoint, FileBlocks } from './calls.js';
+export { extractSchema } from './schema.js';
+export type { ColumnBinding, Schema, SchemaColumn, SchemaFk, SchemaTable } from './schema.js';
+
+/** 챕터 진도 — 단 판정·막힘 처방·원장 (D165). */
+export {
+  DUNNO_FOLD_LIMIT, FOLD_HOPS, PREDICT_PASS, advance, deferChapter, foldPath, fromChapterRow,
+  passTarget, readingTally, recordStageResult, stagePasses, stuckAction,
+} from './progress.js';
+export type {
+  Advance, AdvanceInput, ChapterProgress, ChapterSchedule, ChapterStage, RecheckGrade, RecordInput,
+  StageKind, StageResult, StuckAction,
+} from './progress.js';

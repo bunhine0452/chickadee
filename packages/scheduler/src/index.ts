@@ -22,3 +22,9 @@ export {
   UNREPLAYABLE, applyLog, diffMastery, rebuildMastery, sampleConcepts,
 } from './rebuild.js';
 export type { MasteryDiff, ReplayLog, Seed } from './rebuild.js';
+export {
+  EST_RECHECK_MIN, RECHECK_ASKED, recheckGrade, recheckTally, scheduleRecheck,
+} from './chapter-review.js';
+export type { RecheckAnswers } from './chapter-review.js';
+export { coursePlannedMin, planCourseDay, rechecksOnly } from './course-plan.js';
+export type { CourseItem, CoursePlanInput, RecheckItem, StageItem } from './course-plan.js';

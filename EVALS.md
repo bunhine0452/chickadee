@@ -175,6 +175,70 @@ FROM review_log WHERE elapsed_days > 0;
 
 ③ 통과선: `ge1 ≥ 10` 이고 `mx ≥ 3`. ④ **2026-09-04: mn 0.00 · avg 0.02 · mx 0.08 · ge1 0 · ge3 0 — 실패.**
 
+### C1 — 첫 챕터 통과까지 며칠 (D165)
+
+① 코스를 시작해 첫 기능 하나를 5단 사다리로 끝내는 데 걸린 날. 길면 챕터가 너무 크고, 0이면 통과선이 헐겁다. ② SQL:
+
+```sql
+SELECT ROUND((MIN(c.passed_at) - (SELECT MIN(started_at) FROM session))/86400000.0, 1) AS days
+FROM chapter c WHERE c.passed_at IS NOT NULL;
+```
+
+③ 통과선: `days ≤ 10`. ④ **미측정 — 통과한 챕터가 아직 없다.**
+
+### C2 — 단 커버리지
+
+① `stage_log` 에 1·2·3·4단이 각각 있나. 하나라도 0이면 그 단의 문항을 아직 못 굽는 것이고, 4단이 0인 챕터는 3단까지가 통과다(D165). ② SQL:
+
+```sql
+SELECT stage, COUNT(*) AS n, SUM(passed) AS passed FROM stage_log GROUP BY stage ORDER BY stage;
+```
+
+③ 통과선: 1·2·3단이 각각 `n ≥ 1`. ④ **미측정 — `stage_log` 0건.**
+
+### C3 — 2단 추적 첫 시도 정답률
+
+① 경로를 처음 물었을 때 맞히는 비율. 상한 0.70 이 D138 의 경계를 잇는다 — 너무 쉬우면 추적이 아니라 읽기 확인이다. 하한 0.30 은 경로가 너무 길다는 신호다. ② SQL:
+
+```sql
+SELECT COUNT(*) AS n, SUM(s.passed) AS passed,
+       ROUND(1.0*SUM(s.passed)/NULLIF(COUNT(*),0), 3) AS rate
+FROM stage_log s
+WHERE s.stage = 2 AND s.kind = 'first'
+  AND s.id = (SELECT MIN(x.id) FROM stage_log x
+              WHERE x.unit_id = s.unit_id AND x.stage = 2 AND x.kind = 'first');
+```
+
+③ 통과선: `n ≥ 8` 이고 `rate` 가 0.30~0.70. ④ **미측정.**
+
+### C4 — 되돌린 챕터가 다시 오르나
+
+① 재검 Again 으로 `stage_reached` 를 내린 챕터가 그다음 판정에서 다시 통과하는 비율. 되돌림이 벌이 아니라 순서 재조정이라는 것을 이 수가 판정한다. ② SQL:
+
+```sql
+SELECT COUNT(*) AS n, SUM(nxt.passed) AS passed,
+       ROUND(1.0*SUM(nxt.passed)/NULLIF(COUNT(*),0), 3) AS rate
+FROM stage_log s
+JOIN stage_log nxt ON nxt.unit_id = s.unit_id AND nxt.id = (
+  SELECT MIN(x.id) FROM stage_log x WHERE x.unit_id = s.unit_id AND x.id > s.id)
+WHERE s.kind = 'recheck' AND s.grade = 1;
+```
+
+③ 통과선: `rate ≥ 0.6`, `n ≥ 10`. ④ **미측정.**
+
+### C5 — 재검 유지율 (이 코스의 결론을 판정한다)
+
+① 3일·9일·3주 뒤에도 추적하고 예측하는 비율. 0.7 을 못 넘으면 챕터 통과가 그날의 성능만 잡은 것이고, 그때 고칠 것은 통과선이 아니라 재검 간격이다. `elapsed_days ≥ 1` 은 `chapter.due` 가 「같은 날 재검은 안 낸다」로 이미 지킨다. ② SQL:
+
+```sql
+SELECT COUNT(*) AS n, SUM(passed) AS passed,
+       ROUND(1.0*SUM(passed)/NULLIF(COUNT(*),0), 3) AS rate,
+       ROUND(AVG(elapsed_days), 2) AS avg_days
+FROM stage_log WHERE kind = 'recheck';
+```
+
+③ 통과선: `rate ≥ 0.7`, `n ≥ 20`. ④ **미측정.**
+
 ---
 
 ## 스위트 `human` — 사람이 봐야만 하는 것 (N/M 분모 제외)
