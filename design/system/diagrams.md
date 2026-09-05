@@ -75,7 +75,7 @@ C 2부 아홉 개념 중 여섯이 메모리 줄을 쓰고, C++ 2부 열둘 중 
 
 | 순 | 그림 | 무엇 | 언어 | 모델 스케치 |
 |---|---|---|---|---|
-| **1** | **메모리 줄** | 주소·연속·포인터. 배열이 왜 0부터인가 | C·C++·Rust·Go | `{ base: string; stride: number; slots: {addr, value, name?}[] }` — 값 상자의 한 줄 배치판이고, `ValueCell` 에 `addr` 을 더하면 그대로 선다 |
+| **1** | **메모리 줄** | 주소·연속·포인터. 배열이 왜 0부터인가 | C·C++·Rust·Go·**Java·C#**(java-learning.md·csharp-learning.md 가 「스택의 이름 → 힙의 상자」에 여섯 판을 걸었다) | `{ base: string; stride: number; slots: {addr, value, name?}[] }` — 값 상자의 한 줄 배치판이고, `ValueCell` 에 `addr` 을 더하면 그대로 선다 |
 | **2** | **겹친 비트 배열** | **`300u32 as u8` 이 왜 44 인가.** 두 폭을 위아래로 겹쳐 **잘리는 자리**를 보인다 | C·C++·Rust·Go | `{ from: BitsModel; to: BitsModel; keep: number }` — `to.width` 개의 하위 비트만 살아남고 나머지는 잘린 표시. 아래 상자 참조 |
 | **3** | **스택 프레임** | 호출이 쌓이고 걷힌다 | 전부 | `{ frames: { fn: string; args: ValueCell[]; locals: ValueCell[] }[] }` — 단계마다 프레임 배열의 스냅숏. `ValueStep` 의 중첩판 |
 | 4 | **타입 변환 사다리** | `int` → `double` 은 되고 반대는 잘린다 | 전부 | `{ rungs: { type: NumType; value: string }[]; edges: { from: number; to: number; kind: 'widen' \| 'narrow' \| 'fallible' }[] }` |
