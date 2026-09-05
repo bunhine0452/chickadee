@@ -1,0 +1,195 @@
+schema: 1
+id: swift/throws-try
+universal: common/try-catch
+name: { ko: 터질 수 있다고 표시하기, en: throws and try }
+token: "try"
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 3
+prereq: [swift/function-declaration, swift/optional-type, cs/error-vs-bug]
+confusions: []
+dict:
+  one_liner:
+    ko: "터질 수 있는 함수는 머리에 표시하고, 부르는 줄마다 표시를 하나 더 적는다."
+    en: "A function that can fail says so in its head, and every call repeats the marker."
+  why:
+    ko: >-
+      오류를 낼 수 있는 함수는 <b>머리에 그렇게 적습니다.</b> 그리고 그 함수를 부르는
+      <b>줄마다</b> 표시를 하나 더 적어야 해요. 그래서 어디서 터질 수 있는지가 코드에 남습니다 —
+      다른 언어에서는 그 사실이 문서에만 있거나 아무 데도 없죠.
+      표시를 적었다고 오류를 <b>처리한 것은 아닙니다.</b> 「여기서 터질 수 있다」는 말일 뿐이고,
+      받는 것은 받는 블록이 하거나, 오류를 「없음」으로 바꾸거나, 안 터진다고 보증하는 것입니다.
+      마지막 것은 틀리면 앱이 끝나요.
+      표본에서 785곳/143파일입니다.
+    en: >-
+      A function that can raise an error <b>says so in its head</b>, and <b>every line</b> that
+      calls it repeats a marker. So where failure can happen stays visible in the code — elsewhere
+      that fact lives in documentation, or nowhere.
+      Writing the marker is <b>not handling the error.</b> It only says "this can fail here";
+      receiving it is the job of a receiving block, or of turning the error into absence, or of
+      promising it cannot fail. The last one ends the app when the promise does not hold.
+      The sample has 785 of these across 143 files.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 여기서 터질 수 있다고 알린다."
+      en: "{{pick.1|code}} on line {{site.line}} says failure can happen here."
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 터지면 그 아래 줄은 안 돈다."
+      en: "If {{pick.2|code}} fails, the lines below do not run."
+    - ko: "오류는 받는 블록이나 부르는 쪽으로 간다."
+      en: "The error goes to a receiving block, or on to the caller."
+rule:
+  ko: "<b>표시는 처리한 것이 아니다.</b> 어디서 터질 수 있는지를 줄에 남기는 것뿐이다."
+  en: "<b>The marker is not handling.</b> It only records where failure can happen."
+result:
+  label: { ko: "{{site.line}}행의 호출", en: "the call on line {{site.line}}" }
+  value: "{{pick.1}} {{pick.2}}"
+  note: { ko: "터지면 아래로 안 간다", en: "on failure the lines below do not run" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 터질 수 있다는 것이 이 줄에 적혔습니다."
+  en: "That {{pick.2|code}} can fail is recorded on this line."
+payoff:
+  ko: "이걸 알면 「이 함수가 어디서 실패하지」가 풀립니다 — 표시가 붙은 줄입니다."
+  en: "This untangles “where can this function fail” — the lines carrying the marker."
+bridge:
+  ko: >-
+    자바는 함수 머리에만 적고 부르는 줄에는 안 적습니다. Go 는 <b>돌려주는 값</b>으로 오류를
+    넘겨요. Swift 는 줄마다 표시가 남습니다.
+  en: >-
+    Java marks the head only, never the call. Go passes errors <b>as a returned value</b>. Swift
+    leaves a marker on every line.
+misconceptions:
+  # swift.md §9 ⑩.
+  - ko: "표시를 적으면 오류를 처리한 것이다 — 「터질 수 있다」는 말일 뿐입니다."
+    en: "Writing the marker handles the error — it only says failure is possible."
+  - ko: "표시를 안 적어도 부를 수 있다 — 못 부릅니다. 빌드가 멈춥니다."
+    en: "It can be called without the marker — it cannot; the build stops."
+  - ko: "터지면 그 줄만 건너뛴다 — 그 아래가 통째로 안 돕니다."
+    en: "Failure skips just that line — everything below it is skipped."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>여기서 터질 수 있다는 표시</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the marker saying failure can happen here</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>부르는 대상</b>입니다. 터질 수 있다는 표시는 그 앞에 붙어요."
+          en: "{{pick.2|code}} is <b>what is called</b>. The marker sits in front of it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 대상이냐 표시냐", en: "The sharpest spot — the callee or the marker" }
+          code:
+            - "try load()      // 터질 수 있다"
+            - "load()          // 표시가 없으면 빌드가 멈춘다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 함수 <b>몸통</b>입니다. 터질 수 있다는 사실은 머리와 부르는 줄에 적혀요."
+          en: "{{pick.3|code}} is the function's <b>body</b>. The possibility of failure is recorded in the head and at the call."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 몸통이냐 표시냐", en: "The sharpest spot — the body or the marker" }
+          code:
+            - "func load() throws { }"
+            - "func load() { }        // 안 터진다"
+meaning:
+  - q:
+      ko: "표시를 적기만 하고 받는 블록을 안 쓰면 오류는 어디로 갈까요?"
+      en: "With the marker written but no receiving block, where does the error go?"
+    options:
+      - t:
+          ko: "부르는 쪽으로 넘어간다 — 그 함수도 터질 수 있다고 적혀 있어야 한다"
+          en: "On to the caller — which must itself be marked as able to fail"
+      - t:
+          ko: "그 자리에서 조용히 사라진다"
+          en: "It quietly disappears there"
+        diag:
+          t:
+            ko: "사라지지 않습니다. 아무도 안 받으면 위로 계속 올라가고, 위로 못 올라가는 함수라면 빌드가 멈춰요."
+            en: "Nothing disappears. Unreceived, it travels upward, and a function that cannot pass it up fails to build."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 받나 넘기나", en: "The sharpest spot — receive or pass up" }
+            code:
+              - "func f() throws { try load() }   // 넘긴다"
+              - "func f() { try load() }          // 빌드가 멈춘다"
+      - t:
+          ko: "앱이 끝난다"
+          en: "The app ends"
+        diag:
+          t:
+            ko: "끝나는 것은 <b>안 터진다고 보증</b>했을 때입니다. 그냥 표시만 적으면 넘어가요."
+            en: "Ending is what happens when failure is <b>promised away</b>. A plain marker passes it up."
+      - t:
+          ko: "없을 수 있는 값이 된다"
+          en: "It becomes a possibly-absent value"
+        diag:
+          t:
+            ko: "그건 오류를 「없음」으로 <b>바꾸는 표시</b>를 썼을 때입니다. 표시 모양이 달라요."
+            en: "That is the marker that <b>turns</b> an error into absence. It is written differently."
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>여기서 터질 수 있다</b>고 표시합니다."
+      en: "Choose what goes in the blank. Line {{site.line}} marks that <b>failure can happen here</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "try", mono: true }
+      - t: "throw"
+        mono: true
+        diag:
+          t:
+            ko: "이건 오류를 <b>내는</b> 낱말입니다. 부르는 자리가 아니라 오류를 만들어 던지는 자리에 서요."
+            en: "That word <b>raises</b> an error. It stands where an error is created, not at a call."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 부르나 던지나", en: "The sharpest spot — calling or raising" }
+            code:
+              - "try load()"
+              - "throw MyError.bad"
+      - t: "catch"
+        mono: true
+        diag:
+          t:
+            ko: "이건 오류를 <b>받는</b> 블록을 엽니다. 표시가 붙은 줄이 그 안에 들어가는 것이지 표시 자체는 아니에요."
+            en: "That opens the block that <b>receives</b> an error. Marked lines go inside it; it is not the marker."
+      - t: "await"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>기다리는</b> 표시입니다. 실패가 아니라 시간이 걸린다는 뜻이라 축이 달라요."
+            en: "That marks <b>waiting</b>. It is about time, not failure — a different axis."
+why_gate:
+  q:
+    ko: "Swift 는 왜 <b>부르는 줄마다</b> 표시를 적게 할까요?"
+    en: "Why does Swift ask for a marker <b>on every calling line</b>?"
+  choices:
+    - t:
+        ko: "함수 머리에만 적으면 어느 줄에서 흐름이 끊길 수 있는지가 안 보이고, 그 줄 아래가 안 돈다는 사실이 가려지기 때문"
+        en: "Because marking only the head hides which line can cut the flow, and that everything below it is skipped"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 대신 코드가 시끄러워지는 값을 무엇으로 치르는지도 적어 보세요."
+        en: "That is the direction. Say what the extra noise buys, too."
+    - t:
+        ko: "표시가 있으면 더 빨라서"
+        en: "Because the marker makes it faster"
+      ok: false
+      fb:
+        ko: "속도와 무관합니다. 읽는 사람이 흐름이 끊기는 줄을 보는 것이 이유예요."
+        en: "It has nothing to do with speed. Seeing which line can cut the flow is the reason."
+    - t:
+        ko: "컴파일러가 함수 머리를 못 읽어서"
+        en: "Because the compiler cannot read the head"
+      ok: false
+      fb:
+        ko: "읽습니다. 표시를 요구하는 것은 컴파일러가 아니라 <b>읽는 사람</b>을 위한 거예요."
+        en: "It reads it. The marker is required for the <b>reader</b>, not for the compiler."
+queries:
+  - { grammars: [swift], file: ./throws-try.scm }
+examples:
+  - code: "func f() throws { let d = try load() }"
+    expect: { sites: 2, form: throws, hole: "throws", picks: { 1: "throws", 2: "f", 3: "let d = try load()" } }
+  - code: "func g() { let d = try? load() }"
+    expect: { sites: 1, form: try, hole: "try?", picks: { 1: "try?", 2: "load()" } }
+  - code: "func h() { load() }"
+    expect: none

@@ -1,0 +1,196 @@
+schema: 1
+id: swift/capture-list
+universal: null
+name: { ko: 클로저가 붙잡는 것 정하기, en: Capture list }
+token: "[weak]"
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 4
+prereq: [swift/arc-weak, cs/closure-capture]
+confusions: []
+dict:
+  one_liner:
+    ko: "중괄호 안이 나중에 도니 바깥 이름을 붙잡아 두는데, 대괄호가 그 방식을 정한다."
+    en: "Braces that run later hold on to outer names, and the brackets settle how."
+  why:
+    ko: >-
+      괄호 밖 중괄호 안의 코드는 <b>나중에</b> 돕니다. 그때도 바깥 이름을 써야 하니
+      <b>붙잡아 둡니다</b> — 그리고 붙잡힌 것은 안 지워집니다.
+      붙잡힌 것이 <b>자기 자신</b>이면 고리가 생깁니다: 화면이 클로저를 들고, 클로저가 화면을
+      붙잡아, 화면을 닫아도 안 지워져요. 중괄호 바로 앞 대괄호가 그 고리를 끊는 자리입니다 —
+      「이것은 세지 말고 붙잡아라」라고 적습니다.
+      세지 않기로 하면 그 이름은 <b>없을 수 있는 값</b>이 되고, 그래서 안쪽에서 물음표를 달고
+      쓰게 됩니다. 표본 428파일에서 10곳/5파일인데, 같은 리포에 저장된 세지 않는 이름은
+      <b>0곳</b>이에요 — 이 언어에서 고리는 저장 자리가 아니라 클로저에서 납니다.
+    en: >-
+      Code inside trailing braces runs <b>later</b>. It still needs the outer names then, so it
+      <b>holds on</b> to them — and what is held is not erased.
+      When what is held is <b>the owner itself</b>, a loop forms: the screen holds the closure and
+      the closure holds the screen, so closing the screen erases nothing. The brackets just before
+      the braces are where that loop is cut: "hold this one without counting".
+      Uncounted, the name becomes <b>possibly absent</b>, which is why it is used with a question
+      mark inside. The sample has 10 of these across 5 files, while stored uncounted names number
+      <b>zero</b> — in this language the loops come from closures, not from stored fields.
+  trace:
+    - ko: "{{site.line}}행의 중괄호는 나중에 돈다."
+      en: "The braces on line {{site.line}} run later."
+    - ko: "{{pick.2|code}}{{pick.2|josa:을,를}} 붙잡아 두어야 그때도 쓸 수 있다."
+      en: "{{pick.2|code}} is held so that it is still usable then."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 그 붙잡음을 세지 말라고 적는다."
+      en: "{{pick.1|code}} says to hold it without counting."
+rule:
+  ko: "<b>붙잡힌 것은 안 지워진다.</b> 대괄호가 그 붙잡음을 세지 않게 바꾼다."
+  en: "<b>What is held is not erased.</b> The brackets turn that holding uncounted."
+result:
+  label: { ko: "{{site.line}}행의 붙잡음", en: "the capture on line {{site.line}}" }
+  value: "[{{pick.1}} {{pick.2}}]"
+  note: { ko: "세지 않으므로 비워질 수 있다", en: "uncounted, so it can empty" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:을,를}} 세지 않고 붙잡았습니다."
+  en: "{{pick.2|code}} was held without counting."
+payoff:
+  ko: "이걸 알면 「화면을 닫았는데 왜 살아 있지」가 풀립니다 — 클로저가 붙잡고 있는 겁니다."
+  en: "This untangles “I closed the screen and it is still alive” — a closure is holding it."
+bridge:
+  ko: >-
+    JS 의 클로저도 바깥 이름을 붙잡지만 <b>고를 자리가 없습니다</b>. Swift 는 대괄호에서
+    붙잡는 방식을 고르게 해요.
+  en: >-
+    JS closures hold outer names too but offer <b>no place to choose how</b>. Swift puts that
+    choice in the brackets.
+misconceptions:
+  - ko: "중괄호 안은 지금 돈다 — 나중에 돕니다. 그래서 붙잡아 두는 것이고요."
+    en: "The braces run now — they run later, which is why anything is held at all."
+  - ko: "붙잡은 값의 복사본이 들어간다 — 상자 쪽은 같은 상자를 붙잡습니다."
+    en: "A copy is captured — on the box side the same box is held."
+  - ko: "세지 않기로 해도 값은 늘 있다 — 사라지면 비워지므로 없을 수 있는 값입니다."
+    en: "Uncounted still means always present — it empties when the target goes."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>붙잡는 방식을 정하는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that settles how it is held</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>붙잡히는 것</b>입니다. 어떻게 붙잡을지는 그 앞 낱말이 정해요."
+          en: "{{pick.2|code}} is <b>what is held</b>. How it is held is settled by the word in front."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 대상이냐 방식이냐", en: "The sharpest spot — the target or the manner" }
+          code:
+            - "{ [weak self] in self?.go() }"
+            - "{ self.go() }               // 세면서 붙잡는다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 나중에 도는 <b>몸통</b>입니다. 붙잡는 방식은 몸통 앞 대괄호가 정해요."
+          en: "{{pick.3|code}} is the <b>body</b> that runs later. The manner is settled in the brackets before it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 몸통이냐 대괄호냐", en: "The sharpest spot — the body or the brackets" }
+          code:
+            - "{ [weak self] in self?.go() }"
+            - "{ [unowned self] in self.go() }"
+meaning:
+  - q:
+      ko: "클로저가 자기를 들고 있는 것을 그대로 붙잡으면 어떻게 될까요?"
+      en: "What happens when a closure holds the very thing that holds it?"
+    options:
+      - t:
+          ko: "서로 붙잡는 고리가 되어 둘 다 안 지워진다"
+          en: "A loop forms and neither is erased"
+      - t:
+          ko: "나중에 알아서 풀린다"
+          en: "It resolves itself later"
+        diag:
+          t:
+            ko: "풀어 주는 절차가 없습니다. 세는 방식만 있어서 <b>사람이 대괄호에서 끊어야</b> 해요."
+            en: "Nothing resolves it. There is only counting, so <b>a person cuts it in the brackets</b>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 끊나 안 끊나", en: "The sharpest spot — cut or not" }
+            code:
+              - "{ self.go() }              // 고리가 생긴다"
+              - "{ [weak self] in self?.go() }"
+      - t:
+          ko: "클로저가 복사본을 붙잡아 문제가 없다"
+          en: "The closure holds a copy, so there is no problem"
+        diag:
+          t:
+            ko: "상자 쪽은 복사되지 않습니다. 같은 상자를 붙잡으므로 고리가 그대로 생겨요."
+            en: "The box side is not copied. The same box is held, so the loop forms."
+      - t:
+          ko: "빌드가 멈춘다"
+          en: "The build stops"
+        diag:
+          t:
+            ko: "멈추지 않습니다 — 올바른 코드예요. 지워지지 않는 것이 돌면서만 보이는 것이 이 자리의 위험입니다."
+            en: "It does not — the code is valid. That nothing is erased shows only at run time, which is the danger."
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 붙잡되 <b>세지 않고, 사라지면 비워집니다</b>."
+      en: "Choose what goes in the blank. Line {{site.line}} holds it <b>without counting, emptying when it goes</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "weak", mono: true }
+      - t: "unowned"
+        mono: true
+        diag:
+          t:
+            ko: "이것도 안 세지만 <b>비워 주지 않습니다</b>. 사라진 뒤에 읽으면 앱이 끝나요 — 대신 안쪽에서 물음표 없이 씁니다."
+            en: "That one also skips counting but <b>does not empty</b>. Read after the target goes, the app ends — in exchange no question mark is needed."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 비우나 안 비우나", en: "The sharpest spot — emptied or not" }
+            code:
+              - "{ [weak self] in self?.go() }"
+              - "{ [unowned self] in self.go() }"
+      - t: "var"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>이름을 만드는</b> 낱말입니다. 대괄호 안은 이미 있는 이름을 붙잡는 자리라 방식만 적어요."
+            en: "That word <b>makes a name</b>. The brackets capture an existing one, so only the manner goes there."
+      - t: "let"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>안 바뀌는 이름</b>을 만드는 낱말입니다. 붙잡는 방식과는 다른 축이에요."
+            en: "That word makes a <b>fixed name</b> — a different axis from how something is held."
+why_gate:
+  q:
+    ko: "붙잡는 방식을 왜 <b>중괄호 앞 대괄호</b>에서 정할까요?"
+    en: "Why is the manner of holding settled <b>in brackets before the braces</b>?"
+  choices:
+    - t:
+        ko: "붙잡는 일이 클로저가 만들어지는 순간에 일어나므로, 그 순간을 적는 자리가 몸통 앞이어야 하기 때문"
+        en: "Because the holding happens when the closure is made, so it has to be written before the body"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 몸통 안에서 정하면 무엇이 안 되는지도 적어 보세요."
+        en: "That is the direction. Say what would not work if it were settled inside the body."
+    - t:
+        ko: "대괄호가 눈에 잘 띄어서"
+        en: "Because brackets stand out"
+      ok: false
+      fb:
+        ko: "보기 문제가 아닙니다. 붙잡는 순간이 몸통보다 먼저라는 것이 이유예요."
+        en: "Visibility is not it. The holding happens before the body does."
+    - t:
+        ko: "몸통 안에는 낱말을 못 적어서"
+        en: "Because words cannot be written inside the body"
+      ok: false
+      fb:
+        ko: "적을 수 있습니다. 다만 그때는 이미 붙잡은 뒤라 늦어요."
+        en: "They can. By then the holding has already happened, so it is too late."
+queries:
+  - { grammars: [swift], file: ./capture-list.scm }
+examples:
+  - code: "let c = { [weak self] in self?.go() }"
+    expect: { sites: 1, form: capture, hole: "weak", picks: { 1: "weak", 2: "self", 3: "self?.go()" } }
+  - code: "let d = { [unowned self] in self.go() }"
+    expect: { sites: 1, form: capture, hole: "unowned", picks: { 1: "unowned", 2: "self", 3: "self.go()" } }
+  - code: "let e = { self.go() }"
+    expect: none

@@ -1,0 +1,197 @@
+schema: 1
+id: swift/async-await
+universal: common/async-await
+name: { ko: 기다렸다 값 꺼내기, en: async and await }
+token: "await"
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 3
+prereq: [swift/closure-trailing, swift/throws-try, cs/blocking-and-async]
+confusions: []
+dict:
+  one_liner:
+    ko: "기다리는 자리를 줄에 표시하고, 한 번 쓰면 부르는 쪽까지 그 표시가 번진다."
+    en: "It marks where a value is waited for, and one use spreads to every caller."
+  why:
+    ko: >-
+      시간이 걸리는 일을 부를 때, 그 자리에 <b>기다린다</b>는 표시를 적습니다. 표시가 붙은 줄에서
+      흐름이 <b>멈춰 서고 자리를 내줍니다</b> — 다른 일이 그동안 돌 수 있어요. 다른 스레드로
+      옮기는 표시가 아닙니다.
+      그리고 이 표시는 아무 데나 못 적습니다 — 함수 머리에 <b>시간이 걸린다</b>고 적힌 안에서만
+      쓸 수 있어요. 그래서 한 곳에 쓰면 그 함수의 머리가 바뀌고, 그 함수를 부르는 쪽도 표시를
+      적어야 하고… <b>부르는 사슬을 따라 위로 번집니다.</b> 「왜 갑자기 여기까지 고쳐야 하지」가
+      여기서 나옵니다.
+      표본 428파일에서 1,138곳/148파일입니다.
+    en: >-
+      Calling something that takes time means writing a <b>wait</b> marker at that place. On a
+      marked line the flow <b>stops and yields</b> — other work can run meanwhile. It is not a
+      marker that moves anything to another thread.
+      The marker cannot go just anywhere: it is only legal inside a function whose head says it
+      <b>takes time</b>. So one use changes that function's head, and its callers must mark their
+      calls, and so on — <b>it spreads up the call chain.</b> That is where "why am I suddenly
+      editing all the way up here" comes from.
+      The sample has 1,138 of these across 148 files.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}}{{pick.2|josa:을,를}} 부른다."
+      en: "Line {{site.line}} calls {{pick.2|code}}."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 그 자리에서 흐름을 멈춰 세운다."
+      en: "{{pick.1|code}} makes the flow stop there."
+    - ko: "값이 오면 그 줄부터 다시 이어진다."
+      en: "When the value arrives, the flow resumes from that line."
+rule:
+  ko: "<b>표시는 스레드를 옮기지 않는다.</b> 그 자리에서 멈추고 자리를 내주는 것이다."
+  en: "<b>The marker moves nothing to a thread.</b> It stops there and yields the seat."
+result:
+  label: { ko: "{{site.line}}행의 기다림", en: "the wait on line {{site.line}}" }
+  value: "{{pick.1}} {{pick.2}}"
+  note: { ko: "여기서 멈췄다 이어진다", en: "it stops here and resumes" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:을,를}} 기다린 뒤 다음 줄로 이어집니다."
+  en: "After waiting on {{pick.2|code}} the flow moves to the next line."
+payoff:
+  ko: "이걸 알면 「왜 부르는 쪽까지 고쳐야 하지」가 풀립니다 — 머리가 바뀐 겁니다."
+  en: "This untangles “why must the callers change too” — the head changed."
+bridge:
+  ko: >-
+    JS 도 같은 두 낱말을 씁니다. 다른 것은 Swift 가 <b>기다릴 수 있는 자리</b>를 문법으로
+    막아 둔다는 점이에요.
+  en: >-
+    JS uses the same two words. What differs is that Swift <b>restricts where waiting is legal</b>
+    in the grammar.
+misconceptions:
+  # swift.md §9 ⑪.
+  - ko: "이 표시를 쓰면 백그라운드로 넘어간다 — 그 자리에서 멈추고 자리를 내주는 것입니다."
+    en: "The marker moves work to the background — it stops there and yields the seat."
+  - ko: "아무 함수에서나 쓸 수 있다 — 머리에 표시가 있는 함수 안에서만 씁니다."
+    en: "It works in any function — only inside one whose head carries the marker."
+  - ko: "기다리는 동안 아무것도 못 돈다 — 자리를 내주므로 다른 일이 돕니다."
+    en: "Nothing runs while it waits — the seat is yielded, so other work runs."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>흐름이 멈춰 서는 표시</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the marker where the flow stops</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>기다리는 대상</b>입니다. 멈춰 서라는 표시는 그 앞에 붙어요."
+          en: "{{pick.2|code}} is <b>what is waited on</b>. The marker sits in front of it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 대상이냐 표시냐", en: "The sharpest spot — the callee or the marker" }
+          code:
+            - "await api.get()   // 멈춘다"
+            - "api.get()         // 표시가 없으면 빌드가 멈춘다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 함수 <b>몸통</b>입니다. 기다리는 자리는 몸통 안의 한 줄이에요."
+          en: "{{pick.3|code}} is the function's <b>body</b>. Waiting happens on one line inside it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 몸통이냐 한 줄이냐", en: "The sharpest spot — the body or one line" }
+          code:
+            - "func load() async { }"
+            - "func load() async { await api.get() }"
+meaning:
+  - q:
+      ko: "이 표시가 붙은 줄에서 흐름은 무엇을 할까요?"
+      en: "What does the flow do on a line carrying this marker?"
+    options:
+      - t:
+          ko: "그 자리에서 멈추고 자리를 내준다 — 다른 일이 그동안 돈다"
+          en: "It stops there and yields the seat, so other work runs"
+      - t:
+          ko: "다른 스레드로 옮겨 간다"
+          en: "It moves to another thread"
+        diag:
+          t:
+            ko: "옮기는 표시가 아닙니다. 어느 스레드에서 이어질지는 다른 규칙이 정하고, 이 표시는 <b>멈춤과 이어짐</b>만 말해요."
+            en: "It is not a moving marker. Which thread resumes it is settled elsewhere; this marker only says <b>stop and resume</b>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 옮김이냐 멈춤이냐", en: "The sharpest spot — moving or stopping" }
+            code:
+              - "await api.get()          // 멈췄다 이어진다"
+              - "Task.detached { … }      // 옮기는 것은 이쪽"
+      - t:
+          ko: "그 줄이 끝날 때까지 아무것도 못 돈다"
+          en: "Nothing at all runs until that line finishes"
+        diag:
+          t:
+            ko: "자리를 내주므로 다른 일이 돕니다. 아무것도 못 도는 것은 <b>안 내주고 붙잡는</b> 기다림이에요."
+            en: "The seat is yielded, so other work runs. Blocking everything is the <b>non-yielding</b> kind of wait."
+      - t:
+          ko: "값을 기다리지 않고 넘어간다"
+          en: "It moves on without waiting for the value"
+        diag:
+          t:
+            ko: "넘어가지 않습니다. 값이 와야 그 줄이 끝나고 다음 줄로 갑니다 — 안 기다리려면 다른 표기를 써야 해요."
+            en: "It does not. The line finishes only when the value arrives — not waiting needs a different notation."
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>값이 올 때까지 멈춰 섭니다</b>."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>stops until the value arrives</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "await", mono: true }
+      - t: "try"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>터질 수 있다</b>는 표시입니다. 시간이 아니라 실패를 말하는 것이라 축이 달라요 — 둘을 같이 적기도 합니다."
+            en: "That marks that it <b>can fail</b>. It speaks of failure, not time — a different axis, and the two often appear together."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 시간이냐 실패냐", en: "The sharpest spot — time or failure" }
+            code:
+              - "await api.get()"
+              - "try load()"
+      - t: "async"
+        mono: true
+        diag:
+          t:
+            ko: "이건 함수 <b>머리</b>에 적는 낱말입니다. 「시간이 걸린다」는 선언이라 부르는 줄에는 안 서요."
+            en: "That word goes in the function's <b>head</b>. It declares that the function takes time; it does not stand at a call."
+      - t: "defer"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>나갈 때 할 일</b>을 미뤄 두는 낱말입니다. 기다림과는 상관이 없어요."
+            en: "That word <b>postpones</b> work until the scope is left. It has nothing to do with waiting."
+why_gate:
+  q:
+    ko: "이 표시는 왜 <b>부르는 사슬을 따라 위로</b> 번질까요?"
+    en: "Why does this marker <b>spread up the call chain</b>?"
+  choices:
+    - t:
+        ko: "멈췄다 이어지려면 부르는 쪽도 그 사이에 자리를 내줄 수 있어야 하고, 그 사실이 머리에 적혀야 하기 때문"
+        en: "Because stopping and resuming needs the caller to be able to yield too, and that fact belongs in its head"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 번지는 것을 여기서 끊는 방법이 무엇인지도 적어 보세요."
+        en: "That is the direction. Say how the spread gets stopped, too."
+    - t:
+        ko: "표시가 있으면 컴파일러가 최적화를 더 해서"
+        en: "Because the marker lets the compiler optimise more"
+      ok: false
+      fb:
+        ko: "최적화 문제가 아닙니다. 부르는 쪽도 멈출 수 있어야 한다는 것이 이유예요."
+        en: "Optimisation is not it. The caller having to be able to stop is."
+    - t:
+        ko: "Swift 가 스레드를 직접 못 다뤄서"
+        en: "Because Swift cannot handle threads directly"
+      ok: false
+      fb:
+        ko: "다룰 수 있습니다. 번짐은 스레드가 아니라 <b>멈췄다 이어지는 성질</b>에서 나와요."
+        en: "It can. The spread comes from the stop-and-resume property, not from threads."
+queries:
+  - { grammars: [swift], file: ./async-await.scm }
+examples:
+  - code: "func load() async { let d = await api.get() }"
+    expect: { sites: 2, form: async, hole: "async", picks: { 1: "async", 2: "load", 3: "let d = await api.get()" } }
+  - code: "func f() { let d = await api.get() }"
+    expect: { sites: 1, form: await, hole: "await", picks: { 1: "await", 2: "api.get()" } }
+  - code: "func h() { let d = api.get() }"
+    expect: none

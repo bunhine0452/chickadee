@@ -1,0 +1,199 @@
+schema: 1
+id: swift/switch-exhaustive
+# `common/exhaustive-match` 는 아직 없다 — swift.md §6 이 신규 보편형으로 제안했고 규약 4 대로
+# 이 사전은 새 `common/` 을 만들지 않는다. `null` 로 두고 후보로 보고한다.
+universal: null
+name: { ko: 모든 경우를 적기, en: Exhaustive switch }
+token: "switch"
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 3
+prereq: [swift/enum-associated-value]
+confusions: []
+dict:
+  one_liner:
+    ko: "빠뜨린 경우가 있으면 빌드가 멈추고, 나머지를 한 줄로 덮으면 그 셈이 꺼진다."
+    en: "A missing case stops the build, and a catch-all line turns that counting off."
+  why:
+    ko: >-
+      여러 갈래를 적는 자리인데, Swift 는 여기서 <b>빠뜨린 경우를 셉니다.</b> 갈래 목록의
+      경우를 하나라도 안 적으면 빌드가 멈춰요. 그래서 나중에 갈래를 늘렸을 때
+      <b>고쳐야 할 자리를 컴파일러가 전부 찾아 줍니다.</b>
+      여기서 습관 하나가 손해로 바뀝니다. 「나머지는 이렇게」를 한 줄 적어 두면 편하지만,
+      그 줄이 있으면 <b>세는 눈이 감깁니다</b> — 나중에 갈래가 늘어도 아무도 안 알려 주고,
+      새 갈래가 조용히 그 한 줄로 흘러갑니다.
+      값을 데리고 다니는 갈래는 여기서 <b>이름을 붙여 꺼냅니다</b> — 갈래를 묻는 것과 값을
+      꺼내는 것이 한 줄에서 일어나요.
+    en: >-
+      This is where several branches are written, and Swift <b>counts the missing ones.</b> Leave
+      out any case of the list and the build stops. So when a case is added later, <b>the compiler
+      finds every place that needs updating.</b>
+      One habit turns costly here. A "everything else" line is convenient, but with it the
+      <b>counting eye closes</b> — adding a case tells nobody, and the new case quietly flows into
+      that line.
+      A case that carries data is <b>named and unpacked</b> here — asking which case and taking its
+      data happen on one line.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}}{{pick.2|josa:을,를}} 한 값으로 접는다."
+      en: "Line {{site.line}} folds {{pick.2|code}} to one value."
+    - ko: "{{pick.3|code}} 부터 갈래를 차례로 맞춰 본다."
+      en: "From {{pick.3|code}} on, the cases are matched in order."
+    - ko: "맞는 갈래 하나만 돌고 나머지는 건너뛴다."
+      en: "One matching case runs and the rest are skipped."
+rule:
+  ko: "<b>빠뜨린 경우가 있으면 빌드가 멈춘다.</b> 나머지를 덮는 줄은 그 셈을 끈다."
+  en: "<b>A missing case stops the build.</b> A catch-all line switches that counting off."
+result:
+  label: { ko: "{{site.line}}행의 갈래 고르기", en: "the case selection on line {{site.line}}" }
+  value: "{{pick.1}} {{pick.2}}"
+  note: { ko: "맞는 갈래 하나만 돈다", en: "only the matching case runs" }
+ok:
+  ko: "{{pick.2|code}}에 맞는 갈래 하나가 돌았습니다."
+  en: "The one case matching {{pick.2|code}} ran."
+payoff:
+  ko: "이걸 알면 「갈래를 늘렸는데 어디를 고쳐야 하지」가 풀립니다 — 빌드가 다 찾아 줍니다."
+  en: "This untangles “I added a case, what needs updating” — the build finds it all."
+bridge:
+  ko: >-
+    자바·C 는 빠뜨린 경우를 <b>안 셉니다</b>. 그래서 그쪽에서는 나머지를 덮는 줄이 방어이고
+    Swift 에서는 그것이 눈가리개예요.
+  en: >-
+    Java and C <b>do not count</b> missing cases, so a catch-all is a defence there. In Swift it is
+    a blindfold.
+misconceptions:
+  # swift.md §9 ⑫.
+  - ko: "나머지를 덮는 줄을 적어 두면 안전하다 — 오히려 갈래가 늘었을 때 안 알려 줍니다."
+    en: "A catch-all is the safe choice — it is what stops you being told when cases grow."
+  - ko: "맞는 갈래 다음 것도 이어서 돈다 — 하나만 돌고 끝납니다."
+    en: "Matching falls through to the next case — one runs and it ends."
+  - ko: "값을 데리고 다니는 갈래는 따로 꺼내야 한다 — 갈래를 묻는 줄에서 함께 꺼냅니다."
+    en: "A carried value needs a separate step — it is unpacked on the line that asks."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>갈래를 고르는 기준이 되는 값</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the value the cases are matched against</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>낱말</b>입니다. 무엇을 기준으로 고를지는 그 뒤가 정해요."
+          en: "{{pick.1|code}} is the <b>word</b>. What the cases are matched against comes after it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 낱말이냐 기준이냐", en: "The sharpest spot — the word or the subject" }
+          code:
+            - "switch state { }"
+            - "switch other { }   // 같은 낱말, 다른 기준"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>갈래 하나</b>입니다. 갈래는 결과이고 기준은 그 위에 있어요."
+          en: "{{pick.3|code}} is <b>one case</b>. Cases are the outcome; the subject is above them."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 기준이냐 갈래냐", en: "The sharpest spot — the subject or a case" }
+          code:
+            - "switch state { case .ok: g() }"
+            - "switch state { case .bad: h() }"
+meaning:
+  - q:
+      ko: "나중에 갈래를 하나 늘렸는데 어느 자리에 「나머지는 이렇게」가 적혀 있으면 어떻게 될까요?"
+      en: "A case is added later and one place has an “everything else” line — what happens there?"
+    options:
+      - t:
+          ko: "아무도 안 알려 주고 새 갈래가 그 줄로 흘러간다"
+          en: "Nobody is told and the new case flows into that line"
+      - t:
+          ko: "빌드가 멈춰 고칠 자리를 알려 준다"
+          en: "The build stops and points at what to fix"
+        diag:
+          t:
+            ko: "그건 그 줄이 <b>없을 때</b>의 답입니다. 나머지를 덮는 줄이 있으면 빠진 경우가 없다고 세어져서 조용히 지나가요."
+            en: "That is the answer <b>without</b> that line. With a catch-all nothing counts as missing and it passes quietly."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 덮는 줄이 있나", en: "The sharpest spot — is there a catch-all" }
+            code:
+              - "case .a: … case .b: …          // 늘리면 빌드가 멈춘다"
+              - "case .a: … default: …          // 조용히 흘러간다"
+      - t:
+          ko: "새 갈래가 무시된다"
+          en: "The new case is ignored"
+        diag:
+          t:
+            ko: "무시되지 않습니다 — 덮는 줄이 <b>실행</b>돼요. 아무것도 안 하는 것보다 나쁠 수 있습니다."
+            en: "It is not ignored — the catch-all <b>runs</b>. That can be worse than doing nothing."
+      - t:
+          ko: "돌다가 멈춘다"
+          en: "It stops while running"
+        diag:
+          t:
+            ko: "안 멈춥니다. 덮는 줄이 받아 주니 조용히 도는 것이 문제예요."
+            en: "It does not stop. The catch-all receives it, and running quietly is the problem."
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>여러 갈래 중 맞는 하나</b>를 고릅니다."
+      en: "Choose what goes in the blank. Line {{site.line}} picks <b>the one matching case</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "switch", mono: true }
+      - t: "if"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>참·거짓 하나</b>로 갈립니다. 갈래가 여럿이면 줄이 길어지고, 빠뜨린 경우를 세어 주지도 않아요."
+            en: "That branches on <b>one truth value</b>. Many cases make it long, and nothing counts what is missing."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 세어 주나", en: "The sharpest spot — is anything counted" }
+            code:
+              - "switch s { case .a: … case .b: … }"
+              - "if s == .a { } else if s == .b { }"
+      - t: "guard"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>아니면 나가는</b> 모양입니다. 갈래를 늘어놓는 자리가 아니고 실패 쪽에서 나가야 해요."
+            en: "That is the <b>otherwise leave</b> shape. It lists no cases and its failing side must exit."
+      - t: "for"
+        mono: true
+        diag:
+          t:
+            ko: "이건 모아 둔 것을 <b>훑습니다</b>. 값 하나를 갈래에 맞추는 일과는 다른 일이에요."
+            en: "That <b>walks</b> a collection — a different job from matching one value against cases."
+why_gate:
+  q:
+    ko: "Swift 는 왜 <b>빠뜨린 경우를 셀까요</b>?"
+    en: "Why does Swift <b>count the missing cases</b>?"
+  choices:
+    - t:
+        ko: "갈래를 나중에 늘렸을 때 고쳐야 할 자리를 사람이 기억해서 찾는 대신 빌드가 전부 찾아 주게 하려고"
+        en: "So that adding a case later has the build find every place to update instead of a person remembering"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 셈을 스스로 끄는 습관이 무엇인지도 적어 보세요."
+        en: "That is the direction. Say which habit switches the counting off, too."
+    - t:
+        ko: "다 적힌 쪽이 빨라서"
+        en: "Because a complete list runs faster"
+      ok: false
+      fb:
+        ko: "속도가 이유는 아닙니다. 나중에 늘렸을 때 찾아 주는 것이 이유예요."
+        en: "Speed is not the reason. Finding the places later is."
+    - t:
+        ko: "덮는 줄을 못 쓰게 하려고"
+        en: "To forbid catch-all lines"
+      ok: false
+      fb:
+        ko: "못 쓰게 하지 않습니다 — 쓸 수 있고, 쓰면 셈이 꺼진다는 것을 알아야 할 뿐이에요."
+        en: "They are not forbidden — they are allowed, and what matters is knowing they switch the counting off."
+queries:
+  - { grammars: [swift], file: ./switch-exhaustive.scm }
+examples:
+  - code: "func f() { switch state { case .ok: g() } }"
+    expect: { sites: 1, form: switch, hole: "switch", picks: { 1: "switch", 2: "state" } }
+  - code: "func f() { switch kind { case .a: g(); case .b: h() } }"
+    expect: { sites: 1, form: switch, hole: "switch", picks: { 1: "switch", 2: "kind" } }
+  - code: "func f() { if state == .ok { g() } }"
+    expect: none

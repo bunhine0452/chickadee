@@ -1,0 +1,191 @@
+schema: 1
+id: swift/function-declaration
+universal: common/function-definition
+name: { ko: 함수 만들기, en: Function declaration }
+token: "func"
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 1
+prereq: [cs/call-stack]
+confusions: []
+dict:
+  one_liner:
+    ko: "부를 수 있는 묶음을 만들고, 인자마다 부르는 이름과 받는 이름을 따로 적는다."
+    en: "It makes something callable; each input has a calling name and a body name."
+  why:
+    ko: >-
+      Swift 의 함수는 인자 이름이 <b>둘</b>입니다 — 부를 때 쓰는 이름과 몸통 안에서 쓰는 이름.
+      둘을 다르게 적으면 부르는 줄이 문장처럼 읽히고, 몸통 안에서는 짧은 이름을 씁니다.
+      하나만 적으면 그 하나가 두 몫을 하고, 앞에 밑줄을 적으면 부를 때 이름을 <b>안 씁니다.</b>
+      그래서 같은 함수를 부르는 줄이 세 가지 모양으로 나옵니다. 부르는 이름은 <b>함수 이름의
+      일부</b>라서, 이름이 같아도 부르는 이름이 다르면 다른 함수예요.
+    en: >-
+      A Swift input has <b>two</b> names — the one used at the call and the one used in the body.
+      Make them different and the call reads like a sentence while the body keeps a short name.
+      Write one name and it does both jobs; put an underscore in front and the call uses
+      <b>no name at all.</b> So one function can be called in three shapes. The calling name is
+      <b>part of the function's identity</b>: same base name, different calling names, different
+      functions.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}} 라는 부를 수 있는 묶음을 세운다."
+      en: "Line {{site.line}} sets up a callable named {{pick.2|code}}."
+    - ko: "인자마다 부르는 이름과 받는 이름이 정해진다."
+      en: "Each input gets its calling name and its receiving name."
+    - ko: "부르는 줄은 그 이름들을 그대로 적는다."
+      en: "The call writes those names out."
+rule:
+  ko: "<b>부르는 이름은 함수 이름의 일부다.</b> 안 적으면 그 함수를 못 찾는다."
+  en: "<b>The calling name is part of the function's identity.</b> Leave it out and the call misses."
+result:
+  label: { ko: "{{site.line}}행의 함수", en: "the function on line {{site.line}}" }
+  value: "{{pick.2}}({{pick.3}}:)"
+  note: { ko: "부르는 이름까지가 이름이다", en: "the calling name is part of the name" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:을,를}} 부를 때 {{pick.3|code}} 라는 이름을 적어야 합니다."
+  en: "Calling {{pick.2|code}} means writing the name {{pick.3|code}}."
+payoff:
+  ko: "이걸 알면 「함수는 있는데 못 찾는다」가 풀립니다 — 부르는 이름을 빠뜨린 겁니다."
+  en: "This untangles “the function is right there but the call misses” — a calling name was dropped."
+bridge:
+  ko: >-
+    파이썬은 부를 때 이름을 <b>골라서</b> 쓸 수 있고 자바에는 아예 없습니다. Swift 는
+    <b>정의가 정한 대로</b> 써야 해요.
+  en: >-
+    Python lets the caller <b>choose</b> to name inputs; Java has no such thing. Swift makes the
+    call follow <b>what the definition set</b>.
+misconceptions:
+  - ko: "부를 때 이름을 안 써도 된다 — 정의가 밑줄을 적지 않았으면 반드시 씁니다."
+    en: "The call can skip the name — not unless the definition wrote an underscore."
+  - ko: "이름이 같으면 같은 함수다 — 부르는 이름이 다르면 다른 함수입니다."
+    en: "Same base name means the same function — different calling names make different functions."
+  - ko: "몸통 안에서도 부르는 이름을 쓴다 — 몸통에서는 받는 이름을 씁니다."
+    en: "The body uses the calling name — the body uses the receiving name."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>부를 때 적어야 하는 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name that has to be written at the call</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.3
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>낱말</b>입니다. 부를 수 있는 것을 만든다고 알릴 뿐 이름은 아니에요."
+          en: "{{pick.1|code}} is the <b>word</b>. It announces a callable; it is not a name."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 낱말이냐 이름이냐", en: "The sharpest spot — the word or a name" }
+          code:
+            - "func greet(to name: String) { }"
+            - "greet(to: \"곽\")"
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 함수의 <b>앞이름</b>입니다. 부르는 줄에는 이것 말고 인자 이름도 함께 적어야 해요."
+          en: "{{pick.2|code}} is the function's <b>base name</b>. A call needs the input names beside it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 앞이름이냐 인자 이름이냐", en: "The sharpest spot — base name or input name" }
+          code:
+            - "greet(\"곽\")       // 못 찾는다"
+            - "greet(to: \"곽\")   // 찾는다"
+meaning:
+  - q:
+      ko: "정의에 부르는 이름이 적혀 있는데 부르는 줄에서 빠뜨리면 어떻게 될까요?"
+      en: "What happens when a call leaves out a calling name the definition wrote?"
+    options:
+      - t:
+          ko: "그 함수를 못 찾아 빌드가 멈춘다"
+          en: "The call misses the function and the build stops"
+      - t:
+          ko: "순서대로 들어가서 그냥 돈다"
+          en: "The inputs go in by position and it just runs"
+        diag:
+          t:
+            ko: "자바·C 가 그렇게 합니다. Swift 는 부르는 이름까지가 함수의 이름이라 이름이 빠지면 다른 함수를 찾게 돼요."
+            en: "Java and C do that. In Swift the calling names are part of the name, so leaving one out looks for a different function."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 순서냐 이름이냐", en: "The sharpest spot — position or name" }
+            code:
+              - "func f(to x: Int) { }"
+              - "f(1)   // 빌드가 멈춘다"
+      - t:
+          ko: "경고만 붙고 돈다"
+          en: "It warns and runs"
+        diag:
+          t:
+            ko: "경고가 아니라 멈춤입니다. 이름이 다르면 <b>다른 함수</b>이고, 그 이름의 함수는 없으니까요."
+            en: "Not a warning but a stop. A different name is a <b>different function</b>, and that one does not exist."
+      - t:
+          ko: "돌다가 멈춘다"
+          en: "It stops while running"
+        diag:
+          t:
+            ko: "돌기 전에 막힙니다. 어느 함수를 부르는지는 빌드 단계에서 정해져요."
+            en: "It is caught before it runs. Which function a call reaches is settled at build time."
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>부를 수 있는 묶음</b>을 만듭니다."
+      en: "Choose what goes in the blank. Line {{site.line}} makes something <b>callable</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "func", mono: true }
+      - t: "var"
+        mono: true
+        diag:
+          t:
+            ko: "이 낱말은 <b>이름 하나</b>를 만듭니다. 부를 수 있는 것을 담을 수는 있지만 인자 이름을 정하는 자리가 없어요."
+            en: "That word makes a <b>name</b>. It can hold something callable, but there is no place to set input names."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 만드나 담나", en: "The sharpest spot — declaring or holding" }
+            code:
+              - "func f(to x: Int) { }"
+              - "var f = { (x: Int) in }   // 이름표가 없다"
+      - t: "struct"
+        mono: true
+        diag:
+          t:
+            ko: "이 낱말은 <b>값으로 도는 묶음</b>을 만듭니다. 부르는 것이 아니라 담는 것이라 인자 이름이 따로 없어요."
+            en: "That word makes a <b>value type</b> — something that holds, not something you call."
+      - t: "init"
+        mono: true
+        diag:
+          t:
+            ko: "이 낱말은 <b>새 값을 세우는</b> 자리입니다. 이름을 따로 못 짓고 타입 이름으로 불려요."
+            en: "That word sets up a <b>new value</b>. It gets no name of its own and is called by the type's name."
+why_gate:
+  q:
+    ko: "Swift 는 왜 인자 이름을 <b>둘로</b> 두었을까요?"
+    en: "Why does Swift give an input <b>two</b> names?"
+  choices:
+    - t:
+        ko: "부르는 줄은 무엇을 하는지 읽히게, 몸통은 짧게 쓰게 — 두 자리가 원하는 이름이 다르기 때문"
+        en: "Because the call wants a name that reads and the body wants a short one, and those differ"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 하나만 적었을 때 무엇이 바뀌는지도 적어 보세요."
+        en: "That is the direction. Say what changes when only one name is written, too."
+    - t:
+        ko: "이름을 둘 두면 더 빨라서"
+        en: "Because two names are faster"
+      ok: false
+      fb:
+        ko: "속도와 무관합니다. 읽는 자리와 쓰는 자리가 다르다는 것이 이유예요."
+        en: "It has nothing to do with speed. Reading and writing want different names."
+    - t:
+        ko: "같은 이름의 함수를 여러 개 만들려고"
+        en: "So that several functions can share a name"
+      ok: false
+      fb:
+        ko: "그건 <b>결과</b>입니다. 부르는 이름이 이름의 일부라서 그렇게 되는 것이지 목적이 아니에요."
+        en: "That is a <b>consequence</b>. It follows from the calling name being part of the identity."
+queries:
+  - { grammars: [swift], file: ./function-declaration.scm }
+examples:
+  - code: "func greet(to name: String) { }"
+    expect: { sites: 1, form: func, hole: "func", picks: { 1: "func", 2: "greet", 3: "to" } }
+  - code: "func reload() { }"
+    expect: { sites: 1, form: func, hole: "func", picks: { 1: "func", 2: "reload" } }
+  - code: "struct P { var x = 0 }"
+    expect: none

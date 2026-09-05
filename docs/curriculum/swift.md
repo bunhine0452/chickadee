@@ -248,55 +248,65 @@ README §11 의 미결 3번이 같은 물음이고, **Swift 가 그 물음이 �
 **19일은 하한이다.** 만기 재검이 먼저 예산을 먹으므로(정본 §2) 실제 달력은 더 길고, 얼마나
 길어지는지는 **안 쟀다.** 3부가 서면 `swiftui/` 개수만큼 더 붙는다.
 
-### §0.7 문법 현황 — **로드는 통과하고 캡처가 0 이다**
+### §0.7 문법 현황 — **문법이 붙었고 실코드로 쟀다** (2026-09-06 갱신)
+
+이 절은 「로드는 통과하고 캡처가 0 이다」였다. D190 이 `tree-sitter-swift` 0.7.3 을 링크했고,
+아래 순서 여섯 중 1~4 와 6 이 끝났다. **5(Monaco)만 남았다.**
 
 | 자리 | 상태 | 근거 |
 |---|---|---|
-| `crates/parse` 문법 | ❌ **없다.** 크레이트가 `Cargo.toml` 에 아예 없다 | `crates/parse/Cargo.toml` · `langs.rs` |
-| 그 사실을 지키는 못 | ✅ `swift_and_dart_are_not_in_the_build_yet` — 넣으면 빨개진다 | `crates/parse/tests/quality.rs:125` |
-| `grammarSchema` | ✅ `swift` 가 이미 있다 | `packages/dictionary/src/schema.ts:29` |
-| `grammarOf('.swift')` | ✅ `swift` | `apps/desktop/src/session-flow.ts` |
-| 사전을 쓰면 | **스키마도 린트도 통과하고 캡처만 0곳** | I6 확인 |
-| 파싱을 시키면 | `ParseError::UnsupportedLang("swift")` — 조용히 TS 로 새지는 않는다 | `crates/parse/src/lib.rs:128` |
-| `dictionary/swift/**` | ❌ 없다 | `ls dictionary/` |
+| `crates/parse` 문법 | ✅ `lang-swift` 피처 · `tree-sitter-swift` 0.7.3 | `crates/parse/Cargo.toml` · `langs.rs` |
+| 그 사실을 지키는 못 | ✅ `the_dictionary_schema_agrees_with_the_grammars_actually_linked` 로 바뀌었다 | `crates/parse/tests/quality.rs` |
+| `grammar_abi` | ✅ **15** — `languages()` 가 `abi 15 · node kinds 563` 을 보고한다 | 이 세션 실측 · `_lang.yaml` |
+| `grammarSchema` | ✅ `swift: true` | `packages/dictionary/src/schema.ts` |
+| 시스템 쿼리 둘 | ✅ `_imports.scm`(모듈 이름) · `_blocks.scm`(**`computed_property` 포함**) | `dictionary/swift/` |
+| Monaco (05 §1.3) | ❌ 아직 없다 — 안 더하면 T1 화면이 plaintext 로 떨어진다 | `monaco-editor@0.52.2` 에 파일은 있다 |
+| `dictionary/swift/**` | ✅ 개념 37장 · 쿼리 39장 | 이 세션 |
 
-**「스키마에 있으니 열려 있다」가 아니다.** `dictionary/swift/_lang.yaml` 에 `grammars: [swift]` 를
-적으면 로드 단계는 통과하는데 파서가 없어 **캡처가 0곳**이고, 사용처가 0이면 카드가 안 구워진다.
-**「곧 됩니다」가 아니라 순서가 있다.**
+**실코드 ERROR 비율 — 03 §2.3 의 게이트를 통과한다.** 표본은 공개 SwiftUI 앱
+`Dimillian/IceCubesApp`(`--depth 1`, `.swift` 428파일)와 사용자 리포 `ECC` 의 `.swift` 1장이다.
 
-**Swift 를 세우려면 이 순서다.**
+| 무엇 | 값 |
+|---|---:|
+| ERROR 노드가 든 파일 | **7 / 428 (1.6 %)** |
+| 그중 `quality == "poor"` (03 §2.3 의 판정) | **1 / 428 (0.2 %)** |
+| 이름순 첫 20파일의 ERROR | **1 / 20 (5.0 %)** |
+| `ECC/…/generate_icons.swift` | **0 / 1** |
 
-1. `crates/parse/Cargo.toml` 에 `tree-sitter-swift`(0.7.3 · MIT · alex-pinkus)를 넣고 `lang-swift`
-   피처와 `langs.rs` 한 줄을 더한다. `parser.c` 가 **20.6 MB** 라 빌드 시간이 늘어난다(§8).
-2. 그 순간 `quality.rs:125` 가 빨개진다. **실코드 20파일 ERROR 비율을 재고 03 §2.3 의 5 % 게이트를
-   통과하는지 본다.** 통과 못 하면 여기서 멈춘다(00 §6-2 「기본 보류」). **이 세션에서도 안 쟀다.**
-3. `grammar_abi` 를 `_lang.yaml` 에 **15** 로 적는다(실측 · §8). 크레이트의 dev-dependency 가
-   `tree-sitter 0.23.0` 인데 이 리포는 0.25.10 이라 그 조합이 시험된 적이 없다는 것도 여기서 확인한다.
-4. 시스템 쿼리 둘 — `_imports.scm`(모듈 이름) · `_blocks.scm`(`function_declaration` ·
-   `init_declaration` · `class_declaration` 을 `declaration_kind` 별로 · **`computed_property`**).
-   마지막 것을 빼면 SwiftUI 의 `var body` 가 블록으로 안 잡힌다(§8).
-5. Monaco 에 `basic-languages/swift` 한 줄(있는 것을 확인했다 · §8). 안 더하면 T1 화면이 plaintext 로
-   떨어진다.
-6. 그다음에야 `dictionary/swift/**` 다.
+**ERROR 를 내는 구문 여섯 — 최소 재현으로 갈랐다.** 일곱 파일이 여섯 원인으로 갈린다.
 
-**0부가 문법 없이 서는가 — 반만 그렇다.** 0부 판은 사전의 `examples[]` 로 카드를 굽고 파싱을
-안 한다(`packages/cards/src/t0-synthetic.ts`, `SYNTHETIC_SITE_ID = -1`). 그런데 그 파일의 두 문이
-**둘 다 「내 코드」 쪽 인자를 요구한다** — `makeSyntheticCard` 는 `previewSiteId`(「곧 여기서
-봅니다」로 예고할 실제 사용처)가 **필수**이고, `makeAbsentCard` 는 `AbsenceReason`(framework ·
-library · scale · idiom)이 필수다. 문법이 없으면 앞의 것을 못 만들고, 뒤의 것을 쓰면 **「네 코드엔
-없다」와 「우리가 못 읽는다」가 섞여** D137 이 막으려던 자리로 되돌아간다.
-**문법 없이 0부를 세우려면 세 번째 문이 필요하고 오늘 그것은 없다.**
-채점 쪽은 덜 급하다 — 여섯 형식 중 파서를 쓰는 것은 `build` 하나이고, 그것도 문법이 없으면
-정규식 정규화 폴백으로 떨어진다(정본 §5).
+| 원인 | 어디 | 최소 재현 |
+|---|---|---|
+| 여러 줄 조건 뒤 **여는 중괄호가 홀로 다음 줄**에 있을 때 | `AddAccountsView` L293 · `NotificationService` L100·119·144·161 | `if let a = try? await g(),`⏎`  let b = h(a)`⏎`{` |
+| 선언 몸통 **안의 `#if`** (열거 갈래 사이) | `HapticManager` L17 | `enum T { case one`⏎`#if os(iOS)`⏎`case two(Int)`⏎`#endif }` |
+| `isolated deinit` (Swift 6.2) | `MediaUIAttachmentVideoView` L83 | `final class C { isolated deinit { } }` |
+| 여러 줄로 접은 **`typealias` 규약 합성** | `EditorStore` L14 | `typealias C = A`⏎`  & B` |
+| **`await` 가 조건에** 있는 `if`/`else if` | `TimelineViewModel` L232·239 | `if await store.isEmpty { }` |
+| `else if let x: T = try? await …` | `StatusRowViewModel` L319 | 같은 줄 그대로 |
 
-**표본이 없다는 것의 값 — 티어 한 줄.** 정본 §5 의 셋 중 **A(모든 리포)만 선다.**
-0·1부는 합성 교재로 설 수 있고 `cs/` 간선 아홉(§7)이 붙는다. **B 는 통째로 비어 있다** —
-문법이 없으니 HTTP 간선도 기능 폐포도 스키마 추출도 없고 실행 러너도 없다.
-그리고 이 리포에 `.swift` 가 **0개**라 **「내가 만든 코드가 교재」(정본 §1)가 이 언어에서는 설계
-단계부터 성립하지 않았다** — §1 의 「생김새」가 추정인 것, 0장 정렬의 첫 키를 못 재는 것(§0.5),
-오개념 열둘의 근거가 얇은 것(§9)이 전부 같은 구멍에서 나온다.
-**코스는 위 순서 2번에서 멈춘다** — ERROR 비율을 재기 전에는 0부조차 실물로 못 세우고,
-2부는 사용자가 Swift 리포를 가져온 뒤에야 「내 코드」 절반이 채워진다.
+ERROR 가 **아닌** 것으로 확인한 것 셋: `nonisolated override init()` · `@Observable public class …: NSObject` ·
+최상위 `#if` 안의 `import`. §8 이 「없는 것」으로 적은 `isolated` 는 실제로 걸렸고, `sending` 은
+이 표본에 안 나왔다.
+
+**남은 위험은 셋이다.** ① `if` 조건 뒤 홀로 선 중괄호가 이 표본에서 가장 흔한 원인이고(7 중 2파일),
+그것이 §8 이 「가장 위험해 보이는 자리 — 확인 필요」로 적어 둔 외부 스캐너의 문 경계다 —
+**예상이 맞았다.** ② 선언 안의 `#if` 는 플랫폼별 코드가 많은 앱일수록 늘어난다.
+③ 이름순 첫 20파일에서는 5.0 % 라 20파일 표본만으로는 게이트 판정이 불안정하다 —
+전량 428파일의 1.6 % 를 근거로 쓴다.
+
+**0부가 문법 없이 서는가 — 이제 물음이 바뀌었다.** 0부 판은 사전의 `examples[]` 로 카드를 굽고
+파싱을 안 한다(`packages/cards/src/t0-synthetic.ts`, `SYNTHETIC_SITE_ID = -1`). 그 파일의 두 문이
+둘 다 「내 코드」 쪽 인자를 요구하는 것은 그대로다 — `makeSyntheticCard` 는 `previewSiteId` 가
+필수이고 `makeAbsentCard` 는 `AbsenceReason` 이 필수다. 문법이 붙었으므로 <b>앞의 것이 이제
+만들어진다</b> — Swift 리포를 연 사용자에게는 예고할 실제 사용처가 생긴다.
+
+**표본이 없다는 것의 값 — 한 칸 올라갔다.** 정본 §5 의 셋 중 A 는 그대로 서고, B 는
+문법이 붙으며 <b>재료가 생겼다</b>(파일 간선은 여전히 안 선다 — Swift 의 `import` 는 모듈이라
+`resolve-imports.ts` 가 `null` 을 돌려준다. 04 §7.1). 남는 구멍은 하나다:
+**사용자 리포에 `.swift` 가 1장뿐**이고 그 하나도 앱이 아니라 아이콘 생성 스크립트다
+(`ECC/skills/ios-icon-gen/scripts/generate_icons.swift`, 258줄). 그래서 아래 §N 의 사용처 수치는
+**내 코드가 아니라 남의 코드**에서 잰 것이고, §1 의 「생김새」가 추정이라는 단서도 그대로다.
+2부는 사용자가 Swift 앱을 가져온 뒤에야 「내 코드」 절반이 채워진다.
 
 ---
 
@@ -691,3 +701,131 @@ Swift 6.3.3 으로 실행해 확인했다**(§0.4) — 근거가 얇다는 위 �
 800줄 상한을 넘어 [`swift-learning.md`](./swift-learning.md) 로 분리했다 — 기계 한 문장 ·
 애플 책과 100 Days 의 옵셔널 자리 실측 · 좁혀야 통과하는 연습 넷 · 오답 진단이 `variants` 를 요구하는 이유 ·
 문법이 러너보다 큰 벽인 것 · 바꿀 것 diff.
+
+---
+
+## §12 실물이 된 것 — 실측 (2026-09-06)
+
+이 문서는 여기까지 제안이었다. `dictionary/swift/**` 와 `packages/course/src/parts/swift.ts` 가
+섰으므로 **잰 값과 어긋난 자리**를 이 절에 남긴다. 위 절들의 문장은 안 고쳤다 —
+바뀐 자리는 아래 표가 가리킨다(§0.7 만 예외로, 「캡처가 0」이 거짓이 되어 그 자리에서 고쳤다).
+
+### §12.1 장수와 줄 수
+
+| 부 | 개념 | 판 근거 |
+|---|---:|---|
+| 0부 값과 식 | **8** | §0.1 축 여덟 그대로 |
+| 1부 흐름과 묶기 | **4** | §2 여덟에서 값 층위 넷이 0부로 올라간 뒤 |
+| 2부 Swift 의 타입 | **25** | §3 중심 열다섯 + §4 심화 열 |
+| 3부 프레임워크 | **0** | `swiftui/` 사전이 없다 (§12.5) |
+| **합** | **37** | `_lang.yaml` 의 `essential` 과 `SWIFT_PARTS` 가 같다 |
+
+개념 YAML **7,059줄**(한 장 평균 191줄) · `_lang.yaml` 104줄 · `.scm` **39장 488줄**
+(개념 37 + 시스템 둘 45줄). 첫 물결이 잰 「한 장 213줄」(README §11)보다 10 % 적다.
+
+**골든 126개 — 양성 89 · 음성 37.** 개념마다 음성(`expect: none`)이 정확히 하나이고 양성이
+둘 이상이다. `cargo test -p chickadee-parse --test dictionary` 의 여섯 시험이 전부 초록이다.
+
+### §12.2 표본 리포별 사용처 — 곳 / 파일
+
+표본은 둘뿐이고 **하나는 남의 코드**다. 공개 SwiftUI 앱 `Dimillian/IceCubesApp`
+(`--depth 1` · `.swift` **428파일**)와 사용자 리포 `ECC` 의 `.swift` **1장**
+(`skills/ios-icon-gen/scripts/generate_icons.swift`, 258줄 · 앱이 아니라 CLI 스크립트).
+재는 방법은 `chickadee_parse::{compile, scan}` 을 부르는 임시 시험이었고 재고 지웠다.
+
+| 개념 | IceCubesApp 곳/파일 | ECC 곳 |
+|---|---:|---:|
+| `assignment` | 3,134 / 281 | 31 |
+| `closure-trailing` | 2,550 / 244 | 0 |
+| `text-literal` | 1,493 / 236 | 20 |
+| `async-await` | 1,138 / 148 | 0 |
+| `property-wrapper` | 1,106 / 190 | 0 |
+| `switch-exhaustive` | 1,101 / 116 | 20 |
+| `return-statement` | 1,085 / 190 | 24 |
+| `function-declaration` | 1,070 / 240 | 5 |
+| `protocol-conformance` | 787 / **315** | 2 |
+| `throws-try` | 785 / 143 | 5 |
+| `optional-type` | 761 / 177 | 0 |
+| `equality` | 607 / 151 | 2 |
+| `boolean-literal` | 591 / 151 | 2 |
+| `if-let` | 568 / 130 | 0 |
+| `struct-declaration` | 539 / **341** | 1 |
+| `some-any` | 512 / 212 | 0 |
+| `optional-chaining` | 461 / 129 | 0 |
+| `if-statement` | 431 / 116 | 1 |
+| `result-builder` | 429 / 187 | 0 |
+| `string-interpolation` | 375 / 101 | 39 |
+| `nil-coalescing` | 312 / 110 | 0 |
+| `guard-let` | 255 / 77 | 7 |
+| `enum-associated-value` | 206 / 43 | 5 |
+| `array-subscript` | 186 / 75 | 5 |
+| `extension` | 145 / 44 | 0 |
+| `type-conversion` | 129 / 52 | 12 |
+| `integer-literal` | 123 / 58 | 3 |
+| `map-filter` | 117 / 60 | 0 |
+| `operator-precedence` | 115 / 42 | 2 |
+| `force-unwrap` | 65 / 35 | 0 |
+| `for-in-loop` | 64 / 31 | 1 |
+| `float-literal` | 37 / 15 | 0 |
+| `generics` | 16 / 9 | 0 |
+| `capture-list` | 10 / 5 | 0 |
+| `while-repeat` | 9 / 9 | 1 |
+| `mutating-method` | 2 / 1 | 0 |
+| **`arc-weak`** | **0 / 0** | **0** |
+
+**이 표가 말하는 것 넷.**
+
+**① 대입 다음이 후행 클로저다.** 3,134곳과 2,550곳 — §1 이 「이 DSL 이 코드의 대부분을
+차지한다」고 추정한 자리에 수치가 붙었다. 셋째가 글자 묶음(1,493)이고, 화면 코드에서 글자가
+`Text("…")` 로 들어가는 자리를 `strarg` 패턴이 잡는다.
+
+**② 「파일 수」로 세면 순위가 뒤집힌다.** `struct-declaration` 은 곳으로는 열다섯째인데
+**341파일**로 1위이고, `protocol-conformance` 가 315파일로 2위다. 파일마다 타입 하나를 선언하고
+규약을 하나 거는 모양이 428파일에 고르게 깔려 있다는 뜻이다 — 구멍 지도(03 §6)의 분모로는
+곳보다 파일이 이 언어를 더 잘 그린다.
+
+**③ `while` 은 9곳, `repeat-while` 은 0곳이다.** §2 가 「`while` 을 §3 으로 내린다」고 한 판단이
+맞았다. 반복의 자리는 `for-in`(64곳)조차 아니라 `ForEach` 와 고차 함수가 가져갔다 —
+`map`·`filter` 계열이 117곳이다.
+
+**④ `weak`/`unowned` 저장 속성이 0곳이다.** tree-sitter 실측과 `grep` 이 같은 값을 낸다
+(`weak var` 0 · `unowned` 0). 같은 리포에서 `[weak self]` 캡처 목록은 10곳/5파일이다 —
+**고리는 저장 자리가 아니라 클로저에서 난다.** §4 ⑥ 이 `arc-weak` 를 `capture-list` 의 선행으로
+둔 배치는 그대로 두되, 「내 코드에서 만난다」는 기대는 접어야 한다.
+
+### §12.3 파서 ERROR 비율 — 게이트를 통과한다
+
+전문은 §0.7 로 옮겼다. 요약: **428파일 중 7파일(1.6 %)에 ERROR 노드**가 있고 그중
+`quality == "poor"` 는 **1파일(0.2 %)** 이다. 03 §2.3 의 게이트를 통과한다.
+이름순 첫 20파일만 보면 **1/20(5.0 %)** 이라 20파일 표본으로는 판정이 흔들린다 —
+전량을 근거로 쓴다. 원인 여섯은 §0.7 의 표에 최소 재현과 함께 적었다.
+
+**커뮤니티 문법을 처음 쓰는 자리라 이것이 이 세션의 첫 발견이다.** §8 이 「가장 위험해 보이는
+자리 — 확인 필요」로 지목한 외부 스캐너의 문 경계가 실제로 가장 흔한 원인이었고
+(여러 줄 조건 뒤 홀로 선 중괄호, 7파일 중 2), §8 이 「없는 것」으로 적은 `isolated` 도 실제로
+걸렸다(1파일). `sending` 은 이 표본에 안 나왔다.
+
+### §12.4 문서와 어긋나 바꾼 자리
+
+| # | 문서가 적은 것 | 실물 | 왜 |
+|---|---|---|---|
+| 1 | §0.2 — 0-1·0-2 의 `universal` 이 `common/number-literal` | `common/integer-literal` · `common/float-literal` | D187 ④ 가 그 보편형을 둘로 쪼갰고 옛 id 에 `superseded_by` 가 달렸다. README §8 표를 따랐다 |
+| 2 | §0.2 — 0-6 의 `universal` 이 `common/type-cast`(신규 후보) | `null` | 그 개념이 아직 없다. 규약 4 대로 새 `common/` 을 안 만들고 후보로만 보고한다 |
+| 3 | §3 ⑥ `common/unwrap-binding` · §3 ⑯ `common/tagged-union` · §4 ① `common/exhaustive-match` | 셋 다 `null` | 같은 이유. §6 이 「신규 보편 제안 셋」으로 적어 둔 것이고 만드는 것은 이 사전의 몫이 아니다 |
+| 4 | §0.1 0-4 의 `cs/` 에 `cs/truthiness` 없음 | `prereq: [cs/type]` 하나 | Swift 에 「참 같은 값」이 없어 `common/truthiness` 를 걸면 거짓이 전이된다(D4) |
+| 5 | §2 ⑥ `for-in-loop` 의 prereq 가 `swift/let-var` · §3 ④ `while-repeat` 의 prereq 가 `swift/comparison` | `swift/assignment` · `swift/equality` | 그 둘이 0부로 올라가며 id 가 바뀌었다(§0.5). 문서가 옛 이름을 남겨 두었다 |
+| 6 | §0.3 — 0-3 의 판정에 자소 뭉치 길이 재기(`count`·`utf8`) | 쿼리에서 뺐다 | `count` 는 배열에도 있어 정적으로 못 가른다. 넣으면 `py/arithmetic` 이 밟은 오탐(README §6 #13)을 되풀이한다. 길이 셋의 값(1·11·25)은 산문과 `misconceptions` 에 남겼다 |
+| 7 | §8 함정 ⑦ — 「알려진 프로토콜 이름 목록을 쿼리에 박는다」 | `declaration_kind` 를 `struct`·`enum` 으로 좁혔다 | 값 타입에는 상속이 없으므로 콜론 뒤는 언제나 규약이다. 이름 목록을 박으면 새 규약이 조용히 빠진다 |
+| 8 | **§8 에 없던 것 — 필드 이름 셋이 쿼리에서 안 맞는다** | 자리로 잡았다 | `node-types.json` 은 `type_annotation.type` · `parameter.type` · `function_declaration.return_type` 을 필드로 적어 두는데 쿼리에서 **하나도 안 맞는다**(실측). `parameter.name` 은 반대로 이름과 타입 <b>둘 다</b> 잡는다. 필드를 믿고 적으면 캡처가 0곳이 되고 그 사실이 아무 데서도 안 터진다 — 함정 ⑨ 로 세울 자리다 |
+| 9 | §5 — 0장 적재량 29 | **37** | §5 는 §0 이전의 개념 목록으로 센 값이다. `essential` 전량이 깊이 ≤ 2 인지는 `zero-chapter.test.ts` 가 잰다(D184 로 상한이 없으므로 자를 일은 없다) |
+
+### §12.5 안 만든 것과 이유
+
+| 무엇 | 왜 |
+|---|---|
+| **3부 `swiftui/` 사전** | §0.5 가 「3부를 어떻게 채울지는 안 정했다」로 남긴 자리다. `@State`·`body`·수식어 사슬은 프레임워크 관습이라 `swift/` 가 아니고, 그 목록을 짜는 것이 다음 물결이다. `SWIFT_PARTS` 의 3부는 빈 목록이다 |
+| **`detect: { module: 'SwiftUI' }`** | §1 이 제안한 감지 게이트. `_lang.yaml` 스키마(`packages/dictionary/src/schema.ts`)를 넓혀야 해서 이 세션의 범위 밖이다. `_imports.scm` 이 그 신호(`import SwiftUI`)를 이미 만든다 |
+| **Monaco `basic-languages/swift`** | 05 §1.3 의 배선이고 `apps/` 쪽이라 범위 밖. 안 더하면 T1 화면이 plaintext 로 떨어진다 |
+| **`alternatives`** | 비워 두었다. 가장 그럴듯한 짝(`force-unwrap` ↔ `guard-let`)이 한쪽으로 안 기운다 — 65곳 대 255곳이라 「없는 쪽을 다른 표기가 대신 썼다」가 아니라 둘 다 흔하다 |
+| **옵셔널 풀기 경로 그림** | `swift-learning.md` §11.3.2 대로 걸음 사다리가 그대로 받는다. 그림 신청은 0 그대로다 |
+| **`Package.swift` 를 사용처에서 뺄지** | §8 이 남긴 물음. 표본에 `Package.swift` 가 있지만(`.swift` 확장자라 함께 세어졌다) D60 과 같은 처리를 할지는 사용자 결정이다 — 이 세션은 안 뺐다 |

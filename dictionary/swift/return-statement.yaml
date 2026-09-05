@@ -1,0 +1,193 @@
+schema: 1
+id: swift/return-statement
+universal: common/return-value
+name: { ko: 값 돌려주기, en: Return }
+token: "return"
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 1
+prereq: [swift/function-declaration]
+confusions: []
+dict:
+  one_liner:
+    ko: "부른 자리로 값을 보내고 그 줄에서 함수가 끝나며, 몸통이 식 하나면 낱말을 생략한다."
+    en: "It sends a value back and ends the function; one expression needs no word."
+  why:
+    ko: >-
+      값을 보내는 줄은 두 가지 일을 합니다 — 값을 부른 자리로 보내고, <b>거기서 함수를 끝냅니다.</b>
+      아래에 줄이 더 있어도 안 돕니다.
+      Swift 에는 규칙이 하나 더 있어요: 몸통이 <b>식 하나뿐이면 낱말을 안 적어도</b> 그 식이
+      돌아갑니다. 화면을 그리는 코드가 그 규칙 위에 서 있습니다 — 화면을 내주는 속성 안에
+      돌려주는 낱말이 하나도 없는 이유가 이것이고, 처음 보면 그 값이 어디로 가는지 안 보여요.
+      돌려줄 타입은 함수 머리에 적히고, 그 타입과 안 맞는 값을 보내면 빌드가 멈춥니다.
+    en: >-
+      The line that sends a value does two things — it hands the value back and <b>ends the
+      function there.</b> Lines below it do not run.
+      Swift adds one rule: when the body is <b>a single expression the word may be dropped</b> and
+      that expression goes back. Screen-drawing code stands on that rule — it is why a property
+      that yields a screen holds no such word anywhere, and on first sight the value seems to go
+      nowhere. The type going back is written in the function's head, and sending a value that
+      does not match stops the build.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}}{{pick.2|josa:을,를}} 한 값으로 접는다."
+      en: "Line {{site.line}} folds {{pick.2|code}} to one value."
+    - ko: "그 값이 부른 자리로 간다."
+      en: "That value goes back to the call."
+    - ko: "함수는 그 줄에서 끝난다 — 아래 줄은 안 돈다."
+      en: "The function ends there; lines below do not run."
+rule:
+  ko: "<b>값을 보내는 줄에서 함수가 끝난다.</b> 몸통이 식 하나면 낱말은 없어도 된다."
+  en: "<b>The function ends on the line that sends a value.</b> A one-expression body may omit the word."
+result:
+  label: { ko: "{{site.line}}행이 돌려주는 것", en: "what line {{site.line}} sends back" }
+  value: "{{pick.2}}"
+  note: { ko: "여기서 함수가 끝난다", en: "the function ends here" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 부른 자리로 갔고 함수는 끝났습니다."
+  en: "{{pick.2|code}} went back to the call and the function ended."
+payoff:
+  ko: "이걸 알면 「아래 줄이 왜 안 돌지」가 풀립니다 — 위에서 이미 끝난 겁니다."
+  en: "This untangles “why did the lines below not run” — it already ended above."
+bridge:
+  ko: >-
+    파이썬은 아무것도 안 보내면 빈 값을 보냅니다. Swift 는 <b>보낼 타입을 머리에 적어 두고</b>
+    안 맞으면 빌드가 멈춰요.
+  en: >-
+    Python sends an empty value when nothing is sent. Swift <b>writes the outgoing type in the
+    head</b> and stops the build on a mismatch.
+misconceptions:
+  - ko: "아래 줄도 돈다 — 안 돕니다. 그 줄에서 함수가 끝나요."
+    en: "The lines below still run — they do not; the function ends there."
+  - ko: "낱말이 없으면 아무것도 안 돌려준다 — 식 하나짜리 몸통은 그 식을 돌려줍니다."
+    en: "No word means nothing goes back — a one-expression body sends that expression."
+  - ko: "돌려줄 타입은 값이 정한다 — 함수 머리가 정하고, 값이 안 맞으면 빌드가 멈춥니다."
+    en: "The value settles the outgoing type — the head settles it, and a mismatch stops the build."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>부른 자리로 가는 것</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>what goes back to the call</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>낱말</b>입니다. 보내라고 시킬 뿐 무엇이 가는지는 뒤가 정해요."
+          en: "{{pick.1|code}} is the <b>word</b>. It orders the send; what goes is settled after it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 낱말이냐 값이냐", en: "The sharpest spot — the word or the value" }
+          code:
+            - "return n     // n 이 간다"
+            - "return       // 아무것도 안 간다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 함수의 <b>이름</b>입니다. 이름은 값이 아니라 부르는 쪽이 쓰는 것이에요."
+          en: "{{pick.3|code}} is the function's <b>name</b> — what the caller writes, not what goes back."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 값이냐", en: "The sharpest spot — the name or the value" }
+          code:
+            - "func total() -> Int { 3 }"
+            - "let t = total()   // 3 이 온다"
+meaning:
+  - q:
+      ko: "몸통이 식 하나뿐인 함수에 돌려주는 낱말이 없으면 무엇이 돌아갈까요?"
+      en: "In a one-expression body with no such word, what goes back?"
+    options:
+      - t:
+          ko: "그 식의 값이 그대로 돌아간다"
+          en: "The value of that expression goes back"
+      - t:
+          ko: "아무것도 안 돌아간다"
+          en: "Nothing goes back"
+        diag:
+          t:
+            ko: "돌려줄 타입이 머리에 적혀 있으면 아무것도 안 보내는 몸통은 빌드가 안 됩니다. 식 하나짜리는 그 식이 가는 것으로 읽혀요."
+            en: "With an outgoing type in the head, a body that sends nothing does not build. A single expression is read as the thing sent."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 식 하나냐 여럿이냐", en: "The sharpest spot — one expression or many" }
+            code:
+              - "func t() -> Int { 3 }        // 3 이 간다"
+              - "func t() -> Int { g(); 3 }   // 낱말이 필요하다"
+      - t:
+          ko: "마지막 줄의 값이 언제나 돌아간다"
+          en: "The last line's value always goes back"
+        diag:
+          t:
+            ko: "줄이 둘 이상이면 그 규칙이 안 섭니다. <b>식 하나뿐</b>일 때만 생략할 수 있어요."
+            en: "With more than one line the rule does not apply. It may be dropped only for <b>a single expression</b>."
+      - t:
+          ko: "빈 값이 돌아간다"
+          en: "An empty value goes back"
+        diag:
+          t:
+            ko: "빈 값은 돌려줄 타입을 안 적었을 때의 이야기입니다. 타입이 적혀 있으면 그 타입의 값이 가야 해요."
+            en: "An empty value is what happens with no outgoing type. With one written, a value of that type has to go."
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 값을 <b>부른 자리로 보내며 함수를 끝냅니다</b>."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>sends a value back and ends the function</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "return", mono: true }
+      - t: "break"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>되풀이나 갈래</b>를 빠져나옵니다. 함수를 끝내지도, 값을 보내지도 않아요."
+            en: "That leaves a <b>loop or a case</b>. It neither ends the function nor sends a value."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 함수냐 되풀이냐", en: "The sharpest spot — the function or the loop" }
+            code:
+              - "for x in xs { break }   // 되풀이만 끝난다"
+              - "for x in xs { return }  // 함수가 끝난다"
+      - t: "continue"
+        mono: true
+        diag:
+          t:
+            ko: "이건 되풀이의 <b>다음 바퀴</b>로 건너뜁니다. 되풀이 밖에서 쓰면 빌드가 멈춰요."
+            en: "That skips to the <b>next lap</b> of a loop. Outside a loop it stops the build."
+      - t: "throw"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>오류를 던져</b> 함수를 끝냅니다. 값이 아니라 오류가 가고, 받는 쪽이 다릅니다."
+            en: "That ends the function by <b>throwing an error</b>. An error goes back, not a value, and it is received differently."
+why_gate:
+  q:
+    ko: "Swift 는 왜 식 하나짜리 몸통에서 <b>낱말을 생략하게</b> 할까요?"
+    en: "Why does Swift <b>let the word be dropped</b> in a one-expression body?"
+  choices:
+    - t:
+        ko: "화면을 짜는 코드가 식을 줄줄이 늘어놓는 모양이라, 줄마다 낱말이 붙으면 그 모양이 안 읽히기 때문"
+        en: "Because screen-building code lines up expressions, and a word on every line would bury the shape"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 대신 처음 읽는 사람이 무엇을 못 보게 되는지도 적어 보세요."
+        en: "That is the direction. Say what a first-time reader loses in exchange, too."
+    - t:
+        ko: "낱말을 적으면 느려서"
+        en: "Because writing the word is slower"
+      ok: false
+      fb:
+        ko: "속도는 같습니다. 읽히는 모양을 위한 규칙이에요."
+        en: "The speed is the same. The rule is about the shape that reads."
+    - t:
+        ko: "낱말이 없어도 컴파일러가 못 알아채서"
+        en: "Because the compiler cannot tell either way"
+      ok: false
+      fb:
+        ko: "알아챕니다 — 식 하나인지 아닌지를 보고 정하는 규칙이에요."
+        en: "It can tell — the rule is exactly that it checks for a single expression."
+queries:
+  - { grammars: [swift], file: ./return-statement.scm }
+examples:
+  - code: "func total() -> Int { return 3 }"
+    expect: { sites: 2, form: rettype, picks: { 2: "Int", 3: "total" } }
+  - code: "func f() { if x { return g() } }"
+    expect: { sites: 1, form: ret, hole: "return", picks: { 1: "return", 2: "g()" } }
+  - code: "func f() { g() }"
+    expect: none

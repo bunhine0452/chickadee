@@ -1,0 +1,208 @@
+schema: 1
+id: swift/type-conversion
+# 0부 축 6. 보편형은 **비어 있다** — README §9 가 「아직 비어 있는 것 하나: 축 6 의
+# `common/type-cast`」로 적어 둔 자리다. 규약 4 대로 이 문서는 새 `common/` 을 만들지 않고
+# `null` 로 두고 후보로 보고한다.
+universal: null
+name: { ko: 종류를 손으로 옮기기, en: Type conversion }
+token: "Int()"
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cs/type-conversion, cs/static-vs-dynamic-typing]
+confusions: []
+dict:
+  one_liner:
+    ko: "종류가 다른 값은 저절로 안 섞이고, 옮기려면 새 값을 손으로 만들어야 한다."
+    en: "Different kinds never mix on their own; moving one means making a new value."
+  why:
+    ko: >-
+      많은 언어는 종류가 다른 둘을 만나면 넓은 쪽으로 조용히 맞춰 줍니다. Swift 는 <b>안 맞춰
+      줍니다.</b> 정수를 담은 이름과 소수를 담은 이름을 그냥 더하면 그 줄에서 빌드가 멈춰요.
+      옮기려면 목표 종류의 이름을 부르는 <b>호출</b>을 적어야 하고, 그 호출은 값을 고치는 게
+      아니라 <b>새 값을 만듭니다.</b>
+      헷갈리는 자리가 하나 있습니다 — <b>리터럴끼리는 섞입니다.</b> 코드에 직접 적은 수는 종류가
+      아직 안 정해져서 자리에 맞게 정해지기 때문입니다. 이름이 붙는 순간 종류가 굳고, 그때부터
+      못 섞여요. 그리고 글자에서 수로 옮기는 호출은 <b>실패할 수 있어서</b> 결과가 그냥 수가
+      아니라 「없을 수도 있는 수」로 나옵니다.
+    en: >-
+      Many languages quietly widen when two kinds meet. Swift <b>does not.</b> Add a name holding
+      a whole number to a name holding a fraction and the build stops on that line. Moving one
+      means writing a <b>call</b> named after the target kind, and that call does not edit the
+      value — it <b>makes a new one.</b>
+      One spot confuses everyone: <b>written-out numbers do mix.</b> A number typed into the code
+      has no kind yet and takes the one the slot asks for. The moment it gets a name the kind sets
+      and mixing stops. And moving from text to a number <b>can fail</b>, so the result is not a
+      number but a possibly-absent one.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.3|code}}{{pick.3|josa:은,는}} 옮길 재료다."
+      en: "{{pick.3|code}} on line {{site.line}} is the material to move."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 목표 종류의 이름이고, 그것을 부르면 새 값이 난다."
+      en: "{{pick.1|code}} names the target kind, and calling it makes a new value."
+    - ko: "재료는 그대로 남는다 — 고쳐진 것이 아니다."
+      en: "The material is untouched — nothing was edited."
+rule:
+  ko: "<b>종류를 옮기는 것은 호출이다.</b> 값이 고쳐지는 것이 아니라 새 값이 난다."
+  en: "<b>Moving between kinds is a call.</b> No value is edited; a new one is made."
+result:
+  label: { ko: "{{site.line}}행의 옮김", en: "the move on line {{site.line}}" }
+  value: "{{pick.1}}({{pick.3}})"
+  note: { ko: "새 값이 난다", en: "a new value is made" }
+ok:
+  ko: "{{pick.3|code}}{{pick.3|josa:을,를}} 재료로 {{pick.1|code}} 종류의 새 값이 났습니다."
+  en: "A new value of kind {{pick.1|code}} was made from {{pick.3|code}}."
+payoff:
+  ko: "이걸 알면 「직접 적은 수는 되는데 이름끼리는 안 된다」가 풀립니다 — 종류가 언제 굳느냐의 문제입니다."
+  en: "This untangles “written numbers work but names do not” — it is about when the kind sets."
+bridge:
+  ko: >-
+    C#·자바는 좁은 쪽을 넓은 쪽으로 조용히 넓혀 줍니다. Go 는 Swift 처럼 안 섞지만
+    <b>직접 적은 수도</b> 안 섞어요.
+  en: >-
+    C# and Java quietly widen the narrower side. Go refuses like Swift but refuses
+    <b>written-out numbers too</b>.
+misconceptions:
+  # swift.md §0.1 0-6 · §0.3 — 실측 (`1 + 2.0` 은 3.0, `let a = 1; let b = 2.0; a + b` 는 빌드 정지).
+  - ko: >-
+      직접 적은 수가 되니까 이름끼리도 된다 — 안 됩니다. 직접 적은 수는 종류가 아직 안 정해져
+      있고 이름은 이미 굳었어요.
+    en: >-
+      Written numbers mix so names mix — they do not. A written number has no kind yet; a name
+      already set one.
+  - ko: "옮기면 원래 값이 바뀐다 — 새 값이 날 뿐 재료는 그대로입니다."
+    en: "Moving changes the original — it only makes a new value; the material is untouched."
+  - ko: >-
+      글자에서 수로 옮기면 수가 나온다 — 실패할 수 있어서 「없을 수도 있는 수」가 나옵니다.
+    en: >-
+      Text to number gives a number — it can fail, so it gives a possibly-absent number.
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>목표 종류를 정하는 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name that settles the target kind</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 여는 괄호라서 <b>호출</b>이라는 표시일 뿐입니다. 종류를 정하는 것은 그 앞에 적힌 이름이에요."
+          en: "{{pick.2|code}} marks this line as a <b>call</b>. The kind comes from the name in front of it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 호출 표시냐 종류냐", en: "The sharpest spot — the call mark or the kind" }
+          code:
+            - "Double(n)   // 종류는 앞의 이름"
+            - "(n)         // 괄호만으로는 안 옮겨진다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 옮길 <b>재료</b>입니다. 재료는 그대로 남고 새 값이 따로 나요."
+          en: "{{pick.3|code}} is the <b>material</b>. It stays as it was; a separate new value is made."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 재료냐 목표냐", en: "The sharpest spot — the material or the target" }
+          code:
+            - "let a = 1"
+            - "let b = Double(a)   // a 는 여전히 정수"
+meaning:
+  - q:
+      ko: "정수를 담은 이름과 소수를 담은 이름을 그냥 더하면 어떻게 될까요?"
+      en: "What happens when a name holding a whole number is added to one holding a fraction?"
+    options:
+      - t:
+          ko: "빌드가 그 줄에서 멈춘다 — 손으로 옮겨야 한다"
+          en: "The build stops on that line — the move has to be written"
+      - t:
+          ko: "넓은 쪽으로 저절로 맞춰진다"
+          en: "The narrower side widens on its own"
+        diag:
+          t:
+            ko: "C#·자바가 그렇게 합니다. Swift 는 안 맞춰 주고, 그래서 직접 적은 수는 되는데 이름끼리는 안 되는 갈림이 생겨요."
+            en: "C# and Java do that. Swift does not, which is why written numbers mix and names do not."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 적은 수냐 이름이냐", en: "The sharpest spot — written or named" }
+            code:
+              - "1 + 2.0        // 된다"
+              - "a + b          // 빌드가 멈춘다"
+      - t:
+          ko: "소수점이 잘려 정수가 된다"
+          en: "The fraction is cut off and it becomes whole"
+        diag:
+          t:
+            ko: "자르는 일은 손으로 옮길 때 일어납니다. 그냥 더하는 자리에서는 아무 일도 안 일어나고 빌드가 멈춰요."
+            en: "Cutting happens when the move is written. Plain addition does nothing at all — the build stops."
+      - t:
+          ko: "돌다가 멈춘다"
+          en: "It stops while running"
+        diag:
+          t:
+            ko: "돌기 전에 막힙니다. 종류가 안 맞는 것은 빌드 단계에서 걸려요."
+            en: "It is caught before it runs. A kind mismatch fails at build time."
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>소수 종류의 새 값</b>을 만듭니다."
+      en: "Choose what goes in the blank. Line {{site.line}} makes a <b>new value of the fraction kind</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "Double", mono: true }
+      - t: "Int"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>정수</b> 종류로 옮깁니다. 소수를 넣으면 소수점 아래가 반올림이 아니라 <b>버려집니다</b>."
+            en: "That moves to the <b>whole number</b> kind. A fraction loses everything after the point — dropped, not rounded."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 남기나 버리나", en: "The sharpest spot — kept or dropped" }
+            code:
+              - "Double(2) / 3   // 0.666…"
+              - "Int(2.9)        // 2"
+      - t: "String"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>글자 묶음</b>으로 옮깁니다. 결과는 셈에 못 쓰고, 더하면 이어 붙어요."
+            en: "That moves to <b>text</b>. The result does no arithmetic, and adding joins instead."
+      - t: "Bool"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>참·거짓</b>으로 옮깁니다. 수에서 곧장 옮길 수 없고, Swift 에는 그런 길이 없어요."
+            en: "That moves to <b>true/false</b>. There is no path from a number to that in Swift."
+why_gate:
+  q:
+    ko: "Swift 는 왜 종류가 다른 둘을 <b>저절로 안 맞춰</b> 줄까요?"
+    en: "Why does Swift <b>refuse to match kinds on its own</b>?"
+  choices:
+    - t:
+        ko: "저절로 맞추면 값이 잘리거나 자릿수가 어긋나는 자리가 코드에 안 적히고, 읽는 사람이 그것을 못 보기 때문"
+        en: "Because an automatic match leaves the place where a value is cut or rounded unwritten, and the reader cannot see it"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 대신 코드가 길어지는 값을 무엇으로 치르는지도 적어 보세요."
+        en: "That is the direction. Say what the extra length buys, too."
+    - t:
+        ko: "저절로 맞추는 것이 느려서"
+        en: "Because matching on its own is slow"
+      ok: false
+      fb:
+        ko: "속도 문제가 아닙니다. 손으로 적힌 자리가 있어야 읽는 사람이 본다는 것이 이유예요."
+        en: "Speed is not it. The reason is that a written move is one the reader can see."
+    - t:
+        ko: "Swift 에 종류를 옮기는 방법이 없어서"
+        en: "Because Swift has no way to move between kinds"
+      ok: false
+      fb:
+        ko: "방법은 있습니다 — 호출을 적으면 돼요. 안 열어 둔 것은 <b>저절로</b> 되는 길입니다."
+        en: "There is a way — write the call. What is closed is the <b>automatic</b> path."
+queries:
+  - { grammars: [swift], file: ./type-conversion.scm }
+examples:
+  - code: "let d = Double(count)"
+    expect: { sites: 1, form: convert, hole: "Double", picks: { 1: "Double", 2: "(", 3: "count" } }
+  - code: "let n = Int(\"12\")"
+    expect: { sites: 1, form: convert, hole: "Int", picks: { 1: "Int", 2: "(", 3: "\"12\"" } }
+  - code: "let v = value as NSNumber"
+    expect: { sites: 1, form: cast, picks: { 1: "NSNumber", 2: "as", 3: "value" } }
+  - code: "let s = greet(name)"
+    expect: none

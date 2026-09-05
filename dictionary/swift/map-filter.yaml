@@ -1,0 +1,193 @@
+schema: 1
+id: swift/map-filter
+universal: common/map-transform
+name: { ko: 항목마다 바꿔 새로 만들기, en: Map and filter }
+token: "map"
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 2
+prereq: [swift/closure-trailing, swift/array-subscript]
+confusions: []
+dict:
+  one_liner:
+    ko: "항목마다 같은 일을 시켜 새 모음을 내고, 원본은 그대로 남는다."
+    en: "It runs one job per item to build a new collection, leaving the source alone."
+  why:
+    ko: >-
+      되풀이를 손으로 적는 대신 「항목마다 이 일을 해라」를 한 줄로 넘깁니다. 결과는
+      <b>새 모음</b>이고 원본은 안 바뀝니다.
+      Swift 에서 헷갈리는 자리는 <b>같은 이름이 두 곳에 있다</b>는 것입니다. 목록에 쓰면 항목
+      전부를 훑고, <b>없을 수 있는 값</b>에 쓰면 그 값 하나에만 일을 시킵니다 — 있으면 하고
+      없으면 안 하고요. 이름이 같아서 무엇을 훑는지가 코드만 봐서는 안 보이고, 앞에 있는 것의
+      타입을 봐야 압니다.
+      비어 있는 것을 걸러 내며 바꾸는 이름이 따로 있는 것도 이 갈림 때문입니다.
+    en: >-
+      Instead of writing a loop by hand, one line hands over "do this to every item". The result is
+      a <b>new collection</b>; the source is unchanged.
+      The confusing part in Swift is that <b>the same names live in two places.</b> On a list they
+      walk every item; on a <b>possibly-absent value</b> they run the job on that one value —
+      once if present, never if absent. Same name, so what is being walked is invisible in the
+      line itself; the type in front is what tells you.
+      A separate name for "transform and drop the empties" exists for the same reason.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}}의 항목을 하나씩 꺼낸다."
+      en: "Line {{site.line}} takes the items of {{pick.2|code}} one at a time."
+    - ko: "항목마다 {{pick.3|code}}{{pick.3|josa:을,를}} 돌린다."
+      en: "For each item it runs {{pick.3|code}}."
+    - ko: "결과를 모아 새 모음을 낸다 — 원본은 그대로다."
+      en: "The results are gathered into a new collection; the source is unchanged."
+rule:
+  ko: "<b>원본은 안 바뀌고 새 모음이 난다.</b> 같은 이름이 목록에도 없을 수 있는 값에도 있다."
+  en: "<b>The source stays; a new collection is made.</b> The same names live on lists and optionals."
+result:
+  label: { ko: "{{site.line}}행의 결과", en: "the result on line {{site.line}}" }
+  value: "{{pick.2}}.{{pick.1}} { … }"
+  note: { ko: "새 모음이다", en: "a new collection" }
+ok:
+  ko: "{{pick.2|code}}의 항목마다 일이 돌아 새 모음이 났습니다."
+  en: "The job ran on each item of {{pick.2|code}} and a new collection came out."
+payoff:
+  ko: "이걸 알면 「원본이 왜 안 바뀌지」가 풀립니다 — 새로 만드는 겁니다."
+  en: "This untangles “why did the source not change” — a new one was made."
+bridge:
+  ko: >-
+    JS·파이썬에도 같은 이름이 있습니다. Swift 만의 것은 <b>없을 수 있는 값에도 같은 이름이
+    있다</b>는 점이에요.
+  en: >-
+    JS and Python have the same names. What is Swift's own is that <b>optionals carry them too</b>.
+misconceptions:
+  - ko: "원본이 바뀐다 — 새 모음이 나고 원본은 그대로입니다."
+    en: "The source changes — a new collection is made and the source stays."
+  - ko: "언제나 목록을 훑는다 — 앞이 없을 수 있는 값이면 값 하나에만 일을 시킵니다."
+    en: "It always walks a list — on an optional it runs the job on one value."
+  - ko: "결과의 개수가 원본과 같다 — 걸러 내는 이름을 쓰면 줄어듭니다."
+    en: "The result has as many items as the source — the filtering names make it fewer."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>항목마다 무엇을 하라는 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name saying what to do with each item</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>훑을 대상</b>입니다. 무엇을 할지는 그 뒤의 이름이 정해요."
+          en: "{{pick.2|code}} is <b>what gets walked</b>. What happens to each item is settled by the name after it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 대상이냐 하는 일이냐", en: "The sharpest spot — the source or the job" }
+          code:
+            - "xs.map { $0 * 2 }"
+            - "xs.filter { $0 > 0 }   // 같은 대상, 다른 일"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 항목마다 도는 <b>일 자체</b>입니다. 어떻게 모을지는 앞의 이름이 정해요."
+          en: "{{pick.3|code}} is the <b>job</b> that runs per item. How results are gathered is settled by the name in front."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 일이냐 모으는 법이냐", en: "The sharpest spot — the job or the gathering" }
+          code:
+            - "xs.map { $0 > 0 }      // 참·거짓 목록"
+            - "xs.filter { $0 > 0 }   // 걸러진 목록"
+meaning:
+  - q:
+      ko: "없을 수 있는 값에 이 이름을 쓰면 무엇을 훑을까요?"
+      en: "Used on a possibly-absent value, what does this name walk?"
+    options:
+      - t:
+          ko: "값 하나 — 있으면 한 번 하고 없으면 안 한다"
+          en: "One value — once if present, never if absent"
+      - t:
+          ko: "언제나 목록을 훑는다"
+          en: "It always walks a list"
+        diag:
+          t:
+            ko: "이름이 같아서 그렇게 읽히지만, 앞이 없을 수 있는 값이면 항목이 최대 하나예요. 무엇을 훑는지는 앞의 타입이 정합니다."
+            en: "The shared name suggests that, but an optional has at most one item. The type in front settles what is walked."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 목록이냐 값 하나냐", en: "The sharpest spot — a list or one value" }
+            code:
+              - "[1,2].map { $0 * 2 }   // 두 번"
+              - "n?.map { $0 * 2 }      // 있으면 한 번"
+      - t:
+          ko: "빌드가 멈춘다"
+          en: "The build stops"
+        diag:
+          t:
+            ko: "멈추지 않습니다. 없을 수 있는 값에도 같은 이름이 있어서 조용히 돌아요 — 그것이 헷갈리는 이유예요."
+            en: "It does not stop. Optionals carry the same names, so it runs quietly — which is what makes it confusing."
+      - t:
+          ko: "값이 없으면 그 줄에서 죽는다"
+          en: "It dies on that line when the value is absent"
+        diag:
+          t:
+            ko: "안 죽습니다. 없으면 일을 <b>안 하고</b> 결과도 「없음」이에요."
+            en: "It does not die. Absent means the job <b>does not run</b> and the result is absence."
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 항목마다 <b>바꿔서 같은 개수</b>의 새 모음을 냅니다."
+      en: "Choose what goes in the blank. Line {{site.line}} transforms each item into <b>a new collection of the same size</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "map", mono: true }
+      - t: "filter"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>걸러 냅니다</b>. 항목을 바꾸지 않고 남길지 말지만 정해서 개수가 줄어들 수 있어요."
+            en: "That <b>filters</b>. It changes nothing and only decides what stays, so the count can drop."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 바꾸나 고르나", en: "The sharpest spot — transform or select" }
+            code:
+              - "xs.map { $0 * 2 }      // 개수 같음"
+              - "xs.filter { $0 > 0 }   // 개수 줄 수 있음"
+      - t: "reduce"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>하나로 접습니다</b>. 모음이 아니라 값 하나가 나오고, 시작값을 따로 적어야 해요."
+            en: "That <b>folds to one</b>. A single value comes out, not a collection, and a starting value is needed."
+      - t: "forEach"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>돌기만</b> 합니다. 결과를 안 모아서 새 모음이 안 나오고, 값을 쓰려면 바깥에 담아야 해요."
+            en: "That <b>only runs</b>. It gathers nothing, so no new collection comes out."
+why_gate:
+  q:
+    ko: "Swift 는 왜 목록과 없을 수 있는 값에 <b>같은 이름</b>을 두었을까요?"
+    en: "Why does Swift use <b>the same names</b> on lists and on optionals?"
+  choices:
+    - t:
+        ko: "둘 다 「담긴 것이 0개 이상」이고, 항목마다 일을 시켜 다시 담는다는 규칙이 같기 때문"
+        en: "Because both hold zero or more items, and the rule — run a job per item and re-wrap — is the same"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이름이 같아서 생기는 혼란이 무엇인지도 적어 보세요."
+        en: "That is the direction. Say what the shared name costs the reader, too."
+    - t:
+        ko: "이름을 아끼려고"
+        en: "To save on names"
+      ok: false
+      fb:
+        ko: "아끼자는 것이 아닙니다. 규칙이 같다는 것이 이유예요."
+        en: "It is not about saving. The shared rule is the reason."
+    - t:
+        ko: "없을 수 있는 값이 사실 목록이라서"
+        en: "Because an optional really is a list"
+      ok: false
+      fb:
+        ko: "목록은 아닙니다. 개수가 0 아니면 1인 <b>담개</b>라는 점이 같을 뿐이에요."
+        en: "It is not a list. It is a <b>container</b> of zero or one, which is the shared part."
+queries:
+  - { grammars: [swift], file: ./map-filter.scm }
+examples:
+  - code: "let ys = xs.map { g($0) }"
+    expect: { sites: 1, form: hof, hole: "map", picks: { 1: "map", 2: "xs", 3: "g($0)" } }
+  - code: "let zs = xs.filter { $0 > 0 }"
+    expect: { sites: 1, form: hof, hole: "filter", picks: { 1: "filter", 2: "xs", 3: "$0 > 0" } }
+  - code: "let a = xs.first"
+    expect: none

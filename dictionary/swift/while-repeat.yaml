@@ -1,0 +1,192 @@
+schema: 1
+id: swift/while-repeat
+universal: common/loop-while
+name: { ko: 조건이 참인 동안 되풀이, en: While and repeat }
+token: "while"
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 2
+prereq: [swift/equality, cs/complexity]
+confusions: []
+dict:
+  one_liner:
+    ko: "조건을 앞에서 보면 한 번도 안 돌 수 있고, 뒤에서 보면 반드시 한 번은 돈다."
+    en: "Testing first may run zero laps; testing last always runs at least one."
+  why:
+    ko: >-
+      되풀이 모양이 둘입니다. 조건을 <b>앞에서</b> 보는 것은 처음부터 거짓이면 몸통이 한 번도
+      안 돌아요. 조건을 <b>뒤에서</b> 보는 것은 몸통이 먼저 돌고 조건을 나중에 봐서
+      <b>반드시 한 번은</b> 돕니다. 다른 언어에서 뒤에서 보는 모양의 이름이 `do` 로 시작하는데,
+      Swift 의 `do` 는 <b>오류를 받는 블록</b>이라 이름을 뺏겼습니다.
+      실무에서는 둘 다 드뭅니다 — 표본 428파일에서 앞에서 보는 것이 9곳, 뒤에서 보는 것이
+      <b>0곳</b>이에요. 훑는 되풀이가 그 자리를 거의 다 가져갔습니다.
+    en: >-
+      There are two shapes. Testing <b>first</b> means a body that never runs when the test starts
+      false. Testing <b>last</b> runs the body before the test, so it runs <b>at least once</b>.
+      In other languages the second shape's name starts with `do`; in Swift `do` is <b>the block
+      that receives errors</b>, so the name went elsewhere.
+      Both are rare in practice — in the 428-file sample, testing first appears 9 times and testing
+      last <b>0 times</b>. The walking loop took almost the whole job.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}}{{pick.2|josa:을,를}} 본다."
+      en: "Line {{site.line}} reads {{pick.2|code}}."
+    - ko: "참이면 {{pick.3|code}} 안이 한 바퀴 돈다."
+      en: "If it holds, the inside of {{pick.3|code}} runs one lap."
+    - ko: "바퀴가 끝나면 조건을 다시 본다."
+      en: "At the end of the lap the test is read again."
+rule:
+  ko: "<b>조건을 앞에서 보면 0바퀴가 가능하다.</b> 뒤에서 보면 최소 한 바퀴다."
+  en: "<b>Testing first allows zero laps.</b> Testing last guarantees one."
+result:
+  label: { ko: "{{site.line}}행의 되풀이", en: "the loop on line {{site.line}}" }
+  value: "{{pick.1}} {{pick.2}}"
+  note: { ko: "조건이 거짓이 될 때까지 돈다", en: "it runs until the test fails" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 참인 동안 {{pick.3|code}} 안이 돕니다."
+  en: "The inside of {{pick.3|code}} runs while {{pick.2|code}} holds."
+payoff:
+  ko: "이걸 알면 「끝나지 않는다」가 풀립니다 — 몸통이 조건의 값을 안 바꾸는 겁니다."
+  en: "This untangles “it never ends” — the body is not changing what the test reads."
+bridge:
+  ko: >-
+    C·자바·JS 는 뒤에서 보는 모양을 `do` 로 엽니다. Swift 는 그 낱말을 오류 블록에 줘서
+    <b>다른 낱말</b>을 씁니다.
+  en: >-
+    C, Java and JS open the test-last shape with `do`. Swift gave that word to error blocks and
+    uses <b>another</b>.
+misconceptions:
+  - ko: "몸통은 적어도 한 번은 돈다 — 앞에서 보는 모양은 0바퀴가 됩니다."
+    en: "The body runs at least once — the test-first shape can run zero laps."
+  - ko: "조건은 한 바퀴 중간에도 다시 본다 — 바퀴 경계에서만 봅니다."
+    en: "The test is re-read mid-lap — it is read only at lap boundaries."
+  - ko: "뒤에서 보는 모양은 `do` 로 연다 — Swift 에서 그 낱말은 오류 블록입니다."
+    en: "The test-last shape opens with `do` — in Swift that word is the error block."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>몇 바퀴 돌지를 정하는 부분</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the part that settles how many laps run</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>낱말</b>입니다. 조건을 앞에서 보는지 뒤에서 보는지만 알려요."
+          en: "{{pick.1|code}} is the <b>word</b>. It only says whether the test comes first or last."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 낱말이냐 조건이냐", en: "The sharpest spot — the word or the test" }
+          code:
+            - "while n > 0 { n -= 1 }"
+            - "while n > 5 { n -= 1 }   // 같은 낱말, 다른 바퀴 수"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 도는 <b>몸통</b>입니다. 몸통이 조건의 값을 안 바꾸면 안 끝나요."
+          en: "{{pick.3|code}} is the <b>body</b>. If it never changes what the test reads, the loop never ends."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 몸통이냐 조건이냐", en: "The sharpest spot — the body or the test" }
+          code:
+            - "while n > 0 { n -= 1 }   // 끝난다"
+            - "while n > 0 { g() }      // 안 끝난다"
+meaning:
+  - q:
+      ko: "조건을 앞에서 보는 되풀이에서 조건이 처음부터 거짓이면 몸통은 몇 바퀴 돌까요?"
+      en: "In a test-first loop whose test starts false, how many laps does the body run?"
+    options:
+      - t:
+          ko: "0바퀴 — 한 번도 안 돈다"
+          en: "Zero — it never runs"
+      - t:
+          ko: "1바퀴 — 한 번은 돈다"
+          en: "One — it runs once"
+        diag:
+          t:
+            ko: "그건 조건을 <b>뒤에서</b> 보는 모양의 답입니다. 앞에서 보면 몸통에 닿기 전에 끝나요."
+            en: "That is the <b>test-last</b> shape's answer. Testing first ends before the body is reached."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 앞이냐 뒤냐", en: "The sharpest spot — first or last" }
+            code:
+              - "while false { g() }          // 0바퀴"
+              - "repeat { g() } while false   // 1바퀴"
+      - t:
+          ko: "조건이 참이 될 때까지 기다린다"
+          en: "It waits until the test holds"
+        diag:
+          t:
+            ko: "기다리지 않습니다. 거짓이면 그 자리에서 지나가고 아래 줄로 갑니다."
+            en: "It does not wait. False means it passes straight to the next line."
+      - t:
+          ko: "빌드가 멈춘다"
+          en: "The build stops"
+        diag:
+          t:
+            ko: "멈추지 않습니다. 늘 거짓인 조건도 올바른 코드예요 — 경고가 붙을 수는 있습니다."
+            en: "It does not stop. An always-false test is valid code, though it may warn."
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 조건을 <b>먼저 보고</b> 참인 동안 돕니다."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>reads the test first</b> and runs while it holds."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "while", mono: true }
+      - t: "repeat"
+        mono: true
+        diag:
+          t:
+            ko: "이건 조건을 <b>뒤에서</b> 봅니다. 몸통이 먼저 돌아서 처음부터 거짓이어도 한 바퀴는 돌아요."
+            en: "That reads the test <b>last</b>. The body runs first, so even a false test gets one lap."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 앞이냐 뒤냐", en: "The sharpest spot — first or last" }
+            code:
+              - "while false { g() }          // 0바퀴"
+              - "repeat { g() } while false   // 1바퀴"
+      - t: "for"
+        mono: true
+        diag:
+          t:
+            ko: "이건 모아 둔 것을 <b>하나씩</b> 훑습니다. 조건이 아니라 항목 수가 바퀴를 정해요."
+            en: "That walks a collection <b>item by item</b>. The count of items sets the laps, not a test."
+      - t: "if"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>갈림</b>이라 한 번만 봅니다. 참이면 안이 한 번 돌고 끝이에요."
+            en: "That is a <b>branch</b> and reads once. Holding runs the inside once and it is done."
+why_gate:
+  q:
+    ko: "표본 리포에서 이 모양이 왜 <b>이렇게 드물까요</b>?"
+    en: "Why is this shape <b>so rare</b> in the sample repository?"
+  choices:
+    - t:
+        ko: "바퀴 수가 훑을 대상으로 정해지는 일이 대부분이라, 조건을 손으로 굴리는 자리가 거의 안 남기 때문"
+        en: "Because laps are usually settled by what is being walked, leaving almost no place for a hand-rolled test"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그래도 이 모양이 남는 자리가 어디인지도 적어 보세요."
+        en: "That is the direction. Say where this shape still earns its place, too."
+    - t:
+        ko: "이 모양이 느려서"
+        en: "Because this shape is slow"
+      ok: false
+      fb:
+        ko: "속도는 같습니다. 쓸 자리가 없어진 것이 이유예요."
+        en: "The speed is the same. The occasions went away."
+    - t:
+        ko: "Swift 가 이 모양을 권하지 않아서"
+        en: "Because Swift discourages it"
+      ok: false
+      fb:
+        ko: "권하고 말고가 아닙니다. 항목을 훑는 모양이 대부분의 자리를 이미 덮어요."
+        en: "It is not discouraged. Walking items simply covers most of the ground."
+queries:
+  - { grammars: [swift], file: ./while-repeat.scm }
+examples:
+  - code: "func f() { while n > 0 { n -= 1 } }"
+    expect: { sites: 1, form: while, hole: "while", picks: { 1: "while", 2: "n > 0" } }
+  - code: "func f() { repeat { n += 1 } while n < 3 }"
+    expect: { sites: 1, form: repeat, hole: "repeat", picks: { 1: "repeat", 2: "n < 3" } }
+  - code: "func f() { for x in xs { g(x) } }"
+    expect: none

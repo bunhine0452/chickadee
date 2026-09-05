@@ -1,0 +1,165 @@
+schema: 1
+id: swift/array-subscript
+universal: common/list
+name: { ko: 대괄호로 꺼내기, en: Subscript }
+token: "[]"
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 2
+prereq: [swift/assignment, cs/bounds]
+confusions: []
+# 구멍을 못 뚫는다 — 아래 `no_hole_reason`.
+dict:
+  one_liner:
+    ko: "같은 대괄호인데 목록은 없는 자리에서 죽고 사전은 「없음」을 돌려준다."
+    en: "Brackets crash on a missing list slot but yield absence for a missing key."
+  why:
+    ko: >-
+      대괄호는 두 곳에서 같은 모양으로 쓰이는데 <b>없는 것을 물었을 때의 답이 정반대</b>입니다.
+      번호로 세는 목록에서 범위를 벗어난 번호를 물으면 그 줄에서 프로그램이 <b>죽습니다</b>
+      (실측 종료 코드 133). 열쇠로 찾는 사전에서 없는 열쇠를 물으면 죽지 않고
+      <b>「없음」을 돌려줍니다.</b>
+      그래서 사전에서 꺼낸 값은 언제나 「없을 수도 있는 값」이고, 이것이 이 언어에서 없을 수 있는
+      값이 가장 자주 튀어나오는 자리입니다. 목록의 번호는 미리 세어 보고 물어야 해요.
+    en: >-
+      The brackets look the same in two places but <b>answer the missing case in opposite ways.</b>
+      Ask a numbered list for an index past its end and the program <b>dies</b> on that line
+      (measured, exit code 133). Ask a keyed map for a key it does not have and nothing dies —
+      it <b>yields absence.</b>
+      So a value pulled out of a map is always a possibly-absent one, and this is where such
+      values most often appear in Swift. An index into a list has to be checked before it is asked.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}}에게 {{pick.1|code}} 자리를 묻는다."
+      en: "Line {{site.line}} asks {{pick.2|code}} for the slot {{pick.1|code}}."
+    - ko: "번호로 세는 것이면 범위 밖일 때 그 줄에서 죽는다."
+      en: "If it is numbered, an index past the end kills the line."
+    - ko: "열쇠로 찾는 것이면 없을 때 「없음」이 돌아온다."
+      en: "If it is keyed, a missing key yields absence."
+rule:
+  ko: "<b>같은 대괄호가 두 규칙을 쓴다.</b> 목록은 죽고 사전은 없을 수 있는 값을 준다."
+  en: "<b>One bracket, two rules.</b> A list dies; a map yields a possibly-absent value."
+result:
+  label: { ko: "{{site.line}}행이 꺼내는 것", en: "what line {{site.line}} pulls out" }
+  value: "{{pick.2}}[{{pick.1}}]"
+  note: { ko: "없을 때의 답이 종류마다 다르다", en: "the missing case answers differently per kind" }
+ok:
+  ko: "{{pick.2|code}}에서 {{pick.1|code}} 자리를 꺼냈습니다."
+  en: "The slot {{pick.1|code}} was pulled out of {{pick.2|code}}."
+payoff:
+  ko: "이걸 알면 「왜 여기만 없을 수 있는 값이 나오지」가 풀립니다 — 열쇠로 찾은 겁니다."
+  en: "This untangles “why is this one possibly absent” — it came from a key lookup."
+bridge:
+  ko: >-
+    파이썬은 둘 다 예외를 냅니다. JS 는 둘 다 조용히 「없음」을 줘요. Swift 는 <b>갈라져</b>
+    있습니다.
+  en: >-
+    Python raises for both. JS quietly yields absence for both. Swift <b>splits</b> them.
+misconceptions:
+  - ko: "범위를 벗어나면 「없음」이 온다 — 목록에서는 그 줄에서 죽습니다."
+    en: "Out of range yields absence — in a list it kills the line."
+  - ko: "사전에서 꺼낸 값은 그냥 값이다 — 없을 수도 있는 값이라 벗겨야 씁니다."
+    en: "A map lookup gives a plain value — it gives a possibly-absent one that has to be unwrapped."
+  - ko: "음수 번호는 뒤에서부터 센다 — 파이썬 이야기입니다. Swift 에서는 죽어요."
+    en: "A negative index counts from the end — that is Python. In Swift it dies."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>꺼낼 자리를 가리키는 것</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the thing naming which slot to pull</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>꺼내는 대상</b>입니다. 어느 자리를 꺼낼지는 대괄호 안이 정해요."
+          en: "{{pick.2|code}} is <b>what is being read</b>. Which slot comes out is settled inside the brackets."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 대상이냐 자리냐", en: "The sharpest spot — the source or the slot" }
+          code:
+            - "arr[0]     // 첫 자리"
+            - "arr[5]     // 없으면 죽는다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>여는 대괄호</b>입니다. 꺼낸다는 표시일 뿐 어느 자리인지는 그 안이 정해요."
+          en: "{{pick.3|code}} is the <b>opening bracket</b> — the mark that this is a lookup, not which slot."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 표시냐 자리냐", en: "The sharpest spot — the mark or the slot" }
+          code:
+            - "arr[i]"
+            - "arr(i)     // 이건 호출이다"
+meaning:
+  - q:
+      ko: "열쇠로 찾는 사전에서 없는 열쇠를 물으면 무엇이 돌아올까요?"
+      en: "What comes back when a keyed map is asked for a key it does not have?"
+    options:
+      - t:
+          ko: "「없음」이 돌아온다 — 죽지 않는다"
+          en: "Absence comes back — nothing dies"
+      - t:
+          ko: "그 줄에서 죽는다"
+          en: "It dies on that line"
+        diag:
+          t:
+            ko: "죽는 것은 <b>번호로 세는 목록</b>입니다. 열쇠로 찾는 쪽은 없을 수도 있는 값을 돌려주도록 만들어져 있어요."
+            en: "Dying is what a <b>numbered list</b> does. The keyed side is built to yield a possibly-absent value."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 번호냐 열쇠냐", en: "The sharpest spot — index or key" }
+            code:
+              - "arr[5]        // 없으면 죽는다"
+              - "dict[\"k\"]     // 없으면 「없음」"
+      - t:
+          ko: "빈 값이 돌아온다"
+          en: "An empty value comes back"
+        diag:
+          t:
+            ko: "빈 값과 「없음」은 다릅니다. 빈 글자 묶음이 담겨 있을 수도 있어서, 그 둘을 가르는 것이 이 표기의 요점이에요."
+            en: "Empty and absent differ. Empty text could be what is stored, and telling the two apart is the point."
+      - t:
+          ko: "열쇠가 새로 만들어진다"
+          en: "The key is created"
+        diag:
+          t:
+            ko: "읽는 자리에서는 안 만들어집니다. 넣는 자리에서만 새 열쇠가 생겨요."
+            en: "Reading creates nothing. A new key appears only when a value is put in."
+why_gate:
+  q:
+    ko: "Swift 는 왜 목록과 사전에서 <b>없는 것을 물었을 때</b>를 다르게 답할까요?"
+    en: "Why does Swift answer the <b>missing case</b> differently for lists and maps?"
+  choices:
+    - t:
+        ko: "번호는 미리 셀 수 있어 없는 번호를 묻는 것이 실수인 반면, 열쇠는 있는지 없는지가 물어야만 알 수 있는 것이기 때문"
+        en: "Because an index can be checked in advance so asking for a missing one is a mistake, while a key's presence is only knowable by asking"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그래서 사전에서 꺼낸 값이 어떤 모양으로 나오는지도 적어 보세요."
+        en: "That is the direction. Say what shape a map lookup comes back in, too."
+    - t:
+        ko: "사전이 목록보다 느려서"
+        en: "Because maps are slower than lists"
+      ok: false
+      fb:
+        ko: "속도 문제가 아닙니다. 미리 알 수 있느냐 없느냐가 갈림의 이유예요."
+        en: "Speed is not it. What can be known in advance is."
+    - t:
+        ko: "목록에는 「없음」이라는 값이 없어서"
+        en: "Because a list has no way to say absence"
+      ok: false
+      fb:
+        ko: "있습니다 — 안전하게 꺼내는 다른 표기가 그것을 돌려줘요. 기본을 그렇게 안 둔 것이 결정입니다."
+        en: "It has one — a safer lookup returns exactly that. Not making it the default is the decision."
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 개념의 정답은 코드에 적힌 글자가 아니라 **대괄호 안이 번호인지 열쇠인지**이고,
+  그 값은 사용처마다 다르다(표본에서 정수 리터럴·이름·계산식이 모두 나온다). 여는 대괄호를 구멍으로
+  삼으면 한 글자라 빈칸형이 생성 단계에서 떨어진다(`MIN_HOLE`). 없을 때의 답을 묻는 판은
+  뜻 고르기가 진다.
+queries:
+  - { grammars: [swift], file: ./array-subscript.scm }
+examples:
+  - code: "func f() { let a = arr[0] }"
+    expect: { sites: 1, form: subscript, picks: { 1: "0", 2: "arr", 3: "[" } }
+  - code: "func f() { let b = dict[\"k\"] }"
+    expect: { sites: 1, form: subscript, picks: { 1: "\"k\"", 2: "dict", 3: "[" } }
+  - code: "func f() { let c = load(0) }"
+    expect: none

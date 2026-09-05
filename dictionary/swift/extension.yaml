@@ -1,0 +1,194 @@
+schema: 1
+id: swift/extension
+universal: null
+name: { ko: 나중에 붙이기, en: Extension }
+token: "extension"
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 3
+prereq: [swift/protocol-conformance]
+confusions: []
+dict:
+  one_liner:
+    ko: "이미 있는 타입에 메서드를 뒤에서 붙이고, 붙인 자리는 원래 선언과 다른 파일일 수 있다."
+    en: "It adds methods to an existing type from outside, even from another file."
+  why:
+    ko: >-
+      남이 만든 타입에도 <b>내 메서드를 나중에 붙일 수 있습니다.</b> 표준 라이브러리의 글자
+      묶음에도, 다른 모듈의 타입에도요.
+      그 대가는 <b>「이 메서드 어디서 왔지」가 선언 한 군데를 봐서는 안 나온다</b>는 것입니다.
+      한 타입의 능력이 여러 파일에 흩어져 있을 수 있어요. 표본에서 145곳/44파일입니다.
+      규약을 <b>나중에</b> 지키게 만드는 것도 이 표기입니다 — 타입 선언은 그대로 두고 규약만
+      따로 붙이면, 규약별로 파일을 갈라 둘 수 있습니다. 다만 저장 속성은 못 붙입니다.
+      자리를 나중에 늘리면 이미 만들어진 값들의 크기가 달라지니까요.
+    en: >-
+      Methods can be added to <b>someone else's type from outside</b> — to the standard library's
+      text type, to a type from another module.
+      The cost is that <b>"where did this method come from" is not answered by one declaration.</b>
+      A type's abilities may be scattered across files; the sample has 145 such places in 44 files.
+      This is also how a type conforms to a contract <b>after the fact</b> — leave the declaration
+      alone and attach the contract separately, one file per contract. What cannot be added is a
+      stored field: adding room later would change the size of values already made.
+  trace:
+    - ko: "{{site.line}}행이 이미 있는 {{pick.2|code}}{{pick.2|josa:을,를}} 다시 연다."
+      en: "Line {{site.line}} reopens the existing {{pick.2|code}}."
+    - ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 그 타입에 새로 붙는다."
+      en: "{{pick.3|code}} is added to that type."
+    - ko: "원래 선언은 안 바뀐다 — 다른 파일에 있어도 된다."
+      en: "The original declaration is untouched, and may live in another file."
+rule:
+  ko: "<b>능력은 나중에 붙일 수 있다.</b> 다만 저장할 자리는 못 늘린다."
+  en: "<b>Abilities can be added later.</b> Storage cannot."
+result:
+  label: { ko: "{{site.line}}행이 붙이는 것", en: "what line {{site.line}} adds" }
+  value: "{{pick.2}}.{{pick.3}}"
+  note: { ko: "원래 선언은 다른 파일일 수 있다", en: "the original may be in another file" }
+ok:
+  ko: "{{pick.2|code}}에 {{pick.3|code}}{{pick.3|josa:이,가}} 붙었습니다."
+  en: "{{pick.3|code}} was added to {{pick.2|code}}."
+payoff:
+  ko: "이걸 알면 「이 메서드 선언이 어디 있지」가 풀립니다 — 다른 파일에 붙었을 수 있습니다."
+  en: "This untangles “where is this method declared” — it may have been added in another file."
+bridge:
+  ko: >-
+    자바에는 이 표기가 <b>없습니다</b> — 남의 타입에 메서드를 못 붙여요. C# 은 비슷한 것이
+    있지만 규약을 나중에 걸지는 못합니다.
+  en: >-
+    Java <b>has no such thing</b> — a foreign type cannot gain methods. C# has something similar
+    but cannot add conformance after the fact.
+misconceptions:
+  - ko: "원래 선언이 바뀐다 — 안 바뀝니다. 능력만 따로 붙습니다."
+    en: "The original declaration changes — it does not; only abilities are attached."
+  - ko: "저장 속성도 붙일 수 있다 — 못 붙입니다. 계산해서 내주는 것만 됩니다."
+    en: "Stored fields can be added too — they cannot; only computed ones."
+  - ko: "같은 파일에만 붙일 수 있다 — 다른 파일, 다른 모듈에서도 붙습니다."
+    en: "It only works in the same file — other files and other modules work too."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>능력을 받는 타입의 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name of the type receiving the ability</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>낱말</b>입니다. 어느 타입을 다시 여는지는 그 뒤가 정해요."
+          en: "{{pick.1|code}} is the <b>word</b>. Which type is reopened comes after it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 낱말이냐 대상이냐", en: "The sharpest spot — the word or the target" }
+          code:
+            - "extension String { }"
+            - "extension Int { }   // 같은 낱말, 다른 대상"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>붙는 것</b>입니다. 받는 쪽은 그 위에 적혀 있어요."
+          en: "{{pick.3|code}} is <b>what is added</b>. The receiver is written above it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 받는 쪽이냐 붙는 것이냐", en: "The sharpest spot — receiver or addition" }
+          code:
+            - "extension String { func shout() { } }"
+            - "extension Int { func shout() { } }"
+meaning:
+  - q:
+      ko: "이 표기로 <b>저장 속성</b>을 붙이려 하면 어떻게 될까요?"
+      en: "What happens when a <b>stored field</b> is added this way?"
+    options:
+      - t:
+          ko: "빌드가 멈춘다 — 자리를 나중에 못 늘린다"
+          en: "The build stops — storage cannot be added later"
+      - t:
+          ko: "붙긴 하는데 값이 안 남는다"
+          en: "It attaches but never keeps a value"
+        diag:
+          t:
+            ko: "붙지 않습니다. 이미 만들어진 값들의 크기가 달라지므로 <b>빌드 단계</b>에서 막혀요."
+            en: "It does not attach. Values already made would change size, so it is blocked <b>at build time</b>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 저장이냐 계산이냐", en: "The sharpest spot — stored or computed" }
+            code:
+              - "extension P { var double: Int { n * 2 } }   // 된다"
+              - "extension P { var cache: Int = 0 }          // 빌드가 멈춘다"
+      - t:
+          ko: "원래 선언이 고쳐진다"
+          en: "The original declaration is edited"
+        diag:
+          t:
+            ko: "원래 선언은 안 건드립니다. 다른 모듈의 타입이면 고칠 수도 없어요."
+            en: "The original is untouched. For a type from another module it could not be edited at all."
+      - t:
+          ko: "계산해 내주는 것으로 바뀐다"
+          en: "It becomes a computed one instead"
+        diag:
+          t:
+            ko: "저절로 바뀌지 않습니다. 계산해 내주는 모양으로 <b>사람이 고쳐 적어야</b> 통과해요."
+            en: "Nothing converts on its own. It has to be <b>rewritten by hand</b> as a computed one."
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 이미 있는 타입에 <b>능력을 나중에 붙입니다</b>."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>adds an ability later</b> to an existing type."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "extension", mono: true }
+      - t: "struct"
+        mono: true
+        diag:
+          t:
+            ko: "이 낱말은 <b>새 타입</b>을 만듭니다. 이미 있는 이름을 다시 쓰면 이름이 겹쳐 빌드가 멈춰요."
+            en: "That word makes a <b>new type</b>. Reusing an existing name collides and stops the build."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 새로 만드나 다시 여나", en: "The sharpest spot — make new or reopen" }
+            code:
+              - "extension String { }   // 다시 연다"
+              - "struct String { }      // 새로 만든다"
+      - t: "protocol"
+        mono: true
+        diag:
+          t:
+            ko: "이 낱말은 <b>지킬 목록</b>을 적습니다. 목록만 만들 뿐 어떤 타입에 붙이지는 않아요."
+            en: "That word writes a <b>list to keep</b>. It creates the list; it attaches nothing."
+      - t: "class"
+        mono: true
+        diag:
+          t:
+            ko: "이 낱말은 <b>상자로 도는 새 타입</b>을 만듭니다. 역시 다시 여는 것이 아니에요."
+            en: "That word makes a <b>new box type</b>. It does not reopen anything either."
+why_gate:
+  q:
+    ko: "Swift 는 왜 저장 속성만 <b>나중에 못 붙이게</b> 할까요?"
+    en: "Why can <b>only storage</b> not be added later?"
+  choices:
+    - t:
+        ko: "저장할 자리가 늘면 이미 만들어진 값들의 크기가 달라져, 그 값을 만든 코드와 안 맞게 되기 때문"
+        en: "Because more storage changes the size of values already made, breaking the code that made them"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그럼 대신 무엇을 붙일 수 있는지도 적어 보세요."
+        en: "That is the direction. Say what can be attached instead, too."
+    - t:
+        ko: "저장 속성이 느려서"
+        en: "Because stored fields are slow"
+      ok: false
+      fb:
+        ko: "속도 문제가 아닙니다. 값의 크기가 바뀐다는 것이 이유예요."
+        en: "Speed is not it. The change in size is."
+    - t:
+        ko: "메서드가 더 중요해서"
+        en: "Because methods matter more"
+      ok: false
+      fb:
+        ko: "중요도 문제가 아닙니다. 메서드는 값의 크기를 안 바꿔서 붙는 거예요."
+        en: "Importance is not it. Methods attach because they do not change a value's size."
+queries:
+  - { grammars: [swift], file: ./extension.scm }
+examples:
+  - code: "extension String { func shout() -> String { self } }"
+    expect: { sites: 1, form: extension, hole: "extension", picks: { 1: "extension", 2: "String", 3: "shout" } }
+  - code: "extension Item { func label() -> String { name } }"
+    expect: { sites: 1, form: extension, hole: "extension", picks: { 1: "extension", 2: "Item", 3: "label" } }
+  - code: "struct Item { var name = \"\" }"
+    expect: none

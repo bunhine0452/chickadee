@@ -1,0 +1,199 @@
+schema: 1
+id: swift/some-any
+universal: null
+name: { ko: 하나로 정해진 타입과 그때그때 다른 타입, en: some and any }
+token: "some"
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 4
+prereq: [swift/generics, cs/dynamic-dispatch]
+confusions: []
+dict:
+  one_liner:
+    ko: "규약 이름 앞의 낱말이 「하나로 정해진 타입」과 「그때그때 다른 타입」을 가른다."
+    en: "The word before a contract name splits a fixed hidden type from a per-value one."
+  why:
+    ko: >-
+      규약 이름만 적으면 「그 규약을 지키는 무엇」이라는 뜻인데, 그것이 <b>둘로 갈립니다.</b>
+      앞의 낱말 하나가 그 갈림을 적어요.
+      한쪽은 <b>하나로 정해진 어떤 타입</b>입니다 — 부르는 쪽은 그것이 무엇인지 모르지만
+      컴파일러는 압니다. 그래서 값마다 타입이 달라질 수 없고, 갈래마다 다른 것을 돌려주면
+      빌드가 멈춥니다.
+      다른 쪽은 <b>값마다 다를 수 있는 타입</b>입니다. 담을 수 있는 대신 무엇인지 몰라서
+      한 겹을 더 거쳐 부릅니다.
+      화면을 그리는 코드가 앞의 것 위에 서 있어요 — 표본에서 512곳/212파일입니다.
+    en: >-
+      A bare contract name means "something that keeps this contract", and that <b>splits in
+      two.</b> One word in front records the split.
+      One side is <b>a single fixed hidden type</b>: the caller does not know what it is, but the
+      compiler does. So the type cannot vary per value, and returning a different thing from
+      different branches stops the build.
+      The other side is <b>a type that may differ per value.</b> It can be stored in a mixed
+      collection, but nothing is known about it, so calls go through one more layer.
+      Screen-drawing code stands on the first — 512 places across 212 files in the sample.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.2|code}}{{pick.2|josa:은,는}} {{pick.3|code}} 규약을 지키는 값을 내놓는다."
+      en: "{{pick.2|code}} on line {{site.line}} yields a value keeping the contract {{pick.3|code}}."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 그 타입이 하나로 정해지는지를 적는다."
+      en: "{{pick.1|code}} records whether that type is fixed to one."
+    - ko: "정해져 있으면 갈래마다 다른 것을 내놓을 수 없다."
+      en: "If it is fixed, different branches cannot yield different things."
+rule:
+  ko: "<b>하나로 정해진 쪽은 갈래마다 달라질 수 없다.</b> 그때그때 다른 쪽은 담을 수 있다."
+  en: "<b>The fixed side cannot vary per branch.</b> The per-value side can be mixed and stored."
+result:
+  label: { ko: "{{site.line}}행의 타입", en: "the type on line {{site.line}}" }
+  value: "{{pick.1}} {{pick.3}}"
+  note: { ko: "누가 아는가가 다르다", en: "who knows the type is what differs" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} {{pick.1|code}} 이라고 적혀 타입이 하나로 정해졌습니다."
+  en: "{{pick.2|code}} is written with {{pick.1|code}}, so its type is fixed to one."
+payoff:
+  ko: "이걸 알면 「갈래마다 다른 화면을 돌려주면 왜 안 되지」가 풀립니다 — 하나로 정해진 겁니다."
+  en: "This untangles “why can branches not return different screens” — the type is fixed."
+bridge:
+  ko: >-
+    자바·C# 은 규약 이름만 적으면 언제나 <b>그때그때 다른 쪽</b>입니다. Swift 는 둘을 낱말로
+    갈라 두었어요.
+  en: >-
+    In Java and C# a bare contract name is always the <b>per-value</b> side. Swift splits the two
+    with a word.
+misconceptions:
+  # swift.md §9 ⑨.
+  - ko: "「하나로 정해진」 쪽이 「아무거나」라는 뜻이다 — 정반대입니다. 하나로 못 박혀 있어요."
+    en: "The fixed side means “anything” — it is the opposite: pinned to one."
+  - ko: "갈래마다 다른 것을 돌려줘도 된다 — 하나로 정해진 쪽에서는 빌드가 멈춥니다."
+    en: "Branches may yield different things — on the fixed side the build stops."
+  - ko: "둘은 같은 뜻인데 표기만 다르다 — 무엇을 담을 수 있는지가 갈립니다."
+    en: "The two are the same with different spellings — what can be stored differs."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>타입이 하나로 정해지는지를 적은 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word recording whether the type is fixed</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 이름은 타입이 하나로 정해지는지를 안 정해요."
+          en: "{{pick.2|code}} is the <b>name</b>. A name settles nothing about the split."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 낱말이냐", en: "The sharpest spot — the name or the word" }
+          code:
+            - "var body: some View { … }"
+            - "var body: any View { … }   // 같은 이름, 다른 갈림"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>규약 이름</b>입니다. 규약은 지킬 목록이고 갈림은 그 앞 낱말이 적어요."
+          en: "{{pick.3|code}} is the <b>contract name</b> — the list to keep. The split is recorded by the word in front."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 규약이냐 갈림이냐", en: "The sharpest spot — the contract or the split" }
+          code:
+            - "some View"
+            - "some Shape   // 규약만 다르다"
+meaning:
+  - q:
+      ko: "하나로 정해진 쪽에서 갈래마다 다른 것을 돌려주면 어떻게 될까요?"
+      en: "On the fixed side, what happens when branches yield different things?"
+    options:
+      - t:
+          ko: "빌드가 멈춘다 — 타입이 하나여야 한다"
+          en: "The build stops — the type has to be one"
+      - t:
+          ko: "돌면서 알아서 골라진다"
+          en: "It sorts itself out at run time"
+        diag:
+          t:
+            ko: "그건 <b>그때그때 다른 쪽</b>의 이야기입니다. 하나로 정해진 쪽은 빌드에서 타입이 하나로 좁혀져야 해요."
+            en: "That is the <b>per-value</b> side. The fixed side has to narrow to one type at build time."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 하나냐 여럿이냐", en: "The sharpest spot — one or many" }
+            code:
+              - "if a { Text(\"x\") } else { Image(…) }   // some 이면 빌드가 멈춘다"
+              - "AnyView(Text(\"x\"))                     // 담아서 하나로 만든다"
+      - t:
+          ko: "첫 갈래의 타입으로 정해진다"
+          en: "The first branch's type wins"
+        diag:
+          t:
+            ko: "고르지 않습니다. 갈래가 다르면 <b>하나로 못 좁힌다</b>고 판정하고 멈춰요."
+            en: "Nothing is chosen. Differing branches simply <b>cannot narrow</b>, and it stops."
+      - t:
+          ko: "경고만 붙고 돈다"
+          en: "It warns and runs"
+        diag:
+          t:
+            ko: "경고가 아니라 멈춤입니다. 하나로 정해진다는 약속이 깨지는 자리라서요."
+            en: "Not a warning but a stop. It is exactly where the promise of one type breaks."
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행의 타입은 <b>하나로 정해져 있고 컴파일러가 압니다</b>."
+      en: "Choose what goes in the blank. The type on line {{site.line}} is <b>fixed to one and known to the compiler</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "some", mono: true }
+      - t: "any"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>값마다 다를 수 있는</b> 쪽입니다. 담을 수 있는 대신 무엇인지 몰라 한 겹 더 거쳐 부르고, 화면 코드에는 그 겹이 부담이에요."
+            en: "That is the <b>per-value</b> side. It can be mixed, but nothing is known, so calls go through one more layer."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 하나냐 그때그때냐", en: "The sharpest spot — fixed or per-value" }
+            code:
+              - "var body: some View { … }"
+              - "let shapes: [any Shape] = [c, s]"
+      - t: "each"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>타입 여러 개를 한 자리에</b> 받는 표기입니다. 하나로 정해지는지와는 다른 축이에요."
+            en: "That takes <b>several types in one slot</b> — a different axis from the fixed/per-value split."
+      - t: "inout"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>인자를 고쳐서 돌려주겠다</b>는 표시입니다. 타입이 아니라 넘기는 방식이에요."
+            en: "That marks <b>an argument edited in place</b>. It is about passing, not about the type."
+why_gate:
+  q:
+    ko: "화면을 그리는 코드는 왜 <b>하나로 정해진</b> 쪽을 쓸까요?"
+    en: "Why does screen-drawing code use the <b>fixed</b> side?"
+  choices:
+    - t:
+        ko: "화면이 매번 새로 만들어져 이전 것과 견주어지는데, 타입이 하나로 정해져 있어야 그 견줌을 빌드에서 짜 넣을 수 있기 때문"
+        en: "Because a screen is remade and compared each time, and only a fixed type lets that comparison be built in"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 때문에 못 쓰게 되는 코드 모양이 무엇인지도 적어 보세요."
+        en: "That is the direction. Say which code shape it rules out, too."
+    - t:
+        ko: "글자가 짧아서"
+        en: "Because the word is shorter"
+      ok: false
+      fb:
+        ko: "길이 문제가 아닙니다. 타입이 정해져야 견줌을 빌드에서 짜 넣을 수 있어요."
+        en: "Length is not it. A settled type is what lets the comparison be built in."
+    - t:
+        ko: "규약을 지키는 타입이 하나뿐이라서"
+        en: "Because only one type keeps the contract"
+      ok: false
+      fb:
+        ko: "지키는 타입은 많습니다. 한 자리에서 <b>하나로 좁혀진다</b>는 것이 요점이에요."
+        en: "Many types keep it. The point is that one place <b>narrows to one</b>."
+queries:
+  - { grammars: [swift], file: ./some-any.scm }
+examples:
+  - code: "func make() -> some View { Text(\"a\") }"
+    expect: { sites: 1, form: some-return, hole: "some", picks: { 1: "some", 2: "make", 3: "View" } }
+  - code: "struct P { var body: some View { Text(\"a\") } }"
+    expect: { sites: 1, form: some-prop, hole: "some", picks: { 1: "some", 2: "body", 3: "View" } }
+  - code: "func use(_ x: any Shape) { }"
+    expect: { sites: 1, form: any-param, hole: "any", picks: { 1: "any", 2: "x", 3: "Shape" } }
+  - code: "func plain() -> View { v }"
+    expect: none
