@@ -116,6 +116,17 @@ const ABSENCE: Readonly<Record<string, AbsenceReason>> = {
   // 파이썬 0부 — `adelie` 139 · `ECC` 63파일에서 0곳(S6). 없어서가 아니라 정적으로 볼 자리가 0곳이다 —
   // 양쪽 타입을 알아야 하는데 tree-sitter 도 정규식도 모른다. 명시 변환(285곳/80파일)이 그 자리를 가져갔다.
   'py/implicit-conversion': 'idiom',
+  // SQL 2부 — 표본(ai-pm .sql 33 · MonggleMonggle .sql 27 + 매퍼 20)에서 0곳 (D190 sql 세션).
+  // 경계가 SQL 밖에 있다 — MonggleMonggle 은 `@Transactional` 이 java 13파일, ai-pm 은 Rust `.transaction(`.
+  'sql/transaction': 'framework',
+  // 콘솔에서 치는 문장이라 파일에 안 남는다 — 이 리포 71파일까지 전부 0곳.
+  'sql/query-plan': 'idiom',
+  // `OVER (` 0곳 · `WITH` 0곳 · `EXISTS` 는 DDL 의 `IF NOT EXISTS` 뿐 · 자기 조인 0곳 — 이 규모에서는
+  // 쿼리가 평평하다(매퍼에 `IN (` 도 0곳). 서브쿼리를 끌어올릴 만큼 문장이 안 길다.
+  'sql/window-function': 'scale',
+  'sql/cte': 'scale',
+  'sql/exists': 'scale',
+  'sql/self-join': 'scale',
   // 다른 문법이 자리를 가져갔다. 표본 리포에서 `for (;;)` 0곳 · for-each 1곳 · 배열 1곳이고,
   // 그 자리를 스트림(9곳)과 람다(53곳)가 다 쓴다.
   'java/for-loop': 'idiom',

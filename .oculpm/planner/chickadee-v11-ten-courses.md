@@ -20,7 +20,7 @@ owner: claude-code
 - [x] py — 1부 남은 셋·2부 저작, parts/py.ts, 골든·린트·ABI 초록 {#l-py}
 - [x] ts — 2부 채우기(narrowing·union·class·prototype 등), parts/ts.ts {#l-ts}
 - [x] java — 0·1·2·3부 이미 섬. 남은 것(string-concat·autoboxing 자리, 골든 보강) 점검 {#l-java}
-- [~] sql — 바닥 남은 다섯 + 중심, parts/sql.ts {#l-sql}
+- [x] sql — 바닥 남은 다섯 + 중심, parts/sql.ts {#l-sql}
 - [~] rs — 0부 11 + 1·2부 전량 신규(사전 0장 → 표본 ai-pm 280장), parts/rs.ts {#l-rs}
 - [~] go — 0부 + 1·2부 전량 신규, 표본은 공개 리포, parts/go.ts {#l-go}
 - [~] c — 0부(기계 층) + 1·2부 전량 신규, 파서 ERROR 비율 실측, parts/c.ts {#l-c}
@@ -62,4 +62,5 @@ owner: claude-code
 | 2026-09-06T01:05:29+09:00 | #l-java | claude-code | ~→x |  | 47장(0부 19·1부 8·2부 20) · 골든 114/47 · string-concat·autoboxing 0부 복귀 · ERROR 0% · 병합 f69d8e1, 남은 것 map-and-set |
 | 2026-09-06T01:21:10+09:00 | #l-ts | claude-code | ~→x |  | 69장(0부 21·1부 13·2부 18) · 골든 164/84 · ERROR 0% · 병합 c2898f6 · 래칫 137/141/137/128 |
 | 2026-09-06T01:30:10+09:00 | #l-py | claude-code | ~→x |  | 42장(0부 18·1부 10·2부 14) · 골든 132/75 · ERROR 0% · 병합 06f68ca · 래칫 155/159/155/146 |
+| 2026-09-06T04:39:43+09:00 | #l-sql | claude-code | ~→x |  | 40장(0부 8·1부 8·2부 24) · 골든 90/55 · ABSENCE 6 · 병합 5dafc8f · 래칫 184/166/184/175 |
 <!-- oculpm:plan-log end -->
