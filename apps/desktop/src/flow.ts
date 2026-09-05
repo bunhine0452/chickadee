@@ -7,6 +7,7 @@ import {
   fillCommits, listRepos, loadMastery, registerRepo, recountUnknown, runIngest, writeUnitNodes,
   writeZeroChapter,
 } from '@chickadee/concepts';
+import { bakeCourse, bakeSiteless } from '@chickadee/course';
 import { loadDict } from '@chickadee/dictionary';
 import { ipc, IpcError, log } from '@chickadee/ipc-client';
 import { dayKey } from '@chickadee/scheduler';
@@ -14,6 +15,7 @@ import { errorCopy, isInternal } from '@chickadee/ui';
 
 import { stampRun } from './data/maintenance.js';
 import { loadSettings } from './data/settings.js';
+import { useCourse } from './screens/course/store.js';
 import { loadHome } from './screens/home/data.js';
 import { useUi } from './store.js';
 
@@ -126,6 +128,20 @@ export async function ingest(mode: 'full' | 'incremental'): Promise<void> {
     await recountUnknown(dict, repo.id, mastery);
     // 0장은 미지 수를 보고 담을 판을 고르므로 `recountUnknown` 뒤다 (D136).
     await writeZeroChapter(dict, repo.id, mastery);
+    // 코스 판을 굽는다 (D171·D172) — 챕터마다 다섯 단, 그리고 사용처 없는 규약·기계 개념.
+    // 실패해도 인제스트는 끝난 것이다: 화면이 챕터를 열 때 `ensureChapterBaked` 가 한 번 더 시도한다.
+    try {
+      const deps = { repoId: repo.id, rootPath: repo.rootPath, dict, now: Date.now() };
+      const baked = await bakeCourse(deps);
+      const siteless = await bakeSiteless(deps);
+      log.info('코스 판을 구웠다', {
+        repoId: repo.id, chapters: baked.length,
+        cards: baked.reduce((s, c) => s + c.stages.reduce((x, st) => x + st.baked, 0), 0),
+        proto: siteless.proto, cs: siteless.cs,
+      });
+    } catch (e) {
+      log.warn('코스 판을 굽지 못했다', { errorCode: e instanceof IpcError ? e.code : 'UNKNOWN' });
+    }
     // 06 §6.3 — 이 실행이 무엇으로 읽혔는지를 지문으로 남긴다. 다음에 열 때 지금 빌드의
     // 값과 다르면 홈이 「재인제스트 필요」를 낸다. 실패해도 인제스트는 끝난 것이다.
     await stampRun(repo.id, dict, report_.sites)
@@ -164,4 +180,21 @@ async function background(repoId: number, rootPath: string): Promise<void> {
   } catch (e) {
     log.warn('출처 채우기를 건너뛴다', { errorCode: e instanceof IpcError ? e.code : 'UNKNOWN' });
   }
+}
+
+/**
+ * 코스 화면을 연다 (D171). 세션 중에는 열지 않는다 — 원장에 남는 판이 어느 실행의 것인지가
+ * 도중에 흔들리면 안 된다(`setActive`·`openClone` 과 같은 이유). 열렸으면 참.
+ */
+export function openCourse(): boolean {
+  const ui = useUi.getState();
+  if (ui.session !== null || ui.activeId === null) return false;
+  useCourse.getState().openCourse();
+  return true;
+}
+
+/** 코스에서 홈으로. 단 오버레이가 걸려 있으면 그것도 닫는다 — 잃는 것은 진행 중인 단뿐이다. */
+export function closeCourse(): void {
+  useCourse.getState().closeCourse();
+  useUi.getState().go('home');
 }

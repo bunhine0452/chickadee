@@ -11,8 +11,10 @@ import { currentBuild, ingestFingerprint, needsReingest } from './data/maintenan
 import { applyLocale, saveSetting } from './data/settings.js';
 import { makePlateFor, pickPlateNow, type ManualResult } from './data/manual.js';
 import { previewToday } from './data/session.js';
-import { cancelIngest, ingest, refreshHome, report, todayKey } from './flow.js';
+import { cancelIngest, closeCourse, ingest, openCourse, refreshHome, report, todayKey } from './flow.js';
 import { CloneScreen } from './screens/clone/CloneScreen.js';
+import { CourseScreen } from './screens/course/CourseScreen.js';
+import { useCourse } from './screens/course/store.js';
 import { HomeScreen } from './screens/home/HomeScreen.js';
 import { conceptLabel, type HomeData } from './screens/home/data.js';
 import { FirstRun } from './screens/home/empty.js';
@@ -34,6 +36,7 @@ export function App(): React.JSX.Element {
   const ui = useUi();
   const repo = activeRepo(ui);
   const inSession = ui.session !== null;
+  const courseOpen = useCourse((s) => s.open);
   const [today, setToday] = useState<TodayPreview | null>(null);
   // 06 §6.3 — 마지막 인제스트의 지문과 지금 빌드의 지문이 다르면 홈이 배너를 낸다.
   // 지문 계산은 `parse_langs` 한 번을 부르므로 리포가 바뀔 때만 다시 잰다.
@@ -134,7 +137,29 @@ export function App(): React.JSX.Element {
   }
 
   /*
-   * 코스는 세션과 달리 **오버레이가 아니라 화면**이다 (D120 · 05 §2.1 `clone`). 일일 큐
+   * 코스 화면 (D171). 클론 코스처럼 홈을 대신하는 화면이고, 그 위에 단 오버레이가 걸린다.
+   * 어휘 관문은 **기존 교정쇄**를 여므로 세션 오버레이도 여기서 같이 그린다 — 그때 코스
+   * 화면은 `inert` 로 뒤에 남는다(05 §5).
+   */
+  if (courseOpen && repo !== null) {
+    return (
+      <>
+        <div inert={inSession ? true : undefined}>
+          <CourseScreen
+            repoId={repo.id}
+            repoName={repo.name}
+            rootPath={repo.rootPath}
+            onBack={() => closeCourse()}
+          />
+        </div>
+        {inSession ? <SessionScreen repoId={repo.id} repoName={repo.name} /> : null}
+        <Toast msg={ui.toast ?? ''} on={ui.toast !== undefined} />
+      </>
+    );
+  }
+
+  /*
+   * 클론 코스는 세션과 달리 **오버레이가 아니라 화면**이다 (D120 · 05 §2.1 `clone`). 일일 큐
    * 밖의 모드라 홈을 덮는 것이 아니라 대신하고, 그래서 Esc 의 주인이 하나로 남는다.
    * `cloneScope` 가 없으면 열지 않는다 — `openClone` 이 언제나 같이 세운다.
    */
@@ -203,8 +228,13 @@ export function App(): React.JSX.Element {
           onMake={(conceptId) => void place('gap', repo, home, conceptId)}
           onPick={(conceptId) => void place('manual', repo, home, conceptId)}
           onCourse={(unitId) => {
-            const scope = unitId === null ? { kind: 'repo' as const } : { kind: 'unit' as const, unitId };
-            if (!useUi.getState().openClone(scope)) useUi.getState().say(t('course.inSession'));
+            // 마스트헤드의 「코스」는 새 코스(D171), 대지 카드의 「코스 열기」는 그 대지의
+            // 클론 코스(D120)다 — 이름이 같은 두 문을 한 자리에서 가른다.
+            if (unitId === null) {
+              if (!openCourse()) useUi.getState().say(t('chapter.inSession'));
+              return;
+            }
+            if (!useUi.getState().openClone({ kind: 'unit', unitId })) useUi.getState().say(t('course.inSession'));
           }}
         />
       </div>
