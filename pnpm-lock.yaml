@@ -93,6 +93,9 @@ importers:
       '@chickadee/concepts':
         specifier: workspace:*
         version: link:../../packages/concepts
+      '@chickadee/course':
+        specifier: workspace:*
+        version: link:../../packages/course
       '@chickadee/dictionary':
         specifier: workspace:*
         version: link:../../packages/dictionary
@@ -203,6 +206,27 @@ importers:
       better-sqlite3:
         specifier: ^13.0.3
         version: 13.0.3
+
+  packages/course:
+    dependencies:
+      '@chickadee/cards':
+        specifier: workspace:*
+        version: link:../cards
+      '@chickadee/concepts':
+        specifier: workspace:*
+        version: link:../concepts
+      '@chickadee/dictionary':
+        specifier: workspace:*
+        version: link:../dictionary
+      '@chickadee/ipc-client':
+        specifier: workspace:*
+        version: link:../ipc-client
+      '@chickadee/store-sql':
+        specifier: workspace:*
+        version: link:../store-sql
+      '@chickadee/text':
+        specifier: workspace:*
+        version: link:../text
 
   packages/dictionary:
     dependencies:

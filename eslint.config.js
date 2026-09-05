@@ -36,6 +36,7 @@ const WORKSPACE_PACKAGES = [
   'cards',
   'scheduler',
   'grading',
+  'course',
   'ui',
   'text',
   'i18n',
@@ -58,8 +59,11 @@ const ALLOWED_DEPS = {
   cards: ['concepts', 'store-sql', 'dictionary'],
   scheduler: ['store-sql', 'concepts'],
   grading: ['ipc-client', 'store-sql', 'scheduler'],
+  // D172 — 코스 카드를 굽는 층. cards 가 concepts 의 `Hop` 을 import 하므로 concepts 에 둘 수
+  // 없고(순환), 생성기는 순수라 IPC 를 못 부른다. 그래서 cards 위·ui 아래에 한 층이 선다.
+  course: ['cards', 'concepts', 'dictionary', 'store-sql', 'ipc-client'],
   // 01 §2: `ui` 는 「위 전부」 — 단 invoke 직접 호출은 금지(= @tauri-apps 는 여전히 막힌다).
-  ui: ['cards', 'scheduler', 'grading', 'concepts', 'dictionary', 'store-sql', 'ipc-client'],
+  ui: ['course', 'cards', 'scheduler', 'grading', 'concepts', 'dictionary', 'store-sql', 'ipc-client'],
   // `text` 는 01 §2 표에 없다. 의존 없는 잎 유틸로 다룬다 — 누구나 쓰고, 아무것도 쓰지 않는다.
   text: [],
   // `i18n` 도 잎이다 (D117). `text` 의 render() 위에 카탈로그 한 겹을 얹은 것뿐이라
