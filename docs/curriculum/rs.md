@@ -2,6 +2,11 @@
 
 조사일 2026-09-04. `dictionary/rs/**` 는 아직 없다. 이 문서는 그 앞의 결정 재료다.
 
+> 2026-09-05 에 사용자 리포 넷(`ai-pm` 280장 · `file_converter` 45 · `PySpace` 8 · `ECC` 16)으로
+> 실측을 붙였다 — **[`docs/plan/rust-axis.md`](../plan/rust-axis.md)**. 이 문서의 「확인 못 한 것」
+> 중 둘이 그때 닫혔고(§8), 아직 안 반영한 설계 변경 둘(`async`/`await` 개념 추가 ·
+> `smart-pointer → shared-thread-state` 선행 끊기)은 그 계획 §2.3 에 근거와 함께 적혀 있다.
+
 ## §1 언어 좌표
 
 TIOBE 2026-08 에서 **10위 · 1.45%**(7월 1.34%로 첫 진입). CLI 도구 · 시스템/네트워크 서비스 ·
@@ -197,7 +202,7 @@ Rust 개념이다. 그 아래의 기계 사실은 §7 로 민다.
 | `cs/text-encoding` | 있음 | `string-vs-str` — `&str` 이 UTF-8 을 보증해서 바이트 색인이 막힌다 |
 | `cs/error-vs-bug` | 있음 | `result` `question-mark` |
 | `cs/compile-and-run` · `cs/linking` | 있음 | `module-visibility` |
-| **`cs/static-vs-dynamic-dispatch`** | **신규 제안** — 컴파일 시 복제냐 실행 시 표냐 | `generic-bounds` `impl-trait-for` (`impl Trait` 대 `dyn Trait`) |
+| **`cs/dynamic-dispatch`** | **있음** — 2026-09-05 확인. 신규 제안이 아니었다(`docs/plan/rust-axis.md` §1.4) | `generic-bounds` `impl-trait-for` (`impl Trait` 대 `dyn Trait`) |
 
 `cs/undefined-behavior` 가 Rust 쪽에서 가장 무겁다: Crichton 외(2023)가 36명에게서 찾은
 **1번 오개념이 정확히 이것**이다 — 학습자는 왜 거부되는지는 대체로 말하지만 거부 안 했으면
@@ -221,7 +226,7 @@ Rust 개념이다. 그 아래의 기계 사실은 §7 로 민다.
 
 ## §8 tree-sitter 현실
 
-### `grammar_abi` — 14, 그리고 `ts` 의 15 는 확인이 필요하다
+### `grammar_abi` — 14 (2026-09-05 런타임으로 확정)
 
 `~/.cargo/registry` 에 이미 받아진 크레이트의 `src/parser.c` 를 직접 읽었다.
 
@@ -230,11 +235,12 @@ Rust 개념이다. 그 아래의 기계 사실은 §7 로 민다.
 | `tree-sitter-rust` 0.23.3 | **14** | (없음) |
 | `tree-sitter-python` 0.23.6 | 14 | `py` = 14 ✓ |
 | `tree-sitter-go` 0.23.4 | 14 | (없음) |
-| `tree-sitter-typescript` 0.23.2 (`typescript/src`·`tsx/src` 둘 다) | **14** | `ts` = **15** ✗ |
+| `tree-sitter-typescript` 0.23.2 (`typescript/src`·`tsx/src` 둘 다) | **14** | `ts` = `{ typescript: 14, tsx: 14 }` ✓ |
 
-`rs` 는 14 로 적는다. `ts` 의 15 가 어디서 나온 값인지는 확인 못 했다 — 런타임
-`Language::abi_version()`(`langs.rs` 의 `LangInfo.abi`)을 돌려 보지 않았고, `grammar_abi` 는
-`ingest.ts:84` 의 캐시 키에만 쓰여 틀려도 조용하다. `rs` 를 만들기 전에 이 어긋남을 먼저 정할 것.
+`rs` 는 `{ rust: 14 }` 로 적는다. **어긋남은 없었다** — `dictionary/ts/_lang.yaml` 의 15 는
+`typescript` 가 아니라 **`javascript` 키**의 값이다(tree-sitter-javascript 0.25 → abi 15).
+런타임 `Language::abi_version()` 을 2026-09-05 에 직접 돌려 rust 14 · typescript 14 · tsx 14 ·
+java 14 를 확인했다(`docs/plan/rust-axis.md` §1.4).
 
 named node kinds 169개. 시스템 쿼리는 `use_declaration`(`_imports.scm`)과
 `function_item`·`impl_item`·`mod_item`·`struct_item`(`_blocks.scm`)으로 선다.
@@ -257,8 +263,9 @@ attribute > token_tree` 다. 「이 구조체가 `Clone` 을 구현한다」를 
 
 **④ `<` 의 두 뜻.** `a < b` 의 비교와 `Vec<T>` 의 타입 인자가 같은 글자다. tree-sitter-rust 는
 `binary_expression` 과 `generic_type` 을 따로 내므로 파이썬의 연쇄 비교처럼 형제 앵커로 잘라낼
-필요는 **없어 보인다** — 골든으로 확인 못 했다. `rs/comparison` 쿼리가 `(binary_expression
-operator: "<")` 만 잡는지 먼저 볼 것. turbofish `collect::<Vec<_>>()` 는 또 다른 노드(`generic_function`)다.
+필요가 **없다** — 2026-09-05 에 실측했다. `(binary_expression operator: "<")` 가 ai-pm 116,979줄에서
+**76개**, `(generic_type)` 이 **4,771개**로 갈리고 스니펫에서도 안 섞인다. turbofish
+`collect::<Vec<_>>()` 는 또 다른 노드(`generic_function`, ai-pm 580개)다.
 
 **⑤ `mut` 이 두 자리에서 같은 이름이다.** `let mut x` 는 `let_declaration` + `mutable_specifier`,
 `&mut x` 는 `reference_expression` + 같은 `mutable_specifier` 라 부모로 갈라야 한다. `if let` 은
@@ -312,8 +319,8 @@ D148 ③ 대로 목록만 참고했고, 여기서는 **겹치지 않는 쪽이 �
 
 **확인 못 한 것**
 
-1. `dictionary/ts/_lang.yaml` 의 `grammar_abi: 15` 대 측정값 14. 런타임 `abi_version()` 을 안 돌려 봤다.
-2. `a < b` 와 `Vec<T>` 가 `.scm` 에서 실제로 안 섞이는지 — grammar.js 만 보고 판단했고 골든이 없다.
+1. ~~`dictionary/ts/_lang.yaml` 의 `grammar_abi: 15` 대 측정값 14~~ — **닫혔다**(§8). 15 는 `javascript` 키였다.
+2. ~~`a < b` 와 `Vec<T>` 가 `.scm` 에서 실제로 안 섞이는지~~ — **닫혔다**(§8 ④). 실측 76 대 4,771.
 3. 「E0382 ~30%」처럼 도는 빌림 오류 빈도. 2차 요약뿐이라 본문에 수치로 쓰지 않았다.
 4. 바이브 코딩 Rust 의 `.clone()`·`Arc<Mutex<_>>`·`unwrap()` 편향. 블로그·기술 보고서 수준의 관찰이고 계량 근거가 없다.
 5. `rs/move` 가 D154 의 UNION 가지를 실제로 타는지 — SQL 조건이 맞는 것까지만 확인했고 돌려 보지 않았다.
