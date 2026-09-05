@@ -23,7 +23,7 @@ owner: claude-code
 - [x] 각 언어 §N.6 diff 를 등록부 행 하나(D185)로 묶고, 순서 변경은 curriculum 문서 본문에 반영 {#k-diffs}
 - [x] docs/curriculum/<lang>.md 의 「상한 24」 언급을 D184 로 고친다 (세션 중 충돌 회피로 미뤄 둔 것) {#k-cap-mentions}
 - [x] docs/curriculum/README.md 에 §13 학습법 요약 표(언어 · 기계 한 문장 · 특유 연습 · 근거 강도) · docs/program/README.md 에 pedagogy.md 행 {#k-readme}
-- [ ] typecheck · lint · test:unit · gates · design:check · contrast · motion → 커밋(영어) → 푸시 → gh run watch {#k-gates}
+- [x] typecheck · lint · test:unit · gates · design:check · contrast · motion → 커밋(영어) → 푸시 → gh run watch {#k-gates}
 
 ## Q · 사용자 결정 (멈춤표) {#q-user}
 - [ ] 물을 것 — build 형식(거꾸로 만들기)을 열려면 러너를 리포 밖 스니펫·자바 외 언어로 넓혀야 한다. 지금 여나 {#q-build-format}
@@ -50,4 +50,5 @@ owner: claude-code
 | 2026-09-05T19:35:01+09:00 | #k-cap-mentions | claude-code | ☐→x |  | py·ts·c·cpp·rs·swift·java·csharp 의 결정 지점에 D184 메모. go·sql 은 원래 안 넘쳐 손 안 댐 |
 | 2026-09-05T19:35:03+09:00 | #k-readme | claude-code | ☐→x |  | README §13 (기계 표 · 겹친 자리 다섯 · 미적용 diff · 그림 신청 · 근거 한계) · program/README 에 pedagogy 행(J0) |
 | 2026-09-05T19:35:20+09:00 | #k-formats | claude-code | ☐→x |  | fundamentals.md §13 — 새 형식 둘(order·trace-table) · 확장 여섯 · table 배치 셋 · 안 만들 것 둘 |
+| 2026-09-05T19:42:27+09:00 | #k-gates | claude-code | ☐→x | .oculpm/journal/20260905/Chores/1934_chore_ten-language-learning-methods-integration.md | 로컬 게이트 전부 초록 · 푸시 2904898 · CI 8잡 성공 (run 33961093472) |
 <!-- oculpm:plan-log end -->
