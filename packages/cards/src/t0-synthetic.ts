@@ -105,6 +105,9 @@ const ABSENCE: Readonly<Record<string, AbsenceReason>> = {
   // TS 0부 — `ai-pm` 613 · `ECC` 410파일에서 0곳(S5). 쿼리가 잡는 것은 한쪽이 리터럴인 식뿐이고
   // 실제 강제 변환은 `'…' + name` 꼴이라 소스에 타입이 없다 — 명시 변환과 타입 검사기가 가져갔다.
   'ts/implicit-conversion': 'idiom',
+  // 파이썬 0부 — `adelie` 139 · `ECC` 63파일에서 0곳(S6). 없어서가 아니라 정적으로 볼 자리가 0곳이다 —
+  // 양쪽 타입을 알아야 하는데 tree-sitter 도 정규식도 모른다. 명시 변환(285곳/80파일)이 그 자리를 가져갔다.
+  'py/implicit-conversion': 'idiom',
   // 다른 문법이 자리를 가져갔다. 표본 리포에서 `for (;;)` 0곳 · for-each 1곳 · 배열 1곳이고,
   // 그 자리를 스트림(9곳)과 람다(53곳)가 다 쓴다.
   'java/for-loop': 'idiom',

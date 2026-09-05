@@ -85,6 +85,12 @@ const DIFF_MAX_LINES = 3_000;
  * 첫 메서드 앞에만 있다. 그래서 첫 칸 앞의 창을 블록으로 하나 더 세운다.
  */
 const HEAD_MAX_LINES = 60;
+/**
+ * `cs/` 하나가 창을 빌리려고 두드려 볼 언어 개념의 수. 빌려 주는 쪽이 열을 넘는 `cs/` 가
+ * 있어서(0부 · D187) 전부 두드리면 개념 수 × 언어 수만큼 질의가 는다 — 그래도 앞에서 자르기
+ * 전에 리포의 언어로 먼저 거른다(`bakeSiteless` 갈래 ②).
+ */
+const LENDER_PROBES = 6;
 /** 판정용 테스트로 읽어 둘 리포 테스트 파일 수·크기 상한 (D180). 스프링 리포의 테스트는 짧다. */
 const TEST_FILES_MAX = 40;
 const TEST_LINES_MAX = 600;
@@ -407,12 +413,34 @@ export async function bakeSiteless(deps: BakeDeps): Promise<SitelessBake> {
   }
 
   // 갈래 ②  낱말도 없는 개념 — 자기를 선행으로 가리키는 언어 개념의 창을 **빌린다** (`cs/`).
+  //
+  // 후보를 자르기 전에 **이 리포에 있는 언어**로 먼저 거른다. `lenders` 는 id 알파벳순으로
+  // 주는데, 0부(D187)가 언어마다 같은 `cs/` 를 가리키면서 목록이 길어졌다 — 그러면 아래의
+  // `LENDER_PROBES` 개가 앞자리 언어로만 차고, 그 언어가 리포에 없으면 질의가 전부 0행을
+  // 내서 판이 안 선다. 2026-09-05 실측: `cs/floating-point` 의 빌려 주는 쪽이 열이고
+  // 앞의 여섯이 java·py 뿐이라 TS 리포에서 창을 못 찾는다(`cs/type` 은 py 가 들어오기
+  // **전에** 이미 java 일곱에 밀려 같은 자리였다). 거르는 값은 파일 확장자이고 표는
+  // `_lang.yaml` 이 이미 든다.
+  const extToLang = new Map<string, string>();
+  for (const [lang, meta] of dict.langs) {
+    for (const exts of Object.values(meta.extensions)) {
+      for (const ext of exts ?? []) extToLang.set(ext, lang);
+    }
+  }
+  const repoLangs = new Set<string>();
+  for (const f of all) {
+    const dot = f.path.lastIndexOf('.');
+    const lang = dot < 0 ? undefined : extToLang.get(f.path.slice(dot));
+    if (lang !== undefined) repoLangs.add(lang);
+  }
   for (const ns of SITELESS_NAMESPACES) {
     for (const [target, langIds] of lenders(dict.concepts, ns)) {
       const concept = dict.concepts.get(target);
       if (concept === undefined || baked.has(target)) continue;
       const candidates: LenderSite[] = [];
-      for (const lenderId of langIds.slice(0, 6)) {
+      // 리포의 언어가 하나도 안 걸리면(확장자 표에 없는 리포) 옛 동작 그대로 앞에서 자른다.
+      const mineFirst = langIds.filter((id) => repoLangs.has(langOf(id) ?? ''));
+      for (const lenderId of (mineFirst.length > 0 ? mineFirst : langIds).slice(0, LENDER_PROBES)) {
         for (const row of await ipc.store.query('card.sites_for_concept', { repoId, conceptId: lenderId, limit: 3 })) {
           candidates.push({ conceptId: lenderId, site: fromConceptSiteRow(row), path: row.path });
         }

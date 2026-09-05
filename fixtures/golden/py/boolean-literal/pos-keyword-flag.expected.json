@@ -1,0 +1,28 @@
+[
+  {
+    "queryId": "py/boolean-literal",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "true",
+    "startLine": 2,
+    "startCol": 43,
+    "endLine": 2,
+    "endCol": 47,
+    "nodeKind": "true",
+    "inError": false
+  },
+  {
+    "queryId": "py/boolean-literal",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "true",
+    "startLine": 2,
+    "startCol": 43,
+    "endLine": 2,
+    "endCol": 47,
+    "nodeKind": "true",
+    "inError": false
+  }
+]

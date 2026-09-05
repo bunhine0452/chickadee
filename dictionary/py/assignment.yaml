@@ -68,6 +68,21 @@ misconceptions:
     en: "Assigning to an undeclared name stops — in Python that line is what makes the name."
   - ko: "함수 안에서 넣으면 바깥 이름이 바뀐다 — 안에서 넣으면 그 함수 안의 새 이름이 됩니다."
     en: "Assigning inside a function changes the outer name — it makes a new name inside instead."
+  # 아래 둘은 `progmiscon` 의 `VariablesHoldObjects`·`VariablesHoldExpressions` 다
+  # (`py.md` §9 #15·#16 · `py-learning.md` §11.6 ③). 앞의 것은 §11.1 이 세운 기계
+  # (「이름은 가리킬 뿐 담지 않는다」)의 **정면 반대말**이라 이 개념에 붙어야 한다.
+  - ko: >-
+      이름이 값을 통째로 담는다 — <b>가리킬 뿐</b>입니다. 언어 참조가 이 줄을 「이름을 값에
+      묶는다」로 적었고, 그래서 같은 값을 이름 둘이 가리킬 수 있어요.
+    en: >-
+      A name holds the value itself — it only <b>points</b>. The language reference calls this line
+      "binding a name to a value," which is why two names can point at one value.
+  - ko: >-
+      오른쪽에 적은 식이 그대로 저장된다 — 넣기 <b>전에</b> 접혀서 값 하나가 됩니다.
+      나중에 오른쪽의 이름이 바뀌어도 이미 담긴 값은 안 따라가요.
+    en: >-
+      The expression on the right is stored as written — it folds to one value <b>before</b> the
+      putting. Change a name on the right later and what was stored does not follow.
 
 point:
   - q:

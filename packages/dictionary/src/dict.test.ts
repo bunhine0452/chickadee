@@ -199,15 +199,16 @@ const DEBT_RATCHET: Record<string, number> = {
   // → 65(D166, java 관문 0 과 OOP 축 열셋) → **73**(D177, 정식 자바 코스 3부의 자바 개념 여덟).
   // → **104**(D187 — 0부 「값과 식」: java 14 신설+5 갱신 · ts 11 · sql 9 · common 3 · cs 2. 첫 물결 합류 시점의
   //   `충족/대상` 을 그대로 옮겼다 — 병렬 저작 중엔 어느 세션도 확정할 수 없어서 오케스트레이터가 잠근다).
-  'blank-or-reason': 104,
-  'point-picks': 100,
-  'why-gate': 104,
+  // → **120**(둘째 물결 — 파이썬 0부 16 신설로 대상이 찼다. one_liner 는 95 → 111).
+  'blank-or-reason': 120,
+  'point-picks': 116,
+  'why-gate': 120,
   // 6 → 11(D147) → 18(D148) → 26(D150) → **33**(D152, 파이썬 바닥 여덟). D150 이 「먼저 읽기」를
   // 0장 소속에서 「겹 0」으로 넓혀 `essential` 전량이 대상이 됐다. 새로 든 넷(`array-filter`
   // 의 `filter` · `array-map-immutable` 의 `map` · `arrow-function` 의 `=>` · 그리고
   // `array-destructuring` 은 영문 관사 `a` 가 정답 토큰과 겹쳤다)을 고쳐 채웠다.
   // 33 → 36(java 바닥 셋) → 38(sql 바닥 둘) → 42(java 바닥 여덟 완성) → 57(D166) → **65**(D177).
-  'zero-one-liner': 95,
+  'zero-one-liner': 111,
 };
 
 describe('사전 저작 부채 (D145)', () => {

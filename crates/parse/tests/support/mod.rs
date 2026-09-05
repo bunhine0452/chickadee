@@ -60,6 +60,12 @@ pub const DIRS: &[Dir] = &[
         ext: "java",
         lang: Some("java"),
     },
+    Dir {
+        name: "py",
+        grammar: "python",
+        ext: "py",
+        lang: Some("py"),
+    },
 ];
 
 pub fn root() -> PathBuf {

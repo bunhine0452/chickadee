@@ -1,0 +1,28 @@
+[
+  {
+    "queryId": "py/value-bits",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "site",
+    "form": "radix",
+    "startLine": 4,
+    "startCol": 11,
+    "endLine": 4,
+    "endCol": 16,
+    "nodeKind": "integer",
+    "inError": false
+  },
+  {
+    "queryId": "py/value-bits",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "pick.1",
+    "form": "radix",
+    "startLine": 4,
+    "startCol": 11,
+    "endLine": 4,
+    "endCol": 16,
+    "nodeKind": "integer",
+    "inError": false
+  }
+]

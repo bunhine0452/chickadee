@@ -1,0 +1,41 @@
+[
+  {
+    "queryId": "py/return-statement",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "return",
+    "startLine": 3,
+    "startCol": 8,
+    "endLine": 3,
+    "endCol": 14,
+    "nodeKind": "return_statement",
+    "inError": false
+  },
+  {
+    "queryId": "py/return-statement",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "return",
+    "startLine": 3,
+    "startCol": 8,
+    "endLine": 3,
+    "endCol": 14,
+    "nodeKind": "return",
+    "inError": false
+  },
+  {
+    "queryId": "py/return-statement",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "hole",
+    "form": "return",
+    "startLine": 3,
+    "startCol": 8,
+    "endLine": 3,
+    "endCol": 14,
+    "nodeKind": "return",
+    "inError": false
+  }
+]

@@ -1,0 +1,54 @@
+[
+  {
+    "queryId": "py/list-literal",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "items",
+    "startLine": 2,
+    "startCol": 11,
+    "endLine": 2,
+    "endCol": 20,
+    "nodeKind": "list",
+    "inError": false
+  },
+  {
+    "queryId": "py/list-literal",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "items",
+    "startLine": 2,
+    "startCol": 11,
+    "endLine": 2,
+    "endCol": 12,
+    "nodeKind": "[",
+    "inError": false
+  },
+  {
+    "queryId": "py/list-literal",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "items",
+    "startLine": 2,
+    "startCol": 12,
+    "endLine": 2,
+    "endCol": 13,
+    "nodeKind": "integer",
+    "inError": false
+  },
+  {
+    "queryId": "py/list-literal",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "items",
+    "startLine": 2,
+    "startCol": 19,
+    "endLine": 2,
+    "endCol": 20,
+    "nodeKind": "]",
+    "inError": false
+  }
+]

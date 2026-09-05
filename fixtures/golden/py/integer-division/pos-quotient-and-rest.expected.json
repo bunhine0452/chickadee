@@ -1,0 +1,54 @@
+[
+  {
+    "queryId": "py/integer-division",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "site",
+    "form": "divmod",
+    "startLine": 2,
+    "startCol": 11,
+    "endLine": 2,
+    "endCol": 30,
+    "nodeKind": "call",
+    "inError": false
+  },
+  {
+    "queryId": "py/integer-division",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "pick.1",
+    "form": "divmod",
+    "startLine": 2,
+    "startCol": 11,
+    "endLine": 2,
+    "endCol": 17,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "py/integer-division",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "pick.2",
+    "form": "divmod",
+    "startLine": 2,
+    "startCol": 17,
+    "endLine": 2,
+    "endCol": 18,
+    "nodeKind": "(",
+    "inError": false
+  },
+  {
+    "queryId": "py/integer-division",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "pick.3",
+    "form": "divmod",
+    "startLine": 2,
+    "startCol": 18,
+    "endLine": 2,
+    "endCol": 23,
+    "nodeKind": "identifier",
+    "inError": false
+  }
+]

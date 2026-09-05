@@ -1,0 +1,247 @@
+schema: 1
+id: py/number-literal
+# 0부 축 A. 보편형은 `common/integer-literal` 이다 (D187 ④ 로 쪼갠 뒤의 새 참조) — 그 판이
+# 「자릿수가 정해진 상자」를 이미 가르치므로 파이썬에서 다시 배울 것은 **점 하나가 종류를
+# 가른다**는 것뿐이다. 소수 쪽의 기계는 `py/float-inexact` 가 진다.
+universal: common/integer-literal
+name: { ko: 숫자 값, en: Number value }
+token: "0"
+grammars: [python]
+framework: null
+essential: true
+difficulty: 1
+prereq: [cs/type]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "따옴표 없이 적은 값. 점이 있느냐 없느냐로 종류가 갈린다."
+    en: "A value written without quotes. A dot decides which kind it is."
+  why:
+    ko: >-
+      파이썬에는 타입을 적는 줄이 없습니다. 그래서 {{site.line}}행의
+      {{pick.2|code}}{{pick.2|josa:이,가}} 무슨 종류인지는 <b>오른쪽에 적힌 모양</b>이 정해요.
+      점이 없으면 정수이고 점이 있으면 소수입니다 — 눈에는 거의 같은데 기계 안에서는
+      담기는 방식이 완전히 다릅니다.
+      <code>1 == 1.0</code> 은 참인데 <code>type(1) is type(1.0)</code> 은 거짓입니다.
+      값이 같은 것과 종류가 같은 것은 다른 물음이에요.
+    en: >-
+      Python has no line that writes a type down. So what kind {{pick.2|code}} holds on line
+      {{site.line}} is decided by <b>the shape written on the right</b>: no dot means a whole
+      number, a dot means a decimal. They look almost alike, yet the machine stores them in
+      completely different ways. <code>1 == 1.0</code> is true while
+      <code>type(1) is type(1.0)</code> is false — same value and same kind are two questions.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:을,를}} 그 모양대로 값 하나로 만든다."
+      en: "{{pick.1|code}} on line {{site.line}} becomes one value in the shape it was written."
+    - ko: "점이 있으면 소수, 없으면 정수로 종류가 정해진다."
+      en: "A dot makes it a decimal; no dot makes it a whole number."
+    - ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 그 값을 {{pick.2|code}} 라는 이름에 붙인다."
+      en: "{{pick.3|code}} attaches that value to the name {{pick.2|code}}."
+
+rule:
+  ko: >-
+    <b>점 하나가 종류를 가른다.</b> 값이 같아도 종류는 다를 수 있고, 파이썬은 그 종류를
+    적는 자리가 따로 없다.
+  en: >-
+    <b>One dot decides the kind.</b> Equal values can be different kinds, and Python has no separate
+    place to write that kind down.
+result:
+  label:
+    ko: "{{site.line}}행 뒤의 {{pick.2}}"
+    en: "{{pick.2}} after line {{site.line}}"
+  value: "{{pick.1}}"
+  note:
+    ko: "적힌 모양이 종류를 정한다"
+    en: "the written shape sets the kind"
+ok:
+  ko: >-
+    {{pick.2|code}} 에 {{pick.1|code}}{{pick.1|josa:이,가}} 담겼습니다. 종류는 <b>적힌 모양</b>이 정하고,
+    나중에 다른 종류를 넣으면 그때 또 바뀝니다.
+  en: >-
+    {{pick.2|code}} now holds {{pick.1|code}}. The kind comes from <b>the shape written</b>, and
+    putting another kind in later changes it again.
+payoff:
+  ko: >-
+    「왜 <code>2</code> 라고 적었는데 <code>2.0</code> 이 찍히나」가 여기서 풀립니다 —
+    셈 어딘가에 점이 있었기 때문이에요.
+  en: >-
+    “Why does <code>2</code> print as <code>2.0</code>” answers itself here: somewhere in the
+    arithmetic there was a dot.
+bridge:
+  ko: >-
+    자바는 이 종류를 <b>이름 앞에</b> 적고(<code>int n = 1</code>) 파이썬은 안 적습니다.
+    안 적는다고 없는 것이 아니라 <b>값이 들고 다니는</b> 거예요.
+  en: >-
+    Java writes this kind <b>before the name</b> (<code>int n = 1</code>); Python does not. Not
+    writing it does not remove it — <b>the value carries it</b>.
+misconceptions:
+  - ko: >-
+      <code>1</code> 과 <code>1.0</code> 은 같다 — 값을 견주면 참이고 종류를 견주면 거짓입니다.
+      둘을 한 사실로 알면 나중에 종류가 어긋난 자리를 못 찾아요.
+    en: >-
+      <code>1</code> and <code>1.0</code> are the same — true by value, false by kind. Holding those
+      as one fact hides the spot where the kinds part later.
+  - ko: >-
+      파이썬에는 타입이 없다 — 적는 <b>자리</b>가 없을 뿐 값마다 종류가 있습니다.
+    en: >-
+      Python has no types — it has no <b>place to write them</b>, but every value has a kind.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>이 이름의 종류를 정하는 것</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the thing that decides this name's kind</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 파이썬에서 이름은 종류를
+            안 갖고, 그 자리에 다른 종류를 넣으면 그대로 바뀌어요.
+          en: >-
+            {{pick.2|code}} is the <b>name</b>. In Python a name has no kind of its own; put another
+            kind in and it simply changes.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 이름이냐 값이냐"
+            en: "The sharpest spot — the name or the value"
+          code:
+            - "n = 1      # 정수가 들어 있다"
+            - "n = 1.0    # 같은 이름, 다른 종류"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} <b>넣는 일</b>을 하는 기호입니다. 무엇이
+            들어가는지는 오른쪽이 정해요.
+          en: >-
+            {{pick.3|code}} is the symbol that <b>puts the value in</b>. What goes in is decided by
+            the right-hand side.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 넣는 일과 담기는 것"
+            en: "The sharpest spot — the putting or the thing put"
+          code:
+            - "n = 1      # 기호는 같다"
+            - "n = 1.0    # 갈리는 것은 오른쪽이다"
+
+meaning:
+  - q:
+      ko: "<code>type(1) is type(1.0)</code> 은 어떻게 될까요?"
+      en: "How does <code>type(1) is type(1.0)</code> come out?"
+    hint:
+      ko: "값이 같은 것과 종류가 같은 것은 다른 물음입니다."
+      en: "Same value and same kind are two different questions."
+    options:
+      - t:
+          ko: "거짓 — 값은 같아도 종류가 다르다"
+          en: "False — same value, different kinds"
+      - t:
+          ko: "참 — <code>1 == 1.0</code> 이 참이니까"
+          en: "True — because <code>1 == 1.0</code> is true"
+        diag:
+          t:
+            ko: >-
+              값을 견주면 참이 맞습니다. 그런데 여기서 묻는 것은 <b>종류</b>이고, 종류는
+              점이 있느냐로 갈려요.
+            en: >-
+              By value that holds. What is asked here is the <b>kind</b>, and the kind parts on
+              whether a dot was written.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 값이냐 종류냐"
+              en: "The sharpest spot — value or kind"
+            code:
+              - "1 == 1.0          # True"
+              - "type(1) == type(1.0)   # False"
+      - t:
+          ko: "파이썬에는 종류가 없어서 읽지 못하고 멈춘다"
+          en: "Python has no kinds, so it stops and cannot read it"
+        diag:
+          t:
+            ko: >-
+              멈추지 않습니다. 종류를 <b>적는 자리</b>가 없을 뿐이고, 값마다 종류가 있어서
+              그것을 물어보는 함수까지 있어요.
+            en: >-
+              It does not stop. Python only lacks a <b>place to write</b> the kind; every value has
+              one, and there is even a function to ask for it.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 안 적는 것과 없는 것"
+              en: "The sharpest spot — unwritten or absent"
+            code:
+              - "type(1)      # <class 'int'>"
+              - "type(1.0)    # <class 'float'>"
+      - t:
+          ko: "둘 다 숫자라 같은 종류다"
+          en: "Both are numbers, so the kind is the same"
+        diag:
+          t:
+            ko: >-
+              사람이 부르는 이름은 둘 다 「숫자」가 맞습니다. 기계는 <b>담는 방식</b>으로
+              나누고, 그 둘은 자리를 세는 법부터 달라요.
+            en: >-
+              People call both “numbers,” and that is fair. The machine divides them by <b>how they
+              are stored</b>, and the two count their slots differently from the start.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 부르는 이름과 담는 방식"
+              en: "The sharpest spot — what we call it, how it is stored"
+            code:
+              - "(1).bit_length()      # 1"
+              - "(1.0).hex()           # '0x1.0000000000000p+0'"
+
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 개념의 정답은 사용처마다 다른 리터럴(`1`·`0.5`·`30`)이라 빈칸형의
+  첫 보기를 사전에 고정할 수 없다 (`t0-blank` 가 첫 보기와 구멍 원문을 견준다). 종류를 묻는
+  일은 뜻 고르기가, 자리를 묻는 일은 지목형이 한다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 종류를 안 적고도 될까요?"
+    en: "Why does line {{site.line}} get away without writing the kind?"
+  choices:
+    - t:
+        ko: "값이 종류를 들고 다녀서 — 이름이 아니라 값에 붙어 있다"
+        en: "Because the value carries its kind — it sits on the value, not the name"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그러면 같은 이름에 다른 종류를 넣었을 때 무엇이 달라질지도 적어 보세요."
+        en: >-
+          That is the direction. Add what changes when another kind goes into the same name.
+    - t:
+        ko: "파이썬이 모든 수를 같은 종류로 다뤄서"
+        en: "Because Python treats every number as one kind"
+      ok: false
+      fb:
+        ko: >-
+          그렇게 하는 언어는 자바스크립트입니다. 파이썬은 정수와 소수를 <b>끝까지 갈라</b> 둡니다.
+        en: >-
+          The language that does that is JavaScript. Python keeps whole numbers and decimals
+          <b>apart all the way down</b>.
+    - t:
+        ko: "종류가 실행할 때 정해져서 미리 적을 수 없어서"
+        en: "Because the kind is set at run time and cannot be written ahead"
+      ok: false
+      fb:
+        ko: >-
+          적을 수는 있습니다 — 힌트로 적는 자리가 따로 있고, 다만 그것이 검사를 하지는 않아요.
+        en: >-
+          It can be written: there is a place for hints. What that place does not do is check.
+
+queries:
+  - { grammars: [python], file: ./number-literal.scm }
+
+examples:
+  - code: "limit = 30             # limit -> 30 (int)"
+    expect: { sites: 1, form: int, picks: { 1: "30", 2: "limit", 3: "=" } }
+  - code: "ratio = 0.5            # ratio -> 0.5 (float)"
+    expect: { sites: 1, form: float, picks: { 1: "0.5", 2: "ratio", 3: "=" } }
+  - code: "wait(timeout=30)       # timeout -> 30 (int)"
+    expect: { sites: 1, form: kwarg, picks: { 1: "30", 2: "timeout", 3: "=" } }
+  - code: 'label = "30"           # label -> "30" (str)'
+    expect: none
+  - code: "total = price + 1      # price + 1 -> 새 값 (int)"
+    expect: none
