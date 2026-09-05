@@ -603,3 +603,110 @@ Exercism C 트랙에 개념 연습이 없어 D148 ⑤의 「같은 모양의 con
 800줄 상한을 넘어 [`c-learning.md`](./c-learning.md) 로 분리했다 — 기계 **둘**(자리·약속)과 그것이
 덮는 오개념 수 · 교재 다섯의 순서 실측 · UB 판정이 T1 을 통과하는 이유 · 오답 분류 셋 신청 ·
 「C 를 코스에서 빼고 `cs/` 의 실습 표기로」 권고 · 바꿀 것 diff.
+
+---
+
+## §12 실물이 된 것 — 실측 (2026-09-06 · D190)
+
+`dictionary/c/` 가 섰다. 파서는 D190 이 링크했다(`tree-sitter-c` 0.24.2 · ABI 15 — §8 의 측정과 같다).
+
+### 장수
+
+| 부 | 개념 | id |
+|---|---|---|
+| 0부 값과 식 | 12 | §0.1 표 그대로 — `declaration` `assignment` `number-literal` `integer-type` `overflow` `float-type` `char-literal` `truthiness` `arithmetic` `comparison` `operator-precedence` `conversion` |
+| 1부 문과 흐름 | 8 | §0.6 — `if-statement` `while-loop` `for-loop` `function-definition` `function-call` `return-statement` `string-literal` `array-declaration` |
+| 2부 포인터와 메모리 | 9 | §0.6 — `pointer-declaration` `address-of` `dereference` `null-check` `sizeof` `struct-definition` `member-access` `array-decay` `malloc-free` |
+| 2부 뒤 빌드와 규격 | 9 | §0.6 의 3부 아홉 — `header-include` `function-prototype` `const` `typedef` `macro-define` `conditional-compilation` `function-pointer` `static-storage` `undefined-behavior` |
+| **합** | **38** | `essential` 38 · 0부 신규 12(README §12 규약 8 의 상한 열둘에 정확히) |
+
+YAML **39장 8,948줄**(`_lang.yaml` 포함, 개념당 약 228줄) · `.scm` **40장 775줄**(`_imports`·`_blocks` 포함) ·
+골든 **178**(양성 116 · 음성 62). 빈칸형은 27장, `no_hole_reason` 11장(`overflow` `float-type`
+`truthiness` `function-definition` `function-call` `array-declaration` `array-decay` `function-prototype`
+`typedef` `function-pointer` `undefined-behavior` — 정답이 값이거나 사용처마다 다른 낱말이거나 구두점).
+
+**3부가 비었다.** 문서의 3부 「빌드와 규격」 아홉은 `packages/course/src/parts/c.ts` 에서 **2부 끝에**
+잇는다 — 등록부 시험(`parts/index.test.ts`)이 3부를 「프레임워크 사전 전량이거나 빈 목록」으로
+못박았고 C 에는 프레임워크 사전이 없다. §0.6 의 「한 프로젝트」 층은 순서로만 남고 부 번호로는 안 남는다.
+
+### 표본 — `jq` (사용자 리포에는 C 가 0장이다, §0.7)
+
+`jqlang/jq` master 의 `src/` — `.c` 21장 · `.h` 21장(`decNumber/` 제외), 2026-09-06 tarball.
+측정은 `crates/parse` 의 `compile`+`scan` 을 임시 시험으로 돌려 `@site` 캡처 중 `in_error` 가
+아닌 것을 셌다(곳 / 파일). 38개념 전부 **0곳이 아니다.**
+
+| 개념 | 곳 | 파일 | 개념 | 곳 | 파일 |
+|---|---:|---:|---|---:|---:|
+| `function-call` | 7,088 | 27 | `dereference` | 413 | 17 |
+| `member-access` | 3,165 | 18 | `static-storage` | 360 | 22 |
+| `comparison` | 1,908 | 25 | `function-prototype` | 358 | 26 |
+| `assignment` | 1,633 | 21 | `const` | 316 | 31 |
+| `if-statement` | 1,616 | 24 | `conversion` | 248 | 20 |
+| `arithmetic` | 1,137 | 21 | `char-literal` | 197 | 12 |
+| `declaration` | 1,093 | 25 | `null-check` | 174 | 15 |
+| `pointer-declaration` | 1,036 | 33 | `number-literal` | 169 | 18 |
+| `return-statement` | 1,009 | 24 | `for-loop` | 137 | 15 |
+| `operator-precedence` | 774 | 24 | `sizeof` | 133 | 19 |
+| `integer-type` | 741 | 29 | `while-loop` | 109 | 17 |
+| `macro-define` | 636 | 22 | `typedef` | 73 | 12 |
+| `address-of` | 609 | 19 | `array-declaration` | 64 | 13 |
+| `function-definition` | 609 | 24 | `overflow` | 48 | 3 |
+| `conditional-compilation` | 568 | 34 | `malloc-free` | 47 | 10 |
+| `truthiness` | 553 | 22 | `struct-definition` | 43 | 19 |
+| `header-include` | 499 | 38 | `float-type` | 23 | 3 |
+| `string-literal` | 475 | 17 | `function-pointer` | 13 | 5 |
+| | | | `array-decay` | 5 | 2 |
+| | | | `undefined-behavior` | 5 | 2 |
+
+**얇은 다섯**(`overflow` `float-type` `function-pointer` `array-decay` `undefined-behavior`)은
+`thin_threshold`(min_files 2 · min_sites 3)를 넘기는 하되 파일 셋 이하다 — 다른 C 리포에서는
+0곳일 수 있고, 그때의 사유는 `t0-synthetic.ts` 의 `ABSENCE` 표 몫이다(보고에 초안). `function-call`
+7,088 은 매크로 호출까지 센 수다 — `jv_string("…")` 류가 그대로 `call_expression` 이다.
+
+### 파서 — 실코드 20파일 ERROR 비율 (00 §6-2)
+
+`.c` 21장 중 앞 20장(이름순)을 `tree-sitter-c` 0.24.2 로 파싱했다.
+
+| | 파일 | ERROR 노드 있음 | `quality: poor` | 바이트 | ERROR 바이트 | 비율 |
+|---|---:|---:|---:|---:|---:|---:|
+| `.c` 20 | 20 | 15 | 3 | 665,358 | 118,253 | **17.8 %** |
+| 〃 `poor` 셋 제외 | 17 | 12 | 0 | 527,227 | 2,320 | **0.44 %** |
+| `.h` 21 | 21 | 7 | 2 | 60,576 | 1,320 | 2.2 % |
+
+`poor` 셋 — `jv_dtoa.c` **100 %**(88,819 바이트가 통째로 한 ERROR) · `main.c` 72 % · `jq_test.c` 34 %.
+셋 다 **§8 ③ 그대로**다: 첫 ERROR 가 `#ifdef HAVE_ALLOCA_H … #include … #elif`(`util.c` 도 같은 모양,
+95 %) · `#ifdef HAVE_PTHREAD` 안의 `#define`(`jq_test.c`) · `#ifdef` 로 갈린 문자열 이어붙이기
+(`main.c` 의 사용법 문자열)다. 나머지 열둘의 ERROR 는 파일당 0.2~1.2 % 라 캡처에 영향이 없다.
+**「쓸 수 있다」의 근거는 이 0.44 %** 이고, 대가는 `#ifdef` 가 구문 중간을 자르는 파일이 통째로
+`poor` 가 된다는 것 — `derive.ts` 가 `poor` 파일의 캡처를 어떻게 다룰지(§8 ③ 「확인 못 한 것」)는
+여전히 열려 있다.
+
+### 문서와 어긋나 바꾼 자리
+
+- **0부 id 는 §0.1 을 따랐다** — README §8 의 축 id 조각(`integer-literal` `float-literal` `text-literal`
+  `boolean-literal` `type-conversion` `equality`)과 다르다. 전이는 `universal` 로만 잇는다:
+  `number-literal`→`common/integer-literal`(쪼개진 쪽, D187 ④) · `float-type`→`common/float-literal` ·
+  `truthiness`→`common/truthiness` · `declaration`→`common/variable-binding` · `assignment`→
+  `common/reassignment` · `arithmetic`→`common/arithmetic` · `comparison`→`common/comparison`.
+  `integer-type` `overflow` `char-literal` `operator-precedence` `conversion` 은 `null`(자바와 같은 판단).
+- **`cs/` 선행은 45장 안의 id 로 바꿔 걸었다** — §7 표의 열일곱 중 있는 그대로는 다섯
+  (`memory-address` `stack-and-heap` `call-stack` `floating-point` `bounds`). 바꿔 건 것:
+  `byte-and-word`→`bit-and-byte` · `lifetime`→`scope-and-lifetime` · `value-and-reference`→
+  `value-vs-reference` · `integer-representation`·`binary-and-bits`→`binary-representation` ·
+  `character-encoding`→`text-encoding` · `compile-and-link`→`linking`+`compile-and-run` ·
+  `alignment-and-padding`→`memory-layout` · `spec-and-undefined`→`undefined-behavior`.
+  **없어서 못 건 넷** — `cs/signed-and-unsigned`(§0.5 가 이미 적음) · `cs/null-terminated-string` ·
+  `cs/preprocessing` · `cs/alignment-and-padding`. 규약 5 대로 `cs/` 는 안 만들었다.
+- **`common/` 후보 다섯은 없다** — §6 의 `counted-loop` `reference-type` `take-address` `dereference`
+  `record-type`. 그 다섯 개념은 `universal: null` 로 섰다. `function-pointer` 는 `common/function-value`.
+- **`confusions` 는 전부 비웠다.** 린트 `blank-wrong-from-confusions` 가 빈칸 오답 셋을 **전부** 혼동 쌍의
+  토큰으로 요구하는데, C 의 오답은 다른 언어의 낱말(`var` `nil` `new`)이거나 같은 자리의 다른
+  기호라 한 개념의 토큰으로 못 채운다. 혼동 쌍이 문서에는 있고 사전에는 없다.
+- `.h` 는 c 의 것이다(`extensions`) — cpp 는 `.hpp .hh .hxx` 만(D190).
+
+### 안 만든 것
+
+`c/integer-promotion`(§0.4 대로 `conversion` 이 흡수) · `c/boolean`(§8 ⑦) · 두 겹 포인터(`char **argv`
+— `pointer-declaration` 이 안 잡는다) · 괄호 없는 `sizeof x` · 값 없는 `return;` · `#ifdef` 안의 파일 범위
+`static` · 인자 계산 순서(`f(i++, i++)`). 0부와 1부 사이의 「작은 문제 층」(`dictionary/drills/`)에 C 는
+없다 — 러너(D175)가 C 를 모른다.

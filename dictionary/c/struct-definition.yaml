@@ -1,0 +1,248 @@
+schema: 1
+id: c/struct-definition
+# 2부 「포인터와 메모리」 (`docs/curriculum/c.md` §3 #20 · §0.6). `universal: null` — c.md §6 이
+# `common/record-type` 을 후보로 냈으나(Go·Rust·Swift `struct`) 아직 없다. 후보로 보고.
+universal: null
+name: { ko: 값 여럿 묶어 새 이름 붙이기, en: Struct definition }
+token: "struct"
+grammars: [c]
+framework: null
+essential: true
+difficulty: 2
+prereq: [c/declaration, cs/memory-layout, cs/value-vs-reference]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "타입이 다른 칸 몇 개를 한 덩이로 묶어 새 타입을 만든다. 덩이는 값이라 넣으면 통째로 복사된다."
+    en: "Bundles typed slots into one block, a new type that is copied whole when put."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} {{pick.3|code}} 안의 칸들을 <b>한 덩이</b>로 묶어
+      {{pick.2|code}} 라는 새 타입을 만듭니다. 칸들은 기억에 적힌 순서대로 나란히 놓이고, 사이에 빈
+      바이트(패딩)가 낄 수 있어 덩이 크기가 칸의 합보다 클 수 있어요. 요점은 이 덩이가 <b>값</b>이라는
+      것 — 이름에 넣으면 <b>통째로 복사</b>되고, 함수에 넘기면 통째로 복사되어 갑니다. 파이썬·JS 의
+      객체가 참조로 복사되는 것과 정확히 반대예요. 복사를 피하려면 포인터를 넘기고, 그때 안의 이름은
+      화살표로 꺼냅니다.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} bundles the slots in {{pick.3|code}} into <b>one block</b>
+      and makes a new type named {{pick.2|code}}. The slots sit side by side in memory in the written
+      order, possibly with empty bytes (padding) between, so the block may be bigger than the sum of its
+      slots. The point is that this block is a <b>value</b> — put into a name it is <b>copied whole</b>,
+      and passed into a function it travels as a whole copy. The exact opposite of Python and JS
+      objects, which copy by reference. To avoid the copy, pass a pointer and take the members through
+      the arrow.
+  trace:
+    - ko: "{{pick.3|code}} 의 칸들이 적힌 순서로 나란히 배치된다 — 사이에 패딩이 낄 수 있다."
+      en: "The slots in {{pick.3|code}} are laid side by side in the written order — padding may sit between."
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 그 배치의 이름이 된다 — 타입이지 값이 아니다."
+      en: "{{pick.2|code}} becomes the name of that layout — a type, not a value."
+    - ko: "{{site.line}}행 아래에서 그 타입의 값을 넣거나 넘기면 덩이가 통째로 복사된다."
+      en: "Below line {{site.line}}, putting or passing a value of that type copies the whole block."
+
+rule:
+  ko: "<b>덩이는 값이다.</b> 넣으면 통째로 복사되고, 복사를 피하려면 포인터를 넘긴다."
+  en: "<b>The block is a value.</b> Putting copies it whole; pass a pointer to avoid the copy."
+result:
+  label:
+    ko: "{{site.line}}행이 만든 타입"
+    en: "the type made on line {{site.line}}"
+  value: "{{pick.1}} {{pick.2}}"
+  note:
+    ko: "칸 여럿이 한 덩이"
+    en: "several slots, one block"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} 이제 {{pick.3|code}} 의 칸들을 한 덩이로 묶은 타입입니다.
+  en: >-
+    {{pick.2|code}} is now a type that bundles the slots of {{pick.3|code}} into one block.
+payoff:
+  ko: >-
+    이걸 알면 「함수 안에서 구조체를 고쳤는데 밖은 그대로다」가 풀립니다 — 복사본을 고친 거예요.
+  en: >-
+    This untangles “I changed the struct inside the function but outside it is unchanged” — a copy was
+    changed.
+bridge:
+  ko: >-
+    파이썬의 객체는 이름이 가리킬 뿐이라 넘기면 같은 객체가 갑니다. C 의 덩이는 값이라 통째로
+    복사돼요 — 같은 일을 하려면 포인터를 적어야 합니다.
+  en: >-
+    A Python object is only pointed at by names, so passing sends the same object. A C block is a
+    value and is copied whole — the same effect needs a written pointer.
+misconceptions:
+  # c.md §3 #20 — 규격에서 나온 사실이고 빈도 자료는 없다.
+  - ko: "덩이를 넘기면 원본이 간다 — <b>통째로 복사</b>됩니다. 원본을 고치려면 포인터를 넘겨요."
+    en: "Passing the block sends the original — it is <b>copied whole</b>. Pass a pointer to change the original."
+  - ko: "덩이 크기는 칸 크기의 합이다 — <b>패딩</b>이 끼어 더 클 수 있습니다. <code>sizeof</code> 로 재야 알아요."
+    en: "The block's size is the sum of its slots — <b>padding</b> may make it larger. Measure with <code>sizeof</code>."
+  - ko: "정의하면 값이 하나 생긴다 — <b>타입</b>이 생길 뿐입니다. 값은 그 타입으로 이름을 만들어야 생겨요."
+    en: "Defining it makes one value — it makes <b>a type</b> only. A value appears when a name is made with that type."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>새 타입의 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the new type's name</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 덩이를 <b>만드는 낱말</b>입니다. 이름은 그 옆이나 끝에 따로 적혀요."
+          en: "{{pick.1|code}} is <b>the word that makes</b> the block. The name is written separately beside it or at the end."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 낱말과 이름"
+            en: "The sharpest spot — the word and the name"
+          code:
+            - "struct point { … };   /* struct 가 낱말, point 가 이름 */"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 묶이는 <b>칸들</b>입니다. 이름이 아니라 배치예요."
+          en: "{{pick.3|code}} is <b>the slots</b> being bundled. A layout, not a name."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 배치와 이름"
+            en: "The sharpest spot — the layout and the name"
+          code:
+            - "{ int x; int y; }   /* 배치 */"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행의 타입으로 만든 값을 <code>b = a;</code> 처럼 다른 이름에 넣으면 무엇이 일어날까요?"
+      en: "Put a value of the type on line {{site.line}} into another name, as in <code>b = a;</code> — what happens?"
+    hint:
+      ko: "덩이는 값입니다."
+      en: "The block is a value."
+    options:
+      - t:
+          ko: "칸 전부가 통째로 복사된다 — 뒤에 한쪽을 고쳐도 다른 쪽은 그대로다"
+          en: "All the slots are copied whole — changing one later leaves the other alone"
+      - t:
+          ko: "b 가 a 와 같은 덩이를 가리킨다"
+          en: "b points at the same block as a"
+        diag:
+          t:
+            ko: "그것은 <b>파이썬·JS</b> 의 규칙입니다. C 의 덩이는 값이라 넣으면 복사돼요 — 같은 덩이를 보려면 포인터가 필요합니다."
+            en: "That is <b>Python's and JS's</b> rule. A C block is a value and is copied when put — seeing the same block needs a pointer."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 값이냐 참조냐"
+              en: "The sharpest spot — value or reference"
+            code:
+              - "b = a;        /* 복사 */"
+              - "p = &a;       /* 같은 덩이 */"
+      - t:
+          ko: "컴파일 오류 — 덩이는 넣을 수 없다"
+          en: "A compile error — blocks cannot be put"
+        diag:
+          t:
+            ko: "넣을 수 <b>있습니다</b>. 같은 타입이면 통째로 복사돼요. 못 하는 것은 견주기(<code>==</code>)입니다."
+            en: "It <b>can</b> be put. Same type, copied whole. What cannot be done is comparison (<code>==</code>)."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 넣기는 되고 견주기는 안 된다"
+              en: "The sharpest spot — putting works, comparing does not"
+            code:
+              - "b = a;     /* 된다 */"
+              - "a == b     /* 오류 */"
+      - t:
+          ko: "첫 칸만 복사된다"
+          en: "Only the first slot is copied"
+        diag:
+          t:
+            ko: "<b>전부</b> 복사됩니다. 안의 배열까지요 — 그래서 큰 덩이를 넘기면 비쌉니다."
+            en: "<b>Everything</b> is copied, arrays inside included — which is why passing a large block is expensive."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 통째로"
+              en: "The sharpest spot — the whole thing"
+            code:
+              - "struct big { int a[1000]; };   /* 4000바이트가 복사된다 */"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 칸 여럿을 <b>한 덩이로 묶어 새 타입</b>을 만듭니다."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>bundles slots into a new type</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "struct", mono: true }
+      - t: "class"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>C++·자바의 낱말</b>입니다. C 에는 없고, 메서드도 상속도 없어요 — 칸을 묶는 덩이뿐입니다."
+            en: "That is <b>C++'s and Java's word</b>. C does not have it, nor methods or inheritance — only blocks of slots."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — C 에 없는 낱말"
+              en: "The sharpest spot — a word C lacks"
+            code:
+              - "class point { … };   /* 오류 */"
+      - t: "typedef"
+        mono: true
+        diag:
+          t:
+            ko: "이건 있는 타입에 <b>별명</b>을 붙이는 낱말입니다. 칸을 묶지는 않아요 — 묶은 뒤에 이름을 짧게 할 때 앞에 붙입니다."
+            en: "That word gives an existing type <b>an alias</b>. It bundles nothing — it goes in front to shorten the name after bundling."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 묶기냐 별명이냐"
+              en: "The sharpest spot — bundling or aliasing"
+            code:
+              - "typedef struct { … } Point;"
+      - t: "enum"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>이름 붙은 정수 목록</b>입니다. 칸을 묶는 것이 아니라 값 하나에 이름 여럿을 줘요."
+            en: "That is <b>a list of named whole numbers</b>. It bundles no slots; it gives several names to one value."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 덩이냐 목록이냐"
+              en: "The sharpest spot — a block or a list"
+            code:
+              - "enum color { RED, GREEN };"
+
+why_gate:
+  q:
+    ko: "C 는 왜 덩이를 참조가 아니라 <b>값</b>으로 둘까요?"
+    en: "Why does C make a block <b>a value</b> rather than a reference?"
+  choices:
+    - t:
+        ko: "덩이가 기억에 그대로 놓인 바이트라 값처럼 다루면 어디에 있는지 사람이 정할 수 있고, 참조가 필요한 자리는 포인터로 명시하게 두었기 때문"
+        en: "Because a block is bytes laid out in memory as they are, so treating it as a value lets a person decide where it lives, and reference is made explicit with a pointer where needed"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 선택의 대가(큰 덩이의 복사)를 어떻게 피하는지도 적어 보세요."
+        en: "That is the direction. Say how the cost of that choice (copying a large block) is avoided."
+    - t:
+        ko: "참조를 만들 줄 몰라서"
+        en: "Because references could not be made"
+      ok: false
+      fb:
+        ko: "포인터가 참조입니다. 있는데 기본으로 안 쓴 거예요."
+        en: "A pointer is a reference. It exists; it is just not the default."
+    - t:
+        ko: "값이 참조보다 빨라서"
+        en: "Because values are faster than references"
+      ok: false
+      fb:
+        ko: "큰 덩이는 값이 더 느립니다. 이유는 속도가 아니라 배치의 통제예요."
+        en: "For large blocks values are slower. The reason is control of layout, not speed."
+
+queries:
+  - { grammars: [c], file: ./struct-definition.scm }
+
+examples:
+  - code: "struct point { int x; int y; };          /* 새 타입 struct point */"
+    expect: { sites: 1, form: named, hole: "struct", picks: { 1: "struct", 2: "point", 3: "{ int x; int y; }" } }
+  - code: "typedef struct { int x; int y; } Point;  /* 이름 없는 덩이에 Point */"
+    expect: { sites: 1, form: anonymous-typedef, hole: "struct", picks: { 1: "struct", 2: "Point", 3: "{ int x; int y; }" } }
+  - code: "typedef struct node { int v; } Node;     /* 이름 둘 — 정의는 하나 */"
+    expect: { sites: 1, form: named, picks: { 2: "node" } }
+  - code: "struct point p;                          /* 쓰는 자리 — 정의가 아니다 */"
+    expect: none

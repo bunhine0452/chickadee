@@ -1,0 +1,257 @@
+schema: 1
+id: c/operator-precedence
+# 0부 축 E 신규 (`docs/curriculum/c.md` §0.1 #11). `universal: null` — 세기 표는 언어마다 다르고,
+# C 의 함정(`*p++` · `a & b == c`)은 포인터와 비트 연산이 있는 언어에서만 성립한다.
+universal: null
+name: { ko: 어느 것이 먼저 묶이나, en: Operator precedence }
+token: "*p++"
+grammars: [c]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cs/operator-precedence, c/arithmetic]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "괄호가 없으면 센 기호가 먼저 묶인다. 뒤에 붙는 기호가 앞에 붙는 기호보다 세다."
+    en: "Without parentheses the stronger symbol binds first; trailing beats leading."
+  why:
+    ko: >-
+      식은 왼쪽부터 차례로 읽히지 <b>않습니다</b>. 기호마다 세기가 있어서 {{site.line}}행의
+      {{pick.1|code}}{{pick.1|josa:은,는}} {{pick.3|code}}{{pick.3|josa:이,가}} 먼저 접힌 <b>뒤에</b> 붙어요.
+      C 에서 가장 자주 무는 자리는 둘입니다. <code>*p++</code> 는 「가리키는 값을 하나 늘린다」가
+      아니라 <b><code>*(p++)</code></b> — 뒤에 붙는 <code>++</code> 가 앞의 <code>*</code> 보다 세서
+      포인터가 움직이고 옛 자리의 값이 읽혀요. 그리고 <code>a &amp; b == c</code> 는
+      <b><code>a &amp; (b == c)</code></b> — 견주기가 비트 연산보다 셉니다. 둘 다 괄호 하나면 뜻이
+      바뀝니다.
+    en: >-
+      An expression is <b>not</b> read left to right in order. Symbols have strengths, so on line
+      {{site.line}} the {{pick.1|code}} attaches <b>after</b> {{pick.3|code}} has already folded. Two
+      spots bite most often in C. <code>*p++</code> is not “add one to the pointed value” but
+      <b><code>*(p++)</code></b> — the trailing <code>++</code> is stronger than the leading
+      <code>*</code>, so the pointer moves and the value at the old place is read. And
+      <code>a &amp; b == c</code> is <b><code>a &amp; (b == c)</code></b> — comparison is stronger than
+      the bit operation. One pair of parentheses changes either meaning.
+  trace:
+    - ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 먼저 접힌다 — 그 기호가 더 세다."
+      en: "{{pick.3|code}} folds first — its symbol is stronger."
+    - ko: "그다음 {{pick.1|code}}{{pick.1|josa:이,가}} {{pick.2|code}}{{pick.2|josa:과,와}} 그 결과를 잇는다."
+      en: "Then {{pick.1|code}} joins {{pick.2|code}} with that result."
+    - ko: "{{site.line}}행이 낸 값은 그 순서의 값이다 — 괄호를 치면 순서가 바뀐다."
+      en: "The value line {{site.line}} yields comes from that order — parentheses change the order."
+
+rule:
+  ko: "<b>센 기호가 먼저 접힌다.</b> 뒤에 붙는 기호가 앞에 붙는 기호보다 세고, 견주기가 비트 연산보다 세다."
+  en: "<b>The stronger symbol folds first.</b> Trailing beats leading, and comparison beats bit operations."
+result:
+  label:
+    ko: "{{site.line}}행이 접히는 순서"
+    en: "the fold order on line {{site.line}}"
+  value: "{{pick.2}} {{pick.1}} {{pick.3}}"
+  note:
+    ko: "오른쪽이 먼저 접혔다"
+    en: "the right side folded first"
+ok:
+  ko: >-
+    {{pick.3|code}}{{pick.3|josa:이,가}} 먼저 접히고 {{pick.1|code}}{{pick.1|josa:이,가}} 그다음이었습니다.
+  en: >-
+    {{pick.3|code}} folded first and {{pick.1|code}} came after.
+payoff:
+  ko: >-
+    이걸 알면 <code>*p++</code> 가 읽힙니다 — 포인터가 한 칸 가고, 손에 남는 것은 옛 칸의 값이에요.
+  en: >-
+    This makes <code>*p++</code> readable — the pointer moves one place, and what is left in hand is
+    the value from the old place.
+bridge:
+  ko: >-
+    파이썬·자바에도 세기 표는 있지만 뒤에 붙는 기호와 포인터가 없어 이 함정이 없습니다. C 의 함정은
+    C 의 기호에서 나와요.
+  en: >-
+    Python and Java have strength tables too, but no trailing symbols and no pointers, so this trap
+    is absent. C's trap comes from C's own symbols.
+misconceptions:
+  # c.md §0.1 #11 — 규격에서 나온 사실이고 빈도 자료는 없다.
+  - ko: "<code>*p++</code> 는 가리키는 값을 하나 늘린다 — <b>포인터</b>가 한 칸 갑니다. 값을 늘리려면 <code>(*p)++</code> 예요."
+    en: "<code>*p++</code> adds one to the pointed value — <b>the pointer</b> moves one place. To add to the value, write <code>(*p)++</code>."
+  - ko: "<code>a &amp; b == c</code> 는 왼쪽부터 묶인다 — 견주기가 더 세서 <code>a &amp; (b == c)</code> 입니다."
+    en: "<code>a &amp; b == c</code> groups from the left — comparison is stronger, so it is <code>a &amp; (b == c)</code>."
+  - ko: "왼쪽이 거짓이어도 오른쪽은 돈다 — <code>&amp;&amp;</code> 는 왼쪽이 0 이면 오른쪽을 <b>안 봅니다</b>. 그래서 <code>p &amp;&amp; *p</code> 가 안전해요."
+    en: "The right side runs even when the left is false — <code>&amp;&amp;</code> <b>skips</b> the right when the left is 0. That is why <code>p &amp;&amp; *p</code> is safe."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>나중에 묶이는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that binds later</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 한쪽 <b>재료</b>입니다. 순서를 정하는 것은 재료가 아니라 기호의 세기예요."
+          en: "{{pick.2|code}} is one <b>input</b>. What sets the order is not an input but the strength of the symbols."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 재료가 아니라 기호"
+            en: "The sharpest spot — the symbol, not the input"
+          code:
+            - "2 + 3 * 4   /* 3 * 4 가 먼저 */"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>먼저 접히는 쪽</b>입니다. 그 안의 기호가 더 세서 통째로 하나의 값이 된 뒤에야 바깥 기호가 붙어요."
+          en: "{{pick.3|code}} is <b>the part that folds first</b>. Its symbol is stronger, so it becomes one value before the outer symbol attaches."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 먼저냐 나중이냐"
+            en: "The sharpest spot — first or later"
+          code:
+            - "*p++     /* p++ 가 먼저 */"
+            - "(*p)++   /* *p 가 먼저 */"
+
+meaning:
+  - q:
+      ko: "<code>*p++</code> 를 돌리면 무엇이 달라질까요?"
+      en: "Run <code>*p++</code> — what changes?"
+    hint:
+      ko: "뒤에 붙는 기호가 앞에 붙는 기호보다 셉니다."
+      en: "A trailing symbol beats a leading one."
+    options:
+      - t:
+          ko: "포인터가 한 칸 가고, 식의 값은 옛 칸의 값이다"
+          en: "The pointer moves one place, and the expression's value is the value at the old place"
+      - t:
+          ko: "가리키는 값이 하나 늘어난다"
+          en: "The pointed value grows by one"
+        diag:
+          t:
+            ko: "그것은 <code>(*p)++</code> 입니다. 괄호가 없으면 <code>++</code> 가 <code>p</code> 에 붙어요 — <b>포인터</b>가 움직입니다."
+            en: "That is <code>(*p)++</code>. Without parentheses the <code>++</code> attaches to <code>p</code> — <b>the pointer</b> moves."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 괄호 하나"
+              en: "The sharpest spot — one pair of parentheses"
+            code:
+              - "*p++     /* p 가 간다 */"
+              - "(*p)++   /* 값이 는다 */"
+      - t:
+          ko: "포인터가 한 칸 가고, 식의 값은 새 칸의 값이다"
+          en: "The pointer moves one place, and the expression's value is the value at the new place"
+        diag:
+          t:
+            ko: "뒤에 붙는 <code>++</code> 는 <b>옛 값</b>을 냅니다. 새 칸을 읽으려면 <code>*++p</code> 예요."
+            en: "A trailing <code>++</code> yields <b>the old value</b>. To read the new place, write <code>*++p</code>."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 앞이냐 뒤냐"
+              en: "The sharpest spot — before or after"
+            code:
+              - "*p++    /* 옛 칸 */"
+              - "*++p    /* 새 칸 */"
+      - t:
+          ko: "컴파일 오류"
+          en: "A compile error"
+        diag:
+          t:
+            ko: "완전히 합법이고 <b>관용구</b>입니다. 문자열을 복사하는 <code>while (*d++ = *s++);</code> 가 이 모양이에요."
+            en: "Fully legal and an <b>idiom</b>. The string copy <code>while (*d++ = *s++);</code> has this shape."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 관용구다"
+              en: "The sharpest spot — it is an idiom"
+            code:
+              - "while (*d++ = *s++);"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 왼쪽이 0 이면 <b>오른쪽을 안 봅니다</b>."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>skips the right side</b> when the left is 0."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "&&", mono: true }
+      - t: "&"
+        mono: true
+        diag:
+          t:
+            ko: "기호 하나짜리는 <b>비트 연산</b>입니다. 양쪽을 다 계산하고 비트끼리 겹쳐요 — 오른쪽을 건너뛰지 않으니 <code>p &amp; *p</code> 는 빈 포인터를 엽니다."
+            en: "The single symbol is a <b>bit operation</b>. It computes both sides and overlays the bits — the right is never skipped, so <code>p &amp; *p</code> opens an empty pointer."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 건너뛰느냐 마느냐"
+              en: "The sharpest spot — skip or not"
+            code:
+              - "p && *p   /* p 가 0 이면 *p 를 안 본다 */"
+              - "p & *p    /* 둘 다 본다 */"
+      - t: "and"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>파이썬의 낱말</b>입니다. C 에는 없어서 컴파일러가 이름으로 읽고 멈춰요."
+            en: "That is <b>Python's word</b>. C does not have it; the compiler reads it as a name and stops."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 다른 언어의 낱말"
+              en: "The sharpest spot — another language's word"
+            code:
+              - "a and b   /* 오류 */"
+              - "a && b"
+      - t: "||"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>「또는」</b>입니다. 왼쪽이 0 이 아닐 때 오른쪽을 건너뛰어요 — 방향이 반대입니다."
+            en: "That is <b>“or”</b>. It skips the right when the left is not 0 — the opposite direction."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 언제 건너뛰나"
+              en: "The sharpest spot — when it skips"
+            code:
+              - "a && b   /* a 가 0 이면 건너뛴다 */"
+              - "a || b   /* a 가 0 이 아니면 건너뛴다 */"
+
+why_gate:
+  q:
+    ko: "C 는 왜 뒤에 붙는 기호를 앞에 붙는 기호보다 <b>세게</b> 두었을까요?"
+    en: "Why does C make a trailing symbol <b>stronger</b> than a leading one?"
+  choices:
+    - t:
+        ko: "선언의 모양을 따라 식도 「안에서 밖으로」 읽게 하려는 것이고, 그 규칙 하나로 배열·호출·후위 증가가 이름에 먼저 붙기 때문"
+        en: "Because expressions are read “inside out” like declarations, and that one rule makes subscripts, calls and postfix increments attach to the name first"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 규칙이 편한 자리(<code>a[i]++</code>)와 무는 자리(<code>*p++</code>)를 하나씩 적어 보세요."
+        en: "That is the direction. Name one spot where the rule helps (<code>a[i]++</code>) and one where it bites (<code>*p++</code>)."
+    - t:
+        ko: "우연히 그렇게 정해져서"
+        en: "It just happened that way"
+      ok: false
+      fb:
+        ko: "우연이 아니라 한 규칙입니다. 이름 뒤에 붙는 것이 늘 먼저 붙어요."
+        en: "Not chance but one rule. What attaches after the name always attaches first."
+    - t:
+        ko: "컴파일러가 뒤부터 읽어서"
+        en: "Because the compiler reads from the end"
+      ok: false
+      fb:
+        ko: "읽는 방향이 아니라 세기 표입니다. 표가 순서를 정하고 컴파일러는 그 표를 따를 뿐이에요."
+        en: "It is the strength table, not the reading direction. The table fixes the order; the compiler follows it."
+
+queries:
+  - { grammars: [c], file: ./operator-precedence.scm }
+
+examples:
+  - code: "int y = *p++;                /* p 가 한 칸 가고 y 는 옛 칸의 값 */"
+    expect: { sites: 1, form: deref-step, picks: { 1: "*", 2: "p", 3: "++" } }
+  - code: "int bad = a & b == c;        /* a & (b == c) */"
+    expect: { sites: 1, form: bit-compare, picks: { 1: "&", 2: "a", 3: "b == c" } }
+  - code: "int m = 2 + 3 * 4;           /* m -> 14 (int) */"
+    expect: { sites: 1, form: mixed, picks: { 1: "+", 2: "2", 3: "3 * 4" } }
+  - code: "int safe = p && *p;          /* p 가 0 이면 *p 를 안 본다 */"
+    expect: { sites: 1, form: shortcircuit, hole: "&&", picks: { 1: "&&", 2: "p", 3: "*p" } }
+  - code: "int n = 1 + 2;               /* 세기가 하나뿐 — 다른 판이다 */"
+    expect: none
+  - code: "int v = (*p)++;              /* 괄호가 순서를 바꿨다 — 안 잡는다 */"
+    expect: none

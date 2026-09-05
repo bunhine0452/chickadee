@@ -1,0 +1,254 @@
+schema: 1
+id: c/malloc-free
+# 2부 「포인터와 메모리」 (`docs/curriculum/c.md` §3 #24 · §0.6). `universal: null` — 수동 해제가
+# 열 언어 중 C 뿐이다. Rust 학습자가 `Box` 를 이해하려면 힙이 필요하고, 힙을 그리는 가장 싼
+# 코드가 이 판이다 (c-learning.md §11.5).
+universal: null
+name: { ko: 빌리고 돌려주기, en: malloc and free }
+token: "malloc"
+grammars: [c]
+framework: null
+essential: true
+difficulty: 3
+prereq: [c/pointer-declaration, c/dereference, c/sizeof, cs/stack-and-heap, cs/scope-and-lifetime]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "함수의 자리 밖에서 바이트를 빌려 주소를 받는다. 돌려주는 일은 언어가 안 하고 사람이 한다."
+    en: "Borrows bytes outside any function's place; giving them back is your job."
+  why:
+    ko: >-
+      함수의 지역 이름들은 돌아갈 때 통째로 사라집니다. 그보다 오래 살아야 하는 값은 <b>다른
+      자리</b>에서 빌려야 하고, {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 그 일을 해요 —
+      {{pick.3|code}} 바이트를 빌려 그 첫 칸의 <b>주소</b>를 돌려줍니다. 빌린 칸 안은 정해지지 않았고
+      (0 이 아닙니다), 빌리지 못하면 0번지가 옵니다. 그리고 C 는 그 칸을 <b>스스로 돌려주지 않아요</b>.
+      다 쓰면 <code>free</code> 로 돌려줘야 하고, 안 돌려주면 프로그램이 끝날 때까지 남고, 두 번
+      돌려주거나 돌려준 뒤 열면 답이 없습니다. 돌려준 뒤에도 포인터는 옛 번호를 들고 있어요.
+    en: >-
+      A function's local names vanish whole when it returns. A value that must outlive that has to be
+      borrowed from <b>another place</b>, and {{pick.1|code}} on line {{site.line}} does that — it
+      borrows {{pick.3|code}} bytes and hands back the <b>address</b> of the first slot. The borrowed
+      slots are undecided inside (not 0), and if borrowing fails address 0 comes back. And C does
+      <b>not give the slots back by itself</b>. When done you return them with <code>free</code>; left
+      unreturned they stay until the program ends, and returning twice or opening after returning has
+      no answer. Even after returning, the pointer still holds the old number.
+  trace:
+    - ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 먼저 수가 된다 — 몇 바이트를 빌릴지."
+      en: "{{pick.3|code}} becomes a number first — how many bytes to borrow."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 함수의 자리 밖에서 그만큼 잡고 첫 칸의 주소를 낸다."
+      en: "{{pick.1|code}} reserves that much outside any function's place and yields the first slot's address."
+    - ko: "{{site.line}}행 뒤에서 그 주소로 칸을 쓰고, 다 쓰면 사람이 돌려준다."
+      en: "After line {{site.line}} the slots are used through that address, and a person returns them when done."
+
+rule:
+  ko: "<b>빌린 것은 사람이 돌려준다.</b> 안 돌려주면 남고, 두 번 돌려주거나 돌려준 뒤 열면 답이 없다."
+  en: "<b>What is borrowed, a person returns.</b> Unreturned it stays; returned twice or opened after, no answer."
+result:
+  label:
+    ko: "{{site.line}}행이 빌린 자리"
+    en: "the place borrowed on line {{site.line}}"
+  value: "{{pick.1}}{{pick.2}}"
+  note:
+    ko: "함수의 자리 밖, 사람이 돌려줄 때까지"
+    en: "outside any function's place, until returned by hand"
+ok:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:이,가}} {{pick.3|code}} 만큼 빌렸고 그 주소가 돌아왔습니다 — 돌려주는 줄이 어딘가
+    있어야 해요.
+  en: >-
+    {{pick.1|code}} borrowed {{pick.3|code}} and the address came back — a returning line has to exist
+    somewhere.
+payoff:
+  ko: >-
+    이걸 알면 「함수가 돌려준 배열이 쓰레기다」의 해법이 보입니다 — 지역 자리 대신 빌린 자리를 돌려주는
+    거예요.
+  en: >-
+    This shows the fix for “the array my function returned is garbage” — return a borrowed place
+    instead of a local one.
+bridge:
+  ko: >-
+    파이썬·자바는 안 쓰는 값을 언어가 알아서 거둡니다. Rust 는 주인이 사라질 때 자동으로 돌려줘요.
+    C 만 사람이 돌려줍니다.
+  en: >-
+    Python and Java collect unused values by themselves. Rust returns them automatically when the
+    owner goes away. Only C leaves the returning to a person.
+misconceptions:
+  # c.md §3 #24 · §9 #2·#9 — 규격에서 나온 사실이고 빈도 자료는 없다.
+  - ko: "빌린 칸은 0 으로 시작한다 — <b>정해지지 않은</b> 값입니다. 0 이 필요하면 <code>calloc</code> 을 써요."
+    en: "Borrowed slots start at 0 — they hold <b>undecided</b> values. Use <code>calloc</code> when 0 is needed."
+  - ko: "돌려주면 포인터가 0 이 된다 — <b>옛 번호 그대로</b>입니다. <code>p = NULL;</code> 을 손으로 적어요."
+    en: "Returning makes the pointer 0 — it keeps <b>the old number</b>. Write <code>p = NULL;</code> by hand."
+  - ko: "안 돌려줘도 함수가 끝나면 사라진다 — 함수의 자리 <b>밖</b>이라 프로그램이 끝날 때까지 남습니다."
+    en: "Unreturned slots vanish when the function ends — they are <b>outside</b> the function's place and stay until the program ends."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>함수의 자리 밖에서 칸을 빌리거나 돌려주는 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name that borrows or returns slots outside any function's place</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>넘기는 것</b>입니다 — 몇 바이트인지, 또는 돌려줄 주소. 빌리고 돌려주는 일은 그 앞의 이름이 해요."
+          en: "{{pick.2|code}} is <b>what is passed</b> — how many bytes, or the address to return. The borrowing and returning are done by the name in front."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 이름과 넘기는 것"
+            en: "The sharpest spot — the name and what is passed"
+          code:
+            - "malloc(sizeof(Node))   /* malloc 이 빌리고, 크기를 넘긴다 */"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>얼마나</b> 또는 <b>무엇을</b>입니다. 그 자체는 아무것도 빌리지 않아요."
+          en: "{{pick.3|code}} is <b>how much</b> or <b>which</b>. It borrows nothing by itself."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 양과 행위"
+            en: "The sharpest spot — the amount and the act"
+          code:
+            - "sizeof(Node)           /* 수 하나 */"
+            - "malloc(sizeof(Node))   /* 빌린다 */"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행에서 빌린 칸을 <b>돌려주지 않고</b> 함수가 끝나면 그 칸은 어떻게 될까요?"
+      en: "If the function ends <b>without returning</b> the slots borrowed on line {{site.line}}, what becomes of them?"
+    hint:
+      ko: "빌린 자리는 함수의 자리 밖입니다."
+      en: "The borrowed place is outside the function's place."
+    options:
+      - t:
+          ko: "프로그램이 끝날 때까지 남는다 — 주소를 잃으면 다시는 못 돌려준다"
+          en: "They stay until the program ends — lose the address and they can never be returned"
+      - t:
+          ko: "함수가 끝나며 함께 사라진다"
+          en: "They vanish with the function"
+        diag:
+          t:
+            ko: "함께 사라지는 것은 <b>지역 이름</b>입니다. 빌린 칸은 그 자리 밖이라 남아요 — 그것이 빌리는 이유이기도 합니다."
+            en: "What vanishes with it is <b>the local names</b>. Borrowed slots are outside that place and stay — which is also why they are borrowed."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 안이냐 밖이냐"
+              en: "The sharpest spot — inside or outside"
+            code:
+              - "int a[8];              /* 함수와 함께 사라진다 */"
+              - "int *p = malloc(32);   /* 남는다 */"
+      - t:
+          ko: "언어가 알아서 거둔다"
+          en: "The language collects them"
+        diag:
+          t:
+            ko: "그것은 <b>파이썬·자바</b>입니다. C 는 아무것도 거두지 않아요 — 돌려주는 줄이 없으면 그대로입니다."
+            en: "That is <b>Python and Java</b>. C collects nothing — without a returning line they stay."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 거두는 이가 없다"
+              en: "The sharpest spot — nobody collects"
+            code:
+              - "free(p);   /* 이 줄이 유일한 길 */"
+      - t:
+          ko: "오류가 나서 프로그램이 멈춘다"
+          en: "An error stops the program"
+        diag:
+          t:
+            ko: "멈추지 않습니다. 조용히 남을 뿐이에요 — 오래 도는 프로그램에서는 그것이 쌓여 기억이 모자라게 됩니다."
+            en: "Nothing stops. They quietly stay — in a long-running program that piles up until memory runs out."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 조용히 쌓인다"
+              en: "The sharpest spot — it piles up quietly"
+            code:
+              - "while (1) { malloc(1); }   /* 언젠가 모자란다 */"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 함수의 자리 밖에서 <b>칸을 빌립니다</b>."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>borrows slots</b> outside any function's place."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "malloc", mono: true }
+      - t: "free"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>돌려주는</b> 쪽입니다. 크기를 넘기는 자리에 두면 그 수를 주소로 읽어 돌려주려 하고, 답이 없어요."
+            en: "That is the <b>returning</b> side. Given a size where an address is expected, it tries to return that number as an address — no answer."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 빌리기냐 돌려주기냐"
+              en: "The sharpest spot — borrowing or returning"
+            code:
+              - "p = malloc(32);   /* 빌린다 */"
+              - "free(p);          /* 돌려준다 */"
+      - t: "new"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>C++·자바의 낱말</b>입니다. C 에는 없어서 모르는 이름이라고 멈춰요."
+            en: "That is <b>C++'s and Java's word</b>. C does not have it and stops on an unknown name."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 다른 언어의 낱말"
+              en: "The sharpest spot — another language's word"
+            code:
+              - "p = new Node;   /* 오류 */"
+      - t: "alloc"
+        mono: true
+        diag:
+          t:
+            ko: "C 표준에는 <code>alloc</code> 이라는 함수가 <b>없습니다</b>. 있는 것은 <code>malloc</code>·<code>calloc</code>·<code>realloc</code> 셋이에요."
+            en: "The C standard has <b>no</b> function named <code>alloc</code>. The three are <code>malloc</code>, <code>calloc</code> and <code>realloc</code>."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 없는 이름"
+              en: "The sharpest spot — a name that does not exist"
+            code:
+              - "alloc(32)    /* 오류 */"
+              - "malloc(32)"
+
+why_gate:
+  q:
+    ko: "C 는 왜 빌린 칸을 <b>사람이 돌려주게</b> 둘까요?"
+    en: "Why does C leave returning borrowed slots <b>to a person</b>?"
+  choices:
+    - t:
+        ko: "언제 안 쓰는지를 언어가 알려면 실행 중에 추적하는 장치(수거기)가 필요하고, C 는 그 비용과 멈춤을 안 얹는 대신 시점을 사람에게 맡겼기 때문"
+        en: "Because knowing when slots are no longer used needs run-time tracking (a collector), and C declines that cost and its pauses, leaving the timing to a person"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 선택이 만드는 사고 셋(안 돌려줌 · 두 번 돌려줌 · 돌려준 뒤 열기)도 적어 보세요."
+        en: "That is the direction. Name the three accidents that choice creates (never returned, returned twice, opened after returning)."
+    - t:
+        ko: "수거기를 만들 줄 몰라서"
+        en: "Because nobody knew how to build a collector"
+      ok: false
+      fb:
+        ko: "당시에도 있었습니다. 안 얹은 것은 선택이에요."
+        en: "They existed then. Leaving one out was a choice."
+    - t:
+        ko: "사람이 돌려주는 쪽이 안전해서"
+        en: "Because returning by hand is safer"
+      ok: false
+      fb:
+        ko: "덜 안전합니다. 이유는 안전이 아니라 비용과 통제예요."
+        en: "It is less safe. The reason is cost and control, not safety."
+
+queries:
+  - { grammars: [c], file: ./malloc-free.scm }
+
+examples:
+  - code: "Node *nd = malloc(sizeof(Node));   /* 함수 밖의 자리 */"
+    expect: { sites: 1, form: alloc, hole: "malloc", picks: { 1: "malloc", 2: "(sizeof(Node))", 3: "sizeof(Node)" } }
+  - code: "free(nd);                          /* 돌려준다 — nd 는 옛 번호 그대로 */"
+    expect: { sites: 1, form: free, hole: "free", picks: { 1: "free", 2: "(nd)", 3: "nd" } }
+  - code: "int *xs = calloc(n, sizeof(int));  /* 0 으로 채워 빌린다 */"
+    expect: { sites: 1, form: alloc, hole: "calloc", picks: { 1: "calloc", 3: "n" } }
+  - code: "puts(\"hi\");                       /* 보통 부르기 — 다른 판이다 */"
+    expect: none

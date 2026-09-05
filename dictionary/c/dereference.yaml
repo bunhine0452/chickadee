@@ -1,0 +1,253 @@
+schema: 1
+id: c/dereference
+# 2부 「포인터와 메모리」 (`docs/curriculum/c.md` §3 #18 · §0.6). `universal: null` — c.md §6 이
+# `common/dereference` 를 후보로 냈으나(Go `*p` · Rust `*r`) 아직 없다. 후보로 보고.
+universal: null
+name: { ko: 자리를 열어 값 꺼내기, en: Dereference }
+token: "*p"
+grammars: [c]
+framework: null
+essential: true
+difficulty: 2
+prereq: [c/pointer-declaration, cs/pointer-indirection, cs/memory-address]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "포인터 앞에 붙이면 번호를 따라가 그 자리를 연다. 왼쪽에 있으면 쓰고, 오른쪽에 있으면 읽는다."
+    en: "Before a pointer it follows the number and opens that place to read or write."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} {{pick.2|code}} 안의 <b>번호를 따라가</b> 그 자리를 엽니다.
+      열린 자리는 이름처럼 쓰여요 — 넣기의 왼쪽에 있으면 그 자리에 <b>쓰고</b>, 다른 데 있으면 그
+      자리를 <b>읽습니다</b>. 같은 별표가 선언 줄에서는 「이 이름은 포인터다」였고 여기서는 「열어라」예요
+      — 자리가 다르면 뜻이 다릅니다. 번호가 아무 데나 가리키면(값 없이 만든 포인터, 돌려준 지역
+      자리, 빈 자리 0) 여는 순간 답이 없고, 대개 프로그램이 거기서 죽어요.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} <b>follows the number</b> inside {{pick.2|code}} and opens
+      that place. The opened place is used like a name — on the left of a putting it <b>writes</b>
+      there; anywhere else it <b>reads</b> from there. The same star meant “this name is a pointer” on
+      the declaration line and means “open it” here — a different spot, a different meaning. If the
+      number points anywhere at all (a pointer made without a value, a returned local place, the empty
+      place 0), opening it has no answer, and the program usually dies right there.
+  trace:
+    - ko: "{{pick.2|code}} 안의 번호를 읽는다."
+      en: "The number inside {{pick.2|code}} is read."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 그 번호의 자리로 간다 — 자리가 살아 있어야 한다."
+      en: "{{pick.1|code}} goes to the place with that number — the place has to be alive."
+    - ko: "{{site.line}}행에서 그 자리를 읽거나 쓴다. 포인터 자체는 안 바뀐다."
+      en: "Line {{site.line}} reads or writes that place. The pointer itself does not change."
+
+rule:
+  ko: "<b>식의 별표는 번호를 따라가 연다.</b> 왼쪽이면 쓰기, 아니면 읽기이고, 죽은 자리를 열면 답이 없다."
+  en: "<b>A star in an expression follows the number and opens it.</b> Left means write, else read; opening a dead place has no answer."
+result:
+  label:
+    ko: "{{site.line}}행이 연 자리"
+    en: "the place opened on line {{site.line}}"
+  value: "{{pick.1}}{{pick.2}}"
+  note:
+    ko: "포인터가 아니라 그 너머"
+    en: "not the pointer but what it names"
+ok:
+  ko: >-
+    {{pick.1|code}}{{pick.2|code}}{{pick.2|josa:은,는}} {{pick.2|code}}{{pick.2|josa:이,가}} 가리키는 자리 그 자체입니다.
+  en: >-
+    {{pick.1|code}}{{pick.2|code}} is the very place {{pick.2|code}} names.
+payoff:
+  ko: >-
+    이걸 알면 「포인터를 바꿨는데 값이 안 바뀐다」가 풀립니다 — 별표 없이 넣으면 번호가 바뀌고, 별표를
+    붙여 넣어야 그 자리의 값이 바뀌어요.
+  en: >-
+    This untangles “I changed the pointer but the value did not change” — putting without the star
+    changes the number; putting with it changes the value at that place.
+bridge:
+  ko: >-
+    파이썬은 이름을 쓰면 늘 가리키는 객체가 나와서 「열기」가 따로 없습니다. C 는 번호와 값이 갈라져
+    있어 여는 기호를 적어야 해요.
+  en: >-
+    In Python using a name always yields the object it points at, so there is no separate “open”. C
+    keeps the number and the value apart, so an opening symbol has to be written.
+misconceptions:
+  # c.md §3 #18 · §9 #3·#9 — 규격에서 나온 사실이고 빈도 자료는 없다.
+  - ko: "포인터에 넣으면 값이 바뀐다 — 별표 없이 넣으면 <b>번호</b>가 바뀝니다. 값을 바꾸려면 열어서 넣어요."
+    en: "Putting into the pointer changes the value — without the star it changes <b>the number</b>. To change the value, open it and put."
+  - ko: "선언의 별표와 식의 별표는 같은 일이다 — 선언에서는 「포인터다」, 식에서는 「열어라」입니다. 노드 종류부터 달라요."
+    en: "The star in a declaration and in an expression do the same thing — in a declaration it says “a pointer”, in an expression “open it”. Even the parse node differs."
+  - ko: "돌려준 자리(<code>free</code>)를 열어도 옛 값이 나온다 — 답이 <b>없습니다</b>. 나올 수도, 다른 것이 나올 수도, 죽을 수도 있어요."
+    en: "Opening a freed place still shows the old value — there is <b>no answer</b>. It may appear, something else may, or the program may die."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>번호를 따라가 자리를 여는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that follows the number and opens the place</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 번호를 든 <b>포인터</b>입니다. 이름만 적으면 번호가 나와요 — 여는 것은 앞의 기호입니다."
+          en: "{{pick.2|code}} is <b>the pointer</b> holding the number. The name alone yields the number — the symbol in front opens it."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 번호냐 그 너머냐"
+            en: "The sharpest spot — the number or beyond it"
+          code:
+            - "p     /* 번호 */"
+            - "*p    /* 그 자리의 값 */"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 열린 자리에 <b>넣거나 받는 쪽</b>입니다. 여는 일은 별표가 해요."
+          en: "{{pick.3|code}} is <b>what is put into or taken from</b> the opened place. The opening is done by the star."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 여는 것과 오가는 것"
+            en: "The sharpest spot — the opening and what passes"
+          code:
+            - "*p = 5;     /* * 가 열고 5 가 들어간다 */"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행에서 별표를 <b>빼고</b> <code>{{pick.2}} = 5;</code> 라고 적으면 무엇이 바뀔까요?"
+      en: "Drop the star on line {{site.line}} and write <code>{{pick.2}} = 5;</code> — what changes?"
+    hint:
+      ko: "포인터 안에는 번호가 있습니다."
+      en: "Inside the pointer is a number."
+    options:
+      - t:
+          ko: "포인터 안의 번호가 5 로 바뀐다 — 5 번지를 가리키게 되고, 그 자리를 열면 답이 없다"
+          en: "The number inside the pointer becomes 5 — it now names place 5, and opening that has no answer"
+      - t:
+          ko: "가리키는 자리의 값이 5 가 된다"
+          en: "The value at the named place becomes 5"
+        diag:
+          t:
+            ko: "그것은 <b>별표가 있을 때</b>입니다. 별표가 없으면 이름 자체, 즉 번호에 넣어요."
+            en: "That is <b>with the star</b>. Without it, the putting goes into the name itself — the number."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 별표 하나"
+              en: "The sharpest spot — one star"
+            code:
+              - "*p = 5;   /* 자리의 값 */"
+              - "p = 5;    /* 번호 */"
+      - t:
+          ko: "컴파일 오류"
+          en: "A compile error"
+        diag:
+          t:
+            ko: "경고는 나지만 <b>컴파일됩니다</b>. 정수를 포인터에 넣는 것을 C 는 막지 않아요."
+            en: "There is a warning but <b>it compiles</b>. C does not block putting an integer into a pointer."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 경고뿐"
+              en: "The sharpest spot — only a warning"
+            code:
+              - "p = 5;   /* 경고: 정수를 포인터로 */"
+      - t:
+          ko: "아무 일도 안 난다"
+          en: "Nothing happens"
+        diag:
+          t:
+            ko: "번호가 바뀝니다. 그 뒤 포인터를 여는 줄에서 <b>답이 없어지는</b> 것이 「아무 일」이 아니에요."
+            en: "The number changes. The next line that opens the pointer <b>loses its answer</b> — hardly nothing."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 나중에 터진다"
+              en: "The sharpest spot — it blows up later"
+            code:
+              - "p = 5; *p;   /* 여기서 답이 없다 */"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 포인터가 가리키는 <b>자리를 엽니다</b>."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>opens the place</b> the pointer names."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "*", mono: true }
+      - t: "&"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>자리를 얻는</b> 기호입니다. 포인터 앞에 붙이면 포인터 자체의 자리가 나와요 — 방향이 반대입니다."
+            en: "That symbol <b>takes a place</b>. On a pointer it yields the pointer's own place — the opposite direction."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 방향"
+              en: "The sharpest spot — the direction"
+            code:
+              - "*p    /* 번호 → 값 */"
+              - "&p    /* 포인터의 자리 */"
+      - t: "->"
+        mono: true
+        diag:
+          t:
+            ko: "화살표는 구조체 포인터에서 <b>안의 이름을 꺼낼</b> 때 씁니다. 값 하나를 여는 자리에는 뒤에 이름이 없어 못 와요."
+            en: "The arrow <b>takes a member</b> through a struct pointer. Where one value is opened there is no member name after it, so it cannot stand."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 안의 이름이 있나"
+              en: "The sharpest spot — is there a member"
+            code:
+              - "p->x    /* 안의 x */"
+              - "*p      /* 통째로 */"
+      - t: "@"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>C 에 없는 기호</b>입니다. 컴파일러가 못 읽어요."
+            en: "That is <b>not a C symbol</b>. The compiler cannot read it."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 없는 기호"
+              en: "The sharpest spot — a symbol C lacks"
+            code:
+              - "@p   /* 오류 */"
+
+why_gate:
+  q:
+    ko: "C 는 왜 포인터를 쓸 때마다 <b>여는 기호를 적게</b> 할까요?"
+    en: "Why does C make you <b>write an opening symbol</b> every time a pointer is used?"
+  choices:
+    - t:
+        ko: "번호 자체를 값으로 다루는 일(셈 · 견주기 · 넘기기)과 그 너머를 다루는 일이 둘 다 필요해서, 어느 쪽인지를 글자로 갈라 적게 한 것이기 때문"
+        en: "Because handling the number itself (arithmetic, comparison, passing) and handling what lies beyond are both needed, so which one is meant is spelled out in a character"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 번호 자체를 셈하는 자리(배열 훑기)를 하나 적어 보세요."
+        en: "That is the direction. Name one spot where the number itself is computed (walking an array)."
+    - t:
+        ko: "컴파일러가 저절로 못 열어서"
+        en: "Because the compiler cannot open it by itself"
+      ok: false
+      fb:
+        ko: "열 수 있습니다. 안 여는 것은 번호를 그대로 쓰는 일도 있어서예요."
+        en: "It could. It does not because the number itself is sometimes what is wanted."
+    - t:
+        ko: "여는 것이 느려서 경고하려고"
+        en: "To warn that opening is slow"
+      ok: false
+      fb:
+        ko: "속도가 아니라 뜻입니다. 번호냐 그 너머냐를 가르는 글자예요."
+        en: "It is meaning, not speed — a character that tells the number from what lies beyond."
+
+queries:
+  - { grammars: [c], file: ./dereference.scm }
+
+examples:
+  - code: "*p = 5;                         /* p 가 가리키는 자리에 5 */"
+    expect: { sites: 1, form: store, hole: "*", picks: { 1: "*", 2: "p", 3: "5" } }
+  - code: "int v = *p;                     /* v -> 그 자리의 값 */"
+    expect: { sites: 1, form: load, hole: "*", picks: { 1: "*", 2: "p", 3: "v" } }
+  - code: "return *p;                      /* 그 자리의 값을 돌려준다 */"
+    expect: { sites: 1, form: load-return, hole: "*", picks: { 1: "*", 2: "p" } }
+  - code: "while (*s) s++;                 /* 끝 표시까지 */"
+    expect: { sites: 1, form: load-test, hole: "*", picks: { 1: "*", 2: "s" } }
+  - code: "int m = a * b;                  /* 곱하기 — 다른 것이다 */"
+    expect: none
+  - code: "int *p;                         /* 선언의 별표 — 다른 판이다 */"
+    expect: none

@@ -1,0 +1,251 @@
+schema: 1
+id: c/while-loop
+# 1부 「문과 흐름」 (`docs/curriculum/c.md` §2 #6 · §0.6). 보편형은 `common/loop-while`.
+# C 라서 다른 것 — 조건 자리가 「참이냐」가 아니라 「0 이 아니냐」다.
+universal: common/loop-while
+name: { ko: 조건이 0 이 아닌 동안 되풀이, en: while loop }
+token: "while"
+grammars: [c]
+framework: null
+essential: true
+difficulty: 2
+prereq: [c/comparison, c/truthiness]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "괄호 안이 0 이 아닌 동안 몸통을 되풀이한다. 매 바퀴 앞에 조건을 다시 본다."
+    en: "Repeats the body as long as the parentheses are not 0, checked each lap."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 매 바퀴 <b>앞에</b> {{pick.2|code}}{{pick.2|josa:을,를}} 보고,
+      0 이 아니면 {{pick.3|code}}{{pick.3|josa:을,를}} 한 번 더 돌립니다. 처음부터 0 이면 몸통은 한 번도
+      안 돌아요. 조건 자리가 「참이냐」가 아니라 「0 이냐」라서 C 특유의 모양이 나옵니다 —
+      <code>while (n--)</code> 는 n 이 0 이 될 때까지 세고, <code>while (*s)</code> 는 끝 표시까지
+      글자를 훑고, <code>while (1)</code> 은 안에서 <code>break</code> 로 끊을 때까지 돌아요. 끝나려면
+      몸통 안의 무언가가 조건을 0 으로 만들어야 합니다.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} looks at {{pick.2|code}} <b>before</b> every lap and, if it
+      is not 0, runs {{pick.3|code}} once more. If it is 0 from the start the body never runs. Because
+      the condition asks “is it 0” rather than “is it true”, C has shapes of its own —
+      <code>while (n--)</code> counts n down to 0, <code>while (*s)</code> walks characters up to the
+      end mark, and <code>while (1)</code> runs until a <code>break</code> inside cuts it. To end,
+      something in the body has to turn the condition into 0.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:을,를}} 본다 — 0 이면 여기서 끝이다."
+      en: "{{pick.2|code}} is read — if it is 0, this is the end."
+    - ko: "0 이 아니면 {{pick.3|code}}{{pick.3|josa:이,가}} 한 바퀴 돈다."
+      en: "If not 0, {{pick.3|code}} runs one lap."
+    - ko: "다시 {{site.line}}행의 조건으로 돌아간다 — 몸통이 조건을 바꾸지 않으면 영영 돈다."
+      en: "Back to the condition on line {{site.line}} — if the body never changes it, it runs forever."
+
+rule:
+  ko: "<b>조건은 매 바퀴 앞에 본다.</b> 처음부터 0 이면 한 번도 안 돌고, 몸통이 조건을 안 바꾸면 안 끝난다."
+  en: "<b>The condition is read before every lap.</b> 0 from the start means never; a body that leaves it alone never ends."
+result:
+  label:
+    ko: "{{site.line}}행의 되풀이"
+    en: "the loop on line {{site.line}}"
+  value: "{{pick.1}} {{pick.2}}"
+  note:
+    ko: "0 이 될 때까지"
+    en: "until it becomes 0"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:이,가}} 0 이 아닌 동안 {{pick.3|code}}{{pick.3|josa:이,가}} 되풀이됩니다.
+  en: >-
+    {{pick.3|code}} repeats while {{pick.2|code}} is not 0.
+payoff:
+  ko: >-
+    이걸 알면 「무한 반복」이 어디서 나는지 보입니다 — 몸통 안에 조건을 0 으로 만드는 줄이 없는 거예요.
+  en: >-
+    This shows where an endless loop comes from — nothing in the body turns the condition into 0.
+bridge:
+  ko: >-
+    파이썬의 <code>while</code> 도 매 바퀴 앞에 조건을 봅니다. C 가 다른 것은 조건이 참·거짓이 아니라
+    수라 <code>while (n--)</code> 같은 모양이 된다는 점이에요.
+  en: >-
+    Python's <code>while</code> also checks before each lap. What differs in C is that the condition
+    is a number, not a truth value, which allows shapes like <code>while (n--)</code>.
+misconceptions:
+  # c.md §2 #6 — 규격에서 나온 사실이고 빈도 자료는 없다.
+  - ko: "몸통은 적어도 한 번은 돈다 — 조건이 처음부터 0 이면 <b>한 번도</b> 안 돕니다. 한 번은 도는 모양은 <code>do … while</code> 이에요."
+    en: "The body runs at least once — 0 from the start means it runs <b>never</b>. The shape that runs once is <code>do … while</code>."
+  - ko: "조건은 몸통이 도는 중에도 검사된다 — <b>바퀴 앞에서만</b> 봅니다. 몸통 중간에 조건이 0 이 돼도 그 바퀴는 끝까지 돌아요."
+    en: "The condition is checked during the body — only <b>before a lap</b>. If it becomes 0 mid-body, that lap still finishes."
+  - ko: "<code>while (1)</code> 은 오류다 — 1 은 0 이 아니라 <b>영영 참</b>인 관용구입니다. 안에서 <code>break</code> 로 끊어요."
+    en: "<code>while (1)</code> is an error — 1 is not 0, so it is the <b>forever</b> idiom, cut from inside with <code>break</code>."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>매 바퀴 앞에 다시 보는 부분</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the part read again before every lap</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 되풀이를 <b>여는 낱말</b>입니다. 무엇을 볼지는 그 옆 괄호가 말해요."
+          en: "{{pick.1|code}} is <b>the word that opens</b> the loop. What to look at is said by the parentheses beside it."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 여는 낱말과 조건"
+            en: "The sharpest spot — the opening word and the condition"
+          code:
+            - "while (n) n--;   /* while 이 열고, (n) 을 본다 */"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>몸통</b>입니다. 조건이 0 이 아닐 때 도는 쪽이지, 조건을 보는 쪽이 아니에요."
+          en: "{{pick.3|code}} is <b>the body</b>. It is what runs when the condition is not 0, not what reads the condition."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 보는 쪽과 도는 쪽"
+            en: "The sharpest spot — the reading side and the running side"
+          code:
+            - "while (n) { n--; }   /* (n) 을 보고, { n--; } 가 돈다 */"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행의 {{pick.2|code}}{{pick.2|josa:이,가}} <b>처음부터 0</b> 이면 몸통은 몇 번 돌까요?"
+      en: "If {{pick.2|code}} on line {{site.line}} is <b>0 from the start</b>, how many times does the body run?"
+    hint:
+      ko: "조건을 보는 때가 몸통보다 앞입니다."
+      en: "The condition is read before the body."
+    options:
+      - t:
+          ko: "한 번도 안 돈다"
+          en: "Never"
+      - t:
+          ko: "한 번은 돈 뒤에 멈춘다"
+          en: "Once, then it stops"
+        diag:
+          t:
+            ko: "그것은 <b>몸통을 먼저 돌리는</b> <code>do … while</code> 입니다. 이 모양은 묻고 나서 돌아요."
+            en: "That is <code>do … while</code>, which <b>runs the body first</b>. This shape asks, then runs."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 묻고 도나 돌고 묻나"
+              en: "The sharpest spot — ask then run, or run then ask"
+            code:
+              - "while (0) a();        /* 0번 */"
+              - "do a(); while (0);    /* 1번 */"
+      - t:
+          ko: "영영 돈다"
+          en: "Forever"
+        diag:
+          t:
+            ko: "영영 도는 것은 조건이 <b>0 이 아닌 채</b>로 남을 때입니다. 처음부터 0 이면 정반대로 시작도 안 해요."
+            en: "Forever is what happens when the condition <b>stays non-zero</b>. 0 from the start is the opposite — it never begins."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 0 이면 끝"
+              en: "The sharpest spot — 0 means end"
+            code:
+              - "while (1)   /* 영영 */"
+              - "while (0)   /* 0번 */"
+      - t:
+          ko: "컴파일이 멈춘다"
+          en: "Compiling stops"
+        diag:
+          t:
+            ko: "문법에는 아무 문제가 없습니다. <b>안 도는 것</b>은 오류가 아니라 결과예요."
+            en: "The grammar is fine here. <b>Not running</b> is a result, not an error."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 문법이냐 결과냐"
+              en: "The sharpest spot — grammar or outcome"
+            code:
+              - "while (0) { }   /* 컴파일 된다 */"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 조건이 0 이 아닌 동안 <b>되풀이</b>합니다."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>repeats</b> while the condition is not 0."
+    hint:
+      ko: "보기 넷은 전부 괄호를 달고 같은 자리에 설 수 있는 낱말입니다."
+      en: "All four take parentheses and can stand in the same slot."
+    options:
+      - { t: "while", mono: true }
+      - t: "if"
+        mono: true
+        diag:
+          t:
+            ko: "<code>if</code> 는 <b>한 번</b> 갈릴 뿐 되풀이하지 않습니다. 조건이 0 이 아니어도 몸통은 한 번만 돌아요."
+            en: "<code>if</code> splits <b>once</b> and does not repeat. Even with a non-zero condition the body runs only once."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 한 번이냐 되풀이냐"
+              en: "The sharpest spot — once or repeated"
+            code:
+              - "if (n) n--;      /* 한 번 */"
+              - "while (n) n--;   /* 0 까지 */"
+      - t: "for"
+        mono: true
+        diag:
+          t:
+            ko: "<code>for</code> 도 되풀이하지만 괄호 안이 <b>세 칸</b>입니다. 한 칸짜리 조건만 있는 자리에는 모양이 안 맞아요."
+            en: "<code>for</code> repeats too, but its parentheses hold <b>three slots</b>. It does not fit a slot with one condition."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 한 칸이냐 세 칸이냐"
+              en: "The sharpest spot — one slot or three"
+            code:
+              - "while (n > 0)"
+              - "for (; n > 0; )   /* 칸을 비워야 같아진다 */"
+      - t: "until"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>다른 언어의 낱말</b>입니다. C 에는 없고, 「0 이 될 때까지」는 <code>while</code> 에 뒤집은 조건으로 적어요."
+            en: "That is <b>another language's word</b>. C does not have it; “until 0” is written as <code>while</code> with a flipped condition."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — C 에 없는 낱말"
+              en: "The sharpest spot — a word C lacks"
+            code:
+              - "until (done)     /* 오류 */"
+              - "while (!done)"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 몇 번 돌지를 적지 않고 <b>조건만</b> 적을까요?"
+    en: "Why does line {{site.line}} write <b>only a condition</b> instead of how many times to run?"
+  choices:
+    - t:
+        ko: "끝나는 때가 미리 정해진 수가 아니라 몸통이 만드는 상태에 달려 있어서, 그 상태를 매 바퀴 다시 묻는 모양이 필요하기 때문"
+        en: "Because the end depends on a state the body produces rather than a number known in advance, so a shape that re-asks that state every lap is needed"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 횟수가 미리 정해진 되풀이는 어떤 모양을 쓰는지도 적어 보세요."
+        en: "That is the direction. Say which shape a loop with a known count uses."
+    - t:
+        ko: "C 에 횟수를 적는 되풀이가 없어서"
+        en: "Because C has no counted loop"
+      ok: false
+      fb:
+        ko: "있습니다 — 세 칸짜리 모양이요. 여기서 조건만 적은 것은 선택이에요."
+        en: "It does — the three-slot shape. Writing only a condition here is a choice."
+    - t:
+        ko: "조건만 적는 쪽이 빨라서"
+        en: "Because a bare condition is faster"
+      ok: false
+      fb:
+        ko: "속도 문제가 아닙니다. 끝나는 때를 누가 정하느냐의 문제예요."
+        en: "Speed is not it. The question is who decides when it ends."
+
+queries:
+  - { grammars: [c], file: ./while-loop.scm }
+
+examples:
+  - code: "while (n > 0) { n--; }          /* n 이 0 이 될 때까지 */"
+    expect: { sites: 1, form: while, hole: "while", picks: { 1: "while", 2: "(n > 0)", 3: "{ n--; }" } }
+  - code: "while (*s) s++;                 /* 끝 표시까지 */"
+    expect: { sites: 1, form: while, hole: "while", picks: { 1: "while", 2: "(*s)", 3: "s++;" } }
+  - code: "do { n++; } while (n < 3);      /* 몸통 먼저, 그다음 조건 */"
+    expect: { sites: 1, form: do, picks: { 1: "do", 2: "(n < 3)", 3: "{ n++; }" } }
+  - code: "for (;;) break;                 /* 세 칸짜리 — 다른 판이다 */"
+    expect: none
+  - code: "if (n) n--;                     /* 한 번 — 다른 판이다 */"
+    expect: none

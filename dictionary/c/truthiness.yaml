@@ -1,0 +1,208 @@
+schema: 1
+id: c/truthiness
+# 0부 축 D (`docs/curriculum/c.md` §0.1 #8 · §3 #13). 보편형은 `common/truthiness` 다 (D187 ⑤ —
+# 「무엇이 참으로 쳐지나」는 기계가 아니라 언어 설계라 `common/` 에 있다). C 의 답은 열 언어 중
+# 가장 짧다: 참·거짓 타입이 없고 **0 이 아니면 참**이다.
+universal: common/truthiness
+name: { ko: 0 이 아니면 참, en: Truthiness }
+token: "if (p)"
+grammars: [c]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cs/type, c/comparison, c/number-literal]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "참·거짓 타입이 없다. 조건 자리는 값이 0 인지만 보고, 0 이 아니면 전부 참이다."
+    en: "No truth type: a condition asks only whether the value is 0; else it is true."
+  why:
+    ko: >-
+      {{site.line}}행의 조건 자리에는 견주기가 없고 {{pick.2|code}}{{pick.2|josa:이,가}} <b>그대로</b> 놓여
+      있습니다. C 에는 참·거짓 타입이 없어서 조건은 「이 값이 0 이냐」만 물어요 — 0 이면 거짓,
+      나머지 전부가 참입니다. 포인터도 수라 <code>if (p)</code> 는 「빈 자리가 아니냐」이고,
+      <code>while (*s)</code> 는 「끝 표시 0 에 닿기 전까지」예요. 함정이 하나 있습니다 —
+      <code>strcmp</code> 는 <b>같으면 0</b> 을 내므로 <code>if (strcmp(a, b))</code> 는 「같으면」이
+      아니라 <b>「다르면」</b>입니다.
+    en: >-
+      The condition on line {{site.line}} has no comparison; {{pick.2|code}} sits there <b>as it is</b>.
+      C has no truth type, so a condition asks only “is this value 0?” — 0 is false and everything else
+      is true. A pointer is a number too, so <code>if (p)</code> means “not an empty place”, and
+      <code>while (*s)</code> means “until the end mark 0”. One trap — <code>strcmp</code> yields
+      <b>0 when equal</b>, so <code>if (strcmp(a, b))</code> means <b>“if different”</b>, not “if equal”.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 값으로 접힌다 — 수든 포인터든 결국 수다."
+      en: "{{pick.2|code}} folds to a value — a number or a pointer, a number either way."
+    - ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 그 수가 0 인지만 본다."
+      en: "{{pick.3|code}} looks only at whether that number is 0."
+    - ko: "0 이 아니면 {{pick.1|code}}{{pick.1|josa:이,가}} 돈다 — {{site.line}}행에 참·거짓은 어디에도 없다."
+      en: "If it is not 0, {{pick.1|code}} runs — there is no true or false anywhere on line {{site.line}}."
+
+rule:
+  ko: "<b>0 이면 거짓, 아니면 참.</b> 조건 자리에 오는 것은 참·거짓이 아니라 수다."
+  en: "<b>0 is false, anything else is true.</b> What sits in a condition is a number, not a truth value."
+result:
+  label:
+    ko: "{{site.line}}행의 조건"
+    en: "the condition on line {{site.line}}"
+  value: "{{pick.2}}"
+  note:
+    ko: "0 인지만 본다"
+    en: "only asked whether it is 0"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} 견주지 않고 그대로 조건이 됐습니다 — 0 이 아니면 참이에요.
+  en: >-
+    {{pick.2|code}} became the condition without any comparison — true unless it is 0.
+payoff:
+  ko: >-
+    이걸 알면 <code>if (strcmp(a, b))</code> 를 「같으면」으로 읽는 실수가 사라집니다 — 0 이 같음이라
+    그 조건은 「다르면」이에요.
+  en: >-
+    This removes the mistake of reading <code>if (strcmp(a, b))</code> as “if equal” — 0 means equal,
+    so the condition means “if different”.
+bridge:
+  ko: >-
+    파이썬은 빈 목록도 거짓이고 자바는 참·거짓 타입만 조건에 옵니다. C 는 둘 다 아니라 그냥
+    0 이냐를 봐요 — 규칙이 하나뿐입니다.
+  en: >-
+    Python counts an empty list as false and Java lets only the truth type into a condition. C is
+    neither — it just asks whether the value is 0, one rule only.
+misconceptions:
+  # c.md §9 #6 · §8 ⑦ — 규격·라이브러리 규약에서 나온 사실이고 빈도 자료는 없다.
+  - ko: "<code>if (strcmp(a, b))</code> 는 같으면 들어간다 — <code>strcmp</code> 는 같으면 <b>0</b> 을 내므로 <b>다르면</b> 들어갑니다."
+    en: "<code>if (strcmp(a, b))</code> enters when equal — <code>strcmp</code> yields <b>0</b> when equal, so it enters when <b>different</b>."
+  - ko: "<code>true</code>·<code>false</code> 가 언어의 낱말이다 — <code>stdbool.h</code> 가 주는 이름이고 값은 1 과 0 입니다. 관용구는 여전히 수예요."
+    en: "<code>true</code> and <code>false</code> are language words — <code>stdbool.h</code> supplies them, and their values are 1 and 0. The idiom is still numbers."
+  - ko: "음수는 거짓이다 — 0 이 아니면 전부 참입니다. −1 도 참이에요."
+    en: "Negatives are false — anything but 0 is true. −1 is true."
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 개념의 요점은 조건 자리에 **견주기가 없다**는 것이라 뚫을 낱말이 없다 —
+  구멍을 만들면 「무엇을 넣어야 하나」의 답이 「아무것도」가 된다. 견주기가 있는 조건은
+  `c/comparison` 의 빈칸이 맡는다.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>견주지 않고 그대로 조건이 된 값</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the value that became the condition without a comparison</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 값이 아니라 그 값을 <b>두고 하는 일</b>입니다 — 갈래를 돌리거나 뒤집거나. 조건이 된 값은 괄호 안에 있어요."
+          en: "{{pick.1|code}} is not the value but <b>what is done with it</b> — running the branch or flipping it. The value that became the condition is inside the parentheses."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 값이냐 일이냐"
+            en: "The sharpest spot — the value or the action"
+          code:
+            - "if (p) x = 1;   /* p 가 조건, x = 1 은 갈래 */"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 조건을 <b>묻는 낱말</b>입니다. 무엇이 0 인지를 보는 것이지 그 자체가 값은 아니에요."
+          en: "{{pick.3|code}} is <b>the word that asks</b>. It checks what is 0; it is not a value itself."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 묻는 낱말과 값"
+            en: "The sharpest spot — the asking word and the value"
+          code:
+            - "while (*s)   /* while 이 묻고, *s 가 답한다 */"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행의 {{pick.2|code}}{{pick.2|josa:이,가}} <b>−1</b> 이면 조건은 어느 쪽일까요?"
+      en: "If {{pick.2|code}} on line {{site.line}} is <b>−1</b>, which way does the condition go?"
+    hint:
+      ko: "규칙은 하나 — 0 이냐."
+      en: "One rule — is it 0."
+    options:
+      - t:
+          ko: "참 — 0 이 아니면 전부 참이다"
+          en: "True — anything but 0 is true"
+      - t:
+          ko: "거짓 — 음수라서"
+          en: "False — it is negative"
+        diag:
+          t:
+            ko: "부호는 <b>안 봅니다</b>. 0 인지만 보고, −1 은 0 이 아니라 참이에요."
+            en: "The sign is <b>not looked at</b>. Only whether it is 0 — and −1 is not 0, so true."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 부호가 아니라 0"
+              en: "The sharpest spot — 0, not the sign"
+            code:
+              - "if (-1) puts(\"참\");   /* 찍힌다 */"
+      - t:
+          ko: "컴파일 오류 — 참·거짓이 아니라서"
+          en: "A compile error — it is not a truth value"
+        diag:
+          t:
+            ko: "C 에는 참·거짓 타입이 <b>없습니다</b>. 조건 자리에는 어떤 수든 옵니다 — 자바라면 오류지만 C 는 아니에요."
+            en: "C has <b>no</b> truth type. Any number may sit in a condition — an error in Java, not in C."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 자바와 다르다"
+              en: "The sharpest spot — unlike Java"
+            code:
+              - "if (n)   /* C: 된다  Java: 오류 */"
+      - t:
+          ko: "1 과 견주어 거짓"
+          en: "Compared with 1, so false"
+        diag:
+          t:
+            ko: "1 과 견주지 <b>않습니다</b>. 견주는 상대는 0 하나이고, 그것도 「0 이냐」이지 「1 이냐」가 아니에요."
+            en: "It is <b>not</b> compared with 1. The only reference is 0, and the question is “is it 0”, not “is it 1”."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 1 이 아니라 0"
+              en: "The sharpest spot — 0, not 1"
+            code:
+              - "if (2)   /* 참 — 1 과 견주지 않는다 */"
+
+why_gate:
+  q:
+    ko: "C 는 왜 참·거짓 타입 없이 <b>0 이냐</b> 하나로 조건을 정할까요?"
+    en: "Why does C decide a condition with the single rule <b>is it 0</b>, without a truth type?"
+  choices:
+    - t:
+        ko: "기계에는 참·거짓이 없고 「0 인지 검사하는 명령」만 있어서, 그 명령 하나로 조건을 옮기면 변환이 필요 없기 때문"
+        en: "Because the machine has no truth value, only a “test for zero” instruction, and mapping a condition onto that one instruction needs no conversion"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 규칙 때문에 읽는 사람이 조심할 자리 하나도 적어 보세요."
+        en: "That is the direction. Add one spot where that rule makes the reader careful."
+    - t:
+        ko: "참·거짓 타입을 만들 시간이 없어서"
+        en: "Because there was no time to make a truth type"
+      ok: false
+      fb:
+        ko: "시간이 아니라 모형입니다. 나중에 <code>_Bool</code> 이 생겼어도 조건 규칙은 그대로예요."
+        en: "It is the model, not time. Even after <code>_Bool</code> arrived, the condition rule stayed."
+    - t:
+        ko: "0 이 특별한 수라서"
+        en: "Because 0 is a special number"
+      ok: false
+      fb:
+        ko: "0 이 특별한 것은 결과이지 이유가 아닙니다. 기계의 검사 명령이 0 을 보기 때문에 특별해진 거예요."
+        en: "0 being special is the result, not the reason. It became special because the machine's test instruction looks at 0."
+
+queries:
+  - { grammars: [c], file: ./truthiness.scm }
+
+examples:
+  - code: "if (p) x = 1;                /* p 가 0 이 아니면 */"
+    expect: { sites: 1, form: if-bare, picks: { 1: "x = 1;", 2: "p", 3: "if" } }
+  - code: "if (!found) return 2;        /* found 가 0 이면 */"
+    expect: { sites: 1, form: if-not, picks: { 1: "!", 2: "found", 3: "if" } }
+  - code: "while (n--) { x += n; }      /* n 이 0 이 될 때까지 */"
+    expect: { sites: 1, form: while-bare, picks: { 1: "{ x += n; }", 2: "n--", 3: "while" } }
+  - code: "while (*s) s++;              /* 끝 표시 0 까지 */"
+    expect: { sites: 1, form: while-bare, picks: { 2: "*s" } }
+  - code: "if (x == 0) x = 1;           /* 견주기 — 다른 판이다 */"
+    expect: none
+  - code: "if (a < b) x = 1;            /* 견주기 — 다른 판이다 */"
+    expect: none
