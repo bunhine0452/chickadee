@@ -323,32 +323,28 @@ describe('ink 테마', () => {
     const d = themeData('light');
     const rule = (token: string) => d.rules.find((r) => r.token === token);
     expect(d.base).toBe('vs');
-    expect(rule('keyword')).toEqual({
-      token: 'keyword',
-      foreground: tokens.light['--blue-text'],
-      fontStyle: 'bold',
-    });
-    expect(rule('string')?.foreground).toBe(tokens.light['--pink-text']);
-    expect(rule('number')?.foreground).toBe(tokens.light['--yellow-text']);
+    expect(rule('keyword')?.foreground).toBe(tokens.light['--syn-key']);
+    expect(rule('string')?.foreground).toBe(tokens.light['--syn-str']);
+    expect(rule('number')?.foreground).toBe(tokens.light['--syn-num']);
     expect(rule('comment')).toEqual({
       token: 'comment',
-      foreground: tokens.light['--ink-soft'],
+      foreground: tokens.light['--syn-com'],
       fontStyle: 'italic',
     });
-    expect(rule('delimiter')?.foreground).toBe(tokens.light['--ink-soft']);
-    expect(rule('type')?.foreground).toBe(tokens.light['--ink']);
-    expect(d.colors['editor.background']).toBe(tokens.light['--stock']);
-    expect(d.colors['editorLineNumber.foreground']).toBe(tokens.light['--ink-soft']);
-    expect(d.colors['editorGutter.background']).toBe(tokens.light['--paper-3']);
-    expect(d.colors['editorCursor.foreground']).toBe(tokens.light['--ink']);
-    expect(d.colors['editor.selectionBackground']).toBe(tokens.light['--paper-3']);
+    expect(rule('delimiter')?.foreground).toBe(tokens.light['--text-muted']);
+    expect(rule('type')?.foreground).toBe(tokens.light['--syn-type']);
+    expect(d.colors['editor.background']).toBe(tokens.light['--code-bg']);
+    expect(d.colors['editorLineNumber.foreground']).toBe(tokens.light['--text-muted']);
+    expect(d.colors['editorGutter.background']).toBe(tokens.light['--surface-2']);
+    expect(d.colors['editorCursor.foreground']).toBe(tokens.light['--text']);
+    expect(d.colors['editor.selectionBackground']).toBe(tokens.light['--surface-3']);
   });
 
   it('야간반은 base 와 값이 함께 바뀐다', () => {
     const d = themeData('dark');
     expect(d.base).toBe('vs-dark');
-    expect(d.colors['editor.background']).toBe(tokens.dark['--stock']);
-    expect(d.rules.find((r) => r.token === 'string')?.foreground).toBe(tokens.dark['--pink-text']);
+    expect(d.colors['editor.background']).toBe(tokens.dark['--code-bg']);
+    expect(d.rules.find((r) => r.token === 'string')?.foreground).toBe(tokens.dark['--syn-str']);
   });
 
   it('setInkTheme 은 이름으로 갈아 끼운다', () => {

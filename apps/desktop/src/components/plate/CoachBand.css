@@ -1,32 +1,32 @@
-/* 첫 판 안내 띠 (D134). 목업에 없는 자리라 「이어보기」 문단(`.linkpara`)과 같은 재료를
-   썼다 — 판 안에 얹히지만 판의 일부가 아닌 글이라는 뜻이 그 모양이다.
-
-   자리를 미리 잡지 않는다: 이 띠는 첫 판에만 있고 걸음이 바뀌어도 **줄 수가 같도록** 문구를
-   맞췄다. 정본 §3-3 이 지키는 것은 판정란이고, 이 띠는 판정란보다 위에서 처음부터 서 있다. */
+/* 첫 문제를 함께 걷는 안내 띠 (D134).
+   자리를 미리 잡지 않는다: 이 띠는 첫 문제에만 있고 걸음이 바뀌어도 줄 수가 같도록 문구를
+   맞췄다. 정본 §3-3 이 지키는 것은 판정란이고, 이 띠는 그 위에서 처음부터 서 있다. */
 .coach {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: start;
-  gap: 12px;
-  margin-bottom: 14px;
-  padding: 11px 14px;
-  border-left: 5px solid var(--t0);
-  background: var(--paper-3);
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+  background: var(--accent-weak);
 }
 
 .coach-n {
-  color: var(--t0-text);
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
-  font-weight: 700;
-  letter-spacing: .12em;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  font-weight: var(--fw-bold);
+  letter-spacing: .1em;
   white-space: nowrap;
 }
 
 .coach p {
-  color: var(--ink);
-  font-size: var(--fs-15);
+  max-width: var(--measure);
+  color: var(--text);
+  font-size: var(--fs-3);
   line-height: var(--lh-body);
+  word-break: keep-all;
 }
 
-.coach p b { font-weight: 700 }
+.coach p b { font-weight: var(--fw-bold) }

@@ -3,7 +3,7 @@
    나머지 면은 종이와 먹이다. `filter: drop-shadow` 는 쓰지 않는다 (정본 §6 성능). */
 .run-panel {
   border: 1px solid var(--rule);
-  background: var(--paper-2);
+  background: var(--surface-2);
   padding: 12px 14px;
   border-left: 4px solid var(--state-locked);
 }
@@ -25,13 +25,13 @@
 
 .run-head b {
   font-size: var(--fs-15);
-  color: var(--ink);
+  color: var(--text);
 }
 
 .run-go {
   border: 1px solid var(--rule);
-  background: var(--stock);
-  color: var(--ink);
+  background: var(--bg);
+  color: var(--text);
   font-family: inherit;
   font-size: var(--fs-14);
   padding: 5px 12px;
@@ -39,7 +39,7 @@
 }
 
 .run-go:disabled {
-  color: var(--ink-faint);
+  color: var(--text-muted);
   cursor: default;
 }
 
@@ -52,7 +52,7 @@
   margin: 0;
   font-size: var(--fs-16);
   line-height: 1.7;
-  color: var(--ink);
+  color: var(--text);
   word-break: keep-all;
 }
 
@@ -60,7 +60,7 @@
   margin: 4px 0 0;
   font-size: var(--fs-14);
   line-height: 1.7;
-  color: var(--ink-soft);
+  color: var(--text-muted);
   word-break: keep-all;
 }
 
@@ -73,12 +73,12 @@
 
 .run-fails code {
   font-family: var(--f-mono);
-  color: var(--ink);
+  color: var(--text);
 }
 
 .run-fails span {
   display: block;
-  color: var(--ink-soft);
+  color: var(--text-muted);
 }
 
 .run-log {
@@ -88,7 +88,7 @@
 
 .run-log summary {
   cursor: pointer;
-  color: var(--ink-soft);
+  color: var(--text-muted);
 }
 
 /* 예·아니오 두 단추. 「예」가 앞이지만 크기는 같다 — 한쪽을 크게 만들면 물음이 아니다. */
@@ -103,7 +103,7 @@
   margin: 8px 0 0;
   font-size: var(--fs-13);
   line-height: 1.7;
-  color: var(--ink-mute);
+  color: var(--text-muted);
   word-break: keep-all;
 }
 
@@ -112,7 +112,7 @@
   margin: 8px 0 0;
   max-height: 260px;
   overflow: auto;
-  background: var(--paper-3);
+  background: var(--surface-3);
   border: 1px solid var(--rule);
   padding: 8px 10px;
   font-family: var(--f-mono);

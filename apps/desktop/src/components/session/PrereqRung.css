@@ -1,54 +1,74 @@
-/* 목업: design/src/ink/session.css 「② 선행 개념 진단」 블록.
-   바꾼 것 — 비어 있는 층의 진홍 글자를 --t1-text 로 (05 §4.2).
-   목업이 인라인으로 붙였던 `style="margin-top:10px"` 두 곳은 클래스로 뺐다. */
+/* 사다리 2단 — 아래층 진단 (정본 §3-1 ②).
+   숙련도는 막대가 아니라 「n단계」 한 낱말이다 (D179·D182). 「비어 있음」은 점선 테두리와
+   낱말로 말하고 색으로만 말하지 않는다. */
 .prereq {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 10px;
+  gap: var(--s-2);
+  margin-top: var(--s-3);
 }
 
 .pq {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
-  border: 2px solid var(--rule);
-  background: var(--paper-2);
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
 }
 
-/* 겹은 막대다 — 목록에 마스코트를 세우지 않는다 (D179). */
-.pq .passes i {
-  width: 7px;
-  height: 18px;
+.pq-ly {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.pq-state {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+  font-size: var(--fs-1);
+  white-space: nowrap;
 }
 
 .pq .nm {
-  font-size: var(--fs-15);
-  font-weight: 600;
-  letter-spacing: -.02em;
+  min-width: 0;
+  font-size: var(--fs-3);
+  font-weight: var(--fw-medium);
+  word-break: keep-all;
 }
 
 .pq .nm small {
   display: block;
   margin-top: 1px;
-  color: var(--ink-soft);
-  font-size: var(--fs-13);
-  font-weight: 400;
+  color: var(--text-muted);
+  font-size: var(--fs-1);
+  font-weight: var(--fw-normal);
+  line-height: var(--lh-body);
 }
 
 .pq.gap { border-style: dashed }
 
 .pq.gap .nm small {
-  color: var(--t1-text);
-  font-weight: 600;
+  color: var(--text);
+  font-weight: var(--fw-medium);
 }
 
-.prereq-note { margin-top: 10px }
+.prereq-note { margin-top: var(--s-3) }
 
-/* 합성 판의 예고 한 줄 (D137). 본문이라 `.note` 의 `--measure`·행간을 물려받고,
-   여기서는 위 목록과의 간격만 준다. */
-.prereq-preview {
-  margin: 10px 0 0;
+/* 합성 문제의 예고 한 줄 (D137). */
+.prereq-preview { margin: var(--s-3) 0 0 }
+
+@media (width <= 720px) {
+  .pq {
+    grid-template-columns: auto minmax(0, 1fr);
+    row-gap: var(--s-2);
+  }
+
+  .pq-state,
+  .pq .press-btn { grid-column: 2 }
 }

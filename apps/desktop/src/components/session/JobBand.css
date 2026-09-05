@@ -1,142 +1,100 @@
-/* 목업: design/src/ink/session.css 「작업 띠」 블록.
-   바꾼 것 —
-     · 막대는 `shell/TimeQueue` 가 그린다. 목업의 `.jq` 선언은 `.jobband .queue` 로 옮겨
-       높이·간격만 되돌린다 (05 §5 가 `.jq` 와 `.queue` 를 같은 컴포넌트로 묶었다).
-     · 지금 칸 테두리의 진홍 원색은 --t1 로 (05 §4.2).
-     · 목업의 `[data-theme="dark"] .jq{box-shadow:… var(--glow-t1)}` 은 뺐다 —
-       다크 선택자는 tokens.css 와 6개 컴포넌트에만 허용되고 JobBand 는 그 목록에 없다
-       (05 §4.3). 야간 글로우가 필요하면 TimeQueue.css 로 가야 한다.
-     · 이름표 줄은 목업의 가로 `.jq-labels` 그대로다. TimeQueue 의 `labels` 는 홈의
-       세로 목록(`.qlist`)이라 작업 띠에는 맞지 않는다. */
+/* 진행 띠 (D182). 학습 화면에서 **가장 조용한** 자리다 — 문제가 아니기 때문이다.
+ *
+ * 전에는 상자 하나였다: 2.5px 테두리 · 오프셋 그림자 · 로고 46px · 디스플레이 서체 제목 ·
+ * 리포 이름 · 문제 이름표 줄. 세로 96px 을 먹고 눈이 매 판마다 그것을 지나야 했다.
+ * 지금은 밑줄 하나에 얹힌 한 줄 + 3px 막대이고, 높이 600 창에서 문제에 44px 을 돌려준다. */
 .jobband {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 22px;
-  margin: 14px 18px 0;
-  padding: 9px 16px 10px;
-  border: 2.5px solid var(--rule);
-  background: var(--paper);
-  box-shadow: 4px 5px 0 var(--edge), var(--lamp);
-}
-
-.jb-brand {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-  padding-right: 18px;
-  border-right: 2px dashed var(--rule);
+  flex-direction: column;
+  gap: var(--s-2);
+  padding: var(--s-3) var(--s-5) var(--s-2);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
 }
 
-.jb-brand .logo {
-  display: block;
-  flex: 0 0 auto;
-  width: 46px;
-  height: 46px;
-}
-
-.jb-title {
-  color: var(--ink);
-  font-family: var(--f-poster);
-  font-weight: 400;
-  font-synthesis-weight: none;
-  font-size: var(--fs-poster-s);
-  letter-spacing: .01em;
-  line-height: .9;
-  white-space: nowrap;
-}
-
-.jb-sub {
-  margin-top: 4px;
-  color: var(--ink-soft);
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
-  font-weight: 600;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.jb-queue { min-width: 0 }
-
-.jq-h {
+/* 글은 본문 폭에 맞춰 가운데로 모은다 — 폭 2560 에서 자리 숫자와 나가기가 화면 양 끝으로
+   2,500px 벌어지면 눈이 띠 하나를 읽는 데 화면을 가로지른다. 막대는 화면 끝까지 간다. */
+.jb-line {
   display: flex;
-  justify-content: space-between;
   align-items: baseline;
-  gap: 14px;
-  margin-bottom: 5px;
-  color: var(--ink-soft);
-  font-size: var(--fs-14);
+  gap: var(--s-4);
+  width: 100%;
+  max-width: var(--content-max);
+  margin: 0 auto;
+  min-width: 0;
 }
 
-.jq-h b {
-  color: var(--ink);
-  font-weight: 700;
+.jb-where {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s-3);
+  min-width: 0;
+  margin: 0;
+  font-size: var(--fs-2);
 }
 
-.jq-h .time {
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
+/* 「3 / 7」 — 자리는 숫자로만 말한다. */
+.jb-count {
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-2);
+  font-weight: var(--fw-bold);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
-/* 시간 비례 큐 — 칸 너비 = 걸리는 시간 (정본 §3-5) */
-.jobband .queue {
-  gap: 3px;
-  height: 20px;
-  margin: 0;
-}
-
-.jobband .queue i { min-width: 9px }
-
-.jobband .queue i[data-state="now"] {
-  outline: 2px solid var(--t1);
-  outline-offset: 1px;
-}
-
-.jq-labels {
-  display: flex;
-  gap: 3px;
-  margin-top: 4px;
-}
-
-.jq-labels span {
-  flex: var(--w, 1) 1 0;
+.jb-what {
   min-width: 0;
   overflow: hidden;
-  color: var(--ink-soft);
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
-  letter-spacing: -.01em;
+  color: var(--text-muted);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.jq-labels span.now {
-  color: var(--ink);
-  font-weight: 700;
+.jb-repo {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.jb-time {
+  margin-left: auto;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .jb-ctl {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
-  gap: 10px;
+  gap: var(--s-2);
 }
 
-/* 좁은 창(최소 1000×680)에서도 띠는 한 줄이다 — 나가기를 새 줄로 내리면 띠가 180px 가 되어
-   판이 그만큼 잘렸다 (D170 ⑦). 대신 브랜드 글자를 접는다. */
-@media (width <= 1080px) {
-  .jobband { gap: 14px }
-
-  .jb-brand { padding-right: 12px }
-
-  .jb-sub { display: none }
-
-  .jb-title { font-size: var(--fs-24) }
+/* 시간 비례 막대 — 칸 너비 = 걸리는 시간 (정본 §3-5).
+   두께 3px. 진행은 읽어야 할 글이 아니라 곁눈으로 보는 것이다. */
+.jobband .queue {
+  gap: 2px;
+  height: 3px;
+  margin: 0;
 }
 
-@media (width <= 720px) {
-  .jb-title { font-size: var(--fs-24) }
+.jobband .queue i { min-width: 6px }
+
+.jobband .queue i[data-state="now"] {
+  outline: 1px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* 좁은 폭 — 리포 이름부터 접는다. 띠는 어느 폭에서도 한 줄이다. */
+@media (width <= 900px) {
+  .jobband { padding: var(--s-2) var(--s-4) }
+
+  .jb-repo { display: none }
 }

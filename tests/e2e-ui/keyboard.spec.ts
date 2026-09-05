@@ -71,8 +71,8 @@ test('15 키보드만으로 1~13', async ({ page, app }) => {
   await page.keyboard.press(`Digit${key}`);
   await expect(page.locator(`.ch[data-k="${key}"]`)).toHaveAttribute('aria-checked', 'true');
   await page.keyboard.press('Enter');
-  await expect(page.locator('.fb .stampbox .stamp')).toContainText('같음');
-  await expect(page.locator('.ps-rail .plus')).toHaveText('+1단계');
+  await expect(page.locator('.fb .fb-tag')).toHaveText('정답');
+  await expect(page.locator('.fb .gain-step')).toHaveText('0단계→1단계');
 
   // ── 6. LIFER — 판정란 안에 남으므로 벗길 겹이 없고, 포커스는 채점 자리에 그대로다 (D131).
   await page.locator('.fb .lifer-note').waitFor();

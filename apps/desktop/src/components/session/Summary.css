@@ -1,273 +1,275 @@
-/* 목업: design/src/ink/session.css 「인쇄 완료」 블록.
-   바꾼 것 —
-     · 진홍 원색을 --t1 / --t1-text 로 (05 §4.2).
-     · 선택자에서 중간 마디를 뺐다: `.done-head p b`→`.done-head b`,
-       `.shift .next b`→`.shift b`, `.lifer-box p b`→`.lifer-box b`,
-       `.shift .pair .dee*`→`.shift .dee*`. 그 상자 안에 다른 `b`·막대가 없어
-       고르는 대상은 같고, 같은 키 선택자끼리의 특이도가 평평해져
-       stylelint no-descending-specificity 를 통과한다.
-   `.pane-h` 는 목업에서 T1 필사 화면과 함께 쓰는 클래스다. 지금은 요약만 쓰므로 여기 두었다 —
-   T1 을 옮기는 사람은 다시 정의하지 말고 이 파일을 import 하거나 한 곳으로 옮긴다. */
+/* 학습 완료 (D182 · 정본 §6·§7).
+ *
+ * 뺀 것 — 로고 84px · 디스플레이 서체 제목 · 회전 도장 둘 · 마스코트 스티커 셋 ·
+ * 트랙 알약 · 겹 막대 넷 · 기울어진 연속 인쇄 원 · 오프셋 그림자. 열넷이다.
+ * 「오늘 무엇이 올랐나」는 숫자 표와 목록이 말한다 — 상장이 아니라 명세서다. */
 .done-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 18px;
-}
-
-.done-head .logo {
-  flex: 0 0 auto;
-  width: 84px;
-  height: 84px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--s-1) var(--s-4);
+  padding-bottom: var(--s-3);
+  border-bottom: 1px solid var(--border);
 }
 
 .done-head h2 {
-  font-family: var(--f-poster);
-  font-weight: 400;
-  font-synthesis-weight: none;
-  font-size: var(--fs-poster);
-  letter-spacing: .01em;
-  line-height: .94;
+  grid-column: 1;
+  font-family: var(--font-ui);
+  font-size: var(--fs-6);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  word-break: keep-all;
 }
 
 .done-head p {
-  margin-top: 4px;
-  color: var(--ink-soft);
-  font-size: var(--fs-15);
+  grid-column: 1;
+  color: var(--text-muted);
+  font-size: var(--fs-3);
+  line-height: var(--lh-body);
 }
 
 .done-head b {
-  color: var(--ink);
-  font-weight: 700;
+  color: var(--text);
+  font-weight: var(--fw-medium);
 }
 
-.done-head .stamp {
-  --r: -7deg;
-
-  margin-left: auto;
+.done-date {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  align-self: start;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
+/* 오늘의 숫자 넷. 칸을 나누는 것은 선 하나다. */
 .tally {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  border: 2.5px solid var(--rule);
-  background: var(--paper);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  overflow: hidden;
 }
 
 .tally > div {
-  padding: 12px 14px;
-  border-left: 2px solid var(--rule);
+  padding: var(--s-3) var(--s-4);
+  border-left: 1px solid var(--border);
 }
 
 .tally > div:first-child { border-left: 0 }
 
 .tally .k {
-  color: var(--ink-soft);
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
-  letter-spacing: .14em;
-  text-transform: uppercase;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  letter-spacing: .08em;
 }
 
 .tally .v {
-  margin-top: 4px;
-  font-family: var(--f-poster);
-  font-weight: 400;
-  font-synthesis-weight: none;
-  font-size: var(--fs-poster-s);
-  letter-spacing: .01em;
-  line-height: 1;
+  margin-top: var(--s-1);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: var(--fs-6);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--lh-tight);
 }
 
 .tally .v .u {
-  margin-left: 3px;
-  color: var(--ink-soft);
-  font-family: var(--f-ui);
-  font-size: var(--fs-14);
-  font-weight: 500;
+  margin-left: var(--s-1);
+  color: var(--text-muted);
+  font-size: var(--fs-2);
+  font-weight: var(--fw-normal);
 }
 
 .pane-h {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: baseline;
-  gap: 10px;
-  margin-bottom: 4px;
-  color: var(--ink-soft);
-  font-size: var(--fs-14);
+  gap: var(--s-2);
+  margin-bottom: var(--s-2);
+  color: var(--text-muted);
+  font-size: var(--fs-2);
 }
 
 .pane-h b {
-  color: var(--ink);
-  font-size: var(--fs-15);
-  font-weight: 700;
+  color: var(--text);
+  font-size: var(--fs-4);
+  font-weight: var(--fw-bold);
 }
 
 .shifts {
   display: flex;
   flex-direction: column;
-  border-top: 2.5px solid var(--rule);
+  border-top: 1px solid var(--border);
 }
 
 .shift {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 14px;
-  padding: 10px 0;
-  border-top: 1px dashed var(--rule);
+  gap: var(--s-3);
+  padding: var(--s-3) 0;
+  border-bottom: 1px solid var(--border);
 }
 
-.shift:first-child { border-top: 0 }
-
+/* 숙련도 이동은 숫자 둘과 화살표 하나다 — 막대도 마스코트도 없다 (D179·D182). */
 .shift .pair {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-/* 겹 이동은 막대 둘 — 마스코트는 완료 머리에만 남는다 (D179). */
-.shift .passes i {
-  width: 8px;
-  height: 18px;
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--s-1);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-3);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .shift .pair .arr {
-  padding: 0 2px;
-  color: var(--t1-text);
-  font-family: var(--f-mono);
-  font-size: var(--fs-14);
-  font-weight: 700;
+  color: var(--text-muted);
+  font-weight: var(--fw-normal);
 }
 
 .shift .nm {
-  font-size: var(--fs-15);
-  font-weight: 600;
-  letter-spacing: -.02em;
+  min-width: 0;
+  font-size: var(--fs-3);
+  font-weight: var(--fw-medium);
+  word-break: keep-all;
 }
 
 .shift .nm small {
   display: block;
   margin-top: 1px;
-  color: var(--ink-soft);
-  font-size: var(--fs-13);
-  font-weight: 400;
+  color: var(--text-muted);
+  font-size: var(--fs-1);
+  font-weight: var(--fw-normal);
+  line-height: var(--lh-body);
 }
 
 .shift .nm code {
-  padding: 0 4px;
-  border: 1px solid var(--rule);
-  background: var(--paper-3);
-  font-size: var(--fs-14);
+  font-family: var(--font-mono);
+  font-size: .92em;
+  color: var(--text-muted);
 }
 
 .shift .next {
-  color: var(--ink-soft);
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
   text-align: right;
   white-space: nowrap;
 }
 
-.shift b { color: var(--ink) }
+.shift b {
+  color: var(--text);
+  font-weight: var(--fw-medium);
+}
 
 .lifer-box {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  padding: 14px 18px;
-  border: 2.5px solid var(--rule);
-  background: var(--stock);
-  box-shadow: 4px 4px 0 var(--edge);
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
 }
 
-.lifer-box .dee-sticker {
-  flex: 0 0 auto;
-  width: 64px;
-  height: 64px;
-}
-
-.lifer-box .dee {
-  width: 100%;
-  height: 100%;
+.lifer-box .lifer-k {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  font-weight: var(--fw-bold);
+  letter-spacing: .12em;
+  text-transform: uppercase;
 }
 
 .lifer-box h4 {
-  font-size: var(--fs-18);
-  font-weight: 700;
-  letter-spacing: -.025em;
+  margin-top: var(--s-1);
+  font-size: var(--fs-4);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  word-break: keep-all;
 }
 
 .lifer-box p {
-  margin-top: 3px;
-  color: var(--ink-soft);
-  font-size: var(--fs-15);
+  max-width: var(--measure);
+  margin-top: var(--s-1);
+  color: var(--text-muted);
+  font-size: var(--fs-3);
+  line-height: var(--lh-body);
 }
 
 .lifer-box b {
-  color: var(--ink);
-  font-weight: 600;
+  color: var(--text);
+  font-weight: var(--fw-medium);
 }
 
-.lifer-box .stamp {
-  --r: 6deg;
-
-  margin-left: auto;
-}
-
-/* 연속 인쇄는 숫자로만. 끊겨도 연출이 없다 (정본 §3-7) */
+/* 연속 학습은 숫자로만. 끊겨도 연출이 없다 (정본 §3-7). */
 .streak-line {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 14px;
-  color: var(--ink-soft);
-  font-size: var(--fs-15);
+  gap: var(--s-3);
+  color: var(--text-muted);
+  font-size: var(--fs-3);
+  line-height: var(--lh-body);
 }
 
-.streak-line b { color: var(--ink) }
+.streak-line b {
+  color: var(--text);
+  font-weight: var(--fw-medium);
+}
 
 .streak-line .st {
   display: grid;
   place-items: center;
   flex: 0 0 auto;
-  width: 44px;
-  height: 44px;
-  border: 2.5px solid var(--t1);
-  border-radius: 50%;
-  box-shadow: inset 0 0 0 2px var(--paper-2), inset 0 0 0 3.5px var(--t1);
-  color: var(--t1-text);
-  font-family: var(--f-mono);
-  font-size: var(--fs-14);
-  font-weight: 700;
-  transform: rotate(-5deg);
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-2);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
 }
-
-[data-trim="on"] .streak-line .st { transform: none }
 
 .hintbox {
   display: grid;
-  gap: 4px;
-  padding: 9px 12px;
-  border-left: 4px solid var(--t2);
-  background: var(--paper-3);
-  color: var(--ink);
-  font-size: var(--fs-15);
+  gap: var(--s-1);
+  max-width: var(--measure);
+  padding: var(--s-3) var(--s-4);
+  border-left: 3px solid var(--border-strong);
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: var(--fs-3);
+  line-height: var(--lh-body);
+  word-break: keep-all;
 }
 
-.hintbox b { font-weight: 700 }
+.hintbox b { font-weight: var(--fw-bold) }
 
+/* 좁은 폭 — 「다음 복습」을 아래 줄로 내린다. 잘리지도 겹치지도 않는다. */
 @media (width <= 720px) {
-  .tally { grid-template-columns: 1fr 1fr }
+  .done-head { grid-template-columns: minmax(0, 1fr) }
 
-  .tally > div:nth-child(3) { border-left: 0 }
+  .done-date {
+    grid-row: auto;
+    grid-column: 1;
+  }
 
-  .tally > div:nth-child(n + 3) { border-top: 2px solid var(--rule) }
+  .shift {
+    grid-template-columns: auto minmax(0, 1fr);
+    row-gap: var(--s-1);
+  }
+
+  .shift .next {
+    grid-column: 2;
+    text-align: left;
+  }
 }
-
-/* ───────── 굵은 글자 ─────────
-   `.next.soon b` 만 클래스가 둘이라 특이도가 높다. 같은 `b` 규칙은 파일 안에서
-   오름차순이어야 하므로(stylelint no-descending-specificity) 끝으로 옮겼다.
-   값은 목업 그대로다 — 다음 인쇄가 코앞인 판만 진홍으로 적는다. */
-.shift .next.soon b { color: var(--t1-text) }

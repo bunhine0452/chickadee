@@ -1,20 +1,13 @@
 import { useEffect, useRef } from 'react';
 import { t } from '@chickadee/i18n';
-import { cx, Dee, DeeLogo, FlatButton, Misreg, Passes, Pill, PressButton, Reg, RichText, Stamp } from '@chickadee/ui';
+import { cx, FlatButton, PressButton, RichText } from '@chickadee/ui';
 import type { InkLayer, Track } from '@chickadee/ui';
 
 import { layerNames } from '../../screens/home/data';
 import { Acts } from '../plate/Acts';
-// 요약도 교정지 한 장이다 — 껍데기(`.ps`·`.ps-rail`·`.ps-in`)를 plate 에서 그대로 쓴다.
+// 요약도 문제 판과 같은 폭·같은 흐름을 쓴다 (`.ps`·`.ps.wide`).
 import '../plate/ProofSheet.css';
 import './Summary.css';
-
-/** 요약 로고 크기(px). 05 §6 이 못박은 세 자리 중 하나. */
-const LOGO_SIZE = 84;
-
-/** 도장이 얹히는 각도(도). */
-const STAMP_ROTATE = -7;
-const LIFER_STAMP_ROTATE = 6;
 
 /** 「곧」으로 표시할 겹 — 1겹 이하는 다음 인쇄가 코앞이다. */
 const SOON_LAYER = 1;
@@ -124,24 +117,14 @@ export function Summary({
 
   return (
     <article ref={ref} className="ps wide" tabIndex={-1} aria-label={t('session.printDone')}>
-      <Reg hit />
-
-      <div className="ps-rail" aria-hidden="true">
-        <Dee ly={4} sticker />
-        <span className="vt">{t('summary.railVertical', { runNo })}</span>
-      </div>
-
       <div className="ps-in">
         <div className="done-head">
-          <DeeLogo size={LOGO_SIZE} className="logo" />
-          <div>
-            <Misreg as="h2" text={t('session.printDone')} />
-            <p>
-              <b>{runNo}</b> · {repo} ·{' '}
-              {t('summary.line', { printed: String(printed), mins: String(mins) })}
-            </p>
-          </div>
-          <Stamp text={t('session.printDone')} sub={date} rotate={STAMP_ROTATE} />
+          <h2>{t('session.printDone')}</h2>
+          <p>
+            <b>{runNo}</b> · {repo} ·{' '}
+            {t('summary.line', { printed: String(printed), mins: String(mins) })}
+          </p>
+          <span className="done-date">{date}</span>
         </div>
 
         <div className="tally">
@@ -182,16 +165,15 @@ export function Summary({
           <ul className="shifts">
             {results.map((row) => (
               <li key={row.conceptId} className="shift">
-                <span className="pair" aria-hidden="true">
-                  <Passes n={row.lyFrom} track={row.track} label="" />
-                  <span className="arr">→</span>
-                  <Passes n={row.lyTo} track={row.track} label="" />
+                <span className="pair">
+                  {row.lyFrom}
+                  <span className="arr" aria-hidden="true">→</span>
+                  {row.lyTo}
                 </span>
                 <span className="nm">
                   {row.concept} {row.code === '' ? null : <code>{row.code}</code>}
                   <small>
-                    <Pill track={row.track}>{row.track.toUpperCase()}</Pill> {names[row.lyFrom].k} →{' '}
-                    {names[row.lyTo].k} · {moved(row.lyFrom, row.lyTo)}
+                    {names[row.lyFrom].k} → {names[row.lyTo].k} · {moved(row.lyFrom, row.lyTo)}
                     {row.extra ?? ''}
                   </small>
                 </span>
@@ -207,14 +189,11 @@ export function Summary({
 
         {lifer === undefined ? null : (
           <div className="lifer-box">
-            <Dee ly={4} sticker />
-            <div>
-              <h4>
-                {t('summary.liferHeading')} {lifer.concept} {lifer.code === '' ? null : <code>{lifer.code}</code>}
-              </h4>
-              <RichText as="p" html={lifer.where} />
-            </div>
-            <Stamp text={t('lifer.stamp')} rotate={LIFER_STAMP_ROTATE} />
+            <div className="lifer-k">{t('lifer.kicker')}</div>
+            <h4>
+              {t('summary.liferHeading')} {lifer.concept} {lifer.code === '' ? null : <code>{lifer.code}</code>}
+            </h4>
+            <RichText as="p" html={lifer.where} />
           </div>
         )}
 

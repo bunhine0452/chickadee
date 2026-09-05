@@ -2,18 +2,17 @@
    `.band-*`.
 
    바꾼 것 —
-     · **13px 하한(05 §4.2)**. 목업의 `.dir{12.5px}` · `.newtag{12px}` 가 룰에 걸린다.
-       셋 다 var(--fs-13) 로 올렸고(`.band-s` 는 13px 리터럴 → 토큰), 넓어진 글에 맞춰
+     · **13px 하한(정본 §6)**. 12.5px·12px 은 토큰이 없다 — 둘 다 --fs-1 로 올린다.
+       셋 다 var(--fs-1) 로 올렸고(`.band-s` 는 13px 리터럴 → 토큰), 넓어진 글에 맞춰
        「＋ 새 파일」 배지 폭을 56 → 74, 상자 폭 NW 를 178 → **196**(+18) 으로 늘렸다.
        왜 +18 인가: 가장 긴 표본 이름 `QuantityStepper.tsx` 는 19자 × 14px 모노 = 159.6px,
        왼 여백 11 을 더해 170.6px 에서 끝난다. 178 폭에서는 판정 배지 자리(NW−22 = 156)를
        이미 밟고 있었고 196 이면 배지가 174 에서 시작해 3.4px 이 남는다. 치수는
        DependencyMap.tsx 의 `G` 에 있다 (04 §7.3).
-     · **판정 색을 별칭으로**(05 §4.2). `.nd.ok rect{stroke:var(--pink)}` → --verdict-exact,
-       `.missed` --yellow-deep → --verdict-differ, `.sec` --blue → --verdict-equiv,
-       배지 글자 --pink-text/--yellow-text/--blue-text → --verdict-*-text.
-       「＋ 새 파일」 배지는 황을 **면으로** 칠하므로 --verdict-differ-face /
-       --on-verdict-differ 다 (D95 — 면과 선은 다른 이름이다).
+     · **색은 뜻에만**(정본 §6). 맞은 노드 --ok · 놓친 노드 --bad · 곁가지 --info 이고,
+       트랙 색은 하나도 안 쓴다.
+       「＋ 새 파일」 배지는 황을 **면으로** 칠하므로 --bad-bg /
+       --bad 다 (D95 — 면과 선은 다른 이름이다).
      · 목업의 `[data-theme="dark"] .nd.sel rect{filter:none}` 은 지웠다. 이 파일에는 filter
        가 하나도 없고(05 §10), 다크 선택자는 T2 컴포넌트에 허용되지 않는다 (05 §4.3).
 
@@ -29,37 +28,37 @@
        보이게 한다. 점선 테두리를 쓰지 않은 이유: 점선은 이미 missed·wrong·sec 의 뜻이다.
        이름은 `lib/ (3)` (04 §7.4).
 
-   `.nd.missed` 의 `animation: blip .5s 3` 은 목업 그대로 둔다 — 유한(3회) 500ms 라
-   정본 §3-7 「상시 애니메이션 금지」와 720ms 상한에 걸리지 않는다. */
+   `.nd.missed` 의 깜빡임은 D182 로 없앴다 — 모션 상한이 200ms 로 내려왔고(정본 §6),
+   「놓쳤다」는 어차피 점선 테두리와 뱃지가 이미 말한다. 움직일 이유가 없다. */
 .map {
   position: relative;
   overflow: auto;
-  border: 2px solid var(--rule);
-  background: var(--stock);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
 }
 
 .map svg {
   display: block;
-  font-family: var(--f-mono);
+  font-family: var(--font-mono);
 }
 
 .map .band-l {
-  fill: var(--ink-soft);
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
+  fill: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
   font-weight: 700;
   letter-spacing: .08em;
 }
 
 .map .band-s {
-  fill: var(--ink-soft);
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
+  fill: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
   opacity: .85;
 }
 
 .map .band-line {
-  stroke: var(--rule);
+  stroke: var(--border);
   stroke-dasharray: 4 6;
   opacity: .5;
 }
@@ -67,13 +66,13 @@
 /* ───────── 엣지 ───────── */
 .map .edge {
   fill: none;
-  stroke: var(--ink-mute);
+  stroke: var(--border-strong);
   stroke-width: 1.8;
   marker-end: url("#ar");
 }
 
 .map .edge.hl {
-  stroke: var(--ink);
+  stroke: var(--text);
   stroke-width: 2.4;
   marker-end: url("#arK");
 }
@@ -94,115 +93,110 @@
 .map .nd { cursor: pointer }
 
 .map .nd rect {
-  fill: var(--paper-2);
-  stroke: var(--rule);
+  fill: var(--surface);
+  stroke: var(--border);
   stroke-width: 2;
   transition: fill .12s;
 }
 
-.map .nd:hover rect { fill: var(--paper-3) }
+.map .nd:hover rect { fill: var(--surface-2) }
 
 .map .nd:focus-visible { outline: none }
 
 .map .nd:focus-visible rect {
-  stroke: var(--t0);
+  stroke: var(--accent);
   stroke-width: 3;
 }
 
 .map .nd .nm {
-  fill: var(--ink);
-  font-size: var(--fs-14);
+  fill: var(--text);
+  font-size: var(--fs-2);
   font-weight: 600;
 }
 
 .map .nd .dir {
-  fill: var(--ink-soft);
-  font-size: var(--fs-13);
+  fill: var(--text-muted);
+  font-size: var(--fs-1);
 }
 
-.map .nd.sel rect { fill: var(--t0) }
-.map .nd.sel .nm { fill: var(--on-t0) }
+.map .nd.sel rect { fill: var(--accent) }
+.map .nd.sel .nm { fill: var(--on-accent) }
 
 .map .nd.sel .dir {
-  fill: var(--on-t0);
+  fill: var(--on-accent);
   opacity: .8;
 }
 
 .map .nd.dim { opacity: .28 }
 
 .map .nd .badge {
-  font-size: var(--fs-14);
+  font-size: var(--fs-2);
   font-weight: 700;
 }
 
 .map .nd.ok rect {
-  fill: var(--stock);
-  stroke: var(--verdict-exact);
+  fill: var(--surface-2);
+  stroke: var(--ok);
   stroke-width: 3;
 }
 
-.map .nd.ok .badge { fill: var(--verdict-exact-text) }
+.map .nd.ok .badge { fill: var(--ok) }
 
 .map .nd.missed rect {
-  fill: var(--paper-2);
-  stroke: var(--verdict-differ);
+  fill: var(--surface);
+  stroke: var(--bad);
   stroke-width: 3;
   stroke-dasharray: 6 4;
-  animation: blip .5s 3;
 }
 
-.map .nd.missed .badge { fill: var(--verdict-differ-text) }
-
-@keyframes blip {
-  50% { opacity: .35 }
-}
+.map .nd.missed .badge { fill: var(--bad) }
 
 .map .nd.wrong rect {
-  fill: var(--paper-3);
-  stroke: var(--ink-mute);
+  fill: var(--surface-2);
+  stroke: var(--border-strong);
   stroke-dasharray: 3 3;
 }
 
-.map .nd.wrong .nm { fill: var(--ink-soft) }
-.map .nd.wrong .badge { fill: var(--ink-soft) }
+.map .nd.wrong .nm { fill: var(--text-muted) }
+.map .nd.wrong .badge { fill: var(--text-muted) }
 
 .map .nd.sec rect {
-  stroke: var(--verdict-equiv);
+  stroke: var(--info);
   stroke-width: 2.5;
   stroke-dasharray: 6 4;
 }
 
-.map .nd.sec .badge { fill: var(--verdict-equiv-text) }
+.map .nd.sec .badge { fill: var(--info) }
 
 /* 접힌 폴더 — 뒤에 한 장 더. `.nd.sel`·`.nd.ok` 의 면 색이 앞 상자에만 걸리도록
    `.stack` 은 언제나 종이 색이다. */
 .map .nd .stack {
-  fill: var(--paper-3);
-  stroke: var(--rule);
+  fill: var(--surface-2);
+  stroke: var(--border);
   stroke-width: 2;
 }
 
 /* ───────── 모서리 배지 둘 ───────── */
 .map .nd .newbg {
-  fill: var(--verdict-differ-face);
-  stroke: var(--rule);
+  fill: var(--bad-bg);
+  stroke: var(--border);
   stroke-width: 1.5;
 }
 
 .map .nd .newtag {
-  fill: var(--on-verdict-differ);
-  font-size: var(--fs-13);
+  fill: var(--bad);
+  font-size: var(--fs-1);
   font-weight: 700;
 }
 
 .map .nd .cycbg {
-  fill: var(--paper-3);
-  stroke: var(--rule);
+  fill: var(--surface-2);
+  stroke: var(--border);
   stroke-width: 1.5;
 }
 
 .map .nd .cyctag {
-  fill: var(--ink);
-  font-size: var(--fs-13);
+  fill: var(--text);
+  font-size: var(--fs-1);
   font-weight: 700;
 }

@@ -41,13 +41,13 @@ test('01 홈 → 인쇄 시작 → 1판 정답', async ({ page, app }) => {
 
   await page.locator(`.ch[data-k="${answerKeyOf(app.db)}"]`).click();
   await page.locator('.acts .press-btn').click();
-  await expect(page.locator('.fb .stampbox .stamp')).toBeVisible();
+  await expect(page.locator('.fb .fb-tag')).toBeVisible();
 
-  // 정합 도장 — 은유와 평문을 같이 찍는다.
-  await expect(page.locator('.fb .stampbox .stamp')).toContainText('같음');
-  // `+1겹` — 겹이 움직인 것을 이득으로 (05 §5 `ProofSheet`).
-  await expect(page.locator('.ps-rail .plus')).toHaveText('+1단계');
-  await expect(page.locator('.ps-rail .plus')).toHaveClass(/\bon\b/);
+  // 판정은 낱말 하나다 — 회전 도장은 D182 로 없앴다.
+  await expect(page.locator('.fb .fb-tag')).toHaveText('정답');
+  await expect(page.locator('.fb .stampbox, .ps-rail')).toHaveCount(0);
+  // 숙련도가 오른 것은 판 머리 레일이 아니라 **판정란**이 말한다 (D182).
+  await expect(page.locator('.fb .gain-step')).toHaveText('0단계→1단계');
 
   // live 문구 — 세션의 낭독 지점은 오버레이의 `.vh#live` 한 곳이다 (05 §7 · D114).
   // 판정란 자신은 `aria-live` 를 들지 않는다: 통째로 읽으면 60자 규약을 넘는다.
@@ -70,8 +70,10 @@ test('02 2판 오답', async ({ page, app }) => {
   const wrong = (answerKeyOf(app.db) % 4) + 1;
   await page.locator(`.ch[data-k="${wrong}"]`).click();
   await page.locator('.acts .press-btn').click();
-  await expect(page.locator('.fb .stampbox .stamp')).toContainText('다름');
+  await expect(page.locator('.fb .fb-tag')).toHaveText('오답');
   await expect(page.locator('.fb')).toContainText('틀렸습니다');
+  // 진단은 판정란에서 제 자리를 갖는다 — 「고른 그것이 참이 되는 조건」이 여기다 (정본 §3-2).
+  await expect(page.locator('.fb .fb-why')).toBeVisible();
 
   // 날카로운 자리 — 실제로 터지는 최소 코드 두 줄이 코드판으로 붙는다.
   const edge = page.locator('.fb .edge');
@@ -178,7 +180,7 @@ test('06 새 판 첫 정합 → LIFER', async ({ page, app }) => {
   await expect(note).toContainText('time.ts:19');
 
   // 판정문과 같은 칸에 있다 — 덮는 것이 없으므로 판정도 같이 읽힌다.
-  await expect(page.locator('.fb h4')).toContainText('맞았습니다');
+  await expect(page.locator('.fb .fb-head')).toContainText('맞았습니다');
 
   // 덮는 것이 없으니 포커스는 채점 직후 자리(다음 판 단추)에 그대로 있다 (05 §7).
   expect(await focusPath(page)).toContain('press-btn');

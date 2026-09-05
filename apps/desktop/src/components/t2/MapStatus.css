@@ -5,12 +5,12 @@
   gap: 12px;
   justify-content: space-between;
   margin-top: 6px;
-  color: var(--ink-soft);
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
 }
 
 .map-status b {
-  color: var(--ink);
+  color: var(--text);
   font-weight: 600;
 }

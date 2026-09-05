@@ -1,5 +1,5 @@
 /* 목업: design/src/ink/session.css 의 `.commit`.
-   바꾼 것 — 해시 도장의 --yellow 면을 --verdict-differ-face / --on-verdict-differ 로.
+   바꾼 것 — 해시 도장의 --yellow 면을 --bad-bg / --bad 로.
    면을 통째로 칠하는 자리라 선 이름이 아니라 면 이름이다 (D95 · 05 §4.2). */
 .commit {
   display: grid;
@@ -7,31 +7,31 @@
   gap: 14px;
   align-items: center;
   padding: 12px 14px;
-  border: 2px dashed var(--rule);
+  border: 2px dashed var(--border);
 }
 
 .commit .h {
   padding: 3px 9px;
-  border: 2px solid var(--rule);
-  background: var(--verdict-differ-face);
-  color: var(--on-verdict-differ);
-  font-family: var(--f-mono);
-  font-size: var(--fs-15);
+  border: 1px solid var(--border);
+  background: var(--bad-bg);
+  color: var(--bad);
+  font-family: var(--font-mono);
+  font-size: var(--fs-3);
   font-weight: 700;
 }
 
 .commit p {
-  color: var(--ink-soft);
-  font-size: var(--fs-14);
+  color: var(--text-muted);
+  font-size: var(--fs-2);
 }
 
 .commit p b {
-  color: var(--ink);
+  color: var(--text);
   font-weight: 600;
 }
 
 .commit .msg {
-  color: var(--ink);
-  font-family: var(--f-mono);
-  font-size: var(--fs-14);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-2);
 }

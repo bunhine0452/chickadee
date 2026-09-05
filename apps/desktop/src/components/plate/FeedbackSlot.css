@@ -1,12 +1,15 @@
-/* 목업: design/src/ink/session.css 「피드백 슬롯」 블록.
-   바꾼 것 — `.edge` 의 황 원색을 --t2 로, `.gain b` 의 진홍 글자를 --t1-text 로 (05 §4.2).
-
-   ┌ 정본 §3-3 의 게이트 ─────────────────────────────────────────────────────┐
-   │ `.slot` 이 min-height 로 118px 을 미리 잡고, 빈 안내(`.slot-idle`)와 판정  │
-   │ (`.fb`)이 같은 격자 칸에 겹쳐 놓인다. 그래서 답해도 위쪽 글이 0px 도       │
-   │ 밀리지 않는다. 이 세 줄(min-height · grid-area 두 개)을 지우면 게이트가    │
-   │ 무너진다 — FeedbackSlot.test.tsx 가 이 선언을 직접 읽어 지킨다.           │
-   └──────────────────────────────────────────────────────────────────────────┘ */
+/* 판정란 (정본 §3-2·§3-3 · D182).
+ *
+ * ┌ 정본 §3-3 의 게이트 ─────────────────────────────────────────────────────┐
+ * │ `.slot` 이 min-height 로 118px 을 미리 잡고, 빈 안내(`.slot-idle`)와 판정  │
+ * │ (`.fb`)이 같은 격자 칸에 겹쳐 놓인다. 그래서 답해도 위쪽 글이 0px 도       │
+ * │ 밀리지 않는다. 이 세 줄(min-height · grid-area 두 개)을 지우면 게이트가    │
+ * │ 무너진다 — FeedbackSlot.test.tsx 가 이 선언을 직접 읽어 지킨다.           │
+ * └──────────────────────────────────────────────────────────────────────────┘
+ *
+ * 뺀 것 — 회전 도장 152px · 겹 막대 두 개 · 2.5px 테두리. 셋 다 「왜 그런가」보다 컸다.
+ * 색은 왼쪽 3px 선과 낱말 하나(`.fb-tag`)에만 온다. 배경 옅은 물 한 겹은 「이 덩어리가
+ * 판정이다」를 곁눈으로 알려 주는 값이라 남긴다 — 그 위에 얹히는 글자는 --text 다. */
 .slot {
   position: relative;
   display: grid;
@@ -14,30 +17,33 @@
   min-height: 118px;
 }
 
+/* 빈 안내는 이름표가 아니라 **문장**이다 — 그래서 본문 규칙을 그대로 받는다
+   (16px 이상 · 7:1 · --measure). --text-faint 는 짧은 보조 라벨 전용이라 여기 못 쓴다. */
 .slot-idle {
   grid-area: 1 / 1;
-  max-width: none;
-  padding: 14px 16px;
-  border: 2px dashed var(--ink-mute);
-  color: var(--ink-soft);
-  font-size: var(--fs-14);
+  align-self: start;
+  max-width: var(--measure);
+  padding: var(--s-3) 0 0;
+  color: var(--text-muted);
+  font-size: var(--fs-4);
   line-height: var(--lh-body);
+  word-break: keep-all;
 }
 
 .slot-idle[hidden] { display: none }
 
 .fb {
   grid-area: 1 / 1;
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: start;
-  gap: 16px;
-  padding: 14px 16px 14px 18px;
-  border: 2.5px solid var(--rule);
-  background: var(--paper);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  padding: var(--s-4) var(--s-4) var(--s-4) var(--s-5);
+  border-left: 3px solid var(--border-strong);
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+  background: var(--surface-2);
   opacity: 0;
-  transform: translateY(6px);
-  transition: opacity .2s, transform .28s var(--e-settle);
+  transform: translateY(4px);
+  transition: opacity var(--dur-fast), transform var(--dur-base) var(--ease);
 }
 
 .fb.on {
@@ -45,100 +51,131 @@
   transform: none;
 }
 
-.fb.right { background: var(--stock) }
-
-/* 도장 실측 폭은 143px 이다(회전 포함) — 목업의 118px 은 도장이 상자를 넘겨 회전한
-   오른쪽 모서리가 제목 첫 글자를 덮었다 (D130). 넘치지 않을 만큼만 넓힌다. */
-.fb .stampbox {
-  display: grid;
-  place-items: center;
-  width: 152px;
-  padding-top: 4px;
+.fb.right {
+  border-left-color: var(--ok);
+  background: var(--ok-bg);
 }
 
-.fb h4 {
-  font-size: var(--fs-16);
-  font-weight: 700;
-  letter-spacing: -.02em;
-  line-height: 1.4;
+.fb.wrong {
+  border-left-color: var(--bad);
+  background: var(--bad-bg);
 }
 
-.fb h4 code {
-  padding: 0 4px;
-  border: 1px solid var(--rule);
-  background: var(--paper-3);
-  font-size: var(--fs-15);
+/* ① 맞았나 틀렸나 — 한 낱말과 한 줄. */
+.fb-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s-2);
+  color: var(--text);
+  font-size: var(--fs-4);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-tight);
+  word-break: keep-all;
 }
 
-.fb p {
-  margin-top: 5px;
-  color: var(--ink-soft);
-  font-size: var(--fs-15);
+.fb-tag {
+  flex: 0 0 auto;
+  font-size: var(--fs-2);
+  font-weight: var(--fw-bold);
+  letter-spacing: .04em;
+}
+
+.fb.right .fb-tag { color: var(--ok) }
+
+.fb.wrong .fb-tag { color: var(--bad) }
+
+.fb-head code,
+.fb-why code,
+.fb-rule code {
+  padding: 0 var(--s-1);
+  border-radius: var(--r-sm);
+  background: var(--surface-3);
+  font-family: var(--font-mono);
+  font-size: .92em;
+}
+
+/* ② 왜 그런가 — 이 판에서 학습이 실제로 일어나는 문장이다 (정본 §3-2).
+   오답이면 「틀렸다」가 아니라 「당신이 고른 그것이 참이 되는 조건」이 여기 온다.
+   그래서 흐린 회색이 아니라 --text 이고, 행 길이는 본문 조판(--measure)을 따른다. */
+.fb-why {
+  max-width: var(--measure);
+  color: var(--text);
+  font-size: var(--fs-4);
   line-height: var(--lh-body);
+  word-break: keep-all;
 }
 
-.fb p b {
-  color: var(--ink);
-  font-weight: 600;
+.fb-why b {
+  font-weight: var(--fw-bold);
 }
 
-.fb p code {
-  padding: 0 4px;
-  border: 1px solid var(--rule);
-  background: var(--paper-3);
-  font-size: var(--fs-14);
-}
-
-/* 가장 날카로운 자리 — 실제로 터지는 최소 코드 (정본 §3-2) */
+/* ③ 가장 날카로운 자리 — 실제로 터지는 최소 코드 (정본 §3-2). */
 .fb .edge {
-  margin-top: 9px;
-  padding: 9px 12px;
-  border-left: 4px solid var(--t2);
-  background: var(--paper-3);
-  color: var(--ink);
-  font-size: var(--fs-15);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  min-width: 0;
+  margin-top: var(--s-1);
+  color: var(--text);
+  font-size: var(--fs-3);
+  line-height: var(--lh-body);
+  word-break: keep-all;
 }
 
-.fb .edge b { font-weight: 700 }
+/* `.fb .edge b` 는 아래 「굵은 글자」 절에 모았다 — 같은 `b` 규칙은 특이도 오름차순이다. */
 
-.fb .edge code {
-  padding: 0 4px;
-  border: 1px solid var(--rule);
-  background: var(--stock);
-  font-size: var(--fs-14);
+.fb .edge .code { font-size: var(--fs-3) }
+
+/* ④ 규칙 · 이 줄이 끝난 뒤 — 물러난다. */
+.fb-rule {
+  max-width: var(--measure);
+  color: var(--text-muted);
+  font-size: var(--fs-3);
+  line-height: var(--lh-body);
+  word-break: keep-all;
 }
 
+.fb-rule b {
+  color: var(--text);
+  font-weight: var(--fw-medium);
+}
+
+/* ⑤ 숙련도 — 숫자와 말. 「모르겠어요」가 이득이라는 것도 여기서 읽힌다 (정본 §3-1). */
 .fb .gain {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-  margin-top: 10px;
-  color: var(--ink-soft);
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
+  align-items: baseline;
+  gap: var(--s-1) var(--s-3);
+  margin-top: var(--s-1);
+  color: var(--text-muted);
+  font-size: var(--fs-2);
 }
 
-/* 겹 이동은 막대 둘 — 판정란에 마스코트를 세우지 않는다 (D179). */
-.fb .gain .pair {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.fb .gain-step {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--s-1);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-weight: var(--fw-medium);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
-.fb .gain .passes i {
-  width: 7px;
-  height: 14px;
+.fb .gain-step .arr { color: var(--text-muted) }
+
+.fb .gain b {
+  color: var(--text);
+  font-weight: var(--fw-medium);
 }
 
-.fb .gain .arr {
-  color: var(--ink-soft);
-  font-size: var(--fs-14);
-}
+/* ───────── 굵은 글자 ─────────
+   같은 `b` 를 손대는 규칙은 파일 안에서 특이도 오름차순이어야 한다
+   (stylelint no-descending-specificity). */
+.fb .edge b { font-weight: var(--fw-bold) }
 
-.fb .gain b { color: var(--t1-text) }
-
-/* 감축 모드 — 판정은 즉시 자리에 선다. 자리는 어차피 미리 잡혀 있어 움직일 것이 없다 (05 §6). */
+/* 감축 모드 — 판정은 즉시 자리에 선다. 자리는 어차피 미리 잡혀 있어 움직일 것이 없다. */
 @media (prefers-reduced-motion: reduce) {
   .fb { transition-duration: .001ms }
 }

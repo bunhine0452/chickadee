@@ -1,50 +1,50 @@
 /* 목업: design/src/ink/session.css 「왜 게이트」 블록의 `.whybox`.
    바꾼 것 —
-     · 보기 안의 사유는 목업의 `<small style="color:var(--ink-soft)">` 였다. RichText 허용
+     · 보기 안의 사유는 목업의 `<small style="color:var(--text-muted)">` 였다. RichText 허용
        태그 6개(code·b·i·em·br·kbd)에 `small` 이 없어 `<i>` 로 옮기고 색·크기를 여기서 준다
-       (06 §4.2 · D42). 기본 축소(16px × .8)는 13px 하한에 걸리므로 --fs-14 로 고정한다.
+       (06 §4.2 · D42). 기본 축소(16px × .8)는 13px 하한에 걸리므로 --fs-2 로 고정한다.
      · 정답을 본 뒤의 안내 `<p>` 의 인라인 margin 을 `.after-pick` 클래스로. */
 .whybox {
   display: grid;
   gap: 10px;
   padding: 14px 16px;
-  border: 2.5px solid var(--rule);
-  background: var(--paper);
+  border: 1px solid var(--border);
+  background: var(--surface);
 }
 
 .whybox h4 {
-  font-size: var(--fs-18);
+  font-size: var(--fs-4);
   font-weight: 700;
   letter-spacing: -.02em;
 }
 
 .whybox h4 code {
   padding: 0 5px;
-  border: 1.5px solid var(--rule);
-  background: var(--paper-3);
-  font-size: var(--fs-16);
+  border: 1.5px solid var(--border);
+  background: var(--surface-2);
+  font-size: var(--fs-4);
 }
 
 .whybox p {
-  color: var(--ink-soft);
-  font-size: var(--fs-15);
+  color: var(--text-muted);
+  font-size: var(--fs-3);
 }
 
 .whybox textarea {
   width: 100%;
   min-height: 72px;
   padding: 10px 12px;
-  border: 2px solid var(--rule);
-  background: var(--stock);
-  color: var(--ink);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
   font: inherit;
-  font-size: var(--fs-15);
+  font-size: var(--fs-3);
   line-height: var(--lh-body);
   resize: vertical;
 }
 
 .whybox textarea:focus {
-  outline: 3px solid var(--t1);
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
 
@@ -56,21 +56,21 @@
 }
 
 .whybox .cnt {
-  color: var(--ink-soft);
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
 }
 
 .whybox .cnt.ok {
-  color: var(--t1-text);
+  color: var(--accent);
   font-weight: 700;
 }
 
 .whybox .choices { margin-top: 2px }
 
 .whybox .ch .t i {
-  color: var(--ink-soft);
-  font-size: var(--fs-14);
+  color: var(--text-muted);
+  font-size: var(--fs-2);
   font-style: normal;
 }
 

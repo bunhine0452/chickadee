@@ -1,210 +1,119 @@
-/* 목업: design/src/ink/session.css `.ps` 블록.
-   바꾼 것 —
-     · `.ps-rail .plus` 의 진홍 글자를 --t1-text 로 (05 §4.2).
-     · 판 번호 `.sig` 를 포스터 30px 에서 모노 20px 로 내리고 레일을 46 → 34px 로 좁혔다.
-       화면에서 가장 큰 것이 코드여야 한다 (D179 · 정본 §6).
-     · 부속 숨김에서 목업은 `transform:none` 만 걸었는데, `sheetin` 키프레임이
-       `both` 로 최종 포즈를 다시 얹어 기울기가 살아난다. `--tilt: 0deg` 를 함께 넣어
-       키프레임 안쪽까지 껐다 — 레이아웃은 1px 도 안 바뀐다 (05 §4.3).
-   `sheetin` 은 여기서 한 번만 정의하고 `.link-para`·`.reprint` 가 같이 쓴다. */
+/* 문제 판 (D182 · 정본 §6).
+ *
+ * 뺀 것 — 테두리 2.5px · 오프셋 그림자 6px · 회전(`--tilt`) · `sheetin` 등장 애니메이션 ·
+ * 왼쪽 레일(겹 숫자 · 세로 글자 · `+1겹` 뱃지) · 판 번호 어긋남(`Misreg`) · 트랙 알약(`Pill`) ·
+ * 겹 막대(`Passes`) · 등록표시(`Reg`). 열둘이다.
+ *
+ * 남은 것은 셋 — 무엇에 대한 문제인가(머리) · 무엇을 묻는가(코드와 물음) · 어떻게 되었나
+ * (판정란). 화면에서 **틀이 있는 것은 코드 창 하나뿐**이고, 그래서 눈이 그리로 간다. */
 .ps {
-  position: relative;
-  display: grid;
-  grid-template-columns: 34px minmax(0, 1fr);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
   width: 100%;
-  max-width: 860px;
-  padding: 18px 20px 22px 0;
-  border: 2.5px solid var(--rule);
-  background: var(--paper-2);
-  box-shadow: 6px 7px 0 var(--edge), 0 18px 26px -18px var(--drop), var(--lamp);
-  transform: rotate(var(--tilt, 0deg));
-  animation: sheetin .34s var(--e-settle) both;
-}
 
-.ps.wide { max-width: 1120px }
-
-.ps.xwide { max-width: 1240px }
-
-[data-trim="on"] .ps {
-  --tilt: 0deg;
-
-  transform: none;
-}
-
-@keyframes sheetin {
-  0% {
-    opacity: 0;
-    transform: translateY(14px) rotate(var(--tilt, 0deg));
-  }
-
-  100% {
-    opacity: 1;
-    transform: translateY(0) rotate(var(--tilt, 0deg));
-  }
-}
-
-/* 왼쪽 레일 — 이 판을 몇 도까지 찍었나 */
-.ps-rail {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding: 4px 0 10px;
-  border-right: 2px dashed var(--rule);
-}
-
-/* 겹은 숫자다 (D179) — 문제 화면의 레일에 마스코트가 서지 않는다. */
-.ps-rail .rail-ly {
-  display: grid;
-  width: 32px;
-  height: 32px;
-  border: 2px solid var(--rule);
-  background: var(--paper-3);
-  color: var(--ink);
-  font-family: var(--f-mono);
-  font-size: var(--fs-18);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  place-items: center;
-}
-
-.ps-rail .vt {
-  color: var(--ink-soft);
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
-  font-weight: 600;
-  letter-spacing: .16em;
-  white-space: nowrap;
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-}
-
-.ps-rail .plus {
-  opacity: 0;
-  color: var(--t1-text);
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
-  font-weight: 700;
-  transform: translateY(6px);
-  transition: opacity .3s, transform .3s var(--e-hop);
-}
-
-.ps-rail .plus.on {
-  opacity: 1;
-  transform: none;
-}
-
-[data-trim="on"] .ps-rail { border-right-style: solid }
-
-[data-trim="on"] .ps-rail .vt { display: none }
-
-.ps-in {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  /* 880px = 코드 80칸(16px 모노 ≈ 9.6px/칸)에 줄번호 칸과 안쪽 여백을 더한 값이다.
+     그 이상 넓히지 않는다 — 넓은 화면에서 늘어나야 하는 것은 본문이 아니라 여백이다
+     (정본 §6). 산문은 여기서 다시 --measure 로 묶인다(`.ask`·`.fb-why`·`.fb-rule`). */
+  max-width: min(100%, 880px);
   min-width: 0;
-  padding-left: 16px;
 }
 
-/* 머리 : 트랙 · 개념 · 출처 · 겹 */
+/* 코드가 넓어야 뜻이 상하지 않는 유형 — 경로(hop·caller) · 수정 · 재구현. */
+.ps.wide { max-width: min(100%, var(--content-max)) }
+
+.ps.xwide { max-width: min(100%, calc(var(--content-max) + 160px)) }
+
+.ps:focus { outline: none }
+
+.ps:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: var(--s-2);
+}
+
+/* 머리 — 「무엇에 대한 문제인가」. 한 덩어리로 읽히고 물음보다 물러난다. */
 .ps-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 14px;
-  padding-bottom: 12px;
-  border-bottom: 2.5px solid var(--rule);
-}
-
-.ps-head .sig {
-  position: relative;
-  top: 1px;
-  flex: 0 0 auto;
-  color: var(--ink-soft);
-  font-family: var(--f-mono);
-  font-size: var(--fs-20);
-  font-weight: 700;
-  letter-spacing: .01em;
-  line-height: 1.2;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--s-1) var(--s-4);
+  padding-bottom: var(--s-3);
+  border-bottom: 1px solid var(--border);
 }
 
 .ps-h2 {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-  font-size: var(--fs-20);
-  font-weight: 700;
-  letter-spacing: -.03em;
-  line-height: 1.25;
+  grid-column: 1;
+  min-width: 0;
+  font-family: var(--font-ui);
+  font-size: var(--fs-3);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  overflow-wrap: anywhere;
+  word-break: keep-all;
 }
 
 .ps-h2 code {
-  padding: 0 6px;
-  border: 1.5px solid var(--rule);
-  background: var(--paper-3);
-  font-size: var(--fs-18);
+  font-family: var(--font-mono);
+  font-size: var(--fs-2);
+  font-weight: var(--fw-medium);
+  color: var(--text-muted);
 }
 
-.ps-h2 .pl {
-  color: var(--ink-soft);
-  font-size: var(--fs-14);
-  font-weight: 500;
-  letter-spacing: 0;
+.ps-meta {
+  display: flex;
+  flex-wrap: wrap;
+  grid-column: 1;
+  gap: var(--s-1) var(--s-3);
+  min-width: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-1);
+  line-height: var(--lh-body);
 }
 
 .ps-src {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-  margin-top: 4px;
-  color: var(--ink-soft);
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
-  letter-spacing: .01em;
+  min-width: 0;
+  font-family: var(--font-mono);
+  overflow-wrap: anywhere;
 }
 
 .ps-src b {
-  color: var(--ink);
-  font-weight: 600;
+  color: var(--text);
+  font-weight: var(--fw-medium);
 }
 
+/* 숙련도 — 숫자와 말이지 그림이 아니다 (D179 · 정본 §6·§7). */
 .ps-ly {
-  display: flex;
-  flex: 0 0 auto;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-  margin-left: auto;
-}
-
-.ps-ly .lyn {
-  color: var(--ink-soft);
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  align-self: start;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  text-align: right;
   white-space: nowrap;
 }
 
-.ps-ly .lyn b { color: var(--ink) }
+.ps-ly b {
+  color: var(--text-muted);
+  font-weight: var(--fw-medium);
+}
 
+/* 좁은 폭 — 숙련도를 머리 아래 왼쪽으로 내린다. 잘리거나 겹치지 않는다. */
 @media (width <= 720px) {
-  .ps {
-    grid-template-columns: 28px minmax(0, 1fr);
-    padding-right: 14px;
+  .ps-head { grid-template-columns: minmax(0, 1fr) }
+
+  .ps-ly {
+    grid-row: auto;
+    grid-column: 1;
+    text-align: left;
+    white-space: normal;
   }
-
-  .ps-in { padding-left: 12px }
 }
 
-/* 감축 모드 — 전환만 지우고 최종 포즈는 남긴다 (05 §6). `sheetin` 은 `both` 라
-   .001ms 로 줄여도 마지막 프레임(불투명 1 · 제자리)에 그대로 선다. */
-@media (prefers-reduced-motion: reduce) {
-  .ps { animation-duration: .001ms }
-
-  .ps-rail .plus { transition-duration: .001ms }
+/* 요약 화면이 판 껍데기를 그대로 쓴다 (`.ps.wide > .ps-in`). */
+.ps-in {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+  min-width: 0;
 }
-
-[data-motion="reduce"] .ps { animation-duration: .001ms }
-
-[data-motion="reduce"] .ps-rail .plus { transition-duration: .001ms }

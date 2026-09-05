@@ -27,35 +27,26 @@ describe('ProofSheet', () => {
     expect(container.querySelector('article.ps')).not.toBe(document.activeElement);
   });
 
-  it('목업 클래스를 그대로 붙인다', () => {
+  it('판은 머리와 내용뿐이다 — 레일·판번호·알약은 내려갔다 (D182)', () => {
     const { container } = render(<ProofSheet {...BASE} ly={[2, 2]} />);
-    for (const cls of ['.ps', '.ps-rail', '.ps-in', '.ps-head', '.ps-h2', '.ps-src', '.ps-ly', '.sig']) {
+    for (const cls of ['.ps', '.ps-head', '.ps-h2', '.ps-meta', '.ps-src', '.ps-ly']) {
       expect(container.querySelector(cls), cls).not.toBeNull();
+    }
+    for (const cls of ['.ps-rail', '.sig', '.pill', '.passes', '.reg', '.dee']) {
+      expect(container.querySelector(cls), cls).toBeNull();
     }
   });
 
-  it('겹이 오르면 레일에 「+1겹」이 켜진다', () => {
+  it('숙련도가 오른 것은 판 머리가 아니라 판정란이 말한다 (D182)', () => {
     const { container } = render(<ProofSheet {...BASE} ly={[2, 3]} />);
-    const plus = container.querySelector('.ps-rail .plus');
-    expect(plus?.textContent).toBe('+1단계');
-    expect(plus?.className).toContain('on');
-  });
-
-  it('겹이 내려가면 「−1겹」, 제자리면 비어 있고 꺼져 있다', () => {
-    const down = render(<ProofSheet {...BASE} ly={[3, 2]} />);
-    expect(down.container.querySelector('.ps-rail .plus')?.textContent).toBe('−1단계');
-    cleanup();
-
-    const flat = render(<ProofSheet {...BASE} ly={[2, 2]} />);
-    const plus = flat.container.querySelector('.ps-rail .plus');
-    expect(plus?.textContent).toBe('');
-    expect(plus?.className).not.toContain('on');
+    expect(container.querySelector('.plus')).toBeNull();
+    // 머리에 남는 것은 **지금** 값 하나다.
+    expect(container.querySelector('.ps-ly')?.getAttribute('data-ly')).toBe('3');
   });
 
   it('겹은 지금 값으로 그리고 평문을 병기한다', () => {
     render(<ProofSheet {...BASE} ly={[2, 3]} />);
-    expect(screen.getByText('숙련도 3 / 4 · 자리 잡음 · 오래 두고도 맞힘')).toBeTruthy();
-    expect(screen.getByRole('img', { name: 'T0 · 숙련도 3단계' })).toBeTruthy();
+    expect(screen.getByText(/숙련도 3 \/ 4 · 자리 잡음/)).toBeTruthy();
   });
 
   it('폭 3단은 클래스로만 갈린다', () => {
@@ -67,10 +58,13 @@ describe('ProofSheet', () => {
     expect(x.container.querySelector('.ps')?.className).toContain('xwide');
   });
 
-  it('기울기는 --tilt 로만 들어간다 — 부속 숨김이 CSS 한 곳에서 끈다', () => {
-    const { container } = render(<ProofSheet {...BASE} ly={[1, 1]} tilt={-0.2} />);
+  it('판에는 인라인 스타일이 하나도 없다 — 기울기·그림자·질감을 없앴다 (D182)', () => {
+    const { container } = render(<ProofSheet {...BASE} ly={[1, 1]} />);
     const ps = container.querySelector<HTMLElement>('.ps');
-    expect(ps?.style.getPropertyValue('--tilt')).toBe('-0.2deg');
+    expect(ps?.getAttribute('style')).toBeNull();
+    expect(container.querySelector('.ps-rail')).toBeNull();
+    expect(container.querySelector('.pill')).toBeNull();
+    expect(container.querySelector('.passes')).toBeNull();
   });
 
   it('출처의 서식은 살리고 태그는 정화한다', () => {

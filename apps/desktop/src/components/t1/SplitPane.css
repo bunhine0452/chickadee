@@ -13,7 +13,7 @@
 
 .split .vr {
   align-self: stretch;
-  background: var(--rule);
+  background: var(--border);
   opacity: .6;
 }
 
@@ -23,17 +23,17 @@
   align-items: baseline;
   justify-content: space-between;
   margin-bottom: 8px;
-  color: var(--ink-soft);
-  font-size: var(--fs-14);
+  color: var(--text-muted);
+  font-size: var(--fs-2);
 }
 
 .pane-h b {
-  color: var(--ink);
-  font-size: var(--fs-15);
+  color: var(--text);
+  font-size: var(--fs-3);
   font-weight: 700;
 }
 
 .pane-h .mono {
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
 }

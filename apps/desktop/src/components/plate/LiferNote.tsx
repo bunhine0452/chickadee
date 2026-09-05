@@ -1,12 +1,9 @@
 import { useLayoutEffect } from 'react';
 import { t } from '@chickadee/i18n';
-import { RichText, Stamp } from '@chickadee/ui';
+import { RichText } from '@chickadee/ui';
 
 import { closeMark } from '../../devtools/audit.js';
 import './LiferNote.css';
-
-/** 도장이 얹히는 각도(도). */
-const STAMP_ROTATE = 6;
 
 export interface LiferNoteProps {
   /** 개념 이름. */
@@ -26,8 +23,8 @@ export interface LiferNoteProps {
  * 도장이 찍히는 연출과 첫 기록이 한 화면에서 같이 읽힌다. 담는 것은 컨페티가 아니라
  * 영구 기록이다 — 개념 이름 · 채집지(파일·줄) · 일련번호 · 도장.
  *
- * **마스코트는 없다** (D179 · 정본 §6). 여기는 문제 화면 안이고, 기록의 값은 기록이지
- * 그림이 아니다. Dee 는 빈 상태 · 완료 화면 · 표지에만 선다.
+ * **마스코트도 도장도 없다** (D179·D182 · 정본 §6·§7). 여기는 문제 화면 안이고, 기록의
+ * 값은 기록이지 그림이 아니다. 남는 것은 넉 줄 — 머리말 · 개념 · 채집지 · 일련번호.
  */
 export function LiferNote({ concept, code, where, serial }: LiferNoteProps) {
   // 05 §10 `lifer:open` — 첫 성공을 알아챈 순간부터 기록이 실제로 놓일 때까지.
@@ -45,7 +42,6 @@ export function LiferNote({ concept, code, where, serial }: LiferNoteProps) {
         <RichText as="p" html={where} />
         <div className="lifer-serial">{serial}</div>
       </div>
-      <Stamp text={t('lifer.stamp')} rotate={STAMP_ROTATE} hit />
     </div>
   );
 }

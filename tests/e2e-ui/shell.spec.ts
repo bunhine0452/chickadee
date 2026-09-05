@@ -48,10 +48,12 @@ test('11 요약', async ({ page, app }) => {
   await page.locator('.masthead').waitFor();
   await expect(page.locator('.proof')).toHaveCount(0);
   await expect(page.locator('.today-empty')).toBeVisible();
-  await expect(page.locator('.today .press-btn')).toBeDisabled();
+  // 오늘 할 것이 없으면 단추 자체를 안 그린다 (D182). 눌리지 않는 단추는 자리만
+  // 차지하고, 빈 상태가 할 일은 「왜 없는가」를 말하는 것이다 (정본 §3-7).
+  await expect(page.locator('.today .press-btn')).toHaveCount(0);
 });
 
-test('12 야간반 + 부속 숨김', async ({ page }) => {
+test('12 어둡게 — 조판은 1px 도 안 움직이고 대비는 7:1 이다', async ({ page }) => {
   // `?dev=1` 이라야 `__audit` 이 붙는다 (05 §10) — 대비 전수는 그 손잡이로 잰다.
   await openHome(page, '?dev=1');
 
@@ -89,24 +91,12 @@ test('12 야간반 + 부속 숨김', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   expect(await boxes()).toEqual(day);
 
-  // 부속을 보였다 숨겼다 한다 — 어느 쪽에서 시작하든 조판은 1px 도 안 움직인다.
-  // 기본값(`DEFAULTS.trim`)은 설정 화면 쪽에서 바뀔 수 있으니 지금 값에서 출발한다.
-  const trim = page.getByRole('switch', { name: '장식 보이기 · 숨기기' });
-  const first = await page.locator('html').getAttribute('data-trim');
-  await trim.click();
-  await expect(page.locator('html')).not.toHaveAttribute('data-trim', first ?? '');
-  expect(await boxes()).toEqual(day);
-  await trim.click();
-  await expect(page.locator('html')).toHaveAttribute('data-trim', first ?? '');
-  expect(await boxes()).toEqual(day);
-
-  // 표가 말한 자리 — 야간반 + 부속 숨김에서 끝난다.
-  if ((await page.locator('html').getAttribute('data-trim')) !== 'on') await trim.click();
-  await expect(page.locator('html')).toHaveAttribute('data-trim', 'on');
+  // 「장식 보이기 · 숨기기」 스위치는 D182 로 없어졌다 — 장식을 토큰째 지웠으니 끌 것이
+  // 없다(정본 §6 「장식 0」). 스위치가 정말 없다는 것을 여기서 못박는다.
+  await expect(page.getByRole('switch', { name: '장식 보이기 · 숨기기' })).toHaveCount(0);
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-  expect(await boxes()).toEqual(day);
 
-  // 야간반에서도 종이 위 텍스트는 7:1 이다 (05 §9 · 정본 §6).
+  // 어둡게에서도 표면 위 텍스트는 7:1 이다 (05 §9 · 정본 §6).
   await expect.poll(async () => (await contrast()).below7, { timeout: 5_000 }).toEqual([]);
   expect((await contrast()).checked).toBe(dayContrast.checked);
 });
@@ -152,7 +142,7 @@ test('13 Esc 3단계', async ({ page, app }) => {
   await resume.click();
   await page.locator(SHEET).waitFor();
   await expect(page.locator(SHEET)).toHaveAttribute('aria-label', /1번 · 문자열 리터럴/);
-  await expect(page.locator('.jq-h')).toContainText('지금 1 / 3');
+  await expect(page.locator('.jb-where')).toContainText('1 / 3');
 });
 
 test('14 리포 등록 → 인제스트 진행 → 홈', async ({ page, app }) => {
@@ -253,8 +243,11 @@ test('14 리포 등록 → 인제스트 진행 → 홈', async ({ page, app }) =
   });
   await page.locator('.masthead').waitFor();
   await expect(page.locator('.masthead')).toContainText('fresh');
-  await expect(page.locator('.sheets')).toContainText('아직 단원이 없습니다');
-  await expect(page.locator('.forecast .fc-mark')).toHaveText('불가');
+  await expect(page.locator('.units')).toContainText('아직 단원이 없습니다');
+  // 「책임 배치 문제」 안내는 **읽은 파일이 있을 때만** 뜬다 (D182 가 미조판 예고 판을
+  // 「아직 못 하는 것」 문단으로 갈면서 조건이 이렇게 좁아졌다). 여기는 0 파일이라
+  // 할 말이 「아직 단원이 없다」 하나뿐이고, 그 하나는 위에서 이미 봤다.
+  await expect(page.locator('.forecast')).toHaveCount(0);
   await expect(page.locator('.today-empty')).toBeVisible();
 
   // 원장에도 리포 한 줄이 남았다 — 화면 밖 사실이다.

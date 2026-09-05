@@ -8,15 +8,15 @@
        `3.2em minmax(0,1fr)` 는 거터 div 를 손으로 그리는 plain 판만 필요하다. */
 .editor {
   position: relative;
-  border: 2px solid var(--rule);
-  background: var(--stock);
-  font-family: var(--f-mono);
-  font-size: var(--fs-16);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-4);
   line-height: 1.85;
 }
 
 .editor.focus {
-  outline: 3px solid var(--t1);
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
 
@@ -43,15 +43,15 @@
 }
 
 .editor.mono .gl-tick.gl-exact {
-  box-shadow: inset 3px 0 0 var(--verdict-exact);
+  box-shadow: inset 3px 0 0 var(--ok);
 }
 
 .editor.mono .gl-tick.gl-equiv {
-  box-shadow: inset 3px 0 0 var(--verdict-equiv);
+  box-shadow: inset 3px 0 0 var(--info);
 }
 
 .editor.mono .gl-tick.gl-differ {
-  box-shadow: inset 3px 0 0 var(--verdict-differ);
+  box-shadow: inset 3px 0 0 var(--bad);
 }
 
 /* ── textarea 판 (05 §8 마지막 문단의 되돌림 스위치) ──────────────────────── */
@@ -62,8 +62,8 @@
 
 .editor.plain .gut {
   padding-top: 6px;
-  border-right: 1px solid var(--rule);
-  background: var(--paper-3);
+  border-right: 1px solid var(--border);
+  background: var(--surface-2);
   user-select: none;
 }
 
@@ -71,7 +71,7 @@
   position: relative;
   height: 1.85em;
   padding-right: .9em;
-  color: var(--ink-soft);
+  color: var(--text-muted);
   font-variant-numeric: tabular-nums;
   text-align: right;
 }
@@ -88,21 +88,21 @@
 }
 
 .editor.plain .gl.cur {
-  background: var(--paper-2);
-  color: var(--ink);
+  background: var(--surface);
+  color: var(--text);
   font-weight: 700;
 }
 
 .editor.plain .gl.exact::before {
-  background: var(--verdict-exact);
+  background: var(--ok);
 }
 
 .editor.plain .gl.equiv::before {
-  background: var(--verdict-equiv);
+  background: var(--info);
 }
 
 .editor.plain .gl.differ::before {
-  background: var(--verdict-differ);
+  background: var(--bad);
 }
 
 .editor.plain textarea {
@@ -112,7 +112,7 @@
   border: 0;
   outline: 0;
   background: transparent;
-  color: var(--ink);
+  color: var(--text);
   font: inherit;
   line-height: inherit;
   overflow: hidden;

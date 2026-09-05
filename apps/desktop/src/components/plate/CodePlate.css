@@ -1,19 +1,39 @@
-/* 목업: design/src/ink/shared.css 「코드 판」 블록 — 16px / 1.85 / 줄번호.
-   바꾼 것 — `.tok.ans` 의 황 원색·먹 리터럴을 트랙 별칭 --t2 / --on-t2 로 (05 §4.2).
-   값은 목업의 --yellow / #221D18 과 같고, 야간반 대비는 --on-t2 가 이미 들고 있어
-   목업의 [data-theme="dark"] 한 줄이 필요 없어졌다 (05 §4.3).
-
-   판 안에는 잉크(색면)를 얹지 않는다 — 구문 강조는 판독 보조지 장식이 아니다.
-   D179 로 둘을 더 고쳤다: 코드를 16 → 18px 로 올려 화면에서 가장 큰 글이 되게 하고,
-   `.tok.ans` 의 황 색면을 걷었다 — 읽어야 하는 글자 위에는 면을 얹지 않는다(정본 §6). */
+/* 코드 창 (D182 · 정본 §6).
+ *
+ * **화면에서 틀이 있는 유일한 것**이다. 판이 테두리를 버렸으므로 이 테두리가 「여기가 읽을
+ * 곳」이라는 뜻을 혼자 진다.
+ *
+ * 다시 잰 것 넷 —
+ *   ① 글자 16px(--fs-4). 전에는 18px 이었다. 행 높이가 33.3 → 29.6px 이 되어 창 상한 20줄
+ *      (D141)이 666 → 592px 로 줄고, 높이 700 창에서 물음·보기·판정란과 함께 선다.
+ *   ② 행간 1.85(--lh-code). 정본 §6 의 하한이라 더 좁히지 않는다.
+ *   ③ **줄번호가 가로 스크롤에 붙어 있다**(`position: sticky`). 좁은 폭에서 창 안을 오른쪽으로
+ *      밀면 전에는 번호가 같이 밀려나 「몇 행」을 묻는 문제의 답을 화면에서 잃었다.
+ *   ④ 초점 줄은 **왼쪽 선 하나 + 줄번호 칸**이다. 코드 글자 위에는 색면이 한 겹도 없다.
+ *      실측이 그 규칙의 값을 말해 준다 — 구문 강조 여섯은 `--code-bg` 위에서만 7:1 을 넘는다
+ *      (가장 빠듯한 어두운 갈래 `--syn-com` 7.17:1). 그 글자 밑에 `--surface-3` 을 깔면
+ *      5.81:1, `--accent-weak` 이면 5.67:1 로 떨어져 **정본 §6 의 본문 대비 7:1 이 깨진다.**
+ *      그래서 이 파일에서 색이 오는 자리는 선과 줄번호 칸뿐이다.
+ *
+ * 좁은 폭의 답: 코드는 줄바꿈하면 뜻이 상한다(들여쓰기가 구조다). 그래서 **가로 스크롤을
+ * 이 창 안에 가둔다** — `overflow-x: auto` + `overscroll-behavior-x: contain`. 판도 작업대도
+ * 가로로 흐르지 않고, 흐르는 것은 코드뿐이다. */
 .code {
-  overflow: auto;
-  border: 2px solid var(--rule);
-  background: var(--stock);
-  color: var(--ink);
-  font-family: var(--f-mono);
-  font-size: var(--fs-18);
-  line-height: 1.85;
+  min-width: 0;
+  max-width: 100%;
+
+  /* 세로로는 안 흐른다 — 창은 접힘(D141)이 길이를 정하고 스크롤이 정하지 않는다. */
+  overflow: auto hidden;
+
+  /* 창 끝에서 가로 스크롤이 바깥으로 새지 않는다 — 새면 화면 전체가 옆으로 밀린다. */
+  overscroll-behavior-x: contain;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--code-bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-4);
+  line-height: var(--lh-code);
   tab-size: 2;
 }
 
@@ -23,11 +43,15 @@
   min-width: max-content;
 }
 
+/* 줄번호 — 가로로 밀어도 제자리에 남는다. */
 .code .ln > i {
+  position: sticky;
+  left: 0;
+  z-index: 1;
   padding: 0 .9em 0 0;
-  border-right: 1px solid var(--rule);
-  background: var(--paper-3);
-  color: var(--ink-soft);
+  border-right: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-muted);
   font-style: normal;
   font-variant-numeric: tabular-nums;
   text-align: right;
@@ -39,58 +63,43 @@
   white-space: pre;
 }
 
-/* 초점 줄 — 이 판이 무엇을 묻는지 눈이 먼저 닿는 자리.
-   면은 종이고, 색은 왼쪽 4px 선 하나다 (진행 상태 · D179). */
+/* 초점 줄 — 이 문제가 무엇을 묻는지 눈이 먼저 닿는 자리.
+   글자 밑에 까는 것은 없다. 신호는 왼쪽 3px 선과, 굵어진 줄번호 칸이다. */
 .code .ln.hi > span {
-  background: var(--paper-3);
-  box-shadow: inset 4px 0 0 var(--state-progress);
+  box-shadow: inset 3px 0 0 var(--accent);
 }
 
 .code .ln.hi > i {
-  color: var(--ink);
-  font-weight: 700;
+  background: var(--surface-3);
+  color: var(--text);
+  font-weight: var(--fw-bold);
 }
 
+/* 구문 강조 — 정본 §6 의 유일한 색 예외. 여섯 색 전부 --code-bg 위에서 7:1 이상이다. */
 .code .k {
-  color: var(--t0-text);
-  font-weight: 600;
+  color: var(--syn-key);
+  font-weight: var(--fw-medium);
 }
 
-.code .s { color: var(--t1-text) }
+.code .s { color: var(--syn-str) }
 
-.code .n { color: var(--t2-text) }
+.code .n { color: var(--syn-num) }
 
 .code .c {
-  color: var(--ink-soft);
+  color: var(--syn-com);
   font-style: italic;
 }
 
-.code .p { color: var(--ink-soft) }
+.code .p { color: var(--text-muted) }
 
 .code .f {
-  color: var(--ink);
-  font-weight: 600;
+  color: var(--syn-fn);
+  font-weight: var(--fw-medium);
 }
 
-/* 강조 토큰 — 색은 **선**으로만 온다. 면을 칠하면 그 글자가 읽기 어려워진다 (D179). */
-.code .tok {
-  position: relative;
-  border-bottom: 2px solid var(--ink-mute);
-}
-
-.code .tok.ans {
-  margin: 0 -2px;
-  padding: 0 2px;
-  border-bottom: 3px solid var(--state-right);
-  background: var(--paper-3);
-  color: var(--ink);
-  font-weight: 700;
-}
-
-/* 접힌 자리 (D141) — 창은 감싸는 블록이고, 20줄을 넘으면 초점 둘레만 펴 둔다.
-   줄번호 자리에는 번호 대신 `…` 가 선다: 접힌 줄은 번호가 하나가 아니다. */
+/* 접힌 자리 (D141) — 창은 감싸는 블록이고, 20줄을 넘으면 초점 둘레만 펴 둔다. */
 .code .ln.fold > i {
-  color: var(--ink-soft);
+  color: var(--text-muted);
   letter-spacing: .1em;
 }
 
@@ -102,19 +111,19 @@
 .code .unfold {
   padding: 0;
   border: 0;
-  border-bottom: 1px solid var(--rule);
+  border-bottom: 1px solid var(--border-strong);
   background: none;
-  color: var(--ink-soft);
+  color: var(--text-muted);
   font: inherit;
   cursor: pointer;
 }
 
 .code .unfold:hover {
-  color: var(--ink);
-  border-bottom-color: var(--ink);
+  border-bottom-color: var(--text);
+  color: var(--text);
 }
 
 .code .unfold:focus-visible {
-  outline: 3px solid var(--t0);
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
 }

@@ -1,48 +1,55 @@
-/* 목업: design/src/ink/session.css 「④ 자유 질문」 블록 — 그대로.
-   목업이 인라인으로 붙였던 `style="margin-top:10px"` 은 `.askbox` 로 들어갔다. */
+/* 사다리 4단 — 자유 질문 (정본 §3-1 ④). 밖으로 나가는 유일한 단이고,
+   나가는 것은 이 줄과 앞뒤 4줄뿐이라는 사실을 만들어진 프롬프트가 그대로 보여 준다. */
 .askbox {
   display: grid;
-  gap: 10px;
-  margin-top: 10px;
+  gap: var(--s-3);
+  min-width: 0;
+  margin-top: var(--s-3);
 }
 
 .askbox textarea {
   width: 100%;
-  min-height: 84px;
-  padding: 10px 12px;
-  border: 2px solid var(--rule);
-  background: var(--stock);
-  color: var(--ink);
+  min-height: 5.5rem;
+  padding: var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--text);
   font: inherit;
-  font-size: var(--fs-15);
+  font-size: var(--fs-4);
   line-height: var(--lh-body);
   resize: vertical;
 }
 
-.askbox textarea:focus {
-  outline: 3px solid var(--t0);
-  outline-offset: 2px;
+.askbox textarea:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
 }
 
 .askbox .row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: var(--s-3);
 }
 
 .askbox .row .note {
-  color: var(--ink-soft);
-  font-size: var(--fs-14);
+  color: var(--text-muted);
+  font-size: var(--fs-2);
 }
 
+/* 만들어진 프롬프트 — 나가는 글자 전부가 여기 그대로 있다. */
 .prompt-out {
-  padding: 10px 12px;
-  border: 2px dashed var(--rule);
-  background: var(--paper-3);
-  color: var(--ink);
-  font-family: var(--f-mono);
-  font-size: var(--fs-14);
-  line-height: 1.7;
+  min-width: 0;
+  padding: var(--s-3) var(--s-4);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--code-bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-3);
+  line-height: var(--lh-code);
   white-space: pre-wrap;
 }

@@ -1,38 +1,50 @@
-/* 목업: design/src/ink/session.css 「① 사전 3층」 블록 — 그대로.
-   목업이 인라인으로 붙였던 `style="margin-top:10px"` 만 `.dict-note` 로 뺐다. */
+/* 사다리 1단 — 사전 3층 (정본 §3-1 ①). 층 이름과 문장이 나란한 정의 목록이다. */
 .dict {
   display: grid;
   gap: 0;
-  border: 2px solid var(--rule);
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  overflow: hidden;
 }
 
 .dict > div {
   display: grid;
-  grid-template-columns: 96px minmax(0, 1fr);
+  grid-template-columns: 6rem minmax(0, 1fr);
   align-items: start;
-  gap: 14px;
-  padding: 10px 14px;
-  border-top: 1px dashed var(--rule);
+  gap: var(--s-4);
+  padding: var(--s-3) var(--s-4);
+  border-top: 1px solid var(--border);
 }
 
 .dict > div:first-child { border-top: 0 }
 
 .dict b {
-  padding-top: 3px;
-  color: var(--ink-soft);
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
-  letter-spacing: .1em;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  font-weight: var(--fw-bold);
+  letter-spacing: .08em;
 }
 
 .dict p {
-  color: var(--ink);
-  font-size: var(--fs-15);
+  max-width: var(--measure);
+  color: var(--text);
+  font-size: var(--fs-3);
+  line-height: var(--lh-body);
+  word-break: keep-all;
 }
 
 .dict .code {
-  margin-top: 6px;
-  font-size: var(--fs-15);
+  margin-top: var(--s-2);
+  font-size: var(--fs-3);
 }
 
-.dict-note { margin-top: 10px }
+.dict-note { margin-top: var(--s-3) }
+
+@media (width <= 720px) {
+  .dict > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-1);
+  }
+}

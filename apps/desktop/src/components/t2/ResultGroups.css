@@ -1,15 +1,15 @@
 /* 목업: design/src/ink/session.css 의 `.rgroups` · `.rg`.
-   바꾼 것 — 머리말 왼쪽 4px 띠의 원색을 별칭으로. missed --yellow-deep → --verdict-differ,
-   ok --pink → --verdict-exact, sec --blue → --verdict-equiv (05 §4.2). 띠는 면이 아니라
-   **선**이라 -face 가 아니라 --verdict-differ 다 (D95). wrong 은 원색이 아니었다. */
+   바꾼 것 — 머리말 왼쪽 4px 띠의 원색을 별칭으로. missed --yellow-deep → --bad,
+   ok --pink → --ok, sec --blue → --info (05 §4.2). 띠는 면이 아니라
+   **선**이라 -face 가 아니라 --bad 다 (D95). wrong 은 원색이 아니었다. */
 .rgroups {
   display: grid;
   gap: 12px;
 }
 
 .rg {
-  border: 2px solid var(--rule);
-  background: var(--paper);
+  border: 1px solid var(--border);
+  background: var(--surface);
 }
 
 .rg h5 {
@@ -17,9 +17,9 @@
   gap: 10px;
   align-items: center;
   padding: 8px 12px;
-  border-bottom: 2px solid var(--rule);
-  background: var(--paper-3);
-  font-size: var(--fs-15);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+  font-size: var(--fs-3);
   font-weight: 700;
 }
 
@@ -28,21 +28,21 @@
   place-items: center;
   width: 24px;
   height: 24px;
-  border: 2px solid var(--rule);
-  background: var(--paper-2);
-  font-family: var(--f-mono);
-  font-size: var(--fs-14);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-family: var(--font-mono);
+  font-size: var(--fs-2);
 }
 
-.rg.missed h5 { box-shadow: inset 4px 0 0 var(--verdict-differ) }
-.rg.ok h5 { box-shadow: inset 4px 0 0 var(--verdict-exact) }
-.rg.wrong h5 { box-shadow: inset 4px 0 0 var(--ink-mute) }
-.rg.sec h5 { box-shadow: inset 4px 0 0 var(--verdict-equiv) }
+.rg.missed h5 { box-shadow: inset 4px 0 0 var(--bad) }
+.rg.ok h5 { box-shadow: inset 4px 0 0 var(--ok) }
+.rg.wrong h5 { box-shadow: inset 4px 0 0 var(--border-strong) }
+.rg.sec h5 { box-shadow: inset 4px 0 0 var(--info) }
 
 .rg h5 small {
   margin-left: auto;
-  color: var(--ink-soft);
-  font-size: var(--fs-13);
+  color: var(--text-muted);
+  font-size: var(--fs-1);
   font-weight: 500;
 }
 
@@ -56,30 +56,30 @@
   grid-template-columns: auto minmax(0, 1fr);
   gap: 3px 12px;
   padding: 8px 12px;
-  border-top: 1px dashed var(--rule);
-  font-size: var(--fs-15);
+  border-top: 1px dashed var(--border);
+  font-size: var(--fs-3);
 }
 
 .rg li:first-child { border-top: 0 }
 
 .rg li code {
-  color: var(--ink);
-  font-family: var(--f-mono);
-  font-size: var(--fs-14);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-2);
   font-weight: 600;
 }
 
 .rg li .stat {
   grid-row: 2;
   grid-column: 1;
-  color: var(--ink-soft);
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
 }
 
 .rg li p {
   grid-row: 1/3;
   grid-column: 2;
-  color: var(--ink-soft);
-  font-size: var(--fs-15);
+  color: var(--text-muted);
+  font-size: var(--fs-3);
 }

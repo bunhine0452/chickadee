@@ -27,9 +27,11 @@ const T2_WHY =
 test('T1·T2 를 못 여는 이유가 홈에 적혀 있다', async ({ page, app }) => {
   await openHome(page);
 
-  await expect(page.locator('.locked-panel')).toContainText('T1 필사');
-  await expect(page.locator('.locked-panel')).toContainText('열립니다');
-  await expect(page.locator('.forecast')).toContainText('책임 배치 문제는 아직 만들 수 없습니다');
+  // D182 가 홈을 다시 짜면서 「아직 못 하는 것」 둘이 「아직 안 배운 문법」 아래 한 자리로
+  // 모였다 — T1 필사(D96)와 책임 배치(D170 ⑤). 판 두 장이 하던 일을 두 문단이 한다.
+  await expect(page.locator('.gaps-locked').first()).toContainText('T1 필사');
+  await expect(page.locator('.gaps-locked').first()).toContainText('열립니다');
+  await expect(page.locator('.forecast')).toContainText('책임 배치 문제');
   await expect(page.locator('.forecast')).toContainText('커밋은 0개');
 
   const counts = app.db

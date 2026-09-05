@@ -1,93 +1,71 @@
-/* 목업 `design/src/ink/session.css` 의 「LIFER」 카드 속을 판정란 크기로 옮긴 것 (D131).
-   베일(`.lifer-veil`)과 그 위의 카드 그림자·포커스 트랩은 함께 사라졌다 — 덮을 배경이
-   없으므로 남길 것이 없다. 담는 것은 머리말 · 개념 · 채집지 · 일련번호 · 도장이다.
-   D179 로 앞머리의 Dee 를 뺐다 — 문제 화면에 마스코트를 세우지 않는다(정본 §6). */
+/* 처음 만난 개념의 기록 (정본 §3-6 · D131 · D182).
+   컨페티가 아니라 **영구 기록**이다 — 개념 이름 · 채집지(파일·줄) · 일련번호.
+   D179 로 마스코트를, D182 로 도장을 뺐다. 남은 연출은 일련번호가 찍히는 한 번뿐이다. */
 .lifer-note {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 14px;
-  margin-top: 12px;
-  padding: 12px 14px;
-  border: 2px solid var(--rule);
-  background: var(--paper-2);
-  animation: sheetin .42s var(--e-settle) both;
+  margin-top: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
 }
 
 .lifer-k {
-  color: var(--t1-text);
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
-  font-weight: 700;
-  letter-spacing: .16em;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  font-weight: var(--fw-bold);
+  letter-spacing: .12em;
   text-transform: uppercase;
 }
 
 .lifer-note h5 {
-  margin-top: 2px;
-  font-size: var(--fs-20);
-  font-weight: 700;
-  letter-spacing: -.03em;
-  line-height: 1.2;
+  margin-top: var(--s-1);
+  font-size: var(--fs-4);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  word-break: keep-all;
 }
 
 .lifer-note h5 code {
-  padding: 0 5px;
-  border: 1.5px solid var(--rule);
-  background: var(--paper-3);
-  font-size: var(--fs-16);
+  font-family: var(--font-mono);
+  font-size: .88em;
+  font-weight: var(--fw-medium);
+  color: var(--text-muted);
 }
 
 .lifer-note p {
-  margin-top: 3px;
-  color: var(--ink-soft);
-  font-size: var(--fs-14);
+  margin-top: var(--s-1);
+  color: var(--text-muted);
+  font-size: var(--fs-2);
+  line-height: var(--lh-body);
+  word-break: keep-all;
 }
 
 .lifer-note p b {
-  color: var(--ink);
-  font-weight: 600;
+  color: var(--text);
+  font-weight: var(--fw-medium);
 }
 
-/* 일련번호가 찍히는 소리 — 영구 기록이라는 것을 눈으로 말한다 */
+/* 일련번호가 찍히는 소리 — 영구 기록이라는 것을 눈으로 말한다. 200ms 상한 안이다. */
 .lifer-serial {
   width: 0;
-  margin-top: 6px;
+  margin-top: var(--s-1);
   overflow: hidden;
-  border-right: 2px solid var(--t1);
-  color: var(--ink-soft);
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
   letter-spacing: .04em;
   white-space: nowrap;
-  animation: typeout .56s steps(22) .7s forwards;
+  animation: typeout 200ms steps(22) forwards;
 }
 
 @keyframes typeout {
   to { width: 100% }
 }
 
-.lifer-note .stamp {
-  align-self: start;
-  animation-delay: .42s;
-}
-
-/* 감축 모드 — 최종 포즈는 남긴다 (05 §6). 일련번호와 도장은 지연도 함께 지운다:
-   `typeout` 은 지연 동안 폭이 0 이고 도장은 `both` 라 0% 포즈(투명)에 머문다. */
+/* 감축 모드 — 최종 포즈(다 찍힌 번호)는 남긴다 (05 §6). */
 @media (prefers-reduced-motion: reduce) {
-  .lifer-note { animation-duration: .001ms }
-
-  .lifer-serial,
-  .lifer-note .stamp {
-    animation-duration: .001ms;
-    animation-delay: 0s;
-  }
+  .lifer-serial { animation-duration: .001ms }
 }
 
-[data-motion="reduce"] .lifer-note { animation-duration: .001ms }
-
-[data-motion="reduce"] .lifer-serial,
-[data-motion="reduce"] .lifer-note .stamp {
-  animation-duration: .001ms;
-  animation-delay: 0s;
-}
+[data-motion="reduce"] .lifer-serial { animation-duration: .001ms }

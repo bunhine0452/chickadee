@@ -4,8 +4,8 @@
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
-  color: var(--ink-soft);
-  font-size: var(--fs-14);
+  color: var(--text-muted);
+  font-size: var(--fs-2);
 }
 
 .dfilter .sw span { padding: 4px 9px }

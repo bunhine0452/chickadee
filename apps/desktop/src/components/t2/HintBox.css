@@ -1,14 +1,14 @@
 /* 목업: design/src/ink/session.css 의 `.hintbox`.
-   바꾼 것 — 왼쪽 4px 띠의 --yellow 를 --verdict-differ 로. 힌트는 트랙 색이 아니라
+   바꾼 것 — 왼쪽 4px 띠의 --yellow 를 --bad 로. 힌트는 트랙 색이 아니라
    「아직 못 맞힌 자리」의 색이고, 05 §4.2 가 컴포넌트에 허용하는 이름은 별칭뿐이다. */
 .hintbox {
   display: grid;
   gap: 4px;
   padding: 9px 12px;
-  border-left: 4px solid var(--verdict-differ);
-  background: var(--paper-3);
-  color: var(--ink);
-  font-size: var(--fs-15);
+  border-left: 4px solid var(--bad);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: var(--fs-3);
 }
 
 .hintbox b { font-weight: 700 }

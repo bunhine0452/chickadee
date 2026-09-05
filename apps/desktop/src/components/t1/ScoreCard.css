@@ -1,47 +1,80 @@
-/* 목업: design/src/ink/session.css 「채점 결과」 블록의 `.score`.
-   알약 3색은 목업 그대로 `.pill t1/t0/t2` 를 쓴다 — Pill 이 이미 트랙 별칭만 만진다. */
+/* 필사 채점 결과의 머리 (D182). 트랙 색 알약 셋을 숫자 세 칸으로 바꿨다 —
+   같음·같은 뜻·다름은 **이름**으로 갈리지 색으로 갈리지 않는다 (정본 §6). */
 .score {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  gap: 20px;
+  gap: var(--s-5);
   align-items: center;
-  padding: 14px 18px;
-  border: 2.5px solid var(--rule);
-  background: var(--paper);
+  padding: var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
 }
 
 .score .big {
-  font-family: var(--f-poster);
-  font-weight: 400;
-  font-synthesis-weight: none;
-  font-size: var(--fs-poster);
-  letter-spacing: .01em;
-  line-height: .9;
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: var(--fs-6);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--lh-tight);
   white-space: nowrap;
 }
 
 .score .big small {
-  margin-left: 6px;
-  color: var(--ink-soft);
-  font-family: var(--f-ui);
-  font-size: var(--fs-15);
-  font-weight: 500;
-  letter-spacing: 0;
+  display: block;
+  margin-top: var(--s-1);
+  color: var(--text-muted);
+  font-size: var(--fs-2);
+  font-weight: var(--fw-normal);
 }
 
 .score p {
-  color: var(--ink-soft);
-  font-size: var(--fs-15);
+  max-width: var(--measure);
+  color: var(--text-muted);
+  font-size: var(--fs-3);
+  line-height: var(--lh-body);
+  word-break: keep-all;
 }
 
 .score p b {
-  color: var(--ink);
-  font-weight: 700;
+  color: var(--text);
+  font-weight: var(--fw-medium);
 }
 
-.score .pills {
+.score-nums {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
+  gap: var(--s-2) var(--s-5);
+  margin-top: var(--s-3);
+}
+
+.score-nums > div {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-2);
+}
+
+.score-nums dt {
+  color: var(--text-muted);
+  font-size: var(--fs-2);
+}
+
+.score-nums dd {
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-4);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.score-verdict {
+  margin-top: var(--s-2);
+  color: var(--text);
+  font-size: var(--fs-3);
+  font-weight: var(--fw-medium);
+}
+
+@media (width <= 720px) {
+  .score { grid-template-columns: minmax(0, 1fr) }
 }
