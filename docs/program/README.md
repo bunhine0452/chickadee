@@ -16,6 +16,7 @@
 | [`course.md`](./course.md) | 코스 구조 — 챕터를 어떻게 자르고 어떤 순서로, 몇 주인가 |
 | [`mastery.md`](./mastery.md) | 진도와 평가 — 잉크 겹·FSRS 를 어디로 내리나 |
 | [`chapter-login.md`](./chapter-login.md) | 첫 챕터 실물 — 로그인을 5단 끝까지 |
+| [`fundamentals.md`](./fundamentals.md) | **기초 문항의 형식** — 4지선다를 버리고 값을 적게 한다(`value`·`step`·`table`·`build`). 열 언어 공통 |
 
 ---
 

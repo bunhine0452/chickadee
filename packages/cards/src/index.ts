@@ -87,3 +87,11 @@ export {
   springTests, JUDGE_PACKAGE,
 } from './stage-tests.js';
 export type { JudgeTestInput, MethodContract } from './stage-tests.js';
+
+// 기초 문항 — 고르지 않고 적는다 (`docs/program/fundamentals.md`)
+export {
+  buildAllValueItems, buildValueItems, valueText, FUND_DIALECTS, FUND_LANGS, FUND_SITE_ID,
+} from './fundamentals.js';
+export type {
+  FoldStep, FundDialect, FundDrop, FundItem, FundLang, FundType, FundValue, OverflowRule,
+} from './fundamentals.js';
