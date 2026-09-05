@@ -1,0 +1,223 @@
+schema: 1
+id: ts/closure
+universal: null
+name: { ko: 바깥 값을 데려가는 함수, en: Closure }
+token: "() => n"
+grammars: [typescript, tsx, javascript, vue]
+framework: null
+essential: true
+difficulty: 3
+prereq: [ts/arrow-function, ts/reassignment, cs/closure-capture, cs/scope-and-lifetime]
+confusions: [ts/callback-argument]
+
+dict:
+  one_liner:
+    ko: "안에서 만든 함수는 바깥 이름을 데려간다. 데려가는 것은 값이 아니라 <b>자리</b>다."
+    en: "A function made inside takes outer names with it — the slot, not the value."
+  why:
+    ko: >-
+      {{site.line}}행에서 만들어진 {{pick.2|code}}{{pick.2|josa:은,는}} 바깥이 끝난 뒤에도 삽니다.
+      살아 있는 동안 바깥 이름을 계속 볼 수 있는데, 보는 것이 그때 복사한 값이 아니라 <b>그 이름의
+      자리</b>예요 — 자리가 바뀌면 나중에 부른 함수가 바뀐 값을 봅니다.
+    en: >-
+      {{pick.2|code}}, made on line {{site.line}}, outlives what made it. While it lives it can still
+      see the outer names, and what it sees is <b>the slot</b>, not a value copied back then — change
+      the slot and a later call sees the change.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.1|code}} 안에서 함수 하나를 만든다."
+      en: "Line {{site.line}} makes one function inside {{pick.1|code}}."
+    - ko: "만든 함수 {{pick.2|code}}{{pick.2|josa:이,가}} 바깥으로 나간다 — 자리를 들고 간다."
+      en: "The made function {{pick.2|code}} leaves — carrying the slots with it."
+    - ko: "나중에 불릴 때 그 자리를 다시 읽는다. 그동안 자리가 바뀌었으면 바뀐 값을 본다."
+      en: "Called later, it reads those slots again. Changed in the meantime, it sees the change."
+
+rule:
+  ko: >-
+    <b>데려가는 것은 이름의 자리다.</b> 값을 그때 복사해 두는 것이 아니라서, 부른 시점의 값이
+    보인다.
+  en: >-
+    <b>What is taken is the name's slot.</b> No value was copied at the time, so what shows is the
+    value at the moment of the call.
+result:
+  label:
+    ko: "{{site.line}}행이 내보내는 것"
+    en: "What line {{site.line}} sends out"
+  value: "{{pick.2}} + 바깥 자리"
+  note:
+    ko: "함수 하나와 그 함수가 보는 자리들"
+    en: "one function and the slots it can see"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} 만들어진 자리와 <b>부르는 자리</b>가 다릅니다. 그 둘이
+    다르다는 것이 이 개념이 있는 이유예요.
+  en: >-
+    For {{pick.2|code}} the place it was made and the <b>place it is called</b> are different. That
+    difference is the whole reason this concept exists.
+payoff:
+  ko: >-
+    타이머 안의 변수가 옛 값을 보는 버그, 반복문에서 만든 함수들이 전부 같은 값을 보는 버그가 이
+    한 자리에서 나옵니다.
+  en: >-
+    The bug where a timer sees a stale variable and the bug where functions made in a loop all see
+    the same value both come from here.
+bridge:
+  ko: >-
+    자리를 다시 안 묶으려면 그때의 값을 <b>인자로 넘겨</b> 새 이름에 담아야 합니다.
+  en: >-
+    To avoid rebinding the slot, pass the value <b>as an argument</b> so it lands in a fresh name.
+misconceptions:
+  - ko: "만들 때의 값이 복사돼 들어간다 — 자리를 봅니다. 값은 부를 때 읽어요."
+    en: "The value is copied in when it is made — it sees a slot; the value is read on the call."
+  - ko: "바깥이 끝나면 데려간 이름도 사라진다 — 함수가 사는 동안 같이 삽니다."
+    en: "When the outside ends the taken names die — they live as long as the function does."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>바깥으로 나가는 함수</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the function that leaves</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: >-
+            {{pick.1|code}}{{pick.1|josa:은,는}} 그 함수를 <b>만드는</b> 쪽입니다. 나가는 것은 그
+            안에서 만들어진 쪽이에요.
+          en: >-
+            {{pick.1|code}} is what <b>makes</b> the function. What leaves is the one made inside it.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 만드는 쪽과 나가는 쪽"
+            en: "The sharpest spot — the maker or the one that leaves"
+          code:
+            - "function make() { return () => n }"
+            - "//       ^만드는 쪽      ^나가는 쪽"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 나간 함수의 <b>안쪽</b>입니다. 나가는 것은 그것을
+            감싼 함수예요.
+          en: >-
+            {{pick.3|code}} is the <b>inside</b> of the function that leaves. What leaves is the one
+            wrapping it.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 감싼 것과 감싸인 것"
+            en: "The sharpest spot — the wrapper or the wrapped"
+          code:
+            - "const add = (a) => (b) => a + b"
+            - "//                 ^나간다  ^안쪽"
+
+meaning:
+  - q:
+      ko: >-
+        <code>let n = 1; const f = () => n; n = 2; f()</code> 의 값은 무엇일까요?
+      en: >-
+        What is the value of <code>let n = 1; const f = () => n; n = 2; f()</code>?
+    hint:
+      ko: "함수가 데려간 것이 값인지 자리인지를 생각해 보세요."
+      en: "Ask whether the function took a value or a slot."
+    options:
+      - t:
+          ko: "<code>2</code> — 부를 때 그 자리를 다시 읽는다"
+          en: "<code>2</code> — the slot is read again at the call"
+      - t:
+          ko: "<code>1</code> — 만들 때의 값을 데려갔다"
+          en: "<code>1</code> — the value at creation time was taken"
+        diag:
+          t:
+            ko: >-
+              값을 복사해 두는 언어도 있습니다. 여기서는 자리를 데려가서, 만든 뒤에 바뀐 것도 그대로
+              보여요.
+            en: >-
+              Some languages do copy the value. Here the slot is taken, so a change made afterwards
+              shows through.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 값인가 자리인가"
+              en: "The sharpest spot — a value or a slot"
+            code:
+              - "let n = 1; const f = () => n; n = 2"
+              - "f()   // 2"
+      - t:
+          ko: "<code>undefined</code> — 바깥이 끝나서 이름이 사라졌다"
+          en: "<code>undefined</code> — the outside ended and the name is gone"
+        diag:
+          t:
+            ko: >-
+              데려간 이름은 함수가 사는 동안 같이 삽니다. 사라지는 것은 그 함수까지 아무도 안
+              가리키게 된 뒤예요.
+            en: >-
+              A taken name lives as long as the function does. It goes only after nothing points at
+              that function either.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 언제 사라지나"
+              en: "The sharpest spot — when does it go"
+            code:
+              - "const f = make(); f()   // 살아 있다"
+              - "// f 를 아무도 안 가리킬 때 함께 간다"
+      - t:
+          ko: "그 줄에서 멈춘다"
+          en: "It stops on that line"
+        diag:
+          t:
+            ko: >-
+              멈추지 않습니다. 안에서 바깥 이름을 읽는 것은 정상적인 일이고, 규칙이 「어느 값을
+              읽나」 하나뿐이에요.
+            en: >-
+              Nothing stops. Reading an outer name from inside is ordinary; the only rule is which
+              value gets read.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 막히나 값이 갈리나"
+              en: "The sharpest spot — blocked or just a different value"
+            code:
+              - "() => n     // 읽을 수 있다"
+              - "() => n     // 언제의 n 인가가 물음"
+
+no_hole_reason: >-
+  이 개념의 차이는 지운 글자가 아니라 「같은 이름을 언제 읽나」다. 코드에서 한 조각을 빼도 그 물음이
+  안 생기고, 빼면 그저 다른 함수가 된다. 그래서 값과 자리를 뜻으로 묻는다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 함수 안에서 함수를 만들었을까요?"
+    en: "Why does line {{site.line}} make a function inside a function?"
+  choices:
+    - t:
+        ko: "바깥에서 정해진 것을 나중까지 들고 가려고"
+        en: "To carry what was settled outside along to a later moment"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 들고 가는 것이 값인지 자리인지도 한 줄 적어 보세요."
+        en: "That is the direction. Add a line on whether it carries a value or a slot."
+    - t:
+        ko: "같은 코드를 두 번 안 쓰려고"
+        en: "To avoid writing the same code twice"
+      ok: false
+      fb:
+        ko: "그것만이라면 함수 하나로 충분합니다. 안에서 만든 이유는 바깥 이름 때문이에요."
+        en: "For that one function would do. Making it inside is about the outer names."
+    - t:
+        ko: "바깥 이름을 감춰 두려고"
+        en: "To hide the outer names"
+      ok: false
+      fb:
+        ko: "감추는 효과가 있기는 하지만, 이 판이 재는 것은 <b>언제의 값을 보는가</b>입니다."
+        en: "It does hide them, but what this plate measures is <b>which moment's value is seen</b>."
+
+queries:
+  - { grammars: [typescript, tsx, javascript, vue], file: ./closure.scm }
+
+examples:
+  - code: "function counter() { let n = 0; return () => n + 1 }"
+    expect: { sites: 1, form: returns-fn, picks: { 1: "counter", 2: "() => n + 1" } }
+  - code: "const add = (a) => (b) => a + b"
+    expect: { sites: 1, form: curried, picks: { 3: "a + b" } }
+  - code: "setTimeout(() => save(draft), 100)"
+    expect: { sites: 1, form: deferred, picks: { 1: "setTimeout", 2: "() => save(draft)" } }
+  - code: "const add = (a, b) => a + b"
+    expect: none

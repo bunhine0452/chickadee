@@ -1,0 +1,193 @@
+schema: 1
+id: ts/structural-typing
+universal: null
+name: { ko: 이름 말고 모양이 맞으면, en: Structural typing }
+token: null
+grammars: [typescript, tsx]
+framework: null
+essential: false
+difficulty: 4
+prereq: [ts/interface-type]
+confusions: [ts/interface-type]
+
+dict:
+  one_liner:
+    ko: "맞는지 보는 기준이 이름이 아니라 필드다. 이름이 달라도 모양이 같으면 들어간다."
+    en: "Fit is judged by fields, not names. Same fields, different names, and it fits."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.3|code}}{{pick.3|josa:은,는}} {{pick.2|code}} 라는 이름을 어디에도
+      안 적었습니다. 그런데 통과해요 — 이 언어가 보는 것은 <b>필드가 맞는가</b>이지 어느 선언에서
+      왔는가가 아니기 때문입니다.
+    en: >-
+      {{pick.3|code}} on line {{site.line}} never names {{pick.2|code}} anywhere. It still passes —
+      this language looks at <b>whether the fields fit</b>, not which declaration a value came from.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.1|code}} 에 {{pick.2|code}} 약속을 건다."
+      en: "Line {{site.line}} puts the promise {{pick.2|code}} on {{pick.1|code}}."
+    - ko: "{{pick.3|code}} 의 필드를 그 약속의 필드와 하나씩 맞춰 본다."
+      en: "The fields of {{pick.3|code}} are matched against the promise's fields one by one."
+    - ko: "다 맞으면 통과한다 — 이름은 한 번도 안 본다."
+      en: "All matched, it passes — the name was never consulted."
+
+rule:
+  ko: >-
+    <b>바로 적은 묶음만 더 엄격하다.</b> 변수에 담긴 값은 필드가 남아도 통과하지만, 그 자리에서
+    적은 묶음은 남는 필드가 있으면 걸린다.
+  en: >-
+    <b>Only a bundle written on the spot is stricter.</b> A value held in a variable passes with
+    extra fields; a literal written right there is caught for them.
+result:
+  label:
+    ko: "{{site.line}}행이 보는 것"
+    en: "What line {{site.line}} looks at"
+  value: "{{pick.3}} 의 필드"
+  note:
+    ko: "이름이 아니라 필드"
+    en: "fields, not names"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} 그 자리에 요구되는 <b>모양</b>입니다. 그 모양을 만족하는
+    값이면 어디서 왔든 들어와요.
+  en: >-
+    {{pick.2|code}} is the <b>shape</b> required here. Any value satisfying it gets in, wherever it
+    came from.
+payoff:
+  ko: >-
+    자바나 C# 을 먼저 배운 사람이 가장 크게 헷갈리는 자리입니다. 이것을 알면 「왜 이 값이
+    여기 들어가지」가 한 번에 풀려요.
+  en: >-
+    This trips people coming from Java or C# hardest. Knowing it settles "why does this value even
+    fit here" in one step.
+bridge:
+  ko: >-
+    모양이 겹치면 실수도 통과합니다 — 서로 다른 뜻의 두 모양이 필드가 같으면 컴파일러가 안
+    갈라 줘요.
+  en: >-
+    Overlapping shapes let mistakes through — two shapes meaning different things but sharing fields
+    are not told apart.
+misconceptions:
+  - ko: "선언 이름이 다르면 못 넣는다 — 필드가 같으면 들어갑니다."
+    en: "Different declaration names cannot be swapped — matching fields can."
+  - ko: "필드가 남으면 언제나 걸린다 — 변수에 담긴 값은 통과합니다."
+    en: "Extra fields are always caught — a value held in a variable passes."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>요구되는 모양의 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name of the required shape</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: >-
+            {{pick.1|code}}{{pick.1|josa:은,는}} 값을 받는 <b>이름</b>입니다. 요구되는 모양은 콜론
+            뒤에 있어요.
+          en: >-
+            {{pick.1|code}} is the <b>name</b> receiving the value. The required shape is after the
+            colon.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 받는 이름과 요구되는 모양"
+            en: "The sharpest spot — the receiving name or the required shape"
+          code:
+            - "const p: Point = { x: 1, y: 2 }"
+            - "//    ^이름  ^모양"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 들어가는 <b>값</b>입니다. 이 값이 어느 선언에서
+            왔는지는 아무도 안 봐요.
+          en: >-
+            {{pick.3|code}} is the <b>value</b> going in. Which declaration it came from is never
+            consulted.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 값과 요구되는 모양"
+            en: "The sharpest spot — the value or the required shape"
+          code:
+            - "const p: Point = { x: 1, y: 2 }"
+            - "//         ^모양   ^값"
+
+meaning:
+  - q:
+      ko: >-
+        <code>interface A { id: number }</code> 자리에 <code>const b = { id: 1, extra: 2 }</code> 로
+        만든 <code>b</code> 를 넣으면?
+      en: >-
+        Where <code>interface A { id: number }</code> is required, what if you pass <code>b</code>
+        made by <code>const b = { id: 1, extra: 2 }</code>?
+    hint:
+      ko: "바로 적은 묶음과 변수에 담긴 값이 갈립니다."
+      en: "A literal written on the spot and a value in a variable part ways."
+    options:
+      - t:
+          ko: "들어간다 — 필요한 필드가 다 있으면 남는 필드는 안 본다"
+          en: "It fits — with the needed fields present, extras go unchecked"
+      - t:
+          ko: "안 된다 — 필드가 하나 더 많다"
+          en: "It fails — there is one extra field"
+        diag:
+          t:
+            ko: >-
+              바로 적은 묶음이었다면 걸렸을 겁니다. 변수에 담은 뒤에는 남는 필드를 안 봐요.
+            en: >-
+              Written as a literal on the spot it would have been caught. Once it is in a variable,
+              extras go unchecked.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 변수인가 바로 적은 묶음인가"
+              en: "The sharpest spot — a variable or a literal"
+            code:
+              - "f({ id: 1, extra: 2 })   // 걸린다"
+              - "f(b)                     // 들어간다"
+      - t:
+          ko: "남는 필드가 지워진 채 들어간다"
+          en: "It goes in with the extra field stripped"
+        diag:
+          t:
+            ko: >-
+              값은 한 글자도 안 바뀝니다. 약속은 확인만 하고 컴파일이 끝나면 사라져요.
+            en: >-
+              The value is not altered at all. A promise only checks, and it is gone after compiling.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 확인인가 손질인가"
+              en: "The sharpest spot — checking or trimming"
+            code:
+              - "const a: A = b   // 그대로"
+              - "// extra 는 돌아가는 중에도 있다"
+      - t:
+          ko: "<code>b</code> 를 그 이름으로 다시 선언해야 한다"
+          en: "<code>b</code> has to be redeclared under that name"
+        diag:
+          t:
+            ko: >-
+              이름을 붙일 필요가 없습니다. 이 언어가 보는 것은 필드뿐이에요.
+            en: >-
+              No naming is needed. Fields are all this language looks at.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 이름을 붙이나 모양만 맞추나"
+              en: "The sharpest spot — naming or just fitting"
+            code:
+              - "const b: A = { id: 1 }   // 붙여도 된다"
+              - "const b = { id: 1 }      // 안 붙여도 된다"
+
+no_hole_reason: >-
+  이 개념은 두 선언을 나란히 놓아야 보이는 성질이라 한 줄에서 지울 조각이 없다.
+  여기서 재는 것은 「무엇을 보고 맞다고 하나」이고, 그것은 뜻으로 물어야 한다.
+
+queries:
+  - { grammars: [typescript, tsx], file: ./structural-typing.scm }
+
+examples:
+  - code: "const p: Point = { x: 1, y: 2 }"
+    expect: { sites: 1, form: shape-fits, picks: { 1: "p", 2: "Point", 3: "{ x: 1, y: 2 }" } }
+  - code: "function draw(at: { x: number; y: number }) { return at }"
+    expect: { sites: 1, form: inline-shape, picks: { 1: "at" } }
+  - code: "const p = { x: 1, y: 2 }"
+    expect: none

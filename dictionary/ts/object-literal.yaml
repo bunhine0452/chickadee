@@ -1,0 +1,220 @@
+schema: 1
+id: ts/object-literal
+universal: null
+name: { ko: 이름표 붙은 묶음, en: Object literal }
+token: "{ a: 1 }"
+grammars: [typescript, tsx, javascript, vue]
+framework: null
+essential: true
+difficulty: 1
+prereq: [ts/string-literal, cs/hash-table]
+confusions: [ts/object-destructuring, ts/object-spread]
+
+dict:
+  one_liner:
+    ko: "값 여럿을 이름표로 묶어 하나로 만든다. 순서가 아니라 이름으로 꺼낸다."
+    en: "Several values tied under labels into one — fetched by name, not by order."
+  why:
+    ko: >-
+      배열은 자리를 세지만 여기는 <b>이름</b>으로 셉니다. {{site.line}}행의
+      {{pick.2|code}}{{pick.2|josa:은,는}} 꺼낼 때 쓰는 이름표이고 {{pick.3|code}}{{pick.3|josa:은,는}}
+      그 이름표에 붙은 값이에요. 자리를 바꿔도 뜻이 그대로인 이유가 그것입니다.
+    en: >-
+      An array counts by position; this counts by <b>name</b>. On line {{site.line}},
+      {{pick.2|code}} is the label you fetch by and {{pick.3|code}} is the value hanging on it.
+      That is why moving the entries around changes nothing.
+  trace:
+    - ko: "{{site.line}}행이 중괄호로 묶음 {{pick.1|code}} 하나를 연다."
+      en: "Line {{site.line}} opens one bundle, {{pick.1|code}}, with braces."
+    - ko: "{{pick.2|code}} 이름표 아래에 {{pick.3|code}}{{pick.3|josa:을,를}} 붙인다."
+      en: "{{pick.3|code}} is hung under the label {{pick.2|code}}."
+    - ko: "다 붙으면 값 하나가 되어 이름에 묶이거나 인자로 넘어간다."
+      en: "Once hung, the whole thing is one value — bound to a name or passed as an argument."
+
+rule:
+  ko: >-
+    <b>이름표 왼쪽은 이름이고 오른쪽은 값이다.</b> 이름을 생략하면 값 자리의 이름이 그대로
+    이름표가 된다.
+  en: >-
+    <b>Left of the colon is a name, right of it is a value.</b> Drop the name and the value's own
+    name becomes the label.
+result:
+  label:
+    ko: "{{site.line}}행이 만든 것"
+    en: "What line {{site.line}} makes"
+  value: "{ {{pick.2}}: … }"
+  note:
+    ko: "이름표 하나짜리 묶음"
+    en: "a bundle with one label"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} 값이 아니라 <b>이름</b>입니다. 따옴표를 안 써도 글자로
+    다뤄지고, 그래서 점 뒤에 그 이름을 적으면 꺼내집니다.
+  en: >-
+    {{pick.2|code}} is a <b>name</b>, not a value. It is treated as text even without quotes, which
+    is why writing it after a dot reaches the value.
+payoff:
+  ko: >-
+    AI 가 짠 코드에서 함수에 넘기는 인자도, 서버가 돌려주는 응답도 이 모양입니다. 이름표를
+    읽을 줄 알면 그 줄이 무엇을 담아 보내는지가 바로 보여요.
+  en: >-
+    In AI-written code the arguments you pass and the responses you get back are both this shape.
+    Read the labels and you see at once what a line is carrying.
+bridge:
+  ko: >-
+    꺼낼 때는 반대 모양입니다 — <code>const { {{pick.2}} } = obj</code> 가 같은 이름표를 열쇠로
+    씁니다.
+  en: >-
+    Taking things out is the mirror image — <code>const { {{pick.2}} } = obj</code> uses the same
+    label as its key.
+misconceptions:
+  - ko: "이름표는 적은 순서대로 나온다 — 순회 순서는 약속돼 있지 않습니다."
+    en: "Labels come back in the order written — the iteration order is not promised."
+  - ko: "이름표에는 따옴표가 필요하다 — 식별자 꼴이면 안 써도 됩니다."
+    en: "A label needs quotes — not when it looks like an identifier."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>이름표</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the label</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 묶음 <b>전체</b>입니다. 이름표는 그 안에 있어요."
+          en: "{{pick.1|code}} is the <b>whole</b> bundle. The label is inside it."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 묶음 전체와 이름표"
+            en: "The sharpest spot — the whole bundle or one label"
+          code:
+            - "{ id: 1 }   // 전체가 묶음"
+            - "{ id: 1 }   // id 가 이름표"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 이름표에 <b>붙은 값</b>입니다. 이름표는 콜론 왼쪽에
+            있어요.
+          en: >-
+            {{pick.3|code}} is the <b>value hung on</b> the label. The label sits left of the colon.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 콜론의 어느 쪽인가"
+            en: "The sharpest spot — which side of the colon"
+          code:
+            - "{ id: 1 }   // 왼쪽이 이름"
+            - "{ id: 1 }   // 오른쪽이 값"
+
+meaning:
+  - q:
+      ko: "<code>const id = 7; const row = { id }</code> 에서 <code>row</code> 는 무엇인가요?"
+      en: "In <code>const id = 7; const row = { id }</code>, what is <code>row</code>?"
+    hint:
+      ko: "이름을 한 번만 적은 꼴입니다. 무엇이 생략됐을까요."
+      en: "The name is written once. What was left out?"
+    options:
+      - t:
+          ko: "<code>{ id: 7 }</code> — 이름표와 값이 같은 이름에서 왔다"
+          en: "<code>{ id: 7 }</code> — label and value both came from the same name"
+      - t:
+          ko: "<code>{ id: 'id' }</code> — 이름표 글자가 값이 된다"
+          en: "<code>{ id: 'id' }</code> — the label text becomes the value"
+        diag:
+          t:
+            ko: >-
+              이름표는 글자로 다뤄지지만 <b>값 자리는 그렇지 않습니다.</b> 값 자리에는 같은 이름의
+              변수가 들어가요.
+            en: >-
+              The label is treated as text, but the <b>value slot is not</b>. The value slot takes
+              the variable of that name.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 이름표와 값"
+              en: "The sharpest spot — label or value"
+            code:
+              - "{ id }        // { id: id }"
+              - "{ id: 'id' }  // 이건 직접 적어야 한다"
+      - t:
+          ko: "<code>7</code> — 값 하나가 그대로 담긴다"
+          en: "<code>7</code> — just the value itself"
+        diag:
+          t:
+            ko: >-
+              중괄호는 묶음을 만듭니다. 담긴 값이 하나여도 묶음은 묶음이라 <code>row === 7</code>
+              은 안 됩니다.
+            en: >-
+              Braces make a bundle. Even with one value inside, it stays a bundle, so
+              <code>row === 7</code> does not hold.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 값과 묶음"
+              en: "The sharpest spot — value or bundle"
+            code:
+              - "const row = { id }   // 묶음"
+              - "const row = id       // 값"
+      - t:
+          ko: "<code>id</code> 를 꺼내 온다 — 구조분해다"
+          en: "It takes <code>id</code> out — this is destructuring"
+        diag:
+          t:
+            ko: >-
+              꺼내는 모양은 등호 <b>왼쪽</b>에 중괄호가 옵니다. 여기서는 오른쪽이라 만드는 자리예요.
+            en: >-
+              Taking out puts the braces on the <b>left</b> of the equals sign. Here they are on the
+              right, so this is the making side.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 등호의 어느 쪽인가"
+              en: "The sharpest spot — which side of the equals sign"
+            code:
+              - "const { id } = row   // 꺼낸다"
+              - "const row = { id }   // 만든다"
+
+no_hole_reason: >-
+  이 줄에서 지울 만한 기호는 중괄호와 콜론뿐이고 둘 다 지우면 코드가 파싱되지 않는다.
+  여기서 재는 것은 「무엇이 이름이고 무엇이 값인가」이고, 그것은 자리를 짚어 물어야 한다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 값들을 묶었을까요?"
+    en: "Why does line {{site.line}} bundle the values together?"
+  choices:
+    - t:
+        ko: "관련된 값 여럿을 이름으로 꺼낼 수 있게 하나로 든다"
+        en: "To carry related values as one, fetched by name"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 묶음이 어디로 넘어가는지도 한 줄 적어 보세요."
+        en: "That is the direction. Add a line on where this bundle goes next."
+    - t:
+        ko: "값을 순서대로 담아 두려고"
+        en: "To keep the values in order"
+      ok: false
+      fb:
+        ko: "순서로 꺼내는 것은 배열입니다. 이름표는 순서를 약속하지 않아요."
+        en: "Order is what an array gives. Labels promise no order."
+    - t:
+        ko: "값을 못 바꾸게 잠그려고"
+        en: "To lock the values from changing"
+      ok: false
+      fb:
+        ko: "묶음은 잠그지 않습니다. 만든 뒤에도 이름표마다 값을 바꿔 넣을 수 있어요."
+        en: "A bundle locks nothing. After it is made, each label can still take a new value."
+
+queries:
+  - { grammars: [typescript, tsx, javascript, vue], file: ./object-literal.scm }
+
+examples:
+  - code: "const row = { id: 1, name: 'kim' }"
+    expect: { sites: 1, form: pair, picks: { 1: "{ id: 1, name: 'kim' }", 2: "id", 3: "1" } }
+  - code: "send({ ok: true })"
+    expect: { sites: 1, form: pair, picks: { 2: "ok", 3: "true" } }
+  - code: "const row = { id }"
+    expect: { sites: 1, form: shorthand, picks: { 2: "id" } }
+  - code: "const { id } = row"
+    expect: none
+  - code: "const xs = [1, 2]"
+    expect: none

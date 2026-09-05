@@ -256,5 +256,11 @@ queries:
 examples:
   - code: "while (n < 3) { n++ }"
     expect: { sites: 1, form: while, hole: "while", picks: { 1: "while", 2: "(n < 3)", 3: "{ n++ }" } }
+  - code: "while (queue.length) { queue.pop() }"
+    expect: { sites: 1, form: while, hole: "while", picks: { 1: "while", 2: "(queue.length)" } }
+  - code: "while (more) next()"
+    expect: { sites: 1, form: while, picks: { 2: "(more)", 3: "next()" } }
   - code: "if (n < 3) { n++ }"
+    expect: none
+  - code: "for (const x of xs) { use(x) }"
     expect: none

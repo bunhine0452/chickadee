@@ -70,17 +70,37 @@ essential:
   - ts/call-expression
   - ts/arrow-function
   - ts/array-basics
+  - ts/object-literal          # ts.md §3 #1 — 배열은 있는데 묶음을 **만드는** 개념이 없었다
   - ts/array-destructuring
   - ts/object-destructuring
   - ts/try-catch
   - ts/for-of
-  # ── 2부 「타입과 객체」 ────────────────────────────────────────────────────
+  # ── 2부 「타입과 객체」 (ts.md §1.5.4) ─────────────────────────────────────
+  #
+  # **타입 축 셋이 맨 앞이다** (§3 「순서 하나」 · D187 ⑰). 근거는 다섯 자료 중 배치의 이유를
+  # 적은 유일한 것 — TS Handbook 이 좁히기를 본편 셋째에 두면서 「JS 의 런타임 제어 흐름 위에
+  # 겹친다」고 적었다. 비용은 3판이다: `narrowing` 의 선행이 `union-type`, 그 선행이
+  # `type-annotation` 이라 위상 정렬이 셋을 함께 끌어올린다.
+  #
+  # §3 은 「`if-statement` 바로 뒤」라고도 적었는데 그 자리는 1부 안이다. 부 경계를 넘으면
+  # 1부가 16 · 2부가 15 가 되어 §1.5.4 의 판 수(1부 13 · 2부 18)와 어긋나므로, **부 배치의
+  # 정본인 §1.5.4 를 따라 2부의 맨 앞**에 둔다. 1부 다음이 2부이므로 순서의 뜻은 같다.
+  - ts/type-annotation
+  - ts/union-type
+  - ts/narrowing
   - ts/object-spread
   - ts/optional-chaining
   - ts/nullish-coalescing
+  - ts/callback-argument
   - ts/array-map-immutable
   - ts/array-filter
   - ts/array-method-chain
+  - ts/array-reduce
+  - ts/closure
+  - ts/import-export
+  - ts/throw-error
+  - ts/interface-type
+  - ts/class-declaration
   - ts/async-await
   - ts/generics
 
@@ -95,6 +115,19 @@ alternatives:
   # 같은 리포 안에서 두 표기가 섞인다. `ECC` 는 410파일에 느슨한 쪽이 **1곳**뿐이고
   # `ai-pm` 은 613파일에 390곳이다 — 짝이 부기할 것이 리포마다 통째로 다른 유일한 자리다.
   - { gap: ts/comparison, present: ts/loose-equality, note: { ko: "견주는 방법이 둘인데 규칙이 다릅니다 — AI 가 섞어 썼습니다", en: "Two ways to weigh, two different rules — the AI mixed them" } }
+  # ── 2부가 서면서 다섯 (ts.md §3 「새 alternatives 짝」) ────────────────────
+  # 좁히는 대신 단언으로 눌렀다 — 검사를 끈 자리가 몇 곳인가.
+  - { gap: ts/narrowing, present: ts/type-assertion, note: { ko: "좁히는 대신 눌러 두었습니다 — 그 줄부터는 확인이 없습니다", en: "Pressed down instead of narrowed — from that line on there is no check" } }
+  # 같은 `typeof` 가 TS 파일에서는 타입을 좁히고 JS 파일에서는 값을 가른다.
+  # `ECC`(js 410파일)에서 값 가르기 쪽이 두껍고 `ai-pm`(ts·tsx 613파일)에서는 얇다 —
+  # 짝이 부기할 것이 파일 확장자로 갈리는 자리다 (ts-learning.md §11.5 ④).
+  - { gap: ts/narrowing, present: ts/typeof-guard, note: { ko: "같은 글자가 여기서는 값만 가릅니다 — 타입이 안 적혀 있어서요", en: "The same glyphs only split values here — no types are written down" } }
+  # 같은 합계를 한쪽은 접고 한쪽은 쌓는다.
+  - { gap: ts/array-reduce, present: ts/for-of }
+  # ESM 과 CJS 가 한 리포에 섞였다.
+  - { gap: ts/import-export, present: ts/require-call, note: { ko: "파일을 들여오는 체계가 둘 섞여 있습니다", en: "Two systems for pulling files in, mixed together" } }
+  # `+` 로 잇기와 백틱이 같은 파일에 있다.
+  - { gap: ts/template-literal, present: ts/string-concat }
 
 # 「네 코드엔 없다」 — 0부에서 사용처가 **0곳**인 판 하나 (D177 규칙 ① · D186 ④).
 #

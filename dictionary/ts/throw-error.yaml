@@ -1,0 +1,224 @@
+schema: 1
+id: ts/throw-error
+universal: null
+name: { ko: 터뜨리기, en: Throwing an error }
+token: "throw"
+grammars: [typescript, tsx, javascript, vue]
+framework: null
+essential: true
+difficulty: 2
+prereq: [ts/call-expression, cs/call-stack]
+confusions: [ts/return-statement, ts/try-catch]
+
+dict:
+  one_liner:
+    ko: "이 줄에서 흐름을 끊고, 받아 줄 곳을 찾아 부른 쪽으로 거슬러 올라간다."
+    en: "The flow is cut here and climbs back to the callers, looking for a catcher."
+  why:
+    ko: >-
+      {{site.line}}행 아래는 안 돕니다. {{pick.1|code}}{{pick.1|josa:은,는}} 값을 돌려주는 것이
+      아니라 <b>이 함수를 그만두게</b> 하고, 받아 줄 곳이 나올 때까지 부른 쪽으로 계속 올라가요.
+      아무 데서도 안 받으면 프로그램이 거기서 끝납니다.
+    en: >-
+      Nothing below line {{site.line}} runs. {{pick.1|code}} does not return a value; it <b>abandons
+      this function</b> and keeps climbing to the callers until something catches. Caught nowhere,
+      the program ends there.
+  trace:
+    - ko: "{{site.line}}행에서 {{pick.2|code}}{{pick.2|josa:이,가}} 만들어진다."
+      en: "On line {{site.line}}, {{pick.2|code}} is made."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 그것을 들고 이 함수를 그만둔다."
+      en: "{{pick.1|code}} takes it and abandons this function."
+    - ko: "부른 쪽으로 올라가며 받아 줄 곳을 찾는다."
+      en: "It climbs to the callers looking for a place that catches."
+
+rule:
+  ko: >-
+    <b>던져지는 것은 아무 값이나 될 수 있다.</b> 그래서 받는 쪽은 그것이 오류 객체라고 믿으면
+    안 된다.
+  en: >-
+    <b>Anything at all can be thrown.</b> So the catching side must not assume an error object.
+result:
+  label:
+    ko: "{{site.line}}행 다음에 일어나는 것"
+    en: "What happens after line {{site.line}}"
+  value: "{{pick.1}} → 부른 쪽"
+  note:
+    ko: "아래 줄은 안 돈다"
+    en: "the lines below do not run"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} 던져지는 값입니다. 돌려주기와 달리 받는 쪽이 <b>정해져
+    있지 않아요</b> — 위로 올라가다 처음 만나는 곳이 받습니다.
+  en: >-
+    {{pick.2|code}} is the value thrown. Unlike returning, the receiver is <b>not decided in
+    advance</b> — the first place met on the way up takes it.
+payoff:
+  ko: >-
+    <code>if (!res.ok) throw new Error(…)</code> 는 AI 가 쓴 코드의 기본형입니다. 이 줄이 무엇을
+    끊는지 알면 그 아래를 안 읽어도 되는 이유가 보여요.
+  en: >-
+    <code>if (!res.ok) throw new Error(…)</code> is the default shape in AI-written code. Knowing
+    what this line cuts shows why the lines under it need no reading.
+bridge:
+  ko: >-
+    받는 쪽에서 그 값이 무엇인지 확인해야 합니다 — TS 가 <code>catch</code> 의 이름에
+    <code>unknown</code> 을 주는 이유가 그것이에요.
+  en: >-
+    The catching side has to check what arrived — which is why TS gives the <code>catch</code> name
+    the type <code>unknown</code>.
+misconceptions:
+  - ko: "터뜨리기는 값을 돌려주는 것이다 — 돌려주기는 부른 쪽으로 가고, 이것은 <b>그만두기</b>입니다."
+    en: "Throwing returns a value — returning goes to the caller; this <b>abandons</b>."
+  - ko: "받는 쪽에 오는 것은 늘 오류 객체다 — 글자도 묶음도 올 수 있습니다."
+    en: "What arrives is always an error object — text or a bundle can arrive too."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>던져지는 값</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the value being thrown</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: >-
+            {{pick.1|code}}{{pick.1|josa:은,는}} <b>하는 일</b>을 적은 낱말입니다. 던져지는 값은 그
+            뒤에 있어요.
+          en: >-
+            {{pick.1|code}} is the word for <b>the action</b>. The thrown value comes after it.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 낱말과 값"
+            en: "The sharpest spot — the word or the value"
+          code:
+            - "throw new Error('bad')   // throw 가 하는 일"
+            - "throw new Error('bad')   // 뒤가 값"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 그 값 <b>안에</b> 들어가는 설명입니다. 던져지는
+            것은 그것을 담은 쪽이에요.
+          en: >-
+            {{pick.3|code}} is the description that goes <b>inside</b> the value. What is thrown is
+            the thing holding it.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 담는 것과 담기는 것"
+            en: "The sharpest spot — the holder or the held"
+          code:
+            - "throw new Error('bad')   // Error 가 던져진다"
+            - "throw new Error('bad')   // 'bad' 는 그 안"
+
+meaning:
+  - q:
+      ko: >-
+        <code>function f() { throw new Error('x'); return 1 }</code> 에서
+        <code>return 1</code> 은 언제 돌까요?
+      en: >-
+        In <code>function f() { throw new Error('x'); return 1 }</code>, when does
+        <code>return 1</code> run?
+    hint:
+      ko: "터뜨리기가 흐름에 하는 일을 생각해 보세요."
+      en: "Think about what throwing does to the flow."
+    options:
+      - t:
+          ko: "안 돈다 — 그 위에서 함수가 끝난다"
+          en: "Never — the function ends above it"
+      - t:
+          ko: "받아 준 곳이 있으면 그 뒤에 돈다"
+          en: "It runs afterwards if something caught"
+        diag:
+          t:
+            ko: >-
+              받아 준 곳은 <b>부른 쪽</b>에 있습니다. 이 함수로 돌아오지 않아서 남은 줄은 영영 안
+              돌아요.
+            en: >-
+              Whatever catches is <b>up the call chain</b>. Control never comes back into this
+              function, so the remaining lines never run.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 돌아오나"
+              en: "The sharpest spot — does control come back"
+            code:
+              - "try { f() } catch (e) {}   // 여기서 이어진다"
+              - "// f 안의 남은 줄은 안 돈다"
+      - t:
+          ko: "먼저 돌고 나서 터뜨린다"
+          en: "It runs first, then the throw happens"
+        diag:
+          t:
+            ko: >-
+              적힌 순서대로 돕니다. 터뜨리기가 위에 있으니 아래 줄까지 못 가요.
+            en: >-
+              Lines run in the order written. The throw is above, so the line below is never reached.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 위인가 아래인가"
+              en: "The sharpest spot — above or below"
+            code:
+              - "throw new Error('x'); return 1   // 안 돈다"
+              - "return 1; throw new Error('x')   // 안 던진다"
+      - t:
+          ko: "<code>1</code> 이 던져진다"
+          en: "<code>1</code> is what gets thrown"
+        diag:
+          t:
+            ko: >-
+              던져지는 값은 그 낱말 바로 뒤에 적힌 것입니다. 아래 줄과는 상관이 없어요.
+            en: >-
+              What is thrown is written immediately after the word. The line below has nothing to do
+              with it.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 무엇이 던져지나"
+              en: "The sharpest spot — what is thrown"
+            code:
+              - "throw new Error('x')   // Error 가 던져진다"
+              - "return 1               // 안 닿는다"
+
+no_hole_reason: >-
+  낱말을 지우면 그 줄이 그냥 값을 만드는 식이 되어 흐름 이야기가 사라진다. 여기서 재는 것은
+  「무엇이 던져지고 어디까지 안 도나」이고, 그것은 자리와 뜻으로 물어야 한다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 값을 돌려주지 않고 터뜨렸을까요?"
+    en: "Why does line {{site.line}} throw instead of returning a value?"
+  choices:
+    - t:
+        ko: "여기서는 이어 갈 수 없어서 — 판단을 부른 쪽으로 넘긴다"
+        en: "Because it cannot go on here — the decision is handed up to the caller"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 판단을 <b>어디서</b> 받는지도 한 줄 적어 보세요."
+        en: "That is the direction. Add a line on <b>where</b> that decision gets taken."
+    - t:
+        ko: "부른 쪽에 값을 주려고"
+        en: "To give the caller a value"
+      ok: false
+      fb:
+        ko: "값을 주는 것은 돌려주기입니다. 이것은 <b>그만두기</b>예요."
+        en: "Giving a value is what returning does. This <b>abandons</b>."
+    - t:
+        ko: "로그를 남기려고"
+        en: "To leave a log line"
+      ok: false
+      fb:
+        ko: "로그는 따로 적어야 합니다. 이 낱말이 하는 일은 흐름을 끊는 것이에요."
+        en: "A log has to be written separately. This word cuts the flow."
+
+queries:
+  - { grammars: [typescript, tsx, javascript, vue], file: ./throw-error.scm }
+
+examples:
+  - code: "if (!res.ok) throw new Error('request rejected')"
+    expect:
+      sites: 1
+      form: new-error
+      picks: { 1: "throw", 2: "Error", 3: "'request rejected'" }
+  - code: "throw reason"
+    expect: { sites: 1, form: value, picks: { 1: "throw", 2: "reason" } }
+  - code: "return new Error('bad')"
+    expect: none

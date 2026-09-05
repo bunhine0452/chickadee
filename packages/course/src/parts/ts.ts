@@ -33,7 +33,7 @@ export const TS_PARTS: readonly PartAssignment[] = [
     ],
   },
   {
-    // 1부 「흐름과 묶기」
+    // 1부 「흐름과 묶기」 13판 (ts.md §1.5.4)
     part: 1,
     concepts: [
       'ts/if-statement',
@@ -44,6 +44,7 @@ export const TS_PARTS: readonly PartAssignment[] = [
       'ts/call-expression',
       'ts/arrow-function',
       'ts/array-basics',
+      'ts/object-literal',
       'ts/array-destructuring',
       'ts/object-destructuring',
       'ts/try-catch',
@@ -51,21 +52,33 @@ export const TS_PARTS: readonly PartAssignment[] = [
     ],
   },
   {
-    // 2부 「타입과 객체」
+    // 2부 「타입과 객체」 18판 (ts.md §1.5.4). 타입 축 셋이 맨 앞이다 — §3 「순서 하나」 ·
+    // D187 ⑰. `narrowing` ← `union-type` ← `type-annotation` 이라 셋이 함께 앞으로 온다.
     part: 2,
     concepts: [
+      'ts/type-annotation',
+      'ts/union-type',
+      'ts/narrowing',
       'ts/object-spread',
       'ts/optional-chaining',
       'ts/nullish-coalescing',
+      'ts/callback-argument',
       'ts/array-map-immutable',
       'ts/array-filter',
       'ts/array-method-chain',
+      'ts/array-reduce',
+      'ts/closure',
+      'ts/import-export',
+      'ts/throw-error',
+      'ts/interface-type',
+      'ts/class-declaration',
       'ts/async-await',
       'ts/generics',
     ],
   },
   {
-    // 3부 — `react/` 가 한 장뿐이라 아직 목록이 없다
+    // 3부 — `react/` 가 한 장뿐이라 비워 둔다. 프레임워크 축의 계획은
+    // `docs/plan/js-framework-axis.md` 에 있고, 이 사전은 그것을 안 앞당긴다.
     part: 3,
     concepts: [],
   },

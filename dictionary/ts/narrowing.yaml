@@ -1,0 +1,226 @@
+schema: 1
+id: ts/narrowing
+universal: null
+name: { ko: 타입 좁히기, en: Narrowing }
+token: "typeof"
+grammars: [typescript, tsx]
+framework: null
+essential: true
+difficulty: 3
+prereq: [ts/union-type, ts/if-statement]
+confusions: [ts/type-assertion]
+
+dict:
+  one_liner:
+    ko: "조건 한 줄이 그 아래에서 할 수 있는 일을 바꾼다. 흐름만이 아니라 약속도 갈린다."
+    en: "One condition changes what the lines below may do — flow and promise both split."
+  why:
+    ko: >-
+      갈래가 여럿이면 공통분만 쓸 수 있습니다. {{site.line}}행의 조건이 <b>어느 갈래인지를 가려
+      주면</b> 그 블록 안에서는 {{pick.2|code}}{{pick.2|josa:이,가}} 한 갈래로 좁혀지고, 그 갈래에만
+      있는 것도 쓸 수 있게 돼요.
+    en: >-
+      With several branches only the common part is available. When the condition on line
+      {{site.line}} <b>settles which branch</b>, inside that block {{pick.2|code}} narrows to one,
+      and what only that branch has becomes usable.
+  trace:
+    - ko: "{{site.line}}행 위에서 {{pick.2|code}}{{pick.2|josa:은,는}} 아직 갈래 여럿이다."
+      en: "Above line {{site.line}}, {{pick.2|code}} is still several branches."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 조건으로 한 갈래를 가른다."
+      en: "{{pick.1|code}} settles one branch as the condition."
+    - ko: "블록 안에서는 그 갈래 하나이고, 블록을 나가면 도로 여럿이 된다."
+      en: "Inside the block it is that one branch; leaving the block it is several again."
+
+rule:
+  ko: >-
+    <b>좁히기는 블록 안에서만 산다.</b> 조건이 참인 가지 안에서만 좁혀지고, 그 밖에서는 원래
+    갈래 목록으로 돌아간다.
+  en: >-
+    <b>Narrowing lives inside the block.</b> It holds only in the branch where the condition is
+    true; outside, the full list returns.
+result:
+  label:
+    ko: "{{site.line}}행 안쪽에서의 {{pick.2}}"
+    en: "{{pick.2}} inside line {{site.line}}"
+  value: "{{pick.2}} → {{pick.3}}"
+  note:
+    ko: "블록 안에서만"
+    en: "inside the block only"
+ok:
+  ko: >-
+    {{pick.3|code}}{{pick.3|josa:은,는}} 견줄 대상이고, 좁혀지는 것은
+    {{pick.2|code}} 쪽입니다. 컴파일러가 이 조건을 읽고 아래 줄들의 약속을 다시 셈해요.
+  en: >-
+    {{pick.3|code}} is what is compared against; the one being narrowed is {{pick.2|code}}. The
+    compiler reads this condition and recomputes the promises for the lines below.
+payoff:
+  ko: >-
+    「위에선 빨간 줄이 있었는데 <code>if</code> 안에선 없다」가 TS 를 처음 쓰는 사람의 첫 질문입니다.
+    이 개념 하나가 그 질문의 답이에요.
+  en: >-
+    "It was red above but fine inside the <code>if</code>" is the first question a TS newcomer
+    asks. This one concept is the answer.
+bridge:
+  ko: >-
+    좁히는 대신 <code>as</code> 로 눌러 버릴 수도 있습니다 — 그때는 확인이 사라지고 돌아가는 중에
+    터질 자리가 남아요.
+  en: >-
+    You can press it down with <code>as</code> instead of narrowing — then the check is gone and a
+    place to blow up at run time is left behind.
+misconceptions:
+  - ko: "좁힌 결과가 블록 밖에서도 남는다 — 블록을 나가면 도로 여럿입니다."
+    en: "The narrowing survives outside the block — leaving it, the list returns."
+  - ko: "<code>typeof</code> 로 배열도 가려진다 — 배열도 <code>'object'</code> 입니다."
+    en: "<code>typeof</code> can single out an array — an array is <code>'object'</code> too."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>좁혀지는 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name being narrowed</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: >-
+            {{pick.1|code}}{{pick.1|josa:은,는}} 갈래를 <b>물어보는</b> 쪽입니다. 좁혀지는 것은 그
+            물음의 대상이에요.
+          en: >-
+            {{pick.1|code}} is the side that <b>asks</b> which branch. What narrows is what it asks
+            about.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 묻는 쪽과 물어지는 쪽"
+            en: "The sharpest spot — asker or asked"
+          code:
+            - "if (typeof v === 'string')   // typeof 가 묻는다"
+            - "if (typeof v === 'string')   // v 가 좁혀진다"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 견주는 <b>상대</b>입니다. 이 값이 좁혀지는 것이
+            아니라, 이 값과 같은지로 다른 이름이 좁혀져요.
+          en: >-
+            {{pick.3|code}} is what is compared <b>against</b>. It is not the one narrowed; matching
+            it is what narrows the other name.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 좁혀지는 쪽과 기준"
+            en: "The sharpest spot — the narrowed one or the yardstick"
+          code:
+            - "if (typeof v === 'string')   // v 가 좁혀진다"
+            - "if (typeof v === 'string')   // 'string' 은 기준"
+
+meaning:
+  - q:
+      ko: >-
+        <code>function f(v: string | number)</code> 안에서 <code>if (typeof v === 'string') {}</code>
+        블록을 <b>나온 뒤</b> <code>v</code> 는 무엇인가요?
+      en: >-
+        Inside <code>function f(v: string | number)</code>, after leaving the
+        <code>if (typeof v === 'string') {}</code> block, what is <code>v</code>?
+    hint:
+      ko: "좁히기가 사는 범위를 생각해 보세요."
+      en: "Think about where the narrowing lives."
+    options:
+      - t:
+          ko: "다시 두 갈래다 — 블록을 나가면 좁히기가 끝난다"
+          en: "Two branches again — narrowing ends with the block"
+      - t:
+          ko: "계속 글자다 — 한 번 좁히면 끝까지 간다"
+          en: "Still text — narrowing once settles it for good"
+        diag:
+          t:
+            ko: >-
+              좁히기는 <b>조건이 참인 가지</b>의 성질입니다. 블록을 나오면 조건이 참이라는 근거가
+              없어져서 원래 목록으로 돌아가요.
+            en: >-
+              Narrowing is a property of <b>the branch where the condition holds</b>. Leaving it,
+              the ground for that claim is gone and the full list returns.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 블록 안과 밖"
+              en: "The sharpest spot — inside or outside the block"
+            code:
+              - "if (typeof v === 'string') { v.length }"
+              - "v.length   // 블록 밖에서는 걸린다"
+      - t:
+          ko: "숫자다 — 글자 쪽은 이미 처리했으니까"
+          en: "A number — the text case was already handled"
+        diag:
+          t:
+            ko: >-
+              <code>else</code> 가지였다면 그 말이 맞습니다. 블록을 그냥 나온 자리는 두 갈래가 다시
+              합쳐진 자리예요.
+            en: >-
+              In the <code>else</code> branch that would hold. Just past the block, the two branches
+              have merged again.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — else 인가 그다음 줄인가"
+              en: "The sharpest spot — the else or the next line"
+            code:
+              - "if (…) {} else { /* 숫자 */ }"
+              - "if (…) {}  /* 다음 줄은 둘 다 */"
+      - t:
+          ko: "확인할 수 없는 것이 된다"
+          en: "It becomes something uncheckable"
+        diag:
+          t:
+            ko: >-
+              적어 둔 갈래 목록은 지워지지 않습니다. 조건이 그 목록을 임시로 줄여 줄 뿐이에요.
+            en: >-
+              The branch list you wrote is never erased. A condition only shrinks it for a while.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 줄이는가 지우는가"
+              en: "The sharpest spot — shrinking or erasing"
+            code:
+              - "v: string | number   // 적힌 것"
+              - "if (typeof v === 'string')  // 잠시 줄인다"
+
+no_hole_reason: >-
+  조건에서 지울 만한 글자를 지우면 그 줄이 좁히기가 아니라 다른 조건이 되어 버린다.
+  여기서 재는 것은 「무엇이 좁혀지고 무엇이 기준인가」이고, 그것은 자리를 짚어 물어야 한다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 갈래를 먼저 가렸을까요?"
+    en: "Why does line {{site.line}} settle the branch first?"
+  choices:
+    - t:
+        ko: "한 갈래에만 있는 것을 아래에서 쓰려고 — 확인을 코드에 남겼다"
+        en: "To use what one branch alone has below — the check stays in the code"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 나머지 갈래를 어디서 받는지도 한 줄 적어 보세요."
+        en: "That is the direction. Add a line on where the other branch is handled."
+    - t:
+        ko: "값을 그 갈래로 바꾸려고"
+        en: "To convert the value into that branch"
+      ok: false
+      fb:
+        ko: "바꾸지 않습니다. 이미 그 갈래였는지를 물어볼 뿐이에요."
+        en: "Nothing is converted. It only asks whether it already was that branch."
+    - t:
+        ko: "컴파일러의 확인을 꺼 두려고"
+        en: "To switch the compiler's checking off"
+      ok: false
+      fb:
+        ko: "끄는 것은 <code>as</code> 쪽입니다. 이 줄은 오히려 확인을 <b>남깁니다</b>."
+        en: "Switching off is what <code>as</code> does. This line <b>keeps</b> the check."
+
+queries:
+  - { grammars: [typescript, tsx], file: ./narrowing.scm }
+
+examples:
+  - code: "function f(v: string | number) { if (typeof v === 'string') { return v.length } return 0 }"
+    expect: { sites: 1, form: typeof, picks: { 1: "typeof v", 2: "v", 3: "'string'" } }
+  - code: "if ('code' in err) { report(err.code) }"
+    expect: { sites: 1, form: in, picks: { 1: "if", 2: "err", 3: "'code'" } }
+  - code: "if (e instanceof Error) { log(e.message) }"
+    expect: { sites: 1, form: instanceof, picks: { 1: "if", 2: "e", 3: "Error" } }
+  - code: "if (v === 1) { run() }"
+    expect: none

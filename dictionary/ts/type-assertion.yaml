@@ -1,0 +1,189 @@
+schema: 1
+id: ts/type-assertion
+universal: null
+name: { ko: "as 는 검사를 끄는 것", en: Type assertion }
+token: "as"
+grammars: [typescript, tsx]
+framework: null
+essential: false
+difficulty: 3
+prereq: [ts/type-annotation, ts/type-erasure]
+confusions: [ts/type-annotation, ts/explicit-conversion]
+
+dict:
+  one_liner:
+    ko: "값은 그대로 두고 컴파일러의 입만 막는다. 바꾸는 것이 아니다."
+    en: "The value is left alone and the compiler is silenced. Nothing is converted."
+  why:
+    ko: >-
+      {{site.line}}행은 {{pick.1|code}}{{pick.1|josa:이,가}} {{pick.2|code}} 라고 <b>단언</b>합니다.
+      컴파일러는 그 말을 믿고 확인을 그만두는데, 값은 한 글자도 안 바뀌어요. 그래서 단언이 어긋나면
+      그 줄이 아니라 <b>몇 줄 아래</b>에서 터집니다.
+    en: >-
+      Line {{site.line}} <b>asserts</b> that {{pick.1|code}} is {{pick.2|code}}. The compiler takes
+      that word and stops checking, while the value itself changes not one bit. So an assertion that does not hold
+      blows up not here but <b>a few lines down</b>.
+  trace:
+    - ko: "{{site.line}}행에서 {{pick.1|code}}{{pick.1|josa:은,는}} 원래 타입이다."
+      en: "On line {{site.line}}, {{pick.1|code}} has its original type."
+    - ko: "단언이 그것을 {{pick.2|code}}{{pick.2|josa:으로,로}} 적어 두고 확인을 끝낸다."
+      en: "The assertion records it as {{pick.2|code}} and ends the checking."
+    - ko: "돌아갈 때는 그 표시가 없다 — 값은 처음 그대로다."
+      en: "At run time the mark is gone — the value is what it always was."
+
+rule:
+  ko: >-
+    <b>단언은 변환이 아니다.</b> 값을 바꾸려면 부르는 코드가 있어야 하고, 그것만 실행에 남는다.
+  en: >-
+    <b>An assertion is not a conversion.</b> Changing a value takes a call, and only that survives
+    into the running program.
+result:
+  label:
+    ko: "{{site.line}}행 뒤의 값"
+    en: "The value after line {{site.line}}"
+  value: "{{pick.1}} (그대로)"
+  note:
+    ko: "표시만 바뀌었다"
+    en: "only the label changed"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} 값이 무엇인지에 대한 <b>사람의 주장</b>입니다.
+    컴파일러는 그 주장을 검사하지 않고 받아들여요.
+  en: >-
+    {{pick.2|code}} is <b>a human claim</b> about what this value is. The compiler takes it without
+    checking.
+payoff:
+  ko: >-
+    이 표기가 붙은 자리를 세면 이 리포에서 <b>검사를 끈 곳의 지도</b>가 나옵니다. 응답을 받는
+    자리에 몰려 있다면 그쪽이 먼저 확인해야 할 곳이에요.
+  en: >-
+    Counting where this notation sits maps <b>the places checking was switched off</b>. If they
+    cluster where responses arrive, that is what to verify first.
+bridge:
+  ko: >-
+    끄는 대신 <b>가리는</b> 방법이 있습니다 — 조건 한 줄로 좁히면 확인이 코드에 남아요.
+  en: >-
+    Instead of switching off there is <b>settling</b> — narrow with one condition and the check
+    stays in the code.
+misconceptions:
+  - ko: "단언을 쓰면 그 타입으로 바뀐다 — 값은 그대로입니다."
+    en: "Asserting converts to that type — the value is untouched."
+  - ko: "단언이 어긋나면 그 줄에서 걸린다 — 몇 줄 아래에서 터집니다."
+    en: "An assertion that misses is caught on that line — it blows up further down."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>주장된 타입</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the asserted type</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: >-
+            {{pick.1|code}}{{pick.1|josa:은,는}} 주장의 <b>대상</b>입니다. 주장된 타입은 그 낱말
+            뒤에 있어요.
+          en: >-
+            {{pick.1|code}} is <b>what</b> the claim is about. The asserted type comes after the word.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 대상과 주장"
+            en: "The sharpest spot — the subject or the claim"
+          code:
+            - "res as User   // res 가 대상"
+            - "res as User   // User 가 주장"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 「없음이 아니다」라는 다른 표기입니다. 타입 이름을
+            적는 쪽과는 다른 자리예요.
+          en: >-
+            {{pick.3|code}} is the other notation, "this is not absent". A different spot from
+            naming a type.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 타입을 적나 없음만 지우나"
+            en: "The sharpest spot — naming a type or only removing absence"
+          code:
+            - "res as User   // 타입을 적는다"
+            - "res!          // 없음만 지운다"
+
+meaning:
+  - q:
+      ko: "<code>const n = (input as number) + 1</code> 에서 <code>input</code> 이 글자 <code>'2'</code> 였다면?"
+      en: "In <code>const n = (input as number) + 1</code>, what if <code>input</code> was the text <code>'2'</code>?"
+    hint:
+      ko: "단언이 값을 바꿨을까요, 표시만 바꿨을까요."
+      en: "Did the assertion change the value, or only the label?"
+    options:
+      - t:
+          ko: "<code>'21'</code> 이 된다 — 값은 글자 그대로다"
+          en: "It becomes <code>'21'</code> — the value is still text"
+      - t:
+          ko: "<code>3</code> 이 된다"
+          en: "It becomes <code>3</code>"
+        diag:
+          t:
+            ko: >-
+              그러려면 값을 실제로 바꿔야 합니다. 단언은 표시만 바꾸므로 더하기는 여전히 글자끼리의
+              규칙으로 돌아요.
+            en: >-
+              That would need the value actually changed. An assertion changes only the label, so the
+              addition still runs by the text rule.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 표시와 값"
+              en: "The sharpest spot — the label or the value"
+            code:
+              - "(input as number) + 1   // '21'"
+              - "Number(input) + 1       // 3"
+      - t:
+          ko: "그 줄에서 멈춘다"
+          en: "It stops on that line"
+        diag:
+          t:
+            ko: >-
+              멈추지 않습니다. 단언이 컴파일러를 통과시켰고, 돌아갈 때는 확인할 코드가 안 남아요.
+            en: >-
+              Nothing stops. The assertion got past the compiler, and at run time no checking code
+              remains.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 컴파일과 실행"
+              en: "The sharpest spot — compile or run"
+            code:
+              - "input as number   // 컴파일 통과"
+              - "// 실행에는 아무 검사도 없다"
+      - t:
+          ko: "<code>NaN</code> 이 된다"
+          en: "It becomes <code>NaN</code>"
+        diag:
+          t:
+            ko: >-
+              더하기는 한쪽이 글자면 잇기가 됩니다. 수로 억지로 밀어 넣는 것은 다른 연산자들이에요.
+            en: >-
+              With one side text, addition joins. Forcing to a number is what the other operators do.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 더하기와 나머지 연산자"
+              en: "The sharpest spot — addition or the rest"
+            code:
+              - "'2' + 1   // '21'"
+              - "'2' * 1   // 2"
+
+no_hole_reason: >-
+  단언을 지우면 그 줄이 그냥 값이 되어 아무 물음도 안 남는다. 여기서 재는 것은 「무엇이 바뀌고
+  무엇이 안 바뀌나」이고, 그것은 값으로 물어야 한다.
+
+queries:
+  - { grammars: [typescript, tsx], file: ./type-assertion.scm }
+
+examples:
+  - code: "const user = res.data as User"
+    expect: { sites: 1, form: as, picks: { 1: "res.data", 2: "User" } }
+  - code: "const id = row!.id"
+    expect: { sites: 1, form: non-null, picks: { 3: "row" } }
+  - code: "const user: User = res.data"
+    expect: none

@@ -1,0 +1,220 @@
+schema: 1
+id: ts/class-declaration
+universal: common/class-definition
+name: { ko: class 선언, en: class declaration }
+token: "class"
+grammars: [typescript, tsx, javascript, vue]
+framework: null
+essential: true
+difficulty: 3
+# 선행 방향은 D187 ⑰ 이 정했다 — 프로토타입이 먼저다. 근거는 교재 셋(Eloquent JS 7장 ·
+# javascript.info 8→9장 · YDKJS)이 전부 그 순서이고, 실측이 반대다: `ECC` 422파일에
+# `class` 선언 1곳 대 `prototype` 36곳. 반대 방향(prototype-chain → class-declaration)은 안 적는다.
+prereq: [ts/function-declaration, ts/object-literal, ts/prototype-chain]
+confusions: [ts/function-declaration, ts/object-literal]
+
+dict:
+  one_liner:
+    ko: "같은 모양의 것을 여럿 만드는 틀. 뒤에서는 사슬로 이어진 묶음이 돈다."
+    en: "A mould for making many of one shape. Behind it, bundles linked in a chain."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 값이 아니라 <b>틀</b>입니다. 이 틀로
+      만든 것들은 {{pick.2|code}} 같은 멤버를 각자 베껴 갖지 않고, 한 군데 있는 것을 <b>사슬로
+      올라가</b> 찾습니다. 그래서 나중에 틀에 하나를 더해도 이미 만들어진 것들이 그것을 봐요.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} is a <b>mould</b>, not a value. Things made from it do
+      not each copy a member like {{pick.2|code}}; they <b>walk up a chain</b> to the one place it
+      lives. Add one to the mould later and things already made can see it.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.1|code}}{{pick.1|josa:이,가}}라는 이름으로 틀을 세운다."
+      en: "Line {{site.line}} stands the mould up under the name {{pick.1|code}}."
+    - ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 만들어진 것마다 베껴지지 않고 한 군데에 놓인다."
+      en: "{{pick.2|code}} is not copied into each made thing; it sits in one place."
+    - ko: "만들어진 것에서 못 찾으면 그 한 군데로 한 칸 올라가 다시 찾는다."
+      en: "Not found on the made thing, the search steps up one link and looks again."
+
+rule:
+  ko: >-
+    <b>틀은 끌어올려지지 않는다.</b> 함수 정의와 달리 선언 줄보다 위에서 쓰면 그 자리에서 멈춘다.
+  en: >-
+    <b>A mould is not hoisted.</b> Unlike a function definition, using it above its line stops right
+    there.
+result:
+  label:
+    ko: "{{site.line}}행이 세우는 것"
+    en: "What line {{site.line}} stands up"
+  value: "{{pick.1}} — 틀 하나"
+  note:
+    ko: "값이 아니라 틀"
+    en: "a mould, not a value"
+ok:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:은,는}} 그 낱말 없이도 쓸 수 있는 것을 <b>짧게 적은 것</b>입니다.
+    같은 사슬을 함수와 묶음으로도 지을 수 있어요.
+  en: >-
+    {{pick.1|code}} is <b>shorthand</b> for something writable without this word. The same chain can
+    be built with a function and a bundle.
+payoff:
+  ko: >-
+    서버 코드와 오류 갈래가 이 모양으로 옵니다. 뒤에서 무엇이 도는지 알면 「왜 여기서
+    <code>undefined</code> 가 나오나」의 절반이 풀려요.
+  en: >-
+    Server code and error kinds arrive in this shape. Knowing what runs behind it settles half of
+    "why is this <code>undefined</code>".
+bridge:
+  ko: >-
+    이 틀로 만든 것에서 이름을 못 찾으면 <b>한 칸 위</b>로 올라갑니다 — 그 사슬이 이 낱말의 정체예요.
+  en: >-
+    When a name is not found on a made thing, the search goes <b>one link up</b> — that chain is what
+    this word really is.
+misconceptions:
+  - ko: "틀도 함수처럼 끌어올려진다 — 선언 위에서 쓰면 멈춥니다."
+    en: "Moulds hoist like functions — using one above its line stops there."
+  - ko: "만들어진 것마다 멤버가 베껴진다 — 한 군데를 사슬로 찾아갑니다."
+    en: "Each made thing gets its own copy of the members — one place is found through a chain."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>틀의 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the mould's name</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 틀 <b>안</b>의 첫 멤버입니다. 틀의 이름은 중괄호
+            앞에 있어요.
+          en: >-
+            {{pick.2|code}} is the first member <b>inside</b> the mould. Its name sits before the
+            brace.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 틀의 이름과 멤버"
+            en: "The sharpest spot — the mould's name or a member"
+          code:
+            - "class Store { save() {} }"
+            - "//     ^틀 이름   ^멤버"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 만들 때 먼저 도는 멤버의 이름입니다. 틀 자체의
+            이름과는 다른 자리예요.
+          en: >-
+            {{pick.3|code}} names the member that runs first at creation — a different spot from the
+            mould's own name.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 틀의 이름과 만들 때 도는 멤버"
+            en: "The sharpest spot — the mould's name or the member that runs at creation"
+          code:
+            - "class Store { constructor() {} }"
+            - "//     ^이름       ^만들 때 돈다"
+
+meaning:
+  - q:
+      ko: "<code>new Store()</code> 를 <code>class Store {}</code> 선언 <b>위</b>에서 부르면?"
+      en: "What if <code>new Store()</code> is called <b>above</b> the <code>class Store {}</code> line?"
+    hint:
+      ko: "함수 정의와 갈리는 자리입니다."
+      en: "This is where it parts ways with a function definition."
+    options:
+      - t:
+          ko: "그 자리에서 멈춘다 — 틀은 끌어올려지지 않는다"
+          en: "It stops there — a mould is not hoisted"
+      - t:
+          ko: "된다 — 함수처럼 끌어올려진다"
+          en: "It works — it hoists like a function"
+        diag:
+          t:
+            ko: >-
+              이름은 미리 자리를 잡지만 <b>쓸 수 있게 되는 것은 선언 줄부터</b>입니다. 그 전에 쓰면
+              멈춰요.
+            en: >-
+              The name does take its place early, but it becomes <b>usable only from the declaring
+              line</b>. Before that it stops.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 함수와 틀"
+              en: "The sharpest spot — a function or a mould"
+            code:
+              - "f(); function f() {}     // 된다"
+              - "new S(); class S {}      // 멈춘다"
+      - t:
+          ko: "<code>undefined</code> 가 나온다"
+          en: "It yields <code>undefined</code>"
+        diag:
+          t:
+            ko: >-
+              조용히 <code>undefined</code> 가 되는 것은 옛 선언 낱말 쪽입니다. 이 자리는 소리를 내요.
+            en: >-
+              Quietly becoming <code>undefined</code> is the old declaring word's behaviour. This
+              spot speaks up.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 조용한가 소리 내는가"
+              en: "The sharpest spot — quiet or loud"
+            code:
+              - "console.log(v); var v = 1   // undefined"
+              - "new S(); class S {}         // 멈춘다"
+      - t:
+          ko: "빈 묶음이 하나 만들어진다"
+          en: "One empty bundle is made"
+        diag:
+          t:
+            ko: >-
+              만들려면 틀이 이미 서 있어야 합니다. 아직 안 선 틀로는 아무것도 안 만들어져요.
+            en: >-
+              Making needs the mould already standing. Nothing is made from one that is not up yet.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 틀이 섰나"
+              en: "The sharpest spot — is the mould up"
+            code:
+              - "class S {}; new S()   // 만들어진다"
+              - "new S(); class S {}   // 안 만들어진다"
+
+no_hole_reason: >-
+  낱말을 지우면 그 줄이 파싱되지 않고, 이름을 지우면 익명 틀이 되어 다른 개념이 된다.
+  여기서 재는 것은 「이름과 멤버가 어느 층인가」라 자리를 짚어 묻는다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 틀을 세웠을까요?"
+    en: "Why does line {{site.line}} stand a mould up?"
+  choices:
+    - t:
+        ko: "같은 모양을 여럿 만들면서 멤버는 한 군데에만 두려고"
+        en: "To make many of one shape while keeping the members in one place"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 틀로 몇 개를 만드는지도 세어 보세요."
+        en: "That is the direction. Count how many things are made from it."
+    - t:
+        ko: "값을 하나 만들어 두려고"
+        en: "To make one value"
+      ok: false
+      fb:
+        ko: "값은 만들 때 생깁니다. 이 줄은 틀만 세워요."
+        en: "The value appears at creation time. This line only stands the mould up."
+    - t:
+        ko: "이 언어에 묶음이 없어서"
+        en: "Because this language has no bundles"
+      ok: false
+      fb:
+        ko: "묶음은 있습니다. 이 낱말이 하는 일은 그 묶음들을 <b>사슬로 잇는 것</b>이에요."
+        en: "Bundles exist. What this word does is <b>link them into a chain</b>."
+
+queries:
+  - { grammars: [typescript, tsx, javascript, vue], file: ./class-declaration.scm }
+
+examples:
+  - code: "class Store { save() { return 1 } }"
+    expect: { sites: 1, form: class, picks: { 1: "Store", 2: "save() { return 1 }" } }
+  - code: "class Cache { constructor() { this.map = new Map() } }"
+    expect: { sites: 2, form: class, picks: { 1: "Cache", 3: "constructor" } }
+  - code: "function Store() { return {} }"
+    expect: none

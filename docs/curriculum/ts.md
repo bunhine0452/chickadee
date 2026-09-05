@@ -350,6 +350,13 @@ javascript.info 8→9장 · YDKJS)이 전부 프로토타입 먼저이고, 실�
 > 둘을 저작할 때 `ts/class-declaration` 의 `prereq` 에 `ts/prototype-chain` 을 넣는다.
 > 반대 방향(`prototype-chain` → `class-declaration`)은 **적지 않는다.**
 
+**둘 다 섰고 방향은 적힌 그대로다 (2026-09-06 · §12).** `ts/class-declaration` 의 `prereq` 가
+`[ts/function-declaration, ts/object-literal, ts/prototype-chain]` 이고 `ts/prototype-chain` 의
+`prereq` 는 `[ts/property-access, cs/dynamic-dispatch]` 다 — 반대 방향은 안 적었다.
+`class-declaration` 은 2부(essential), `prototype-chain` 은 부 밖(`essential: false`)이라
+**2부의 판 하나가 부 밖의 개념을 선행으로 갖는다.** 위상 정렬은 부 안에서만 돌므로 순서는 안
+흔들리고, 바뀌는 것은 카드 페이로드에 실리는 선행 목록뿐이다.
+
 **해시 영향은 저작 시점에 생긴다.** `prereq` 는 카드 페이로드에 실린다
 (`packages/cards/src/payload.ts` 의 `prereqOf` → `commonPayload`)고, `content_hash` 는
 `{conceptId, kind, siteId, genVersion, payload}` 를 통째로 해싱한다
@@ -473,6 +480,12 @@ TS 는 만드는 낱말과 옮기는 낱말이 갈려 노드가 둘이다. `foun
 > `ts/if-statement` **바로 뒤**에 둔다. `ts/interface-type` 은 따라오지 않는다 —
 > `narrowing` 의 선행이 아니고, `interface` 가 없어도 `'idle' | 'loading'` 은 좁혀진다.
 
+**셋이 섰다 (2026-09-06 · §12).** 자리는 **2부의 맨 앞**이다. 「`if-statement` 바로 뒤」를
+글자 그대로 두면 셋이 1부 안으로 들어가 1부가 16 · 2부가 15 가 되고, 그것은 §1.5.4 가 정한
+판 수(1부 13 · 2부 18)와 어긋난다. **부 배치의 정본은 §1.5.4** 이므로 그쪽을 따랐고,
+1부 다음이 2부이므로 「`if` 를 배운 직후」라는 뜻은 그대로 선다. `ts/interface-type` 은
+예고대로 안 따라왔다 — 2부 열다섯째다.
+
 ### 새 `alternatives:` 짝 다섯
 
 기존 다섯에 더한다. 조건은 「같은 일을 하는 다른 표기를 쿼리로 셀 수 있을 것」이다.
@@ -488,6 +501,11 @@ TS 는 만드는 낱말과 옮기는 낱말이 갈려 노드가 둘이다. `foun
 
 표기 개념 셋(`ts/require-call` · `ts/string-concat` · `ts/typeof-guard`)이 더 필요하다. `promise-then`·`logical-or-default`
 처럼 `essential: false` 로 둔다 — 분모가 아니라 **부기**다.
+
+**셋 다 섰고 짝 다섯이 `_lang.yaml` 에 들어갔다 (2026-09-06 · §12).** `ts/typeof-guard` 의
+`grammars` 는 `[javascript, vue]` 뿐이다 — 같은 글자가 TS 파일에서는 타입을 좁히고 JS 파일에서는
+값만 가르므로, 두 자리를 문법으로 갈라야 짝이 「이 파일에는 타입이 안 적혀 있다」를 말할 수 있다.
+`ts/narrowing` 은 반대로 `[typescript, tsx]` 뿐이다.
 
 ---
 
@@ -726,3 +744,126 @@ progmiscon.org 의 JavaScript 항목은 **33건**이다 — 공개 6 · **초안
 800줄 상한 때문에 갈라 냈다 → **[`ts-learning.md`](./ts-learning.md)**.
 기계 넷(값 · 두 줄 · 사슬 · 컴파일 시각 타입) · 교재 다섯의 순서 대조 · 이 언어 특유의 연습
 (`pedagogy.md` §4 의 세 시험) · 오개념 33건과 계산된 진단의 구멍 · 실측 · §1.5~§4 에 낼 diff 여덟.
+
+---
+
+## §12 실물이 된 것 — 실측 (2026-09-06)
+
+§1.5 가 0부를 세우고 §3·§4 가 목록을 냈다. 이 절은 그 목록이 `dictionary/ts/` 에서 실제로
+몇 장이 됐고, 사용자 리포에서 몇 곳에 걸리는지를 적는다. **세는 방법**: `crates/parse/tests/`
+에 임시 시험을 하나 두고 `chickadee_parse::{compile, Spec}` 으로 각 개념의 `.scm` 을 표본
+리포 전체에 돌려 `@site` 캡처를 셌다(`in_error` 인 캡처는 뺀다). 시험은 세고 나서 지웠다.
+
+### 12.1 장수와 줄
+
+| | 0부 | 1부 | 2부 | 3부 | 부 밖 | 합 |
+|---|---:|---:|---:|---:|---:|---:|
+| 개념 YAML | 21 | 13 | 18 | 0 | 17 | **69** |
+| `essential` | 21 | 13 | 18 | — | 0 | **52** |
+
+부 밖 열일곱은 §4 심화 여덟(`type-erasure` · `type-assertion` · `prototype-chain` ·
+`structural-typing` · `generic-constraint` · `any-unknown` · `this-binding` · `await-resume`),
+§3 의 표기 셋(`require-call` · `string-concat` · `typeof-guard`), 그리고 먼저 서 있던 여섯
+(`promise-then` · `logical-or-default` · `logical-and-guard` · `array-foreach` ·
+`array-push-mutate` · `index-access-pair`)이다.
+
+| | 값 |
+|---|---:|
+| 개념 YAML 줄 수 (69장) | 15,276 |
+| 이번에 더한 22장 | 4,567줄 (한 장 **208줄**) |
+| `.scm` 파일 | 72 (개념 69 + 시스템 둘 + `optional-chaining.js.scm`) · 920줄 |
+| 골든 예시 | 양성 **164** · 음성 **84** (개념마다 양성 2 이상 · 음성 1 이상) |
+
+README §11 의 어림이 「한 장 213줄」이었고 이번 22장이 208줄이다 — 2.3% 차이다.
+
+### 12.2 표본 리포별 사용처 (곳/파일)
+
+표본은 다섯이다 — `ai-pm`(ts·tsx·js 636파일) · `ECC`(410) · `file_converter`(50) ·
+`bunhine_web`(44) · `MonggleMonggle`(46). 이번에 선 22장만 적는다. 나머지 47장의 값은
+§1.5.3-a 의 표와 같은 방법으로 잰 것이고 큰 변화가 없다.
+
+| 개념 | `ai-pm` | `ECC` | `file_converter` | `bunhine_web` | `MonggleMonggle` |
+|---|---:|---:|---:|---:|---:|
+| `object-literal` | 6,370/493 | 7,866/366 | 303/39 | 478/38 | 256/39 |
+| `type-annotation` | 6,028/556 | 87/8 | 229/39 | 262/20 | **0** |
+| `import-export` | 4,777/625 | 164/19 | 279/49 | 197/41 | 166/43 |
+| `callback-argument` | 2,763/331 | 452/111 | 172/26 | 16/5 | 115/29 |
+| `await-resume` | 1,593/206 | 1,030/46 | 266/19 | 126/29 | 158/29 |
+| `union-type` | 1,465/305 | 35/4 | 38/18 | 12/9 | **0** |
+| `type-erasure` | 1,146/401 | 29/5 | 51/23 | 26/19 | **0** |
+| `require-call` | **0** | 1,675/388 | **0** | **0** | **0** |
+| `type-assertion` | 673/195 | **0** | 9/8 | 57/2 | **0** |
+| `interface-type` | 468/179 | 16/5 | 19/14 | 11/6 | **0** |
+| `typeof-guard` | 1/1 | 466/134 | **0** | 9/2 | 16/4 |
+| `structural-typing` | 350/196 | 1/1 | 10/7 | 1/1 | **0** |
+| `string-concat` | 289/103 | 258/75 | **0** | 24/8 | 18/4 |
+| `throw-error` | 69/33 | 389/109 | 3/3 | 44/10 | 8/2 |
+| `this-binding` | 78/12 | 56/33 | **0** | **0** | **0** |
+| `closure` | 77/64 | 23/13 | 2/2 | 5/4 | 15/8 |
+| `any-unknown` | 44/33 | **0** | 4/4 | 11/6 | **0** |
+| `array-reduce` | 29/22 | 43/22 | 1/1 | 1/1 | **0** |
+| `class-declaration` | 15/10 | 2/1 | **0** | **0** | **0** |
+| `narrowing` | 15/10 | **0** | **0** | **0** | **0** |
+| `prototype-chain` | 9/4 | 37/26 | **0** | **0** | **0** |
+| `generic-constraint` | 13/8 | **0** | **0** | **0** | **0** |
+
+**다섯 리포 전부에서 0곳인 개념은 하나뿐이다** — `ts/implicit-conversion`(이미 §1.5.3-a 가
+적은 대로 `idiom`). 나머지 스물하나는 적어도 한 리포에서 재료가 있다.
+
+### 12.3 이 표가 §1.5.3-a·§11.5 에 더하는 것 넷
+
+**① `ECC` 는 CJS 리포다 — `require` 1,675곳/388파일.** `ai-pm` 은 0곳이고 `import-export` 가
+4,777곳/625파일이다. §3 이 제안한 짝 `gap: ts/import-export, present: ts/require-call` 은
+**두 리포에서 정확히 반대 방향으로** 선다: `ECC` 를 연 사람은 「이 리포는 옛 체계다」를,
+`ai-pm` 을 연 사람은 그 짝이 부기할 것이 없음을 본다. `loose-equality` 가 리포마다 갈리던
+자리(§1.5.3 ①)와 같은 종류이고, 갈림의 폭은 이쪽이 훨씬 크다.
+
+**② `typeof-guard` 와 `narrowing` 이 문법으로 깨끗이 갈린다.** `typeof-guard`(js·vue)는
+`ECC` 466곳/134파일이고 `ai-pm` 은 1곳, `narrowing`(ts·tsx)은 `ai-pm` 15곳/10파일이고
+`ECC` 는 0곳이다. ts-learning.md §11.5 ④ 가 정규식으로 잰 「`ECC` 283 대 `ai-pm` 34」와 같은
+방향이고, 문법을 갈라 놓으니 두 자리가 **한 리포 안에서 겹치지 않는다.**
+
+**③ `narrowing` 이 예상보다 얇다 — `ai-pm` 15곳/10파일.** 쿼리가 잡는 것은
+`if (typeof x === '…')` · `in` · `instanceof` 세 꼴뿐이고, 실제 TS 코드의 좁히기는
+`if (!x)` · `if (x === null)` · 판별 유니온처럼 **조건의 모양이 아니라 타입이 정하는** 자리가
+많다. 그 자리들은 두 피연산자의 타입을 알아야 보여서 `implicit-conversion` 과 같은 벽에 걸린다
+(§1.5.3 「못 잰 것 하나」). 얇은 대로 두고 합성을 정본으로 삼는다 — 15곳은
+`thin_threshold`(min_sites 3 · min_files 2)는 넘으므로 사용처 판은 뜬다.
+
+**④ `class-declaration` 이 다섯 리포 통틀어 17곳이다.** `ai-pm` 15/10 · `ECC` 2/1 · 나머지 0.
+반면 `prototype-chain` 은 `ECC` 37곳/26파일로 `class` 보다 **열여덟 배** 많다.
+ts-learning.md §11.2 ③ 이 선행 방향을 뒤집은 근거(「학습자가 실제로 보는 것은 `class` 다」가
+표본에서 안 선다)가 쿼리 실측으로도 그대로 선다. 다만 §11.7 이 남긴 유보 — 「`ECC` 의
+`prototype` 36곳이 몇 개나 `Object.prototype.hasOwnProperty` 류 관용구인지 안 갈랐다」 —
+는 **여전히 안 갈랐다.** 이 쿼리는 `X.prototype.y` 와 `Object` 의 사슬 API 셋을 함께 세므로
+그 유보를 풀지 못한다.
+
+### 12.4 파서 ERROR 비율
+
+`ai-pm` 실코드 20파일 **0곳(0%)** · `ECC` 실코드 20파일 **0곳(0%)**.
+`crates/parse` 의 `quality_of` 가 쓰는 기준(ERROR+MISSING 바이트 5% 또는 한 영역 40줄)으로
+쟀고, 두 표본에서 `poor` 로 떨어진 파일이 없다. §8 이 적은 파싱 함정 여섯은 **읽는 문법을
+확장자로 못박아 둔 덕에** 이 표본에서 안 터졌다.
+
+### 12.5 문서와 어긋나 바꾼 자리 다섯
+
+| # | 문서가 적은 것 | 실물 | 왜 |
+|---|---|---|---|
+| 1 | §3 「순서 하나」 — 타입 축 셋을 **`essential` 에서 `if-statement` 바로 뒤**에 | **2부의 맨 앞** | 글자 그대로 두면 셋이 1부 안으로 들어가 1부 16 · 2부 15 가 되어 §1.5.4 의 판 수(13 · 18)와 어긋난다. **부 배치의 정본은 §1.5.4** 이고 1부 다음이 2부라 「`if` 직후」의 뜻은 지켜진다 |
+| 2 | §5 「타입 개념 아홉을 `essential` 에 넣지 않는다」 | 다섯을 넣었다 — `type-annotation` · `union-type` · `narrowing` · `interface-type` · `generics` | §1.5.4(D177 뒤)가 그 다섯을 2부에 뒀고 부 목록과 `essential` 은 시험이 대조한다. **대가는 §5 가 경고한 그대로다** — `.js` 만 있는 리포에서 다섯의 사용처가 0이 되어 구멍 지도 분모가 다섯 늘어난다. 실측이 그 값이다: `MonggleMonggle`(js·vue 46파일)에서 다섯 다 0곳 |
+| 3 | §3 #14 `narrowing`, §4 #4 `prototype-chain` 의 `grammars` 를 안 적었다 | `narrowing` = `[typescript, tsx]` · `typeof-guard` = `[javascript, vue]` | 같은 `typeof x === '…'` 가 두 자리에서 다른 것을 한다. 문법으로 가르지 않으면 한 리포에서 두 개념이 같은 줄을 두 번 세고, `alternatives` 짝이 「이 파일에는 타입이 안 적혀 있다」를 못 말한다 |
+| 4 | §6 의 새 `common/` 열하나 | 셋만 걸었다 — `common/class-definition`(`class-declaration`) · `common/function-value`(`callback-argument`) · `common/generics`(`generic-constraint`) | 나머지 여덟(`record` · `reference-sharing` · `closure` · `module-import` · `raise-error` · `fold-reduce` · `type-annotation` · `union-type` · `type-narrowing`)은 `dictionary/common/` 에 **아직 없다.** README §12 규약 4 대로 새로 만들지 않고 후보로만 낸다 — 그 여덟은 `universal: null` 이다 |
+| 5 | §7 의 신청 `cs/task-queue` | 안 걸었다 | `dictionary/cs/` 45장에 없다. `ts/await-resume` 은 `cs/blocking-and-async` 하나만 걸고, 「두 줄 중 앞줄이 먼저」라는 결정성은 그 장이 안 담는다 — ts-learning.md §11.6 의 신청이 그대로 남는다 |
+
+### 12.6 안 만든 것
+
+**3부는 비워 뒀다.** `dictionary/react/` 가 한 장(`functional-state-update`)뿐이라 목록을
+세우면 「프레임워크 부」가 판 하나가 된다. `docs/plan/js-framework-axis.md` §2.2 가 react 아홉,
+§2.3 이 node 여섯을 계획하고 있고 그것은 이 사전의 몫이 아니다. `TS_PARTS` 의 3부는 빈 목록이다.
+
+**`foundation:` 필드는 안 더했다** (§2 의 제안). `_lang.yaml` 스키마를 고쳐야 하고
+그 파일은 이 작업의 범위 밖이다.
+
+**§4 심화 여덟은 `essential: false` 다.** 부 밖이라 코스의 판이 되지는 않지만, 사용처가 있으면
+카드는 그대로 구워지고 큐에도 들어간다(§5 가 적은 그대로). `structural-typing` 의 `token` 은
+§4 표의 `—` 를 그대로 옮겨 `null` 이다.

@@ -1,0 +1,191 @@
+schema: 1
+id: ts/prototype-chain
+universal: null
+name: { ko: class 뒤의 사슬, en: Prototype chain }
+token: "prototype"
+grammars: [typescript, tsx, javascript, vue]
+framework: null
+essential: false
+difficulty: 3
+# 방향은 D187 ⑰ 이 정했다 — 이쪽이 먼저다. `class-declaration` 이 이 개념을 선행으로 갖고,
+# 반대 방향은 적지 않는다.
+prereq: [ts/property-access, cs/dynamic-dispatch]
+confusions: [ts/property-access]
+
+dict:
+  one_liner:
+    ko: "이름을 못 찾으면 한 칸 위로 올라가 다시 찾는다. 그 위가 또 있으면 또 올라간다."
+    en: "A name not found here goes one link up and looks again — and again above that."
+  why:
+    ko: >-
+      묶음마다 멤버를 베껴 두면 만드는 것마다 자리를 먹습니다. 대신 한 군데 두고 <b>못 찾으면
+      올라가</b> 찾아요. {{site.line}}행의 {{pick.2|code}}{{pick.2|josa:이,가}} 그 한 군데이고,
+      {{pick.3|code}}{{pick.3|josa:은,는}} 거기에 놓이는 이름입니다.
+    en: >-
+      Copying members into every bundle costs room per made thing. Instead they live in one place and
+      a miss <b>climbs one link</b>. {{pick.2|code}} on line {{site.line}} is that one place, and
+      {{pick.3|code}} is the name put there.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.1|code}} 의 한 칸 위를 연다."
+      en: "Line {{site.line}} opens the link above {{pick.1|code}}."
+    - ko: "{{pick.3|code}}{{pick.3|josa:을,를}} 거기에 놓는다 — 만들어진 것마다 놓지 않는다."
+      en: "{{pick.3|code}} is put there, not into each made thing."
+    - ko: "만들어진 것에서 그 이름을 찾으면 못 찾고 한 칸 올라가 여기서 찾는다."
+      en: "Looking for it on a made thing misses, climbs one link, and finds it here."
+
+rule:
+  ko: >-
+    <b>사슬은 값이 아니라 찾기의 길이다.</b> 못 찾으면 <code>undefined</code> 가 나올 뿐 오류가
+    아니다.
+  en: >-
+    <b>The chain is a search path, not a value.</b> A miss yields <code>undefined</code>; it is not
+    an error.
+result:
+  label:
+    ko: "{{site.line}}행이 놓는 자리"
+    en: "Where line {{site.line}} puts it"
+  value: "{{pick.1}} ↑ {{pick.3}}"
+  note:
+    ko: "한 칸 위"
+    en: "one link up"
+ok:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:은,는}} 틀이고 그 위 한 칸은 <b>묶음</b>입니다. 사슬로 이어진 것은
+    틀이 아니라 묶음이에요.
+  en: >-
+    {{pick.1|code}} is the mould, and one link up is a <b>bundle</b>. What the chain links is
+    bundles, not moulds.
+payoff:
+  ko: >-
+    <code>class</code> 라는 낱말이 무엇을 짧게 적은 것인지가 여기서 풀립니다. 라이브러리 코드가
+    이 모양으로 되어 있으면 그 낱말 없이도 읽을 수 있어요.
+  en: >-
+    This is where the word <code>class</code> reveals what it is shorthand for. Library code written
+    this way becomes readable without that word.
+bridge:
+  ko: >-
+    같은 사슬을 <code>class</code> 로 짧게 적을 수 있습니다 — 낱말이 다를 뿐 뒤에서 도는 것은
+    같아요.
+  en: >-
+    The same chain can be written short with <code>class</code> — a different word, the same thing
+    running behind it.
+misconceptions:
+  - ko: "사슬로 이어진 것은 클래스다 — 이어진 것은 <b>묶음</b>입니다."
+    en: "What the chain links is classes — it links <b>bundles</b>."
+  - ko: "없는 이름을 읽으면 멈춘다 — <code>undefined</code> 가 나옵니다."
+    en: "Reading a missing name stops — it yields <code>undefined</code>."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>한 칸 위</b>를 가리키는 이름을 짚어 보세요."
+      en: "On line {{site.line}}, point at the name for <b>one link up</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: >-
+            {{pick.1|code}}{{pick.1|josa:은,는}} 사슬의 <b>아래쪽</b>입니다. 한 칸 위를 가리키는
+            이름은 그 뒤에 있어요.
+          en: >-
+            {{pick.1|code}} is the <b>lower end</b> of the chain. The name for one link up follows it.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 아래와 위"
+            en: "The sharpest spot — below or above"
+          code:
+            - "Store.prototype.save = f"
+            - "//^아래     ^한 칸 위"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 그 한 칸 위에 <b>놓이는 이름</b>입니다. 사슬을
+            가리키는 이름은 그 앞이에요.
+          en: >-
+            {{pick.3|code}} is the <b>name placed</b> one link up. The word naming the link comes
+            before it.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 자리와 놓이는 것"
+            en: "The sharpest spot — the place or what is placed"
+          code:
+            - "Store.prototype.save = f"
+            - "//    ^자리      ^놓이는 이름"
+
+meaning:
+  - q:
+      ko: "만든 것에도 한 칸 위에도 없는 이름을 읽으면 어떻게 될까요?"
+      en: "What happens reading a name found neither on the made thing nor one link up?"
+    hint:
+      ko: "사슬이 어디까지 가는지 생각해 보세요."
+      en: "Think about where the chain ends."
+    options:
+      - t:
+          ko: "끝까지 올라가 보고 <code>undefined</code> 를 낸다"
+          en: "It climbs to the end and yields <code>undefined</code>"
+      - t:
+          ko: "그 자리에서 멈춘다"
+          en: "It stops right there"
+        diag:
+          t:
+            ko: >-
+              읽기는 안 멈춥니다. 멈추는 것은 그 <code>undefined</code> 를 <b>부르려고</b> 할 때예요.
+            en: >-
+              Reading does not stop. What stops is <b>calling</b> that <code>undefined</code>.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 읽기와 부르기"
+              en: "The sharpest spot — reading or calling"
+            code:
+              - "obj.nope        // undefined"
+              - "obj.nope()      // 멈춘다"
+      - t:
+          ko: "<code>null</code> 이 나온다"
+          en: "It yields <code>null</code>"
+        diag:
+          t:
+            ko: >-
+              「없다고 넣은 것」과 「안 넣은 것」은 다른 값입니다. 못 찾은 자리는 뒤쪽이에요.
+            en: >-
+              "Put there as absent" and "never put" are different values. A miss gives the latter.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 없음이 둘"
+              en: "The sharpest spot — two kinds of absence"
+            code:
+              - "obj.nope     // undefined"
+              - "obj.n = null // null"
+      - t:
+          ko: "사슬의 맨 위에서 새로 만들어진다"
+          en: "It is created at the top of the chain"
+        diag:
+          t:
+            ko: >-
+              읽기는 아무것도 안 만듭니다. 만드는 것은 대입 쪽이고, 그것도 <b>맨 아래</b>에 놓여요.
+            en: >-
+              Reading creates nothing. Creating is what assignment does, and it lands at the
+              <b>bottom</b>.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 읽기와 쓰기"
+              en: "The sharpest spot — reading or writing"
+            code:
+              - "obj.nope      // 안 만든다"
+              - "obj.nope = 1  // obj 에 놓인다"
+
+no_hole_reason: >-
+  사슬은 글자가 아니라 찾기의 길이라 지울 조각이 없다. 지울 수 있는 것은 사슬을 가리키는 이름
+  하나뿐이고 그것을 지우면 다른 개념이 된다 — 그래서 자리와 뜻으로 묻는다.
+
+queries:
+  - { grammars: [typescript, tsx, javascript, vue], file: ./prototype-chain.scm }
+
+examples:
+  - code: "Store.prototype.save = function () { return 1 }"
+    expect: { sites: 1, form: prototype-member, picks: { 1: "Store", 2: "prototype", 3: "save" } }
+  - code: "const base = Object.create(null)"
+    expect: { sites: 1, form: object-api, picks: { 1: "Object", 2: "create", 3: "null" } }
+  - code: "const n = store.save"
+    expect: none
