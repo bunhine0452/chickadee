@@ -376,6 +376,60 @@ for (const screen of SCREENS) {
   });
 }
 
+// ───────── 단 상한 2 (D187 ⑪) ─────────
+
+/**
+ * 2000px 이상에서 **본문 단이 셋 이상이면 안 된다.**
+ *
+ * 「단」의 정의를 여기서 못박는다: 격자 하나가 만든 트랙 중 **`--col-min`(300px) 이상**인 것이
+ * 셋 이상일 때다. 폭으로 거르지 않으면 숫자 넷을 늘어놓은 요약의 셈 줄(`.tally`, 칸 9rem)이나
+ * 아이콘·라벨·값을 나란히 놓은 세 칸 격자가 전부 「3단」으로 잡힌다 — 그것들은 단이 아니라
+ * 한 줄이다. 카드가 늘어서는 자리만 재는 것이 이 상한의 뜻이다.
+ */
+const COL_MIN = 300;
+const MAX_COLS = 2;
+
+interface WideGrid { sel: string; cols: number; widths: number[] }
+
+function wideGridsInPage(minPx: number): WideGrid[] {
+  const out: WideGrid[] = [];
+  const sel = (el: Element): string => {
+    const parts: string[] = [];
+    let node: Element | null = el;
+    for (let i = 0; i < 3 && node !== null && node.tagName !== 'HTML'; i += 1) {
+      const cls = typeof node.className === 'string' && node.className.trim() !== ''
+        ? `.${node.className.trim().split(/\s+/).slice(0, 3).join('.')}`
+        : '';
+      parts.unshift(`${node.tagName.toLowerCase()}${cls}`);
+      node = node.parentElement;
+    }
+    return parts.join(' > ');
+  };
+  for (const el of Array.from(document.body.querySelectorAll<HTMLElement>('*'))) {
+    const cs = getComputedStyle(el);
+    if (cs.display !== 'grid' && cs.display !== 'inline-grid') continue;
+    // `grid-template-columns` 의 **계산값**은 트랙 너비 목록이다 — `repeat()` 이 이미 풀렸다.
+    const widths = cs.gridTemplateColumns.split(' ')
+      .map((t) => Number.parseFloat(t))
+      .filter((n) => Number.isFinite(n));
+    const wide = widths.filter((w) => w >= minPx);
+    if (wide.length > 2) out.push({ sel: sel(el), cols: wide.length, widths: wide.map(Math.round) });
+  }
+  return out;
+}
+
+for (const screen of SCREENS) {
+  test(`${screen.name} — 2560 에서 본문 단이 ${MAX_COLS}개를 안 넘는다`, async ({ page, app }) => {
+    await screen.open(page, app);
+    await page.setViewportSize({ width: 2560, height: 900 });
+    await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+    await settled(page);
+    const wide = await page.evaluate(wideGridsInPage, COL_MIN);
+    const table = wide.map((g) => `${g.sel} — ${g.cols}단 (${g.widths.join(' · ')}px)`).join('\n');
+    expect(wide, `단이 ${MAX_COLS}개를 넘는 격자 ${wide.length}개\n${table}`).toEqual([]);
+  });
+}
+
 // ───────── 예외 목록 규약 (06 §2 — 만료일 필수, 최대 90일) ─────────
 
 test('responsive.allow.json — 파일이 스스로 무엇인지 말한다', () => {

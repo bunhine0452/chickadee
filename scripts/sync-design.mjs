@@ -183,12 +183,39 @@ function renderItems(items) {
   return out.join('\n');
 }
 
+/**
+ * 어둡게 한 벌을 **매체 질의 안에** 한 번 더 낸다 (D187 ⑫ — 시스템 따름 + 설정 덮어씀).
+ *
+ * 값의 출처는 여전히 `[data-theme="dark"]{…}` 하나다. 여기서 하는 일은 그 같은 선언을
+ * 「고른 적 없는 사람」에게도 닿게 하는 것뿐이다:
+ *
+ *   :root                                  밝게 (고른 적 없고 시스템도 밝을 때)
+ *   @media (prefers-color-scheme: dark)
+ *     :root:not([data-theme="light"])      시스템이 어두우면 따라간다
+ *   [data-theme="dark"]                    설정이 덮어쓴다 (시스템이 밝아도 어둡게)
+ *
+ * `:not([data-theme="light"])` 가 요점이다 — 이것이 없으면 시스템이 어두울 때
+ * **밝게를 고른 사람의 선택을 매체 질의가 도로 덮는다.** 특이도는 (0,2,0)이라
+ * `[data-theme="dark"]`(0,1,0)보다 세지만 두 규칙은 같은 값을 내므로 겹쳐도 결과가 같다.
+ */
+const SYSTEM_DARK = {
+  media: '@media (prefers-color-scheme: dark)',
+  selector: ':root:not([data-theme="light"])',
+  title: '토큰 : 어둡게 (시스템 따름 — D187 ⑫)',
+};
+
+/** 한 단 더 들여쓴다. 빈 줄은 그대로 둔다 — 들여쓴 빈 줄은 stylelint 가 잡는다. */
+const indent = (text) => text.split('\n').map((l) => (l === '' ? l : `  ${l}`)).join('\n');
+
 function renderCss(itemsByTheme) {
   const head = [
     '/* 생성 파일 — 직접 고치지 마세요.',
     ` * 원본:   ${SRC_TOKENS} 의 :root{…} · [data-theme="dark"]{…}`,
-    ' * 생성기: scripts/sync-design.mjs (05 §12 · D182)',
+    ' * 생성기: scripts/sync-design.mjs (05 §12 · D182 · D187 ⑫)',
     ` * 갱신:   ${SYNC_CMD}   /   검사: pnpm design:check (CI 드리프트 게이트)`,
+    ' *',
+    ' * 블록 셋 — 밝게 · 어둡게(설정) · 어둡게(시스템 따름). 셋째는 둘째와 **같은 값**이고',
+    ' * 값의 출처는 원본 한 곳뿐이다.',
     ' */',
     '',
   ];
@@ -198,6 +225,9 @@ function renderCss(itemsByTheme) {
     parts.push(`${b.selector} {\n${renderItems(itemsByTheme[b.theme])}\n}`);
     parts.push('');
   }
+  parts.push(`/* ───────── ${SYSTEM_DARK.title} ───────── */`);
+  parts.push(`${SYSTEM_DARK.media} {\n${indent(`${SYSTEM_DARK.selector} {\n${renderItems(itemsByTheme.dark)}\n}`)}\n}`);
+  parts.push('');
   return `${parts.join('\n')}`;
 }
 

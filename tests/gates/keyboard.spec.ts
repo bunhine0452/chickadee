@@ -50,9 +50,10 @@ test('키보드 완결 — 마우스 0 으로 홈 → T0 → 사다리 → 정�
   //    맨 Tab 으로 재지 않는 이유: WebKit 은 시스템의 「전체 키보드 접근」 설정에 따라 Tab 이
   //    버튼을 건너뛴다(실측 — 홈에서 Tab 한 번 뒤 activeElement 가 body). 그것은 엔진의
   //    정책이지 화면의 성질이 아니라, 재면 게이트가 앱이 아니라 엔진을 재게 된다.
-  const themeSwitch = page.getByRole('switch', { name: '밝게 · 어둡게 전환' });
-  await themeSwitch.focus();
-  trail.push(`홈 스위치 → ${await focusHolds(page, '홈 스위치')}`);
+  //
+  //    밝기 스위치는 이제 헤더에 없다 (D187 ⑫) — 대신 헤더의 항해 링크 하나를 짚는다.
+  await page.getByRole('button', { name: '설정' }).focus();
+  trail.push(`홈 항해 → ${await focusHolds(page, '홈 항해')}`);
 
   // ② 인쇄 시작 (Enter). 마우스를 쓰지 않으려고 이름으로 찾아 포커스만 옮긴다.
   await startSession(page);
