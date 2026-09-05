@@ -159,6 +159,36 @@ describe('정규화 파이프라인 (04 §4.2)', () => {
     expect(indentWidth('\t x')).toBe(3);
   });
 
+  // D152 ⓑ · v06 `b-t1-indent`. 파이썬은 들여쓰기가 블록 경계라 깊이가 곧 프로그램이다.
+  test('5 파이썬은 깊이가 다르면 어긋남이다', () => {
+    const flat = compareLine('    store.write(rows)', 'store.write(rows)', set, 'python');
+    expect(flat.status).toBe('differ');
+    expect(flat.reasons.at(-1)?.code).toBe('INDENT');
+    expect(flat.reasons.at(-1)?.detail).toBe('4 ↔ 0');
+    // 같은 줄이 TS 에서는 동등이다 — 중괄호가 경계를 지므로 폭은 보기의 문제다.
+    expect(compareLine('    store.write(rows)', 'store.write(rows)', set).status).toBe('equiv');
+  });
+
+  test('5 파이썬에서 탭 하나는 공백 넷이다 — 같은 깊이면 어긋남이 아니다', () => {
+    expect(indentWidth('\tx', 'python')).toBe(4);
+    expect(indentWidth('    x', 'python')).toBe(4);
+    const same = compareLine('\tstore.write(rows)', '    store.write(rows)', set, 'python');
+    expect(same.status).toBe('equiv');
+    expect(same.reasons.map((x) => x.code)).toStrictEqual(['WHITESPACE']);
+    // 탭을 2로 세던 옛 규칙이면 이 짝이 「같은 깊이」가 되어 통과한다 — 파이썬에서는 아니다.
+    const deeper = compareLine('\tstore.write(rows)', '  store.write(rows)', set, 'python');
+    expect(deeper.status).toBe('differ');
+    expect(deeper.reasons.at(-1)?.detail).toBe('4 ↔ 2');
+  });
+
+  test('5 파이썬 분기는 들여쓰기 말고는 아무것도 안 바꾼다', () => {
+    // 깊이가 같으면 그다음 단계가 그대로 돈다 — 따옴표·종결자·치환 후보 전부.
+    expect(compareLine("    f('')", '    f("")', set, 'python').reasons[0]?.code).toBe('QUOTE');
+    const rename = compareLine('    total = a + b', '    total = x + b', set, 'python');
+    expect(rename.status).toBe('pending');
+    expect(rename.maps).toStrictEqual([['a', 'x']]);
+  });
+
   test('6·7 종결자와 따옴표', () => {
     expect(compareLine('f()', 'f();', set).reasons[0]?.code).toBe('TERMINATOR');
     expect(compareLine("f('')", 'f("")', set).reasons[0]?.code).toBe('QUOTE');

@@ -46,17 +46,36 @@ export type FundValue =
   | { t: 'float'; v: string }
   | { t: 'bool'; v: boolean }
   | { t: 'string'; v: string }
-  | { t: 'event'; name: string; accept: readonly string[] };
+  | { t: 'event'; name: string; accept: readonly string[] }
+  | { t: 'compile-error'; name: string; accept: readonly string[] }
+  | { t: 'unspecified'; name: string; accept: readonly string[] };
 
 export interface FoldStep { code: string; type: string }
 
-/** 채점에 필요한 것만. `FundItem` 이 이 모양을 구조적으로 만족한다. */
+/** 같은 언어 안의 다른 판. `@chickadee/cards` 의 `FundAlt` 와 같은 모양이다. */
+export interface FundAlt {
+  code: readonly string[];
+  from: string;
+  to: string;
+  value: FundValue;
+}
+
+/**
+ * 채점에 필요한 것만. `FundItem` 이 이 모양을 구조적으로 만족한다.
+ *
+ * `variants`·`langAlt` 는 **선택**이다 — 이 형식을 빌려 쓰는 다른 판(`build` 형식의 실행
+ * 채점)이 그 재료 없이도 이 함수를 부를 수 있어야 한다.
+ */
 export interface FundGradeInput {
   expected: FundValue;
   spell: { yes: string; no: string };
   siblings: readonly { lang: string; name: string; value: FundValue }[];
   ideal: FundValue | null;
   fold: readonly FoldStep[];
+  /** 같은 언어, 한 글자 다른 판. */
+  variants?: readonly FundAlt[];
+  /** 같은 언어, 다른 규칙. */
+  langAlt?: readonly FundAlt[];
 }
 
 /**
@@ -74,12 +93,22 @@ export type MissKind =
   | 'ideal-math'
   /** 다른 언어에서는 그 답이 참이다. */
   | 'other-language'
+  /** **같은 언어**에서 한 글자 다른 식의 답이다 — `2 + 3 * 4` 자리의 `(2 + 3) * 4`. */
+  | 'other-form'
+  /** **같은 언어**의 다른 규칙에서는 그 답이 참이다 — `Integer` 가 127 이었다면. */
+  | 'other-rule'
   /** 버리는 자리에서 반올림했다 — `7 / 2` 에 `4`. */
   | 'rounding'
   /** 부호만 다르다. */
   | 'sign'
   /** 다른 언어의 표기를 썼다 — 파이썬 자리에 `true`. */
   | 'spelling'
+  /**
+   * 어디에도 안 걸렸고 **이 판에는 진단 재료가 아예 없다.** `unknown` 과 갈라 둔 것이
+   * D186 ④ 다 — 「모르겠다」와 「우리가 댈 것이 없다」는 다른 말이고, 뒤쪽을 숨기면
+   * 학습자는 앱이 답을 알면서 안 알려 준다고 읽는다.
+   */
+  | 'no-diagnosis'
   | 'unknown';
 
 /** 진단 문구의 i18n 키. **문구는 `packages/i18n` 이 댄다** (`ABSENCE_MESSAGE_KEY` 선례). */
@@ -89,6 +118,9 @@ export const MISS_MESSAGE_KEY: Readonly<Record<MissKind, string>> = {
   'type-drift': 'fund.missTypeDrift',
   'ideal-math': 'fund.missIdealMath',
   'other-language': 'fund.missOtherLanguage',
+  'other-form': 'fund.missOtherForm',
+  'other-rule': 'fund.missOtherRule',
+  'no-diagnosis': 'fund.missNoDiagnosis',
   rounding: 'fund.missRounding',
   sign: 'fund.missSign',
   spelling: 'fund.missSpelling',
@@ -104,6 +136,11 @@ export interface FundVerdict {
   diagKey: string | null;
   /** `other-language` 일 때 그 언어의 이름. 그 밖에는 `null`. */
   trueIn: string | null;
+  /**
+   * `other-form`·`other-rule` 일 때 **그 답이 참이 되는 코드**와 무엇이 바뀌었나.
+   * 화면이 두 판을 나란히 놓는다. 그 밖에는 `null`.
+   */
+  alt: FundAlt | null;
   /** 정규화한 학습자의 답. 판정란이 「당신이 적은 것」으로 되비친다. 못 읽었으면 `null`. */
   normalized: string | null;
   /** 오답일 때 펴 보이는 기계의 걸음. 정답이면 빈 배열 (정본 §3-3 은 자리를 미리 비운다). */
@@ -161,8 +198,18 @@ export function normalizeFloat(raw: string): number | null {
 /** 두 double 이 **같은 비트**인가. `Object.is` 라 `-0` 과 `0` 도 갈린다. */
 const sameDouble = (a: number, b: number): boolean => Object.is(a, b) || (a === b);
 
-/** 값 하나를 학습자가 적은 글과 견준다. 같으면 참. */
-function matches(value: FundValue, raw: string): boolean {
+/** 어느 언어의 것이든 참·거짓으로 읽히는 표기. 형제(다른 언어의 답)를 볼 때만 쓴다. */
+const TRUE_SPELLINGS = new Set(['true', 'True', 'TRUE', '1', 'yes', '.T.']);
+const FALSE_SPELLINGS = new Set(['false', 'False', 'FALSE', '0', 'no', '.F.']);
+
+/**
+ * 값 하나를 학습자가 적은 글과 견준다. 같으면 참.
+ *
+ * `spell` 을 넘기면 **그 언어의 표기 하나만** 참이다(정답·같은 언어의 다른 판). 안 넘기면
+ * 어느 언어의 표기든 받는다 — 형제를 볼 때 묻는 것이 「그 답이 **다른 언어**에서 참인가」라
+ * 표기까지 그 언어의 것으로 적었기를 기대할 수 없다.
+ */
+function matches(value: FundValue, raw: string, spell?: { yes: string; no: string }): boolean {
   const s = collapse(raw);
   switch (value.t) {
     case 'int': {
@@ -174,10 +221,12 @@ function matches(value: FundValue, raw: string): boolean {
       return n !== null && sameDouble(n, Number(value.v));
     }
     case 'bool':
-      return s === (value.v ? 'true' : 'false');
+      return spell === undefined
+        ? (value.v ? TRUE_SPELLINGS : FALSE_SPELLINGS).has(s)
+        : s === (value.v ? spell.yes : spell.no);
     case 'string':
       return unquote(s) === value.v;
-    case 'event': {
+    case 'event': case 'compile-error': case 'unspecified': {
       const low = s.toLowerCase();
       return value.accept.some((a) => a.toLowerCase() === low);
     }
@@ -205,6 +254,7 @@ const verdict = (over: Partial<FundVerdict> & Pick<FundVerdict, 'ok'>): FundVerd
   miss: null,
   diagKey: null,
   trueIn: null,
+  alt: null,
   normalized: null,
   fold: [],
   ...over,
@@ -224,8 +274,8 @@ function shown(expected: FundValue, raw: string): string {
 /**
  * `value` 형식 한 칸의 채점.
  *
- * 순서가 규칙이다 — ① 맞았나 ② 종류만 어긋났나 ③ **다른 언어의 답인가** ④ 수학의 답인가
- * ⑤ 반올림·부호인가 ⑥ 모르겠다.
+ * 순서가 규칙이다 — ① 맞았나 ② 종류만 어긋났나 ③ **다른 언어의 답인가** ③′ 같은 언어의
+ * 다른 판·다른 규칙인가 ④ 수학의 답인가 ⑤ 반올림·부호인가 ⑥ 모르겠다(또는 **댈 것이 없다**).
  *
  * **③ 이 ④·⑤ 보다 앞이다.** 처음엔 ④ 를 앞에 뒀다가 시험이 뒤집었다 — `7 / 2` 에 `3.5` 를
  * 적으면 그것은 「나눗셈의 참값」이면서 동시에 「파이썬의 답」인데, 둘 중 가르치는 것은
@@ -240,22 +290,21 @@ export function gradeValue(item: FundGradeInput, raw: string): FundVerdict {
   }
 
   const { expected } = item;
+  if (matches(expected, s, item.spell)) return verdict({ ok: true, normalized: shown(expected, s) });
 
-  // 참·거짓은 그 언어의 표기 하나만 정답이다.
-  if (expected.t === 'bool') {
-    if (s === (expected.v ? item.spell.yes : item.spell.no)) return verdict({ ok: true, normalized: s });
-    const miss: MissKind = BOOL_SPELLINGS.has(s) ? 'spelling' : 'unparsable';
-    return verdict({ ok: false, miss, diagKey: MISS_MESSAGE_KEY[miss], normalized: s, fold: item.fold });
-  }
-
-  if (matches(expected, s)) return verdict({ ok: true, normalized: shown(expected, s) });
-
-  const wrong = (miss: MissKind, trueIn: string | null = null): FundVerdict => verdict({
-    ok: false, miss, diagKey: MISS_MESSAGE_KEY[miss], trueIn,
+  const wrong = (miss: MissKind, trueIn: string | null = null, alt: FundAlt | null = null): FundVerdict => verdict({
+    ok: false, miss, diagKey: MISS_MESSAGE_KEY[miss], trueIn, alt,
     normalized: shown(expected, s), fold: item.fold,
   });
 
-  // ② 값은 같은데 종류가 다르다. `int` 자리의 `3.0` 과 `float` 자리의 사건 이름이 여기다.
+  // ① 참·거짓 자리에 **다른 언어의 표기**를 썼다. 파이썬의 `true` 가 여기다 — 그 자리에서
+  //    그 글자는 값이 아니라 이름이고 `NameError` 가 난다. 이 언어의 표기로 적었는데 값이
+  //    반대인 경우는 여기가 아니다 — 그것은 표기 문제가 아니라 **답 문제**라 아래로 내려간다.
+  if (expected.t === 'bool' && s !== item.spell.yes && s !== item.spell.no) {
+    if (BOOL_SPELLINGS.has(s)) return wrong('spelling');
+  }
+
+  // ② 값은 같은데 종류가 다르다. `int` 자리의 `3.0` 이 여기다.
   if (expected.t === 'int') {
     const asFloat = normalizeFloat(s);
     if (asFloat !== null && Number.isInteger(asFloat) && String(asFloat) === BigInt(expected.v).toString()) {
@@ -267,8 +316,17 @@ export function gradeValue(item: FundGradeInput, raw: string): FundVerdict {
   const sibling = item.siblings.find((x) => matches(x.value, s));
   if (sibling !== undefined) return wrong('other-language', sibling.name);
 
+  // ③′ 언어 밖에 없으면 **언어 안**을 본다 (D186 ③ㄷ). 한 글자 다른 식이 먼저고 그다음이
+  //     같은 언어의 다른 규칙이다 — 앞은 「어디를 잘못 읽었나」, 뒤는 「어느 규칙을 쓰고
+  //     있었나」이고 앞쪽이 더 좁은 진단이다.
+  const variant = (item.variants ?? []).find((x) => matches(x.value, s, item.spell));
+  if (variant !== undefined) return wrong('other-form', null, variant);
+
+  const rule = (item.langAlt ?? []).find((x) => matches(x.value, s, item.spell));
+  if (rule !== undefined) return wrong('other-rule', null, rule);
+
   // ④ 어느 언어도 그 답을 안 내면, 그제야 「수학의 답」이다.
-  if (item.ideal !== null && matches(item.ideal, s)) return wrong('ideal-math');
+  if (item.ideal !== null && matches(item.ideal, s, item.spell)) return wrong('ideal-math');
 
   // ⑤ 버릴 자리에서 반올림했나 · 부호만 다른가.
   const mine = normalizeFloat(s);
@@ -285,5 +343,11 @@ export function gradeValue(item: FundGradeInput, raw: string): FundVerdict {
     }
   }
 
-  return wrong('unknown');
+  // ⑥ 참·거짓 자리에 참도 거짓도 아닌 글을 적었으면 못 읽은 것이다.
+  if (expected.t === 'bool' && !BOOL_SPELLINGS.has(s)) return wrong('unparsable');
+
+  // ⑦ 어디에도 안 걸렸다. **재료가 아예 없었으면 그 사실을 말한다** (D186 ④).
+  const hasMaterial = item.siblings.length > 0
+    || (item.variants ?? []).length > 0 || (item.langAlt ?? []).length > 0;
+  return wrong(hasMaterial ? 'unknown' : 'no-diagnosis');
 }

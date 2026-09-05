@@ -102,7 +102,7 @@ export function gradeT1(input: T1Input): T1Result {
     }
     const u = input.user[pair.ui] as string;
     if (blankOriginal && u.trim() === '') continue;
-    const cmp = compareLine(o, u, prot);
+    const cmp = compareLine(o, u, prot, input.grammar);
     // `pending` 은 11단계가 판정한다. 그때까지 표시는 `differ` 다 — 낙관해 두면 치환이
     // 거부됐을 때 화면이 「동등」에서 「어긋남」으로 뒤집힌다.
     const row: T1Row = {

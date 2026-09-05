@@ -308,11 +308,11 @@ function gradeRepair(payload: Repair, answer: StageAnswer, opts: StageOptions): 
     if (user.trim() === '') {
       return {
         ok: false, pct: 0, diagnosis: t('grading.stagePatchNoLine'), okText: null, rule: null,
-        detail: { kind: 'line', compare: compareLine(expected, user, new Set()) }, gated, run: null,
+        detail: { kind: 'line', compare: compareLine(expected, user, new Set(), payload.grammar) }, gated, run: null,
       };
     }
     const prot = buildProt({ original: [expected], grammar: payload.grammar });
-    const compare = compareLine(expected, user, prot);
+    const compare = compareLine(expected, user, prot, payload.grammar);
     const ok = compare.status === 'exact' || compare.status === 'equiv';
     return {
       ok, pct: ok ? 100 : 0,
