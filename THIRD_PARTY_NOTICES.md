@@ -61,7 +61,7 @@ The OFL obligations this project is under:
 
 ## Rust crates
 
-600 crates reachable from the workspace members without a dev-only edge, across all
+604 crates reachable from the workspace members without a dev-only edge, across all
 three release platforms. Licenses in use: (MIT OR Apache-2.0) AND Unicode-3.0 · 0BSD OR MIT OR Apache-2.0 · Apache-2.0 · Apache-2.0 AND MIT · Apache-2.0 OR BSL-1.0 · Apache-2.0 OR MIT · Apache-2.0 WITH LLVM-exception · Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT · BSD-2-Clause OR Apache-2.0 OR MIT · BSD-3-Clause · BSD-3-Clause AND MIT · BSD-3-Clause OR Apache-2.0 · BSD-3-Clause OR MIT · BSD-3-Clause OR MIT OR Apache-2.0 · BSL-1.0 · CC0-1.0 OR MIT-0 OR Apache-2.0 · ISC · MIT · MIT OR Apache-2.0 · MIT OR Apache-2.0 OR LGPL-2.1-or-later · MIT OR Apache-2.0 OR Zlib · MIT OR Zlib OR Apache-2.0 · MPL-2.0 · Unicode-3.0 · Unlicense OR MIT · Zlib · Zlib OR Apache-2.0 OR MIT.
 
 | Package | Version | License |
@@ -517,6 +517,9 @@ three release platforms. Licenses in use: (MIT OR Apache-2.0) AND Unicode-3.0 ·
 | tracing-core | 0.1.36 | MIT |
 | tray-icon | 0.24.2 | MIT OR Apache-2.0 |
 | tree-sitter | 0.25.10 | MIT |
+| tree-sitter-c | 0.24.2 | MIT |
+| tree-sitter-c-sharp | 0.23.5 | MIT |
+| tree-sitter-cpp | 0.23.4 | MIT |
 | tree-sitter-css | 0.23.2 | MIT |
 | tree-sitter-go | 0.23.4 | MIT |
 | tree-sitter-java | 0.23.5 | MIT |
@@ -525,6 +528,7 @@ three release platforms. Licenses in use: (MIT OR Apache-2.0) AND Unicode-3.0 ·
 | tree-sitter-python | 0.23.6 | MIT |
 | tree-sitter-rust | 0.23.3 | MIT |
 | tree-sitter-sequel | 0.3.11 | MIT |
+| tree-sitter-swift | 0.7.3 | MIT |
 | tree-sitter-typescript | 0.23.2 | MIT |
 | tree-sitter-xml | 0.7.0 | MIT |
 | tree_magic_mini | 3.2.2 | MIT |

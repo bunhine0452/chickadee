@@ -75,8 +75,8 @@ misconceptions:
 
 point:
   - q:
-      ko: "{{site.line}}행에서 <b>이 파일에서 쓸 이름</b>을 짚어 보세요."
-      en: "On line {{site.line}}, point at <b>the name this file will use</b>."
+      ko: "{{site.line}}행에서 <b>파일 사이를 오가는 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name that crosses the file boundary</b>."
     hint:
       ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
       en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
@@ -210,14 +210,18 @@ why_gate:
         en: "The order is the other way — the imported file runs <b>first</b>."
 
 queries:
-  - { grammars: [typescript, tsx, javascript, vue], file: ./import-export.scm }
+  - { grammars: [typescript, tsx], file: ./import-export.scm }
+  - { grammars: [javascript, vue], file: ./import-export.js.scm }
 
 examples:
   - code: "import { save } from './store'"
-    expect: { sites: 1, form: named, picks: { 1: "save", 2: "'./store'" } }
+    expect: { sites: 1, form: named, picks: { 1: "save", 2: "'./store'", 4: "import" } }
   - code: "import React from 'react'"
-    expect: { sites: 1, form: default, picks: { 1: "React", 2: "'react'" } }
+    expect: { sites: 1, form: default, picks: { 1: "React", 2: "'react'", 4: "import" } }
+  # 내보내기는 이 개념이 잡지 않는다 — 출처(pick.2)가 없어 산문이 안 선다. `ts/export-declaration` 의 몫.
   - code: "export function save() { return 1 }"
-    expect: { sites: 1, form: export, picks: { 3: "function save() { return 1 }" } }
+    expect: none
+  - code: "export const DAY_MS = 86_400_000;"
+    expect: none
   - code: "const save = require('./store')"
     expect: none
