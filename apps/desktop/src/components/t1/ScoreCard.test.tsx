@@ -29,9 +29,9 @@ describe('ScoreCard', () => {
     const { container } = render(<ScoreCard {...NUMBERS} verdict="repeat-soft" />);
     const pills = [...container.querySelectorAll('.pills .pill')];
     expect(pills.map((el) => el.textContent)).toEqual([
-      '정합 14',
-      '동등 3',
-      '어긋남 3',
+      '같음 14',
+      '같은 뜻 3',
+      '다름 3',
       '한 번 더 같은 단계를 권합니다',
     ]);
     expect(pills.map((el) => el.className)).toEqual(['pill t1', 'pill t0', 'pill t2', 'pill ghost']);

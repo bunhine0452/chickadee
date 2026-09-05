@@ -26,8 +26,8 @@ describe('ColorBar', () => {
 
   it('총량을 한 문장으로 읽어 준다', () => {
     render(<ColorBar days={DAYS} />);
-    const bar = screen.getByRole('img', { name: /지난 14일 잉크 농도/ });
-    expect(bar.getAttribute('aria-label')).toBe('지난 14일 잉크 농도. 찍은 날 12일, 모두 202분.');
+    const bar = screen.getByRole('img', { name: /지난 14일 학습량/ });
+    expect(bar.getAttribute('aria-label')).toBe('지난 14일 학습량. 공부한 날 12일, 모두 202분.');
   });
 
   it('칸이 모자라게 와도 14칸을 채운다', () => {

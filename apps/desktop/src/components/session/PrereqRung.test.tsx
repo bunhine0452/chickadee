@@ -24,7 +24,7 @@ describe('PrereqRung', () => {
 
   it('비어 있는 층을 세어 진단한다', () => {
     const { container } = render(<PrereqRung rows={ROWS} done={[]} />);
-    expect(container.textContent).toContain('3개 중 1개가 아직 안 찍혔습니다');
+    expect(container.textContent).toContain('3개 중 1개를 아직 안 익혔습니다');
   });
 
   it('아래층이 없으면 「익숙하지 않은 것」이라고 말한다', () => {
@@ -41,7 +41,7 @@ describe('PrereqRung', () => {
   it('내려갈 판이 있는 빈 층에만 점프 버튼을 낸다', () => {
     render(<PrereqRung rows={ROWS} done={[]} />);
     expect(screen.getAllByRole('button')).toHaveLength(1);
-    expect(screen.getByRole('button').textContent).toContain('이 판으로 내려가기');
+    expect(screen.getByRole('button').textContent).toContain('이 문제로 내려가기');
   });
 
   it('점프는 그 줄을 통째로 올려 보낸다', async () => {
@@ -56,12 +56,12 @@ describe('PrereqRung', () => {
   it('보고 온 층은 버튼 대신 표시로 바뀌고 겹이 한 칸 오른다', () => {
     const { container } = render(<PrereqRung rows={ROWS} done={['ts/nullish']} onJump={() => undefined} />);
     expect(screen.queryByRole('button')).toBeNull();
-    expect(container.querySelector('.pq .nm small')?.textContent).toBe('방금 봄 · 1겹');
+    expect(container.querySelector('.pq .nm small')?.textContent).toBe('방금 봄 · 1단계');
   });
 
   it('판이 없는 층은 홈으로 안내한다', () => {
     const { container } = render(<PrereqRung rows={ROWS} done={[]} />);
-    expect(container.textContent).toContain('판 없음 · 홈에서 「판 만들기」');
+    expect(container.textContent).toContain('문제 없음 · 홈에서 「문제 만들기」');
   });
 
   it('내려가도 지금 판이 사라지지 않는다고 적는다', () => {

@@ -37,7 +37,7 @@ describe('SheetIndex', () => {
     expect(tabs[1]?.getAttribute('aria-selected')).toBe('true');
     expect(tabs[0]?.getAttribute('aria-selected')).toBe('false');
     // 칩 안의 이름은 잘릴 수 있으므로 읽히는 이름이 진행까지 든다.
-    expect(tabs[1]?.getAttribute('aria-label')).toContain('4개 중 1개 찍음');
+    expect(tabs[1]?.getAttribute('aria-label')).toContain('4개 중 1개 익힘');
   });
 
   it('탭 순서에는 고른 칩 하나만 있다 (roving tabindex)', () => {
@@ -78,7 +78,7 @@ describe('0장 칩 (D136)', () => {
     render(<SheetIndex sheets={[zero(), ...SHEETS]} selected={0} onSelect={vi.fn()} />);
     const chips = screen.getAllByRole('tab');
     expect(chips[0]?.textContent).toContain('0장');
-    expect(chips[0]?.textContent).not.toContain('1대');
+    expect(chips[0]?.textContent).not.toContain('1단원');
   });
 
   it('읽히는 이름이 몇 장이고 끝이 있다는 것을 말한다', () => {
@@ -91,7 +91,7 @@ describe('0장 칩 (D136)', () => {
 
   it('보통 대지는 그대로 「N대」다', () => {
     render(<SheetIndex sheets={SHEETS} selected={1} onSelect={vi.fn()} />);
-    expect(screen.getAllByRole('tab')[0]?.textContent).toContain('1대');
+    expect(screen.getAllByRole('tab')[0]?.textContent).toContain('1단원');
   });
 });
 
@@ -101,8 +101,8 @@ describe('판번호 (D136)', () => {
   it('0장은 번호를 먹지 않는다 — 첫 진짜 대지가 「1대」다', () => {
     render(<SheetIndex sheets={[zero(), ...SHEETS]} selected={1} onSelect={vi.fn()} />);
     const chips = screen.getAllByRole('tab');
-    expect(chips[1]?.textContent).toContain('1대');
-    expect(chips[2]?.textContent).toContain('2대');
-    expect(chips[3]?.textContent).toContain('3대');
+    expect(chips[1]?.textContent).toContain('1단원');
+    expect(chips[2]?.textContent).toContain('2단원');
+    expect(chips[3]?.textContent).toContain('3단원');
   });
 });

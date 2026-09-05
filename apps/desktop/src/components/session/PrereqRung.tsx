@@ -1,5 +1,5 @@
 import { t } from '@chickadee/i18n';
-import { cx, Dee, Pill, PressButton, RichText } from '@chickadee/ui';
+import { cx, Passes, Pill, PressButton, RichText } from '@chickadee/ui';
 import type { InkLayer } from '@chickadee/ui';
 
 import './PrereqRung.css';
@@ -76,7 +76,7 @@ export function PrereqRung({ rows, done, onJump }: PrereqRungProps) {
           const ly = (seen ? Math.min(4, Math.max(1, row.ly + 1)) : row.ly) as InkLayer;
           return (
             <div key={row.conceptId} className={cx('pq', row.state === 'gap' && !seen && 'gap')}>
-              <Dee ly={ly} sticker />
+              <Passes n={ly} label={t('plate.layerN', { n: String(ly) })} />
               <span className="nm">
                 {row.n}
                 <small>{seen ? t('prereq.justSeen', { n: String(ly) }) : row.note}</small>

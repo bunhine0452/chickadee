@@ -23,10 +23,7 @@ export const BUDGET_MS = 720;
  * - `peek` 1.6s × 2 — 목업의 `infinite` 를 유한화한 값이다(D11 · 05 §6). 한 번 재생이
  *   1.6s 이고 두 번 돈다.
  */
-export const EXCEPTIONS = [
-  { match: /lifer/i, ms: 1_360, why: '정본 §3-9 명시 예외' },
-  { match: /\bpeek\b/i, ms: 1_600, why: 'D11 · 05 §6 — infinite 를 2회로 유한화' },
-];
+export const EXCEPTIONS = [];
 
 /** `infinite` 는 상시 애니메이션이다 — 정본 §3-7 이 통째로 금지한다. */
 const INFINITE = /animation(?:-iteration-count)?\s*:[^;}]*\binfinite\b/gi;

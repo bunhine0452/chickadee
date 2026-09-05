@@ -1,12 +1,10 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { cx } from '../cx';
 import type { InkLayer } from '../types';
 import { deeImageUrl } from './deeImage';
 import { SYMBOL_ID } from './symbols';
 import type { DeeSymbol } from './symbols';
-import { useDeeMotion } from './useDeeMotion';
-import type { DeeMotion } from './useDeeMotion';
 import './dee.css';
 
 export type { DeeSymbol };
@@ -20,47 +18,38 @@ export interface DeeProps {
   symbol?: DeeSymbol | undefined;
   /** px. `DEE_HEAD_SIZE_LIMIT` 미만이면 심볼이 `head` 로 바뀐다. */
   size?: number | undefined;
-  motion?: DeeMotion | null | undefined;
   /** 크림 원판 위에 얹은 스티커로 감싼다 (`.dee-sticker`). */
   sticker?: boolean | undefined;
-  /** 타이핑 중이면 모션 0 (05 §6). */
-  typing?: boolean | undefined;
-  /** 감축 모드 — 클래스는 붙고 최종 포즈만 남는다. */
-  reducedMotion?: boolean | undefined;
-  /** 같은 모션을 다시 재생시키려면 올린다. */
-  motionNonce?: number | undefined;
   className?: string | undefined;
 }
 
 /**
- * `.dee` — 판(plate)이 겹으로 켜지는 박새. 표정은 없다 (05 §6).
- * 장식이므로 접근성 트리에서 뺀다 — 겹은 `Passes` 와 글자가 나른다.
+ * `.dee` — 판(plate)이 겹으로 켜지는 박새. 표정도 동작도 없다 (정본 §7 · D179).
+ *
+ * **움직이지 않는다.** 홉·고개 기울임·거꾸로 매달리기 다섯 동작과 `useDeeMotion` 을
+ * D179 에서 통째로 지웠다. 서는 자리도 셋뿐이다 — 빈 상태 · 완료 화면 · 표지. 진도는
+ * `Passes` 막대와 숫자가 말한다.
+ *
+ * 장식이므로 접근성 트리에서 뺀다.
  */
 export function Dee({
   ly,
   symbol = 'badge',
   size,
-  motion,
   sticker,
-  typing,
-  reducedMotion,
-  motionNonce,
   className,
 }: DeeProps) {
-  const ref = useRef<SVGSVGElement | null>(null);
-  useDeeMotion(ref, motion, { typing, reducedMotion, nonce: motionNonce });
-
   const resolved: DeeSymbol = size !== undefined && size < DEE_HEAD_SIZE_LIMIT ? 'head' : symbol;
   const box: CSSProperties | undefined = size === undefined ? undefined : { width: size, height: size };
 
   /**
-   * 움직이지 않는 스티커는 **그림 한 장**으로 그린다 (D115). 홈은 개념 줄마다 하나를 놓아
-   * 그 수가 수백이 되는데, `<use>` 는 인스턴스마다 6 경로를 다시 래스터한다(05 §10).
+   * 스티커는 **그림 한 장**으로 그린다 (D115). 홈은 개념 줄마다 하나를 놓아 그 수가
+   * 수백이 되는데, `<use>` 는 인스턴스마다 6 경로를 다시 래스터한다(05 §10).
    *
    * 첫 커밋에는 스프라이트가 아직 문서에 없을 수 있어 `<use>` 로 그리고, 레이아웃 단계에서
    * 그림으로 바꾼다 — 판당 한 번만 굽고 나머지는 캐시가 답한다.
    */
-  const bakeable = sticker === true && (motion === undefined || motion === null);
+  const bakeable = sticker === true;
   const [image, setImage] = useState<string | null>(null);
   useLayoutEffect(() => {
     if (!bakeable) return;
@@ -79,7 +68,6 @@ export function Dee({
 
   const svg = (
     <svg
-      ref={ref}
       className={cx('dee', className)}
       data-ly={ly}
       // 목업의 모든 `.dee` 가 이 뷰박스를 달고 있다. 빠뜨리면 `<use>` 가 심볼의 430 좌표계를

@@ -1,4 +1,6 @@
-/* 목업: design/src/ink/shared.css `.pill` — 클래스명·선언 그대로 */
+/* 목업: design/src/ink/shared.css `.pill`.
+   바꾼 것 — 트랙 3색 **면**을 종이와 먹으로 내리고 트랙은 왼쪽 3px 선으로만 남겼다
+   (D179 · 정본 §6 「색은 상태에만」). 배지가 색면이면 문제 화면에서 코드보다 먼저 눈에 든다. */
 .pill {
   display: inline-block;
   padding: 2px 7px;
@@ -12,19 +14,13 @@
   white-space: nowrap;
 }
 
-.pill.t0 {
-  background: var(--t0);
-  color: var(--on-t0);
-}
-
-.pill.t1 {
-  background: var(--t1);
-  color: var(--on-t1);
-}
-
+.pill.t0,
+.pill.t1,
 .pill.t2 {
-  background: var(--t2);
-  color: var(--on-t2);
+  padding-left: 6px;
+  border-left-width: 3px;
+  background: var(--paper-3);
+  color: var(--ink);
 }
 
 .pill.ghost {

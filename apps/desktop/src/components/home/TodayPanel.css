@@ -52,12 +52,11 @@
   gap: 8px;
   align-items: baseline;
   padding: 4px 0 4px 8px;
-  border-left: 3px solid var(--t0);
+
+  /* 줄머리 선은 트랙을 안 가른다 — 트랙은 줄의 글자가 말한다 (D179). */
+  border-left: 3px solid var(--ink-mute);
   font-size: 13px;
 }
-
-.qlist li[data-kind="t1"] { border-left-color: var(--t1) }
-.qlist li[data-kind="t2"] { border-left-color: var(--t2) }
 
 .q-name {
   font-weight: 600;
@@ -93,7 +92,7 @@
 
 .cb-mini i.on {
   border-color: transparent;
-  background: var(--t0);
+  background: var(--ink-soft);
 }
 
 .stamp-date {

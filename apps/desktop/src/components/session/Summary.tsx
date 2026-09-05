@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { t } from '@chickadee/i18n';
-import { cx, Dee, DeeLogo, FlatButton, Misreg, Pill, PressButton, Reg, RichText, Stamp } from '@chickadee/ui';
+import { cx, Dee, DeeLogo, FlatButton, Misreg, Passes, Pill, PressButton, Reg, RichText, Stamp } from '@chickadee/ui';
 import type { InkLayer, Track } from '@chickadee/ui';
 
 import { layerNames } from '../../screens/home/data';
@@ -183,9 +183,9 @@ export function Summary({
             {results.map((row) => (
               <li key={row.conceptId} className="shift">
                 <span className="pair" aria-hidden="true">
-                  <Dee ly={row.lyFrom} sticker />
+                  <Passes n={row.lyFrom} track={row.track} label="" />
                   <span className="arr">→</span>
-                  <Dee ly={row.lyTo} sticker />
+                  <Passes n={row.lyTo} track={row.track} label="" />
                 </span>
                 <span className="nm">
                   {row.concept} {row.code === '' ? null : <code>{row.code}</code>}
@@ -207,7 +207,7 @@ export function Summary({
 
         {lifer === undefined ? null : (
           <div className="lifer-box">
-            <Dee ly={4} motion="hop" sticker />
+            <Dee ly={4} sticker />
             <div>
               <h4>
                 {t('summary.liferHeading')} {lifer.concept} {lifer.code === '' ? null : <code>{lifer.code}</code>}

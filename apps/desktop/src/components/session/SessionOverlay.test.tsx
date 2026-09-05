@@ -37,7 +37,7 @@ function Stage(props: {
 describe('SessionOverlay', () => {
   it('교정쇄 대화상자다 — 홈은 그 밖에 남는다', () => {
     render(<Stage onExit={() => undefined} />);
-    const dialog = screen.getByRole('dialog', { name: '교정쇄' });
+    const dialog = screen.getByRole('dialog', { name: '오늘 학습' });
     expect(dialog.getAttribute('aria-modal')).toBe('true');
     expect(dialog.className).toContain('proof');
     expect(dialog.querySelector('main.bench')).not.toBeNull();

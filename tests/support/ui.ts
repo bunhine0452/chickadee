@@ -284,14 +284,14 @@ export async function finishSession(
   page: Page,
   db: import('better-sqlite3').Database,
 ): Promise<void> {
-  const done = page.locator('[aria-label="인쇄 완료"]');
+  const done = page.locator('[aria-label="오늘 학습 완료"]');
   for (let left = MAX_PLATES; left > 0; left -= 1) {
     // Space 뒤에 **판이 실제로 바뀔 때까지** 기다린다 — 요약이 서거나 교정지의 이름표가 달라질 때까지.
     // 앞서는 `.fb.on` 이 사라지는 것만 봤는데, T2 판에는 그 칸이 없어 옛 판 위에서 다음 걸음을 뗐다.
     const prev = await page.locator('article.ps').first().getAttribute('aria-label');
     await page.keyboard.press('Space');
     await page.waitForFunction(
-      (was) => document.querySelector('[aria-label="인쇄 완료"]') !== null
+      (was) => document.querySelector('[aria-label="오늘 학습 완료"]') !== null
         || document.querySelector('article.ps')?.getAttribute('aria-label') !== was,
       prev,
     );

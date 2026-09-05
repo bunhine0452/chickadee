@@ -18,16 +18,10 @@
   background: var(--paper-2);
 }
 
-.pq .dee-sticker {
-  width: 34px;
-  height: 34px;
-  border-width: 2px;
-  box-shadow: none;
-}
-
-.pq .dee {
-  width: 100%;
-  height: 100%;
+/* 겹은 막대다 — 목록에 마스코트를 세우지 않는다 (D179). */
+.pq .passes i {
+  width: 7px;
+  height: 18px;
 }
 
 .pq .nm {

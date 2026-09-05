@@ -37,13 +37,13 @@ describe('ProofSheet', () => {
   it('겹이 오르면 레일에 「+1겹」이 켜진다', () => {
     const { container } = render(<ProofSheet {...BASE} ly={[2, 3]} />);
     const plus = container.querySelector('.ps-rail .plus');
-    expect(plus?.textContent).toBe('+1겹');
+    expect(plus?.textContent).toBe('+1단계');
     expect(plus?.className).toContain('on');
   });
 
   it('겹이 내려가면 「−1겹」, 제자리면 비어 있고 꺼져 있다', () => {
     const down = render(<ProofSheet {...BASE} ly={[3, 2]} />);
-    expect(down.container.querySelector('.ps-rail .plus')?.textContent).toBe('−1겹');
+    expect(down.container.querySelector('.ps-rail .plus')?.textContent).toBe('−1단계');
     cleanup();
 
     const flat = render(<ProofSheet {...BASE} ly={[2, 2]} />);
@@ -54,8 +54,8 @@ describe('ProofSheet', () => {
 
   it('겹은 지금 값으로 그리고 평문을 병기한다', () => {
     render(<ProofSheet {...BASE} ly={[2, 3]} />);
-    expect(screen.getByText('잉크 3겹 / 4 · + 청판 · 색이 들어옴')).toBeTruthy();
-    expect(screen.getByRole('img', { name: 'T0 · 잉크 3겹' })).toBeTruthy();
+    expect(screen.getByText('숙련도 3 / 4 · 자리 잡음 · 오래 두고도 맞힘')).toBeTruthy();
+    expect(screen.getByRole('img', { name: 'T0 · 숙련도 3단계' })).toBeTruthy();
   });
 
   it('폭 3단은 클래스로만 갈린다', () => {

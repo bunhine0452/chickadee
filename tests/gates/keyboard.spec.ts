@@ -50,7 +50,7 @@ test('키보드 완결 — 마우스 0 으로 홈 → T0 → 사다리 → 정�
   //    맨 Tab 으로 재지 않는 이유: WebKit 은 시스템의 「전체 키보드 접근」 설정에 따라 Tab 이
   //    버튼을 건너뛴다(실측 — 홈에서 Tab 한 번 뒤 activeElement 가 body). 그것은 엔진의
   //    정책이지 화면의 성질이 아니라, 재면 게이트가 앱이 아니라 엔진을 재게 된다.
-  const themeSwitch = page.getByRole('switch', { name: '주간반 · 야간반 전환' });
+  const themeSwitch = page.getByRole('switch', { name: '밝게 · 어둡게 전환' });
   await themeSwitch.focus();
   trail.push(`홈 스위치 → ${await focusHolds(page, '홈 스위치')}`);
 
@@ -100,7 +100,7 @@ test('키보드 완결 — 마우스 0 으로 홈 → T0 → 사다리 → 정�
 
   // ⑧ 요약에서 Enter 는 홈으로 (05 §7). 돌아온 뒤의 포커스는 아래 `test.fail` 이 따로 본다.
   await page.keyboard.press('Enter');
-  await expect(page.locator('article.ps[aria-label="인쇄 완료"]')).toHaveCount(0);
+  await expect(page.locator('article.ps[aria-label="오늘 학습 완료"]')).toHaveCount(0);
   await expect(page.locator('.masthead')).toBeVisible();
   trail.push('홈 복귀');
 
@@ -157,7 +157,7 @@ const AXE_SCREENS: Array<{ name: string; open: (page: Page) => Promise<void> }> 
     open: async (page) => { await gotoDev(page); await startSession(page); },
   },
   {
-    name: '야간반',
+    name: '어둡게',
     open: async (page) => { await gotoDev(page); await toNight(page); },
   },
   // 서가는 목록(listbox)과 2단 확인이 새로 들어온 자리라 aria 를 여기서 한 번 더 받는다 (D119).

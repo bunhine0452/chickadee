@@ -18,7 +18,7 @@ const SHEET = '.proof article.ps';
 /** 홈에서 판 한 장을 걸고 교정지가 놓일 때까지. */
 async function startPrinting(page: import('@playwright/test').Page): Promise<void> {
   await openHome(page);
-  await page.getByRole('button', { name: /인쇄 시작/ }).click();
+  await page.getByRole('button', { name: /학습 시작/ }).click();
   await page.locator(SHEET).waitFor();
 }
 
@@ -27,12 +27,12 @@ test('01 홈 → 인쇄 시작 → 1판 정답', async ({ page, app }) => {
 
   // 오늘의 인쇄가 판 수와 분을 먼저 말한다 (정본 §3-5).
   // T0 둘 + 구조 한 판 — 홈 미리보기가 세션이 실제로 거는 수와 같다 (D140 · D170 ④).
-  await expect(page.locator('.today .today-n')).toHaveText(/3판 · 약 \d+분/);
-  await expect(page.locator('.today .press-btn')).toContainText('인쇄 시작');
+  await expect(page.locator('.today .today-n')).toHaveText(/3문제 · 약 \d+분/);
+  await expect(page.locator('.today .press-btn')).toContainText('학습 시작');
 
-  await page.getByRole('button', { name: /인쇄 시작/ }).click();
+  await page.getByRole('button', { name: /학습 시작/ }).click();
   await page.locator(SHEET).waitFor();
-  await expect(page.locator(SHEET)).toHaveAttribute('aria-label', /1판 · 문자열 리터럴/);
+  await expect(page.locator(SHEET)).toHaveAttribute('aria-label', /1번 · 문자열 리터럴/);
   // 교정지가 마운트되면 포커스는 판 자신이다 (05 §7).
   expect(await focusPath(page)).toBe('article.ps');
 
@@ -44,17 +44,17 @@ test('01 홈 → 인쇄 시작 → 1판 정답', async ({ page, app }) => {
   await expect(page.locator('.fb .stampbox .stamp')).toBeVisible();
 
   // 정합 도장 — 은유와 평문을 같이 찍는다.
-  await expect(page.locator('.fb .stampbox .stamp')).toContainText('정합');
+  await expect(page.locator('.fb .stampbox .stamp')).toContainText('같음');
   await expect(page.locator('.fb .stampbox .stamp')).toContainText('in register');
   // `+1겹` — 겹이 움직인 것을 이득으로 (05 §5 `ProofSheet`).
-  await expect(page.locator('.ps-rail .plus')).toHaveText('+1겹');
+  await expect(page.locator('.ps-rail .plus')).toHaveText('+1단계');
   await expect(page.locator('.ps-rail .plus')).toHaveClass(/\bon\b/);
 
   // live 문구 — 세션의 낭독 지점은 오버레이의 `.vh#live` 한 곳이다 (05 §7 · D114).
   // 판정란 자신은 `aria-live` 를 들지 않는다: 통째로 읽으면 60자 규약을 넘는다.
   await expect(page.locator('.fb')).not.toHaveAttribute('aria-live', /.*/);
   const live = page.locator('.proof #live');
-  await expect(live).toHaveText(/정합 — 맞았습니다\. 잉크 1겹 · 다음 인쇄.*Space 로 다음\./);
+  await expect(live).toHaveText(/맞았습니다\. 숙련도 1단계 · 다음 복습.*Space 로 다음\./);
   await expect(page.locator('.fb')).toContainText('맞았습니다');
 
   // 판정란은 자리를 미리 비워 뒀다 — 답해도 위쪽 글이 0px 도 밀리지 않는다 (정본 §3-3).
@@ -71,7 +71,7 @@ test('02 2판 오답', async ({ page, app }) => {
   const wrong = (answerKeyOf(app.db) % 4) + 1;
   await page.locator(`.ch[data-k="${wrong}"]`).click();
   await page.locator('.acts .press-btn').click();
-  await expect(page.locator('.fb .stampbox .stamp')).toContainText('어긋남');
+  await expect(page.locator('.fb .stampbox .stamp')).toContainText('다름');
   await expect(page.locator('.fb')).toContainText('틀렸습니다');
 
   // 날카로운 자리 — 실제로 터지는 최소 코드 두 줄이 코드판으로 붙는다.
@@ -108,7 +108,7 @@ test('03 3판 `?` 사다리 1~4단', async ({ page }) => {
   // 예정도 없다 — 「모르겠어요」가 옮길 자리가 없으므로 0 → 0 이고 다시 찍기 줄은 뜨지
   // 않는다. 앞서는 예정이 없는데도 「다시 찍기 오늘 안에 → 오늘 안에」를 적었다.
   const gain = ladder.locator('.ld-gain');
-  await expect(gain).toHaveText('잉크 0겹 → 0겹');
+  await expect(gain).toHaveText('숙련도 0단계 → 0단계');
 
   // 1단 — 사전 3층.
   await expect(ladder.locator('.rung-body h4')).toHaveText(/사전 3층/);

@@ -90,12 +90,8 @@
   letter-spacing: -.03em;
 }
 
-.node[data-track="t0"] .face { background: var(--t0) }
-.node[data-track="t0"] .face .g { color: var(--on-t0) }
-.node[data-track="t1"] .face { background: var(--t1) }
-.node[data-track="t1"] .face .g { color: var(--on-t1) }
-.node[data-track="t2"] .face { background: var(--t2) }
-.node[data-track="t2"] .face .g { color: var(--on-t2) }
+/* 스티커 면은 종이다 — 트랙이 색을 고르지 않는다 (D179 · 정본 §6).
+   무슨 트랙인지는 오른쪽 위 `.tag` 의 `T0`·`T1`·`T2` 글자가 말한다. */
 
 .tag {
   position: absolute;
@@ -130,13 +126,11 @@
 .ck svg {
   width: 15px;
   height: 15px;
-  color: var(--t0-text);
+  color: var(--state-progress-text);
 }
 
-/* 완료 = 진홍 오버프린트 한 겹 (블렌드 대신 미리 섞은 색 — 노드 수만큼 합성 비용이 늘지 않게) */
-.node[data-state="done"][data-track="t0"] .face { background: color-mix(in srgb, var(--t0) 88%, var(--t1)) }
-.node[data-state="done"][data-track="t1"] .face { background: color-mix(in srgb, var(--t1) 88%, var(--t2)) }
-.node[data-state="done"][data-track="t2"] .face { background: color-mix(in srgb, var(--t2) 88%, var(--t1)) }
+/* 완료 = 두른 선 한 겹. 색이 아니라 `.ck` 체크 배지와 이 테두리가 말한다 (D179). */
+.node[data-state="done"] .face { box-shadow: inset 0 0 0 3px var(--rule) }
 
 /* 잠김 = 애벌 인쇄(하프톤 한 겹). 흔들지 않는다 — 이유는 상세가 말한다 (D11) */
 .node[data-state="locked"] { cursor: not-allowed }
@@ -239,11 +233,10 @@
   border-color: var(--ink-mute);
 }
 
-/* 야간반 — 05 §4.3 dark allowlist 6개 중 하나 (Node) */
-[data-theme="dark"] .ck svg { color: var(--t0) }
-[data-theme="dark"] .node[data-track="t0"] { --glow: var(--glow-t0) }
-[data-theme="dark"] .node[data-track="t1"] { --glow: var(--glow-t1) }
-[data-theme="dark"] .node[data-track="t2"] { --glow: var(--glow-t2) }
+/* 야간반 — 05 §4.3 dark allowlist 6개 중 하나 (Node).
+   후광도 트랙을 안 가른다 — 빛나는 것은 **지금 여기**뿐이다 (D179). */
+[data-theme="dark"] .ck svg { color: var(--state-progress) }
+[data-theme="dark"] .node { --glow: transparent }
 [data-theme="dark"] .node:not([data-state="locked"]) .die { box-shadow: 0 5px 0 var(--edge), 0 0 18px var(--glow) }
 [data-theme="dark"] .node:not([data-state="locked"]):hover .die { box-shadow: 0 8px 0 var(--edge), 0 0 26px var(--glow) }
-[data-theme="dark"] .node[data-state="current"] .die { box-shadow: 0 5px 0 var(--edge), 0 0 30px var(--glow-t1), 0 0 10px var(--glow-t0) }
+[data-theme="dark"] .node[data-state="current"] .die { box-shadow: 0 5px 0 var(--edge), 0 0 30px var(--glow-t0) }

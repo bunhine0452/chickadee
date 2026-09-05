@@ -84,18 +84,19 @@
   white-space: nowrap;
 }
 
-/* 진행 막대. D127 이 게이지 셋에 정한 것과 같은 굵기·대비를 쓴다 — 채움은 트랙 색,
-   빈 칸은 종이색 바탕에 안쪽 테두리다(`opacity` 로 흐리지 않는다). */
+/* 진행 막대. D127 이 게이지 셋에 정한 것과 같은 굵기·대비를 쓴다 — 채움은 진행 색,
+   빈 칸은 종이색 바탕에 안쪽 테두리다(`opacity` 로 흐리지 않는다).
+   D179 로 트랙 색을 뺐다 — 이 막대가 재는 것은 트랙이 아니라 진행이다. */
 .sx-bar {
   grid-area: bar;
   height: 8px;
   margin-top: 4px;
   border: 1px solid var(--rule);
   background:
-    linear-gradient(to right, var(--t0) 0 var(--fill, 0%), var(--paper-3) var(--fill, 0%) 100%);
+    linear-gradient(to right, var(--state-progress) 0 var(--fill, 0%), var(--paper-3) var(--fill, 0%) 100%);
 }
 
-.sx[data-state="done"] .sx-bar { background: var(--t1) }
+.sx[data-state="done"] .sx-bar { background: var(--state-progress) }
 
 @media (prefers-reduced-motion: reduce) {
   .sx { transition-duration: .001ms }

@@ -34,8 +34,8 @@ const ROWS: HomeRetake[] = [
 describe('ConceptList', () => {
   it('겹을 색이 아니라 문장으로 낸다', () => {
     render(<ConceptList rows={ROWS} now={NOW} />);
-    expect(screen.getByRole('img', { name: 'T0 문법 · 잉크 2겹' })).toBeTruthy();
-    expect(screen.getByRole('img', { name: 'T2 구조 · 잉크 1겹' })).toBeTruthy();
+    expect(screen.getByRole('img', { name: 'T0 문법 · 숙련도 2단계' })).toBeTruthy();
+    expect(screen.getByRole('img', { name: 'T2 구조 · 숙련도 1단계' })).toBeTruthy();
   });
 
   it('만기를 사람 말로 바꿔 적는다', () => {
@@ -46,13 +46,13 @@ describe('ConceptList', () => {
 
   it('목록에 이름을 붙여 스크린리더가 자리를 안다', () => {
     render(<ConceptList rows={ROWS} now={NOW} />);
-    const list = screen.getByRole('list', { name: '다시 찍을 개념' });
+    const list = screen.getByRole('list', { name: '다시 풀 개념' });
     expect(list.textContent).toContain('함수형 업데이트');
     expect(list.textContent).toContain('useState');
   });
 
   it('비어 있으면 빈 상태 문구를 낸다', () => {
     render(<ConceptList rows={[]} now={NOW} />);
-    expect(screen.getByText(/다시 찍을 개념이 아직 없습니다/)).toBeTruthy();
+    expect(screen.getByText(/다시 풀 개념이 아직 없습니다/)).toBeTruthy();
   });
 });

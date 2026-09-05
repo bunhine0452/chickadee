@@ -1,5 +1,5 @@
 import { t } from '@chickadee/i18n';
-import { Dee, Passes } from '@chickadee/ui';
+import { Passes } from '@chickadee/ui';
 
 import type { HomeRetake } from '../../screens/home/data';
 import { dueLabel, inkTrack, isSoon, trackName } from './labels';
@@ -13,7 +13,7 @@ export interface ConceptListProps {
   now?: number | undefined;
 }
 
-/** `.conc` — 「다시 찍을 개념」. 겹은 색이 아니라 `Passes` 의 문장이 나른다 (05 §9). */
+/** `.conc` — 「다시 찍을 개념」. 겹은 `Passes` 막대와 그 문장이 나른다 (05 §9 · D179). */
 export function ConceptList({ rows, now }: ConceptListProps) {
   const at = now ?? Date.now();
 
@@ -27,7 +27,6 @@ export function ConceptList({ rows, now }: ConceptListProps) {
         const track = inkTrack(row.track);
         return (
           <li key={row.conceptId} className="cn">
-            <Dee ly={row.layer} sticker />
             <span className="nm">
               {row.token === null ? null : <code>{row.token}</code>}
               {row.token === null ? '' : ' '}

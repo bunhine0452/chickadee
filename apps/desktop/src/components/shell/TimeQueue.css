@@ -1,6 +1,8 @@
 /* 목업 design/ink-home.html 의 `.queue`·`.qlist` (05 §5).
    목업과 다른 것 둘 (D127) — 높이 14 → 18px, 「아직 안 지난 칸」을 `opacity: .3` 대신
-   빗금으로 비운다. 남은 양이 눈에 먼저 들어와야 하는데 흐린 색은 종이와 갈리지 않았다. */
+   빗금으로 비운다. 남은 양이 눈에 먼저 들어와야 하는데 흐린 색은 종이와 갈리지 않았다.
+   D179 — 칸의 트랙 3색을 **진행 한 색**으로 모았다. 칸의 너비는 여전히 예상 시간에
+   비례하고(정본 §3-5), 칸끼리는 2px 틈이 가른다. 무슨 트랙인지는 아래 목록의 라벨이 말한다. */
 .queue {
   display: flex;
   gap: 2px;
@@ -19,9 +21,9 @@
   background: var(--paper-2);
 }
 
-.queue i.t0 { background: var(--t0); }
-.queue i.t1 { background: var(--t1); }
-.queue i.t2 { background: var(--t2); }
+.queue i.t0,
+.queue i.t1,
+.queue i.t2 { background: var(--state-progress); }
 
 /* 다시 찍기·복습은 점무늬로 구분한다 — 색을 하나 더 만들지 않는다. */
 .queue i.review {

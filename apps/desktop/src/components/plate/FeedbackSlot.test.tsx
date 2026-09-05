@@ -120,10 +120,12 @@ describe('FeedbackSlot', () => {
     expect(edge?.querySelectorAll('.code .ln')).toHaveLength(2);
   });
 
-  it('겹 이동은 Dee 두 마리와 문장으로 낸다', () => {
+  it('겹 이동은 막대 둘과 문장으로 낸다 (D179 — 마스코트가 아니다)', () => {
     const { container } = render(<FeedbackSlot {...GRADED} gain={{ from: 2, to: 3, text: '잉크 <b>3겹</b>' }} />);
     const gain = container.querySelector('.fb .gain');
-    expect(gain?.querySelectorAll('.dee')).toHaveLength(2);
+    expect(gain?.querySelectorAll('.passes')).toHaveLength(2);
+    expect(gain?.querySelectorAll('.passes i.on')).toHaveLength(5);
+    expect(gain?.querySelector('.dee, .dee-sticker')).toBeNull();
     expect(gain?.textContent).toContain('3겹');
   });
 

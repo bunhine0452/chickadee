@@ -153,7 +153,7 @@ describe('HomeScreen', () => {
   it('HomeData 하나로 마스트헤드·대지·「판이 없는 문법」을 다 그린다', () => {
     draw(DATA);
 
-    const ticket = screen.getByRole('group', { name: '작업 지시서' });
+    const ticket = screen.getByRole('group', { name: '오늘 요약' });
     expect(ticket.textContent).toContain('cart-shop-web');
     expect(ticket.textContent).toContain('2026-09-03');
 
@@ -167,8 +167,8 @@ describe('HomeScreen', () => {
     // 처음 걸리는 것은 인쇄 중인 대지다.
     expect(sheets[0]?.textContent).toContain('로그인 흐름');
 
-    expect(screen.getByRole('list', { name: '판이 없는 문법' }).textContent).toContain('async / await');
-    expect(screen.getByRole('img', { name: /지난 14일 잉크 농도/ })).toBeTruthy();
+    expect(screen.getByRole('list', { name: '아직 안 배운 문법' }).textContent).toContain('async / await');
+    expect(screen.getByRole('img', { name: /지난 14일 학습량/ })).toBeTruthy();
   });
 
   it('잉크 겹 패널은 접힌 채 열리고 제목 줄로 펼쳐진다 (D133)', async () => {
@@ -176,11 +176,11 @@ describe('HomeScreen', () => {
     draw(DATA);
 
     // 접힌 속은 지우지 않고 덮는다 — 접근성 트리에서만 사라진다.
-    expect(screen.queryByRole('img', { name: /잉크 겹 5단계/ })).toBeNull();
+    expect(screen.queryByRole('img', { name: /숙련도 다섯 단계/ })).toBeNull();
 
-    await user.click(screen.getByRole('button', { name: /잉크 겹/ }));
-    expect(screen.getByRole('img', { name: /잉크 겹 5단계/ })).toBeTruthy();
-    expect(screen.getByRole('list', { name: '다시 찍을 개념' })).toBeTruthy();
+    await user.click(screen.getByRole('button', { name: /숙련도/ }));
+    expect(screen.getByRole('img', { name: /숙련도 다섯 단계/ })).toBeTruthy();
+    expect(screen.getByRole('list', { name: '다시 풀 개념' })).toBeTruthy();
   });
 
   it('「판 만들기」가 화면 밖으로 개념 id 를 넘긴다', async () => {
@@ -188,7 +188,7 @@ describe('HomeScreen', () => {
     const user = userEvent.setup();
     draw(DATA, onMake);
 
-    await user.click(screen.getByRole('button', { name: 'async / await 판 만들기' }));
+    await user.click(screen.getByRole('button', { name: 'async / await 문제 만들기' }));
     expect(onMake).toHaveBeenCalledWith('common/async-await');
   });
 
@@ -200,11 +200,11 @@ describe('HomeScreen', () => {
   it('대지가 0개여도 깨지지 않고 빈 상태를 말한다', () => {
     draw(EMPTY);
     expect(screen.queryAllByRole('article')).toHaveLength(0);
-    expect(screen.getByText(/대지(가|는) 없습니다/)).toBeTruthy();
-    expect(screen.getByText(/책임 배치 판은 아직 짤 수 없습니다/)).toBeTruthy();
-    expect(screen.getByText(/판이 없는 문법이 없습니다/)).toBeTruthy();
-    expect(screen.getByText(/다시 찍을 개념이 아직 없습니다/)).toBeTruthy();
-    expect(screen.getByRole('img', { name: /지난 14일 잉크 농도/ })).toBeTruthy();
+    expect(screen.getByText(/단원(이|은) 없습니다/)).toBeTruthy();
+    expect(screen.getByText(/책임 배치 문제는 아직 만들 수 없습니다/)).toBeTruthy();
+    expect(screen.getByText(/아직 안 배운 문법이 없습니다/)).toBeTruthy();
+    expect(screen.getByText(/다시 풀 개념이 아직 없습니다/)).toBeTruthy();
+    expect(screen.getByRole('img', { name: /지난 14일 학습량/ })).toBeTruthy();
   });
 
   it('초보 안내는 플래그가 섰을 때만, 대지보다 위에 뜬다 (02 §6.4)', () => {
@@ -219,7 +219,7 @@ describe('HomeScreen', () => {
     expect(notice.textContent).toContain('잠기는 것은 없습니다');
     expect(notice.querySelector('button')).toBeNull();
     // 상단이다 — 작업대(「판이 없는 문법」)보다 문서 순서가 앞이면 스크롤 없이 보인다.
-    const gaps = screen.getByRole('list', { name: '판이 없는 문법' });
+    const gaps = screen.getByRole('list', { name: '아직 안 배운 문법' });
     expect(notice.compareDocumentPosition(gaps) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
@@ -231,9 +231,9 @@ describe('HomeScreen', () => {
     draw(DATA, vi.fn(), { reingest: true });
     const banner = screen.getByRole('region', { name: /재인제스트 필요/ });
     // 경고가 아니라 안내다 — 다시 읽어도 겹은 남는다는 것이 배너의 본문이다 (06 §6.3).
-    expect(banner.textContent).toContain('익힌 겹은 개념에 붙어 있어 그대로 남습니다');
+    expect(banner.textContent).toContain('익힌 숙련도는 개념에 붙어 있어 그대로 남습니다');
     // 마스트헤드 바로 아래 — 대지보다 앞이라 스크롤 없이 보인다.
-    const gaps = screen.getByRole('list', { name: '판이 없는 문법' });
+    const gaps = screen.getByRole('list', { name: '아직 안 배운 문법' });
     expect(banner.compareDocumentPosition(gaps) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 

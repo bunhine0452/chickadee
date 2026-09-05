@@ -31,12 +31,12 @@ describe('모션 상한', () => {
     expect(scanCss(css, 'x.css')).toEqual([]);
   });
 
-  test('문서가 올린 예외 둘만 720ms 를 넘을 수 있다', () => {
-    expect(EXCEPTIONS.map((e) => e.ms)).toEqual([1360, 1600]);
-    expect(scanCss('.dee.lifer { animation: lifer 1.35s both }', 'x.css')).toEqual([]);
-    expect(scanCss('.dee.peek { animation: peek 1.6s ease 2 }', 'x.css')).toEqual([]);
-    // 예외 이름을 붙였다고 무제한은 아니다.
-    expect(scanCss('.dee.peek { animation: peek 3s ease 2 }', 'x.css')).toHaveLength(1);
+  // D179 로 마스코트 동작이 통째로 사라져 예외가 0이 됐다. 예외를 지운 자리를 시험이
+  // 지킨다 — 다시 무언가를 720ms 밖으로 내보내려면 문서와 이 목록을 함께 고쳐야 한다.
+  test('예외 목록이 비었고, 이제 아무것도 720ms 를 넘지 못한다', () => {
+    expect(EXCEPTIONS).toEqual([]);
+    expect(scanCss('.dee.lifer { animation: lifer 1.35s both }', 'x.css')).toHaveLength(1);
+    expect(scanCss('.x { animation: fade 0.7s both }', 'x.css')).toEqual([]);
   });
 
   test('`0s` 는 시간이 아니라 「없음」이다 (감축 모드)', () => {

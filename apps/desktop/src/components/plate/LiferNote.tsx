@@ -1,12 +1,9 @@
 import { useLayoutEffect } from 'react';
 import { t } from '@chickadee/i18n';
-import { Dee, RichText, Stamp } from '@chickadee/ui';
+import { RichText, Stamp } from '@chickadee/ui';
 
 import { closeMark } from '../../devtools/audit.js';
 import './LiferNote.css';
-
-/** 첫 기록 Dee 의 키(px). 판정란 안이라 베일 시절(84px)보다 작다. */
-const DEE_SIZE = 56;
 
 /** 도장이 얹히는 각도(도). */
 const STAMP_ROTATE = 6;
@@ -26,8 +23,11 @@ export interface LiferNoteProps {
  * `.lifer-note` — 처음 기록하는 순간 (정본 §3-6 · D131).
  *
  * 전면 베일이 아니라 **판정란 안**이다. 판정문과 나란히 남으므로 덮을 배경도 닫을 것도 없고,
- * 도장이 찍히는 연출과 첫 기록이 한 화면에서 같이 읽힌다. 담는 것은 베일 시절 그대로다 —
- * 컨페티가 아니라 영구 기록(도장 · 일련번호 · 채집지).
+ * 도장이 찍히는 연출과 첫 기록이 한 화면에서 같이 읽힌다. 담는 것은 컨페티가 아니라
+ * 영구 기록이다 — 개념 이름 · 채집지(파일·줄) · 일련번호 · 도장.
+ *
+ * **마스코트는 없다** (D179 · 정본 §6). 여기는 문제 화면 안이고, 기록의 값은 기록이지
+ * 그림이 아니다. Dee 는 빈 상태 · 완료 화면 · 표지에만 선다.
  */
 export function LiferNote({ concept, code, where, serial }: LiferNoteProps) {
   // 05 §10 `lifer:open` — 첫 성공을 알아챈 순간부터 기록이 실제로 놓일 때까지.
@@ -37,7 +37,6 @@ export function LiferNote({ concept, code, where, serial }: LiferNoteProps) {
 
   return (
     <div className="lifer-note" aria-label={t('lifer.label')}>
-      <Dee ly={4} size={DEE_SIZE} motion="lifer" sticker />
       <div className="lifer-note-body">
         <div className="lifer-k">{t('lifer.kicker')}</div>
         <h5>

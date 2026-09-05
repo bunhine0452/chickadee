@@ -12,12 +12,12 @@ import {
 import { answerKeyOf } from '../support/app-db.js';
 
 const SHEET = '.proof article.ps';
-const DONE = '[aria-label="인쇄 완료"]';
+const DONE = '[aria-label="오늘 학습 완료"]';
 
 
 test('11 요약', async ({ page, app }) => {
   await openHome(page);
-  await page.getByRole('button', { name: /인쇄 시작/ }).click();
+  await page.getByRole('button', { name: /학습 시작/ }).click();
   await page.locator(SHEET).waitFor();
   await page.locator(`.ch[data-k="${answerKeyOf(app.db)}"]`).click();
   await page.locator('.acts .press-btn').click();
@@ -31,8 +31,8 @@ test('11 요약', async ({ page, app }) => {
   const shift = page.locator(`${DONE} .shifts .shift`);
   await expect(shift).toHaveCount(3);
   await expect(shift.first()).toContainText('문자열 리터럴');
-  await expect(shift.first().locator('small')).toContainText('미인쇄 → 애벌 · +1겹');
-  await expect(shift.first().locator('.next')).toContainText('다음 인쇄');
+  await expect(shift.first().locator('small')).toContainText('아직 → 처음 · +1단계');
+  await expect(shift.first().locator('.next')).toContainText('다음 복습');
 
   // LIFER 박스 · 내일 예고.
   await expect(page.locator(`${DONE} .lifer-box`)).toContainText('처음 기록한 문법');
@@ -85,13 +85,13 @@ test('12 야간반 + 부속 숨김', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
 
   // 야간반으로.
-  await page.getByRole('switch', { name: '주간반 · 야간반 전환' }).click();
+  await page.getByRole('switch', { name: '밝게 · 어둡게 전환' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   expect(await boxes()).toEqual(day);
 
   // 부속을 보였다 숨겼다 한다 — 어느 쪽에서 시작하든 조판은 1px 도 안 움직인다.
   // 기본값(`DEFAULTS.trim`)은 설정 화면 쪽에서 바뀔 수 있으니 지금 값에서 출발한다.
-  const trim = page.getByRole('switch', { name: '인쇄 부속 보이기 · 숨기기' });
+  const trim = page.getByRole('switch', { name: '장식 보이기 · 숨기기' });
   const first = await page.locator('html').getAttribute('data-trim');
   await trim.click();
   await expect(page.locator('html')).not.toHaveAttribute('data-trim', first ?? '');
@@ -114,7 +114,7 @@ test('12 야간반 + 부속 숨김', async ({ page }) => {
 test('13 Esc 3단계', async ({ page, app }) => {
   void app;
   await openHome(page);
-  await page.getByRole('button', { name: /인쇄 시작/ }).click();
+  await page.getByRole('button', { name: /학습 시작/ }).click();
   await page.locator(SHEET).waitFor();
   await page.locator('.acts .dunno').click();
   await page.locator('.reprint').waitFor();
@@ -146,12 +146,12 @@ test('13 Esc 3단계', async ({ page, app }) => {
 
   // ④ 홈은 「이어 찍기」로 바뀌어 있다. 진행은 저장됐다.
   const resume = page.locator('.today .press-btn');
-  await expect(resume).toContainText('이어 찍기 · 1번째 판부터');
+  await expect(resume).toContainText('이어 풀기 · 1번째 문제부터');
 
   // 재진입하면 같은 판이 다시 걸린다.
   await resume.click();
   await page.locator(SHEET).waitFor();
-  await expect(page.locator(SHEET)).toHaveAttribute('aria-label', /1판 · 문자열 리터럴/);
+  await expect(page.locator(SHEET)).toHaveAttribute('aria-label', /1번 · 문자열 리터럴/);
   await expect(page.locator('.jq-h')).toContainText('지금 1 / 3');
 });
 
@@ -253,7 +253,7 @@ test('14 리포 등록 → 인제스트 진행 → 홈', async ({ page, app }) =
   });
   await page.locator('.masthead').waitFor();
   await expect(page.locator('.masthead')).toContainText('fresh');
-  await expect(page.locator('.sheets')).toContainText('아직 대지가 없습니다');
+  await expect(page.locator('.sheets')).toContainText('아직 단원이 없습니다');
   await expect(page.locator('.forecast .fc-mark')).toHaveText('불가');
   await expect(page.locator('.today-empty')).toBeVisible();
 

@@ -3,14 +3,16 @@
    값은 목업의 --yellow / #221D18 과 같고, 야간반 대비는 --on-t2 가 이미 들고 있어
    목업의 [data-theme="dark"] 한 줄이 필요 없어졌다 (05 §4.3).
 
-   판 안에는 잉크(색면)를 얹지 않는다 — 구문 강조는 판독 보조지 장식이 아니다. */
+   판 안에는 잉크(색면)를 얹지 않는다 — 구문 강조는 판독 보조지 장식이 아니다.
+   D179 로 둘을 더 고쳤다: 코드를 16 → 18px 로 올려 화면에서 가장 큰 글이 되게 하고,
+   `.tok.ans` 의 황 색면을 걷었다 — 읽어야 하는 글자 위에는 면을 얹지 않는다(정본 §6). */
 .code {
   overflow: auto;
   border: 2px solid var(--rule);
   background: var(--stock);
   color: var(--ink);
   font-family: var(--f-mono);
-  font-size: var(--fs-16);
+  font-size: var(--fs-18);
   line-height: 1.85;
   tab-size: 2;
 }
@@ -37,10 +39,11 @@
   white-space: pre;
 }
 
-/* 초점 줄 — 이 판이 무엇을 묻는지 눈이 먼저 닿는 자리 */
+/* 초점 줄 — 이 판이 무엇을 묻는지 눈이 먼저 닿는 자리.
+   면은 종이고, 색은 왼쪽 4px 선 하나다 (진행 상태 · D179). */
 .code .ln.hi > span {
   background: var(--paper-3);
-  box-shadow: inset 4px 0 0 var(--t2);
+  box-shadow: inset 4px 0 0 var(--state-progress);
 }
 
 .code .ln.hi > i {
@@ -69,18 +72,19 @@
   font-weight: 600;
 }
 
-/* 강조 토큰 — 판 안에서 색 「면」이 허락된 유일한 자리 (05 §5) */
+/* 강조 토큰 — 색은 **선**으로만 온다. 면을 칠하면 그 글자가 읽기 어려워진다 (D179). */
 .code .tok {
   position: relative;
-  border-bottom: 2px solid var(--t2);
+  border-bottom: 2px solid var(--ink-mute);
 }
 
 .code .tok.ans {
   margin: 0 -2px;
   padding: 0 2px;
-  border-bottom-color: var(--rule);
-  background: var(--t2);
-  color: var(--on-t2);
+  border-bottom: 3px solid var(--state-right);
+  background: var(--paper-3);
+  color: var(--ink);
+  font-weight: 700;
 }
 
 /* 접힌 자리 (D141) — 창은 감싸는 블록이고, 20줄을 넘으면 초점 둘레만 펴 둔다.

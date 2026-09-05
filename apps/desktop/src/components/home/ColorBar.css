@@ -48,9 +48,10 @@
   opacity: var(--o, 1);
 }
 
-.cb .i0 { background: var(--t0) }
-.cb .i1 { background: var(--t1) }
-.cb .i2 { background: var(--t2) }
+/* 세 줄이 겹쳐 농도를 만든다. 색은 하나다 — 진하기가 정보이고 색상은 아니다 (D179). */
+.cb .i0,
+.cb .i1,
+.cb .i2 { background: var(--ink-soft) }
 
 .cb div[data-v="0"] {
   opacity: .5;

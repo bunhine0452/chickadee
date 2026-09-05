@@ -38,7 +38,7 @@ const SCREENS: Array<{ name: string; open: (page: Page, app: AppDb) => Promise<v
     },
   },
   {
-    name: '야간반',
+    name: '어둡게',
     open: async (page) => {
       await gotoDev(page);
       await toNight(page);
@@ -114,9 +114,11 @@ test('실루엣 — 24 · 32px 배지도 3단이 산다', async ({ page, app: _a
 /**
  * 모션 상한 720ms (06 §2). **정적 전수는 `scripts/check-motion.mjs` 가 이미 본다** —
  * 여기서 보는 것은 그 파서가 볼 수 없는 것이다: 계산된 값, 인라인 스타일, 단축 속성의 조합.
- * LIFER(1.36s)와 `peek`(1.6s × 2, D11)는 문서가 올린 예외라 선택자로 뺀다.
+ * 남은 예외는 `.lifer-note` 하나다 — 첫 기록의 등장 글은 §3.9 의 명시 예외(1.36s)다.
+ * `.dee.lifer`·`.dee.peek` 는 D179 로 마스코트 동작 클래스가 삭제되어 가리킬 선택자가 없어 뺐다
+ * (`scripts/check-motion.mjs` 의 `EXCEPTIONS` 두 줄도 같은 이유로 죽은 항목이다).
  */
-const MOTION_EXEMPT = ['.dee.lifer', '.dee.peek', '.lifer-note', '.lifer-note *'];
+const MOTION_EXEMPT = ['.lifer-note', '.lifer-note *'];
 
 for (const screen of SCREENS) {
   test(`${screen.name} — 모션 상한 720ms`, async ({ page, app }) => {

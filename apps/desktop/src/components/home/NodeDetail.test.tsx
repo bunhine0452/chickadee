@@ -33,8 +33,8 @@ describe('NodeDetail', () => {
 
   it('겹과 다음 인쇄를 평문으로 적는다', () => {
     render(<NodeDetail node={NODE} onClose={() => undefined} now={NOW} />);
-    expect(screen.getByText('잉크 2겹 / 4 · 먹판 · 윤곽이 잡힘')).toBeTruthy();
-    expect(screen.getByText(/다음 인쇄는 3일 뒤입니다/)).toBeTruthy();
+    expect(screen.getByText('숙련도 2 / 4 · 익히는 중 · 날을 두고 다시 맞혔음')).toBeTruthy();
+    expect(screen.getByText(/다음 복습은 3일 뒤입니다/)).toBeTruthy();
   });
 
   it('Esc 로 닫는다', async () => {
@@ -57,9 +57,9 @@ describe('NodeDetail', () => {
 
   it('잠긴 스티커는 이유만 적고 「이 판 찍기」를 내지 않는다', () => {
     render(<NodeDetail node={LOCKED} onGo={() => undefined} onClose={() => undefined} now={NOW} />);
-    expect(screen.getByText(/아직 판이 걸리지 않았습니다/)).toBeTruthy();
-    expect(screen.getByText(/앞 판이 먼저입니다/)).toBeTruthy();
-    expect(screen.queryByRole('button', { name: '이 판 찍기' })).toBeNull();
+    expect(screen.getByText(/아직 문제가 없습니다/)).toBeTruthy();
+    expect(screen.getByText(/앞 문제가 먼저입니다/)).toBeTruthy();
+    expect(screen.queryByRole('button', { name: '이 문제 풀기' })).toBeNull();
   });
 
   it('「이 판 찍기」는 개념 id 를 돌려준다', async () => {
@@ -67,7 +67,7 @@ describe('NodeDetail', () => {
     const user = userEvent.setup();
     render(<NodeDetail node={NODE} onGo={onGo} onClose={() => undefined} now={NOW} />);
 
-    await user.click(screen.getByRole('button', { name: '이 판 찍기' }));
+    await user.click(screen.getByRole('button', { name: '이 문제 풀기' }));
     expect(onGo).toHaveBeenCalledWith('ts/optional-chaining');
   });
 });

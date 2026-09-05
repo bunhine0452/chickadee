@@ -39,14 +39,16 @@
   box-shadow: inset 0 -2px 0 var(--t0);
 }
 
+/* 정답·오답은 **밑줄**로 온다 — 코드 글자 위에 색면을 얹지 않는다 (D179 · 정본 §6). */
 .code .tk.right {
-  border-bottom: 2px solid var(--rule);
-  background: var(--t2);
-  color: var(--on-t2);
+  border-bottom: 3px solid var(--state-right);
+  background: var(--paper-3);
+  color: var(--ink);
+  font-weight: 700;
 }
 
 .code .tk.wrong {
-  border-bottom: 2px solid var(--t1);
+  border-bottom: 3px dashed var(--state-wrong-text);
   opacity: .85;
   text-decoration: none;
 }

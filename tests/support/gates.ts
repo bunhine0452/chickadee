@@ -118,7 +118,7 @@ export const T2_SKIP = 'tiny 시드에 커밋·import 간선이 없다 — makeT
  * 같은 걸음을 걷는다 — 여기가 ko 만 알면 그 스모크는 홈에서 30초를 기다리다 죽는다.
  */
 export async function startSession(page: Page): Promise<void> {
-  const start = page.getByRole('button', { name: /인쇄 시작|이어 찍기|Start printing|Carry on/ });
+  const start = page.getByRole('button', { name: /학습 시작|이어 풀기|Start studying|Carry on/ });
   await start.waitFor();
   await start.focus();
   await page.keyboard.press('Enter');
@@ -165,14 +165,14 @@ const MAX_PLATES = 12;
  * 판을 답한 뒤 다시 넘긴다.
  */
 export async function toSummary(page: Page, app: AppDb): Promise<void> {
-  const done = page.locator('article.ps[aria-label="인쇄 완료"], article.ps[aria-label="Printing done"]');
+  const done = page.locator('article.ps[aria-label="오늘 학습 완료"], article.ps[aria-label="Done for today"]');
   for (let left = MAX_PLATES; left > 0; left -= 1) {
     // Space 뒤에 **판이 실제로 바뀔 때까지** 기다린다 — 요약이 서거나 교정지의 이름표가 달라질
     // 때까지. `.fb.on` 만 보면 그 칸이 없는 T2 판에서 옛 판 위에 다음 걸음을 뗀다.
     const prev = await page.locator('article.ps').first().getAttribute('aria-label');
     await page.keyboard.press('Space');
     await page.waitForFunction(
-      (was) => document.querySelector('article.ps[aria-label="인쇄 완료"], article.ps[aria-label="Printing done"]') !== null
+      (was) => document.querySelector('article.ps[aria-label="오늘 학습 완료"], article.ps[aria-label="Done for today"]') !== null
         || document.querySelector('article.ps')?.getAttribute('aria-label') !== was,
       prev,
     );
@@ -188,7 +188,7 @@ export async function toSummary(page: Page, app: AppDb): Promise<void> {
 
 /** 야간반 (05 §4.3). 스위치는 마스트헤드에 있고 `<html data-theme>` 하나만 바뀐다. */
 export async function toNight(page: Page): Promise<void> {
-  const sw = page.getByRole('switch', { name: '주간반 · 야간반 전환' });
+  const sw = page.getByRole('switch', { name: '밝게 · 어둡게 전환' });
   await sw.focus();
   await page.keyboard.press('Space');
   await page.waitForFunction(() => document.documentElement.dataset['theme'] === 'dark');
@@ -225,7 +225,7 @@ export async function toShelf(page: Page): Promise<void> {
 
 /** 인쇄 부속 숨김 (05 §4.3 — 텍스트·레이아웃은 1px 도 바뀌지 않는다). */
 export async function toggleTrim(page: Page): Promise<void> {
-  const sw = page.getByRole('switch', { name: '인쇄 부속 보이기 · 숨기기' });
+  const sw = page.getByRole('switch', { name: '장식 보이기 · 숨기기' });
   await sw.focus();
   await page.keyboard.press('Space');
   await settled(page);

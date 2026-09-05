@@ -60,7 +60,7 @@ afterEach(() => {
 describe('Masthead', () => {
   it('작업 지시서에 리포·날짜·연속일·겹 평균을 적는다', () => {
     setup();
-    const ticket = screen.getByRole('group', { name: '작업 지시서' });
+    const ticket = screen.getByRole('group', { name: '오늘 요약' });
     expect(ticket.textContent).toContain('cart-shop-web');
     expect(ticket.textContent).toContain('2026-09-03');
     expect(ticket.textContent).toContain('7');
@@ -80,13 +80,14 @@ describe('Masthead', () => {
     setup();
 
     expect(document.documentElement.getAttribute('data-theme')).toBe('light');
-    expect(document.documentElement.getAttribute('data-trim')).toBe('off');
+    // 부속은 기본이 숨김이다 (D179) — 스위치는 켜는 쪽으로 움직인다.
+    expect(document.documentElement.getAttribute('data-trim')).toBe('on');
 
-    await user.click(screen.getByRole('switch', { name: '주간반 · 야간반 전환' }));
+    await user.click(screen.getByRole('switch', { name: '밝게 · 어둡게 전환' }));
     expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
 
-    await user.click(screen.getByRole('switch', { name: '인쇄 부속 보이기 · 숨기기' }));
-    expect(document.documentElement.getAttribute('data-trim')).toBe('on');
+    await user.click(screen.getByRole('switch', { name: '장식 보이기 · 숨기기' }));
+    expect(document.documentElement.getAttribute('data-trim')).toBe('off');
   });
 
   // ───────── E7 (06 §1.5) ─────────
@@ -94,21 +95,21 @@ describe('Masthead', () => {
   it('스위치를 누르면 settings 테이블에 저장한다', async () => {
     const user = userEvent.setup();
     setup();
-    await user.click(screen.getByRole('switch', { name: '주간반 · 야간반 전환' }));
-    await user.click(screen.getByRole('switch', { name: '인쇄 부속 보이기 · 숨기기' }));
+    await user.click(screen.getByRole('switch', { name: '밝게 · 어둡게 전환' }));
+    await user.click(screen.getByRole('switch', { name: '장식 보이기 · 숨기기' }));
 
     await waitFor(() => expect(saved).toHaveLength(2));
     expect(saved).toEqual([
       { key: 'theme', valueJson: '"dark"' },
-      { key: 'trim', valueJson: '"on"' },
+      { key: 'trim', valueJson: '"off"' },
     ]);
   });
 
-  it('재실행하면 저장된 야간반·부속 숨김이 그대로 돌아온다 (E7)', async () => {
+  it('재실행하면 저장된 야간반·부속 보임이 그대로 돌아온다 (E7)', async () => {
     const user = userEvent.setup();
     setup();
-    await user.click(screen.getByRole('switch', { name: '주간반 · 야간반 전환' }));
-    await user.click(screen.getByRole('switch', { name: '인쇄 부속 보이기 · 숨기기' }));
+    await user.click(screen.getByRole('switch', { name: '밝게 · 어둡게 전환' }));
+    await user.click(screen.getByRole('switch', { name: '장식 보이기 · 숨기기' }));
     await waitFor(() => expect(saved).toHaveLength(2));
 
     // 「재실행」 — 화면을 통째로 버리고 속성도 지운 뒤 같은 `settings` 행 위에서 다시 연다.
@@ -119,9 +120,9 @@ describe('Masthead', () => {
 
     await waitFor(() => {
       expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
-      expect(document.documentElement.getAttribute('data-trim')).toBe('on');
+      expect(document.documentElement.getAttribute('data-trim')).toBe('off');
     });
-    expect(screen.getByRole('switch', { name: '주간반 · 야간반 전환' }).getAttribute('aria-checked'))
+    expect(screen.getByRole('switch', { name: '밝게 · 어둡게 전환' }).getAttribute('aria-checked'))
       .toBe('true');
   });
 

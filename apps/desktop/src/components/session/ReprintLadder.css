@@ -21,17 +21,6 @@
   background: var(--paper-3);
 }
 
-.ld-head .dee-sticker {
-  flex: 0 0 auto;
-  width: 46px;
-  height: 46px;
-}
-
-.ld-head .dee {
-  width: 100%;
-  height: 100%;
-}
-
 .ld-head h3 {
   font-size: var(--fs-18);
   font-weight: 700;

@@ -18,7 +18,7 @@ const QUEUE: QueueItem[] = [
 describe('JobBand', () => {
   it('작업 띠 머리이고 목업 클래스를 그대로 붙인다', () => {
     const { container } = render(<JobBand runNo="Run 08" repo="cart-shop-web" queue={QUEUE} pos={0} elapsed={0} />);
-    expect(screen.getByRole('banner', { name: '작업 띠' })).toBeTruthy();
+    expect(screen.getByRole('banner', { name: '진행 띠' })).toBeTruthy();
     for (const cls of ['.jobband', '.jb-brand', '.jb-title', '.jb-sub', '.jq-h', '.jq-labels', '.jb-ctl']) {
       expect(container.querySelector(cls), cls).not.toBeNull();
     }
@@ -50,7 +50,7 @@ describe('JobBand', () => {
 
   it('1분 미만 판은 초로 적는다', () => {
     const { container } = render(<JobBand runNo="Run 08" repo="r" queue={QUEUE} pos={1} elapsed={0} />);
-    expect(container.querySelector('.jq-h .time')?.textContent).toContain('30초 판');
+    expect(container.querySelector('.jq-h .time')?.textContent).toContain('30초');
   });
 
   it('다 찍으면 인쇄 완료로 바뀐다', () => {
@@ -59,7 +59,7 @@ describe('JobBand', () => {
     );
     const head = container.querySelector('.jq-h');
     expect(head?.textContent).toContain('4 / 4');
-    expect(head?.textContent).toContain('인쇄 완료');
+    expect(head?.textContent).toContain('오늘 학습 완료');
     expect(head?.textContent).toContain('오늘 15분');
   });
 

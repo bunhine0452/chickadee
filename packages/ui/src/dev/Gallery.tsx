@@ -2,8 +2,6 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { Dee } from '../dee/Dee';
 import { DeeSprite } from '../dee/DeeSprite';
-import { DEE_MOTIONS } from '../dee/useDeeMotion';
-import type { DeeMotion } from '../dee/useDeeMotion';
 import { FlatButton } from '../FlatButton';
 import { Kbd } from '../Kbd';
 import { LiveRegion } from '../LiveRegion';
@@ -31,7 +29,6 @@ import './tokens.css';
 
 const TRACKS: readonly Track[] = ['t0', 't1', 't2'];
 const LAYERS: readonly InkLayer[] = [0, 1, 2, 3, 4];
-const MOTIONS = Object.keys(DEE_MOTIONS) as readonly DeeMotion[];
 
 function Slot({ cap, children }: { cap: string; children: ReactNode }) {
   return (
@@ -56,8 +53,6 @@ function GalleryBody() {
   const [trim, setTrim] = useState<'off' | 'on'>('off');
   const [dunno, setDunno] = useState(false);
   const [toastOn, setToastOn] = useState(true);
-  const [motion, setMotion] = useState<DeeMotion>('hop');
-  const [nonce, setNonce] = useState(0);
 
   return (
     <div className="gallery" data-theme={theme} data-trim={trim}>
@@ -220,29 +215,6 @@ function GalleryBody() {
         </Slot>
         <Slot cap="head 18">
           <Dee ly={4} symbol="badge" size={18} />
-        </Slot>
-      </Section>
-
-      <Section title="Dee — 습성 동작">
-        {MOTIONS.map((m) => (
-          <Slot key={m} cap={`${m} ${DEE_MOTIONS[m].durationMs}ms`}>
-            <Dee ly={4} size={56} motion={motion === m ? m : null} motionNonce={nonce} />
-          </Slot>
-        ))}
-        <Slot cap="재생">
-          <FlatButton
-            onClick={() => {
-              const at = MOTIONS.indexOf(motion);
-              const next = MOTIONS[(at + 1) % MOTIONS.length];
-              if (next !== undefined) setMotion(next);
-              setNonce(nonce + 1);
-            }}
-          >
-            다음 동작
-          </FlatButton>
-        </Slot>
-        <Slot cap="타이핑 중">
-          <Dee ly={4} size={56} motion="hop" typing />
         </Slot>
       </Section>
 

@@ -36,8 +36,6 @@ export type { RichTextProps } from './RichText';
 export { DeeSprite } from './dee/DeeSprite';
 export { Dee, DeeLogo, DEE_HEAD_SIZE_LIMIT } from './dee/Dee';
 export type { DeeProps, DeeLogoProps, DeeSymbol } from './dee/Dee';
-export { useDeeMotion, DEE_MOTIONS, DEE_MOTION_CLASSES, DEE_MOTION_BUDGET_MS } from './dee/useDeeMotion';
-export type { DeeMotion, DeeMotionOptions, DeeMotionSpec } from './dee/useDeeMotion';
 export { DEE_PLATES, DEE_BIRD_CLIP_POINTS, DEE_BIRD_DIECUT_POINTS } from './dee/deePlates';
 export { deeStandalone } from './dee/deeStandalone';
 export { deeImageUrl, clearDeeImageCache } from './dee/deeImage';

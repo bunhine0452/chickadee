@@ -14,7 +14,7 @@ describe('Newcomer', () => {
 
   it('두 플래그의 사유 문장이 다르다 — 한 세션인지 두 세션인지', () => {
     render(<Newcomer flag="suspect" />);
-    expect(screen.getByRole('complementary').textContent).toContain('오늘 뿌리 개념 판이 막혔고');
+    expect(screen.getByRole('complementary').textContent).toContain('오늘 뿌리 개념 문제가 막혔고');
     cleanup();
 
     render(<Newcomer flag="confirmed" />);

@@ -34,7 +34,7 @@ describe('Node', () => {
   it('이름·트랙·겹·상태를 라벨 한 줄로 말한다', () => {
     render(<Node node={CURRENT} index={0} expanded={false} onOpen={() => undefined} />);
     const button = screen.getByRole('button', {
-      name: '옵셔널 체이닝. T0 문법. 1겹 애벌. 지금 여기.',
+      name: '옵셔널 체이닝. T0 문법. 1단계 · 처음. 지금 여기.',
     });
     expect(button.getAttribute('aria-expanded')).toBe('false');
     expect(button.getAttribute('data-state')).toBe('current');

@@ -55,12 +55,12 @@ describe('nodeSeed', () => {
 
 describe('그 밖의 문구', () => {
   it('레일은 판 번호와 도수를 같이 말한다', () => {
-    expect(railLabel(2, 2)).toBe('판 02 · 1도');
-    expect(railLabel(11, 0)).toBe('판 11 · 미인쇄');
+    expect(railLabel(2, 2)).toBe('02단원 · 평균 2단계');
+    expect(railLabel(11, 0)).toBe('11단원 · 평균 0단계');
   });
 
   it('겹은 은유 옆에 평문을 병기한다 (정본 §6)', () => {
-    expect(layerText(3)).toBe('잉크 3겹 / 4 · + 청판 · 색이 들어옴');
+    expect(layerText(3)).toBe('숙련도 3 / 4 · 자리 잡음 · 오래 두고도 맞힘');
   });
 
   it('T3 는 예약이라 먹판 자리를 빌린다', () => {

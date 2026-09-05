@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { t } from '@chickadee/i18n';
-import { Dee, Kbd, Passes, Pill } from '@chickadee/ui';
+import { Kbd, Passes, Pill } from '@chickadee/ui';
 
 import type { HomeNode } from '../../screens/home/data';
 import { dueLabel, inkTrack, layerText, trackName } from './labels';
@@ -73,7 +73,6 @@ export function NodeDetail({ node, onGo, onClose, now }: NodeDetailProps) {
         aria-label={t('home.detail', { name: node.nameKo })}
         tabIndex={-1}
       >
-        <Dee ly={locked ? 0 : node.shownLayer} sticker />
         <div>
           <h4>{locked ? t('home.detailTitleLocked', { name: node.nameKo }) : node.nameKo}</h4>
           <p>{locked ? lockedBody() : body(node, at)}</p>

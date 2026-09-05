@@ -3,7 +3,7 @@
      · 진홍 원색을 --t1 / --t1-text 로 (05 §4.2).
      · 선택자에서 중간 마디를 뺐다: `.done-head p b`→`.done-head b`,
        `.shift .next b`→`.shift b`, `.lifer-box p b`→`.lifer-box b`,
-       `.shift .pair .dee*`→`.shift .dee*`. 그 상자 안에 다른 `b`·스티커가 없어
+       `.shift .pair .dee*`→`.shift .dee*`. 그 상자 안에 다른 `b`·막대가 없어
        고르는 대상은 같고, 같은 키 선택자끼리의 특이도가 평평해져
        stylelint no-descending-specificity 를 통과한다.
    `.pane-h` 는 목업에서 T1 필사 화면과 함께 쓰는 클래스다. 지금은 요약만 쓰므로 여기 두었다 —
@@ -122,16 +122,10 @@
   gap: 6px;
 }
 
-.shift .dee-sticker {
-  width: 38px;
-  height: 38px;
-  border-width: 2px;
-  box-shadow: none;
-}
-
-.shift .dee {
-  width: 100%;
-  height: 100%;
+/* 겹 이동은 막대 둘 — 마스코트는 완료 머리에만 남는다 (D179). */
+.shift .passes i {
+  width: 8px;
+  height: 18px;
 }
 
 .shift .pair .arr {

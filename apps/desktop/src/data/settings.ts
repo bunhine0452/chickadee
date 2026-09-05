@@ -14,18 +14,17 @@ import { EDITOR_ASSIST_DEFAULT, type EditorAssist } from '../components/t1/monac
 import { measure } from '../devtools/audit.js';
 
 /**
- * 부속 기본값은 **플랫폼별**이다 (D12 · 05 §4.3) — Linux(WebKitGTK)는 `'on'`(부속 숨김),
- * macOS·Windows 는 `'off'`. 부속(등록표시·기울기·결·어긋남·절취선·도장 회전)은 블렌드와
- * 필터를 쓰는데 WebKitGTK 가 그것을 가장 비싸게 그린다.
+ * 부속 기본값은 **모든 플랫폼에서 `'on'`(숨김)** 이다 (D179 · 정본 §6).
  *
- * `navigator.userAgent` 로 가른다 — `@tauri-apps/plugin-os` 를 붙이면 권한 표면이 하나
- * 늘어나는데(06 §4.3), 얻는 것은 이 한 줄뿐이다. 브라우저 게이트에서도 같은 값이 나온다.
+ * 부속은 등록표시 · 판 번호 어긋남 · 종이 결 · 노드 지터 · 도장 회전이다. 전에는
+ * 플랫폼으로 갈랐고(D12 — Linux 만 껐다) 이유가 성능이었는데, 이제 이유는 성능이 아니라
+ * 화면의 주인이 누구냐다. 코드와 다이어그램이 가장 큰 요소여야 하고 장식은 본문 단 밖에만
+ * 둔다 — 그러니 기본이 꺼짐이고, 켜고 싶은 사람이 스위치를 켠다.
+ *
+ * 스위치는 그대로다. `applyTrim` 도 그대로다 — 바뀌는 것은 저장된 값이 없을 때의 답 하나뿐이다.
  */
 function defaultTrim(): Settings['trim'] {
-  return typeof navigator !== 'undefined' && /Linux|X11/.test(navigator.userAgent)
-    && !/Android/.test(navigator.userAgent)
-    ? 'on'
-    : 'off';
+  return 'on';
 }
 
 /** D12 기본값. `settings` 에 행이 없을 때 쓰는 값이며 화면이 바꾸면 행이 생긴다. */

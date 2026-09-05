@@ -1,5 +1,5 @@
 import { t } from '@chickadee/i18n';
-import { Dee } from '@chickadee/ui';
+import { Passes } from '@chickadee/ui';
 import type { InkLayer } from '@chickadee/ui';
 
 import { layerNames } from '../../screens/home/data';
@@ -45,7 +45,7 @@ export function InkScale({ counts }: InkScaleProps) {
         const it = names[i];
         return (
           <div key={i} className={i === hit ? 'ld hit' : 'ld'}>
-            <Dee ly={i} sticker />
+            <Passes n={i} label={t('home.inkScalePart', { n: it.n, k: it.k, count: String(counts[i] ?? 0) })} />
             <b>{it.n}</b>
             <span>{it.k}</span>
             <em>

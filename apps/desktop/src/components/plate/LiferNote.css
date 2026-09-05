@@ -1,10 +1,10 @@
 /* 목업 `design/src/ink/session.css` 의 「LIFER」 카드 속을 판정란 크기로 옮긴 것 (D131).
    베일(`.lifer-veil`)과 그 위의 카드 그림자·포커스 트랩은 함께 사라졌다 — 덮을 배경이
-   없으므로 남길 것이 없다. 담는 것(Dee 4겹 · 머리말 · 개념 · 채집지 · 일련번호 · 도장)은
-   그대로다. */
+   없으므로 남길 것이 없다. 담는 것은 머리말 · 개념 · 채집지 · 일련번호 · 도장이다.
+   D179 로 앞머리의 Dee 를 뺐다 — 문제 화면에 마스코트를 세우지 않는다(정본 §6). */
 .lifer-note {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 14px;
   margin-top: 12px;
@@ -12,16 +12,6 @@
   border: 2px solid var(--rule);
   background: var(--paper-2);
   animation: sheetin .42s var(--e-settle) both;
-}
-
-.lifer-note .dee-sticker {
-  width: 56px;
-  height: 56px;
-}
-
-.lifer-note .dee {
-  width: 100%;
-  height: 100%;
 }
 
 .lifer-k {

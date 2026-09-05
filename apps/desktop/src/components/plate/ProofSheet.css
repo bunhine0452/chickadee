@@ -1,6 +1,8 @@
 /* 목업: design/src/ink/session.css `.ps` 블록.
    바꾼 것 —
      · `.ps-rail .plus` 의 진홍 글자를 --t1-text 로 (05 §4.2).
+     · 판 번호 `.sig` 를 포스터 30px 에서 모노 20px 로 내리고 레일을 46 → 34px 로 좁혔다.
+       화면에서 가장 큰 것이 코드여야 한다 (D179 · 정본 §6).
      · 부속 숨김에서 목업은 `transform:none` 만 걸었는데, `sheetin` 키프레임이
        `both` 로 최종 포즈를 다시 얹어 기울기가 살아난다. `--tilt: 0deg` 를 함께 넣어
        키프레임 안쪽까지 껐다 — 레이아웃은 1px 도 안 바뀐다 (05 §4.3).
@@ -8,10 +10,10 @@
 .ps {
   position: relative;
   display: grid;
-  grid-template-columns: 46px minmax(0, 1fr);
+  grid-template-columns: 34px minmax(0, 1fr);
   width: 100%;
   max-width: 860px;
-  padding: 18px 24px 22px 0;
+  padding: 18px 20px 22px 0;
   border: 2.5px solid var(--rule);
   background: var(--paper-2);
   box-shadow: 6px 7px 0 var(--edge), 0 18px 26px -18px var(--drop), var(--lamp);
@@ -51,17 +53,19 @@
   border-right: 2px dashed var(--rule);
 }
 
-.ps-rail .dee-sticker {
-  width: 36px;
-  height: 36px;
-  border-width: 2px;
-  box-shadow: none;
-  transition: transform .3s var(--e-hop);
-}
-
-.ps-rail .dee {
-  width: 100%;
-  height: 100%;
+/* 겹은 숫자다 (D179) — 문제 화면의 레일에 마스코트가 서지 않는다. */
+.ps-rail .rail-ly {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--rule);
+  background: var(--paper-3);
+  color: var(--ink);
+  font-family: var(--f-mono);
+  font-size: var(--fs-18);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  place-items: center;
 }
 
 .ps-rail .vt {
@@ -99,7 +103,7 @@
   flex-direction: column;
   gap: 16px;
   min-width: 0;
-  padding-left: 22px;
+  padding-left: 16px;
 }
 
 /* 머리 : 트랙 · 개념 · 출처 · 겹 */
@@ -114,13 +118,14 @@
 
 .ps-head .sig {
   position: relative;
-  top: -2px;
+  top: 1px;
   flex: 0 0 auto;
-  color: var(--ink);
-  font-family: var(--f-poster);
-  font-size: var(--fs-poster-s);
+  color: var(--ink-soft);
+  font-family: var(--f-mono);
+  font-size: var(--fs-20);
+  font-weight: 700;
   letter-spacing: .01em;
-  line-height: .9;
+  line-height: 1.2;
 }
 
 .ps-h2 {
@@ -185,11 +190,11 @@
 
 @media (width <= 720px) {
   .ps {
-    grid-template-columns: 32px minmax(0, 1fr);
+    grid-template-columns: 28px minmax(0, 1fr);
     padding-right: 14px;
   }
 
-  .ps-in { padding-left: 14px }
+  .ps-in { padding-left: 12px }
 }
 
 /* 감축 모드 — 전환만 지우고 최종 포즈는 남긴다 (05 §6). `sheetin` 은 `both` 라
@@ -197,11 +202,9 @@
 @media (prefers-reduced-motion: reduce) {
   .ps { animation-duration: .001ms }
 
-  .ps-rail .plus,
-  .ps-rail .dee-sticker { transition-duration: .001ms }
+  .ps-rail .plus { transition-duration: .001ms }
 }
 
 [data-motion="reduce"] .ps { animation-duration: .001ms }
 
-[data-motion="reduce"] .ps-rail .plus,
-[data-motion="reduce"] .ps-rail .dee-sticker { transition-duration: .001ms }
+[data-motion="reduce"] .ps-rail .plus { transition-duration: .001ms }

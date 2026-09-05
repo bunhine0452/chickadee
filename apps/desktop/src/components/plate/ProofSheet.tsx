@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { t } from '@chickadee/i18n';
-import { cx, Dee, Misreg, Passes, Pill, Reg, RichText } from '@chickadee/ui';
+import { cx, Misreg, Passes, Pill, Reg, RichText } from '@chickadee/ui';
 import type { InkLayer, Track } from '@chickadee/ui';
 
 import { layerNames } from '../../screens/home/data';
@@ -87,8 +87,9 @@ export function ProofSheet({
     >
       <Reg />
 
+      {/* 겹은 숫자다 — 문제 화면에 마스코트를 세우지 않는다 (D179 · 정본 §6·§7). */}
       <div className="ps-rail" aria-hidden="true">
-        <Dee ly={to} sticker />
+        <b className="rail-ly">{to}</b>
         <span className={cx('plus', plus !== '' && 'on')}>{plus}</span>
         <span className="vt">
           {t('plate.railVertical', { no, n: String(to), name: layerNames()[to].k })}

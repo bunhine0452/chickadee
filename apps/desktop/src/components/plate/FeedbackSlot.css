@@ -119,16 +119,16 @@
   font-size: var(--fs-13);
 }
 
-.fb .gain .dee-sticker {
-  width: 30px;
-  height: 30px;
-  border-width: 2px;
-  box-shadow: none;
+/* 겹 이동은 막대 둘 — 판정란에 마스코트를 세우지 않는다 (D179). */
+.fb .gain .pair {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.fb .gain .dee {
-  width: 100%;
-  height: 100%;
+.fb .gain .passes i {
+  width: 7px;
+  height: 14px;
 }
 
 .fb .gain .arr {

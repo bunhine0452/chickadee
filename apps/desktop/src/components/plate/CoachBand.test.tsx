@@ -9,7 +9,7 @@ afterEach(cleanup);
 describe('CoachBand', () => {
   it('걸음마다 다른 말을 하고, 셋 다 3걸음 중 몇째인지를 든다', () => {
     const { container, rerender } = render(<CoachBand step={1} />);
-    const band = screen.getByRole('complementary', { name: '첫 판 안내' });
+    const band = screen.getByRole('complementary', { name: '첫 문제 안내' });
     expect(band.textContent).toContain('1 / 3');
     expect(band.textContent).toContain('보기 넷 중 하나');
 
@@ -21,7 +21,7 @@ describe('CoachBand', () => {
 
     rerender(<CoachBand step={3} />);
     expect(container.textContent).toContain('3 / 3');
-    expect(container.textContent).toContain('판정란');
+    expect(container.textContent).toContain('채점 결과');
     expect(container.textContent).toContain('Space');
   });
 

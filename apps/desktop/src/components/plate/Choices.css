@@ -87,10 +87,10 @@
   color: var(--on-t0);
 }
 
-.ch.right { box-shadow: 0 4px 0 var(--edge), inset 0 0 0 2.5px var(--verdict-exact) }
+.ch.right { box-shadow: 0 4px 0 var(--edge), inset 0 0 0 2.5px var(--state-right) }
 
 .ch.right .n {
-  background: var(--verdict-exact);
+  background: var(--state-right);
   color: var(--on-t1);
 }
 
@@ -100,8 +100,8 @@
 }
 
 .ch.wrong .n {
-  background: var(--t2);
-  color: var(--on-t2);
+  background: var(--state-wrong);
+  color: var(--on-verdict-differ);
 }
 
 .ch[disabled] { cursor: default }

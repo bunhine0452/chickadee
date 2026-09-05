@@ -11,7 +11,7 @@ import { TodayPanel, type TodayPreview } from './TodayPanel';
 const preview = (over: Partial<TodayPreview> = {}): TodayPreview => ({
   items: [
     { kind: 't0', label: '선택적 체이닝', mins: 0.5, sub: '복습', review: true },
-    { kind: 't0', label: '배열 map', mins: 2, sub: '새 판', review: false },
+    { kind: 't0', label: '배열 map', mins: 2, sub: '새 문제', review: false },
   ],
   mins: 2.5,
   resumeAt: null,
@@ -26,7 +26,7 @@ describe('TodayPanel', () => {
   test('판 수와 예상 시간을 적는다', () => {
     render(<TodayPanel today={preview()} onStart={() => undefined} date="2026-09-03" />);
     expect(screen.getByText('2')).toBeTruthy();
-    expect(screen.getByRole('button', { name: /인쇄 시작/ })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /학습 시작/ })).toBeTruthy();
   });
 
   test('진행바는 시간 비례다 — 칸 너비가 예상 시간이다 (정본 §3-5)', () => {
@@ -43,7 +43,7 @@ describe('TodayPanel', () => {
     render(
       <TodayPanel today={preview({ resumeAt: 2 })} onStart={() => undefined} date="2026-09-03" />,
     );
-    expect(screen.getByRole('button', { name: /이어 찍기 · 3번째 판부터/ })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /이어 풀기 · 3번째 문제부터/ })).toBeTruthy();
   });
 
   test('찍을 것이 없으면 버튼이 잠기고 이유를 적는다 (02 §5.3)', () => {
@@ -54,15 +54,15 @@ describe('TodayPanel', () => {
         date="2026-09-03"
       />,
     );
-    expect(screen.getByText(/오늘은 인쇄할 판이 없습니다/)).toBeTruthy();
-    expect(screen.getByRole('button', { name: /인쇄 시작/ }).hasAttribute('disabled')).toBe(true);
+    expect(screen.getByText(/오늘은 풀 문제가 없습니다/)).toBeTruthy();
+    expect(screen.getByRole('button', { name: /학습 시작/ }).hasAttribute('disabled')).toBe(true);
   });
 
   test('연속 인쇄는 숫자로만 적는다 — 끊겨도 연출이 없다 (정본 §3-7)', () => {
     const { container } = render(
       <TodayPanel today={preview({ streak: 0 })} onStart={() => undefined} date="2026-09-03" />,
     );
-    expect(container.querySelector('.stampcard')?.textContent).toContain('연속 인쇄');
+    expect(container.querySelector('.stampcard')?.textContent).toContain('연속 학습');
     expect(container.querySelectorAll('.cb-mini i.on')).toHaveLength(3);
   });
 
@@ -70,7 +70,7 @@ describe('TodayPanel', () => {
     const onStart = vi.fn();
     const user = userEvent.setup();
     render(<TodayPanel today={preview()} onStart={onStart} date="2026-09-03" />);
-    await user.click(screen.getByRole('button', { name: /인쇄 시작/ }));
+    await user.click(screen.getByRole('button', { name: /학습 시작/ }));
     expect(onStart).toHaveBeenCalledOnce();
   });
 });

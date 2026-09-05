@@ -35,7 +35,7 @@ describe('GapsPanel', () => {
     const user = userEvent.setup();
     render(<GapsPanel gaps={GAPS} onMake={onMake} />);
 
-    await user.click(screen.getByRole('button', { name: '?? 판 만들기' }));
+    await user.click(screen.getByRole('button', { name: '?? 문제 만들기' }));
 
     expect(onMake).toHaveBeenCalledTimes(1);
     expect(onMake).toHaveBeenCalledWith('ts/nullish-default');
@@ -43,7 +43,7 @@ describe('GapsPanel', () => {
 
   it('등장 횟수를 글자로 낸다 — 막대는 장식이다', () => {
     render(<GapsPanel gaps={GAPS} onMake={() => undefined} />);
-    const list = screen.getByRole('list', { name: '판이 없는 문법' });
+    const list = screen.getByRole('list', { name: '아직 안 배운 문법' });
     expect(list.textContent).toContain('11');
     expect(list.textContent).toContain('번 등장');
     expect(screen.getByText('async / await')).toBeTruthy();
@@ -58,6 +58,6 @@ describe('GapsPanel', () => {
 
   it('구멍이 없으면 빈 상태 문구를 낸다', () => {
     render(<GapsPanel gaps={[]} onMake={() => undefined} />);
-    expect(screen.getByText(/판이 없는 문법이 없습니다/)).toBeTruthy();
+    expect(screen.getByText(/아직 안 배운 문법이 없습니다/)).toBeTruthy();
   });
 });

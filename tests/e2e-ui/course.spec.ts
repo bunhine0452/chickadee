@@ -79,7 +79,7 @@ test('코스 — 목차에서 2단 판 하나가 원장까지 간다', async ({ 
   // 2단 — 판 한 장을 걸고, 짚고, 확인하고, 다음으로.
   await page.getByRole('button', { name: /2단 추적 시작/ }).click();
   await page.locator('.proof article.ps').waitFor();
-  await expect(page.locator('.proof article.ps')).toHaveAttribute('aria-label', /1판 · 로그인/);
+  await expect(page.locator('.proof article.ps')).toHaveAttribute('aria-label', /1번 · 로그인/);
   await page.locator('.proof .tk[data-k="1"]').click();
   await page.locator('.proof .acts .press-btn').click();
   await expect(page.locator('.proof .fb')).toContainText('맞았습니다');

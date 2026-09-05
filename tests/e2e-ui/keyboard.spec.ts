@@ -71,8 +71,8 @@ test('15 키보드만으로 1~13', async ({ page, app }) => {
   await page.keyboard.press(`Digit${key}`);
   await expect(page.locator(`.ch[data-k="${key}"]`)).toHaveAttribute('aria-checked', 'true');
   await page.keyboard.press('Enter');
-  await expect(page.locator('.fb .stampbox .stamp')).toContainText('정합');
-  await expect(page.locator('.ps-rail .plus')).toHaveText('+1겹');
+  await expect(page.locator('.fb .stampbox .stamp')).toContainText('같음');
+  await expect(page.locator('.ps-rail .plus')).toHaveText('+1단계');
 
   // ── 6. LIFER — 판정란 안에 남으므로 벗길 겹이 없고, 포커스는 채점 자리에 그대로다 (D131).
   await page.locator('.fb .lifer-note').waitFor();
@@ -80,7 +80,7 @@ test('15 키보드만으로 1~13', async ({ page, app }) => {
 
   // ── 11. Space 로 다음. 남은 판까지 답하면 요약 (D113). Enter 로 홈.
   await finishSession(page, app.db);
-  const done = page.locator('[aria-label="인쇄 완료"]');
+  const done = page.locator('[aria-label="오늘 학습 완료"]');
   await expect(done.locator('.shifts .shift')).toHaveCount(3);
   expect(await focusPath(page)).toContain('press-btn');
   await page.keyboard.press('Enter');
@@ -88,7 +88,7 @@ test('15 키보드만으로 1~13', async ({ page, app }) => {
   await expect(page.locator('.proof')).toHaveCount(0);
 
   // ── 12. 야간반도 키보드로 — 스위치는 `role=switch` 이고 `←→` 로 넘어간다.
-  await tabTo(page, 'button.sw[aria-label="주간반 · 야간반 전환"]');
+  await tabTo(page, 'button.sw[aria-label="밝게 · 어둡게 전환"]');
   await page.keyboard.press('ArrowRight');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 

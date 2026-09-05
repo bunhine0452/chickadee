@@ -10,7 +10,7 @@ describe('EdStatus', () => {
   it('판정 3색에는 낱말이 같이 붙고 색면은 낭독하지 않는다', () => {
     const { container } = render(<EdStatus lines={0} savedAt={null} peeks={0} />);
     const legend = container.querySelector('.legend');
-    expect(legend?.textContent).toBe('정합 동등 어긋남');
+    expect(legend?.textContent).toBe('같음 같은 뜻 다름');
     const swatches = [...container.querySelectorAll('.legend i')];
     expect(swatches.map((el) => el.className)).toEqual(['e', 'q', 'd']);
     expect(swatches.every((el) => el.getAttribute('aria-hidden') === 'true')).toBe(true);

@@ -1,5 +1,6 @@
-/* 목업: ink-home.html `.dee` 판 변수 + design/src/ink/shared.css 동작 클래스
-   바꾼 것 — `peek` 의 `infinite` → `2` (00 D11 「상시 애니메이션 유한화」). */
+/* 목업: ink-home.html `.dee` 판 변수.
+   D179 로 동작 클래스 다섯(`hop`·`tilt`·`hang`·`peek`·`lifer`)과 감축 모드 블록을 지웠다 —
+   마스코트는 움직이지 않는다(정본 §7). 남은 것은 판 변수와 스티커 틀뿐이다. */
 .dee {
   display: inline-block;
   overflow: visible;
@@ -68,68 +69,3 @@
   background-repeat: no-repeat;
   background-size: contain;
 }
-
-/* ── 습성 동작 ── */
-.dee.hop { animation: hop 520ms var(--e-hop) }
-
-@keyframes hop {
-  0% { transform: translateY(0) }
-  34% { transform: translateY(-16px) }
-  62% { transform: translateY(0) }
-  74% { transform: translateY(-3.5px) }
-  100% { transform: translateY(0) }
-}
-
-.dee.tilt { animation: tilt 700ms var(--e-settle) both }
-
-@keyframes tilt {
-  0% { transform: rotate(0) }
-  40% { transform: rotate(-14deg) }
-  100% { transform: rotate(-9deg) }
-}
-
-/* 거꾸로 매달리기 : 안 보이던 면을 본다 */
-.dee.hang {
-  transform: rotate(180deg) scaleX(-1);
-  transition: transform .55s var(--e-hop);
-}
-
-.dee.peek { animation: peek 1.6s var(--e-soft) 2 }
-
-@keyframes peek {
-  0%, 100% { transform: translateY(0) }
-  50% { transform: translateY(-2px) rotate(-3deg) }
-}
-
-.dee.lifer { animation: lifer 1.35s var(--e-hop) both }
-
-@keyframes lifer {
-  0% { transform: translateY(0) scale(1) }
-  18% { transform: translateY(-22px) scale(1.06) rotate(-8deg) }
-  36% { transform: translateY(0) scale(1) }
-  52% { transform: translateY(-14px) rotate(6deg) }
-  68% { transform: translateY(0) }
-  82% { transform: translateY(-5px) }
-  100% { transform: translateY(0) }
-}
-
-/* 감축 모드 : 전환만 없애고 최종 포즈(`hang` 의 180deg, `tilt` 의 -9deg)는 남긴다 */
-@media (prefers-reduced-motion: reduce) {
-  .dee.hop,
-  .dee.tilt,
-  .dee.peek,
-  .dee.lifer {
-    animation-duration: .001ms;
-    animation-iteration-count: 1;
-  }
-  .dee.hang { transition-duration: .001ms }
-}
-
-[data-motion="reduce"] .dee.hop,
-[data-motion="reduce"] .dee.tilt,
-[data-motion="reduce"] .dee.peek,
-[data-motion="reduce"] .dee.lifer {
-  animation-duration: .001ms;
-  animation-iteration-count: 1;
-}
-[data-motion="reduce"] .dee.hang { transition-duration: .001ms }

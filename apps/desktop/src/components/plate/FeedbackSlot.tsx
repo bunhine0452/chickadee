@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { t } from '@chickadee/i18n';
-import { cx, Dee, RichText, Stamp } from '@chickadee/ui';
+import { cx, Passes, RichText, Stamp } from '@chickadee/ui';
 import type { InkLayer, StampTone } from '@chickadee/ui';
 
 import { CodePlate } from './CodePlate';
@@ -140,9 +140,12 @@ export function FeedbackSlot({
               )}
               {gain === undefined ? null : (
                 <div className="gain">
-                  <Dee ly={gain.from} sticker />
-                  <span className="arr">→</span>
-                  <Dee ly={gain.to} sticker />
+                  {/* 겹 이동은 막대 둘이 말한다 — 마스코트를 진도계로 쓰지 않는다 (D179). */}
+                  <span className="pair" aria-hidden="true">
+                    <Passes n={gain.from} label="" />
+                    <span className="arr">→</span>
+                    <Passes n={gain.to} label="" />
+                  </span>
                   <RichText html={gain.text} />
                 </div>
               )}
