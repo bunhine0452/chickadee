@@ -29,7 +29,7 @@ describe('E6 Esc 복구', () => {
   before(async () => {
     await waitForBoot();
     await shown('.today');
-    const items = await (await shown('.today .qlist')).$$('li');
+    const items = await (await shown('.today .today-list')).$$('li');
     target = Math.min(3, items.length);
     assert.ok(target >= 2, `큐가 ${items.length}장이라 「중간에서 나가기」를 만들 수 없다`);
   });

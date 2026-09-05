@@ -15,7 +15,7 @@ describe('E4 홈', () => {
   });
 
   it('오늘 할 것이 보인다', async () => {
-    const list = await shown('.today .qlist');
+    const list = await shown('.today .today-list');
     const items = await list.$$('li');
     assert.ok(items.length > 0, '오늘 낼 문제가 하나도 없다 — 시드가 큐를 못 만들었다');
   });
@@ -34,7 +34,7 @@ describe('E4 홈', () => {
     assert.ok(plates > 0, `문제가 0개다: ${line}`);
     assert.ok(mins > 0 && mins <= 25, `총 분이 상한 25 밖이다: ${mins}분`);
 
-    const items = await (await shown('.today .qlist')).$$('li');
+    const items = await (await shown('.today .today-list')).$$('li');
     assert.equal(items.length, plates, `줄은 ${plates}문제인데 목록은 ${items.length}개다`);
   });
 
@@ -49,7 +49,7 @@ describe('E4 홈', () => {
 
   it('마스트헤드에서 설정으로 갈 수 있다 (E7·E8 의 입구)', async () => {
     const masthead = await shown('header.masthead');
-    const buttons = await masthead.$$('button.flat-btn');
+    const buttons = await masthead.$$('nav.mh-nav button.mh-link');
     // WebdriverIO v9 의 `ElementArray` 는 `map`·`filter` 를 **비동기 판**으로 덮어쓴다 —
     // 배열이 아니라 Promise 가 나오므로 `Promise.all` 에 넣으면 「object is not iterable」이다.
     const labels: string[] = [];
