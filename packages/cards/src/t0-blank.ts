@@ -6,7 +6,7 @@
 import { t } from '@chickadee/i18n';
 import { mulberry32, shuffle, tokenize } from '@chickadee/text';
 
-import { codeLines, lineAt, spanOf, LINES_WINDOW, type Span } from './lines.js';
+import { codeLines, inWindow, lineAt, spanOf, type Span } from './lines.js';
 import { commonPayload, finish, renderDiag, seedFor, type Diag } from './payload.js';
 import { buildVars, Renderer } from './vars.js';
 import type { GenResult, SiteInput, T0Request } from './types.js';
@@ -61,8 +61,9 @@ export function genBlank(req: T0Request, input: SiteInput): GenResult {
   const span: Span = { ...found, hole: true };
 
   // 정답 토큰이 맥락 줄에 또 보이면 「보고 베낀다」 — 순위를 낮춘다 (전부 leak 이면 허용).
-  const leak = input.lines
-    .filter((l) => Math.abs(l.n - site.lineStart) <= LINES_WINDOW)
+  // 세는 범위는 **판에 실제로 실리는 창**이다. 창이 블록으로 넓어졌으니 누설도 그만큼 는다
+  // (D141) — 다만 탈락이 아니라 강등이라 판이 사라지지는 않는다 (04 §1.2).
+  const leak = inWindow(input.lines, site.lineStart, input.block)
     .reduce((n, l) => n + l.t.split(hole).length - 1, 0) > 1;
 
   const order = shuffle(rendered.map((_, i) => i), rng);
@@ -80,7 +81,7 @@ export function genBlank(req: T0Request, input: SiteInput): GenResult {
 
   const card = finish(req, input, 'blank', {
     track: 't0', kind: 'blank', ...common,
-    lines: codeLines(input.lines, site.lineStart, [span]),
+    lines: codeLines(input.lines, site.lineStart, [span], input.block),
     q, hint, options, answer, why,
   });
   return leak ? { card, leak: true } : { card };

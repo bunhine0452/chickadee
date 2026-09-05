@@ -512,5 +512,125 @@
         "note": "cartApi.ts → route.ts — 가져다 쓰는 쪽이 cartApi.ts 입니다."
       }
     ]
+  },
+  "entry-doors": {
+    "kind": "entry",
+    "pct": 100,
+    "found": [
+      "src/app/",
+      "src/cli/"
+    ],
+    "missed": [],
+    "wrong": [],
+    "bonus": [
+      "src/features/cart/"
+    ],
+    "verdict": "advance",
+    "capped": null,
+    "hints": 0,
+    "rows": [
+      {
+        "path": "src/app/",
+        "tier": "found",
+        "stat": "문",
+        "note": "«page.tsx» — 밖에서 부르는 파일이 여기 있고 들어오는 화살표가 없습니다."
+      },
+      {
+        "path": "src/cli/",
+        "tier": "found",
+        "stat": "문",
+        "note": "들어오는 화살표가 없고 1곳을 가져다 씁니다."
+      },
+      {
+        "path": "src/features/cart/",
+        "tier": "sec",
+        "stat": "문처럼 생긴 곳",
+        "note": "문 이름은 «index.ts» 인데 리포 안에서 1곳이 이 폴더를 가져다 씁니다."
+      }
+    ]
+  },
+  "entry-hub": {
+    "kind": "entry",
+    "pct": 0,
+    "found": [],
+    "missed": [
+      "src/app/",
+      "src/cli/"
+    ],
+    "wrong": [
+      "src/lib/"
+    ],
+    "bonus": [],
+    "verdict": "repeat",
+    "capped": null,
+    "hints": 1,
+    "rows": [
+      {
+        "path": "src/app/",
+        "tier": "missed",
+        "stat": "문",
+        "note": "«page.tsx» — 밖에서 부르는 파일이 여기 있고 들어오는 화살표가 없습니다."
+      },
+      {
+        "path": "src/cli/",
+        "tier": "missed",
+        "stat": "문",
+        "note": "들어오는 화살표가 없고 1곳을 가져다 씁니다."
+      },
+      {
+        "path": "src/lib/",
+        "tier": "wrong",
+        "stat": null,
+        "note": "3곳이 이 폴더를 가져다 씁니다. 많이 쓰이는 것과 처음 들어오는 것은 다릅니다."
+      },
+      {
+        "path": "src/features/cart/",
+        "tier": "sec",
+        "stat": "문처럼 생긴 곳",
+        "note": "문 이름은 «index.ts» 인데 리포 안에서 1곳이 이 폴더를 가져다 씁니다."
+      }
+    ]
+  },
+  "role-right": {
+    "kind": "role",
+    "pct": 100,
+    "found": [
+      "src/core/"
+    ],
+    "missed": [],
+    "wrong": [],
+    "bonus": [],
+    "verdict": "advance",
+    "capped": null,
+    "hints": 0,
+    "rows": [
+      {
+        "path": "src/core/",
+        "tier": "found",
+        "stat": "동작 · 통신",
+        "note": "이 폴더는 «동작 · 통신» 층입니다."
+      }
+    ]
+  },
+  "role-wrong": {
+    "kind": "role",
+    "pct": 0,
+    "found": [],
+    "missed": [
+      "src/core/"
+    ],
+    "wrong": [],
+    "bonus": [],
+    "verdict": "repeat",
+    "capped": null,
+    "hints": 2,
+    "rows": [
+      {
+        "path": "src/core/",
+        "tier": "missed",
+        "stat": "화면",
+        "note": "이 폴더는 «동작 · 통신» 층입니다."
+      }
+    ]
   }
 }

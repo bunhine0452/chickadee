@@ -3,11 +3,11 @@ id: ts/promise-then
 universal: common/promise-chain
 name: { ko: "약속 체인(.then)", en: "Promise chain with .then" }
 token: ".then"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: false
 difficulty: 3
-prereq: [ts/arrow-function, ts/call-expression]
+prereq: [ts/arrow-function, ts/call-expression, cs/blocking-and-async]
 confusions: [ts/async-await, ts/array-method-chain]
 
 dict:
@@ -165,7 +165,7 @@ meaning:
               - "await p; next()            // next 가 나중"
 
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./promise-then.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./promise-then.scm }
 
 examples:
   - code: "fetch(url).then((r) => r.json()).catch((e) => log(e))"

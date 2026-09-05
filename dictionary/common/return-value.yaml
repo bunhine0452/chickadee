@@ -1,0 +1,34 @@
+schema: 1
+id: common/return-value
+universal: null
+name: { ko: 값 돌려주기, en: Returning a value }
+token: null
+grammars: []
+essential: false
+difficulty: 1
+prereq: [common/function-definition]
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "하던 일을 그 자리에서 끝내고, 부른 자리에 값 하나를 건넨다."
+    en: "Ends the work right there and hands one value back to whoever called."
+  why:
+    ko: >-
+      두 가지가 <b>한꺼번에</b> 일어납니다 — 그 아래 줄은 실행되지 않고, 부른 자리는 그 값이
+      됩니다. 값을 건네지 않으면 부른 쪽은 결과를 받을 길이 없어요.
+    en: >-
+      Two things happen <b>at once</b> — the lines below do not run, and the calling spot becomes
+      that value. Hand nothing back and the caller has no way to get a result.
+  trace: []
+rule:
+  ko: "그 아래 줄은 돌지 않고, 부른 자리가 그 값이 된다."
+  en: "The lines below do not run, and the call site becomes that value."
+ok:
+  ko: "여기서 끝나고, 부른 자리에 이 값이 남습니다."
+  en: "It ends here, and this value is what the call site is left with."
+misconceptions:
+  - ko: "화면에 찍는 것과 같다 — 다릅니다. 찍는 것은 보여 주고, 이것은 건넵니다."
+    en: "It is the same as printing — no. Printing shows; this hands a value over."
+  - ko: "아래 줄도 마저 돈다 — 아니요. 그 자리에서 끝납니다."
+    en: "The lines below still run — no. It ends right there."

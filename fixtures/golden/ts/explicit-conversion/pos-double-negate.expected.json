@@ -1,0 +1,54 @@
+[
+  {
+    "queryId": "ts/explicit-conversion",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "site",
+    "form": "double-negate",
+    "startLine": 3,
+    "startCol": 19,
+    "endLine": 3,
+    "endCol": 31,
+    "nodeKind": "unary_expression",
+    "inError": false
+  },
+  {
+    "queryId": "ts/explicit-conversion",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.1",
+    "form": "double-negate",
+    "startLine": 3,
+    "startCol": 19,
+    "endLine": 3,
+    "endCol": 20,
+    "nodeKind": "!",
+    "inError": false
+  },
+  {
+    "queryId": "ts/explicit-conversion",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.2",
+    "form": "double-negate",
+    "startLine": 3,
+    "startCol": 20,
+    "endLine": 3,
+    "endCol": 21,
+    "nodeKind": "!",
+    "inError": false
+  },
+  {
+    "queryId": "ts/explicit-conversion",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.3",
+    "form": "double-negate",
+    "startLine": 3,
+    "startCol": 21,
+    "endLine": 3,
+    "endCol": 31,
+    "nodeKind": "member_expression",
+    "inError": false
+  }
+]

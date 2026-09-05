@@ -5,9 +5,9 @@ import { devPanel } from './devpanel.js';
 import { IpcError, toIpcError } from './errors.js';
 import type { BatchOp, ParamsOf, RowOf, StatementName } from './statements.js';
 import type {
-  AppPaths, AppVersion, BlameHunk, Block, Catalog, ExecInfo, IngestDone, IngestProgress,
-  FileDiff, IngestSpec, JobId, LangInfo, LinesChunk, ReadBlockReq, ReadLinesReq, RepoProbe,
-  SnippetReq, SnippetResult, StoreInfo,
+  AppPaths, AppVersion, AskOut, AskSpec, BlameHunk, Block, Catalog, ExecInfo, IngestDone, IngestProgress,
+  FileDiff, IngestSpec, JobId, LangInfo, LinesChunk, ProcOut, ProcSpec, ReadBlockReq,
+  ReadLinesReq, RepoProbe, SnippetReq, SnippetResult, StdinOut, StdinSpec, StoreInfo,
 } from './types.js';
 
 /** STORE_BUSY 재시도 (01 §6): 3회, 50ms 백오프. 여기가 유일한 자동 재시도다. */
@@ -47,6 +47,13 @@ export const ipc = {
      * `repos.ts` 가 이것과 `repo.*` statement 로 조립한다 (D65).
      */
     probe: (path: string) => call<RepoProbe>('repo_probe', { path }),
+    /**
+     * 주소 하나를 받아 `into` 에 통째로 내려받고, 받은 것을 `probe` 와 같은 모양으로
+     * 돌려준다 (D129). `into` 는 **아직 없어야 하는 전체 경로**다 — 어디에 받을지 고르고
+     * 폴더 이름을 정하는 것은 TS 쪽 일이다(`@chickadee/concepts` 의 `cloneRepo`).
+     * 리포가 크면 분 단위로 걸린다.
+     */
+    clone: (url: string, into: string) => call<RepoProbe>('repo_clone', { url, into }),
   },
   ingest: {
     /**
@@ -137,9 +144,35 @@ export const ipc = {
      */
     show: () => getCurrentWindow().show(),
   },
-  /** T3 은 자리만 있다 — 언제나 NOT_IMPLEMENTED 다 (01 §9). */
+  /**
+   * 4·5단을 실제로 실행해 판정한다 (D175). 여기는 **프로세스 한 겹**이고, 무엇을
+   * 실행할지·통과인지는 `@chickadee/grading` 의 `runTests` 가 정한다.
+   *
+   * 실패한 자식은 오류가 아니다 — 종료 코드로 돌아온다. 오류로 던지는 것은 시작조차
+   * 못 한 경우(`RUN_SPAWN`)와 입출력 실패(`RUN_IO`)뿐이다.
+   */
   t3: {
-    run: () => call<never>('t3_run'),
+    run: (spec: ProcSpec) => call<ProcOut>('t3_run', { spec }),
+  },
+  /**
+   * 임시 sqlite 하나를 세우고 묻는다 (D175 를 SQL 로). 여기는 **엔진 한 겹**이고,
+   * 무엇을 세울지·기대 표와 맞는지는 `@chickadee/grading` 의 `runSql` 이 정한다.
+   *
+   * 잘못 적힌 문장은 오류가 아니다 — `failedAt` 과 `message` 로 돌아온다. 오류로 던지는
+   * 것은 엔진 자체를 못 연 경우(`RUN_IO`)뿐이다.
+   */
+  sql: {
+    run: (spec: AskSpec) => call<AskOut>('sql_run', { spec }),
+  },
+  /**
+   * 짧은 프로그램 여럿을 표준 입력을 물려 돌린다 (D186 ⑧). 여기는 **걸음 한 겹**이고,
+   * 무엇을 돌릴지·나온 글이 기대와 맞는지는 `@chickadee/grading` 의 `runStdin` 이 정한다.
+   *
+   * 안 깔린 언어는 오류가 아니다 — `spawnFailed` 로 돌아온다. 던지는 것은 입출력 실패
+   * (`RUN_IO`)와 규칙 밖 인자(`BAD_INPUT`)뿐이다.
+   */
+  stdin: {
+    run: (spec: StdinSpec) => call<StdinOut>('stdin_run', { spec }),
   },
 } as const;
 

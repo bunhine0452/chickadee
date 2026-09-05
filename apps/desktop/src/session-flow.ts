@@ -5,12 +5,13 @@
  * 규칙의 주인은 여전히 셋이다: 판정 `@chickadee/grading` · 겹과 큐 `@chickadee/scheduler` ·
  * 문항 `@chickadee/cards`. 이 파일은 그 셋을 원장과 store 에 잇는다.
  */
-import { newcomerFlag, recountUnknown } from '@chickadee/concepts';
+import { newcomerFlag, recountUnknown, rootCleared } from '@chickadee/concepts';
 import { loadDict, type Dict } from '@chickadee/dictionary';
 import {
-  canAppeal, draftAppeal, draftT2Appeal, draftWhy, gradeDirection, gradeFlow, gradePicks, gradeT0,
-  gradeT1, isLifer, nextStage, pickQuestion, t0Answered, toReviewDetail, toT1Detail, toT2Detail,
-  T2_ENGINE_VERSION, type Question, type T0Answered, type T1Result, type T2Result,
+  canAppeal, draftAppeal, draftT2Appeal, draftWhy, gradeDirection, gradeFlow, gradePicks, gradeRole,
+  gradeT0, gradeT1, isLifer, nextStage, pickQuestion, t0Answered, toReviewDetail, toT1Detail, toT2Detail,
+  T2_ENGINE_VERSION, type AssistCount, type Question, type T0Answered, type T1Result,
+  type T2Result,
 } from '@chickadee/grading';
 import { IpcError, ipc, log } from '@chickadee/ipc-client';
 import { TICK_MS, labelFor, shouldInsertPrereq, shouldInsertRetry } from '@chickadee/scheduler';
@@ -18,13 +19,13 @@ import type { CardPayload, ConceptId, ItemState, Layer } from '@chickadee/store-
 
 import { measure, markSessionOpen } from './devtools/audit.js';
 import { originalAst, parseSnippet } from './data/blocks.js';
-import { cardMaker, makeCard, type MakerDeps } from './data/cards.js';
+import { cardMaker, makeCard, makeSyntheticPlate, type MakerDeps } from './data/cards.js';
 import { emptyMastery, finishPlate } from './data/plate.js';
 import {
   insertPrereq, insertRetry, loadMastery, loadPlates, openSession, recordDunno, recordLadder,
   removePlate, saveItem, saveSession, today, type Plate,
 } from './data/session.js';
-import { loadScheduler, loadSettings, saveSetting } from './data/settings.js';
+import { loadEditorAssist, loadScheduler, loadSettings, saveSetting } from './data/settings.js';
 import { report, todayKey } from './flow.js';
 import { useUi, type PlateResult } from './store.js';
 
@@ -72,7 +73,7 @@ export async function startSession(repoId: number, rootPath: string): Promise<bo
     useUi.getState().beginSession(view.session, view.plates, view.pos);
     return true;
   } catch (e) {
-    report(e, '인쇄 시작');
+    report(e, '학습 시작');
     return false;
   }
 }
@@ -175,6 +176,23 @@ export async function answerPlate(input: AnswerInput): Promise<PlateResult | nul
       await insertRetry(session.id, plate.pos, plate.id,
         { id: plate.cardId, conceptId: plate.conceptId, track: plate.track }, now);
     }
+
+    // 합성 판을 맞히면 **예고한 자리가 오늘 큐에 들어온다** (D137 · 방안 E-4).
+    // 예고를 문장이 아니라 큐로 지키는 자리다 — 여기가 없으면 「곧 여기서 봅니다」는 빈말이고
+    // 합성 예제는 남의 예제로 남는다. 합성 판은 `site_id` 가 없고 payload 에 예고가 있다.
+    if (verdict.correct && !input.dunno && plate.siteId === null
+        && payload.previewSiteId !== undefined) {
+      // `data/manual.ts` 는 `startSession` 을 여기서 가져간다 — 정적으로 마주 부르면
+      // 모듈 순환이라 필요한 순간에만 부른다.
+      const { makePlateFor } = await import('./data/manual.js');
+      await makePlateFor({
+        repoId: session.repoId,
+        rootPath: maker?.rootPath ?? '',
+        conceptId: plate.conceptId,
+        siteId: payload.previewSiteId,
+      }).catch((e: unknown) => report(e, '예고한 자리 걸기'));
+    }
+
     useUi.getState().setPlates(await loadPlates(session.id));
 
     const result: PlateResult = {
@@ -198,7 +216,7 @@ export async function answerPlate(input: AnswerInput): Promise<PlateResult | nul
 const maxRung = (rungs: readonly number[]): 1 | 2 | 3 | 4 =>
   (rungs.length === 0 ? 1 : Math.max(...rungs)) as 1 | 2 | 3 | 4;
 
-/** 「잉크 N겹 · 다음 인쇄 …」 — `applyOutcome` 결과로만 그린다 (05 §3). */
+/** 「숙련도 N단계 · 다음 복습 …」 — `applyOutcome` 결과로만 그린다 (05 §3 · D178). */
 function gainText(
   before: Layer,
   after: Layer,
@@ -207,9 +225,9 @@ function gainText(
   settings: { tz: string; rolloverHour: number },
 ): string {
   const next = labelFor(dueAt, now, settings.tz, settings.rolloverHour);
-  if (after > before) return `잉크 ${after}겹 · 다음 인쇄 ${next}`;
-  if (after < before) return `잉크 ${after}겹으로 내려갑니다 · 다음 인쇄 ${next}`;
-  return `잉크 ${after}겹 그대로 · 다음 인쇄 ${next}`;
+  if (after > before) return `숙련도 ${after}단계 · 다음 복습 ${next}`;
+  if (after < before) return `숙련도 ${after}단계로 내려갑니다 · 다음 복습 ${next}`;
+  return `숙련도 ${after}단계 그대로 · 다음 복습 ${next}`;
 }
 
 // ───────── T1 채점 (04 §4~§6 · 02 §4) ─────────
@@ -221,6 +239,8 @@ export interface T1Answer {
   /** 채점한 단계. 「한 단계 쉽게」를 눌렀으면 내려간 쪽이다 (D85). */
   stage: 1 | 2 | 3;
   peeks: number;
+  /** 이 판의 글자가 어디서 왔나 (D143). 감점 없음 — 기록과 스케줄러 신호다. */
+  assist?: AssistCount | undefined;
   downgraded: boolean;
   elapsedMs: number;
   /** 이의를 접수한 행의 `oi`(0-based 원본 줄 색인). */
@@ -236,7 +256,7 @@ export interface T1Answer {
  * 05 §10 `t1:grade` 예산은 비교 엔진의 것이므로 IPC 를 그 밖에 둔다.
  */
 export async function gradeT1Plate(
-  input: Pick<T1Answer, 'draft' | 'stage' | 'peeks' | 'downgraded'>,
+  input: Pick<T1Answer, 'draft' | 'stage' | 'peeks' | 'assist' | 'downgraded'>,
 ): Promise<{ result: T1Result; question: Question } | null> {
   const { plates, pos } = useUi.getState();
   const plate = plates[pos];
@@ -262,6 +282,7 @@ export async function gradeT1Plate(
       user,
       grammar,
       peeks: input.peeks,
+      ...(input.assist === undefined ? {} : { assist: input.assist }),
       downgraded: input.downgraded,
       ...(answerAst !== null && sourceAst !== null
         ? {
@@ -304,6 +325,9 @@ export async function finishT1Plate(
     const now = Date.now();
     const day = today(now, settings);
     const grammar = grammarOf(payload.file);
+    // 이의 키에 실을 편집 보조 상태 (D143). 설정을 못 읽으면 기본값으로 친다 —
+    // 이의 하나 때문에 판을 마치지 못하게 두지 않는다.
+    const assist = await loadEditorAssist().catch(() => 'stage' as const);
 
     const mastery = (await loadMastery([plate.conceptId])).get(plate.conceptId)
       ?? emptyMastery(plate.conceptId, null);
@@ -316,7 +340,11 @@ export async function finishT1Plate(
       .map((oi) => result.rows.find((r) => r.oi === oi))
       .filter((r): r is NonNullable<typeof r> => r !== undefined && canAppeal(r))
       .map((row) => {
-        const draft = draftAppeal(row, payload.original, answer.draft.split('\n'), grammar);
+        // 그 판에 걸려 있던 편집 보조를 키에 싣는다 (D143) — 안 실으면 보조를 켠 판정과
+        // 끈 판정이 「같은 불만 3건」으로 한 통에 모인다.
+        const draft = draftAppeal(
+          row, payload.original, answer.draft.split('\n'), grammar, assist,
+        );
         return {
           track: 't1' as const,
           lineNo: draft.lineNo,
@@ -338,6 +366,7 @@ export async function finishT1Plate(
     const stageAfter = nextStage(result.stage, result.verdict);
     const state: ItemState = {
       answered: true, t1Draft: answer.draft, t1Stage: result.stage, peeks: answer.peeks,
+      ...(answer.assist === undefined ? {} : { assist: answer.assist }),
     };
 
     const finished = await finishPlate({
@@ -390,7 +419,7 @@ export async function finishT1Plate(
     if (finished.ceremony) useUi.getState().countLifer();
     return outcome;
   } catch (e) {
-    report(e, '필사 판 마무리');
+    report(e, '필사 문제 마무리');
     return null;
   }
 }
@@ -398,11 +427,12 @@ export async function finishT1Plate(
 const t1Of = (payload: CardPayload): Extract<CardPayload, { track: 't1' }> | null =>
   payload.track === 't1' ? payload : null;
 
-/** 04 §8.3 흐름 추적의 답 — 사용자가 세운 순서. 종마다 답의 모양이 다르다. */
+/** 종마다 답의 모양이 다르다 (04 §8.3·§8.5). 진입점은 노드가 폴더일 뿐 고르는 방식이 같다. */
 export type T2Answer =
-  | { kind: 'placement' | 'radius'; selected: readonly string[] }
+  | { kind: 'placement' | 'radius' | 'entry'; selected: readonly string[] }
   | { kind: 'flow'; ordered: readonly string[] }
-  | { kind: 'direction'; picks: readonly (0 | 1 | 2 | 3)[] };
+  | { kind: 'direction'; picks: readonly (0 | 1 | 2 | 3)[] }
+  | { kind: 'role'; pick: number | null };
 
 /**
  * 채점만 한다 — 원장에는 쓰지 않는다. T1 과 같은 두 걸음이다(`gradeT1Plate`/`finishT1Plate`):
@@ -420,6 +450,7 @@ export function gradeT2Plate(answer: T2Answer, hints: number): T2Result | null {
   try {
     if (answer.kind === 'flow') return gradeFlow({ payload, ordered: answer.ordered, hints });
     if (answer.kind === 'direction') return gradeDirection({ payload, picks: answer.picks, hints });
+    if (answer.kind === 'role') return gradeRole({ payload, pick: answer.pick, hints });
     return gradePicks({ kind: answer.kind, payload, selected: answer.selected, hints });
   } catch (e) {
     report(e, '채점');
@@ -514,7 +545,7 @@ export async function finishT2Plate(
     if (finished.ceremony) useUi.getState().countLifer();
     return outcome;
   } catch (e) {
-    report(e, '구조 판 마무리');
+    report(e, '구조 문제 마무리');
     return null;
   }
 }
@@ -524,16 +555,32 @@ export async function finishT2Plate(
  * 정본이지만 채점 경로는 사전을 들고 있지 않을 수 있어(세션을 이어 찍으면 `maker` 가
  * `null` 이다) 표를 여기 좁게 둔다 — 모르면 `typescript` 로 두고, 그때 AST 층이 폴백한다.
  */
+const GRAMMAR_BY_EXT: Readonly<Record<string, string>> = {
+  '.tsx': 'tsx', '.jsx': 'tsx',
+  '.ts': 'typescript', '.mts': 'typescript', '.cts': 'typescript',
+  '.js': 'javascript', '.mjs': 'javascript', '.cjs': 'javascript',
+  // `.pyi` 가 빠져 있어 스텁이 `typescript` 로 폴백하고 있었다 — `py/_lang.yaml` 은
+  // 처음부터 `python: [.py, .pyi]` 였다 (D156 조사).
+  '.vue': 'vue',
+  '.xml': 'xml',
+  '.py': 'python', '.pyi': 'python',
+  '.go': 'go',
+  '.rs': 'rust',
+  '.sql': 'sql',
+  '.swift': 'swift',
+  '.dart': 'dart',
+  '.java': 'java',
+  '.cs': 'c_sharp',
+  '.cpp': 'cpp', '.cc': 'cpp', '.cxx': 'cpp',
+  '.hpp': 'cpp', '.hh': 'cpp', '.hxx': 'cpp',
+  // `.c` 는 확정이고 `.h` 는 아니다 — C++ 헤더도 `.h` 를 쓴다. 여기서는 리포를 못 보므로
+  // `c` 로 두고, 리포 단위 판정은 인제스트의 `LangSpec` 이 한다 (03 §2.1).
+  '.c': 'c', '.h': 'c',
+};
+
 export function grammarOf(path: string): string {
   const ext = path.slice(path.lastIndexOf('.'));
-  if (ext === '.tsx' || ext === '.jsx') return 'tsx';
-  if (ext === '.ts' || ext === '.mts' || ext === '.cts') return 'typescript';
-  if (ext === '.js' || ext === '.mjs' || ext === '.cjs') return 'javascript';
-  if (ext === '.py') return 'python';
-  if (ext === '.go') return 'go';
-  if (ext === '.rs') return 'rust';
-  if (ext === '.sql') return 'sql';
-  return 'typescript';
+  return GRAMMAR_BY_EXT[ext] ?? 'typescript';
 }
 
 // ───────── 사다리 (02 §4 · 04 §2.4) ─────────
@@ -567,6 +614,7 @@ export async function openRung(dunnoEventId: number, rung: 1 | 2 | 3 | 4): Promi
 export async function jumpPrereq(
   dunnoEventId: number,
   conceptId: ConceptId,
+  previewSiteId: number | null = null,
 ): Promise<boolean> {
   const { session, plates, pos } = useUi.getState();
   const plate = plates[pos];
@@ -574,7 +622,11 @@ export async function jumpPrereq(
   if (!shouldInsertPrereq(plate.role)) return false;
 
   try {
-    const cardId = await makeCard(maker, conceptId, null, 1);
+    // 내 코드의 사용처로 판을 먼저 시도한다. 못 만들면(미지가 많아 아직 못 여는 자리)
+    // 사전의 가장 단순한 모양으로 대신 내려간다 — 그때 `previewSiteId` 가 「곧 여기서
+    // 봅니다」의 대상이고, 맞히면 그 자리가 오늘 큐에 들어온다 (D137 · 방안 E-4).
+    const cardId = await makeCard(maker, conceptId, null, 1)
+      ?? (previewSiteId === null ? null : await makeSyntheticPlate(maker, conceptId, previewSiteId));
     if (cardId === null) return false;
     await insertPrereq(session.id, plate.pos, plate.id,
       { id: cardId, conceptId, track: 't0' }, Date.now());
@@ -696,12 +748,22 @@ async function afterSession(repoId: number, sessionId: number): Promise<void> {
     ipc.store.query('review.ladder_empty_prereq', { sessionId }),
     loadSettings(),
   ]);
+  const rootResults = roots.map(
+    (r) => ({ conceptId: r.concept_id, ok: r.ok === 1, dunno: r.dunno === 1 }),
+  );
   const flag = newcomerFlag({
-    rootResults: roots.map((r) => ({ conceptId: r.concept_id, ok: r.ok === 1, dunno: r.dunno === 1 })),
+    rootResults,
     emptyPrereqReports: empties[0]?.n ?? 0,
     previous: settings.newcomerFlag,
   });
   if (flag !== settings.newcomerFlag) await saveSetting('newcomerFlag', flag, Date.now());
+
+  // ③ 0장 종료 조건 ② 의 「뿌리를 통과한 세션이 나왔는가」 (D136). 한 번 참이면 참으로
+  //    남는다 — 「나옴」이 조건이라 나중 세션이 그 사실을 되돌리지 못한다. `newcomerFlag` 로
+  //    대신할 수 없다: 그쪽 'none' 은 아직 아무것도 안 재 본 첫날과 구별되지 않는다.
+  if (!settings.rootCleared && rootCleared(rootResults)) {
+    await saveSetting('rootCleared', true, Date.now());
+  }
 }
 
 const totalElapsed = (elapsed: Record<number, number>): number =>

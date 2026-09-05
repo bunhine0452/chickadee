@@ -1,0 +1,54 @@
+[
+  {
+    "queryId": "ts/operator-precedence",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "site",
+    "form": "mul-left",
+    "startLine": 3,
+    "startCol": 9,
+    "endLine": 3,
+    "endCol": 27,
+    "nodeKind": "binary_expression",
+    "inError": false
+  },
+  {
+    "queryId": "ts/operator-precedence",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.3",
+    "form": "mul-left",
+    "startLine": 3,
+    "startCol": 9,
+    "endLine": 3,
+    "endCol": 21,
+    "nodeKind": "binary_expression",
+    "inError": false
+  },
+  {
+    "queryId": "ts/operator-precedence",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.1",
+    "form": "mul-left",
+    "startLine": 3,
+    "startCol": 22,
+    "endLine": 3,
+    "endCol": 23,
+    "nodeKind": "-",
+    "inError": false
+  },
+  {
+    "queryId": "ts/operator-precedence",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.2",
+    "form": "mul-left",
+    "startLine": 3,
+    "startCol": 24,
+    "endLine": 3,
+    "endCol": 27,
+    "nodeKind": "identifier",
+    "inError": false
+  }
+]

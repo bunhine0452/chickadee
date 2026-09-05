@@ -44,7 +44,8 @@ vi.mock('@chickadee/ipc-client', () => ({
   IpcError: class extends Error {},
 }));
 
-const { deriveRepo, materializeDict, recountUnknown, writeUnitNodes } = await import('./ingest.js');
+const { deriveRepo, loadMastery, materializeDict, recountUnknown, writeUnitNodes,
+  writeZeroChapter } = await import('./ingest.js');
 
 const dict = loadDict();
 
@@ -250,6 +251,97 @@ describe('파생 한 바퀴', () => {
   });
 });
 
+describe('0장 — 이 언어의 바닥 (D136)', () => {
+  /**
+   * 뿌리 개념 사용처 하나. `seedFile` 이 심는 `ts/optional-chaining` 은 선행 깊이 2 라
+   * 0장에 들지 않는다 — 0장은 깊이 ≤ 1 만 담는다. 「내 코드에 기초 개념이 없는 게 아니라
+   * 묻혀 있다」(방안 E)를 그대로 옮기면 이 `const` 한 줄이 그 묻혀 있던 것이다.
+   */
+  function seedRoot(id: number, path: string, line: string): void {
+    db.prepare(statements['facts.file_upsert']).run(toSqliteBindings({
+      repoId: 1, path, lang: null, grammar: 'typescript', lineCount: 1, byteSize: line.length,
+      contentHash: `root-${id}`, headOid: `root-${id}`, isDirty: false, parseQuality: 'ok',
+      skipReason: null, updatedAt: T,
+    }));
+    const eq = line.indexOf('=');
+    const caps = [
+      { name: 'site', form: 'const', start: 0, end: line.length - 1, kind: 'lexical_declaration' },
+      { name: 'pick.1', form: 'const', start: 0, end: 5, kind: 'const' },
+      { name: 'pick.2', form: 'const', start: 6, end: eq - 1, kind: 'identifier' },
+      { name: 'pick.3', form: 'const', start: eq + 2, end: line.length - 1, kind: 'number' },
+    ];
+    for (const cap of caps) {
+      db.prepare(statements['facts.capture_insert']).run(toSqliteBindings({
+        repoId: 1, path, queryId: 'ts/const-declaration', matchId: id, patternIndex: 0,
+        name: cap.name, form: cap.form, nodeKind: cap.kind, inError: false,
+        startByte: cap.start, endByte: cap.end, startLine: 1, endLine: 1,
+        startCol: cap.start, endCol: cap.end, excerpt: line.slice(cap.start, cap.end),
+      }));
+    }
+  }
+
+  beforeEach(async () => {
+    await materializeDict(dict, T);
+    seedRoot(1, 'src/features/cart/limits.ts', 'const MAX = 10\n');
+    seedRoot(2, 'src/features/cart/page.ts', 'const MIN = 20\n');
+    seedRoot(3, 'src/features/cart/view.ts', 'const TOP = 30\n');
+    await deriveRepo(dict, options);
+    await writeUnitNodes(1);
+    await recountUnknown(dict, 1, []);
+  });
+
+  const manual = (): { id: number; order_idx: number } | undefined =>
+    db.prepare("SELECT id, order_idx FROM unit WHERE source = 'manual'").get() as
+      { id: number; order_idx: number } | undefined;
+
+  test('그 언어를 하나도 안 찍었으면 열린다', async () => {
+    const n = await writeZeroChapter(dict, 1, []);
+    expect(n).toBeGreaterThan(0);
+    const unit = manual();
+    expect(unit).toBeDefined();
+    // 색인 띠 맨 앞에 서야 한다 — `home.units` 가 order_idx 로 정렬한다.
+    expect(unit?.order_idx).toBeLessThan(0);
+  });
+
+  test('이미 그 언어를 찍었으면 열지 않는다', async () => {
+    const known = [...dict.langs.values()].flatMap((m) => m.essential)
+      .map((conceptId) => ({ conceptId, layer: 4, universalId: null }));
+    expect(await writeZeroChapter(dict, 1, known)).toBe(0);
+    expect(manual()).toBeUndefined();
+  });
+
+  test('한 번 열린 대지는 겹이 쌓여도 남는다 — 끝나도 사라지지 않는다', async () => {
+    await writeZeroChapter(dict, 1, []);
+    const before = manual()?.id;
+    const known = [...dict.langs.values()].flatMap((m) => m.essential)
+      .map((conceptId) => ({ conceptId, layer: 4, universalId: null }));
+    await writeZeroChapter(dict, 1, known);
+    expect(manual()?.id).toBe(before);
+  });
+
+  test('재인제스트가 0장 대지를 지우지 않는다', async () => {
+    await writeZeroChapter(dict, 1, []);
+    const before = manual()?.id;
+    // 파생을 한 바퀴 더 돈다 — `derive.unit_delete_missing` 이 여기서 돈다.
+    await deriveRepo(dict, options);
+    expect(manual()?.id).toBe(before);
+  });
+
+  test('담긴 개념은 전부 스티커가 된다', async () => {
+    const n = await writeZeroChapter(dict, 1, []);
+    const rows = db.prepare(
+      "SELECT concept_id, track FROM unit_node WHERE unit_id = ?",
+    ).all(manual()?.id) as { concept_id: string; track: string }[];
+    expect(rows).toHaveLength(n);
+    for (const row of rows) expect(row.track).toBe('t0');
+  });
+
+  test('원장의 실제 겹을 읽는다 — 빈 배열을 넘기지 않는다', async () => {
+    const rows = await loadMastery(dict);
+    expect(Array.isArray(rows)).toBe(true);
+  });
+});
+
 describe('홈 쿼리가 파생 결과를 읽는다', () => {
   beforeEach(async () => {
     await materializeDict(dict, T);
@@ -341,5 +433,103 @@ describe('증분 재파생', () => {
     const row = db.prepare("SELECT site_count FROM gap WHERE concept_id = 'ts/optional-chaining'")
       .get() as { site_count: number };
     expect(row.site_count).toBe(3);
+  });
+});
+
+describe('메서드 줄기 · 스키마 · 죽은 갈래 (D168 · D169)', () => {
+  const FE = 'FRONT/src/services/authService.js';
+  const CTRL = 'BACK/src/main/java/com/a/controller/AuthController.java';
+  const SVC = 'BACK/src/main/java/com/a/service/AuthService.java';
+  const DDL = 'BACK/schema.sql';
+  const LOST = 'FRONT/src/services/emotionService.js';
+
+  /** 캡처 한 건 — 줄과 이름을 마음대로. `_imports`·`_blocks` 둘 다 이것으로 심는다. */
+  function cap(path: string, queryId: string, matchId: number, name: string, form: string | null,
+    line: number, excerpt: string, endLine = line, patternIndex = 0): void {
+    db.prepare(statements['facts.capture_insert']).run(toSqliteBindings({
+      repoId: 1, path, queryId, matchId, patternIndex, name, form, nodeKind: 'x', inError: false,
+      startByte: 0, endByte: excerpt.length, startLine: line, endLine, startCol: 0, endCol: excerpt.length, excerpt,
+    }));
+  }
+  const block = (path: string, id: number, name: string, from: number, to: number, form: string | null): void => {
+    cap(path, '_blocks', id, 'block.function', form, from, 'x', to);
+    cap(path, '_blocks', id, 'block.name', form, from, name);
+  };
+
+  function seed(): void {
+    for (const [i, path] of [FE, CTRL, SVC, DDL, LOST].entries()) {
+      db.prepare(statements['facts.file_upsert']).run(toSqliteBindings({
+        repoId: 1, path, lang: null, grammar: path.endsWith('.java') ? 'java' : path.endsWith('.sql') ? 'sql' : 'javascript',
+        lineCount: 20, byteSize: 100, contentHash: `h-${i}`, headOid: `h-${i}`, isDirty: false, parseQuality: 'ok',
+        skipReason: null, updatedAt: T,
+      }));
+    }
+    block(FE, 1, 'login', 3, 8, null);
+    cap(FE, '_imports', 1, 'import.source', 'http-post', 5, "'/auth/login'");
+    cap(CTRL, '_imports', 1, 'import.source', 'route-base', 2, '"/api/auth"');
+    cap(CTRL, '_imports', 2, 'import.source', 'route-post', 10, '"/login"', 10, 1);
+    block(CTRL, 1, 'login', 9, 12, 'method');
+    cap(CTRL, '_imports', 3, 'ctx.type', 'field', 4, 'AuthService', 4, 2);
+    cap(CTRL, '_imports', 3, 'import.source', 'field', 4, 'authService', 4, 2);
+    cap(CTRL, '_imports', 4, 'ctx.recv', 'call', 11, 'authService', 11, 3);
+    cap(CTRL, '_imports', 4, 'import.source', 'call', 11, 'login', 11, 3);
+    block(SVC, 1, 'login', 5, 9, 'method');
+    cap(DDL, '_imports', 1, 'import.source', 'ddl-table', 1, '`users`');
+    cap(DDL, '_imports', 2, 'ctx.table', 'ddl-column', 1, '`users`', 1, 1);
+    cap(DDL, '_imports', 2, 'ctx.type', 'ddl-column', 2, 'BIGINT', 2, 1);
+    cap(DDL, '_imports', 2, 'import.source', 'ddl-column', 2, '`user_id`', 2, 1);
+    cap(LOST, '_imports', 1, 'import.source', 'http-get', 1, "'/emotions/stats'");
+  }
+
+  test('요청 줄기가 메서드 단위로 저장된다 — 프론트 → 컨트롤러 메서드 → 서비스 메서드', async () => {
+    seed();
+    const out = await deriveRepo(dict, options);
+    expect(out.paths).toBe(1);
+    const rows = db.prepare(
+      `SELECT f.path, h.name, h.line_start, h.line_end, h.called_line, h.depth, h.kind
+         FROM request_hop h JOIN file f ON f.id = h.file_id ORDER BY h.ord`,
+    ).all() as { path: string; name: string; line_start: number; line_end: number; called_line: number | null; depth: number; kind: string | null }[];
+    expect(rows).toEqual([
+      { path: FE, name: 'login', line_start: 3, line_end: 8, called_line: null, depth: 0, kind: null },
+      { path: CTRL, name: 'login', line_start: 9, line_end: 12, called_line: 5, depth: 1, kind: 'http' },
+      { path: SVC, name: 'login', line_start: 5, line_end: 9, called_line: 11, depth: 2, kind: 'call' },
+    ]);
+    const head = db.prepare('SELECT label, hop_count, unit_id FROM request_path').get() as { label: string; hop_count: number; unit_id: number | null };
+    expect(head.label).toBe('POST /auth/login');
+    expect(head.hop_count).toBe(3);
+    expect(head.unit_id).not.toBeNull();
+  });
+
+  test('챕터가 「이 파일의 이 줄들만」을 읽는다 — 파일이 아니라 블록 범위다', async () => {
+    seed();
+    await deriveRepo(dict, options);
+    const unit = db.prepare(`SELECT id FROM unit WHERE name = 'auth'`).get() as { id: number };
+    const ranges = db.prepare(statements['path.ranges_by_unit']).all(toSqliteBindings({ unitId: unit.id })) as { path: string; line_start: number; line_end: number }[];
+    expect(ranges.map((r) => `${r.path.split('/').pop()}:${r.line_start}-${r.line_end}`)).toStrictEqual([
+      'AuthController.java:9-12', 'AuthService.java:5-9', 'authService.js:3-8',
+    ]);
+  });
+
+  test('DDL 이 표와 열로 남고, 라우트 없는 호출이 죽은 갈래로 남는다', async () => {
+    seed();
+    const out = await deriveRepo(dict, options);
+    expect(out.tables).toBe(1);
+    const cols = db.prepare('SELECT t.name AS t, c.name AS c, c.type FROM db_column c JOIN db_table t ON t.id = c.table_id').all();
+    expect(cols).toEqual([{ t: 'users', c: 'user_id', type: 'BIGINT' }]);
+    const dead = db.prepare(statements['path.dead_list']).all(toSqliteBindings({ repoId: 1 })) as { kind: string; path: string; label: string }[];
+    expect(dead.filter((d) => d.kind === 'unreached-call')).toEqual([
+      expect.objectContaining({ path: LOST, label: 'GET /emotions/stats' }),
+    ]);
+  });
+
+  test('다시 돌려도 줄기·표·갈래가 늘지 않는다 — 리포 단위로 지우고 다시 쓴다', async () => {
+    seed();
+    await deriveRepo(dict, options);
+    await deriveRepo(dict, options);
+    const n = (sql: string): number => (db.prepare(sql).get() as { n: number }).n;
+    expect(n('SELECT COUNT(*) AS n FROM request_path')).toBe(1);
+    expect(n('SELECT COUNT(*) AS n FROM request_hop')).toBe(3);
+    expect(n('SELECT COUNT(*) AS n FROM db_table')).toBe(1);
+    expect(n('SELECT COUNT(*) AS n FROM dead_branch WHERE kind = \'unreached-call\'')).toBe(1);
   });
 });

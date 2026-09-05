@@ -56,6 +56,10 @@ vi.mock('./data.js', async (orig) => {
 vi.mock('../../data/settings.js', () => ({
   loadSettings: () => Promise.resolve({ theme: 'light' }),
   loadScheduler: () => Promise.resolve({}),
+  // 판이 편집 보조 설정을 스스로 읽는다 (D143). 이 화면의 시험은 그 값과 무관하다.
+  useEditorAssist: () => 'stage',
+  // Monaco 의 테마는 `<html data-theme>` 을 따른다 — jsdom 에서는 늘 밝게다.
+  useResolvedTheme: () => 'light',
 }));
 
 vi.mock('../../flow.js', () => ({ report: () => undefined, todayKey: () => '2026-09-04' }));
@@ -237,7 +241,7 @@ describe('목차 (clone-screen-toc)', () => {
 
     const nav = screen.getByLabelText('코스 목차');
     expect(nav.textContent).toContain('핵심');
-    expect(nav.textContent).toContain('src/a.ts');
+    expect(nav.textContent).toContain('a.ts · src');
     expect(nav.textContent).toContain('끝 · 91%');
     expect(nav.textContent).toContain('원본이 바뀜');
     expect(nav.textContent).toContain('0 / 1 파일');

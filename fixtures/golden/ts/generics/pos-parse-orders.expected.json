@@ -37,5 +37,18 @@
     "endCol": 34,
     "nodeKind": "array_type",
     "inError": false
+  },
+  {
+    "queryId": "ts/generics",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "call-type-args",
+    "startLine": 4,
+    "startCol": 35,
+    "endLine": 4,
+    "endCol": 40,
+    "nodeKind": "arguments",
+    "inError": false
   }
 ]

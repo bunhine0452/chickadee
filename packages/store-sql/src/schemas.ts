@@ -162,7 +162,7 @@ export const edgeKindSchema = z.enum(['static', 'type', 'dynamic', 'http']);
  */
 const t2PayloadSchema = z.object({
   track: z.literal('t2'),
-  kind: z.enum(['placement', 'radius', 'flow', 'direction']),
+  kind: z.enum(['placement', 'radius', 'flow', 'direction', 'entry', 'role']),
   q: z.string(),
   hint: z.string(),
   bands: z.array(z.object({ l: z.string(), s: z.string() })),
@@ -181,12 +181,161 @@ const t2PayloadSchema = z.object({
   pairs: z.array(z.object({
     a: z.string(), b: z.string(), answer: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3)]),
   })).optional(),
+  role: z.object({ folder: z.string(), answer: int() }).optional(),
 });
 
-/** `card.payload_json` (02 §8.2 · 05 가 그대로 렌더한다). */
-export const cardPayloadSchema = z.discriminatedUnion('track', [t0PayloadSchema, t1PayloadSchema, t2PayloadSchema]);
+// ───────── 코스 문항 (D164) ─────────
+// 셋 다 `track: 't3'` 라 `discriminatedUnion('track')` 에 못 든다 — 바깥을 `z.union` 으로 감싼다.
+// 예전 셋은 `track` 으로 먼저 갈리고, `t3` 는 `kind` 가 다시 가른다.
+
+/** 코스의 단 1~5 (`card.stage_no`). */
+export const stageNoSchema = z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5)]);
+export const repairTypeSchema = z.enum(['patch-line', 'patch-place', 'rollback']);
+export const reimplTypeSchema = z.enum(['reimpl-spec', 'reimpl-layer', 'handoff']);
+
+const plainWhySchema = z.array(z.union([z.null(), z.object({ t: z.string() })]));
+
+const stageChoiceSchema = z.object({
+  track: z.literal('t3'),
+  kind: z.enum(['twin', 'origin', 'cut', 'reorder', 'contract']),
+  stage: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+  file: z.string(),
+  focus: int(),
+  lines: z.array(codeLineSchema),
+  q: z.string(),
+  hint: z.string(),
+  options: z.array(z.object({
+    t: z.string(), mono: z.boolean().optional(), f: z.string().optional(), l: int().optional(),
+  })),
+  answer: int(),
+  why: plainWhySchema,
+  ok: z.string(),
+  rule: z.string(),
+  promptLines: z.array(z.string()),
+  reason: z.object({
+    q: z.string(), options: z.array(z.object({ t: z.string() })), answer: int(), why: plainWhySchema,
+  }).optional(),
+});
+
+/** 판정용 테스트 한 장 (D180). 4·5단 payload 에 실려 러너로 간다. */
+const judgeTestSchema = z.object({
+  path: z.string(),
+  text: z.string(),
+  source: z.enum(['commit', 'repo', 'contract']),
+});
+
+const stageRepairSchema = z.object({
+  track: z.literal('t3'),
+  kind: z.literal('repair'),
+  type: repairTypeSchema,
+  stage: z.literal(4),
+  q: z.string(),
+  file: z.string(),
+  grammar: z.string(),
+  goal: z.string(),
+  commit: z.object({ h: z.string(), d: z.string(), m: z.string() }),
+  lines: z.array(z.string()),
+  from: int(),
+  target: int(),
+  expected: z.array(z.string()),
+  accept: z.array(int()).optional(),
+  promptLines: z.array(z.string()),
+  tests: z.array(judgeTestSchema).optional(),
+});
+
+const stageReimplSchema = z.object({
+  track: z.literal('t3'),
+  kind: z.literal('reimpl'),
+  type: reimplTypeSchema,
+  stage: z.literal(5),
+  file: z.string(),
+  grammar: z.string(),
+  fn: z.string(),
+  original: z.array(z.string()),
+  from: int(),
+  signature: z.array(z.string()),
+  mustHold: z.array(z.object({
+    text: z.string(), source: z.enum(['user', 'dict', 'ast']), anchor: z.array(int()),
+  })),
+  links: z.array(z.string()),
+  context: z.array(z.object({ file: z.string(), lines: z.array(z.string()) })),
+  question: z.string(),
+  promptLines: z.array(z.string()),
+  blockId: z.union([int(), z.null()]),
+  tests: z.array(judgeTestSchema).optional(),
+});
+
+/** 격자의 열 축 (D187 ⑱). 다섯 중 `var`·`obj` 둘만 생성기가 낸다. */
+export const traceAxisSchema = z.enum(['var', 'obj', 'addr', 'place', 'row']);
+
+/** 격자 칸 하나의 답. `box` 는 글자가 아니라 **분할**이 정답이다 (`schemas` 는 모양만 본다). */
+export const traceCellSchema = z.union([
+  z.object({ t: z.literal('int'), v: z.string() }),
+  z.object({ t: z.literal('float'), v: z.string() }),
+  z.object({ t: z.literal('bool'), v: z.boolean() }),
+  z.object({ t: z.literal('string'), v: z.string() }),
+  z.object({ t: z.literal('box'), label: z.string(), accept: z.array(z.string()) }),
+  z.object({ t: z.literal('none'), accept: z.array(z.string()) }),
+  z.object({ t: z.literal('unknown'), accept: z.array(z.string()) }),
+]);
+
+/** `order` — 조각의 순열 (D187 ⑱). `fact` 가 오답 진단의 재료다. */
+const stageOrderSchema = z.object({
+  track: z.literal('t3'),
+  kind: z.literal('order'),
+  stage: z.literal(5),
+  q: z.string(),
+  hint: z.string(),
+  pieces: z.array(z.object({ id: z.string(), t: z.string(), fact: z.string() })),
+  answer: z.array(z.string()),
+  deck: z.array(z.string()),
+  ok: z.string(),
+  rule: z.string(),
+  promptLines: z.array(z.string()),
+});
+
+/** `trace-table` — 시간 × 열 격자 (D187 ⑱). */
+const stageTraceSchema = z.object({
+  track: z.literal('t3'),
+  kind: z.literal('trace'),
+  stage: z.literal(2),
+  q: z.string(),
+  hint: z.string(),
+  file: z.string(),
+  lines: z.array(codeLineSchema),
+  cols: z.array(z.object({ k: z.string(), axis: traceAxisSchema, t: z.string() })),
+  rows: z.array(z.object({ k: z.string(), line: z.union([int(), z.null()]), t: z.string() })),
+  cells: z.array(z.object({
+    r: z.string(), c: z.string(), v: traceCellSchema, carry: z.union([z.string(), z.null()]),
+  })),
+  hidden: z.array(z.string()),
+  ok: z.string(),
+  rule: z.string(),
+  promptLines: z.array(z.string()),
+});
+
+/** `card.payload_json` (02 §8.2 · 05 가 그대로 렌더한다). 코스 셋은 D164, 뒤 둘은 D187 ⑱. */
+export const cardPayloadSchema = z.union([
+  z.discriminatedUnion('track', [t0PayloadSchema, t1PayloadSchema, t2PayloadSchema]),
+  stageChoiceSchema,
+  stageRepairSchema,
+  stageReimplSchema,
+  stageOrderSchema,
+  stageTraceSchema,
+]);
 
 // ───────── 세션 · 원장 ─────────
+
+/**
+ * 이 판의 글자가 어디서 왔나 (D143). 감점 없음 — 기록과 스케줄러 신호다.
+ *
+ * 스키마가 모르는 키는 **떼어 낸다**. 타입만 넣고 여기를 빠뜨리면 저장은 되는데 읽을 때
+ * 조용히 사라지고, `Covers<…>` 는 인터페이스가 스키마 출력을 확장하는 방향이라 컴파일도
+ * 안 깨진다 — 그래서 이 세 줄이 타입보다 먼저다.
+ */
+const assistCountSchema = z.object({
+  keyed: int(), assisted: int(), pasted: int(), accepted: int(),
+});
 
 /** `session_item.state_json` — 판 내부 진행. */
 export const itemStateSchema = z.object({
@@ -200,6 +349,7 @@ export const itemStateSchema = z.object({
   t1Draft: z.string().optional(),
   t1Stage: stageSchema.optional(),
   peeks: int().optional(),
+  assist: assistCountSchema.optional(),
   t2Sel: z.array(z.string()).optional(),
   hints: int().optional(),
 });
@@ -220,7 +370,8 @@ export const reviewDetailSchema = z.discriminatedUnion('track', [
   z.object({
     track: z.literal('t1'),
     meaning: z.number(), total: int(), exact: int(), equiv: int(), differ: int(), missing: int(), extra: int(),
-    peeks: int(), downgraded: z.boolean(), stageBefore: stageSchema, stageAfter: stageSchema,
+    peeks: int(), assist: assistCountSchema.optional(),
+    downgraded: z.boolean(), stageBefore: stageSchema, stageAfter: stageSchema,
     appealedLines: z.array(int()), whyText: z.string(), whyPick: int().nullable(),
   }),
   z.object({
@@ -282,6 +433,9 @@ export const settingsSchema = z.object({
   identities: z.array(z.object({ email: z.string(), name: z.string() })),
   excludeGlobs: z.array(z.string()),
   locale: z.enum(['ko', 'en']),
+  tutorialSeen: z.boolean(),
+  declaredNewcomer: z.boolean(),
+  rootCleared: z.boolean(),
   dictLangs: z.array(z.string()),
   lastRepoId: z.number().nullable(),
 });
@@ -306,6 +460,9 @@ export const SETTINGS_KEYS = {
   identities: 'identities',
   excludeGlobs: 'exclude_globs',
   locale: 'locale',
+  tutorialSeen: 'tutorial_seen',
+  declaredNewcomer: 'declared_newcomer',
+  rootCleared: 'root_cleared',
   dictLangs: 'dict_langs',
   lastRepoId: 'last_repo_id',
 } as const satisfies Record<keyof Settings, string>;
@@ -323,9 +480,27 @@ export const settingsValueSchema = (field: SettingsField): z.ZodTypeAny => setti
 
 // ───────── JSON 열 파싱 ─────────
 
-/** zod 문제 목록 → `'경로:코드'` — **값은 넣지 않는다** (01 §6). */
+/**
+ * zod 문제 목록 → `'경로:코드'` — **값은 넣지 않는다** (01 §6).
+ *
+ * `z.union` 은 문제를 `invalid_union` 하나로 접고 갈래별 문제를 `unionErrors` 에 숨긴다
+ * (`cardPayloadSchema`, D164). 접힌 채로 내면 「payload 가 틀렸다」밖에 못 말하므로 갈래 안의
+ * 문제를 펼친다 — 가장 적게 틀린 갈래가 실제로 뜻한 모양이라 그 갈래의 경로를 앞에 둔다.
+ */
 function issuePaths(error: z.ZodError): string[] {
-  return error.issues.slice(0, 8).map((i) => `${i.path.join('.') || '<root>'}:${i.code}`);
+  const flat = (issues: readonly z.ZodIssue[]): string[] => {
+    const out: string[] = [];
+    for (const i of issues) {
+      if (i.code === 'invalid_union') {
+        const branches = i.unionErrors.map((e) => flat(e.issues)).sort((a, b) => a.length - b.length);
+        for (const b of branches) out.push(...b);
+      } else {
+        out.push(`${i.path.join('.') || '<root>'}:${i.code}`);
+      }
+    }
+    return out;
+  };
+  return [...new Set(flat(error.issues))].slice(0, 8);
 }
 
 /**

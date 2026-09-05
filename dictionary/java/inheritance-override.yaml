@@ -1,0 +1,257 @@
+schema: 1
+id: java/inheritance-override
+universal: null
+name: { ko: 물려받아 다시 쓰기, en: Inheritance and override }
+token: "extends"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 3
+prereq: [java/class-declaration, java/method-declaration, cs/dynamic-dispatch]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "다른 틀의 것을 통째로 물려받고, 그중 하나를 내 것으로 다시 적는다."
+    en: "Takes over another mould's parts whole, then rewrites one of them as its own."
+  why:
+    ko: >-
+      {{site.line}}행은 이 클래스가 <b>남의 틀 위에 서 있다</b>고 적은 자리입니다. 그래서 이 파일에
+      안 적힌 메서드도 이 클래스에 있고, 여기서 다시 적은 것은 <b>같은 이름으로 덮입니다</b>.
+      읽을 때 이것이 어려운 이유가 여기 있어요 — 어떤 몸이 실제로 도는지가 파일 하나에 안 적혀
+      있고, 실행할 때의 <b>실제 상자</b>가 정합니다. 프레임워크의 자리가 대개 이 모양이에요:
+      틀이 뼈대를 다 갖고 있고 우리가 채우는 것은 구멍 하나입니다.
+    en: >-
+      Line {{site.line}} records that this class <b>stands on someone else's mould</b>. So methods not
+      written in this file belong to it, and one rewritten here <b>covers</b> the inherited one of the
+      same name. That is what makes this hard to read — which body actually runs is not written in one
+      file; the <b>real box</b> at run time decides. Framework slots usually look like this: the mould
+      holds the skeleton and what we fill is one hole.
+  trace:
+    - ko: "{{pick.2|code}} 쪽의 것이 이 클래스에 그대로 들어온다."
+      en: "Everything on the {{pick.2|code}} side comes into this class as is."
+    - ko: "같은 이름을 여기서 다시 적으면 그 하나만 덮인다."
+      en: "Rewriting one name here covers only that one."
+    - ko: "실제로 어느 몸이 도는지는 실행할 때의 상자가 정한다."
+      en: "Which body actually runs is decided by the box at run time."
+
+rule:
+  ko: "<b>덮이는 것은 이름이 같은 하나뿐이다.</b> 나머지는 물려받은 그대로 남는다."
+  en: "<b>Only the one with the same name is covered.</b> The rest stay as inherited."
+ok:
+  ko: >-
+    {{pick.2|code}} 의 것을 다 지니고, 다시 적은 것 하나만 이 클래스의 몸으로 돕니다.
+  en: >-
+    It holds everything from {{pick.2|code}}, and only the rewritten one runs as this class's body.
+payoff:
+  ko: >-
+    이걸 알면 「이 메서드가 어디 적혀 있지」가 풀립니다 — 이 파일에 없으면 <b>물려준 쪽</b>을
+    열면 돼요.
+  en: >-
+    Knowing this settles “where is this method written” — if it is not in this file, open the
+    <b>mould it came from</b>.
+bridge:
+  ko: >-
+    파이썬은 물려받은 것을 다시 적을 때 <b>표시를 안 붙입니다</b>. 자바는 표시를 붙일 수 있고,
+    붙이면 이름을 잘못 적었을 때 컴파일러가 잡아 줍니다.
+  en: >-
+    Python <b>attaches no marker</b> when rewriting an inherited method. Here a marker may be attached,
+    and with it the compiler catches a mistyped name.
+misconceptions:
+  - ko: "표시를 붙여야 덮인다 — 안 붙여도 덮입니다. 표시는 <b>검사</b>이지 강제가 아니에요."
+    en: "The marker is what makes it cover — it covers without one. The marker is a <b>check</b>, not a requirement."
+  - ko: "물려받으면 다 다시 적어야 한다 — 안 적은 것은 물려준 쪽 몸이 그대로 돕니다."
+    en: "Everything inherited must be rewritten — what is not rewritten runs the inherited body."
+  - ko: "여러 틀을 한꺼번에 물려받을 수 있다 — 틀은 <b>하나</b>뿐입니다. 목록은 여럿 받을 수 있어요."
+    en: "Several moulds can be inherited at once — only <b>one</b> mould. Several lists, yes."
+  - ko: "이름만 같으면 덮인다 — 받는 값의 모양까지 같아야 합니다. 다르면 <b>둘 다</b> 남아요."
+    en: "The same name is enough to cover — the parameter shapes must match too. Otherwise <b>both</b> remain."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>물려주는 쪽의 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name of the mould it came from</b>."
+    hint:
+      ko: "물려받겠다는 낱말 <b>뒤</b>에 옵니다."
+      en: "It comes <b>after</b> the word that says it inherits."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>물려받는다</b>는 낱말입니다. 누구에게서인지는 그 뒤에 와요."
+          en: "{{pick.1|code}} is the word that says it <b>inherits</b>. From whom comes after it."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 신호냐 상대냐"
+            en: "The sharpest spot — the signal or the source"
+          code:
+            - "앞 낱말: 물려받는다"
+            - "뒤 이름: 누구에게서"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>다시 적었다는 표시</b>입니다. 물려주는 쪽의 이름이 아니에요."
+          en: "{{pick.3|code}} is the <b>marker that says it was rewritten</b>. It is not the source's name."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 물려받기냐 다시 적기냐"
+            en: "The sharpest spot — inheriting or rewriting"
+          code:
+            - "물려받기: 클래스 줄에 적힌다"
+            - "다시 적기: 메서드 위에 표시가 붙는다"
+      pick.4:
+        t:
+          ko: "{{pick.4|code}}{{pick.4|josa:은,는}} <b>다시 적은 메서드의 이름</b>입니다. 물려준 틀의 이름이 아니에요."
+          en: "{{pick.4|code}} is <b>the rewritten method's name</b>, not the mould's."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 틀 이름이냐 메서드 이름이냐"
+            en: "The sharpest spot — the mould's name or the method's"
+          code:
+            - "틀:     클래스 줄에서 온다"
+            - "메서드: 그 안에서 다시 적힌다"
+
+meaning:
+  - q:
+      ko: "다시 적은 메서드에서 <b>표시를 떼면</b> 어떻게 될까요?"
+      en: "Remove the <b>marker</b> from a rewritten method — what happens?"
+    hint:
+      ko: "그 표시가 하는 일은 하나입니다."
+      en: "That marker does exactly one job."
+    options:
+      - t:
+          ko: "그대로 덮인다 — 표시는 이름 오타를 잡아 주는 검사일 뿐이다"
+          en: "It still covers — the marker is only a check against a mistyped name"
+      - t:
+          ko: "안 덮이고 물려받은 몸이 돈다"
+          en: "It stops covering and the inherited body runs"
+        diag:
+          t:
+            ko: "덮는 것은 <b>이름과 모양</b>이 결정합니다. 표시는 그 결정에 참여하지 않아요."
+            en: "Covering is decided by <b>name and shape</b>. The marker takes no part in that decision."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 무엇이 덮기를 정하나"
+              en: "The sharpest spot — what decides the covering"
+            code:
+              - "정하는 것: 이름 + 받는 값의 모양"
+              - "표시:      맞는지 확인만"
+      - t:
+          ko: "컴파일이 멈춘다"
+          en: "Compiling stops"
+        diag:
+          t:
+            ko: "표시는 <b>선택</b>입니다. 없어도 문법에 맞아요 — 그래서 오타가 조용히 지나갈 수 있는 거예요."
+            en: "The marker is <b>optional</b>. Without it the code is still grammatical — which is exactly how a typo slips by."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 필수냐 선택이냐"
+              en: "The sharpest spot — required or optional"
+            code:
+              - "표시 없음: 컴파일 된다"
+              - "이름 오타: 그때 조용히 새 메서드가 된다"
+      - t:
+          ko: "실행할 때 어느 몸을 부를지 못 정해 멈춘다"
+          en: "At run time it cannot decide which body to call and stops"
+        diag:
+          t:
+            ko: "정하는 규칙은 표시와 무관하게 늘 같습니다 — <b>실제 상자</b>의 몸이 돌아요."
+            en: "The rule is the same with or without the marker — the body of the <b>real box</b> runs."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 무엇이 몸을 고르나"
+              en: "The sharpest spot — what picks the body"
+            code:
+              - "고르는 것: 실행 때의 실제 상자"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 이 클래스가 {{pick.2|code}} 의 것을 물려받는다고 적습니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} records that this class takes over what
+        {{pick.2|code}} has.
+    hint:
+      ko: "목록을 받는 낱말과 틀을 물려받는 낱말이 다릅니다."
+      en: "The word for taking a list differs from the word for inheriting a mould."
+    options:
+      - { t: "extends", mono: true }
+      - t: "implements"
+        mono: true
+        diag:
+          t:
+            ko: "<code>implements</code> 는 <b>목록을 받겠다</b>는 낱말입니다. 몸통은 안 물려받고 이름만 받아요."
+            en: "<code>implements</code> says <b>the list is taken</b>. No bodies come with it, only names."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 몸통이 따라오나"
+              en: "The sharpest spot — do bodies come along"
+            code:
+              - "틀 물려받기: 몸통까지 온다"
+              - "목록 받기:   이름만 온다"
+      - t: "super"
+        mono: true
+        diag:
+          t:
+            ko: "<code>super</code> 는 몸통 <b>안에서</b> 물려준 쪽을 부를 때 쓰는 낱말입니다. 클래스 줄에는 못 옵니다."
+            en: "<code>super</code> is used <b>inside</b> a body to call the inherited side. It cannot stand on the class line."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 선언이냐 호출이냐"
+              en: "The sharpest spot — declaring or calling"
+            code:
+              - "클래스 줄: 물려받겠다고 적는다"
+              - "몸통 안:   물려준 쪽을 부른다"
+      - t: "inherits"
+        mono: true
+        diag:
+          t:
+            ko: "<code>inherits</code> 는 자바 문법이 모르는 낱말입니다. 뜻은 맞지만 이 언어의 낱말이 아니에요."
+            en: "<code>inherits</code> is not a word Java's grammar knows. The meaning fits; the word is not this language's."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 뜻이냐 낱말이냐"
+              en: "The sharpest spot — the meaning or the word"
+            code:
+              - "뜻:   물려받는다"
+              - "낱말: 언어마다 다르다"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행에서 이 틀을 <b>물려받은</b> 이유는 무엇일까요?"
+    en: "Why does line {{site.line}} <b>inherit</b> this mould?"
+  choices:
+    - t:
+        ko: "뼈대를 그쪽이 다 갖고 있어서 — 우리는 <b>구멍 하나</b>만 채우면 된다"
+        en: "Because that side holds the skeleton — we only fill <b>one hole</b>"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 어느 구멍을 채웠는지도 한 줄 적어 보세요."
+        en: "That is the direction. Add a line on which hole was filled."
+    - t:
+        ko: "코드를 덜 쓰려고"
+        en: "To write less code"
+      ok: false
+      fb:
+        ko: "덜 쓰는 것은 결과입니다. 이유는 <b>그 틀이 정한 순서에 끼어야 해서</b>예요."
+        en: "Writing less is the result. The reason is <b>having to fit into the order that mould sets</b>."
+    - t:
+        ko: "자바에서는 클래스가 반드시 무언가를 물려받아야 해서"
+        en: "Because a Java class must inherit something"
+      ok: false
+      fb:
+        ko: "안 적어도 됩니다. 적은 것은 그 틀이 필요해서예요."
+        en: "It can be left out. It is written because that mould was needed."
+
+queries:
+  - { grammars: [java], file: ./inheritance-override.scm }
+
+examples:
+  - code: "class F extends OncePerRequestFilter { }"
+    expect:
+      sites: 1
+      form: extends
+      hole: "extends"
+      picks: { 1: "extends", 2: "OncePerRequestFilter" }
+  - code: "class F { @Override public String toString() { return \"x\"; } }"
+    expect: { sites: 1, form: override, picks: { 3: "Override", 4: "toString" } }
+  - code: "class F implements Runnable { public void run() {} }"
+    expect: none

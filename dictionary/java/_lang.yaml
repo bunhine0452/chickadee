@@ -1,0 +1,90 @@
+lang: java
+version: 0.1.0
+grammars: [java]
+# tree-sitter-java 0.23.5 의 `parser.c` 가 14 다. 대조는 시험이 한다
+# (`declared_grammar_abi_matches_the_linked_grammar`).
+grammar_abi: { java: 14 }
+
+extensions:
+  java: [.java]
+
+# 정식 자바 코스 **0~3부** (D177 · 0부는 `docs/curriculum/java.md` §1.5). 부마다 교재가 다르다 —
+# **0부와 1부는 합성 예제**, **2부는 합성 + 내 코드**, **3부는 내 코드 중심**(`spring/` · D176).
+# 여기 적힌 순서가 부 순서이고, 부 안의 순서는 §1.5.1 의 **축 A~H** 다.
+#
+# 0부 「이 언어의 값과 식」 열아홉 판 중 **열일곱**이 여기 있다. 빠진 둘은
+# `java/string-concat`(표본 16곳/9파일)과 `java/autoboxing`(246곳/64파일)이고, 0부가
+# `essential` 에 새로 올리는 것을 **열둘**로 묶는 상한 때문이다(`docs/curriculum/README.md`
+# §12 규약 8). 둘 다 사용처가 넉넉해 카드는 그대로 서고, 빠지는 것은 구멍 지도(03 §6)의
+# 분모와 0장 후보뿐이다.
+#
+# 1부 흐름과 묶기 여덟 — 0부가 값 축을 가져가서 「흐름과 묶기」만 남았다(§1.5.4).
+# 표본 `MonggleMonggle`(자바 99장)에서 `for (;;)` 는 **0곳**, for-each 는 **1곳**,
+# 배열은 **1곳**(`String[] args`)이다 — 내 코드만으로는 반복도 배열도 못 가르친다.
+#
+# 2부 객체 열여섯 — 한 판도 안 움직였다. `abstract-class`·`generic-bound`·`equals-hashcode`
+# 셋은 그 리포에 **0곳**이라 합성으로 가르치고 「네 코드엔 없다」를 명시한다(D158 <2>).
+# `annotation` 이 2부의 끝이고 3부의 문턱이다.
+essential:
+  # 0부 축 A — 정수형과 그 한계
+  - java/value-bits
+  - java/variable-declaration
+  - java/integer-limit
+  # 0부 축 B — 실수형과 왜 안 떨어지나
+  - java/floating-type
+  - java/float-inexact
+  # 0부 축 C — 문자열과 인코딩
+  - java/string-literal
+  - java/text-length
+  # 0부 축 D — 참·거짓
+  - java/boolean-literal
+  - java/boolean-only-condition
+  # 0부 축 E — 연산자와 우선순위
+  - java/arithmetic
+  - java/operator-precedence
+  # 0부 축 F — 형 변환
+  - java/implicit-conversion
+  - java/explicit-conversion
+  # 0부 축 G — 대입과 이름
+  - java/assignment
+  - java/reference-binding
+  # 0부 축 H — 비교와 같음
+  - java/comparison
+  - java/reference-equality
+  # 1부 흐름과 묶기
+  - java/class-declaration
+  - java/if-statement
+  - java/method-declaration
+  - java/return-statement
+  - java/array
+  - java/for-loop
+  - java/for-each
+  - java/import
+  # 2부 객체
+  - java/access-modifier
+  - java/field-declaration
+  - java/new-expression
+  - java/constructor
+  - java/static
+  - java/null
+  - java/collection-generic
+  - java/interface
+  - java/inheritance-override
+  - java/abstract-class
+  - java/generic-bound
+  - java/equals-hashcode
+  - java/lambda
+  - java/stream-pipeline
+  - java/try-catch
+  - java/annotation
+alternatives: []
+
+thin_threshold: { min_files: 2, min_sites: 3, small_repo_files: 20 }
+
+diag_default:
+  point:
+    ko: "«{{pick}}»{{pick|josa:은,는}} {{role}} 자리입니다. {{concept}}{{concept|josa:은,는}} «{{answer}}» 입니다. {{rule}}"
+    en: "«{{pick}}» is the {{role}} slot. The {{concept}} is «{{answer}}». {{rule}}"
+  blank:
+    ko: "«{{pick}}»{{pick|josa:은,는}} 이 자리에 오지 않습니다. {{rule}}"
+    en: "«{{pick}}» does not go in this slot. {{rule}}"

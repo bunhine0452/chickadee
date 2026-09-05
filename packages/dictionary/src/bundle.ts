@@ -37,6 +37,17 @@ const FILES: ReadonlyMap<string, string> = new Map(
 );
 
 /**
+ * `dictionary/` 아래에 살지만 **개념이 아닌** 네임스페이스. 여기 든 이름은 `loadDict` 가
+ * 아예 안 본다 — 그 파일들은 개념 스키마를 만족하지 않으므로 로더에 걸리면 문제 목록이
+ * 그것으로 채워진다 (`dict.test.ts` 의 「스키마를 어긴 파일이 없다」).
+ *
+ * `drills/` 가 그 하나다. 작은 문제 층의 문제 YAML 이고 (D186 ⑧), 사전과 같은 자리에 사는
+ * 이유는 같은 것이기 때문이다 — 사람이 손으로 쓴 **한국어 정본 + 영어 병기** 내용이고
+ * 번들에 구워져 타입 검사와 해시의 대상이 된다.
+ */
+const NOT_CONCEPTS = new Set(['drills']);
+
+/**
  * 번들에 든 네임스페이스 전부. `_lang.yaml` 은 **있어도 되고 없어도 된다** —
  * `common/`·`arch/` 는 개념만 있는 네임스페이스이고 문법에 매이지 않는다 (03 §3.1·§4.1).
  * 03 §4.1 의 그림에도 `common/` 에는 `_lang.yaml` 이 없다.
@@ -45,9 +56,22 @@ export function bundledLangs(): string[] {
   const out = new Set<string>();
   for (const rel of FILES.keys()) {
     const [lang, file] = rel.split('/');
-    if (lang !== undefined && file !== undefined && file.endsWith('.yaml')) out.add(lang);
+    if (lang === undefined || file === undefined || !file.endsWith('.yaml')) continue;
+    if (NOT_CONCEPTS.has(lang)) continue;
+    out.add(lang);
   }
   return [...out].sort();
+}
+
+/**
+ * 작은 문제 층의 원문 (D186 ⑧). 키는 `drills/<id>/drill.yaml` 이고 파싱은 부르는 쪽
+ * (`packages/cards/src/drill.ts`)이 한다 — 사전 로더와 스키마가 다르다.
+ */
+export function bundledDrills(): { relPath: string; text: string }[] {
+  return [...FILES.entries()]
+    .filter(([rel]) => rel.startsWith('drills/') && rel.endsWith('.yaml'))
+    .map(([relPath, text]) => ({ relPath, text }))
+    .sort((a, b) => a.relPath.localeCompare(b.relPath));
 }
 
 /** 언어 하나의 모든 원문. 파싱은 `load.ts` 가 한다 (Rust 는 YAML 을 읽지 않는다 — D40). */

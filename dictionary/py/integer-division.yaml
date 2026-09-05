@@ -1,0 +1,247 @@
+schema: 1
+id: py/integer-division
+# 0부 축 B. `universal: null` — 「버림 나누기」는 열 언어에 다 있지만 **버리는 방향**이 갈린다.
+# 파이썬은 아래로(`-7 // 2 == -4`), 자바·C·Go 는 0 쪽으로(`-7 / 2 == -3`), JS 는 `Math.floor`
+# 와 `Math.trunc` 로 둘을 갈라 적는다. 같은 이름으로 묶으면 부호가 있는 자리에서 틀린 것을
+# 물려준다 (`py.md` §1.5.2 나눗셈 행).
+universal: null
+name: { ko: 몫만 남기는 나누기, en: Division that keeps the quotient }
+token: "//"
+grammars: [python]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cs/floating-point, cs/type-conversion]
+confusions: [py/arithmetic, py/integer-limit, py/comparison]
+
+dict:
+  one_liner:
+    ko: "나누기가 둘이다. 한쪽은 늘 소수를 내고 다른 쪽은 아래로 버린다."
+    en: "There are two divisions: one always yields a decimal, the other floors."
+  why:
+    ko: >-
+      파이썬에서 기호 하나짜리 나누기는 딱 떨어져도 <b>소수</b>를 냅니다
+      (<code>4 / 2</code> 는 <code>2.0</code>). 몫만 필요할 때 쓰라고 기호를 겹쳐 적는 쪽이
+      따로 있고, {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 그것이에요.
+      버리는 방향이 <b>0 쪽이 아니라 아래</b>입니다. 그래서 <code>7 // 2</code> 는 <code>3</code>
+      인데 <code>-7 // 2</code> 는 <code>-3</code> 이 아니라 <code>-4</code> 예요.
+      공식 문서가 이유를 적어 두었습니다 — <code>i == (i//j)*j + (i%j)</code> 를 늘 지키려고
+      아래로 내립니다. 나머지의 부호가 나누는 수를 따라가는 것도 같은 약속에서 나와요.
+    en: >-
+      In Python the single-symbol division yields a <b>decimal</b> even when it comes out even
+      (<code>4 / 2</code> is <code>2.0</code>). For the quotient alone there is a doubled symbol, and
+      that is {{pick.1|code}} on line {{site.line}}. It floors <b>downward, not toward zero</b>: so
+      <code>7 // 2</code> is <code>3</code> while <code>-7 // 2</code> is <code>-4</code>, not
+      <code>-3</code>. The official documentation gives the reason — flooring keeps
+      <code>i == (i//j)*j + (i%j)</code> true at all times, and the sign of the remainder following
+      the divisor comes from the same promise.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:을,를}} 값으로 만든다."
+      en: "{{pick.2|code}} and {{pick.3|code}} on line {{site.line}} each become a value."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 나눈 뒤 <b>아래로</b> 내린다."
+      en: "{{pick.1|code}} divides and then rounds <b>downward</b>."
+    - ko: "양쪽이 정수면 결과도 정수다. 한쪽이 소수면 결과도 소수인데 값은 여전히 내려간 값이다."
+      en: "Two whole numbers give a whole number; one decimal gives a decimal, still floored."
+
+rule:
+  ko: >-
+    <b>0 쪽이 아니라 아래로 버린다.</b> 음수에서 그 차이가 드러나고, 나머지의 부호는
+    나누는 수를 따라간다.
+  en: >-
+    <b>It floors downward, not toward zero.</b> Negatives reveal the difference, and the remainder
+    takes the sign of the divisor.
+result:
+  label:
+    ko: "{{site.line}}행의 몫"
+    en: "the quotient on line {{site.line}}"
+  value: "{{pick.2}} {{pick.1}} {{pick.3}}"
+  note:
+    ko: "아래로 내린 값"
+    en: "the value rounded downward"
+ok:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:이,가}} 몫만 남깁니다. 나머지가 필요하면 기호가 또
+    따로 있고, 둘을 한 번에 받는 함수도 있어요.
+  en: >-
+    {{pick.1|code}} keeps only the quotient. The remainder has its own symbol, and one function
+    hands back both at once.
+payoff:
+  ko: >-
+    쪽 나누기·격자 계산에서 「한 칸이 모자란다」가 여기서 풀립니다. 음수가 섞이면
+    예상과 한 칸 달라지는 자리도 같은 규칙이에요.
+  en: >-
+    “The pagination is one short” answers itself here, and so does the off-by-one that appears once
+    negatives enter.
+bridge:
+  ko: >-
+    기호 하나짜리 나누기는 <code>py/arithmetic</code> 의 자리이고 규칙이 반대입니다 —
+    그쪽은 딱 떨어져도 소수를 냅니다.
+  en: >-
+    The single-symbol division belongs to <code>py/arithmetic</code> and its rule is the opposite:
+    a decimal even when it comes out even.
+misconceptions:
+  - ko: >-
+      <code>-7</code> 을 둘로 나누면 <code>-3</code> 이다 — <code>-4</code> 입니다.
+      0 쪽으로 자르는 언어의 답을 그대로 가져온 자리예요.
+    en: >-
+      Dividing <code>-7</code> by two gives <code>-3</code> — it gives <code>-4</code>. That answer
+      comes from a language that cuts toward zero.
+  - ko: >-
+      양쪽이 정수면 결과도 늘 정수다 — 한쪽이 소수면 소수가 나옵니다.
+      <code>7.0</code> 을 둘로 내리면 <code>3.0</code> 이에요.
+    en: >-
+      Two whole numbers always give a whole number — one decimal gives a decimal.
+      <code>7.0</code> floored by two is <code>3.0</code>.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>몫만 남기는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that keeps only the quotient</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} <b>나뉘는 쪽</b>입니다. 버리는 방향을 정하는
+            일은 가운데 기호가 해요.
+          en: >-
+            {{pick.2|code}} is the side <b>being divided</b>. Which way it rounds is decided by the
+            symbol between.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 값과 하는 일"
+            en: "The sharpest spot — the value and the doing"
+          code:
+            - "7          # 값 하나일 뿐이다"
+            - "7 // 2     # 3 — 몫만 남는다"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} <b>나누는 쪽</b>입니다. 나머지의 부호가
+            이쪽을 따라가지만, 버리는 일 자체는 기호가 합니다.
+          en: >-
+            {{pick.3|code}} is the <b>divisor</b>. The remainder takes its sign from here, yet the
+            flooring itself is the symbol's job.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 나누는 수냐 나누는 방식이냐"
+            en: "The sharpest spot — the divisor or the manner"
+          code:
+            - "7 // 2     # 3"
+            - "7 / 2      # 3.5 — 같은 수, 다른 기호"
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행은 나눈 뒤 <b>아래로 내려</b> 몫만 남깁니다.
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} divides and rounds <b>downward</b>,
+        keeping only the quotient.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "//", mono: true }
+      - t: "+"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 기호는 <b>더합니다.</b> 나누는 자리에 두면 값이 커지는 쪽으로 가고, 몫은
+              어디에서도 안 나와요.
+            en: >-
+              That symbol <b>adds</b>. Put where a division belongs, it moves the value the other
+              way and no quotient appears anywhere.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 나누기냐 더하기냐"
+              en: "The sharpest spot — dividing or adding"
+            code:
+              - "7 // 2     # 3"
+              - "7 + 2      # 9"
+      - t: "**"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 기호는 <b>거듭 곱합니다.</b> 겹쳐 적은 모양이 닮았을 뿐, 값이 작아지는 대신
+              아주 커져요.
+            en: >-
+              That symbol <b>raises to a power</b>. Only the doubled shape looks alike; the value
+              grows sharply instead of shrinking.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 겹친 기호 둘"
+              en: "The sharpest spot — two doubled symbols"
+            code:
+              - "7 // 2     # 3"
+              - "7 ** 2     # 49"
+      - t: "=="
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 기호는 <b>견줍니다.</b> 몫 대신 참·거짓 하나가 나와서, 그 값을 셈에 이어 쓰면
+              종류가 어긋나요.
+            en: >-
+              That symbol <b>weighs</b>. A true-or-false comes out instead of a quotient, and feeding
+              it into further arithmetic makes the kinds clash.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 값이냐 판단이냐"
+              en: "The sharpest spot — a value or a judgement"
+            code:
+              - "7 // 2     # 3"
+              - "7 == 2     # False"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 소수를 내는 나누기를 안 쓸까요?"
+    en: "Why does line {{site.line}} avoid the division that yields a decimal?"
+  choices:
+    - t:
+        ko: "여기서 필요한 것이 <b>몇 개인가</b>여서 — 소수 개수는 뜻이 없다"
+        en: "Because what is needed here is <b>how many</b>, and a fractional count means nothing"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 값이 음수일 수 있는지도 함께 적어 보세요 — 그때 한 칸이 갈립니다."
+        en: >-
+          That is the direction. Add whether the value can go negative — that is where one step
+          parts.
+    - t:
+        ko: "소수 나누기가 느려서"
+        en: "Because decimal division is slow"
+      ok: false
+      fb:
+        ko: "속도 차이는 이 자리의 이유가 아닙니다. 갈리는 것은 <b>결과의 종류</b>입니다."
+        en: "Speed is not the reason here. What parts ways is <b>the kind of the result</b>."
+    - t:
+        ko: "파이썬이 정수끼리는 이 기호만 받아서"
+        en: "Because Python only accepts this symbol between whole numbers"
+      ok: false
+      fb:
+        ko: >-
+          둘 다 받습니다. 정수끼리 소수 나누기를 하면 소수가 나올 뿐 멈추지 않아요.
+        en: >-
+          It accepts both. Decimal division between whole numbers simply yields a decimal; nothing
+          stops.
+
+queries:
+  - { grammars: [python], file: ./integer-division.scm }
+
+examples:
+  - code: "pages = total // size      # 7 // 2 -> 3 (int)"
+    expect: { sites: 1, form: floordiv, hole: "//", picks: { 1: "//", 2: "total", 3: "size" } }
+  - code: "back = -7 // 2             # -7 // 2 -> -4 (int)"
+    expect: { sites: 1, form: floordiv, hole: "//", picks: { 1: "//", 3: "2" } }
+  - code: "left //= 2                 # 7 //= 2 -> left 가 3 (int)"
+    expect: { sites: 1, form: floordiv-assign, hole: "//=", picks: { 1: "//=", 2: "left", 3: "2" } }
+  - code: "q, r = divmod(total, size) # divmod(7, 2) -> (3, 1) (tuple)"
+    expect: { sites: 1, form: divmod, picks: { 1: "divmod" } }
+  - code: "half = total / 2           # 7 / 2 -> 3.5 (float)"
+    expect: none
+  - code: "rest = total % size        # 7 % 2 -> 1 (int)"
+    expect: none

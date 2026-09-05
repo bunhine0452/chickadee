@@ -1,0 +1,233 @@
+schema: 1
+id: sql/row-and-set
+universal: null
+name: { ko: "단위는 행이다", en: "Rows, not values" }
+token: "LIMIT"
+grammars: [sql, mybatis_sql]
+framework: null
+essential: true
+difficulty: 1
+prereq: []
+confusions: []
+
+dict:
+  one_liner:
+    ko: "몇 줄만 가져오라고 정하는 자리. 어느 줄인지는 여기서 안 정한다."
+    en: "Says how many rows to take. Which rows is decided elsewhere."
+  why:
+    ko: >-
+      SQL 이 다루는 것은 값 하나가 아니라 <b>행의 모음</b>입니다. 그리고 그 모음에는
+      <b>순서가 없어요</b> — 넣은 순서도, 어제 나온 순서도 약속이 아닙니다.
+      {{site.line}}행은 그 모음에서 몇 줄만 떼어 오는데, 줄 세우는 절이 위에 없으면
+      <b>어느 줄이 올지</b>는 그날 데이터베이스가 고른 길에 따라 달라집니다.
+    en: >-
+      What SQL handles is not one value but <b>a bag of rows</b>, and that bag has
+      <b>no order</b> — not the order they went in, not yesterday's order.
+      Line {{site.line}} takes a few rows off it, and with no ordering clause above,
+      <b>which</b> rows arrive depends on the path the database happened to pick.
+  trace:
+    - ko: "{{pick.3|code}} 의 행이 모두 놓인다."
+      en: "Every row of {{pick.3|code}} is laid out."
+    - ko: "그 모음에는 첫째도 마지막도 없다."
+      en: "The bag has no first and no last."
+    - ko: "{{pick.2}}줄만 떼어 온다 — 어느 {{pick.2}}줄인지는 안 정해졌다."
+      en: "{{pick.2}} of them come back — which {{pick.2}} was never settled."
+
+rule:
+  ko: "<b>흐르는 것은 행의 모음이고 그 모음에는 순서가 없다.</b> 줄 세우는 절이 없으면 「상위 몇 개」가 아니라 「아무 몇 개」다."
+  en: "<b>What flows is a bag of rows, and a bag has no order.</b> With no ordering clause it is not the top few but any few."
+result:
+  label:
+    ko: "돌아오는 줄 수"
+    en: "rows that come back"
+  value: "{{pick.2}}"
+  note:
+    ko: "어느 줄인지는 약속이 없다"
+    en: "which rows is not promised"
+ok:
+  ko: >-
+    {{pick.3|code}} 에서 {{pick.2}}줄이 돌아옵니다. 같은 문장을 내일 또 돌려도 같은 {{pick.2}}줄이라는
+    보장은 없어요 — 색인이 하나 생기면 그날부터 달라집니다.
+  en: >-
+    {{pick.2}} rows come back from {{pick.3|code}}. Run the same statement tomorrow and there is no
+    promise of the same {{pick.2}} — one new index and it changes that day.
+payoff:
+  ko: >-
+    이걸 알면 「목록 맨 위가 왜 갑자기 바뀌었지」가 풀립니다 — 맨 위를 정한 적이 없었기 때문이에요.
+  en: >-
+    This untangles “why did the top of the list change” — the top was never decided.
+bridge:
+  ko: >-
+    다른 언어의 배열은 <b>자리 번호</b>가 있어서 0번이 언제나 0번입니다. 표의 행에는 그 번호가 없어요.
+  en: >-
+    An array in other languages has <b>positions</b>, so index 0 is always index 0. A table's rows have no such number.
+misconceptions:
+  - ko: "표에는 「첫 행」이 있다 — 줄 세우는 절을 붙이기 전에는 없습니다."
+    en: "A table has a “first row” — not until an ordering clause says so."
+  - ko: "넣은 순서대로 나온다 — 대개 그렇게 보이지만 약속이 아닙니다."
+    en: "Rows come back in the order they went in — it often looks that way, but it is not promised."
+  - ko: "중복을 접는 낱말은 목록의 첫 항목을 골라 준다 — 중복만 접습니다. 값이 여럿이면 여전히 여럿이에요."
+    en: "The word that folds duplicates picks the first item — it only folds duplicates. Several values stay several."
+
+meaning:
+  - q:
+      ko: "줄 세우는 절 없이 이 문장을 두 번 돌리면 어떻게 될까요?"
+      en: "What happens if this statement runs twice with no ordering clause?"
+    hint:
+      ko: "행의 모음에 순서가 <b>없다</b>는 것이 무엇을 뜻하는지 생각해 보세요."
+      en: "Think about what it means that a bag of rows has <b>no</b> order."
+    options:
+      - t:
+          ko: "같은 줄이 올 수도 있고 다른 줄이 올 수도 있다"
+          en: "The same rows may come, or different ones may"
+      - t:
+          ko: "언제나 같은 줄이 온다"
+          en: "The same rows always come"
+        diag:
+          t:
+            ko: >-
+              대개 그렇게 <b>보입니다</b>. 그런데 그것은 약속이 아니라 그날의 실행 경로이고,
+              색인이 하나 생기면 바뀝니다.
+            en: >-
+              It usually <b>looks</b> that way, but that is the day's execution path, not a promise —
+              one new index changes it.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 보이는 것이냐 약속이냐", en: "The sharpest spot — appearance or promise" }
+            code:
+              - "-- 오늘 본 순서"
+              - "-- 내일도 같다는 약속은 없다"
+      - t:
+          ko: "데이터베이스가 순서를 물어본다"
+          en: "The database asks which order you want"
+        diag:
+          t:
+            ko: "아무것도 안 묻습니다. 안 적으면 <b>안 정해진 채로</b> 돌 뿐이에요."
+            en: "It asks nothing. Left unsaid, it simply runs <b>undecided</b>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 묻느냐 그냥 도느냐", en: "The sharpest spot — asking or just running" }
+            code:
+              - "-- 경고 없음"
+              - "-- 결과만 그때그때"
+      - t:
+          ko: "순서를 안 적었으니 오류가 난다"
+          en: "It errors because no order was given"
+        diag:
+          t:
+            ko: "오류가 아닙니다. 순서를 <b>요구하지 않는</b> 것이 이 언어의 성질이에요."
+            en: "It is not an error. Not <b>requiring</b> an order is what this language is."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 막느냐 허용하느냐", en: "The sharpest spot — blocked or allowed" }
+            code:
+              - "-- 줄 세우기 없이도 통과"
+              - "-- 결과 순서만 미정"
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>몇 줄만 가져오라</b>고 정하는 낱말을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that takes only a few rows</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>몇 줄인지</b>입니다. 그 수를 몇 줄이라고 읽게 하는 것은 앞의 낱말이에요."
+          en: "{{pick.2|code}} is <b>how many</b>. What makes that number mean rows is the word before it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 수냐 그 수를 쓰는 낱말이냐", en: "The sharpest spot — the number or the word that uses it" }
+          code:
+            - "10           -- 그냥 수"
+            - "LIMIT 10     -- 열 줄만"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>읽는 표</b>입니다. 몇 줄을 떼어 올지와는 다른 물음이에요."
+          en: "{{pick.3|code}} is <b>the table read</b>. How many rows to take is a different question."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 어디서냐 몇 줄이냐", en: "The sharpest spot — from where or how many" }
+          code:
+            - "FROM users     -- 어디서"
+            - "LIMIT 10       -- 몇 줄"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>몇 줄만</b> 가져옵니다."
+      en: "Choose what goes in the blank. Line {{site.line}} takes <b>only a few</b> rows."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "LIMIT", mono: true }
+      - t: "OFFSET"
+        mono: true
+        diag:
+          t:
+            ko: "<code>OFFSET</code> 은 <b>몇 줄을 건너뛸지</b>를 정합니다. 가져올 줄 수는 안 정해요."
+            en: "<code>OFFSET</code> says <b>how many to skip</b>. It does not say how many to take."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 건너뛰기냐 가져오기냐", en: "The sharpest spot — skipping or taking" }
+            code:
+              - "OFFSET 10    -- 열 줄 건너뛰기"
+              - "LIMIT 10     -- 열 줄 가져오기"
+      - t: "HAVING"
+        mono: true
+        diag:
+          t:
+            ko: "<code>HAVING</code> 은 <b>묶은 뒤</b>에 묶음을 거르는 자리라 줄 수를 세는 물음이 아닙니다."
+            en: "<code>HAVING</code> filters groups <b>after</b> grouping, so it is not about a count of rows."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 거르기냐 자르기냐", en: "The sharpest spot — filtering or cutting" }
+            code:
+              - "HAVING COUNT(*) > 2   -- 묶음 거르기"
+              - "LIMIT 2               -- 두 줄만"
+      - t: "WHERE"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>WHERE</code> 는 <b>조건에 맞는 행</b>을 남깁니다. 맞는 행이 백 줄이면 백 줄이 다 나와요.
+            en: >-
+              <code>WHERE</code> keeps <b>rows that match</b>. If a hundred match, a hundred come back.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 조건이냐 개수냐", en: "The sharpest spot — a condition or a count" }
+            code:
+              - "WHERE ok = 1   -- 맞는 행 전부"
+              - "LIMIT 3        -- 세 줄"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 <b>몇 줄만</b> 가져올까요?"
+    en: "Why does line {{site.line}} take <b>only a few</b> rows?"
+  choices:
+    - t:
+        ko: "화면이나 다음 단계가 그만큼만 쓰기 때문 — 나머지를 읽는 값이 없다"
+        en: "Because the screen or the next step uses only that many — reading the rest buys nothing"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그러면 <b>어느</b> 줄이어야 하는지도 이 문장이 정해야 하는지 적어 보세요."
+        en: "That is the direction. Now say whether this statement must also settle <b>which</b> rows."
+    - t:
+        ko: "표에 그만큼밖에 없어서"
+        en: "Because the table holds only that many"
+      ok: false
+      fb:
+        ko: "표의 크기와는 무관합니다. 더 있어도 그만큼에서 <b>자릅니다</b>."
+        en: "The table's size has nothing to do with it. Even with more, it <b>cuts</b> there."
+    - t:
+        ko: "SQL 이 한 번에 그 이상 못 읽어서"
+        en: "Because SQL cannot read more at once"
+      ok: false
+      fb:
+        ko: "그런 제한은 없습니다. 안 적으면 맞는 행이 <b>전부</b> 나와요."
+        en: "There is no such limit. Left unsaid, <b>every</b> matching row comes back."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./row-and-set.scm }
+
+examples:
+  - code: "SELECT id FROM users LIMIT 10"
+    expect: { sites: 1, form: limit, hole: "LIMIT", picks: { 1: "LIMIT", 2: "10", 3: "users" } }
+  - code: "SELECT id FROM users ORDER BY id LIMIT 10"
+    expect: { sites: 1, form: limit }
+  - code: "SELECT id FROM users"
+    expect: none

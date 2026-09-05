@@ -50,9 +50,10 @@ test('키보드 완결 — 마우스 0 으로 홈 → T0 → 사다리 → 정�
   //    맨 Tab 으로 재지 않는 이유: WebKit 은 시스템의 「전체 키보드 접근」 설정에 따라 Tab 이
   //    버튼을 건너뛴다(실측 — 홈에서 Tab 한 번 뒤 activeElement 가 body). 그것은 엔진의
   //    정책이지 화면의 성질이 아니라, 재면 게이트가 앱이 아니라 엔진을 재게 된다.
-  const themeSwitch = page.getByRole('switch', { name: '주간반 · 야간반 전환' });
-  await themeSwitch.focus();
-  trail.push(`홈 스위치 → ${await focusHolds(page, '홈 스위치')}`);
+  //
+  //    밝기 스위치는 이제 헤더에 없다 (D187 ⑫) — 대신 헤더의 항해 링크 하나를 짚는다.
+  await page.getByRole('button', { name: '설정' }).focus();
+  trail.push(`홈 항해 → ${await focusHolds(page, '홈 항해')}`);
 
   // ② 인쇄 시작 (Enter). 마우스를 쓰지 않으려고 이름으로 찾아 포커스만 옮긴다.
   await startSession(page);
@@ -83,15 +84,10 @@ test('키보드 완결 — 마우스 0 으로 홈 → T0 → 사다리 → 정�
   await page.locator('.fb.on').waitFor();
   trail.push(`채점 → ${await focusHolds(page, '채점')}`);
 
-  // ⑥ 첫 정합이면 LIFER 가 그 위에 뜬다 — 2중 트랩이라 포커스는 베일 안이다 (05 §7).
-  //    아무 키로 닫히고, 닫히면 포커스가 돌아와야 한다.
-  const veil = page.locator('.lifer-veil');
-  if (await veil.count() > 0) {
-    const inVeil = await focusHolds(page, 'LIFER 열림');
-    expect(inVeil).toContain('lifer-card');
-    trail.push(`LIFER → ${inVeil}`);
-    await page.keyboard.press('Escape');
-    await veil.waitFor({ state: 'detached' });
+  // ⑥ 첫 정합이면 첫 기록이 판정란 안에 남는다 (D131) — 덮는 것이 없으므로 포커스는
+  //    움직이지 않고, 벗길 겹도 없다.
+  if (await page.locator('.lifer-note').count() > 0) {
+    trail.push(`LIFER → ${await focusHolds(page, '첫 기록')}`);
   }
 
   // 05 §7 — 고른 보기가 `disabled` 로 굳으므로 포커스는 다음 동작 버튼에 있어야 한다.
@@ -105,7 +101,7 @@ test('키보드 완결 — 마우스 0 으로 홈 → T0 → 사다리 → 정�
 
   // ⑧ 요약에서 Enter 는 홈으로 (05 §7). 돌아온 뒤의 포커스는 아래 `test.fail` 이 따로 본다.
   await page.keyboard.press('Enter');
-  await expect(page.locator('article.ps[aria-label="인쇄 완료"]')).toHaveCount(0);
+  await expect(page.locator('article.ps[aria-label="오늘 학습 완료"]')).toHaveCount(0);
   await expect(page.locator('.masthead')).toBeVisible();
   trail.push('홈 복귀');
 
@@ -144,11 +140,6 @@ test('키보드 완결 — 세션을 닫고 홈으로 와도 포커스가 남는
   await page.keyboard.press(`Digit${answerKey(app)}`);
   await page.keyboard.press('Enter');
   await page.locator('.fb.on').waitFor();
-  const veil = page.locator('.lifer-veil');
-  if (await veil.count() > 0) {
-    await page.keyboard.press('Escape');
-    await veil.waitFor({ state: 'detached' });
-  }
   await toSummary(page, app);
   await page.keyboard.press('Enter');
   await expect(page.locator('.masthead')).toBeVisible();
@@ -167,7 +158,7 @@ const AXE_SCREENS: Array<{ name: string; open: (page: Page) => Promise<void> }> 
     open: async (page) => { await gotoDev(page); await startSession(page); },
   },
   {
-    name: '야간반',
+    name: '어둡게',
     open: async (page) => { await gotoDev(page); await toNight(page); },
   },
   // 서가는 목록(listbox)과 2단 확인이 새로 들어온 자리라 aria 를 여기서 한 번 더 받는다 (D119).

@@ -121,7 +121,7 @@ const CARD_T0: Card = {
     transferFrom: CID.universal, previewSiteId: 1,
   },
   snapshot: [{ n: 42, t: "const nick = res.user?.profile?.nickname ?? '손님'", target: true }],
-  genVersion: 1, contentHash: 'hash-t0', createdAt: T, retiredAt: null,
+  genVersion: 1, contentHash: 'hash-t0', createdAt: T, retiredAt: null, stageNo: null,
 };
 
 const CARD_T1: Card = {
@@ -135,7 +135,7 @@ const CARD_T1: Card = {
       choices: [{ t: '아무것도 안 돌아온다', ok: true, fb: '맞습니다' }, { t: '터진다', ok: false, fb: '터지지는 않아요' }],
     },
   },
-  snapshot: null, genVersion: 1, contentHash: 'hash-t1', createdAt: T, retiredAt: T + 10,
+  snapshot: null, genVersion: 1, contentHash: 'hash-t1', createdAt: T, retiredAt: T + 10, stageNo: null,
 };
 
 const CARD_T2: Card = {
@@ -149,7 +149,24 @@ const CARD_T2: Card = {
     core: { 'src/a.ts': ['+12', '-3'] }, sec: { 'src/b.ts': ['+1', '-0'] },
     trap: { 'src/c.ts': '이 커밋과 무관' }, hints: ['라우터부터 보세요'],
   },
-  snapshot: null, genVersion: 2, contentHash: 'hash-t2', createdAt: T, retiredAt: null,
+  snapshot: null, genVersion: 2, contentHash: 'hash-t2', createdAt: T, retiredAt: null, stageNo: null,
+};
+
+/** 코스 선택형 (D164) — `track` 열은 t3, `stage_no` 가 단이다. */
+const CARD_T3: Card = {
+  id: 4, repoId: 1, unitId: 1, track: 't3', kind: 'cut', conceptId: CID.ts,
+  level: 1, siteId: null, fileId: 1, commitId: null,
+  payload: {
+    track: 't3', kind: 'cut', stage: 3, file: 'src/features/auth/useLogin.ts', focus: 41,
+    lines: [{ n: 41, t: 'if (!res.ok) return null', target: true }, { n: 42, t: 'const nick = 1' }],
+    q: '41행을 지우면 무엇이 달라질까요?', hint: '그 줄이 막던 입력을 생각해 보세요.',
+    options: [{ t: '실패 응답에서도 아래 줄이 돈다' }, { t: '아무것도 달라지지 않는다' }],
+    answer: 0, why: [null, { t: '그 줄은 실패 응답을 막고 있었습니다.' }],
+    ok: '그 줄이 실패를 걸러 냅니다.', rule: '가드는 지우면 그 입력이 통과한다.',
+    promptLines: ['if (!res.ok) return null', 'const nick = 1'],
+    reason: { q: '왜 그런가요?', options: [{ t: '가드라서' }, { t: '주석이라서' }], answer: 0, why: [null, { t: '주석이 아닙니다.' }] },
+  },
+  snapshot: null, genVersion: 1, contentHash: 'hash-t3', createdAt: T, retiredAt: null, stageNo: 3,
 };
 
 const SESSION: Session = {
@@ -246,7 +263,8 @@ const SETTINGS: Settings = {
   budgetMin: 15, tz: 'Asia/Seoul', rolloverHour: 4, desiredRetention: 0.9, newPerDay: 2,
   t1PerWeek: 2, newcomerFlag: 'suspect', theme: 'dark', trim: 'on', motion: 'reduce',
   identities: [{ email: 'me@example.com', name: '나' }], excludeGlobs: ['dist/**', '**/*.min.js'],
-  locale: 'en', dictLangs: ['ts', 'py'], lastRepoId: 3,
+  locale: 'en', tutorialSeen: true, declaredNewcomer: false, rootCleared: true,
+  dictLangs: ['ts', 'py'], lastRepoId: 3,
 };
 
 // ───────── 적재 ─────────
@@ -322,12 +340,13 @@ function seed(): void {
     ast_json: json(BLOCK.ast), is_alive: 1, updated_at: BLOCK.updatedAt,
   });
 
-  for (const c of [CARD_T0, CARD_T1, CARD_T2]) {
+  for (const c of [CARD_T0, CARD_T1, CARD_T2, CARD_T3]) {
     insert(db, 'card', {
       id: c.id, repo_id: c.repoId, unit_id: c.unitId, track: c.track, kind: c.kind, concept_id: c.conceptId,
       level: c.level, site_id: c.siteId, file_id: c.fileId, commit_id: c.commitId,
       payload_json: json(c.payload), snapshot_json: c.snapshot === null ? null : json(c.snapshot),
       gen_version: c.genVersion, content_hash: c.contentHash, created_at: c.createdAt, retired_at: c.retiredAt,
+      stage_no: c.stageNo ?? null,
     });
   }
 
@@ -410,9 +429,10 @@ beforeAll(() => {
 // ───────── 왕복 ─────────
 
 describe('fromXxxRow 왕복 (인메모리 SQLite + 마이그레이션 전부)', () => {
-  test('마이그레이션이 33개 테이블을 만든다', () => {
+  // 0007 까지 35 · 0009(경로·스키마·죽은 코드, D168·D169)가 7 을 더했다. 0008 은 표를 다시 만들 뿐 수를 안 바꾼다.
+  test('마이그레이션이 42개 테이블을 만든다', () => {
     const rows = db.prepare(statements['store.table_names']).all() as { name: string }[];
-    expect(rows).toHaveLength(33);
+    expect(rows).toHaveLength(42);
     expect(db.pragma('user_version')).toEqual([{ user_version: SCHEMA_VERSION }]);
   });
 
@@ -428,7 +448,7 @@ describe('fromXxxRow 왕복 (인메모리 SQLite + 마이그레이션 전부)', 
     expect(fromMasteryRow(one(db, 'mastery', "concept_id = 'ts/optional-chaining'"))).toStrictEqual(MASTERY);
   });
 
-  test.each([[CARD_T0], [CARD_T1], [CARD_T2]])('card #%# — payload/snapshot JSON', (card: Card) => {
+  test.each([[CARD_T0], [CARD_T1], [CARD_T2], [CARD_T3]])('card #%# — payload/snapshot JSON · stage_no (D164)', (card: Card) => {
     expect(fromCardRow(one(db, 'card', `id = ${card.id}`))).toStrictEqual(card);
   });
 
@@ -520,6 +540,59 @@ describe('toXxxParams 왕복 (카탈로그 statement 로 쓴 뒤 되읽기)', ()
 });
 
 // ───────── 무음 손상 금지 ─────────
+
+/**
+ * D154 — 「사용처 없이 카드만 있는 개념」 가지. **이 문장에는 시험이 없었다**: 가지를 더하며
+ * 문법 오류가 나도 아무도 안 잡는 상태였고, 낡은 `dist` 로 확인하면 옛 문장을 재게 된다.
+ *
+ * 시험마다 다른 개념을 쓴다 — DB 가 이 파일 전체에 하나뿐이라 순서에 기대면 안 된다.
+ */
+describe('queue.new_candidates (실제 SQLite)', () => {
+  let n = 0;
+  /** 사용처 없이 카드만 있는 개념 하나를 심고 그 id 를 준다. */
+  const seedCardOnly = (over: { retired?: boolean; printed?: boolean } = {}): string => {
+    n += 1;
+    const id = `exec/order${n}`;
+    insert(db, 'concept', {
+      id, lang: 'exec', name_ko: id, name_en: id, token: null, kind: 'universal',
+      universal_id: null, track_default: 't0', dict_version_id: 1, is_retired: 0,
+    });
+    insert(db, 'card', {
+      id: 900 + n, repo_id: 1, unit_id: null, track: 't0', kind: 'point', concept_id: id,
+      level: 1, site_id: null, file_id: null, commit_id: null, payload_json: '{}',
+      snapshot_json: null, gen_version: 1, content_hash: `exec-${n}`, created_at: T,
+      retired_at: over.retired === true ? T : null,
+    });
+    if (over.printed === true) {
+      insert(db, 'mastery', {
+        concept_id: id, state: 2, stability: 1, difficulty: 5, due_at: T, last_review_at: T,
+        reps: 1, lapses: 0, layer: 1, day_key: '2026-09-04', day_start_layer: 0, day_ceiling: 1,
+        first_ok_at: T, last_ok_day: '2026-09-04', dunno_total: 0, transfer_from: null,
+        applied_log_id: 0, updated_at: T,
+      });
+    }
+    return id;
+  };
+  const rows = (): { id: string; site_count: number }[] =>
+    db.prepare(statements['queue.new_candidates']).all({ repoId: 1 }) as never;
+
+  test('사용처가 없어도 카드가 있으면 후보로 나온다 — site_count 는 0 이다', () => {
+    const id = seedCardOnly();
+    const hit = rows().find((r) => r.id === id);
+    expect(hit).toBeDefined();
+    expect(hit?.site_count).toBe(0);
+  });
+
+  test('카드가 은퇴하면 빠진다', () => {
+    const id = seedCardOnly({ retired: true });
+    expect(rows().some((r) => r.id === id)).toBe(false);
+  });
+
+  test('이미 찍은 개념은 빠진다 — 새 판 후보가 아니다', () => {
+    const id = seedCardOnly({ printed: true });
+    expect(rows().some((r) => r.id === id)).toBe(false);
+  });
+});
 
 describe('*_json 이 스키마와 다르면 오류다 (02 §8.1)', () => {
   const SECRET = 'PRIVATE_CODE_ZZTOP_9931';

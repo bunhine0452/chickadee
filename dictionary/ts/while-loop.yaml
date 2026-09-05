@@ -1,0 +1,260 @@
+schema: 1
+id: ts/while-loop
+universal: common/loop-while
+name: { ko: while 문, en: while loop }
+token: "while"
+grammars: [typescript, tsx, javascript, vue]
+framework: null
+essential: true
+difficulty: 2
+prereq: [ts/comparison]
+# 빈칸 오답(if·for·switch)은 개념으로 존재하지 않는 낱말이라 혼동 쌍으로 묶을 수 없다.
+# `ts/const-declaration`(오답 let·var·readonly)과 같은 자리다.
+confusions: []
+
+dict:
+  one_liner:
+    ko: "조건을 볼 때마다 다시 판단해, 참인 동안 같은 묶음을 되풀이한다."
+    en: "Judges again on every pass and repeats the same block as long as it holds."
+  why:
+    ko: >-
+      갈림과 <b>판단 횟수</b>가 다릅니다. 갈림은 그 줄에 닿았을 때 한 번 보고 지나가지만,
+      {{site.line}}행은 {{pick.3|code}}{{pick.3|josa:을,를}} 한 바퀴 돌 때마다 {{pick.2|code}}{{pick.2|josa:을,를}} 다시 봅니다.
+      그래서 안에서 조건을 움직이지 않으면 끝나지 않아요.
+    en: >-
+      What differs from a fork is <b>how often it judges</b>. A fork looks once and moves on; line
+      {{site.line}} looks at {{pick.2|code}} again after every pass through {{pick.3|code}}. So if
+      nothing inside moves the condition, it never ends.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:을,를}} 판단한다 — 거짓이면 한 번도 돌지 않는다."
+      en: "{{pick.2|code}} is judged — false here and it never runs at all."
+    - ko: "참이면 {{pick.3|code}}{{pick.3|josa:을,를}} 한 바퀴 돈다."
+      en: "If it holds, {{pick.3|code}} goes round once."
+    - ko: "한 바퀴가 끝나면 {{pick.2|code}}{{pick.2|josa:을,를}} 다시 판단한다."
+      en: "When the pass ends, {{pick.2|code}} is judged again."
+
+rule:
+  ko: "<b>한 바퀴마다 다시 판단한다.</b> 조건을 움직이는 줄이 안에 있어야 끝난다."
+  en: "<b>It judges again each pass.</b> Something inside must move the condition, or it never ends."
+result:
+  label:
+    ko: "{{site.line}}행의 되풀이"
+    en: "the loop on line {{site.line}}"
+  value: "{{pick.2}}"
+  note:
+    ko: "바퀴마다 다시 본다"
+    en: "judged again each pass"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:이,가}} 참인 동안 {{pick.3|code}}{{pick.3|josa:이,가}} 되풀이됩니다. 거짓이 되는 순간 묶음을
+    빠져나와 다음 줄로 가요.
+  en: >-
+    While {{pick.2|code}} holds, {{pick.3|code}} repeats. The moment it fails, the block is left
+    behind and the next line runs.
+payoff:
+  ko: >-
+    되풀이를 알면 「몇 번인지 모르는 일」을 적을 수 있습니다 — 횟수를 미리 세지 않아도
+    조건이 대신 세어 주니까요.
+  en: >-
+    Loops are what let you write work whose length you do not know — you need not count the passes,
+    the condition counts them for you.
+bridge:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} 갈림에 오는 것과 똑같은 참·거짓 물음입니다 — 다른 것은 <b>몇 번 묻는가</b>
+    하나뿐이에요.
+  en: >-
+    {{pick.2|code}} is exactly the kind of true-or-false question a fork takes — the only difference
+    is <b>how many times it is asked</b>.
+misconceptions:
+  - ko: "적어도 한 번은 돈다 — 아니요. 처음부터 거짓이면 한 번도 안 돕니다."
+    en: "It runs at least once — no. False at the start means it never runs."
+  - ko: "조건이 거짓이 되면 그 자리에서 즉시 멈춘다 — 돌던 바퀴는 마치고 나갑니다."
+    en: "It stops the instant the condition fails — it finishes the pass, then leaves."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>같은 묶음을 되풀이하게 하는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that makes the block repeat</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>판단할 물음</b>입니다. 같은 물음이 갈림에도 오고, 되풀이하게 만드는 것은 앞의 낱말이에요."
+          en: >-
+            {{pick.2|code}} is <b>the question to judge</b>. The very same question fits a fork; the
+            repeating comes from the word in front.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 같은 물음, 다른 낱말"
+            en: "The sharpest spot — same question, different word"
+          code:
+            - "if (n < 3) { n++ }      // 한 번만"
+            - "while (n < 3) { n++ }   // 거짓이 될 때까지"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>되풀이될 줄들</b>입니다. 이 묶음은 자기가 몇 번 도는지 모르고, 그것을 정하는 것은 앞의 낱말입니다."
+          en: >-
+            {{pick.3|code}} is <b>the lines to repeat</b>. The block does not know how often it
+            goes round; the word in front decides.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 한 번이냐 여러 번이냐"
+            en: "The sharpest spot — once or many times"
+          code:
+            - "{ n++ }                // 한 번 실행된다"
+            - "while (n < 3) { n++ }  // 여러 번 실행된다"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행에 닿았을 때 {{pick.2|code}}{{pick.2|josa:이,가}} 이미 거짓이면 어떻게 될까요?"
+      en: "If {{pick.2|code}} is already false when line {{site.line}} is reached, what happens?"
+    hint:
+      ko: "판단이 <b>먼저</b>이고 실행이 나중입니다."
+      en: "The judging comes <b>first</b>, the running after."
+    options:
+      - t:
+          ko: "한 번도 돌지 않고 묶음을 지나쳐 다음 줄로 간다"
+          en: "It never runs at all and passes the block for the next line"
+      - t:
+          ko: "적어도 한 번은 돌고 나서 빠져나온다"
+          en: "It runs at least once and then leaves"
+        diag:
+          t:
+            ko: "<code>do … while</code> 이었다면 그 말이 맞습니다 — 그쪽은 실행이 판단보다 먼저예요. 여기서는 판단이 먼저라 한 줄도 실행되지 않습니다."
+            en: >-
+              That would hold for <code>do … while</code>, where the body comes before the check.
+              Here the check comes first, so not one line runs.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 판단이 먼저냐 실행이 먼저냐"
+              en: "The sharpest spot — check first or run first"
+            code:
+              - "while (false) { a() }      // a 는 0번"
+              - "do { a() } while (false)   // a 는 1번"
+      - t:
+          ko: "참이 될 때까지 그 줄에서 기다린다"
+          en: "It waits on that line until the condition turns true"
+        diag:
+          t:
+            ko: "기다리지 않습니다. 조건을 바꿀 수 있는 것은 이 묶음 안의 줄인데 그 줄이 한 번도 돌지 않으므로, 기다린다면 영영 그대로예요."
+            en: >-
+              It does not wait. Only lines inside could move the condition, and those never run — so
+              waiting would last forever.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 누가 조건을 움직이나"
+              en: "The sharpest spot — who moves the condition"
+            code:
+              - "while (n < 3) { n++ }   // 안에서 n 이 움직인다"
+              - "while (n < 3) { }       // 아무도 안 움직여 끝나지 않는다"
+      - t:
+          ko: "오류로 멈춘다"
+          en: "It stops with an error"
+        diag:
+          t:
+            ko: "거짓은 오류가 아니라 <b>답의 한쪽</b>입니다. 되풀이를 0번 하기로 정해진 것뿐이에요."
+            en: >-
+              False is not an error, it is <b>one side of the answer</b>. It simply settles on zero
+              passes.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 0번도 정상이다"
+              en: "The sharpest spot — zero passes is normal"
+            code:
+              - "while (false) { a() }; b()   // b 는 실행된다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 조건이 참인 <b>동안</b> 같은 묶음을 되풀이합니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} repeats the same block <b>as long as</b>
+        the condition holds.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "while", mono: true }
+      - t: "if"
+        mono: true
+        diag:
+          t:
+            ko: "<code>if</code> 도 같은 조건을 봅니다. 다른 점은 <b>한 번 보고 지나간다</b>는 것 하나예요. 되풀이해야 하는 자리에 쓰면 한 바퀴만 돕니다."
+            en: >-
+              <code>if</code> looks at the same condition. The one difference is that it <b>looks
+              once and moves on</b>. Where repeating is wanted, it goes round only once.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 한 번이냐 되풀이냐"
+              en: "The sharpest spot — once or repeated"
+            code:
+              - "if (n < 3) { n++ }      // n 은 한 번만 는다"
+              - "while (n < 3) { n++ }   // n 이 3 이 될 때까지 는다"
+      - t: "for"
+        mono: true
+        diag:
+          t:
+            ko: "<code>for</code> 도 되풀이하지만 <b>셋(시작·조건·증가)</b>이나 목록을 받는 자리입니다. 여기 있는 것은 조건 하나뿐이에요."
+            en: >-
+              <code>for</code> also repeats, but it takes <b>three parts</b> or a list. What stands
+              here is a condition alone.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 조건 하나냐 셋이냐"
+              en: "The sharpest spot — one part or three"
+            code:
+              - "while (n < 3) { n++ }        // 조건 하나"
+              - "for (let i = 0; i < 3; i++)  // 셋"
+      - t: "switch"
+        mono: true
+        diag:
+          t:
+            ko: "<code>switch</code> 는 <b>값 하나를 여러 갈래와 맞춰 보는</b> 자리라 되풀이하지 않습니다. 맞는 갈래 하나를 실행하고 끝나요."
+            en: >-
+              <code>switch</code> <b>matches one value against many branches</b> and does not
+              repeat. It runs the branch that fits and is done.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 되풀이냐 고르기냐"
+              en: "The sharpest spot — repeating or picking"
+            code:
+              - "while (n < 3) { n++ }        // 여러 번"
+              - "switch (n) { case 1: ... }   // 한 번"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 횟수를 세지 않고 조건으로 되풀이할까요?"
+    en: "Why does line {{site.line}} repeat on a condition instead of counting passes?"
+  choices:
+    - t:
+        ko: "몇 번 돌아야 하는지 미리 알 수 없어서 — 조건이 대신 그것을 정한다"
+        en: "Because the number of passes is not known up front — the condition settles it"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 조건을 움직이는 줄이 안의 어디인지도 함께 짚어 보세요."
+        en: "That is the direction. Point out as well which line inside moves the condition."
+    - t:
+        ko: "횟수를 세는 것보다 빨라서"
+        en: "Because it is faster than counting"
+      ok: false
+      fb:
+        ko: "속도의 문제가 아닙니다. 횟수를 알면 세는 쪽이 오히려 읽기 좋습니다."
+        en: "It is not about speed. When the count is known, counting reads better."
+    - t:
+        ko: "숫자를 쓰지 않으려고"
+        en: "To avoid using numbers"
+      ok: false
+      fb:
+        ko: "조건 안에는 대개 숫자가 들어 있습니다. 이유는 횟수를 미리 모른다는 데 있습니다."
+        en: "Conditions usually contain numbers. The reason is that the count is unknown up front."
+
+queries:
+  - { grammars: [typescript, tsx, javascript, vue], file: ./while-loop.scm }
+
+examples:
+  - code: "while (n < 3) { n++ }"
+    expect: { sites: 1, form: while, hole: "while", picks: { 1: "while", 2: "(n < 3)", 3: "{ n++ }" } }
+  - code: "if (n < 3) { n++ }"
+    expect: none

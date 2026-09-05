@@ -1,0 +1,26 @@
+lang: css
+version: 0.1.0
+grammars: [css, vue_style]
+# tree-sitter-css 0.23.2 의 `parser.c` 가 14 다. `vue_style` 은 같은 문법을 `<style>` 구간에만
+# 돌리는 가상 문법이라 값이 같다.
+grammar_abi: { css: 14, vue_style: 14 }
+
+extensions:
+  css: [.css]
+  # `.vue` 는 `ts` 사전(`vue` 문법)도 잡는다 — 으뜸 문법(파일 행)은 먼저 온 쪽이고 캡처는
+  # 양쪽에서 다 나온다 (`jobs.rs` 의 `grammars_of`). 한 파일에 언어가 셋인 첫 사례다.
+  vue_style: [.vue]
+
+essential:
+  - css/declaration
+  - css/rule-set
+
+alternatives: []
+thin_threshold: { min_files: 2, min_sites: 3, small_repo_files: 20 }
+diag_default:
+  point:
+    ko: "«{{pick}}»{{pick|josa:은,는}} {{role}} 자리입니다. {{concept}}{{concept|josa:은,는}} «{{answer}}» 입니다. {{rule}}"
+    en: "«{{pick}}» is the {{role}} slot. The {{concept}} is «{{answer}}». {{rule}}"
+  blank:
+    ko: "«{{pick}}»{{pick|josa:은,는}} 이 자리에 오지 않습니다. {{rule}}"
+    en: "«{{pick}}» does not go in this slot. {{rule}}"

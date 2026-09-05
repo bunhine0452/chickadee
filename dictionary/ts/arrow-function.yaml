@@ -3,17 +3,17 @@ id: ts/arrow-function
 universal: common/function-value
 name: { ko: 화살표 함수, en: Arrow function }
 token: "=>"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 2
-prereq: [ts/const-declaration, ts/call-expression]
+prereq: [ts/const-declaration, ts/call-expression, cs/closure-capture]
 confusions: [ts/call-expression]
 
 dict:
   one_liner:
-    ko: "<code>=></code> 왼쪽은 받을 것, 오른쪽은 돌려줄 것. 함수를 값처럼 쓴다."
-    en: "Left of <code>=></code> is what it takes, right is what it gives. Use it like a value."
+    ko: "왼쪽은 받을 것, 오른쪽은 돌려줄 것. 함수를 값처럼 이름에 담아 넘긴다."
+    en: "Left side takes, right side gives back. Puts one function into one value."
   why:
     ko: >-
       함수를 값으로 쓸 수 있으면 「무엇을 할지」를 다른 함수에 넘길 수 있습니다.
@@ -174,8 +174,39 @@ meaning:
               - "const f = () => {}   // 함수"
               - "const v = f()        // undefined"
 
+# 빈칸형을 못 내는 사유 (D145). 「아직 안 썼다」가 아니라 「이 문법에는 뚫을 구멍이 없다」다.
+no_hole_reason: >-
+  화살표를 지우면 남는 것은 다른 표기가 아니라 문법 오류다. 같은 일을 하는 function 식은 낱말 하나를 바꿔 끼우는 일이 아니라 줄 전체를 다시 쓰는 일이라 빈칸에 안 들어간다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 함수를 이름 없이 그 자리에서 만들까요?"
+    en: "Why does line {{site.line}} build a function on the spot, with no name?"
+  choices:
+    - t:
+        ko: "이 자리에서 한 번 넘기고 마는 함수라 이름을 지어 둘 곳이 없어서"
+        en: "Because it is handed over once, right here, so there is nowhere for a name to live"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 함수를 다른 줄에서도 부르게 되면 무엇이 달라질지 덧붙여 보세요."
+        en: "That is the direction. Add what would change once this function is called from other lines too."
+    - t:
+        ko: "화살표가 더 짧아서"
+        en: "Because the arrow form is shorter"
+      ok: false
+      fb:
+        ko: "짧은 것은 결과입니다. 이름을 안 짓는 이유는 그 함수를 다른 데서 부르지 않기 때문입니다."
+        en: "Short is the outcome, not the reason. The reason for no name is that nothing else calls it."
+    - t:
+        ko: "화살표 함수만 인자로 넘길 수 있어서"
+        en: "Because only arrow functions can be passed as arguments"
+      ok: false
+      fb:
+        ko: "이름 붙인 함수도 그대로 넘깁니다. 갈리는 것은 그 함수를 다시 부를 일이 있느냐입니다."
+        en: "A named function passes just as well. What parts ways is whether it is called again."
+
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./arrow-function.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./arrow-function.scm }
 
 examples:
   - code: "const double = (n) => n * 2"

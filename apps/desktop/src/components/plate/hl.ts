@@ -27,11 +27,15 @@ const KW =
   /^(const|let|var|function|return|if|else|await|async|export|import|from|type|new|typeof|null|undefined|true|false|as|for|of|in|while|class|extends|interface|default|throw|try|catch|switch|case|break)$/;
 
 /**
- * 목업 `TOKRE` 그대로 — 주석 · 문자열 · 숫자 · 식별자 · 공백 · 그 밖의 한 글자.
+ * 목업 `TOKRE` 에서 숫자만 넓힌 것 — 주석 · 문자열 · 숫자 · 식별자 · 공백 · 그 밖의 한 글자.
  * `m` 플래그가 없는 것도 그대로다: 판은 한 줄씩 들어오므로 `//.*$` 의 `$` 는 줄 끝이다.
+ *
+ * 숫자가 `\d[\w.]*` 인 이유 (D170 ①): 목업의 `\b\d+(?:\.\d+)?\b` 는 `86_400_000` · `0xFF` ·
+ * `1e3` · `10n` 에서 뒤에 낱말 글자가 붙어 `\b` 가 안 서고, 그러면 어느 갈래도 안 걸린 앞자리를
+ * `exec` 가 **건너뛰어** 판의 코드가 원본과 달라졌다(`86_400_000` 이 `_400_000` 으로).
  */
 const TOKRE =
-  /(\/\/.*$)|(`(?:[^`\\]|\\.)*`|'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")|(\b\d+(?:\.\d+)?\b)|([A-Za-z_$][\w$]*)|(\s+)|([^\sA-Za-z_$\d])/;
+  /(\/\/.*$)|(`(?:[^`\\]|\\.)*`|'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")|(\d[\w.]*)|([A-Za-z_$][\w$]*)|(\s+)|([^\sA-Za-z_$\d])/;
 
 /** 식별자 뒤에 여는 괄호가 붙으면 호출이다. 목업의 `nxt` 선행 탐색. */
 const NEXT_NON_SPACE = /^\s*(\S)/;
@@ -48,8 +52,12 @@ export function hl(src: string): HlToken[] {
   const out: HlToken[] = [];
   let prev = '';
 
+  let last = 0;
   let m = re.exec(src);
   while (m !== null) {
+    // 어느 갈래에도 안 걸린 글자는 맨 글자로 남긴다 — 떨어뜨리면 판이 원본과 달라진다 (D170 ①).
+    if (m.index > last) out.push({ cls: null, t: src.slice(last, m.index) });
+    last = m.index + m[0].length;
     const s = m[0];
     if (m[1] !== undefined) out.push({ cls: 'c', t: s });
     else if (m[2] !== undefined) out.push({ cls: 's', t: s });
@@ -66,5 +74,6 @@ export function hl(src: string): HlToken[] {
     if (m[5] === undefined) prev = prev === '<' && s === '/' ? '</' : s;
     m = re.exec(src);
   }
+  if (last < src.length) out.push({ cls: null, t: src.slice(last) });
   return out;
 }

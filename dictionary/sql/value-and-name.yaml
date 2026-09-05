@@ -1,0 +1,192 @@
+schema: 1
+id: sql/value-and-name
+universal: null
+name: { ko: 따옴표가 값과 이름을 가른다, en: Literal or identifier }
+token: "'…'"
+grammars: [sql, mybatis_sql]
+framework: null
+essential: true
+difficulty: 1
+prereq: []
+confusions: []
+
+dict:
+  one_liner:
+    ko: "따옴표 하나가 「적힌 그대로의 것」과 「표에 있는 자리」를 가른다."
+    en: "One quote mark splits “the thing as written” from “a slot in the table”."
+  why:
+    ko: >-
+      SQL 에서 <code>'abc'</code> 는 글자 그 자체이고 <code>abc</code> 는 <b>열 이름</b>입니다.
+      {{site.line}}행의 {{pick.1|code}} 쪽은 앞의 것이라 표를 뒤지지 않고 그 글자와 견줍니다.
+      큰따옴표는 표준에서 <b>이름</b> 쪽이라 <code>"abc"</code> 라고 쓰면 <code>abc</code> 라는
+      열을 찾으라는 뜻이 됩니다 — 그런 열이 없으면 SQLite 만 조용히 글자로 봐줘요.
+    en: >-
+      In SQL <code>'abc'</code> is the text itself and <code>abc</code> is a <b>column name</b>.
+      {{pick.1|code}} on line {{site.line}} is the first, so nothing is looked up; the text is
+      weighed as written. Double quotes are on the <b>name</b> side of the standard, so
+      <code>"abc"</code> asks for a column called <code>abc</code> — and only SQLite quietly falls
+      back to text when no such column exists.
+  trace:
+    - ko: "{{pick.2|code}} 쪽은 표에서 찾을 이름이다."
+      en: "{{pick.2|code}} is a name to look up in the table."
+    - ko: "{{pick.1|code}} 쪽은 찾지 않고 그대로 쓰는 글자다."
+      en: "{{pick.1|code}} is text used as written, with nothing looked up."
+    - ko: "가운데 {{pick.3|code}} 기호가 그 둘을 견준다."
+      en: "{{pick.3|code}} weighs the two."
+
+rule:
+  ko: "<b>작은따옴표 안은 값, 그 밖은 이름이다.</b> 어느 따옴표가 이름인지는 데이터베이스가 정한다."
+  en: "<b>Inside single quotes is a value; outside is a name.</b> Which quote means a name is the database's call."
+result:
+  label:
+    ko: "견주는 상대"
+    en: "what it is weighed against"
+  value: "{{pick.1}}"
+  note:
+    ko: "찾지 않고 그대로 쓴다"
+    en: "used as written, not looked up"
+ok:
+  ko: >-
+    {{pick.2|code}} 열의 값이 {{pick.1|code}} 인 행만 남습니다. 따옴표를 빼면 같은 이름의 <b>열</b>을 찾게 돼요.
+  en: >-
+    Only rows whose {{pick.2|code}} equals {{pick.1|code}} remain. Drop the quotes and it looks for a <b>column</b> of that name.
+payoff:
+  ko: >-
+    이걸 알면 「<code>no such column</code>」이 왜 나는지 바로 보입니다 — 값이어야 할 자리를 이름으로 적은 것이에요.
+  en: >-
+    This makes <code>no such column</code> read at a glance — a slot that wanted a value was written as a name.
+bridge:
+  ko: >-
+    다른 언어에서는 따옴표 종류가 취향입니다. 여기서는 <b>뜻이 바뀝니다</b>.
+  en: >-
+    In other languages the choice of quote is taste. Here it <b>changes the meaning</b>.
+misconceptions:
+  - ko: "큰따옴표로도 글자 값을 쓸 수 있다 — 표준에서 그것은 <b>이름</b>이라 열을 찾습니다."
+    en: "Double quotes also make text — in the standard they make a <b>name</b>, so a column is looked up."
+  - ko: "따옴표 없는 글자는 값이다 — 이름입니다. 그런 이름이 없으면 거기서 멈춰요."
+    en: "Bare text is a value — it is a name, and with no such name it stops there."
+  - ko: "값과 이름은 데이터베이스가 알아서 가른다 — 가르는 것은 <b>따옴표</b> 하나입니다."
+    en: "The database tells values and names apart on its own — the <b>quote mark</b> does."
+
+meaning:
+  - q:
+      ko: "{{pick.1|code}} 의 작은따옴표를 큰따옴표로 바꾸면 어떻게 될까요?"
+      en: "What if the single quotes in {{pick.1|code}} become double quotes?"
+    hint:
+      ko: "큰따옴표는 표준에서 <b>이름</b> 쪽입니다."
+      en: "Double quotes are on the <b>name</b> side of the standard."
+    options:
+      - t:
+          ko: "그 이름의 열을 찾는다 — 없으면 데이터베이스에 따라 멈추거나 글자로 봐준다"
+          en: "It looks for a column of that name — and depending on the database it stops or falls back to text"
+      - t:
+          ko: "아무것도 안 달라진다"
+          en: "Nothing changes"
+        diag:
+          t:
+            ko: >-
+              따옴표 종류가 <b>값이냐 이름이냐</b>를 정합니다. 취향이 아니라 뜻이에요.
+            en: >-
+              The kind of quote settles <b>value or name</b>. It is meaning, not taste.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 취향이냐 뜻이냐", en: "The sharpest spot — taste or meaning" }
+            code:
+              - "'abc'    -- 글자"
+              - "\"abc\"    -- 열 이름"
+      - t:
+          ko: "문법 오류로 멈춘다"
+          en: "It stops with a syntax error"
+        diag:
+          t:
+            ko: "문법은 <b>맞습니다</b>. 이름으로 읽힐 뿐이라 조용히 다른 물음이 돼요."
+            en: "The syntax is <b>fine</b>. It is simply read as a name, and quietly becomes another question."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 막히느냐 조용하냐", en: "The sharpest spot — blocked or silent" }
+            code:
+              - "-- 문법은 통과"
+              - "-- 뜻만 바뀐다"
+      - t:
+          ko: "이름을 찾다가 못 찾으면 자동으로 글자로 바뀐다 — 어디서나"
+          en: "A name that is not found always turns into text — everywhere"
+        diag:
+          t:
+            ko: >-
+              그렇게 봐주는 것은 <b>SQLite 의 옛 관용</b> 하나뿐입니다. 다른 데서는 거기서 멈춰요.
+            en: >-
+              Only <b>SQLite's old leniency</b> does that. Elsewhere it stops there.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 한 곳이냐 어디서나냐", en: "The sharpest spot — one place or everywhere" }
+            code:
+              - "-- SQLite: 글자로 봐준다"
+              - "-- 그 밖: no such column"
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>적힌 그대로의 값</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the value written as-is</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 표에서 <b>찾을 이름</b>입니다. 따옴표가 없다는 것이 그 표시예요."
+          en: "{{pick.2|code}} is a <b>name to look up</b>. Having no quotes is the sign."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 값이냐", en: "The sharpest spot — a name or a value" }
+          code:
+            - "status         -- 이름"
+            - "'open'         -- 값"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 둘을 <b>견주는</b> 기호입니다. 값도 이름도 아니에요."
+          en: "{{pick.3|code}} is the sign that <b>weighs</b> the two. It is neither a value nor a name."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 견주기냐 견줄 것이냐", en: "The sharpest spot — the weighing or the weighed" }
+          code:
+            - "="
+            - "status = 'open'"
+
+no_hole_reason: >-
+  구멍에 넣을 보기가 사용처마다 다른 글자다 — 값 자체를 뚫으면 리포가 쓴 낱말을 맞히는 문항이 되고,
+  가르는 것은 낱말이 아니라 따옴표라 보기 넷을 고정할 자리가 없다. 이 층이 묻는 것은
+  「어느 쪽이 값인가」이고, 그것은 지목형이 정확히 묻는다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 <b>따옴표를 붙인 글자</b>로 견줄까요?"
+    en: "Why does line {{site.line}} weigh against <b>quoted text</b>?"
+  choices:
+    - t:
+        ko: "찾는 것이 표 안의 다른 열이 아니라 정해진 글자라서 — 이름으로 적으면 다른 물음이 된다"
+        en: "Because what it wants is a fixed piece of text, not another column — as a name it becomes another question"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 글자가 매번 달라져야 한다면 무엇으로 바꿔야 하는지도 적어 보세요."
+        en: "That is the direction. Now say what this should become if the text must change each time."
+    - t:
+        ko: "SQL 이 따옴표를 요구해서"
+        en: "Because SQL requires quotes"
+      ok: false
+      fb:
+        ko: "요구하지 않습니다. 따옴표를 빼면 <b>이름</b>으로 읽히고 그것도 말이 되는 문장이에요."
+        en: "It requires none. Without them it reads as a <b>name</b>, and that is a valid statement too."
+    - t:
+        ko: "글자가 여러 개라서"
+        en: "Because the text has several characters"
+      ok: false
+      fb:
+        ko: "길이와는 무관합니다. 한 글자여도 값이면 따옴표가 붙어요."
+        en: "Length has nothing to do with it. One character still takes quotes if it is a value."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./value-and-name.scm }
+
+examples:
+  - code: "SELECT * FROM cart WHERE status = 'open'"
+    expect: { sites: 1, form: text-value, picks: { 1: "'open'", 2: "status", 3: "=" } }
+  - code: "SELECT * FROM cart WHERE status = \"open\""
+    expect: none
+  - code: "SELECT * FROM cart WHERE qty = 3"
+    expect: none

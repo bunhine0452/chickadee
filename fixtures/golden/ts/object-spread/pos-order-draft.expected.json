@@ -16,6 +16,19 @@
     "queryId": "ts/object-spread",
     "matchId": 1,
     "patternIndex": 0,
+    "name": "pick.3",
+    "form": "object",
+    "startLine": 3,
+    "startCol": 9,
+    "endLine": 3,
+    "endCol": 10,
+    "nodeKind": "{",
+    "inError": false
+  },
+  {
+    "queryId": "ts/object-spread",
+    "matchId": 1,
+    "patternIndex": 0,
     "name": "pick.2",
     "form": "object",
     "startLine": 4,
@@ -49,6 +62,19 @@
     "endLine": 5,
     "endCol": 50,
     "nodeKind": "object",
+    "inError": false
+  },
+  {
+    "queryId": "ts/object-spread",
+    "matchId": 2,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "object",
+    "startLine": 5,
+    "startCol": 13,
+    "endLine": 5,
+    "endCol": 14,
+    "nodeKind": "{",
     "inError": false
   },
   {

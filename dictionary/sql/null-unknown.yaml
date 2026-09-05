@@ -1,0 +1,234 @@
+schema: 1
+id: sql/null-unknown
+universal: null
+name: { ko: "없음이 아니라 모름", en: "Unknown, not empty" }
+token: "NULL"
+grammars: [sql, mybatis_sql]
+framework: null
+essential: true
+difficulty: 2
+prereq: [sql/value-and-name]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "값이 비었다는 표시가 아니라 <b>값을 모른다</b>는 표시다."
+    en: "Not a mark for “empty” but for “we do not know”."
+  why:
+    ko: >-
+      이 표시는 빈 글자도 0 도 아닙니다 — <b>값을 모른다</b>는 뜻이에요. 그래서 이것끼리
+      견주면 답이 참도 거짓도 아닌 <b>모름</b>이 되고, 조건은 모름인 행을 버립니다.
+      {{site.line}}행이 견주기 기호 대신 {{pick.3|code}} 라는 낱말을 쓰는 이유가 그것입니다 —
+      모르는 것을 견줄 수는 없으니 <b>모르는지 묻는</b> 낱말이 따로 있어요.
+    en: >-
+      This mark is neither empty text nor zero — it means <b>the value is not known</b>. Weigh two
+      of them and the answer is neither true nor false but <b>unknown</b>, and a filter throws
+      unknown rows away. That is why line {{site.line}} uses {{pick.3|code}} instead of a
+      comparison sign — the unknown cannot be weighed, so there is a separate word that
+      <b>asks whether</b> it is unknown.
+  trace:
+    - ko: "{{pick.2|code}} 의 값이 있는지 없는지를 본다."
+      en: "Whether {{pick.2|code}} has a value is looked at."
+    - ko: "{{pick.1|code}} 쪽은 값이 아니라 「모른다」는 표시다."
+      en: "{{pick.1|code}} is not a value but the mark for “not known”."
+    - ko: "그래서 견주기가 아니라 묻기로만 다룰 수 있다."
+      en: "So it can only be asked about, never weighed."
+
+rule:
+  ko: "<b>이 표시는 값이 아니라 모름이다.</b> 모름은 다른 모름과 같지도 다르지도 않다."
+  en: "<b>This mark is unknown, not a value.</b> One unknown is neither equal to nor different from another."
+result:
+  label:
+    ko: "{{pick.2}} 자리의 상태"
+    en: "the state of {{pick.2}}"
+  value: "{{pick.1}}"
+  note:
+    ko: "값이 아니라 모름이다"
+    en: "unknown, not a value"
+ok:
+  ko: >-
+    {{pick.2|code}} 값을 모르는 행이 가려집니다. 같은 것을 견주기 기호로 물었다면 한 줄도 안 나왔을 거예요.
+  en: >-
+    Rows where {{pick.2|code}} is not known are singled out. Asked with a comparison sign, none would have come back.
+payoff:
+  ko: >-
+    이걸 알면 「빈 값이 분명히 있는데 왜 안 나오지」가 풀립니다 — 견주기로 물었기 때문이에요.
+  en: >-
+    This untangles “there really are empty rows, why do none come back” — the question was a comparison.
+bridge:
+  ko: >-
+    다른 언어의 「없음」은 값이라 <b>같다</b>고 견줄 수 있습니다. 여기서는 견주면 답이 사라져요.
+  en: >-
+    “Absent” in other languages is a value, so it can be weighed as <b>equal</b>. Here weighing makes the answer vanish."
+misconceptions:
+  - ko: "빈 글자와 같다 — 빈 글자는 <b>값</b>이고 이것은 값이 아닙니다."
+    en: "It is the same as empty text — empty text is a <b>value</b>; this is not."
+  - ko: "0 이나 거짓과 같다 — 0 도 거짓도 아는 값입니다. 이것은 모른다는 표시예요."
+    en: "It is the same as zero or false — zero and false are known values. This marks the unknown."
+  - ko: "이것끼리는 같다 — 모름끼리 견주면 답도 모름이라 같다고 안 나옵니다."
+    en: "Two of them are equal — weighing unknowns gives unknown, so they never come back equal."
+
+meaning:
+  - q:
+      ko: "{{pick.2|code}} 열을 이 표시와 <b>견주기 기호로</b> 물으면 어떻게 될까요?"
+      en: "What if {{pick.2|code}} is asked about with a <b>comparison sign</b> instead?"
+    hint:
+      ko: "답이 참·거짓 <b>둘이 아니라 셋</b>이라는 것이 열쇠입니다."
+      en: "The key is that there are <b>three</b> answers, not two."
+    options:
+      - t:
+          ko: "한 행도 안 나온다 — 그리고 오류도 안 난다"
+          en: "No row comes back — and no error either"
+      - t:
+          ko: "모르는 행이 나온다"
+          en: "The unknown rows come back"
+        diag:
+          t:
+            ko: >-
+              그러려면 <b>모름 = 모름</b>이 참이어야 하는데 여기서는 모름입니다. 조건은 모름인 행을 버려요.
+            en: >-
+              That needs <b>unknown = unknown</b> to be true, and here it is unknown. A filter throws unknown rows away.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 참이냐 모름이냐", en: "The sharpest spot — true or unknown" }
+            code:
+              - "x IS NULL    -- 참/거짓"
+              - "x = NULL     -- 모름 → 버려짐"
+      - t:
+          ko: "문법 오류로 멈춘다"
+          en: "It stops with a syntax error"
+        diag:
+          t:
+            ko: "문법은 <b>맞습니다</b>. 아무도 안 말려 주고 결과가 비어 있는 것으로만 드러나요."
+            en: "The syntax is <b>fine</b>. Nothing warns you; it shows up only as an empty result."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 막히느냐 조용하냐", en: "The sharpest spot — blocked or silent" }
+            code:
+              - "-- 오류 메시지가 없다"
+              - "-- 결과만 0행"
+      - t:
+          ko: "모든 행이 나온다"
+          en: "Every row comes back"
+        diag:
+          t:
+            ko: "반대입니다. 모름은 참이 아니라서 조건을 <b>하나도</b> 통과하지 못해요."
+            en: "The other way round. Unknown is not true, so <b>nothing</b> passes the filter."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 전부냐 전무냐", en: "The sharpest spot — all or none" }
+            code:
+              - "WHERE x = NULL   -- 0행"
+              - "WHERE 1 = 1      -- 전부"
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>모른다는 표시</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the mark for “not known”</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>묻는 대상</b>입니다. 표시 자체는 그 뒤에 있어요."
+          en: "{{pick.2|code}} is <b>what is asked about</b>. The mark itself sits after it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 대상이냐 표시냐", en: "The sharpest spot — the subject or the mark" }
+          code:
+            - "closed_at              -- 대상"
+            - "closed_at IS NULL      -- 대상과 표시"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>묻는 낱말</b>입니다. 무엇을 묻는지는 그 뒤가 정해요."
+          en: "{{pick.3|code}} is <b>the asking word</b>. What is asked is settled by what follows."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 묻기냐 표시냐", en: "The sharpest spot — the asking or the mark" }
+          code:
+            - "IS"
+            - "IS NULL"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 값을 <b>모르는</b> 행을 가려냅니다."
+      en: "Choose what goes in the blank. Line {{site.line}} singles out rows whose value is <b>not known</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "NULL", mono: true }
+      - t: "FALSE"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>FALSE</code> 는 <b>아는 값</b>입니다. 모르는 것과 거짓인 것은 다른 상태예요.
+            en: >-
+              <code>FALSE</code> is a <b>known value</b>. Not knowing and being false are different states."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 아는 거짓이냐 모름이냐", en: "The sharpest spot — a known false or the unknown" }
+            code:
+              - "ok IS FALSE    -- 거짓인 행"
+              - "ok IS NULL     -- 모르는 행"
+      - t: "UNKNOWN"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              뜻은 가깝지만 <b>적을 수 있는 낱말이 아닙니다</b>. 모름은 견주기의 결과로만 나와요.
+            en: >-
+              The meaning is close, but it is <b>not a word you can write</b>. The unknown only appears as the result of weighing."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 적는 것이냐 나오는 것이냐", en: "The sharpest spot — written or produced" }
+            code:
+              - "-- 값 자리에 적는 표시"
+              - "-- 견주기가 내는 셋째 답"
+      - t: "NONE"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              다른 언어의 낱말입니다. 이 언어에서는 그 이름의 <b>열</b>을 찾게 돼요.
+            en: >-
+              That is another language's word. Here it is read as a <b>column</b> of that name."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 표시냐 이름이냐", en: "The sharpest spot — the mark or a name" }
+            code:
+              - "IS NULL     -- 이 언어의 표시"
+              - "IS NONE     -- NONE 이라는 열"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 <b>모르는 행</b>을 따로 가려낼까요?"
+    en: "Why does line {{site.line}} single out <b>rows that are not known</b>?"
+  choices:
+    - t:
+        ko: "여기서는 모름이 상태를 나타내서 — 아직 안 끝난 것·지워진 것을 그렇게 표시했다"
+        en: "Because here the unknown stands for a state — not finished yet, or removed, is marked that way"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 상태를 <b>값</b>으로 표시했다면 무엇이 달라지는지도 적어 보세요."
+        en: "That is the direction. Now say what changes if that state were marked with a <b>value</b>."
+    - t:
+        ko: "SQL 이 이 표시를 특별히 다뤄서"
+        en: "Because SQL treats this mark specially"
+      ok: false
+      fb:
+        ko: "다루는 것은 맞지만 <b>왜 이 열이 비어 있는지</b>는 안 정해 줍니다. 그건 설계의 선택이에요."
+        en: "It does, but not <b>why this column is empty</b>. That is a choice in the design."
+    - t:
+        ko: "빠르게 하려고"
+        en: "To make it faster"
+      ok: false
+      fb:
+        ko: "속도와는 무관합니다. 이 물음은 <b>어떤 행이 맞는가</b>에 대한 것이에요."
+        en: "This has nothing to do with speed. It is about <b>which rows are the right ones</b>."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./null-unknown.scm }
+
+examples:
+  - code: "SELECT * FROM cart WHERE closed_at IS NULL"
+    expect: { sites: 1, form: "null", hole: "NULL", picks: { 1: "NULL", 2: "closed_at", 3: "IS" } }
+  - code: "SELECT * FROM cart WHERE closed_at IS NOT NULL"
+    expect: { sites: 1, form: "null", hole: "NULL", picks: { 1: "NULL", 2: "closed_at", 3: "IS NOT" } }
+  - code: "SELECT * FROM cart WHERE closed_at = NULL"
+    expect: none

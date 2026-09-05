@@ -1,0 +1,197 @@
+schema: 1
+id: py/if-statement
+universal: common/conditional-branch
+name: { ko: if 문, en: if statement }
+token: "if"
+grammars: [python]
+framework: null
+essential: true
+difficulty: 1
+prereq: []
+# 빈칸 오답(while·for·elif)은 개념으로 없거나 같은 낱말족이라 혼동 쌍으로 못 묶는다.
+confusions: []
+
+dict:
+  one_liner:
+    ko: "조건이 참일 때만 그 아래 묶음을 실행하고, 거짓이면 통째로 건너뛴다."
+    en: "Runs the block below only when the condition holds; skips it whole otherwise."
+  why:
+    ko: >-
+      이것이 없으면 프로그램은 위에서 아래로 <b>모든 줄</b>을 실행합니다. {{site.line}}행은
+      {{pick.2|code}}{{pick.2|josa:을,를}} 판단해 참일 때만 아래 묶음으로 들어가요. 파이썬에서
+      그 묶음의 경계는 중괄호가 아니라 <b>들여쓰기</b>입니다.
+    en: >-
+      Without this a program runs <b>every line</b>, top to bottom. Line {{site.line}} judges
+      {{pick.2|code}} and steps into the block only when it holds. In Python that block is bounded
+      by <b>indentation</b>, not braces.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:을,를}} 먼저 판단한다."
+      en: "{{pick.2|code}} is judged first."
+    - ko: "참이면 들여쓴 묶음을 실행한다."
+      en: "If it holds, the indented block runs."
+    - ko: "거짓이면 그 묶음을 건너뛰고 들여쓰기가 돌아온 줄로 간다."
+      en: "If not, the block is skipped down to where the indentation returns."
+
+rule:
+  ko: "<b>판단은 그 줄에 닿았을 때 한 번뿐이다.</b> 묶음의 경계는 들여쓰기가 정한다."
+  en: "<b>The judgement happens once, when the line is reached.</b> Indentation bounds the block."
+result:
+  label:
+    ko: "{{site.line}}행의 갈림"
+    en: "the branch at line {{site.line}}"
+  value: "{{pick.2}}"
+  note:
+    ko: "참일 때만 아래로 간다"
+    en: "only true goes below"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:이,가}} 참이면 들여쓴 묶음으로 들어갑니다. 거짓이면 그 묶음은
+    <b>한 줄도</b> 실행되지 않아요.
+  en: >-
+    When {{pick.2|code}} holds it enters the indented block. When it does not, <b>not one line</b>
+    of that block runs.
+payoff:
+  ko: >-
+    이 한 줄이 있어서 {{site.line}}행 아래가 <b>언제나</b> 도는 코드가 아니게 됩니다.
+  en: >-
+    This one line is what keeps the code below line {{site.line}} from running <b>always</b>.
+bridge:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} 참·거짓으로 좁혀지는 물음이고, 들여쓴 묶음은 그 답이
+    참일 때만 가는 길입니다.
+  en: >-
+    {{pick.2|code}} narrows to true or false, and the indented block is the road taken only then.
+misconceptions:
+  - ko: "거짓이면 프로그램이 멈춘다 — 아니요. 묶음만 건너뛰고 이어집니다."
+    en: "False stops the program — no. Only the block is skipped."
+  - ko: "괄호로 감싸야 한다 — 파이썬은 조건에 괄호가 필요 없습니다. 묶음은 들여쓰기가 정해요."
+    en: "The condition needs parentheses — Python does not require them; indentation bounds the block."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>흐름을 둘로 가르는 일을 맡은 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word whose job is splitting the flow in two</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>판단할 물음</b>입니다. 물음은 스스로 흐름을 가르지 못해요."
+          en: "{{pick.2|code}} is <b>the question</b>. A question cannot split the flow by itself."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 물음만으로는 아무 일도 안 난다"
+            en: "The sharpest spot — a question alone does nothing"
+          code:
+            - "count > 0          # 참·거짓만 나온다"
+            - "if count > 0: ...  # 그 답이 흐름을 가른다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 참일 때 <b>실행할 묶음</b>입니다. 들여쓰기가 그 경계이고, 언제 도는지는 앞의 낱말이 정합니다."
+          en: >-
+            {{pick.3|code}} is <b>the block to run</b>. Indentation bounds it; when it runs is
+            decided by the word in front.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 들여쓰기가 경계다"
+            en: "The sharpest spot — indentation is the boundary"
+          code:
+            - "if ok:"
+            - "    send()   # 들여쓴 동안만 이 갈래다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 조건이 참일 때만 아래 묶음을 <b>한 번</b> 실행합니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} runs the block below <b>once</b>, only
+        when the condition holds.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "if", mono: true }
+      - t: "while"
+        mono: true
+        diag:
+          t:
+            ko: "<code>while</code> 도 같은 조건을 봅니다. 다른 점은 <b>거짓이 될 때까지 되풀이한다</b>는 것 하나예요."
+            en: >-
+              <code>while</code> reads the same condition. The one difference is that it
+              <b>repeats until it fails</b>.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 한 번이냐 되풀이냐"
+              en: "The sharpest spot — once or repeated"
+            code:
+              - "if n < 3: n += 1      # 한 번만"
+              - "while n < 3: n += 1   # 3 이 될 때까지"
+      - t: "elif"
+        mono: true
+        diag:
+          t:
+            ko: "<code>elif</code> 는 <b>앞선 갈림이 거짓이었을 때</b>만 보는 자리라 위에 갈림이 하나 있어야 합니다. 첫 갈림 자리에는 오지 못해요."
+            en: >-
+              <code>elif</code> is only looked at <b>when an earlier branch did not hold</b>, so a
+              branch must stand above it. It cannot open the first one.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 첫 갈림이냐 다음 갈림이냐"
+              en: "The sharpest spot — the first branch or a later one"
+            code:
+              - "if a: ...       # 첫 갈림"
+              - "elif b: ...     # 앞이 거짓일 때만"
+      - t: "for"
+        mono: true
+        diag:
+          t:
+            ko: "<code>for</code> 는 <b>목록을 하나씩 도는</b> 자리라 뒤에 <code>in</code> 과 목록이 따라옵니다. 참·거짓 하나로 갈리는 자리가 아니에요."
+            en: >-
+              <code>for</code> <b>walks a list</b>, so it is followed by <code>in</code> and the
+              list. It is not where a single true-or-false splits.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 갈래냐 되풀이냐"
+              en: "The sharpest spot — a branch or a walk"
+            code:
+              - "if xs: ...           # 한 번 갈린다"
+              - "for x in xs: ...     # 목록만큼 돈다"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 이 일을 조건 아래에 두었을까요?"
+    en: "Why does line {{site.line}} put this work under a condition?"
+  choices:
+    - t:
+        ko: "그 아래 줄들이 언제나 옳지는 않아서 — 참일 때만 실행해야 한다"
+        en: "Because the lines below are not always right — they should run only when it holds"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 조건이 거짓인데도 실행됐다면 무엇이 어긋났을지도 적어 보세요."
+        en: >-
+          That is the direction. Say also what would break if it ran when the condition does not
+          hold.
+    - t:
+        ko: "코드를 짧게 만들려고"
+        en: "To make the code shorter"
+      ok: false
+      fb:
+        ko: "줄 수는 오히려 늡니다. 얻는 것은 <b>언제 실행되는지</b>에 대한 약속입니다."
+        en: "It adds lines. What you gain is a promise about <b>when</b> it runs."
+    - t:
+        ko: "들여쓰기를 맞추려고"
+        en: "To line up the indentation"
+      ok: false
+      fb:
+        ko: "들여쓰기는 갈림의 결과이지 이유가 아닙니다. 이유는 그 줄들이 언제 옳은지에 있습니다."
+        en: "Indentation follows the branch; it is not the reason. The reason is when those lines are right."
+
+queries:
+  - { grammars: [python], file: ./if-statement.scm }
+
+examples:
+  - code: "if count > 0:\n    send()"
+    expect: { sites: 1, form: if, hole: "if", picks: { 1: "if", 2: "count > 0" } }
+  - code: "value = a if ok else b"
+    expect: none

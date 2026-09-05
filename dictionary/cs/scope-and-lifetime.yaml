@@ -1,0 +1,89 @@
+schema: 1
+id: cs/scope-and-lifetime
+universal: null
+name: { ko: "이름이 보이는 범위와 값이 사는 기간", en: "Scope and lifetime" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+track_default: t0
+essential: false
+difficulty: 2
+prereq: [cs/call-stack]
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "이름이 안 보이는 자리에서도 값은 살아 있을 수 있다. 둘은 다른 축이다."
+    en: "A value can be alive where its name is invisible. Two different axes."
+  why:
+    ko: >-
+      <b>범위</b>는 「여기서 이 이름을 쓸 수 있나」이고 <b>기간</b>은 「그 값이 아직 있나」입니다.
+      둘이 같아 보이는 이유는 흔한 경우에 같이 끝나기 때문이에요 — 함수가 끝나면 이름도
+      값도 사라집니다. 그런데 안쪽 함수가 바깥 값을 데려가면 <b>이름은 안 보이는데 값은 산</b>
+      상태가 됩니다. 반대로 이름은 보이는데 가리키는 값이 이미 치워진 경우도 있어요.
+      두 축을 갈라 두면 이 두 사고가 각각 다른 자리에 있다는 것이 보입니다.
+    en: >-
+      <b>Scope</b> asks whether a name is usable here; <b>lifetime</b> asks whether the value still
+      exists. They look identical because in the common case they end together — a function ends
+      and both go. But when an inner function carries an outer value along, the <b>name is
+      invisible while the value lives</b>. And the reverse happens too: the name is visible while
+      the value it points at is already gone. Splitting the axes puts these two accidents in
+      different places.
+  trace: []
+rule:
+  ko: "<b>보이는 것과 살아 있는 것은 다른 질문이다.</b> 흔히 같이 끝날 뿐이다."
+  en: "<b>Visible and alive are different questions.</b> They merely often end together."
+ok:
+  ko: >-
+    안쪽에서 만든 이름은 바깥에서 안 보입니다. 안쪽이 끝나면 그 값도 대개 함께 걷히고,
+    누가 그 값을 아직 들고 있으면 그때만 더 삽니다.
+  en: >-
+    A name made inside is invisible outside. When the inside ends its values are usually taken
+    with it; they live longer only while something still holds them.
+misconceptions:
+  - ko: "이름이 안 보이면 값도 없어졌다 — 데려간 함수가 있으면 값은 남습니다."
+    en: "If the name is invisible the value is gone — not if a function carried it along."
+  - ko: "블록이 끝나면 무조건 치워진다 — 언어마다 치우는 규칙이 다릅니다."
+    en: "Leaving a block always frees it — the rule for freeing differs by language."
+  - ko: "같은 이름이면 같은 값이다 — 범위가 다르면 이름이 같아도 다른 값입니다."
+    en: "Same name, same value — different scopes make different values of the same name."
+meaning:
+  - q:
+      ko: "함수가 끝났는데 그 안에서 만든 값이 아직 쓰이고 있습니다. <b>어떻게 가능한가요?</b>"
+      en: "A function ended, yet a value made inside it is still in use. <b>How?</b>"
+    hint:
+      ko: "이름이 사라지는 것과 값이 사라지는 것은 다른 일입니다."
+      en: "A name going away is not a value going away."
+    options:
+      - t: { ko: "누군가 그 값을 아직 들고 있어서 값의 기간이 더 길다", en: "Something still holds it, so the value outlives the name" }
+      - t: { ko: "함수가 사실은 안 끝났다", en: "The function did not really end" }
+        diag:
+          t:
+            ko: "끝난 함수의 칸은 실제로 걷힙니다. 남는 것은 <b>값</b>이지 함수의 칸이 아니에요."
+            en: "The slot of a finished function really is taken off. What remains is the <b>value</b>, not the slot."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 칸이냐 값이냐", en: "The sharpest spot — slot or value" }
+            code:
+              - "칸: 끝나면 걷힌다"
+              - "값: 들고 있으면 남는다"
+      - t: { ko: "그 이름을 바깥에서도 볼 수 있어서", en: "Because the name is visible outside too" }
+        diag:
+          t:
+            ko: "이름은 여전히 안 보입니다. 값에 닿는 길은 <b>이름이 아니라 들고 있는 쪽</b>이에요."
+            en: "The name is still invisible. The path to the value runs through <b>whoever holds it</b>, not the name."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 이름이냐 손이냐", en: "The sharpest spot — name or hold" }
+            code:
+              - "이름: 안 보인다"
+              - "값: 들고 있는 쪽을 통해 닿는다"
+      - t: { ko: "값이 복사돼서 원본과 무관해졌다", en: "It was copied and no longer relates to the original" }
+        diag:
+          t:
+            ko: "복사됐다면 <b>다른 값</b>입니다. 지금 묻는 것은 같은 값이 계속 살아 있는 경우예요 — 둘 다 실제로 일어나고 언어마다 갈립니다."
+            en: "A copy is <b>a different value</b>. The question is about the same value staying alive — both happen, and languages differ."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 복사냐 그대로냐", en: "The sharpest spot — copied or same" }
+            code:
+              - "복사: 고쳐도 원본은 그대로"
+              - "그대로: 고치면 양쪽이 바뀐다"

@@ -1,24 +1,31 @@
 import type { RepoId } from '@chickadee/ipc-client';
 
+import { detectJava, runJava } from './java-runner.js';
+import type { RunResult, RunSpec, RunnerProbe } from './runner.js';
+
 /** 러너가 필요한 것은 id 와 경로뿐이다 — 장부 행 전체(`RepoInfo`)는 `store-sql` 에 있고 01 §2 의 의존 방향상 여기서 볼 수 없다. */
 export interface RunnerRepo { id: RepoId; rootPath: string }
 
 /**
- * T3(버그 수리·재구현) 자리 — 인터페이스만 예약한다 (01 §9, 정본 §2 「유보」).
+ * 언어 하나를 실제로 돌리는 법 (D175). MVP 에서 이 자리는 비어 있었고 `t3_run` 은
+ * 언제나 `NOT_IMPLEMENTED` 였다 — 정본 §2·§5 개정으로 열렸다.
  *
- * T0~T2 는 실행 없이 채점되므로 전 언어 지원이 실제로 가능하다. T3 만이 프로세스 실행을 요구하고,
- * 그것은 Tauri `shell` 스코프와 샌드박스 결정을 끌고 온다 — MVP 밖이다.
- * 지금 있는 것은 이 타입과, 언제나 `NOT_IMPLEMENTED` 를 돌려주는 `t3_run` 명령뿐이다.
+ * 어댑터가 아는 것은 **탐지와 실행**뿐이다. 프로세스·작업본·상한은 Rust 이고, 언제
+ * 부를지와 통과선은 `runner.ts` 와 `stage.ts` 다. 언어를 늘릴 때 여기 항목이 하나
+ * 늘고 Rust 는 0 줄이다.
  */
 export interface RunnerAdapter {
   id: string;
-  detect(repo: RunnerRepo, files: string[]): Promise<boolean>;
-  run(spec: { repoId: RepoId; cmd: string[]; timeoutMs: number }): Promise<{
-    passed: number;
-    failed: number;
-    log: string;
-  }>;
+  /** 이 컴퓨터에서 이 리포를 돌릴 수 있는가. 없다고 답하는 것은 오류가 아니다. */
+  detect(repo: RunnerRepo): Promise<RunnerProbe>;
+  run(spec: RunSpec, rootPath: string): Promise<RunResult>;
 }
 
-/** MVP 에서 비어 있다. 러너가 들어오면 여기에 등록한다. */
-export const runners: RunnerAdapter[] = [];
+export const javaRunner: RunnerAdapter = {
+  id: 'java',
+  detect: (repo) => detectJava(repo.rootPath),
+  run: runJava,
+};
+
+/** 지금 하나. 다음 언어는 여기 한 줄이다. */
+export const runners: RunnerAdapter[] = [javaRunner];

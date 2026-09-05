@@ -1,0 +1,268 @@
+schema: 1
+id: ts/if-statement
+universal: common/conditional-branch
+name: { ko: if 문, en: if statement }
+token: "if"
+grammars: [typescript, tsx, javascript, vue]
+framework: null
+essential: true
+difficulty: 1
+prereq: []
+# 빈칸 오답(while·for·switch)은 개념으로 존재하지 않는 낱말이라 혼동 쌍으로 묶을 수 없다.
+# `ts/const-declaration`(오답 let·var·readonly)과 같은 자리다.
+confusions: []
+
+dict:
+  # 이 한 줄은 0장에서 문제보다 **먼저** 읽힌다 (D138). 그래서 정답 낱말(`if`)을 적지 않고
+  # 하는 일로 쓴다. 태그를 뺀 80자 상한도 여기 걸린다.
+  one_liner:
+    ko: "조건이 참일 때만 그 아래 묶음을 실행하고, 거짓이면 통째로 건너뛴다."
+    en: "Runs the block below only when the condition holds; skips it whole otherwise."
+  why:
+    ko: >-
+      이것이 없으면 프로그램은 위에서 아래로 <b>모든 줄</b>을 실행합니다. {{site.line}}행은
+      {{pick.2|code}}{{pick.2|josa:을,를}} 판단해서 참일 때만 {{pick.3|code}} 안으로
+      들어가고, 거짓이면 그 묶음을 통째로 지나쳐 다음 줄로 갑니다.
+    en: >-
+      Without this a program runs <b>every line</b>, top to bottom. Line {{site.line}} judges
+      {{pick.2|code}} and steps into {{pick.3|code}} only when that holds; when it does not, it
+      passes the whole block and goes to the next line.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:을,를}} 먼저 판단한다."
+      en: "{{pick.2|code}} is judged first."
+    - ko: "참이면 {{pick.3|code}} 안의 줄을 실행한다."
+      en: "If it holds, the lines inside {{pick.3|code}} run."
+    - ko: "거짓이면 그 묶음을 건너뛰고 다음 줄로 간다."
+      en: "If it does not, the block is skipped and the next line runs."
+
+rule:
+  ko: "<b>판단은 그 줄에 닿았을 때 한 번뿐이다.</b> 참이 될 때까지 기다리지 않는다."
+  en: "<b>The judgement happens once, when the line is reached.</b> It does not wait for true."
+result:
+  label:
+    ko: "{{site.line}}행의 갈림"
+    en: "the branch at line {{site.line}}"
+  value: "{{pick.2}}"
+  note:
+    ko: "참일 때만 아래로 간다"
+    en: "only true goes below"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:이,가}} 참이면 {{pick.3|code}} 안으로 들어갑니다. 거짓이면
+    그 묶음은 <b>한 줄도</b> 실행되지 않고 다음 줄로 넘어갑니다.
+  en: >-
+    When {{pick.2|code}} holds, it goes into {{pick.3|code}}. When it does not, <b>not one line</b>
+    of that block runs and it moves to the next line.
+payoff:
+  ko: >-
+    이 한 줄이 있어서 {{site.line}}행 아래가 <b>언제나</b> 도는 코드가 아니게 됩니다. 갈래를
+    나눌 줄 알면 「빈 목록일 때만 다르게」 같은 것을 코드로 적을 수 있어요.
+  en: >-
+    This one line is what keeps the code below line {{site.line}} from running <b>always</b>. Once
+    you can split a path you can write things like “only when the list is empty”.
+bridge:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} 참·거짓 하나로 좁혀지는 물음이고, {{pick.3|code}}{{pick.3|josa:은,는}}
+    그 답이 참일 때만 가는 길입니다.
+  en: >-
+    {{pick.2|code}} is a question that narrows to true or false, and {{pick.3|code}} is the road
+    taken only when that answer is true.
+misconceptions:
+  - ko: "거짓이면 프로그램이 멈춘다 — 아니요. 묶음만 건너뛰고 그 다음 줄부터 이어집니다."
+    en: "False stops the program — no. Only the block is skipped; the next line still runs."
+  - ko: "조건이 참이 될 때까지 기다린다 — 아니요. 되풀이는 <code>while</code> 이 하는 일입니다."
+    en: "It waits until the condition turns true — no. Repeating is what <code>while</code> does."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>흐름을 둘로 가르는 일을 맡은 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word whose job is splitting the flow in two</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>판단할 물음</b>입니다. 물음은 스스로 흐름을 가르지 못하고, 가르는 일은 앞의 <code>if</code> 가 합니다."
+          en: >-
+            {{pick.2|code}} is <b>the question to judge</b>. A question cannot split the flow by
+            itself; the splitting is done by the <code>if</code> in front of it.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 물음만으로는 아무 일도 안 난다"
+            en: "The sharpest spot — a question alone does nothing"
+          code:
+            - "(count > 0)        // 참·거짓만 나오고 끝난다"
+            - "if (count > 0) { } // 그 답이 흐름을 가른다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 참일 때 <b>실행할 줄들</b>입니다. 이 묶음은 자기가 언제 도는지 모르고, 그것을 정하는 것은 앞의 <code>if</code> 입니다."
+          en: >-
+            {{pick.3|code}} is <b>the lines to run</b> when it holds. The block does not know when
+            it runs; the <code>if</code> in front decides that.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 묶음이냐 가르는 말이냐"
+            en: "The sharpest spot — the block or the word that splits"
+          code:
+            - "{ send() }         // 늘 실행된다"
+            - "if (ok) { send() } // ok 일 때만 실행된다"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행에서 {{pick.2|code}}{{pick.2|josa:이,가}} 거짓이면 어떻게 될까요?"
+      en: "On line {{site.line}}, what happens when {{pick.2|code}} does not hold?"
+    hint:
+      ko: "판단은 그 줄에 닿았을 때 <b>한 번</b>입니다."
+      en: "The judgement happens <b>once</b>, when the line is reached."
+    options:
+      - t:
+          ko: "그 묶음을 통째로 건너뛰고 다음 줄부터 이어진다"
+          en: "The whole block is skipped and it carries on from the next line"
+      - t:
+          ko: "한 번은 실행되고 그 다음부터 건너뛴다"
+          en: "It runs once and is skipped from then on"
+        diag:
+          t:
+            ko: "<code>do … while</code> 이었다면 그 말이 맞습니다 — 그쪽은 판단보다 실행이 먼저예요. 여기서는 판단이 먼저라 거짓이면 한 줄도 실행되지 않습니다."
+            en: >-
+              That would hold for <code>do … while</code>, where the body runs before the check.
+              Here the check comes first, so nothing inside runs at all.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 판단이 먼저냐 실행이 먼저냐"
+              en: "The sharpest spot — check first or run first"
+            code:
+              - "if (false) { a() }        // a 는 0번"
+              - "do { a() } while (false)  // a 는 1번"
+      - t:
+          ko: "오류로 멈춘다"
+          en: "It stops with an error"
+        diag:
+          t:
+            ko: "거짓은 오류가 아니라 <b>답의 한쪽</b>입니다. 갈림의 두 길 중 하나를 고른 것뿐이라 프로그램은 그대로 이어집니다."
+            en: >-
+              False is not an error, it is <b>one side of the answer</b>. It simply took one of the
+              two roads, and the program carries on.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 거짓과 오류는 다르다"
+              en: "The sharpest spot — false and error are different"
+            code:
+              - "if (false) { a() }; b()  // b 는 실행된다"
+              - "throw new Error(); b()   // b 는 실행되지 않는다"
+      - t:
+          ko: "참이 될 때까지 그 줄에서 기다린다"
+          en: "It waits on that line until the condition turns true"
+        diag:
+          t:
+            ko: "되풀이해서 다시 보는 것은 <code>while</code> 이 하는 일입니다. 이 문법은 그 줄에 닿았을 때 <b>한 번</b> 판단하고 지나갑니다."
+            en: >-
+              Looking again and again is what <code>while</code> does. This form judges <b>once</b>,
+              when the line is reached, and moves on.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 한 번 보나 되풀이해 보나"
+              en: "The sharpest spot — judged once or judged again"
+            code:
+              - "if (n < 3) { n++ }     // n 은 한 번만 는다"
+              - "while (n < 3) { n++ }  // n 이 3 이 될 때까지 는다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 조건이 참일 때만 아래 묶음을 <b>한 번</b> 실행합니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} runs the block below <b>once</b>, and only
+        when the condition holds.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "if", mono: true }
+      - t: "while"
+        mono: true
+        diag:
+          t:
+            ko: "<code>while</code> 도 같은 조건을 봅니다. 다른 점은 <b>거짓이 될 때까지 되풀이한다</b>는 것 하나예요. 한 번만 갈라야 하는 자리에 쓰면 끝나지 않을 수 있습니다."
+            en: >-
+              <code>while</code> looks at the same condition. The one difference is that it
+              <b>repeats until the condition fails</b>. Used where one split is wanted, it may never
+              end.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 한 번이냐 되풀이냐"
+              en: "The sharpest spot — once or repeated"
+            code:
+              - "if (n < 3) { n++ }     // n 은 한 번만 는다"
+              - "while (n < 3) { n++ }  // n 이 3 이 될 때까지 는다"
+      - t: "for"
+        mono: true
+        diag:
+          t:
+            ko: "<code>for</code> 는 <b>몇 번 도는지</b>를 적는 자리라 셋(시작·조건·증가)을 받거나 목록을 받습니다. 여기 있는 것은 참·거짓 하나뿐이에요."
+            en: >-
+              <code>for</code> is where you write <b>how many times</b> to go around, so it takes
+              three parts or a list. What stands here is a single true-or-false.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 갈래냐 횟수냐"
+              en: "The sharpest spot — a branch or a count"
+            code:
+              - "if (xs.length) { a() }        // 한 번 갈린다"
+              - "for (const x of xs) { a(x) }  // 목록만큼 돈다"
+      - t: "switch"
+        mono: true
+        diag:
+          t:
+            ko: "<code>switch</code> 는 <b>값 하나를 여러 갈래와 맞춰 보는</b> 자리라 <code>case</code> 들이 따라옵니다. 참·거짓 하나로 갈리는 자리에는 오지 않습니다."
+            en: >-
+              <code>switch</code> is where <b>one value is matched against many branches</b>, so
+              <code>case</code> arms follow it. It does not stand where a single true-or-false splits.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 두 갈래냐 여러 갈래냐"
+              en: "The sharpest spot — two branches or many"
+            code:
+              - "if (k === 'a') { }            // 참·거짓 하나"
+              - "switch (k) { case 'a': ... }  // 값을 여러 갈래와 맞춘다"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 이 일을 조건 아래에 두었을까요?"
+    en: "Why does line {{site.line}} put this work under a condition?"
+  choices:
+    - t:
+        ko: "그 아래 줄들이 언제나 옳지는 않아서 — 참일 때만 실행해야 한다"
+        en: "Because the lines below are not always right — they should run only when it holds"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 조건이 거짓인데도 실행됐다면 무엇이 잘못됐을지도 함께 적어 보세요."
+        en: >-
+          That is the direction. Say also what those lines would do if they ran when it does not
+          hold.
+    - t:
+        ko: "코드를 짧게 만들려고"
+        en: "To make the code shorter"
+      ok: false
+      fb:
+        ko: "줄 수는 오히려 늡니다. 얻는 것은 짧음이 아니라 <b>언제 실행되는지</b>에 대한 약속입니다."
+        en: "It adds lines, if anything. What you gain is not brevity but a promise about <b>when</b> it runs."
+    - t:
+        ko: "속도를 빠르게 하려고"
+        en: "To make it faster"
+      ok: false
+      fb:
+        ko: "건너뛰어서 빨라지는 경우도 있지만 그건 결과이지 이유가 아닙니다. 이유는 그 줄들이 언제 옳은지에 있습니다."
+        en: "Skipping can be faster, but that is a result, not the reason. The reason is when those lines are right."
+
+queries:
+  - { grammars: [typescript, tsx, javascript, vue], file: ./if-statement.scm }
+
+examples:
+  - code: "if (count > 0) { send() }"
+    expect: { sites: 1, form: if, hole: "if", picks: { 1: "if", 2: "(count > 0)", 3: "{ send() }" } }
+  - code: "if (ok) { a() } else { b() }"
+    expect: { sites: 1, form: if, hole: "if", picks: { 1: "if", 2: "(ok)", 3: "{ a() }", 4: "else { b() }" } }
+  - code: "const v = ok ? a : b"
+    expect: none

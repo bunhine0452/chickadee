@@ -1,6 +1,8 @@
 import { t } from '@chickadee/i18n';
 import { Kbd } from '@chickadee/ui';
+import type { AssistCount } from '@chickadee/grading';
 
+import { handPct } from './assist';
 import './EdStatus.css';
 
 export interface EdStatusProps {
@@ -10,6 +12,11 @@ export interface EdStatusProps {
   savedAt: number | null;
   /** 원본 본 횟수. 감점이 아니라 이 판을 더 자주 보여줄 신호다 (정본 §3-1). */
   peeks: number;
+  /**
+   * 이 판의 글자가 어디서 왔나 (D143). `peeks` 와 같은 규칙 — **감점 없음.**
+   * 아직 아무것도 안 센 판이면 생략한다: 「0 %」와 「안 쟀다」는 다른 말이다.
+   */
+  assist?: AssistCount | undefined;
 }
 
 function pad2(n: number): string {
@@ -29,7 +36,7 @@ export function hhmm(at: number): string {
  * 「정합 · 동등 · 어긋남」이라는 낱말이 정보를 나른다. 색을 못 보는 눈에도 거터의 틱이
  * 무엇인지는 이 줄이 말해 준다.
  */
-export function EdStatus({ lines, savedAt, peeks }: EdStatusProps) {
+export function EdStatus({ lines, savedAt, peeks, assist }: EdStatusProps) {
   return (
     <div className="ed-status">
       <span className="legend">
@@ -56,6 +63,11 @@ export function EdStatus({ lines, savedAt, peeks }: EdStatusProps) {
       <span>
         {t('clone.peekCount')} <b>{peeks}</b>
       </span>
+      {assist === undefined ? null : (
+        <span>
+          {t('clone.handPct')} <b>{handPct(assist)}%</b>
+        </span>
+      )}
     </div>
   );
 }

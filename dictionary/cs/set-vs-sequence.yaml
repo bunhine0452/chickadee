@@ -1,0 +1,89 @@
+schema: 1
+id: cs/set-vs-sequence
+universal: null
+name: { ko: "순서가 있나 없나", en: "Set and sequence" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+# SQL 편이 밀어낸 것 (cs.md §10.2).
+track_default: t0
+essential: false
+difficulty: 2
+prereq: []
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "모아 둔 것에 순서가 약속돼 있는지 아닌지. 없으면 물어도 답이 없다."
+    en: "Whether a collection promises an order. Without one, there is no answer."
+  why:
+    ko: >-
+      항목을 모아 두는 방법은 두 갈래입니다. <b>몇 번째인지가 뜻을 갖는</b> 것과
+      <b>들어 있는지만 뜻을 갖는</b> 것. 뒤쪽에서는 순서를 물어도 약속된 답이 없어요 —
+      오늘 이 순서로 나오는 것은 <b>지금 담긴 방식</b>의 결과일 뿐, 내일 바뀔 수 있습니다.
+      질의 결과가 정렬을 안 적으면 순서를 보장하지 않는 것도, 해시로 담은 것을 훑을 때
+      순서가 들쭉날쭉한 것도 같은 자리예요. <b>순서가 필요하면 순서를 적어야 합니다.</b>
+    en: >-
+      Collections come in two kinds: those where <b>position means something</b> and those where
+      only <b>membership</b> does. In the second, asking about order has no promised answer —
+      today's order is a by-product of <b>how it is currently stored</b> and can change tomorrow.
+      A query result without a sort clause, and a hash-stored collection iterating unevenly, are
+      the same spot. <b>If you need an order, write one.</b>
+  trace: []
+rule:
+  ko: "<b>안 약속한 순서에 기대지 않는다.</b> 필요하면 적는다."
+  en: "<b>Do not lean on an order nobody promised.</b> Write it if you need it."
+ok:
+  ko: >-
+    들어 있는지만 물으면 어느 쪽이든 같은 답이 나옵니다. 갈리는 것은 순서·중복·몇 번째를
+    물을 때예요.
+  en: >-
+    Ask only about membership and both kinds answer alike. They part on order, duplicates and
+    position.
+misconceptions:
+  - ko: "여러 번 돌려도 같은 순서면 보장된 것이다 — 담긴 방식이 그대로일 동안만 같습니다."
+    en: "Same order every run means it is guaranteed — only while the storage stays the same."
+  - ko: "정렬을 적으면 느려지니 안 적는 것이 낫다 — 순서에 기대면서 안 적는 것이 더 비쌉니다."
+    en: "Sorting is slow, so skip it — leaning on an unwritten order costs more."
+  - ko: "중복이 없으면 순서도 없다 — 두 성질은 서로 다른 축입니다."
+    en: "No duplicates means no order — the two properties are different axes."
+meaning:
+  - q:
+      ko: "정렬을 안 적은 질의가 어제와 다른 순서로 나왔습니다. <b>무엇이 잘못됐나요?</b>"
+      en: "A query without a sort came back in a different order today. <b>What broke?</b>"
+    hint:
+      ko: "어제의 순서는 무엇이 정해 준 것이었을까요."
+      en: "What decided yesterday's order?"
+    options:
+      - t: { ko: "아무것도 — 순서를 약속받은 적이 없다", en: "Nothing — no order was ever promised" }
+      - t: { ko: "데이터베이스가 규칙을 어겼다", en: "The database broke its rule" }
+        diag:
+          t:
+            ko: "지킬 규칙이 없었습니다. 순서를 <b>안 적은</b> 질의에 대해서는 어느 순서로 줘도 약속을 지킨 것이에요."
+            en: "There was no rule to break. For a query that <b>writes no order</b>, any order keeps the promise."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 어긴 것과 약속이 없는 것", en: "The sharpest spot — broken or unpromised" }
+            code:
+              - "적었다: 그 순서를 지킨다"
+              - "안 적었다: 아무 순서나 된다"
+      - t: { ko: "데이터가 바뀌어서 순서가 바뀌었다", en: "The data changed, so the order changed" }
+        diag:
+          t:
+            ko: "데이터가 그대로여도 바뀔 수 있습니다 — 담긴 방식이나 읽는 계획이 바뀌면 됩니다."
+            en: "It can change with identical data — a different storage layout or read plan is enough."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 데이터냐 계획이냐", en: "The sharpest spot — data or plan" }
+            code:
+              - "데이터 그대로: 순서는 바뀔 수 있다"
+              - "적은 순서: 언제나 같다"
+      - t: { ko: "어제 순서가 우연이었고 오늘이 진짜다", en: "Yesterday was a fluke and today is the truth" }
+        diag:
+          t:
+            ko: "<b>둘 다</b> 우연입니다. 어느 쪽도 진짜가 아니고, 진짜를 원하면 적어야 해요."
+            en: "<b>Both</b> are flukes. Neither is the truth, and getting one means writing it."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 어느 쪽이 진짜냐", en: "The sharpest spot — which one is true" }
+            code:
+              - "안 적음: 둘 다 우연"
+              - "적음: 그것이 진짜"

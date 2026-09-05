@@ -24,11 +24,80 @@ export const SUPPORTED_SCHEMA = [1] as const;
  */
 export type Locale = 'ko' | 'en';
 
-/** tree-sitter 문법 키 (D19). 사전 네임스페이스 `lang` 과 다른 축이다. */
-export const grammarSchema = z.enum([
-  'typescript', 'tsx', 'javascript', 'python', 'go', 'rust', 'swift', 'dart', 'sql',
-]);
+/**
+ * tree-sitter 문법 키 (D19) → **이 빌드에 파서가 링크돼 있나.** 사전 네임스페이스 `lang` 과
+ * 다른 축이다.
+ *
+ * 값이 `false` 인 것은 **이름만 있고 파서가 없다**. 사전이 그 문법을 걸면 스키마도 린트도
+ * 통과하는데 캡처가 **0곳**이고, 사용처가 0이면 카드가 안 구워진다 — 「곧 됩니다」가 아니라
+ * 그 언어가 안 서는 것이다(`csharp.md` §0.7 이 C# 에서 실제로 밟은 자리). 그래서
+ * `lint.ts` 의 `grammar-not-linked` 가 그것을 **오류**로 찍는다.
+ *
+ * **하드코딩은 이 표 하나다.** 링크 여부의 정본은 `crates/parse/src/langs.rs` 의 `LANGS`
+ * 이고, `crates/parse/tests/quality.rs` 가 이 표를 그 목록과 양방향으로 대조한다 —
+ * 크레이트를 넣고 이 표를 안 고치면 빨개지고, 이 표만 고쳐도 빨개진다. 예전에는 그 못이
+ * `swift`·`dart` **두 이름만** 지켜서 C# 문법이 아무 경고 없이 들어올 수 있었다.
+ */
+export const GRAMMARS = {
+  typescript: true,
+  tsx: true,
+  javascript: true,
+  python: true,
+  go: true,
+  rust: true,
+  sql: true,
+  java: true,
+  // Vue SFC. 문법이 따로 있는 게 아니라 자바스크립트를 `<script>` 구간에만 돌린다 (D159).
+  vue: true,
+  // MyBatis 매퍼. 속성값이 자바 클래스 이름이라 해석은 자바와 같은 규칙을 쓴다 (D159).
+  xml: true,
+  // 매퍼 안의 SQL. 문법은 sql 이고 읽는 자리만 문 본문으로 좁힌다 (D159).
+  mybatis_sql: true,
+  // `.css` 와 `.vue` 의 `<style>` (D159).
+  css: true,
+  vue_style: true,
+  // ── 아래는 이름만 있다. 크레이트가 `crates/parse/Cargo.toml` 에 없다. ──
+  // 03 §2.2 가 적은 위험(수십 MB `parser.c`) 때문에 3-OS 빌드에 얹기 전에 따로 판단할 일이다.
+  swift: false,
+  dart: false,
+  // D156 의 열 언어. `c_sharp` 은 tree-sitter 크레이트가 쓰는 키이고 사전 네임스페이스는
+  // `csharp` 이다 — `cs/` 를 기초 CS 사전이 가져갔다 (D157).
+  c: false,
+  cpp: false,
+  c_sharp: false,
+} as const satisfies Record<string, boolean>;
+
+const grammarNames = Object.keys(GRAMMARS) as [keyof typeof GRAMMARS, ...(keyof typeof GRAMMARS)[]];
+
+export const grammarSchema = z.enum(grammarNames);
 export type Grammar = z.infer<typeof grammarSchema>;
+
+/** 이 빌드에 파서가 있나. 없으면 사전이 그 문법에 거는 쿼리는 캡처를 0곳 낸다. */
+export const isLinkedGrammar = (grammar: string): boolean =>
+  (GRAMMARS as Record<string, boolean>)[grammar] === true;
+
+/** 이름은 아는데 파서가 없는 문법. 린트 메시지와 Rust 쪽 못이 같은 목록을 본다. */
+export const UNLINKED_GRAMMARS: readonly string[] = Object.entries(GRAMMARS)
+  .filter(([, linked]) => !linked)
+  .map(([name]) => name);
+
+/**
+ * 쿼리 없이 사는 네임스페이스 (D157 §7). 세 번은 각자 하드코딩했고 넷째에서 모았다.
+ *
+ * `common/` 은 전이 축, `arch/`(D142)·`exec/`(D151)는 문항을 그래프·AST 에서 **계산**하고,
+ * `cs/`(D157)·`proto/`(D159)는 문법이 아니라 기계와 규약이라 짚을 노드가 없다.
+ * `spring/`(D176)은 프레임워크가 **런타임에** 하는 일이라 소스에 노드가 없다 — 여기만
+ * `_lang.yaml` 을 갖는데, 감지 게이트(D59)를 적을 자리가 그 파일뿐이기 때문이다.
+ * 사전은 산문과 숙련도 키만 댄다.
+ *
+ * 새 네임스페이스를 여기 더하면 린트·시험이 함께 따라온다 — 세 곳에 흩어져 있을 때는
+ * 하나만 고치고 나머지를 잊는 것이 가능했다.
+ */
+export const COMPUTED_NAMESPACES = ['common/', 'arch/', 'exec/', 'cs/', 'proto/', 'spring/'] as const;
+
+/** 그 네임스페이스의 개념인가 — 쿼리도 사용처도 없다. */
+export const isComputed = (id: string): boolean =>
+  COMPUTED_NAMESPACES.some((prefix) => id.startsWith(prefix));
 
 /** 개념 id — `<lang>/<slug>` (03 §3.1). */
 export const conceptIdSchema = z.string().regex(/^[a-z][a-z0-9]*\/[a-z0-9][a-z0-9-]*$/);
@@ -144,6 +213,15 @@ function conceptShape<T extends Localized>(make: (cap?: Cap) => z.ZodType<T, z.Z
       /** 보편 개념 id, 또는 언어 고유면 `null` — 개념 전이의 근거다 (03 §3.1). */
       universal: conceptIdSchema.nullable().default(null),
       /**
+       * 이 개념이 **쪼개졌다·대체됐다** (D187 ④). 새 참조는 여기 적힌 개념들을 쓴다.
+       *
+       * 지우지 않는 이유: 개념 id 는 원장의 `concept` 행 키이고 겹(`mastery`)이 거기 쌓인다
+       * (D4). 지우면 이미 배운 사람의 겹이 갈 곳을 잃는다. 그래서 개념은 그대로 로드되고
+       * 카드도 그대로 나며, **기존 참조는 안 깨진다** — 바뀌는 것은 「새로 걸 때 무엇을
+       * 가리키나」뿐이고 린트가 그 한 가지만 막는다(`superseded-target`).
+       */
+      superseded_by: z.array(conceptIdSchema).default([]),
+      /**
        * 두 언어를 다 들고 다닌다 — 원장의 `concept.name_ko`·`name_en` 두 열로 갈라져
        * 들어가므로 로케일이 풀려도 한쪽을 버리지 않는다 (D118 · 마이그레이션 0002).
        */
@@ -175,6 +253,19 @@ function conceptShape<T extends Localized>(make: (cap?: Cap) => z.ZodType<T, z.Z
       meaning: z.array(meaning).default([]),
       point: z.array(point).default([]),
       blank: z.array(blank).default([]),
+      /**
+       * 빈칸형을 **못 내는** 사유 (D145). `blank:` 와 `@hole` 을 둘 다 못 갖춘 `essential`
+       * 개념은 여기에 이유를 적는다. 「아직 안 썼다」와 「이 문법에는 뚫을 구멍이 없다」는
+       * 다른 상태인데 게이트는 그 둘을 구별할 수 없다 — 사람이 적어야 구별된다.
+       * 빈칸형이 이미 있는 개념에 남아 있으면 린트가 잡는다(`no-hole-reason-stale`).
+       */
+      /**
+     * 이 개념이 그 코드에 있다는 **근거 낱말** (D159 `proto/`). 쿼리가 없는 개념은 짚을 노드가
+     * 없어서, 블록의 글자에 이 표시가 보이면 그 줄을 자리로 삼는다 (`t0-proto.ts`).
+     * 문법이 아니라 규약이라 노드로는 못 잡는다 — `Bearer` 는 어느 언어에서도 그냥 글자다.
+     */
+    evidence: z.array(z.string()).default([]),
+    no_hole_reason: z.string().min(8).nullable().default(null),
       why_gate: whyGate.optional(),
       queries: z.array(z.object({
         grammars: z.array(grammarSchema).min(1),
@@ -221,12 +312,31 @@ function langShape<T extends Localized>(text: z.ZodType<T, z.ZodTypeDef, T>) {
     lang: z.string().regex(/^[a-z][a-z0-9]*$/),
     version: z.string(),
     grammars: z.array(grammarSchema).min(1),
-    grammar_abi: z.number().int().positive(),
+    /**
+     * grammar → ABI. **숫자 하나가 아니다** — `ts` 는 `typescript`(14)·`tsx`(14)·
+     * `javascript`(15) 셋을 물고 있어 한 값으로 못 적는다. 값을 정하는 것은 언어가 아니라
+     * `Cargo.lock` 이 고정한 크레이트 버전이다(같은 문법도 버전이 다르면 갈린다).
+     * `dict.test.ts` 가 `parse_langs` 가 보고하는 실제 `abi` 와 대조한다.
+     */
+    grammar_abi: z.record(grammarSchema, z.number().int().positive()),
     /** grammar → 확장자. 인제스트의 `LangSpec` 이 여기서 나온다 (03 §2.1). */
     extensions: z.record(grammarSchema, z.array(z.string().regex(/^\.[a-z0-9.]+$/))),
-    /** `package.json` 의존성으로 감지한다. 감지 실패 리포에서는 로드하지 않는다 (D59). */
+    /**
+     * 프레임워크 사전의 감지 신호. 감지 실패 리포에서는 로드하지 않는다 (D59).
+     *
+     * 두 모양이다 — `dependency` 는 `package.json` 의 의존성 이름이고(`react`),
+     * `manifest`+`contains` 는 **빌드 매니페스트 원문에 그 글자가 보이는가**다
+     * (`build.gradle` 에 `spring-boot`, D176). 자바에는 `package.json` 이 없어서
+     * 앞의 것 하나로는 스프링을 못 잡는다. 판정은 `load.ts` 의 `detected` 하나다.
+     */
     framework: z.string().nullable().default(null),
-    detect: z.object({ dependency: z.string() }).strict().optional(),
+    detect: z.union([
+      z.object({ dependency: z.string().min(1) }).strict(),
+      z.object({
+        manifest: z.array(z.string().min(1)).min(1),
+        contains: z.string().min(1),
+      }).strict(),
+    ]).optional(),
     essential: z.array(conceptIdSchema).default([]),
     alternatives: z.array(z.object({
       gap: conceptIdSchema,

@@ -1,0 +1,210 @@
+schema: 1
+id: sql/clause-order
+universal: null
+name: { ko: "적는 순서와 도는 순서가 다르다", en: "Written order, run order" }
+token: null
+grammars: [sql, mybatis_sql]
+framework: null
+essential: true
+difficulty: 2
+prereq: [sql/expression-per-row]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "절이 적힌 차례와 도는 차례가 다르다. 맨 위에 적힌 절이 다섯 번째로 돈다."
+    en: "Clauses do not run in the order written. The one written first runs fifth."
+  why:
+    ko: >-
+      {{site.line}}행은 위에서 아래로 읽히지만 도는 차례는 다릅니다 — 표를 대는 절이
+      <b>가장 먼저</b>, 행을 거르는 절이 그다음, 볼 열을 고르는 절은 <b>거의 마지막</b>이에요.
+      순서가 그럴 수밖에 없는 이유는 간단합니다: 표가 정해져야 거를 것이 있고, 거르고 나야
+      고를 것이 남습니다. 그래서 고르는 절에서 붙인 별명을 거르는 절에서 못 씁니다 —
+      그 절이 <b>아직 안 돌았기</b> 때문이에요.
+    en: >-
+      Line {{site.line}} reads top to bottom, but it runs in another order — the clause naming the
+      table goes <b>first</b>, the one filtering rows next, and the one choosing columns <b>almost
+      last</b>. The reason is plain: a table must be settled before there is anything to filter, and
+      filtering must happen before there is anything to choose. That is why a nickname made in the
+      choosing clause cannot be used in the filtering one — that clause <b>has not run yet</b>.
+  trace:
+    - ko: "{{pick.2|code}} 절이 먼저 돌아 표를 연다."
+      en: "{{pick.2|code}} runs first and opens the table."
+    - ko: "{{pick.3|code}} 절이 행을 거른다."
+      en: "{{pick.3|code}} filters the rows."
+    - ko: "{{pick.1|code}} 절은 남은 행에서 {{pick.4|code}} 열을 고른다 — 맨 위에 적혀 있지만 여기서 돈다."
+      en: "{{pick.1|code}} then picks {{pick.4|code}} from what is left — written at the top, run here."
+
+rule:
+  ko: "<b>적힌 차례가 도는 차례가 아니다.</b> 표를 대고 → 행을 거르고 → 열을 고른다."
+  en: "<b>Written order is not run order.</b> Name the table, filter the rows, then choose the columns."
+result:
+  label:
+    ko: "가장 먼저 도는 절"
+    en: "the clause that runs first"
+  value: "{{pick.2}}"
+  note:
+    ko: "적히기는 두 번째다"
+    en: "written second"
+ok:
+  ko: >-
+    표를 연 다음 행이 걸러지고, 마지막에 {{pick.4|code}} 열이 골라집니다. 읽은 차례와 반대예요.
+  en: >-
+    The table opens, then rows are filtered, and {{pick.4|code}} is chosen last. That is the reverse of the reading order.
+payoff:
+  ko: >-
+    이걸 알면 「위에서 붙인 별명을 왜 아래에서 못 쓰지」가 풀립니다 — 그 절이 아직 안 돌았기 때문이에요.
+  en: >-
+    This untangles “why can't I use the nickname I just made” — that clause has not run yet.
+bridge:
+  ko: >-
+    다른 언어는 적은 줄이 그 차례로 돕니다. 여기서는 <b>무엇을 원하는지</b>만 적고 차례는 데이터베이스가 정해요.
+  en: >-
+    In other languages the lines run in the order written. Here you state <b>what you want</b> and the database settles the order.
+misconceptions:
+  - ko: "맨 위 절이 먼저 돈다 — 표를 대는 절이 먼저입니다."
+    en: "The topmost clause runs first — the clause naming the table does."
+  - ko: "고르는 절에서 붙인 별명을 거르는 절에서 쓸 수 있다 — 그 절이 아직 안 돌아서 못 씁니다."
+    en: "A nickname from the choosing clause works in the filtering one — that clause has not run, so it does not."
+  - ko: "이름을 지어 둔 조회는 정의만 하면 아래에서 그냥 쓰인다 — 표를 대는 절에 그 이름을 적어야 쓰입니다."
+    en: "A named query is usable below once defined — its name must be written into the clause that names the table."
+
+meaning:
+  - q:
+      ko: "고르는 절에서 붙인 별명을 거르는 절에서 쓰면 어떻게 될까요?"
+      en: "What if a nickname made in the choosing clause is used in the filtering one?"
+    hint:
+      ko: "그 시점에 그 절이 <b>돌았는지</b>를 생각해 보세요."
+      en: "Think about whether that clause <b>has run</b> at that point."
+    options:
+      - t:
+          ko: "그런 이름이 없다며 멈춘다 — 아직 안 만들어졌다"
+          en: "It stops saying there is no such name — it has not been made yet"
+      - t:
+          ko: "잘 돈다 — 위에 적혀 있으니까"
+          en: "It works — it is written above"
+        diag:
+          t:
+            ko: >-
+              적힌 자리와 도는 차례가 다릅니다. 위에 적혔어도 <b>나중에</b> 돌아요.
+            en: >-
+              Where it is written and when it runs are different things. Written above, it still runs <b>later</b>.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 적힌 자리냐 도는 차례냐", en: "The sharpest spot — where written or when run" }
+            code:
+              - "SELECT qty * 2 AS twice"
+              - "WHERE twice > 4   -- 아직 없다"
+      - t:
+          ko: "별명 대신 원래 식이 자동으로 들어간다"
+          en: "The original expression is substituted for the nickname"
+        diag:
+          t:
+            ko: >-
+              그렇게 <b>펴 주지 않습니다</b>. 같은 식을 거르는 절에 다시 적어야 해요.
+            en: >-
+              Nothing <b>expands</b> it. The same expression has to be written again in the filtering clause.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 펴 주냐 다시 적냐", en: "The sharpest spot — expanded or rewritten" }
+            code:
+              - "WHERE twice > 4      -- 안 된다"
+              - "WHERE qty * 2 > 4    -- 이렇게"
+      - t:
+          ko: "그 행이 조용히 빠진다"
+          en: "The row quietly drops"
+        diag:
+          t:
+            ko: "조용하지 않습니다. 이름을 못 찾는 것은 <b>문장이 서기 전</b>에 걸려요."
+            en: "Nothing is quiet here. A name that cannot be found is caught <b>before the statement stands</b>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 결과냐 문장이냐", en: "The sharpest spot — the result or the statement" }
+            code:
+              - "-- 행이 주는 것이 아니라"
+              - "-- 문장이 서지 않는다"
+
+point:
+  - q:
+      ko: "{{site.line}}행의 세 절 가운데 <b>가장 먼저 도는</b> 것을 짚어 보세요."
+      en: "Of the three clauses on line {{site.line}}, point at <b>the one that runs first</b>."
+    hint:
+      ko: "표가 정해져야 나머지가 말이 됩니다."
+      en: "Nothing else means anything until the table is settled."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: >-
+            {{pick.1|code}}{{pick.1|josa:은,는}} 맨 위에 적혀 있지만 <b>다섯 번째</b>로 돕니다 —
+            고를 것이 남으려면 먼저 걸러져야 해서예요.
+          en: >-
+            {{pick.1|code}} is written at the top but runs <b>fifth</b> — there has to be something
+            left to choose from.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 적힌 자리냐 도는 차례냐", en: "The sharpest spot — where written or when run" }
+          code:
+            - "SELECT ...   -- 적히기는 처음"
+            - "FROM ...     -- 돌기는 처음"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} <b>두 번째</b>로 돕니다. 거를 행이 있으려면 표가 먼저 열려야 해요.
+          en: >-
+            {{pick.3|code}} runs <b>second</b>. There must be rows to filter, so the table opens first.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 거르기냐 표 대기냐", en: "The sharpest spot — filtering or naming the table" }
+          code:
+            - "FROM cart      -- 먼저"
+            - "WHERE ok = 1   -- 그다음"
+      pick.4:
+        t:
+          ko: >-
+            {{pick.4|code}}{{pick.4|josa:은,는}} <b>무엇을 볼지</b>이지 절이 아닙니다. 절은 그 앞의 낱말이에요.
+          en: >-
+            {{pick.4|code}} is <b>what to look at</b>, not a clause. The clause is the word before it.
+        edge:
+          h: { ko: "가장 날카로운 자리 — 절이냐 고른 열이냐", en: "The sharpest spot — the clause or the chosen columns" }
+          code:
+            - "id, qty"
+            - "SELECT id, qty"
+
+no_hole_reason: >-
+  이 개념의 답은 낱말 하나가 아니라 절 셋의 차례다 — 구멍을 하나 뚫으면 「무엇이 들어가나」를 묻게 되고
+  그것은 이미 다른 개념이 묻는다. 여기서 물어야 하는 것은 「이 셋 중 무엇이 먼저 도나」이고,
+  그것은 지목형이 세 자리를 나란히 두고 묻는다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 거르는 절을 <b>표를 댄 뒤</b>에 둘까요?"
+    en: "Why does line {{site.line}} put the filtering clause <b>after</b> naming the table?"
+  choices:
+    - t:
+        ko: "거를 행이 있으려면 표가 먼저 열려야 해서 — 순서를 바꾸면 거를 대상이 없다"
+        en: "Because there must be rows to filter — reversed, there is nothing to filter"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그러면 열을 고르는 절이 왜 그보다 뒤인지도 적어 보세요."
+        en: "That is the direction. Now say why the clause choosing columns comes later still."
+    - t:
+        ko: "SQL 문법이 그 자리만 허락해서"
+        en: "Because SQL syntax allows it only there"
+      ok: false
+      fb:
+        ko: "적는 자리가 정해진 것은 맞지만, 물은 것은 <b>왜 그 차례로 도는가</b>예요."
+        en: "The written position is fixed, yes — but the question was <b>why it runs in that order</b>."
+    - t:
+        ko: "그래야 빠르니까"
+        en: "Because it is faster that way"
+      ok: false
+      fb:
+        ko: "속도가 아니라 <b>뜻</b>입니다. 순서가 바뀌면 무엇을 거를지가 정해지지 않아요."
+        en: "It is <b>meaning</b>, not speed. Reversed, there is nothing settled to filter."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./clause-order.scm }
+
+examples:
+  - code: "SELECT id FROM cart WHERE ok = 1"
+    expect: { sites: 1, form: clause-order, picks: { 1: "SELECT", 2: "FROM", 3: "WHERE", 4: "id" } }
+  - code: "SELECT id, qty FROM cart WHERE qty > 0"
+    expect: { sites: 1, form: clause-order, picks: { 1: "SELECT", 2: "FROM", 3: "WHERE", 4: "id, qty" } }
+  - code: "SELECT id FROM cart"
+    expect: none

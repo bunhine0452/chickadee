@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { dueLabel, glyphOf, inkTrack, isSoon, layerText, nodeSeed, railLabel } from './labels';
+import { dueLabel, isSoon, layerLabel, layerText, trackName } from './labels';
 
 const NOW = Date.UTC(2026, 8, 3, 9, 0, 0);
 const DAY = 86_400_000;
@@ -28,43 +28,20 @@ describe('dueLabel', () => {
   });
 });
 
-describe('glyphOf', () => {
-  it('T0 은 짧은 토큰을 그대로 얼굴에 찍는다', () => {
-    expect(glyphOf({ track: 't0', token: '?.' })).toBe('?.');
+describe('layerLabel · layerText', () => {
+  it('단계 수와 짧은 이름을 한 덩어리로 낸다', () => {
+    expect(layerLabel(2)).toBe('2단계 · 익히는 중');
+    expect(layerLabel(0)).toBe('0단계 · 아직');
   });
 
-  it('토큰이 없거나 길면 트랙 글리프로 떨어진다', () => {
-    expect(glyphOf({ track: 't0', token: null })).toBe('{ }');
-    expect(glyphOf({ track: 't0', token: 'async / await' })).toBe('{ }');
-    expect(glyphOf({ track: 't1', token: 'map' })).toBe('✎');
-    expect(glyphOf({ track: 't2', token: null })).toBe('/ /');
+  it('긴 형태는 분모와 뜻을 함께 낸다', () => {
+    expect(layerText(3)).toBe('숙련도 3 / 4 · 자리 잡음 · 오래 두고도 맞힘');
   });
 });
 
-describe('nodeSeed', () => {
-  it('같은 개념 id 는 언제나 같은 지터를 낸다 (05 §10)', () => {
-    expect(nodeSeed('ts/optional-chaining', 2)).toEqual(nodeSeed('ts/optional-chaining', 2));
-  });
-
-  it('개념이 다르면 지터도 갈라진다', () => {
-    const a = nodeSeed('ts/optional-chaining', 0);
-    const b = nodeSeed('common/try-catch', 0);
-    expect(a).not.toEqual(b);
-  });
-});
-
-describe('그 밖의 문구', () => {
-  it('레일은 판 번호와 도수를 같이 말한다', () => {
-    expect(railLabel(2, 2)).toBe('판 02 · 1도');
-    expect(railLabel(11, 0)).toBe('판 11 · 미인쇄');
-  });
-
-  it('겹은 은유 옆에 평문을 병기한다 (정본 §6)', () => {
-    expect(layerText(3)).toBe('잉크 3겹 / 4 · + 청판 · 색이 들어옴');
-  });
-
-  it('T3 는 예약이라 먹판 자리를 빌린다', () => {
-    expect(inkTrack('t3')).toBe('t0');
-    expect(inkTrack('t2')).toBe('t2');
+describe('trackName', () => {
+  it('트랙은 색이 아니라 이름으로 갈린다', () => {
+    expect(trackName('t0')).toBe('T0 문법');
+    expect(trackName('t2')).toBe('T2 구조');
   });
 });

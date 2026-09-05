@@ -1,0 +1,221 @@
+schema: 1
+id: py/return-statement
+universal: common/return-value
+name: { ko: 값 돌려주기, en: return statement }
+token: "return"
+grammars: [python]
+framework: null
+essential: true
+difficulty: 1
+prereq: [py/function-definition]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "하던 일을 그 자리에서 끝내고, 부른 자리에 값 하나를 건넨다."
+    en: "Ends the work there and hands one value back to whoever called."
+  why:
+    ko: >-
+      두 가지가 <b>한꺼번에</b> 일어납니다 — {{site.line}}행 아래 줄은 실행되지 않고, 이 함수를
+      부른 자리가 {{pick.2|code}}{{pick.2|josa:이,가}} 됩니다. 건네는 줄이 없으면 파이썬은 조용히
+      <code>None</code> 을 건네요 — 그래서 잊어도 멈추지 않고 값만 비어 옵니다.
+    en: >-
+      Two things happen <b>at once</b> — the lines below line {{site.line}} do not run, and the
+      place that called this function becomes {{pick.2|code}}. With no such line Python quietly
+      hands back <code>None</code>, so forgetting it does not stop anything; the value just arrives empty.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:을,를}} 먼저 값으로 만든다."
+      en: "{{pick.2|code}} becomes a value first."
+    - ko: "{{site.line}}행에서 이 함수가 끝난다."
+      en: "The function ends at line {{site.line}}."
+    - ko: "부른 자리에 그 값이 남는다."
+      en: "That value is what the call site is left with."
+
+rule:
+  ko: "<b>아래 줄은 돌지 않고, 부른 자리가 그 값이 된다.</b> 없으면 <code>None</code> 이 간다."
+  en: "<b>The lines below do not run and the call site becomes that value.</b> Absent, <code>None</code> goes."
+result:
+  label:
+    ko: "{{site.line}}행이 건넨 값"
+    en: "the value handed back on line {{site.line}}"
+  value: "{{pick.2}}"
+  note:
+    ko: "여기서 끝난다"
+    en: "it ends here"
+ok:
+  ko: >-
+    이 함수는 {{site.line}}행에서 끝나고, 부른 자리에는 {{pick.2|code}}{{pick.2|josa:이,가}} 남습니다. 아래 줄이
+    있어도 돌지 않아요.
+  en: >-
+    The function ends at line {{site.line}} and the call site is left with {{pick.2|code}}. Lines
+    below it do not run.
+payoff:
+  ko: >-
+    이걸 알면 「함수는 도는데 왜 값이 <code>None</code> 이지」가 풀립니다 — 건네는 줄이 없으면
+    파이썬이 그것을 대신 보냅니다.
+  en: >-
+    This answers “the function ran, so why is the value <code>None</code>” — with no line handing
+    one back, Python sends that instead.
+bridge:
+  ko: >-
+    함수를 부르는 자리는 그 자리에서 <b>값 하나</b>가 됩니다 — 그 값을 정하는 것이 {{site.line}}행이에요.
+  en: >-
+    A call becomes <b>one value</b> where it stands — and line {{site.line}} decides that value.
+misconceptions:
+  - ko: "화면에 찍는 것과 같다 — 다릅니다. 찍는 것은 보여 주고, 이것은 건넵니다."
+    en: "It is the same as printing — no. Printing shows; this hands a value over."
+  - ko: "안 적으면 멈춘다 — 아니요. 조용히 <code>None</code> 이 갑니다."
+    en: "Leaving it out stops the program — no. <code>None</code> quietly goes instead."
+
+meaning:
+  - q:
+      ko: "{{site.line}}행 <b>아래에</b> 줄이 더 있다면 그 줄들은 어떻게 될까요?"
+      en: "If there are more lines <b>below</b> line {{site.line}}, what happens to them?"
+    hint:
+      ko: "이 낱말은 값을 건네는 동시에 <b>끝냅니다</b>."
+      en: "This word hands a value back and <b>ends</b> at the same time."
+    options:
+      - t:
+          ko: "실행되지 않는다 — 이 줄에서 함수가 끝난다"
+          en: "They do not run — the function ends on this line"
+      - t:
+          ko: "마저 실행되고 나서 값이 건네진다"
+          en: "They run first, and then the value is handed back"
+        diag:
+          t:
+            ko: "건네는 일과 끝내는 일이 <b>같이</b> 일어납니다. 아래 줄을 돌게 하려면 그 줄들이 이 줄보다 위에 있어야 해요."
+            en: >-
+              Handing back and ending happen <b>together</b>. To have those lines run, they must sit
+              above this one.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 위냐 아래냐"
+              en: "The sharpest spot — above or below"
+            code:
+              - "def f():\n    log()\n    return 1   # log 가 돈다"
+              - "def f():\n    return 1\n    log()    # log 는 안 돈다"
+      - t:
+          ko: "들여쓰기가 같으면 실행된다"
+          en: "They run if the indentation matches"
+        diag:
+          t:
+            ko: "들여쓰기는 <b>어디까지가 이 함수인지</b>를 정할 뿐 실행 순서를 되돌리지 못합니다. 같은 묶음 안이어도 끝난 뒤는 안 돌아요."
+            en: >-
+              Indentation only says <b>how far the function reaches</b>; it cannot undo the ending.
+              Inside the same block or not, nothing after it runs.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 경계와 순서는 다른 것"
+              en: "The sharpest spot — boundary and order are different"
+            code:
+              - "    return 1"
+              - "    log()      # 같은 묶음이어도 안 돈다"
+      - t:
+          ko: "다음에 이 함수를 부를 때 실행된다"
+          en: "They run the next time this function is called"
+        diag:
+          t:
+            ko: "다음에 불러도 <b>맨 위부터</b> 다시 시작합니다. 끝난 자리를 기억해 두었다가 이어 가지 않아요."
+            en: >-
+              The next call starts again <b>from the top</b>. It does not remember where it stopped.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 늘 처음부터"
+              en: "The sharpest spot — always from the top"
+            code:
+              - "f(); f()   # 두 번 다 맨 위부터"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 이 함수를 끝내면서 부른 자리에 <b>값 하나</b>를 건넵니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} ends the function and hands <b>one
+        value</b> back.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "return", mono: true }
+      - t: "break"
+        mono: true
+        diag:
+          t:
+            ko: "<code>break</code> 는 <b>되풀이를 빠져나오는</b> 낱말이라 값을 건네지 않고 함수를 끝내지도 않습니다. 되풀이 밖에서 쓰면 그 자리에서 멈춰요."
+            en: >-
+              <code>break</code> <b>leaves a loop</b>: it hands back no value and does not end the
+              function. Outside a loop it stops right there.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 함수를 끝내나 고리를 벗어나나"
+              en: "The sharpest spot — ending a function or leaving a loop"
+            code:
+              - "while a:\n    break\nlog()    # log 가 돈다"
+              - "while a:\n    return\nlog()   # log 는 안 돈다"
+      - t: "yield"
+        mono: true
+        diag:
+          t:
+            ko: "<code>yield</code> 는 값을 건네되 <b>끝내지 않고 멈춰 둡니다</b>. 게다가 이 낱말이 하나라도 있으면 함수 전체가 다른 종류가 되어 부를 때 값 대신 <b>생성기</b>가 옵니다."
+            en: >-
+              <code>yield</code> hands a value over but <b>pauses instead of ending</b>. One of them
+              also turns the whole function into another kind: calling it gives a <b>generator</b>.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 함수 종류가 통째로 바뀐다"
+              en: "The sharpest spot — the whole function changes kind"
+            code:
+              - "def f():\n    return 1   # f() 는 1"
+              - "def f():\n    yield 1    # f() 는 생성기"
+      - t: "pass"
+        mono: true
+        diag:
+          t:
+            ko: "<code>pass</code> 는 <b>아무 일도 안 하는</b> 자리 채움이라 묶음이 비면 안 될 때 씁니다. 값도 안 건네고 끝내지도 않아요."
+            en: >-
+              <code>pass</code> is a placeholder that <b>does nothing</b>, used where a block may not
+              be empty. It hands nothing back and ends nothing.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 자리 채움이냐 건넴이냐"
+              en: "The sharpest spot — a placeholder or a hand-back"
+            code:
+              - "def f():\n    pass       # f() 는 None"
+              - "def f():\n    return 1   # f() 는 1"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 값을 화면에 찍지 않고 건넸을까요?"
+    en: "Why does line {{site.line}} hand the value over instead of printing it?"
+  choices:
+    - t:
+        ko: "부른 쪽이 그 값으로 무엇을 할지 정하게 하려고 — 찍으면 거기서 끝난다"
+        en: "So the caller decides what to do with it — printing ends the story there"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 같은 함수를 다른 자리에서 다르게 쓰려면 무엇이 필요한지도 적어 보세요."
+        en: "That is the direction. Say what is needed to use the same function differently elsewhere."
+    - t:
+        ko: "화면에 찍는 것이 느려서"
+        en: "Because printing is slow"
+      ok: false
+      fb:
+        ko: "속도의 문제가 아닙니다. 찍으면 값이 밖으로 나가 버려 다른 계산에 쓸 수 없습니다."
+        en: "It is not about speed. Printed, the value leaves and nothing else can use it."
+    - t:
+        ko: "함수 안에서는 못 찍어서"
+        en: "Because a function cannot print"
+      ok: false
+      fb:
+        ko: "찍을 수는 있습니다. 안 찍은 이유는 결정을 부른 쪽에 넘기기 때문입니다."
+        en: "It can print. It does not because it leaves the decision to its caller."
+
+queries:
+  - { grammars: [python], file: ./return-statement.scm }
+
+examples:
+  - code: "def f():\n    return 1"
+    expect: { sites: 1, form: return, hole: "return", picks: { 1: "return", 2: "1" } }
+  - code: "def f():\n    return"
+    expect: { sites: 1, form: return, hole: "return", picks: { 1: "return" } }
+  - code: "x = 1"
+    expect: none

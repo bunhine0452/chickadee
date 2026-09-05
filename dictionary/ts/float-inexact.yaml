@@ -1,0 +1,219 @@
+schema: 1
+id: ts/float-inexact
+universal: null
+name: { ko: 소수가 안 떨어진다, en: Decimals do not land }
+token: "toFixed"
+grammars: [typescript, tsx, javascript, vue]
+framework: null
+essential: true
+difficulty: 3
+prereq: [ts/number-literal, cs/floating-point, cs/binary-representation]
+confusions: [ts/number-literal, ts/string-literal]
+
+dict:
+  one_liner:
+    ko: "십진 소수 대부분은 2진수로 정확히 못 적는다. 그 오차가 셈에 남는다."
+    en: "Most decimals cannot be written exactly in base two, and the gap stays."
+  why:
+    ko: >-
+      <code>0.1</code> 은 2진수로 끝없이 이어져서 어느 자리에서 잘립니다. 잘린 값끼리 더하면
+      답도 조금 어긋나요. {{site.line}}행의 {{pick.2|code}}{{pick.2|josa:은,는}} 그 어긋남을
+      화면에서 감추는 자리이고, 감춘다는 것이 없앤다는 뜻은 아닙니다.
+    en: >-
+      <code>0.1</code> runs on forever in base two, so it is cut somewhere. Add two cut values and
+      the answer is off a little too. {{pick.2|code}} on line {{site.line}} hides that drift on
+      screen, and hiding is not removing.
+  trace:
+    - ko: "{{pick.1|code}} 안의 값은 이미 조금 어긋나 있다."
+      en: "The value inside {{pick.1|code}} is already off by a little."
+    - ko: "{{site.line}}행의 {{pick.2|code}}{{pick.2|josa:이,가}} 자릿수를 잘라 보여 준다."
+      en: "{{pick.2|code}} on line {{site.line}} cuts the digits down for display."
+    - ko: "나오는 것은 <b>글자</b>다 — 다시 더하면 이어 붙는다."
+      en: "What comes out is <b>text</b> — add it again and it runs together."
+
+rule:
+  ko: >-
+    <b>보이는 자릿수는 값이 아니다.</b> 자릿수를 자르는 일은 화면을 위한 것이고, 결과는 글자다.
+  en: >-
+    <b>The digits you see are not the value.</b> Cutting digits is for the screen, and the result is
+    text.
+result:
+  label:
+    ko: "{{site.line}}행이 내놓는 것"
+    en: "What line {{site.line}} yields"
+  value: "{{pick.1}}.{{pick.2}}(…)"
+  note:
+    ko: "수가 아니라 글자"
+    en: "text, not a number"
+ok:
+  ko: >-
+    {{pick.1|code}} 의 값은 2진수로 잘린 채 들어 있고, 여기서는 그것을 보기 좋게
+    <b>글자로</b> 만들 뿐입니다. 값 자체는 안 바뀌어요.
+  en: >-
+    The value in {{pick.1|code}} sits there already cut in base two, and this line only turns it
+    into readable <b>text</b>. The value itself does not change.
+payoff:
+  ko: >-
+    돈을 다루는 코드가 이 자리에서 갈립니다 — 원 단위로 계산해 두고 보여 줄 때만 자르면
+    합계가 어긋나지 않아요.
+  en: >-
+    Money code parts ways here — compute in whole units and cut only for display, and the totals
+    stop drifting.
+bridge:
+  ko: >-
+    수의 종류가 하나뿐이라는 사실과 같은 뿌리입니다. 정수도 소수도 같은 64비트를
+    나눠 쓰고 있어요.
+  en: >-
+    This has the same root as there being one kind of number: whole values and fractions share the
+    same 64 bits.
+misconceptions:
+  - ko: "자릿수를 자르면 수가 나온다 — 나오는 것은 글자입니다. 다시 더하면 이어 붙어요."
+    en: "Cutting digits gives a number — it gives text. Add it again and it runs together."
+  - ko: "오차는 아주 큰 수에서만 생긴다 — <code>0.1</code> 같은 작은 값에서 이미 생깁니다."
+    en: "The drift only shows up in huge numbers — it is already there in something as small as <code>0.1</code>."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>자릿수를 잘라 보여 주는 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name that cuts the digits for display</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 잘리는 <b>대상</b>입니다. 이 값은 그대로 남고, 잘린 것은 새로 만들어진 글자예요."
+          en: >-
+            {{pick.1|code}} is <b>what gets cut</b>. This value stays as it is; the cut version is a
+            newly made piece of text.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 원본과 사본"
+            en: "The sharpest spot — the original and the copy"
+          code:
+            - "const x = 0.1 + 0.2   // 0.30000000000000004"
+            - "x.toFixed(2)          // '0.30' — x 는 그대로"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 안쪽 이름을 꺼내는 <b>표시</b>입니다. 자르는 일은 그 오른쪽 이름이 합니다."
+          en: >-
+            {{pick.3|code}} is the <b>mark</b> that reaches inside. The cutting is done by the name
+            on its right.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 꺼내는 표시와 하는 일"
+            en: "The sharpest spot — the reaching mark or the work"
+          code:
+            - "x.toFixed(2)"
+            - "x.toString()"
+
+meaning:
+  - q:
+      ko: "<code>0.1 + 0.2 === 0.3</code> 의 값은 무엇일까요?"
+      en: "What is the value of <code>0.1 + 0.2 === 0.3</code>?"
+    hint:
+      ko: "두 값은 2진수로 적힐 때 이미 조금 잘려 있습니다."
+      en: "Both values are already cut a little when written in base two."
+    options:
+      - t:
+          ko: "<code>false</code> — 왼쪽이 <code>0.30000000000000004</code> 다"
+          en: "<code>false</code> — the left side is <code>0.30000000000000004</code>"
+      - t:
+          ko: "<code>true</code> — 수학에서 같으니까"
+          en: "<code>true</code> — they are equal in mathematics"
+        diag:
+          t:
+            ko: "수학에서는 같습니다. 기계는 두 값을 2진수로 적을 때 이미 조금씩 잘라 두었고, 잘린 것끼리 더한 답도 잘린 자리에 안 맞아요."
+            en: >-
+              In mathematics they are equal. The machine already cut both values when writing them
+              in base two, and the sum of two cut values does not land on a cut slot either.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 수학과 기계"
+              en: "The sharpest spot — mathematics or the machine"
+            code:
+              - "0.1 + 0.2          // 0.30000000000000004"
+              - "0.5 + 0.25 === 0.75 // true — 2진수로 딱 떨어진다"
+      - t:
+          ko: "자릿수가 많아 멈춘다"
+          en: "There are too many digits and it stops"
+        diag:
+          t:
+            ko: "멈추지 않습니다. 자릿수는 늘 예순넷으로 고정이고, 모자란 자리는 조용히 가장 가까운 값으로 접힙니다."
+            en: >-
+              Nothing stops. The width is always sixty four, and whatever does not fit folds quietly
+              to the nearest value.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 폭은 고정이다"
+              en: "The sharpest spot — the width is fixed"
+            code:
+              - "0.1 + 0.2      // 값이 나온다"
+              - "(0.1).toFixed(20)  // 잘린 자리가 보인다"
+      - t:
+          ko: "<code>0.3</code> 이 나오지만 종류가 달라서 거짓이다"
+          en: "It yields <code>0.3</code> but the kinds differ, so it is false"
+        diag:
+          t:
+            ko: "종류는 둘 다 같은 하나뿐입니다 — 갈리는 것은 종류가 아니라 <b>값</b>이에요."
+            en: >-
+              Both sides are the same single kind — what parts ways is the <b>value</b>, not the
+              kind.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 종류가 아니라 값"
+              en: "The sharpest spot — the value, not the kind"
+            code:
+              - "typeof (0.1 + 0.2)   // 'number'"
+              - "0.1 + 0.2            // 0.30000000000000004"
+
+no_hole_reason: >-
+  자르는 일을 하는 것은 이름 하나이고, 다른 이름을 넣으면 표준 라이브러리 이름을 외우는 물음이 된다.
+  이 개념이 재는 것은 이름이 아니라 「자르면 무엇이 나오나」다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 자릿수를 잘라 두었을까요?"
+    en: "Why does line {{site.line}} cut the digits?"
+  choices:
+    - t:
+        ko: "사람이 읽을 자리라서 — 값은 그대로 두고 보이는 것만 정리한다"
+        en: "Because a person reads it here — the value stays and only the display is tidied"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 잘린 글자를 다시 셈에 넣으면 무엇이 달라지는지도 적어 보세요."
+        en: "That is the direction. Add what changes if the cut text goes back into arithmetic."
+    - t:
+        ko: "값의 오차를 없애려고"
+        en: "To remove the drift from the value"
+      ok: false
+      fb:
+        ko: "값은 그대로입니다. 보이는 자릿수만 줄었고, 그래서 다시 더하면 오차가 그대로 따라옵니다."
+        en: >-
+          The value is untouched. Only the shown digits shrank, so the drift comes right back when
+          you add again.
+    - t:
+        ko: "글자로 바꿔야만 화면에 나오니까"
+        en: "Because only text can be shown on screen"
+      ok: false
+      fb:
+        ko: "수도 그대로 그려집니다. 여기서 글자로 만드는 이유는 <b>자릿수를 정하려고</b>입니다."
+        en: >-
+          A number draws fine on its own. Text is made here in order to <b>fix the number of
+          digits</b>.
+
+queries:
+  - { grammars: [typescript, tsx, javascript, vue], file: ./float-inexact.scm }
+
+examples:
+  - code: "const label = total.toFixed(2)"
+    expect: { sites: 1, form: fixed, picks: { 1: "total", 2: "toFixed", 3: "(2)" } }
+  - code: "const near = Math.abs(a - b) < Number.EPSILON"
+    expect: { sites: 1, form: epsilon, picks: { 1: "Number", 2: "EPSILON", 3: "." } }
+  - code: "const short = ratio.toPrecision(3)"
+    expect: { sites: 1, form: fixed, picks: { 1: "ratio", 2: "toPrecision", 3: "(3)" } }
+  - code: "const text = total.toString()"
+    expect: none
+  - code: "const rounded = Math.round(total)"
+    expect: none

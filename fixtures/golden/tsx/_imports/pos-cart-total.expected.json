@@ -37,5 +37,57 @@
     "endCol": 36,
     "nodeKind": "string",
     "inError": false
+  },
+  {
+    "queryId": "_imports",
+    "matchId": 4,
+    "patternIndex": 10,
+    "name": "import.source",
+    "form": "call-self",
+    "startLine": 6,
+    "startCol": 16,
+    "endLine": 6,
+    "endCol": 23,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "_imports",
+    "matchId": 5,
+    "patternIndex": 9,
+    "name": "ctx.recv",
+    "form": "call",
+    "startLine": 6,
+    "startCol": 30,
+    "endLine": 6,
+    "endCol": 35,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "_imports",
+    "matchId": 5,
+    "patternIndex": 9,
+    "name": "import.source",
+    "form": "call",
+    "startLine": 6,
+    "startCol": 36,
+    "endLine": 6,
+    "endCol": 42,
+    "nodeKind": "property_identifier",
+    "inError": false
+  },
+  {
+    "queryId": "_imports",
+    "matchId": 6,
+    "patternIndex": 10,
+    "name": "import.source",
+    "form": "call-self",
+    "startLine": 7,
+    "startCol": 36,
+    "endLine": 7,
+    "endCol": 45,
+    "nodeKind": "identifier",
+    "inError": false
   }
 ]

@@ -4,6 +4,7 @@
  *
  * 「고르기 → Enter → Space」 세 번이면 판 한 장이 끝난다(정본 §3-8). 키는 전부 `e.code` 다.
  */
+import { absenceReason, isSynthetic, type AbsenceReason } from '@chickadee/cards';
 import { FlatButton, Kbd, PressButton } from '@chickadee/ui';
 import { useCallback, useEffect, useState } from 'react';
 import { t, type MessageKey } from '@chickadee/i18n';
@@ -11,10 +12,12 @@ import { t, type MessageKey } from '@chickadee/i18n';
 import { Acts } from '../../components/plate/Acts.js';
 import { Ask } from '../../components/plate/Ask.js';
 import { Choices } from '../../components/plate/Choices.js';
+import { CoachBand, type CoachStep } from '../../components/plate/CoachBand.js';
 import { CodePlate, type CodePlateProps } from '../../components/plate/CodePlate.js';
 import type { HoleState } from '../../components/plate/Hole.js';
 import { Crumb } from '../../components/plate/Crumb.js';
 import { FeedbackSlot, type FeedbackState } from '../../components/plate/FeedbackSlot.js';
+import type { LiferNoteProps } from '../../components/plate/LiferNote.js';
 import { LinkPara } from '../../components/plate/LinkPara.js';
 import { ProofSheet } from '../../components/plate/ProofSheet.js';
 import { ReprintLadder, type RungNo } from '../../components/session/ReprintLadder.js';
@@ -35,12 +38,44 @@ const ROLE_KEY = {
 /** 판 머리의 역할 이름. 세 판이 같은 표를 쓴다. */
 const roleName = (role: keyof typeof ROLE_KEY): string => t(ROLE_KEY[role]);
 
+/**
+ * 「네 코드엔 없다」의 사유 넷 (D177 · D158 ② · D186 ④).
+ *
+ * `packages/cards` 의 `ABSENCE_MESSAGE_KEY` 와 같은 표지만 여기서는 `MessageKey` 로 든다 —
+ * 그쪽은 카탈로그를 모르는 자리라 `string` 이고, 화면이 실제로 부르는 자리는 여기다.
+ */
+const ABSENT_KEY = {
+  framework: 't0.absentFramework', library: 't0.absentLibrary',
+  scale: 't0.absentScale', idiom: 't0.absentIdiom',
+} as const satisfies Record<AbsenceReason, MessageKey>;
+
+/**
+ * 이 판이 사전 예제로 구워졌나 (D137 · D177). 원장의 `card.site_id` 가 NULL 이면 대응하는
+ * `concept_site` 행이 없다는 뜻이고, 그것이 곧 합성이다 — 생성기가 쓰는 자리표(`-1`)를
+ * 원장에 넣으면 외래키가 깨지므로 두 쪽이 이 한 가지 사실을 같은 판정으로 읽는다.
+ *
+ * 문자열(`payload.file`)로 가르지 않는다: 「사전 예제」는 **구울 때의 로케일**로 박히므로
+ * 언어를 바꾼 뒤에는 비교가 어긋난다.
+ */
+export const syntheticPlate = (plate: Plate): boolean =>
+  plate.track === 't0' && (plate.siteId === null || isSynthetic(plate.siteId));
+
 export interface T0PlateProps {
   plate: Plate;
   no: number;
   result: PlateResult | null;
   /** 아래층에서 돌아온 직후면 「이어보기」 문단이 열린다 (02 §4). */
   payoff: string | null;
+  /** 이 개념을 처음 기록한 판이면 판정란 안에 그 기록이 남는다 (D131). */
+  lifer: LiferNoteProps | null;
+  /** 첫 판을 함께 걷는 안내 띠 (D134). 이 리포의 첫 세션 첫 판에서만 참이다. */
+  coach: boolean;
+  /**
+   * 0장 판 위에 미리 펴는 사전 한 줄 (D138). **0장 대지의 판에서만** 값이 있다 —
+   * 전역으로 켜면 정본 §1 「가치는 설명이 아니라 강제된 능동 출력」과 부딪친다.
+   * 정답을 누설하는 한 줄은 `readFirstText` 가 이미 걸러 `null` 로 온다.
+   */
+  readFirst: string | null;
   ladder: LadderData | null;
   ladderOpen: boolean;
   rung: RungNo;
@@ -52,7 +87,7 @@ export interface T0PlateProps {
   onBuildPrompt: () => void;
   onCopyPrompt: () => void;
   onDunno: () => void;
-  onJumpPrereq: (conceptId: string) => void;
+  onJumpPrereq: (conceptId: string, previewSiteId: number | null) => void;
   onBack: () => void;
   onSubmit: (sel: number) => void;
   onNext: () => void;
@@ -162,6 +197,11 @@ export function T0Plate(props: T0PlateProps): React.JSX.Element | null {
 
   if (payload === null) return null;
 
+  // 합성 판은 「내 코드」가 아니다 — 그 자리에 파일 경로를 적으면 판 머리가 거짓말을 한다.
+  // 리포에 자리가 **아예 없는** 개념이면 왜 없는지까지 적는다 (D186 ④).
+  const synthetic = syntheticPlate(plate);
+  const absent: AbsenceReason | null = synthetic ? absenceReason(plate.conceptId) : null;
+
   const state: FeedbackState = result === null ? 'idle' : result.correct ? 'right' : 'wrong';
   const diag = result === null ? null : payload.why[result.sel] ?? null;
   const selectedPick = sel === null ? null : sel + 1;
@@ -176,10 +216,9 @@ export function T0Plate(props: T0PlateProps): React.JSX.Element | null {
         kind: t(KIND_KEY[payload.kind]),
         role: roleName(plate.role),
       })}
-      source={t('session.sourceT0', {
-        file: payload.file,
-        focus: String(payload.focus),
-      })}
+      source={synthetic
+        ? t('t0.syntheticSource')
+        : t('session.sourceT0', { file: payload.file, focus: String(payload.focus) })}
       ly={result === null ? [plate.layer, plate.layer] : result.layer}
       focusOnMount={props.payoff === null}
     >
@@ -191,6 +230,21 @@ export function T0Plate(props: T0PlateProps): React.JSX.Element | null {
       ) : null}
 
       {props.payoff === null ? null : <LinkPara payoff={props.payoff} focusOnMount />}
+
+      {/* 걸음은 사용자가 무엇을 했는지로만 정해진다 — 넘기기 버튼도 타이머도 없다 (D134). */}
+      {!props.coach ? null : (
+        <CoachBand step={(answered ? 3 : sel === null ? 1 : 2) satisfies CoachStep} synthetic={synthetic} />
+      )}
+
+      {/* 문제보다 먼저 읽는 한 줄 (D138). 이 언어가 처음이면 읽을 것을 얻으려고 먼저
+          막혀야 하는데, 0장 대지의 판에서만 그 순서를 뒤집는다. */}
+      {absent === null ? null : (
+        <p className="note t0-absent">{t(ABSENT_KEY[absent])}</p>
+      )}
+
+      {props.readFirst === null ? null : (
+        <p className="note read-first">{props.readFirst}</p>
+      )}
 
       <Ask q={payload.q} hint={payload.hint} />
 
@@ -217,15 +271,13 @@ export function T0Plate(props: T0PlateProps): React.JSX.Element | null {
         {...(result === null
           ? {}
           : {
-              stamp: result.correct
-                ? { text: t('session.exact'), sub: 'in register', tone: 'pink' as const }
-                : { text: t('session.differ'), sub: 'off register', tone: 'blue' as const },
               title: result.correct ? t('session.right') : t('session.wrong'),
               body: result.correct ? payload.ok : diag?.t,
               ...(diag?.edge ? { edge: diag.edge } : {}),
               rule: payload.rule,
               ...(payload.result ? { result: payload.result } : {}),
               gain: { from: result.layer[0], to: result.layer[1], text: result.gain },
+              ...(props.lifer === null ? {} : { lifer: props.lifer }),
             })}
       />
 
@@ -238,7 +290,7 @@ export function T0Plate(props: T0PlateProps): React.JSX.Element | null {
           card={ladder.card}
           prereqDone={plate.state?.prereqDone ?? []}
           {...(ladder.nextWas === undefined ? {} : { nextWas: ladder.nextWas })}
-          onJump={(row) => props.onJumpPrereq(row.conceptId)}
+          onJump={(row) => props.onJumpPrereq(row.conceptId, row.previewSiteId ?? null)}
           ask={{
             text: props.stuck,
             onText: props.onStuck,

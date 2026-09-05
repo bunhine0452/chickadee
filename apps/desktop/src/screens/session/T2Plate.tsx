@@ -2,11 +2,14 @@
  * T2 교정지 한 장 (05 §5·§7 · 04 §7~§8). 두 화면이 한 판 안에 있다:
  * **고르기 → 채점 결과**. 목업 `t2.js` 의 `render`·`resultHTML` 이다.
  *
- * 고르기 화면은 **종마다 다르다**(04 §8.3 · D107) — 파일을 고르는 두 종(책임 배치·영향
- * 반경)은 지도에서 상자를 고르고, 흐름 추적은 카드 덱의 순서를 세우고, 의존성 방향은
- * 5문항 4지선다를 푼다. 지도와 결과 화면은 **네 종이 같이 쓴다**: 04 §8.3 의 힌트가
- * 흐름 추적·의존성 방향에서도 「화살표가 이어지는지 보세요」·「두 상자에 마우스를
+ * 고르기 화면은 **종마다 다르다**(04 §8.3·§8.5 · D107·D142) — 지도에서 상자를 고르는 세 종
+ * (책임 배치·영향 반경·진입점), 카드 덱의 순서를 세우는 흐름 추적, 5문항 4지선다인 의존성
+ * 방향, 한 문항 4지인 폴더의 역할. 지도와 결과 화면은 **여섯 종이 같이 쓴다**: 04 §8.3 의
+ * 힌트가 흐름 추적·의존성 방향에서도 「화살표가 이어지는지 보세요」·「두 상자에 마우스를
  * 올리면」이라 지도가 문제의 일부다.
+ *
+ * 뒤의 두 종은 지도의 노드가 파일이 아니라 **폴더**다 (04 §7.5). 화면은 그것을 모른다 —
+ * `DependencyMap` 은 경로 문자열 세 키를 그대로 받으므로 한 글자도 안 고쳤다.
  *
  * T1 의 왜 게이트에 해당하는 자리가 T2 에는 없다 — 04 §6 은 필사 뒤의 걸음이고, T2 의
  * 같은 자리는 결과 화면의 「이것도 맞다」(04 §8.4)다.
@@ -30,6 +33,7 @@ import { HintBox } from '../../components/t2/HintBox.js';
 import { MapStatus } from '../../components/t2/MapStatus.js';
 import { PickedChips } from '../../components/t2/PickedChips.js';
 import { ResultGroups, type ResultRow } from '../../components/t2/ResultGroups.js';
+import { RoleQuiz } from '../../components/t2/RoleQuiz.js';
 import { Verdict } from '../../components/t2/Verdict.js';
 import type { Plate } from '../../data/session.js';
 import type { PlateResult } from '../../store.js';
@@ -103,13 +107,22 @@ export function T2Plate(props: T2PlateProps): React.JSX.Element | null {
 
   const selected = useMemo(() => new Set(props.selected), [props.selected]);
 
-  /** 파일을 고르는 두 종인가 (04 §8.2 가 한 식으로 묶는 그 둘). */
-  const picking = payload !== null && (payload.kind === 'placement' || payload.kind === 'radius');
+  /**
+   * 지도에서 골라 답하는 종인가 (04 §8.2 가 한 식으로 묶는 그 셋). 진입점은 노드가
+   * 폴더일 뿐 고르는 방식도 채점식도 같다 (D142).
+   */
+  const picking = payload !== null
+    && (payload.kind === 'placement' || payload.kind === 'radius' || payload.kind === 'entry');
   const ordered = props.ordered ?? [];
   const picks = props.picks ?? [];
   const pairs = payload?.pairs ?? [];
   /** 아직 안 푼 문항 — 의존성 방향의 채점 잠금이 이 수를 본다. */
   const left = pairs.filter((_, i) => picks[i] === undefined).length;
+  /**
+   * 폴더의 역할은 문항이 하나라 **첫 칸을 그대로 쓴다** — 의존성 방향이 쓰는 `picks` 와
+   * 같은 자리다. 판 하나는 그중 하나만 채우므로 둘이 섞이지 않는다.
+   */
+  const rolePick = picks[0] ?? null;
 
   /**
    * 채점을 걸 수 있는가. 종마다 「무엇이 답인가」가 다르므로 자물쇠도 다르다.
@@ -124,7 +137,9 @@ export function T2Plate(props: T2PlateProps): React.JSX.Element | null {
       ? props.selected.length > 0
       : payload.kind === 'flow'
         ? ordered.length > 0
-        : pairs.length > 0 && left === 0;
+        : payload.kind === 'role'
+          ? rolePick !== null
+          : pairs.length > 0 && left === 0;
 
   /** 채점 뒤 지도의 노드 상태 (목업 `stateOf`). 04 §8.2 의 네 티어 그대로다. */
   const nodeStates = useMemo(() => {
@@ -242,6 +257,21 @@ export function T2Plate(props: T2PlateProps): React.JSX.Element | null {
               pairs={pairs}
               picks={picks}
               {...(props.onPick === undefined ? {} : { onPick: props.onPick })}
+            />
+          ) : null}
+          {payload.kind === 'role' && payload.role !== undefined ? (
+            <RoleQuiz
+              folder={payload.role.folder}
+              bands={payload.bands}
+              pick={rolePick}
+              {...(props.onPick === undefined ? {} : {
+                // 보기가 넷이라 색인이 곧 `DirectionPick` 의 범위다. 넓히지 않고 좁혀서 넘긴다.
+                onPick: (choice: number) => {
+                  if (choice === 0 || choice === 1 || choice === 2 || choice === 3) {
+                    props.onPick?.(0, choice);
+                  }
+                },
+              })}
             />
           ) : null}
           {props.hints > 0 ? <HintBox hints={payload.hints.slice(0, props.hints)} /> : null}

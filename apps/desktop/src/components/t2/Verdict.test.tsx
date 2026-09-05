@@ -17,11 +17,11 @@ describe('verdictTitle', () => {
 });
 
 describe('Verdict', () => {
-  it('큰 숫자는 어긋남 판을 지나고 글자는 한 번만 읽힌다', () => {
+  it('큰 숫자는 그냥 숫자다 — 어긋남 판을 없앴다 (D182)', () => {
     const { container } = render(<Verdict pct={83} core={6} found={5} missed={1} wrong={2} bonus={1} />);
     const big = container.querySelector('.verdict .big');
-    expect(big?.getAttribute('class')).toContain('mr');
-    expect(big?.getAttribute('data-w')).toBe('83%');
+    expect(big?.getAttribute('class')).toBe('big');
+    expect(big?.getAttribute('data-w')).toBeNull();
     expect(big?.textContent).toBe('83%');
   });
 

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mapper namespace="shop.CartMapper">
+  <select id="broken" resultType="Cart">
+    SELECT id FROM cart WHERE deleted_at = NULL
+  </select>
+</mapper>

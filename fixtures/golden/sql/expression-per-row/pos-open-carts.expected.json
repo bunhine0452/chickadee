@@ -1,0 +1,67 @@
+[
+  {
+    "queryId": "sql/expression-per-row",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "per-row",
+    "startLine": 1,
+    "startCol": 10,
+    "endLine": 1,
+    "endCol": 41,
+    "nodeKind": "from",
+    "inError": false
+  },
+  {
+    "queryId": "sql/expression-per-row",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "per-row",
+    "startLine": 1,
+    "startCol": 15,
+    "endLine": 1,
+    "endCol": 19,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "sql/expression-per-row",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "per-row",
+    "startLine": 1,
+    "startCol": 20,
+    "endLine": 1,
+    "endCol": 25,
+    "nodeKind": "keyword_where",
+    "inError": false
+  },
+  {
+    "queryId": "sql/expression-per-row",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "hole",
+    "form": "per-row",
+    "startLine": 1,
+    "startCol": 20,
+    "endLine": 1,
+    "endCol": 25,
+    "nodeKind": "keyword_where",
+    "inError": false
+  },
+  {
+    "queryId": "sql/expression-per-row",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "per-row",
+    "startLine": 1,
+    "startCol": 26,
+    "endLine": 1,
+    "endCol": 41,
+    "nodeKind": "binary_expression",
+    "inError": false
+  }
+]

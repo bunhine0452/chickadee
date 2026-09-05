@@ -137,6 +137,133 @@ export interface AppVersion { app: string; tauri: string; sqlite: string; rustc:
 export interface LangInfo { grammar: string; grammarVersion: string; abi: number }
 
 /** 경로는 리포 루트 절대 경로다 — 장부가 TS 에 있으므로 id 를 되돌릴 곳이 Rust 에 없다 (D65). */
+/**
+ * `t3_run` (D175). Rust 는 여기까지만 안다 — 무엇을 실행할지, 결과가 통과인지는
+ * `@chickadee/grading` 의 `runner.ts` 가 정한다.
+ *
+ * `rootPath` 가 빈 문자열이면 복사를 건너뛴다 — `java -version` 같은 탐지용 호출이다.
+ * 상한(600초 · 스트림당 128 KiB)은 Rust 가 깎으므로 여기서 올려 보낼 수 없다.
+ */
+export interface ProcSpec {
+  /** 복사해 올 원본. **한 바이트도 쓰지 않는다.** */
+  rootPath: string;
+  /** 작업본 이름 (`[A-Za-z0-9._-]`). 같은 이름은 같은 작업본이라 빌드 캐시가 남는다. */
+  workId: string;
+  /**
+   * 프로그램이 시작하기 **전에** 있어야 하는 것, 홈 디렉터리 상대 경로. 하나라도 없으면
+   * `missing` 으로 돌려주고 **아무것도 시작하지 않는다** — 「묻기 전에 네트워크를 쓰지
+   * 않는다」를 지키려면 여는 쪽이 아니라 닫는 쪽이 기본이어야 한다.
+   */
+  needs: string[];
+  /**
+   * 복사 규칙이 떨어뜨렸어도 **반드시 가져올** 경로. 빌드 도구의 래퍼는 리포가 스스로
+   * `.gitignore` 에 넣는 일이 흔하고(Flutter 템플릿이 `/gradlew` 와 `gradle-wrapper.jar`
+   * 를 그렇게 한다) 그러면 아무것도 시작되지 않는다. 무엇이 그런 파일인지는 언어 지식이라
+   * 부르는 쪽이 적는다.
+   */
+  keep: string[];
+  /** 실행 직전에 작업본에 덮어쓸 것. 경로는 작업본 루트 상대이고 `..` 는 거부된다. */
+  files: [path: string, text: string][];
+  /** 한 조각짜리 이름은 `PATH` 로, `./gradlew` 처럼 여러 조각이면 작업본 안의 파일로 푼다. */
+  program: string;
+  args: string[];
+  env: [name: string, value: string][];
+  timeoutMs: number;
+}
+
+export interface ProcOut {
+  /** 신호로 죽었으면 `null`. 시간 초과가 그 경우다. */
+  code: number | null;
+  stdout: string;
+  stderr: string;
+  workDir: string;
+  /** 비어 있지 않으면 프로그램은 **시작조차 안 했다**. 오류가 아니라 사실이다. */
+  missing: string[];
+  /** 스트림 하나라도 상한에서 잘렸다. */
+  truncated: boolean;
+  timedOut: boolean;
+  durationMs: number;
+}
+
+/**
+ * `sql_run` (D175 를 SQL 로). Rust 는 문장 목록과 상한만 안다 — 무엇을 세우고 무엇을 묻고
+ * 결과 표가 맞는지는 `@chickadee/grading` 의 `sql-runner.ts` 가 정한다.
+ *
+ * 데이터베이스는 **메모리에만** 선다. 학습자 리포의 파일을 열지 않으므로 작업본을 지우고
+ * 말고 할 것이 없고, 문장이 잘못돼도 고장 낼 원본이 없다.
+ */
+export interface AskSpec {
+  /** 데이터베이스를 세우는 문장들 — 스키마와 시드. 순서대로 돈다. */
+  setup: string[];
+  /** 결과 표를 받을 문장들. 첫 실패에서 멈춘다. */
+  asks: string[];
+  timeoutMs: number;
+  /** 표 하나의 행 상한. 넘으면 `truncated` 로 표시된 채 잘려 온다. */
+  maxRows: number;
+}
+
+export interface SqlTable {
+  columns: string[];
+  /** `null` 은 **없는 값**이다 — 빈 글자와 다르고, 이 층이 가르치는 것이 그 차이다. */
+  rows: (string | null)[][];
+  truncated: boolean;
+}
+
+export interface AskOut {
+  /** `asks` 하나마다 하나. 도중에 실패하면 그보다 짧다. */
+  tables: SqlTable[];
+  /** 음수면 `setup` 의 (−n−1)번째, 0 이상이면 `asks` 의 그 번째가 실패했다. */
+  failedAt: number | null;
+  /** 엔진이 한 말. 부른 쪽이 보낸 글에 대한 것이라 그대로 돌아온다. */
+  message: string | null;
+  timedOut: boolean;
+  durationMs: number;
+}
+
+/**
+ * `stdin_run` (D186 ⑧ · D187 ①). Rust 는 걸음 목록과 상한만 안다 — 무엇을 돌리고 나온 글이
+ * 맞는지는 `@chickadee/grading` 의 `stdin-runner.ts` 가 정한다.
+ *
+ * 작업 디렉터리는 이 호출 안에서 만들어졌다가 **지워진다**. 학습자 리포는 열지도 않으므로
+ * 「원본은 읽기만 한다」가 「원본을 안 본다」가 된다 (sqlite 러너와 같은 자리).
+ * 내려받는 것이 없어 D175 ④ 의 동의 게이트는 이 길에 없다.
+ */
+export interface StepSpec {
+  /** `PATH` 를 타는 이름 하나. 경로 구분자가 들면 거부된다. */
+  program: string;
+  args: string[];
+  /** 표준 입력으로 넣어 줄 글. 다 넣고 파이프를 닫아 프로그램의 읽기가 끝에 닿는다. */
+  feed: string;
+  /** 0 으로 안 끝나면 **뒤 걸음을 시작하지 않는다**. 부르는 쪽이 컴파일 걸음에 건다. */
+  mustPass: boolean;
+}
+
+export interface StdinSpec {
+  /** 첫 걸음 전에 작업 디렉터리에 쓸 것. 경로는 상대이고 `..` 는 거부된다. */
+  files: [path: string, text: string][];
+  steps: StepSpec[];
+  env: [name: string, value: string][];
+  /** **걸음마다**의 상한이지 전체가 아니다. Rust 가 5초에서 깎는다. */
+  timeoutMs: number;
+}
+
+export interface StepOut {
+  /** 신호로 죽었으면 `null`. 시간 초과가 그 경우다. */
+  code: number | null;
+  stdout: string;
+  stderr: string;
+  truncated: boolean;
+  timedOut: boolean;
+  durationMs: number;
+}
+
+export interface StdinOut {
+  /** 시작된 걸음마다 하나, 순서대로. 시간 초과·`mustPass` 실패·못 시작에서 짧아진다. */
+  steps: StepOut[];
+  /** 시작조차 못 한 걸음. **오류가 아니라 사실이다** — 대개 「그 언어가 안 깔렸다」. */
+  spawnFailed: number | null;
+}
+
 export interface ReadLinesReq { rootPath: string; relPath: string; from: number; to: number; rev?: string }
 export interface ReadBlockReq { rootPath: string; relPath: string; startByte: number; endByte: number; rev?: string }
 

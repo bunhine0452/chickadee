@@ -1,0 +1,54 @@
+[
+  {
+    "queryId": "java/return-statement",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "site",
+    "form": "bare",
+    "startLine": 6,
+    "startCol": 12,
+    "endLine": 6,
+    "endCol": 19,
+    "nodeKind": "return_statement",
+    "inError": false
+  },
+  {
+    "queryId": "java/return-statement",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.1",
+    "form": "bare",
+    "startLine": 6,
+    "startCol": 12,
+    "endLine": 6,
+    "endCol": 18,
+    "nodeKind": "return",
+    "inError": false
+  },
+  {
+    "queryId": "java/return-statement",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "hole",
+    "form": "bare",
+    "startLine": 6,
+    "startCol": 12,
+    "endLine": 6,
+    "endCol": 18,
+    "nodeKind": "return",
+    "inError": false
+  },
+  {
+    "queryId": "java/return-statement",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.3",
+    "form": "bare",
+    "startLine": 6,
+    "startCol": 18,
+    "endLine": 6,
+    "endCol": 19,
+    "nodeKind": ";",
+    "inError": false
+  }
+]

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 매퍼 안의 SQL. 자리표 `#{...}` 는 파서에게만 같은 너비의 글자 값으로 가려진다
+     (`crates/parse/src/params.rs`) — 그전에는 오른쪽이 열 이름으로 잡혔다. -->
+<mapper namespace="shop.CartMapper">
+  <select id="findById" resultType="Cart">
+    SELECT id, status FROM cart WHERE id = #{cartId}
+  </select>
+</mapper>

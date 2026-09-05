@@ -1,0 +1,90 @@
+schema: 1
+id: cs/dynamic-dispatch
+universal: null
+name: { ko: "어느 몸통이 불릴지 언제 정해지나", en: "Static and dynamic dispatch" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+# 자바·C#·Go·Rust 편이 밀어낸 것 (cs.md §10.2).
+track_default: t0
+essential: false
+difficulty: 3
+prereq: [cs/abstraction, cs/type]
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "번역할 때 정하면 빠르고, 돌 때 정하면 갈아 끼울 수 있다."
+    en: "Decided at translation it is fast; decided at run time it can be swapped."
+  why:
+    ko: >-
+      같은 이름의 함수가 여럿일 때, <b>어느 몸통이 불릴지</b>를 언제 정할까요.
+      번역할 때 정하면 부르는 자리에 몸통이 박히고 아주 빠릅니다 — 대신 나중에 갈아 끼울 수 없어요.
+      돌 때 정하면 값이 「나는 이 몸통을 쓴다」를 들고 다니고 부를 때마다 한 번 더 건너갑니다 —
+      느린 대신 <b>같은 자리에 다른 것을 끼울 수 있습니다</b>. 인터페이스로 갈아 끼우기,
+      테스트에서 가짜를 넣기가 전부 뒤쪽 덕입니다. 「왜 인터페이스를 쓰면 유연한가」의 답이 여기예요.
+    en: >-
+      With several functions of one name, when is it decided <b>which body runs</b>? Decide at
+      translation and the body is baked into the call site — very fast, and impossible to swap
+      later. Decide at run time and the value carries “I use this body”, adding one hop per call —
+      slower, but <b>anything else can be dropped into the same slot</b>. Swapping implementations
+      behind an interface, or substituting a fake in a test, all come from the second. That is why
+      interfaces buy flexibility.
+  trace: []
+rule:
+  ko: "<b>늦게 정할수록 갈아 끼울 수 있고 걸음이 하나 는다.</b>"
+  en: "<b>The later it is decided, the more swappable — and one more hop.</b>"
+ok:
+  ko: >-
+    값이 어느 몸통을 쓰는지 들고 다니면 부르는 쪽은 이름만 알면 됩니다. 그래서 부르는 코드를
+    안 고치고 몸통만 바꿀 수 있어요.
+  en: >-
+    When a value carries which body it uses, the caller needs only the name. So the body can change
+    without touching the calling code.
+misconceptions:
+  - ko: "돌 때 정하는 것이 언제나 느리다 — 걸음 하나 차이이고 대개 안 보입니다."
+    en: "Deciding at run time is always slow — it is one hop, usually invisible."
+  - ko: "인터페이스를 쓰면 자동으로 늦게 정해진다 — 번역 때 정하는 방식으로 쓰는 언어도 있습니다."
+    en: "Interfaces always defer the decision — some languages resolve them at translation."
+  - ko: "어느 몸통이 불릴지는 이름이 정한다 — 이름이 같아도 값이 어느 것을 쓰는지가 정합니다."
+    en: "The name picks the body — with equal names, the value's carried choice picks."
+meaning:
+  - q:
+      ko: "부르는 코드를 한 글자도 안 고치고 몸통만 갈아 끼웠습니다. <b>무엇이 그것을 가능하게 하나요?</b>"
+      en: "The body was swapped without touching a character of the caller. <b>What made that possible?</b>"
+    hint:
+      ko: "부르는 자리에 몸통이 박혀 있었다면 못 갈아 끼웠을 것입니다."
+      en: "If the body were baked into the call site, no swap would be possible."
+    options:
+      - t: { ko: "어느 몸통을 쓸지 돌 때 정해서 값이 그것을 들고 다닌다", en: "The body is chosen at run time and the value carries the choice" }
+      - t: { ko: "부르는 코드가 몸통 이름을 몰라서", en: "The caller does not know the body's name" }
+        diag:
+          t:
+            ko: "모른다는 것은 <b>결과</b>입니다. 몰라도 되는 이유는 값이 자기 몸통을 들고 다니기 때문이에요."
+            en: "Not knowing is the <b>consequence</b>. It need not know because the value carries its own body."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 모름이냐 들고 다님이냐", en: "The sharpest spot — ignorance or carrying" }
+            code:
+              - "모름: 그래서 안 고쳐도 된다"
+              - "들고 다님: 그래서 몰라도 된다"
+      - t: { ko: "번역을 다시 해서", en: "Because it was translated again" }
+        diag:
+          t:
+            ko: "번역 때 정하는 방식이면 다시 번역해야 <b>부르는 자리가 바뀝니다</b>. 여기서는 부르는 자리가 그대로였어요."
+            en: "With translation-time choice you must retranslate to <b>change the call site</b>. Here the call site never changed."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 부르는 자리가 바뀌나", en: "The sharpest spot — does the call site change" }
+            code:
+              - "번역 때: 부르는 자리에 몸통이 박힌다"
+              - "돌 때: 부르는 자리는 그대로"
+      - t: { ko: "두 몸통의 이름이 같아서", en: "Because both bodies share a name" }
+        diag:
+          t:
+            ko: "이름이 같은 것은 <b>필요조건</b>이지만 충분하지 않습니다. 이름이 같아도 번역 때 하나로 박히면 못 갈아 끼워요."
+            en: "A shared name is <b>necessary</b>, not sufficient. With the same name, a translation-time bake still blocks the swap."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 이름이냐 시점이냐", en: "The sharpest spot — name or moment" }
+            code:
+              - "이름 같음: 필요하다"
+              - "돌 때 정함: 그래서 갈린다"

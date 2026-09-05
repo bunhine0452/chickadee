@@ -1,0 +1,257 @@
+schema: 1
+id: java/try-catch
+universal: common/try-catch
+name: { ko: 터진 것을 받아 잇기, en: try and catch }
+token: "catch"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 3
+prereq: [java/inheritance-override, spring/exception-handler]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "터질 수 있는 줄을 묶고, 터졌을 때 갈 곳을 <b>타입으로</b> 적어 둔다."
+    en: "Wraps lines that may blow up and names, <b>by type</b>, where to go when they do."
+  why:
+    ko: >-
+      어떤 줄은 도중에 터집니다 — 그러면 그 아래 줄들은 <b>건너뛰고</b> 프로그램이 위로 튕겨
+      올라가요. {{site.line}}행은 그 튕김을 여기서 <b>받아</b> 흐름을 잇습니다. 자바에서 날카로운
+      자리는 「무엇을 받을지」를 <b>타입으로</b> 적는다는 것이에요. 무엇이 받아지는지는 예외
+      클래스들의 <b>물려받은 관계</b>가 정합니다 — 그래서 맨 위 조상을 적으면 거의 다 삼켜 버리고,
+      진짜 문제가 조용히 지워집니다.
+    en: >-
+      Some lines blow up mid-way — the lines below are <b>skipped</b> and the program bounces upward.
+      Line {{site.line}} <b>receives</b> that bounce here and continues the flow. Java's sharp spot is
+      that what to receive is written <b>as a type</b>. Which failures are received is decided by the
+      <b>inheritance</b> among exception classes — so naming the topmost ancestor swallows nearly
+      everything, and the real problem is quietly erased.
+  trace:
+    - ko: "{{pick.2|code}} 안의 줄들이 위에서부터 돈다."
+      en: "The lines in {{pick.2|code}} run from the top."
+    - ko: "터지면 그 자리에서 멈추고 {{pick.4|code}} 자리와 견줘 받을지 정한다."
+      en: "On a blow-up it halts there and is matched against {{pick.4|code}} to decide."
+    - ko: "받아지면 {{pick.5|code}}{{pick.5|josa:이,가}} 돌고, 그다음은 묶음 바깥으로 이어진다."
+      en: "If received, {{pick.5|code}} runs and the flow continues past the block."
+
+rule:
+  ko: "<b>받을 것을 타입으로 적는다.</b> 무엇이 받아지는지는 예외들의 물려받은 관계가 정한다."
+  en: "<b>What is received is written as a type.</b> Inheritance among exceptions decides what fits."
+ok:
+  ko: >-
+    {{pick.2|code}} 에서 터진 것이 {{pick.4|code}} 에 맞으면 {{pick.5|code}} 쪽으로 넘어가 흐름이 이어집니다.
+  en: >-
+    A blow-up in {{pick.2|code}} that matches {{pick.4|code}} moves into {{pick.5|code}} and the flow
+    continues.
+payoff:
+  ko: >-
+    이걸 알면 「왜 오류가 아무 데도 안 남았지」가 풀립니다 — 맨 위 조상을 적어 두고 안에서
+    아무것도 안 하면 그 자리에서 통째로 지워져요.
+  en: >-
+    Knowing this untangles “why is there no trace of the error” — naming the topmost ancestor and doing
+    nothing inside erases it right there.
+bridge:
+  ko: >-
+    파이썬도 종류로 받지만 자바는 그 종류가 <b>클래스이고 물려받습니다</b>. 그래서 하나를 적었을
+    때 무엇까지 받아지는지가 그 클래스의 <b>족보</b>로 정해져요.
+  en: >-
+    Python also receives by kind, but here the kind is <b>a class, and it inherits</b>. So how much one
+    name receives is decided by that class's <b>lineage</b>.
+misconceptions:
+  - ko: "받아 두면 문제가 없어진다 — 없어지는 것은 <b>튕김</b>이지 원인이 아닙니다."
+    en: "Receiving it makes the problem go away — what goes away is the <b>bounce</b>, not the cause."
+  - ko: "적은 타입과 <b>똑같아야</b> 받아진다 — 물려받은 것도 받아집니다. 그래서 조상을 적으면 넓어져요."
+    en: "It must match the written type <b>exactly</b> — descendants are received too, so an ancestor widens it."
+  - ko: "터진 줄 다음 줄부터 이어진다 — 묶음 안의 남은 줄은 <b>건너뜁니다</b>."
+    en: "It resumes at the line after the blow-up — the remaining lines in the block are <b>skipped</b>."
+  - ko: "묶어 두면 느려진다 — 아무 일도 안 터지면 비용이 거의 없습니다."
+    en: "Wrapping makes it slow — with nothing blowing up, the cost is near zero."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>무엇을 받을지 정하는 자리</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the part that decides what is received</b>."
+    hint:
+      ko: "받는 자리의 괄호 안에 <b>타입</b>으로 적혀 있습니다."
+      en: "It is written as a <b>type</b> inside the receiving parentheses."
+    answer: pick.4
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>지켜보는 줄들</b>입니다. 무엇을 받을지는 그 아래에 적혀요."
+          en: "{{pick.2|code}} is <b>the lines being watched</b>. What to receive is written below them."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 지켜보는 곳이냐 받는 조건이냐"
+            en: "The sharpest spot — what is watched or what is received"
+          code:
+            - "앞 묶음: 터질 수 있는 줄들"
+            - "괄호 안: 무엇을 받을지"
+      pick.5:
+        t:
+          ko: "{{pick.5|code}}{{pick.5|josa:은,는}} 받은 <b>뒤에 할 일</b>입니다. 받을지 말지는 그 앞의 괄호가 정해요."
+          en: "{{pick.5|code}} is <b>what to do after</b> receiving. Whether to receive is set by the parentheses before it."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 조건이냐 뒤처리냐"
+            en: "The sharpest spot — the condition or the follow-up"
+          code:
+            - "괄호 안: 받을 조건"
+            - "그 뒤:   받고 나서 할 일"
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>여기부터 지켜본다</b>는 낱말입니다. 무엇을 받을지는 아직 안 적혔어요."
+          en: "{{pick.1|code}} says <b>watching starts here</b>. What to receive is not written yet."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 지켜보기 시작이냐 받기냐"
+            en: "The sharpest spot — starting to watch or receiving"
+          code:
+            - "앞 낱말: 여기부터 지켜본다"
+            - "뒷 낱말: 이런 것을 받는다"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행이 받겠다고 적은 타입의 <b>물려받은 자식</b>이 터지면 어떻게 될까요?"
+      en: "A <b>descendant</b> of the type named on line {{site.line}} blows up — what happens?"
+    hint:
+      ko: "받아지는 범위는 클래스의 족보를 따릅니다."
+      en: "The receiving range follows the class lineage."
+    options:
+      - t:
+          ko: "그것도 받아진다 — 적은 타입이 조상이면 자식도 다 받는다"
+          en: "It is received too — an ancestor named receives all its descendants"
+      - t:
+          ko: "안 받아진다 — 이름이 정확히 같아야 한다"
+          en: "It is not — the name must match exactly"
+        diag:
+          t:
+            ko: "정확히 같을 필요가 없습니다. 그래서 맨 위 조상을 적으면 <b>거의 전부</b>가 받아져요."
+            en: "An exact match is not required. That is exactly why naming the topmost ancestor receives <b>nearly everything</b>."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 정확히냐 족보냐"
+              en: "The sharpest spot — exact or by lineage"
+            code:
+              - "적은 것이 조상 → 자식도 받아진다"
+      - t:
+          ko: "받아지지만 원래 종류를 알 수 없게 된다"
+          en: "It is received but its original kind becomes unknowable"
+        diag:
+          t:
+            ko: "받은 것의 <b>진짜 종류는 그대로 남아</b> 있습니다. 물어보면 알 수 있어요."
+            en: "The <b>real kind of what was received survives</b>. It can be asked."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 종류가 지워지나"
+              en: "The sharpest spot — is the kind erased"
+            code:
+              - "적은 타입: 받을 범위"
+              - "진짜 종류: 그대로 남는다"
+      - t:
+          ko: "받아지지만 그 아래 줄이 다시 처음부터 돈다"
+          en: "It is received and the lines below start over"
+        diag:
+          t:
+            ko: "되돌아가는 일은 없습니다. 묶음 안의 남은 줄은 <b>건너뛰고</b> 받는 자리로 갑니다."
+            en: "Nothing rewinds. The remaining lines in the block are <b>skipped</b> and it goes to the receiving spot."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 다시 도나 건너뛰나"
+              en: "The sharpest spot — retry or skip"
+            code:
+              - "터진 줄 아래: 안 돈다"
+              - "다시 돌리려면 되풀이를 손으로 적어야"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 {{pick.2|code}} 에서 터진 것을 <b>여기서 받습니다</b>."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} <b>receives here</b> what blew up in {{pick.2|code}}.
+    hint:
+      ko: "보기 넷은 여러 언어가 같은 자리에 쓰는 낱말입니다."
+      en: "All four are words different languages write in this slot."
+    options:
+      - { t: "catch", mono: true }
+      - t: "except"
+        mono: true
+        diag:
+          t:
+            ko: "<code>except</code> 는 파이썬이 이 자리에 쓰는 낱말입니다. 하는 일은 같지만 자바 문법이 모릅니다."
+            en: "<code>except</code> is Python's word for this slot. Same job, but Java's grammar does not know it."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 어느 언어의 낱말이냐"
+              en: "The sharpest spot — whose word it is"
+            code:
+              - "파이썬: except ValueError:"
+              - "자바:   다른 낱말을 쓴다"
+      - t: "finally"
+        mono: true
+        diag:
+          t:
+            ko: "<code>finally</code> 는 <b>터지든 안 터지든</b> 도는 자리입니다. 받는 자리가 아니에요."
+            en: "<code>finally</code> runs <b>whether or not</b> anything blew up. It does not receive."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 받는 곳이냐 늘 도는 곳이냐"
+              en: "The sharpest spot — receiving or always running"
+            code:
+              - "받는 곳:   터졌을 때만"
+              - "finally:  언제나"
+      - t: "rescue"
+        mono: true
+        diag:
+          t:
+            ko: "<code>rescue</code> 는 루비의 낱말입니다. 뜻은 같은데 자바에서는 그냥 이름으로 읽혀요."
+            en: "<code>rescue</code> is Ruby's word. The meaning matches, but here it reads as a plain name."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 문법의 낱말이냐 그냥 이름이냐"
+              en: "The sharpest spot — a word of the grammar or a plain name"
+            code:
+              - "문법의 낱말: 흐름을 바꾼다"
+              - "그냥 이름:   찾을 수 없다고 한다"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행이 이 자리에서 <b>받기로</b> 한 이유는 무엇일까요?"
+    en: "Why does line {{site.line}} choose to <b>receive</b> right here?"
+  choices:
+    - t:
+        ko: "여기서라야 <b>대신할 답</b>을 낼 수 있어서 — 더 위로 올라가면 무엇을 하려던 건지 모른다"
+        en: "Because only here can a <b>replacement answer</b> be given — higher up, the intent is gone"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 여기서 무엇으로 이어 붙였는지도 적어 보세요."
+        en: "That is the direction. Add what it continued with."
+    - t:
+        ko: "터지면 프로그램이 죽으니까 무조건 받아야 해서"
+        en: "Because a blow-up kills the program, so it must always be received"
+      ok: false
+      fb:
+        ko: "안 받고 위로 올려보내는 것이 <b>더 나은</b> 자리도 많습니다. 여기서 받은 이유가 따로 있어야 해요."
+        en: "Letting it rise is often the <b>better</b> choice. Receiving here needs its own reason."
+    - t:
+        ko: "자바가 여기서 받으라고 시켜서"
+        en: "Because Java requires receiving here"
+      ok: false
+      fb:
+        ko: "받거나 위로 넘기거나 <b>둘 중 하나</b>면 됩니다. 여기를 고른 것은 선택이에요."
+        en: "Receiving or passing it up — <b>either</b> satisfies Java. Choosing here is a choice."
+
+queries:
+  - { grammars: [java], file: ./try-catch.scm }
+
+examples:
+  - code: "void m() { try { risky(); } catch (Exception e) { log(e); } }"
+    expect:
+      sites: 1
+      form: try
+      hole: "catch"
+      picks: { 1: "try", 3: "catch", 4: "Exception" }
+  - code: "void m() { try { p(); } catch (IllegalStateException e) { return; } }"
+    expect: { sites: 1, form: try, picks: { 4: "IllegalStateException" } }
+  - code: "void m() { risky(); }"
+    expect: none

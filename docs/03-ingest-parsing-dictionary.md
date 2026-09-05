@@ -401,7 +401,23 @@ function unknownCount(site: ConceptSite, layerOf: (c: string) => 0 | 1 | 2 | 3 |
 }
 ```
 
-첫 노출 = `unknownCount` 최소 → 동률이면 `uncoveredRatio` 오름차순 → `dirty=false` 우선 → 파일 내 Site 수 많은 파일 우선(한 파일이 여러 카드에 다시 나와 익숙해진다). `unknownCount > 3` 인 사용처는 겹이 오를 때까지 보류 — 이것이 §4 「난이도 곡선이 파생된다」의 구현이다. `const MAX = 10` 은 lineConcepts = {const-declaration, number-literal} 로 0~1, `const [c, setC] = useState(0)` 은 {const, array-destructuring, call, react/use-state} 로 3~4 가 된다.
+`unknownCount` 가 재는 것은 **초점 줄**이다. 판이 보여 주는 것은 줄이 아니라 **창**(D141 — 감싸는 블록 ∪ 초점 ±2, 상한 40줄)이므로 창을 따로 센다 (D155):
+
+```ts
+function windowUnknown(site, block, index, layerOf): number {
+  const win = windowRange(site.lineStart, block);              // 판이 그리는 창과 같은 함수
+  const ids = new Set<string>();
+  for (let n = win.from; n <= win.to; n += 1)
+    for (const id of index.get(n) ?? []) if (id !== site.conceptId) ids.add(id);
+  return [...ids].filter((id) => layerOf(id) === 0).length;
+}
+```
+
+첫 노출 = `unknownCount` 최소 → 동률이면 **`windowUnknown` 최소** → `uncoveredRatio` 오름차순 → 짧은 사용처 → `dirty=false` 우선 → 경로. `unknownCount > 3` 인 사용처는 겹이 오를 때까지 보류 — 이것이 §4 「난이도 곡선이 파생된다」의 구현이다. 문턱은 초점 줄 기준 그대로이고 창은 **순서만** 정한다. `const MAX = 10` 은 lineConcepts = {const-declaration, number-literal} 로 0~1, `const [c, setC] = useState(0)` 은 {const, array-destructuring, call, react/use-state} 로 3~4 가 된다.
+
+**왜 창을 따로 세나** (D155): 초점 줄만 보면 1,747줄짜리 파일 한복판의 두 글자짜리 리터럴이 만점을 받는다. 실측 리포에서 `ts/number-literal` 사용처 261곳 중 미지 0 인 다섯이 동률이 되었고, 마지막 동률 처리가 경로 알파벳순이라 **가장 큰 파일이 이겼다** — 「숫자」의 첫 판이 `function Spark({ data, w = 56, h = 16 }: { data: number[]; w?: number; h?: number })` 로 나갔다. `const MIN_FONT = 9;` 가 같은 후보 안에 있었다. 창을 넣으면 창 14줄·미지 10 에서 5줄·미지 0 으로 옮겨간다.
+
+`uncoveredRatio`(> 0.5 면 +1)가 이것을 잡았어야 했는데 같은 리포 4,488 사용처의 평균이 0.00 이라 **한 번도 걸리지 않는다** — 감싸는 사용처의 바이트 범위가 안쪽 토큰을 전부 「덮은 것」으로 치기 때문이다. 그 자리는 따로 본다.
 
 ---
 
@@ -486,6 +502,7 @@ misconceptions: ["…"]                      # 흔한 오해 (사다리 1단 보
 meaning: [ { q, hint, options: [ {t}, {t, diag:{t, edge:{h, code:[…]}}}, … ] } ]
 point:   [ { q, hint, answer: pick.N, diag: { pick.M: {t, edge}, … } } ]
 blank:   [ { q, hint, options: [ {t, mono:true}, {t, mono:true, diag:{…}}, … ] } ]  # 첫 옵션 = @hole 원문
+no_hole_reason: "…" | null                 # 빈칸형을 **못 내는** 사유. essential 인데 blank+@hole 이 없으면 여기에 적는다 (D145)
 why_gate:                                   # 선택 · T1 왜 게이트 문항 (04 §6)
   q: "이 줄이 없으면 무엇이 달라질까요?"
   help: "…"
@@ -499,6 +516,8 @@ examples:                                  # 골든 (§5.1 · §8) — 양성·�
 **로케일 (D117 · D118).** 사람이 읽는 문자열은 `{ ko, en }` 두 벌이다 — `name` 은 이미 그 모양이고 `dict.one_liner` · `dict.why` · `dict.trace[]` · `rule` · `ok` · `payoff` · `bridge` · `misconceptions[]` · `result.label` · `result.note` · 문항의 `q` · `hint` · `options[].t` · `diag.t` · `diag.edge.h` · `why_gate.q` · `why_gate.help` · `why_gate.choices[].t` · `.fb` 가 같은 규칙을 따른다. 위 예시는 `ko` 만 적은 축약형이고 **문자열 자리에 스칼라를 쓰면 `ko` 로 읽는다** — 기존 57 파일이 손대지 않고 통과하며 `en` 은 채우는 대로 붙는다. `en` 이 없으면 로더가 `ko` 로 폴백하고 판에 그 사실을 한 줄로 적는다(빈 칸을 그리지 않는다). 조사 필터 `{{…|josa:…}}` 는 `en` 에서 항등이므로 en 문자열에 쓰지 않는다(§5.1 린트). 개념 이름의 `en` 은 **용어집 `dictionary/_glossary.en.yaml` 이 정본**이다 — 같은 개념이 파일마다 다른 영단어로 나가는 것을 막는 유일한 자리이고, 사용자가 검수하는 지점도 여기 하나다.
 
 의미형은 옵션 4개(정답 1 + 진단 3), 지목형은 `diag` 가 오답 pick 마다 있어야 하고, 빈칸형은 옵션 4개 중 오답 3개가 `confusions` 에 있는 개념의 토큰이어야 한다. `why_gate.choices` 는 3개·`ok` 1개(린트).
+
+`no_hole_reason` 은 **부채를 갚는 글이 아니라 부채가 아님을 밝히는 글**이다(D145). 「아직 안 썼다」와 「이 문법에는 뚫을 구멍이 없다」는 다른 상태인데 게이트는 그 둘을 구별할 수 없다 — 사람이 적어야 구별된다. 빈칸형이 생긴 뒤에도 남아 있으면 린트가 잡는다(`no-hole-reason-stale`): 표는 초록인데 이유는 거짓말인 상태를 만들지 않는다.
 
 ### 4.5 완성 예시 1 — `ts/optional-chaining.yaml`
 
@@ -682,9 +701,39 @@ examples:
 - `crates/parse/tests/dictionary.rs`(테스트 전용 `serde_yaml` dev-dependency, 예산 밖)가 검사하는 것: 모든 `.scm` 이 고정된 문법으로 컴파일 · 캡처 이름 정규식(§3.2) · 패턴마다 `@site` 1개(맥락 패턴은 `@ctx.*` 만; `_imports`·`_blocks` 는 각자 규약) · 죽은 패턴(모든 `examples` 에서 0매치) 금지 · `examples[].code` 의 캡처를 `fixtures/ipc/dict-examples/<id>.json` 로 덤프.
 - Site 수준 `expect`(sites·form·picks·hole·ctx)는 `pnpm dict:test`(vitest)가 그 덤프에서 `derive.ts` 로 파생해 비교한다.
 
+**사전 저작 부채 게이트 (D145).** 위의 린트는 **틀린 것**을 잡는다 — 통과가 곧 정답이라 임계가 없다. 그와 별개로 `pnpm dict:lint` 는 **아직 안 쓴 것**을 세어 표로 찍는다(`authoringDebt`). 규칙 넷:
+
+| 규칙 | 대상 | 무엇을 센다 |
+|---|---|---|
+| `blank-or-reason` | `_lang.yaml` 의 `essential` | `blank:` 절과 `@hole` 캡처를 **둘 다** 갖거나, `no_hole_reason` 에 못 갖는 사유를 적었나 |
+| `point-picks` | `point:` 가 있는 개념 전부 | 그 개념 `.scm` 이 `@pick.N` 을 **3개 이상** 내나 (정답 1 + 오답 3 이 나오는 최소값, `packages/cards/src/t0-point.ts`) |
+| `why-gate` | `essential` | `why_gate:` 가 있나 |
+| `zero-one-liner` | 0장 후보 = `essential` ∧ 그 집합 안에서의 선행 깊이 ≤ 1 (D136) | `one_liner` 가 그 개념 문항의 **정답 토큰을 글자로 내지 않나** (D138) |
+
+임계는 D132 와 같은 **래칫**이다 — 오늘의 실측을 바닥으로 두고 **목표(대상 전량)를 나란히 적고 표를 매번 찍는다**. 임계를 오늘 값에 맞춰 두고 목표를 지우면 그 거리가 안 보인다. 사전을 채우면 `dict.test.ts` 의 `DEBT_RATCHET` 을 **올린다**. 2026-09-04 실측: `blank-or-reason` 2/23 · `point-picks` 18/26 · `why-gate` 0/23 · `zero-one-liner` 3/6.
+
+`zero-one-liner` 의 대상이 실제 0장 대지의 8장이 아니라 **후보 전량**인 이유: 어느 8장이 뽑히는지는 리포마다 다르고 사전만 보고는 알 수 없다. 어느 것이 뽑혀도 새면 안 된다. 검사는 태그와 문장 끝 마침표·쉼표를 걷어낸 뒤에 본다 — `.` 이 정답인 개념(`ts/property-access`)에서 한국어 문장의 마침표까지 걸리면 통과할 수 없는 규칙이 되기 때문이고, 식별자 꼴 토큰은 낱말 경계로 본다(`prev` 가 `previous` 안에서 걸리면 안 된다).
+
+**왜 부채가 게이트여야 하나.** 개념 하나가 YAML 150~230줄이고 `ko`/`en` 양쪽이라 사전은 이 리포에서 가장 비싼 손 작업이다. 게이트가 없으면 미뤄지는 것이 기본값이고, `blank:` 2편·`why_gate:` 0편이 그 증거다. 그 결과가 판 유형 쏠림으로 나온다 — `tests/support/quality.test.ts` 의 `KIND_SHARE_RATCHET`(의미형 99.5%)과 이 표는 같은 원인의 앞뒤이고, 그 게이트의 드롭 사유 「짚을 후보가 3개에 못 미친다」·「이 사용처에는 구멍(@hole)이 없다」가 여기 두 줄에 그대로 대응한다. **저 상수를 내리는 일은 이 표를 채우는 일이다.**
+
 ### 5.2 커뮤니티 기여 워크플로
 
-PR 템플릿 항목: (1) 개념 id 와 `universal` 판단 근거 (2) 이 문법이 실제 리포에서 어떻게 보이는지 링크 1개 이상 (3) `examples` 양성 2·음성 1 이상 (4) 오답 진단이 「그것이 참이 되는 조건」 형식인지 자가 체크 (5) `pnpm dict:lint` 와 `cargo test` 통과 로그 (6) 한국어 본문 검토자 태그(`@dict-ko`). 새 언어는 `_lang.yaml` + 바닥 개념 10개 + 골든 20파일이 최소 단위. LLM 으로 초안을 만드는 것은 허용하되 PR 본문에 명시하고 사람이 예시를 실제로 돌려 본다.
+PR 템플릿 항목: (1) 개념 id 와 `universal` 판단 근거 (2) 이 문법이 실제 리포에서 어떻게 보이는지 링크 1개 이상 (3) `examples` 양성 2·음성 1 이상 (4) 오답 진단이 「그것이 참이 되는 조건」 형식인지 자가 체크 (5) `pnpm dict:lint` 와 `cargo test` 통과 로그 (6) 한국어 본문 검토자 태그(`@dict-ko`) (7) **LLM 초안을 썼는지와 어디에 썼는지**. 새 언어는 `_lang.yaml` + 바닥 개념 10개 + 골든 20파일이 최소 단위.
+
+**목록은 밖에서 참고하고 간선은 우리가 매긴다 (D148).** 새 언어·새 바닥 개념의 **목록**은 [Exercism](https://github.com/exercism) 트랙의 `config.json`(MIT · © 2021 Exercism)을 참고 출처로 쓴다 — 무엇이 그 언어의 바닥인가에 대한 남의 답이 이미 있고, 우리 판정과 갈리면 갈린 이유를 PR 에 적는다. 다만 그 파일의 `prerequisites` 는 **가져오지 않는다**: 그쪽 값은 *연습문제를 여는 조건*이고 우리 `prereq` 는 *개념 이해의 선행*(§3.1)이라 뜻이 다르다. JS 트랙의 `functions` 가 깊이 6(선행 `objects · arrays · null-undefined`)인 것이 그 차이다 — 함수가 배열보다 어려워서가 아니라 그 연습이 객체·배열을 다루기 때문이고, 간선을 그대로 쓰면 함수 정의가 0장(깊이 ≤ 2, D147)에 영영 못 들어온다. **산문은 베끼지 않는다** — 문장을 가져오는 순간 MIT 고지 의무가 생기고, 사전 산문은 아래의 LLM 초안 + 사람 검토 경로로 쓴다.
+
+**LLM 초안은 권장한다 (D144).** 이 자리는 「허용」이었고 「권장」으로 올린다 — 부채 표(§5.1)가 비어 있는 칸을 개념 단위로 세고 있고, 그 칸을 메우는 일(`.scm` 의 `@hole`·`@pick.N` 자리 · `blank:` 절 · `why_gate:` 문항 · 새 언어의 개념 초안)은 초안이 있으면 몇 배로 빠르다. 대신 **PR 본문에 어디에 썼는지 적고, 사람이 예시를 실제로 돌려 본다.**
+
+**LLM 은 저작 시점에만 쓴다 — 실행 시점에는 쓰지 않는다 (D144).** 산출물이 리포에 커밋되는 YAML 이므로 **키가 없는 사용자에게 똑같이 도착한다**. 실행 시 생성·채점 경로는 열지 않는다. 안티패턴 네 행이 그대로 남고, 사다리 4단은 D106 대로 프롬프트 생성·복사에 머문다:
+
+| 어디 | 기각한 것 |
+|---|---|
+| 04 §1.4 | LLM 으로 보기·진단 생성 |
+| 04 §4.6 | LLM 「같은 뜻인가」 판단(T1 채점) |
+| 이 문서 「대안과 버린 이유」 | 사전 문장을 LLM 이 실행 시 생성 |
+| 06 「대안과 버린 이유」 | 채점 테스트에 LLM 판정 대조 |
+
+이 경계가 도구가 아니라 **검증 위치**의 문제인 이유는 §5.1 의 검증기 목록에 있다 — 기계가 보는 것은 스키마·참조·캡처 자리·`examples` 파생·템플릿 변수·문체이고, 그 목록에 **없는** 것이 둘 있다: 의미형이 주장하는 **값이 참인가**, 그리고 「그것이 참이 되는 조건」 **진단문이 참인가**. 실행 없이 판정할 수 없어 사람의 PR 리뷰가 유일한 방어이고, 저작 시점에는 그 방어가 있고 실행 시점에는 없다.
 
 ### 5.3 버전과 앱 호환
 
@@ -726,7 +775,7 @@ diag_default:          # point[].diag 가 없는 pick · blank 폴백 진단 (04
 
 - 집계(TS, 리포 열 때와 인제스트 후): `essential` 개념마다 `count = |sites|`, `files = |distinct path|`, `layer` = 사용자 겹.
 - **표본 부족** `thin`: 언어 파일 ≥ `small_repo_files` 인 리포에서 `files < min_files || count < min_sites`. 작은 리포는 `count ≥ 1` 이면 충분. `thin` 이면 사다리 3단(다른 사용처)을 끄고, 사전 `examples` 의 합성 예시를 쓰되 반드시 「곧 {{file.base}}:{{site.line}} 에서 봅니다」 예고를 붙인다(discussion §4).
-- **판이 없는 문법** 패널 = `count > 0 && layer == 0` 인 essential 개념, `count` 내림차순, 상위 1개 또는 `count ≥ 10` 은 `hot`, 막대 `--f = count / max(count)`. `count == 0` 인 필수 문법은 패널에 **안 나온다**(패널 정의가 「내 코드엔 있는데」다). 그런 개념은 사용자가 그 언어가 처음일 때만 「0장 — 이 언어의 바닥」에 합성 예시로 나온다.
+- **판이 없는 문법** 패널 = `count > 0 && layer == 0` 인 essential 개념, `count` 내림차순, 상위 1개 또는 `count ≥ 10` 은 `hot`, 막대 `--f = count / max(count)`. `count == 0` 인 필수 문법은 패널에 **안 나온다**(패널 정의가 「내 코드엔 있는데」다). 그런 개념은 사용자가 그 언어가 처음일 때만 「0장 — 이 언어의 바닥」에 합성 예시로 나온다 — 0장의 정의와 담기는 규칙은 **02 §6.2** 가 소유하고, 대지를 쓰는 것은 `writeZeroChapter` 다 (D136). **리포에 사용처가 아예 없는 개념은 0장에도 담지 않는다**: 「곧 네 코드 어디에서 본다」를 예고할 자리가 없으면 합성 예제를 만들지 않는다(D137, 방안 E-4).
 - `alternatives` 매핑: 구멍 개념의 `present` 쪽도 `count > 0` 이면 패널 행에 「`.then` 체인도 N곳」 부기를 단다 — 사용자가 「왜 두 가지가 있나」를 물을 자리이며 「선택의 왜」(ocul-pm 일지 연동, 01)로 이어진다.
 - **「판 만들기」**: 개념을 활성화 → §3.6 으로 첫 노출 Site 선택 → 카드 종류 순서 `point`(pick 있으면) → `meaning` → `blank`(hole 있으면) 중 사전에 있는 첫 것 → 02 §5.5 `role='gap'` 으로 삽입.
 
@@ -741,7 +790,22 @@ TS `packages/concepts/units.ts`, 인제스트 파생 때 실행한다. `source='
 3. `src/<x>/**`(`x` 가 `lib`·`utils`·`types`·`components/ui` 가 아닐 때) → 대지 `x`
 4. 그 밖은 인제스트 파일 ≥ 3 인 2단계 디렉터리 → 디렉터리명
 
-어디에도 안 들면 대지 「기타」. `unit_file` 은 파일→대지 1:1.
+어디에도 안 들면 대지 「기타」.
+
+**기능 대지가 먼저다** (D160). 프론트가 백을 부른 자리(`import_edge.kind='http'` 의 `from`)에서
+엣지를 따라간 폐포가 기능 하나이고, 이름은 진입 파일에서 뽑는다(`authService.js` → `auth`).
+위의 네 규칙은 **어느 기능에도 안 든 파일만** 받는다 — 둘이 경쟁하지 않고 층을 나눈다.
+런타임에 엮이는 것(Spring 필터 체인)은 어느 폐포에도 안 들어 디렉터리 쪽으로 온다.
+
+디렉터리 규칙만으로는 층으로 나눈 리포에서 무너진다 — Spring 은 package-by-layer 라
+규칙 3번이 `BACK/src/main/java/…` 를 전부 `main` 하나로 뭉치고, 실측한 리포에서 대지 하나가
+백엔드 107파일을 삼켰다.
+
+**`unit_file` 은 파일→대지 N:M 이다** (D160 · 기본키가 `(unit_id, file_id)` 다).
+전에 여기 「1:1」이라고 적혀 있었으나 실측이 그것을 반증했다 — 90파일 중 13개가 둘 이상의
+기능에 든다(`UserDao` 는 로그인이자 회원정보다). 1:1 로 접는 두 방법을 다 재 봤고 둘 다
+정보를 잃는다: 겹치는 것을 빼면 로그인이 18→11 로 깎이고, 가장 작은 폐포에 주면 여덟 기능이
+모두 쓰는 `api.js` 가 「이미지」로 간다.
 
 `unit_node` = 대지 파일에 살아 있는 사용처가 있는 T0 개념 + 대지 블록의 대표 개념(T1) + `arch/*` 4개(T2, 후보 커밋 ≥ 3 또는 그래프가 있을 때). `order_idx` 는 02 §6 위상 정렬(대지 개념의 최소 위상). `commit-cluster` 는 MVP 밖.
 

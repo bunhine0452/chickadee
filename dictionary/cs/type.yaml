@@ -1,0 +1,87 @@
+schema: 1
+id: cs/type
+universal: null
+name: { ko: "값에 붙은 「무엇으로 다룰지」", en: "Type" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+track_default: t0
+essential: false
+difficulty: 1
+prereq: []
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "같은 묶음도 정수라 하면 정수고 글자라 하면 글자다. 그 약속의 이름."
+    en: "The name of the agreement that says what a value is to be treated as."
+  why:
+    ko: >-
+      타입은 값에 붙은 이름표가 아니라 <b>그 값으로 무엇을 할 수 있는지</b>의 목록입니다.
+      숫자에는 더하기가 있고 글자에는 잇기가 있어요. 그래서 타입이 정해지면
+      <b>가능한 연산</b>과 <b>가능한 오류</b>가 함께 정해집니다.
+      「숫자 더하기와 글자 잇기가 같은 <code>+</code> 로 적히는데 결과가 다른」 일이
+      생기는 이유도, 「이 값에 그 함수를 못 부른다」는 말의 뜻도 여기서 나옵니다.
+    en: >-
+      A type is not a sticker on a value; it is the list of <b>what can be done with it</b>.
+      Numbers add, text joins. So fixing the type fixes both the <b>operations available</b> and
+      the <b>errors possible</b>. This is why the same <code>+</code> can add and can join with
+      different results, and what “you cannot call that on this value” actually means.
+  trace: []
+rule:
+  ko: "<b>타입은 할 수 있는 일의 목록이다.</b> 값이 아니라 다루는 방법을 정한다."
+  en: "<b>A type is a list of permitted operations.</b> It fixes handling, not the value."
+ok:
+  ko: >-
+    값을 만들 때 타입이 함께 정해집니다. 그 뒤로는 그 타입이 허락하는 일만 할 수
+    있고, 다른 타입으로 다루려면 바꾸는 단계가 따로 필요합니다.
+  en: >-
+    A value gets its type when it is made. After that only what the type permits is allowed;
+    treating it as another type takes a separate conversion step.
+misconceptions:
+  - ko: "타입은 컴파일할 때만 있는 것이다 — 돌 때 타입을 들고 다니는 언어가 많습니다."
+    en: "Types exist only at compile time — many languages carry types at run time too."
+  - ko: "타입이 있으면 값이 안전하다 — 타입은 <b>다루는 방법</b>을 지킬 뿐 값의 옳음은 안 봅니다."
+    en: "Types make values safe — a type guards <b>handling</b>, not whether the value is sensible."
+  - ko: "숫자와 글자는 애초에 다른 물건이다 — 담긴 것은 같은 비트 줄이고 다루는 약속만 다릅니다."
+    en: "Numbers and text are different things underneath — the bits are alike; only the agreement differs."
+meaning:
+  - q:
+      ko: "어떤 값에 특정 함수를 못 부른다는 말을 들었습니다. <b>무엇이 그것을 막나요?</b>"
+      en: "You are told a certain function cannot be called on a value. <b>What blocks it?</b>"
+    hint:
+      ko: "값이 무엇인지가 아니라, 그 값으로 <b>무엇을 할 수 있는지</b>가 문제입니다."
+      en: "The question is not what the value is, but <b>what can be done with it</b>."
+    options:
+      - t: { ko: "그 타입이 허락하는 일에 그 함수가 없다", en: "That operation is not on the type's list" }
+      - t: { ko: "값이 비어 있어서", en: "Because the value is empty" }
+        diag:
+          t:
+            ko: "빈 값도 타입이 있습니다. 비었는지는 <b>돌 때</b> 알 수 있는 것이고, 다룰 수 있는지는 타입이 미리 정해 둔 것이에요."
+            en: "An empty value still has a type. Emptiness is known <b>at run time</b>; what is allowed was fixed by the type in advance."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 비었나 다룰 수 있나", en: "The sharpest spot — empty or permitted" }
+            code:
+              - "비었다: 값이 없다"
+              - "못 부른다: 그 타입의 목록에 없다"
+      - t: { ko: "그 함수가 아직 정의되지 않아서", en: "Because the function is not defined yet" }
+        diag:
+          t:
+            ko: "함수가 아예 없는 것과 <b>이 타입에는 없는</b> 것은 다른 말입니다. 다른 타입에는 같은 이름이 있을 수 있어요."
+            en: "No such function at all is different from <b>not on this type</b>. Another type may well have the same name."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 없는 것과 여기 없는 것", en: "The sharpest spot — absent or absent here" }
+            code:
+              - "없다: 어디에도 없는 이름"
+              - "여기 없다: 이 타입의 목록 밖"
+      - t: { ko: "값이 너무 커서", en: "Because the value is too large" }
+        diag:
+          t:
+            ko: "크기는 <b>담을 수 있느냐</b>의 문제이고, 다룰 수 있느냐는 타입이 정합니다. 작은 값에도 똑같이 막혀요."
+            en: "Size is about <b>what fits</b>; what is permitted is set by the type. A small value is blocked just the same."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 크기냐 목록이냐", en: "The sharpest spot — size or list" }
+            code:
+              - "크기: 자리에 담기나"
+              - "타입: 그 일이 목록에 있나"

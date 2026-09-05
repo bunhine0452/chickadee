@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 자리표가 없는 진짜 조인. 오른쪽은 열 이름이 맞고 그대로 잡혀야 한다. -->
+<mapper namespace="shop.CartMapper">
+  <select id="withItems" resultType="Cart">
+    SELECT c.id, i.sku FROM cart c JOIN item i ON c.id = i.cart_id
+  </select>
+</mapper>

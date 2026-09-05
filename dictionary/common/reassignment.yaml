@@ -1,0 +1,35 @@
+schema: 1
+id: common/reassignment
+universal: null
+name: { ko: 이름에 값 다시 넣기, en: Reassignment }
+token: null
+grammars: []
+essential: false
+difficulty: 1
+prereq: []
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "이미 있는 이름이 가리키는 값을 다른 값으로 바꾼다."
+    en: "Points a name that already exists at a different value."
+  why:
+    ko: >-
+      이름을 만드는 일과 <b>이미 있는 이름을 다른 값에 다시 묶는</b> 일은 다릅니다. 두
+      번째부터는 새로 만들지 않아요 — 그래서 이 줄 위와 아래에서 같은 이름이 다른 값입니다.
+    en: >-
+      Making a name and <b>pointing an existing name at something else</b> are different jobs. From
+      the second time on nothing new is made — so the same name means different values above and
+      below this line.
+  trace: []
+rule:
+  ko: "이름은 그대로 하나, 가리키는 값만 바뀐다."
+  en: "The name stays one and the same; only what it points at changes."
+ok:
+  ko: "이 줄 아래로 그 이름은 새 값을 가리킵니다."
+  en: "Below this line the name points at the new value."
+misconceptions:
+  - ko: "이름이 하나 더 생긴다 — 아니요. 같은 이름이 다른 값을 가리킬 뿐입니다."
+    en: "Another name appears — no. The same name simply points elsewhere."
+  - ko: "선언한 적 없어도 된다 — 먼저 만들어 둔 이름이라야 합니다."
+    en: "It works without declaring first — the name has to exist already."

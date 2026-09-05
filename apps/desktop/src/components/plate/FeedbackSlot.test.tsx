@@ -22,7 +22,6 @@ function Above() {
 
 const GRADED = {
   state: 'wrong' as const,
-  stamp: { text: '어긋남', sub: 'OFF REGISTER', tone: 'yellow' as const, rotate: 5 },
   title: '어긋났습니다 — <code>items</code> 를 골랐습니다',
   body: '<b>items</b> 가 참이 되는 조건은 앞이 이미 객체일 때뿐입니다.',
   rule: '앞이 <code>null</code> 이면 뒤를 건너뛴다.',
@@ -77,11 +76,16 @@ describe('FeedbackSlot — 판정란 0px 게이트 (정본 §3-3)', () => {
 });
 
 describe('FeedbackSlot', () => {
-  it('목업 클래스를 그대로 붙인다', () => {
+  it('판정은 도장이 아니라 낱말 하나와 문장이다 (D182)', () => {
     const { container } = render(<FeedbackSlot {...GRADED} />);
-    for (const cls of ['.slot', '.slot-idle', '.fb', '.fb .stampbox']) {
+    for (const cls of ['.slot', '.slot-idle', '.fb', '.fb-tag', '.fb-head', '.fb-why']) {
       expect(container.querySelector(cls), cls).not.toBeNull();
     }
+    // 회전 도장은 없앴다 — 판정란에서 가장 큰 것이 「왜 그런가」여야 한다.
+    for (const cls of ['.stampbox', '.stamp', '.passes']) {
+      expect(container.querySelector(cls), cls).toBeNull();
+    }
+    expect(container.querySelector('.fb-tag')?.textContent).toBe('오답');
   });
 
   it('비어 있으면 왜 비어 있는지를 그 자리에 적는다', () => {
@@ -96,19 +100,22 @@ describe('FeedbackSlot', () => {
     expect(document.activeElement).toBe(document.body);
   });
 
-  it('진단은 「틀렸다」가 아니라 고른 것이 참이 되는 조건을 적는다', () => {
+  it('진단은 「틀렸다」가 아니라 고른 것이 참이 되는 조건을 적는다 (정본 §3-2)', () => {
     const { container } = render(<FeedbackSlot {...GRADED} />);
-    expect(container.querySelector('.fb h4')?.textContent).toContain('items');
-    expect(container.textContent).toContain('참이 되는 조건');
+    expect(container.querySelector('.fb-head')?.textContent).toContain('items');
+    // 그 문장이 판정란에서 가장 잘 읽혀야 하므로 제 자리(`.fb-why`)를 갖는다.
+    expect(container.querySelector('.fb-why')?.textContent).toContain('참이 되는 조건');
   });
 
-  it('맞았으면 .fb.right, 틀렸으면 붙지 않는다', () => {
+  it('맞았으면 .fb.right, 틀렸으면 .fb.wrong', () => {
     const ok = render(<FeedbackSlot state="right" title="맞았습니다" />);
     expect(ok.container.querySelector('.fb')?.className).toContain('right');
+    expect(ok.container.querySelector('.fb-tag')?.textContent).toBe('정답');
     cleanup();
 
     const no = render(<FeedbackSlot {...GRADED} />);
     expect(no.container.querySelector('.fb')?.className).not.toContain('right');
+    expect(no.container.querySelector('.fb')?.className).toContain('wrong');
   });
 
   it('가장 날카로운 자리는 코드 판으로 그린다', () => {
@@ -120,11 +127,12 @@ describe('FeedbackSlot', () => {
     expect(edge?.querySelectorAll('.code .ln')).toHaveLength(2);
   });
 
-  it('겹 이동은 Dee 두 마리와 문장으로 낸다', () => {
-    const { container } = render(<FeedbackSlot {...GRADED} gain={{ from: 2, to: 3, text: '잉크 <b>3겹</b>' }} />);
+  it('숙련도 이동은 숫자 둘과 문장으로 낸다 (D179·D182 — 막대도 마스코트도 아니다)', () => {
+    const { container } = render(<FeedbackSlot {...GRADED} gain={{ from: 2, to: 3, text: '숙련도 <b>3단계</b>' }} />);
     const gain = container.querySelector('.fb .gain');
-    expect(gain?.querySelectorAll('.dee')).toHaveLength(2);
-    expect(gain?.textContent).toContain('3겹');
+    expect(gain?.querySelector('.gain-step')?.textContent).toBe('2단계→3단계');
+    expect(gain?.querySelector('.passes, .dee, .dee-sticker')).toBeNull();
+    expect(gain?.textContent).toContain('3단계');
   });
 
   it('서식 글의 위험한 태그는 정화한다', () => {

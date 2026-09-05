@@ -15,10 +15,12 @@
         "title": "Chickadee",
         "width": 1360,
         "height": 860,
-        "minWidth": 1000,
-        "minHeight": 680,
+        "minWidth": 720,
+        "minHeight": 600,
         "visible": false,
-        "backgroundColor": "#D9CDB4"
+        "backgroundColor": "#D9CDB4",
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true
       }
     ],
     "security": {

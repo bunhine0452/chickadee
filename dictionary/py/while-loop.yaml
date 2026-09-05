@@ -1,0 +1,196 @@
+schema: 1
+id: py/while-loop
+universal: common/loop-while
+name: { ko: while 문, en: while loop }
+token: "while"
+grammars: [python]
+framework: null
+essential: true
+difficulty: 2
+prereq: [py/comparison, cs/complexity]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "조건을 볼 때마다 다시 판단해, 참인 동안 같은 묶음을 되풀이한다."
+    en: "Judges again on every pass and repeats the same block as long as it holds."
+  why:
+    ko: >-
+      갈림과 <b>판단 횟수</b>가 다릅니다. 갈림은 그 줄에 닿았을 때 한 번 보고 지나가지만,
+      {{site.line}}행은 들여쓴 묶음을 한 바퀴 돌 때마다 {{pick.2|code}}{{pick.2|josa:을,를}}
+      다시 봅니다. 그래서 안에서 조건을 움직이지 않으면 끝나지 않아요.
+    en: >-
+      What differs from a fork is <b>how often it judges</b>. A fork looks once; line {{site.line}}
+      looks at {{pick.2|code}} again after every pass through the indented block. So if nothing
+      inside moves the condition, it never ends.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:을,를}} 판단한다 — 거짓이면 한 번도 안 돈다."
+      en: "{{pick.2|code}} is judged — false here and it never runs."
+    - ko: "참이면 들여쓴 묶음을 한 바퀴 돈다."
+      en: "If it holds, the indented block goes round once."
+    - ko: "한 바퀴가 끝나면 다시 판단한다."
+      en: "When the pass ends, it is judged again."
+
+rule:
+  ko: "<b>한 바퀴마다 다시 판단한다.</b> 조건을 움직이는 줄이 안에 있어야 끝난다."
+  en: "<b>It judges again each pass.</b> Something inside must move the condition, or it never ends."
+result:
+  label:
+    ko: "{{site.line}}행의 되풀이"
+    en: "the loop on line {{site.line}}"
+  value: "{{pick.2}}"
+  note:
+    ko: "바퀴마다 다시 본다"
+    en: "judged again each pass"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:이,가}} 참인 동안 들여쓴 묶음이 되풀이됩니다. 거짓이 되는 순간
+    묶음을 빠져나와 들여쓰기가 돌아온 줄로 가요.
+  en: >-
+    While {{pick.2|code}} holds, the indented block repeats. The moment it fails, the block is left
+    behind and the line where indentation returns runs next.
+payoff:
+  ko: >-
+    되풀이를 알면 「몇 번인지 모르는 일」을 적을 수 있습니다 — 조건이 대신 세어 주니까요.
+  en: >-
+    Loops let you write work whose length you do not know — the condition counts for you.
+bridge:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} 갈림에 오는 것과 똑같은 참·거짓 물음입니다 — 다른 것은
+    <b>몇 번 묻는가</b> 하나뿐이에요.
+  en: >-
+    {{pick.2|code}} is the same true-or-false question a fork takes — only how often it is asked differs.
+misconceptions:
+  - ko: "적어도 한 번은 돈다 — 아니요. 처음부터 거짓이면 한 번도 안 돕니다."
+    en: "It runs at least once — no. False at the start means it never runs."
+  - ko: "거짓이 되면 그 자리에서 즉시 멈춘다 — 돌던 바퀴는 마치고 나갑니다."
+    en: "It stops the instant it fails — it finishes the pass, then leaves."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>같은 묶음을 되풀이하게 하는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that makes the block repeat</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>판단할 물음</b>입니다. 같은 물음이 갈림에도 오고, 되풀이하게 만드는 것은 앞의 낱말이에요."
+          en: >-
+            {{pick.2|code}} is <b>the question</b>. The same one fits a fork; the repeating comes
+            from the word in front.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 같은 물음, 다른 낱말"
+            en: "The sharpest spot — same question, different word"
+          code:
+            - "if n < 3: n += 1      # 한 번만"
+            - "while n < 3: n += 1   # 거짓이 될 때까지"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>되풀이될 묶음</b>입니다. 들여쓰기가 경계이고, 몇 번 도는지는 앞의 낱말이 정합니다."
+          en: >-
+            {{pick.3|code}} is <b>the block to repeat</b>. Indentation bounds it; how often is
+            decided by the word in front.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 한 번이냐 여러 번이냐"
+            en: "The sharpest spot — once or many times"
+          code:
+            - "n += 1                # 한 번"
+            - "while n < 3: n += 1   # 여러 번"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 조건이 참인 <b>동안</b> 같은 묶음을 되풀이합니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} repeats the block <b>as long as</b> the
+        condition holds.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "while", mono: true }
+      - t: "if"
+        mono: true
+        diag:
+          t:
+            ko: "<code>if</code> 도 같은 조건을 봅니다. 다른 점은 <b>한 번 보고 지나간다</b>는 것 하나예요."
+            en: >-
+              <code>if</code> reads the same condition. The one difference is that it <b>looks once
+              and moves on</b>.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 한 번이냐 되풀이냐"
+              en: "The sharpest spot — once or repeated"
+            code:
+              - "if n < 3: n += 1      # n 은 한 번만 는다"
+              - "while n < 3: n += 1   # 3 이 될 때까지"
+      - t: "for"
+        mono: true
+        diag:
+          t:
+            ko: "<code>for</code> 도 되풀이하지만 <b>목록을 하나씩</b> 도는 자리라 뒤에 <code>in</code> 과 목록이 따라옵니다. 여기 있는 것은 조건 하나뿐이에요."
+            en: >-
+              <code>for</code> also repeats, but it <b>walks a list</b>, so <code>in</code> and the
+              list follow it. What stands here is a condition alone.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 조건이냐 목록이냐"
+              en: "The sharpest spot — a condition or a list"
+            code:
+              - "while n < 3: ...      # 조건"
+              - "for x in xs: ...      # 목록"
+      - t: "elif"
+        mono: true
+        diag:
+          t:
+            ko: "<code>elif</code> 는 <b>앞선 갈림이 거짓일 때</b> 보는 자리라 위에 갈림이 있어야 하고, 되풀이하지 않습니다."
+            en: >-
+              <code>elif</code> is looked at <b>when an earlier branch did not hold</b>, needs a
+              branch above it, and does not repeat.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 되풀이냐 다음 갈래냐"
+              en: "The sharpest spot — repeating or the next branch"
+            code:
+              - "while a: ...    # 되풀이"
+              - "elif a: ...     # 한 번, 그것도 앞이 거짓일 때만"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 횟수를 세지 않고 조건으로 되풀이할까요?"
+    en: "Why does line {{site.line}} repeat on a condition instead of counting?"
+  choices:
+    - t:
+        ko: "몇 번 돌아야 하는지 미리 알 수 없어서 — 조건이 대신 정한다"
+        en: "Because the number of passes is not known up front — the condition settles it"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 조건을 움직이는 줄이 안의 어디인지도 함께 짚어 보세요."
+        en: "That is the direction. Point out which line inside moves the condition."
+    - t:
+        ko: "횟수를 세는 것보다 빨라서"
+        en: "Because it is faster than counting"
+      ok: false
+      fb:
+        ko: "속도의 문제가 아닙니다. 횟수를 알면 세는 쪽이 오히려 읽기 좋습니다."
+        en: "It is not about speed. When the count is known, counting reads better."
+    - t:
+        ko: "목록이 없어서"
+        en: "Because there is no list"
+      ok: false
+      fb:
+        ko: "목록이 있어도 조건으로 돌 수 있습니다. 이유는 횟수를 미리 모른다는 데 있습니다."
+        en: "A list can still be looped on a condition. The reason is the unknown count."
+
+queries:
+  - { grammars: [python], file: ./while-loop.scm }
+
+examples:
+  - code: "while n > 0:\n    n -= 1"
+    expect: { sites: 1, form: while, hole: "while", picks: { 1: "while", 2: "n > 0" } }
+  - code: "if n > 0:\n    n -= 1"
+    expect: none

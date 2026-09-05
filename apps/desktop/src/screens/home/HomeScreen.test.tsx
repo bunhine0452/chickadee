@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -34,7 +34,7 @@ const DATA: HomeData = {
     {
       unitId: 1,
       name: '장바구니 담기 / 빼기',
-      rootPath: 'src/features/cart',
+      rootPath: 'src/features/cart', zero: false,
       files: 12,
       avgLayer: 3,
       state: 'done',
@@ -54,7 +54,7 @@ const DATA: HomeData = {
     {
       unitId: 2,
       name: '로그인 흐름',
-      rootPath: 'src/features/auth',
+      rootPath: 'src/features/auth', zero: false,
       files: 8,
       avgLayer: 1,
       state: 'current',
@@ -133,79 +133,141 @@ const EMPTY: HomeData = {
   files: 0,
 };
 
-function draw(data: HomeData, onMake = vi.fn(), extra: { reingest?: boolean } = {}) {
+function draw(
+  data: HomeData,
+  onMake = vi.fn(),
+  extra: {
+    reingest?: boolean;
+    onPick?: (id: string) => void;
+    onSettings?: () => void;
+    onRepos?: () => void;
+  } = {},
+) {
+  const { onSettings, onRepos, ...rest } = extra;
   render(
     <HomeScreen
       data={data}
       repoName="cart-shop-web"
       today="2026-09-03"
       streak={7}
-      onSettings={() => undefined}
+      today_={{
+        items: [
+          { kind: 't0', label: '새 문법 문제', mins: 1 },
+          { kind: 't1', label: '필사 한 문제', mins: 8 },
+        ],
+        mins: 9,
+        resumeAt: null,
+        streak: 7,
+        days: [],
+      }}
+      onStart={() => undefined}
+      onSettings={onSettings ?? (() => undefined)}
+      onRepos={onRepos ?? (() => undefined)}
       onMake={onMake}
       now={NOW}
-      {...extra}
+      {...rest}
     />,
   );
   return onMake;
 }
 
 describe('HomeScreen', () => {
-  it('HomeData 하나로 마스트헤드·대지·「판이 없는 문법」을 다 그린다', () => {
+  it('화면에 있는 것은 셋이다 — 오늘 할 것 · 단원 · 아직 안 배운 문법', () => {
     draw(DATA);
 
-    const ticket = screen.getByRole('group', { name: '작업 지시서' });
-    expect(ticket.textContent).toContain('cart-shop-web');
-    expect(ticket.textContent).toContain('2026-09-03');
+    // 하나의 초점 (정본 §6). 오늘 할 것이 단원보다 문서 순서가 앞이다.
+    const today = screen.getByRole('region', { name: '오늘 할 것' });
+    expect(today.textContent).toContain('2');
+    expect(today.textContent).toContain('9');
+    const units = screen.getByRole('region', { name: '단원' });
+    expect(today.compareDocumentPosition(units) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 
-    expect(screen.getByRole('heading', { level: 1 }).textContent).toContain('cart-shop-web');
-    const sheets = screen.getAllByRole('article');
-    expect(sheets).toHaveLength(2);
-    expect(sheets[0]?.textContent).toContain('장바구니 담기 / 빼기');
-    expect(sheets[1]?.textContent).toContain('로그인 흐름');
+    expect(units.textContent).toContain('로그인 흐름');
+    expect(units.textContent).toContain('장바구니 담기 / 빼기');
+    expect(screen.getByRole('list', { name: '아직 안 배운 문법' }).textContent)
+      .toContain('async / await');
 
-    expect(screen.getByRole('list', { name: '판이 없는 문법' }).textContent).toContain('async / await');
-    expect(screen.getByRole('img', { name: /잉크 겹 5단계/ })).toBeTruthy();
-    expect(screen.getByRole('img', { name: /지난 14일 잉크 농도/ })).toBeTruthy();
-    expect(screen.getByRole('list', { name: '다시 찍을 개념' })).toBeTruthy();
+    // 뺀 것들이 정말 없다 — 도장·14일 막대·숙련도 사다리·다시 풀 개념·마스코트.
+    expect(screen.queryByRole('img', { name: /지난 14일/ })).toBeNull();
+    expect(screen.queryByRole('img', { name: /숙련도 다섯 단계/ })).toBeNull();
+    expect(screen.queryByRole('list', { name: '다시 풀 개념' })).toBeNull();
+    expect(screen.queryByRole('group', { name: '오늘 요약' })).toBeNull();
   });
 
-  it('「판 만들기」가 화면 밖으로 개념 id 를 넘긴다', async () => {
+  it('단원은 한 번에 하나만 펴 둔다 (정본 §3-9)', async () => {
+    const user = userEvent.setup();
+    draw(DATA);
+
+    // 처음 펴 있는 것은 지금 배우는 단원이다.
+    const current = screen.getByRole('button', { name: /로그인 흐름/ });
+    const other = screen.getByRole('button', { name: /장바구니 담기 \/ 빼기/ });
+    expect(current.getAttribute('aria-expanded')).toBe('true');
+    expect(other.getAttribute('aria-expanded')).toBe('false');
+    expect(screen.getByText('옵셔널 체이닝')).toBeTruthy();
+
+    await user.click(other);
+    expect(other.getAttribute('aria-expanded')).toBe('true');
+    expect(current.getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('개념 줄은 이름 · 트랙 · 숙련도 · 상태를 글자로 말한다 (색으로 가르지 않는다)', () => {
+    draw(DATA);
+    const row = screen.getByText('옵셔널 체이닝').closest('li');
+    expect(row?.textContent).toContain('T0 문법');
+    expect(row?.textContent).toContain('1단계 · 처음');
+    expect(row?.textContent).toContain('지금 여기');
+  });
+
+  it('「문제 만들기」가 화면 밖으로 개념 id 를 넘긴다', async () => {
     const onMake = vi.fn();
     const user = userEvent.setup();
     draw(DATA, onMake);
 
-    await user.click(screen.getByRole('button', { name: 'async / await 판 만들기' }));
+    await user.click(screen.getByRole('button', { name: 'async / await 문제 만들기' }));
     expect(onMake).toHaveBeenCalledWith('common/async-await');
   });
 
-  it('길잡이 문구는 말풍선이 아니라 live 로 읽힌다', () => {
-    draw(DATA);
-    expect(screen.getByRole('status').textContent).toContain('옵셔널 체이닝');
+  it('개념 줄의 「이 문제 풀기」가 개념 id 를 넘긴다', async () => {
+    const onPick = vi.fn();
+    const user = userEvent.setup();
+    draw(DATA, vi.fn(), { onPick });
+
+    const row = screen.getByText('옵셔널 체이닝').closest('li') as HTMLElement;
+    await user.click(within(row).getByRole('button', { name: '이 문제 풀기' }));
+    expect(onPick).toHaveBeenCalledWith('ts/optional-chaining');
   });
 
-  it('대지가 0개여도 깨지지 않고 빈 상태를 말한다', () => {
+  it('단원이 0개여도 깨지지 않고 왜 없는지를 말한다', () => {
     draw(EMPTY);
-    expect(screen.queryAllByRole('article')).toHaveLength(0);
-    expect(screen.getByText(/아직 대지가 없습니다/)).toBeTruthy();
-    expect(screen.getByText(/이 리포로는 T2 를 짤 수 없습니다/)).toBeTruthy();
-    expect(screen.getByText(/판이 없는 문법이 없습니다/)).toBeTruthy();
-    expect(screen.getByText(/다시 찍을 개념이 아직 없습니다/)).toBeTruthy();
-    expect(screen.getByRole('img', { name: /지난 14일 잉크 농도/ })).toBeTruthy();
+    expect(screen.getByText(/단원(이|은) 없습니다/)).toBeTruthy();
+    expect(screen.getByText(/아직 안 배운 문법이 없습니다/)).toBeTruthy();
   });
 
-  it('초보 안내는 플래그가 섰을 때만, 대지보다 위에 뜬다 (02 §6.4)', () => {
+  it('「아직 못 하는 것」 둘이 한 자리에 있다 — T1 필사와 책임 배치 (D96 · D170 ⑤)', () => {
+    // 커밋 0 · 필사 블록 0 인 리포. 둘 다 「지금은 안 된다, 이유는 이것이다」다.
+    draw({
+      ...DATA,
+      openableBlocks: 0,
+      lastRun: { ...(DATA.lastRun as NonNullable<HomeData['lastRun']>), commits: 0 },
+    });
+    const gaps = screen.getByRole('region', { name: '아직 안 배운 문법' });
+    expect(gaps.textContent).toContain('T1 필사');
+    expect(gaps.textContent).toContain('책임 배치 문제');
+    expect(gaps.textContent).toContain('커밋은 0개');
+  });
+
+  it('초보 안내는 플래그가 섰을 때만, 단원보다 위에 뜬다 (02 §6.4)', () => {
     draw(DATA);
     expect(screen.queryByRole('complementary', { name: '먼저 읽을 것' })).toBeNull();
     cleanup();
 
     draw({ ...DATA, newcomerFlag: 'confirmed' });
     const notice = screen.getByRole('complementary', { name: '먼저 읽을 것' });
-    expect(notice.textContent).toContain('내 코드를 교재로 씁니다');
-    // 아무것도 잠그지 않는 것이 눈에 보여야 한다. 닫기 버튼은 두지 않는다(다시 켤 길이 없다).
+    expect(notice.textContent).toContain('0장 — 이 언어의 바닥');
+    // 아무것도 잠그지 않는 것이 눈에 보여야 한다. 닫기 버튼은 두지 않는다.
     expect(notice.textContent).toContain('잠기는 것은 없습니다');
     expect(notice.querySelector('button')).toBeNull();
-    // 상단이다 — 작업대(「판이 없는 문법」)보다 문서 순서가 앞이면 스크롤 없이 보인다.
-    const gaps = screen.getByRole('list', { name: '판이 없는 문법' });
+    const gaps = screen.getByRole('list', { name: '아직 안 배운 문법' });
     expect(notice.compareDocumentPosition(gaps) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
@@ -215,37 +277,22 @@ describe('HomeScreen', () => {
     cleanup();
 
     draw(DATA, vi.fn(), { reingest: true });
-    const banner = screen.getByRole('region', { name: /재인제스트 필요/ });
-    // 경고가 아니라 안내다 — 다시 읽어도 겹은 남는다는 것이 배너의 본문이다 (06 §6.3).
-    expect(banner.textContent).toContain('익힌 겹은 개념에 붙어 있어 그대로 남습니다');
-    // 마스트헤드 바로 아래 — 대지보다 앞이라 스크롤 없이 보인다.
-    const gaps = screen.getByRole('list', { name: '판이 없는 문법' });
+    const banner = screen.getByRole('complementary', { name: /재인제스트 필요/ });
+    // 경고가 아니라 안내다 — 다시 읽어도 숙련도는 남는다는 것이 배너의 본문이다.
+    expect(banner.textContent).toContain('익힌 숙련도는 개념에 붙어 있어 그대로 남습니다');
+    const gaps = screen.getByRole('list', { name: '아직 안 배운 문법' });
     expect(banner.compareDocumentPosition(gaps) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
-  it('마스트헤드의 설정 버튼이 화면 밖으로 나간다', async () => {
+  it('맨 윗줄의 설정·서가가 화면 밖으로 나간다', async () => {
     const user = userEvent.setup();
     const onSettings = vi.fn();
-    render(
-      <HomeScreen
-        data={DATA}
-        repoName="cart-shop-web"
-        today="2026-09-03"
-        streak={7}
-        onSettings={onSettings}
-        onMake={vi.fn()}
-        now={NOW}
-      />,
-    );
+    const onRepos = vi.fn();
+    draw(DATA, vi.fn(), { onSettings, onRepos });
+
     await user.click(screen.getByRole('button', { name: '설정' }));
     expect(onSettings).toHaveBeenCalledTimes(1);
-  });
-
-  it('대지의 스티커를 눌러 상세를 열 수 있다', async () => {
-    const user = userEvent.setup();
-    draw(DATA);
-
-    await user.click(screen.getByRole('button', { name: /옵셔널 체이닝/ }));
-    expect(screen.getByRole('region', { name: '옵셔널 체이닝 상세' })).toBeTruthy();
+    await user.click(screen.getByRole('button', { name: '서가' }));
+    expect(onRepos).toHaveBeenCalledTimes(1);
   });
 });

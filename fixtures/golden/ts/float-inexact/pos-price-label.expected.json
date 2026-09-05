@@ -1,0 +1,54 @@
+[
+  {
+    "queryId": "ts/float-inexact",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "fixed",
+    "startLine": 4,
+    "startCol": 12,
+    "endLine": 4,
+    "endCol": 30,
+    "nodeKind": "call_expression",
+    "inError": false
+  },
+  {
+    "queryId": "ts/float-inexact",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "fixed",
+    "startLine": 4,
+    "startCol": 12,
+    "endLine": 4,
+    "endCol": 19,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "ts/float-inexact",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "fixed",
+    "startLine": 4,
+    "startCol": 20,
+    "endLine": 4,
+    "endCol": 27,
+    "nodeKind": "property_identifier",
+    "inError": false
+  },
+  {
+    "queryId": "ts/float-inexact",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "fixed",
+    "startLine": 4,
+    "startCol": 27,
+    "endLine": 4,
+    "endCol": 30,
+    "nodeKind": "arguments",
+    "inError": false
+  }
+]

@@ -1,0 +1,21 @@
+/* 목업에 없는 자리다. 보기 상자는 `Choices`(`.choices`·`.ch`)가 그대로 그리므로 여기서는
+   지도에서 빠진 폴더 상자 하나만 둔다 — 지도 노드(`.map .nd`)와 같은 고정폭 · 같은 테두리
+   두께라 「이 상자를 네 층 중 하나에 놓아라」가 눈으로 이어진다. 색은 별칭만 쓴다 (05 §4.2). */
+.rquiz {
+  display: grid;
+  gap: 12px;
+}
+
+.rquiz .rq-f {
+  justify-self: start;
+  max-width: 100%;
+  margin: 0;
+  padding: 6px 12px;
+  border: 2px dashed var(--border);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-family: var(--font-mono);
+  font-size: var(--fs-3);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}

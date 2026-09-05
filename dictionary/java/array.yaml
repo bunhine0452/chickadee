@@ -1,0 +1,237 @@
+schema: 1
+id: java/array
+universal: null
+name: { ko: 크기가 정해진 상자, en: Array }
+token: "[]"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 2
+prereq: [java/variable-declaration, java/new-expression]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "만들 때 칸 수를 정하고, 그 뒤로는 칸을 못 늘린다."
+    en: "The number of slots is fixed at creation and never grows."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 「값 하나」가 아니라 「같은 종류를
+      <b>여러 칸</b>」이라는 표시입니다. 칸 수는 만들 때 정해지고 그 뒤로 안 바뀌어요 —
+      더 넣고 싶으면 새로 만들어 옮기는 수밖에 없습니다. 그래서 자바 코드에서 칸이 늘었다 줄었다
+      하는 자리에는 이것이 안 쓰이고, 늘려 주는 상자가 대신 서 있습니다. 읽을 때는 반대로 보면
+      됩니다 — 이 표시가 보이면 <b>칸 수가 이미 정해진 자리</b>입니다.
+    en: >-
+      The {{pick.1|code}} on line {{site.line}} does not mark “one value” but “<b>several slots</b>
+      of the same kind”. The slot count is fixed at creation and never changes — to hold more you
+      build a new one and copy across. So Java code that grows and shrinks does not use this; a
+      growable box stands there instead. Reading works the other way round: where this mark shows up,
+      <b>the slot count is already settled</b>.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 칸 하나에 담기는 종류다."
+      en: "{{pick.2|code}} is the kind held in one slot."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 「하나」를 「여러 칸」으로 바꾼다."
+      en: "{{pick.1|code}} turns “one” into “several slots”."
+    - ko: "{{site.line}}행이 정한 칸 수는 그 뒤로 안 바뀐다."
+      en: "The slot count settled on line {{site.line}} never changes after that."
+
+rule:
+  ko: "<b>칸 수는 만들 때 정해진다.</b> 다 찼다고 저절로 늘어나지 않는다."
+  en: "<b>The slot count is fixed at creation.</b> A full one does not grow by itself."
+ok:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:이,가}} 붙으면 {{pick.2|code}}{{pick.2|josa:을,를}} 여러 칸 담는
+    상자입니다. 칸 수는 만들 때 정해져요.
+  en: >-
+    With {{pick.1|code}} attached it holds several slots of {{pick.2|code}}. The slot count is settled
+    at creation.
+payoff:
+  ko: >-
+    이걸 알면 「왜 여기는 이걸 쓰고 저기는 다른 걸 쓰나」가 보입니다 — 칸 수를 미리 아는 자리에만
+    이것이 서요.
+  en: >-
+    Knowing this shows why one place uses this and another does not — it stands only where the slot
+    count is known in advance.
+bridge:
+  ko: >-
+    파이썬·자바스크립트의 목록은 넣을 때마다 늘어납니다. 자바는 <b>늘어나는 것</b>과
+    <b>안 늘어나는 것</b>을 문법으로 갈라 두었어요.
+  en: >-
+    Lists in Python and JavaScript grow as you push. Java splits <b>what grows</b> from <b>what does
+    not</b> at the grammar level.
+misconceptions:
+  - ko: "더 넣으면 칸이 늘어난다 — 안 늘어납니다. 새로 만들어 옮겨야 해요."
+    en: "Adding more grows it — it does not. You build a new one and copy across."
+  - ko: "길이는 <code>size()</code> 로 잰다 — 이것은 <b>괄호 없는</b> <code>length</code> 입니다. 셋이 다 달라요."
+    en: "Length is read with <code>size()</code> — this one uses <code>length</code> <b>without parentheses</b>. All three differ."
+  - ko: "칸은 1번부터 센다 — <b>0번부터</b>입니다. 칸이 셋이면 마지막은 2번이에요."
+    en: "Slots count from 1 — they count from <b>0</b>. With three slots the last is 2."
+  - ko: "만들자마자 칸이 비어 있다 — 종류마다 정해진 값(<code>0</code>·<code>false</code>·<code>null</code>)이 이미 들어 있습니다."
+    en: "The slots start empty — each already holds its kind's default (<code>0</code>, <code>false</code>, <code>null</code>)."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>「여러 칸」이라고 말하는 표시</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the mark that says “several slots”</b>."
+    hint:
+      ko: "종류 이름 <b>뒤</b>에 붙는 두 글자입니다."
+      en: "It is the two characters that follow the kind's name."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>칸 하나에 담기는 종류</b>입니다. 「여러 칸」은 그 뒤에 붙어요."
+          en: "{{pick.2|code}} is <b>the kind held in one slot</b>. “Several slots” is attached after it."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 종류냐 칸 수냐"
+            en: "The sharpest spot — the kind or the slots"
+          code:
+            - "int   → 칸 하나"
+            - "int[] → 여러 칸"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행이 만든 것에 칸이 셋인데 넷째를 넣으려 하면 어떻게 될까요?"
+      en: "What happens when a fourth value is put into the three slots made on line {{site.line}}?"
+    hint:
+      ko: "칸 수를 정한 시점이 언제였는지 보세요."
+      en: "Look at when the slot count was settled."
+    options:
+      - t:
+          ko: "실행할 때 「칸 밖이다」로 멈춘다"
+          en: "It stops at run time with “out of slots”"
+      - t:
+          ko: "칸이 하나 늘어난다"
+          en: "One more slot appears"
+        diag:
+          t:
+            ko: "늘어나는 것은 <b>다른 상자</b>의 성질입니다. 이것은 만들 때 정한 칸 수를 끝까지 지켜요."
+            en: "Growing is the behaviour of a <b>different box</b>. This one keeps the count it was made with."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 늘어나나"
+              en: "The sharpest spot — does it grow"
+            code:
+              - "이것:      칸 셋이면 끝까지 셋"
+              - "늘어나는 것: 넣을 때마다 는다"
+      - t:
+          ko: "컴파일이 멈춘다"
+          en: "Compiling stops"
+        diag:
+          t:
+            ko: "몇 번 칸에 넣을지는 <b>돌아야</b> 정해지는 값이라 번역하는 동안에는 알 수 없습니다."
+            en: "Which slot is written is a value known only <b>while running</b>, so translating cannot see it."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 번역할 때냐 돌 때냐"
+              en: "The sharpest spot — translating or running"
+            code:
+              - "javac: 통과한다"
+              - "실행:  거기서 멈춘다"
+      - t:
+          ko: "조용히 무시된다"
+          en: "It is silently ignored"
+        diag:
+          t:
+            ko: "조용한 것이 더 나쁠 뻔했습니다. 자바는 <b>그 자리에서 멈춰</b> 어디가 잘못됐는지 알려 줘요."
+            en: "Silence would have been worse. Java <b>stops right there</b> and names the slot it could not reach."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 조용하냐 멈추냐"
+              en: "The sharpest spot — silence or a stop"
+            code:
+              - "ArrayIndexOutOfBoundsException: 3"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>같은 종류를 여러 칸</b> 담는 자리를 엽니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} opens a place holding <b>several slots of the
+        same kind</b>.
+    hint:
+      ko: "보기 넷은 전부 종류 이름 뒤에 설 수 있는 괄호 쌍입니다."
+      en: "All four are bracket pairs that can follow a kind's name."
+    options:
+      - { t: "[]", mono: true }
+      - t: "<>"
+        mono: true
+        diag:
+          t:
+            ko: "<code>&lt;&gt;</code> 는 <b>안에 무엇이 들어가는지</b>를 적는 자리입니다. 칸 수를 정하지 않아요."
+            en: "<code>&lt;&gt;</code> writes <b>what goes inside</b>. It does not settle a slot count."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 칸 수냐 담기는 종류냐"
+              en: "The sharpest spot — slot count or contained kind"
+            code:
+              - "int[]      : 칸 수를 정한다"
+              - "List<Integer>: 늘어난다"
+      - t: "()"
+        mono: true
+        diag:
+          t:
+            ko: "<code>()</code> 는 <b>부르는</b> 자리이거나 넘기는 것을 적는 자리입니다. 종류 뒤에 붙지 않아요."
+            en: "<code>()</code> marks a <b>call</b> or what is passed. It does not attach to a kind."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 부르기냐 담기냐"
+              en: "The sharpest spot — calling or holding"
+            code:
+              - "f() : 부른다"
+              - "T[] : 담는다"
+      - t: "{}"
+        mono: true
+        diag:
+          t:
+            ko: "<code>{}</code> 는 <b>묶음</b>을 여는 자리입니다. 값을 처음 채워 넣을 때는 쓰지만 종류 뒤에는 안 옵니다."
+            en: "<code>{}</code> opens a <b>block</b>. It appears when filling initial values, never right after a kind."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 종류 뒤냐 값 자리냐"
+              en: "The sharpest spot — after the kind or in the value"
+            code:
+              - "int[] a = {1, 2, 3};"
+              - "//  ^종류 뒤   ^값 자리"
+
+why_gate:
+  q:
+    ko: "칸 수를 만들 때 못박고 그 뒤로 못 바꾸게 한 것은 <b>무엇을 얻으려고</b>일까요?"
+    en: "<b>What is gained</b> by nailing the slot count at creation and never changing it?"
+  choices:
+    - t:
+        ko: "칸이 나란히 붙어 있어 <b>몇 번 칸이든 한 번에</b> 닿을 수 있게"
+        en: "So slots sit side by side and <b>any slot is reached in one step</b>"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 대신 무엇을 잃었는지도 적어 보세요."
+        en: "That is the direction. Add what was given up in exchange."
+    - t:
+        ko: "메모리를 아끼려고"
+        en: "To save memory"
+      ok: false
+      fb:
+        ko: "덜 쓰기는 하지만 그건 곁다리입니다. 얻는 것은 <b>닿는 속도</b>예요."
+        en: "It does use less, but that is a side effect. What is gained is <b>the speed of reaching</b>."
+    - t:
+        ko: "자바가 늘어나는 상자를 못 만들어서"
+        en: "Because Java cannot make a growing box"
+      ok: false
+      fb:
+        ko: "만들 수 있고 실제로 있습니다. 둘 중 하나를 고르는 것이에요."
+        en: "It can, and such a box exists. This is a choice between two."
+
+queries:
+  - { grammars: [java], file: ./array.scm }
+
+examples:
+  - code: "int[] scores = new int[3];"
+    expect:
+      sites: 2
+      form: type
+      hole: "[]"
+      picks: { 1: "[]", 2: "int" }
+  - code: "int first = scores[0];"
+    expect: { sites: 1, form: index, picks: { 4: "scores", 5: "0" } }
+  - code: "List<Integer> scores = new ArrayList<>();"
+    expect: none

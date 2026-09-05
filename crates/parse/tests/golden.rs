@@ -162,7 +162,23 @@ fn the_golden_files_still_describe_what_the_queries_capture() {
 /// 개념이 적어 하한만 지킨다.
 #[test]
 fn each_grammar_brings_its_concepts_and_its_three_traps() {
-    for (dir, least) in [("ts", 20usize), ("tsx", 3), ("sql", 3)] {
+    // java 하한 34 — 2·3부 스물하나에 **0부 「값과 식」 열셋**이 붙었다
+    // (`docs/curriculum/java.md` §1.5). 0부 열아홉 중 나머지 여섯은 표본 리포에 사용처가
+    // 없거나 얇아(`integer-limit` 2곳 · `floating-type` 1 · `reference-binding` 1 ·
+    // `float-inexact`·`implicit-conversion`·`explicit-conversion` 0) 골든을 안 둔다 —
+    // 그쪽은 사전 `examples[]` 와 합성 카드가 그물이다 (D177 규칙 <1>).
+    // py 하한 24 — 바닥 여덟(D152)에 **0부 「값과 식」 열여섯**이 붙었다
+    // (`docs/curriculum/py.md` §1.5). 0부 19판 중 나머지 셋은 개념이 다른 부의 것이거나
+    // (`reference-binding` 은 1부라 여기 세어도 같은 24다) 아직 저작 전이다.
+    // 사용처가 0곳인 `implicit-conversion` 도 골든을 둔다 — 합성 예제가 정본인 판이라
+    // 그물이 사전 `examples[]` 하나뿐이면 문법이 바뀔 때 조용히 죽는다.
+    for (dir, least) in [
+        ("ts", 20usize),
+        ("tsx", 3),
+        ("sql", 3),
+        ("java", 34),
+        ("py", 24),
+    ] {
         let cases = support::cases_of(dir);
         let concepts: BTreeSet<&str> = cases
             .iter()

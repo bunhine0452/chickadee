@@ -6,7 +6,9 @@
 
 mod ast;
 mod langs;
+mod params;
 mod query;
+mod sfc;
 
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -54,7 +56,51 @@ pub fn scan(src: &[u8], queries: &Queries, max_bytes: usize) -> Result<Scan, Par
             max: max_bytes,
         });
     }
-    with_tree(&queries.grammar, src, |tree| Ok(queries.run(tree, src)))
+    // The parser reads the blanked bytes; every query, predicate and excerpt reads the
+    // original ones. Both buffers are the same length, so the offsets a node carries mean
+    // the same thing in either (`params.rs`).
+    let blanked = params::blanked(&queries.grammar, src);
+    let feed = blanked.as_deref().unwrap_or(src);
+    if sfc::is_embedded(&queries.grammar) {
+        return scan_ranges(src, feed, queries);
+    }
+    with_tree(&queries.grammar, feed, |tree| Ok(queries.run(tree, src)))
+}
+
+/// One parse per embedded range.
+///
+/// tree-sitter reads several included ranges as **one joined document**, so a node
+/// can span two of them and report an excerpt covering the gap between. That is
+/// wrong for a `MyBatis` mapper, where each statement is its own SQL, and for a Vue
+/// file with both `<script>` and `<script setup>`. Parsing them one at a time costs
+/// a parse per range and gives each its own tree.
+fn scan_ranges(src: &[u8], feed: &[u8], queries: &Queries) -> Result<Scan, ParseError> {
+    // `bytecount` 를 들이지 않는다 — 파일 하나를 여는 길에 한 번 도는 셈이고,
+    // 크레이트 하나가 그 값보다 비싸다 (01 §1.1 얇은 Rust).
+    #[allow(clippy::naive_bytecount)]
+    let lines = u32::try_from(src.iter().filter(|&&b| b == b'\n').count()).unwrap_or(u32::MAX) + 1;
+    let mut captures = Vec::new();
+    let mut quality = "ok";
+    for range in sfc::ranges_for(&queries.grammar, src) {
+        let one = with_tree_ranged(&queries.grammar, feed, Some(&[range]), |tree| {
+            Ok(queries.run(tree, src))
+        })?;
+        if one.quality == "poor" {
+            quality = "poor";
+        }
+        // Match ids restart at 1 per parse; offset them so a mapper's 40 statements
+        // do not all report match 1 and get grouped as one match downstream (D168).
+        let base = captures.last().map_or(0, |c: &query::Capture| c.match_id);
+        captures.extend(one.captures.into_iter().map(|mut c| {
+            c.match_id += base;
+            c
+        }));
+    }
+    Ok(Scan {
+        captures,
+        quality,
+        line_count: lines,
+    })
 }
 
 /// The flattened tree of a snippet — what TS compares two blocks with (04).
@@ -75,6 +121,16 @@ fn with_tree<T>(
     src: &[u8],
     f: impl FnOnce(&Tree) -> Result<T, ParseError>,
 ) -> Result<T, ParseError> {
+    with_tree_ranged(grammar, src, None, f)
+}
+
+/// `ranges` narrows what is read. `None` reads the whole file.
+fn with_tree_ranged<T>(
+    grammar: &str,
+    src: &[u8],
+    ranges: Option<&[tree_sitter::Range]>,
+    f: impl FnOnce(&Tree) -> Result<T, ParseError>,
+) -> Result<T, ParseError> {
     let lang = langs::language_of(grammar)
         .ok_or_else(|| ParseError::UnsupportedLang(grammar.to_owned()))?;
     PARSERS.with(|cell| {
@@ -87,6 +143,18 @@ fn with_tree<T>(
             pool.insert(grammar.to_owned(), fresh);
         }
         let parser = pool.get_mut(grammar).expect("just inserted");
+        // 한 파일에 언어가 여럿이면 읽을 자리를 좁힌다 (D159). 파서는 문법마다 재사용되므로
+        // **매번 새로 지정한다** — 앞 파일의 구간이 남으면 조용히 틀린다. 비우면 tree-sitter 가
+        // 문서 전체를 읽으므로, 좁힐 것이 없을 때는 빈 구간을 줘서 아무것도 안 읽게 한다.
+        if sfc::is_embedded(grammar) {
+            let empty = [tree_sitter::Range {
+                start_byte: 0,
+                end_byte: 0,
+                start_point: tree_sitter::Point::new(0, 0),
+                end_point: tree_sitter::Point::new(0, 0),
+            }];
+            let _ = parser.set_included_ranges(ranges.unwrap_or(&empty));
+        }
         let started = Instant::now();
         let mut over = |_: &tree_sitter::ParseState| started.elapsed() > TIMEOUT;
         let opts = tree_sitter::ParseOptions::new().progress_callback(&mut over);

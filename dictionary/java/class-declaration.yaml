@@ -1,0 +1,260 @@
+schema: 1
+id: java/class-declaration
+universal: common/class-definition
+name: { ko: 코드가 사는 상자, en: Class declaration }
+token: "class"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 1
+prereq: [cs/invariant, cs/dynamic-dispatch, spring/component-scan]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "자바에서는 모든 코드가 상자 안에 산다. 상자 밖에는 아무것도 못 둔다."
+    en: "In Java every line lives inside a box. Nothing can sit outside one."
+  why:
+    ko: >-
+      다른 언어는 파일 첫 줄부터 코드를 적습니다. 자바는 <b>못 적습니다</b> — {{site.line}}행의
+      이 낱말이 상자를 열기 전까지는 변수도 함수도 놓을 자리가 없어요. 그래서 「Hello World」에도
+      상자가 하나 필요하고, 처음 보는 사람에게는 그 상자가 <b>군더더기처럼</b> 보입니다.
+      군더더기가 아니라 자바의 규칙입니다.
+    en: >-
+      Other languages let you write code on the first line of a file. Java <b>does not</b> — until
+      the word on line {{site.line}} opens a box there is nowhere to put a variable or a function.
+      So even “Hello World” needs one box, and to a newcomer that box looks like <b>ceremony</b>.
+      It is not ceremony; it is the rule.
+  trace:
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 상자를 연다."
+      en: "{{pick.1|code}} opens the box."
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 그 상자의 이름이다."
+      en: "{{pick.2|code}} is the name of that box."
+    - ko: "중괄호 안의 것이 전부 이 상자의 것이다."
+      en: "Everything inside the braces belongs to this box."
+
+rule:
+  ko: "<b>상자 밖에는 코드를 못 둔다.</b> 그리고 <code>public</code> 상자의 이름은 파일 이름과 같아야 한다."
+  en: "<b>No code outside a box.</b> And a <code>public</code> box must be named like its file."
+result:
+  label:
+    ko: "{{pick.2}} 라는 상자"
+    en: "a box called {{pick.2}}"
+  value: "{{pick.2}}"
+  note:
+    ko: "파일 이름과 같아야 한다"
+    en: "must match the file name"
+ok:
+  ko: >-
+    {{pick.2|code}} 라는 상자가 섰습니다. 이 아래로 적는 값과 일은 전부 이 상자의 것이에요.
+  en: >-
+    A box called {{pick.2|code}} now stands. Every value and every piece of work below belongs to it.
+payoff:
+  ko: >-
+    이걸 알면 「왜 파일 이름을 고치라고 하나」가 풀립니다 — 상자 이름과 파일 이름이 어긋났기
+    때문이고, 고칠 곳은 둘 중 하나입니다.
+  en: >-
+    This untangles “why does it want me to rename the file” — the box name and the file name have
+    drifted apart, and one of the two has to move.
+bridge:
+  ko: >-
+    파이썬·자바스크립트는 상자 없이도 첫 줄부터 적습니다. 자바에서 그 자리는 <b>비어 있을 수
+    없습니다</b>.
+  en: >-
+    Python and JavaScript let you write from the first line with no box. In Java that place
+    <b>cannot be empty</b>.
+misconceptions:
+  - ko: "상자를 적으면 안이 바로 돈다 — 상자는 모양을 적어 둔 것이고, 도는 것은 누가 부를 때입니다."
+    en: "Writing the box runs what is inside — the box records a shape; it runs when something calls in."
+  - ko: "한 파일에 상자 하나만 둘 수 있다 — 여럿 둘 수 있고, 다만 <code>public</code> 은 하나입니다."
+    en: "A file holds one box — it may hold several; only one of them may be <code>public</code>."
+  - ko: "상자 이름은 아무렇게나 지어도 된다 — <code>public</code> 이면 파일 이름과 같아야 합니다."
+    en: "The name is free — for a <code>public</code> box it must match the file name."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>상자를 여는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that opens the box</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 상자의 <b>이름</b>입니다. 이름만으로는 상자가 서지 않아요 — 무엇을 여는지 말하는 낱말이 앞에 있어야 합니다."
+          en: >-
+            {{pick.2|code}} is the box's <b>name</b>. A name alone raises no box — the word that
+            says what is being opened must come first.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 이름이냐 여는 낱말이냐"
+            en: "The sharpest spot — the name or the opening word"
+          code:
+            - "Store           // 이것만으로는 아무것도 아니다"
+            - "class Store {}  // 이제 상자다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 상자 <b>안</b>입니다. 안에 무엇이 들었는지는 상자를 연 뒤의 이야기예요."
+          en: >-
+            {{pick.3|code}} is the <b>inside</b>. What it holds is a story that starts after the box
+            is opened.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 여는 곳이냐 담기는 곳이냐"
+            en: "The sharpest spot — the opening or the holding"
+          code:
+            - "class Store {}  // 여는 곳은 앞"
+            - "{ int n; }      // 담기는 곳은 뒤"
+
+meaning:
+  - q:
+      ko: "이 파일 이름이 {{pick.2|code}}<code>.java</code> 가 아니라면 어떻게 될까요?"
+      en: "What if this file is not named {{pick.2|code}}<code>.java</code>?"
+    hint:
+      ko: "<code>public</code> 이 붙은 상자에만 걸리는 규칙입니다."
+      en: "The rule binds only a box marked <code>public</code>."
+    options:
+      - t:
+          ko: "컴파일이 멈춘다 — 이름을 맞추라고 한다"
+          en: "It stops compiling — it asks for the names to match"
+      - t:
+          ko: "그냥 돈다 — 파일 이름은 상관없다"
+          en: "It just runs — the file name does not matter"
+        diag:
+          t:
+            ko: "자바는 상자를 <b>파일 이름으로 찾습니다</b>. 이름이 어긋나면 찾을 수가 없어서 컴파일이 거기서 멈춰요."
+            en: >-
+              Java finds a box <b>by its file name</b>. When the two drift apart it cannot be found,
+              and compiling stops right there.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 이름이 둘인가 하나인가"
+              en: "The sharpest spot — one name or two"
+            code:
+              - "// Store.java  →  class Store   ✔"
+              - "// Box.java    →  class Store   ✘"
+      - t:
+          ko: "실행할 때 못 찾는다고 멈춘다"
+          en: "It stops at run time, saying it cannot be found"
+        diag:
+          t:
+            ko: "돌기 <b>전에</b> 걸립니다. 이건 컴파일러가 보는 규칙이라 실행까지 가지 않아요."
+            en: >-
+              It is caught <b>before</b> anything runs. The compiler enforces this, so it never
+              reaches run time.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 번역할 때냐 돌 때냐"
+              en: "The sharpest spot — translating or running"
+            code:
+              - "javac Box.java   // 여기서 멈춘다"
+              - "java Box         // 여기까지 못 간다"
+      - t:
+          ko: "상자 이름이 파일 이름으로 바뀐다"
+          en: "The box is renamed to match the file"
+        diag:
+          t:
+            ko: "자바는 코드를 <b>고쳐 주지 않습니다</b>. 어긋난 것을 말해 줄 뿐이고 고치는 것은 사람입니다."
+            en: >-
+              Java does not <b>edit your code</b>. It reports the mismatch and leaves the fixing to you.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 알려 주기냐 고쳐 주기냐"
+              en: "The sharpest spot — reporting or repairing"
+            code:
+              - "error: class Store is public,"
+              - "       should be declared in Store.java"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>값과 하는 일을 함께</b> 담는 상자를 엽니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} opens a box that holds <b>values and work
+        together</b>.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "class", mono: true }
+      - t: "interface"
+        mono: true
+        diag:
+          t:
+            ko: "<code>interface</code> 는 <b>할 일의 목록만</b> 적는 상자라 값을 못 담습니다. 「무엇을 할 수 있는가」는 적고 「어떻게」는 안 적어요."
+            en: >-
+              <code>interface</code> is a box that lists <b>only the work</b>; it holds no values.
+              It says what can be done, never how.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 값을 담느냐 목록만이냐"
+              en: "The sharpest spot — holding values or listing work"
+            code:
+              - "class Store { int n; }      // 값이 산다"
+              - "interface Store { void f(); } // 목록뿐"
+      - t: "enum"
+        mono: true
+        diag:
+          t:
+            ko: "<code>enum</code> 은 <b>미리 정한 몇 가지</b>를 적는 상자입니다. 개수가 고정이라 새로 찍어낼 수 없어요."
+            en: >-
+              <code>enum</code> is a box for <b>a fixed handful</b> of things. The count is settled,
+              so nothing new can be stamped out.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 몇 개로 정해졌나"
+              en: "The sharpest spot — is the count settled"
+            code:
+              - "enum Day { MON, TUE }  // 딱 둘"
+              - "class Day { }          // 얼마든지"
+      - t: "record"
+        mono: true
+        diag:
+          t:
+            ko: "<code>record</code> 도 상자지만 <b>값만 나르라고</b> 만든 것이라 만든 뒤에는 안을 못 바꿉니다."
+            en: >-
+              <code>record</code> is a box too, but it is meant <b>to carry values</b>, and once made
+              its inside cannot change.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 나중에 바뀌느냐"
+              en: "The sharpest spot — can it change later"
+            code:
+              - "record P(int x) {}  // x 는 그대로"
+              - "class P { int x; }  // x 를 고칠 수 있다"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 이 값들과 이 일들을 <b>한 상자에</b> 묶었을까요?"
+    en: "Why does line {{site.line}} bind these values and this work into <b>one box</b>?"
+  choices:
+    - t:
+        ko: "이 값들을 다루는 일이 여기 모여 있어야, 값이 바뀔 때 고칠 곳이 한 군데가 되기 때문"
+        en: "So the work on these values sits in one place, and a change has one place to happen"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 상자를 둘로 쪼갠다면 어디를 자를지도 함께 적어 보세요."
+        en: "That is the direction. Say also where you would cut if this box were split in two."
+    - t:
+        ko: "자바가 상자를 요구해서"
+        en: "Because Java demands a box"
+      ok: false
+      fb:
+        ko: "요구하는 것은 맞지만 <b>어느 상자에 무엇을 넣을지</b>는 안 정해 줍니다. 그것이 이 줄의 선택입니다."
+        en: "It does demand one, but not <b>what goes in which box</b>. That is this line's choice."
+    - t:
+        ko: "이름을 짧게 쓰려고"
+        en: "To keep names short"
+      ok: false
+      fb:
+        ko: "짧아지는 것은 결과일 뿐입니다. 묶는 이유는 값과 일이 <b>같이 바뀌기</b> 때문이에요."
+        en: "Shorter names are a side effect. Things are bound because they <b>change together</b>."
+
+queries:
+  - { grammars: [java], file: ./class-declaration.scm }
+
+examples:
+  - code: "class Store {}"
+    expect: { sites: 1, form: class, hole: "class", picks: { 1: "class", 2: "Store", 3: "{}" } }
+  - code: "interface Store {}"
+    expect: none

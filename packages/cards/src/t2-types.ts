@@ -14,7 +14,10 @@ import type { CardPayload, ConceptId, EdgeKind } from '@chickadee/store-sql';
 
 import type { NoPlate } from './types.js';
 
-/** `CardPayload` 의 t2 변형. 이 모양은 `store-sql` 의 `t2PayloadSchema` 가 zod 로 고정한다. */
+/**
+ * `CardPayload` 의 t2 변형. 이 모양은 `store-sql` 의 `t2PayloadSchema` 가 zod 로 고정한다.
+ * `entry`·`role` 두 종과 `role` 키도 그 zod 안에 있다 (D142).
+ */
 export type T2Payload = Extract<CardPayload, { track: 't2' }>;
 export type T2Kind = T2Payload['kind'];
 
@@ -131,6 +134,12 @@ export interface T2Request {
   conceptId: ConceptId;
   /** 04 §9 결정성. 같은 시드면 같은 카드다. */
   seed: number;
+  /**
+   * 리포 지도 종(`entry`·`role`)에서 **몇 번째 후보**를 낼 것인가 (D142). 대지 목록의
+   * 색인이고, 후보가 그만큼 없으면 생성기가 `NoPlate` 를 낸다 — 같은 판을 두 번 굽지
+   * 않는다. 대지마다 지도가 달라지는 나머지 네 종에는 뜻이 없다.
+   */
+  targetIndex?: number;
   files: readonly GraphFile[];
   edges: readonly GraphEdge[];
   /** 최근 순. 04 §8.1 의 후보 필터가 여기서 고른다. */
@@ -143,6 +152,23 @@ export interface T2Request {
 
 /** 04 §8.1 후보 커밋의 최소 개수. 이보다 적으면 책임 배치를 만들지 않는다 (§8.4). */
 export const MIN_COMMITS_FOR_PLACEMENT = 3;
+
+// ───────── 리포 지도 (04 §7.5 · §8.5 · D142) ─────────
+
+/**
+ * 리포 지도가 서려면 있어야 하는 최소 노드 수. 폴더 다섯 장짜리 그림에는 「이 프로젝트는
+ * 이런 구조구나」가 없다 — 그 리포에서는 대지 하나짜리 문제가 맞다.
+ */
+export const MIN_REPO_NODES = 6;
+
+/**
+ * 진입점 문제의 정답 상한. 지도의 절반이 문이면 아무 데나 찍어도 맞는다 — 상한과 함께
+ * 「정답이 노드의 절반을 넘지 않는다」도 본다 (`buildEntry`).
+ */
+export const MAX_ENTRY_CORE = 4;
+
+/** 「이 폴더는 왜 있나」를 물을 수 있는 폴더의 최소 파일 수. 한 장짜리는 폴더가 아니다. */
+export const MIN_ROLE_MEMBERS = 2;
 
 /** 생성 결과. `NoPlate` 와 같은 자리에서 「못 만들었다」를 말한다. */
 export interface T2Card {

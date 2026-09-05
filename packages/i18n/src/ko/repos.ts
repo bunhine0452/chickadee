@@ -14,10 +14,20 @@ export const repos = {
   'repos.add': '리포 추가',
   'repos.pickFolder': '리포 폴더 고르기',
   'repos.pickNew': '옮긴 리포 폴더 고르기',
+
+  // 주소로 받기 (D129). 첫 실행과 서가가 같은 문구를 쓴다.
+  'repos.cloneLabel': 'git 주소',
+  'repos.clonePlaceholder': 'https://github.com/사용자/리포',
+  'repos.cloneGo': '주소로 받기',
+  'repos.cloneBusy': '받는 중…',
+  'repos.pickClone': '받을 자리 고르기',
+  'repos.cloneNote':
+    'https 주소를 붙여 넣으면 고른 폴더 아래에 리포 이름으로 받아서 그대로 등록합니다. '
+    + '큰 리포는 몇 분 걸립니다.',
   'repos.note':
     '리포마다 학습 기록이 따로 쌓입니다. 리포를 바꿔도 진행 중인 세션은 그 리포에 남아, '
-    + '돌아오면 그 자리에서 이어 찍힙니다.',
-  'repos.empty': '등록된 리포가 없습니다. 폴더를 하나 등록하면 커밋과 파일을 읽어 판을 짭니다.',
+    + '돌아오면 그 자리에서 이어집니다.',
+  'repos.empty': '등록된 리포가 없습니다. 폴더를 하나 등록하면 커밋과 파일을 읽어 문제를 만듭니다.',
   'repos.open': '「{{name}}」 리포 열기',
   'repos.active': '보는 중',
 
@@ -28,14 +38,14 @@ export const repos = {
   'repos.lastIngest': '마지막 읽기',
   'repos.never': '아직 없음',
   'repos.concepts': '개념',
-  'repos.avgLayer': '겹 평균',
+  'repos.avgLayer': '평균 숙련도',
   // 오늘 큐의 복습 몫이다. 새 개념은 하루 상한과 선행 판정이 걸려 세션을 열어야 정해진다.
   'repos.due': '오늘 만기',
 
   'repos.missingNote':
     '이 경로에 폴더가 없습니다. 옮겼다면 새 위치를 알려 주세요 — 학습 기록은 그대로 이어집니다.',
   'repos.detachedNote':
-    '목록에서 뺀 리포입니다. 같은 폴더를 다시 등록하면 개념 겹과 학습 기록이 그대로 돌아옵니다.',
+    '목록에서 뺀 리포입니다. 같은 폴더를 다시 등록하면 개념 숙련도와 학습 기록이 그대로 돌아옵니다.',
   'repos.locate': '위치 알려주기',
   'repos.mismatch': '다른 리포입니다 — 첫 커밋이 다릅니다.',
   'repos.relocated': '「{{name}}」 리포의 새 위치를 잡았습니다.',
@@ -47,12 +57,12 @@ export const repos = {
     + '다시 등록하면 이어집니다.',
   'repos.purgeAsk':
     '「{{name}}」 리포의 파일·커밋·개념 사용처를 지웁니다. 카드는 지우지 않고 은퇴시킵니다 — '
-    + '언제 무엇을 찍었는지가 카드에 매여 있어 카드를 지우면 학습 기록이 끊깁니다.',
+    + '언제 무엇을 풀었는지가 카드에 매여 있어 카드를 지우면 학습 기록이 끊깁니다.',
   'repos.confirmRemove': '뺍니다',
   'repos.confirmPurge': '지웁니다',
   'repos.cancel': '그만두기',
   'repos.removed': '「{{name}}」 리포를 목록에서 뺐습니다.',
-  'repos.purged': '「{{name}}」 리포를 지웠습니다. 찍은 기록은 남습니다.',
+  'repos.purged': '「{{name}}」 리포를 지웠습니다. 푼 기록은 남습니다.',
 
   'repos.switch': '리포 전환',
   'repos.all': '전부 보기',

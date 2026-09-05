@@ -1,0 +1,93 @@
+schema: 1
+id: spring/repository-pattern
+universal: null
+name: { ko: "저장소를 인터페이스 뒤에 두기", en: "Repository pattern" }
+token: null
+grammars: []
+framework: spring
+# 짚을 노드가 없다 — 구현체는 실행할 때 만들어진다 (D176). 창은 자바 개념에서 빌린다 (D157 ②).
+track_default: t0
+essential: false
+difficulty: 2
+prereq: [spring/dependency-injection, cs/abstraction]
+confusions: [spring/persistence-mapping]
+queries: []
+dict:
+  one_liner:
+    ko: "저장소에 묻는 일을 인터페이스 하나로 모아 둔다."
+    en: "Everything asked of storage is gathered behind one interface."
+  why:
+    ko: >-
+      서비스가 SQL 을 직접 들고 있으면 두 가지 일이 한 클래스에 섞입니다 — <b>무엇을 할지</b>와
+      <b>어떻게 꺼낼지</b>. 그래서 꺼내는 일만 인터페이스 하나로 모읍니다. 서비스는 그 인터페이스만
+      알고, 실제 질의가 어디에 적혀 있는지는 모릅니다. 스프링에서 놀라운 것은 여기예요 —
+      <b>그 인터페이스를 구현한 클래스를 내가 안 씁니다.</b> 표시를 보고 스프링이 실행할 때 만들어
+      컨테이너에 넣습니다. 그래서 <code>UserDao</code> 를 열어도 메서드 본문이 없고, 본문에 해당하는
+      SQL 은 <b>다른 파일</b>에 있습니다.
+    en: >-
+      A service holding SQL mixes two jobs in one class — <b>what to do</b> and <b>how to fetch</b>.
+      So the fetching is gathered behind one interface. The service knows only that interface and
+      not where the real query is written. Here is the surprising part in Spring: <b>you never write
+      the class implementing it.</b> Spring reads the mark, builds one at run time, and puts it in
+      the container. That is why opening <code>UserDao</code> shows no method bodies, and the SQL
+      that stands for them lives in <b>another file</b>.
+  trace: []
+rule:
+  ko: "<b>인터페이스만 있고 구현은 내가 안 쓴다.</b> 질의는 다른 파일에 있다."
+  en: "<b>Only the interface is yours; the implementation is not.</b> The query lives elsewhere."
+ok:
+  ko: >-
+    서비스는 인터페이스의 메서드를 부릅니다. 실행할 때 만들어진 구현이 그 이름에 맞는
+    질의를 찾아 돌립니다.
+  en: >-
+    The service calls the interface's method. An implementation built at run time finds the query
+    matching that name and runs it.
+misconceptions:
+  - ko: "구현 클래스를 찾아야 한다 — 없습니다. 실행할 때 만들어집니다."
+    en: "There is an implementation class to find — there is none; it is made at run time."
+  - ko: "메서드 본문이 없으니 아무 일도 안 한다 — 본문에 해당하는 질의가 다른 파일에 있습니다."
+    en: "No body means it does nothing — the query standing for the body is in another file."
+  - ko: "인터페이스 이름만 맞으면 된다 — 메서드 이름이 질의를 찾는 열쇠입니다."
+    en: "Only the interface name matters — the method name is the key that finds the query."
+  - ko: "애너테이션은 명령이다 — 표시일 뿐이고 스프링이 그것을 보고 만듭니다."
+    en: "An annotation is a command — it is a mark; Spring builds from it."
+evidence: ["@Mapper", "@MapperScan", "@Repository", "JpaRepository", "CrudRepository"]
+meaning:
+  - q:
+      ko: "인터페이스에 메서드 본문이 없습니다. <b>부르면 무엇이 도나요?</b>"
+      en: "The interface has no method bodies. <b>What runs when it is called?</b>"
+    hint:
+      ko: "그 인터페이스를 구현한 클래스가 소스 어디에 있는지 찾아보세요."
+      en: "Try to find the class implementing it in the source."
+    options:
+      - t: { ko: "스프링이 실행할 때 만든 구현이 돈다", en: "An implementation Spring built at run time" }
+      - t: { ko: "인터페이스의 기본 구현이 돈다", en: "The interface's default implementation" }
+        diag:
+          t:
+            ko: "기본 구현을 쓰려면 <b>본문을 인터페이스에 적어야</b> 합니다. 여기에는 본문 자체가 없어요."
+            en: "A default implementation needs <b>a body written in the interface</b>. Here there is no body at all."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 적힌 본문이냐 만들어진 것이냐", en: "The sharpest spot — a written body or a generated one" }
+            code:
+              - "기본 구현: 본문이 적혀 있다"
+              - "여기: 본문이 없다"
+      - t: { ko: "부르는 쪽에서 넘긴 코드가 돈다", en: "Code passed in by the caller" }
+        diag:
+          t:
+            ko: "부르는 쪽은 <b>인자만</b> 넘깁니다. 무엇을 할지는 넘기지 않아요 — 그것을 아는 것은 만들어진 구현입니다."
+            en: "The caller passes <b>arguments only</b>, never the behavior — that is known to the generated implementation."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값이냐 행동이냐", en: "The sharpest spot — values or behavior" }
+            code:
+              - "부르는 쪽: 인자"
+              - "구현: 무엇을 할지"
+      - t: { ko: "같은 이름의 클래스를 자바가 찾아 준다", en: "Java finds a class with the same name" }
+        diag:
+          t:
+            ko: "자바는 이름으로 구현을 찾아 주지 않습니다. 그런 클래스가 <b>없어도</b> 도는 것이 여기서 놀라운 자리예요."
+            en: "Java does not find implementations by name. What is surprising here is that it works with <b>no such class</b>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 찾기냐 만들기냐", en: "The sharpest spot — found or built" }
+            code:
+              - "자바: 이름으로 안 찾는다"
+              - "스프링: 실행할 때 만든다"

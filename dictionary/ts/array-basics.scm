@@ -5,6 +5,7 @@
 ; 길이 읽기 — `xs.length`.
 ((member_expression
    object: (_) @pick.1
+   "." @pick.3
    property: (property_identifier) @pick.2) @site
  (#eq? @pick.2 "length")
  (#set! form "length"))

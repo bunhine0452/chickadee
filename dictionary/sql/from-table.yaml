@@ -1,0 +1,216 @@
+schema: 1
+id: sql/from-table
+universal: null
+name: { ko: 어느 표에서 가져올지 대기, en: Naming the source }
+token: "FROM"
+grammars: [sql, mybatis_sql]
+framework: null
+essential: true
+difficulty: 1
+prereq: []
+confusions: []
+
+dict:
+  one_liner:
+    ko: "어느 표에서 가져올지 대는 절. 적히기는 두 번째인데 먼저 도는 자리다."
+    en: "Names the table to read from. Written second, run first."
+  why:
+    ko: >-
+      SQL 은 <b>적힌 순서대로 돌지 않습니다</b>. {{site.line}}행의 이 절이 위의 고르는 절보다
+      <b>먼저</b> 돕니다 — 표가 정해져야 무엇을 고를지 말이 되기 때문이에요. 그래서 위에서
+      아래로 읽으면 순서를 거꾸로 읽게 됩니다.
+    en: >-
+      SQL <b>does not run in written order</b>. The clause on line {{site.line}} runs <b>before</b>
+      the choosing clause above it — the table has to be settled before choosing means anything.
+      Read top to bottom and you read the order backwards.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:을,를}} 먼저 연다."
+      en: "{{pick.2|code}} is opened first."
+    - ko: "그 표의 행이 위의 절로 올라간다."
+      en: "Its rows go up to the clause above."
+    - ko: "고르는 일은 그다음이다."
+      en: "Choosing comes after that."
+
+rule:
+  ko: "<b>적힌 순서와 도는 순서가 다르다.</b> 표를 대는 절이 고르는 절보다 먼저 돈다."
+  en: "<b>Written order is not run order.</b> The source clause runs before the choosing clause."
+result:
+  label:
+    ko: "읽을 표"
+    en: "the table read"
+  value: "{{pick.2}}"
+  note:
+    ko: "이 절이 먼저 돈다"
+    en: "this clause runs first"
+ok:
+  ko: >-
+    {{pick.2|code}} 의 행이 먼저 놓이고, 무엇을 볼지는 그다음에 정해집니다.
+  en: >-
+    The rows of {{pick.2|code}} are laid out first; what to look at is settled after.
+payoff:
+  ko: >-
+    이걸 알면 「위에서 붙인 별명을 왜 위에서 못 쓰나」가 풀립니다 — 그 절이 아직 안 돌았기 때문이에요.
+  en: >-
+    This untangles “why can’t I use the alias I just made” — that clause has not run yet.
+bridge:
+  ko: >-
+    보통의 언어는 적은 순서대로 돕니다. SQL 은 <b>무엇을 원하는지</b>만 적고 순서는 데이터베이스가 정합니다.
+  en: >-
+    Ordinary languages run in the order written. SQL states <b>what you want</b> and leaves the order to the database.
+misconceptions:
+  - ko: "위에 적힌 절이 먼저 돈다 — 표를 대는 절이 먼저입니다."
+    en: "The clause written first runs first — the source clause goes first."
+  - ko: "표를 여럿 대면 그냥 이어 붙는다 — 조건을 안 주면 모든 짝이 생겨 행이 곱해집니다."
+    en: "Naming two tables just appends them — with no condition every pair is made and the rows multiply."
+
+meaning:
+  - q:
+      ko: "{{pick.2|code}} 대신 없는 표 이름을 적으면 어떻게 될까요?"
+      en: "What if a table that does not exist is named instead of {{pick.2|code}}?"
+    hint:
+      ko: "이 절이 <b>가장 먼저</b> 돕니다."
+      en: "This clause runs <b>first</b>."
+    options:
+      - t:
+          ko: "거기서 멈춘다 — 뒤의 절은 아예 안 본다"
+          en: "It stops there — the later clauses are never looked at"
+      - t:
+          ko: "빈 결과가 나온다"
+          en: "It comes back empty"
+        diag:
+          t:
+            ko: "빈 결과는 <b>표가 있는데 맞는 행이 없을 때</b> 나옵니다. 표 자체가 없으면 그 전에 멈춰요."
+            en: >-
+              An empty result means <b>the table exists but no row matched</b>. If the table itself
+              is missing it stops before that.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 없는 표냐 없는 행이냐"
+              en: "The sharpest spot — no table or no rows"
+            code:
+              - "FROM users WHERE 1=0   -- 빈 결과"
+              - "FROM userz             -- 여기서 멈춘다"
+      - t:
+          ko: "비슷한 이름의 표를 찾아 준다"
+          en: "It finds a table with a similar name"
+        diag:
+          t:
+            ko: "이름을 <b>고쳐 주지 않습니다</b>. 비슷한 이름을 알려 주는 데이터베이스는 있어도 대신 쓰지는 않아요."
+            en: >-
+              It does not <b>correct the name</b>. Some databases suggest a near match, but none use
+              it for you.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 알려 주기냐 대신 쓰기냐"
+              en: "The sharpest spot — suggesting or substituting"
+            code:
+              - "no such table: userz"
+              - "-- 제안은 해도 실행은 안 한다"
+      - t:
+          ko: "그 자리에 빈 표가 만들어진다"
+          en: "An empty table is created there"
+        diag:
+          t:
+            ko: "읽는 문장은 표를 <b>만들지 않습니다</b>. 만드는 것은 따로 적어야 하는 다른 문장이에요."
+            en: >-
+              A reading statement never <b>creates</b> a table. Creating is a different statement you
+              have to write.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 읽기냐 만들기냐"
+              en: "The sharpest spot — reading or creating"
+            code:
+              - "SELECT ... FROM t   -- 읽기만"
+              - "CREATE TABLE t ...  -- 만들기"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>어느 표에서</b> 가져올지를 댑니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} names <b>which table</b> to read from.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "FROM", mono: true }
+      - t: "INTO"
+        mono: true
+        diag:
+          t:
+            ko: "<code>INTO</code> 는 <b>넣을 곳</b>을 대는 자리라 읽는 문장에 오지 않습니다. 방향이 반대예요."
+            en: >-
+              <code>INTO</code> names <b>where to put</b> rows, so it does not stand in a reading
+              statement. The direction is reversed.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 읽기냐 쓰기냐"
+              en: "The sharpest spot — reading or writing"
+            code:
+              - "SELECT * FROM users"
+              - "INSERT INTO users ..."
+      - t: "JOIN"
+        mono: true
+        diag:
+          t:
+            ko: "<code>JOIN</code> 은 <b>이미 댄 표에 하나를 더</b> 붙이는 자리라 앞에 표가 하나 있어야 합니다."
+            en: >-
+              <code>JOIN</code> adds <b>one more table to one already named</b>, so a table must
+              stand before it.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 첫 표냐 붙이는 표냐"
+              en: "The sharpest spot — the first table or an added one"
+            code:
+              - "FROM users            -- 첫 표"
+              - "FROM users JOIN dream -- 붙이기"
+      - t: "USING"
+        mono: true
+        diag:
+          t:
+            ko: "<code>USING</code> 은 붙일 때 <b>어느 열로 맞출지</b>를 대는 자리라, 붙이는 절 뒤에만 옵니다."
+            en: >-
+              <code>USING</code> says <b>which column to match on</b> when joining, so it follows a
+              join clause and nothing else.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 표냐 맞출 열이냐"
+              en: "The sharpest spot — the table or the matching column"
+            code:
+              - "FROM users"
+              - "JOIN dream USING (user_id)"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 <b>이 표</b>를 골랐을까요?"
+    en: "Why does line {{site.line}} name <b>this table</b>?"
+  choices:
+    - t:
+        ko: "묻고 싶은 것이 이 표의 행에 대한 것이라서 — 다른 표를 대면 물음 자체가 달라진다"
+        en: "Because the question is about this table’s rows — another table would be another question"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 표에 없는 값을 물으려면 무엇을 더 대야 하는지도 적어 보세요."
+        en: "That is the direction. Say what else must be named to ask for a value this table lacks."
+    - t:
+        ko: "SQL 이 표 이름을 요구해서"
+        en: "Because SQL demands a table name"
+      ok: false
+      fb:
+        ko: "요구하는 것은 맞지만 <b>어느 표인지</b>는 안 정해 줍니다. 그것이 이 줄의 선택이에요."
+        en: "It does demand one, but not <b>which</b>. That is this line’s choice."
+    - t:
+        ko: "가장 큰 표라서"
+        en: "Because it is the biggest table"
+      ok: false
+      fb:
+        ko: "크기는 고르는 이유가 아닙니다. 답이 <b>어디 적혀 있는지</b>가 정합니다."
+        en: "Size is not the reason. <b>Where the answer is written</b> decides."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./from-table.scm }
+
+examples:
+  - code: "SELECT * FROM users"
+    expect: { sites: 1, form: from, hole: "FROM", picks: { 1: "FROM", 2: "users" } }
+  - code: "INSERT INTO users (a) VALUES (1)"
+    expect: none

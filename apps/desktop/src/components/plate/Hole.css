@@ -1,33 +1,38 @@
-/* 목업: design/src/ink/session.css 「빈칸형」 블록.
-   바꾼 것 — 정답 면의 황 원색·먹 리터럴을 --t2 / --on-t2 로, 어긋남 취소선을 --t1 로 (05 §4.2).
-   값은 목업의 --yellow / #221D18 / --pink 와 같아 야간반 한 줄이 필요 없어졌다. */
+/* 빈칸 (D182 · 정본 §6). 뚫린 자리는 **점선 테두리**이고, 채워지면 실선이 된다.
+   여기는 면을 두어도 되는 유일한 자리다 — 안에 들어가는 것은 구문 강조가 아니라 학습자가
+   고른 글자이고 색이 --text 라, G1 의 대비 검사가 이미 재는 짝(본문 on 상태 면)이다. */
 .code .hole {
   display: inline-block;
   min-width: 5.5em;
   margin: 0 .1em;
   padding: 0 .4em;
-  border: 2px dashed var(--ink-mute);
-  border-radius: 2px;
-  background: var(--paper-3);
-  color: var(--ink-soft);
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface-3);
+  color: var(--text-muted);
   text-align: center;
 }
 
 .code .hole.filled {
-  border-color: var(--t0);
+  border-color: var(--accent);
   border-style: solid;
-  background: var(--stock);
-  color: var(--ink);
+  background: var(--accent-weak);
+  color: var(--text);
 }
 
 .code .hole.right {
-  border-color: var(--rule);
-  background: var(--t2);
-  color: var(--on-t2);
+  border-color: var(--ok);
+  border-style: solid;
+  background: var(--ok-bg);
+  color: var(--text);
+  font-weight: var(--fw-bold);
 }
 
 .code .hole.wrong {
-  border-color: var(--t1);
+  border-color: var(--bad);
+  border-style: solid;
+  background: var(--bad-bg);
+  color: var(--text);
   text-decoration: line-through;
-  text-decoration-color: var(--t1);
+  text-decoration-color: var(--bad);
 }

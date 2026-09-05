@@ -1,22 +1,26 @@
-/* 목업: design/src/ink/session.css `.acts` — 그대로.
-   `.dunno` 는 packages/ui 의 FlatButton 이 이미 들고 있다 (05 §5). */
+/* 동작 줄 (D182). 왼쪽은 언제나 「모르겠어요」 자리다 — 맞혔을 때도 사라지지 않는다.
+   좁은 폭에서 안내 문장이 먼저 줄을 바꾸고, 두 단추는 끝까지 한 줄에 남는다. */
 .acts {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
-  padding-top: 14px;
-  border-top: 2px dashed var(--rule);
+  gap: var(--s-3);
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--border);
 }
 
 .acts .sp { flex: 1 }
 
 .acts .hint {
-  color: var(--ink-soft);
-  font-size: var(--fs-14);
+  flex: 1 1 12rem;
+  min-width: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-2);
+  line-height: var(--lh-body);
+  word-break: keep-all;
 }
 
 .acts .hint b {
-  color: var(--ink);
-  font-weight: 600;
+  color: var(--text);
+  font-weight: var(--fw-medium);
 }

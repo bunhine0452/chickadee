@@ -11,14 +11,24 @@ import {
 } from '@chickadee/ipc-client';
 
 import { inBatches } from './batch.js';
+import { buildCallGraph, type FileBlocks } from './calls.js';
 import { type Identity } from './commits.js';
+import { deadBranches } from './dead.js';
 import { reclassifyCommits } from './identities.js';
 import { deriveFile, type DerivedSite, type RawBlock } from './derive.js';
 import { buildGaps, type CountableSite } from './gaps.js';
-import { resolveImports, type FileImports } from './resolve-imports.js';
+import { methodPaths } from './path.js';
+import { resolveImports, type FileImports, type ResolvedEdge } from './resolve-imports.js';
 import { EXCLUDE_GLOBS, GENERATED_MARKERS, LIMITS } from './ingest-defaults.js';
-import { assignUnits } from './units.js';
-import { knownSet, unknownCount, type MasteryRow } from './unknown-rank.js';
+import { extractSchema } from './schema.js';
+import { entryUnits, planUnits, type EntrySeed } from './units.js';
+import {
+  innermostBlock, knownSet, lineIndex, unknownCount, windowUnknown,
+  type LineIndex, type LineSpan, type MasteryRow, type WindowSite,
+} from './unknown-rank.js';
+import {
+  ZERO_CHAPTER_ORDER, ZERO_CHAPTER_UNIT, shouldOpen as shouldOpenZeroChapter, zeroChapterPlates,
+} from './zero-chapter.js';
 
 /** `store_batch` 한 번의 상한 (01 §3.2). */
 
@@ -30,6 +40,12 @@ export interface IngestReport extends IngestDone {
   units: number;
   /** 사전에서 건너뛴 파일 — 있으면 개발자 패널이 보여 준다. */
   dictProblems: number;
+  /** 메서드 단위 요청 줄기 수 (D168). */
+  paths?: number;
+  /** DDL 에서 선 표 수 (D169). */
+  tables?: number;
+  /** 죽은 갈래 수 (D168). */
+  dead?: number;
 }
 
 export interface IngestOptions {
@@ -65,6 +81,12 @@ export interface IngestOptions {
  * 네임스페이스는 `_lang.yaml` 이 있는 것만이 아니다: `common/`·`arch/` 는 개념만 있고
  * 문법에 매이지 않는다. 그래도 `concept.dict_version_id` 가 NOT NULL 이라 판 행은 필요하다.
  */
+/** 문법별 ABI 표를 순서에 안 흔들리는 문자열로. `{tsx:14,typescript:14}` → `"tsx=14,typescript=14"`. */
+function abiKey(abi: Readonly<Record<string, number>> | undefined): string {
+  if (!abi) return '0';
+  return Object.keys(abi).sort().map((g) => `${g}=${abi[g]}`).join(',');
+}
+
 export async function materializeDict(dict: Dict, now: number): Promise<void> {
   const spaces = new Set([...dict.langs.keys(), ...[...dict.concepts.keys()].map(langOf)]);
   const ops: BatchOp[] = [...spaces].sort().map((lang) => {
@@ -75,7 +97,9 @@ export async function materializeDict(dict: Dict, now: number): Promise<void> {
         lang,
         version: meta?.version ?? '0',
         // 번들 사전은 빌드 산출물이라 파일 해시 대신 버전·ABI 로 식별한다.
-        sha256: `${meta?.version ?? '0'}:${meta?.grammar_abi ?? 0}`,
+        // ABI 는 문법별 표라 **키를 정렬해** 넣는다 — 객체 순서가 바뀌면 같은 사전이
+        // 다른 해시를 얻어 재인제스트가 돈다.
+        sha256: `${meta?.version ?? '0'}:${abiKey(meta?.grammar_abi)}`,
         conceptCount: [...dict.concepts.keys()].filter((id) => langOf(id) === lang).length,
         loadedAt: now,
       },
@@ -176,7 +200,10 @@ export async function runIngest(options: IngestOptions): Promise<IngestReport> {
 export async function deriveRepo(
   dict: Dict,
   options: IngestOptions,
-): Promise<{ sites: number; blocks: number; edges: number; gaps: number; units: number }> {
+): Promise<{
+  sites: number; blocks: number; edges: number; gaps: number; units: number;
+  paths: number; tables: number; dead: number;
+}> {
   const { repoId, now } = options;
   const heuristic = new Set(
     [...dict.concepts.values()]
@@ -193,6 +220,8 @@ export async function deriveRepo(
   let blockCount = 0;
   let step = 0;
   const imports: FileImports[] = [];
+  // 블록도 모아 둔다 — 호출 그래프의 노드다 (D168). 파일 집합이 다 모여야 이름이 풀린다.
+  const blocksOf: FileBlocks[] = [];
 
   for (const file of target) {
     const captures = await ipc.store.query('derive.captures_by_file', { fileId: file.id });
@@ -208,18 +237,171 @@ export async function deriveRepo(
     // 지정자는 모아 두었다가 파일 집합이 다 모인 뒤 한 번에 푼다 — `./x` 가 어느 파일인지는
     // 그 파일이 인제스트에 들어왔는지를 알아야 답할 수 있다 (04 §7.1).
     imports.push({ path: file.path, imports: result.imports });
+    blocksOf.push({ path: file.path, blocks: result.blocks });
     blockCount += result.blocks.length;
     siteCount += sites.length;
     step += 1;
     options.onProgress?.('derive', step, target.length, file.path);
   }
 
-  const edges = await writeEdges(repoId, files, imports, target.map((f) => f.id));
+  const { count: edges, resolved } = await writeEdges(repoId, files, imports, target.map((f) => f.id));
   await reclassifyCommits(repoId, options.identities ?? []);
+  // HTTP 말고 다른 문 — `@Scheduled` 가 있는 파일 (D168).
+  const seeds: EntrySeed[] = imports
+    .filter((f) => f.imports.some((r) => r.form === 'entry-scheduled'))
+    .map((f) => ({ path: f.path }));
   // 대지와 구멍은 리포 전체를 본다 — 증분이어도 「몇 파일 중 몇 곳」의 분모는 전체다.
-  const units = await writeUnits(repoId, files);
+  const units = await writeUnits(dict, repoId, files, resolved, seeds, now);
   const gaps = await writeGaps(dict, repoId, files.length, now);
-  return { sites: siteCount, blocks: blockCount, edges, gaps, units };
+  // 줄기·스키마·죽은 갈래는 캡처에서 매번 다시 선다 (D168 · D169). 대지 뒤에 오는 이유는
+  // 줄기가 대지 이름으로 꽂히기 때문이다.
+  const graphIn = { files: imports, blocks: blocksOf, edges: resolved };
+  const graph = buildCallGraph(graphIn);
+  const paths = await writeRequestPaths(repoId, files, imports, resolved, seeds, graph, now);
+  const tables = await writeSchema(repoId, files, imports, resolved);
+  const dead = await writeDead(repoId, files, imports, resolved, graph);
+  return { sites: siteCount, blocks: blockCount, edges, gaps, units, paths, tables, dead };
+}
+
+/**
+ * 메서드 단위 요청 줄기 (D168). HTTP 호출 자리마다 하나이고, 칸은 (파일, 줄 범위)다.
+ * 챕터 화면이 「이 파일의 이 줄들만」을 여기서 읽는다 — `unit_file` 은 그대로 파일 단위다.
+ */
+async function writeRequestPaths(
+  repoId: number,
+  files: readonly { id: number; path: string }[],
+  imports: readonly FileImports[],
+  edges: readonly ResolvedEdge[],
+  seeds: readonly EntrySeed[],
+  graph: ReturnType<typeof buildCallGraph>,
+  now: number,
+): Promise<number> {
+  const idOf = new Map(files.map((f) => [f.path, f.id]));
+  // 줄기의 대지 = 그 HTTP 호출 파일이 시작한 기능. 이름은 `entryUnits` 가 정한 그대로다.
+  // 서버가 서버를 부른 자리(`FortuneService.java` → FastAPI)는 진입점이 아니라 **어느 기능 안**이다 —
+  // 그 파일을 품은 가장 작은 기능으로 꽂는다.
+  const features = entryUnits(edges, seeds);
+  const unitOf = (path: string): string | null => {
+    const own = features.find((u) => u.entry === path);
+    if (own !== undefined) return own.name;
+    const holding = features.filter((u) => u.files.includes(path)).sort((a, b) => a.files.length - b.files.length);
+    return holding[0]?.name ?? null;
+  };
+  // 호출 자리 → 라우트 문자열. `request_path.label` 이 사람이 읽는 이름이다.
+  const labelOf = new Map<string, string>();
+  for (const f of imports) {
+    for (const r of f.imports) {
+      const m = r.form === null ? null : /^http-(get|post|put|patch|delete|any)$/.exec(r.form);
+      if (m === null) continue;
+      labelOf.set(`${f.path}:${r.line}`, `${m[1] === 'any' ? '' : `${(m[1] as string).toUpperCase()} `}${r.specifier}`);
+    }
+  }
+
+  const ops: BatchOp[] = [
+    { name: 'path.clear', params: { repoId } },
+    { name: 'path.clear_paths', params: { repoId } },
+  ];
+  let count = 0;
+  for (const hops of methodPaths(graph)) {
+    const http = hops.find((h) => h.kind === 'http');
+    const entry = http?.calledAt;
+    if (entry === undefined || entry === null) continue;
+    const entryFileId = idOf.get(entry.path);
+    if (entryFileId === undefined) continue;
+    if (hops.some((h) => !idOf.has(h.path))) continue;
+    ops.push({
+      name: 'path.insert',
+      params: {
+        repoId, unitName: unitOf(entry.path), entryFileId, entryLine: entry.line,
+        label: labelOf.get(`${entry.path}:${entry.line}`) ?? '', hopCount: hops.length, updatedAt: now,
+      },
+    });
+    hops.forEach((h, ord) => {
+      ops.push({
+        name: 'path.hop_insert',
+        params: {
+          repoId, entryFileId, entryLine: entry.line, ord, fileId: idOf.get(h.path) as number, name: h.name,
+          lineStart: h.lineStart, lineEnd: h.lineEnd, calledLine: h.calledAt?.line ?? null, depth: h.depth, kind: h.kind,
+        },
+      });
+    });
+    count += 1;
+  }
+  await inBatches(ops);
+  return count;
+}
+
+/** 표·열·외래키·열↔필드 (D169). */
+async function writeSchema(
+  repoId: number,
+  files: readonly { id: number; path: string }[],
+  imports: readonly FileImports[],
+  edges: readonly ResolvedEdge[],
+): Promise<number> {
+  const idOf = new Map(files.map((f) => [f.path, f.id]));
+  const schema = extractSchema(imports, edges);
+  const ops: BatchOp[] = [
+    { name: 'schema.clear_bindings', params: { repoId } },
+    { name: 'schema.clear_fks', params: { repoId } },
+    { name: 'schema.clear_columns', params: { repoId } },
+    { name: 'schema.clear_tables', params: { repoId } },
+  ];
+  const known = new Set<string>();
+  for (const t of schema.tables) {
+    const fileId = idOf.get(t.path);
+    if (fileId === undefined) continue;
+    known.add(t.name);
+    ops.push({ name: 'schema.table_insert', params: { repoId, name: t.name, fileId, line: t.line } });
+    t.columns.forEach((c, ord) => {
+      ops.push({
+        name: 'schema.column_insert',
+        params: {
+          repoId, tableName: t.name, ord, name: c.name, type: c.type, notNull: c.notNull ? 1 : 0,
+          defaultValue: c.default, line: c.line,
+        },
+      });
+    });
+  }
+  for (const k of schema.fks) {
+    if (!known.has(k.table)) continue;
+    ops.push({
+      name: 'schema.fk_insert',
+      params: { repoId, tableName: k.table, columnName: k.column, refTable: k.refTable, refColumn: k.refColumn, line: k.line },
+    });
+  }
+  for (const b of schema.bindings) {
+    const fileId = idOf.get(b.path);
+    if (fileId === undefined) continue;
+    ops.push({
+      name: 'schema.binding_insert',
+      params: {
+        repoId, fileId, line: b.line, columnName: b.column, property: b.property, entity: b.entity,
+        entityFileId: b.entityPath === null ? null : idOf.get(b.entityPath) ?? null,
+        tableName: b.table !== null && known.has(b.table) ? b.table : null,
+      },
+    });
+  }
+  await inBatches(ops);
+  return known.size;
+}
+
+/** 죽은 갈래 — 표시만 한다 (D168). */
+async function writeDead(
+  repoId: number,
+  files: readonly { id: number; path: string }[],
+  imports: readonly FileImports[],
+  edges: readonly ResolvedEdge[],
+  graph: ReturnType<typeof buildCallGraph>,
+): Promise<number> {
+  const idOf = new Map(files.map((f) => [f.path, f.id]));
+  const ops: BatchOp[] = [{ name: 'path.dead_clear', params: { repoId } }];
+  for (const d of deadBranches({ paths: files.map((f) => f.path), files: imports, edges, graph })) {
+    const fileId = idOf.get(d.path);
+    if (fileId === undefined) continue;
+    ops.push({ name: 'path.dead_insert', params: { repoId, kind: d.kind, fileId, line: d.line, label: d.label } });
+  }
+  await inBatches(ops);
+  return ops.length - 1;
 }
 
 /**
@@ -235,7 +417,8 @@ async function writeEdges(
   files: readonly { id: number; path: string }[],
   imports: readonly FileImports[],
   touched: readonly number[],
-): Promise<number> {
+  // 해석 결과를 함께 돌려준다 — 대지가 같은 것을 다시 풀지 않게 (D160).
+): Promise<{ count: number; resolved: ResolvedEdge[] }> {
   const idOf = new Map(files.map((f) => [f.path, f.id]));
   const resolved = resolveImports({ paths: files.map((f) => f.path), files: imports });
   const mine = new Set(touched);
@@ -264,7 +447,8 @@ async function writeEdges(
   // 경로는 싣지 않는다 (01 §6) — 개수만 남긴다.
   if (unknown > 0) log.info('가리키는 파일이 없는 import', { n: unknown });
   await inBatches(ops);
-  return ops.length - touched.length;
+  // 대지가 같은 것을 다시 풀지 않도록 해석 결과를 함께 돌려준다 (D160).
+  return { count: ops.length - touched.length, resolved };
 }
 
 /**
@@ -360,6 +544,10 @@ async function writeSites(
 /**
  * 미지 개념 수를 다시 센다 (02 §6.1). 겹이 바뀌면 값이 바뀌므로 인제스트 뒤와
  * 세션 뒤 두 시점에 돈다 — 여기서는 앞의 것이다.
+ *
+ * 두 수를 함께 센다 (D155): **초점 줄**의 미지(`unknown_count`)와 **창**의
+ * 미지(`window_unknown`). 앞의 것은 「오늘 낼 수 있는가」의 문턱이고 뒤의 것은 같은 값
+ * 안에서의 순서다. 겹을 봐야 나오는 수라 둘 다 여기서 난다 — 나뉘면 한쪽만 낡는다.
  */
 export async function recountUnknown(
   dict: Dict,
@@ -369,6 +557,24 @@ export async function recountUnknown(
   const known = knownSet(mastery);
   const layerOf = (id: string): number => (known.has(id) ? 1 : 0);
   const rows = await ipc.store.query('derive.sites_for_rank', { repoId });
+  const blocks = await ipc.store.query('derive.blocks_for_rank', { repoId });
+
+  // 창은 파일 안에서만 뜻이 있다 — 사용처와 블록을 파일별로 갈라 둔다.
+  const sitesOf = new Map<number, WindowSite[]>();
+  for (const row of rows) {
+    const at = sitesOf.get(row.file_id) ?? [];
+    at.push({ conceptId: row.concept_id, lineStart: row.line_start, lineEnd: row.line_end });
+    sitesOf.set(row.file_id, at);
+  }
+  const blocksOf = new Map<number, LineSpan[]>();
+  for (const block of blocks) {
+    const at = blocksOf.get(block.file_id) ?? [];
+    at.push({ from: block.line_start, to: block.line_end });
+    blocksOf.set(block.file_id, at);
+  }
+  const indexOf = new Map<number, LineIndex>();
+  for (const [fileId, sites] of sitesOf) indexOf.set(fileId, lineIndex(sites));
+
   const ops = rows.map((row) => ({
     name: 'derive.unknown_count_set' as const,
     params: {
@@ -385,17 +591,107 @@ export async function recountUnknown(
         layerOf,
         dict,
       ),
+      windowUnknown: windowUnknown(
+        { conceptId: row.concept_id, lineStart: row.line_start },
+        innermostBlock(blocksOf.get(row.file_id) ?? [], row.line_start),
+        indexOf.get(row.file_id) ?? new Map(),
+        layerOf,
+      ),
     },
   }));
   await inBatches(ops);
   return ops.length;
 }
 
+/**
+ * 원장의 겹 전량을 `MasteryRow` 로. `universal_id` 는 원장에 없으므로 사전에서 붙인다.
+ *
+ * 인제스트 뒤 계산(`recountUnknown` · `writeZeroChapter`)은 **실제 겹**을 봐야 한다 —
+ * 빈 배열을 넘기면 이미 배운 개념이 전부 「모르는 것」이 되어 미지 수가 부풀고, 0장이
+ * 그 언어를 이미 아는 사람에게도 열린다.
+ */
+export async function loadMastery(dict: Dict): Promise<MasteryRow[]> {
+  const rows = await ipc.store.query('review.mastery_all', {});
+  return rows.map((row) => ({
+    conceptId: row.concept_id,
+    layer: row.layer,
+    universalId: dict.concepts.get(row.concept_id)?.universal ?? null,
+  }));
+}
+
+/**
+ * 「0장 — 이 언어의 바닥」 대지를 갱신한다 (D136).
+ *
+ * `recountUnknown` **뒤에** 돌아야 한다 — 담을 판을 고르는 기준이 `unknown_count` 이고,
+ * 그 값을 채우는 것이 `recountUnknown` 이다. `writeUnitNodes` 뒤이기도 해야 한다: 그쪽이
+ * `derive.unit_nodes_clear` 로 이 리포의 스티커를 통째로 비운다.
+ *
+ * 대지를 **여는 것은 한 번뿐**이다(그 언어 essential 이 전부 0겹일 때). 그 뒤로는 이미
+ * 있는 대지의 스티커만 다시 쓴다 — 끝났다고 대지가 사라지지 않는다.
+ */
+export async function writeZeroChapter(
+  dict: Dict,
+  repoId: number,
+  mastery: readonly MasteryRow[],
+): Promise<number> {
+  const known = knownSet(mastery);
+  const layerOf = (id: string): number => (known.has(id) ? 1 : 0);
+  const existing = await ipc.store.query('derive.unit_manual_names', { repoId });
+  const opened = existing.some((row) => row.name === ZERO_CHAPTER_UNIT);
+
+  const essential = [...dict.langs.values()].flatMap((meta) => meta.essential);
+  if (!opened && !shouldOpenZeroChapter(essential, layerOf)) return 0;
+
+  const rows = await ipc.store.query('derive.sites_for_rank', { repoId });
+  const best = new Map<string, { siteId: number; unknown: number }>();
+  for (const row of rows) {
+    const at = best.get(row.concept_id);
+    if (at === undefined || row.unknown_count < at.unknown) {
+      best.set(row.concept_id, { siteId: row.id, unknown: row.unknown_count });
+    }
+  }
+
+  const plates = zeroChapterPlates({
+    essential,
+    prereqOf: (id) => dict.concepts.get(id)?.prereq ?? [],
+    bestSiteOf: (id) => {
+      const hit = best.get(id);
+      return hit === undefined
+        ? null
+        : { siteId: hit.siteId, unknown: hit.unknown, lineStart: 0, lineEnd: 0 };
+    },
+  });
+  // 판이 하나도 없으면 대지를 만들지 않는다 — 빈 대지는 색인 띠에서 죽은 칩이다.
+  if (plates.length === 0) return 0;
+
+  const ops: BatchOp[] = [{
+    name: 'derive.unit_manual_upsert',
+    params: { repoId, name: ZERO_CHAPTER_UNIT, orderIdx: ZERO_CHAPTER_ORDER },
+  }];
+  plates.forEach((plate, i) => {
+    ops.push({
+      name: 'derive.unit_node_insert',
+      params: {
+        repoId, name: ZERO_CHAPTER_UNIT, conceptId: plate.conceptId, track: 't0', nodeOrder: i,
+      },
+    });
+  });
+  await inBatches(ops);
+  return plates.length;
+}
+
 async function writeUnits(
+  dict: Dict,
   repoId: number,
   files: readonly { id: number; path: string }[],
+  edges: readonly ResolvedEdge[],
+  seeds: readonly EntrySeed[],
+  now: number,
 ): Promise<number> {
-  const { units, byPath } = assignUnits(files.map((f) => f.path));
+  // 기능(진입점 폐포)이 먼저고 남은 것을 디렉터리 규칙이 받는다 (D160).
+  // 순서는 코스의 순서다 — `unit.order_idx` 가 곧 챕터 번호다 (D162).
+  const protoMarks = [...dict.concepts.values()].flatMap((c) => c.evidence);
+  const { units, unitsOf } = planUnits(files.map((f) => f.path), edges, { protoMarks, entries: seeds });
   const ops: BatchOp[] = units.map((unit, i) => ({
     name: 'derive.unit_upsert',
     params: { repoId, name: unit.name, rootPath: unit.rootPath || null, orderIdx: i },
@@ -403,10 +699,20 @@ async function writeUnits(
   ops.push({ name: 'derive.unit_delete_missing', params: { repoId, names: units.map((u) => u.name) } });
   ops.push({ name: 'derive.unit_files_clear', params: { repoId } });
   for (const file of files) {
-    const name = byPath.get(file.path);
-    if (name === undefined) continue;
-    ops.push({ name: 'derive.unit_file_insert', params: { repoId, name, fileId: file.id } });
+    // 파일 하나가 대지 여럿에 든다 (D160). `unit_file` 의 기본키가 그것을 이미 허용한다.
+    for (const name of unitsOf.get(file.path) ?? []) {
+      ops.push({ name: 'derive.unit_file_insert', params: { repoId, name, fileId: file.id } });
+    }
   }
+  // 챕터 진도 (D162). 대지마다 한 행이고 **진도 열은 안 건드린다** — 다시 인제스트해도
+  // 배운 것이 안 지워진다. 대지가 서 있어야 꽂히므로 `unit_upsert` 뒤에 온다.
+  for (const unit of units) {
+    ops.push({
+      name: 'derive.chapter_upsert',
+      params: { repoId, name: unit.name, origin: unit.origin, updatedAt: now },
+    });
+  }
+  ops.push({ name: 'derive.chapter_delete_missing', params: { repoId } });
   await inBatches(ops);
   return units.length;
 }
@@ -417,20 +723,24 @@ async function writeUnits(
  */
 export async function writeUnitNodes(repoId: number): Promise<number> {
   const sites = await ipc.store.query('derive.sites_for_rank', { repoId });
-  const files = await ipc.store.query('derive.files', { repoId });
-  const { byPath } = assignUnits(files.map((f) => f.path));
+  // 대지를 **다시 파생하지 않는다** — `writeUnits` 가 방금 쓴 것을 읽는다 (D160).
+  // 같은 규칙을 두 곳에서 돌리면 둘이 어긋날 자리가 생기고, 여기는 엣지도 못 본다.
+  const byPath = new Map<string, string[]>();
+  for (const row of await ipc.store.query('derive.unit_files', { repoId })) {
+    byPath.set(row.path, [...(byPath.get(row.path) ?? []), row.name]);
+  }
   const seen = new Set<string>();
   const ops: BatchOp[] = [];
   for (const site of sites) {
-    const unit = byPath.get(site.path);
-    if (unit === undefined) continue;
-    const key = `${unit}\u0000${site.concept_id}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    ops.push({
-      name: 'derive.unit_node_insert',
-      params: { repoId, name: unit, conceptId: site.concept_id, track: 't0', nodeOrder: seen.size },
-    });
+    for (const unit of byPath.get(site.path) ?? []) {
+      const key = `${unit}\u0000${site.concept_id}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      ops.push({
+        name: 'derive.unit_node_insert',
+        params: { repoId, name: unit, conceptId: site.concept_id, track: 't0', nodeOrder: seen.size },
+      });
+    }
   }
   await ipc.store.exec('derive.unit_nodes_clear', { repoId });
   await inBatches(ops);

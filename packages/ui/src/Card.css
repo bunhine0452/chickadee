@@ -1,0 +1,60 @@
+/* D182 — 내용을 담는 면 하나. 그림자는 「떠 있다」를 말할 때만(모달·팝오버) 쓰고,
+   판판한 자리에는 테두리 1px 이면 충분하다. 종이 흉내·질감·기울기는 없다(정본 §6). */
+.card {
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.card.inset { background: var(--surface-2) }
+
+.card.plain { border-color: transparent }
+
+.card.raised { box-shadow: var(--shadow-1) }
+
+.card.float { box-shadow: var(--shadow-2) }
+
+.card.pad { padding: var(--s-5) }
+
+.card.pad-sm { padding: var(--s-3) }
+
+.card.pad-lg { padding: var(--s-6) }
+
+/* 누를 수 있는 카드 — 목록 항목이 그렇다. 색이 아니라 테두리가 짙어져 반응한다. */
+.card.tap {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+}
+
+.card.tap:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+}
+
+.card > .card-head {
+  display: flex;
+  gap: var(--s-3);
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--s-3);
+}
+
+.card > .card-head > h2,
+.card > .card-head > h3 {
+  margin: 0;
+  font-size: var(--fs-5);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: -.01em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card.tap { transition-duration: .001ms }
+}
+[data-motion="reduce"] .card.tap { transition-duration: .001ms }

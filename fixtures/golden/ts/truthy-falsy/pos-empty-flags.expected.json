@@ -1,0 +1,80 @@
+[
+  {
+    "queryId": "ts/truthy-falsy",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "site",
+    "form": "negate",
+    "startLine": 3,
+    "startCol": 16,
+    "endLine": 3,
+    "endCol": 21,
+    "nodeKind": "unary_expression",
+    "inError": false
+  },
+  {
+    "queryId": "ts/truthy-falsy",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.2",
+    "form": "negate",
+    "startLine": 3,
+    "startCol": 16,
+    "endLine": 3,
+    "endCol": 17,
+    "nodeKind": "!",
+    "inError": false
+  },
+  {
+    "queryId": "ts/truthy-falsy",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.1",
+    "form": "negate",
+    "startLine": 3,
+    "startCol": 17,
+    "endLine": 3,
+    "endCol": 21,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "ts/truthy-falsy",
+    "matchId": 2,
+    "patternIndex": 1,
+    "name": "site",
+    "form": "negate",
+    "startLine": 4,
+    "startCol": 18,
+    "endLine": 4,
+    "endCol": 23,
+    "nodeKind": "unary_expression",
+    "inError": false
+  },
+  {
+    "queryId": "ts/truthy-falsy",
+    "matchId": 2,
+    "patternIndex": 1,
+    "name": "pick.2",
+    "form": "negate",
+    "startLine": 4,
+    "startCol": 18,
+    "endLine": 4,
+    "endCol": 19,
+    "nodeKind": "!",
+    "inError": false
+  },
+  {
+    "queryId": "ts/truthy-falsy",
+    "matchId": 2,
+    "patternIndex": 1,
+    "name": "pick.1",
+    "form": "negate",
+    "startLine": 4,
+    "startCol": 19,
+    "endLine": 4,
+    "endCol": 23,
+    "nodeKind": "identifier",
+    "inError": false
+  }
+]

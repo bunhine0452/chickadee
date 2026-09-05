@@ -1,0 +1,87 @@
+schema: 1
+id: cs/garbage-collection
+universal: null
+name: { ko: "안 쓰는 값을 누가 치우나", en: "Automatic memory management" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+track_default: t0
+essential: false
+difficulty: 3
+prereq: [cs/stack-and-heap]
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "치우는 일을 사람이 하느냐, 규칙이 하느냐, 청소부가 하느냐."
+    en: "Reclaiming is done by a person, by a rule, or by a collector."
+  why:
+    ko: >-
+      오래 사는 자리는 누군가 치워야 합니다. 갈래는 셋이에요.
+      <b>사람이</b> 「이제 안 쓴다」를 적는 방식 — 빠지면 자리가 쌓이고 두 번 적으면 사고가 납니다.
+      <b>규칙이</b> 정하는 방식 — 「이 이름이 사라지면 치운다」를 언어가 강제하고, 대신 규칙을 적어야 합니다.
+      <b>청소부가</b> 도는 방식 — 아무도 안 들고 있는 값을 찾아 치우고, 대신 <b>도는 시점을 내가 못 정합니다</b>.
+      셋 다 「안 들고 있으면 치운다」는 같은 목표이고, <b>누가 그것을 아느냐</b>가 다릅니다.
+    en: >-
+      Long-lived space must be reclaimed by someone. Three branches. <b>A person</b> writes “done
+      with this” — miss it and space piles up; write it twice and you have an accident.
+      <b>A rule</b> decides — the language enforces “when this name goes, reclaim”, at the price of
+      writing the rules. <b>A collector</b> runs — it finds values nobody holds and reclaims them,
+      at the price that <b>you do not choose when it runs</b>. All three aim at the same thing:
+      reclaim what nobody holds. They differ on <b>who knows that</b>.
+  trace: []
+rule:
+  ko: "<b>들고 있으면 아무도 못 치운다.</b> 청소부가 있어도 마찬가지다."
+  en: "<b>Nothing held can be reclaimed.</b> A collector changes nothing about that."
+ok:
+  ko: >-
+    안 쓰게 된 값을 놓아 주면 자리가 돌아옵니다. 놓아 주는 방법이 갈래마다 다를 뿐이에요.
+  en: >-
+    Let go of what you no longer use and the space returns. Only the way of letting go differs.
+misconceptions:
+  - ko: "청소부가 있으면 새는 일이 없다 — 계속 들고 있으면 그대로 쌓입니다."
+    en: "A collector means no leaks — hold on and it piles up all the same."
+  - ko: "치우는 시점을 내가 정할 수 있다 — 청소부 방식에서는 대개 못 정합니다."
+    en: "You choose when it runs — with a collector, usually not."
+  - ko: "규칙이 정하는 방식은 느리다 — 도는 때에 청소하는 비용이 아예 없습니다."
+    en: "Rule-based reclaiming is slow — it has no run-time collection cost at all."
+meaning:
+  - q:
+      ko: "청소부가 있는 언어인데 메모리가 계속 늘어납니다. <b>무엇을 의심해야 하나요?</b>"
+      en: "Memory keeps growing in a collected language. <b>What do you suspect?</b>"
+    hint:
+      ko: "청소부가 치우는 것은 아무도 안 들고 있는 값입니다."
+      en: "A collector reclaims what nobody holds."
+    options:
+      - t: { ko: "어딘가 그 값을 계속 들고 있는 자리가 있다", en: "Something is still holding those values" }
+      - t: { ko: "청소부가 고장 났다", en: "The collector is broken" }
+        diag:
+          t:
+            ko: "청소부는 <b>안 들고 있는 것만</b> 치우도록 만들어져 있습니다. 들고 있는 것을 안 치우는 것은 제 일을 한 거예요."
+            en: "A collector is built to reclaim <b>only what is unheld</b>. Leaving held values alone is it doing its job."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 못 치우나 안 치우나", en: "The sharpest spot — cannot or must not" }
+            code:
+              - "안 들고 있음: 치운다"
+              - "들고 있음: 안 치우는 것이 맞다"
+      - t: { ko: "값이 너무 커서 치우는 데 시간이 걸린다", en: "The values are large and take time to reclaim" }
+        diag:
+          t:
+            ko: "치우는 데 걸리는 시간은 잠깐 늘었다 줄어드는 모양입니다. <b>계속 늘어나는</b> 것은 안 치워지고 있다는 표시예요."
+            en: "Reclaiming time makes memory rise and fall. <b>Monotonic growth</b> means nothing is being reclaimed."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 오르내리나 계속 오르나", en: "The sharpest spot — sawtooth or climb" }
+            code:
+              - "느린 청소: 오르내린다"
+              - "붙잡음: 계속 오른다"
+      - t: { ko: "메모리를 직접 해제하는 코드를 안 써서", en: "Because you did not write code to free it" }
+        diag:
+          t:
+            ko: "그 코드를 <b>안 쓰는 것이 이 방식</b>입니다. 쓸 코드는 해제가 아니라 <b>놓아 주는 것</b>이에요."
+            en: "Not writing it <b>is the scheme</b>. The code to write is not a free, it is a <b>release of the hold</b>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 해제냐 놓아 주기냐", en: "The sharpest spot — free or release" }
+            code:
+              - "해제: 사람이 치우는 갈래"
+              - "놓아 주기: 청소부가 치울 수 있게"

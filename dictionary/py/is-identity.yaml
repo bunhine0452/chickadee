@@ -1,0 +1,247 @@
+schema: 1
+id: py/is-identity
+# 0부 축 H. `universal: null` — 「자리냐 값이냐」의 물음은 여러 언어에 있지만 파이썬만
+# **리터럴과 견주면 컴파일러가 경고한다**(3.8 · bpo-34850). 자바의 `Integer` 캐시는 경고가
+# 없고 JS 에는 이 낱말 자체가 없다. 좁힌 그 문장이 이 판의 근거다 (`py-learning.md` §11.3 #4).
+universal: null
+name: { ko: 같은 것인지 견주기, en: Same object or not }
+token: "is"
+grammars: [python]
+framework: null
+essential: true
+difficulty: 2
+prereq: [py/comparison, cs/identity-vs-equality, cs/memory-address]
+confusions: [py/comparison, py/bool-op-value, py/arithmetic]
+
+dict:
+  one_liner:
+    ko: "값이 같으냐가 아니라 같은 자리에 있느냐를 묻는다."
+    en: "It asks not whether two values match but whether they occupy one place."
+  why:
+    ko: >-
+      파이썬 데이터 모델은 값마다 <b>자리·종류·값</b> 셋이 있다고 적고, 이 낱말을
+      「두 값의 <b>자리</b>를 견준다」로 정의합니다. 견주기 기호가 값을 보는 것과 다른 물음이에요.
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 그 자리입니다.
+      쓸 데가 좁습니다 — 자리가 하나뿐임이 <b>보장된 값</b>에만 씁니다. <code>None</code> 이
+      그런 값이고, 그래서 「없음인가」는 늘 이 낱말로 묻습니다.
+      숫자·글자에 쓰면 <b>우연히 맞습니다.</b> 작은 정수와 짧은 글자를 파이썬이 미리 하나씩
+      만들어 두기 때문인데, 그 범위 밖에서는 답이 뒤집혀요. 3.8 부터는 리터럴과 견주면
+      경고 한 줄이 뜹니다 — 실제로 사용자 리포 둘(파일 202개)에 그 모양이 <b>0곳</b>입니다.
+    en: >-
+      Python's data model says every value has a <b>place, a kind and a value</b>, and defines this
+      word as comparing the <b>places</b>. That is a different question from what the equality
+      symbol asks. {{pick.1|code}} on line {{site.line}} is that spot. Its use is narrow: only for
+      values <b>guaranteed</b> to have a single place. <code>None</code> is such a value, which is
+      why "is it absent" is always asked this way. On numbers and text it merely <b>happens to be
+      right</b>: Python pre-builds one copy of small whole numbers and short text, and outside that
+      range the answer flips. Since 3.8 comparing against a literal raises a warning — and across two
+      sample repositories (202 files) that shape appears <b>0 times</b>.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}} 값을 각각 찾는다."
+      en: "{{pick.2|code}} and {{pick.3|code}} on line {{site.line}} are each looked up."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 값이 아니라 <b>자리</b>를 견준다."
+      en: "{{pick.1|code}} weighs the <b>places</b>, not the values."
+    - ko: "같은 자리면 참, 아니면 거짓이다. 안이 같은지는 안 본다."
+      en: "One place gives true, two give false. What is inside is never inspected."
+
+rule:
+  ko: >-
+    <b>자리를 견준다.</b> 자리가 하나뿐임이 보장된 값에만 쓰고, 나머지는 값으로 견준다.
+  en: >-
+    <b>It weighs places.</b> Use it only where a single place is guaranteed; weigh the rest by value.
+result:
+  label:
+    ko: "{{site.line}}행의 판단"
+    en: "the judgement on line {{site.line}}"
+  value: "{{pick.2}} {{pick.1}} {{pick.3}}"
+  note:
+    ko: "자리가 같은가"
+    en: "one place or two"
+ok:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:이,가}} 두 자리를 견줍니다. 안이 같은지를 묻고 싶으면
+    견주기 기호를 써야 해요 — 답이 갈리는 자리가 있습니다.
+  en: >-
+    {{pick.1|code}} weighs the two places. To ask whether the contents match you need the equality
+    symbol, and there are spots where the two answers part.
+payoff:
+  ko: >-
+    「왜 <code>None</code> 만 이 낱말로 견주나」가 풀립니다 — 자리가 하나뿐임이 보장된
+    값이 그것뿐이어서예요.
+  en: >-
+    “Why is <code>None</code> the one thing weighed this way” answers itself: it is the value whose
+    single place is guaranteed.
+bridge:
+  ko: >-
+    값이 같은지를 묻는 기호는 옆 판입니다. 대부분의 자리에서 두 답이 같아 보여서,
+    <b>갈리는 자리</b>를 아는 것이 이 판의 몫이에요.
+  en: >-
+    The symbol that asks about values is the neighbouring plate. In most spots the two answers look
+    alike, so knowing <b>where they part</b> is this plate's job.
+misconceptions:
+  - ko: >-
+      값이 같으면 이 낱말도 참이다 — 자리가 다르면 거짓입니다. 큰 수·긴 글자에서
+      그 차이가 드러나요.
+    en: >-
+      Matching values make this word true — different places make it false, and large numbers or
+      long text reveal the gap.
+  - ko: >-
+      작은 정수에서 참이니 어디서나 참이다 — 미리 만들어 둔 범위 안에서만 그렇습니다.
+      그 밖에서는 구현이 정하고, 그래서 3.8 부터 경고가 뜹니다.
+    en: >-
+      True for small whole numbers, so true everywhere — only inside the pre-built range. Beyond it
+      the implementation decides, which is why 3.8 added the warning.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>자리를 견주는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that weighs the places</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 견주어지는 <b>한쪽</b>입니다. 자리를 보느냐
+            값을 보느냐는 가운데 낱말이 정해요.
+          en: >-
+            {{pick.2|code}} is <b>one side</b> being weighed. Whether places or values are compared
+            is set by the word between.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 값과 물음"
+            en: "The sharpest spot — a value and the question"
+          code:
+            - "flag is None      # 자리를 본다"
+            - "flag == None      # 값을 본다"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 견주어지는 <b>다른 한쪽</b>입니다.
+            이 값이 자리가 하나뿐인 값이라 이 낱말을 쓸 수 있는 거예요.
+          en: >-
+            {{pick.3|code}} is the <b>other side</b>. It is because this value has a single
+            guaranteed place that the word may be used at all.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 왜 이 값에만 쓰나"
+            en: "The sharpest spot — why only this value"
+          code:
+            - "x is None         # 늘 안전하다"
+            - "x is 1000         # 3.8 부터 경고가 뜬다"
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행은 값이 아니라 <b>자리</b>를 견줍니다.
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} weighs the <b>place</b>, not the value.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "is", mono: true }
+      - t: "=="
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 기호는 <b>값</b>을 견줍니다. 없음과 견줄 때는 대개 같은 답이 나오지만, 값을
+              견주는 방법을 스스로 정한 자료형이면 답이 갈려요.
+            en: >-
+              That symbol weighs <b>values</b>. Against absence the answers usually agree, yet a type
+              that defines its own equality can make them part.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 자리냐 값이냐"
+              en: "The sharpest spot — the place or the value"
+            code:
+              - "x is None        # 자리를 본다"
+              - "x == None        # 값을 본다"
+      - t: "or"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 낱말은 <b>둘 중 하나를 골라</b> 내놓습니다. 참·거짓이 아니라 값이 나와서,
+              갈림길에 두면 「비었나」를 묻는 판이 돼요.
+            en: >-
+              That word <b>picks one of the two</b> and hands it back. A value comes out, not a
+              true-or-false, so at a fork it turns into an emptiness test.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 견주기냐 고르기냐"
+              en: "The sharpest spot — weighing or choosing"
+            code:
+              - "x is None        # True 또는 False"
+              - "x or None        # x 또는 None"
+      - t: "+"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 기호는 <b>셈합니다.</b> 없음과는 종류가 안 맞아 그 자리에서 멈추고, 견주는
+              일과는 아무 상관이 없어요.
+            en: >-
+              That symbol <b>computes</b>. Against absence the kinds clash and it stops there; it has
+              nothing to do with weighing.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 견주기냐 셈하기냐"
+              en: "The sharpest spot — weighing or computing"
+            code:
+              - "x is None        # 판단이 나온다"
+              - "x + None         # TypeError"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 값이 아니라 자리를 견줄까요?"
+    en: "Why does line {{site.line}} weigh the place instead of the value?"
+  choices:
+    - t:
+        ko: "견주는 상대가 자리 하나뿐인 값이어서 — 그때는 이쪽이 더 정확하다"
+        en: "Because the other side has a single guaranteed place — here this is the exact question"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 자리가 여럿일 수 있는 값에 같은 낱말을 쓰면 무엇이 나오는지도 적어 보세요."
+        en: >-
+          That is the direction. Add what comes out when the same word meets a value that can have
+          many places.
+    - t:
+        ko: "값 견주기보다 빨라서"
+        en: "Because it is faster than weighing values"
+      ok: false
+      fb:
+        ko: >-
+          빠른 것은 맞지만 그것이 고르는 이유는 아닙니다. 갈리는 것은 <b>무엇을 묻느냐</b>예요.
+        en: >-
+          It is faster, yet that is not why it is chosen. What parts ways is <b>what is being
+          asked</b>.
+    - t:
+        ko: "없음과는 값 견주기를 못 해서"
+        en: "Because absence cannot be weighed by value"
+      ok: false
+      fb:
+        ko: >-
+          할 수는 있습니다. 대개 같은 답이 나오고, 자료형이 견주는 법을 스스로 정했을 때만
+          갈려요 — 그 위험 때문에 자리 쪽을 씁니다.
+        en: >-
+          It can be. The answers usually agree and part only when a type defines its own equality —
+          and it is that risk that makes the place the safer question.
+
+queries:
+  - { grammars: [python], file: ./is-identity.scm }
+
+examples:
+  - code: "missing = value is None       # None is None -> True (bool)"
+    expect: { sites: 1, form: is, hole: "is", picks: { 1: "is", 2: "value", 3: "None" } }
+  - code: "ready = value is not None     # 1 is not None -> True (bool)"
+    expect: { sites: 1, form: is-not, hole: "is not", picks: { 1: "is not", 2: "value", 3: "None" } }
+  - code: "same = a is b                 # [] is [] -> False (bool)"
+    expect: { sites: 1, form: is, hole: "is", picks: { 1: "is", 2: "a", 3: "b" } }
+  - code: "same = a == b                 # [] == [] -> True (bool)"
+    expect: none
+  - code: "found = key in table          # 'k' in {} -> False (bool)"
+    expect: none

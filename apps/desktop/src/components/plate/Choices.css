@@ -1,124 +1,142 @@
-/* 목업: design/src/ink/session.css 「선택지」 블록.
-   바꾼 것 —
-     · 정합 표시 `.ch.right` 는 판정 색 별칭 --verdict-exact (값은 목업의 --pink 와 같다, D56).
-     · 어긋난 보기 번호 `.ch.wrong .n` 의 황 원색·먹 리터럴은 --t2 / --on-t2 (05 §4.2).
-   코드 안엔 잉크를 안 얹으니 색은 테두리·번호에만 남는다. */
+/* 보기 (D182 · 정본 §6).
+ *
+ * 뺀 것 — 2.5px 겹테두리 · 4px 오프셋 그림자 · 눌리는 4px 이동. 종이 흉내였다.
+ * 남은 것은 면 하나와 테두리 한 겹이고, 고른 것은 **테두리 색과 번호 칸**이 말한다.
+ *
+ * 폭은 미디어 쿼리가 아니라 `auto-fit` 이 정한다 — 판이 22rem 두 칸을 못 담으면 한 줄로
+ * 내려온다. 720 에서 한 단, 1280~2560 에서 두 단이고 그 사이 어느 폭에서도 안 깨진다. */
 .choices {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: var(--s-3);
+  min-width: 0;
 }
 
-.choices.one { grid-template-columns: 1fr }
+.choices.one { grid-template-columns: minmax(0, 1fr) }
 
 .ch {
   all: unset;
   box-sizing: border-box;
-  position: relative;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: start;
-  gap: 12px;
-  min-height: 54px;
-  padding: 11px 14px 11px 11px;
-  border: 2.5px solid var(--rule);
-  background: var(--paper);
-  box-shadow: 0 4px 0 var(--edge);
-  color: var(--ink);
+  gap: var(--s-3);
+  min-width: 0;
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--text);
   cursor: pointer;
-  transition: transform .08s, box-shadow .08s, background .12s;
+  transition: border-color var(--dur-fast), background var(--dur-fast);
 }
 
 .ch:focus-visible {
-  outline: 3px solid var(--t0);
-  outline-offset: 3px;
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 
-.ch:hover { background: var(--stock) }
-
-.ch:active {
-  box-shadow: 0 0 0 var(--edge);
-  transform: translateY(4px);
+.ch:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-2);
 }
 
 .ch .n {
   display: grid;
   place-items: center;
   flex: 0 0 auto;
-  width: 26px;
-  height: 26px;
-  margin-top: 1px;
-  border: 2px solid var(--rule);
-  background: var(--paper-3);
-  color: var(--ink-soft);
-  font-family: var(--f-mono);
-  font-size: var(--fs-14);
-  font-weight: 700;
+  width: 22px;
+  height: 22px;
+  margin-top: 2px;
+  border-radius: var(--r-sm);
+  background: var(--surface-3);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  font-weight: var(--fw-bold);
 }
 
 .ch .t {
-  font-size: var(--fs-16);
-  letter-spacing: -.015em;
-  line-height: 1.5;
+  min-width: 0;
+  font-size: var(--fs-4);
+  line-height: var(--lh-body);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 .ch .t code {
-  padding: 0 4px;
-  border: 1px solid var(--rule);
-  background: var(--paper-3);
-  font-family: var(--f-mono);
-  font-size: var(--fs-15);
+  padding: 0 var(--s-1);
+  border-radius: var(--r-sm);
+  background: var(--surface-3);
+  font-family: var(--font-mono);
+  font-size: .92em;
 }
 
+/* 코드 조각 보기 — 줄바꿈하면 뜻이 상하므로 이 칸 안에서만 가로로 흐른다. */
 .ch.code-choice .t {
-  font-family: var(--f-mono);
-  font-size: var(--fs-16);
-  white-space: pre-wrap;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  font-family: var(--font-mono);
+  font-size: var(--fs-3);
+  white-space: pre;
 }
 
 .ch.sel {
-  background: var(--stock);
-  box-shadow: 0 4px 0 var(--edge), inset 0 0 0 2px var(--t0);
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+  background: var(--accent-weak);
 }
 
 .ch.sel .n {
-  border-color: var(--rule);
-  background: var(--t0);
-  color: var(--on-t0);
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
-.ch.right { box-shadow: 0 4px 0 var(--edge), inset 0 0 0 2.5px var(--verdict-exact) }
+.ch.right {
+  border-color: var(--ok);
+  box-shadow: inset 0 0 0 1px var(--ok);
+  background: var(--ok-bg);
+}
 
 .ch.right .n {
-  background: var(--verdict-exact);
-  color: var(--on-t1);
+  background: var(--ok);
+  color: var(--text-inverse);
 }
 
 .ch.wrong {
-  border-style: dashed;
-  color: var(--ink-soft);
+  border-color: var(--bad);
+  box-shadow: inset 0 0 0 1px var(--bad);
+  background: var(--bad-bg);
 }
 
 .ch.wrong .n {
-  background: var(--t2);
-  color: var(--on-t2);
+  background: var(--bad);
+  color: var(--text-inverse);
 }
 
 .ch[disabled] { cursor: default }
 
-.ch[disabled]:hover { background: var(--paper) }
-
-.ch[disabled]:active {
-  box-shadow: 0 4px 0 var(--edge);
-  transform: none;
+.ch[disabled]:hover {
+  border-color: var(--border);
+  background: var(--surface);
 }
 
-.ch.sel[disabled],
-.ch.right[disabled] { background: var(--stock) }
+.ch.sel[disabled]:hover { background: var(--accent-weak) }
 
-/* 감축 모션 (06 §2 · 05 §3.7) — 전환만 없애고 최종 포즈는 그대로 둔다.
+.ch.right[disabled]:hover {
+  border-color: var(--ok);
+  background: var(--ok-bg);
+}
+
+.ch.wrong[disabled]:hover {
+  border-color: var(--bad);
+  background: var(--bad-bg);
+}
+
+/* 감축 모션 — 전환만 없애고 최종 포즈는 그대로 둔다.
    `.001ms` 인 이유: `0` 이면 `transitionend` 가 안 오는 엔진이 있다. */
 @media (prefers-reduced-motion: reduce) {
   .ch { transition-duration: .001ms }
 }
+
 [data-motion="reduce"] .ch { transition-duration: .001ms }

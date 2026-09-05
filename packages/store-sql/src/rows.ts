@@ -56,7 +56,10 @@ const LEVELS = [1, 2, 3] as const;
 const ROLES = ['review', 'new', 'retry', 'prereq', 'manual', 'gap'] as const;
 const CARD_KINDS = [
   'meaning', 'blank', 'point', 'transcribe', 'placement', 'radius', 'flow', 'direction', 'repair', 'reimpl',
+  // D142 리포 지도 둘 · D164 코스 선택형 다섯. 여기 없으면 `fromCardRow` 가 그 행을 거부한다.
+  'entry', 'role', 'twin', 'origin', 'cut', 'reorder', 'contract',
 ] as const;
+const STAGE_NOS = [1, 2, 3, 4, 5] as const;
 
 /** 오류 메시지에 쓸 행 식별자. 값이 아니라 키만 싣는다 (01 §6). */
 function keyOf(row: Row, cols: readonly string[]): RowId {
@@ -246,6 +249,8 @@ export function fromCardRow(row: Row): Card {
     contentHash: r.text('content_hash'),
     createdAt: r.int('created_at'),
     retiredAt: r.intOrNull('retired_at'),
+    // `card.get`·`card.by_hash` 는 열을 안 싣는다(예전 호출자를 안 깨려고). 실린 statement 에서만 읽는다.
+    stageNo: 'stage_no' in row && row['stage_no'] !== null ? r.intOneOf('stage_no', STAGE_NOS) : null,
   };
 }
 

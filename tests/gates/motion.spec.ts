@@ -24,20 +24,19 @@ test('감축 모션 — 정답 뒤 최종 포즈가 남고 판정란의 전환�
   await startSession(page);
   await submit(page, answerKey(app));
 
-  // ① 최종 포즈 — 판정란이 켜져 있고 도장이 찍혀 있다.
+  // ① 최종 포즈 — 판정란이 켜져 있고 판정 낱말이 읽힌다 (도장은 D182 로 없앴다).
   await expect(page.locator('.fb.on')).toBeVisible();
-  await expect(page.locator('.fb .stamp')).toBeVisible();
+  await expect(page.locator('.fb .fb-tag')).toBeVisible();
 
-  // ② 선언 — 판정란과 도장은 감축 모드에서 지속을 지운다(`FeedbackSlot.css`·`Stamp.css`).
+  // ② 선언 — 판정란은 감축 모드에서 지속을 지운다(`FeedbackSlot.css`).
   const declared = await page.evaluate(() => {
     const read = (sel: string, prop: 'transitionDuration' | 'animationDuration'): string | null => {
       const el = document.querySelector(sel);
       return el === null ? null : getComputedStyle(el)[prop];
     };
-    return { fb: read('.fb', 'transitionDuration'), stamp: read('.fb .stamp', 'animationDuration') };
+    return { fb: read('.fb', 'transitionDuration') };
   });
   expect(declared.fb).not.toBeNull();
-  expect(declared.stamp).not.toBeNull();
   for (const [name, value] of Object.entries(declared)) {
     expect(msOf(value), `${name} = ${String(value)}`).toBeLessThanOrEqual(RESIDUAL_MS);
   }
@@ -92,7 +91,7 @@ test('감축 모션 — 설정으로 켠 것도 미디어 쿼리와 같다 (05 �
 
   // ① 최종 포즈는 남는다 — 「모션 0」이 아니다.
   await expect(page.locator('.fb.on')).toBeVisible();
-  await expect(page.locator('.fb .stamp')).toBeVisible();
+  await expect(page.locator('.fb .fb-tag')).toBeVisible();
 
   // ② 돌고 있는 것은 없다.
   const running = await page.evaluate((limit) => document.getAnimations()
@@ -124,13 +123,13 @@ test('감축 모션 — data-motion="system" 은 아무것도 줄이지 않는�
  * 감축 모드가 **꺼져 있을 때**도 같은 자리가 서는지. 이것이 없으면 위 테스트는
  * 「감축 모드에서 아무것도 안 그린다」를 통과로 읽는다.
  */
-test('감축 모션 아님 — 같은 자리에 판정란과 도장이 선다', async ({ page, app }) => {
+test('감축 모션 아님 — 같은 자리에 판정란이 선다', async ({ page, app }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await gotoDev(page);
   await startSession(page);
   await submit(page, answerKey(app));
   await expect(page.locator('.fb.on')).toBeVisible();
-  await expect(page.locator('.fb .stamp')).toBeVisible();
+  await expect(page.locator('.fb .fb-tag')).toBeVisible();
 });
 
 /**

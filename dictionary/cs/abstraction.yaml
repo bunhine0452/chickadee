@@ -1,0 +1,88 @@
+schema: 1
+id: cs/abstraction
+universal: null
+name: { ko: "안을 안 보고 쓰기", en: "Abstraction" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+track_default: t0
+essential: false
+difficulty: 2
+prereq: []
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "이름 하나가 안의 열 줄을 대신한다. 새는 자리가 어디인지가 공학이다."
+    en: "One name stands for ten lines inside. Engineering is knowing where it leaks."
+  why:
+    ko: >-
+      이름을 붙이면 그 뒤로는 안을 안 봐도 됩니다. 이것이 코드를 크게 만들 수 있는 유일한 방법이에요 —
+      사람의 머리에 한 번에 들어가는 것은 몇 개뿐이니까요. 그런데 안을 안 봐도 되는 것은
+      <b>대개</b> 그렇다는 뜻이지 <b>언제나</b>가 아닙니다. 느려질 때, 순서가 문제 될 때,
+      실패할 때 — 안이 밖으로 <b>샙니다</b>. 좋은 이름은 새는 자리가 적고 새는 자리를 미리 알려 줘요.
+      「이 함수가 무엇을 하나」가 아니라 「무엇을 안 알려 주나」를 묻는 것이 이 층입니다.
+    en: >-
+      Give it a name and you need not look inside again. This is the only way code grows large —
+      a person holds few things at once. But “need not look” means <b>usually</b>, not
+      <b>always</b>. When it is slow, when order matters, when it fails, the inside <b>leaks</b>
+      outward. A good name leaks in few places and tells you where. This layer asks not what a
+      function does but what it does not tell you.
+  trace: []
+rule:
+  ko: "<b>이름은 안을 감추지 지우지 않는다.</b> 감춘 것은 느려질 때 돌아온다."
+  en: "<b>A name hides the inside; it does not delete it.</b> What is hidden returns when things get slow."
+ok:
+  ko: >-
+    이름이 하는 일을 알면 안을 안 열고 쓸 수 있습니다. 결과가 이상할 때만 안을 열고,
+    그때 무엇이 샜는지를 봅니다.
+  en: >-
+    Knowing what a name does lets you use it without opening it. Open it when the result is odd,
+    and look at what leaked.
+misconceptions:
+  - ko: "이름을 붙이면 안의 비용도 사라진다 — 비용은 그대로 있고 안 보일 뿐입니다."
+    en: "Naming removes the cost inside — the cost stays; it just becomes invisible."
+  - ko: "층을 많이 쌓을수록 좋다 — 층마다 새는 자리가 늘어납니다."
+    en: "More layers is better — each layer adds another place to leak."
+  - ko: "안을 몰라도 되는 것이 목표다 — 목표는 <b>대개</b> 몰라도 되게 만드는 것입니다."
+    en: "The goal is never needing the inside — the goal is <b>usually</b> not needing it."
+meaning:
+  - q:
+      ko: "이름만 보고 쓰던 함수가 큰 입력에서 갑자기 느려졌습니다. <b>무슨 일이 일어난 건가요?</b>"
+      en: "A function you used by name alone got slow on large input. <b>What happened?</b>"
+    hint:
+      ko: "감춰 둔 것이 사라진 것은 아닙니다."
+      en: "What was hidden did not go away."
+    options:
+      - t: { ko: "감춰 둔 안의 성질이 밖으로 새어 나왔다", en: "A property of the hidden inside leaked outward" }
+      - t: { ko: "그 함수의 이름이 잘못 지어졌다", en: "The function was named badly" }
+        diag:
+          t:
+            ko: "이름이 <b>비용까지 알려 줬다면</b> 더 나았을 것입니다 — 가까운 자리예요. 다만 이름을 고쳐도 안의 성질은 그대로입니다."
+            en: "A name that also said <b>what it costs</b> would be better — close. But renaming leaves the inside as it is."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 이름이냐 성질이냐", en: "The sharpest spot — the name or the property" }
+            code:
+              - "이름: 알려 주는 방식"
+              - "성질: 안에 실제로 있는 것"
+      - t: { ko: "큰 입력은 원래 못 넣는 것이다", en: "Large input was never allowed" }
+        diag:
+          t:
+            ko: "막아 둔 적이 없으면 넣을 수 있습니다. 넣을 수 있는데 <b>대가가 안 적혀 있던</b> 것이 문제예요."
+            en: "If it was never blocked, it is allowed. The trouble is that the price was <b>not written down</b>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 막았나 안 적었나", en: "The sharpest spot — blocked or unstated" }
+            code:
+              - "막았다: 못 넣는다"
+              - "안 적었다: 넣히는데 비싸다"
+      - t: { ko: "함수를 부르는 횟수가 늘어서", en: "Because it was called more times" }
+        diag:
+          t:
+            ko: "횟수가 늘어도 느려지지만, 지금은 <b>한 번의 비용</b>이 입력 크기에 따라 커진 경우입니다."
+            en: "More calls also slow things, but here the <b>cost of one call</b> grew with input size."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 횟수냐 한 번의 비용이냐", en: "The sharpest spot — count or per-call cost" }
+            code:
+              - "횟수: 같은 비용 × 많이"
+              - "성질: 한 번이 점점 비싸진다"

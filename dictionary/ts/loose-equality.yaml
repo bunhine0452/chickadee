@@ -1,0 +1,272 @@
+schema: 1
+id: ts/loose-equality
+universal: null
+name: { ko: 느슨한 같음, en: Loose equality }
+token: "=="
+grammars: [typescript, tsx, javascript, vue]
+framework: null
+essential: true
+difficulty: 2
+prereq: [ts/comparison, cs/identity-vs-equality]
+# 빈칸 오답 셋이 이 셋의 토큰이다 (`===` · `??` · `&&`).
+confusions: [ts/comparison, ts/nullish-coalescing, ts/logical-and-guard]
+
+dict:
+  one_liner:
+    ko: "종류가 달라도 한쪽을 바꿔 놓고 견주는 쪽이다. 결과가 직관과 자주 어긋난다."
+    en: "This side converts one value first and then weighs, so answers often surprise."
+  why:
+    ko: >-
+      견주는 방법이 둘이고 {{site.line}}행은 <b>느슨한</b> 쪽입니다. 종류가 다르면 먼저
+      한쪽을 바꿔 놓고 견주므로, {{pick.2|code}}{{pick.2|josa:과,와}}
+      {{pick.3|code}}{{pick.3|josa:이,가}} 보기에 달라도 같다고 나올 수 있어요.
+    en: >-
+      There are two ways to weigh and line {{site.line}} takes the <b>loose</b> one. When the kinds
+      differ it converts one side first, so {{pick.2|code}} and {{pick.3|code}} can come out equal
+      even when they do not look it.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}} 의 종류를 본다."
+      en: "Line {{site.line}} looks at the kinds of {{pick.2|code}} and {{pick.3|code}}."
+    - ko: "종류가 다르면 정해진 표대로 한쪽을 바꾼다."
+      en: "If they differ, one side is converted by a fixed table."
+    - ko: "바뀐 값끼리 견주어 참·거짓 하나가 남는다."
+      en: "The converted values are weighed and one true-or-false is left."
+
+rule:
+  ko: >-
+    <b>느슨한 쪽은 종류를 맞춘 뒤에 견준다.</b> 그래서 「빈 것」끼리 서로 같다고 나오는 짝이 생긴다.
+  en: >-
+    <b>The loose side lines the kinds up before weighing.</b> That is how pairs of “empty” things end
+    up equal.
+result:
+  label:
+    ko: "{{site.line}}행의 견줌"
+    en: "The weighing on line {{site.line}}"
+  value: "{{pick.2}} {{pick.1}} {{pick.3}}"
+  note:
+    ko: "종류를 맞춘 뒤의 답"
+    en: "the answer after the kinds were lined up"
+ok:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:은,는}} 종류가 다르면 <b>먼저 바꾸고</b> 견줍니다.
+    바꾸지 않고 견주는 쪽은 기호가 한 글자 더 깁니다.
+  en: >-
+    {{pick.1|code}} <b>converts first</b> when the kinds differ, then weighs. The one that weighs
+    without converting is written one character longer.
+payoff:
+  ko: >-
+    한 파일에서 두 표기가 섞여 있으면 어느 줄이 바꾸고 어느 줄이 안 바꾸는지가 갈립니다.
+    그 자리가 대개 조용한 버그의 자리예요.
+  en: >-
+    When both notations sit in one file, some lines convert and some do not. That split is usually
+    where the quiet bug lives.
+bridge:
+  ko: >-
+    이 표기로 「없음」만 거를 수도 있습니다 — 두 가지 없음이 서로 같다고 나오는 것이
+    그 한 가지 쓸모예요.
+  en: >-
+    This notation can filter absence alone — the two kinds of absence coming out equal is its one
+    real use.
+misconceptions:
+  - ko: "종류가 다르면 바로 거짓이다 — 바꿔 놓고 견주므로 참이 될 수 있습니다."
+    en: "Different kinds means false right away — it converts first, so it can come out true."
+  - ko: "<code>NaN</code> 은 자기 자신과 같다 — 어느 표기로 견주어도 같지 않습니다."
+    en: "<code>NaN</code> equals itself — it comes out unequal under either notation."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>종류를 맞춘 뒤 견주는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that lines the kinds up before weighing</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 견줌을 <b>당하는</b> 쪽입니다. 바꿀지 말지는 가운데 기호가 정해요."
+          en: >-
+            {{pick.2|code}} is one of the values <b>being</b> weighed. Whether anything is converted
+            is decided by the symbol between them.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 값은 규칙을 못 고른다"
+            en: "The sharpest spot — a value cannot pick the rule"
+          code:
+            - "0 == ''      // true"
+            - "0 === ''     // false"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 견줄 <b>상대</b>입니다. 자리를 바꿔도 같은 규칙이 돕니다."
+          en: >-
+            {{pick.3|code}} is the <b>other side</b>. Swap the sides and the same rule runs.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 자리가 아니라 기호가 정한다"
+            en: "The sharpest spot — the symbol decides, not the side"
+          code:
+            - "'' == 0      // true"
+            - "0 == ''      // true"
+
+meaning:
+  - q:
+      ko: "<code>null == undefined</code> 와 <code>null === undefined</code> 는 각각 무엇일까요?"
+      en: "What are <code>null == undefined</code> and <code>null === undefined</code>?"
+    hint:
+      ko: "느슨한 쪽에는 이 짝을 위한 규칙이 따로 있습니다."
+      en: "The loose side has a rule written just for this pair."
+    options:
+      - t:
+          ko: "<code>true</code> 와 <code>false</code>"
+          en: "<code>true</code> and <code>false</code>"
+      - t:
+          ko: "둘 다 <code>true</code>"
+          en: "Both are <code>true</code>"
+        diag:
+          t:
+            ko: "둘 다 「없음」이라 그럴 법합니다. 엄격한 쪽은 종류를 먼저 보고, 두 없음은 서로 다른 종류예요."
+            en: >-
+              Both stand for absence, so that seems fair. The strict side looks at the kind first,
+              and the two absences are different kinds.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 뜻이 같아도 종류가 다르다"
+              en: "The sharpest spot — same meaning, different kind"
+            code:
+              - "typeof null        // 'object'"
+              - "typeof undefined   // 'undefined'"
+      - t:
+          ko: "둘 다 <code>false</code>"
+          en: "Both are <code>false</code>"
+        diag:
+          t:
+            ko: "엄격한 쪽은 그렇습니다. 느슨한 쪽에는 이 짝만을 위한 규칙이 하나 있어서, 두 없음은 서로 같다고 나옵니다."
+            en: >-
+              The strict side is. The loose side carries one rule written just for this pair, so the
+              two absences come out equal.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 표에 적힌 예외 하나"
+              en: "The sharpest spot — one exception written in the table"
+            code:
+              - "null == undefined    // true"
+              - "null == 0            // false"
+      - t:
+          ko: "느슨한 쪽에서는 읽지 못하고 멈춘다"
+          en: "The loose side cannot read it and stops"
+        diag:
+          t:
+            ko: "멈추지 않습니다. 두 표기 모두 언제나 참·거짓 하나를 내고, 그래서 어느 규칙이 돌았는지가 안 보입니다."
+            en: >-
+              Nothing stops. Both notations always yield one true-or-false, which is exactly why the
+              rule that ran stays invisible.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 늘 답이 나온다"
+              en: "The sharpest spot — an answer always comes out"
+            code:
+              - "null == undefined     // true"
+              - "NaN == NaN            // false"
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행은 종류가 다르면 <b>한쪽을 바꿔 놓고</b>
+        견줍니다.
+      en: >-
+        Choose what goes in the blank. When the kinds differ, line {{site.line}} <b>converts one
+        side</b> and then weighs.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "==", mono: true }
+      - t: "==="
+        mono: true
+        diag:
+          t:
+            ko: "한 글자 긴 쪽은 <b>바꾸지 않고</b> 견줍니다. 종류가 다르면 그 자리에서 거짓이 되므로 답이 갈려요."
+            en: >-
+              The longer one weighs <b>without converting</b>. Different kinds make it false on the
+              spot, so the answer parts.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 바꾸느냐 마느냐"
+              en: "The sharpest spot — convert or not"
+            code:
+              - "0 == '0'      // true"
+              - "0 === '0'     // false"
+      - t: "??"
+        mono: true
+        diag:
+          t:
+            ko: "이 기호는 견주지 않고 <b>값을 고릅니다.</b> 참·거짓이 아니라 왼쪽이나 오른쪽 값이 그대로 나와요."
+            en: >-
+              That symbol does not weigh; it <b>chooses a value</b>. What comes out is the left or
+              the right value, not a boolean.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 답이 참·거짓인가 값인가"
+              en: "The sharpest spot — a boolean or a value"
+            code:
+              - "0 == null     // false"
+              - "0 ?? null     // 0"
+      - t: "&&"
+        mono: true
+        diag:
+          t:
+            ko: "이 기호도 <b>값을 고릅니다.</b> 왼쪽이 거짓 같으면 왼쪽을 그대로 내주므로 견줌이 아니에요."
+            en: >-
+              That symbol also <b>chooses a value</b>. If the left side is falsy it hands the left
+              side back, so no weighing happens.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 고르기와 견주기"
+              en: "The sharpest spot — choosing or weighing"
+            code:
+              - "0 == '0'      // true"
+              - "0 && '0'      // 0"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 느슨한 쪽으로 견주었을까요?"
+    en: "Why does line {{site.line}} weigh with the loose one?"
+  choices:
+    - t:
+        ko: "두 가지 없음을 한 번에 거르려고 — 그 짝만 규칙이 따로 있다"
+        en: "To filter both kinds of absence at once — that pair has a rule of its own"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 값이 <code>0</code> 이나 빈 문자열이 될 수 있는지도 적어 보세요."
+        en: "That is the direction. Add whether the value can be <code>0</code> or the empty string."
+    - t:
+        ko: "짧게 적히니까"
+        en: "Because it is shorter to write"
+      ok: false
+      fb:
+        ko: "한 글자 차이지만 규칙이 통째로 다릅니다. 길이로 고를 자리가 아닙니다."
+        en: "It is one character shorter and a whole rule different. Length is not the thing to pick on."
+    - t:
+        ko: "같은 파일 안에서 표기를 맞추려고"
+        en: "To match the notation used elsewhere in the file"
+      ok: false
+      fb:
+        ko: "표기를 맞추는 것은 좋은 일이지만, 맞춘 대상이 <b>다른 규칙</b>이면 답이 함께 바뀝니다."
+        en: >-
+          Matching notation is worth doing, but if what you matched is a <b>different rule</b> the
+          answers change with it.
+
+queries:
+  - { grammars: [typescript, tsx, javascript, vue], file: ./loose-equality.scm }
+
+examples:
+  - code: "if (value == null) { skip() }"
+    expect: { sites: 1, form: loose, hole: "==", picks: { 1: "==", 2: "value", 3: "null" } }
+  - code: "const same = id == raw"
+    expect: { sites: 1, form: loose, hole: "==", picks: { 1: "==", 2: "id", 3: "raw" } }
+  - code: "if (code != 0) { fail() }"
+    expect: { sites: 1, form: loose, hole: "!=", picks: { 1: "!=", 2: "code", 3: "0" } }
+  - code: "const same = id === raw"
+    expect: none
+  - code: "const bigger = a > b"
+    expect: none

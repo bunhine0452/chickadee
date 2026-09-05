@@ -1,5 +1,13 @@
-export type { RunnerAdapter } from './t3-adapter.js';
-export { runners } from './t3-adapter.js';
+// 4·5단 실행 러너 (D175) — 계약은 `runner.ts`, 자바 어댑터는 `java-runner.ts`.
+export type { RunnerAdapter, RunnerRepo } from './t3-adapter.js';
+export { javaRunner, runners } from './t3-adapter.js';
+export {
+  detectRunner, emptyResult, FIRST_RUN_TIMEOUT_MS, forgetRunners, knownRunner, MAX_LOG,
+  rememberRunner, runTests, RUN_TIMEOUT_MS, tailLog,
+} from './runner.js';
+export type { RunFailure, RunResult, RunSpec, RunStatus, RunnerProbe, RunnerReason } from './runner.js';
+export { cannotHost, distPath, gradleVersion, jdkVersion, plainLog, readMarks, sawDownload } from './java-runner.js';
+export type { TestLine } from './java-runner.js';
 
 // T0 — 판정과 진단 (04 §2.1)
 export { gradeT0, pickDiag } from './t0.js';
@@ -47,7 +55,7 @@ export { advanceThreshold, gradeT1, nextStage, toT1Detail, verdictOf } from './t
 export type { T1Input } from './t1-result.js';
 export { REASON_CODES, T1_ENGINE_VERSION } from './t1-types.js';
 export type {
-  AppealVerdict, Engine, Reason, ReasonCode, Status, T1Result, T1Row, Tick,
+  AppealVerdict, AssistCount, Engine, Reason, ReasonCode, Status, T1Result, T1Row, Tick,
 } from './t1-types.js';
 
 // T1 — 이의 (04 §5)
@@ -66,8 +74,8 @@ export {
 export type { Question, QuestionId, WhyCheck, WhyDraft, WhyPayload } from './t1-why.js';
 
 // T2 — 구조 채점 (04 §8.2·§8.3)
-export { gradeDirection, gradeFlow, gradePicks, toT2Detail } from './t2.js';
-export type { DirectionInput, FlowInput, PicksInput } from './t2.js';
+export { gradeDirection, gradeFlow, gradePicks, gradeRole, toT2Detail } from './t2.js';
+export type { DirectionInput, FlowInput, PicksInput, RoleInput } from './t2.js';
 export { cappedNote, foldedNote, T2_ENGINE_VERSION, unchangedNote } from './t2-types.js';
 export type { T2Detail, T2Payload, T2Result, T2Row, T2Tier } from './t2-types.js';
 export type { T2Kind as T2QuestionKind } from './t2-types.js';
@@ -75,3 +83,32 @@ export type { T2Kind as T2QuestionKind } from './t2-types.js';
 // T2 — 「이것도 맞다」 (04 §8.4)
 export { draftT2Appeal, pickRelation, promoteToSec, t2PatternKey, PROMOTE_MIN } from './t2-appeal.js';
 export type { PickRelation, T2AppealDraft, T2AppealInput } from './t2-appeal.js';
+
+// 코스 문항 채점 (D164) · 4·5단 실행 판정 (D180)
+export {
+  buildHandoffPrompt, checkLinks, checkPlace, declaredName, gradeStage, mergeRun, needsRun, testsOf,
+} from './stage.js';
+export type { PlaceCheck, StageAnswer, StageDetail, StageOptions, StageRun, StageVerdict } from './stage.js';
+
+// 형식 둘 — `order`(인접 쌍) · `trace-table`(격자 + 이월) (D187 ⑱)
+export { gradeOrder } from './order.js';
+export type { OrderGradeInput, OrderMiss, OrderPiece, OrderVerdict } from './order.js';
+export { cellKey, gradeTrace } from './trace-table.js';
+export type {
+  TraceCellSpec, TraceCellValue, TraceGradeInput, TraceMiss, TraceMissKind, TraceVerdict,
+} from './trace-table.js';
+
+// 기초 문항 채점 — 값 일치 (`docs/program/fundamentals.md` §4·§5)
+export { gradeValue, normalizeFloat, normalizeInt, MISS_MESSAGE_KEY } from './fundamentals.js';
+export type { FundAlt, FundGradeInput, FundVerdict, MissKind } from './fundamentals.js';
+
+// 표준 입력 러너 — 셋째 러너 (D186 ⑧)
+export {
+  detectStdin, forgetStdinProbes, lastLine, MAX_STDIN_CASES, normalizeOut, outMessage, runStdin,
+  sameOut, STDIN_LANGS, STDIN_TIMEOUT_MS, TOOLCHAIN_MISSING,
+} from './stdin-runner.js';
+export type { CaseOut, StdinCase, StdinLang, StdinResult, StdinRunSpec } from './stdin-runner.js';
+
+// `build` 형식의 채점 — 식을 돌려서 나온 값으로 (D187 ①)
+export { BUILD_MESSAGE_KEY, checkExpr, gradeBuild, usesToken, wrapExpr } from './build.js';
+export type { BuildGradeInput, BuildMiss, BuildVerdict } from './build.js';

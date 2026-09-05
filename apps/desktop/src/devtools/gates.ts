@@ -7,7 +7,6 @@
  * 토큰 대비는 `scripts/check-contrast.mjs`, 모션 상한은 `scripts/check-motion.mjs`.
  * 여기서 재는 것은 **합성 배경과 실제 조판** 이다.
  */
-import { deeStandalone } from '@chickadee/ui';
 
 /** 본문 대비 하한 (정본 §6 측정 규칙). */
 export const PAPER_RATIO = 7;
@@ -262,121 +261,8 @@ export const measureViolations = (
   return rows.filter((r) => r.chars > max || r.chars < (r.note ? noteMin : min));
 };
 
-// ───────── 16px 실루엣 (06 §2) ─────────
-
-/** 캔버스 바탕. 스티커가 놓이는 종이 색이다 (목업 `audit.dee`). */
-const DEE_CANVAS_BG = '#FDFAF0';
-
-/** 먹 판정 — 어두운 **무채색**만. 청판(#374FC4)은 먹이 아니다. */
-const INK_MAX_CHANNEL = 96;
-/** 종이 판정 — 밝기 0.72 위. 회색 경계 픽셀은 둘 다 아니다. */
-const PAPER_MIN_L = 0.72;
-
-export interface DeeReport {
-  size: number;
-  ly: number;
-  smallMark: boolean;
-  headMark: boolean;
-  /** 먹 → 종이 → 먹 3단이 나오는 열의 수. 캡–뺨–턱받이가 살아 있는지. */
-  bandCols: number;
-  /** 그 열들에서 가장 두꺼운 흰 띠(뺨)의 높이 px. */
-  cheekPx: number;
-  darkPx: number;
-  pass: boolean;
-  /** 실패했을 때 사람이 보는 것. 숫자만으로는 어디가 뭉갰는지 모른다. */
-  ascii: string;
-}
-
-/**
- * 자립형 SVG 는 `@chickadee/ui` 가 만든다 — 스티커의 배경 그림(D115)과 **같은 문자열**이어야
- * 게이트가 재는 것과 화면에 뜨는 것이 같다. 여기서는 이름만 다시 내보낸다.
- */
-export { deeStandalone };
-
-/**
- * 06 §2 16px 실루엣 — 자립형 SVG 를 캔버스에 그 크기로 찍고 **열(column)을 훑어**
- * 먹 → 종이 → 먹 3단이 남았는지 센다. 합격 = 그런 열 2개 이상 + 뺨 띠 2px 이상.
- *
- * 왜 눈이 아니라 래스터인가: 16px 에서 무너지는 것은 곡선이 아니라 **획 사이의 흰 틈**이고,
- * 그것은 실제로 찍어 봐야 보인다. 사람이 보는 것은 `ascii` 에 남는다.
- */
-export function dee(size = 16, ly = 4, smallMark = size <= 24, headMark = size <= 20)
-: Promise<DeeReport> {
-  const svg = deeStandalone(ly, headMark ? 'head' : 'badge');
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onerror = () => { reject(new Error('실루엣 SVG 를 이미지로 못 읽었다')); };
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = size;
-      canvas.height = size;
-      const ctx = canvas.getContext('2d');
-      if (ctx === null) { reject(new Error('2d 컨텍스트가 없다')); return; }
-      ctx.fillStyle = DEE_CANVAS_BG;
-      ctx.fillRect(0, 0, size, size);
-      ctx.drawImage(img, 0, 0, size, size);
-      resolve(scanSilhouette(ctx.getImageData(0, 0, size, size).data, size, ly, smallMark, headMark));
-    };
-    img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
-  });
-}
-
-/**
- * 열 훑기 그 자체 (06 §2 의 판정). 래스터가 아니라 **규칙**이라 따로 뽑아 테스트한다.
- */
-export function scanSilhouette(
-  data: Uint8ClampedArray, size: number, ly: number, smallMark: boolean, headMark: boolean,
-): DeeReport {
-  const at = (x: number, y: number): [number, number, number] => {
-    const i = (y * size + x) * 4;
-    return [data[i] ?? 0, data[i + 1] ?? 0, data[i + 2] ?? 0];
-  };
-  const isInk = (x: number, y: number): boolean => Math.max(...at(x, y)) < INK_MAX_CHANNEL;
-  const isPaper = (x: number, y: number): boolean => {
-    const [r, g, b] = at(x, y);
-    return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255 > PAPER_MIN_L;
-  };
-
-  const lines: string[] = [];
-  let darkPx = 0;
-  for (let y = 0; y < size; y += 1) {
-    let line = '';
-    for (let x = 0; x < size; x += 1) {
-      const ink = isInk(x, y);
-      line += ink ? '#' : isPaper(x, y) ? '.' : '+';
-      if (ink) darkPx += 1;
-    }
-    lines.push(line);
-  }
-
-  // 열 하나를 위에서 아래로 훑으며 먹(캡) → 종이(뺨) → 먹(턱받이) 3단을 찾는다.
-  let bandCols = 0;
-  let cheekPx = 0;
-  for (let x = 0; x < size; x += 1) {
-    let stage = 0;
-    let run = 0;
-    let best = 0;
-    for (let y = 0; y < size; y += 1) {
-      const ink = isInk(x, y);
-      const paper = isPaper(x, y);
-      if (stage === 0 && ink) stage = 1;
-      else if (stage === 1 && paper) { stage = 2; run = 1; }
-      else if (stage === 2 && paper) run += 1;
-      else if (stage === 2 && ink) { best = Math.max(best, run); stage = 3; break; }
-      // 회색 경계 픽셀(먹도 종이도 아닌 것)은 띠를 끊지 않는다.
-    }
-    if (stage === 3) {
-      bandCols += 1;
-      cheekPx = Math.max(cheekPx, best);
-    }
-  }
-
-  return {
-    size, ly, smallMark, headMark, bandCols, cheekPx, darkPx,
-    pass: bandCols >= 2 && cheekPx >= 2,
-    ascii: lines.join('\n'),
-  };
-}
+// 16px 실루엣 게이트는 **지웠다** (D182) — 마스코트가 화면에서 내려갔으므로 잴 대상이
+// 없다. `deeStandalone`·`scanSilhouette`·`DeeReport` 도 함께 사라졌다.
 
 // ───────── 모션 (06 §2 · 정본 §3-9) ─────────
 

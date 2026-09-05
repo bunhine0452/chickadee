@@ -1,0 +1,246 @@
+schema: 1
+id: java/abstract-class
+universal: null
+name: { ko: 반만 지은 틀, en: Abstract class }
+token: "abstract"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 3
+prereq: [java/inheritance-override, java/interface, cs/dynamic-dispatch]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "물려줄 것은 적어 두고 몸을 못 정한 자리는 비워, 물려받는 쪽에 미룬다."
+    en: "Settled bodies pass down; undecided ones are left to the inheritor."
+  why:
+    ko: >-
+      틀 하나에 <b>정해진 것과 안 정해진 것</b>이 섞이는 자리가 있습니다. 「모든 결제는 수수료를
+      같은 식으로 뗀다, 다만 카드냐 계좌냐에 따라 <b>승인하는 방법</b>이 다르다」 같은 것이요.
+      할 줄 아는 것의 목록으로는 「같은 식으로」를 담을 수 없고, 보통 틀로는 「다르다」를 강제할 수
+      없습니다. {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 그 사이입니다 — 정해진 몸은
+      그대로 물려주고, 안 정해진 자리는 <b>비운 채로 물려받는 쪽에 미룹니다</b>. 그래서 이 틀로는
+      상자를 만들 수 없어요. 비운 자리가 남아 있으니까요.
+    en: >-
+      Some moulds mix <b>what is settled with what is not</b>: “every payment takes its fee the same
+      way, but card and account <b>authorise differently</b>”. A list of abilities cannot hold “the
+      same way”, and a plain mould cannot force “differently”. {{pick.1|code}} on line {{site.line}}
+      sits between the two — settled bodies are passed down as they are, and the unsettled slots are
+      <b>left empty for whoever inherits</b>. That is why no box can be made from this mould: an empty
+      slot is still there.
+  trace:
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 붙은 {{pick.2|code}}{{pick.2|josa:은,는}} 상자를 못 만든다."
+      en: "{{pick.2|code}}, marked with {{pick.1|code}}, cannot make a box."
+    - ko: "{{pick.3|code}} 안에는 몸이 있는 것과 비운 것이 섞여 있다."
+      en: "Inside {{pick.3|code}}, filled bodies and empty slots sit together."
+    - ko: "{{site.line}}행을 물려받는 쪽이 비운 자리를 채워야 그때 상자가 생긴다."
+      en: "A box appears only when whoever inherits line {{site.line}} fills the empty slots."
+
+rule:
+  ko: "<b>비운 자리가 남아 있으면 상자를 못 만든다.</b> 채우는 것은 물려받는 쪽의 일이다."
+  en: "<b>With an empty slot left, no box can be made.</b> Filling it is the inheritor's job."
+ok:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:은,는}} 「몸을 못 정한 자리가 있다」는 표시입니다. 채우는 쪽이
+    따로 있어요.
+  en: >-
+    {{pick.1|code}} marks “a body is left undecided here”. Someone else fills it in.
+payoff:
+  ko: >-
+    이걸 알면 목록과 보통 틀 사이에서 무엇을 고를지가 보입니다 — <b>물려줄 몸이 있느냐</b>가
+    가르는 자리예요.
+  en: >-
+    Knowing this settles the choice between a list of abilities and a plain mould — the divider is
+    <b>whether there is a body to pass down</b>.
+bridge:
+  ko: >-
+    파이썬에는 이 낱말이 문법에 없고 표준 라이브러리가 흉내 냅니다. 자바는 <b>문법으로</b> 막아요 —
+    비운 자리가 있으면 상자를 만드는 줄에서 컴파일이 멈춥니다.
+  en: >-
+    Python has no such keyword in its grammar and imitates it from the standard library. Java blocks it
+    <b>in the grammar</b>: with an empty slot, the line that makes a box will not compile.
+misconceptions:
+  - ko: "이 틀로도 상자를 만들 수 있다 — <b>못 만듭니다</b>. 비운 자리가 남아 있어서예요."
+    en: "A box can still be made from this mould — it <b>cannot</b>, because an empty slot remains."
+  - ko: "안이 전부 비어 있어야 한다 — <b>섞일 수 있습니다</b>. 몸이 있는 것과 비운 것이 함께 살아요."
+    en: "Everything inside must be empty — they <b>can mix</b>: filled bodies live beside empty slots."
+  - ko: "할 줄 아는 것의 목록과 같다 — 목록은 <b>몸을 못 물려줍니다</b>. 이것은 물려줘요."
+    en: "It is the same as a list of abilities — a list <b>passes down no body</b>. This one does."
+  - ko: "여럿에게서 한꺼번에 물려받을 수 있다 — 이런 틀은 <b>하나만</b>입니다. 목록은 여럿이고요."
+    en: "Several of these can be inherited at once — only <b>one</b> such mould can. Lists can be several."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>「비운 자리가 있다」고 말하는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that says “an empty slot is here”</b>."
+    hint:
+      ko: "이름보다 <b>앞</b>에 옵니다."
+      en: "It comes <b>before</b> the name."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 「비운 자리가 있다」는 그 앞의 낱말이 말해요."
+          en: "{{pick.2|code}} is <b>the name</b>. The empty slot is announced by the word before it."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 이름이냐 표시냐"
+            en: "The sharpest spot — the name or the mark"
+          code:
+            - "abstract class Payment { … }"
+            - "//  ^표시        ^이름"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>안에 든 것</b>입니다. 표시는 중괄호가 열리기 전에 있어요."
+          en: "{{pick.3|code}} is <b>what is inside</b>. The mark sits before the brace opens."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 표시냐 내용이냐"
+            en: "The sharpest spot — the mark or the contents"
+          code:
+            - "표시: 중괄호 앞"
+            - "내용: 중괄호 안"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행의 틀에 <code>new</code> 를 쓰면 어떻게 될까요?"
+      en: "What happens when <code>new</code> is used on the mould from line {{site.line}}?"
+    hint:
+      ko: "비운 자리가 남아 있는지 보세요."
+      en: "Ask whether an empty slot remains."
+    options:
+      - t:
+          ko: "컴파일이 멈춘다 — 비운 자리가 있어 상자를 못 만든다"
+          en: "Compiling stops — an empty slot means no box"
+      - t:
+          ko: "만들어지되 비운 자리를 부르면 그때 터진다"
+          en: "It is made, and blows up when the empty slot is called"
+        diag:
+          t:
+            ko: "돌기 전에 막힙니다. 자바는 이 자리를 <b>번역할 때</b> 잡아요 — 그것이 목록·틀을 갈라 둔 값이에요."
+            en: "It is blocked before running. Java catches this <b>while translating</b> — that is what splitting lists from moulds buys."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 번역할 때냐 돌 때냐"
+              en: "The sharpest spot — translating or running"
+            code:
+              - "javac: 여기서 막힌다"
+      - t:
+          ko: "비운 자리에 아무 일도 안 하는 몸이 자동으로 생긴다"
+          en: "An empty body is filled in automatically"
+        diag:
+          t:
+            ko: "자동으로 채워 주면 <b>안 채운 것을 모르게</b> 됩니다. 자바는 채우라고 시켜요."
+            en: "Filling it in would <b>hide the gap</b>. Java makes you fill it."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 채워 주나 시키나"
+              en: "The sharpest spot — filled in or demanded"
+            code:
+              - "빈 몸을 만들어 주지 않는다"
+      - t:
+          ko: "만들어진다 — 비운 자리만 안 쓰면 된다"
+          en: "It is made; just avoid the empty slot"
+        diag:
+          t:
+            ko: "「안 쓰면 된다」를 <b>컴파일러가 확인할 수 없어서</b> 막습니다. 쓸 수 있는 길이 하나라도 있으면 위험해요."
+            en: "The compiler <b>cannot verify</b> “just avoid it”, so it blocks. One reachable path is enough to be unsafe."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 확인할 수 있나"
+              en: "The sharpest spot — can it be verified"
+            code:
+              - "안 쓴다는 약속은 코드에 안 남는다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>몸을 안 정한 자리를 남긴 틀</b>을 엽니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} opens <b>a mould that leaves a body undecided</b>.
+    hint:
+      ko: "보기 넷은 전부 <code>class</code> 앞에 설 수 있는 낱말입니다."
+      en: "All four can stand before <code>class</code>."
+    options:
+      - { t: "abstract", mono: true }
+      - t: "final"
+        mono: true
+        diag:
+          t:
+            ko: "<code>final</code> 은 <b>물려받지 못하게</b> 막습니다. 물려받는 쪽에 미루는 것과 정반대예요."
+            en: "<code>final</code> blocks inheriting altogether — the opposite of leaving it to an inheritor."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 미루나 막나"
+              en: "The sharpest spot — deferring or blocking"
+            code:
+              - "final:    물려받지 마라"
+              - "이 낱말: 물려받아 채워라"
+      - t: "static"
+        mono: true
+        diag:
+          t:
+            ko: "<code>static</code> 은 <b>상자마다가 아니라 틀에 하나</b>라는 뜻입니다. 비운 자리와 상관없어요."
+            en: "<code>static</code> means <b>one per mould, not per box</b>. It has nothing to do with empty slots."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 몇 개냐 채웠냐"
+              en: "The sharpest spot — how many or filled in"
+            code:
+              - "static: 하나뿐"
+              - "이 낱말: 안 채웠다"
+      - t: "public"
+        mono: true
+        diag:
+          t:
+            ko: "<code>public</code> 은 <b>누가 볼 수 있나</b>를 정합니다. 몸을 채웠는지와는 다른 축이에요."
+            en: "<code>public</code> settles <b>who can see it</b> — a different axis from whether a body is filled."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 보이기냐 채우기냐"
+              en: "The sharpest spot — visibility or completeness"
+            code:
+              - "public:  볼 수 있다"
+              - "이 낱말: 아직 안 채웠다"
+
+why_gate:
+  q:
+    ko: "몸이 있는 것과 없는 것을 <b>한 틀에</b> 두게 한 것은 무엇을 위해서일까요?"
+    en: "<b>Why</b> allow filled and empty bodies <b>in one mould</b>?"
+  choices:
+    - t:
+        ko: "같은 부분은 <b>한 번만</b> 적고 다른 부분만 채우게 하려고"
+        en: "So the shared part is written <b>once</b> and only the differing part is filled"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 대신 물려받는 틀이 하나로 제한된다는 것도 적어 보세요."
+        en: "That is the direction. Add that only one such mould can be inherited in exchange."
+    - t:
+        ko: "코드를 짧게 쓰려고"
+        en: "To write less code"
+      ok: false
+      fb:
+        ko: "짧아지기도 하지만 그건 결과입니다. 얻는 것은 <b>같은 부분이 한 군데에만 있다</b>는 것이에요."
+        en: "It may get shorter, but that is a result. What is gained is <b>the shared part living in one place</b>."
+    - t:
+        ko: "할 줄 아는 것의 목록으로는 아무것도 못 해서"
+        en: "Because a list of abilities can do nothing"
+      ok: false
+      fb:
+        ko: "목록도 많은 것을 합니다. 못 하는 것은 <b>몸을 물려주는 일</b> 하나예요."
+        en: "A list does plenty. The one thing it cannot do is <b>pass down a body</b>."
+
+queries:
+  - { grammars: [java], file: ./abstract-class.scm }
+
+examples:
+  - code: "abstract class Payment { void fee() {} }"
+    expect:
+      sites: 1
+      form: class
+      hole: "abstract"
+      picks: { 1: "abstract", 2: "Payment" }
+  - code: "class P { abstract void authorize(); }"
+    expect: { sites: 1, form: method, picks: { 1: "abstract", 4: "authorize" } }
+  - code: "class Payment { void fee() {} }"
+    expect: none

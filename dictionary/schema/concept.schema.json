@@ -26,6 +26,13 @@
           ],
           "default": null
         },
+        "superseded_by": {
+          "type": "array",
+          "items": {
+            "$ref": "#/properties/id"
+          },
+          "default": []
+        },
         "name": {
           "type": "object",
           "properties": {
@@ -65,9 +72,18 @@
               "python",
               "go",
               "rust",
+              "sql",
+              "java",
+              "vue",
+              "xml",
+              "mybatis_sql",
+              "css",
+              "vue_style",
               "swift",
               "dart",
-              "sql"
+              "c",
+              "cpp",
+              "c_sharp"
             ]
           },
           "default": []
@@ -366,6 +382,25 @@
           },
           "default": []
         },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "no_hole_reason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 8
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "why_gate": {
           "type": "object",
           "properties": {
@@ -518,17 +553,51 @@
               "python",
               "go",
               "rust",
+              "sql",
+              "java",
+              "vue",
+              "xml",
+              "mybatis_sql",
+              "css",
+              "vue_style",
               "swift",
               "dart",
-              "sql"
+              "c",
+              "cpp",
+              "c_sharp"
             ]
           },
           "minItems": 1
         },
         "grammar_abi": {
-          "type": "integer",
-          "exclusiveMinimum": true,
-          "minimum": 0
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "exclusiveMinimum": true,
+            "minimum": 0
+          },
+          "propertyNames": {
+            "enum": [
+              "typescript",
+              "tsx",
+              "javascript",
+              "python",
+              "go",
+              "rust",
+              "sql",
+              "java",
+              "vue",
+              "xml",
+              "mybatis_sql",
+              "css",
+              "vue_style",
+              "swift",
+              "dart",
+              "c",
+              "cpp",
+              "c_sharp"
+            ]
+          }
         },
         "extensions": {
           "type": "object",
@@ -547,9 +616,18 @@
               "python",
               "go",
               "rust",
+              "sql",
+              "java",
+              "vue",
+              "xml",
+              "mybatis_sql",
+              "css",
+              "vue_style",
               "swift",
               "dart",
-              "sql"
+              "c",
+              "cpp",
+              "c_sharp"
             ]
           }
         },
@@ -561,16 +639,43 @@
           "default": null
         },
         "detect": {
-          "type": "object",
-          "properties": {
-            "dependency": {
-              "type": "string"
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "dependency": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "dependency"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "manifest": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "minItems": 1
+                },
+                "contains": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "manifest",
+                "contains"
+              ],
+              "additionalProperties": false
             }
-          },
-          "required": [
-            "dependency"
-          ],
-          "additionalProperties": false
+          ]
         },
         "essential": {
           "type": "array",

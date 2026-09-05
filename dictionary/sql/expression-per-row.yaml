@@ -1,0 +1,236 @@
+schema: 1
+id: sql/expression-per-row
+universal: null
+name: { ko: "식 하나가 행마다 한 번", en: "One expression, every row" }
+token: "WHERE"
+grammars: [sql, mybatis_sql]
+framework: null
+essential: true
+difficulty: 2
+prereq: [sql/row-and-set]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "조건에 맞는 행만 남기는 절. 한 번 적은 식이 행 수만큼 평가된다."
+    en: "Keeps only the rows that match. One written expression runs once per row."
+  why:
+    ko: >-
+      {{site.line}}행의 조건은 <b>한 번</b> 적혔는데 {{pick.3|code}} 의 행 수만큼 평가됩니다.
+      그래서 이 언어에는 반복문을 적을 자리가 <b>아예 없어요</b> — 반복은 적는 것이 아니라
+      절이 도는 방식입니다. 그리고 이 층은 행을 <b>하나씩 따로</b> 보므로, 여러 행을 한꺼번에
+      봐야 아는 것(몇 개인지·합이 얼마인지)은 여기서 물을 수 없습니다.
+    en: >-
+      The condition on line {{site.line}} is written <b>once</b> and evaluated as many times as
+      {{pick.3|code}} has rows. That is why there is <b>nowhere</b> to write a loop in this
+      language — repetition is not written, it is how the clause runs. And because this layer looks
+      at rows <b>one at a time</b>, anything that needs several rows at once — how many, what the
+      total is — cannot be asked here.
+  trace:
+    - ko: "{{pick.3|code}} 의 행을 하나 꺼낸다."
+      en: "One row of {{pick.3|code}} is taken."
+    - ko: "그 행에서 {{pick.2|code}} 조건을 따져 본다."
+      en: "{{pick.2|code}} is worked out on that row."
+    - ko: "참이면 남기고, 다음 행에서 처음부터 다시 한다."
+      en: "If it holds the row stays, and the next row starts over."
+
+rule:
+  ko: "<b>식은 한 번 적고 행마다 한 번 돈다.</b> 그래서 반복을 적을 자리가 없고, 여러 행을 한꺼번에 보는 물음도 이 층에 없다."
+  en: "<b>Written once, run once per row.</b> So there is no place to write repetition, and no way to ask about several rows at once."
+result:
+  label:
+    ko: "{{site.line}}행이 남기는 것"
+    en: "what line {{site.line}} keeps"
+  value: "{{pick.2}}"
+  note:
+    ko: "행마다 한 번씩 따져 본다"
+    en: "worked out once per row"
+ok:
+  ko: >-
+    {{pick.2|code}} 라는 조건이 참인 행만 남습니다. 몇 행이 남을지는 표에 든 값이 정해요 — 이 줄은 그 수를 모릅니다.
+  en: >-
+    Only rows where {{pick.2|code}} holds remain. How many that is depends on the values in the table — this line does not know.
+payoff:
+  ko: >-
+    이걸 알면 「몇 개인지 세는 조건을 왜 여기 못 쓰지」가 풀립니다 — 이 시점엔 아직 한 행만 보고 있어서예요.
+  en: >-
+    This untangles “why can't I put a counting condition here” — at this point only one row is in view.
+bridge:
+  ko: >-
+    다른 언어는 반복문을 적고 그 안에 조건을 넣습니다. 여기서는 조건만 적고 <b>반복은 절이 합니다</b>.
+  en: >-
+    Other languages write a loop and put the condition inside. Here only the condition is written and <b>the clause does the repeating</b>."
+misconceptions:
+  - ko: "여기에 반복문을 넣어야 여러 행을 본다 — 넣을 자리가 없습니다. 절이 이미 행마다 돕니다."
+    en: "A loop is needed here to see many rows — there is nowhere to put one. The clause already runs per row."
+  - ko: "여기서 개수를 세는 조건을 걸 수 있다 — 이 시점에는 아직 묶음이 없어서 못 겁니다."
+    en: "A counting condition can go here — at this point there is no group yet, so it cannot."
+  - ko: "조건을 안 적으면 아무 행도 안 나온다 — 반대로 <b>전부</b> 나옵니다."
+    en: "With no condition no rows come back — the other way round: <b>all</b> of them do."
+
+meaning:
+  - q:
+      ko: "{{site.line}}행의 조건을 통째로 지우면 어떻게 될까요?"
+      en: "What happens if the condition on line {{site.line}} is removed entirely?"
+    hint:
+      ko: "이 절이 하는 일은 <b>남기는</b> 것입니다."
+      en: "What this clause does is <b>keep</b> rows."
+    options:
+      - t:
+          ko: "표의 행이 전부 나온다"
+          en: "Every row of the table comes back"
+      - t:
+          ko: "한 행도 안 나온다"
+          en: "No row comes back"
+        diag:
+          t:
+            ko: >-
+              조건은 <b>거르는</b> 것이라 없으면 거르지 않습니다. 아무것도 안 거르면 전부 지나가요.
+            en: >-
+              A condition <b>filters</b>, so with none nothing is filtered. Filter nothing and everything passes.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 거르기냐 고르기냐", en: "The sharpest spot — filtering or selecting" }
+            code:
+              - "WHERE ok = 1   -- 걸러 남기기"
+              - "-- 조건 없음     -- 전부"
+      - t:
+          ko: "문법 오류로 멈춘다"
+          en: "It stops with a syntax error"
+        diag:
+          t:
+            ko: "이 절은 <b>있어도 되고 없어도 됩니다</b>. 없는 문장이 이 리포에도 많아요."
+            en: "This clause is <b>optional</b>. Plenty of statements in this repository have none."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 필수냐 선택이냐", en: "The sharpest spot — required or optional" }
+            code:
+              - "SELECT * FROM t"
+              - "SELECT * FROM t WHERE ok = 1"
+      - t:
+          ko: "행을 하나씩 보는 대신 한꺼번에 보게 된다"
+          en: "Rows stop being looked at one at a time and are looked at together"
+        diag:
+          t:
+            ko: >-
+              보는 방식은 <b>안 바뀝니다</b>. 조건이 있든 없든 이 층은 행 하나씩이에요.
+            en: >-
+              The way of looking <b>does not change</b>. With or without a condition, this layer is one row at a time.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 조건이냐 층이냐", en: "The sharpest spot — the condition or the layer" }
+            code:
+              - "-- 조건은 있고 없고만 정한다"
+              - "-- 한꺼번에 보는 것은 다른 절"
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>맞는 행만 남기라</b>고 정하는 낱말을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that keeps only the matching rows</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>조건 자체</b>입니다. 그것을 행마다 돌리라고 정하는 것은 앞의 낱말이에요."
+          en: "{{pick.2|code}} is <b>the condition itself</b>. What makes it run per row is the word before it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 조건이냐 그 조건을 쓰는 절이냐", en: "The sharpest spot — the condition or the clause that uses it" }
+          code:
+            - "ok = 1"
+            - "WHERE ok = 1"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>읽는 표</b>입니다. 몇 번 도는지를 정할 뿐 무엇을 남길지는 안 정해요."
+          en: "{{pick.3|code}} is <b>the table read</b>. It settles how many times, not what stays."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 몇 번이냐 무엇을 남기냐", en: "The sharpest spot — how many times or what stays" }
+          code:
+            - "FROM cart        -- 몇 번"
+            - "WHERE ok = 1     -- 무엇을 남기나"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 조건에 <b>맞는 행만</b> 남깁니다."
+      en: "Choose what goes in the blank. Line {{site.line}} keeps <b>only the rows that match</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "WHERE", mono: true }
+      - t: "HAVING"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>HAVING</code> 은 <b>묶은 뒤</b>에 묶음을 거릅니다. 행 하나씩 보는 이 층보다 나중이에요.
+            en: >-
+              <code>HAVING</code> filters groups <b>after</b> grouping. It comes later than this one-row-at-a-time layer.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 행이냐 묶음이냐", en: "The sharpest spot — rows or groups" }
+            code:
+              - "WHERE qty > 0            -- 행 하나씩"
+              - "HAVING COUNT(*) > 2      -- 묶음"
+      - t: "IF"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 언어에는 갈래를 정하는 <b>문</b>이 없습니다. 갈래는 값 자리에만 오고, 행을 거르는 절은 따로예요.
+            en: >-
+              This language has no branching <b>statement</b>. A branch only ever stands where a value stands; filtering rows is a clause of its own.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 문이냐 절이냐", en: "The sharpest spot — a statement or a clause" }
+            code:
+              - "-- if 문은 없다"
+              - "WHERE ok = 1"
+      - t: "FOR"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              반복을 <b>적을 자리가 없습니다</b>. 절이 이미 행마다 한 번씩 돌기 때문이에요.
+            en: >-
+              There is <b>nowhere to write</b> repetition. The clause already runs once per row.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 적는 반복이냐 도는 절이냐", en: "The sharpest spot — written repetition or a running clause" }
+            code:
+              - "-- 반복문은 없다"
+              - "WHERE ok = 1   -- 행마다 한 번"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 <b>이 조건</b>으로 거를까요?"
+    en: "Why does line {{site.line}} filter on <b>this condition</b>?"
+  choices:
+    - t:
+        ko: "뒤 단계가 이 조건에 맞는 행만 쓰기 때문 — 여기서 안 거르면 그쪽이 더 큰 일을 한다"
+        en: "Because the later steps use only these rows — not filtering here makes their work bigger"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 조건을 뒤로 미루면 무엇이 달라지는지도 적어 보세요."
+        en: "That is the direction. Now say what changes if this condition moves later."
+    - t:
+        ko: "SQL 이 조건 하나를 요구해서"
+        en: "Because SQL requires a condition"
+      ok: false
+      fb:
+        ko: "요구하지 않습니다. 안 적으면 표 전체가 나올 뿐이에요."
+        en: "It requires none. Left out, the whole table comes back."
+    - t:
+        ko: "표가 커서 다 못 읽으니까"
+        en: "Because the table is too big to read whole"
+      ok: false
+      fb:
+        ko: "크기와는 무관합니다. 두 줄짜리 표에도 같은 조건을 걸어요."
+        en: "Size has nothing to do with it. The same condition goes on a two-row table."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./expression-per-row.scm }
+
+examples:
+  - code: "SELECT * FROM cart WHERE ok = 1"
+    expect: { sites: 1, form: per-row, hole: "WHERE", picks: { 1: "WHERE", 2: "ok = 1", 3: "cart" } }
+  - code: "UPDATE cart SET ok = 0 WHERE qty = 0"
+    expect: { sites: 1, form: per-row, hole: "WHERE", picks: { 1: "WHERE", 2: "qty = 0", 3: "cart" } }
+  - code: "SELECT * FROM cart"
+    expect: none

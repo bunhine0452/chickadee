@@ -1,0 +1,67 @@
+[
+  {
+    "queryId": "py/bool-op-value",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "site",
+    "form": "default",
+    "startLine": 2,
+    "startCol": 22,
+    "endLine": 2,
+    "endCol": 41,
+    "nodeKind": "keyword_argument",
+    "inError": false
+  },
+  {
+    "queryId": "py/bool-op-value",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "pick.3",
+    "form": "default",
+    "startLine": 2,
+    "startCol": 22,
+    "endLine": 2,
+    "endCol": 29,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "py/bool-op-value",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "pick.2",
+    "form": "default",
+    "startLine": 2,
+    "startCol": 30,
+    "endLine": 2,
+    "endCol": 35,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "py/bool-op-value",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "pick.1",
+    "form": "default",
+    "startLine": 2,
+    "startCol": 36,
+    "endLine": 2,
+    "endCol": 38,
+    "nodeKind": "or",
+    "inError": false
+  },
+  {
+    "queryId": "py/bool-op-value",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "hole",
+    "form": "default",
+    "startLine": 2,
+    "startCol": 36,
+    "endLine": 2,
+    "endCol": 38,
+    "nodeKind": "or",
+    "inError": false
+  }
+]

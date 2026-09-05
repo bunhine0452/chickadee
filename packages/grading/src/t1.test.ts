@@ -17,7 +17,7 @@ import { align } from './t1-align.js';
 import { CATALOG, draftAppeal, issueUrl, patternKey, shapeSignature, suggest } from './t1-appeal.js';
 import { compareLine, evalLine, indentWidth, normalizeQuotes, sim } from './t1-line.js';
 import { buildProt, freeIdents, origIdents } from './t1-prot.js';
-import { gradeT1, nextStage, verdictOf } from './t1-result.js';
+import { gradeT1, nextStage, toT1Detail, verdictOf } from './t1-result.js';
 import { checkWhy, draftWhy, hasWord, pickQuestion } from './t1-why.js';
 
 /** 목업 `T1.original` — LoginForm 20줄. */
@@ -159,6 +159,36 @@ describe('정규화 파이프라인 (04 §4.2)', () => {
     expect(indentWidth('\t x')).toBe(3);
   });
 
+  // D152 ⓑ · v06 `b-t1-indent`. 파이썬은 들여쓰기가 블록 경계라 깊이가 곧 프로그램이다.
+  test('5 파이썬은 깊이가 다르면 어긋남이다', () => {
+    const flat = compareLine('    store.write(rows)', 'store.write(rows)', set, 'python');
+    expect(flat.status).toBe('differ');
+    expect(flat.reasons.at(-1)?.code).toBe('INDENT');
+    expect(flat.reasons.at(-1)?.detail).toBe('4 ↔ 0');
+    // 같은 줄이 TS 에서는 동등이다 — 중괄호가 경계를 지므로 폭은 보기의 문제다.
+    expect(compareLine('    store.write(rows)', 'store.write(rows)', set).status).toBe('equiv');
+  });
+
+  test('5 파이썬에서 탭 하나는 공백 넷이다 — 같은 깊이면 어긋남이 아니다', () => {
+    expect(indentWidth('\tx', 'python')).toBe(4);
+    expect(indentWidth('    x', 'python')).toBe(4);
+    const same = compareLine('\tstore.write(rows)', '    store.write(rows)', set, 'python');
+    expect(same.status).toBe('equiv');
+    expect(same.reasons.map((x) => x.code)).toStrictEqual(['WHITESPACE']);
+    // 탭을 2로 세던 옛 규칙이면 이 짝이 「같은 깊이」가 되어 통과한다 — 파이썬에서는 아니다.
+    const deeper = compareLine('\tstore.write(rows)', '  store.write(rows)', set, 'python');
+    expect(deeper.status).toBe('differ');
+    expect(deeper.reasons.at(-1)?.detail).toBe('4 ↔ 2');
+  });
+
+  test('5 파이썬 분기는 들여쓰기 말고는 아무것도 안 바꾼다', () => {
+    // 깊이가 같으면 그다음 단계가 그대로 돈다 — 따옴표·종결자·치환 후보 전부.
+    expect(compareLine("    f('')", '    f("")', set, 'python').reasons[0]?.code).toBe('QUOTE');
+    const rename = compareLine('    total = a + b', '    total = x + b', set, 'python');
+    expect(rename.status).toBe('pending');
+    expect(rename.maps).toStrictEqual([['a', 'x']]);
+  });
+
   test('6·7 종결자와 따옴표', () => {
     expect(compareLine('f()', 'f();', set).reasons[0]?.code).toBe('TERMINATOR');
     expect(compareLine("f('')", 'f("")', set).reasons[0]?.code).toBe('QUOTE');
@@ -282,6 +312,39 @@ describe('점수와 판정 (04 §4.6)', () => {
     expect(r.pct).toBe(100);
     expect(r.verdict).toBe('advance');
     expect(r.n.exact).toBe(18);
+  });
+
+  test('편집 보조 계수는 점수를 한 자도 안 움직인다 (D143)', () => {
+    const base = grade(SAMPLE);
+    const withAssist = gradeT1({
+      blockId: 7,
+      stage: 2,
+      original: ORIGINAL,
+      user: SAMPLE,
+      grammar: 'tsx',
+      moduleDecls: MODULE_DECLS,
+      peeks: 0,
+      downgraded: false,
+      assist: { keyed: 120, assisted: 400, pasted: 900, accepted: 7 },
+      clock: () => 0,
+    });
+    // 보조가 손보다 많고 붙여넣기가 그 둘을 합친 것보다 많아도 판정은 같다.
+    expect({ ...withAssist, assist: undefined }).toStrictEqual({ ...base, assist: undefined });
+    expect(withAssist.assist).toEqual({ keyed: 120, assisted: 400, pasted: 900, accepted: 7 });
+  });
+
+  test('원장에 실릴 때도 peeks 옆에 그대로 간다 — 안 센 판에는 칸이 없다', () => {
+    const detail = toT1Detail(grade(SAMPLE), { text: '', pick: null }, []);
+    expect('assist' in detail).toBe(false);
+
+    const counted = gradeT1({
+      blockId: 7, stage: 2, original: ORIGINAL, user: SAMPLE, grammar: 'tsx',
+      moduleDecls: MODULE_DECLS, peeks: 2, downgraded: false, clock: () => 0,
+      assist: { keyed: 90, assisted: 10, pasted: 0, accepted: 1 },
+    });
+    const withDetail = toT1Detail(counted, { text: '', pick: null }, []);
+    expect(withDetail.assist).toEqual({ keyed: 90, assisted: 10, pasted: 0, accepted: 1 });
+    expect(withDetail.peeks).toBe(2);
   });
 });
 

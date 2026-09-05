@@ -108,6 +108,52 @@ fn there_is_at_least_one_language_to_check() {
     );
 }
 
+/// `_lang.yaml` 의 `grammar_abi` 가 실제로 링크된 문법의 ABI 와 같은가.
+///
+/// 이 값이 틀려도 앱은 **안 터진다** — `ingest.ts` 의 사전 판 캐시 키에만 쓰여서 캐시가
+/// 조용히 거짓말할 뿐이다. 그래서 시험이 유일한 방벽이고, 없는 동안 실제로 틀려 있었다:
+/// `ts/_lang.yaml` 이 `15` 하나를 적어 뒀는데 셋 중 `javascript` 에만 맞았다
+/// (typescript·tsx 는 14). 값을 정하는 것은 언어가 아니라 `Cargo.lock` 이 고정한 크레이트다.
+#[test]
+fn declared_grammar_abi_matches_the_linked_grammar() {
+    #[derive(Deserialize)]
+    struct Meta {
+        grammars: Vec<String>,
+        grammar_abi: BTreeMap<String, usize>,
+    }
+    let linked: BTreeMap<String, usize> = chickadee_parse::languages()
+        .into_iter()
+        .map(|l| (l.grammar, l.abi))
+        .collect();
+
+    for lang in langs() {
+        let dir = root().join(&lang);
+        let meta: Meta = serde_yaml::from_str(
+            &std::fs::read_to_string(dir.join("_lang.yaml")).expect("_lang.yaml"),
+        )
+        .expect("meta");
+
+        for grammar in &meta.grammars {
+            // 이 빌드에 안 들어온 문법(피처 off)은 견줄 것이 없다.
+            let Some(abi) = linked.get(grammar) else {
+                continue;
+            };
+            assert_eq!(
+                meta.grammar_abi.get(grammar),
+                Some(abi),
+                "{lang}/_lang.yaml: {grammar} 의 grammar_abi 가 {:?} 인데 링크된 문법은 {abi} 다",
+                meta.grammar_abi.get(grammar),
+            );
+        }
+        for g in meta.grammar_abi.keys() {
+            assert!(
+                meta.grammars.contains(g),
+                "{lang}/_lang.yaml: grammar_abi 에 grammars 밖의 {g} 가 있다",
+            );
+        }
+    }
+}
+
 #[test]
 fn every_system_query_compiles_for_every_grammar_of_its_language() {
     #[derive(Deserialize)]

@@ -94,12 +94,9 @@ Then:
 pnpm dict:lint
 ```
 
-It loads every bundled concept and checks the schema, that the id matches the path, that
-`prereq`/`confusions`/`universal` point at concepts that exist and form no cycle, that
-template variables are on the allowed list, that HTML tags are inside the six permitted
-(`code b i em br kbd`, no attributes), that no Korean particle is hardcoded after a
-placeholder, and that the wording avoids "틀렸다"-style phrasing. `one_liner` is capped at
-80 characters and a diagnosis at 300.
+It loads every bundled concept, runs the schema and the lint rules over all of them, and
+prints the authoring-debt table. The next section lists what it covers and what it leaves
+to you.
 
 Two things to know before you write:
 
@@ -110,6 +107,69 @@ Two things to know before you write:
 
 `dictionary/schema/concept.schema.json` is generated from Zod — run `pnpm dict:schema` after
 changing `packages/dictionary/src/schema.ts` rather than editing the JSON.
+
+### What checks the dictionary, and what does not
+
+Four things check a dictionary PR. Three of them are machines.
+
+| Checker | What it covers |
+|---|---|
+| `pnpm dict:lint` | The schema; `id` matches the path; `prereq`/`confusions`/`universal` resolve and form no cycle; a `point:` answer names a capture the query actually produces; a blank card's distractors come from `confusions`; template variables and HTML tags are on the allowed lists; no Korean particle hardcoded after a placeholder; no verdict wording; `one_liner` ≤ 80 characters and a diagnosis ≤ 300 |
+| `cargo test` (`crates/parse/tests/dictionary.rs`) | Every `.scm` compiles against the pinned grammar, capture names match the naming rules, one `@site` per pattern, and no dead pattern — a query that matches nothing in any of its own `examples` fails |
+| `pnpm dict:test` | Runs `examples[].code` through the real pipeline and compares the derived sites against `examples[].expect`: the site count, `form`, each `pick.N`, and `hole` |
+| A person, in review | The two below |
+
+**Only two things are left to a person, and they are the two that matter most.**
+
+1. **Whether a `meaning:` option's claim about a value is true.** Nothing here executes code
+   or reads types, so "this evaluates to `undefined`" is an assertion no checker can settle.
+2. **Whether a diagnosis is true.** A wrong-answer diagnosis states what would have to be the
+   case for that answer to be right — "that would be it if `user` were `null` rather than
+   absent". That is a counterfactual about code nobody ran.
+
+Everything else is already a machine's job, so review time goes to those two.
+
+They are also the reason there is no model behind the running app (`docs/00-overview.md` §4,
+D144). At authoring time these two claims get a reader; at runtime they would get nobody, and
+a user of this app is by definition someone who cannot check them for themselves — a wrong
+diagnosis raises their mastery layer and the scheduler brings it back three weeks later to
+reinforce it.
+
+### Drafting with a model
+
+Encouraged, and declared in the PR. A model is good at the parts that are mechanical and
+slow: `@hole` and `@pick.N` positions in a `.scm`, the four `blank:` options, `why_gate:`
+wording, and a first pass at a new language's concepts. It is not good at the two claims
+above, and it sounds the same either way. Run the `examples` yourself before you push.
+
+What you commit is a YAML file in this repository, so it reaches every user whether or not
+they have an API key. That is why the authoring side is where a model is welcome and the
+runtime side is not.
+
+### The debt table
+
+`pnpm dict:lint` prints a second table, `사전 저작 부채`. It counts what is **not written yet**
+rather than what is wrong, so instead of pass/fail it has a ratchet: today's measurement is
+the floor, the target is the full population, and the distance between them is printed every
+run. Fill a cell and you raise the matching number in `DEBT_RATCHET`
+(`packages/dictionary/src/dict.test.ts`); after that nobody can quietly drop back.
+
+| Rule | Applies to | Passes when |
+|---|---|---|
+| `blank-or-reason` | every `essential` concept | the concept has both a `blank:` card and an `@hole` capture, **or** `no_hole_reason` says why it cannot |
+| `point-picks` | every concept with a `point:` card | its `.scm` produces at least three `@pick.N` — one answer plus three distractors needs that many |
+| `why-gate` | every `essential` concept | it has a `why_gate:` |
+| `zero-one-liner` | Chapter-0 candidates (`essential` at prerequisite depth ≤ 1) | its `one_liner` does not spell out the answer to its own question |
+
+The table exists because this is the most expensive hand work in the repository — one concept
+is 150 to 230 lines of YAML in two languages — and unmeasured expensive work gets deferred
+forever. On 2026-09-04 two of 23 `essential` concepts had a blank card and none had a
+`why_gate`, and that shows up directly in the generator: 193 of 194 generated cards were the
+same card type, because the other two types have nothing to build from.
+
+`no_hole_reason` is not a way to clear the row cheaply. It is for the case where the grammar
+genuinely has no token to remove, and the lint rejects one left behind on a concept that has
+since grown a blank card.
 
 ## Commits and pull requests
 
@@ -136,7 +196,7 @@ that in CI and prints what it measured:
 
 | Rule | What fails |
 |---|---|
-| Line budget | more than 2,300 lines of Rust code across `crates/*/src` and `apps/desktop/src-tauri/src` (comments and blanks excluded) |
+| Line budget | more than 2,800 lines of Rust code across `crates/*/src` and `apps/desktop/src-tauri/src` (comments and blanks excluded) |
 | No domain vocabulary | `concept`, `card`, `mastery`, `ink`, `fsrs`, `queue`, `session`, `grade`, `review` in a Rust identifier or string |
 | No SQL literals | `SELECT`, `INSERT INTO`, `UPDATE`, `DELETE FROM`, `CREATE TABLE` — SQL lives in `packages/store-sql` and runs by catalog name |
 | No git binary | `Command::new("git")` — libgit2 does not execute hooks, and a repository is untrusted input |

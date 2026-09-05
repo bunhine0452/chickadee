@@ -1,6 +1,7 @@
 import { t, type MessageKey } from '@chickadee/i18n';
-import { FlatButton, LiveRegion } from '@chickadee/ui';
+import { FlatButton, LiveRegion, PressButton } from '@chickadee/ui';
 
+import { Page } from '../../components/shell/Page.js';
 import { TimeQueue } from '../../components/shell/TimeQueue.js';
 import { BOX_COUNT, boxes, DONE, positionOf, type Progress } from './phases.js';
 import './IngestScreen.css';
@@ -45,6 +46,8 @@ export interface IngestScreenProps {
   onCancel: () => void;
   /** 끝났거나 실패했을 때 홈으로. 성공하면 화면이 알아서 넘어가지만, 실패하면 여기가 유일한 출구다. */
   onDone: () => void;
+  /** 다 읽은 뒤의 주 행동 — 홈을 거치지 않고 바로 첫 판을 연다 (D186 ①). */
+  onStart: () => void;
   error?: string | undefined;
 }
 
@@ -55,7 +58,7 @@ export function IngestScreen(props: IngestScreenProps) {
   const heading = props.done ? t('ingest.done') : t('ingest.reading', { repo: props.repoName });
 
   return (
-    <main className="ingest" tabIndex={-1}>
+    <Page className="ingest" focusOnMount>
       <h1 className="ingest-h">{heading}</h1>
       <p className="ingest-sub">
         {props.error
@@ -90,7 +93,15 @@ export function IngestScreen(props: IngestScreenProps) {
       ) : null}
 
       {props.done ? (
-        <FlatButton onClick={props.onDone}>{t('home.back')}</FlatButton>
+        /*
+         * 다 읽었으면 다음 행동은 **학습**이지 홈이 아니다 (D186 ①). 「홈으로 → 학습 시작」
+         * 두 걸음을 한 걸음으로 줄인다 — 첫 판까지의 클릭이 3에서 2로 내려간다(실측).
+         * 홈으로 가는 문은 그대로 옆에 남는다: 건너뛴 파일 목록을 읽고 싶은 사람이 있다.
+         */
+        <div className="ingest-acts l-row">
+          <PressButton onClick={props.onStart}>{t('home.todayStart')}</PressButton>
+          <FlatButton ghost onClick={props.onDone}>{t('home.back')}</FlatButton>
+        </div>
       ) : (
         <FlatButton onClick={props.onCancel} disabled={props.cancelling} ghost>
           {props.cancelling ? t('ingest.cancelling') : t('ingest.cancel')}
@@ -101,6 +112,6 @@ export function IngestScreen(props: IngestScreenProps) {
       <LiveRegion
         text={props.done ? t('ingest.saidDone') : t('ingest.saidStep', { label: box?.label ?? '' })}
       />
-    </main>
+    </Page>
   );
 }

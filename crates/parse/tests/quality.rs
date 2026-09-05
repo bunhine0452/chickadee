@@ -119,18 +119,61 @@ fn tsx_parses_the_component_files_cleanly() {
     assert_eq!(poor, 0);
 }
 
-/// Swift·Dart 는 크레이트가 빌드에 없다. 이 테스트는 **그 사실을 고정한다** —
-/// 누가 크레이트를 넣으면 여기가 빨개지고, 그때 실코드 20파일로 품질을 재야 한다.
+/// `packages/dictionary/src/schema.ts` 의 `GRAMMARS` 표를 읽는다 — `(문법 키, 링크됐나)`.
+///
+/// 사전 쪽 스키마는 문법 **이름의 규약**(D19)이라 아직 안 링크된 이름도 받는다. 링크 여부의
+/// 정본은 이 크레이트의 `LANGS` 이고, 두 곳이 어긋나면 사전은 「쓸 수 있다」고 하는데
+/// 파서가 없는 상태가 된다. 표를 손으로 파싱하는 이유: 이 대조 하나 때문에 빌드 단계를
+/// 새로 만들 값이 없다. 표는 `키: true|false,` 한 줄씩이라 모양이 단순하다.
+fn declared_grammars() -> Vec<(String, bool)> {
+    let at: PathBuf = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../packages/dictionary/src/schema.ts")
+        .components()
+        .collect();
+    let text = std::fs::read_to_string(&at).expect("schema.ts");
+    let body = text
+        .split_once("export const GRAMMARS = {")
+        .expect("schema.ts 에 GRAMMARS 표가 없다")
+        .1
+        .split_once("} as const")
+        .expect("GRAMMARS 표가 안 닫혔다")
+        .0;
+    let row = regex_lite::Regex::new(r"(?m)^\s*([a-z_]+)\s*:\s*(true|false)\s*,").expect("regex");
+    let out: Vec<(String, bool)> = row
+        .captures_iter(body)
+        .map(|c| (c[1].to_owned(), &c[2] == "true"))
+        .collect();
+    assert!(out.len() >= 10, "GRAMMARS 표를 {} 줄만 읽었다", out.len());
+    out
+}
+
+/// **파서 없는 언어를 조용히 통과시키지 않는다** (D187 ⑨).
+///
+/// 예전에는 이 못이 `swift`·`dart` **두 이름만** 지켰다. 그래서 C# 문법은 아무 경고 없이
+/// 들어올 수 있었고(`csharp.md` §0.7), 반대로 사전이 `grammars: [c_sharp]` 를 걸어도
+/// 캡처만 0곳인 채 전부 초록이었다. 이제 목록이 아니라 **표 전체**를 양방향으로 본다:
+/// 크레이트를 넣고 `schema.ts` 를 안 고쳐도, 표만 고치고 크레이트를 안 넣어도 빨개진다.
 #[test]
-fn swift_and_dart_are_not_in_the_build_yet() {
-    let names: Vec<String> = chickadee_parse::languages()
+fn the_dictionary_schema_agrees_with_the_grammars_actually_linked() {
+    let linked: Vec<String> = chickadee_parse::languages()
         .into_iter()
         .map(|l| l.grammar)
         .collect();
-    for grammar in ["swift", "dart"] {
+    let declared = declared_grammars();
+
+    for (grammar, says_linked) in &declared {
+        let really = linked.contains(grammar);
+        assert_eq!(
+            *says_linked, really,
+            "{grammar}: schema.ts 의 GRAMMARS 는 {says_linked} 인데 링크된 문법은 {really} 다 — \
+             크레이트를 넣었으면 실코드 20파일 ERROR 비율을 재고 표를 true 로, \
+             뺐으면 false 로 고쳐라 (00 §6-2)"
+        );
+    }
+    for grammar in &linked {
         assert!(
-            !names.contains(&grammar.to_owned()),
-            "{grammar} 문법이 들어왔다 — 실코드 20파일 ERROR 비율을 재고 00 §6-2 를 갱신하라"
+            declared.iter().any(|(name, _)| name == grammar),
+            "{grammar} 이 빌드에는 있는데 schema.ts 의 GRAMMARS 에 없다 — 사전이 이 문법을 못 건다"
         );
     }
 }

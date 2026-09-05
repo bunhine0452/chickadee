@@ -1,0 +1,170 @@
+schema: 1
+id: java/autoboxing
+# 0부 축 F. `universal: null` — 원시와 상자가 갈리는 언어는 자바·C# 계열뿐이고, 파이썬·JS 는
+# 「모두 객체」/「원시가 있지만 없음이 안 섞임」이라 전이할 자리가 없다.
+universal: null
+name: { ko: 상자에 넣고 꺼내기, en: Boxing and unboxing }
+token: "Integer"
+grammars: [java]
+framework: null
+# `essential` 밖이다 — 0부의 `essential` 상한 열둘을 지킨다(README §12 규약 8). 표본 리포에서
+# 246곳/64파일이라 카드는 넉넉히 서고, 빠지는 것은 구멍 지도의 분모뿐이다 (java.md §1.5.6).
+essential: false
+difficulty: 3
+prereq: [cs/value-vs-reference, cs/null-reference, cs/type]
+confusions: []
+dict:
+  one_liner:
+    ko: "원시 값과 그것을 감싼 상자가 소리 없이 오간다 — 상자는 비어 있을 수 있다."
+    en: "A plain value and its box convert silently, and a box can be empty."
+  why:
+    ko: >-
+      자바의 원시 타입에는 각각 <b>상자 타입</b>이 있습니다. 둘은 코드에 표시 없이 오가요 —
+      상자 자리에 원시 값을 넣으면 감싸지고, 원시 자리에 상자를 넣으면 풀립니다. 편한데,
+      <b>상자는 비어 있을 수 있습니다.</b> 비어 있는 상자를 원시 자리에 넣으면 푸는 순간
+      터져요 — 「수인데 왜 없음 오류가 나나」가 여기서 나옵니다. 그리고 이것은 드문 일이
+      아닙니다: 표본 리포 99파일 중 <b>64파일</b>에 상자 타입이 있어요. 데이터베이스에서 온
+      값은 비어 있을 수 있어야 해서 전부 상자 타입이기 때문입니다.
+    en: >-
+      Every primitive type in Java has a matching <b>box type</b>. The two convert with nothing
+      written — a plain value in a box slot gets wrapped, a box in a plain slot gets unwrapped.
+      Convenient, but <b>a box can be empty</b>. Put an empty box in a plain slot and it blows
+      up at the moment of unwrapping — that is where “it is a number, why an absence error”
+      comes from. And it is not rare: <b>64 of 99</b> files in the sample repo use box types,
+      because values that come from a database have to be allowed to be absent.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 원시가 아니라 상자 타입이다."
+      en: "The {{pick.1|code}} on line {{site.line}} is a box type, not a primitive."
+    - ko: "그래서 {{pick.2|code}} 에는 값 대신 비어 있음이 들어갈 수 있다."
+      en: "So {{pick.2|code}} may hold emptiness instead of a value."
+    - ko: "그 상태로 원시 자리에 넘기면 푸는 자리에서 터진다."
+      en: "Passed to a plain slot in that state, it blows up where it is unwrapped."
+rule:
+  ko: "<b>상자와 원시는 표시 없이 오간다.</b> 다만 상자는 비어 있을 수 있고 풀 때 터진다."
+  en: "<b>Box and primitive convert unmarked.</b> But a box can be empty, and unwrapping blows up."
+result:
+  label: { ko: "{{site.line}}행의 타입", en: "the type on line {{site.line}}" }
+  value: "{{pick.1}} {{pick.2}}"
+  note: { ko: "비어 있을 수 있는 자리다", en: "a spot that may be empty" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 상자입니다 — 값이 없을 수도 있다는 뜻이에요."
+  en: "{{pick.2|code}} is a box, which means it may hold no value at all."
+payoff:
+  ko: "이걸 알면 「숫자인데 없음 오류가 난다」가 풀립니다 — 상자를 푸는 자리였어요."
+  en: "This untangles “it is a number, why an absence error” — that was an unwrapping spot."
+bridge:
+  ko: "파이썬은 <code>1</code> 도 객체라 이 갈림이 없습니다. 자바는 같은 수에 두 모양이 있어요."
+  en: "In Python even <code>1</code> is an object, so there is no split. Java gives one number two shapes."
+misconceptions:
+  - ko: "상자 타입과 원시 타입은 같은 것이다 — 담기는 자리가 다르고, 상자만 비어 있을 수 있습니다."
+    en: "Box and primitive are the same — they live in different places, and only a box can be empty."
+  - ko: "상자끼리 같음 기호로 견주면 값이 견주어진다 — 자리가 견주어집니다. 그것이 축 H 의 판입니다."
+    en: "Comparing two boxes with equality compares values — it compares places. That is the axis H plate."
+  - ko: "상자는 성능 때문에 쓴다 — 반대입니다. 자리를 더 쓰고, 쓰는 이유는 <b>비어 있을 수 있어야</b> 해서예요."
+    en: "Boxes are for performance — the opposite. They cost more room and are used because a value <b>may be absent</b>."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>비어 있을 수 있는 타입</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the type that may hold nothing</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 비어 있을 수 있느냐는 이름이 아니라 앞에 적힌 타입이 정해요."
+          en: "{{pick.2|code}} is the <b>name</b>. Whether it may be empty is set by the type in front, not the name."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 원시냐 상자냐", en: "The sharpest spot — primitive or box" }
+          code:
+            - "int n;        // 늘 값이 있다"
+            - "Integer n;    // 비어 있을 수 있다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 담기는 <b>값</b>입니다. 값이 있어도 자리가 상자면 나중에 비워질 수 있어요."
+          en: "{{pick.3|code}} is the <b>value</b>. Even with a value now, a box spot can be emptied later."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 지금 값이냐 담을 수 있는 것이냐", en: "The sharpest spot — the value now or what may be held" }
+          code:
+            - "Integer n = 1;      // 지금은 1"
+            - "n = null;           // 이제 비었다"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행의 자리는 <b>값이 없을 수도</b> 있어야 합니다."
+      en: "Choose what goes in the blank. The spot on line {{site.line}} must be allowed to <b>hold nothing</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "Integer", mono: true }
+      - t: "Long"
+        mono: true
+        diag:
+          t:
+            ko: "이것도 상자라 비어 있을 수는 있지만 <b>칸이 64개</b>입니다. 32칸 값을 담는 자리와 서로 안 바뀌어요."
+            en: "It is a box and may be empty, but it has <b>64 slots</b>. It does not stand in for the 32-slot one."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 32칸 상자냐 64칸 상자냐", en: "The sharpest spot — the 32-slot box or the 64-slot one" }
+            code:
+              - "Integer a = 1;"
+              - "Long b = 1L;"
+      - t: "Boolean"
+        mono: true
+        diag:
+          t:
+            ko: "참·거짓 상자라 수를 못 담습니다. 비어 있을 수 있다는 성질만 같아요."
+            en: "A truth-value box holds no number. Only the may-be-empty part is shared."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 수 상자냐 참·거짓 상자냐", en: "The sharpest spot — a number box or a truth box" }
+            code:
+              - "Integer n = 1;"
+              - "Boolean b = true;"
+      - t: "String"
+        mono: true
+        diag:
+          t:
+            ko: "글자 묶음이라 수가 안 들어갑니다. 비어 있을 수 있는 것은 같지만 담는 것이 달라요."
+            en: "Text takes no number. It may be empty too, but it holds something else."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 수냐 글자냐", en: "The sharpest spot — a number or text" }
+            code:
+              - "Integer n = 1;"
+              - "String s = \"1\";"
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 원시 타입 대신 <b>상자 타입</b>을 골랐을까요?"
+    en: "Why does line {{site.line}} choose a <b>box type</b> over a primitive?"
+  choices:
+    - t:
+        ko: "이 값이 아직 없을 수 있고, 원시 타입에는 「없음」을 담을 자리가 없기 때문"
+        en: "Because this value may not exist yet, and a primitive has no room for absence"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 없음이 언제 들어오는지도 한 줄로 적어 보세요."
+        en: "That is the direction. Add a line on when the absence arrives."
+    - t:
+        ko: "상자 타입이 더 큰 수를 담기 때문"
+        en: "Because a box type holds bigger numbers"
+      ok: false
+      fb:
+        ko: "칸 수는 같습니다. 다른 것은 <b>없음을 담을 수 있느냐</b>예요."
+        en: "The slot count is the same. What differs is <b>room for absence</b>."
+    - t:
+        ko: "상자 타입이 계산이 빠르기 때문"
+        en: "Because a box type computes faster"
+      ok: false
+      fb:
+        ko: "느립니다. 감싸고 푸는 일이 더 붙어요 — 그래도 쓰는 이유가 있다는 것이 이 판입니다."
+        en: "It is slower — wrapping and unwrapping cost extra. That it is still used is the point of this plate."
+queries:
+  - { grammars: [java], file: ./autoboxing.scm }
+examples:
+  - code: "class A { void f() { Integer boxed = 1; } }        // boxed -> 1 (Integer, 상자)"
+    expect: { sites: 1, form: boxdecl, hole: "Integer", picks: { 1: "Integer", 2: "boxed", 3: "1" } }
+  - code: "class A { private Long id; }                       // id -> null (Long, 빈 상자)"
+    expect: { sites: 1, form: boxfield, hole: "Long", picks: { 1: "Long", 2: "id" } }
+  - code: "class A { void f(Boolean active) { } }             // active -> null 일 수 있다 (Boolean)"
+    expect: { sites: 1, form: boxparam, hole: "Boolean", picks: { 1: "Boolean", 2: "active" } }
+  - code: "class A { void f() { int n = 1; } }                // n -> 1 (int, 원시)"
+    expect: none

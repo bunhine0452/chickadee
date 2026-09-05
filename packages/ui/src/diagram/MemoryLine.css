@@ -1,0 +1,103 @@
+/* 메모리 줄 — 칸 하나가 한 열이다. 열 눈금이 데이터에서 나오므로(`gridTemplateColumns` 인라인)
+   창(`windows`)이 자기 칸 위에 정확히 걸린다. 색은 쓰지 않는다 — 줄과 이름이 가른다(정본 §6). */
+.ml {
+  display: grid;
+  gap: var(--s-1) var(--s-2);
+  align-items: center;
+  justify-content: start;
+  min-width: min-content;
+}
+
+/* 줄 이름표. 왼쪽 한 열을 쓰고, 격자 전체가 이것 때문에 표처럼 읽힌다. */
+.ml-head {
+  margin: 0;
+  padding-right: var(--s-2);
+  font-size: var(--fs-1);
+  color: var(--text-muted);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.ml-addr,
+.ml-off {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  color: var(--text-muted);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 값 칸. 이웃과 붙어 있어야 「연속」이 보이므로 테두리를 공유하는 대신 간격을 좁게 둔다. */
+.ml-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.4em;
+  padding: var(--s-1) var(--s-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-3);
+  white-space: nowrap;
+}
+
+/* 예측 — 자리는 남고 값이 없다. 비트 배열의 `.bit.veil` 과 같은 규약이다. */
+.ml-cell.veil {
+  border-style: dashed;
+  background: transparent;
+}
+
+.ml-names {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1);
+  justify-content: center;
+  margin: 0;
+}
+
+.ml-name {
+  font-family: var(--font-mono);
+  font-size: var(--fs-2);
+  color: var(--text);
+}
+
+/* 이름 둘이 한 칸을 가리키는 것 — 별칭. 색이 아니라 **낱말**이 그것을 말한다. */
+.ml-names.many .ml-name {
+  font-weight: var(--fw-medium);
+}
+
+.ml-alias {
+  padding: 0 var(--s-1);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-1);
+  color: var(--text-muted);
+}
+
+/* 창 — 줄 위에 얹힌 구간. 길이는 실선, 용량의 나머지는 점선이다.
+   `append` 가 원본을 고치나 마나가 이 두 구간의 경계에서 갈린다. */
+.ml-win {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.8em;
+  padding: 0 var(--s-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-1);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.ml-win.len {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+.ml-win.cap {
+  border-style: dashed;
+  background: transparent;
+}

@@ -4,3 +4,26 @@
   position: relative;
   z-index: 20;
 }
+
+/* 0장의 「먼저 읽기」 한 줄 (D138). 질문(`.ask`)보다 조용해야 한다 — 이 줄은 읽을 것이고
+   질문이 이 판의 일이다. `.note` 의 `--measure` 36em·행간을 물려받는다. */
+.read-first {
+  margin: 0 0 12px;
+  padding-left: 12px;
+  border-left: 3px solid var(--border);
+  color: var(--text-muted);
+}
+
+/* 「이 문법은 네 코드에 없습니다 — 사유」 (D186 ④ 정직성). 판 머리 **바로 아래**에 서고,
+   앱이 못 하는 것을 말하는 줄이라 다른 곁글에 섞이면 안 된다.
+   `.read-first`(회색 선 + `--text-muted`)보다 한 단 세게, 물음(`.ask`)보다는 약하게 —
+   선은 `--info`(정본 §6 의 「잠김 · 안내」)이고 글자는 `--text` 다. 장식이 아니라 **위계**로
+   눈에 걸리게 한다: 면을 칠하지 않고 선 하나와 글자 색만 바꾼다. */
+.t0-absent {
+  margin: 0 0 var(--s-3);
+  padding: var(--s-2) var(--s-4);
+  border-left: 3px solid var(--info);
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+  background: var(--info-bg);
+  color: var(--text);
+}

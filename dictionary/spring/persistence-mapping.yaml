@@ -1,0 +1,92 @@
+schema: 1
+id: spring/persistence-mapping
+universal: null
+name: { ko: "표의 열과 객체의 필드를 맞춰 두기", en: "Persistence mapping" }
+token: null
+grammars: []
+framework: spring
+# 짚을 노드가 없다 — 맞추는 일은 실행 중에 일어난다 (D176). 창은 근거 낱말이 보이는 블록에서 빌린다.
+track_default: t0
+essential: false
+difficulty: 3
+prereq: [spring/repository-pattern]
+confusions: [spring/connection-and-tx-boundary]
+queries: []
+dict:
+  one_liner:
+    ko: "표의 열 이름과 객체의 필드 이름을 짝지어 적어 둔다."
+    en: "Column names and field names are paired up and written down."
+  why:
+    ko: >-
+      데이터베이스의 표는 <code>login_id</code> 처럼 밑줄로 쓰고 자바 필드는
+      <code>loginId</code> 처럼 씁니다. 이름이 다르니 <b>누가 짝을 지어 줘야</b> 합니다. 그 짝이
+      매핑이에요. 적는 자리는 도구에 따라 다릅니다 — 짝을 <b>XML 표에 모아 적는</b> 방식이 있고,
+      <b>클래스에 표시로 붙이는</b> 방식이 있습니다. 모양은 달라도 하는 일은 같습니다.
+      중요한 것은 하나입니다 — <b>여기 없는 열은 객체에 안 담깁니다</b>. 자바 쪽에 값을 넣어도
+      매핑에 그 자리가 없으면 저장되지 않아요.
+    en: >-
+      A database table writes <code>login_id</code> with an underscore; a Java field writes
+      <code>loginId</code>. The names differ, so <b>something has to pair them</b>. That pairing is
+      the mapping. Where it is written depends on the tool — the pairs can be <b>collected in an XML
+      table</b>, or <b>attached to the class as marks</b>. The shape differs, the job does not. One
+      thing matters: <b>a column missing here never reaches the object</b>. Set a value on the Java
+      side and it is not stored if the mapping has no slot for it.
+  trace: []
+rule:
+  ko: "<b>매핑에 없는 열은 오가지 않는다.</b> 자바에 값을 넣어도 그렇다."
+  en: "<b>A column absent from the mapping does not travel.</b> Even with a value set in Java."
+ok:
+  ko: >-
+    표의 열 하나가 객체의 필드 하나에 짝지어집니다.
+    짝지어진 것만 읽히고 저장됩니다.
+  en: >-
+    One column pairs with one field. Only the paired ones are read and stored.
+misconceptions:
+  - ko: "이름이 비슷하면 알아서 짝지어진다 — 규칙을 켜지 않으면 안 짝지어집니다."
+    en: "Similar names pair themselves — not unless that rule is turned on."
+  - ko: "자바에서 값을 넣었으니 저장된다 — 매핑에 자리가 없으면 안 갑니다."
+    en: "A value set in Java gets stored — not when the mapping has no slot."
+  - ko: "매핑은 도구마다 아예 다른 개념이다 — 적는 자리만 다르고 하는 일은 같습니다."
+    en: "Mapping is a different idea in each tool — only the place it is written differs."
+  - ko: "결과가 맞으니 자바가 그 값을 넣은 것이다 — 표의 기본값일 수 있습니다."
+    en: "The result is right, so Java set it — it may be the table's default."
+evidence: ["resultMap", "parameterType", "@Entity", "@Column", "columnPrefix", "jdbcType"]
+meaning:
+  - q:
+      ko: "자바에서 값을 넣었는데 표에는 <b>다른 값</b>이 들어 있습니다. 무엇을 보나요?"
+      en: "Java set a value but the table holds <b>a different one</b>. What do you check?"
+    hint:
+      ko: "그 열이 짝지어져 있는지부터 보세요."
+      en: "First check whether that column is paired at all."
+    options:
+      - t: { ko: "매핑에 그 열의 자리가 있는지 — 없으면 자바 값이 안 간다", en: "Whether the mapping has a slot for that column" }
+      - t: { ko: "자바에서 값을 넣는 줄이 도는지", en: "Whether the line setting the value runs" }
+        diag:
+          t:
+            ko: "그 줄이 돌아도 매핑에 자리가 없으면 값은 <b>거기서 멈춥니다</b>. 자바만 읽으면 안 보이는 자리예요."
+            en: "Even when that line runs, a missing slot stops the value <b>right there</b>. Reading only Java hides this."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 넣었나 갔나", en: "The sharpest spot — set or sent" }
+            code:
+              - "자바: 값을 넣었다"
+              - "매핑: 보낼 자리가 없다"
+      - t: { ko: "표의 열 타입이 자바 타입과 같은지", en: "Whether the column type matches the Java type" }
+        diag:
+          t:
+            ko: "타입이 안 맞으면 대개 <b>예외가 납니다</b>. 조용히 다른 값이 들어 있는 것은 아예 안 간 쪽에 가까워요."
+            en: "A type mismatch usually <b>raises</b>. A quietly different value points to nothing being sent at all."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 조용하냐 터지냐", en: "The sharpest spot — silent or raised" }
+            code:
+              - "타입 불일치: 예외"
+              - "자리 없음: 조용하다"
+      - t: { ko: "그 표에 데이터가 이미 있었는지", en: "Whether the table already had data" }
+        diag:
+          t:
+            ko: "새로 넣은 행이라면 이전 데이터와 상관없습니다. 값을 정한 것은 <b>매핑이 보낸 것</b>이거나 <b>표의 기본값</b>이에요."
+            en: "For a freshly inserted row, older data is irrelevant. The value came from <b>what the mapping sent</b> or <b>the table's default</b>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 보낸 값이냐 기본값이냐", en: "The sharpest spot — sent value or default" }
+            code:
+              - "보냈다: 자바 값"
+              - "안 보냈다: 표의 기본값"

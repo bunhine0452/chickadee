@@ -1,0 +1,89 @@
+schema: 1
+id: cs/erasure-and-reification
+universal: null
+name: { ko: "타입이 실행까지 남나 지워지나", en: "Erasure and reification" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+# 자바·C# 편이 밀어낸 것 (cs.md §10.2).
+track_default: t0
+essential: false
+difficulty: 4
+prereq: [cs/static-vs-dynamic-typing]
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "적어 둔 타입이 도는 때까지 남는 언어와, 번역이 끝나면 지워지는 언어가 있다."
+    en: "Some languages keep written types at run time; others erase them."
+  why:
+    ko: >-
+      「이 목록은 숫자만 담는다」를 적으면 번역기가 확인해 줍니다.
+      확인이 끝난 뒤 그 정보를 <b>남길지 지울지</b>가 언어마다 달라요.
+      지우는 쪽에서는 도는 때 그 목록이 무엇을 담는 목록인지 <b>물어볼 수 없습니다</b> —
+      확인은 이미 끝났으니 필요 없다는 설계예요. 남기는 쪽에서는 물어볼 수 있고, 그만큼 정보를 들고 다닙니다.
+      「타입을 적었는데 왜 돌 때 못 물어보나」의 답이 이것이고, 이 차이는 두 언어에서
+      <b>같은 코드가 다른 결과</b>를 내게 합니다.
+    en: >-
+      Write “this list holds numbers only” and the translator checks it. Whether that information
+      is <b>kept or erased</b> after the check differs by language. Where it is erased, at run time
+      you <b>cannot ask</b> what the list holds — the design says the check is done, so it is not
+      needed. Where it is kept, you can ask, and the information is carried along. This answers
+      “I wrote the type, so why can I not ask at run time”, and it makes <b>the same code behave
+      differently</b> across the two.
+  trace: []
+rule:
+  ko: "<b>확인과 보관은 다른 일이다.</b> 확인했다고 남아 있는 것은 아니다."
+  en: "<b>Checking and keeping are different jobs.</b> Checked does not mean kept."
+ok:
+  ko: >-
+    번역할 때는 두 언어 다 확인해 줍니다. 갈리는 것은 그 뒤에 물어볼 수 있느냐예요.
+  en: >-
+    Both check at translation. They part on whether you can ask afterwards.
+misconceptions:
+  - ko: "타입을 적었으니 돌 때도 안다 — 지우는 언어에서는 못 물어봅니다."
+    en: "Written types are known at run time — not in languages that erase."
+  - ko: "지우는 것은 정보를 잃는 손해다 — 들고 다닐 것이 없어 가볍다는 이점이 있습니다."
+    en: "Erasure only loses information — it also carries nothing, which is lighter."
+  - ko: "두 방식이 같은 코드를 같게 돌린다 — 물어보는 코드에서 결과가 갈립니다."
+    en: "Both run the same code the same way — code that asks behaves differently."
+meaning:
+  - q:
+      ko: "타입을 적어 둔 목록에게 돌 때 「너는 무엇을 담니」를 물었더니 못 답합니다. <b>무슨 방식인가요?</b>"
+      en: "You asked a typed list at run time what it holds and got no answer. <b>Which scheme?</b>"
+    hint:
+      ko: "확인이 끝난 뒤에 그 정보를 어떻게 했을까요."
+      en: "What became of that information after the check?"
+    options:
+      - t: { ko: "확인한 뒤 그 정보를 지우는 방식", en: "The scheme that erases the information after checking" }
+      - t: { ko: "타입을 안 적어서 확인 자체를 안 한 방식", en: "No type was written, so nothing was checked" }
+        diag:
+          t:
+            ko: "적어 뒀고 <b>확인도 받았습니다</b>. 못 답하는 이유는 확인 뒤에 안 남긴 것이에요."
+            en: "It was written and <b>it was checked</b>. It cannot answer because nothing was kept afterwards."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 확인이냐 보관이냐", en: "The sharpest spot — checking or keeping" }
+            code:
+              - "확인: 번역 때 했다"
+              - "보관: 안 했다"
+      - t: { ko: "목록이 비어 있어서 담긴 것이 없는 방식", en: "The list is empty, so there is nothing it holds" }
+        diag:
+          t:
+            ko: "비어 있어도 <b>무엇을 담는 목록인지</b>는 다른 질문입니다. 정보를 남기는 언어에서는 빈 목록도 답합니다."
+            en: "Even empty, <b>what kind of list it is</b> is a separate question. Where information is kept, an empty list still answers."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 담긴 것이냐 담을 것이냐", en: "The sharpest spot — contents or kind" }
+            code:
+              - "담긴 것: 지금 몇 개"
+              - "담을 것: 무엇을 담는 목록인가"
+      - t: { ko: "물어보는 방법을 안 쓴 것뿐이다", en: "You simply did not use the right way to ask" }
+        diag:
+          t:
+            ko: "지우는 언어에서는 <b>어떤 방법으로도</b> 못 물어봅니다 — 남아 있는 것이 없어서예요."
+            en: "In an erasing language <b>no way of asking</b> works — there is nothing left to ask."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 방법이냐 남았느냐", en: "The sharpest spot — method or presence" }
+            code:
+              - "방법: 남아 있으면 찾을 수 있다"
+              - "지움: 무엇으로도 못 찾는다"

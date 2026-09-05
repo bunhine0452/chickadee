@@ -1,0 +1,54 @@
+[
+  {
+    "queryId": "java/array",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "type",
+    "startLine": 4,
+    "startCol": 28,
+    "endLine": 4,
+    "endCol": 36,
+    "nodeKind": "array_type",
+    "inError": false
+  },
+  {
+    "queryId": "java/array",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "type",
+    "startLine": 4,
+    "startCol": 28,
+    "endLine": 4,
+    "endCol": 34,
+    "nodeKind": "type_identifier",
+    "inError": false
+  },
+  {
+    "queryId": "java/array",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "type",
+    "startLine": 4,
+    "startCol": 34,
+    "endLine": 4,
+    "endCol": 36,
+    "nodeKind": "dimensions",
+    "inError": false
+  },
+  {
+    "queryId": "java/array",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "hole",
+    "form": "type",
+    "startLine": 4,
+    "startCol": 34,
+    "endLine": 4,
+    "endCol": 36,
+    "nodeKind": "dimensions",
+    "inError": false
+  }
+]

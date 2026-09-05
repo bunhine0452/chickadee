@@ -8,8 +8,16 @@ export const core: Record<string, string> = {
 
   'firstRun.note':
     'Your own vibe-coded repo is the textbook. Register one and Chickadee reads its '
-    + 'commits and files, lays a sheet per feature, and sets plates from the grammar your '
+    + 'commits and files, makes a unit per feature, and writes questions from the grammar '
+    + 'your '
     + 'code actually uses. It only reads — nothing is written back to the repo.',
+  'firstRun.scope':
+    'It is fine if “variable” and “function” are new. The first session opens Chapter 0 — '
+    + 'the floor of this language — and works up from the simplest lines in your own code.',
+  'firstRun.newcomerQ': 'Is programming new to you?',
+  'firstRun.newcomerAsk': 'This only sets how long Chapter 0 runs. Nothing is locked.',
+  'firstRun.newcomerYes': 'It is new',
+  'firstRun.newcomerNo': 'I have coded',
   'firstRun.language': 'Display language',
   'firstRun.languageSwitch': 'Choose a display language — 한국어 · English',
   'firstRun.pick': 'Add a repo',
@@ -43,8 +51,8 @@ export const core: Record<string, string> = {
 
   'settings.dictLangs.label': 'Grammar dictionary languages',
   'settings.dictLangs.note':
-    'A language you turn off is dropped from <b>new plates</b>. Reviews of concepts you '
-    + 'already know keep running \u2014 if layers stopped, everything would be overdue at '
+    'A language you turn off is dropped from <b>new questions</b>. Reviews of concepts you '
+    + 'already know keep running \u2014 if mastery stopped, everything would be overdue at '
     + 'once when you turn it back on.',
   'settings.dictLangs.axis':
     'This is a different axis from the display language above. Here you choose what to '
@@ -59,27 +67,27 @@ export const core: Record<string, string> = {
   'settings.look.motionNote':
     '\u201cFollow the system\u201d takes this computer\u2019s reduce-motion setting as is. '
     + '\u201cAlways reduce\u201d drops the transition time and keeps the end state \u2014 '
-    + 'the stamp still lands, it just stops taking time to get there.',
+    + 'the result still lands, it just stops taking time to get there.',
 
   'settings.look.locale': 'Display language',
   'settings.look.localeSwitch': 'Display language 한국어 · English',
   'settings.look.localeNote':
     'Changing the language redraws the screen. Anything not translated yet shows in Korean.',
 
-  // ── Look: the two switches the masthead shares ──────────────────────────
+  // ── Look ───────────────────────────────────────────────────────────────
   'settings.look.title': 'Look',
-  'settings.look.plain': '= the shop floor of the screen',
-  'settings.look.process': 'Shift',
-  'settings.look.themeLight': 'Day shift',
-  'settings.look.themeDark': 'Night shift',
-  'settings.look.themeSwitch': 'Day shift \u00b7 night shift',
-  'settings.look.trimOff': 'Trim shown',
-  'settings.look.trimOn': 'Trim hidden',
-  'settings.look.trimSwitch': 'Show \u00b7 hide print trim',
+  'settings.look.plain': '= screen brightness and motion',
+  'settings.look.process': 'Screen',
+  'settings.look.themeSystem': 'Follow the system',
+  'settings.look.themeLight': 'Light',
+  'settings.look.themeDark': 'Dark',
+  'settings.look.themeSwitch': 'Screen brightness \u2014 follow the system, light, or dark',
+  'settings.look.themeNote':
+    'The default follows the system: when this computer turns dark at night, so does the app. '
+    + 'Picking light or dark pins it regardless of the system.',
   'settings.look.note':
-    'What you pick here is saved and comes back next time. \u201cTrim hidden\u201d drops only '
-    + 'the registration marks, crop lines, grain and stamp rotation \u2014 not one pixel of '
-    + 'the type or the layout.',
+    'What you pick here is saved and comes back next time. Changing the brightness moves '
+    + 'nothing \u2014 not one pixel of the type or the layout.',
 
   // ── Screen heading and section titles ──────────────────────────────────
   'settings.title': 'Settings',
@@ -101,8 +109,22 @@ export const core: Record<string, string> = {
   'settings.study.budgetNote': 'minutes (10\u201325)',
   'settings.study.rollover': 'Day boundary',
   'settings.study.rolloverNote': 'hour \u2014 before this counts as yesterday',
-  'settings.study.newPerDay': 'New plates',
+  'settings.study.newPerDay': 'New questions',
   'settings.study.newPerDayNote': 'per day (max 4)',
+  'settings.study.newcomer': 'Programming experience',
+  'settings.study.newcomerSwitch': 'Choose whether programming is new — It is new · I have coded',
+  'settings.study.newcomerYes': 'It is new',
+  'settings.study.newcomerNo': 'I have coded',
+  'settings.study.newcomerNote':
+    'Left on “It is new”, <b>Chapter 0 runs longer</b> — getting a few root questions right will '
+    + 'not close it, and it stays open until every concept in it is at level 1. Nothing is locked, and '
+    + 'you can change this at any time.',
+  'settings.study.coach': 'First-question walkthrough',
+  'settings.study.coachSwitch': 'First-question walkthrough on · off',
+  'settings.study.coachOn': 'On',
+  'settings.study.coachOff': 'Off',
+  'settings.study.coachNote':
+    'When on, the first question of your next session walks you through pick → submit → read the result, one step at a time. It is a real question, so mastery still counts.',
   'settings.study.tz': 'Time zone',
   'settings.study.tzNote': 'This is the reference so travelling does not drop yesterday\u2019s queue',
 
@@ -115,7 +137,7 @@ export const core: Record<string, string> = {
   'settings.privacy.title': 'Privacy note',
   'settings.privacy.plain': '= what is kept, and where',
   'settings.about.title': 'About',
-  'settings.about.plain': '= version numbers',
+  'settings.about.plain': '= version',
   'settings.about.dataDir': 'Data location',
 
   // ── Data section ───────────────────────────────────────────────────────
@@ -162,7 +184,7 @@ export const core: Record<string, string> = {
   'settings.localeFailed': 'Could not save the display language.',
 
   // ── Performance table ──────────────────────────────────────────────────
-  'settings.perf.empty': 'Nothing measured yet. Reading a repo or printing a plate fills this.',
+  'settings.perf.empty': 'Nothing measured yet. Reading a repo or answering a question fills this.',
   'settings.perf.caption': 'Last {{n}} samples (milliseconds)',
   'settings.perf.colItem': 'Item',
   'settings.perf.colSamples': 'Samples',
@@ -177,7 +199,7 @@ export const core: Record<string, string> = {
   'settings.perf.kindSessionMount': 'Session open',
   'settings.perf.kindT0Grade': 'T0 grading',
   'settings.perf.kindT1Monaco': 'T1 editor',
-  'settings.perf.kindThemeSwitch': 'Shift change',
+  'settings.perf.kindThemeSwitch': 'Theme change',
   'settings.perf.kindLiferOpen': 'LIFER open',
 
   // ── LLM key ────────────────────────────────────────────────────────────

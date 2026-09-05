@@ -1,0 +1,197 @@
+schema: 1
+id: java/field-declaration
+universal: null
+name: { ko: 클래스가 지니는 값, en: Field declaration }
+token: null
+grammars: [java]
+framework: null
+essential: true
+difficulty: 2
+prereq: [java/class-declaration, java/variable-declaration, spring/dependency-injection]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "상자 하나하나가 지니고 다니는 값. 메서드 밖, 클래스 안에 적는다."
+    en: "A value each box carries. Written inside the class and outside every method."
+  why:
+    ko: >-
+      메서드 안의 이름은 그 메서드가 끝나면 사라집니다. 여기 적은 이름은 <b>상자와 함께 남아</b>
+      다음에 어느 메서드가 불려도 그대로 있어요 — 그래서 「이 클래스가 무엇을 기억하는가」가
+      {{site.line}}행 같은 줄들에 다 적혀 있습니다. 문법은 메서드 안의 선언과 <b>똑같이 생겼는데</b>
+      규칙이 하나 다릅니다: 여기 적은 것은 값을 안 넣어도 <b>기본값을 받고</b>, 메서드 안의 이름은
+      안 넣고 읽으면 컴파일이 멈춥니다.
+    en: >-
+      A name inside a method disappears when the method ends. A name written here <b>stays with the
+      box</b> and is still there whichever method runs next — so “what this class remembers” is all
+      written in lines like {{site.line}}. It <b>looks exactly like</b> a declaration inside a method,
+      with one rule apart: what is written here <b>gets a default</b> when no value is given, while a
+      name inside a method read before assignment stops the compiler.
+  trace:
+    - ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 담을 것의 종류를 정한다."
+      en: "{{pick.1|code}} settles what kind of thing it holds."
+    - ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 상자마다 하나씩 생기는 이름이다."
+      en: "{{pick.2|code}} is a name that comes into being once per box."
+    - ko: "값을 안 적어도 종류에 맞는 기본값이 들어가 있다."
+      en: "Even with no value written, a default matching the kind is already in place."
+
+rule:
+  ko: "<b>여기 적은 이름은 기본값을 받는다.</b> 메서드 안의 이름은 안 받는다 — 문법이 같아도 규칙이 다르다."
+  en: "<b>A name written here gets a default.</b> A name inside a method does not — same grammar, different rule."
+ok:
+  ko: >-
+    상자를 하나 만들 때마다 {{pick.2|code}}{{pick.2|josa:이,가}} 하나씩 생깁니다. 다른 상자의 것과 섞이지 않아요.
+  en: >-
+    Every box made brings one {{pick.2|code}} of its own. It never mixes with another box's.
+payoff:
+  ko: >-
+    이걸 알면 클래스가 <b>무엇을 기억하는지</b>를 위쪽 몇 줄만 보고 압니다 — 메서드를 다 읽지
+    않아도 상태의 목록이 거기 있어요.
+  en: >-
+    Knowing this tells you <b>what a class remembers</b> from a few lines at the top — the list of its
+    state is there without reading every method.
+bridge:
+  ko: >-
+    파이썬은 이것을 <code>__init__</code> 안에서 <code>self.x = …</code> 로 만듭니다. 자바는 클래스
+    몸통에 <b>따로 적어</b> 두어서, 목록이 한자리에 모입니다.
+  en: >-
+    Python makes these with <code>self.x = …</code> inside <code>__init__</code>. Java writes them
+    <b>separately</b> in the class body, so the list sits in one place.
+misconceptions:
+  - ko: "메서드 안의 선언과 규칙이 같다 — 문법만 같고 기본값 규칙이 다릅니다."
+    en: "It follows the same rule as a declaration inside a method — only the grammar matches; the default rule differs."
+  - ko: "모든 상자가 같은 값을 나눠 쓴다 — 상자마다 <b>따로</b> 생깁니다. 나눠 쓰게 하려면 따로 적어야 해요."
+    en: "Every box shares one value — each box gets its <b>own</b>. Sharing has to be written on purpose."
+  - ko: "적은 순서대로 값이 채워진다 — 채워지는 시점은 상자를 만들 때이고, 순서에 기대 쓰면 깨집니다."
+    en: "They fill in the order written — they fill when the box is made, and leaning on that order breaks."
+  - ko: "클래스 밖에 적어도 같다 — 클래스 밖에 적힌 것은 <b>다른 노드</b>가 되어 규칙도 달라집니다."
+    en: "Writing it outside the class is the same — outside, it becomes a <b>different node</b> with different rules."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>담을 것의 종류</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the kind of thing it holds</b>."
+    hint:
+      ko: "이름보다 <b>앞</b>에 옵니다."
+      en: "It comes <b>before</b> the name."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 무엇을 담는지는 그 앞에 적혀 있어요."
+          en: "{{pick.2|code}} is the <b>name</b>. What it holds is written in front of it."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 종류냐 이름이냐"
+            en: "The sharpest spot — the kind or the name"
+          code:
+            - "AuthService authService;"
+            - "//  ^종류        ^이름"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>어떻게 다룰지</b>를 적은 낱말입니다. 담는 것의 종류가 아니에요."
+          en: "{{pick.3|code}} says <b>how it is treated</b>. It is not the kind of thing held."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 다루는 방식이냐 담는 종류냐"
+            en: "The sharpest spot — how it is treated or what it holds"
+          code:
+            - "앞 낱말들: 보이는 범위 · 다시 넣기"
+            - "타입: 무엇을 담나"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행에 값을 <b>안 적고</b> 두면 상자를 만든 직후에 그 이름에는 무엇이 들어 있을까요?"
+      en: "Leave line {{site.line}} <b>without a value</b> — what is in that name right after a box is made?"
+    hint:
+      ko: "메서드 안의 이름과 규칙이 갈리는 자리입니다."
+      en: "This is where the rule parts ways with a name inside a method."
+    options:
+      - t:
+          ko: "종류에 맞는 기본값 — 숫자면 0, 참거짓이면 거짓, 상자면 가리키는 데 없음"
+          en: "A default for the kind — zero, false, or pointing nowhere"
+      - t:
+          ko: "아무것도 없어서 읽으면 컴파일이 멈춘다"
+          en: "Nothing, so reading it stops the compiler"
+        diag:
+          t:
+            ko: "그 규칙은 <b>메서드 안의 이름</b>에 걸립니다. 여기 적은 이름은 기본값을 받아요 — 문법이 같아 헷갈리는 자리예요."
+            en: "That rule applies to <b>a name inside a method</b>. A name written here gets a default — the identical grammar is what makes this confusing."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 밖이냐 안이냐"
+              en: "The sharpest spot — outside or inside a method"
+            code:
+              - "클래스 몸통: 기본값을 받는다"
+              - "메서드 안:  안 넣고 읽으면 멈춘다"
+      - t:
+          ko: "쓰레기 값이 들어 있어서 무엇이 나올지 모른다"
+          en: "Garbage, so anything could come out"
+        diag:
+          t:
+            ko: "값이 <b>정해져 있습니다</b>. 무엇이 들어가는지는 종류가 정해요 — 예측할 수 없는 값은 아닙니다."
+            en: "The value is <b>settled</b>. The kind decides what goes in — it is not unpredictable."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 정해졌나 모르나"
+              en: "The sharpest spot — settled or unknown"
+            code:
+              - "int b;     → 0"
+              - "String s;  → 가리키는 데 없음"
+      - t:
+          ko: "이름 자체가 안 만들어진다"
+          en: "The name is not created at all"
+        diag:
+          t:
+            ko: "이름은 만들어집니다. 값을 <b>안 적은 것</b>과 이름이 <b>없는 것</b>은 다른 상태예요."
+            en: "The name is created. <b>Writing no value</b> and <b>having no name</b> are different states."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 이름이 있나 값이 있나"
+              en: "The sharpest spot — the name or the value"
+            code:
+              - "이름: 선언한 순간 생긴다"
+              - "값:  안 적으면 기본값"
+
+no_hole_reason: >-
+  지울 고정 낱말이 없다 — 이 줄에서 눈에 띄는 것은 타입 글자이고 그것이 사용처마다 다르다
+  (String·long·AuthService). 빈칸의 보기를 고정할 수 없다. 같은 이유로 java/variable-declaration
+  도 빈칸을 안 낸다.
+
+why_gate:
+  q:
+    ko: "이 값을 메서드 안이 아니라 <b>{{site.line}}행에 적어 둔</b> 이유는 무엇일까요?"
+    en: "Why is this value written <b>on line {{site.line}}</b> instead of inside a method?"
+  choices:
+    - t:
+        ko: "메서드가 끝나도 <b>남아 있어야</b> 해서 — 다음에 부를 때도 같은 값을 봐야 한다"
+        en: "Because it must <b>outlive</b> the method — the next call needs to see the same value"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 어느 메서드들이 그 값을 함께 보는지도 적어 보세요."
+        en: "That is the direction. Add which methods share that value."
+    - t:
+        ko: "위에 적으면 읽기 좋아서"
+        en: "Because it reads better at the top"
+      ok: false
+      fb:
+        ko: "읽기 좋은 것은 결과입니다. 여기 적은 이유는 <b>남아야 하기 때문</b>이에요."
+        en: "Readability is a side effect. It is written here because it has to <b>persist</b>."
+    - t:
+        ko: "자바는 메서드 안에서 이런 값을 못 만들어서"
+        en: "Because Java cannot make such a value inside a method"
+      ok: false
+      fb:
+        ko: "만들 수 있습니다. 다만 메서드가 끝나면 사라져요."
+        en: "It can. It just disappears when the method ends."
+
+queries:
+  - { grammars: [java], file: ./field-declaration.scm }
+
+examples:
+  - code: "class C { private final AuthService authService; }"
+    expect: { sites: 1, form: field, picks: { 1: "AuthService", 2: "authService", 3: "private final" } }
+  - code: "class C { long expiration = 0; }"
+    expect: { sites: 1, form: field, picks: { 1: "long", 2: "expiration" } }
+  - code: "class C { void m() { int n = 1; } }"
+    expect: none

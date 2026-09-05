@@ -1,21 +1,22 @@
-/* 목업: design/src/ink/shared.css `.toast` */
+/* D182 — 조작 결과. 어긋난 그림자를 걷고 그림자 2단 중 위쪽 하나만 쓴다.
+   전환은 180ms(정본 §6 상한 200ms). */
 .toast {
   position: fixed;
-  bottom: 26px;
+  bottom: var(--s-5);
   left: 50%;
   z-index: 60;
   max-width: min(92vw, 560px);
-  padding: 11px 16px;
-  border: 2.5px solid var(--rule);
-  background: var(--paper-2);
-  box-shadow: 4px 5px 0 var(--edge);
-  color: var(--ink);
-  font-size: var(--fs-15);
-  font-weight: 600;
-  letter-spacing: -.015em;
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-2);
+  color: var(--text);
+  font-size: var(--fs-3);
+  font-weight: var(--fw-medium);
   opacity: 0;
-  transform: translate(-50%, 20px);
-  transition: transform .22s var(--e-settle), opacity .18s;
+  transform: translate(-50%, 12px);
+  transition: transform var(--dur-base) var(--ease), opacity var(--dur-fast) var(--ease);
   pointer-events: none;
 }
 
@@ -27,9 +28,9 @@
 .toast small {
   display: block;
   margin-top: 2px;
-  color: var(--ink-soft);
-  font-size: var(--fs-14);
-  font-weight: 400;
+  color: var(--text-muted);
+  font-size: var(--fs-2);
+  font-weight: var(--fw-normal);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,0 +1,54 @@
+[
+  {
+    "queryId": "sql/value-and-name",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "text-value",
+    "startLine": 1,
+    "startCol": 26,
+    "endLine": 1,
+    "endCol": 41,
+    "nodeKind": "binary_expression",
+    "inError": false
+  },
+  {
+    "queryId": "sql/value-and-name",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "text-value",
+    "startLine": 1,
+    "startCol": 26,
+    "endLine": 1,
+    "endCol": 32,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "sql/value-and-name",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "text-value",
+    "startLine": 1,
+    "startCol": 33,
+    "endLine": 1,
+    "endCol": 34,
+    "nodeKind": "=",
+    "inError": false
+  },
+  {
+    "queryId": "sql/value-and-name",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "text-value",
+    "startLine": 1,
+    "startCol": 35,
+    "endLine": 1,
+    "endCol": 41,
+    "nodeKind": "literal",
+    "inError": false
+  }
+]

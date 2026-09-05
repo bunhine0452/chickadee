@@ -17,7 +17,7 @@ import { test, expect } from '../support/fixture.js';
 import type { Locator, Page } from '@playwright/test';
 
 import {
-  answerKey, closeLifer, gotoDev, settled, startSession, toNight, toSummary, toggleTrim,
+  answerKey, gotoDev, settled, settleLifer, startSession, toNight, toSummary, toggleTrim,
 } from '../support/gates.js';
 
 type Theme = 'day' | 'night';
@@ -168,7 +168,7 @@ for (const theme of ['day', 'night'] as const) {
     await page.keyboard.press(`Digit${answerKey(app)}`);
     await page.keyboard.press('Enter');
     await page.locator('.fb.on').waitFor();
-    await closeLifer(page);
+    await settleLifer(page);
     await shoot(page, `t0-right-${theme}`, { scope: 'session', anchor: 'article.ps' });
   });
 
@@ -184,13 +184,16 @@ for (const theme of ['day', 'night'] as const) {
     await shoot(page, `t0-wrong-${theme}`, { scope: 'session', anchor: 'article.ps' });
   });
 
-  test(`LIFER 베일 · ${theme}`, async ({ page, app }) => {
+  // 첫 기록은 판정란 안이라 정합 한 장에 이미 들어 있다 — 그래도 따로 찍는다.
+  // 이 장이 재는 것은 도장·일련번호·Dee 가 판정문과 **한 칸 안에서** 어긋나지 않는가다 (D131).
+  test(`LIFER 첫 기록 · ${theme}`, async ({ page, app }) => {
     await open(page, theme);
     await startSession(page);
     await page.keyboard.press(`Digit${answerKey(app)}`);
     await page.keyboard.press('Enter');
-    await page.locator('.lifer-veil').waitFor();
-    await shoot(page, `lifer-${theme}`, { scope: 'session' });
+    await page.locator('.lifer-note').waitFor();
+    await settleLifer(page);
+    await shoot(page, `lifer-${theme}`, { scope: 'session', anchor: '.slot' });
   });
 
   test(`요약 · ${theme}`, async ({ page, app }) => {
@@ -199,7 +202,7 @@ for (const theme of ['day', 'night'] as const) {
     await page.keyboard.press(`Digit${answerKey(app)}`);
     await page.keyboard.press('Enter');
     await page.locator('.fb.on').waitFor();
-    await closeLifer(page);
+    await settleLifer(page);
     await toSummary(page, app);
     await shoot(page, `summary-${theme}`, { scope: 'summary', anchor: 'article.ps' });
   });

@@ -8,7 +8,8 @@
  * 만들지 않는다. 순위·마스크·스펙 카드는 생성기가, 판정은 `@chickadee/grading` 이 한다.
  */
 import {
-  generateT1, isT1Card, type BlockCandidate, type BlockConcept, type T1Card,
+  generateT1, isT1Card, type BlockCandidate, type BlockConcept, type FocusLine, type T1Card,
+  makeExecCard, makeProtoCard,
 } from '@chickadee/cards';
 import type { Dict } from '@chickadee/dictionary';
 import { ipc, log, type AstLite } from '@chickadee/ipc-client';
@@ -241,3 +242,148 @@ export const toQueueCandidate = (
   role: prints > 0 ? 'review' : 'new',
   estMin: estMinFor('t1', prints > 0 ? 'review' : 'new', ema),
 });
+
+// ───────── 실행 추적 (D151) ─────────
+
+/** 한 세션에 시도해 보는 블록 수. `bakeNextT2` 의 `BAKE_ATTEMPTS` 와 같은 이유 — 일괄 생성 금지. */
+const EXEC_ATTEMPTS = 6;
+
+/** 지금 있는 추적 개념. 늘어나면 여기 붙는다. */
+const EXEC_CONCEPT = 'exec/order';
+
+/**
+ * 추적 카드를 **한 장** 굽는다 (D151). 없으면 `null`.
+ *
+ * 블록마다 굽지 않는다 — 일괄 생성 금지(D140 과 같은 이유)이고, 추적은 어차피 세션에 한두
+ * 장이면 된다. 짧은 함수에서는 생성기가 사유를 내고 물러나므로 몇 개를 시도해 본다.
+ *
+ * 실패해도 던지지 않는다: 추적 판이 한 장 안 나오는 것이 세션을 막을 이유는 없다.
+ */
+export async function bakeNextExec(deps: BlockDeps): Promise<number | null> {
+  const concept = deps.dict.concepts.get(EXEC_CONCEPT);
+  if (concept === undefined) return null;
+
+  const groups = await loadCandidates(deps);
+  let tried = 0;
+  for (const { grammar, blocks } of groups) {
+    for (const block of blocks) {
+      if (tried >= EXEC_ATTEMPTS) return null;
+      tried += 1;
+
+      // T1 은 원문 줄(`BlockCandidate.lines`)을 쓰고 추적 생성기는 **줄 번호가 붙은** 줄을
+      // 받는다. 읽어 온 첫 줄이 `block.lineStart` 이므로 i 번째가 `lineStart + i` 다
+      // (`cards.ts` 의 `readContext` 와 같은 규약).
+      const lines: FocusLine[] = block.lines.map((t, i) => ({ n: block.lineStart + i, t }));
+      const text = block.lines.join('\n');
+      const ast = await originalAst(block.blockId, grammar, text);
+      if (ast === null) continue;
+
+      const out = makeExecCard({
+        repoId: deps.repoId,
+        dictVersion: deps.dictVersion,
+        attempt: 0,
+        concept,
+        concepts: deps.dict.concepts,
+        ly: 0,
+        lines,
+        ast,
+        grammar,
+        path: block.path,
+        window: { from: block.lineStart, to: block.lineEnd },
+        blockHash: block.textHash,
+      });
+      if ('reason' in out) continue;
+
+      // 같은 블록에서 이미 구운 판은 `content_hash` UNIQUE 가 막는다 — 넣어 보고 조회한다.
+      await ipc.store.exec('card.insert', {
+        repoId: deps.repoId,
+        unitId: null,
+        track: 't0',
+        kind: out.card.kind,
+        conceptId: out.card.conceptId,
+        level: 1,
+        siteId: null,
+        fileId: block.fileId,
+        commitId: null,
+        payloadJson: JSON.stringify(out.card.payload),
+        genVersion: 1,
+        contentHash: out.card.contentHash,
+        createdAt: deps.now,
+      });
+      const rows = await ipc.store.query('card.by_hash', {
+        repoId: deps.repoId, contentHash: out.card.contentHash,
+      });
+      const cardId = rows[0]?.id;
+      if (cardId !== undefined) return cardId;
+    }
+  }
+  return null;
+}
+
+
+/** 규약 개념은 접두어로 안다 — 사전이 `proto/` 하나에 모아 둔다 (D159). */
+const PROTO_PREFIX = 'proto/';
+
+/**
+ * 규약 카드를 **한 장** 굽는다 (D159 · `proto/`). 없으면 `null`.
+ *
+ * 추적(`bakeNextExec`)과 같은 모양이고 다른 것은 자리를 얻는 방법뿐이다 — 추적은 AST 를 보고
+ * 규약은 **근거 낱말**을 본다. 그래서 여기는 `originalAst` 를 안 부른다: 블록 원문만 있으면 된다.
+ *
+ * 블록마다 굽지 않는다(D140). 개념이 여럿이라 블록 하나에 여러 개념을 시도하되, 한 장이 나오면
+ * 곧바로 멈춘다 — 한 세션에 규약 판이 여러 장 필요하지 않다.
+ */
+export async function bakeNextProto(deps: BlockDeps): Promise<number | null> {
+  const concepts = [...deps.dict.concepts.values()]
+    .filter((c) => c.id.startsWith(PROTO_PREFIX) && c.evidence.length > 0);
+  if (concepts.length === 0) return null;
+
+  const groups = await loadCandidates(deps);
+  let tried = 0;
+  for (const { blocks } of groups) {
+    for (const block of blocks) {
+      if (tried >= EXEC_ATTEMPTS) return null;
+      tried += 1;
+      const lines: FocusLine[] = block.lines.map((t, i) => ({ n: block.lineStart + i, t }));
+
+      for (const concept of concepts) {
+        const out = makeProtoCard({
+          repoId: deps.repoId,
+          dictVersion: deps.dictVersion,
+          attempt: 0,
+          concept,
+          concepts: deps.dict.concepts,
+          ly: 0,
+          lines,
+          path: block.path,
+          window: { from: block.lineStart, to: block.lineEnd },
+          blockHash: block.textHash,
+        });
+        if ('reason' in out) continue;
+
+        // 같은 블록의 같은 개념은 `content_hash` UNIQUE 가 막는다 — 넣어 보고 조회한다.
+        await ipc.store.exec('card.insert', {
+          repoId: deps.repoId,
+          unitId: null,
+          track: 't0',
+          kind: out.card.kind,
+          conceptId: out.card.conceptId,
+          level: 1,
+          siteId: null,
+          fileId: block.fileId,
+          commitId: null,
+          payloadJson: JSON.stringify(out.card.payload),
+          genVersion: 1,
+          contentHash: out.card.contentHash,
+          createdAt: deps.now,
+        });
+        const rows = await ipc.store.query('card.by_hash', {
+          repoId: deps.repoId, contentHash: out.card.contentHash,
+        });
+        const cardId = rows[0]?.id;
+        if (cardId !== undefined) return cardId;
+      }
+    }
+  }
+  return null;
+}

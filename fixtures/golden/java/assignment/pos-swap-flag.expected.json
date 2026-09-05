@@ -1,0 +1,67 @@
+[
+  {
+    "queryId": "java/assignment",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "assign",
+    "startLine": 5,
+    "startCol": 8,
+    "endLine": 5,
+    "endCol": 23,
+    "nodeKind": "assignment_expression",
+    "inError": false
+  },
+  {
+    "queryId": "java/assignment",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "assign",
+    "startLine": 5,
+    "startCol": 8,
+    "endLine": 5,
+    "endCol": 15,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "java/assignment",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "assign",
+    "startLine": 5,
+    "startCol": 16,
+    "endLine": 5,
+    "endCol": 17,
+    "nodeKind": "=",
+    "inError": false
+  },
+  {
+    "queryId": "java/assignment",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "hole",
+    "form": "assign",
+    "startLine": 5,
+    "startCol": 16,
+    "endLine": 5,
+    "endCol": 17,
+    "nodeKind": "=",
+    "inError": false
+  },
+  {
+    "queryId": "java/assignment",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "assign",
+    "startLine": 5,
+    "startCol": 18,
+    "endLine": 5,
+    "endCol": 23,
+    "nodeKind": "false",
+    "inError": false
+  }
+]

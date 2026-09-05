@@ -1,158 +1,93 @@
-/* DEV 전용 토큰 — 진열대를 앱 없이 띄우기 위한 최소 한 벌.
-   진짜 단일 출처는 `design/src/ink/tokens.css` → `apps/desktop/src/styles/tokens.css`
-   (05 §12 `sync-design.mjs`). 값은 05 §4.1 표와 같고, 05 §4.2 를 지키려고
-   컴포넌트가 못 쓰는 원색 이름은 아예 만들지 않았다 — 별칭에 hex 를 직접 건다.
-   판정 색(--verdict-*)은 `../styles/tokens.css` 가 따로 든다. */
-:root {
-  color-scheme: light;
+/* DEV 전용 진열대 껍데기. **토큰을 여기 복사하지 않는다** — D182 이전에는 한 벌을 그대로
+   베껴 두어 앱과 조용히 어긋났다. 이제 생성물을 그대로 들여온다(단일 출처는
+   `design/system/tokens.css`, 생성기는 `scripts/sync-design.mjs`). */
+@import url("../../../../apps/desktop/src/styles/tokens.css");
 
-  --desk: #d9cdb4;
-  --desk-2: #cfc1a6;
-  --paper: #f7f1e3;
-  --paper-2: #fdfaf0;
-  --paper-3: #efe7d4;
-  --stock: #fffdf7;
-  --ink: #221d18;
-  --ink-soft: #4a433a;
-  --ink-mute: #7a7063;
-  --ink-faint: #a69b8b;
-  --rule: #221d18;
-  --t0: #1250c8;
-  --t0-deep: #0b3a96;
-  --t0-text: #0f3f9e;
-  --on-t0: #fffdf7;
-  --t1: #ff2e7e;
-  --t1-deep: #c7135c;
-  --t1-text: #960b42;
-  --on-t1: #221d18;
-  --t2: #ffc400;
-  --t2-deep: #c08f00;
-  --t2-text: #664300;
-  --on-t2: #221d18;
-  --knock: #fffdf7;
-  --glow-t0: transparent;
-  --glow-t1: transparent;
-  --glow-t2: transparent;
-  --dee-paper: #fdfaf0;
-  --dee-gray: #a69b8b;
-  --dee-blank: #e4dac4;
-  --blend: multiply;
-  --grain-op: .16;
-  --grain-blend: multiply;
-  --grain-tint: rgb(255 255 255 / 0%);
-  --edge: rgb(34 29 24 / 30%);
-  --drop: rgb(58 44 26 / 24%);
-  --misreg: 1.6px;
-  --lamp: 0 0 0 0 transparent;
-  --fs-13: 13px;
-  --fs-14: 14px;
-  --fs-15: 15px;
-  --fs-16: 16px;
-  --fs-18: 18px;
-  --fs-20: 20px;
-  --fs-24: 24px;
-  --fs-poster-s: 30px;
-  --fs-poster: 44px;
-  --fs-poster-l: 56px;
-  --lh-body: 1.7;
-  --lh-tight: 1.3;
-  --measure: 36em;
-  --f-ui: "IBM Plex Sans KR", "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
-  --f-mono: "IBM Plex Mono", ui-monospace, sfmono-regular, menlo, consolas, monospace;
-  --f-poster: "Black Han Sans", "IBM Plex Sans KR", "Apple SD Gothic Neo", system-ui, sans-serif;
-  --e-hop: cubic-bezier(.22, 1.2, .36, 1);
-  --e-settle: cubic-bezier(.16, 1, .3, 1);
-  --e-soft: cubic-bezier(.4, 0, .2, 1);
-}
-
-[data-theme="dark"] {
-  color-scheme: dark;
-
-  --desk: #0b0908;
-  --desk-2: #050403;
-  --paper: #1f1915;
-  --paper-2: #29211b;
-  --paper-3: #17120e;
-  --stock: #120e0b;
-  --ink: #f3eadb;
-  --ink-soft: #cfc4b2;
-  --ink-mute: #8e8274;
-  --ink-faint: #5e5346;
-  --rule: #5a4b3c;
-  --t0: #3b82ff;
-  --t0-deep: #1a56c4;
-  --t0-text: #9cc2ff;
-  --on-t0: #0a1020;
-  --t1: #ff3a86;
-  --t1-deep: #c4155c;
-  --t1-text: #ffa3ce;
-  --on-t1: #1a0a12;
-  --t2: #ffd030;
-  --t2-deep: #c09600;
-  --t2-text: #ffd866;
-  --on-t2: #1c1400;
-  --knock: #12100c;
-  --glow-t0: rgb(59 130 255 / 42%);
-  --glow-t1: rgb(255 58 134 / 45%);
-  --glow-t2: rgb(255 208 48 / 36%);
-  --blend: screen;
-  --grain-op: .42;
-  --grain-blend: soft-light;
-  --grain-tint: rgb(255 196 120 / 50%);
-  --edge: #080604;
-  --drop: rgb(0 0 0 / 80%);
-  --lamp: inset 0 1.5px 0 rgb(255 206 140 / 12%);
-}
-
-/* 목업 리셋에서 갤러리에 필요한 만큼만 */
 .gallery {
-  padding: 22px 24px 48px;
-  background: var(--desk);
-  color: var(--ink);
-  font-family: var(--f-ui);
-  font-size: var(--fs-16);
+  padding: var(--s-5) var(--s-6) var(--s-8);
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: var(--fs-4);
+  line-height: var(--lh-body);
 }
 
 .gallery button {
   color: inherit;
   font: inherit;
-  letter-spacing: inherit;
 }
 
 .gallery h1 {
-  font-family: var(--f-poster);
-  font-size: var(--fs-poster);
-  line-height: 1;
+  margin: 0 0 var(--s-5);
+  font-size: var(--fs-7);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: -.02em;
 }
 
 .gallery h2 {
-  margin: 26px 0 10px;
-  font-size: var(--fs-18);
+  margin: var(--s-6) 0 var(--s-2);
+  font-size: var(--fs-5);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
 }
 
 .gallery .g-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 14px;
+  gap: var(--s-3);
   align-items: center;
-  padding: 12px 14px;
-  border: 2px solid var(--rule);
-  background: var(--paper-2);
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--surface);
 }
 
 .gallery .g-slot {
   position: relative;
   min-width: 120px;
-  min-height: 90px;
-  padding: 22px 14px 12px;
-  border: 1px dashed var(--ink-mute);
+  min-height: 88px;
+  padding: var(--s-5) var(--s-3) var(--s-3);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--r-md);
 }
 
 .gallery .g-cap {
   position: absolute;
-  top: 3px;
-  left: 5px;
-  color: var(--ink-soft);
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
+  top: var(--s-1);
+  left: var(--s-2);
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+}
+
+/* 토큰 견본판 — 값이 실제로 어떻게 보이는지 한 판에 늘어놓는다. */
+.gallery .g-swatch {
+  display: flex;
+  gap: var(--s-2);
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+}
+
+.gallery .g-chip {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+}
+
+.gallery .g-code {
+  padding: var(--s-3);
+  border-radius: var(--r-md);
+  background: var(--code-bg);
+  font-family: var(--font-mono);
+  font-size: var(--fs-2);
+  line-height: var(--lh-code);
+}
+
+.gallery .g-type {
+  display: flex;
+  gap: var(--s-3);
+  align-items: baseline;
 }

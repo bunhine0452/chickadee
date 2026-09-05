@@ -1,0 +1,54 @@
+[
+  {
+    "queryId": "java/string-concat",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "site",
+    "form": "concat-right",
+    "startLine": 5,
+    "startCol": 15,
+    "endLine": 5,
+    "endCol": 25,
+    "nodeKind": "binary_expression",
+    "inError": false
+  },
+  {
+    "queryId": "java/string-concat",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.2",
+    "form": "concat-right",
+    "startLine": 5,
+    "startCol": 15,
+    "endLine": 5,
+    "endCol": 19,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "java/string-concat",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.1",
+    "form": "concat-right",
+    "startLine": 5,
+    "startCol": 20,
+    "endLine": 5,
+    "endCol": 21,
+    "nodeKind": "+",
+    "inError": false
+  },
+  {
+    "queryId": "java/string-concat",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.3",
+    "form": "concat-right",
+    "startLine": 5,
+    "startCol": 22,
+    "endLine": 5,
+    "endCol": 25,
+    "nodeKind": "string_literal",
+    "inError": false
+  }
+]

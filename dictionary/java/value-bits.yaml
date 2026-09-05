@@ -1,0 +1,168 @@
+schema: 1
+id: java/value-bits
+# 0부 축 A (`docs/curriculum/java.md` §1.5.1). `common/` 에 대응이 없다 — 파이썬은 자릿수
+# 한계가 없고 JS 는 정수 타입이 아예 없어서(§1.5.2 표), 보편형을 걸면 「32칸」이 그 두
+# 언어로 전이된다. 전이가 안 되는 것보다 거짓이 전이되는 것이 비싸다 (D4).
+universal: null
+name: { ko: 값과 비트, en: Values and bits }
+token: "01"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 1
+prereq: [cs/binary-representation, cs/bit-and-byte, cs/type]
+confusions: []
+dict:
+  one_liner:
+    ko: "값은 켜짐·꺼짐의 묶음이고, 정수 타입마다 그 칸 수가 못 박혀 있다."
+    en: "A value is a bundle of on/off slots, and each whole-number type fixes how many."
+  why:
+    ko: >-
+      자바에서 <code>int</code>는 <b>정확히 32칸</b>이고 그 칸 수는 <b>명세가 정합니다</b> —
+      기계가 32비트든 64비트든 안 바뀝니다. C 에서는 컴퓨터마다 달라서 <code>sizeof(int)</code>를
+      물어야 하지만, 자바는 물을 필요가 없어요. <code>long</code>은 64칸,
+      <code>short</code>는 16칸, <code>byte</code>는 8칸입니다.
+      칸 수가 정해져 있다는 것이 다음 두 판의 근거가 됩니다 — 왜 값이 넘치는가, 왜 좁은 칸에
+      넣을 때 잘리는가.
+    en: >-
+      In Java <code>int</code> is <b>exactly 32 slots</b>, and <b>the specification fixes that</b> —
+      it does not change on a 32-bit or a 64-bit machine. In C you have to ask
+      <code>sizeof(int)</code>; in Java there is nothing to ask. <code>long</code> is 64 slots,
+      <code>short</code> 16, <code>byte</code> 8. That fixed count is the ground for the next two
+      plates — why a value wraps, and why it is cut when it goes into a narrower slot.
+  trace:
+    - ko: "{{site.line}}행은 이름 {{pick.2|code}}{{pick.2|josa:을,를}} 세운다."
+      en: "Line {{site.line}} sets up the name {{pick.2|code}}."
+    - ko: "앞에 붙은 {{pick.1|code}}{{pick.1|josa:이,가}} 칸 수를 정한다."
+      en: "The {{pick.1|code}} in front fixes how many slots it gets."
+    - ko: "칸 수는 기계가 아니라 명세가 정한 값이다."
+      en: "That count comes from the specification, not from the machine."
+rule:
+  ko: "<b>타입이 칸 수를 정한다.</b> 32칸·64칸·16칸·8칸이고 기계마다 달라지지 않는다."
+  en: "<b>The type fixes the slot count.</b> 32, 64, 16, 8 — and never per machine."
+result:
+  label: { ko: "{{site.line}}행의 이름", en: "the name on line {{site.line}}" }
+  value: "{{pick.1}} {{pick.2}}"
+  note: { ko: "칸 수가 여기서 정해진다", en: "the slot count is fixed here" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 이제 정해진 칸 수를 가진 이름입니다."
+  en: "{{pick.2|code}} is now a name with a fixed number of slots."
+payoff:
+  ko: "이걸 알면 「왜 큰 수를 넣었더니 음수가 되나」의 아래층이 열립니다 — 칸이 모자란 겁니다."
+  en: "This opens the layer under “why did a big number turn negative” — the slots ran out."
+bridge:
+  ko: "파이썬에는 이 칸이 없습니다. <code>2**100</code> 도 그대로 담겨요. 자바는 칸을 먼저 정합니다."
+  en: "Python has no such slots — <code>2**100</code> just fits. Java fixes the slots first."
+misconceptions:
+  - ko: "칸 수가 컴퓨터마다 다르다 — C 에서는 참이지만 자바는 명세가 못 박습니다."
+    en: "The slot count varies by machine — true in C, but Java's specification pins it."
+  - ko: "큰 수를 넣으면 칸이 늘어난다 — 안 늘어납니다. 넘치는 것이 다음 판입니다."
+    en: "Bigger numbers get more slots — they do not. Overflow is the next plate."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>칸 수를 정하는 글자</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that fixes the slot count</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 이름은 칸 수를 안 바꿔요 — 이름을 길게 지어도 칸은 그대로입니다."
+          en: "{{pick.2|code}} is the <b>name</b>. A name does not change the slot count — a longer name gets no more slots."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 타입이냐", en: "The sharpest spot — the name or the type" }
+          code:
+            - "int n;      // 32칸"
+            - "long n;     // 같은 이름, 64칸"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 처음 들어가는 <b>값</b>입니다. 값이 작아도 칸은 타입이 정한 만큼 잡혀요."
+          en: "{{pick.3|code}} is the starting <b>value</b>. Small values still get all the slots the type asks for."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값이냐 칸이냐", en: "The sharpest spot — the value or the slots" }
+          code:
+            - "int n = 0;      // 32칸을 쓴다"
+            - "byte b = 0;     // 8칸을 쓴다"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>32칸짜리 정수</b> 이름을 세웁니다."
+      en: "Choose what goes in the blank. Line {{site.line}} sets up a <b>32-slot whole number</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "int", mono: true }
+      - t: "double"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>실수</b> 타입이라 64칸을 쓰고 소수를 담습니다. 소수를 안 담는 자리에 쓰면 값이 <code>3.0</code> 처럼 나와요."
+            en: "That is the <b>decimal</b> type — 64 slots that hold a fraction. Where no fraction is wanted the value comes out like <code>3.0</code>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 정수냐 실수냐", en: "The sharpest spot — whole or decimal" }
+            code:
+              - "int n = 7 / 2;      // 3"
+              - "double d = 7 / 2;   // 3.0"
+      - t: "String"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>글자 묶음</b>이라 칸 수가 고정이 아닙니다. 글자 수만큼 자리를 쓰고, 셈에 쓰면 더하기가 아니라 잇기가 돼요."
+            en: "That is a <b>run of characters</b> and its size is not fixed. It grows with the text, and in arithmetic it joins instead of adding."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 수냐 글자냐", en: "The sharpest spot — a number or text" }
+            code:
+              - "int n = 1 + 2;         // 3"
+              - "String s = 1 + \"2\";   // 12"
+      - t: "boolean"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>참·거짓</b> 타입이라 수를 못 담습니다. 자바에서 참·거짓은 숫자가 아니고 서로 오가지도 않아요."
+            en: "That is the <b>true/false</b> type and holds no number. In Java the two never convert into each other."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 수냐 참·거짓이냐", en: "The sharpest spot — a number or a truth value" }
+            code:
+              - "int n = 1;"
+              - "boolean b = true;"
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 <b>칸 수를 먼저 적고</b> 이름을 적을까요?"
+    en: "Why does line {{site.line}} write <b>the slot count first</b> and the name after?"
+  choices:
+    - t:
+        ko: "컴파일러가 이 이름에 자리를 얼마나 잡을지 그 줄에서 정해야 하기 때문"
+        en: "Because the compiler has to decide how much room this name gets, right on that line"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 자리를 나중에 정하면 못 정하는 것이 무엇인지도 적어 보세요."
+        en: "That is the direction. Say what could not be decided if the room were settled later."
+    - t:
+        ko: "자바가 읽기 좋게 하려고 정한 순서라서"
+        en: "Because Java picked that order to read nicely"
+      ok: false
+      fb:
+        ko: "읽기 문제가 아닙니다. 이 순서는 값이 놓이기 전에 자리가 정해져야 해서 생깁니다."
+        en: "It is not about reading. The order exists because the room is settled before any value lands."
+    - t:
+        ko: "값을 보면 칸 수를 알 수 있어서"
+        en: "Because the value tells you the slot count"
+      ok: false
+      fb:
+        ko: "값으로는 못 압니다. <code>0</code> 하나만 봐도 8칸일 수도 64칸일 수도 있어요."
+        en: "The value cannot tell you. A bare <code>0</code> may sit in 8 slots or in 64."
+queries:
+  - { grammars: [java], file: ./value-bits.scm }
+examples:
+  # 값을 든 예 — 식 · 값 · 타입 (`docs/program/fundamentals.md` §8 이 카탈로그로 걷어 갈
+  # 재료다). 주석의 `// 이름 → 값 (타입)` 이 그 세 칸이다.
+  - code: "class A { void f() { int n = 7 / 2; } }        // n -> 3 (int)"
+    expect: { sites: 1, form: intdecl, hole: "int", picks: { 1: "int", 2: "n", 3: "7 / 2" } }
+  - code: "class A { private long ms; }                   // ms -> 0 (long, 64칸)"
+    expect: { sites: 1, form: intfield, picks: { 1: "long", 2: "ms" } }
+  - code: "class A { void f(byte flag) { } }              // flag -> 8칸 (byte)"
+    expect: { sites: 1, form: intparam, picks: { 1: "byte", 2: "flag" } }
+  - code: "class A { void f() { double d = 1.5; } }       // d -> 1.5 (double)"
+    expect: none

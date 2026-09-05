@@ -1,0 +1,248 @@
+schema: 1
+id: py/f-string
+universal: common/string-interpolation
+name: { ko: 문장에 값 끼워 넣기, en: Value inside text }
+token: 'f"'
+grammars: [python]
+framework: null
+essential: true
+difficulty: 1
+prereq: [py/string-literal]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "앞에 글자 하나가 붙으면 중괄호 안이 식이 되어 그 자리에서 계산된다."
+    en: "One letter in front turns the braces into an expression, computed on the spot."
+  why:
+    ko: >-
+      보통의 글자 값에서 중괄호는 그냥 글자입니다. 앞에 표시 한 글자
+      ({{pick.3|code}})가 붙는 순간 중괄호 안이 <b>식</b>이 되고, 그 자리에서 계산돼
+      결과가 끼워집니다. {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 그 식이에요.
+      여기서 조용한 함정이 하나 생깁니다 — 앞의 표시를 빠뜨려도 <b>멈추지 않아요.</b>
+      중괄호가 글자 그대로 남은 문장이 그대로 로그에 찍히고, 그것을 볼 때까지 아무도 모릅니다.
+      다른 언어의 문자열 끼워 넣기와 갈리는 자리이기도 합니다 — 자바스크립트는 백틱이라는
+      <b>다른 따옴표</b>를 쓰고, 자바에는 이 문법이 아예 없어요.
+    en: >-
+      In an ordinary text value braces are just characters. The moment the one-letter mark
+      ({{pick.3|code}}) is added, what sits inside the braces becomes an <b>expression</b>, computed
+      on the spot and slotted in. {{pick.1|code}} on line {{site.line}} is that expression. A quiet
+      trap comes with it: leaving the mark off <b>does not stop anything</b>. A sentence with literal
+      braces goes straight into the log, and nobody notices until they read it. This is also where
+      languages part — JavaScript uses a <b>different quote</b>, the backtick, and Java has no such
+      form at all.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.3|code}} 표시가 이 값을 보통 글자와 가른다."
+      en: "The {{pick.3|code}} mark on line {{site.line}} sets this apart from plain text."
+    - ko: "{{pick.2|code}} 뒤부터 짝이 닫힐 때까지가 식이다."
+      en: "From {{pick.2|code}} to its closing partner is the expression."
+    - ko: "{{pick.1|code}} 값을 구해 그 자리에 글자로 끼워 넣는다."
+      en: "{{pick.1|code}} is evaluated and its result is slotted in as text."
+
+rule:
+  ko: >-
+    <b>앞의 표시 한 글자가 중괄호를 식으로 바꾼다.</b> 빠뜨려도 안 멈추고 중괄호가 글자로 남는다.
+  en: >-
+    <b>One mark in front turns braces into expressions.</b> Leave it off and nothing stops; the
+    braces stay as characters.
+result:
+  label:
+    ko: "{{site.line}}행의 끼워 넣는 자리"
+    en: "the slot on line {{site.line}}"
+  value: "{{pick.1}}"
+  note:
+    ko: "값을 구해 글자로 넣는다"
+    en: "evaluated, then written in as text"
+ok:
+  ko: >-
+    {{pick.1|code}} 값이 그 자리에 들어갑니다. 바깥은 여전히 글자 값 하나이고,
+    안쪽만 <b>식</b>이에요.
+  en: >-
+    The value of {{pick.1|code}} goes into that slot. The whole thing is still one text value; only
+    the inside is an <b>expression</b>.
+payoff:
+  ko: >-
+    로그 문장을 이어 붙이던 코드가 한 줄로 줄어듭니다. 대신 표시를 빠뜨린 줄을
+    눈으로 찾을 수 있게 돼요.
+  en: >-
+    Log lines that were stitched together collapse into one, and you gain the eye to spot the line
+    that lost its mark.
+bridge:
+  ko: >-
+    안쪽에 콜론을 붙이면 <b>모양</b>을 정할 수 있습니다 — 자릿수·정렬·천 단위 구분이
+    같은 중괄호 안에서 끝나요.
+  en: >-
+    A colon inside sets the <b>format</b> — digits, alignment and thousands separators all finish
+    inside the same braces.
+misconceptions:
+  - ko: >-
+      앞의 표시를 빠뜨리면 그 자리에서 멈춘다 — 안 멈춥니다. 중괄호가 글자로 남은 문장이
+      조용히 지나가요.
+    en: >-
+      Leaving the mark off stops the program — it does not. A sentence with literal braces passes
+      quietly.
+  - ko: >-
+      중괄호 안에는 이름만 쓸 수 있다 — 식이면 무엇이든 됩니다. 부르기도, 셈도,
+      대괄호로 꺼내기도 그 안에서 돌아요.
+    en: >-
+      Only a name fits inside the braces — any expression fits. Calls, arithmetic and lookups all
+      run there.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>그 자리에서 계산되는 것</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the part that is computed on the spot</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 식이 <b>시작되는 표시</b>입니다. 계산되는 것은
+            그 안쪽이에요.
+          en: >-
+            {{pick.2|code}} marks <b>where the expression starts</b>. What gets computed is what
+            sits inside it.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 표시와 내용"
+            en: "The sharpest spot — the mark and the content"
+          code:
+            - 'f"{name}"     # name 이 계산된다'
+            - '"{name}"      # 표시가 없으면 글자 그대로다'
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} 값 전체를 <b>다른 종류로</b> 만드는
+            표시입니다. 계산은 중괄호 안에서 일어나요.
+          en: >-
+            {{pick.3|code}} is the mark that makes the whole value <b>a different kind</b>. The
+            computing happens inside the braces.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 값 전체와 한 칸"
+            en: "The sharpest spot — the whole value or one slot"
+          code:
+            - 'f"a {x} b"    # 표시는 맨 앞에 하나'
+            - 'f"{x}{y}"     # 계산되는 칸은 둘'
+
+meaning:
+  - q:
+      ko: "앞의 표시를 빠뜨린 <code>\"hi {name}\"</code> 은 어떻게 될까요?"
+      en: "What happens to <code>\"hi {name}\"</code> with the mark left off?"
+    hint:
+      ko: "중괄호는 보통 글자 값에서 특별한 뜻이 없습니다."
+      en: "In an ordinary text value braces carry no special meaning."
+    options:
+      - t:
+          ko: "중괄호가 글자로 남은 문장이 된다 — 멈추지 않는다"
+          en: "It becomes text with literal braces — nothing stops"
+      - t:
+          ko: "이름을 못 찾아 그 자리에서 멈춘다"
+          en: "The name is not found and it stops there"
+        diag:
+          t:
+            ko: >-
+              이름을 <b>찾지 않습니다.</b> 표시가 없으면 중괄호는 그냥 글자라, 안쪽이 이름인지
+              아닌지 아무도 안 봐요.
+            en: >-
+              The name is <b>never looked up</b>. Without the mark the braces are plain characters,
+              so nothing inspects what sits inside.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 보느냐 안 보느냐"
+              en: "The sharpest spot — looked at or not"
+            code:
+              - 'f"{nope}"     # 없는 이름이면 멈춘다'
+              - '"{nope}"      # 그냥 글자다'
+      - t:
+          ko: "파이썬이 표시를 알아서 붙여 준다"
+          en: "Python adds the mark for you"
+        diag:
+          t:
+            ko: >-
+              안 붙여 줍니다. 중괄호가 든 보통 글자 값도 <b>정상</b>이라, 실수인지 의도인지
+              언어가 가릴 방법이 없어요.
+            en: >-
+              It does not. Plain text with braces is <b>perfectly valid</b>, so the language has no
+              way to tell a slip from an intention.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 실수와 의도"
+              en: "The sharpest spot — a slip or an intention"
+            code:
+              - 'print("{}")   # 중괄호를 일부러 찍는 코드'
+              - 'print(f"{x}") # 값을 끼우는 코드'
+      - t:
+          ko: "경고 한 줄이 뜬다"
+          en: "A warning line appears"
+        diag:
+          t:
+            ko: >-
+              경고도 없습니다. 조용한 것이 이 자리의 어려움이에요 — 로그를 눈으로 볼 때까지
+              아무 신호가 없습니다.
+            en: >-
+              There is no warning either. The silence is what makes this hard: no signal arrives
+              until someone reads the log.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 신호가 있느냐"
+              en: "The sharpest spot — is there a signal"
+            code:
+              - '"hi {name}"   # 조용하다'
+              - 'x is 1000     # 이쪽은 경고가 뜬다'
+
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 개념의 표시(`f`)는 사용처의 캡처 범위 **밖**에 있고 — 사용처는 중괄호
+  한 칸이다 — 중괄호 자체는 한 글자라 빈칸형이 생성 단계에서 떨어진다(`MIN_HOLE`).
+  표시가 빠졌을 때 무슨 일이 나는지는 뜻 고르기가 묻는다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 값을 이어 붙이지 않고 문장 안에 끼워 넣었을까요?"
+    en: "Why does line {{site.line}} slot the value in instead of stitching text together?"
+  choices:
+    - t:
+        ko: "문장의 모양이 그대로 보여서 — 어디에 무엇이 들어가는지 한눈에 읽힌다"
+        en: "Because the shape of the sentence stays visible — what goes where reads at a glance"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 같은 문장을 이어 붙여 적었을 때 무엇이 어려워지는지도 적어 보세요."
+        en: "That is the direction. Add what gets harder when the same sentence is stitched instead."
+    - t:
+        ko: "이어 붙이기보다 늘 빨라서"
+        en: "Because it is always faster than stitching"
+      ok: false
+      fb:
+        ko: >-
+          대개 빠른 것은 맞지만 그것이 고르는 이유는 아닙니다. 갈리는 것은 <b>읽히는가</b>예요.
+        en: >-
+          It usually is faster, yet that is not why it is chosen. What parts ways is <b>whether it
+          reads</b>.
+    - t:
+        ko: "숫자를 글자로 바꿔 주는 유일한 방법이라서"
+        en: "Because it is the only way to turn a number into text"
+      ok: false
+      fb:
+        ko: >-
+          바꾸는 방법은 따로 있습니다. 여기서는 그 일이 <b>덤으로</b> 일어날 뿐이에요.
+        en: >-
+          There is a separate way to convert. Here the conversion happens only <b>as a side
+          effect</b>.
+
+queries:
+  - { grammars: [python], file: ./f-string.scm }
+
+examples:
+  - code: 'greeting = f"hi {name}"        # greeting -> "hi kim" (str)'
+    expect: { sites: 1, form: slot, picks: { 1: "name", 2: "{", 3: 'f"' } }
+  - code: 'line = f"{count} 건"           # line -> "3 건" (str)'
+    expect: { sites: 1, form: slot, picks: { 1: "count", 2: "{", 3: 'f"' } }
+  - code: "path = f'{root}/{name}.json'   # path -> 'data/a.json' (str)"
+    expect: { sites: 2, form: slot }
+  - code: 'plain = "hi {name}"            # plain -> "hi {name}" (str)'
+    expect: none
+  - code: 'joined = "hi " + name          # joined -> "hi kim" (str)'
+    expect: none

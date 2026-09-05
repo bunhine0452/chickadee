@@ -1,0 +1,18 @@
+# 작은 문제 하나 (D186 ⑧). 지문은 우리가 썼고 케이스의 답은 reference.py 가 낸다.
+schema: 1
+id: echo-line
+topic: io
+statement:
+  ko: "한 줄이 주어집니다. 그 줄을 그대로 출력하세요."
+  en: "One line is given. Print that line as it is."
+needs: [common/text-literal, common/function-call]
+langs: [py, ts, java]
+cases:
+  - stdin: "hello\n"
+    stdout: "hello\n"
+  - stdin: "안녕하세요\n"
+    stdout: "안녕하세요\n"
+  - stdin: "a b  c\n"
+    stdout: "a b  c\n"
+  - stdin: "42\n"
+    stdout: "42\n"

@@ -3,6 +3,7 @@
  * `payload.options` 가 없고, `seg[].pick` 번호가 곧 보기 번호다.
  *
  * 셔플하지 않는 이유: 위치가 정보이고 `← →` 이동 순서와 같아야 한다.
+ * 대신 **어느 쪽에서 오답을 고를지**를 시드로 섞는다 (D128) — `spread()` 를 보라.
  */
 import { t, type MessageKey } from '@chickadee/i18n';
 import { mulberry32, tokenize } from '@chickadee/text';
@@ -110,6 +111,28 @@ function tierOf(c: Candidate, answer: Candidate, hasDiag: (n: number) => boolean
 
 const byPosition = (a: Candidate, b: Candidate): number => a.line - b.line || a.from - b.from;
 
+/**
+ * 오답 셋을 「정답 앞 b개 · 뒤 3−b개」로 나눠 고른다 (D128). 번호는 여전히 코드 순서이므로
+ * **정답 번호가 곧 b** 이고, b 를 카드 시드가 정하니 정답 위치가 카드마다 흩어진다.
+ *
+ * 왜 필요한가: 사전의 point 항목 26개 중 13개가 정답을 가운데 `pick.2` 로 두고, 오답 1순위가
+ * 「진단이 있는 pick」이라 양옆 `pick.1`·`pick.3` 이 먼저 뽑힌다 — 코드 순서로 세우면 정답이
+ * 언제나 두 번째였다. 보기를 섞는 길은 없다: 번호가 곧 코드 위 위치이고 `← →` 이동 순서와
+ * 같아야 한다(04 §1.1).
+ *
+ * 치르는 값: 한쪽에 후보가 넉넉해도 반대쪽에서 순위가 낮은 것을 데려올 때가 있다. 순위 자체는
+ * 각 쪽 **안에서** 그대로 지켜지므로 진단이 있는 오답이 먼저 뽑히는 규칙은 살아 있다.
+ */
+function spread(ranked: readonly Candidate[], answer: Candidate, rng: () => number): Candidate[] {
+  const before = ranked.filter((c) => byPosition(c, answer) < 0);
+  const after = ranked.filter((c) => byPosition(c, answer) > 0);
+  // 한쪽이 모자라면 그만큼은 반대쪽이 채운다 — 그래서 낼 수 있는 자리가 [lo, hi] 다.
+  const lo = Math.max(0, WRONG_N - after.length);
+  const hi = Math.min(WRONG_N, before.length);
+  const at = lo + Math.floor(rng() * (hi - lo + 1));
+  return [...before.slice(0, at), ...after.slice(0, WRONG_N - at)];
+}
+
 /** 「가까운 순」 — 다른 줄은 같은 줄보다 언제나 멀다. */
 const distance = (c: Candidate, answer: Candidate): number =>
   Math.abs(c.line - answer.line) * 1_000 + Math.abs(c.from - answer.from);
@@ -138,12 +161,11 @@ export function genPoint(req: T0Request, input: SiteInput): GenResult {
   const pool = candidates.filter((c) => c !== chosen);
   if (pool.length < WRONG_N) return { reason: t('t0.dropFewCandidates', { n: String(WRONG_N) }) };
 
-  const wrong = [...pool]
-    .sort((a, b) =>
-      tierOf(a, chosen, hasDiag) - tierOf(b, chosen, hasDiag)
-      || distance(a, chosen) - distance(b, chosen)
-      || byPosition(a, b))
-    .slice(0, WRONG_N);
+  const ranked = [...pool].sort((a, b) =>
+    tierOf(a, chosen, hasDiag) - tierOf(b, chosen, hasDiag)
+    || distance(a, chosen) - distance(b, chosen)
+    || byPosition(a, b));
+  const wrong = spread(ranked, chosen, rng);
 
   const picks = [chosen, ...wrong].sort(byPosition);
   const spans: Span[] = picks.map((c, i) => ({ line: c.line, from: c.from, to: c.to, pick: i + 1 }));
@@ -160,7 +182,7 @@ export function genPoint(req: T0Request, input: SiteInput): GenResult {
   return {
     card: finish(req, input, 'point', {
       track: 't0', kind: 'point', ...common,
-      lines: codeLines(input.lines, input.site.lineStart, spans),
+      lines: codeLines(input.lines, input.site.lineStart, spans, input.block),
       q, hint, answer: answerIndex, why,
     }),
   };

@@ -1,0 +1,91 @@
+schema: 1
+id: spring/bean-and-container
+universal: null
+name: { ko: "스프링이 들고 있는 객체", en: "Bean and container" }
+token: null
+grammars: []
+framework: spring
+# 짚을 노드가 없다 — 컨테이너는 실행 중에만 있다 (D176). 창은 자바 개념에서 빌린다 (D157 ②).
+track_default: t0
+essential: false
+difficulty: 2
+prereq: [spring/dependency-injection]
+confusions: [spring/component-scan]
+queries: []
+dict:
+  one_liner:
+    ko: "스프링이 만들어 들고 있다가 필요한 곳에 건네는 객체다."
+    en: "An object Spring builds, holds, and hands out where it is needed."
+  why:
+    ko: >-
+      프로그램이 시작하면 스프링이 먼저 하는 일이 있습니다. 필요한 객체들을 <b>미리 만들어
+      이름표를 붙여 한곳에 모아 두는</b> 것이에요. 그 한곳이 컨테이너이고, 거기 든 객체 하나하나가
+      빈입니다. 누가 어떤 타입을 요구하면 컨테이너는 자기가 든 것 중에서 맞는 것을 찾아 건넵니다.
+      <b>기본은 타입 하나에 객체 하나</b>이고, 열 군데가 요구해도 같은 객체가 갑니다.
+      그래서 빈에 상태를 담아 두면 열 군데가 그 상태를 함께 봅니다.
+    en: >-
+      When the program starts, Spring does one thing first: it <b>builds the needed objects ahead of
+      time, labels them, and keeps them in one place</b>. That place is the container, and each
+      object in it is a bean. When something asks for a type, the container finds a match among what
+      it holds and hands it over. <b>By default one object per type</b>, so ten callers get the same
+      object. Put state on a bean and all ten see that state.
+  trace: []
+rule:
+  ko: "<b>빈은 하나를 여럿이 나눠 쓴다.</b> 요구할 때마다 새로 만들지 않는다."
+  en: "<b>One bean is shared by many.</b> It is not rebuilt on each request."
+ok:
+  ko: >-
+    시작할 때 한 번 만들어져 컨테이너에 들어갑니다. 그 뒤로는 요구하는 곳마다
+    같은 객체가 건네집니다.
+  en: >-
+    It is built once at startup and put in the container. From then on the same object is handed to
+    everyone who asks.
+misconceptions:
+  - ko: "요청마다 새 객체가 만들어진다 — 기본은 하나이고 요청이 그것을 함께 씁니다."
+    en: "A new object per request — by default there is one, shared across requests."
+  - ko: "<code>new</code> 로 만든 것도 빈이다 — 컨테이너가 만든 것만 빈입니다."
+    en: "Anything made with <code>new</code> is a bean — only what the container made is."
+  - ko: "빈에 값을 담아 두면 그 요청만 본다 — 하나를 나눠 쓰므로 다른 요청도 봅니다."
+    en: "State on a bean is private to one request — it is shared, so other requests see it."
+  - ko: "애너테이션은 명령이다 — 표시일 뿐이고 컨테이너가 그것을 읽어 만듭니다."
+    en: "An annotation is a command — it is a mark the container reads and acts on."
+evidence: ["@Bean", "@Configuration", "@Primary", "getBean(", "ApplicationContext"]
+meaning:
+  - q:
+      ko: "같은 타입의 빈을 <b>열 군데</b>에서 주입받았습니다. 객체는 몇 개인가요?"
+      en: "A bean of one type is injected in <b>ten places</b>. How many objects are there?"
+    hint:
+      ko: "컨테이너가 시작할 때 몇 개를 만들어 두는지 생각해 보세요."
+      en: "Think about how many the container builds at startup."
+    options:
+      - t: { ko: "하나 — 같은 객체가 열 곳에 건네진다", en: "One — the same object goes to all ten" }
+      - t: { ko: "열 개 — 주입받는 곳마다 하나씩", en: "Ten — one for each place" }
+        diag:
+          t:
+            ko: "주입받는 <b>자리</b>가 열 개일 뿐입니다. 컨테이너는 시작할 때 하나를 만들어 두고 그 하나를 열 번 건넵니다."
+            en: "There are ten <b>places</b>, not ten objects. The container builds one at startup and hands that one out ten times."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 자리 수냐 객체 수냐", en: "The sharpest spot — places or objects" }
+            code:
+              - "자리: 열 곳"
+              - "객체: 하나"
+      - t: { ko: "요청이 올 때마다 하나씩", en: "One per incoming request" }
+        diag:
+          t:
+            ko: "요청마다 새로 만드는 설정도 있지만 <b>기본이 아닙니다</b>. 기본은 시작할 때 하나입니다."
+            en: "There is a setting that builds one per request, but it is <b>not the default</b>. The default is one at startup."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 기본이냐 설정이냐", en: "The sharpest spot — default or configured" }
+            code:
+              - "기본: 시작할 때 하나"
+              - "설정하면: 요청마다 하나"
+      - t: { ko: "쓰기 전까지는 없다가 처음 쓸 때 만들어진다", en: "None until first use, then it is built" }
+        diag:
+          t:
+            ko: "미루는 설정이 있긴 하지만 기본은 <b>시작할 때 전부</b> 만듭니다. 그래서 설정이 잘못되면 뜨자마자 알게 돼요."
+            en: "There is a lazy setting, but by default <b>all are built at startup</b>. That is why bad wiring shows the moment it boots."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 시작할 때냐 쓸 때냐", en: "The sharpest spot — at startup or at first use" }
+            code:
+              - "기본: 뜰 때 다 만든다"
+              - "그래서: 뜨자마자 실패한다"

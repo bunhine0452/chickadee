@@ -6,13 +6,15 @@ import type { ConceptId, RepoInfo } from '@chickadee/store-sql';
 import { Toast } from '@chickadee/ui';
 import { useEffect, useState } from 'react';
 
-import type { TodayPreview } from './components/home/TodayPanel.js';
+import type { TodayPreview } from './components/home/TodayCard.js';
 import { currentBuild, ingestFingerprint, needsReingest } from './data/maintenance.js';
 import { applyLocale, saveSetting } from './data/settings.js';
 import { makePlateFor, pickPlateNow, type ManualResult } from './data/manual.js';
 import { previewToday } from './data/session.js';
-import { cancelIngest, ingest, refreshHome, report, todayKey } from './flow.js';
+import { cancelIngest, closeCourse, ingest, openCourse, refreshHome, report, todayKey } from './flow.js';
 import { CloneScreen } from './screens/clone/CloneScreen.js';
+import { CourseScreen } from './screens/course/CourseScreen.js';
+import { useCourse } from './screens/course/store.js';
 import { HomeScreen } from './screens/home/HomeScreen.js';
 import { conceptLabel, type HomeData } from './screens/home/data.js';
 import { FirstRun } from './screens/home/empty.js';
@@ -34,6 +36,7 @@ export function App(): React.JSX.Element {
   const ui = useUi();
   const repo = activeRepo(ui);
   const inSession = ui.session !== null;
+  const courseOpen = useCourse((s) => s.open);
   const [today, setToday] = useState<TodayPreview | null>(null);
   // 06 §6.3 — 마지막 인제스트의 지문과 지금 빌드의 지문이 다르면 홈이 배너를 낸다.
   // 지문 계산은 `parse_langs` 한 번을 부르므로 리포가 바뀔 때만 다시 잰다.
@@ -74,12 +77,20 @@ export function App(): React.JSX.Element {
   useEffect(() => {
     if (inSession || ui.screen !== 'home') return;
     const id = requestAnimationFrame(() => {
-      document.querySelector<HTMLElement>('.press')?.focus();
+      // **포커스를 잃었을 때만** 옮긴다. `ui.home` 이 바뀔 때마다(세션 뒤 새로 읽기·판 만들기)
+      // 이 효과가 다시 도는데, 그때 사용자가 앉아 있던 자리를 뺏으면 안 된다.
+      if (document.activeElement !== null && document.activeElement !== document.body) return;
+      // `preventScroll` — 포커스를 옮기는 것이 목적이고 스크롤은 목적이 아니다. 뿌리에
+      // 포커스를 주면 브라우저가 그것을 화면 맨 위로 끌어올리는데, 창 크로뮴 여백(D126)이
+      // 생긴 뒤로는 그 28px 이 스크롤로 접혀 종이가 신호등 밑으로 들어갔다.
+      document.querySelector<HTMLElement>('.press')?.focus({ preventScroll: true });
     });
     return () => cancelAnimationFrame(id);
-  }, [inSession, ui.screen]);
+    // `ui.home` 이 든 이유: 첫 부팅에서 이 효과가 도는 순간에는 홈이 아직 `aria-busy` 한 장이라
+    // `.press` 가 없다. 그대로 두면 앱을 켠 직후 포커스가 `<body>` 에 남는다 (실측 D186 감사).
+  }, [inSession, ui.screen, ui.home]);
 
-  // 세션이 닫히면 오늘의 인쇄를 다시 읽는다 — 부분 갱신보다 통째로 다시 읽는 편이 싸다 (05 §3).
+  // 세션이 닫히면 오늘 할 것을 다시 읽는다 — 부분 갱신보다 통째로 다시 읽는 편이 싸다 (05 §3).
   useEffect(() => {
     if (ui.activeId === null || inSession) return;
     void (async () => {
@@ -87,7 +98,7 @@ export function App(): React.JSX.Element {
         const preview = await previewToday(ui.activeId as number, Date.now());
         setToday({ ...preview, streak: 0, days: ui.home?.days ?? [] });
       } catch (e) {
-        report(e, '오늘의 인쇄');
+        report(e, '오늘 할 것');
       }
     })();
   }, [ui.activeId, inSession, ui.home]);
@@ -105,6 +116,11 @@ export function App(): React.JSX.Element {
           error={ui.error}
           onCancel={() => void cancelIngest()}
           onDone={() => useUi.getState().go('home')}
+          onStart={() => {
+            // 홈으로 옮긴 **뒤에** 연다 — 세션은 라우트가 아니라 홈 위의 오버레이다 (05 §2.3).
+            useUi.getState().go('home');
+            void start(repo.id, repo.rootPath);
+          }}
         />
         <Toast msg={ui.toast ?? ''} on={ui.toast !== undefined} />
       </>
@@ -131,7 +147,29 @@ export function App(): React.JSX.Element {
   }
 
   /*
-   * 코스는 세션과 달리 **오버레이가 아니라 화면**이다 (D120 · 05 §2.1 `clone`). 일일 큐
+   * 코스 화면 (D171). 클론 코스처럼 홈을 대신하는 화면이고, 그 위에 단 오버레이가 걸린다.
+   * 어휘 관문은 **기존 교정쇄**를 여므로 세션 오버레이도 여기서 같이 그린다 — 그때 코스
+   * 화면은 `inert` 로 뒤에 남는다(05 §5).
+   */
+  if (courseOpen && repo !== null) {
+    return (
+      <>
+        <div inert={inSession ? true : undefined}>
+          <CourseScreen
+            repoId={repo.id}
+            repoName={repo.name}
+            rootPath={repo.rootPath}
+            onBack={() => closeCourse()}
+          />
+        </div>
+        {inSession ? <SessionScreen repoId={repo.id} repoName={repo.name} /> : null}
+        <Toast msg={ui.toast ?? ''} on={ui.toast !== undefined} />
+      </>
+    );
+  }
+
+  /*
+   * 클론 코스는 세션과 달리 **오버레이가 아니라 화면**이다 (D120 · 05 §2.1 `clone`). 일일 큐
    * 밖의 모드라 홈을 덮는 것이 아니라 대신하고, 그래서 Esc 의 주인이 하나로 남는다.
    * `cloneScope` 가 없으면 열지 않는다 — `openClone` 이 언제나 같이 세운다.
    */
@@ -155,6 +193,13 @@ export function App(): React.JSX.Element {
       <>
         <FirstRun
           onPick={() => void pickFolder()}
+          newcomer={ui.declaredNewcomer}
+          onNewcomer={(newcomer: boolean) => {
+            // 0장의 길이만 정하는 한 문항이다 (D147). 답은 바로 남기고 설정에서 바꾼다.
+            useUi.getState().setDeclaredNewcomer(newcomer);
+            void saveSetting('declaredNewcomer', newcomer, Date.now())
+              .catch(() => log.warn('프로그래밍 경험 답을 저장하지 못했다'));
+          }}
           locale={ui.locale}
           onLocale={(locale: Locale) => {
             // 첫 실행에서는 다시 그리기가 아니라 **그 자리에서** 바뀐다 — 고른 언어로
@@ -188,13 +233,19 @@ export function App(): React.JSX.Element {
           streak={0}
           {...(today ? { today_: today } : {})}
           onSettings={() => useUi.getState().go('settings')}
+          onRepos={() => useUi.getState().go('repos')}
           reingest={reingest}
           onStart={() => void start(repo.id, repo.rootPath)}
           onMake={(conceptId) => void place('gap', repo, home, conceptId)}
           onPick={(conceptId) => void place('manual', repo, home, conceptId)}
           onCourse={(unitId) => {
-            const scope = unitId === null ? { kind: 'repo' as const } : { kind: 'unit' as const, unitId };
-            if (!useUi.getState().openClone(scope)) useUi.getState().say(t('course.inSession'));
+            // 마스트헤드의 「코스」는 새 코스(D171), 대지 카드의 「코스 열기」는 그 대지의
+            // 클론 코스(D120)다 — 이름이 같은 두 문을 한 자리에서 가른다.
+            if (unitId === null) {
+              if (!openCourse()) useUi.getState().say(t('chapter.inSession'));
+              return;
+            }
+            if (!useUi.getState().openClone({ kind: 'unit', unitId })) useUi.getState().say(t('course.inSession'));
           }}
         />
       </div>
@@ -204,11 +255,11 @@ export function App(): React.JSX.Element {
   );
 }
 
-/** 「인쇄 시작」. 큐가 비면 세션을 열지 않고 그 이유를 말한다 (02 §5.3). */
+/** 「학습 시작」. 큐가 비면 세션을 열지 않고 그 이유를 말한다 (02 §5.3). */
 async function start(repoId: number, rootPath: string): Promise<void> {
   const opened = await startSession(repoId, rootPath);
   if (!opened) {
-    useUi.getState().say('오늘은 인쇄할 판이 없습니다 — 리포를 더 파거나 내일 다시 오세요.');
+    useUi.getState().say(t('home.startEmpty'));
   }
 }
 
@@ -238,21 +289,19 @@ async function place(
   if (!result.ok) {
     // `no-plate` 의 사유는 `gap.reason` 에 적혔고 「판이 없는 문법」이 그것을 보인다 (04 §1.4).
     say(result.reason === 'no-plate'
-      ? `「${label}」 판은 아직 만들 수 없습니다 — 사유는 「판이 없는 문법」에 적힙니다.`
-      : `「${label}」 판을 걸지 못했습니다.`);
+      ? t('home.makeNoPlate', { label })
+      : t('home.makeFailed', { label }));
     return;
   }
 
   await refreshHome();
   if (result.opened) return;
   if (result.pos === null) {
-    say(`「${label}」 판을 만들었습니다. 오늘은 인쇄할 큐가 없어 큐에 넣지는 못했습니다.`);
+    say(t('home.makeNoQueue', { label }));
     return;
   }
-  const where = `오늘 큐 ${result.pos + 1}번째`;
-  say(result.reused
-    ? `「${label}」 판은 이미 ${where}에 있습니다.`
-    : `「${label}」 판을 ${where}에 넣었습니다.`);
+  const n = String(result.pos + 1);
+  say(result.reused ? t('home.makeReused', { label, n }) : t('home.makeQueued', { label, n }));
 }
 
 

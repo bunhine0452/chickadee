@@ -1,0 +1,67 @@
+[
+  {
+    "queryId": "java/generic-bound",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "bound",
+    "startLine": 3,
+    "startCol": 18,
+    "endLine": 3,
+    "endCol": 34,
+    "nodeKind": "type_parameter",
+    "inError": false
+  },
+  {
+    "queryId": "java/generic-bound",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "bound",
+    "startLine": 3,
+    "startCol": 18,
+    "endLine": 3,
+    "endCol": 19,
+    "nodeKind": "type_identifier",
+    "inError": false
+  },
+  {
+    "queryId": "java/generic-bound",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "bound",
+    "startLine": 3,
+    "startCol": 20,
+    "endLine": 3,
+    "endCol": 27,
+    "nodeKind": "extends",
+    "inError": false
+  },
+  {
+    "queryId": "java/generic-bound",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "hole",
+    "form": "bound",
+    "startLine": 3,
+    "startCol": 20,
+    "endLine": 3,
+    "endCol": 27,
+    "nodeKind": "extends",
+    "inError": false
+  },
+  {
+    "queryId": "java/generic-bound",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "bound",
+    "startLine": 3,
+    "startCol": 28,
+    "endLine": 3,
+    "endCol": 34,
+    "nodeKind": "type_identifier",
+    "inError": false
+  }
+]

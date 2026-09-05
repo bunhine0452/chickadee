@@ -12,6 +12,7 @@ import { join } from 'node:path';
 import type { Page } from '@playwright/test';
 
 import { answerKeyOf, type AppDb } from './app-db.js';
+import { passT2Plate } from './ui.js';
 
 /**
  * 앱의 게이트 보고를 그대로 받는 모양. 앱 타입을 import 하지 않는 이유는 `tests/` 가
@@ -35,10 +36,6 @@ export interface GateReport {
   measure: MeasureRow[];
   measureViolations: MeasureRow[];
   pass: boolean;
-}
-export interface DeeReport {
-  size: number; ly: number; smallMark: boolean; headMark: boolean;
-  bandCols: number; cheekPx: number; darkPx: number; pass: boolean; ascii: string;
 }
 export interface MotionRow { sel: string; kind: 'animation' | 'transition'; ms: number; name: string }
 
@@ -74,7 +71,6 @@ export async function gotoDev(page: Page): Promise<void> {
 /** 페이지 안에서 본 `window.__audit`. 여기 없는 이름을 부르면 그 자리에서 터진다. */
 interface AuditHandle {
   gates: () => GateReport;
-  dee: (size: number, ly: number, small: boolean, head: boolean) => Promise<DeeReport>;
   motionOver: (limitMs: number, exempt: readonly string[]) => MotionRow[];
 }
 type WithAudit = typeof globalThis & { __audit: AuditHandle };
@@ -82,13 +78,6 @@ type WithAudit = typeof globalThis & { __audit: AuditHandle };
 /** 활자·대비·행 길이 한 벌 (06 §2 표의 앞 세 줄). */
 export const runGates = (page: Page): Promise<GateReport> =>
   page.evaluate(() => (globalThis as WithAudit).__audit.gates());
-
-/** 16px 실루엣 — `audit.dee(16, 4, true, true)` 그대로 (06 §2). */
-export const deeSilhouette = (page: Page, size = 16, ly = 4): Promise<DeeReport> =>
-  page.evaluate(
-    ([s, l]) => (globalThis as WithAudit).__audit.dee(s, l, true, true),
-    [size, ly] as const,
-  );
 
 /** 살아 있는 문서에서 상한을 넘은 모션. 정적 전수는 `scripts/check-motion.mjs` 가 본다. */
 export const motionOver = (page: Page, limitMs: number, exempt: readonly string[])
@@ -117,7 +106,7 @@ export const T2_SKIP = 'tiny 시드에 커밋·import 간선이 없다 — makeT
  * 같은 걸음을 걷는다 — 여기가 ko 만 알면 그 스모크는 홈에서 30초를 기다리다 죽는다.
  */
 export async function startSession(page: Page): Promise<void> {
-  const start = page.getByRole('button', { name: /인쇄 시작|이어 찍기|Start printing|Carry on/ });
+  const start = page.getByRole('button', { name: /학습 시작|이어 풀기|Start studying|Carry on/ });
   await start.waitFor();
   await start.focus();
   await page.keyboard.press('Enter');
@@ -143,12 +132,13 @@ export async function submit(page: Page, sel: number): Promise<void> {
   await settled(page);
 }
 
-/** LIFER 베일이 떠 있으면 아무 키로 닫는다 (정본 §3-6). */
-export async function closeLifer(page: Page): Promise<void> {
-  const veil = page.locator('.lifer-veil');
-  if (await veil.count() === 0) return;
-  await page.keyboard.press('Escape');
-  await veil.waitFor({ state: 'detached' });
+/**
+ * 첫 기록은 판정란 안에 남는다 (정본 §3-6 · D131) — 닫을 것이 없으므로 이 함수가 하는 일은
+ * **연출이 다 놓일 때까지 기다리는 것**뿐이다. 일련번호가 0.7초 뒤에 찍히기 시작하므로
+ * `settled` 만으로는 화면이 아직 움직이는 중일 수 있다.
+ */
+export async function settleLifer(page: Page): Promise<void> {
+  if (await page.locator('.lifer-note').count() === 0) return;
   await settled(page);
 }
 
@@ -163,25 +153,43 @@ const MAX_PLATES = 12;
  * 판을 답한 뒤 다시 넘긴다.
  */
 export async function toSummary(page: Page, app: AppDb): Promise<void> {
-  const done = page.locator('article.ps[aria-label="인쇄 완료"], article.ps[aria-label="Printing done"]');
+  const done = page.locator('article.ps[aria-label="오늘 학습 완료"], article.ps[aria-label="Done for today"]');
   for (let left = MAX_PLATES; left > 0; left -= 1) {
+    // Space 뒤에 **판이 실제로 바뀔 때까지** 기다린다 — 요약이 서거나 교정지의 이름표가 달라질
+    // 때까지. `.fb.on` 만 보면 그 칸이 없는 T2 판에서 옛 판 위에 다음 걸음을 뗀다.
+    const prev = await page.locator('article.ps').first().getAttribute('aria-label');
     await page.keyboard.press('Space');
-    // 넘어갔으면 판정이 걷힌다 — 요약이 떠도 마찬가지다.
-    await page.locator('.fb.on').waitFor({ state: 'detached' });
+    await page.waitForFunction(
+      (was) => document.querySelector('article.ps[aria-label="오늘 학습 완료"], article.ps[aria-label="Done for today"]') !== null
+        || document.querySelector('article.ps')?.getAttribute('aria-label') !== was,
+      prev,
+    );
     await settled(page);
     if (await done.count() > 0) return;
+    // T2 지도 판은 보기 번호가 없다 (D140) — 상자 하나를 고르고 채점해 지나간다.
+    if (await passT2Plate(page)) continue;
     await submit(page, answerKey(app));
-    await closeLifer(page);
+    await settleLifer(page);
   }
   throw new Error(`판 ${MAX_PLATES}장을 답했는데도 요약이 안 떴다 — 큐가 안 줄고 있다`);
 }
 
-/** 야간반 (05 §4.3). 스위치는 마스트헤드에 있고 `<html data-theme>` 하나만 바뀐다. */
+/**
+ * 야간반 (05 §4.3). 밝기는 **설정 화면**에서 고른다 — 헤더에는 스위치가 없다 (D187 ⑫).
+ * 기본은 「시스템 따름」이고 여기서 고른 값이 그것을 덮어쓴다. `<html data-theme>` 하나만
+ * 바뀌고, 고른 뒤에는 홈으로 돌아온다 — 이 함수를 부르는 게이트가 재는 것은 홈이다.
+ */
 export async function toNight(page: Page): Promise<void> {
-  const sw = page.getByRole('switch', { name: '주간반 · 야간반 전환' });
-  await sw.focus();
+  await page.getByRole('button', { name: /^설정$|^Settings$/ }).first().focus();
+  await page.keyboard.press('Enter');
+  const dark = page.getByRole('radio', { name: /^어둡게$|^Dark$/ });
+  await dark.waitFor();
+  await dark.focus();
   await page.keyboard.press('Space');
   await page.waitForFunction(() => document.documentElement.dataset['theme'] === 'dark');
+  await page.getByRole('button', { name: /^홈으로$|^Home$/ }).first().focus();
+  await page.keyboard.press('Enter');
+  await page.locator('.masthead').waitFor();
   await settled(page);
 }
 
@@ -190,9 +198,20 @@ export async function toNight(page: Page): Promise<void> {
  * 이 화면으로 가는 길 자체가 마우스 없이 열려야 한다.
  */
 export async function toShelf(page: Page): Promise<void> {
-  await page.locator('button.repo-switch').focus();
-  await page.keyboard.press('Enter');
-  await page.locator('ul[role="listbox"]').waitFor();
+  // The first test of a file on CI's Linux WebKit sometimes presses Enter before the
+  // switcher's handler is live and the listbox never opens. Retrying the same keystroke
+  // keeps the path keyboard-only; a click here would stop measuring what this gate is for.
+  const list = page.locator('ul[role="listbox"]');
+  for (let attempt = 0; ; attempt += 1) {
+    await page.locator('button.repo-switch').focus();
+    await page.keyboard.press('Enter');
+    try {
+      await list.waitFor({ timeout: 4_000 });
+      break;
+    } catch (e) {
+      if (attempt >= 4) throw e;
+    }
+  }
   await page.keyboard.press('End');
   await page.keyboard.press('Enter');
   // 목록이 설 때까지 기다린다 — `main.shelf` 는 머리말만으로도 먼저 뜨므로 여기서 멈추면
@@ -204,7 +223,7 @@ export async function toShelf(page: Page): Promise<void> {
 
 /** 인쇄 부속 숨김 (05 §4.3 — 텍스트·레이아웃은 1px 도 바뀌지 않는다). */
 export async function toggleTrim(page: Page): Promise<void> {
-  const sw = page.getByRole('switch', { name: '인쇄 부속 보이기 · 숨기기' });
+  const sw = page.getByRole('switch', { name: '장식 보이기 · 숨기기' });
   await sw.focus();
   await page.keyboard.press('Space');
   await settled(page);

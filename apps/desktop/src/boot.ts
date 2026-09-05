@@ -1,7 +1,7 @@
 import { ipc, log } from '@chickadee/ipc-client';
 import { SCHEMA_VERSION, catalog } from '@chickadee/store-sql';
 
-import { applyLocale, DEFAULTS, loadSettings } from './data/settings.js';
+import { applyLocale, DEFAULTS, loadSettings, startTheme } from './data/settings.js';
 import { refreshRepos } from './flow.js';
 import { useUi } from './store.js';
 
@@ -22,6 +22,10 @@ export async function boot(): Promise<void> {
   const locale = settings?.locale ?? DEFAULTS.locale;
   applyLocale(locale);
   useUi.getState().setLocale(locale);
+
+  // 밝기도 **창을 보이기 전에** (D187 ⑫). 이것이 없으면 `<html data-theme>` 을 세우는 것이
+  // 설정 화면의 훅뿐이라, 설정에 들어갔다 나오기 전에는 홈도 세션도 밝게로 굳는다.
+  await startTheme();
 
   // 등록된 리포가 있으면 홈, 없으면 첫 실행 화면 — 그 판단은 목록을 읽어야 한다.
   await refreshRepos().catch(() => log.warn('리포 목록을 읽지 못했다'));

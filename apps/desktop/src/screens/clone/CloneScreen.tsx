@@ -17,7 +17,8 @@ import type { Layer } from '@chickadee/store-sql';
 import { FlatButton, Kbd, RichText } from '@chickadee/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { loadSettings } from '../../data/settings.js';
+import { Page, Split } from '../../components/shell/Page.js';
+import { useResolvedTheme } from '../../data/settings.js';
 import { report } from '../../flow.js';
 import { useUi } from '../../store.js';
 import { CourseDone, CoursePlateView, type CourseView } from './CoursePlateView.js';
@@ -74,7 +75,8 @@ export function CloneScreen(props: CloneScreenProps): React.JSX.Element {
   const [empty, setEmpty] = useState<Empty | null>(null);
   const [finished, setFinished] = useState(false);
   const [recut, setRecut] = useState(false);
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  /** Monaco 의 테마는 `<html data-theme>` 을 따른다 — 저장값이 아니다 (S2 회귀). */
+  const theme = useResolvedTheme();
 
   // ── 조각 하나가 들고 있는 것. 조각이 바뀌면 `loadNext` 가 통째로 갈아 끼운다.
   const [view, setView] = useState<CourseView>('edit');
@@ -102,10 +104,6 @@ export function CloneScreen(props: CloneScreenProps): React.JSX.Element {
     draft,
     elapsed,
   };
-
-  useEffect(() => {
-    void loadSettings().then((s) => setTheme(s.theme)).catch(() => undefined);
-  }, []);
 
   /** 다음 조각을 걸고 판 상태를 통째로 갈아 끼운다. 초안은 원장에 있던 것으로 되돌린다. */
   const loadNext = useCallback(async (
@@ -294,8 +292,8 @@ export function CloneScreen(props: CloneScreenProps): React.JSX.Element {
   }, [view, onNext]);
 
   return (
-    <main className="course" tabIndex={-1}>
-      <header className="course-head">
+    <Page className="course" head={(
+      <header className="course-head l-row">
         <h1>
           {t('course.title')}
           <span className="pl">{t('course.plain')}</span>
@@ -310,13 +308,14 @@ export function CloneScreen(props: CloneScreenProps): React.JSX.Element {
             ? ''
             : ` · ${run.mode === 'commit' ? t('course.modeCommit') : t('course.modeDep')}`}
         </p>
-        <div className="course-head-act">
+        <div className="course-head-act l-push">
           <FlatButton onClick={leave} ghost>
             {t('course.leave')} <Kbd keys="Esc" />
           </FlatButton>
         </div>
       </header>
-
+    )}
+    >
       {empty !== null ? (
         <section className="course-empty">
           <h2>{t('course.emptyTitle')}</h2>
@@ -324,22 +323,24 @@ export function CloneScreen(props: CloneScreenProps): React.JSX.Element {
           <FlatButton onClick={onBack}>{t('course.emptyBack')}</FlatButton>
         </section>
       ) : (
-        <div className="course-body">
-          {toc === null ? (
+        <Split
+          sticky
+          sideLabel={t('course.tocLabel')}
+          side={toc === null
             // 아직 못 읽은 한 프레임. 스피너를 두지 않는다 (정본 §3-7).
-            <aside className="ctoc" aria-busy="true" />
-          ) : (
-            <CourseToc
-              units={toc.units}
-              files={toc.files}
-              filesDone={toc.filesDone}
-              cut={toc.cut}
-              cutDone={toc.cutDone}
-              curId={plate?.step.id ?? null}
-              curSeq={plate?.step.seq ?? null}
-            />
-          )}
-
+            ? <div className="ctoc" aria-busy="true" />
+            : (
+              <CourseToc
+                units={toc.units}
+                files={toc.files}
+                filesDone={toc.filesDone}
+                cut={toc.cut}
+                cutDone={toc.cutDone}
+                curId={plate?.step.id ?? null}
+                curSeq={plate?.step.seq ?? null}
+              />
+            )}
+        >
           <div className="course-work">
             {finished ? (
               <CourseDone n={toc?.cutDone ?? 0} onBack={onBack} />
@@ -384,9 +385,9 @@ export function CloneScreen(props: CloneScreenProps): React.JSX.Element {
               />
             )}
           </div>
-        </div>
+        </Split>
       )}
-    </main>
+    </Page>
   );
 }
 

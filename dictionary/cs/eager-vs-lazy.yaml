@@ -1,0 +1,91 @@
+schema: 1
+id: cs/eager-vs-lazy
+universal: null
+name: { ko: "지금 계산하나 물을 때 계산하나", en: "Eager and lazy" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+# 파이썬·자바·C#·SQL 편이 밀어낸 것 (cs.md §10.2).
+track_default: t0
+essential: false
+difficulty: 3
+prereq: [cs/complexity]
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "돌려받은 것이 값인가 약속인가. 약속이면 아직 아무것도 안 했다."
+    en: "You got a value, or a promise. A promise means nothing has happened yet."
+  why:
+    ko: >-
+      함수가 목록을 돌려줬다고 해서 <b>목록을 만든 것은 아닙니다</b>. 「물어보면 그때 만들어 주겠다」는
+      약속만 돌려준 경우가 많아요. 이 차이는 세 곳에서 드러납니다.
+      ① <b>비용의 시점</b> — 느린 줄이 만든 줄이 아니라 꺼내는 줄입니다.
+      ② <b>한 번뿐인지</b> — 한 번 훑고 나면 비는 약속도 있습니다.
+      ③ <b>중간에 값이 바뀌면</b> — 나중에 꺼내면 바뀐 값을 봅니다.
+      「분명히 여기서 필터를 걸었는데 왜 여기서 느리지」의 답이 대개 이것입니다.
+    en: >-
+      A function returning a list has <b>not necessarily built one</b>. Often it returns only a
+      promise: ask and I will produce. The difference shows in three places. ① <b>When the cost
+      lands</b> — the slow line is the one that reads, not the one that made it. ② <b>Whether it
+      is once</b> — some promises empty after one pass. ③ <b>If values change in between</b> —
+      reading later sees the change. “I filtered up there, so why is it slow down here” usually
+      lands here.
+  trace: []
+rule:
+  ko: "<b>약속은 꺼낼 때 일한다.</b> 느린 줄을 찾으려면 만든 줄이 아니라 꺼내는 줄을 본다."
+  en: "<b>A promise works when read.</b> Look at the reading line, not the making line."
+ok:
+  ko: >-
+    필요한 만큼만 꺼내면 나머지는 계산되지 않습니다. 그래서 아주 큰 것에서 앞의 몇 개만
+    쓸 때는 약속 쪽이 훨씬 쌉니다.
+  en: >-
+    Read only what you need and the rest is never computed. That is why a promise is far cheaper
+    when you take a few items from something huge.
+misconceptions:
+  - ko: "목록처럼 보이면 목록이다 — 꺼내는 순간 만들어지는 약속일 수 있습니다."
+    en: "If it looks like a list it is one — it can be a promise that builds on read."
+  - ko: "약속은 여러 번 써도 된다 — 한 번 훑고 나면 비는 것도 있습니다."
+    en: "A promise can be reused — some empty after a single pass."
+  - ko: "약속이 언제나 더 빠르다 — 어차피 전부 꺼낼 것이면 오히려 손해입니다."
+    en: "A promise is always faster — not when you will read all of it anyway."
+meaning:
+  - q:
+      ko: "필터를 건 줄은 즉시 끝났는데 결과를 세는 줄이 오래 걸립니다. <b>필터가 언제 돌았나요?</b>"
+      en: "Filtering returned instantly; counting the result takes long. <b>When did the filter run?</b>"
+    hint:
+      ko: "필터를 건 줄이 돌려준 것이 무엇이었는지 봅니다."
+      en: "Look at what the filtering line actually returned."
+    options:
+      - t: { ko: "세는 줄에서 — 그때 처음 항목을 훑었다", en: "At the counting line — that is the first pass over items" }
+      - t: { ko: "필터를 건 줄에서 돌았고 세는 줄이 따로 느린 것이다", en: "It ran at the filter; counting is separately slow" }
+        diag:
+          t:
+            ko: "세기 자체는 <b>이미 있는 것을 세는</b> 값싼 일입니다. 오래 걸린다면 세면서 만들고 있는 거예요."
+            en: "Counting what already exists is <b>cheap</b>. Taking long means it is building while counting."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 세기냐 만들기냐", en: "The sharpest spot — counting or building" }
+            code:
+              - "이미 있음: 세기는 싸다"
+              - "약속: 세면서 만든다"
+      - t: { ko: "두 줄에서 반씩 돌았다", en: "Half at each line" }
+        diag:
+          t:
+            ko: "약속은 나눠서 미리 하지 않습니다 — <b>물을 때</b> 합니다. 반씩 나뉘는 방식은 다른 이야기예요."
+            en: "A promise does not do half in advance — it works <b>when asked</b>. Splitting is a different scheme."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 미리냐 물을 때냐", en: "The sharpest spot — ahead or on demand" }
+            code:
+              - "미리: 만든 줄이 느리다"
+              - "물을 때: 꺼내는 줄이 느리다"
+      - t: { ko: "필터 조건이 복잡해서 세는 것이 느려졌다", en: "The condition was complex, so counting is slow" }
+        diag:
+          t:
+            ko: "조건이 복잡하면 <b>필터 자체가</b> 느려야 합니다. 필터가 즉시 끝났다는 것이 아직 안 돌았다는 표시예요."
+            en: "A complex condition should make <b>the filter</b> slow. Its instant return is the tell that it has not run."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 즉시 끝난 줄이 말해 주는 것", en: "The sharpest spot — what an instant return tells you" }
+            code:
+              - "즉시 끝남: 아직 안 돌았다"
+              - "느림: 여기서 처음 돈다"

@@ -1,0 +1,219 @@
+schema: 1
+id: java/method-declaration
+universal: common/function-definition
+name: { ko: 메서드 정의하기, en: Method declaration }
+token: "void"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 2
+prereq: [java/class-declaration, cs/abstraction, cs/call-stack]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "하는 일에 이름을 붙인다. 돌려줄 것이 무엇인지를 이름 앞에 미리 적는다."
+    en: "Names a piece of work, and says up front what it hands back."
+  why:
+    ko: >-
+      {{site.line}}행은 이름보다 <b>앞에</b> 돌려줄 종류를 적습니다. 다른 언어는 「함수다」라는
+      낱말 하나(<code>def</code>·<code>function</code>·<code>fn</code>)로 열지만, 자바에는 그런
+      낱말이 <b>없어요</b> — 그 자리를 종류가 대신합니다. 그리고 <b>비울 수 없습니다</b>:
+      아무것도 안 돌려줄 때조차 「안 돌려준다」는 뜻의 <code>void</code> 를 적어야 합니다.
+    en: >-
+      Line {{site.line}} writes the kind of thing handed back <b>before</b> the name. Other
+      languages open with one word for “this is a function” — <code>def</code>,
+      <code>function</code>, <code>fn</code> — and Java has <b>none</b>; the kind stands in that
+      place instead. And it <b>cannot be left empty</b>: even when nothing comes back you write
+      <code>void</code>, which means exactly that.
+  trace:
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 돌려줄 종류를 미리 말한다."
+      en: "{{pick.1|code}} says in advance what comes back."
+    - ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 그 일에 붙인 이름이다."
+      en: "{{pick.2|code}} is the name of this work."
+    - ko: "{{pick.3|code}} 안의 것은 부를 때 건네받는다."
+      en: "What sits in {{pick.3|code}} is handed in when it is called."
+
+rule:
+  ko: "<b>돌려줄 종류를 이름 앞에 먼저 적는다.</b> 안 돌려줘도 <code>void</code> 라고 적어야 한다."
+  en: "<b>The kind handed back comes before the name.</b> Even nothing is written, as <code>void</code>."
+result:
+  label:
+    ko: "{{pick.2}} 라는 일"
+    en: "work called {{pick.2}}"
+  value: "{{pick.1}}"
+  note:
+    ko: "이 종류로만 돌려준다"
+    en: "hands back only this kind"
+ok:
+  ko: >-
+    {{pick.2|code}} 라는 일이 섰고, 부르면 {{pick.1|code}} 종류를 돌려줍니다. 그 약속은 컴파일러가 지킵니다.
+  en: >-
+    Work called {{pick.2|code}} now stands, and a call hands back {{pick.1|code}}. The compiler
+    holds that promise.
+payoff:
+  ko: >-
+    이걸 알면 「이 함수가 무엇을 주는지」를 <b>안을 안 읽고</b> 압니다 — 첫 낱말이 답이라서요.
+  en: >-
+    This lets you know what a function gives you <b>without reading its body</b> — the first word answers.
+bridge:
+  ko: >-
+    파이썬은 <code>def</code> 하나로 열고 무엇을 돌려주는지는 안을 읽어야 압니다. 자바는 그것을
+    <b>맨 앞에 적게</b> 하고, 대신 적지 않을 자유가 없습니다.
+  en: >-
+    Python opens with <code>def</code> and you must read the body to learn what comes back. Java
+    makes you <b>write it first</b>, and takes away the freedom not to.
+misconceptions:
+  - ko: "<code>void</code> 는 비어 있다는 뜻이라 생략할 수 있다 — 생략하면 컴파일이 멈춥니다. <code>void</code> 도 적어야 하는 종류입니다."
+    en: "<code>void</code> means empty so it can be dropped — dropping it stops the compiler. It is a kind you must write."
+  - ko: "<code>void</code> 인데 <code>return</code> 을 못 쓴다 — 값 없이 <code>return;</code> 만 쓰면 거기서 끝냅니다."
+    en: "You cannot <code>return</code> from a <code>void</code> — a bare <code>return;</code> ends it there."
+  - ko: "종류를 적어 두면 아무거나 돌려줘도 알아서 바꿔 준다 — 안 맞으면 컴파일이 멈춥니다."
+    en: "The declared kind converts whatever you return — a mismatch stops the compiler."
+
+# 빈칸형을 못 내는 사유 (D145). 「아직 안 썼다」가 아니라 「보기 넷을 고정할 수 없다」다.
+no_hole_reason: >-
+  뚫을 자리가 돌려줄 종류인데 그 글자가 사용처마다 다르다(`void`·`int`·`ResponseEntity<LoginResponse>`). 빈칸형은 첫 보기가 구멍 원문과 같아야 해서(`t0-blank` 의 검사) 보기 넷을 사전에 고정할 수 없다. 같은 것을 짚기와 뜻으로 낸다.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>돌려줄 종류를 말하는 자리</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the place that says what comes back</b>."
+    hint:
+      ko: "이름보다 <b>앞</b>에 있습니다."
+      en: "It stands <b>before</b> the name."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 그 일에 붙인 <b>이름</b>입니다. 이름은 무엇을 돌려줄지 말하지 않아요 — 그건 앞자리의 몫입니다."
+          en: >-
+            {{pick.2|code}} is the <b>name</b> of the work. A name says nothing about what comes
+            back; the place in front does.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 이름이냐 종류냐"
+            en: "The sharpest spot — the name or the kind"
+          code:
+            - "int  count()   // int 를 준다"
+            - "void count()   // 아무것도 안 준다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>받는 것</b>입니다. 받는 것과 주는 것은 반대 방향이에요."
+          en: >-
+            {{pick.3|code}} is what is <b>taken in</b>. Taking in and handing back point opposite ways.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 받느냐 주느냐"
+            en: "The sharpest spot — taking or giving"
+          code:
+            - "int f(String s)"
+            - "//  ^줌      ^받음"
+      pick.4:
+        t:
+          ko: "{{pick.4|code}}{{pick.4|josa:은,는}} <b>하는 일</b>입니다. 무엇을 돌려줄지는 안을 읽기 전에 이미 정해져 있어요."
+          en: >-
+            {{pick.4|code}} is the <b>work itself</b>. What comes back was settled before anyone read it.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 약속이냐 이행이냐"
+            en: "The sharpest spot — the promise or the doing"
+          code:
+            - "int f() { ... }"
+            - "//  ^약속   ^이행"
+
+meaning:
+  - q:
+      ko: "돌려줄 종류를 <b>안 적고</b> 이름부터 쓰면 어떻게 될까요?"
+      en: "What if the kind is <b>left out</b> and the name comes first?"
+    hint:
+      ko: "자바에는 「함수다」라고 여는 낱말이 <b>없습니다</b>."
+      en: "Java has <b>no</b> word that opens with “this is a function”."
+    options:
+      - t:
+          ko: "컴파일이 멈춘다 — 그 자리는 비울 수 없다"
+          en: "It stops compiling — that place cannot be empty"
+      - t:
+          ko: "아무것도 안 돌려주는 것으로 읽힌다"
+          en: "It reads as returning nothing"
+        diag:
+          t:
+            ko: "「안 돌려준다」에도 <b>적는 낱말이 있습니다</b> — <code>void</code> 입니다. 비워 두는 것과 <code>void</code> 는 다릅니다."
+            en: >-
+              “Returns nothing” <b>has a word</b> — <code>void</code>. Leaving the place empty is not
+              the same as writing it.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 비움이냐 void 냐"
+              en: "The sharpest spot — empty or void"
+            code:
+              - "void save() {}   // 안 돌려준다"
+              - "     save() {}   // 컴파일 안 됨"
+      - t:
+          ko: "돌려주는 값을 보고 알아서 정한다"
+          en: "It is inferred from what is returned"
+        diag:
+          t:
+            ko: "자바는 메서드의 돌려줄 종류를 <b>추론하지 않습니다</b>. 지역 변수에는 <code>var</code> 가 있지만 이 자리에는 없어요."
+            en: >-
+              Java does <b>not infer</b> a method's return kind. Local variables have
+              <code>var</code>; this place has no such thing.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 추론되는 자리와 아닌 자리"
+              en: "The sharpest spot — where inference reaches and where it does not"
+            code:
+              - "var n = 1;      // 여기는 추론된다"
+              - "var f() { }     // 여기는 안 된다"
+      - t:
+          ko: "생성자로 읽힌다"
+          en: "It reads as a constructor"
+        diag:
+          t:
+            ko: "이름이 <b>상자 이름과 같을 때만</b> 생성자입니다. 다르면 종류가 빠진 메서드라 컴파일이 멈춰요."
+            en: >-
+              It is a constructor <b>only when the name matches the box</b>. Otherwise it is a method
+              missing its kind, and compiling stops.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 이름이 상자와 같은가"
+              en: "The sharpest spot — does the name match the box"
+            code:
+              - "class Store { Store() {} }  // 생성자"
+              - "class Store { save() {} }   // 오류"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 이 몇 줄을 <b>따로 이름 붙여</b> 두었을까요?"
+    en: "Why does line {{site.line}} <b>give these lines a name</b> of their own?"
+  choices:
+    - t:
+        ko: "여러 곳에서 같은 일을 부르고, 이름이 그 일이 무엇인지 대신 말해 주기 때문"
+        en: "Because several places call the same work, and the name says what it is"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 이름을 지우고 안을 그대로 붙여 넣으면 무엇이 나빠지는지도 적어 보세요."
+        en: "That is the direction. Say also what gets worse if the name goes and the body is pasted in."
+    - t:
+        ko: "자바가 메서드를 요구해서"
+        en: "Because Java demands a method"
+      ok: false
+      fb:
+        ko: "상자는 요구하지만 <b>일을 어떻게 나눌지</b>는 안 정해 줍니다. 그것이 이 줄의 선택이에요."
+        en: "It demands a box, not <b>how the work is divided</b>. That is this line's choice."
+    - t:
+        ko: "줄 수를 줄이려고"
+        en: "To make the file shorter"
+      ok: false
+      fb:
+        ko: "이름을 붙이면 오히려 줄이 늡니다. 버는 것은 길이가 아니라 <b>읽는 사람의 이해</b>예요."
+        en: "Naming adds lines. What it buys is not length but <b>the reader's understanding</b>."
+
+queries:
+  - { grammars: [java], file: ./method-declaration.scm }
+
+examples:
+  - code: "class A { void save(String s) { run(); } }"
+    expect: { sites: 1, form: method, picks: { 1: "void", 2: "save", 3: "(String s)", 4: "{ run(); }" } }
+  - code: "class A { A() {} }"
+    expect: none

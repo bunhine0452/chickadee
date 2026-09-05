@@ -1,5 +1,5 @@
 /**
- * 05 §11 시나리오 11~14 — 요약 · 모양 스위치 · Esc 4단계 · 리포 등록과 인제스트.
+ * 05 §11 시나리오 11~14 — 요약 · 모양 스위치 · Esc 3단계 · 리포 등록과 인제스트.
  *
  * 이 넷은 교정지 한 장이 아니라 **셸**을 잰다: 세션이 닫힐 때 무엇이 남는가, 테마와 부속이
  * 조판을 건드리지 않는가, Esc 가 한 번에 한 겹만 벗기는가, 리포를 처음 등록하면 무엇이 도는가.
@@ -12,28 +12,27 @@ import {
 import { answerKeyOf } from '../support/app-db.js';
 
 const SHEET = '.proof article.ps';
-const DONE = '[aria-label="인쇄 완료"]';
+const DONE = '[aria-label="오늘 학습 완료"]';
 
 
 test('11 요약', async ({ page, app }) => {
   await openHome(page);
-  await page.getByRole('button', { name: /인쇄 시작/ }).click();
+  await page.getByRole('button', { name: /학습 시작/ }).click();
   await page.locator(SHEET).waitFor();
   await page.locator(`.ch[data-k="${answerKeyOf(app.db)}"]`).click();
   await page.locator('.acts .press-btn').click();
 
-  // LIFER 는 첫 정합의 연출이다 — 닫고 나서야 다음 판으로 간다.
-  await page.locator('.lifer-veil').waitFor();
-  await page.keyboard.press('KeyG');
+  // 첫 정합의 기록은 판정란 안에 남는다 (D131) — 닫을 것이 없다.
+  await page.locator('.lifer-note').waitFor();
   // 큐는 두 판이다 (D113) — 남은 판까지 답해야 요약이 뜬다.
   await finishSession(page, app.db);
 
-  // 겹 이동 목록 — %가 아니라 겹으로 센다. 답한 판마다 한 줄이다.
+  // 겹 이동 목록 — %가 아니라 겹으로 센다. 답한 판마다 한 줄이다 (T0 둘 + T2 하나, D140).
   const shift = page.locator(`${DONE} .shifts .shift`);
-  await expect(shift).toHaveCount(2);
+  await expect(shift).toHaveCount(3);
   await expect(shift.first()).toContainText('문자열 리터럴');
-  await expect(shift.first().locator('small')).toContainText('미인쇄 → 애벌 · +1겹');
-  await expect(shift.first().locator('.next')).toContainText('다음 인쇄');
+  await expect(shift.first().locator('small')).toContainText('아직 → 처음 · +1단계');
+  await expect(shift.first().locator('.next')).toContainText('다음 복습');
 
   // LIFER 박스 · 내일 예고.
   await expect(page.locator(`${DONE} .lifer-box`)).toContainText('처음 기록한 문법');
@@ -49,10 +48,12 @@ test('11 요약', async ({ page, app }) => {
   await page.locator('.masthead').waitFor();
   await expect(page.locator('.proof')).toHaveCount(0);
   await expect(page.locator('.today-empty')).toBeVisible();
-  await expect(page.locator('.today .press-btn')).toBeDisabled();
+  // 오늘 할 것이 없으면 단추 자체를 안 그린다 (D182). 눌리지 않는 단추는 자리만
+  // 차지하고, 빈 상태가 할 일은 「왜 없는가」를 말하는 것이다 (정본 §3-7).
+  await expect(page.locator('.today .press-btn')).toHaveCount(0);
 });
 
-test('12 야간반 + 부속 숨김', async ({ page }) => {
+test('12 어둡게 — 조판은 1px 도 안 움직이고 대비는 7:1 이다', async ({ page }) => {
   // `?dev=1` 이라야 `__audit` 이 붙는다 (05 §10) — 대비 전수는 그 손잡이로 잰다.
   await openHome(page, '?dev=1');
 
@@ -85,37 +86,29 @@ test('12 야간반 + 부속 숨김', async ({ page }) => {
   await expect.poll(async () => (await contrast()).below7, { timeout: 5_000 }).toEqual([]);
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
 
-  // 야간반으로.
-  await page.getByRole('switch', { name: '주간반 · 야간반 전환' }).click();
+  // 야간반으로. 밝기는 **설정 화면**에서 고른다 — 헤더에는 스위치가 없다 (D187 ⑫).
+  await expect(page.locator('header.masthead [role="switch"]')).toHaveCount(0);
+  await page.getByRole('button', { name: '설정' }).click();
+  await page.getByRole('radio', { name: '어둡게' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await page.getByRole('button', { name: '홈으로' }).first().click();
+  await page.locator('.masthead').waitFor();
   expect(await boxes()).toEqual(day);
 
-  // 부속을 보였다 숨겼다 한다 — 어느 쪽에서 시작하든 조판은 1px 도 안 움직인다.
-  // 기본값(`DEFAULTS.trim`)은 설정 화면 쪽에서 바뀔 수 있으니 지금 값에서 출발한다.
-  const trim = page.getByRole('switch', { name: '인쇄 부속 보이기 · 숨기기' });
-  const first = await page.locator('html').getAttribute('data-trim');
-  await trim.click();
-  await expect(page.locator('html')).not.toHaveAttribute('data-trim', first ?? '');
-  expect(await boxes()).toEqual(day);
-  await trim.click();
-  await expect(page.locator('html')).toHaveAttribute('data-trim', first ?? '');
-  expect(await boxes()).toEqual(day);
-
-  // 표가 말한 자리 — 야간반 + 부속 숨김에서 끝난다.
-  if ((await page.locator('html').getAttribute('data-trim')) !== 'on') await trim.click();
-  await expect(page.locator('html')).toHaveAttribute('data-trim', 'on');
+  // 「장식 보이기 · 숨기기」 스위치는 D182 로 없어졌다 — 장식을 토큰째 지웠으니 끌 것이
+  // 없다(정본 §6 「장식 0」). 스위치가 정말 없다는 것을 여기서 못박는다.
+  await expect(page.getByRole('switch', { name: '장식 보이기 · 숨기기' })).toHaveCount(0);
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-  expect(await boxes()).toEqual(day);
 
-  // 야간반에서도 종이 위 텍스트는 7:1 이다 (05 §9 · 정본 §6).
+  // 어둡게에서도 표면 위 텍스트는 7:1 이다 (05 §9 · 정본 §6).
   await expect.poll(async () => (await contrast()).below7, { timeout: 5_000 }).toEqual([]);
   expect((await contrast()).checked).toBe(dayContrast.checked);
 });
 
-test('13 Esc 4단계', async ({ page, app }) => {
+test('13 Esc 3단계', async ({ page, app }) => {
   void app;
   await openHome(page);
-  await page.getByRole('button', { name: /인쇄 시작/ }).click();
+  await page.getByRole('button', { name: /학습 시작/ }).click();
   await page.locator(SHEET).waitFor();
   await page.locator('.acts .dunno').click();
   await page.locator('.reprint').waitFor();
@@ -130,9 +123,8 @@ test('13 Esc 4단계', async ({ page, app }) => {
   await expect(page.locator('.proof')).toHaveCount(1);
   await expect(page.locator('.askbox textarea')).toHaveValue('여기서 막혔습니다');
 
-  // ② 사다리 접기. **포커스가 사다리 안일 때만** 이 겹이 벗겨진다 (05 §2.3 ③) —
-  //    ① 의 `blur()` 가 포커스를 `<body>` 로 떨어뜨리므로 여기서 다시 사다리로 넣어 준다.
-  //    그 자리 이동이 필요하다는 것 자체가 결함이다(보고 참조).
+  // ② 사다리 접기. **포커스가 사다리 안일 때만** 이 겹이 벗겨진다 (05 §2.3 ②) —
+  //    ① 이 포커스를 오버레이로 옮겨 두므로 여기서 다시 사다리 안으로 넣어 준다.
   await page.locator('.rung[data-r="4"]').focus();
   expect(await focusWithin(page, '.reprint')).toBe(true);
   await page.keyboard.press('Escape');
@@ -148,13 +140,13 @@ test('13 Esc 4단계', async ({ page, app }) => {
 
   // ④ 홈은 「이어 찍기」로 바뀌어 있다. 진행은 저장됐다.
   const resume = page.locator('.today .press-btn');
-  await expect(resume).toContainText('이어 찍기 · 1번째 판부터');
+  await expect(resume).toContainText('이어 풀기 · 1번째 문제부터');
 
   // 재진입하면 같은 판이 다시 걸린다.
   await resume.click();
   await page.locator(SHEET).waitFor();
-  await expect(page.locator(SHEET)).toHaveAttribute('aria-label', /1판 · 문자열 리터럴/);
-  await expect(page.locator('.jq-h')).toContainText('지금 1 / 2');
+  await expect(page.locator(SHEET)).toHaveAttribute('aria-label', /1번 · 문자열 리터럴/);
+  await expect(page.locator('.jb-where')).toContainText('1 / 3');
 });
 
 test('14 리포 등록 → 인제스트 진행 → 홈', async ({ page, app }) => {
@@ -177,15 +169,17 @@ test('14 리포 등록 → 인제스트 진행 → 홈', async ({ page, app }) =
   // 0단계 — 리포가 **0개인 상태에서** 언어를 고르면 그 자리에서 문구가 바뀌고 `settings`
   // 에 내려간다 (D117). 리포 없이 설정을 쓸 수 있다는 것이 이 걸음이 서는 조건이다 —
   // DB 는 `boot.ts` 가 이미 열어 두었고 첫 실행 화면은 그것만 있으면 된다.
-  await page.locator('.firstrun-lang [role="switch"]').click();
+  // 첫 화면에는 스위치가 둘이다 (D147 의 「프로그래밍이 처음인가요?」가 앞에 선다) — 언어 것을 집는다.
+  const lang = page.locator('.firstrun-lang [role="switch"][aria-label*="한국어 · English"]');
+  await lang.click();
   await expect(page.locator('.firstrun')).toContainText('nothing is written back to the repo');
   await expect
     .poll(() => (app.db.prepare("SELECT value_json AS v FROM settings WHERE key = 'locale'")
       .get() as { v: string } | undefined)?.v)
     .toBe('"en"');
 
-  // 다시 한국어로 — 이 시나리오의 나머지는 한국어 문구를 본다.
-  await page.locator('.firstrun-lang [role="switch"]').click();
+  // 다시 한국어로 — 이 시나리오의 나머지는 한국어 문구를 본다. 영어 화면에서는 라벨도 영어다.
+  await lang.click();
   await expect(page.locator('.firstrun')).toContainText('리포에는 아무것도 쓰지 않습니다');
 
   await page.getByRole('button', { name: '리포 등록' }).click();
@@ -253,8 +247,11 @@ test('14 리포 등록 → 인제스트 진행 → 홈', async ({ page, app }) =
   });
   await page.locator('.masthead').waitFor();
   await expect(page.locator('.masthead')).toContainText('fresh');
-  await expect(page.locator('.sheets')).toContainText('아직 대지가 없습니다');
-  await expect(page.locator('.forecast .fc-mark')).toHaveText('불가');
+  await expect(page.locator('.units')).toContainText('아직 단원이 없습니다');
+  // 「책임 배치 문제」 안내는 **읽은 파일이 있을 때만** 뜬다 (D182 가 미조판 예고 판을
+  // 「아직 못 하는 것」 문단으로 갈면서 조건이 이렇게 좁아졌다). 여기는 0 파일이라
+  // 할 말이 「아직 단원이 없다」 하나뿐이고, 그 하나는 위에서 이미 봤다.
+  await expect(page.locator('.forecast')).toHaveCount(0);
   await expect(page.locator('.today-empty')).toBeVisible();
 
   // 원장에도 리포 한 줄이 남았다 — 화면 밖 사실이다.

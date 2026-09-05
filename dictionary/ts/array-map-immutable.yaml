@@ -3,17 +3,17 @@ id: ts/array-map-immutable
 universal: common/map-transform
 name: { ko: "배열 불변 갱신(map)", en: "Immutable array update with map" }
 token: "map"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 2
-prereq: [ts/arrow-function, ts/array-basics, ts/object-spread]
+prereq: [ts/arrow-function, ts/array-basics, ts/object-spread, cs/immutability]
 confusions: [ts/array-foreach, ts/array-filter, ts/array-push-mutate]
 
 dict:
   one_liner:
-    ko: "<code>map</code> 은 항목마다 함수를 불러 새 배열을 만든다. 길이 같음, 원본 그대로."
-    en: "<code>map</code> calls a function per item to build a new array. Same length, original kept."
+    ko: "항목마다 함수를 불러 새 배열을 만든다. 길이는 같고 원본은 그대로다."
+    en: "Calls one function per item to build one new list. Same length, original kept."
   why:
     ko: >-
       화면은 배열이 <b>새 것</b>일 때만 다시 그려집니다. 원본을 고치면(<code>push</code>) 바뀐 걸 모르고,
@@ -216,12 +216,39 @@ meaning:
               - "const a = xs.forEach(f)   // undefined"
               - "const b = xs.map(f)       // 배열"
 
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 원래 배열을 고치지 않고 새 배열을 만들까요?"
+    en: "Why does line {{site.line}} build a new array instead of editing the original?"
+  choices:
+    - t:
+        ko: "같은 배열을 보고 있는 쪽이 있어서, 바뀐 사실을 새 값으로 알려야 해서"
+        en: "Because something else is watching the same array, and the change has to arrive as a new value"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 원본을 그 자리에서 고쳤다면 무엇이 안 일어나는지도 적어 보세요."
+        en: "That is the direction. Add what would not happen if the original were edited in place."
+    - t:
+        ko: "<code>map</code> 은 원본을 못 고쳐서"
+        en: "Because <code>map</code> cannot touch the original"
+      ok: false
+      fb:
+        ko: "콜백 안에서 항목을 직접 고치면 원본도 바뀝니다. 안 고치기로 정한 쪽이 이 줄입니다."
+        en: "Edit an item inside the callback and the original changes too. This line is the decision not to."
+    - t:
+        ko: "새 배열이 더 빨라서"
+        en: "Because a new array is faster"
+      ok: false
+      fb:
+        ko: "새로 만드는 쪽이 일은 더 많습니다. 그 값을 치르는 이유는 원본을 보고 있는 쪽입니다."
+        en: "Building a new one is more work. The reason for paying it is the side watching the original."
+
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./array-map-immutable.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./array-map-immutable.scm }
 
 examples:
   - code: "const next = prev.map((i) => (i.id === id ? { ...i, qty } : i))"
-    expect: { sites: 1, form: map, hole: "map", picks: { 1: "prev" } }
+    expect: { sites: 1, form: map, hole: "map", picks: { 1: "prev", 3: "map" } }
   - code: "const names = users.map(u => u.name)"
     expect: { sites: 1, hole: "map" }
   - code: "items.forEach((i) => console.log(i))"

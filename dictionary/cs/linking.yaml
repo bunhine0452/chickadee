@@ -1,0 +1,90 @@
+schema: 1
+id: cs/linking
+universal: null
+name: { ko: "흩어진 조각이 하나로 붙는 자리", en: "Linking" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+track_default: t0
+essential: false
+difficulty: 3
+prereq: [cs/compile-and-run]
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "번역은 됐는데 실행이 안 되는 오류가 사는 곳."
+    en: "Where the errors live that pass translation and still cannot run."
+  why:
+    ko: >-
+      파일이 여러 장이면 각 파일은 <b>따로 번역됩니다</b>. 이때 다른 파일의 이름은
+      「어딘가 있겠지」로 두고 넘어가요 — 그 파일만 보고는 있는지 알 수 없으니까요.
+      전부 번역된 뒤에 <b>그 이름들을 실제 몸통과 이어 붙이는</b> 단계가 따로 있고, 그 자리에서
+      「이름은 썼는데 몸통이 없다」·「같은 이름의 몸통이 둘이다」가 드러납니다.
+      번역은 다 통과했는데 실행 파일이 안 나오는 오류가 이것이고, 고칠 곳은
+      <b>쓴 자리가 아니라 몸통이 있어야 할 자리</b>입니다.
+    en: >-
+      With several files, each is <b>translated on its own</b>. Names from other files are left as
+      “presumably somewhere” — that file alone cannot tell. After everything is translated, a
+      separate step <b>joins those names to actual bodies</b>, and there “a name with no body” and
+      “two bodies with one name” come out. This is the error where translation all passed and no
+      executable appeared, and the place to fix is <b>where the body should be</b>, not where the
+      name was used.
+  trace: []
+rule:
+  ko: "<b>이름을 쓴 것과 몸통이 있는 것은 다른 단계에서 확인된다.</b>"
+  en: "<b>Using a name and having a body are checked at different stages.</b>"
+ok:
+  ko: >-
+    쓴 이름마다 몸통이 정확히 하나 있으면 붙습니다. 어느 파일에 있는지는 상관없어요 —
+    붙일 대상 안에 있기만 하면 됩니다.
+  en: >-
+    One body for each used name and it joins. Which file it is in does not matter, as long as it
+    is among the pieces being joined.
+misconceptions:
+  - ko: "번역이 통과하면 실행 파일이 나온다 — 붙이는 단계가 따로 남아 있습니다."
+    en: "Passing translation yields an executable — the joining stage is still ahead."
+  - ko: "선언을 적었으면 몸통도 있는 것이다 — 선언은 「이런 이름이 있다」이지 몸통이 아닙니다."
+    en: "A declaration means a body exists — it states a name, not a body."
+  - ko: "이 오류는 코드를 잘못 써서 난다 — 대개 <b>붙일 목록에 안 넣어서</b> 납니다."
+    en: "This error means bad code — usually a piece was left out of the joining list."
+meaning:
+  - q:
+      ko: "모든 파일이 번역은 통과했는데 마지막에 「그 이름의 몸통이 없다」가 나왔습니다. <b>어느 단계인가요?</b>"
+      en: "Every file translated, then “no body for that name” appeared at the end. <b>Which stage?</b>"
+    hint:
+      ko: "한 파일만 보고는 다른 파일에 몸통이 있는지 알 수 없습니다."
+      en: "One file alone cannot tell whether another file has the body."
+    options:
+      - t: { ko: "번역된 조각들을 이어 붙이는 단계", en: "The stage that joins the translated pieces" }
+      - t: { ko: "번역 단계 — 마지막 파일에서 늦게 걸렸다", en: "Translation — caught late, on the last file" }
+        diag:
+          t:
+            ko: "번역은 <b>파일마다 따로</b> 끝납니다. 전부 통과했다면 그 단계는 지난 거예요."
+            en: "Translation finishes <b>per file</b>. All passing means that stage is behind you."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 파일 단위냐 전체 단위냐", en: "The sharpest spot — per file or across files" }
+            code:
+              - "번역: 한 파일만 본다"
+              - "붙이기: 전부를 함께 본다"
+      - t: { ko: "실행 단계 — 그 함수를 부르는 순간 났다", en: "Run time — it fired when the function was called" }
+        diag:
+          t:
+            ko: "실행 단계까지 갔다면 <b>실행 파일이 나왔다</b>는 뜻입니다. 여기서는 실행 파일 자체가 안 나왔어요."
+            en: "Reaching run time means <b>an executable exists</b>. Here none was produced."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 만들어졌나 안 만들어졌나", en: "The sharpest spot — produced or not" }
+            code:
+              - "붙이기 오류: 실행 파일이 없다"
+              - "실행 오류: 돌다가 난다"
+      - t: { ko: "그 이름을 쓴 파일에서 오타를 낸 것이다", en: "A typo in the file that used the name" }
+        diag:
+          t:
+            ko: "오타도 같은 오류를 냅니다 — <b>가까운 자리</b>예요. 다만 몸통이 든 조각을 안 넣은 경우가 더 흔합니다."
+            en: "A typo raises the same error — <b>close</b>. More often, the piece holding the body was simply not included."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 이름이냐 목록이냐", en: "The sharpest spot — the name or the list" }
+            code:
+              - "오타: 이름이 안 맞는다"
+              - "목록: 몸통이 붙일 대상에 없다"

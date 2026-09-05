@@ -1,37 +1,41 @@
-/* 목업: design/src/ink/session.css 「③ 다른 사용처」 블록 — 그대로.
-   목업이 인라인으로 붙였던 `style="margin-top:10px"` 은 `.uses` 로 들어갔다. */
+/* 사다리 3단 — 내 리포의 같은 문법 다른 자리 (정본 §3-1 ③). */
 .uses {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 10px;
+  gap: var(--s-3);
+  margin-top: var(--s-3);
 }
 
 .use {
-  border: 2px solid var(--rule);
-  background: var(--paper-2);
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  overflow: hidden;
 }
 
 .use .src {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
-  gap: 10px;
-  padding: 5px 10px;
-  border-bottom: 1px dashed var(--rule);
-  color: var(--ink-soft);
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
+  gap: var(--s-2);
+  padding: var(--s-2) var(--s-3);
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
 }
 
 .use .src b {
-  color: var(--ink);
-  font-weight: 600;
+  color: var(--text);
+  font-weight: var(--fw-medium);
 }
 
+/* 사용처의 코드는 이미 상자 안이라 테두리를 한 겹 더 두르지 않는다. */
 .use .code {
   border: 0;
-  font-size: var(--fs-15);
-  line-height: 1.75;
+  border-radius: 0;
+  font-size: var(--fs-3);
 }
 
-.uses-none { margin-top: 10px }
+.uses-none { margin-top: var(--s-3) }

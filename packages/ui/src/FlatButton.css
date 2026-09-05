@@ -1,48 +1,56 @@
-/* 목업: design/src/ink/shared.css `.flat-btn` + session.css `.dunno`
-   바꾼 것 — `.dunno.on` 의 황 원색·먹 리터럴을 트랙 별칭 --t2 / --on-t2 로 (05 §4.2) */
+/* D182 — 종이·그림자·점선 테두리를 걷고 `Button` 의 `secondary`/`ghost` 와 같은 옷을 입힌다.
+   이 컴포넌트는 **`Button` 으로 옮기는 중**이라(호출처 27곳) 클래스명만 남았다. */
 .flat-btn {
   display: inline-flex;
-  gap: 8px;
+  gap: var(--s-2);
   align-items: center;
-  padding: 8px 13px;
-  border: 2px solid var(--rule);
-  background: var(--paper-2);
-  box-shadow: 0 3px 0 var(--edge);
-  color: var(--ink);
-  font-size: var(--fs-15);
-  font-weight: 600;
-  letter-spacing: -.015em;
+  min-height: 36px;
+  padding: 0 var(--s-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: var(--fs-3);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-tight);
   white-space: nowrap;
   cursor: pointer;
-  transition: transform .08s, box-shadow .08s, background .12s;
+  transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
 }
-.flat-btn:hover { background: var(--paper-3) }
+.flat-btn:hover:not([disabled]) { background: var(--surface-2) }
 
-.flat-btn:active {
-  transform: translateY(3px);
-  box-shadow: 0 0 0 var(--edge);
+.flat-btn[disabled] {
+  cursor: not-allowed;
+  opacity: .5;
 }
 
 .flat-btn.ghost {
-  border-style: dashed;
+  border-color: transparent;
   background: transparent;
-  box-shadow: none;
-  color: var(--ink-soft);
+  color: var(--text-muted);
 }
 
-.flat-btn.ghost:hover {
-  border-style: solid;
-  background: var(--paper-3);
-  color: var(--ink);
+.flat-btn.ghost:hover:not([disabled]) {
+  background: var(--surface-2);
+  color: var(--text);
 }
 
+/* 「모르겠어요」는 벌이 아니라 공정이다(정본 §3-1) — 경고색을 쓰지 않는다. */
 .dunno {
-  border-color: var(--rule);
-  background: var(--paper-3);
+  border-color: var(--border-strong);
+  background: var(--surface-2);
 }
 
 .dunno.on {
-  border-style: solid;
-  background: var(--t2);
-  color: var(--on-t2);
+  border-color: var(--accent);
+  background: var(--accent-weak);
+  color: var(--accent);
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .flat-btn { transition-duration: .001ms }
+}
+/* stylelint-disable-next-line no-descending-specificity -- 감축 모션은 규칙 순서가
+   아니라 뜻으로 마지막이어야 한다. 특정도를 올려 앞으로 옮기면 앞 규칙을 덮는다. */
+[data-motion="reduce"] .flat-btn { transition-duration: .001ms }

@@ -40,6 +40,19 @@
   },
   {
     "queryId": "ts/async-await",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "pick.3",
+    "form": "async-fn",
+    "startLine": 1,
+    "startCol": 25,
+    "endLine": 1,
+    "endCol": 38,
+    "nodeKind": "formal_parameters",
+    "inError": false
+  },
+  {
+    "queryId": "ts/async-await",
     "matchId": 2,
     "patternIndex": 0,
     "name": "site",
@@ -114,6 +127,19 @@
     "endLine": 6,
     "endCol": 34,
     "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "ts/async-await",
+    "matchId": 3,
+    "patternIndex": 2,
+    "name": "pick.3",
+    "form": "async-fn",
+    "startLine": 6,
+    "startCol": 34,
+    "endLine": 6,
+    "endCol": 50,
+    "nodeKind": "formal_parameters",
     "inError": false
   },
   {

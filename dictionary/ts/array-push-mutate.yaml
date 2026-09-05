@@ -3,12 +3,12 @@ id: ts/array-push-mutate
 universal: common/mutating-append
 name: { ko: "배열에 직접 밀어 넣기(push)", en: "Mutating append with push" }
 token: "push"
-grammars: [typescript, tsx, javascript]
+grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: false
 difficulty: 2
-prereq: [ts/array-basics, ts/call-expression]
-confusions: [ts/array-map-immutable, ts/array-filter]
+prereq: [ts/array-basics, ts/call-expression, cs/aliasing]
+confusions: [ts/array-map-immutable, ts/array-filter, ts/array-foreach]
 
 dict:
   one_liner:
@@ -167,12 +167,72 @@ meaning:
               - "[].push(1)            // 1"
               - "[].forEach(() => {})  // undefined"
 
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>이미 있는 배열</b>에 항목 하나를 덧붙입니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} appends one item to <b>an array that
+        already exists</b>.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "push", mono: true }
+      - t: "map"
+        mono: true
+        diag:
+          t:
+            ko: "<code>map</code> 은 <b>새 배열</b>을 만들어 돌려줍니다. 원래 배열은 그대로 남아요. 이 줄은 돌려받은 값을 아무 데도 안 쓰니 만든 배열이 그대로 버려집니다."
+            en: >-
+              <code>map</code> builds and hands back <b>a new array</b>; the original stays as it
+              was. This line uses nothing from what comes back, so that new array is simply thrown
+              away.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 원본이 길어지나"
+              en: "The sharpest spot — does the original grow"
+            code:
+              - "out.push(x)          // out 이 길어진다"
+              - "out.map((o) => x)    // out 은 그대로"
+      - t: "filter"
+        mono: true
+        diag:
+          t:
+            ko: "<code>filter</code> 는 조건을 통과한 것만 남긴 새 배열을 돌려줍니다. 항목을 <b>빼는</b> 쪽이라 덧붙이려는 이 줄과는 방향이 반대예요."
+            en: >-
+              <code>filter</code> hands back a new array of only what passes the condition. It
+              <b>removes</b> items, which is the opposite direction from this line.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 늘리나 줄이나"
+              en: "The sharpest spot — growing or shrinking"
+            code:
+              - "out.push(x)                // 하나 늘어난다"
+              - "out.filter((o) => o !== x) // 줄어들 수 있다"
+      - t: "forEach"
+        mono: true
+        diag:
+          t:
+            ko: "<code>forEach</code> 는 배열을 한 바퀴 도는 낱말입니다. 이 줄의 인자는 돌 때 부를 함수가 아니라 <b>넣을 값</b>이라, 값 하나를 함수 자리에 놓게 돼요."
+            en: >-
+              <code>forEach</code> is the word for going round an array once. The argument on this
+              line is not a function to call on each turn but <b>the value to put in</b>, so a plain
+              value would land where a function belongs.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 인자가 무엇인가"
+              en: "The sharpest spot — what the argument is"
+            code:
+              - "out.push(item)              // item 을 넣는다"
+              - "out.forEach((o) => send(o)) // 함수를 넘긴다"
+
+
 queries:
-  - { grammars: [typescript, tsx, javascript], file: ./array-push-mutate.scm }
+  - { grammars: [typescript, tsx, javascript, vue], file: ./array-push-mutate.scm }
 
 examples:
   - code: "out.push(item)"
-    expect: { sites: 1, form: push, picks: { 1: "out", 2: "push", 3: "item" } }
+    expect: { sites: 1, form: push, hole: "push", picks: { 1: "out", 2: "push", 3: "item" } }
   - code: "acc.push({ id, qty })"
     expect: { sites: 1, picks: { 1: "acc" } }
   - code: "const next = [...out, item]"

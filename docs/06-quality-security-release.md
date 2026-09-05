@@ -209,6 +209,7 @@ allowlist 항목은 **만료일 필수**(최대 90일). 「왜」: 만료 없는
 | 심볼릭 링크 | `ignore::WalkBuilder` `follow_links(false)` | `evil/link -> /etc`가 결과에 없음 |
 | 경로 탈출 | `canonicalize` 후 리포 루트 `starts_with` 실패 시 거부, IPC 경로 인자도 동일 | `../../etc/passwd` IPC 호출이 오류 |
 | git 훅 실행 | `git2`(libgit2)는 훅을 실행하지 않는다. **`git` 바이너리 호출 금지** — `Command::new("git")`는 `scripts/check-rust-budget.sh` 의 grep 이 CI 실패 | `.git/hooks/post-checkout`가 파일을 만들면 실패 |
+| 앱이 직접 받아 온 리포 (D129) | `repo_clone` 은 `https://` 만 받고(ssh·로컬 경로 없음) 받을 자리가 이미 있으면 거절한다. 받은 뒤에는 폴더를 고른 리포와 **똑같이** 신뢰하지 않는 입력이다 — 위 다섯 줄이 그대로 적용된다. 훅은 libgit2 라 돌지 않는다 | 위 다섯 줄의 테스트가 받아 온 리포에도 그대로 돈다 |
 
 ### 4.2 악성 문법 사전(YAML)
 

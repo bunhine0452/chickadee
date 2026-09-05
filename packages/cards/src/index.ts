@@ -1,14 +1,31 @@
 export { contentHash, fnv1a64 } from './hash.js';
-export { codeLines, promptLines, LINES_WINDOW, PROMPT_WINDOW } from './lines.js';
+export {
+  codeLines, inWindow, promptLines, windowOf,
+  LINES_WINDOW, PROMPT_WINDOW, WINDOW_MAX_LINES,
+} from './lines.js';
 export type { Span } from './lines.js';
 export { GEN_VERSION } from './payload.js';
 export { generateKind, generateT0, prefer } from './t0.js';
 export { genBlank } from './t0-blank.js';
-export { genMeaning } from './t0-meaning.js';
+export { genMeaning, isValueComputed } from './t0-meaning.js';
 export { genPoint } from './t0-point.js';
+export {
+  ABSENCE_MESSAGE_KEY, absenceReason, isSynthetic, makeAbsentCard, makeSyntheticCard,
+  SYNTHETIC_SITE_ID,
+} from './t0-synthetic.js';
+export type { AbsenceReason, AbsentRequest, SyntheticRequest } from './t0-synthetic.js';
+export { buildFirstRun, makeExecCard, renderFirstRun, EXEC_SITE_ID } from './t0-exec.js';
+export { makeProtoCard, PROTO_SITE_ID } from './t0-proto.js';
+export type { ProtoRequest } from './t0-proto.js';
+export type { ExecPick, ExecQuestion, ExecRequest, WrongBecause } from './t0-exec.js';
+export {
+  DIALECTS, blockOf, dialectOf, execFacts, functionsIn, lineIndex, statementsOf, terminatorAt,
+} from './exec-facts.js';
+export type { Dialect, ExecFacts } from './exec-facts.js';
 export { isFailure, isNoPlate } from './types.js';
 export type {
-  FocusLine, GenResult, NoPlate, OtherUse, SiteInput, T0Card, T0Kind, T0Payload, T0Request,
+  FocusLine, GenResult, LineWindow, NoPlate, OtherUse, SiteInput,
+  T0Card, T0Kind, T0Payload, T0Request,
 } from './types.js';
 export { baseName } from './vars.js';
 export { generateT1, genericWhyHelp, genericWhyQ } from './t1.js';
@@ -46,3 +63,55 @@ export type {
   AnswerKey, Band, CommitFileRow, CommitRow, Graph, GraphEdge, GraphFile,
   T2Card, T2Kind, T2Payload, T2Request,
 } from './t2-types.js';
+
+// 코스 문항 16유형 (D164)
+export { buildCourseCards, buildStageCards, conceptsOnPath, TYPES_OF_STAGE } from './stage.js';
+export {
+  buildContracts, buildCuts, buildOrigins, buildReorders, buildTwins, findGuards, swapPairs,
+  MAX_CONTRACT, MAX_CUT, MAX_ORIGIN, MAX_REORDER, MAX_TWIN,
+} from './stage-choice.js';
+export { buildCallers, buildExecs, buildHops, layerOf, splitHops, MAX_CALLER, MAX_EXEC, MAX_HOP } from './stage-trace.js';
+export {
+  buildReimpls, buildRepairs, fixSubject, linksBetween, signatureOf, MAX_PER_TYPE, MAX_REIMPL_LINES,
+  MIN_REIMPL_LINES,
+} from './stage-edit.js';
+export { finishStage, hopOrder, identsOf, nodeId, stageSeed, STAGE_CONCEPTS } from './stage-common.js';
+export { KIND_OF, STAGE_OF } from './stage-types.js';
+export type {
+  Hunk, HunkLine, JudgeTest, NameUse, ResponseKey, StageBlock, StageCard, StageCommit, StageDrop, StageEdge,
+  StageFile, StageRequest, StageResult, StageSite, StageTestFile, StageType,
+} from './stage-types.js';
+// 판정용 테스트 (D180)
+export {
+  commitTests, contractTest, isTestPath, javaFqn, judgeTests, namedTests, parseJavaSignature, simpleName,
+  springTests, JUDGE_PACKAGE,
+} from './stage-tests.js';
+export type { JudgeTestInput, MethodContract } from './stage-tests.js';
+
+// 형식 둘 — `order`(Parsons) · `trace-table`(시간 × 열 격자) (D187 ⑱)
+export { buildLadderOrders, buildOrders, hopPieces, shuffleDeck, MAX_ORDER, ORDER_MAX, ORDER_MIN } from './order.js';
+export {
+  boundName, buildLadderTrace, buildTraces, pickRows, scanNames,
+  BOX_LABELS, MAX_TRACE, MAX_TRACE_COLS, MAX_TRACE_ROWS,
+} from './trace-table.js';
+
+// 기초 문항 — 고르지 않고 적는다 (`docs/program/fundamentals.md`)
+export {
+  buildAllValueItems, buildValueItems, fundCensus, fundConceptId, planFundRetry, valueNoteKey,
+  valueText, verifiedNoteKey,
+  ERRORS, EVENTS, event, FUND_AXES, FUND_DIALECTS, FUND_LANGS, FUND_NOTE_KEY, FUND_SITE_ID,
+} from './fundamentals.js';
+export type {
+  DeclKind, FoldStep, FundAlt, FundAxis, FundCensus, FundCensusLang, FundDiagnosis, FundDialect,
+  FundDrop, FundItem, FundLang, FundRetry, FundType, FundValue, OverflowRule,
+} from './fundamentals.js';
+export { CATALOG as FUND_CATALOG } from './fundamentals-catalog.js';
+export type { ExprSpec as FundExprSpec } from './fundamentals-catalog.js';
+
+// 작은 문제 층 — 0부 끝과 1부 시작 사이 (D186 ⑧)
+export { coverOf, drillsAfterPart0, toDrillItem } from './drill.js';
+export type { DrillItem, DrillPlaceInput, DrillPlacement } from './drill.js';
+
+// 형식 다섯째 — `build`, 「이 값이 나오게 식을 써라」 (D187 ①)
+export { BUILD_LANGS, buildBuildItems, buildConcepts, toBuildItem, wantText } from './build.js';
+export type { BuildItem, BuildLang, BuildTask } from './build.js';

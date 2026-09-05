@@ -15,24 +15,27 @@ exceptions.
 
 ## Bundled fonts
 
-Three font families are bundled in the application binary (`apps/desktop/src/assets/fonts/`).
-They are not subsetted and they are not fetched over the network at runtime.
+Two font families are bundled in the application binary (`apps/desktop/src/assets/fonts/`),
+8 files and 1.80 MB uncompressed. They are not subsetted and they are not fetched over the
+network at runtime.
 
 | Font | Weights | Copyright | License | Full text |
 |---|---|---|---|---|
 | IBM Plex Sans KR | 400 · 500 · 600 · 700 | © 2017 IBM Corp., Reserved Font Name "Plex" | SIL OFL 1.1 | `apps/desktop/src/assets/fonts/OFL-Plex.txt` |
 | IBM Plex Mono | 400 · 500 · 600 · 700 | © 2017 IBM Corp., Reserved Font Name "Plex" | SIL OFL 1.1 | `apps/desktop/src/assets/fonts/OFL-Plex.txt` |
-| Black Han Sans | 400 | © 2015 The Black Han Sans Project Authors (https://github.com/zesstype/Black-Han-Sans) | SIL OFL 1.1 | `apps/desktop/src/assets/fonts/OFL-BlackHanSans.txt` |
+
+Black Han Sans was removed in 2026-09 along with the display type role that used it. Its
+files and its copy of the OFL are gone from the tree.
 
 The OFL obligations this project is under:
 
-- The license text ships with the fonts. Both files above are in the repository and in the
-  application bundle.
+- The license text ships with the fonts. `OFL-Plex.txt` is in the repository and in the
+  application bundle, and it covers both families.
 - The fonts are not sold on their own. They are bundled inside a larger work.
-- Neither font is modified, so no Reserved Font Name has to change. Black Han Sans was
-  converted from TTF to WOFF2 without dropping a glyph or touching the `name` table;
-  `apps/desktop/src/assets/fonts/README.md` records the command and the glyph count.
-- The exact download URLs for re-fetching every file are in that same README.
+- Neither family is modified — no glyph is dropped and the `name` table is untouched — so no
+  Reserved Font Name has to change.
+- The exact download URLs for re-fetching every file are in
+  `apps/desktop/src/assets/fonts/README.md`.
 
 ## npm packages
 
@@ -58,7 +61,7 @@ The OFL obligations this project is under:
 
 ## Rust crates
 
-595 crates reachable from the workspace members without a dev-only edge, across all
+600 crates reachable from the workspace members without a dev-only edge, across all
 three release platforms. Licenses in use: (MIT OR Apache-2.0) AND Unicode-3.0 · 0BSD OR MIT OR Apache-2.0 · Apache-2.0 · Apache-2.0 AND MIT · Apache-2.0 OR BSL-1.0 · Apache-2.0 OR MIT · Apache-2.0 WITH LLVM-exception · Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT · BSD-2-Clause OR Apache-2.0 OR MIT · BSD-3-Clause · BSD-3-Clause AND MIT · BSD-3-Clause OR Apache-2.0 · BSD-3-Clause OR MIT · BSD-3-Clause OR MIT OR Apache-2.0 · BSL-1.0 · CC0-1.0 OR MIT-0 OR Apache-2.0 · ISC · MIT · MIT OR Apache-2.0 · MIT OR Apache-2.0 OR LGPL-2.1-or-later · MIT OR Apache-2.0 OR Zlib · MIT OR Zlib OR Apache-2.0 · MPL-2.0 · Unicode-3.0 · Unlicense OR MIT · Zlib · Zlib OR Apache-2.0 OR MIT.
 
 | Package | Version | License |
@@ -348,6 +351,8 @@ three release platforms. Licenses in use: (MIT OR Apache-2.0) AND Unicode-3.0 ·
 | objc2-web-kit | 0.3.2 | Zlib OR Apache-2.0 OR MIT |
 | once_cell | 1.21.4 | MIT OR Apache-2.0 |
 | open | 5.4.3 | MIT |
+| openssl-probe | 0.1.6 | MIT OR Apache-2.0 |
+| openssl-sys | 0.9.117 | MIT |
 | option-ext | 0.2.0 | MPL-2.0 |
 | ordered-stream | 0.2.0 | MIT OR Apache-2.0 |
 | os_pipe | 1.2.3 | MIT |
@@ -512,13 +517,16 @@ three release platforms. Licenses in use: (MIT OR Apache-2.0) AND Unicode-3.0 ·
 | tracing-core | 0.1.36 | MIT |
 | tray-icon | 0.24.2 | MIT OR Apache-2.0 |
 | tree-sitter | 0.25.10 | MIT |
+| tree-sitter-css | 0.23.2 | MIT |
 | tree-sitter-go | 0.23.4 | MIT |
+| tree-sitter-java | 0.23.5 | MIT |
 | tree-sitter-javascript | 0.25.0 | MIT |
 | tree-sitter-language | 0.1.8 | MIT |
 | tree-sitter-python | 0.23.6 | MIT |
 | tree-sitter-rust | 0.23.3 | MIT |
 | tree-sitter-sequel | 0.3.11 | MIT |
 | tree-sitter-typescript | 0.23.2 | MIT |
+| tree-sitter-xml | 0.7.0 | MIT |
 | tree_magic_mini | 3.2.2 | MIT |
 | try-lock | 0.2.5 | MIT |
 | typeid | 1.0.3 | MIT OR Apache-2.0 |

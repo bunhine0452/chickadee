@@ -1621,6 +1621,482 @@
         "bonus": 0,
         "capped": false
       }
+    },
+    {
+      "id": "entry-doors",
+      "rule": "04 §8.5 — 문 둘을 고르고 문처럼 생긴 곳을 덤으로 → pct 100 · advance · 채점 코드 0줄",
+      "payload": {
+        "track": "t2",
+        "kind": "entry",
+        "q": "이 리포에서 밖에서 처음 들어오는 문은 어느 폴더인가요?",
+        "hint": "지도에서 골라 보세요. 여럿일 수 있습니다.",
+        "bands": [
+          {
+            "l": "화면",
+            "s": "app · cli"
+          },
+          {
+            "l": "기능",
+            "s": "features/"
+          },
+          {
+            "l": "동작 · 통신",
+            "s": "core/"
+          },
+          {
+            "l": "공용 · 데이터",
+            "s": "gen · lib"
+          }
+        ],
+        "files": [
+          {
+            "p": "src/app/",
+            "r": 0,
+            "folded": 4
+          },
+          {
+            "p": "src/cli/",
+            "r": 0,
+            "folded": 2
+          },
+          {
+            "p": "src/features/cart/",
+            "r": 1,
+            "folded": 5
+          },
+          {
+            "p": "src/core/",
+            "r": 2,
+            "folded": 3
+          },
+          {
+            "p": "src/gen/",
+            "r": 3,
+            "folded": 30
+          },
+          {
+            "p": "src/lib/",
+            "r": 3,
+            "folded": 6
+          }
+        ],
+        "edges": [
+          [
+            "src/app/",
+            "src/features/cart/",
+            "static"
+          ],
+          [
+            "src/app/",
+            "src/lib/",
+            "static"
+          ],
+          [
+            "src/cli/",
+            "src/core/",
+            "static"
+          ],
+          [
+            "src/features/cart/",
+            "src/core/",
+            "static"
+          ],
+          [
+            "src/features/cart/",
+            "src/lib/",
+            "static"
+          ],
+          [
+            "src/core/",
+            "src/lib/",
+            "static"
+          ],
+          [
+            "src/core/",
+            "src/gen/",
+            "type"
+          ]
+        ],
+        "core": {
+          "src/app/": [
+            "문",
+            "«page.tsx» — 밖에서 부르는 파일이 여기 있고 들어오는 화살표가 없습니다."
+          ],
+          "src/cli/": [
+            "문",
+            "들어오는 화살표가 없고 1곳을 가져다 씁니다."
+          ]
+        },
+        "sec": {
+          "src/features/cart/": [
+            "문처럼 생긴 곳",
+            "문 이름은 «index.ts» 인데 리포 안에서 1곳이 이 폴더를 가져다 씁니다."
+          ]
+        },
+        "trap": {
+          "src/core/": "2곳이 이 폴더를 가져다 씁니다. 많이 쓰이는 것과 처음 들어오는 것은 다릅니다.",
+          "src/gen/": "1곳이 이 폴더를 가져다 씁니다. 많이 쓰이는 것과 처음 들어오는 것은 다릅니다.",
+          "src/lib/": "3곳이 이 폴더를 가져다 씁니다. 많이 쓰이는 것과 처음 들어오는 것은 다릅니다."
+        },
+        "hints": [
+          "문은 2곳입니다.",
+          "들어오는 화살표가 없는 폴더를 찾으세요. 많이 쓰이는 폴더는 문이 아닙니다.",
+          "가장 많이 쓰이는 곳은 «src/lib/» 입니다 — 그건 창고입니다."
+        ]
+      },
+      "answer": {
+        "kind": "entry",
+        "selected": [
+          "src/app/",
+          "src/cli/",
+          "src/features/cart/"
+        ]
+      },
+      "hints": 0,
+      "requires": {
+        "pct": 100,
+        "verdict": "advance",
+        "found": 2,
+        "missed": 0,
+        "wrong": 0,
+        "bonus": 1,
+        "capped": false
+      }
+    },
+    {
+      "id": "entry-hub",
+      "rule": "04 §8.5 — 가장 많이 쓰이는 창고를 고르면 pct 0 · repeat (trap 사유가 접힘 사유를 이긴다)",
+      "payload": {
+        "track": "t2",
+        "kind": "entry",
+        "q": "이 리포에서 밖에서 처음 들어오는 문은 어느 폴더인가요?",
+        "hint": "지도에서 골라 보세요. 여럿일 수 있습니다.",
+        "bands": [
+          {
+            "l": "화면",
+            "s": "app · cli"
+          },
+          {
+            "l": "기능",
+            "s": "features/"
+          },
+          {
+            "l": "동작 · 통신",
+            "s": "core/"
+          },
+          {
+            "l": "공용 · 데이터",
+            "s": "gen · lib"
+          }
+        ],
+        "files": [
+          {
+            "p": "src/app/",
+            "r": 0,
+            "folded": 4
+          },
+          {
+            "p": "src/cli/",
+            "r": 0,
+            "folded": 2
+          },
+          {
+            "p": "src/features/cart/",
+            "r": 1,
+            "folded": 5
+          },
+          {
+            "p": "src/core/",
+            "r": 2,
+            "folded": 3
+          },
+          {
+            "p": "src/gen/",
+            "r": 3,
+            "folded": 30
+          },
+          {
+            "p": "src/lib/",
+            "r": 3,
+            "folded": 6
+          }
+        ],
+        "edges": [
+          [
+            "src/app/",
+            "src/features/cart/",
+            "static"
+          ],
+          [
+            "src/app/",
+            "src/lib/",
+            "static"
+          ],
+          [
+            "src/cli/",
+            "src/core/",
+            "static"
+          ],
+          [
+            "src/features/cart/",
+            "src/core/",
+            "static"
+          ],
+          [
+            "src/features/cart/",
+            "src/lib/",
+            "static"
+          ],
+          [
+            "src/core/",
+            "src/lib/",
+            "static"
+          ],
+          [
+            "src/core/",
+            "src/gen/",
+            "type"
+          ]
+        ],
+        "core": {
+          "src/app/": [
+            "문",
+            "«page.tsx» — 밖에서 부르는 파일이 여기 있고 들어오는 화살표가 없습니다."
+          ],
+          "src/cli/": [
+            "문",
+            "들어오는 화살표가 없고 1곳을 가져다 씁니다."
+          ]
+        },
+        "sec": {
+          "src/features/cart/": [
+            "문처럼 생긴 곳",
+            "문 이름은 «index.ts» 인데 리포 안에서 1곳이 이 폴더를 가져다 씁니다."
+          ]
+        },
+        "trap": {
+          "src/core/": "2곳이 이 폴더를 가져다 씁니다. 많이 쓰이는 것과 처음 들어오는 것은 다릅니다.",
+          "src/gen/": "1곳이 이 폴더를 가져다 씁니다. 많이 쓰이는 것과 처음 들어오는 것은 다릅니다.",
+          "src/lib/": "3곳이 이 폴더를 가져다 씁니다. 많이 쓰이는 것과 처음 들어오는 것은 다릅니다."
+        },
+        "hints": [
+          "문은 2곳입니다.",
+          "들어오는 화살표가 없는 폴더를 찾으세요. 많이 쓰이는 폴더는 문이 아닙니다.",
+          "가장 많이 쓰이는 곳은 «src/lib/» 입니다 — 그건 창고입니다."
+        ]
+      },
+      "answer": {
+        "kind": "entry",
+        "selected": [
+          "src/lib/"
+        ]
+      },
+      "hints": 1,
+      "requires": {
+        "pct": 0,
+        "verdict": "repeat",
+        "found": 0,
+        "missed": 2,
+        "wrong": 1,
+        "bonus": 0,
+        "capped": false
+      }
+    },
+    {
+      "id": "role-right",
+      "rule": "04 §8.5 — 4지 한 문항을 맞히면 pct 100 · advance",
+      "payload": {
+        "track": "t2",
+        "kind": "role",
+        "q": "«src/core/» 폴더는 왜 있나요?",
+        "hint": "지도에는 이 폴더가 빠져 있습니다. 네 층 중 어디에 놓을지 고르세요.",
+        "bands": [
+          {
+            "l": "화면",
+            "s": "app · cli"
+          },
+          {
+            "l": "기능",
+            "s": "features/"
+          },
+          {
+            "l": "동작 · 통신",
+            "s": "core/"
+          },
+          {
+            "l": "공용 · 데이터",
+            "s": "gen · lib"
+          }
+        ],
+        "files": [
+          {
+            "p": "src/app/",
+            "r": 0,
+            "folded": 4
+          },
+          {
+            "p": "src/cli/",
+            "r": 0,
+            "folded": 2
+          },
+          {
+            "p": "src/features/cart/",
+            "r": 1,
+            "folded": 5
+          },
+          {
+            "p": "src/gen/",
+            "r": 3,
+            "folded": 30
+          },
+          {
+            "p": "src/lib/",
+            "r": 3,
+            "folded": 6
+          }
+        ],
+        "edges": [
+          [
+            "src/app/",
+            "src/features/cart/",
+            "static"
+          ],
+          [
+            "src/app/",
+            "src/lib/",
+            "static"
+          ],
+          [
+            "src/features/cart/",
+            "src/lib/",
+            "static"
+          ]
+        ],
+        "core": {},
+        "sec": {},
+        "trap": {},
+        "hints": [
+          "2개 폴더가 이 폴더를 가져다 쓰고, 이 폴더는 2개를 가져다 씁니다.",
+          "가져다 쓰는 쪽이 위층입니다. 들어오는 화살표만 있으면 맨 아래입니다.",
+          "파일 3개가 들어 있습니다."
+        ],
+        "role": {
+          "folder": "src/core/",
+          "answer": 2
+        }
+      },
+      "answer": {
+        "kind": "role",
+        "pick": 2
+      },
+      "hints": 0,
+      "requires": {
+        "pct": 100,
+        "verdict": "advance",
+        "found": 1,
+        "missed": 0,
+        "wrong": 0,
+        "bonus": 0,
+        "capped": false
+      }
+    },
+    {
+      "id": "role-wrong",
+      "rule": "04 §8.5 — 틀리면 pct 0 · repeat 이고 4지선다라 wrong 도 상한도 없다",
+      "payload": {
+        "track": "t2",
+        "kind": "role",
+        "q": "«src/core/» 폴더는 왜 있나요?",
+        "hint": "지도에는 이 폴더가 빠져 있습니다. 네 층 중 어디에 놓을지 고르세요.",
+        "bands": [
+          {
+            "l": "화면",
+            "s": "app · cli"
+          },
+          {
+            "l": "기능",
+            "s": "features/"
+          },
+          {
+            "l": "동작 · 통신",
+            "s": "core/"
+          },
+          {
+            "l": "공용 · 데이터",
+            "s": "gen · lib"
+          }
+        ],
+        "files": [
+          {
+            "p": "src/app/",
+            "r": 0,
+            "folded": 4
+          },
+          {
+            "p": "src/cli/",
+            "r": 0,
+            "folded": 2
+          },
+          {
+            "p": "src/features/cart/",
+            "r": 1,
+            "folded": 5
+          },
+          {
+            "p": "src/gen/",
+            "r": 3,
+            "folded": 30
+          },
+          {
+            "p": "src/lib/",
+            "r": 3,
+            "folded": 6
+          }
+        ],
+        "edges": [
+          [
+            "src/app/",
+            "src/features/cart/",
+            "static"
+          ],
+          [
+            "src/app/",
+            "src/lib/",
+            "static"
+          ],
+          [
+            "src/features/cart/",
+            "src/lib/",
+            "static"
+          ]
+        ],
+        "core": {},
+        "sec": {},
+        "trap": {},
+        "hints": [
+          "2개 폴더가 이 폴더를 가져다 쓰고, 이 폴더는 2개를 가져다 씁니다.",
+          "가져다 쓰는 쪽이 위층입니다. 들어오는 화살표만 있으면 맨 아래입니다.",
+          "파일 3개가 들어 있습니다."
+        ],
+        "role": {
+          "folder": "src/core/",
+          "answer": 2
+        }
+      },
+      "answer": {
+        "kind": "role",
+        "pick": 0
+      },
+      "hints": 2,
+      "requires": {
+        "pct": 0,
+        "verdict": "repeat",
+        "found": 0,
+        "missed": 1,
+        "wrong": 0,
+        "bonus": 0,
+        "capped": false
+      }
     }
   ]
 }

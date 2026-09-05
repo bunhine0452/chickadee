@@ -1,0 +1,93 @@
+[
+  {
+    "queryId": "sql/self-join",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "self-join",
+    "startLine": 2,
+    "startCol": 2,
+    "endLine": 3,
+    "endCol": 39,
+    "nodeKind": "from",
+    "inError": false
+  },
+  {
+    "queryId": "sql/self-join",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "self-join",
+    "startLine": 2,
+    "startCol": 7,
+    "endLine": 2,
+    "endCol": 12,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "sql/self-join",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "self-join",
+    "startLine": 2,
+    "startCol": 13,
+    "endLine": 2,
+    "endCol": 14,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "sql/self-join",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "self-join",
+    "startLine": 3,
+    "startCol": 7,
+    "endLine": 3,
+    "endCol": 11,
+    "nodeKind": "keyword_join",
+    "inError": false
+  },
+  {
+    "queryId": "sql/self-join",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "hole",
+    "form": "self-join",
+    "startLine": 3,
+    "startCol": 7,
+    "endLine": 3,
+    "endCol": 11,
+    "nodeKind": "keyword_join",
+    "inError": false
+  },
+  {
+    "queryId": "sql/self-join",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "ctx.other",
+    "form": "self-join",
+    "startLine": 3,
+    "startCol": 12,
+    "endLine": 3,
+    "endCol": 17,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "sql/self-join",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.4",
+    "form": "self-join",
+    "startLine": 3,
+    "startCol": 18,
+    "endLine": 3,
+    "endCol": 19,
+    "nodeKind": "identifier",
+    "inError": false
+  }
+]

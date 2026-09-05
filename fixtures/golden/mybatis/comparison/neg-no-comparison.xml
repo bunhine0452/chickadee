@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mapper namespace="shop.CartMapper">
+  <select id="findAll" resultType="Cart">
+    SELECT id, status FROM cart ORDER BY id
+  </select>
+</mapper>

@@ -1,62 +1,82 @@
-/* 첫 실행 화면. 목업이 없는 신규 화면이라(05 §2.1) 마스트헤드·패널의 조판을 그대로 빌린다 —
-   새 색도 새 치수도 만들지 않는다. 클래스는 이 화면 전용으로 이름을 따로 준다(전역 충돌 방지). */
+/* 첫 실행. 한 단이고, 넓어져도 본문 폭은 --measure 를 넘지 않는다. */
 .firstrun {
-  display: grid;
-  place-content: center;
-  min-height: 100vh;
-  padding: 22px 24px 48px;
+  min-height: 100%;
+  background: var(--bg);
+  display: flex;
+  justify-content: center;
+  padding: var(--s-7) var(--s-5) var(--s-8);
 }
 
 .firstrun-in {
+  width: 100%;
+  max-width: 42rem;
   display: grid;
-  justify-items: center;
-  gap: 14px;
-  max-width: 560px;
-  padding: 40px 36px 34px;
-  border: 2.5px solid var(--rule);
-  background: var(--paper);
-  box-shadow: 6px 7px 0 var(--edge), var(--lamp);
-  text-align: center;
-}
-
-.firstrun-in:focus-visible {
-  outline: 3px solid var(--t0);
-  outline-offset: 3px;
-}
-
-.firstrun-logo {
-  display: block;
-  width: 96px;
-  height: 96px;
+  gap: var(--s-4);
+  align-content: start;
 }
 
 .firstrun-title {
-  color: var(--ink);
-  font-family: var(--f-poster);
-  font-size: var(--fs-poster);
-  letter-spacing: .005em;
-  line-height: .94;
+  margin: 0;
+  font-size: var(--fs-6);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: -0.015em;
+  color: var(--text);
 }
 
 .firstrun-note {
+  margin: 0;
   max-width: var(--measure);
-  color: var(--ink-soft);
-  font-size: var(--fs-16);
+  font-size: var(--fs-5);
   line-height: var(--lh-body);
-  text-align: left;
+  color: var(--text);
 }
 
-.firstrun .press-btn { width: auto }
+.firstrun-scope {
+  margin: 0;
+  max-width: var(--measure);
+  font-size: var(--fs-4);
+  line-height: var(--lh-body);
+  color: var(--text-muted);
+}
 
-/* 0단계 언어 고르기 (D117). 설정 화면의 `.set-row` 와 같은 리듬을 쓴다 — 첫 실행에서 본
-   배치가 설정에서 또 나오면 같은 자리를 두 번 배우지 않는다. */
-.firstrun-lang {
+.firstrun-asks {
+  display: grid;
+  gap: var(--s-3);
+  padding: var(--s-4) 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.firstrun-ask {
   display: flex;
   align-items: center;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: var(--s-2) var(--s-4);
 }
 
-.firstrun-lang-k {
-  color: var(--ink-soft);
-  font-size: var(--fs-14);
+.firstrun-ask-k {
+  flex: 1 1 14rem;
+  min-width: 0;
+  font-size: var(--fs-4);
+  color: var(--text);
+}
+
+.firstrun-hint {
+  margin: 0;
+  max-width: var(--measure);
+  font-size: var(--fs-2);
+  line-height: var(--lh-body);
+  color: var(--text-muted);
+}
+
+.firstrun-go {
+  display: grid;
+  gap: var(--s-4);
+  justify-items: start;
+}
+
+@media (width <= 760px) {
+  .firstrun { padding: var(--s-5) var(--s-3) var(--s-7) }
+  .firstrun-title { font-size: var(--fs-5) }
 }

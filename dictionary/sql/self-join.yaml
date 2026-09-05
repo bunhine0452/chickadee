@@ -1,0 +1,246 @@
+schema: 1
+id: sql/self-join
+universal: null
+name: { ko: 같은 표를 두 번 적기, en: Self join }
+token: "JOIN"
+grammars: [sql, mybatis_sql]
+framework: null
+essential: false
+difficulty: 3
+prereq: [sql/from-table, sql/comparison]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "한 표 안에서 행끼리 짝지을 때, 그 표를 두 번 적고 별명을 둘 둔다."
+    en: "To pair rows within one table, the table is named twice under two nicknames."
+  why:
+    ko: >-
+      같은 표의 행 둘을 견주려면 그 표를 <b>두 번</b> 적어야 합니다 — 한 번만 적으면 각 행은
+      자기 자신하고만 견줘져요. {{site.line}}행이 {{pick.2|code}} 표를 두 번 대고
+      {{pick.3|code}} · {{pick.4|code}} 라는 별명을 붙인 이유가 그것입니다. 그 둘은 같은 표를
+      가리키지만 <b>서로 다른 행</b>을 가리키고, 짝을 맞추는 조건이 어느 행끼리 만날지를 정합니다.
+      연구가 잰 것 중 가장 어려운 자리이고, 학습자 열에 하나는 표를 한 번만 적습니다.
+    en: >-
+      Pairing two rows of the same table means naming that table <b>twice</b> — named once, each row
+      only ever meets itself. That is why line {{site.line}} names {{pick.2|code}} twice, under the
+      nicknames {{pick.3|code}} and {{pick.4|code}}. The two point at the same table but at
+      <b>different rows</b>, and the matching condition decides which rows meet. This is the hardest
+      spot the research measures, and about one learner in seven names the table only once.
+  trace:
+    - ko: "{{pick.3|code}} 라는 이름으로 {{pick.2|code}} 표를 한 번 연다."
+      en: "{{pick.2|code}} is opened once as {{pick.3|code}}."
+    - ko: "같은 표를 {{pick.4|code}} 라는 이름으로 또 한 번 연다."
+      en: "The same table is opened again as {{pick.4|code}}."
+    - ko: "짝이 맞는 행끼리만 한 줄로 붙는다."
+      en: "Only rows that match are put together on one line."
+
+rule:
+  ko: "<b>같은 표 안의 짝은 그 표를 두 번 적어야 생긴다.</b> 별명 둘이 서로 다른 행을 가리킨다."
+  en: "<b>A pair inside one table needs that table named twice.</b> Two nicknames point at two different rows."
+result:
+  label:
+    ko: "짝지어지는 두 자리"
+    en: "the two sides being paired"
+  value: "{{pick.3}} · {{pick.4}}"
+  note:
+    ko: "같은 표, 다른 행"
+    en: "same table, different rows"
+ok:
+  ko: >-
+    {{pick.2|code}} 의 행이 짝이 맞는 것끼리 한 줄로 붙습니다. 별명이 없으면 어느 쪽 열인지 적을 수가 없어요.
+  en: >-
+    Rows of {{pick.2|code}} that match are put on one line together. Without the nicknames there is no way to say which side a column came from.
+payoff:
+  ko: >-
+    이걸 알면 「윗사람과 아랫사람을 한 줄에 어떻게 놓지」 같은 물음이 풀립니다 — 같은 표를 두 번 여는 거예요.
+  en: >-
+    This unlocks questions like “how do I get a person and their manager on one line” — the table is opened twice.
+bridge:
+  ko: >-
+    다른 언어라면 같은 목록을 두 번 도는 이중 반복문입니다. 여기서는 <b>표 이름을 두 번 적는 것</b>이 그 일을 해요.
+  en: >-
+    In another language this is a nested loop over one list. Here <b>naming the table twice</b> does that work.
+misconceptions:
+  - ko: "같은 표 안의 짝은 표를 한 번만 적어도 찾을 수 있다 — 그러면 각 행이 자기 자신하고만 견줘집니다."
+    en: "A pair inside one table can be found with the table named once — then each row only meets itself."
+  - ko: "별명은 짧게 쓰려고 붙인다 — 여기서는 <b>어느 쪽 행인지</b>를 가르는 유일한 수단입니다."
+    en: "Nicknames are for brevity — here they are the only way to tell <b>which side's row</b> is meant."
+  - ko: "짝 맞추는 조건을 안 적어도 데이터베이스가 알아서 잇는다 — 안 적으면 <b>모든 조합</b>이 나옵니다."
+    en: "The database joins on its own without a matching condition — without one, <b>every pair</b> comes back."
+
+meaning:
+  - q:
+      ko: "같은 표를 <b>한 번만</b> 적고 두 행을 견주면 어떻게 될까요?"
+      en: "What if the table is named <b>once</b> and two rows are weighed?"
+    hint:
+      ko: "한 번 적으면 그 문장 안에 <b>행 하나</b>만 있습니다."
+      en: "Named once, there is only <b>one row</b> in play at a time."
+    options:
+      - t:
+          ko: "각 행이 자기 자신하고만 견줘진다"
+          en: "Each row is only ever weighed against itself"
+      - t:
+          ko: "데이터베이스가 알아서 다른 행을 가져온다"
+          en: "The database fetches the other row on its own"
+        diag:
+          t:
+            ko: >-
+              가져오지 않습니다. 다른 행을 보려면 그 표를 <b>또 한 번</b> 대야 해요.
+            en: >-
+              It fetches nothing. Seeing another row means naming that table <b>a second time</b>.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 한 번이냐 두 번이냐", en: "The sharpest spot — once or twice" }
+            code:
+              - "FROM staff s"
+              - "FROM staff s JOIN staff m"
+      - t:
+          ko: "앞뒤 행을 자동으로 이어 준다"
+          en: "Neighbouring rows are linked automatically"
+        diag:
+          t:
+            ko: >-
+              「앞뒤」라는 것이 없습니다 — 행의 모음에는 순서가 없어요.
+            en: >-
+              There is no “neighbouring” — a bag of rows has no order.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 순서가 있냐 없냐", en: "The sharpest spot — ordered or not" }
+            code:
+              - "-- 앞 행·뒤 행은 없다"
+              - "-- 짝은 조건이 만든다"
+      - t:
+          ko: "문법 오류로 멈춘다"
+          en: "It stops with a syntax error"
+        diag:
+          t:
+            ko: "문법은 <b>맞습니다</b>. 결과가 조용히 다를 뿐이에요 — 그래서 알아채기 어렵습니다."
+            en: "The syntax is <b>fine</b>. Only the result quietly differs — which is what makes it hard to catch."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 막히느냐 조용하냐", en: "The sharpest spot — blocked or silent" }
+            code:
+              - "-- 오류 없음"
+              - "-- 짝이 안 생길 뿐"
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>같은 표를 한 번 더 붙이는</b> 낱말을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that adds the same table again</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>표 이름</b>입니다. 이 줄에 두 번 나오는 것이 요점이에요."
+          en: "{{pick.2|code}} is <b>the table's name</b>. The point is that it appears twice on this line."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 표 이름이냐 붙이는 낱말이냐", en: "The sharpest spot — the table name or the adding word" }
+          code:
+            - "staff"
+            - "JOIN staff m"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 첫째 쪽의 <b>별명</b>입니다. 붙이는 일은 그 뒤의 낱말이 해요."
+          en: "{{pick.3|code}} is the <b>nickname</b> of the first side. The adding is done by the word after it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 별명이냐 붙이기냐", en: "The sharpest spot — a nickname or the adding" }
+          code:
+            - "staff s        -- 별명"
+            - "JOIN staff m   -- 붙이기"
+      pick.4:
+        t:
+          ko: "{{pick.4|code}}{{pick.4|josa:은,는}} 둘째 쪽의 <b>별명</b>입니다. 이것만으로는 표가 안 붙어요."
+          en: "{{pick.4|code}} is the <b>nickname</b> of the second side. On its own it adds no table."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 둘째 별명이냐 붙이는 낱말이냐", en: "The sharpest spot — the second nickname or the adding word" }
+          code:
+            - "m"
+            - "JOIN staff m"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>같은 표</b>를 한 번 더 붙입니다."
+      en: "Choose what goes in the blank. Line {{site.line}} adds <b>the same table</b> once more."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "JOIN", mono: true }
+      - t: "UNION"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>UNION</code> 은 결과를 <b>아래로</b> 이어 붙입니다. 짝을 한 줄에 놓는 일이 아니에요.
+            en: >-
+              <code>UNION</code> stacks results <b>below</b> one another. It does not put a pair on one line.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 옆이냐 아래냐", en: "The sharpest spot — beside or below" }
+            code:
+              - "JOIN    -- 옆으로 짝짓기"
+              - "UNION   -- 아래로 잇기"
+      - t: "WHERE"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>WHERE</code> 는 이미 있는 행을 <b>거릅니다</b>. 표를 하나 더 대 주지는 않아요.
+            en: >-
+              <code>WHERE</code> <b>filters</b> rows that already exist. It brings no second table.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 거르기냐 붙이기냐", en: "The sharpest spot — filtering or adding" }
+            code:
+              - "WHERE s.id = m.id   -- 거르기"
+              - "JOIN staff m        -- 붙이기"
+      - t: "AND"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              <code>AND</code> 는 조건 <b>둘</b>을 잇는 낱말이라 표를 대는 자리에 오지 않습니다.
+            en: >-
+              <code>AND</code> joins <b>two conditions</b>, so it never stands where a table is named.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 조건이냐 표냐", en: "The sharpest spot — conditions or tables" }
+            code:
+              - "a = 1 AND b = 2   -- 조건"
+              - "JOIN staff m      -- 표"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 <b>같은 표</b>를 두 번 댈까요?"
+    en: "Why does line {{site.line}} name <b>the same table</b> twice?"
+  choices:
+    - t:
+        ko: "묻는 것이 한 행이 아니라 두 행의 관계라서 — 한 번만 대면 그 관계를 적을 자리가 없다"
+        en: "Because the question is a relation between two rows — named once, there is nowhere to write it"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 짝 맞추는 조건을 빼면 몇 줄이 나오는지도 적어 보세요."
+        en: "That is the direction. Now say how many rows come back if the matching condition is dropped."
+    - t:
+        ko: "표가 커서 나눠 읽으려고"
+        en: "To read a big table in two passes"
+      ok: false
+      fb:
+        ko: "나눠 읽는 것이 아닙니다. 같은 표를 <b>두 자리</b>로 두는 것이에요."
+        en: "It is not two passes. The same table is put in <b>two places</b>."
+    - t:
+        ko: "SQL 이 표 둘을 요구해서"
+        en: "Because SQL requires two tables"
+      ok: false
+      fb:
+        ko: "요구하지 않습니다. 표 하나짜리 문장이 이 리포에도 대부분이에요."
+        en: "It requires none. Most statements in this repository name one table."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./self-join.scm }
+
+examples:
+  - code: "SELECT s.name FROM staff s JOIN staff m ON s.boss_id = m.id"
+    expect: { sites: 1, form: self-join, hole: "JOIN", picks: { 1: "JOIN", 2: "staff", 3: "s", 4: "m" }, ctx: { other: "staff" } }
+  - code: "SELECT s.name FROM staff s LEFT JOIN staff m ON s.boss_id = m.id"
+    expect: { sites: 1, form: self-join, hole: "JOIN" }
+  - code: "SELECT s.name FROM staff s JOIN dept d ON s.dept_id = d.id"
+    expect: none

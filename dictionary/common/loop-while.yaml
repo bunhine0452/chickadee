@@ -1,0 +1,34 @@
+schema: 1
+id: common/loop-while
+universal: null
+name: { ko: 조건이 참인 동안 되풀이, en: Looping while a condition holds }
+token: null
+grammars: []
+essential: false
+difficulty: 2
+prereq: [common/comparison]
+confusions: [common/conditional-branch]
+queries: []
+dict:
+  one_liner:
+    ko: "조건을 볼 때마다 다시 판단해서, 참인 동안 같은 묶음을 되풀이한다."
+    en: "Judges again on every pass and repeats the same block while it holds."
+  why:
+    ko: >-
+      갈림과 <b>판단 횟수</b>가 다릅니다. 갈림은 그 줄에 닿았을 때 한 번 보고 지나가지만,
+      이쪽은 한 바퀴 돌 때마다 다시 봅니다. 그래서 안에서 조건을 움직이지 않으면 끝나지 않아요.
+    en: >-
+      What differs from a fork is <b>how often it judges</b>. A fork looks once and moves on; this
+      looks again on every pass. So if nothing inside moves the condition, it never ends.
+  trace: []
+rule:
+  ko: "한 바퀴마다 다시 판단한다. 조건을 움직이는 줄이 안에 있어야 끝난다."
+  en: "It judges again each pass. Something inside must move the condition, or it never ends."
+ok:
+  ko: "조건이 거짓이 되는 순간 묶음을 빠져나와 다음 줄로 갑니다."
+  en: "The moment the condition fails it leaves the block and goes to the next line."
+misconceptions:
+  - ko: "적어도 한 번은 돈다 — 아니요. 처음부터 거짓이면 한 번도 안 돕니다."
+    en: "It runs at least once — no. False at the start means it never runs."
+  - ko: "조건이 거짓이 되면 그 자리에서 즉시 멈춘다 — 돌던 바퀴는 마치고 나갑니다."
+    en: "It stops the instant the condition fails — it finishes the pass, then leaves."

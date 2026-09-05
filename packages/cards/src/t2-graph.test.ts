@@ -7,7 +7,7 @@
 import type { EdgeKind } from '@chickadee/store-sql';
 import { describe, expect, test } from 'vitest';
 
-import { buildGraph, condense, isEntry } from './t2-graph.js';
+import { buildGraph, condense, folderBand, isEntry, repoMapStands } from './t2-graph.js';
 import { MAX_NODES } from './t2-types.js';
 import type { Band, Graph, GraphEdge, GraphFile } from './t2-types.js';
 
@@ -472,5 +472,122 @@ describe('24 노드 상한은 상한이다 (04 §7.4 · 00 §5 게이트)', () =
       files: [...files].reverse(), edges: [...edges].reverse(), unitRoot: 'features/cart',
     });
     expect(b).toEqual(a);
+  });
+});
+
+describe('리포 지도 — 노드가 파일이 아니라 대지·폴더다 (04 §7.5 · D142)', () => {
+  /** 대지 셋(`assignUnits` 3번 규칙)과 공용 둘. 파일 스물둘. */
+  function repo(): { files: GraphFile[]; edges: GraphEdge[] } {
+    const at = (dir: string, n: number, ext = 'tsx'): string[] =>
+      Array.from({ length: n }, (_, i) => `${dir}/f${i}.${ext}`);
+    const screens = at('src/app', 4);
+    const cart = at('src/cart', 5);
+    const orders = at('src/orders', 5);
+    const lib = at('src/lib', 5, 'ts');
+    const hooks = at('src/hooks', 3, 'ts');
+    const all = [...screens, ...cart, ...orders, ...lib, ...hooks];
+    const edges: GraphEdge[] = [];
+    const link = (from: string[], to: string[]): void => {
+      from.forEach((f, i) => edges.push(edge(f, to[i % to.length] as string)));
+    };
+    link(screens, cart);
+    link(screens, orders);
+    link(cart, hooks);
+    link(orders, hooks);
+    link(hooks, lib);
+    link(cart, lib);
+    // 폴더 **안**에서 닫힌 import — 접히면 자기 고리가 되어 사라져야 한다.
+    edges.push(edge(cart[0] as string, cart[1] as string));
+    return { files: all.map((p) => file(p)), edges };
+  }
+
+  test('파일 22장이 폴더 다섯 노드로 접힌다', () => {
+    const { files, edges } = repo();
+    const graph = buildGraph({ files, edges, unitRoot: '', scope: 'repo' });
+    expect([...paths(graph)].sort()).toEqual([
+      'src/app/', 'src/cart/', 'src/hooks/', 'src/lib/', 'src/orders/',
+    ]);
+    expect(graph.files.length).toBeLessThanOrEqual(MAX_NODES);
+    // 접힌 파일 수의 합이 원래 파일 수다 — 조용히 사라진 노드가 없다.
+    const folded = Object.values(graph.foldedOf).reduce((n, xs) => n + xs.length, 0);
+    expect(folded + graph.offMap).toBe(files.length);
+  });
+
+  test('폴더 안에서 닫힌 import 는 선이 되지 않는다', () => {
+    const { files, edges } = repo();
+    const graph = buildGraph({ files, edges, unitRoot: '', scope: 'repo' });
+    for (const [from, to] of graph.edges) expect(from).not.toBe(to);
+    // 같은 두 폴더를 잇는 선은 하나다 — 파일 다섯 쌍이 선 다섯이 되면 지도가 실타래다.
+    const keys = graph.edges.map(([from, to]) => `${from} ${to}`);
+    expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  test('폴더의 층은 04 §7.2 ① 이 폴더 이름을 알면 그것이 이긴다', () => {
+    const { files, edges } = repo();
+    const graph = buildGraph({ files, edges, unitRoot: '', scope: 'repo' });
+    expect(bandOf(graph, 'src/app/')).toBe(0);
+    expect(bandOf(graph, 'src/hooks/')).toBe(2);
+    expect(bandOf(graph, 'src/lib/')).toBe(3);
+    // 이름을 모르는 기능 폴더는 안에 든 파일이 앉은 가장 위 층에서 시작해 아래로 밀린다.
+    expect(bandOf(graph, 'src/cart/')).toBeGreaterThan(0);
+  });
+
+  test('두 번 지어도 같은 지도다 — 입력 순서를 뒤집어도 (04 §9)', () => {
+    const { files, edges } = repo();
+    const a = buildGraph({ files, edges, unitRoot: '', scope: 'repo' });
+    const b = buildGraph({
+      files: [...files].reverse(), edges: [...edges].reverse(), unitRoot: '', scope: 'repo',
+    });
+    expect(b).toEqual(a);
+  });
+
+  test('폴더 순환은 폴더끼리 센다 — 파일 순환이 폴더 안에서 닫히면 ⟲ 가 아니다', () => {
+    const inside = [
+      file('src/lib/a.ts'), file('src/lib/b.ts'), file('src/app/p.tsx'), file('src/app/q.tsx'),
+    ];
+    const edges = [
+      edge('src/lib/a.ts', 'src/lib/b.ts'), edge('src/lib/b.ts', 'src/lib/a.ts'),
+      edge('src/app/p.tsx', 'src/lib/a.ts'), edge('src/app/q.tsx', 'src/lib/b.ts'),
+    ];
+    const graph = buildGraph({ files: inside, edges, unitRoot: '', scope: 'repo' });
+    expect(graph.files.every((f) => f.cycle === undefined)).toBe(true);
+    // 폴더가 서로를 가져다 쓰면 그때는 ⟲ 다.
+    const both = buildGraph({
+      files: inside,
+      edges: [...edges, edge('src/lib/a.ts', 'src/app/p.tsx')],
+      unitRoot: '', scope: 'repo',
+    });
+    expect(both.files.filter((f) => f.cycle === true).map((f) => f.p).sort())
+      .toEqual(['src/app/', 'src/lib/']);
+  });
+
+  test('접히고 나서 고립된 폴더는 지도 밖으로 — 셈이 맞는다', () => {
+    const files = [
+      file('src/lone/a.ts'), file('src/lone/b.ts'),
+      file('src/app/p.tsx'), file('src/lib/x.ts'),
+    ];
+    // `lone` 안에서만 서로 부른다 — 접히면 자기 고리뿐이라 지도에 설 자리가 없다.
+    const edges = [edge('src/lone/a.ts', 'src/lone/b.ts'), edge('src/app/p.tsx', 'src/lib/x.ts')];
+    const graph = buildGraph({ files, edges, unitRoot: '', scope: 'repo' });
+    expect([...paths(graph)].sort()).toEqual(['src/app/', 'src/lib/']);
+    expect(graph.offMap).toBe(2);
+  });
+});
+
+describe('지도가 서는 리포인가 (D142)', () => {
+  test('대지가 「기타」 하나뿐이면 서지 않는다', () => {
+    // 뿌리 바로 밑 파일들 — `assignUnits` 의 네 규칙이 전부 물지 않는다.
+    expect(repoMapStands(['a.ts', 'b.ts', 'c.ts'])).toBe(false);
+    // 2단계 디렉터리에 파일이 셋이면 4번 규칙이 문다 (`MIN_FILES_FOR_UNIT`).
+    expect(repoMapStands(['src/x.ts', 'src/y.ts'])).toBe(false);
+    expect(repoMapStands(['app/cart/a.ts', 'app/cart/b.ts', 'app/cart/c.ts'])).toBe(true);
+  });
+
+  test('폴더 층 패턴은 모노리포의 마지막 `src/` 부터 본다', () => {
+    // 04 §7.2 ① 은 리포 뿌리에 매달려 있다. 폴더 노드에만 그 앞을 벗긴다.
+    expect(folderBand('apps/desktop/src/components/')).toBe(1);
+    expect(folderBand('src/lib/')).toBe(3);
+    expect(folderBand('packages/i18n/src/ko/')).toBeNull();
+    expect(folderBand('src/features/cart/')).toBeNull();
   });
 });

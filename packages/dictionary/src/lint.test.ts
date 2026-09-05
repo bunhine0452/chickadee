@@ -4,9 +4,9 @@
  */
 import { describe, expect, test } from 'vitest';
 
-import { lintDict } from './lint.js';
+import { authoringDebt, lintDict, type DebtCheck } from './lint.js';
 import { resolveConcept } from './resolve.js';
-import { conceptSourceSchema, type SourceConcept } from './schema.js';
+import { conceptSourceSchema, langMetaSchema, type LangMeta, type SourceConcept } from './schema.js';
 import type { Dict } from './load.js';
 
 /** 문장 하나만 갈아 끼우는 최소 개념. 나머지는 스키마 기본값이 채운다. */
@@ -107,5 +107,172 @@ describe('언어별 검사 (D118)', () => {
   test('어느 언어에서 걸렸는지 자리 이름에 남는다', () => {
     const issues = lintDict(dictOf(conceptWith({ rule: { ko: '규칙', en: 'It failed.' } })));
     expect(issues.find((i) => i.rule === 'diagnosis-not-verdict')?.detail).toContain('rule.en');
+  });
+});
+
+describe('파서 없는 문법 (D187 ⑨)', () => {
+  /** C# 사전을 흉내 낸다 — 이름은 스키마에 있고 크레이트는 없다. */
+  const csharpLang = (): LangMeta => langMetaSchema.parse({
+    lang: 'csharp',
+    version: '0.0.0',
+    grammars: ['c_sharp'],
+    grammar_abi: { c_sharp: 15 },
+    extensions: { c_sharp: ['.cs'] },
+    thin_threshold: { min_files: 1, min_sites: 1, small_repo_files: 1 },
+    diag_default: { point: '짚은 자리', blank: '넣은 것' },
+    essential: [],
+  });
+
+  test('_lang.yaml 이 안 링크된 문법을 걸면 오류다 — 로드는 통과하고 캡처만 0곳이 되던 자리', () => {
+    const issues = lintDict({
+      locale: 'ko',
+      langs: new Map([['csharp', csharpLang()]]),
+      concepts: new Map(),
+      sources: new Map(),
+      queries: new Map([['_imports::c_sharp', ''], ['_blocks::c_sharp', '']]),
+      problems: [],
+    });
+    const hit = issues.find((i) => i.rule === 'grammar-not-linked');
+    expect(hit?.at).toBe('csharp');
+    expect(hit?.detail).toContain('c_sharp');
+  });
+
+  test('개념이 안 링크된 문법에 쿼리를 걸어도 오류다', () => {
+    const concept = conceptWith({
+      id: 'csharp/assignment',
+      grammars: ['c_sharp'],
+      queries: [{ grammars: ['c_sharp'], file: 'assignment.scm' }],
+    });
+    const issues = lintDict({
+      ...dictOf(concept),
+      queries: new Map([['csharp/assignment::c_sharp', '(identifier) @site']]),
+    });
+    expect(issues.filter((i) => i.rule === 'grammar-not-linked')).toHaveLength(1);
+  });
+
+  test('링크된 문법은 안 걸린다', () => {
+    expect(rulesOf(conceptWith({ grammars: ['typescript'] }))).not.toContain('grammar-not-linked');
+  });
+});
+
+describe('사전 저작 부채 (D145)', () => {
+  /** `essential` 하나짜리 언어. 부채 표는 `_lang.yaml` 을 봐야 대상이 정해진다. */
+  const langWith = (essential: string[]): LangMeta => langMetaSchema.parse({
+    lang: 'ts',
+    version: '0.0.0',
+    grammars: ['typescript'],
+    grammar_abi: { typescript: 14 },
+    extensions: { typescript: ['.ts'] },
+    thin_threshold: { min_files: 1, min_sites: 1, small_repo_files: 1 },
+    diag_default: { point: '짚은 자리', blank: '넣은 것' },
+    essential,
+  });
+
+  const debtOf = (concept: SourceConcept, scm: string, essential = [concept.id]): DebtCheck[] =>
+    authoringDebt({
+      ...dictOf(concept),
+      langs: new Map([['ts', langWith(essential)]]),
+      queries: new Map([[`${concept.id}::typescript`, scm]]),
+    });
+
+  const check = (checks: DebtCheck[], rule: string): DebtCheck =>
+    checks.find((c) => c.rule === rule) as DebtCheck;
+
+  test('빈칸형이 없으면 부채고, 사유를 적으면 갚은 것으로 센다', () => {
+    const bare = conceptWith({});
+    expect(check(debtOf(bare, '(identifier) @site'), 'blank-or-reason').met).toBe(0);
+    const excused = conceptWith({ no_hole_reason: '이 문법에는 지울 수 있는 토큰이 없다' });
+    expect(check(debtOf(excused, '(identifier) @site'), 'blank-or-reason').met).toBe(1);
+  });
+
+  test('사유가 낡으면 린트가 잡는다 — 표는 초록인데 이유가 거짓말이 된다', () => {
+    const filled = conceptWith({
+      grammars: ['typescript'],
+      confusions: [],
+      no_hole_reason: '이 문법에는 지울 수 있는 토큰이 없다',
+      blank: [{ q: '무엇이 들어가나요?', options: [{ t: '??' }, { t: '||' }, { t: '&&' }, { t: '?.' }] }],
+    });
+    const dict = {
+      ...dictOf(filled),
+      queries: new Map([[`${filled.id}::typescript`, '(identifier) @hole']]),
+    };
+    expect(lintDict(dict).map((i) => i.rule)).toContain('no-hole-reason-stale');
+  });
+
+  test('지목형은 후보가 셋에 못 미치면 부채다 — 정답 1 + 오답 3 이 안 나온다', () => {
+    const point = { q: '짚어 보세요', answer: 'pick.1' };
+    const thin = conceptWith({ grammars: ['typescript'], point: [point] });
+    expect(check(debtOf(thin, '(a) @pick.1 (b) @pick.2'), 'point-picks').met).toBe(0);
+    expect(check(debtOf(thin, '(a) @pick.1 (b) @pick.2 (c) @pick.3'), 'point-picks').met).toBe(1);
+  });
+
+  test('essential 의 why_gate 를 센다', () => {
+    expect(check(debtOf(conceptWith({}), ''), 'why-gate').met).toBe(0);
+  });
+
+  describe('0장 누설 (D138)', () => {
+    const leaky = (oneLiner: string, token: string): SourceConcept => conceptWith({
+      grammars: ['typescript'],
+      dict: { one_liner: oneLiner, why: '왜', trace: [] },
+      point: [{ q: '짚어 보세요', answer: 'pick.1' }],
+      examples: [{ code: 'x', expect: { sites: 1, picks: { 1: token } } }],
+    });
+    const scm = '(a) @pick.1 (b) @pick.2 (c) @pick.3';
+
+    test('one_liner 가 정답 토큰을 그대로 내면 걸린다', () => {
+      const c = check(debtOf(leaky('<code>const</code> 는 이름에 값을 묶는다.', 'const'), scm), 'zero-one-liner');
+      expect(c.total).toBe(1);
+      expect(c.gaps).toEqual(['ts/x(const)']);
+    });
+
+    test('안 내면 통과한다', () => {
+      expect(check(debtOf(leaky('이름 하나에 값을 묶는다.', 'const'), scm), 'zero-one-liner').met).toBe(1);
+    });
+
+    test('문장 끝 마침표는 토큰이 아니다 — 아니면 `.` 이 정답인 개념은 영영 못 지나간다', () => {
+      expect(check(debtOf(leaky('안에서 그 이름의 값을 꺼낸다.', '.'), scm), 'zero-one-liner').met).toBe(1);
+      expect(check(debtOf(leaky('<code>a.b</code> 로 꺼낸다', '.'), scm), 'zero-one-liner').met).toBe(0);
+    });
+
+    test('낱말 안에 묻힌 글자는 누설이 아니다', () => {
+      expect(check(debtOf(leaky('previous 값을 받아 새 값을 돌려준다', 'prev'), scm), 'zero-one-liner').met).toBe(1);
+    });
+
+    // D150 으로 대상이 「0장 후보(깊이 ≤ 2)」에서 **`essential` 전량**이 됐다 — 「먼저 읽기」가
+    // 겹 0 인 모든 개념에서 펴지므로 깊이로 좁히면 린트가 화면보다 좁아진다. 깊이가 깊어도
+    // `essential` 이면 대상이고, `essential` 밖이면 아니다.
+    test('선행이 깊어도 essential 이면 대상이다 (D150)', () => {
+      const root = conceptWith({ id: 'ts/root' });
+      const mid = conceptWith({ id: 'ts/mid', prereq: ['ts/root'] });
+      const top = conceptWith({ id: 'ts/top', prereq: ['ts/mid'] });
+      const far = leaky('<code>const</code> 를 쓴다', 'const');
+      const dict: Dict = {
+        locale: 'ko',
+        langs: new Map([['ts', langWith(['ts/root', 'ts/mid', 'ts/top', 'ts/x'])]]),
+        concepts: new Map(),
+        sources: new Map([
+          ['ts/root', root], ['ts/mid', mid], ['ts/top', top],
+          ['ts/x', { ...far, prereq: ['ts/top'] }],
+        ]),
+        queries: new Map([['ts/x::typescript', scm]]),
+        problems: [],
+      };
+      const c = check(authoringDebt(dict), 'zero-one-liner');
+      expect(c.total).toBe(1);
+      expect(c.gaps).toEqual(['ts/x(const)']);
+    });
+
+    test('essential 밖이면 대상이 아니다', () => {
+      const far = leaky('<code>const</code> 를 쓴다', 'const');
+      const dict: Dict = {
+        locale: 'ko',
+        langs: new Map([['ts', langWith(['ts/root'])]]),
+        concepts: new Map(),
+        sources: new Map([['ts/root', conceptWith({ id: 'ts/root' })], ['ts/x', far]]),
+        queries: new Map([['ts/x::typescript', scm]]),
+        problems: [],
+      };
+      expect(check(authoringDebt(dict), 'zero-one-liner').gaps).toEqual([]);
+    });
   });
 });

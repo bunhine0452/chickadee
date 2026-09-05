@@ -1,0 +1,88 @@
+schema: 1
+id: proto/stateless-session
+universal: null
+name: { ko: 서버가 아무것도 안 들고 있기, en: Stateless server }
+token: null
+grammars: []
+framework: null
+track_default: t0
+essential: false
+difficulty: 3
+prereq: []
+confusions: []
+dict:
+  one_liner:
+    ko: "요청 사이에 서버는 아무것도 기억하지 않는다. 필요한 것은 요청이 들고 온다."
+    en: "The server keeps nothing between requests. The request brings what it needs."
+  why:
+    ko: >-
+      서버가 「이 사람은 아까 로그인했다」를 <b>기억해 두는</b> 방식이 있습니다. 편하지만 그
+      기억이 서버 한 대 안에 있어서, 서버를 두 대로 늘리면 두 번째 서버는 그 사람을 모릅니다.
+      기억을 안 하는 쪽을 고르면 그 문제가 사라져요 — 모든 요청이 <b>필요한 것을 스스로</b>
+      들고 오니 어느 서버가 받아도 같습니다. 대가는 둘입니다. 요청마다 확인을 <b>다시</b> 하고,
+      한 번 내준 것을 <b>즉시 되물릴 수 없습니다</b>. 그리고 두 방식을 섞으면 둘의 단점만 남습니다.
+    en: >-
+      One design has the server <b>remember</b> that this person logged in a moment ago. It is
+      convenient, but the memory lives inside one machine, so add a second and it does not know that
+      person. Choosing not to remember makes the problem vanish — every request <b>brings what it
+      needs</b>, so any machine can take it. The price is two things: the check is done <b>again</b>
+      on every request, and what was handed out <b>cannot be withdrawn on the spot</b>. Mixing the two
+      designs keeps only the drawbacks of each.
+  trace: []
+rule:
+  ko: "<b>기억하지 않으면 어느 서버가 받아도 같다.</b> 대신 한 번 내준 것을 곧바로 되물릴 수 없다."
+  en: "<b>Remember nothing and any machine can take it.</b> In exchange, what was handed out cannot be pulled back at once."
+ok:
+  ko: >-
+    요청이 들고 온 것만 보고 판단합니다. 판단이 끝나면 서버에는 아무것도 남지 않아요.
+  en: >-
+    The decision is made from what the request brought. When it is done, nothing stays on the server.
+misconceptions:
+  - ko: "기억하지 않으면 로그인 상태가 유지되지 않는다 — 유지하는 쪽이 서버에서 <b>요청</b>으로 옮겨졌을 뿐입니다."
+    en: "Not remembering means the login does not persist — what persists moved from the server to the <b>request</b>."
+  - ko: "서버가 한 대면 어느 쪽이든 같다 — 한 대가 다시 시작할 때 기억은 사라집니다."
+    en: "With one machine either design is the same — a restart erases the memory."
+  - ko: "기억을 안 하니 더 빠르다 — 요청마다 확인을 다시 하므로 그 값은 따로 치릅니다."
+    en: "Not remembering is faster — the check runs again on every request, and that cost is paid separately."
+  - ko: "둘을 같이 쓰면 안전해진다 — 늘어나기 어려운 점과 되물리기 어려운 점이 <b>둘 다</b> 남습니다."
+    en: "Using both is safer — you keep <b>both</b> the scaling problem and the revocation problem."
+evidence: ["SessionCreationPolicy", "STATELESS", "sessionManagement", "sessionCreationPolicy", "SecurityContextHolder"]
+meaning:
+  - q:
+      ko: "{{site.line}}행처럼 서버가 기억하지 않기로 했다면, <b>서버를 한 대 더</b> 놓을 때 무엇이 필요할까요?"
+      en: "With the server set not to remember, as on line {{site.line}}, what is needed to <b>add a second machine</b>?"
+    hint:
+      ko: "요청이 필요한 것을 스스로 들고 옵니다."
+      en: "The request brings what it needs by itself."
+    options:
+      - t: { ko: "아무것도 — 요청이 들고 온 것만 보면 되니 어느 쪽이 받아도 같다", en: "Nothing — either machine decides from what the request brought" }
+      - t: { ko: "두 서버가 기억을 서로 나눠 갖도록 이어 준다", en: "Wire the two machines to share their memory" }
+        diag:
+          t:
+            ko: "그것은 <b>기억하는 쪽</b>을 골랐을 때 필요한 일입니다. 여기서는 나눠 가질 기억이 아예 없어요."
+            en: "That is what the <b>remembering</b> design needs. Here there is no memory to share."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 나눌 것이 있나", en: "The sharpest spot — is there anything to share" }
+            code:
+              - "기억함: 나눠 갖거나 한쪽에 몰아준다"
+              - "안 기억함: 나눌 것이 없다"
+      - t: { ko: "같은 사람은 늘 같은 서버로 가도록 묶는다", en: "Pin each person to the same machine" }
+        diag:
+          t:
+            ko: "그 묶음도 <b>기억하는 쪽</b>의 우회로입니다. 그 서버가 내려가면 그 사람만 끊기고요."
+            en: "That pinning is another way around the <b>remembering</b> design. And if that machine goes down, only those people are cut off."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 어디로 가도 되나", en: "The sharpest spot — may it go anywhere" }
+            code:
+              - "묶음 필요: 기억이 한쪽에만 있다"
+              - "묶음 불필요: 어느 쪽이든 판단이 같다"
+      - t: { ko: "사용자마다 다시 로그인하게 한다", en: "Make everyone log in again" }
+        diag:
+          t:
+            ko: "다시 로그인할 이유가 없습니다. 들고 온 것이 그대로 유효하고, 그것을 확인하는 방법은 두 서버가 같아요."
+            en: "There is no reason to. What the request brought is still valid, and both machines check it the same way."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 서버가 바뀌면 무효인가", en: "The sharpest spot — does a new machine invalidate it" }
+            code:
+              - "확인 재료: 요청이 들고 온 것"
+              - "→ 서버가 바뀌어도 그대로"

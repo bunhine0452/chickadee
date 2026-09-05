@@ -1,0 +1,18 @@
+# 작은 문제 하나 (D186 ⑧). 지문은 우리가 썼고 케이스의 답은 reference.py 가 낸다.
+schema: 1
+id: big-product
+topic: arithmetic
+statement:
+  ko: "한 줄에 정수 두 개가 주어집니다. 두 수의 곱을 출력하세요. 곱이 32비트 정수에 안 들어가는 경우가 섞여 있습니다."
+  en: "One line holds two integers. Print their product. Some of the products do not fit in a 32-bit integer."
+needs: [common/arithmetic, cs/integer-overflow]
+langs: [py, ts, java]
+cases:
+  - stdin: "3 4\n"
+    stdout: "12\n"
+  - stdin: "2147483647 2\n"
+    stdout: "4294967294\n"
+  - stdin: "-2147483648 2\n"
+    stdout: "-4294967296\n"
+  - stdin: "0 999999\n"
+    stdout: "0\n"

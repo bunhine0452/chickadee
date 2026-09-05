@@ -1,0 +1,189 @@
+schema: 1
+id: sql/column-type
+universal: null
+name: { ko: 타입은 값이 아니라 열에 붙는다, en: Types live on columns }
+token: "INTEGER"
+grammars: [sql, mybatis_sql]
+framework: null
+essential: true
+difficulty: 1
+prereq: []
+confusions: []
+
+dict:
+  one_liner:
+    ko: "값을 넣을 때 종류를 안 적는다. 자리가 종류를 미리 정해 놓았기 때문이다."
+    en: "A value never carries its kind. The slot settled that beforehand."
+  why:
+    ko: >-
+      다른 언어는 값 옆에 종류를 적습니다. SQL 은 <b>표를 만들 때 한 번</b> 적고 그 뒤로는
+      안 적어요 — {{site.line}}행의 이 선언이 {{pick.2|code}} 자리에 무엇이 올 수 있는지를
+      <b>미리</b> 정합니다. 그래서 나중에 값을 넣는 문장에는 종류가 한 글자도 안 나오고,
+      어긋난 값이 들어갈 때 <b>어디를 봐야 하는지</b>가 이 줄입니다.
+    en: >-
+      Other languages write the kind beside the value. SQL writes it <b>once, when the table is
+      made</b>, and never again — the declaration on line {{site.line}} settles <b>in advance</b>
+      what may sit in {{pick.2|code}}. Statements that put values in carry no kind at all, so when
+      a mismatched value lands, <b>this</b> is the line to look at.
+  trace:
+    - ko: "{{pick.3|code}} 라는 표를 만든다."
+      en: "A table named {{pick.3|code}} is made."
+    - ko: "그 안에 {{pick.2|code}} 라는 자리를 둔다."
+      en: "Inside it a slot named {{pick.2|code}} is set."
+    - ko: "그 자리에 올 값의 종류를 여기서 정한다."
+      en: "The kind of value that slot takes is settled here."
+
+rule:
+  ko: "<b>종류는 값이 아니라 열에 붙는다.</b> 한 번 적어 두면 그 열의 모든 행이 그 약속을 받는다."
+  en: "<b>The kind belongs to the column, not the value.</b> Written once, every row of that column inherits it."
+result:
+  label:
+    ko: "{{pick.2}} 자리가 받는 것"
+    en: "what the {{pick.2}} slot takes"
+  value: "{{pick.1}}"
+  note:
+    ko: "값 쪽에는 안 적힌다"
+    en: "never written on the value"
+ok:
+  ko: >-
+    {{pick.2|code}} 에 들어가는 값은 모두 {{pick.1|code}} 종류로 다뤄집니다. 값마다 다시 정할 자리가 없어요.
+  en: >-
+    Every value that lands in {{pick.2|code}} is handled as {{pick.1|code}}. There is no per-value slot to say it again.
+payoff:
+  ko: >-
+    이걸 알면 「이 값이 왜 이렇게 나오지」를 값이 아니라 <b>표를 만든 줄</b>에서 찾게 됩니다.
+  en: >-
+    This sends you to <b>the line that made the table</b>, not to the value, when a value comes back odd.
+bridge:
+  ko: >-
+    다른 언어는 변수마다 종류를 붙입니다. 여기서는 <b>자리 하나에 한 번</b>이고 그 자리를 지나는 값 전부가 따릅니다.
+  en: >-
+    Other languages tag each variable. Here it is <b>once per slot</b>, and every value passing through follows.
+misconceptions:
+  - ko: "종류를 적어 두면 데이터베이스가 반드시 지켜 준다 — SQLite 에서는 <b>권고</b>라 다른 종류도 들어갑니다."
+    en: "A declared kind is always enforced — in SQLite it is <b>advisory</b>, and another kind still goes in."
+  - ko: "참·거짓을 담는 자리는 따로 있다 — MySQL 에는 그 자리가 없어 작은 정수로 씁니다."
+    en: "There is a slot kind for true and false — MySQL has none and uses a small integer instead."
+  - ko: "값을 넣는 문장을 보면 종류를 알 수 있다 — 거기엔 안 적혀 있습니다. 표를 만든 줄을 봐야 해요."
+    en: "The inserting statement tells you the kind — it does not. The line that made the table does."
+
+meaning:
+  - q:
+      ko: "{{pick.2|code}} 자리에 다른 종류의 값을 넣으면 어떻게 될까요?"
+      en: "What if a value of another kind is put into {{pick.2|code}}?"
+    hint:
+      ko: "데이터베이스마다 다르다는 것이 답의 절반입니다."
+      en: "Half the answer is that databases differ."
+    options:
+      - t:
+          ko: "막는 데이터베이스도 있고 조용히 받아 주는 데이터베이스도 있다"
+          en: "Some databases block it and some quietly take it"
+      - t:
+          ko: "어디서든 반드시 막힌다"
+          en: "It is always blocked, everywhere"
+        diag:
+          t:
+            ko: >-
+              SQLite 는 열의 종류를 <b>권고</b>로 다룹니다 — 숫자 자리에 글자가 들어가고 아무 말도 안 해요.
+            en: >-
+              SQLite treats a column's kind as <b>advice</b> — text lands in a number slot and nothing is said.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 강제냐 권고냐", en: "The sharpest spot — enforced or advisory" }
+            code:
+              - "-- 표준: 거부"
+              - "-- SQLite: 그대로 저장"
+      - t:
+          ko: "값에 붙은 종류가 열의 종류를 덮어쓴다"
+          en: "The value's own kind overwrites the column's"
+        diag:
+          t:
+            ko: "값에는 붙일 자리가 <b>없습니다</b>. 종류를 적는 곳은 표를 만드는 줄 하나예요."
+            en: "A value has <b>nowhere</b> to carry one. The only place a kind is written is the line that made the table."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값이냐 열이냐", en: "The sharpest spot — the value or the column" }
+            code:
+              - "VALUES ('7')      -- 종류 표기 없음"
+              - "qty INTEGER       -- 여기 하나"
+      - t:
+          ko: "열의 종류가 그 값에 맞게 바뀐다"
+          en: "The column's kind changes to fit the value"
+        diag:
+          t:
+            ko: "선언은 <b>안 움직입니다</b>. 바꾸려면 표를 고치는 문장을 따로 적어야 해요."
+            en: "The declaration <b>does not move</b>. Changing it needs a separate statement that alters the table."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 선언이냐 값이냐", en: "The sharpest spot — the declaration or the value" }
+            code:
+              - "-- 선언은 그대로"
+              - "ALTER TABLE ...   -- 바꾸려면 따로"
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>이 자리가 받는 값의 종류</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the kind of value this slot takes</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 자리의 <b>이름</b>입니다. 종류는 그 바로 뒤에 옵니다."
+          en: "{{pick.2|code}} is the slot's <b>name</b>. The kind comes right after it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 종류냐", en: "The sharpest spot — the name or the kind" }
+          code:
+            - "qty            -- 이름"
+            - "qty INTEGER    -- 이름과 종류"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>표</b>의 이름입니다. 표 하나 안에 자리가 여럿이에요."
+          en: "{{pick.3|code}} is <b>the table's</b> name. One table holds many slots."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 표냐 자리냐", en: "The sharpest spot — the table or the slot" }
+          code:
+            - "CREATE TABLE cart   -- 표"
+            - "  qty INTEGER       -- 자리"
+
+no_hole_reason: >-
+  뚫을 낱말이 사용처마다 다르다 — 종류 이름은 리포가 고른 글자(INTEGER · TEXT · bigint · datetime)라
+  보기 넷을 고정하면 찍는 문항이 된다. 이 층에서 물어야 하는 것은 「어느 종류냐」가 아니라
+  「종류가 값이 아니라 열에 붙는다」이고, 그것은 지목형과 뜻 고르기가 묻는다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 <b>이 종류</b>로 정했을까요?"
+    en: "Why does line {{site.line}} settle on <b>this kind</b>?"
+  choices:
+    - t:
+        ko: "그 자리에 들어올 값이 실제로 그런 값이라서 — 다른 종류로 두면 견주기와 정렬이 달라진다"
+        en: "Because the values that land there really are of that kind — another kind changes comparing and ordering"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 글자로 정하면 <b>크기 견주기</b>가 어떻게 달라지는지도 적어 보세요."
+        en: "That is the direction. Now say how <b>size comparison</b> changes if it were text."
+    - t:
+        ko: "가장 안전한 종류라서"
+        en: "Because it is the safest kind"
+      ok: false
+      fb:
+        ko: "안전한 종류라는 것은 없습니다. 맞는 종류가 <b>값에 따라</b> 다를 뿐이에요."
+        en: "There is no safe kind. The right one simply depends on <b>the values</b>."
+    - t:
+        ko: "SQL 이 이 종류를 요구해서"
+        en: "Because SQL requires this kind"
+      ok: false
+      fb:
+        ko: "요구하지 않습니다. 무엇을 담을지는 <b>이 표를 만든 사람</b>이 정했어요."
+        en: "It requires nothing. What it holds was settled by <b>whoever made this table</b>."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./column-type.scm }
+
+examples:
+  - code: "CREATE TABLE cart (id INTEGER NOT NULL, note TEXT)"
+    expect: { sites: 2, form: column-type, picks: { 1: "INTEGER", 2: "id", 3: "cart" } }
+  - code: "CREATE TABLE item (sku TEXT)"
+    expect: { sites: 1, form: column-type, picks: { 1: "TEXT", 2: "sku", 3: "item" } }
+  - code: "INSERT INTO cart (id) VALUES (1)"
+    expect: none

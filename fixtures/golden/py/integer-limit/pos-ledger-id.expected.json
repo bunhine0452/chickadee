@@ -1,0 +1,28 @@
+[
+  {
+    "queryId": "py/integer-limit",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "site",
+    "form": "huge",
+    "startLine": 1,
+    "startCol": 10,
+    "endLine": 1,
+    "endCol": 30,
+    "nodeKind": "integer",
+    "inError": false
+  },
+  {
+    "queryId": "py/integer-limit",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.1",
+    "form": "huge",
+    "startLine": 1,
+    "startCol": 10,
+    "endLine": 1,
+    "endCol": 30,
+    "nodeKind": "integer",
+    "inError": false
+  }
+]

@@ -15,11 +15,12 @@ const base = {
   done: false,
   onCancel: () => undefined,
   onDone: () => undefined,
+  onStart: () => undefined,
 };
 
 describe('4단계 매핑 (D47)', () => {
   test('Rust 의 네 단계와 TS 의 두 단계가 네 칸으로 접힌다', () => {
-    expect(boxes().map((b) => b.label)).toEqual(['코드 읽기', '히스토리', '개념 추출', '판 짜기']);
+    expect(boxes().map((b) => b.label)).toEqual(['코드 읽기', '히스토리', '개념 추출', '문제 만들기']);
     expect(positionOf({ phase: 'walk', done: 1, total: 2 }).pos).toBe(0);
     expect(positionOf({ phase: 'parse', done: 1, total: 2 }).pos).toBe(0);
     expect(positionOf({ phase: 'git', done: 1, total: 2 }).pos).toBe(1);

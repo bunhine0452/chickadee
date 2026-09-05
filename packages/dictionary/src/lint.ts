@@ -6,7 +6,7 @@
  * 불변 규칙이고, 조사 하드코딩은 값이 무엇인지 모르는 채로 반드시 틀린다 (03 §4.3).
  */
 import { mapProse } from './prose.js';
-import { koOf, type LangMeta, type Locale, type SourceConcept } from './schema.js';
+import { isLinkedGrammar, koOf, type LangMeta, type Locale, type SourceConcept } from './schema.js';
 import { keyOf, type Dict } from './load.js';
 
 export interface LintIssue {
@@ -83,6 +83,24 @@ function checkLang(lang: string, meta: LangMeta, dict: Dict, issues: LintIssue[]
       if (!dict.queries.has(keyOf(id, grammar))) add('system-query', `${grammar}/${id}.scm 이 없다`);
     }
   }
+  for (const grammar of meta.grammars) checkLinked(grammar, add);
+}
+
+/**
+ * 파서가 없는 문법을 조용히 통과시키지 않는다 (D187 ⑨).
+ *
+ * `grammarSchema` 는 **이름의 규약**(D19)이라 아직 안 링크된 문법도 받는다. 그래서
+ * `_lang.yaml` 에 `grammars: [c_sharp]` 를 적으면 스키마도 로드도 통과하고 **캡처만 0곳**이
+ * 되는데, 0곳은 「사용처가 없는 리포」와 화면에서 구별되지 않는다. 세는 자리가 없으니
+ * 아무 데서도 안 터지고, 그 상태로 사전 한 벌을 다 쓰게 된다.
+ */
+function checkLinked(grammar: string, add: (rule: string, detail: string) => void): void {
+  if (isLinkedGrammar(grammar)) return;
+  add(
+    'grammar-not-linked',
+    `${grammar}: 문법이 이 빌드에 안 링크돼 있다 — 캡처가 0곳이다.`
+      + ' crates/parse/Cargo.toml 과 langs.rs 에 먼저 넣고 schema.ts 의 GRAMMARS 를 true 로 올려라',
+  );
 }
 
 function checkConcept(concept: SourceConcept, dict: Dict, issues: LintIssue[]): void {
@@ -95,20 +113,24 @@ function checkConcept(concept: SourceConcept, dict: Dict, issues: LintIssue[]): 
   if (concept.universal !== null && !dict.sources.has(concept.universal)) {
     add('reference-exists', concept.universal);
   }
+  // 쪼개진 개념 (D187 ④). 가리키는 곳이 있어야 하고, 자기 자신이면 안 되고, 대체본이 또
+  // 대체됐으면 안 된다 — 사슬이 되면 「새 참조는 무엇을 쓰나」가 한 번에 안 읽힌다.
+  for (const ref of concept.superseded_by) {
+    if (!dict.sources.has(ref)) add('reference-exists', ref);
+    else if (ref === concept.id) add('superseded-target', '자기 자신을 가리킨다');
+    else if ((dict.sources.get(ref)?.superseded_by.length ?? 0) > 0) {
+      add('superseded-target', `${ref} 도 쪼개진 개념이다`);
+    }
+  }
   for (const grammar of concept.grammars) {
     if (concept.queries.length > 0 && !dict.queries.has(keyOf(concept.id, grammar))) {
       add('query-for-grammar', grammar);
     }
   }
+  const named = new Set<string>([...concept.grammars, ...concept.queries.flatMap((q) => q.grammars)]);
+  for (const grammar of named) checkLinked(grammar, add);
 
-  const scms = concept.grammars
-    .map((g) => dict.queries.get(keyOf(concept.id, g)))
-    .filter((s): s is string => s !== undefined);
-  const picks = new Set(scms.flatMap((s) => [...s.matchAll(/@(pick\.[1-9])/g)].map((m) => m[1] ?? '')));
-  const hasHole = scms.some((s) => s.includes('@hole'));
-  const ctxNames = new Set(
-    scms.flatMap((s) => [...s.matchAll(/@ctx\.([a-z_]+)/g)].map((m) => `ctx.${m[1] ?? ''}`)),
-  );
+  const { picks, hasHole, ctxNames } = queryFacts(concept, dict);
 
   for (const [i, card] of concept.point.entries()) {
     if (!picks.has(card.answer)) add('point-answer-in-query', `point[${i}] ${card.answer}`);
@@ -120,6 +142,11 @@ function checkConcept(concept: SourceConcept, dict: Dict, issues: LintIssue[]): 
   }
   // 빈칸형은 `@hole` 이 있어야 성립하고, 오답은 혼동 쌍의 토큰이어야 한다 (03 §4.4).
   if (concept.blank.length > 0 && !hasHole) add('blank-needs-hole', '쿼리에 @hole 이 없다');
+  // 사유는 빈칸형이 **없는** 자리를 설명하는 글이다. 빈칸형이 생긴 뒤에도 남아 있으면
+  // 부채 표는 초록인데 이유는 거짓말인 상태가 된다 (D145).
+  if (concept.no_hole_reason !== null && concept.blank.length > 0 && hasHole) {
+    add('no-hole-reason-stale', 'blank 와 @hole 이 이미 있는데 no_hole_reason 이 남아 있다');
+  }
   const confusionTokens = new Set(
     concept.confusions.map((id) => dict.sources.get(id)?.token).filter((t): t is string => !!t),
   );
@@ -138,7 +165,8 @@ function checkConcept(concept: SourceConcept, dict: Dict, issues: LintIssue[]): 
   }
 
   // 사전 3층의 `trace` 는 사용자의 코드를 짚어야 한다 — 안 그러면 튜토리얼이 된다.
-  // 사용처가 없는 보편·구조 개념(`common/`·`arch/`)은 짚을 코드가 없으므로 제외한다.
+  // 사용처가 없는 개념(`COMPUTED_NAMESPACES`)은 짚을 코드가 없으므로 제외된다 —
+  // 쿼리가 없으면 이 검사 자체가 안 돈다.
   if (concept.queries.length > 0) {
     if (concept.grammars.length === 0) add('grammars-for-query', '쿼리가 있는데 grammars 가 비었다');
     if (!concept.dict.trace.some((t) => /\{\{(site|pick)\./.test(koOf(t)))) {
@@ -214,4 +242,208 @@ function checkCycles(dict: Dict, issues: LintIssue[]): void {
     state.set(id, 'done');
   };
   for (const id of dict.sources.keys()) walk(id, []);
+}
+
+/** 개념의 `.scm` 들이 실제로 내는 것. 린트와 부채 표가 같은 자리에서 읽는다. */
+function queryFacts(
+  concept: SourceConcept,
+  dict: Dict,
+): { picks: Set<string>; hasHole: boolean; ctxNames: Set<string> } {
+  const scms = concept.grammars
+    .map((g) => dict.queries.get(keyOf(concept.id, g)))
+    .filter((s): s is string => s !== undefined);
+  return {
+    picks: new Set(scms.flatMap((s) => [...s.matchAll(/@(pick\.[1-9])/g)].map((m) => m[1] ?? ''))),
+    hasHole: scms.some((s) => s.includes('@hole')),
+    ctxNames: new Set(
+      scms.flatMap((s) => [...s.matchAll(/@ctx\.([a-z_]+)/g)].map((m) => `ctx.${m[1] ?? ''}`)),
+    ),
+  };
+}
+
+// ── 사전 저작 부채 (D145) ─────────────────────────────────────────────────────
+//
+// 위의 `lintDict` 는 **틀린 것**을 잡는다 — 통과가 곧 정답이라 임계가 없다. 여기서 세는
+// 것은 **아직 안 쓴 것**이고, 그건 오늘 하루에 사라지지 않는다. 그래서 D132 와 같은 모양을
+// 쓴다: 오늘의 실측을 래칫으로 두고 목표를 나란히 적고 표를 매번 찍는다. 임계를 오늘 값에
+// 맞춰 두고 목표를 지우면 그 거리가 안 보인다.
+//
+// 왜 부채가 게이트여야 하는가: 개념 하나가 YAML 150~230줄이고 ko/en 양쪽이라 **사전은 이
+// 리포에서 가장 비싼 손 작업**이다. 게이트가 없으면 미뤄지는 것이 기본값이고, `blank:` 2편·
+// `why_gate:` 0편이 그 증거다. 그 결과가 판 유형 쏠림이다 —
+// `tests/support/quality.test.ts` 의 `KIND_SHARE_RATCHET` 과 이 표는 같은 원인의 앞뒤다.
+
+/** 부채 규칙 하나. 표의 한 줄이 된다. */
+export interface DebtCheck {
+  /** 래칫 상수의 키. */
+  rule: string;
+  /** 사람이 읽는 한 줄. */
+  label: string;
+  /** 지금 충족한 개념 수. */
+  met: number;
+  /** 이 규칙을 받는 개념 수 = **목표**. */
+  total: number;
+  /** 아직 못 채운 개념. 괄호 안은 왜 못 채웠는지. */
+  gaps: string[];
+}
+
+// D150 으로 `ZERO_CHAPTER_DEPTH` 와 `depthWithin` 이 죽어 지웠다. 「먼저 읽기」의 대상이
+// 깊이가 아니라 `essential` 소속으로 정해지므로 이 파일은 더 이상 선행 깊이를 세지 않는다 —
+// `zero-chapter.ts` 의 상수를 여기 복사해 두던 동기화 부담도 함께 사라졌다.
+
+/** 지목형이 성립하는 최소 후보 수 — 정답 1 + 오답 3 (`packages/cards/src/t0-point.ts`). */
+const MIN_PICKS = 3;
+
+/**
+ * 문항의 정답이 화면에 **글자로** 나올 때의 그 글자. `examples[].expect` 가 유일한 출처다 —
+ * `pick.N` 은 자리 이름이라 그 자체로는 글자가 없고, 무엇이 찍히는지는 예시가 안다.
+ */
+function answerTokens(concept: SourceConcept): Set<string> {
+  const wanted = new Set(concept.point.map((p) => p.answer));
+  const tokens = new Set<string>();
+  for (const example of concept.examples) {
+    if (example.expect === 'none') continue;
+    for (const [key, value] of Object.entries(example.expect.picks ?? {})) {
+      const name = key.startsWith('pick.') ? key : `pick.${key}`;
+      if (wanted.has(name)) tokens.add(value);
+    }
+    // 빈칸형의 정답은 구멍에 들어 있던 원문이다.
+    if (concept.blank.length > 0 && example.expect.hole !== undefined) {
+      tokens.add(example.expect.hole);
+    }
+  }
+  return tokens;
+}
+
+/**
+ * 이 글이 그 토큰을 **글자로** 내주는가.
+ *
+ * 두 가지를 걷어내고 본다. ① 태그 — `<b>` 의 `b` 는 사람이 읽는 글자가 아니다.
+ * ② 문장 부호로 쓰인 마침표·쉼표 — 한국어 문장 끝의 `.` 는 토큰이 아닌데, `.` 이 정답인
+ * 개념(`ts/property-access`)에서는 그것까지 걸려 **통과할 수 없는 규칙**이 된다.
+ * 식별자 꼴 토큰은 낱말 경계로 본다 — `prev` 가 `previous` 안에서 걸리면 안 된다.
+ *
+ * **내보내는 이유**: 화면도 같은 판정을 써야 한다. `apps/desktop/src/data/read-first.ts` 가
+ * 0장 판 위에 한 줄을 펼지 정할 때 이것을 부른다 — 규칙이 둘이면 린트가 「샌다」고 하는
+ * 문장을 화면이 그대로 펴는 일이 생긴다 (D138).
+ */
+export function revealsToken(text: string, token: string): boolean {
+  if (token === '') return false;
+  const bare = text.replace(TAG, '').replace(/[.,](?=\s|$)/g, '');
+  if (/^[\w$]+$/.test(token)) {
+    return new RegExp(`(^|[^\\w$])${token}([^\\w$]|$)`).test(bare);
+  }
+  return bare.includes(token);
+}
+
+/**
+ * 사전 저작 부채를 센다. **틀린 것이 아니라 안 쓴 것**이라 실패가 아니라 표다 —
+ * 임계는 `dict.test.ts` 의 래칫이 건다.
+ */
+export function authoringDebt(dict: Dict): DebtCheck[] {
+  const essential = [...new Set([...dict.langs.values()].flatMap((m) => m.essential))]
+    .filter((id) => dict.sources.has(id))
+    .sort();
+  const conceptsWithPoint = [...dict.sources.values()]
+    .filter((c) => c.point.length > 0)
+    .sort((a, b) => a.id.localeCompare(b.id));
+
+  // 「먼저 읽기」가 열릴 수 있는 개념 (D138 → **D150**). 처음에는 0장 후보(깊이 ≤ 2)뿐이었는데
+  // D150 이 게이트를 「그 개념의 겹이 0」으로 넓혔다 — 이제 `essential` 은 전부 첫 만남에서
+  // 한 줄이 펴지므로 깊이로 좁히면 **린트가 화면보다 좁아진다.** 좁으면 부채 표는 초록인데
+  // 화면은 정답을 흘린다.
+  const leakPool: string[] = [];
+  for (const meta of dict.langs.values()) {
+    for (const id of meta.essential) if (dict.sources.has(id)) leakPool.push(id);
+  }
+  leakPool.sort();
+
+  const blankGaps: string[] = [];
+  const whyGaps: string[] = [];
+  for (const id of essential) {
+    const concept = dict.sources.get(id) as SourceConcept;
+    const { hasHole } = queryFacts(concept, dict);
+    // 쿼리 없는 네임스페이스(`COMPUTED_NAMESPACES` — `exec/`·`proto/`·`cs/`)는 `@hole` 을
+    // **가질 수 없다**: 뚫을 구멍이 있으려면 짚을 노드가 있어야 한다. 그래서 그쪽이
+    // `essential` 로 들어오면 통과하는 길이 `no_hole_reason` 하나뿐이고, 그것이 맞다 —
+    // 「아직 안 썼다」와 「이 층에는 구멍이 없다」를 사람이 한 줄로 갈라 적는 자리다 (D145 · D157).
+    const filled = concept.blank.length > 0 && hasHole;
+    if (!filled && concept.no_hole_reason === null) {
+      blankGaps.push(`${id}(${concept.blank.length === 0 ? 'blank 없음' : '@hole 없음'})`);
+    }
+    if (concept.why_gate === undefined) whyGaps.push(id);
+  }
+
+  const pickGaps: string[] = [];
+  for (const concept of conceptsWithPoint) {
+    const n = queryFacts(concept, dict).picks.size;
+    if (n < MIN_PICKS) pickGaps.push(`${concept.id}(${n})`);
+  }
+
+  const leakGaps: string[] = [];
+  let leakTotal = 0;
+  for (const id of leakPool) {
+    const concept = dict.sources.get(id) as SourceConcept;
+    const tokens = answerTokens(concept);
+    if (tokens.size === 0) continue; // 짚을 정답이 없는 개념은 샐 것도 없다
+    leakTotal += 1;
+    const one = concept.dict.one_liner;
+    const texts = [koOf(one), typeof one === 'string' ? '' : one.en ?? ''];
+    const shown = [...tokens].filter((t) => texts.some((text) => revealsToken(text, t)));
+    if (shown.length > 0) leakGaps.push(`${id}(${shown.join(' ')})`);
+  }
+
+  return [
+    {
+      rule: 'blank-or-reason',
+      label: 'essential 에 blank+@hole 또는 no_hole_reason',
+      met: essential.length - blankGaps.length,
+      total: essential.length,
+      gaps: blankGaps,
+    },
+    {
+      rule: 'point-picks',
+      label: `point 가 있으면 @pick.N ${MIN_PICKS}개 이상`,
+      met: conceptsWithPoint.length - pickGaps.length,
+      total: conceptsWithPoint.length,
+      gaps: pickGaps,
+    },
+    {
+      rule: 'why-gate',
+      label: 'essential 에 why_gate',
+      met: essential.length - whyGaps.length,
+      total: essential.length,
+      gaps: whyGaps,
+    },
+    {
+      rule: 'zero-one-liner',
+      label: '첫 만남에 펴는 one_liner 가 정답을 안 낸다 (D150)',
+      met: leakTotal - leakGaps.length,
+      total: leakTotal,
+      gaps: leakGaps,
+    },
+  ];
+}
+
+/** 한글·한자는 두 칸을 먹는다. 표가 어긋나면 아무도 안 읽는다. */
+const width = (text: string): number =>
+  [...text].reduce((n, ch) => n + (/[\u1100-\u115F\u2E80-\uA4CF\uAC00-\uD7A3\uF900-\uFAFF\uFE30-\uFE6F\uFF00-\uFF60\uFFE0-\uFFE6]/.test(ch) ? 2 : 1), 0);
+const padEnd = (text: string, n: number): string => text + ' '.repeat(Math.max(0, n - width(text)));
+const padStart = (text: string, n: number): string => ' '.repeat(Math.max(0, n - width(text))) + text;
+
+/** 부채 표 한 판. 통과해도 찍는다 — 사람이 거리를 보는 자리가 그 표다. */
+export function debtTable(checks: readonly DebtCheck[], ratchet: Readonly<Record<string, number>>): string {
+  const label = Math.max(...checks.map((c) => width(c.label)), 24) + 2;
+  const lines = [`${padEnd('사전 저작 부채 (D145)', label + 2)}충족/대상   남은   래칫  못 채운 것`];
+  for (const c of checks) {
+    const left = c.total - c.met;
+    const gaps = c.gaps.length <= 4
+      ? c.gaps.join(' · ')
+      : `${c.gaps.slice(0, 4).join(' · ')} … +${c.gaps.length - 4}`;
+    lines.push(
+      `  ${padEnd(c.label, label)}${padStart(`${c.met}/${c.total}`, 7)}`
+      + `${padStart(String(left), 7)}${padStart(String(ratchet[c.rule] ?? 0), 7)}  ${gaps || '없음'}`,
+    );
+  }
+  return lines.join('\n');
 }

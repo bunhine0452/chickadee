@@ -1,0 +1,54 @@
+[
+  {
+    "queryId": "java/inheritance-override",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "extends",
+    "startLine": 3,
+    "startCol": 37,
+    "endLine": 3,
+    "endCol": 65,
+    "nodeKind": "superclass",
+    "inError": false
+  },
+  {
+    "queryId": "java/inheritance-override",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "extends",
+    "startLine": 3,
+    "startCol": 37,
+    "endLine": 3,
+    "endCol": 44,
+    "nodeKind": "extends",
+    "inError": false
+  },
+  {
+    "queryId": "java/inheritance-override",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "hole",
+    "form": "extends",
+    "startLine": 3,
+    "startCol": 37,
+    "endLine": 3,
+    "endCol": 44,
+    "nodeKind": "extends",
+    "inError": false
+  },
+  {
+    "queryId": "java/inheritance-override",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "extends",
+    "startLine": 3,
+    "startCol": 45,
+    "endLine": 3,
+    "endCol": 65,
+    "nodeKind": "type_identifier",
+    "inError": false
+  }
+]

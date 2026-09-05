@@ -1,52 +1,49 @@
-/* 목업: design/src/ink/session.css 「지목형」 블록.
-   바꾼 것 —
-     · 정답 면의 황 원색·먹 리터럴을 --t2 / --on-t2 로, 어긋남 밑줄을 --t1 로 (05 §4.2).
-       값은 목업의 --yellow / #221D18 / --pink 와 같고, 목업의 [data-theme="dark"] 한 줄은
-       --on-t2 가 야간반 값을 이미 들고 있어 지웠다 (05 §4.3).
-     · 선택자 순서를 특이도 오름차순으로 다시 깔았다 — stylelint no-descending-specificity.
-       규칙끼리 겹치는 자리가 없어 화면은 목업과 같다.
+/* 짚을 토큰 (D182 · 정본 §6).
+   **코드 글자 위에 색면을 한 겹도 얹지 않는다.** 면을 깔면 그 밑의 구문 강조가 7:1 을
+   못 넘긴다(CodePlate.css 의 실측). 그래서 신호는 전부 밑줄이다 —
+   짚을 수 있음은 점선, 고른 것은 굵은 실선 + 굵은 글자, 정오는 밑줄 색.
 
-   버튼이지만 종이 위에 얹힌 면은 없다 — 짚을 수 있다는 것은 점선 밑줄로만 말한다. */
+   고른 것에 --accent 를 쓰지 않는 이유: `--syn-fn`(#17418F)과 `--accent`(#0E47A6)의 대비가
+   1.13:1 이라(어두운 갈래 1.02:1) 함수 이름 밑에 그은 액센트 밑줄이 글자와 한 덩어리로
+   읽힌다. 대신 --text 로 긋는다 — 여섯 구문 색 어느 것과도 갈린다. */
 .tk {
   all: unset;
   box-sizing: border-box;
 }
 
 .tk:focus-visible {
-  outline: 3px solid var(--t0);
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
 
 .code.pickable .tk {
   margin: 0 -1px;
   padding: 0 1px;
-  border-bottom: 2px dashed var(--ink-mute);
+  border-bottom: 2px dashed var(--border-strong);
   cursor: pointer;
-  transition: background .12s;
+  transition: border-color var(--dur-fast);
 }
 
 .code:not(.pickable) .tk { cursor: default }
 
 .code.pickable .tk:hover {
-  border-bottom-color: var(--rule);
+  border-bottom-color: var(--text-muted);
   border-bottom-style: solid;
-  background: var(--paper-3);
 }
 
+/* 고른 것 — 굵은 검은 밑줄과 굵은 글자. 색맹 여부와 무관하게 갈린다. */
 .code.pickable .tk.sel {
-  border-bottom: 2px solid var(--t0);
-  background: var(--paper-3);
-  box-shadow: inset 0 -2px 0 var(--t0);
+  border-bottom: 3px solid var(--text);
+  font-weight: var(--fw-bold);
 }
 
+/* 정답·오답은 밑줄 색과 모양으로 온다. 초록·빨강은 여섯 구문 색과 색상이 겹치지 않는다. */
 .code .tk.right {
-  border-bottom: 2px solid var(--rule);
-  background: var(--t2);
-  color: var(--on-t2);
+  border-bottom: 3px solid var(--ok);
+  font-weight: var(--fw-bold);
 }
 
 .code .tk.wrong {
-  border-bottom: 2px solid var(--t1);
-  opacity: .85;
-  text-decoration: none;
+  border-bottom: 3px dashed var(--bad);
+  font-weight: var(--fw-bold);
 }

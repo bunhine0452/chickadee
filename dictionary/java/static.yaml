@@ -1,0 +1,241 @@
+schema: 1
+id: java/static
+universal: null
+name: { ko: 틀에 하나뿐인 것, en: Static member }
+token: "static"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 3
+prereq: [java/field-declaration, java/method-declaration]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "상자마다가 아니라 틀에 하나뿐인 것. 그 안에는 「이 상자」가 없다."
+    en: "One per mould, not one per box. Inside it there is no “this box”."
+  why:
+    ko: >-
+      보통 필드와 메서드는 <b>상자에 딸립니다</b> — 상자를 만들어야 쓰고, 상자마다 값이 따로예요.
+      {{site.line}}행처럼 이 낱말이 붙으면 딸리는 곳이 상자가 아니라 <b>틀</b>이 됩니다. 그래서
+      상자를 안 만들고도 부를 수 있고, 값은 프로그램 전체에 하나뿐이에요. 그 대신 잃는 것이
+      있습니다 — 안에 「이 상자」가 없어서, 상자에 딸린 필드를 <b>이름만으로 못 읽습니다</b>.
+      읽으려면 어느 상자인지를 손으로 넘겨야 해요.
+    en: >-
+      Ordinarily fields and methods <b>belong to a box</b> — a box must exist to use them, and each box
+      has its own values. When this word is attached, as on line {{site.line}}, they belong to the
+      <b>mould</b> instead. So they can be called without making a box, and the value exists once for
+      the whole program. Something is lost in exchange: with no “this box” inside, a field that belongs
+      to a box <b>cannot be read by name alone</b>. Which box has to be handed in by hand.
+  trace:
+    - ko: "{{pick.1|code}} 표시가 붙어 딸리는 곳이 상자에서 틀로 옮겨진다."
+      en: "With {{pick.1|code}} attached, what it belongs to moves from the box to the mould."
+    - ko: "{{pick.3|code}} 자리는 상자를 만들지 않고도 부를 수 있게 된다."
+      en: "{{pick.3|code}} becomes callable without making a box."
+    - ko: "그 안에서는 상자에 딸린 필드를 이름만으로 읽을 수 없다."
+      en: "Inside it, a field belonging to a box cannot be read by name alone."
+
+rule:
+  ko: "<b>딸리는 곳이 틀이다.</b> 그래서 안에 「이 상자」가 없고, 상자에 딸린 것을 이름만으로 못 읽는다."
+  en: "<b>It belongs to the mould.</b> So there is no “this box” inside, and a box's fields are unreachable by name."
+ok:
+  ko: >-
+    {{pick.3|code}} 자리는 상자 없이 클래스 이름만으로 부릅니다. 값도 프로그램에 하나뿐이에요.
+  en: >-
+    {{pick.3|code}} is reached through the class name with no box. Its value exists once for the program.
+payoff:
+  ko: >-
+    이걸 알면 「왜 여기서는 그 필드를 못 읽지」가 풀립니다 — 딸리는 곳이 달라서, 어느 상자인지가
+    <b>정해져 있지 않기</b> 때문이에요.
+  en: >-
+    Knowing this untangles “why can't I read that field here” — it belongs elsewhere, so <b>which box</b>
+    was never settled.
+bridge:
+  ko: >-
+    파이썬은 <code>self</code> 를 매개변수로 <b>손으로 받아서</b> 없으면 없는 대로 티가 납니다.
+    자바는 그 자리를 문법이 숨겨 두어, 없어졌다는 것이 오류 문구로만 드러나요.
+  en: >-
+    Python <b>takes <code>self</code> by hand</b> as a parameter, so its absence is visible. Here the
+    grammar hides that slot, and its absence surfaces only as an error message.
+misconceptions:
+  - ko: "안에서도 상자의 필드를 그냥 쓸 수 있다 — 「이 상자」가 없어서 못 씁니다."
+    en: "A box's fields are usable inside anyway — with no “this box”, they are not."
+  - ko: "값이 상자마다 하나씩 생긴다 — 프로그램 전체에 하나입니다. 한쪽에서 고치면 다 바뀌어요."
+    en: "Each box gets its own value — there is one for the whole program. Change it anywhere and it changes everywhere."
+  - ko: "빠르게 하려고 붙인다 — 속도가 아니라 <b>딸리는 곳</b>을 정하는 표시입니다."
+    en: "It is attached for speed — it is not about speed but about <b>what it belongs to</b>."
+  - ko: "상자를 통해서는 못 부른다 — 부를 수는 있지만 어느 상자든 <b>같은 하나</b>를 부르는 것입니다."
+    en: "It cannot be called through a box — it can, but every box reaches <b>the same one</b>."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>딸리는 곳을 틀로 옮기는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that moves it to the mould</b>."
+    hint:
+      ko: "타입보다 앞에 오는 낱말 중 하나입니다."
+      en: "It is one of the words standing before the type."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>무엇을 담거나 돌려주는지</b>입니다. 딸리는 곳과는 다른 축이에요."
+          en: "{{pick.2|code}} says <b>what it holds or returns</b>. That is a different axis from what it belongs to."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 무엇이냐 어디에 딸리냐"
+            en: "The sharpest spot — what it is or what it belongs to"
+          code:
+            - "타입: 무엇을 담나"
+            - "앞 낱말: 상자냐 틀이냐"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>이름</b>입니다. 딸리는 곳은 앞의 낱말이 정해요."
+          en: "{{pick.3|code}} is the <b>name</b>. What it belongs to is set by the word in front."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 이름이냐 소속이냐"
+            en: "The sharpest spot — the name or the belonging"
+          code:
+            - "static int count;"
+            - "//  ^소속  ^타입 ^이름"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행 안에서 상자에 딸린 필드를 <b>이름만으로</b> 읽으면 어떻게 될까요?"
+      en: "Read a box's field <b>by name alone</b> inside line {{site.line}} — what happens?"
+    hint:
+      ko: "어느 상자인지가 정해져 있어야 읽을 수 있습니다."
+      en: "Reading needs which box to be settled."
+    options:
+      - t:
+          ko: "컴파일이 멈춘다 — 어느 상자인지가 정해져 있지 않다"
+          en: "Compiling stops — which box was never settled"
+      - t:
+          ko: "가장 먼저 만든 상자의 값을 읽는다"
+          en: "It reads the value of the first box made"
+        diag:
+          t:
+            ko: "「가장 먼저」 같은 규칙은 없습니다. 상자가 하나도 없을 수도 있어서, 자바는 아예 <b>묻지도 않고</b> 막아요."
+            en: "There is no “first” rule. There may be no boxes at all, so Java blocks it <b>without even asking</b>."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 고르나 막나"
+              en: "The sharpest spot — pick one or block"
+            code:
+              - "상자가 0개일 수 있다"
+              - "→ 고를 수 없으니 막는다"
+      - t:
+          ko: "읽히지만 값이 늘 기본값이다"
+          en: "It reads, but always gives the default"
+        diag:
+          t:
+            ko: "읽히지 <b>않습니다</b>. 값이 무엇이냐 이전에 「어느 상자냐」가 없어요."
+            en: "It does <b>not</b> read. Before any question of value, there is no “which box”."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 값이 없냐 상자가 없냐"
+              en: "The sharpest spot — no value or no box"
+            code:
+              - "값 이전의 문제: 어느 상자인가"
+      - t:
+          ko: "실행하다가 그 줄에서 멈춘다"
+          en: "It stops at that line while running"
+        diag:
+          t:
+            ko: "실행까지 안 갑니다. 이것은 <b>컴파일할 때</b> 걸리는 문제예요."
+            en: "It never reaches run time. This is caught <b>at compile time</b>."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 번역할 때냐 돌 때냐"
+              en: "The sharpest spot — translating or running"
+            code:
+              - "javac: 여기서 막힌다"
+              - "java:  여기까지 못 온다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 상자마다가 아니라 <b>틀에 하나</b>만 두게 합니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} makes it <b>one per mould</b>, not one per box.
+    hint:
+      ko: "보기 넷은 전부 같은 자리에 설 수 있는 낱말입니다."
+      en: "All four can stand in the same slot."
+    options:
+      - { t: "static", mono: true }
+      - t: "final"
+        mono: true
+        diag:
+          t:
+            ko: "<code>final</code> 은 <b>다시 넣지 못한다</b>는 뜻이고 딸리는 곳은 그대로 상자입니다. 두 낱말은 다른 축이라 같이 붙기도 해요."
+            en: "<code>final</code> means <b>no reassigning</b>, and it still belongs to the box. The two are different axes and often appear together."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 소속이냐 다시 넣기냐"
+              en: "The sharpest spot — belonging or reassignment"
+            code:
+              - "소속: 상자냐 틀이냐"
+              - "다시 넣기: 되냐 안 되냐"
+      - t: "abstract"
+        mono: true
+        diag:
+          t:
+            ko: "<code>abstract</code> 는 <b>몸통을 안 적는다</b>는 뜻입니다. 물려받은 쪽이 채워야 해서 딸리는 곳과는 상관이 없어요."
+            en: "<code>abstract</code> means <b>no body is written</b>; whoever inherits fills it. It says nothing about belonging."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 소속이냐 몸통이냐"
+              en: "The sharpest spot — belonging or the body"
+            code:
+              - "abstract: 몸통이 없다"
+              - "이 낱말:  몸통은 있고 소속이 다르다"
+      - t: "default"
+        mono: true
+        diag:
+          t:
+            ko: "<code>default</code> 는 인터페이스 안에서 <b>몸통을 적을 때</b> 쓰는 낱말입니다. 클래스의 필드에는 못 붙어요."
+            en: "<code>default</code> is used inside an interface to <b>give a body</b>. It cannot go on a class field."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 어디에 붙는 낱말이냐"
+              en: "The sharpest spot — where the word may go"
+            code:
+              - "default: 인터페이스 메서드"
+              - "이 낱말: 클래스의 필드·메서드"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행을 <b>상자에 딸리지 않게</b> 한 이유는 무엇일까요?"
+    en: "Why is line {{site.line}} kept <b>off the box</b>?"
+  choices:
+    - t:
+        ko: "상자가 없어도 되는 일이라서 — 어느 상자인지가 답에 영향을 주지 않는다"
+        en: "Because the work needs no box — which box it is does not change the answer"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 일이 무엇에만 기대는지도 적어 보세요."
+        en: "That is the direction. Add what the work actually leans on."
+    - t:
+        ko: "상자를 만드는 비용을 아끼려고"
+        en: "To save the cost of making a box"
+      ok: false
+      fb:
+        ko: "비용은 곁다리입니다. 기준은 <b>어느 상자인지가 필요한가</b>예요."
+        en: "Cost is a side effect. The test is whether <b>which box</b> is needed at all."
+    - t:
+        ko: "값을 여러 곳에서 고치려고"
+        en: "So the value can be changed from many places"
+      ok: false
+      fb:
+        ko: "그건 오히려 위험한 이유입니다. 하나뿐인 값을 여기저기서 고치면 추적이 안 돼요."
+        en: "That is a reason to be careful, not a reason to do it. One shared value changed everywhere is untraceable."
+
+queries:
+  - { grammars: [java], file: ./static.scm }
+
+examples:
+  - code: "class C { static int count = 0; }"
+    expect: { sites: 1, form: field, hole: "static", picks: { 1: "static", 2: "int", 3: "count" } }
+  - code: "class C { public static Long getCurrentUserId() { return 1L; } }"
+    expect: { sites: 1, form: method, picks: { 1: "static", 2: "Long", 3: "getCurrentUserId" } }
+  - code: "class C { int count = 0; }"
+    expect: none

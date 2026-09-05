@@ -1,0 +1,93 @@
+[
+  {
+    "queryId": "java/equals-hashcode",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "equals",
+    "startLine": 8,
+    "startCol": 4,
+    "endLine": 11,
+    "endCol": 5,
+    "nodeKind": "method_declaration",
+    "inError": false
+  },
+  {
+    "queryId": "java/equals-hashcode",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "equals",
+    "startLine": 9,
+    "startCol": 19,
+    "endLine": 9,
+    "endCol": 25,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "java/equals-hashcode",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "hole",
+    "form": "equals",
+    "startLine": 9,
+    "startCol": 19,
+    "endLine": 9,
+    "endCol": 25,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "java/equals-hashcode",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "equals",
+    "startLine": 9,
+    "startCol": 25,
+    "endLine": 9,
+    "endCol": 35,
+    "nodeKind": "formal_parameters",
+    "inError": false
+  },
+  {
+    "queryId": "java/equals-hashcode",
+    "matchId": 2,
+    "patternIndex": 1,
+    "name": "site",
+    "form": "hashCode",
+    "startLine": 13,
+    "startCol": 4,
+    "endLine": 16,
+    "endCol": 5,
+    "nodeKind": "method_declaration",
+    "inError": false
+  },
+  {
+    "queryId": "java/equals-hashcode",
+    "matchId": 2,
+    "patternIndex": 1,
+    "name": "pick.1",
+    "form": "hashCode",
+    "startLine": 14,
+    "startCol": 15,
+    "endLine": 14,
+    "endCol": 23,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "java/equals-hashcode",
+    "matchId": 2,
+    "patternIndex": 1,
+    "name": "pick.3",
+    "form": "hashCode",
+    "startLine": 14,
+    "startCol": 26,
+    "endLine": 16,
+    "endCol": 5,
+    "nodeKind": "block",
+    "inError": false
+  }
+]

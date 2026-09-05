@@ -43,6 +43,18 @@ rules:
       (`Safe navigation` ↔ `Optional chaining`, `Callback chain` ↔
       `Promise chain with .then` …). 짝은 아래 표의 `universal` 열이 보여 준다.
       짝끼리 이름을 맞추지 않는다 — 맞추면 첫 규칙의 충돌이 24건이 된다.
+  - id: framework-proper-noun
+    rule: |
+      프레임워크 고유 이름은 **번역하지 않는다** (D187 ⑮). Bean · Controller · Repository ·
+      Autowired · Interceptor 는 스프링이 지은 이름이고, 학습자가 자기 코드에서 보는 글자도
+      그것이다. `common/**` 의 「평이한 설명」 규칙은 보편 개념의 것이지 프레임워크의 것이
+      아니다 — 「스프링이 들고 있는 객체」를 en 에서 "Managed object" 로 옮기면 앱이 부르는
+      이름과 코드가 쓰는 이름이 갈린다. **ko 는 그대로 풀어 쓴다**: 한국어 이름은 처음 보는
+      사람에게 그 이름이 무엇인지 말해야 하고, 고유 이름은 en 열과 본문 코드가 든다.
+    applied:
+      # 고칠 것이 없었다 — `dictionary/spring/*.yaml` 열다섯의 `name.en` 이 이미 원어다.
+      # 이 규칙은 그것을 잠그고, 다음 프레임워크 사전(`react/`·`mybatis/`)에 미리 건다.
+      - spring/**:            "변경 0건" — 아래 표가 그 name.en 을 그대로 옮긴 것이다
 
 # ── 개념 이름 ─────────────────────────────────────────────────────────────
 # ko 가 정본이다. en 을 고치면 해당 YAML 의 name.en 도 같이 고친다.
@@ -239,3 +251,177 @@ concepts:
     ko: "undefined 와 null"
     en: "undefined and null"
     universal: common/absent-value   # Absent value
+
+  # ── 0부 「값과 식」 — 첫 물결 합류 때 더한 39개 (D187 · 2026-09-05). en 은 각 YAML 의 name.en 을 옮겼고
+  # 규칙 셋(universal-plain 등)은 저작 세션이 적용했다. 사람이 다시 볼 자리다.
+  - id: common/float-literal
+    ko: "소수 값"
+    en: "Decimal value"
+  - id: common/integer-literal
+    ko: "정수 값"
+    en: "Whole-number value"
+  - id: common/truthiness
+    ko: "무엇이 참으로 쳐지나"
+    en: "What counts as true"
+  - id: cs/operator-precedence
+    ko: "괄호 없이 무엇이 먼저 묶이나"
+    en: "Operator precedence"
+  - id: cs/type-conversion
+    ko: "다른 타입 둘이 만나면"
+    en: "Type conversion"
+  - id: java/autoboxing
+    ko: "상자에 넣고 꺼내기"
+    en: "Boxing and unboxing"
+  - id: java/boolean-only-condition
+    ko: "조건 자리의 규칙"
+    en: "What a condition takes"
+  - id: java/explicit-conversion
+    ko: "적어서 좁히기"
+    en: "Narrowing by hand"
+  - id: java/float-inexact
+    ko: "소수가 안 떨어진다"
+    en: "Fractions do not land"
+    universal: common/float-literal
+  - id: java/floating-type
+    ko: "실수 타입 둘"
+    en: "Two decimal types"
+  - id: java/implicit-conversion
+    ko: "저절로 넓어지는 것"
+    en: "Widening on its own"
+  - id: java/integer-limit
+    ko: "정수의 한계"
+    en: "Integer limits"
+    universal: common/integer-literal
+  - id: java/operator-precedence
+    ko: "접히는 순서"
+    en: "How an expression folds"
+  - id: java/reference-binding
+    ko: "값이 가나 자리가 가나"
+    en: "Value or address"
+  - id: java/reference-equality
+    ko: "같은 상자냐 같은 내용이냐"
+    en: "Same box or same contents"
+  - id: java/string-concat
+    ko: "글자 잇기"
+    en: "Joining text"
+  - id: java/string-literal
+    ko: "글자 묶음"
+    en: "String literal"
+    universal: common/text-literal
+  - id: java/text-length
+    ko: "글자와 길이"
+    en: "Characters and length"
+  - id: java/value-bits
+    ko: "값과 비트"
+    en: "Values and bits"
+  - id: sql/clause-order
+    ko: "적는 순서와 도는 순서가 다르다"
+    en: "Written order, run order"
+  - id: sql/column-type
+    ko: "타입은 값이 아니라 열에 붙는다"
+    en: "Types live on columns"
+  - id: sql/expression-per-row
+    ko: "식 하나가 행마다 한 번"
+    en: "One expression, every row"
+  - id: sql/implicit-cast
+    ko: "타입이 다르면 조용히 맞춘다"
+    en: "Implicit conversion"
+  - id: sql/null-unknown
+    ko: "없음이 아니라 모름"
+    en: "Unknown, not empty"
+  - id: sql/row-and-set
+    ko: "단위는 행이다"
+    en: "Rows, not values"
+  - id: sql/self-join
+    ko: "같은 표를 두 번 적기"
+    en: "Self join"
+  - id: sql/three-valued-comparison
+    ko: "견주기가 내는 답이 셋"
+    en: "Three-valued comparison"
+  - id: sql/value-and-name
+    ko: "따옴표가 값과 이름을 가른다"
+    en: "Literal or identifier"
+  - id: ts/explicit-conversion
+    ko: "적어 놓는 타입 변환"
+    en: "Conversion you write down"
+  - id: ts/float-inexact
+    ko: "소수가 안 떨어진다"
+    en: "Decimals do not land"
+  - id: ts/implicit-conversion
+    ko: "저절로 바뀌는 타입"
+    en: "Conversion that happens on its own"
+  - id: ts/integer-division
+    ko: "나눗셈과 버림"
+    en: "Division and truncation"
+  - id: ts/loose-equality
+    ko: "느슨한 같음"
+    en: "Loose equality"
+  - id: ts/number-is-double
+    ko: "수가 한 종류다"
+    en: "One kind of number"
+  - id: ts/operator-precedence
+    ko: "접히는 순서"
+    en: "The order it folds"
+  - id: ts/reference-sharing
+    ko: "같은 것을 가리키기"
+    en: "Pointing at the same thing"
+  - id: ts/text-length
+    ko: "글자와 코드 단위"
+    en: "Characters and code units"
+  - id: ts/truthy-falsy
+    ko: "참 같은 값 거짓 같은 값"
+    en: "Truthy and falsy"
+    universal: common/truthiness
+  - id: ts/value-bits
+    ko: "값과 비트"
+    en: "Values and bits"
+
+  # ── spring/ 열다섯 (D176 · D187 ⑮) ───────────────────────────────────────
+  # ko 는 「무엇을 하는 자리인가」를 풀어 쓰고, en 은 스프링이 지은 이름 그대로다
+  # (rules 의 `framework-proper-noun`). `universal` 은 붙지 않는다 — 프레임워크 개념은
+  # 다른 언어로 전이되지 않는다(D4 의 전이는 `universal` 이 같은 언어 개념 사이의 것이다).
+  - id: spring/bean-and-container
+    ko: "스프링이 들고 있는 객체"
+    en: "Bean and container"
+  - id: spring/bean-lifecycle
+    ko: "빈이 태어나고 죽는 순서"
+    en: "Bean lifecycle"
+  - id: spring/bean-validation
+    ko: "들어온 값을 메서드 앞에서 검사하기"
+    en: "Bean validation"
+  - id: spring/component-scan
+    ko: "패키지를 훑어 빈을 찾기"
+    en: "Component scan"
+  - id: spring/configuration-binding
+    ko: "설정 파일의 값이 코드로 들어오는 길"
+    en: "Configuration binding"
+  - id: spring/connection-and-tx-boundary
+    ko: "연결을 빌려 쓰는 구간"
+    en: "Connection and transaction boundary"
+  - id: spring/controller-mapping
+    ko: "주소를 메서드에 배정하기"
+    en: "Controller mapping"
+  - id: spring/dependency-injection
+    ko: "필요한 것을 밖에서 받기"
+    en: "Dependency injection"
+  - id: spring/exception-handler
+    ko: "던진 예외가 응답이 되는 자리"
+    en: "Exception handler"
+  - id: spring/filter-vs-interceptor
+    ko: "컨트롤러 앞에 서는 두 자리"
+    en: "Filter and interceptor"
+  - id: spring/persistence-mapping
+    ko: "표의 열과 객체의 필드를 맞춰 두기"
+    en: "Persistence mapping"
+  - id: spring/proxy-and-aop
+    ko: "내 객체 대신 나가는 프록시"
+    en: "Proxy and AOP"
+  - id: spring/repository-pattern
+    ko: "저장소를 인터페이스 뒤에 두기"
+    en: "Repository pattern"
+  - id: spring/request-dispatch
+    ko: "요청 하나가 메서드까지 가는 길"
+    en: "Request dispatch"
+  - id: spring/transaction-propagation
+    ko: "이미 열린 트랜잭션을 만났을 때"
+    en: "Transaction propagation"

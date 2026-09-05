@@ -1,0 +1,67 @@
+[
+  {
+    "queryId": "py/is-identity",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "site",
+    "form": "is-not",
+    "startLine": 2,
+    "startCol": 7,
+    "endLine": 2,
+    "endCol": 24,
+    "nodeKind": "comparison_operator",
+    "inError": false
+  },
+  {
+    "queryId": "py/is-identity",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.2",
+    "form": "is-not",
+    "startLine": 2,
+    "startCol": 7,
+    "endLine": 2,
+    "endCol": 12,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "py/is-identity",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.1",
+    "form": "is-not",
+    "startLine": 2,
+    "startCol": 13,
+    "endLine": 2,
+    "endCol": 19,
+    "nodeKind": "is not",
+    "inError": false
+  },
+  {
+    "queryId": "py/is-identity",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "hole",
+    "form": "is-not",
+    "startLine": 2,
+    "startCol": 13,
+    "endLine": 2,
+    "endCol": 19,
+    "nodeKind": "is not",
+    "inError": false
+  },
+  {
+    "queryId": "py/is-identity",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.3",
+    "form": "is-not",
+    "startLine": 2,
+    "startCol": 20,
+    "endLine": 2,
+    "endCol": 24,
+    "nodeKind": "none",
+    "inError": false
+  }
+]

@@ -1,0 +1,90 @@
+schema: 1
+id: cs/bounds
+universal: null
+name: { ko: "끝을 넘어 읽으면", en: "Bounds" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+# C 편이 밀어낸 것 (cs.md §10.2).
+track_default: t0
+essential: false
+difficulty: 3
+prereq: [cs/contiguous-vs-linked, cs/memory-address]
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "경계를 언어가 검사하느냐가 갈린다. 안 하면 남의 값이 읽히고 조용하다."
+    en: "Whether the language checks the edge. If not, you read a neighbour, quietly."
+  why:
+    ko: >-
+      항목 열 개짜리 목록에서 열한 번째를 달라고 하면 무슨 일이 날까요.
+      언어가 <b>검사하면</b> 그 자리에서 멈추고 어디서 났는지 알려 줍니다.
+      검사하지 않으면 <b>그 자리에 있던 다른 값</b>을 그냥 읽어요 — 오류도 메시지도 없이,
+      말이 되는 것처럼 보이는 값이 나옵니다. 이게 무서운 이유는 <b>조용해서</b>입니다.
+      원인이 난 자리와 이상해 보이는 자리가 멀어서, 검사 없는 언어에서 경계는
+      사람이 세어야 하는 것이 됩니다.
+    en: >-
+      Ask a ten-item list for the eleventh. If the language <b>checks</b>, it stops there and tells
+      you where. If it does not, it simply reads <b>whatever value sat at that spot</b> — no error,
+      no message, a value that looks plausible. What makes this dangerous is the <b>quiet</b>. The
+      place of the cause and the place of the symptom are far apart, so in unchecked languages the
+      boundary is something a person must count.
+  trace: []
+rule:
+  ko: "<b>검사 없는 경계는 사람이 센다.</b> 넘어가도 아무 말이 없다."
+  en: "<b>An unchecked edge is counted by hand.</b> Crossing it says nothing."
+ok:
+  ko: >-
+    검사하는 언어에서는 넘어가는 순간 멈춥니다. 검사 안 하는 언어에서는 길이를 들고 다니며
+    직접 비교하는 것이 그 자리를 메우는 방법입니다.
+  en: >-
+    Checked languages stop the moment you cross. In unchecked ones, carrying the length and
+    comparing yourself is what fills the gap.
+misconceptions:
+  - ko: "넘어가면 오류가 난다 — 검사하지 않는 언어에서는 아무 일 없이 지나갑니다."
+    en: "Crossing raises an error — unchecked languages just carry on."
+  - ko: "읽기만 하면 안전하다 — 읽은 값이 그대로 흘러가 나중에 이상한 결과가 됩니다."
+    en: "Reading is harmless — the read value flows on and shows up as an odd result later."
+  - ko: "검사는 공짜다 — 항목마다 비교가 하나 늘어납니다. 그래서 안 하는 언어가 있습니다."
+    en: "Checking is free — it is one comparison per access. Hence languages that skip it."
+meaning:
+  - q:
+      ko: "목록 끝을 넘어 읽었는데 오류 없이 이상한 값이 나왔습니다. <b>무엇을 읽은 건가요?</b>"
+      en: "Reading past the end gave a strange value and no error. <b>What was read?</b>"
+    hint:
+      ko: "그 자리에도 메모리는 있습니다. 비어 있는 것이 아니에요."
+      en: "There is memory at that spot. It is not nothing."
+    options:
+      - t: { ko: "그 자리에 놓여 있던 다른 값", en: "Whatever other value was sitting there" }
+      - t: { ko: "목록의 마지막 항목이 한 번 더", en: "The last item, once more" }
+        diag:
+          t:
+            ko: "마지막 항목이 나오려면 <b>누군가 그렇게 정해 줘야</b> 합니다. 검사 안 하는 읽기는 정해 주는 사람이 없어요."
+            en: "Returning the last item requires <b>someone to decide that</b>. An unchecked read has no such decider."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 정해진 답이냐 우연이냐", en: "The sharpest spot — a defined answer or an accident" }
+            code:
+              - "정해짐: 언제나 같은 값"
+              - "우연: 그때 거기 있던 것"
+      - t: { ko: "「없음」을 뜻하는 값", en: "A value meaning “absent”" }
+        diag:
+          t:
+            ko: "「없음」을 돌려주는 것도 <b>검사한</b> 결과입니다. 검사를 안 했으니 돌려줄 「없음」도 없어요."
+            en: "Returning “absent” is itself the outcome of <b>a check</b>. With no check there is no “absent” to return."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 검사했나 안 했나", en: "The sharpest spot — checked or not" }
+            code:
+              - "검사함: 없음 또는 멈춤"
+              - "검사 안 함: 거기 있던 비트"
+      - t: { ko: "0 — 안 쓰는 자리는 0으로 채워져 있다", en: "Zero — unused space is zeroed" }
+        diag:
+          t:
+            ko: "새로 받은 자리가 0인 경우는 있지만, 넘어간 자리는 <b>다른 것이 쓰던 자리</b>일 수 있습니다."
+            en: "Freshly granted space can be zeroed, but the spot past the end may be <b>space something else uses</b>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 새 자리냐 남의 자리냐", en: "The sharpest spot — fresh or a neighbour's" }
+            code:
+              - "새 자리: 0일 수 있다"
+              - "넘어간 자리: 남이 쓰던 값"

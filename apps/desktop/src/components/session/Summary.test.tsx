@@ -38,7 +38,7 @@ describe('Summary', () => {
   it('집계 네 칸을 숫자로 적는다', () => {
     const { container } = render(<Summary {...BASE} onHome={() => undefined} />);
     const cells = [...container.querySelectorAll('.tally > div')].map((el) => el.textContent);
-    expect(cells[0]).toContain('5판');
+    expect(cells[0]).toContain('5문제');
     expect(cells[1]).toContain('4 / 5');
     expect(cells[2]).toContain('15분');
     expect(cells[3]).toContain('7일');
@@ -48,14 +48,14 @@ describe('Summary', () => {
     const { container } = render(<Summary {...BASE} onHome={() => undefined} />);
     const rows = [...container.querySelectorAll('.shift')];
     expect(rows).toHaveLength(3);
-    expect(rows[0]?.textContent).toContain('+1겹');
-    expect(rows[1]?.textContent).toContain('−1겹 · 다시 찍기');
+    expect(rows[0]?.textContent).toContain('+1단계');
+    expect(rows[1]?.textContent).toContain('−1단계 · 다시 풀기');
     expect(rows[2]?.textContent).toContain('12줄 중 11줄 의미 일치');
   });
 
   it('겹 이름은 평문으로 병기한다', () => {
     const { container } = render(<Summary {...BASE} onHome={() => undefined} />);
-    expect(container.querySelector('.shift')?.textContent).toContain('먹판 → + 청판');
+    expect(container.querySelector('.shift')?.textContent).toContain('익히는 중 → 자리 잡음');
   });
 
   it('다음 인쇄가 코앞인 판만 soon 이 붙는다', () => {
@@ -135,11 +135,11 @@ describe('Summary', () => {
     const user = userEvent.setup();
     render(<Summary {...BASE} onHome={() => undefined} onAgain={onAgain} />);
 
-    await user.click(screen.getByRole('button', { name: '오늘 판 다시 보기' }));
+    await user.click(screen.getByRole('button', { name: '오늘 문제 다시 보기' }));
     expect(onAgain).toHaveBeenCalledTimes(1);
     cleanup();
 
     render(<Summary {...BASE} onHome={() => undefined} />);
-    expect(screen.queryByRole('button', { name: '오늘 판 다시 보기' })).toBeNull();
+    expect(screen.queryByRole('button', { name: '오늘 문제 다시 보기' })).toBeNull();
   });
 });

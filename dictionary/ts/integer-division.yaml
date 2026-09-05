@@ -1,0 +1,223 @@
+schema: 1
+id: ts/integer-division
+universal: null
+name: { ko: 나눗셈과 버림, en: Division and truncation }
+token: "Math.floor"
+grammars: [typescript, tsx, javascript, vue]
+framework: null
+essential: true
+difficulty: 2
+prereq: [ts/arithmetic, cs/floating-point]
+confusions: [ts/arithmetic, ts/number-literal]
+
+dict:
+  one_liner:
+    ko: "나누기는 늘 소수를 낸다. 버리는 방향은 두 가지이고 음수에서 갈린다."
+    en: "Division yields a fraction, and the two ways to drop it part on negatives."
+  why:
+    ko: >-
+      자바·C 를 먼저 배웠다면 <code>7 / 2</code> 를 <code>3</code> 으로 예상합니다. 여기서는
+      <code>3.5</code> 예요. 그래서 {{site.line}}행처럼 {{pick.2|code}}{{pick.2|josa:을,를}}
+      따로 불러야 하고, 어느 쪽으로 버리느냐를 그때 고르게 됩니다.
+    en: >-
+      If Java or C came first you expect <code>7 / 2</code> to be <code>3</code>. Here it is
+      <code>3.5</code>. That is why line {{site.line}} has to call {{pick.2|code}} separately, and
+      choosing which way to drop happens right there.
+  trace:
+    - ko: "{{pick.3|code}} 의 값은 소수까지 그대로 있다."
+      en: "The value of {{pick.3|code}} still carries its fraction."
+    - ko: "{{site.line}}행의 {{pick.2|code}}{{pick.2|josa:이,가}} 정해진 방향으로 소수를 버린다."
+      en: "{{pick.2|code}} on line {{site.line}} drops the fraction in one fixed direction."
+    - ko: "남는 것도 여전히 같은 종류의 수다 — 정수 종류로 바뀌는 것이 아니다."
+      en: "What is left is still the same kind of number — it does not become an integer kind."
+
+rule:
+  ko: >-
+    <b>아래로 버리기와 0 쪽으로 버리기는 다른 일이다.</b> 양수에서는 같고 음수에서 갈린다.
+  en: >-
+    <b>Dropping downward and dropping toward zero are different jobs.</b> They agree on positives
+    and part on negatives.
+result:
+  label:
+    ko: "{{site.line}}행이 내놓는 것"
+    en: "What line {{site.line}} yields"
+  value: "{{pick.1}}.{{pick.2}}(…)"
+  note:
+    ko: "소수를 버린 같은 종류의 수"
+    en: "the same kind of number, fraction dropped"
+ok:
+  ko: >-
+    {{pick.1|code}} 아래의 이름 하나가 소수를 <b>정해진 방향으로</b> 버립니다.
+    양수만 다루는 코드에서는 어느 것을 써도 답이 같아요.
+  en: >-
+    One name under {{pick.1|code}} drops the fraction <b>in one fixed direction</b>. In code that
+    only ever sees positives, either name gives the same answer.
+payoff:
+  ko: >-
+    쪽 번호·격자 좌표·나이 계산이 이 자리에서 갈립니다. 음수가 한 번이라도 들어오면
+    어느 방향을 골랐는지가 그대로 버그가 돼요.
+  en: >-
+    Page numbers, grid coordinates and age calculations part ways here. Let a negative in once and
+    the direction you picked becomes the bug.
+bridge:
+  ko: >-
+    나누기가 늘 소수를 내는 이유는 수의 종류가 하나뿐이기 때문입니다 — 정수만 담는
+    자리가 없어요.
+  en: >-
+    Division always yields a fraction because there is only one kind of number — no slot holds
+    whole values alone.
+misconceptions:
+  - ko: "<code>7 / 2</code> 는 <code>3</code> 이다 — 그것은 정수 타입이 있는 언어의 답입니다."
+    en: "<code>7 / 2</code> is <code>3</code> — that is the answer in a language that has an integer type."
+  - ko: "아래로 버리기와 0 쪽으로 버리기는 같다 — 양수에서만 같고 음수에서 한 칸 갈립니다."
+    en: >-
+      Dropping downward and dropping toward zero are the same — they match on positives only and
+      differ by one on negatives.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>소수를 버리는 방향을 정하는 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name that fixes which way the fraction is dropped</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 셈에 쓰는 이름들을 <b>담아 둔 자리</b>입니다. 방향을 정하는 것은 그 아래에 붙은 이름이에요."
+          en: >-
+            {{pick.1|code}} is the <b>holder</b> of the names used for arithmetic. The direction is
+            fixed by the name attached under it.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 담는 것과 하는 것"
+            en: "The sharpest spot — the holder or the doer"
+          code:
+            - "Math.floor(-3.5)   // -4"
+            - "Math.trunc(-3.5)   // -3"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 버려질 <b>값</b>입니다. 값은 스스로 방향을 못 정하고, 어느 쪽으로 버릴지는 이름이 정해요."
+          en: >-
+            {{pick.3|code}} is the <b>value</b> being dropped. A value cannot pick a direction; the
+            name does.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 같은 값, 다른 답"
+            en: "The sharpest spot — same value, different answer"
+          code:
+            - "Math.floor(-3.5)   // -4"
+            - "Math.ceil(-3.5)    // -3"
+
+meaning:
+  - q:
+      ko: "<code>Math.floor(-7 / 2)</code> 와 <code>Math.trunc(-7 / 2)</code> 는 각각 무엇이 될까요?"
+      en: "What do <code>Math.floor(-7 / 2)</code> and <code>Math.trunc(-7 / 2)</code> each become?"
+    hint:
+      ko: "<code>-7 / 2</code> 는 <code>-3.5</code> 입니다. 아래는 어느 쪽일까요."
+      en: "<code>-7 / 2</code> is <code>-3.5</code>. Which way is down?"
+    options:
+      - t:
+          ko: "<code>-4</code> 와 <code>-3</code> — 아래로 버리기와 0 쪽으로 버리기가 갈린다"
+          en: "<code>-4</code> and <code>-3</code> — downward and toward zero part ways"
+      - t:
+          ko: "둘 다 <code>-3</code>"
+          en: "Both are <code>-3</code>"
+        diag:
+          t:
+            ko: "양수였다면 그 말이 맞습니다. 음수에서는 「아래」가 0 에서 멀어지는 쪽이라 한 칸 더 내려가요."
+            en: >-
+              For a positive that holds. On a negative, “down” is the direction away from zero, so it
+              goes one step further.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 부호가 바뀌면 방향이 갈린다"
+              en: "The sharpest spot — the sign is what splits the two"
+            code:
+              - "Math.floor(3.5)    // 3 · trunc 도 3"
+              - "Math.floor(-3.5)   // -4 · trunc 는 -3"
+      - t:
+          ko: "둘 다 <code>-3.5</code> — 종류가 안 바뀌니까"
+          en: "Both are <code>-3.5</code> — the kind does not change"
+        diag:
+          t:
+            ko: "종류가 안 바뀌는 것은 맞습니다. 그래도 값은 바뀌어요 — 종류는 하나뿐이고 <code>-3</code> 도 <code>-3.5</code> 도 같은 종류입니다."
+            en: >-
+              The kind indeed does not change. The value still does — there is only one kind, and
+              <code>-3</code> and <code>-3.5</code> both live in it.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 종류와 값"
+              en: "The sharpest spot — kind or value"
+            code:
+              - "typeof Math.floor(-3.5)   // 'number'"
+              - "Math.floor(-3.5)          // -4"
+      - t:
+          ko: "둘 다 <code>-4</code> — 버림은 늘 아래다"
+          en: "Both are <code>-4</code> — dropping always goes down"
+        diag:
+          t:
+            ko: "이름이 둘인 이유가 거기 있습니다. 하나는 아래로, 하나는 0 쪽으로 버려서 음수에서 답이 갈려요."
+            en: >-
+              That is exactly why there are two names. One goes down, one goes toward zero, and on a
+              negative the answers part.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 이름이 둘인 이유"
+              en: "The sharpest spot — why there are two names"
+            code:
+              - "Math.trunc(-3.5)   // -3"
+              - "Math.floor(-3.5)   // -4"
+
+no_hole_reason: >-
+  구멍에 들어갈 것이 표준 라이브러리 이름이라, 지우면 「이름을 외웠나」를 묻는 물음이 된다.
+  이 개념이 재는 것은 이름이 아니라 「음수에서 두 답이 갈린다」이고 그것은 값으로 물어야 한다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 나눈 값을 그대로 안 쓰고 버렸을까요?"
+    en: "Why does line {{site.line}} drop part of the divided value instead of using it whole?"
+  choices:
+    - t:
+        ko: "쓸 자리가 셀 수 있는 값이라야 해서 — 나누기는 소수를 그대로 낸다"
+        en: "Because the place it goes needs a countable value — division yields a fraction as it is"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 값이 음수가 될 수 있는지도 함께 적어 보세요 — 그때 방향이 갈립니다."
+        en: >-
+          That is the direction. Add whether that value can go negative — that is when the direction
+          matters.
+    - t:
+        ko: "나누기가 이 언어에서는 오류를 내서"
+        en: "Because division raises an error in this language"
+      ok: false
+      fb:
+        ko: "오류는 안 납니다. <code>0</code> 으로 나눠도 멈추지 않고 <code>Infinity</code> 가 나옵니다."
+        en: >-
+          Nothing is raised. Even dividing by <code>0</code> does not stop; it yields
+          <code>Infinity</code>.
+    - t:
+        ko: "소수를 담을 수 있는 종류가 따로 없어서"
+        en: "Because there is no separate kind that can hold a fraction"
+      ok: false
+      fb:
+        ko: "반대입니다. 종류가 하나뿐인데 그 하나가 소수를 담습니다 — 그래서 버리는 일을 따로 해야 해요."
+        en: >-
+          The other way round. There is one kind and that one holds fractions — which is why the
+          dropping has to be done on purpose.
+
+queries:
+  - { grammars: [typescript, tsx, javascript, vue], file: ./integer-division.scm }
+
+examples:
+  - code: "const page = Math.floor(offset / size)"
+    expect: { sites: 1, form: truncate, picks: { 1: "Math", 2: "floor", 3: "offset / size" } }
+  - code: "const whole = Math.trunc(ratio)"
+    expect: { sites: 1, form: truncate, picks: { 1: "Math", 2: "trunc", 3: "ratio" } }
+  - code: "const up = Math.ceil(total / perPage)"
+    expect: { sites: 1, form: truncate, picks: { 1: "Math", 2: "ceil", 3: "total / perPage" } }
+  - code: "const half = total / 2"
+    expect: none
+  - code: "const big = Math.max(a, b)"
+    expect: none

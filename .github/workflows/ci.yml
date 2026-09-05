@@ -238,7 +238,7 @@ jobs:
           print(f"ok   advisories.ignore {len(entries)} entries, no expired exception")
           PY
 
-      - name: Rust budget · forbidden words (01 §1.1)
+      - name: thin Rust walls · line census (01 §1.1 · D181)
         run: bash scripts/check-rust-budget.sh
 
       # 06 §3.5 — "put a mock key in and grep every produced file". The full form of this
@@ -429,7 +429,13 @@ jobs:
       - name: motion ceiling (static)
         run: pnpm check:motion
 
-      - run: pnpm test:gates
+      # type · contrast · measure · silhouette · motion, plus the two gates D182 added:
+      # `responsive.spec.ts` (720–2560 wide × 600+ tall: no horizontal scroll, nothing
+      # outside the viewport, no overlap, no clipped text) and `glyph.spec.ts` (no
+      # synthetic bold, no missing weight, no tofu — the bug design gates missed, D183).
+      # One command, one browser launch: splitting them would pay the startup cost twice.
+      - name: design · responsive · glyph gates
+        run: pnpm test:gates
 
       # the 15 mockIPC scenarios of 05 §11 — same harness, same two engines, retries 0.
       - run: pnpm test:e2e-ui

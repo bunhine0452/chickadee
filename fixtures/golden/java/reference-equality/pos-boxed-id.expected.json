@@ -1,0 +1,67 @@
+[
+  {
+    "queryId": "java/reference-equality",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "equals",
+    "startLine": 5,
+    "startCol": 15,
+    "endLine": 5,
+    "endCol": 40,
+    "nodeKind": "method_invocation",
+    "inError": false
+  },
+  {
+    "queryId": "java/reference-equality",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "equals",
+    "startLine": 5,
+    "startCol": 15,
+    "endLine": 5,
+    "endCol": 21,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "java/reference-equality",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "equals",
+    "startLine": 5,
+    "startCol": 22,
+    "endLine": 5,
+    "endCol": 28,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "java/reference-equality",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "hole",
+    "form": "equals",
+    "startLine": 5,
+    "startCol": 22,
+    "endLine": 5,
+    "endCol": 28,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "java/reference-equality",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "equals",
+    "startLine": 5,
+    "startCol": 29,
+    "endLine": 5,
+    "endCol": 39,
+    "nodeKind": "identifier",
+    "inError": false
+  }
+]

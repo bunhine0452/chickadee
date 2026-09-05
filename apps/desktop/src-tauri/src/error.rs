@@ -48,6 +48,8 @@ impl From<chickadee_git::GitError> for IpcError {
             E::CommitNotFound(_) => "GIT_COMMIT_NOT_FOUND",
             E::BlameTimeout { .. } => "GIT_BLAME_TIMEOUT",
             E::BadPath(_) => "FS_NOT_FOUND",
+            E::BadUrl => "GIT_URL_UNSUPPORTED",
+            E::Occupied => "GIT_DEST_OCCUPIED",
             E::Lib(_) => "GIT_IO",
         };
         // No path or byte reaches the message — `Display` on these variants is
@@ -68,13 +70,4 @@ impl From<chickadee_parse::ParseError> for IpcError {
         };
         Self::new(code, e.to_string(), false)
     }
-}
-
-/// 아직 구현하지 않은 자리 (T3 — 01 §9).
-pub fn not_implemented(what: &str) -> IpcError {
-    IpcError::new(
-        "NOT_IMPLEMENTED",
-        format!("{what} 은 아직 없습니다."),
-        false,
-    )
 }

@@ -1,164 +1,187 @@
 /* 생성 파일 — 직접 고치지 마세요.
- * 원본:   design/src/ink/tokens.css 의 :root{…} · [data-theme="dark"]{…}
- * 생성기: scripts/sync-design.mjs (05 §12 — 목업 두 장도 같은 원본을 인라인한다)
+ * 원본:   design/system/tokens.css 의 :root{…} · [data-theme="dark"]{…}
+ * 생성기: scripts/sync-design.mjs (05 §12 · D182 · D187 ⑫)
  * 갱신:   pnpm design:sync   /   검사: pnpm design:check (CI 드리프트 게이트)
+ *
+ * 블록 셋 — 밝게 · 어둡게(설정) · 어둡게(시스템 따름). 셋째는 둘째와 **같은 값**이고
+ * 값의 출처는 원본 한 곳뿐이다.
  */
 
-/* ───────── 토큰 : 주간반 (밝은 종이) ───────── */
+/* ───────── 토큰 : 밝게 ───────── */
 :root {
   color-scheme: light;
 
-  /* 종이 */
-  --desk: #D9CDB4;
-  --desk-2: #CFC1A6;
-  --paper: #F7F1E3;
-  --paper-2: #FDFAF0;
-  --paper-3: #EFE7D4;
-  --stock: #FFFDF7;
+  /* ── 표면 ── 중립 회색 넷. 뒤로 갈수록 짙어지고, 넷 다 본문을 얹을 수 있다. */
+  --bg: #F2F3F5;
+  --surface: #FFFFFF;
+  --surface-2: #F7F8FA;
+  --surface-3: #ECEEF1;
+  --border: #D9DDE3;
+  --border-strong: #767E8A;
+  --overlay: rgba(14,17,20,.55);
 
-  /* 먹 — 텍스트는 --ink / --ink-soft 두 단계만 쓴다 (둘 다 종이 위 7:1 이상) */
-  --ink: #221D18;
-  --ink-soft: #4A433A;
+  /* ── 글자 ── --text·--text-muted 는 7:1, --text-faint 는 4.5:1(본문 금지·보조 라벨 전용) */
+  --text: #14171A;
+  --text-muted: #454C55;
+  --text-faint: #5F666F;
+  --text-inverse: #FFFFFF;
 
-  /* 아래 둘은 텍스트 금지 — 괘선·점·비활성 면 전용 */
-  --ink-mute: #7A7063;
-  --ink-faint: #A69B8B;
-  --rule: #221D18;
+  /* ── 액센트 하나 ── 지금 해야 할 일 · 링크 · 초점. 그 밖에 쓰지 않는다. */
+  --accent: #0E47A6;
+  --accent-hover: #0A3A8A;
+  --accent-weak: #E3ECFB;
+  --on-accent: #FFFFFF;
 
-  /* 잉크 3색 (면) */
-  --blue: #1250C8;
-  --blue-deep: #0B3A96;
-  --pink: #FF2E7E;
-  --pink-deep: #C7135C;
-  --yellow: #FFC400;
-  --yellow-deep: #C08F00;
+  /* ── 상태 넷 ── 정답 · 오답 · 진행/주의 · 잠김/안내. 트랙·종류·범주는 색으로 가르지 않는다. */
+  --ok: #10593A;
+  --ok-bg: #E2F1E9;
+  --bad: #931B1B;
+  --bad-bg: #FBE7E7;
+  --warn: #6E4204;
+  --warn-bg: #FBEFD9;
+  --info: #37406B;
+  --info-bg: #E9EBF6;
 
-  /* 잉크 3색 (글자용 — 종이 위 7:1) */
-  --blue-text: #0F3F9E;
-  --pink-text: #960B42;
-  --yellow-text: #664300;
+  /* ── 코드 ── 정본 §6 의 유일한 색 예외. 여섯 색 전부 --code-bg 위에서 7:1 이상. */
+  --code-bg: #F6F8FA;
+  --syn-key: #7B2D8E;
+  --syn-str: #0B5A34;
+  --syn-num: #8A3B12;
+  --syn-com: #4A525C;
+  --syn-type: #095A66;
+  --syn-fn: #17418F;
 
-  /* 트랙 별칭 — 컴포넌트는 이 이름만 쓴다 (색 토큰 이름 통일) */
-  --t0: var(--blue);
-  --t0-deep: var(--blue-deep);
-  --t0-text: var(--blue-text);
-  --on-t0: #FFFDF7;
-  --t1: var(--pink);
-  --t1-deep: var(--pink-deep);
-  --t1-text: var(--pink-text);
-  --on-t1: #221D18;
-  --t2: var(--yellow);
-  --t2-deep: var(--yellow-deep);
-  --t2-text: var(--yellow-text);
-  --on-t2: #221D18;
-  --knock: #FFFDF7;
+  /* ── 초점 ── 어느 표면에서나 보인다(전부 3:1 이상). 액센트보다 한 단 밝아 테두리로 읽힌다. */
+  --focus: #1358D6;
 
-  /* Dee 스티커 — 테마와 무관하게 크림 종이에 찍힌다 */
-  --dee-paper: #FDFAF0;
-  --dee-gray: #A69B8B;
-  --dee-blank: #E4DAC4;
-
-  /* 인쇄 물리 */
-  --blend: multiply;
-  --grain-op: .16;
-  --grain-blend: multiply;
-  --grain-tint: rgba(255,255,255,0);
-  --edge: rgba(34,29,24,.30);
-  --drop: rgba(58,44,26,.24);
-  --misreg: 1.6px;
-  --lamp: 0 0 0 0 transparent;
-
-  /* 활자 — 13px 미만 토큰 없음 */
-  --fs-13: 13px;
-  --fs-14: 14px;
-  --fs-15: 15px;
-  --fs-16: 16px;
-  --fs-18: 18px;
-  --fs-20: 20px;
-  --fs-24: 24px;
-  --fs-poster-s: 30px;
-  --fs-poster: 44px;
-  --fs-poster-l: 56px;
+  /* ── 활자 ── 7단. 13px 미만 없음(정본 §6). 본문은 --fs-4 = 16px 이 하한.
+     작은 쪽 넷은 1px 간격(UI 크로뮴은 미세한 단이 필요하다), 큰 쪽 셋은 ≈1.3배. */
+  --fs-1: 13px;
+  --fs-2: 14px;
+  --fs-3: 15px;
+  --fs-4: 16px;
+  --fs-5: 20px;
+  --fs-6: 26px;
+  --fs-7: 34px;
+  --lh-tight: 1.25;
   --lh-body: 1.7;
-  --lh-tight: 1.3;
+  --lh-code: 1.85;
+  --fw-normal: 400;
+  --fw-medium: 500;
+  --fw-bold: 700;
 
-  /* 행 길이 — ch 는 라틴 0 폭이라 한글엔 2배로 틀린다. em 으로 걸고 실측한다.
-     Plex Sans KR / Pretendard ≈1.00em → 36자, Apple SD Gothic Neo ≈0.857em → 42자 */
+  /* 읽기용 하나 + 코드용 하나. 디스플레이 서체 없음(D182·D183).
+     mono 스택에 Plex Sans KR 이 있는 이유: IBM Plex Mono 는 한글 글리프가 0자라
+     코드 주석의 한글이 시스템 서체로 새는데, 두 얼굴은 upem·x높이(516)·대문자높이(698)가
+     같아 한 줄에 섞여도 기준선이 흔들리지 않는다. */
+  --font-ui: "IBM Plex Sans KR","Apple SD Gothic Neo","Noto Sans KR",system-ui,-apple-system,sans-serif;
+  --font-mono: "IBM Plex Mono","IBM Plex Sans KR",ui-monospace,"SFMono-Regular","Menlo","Consolas",monospace;
+
+  /* ── 간격 ── 4px 배수. 사이값을 쓰지 않는다. */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+
+  /* ── 모양 ── 반지름 3단 · 그림자 2단. 그림자는 「떠 있다」를 말할 때만 한 겹. */
+  --r-sm: 4px;
+  --r-md: 8px;
+  --r-lg: 14px;
+  --shadow-1: 0 1px 2px rgba(14,17,20,.06),0 1px 1px rgba(14,17,20,.04);
+  --shadow-2: 0 6px 16px rgba(14,17,20,.10),0 1px 3px rgba(14,17,20,.06);
+
+  /* ── 배치 ── --measure 는 한글 기준 실측이다(README §3): Plex Sans KR 한글 음절
+     평균 자폭 0.892em → 36em 이 40.4자, 정본의 35~45자 안. */
   --measure: 36em;
-  --f-ui: "IBM Plex Sans KR","Pretendard","Apple SD Gothic Neo","Noto Sans KR",system-ui,-apple-system,sans-serif;
-  --f-mono: "IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-  --f-poster: "Black Han Sans","IBM Plex Sans KR","Apple SD Gothic Neo",system-ui,sans-serif;
-  --e-hop: cubic-bezier(.22,1.2,.36,1);
-  --e-settle: cubic-bezier(.16,1,.3,1);
-  --e-soft: cubic-bezier(.4,0,.2,1);
+  --content-max: 1120px;
+  --sidebar-w: 264px;
 
-  /* 판정 색 별칭 — 트랙 색과 독립 (D11 · D56 · D95) · 주간 glow 는 없음 (05 §4.1) */
-  --verdict-exact: #FF2E7E;
-  --verdict-equiv: #1250C8;
-  --verdict-differ: #C08F00;
-  --verdict-exact-text: #960B42;
-  --verdict-equiv-text: #0F3F9E;
-  --verdict-differ-text: #664300;
-  --verdict-differ-face: #FFC400;
-  --on-verdict-differ: #221D18;
-  --glow-t0: transparent;
-  --glow-t1: transparent;
-  --glow-t2: transparent;
+  /* ── 모션 ── 정본 §6 상한 200ms. 상태가 바뀌는 것을 설명할 때만 쓴다. */
+  --dur-fast: 120ms;
+  --dur-base: 180ms;
+  --ease: cubic-bezier(.2,0,0,1);
 }
 
-/* ───────── 토큰 : 야간반 (어두운 판지에 형광 잉크) ───────── */
+/* ───────── 토큰 : 어둡게 ───────── */
 [data-theme="dark"] {
   color-scheme: dark;
 
-  --desk: #0B0908;
-  --desk-2: #050403;
-  --paper: #1F1915;
-  --paper-2: #29211B;
-  --paper-3: #17120E;
-  --stock: #120E0B;
-  --ink: #F3EADB;
-  --ink-soft: #CFC4B2;
-  --ink-mute: #8E8274;
-  --ink-faint: #5E5346;
-  --rule: #5A4B3C;
-
-  /* 밤의 잉크는 옅어지지 않는다 — 검은 판지 위 형광은 낮보다 뜨겁다 */
-  --blue: #3B82FF;
-  --blue-deep: #1A56C4;
-  --pink: #FF3A86;
-  --pink-deep: #C4155C;
-  --yellow: #FFD030;
-  --yellow-deep: #C09600;
-  --blue-text: #9CC2FF;
-  --pink-text: #FFA3CE;
-  --yellow-text: #FFD866;
-  --on-t0: #0A1020;
-  --on-t1: #1A0A12;
-  --on-t2: #1C1400;
-  --knock: #12100C;
-  --glow-t0: rgba(59,130,255,.42);
-  --glow-t1: rgba(255,58,134,.45);
-  --glow-t2: rgba(255,208,48,.36);
-  --blend: screen;
-  --grain-op: .42;
-  --grain-blend: soft-light;
-  --grain-tint: rgba(255,196,120,.5);
-  --edge: #080604;
-  --drop: rgba(0,0,0,.8);
-  --lamp: inset 0 1.5px 0 rgba(255,206,140,.12);
-
-  /* 판정 색 별칭 — 트랙 색과 독립 (D11 · D56 · D95) */
-  --verdict-exact: #FF3A86;
-  --verdict-equiv: #3B82FF;
-  --verdict-differ: #C09600;
-  --verdict-exact-text: #FFA3CE;
-  --verdict-equiv-text: #9CC2FF;
-  --verdict-differ-text: #FFD866;
-  --verdict-differ-face: #FFD030;
-  --on-verdict-differ: #221D18;
+  --bg: #0F1114;
+  --surface: #16191D;
+  --surface-2: #1C2025;
+  --surface-3: #23282E;
+  --border: #2C323A;
+  --border-strong: #6E7885;
+  --overlay: rgba(0,0,0,.62);
+  --text: #E8EBEF;
+  --text-muted: #AFB7C1;
+  --text-faint: #8B94A2;
+  --text-inverse: #0F1114;
+  --accent: #8CBCFF;
+  --accent-hover: #ADD0FF;
+  --accent-weak: #142A46;
+  --on-accent: #0B1A33;
+  --ok: #6ADFA0;
+  --ok-bg: #102B1C;
+  --bad: #FF9B93;
+  --bad-bg: #3A1917;
+  --warn: #F2C14E;
+  --warn-bg: #33270E;
+  --info: #A8B6E8;
+  --info-bg: #1E2440;
+  --code-bg: #11151A;
+  --syn-key: #D9A2F0;
+  --syn-str: #86DDA6;
+  --syn-num: #F0AF7A;
+  --syn-com: #98A3B2;
+  --syn-type: #6FD3D8;
+  --syn-fn: #9DBBFF;
+  --focus: #7FB6FF;
+  --shadow-1: 0 1px 2px rgba(0,0,0,.44),0 1px 1px rgba(0,0,0,.30);
+  --shadow-2: 0 6px 16px rgba(0,0,0,.52),0 1px 3px rgba(0,0,0,.36);
 }
 
-/* ───────── 야간 작업 램프 — 대지를 비추는 빛 하나 (05 §4.3: 다크 선택자는 tokens.css 에만) ───────── */
-[data-theme="dark"] body {
-  background-image: radial-gradient(70% 42% at 50% -4%, rgba(255,178,88,.16), transparent 62%), radial-gradient(110% 80% at 100% 110%, rgba(76,147,255,.05), transparent 60%);
+/* ───────── 토큰 : 어둡게 (시스템 따름 — D187 ⑫) ───────── */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --bg: #0F1114;
+    --surface: #16191D;
+    --surface-2: #1C2025;
+    --surface-3: #23282E;
+    --border: #2C323A;
+    --border-strong: #6E7885;
+    --overlay: rgba(0,0,0,.62);
+    --text: #E8EBEF;
+    --text-muted: #AFB7C1;
+    --text-faint: #8B94A2;
+    --text-inverse: #0F1114;
+    --accent: #8CBCFF;
+    --accent-hover: #ADD0FF;
+    --accent-weak: #142A46;
+    --on-accent: #0B1A33;
+    --ok: #6ADFA0;
+    --ok-bg: #102B1C;
+    --bad: #FF9B93;
+    --bad-bg: #3A1917;
+    --warn: #F2C14E;
+    --warn-bg: #33270E;
+    --info: #A8B6E8;
+    --info-bg: #1E2440;
+    --code-bg: #11151A;
+    --syn-key: #D9A2F0;
+    --syn-str: #86DDA6;
+    --syn-num: #F0AF7A;
+    --syn-com: #98A3B2;
+    --syn-type: #6FD3D8;
+    --syn-fn: #9DBBFF;
+    --focus: #7FB6FF;
+    --shadow-1: 0 1px 2px rgba(0,0,0,.44),0 1px 1px rgba(0,0,0,.30);
+    --shadow-2: 0 6px 16px rgba(0,0,0,.52),0 1px 3px rgba(0,0,0,.36);
+  }
 }

@@ -1,0 +1,89 @@
+schema: 1
+id: proto/hmac-signature
+universal: null
+name: { ko: 비밀 열쇠로 찍는 봉인, en: HMAC signature }
+token: null
+grammars: []
+framework: null
+track_default: t0
+essential: false
+difficulty: 3
+prereq: []
+confusions: []
+dict:
+  one_liner:
+    ko: "같은 비밀 열쇠를 가진 쪽만 같은 봉인을 찍는다. 한 글자만 바뀌어도 봉인이 어긋난다."
+    en: "Only the same secret key stamps the same seal. One changed letter breaks it."
+  why:
+    ko: >-
+      쪽지를 남에게 들려 보내면 <b>가는 길에 고쳐질 수</b> 있습니다. 그래서 내용과 비밀 열쇠를
+      섞어 짧은 봉인을 만들어 붙입니다. 받아서 같은 열쇠로 다시 찍어 보고 <b>같으면</b> 고쳐지지
+      않은 것이에요. 여기서 보장되는 것은 딱 둘입니다 — <b>내가 만든 것이고</b>, <b>그대로다</b>.
+      안 보이게 감추는 일은 하지 않아요. 그래서 봉인이 지키는 것은 열쇠 하나뿐이고, 열쇠가
+      새면 누구나 같은 봉인을 찍습니다.
+    en: >-
+      Hand a note to someone to carry and it <b>can be altered on the way</b>. So the contents and a
+      secret key are mixed into a short seal and attached. Stamp it again with the same key on
+      arrival, and <b>a match</b> means nothing was altered. Exactly two things are guaranteed —
+      <b>it came from me</b>, and <b>it is unchanged</b>. Hiding is not among them. So one key is
+      all that holds it up, and a leaked key lets anyone stamp the same seal.
+  trace: []
+rule:
+  ko: "<b>봉인은 고쳐졌는지만 말한다.</b> 안을 감추지 않고, 열쇠가 새면 누구나 찍는다."
+  en: "<b>A seal says only whether it changed.</b> It hides nothing, and a leaked key stamps for anyone."
+ok:
+  ko: >-
+    받은 내용으로 같은 열쇠를 써서 다시 찍어 보고, 붙어 온 봉인과 견줍니다. 같으면 그대로예요.
+  en: >-
+    The received contents are stamped again with the same key and compared with the seal that came
+    attached. A match means unchanged.
+misconceptions:
+  - ko: "봉인이 붙었으니 내용이 안 보인다 — 감추는 일은 안 합니다. 안은 그대로 읽힙니다."
+    en: "A seal means the contents are hidden — it hides nothing. The inside reads plainly."
+  - ko: "봉인이 길어야 안전하다 — 길이가 아니라 <b>열쇠를 아무도 모르는가</b>가 안전을 정합니다."
+    en: "A longer seal is safer — safety comes from nobody knowing the key, not from length."
+  - ko: "봉인만 보면 언제 만들었는지 안다 — 유효 기간은 <b>안에 적어 넣어야</b> 알 수 있습니다."
+    en: "A seal tells you when it was made — an expiry has to be <b>written inside</b> to exist."
+  - ko: "봉인이 맞으면 그 사람이 지금도 유효하다 — 봉인은 <b>고쳐졌는지</b>만 말합니다. 탈퇴했는지는 모릅니다."
+    en: "A matching seal means the person is still valid — it says only that nothing changed, not that the account still exists."
+evidence: ["HS256", "hmacShaKeyFor", "signWith", "SignatureAlgorithm", "verifyWith", "SecretKey"]
+meaning:
+  - q:
+      ko: "{{site.line}}행의 봉인이 <b>맞았을 때</b> 확실해지는 것은 무엇일까요?"
+      en: "When the seal on line {{site.line}} <b>matches</b>, what is then certain?"
+    hint:
+      ko: "봉인은 내용과 열쇠를 섞어 만든 짧은 값입니다."
+      en: "A seal is a short value mixed from the contents and the key."
+    options:
+      - t: { ko: "열쇠를 가진 쪽이 만들었고, 그 뒤로 안 고쳐졌다", en: "A key holder made it, and it has not been altered since" }
+        # 정답 옵션에는 diag 가 없다 (03 §4.2).
+      - t: { ko: "내용이 남에게 안 읽힌다", en: "The contents cannot be read by others" }
+        diag:
+          t:
+            ko: "감추는 것은 <b>다른 일</b>입니다. 봉인은 고쳐졌는지를 말할 뿐이고, 안에 든 것은 누구나 읽을 수 있어요."
+            en: "Hiding is a <b>different job</b>. A seal reports alteration; anyone can still read what is inside."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 감추기냐 고침 알기냐", en: "The sharpest spot — hiding or detecting change" }
+            code:
+              - "봉인: 고치면 어긋난다"
+              - "감추기: 애초에 못 읽는다"
+      - t: { ko: "만든 사람이 지금도 쓸 자격이 있다", en: "Whoever made it still has the right to use it" }
+        diag:
+          t:
+            ko: "그것은 <b>지금</b>을 묻는 물음이라 봉인이 답하지 못합니다. 탈퇴했든 권한이 바뀌었든 봉인은 그대로 맞아요."
+            en: "That asks about <b>now</b>, which a seal cannot answer. Deleted account or changed rights, the seal still matches."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 그때냐 지금이냐", en: "The sharpest spot — then or now" }
+            code:
+              - "봉인: 만들 때의 사실"
+              - "자격: 지금의 사실 → 따로 봐야"
+      - t: { ko: "봉인만 보고 원래 내용을 되살릴 수 있다", en: "The original contents can be recovered from the seal alone" }
+        diag:
+          t:
+            ko: "봉인은 <b>줄여 놓은 값</b>이라 되돌릴 수 없습니다. 원래 내용은 봉인 옆에 따로 실려 옵니다."
+            en: "A seal is a <b>shrunk</b> value and cannot be reversed. The original travels beside it, separately."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 줄인 값이냐 담은 값이냐", en: "The sharpest spot — a digest or a container" }
+            code:
+              - "봉인: 길이가 늘 같다"
+              - "내용: 길이가 제각각 → 못 담는다"

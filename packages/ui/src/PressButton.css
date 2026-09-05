@@ -1,86 +1,56 @@
-/* 목업: design/src/ink/shared.css `.press-btn`
-   바꾼 것 — 원색 토큰 금지(05 §4.2): 진홍(면·깊은 면)을 --t1 / --t1-deep 으로.
-   목업의 `.press-btn.blue` 는 이미 --t0 계열이라 그대로. */
+/* D182 — 두꺼운 종이가 눌리는 촉각 연출(5px 그림자 · 이동 · 야간 발광)을 걷었다.
+   화면에서 가장 큰 것은 코드이고, 버튼은 자리와 크기로 눈에 든다 — 입체로 들지 않는다.
+   이 컴포넌트는 **`Button` 의 `primary` 로 옮기는 중**이다(호출처 20곳). */
 .press-btn {
   display: inline-flex;
-  gap: 10px;
+  gap: var(--s-2);
   align-items: center;
   justify-content: center;
-  padding: 11px 18px 12px;
-  border: 2.5px solid var(--rule);
-  background: var(--t1);
-  box-shadow: 0 5px 0 var(--t1-deep), 0 5px 0 2.5px var(--rule), 0 11px 14px -7px var(--drop);
-  color: var(--on-t1);
-  font-size: var(--fs-16);
-  font-weight: 700;
-  letter-spacing: -.02em;
+  min-height: 44px;
+  padding: 0 var(--s-5);
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-family: var(--font-ui);
+  font-size: var(--fs-4);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
   white-space: nowrap;
   cursor: pointer;
-  transition: transform .08s cubic-bezier(.3, .8, .4, 1), box-shadow .08s, background .12s;
+  transition: background var(--dur-fast) var(--ease);
 }
+.press-btn:hover:not([disabled]) { background: var(--accent-hover) }
 
-.press-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 0 var(--t1-deep), 0 6px 0 2.5px var(--rule), 0 13px 16px -7px var(--drop);
-}
+/* 제출이 거부됐을 때의 「눌렸다 뜸」. 움직이지 않고 면만 한 단 어두워진다 —
+   모션은 상태 변화를 설명할 때만이고, 거부는 색으로 충분히 설명된다(정본 §6). */
+.press-btn:active:not([disabled]),
+.press-btn.down { background: var(--accent-hover) }
 
-.press-btn:active,
-.press-btn.down {
-  transform: translateY(5px);
-  box-shadow: 0 0 0 var(--t1-deep), 0 0 0 2.5px var(--rule), 0 2px 6px -3px var(--drop);
-}
-
+/* `.blue` 는 목업의 두 번째 색이었다. 색은 뜻에만 쓰므로 이제 같은 액센트이고,
+   클래스는 호출처가 옮겨 갈 때까지 남는다. */
 .press-btn.blue {
-  background: var(--t0);
-  box-shadow: 0 5px 0 var(--t0-deep), 0 5px 0 2.5px var(--rule), 0 11px 14px -7px var(--drop);
-  color: var(--on-t0);
-}
-
-.press-btn.blue:hover {
-  box-shadow: 0 6px 0 var(--t0-deep), 0 6px 0 2.5px var(--rule), 0 13px 16px -7px var(--drop);
-}
-
-.press-btn.blue:active,
-.press-btn.blue.down {
-  box-shadow: 0 0 0 var(--t0-deep), 0 0 0 2.5px var(--rule), 0 2px 6px -3px var(--drop);
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 .press-btn[disabled] {
-  transform: none;
-  background: var(--paper-3);
-  box-shadow: 0 5px 0 var(--edge), 0 5px 0 2.5px var(--rule);
-  color: var(--ink-soft);
+  background: var(--surface-3);
+
+  /* `--text-faint` 는 어떤 표면 위에서도 7:1 을 못 넘는다 — 보조 라벨 전용이고 글자에는
+     쓰지 않는다. 비활성은 WCAG 예외이지만 예외를 쓰지 않고 넘는 쪽을 골랐다. */
+  color: var(--text-muted);
   cursor: not-allowed;
 }
 
-/*
- * 목업 ink-home.html: 버튼 안의 키 캡은 조금 더 얌전하다.
- *
- * `opacity` 만 되돌린다. `shared.css` 의 `kbd.k` 가 `.8` 을 걸어 두는데, 이 버튼의 면은
- * 채도가 높은 `--t1` 이라 `--on-t1`(4.73:1)이 합성되면서 **3.79:1** 로 떨어진다 — axe
- * serious 다. `check-contrast.mjs` 는 토큰 쌍만 재고 opacity 합성을 모르므로 정적 게이트는
- * 4.73 을 보고 통과시킨다(`--desk`·`--ink-mute` 와 같은 종류의 구멍). 캡의 크기·테두리·
- * 서체는 목업 그대로다.
- */
 .press-btn kbd {
-  font-size: var(--fs-13);
+  font-size: var(--fs-1);
   opacity: 1;
 }
 
-/* 야간반 글로우 — 05 §4.3 dark allowlist 6개 중 하나 */
-[data-theme="dark"] .press-btn:not([disabled]) {
-  box-shadow: 0 5px 0 var(--t1-deep), 0 5px 0 2.5px var(--rule), 0 0 26px var(--glow-t1);
-}
-
-[data-theme="dark"] .press-btn.blue:not([disabled]) {
-  box-shadow: 0 5px 0 var(--t0-deep), 0 5px 0 2.5px var(--rule), 0 0 26px var(--glow-t0);
-}
-
-/* 감축 모션 (06 §2 · 05 §3.7) — 전환만 없애고 최종 포즈는 그대로 둔다.
-   `.001ms` 인 이유: `0` 이면 `transitionend` 가 안 오는 엔진이 있다. */
 @media (prefers-reduced-motion: reduce) {
   .press-btn { transition-duration: .001ms }
 }
 /* stylelint-disable-next-line no-descending-specificity -- 감축 모션은 규칙 순서가
-   아니라 뜻으로 마지막이어야 한다. 특정도를 올려 앞으로 옮기면 야간 규칙을 덮는다. */
+   아니라 뜻으로 마지막이어야 한다. 특정도를 올려 앞으로 옮기면 앞 규칙을 덮는다. */
 [data-motion="reduce"] .press-btn { transition-duration: .001ms }

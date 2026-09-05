@@ -1,0 +1,67 @@
+[
+  {
+    "queryId": "java/comparison",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "compare",
+    "startLine": 5,
+    "startCol": 22,
+    "endLine": 5,
+    "endCol": 36,
+    "nodeKind": "binary_expression",
+    "inError": false
+  },
+  {
+    "queryId": "java/comparison",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "compare",
+    "startLine": 5,
+    "startCol": 22,
+    "endLine": 5,
+    "endCol": 27,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "java/comparison",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "compare",
+    "startLine": 5,
+    "startCol": 28,
+    "endLine": 5,
+    "endCol": 30,
+    "nodeKind": ">=",
+    "inError": false
+  },
+  {
+    "queryId": "java/comparison",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "hole",
+    "form": "compare",
+    "startLine": 5,
+    "startCol": 28,
+    "endLine": 5,
+    "endCol": 30,
+    "nodeKind": ">=",
+    "inError": false
+  },
+  {
+    "queryId": "java/comparison",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "compare",
+    "startLine": 5,
+    "startCol": 31,
+    "endLine": 5,
+    "endCol": 36,
+    "nodeKind": "decimal_integer_literal",
+    "inError": false
+  }
+]

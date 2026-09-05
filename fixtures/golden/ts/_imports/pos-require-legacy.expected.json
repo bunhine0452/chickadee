@@ -2,6 +2,19 @@
   {
     "queryId": "_imports",
     "matchId": 1,
+    "patternIndex": 10,
+    "name": "import.source",
+    "form": "call-self",
+    "startLine": 2,
+    "startCol": 15,
+    "endLine": 2,
+    "endCol": 22,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "_imports",
+    "matchId": 2,
     "patternIndex": 3,
     "name": "ctx.callee",
     "form": "require",
@@ -14,7 +27,7 @@
   },
   {
     "queryId": "_imports",
-    "matchId": 1,
+    "matchId": 2,
     "patternIndex": 3,
     "name": "import.source",
     "form": "require",
@@ -27,7 +40,20 @@
   },
   {
     "queryId": "_imports",
-    "matchId": 2,
+    "matchId": 3,
+    "patternIndex": 10,
+    "name": "import.source",
+    "form": "call-self",
+    "startLine": 3,
+    "startCol": 21,
+    "endLine": 3,
+    "endCol": 28,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "_imports",
+    "matchId": 4,
     "patternIndex": 3,
     "name": "ctx.callee",
     "form": "require",
@@ -40,7 +66,7 @@
   },
   {
     "queryId": "_imports",
-    "matchId": 2,
+    "matchId": 4,
     "patternIndex": 3,
     "name": "import.source",
     "form": "require",

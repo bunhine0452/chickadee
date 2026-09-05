@@ -1,0 +1,277 @@
+/* 코스 화면 (D171 · 정본 §6). 머리 한 줄 · 챕터 목차 · 일하는 단 하나다.
+   좁아지면 목차가 본문 위로 접혀 쌓이고, 넓어지면 본문이 늘어나는 대신 여백이 는다.
+
+   단 오버레이(`.cc-pick`·`.cc-window`·`.cc-editor`·`.cc-done`·`.cc-stuck` …)의 규칙은
+   여기 없다 — `StagePlate.css` 가 `.course-run` 아래로 가져갔다(G4).
+   폭·여백·쌓임은 `components/shell/Page`·`Split` 이 정한다 (G2). */
+.cc .l-page-body {
+  display: grid;
+  gap: var(--gap);
+  align-content: start;
+  min-width: 0;
+}
+
+.cc:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.cc-head {
+  align-items: baseline;
+  padding-bottom: var(--s-3);
+  border-bottom: 1px solid var(--border);
+}
+
+.cc-head h1 {
+  margin: 0;
+  color: var(--text);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-6);
+  line-height: var(--lh-tight);
+  letter-spacing: -0.015em;
+}
+
+.cc-head .pl,
+.cc-today .pl {
+  margin-left: var(--s-2);
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: var(--fs-3);
+  font-weight: var(--fw-normal);
+}
+
+.cc-repo {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-2);
+}
+
+.cc-wait {
+  min-height: 320px;
+}
+
+.cc-empty {
+  display: grid;
+  gap: var(--s-3);
+  max-width: var(--measure);
+  padding: var(--s-6);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+}
+
+/* ───────── 목차 ───────── */
+.cc-toc {
+  padding: var(--s-4) 0;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  min-width: 0;
+}
+
+/* 좁은 창에서 목차가 본문 위로 쌓이면 세로로 길다 — 그때만 높이를 자른다. */
+@media (width < 900px) {
+  .cc-toc {
+    max-height: 22em;
+    overflow-y: auto;
+  }
+}
+
+.cc-toc-head {
+  display: grid;
+  gap: var(--s-2);
+  padding: 0 var(--s-4) var(--s-3);
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  font-size: var(--fs-3);
+}
+
+.cc-bar {
+  position: relative;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+
+.cc-bar i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--pct);
+  background: var(--accent);
+}
+
+.cc-toc h3 {
+  margin: var(--s-4) var(--s-4) var(--s-1);
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: var(--fs-1);
+  font-weight: var(--fw-medium);
+}
+
+.cc-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cc-rowbtn {
+  display: grid;
+  width: 100%;
+  padding: var(--s-2) var(--s-4);
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-3);
+  text-align: left;
+  cursor: pointer;
+  grid-template-columns: 3.2em minmax(0, 1fr) auto;
+  gap: var(--s-2);
+  align-items: baseline;
+}
+
+.cc-rowbtn:hover { background: var(--surface-2) }
+
+.cc-rowbtn:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+.cc-row.cur .cc-rowbtn {
+  background: var(--accent-weak);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.cc-row.locked .cc-rowbtn {
+  color: var(--text-muted);
+}
+
+.cc-no {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+}
+
+.cc-row.today .cc-no {
+  color: var(--accent);
+  font-weight: var(--fw-medium);
+}
+
+.cc-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cc-st {
+  color: var(--text-muted);
+  font-size: var(--fs-1);
+  white-space: nowrap;
+}
+
+/* ───────── 오늘 · 패널 ───────── */
+.cc-today,
+.cc-panel {
+  display: grid;
+  gap: var(--s-3);
+  padding: var(--s-5);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  min-width: 0;
+}
+
+/* 오늘 15분이 이 화면의 하나의 초점이다 — 테두리 한 단 진하게 (정본 §6). */
+.cc-today { border-color: var(--border-strong) }
+
+.cc-today h2,
+.cc-panel-head h2 {
+  margin: 0;
+  color: var(--text);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-5);
+  line-height: var(--lh-tight);
+}
+
+.cc-panel-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  align-items: baseline;
+}
+
+.cc-panel-head .pl {
+  color: var(--text-muted);
+  font-size: var(--fs-2);
+}
+
+.cc-panel-st {
+  margin-left: auto;
+  color: var(--accent);
+  font-size: var(--fs-3);
+  font-weight: var(--fw-medium);
+}
+
+.cc-progress {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--fs-5);
+  font-weight: var(--fw-medium);
+}
+
+.cc-acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.cc-paths,
+.cc-zero {
+  color: var(--text);
+  font-size: var(--fs-2);
+}
+
+.cc-paths summary,
+.cc-zero summary {
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.cc-paths ul,
+.cc-zero ul,
+.cc-dead {
+  margin: var(--s-2) 0 0;
+  padding-left: 1.2em;
+}
+
+.cc-paths li,
+.cc-dead li {
+  margin: var(--s-1) 0;
+}
+
+.cc-paths small,
+.cc-dead small {
+  color: var(--text-muted);
+}
+
+.cc-empty .note,
+.cc-vocab,
+.cc-oneliner {
+  max-width: var(--measure);
+}
+
+@media (width <= 760px) {
+  .cc-head h1 { font-size: var(--fs-5); }
+
+  .cc-today,
+  .cc-panel {
+    padding: var(--s-4) var(--s-3);
+  }
+}
+
+/* 「오늘 15분」 칸의 단추 (D186 ①) — 계획이 비어도 다음 걸음이 있어야 한다.
+   `.cc-today` 가 격자라 그냥 두면 단추가 칸 너비를 다 먹어 2560 에서 1120px 짜리 단추가 된다.
+   위 여백은 격자의 `gap`(12px)이 이미 준다 — 여기서 더하지 않는다. */
+.cc-today > .press-btn { justify-self: start }

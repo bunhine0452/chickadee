@@ -4,9 +4,9 @@
  * 키 이름은 `화면.자리` 다. `ko` 가 키 집합의 정본이고 `en/cards.ts` 가 따라온다 (D117).
  * **이 파일은 그 영역을 맡은 세션만 고친다** — 카탈로그를 영역별로 가른 이유가 그것이다.
  *
- * 두 갈래가 섞여 있다. 카드에 구워져 화면에 그대로 뜨는 문장(질문·힌트·진단)과, 판을
+ * 두 갈래가 섞여 있다. 카드에 구워져 화면에 그대로 뜨는 문장(질문·힌트·진단)과, 문제를
  * 만들지 못한 사유(`drop*`·`no*`)다. 사유도 화면 문구다 — `gap.reason` 으로 내려가 홈의
- * 「판이 없는 문법」이 읽는다(04 §1.4). 어투가 다른 것은 그대로 뒀다: 사유는 「없다」,
+ * 「아직 안 배운 문법」이 읽는다(04 §1.4). 어투가 다른 것은 그대로 뒀다: 사유는 「없다」,
  * 카드 본문은 「없습니다」다.
  */
 export const cards = {
@@ -25,6 +25,30 @@ export const cards = {
   't0.pointDiag': '«{{pick}}»{{pick|josa:은,는}} {{role}} 자리입니다. 정답은 «{{answer}}» 입니다.',
 
   't0.noSiteInRepo': '리포에 이 문법의 사용처가 없다',
+
+  // ── 「네 코드엔 없다」 넷 (D177 · `ABSENCE_MESSAGE_KEY`) ─────────────────────
+  // 정본 §4 ① — 자리가 없으면 **없다는 사실을 명시한다**. 그러니 이 넷은 사과문이 아니라
+  // 안내문이다: 왜 없는지와 **어디서 다시 만나는지**를 말한다. 사유는 개념마다 다르지 않고
+  // 리포마다도 안 달라져 사전이 아니라 여기 산다(`exec.*` 와 같은 자리).
+  't0.absentFramework':
+    '이 문법은 네 코드에 없습니다 — 프레임워크가 대신 해 주고 있어서입니다. '
+    + '여기서 손으로 한 번 써 두면, 그 애너테이션이 무엇을 지웠는지 읽을 때 보입니다.',
+  't0.absentLibrary':
+    '이 문법은 네 코드에 없습니다 — 라이브러리가 이미 갖고 있어 직접 쓸 일이 없었습니다. '
+    + '여기서 한 번 써 보면, 그 호출 한 줄이 무엇을 대신하는지 알게 됩니다.',
+  't0.absentScale':
+    '이 문법은 네 코드에 없습니다 — 이 리포 규모에서는 필요가 안 생겼습니다. '
+    + '지금 익혀 두면, 코드가 자라 같은 모양이 필요해질 때 알아봅니다.',
+  't0.absentIdiom':
+    '이 문법은 네 코드에 없습니다 — 같은 일을 다른 관용구가 다 가져갔습니다. '
+    + '여기서 원래 모양을 보면, 네 코드가 고른 쪽이 왜 그런지 읽힙니다.',
+  // 합성 예제 (D137). 파일 이름 자리에 경로 대신 서는 말이다 — 없는 파일을 가리키면
+  // 사다리 3단과 4단 프롬프트가 거짓말을 한다.
+  't0.syntheticFile': '사전 예제',
+  // 판 머리의 출처 줄. 합성 판에서 「내 코드 사전 예제:1」이라고 적히면 그 줄이 거짓말이다
+  // (D186 ④ · 실측 · D186 감사).
+  't0.syntheticSource': '사전 예제 — <b>내 코드에서 떠 온 줄이 아닙니다</b>',
+  't0.noExample': '사전에 쓸 수 있는 예제가 없다',
   't0.noSiteUsable': '쓸 수 있는 사용처가 없다',
   't0.dropNoHole': '이 사용처에는 구멍(@hole)이 없다',
   't0.dropHoleTooShort': '구멍이 한 글자라 빈칸으로 못 낸다',
@@ -92,7 +116,7 @@ export const cards = {
   't2.hintSpread':
     '이 기능은 {{bands}}개 층 중 <b>{{n}}개 층</b>에 걸쳐 있습니다. 화면만 고쳐서는 끝나지 않아요.',
   't2.hintNoNewFiles': '이번 커밋에서 새로 만들어진 파일은 없습니다. 있던 파일만 고쳤어요.',
-  't2.hintNewFiles': '<b>새로 만들어진 파일이 {{n}}개</b> 있습니다. 지도에 「새 판」 표시가 있어요.',
+  't2.hintNewFiles': '<b>새로 만들어진 파일이 {{n}}개</b> 있습니다. 지도에 「새 파일」 표시가 있어요.',
   't2.hintCoreCount': '꼭 고쳐야 하는 파일은 <b>{{n}}개</b>입니다.',
   't2.hintCoreCountBonus': '{{count}} (＋ 보너스 {{n}}개)',
   't2.commitStat': '파일 {{files}}개 · +{{ins}} −{{del}}',
@@ -127,7 +151,163 @@ export const cards = {
   't2.noCommits': '후보 커밋 {{n}}건 — {{min}}건은 있어야 한다',
   't2.noCommitFiles': '후보 커밋의 변경 파일을 찾지 못했다',
   't2.mapTooSmall': '지도 노드 {{n}}개 — 너무 작다',
-  't2.noRadiusTarget': '들어오는 화살표가 있는 대지 파일이 없다',
+  't2.noRadiusTarget': '들어오는 화살표가 있는 단원 파일이 없다',
   't2.noFlowPath': '{{n}}개 이상 이어지는 경로가 없다',
   't2.noDirectionPairs': '방향을 물을 쌍이 {{n}}개가 안 된다',
+
+  // ───────── T2 — 리포 지도 두 종 (04 §8.5 · D142) ─────────
+  // 폴더·파일 이름 뒤에는 조사를 붙이지 않는다. `josa` 의 받침 판정은 한글 기준이라
+  // `route.ts` 를 「받침 있음」으로 보는데 읽으면 「…에스」로 끝난다 (`grading.directionOneWay`
+  // 와 같은 이유). 문장을 조사가 붙지 않는 자리로 짠다.
+  't2.entryQuestion': '이 리포에서 밖에서 처음 들어오는 문은 어느 폴더인가요?',
+  't2.entryHint': '지도에서 골라 보세요. 여럿일 수 있습니다.',
+  't2.entryStat': '문',
+  't2.entrySecStat': '문처럼 생긴 곳',
+  't2.entryCore': '들어오는 화살표가 없고 {{out}}곳을 가져다 씁니다.',
+  't2.entryCoreNamed': '«{{name}}» — 밖에서 부르는 파일이 여기 있고 들어오는 화살표가 없습니다.',
+  't2.entrySec': '문 이름은 «{{name}}» 인데 리포 안에서 {{in}}곳이 이 폴더를 가져다 씁니다.',
+  't2.entryTrap':
+    '{{in}}곳이 이 폴더를 가져다 씁니다. 많이 쓰이는 것과 처음 들어오는 것은 다릅니다.',
+  't2.entryHint1': '문은 {{n}}곳입니다.',
+  't2.entryHint2': '들어오는 화살표가 없는 폴더를 찾으세요. 많이 쓰이는 폴더는 문이 아닙니다.',
+  't2.entryHint3': '가장 많이 쓰이는 곳은 «{{name}}» 입니다 — 그건 창고입니다.',
+
+  't2.roleQuestion': '«{{folder}}» 폴더는 왜 있나요?',
+  't2.roleHint': '지도에는 이 폴더가 빠져 있습니다. 네 층 중 어디에 놓을지 고르세요.',
+  't2.roleHint1': '{{in}}개 폴더가 이 폴더를 가져다 쓰고, 이 폴더는 {{out}}개를 가져다 씁니다.',
+  't2.roleHint2': '가져다 쓰는 쪽이 위층입니다. 들어오는 화살표만 있으면 맨 아래입니다.',
+  't2.roleHint3': '파일 {{n}}개가 들어 있습니다.',
+
+  't2.noRepoMap': '단원이 「기타」 하나뿐이라 리포 지도가 서지 않는다',
+  't2.smallRepoMap': '리포 지도 노드가 {{n}}개뿐이다',
+  't2.entryNone': '문이 될 만한 폴더가 지도의 절반을 넘거나 하나도 없다 (노드 {{n}})',
+  // ───────── 실행 추적 (D151) ─────────
+  // 오답의 「참이 되는 조건」은 개념마다 다르지 않고 언어에도 안 매인다 — 정의는 어느
+  // 언어에서도 실행이 아니다. 그래서 사전이 아니라 여기 둔다 (`arch/*` 와 같은 자리).
+  // 못 내는 사유 — 홈의 「아직 안 배운 문법」에 그대로 뜬다 (04 `no-plate`).
+  'exec.noGrammar': '이 문법은 아직 실행 순서를 못 읽는다',
+  'exec.noFunction': '이 블록에 함수 정의가 없다',
+  'exec.noTrace': '짚을 후보가 넷에 못 미친다 — 함수가 너무 짧다',
+  'proto.noEvidence': '근거 낱말이 이 블록에 안 보인다',
+  'exec.orderQ': '이 함수를 부르면 <b>가장 먼저</b> 도는 줄을 짚어 보세요.',
+  'exec.orderHint': '정의한 자리에서는 아직 아무것도 돌지 않습니다.',
+  'exec.whyDefinition':
+    '그 줄은 <b>정의</b>입니다 — 이름을 만들어 둘 뿐이고, 안의 줄은 누가 부를 때 돕니다. '
+    + '파일을 위에서 아래로 읽는 순서와 실행 순서가 다른 것이 여기서 갈립니다.',
+  'exec.whyRuns':
+    '그 줄도 <b>돕니다</b> — 다만 첫 번째가 아닙니다. 위에 먼저 닿는 줄이 있습니다.',
+  'exec.whyConditional':
+    '그 줄은 조건 안에 있어 <b>돌 수도 있습니다</b>. 「반드시 먼저 돈다」와 「참이면 돈다」는 다릅니다.',
+  'exec.whyNested':
+    '그 줄은 <b>안쪽 함수</b>에 있습니다 — 바깥을 부른다고 도는 것이 아니라 그 함수를 부를 때 돕니다.',
+  't2.roleNone': '패턴으로 층이 정해진 폴더가 {{n}}개뿐이다',
+
+  // ───────── 코스 문항 16유형 (D164 · `docs/program/exercises.md` §2) ─────────
+  // 오답의 「참이 되는 조건」은 개념마다 다르지 않다 — `exec.*` 와 같은 이유로 사전이 아니라 여기.
+  // 못 내는 사유(`stage.no*`·`stage.*Few*`)는 챕터 화면의 「이 단에 없는 문항」에 뜬다.
+  // 1단 · 쌍둥이
+  'stage.twinQ': '{{focus}}행과 <b>같은 일</b>을 하는 줄은 어느 것일까요?',
+  'stage.twinHint': '모양이 아니라 하는 일을 견주세요. 파일이 달라도 됩니다.',
+  'stage.twinOk': '같은 문법은 다른 파일에서도 같은 일을 합니다.',
+  'stage.twinRule': '<b>어휘는 파일을 가로지른다.</b> 한 번 익힌 문법은 어디서 만나도 같은 뜻이다.',
+  'stage.twinWhy': '그 줄은 «{{concept}}» 자리입니다 — 모양은 닮았지만 하는 일이 다릅니다.',
+  'stage.twinNoOther': '같은 개념의 다른 사용처가 없다',
+  'stage.twinFewTraps': '함정으로 쓸 다른 개념의 줄이 셋에 못 미친다',
+  // 2단 · 처음 정해지는 자리
+  'stage.originQ': '«{{name}}» 의 값은 이 경로에서 어디서 <b>처음</b> 정해질까요?',
+  'stage.originHint': '읽는 자리와 정하는 자리는 다릅니다. 요청이 흐르는 순서로 짚어 보세요.',
+  'stage.originOk': '값이 정해지는 자리는 하나이고, 나머지는 그 값을 읽거나 옮깁니다.',
+  'stage.originRule': '<b>값은 한 자리에서 정해지고 여러 자리에서 읽힌다.</b>',
+  'stage.originReads': '여기는 «{{name}}» 을 <b>읽는</b> 자리입니다 — 정하는 자리는 더 앞에 있습니다.',
+  'stage.originCarries': '여기는 «{{name}}» 을 <b>옮겨 싣는</b> 자리입니다 — 값은 이미 정해져 있습니다.',
+  'stage.originOtherPath': '여기는 <b>다른 경로</b>입니다 — 이 요청은 이 줄을 지나지 않습니다.',
+  'stage.originNoDefine': '«{{name}}» 을 정하는 자리를 경로에서 못 찾았다',
+  'stage.originFewOptions': '보기가 넷에 못 미친다',
+  // 2단 · 요청 줄기
+  'stage.hopQ': '«{{first}}» 에서 시작한 요청이 «{{last}}» 까지 어느 파일 어느 줄을 순서대로 지날까요?',
+  'stage.hopHint': '화면에서 저장소 쪽으로. 같은 파일의 다른 줄이 섞여 있습니다.',
+  'stage.hopTrapSibling': '같은 파일의 다른 요청입니다 — 이 버튼은 이 줄을 지나지 않습니다.',
+  'stage.hopHint1': '{{n}}칸입니다.',
+  'stage.hopHint2': '언어가 바뀌는 자리가 층이 바뀌는 자리입니다.',
+  'stage.hopHint3': '첫 칸은 «{{first}}» 입니다.',
+  'stage.hopDown': '내려가는 반쪽',
+  'stage.hopUp': '이어지는 반쪽',
+  'stage.hopTooShort': '줄기가 두 칸에 못 미친다',
+  // 2단 · 부르는 자리
+  'stage.callerQ': '«{{target}}» 을 부르는 자리는 어느 파일일까요?',
+  'stage.callerHint': '가져다 쓰는 쪽이 부르는 쪽입니다. 화살표가 들어오는 파일을 고르세요.',
+  'stage.callerCore': '이 파일이 «{{target}}» 을 가져다 씁니다.',
+  'stage.callerTrap': '«{{target}}» 이 이 파일을 쓰는 것이지, 이 파일이 «{{target}}» 을 쓰는 것이 아닙니다.',
+  'stage.callerHint1': '부르는 파일은 {{n}}개입니다.',
+  'stage.callerHint2': '같은 층끼리는 잘 부르지 않습니다.',
+  'stage.callerHint3': '«{{target}}» 과 이름이 닮은 파일부터 보세요.',
+  'stage.callerNone': '경로 위에 다른 파일이 부르는 파일이 없다',
+  // 3단 · 지우면 (가드 카탈로그 넷)
+  'stage.cutQ': '{{focus}}행을 지우면 무엇이 달라질까요?',
+  'stage.cutHint': '그 줄이 <b>막고 있던 입력</b>을 떠올려 보세요.',
+  'stage.cutRule': '<b>가드를 지우면 그 가드가 막던 입력이 통과한다.</b> 달라지는 것은 예외 경로다.',
+  'stage.cutOptSoft': '지운 것으로 표시된 행이 결과에 다시 나타난다',
+  'stage.cutOptThrow': '잘못된 입력이 예외 없이 아래 줄로 흘러간다',
+  'stage.cutOptNull': '비어 있는 값에 안쪽 줄이 그대로 돌아 터진다',
+  'stage.cutOptOrElse': '못 찾았을 때 예외 대신 빈 값이 다음 줄로 넘어간다',
+  'stage.cutNothing': '아무것도 달라지지 않는다',
+  'stage.cutCompile': '컴파일 오류가 난다',
+  'stage.cutSoftOk': '같은 파일 {{line}}행이 «{{col}}» 에 시각을 넣어 지운 것으로 표시합니다 — 행은 남아 있습니다.',
+  'stage.cutThrowOk': '{{cond}} 이면 여기서 멈춥니다. 지우면 그 입력이 아래로 흘러갑니다.',
+  'stage.cutNullOk': '«{{name}}» 이 비었을 때 안쪽 줄을 건너뜁니다. 지우면 빈 값으로 안쪽이 돕니다.',
+  'stage.cutOrElseOk': '못 찾으면 여기서 예외가 납니다. 지우면 빈 값이 다음 줄로 갑니다.',
+  'stage.cutNothingWhy': '정상 입력에서는 그렇게 보입니다. 하지만 {{blocked}} 이 들어오면 그 줄이 막고 있었습니다.',
+  'stage.cutCompileWhy': '가드 한 줄을 지워도 문법은 그대로입니다 — 달라지는 것은 실행 시 흐름입니다.',
+  'stage.cutOtherGuardWhy': '그것은 다른 모양의 가드가 막는 것입니다 — 이 줄은 {{blocked}} 을 막습니다.',
+  'stage.cutBlockedSoft': '«{{col}}» 이 채워진 행',
+  'stage.cutBlockedThrow': '{{cond}} 인 입력',
+  'stage.cutBlockedNull': '«{{name}}» 이 비어 있는 입력',
+  'stage.cutBlockedOrElse': '찾는 것이 없는 입력',
+  'stage.cutNoGuard': '경로 위에 카탈로그의 가드 모양이 없다',
+  // 3단 · 뒤집으면
+  'stage.reorderQ': '{{a}}행과 {{b}}행을 뒤집으면 무엇이 달라질까요?',
+  'stage.reorderHint': '앞 줄이 만든 이름을 뒤 줄이 쓰는지 보세요.',
+  'stage.reorderOk': '순서는 값의 시간입니다 — 만들기 전에 쓰면 없고, 바꾼 뒤에 읽으면 새 값입니다.',
+  'stage.reorderRule': '<b>선언은 사용보다 앞서야 하고, 읽는 줄은 바꾸는 줄 뒤에 와야 뜻이 산다.</b>',
+  'stage.reorderBreaks': '«{{name}}» 이 아직 없어서 깨진다',
+  'stage.reorderStale': '«{{name}}» 이 옛 값이 되어 결과만 달라진다',
+  'stage.reorderSame': '아무것도 달라지지 않는다',
+  'stage.reorderNeither': '두 줄 다 돌지 않는다',
+  'stage.reorderBreaksWhy': '{{b}}행이 «{{name}}» 을 쓰는데 그 이름은 {{a}}행이 만듭니다. 뒤집으면 쓰는 순간에 없습니다.',
+  'stage.reorderStaleWhy': '{{b}}행이 «{{name}}» 을 읽는데 {{a}}행이 그 값을 바꿉니다. 뒤집으면 바꾸기 전 값을 읽습니다.',
+  'stage.reorderSameWhy': '두 줄이 서로의 이름을 안 씁니다 — 순서가 뜻을 바꾸지 않습니다.',
+  'stage.reorderNeitherWhy': '순서를 바꿔도 두 줄은 돕니다. 달라지는 것은 값이지 실행 여부가 아닙니다.',
+  'stage.reorderNoPair': '뒤집어 물을 만한 이웃 줄 쌍이 없다',
+  // 3단 · 응답 계약
+  'stage.contractQ': '응답에서 «{{key}}» 를 빼면 화면 쪽 <b>어디가 먼저</b> 깨질까요?',
+  'stage.contractHint': '그 이름을 읽는 첫 자리를 찾으세요. 여기는 JSON 이라 컴파일러가 안 잡습니다.',
+  'stage.contractOk': 'JSON 의 이름은 약속일 뿐이라 빼도 오류 없이 빈 값이 흘러갑니다. 처음 읽는 자리가 첫 균열입니다.',
+  'stage.contractRule': '<b>층 사이의 계약은 이름이다.</b> 이름이 빠지면 컴파일러가 아니라 화면이 알려 준다.',
+  'stage.contractLaterWhy': '그 줄도 «{{key}}» 를 읽지만 <b>더 뒤</b>입니다 — 먼저 깨지는 자리가 앞에 있습니다.',
+  'stage.contractOtherKeyWhy': '그 줄은 «{{other}}» 를 읽습니다 — «{{key}}» 가 빠져도 그대로 돕니다.',
+  'stage.contractMakerWhy': '거기는 «{{key}}» 를 <b>만드는</b> 쪽입니다 — 빼는 자리이지 깨지는 자리가 아닙니다.',
+  'stage.contractReasonQ': '왜 컴파일러가 못 잡을까요?',
+  'stage.contractReasonJson': 'JSON 은 글자라 이름이 맞는지 아무도 확인하지 않는다',
+  'stage.contractReasonType': '타입이 있어서 빼는 순간 오류가 난다',
+  'stage.contractReasonServer': '서버가 빠진 이름을 채워서 보낸다',
+  'stage.contractReasonCache': '브라우저가 이전 값을 기억한다',
+  'stage.contractReasonTypeWhy': '타입은 같은 프로세스 안에서만 봅니다 — HTTP 를 건너면 글자입니다.',
+  'stage.contractReasonServerWhy': '서버는 자기가 만든 것만 보냅니다. 빠진 이름은 빠진 채로 갑니다.',
+  'stage.contractReasonCacheWhy': '기억하는 것은 요청이지 응답의 이름이 아닙니다.',
+  'stage.contractNoKey': 'HTTP 양끝에서 같은 이름을 못 찾았다',
+  // 4단 · 수정 (실제 fix: 커밋이 정답지)
+  'stage.patchLineQ': '「{{goal}}」이 되도록 {{line}}행을 고쳐 보세요.',
+  'stage.patchPlaceQ': '이 줄은 어디에 들어가야 할까요? — <code>{{text}}</code>',
+  'stage.rollbackQ': '이 코드는 「{{goal}}」 커밋 <b>이전</b>에 어떤 모양이었을까요? 바뀐 줄을 그때로 되돌려 보세요.',
+  'stage.patchNoFix': '경로 위 파일을 고친 fix 커밋이 없다',
+  'stage.patchNoHunk': 'fix 커밋에 한 줄 바꿈이나 한 줄 추가가 없다',
+  // 5단 · 재구현
+  'stage.reimplSpecQ': '시그니처와 지킬 것만 보고 «{{fn}}» 의 본문을 써 보세요.',
+  'stage.reimplLayerQ': '다른 층은 다 있습니다. «{{file}}» 의 «{{fn}}» 을 써 보세요 — 이웃 층이 사양입니다.',
+  'stage.handoffQ': '내가 쓴 «{{fn}}» 이 실제로 도는지는 여기서 확인할 수 없습니다. 아래 프롬프트를 들고 나가 물어보세요.',
+  'stage.handoffAsk': '위 코드가 원본과 같은 일을 하는지, 다르다면 어느 줄이 다른지 알려주세요.',
+  'stage.reimplNoBlock': '{{min}}~{{max}}줄짜리 함수 블록이 경로 위에 없다',
+  'stage.reimplNoNeighbor': '이웃 층이 없어 사양을 만들 수 없다',
+  // 단마다 문항이 없을 때
+  'stage.noPaths': '이 기능에 요청 줄기가 없다',
 } as const;

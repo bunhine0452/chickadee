@@ -1,8 +1,8 @@
 /**
- * 모션 상한 게이트 (06 §2 · 정본 §3-9). 720ms 를 넘는 애니메이션·전환이 있으면 실패한다.
- * LIFER 는 명시 예외(1.36s)이고 그 밖의 예외는 없다.
+ * 모션 상한 게이트 (06 §2 · 정본 §6). **200ms** 를 넘는 애니메이션·전환이 있으면 실패한다.
+ * 예외는 없다 — 720ms 와 LIFER 1.36s 예외는 D182 가 걷었다.
  *
- * 정적 파싱인 이유: 「상시 애니메이션 금지」와 「최대 720ms」는 **선언**의 성질이라
+ * 정적 파싱인 이유: 「상시 애니메이션 금지」와 「최대 200ms」는 **선언**의 성질이라
  * 브라우저를 띄우지 않고도 전수로 볼 수 있다. 실행 중 잔존 여부는 감축 모드 게이트가
  * 브라우저에서 따로 본다.
  */
@@ -12,23 +12,17 @@ import { join } from 'node:path';
 const ROOT = new URL('..', import.meta.url).pathname;
 const ROOTS = ['apps/desktop/src', 'packages/ui/src'];
 
-/** 정본 §3-9: 기쁨은 움직임에, 최대 720ms. */
-export const BUDGET_MS = 720;
+/** 정본 §6: 모션은 상태 변화를 설명할 때만, 최대 200ms. */
+export const BUDGET_MS = 200;
 
 /**
- * 문서가 직접 올린 예외 둘. **여기 없는 것은 예외가 아니다** — 새 예외는 결정 등록부를
- * 먼저 거쳐야 하고, 그래야 「예외 목록이 규칙을 무력화하는」 일이 안 생긴다(06 §2).
- *
- * - `lifer` 1.36s — 정본 §3-9 의 명시 예외.
- * - `peek` 1.6s × 2 — 목업의 `infinite` 를 유한화한 값이다(D11 · 05 §6). 한 번 재생이
- *   1.6s 이고 두 번 돈다.
+ * **예외 없음.** 정본 §6 이 「대기·강조·환영 애니메이션은 없다」로 닫았고, 남길 만한
+ * 연출이 하나도 없다. 새 예외는 결정 등록부를 먼저 거쳐야 한다(06 §2) — 예외 목록이
+ * 규칙을 무력화하는 일을 막는 자리가 여기다.
  */
-export const EXCEPTIONS = [
-  { match: /lifer/i, ms: 1_360, why: '정본 §3-9 명시 예외' },
-  { match: /\bpeek\b/i, ms: 1_600, why: 'D11 · 05 §6 — infinite 를 2회로 유한화' },
-];
+export const EXCEPTIONS = [];
 
-/** `infinite` 는 상시 애니메이션이다 — 정본 §3-7 이 통째로 금지한다. */
+/** `infinite` 는 상시 애니메이션이다 — 정본 §3-7 · §6 이 통째로 금지한다. */
 const INFINITE = /animation(?:-iteration-count)?\s*:[^;}]*\binfinite\b/gi;
 const DURATION = /(animation|transition)(?:-duration)?\s*:([^;}]*)/gi;
 const TIME = /(-?[\d.]+)\s*(ms|s)\b/g;
@@ -80,6 +74,26 @@ export function scanCss(source, file) {
   return findings;
 }
 
+/**
+ * 시간 토큰도 잰다.
+ *
+ * D182 이후 CSS 는 `transition: opacity var(--dur-base)` 처럼 **토큰으로** 시간을 쓴다.
+ * 정적 스캐너는 `var()` 안을 못 보므로, 그 자리는 토큰 값이 상한 안에 있다는 것으로만
+ * 막힌다 — 토큰 하나를 1s 로 올리면 화면 전체가 조용히 느려지고 위 스캔은 0건을 낸다.
+ * 그래서 생성물 tokens.css 의 `--dur-*` 를 여기서 함께 본다.
+ */
+export function scanDurationTokens(root = ROOT) {
+  const css = readFileSync(join(root, 'apps/desktop/src/styles/tokens.css'), 'utf8');
+  const findings = [];
+  for (const m of css.matchAll(/(--dur-[\w-]+)\s*:\s*([^;]+);/g)) {
+    const ms = longestMs(m[2] ?? '');
+    if (ms > BUDGET_MS) {
+      findings.push({ file: 'apps/desktop/src/styles/tokens.css', kind: 'token', ms, sel: m[1] ?? '', cap: BUDGET_MS });
+    }
+  }
+  return findings;
+}
+
 export function scanAll(root = ROOT) {
   const findings = [];
   for (const dir of ROOTS) {
@@ -87,6 +101,7 @@ export function scanAll(root = ROOT) {
       findings.push(...scanCss(readFileSync(file, 'utf8'), file.slice(root.length)));
     }
   }
+  findings.push(...scanDurationTokens(root));
   return findings;
 }
 

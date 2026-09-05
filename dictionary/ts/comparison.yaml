@@ -1,0 +1,258 @@
+schema: 1
+id: ts/comparison
+universal: common/comparison
+name: { ko: 견주기, en: Comparison }
+token: "==="
+grammars: [typescript, tsx, javascript, vue]
+framework: null
+essential: true
+difficulty: 1
+prereq: [ts/boolean-literal, cs/identity-vs-equality]
+# 빈칸 오답 셋이 이 셋의 토큰이다 (`=` · `=>` · `&&`).
+confusions: [ts/reassignment, ts/arrow-function, ts/logical-and-guard]
+
+dict:
+  one_liner:
+    ko: "값 둘을 견주어 참·거짓 하나를 내놓는다. 양쪽 값은 바뀌지 않는다."
+    en: "Weighs two values and yields one true-or-false. Neither value is changed."
+  why:
+    ko: >-
+      갈림길에 필요한 것은 참·거짓 하나인데 손에 있는 것은 숫자나 글자입니다. {{site.line}}행이
+      그 사이를 잇습니다 — {{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:이,가}} 들어가고 답 하나가 나와요.
+    en: >-
+      A fork needs one true-or-false, but what you hold is a number or some text. Line
+      {{site.line}} bridges that — {{pick.2|code}} and {{pick.3|code}} go in, one answer comes out.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:을,를}} 각각 값으로 만든다."
+      en: "{{pick.2|code}} and {{pick.3|code}} each become a value."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 그 둘을 견준다."
+      en: "{{pick.1|code}} weighs the two."
+    - ko: "참·거짓 하나가 남고, 양쪽 값은 그대로다."
+      en: "One true-or-false is left, and both values stay as they were."
+
+rule:
+  ko: "<b>견주기는 값을 바꾸지 않는다.</b> 새 값 하나가 생길 뿐이다."
+  en: "<b>Weighing changes nothing.</b> It only makes one new value."
+result:
+  label:
+    ko: "{{site.line}}행의 견줌"
+    en: "the weighing on line {{site.line}}"
+  value: "{{pick.1}}"
+  note:
+    ko: "양쪽은 그대로 남는다"
+    en: "both sides are left alone"
+ok:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:이,가}} {{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:을,를}} 견주어 참·거짓 하나를 내놓습니다.
+    {{pick.2|code}} 에 무엇이 담겨 있든 그 값은 그대로예요.
+  en: >-
+    {{pick.1|code}} weighs {{pick.2|code}} against {{pick.3|code}} and yields one true-or-false.
+    Whatever {{pick.2|code}} holds, it still holds it.
+payoff:
+  ko: >-
+    이 줄이 있어서 조건 자리에 숫자·글자를 그대로 넣지 않아도 됩니다. 견주기가 그것들을
+    갈림길이 읽을 수 있는 답으로 바꿔 주니까요.
+  en: >-
+    This line is why numbers and text need not be dropped into a condition raw — weighing turns
+    them into the answer a fork can read.
+bridge:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:이,가}} 내놓는 것은 참·거짓 값입니다 — 코드에 <code>true</code> 라고 적어 둔
+    것과 같은 종류이고, 이쪽은 셈해서 얻었을 뿐이에요.
+  en: >-
+    What {{pick.1|code}} yields is a boolean — the same kind as a written-out <code>true</code>,
+    only worked out instead of written.
+misconceptions:
+  - ko: "견주면 왼쪽 값이 결과로 바뀐다 — 아니요. 새 값이 따로 생깁니다."
+    en: "The left value turns into the result — no. A separate new value appears."
+  - ko: "대입과 같은 기호다 — 하나는 넣는 일, 하나는 견주는 일입니다."
+    en: "It is the same symbol as assignment — one puts a value in, the other weighs two."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>두 값을 견주는 일을 맡은 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol whose job is weighing the two values</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 견줌을 <b>당하는</b> 쪽입니다. 값은 스스로 견주지 못하고, 견주는 일은 가운데 기호가 합니다."
+          en: >-
+            {{pick.2|code}} is one of the values <b>being</b> weighed. A value cannot weigh itself;
+            the symbol between them does that.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 값만으로는 답이 안 나온다"
+            en: "The sharpest spot — a value alone yields no answer"
+          code:
+            - "n            // 숫자 하나일 뿐이다"
+            - "n === 0      // 참·거짓이 나온다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 견줄 <b>상대</b>입니다. 어느 쪽에 두어도 견주는 일은 가운데 기호가 합니다."
+          en: >-
+            {{pick.3|code}} is the <b>other side</b> being weighed. Put it on either side; the
+            weighing is still done by the symbol between.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 자리가 아니라 기호가 정한다"
+            en: "The sharpest spot — the symbol decides, not the side"
+          code:
+            - "0 === n      // 같은 답이 나온다"
+            - "n === 0      // 자리를 바꿔도 같다"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행이 지나간 뒤 {{pick.2|code}} 에 담긴 값은 어떻게 될까요?"
+      en: "After line {{site.line}} has run, what has become of the value in {{pick.2|code}}?"
+    hint:
+      ko: "견주기가 만드는 것은 <b>새 값</b>입니다."
+      en: "What weighing makes is a <b>new value</b>."
+    options:
+      - t:
+          ko: "그대로다 — 견주기는 새 값 하나를 만들 뿐 양쪽을 건드리지 않는다"
+          en: "Unchanged — weighing makes one new value and touches neither side"
+      - t:
+          ko: "참·거짓으로 바뀐다"
+          en: "It becomes a true-or-false"
+        diag:
+          t:
+            ko: "참·거짓이 되는 것은 <b>견준 결과</b>이지 {{pick.2|code}}{{pick.2|josa:이,가}} 아닙니다. 결과는 어딘가에 담지 않으면 그 자리에서 사라져요."
+            en: >-
+              What becomes a boolean is <b>the result</b>, not {{pick.2|code}}. And the result is
+              gone at once unless something holds it.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 결과냐 값이냐"
+              en: "The sharpest spot — the result or the value"
+            code:
+              - "let n = 5; n === 5   // 결과는 참, n 은 5"
+              - "let n = 5; n = 5 === 5   // 이러면 n 이 참이 된다"
+      - t:
+          ko: "{{pick.3|code}} 의 값으로 바뀐다"
+          en: "It takes on the value of {{pick.3|code}}"
+        diag:
+          t:
+            ko: "값을 넣는 것은 기호 하나짜리 대입이 하는 일입니다. 견주기는 넣지 않고 묻기만 해요."
+            en: >-
+              Putting a value in is what the single-symbol form does. Weighing does not put; it only
+              asks.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 넣는가 묻는가"
+              en: "The sharpest spot — putting or asking"
+            code:
+              - "n = 0     // n 이 0 이 된다"
+              - "n === 0   // n 은 그대로, 답만 나온다"
+      - t:
+          ko: "다음 줄까지 잠긴다"
+          en: "It is locked until the next line"
+        diag:
+          t:
+            ko: "잠기는 것은 없습니다. 견주기는 읽기만 하고 아무것도 붙잡아 두지 않아요."
+            en: "Nothing is locked. Weighing only reads, and holds on to nothing."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 읽기만 한다"
+              en: "The sharpest spot — it only reads"
+            code:
+              - "n === 0; n = 1   // 바로 다음 줄에서 바꿀 수 있다"
+              - "n === 0; n === 1 // 몇 번을 견줘도 n 은 그대로"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 두 값을 <b>견주기만</b> 하고 어느 쪽도 바꾸지 않습니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} only <b>weighs</b> the two values and
+        changes neither.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "===", mono: true }
+      - t: "="
+        mono: true
+        diag:
+          t:
+            ko: "기호 하나짜리는 <b>넣는</b> 일입니다. 여기 쓰면 견주는 대신 {{pick.2|code}}{{pick.2|josa:이,가}} {{pick.3|code}}{{pick.3|josa:으로,로}} 바뀌고, 조건 자리라면 그 값이 그대로 답이 됩니다."
+            en: >-
+              The single-symbol form <b>puts</b> a value in. Used here, {{pick.2|code}} becomes
+              {{pick.3|code}} instead of being weighed, and in a condition that value becomes the answer.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 하나냐 셋이냐"
+              en: "The sharpest spot — one symbol or three"
+            code:
+              - "if (n = 0) { }    // n 을 0 으로 바꾸고 늘 거짓"
+              - "if (n === 0) { }  // n 을 견주기만 한다"
+      - t: "=>"
+        mono: true
+        diag:
+          t:
+            ko: "이 기호는 <b>함수를 적는</b> 표기라 왼쪽이 받는 값, 오른쪽이 하는 일이 됩니다. 견주기와는 하는 일이 다릅니다."
+            en: >-
+              That symbol <b>writes a function</b>: the left side takes values, the right side does
+              the work. It is a different job from weighing.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 견줌이냐 함수냐"
+              en: "The sharpest spot — a weighing or a function"
+            code:
+              - "n === 0   // 참·거짓이 나온다"
+              - "n => 0    // 함수가 나온다"
+      - t: "&&"
+        mono: true
+        diag:
+          t:
+            ko: "이 기호는 <b>이미 참·거짓인 것 둘</b>을 묶습니다. 여기서는 아직 견주지 않아 참·거짓이 없으므로 묶을 것이 없습니다."
+            en: >-
+              That symbol joins <b>two things that are already true-or-false</b>. Here nothing has
+              been weighed yet, so there is nothing to join.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 만드는가 묶는가"
+              en: "The sharpest spot — making one or joining two"
+            code:
+              - "n === 0 && m === 0   // 견준 둘을 묶는다"
+              - "n && m               // 견주기 없이 값을 그대로 본다"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 두 값을 견주어 두었을까요?"
+    en: "Why does line {{site.line}} weigh these two values?"
+  choices:
+    - t:
+        ko: "갈림길이 읽을 수 있는 참·거짓이 필요해서 — 숫자나 글자는 그대로 쓸 수 없다"
+        en: "Because a fork needs a true-or-false — a number or some text cannot serve as one"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 견주지 않고 값을 그대로 조건에 넣었다면 무엇을 기준으로 갈렸을지도 적어 보세요."
+        en: "That is the direction. Say also what the fork would go on if the raw value were used."
+    - t:
+        ko: "값을 같게 만들려고"
+        en: "To make the two values equal"
+      ok: false
+      fb:
+        ko: "견주기는 묻기만 합니다. 같게 만드는 것은 넣는 일이고 기호가 다릅니다."
+        en: "Weighing only asks. Making them equal is putting a value in, and that is another symbol."
+    - t:
+        ko: "속도를 빠르게 하려고"
+        en: "To make it faster"
+      ok: false
+      fb:
+        ko: "견주기는 속도를 위한 것이 아닙니다. 답을 얻기 위한 것입니다."
+        en: "Weighing is not about speed. It is about getting an answer."
+
+queries:
+  - { grammars: [typescript, tsx, javascript, vue], file: ./comparison.scm }
+
+examples:
+  - code: "const same = a === b"
+    expect: { sites: 1, form: compare, hole: "===", picks: { 1: "===", 2: "a", 3: "b" } }
+  - code: "if (n > 0) { go() }"
+    expect: { sites: 1, form: compare, hole: ">", picks: { 1: ">", 2: "n", 3: "0" } }
+  - code: "const total = a + b"
+    expect: none

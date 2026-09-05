@@ -1,0 +1,246 @@
+schema: 1
+id: py/explicit-conversion
+# 0부 축 F. `universal: null` — 자바는 「좁히기」를 괄호로 적고 값이 잘리는데, 파이썬의
+# 이 자리는 **새 값을 만드는 함수 호출**이라 잘림이 아니라 거절(`ValueError`)이 난다.
+# `int("3.7")` 이 3 이 아닌 것이 그 증거다 (`py.md` §1.5.1 축 F).
+universal: null
+name: { ko: 적어서 바꾸기, en: Converting by hand }
+token: "int("
+grammars: [python]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cs/type-conversion, py/number-literal]
+confusions: [py/implicit-conversion]
+
+dict:
+  one_liner:
+    ko: "바꾸는 것이 아니라 새 값을 만든다. 넣어 준 값은 그대로 남는다."
+    en: "Nothing is changed; a new value is made. What went in stays as it was."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 값을 <b>고치지 않습니다.</b>
+      {{pick.3|code}}{{pick.3|josa:을,를}} 읽어 <b>새 값 하나</b>를 만들고, 원래 값은 그대로 남아요.
+      「바꾼다」로 읽으면 원래 이름에 결과가 담겨 있을 거라 기대하게 되는데 그런 일은 안 일어납니다.
+      읽는 규칙이 넣는 것에 따라 갈립니다. 소수를 주면 <b>0 쪽으로</b> 자르고
+      (<code>int(3.7)</code> 은 3, <code>int(-3.7)</code> 은 −3), 글자를 주면 <b>정수 모양</b>만
+      받습니다 — <code>int("3.7")</code> 은 3 이 아니라 그 자리에서 멈춰요.
+      「자르기」와 「읽기」가 같은 이름 안에 들어 있는 것이 이 판의 날카로운 자리입니다.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} <b>changes nothing</b>. It reads {{pick.3|code}} and
+      builds <b>one new value</b>, leaving the original as it was. Read as "changing," it sets up an
+      expectation that the old name now holds the result, and that never happens. The reading rule
+      splits on what goes in: a decimal is cut <b>toward zero</b> (<code>int(3.7)</code> is 3,
+      <code>int(-3.7)</code> is −3), while text must already <b>look like a whole number</b> —
+      <code>int("3.7")</code> is not 3, it stops there. Cutting and parsing living under one name is
+      the sharp spot of this plate.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.3|code}} 값을 그대로 읽는다 — 안 건드린다."
+      en: "The value {{pick.3|code}} on line {{site.line}} is read, not touched."
+    - ko: "{{pick.2|code}} 안쪽부터 {{pick.1|code}} 의 규칙이 걸린다."
+      en: "From inside {{pick.2|code}} the rule of {{pick.1|code}} applies."
+    - ko: "규칙에 맞으면 새 값 하나가 나오고, 안 맞으면 그 자리에서 멈춘다."
+      en: "Matching the rule yields one new value; failing it stops right there."
+
+rule:
+  ko: >-
+    <b>새 값을 만든다.</b> 소수는 0 쪽으로 자르고, 글자는 모양이 맞아야만 읽는다.
+  en: >-
+    <b>It makes a new value.</b> A decimal is cut toward zero; text is read only if the shape fits.
+result:
+  label:
+    ko: "{{site.line}}행이 만드는 값"
+    en: "the value line {{site.line}} builds"
+  value: "{{pick.1}}{{pick.2}}{{pick.3}})"
+  note:
+    ko: "원래 값은 그대로다"
+    en: "the original stays as it was"
+ok:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:이,가}} 새 값을 냅니다. 결과를 쓰려면 어딘가에 담아야 하고,
+    안 담으면 그대로 사라져요.
+  en: >-
+    {{pick.1|code}} yields a new value. To use it you have to keep it; unkept, it simply vanishes.
+payoff:
+  ko: >-
+    「바꿨는데 그대로다」가 여기서 풀립니다 — 만들기만 하고 안 담았기 때문이에요.
+  en: >-
+    “I converted it and it did not change” answers itself here: the value was built and never kept.
+bridge:
+  ko: >-
+    반대 방향, 즉 <b>안 적어도 저절로</b> 올라가는 자리는 앞 판이 맡습니다. 두 판을 가르는 것은
+    「코드에 적혀 있는가」 하나예요.
+  en: >-
+    The other direction — rising <b>with nothing written</b> — belongs to the previous plate. What
+    separates the two is only whether it appears in the code.
+misconceptions:
+  - ko: >-
+      <code>int("3.7")</code> 은 3 이다 — 그 자리에서 멈춥니다. 소수를 주면 자르고,
+      <b>소수 모양의 글자</b>는 안 받아요.
+    en: >-
+      <code>int("3.7")</code> gives 3 — it stops there. A decimal value is cut, but <b>text shaped
+      like a decimal</b> is refused.
+  - ko: >-
+      부른 뒤에는 원래 값도 바뀐다 — 안 바뀝니다. 새 값이 따로 생기고, 담지 않으면 사라져요.
+    en: >-
+      The original changes once it is called — it does not. A separate value appears and vanishes
+      unless kept.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>새 값을 만드는 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name that builds a new value</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} 새 값이 <b>시작되는 표시</b>입니다.
+            무슨 규칙으로 읽을지는 바로 앞의 이름이 정해요.
+          en: >-
+            {{pick.2|code}} marks <b>where the new value begins</b>. Which rule reads it is set by
+            the name just before.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 표시와 규칙"
+            en: "The sharpest spot — the mark and the rule"
+          code:
+            - 'int("12")     # 12'
+            - 'float("12")   # 12.0 — 같은 표시, 다른 규칙'
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} <b>읽히는 값</b>입니다. 이 값은 안 바뀌고,
+            결과는 따로 생겨요.
+          en: >-
+            {{pick.3|code}} is the value being <b>read</b>. It does not change; the result appears
+            separately.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 읽히는 값과 만들어지는 값"
+            en: "The sharpest spot — the value read and the value made"
+          code:
+            - 'raw = "12"'
+            - 'int(raw)      # raw 는 여전히 "12" 다'
+
+meaning:
+  - q:
+      ko: "<code>int(3.7)</code> 과 <code>int(\"3.7\")</code> 은 각각 어떻게 될까요?"
+      en: "What do <code>int(3.7)</code> and <code>int(\"3.7\")</code> each give?"
+    hint:
+      ko: "넣는 것이 값이냐 글자냐로 읽는 규칙이 갈립니다."
+      en: "The rule splits on whether a value or text goes in."
+    options:
+      - t:
+          ko: "3 과 멈춤 — 소수는 자르고, 소수 모양의 글자는 안 받는다"
+          en: "3 and a stop — a decimal is cut, decimal-shaped text is refused"
+      - t:
+          ko: "둘 다 3 — 같은 값이니까"
+          en: "Both 3 — it is the same value"
+        diag:
+          t:
+            ko: >-
+              같은 값이 아닙니다. 하나는 <b>수</b>이고 하나는 <b>글자</b>라서, 읽는 규칙이
+              아예 다른 것이 걸려요.
+            en: >-
+              They are not the same value. One is a <b>number</b> and one is <b>text</b>, so two
+              different reading rules apply.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 수냐 글자냐"
+              en: "The sharpest spot — a number or text"
+            code:
+              - 'int(3.7)       # 3'
+              - 'int("3.7")     # ValueError'
+      - t:
+          ko: "둘 다 4 — 반올림한다"
+          en: "Both 4 — it rounds"
+        diag:
+          t:
+            ko: >-
+              반올림하지 않습니다. 소수 부분을 <b>버리는</b> 쪽이라 늘 0 쪽으로 가고,
+              반올림은 이름이 따로 있어요.
+            en: >-
+              It does not round. The fractional part is <b>dropped</b>, always toward zero, and
+              rounding has its own name.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 버리기냐 반올림이냐"
+              en: "The sharpest spot — dropping or rounding"
+            code:
+              - "int(3.7)       # 3"
+              - "round(3.7)     # 4"
+      - t:
+          ko: "3 과 3 — 파이썬이 글자도 알아서 읽는다"
+          en: "3 and 3 — Python parses the text as well"
+        diag:
+          t:
+            ko: >-
+              글자도 읽기는 합니다. 다만 <b>정수 모양</b>일 때만이라, 점이 든 글자는 거절해요.
+              읽을 수 있는 모양을 좁혀 둔 것이 파이썬의 선택입니다.
+            en: >-
+              It does parse text — but only when the shape is <b>a whole number</b>, so text with a
+              dot is refused. Narrowing what can be parsed is Python's choice.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 어느 모양까지 받나"
+              en: "The sharpest spot — which shapes are accepted"
+            code:
+              - 'int("12")      # 12'
+              - 'int("3.7")     # ValueError'
+
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 개념의 정답은 사용처마다 다른 이름(`int`·`float`·`str`·`bool`)이라
+  빈칸형의 첫 보기를 사전에 고정할 수 없다 (`t0-blank` 가 첫 보기와 구멍 원문을 견준다).
+  이름을 짚는 일은 지목형이, 규칙이 갈리는 자리는 뜻 고르기가 한다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 종류를 손으로 적어 바꿨을까요?"
+    en: "Why does line {{site.line}} convert by hand?"
+  choices:
+    - t:
+        ko: "저절로 안 바뀌는 사이여서 — 글자와 수는 한 사다리에 없다"
+        en: "Because the two do not meet on their own — text is not on the number ladder"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 넣는 값이 규칙에 안 맞을 때 무엇이 일어나는지도 적어 보세요."
+        en: "That is the direction. Add what happens when the value does not fit the rule."
+    - t:
+        ko: "값을 정확하게 만들려고"
+        en: "To make the value exact"
+      ok: false
+      fb:
+        ko: >-
+          오히려 <b>잃습니다</b> — 소수 부분이 버려져요. 여기서 얻는 것은 정확함이 아니라
+          <b>종류</b>입니다.
+        en: >-
+          It <b>loses</b> instead: the fractional part is dropped. What is gained here is not
+          exactness but a <b>kind</b>.
+    - t:
+        ko: "원래 값을 고치려고"
+        en: "To change the original value"
+      ok: false
+      fb:
+        ko: "원래 값은 안 바뀝니다. 새 값이 따로 생기고, 안 담으면 그대로 사라져요."
+        en: "The original is untouched. A new value appears and vanishes unless kept."
+
+queries:
+  - { grammars: [python], file: ./explicit-conversion.scm }
+
+examples:
+  - code: 'count = int(raw)          # int("12") -> 12 (int)'
+    expect: { sites: 1, form: cast, picks: { 1: "int", 2: "(", 3: "raw" } }
+  - code: 'rate = float(text)        # float("0.5") -> 0.5 (float)'
+    expect: { sites: 1, form: cast, picks: { 1: "float", 2: "(", 3: "text" } }
+  - code: 'label = str(count)        # str(12) -> "12" (str)'
+    expect: { sites: 1, form: cast, picks: { 1: "str", 2: "(", 3: "count" } }
+  - code: "empty = str()             # str() -> 빈 글자 (str)"
+    expect: { sites: 1, form: empty-cast, picks: { 1: "str", 2: "(", 3: ")" } }
+  - code: "total = 1 + 2.0           # 1 + 2.0 -> 3.0 (float)"
+    expect: none
+  - code: "n = len(rows)             # len(rows) -> 목록의 개수 (int)"
+    expect: none

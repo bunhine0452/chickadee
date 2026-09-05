@@ -1,0 +1,100 @@
+schema: 1
+id: common/integer-literal
+universal: null
+name: { ko: 정수 값, en: "Whole-number value" }
+token: null
+grammars: []
+essential: false
+difficulty: 1
+# 정수와 실수는 **같은 자리에 서는 다른 기계**다. 짝으로 걸어 둔다 (D187 ④).
+confusions: [common/float-literal]
+queries: []
+dict:
+  one_liner:
+    ko: "소수점 없이 적은 값. 자릿수가 정해져 있어 끝이 있다."
+    en: "A value written with no decimal point. Its slots are finite, so it has an end."
+  why:
+    ko: >-
+      정수는 <b>자릿수가 정해진 상자</b>에 담깁니다. 흔한 크기가 32칸이고 그때 담을 수 있는
+      가장 큰 값은 <code>2147483647</code> 이에요. 여기에 1 을 더하면 오류가 나는 것이 아니라
+      <code>-2147483648</code> 이 됩니다 — 시곗바늘이 12 를 지나 1 로 가는 것과 같아요.
+      파이썬만 이 상자를 늘려 가며 담아서 한계가 없습니다.
+      나누기도 여기서 갈립니다. 자바·C·Go 에서 <code>7 / 2</code> 는 <b>3</b> 이고
+      파이썬에서는 <b>3.5</b> 예요 — 같은 기호가 언어마다 다른 답을 냅니다.
+    en: >-
+      A whole number lives in a box with a <b>fixed number of slots</b>. Thirty-two is a common
+      size, and the largest value it holds is <code>2147483647</code>. Adding 1 does not raise an
+      error; it gives <code>-2147483648</code>, the way a clock hand passes 12 and lands on 1.
+      Python alone grows the box, so it has no ceiling. Division splits here too: in Java, C and Go
+      <code>7 / 2</code> is <b>3</b>, while in Python it is <b>3.5</b> — one symbol, two answers.
+  trace: []
+rule:
+  ko: "<b>정수에는 끝이 있고, 정수끼리의 나눗셈은 언어가 정한다.</b>"
+  en: "<b>Whole numbers have an end, and what division of two of them yields is the language's call.</b>"
+ok:
+  ko: >-
+    소수점이 없는 값은 자릿수가 정해진 상자에 들어갑니다. 그 상자의 크기와 나눗셈의 답은
+    언어마다 달라요.
+  en: >-
+    A value with no decimal point goes into a box of fixed width. How wide the box is, and what
+    division yields, differ by language.
+misconceptions:
+  - ko: "정수는 아무리 커도 담긴다 — 대부분 32칸이나 64칸이라 2147483647 다음이 -2147483648 입니다."
+    en: >-
+      A whole number of any size fits — most boxes are 32 or 64 slots, so 2147483647 is followed by
+      -2147483648.
+  - ko: "소수점만 없으면 같은 종류다 — 3 과 3.0 은 담기는 방식이 다르고 나눗셈 결과도 갈립니다."
+    en: "No decimal point means the same kind — 3 and 3.0 are stored differently and divide differently."
+  - ko: "넘치면 오류가 난다 — 대개 조용히 뒤집힙니다. Rust 디버그 빌드만 멈춰 세워요."
+    en: "Overflow raises an error — it usually wraps in silence. Only Rust's debug build stops."
+meaning:
+  - q:
+      ko: "자바에서 <code>7 / 2</code> 가 <code>3</code> 으로 나옵니다. <b>어디서 갈린 건가요?</b>"
+      en: "In Java <code>7 / 2</code> comes out <code>3</code>. <b>Where did it split?</b>"
+    hint:
+      ko: "양쪽에 담긴 값이 어떤 종류인지 보세요."
+      en: "Look at what kind of value sits on each side."
+    options:
+      - t:
+          ko: "양쪽이 정수라서 결과도 정수로 잘렸다"
+          en: "Both sides are whole numbers, so the result was cut to a whole number"
+      - t:
+          ko: "자바가 반올림을 내림으로 한다"
+          en: "Java rounds downward"
+        diag:
+          t:
+            ko: "반올림이 아니라 <b>소수 부분을 아예 만들지 않은</b> 것입니다. <code>-7 / 2</code> 는 -4 가 아니라 -3 이에요."
+            en: >-
+              Nothing was rounded — the fractional part <b>was never made</b>. <code>-7 / 2</code> is
+              -3, not -4.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 내림이냐 잘림이냐", en: "The sharpest spot — floor or truncate" }
+            code:
+              - "-7 / 2   → -3   (0 쪽으로 잘린다)"
+              - "내림이면 -4 여야 한다"
+      - t:
+          ko: "7 과 2 가 작아서 소수가 필요 없다"
+          en: "7 and 2 are small enough not to need a decimal"
+        diag:
+          t:
+            ko: "크기와는 무관합니다. <code>7000000 / 2000000</code> 도 같은 이유로 <b>3</b> 이에요."
+            en: "Size has nothing to do with it. <code>7000000 / 2000000</code> is <b>3</b> for the same reason."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 크기냐 종류냐", en: "The sharpest spot — size or kind" }
+            code:
+              - "7 / 2             → 3"
+              - "7000000 / 2000000 → 3"
+      - t:
+          ko: "나눗셈 기호가 원래 몫만 낸다"
+          en: "The division symbol only ever yields a quotient"
+        diag:
+          t:
+            ko: "같은 기호가 파이썬에서는 <code>3.5</code> 를 냅니다. 기호가 아니라 <b>양쪽 값의 종류</b>가 정해요."
+            en: >-
+              The same symbol yields <code>3.5</code> in Python. It is <b>the kind of the operands</b>
+              that decides, not the symbol.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 기호냐 값의 종류냐", en: "The sharpest spot — the symbol or the operands" }
+            code:
+              - "자바:    7 / 2   → 3"
+              - "파이썬:  7 / 2   → 3.5"

@@ -1,67 +1,70 @@
-/* 설정의 「LLM 키」 칸 (06 §3.5 · D106). 담는 절(`.set-sec`)이 이미 괘선과 바탕을 갖고
-   있으므로 여기서는 입력 한 줄과 곁말만 정한다 — 상자 안에 상자를 또 그리지 않는다.
-   활자는 토큰만 쓰고(13px 하한), 상시 애니메이션도 전환도 두지 않는다. */
+/* 설정의 「LLM 키」 칸 (06 §3.5 · D106). 담는 절(`.set-sec`)이 이미 테두리와 바탕을 갖고
+   있으므로 여기서는 입력 한 줄과 곁말만 정한다 — 상자 안에 상자를 또 그리지 않는다. */
 .keypanel {
   display: grid;
-  gap: 8px;
+  gap: var(--s-2);
+  min-width: 0;
 }
 
 .key-form {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: var(--s-2) var(--s-3);
   align-items: center;
-  margin: 2px 0 4px;
+  margin: 0;
+  min-width: 0;
 }
 
 .key-k {
   flex: 0 0 5em;
-  color: var(--ink);
-  font-size: var(--fs-14);
-  font-weight: 600;
+  color: var(--text);
+  font-size: var(--fs-3);
+  font-weight: var(--fw-medium);
 }
 
 /* 붙여넣기가 주 입력이라 한 줄이 넉넉해야 한다. 값은 `type="password"` 로 가려진다. */
 .key-input {
   flex: 1 1 18em;
-  min-width: 12em;
-  padding: 5px 8px;
-  border: 1.5px solid var(--rule);
-  background: var(--stock);
-  color: var(--ink);
-  font-family: var(--f-mono);
-  font-size: var(--fs-14);
+  min-width: 10em;
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-3);
 }
 
-.key-input:focus {
-  outline: 3px solid var(--t0);
-  outline-offset: 2px;
+.key-input:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
 }
 
 .key-input:disabled {
-  background: var(--paper-3);
-  color: var(--ink-soft);
+  background: var(--surface-3);
+  color: var(--text-muted);
 }
 
 .key-note {
   max-width: var(--measure);
-  color: var(--ink-soft);
-  font-size: var(--fs-13);
+  color: var(--text-muted);
+  font-size: var(--fs-2);
   line-height: var(--lh-body);
 }
 
 /* 저장·삭제 결과 한 줄. 누르던 버튼이 사라지므로 포커스가 여기로 온다. */
 .key-said {
   max-width: var(--measure);
-  padding: 6px 10px;
-  border-left: 3px solid var(--t0);
-  background: var(--paper-3);
-  color: var(--ink);
-  font-size: var(--fs-14);
+  padding: var(--s-2) var(--s-3);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  background: var(--accent-weak);
+  color: var(--text);
+  font-size: var(--fs-4);
   line-height: var(--lh-body);
 }
 
 .key-said:focus-visible {
-  outline: 3px solid var(--t0);
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
 }

@@ -1,0 +1,261 @@
+schema: 1
+id: ts/reassignment
+universal: common/reassignment
+name: { ko: 다시 넣기, en: Reassignment }
+token: "="
+grammars: [typescript, tsx, javascript, vue]
+framework: null
+essential: true
+difficulty: 1
+prereq: [cs/state]
+# 빈칸 오답 셋이 이 셋의 토큰이다 (`===` · `=>` · `+`).
+confusions: [ts/comparison, ts/arrow-function, ts/arithmetic, ts/const-declaration]
+
+dict:
+  one_liner:
+    ko: "이미 있는 이름이 가리키는 값을 다른 값으로 바꾼다."
+    en: "Points a name that already exists at a different value."
+  why:
+    ko: >-
+      이름을 <b>만드는</b> 일과 <b>이미 있는 이름을 다시 묶는</b> 일은 다릅니다.
+      {{site.line}}행은 만들지 않아요 — 그래서 이 줄 위와 아래에서 {{pick.2|code}}{{pick.2|josa:이,가}}
+      가리키는 값이 달라집니다.
+    en: >-
+      <b>Making</b> a name and <b>re-pointing</b> one that exists are different jobs. Line
+      {{site.line}} makes nothing — which is why {{pick.2|code}} points at one value above this
+      line and another below it.
+  trace:
+    - ko: "{{pick.3|code}}{{pick.3|josa:을,를}} 먼저 값으로 만든다."
+      en: "{{pick.3|code}} becomes a value first."
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 그 값을 가리키게 한다."
+      en: "{{pick.2|code}} is made to point at it."
+    - ko: "{{site.line}}행 아래로 {{pick.2|code}}{{pick.2|josa:은,는}} 새 값이다."
+      en: "Below line {{site.line}}, {{pick.2|code}} is the new value."
+
+rule:
+  ko: "<b>이름은 그대로 하나, 가리키는 값만 바뀐다.</b> 먼저 만들어 둔 이름이라야 한다."
+  en: "<b>One name throughout; only what it points at changes.</b> The name has to exist already."
+result:
+  label:
+    ko: "{{site.line}}행 아래의 {{pick.2}}"
+    en: "{{pick.2}} below line {{site.line}}"
+  value: "{{pick.3}}"
+  note:
+    ko: "위와 아래가 다른 값이다"
+    en: "different above and below"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:이,가}} 이제 {{pick.3|code}}{{pick.3|josa:을,를}} 가리킵니다. 이름이 하나 더 생긴 것이 아니라
+    같은 이름이 다른 곳을 볼 뿐이에요.
+  en: >-
+    {{pick.2|code}} now points at {{pick.3|code}}. No second name appeared; the same name simply
+    looks elsewhere.
+payoff:
+  ko: >-
+    이걸 알면 「같은 이름인데 값이 왜 다르지」가 풀립니다 — 어느 줄에서 다시 넣었는지를
+    찾으면 됩니다.
+  en: >-
+    This is what untangles “same name, different value” — you go looking for the line that
+    re-pointed it.
+bridge:
+  ko: >-
+    선언은 이름을 <b>만들고</b>, {{site.line}}행은 그 이름을 <b>옮깁니다</b>. 만드는 일은 한 번,
+    옮기는 일은 여러 번 할 수 있어요.
+  en: >-
+    A declaration <b>makes</b> the name; line {{site.line}} <b>moves</b> it. Making happens once,
+    moving as often as you like.
+misconceptions:
+  - ko: "이름이 하나 더 생긴다 — 아니요. 같은 이름이 다른 값을 가리킬 뿐입니다."
+    en: "Another name appears — no. The same name simply points elsewhere."
+  - ko: "<code>const</code> 로 만든 이름에도 된다 — 그 이름은 다시 묶을 수 없어 그 자리에서 멈춥니다."
+    en: "It works on a <code>const</code> name too — that name cannot be rebound; it stops there."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>이름을 다른 값에 다시 묶는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that re-binds the name</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>옮겨지는 이름</b>입니다. 이름은 스스로 옮기지 못하고, 옮기는 일은 가운데 기호가 합니다."
+          en: >-
+            {{pick.2|code}} is <b>the name being moved</b>. A name cannot move itself; the symbol
+            between does that.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 이름만으로는 아무 일도 안 난다"
+            en: "The sharpest spot — a name alone does nothing"
+          code:
+            - "count        // 값을 읽기만 한다"
+            - "count = 0    // 값이 바뀐다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 새로 가리킬 <b>값</b>입니다. 값은 어디로 갈지 모르고, 그것을 정하는 것은 가운데 기호예요."
+          en: >-
+            {{pick.3|code}} is the <b>value</b> to point at. A value does not know where it goes;
+            the symbol between decides.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 값이냐 옮기는 일이냐"
+            en: "The sharpest spot — the value or the move"
+          code:
+            - "0            // 계산되고 사라진다"
+            - "count = 0    // 이름이 그 값을 가리킨다"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행의 {{pick.2|code}}{{pick.2|josa:이,가}} <code>const</code> 로 만든 이름이었다면 어떻게 될까요?"
+      en: "What if {{pick.2|code}} on line {{site.line}} had been made with <code>const</code>?"
+    hint:
+      ko: "<code>const</code> 가 막는 것은 <b>이름을 다시 묶는 일</b>입니다."
+      en: "What <code>const</code> blocks is <b>binding the name again</b>."
+    options:
+      - t:
+          ko: "그 자리에서 멈춘다 — <code>const</code> 로 묶은 이름은 다시 묶을 수 없다"
+          en: "It stops there — a name bound with <code>const</code> cannot be rebound"
+      - t:
+          ko: "조용히 무시되고 옛 값이 남는다"
+          en: "It is quietly ignored and the old value stays"
+        diag:
+          t:
+            ko: "무시되지 않습니다. 그 줄에서 멈추기 때문에 아래 줄이 아예 실행되지 않아요."
+            en: >-
+              It is not ignored. It stops on that line, so the lines below never run at all.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 조용하지 않다"
+              en: "The sharpest spot — it is not quiet"
+            code:
+              - "const c = 1; c = 2; f()   // f 는 실행되지 않는다"
+              - "let l = 1;   l = 2; f()   // f 가 실행된다"
+      - t:
+          ko: "새 이름이 하나 만들어진다"
+          en: "A new name is made"
+        diag:
+          t:
+            ko: "이름을 만드는 것은 <code>const</code>·<code>let</code> 이 붙은 줄입니다. 이 줄에는 그것이 없으니 만들지 않아요."
+            en: >-
+              Names are made on lines carrying <code>const</code> or <code>let</code>. This line has
+              neither, so it makes none.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 만드는 줄과 옮기는 줄"
+              en: "The sharpest spot — the making line and the moving line"
+            code:
+              - "let n = 1   // 만든다"
+              - "n = 2       // 옮긴다"
+      - t:
+          ko: "값 안쪽만 바뀐다"
+          en: "Only the inside of the value changes"
+        diag:
+          t:
+            ko: "안쪽을 고치는 것은 <code>{{pick.2}}.a = …</code> 같은 다른 모양입니다. 여기서는 이름 자체를 다시 묶으려 합니다."
+            en: >-
+              Editing the inside looks like <code>{{pick.2}}.a = …</code>. Here the name itself is
+              being rebound.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 안이냐 이름이냐"
+              en: "The sharpest spot — the inside or the name"
+            code:
+              - "const o = { a: 1 }; o.a = 2   // 된다"
+              - "const o = { a: 1 }; o = {}    // 멈춘다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 이미 있는 이름이 <b>다른 값</b>을 가리키게 합니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} makes an existing name point at a
+        <b>different value</b>.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "=", mono: true }
+      - t: "==="
+        mono: true
+        diag:
+          t:
+            ko: "기호 셋짜리는 <b>견주기</b>라 묻기만 하고 넣지 않습니다. 이 줄은 답 하나를 만들어 놓고 아무 데도 담지 않은 채 끝나요."
+            en: >-
+              The three-symbol form <b>weighs</b>: it asks, it does not put. The line would make one
+              answer and end without keeping it anywhere.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 넣는가 묻는가"
+              en: "The sharpest spot — putting or asking"
+            code:
+              - "count = 0     // count 가 0 이 된다"
+              - "count === 0   // count 는 그대로"
+      - t: "=>"
+        mono: true
+        diag:
+          t:
+            ko: "이 기호는 <b>함수를 적는</b> 표기라 왼쪽이 받는 값이 됩니다. 이름을 옮기는 자리가 아닙니다."
+            en: >-
+              That symbol <b>writes a function</b>, making the left side what it takes. It is not
+              where a name gets moved.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 옮김이냐 함수냐"
+              en: "The sharpest spot — a move or a function"
+            code:
+              - "count = 0    // 값이 바뀐다"
+              - "count => 0   // 함수가 생긴다"
+      - t: "+"
+        mono: true
+        diag:
+          t:
+            ko: "이 기호는 값 둘로 <b>새 값을 만들 뿐</b> 어디에도 담지 않습니다. 이 줄은 값을 하나 만들어 놓고 그대로 버리게 돼요."
+            en: >-
+              That symbol only <b>makes a new value</b> out of two and keeps it nowhere. The line
+              would build one value and then throw it away.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 만드는가 담는가"
+              en: "The sharpest spot — making or keeping"
+            code:
+              - "count + 0   // 값이 생겼다 사라진다"
+              - "count = 0   // 이름이 그 값을 가리킨다"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 새 이름을 만들지 않고 있던 이름을 다시 썼을까요?"
+    en: "Why does line {{site.line}} reuse an existing name instead of making a new one?"
+  choices:
+    - t:
+        ko: "같은 것을 가리키는 이름이라서 — 시점만 달라졌지 무엇을 가리키는지는 그대로다"
+        en: "Because it names the same thing — only the moment changed, not what it stands for"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이름을 새로 만들었다면 읽는 사람이 무엇을 더 확인해야 했을지도 적어 보세요."
+        en: "That is the direction. Say also what a reader would have to check if a new name appeared."
+    - t:
+        ko: "이름을 아끼려고"
+        en: "To save on names"
+      ok: false
+      fb:
+        ko: "이름은 아낄 것이 아닙니다. 다시 쓰는 이유는 같은 것을 가리키기 때문입니다."
+        en: "Names are not scarce. It is reused because it stands for the same thing."
+    - t:
+        ko: "메모리를 아끼려고"
+        en: "To save memory"
+      ok: false
+      fb:
+        ko: "이름 하나가 차지하는 자리는 문제가 되지 않습니다. 이유는 읽는 사람에게 있습니다."
+        en: "What one name costs is not the issue. The reason is about the reader."
+
+queries:
+  - { grammars: [typescript, tsx, javascript, vue], file: ./reassignment.scm }
+
+examples:
+  - code: "count = 0"
+    expect: { sites: 1, form: assign, hole: "=", picks: { 1: "=", 2: "count", 3: "0" } }
+  - code: "cursor = next()"
+    expect: { sites: 1, form: assign, hole: "=", picks: { 1: "=", 2: "cursor", 3: "next()" } }
+  - code: "const count = 0"
+    expect: none

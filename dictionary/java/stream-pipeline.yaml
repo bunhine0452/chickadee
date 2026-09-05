@@ -1,0 +1,246 @@
+schema: 1
+id: java/stream-pipeline
+universal: common/map-transform
+name: { ko: 줄줄이 이어 훑기, en: Stream pipeline }
+token: "stream"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 4
+prereq: [java/lambda, java/collection-generic]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "훑을 일을 이어 적어 두고, 끝내는 연산이 붙을 때 한 번에 흐른다."
+    en: "Passes are written in a chain and flow once a finishing call is attached."
+  why:
+    ko: >-
+      되풀이를 손으로 적으면 「무엇을 하려는가」가 「어떻게 도는가」에 묻힙니다 — 번호·조건·임시
+      목록이 앞에 서고 뜻은 몸통 가운데에 있어요. {{site.line}}행은 순서를 뒤집습니다. 훑을 일을
+      이름 붙여 이어 적고, 도는 방법은 안 적어요. 그런데 <b>적기만 하면 한 번도 안 돕니다</b> —
+      {{pick.1|code}}{{pick.1|josa:이,가}} 문을 열고, 결과를 <b>받아 내는 연산</b>이 붙어야 그때 처음부터
+      한 번에 흐릅니다. 그래서 화면에 아무 일도 안 일어나는 자리에서 이 사슬의 <b>끝</b>을 먼저 봐야
+      합니다.
+    en: >-
+      A hand-written loop buries “what is meant” under “how it turns” — index, test and a scratch list
+      come first, and the meaning sits in the middle of the body. Line {{site.line}} inverts that: the
+      passes are written in a named chain and the turning is never written. But <b>writing alone runs
+      nothing</b>: {{pick.1|code}} opens the gate, and only when a call that <b>draws the result out</b>
+      is attached does it flow, once, from the start. So where nothing happens on screen, look at the
+      <b>end</b> of the chain first.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 훑을 것이다."
+      en: "{{pick.2|code}} is what will be walked."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 사슬의 문을 연다 — 여기서는 아직 아무것도 안 돈다."
+      en: "{{pick.1|code}} opens the chain — nothing runs yet at this point."
+    - ko: "{{site.line}}행의 사슬 끝에 받아 내는 연산이 붙어야 한 번에 흐른다."
+      en: "It flows once only when a drawing-out call is attached to the end of the chain on line {{site.line}}."
+
+rule:
+  ko: "<b>끝내는 연산이 없으면 한 번도 안 돈다.</b> 중간에 적은 것은 적어 둔 것일 뿐이다."
+  en: "<b>Without a finishing call it never runs.</b> The middle is only written down."
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:을,를}} {{pick.1|code}}{{pick.1|josa:으로,로}} 열고 사슬을 잇습니다.
+    받아 내는 연산이 붙을 때 흘러요.
+  en: >-
+    {{pick.2|code}} is opened with {{pick.1|code}} and the chain is joined. It flows when a drawing-out
+    call is attached.
+payoff:
+  ko: >-
+    이걸 알면 「필터를 걸었는데 왜 아무 일도 안 나나」의 답이 보입니다 — 끝이 없어서예요.
+  en: >-
+    Knowing this answers “I added a filter, why does nothing happen” — there is no end.
+bridge:
+  ko: >-
+    자바스크립트의 <code>map</code>·<code>filter</code> 는 <b>줄마다 바로</b> 돌고 새 배열을 냅니다.
+    자바는 끝이 붙기 전까지 <b>미뤄 둡니다</b> — 같아 보이는데 도는 시점이 달라요.
+  en: >-
+    JavaScript's <code>map</code> and <code>filter</code> run <b>line by line</b> and return a new
+    array. Java <b>defers</b> until an end is attached — they look alike but run at different moments.
+misconceptions:
+  - ko: "중간 연산만 적어도 돈다 — <b>한 번도 안 돕니다</b>. 끝내는 연산이 붙어야 흘러요."
+    en: "The middle calls alone run — they <b>never do</b>. A finishing call makes it flow."
+  - ko: "각 단계마다 목록이 하나씩 생긴다 — 대개 <b>한 번</b> 훑으며 각 값이 사슬을 통과합니다."
+    en: "Each step makes its own list — usually it walks <b>once</b>, each value passing through the chain."
+  - ko: "원래 목록이 바뀐다 — <b>안 바뀝니다</b>. 결과는 따로 받아 내야 해요."
+    en: "The source list changes — it <b>does not</b>. The result has to be drawn out separately."
+  - ko: "한 번 만든 사슬을 다시 쓸 수 있다 — <b>한 번뿐</b>입니다. 다시 쓰려면 다시 열어야 해요."
+    en: "One chain can be reused — it is <b>single use</b>. Reusing means opening it again."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>훑을 것</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>what will be walked</b>."
+    hint:
+      ko: "점 <b>앞</b>에 있습니다."
+      en: "It sits <b>before</b> the dot."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>문을 여는 이름</b>입니다. 훑을 것은 그 앞이에요."
+          en: "{{pick.1|code}} is <b>the name that opens the gate</b>. What is walked sits before it."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 여는 이름이냐 훑을 것이냐"
+            en: "The sharpest spot — the opener or the source"
+          code:
+            - "names.stream()"
+            - "// ^훑을 것 ^연다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>넘기는 것을 적는 자리</b>입니다. 여기서는 비어 있어요."
+          en: "{{pick.3|code}} is <b>where arguments are written</b>, and here it is empty."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 훑을 것이냐 넘기는 것이냐"
+            en: "The sharpest spot — the source or the arguments"
+          code:
+            - "names : 훑을 것"
+            - "()    : 넘기는 것 (없다)"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행 뒤에 중간 연산만 잇고 <b>끝내는 연산</b>을 안 붙이면 어떻게 될까요?"
+      en: "If only middle calls follow line {{site.line}} and <b>no finishing call</b> is attached, what happens?"
+    hint:
+      ko: "언제 흐르기 시작하는지 보세요."
+      en: "Ask when it starts to flow."
+    options:
+      - t:
+          ko: "한 번도 안 돈다"
+          en: "It never runs"
+      - t:
+          ko: "적은 만큼 돌고 결과를 버린다"
+          en: "It runs as written and throws the result away"
+        diag:
+          t:
+            ko: "버리는 것이 아니라 <b>시작조차 안 합니다</b>. 안에 적은 일거리도 한 번도 안 불려요."
+            en: "Nothing is thrown away — it <b>never even starts</b>. The work written inside is never called."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 돌고 버리나 안 도나"
+              en: "The sharpest spot — run-and-discard or never run"
+            code:
+              - "xs.stream().map(f);  // f 는 안 불린다"
+      - t:
+          ko: "컴파일이 멈춘다"
+          en: "Compiling stops"
+        diag:
+          t:
+            ko: "문법으로는 문제가 없습니다. <b>조용히 아무 일도 안 하는</b> 것이 이 자리의 함정이에요."
+            en: "Grammatically it is fine. <b>Quietly doing nothing</b> is the trap here."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 막히나 조용하나"
+              en: "The sharpest spot — blocked or silent"
+            code:
+              - "javac: 통과한다"
+      - t:
+          ko: "원래 목록이 바뀐다"
+          en: "The source list changes"
+        diag:
+          t:
+            ko: "원래 목록은 <b>안 바뀝니다</b>. 사슬은 새 결과를 낼 뿐이고, 그것도 끝이 있어야 나와요."
+            en: "The source <b>does not change</b>. The chain produces a new result, and only with an end."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 바꾸나 새로 내나"
+              en: "The sharpest spot — mutating or producing"
+            code:
+              - "원래 목록: 그대로"
+              - "결과:      따로 받는다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 {{pick.2|code}}{{pick.2|josa:을,를}} 훑을 <b>사슬의 문을 엽니다</b>."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} <b>opens the chain</b> that walks {{pick.2|code}}.
+    hint:
+      ko: "보기 넷은 전부 목록에 점을 찍고 부를 수 있는 이름입니다."
+      en: "All four are names callable with a dot on a list."
+    options:
+      - { t: "stream", mono: true }
+      - t: "forEach"
+        mono: true
+        diag:
+          t:
+            ko: "<code>forEach</code> 는 <b>끝내는</b> 쪽입니다. 여는 것이 아니라 그 자리에서 다 돌아요."
+            en: "<code>forEach</code> is a <b>finishing</b> call. It does not open; it runs everything right there."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 여나 끝내나"
+              en: "The sharpest spot — opening or finishing"
+            code:
+              - "stream():  연다"
+              - "forEach(): 끝낸다"
+      - t: "iterator"
+        mono: true
+        diag:
+          t:
+            ko: "<code>iterator</code> 는 <b>손으로 하나씩</b> 꺼내는 쪽입니다. 사슬을 이어 적을 수 없어요."
+            en: "<code>iterator</code> pulls items <b>by hand</b>. No chain can be written on it."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 손으로냐 사슬로냐"
+              en: "The sharpest spot — by hand or by chain"
+            code:
+              - "iterator(): 하나씩 꺼낸다"
+              - "stream():   이어 적는다"
+      - t: "size"
+        mono: true
+        diag:
+          t:
+            ko: "<code>size</code> 는 <b>몇 개인지</b>를 답하는 숫자입니다. 훑는 일과 상관없어요."
+            en: "<code>size</code> answers <b>how many</b> as a number. It walks nothing."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 세기냐 훑기냐"
+              en: "The sharpest spot — counting or walking"
+            code:
+              - "size():   숫자 하나"
+              - "stream(): 훑을 사슬"
+
+why_gate:
+  q:
+    ko: "중간에 적은 것을 <b>바로 안 돌리고</b> 끝까지 미루는 것은 무엇을 얻으려고일까요?"
+    en: "<b>What is gained</b> by deferring the middle calls instead of running them at once?"
+  choices:
+    - t:
+        ko: "각 값이 사슬을 <b>한 번에 통과</b>해 중간 목록을 안 만들게"
+        en: "So each value <b>passes the whole chain once</b> and no intermediate list is built"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 대신 무엇이 안 보이게 됐는지도 적어 보세요."
+        en: "That is the direction. Add what became harder to see in exchange."
+    - t:
+        ko: "코드를 짧게 쓰려고"
+        en: "To write less code"
+      ok: false
+      fb:
+        ko: "짧아지는 것은 사슬로 적었기 때문이지 미룬 것 때문이 아닙니다. 미뤄서 얻는 것은 <b>훑는 횟수</b>예요."
+        en: "The shortness comes from chaining, not from deferring. Deferring buys <b>the number of walks</b>."
+    - t:
+        ko: "자바가 목록을 여러 번 못 훑어서"
+        en: "Because Java cannot walk a list twice"
+      ok: false
+      fb:
+        ko: "여러 번 훑을 수 있습니다. 한 번으로 <b>줄인</b> 것이에요."
+        en: "It can walk many times. This <b>reduces</b> it to one."
+
+queries:
+  - { grammars: [java], file: ./stream-pipeline.scm }
+
+examples:
+  - code: "long n = names.stream().count();"
+    expect:
+      sites: 1
+      form: open
+      hole: "stream"
+      picks: { 1: "stream", 2: "names", 3: "()" }
+  - code: "List<String> up = xs.filter(f).collect(toList());"
+    expect: { sites: 1, form: collect, picks: { 1: "collect", 4: "xs.filter(f)" } }
+  - code: "for (String s : names) { print(s); }"
+    expect: none

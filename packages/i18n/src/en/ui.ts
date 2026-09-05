@@ -7,8 +7,16 @@ export const ui: Record<string, string> = {
   'error.gitCommitNotFound.title': 'The history looks rewritten.',
   'error.gitCommitNotFound.detail': 'Reading the repo again.',
   'error.gitIo.title': 'Could not read the repo.',
+  'error.gitUrlUnsupported.title': 'Only https addresses are fetched.',
+  'error.gitUrlUnsupported.detail':
+    'Copy the HTTPS address from the Code button on GitHub. An ssh address (git@…) needs a key, '
+    + 'so it is not fetched yet.',
+  'error.gitDestOccupied.title': 'Something is already at that spot.',
+  'error.gitDestOccupied.detail':
+    'A folder of that name is already there. If you have the repo on disk already, add it with '
+    + 'Add a repo instead.',
   'error.logsHaveMore': 'The log has the details.',
-  'error.parseLangUnsupported.title': 'No plates for this language yet.',
+  'error.parseLangUnsupported.title': 'No questions for this language yet.',
   'error.parseLangUnsupported.detail':
     'Add the language to the grammar dictionary and it is read from that day on.',
   'error.parseQueryInvalid.title': 'The grammar dictionary has an error.',
@@ -16,7 +24,7 @@ export const ui: Record<string, string> = {
   'error.parseTooLarge.title': 'This file was skipped — too large.',
   'error.parseTimeout.title': 'This file was skipped — it took too long to read.',
   'error.parseTooDeep.title': 'This file was skipped — too deeply nested.',
-  'error.storeMigration.title': 'Could not move the data file to the new plate.',
+  'error.storeMigration.title': 'Could not move the data file to the new format.',
   'error.storeMigration.detail': 'The backup is in <code>backups/</code>.',
   'error.storeConstraint.title': 'Could not save.',
   'error.storeConstraint.detail': 'Reload the screen.',

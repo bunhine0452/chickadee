@@ -1,0 +1,91 @@
+schema: 1
+id: cs/transaction-isolation
+universal: null
+name: { ko: "도중에 남이 보면 무엇이 보이나", en: "Transaction isolation" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+# SQL 편이 밀어낸 것 (cs.md §10.2).
+track_default: t0
+essential: false
+difficulty: 4
+prereq: [cs/race-condition]
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "여러 줄의 변경을 한 덩이로 묶고, 도중을 남에게 안 보이게 한다."
+    en: "Several changes made one lump, with the middle hidden from others."
+  why:
+    ko: >-
+      돈을 옮기는 일은 「한쪽에서 빼고」와 「다른 쪽에 넣고」 두 걸음입니다.
+      그 사이에 다른 사람이 보면 <b>돈이 사라진 순간</b>을 봅니다. 그래서 둘을 한 덩이로 묶고
+      <b>전부 되거나 전부 안 되게</b> 합니다. 그리고 도중을 안 보이게 해요.
+      얼마나 안 보이게 할지는 단계로 정하는데, 강하게 막을수록 <b>기다림이 늘어납니다</b>.
+      경쟁 조건과 같은 문제이고 다른 것은 이름이 있고 <b>단계를 골라 살 수 있다</b>는 점입니다 —
+      대가는 언제나 기다림입니다.
+    en: >-
+      Moving money is two steps: take from one, add to the other. Someone looking in between sees
+      <b>a moment where money does not exist</b>. So the two are made one lump that <b>either all
+      happens or none of it does</b>, and the middle is hidden. How much is hidden is chosen in
+      levels, and the stronger the hiding, <b>the more waiting</b>. It is the same problem as a
+      race condition; what differs is that it has a name and <b>the level can be bought</b> — the
+      price is always waiting.
+  trace: []
+rule:
+  ko: "<b>전부 되거나 전부 안 된다.</b> 도중을 감출수록 기다림이 늘어난다."
+  en: "<b>All of it or none of it.</b> The more the middle is hidden, the more waiting."
+ok:
+  ko: >-
+    묶은 안에서 여러 줄을 고치고 마지막에 한 번에 확정합니다. 도중에 문제가 나면
+    묶음 전체가 없던 일이 됩니다.
+  en: >-
+    Change several rows inside the lump and confirm once at the end. Trouble in the middle undoes
+    the whole lump.
+misconceptions:
+  - ko: "묶으면 빨라진다 — 안전해지고 대개 느려집니다."
+    en: "Wrapping makes it faster — it makes it safer, usually slower."
+  - ko: "묶으면 남이 아무것도 못 본다 — 단계에 따라 보이는 정도가 다릅니다."
+    en: "Wrapping hides everything — how much is hidden depends on the level."
+  - ko: "한 줄만 고치면 묶을 필요가 없다 — 읽고 나서 고치는 것은 두 걸음입니다."
+    en: "One row needs no wrapping — read-then-write is two steps."
+meaning:
+  - q:
+      ko: "두 계좌 사이에서 돈이 잠깐 사라져 보이는 순간이 있습니다. <b>무엇을 하면 되나요?</b>"
+      en: "For a moment money appears to vanish between two accounts. <b>What fixes it?</b>"
+    hint:
+      ko: "두 걸음 사이가 남에게 보이는 것이 문제입니다."
+      en: "The problem is that the gap between two steps is visible."
+    options:
+      - t: { ko: "두 걸음을 한 덩이로 묶고 도중을 안 보이게 한다", en: "Make the two steps one lump and hide the middle" }
+      - t: { ko: "두 걸음의 순서를 바꾼다", en: "Swap the order of the two steps" }
+        diag:
+          t:
+            ko: "순서를 바꾸면 <b>돈이 두 배로 보이는</b> 순간이 생깁니다 — 사라지는 대신 늘어나요. 사이가 보이는 것은 그대로입니다."
+            en: "Swapping creates a moment where money <b>appears twice</b> — it grows instead of vanishing. The visible gap remains."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 어느 쪽으로 어긋나나", en: "The sharpest spot — which way it skews" }
+            code:
+              - "빼고 넣기: 잠깐 사라진다"
+              - "넣고 빼기: 잠깐 두 배"
+      - t: { ko: "두 걸음을 아주 빠르게 만든다", en: "Make the two steps very fast" }
+        diag:
+          t:
+            ko: "빨라지면 <b>드물어질</b> 뿐입니다. 드문 문제가 가장 찾기 어렵다는 것이 이 갈래의 성질이에요."
+            en: "Speed makes it <b>rarer</b>. Rare is the hardest kind to find — that is this family's nature."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 없애나 줄이나", en: "The sharpest spot — removed or reduced" }
+            code:
+              - "빠르게: 확률이 준다"
+              - "묶기: 순간 자체가 없다"
+      - t: { ko: "합계를 한 번 더 계산해서 맞춘다", en: "Recompute the total afterwards" }
+        diag:
+          t:
+            ko: "나중에 맞추는 것은 <b>이미 본 사람</b>에게 안 듣습니다. 그 사람은 사라진 순간을 봤어요."
+            en: "Fixing later does not help <b>whoever already looked</b> — they saw the vanished moment."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 나중이냐 도중이냐", en: "The sharpest spot — after or during" }
+            code:
+              - "나중: 값은 맞춰진다"
+              - "도중: 이미 본 사람이 있다"

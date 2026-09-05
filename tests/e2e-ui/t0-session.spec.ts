@@ -18,7 +18,7 @@ const SHEET = '.proof article.ps';
 /** 홈에서 판 한 장을 걸고 교정지가 놓일 때까지. */
 async function startPrinting(page: import('@playwright/test').Page): Promise<void> {
   await openHome(page);
-  await page.getByRole('button', { name: /인쇄 시작/ }).click();
+  await page.getByRole('button', { name: /학습 시작/ }).click();
   await page.locator(SHEET).waitFor();
 }
 
@@ -26,12 +26,13 @@ test('01 홈 → 인쇄 시작 → 1판 정답', async ({ page, app }) => {
   await openHome(page);
 
   // 오늘의 인쇄가 판 수와 분을 먼저 말한다 (정본 §3-5).
-  await expect(page.locator('.today .today-n')).toHaveText(/2판 · 약 \d+분/);
-  await expect(page.locator('.today .press-btn')).toContainText('인쇄 시작');
+  // T0 둘 + 구조 한 판 — 홈 미리보기가 세션이 실제로 거는 수와 같다 (D140 · D170 ④).
+  await expect(page.locator('.today .today-n')).toHaveText(/3문제 · 약 \d+분/);
+  await expect(page.locator('.today .press-btn')).toContainText('학습 시작');
 
-  await page.getByRole('button', { name: /인쇄 시작/ }).click();
+  await page.getByRole('button', { name: /학습 시작/ }).click();
   await page.locator(SHEET).waitFor();
-  await expect(page.locator(SHEET)).toHaveAttribute('aria-label', /1판 · 문자열 리터럴/);
+  await expect(page.locator(SHEET)).toHaveAttribute('aria-label', /1번 · 문자열 리터럴/);
   // 교정지가 마운트되면 포커스는 판 자신이다 (05 §7).
   expect(await focusPath(page)).toBe('article.ps');
 
@@ -40,20 +41,19 @@ test('01 홈 → 인쇄 시작 → 1판 정답', async ({ page, app }) => {
 
   await page.locator(`.ch[data-k="${answerKeyOf(app.db)}"]`).click();
   await page.locator('.acts .press-btn').click();
-  await expect(page.locator('.fb .stamp')).toBeVisible();
+  await expect(page.locator('.fb .fb-tag')).toBeVisible();
 
-  // 정합 도장 — 은유와 평문을 같이 찍는다.
-  await expect(page.locator('.fb .stamp')).toContainText('정합');
-  await expect(page.locator('.fb .stamp')).toContainText('in register');
-  // `+1겹` — 겹이 움직인 것을 이득으로 (05 §5 `ProofSheet`).
-  await expect(page.locator('.ps-rail .plus')).toHaveText('+1겹');
-  await expect(page.locator('.ps-rail .plus')).toHaveClass(/\bon\b/);
+  // 판정은 낱말 하나다 — 회전 도장은 D182 로 없앴다.
+  await expect(page.locator('.fb .fb-tag')).toHaveText('정답');
+  await expect(page.locator('.fb .stampbox, .ps-rail')).toHaveCount(0);
+  // 숙련도가 오른 것은 판 머리 레일이 아니라 **판정란**이 말한다 (D182).
+  await expect(page.locator('.fb .gain-step')).toHaveText('0단계→1단계');
 
   // live 문구 — 세션의 낭독 지점은 오버레이의 `.vh#live` 한 곳이다 (05 §7 · D114).
   // 판정란 자신은 `aria-live` 를 들지 않는다: 통째로 읽으면 60자 규약을 넘는다.
   await expect(page.locator('.fb')).not.toHaveAttribute('aria-live', /.*/);
   const live = page.locator('.proof #live');
-  await expect(live).toHaveText(/정합 — 맞았습니다\. 잉크 1겹 · 다음 인쇄.*Space 로 다음\./);
+  await expect(live).toHaveText(/맞았습니다\. 숙련도 1단계 · 다음 복습.*Space 로 다음\./);
   await expect(page.locator('.fb')).toContainText('맞았습니다');
 
   // 판정란은 자리를 미리 비워 뒀다 — 답해도 위쪽 글이 0px 도 밀리지 않는다 (정본 §3-3).
@@ -65,13 +65,15 @@ test('02 2판 오답', async ({ page, app }) => {
   // 진단이 「고른 그것이 참이 되는 조건」을 말하는가, 다시 찍기가 큐에 들어가는가.
   await startPrinting(page);
   const queue = page.locator('.jobband .queue');
-  expect((await queueSpeech(queue)).cells).toBe(2);
+  expect((await queueSpeech(queue)).cells).toBe(3);
 
   const wrong = (answerKeyOf(app.db) % 4) + 1;
   await page.locator(`.ch[data-k="${wrong}"]`).click();
   await page.locator('.acts .press-btn').click();
-  await expect(page.locator('.fb .stamp')).toContainText('어긋남');
-  await expect(page.locator('.fb')).toContainText('어긋났습니다');
+  await expect(page.locator('.fb .fb-tag')).toHaveText('오답');
+  await expect(page.locator('.fb')).toContainText('틀렸습니다');
+  // 진단은 판정란에서 제 자리를 갖는다 — 「고른 그것이 참이 되는 조건」이 여기다 (정본 §3-2).
+  await expect(page.locator('.fb .fb-why')).toBeVisible();
 
   // 날카로운 자리 — 실제로 터지는 최소 코드 두 줄이 코드판으로 붙는다.
   const edge = page.locator('.fb .edge');
@@ -80,16 +82,16 @@ test('02 2판 오답', async ({ page, app }) => {
 
   // 큐가 한 칸 늘고 새 칸은 「지나온 것」 무늬다. 05 §11 은 5→6칸이라 적었으나
   // 그것은 5판짜리 큐의 수치이고, 규칙은 「다시 찍기 한 장이 들어간다」이다.
-  await expect.poll(async () => (await queueSpeech(queue)).cells).toBe(3);
+  await expect.poll(async () => (await queueSpeech(queue)).cells).toBe(4);
   await expect(page.locator('.jobband .queue i.review')).toHaveCount(1);
 
   // 원장 쪽 사실 — 부모를 가리키는 `retry` 행이 뒤에 붙었다 (02 §4 · `retryAt` = pos+3, 큐 끝에서 잘림).
   const rows = app.db
     .prepare('SELECT pos, role, parent_item_id AS parent FROM session_item ORDER BY pos')
     .all() as { pos: number; role: string; parent: number | null }[];
-  expect(rows.map((r) => r.role)).toEqual(['new', 'new', 'retry']);
-  expect(rows[2]?.parent).toBe(1);
-  expect(rows[2]?.pos).toBeGreaterThan(rows[0]?.pos ?? 0);
+  expect(rows.map((r) => r.role)).toEqual(['new', 'new', 'new', 'retry']);
+  expect(rows[3]?.parent).toBe(1);
+  expect(rows[3]?.pos).toBeGreaterThan(rows[0]?.pos ?? 0);
 });
 
 test('03 3판 `?` 사다리 1~4단', async ({ page }) => {
@@ -107,18 +109,19 @@ test('03 3판 `?` 사다리 1~4단', async ({ page }) => {
   // 예정도 없다 — 「모르겠어요」가 옮길 자리가 없으므로 0 → 0 이고 다시 찍기 줄은 뜨지
   // 않는다. 앞서는 예정이 없는데도 「다시 찍기 오늘 안에 → 오늘 안에」를 적었다.
   const gain = ladder.locator('.ld-gain');
-  await expect(gain).toHaveText('잉크 0겹 → 0겹');
+  await expect(gain).toHaveText('숙련도 0단계 → 0단계');
 
   // 1단 — 사전 3층.
   await expect(ladder.locator('.rung-body h4')).toHaveText(/사전 3층/);
   await expect(ladder.locator('.rung-body .dict > div')).toHaveCount(3);
 
-  // 2단 — 아래층 진단. 첫 판의 `ts/string-literal` 은 **뿌리 개념이라 선행이 없다**(D113 뒤).
-  // 그때 화면은 줄 대신 「아래층은 모두 찍혀 있습니다」 진단을 낸다 — 그것을 확인한다.
+  // 2단 — 아래층 진단. 첫 판의 `ts/string-literal` 은 언어 선행이 없는 뿌리 개념이고,
+  // 그 아래에 깔린 기계 `cs/text-encoding` 하나만 선행으로 달려 있다(D167). 시드에는 그
+  // 판이 없으므로 줄 하나가 「아직 안 찍힘」으로 뜬다 — 뿌리라도 아래층이 비어 있지 않다.
   await ladder.locator('.rung[data-r="2"]').click();
   await expect(ladder.locator('.rung-body h4')).toHaveText(/아래층 진단/);
-  await expect(ladder.locator('.rung-body .prereq .pq')).toHaveCount(0);
-  await expect(ladder.locator('.rung-body p')).toContainText('아래층은 모두 찍혀 있습니다');
+  await expect(ladder.locator('.rung-body .prereq .pq')).toHaveCount(1);
+  await expect(ladder.locator('.rung-body .prereq .pq')).toContainText('글자와 바이트는 다르다');
 
   // 3단 — 같은 문법이 쓰인 다른 자리. 지금 보고 있는 줄은 빠진다.
   await ladder.locator('.rung[data-r="3"]').click();
@@ -169,21 +172,17 @@ test('06 새 판 첫 정합 → LIFER', async ({ page, app }) => {
   await page.locator(`.ch[data-k="${answerKeyOf(app.db)}"]`).click();
   await page.locator('.acts .press-btn').click();
 
-  // 베일이 열린다 — 컨페티가 아니라 영구 기록이다 (정본 §3-6).
-  const veil = page.locator('.lifer-veil');
-  await veil.waitFor();
-  await expect(veil.locator('.lifer-k')).toHaveText('첫 기록 · LIFER');
-  await expect(veil.locator('.lifer-serial')).toHaveText('#001');
-  await expect(veil).toContainText('time.ts:19');
-  expect(await focusPath(page)).toContain('lifer-card');
+  // 판정란 **안**에 남는다 — 컨페티가 아니라 영구 기록이다 (정본 §3-6 · D131).
+  const note = page.locator('.fb .lifer-note');
+  await note.waitFor();
+  await expect(note.locator('.lifer-k')).toHaveText('첫 기록 · LIFER');
+  await expect(note.locator('.lifer-serial')).toHaveText('#001');
+  await expect(note).toContainText('time.ts:19');
 
-  // 수식키 단독은 닫지 않는다 — Shift 로 대문자를 만들려던 손짓에 평생 한 번이 사라지면 안 된다.
-  await page.keyboard.press('Shift');
-  await expect(veil).toBeVisible();
+  // 판정문과 같은 칸에 있다 — 덮는 것이 없으므로 판정도 같이 읽힌다.
+  await expect(page.locator('.fb .fb-head')).toContainText('맞았습니다');
 
-  // 아무 키나 닫는다. 포커스는 열기 전 자리(다음 판 단추)로 돌아온다.
-  await page.keyboard.press('KeyG');
-  await expect(page.locator('.lifer-veil')).toHaveCount(0);
+  // 덮는 것이 없으니 포커스는 채점 직후 자리(다음 판 단추)에 그대로 있다 (05 §7).
   expect(await focusPath(page)).toContain('press-btn');
 
   // 원장에도 남는다 — 개념당 평생 한 행이고 `shown_at` 이 연출을 본 시각이다.

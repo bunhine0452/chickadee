@@ -1,0 +1,232 @@
+schema: 1
+id: java/return-statement
+universal: common/return-value
+name: { ko: 값 돌려주기, en: return }
+token: "return"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 2
+prereq: [java/method-declaration]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "여기서 메서드가 끝나고, 부른 자리로 값이 간다."
+    en: "The method ends here and the value goes back to whoever called it."
+  why:
+    ko: >-
+      {{site.line}}행은 두 가지 일을 <b>동시에</b> 합니다 — 이 메서드를 끝내고, 부른 자리에 값을
+      건네요. 아래에 줄이 더 있어도 안 돕니다. 그래서 메서드를 읽을 때 이 낱말을 먼저 찾으면
+      「어디까지가 실제로 도는 부분인가」가 바로 보입니다. 그리고 자바에는 조건이 하나 더 붙어요 —
+      돌려줄 종류를 이름 앞에 적었으면 <b>어느 길로 가도</b> 이 줄에 닿아야 하고, 닿지 않는 길이
+      하나라도 있으면 컴파일이 멈춥니다.
+    en: >-
+      Line {{site.line}} does two things <b>at once</b> — it ends this method and hands a value to the
+      caller. Lines below it do not run. So finding this word first shows where the part that actually
+      runs stops. Java adds one more condition: if a kind was written before the name, <b>every path</b>
+      must reach this line, and one path that does not stops the compile.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:을,를}} 먼저 계산한다."
+      en: "{{pick.2|code}} is worked out first."
+    - ko: "그 값이 {{site.line}}행을 부른 자리로 간다."
+      en: "That value goes back to whoever called line {{site.line}}."
+    - ko: "아래에 줄이 더 있어도 돌지 않는다."
+      en: "Lines below do not run, however many there are."
+
+rule:
+  ko: "<b>여기서 끝난다.</b> 종류를 적었으면 어느 길로 가도 이 줄에 닿아야 한다."
+  en: "<b>It ends here.</b> If a kind was written, every path must reach this line."
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:을,를}} 계산해 부른 자리로 보내고 메서드가 끝납니다.
+  en: >-
+    {{pick.2|code}} is worked out, sent to the caller, and the method ends.
+payoff:
+  ko: >-
+    이걸 알면 「분명히 아래에 적었는데 왜 안 도나」의 답이 보입니다 — 위에서 이미 끝났기 때문이에요.
+  en: >-
+    Knowing this answers “I wrote it below, why does it not run” — it already ended above.
+bridge:
+  ko: >-
+    파이썬은 이 줄을 안 적으면 <b>조용히</b> 빈 값을 보냅니다. 자바는 종류를 적었으면 안 적은 길을
+    <b>컴파일에서</b> 막아요 — 조용한 빈 값이 없습니다.
+  en: >-
+    Python <b>quietly</b> sends an empty value when this line is missing. Java blocks the missing path
+    <b>at compile time</b> when a kind was written — there is no quiet empty value.
+misconceptions:
+  - ko: "아래 줄도 마저 돈다 — <b>안 돕니다</b>. 이 줄에서 메서드가 끝나요."
+    en: "The lines below still run — they <b>do not</b>. The method ends on this line."
+  - ko: "이 줄이 값을 <b>찍는다</b> — 찍지 않습니다. 부른 자리로 <b>건넬</b> 뿐이에요."
+    en: "This line <b>prints</b> the value — it does not. It only <b>hands it</b> to the caller."
+  - ko: "되풀이 안에서 쓰면 그 되풀이만 끝난다 — <b>메서드가</b> 끝납니다. 되풀이만 끊는 낱말은 따로 있어요."
+    en: "Inside a loop it ends only the loop — it ends <b>the method</b>. Breaking just the loop is a different word."
+  - ko: "안 적어도 된다 — 돌려줄 종류를 적었으면 <b>반드시</b> 적어야 합니다."
+    en: "It can be left out — when a kind was written it is <b>required</b>."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>부른 자리로 가는 것</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>what goes back to the caller</b>."
+    hint:
+      ko: "낱말 <b>뒤</b>에 오는 것입니다."
+      en: "It is what comes <b>after</b> the word."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>끝낸다</b>는 신호이고, 가는 것은 그 뒤에 있습니다."
+          en: "{{pick.1|code}} is the signal to <b>end</b>; what goes back sits after it."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 신호냐 값이냐"
+            en: "The sharpest spot — the signal or the value"
+          code:
+            - "return total;"
+            - "// ^신호  ^가는 것"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행 <b>아래에</b> 줄이 더 있으면 그 줄들은 언제 돌까요?"
+      en: "If more lines sit <b>below</b> line {{site.line}}, when do they run?"
+    hint:
+      ko: "이 줄이 끝내는 것이 무엇인지 보세요."
+      en: "Ask what this line ends."
+    options:
+      - t:
+          ko: "안 돈다 — 메서드가 여기서 끝난다"
+          en: "They do not — the method ends here"
+      - t:
+          ko: "값을 보낸 뒤에 마저 돈다"
+          en: "They run after the value is sent"
+        diag:
+          t:
+            ko: "보내는 것과 끝나는 것이 <b>같은 순간</b>입니다. 보낸 뒤로 돌아올 자리가 없어요."
+            en: "Sending and ending are <b>the same moment</b>. There is nothing to come back to."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 보내고 마저 도나"
+              en: "The sharpest spot — send then continue"
+            code:
+              - "return a;"
+              - "b();      // 여기는 못 온다"
+      - t:
+          ko: "조건 안이면 돈다"
+          en: "They run when it is inside a condition"
+        diag:
+          t:
+            ko: "조건은 <b>이 줄에 닿을지</b>를 정할 뿐입니다. 닿으면 그때 끝나요."
+            en: "A condition only settles <b>whether this line is reached</b>. Once reached, it ends."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 닿느냐 끝나느냐"
+              en: "The sharpest spot — reaching or ending"
+            code:
+              - "if (x) return a;  // 닿으면 끝"
+              - "return b;         // 안 닿았으면 여기"
+      - t:
+          ko: "컴파일이 멈춘다"
+          en: "Compiling stops"
+        diag:
+          t:
+            ko: "<b>닿을 수 없는 줄</b>이면 실제로 멈춥니다. 다만 조건 안에 있으면 닿을 수 있어 통과해요."
+            en: "For a line that <b>cannot be reached</b> it does stop. Inside a condition it may be reached, so it passes."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 닿을 수 있나"
+              en: "The sharpest spot — can it be reached"
+            code:
+              - "return a; b();      // 막힌다"
+              - "if (x) return a; b(); // 통과"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>메서드를 끝내고 값을 건넵니다</b>."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} <b>ends the method and hands over a value</b>.
+    hint:
+      ko: "보기 넷은 전부 흐름을 끊는 낱말입니다."
+      en: "All four are words that cut the flow."
+    options:
+      - { t: "return", mono: true }
+      - t: "break"
+        mono: true
+        diag:
+          t:
+            ko: "<code>break</code> 는 <b>되풀이만</b> 끊습니다. 메서드는 계속 돌고, 값도 안 건네요."
+            en: "<code>break</code> cuts <b>only the loop</b>. The method keeps running and hands nothing over."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 되풀이냐 메서드냐"
+              en: "The sharpest spot — the loop or the method"
+            code:
+              - "break:  되풀이 하나"
+              - "이것:   메서드 전체"
+      - t: "continue"
+        mono: true
+        diag:
+          t:
+            ko: "<code>continue</code> 는 <b>이번 바퀴만</b> 건너뜁니다. 끝내지도 건네지도 않아요."
+            en: "<code>continue</code> skips <b>this lap only</b>. It neither ends nor hands over."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 건너뛰기냐 끝내기냐"
+              en: "The sharpest spot — skipping or ending"
+            code:
+              - "continue: 다음 바퀴로"
+              - "이것:     부른 자리로"
+      - t: "throw"
+        mono: true
+        diag:
+          t:
+            ko: "<code>throw</code> 도 끝내지만 <b>값이 아니라 터진 것</b>을 보냅니다. 받는 자리가 달라요."
+            en: "<code>throw</code> also ends, but sends <b>a failure, not a value</b>. It lands somewhere else."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 값이냐 터진 것이냐"
+              en: "The sharpest spot — a value or a failure"
+            code:
+              - "throw: catch 가 받는다"
+              - "이것:  부른 자리가 받는다"
+
+why_gate:
+  q:
+    ko: "돌려줄 종류를 적었는데 이 줄이 없으면 <b>컴파일에서</b> 막는 것은 무엇을 위해서일까요?"
+    en: "<b>Why</b> block at compile time when a kind was written but this line is missing?"
+  choices:
+    - t:
+        ko: "값이 안 온 것을 <b>돌기 전에</b> 알려 주려고"
+        en: "So a missing value is reported <b>before it runs</b>"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 안 막으면 무엇을 받게 되는지도 적어 보세요."
+        en: "That is the direction. Add what the caller would receive without the block."
+    - t:
+        ko: "코드를 짧게 쓰게 하려고"
+        en: "To keep the code short"
+      ok: false
+      fb:
+        ko: "오히려 길어집니다. 얻는 것은 <b>언제 아느냐</b>예요."
+        en: "It gets longer. What is gained is <b>when you find out</b>."
+    - t:
+        ko: "자바가 빈 값을 못 만들어서"
+        en: "Because Java cannot make an empty value"
+      ok: false
+      fb:
+        ko: "만들 수 있습니다. 조용히 그것을 <b>대신 보내지 않기로</b> 한 것이에요."
+        en: "It can. The choice was to <b>not send it silently</b> instead."
+
+queries:
+  - { grammars: [java], file: ./return-statement.scm }
+
+examples:
+  - code: "int total() { return 1 + 2; }"
+    expect:
+      sites: 1
+      form: value
+      hole: "return"
+      picks: { 1: "return", 2: "1 + 2" }
+  - code: "void stop() { return; }"
+    expect: { sites: 1, form: bare, picks: { 1: "return", 3: ";" } }
+  - code: "void run() { print(1); }"
+    expect: none

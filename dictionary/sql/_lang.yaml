@@ -1,0 +1,46 @@
+lang: sql
+version: 0.1.0
+grammars: [sql, mybatis_sql]
+# tree-sitter-sequel 의 `parser.c` 가 14 다. 대조는 시험이 한다.
+# `mybatis_sql` 은 같은 sql 문법을 매퍼의 문 본문에만 돌리는 가상 문법이라 값이 같다.
+grammar_abi: { sql: 14, mybatis_sql: 14 }
+
+extensions:
+  sql: [.sql]
+  # MyBatis 매퍼. `.xml` 은 `mybatis` 사전도 잡는다 — 으뜸 문법(파일 행)은 먼저 온 쪽이고
+  # 캡처는 양쪽에서 다 나온다 (`jobs.rs` 의 `grammars_of`).
+  mybatis_sql: [.xml]
+
+# 0부 여덟 (`docs/curriculum/sql.md` §0.2) + 바닥 여덟 중 셋 (§2). 바닥의 남은 다섯은 다음 판이다.
+#
+# 자리표(`:name` · `#{name}`)는 이제 **파서에게만** 같은 너비의 글자 값으로 가려진다
+# (`crates/parse/src/params.rs`). 그래서 `sql/comparison` 이 자리표가 있는 사용처를 빼지 않고도
+# 값 자리를 값이라고 가르친다 — 표본 리포 매퍼 9파일에서 6 → 53 사용처.
+#
+# 선행은 §0.2 의 표를 따르되 **한 칸만 다르다**: `sql/comparison` 에 0-5 와 0-6 을 둘 다 걸면
+# 깊이가 3 이 되어 D184 의 프롤로그(깊이 ≤ 2)에서 빠진다. 0-6 하나만 걸고 0-5 는
+# `sql/null-check` 쪽 사슬(0-3 → 0-4 → 0-5)에 남겼다.
+essential:
+  - sql/row-and-set
+  - sql/column-type
+  - sql/value-and-name
+  - sql/null-unknown
+  - sql/three-valued-comparison
+  - sql/implicit-cast
+  - sql/expression-per-row
+  - sql/clause-order
+  - sql/from-table
+  - sql/comparison
+  - sql/null-check
+
+alternatives: []
+
+thin_threshold: { min_files: 2, min_sites: 3, small_repo_files: 20 }
+
+diag_default:
+  point:
+    ko: "«{{pick}}»{{pick|josa:은,는}} {{role}} 자리입니다. {{concept}}{{concept|josa:은,는}} «{{answer}}» 입니다. {{rule}}"
+    en: "«{{pick}}» is the {{role}} slot. The {{concept}} is «{{answer}}». {{rule}}"
+  blank:
+    ko: "«{{pick}}»{{pick|josa:은,는}} 이 자리에 오지 않습니다. {{rule}}"
+    en: "«{{pick}}» does not go in this slot. {{rule}}"

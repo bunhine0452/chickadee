@@ -3,6 +3,9 @@
   "compilerOptions": {
     // Playwright 는 TS 를 CJS 로 옮겨 돌린다 — `import.meta` 를 쓸 수 없고
     // `better-sqlite3`(CJS, `export =`) 를 기본 import 로 받으려면 interop 이 필요하다.
+    // 품질 게이트(`support/quality.test.ts`)가 앱의 `data/cards.ts` 를 부르고, 그 사슬이
+    // `@chickadee/ui` 의 `.tsx` 까지 닿는다. 여기서 화면을 그리지는 않지만 타입은 읽어야 한다.
+    "jsx": "react-jsx",
     "module": "Preserve",
     "moduleResolution": "bundler",
     "esModuleInterop": true,

@@ -1,0 +1,67 @@
+[
+  {
+    "queryId": "py/arithmetic",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "site",
+    "form": "arith",
+    "startLine": 2,
+    "startCol": 11,
+    "endLine": 2,
+    "endCol": 28,
+    "nodeKind": "binary_operator",
+    "inError": false
+  },
+  {
+    "queryId": "py/arithmetic",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.2",
+    "form": "arith",
+    "startLine": 2,
+    "startCol": 11,
+    "endLine": 2,
+    "endCol": 18,
+    "nodeKind": "call",
+    "inError": false
+  },
+  {
+    "queryId": "py/arithmetic",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.1",
+    "form": "arith",
+    "startLine": 2,
+    "startCol": 19,
+    "endLine": 2,
+    "endCol": 20,
+    "nodeKind": "/",
+    "inError": false
+  },
+  {
+    "queryId": "py/arithmetic",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "hole",
+    "form": "arith",
+    "startLine": 2,
+    "startCol": 19,
+    "endLine": 2,
+    "endCol": 20,
+    "nodeKind": "/",
+    "inError": false
+  },
+  {
+    "queryId": "py/arithmetic",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.3",
+    "form": "arith",
+    "startLine": 2,
+    "startCol": 21,
+    "endLine": 2,
+    "endCol": 28,
+    "nodeKind": "call",
+    "inError": false
+  }
+]

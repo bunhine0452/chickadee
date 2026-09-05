@@ -3,8 +3,10 @@ import { IpcError } from '@chickadee/ipc-client';
 import { FlatButton, PressButton } from '@chickadee/ui';
 import { useEffect, useState } from 'react';
 
+import { Page } from '../../components/shell/Page.js';
 import { refreshRepos, report } from '../../flow.js';
 import { useUi } from '../../store.js';
+import { CloneField } from './CloneField.js';
 import { loadShelf, pickFolder, probeMissing, relocate, remove, type RepoCard } from './data.js';
 import './ReposScreen.css';
 
@@ -118,8 +120,8 @@ export function ReposScreen({ onBack }: ReposScreenProps) {
   };
 
   return (
-    <main className="shelf" tabIndex={-1}>
-      <header className="shelf-head">
+    <Page className="shelf" width="wide" focusOnMount head={(
+      <header className="shelf-head l-row">
         <h1>
           {t('repos.title')}
           <span className="pl">{t('repos.plain')}</span>
@@ -131,16 +133,20 @@ export function ReposScreen({ onBack }: ReposScreenProps) {
           </FlatButton>
         </div>
       </header>
-
+    )}
+    >
       <p className="shelf-lede">{t('repos.note')}</p>
+
+      {/* 폴더 고르기 옆의 두 번째 문 (D129). 목록을 든 화면이라 받은 뒤 다시 읽는다. */}
+      <CloneField onDone={() => void reload()} />
 
       {cards === null ? (
         // 아직 못 읽은 한 프레임. 스피너를 두지 않는다 (정본 §3-7).
-        <div className="shelf-list" aria-busy="true" />
+        <div className="shelf-list l-cols" aria-busy="true" />
       ) : cards.length === 0 ? (
         <p className="shelf-empty">{t('repos.empty')}</p>
       ) : (
-        <ul className="shelf-list" aria-label={t('repos.title')}>
+        <ul className="shelf-list l-cols" aria-label={t('repos.title')}>
           {cards.map((card) => (
             <li key={card.id} className="shelf-card" data-status={card.status}>
               <div className="shelf-top">
@@ -216,6 +222,6 @@ export function ReposScreen({ onBack }: ReposScreenProps) {
           ))}
         </ul>
       )}
-    </main>
+    </Page>
   );
 }

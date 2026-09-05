@@ -1,0 +1,235 @@
+schema: 1
+id: py/value-bits
+# 0부 축 A. `universal: null` — 「비트를 직접 만진다」는 열 언어에 다 있지만, 파이썬에서는
+# **정수의 폭이 안 정해져 있어서** `1 << 100` 이 그대로 값이 된다. JS 는 그 자리에서 32비트로
+# 내려앉고(`ts/value-bits`) 자바는 `int` 32칸에 갇힌다 — 같은 기호가 세 언어에서 다른 답을 낸다.
+universal: null
+name: { ko: 값과 비트, en: Values and bits }
+token: "<<"
+grammars: [python]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cs/binary-representation, cs/bit-and-byte, cs/type]
+# 빈칸 오답 셋(`**` · `//` · `and`)이 각각 개념으로 있고 토큰이 맞는다.
+confusions: [py/integer-limit, py/integer-division, py/bool-op-value]
+
+dict:
+  one_liner:
+    ko: "모든 값은 켜짐·꺼짐의 줄이다. 그 줄을 자리마다 만지는 기호가 따로 있다."
+    en: "Every value is a row of on and off; one symbol moves it slot by slot."
+  why:
+    ko: >-
+      숫자든 글자든 기계 안에서는 켜짐·꺼짐의 줄입니다. 평소에는 그 줄을 볼 일이 없지만
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 그 줄을 <b>한 칸씩 옮깁니다</b> —
+      한 칸 왼쪽이 두 배, 한 칸 오른쪽이 절반이에요.
+      파이썬이 다른 언어와 갈리는 자리가 여기 있습니다. 자바스크립트는 비트를 만지는 순간
+      수를 <b>32칸으로 잘라</b> 쓰고 자바는 처음부터 32칸인데, 파이썬은 자리가 모자라면
+      <b>늘립니다</b>. 그래서 여기서는 값이 조용히 뒤집히는 일이 없어요.
+    en: >-
+      A number or a piece of text is a row of on-and-off inside the machine. You rarely look at that
+      row, but {{pick.1|code}} on line {{site.line}} <b>moves it one slot at a time</b> — one slot
+      left doubles, one slot right halves. This is where Python parts from the rest: JavaScript cuts
+      the number down to <b>32 slots</b> the moment bits are touched, Java starts with 32, and
+      Python simply <b>grows</b> the row when it runs out. Nothing flips over quietly here.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:을,를}} 켜짐·꺼짐의 줄로 편다."
+      en: "{{pick.2|code}} is laid out as a row of on and off."
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 그 줄을 {{pick.3|code}} 칸만큼 옮긴다."
+      en: "{{pick.1|code}} on line {{site.line}} moves that row by {{pick.3|code}} slots."
+    - ko: "남은 줄을 다시 수로 읽는다. 자리가 모자라면 줄이 늘어난다."
+      en: "The row that is left is read back as a number, and the row grows if it runs short."
+
+rule:
+  ko: >-
+    <b>비트 연산은 자리마다 따로 한다.</b> 파이썬은 자리가 모자라면 늘리므로 넘쳐서
+    뒤집히는 일이 없다.
+  en: >-
+    <b>Bitwise work happens slot by slot.</b> Python grows the row when it runs short, so nothing
+    wraps around.
+result:
+  label:
+    ko: "{{site.line}}행이 내놓는 것"
+    en: "What line {{site.line}} yields"
+  value: "{{pick.2}} {{pick.1}} {{pick.3}}"
+  note:
+    ko: "자리를 옮긴 수"
+    en: "the number after the slots moved"
+ok:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:은,는}} 두 값을 <b>비트 자리마다</b> 다룹니다. 결과도 수이고,
+    {{pick.2|code}} 에 담긴 값은 그대로예요.
+  en: >-
+    {{pick.1|code}} works on the two values <b>one slot at a time</b>. The result is a number too,
+    and what {{pick.2|code}} holds is untouched.
+payoff:
+  ko: >-
+    권한 비트를 한 수에 여러 개 담거나 2로 빠르게 나누는 코드가 이 자리에서 나옵니다.
+    <code>0o700</code> 같은 파일 권한도 같은 줄을 다르게 적은 것이에요.
+  en: >-
+    Packing several permission flags into one number, or halving fast, comes from here. A file mode
+    like <code>0o700</code> is the same row written another way.
+bridge:
+  ko: >-
+    같은 줄을 십진으로 적으면 <code>448</code> 이고 여덟 자리씩 끊어 적으면 <code>0o700</code>
+    입니다. 값은 하나이고 <b>적는 법</b>이 둘이에요.
+  en: >-
+    The same row is <code>448</code> in decimal and <code>0o700</code> in octal. One value, two ways
+    of writing it down.
+misconceptions:
+  - ko: "<code>0b1010</code> 를 「천십」으로 읽는다 — 두 자리 체계로 적은 <b>10</b> 입니다."
+    en: "Reading <code>0b1010</code> as one thousand and ten — it is <b>ten</b>, written in base two."
+  - ko: >-
+      비트를 만지면 수가 잘린다 — 자바스크립트·자바에서는 그렇지만 파이썬은 자리를 늘립니다.
+    en: >-
+      Touching bits truncates the number — that holds in JavaScript and Java, but Python grows the
+      row instead.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>비트 줄을 옮기는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that moves the row of bits</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 다뤄지는 <b>값</b>입니다. 값은 스스로 비트를 못 밀어요."
+          en: >-
+            {{pick.2|code}} is the <b>value</b> being worked on. A value cannot shift its own bits.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 값만으로는 아무 일도 안 난다"
+            en: "The sharpest spot — a value alone does nothing"
+          code:
+            - "n          # 수 하나일 뿐이다"
+            - "n << 1     # 자리가 한 칸 옮겨진다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>몇 칸</b>인지를 정하는 쪽입니다. 옮기는 일 자체는 아니에요."
+          en: >-
+            {{pick.3|code}} says <b>how many slots</b>. It is not the moving itself.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 몇 칸이냐와 무엇을 하느냐"
+            en: "The sharpest spot — how many slots, or what is done"
+          code:
+            - "n << 1     # 한 칸 = 두 배"
+            - "n << 3     # 세 칸 = 여덟 배"
+
+blank:
+  - q:
+      ko: >-
+        빈칸에 들어갈 것을 고르세요. {{site.line}}행은 왼쪽 값의 비트를 <b>자리마다 옮겨</b>
+        새 수를 만듭니다.
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} <b>moves the bits</b> of the left value
+        and makes a new number.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "<<", mono: true }
+      - t: "**"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 기호는 <b>거듭제곱</b>이라 오른쪽만큼 곱합니다. 밑이 2 일 때만 우연히 답이 같아지고,
+              다른 수에서는 갈려요.
+            en: >-
+              That symbol <b>raises to a power</b>, multiplying by itself. Only with a base of two do
+              the answers happen to meet; with any other base they part.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 자리 옮기기와 거듭제곱"
+              en: "The sharpest spot — shifting slots or raising a power"
+            code:
+              - "3 << 2     # 12"
+              - "3 ** 2     # 9"
+      - t: "//"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 기호는 <b>몫 나누기</b>라 자리가 아니라 값을 나눕니다. 2 로 나눌 때만 오른쪽으로
+              한 칸 옮긴 것과 같아 보여요.
+            en: >-
+              That symbol is <b>floor division</b>, so it divides the value, not the slots. Only when
+              dividing by two does it look like a one-slot move to the right.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 자리냐 값이냐"
+              en: "The sharpest spot — slots or the value"
+            code:
+              - "12 >> 2    # 3 — 두 칸 오른쪽"
+              - "12 // 2    # 6 — 값을 둘로"
+      - t: "or"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              이 낱말은 <b>둘 중 하나를 골라</b> 내놓습니다. 비트는 하나도 안 움직이고, 왼쪽이
+              참 같으면 왼쪽 값이 그대로 나와요.
+            en: >-
+              That word <b>picks one of the two</b> and hands it back. No bit moves, and if the left
+              side is truthy the left value comes out as it stands.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 옮기는가 고르는가"
+              en: "The sharpest spot — moving or choosing"
+            code:
+              - "4 << 1     # 8"
+              - "4 or 1     # 4"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 비트를 직접 만질까요?"
+    en: "Why does line {{site.line}} touch the bits directly?"
+  choices:
+    - t:
+        ko: "한 수 안에 켜짐·꺼짐을 여러 개 담아 두었고, 그중 한 자리를 봐야 해서"
+        en: "Because several on-off flags live in one number and one slot is needed"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 자리를 이름 붙인 값 여러 개로 나눴다면 무엇이 달라질지도 적어 보세요."
+        en: >-
+          That is the direction. Add what would change if those slots were split into several named
+          values instead.
+    - t:
+        ko: "곱하기·나누기보다 늘 빨라서"
+        en: "Because it is always faster than multiplying and dividing"
+      ok: false
+      fb:
+        ko: "속도 차이는 오늘날 거의 없습니다. 갈리는 것은 값이 아니라 <b>무엇을 뜻하느냐</b>입니다."
+        en: >-
+          The speed difference is next to nothing today. What parts ways is not the value but
+          <b>what it means</b>.
+    - t:
+        ko: "파이썬에는 큰 수를 다루는 다른 방법이 없어서"
+        en: "Because Python has no other way to handle large numbers"
+      ok: false
+      fb:
+        ko: "보통의 셈이 자리를 늘려 가며 얼마든지 큰 수를 다룹니다. 비트 연산은 그 반대의 이유로 씁니다."
+        en: >-
+          Ordinary arithmetic grows the row and handles numbers of any size. Bitwise work is used for
+          the opposite reason.
+
+queries:
+  - { grammars: [python], file: ./value-bits.scm }
+
+examples:
+  - code: "flag = 1 << 3          # 1 << 3 -> 8 (int)"
+    expect: { sites: 1, form: shift, hole: "<<", picks: { 1: "<<", 2: "1", 3: "3" } }
+  - code: "half = n >> 1          # 12 >> 1 -> 6 (int)"
+    expect: { sites: 1, form: shift, hole: ">>", picks: { 1: ">>", 2: "n", 3: "1" } }
+  - code: "mode = 0o700           # mode -> 448 (int)"
+    expect: { sites: 1, form: radix, picks: { 1: "0o700" } }
+  - code: "inverted = ~n          # ~5 -> -6 (int)"
+    expect: { sites: 1, form: flip, picks: { 1: "~", 2: "n" } }
+  - code: "doubled = n * 2        # 6 * 2 -> 12 (int)"
+    expect: none
+  - code: "both = ready or open   # ready or open -> ready (bool)"
+    expect: none

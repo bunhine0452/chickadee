@@ -58,6 +58,15 @@
   --verdict-exact-text:#960B42; --verdict-equiv-text:#0F3F9E; --verdict-differ-text:#664300;
   --verdict-differ-face:#FFC400; --on-verdict-differ:#221D18;
   --glow-t0:transparent; --glow-t1:transparent; --glow-t2:transparent;
+
+  /* 상태 색 — **색을 쓰는 자리는 넷뿐이다** (D179 · 정본 §6). 그 밖의 면은 종이와 먹이다.
+     값은 새로 만들지 않고 이미 있는 것을 가리킨다 — 이름이 하는 일은 「이 색이 무슨 상태를
+     말하는가」를 못 박는 것이고, 트랙(T0·T1·T2)은 더 이상 색을 고르지 않는다.
+     야간반에서 따로 재정의하지 않는다 — var() 는 쓰는 자리에서 풀리므로 어두운 갈래를 그대로 탄다. */
+  --state-right:var(--verdict-exact);       --state-right-text:var(--verdict-exact-text);
+  --state-wrong:var(--verdict-differ-face); --state-wrong-text:var(--verdict-differ-text);
+  --state-progress:var(--blue);             --state-progress-text:var(--blue-text);
+  --state-locked:var(--ink-faint);          --state-locked-text:var(--ink-soft);
 }
 
 /* ───────── 야간반 : 어두운 판지에 형광 잉크 ─────────

@@ -1,0 +1,54 @@
+[
+  {
+    "queryId": "java/operator-precedence",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "site",
+    "form": "mixed",
+    "startLine": 5,
+    "startCol": 18,
+    "endLine": 5,
+    "endCol": 37,
+    "nodeKind": "binary_expression",
+    "inError": false
+  },
+  {
+    "queryId": "java/operator-precedence",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.2",
+    "form": "mixed",
+    "startLine": 5,
+    "startCol": 18,
+    "endLine": 5,
+    "endCol": 22,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "java/operator-precedence",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.1",
+    "form": "mixed",
+    "startLine": 5,
+    "startCol": 23,
+    "endLine": 5,
+    "endCol": 24,
+    "nodeKind": "+",
+    "inError": false
+  },
+  {
+    "queryId": "java/operator-precedence",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.3",
+    "form": "mixed",
+    "startLine": 5,
+    "startCol": 25,
+    "endLine": 5,
+    "endCol": 37,
+    "nodeKind": "binary_expression",
+    "inError": false
+  }
+]

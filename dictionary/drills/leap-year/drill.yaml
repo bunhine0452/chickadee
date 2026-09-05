@@ -1,0 +1,18 @@
+# 작은 문제 하나 (D186 ⑧). 지문은 우리가 썼고 케이스의 답은 reference.py 가 낸다.
+schema: 1
+id: leap-year
+topic: branch
+statement:
+  ko: "연도 하나가 주어집니다. 윤년이면 yes, 아니면 no 를 출력하세요. 윤년은 4의 배수이면서 100의 배수가 아니거나, 400의 배수인 해입니다."
+  en: "One year is given. Print yes if it is a leap year and no if it is not. A leap year is divisible by 4 but not by 100, or else divisible by 400."
+needs: [common/conditional-branch, common/arithmetic]
+langs: [py, ts, java]
+cases:
+  - stdin: "2024\n"
+    stdout: "yes\n"
+  - stdin: "1900\n"
+    stdout: "no\n"
+  - stdin: "2000\n"
+    stdout: "yes\n"
+  - stdin: "2023\n"
+    stdout: "no\n"
