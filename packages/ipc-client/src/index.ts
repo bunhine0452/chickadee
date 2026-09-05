@@ -6,8 +6,8 @@ import { IpcError, toIpcError } from './errors.js';
 import type { BatchOp, ParamsOf, RowOf, StatementName } from './statements.js';
 import type {
   AppPaths, AppVersion, BlameHunk, Block, Catalog, ExecInfo, IngestDone, IngestProgress,
-  FileDiff, IngestSpec, JobId, LangInfo, LinesChunk, ReadBlockReq, ReadLinesReq, RepoProbe,
-  SnippetReq, SnippetResult, StoreInfo,
+  FileDiff, IngestSpec, JobId, LangInfo, LinesChunk, ProcOut, ProcSpec, ReadBlockReq,
+  ReadLinesReq, RepoProbe, SnippetReq, SnippetResult, StoreInfo,
 } from './types.js';
 
 /** STORE_BUSY 재시도 (01 §6): 3회, 50ms 백오프. 여기가 유일한 자동 재시도다. */
@@ -144,9 +144,15 @@ export const ipc = {
      */
     show: () => getCurrentWindow().show(),
   },
-  /** T3 은 자리만 있다 — 언제나 NOT_IMPLEMENTED 다 (01 §9). */
+  /**
+   * 4·5단을 실제로 실행해 판정한다 (D175). 여기는 **프로세스 한 겹**이고, 무엇을
+   * 실행할지·통과인지는 `@chickadee/grading` 의 `runTests` 가 정한다.
+   *
+   * 실패한 자식은 오류가 아니다 — 종료 코드로 돌아온다. 오류로 던지는 것은 시작조차
+   * 못 한 경우(`RUN_SPAWN`)와 입출력 실패(`RUN_IO`)뿐이다.
+   */
   t3: {
-    run: () => call<never>('t3_run'),
+    run: (spec: ProcSpec) => call<ProcOut>('t3_run', { spec }),
   },
 } as const;
 

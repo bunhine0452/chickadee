@@ -15,6 +15,9 @@ export const IPC_ERROR_CODES = [
   // OS 비밀 저장소가 없거나 거부했다 (06 §3.5 · D109). Linux 에 Secret Service 가 없으면
   // 저장 자체가 이 코드로 실패하고, 화면은 그것으로 「저장할 수 없다」를 안다.
   'SECRET_STORE',
+  // 실행 러너 (D175). `RUN_SPAWN` 은 프로그램을 시작하지 못한 것 — 러너 탐지가 이것으로
+  // 「이 컴퓨터에 JDK 가 없다」를 안다. `RUN_IO` 는 시작한 뒤의 입출력 실패다.
+  'RUN_SPAWN', 'RUN_IO',
   'UNKNOWN',
 ] as const;
 export type IpcErrorCode = (typeof IPC_ERROR_CODES)[number];

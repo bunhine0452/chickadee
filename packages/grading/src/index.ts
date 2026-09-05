@@ -1,5 +1,13 @@
-export type { RunnerAdapter } from './t3-adapter.js';
-export { runners } from './t3-adapter.js';
+// 4·5단 실행 러너 (D175) — 계약은 `runner.ts`, 자바 어댑터는 `java-runner.ts`.
+export type { RunnerAdapter, RunnerRepo } from './t3-adapter.js';
+export { javaRunner, runners } from './t3-adapter.js';
+export {
+  detectRunner, emptyResult, FIRST_RUN_TIMEOUT_MS, forgetRunners, knownRunner, MAX_LOG,
+  rememberRunner, runTests, RUN_TIMEOUT_MS, tailLog,
+} from './runner.js';
+export type { RunFailure, RunResult, RunSpec, RunStatus, RunnerProbe, RunnerReason } from './runner.js';
+export { cannotHost, distPath, gradleVersion, jdkVersion, plainLog, readMarks, sawDownload } from './java-runner.js';
+export type { TestLine } from './java-runner.js';
 
 // T0 — 판정과 진단 (04 §2.1)
 export { gradeT0, pickDiag } from './t0.js';
@@ -76,6 +84,8 @@ export type { T2Kind as T2QuestionKind } from './t2-types.js';
 export { draftT2Appeal, pickRelation, promoteToSec, t2PatternKey, PROMOTE_MIN } from './t2-appeal.js';
 export type { PickRelation, T2AppealDraft, T2AppealInput } from './t2-appeal.js';
 
-// 코스 문항 채점 (D164)
-export { buildHandoffPrompt, checkLinks, checkPlace, declaredName, gradeStage } from './stage.js';
-export type { PlaceCheck, StageAnswer, StageDetail, StageOptions, StageVerdict } from './stage.js';
+// 코스 문항 채점 (D164) · 4·5단 실행 판정 (D180)
+export {
+  buildHandoffPrompt, checkLinks, checkPlace, declaredName, gradeStage, mergeRun, needsRun, testsOf,
+} from './stage.js';
+export type { PlaceCheck, StageAnswer, StageDetail, StageOptions, StageRun, StageVerdict } from './stage.js';

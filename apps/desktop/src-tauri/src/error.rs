@@ -71,12 +71,3 @@ impl From<chickadee_parse::ParseError> for IpcError {
         Self::new(code, e.to_string(), false)
     }
 }
-
-/// 아직 구현하지 않은 자리 (T3 — 01 §9).
-pub fn not_implemented(what: &str) -> IpcError {
-    IpcError::new(
-        "NOT_IMPLEMENTED",
-        format!("{what} 은 아직 없습니다."),
-        false,
-    )
-}

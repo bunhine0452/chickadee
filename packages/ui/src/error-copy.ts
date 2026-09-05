@@ -132,6 +132,10 @@ const COPY: Record<IpcErrorCode, ErrorEntry> = {
     action: null,
     internal: true,
   },
+  // 실행 러너가 삼킨다 (D175) — 「JDK 가 없다」도 「실행이 깨졌다」도 `RunPanel` 이
+  // 자기 자리에서 말한다. 전역 오류 띠로 한 번 더 띄우면 같은 사실이 두 번 나온다.
+  RUN_SPAWN: { title: null, action: null, internal: true },
+  RUN_IO: { title: null, action: null, internal: true },
   UNKNOWN: {
     title: 'error.unknown.title',
     detail: 'error.logsHaveMore',

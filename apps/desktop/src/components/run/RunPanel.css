@@ -1,0 +1,122 @@
+/* `.run-panel` — 4·5단 실행 결과 (D175 · 05 §5).
+   색은 상태에만 (D179): 통과 · 오답 · 진행 · 잠김 넷이 왼쪽 띠 하나를 칠하고,
+   나머지 면은 종이와 먹이다. `filter: drop-shadow` 는 쓰지 않는다 (정본 §6 성능). */
+.run-panel {
+  border: 1px solid var(--rule);
+  background: var(--paper-2);
+  padding: 12px 14px;
+  border-left: 4px solid var(--state-locked);
+}
+
+.run-panel[data-state="running"] { border-left-color: var(--state-progress); }
+
+.run-panel[data-state="passed"] { border-left-color: var(--state-right); }
+
+.run-panel[data-state="failed"],
+.run-panel[data-state="timeout"],
+.run-panel[data-state="error"] { border-left-color: var(--state-wrong); }
+
+.run-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.run-head b {
+  font-size: var(--fs-15);
+  color: var(--ink);
+}
+
+.run-go {
+  border: 1px solid var(--rule);
+  background: var(--stock);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: var(--fs-14);
+  padding: 5px 12px;
+  cursor: pointer;
+}
+
+.run-go:disabled {
+  color: var(--ink-faint);
+  cursor: default;
+}
+
+.run-say {
+  margin-top: 8px;
+  max-width: var(--measure, 36em);
+}
+
+.run-line {
+  margin: 0;
+  font-size: var(--fs-16);
+  line-height: 1.7;
+  color: var(--ink);
+  word-break: keep-all;
+}
+
+.run-hint {
+  margin: 4px 0 0;
+  font-size: var(--fs-14);
+  line-height: 1.7;
+  color: var(--ink-soft);
+  word-break: keep-all;
+}
+
+.run-fails {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  font-size: var(--fs-14);
+  line-height: 1.7;
+}
+
+.run-fails code {
+  font-family: var(--f-mono);
+  color: var(--ink);
+}
+
+.run-fails span {
+  display: block;
+  color: var(--ink-soft);
+}
+
+.run-log {
+  margin-top: 10px;
+  font-size: var(--fs-14);
+}
+
+.run-log summary {
+  cursor: pointer;
+  color: var(--ink-soft);
+}
+
+/* 예·아니오 두 단추. 「예」가 앞이지만 크기는 같다 — 한쪽을 크게 만들면 물음이 아니다. */
+.run-ask {
+  display: flex;
+  gap: 8px;
+  margin: 10px 0 0;
+}
+
+/* 실행이 무엇을 했는지의 한 줄 — 오프라인이었나, 배포본을 받았나, 무엇으로 돌았나. */
+.run-foot {
+  margin: 8px 0 0;
+  font-size: var(--fs-13);
+  line-height: 1.7;
+  color: var(--ink-mute);
+  word-break: keep-all;
+}
+
+/* 로그는 길다 — 세로로 접고 가로는 제 안에서 스크롤한다. 본문 단을 밀지 않는다. */
+.run-log pre {
+  margin: 8px 0 0;
+  max-height: 260px;
+  overflow: auto;
+  background: var(--paper-3);
+  border: 1px solid var(--rule);
+  padding: 8px 10px;
+  font-family: var(--f-mono);
+  font-size: var(--fs-13);
+  line-height: 1.85;
+  white-space: pre;
+}

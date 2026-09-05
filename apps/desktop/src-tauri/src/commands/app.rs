@@ -46,9 +46,3 @@ pub fn app_version() -> AppVersion {
             .to_owned(),
     }
 }
-
-/// T3 자리 — 인터페이스만 예약한다 (01 §9).
-#[tauri::command]
-pub fn t3_run() -> Result<(), IpcError> {
-    Err(crate::error::not_implemented("T3"))
-}

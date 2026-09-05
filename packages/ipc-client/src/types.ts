@@ -137,6 +137,54 @@ export interface AppVersion { app: string; tauri: string; sqlite: string; rustc:
 export interface LangInfo { grammar: string; grammarVersion: string; abi: number }
 
 /** 경로는 리포 루트 절대 경로다 — 장부가 TS 에 있으므로 id 를 되돌릴 곳이 Rust 에 없다 (D65). */
+/**
+ * `t3_run` (D175). Rust 는 여기까지만 안다 — 무엇을 실행할지, 결과가 통과인지는
+ * `@chickadee/grading` 의 `runner.ts` 가 정한다.
+ *
+ * `rootPath` 가 빈 문자열이면 복사를 건너뛴다 — `java -version` 같은 탐지용 호출이다.
+ * 상한(600초 · 스트림당 128 KiB)은 Rust 가 깎으므로 여기서 올려 보낼 수 없다.
+ */
+export interface ProcSpec {
+  /** 복사해 올 원본. **한 바이트도 쓰지 않는다.** */
+  rootPath: string;
+  /** 작업본 이름 (`[A-Za-z0-9._-]`). 같은 이름은 같은 작업본이라 빌드 캐시가 남는다. */
+  workId: string;
+  /**
+   * 프로그램이 시작하기 **전에** 있어야 하는 것, 홈 디렉터리 상대 경로. 하나라도 없으면
+   * `missing` 으로 돌려주고 **아무것도 시작하지 않는다** — 「묻기 전에 네트워크를 쓰지
+   * 않는다」를 지키려면 여는 쪽이 아니라 닫는 쪽이 기본이어야 한다.
+   */
+  needs: string[];
+  /**
+   * 복사 규칙이 떨어뜨렸어도 **반드시 가져올** 경로. 빌드 도구의 래퍼는 리포가 스스로
+   * `.gitignore` 에 넣는 일이 흔하고(Flutter 템플릿이 `/gradlew` 와 `gradle-wrapper.jar`
+   * 를 그렇게 한다) 그러면 아무것도 시작되지 않는다. 무엇이 그런 파일인지는 언어 지식이라
+   * 부르는 쪽이 적는다.
+   */
+  keep: string[];
+  /** 실행 직전에 작업본에 덮어쓸 것. 경로는 작업본 루트 상대이고 `..` 는 거부된다. */
+  files: [path: string, text: string][];
+  /** 한 조각짜리 이름은 `PATH` 로, `./gradlew` 처럼 여러 조각이면 작업본 안의 파일로 푼다. */
+  program: string;
+  args: string[];
+  env: [name: string, value: string][];
+  timeoutMs: number;
+}
+
+export interface ProcOut {
+  /** 신호로 죽었으면 `null`. 시간 초과가 그 경우다. */
+  code: number | null;
+  stdout: string;
+  stderr: string;
+  workDir: string;
+  /** 비어 있지 않으면 프로그램은 **시작조차 안 했다**. 오류가 아니라 사실이다. */
+  missing: string[];
+  /** 스트림 하나라도 상한에서 잘렸다. */
+  truncated: boolean;
+  timedOut: boolean;
+  durationMs: number;
+}
+
 export interface ReadLinesReq { rootPath: string; relPath: string; from: number; to: number; rev?: string }
 export interface ReadBlockReq { rootPath: string; relPath: string; startByte: number; endByte: number; rev?: string }
 

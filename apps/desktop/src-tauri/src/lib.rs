@@ -1,5 +1,7 @@
 mod commands;
-mod error;
+pub mod error;
+// The runner test drives the process layer directly, as the pipeline test does jobs.
+pub use commands::proc;
 mod panic;
 // The integration test drives the job directly (06 §1.4).
 pub mod jobs;
@@ -28,7 +30,7 @@ pub fn run() {
             commands::store::store_info,
             commands::app::app_paths,
             commands::app::app_version,
-            commands::app::t3_run,
+            commands::proc::t3_run,
             commands::maint::secret_set,
             commands::maint::secret_delete,
             commands::maint::secret_has,

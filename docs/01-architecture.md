@@ -142,7 +142,7 @@ interface FileDiff { relPath: string; added: string[] /* `+` 줄 본문, 합계 
 | `secret_has` | `{ account }` | `boolean` — **값을 꺼내는 문은 없다** (D109) | `SECRET_STORE` | 100ms | ✗ | — |
 | `app_write_json` | `{ box: 'exports' \| 'logs/crash', name, json }` | `string` — 만든 파일의 **디렉터리**. 경로를 인자로 받지 않고 `name` 은 `[A-Za-z0-9._-]` 만 통과한다 (D109) | `BAD_INPUT` `FS_PERMISSION` `FS_NOT_FOUND` | 30ms | ✗ | — |
 | `app_wipe` | — | `{}` — DB·백업·캐시·로그·크래시·내보내기. 키체인과 종료는 부르는 쪽이 (06 §6.4) | `FS_PERMISSION` `FS_NOT_FOUND` | 500ms | ✗ | — |
-| `t3_run` | — | — | 항상 `NOT_IMPLEMENTED` (§9) | — | — | — |
+| `t3_run` | `{ spec: ProcSpec }` — `rootPath`(빈 문자열이면 복사 안 함)·`workId`·`keep[]`·`files[]`·`program`·`args[]`·`env[]`·`timeoutMs` | `ProcOut` — `code`·`stdout`·`stderr`·`workDir`·`truncated`·`timedOut`·`durationMs` (D175) | `BAD_INPUT` `FS_NOT_FOUND` `FS_PERMISSION` `RUN_SPAWN` `RUN_IO` | 상한까지(기본 60초, 최대 600초) | ✗ — 상한이 끊는다 | — |
 
 M4 에서 돌아온 명령: `git_diff_text`(D64 · 형태는 D98). M3: `parse_snippet`(D67). M5: 위의 다섯(D109). 표에서 빠진 것은 폐기가 아니라 그 마일스톤의 몫이다.
 
@@ -423,13 +423,15 @@ dictionary/python/_imports.scm·_blocks.scm # 시스템 쿼리
 
 `parse_langs` 가 등록된 언어를 알려 주고, TS `dictionary` 가 `manifest.extensions` 로 `LangSpec` 을 만든다. 언어 크레이트는 Cargo feature 로 감싼다(`features = ["lang-typescript", "lang-sql"]`) — 커뮤니티 문법(Swift·Dart)이 빌드를 깨면 빼고 릴리스할 수 있다.
 
-**T3 자리(인터페이스만)**: `packages/grading/src/t3-adapter.ts`
+**실행 러너 (D175)**: 계약은 `packages/grading/src/runner.ts`, 첫 어댑터는 `java-runner.ts`, 등록은 `t3-adapter.ts`.
 ```ts
-export interface RunnerAdapter { id: string; detect(repo: RepoInfo, files: string[]): Promise<boolean>;
-  run(spec: { repoId: RepoId; cmd: string[]; timeoutMs: number }): Promise<{ passed: number; failed: number; log: string }> }
-export const runners: RunnerAdapter[] = [];   // MVP 에서 비어 있음
+export function detectRunner(repoId: RepoId, rootPath: string):
+  Promise<{ ok: boolean; reason?: RunnerReason; jdk?: string; gradle?: string }>;
+export function runTests(spec: RunSpec): Promise<RunResult>;   // status: passed|failed|error|no-runner|timeout
+export const runners: RunnerAdapter[] = [javaRunner];          // 언어 하나에 한 줄
 ```
-Rust 명령 `t3_run` 은 `NOT_IMPLEMENTED` 만 돌려주고, 스키마의 `track` 열거형에 `'t3'` 을 예약한다(02). 프로세스 실행이 들어오면 Tauri `shell` 스코프와 샌드박스 결정이 필요하므로 06 에서 다룬다.
+`no-runner` 는 오류가 아니라 **4·5단을 챕터 통과 게이트에서 빼라는 신호**다 (정본 §5 ①) — 설치를 강요하지 않고 화면이 그 사실만 말한다.
+Rust 명령 `t3_run` 이 **프로세스 한 겹**을 연다 (D175 — 정본 §2·§5 개정). 작업본 동기화 · 답안 주입 · 자식 실행 · 시간과 바이트 상한 · 프로세스 그룹 종료까지가 Rust 이고, 무엇을 실행할지와 통과인지는 TS 다. Tauri `shell` 플러그인은 쓰지 않는다 — 스코프 문법으로 임의 실행을 여는 대신 `std::process` 로 명령 하나만 노출해 `capabilities/default.json` 이 0 줄 늘었다.
 
 **LLM 4단**: MVP 는 프롬프트 생성·복사만(목업 그대로, 전송 없음) — **D106 이 이 문장을 06 §3.3 보다 앞세웠다**. 키는 0.1.0 부터 OS 키체인(`keyring`)에 넣을 수 있고 명령 셋은 §3.2 표에 있다(`secret_*`, D109) — 값을 되읽는 문이 없어 키가 `WebView` 에 존재하지 않는다. 전송은 0.2 이고 인터페이스만 예약: `llm_ask{ provider, messages } → 이벤트 llm_token`.
 
