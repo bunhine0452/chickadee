@@ -22,10 +22,10 @@ owner: claude-code
 - [~] java — 0·1·2·3부 이미 섬. 남은 것(string-concat·autoboxing 자리, 골든 보강) 점검 {#l-java}
 - [~] sql — 바닥 남은 다섯 + 중심, parts/sql.ts {#l-sql}
 - [~] rs — 0부 11 + 1·2부 전량 신규(사전 0장 → 표본 ai-pm 280장), parts/rs.ts {#l-rs}
-- [ ] go — 0부 + 1·2부 전량 신규, 표본은 공개 리포, parts/go.ts {#l-go}
-- [ ] c — 0부(기계 층) + 1·2부 전량 신규, 파서 ERROR 비율 실측, parts/c.ts {#l-c}
-- [ ] cpp — 0부 + 1·2부 전량 신규, 파서 ERROR 비율 실측, parts/cpp.ts {#l-cpp}
-- [ ] csharp — 0부 + 1·2부 전량 신규, 파서 ERROR 비율 실측, parts/csharp.ts {#l-csharp}
+- [~] go — 0부 + 1·2부 전량 신규, 표본은 공개 리포, parts/go.ts {#l-go}
+- [~] c — 0부(기계 층) + 1·2부 전량 신규, 파서 ERROR 비율 실측, parts/c.ts {#l-c}
+- [~] cpp — 0부 + 1·2부 전량 신규, 파서 ERROR 비율 실측, parts/cpp.ts {#l-cpp}
+- [~] csharp — 0부 + 1·2부 전량 신규, 파서 ERROR 비율 실측, parts/csharp.ts {#l-csharp}
 - [ ] swift — 0부 + 1·2부 전량 신규, 파서 ERROR 비율 실측, parts/swift.ts {#l-swift}
 
 ## A · 앱 — 언어 선택과 부 목차 {#a-app}
@@ -54,4 +54,8 @@ owner: claude-code
 | 2026-09-06T00:51:21+09:00 | #l-java | claude-code | ☐→~ |  | Opus 워크트리 세션 출발 — 심화 잔여 + 골든 감사 |
 | 2026-09-06T00:51:30+09:00 | #l-sql | claude-code | ☐→~ |  | Opus 워크트리 세션 출발 — 바닥 다섯 + 중심 16 + 심화 8 |
 | 2026-09-06T00:51:48+09:00 | #l-rs | claude-code | ☐→~ |  | Fable 포크 워크트리 세션 출발 — 0부 11 + 1·2부 전량 |
+| 2026-09-06T00:52:43+09:00 | #l-go | claude-code | ☐→~ |  | Opus 워크트리 세션 출발 — cli/cli 표본 |
+| 2026-09-06T00:53:05+09:00 | #l-c | claude-code | ☐→~ |  | Fable 포크 워크트리 세션 출발 — 기계 층 0부, 파서 ERROR 비율 실측 |
+| 2026-09-06T00:53:31+09:00 | #l-cpp | claude-code | ☐→~ |  | Opus 워크트리 세션 출발 — fmt/json 표본, ERROR 비율 실측 |
+| 2026-09-06T00:53:50+09:00 | #l-csharp | claude-code | ☐→~ |  | Opus 워크트리 세션 출발 — 공개 리포 표본, ERROR 비율 실측 |
 <!-- oculpm:plan-log end -->
