@@ -37,5 +37,18 @@
     "endCol": 32,
     "nodeKind": "string",
     "inError": false
+  },
+  {
+    "queryId": "_imports",
+    "matchId": 4,
+    "patternIndex": 10,
+    "name": "import.source",
+    "form": "call-self",
+    "startLine": 6,
+    "startCol": 9,
+    "endLine": 6,
+    "endCol": 18,
+    "nodeKind": "identifier",
+    "inError": false
   }
 ]

@@ -47,9 +47,17 @@ fn point_at(src: &[u8], at: usize) -> Point {
     Point::new(row, before.len() - start)
 }
 
+/// `<script` → `</script`. A body ends at **its own** closing tag, not at the first
+/// `</` — a Vue script holding `'<svg><path></path></svg>'` strings otherwise loses
+/// everything after that string (D168: the login handler sat there).
+fn close_tag(open_tag: &[u8]) -> Vec<u8> {
+    [b"</", &open_tag[1..]].concat()
+}
+
 /// The bodies of one kind of tag, in order. Empty when there is none — the caller
 /// then parses nothing rather than reading the rest of the file in the wrong language.
 pub(crate) fn tag_bodies(src: &[u8], open_tag: &[u8]) -> Vec<Range> {
+    let close = close_tag(open_tag);
     let mut out = Vec::new();
     let mut at = 0usize;
     while let Some(open) = find(src, open_tag, at) {
@@ -57,7 +65,7 @@ pub(crate) fn tag_bodies(src: &[u8], open_tag: &[u8]) -> Vec<Range> {
             break;
         };
         let start = gt + 1;
-        let Some(end) = find(src, b"</", start) else {
+        let Some(end) = find(src, &close, start) else {
             break;
         };
         if end > start {
@@ -87,12 +95,16 @@ pub(crate) fn statement_bodies(src: &[u8]) -> Vec<Range> {
     const TAGS: [&[u8]; 4] = [b"<select", b"<insert", b"<update", b"<delete"];
     let mut out = Vec::new();
     let mut at = 0usize;
-    while let Some(open) = TAGS.iter().filter_map(|t| find(src, t, at)).min() {
+    while let Some((open, tag)) = TAGS
+        .iter()
+        .filter_map(|t| find(src, t, at).map(|i| (i, *t)))
+        .min()
+    {
         let Some(gt) = find(src, b">", open) else {
             break;
         };
         let start = gt + 1;
-        let Some(end) = find(src, b"</", start) else {
+        let Some(end) = find(src, &close_tag(tag), start) else {
             break;
         };
         if end > start && !src[start..end].contains(&b'<') {

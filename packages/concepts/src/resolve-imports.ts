@@ -75,8 +75,13 @@ const LANG_OF: Readonly<Record<string, Lang>> = {
 
 /** `_imports.scm` 이 라우트로 내보내는 `form` 들 (D159). 이것들은 **나가는 엣지가 아니다.** */
 const ROUTE_FORM = /^route-/;
-/** 프론트가 부르는 자리. `http-post` → `POST`. */
-const HTTP_FORM = /^http-(get|post|put|patch|delete)$/;
+/**
+ * 호출 그래프·스키마의 재료 (D168 · D169). 파일 간선이 아니라 `calls.ts`·`schema.ts` 가 읽는다 —
+ * 여기서 경로로 풀면 `user` 라는 지역 변수가 `user.java` 를 찾아 나선다.
+ */
+const GRAPH_FORM = /^(field|local|call|call-self|entry-scheduled|column-of|ddl-[a-z]+|reads-table)$/;
+/** 프론트가 부르는 자리. `http-post` → `POST`. `http-any` 는 동사 미상(`.uri("…")`, D168). */
+const HTTP_FORM = /^http-(get|post|put|patch|delete|any)$/;
 
 /** 상대 지정자에 붙여 보는 확장자. 순서가 곧 우선순위다 (04 §7.1). */
 const TS_EXT = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.vue', '.d.ts'] as const;
@@ -116,8 +121,8 @@ export function resolveImports(input: ResolveInput): ResolvedEdge[] {
     const lang = langOf(file.path);
     if (lang === null) continue;
     for (const raw of file.imports) {
-      // 라우트 선언은 색인의 재료일 뿐 나가는 엣지가 아니다 (D159).
-      if (raw.form !== null && ROUTE_FORM.test(raw.form)) continue;
+      // 라우트 선언은 색인의 재료일 뿐 나가는 엣지가 아니다 (D159). 호출·스키마 캡처도 그렇다.
+      if (raw.form !== null && (ROUTE_FORM.test(raw.form) || GRAPH_FORM.test(raw.form))) continue;
       const http = raw.form !== null ? HTTP_FORM.exec(raw.form) : null;
       const hit = http
         ? routeHit((http[1] as string).toUpperCase(), raw.specifier, ctx)
@@ -281,8 +286,13 @@ interface RouteAt { path: string; line: number }
 
 function routeIndex(files: readonly FileImports[]): Map<string, RouteAt> {
   const out = new Map<string, RouteAt>();
-  for (const file of files) {
-    if (langOf(file.path) !== 'java') continue;
+  // 같은 라우트가 두 파일에 선언돼 있으면(서비스 사본 둘) **짧은 경로 · 사전순**이 이긴다 —
+  // 입력 순서가 아니라 규칙이 정해야 같은 리포에 같은 답이 나온다 (04 §9).
+  const ordered = [...files].sort((a, b) => a.path.length - b.path.length || cmp(a.path, b.path));
+  for (const file of ordered) {
+    const lang = langOf(file.path);
+    // 자바(Spring)와 파이썬(FastAPI·Flask)이 라우트를 선언한다 (D159 · D168).
+    if (lang !== 'java' && lang !== 'py') continue;
     const base = file.imports.find((r) => r.form === 'route-base')?.specifier ?? '';
     for (const raw of file.imports) {
       const m = raw.form === null ? null : /^route-(bare-)?(get|post|put|patch|delete)$/.exec(raw.form);
@@ -322,20 +332,68 @@ function joinRoute(base: string, leaf: string): string {
  */
 function routeHit(verb: string, spec: string, ctx: Ctx): Hit | null {
   const path = normPath(spec.split(/[?#]/)[0] ?? '');
-  const exact = ctx.routes.get(`${verb} ${path}`);
-  if (exact !== undefined) return { to: exact.path, kind: 'http', toLine: exact.line };
-
-  const prefix = `${verb} `;
-  let found: RouteAt | null = null;
-  for (const [key, at] of ctx.routes) {
-    if (!key.startsWith(prefix)) continue;
-    if (!key.slice(prefix.length).endsWith(path)) continue;
-    if (found !== null && found.path !== at.path) return null;
-    found = at;
+  // 동사 미상(`ANY`, D168 의 `.uri("…")`)이면 어느 동사든 경로가 정확히 같은 것 하나를 찾는다.
+  const verbs = verb === 'ANY' ? ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] : [verb];
+  let exact: RouteAt | null = null;
+  for (const v of verbs) {
+    const at = ctx.routes.get(`${v} ${path}`);
+    if (at === undefined) continue;
+    if (exact !== null && exact.path !== at.path) return null;
+    exact = at;
   }
-  return found === null
-    ? null
-    : { to: found.path, kind: 'http', confidence: 'heuristic', toLine: found.line };
+  if (exact !== null) return { to: exact.path, kind: 'http', toLine: exact.line };
+
+  // 접미가 맞는 것이 여럿이면 — 한쪽의 접두가 다른 쪽 접두의 **앞부분**일 때만 짧은 쪽을 고른다.
+  // `/fortune/comprehensive` 에 Spring 의 `/api/…` 와 FastAPI 의 `/api/v1/…` 가 걸리면 `/api` 다:
+  // 클라이언트가 뺀 baseURL 은 둘의 공통 부분이고, 더 긴 쪽은 그 밑의 다른 서비스다.
+  // 접두가 서로 무관하면(`/api` 와 `/v2`) 안 잇는다 — 틀린 간선은 없는 간선보다 나쁘다.
+  const hits: { at: RouteAt; prefix: string }[] = [];
+  for (const [key, at] of ctx.routes) {
+    const space = key.indexOf(' ');
+    if (!verbs.includes(key.slice(0, space))) continue;
+    const route = key.slice(space + 1);
+    if (!route.endsWith(path)) continue;
+    if (hits.some((h) => h.at.path === at.path)) continue;
+    hits.push({ at, prefix: route.slice(0, route.length - path.length) });
+  }
+  if (hits.length === 0) return null;
+  const shortest = hits.reduce((a, b) => (b.prefix.length < a.prefix.length ? b : a));
+  const nested = hits.every((h) => h === shortest || (h.prefix.startsWith(shortest.prefix) && h.prefix !== shortest.prefix));
+  return nested
+    ? { to: shortest.at.path, kind: 'http', confidence: 'heuristic', toLine: shortest.at.line }
+    : null;
+}
+
+/** 라우트가 없는 HTTP 호출 (D168 `dead.ts`). `resolveImports` 가 조용히 버리는 것을 이름 붙여 돌려준다. */
+export interface HttpMiss { path: string; line: number; verb: string; route: string }
+
+/**
+ * 프론트(또는 서버)가 부르는데 **어느 라우트에도 안 닿는** 호출. 실측 리포의 `GET /emotions/stats`
+ * 가 그것이다 — 서버에 그 경로가 없고, 부르는 쪽은 죽은 갈래를 모른 채 산다.
+ */
+export function httpMisses(input: ResolveInput): HttpMiss[] {
+  const routes = routeIndex(input.files);
+  const ctx: Ctx = {
+    files: new Set(input.paths), goLead: new Map(), routes, tsconfig: null, packageImports: null,
+    goModule: null, pyRoots: [''],
+  };
+  const out: HttpMiss[] = [];
+  for (const file of input.files) {
+    for (const raw of file.imports) {
+      const http = raw.form !== null ? HTTP_FORM.exec(raw.form) : null;
+      if (http === null) continue;
+      const verb = (http[1] as string).toUpperCase();
+      if (routeHit(verb, raw.specifier, ctx) !== null) continue;
+      out.push({ path: file.path, line: raw.line, verb, route: raw.specifier });
+    }
+  }
+  return out.sort((a, b) => cmp(a.path, b.path) || a.line - b.line);
+}
+
+/** 라우트가 선언된 자리 전부 — 부르는 곳이 없는 라우트를 세는 재료다 (D168 `dead.ts`). */
+export function routeDecls(files: readonly FileImports[]): { path: string; line: number; route: string }[] {
+  return [...routeIndex(files)].map(([route, at]) => ({ path: at.path, line: at.line, route }))
+    .sort((a, b) => cmp(a.path, b.path) || a.line - b.line);
 }
 
 /**
@@ -386,7 +444,9 @@ function resolvePy(from: string, spec: string, ctx: Ctx): Hit | null {
     const hit = firstHit(pyCandidates(segs).map((c) => under(root, c)), ctx);
     if (hit !== null) return hit;
   }
-  return null;
+  // 스크립트가 있는 디렉터리도 루트다 — 파이썬은 `sys.path[0]` 이 그것이라 `AI_API/main.py` 의
+  // `from services.x import y` 가 `AI_API/services/x.py` 다. 설정 없이 가장 흔한 배치를 덮는다 (D168).
+  return firstHit(pyCandidates(segs).map((c) => under(dirOf(from), c)), ctx);
 }
 
 function pyCandidates(segs: readonly string[]): string[] {

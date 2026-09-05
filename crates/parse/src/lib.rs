@@ -82,7 +82,13 @@ fn scan_ranges(src: &[u8], queries: &Queries) -> Result<Scan, ParseError> {
         if one.quality == "poor" {
             quality = "poor";
         }
-        captures.extend(one.captures);
+        // Match ids restart at 1 per parse; offset them so a mapper's 40 statements
+        // do not all report match 1 and get grouped as one match downstream (D168).
+        let base = captures.last().map_or(0, |c: &query::Capture| c.match_id);
+        captures.extend(one.captures.into_iter().map(|mut c| {
+            c.match_id += base;
+            c
+        }));
     }
     Ok(Scan {
         captures,

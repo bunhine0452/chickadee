@@ -70,3 +70,103 @@ describe('줄기', () => {
     expect(p.map((h) => h.path)).toStrictEqual([FE, CTRL, SVC]);
   });
 });
+
+// ───────── 메서드 단위 (D168) ─────────
+
+import { buildCallGraph, type FileBlocks } from './calls.js';
+import { methodPaths, trunk } from './path.js';
+import type { RawBlock, RawImport } from './derive.js';
+import type { FileImports } from './resolve-imports.js';
+
+const block = (name: string, lineStart: number, lineEnd: number, form: string | null = 'method'): RawBlock =>
+  ({ name, lineStart, lineEnd, startByte: 0, endByte: 0, form });
+const call = (recv: string | null, name: string, line: number): RawImport =>
+  (recv === null ? { specifier: name, form: 'call-self', line } : { specifier: name, form: 'call', line, ctx: { recv } });
+const field = (name: string, type: string, line: number): RawImport =>
+  ({ specifier: name, form: 'field', line, ctx: { type } });
+
+const VIEW = 'FRONT/LandingView.vue';
+const STORE = 'FRONT/authStore.js';
+const JWT = 'BACK/JwtUtil.java';
+
+function graph(): ReturnType<typeof buildCallGraph> {
+  const files: FileImports[] = [
+    { path: VIEW, imports: [call('authStore', 'login', 504)] },
+    { path: STORE, imports: [call('authService', 'login', 64)] },
+    { path: FE, imports: [{ specifier: '/auth/login', form: 'http-post', line: 21 }, { specifier: '/auth/signup', form: 'http-post', line: 12 }] },
+    { path: CTRL, imports: [field('authService', 'AuthService', 36), { specifier: '/login', form: 'route-post', line: 56 }, { specifier: '/signup', form: 'route-post', line: 44 }, call('authService', 'login', 58), call('authService', 'signup', 46)] },
+    { path: SVC, imports: [field('userDao', 'UserDao', 32), field('jwtUtil', 'JwtUtil', 34), call('userDao', 'findByLoginId', 78), call(null, 'resetDailyCoinIfNeeded', 87), call('userDao', 'findById', 90), call('jwtUtil', 'generateToken', 95), call('userDao', 'resetDailyCoin', 115), call('userDao', 'insertUser', 60)] },
+    { path: DAO, imports: [] }, { path: JWT, imports: [] }, { path: MAP, imports: [] },
+  ];
+  const blocks: FileBlocks[] = [
+    { path: VIEW, blocks: [block('handleSubmit', 467, 515, null)] },
+    { path: STORE, blocks: [block('login', 59, 80, null), block('signup', 30, 58, null)] },
+    { path: FE, blocks: [block('signup', 11, 14, null), block('login', 20, 42, null)] },
+    { path: CTRL, blocks: [block('signup', 44, 48), block('login', 56, 60)] },
+    { path: SVC, blocks: [block('signup', 36, 73), block('login', 76, 110), block('resetDailyCoinIfNeeded', 112, 116)] },
+    { path: DAO, blocks: [block('insertUser', 14, 14), block('findByLoginId', 17, 17), block('findById', 20, 20), block('resetDailyCoin', 26, 26)] },
+    { path: JWT, blocks: [block('generateToken', 32, 39)] },
+    { path: MAP, blocks: [block('insertUser', 25, 28, 'statement'), block('findByLoginId', 31, 36, 'statement'), block('findById', 39, 44, 'statement'), block('resetDailyCoin', 60, 66, 'statement')] },
+  ];
+  const edges: ResolvedEdge[] = [
+    edge(VIEW, STORE, 1), edge(STORE, FE, 1),
+    { ...edge(FE, CTRL, 21, 'http'), toLine: 56 }, { ...edge(FE, CTRL, 12, 'http'), toLine: 44 },
+    edge(CTRL, SVC, 1), edge(SVC, DAO, 1), edge(SVC, JWT, 1), edge(DAO, MAP, 1),
+  ];
+  return buildCallGraph({ files, blocks, edges });
+}
+
+const show = (hops: readonly { path: string; name: string; depth: number; kind: string | null; calledAt: { line: number } | null }[]): string[] =>
+  hops.map((h) => `${'  '.repeat(h.depth)}${h.path.slice(h.path.lastIndexOf('/') + 1)}#${h.name}${h.calledAt === null ? '' : `@${h.calledAt.line}`}${h.kind === null ? '' : ` (${h.kind})`}`);
+
+describe('메서드 줄기 (D168)', () => {
+  test('로그인 — 화면 핸들러에서 매퍼까지, 실행 순서대로 들여쓴다', () => {
+    const paths = methodPaths(graph());
+    const login = paths.find((p) => p.some((h) => h.name === 'login' && h.path === CTRL)) ?? [];
+    expect(show(login)).toStrictEqual([
+      'LandingView.vue#handleSubmit',
+      '  authStore.js#login@504 (call)',
+      '    authService.js#login@64 (call)',
+      '      AuthController.java#login@21 (http)',
+      '        AuthService.java#login@58 (call)',
+      '          UserDao.java#findByLoginId@78 (call)',
+      '            UserMapper.xml#findByLoginId@17 (mapper)',
+      '          AuthService.java#resetDailyCoinIfNeeded@87 (call)',
+      '            UserDao.java#resetDailyCoin@115 (call)',
+      '              UserMapper.xml#resetDailyCoin@26 (mapper)',
+      '          UserDao.java#findById@90 (call)',
+      '            UserMapper.xml#findById@20 (mapper)',
+      '          JwtUtil.java#generateToken@95 (call)',
+    ]);
+  });
+
+  test('회원가입은 첫 칸부터 다른 줄기다 — 호출자가 없으면 위로 안 오른다', () => {
+    const paths = methodPaths(graph());
+    const signup = paths.find((p) => p.some((h) => h.name === 'signup' && h.path === CTRL)) ?? [];
+    expect(show(signup).slice(0, 3)).toStrictEqual([
+      'authService.js#signup',
+      '  AuthController.java#signup@12 (http)',
+      '    AuthService.java#signup@46 (call)',
+    ]);
+    expect(paths).toHaveLength(2);
+  });
+
+  test('등뼈 — 맨 위에서 첫 매퍼 문까지, 곁가지 없이', () => {
+    const paths = methodPaths(graph());
+    const login = paths.find((p) => p.some((h) => h.name === 'login' && h.path === CTRL)) ?? [];
+    expect(trunk(login).map((h) => `${h.path.slice(h.path.lastIndexOf('/') + 1)}#${h.name}`)).toStrictEqual([
+      'LandingView.vue#handleSubmit', 'authStore.js#login', 'authService.js#login',
+      'AuthController.java#login', 'AuthService.java#login', 'UserDao.java#findByLoginId', 'UserMapper.xml#findByLoginId',
+    ]);
+  });
+
+  test('호출자가 둘이면 위로 안 오른다 — 어느 화면에서 왔는지 코드가 말하지 않는다', () => {
+    const g = graph();
+    const other = 'FRONT/OtherView.vue';
+    g.blocks.push({ path: other, name: 'go', lineStart: 1, lineEnd: 9, form: null });
+    const store = g.blocks.find((b) => b.path === STORE && b.name === 'login') as (typeof g.blocks)[number];
+    g.edges.push({ from: { path: other, name: 'go', lineStart: 1, lineEnd: 9, form: null }, to: store, line: 3, kind: 'call' });
+    const login = methodPaths(g).find((p) => p.some((h) => h.name === 'login' && h.path === CTRL)) ?? [];
+    expect(show(login)[0]).toBe('authStore.js#login');
+  });
+});

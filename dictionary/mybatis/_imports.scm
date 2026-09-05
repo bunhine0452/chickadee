@@ -19,3 +19,19 @@
 ((element (STag (Attribute (Name) @ctx.att (AttValue) @import.source)))
  (#any-of? @ctx.att "type" "resultType" "parameterType" "ofType" "javaType")
  (#set! form "static"))
+
+; ── 열 ↔ 필드 (D169) ─────────────────────────────────────────────────
+; `<resultMap type="…entity.User">` 안의 `<id property="userId" column="user_id"/>` 가
+; 표의 열과 자바 필드를 잇는 유일한 자리다. 열 이름이 지정자, 필드와 엔티티는 맥락이다.
+; 표 이름은 여기 없다 — 같은 매퍼의 SQL 이 읽는 표(`reads-table`)나 열 이름의 유일성으로
+; TS(`schema.ts`)가 붙인다.
+((element
+   (STag (Name) @ctx.tag (Attribute (Name) @ctx.tk (AttValue) @ctx.type))
+   (content (element
+     (EmptyElemTag (Name) @ctx.row
+       (Attribute (Name) @ctx.pk (AttValue) @ctx.property)
+       (Attribute (Name) @ctx.ck (AttValue) @import.source)))))
+ (#eq? @ctx.tag "resultMap") (#eq? @ctx.tk "type")
+ (#any-of? @ctx.row "id" "result")
+ (#eq? @ctx.pk "property") (#eq? @ctx.ck "column")
+ (#set! form "column-of"))

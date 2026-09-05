@@ -11,13 +11,17 @@ import {
 } from '@chickadee/ipc-client';
 
 import { inBatches } from './batch.js';
+import { buildCallGraph, type FileBlocks } from './calls.js';
 import { type Identity } from './commits.js';
+import { deadBranches } from './dead.js';
 import { reclassifyCommits } from './identities.js';
 import { deriveFile, type DerivedSite, type RawBlock } from './derive.js';
 import { buildGaps, type CountableSite } from './gaps.js';
+import { methodPaths } from './path.js';
 import { resolveImports, type FileImports, type ResolvedEdge } from './resolve-imports.js';
 import { EXCLUDE_GLOBS, GENERATED_MARKERS, LIMITS } from './ingest-defaults.js';
-import { planUnits } from './units.js';
+import { extractSchema } from './schema.js';
+import { entryUnits, planUnits, type EntrySeed } from './units.js';
 import {
   innermostBlock, knownSet, lineIndex, unknownCount, windowUnknown,
   type LineIndex, type LineSpan, type MasteryRow, type WindowSite,
@@ -36,6 +40,12 @@ export interface IngestReport extends IngestDone {
   units: number;
   /** 사전에서 건너뛴 파일 — 있으면 개발자 패널이 보여 준다. */
   dictProblems: number;
+  /** 메서드 단위 요청 줄기 수 (D168). */
+  paths?: number;
+  /** DDL 에서 선 표 수 (D169). */
+  tables?: number;
+  /** 죽은 갈래 수 (D168). */
+  dead?: number;
 }
 
 export interface IngestOptions {
@@ -190,7 +200,10 @@ export async function runIngest(options: IngestOptions): Promise<IngestReport> {
 export async function deriveRepo(
   dict: Dict,
   options: IngestOptions,
-): Promise<{ sites: number; blocks: number; edges: number; gaps: number; units: number }> {
+): Promise<{
+  sites: number; blocks: number; edges: number; gaps: number; units: number;
+  paths: number; tables: number; dead: number;
+}> {
   const { repoId, now } = options;
   const heuristic = new Set(
     [...dict.concepts.values()]
@@ -207,6 +220,8 @@ export async function deriveRepo(
   let blockCount = 0;
   let step = 0;
   const imports: FileImports[] = [];
+  // 블록도 모아 둔다 — 호출 그래프의 노드다 (D168). 파일 집합이 다 모여야 이름이 풀린다.
+  const blocksOf: FileBlocks[] = [];
 
   for (const file of target) {
     const captures = await ipc.store.query('derive.captures_by_file', { fileId: file.id });
@@ -222,6 +237,7 @@ export async function deriveRepo(
     // 지정자는 모아 두었다가 파일 집합이 다 모인 뒤 한 번에 푼다 — `./x` 가 어느 파일인지는
     // 그 파일이 인제스트에 들어왔는지를 알아야 답할 수 있다 (04 §7.1).
     imports.push({ path: file.path, imports: result.imports });
+    blocksOf.push({ path: file.path, blocks: result.blocks });
     blockCount += result.blocks.length;
     siteCount += sites.length;
     step += 1;
@@ -230,10 +246,162 @@ export async function deriveRepo(
 
   const { count: edges, resolved } = await writeEdges(repoId, files, imports, target.map((f) => f.id));
   await reclassifyCommits(repoId, options.identities ?? []);
+  // HTTP 말고 다른 문 — `@Scheduled` 가 있는 파일 (D168).
+  const seeds: EntrySeed[] = imports
+    .filter((f) => f.imports.some((r) => r.form === 'entry-scheduled'))
+    .map((f) => ({ path: f.path }));
   // 대지와 구멍은 리포 전체를 본다 — 증분이어도 「몇 파일 중 몇 곳」의 분모는 전체다.
-  const units = await writeUnits(dict, repoId, files, resolved, now);
+  const units = await writeUnits(dict, repoId, files, resolved, seeds, now);
   const gaps = await writeGaps(dict, repoId, files.length, now);
-  return { sites: siteCount, blocks: blockCount, edges, gaps, units };
+  // 줄기·스키마·죽은 갈래는 캡처에서 매번 다시 선다 (D168 · D169). 대지 뒤에 오는 이유는
+  // 줄기가 대지 이름으로 꽂히기 때문이다.
+  const graphIn = { files: imports, blocks: blocksOf, edges: resolved };
+  const graph = buildCallGraph(graphIn);
+  const paths = await writeRequestPaths(repoId, files, imports, resolved, seeds, graph, now);
+  const tables = await writeSchema(repoId, files, imports, resolved);
+  const dead = await writeDead(repoId, files, imports, resolved, graph);
+  return { sites: siteCount, blocks: blockCount, edges, gaps, units, paths, tables, dead };
+}
+
+/**
+ * 메서드 단위 요청 줄기 (D168). HTTP 호출 자리마다 하나이고, 칸은 (파일, 줄 범위)다.
+ * 챕터 화면이 「이 파일의 이 줄들만」을 여기서 읽는다 — `unit_file` 은 그대로 파일 단위다.
+ */
+async function writeRequestPaths(
+  repoId: number,
+  files: readonly { id: number; path: string }[],
+  imports: readonly FileImports[],
+  edges: readonly ResolvedEdge[],
+  seeds: readonly EntrySeed[],
+  graph: ReturnType<typeof buildCallGraph>,
+  now: number,
+): Promise<number> {
+  const idOf = new Map(files.map((f) => [f.path, f.id]));
+  // 줄기의 대지 = 그 HTTP 호출 파일이 시작한 기능. 이름은 `entryUnits` 가 정한 그대로다.
+  // 서버가 서버를 부른 자리(`FortuneService.java` → FastAPI)는 진입점이 아니라 **어느 기능 안**이다 —
+  // 그 파일을 품은 가장 작은 기능으로 꽂는다.
+  const features = entryUnits(edges, seeds);
+  const unitOf = (path: string): string | null => {
+    const own = features.find((u) => u.entry === path);
+    if (own !== undefined) return own.name;
+    const holding = features.filter((u) => u.files.includes(path)).sort((a, b) => a.files.length - b.files.length);
+    return holding[0]?.name ?? null;
+  };
+  // 호출 자리 → 라우트 문자열. `request_path.label` 이 사람이 읽는 이름이다.
+  const labelOf = new Map<string, string>();
+  for (const f of imports) {
+    for (const r of f.imports) {
+      const m = r.form === null ? null : /^http-(get|post|put|patch|delete|any)$/.exec(r.form);
+      if (m === null) continue;
+      labelOf.set(`${f.path}:${r.line}`, `${m[1] === 'any' ? '' : `${(m[1] as string).toUpperCase()} `}${r.specifier}`);
+    }
+  }
+
+  const ops: BatchOp[] = [
+    { name: 'path.clear', params: { repoId } },
+    { name: 'path.clear_paths', params: { repoId } },
+  ];
+  let count = 0;
+  for (const hops of methodPaths(graph)) {
+    const http = hops.find((h) => h.kind === 'http');
+    const entry = http?.calledAt;
+    if (entry === undefined || entry === null) continue;
+    const entryFileId = idOf.get(entry.path);
+    if (entryFileId === undefined) continue;
+    if (hops.some((h) => !idOf.has(h.path))) continue;
+    ops.push({
+      name: 'path.insert',
+      params: {
+        repoId, unitName: unitOf(entry.path), entryFileId, entryLine: entry.line,
+        label: labelOf.get(`${entry.path}:${entry.line}`) ?? '', hopCount: hops.length, updatedAt: now,
+      },
+    });
+    hops.forEach((h, ord) => {
+      ops.push({
+        name: 'path.hop_insert',
+        params: {
+          repoId, entryFileId, entryLine: entry.line, ord, fileId: idOf.get(h.path) as number, name: h.name,
+          lineStart: h.lineStart, lineEnd: h.lineEnd, calledLine: h.calledAt?.line ?? null, depth: h.depth, kind: h.kind,
+        },
+      });
+    });
+    count += 1;
+  }
+  await inBatches(ops);
+  return count;
+}
+
+/** 표·열·외래키·열↔필드 (D169). */
+async function writeSchema(
+  repoId: number,
+  files: readonly { id: number; path: string }[],
+  imports: readonly FileImports[],
+  edges: readonly ResolvedEdge[],
+): Promise<number> {
+  const idOf = new Map(files.map((f) => [f.path, f.id]));
+  const schema = extractSchema(imports, edges);
+  const ops: BatchOp[] = [
+    { name: 'schema.clear_bindings', params: { repoId } },
+    { name: 'schema.clear_fks', params: { repoId } },
+    { name: 'schema.clear_columns', params: { repoId } },
+    { name: 'schema.clear_tables', params: { repoId } },
+  ];
+  const known = new Set<string>();
+  for (const t of schema.tables) {
+    const fileId = idOf.get(t.path);
+    if (fileId === undefined) continue;
+    known.add(t.name);
+    ops.push({ name: 'schema.table_insert', params: { repoId, name: t.name, fileId, line: t.line } });
+    t.columns.forEach((c, ord) => {
+      ops.push({
+        name: 'schema.column_insert',
+        params: {
+          repoId, tableName: t.name, ord, name: c.name, type: c.type, notNull: c.notNull ? 1 : 0,
+          defaultValue: c.default, line: c.line,
+        },
+      });
+    });
+  }
+  for (const k of schema.fks) {
+    if (!known.has(k.table)) continue;
+    ops.push({
+      name: 'schema.fk_insert',
+      params: { repoId, tableName: k.table, columnName: k.column, refTable: k.refTable, refColumn: k.refColumn, line: k.line },
+    });
+  }
+  for (const b of schema.bindings) {
+    const fileId = idOf.get(b.path);
+    if (fileId === undefined) continue;
+    ops.push({
+      name: 'schema.binding_insert',
+      params: {
+        repoId, fileId, line: b.line, columnName: b.column, property: b.property, entity: b.entity,
+        entityFileId: b.entityPath === null ? null : idOf.get(b.entityPath) ?? null,
+        tableName: b.table !== null && known.has(b.table) ? b.table : null,
+      },
+    });
+  }
+  await inBatches(ops);
+  return known.size;
+}
+
+/** 죽은 갈래 — 표시만 한다 (D168). */
+async function writeDead(
+  repoId: number,
+  files: readonly { id: number; path: string }[],
+  imports: readonly FileImports[],
+  edges: readonly ResolvedEdge[],
+  graph: ReturnType<typeof buildCallGraph>,
+): Promise<number> {
+  const idOf = new Map(files.map((f) => [f.path, f.id]));
+  const ops: BatchOp[] = [{ name: 'path.dead_clear', params: { repoId } }];
+  for (const d of deadBranches({ paths: files.map((f) => f.path), files: imports, edges, graph })) {
+    const fileId = idOf.get(d.path);
+    if (fileId === undefined) continue;
+    ops.push({ name: 'path.dead_insert', params: { repoId, kind: d.kind, fileId, line: d.line, label: d.label } });
+  }
+  await inBatches(ops);
+  return ops.length - 1;
 }
 
 /**
@@ -517,12 +685,13 @@ async function writeUnits(
   repoId: number,
   files: readonly { id: number; path: string }[],
   edges: readonly ResolvedEdge[],
+  seeds: readonly EntrySeed[],
   now: number,
 ): Promise<number> {
   // 기능(진입점 폐포)이 먼저고 남은 것을 디렉터리 규칙이 받는다 (D160).
   // 순서는 코스의 순서다 — `unit.order_idx` 가 곧 챕터 번호다 (D162).
   const protoMarks = [...dict.concepts.values()].flatMap((c) => c.evidence);
-  const { units, unitsOf } = planUnits(files.map((f) => f.path), edges, { protoMarks });
+  const { units, unitsOf } = planUnits(files.map((f) => f.path), edges, { protoMarks, entries: seeds });
   const ops: BatchOp[] = units.map((unit, i) => ({
     name: 'derive.unit_upsert',
     params: { repoId, name: unit.name, rootPath: unit.rootPath || null, orderIdx: i },

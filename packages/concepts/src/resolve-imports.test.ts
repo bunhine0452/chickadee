@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import type { RawImport } from './derive.js';
-import { resolveImports, type ResolveInput, type ResolvedEdge } from './resolve-imports.js';
+import { httpMisses, resolveImports, routeDecls, type ResolveInput, type ResolvedEdge } from './resolve-imports.js';
 
 /** `_imports` 캡처 한 건. 기본 `form` 은 `.scm` 이 가장 자주 내는 값이다. */
 const spec = (specifier: string, form: string | null = 'static'): RawImport =>
@@ -521,5 +521,64 @@ describe('mybatis 매퍼 (D159)', () => {
   test('뒤집힌 엣지도 자기 자신을 가리키면 버린다', () => {
     const edges = one(MAP, [spec('com.ssafy.app.model.dao.UserDao', 'mapper-of')], { paths: [MAP] });
     expect(edges).toStrictEqual([]);
+  });
+});
+
+describe('D168 — 파이썬 라우트 · 동사 미상 · 접두 규칙 · 라우트 없는 호출', () => {
+  const JAVA_SVC = 'BACK/src/main/java/com/a/service/FortuneService.java';
+  const PY = 'AI_API/main.py';
+  const PY_SVC = 'AI_API/services/comprehensive_service.py';
+  const FRONT = 'FRONT/src/services/fortuneService.js';
+  const CTRL = 'BACK/src/main/java/com/a/controller/FortuneController.java';
+
+  test('`.uri("/api/v1/…")` 가 FastAPI 의 `@app.post` 에 닿는다 — 동사는 몰라도 경로가 같다', () => {
+    const edges = resolveImports({
+      paths: [JAVA_SVC, PY],
+      files: [
+        { path: JAVA_SVC, imports: [{ specifier: '/api/v1/fortune/comprehensive', form: 'http-any', line: 38 }] },
+        { path: PY, imports: [{ specifier: '/api/v1/fortune/comprehensive', form: 'route-post', line: 94 }] },
+      ],
+    });
+    expect(edges).toStrictEqual([
+      { from: JAVA_SVC, to: PY, kind: 'http', confidence: 'syntactic', line: 38, toLine: 94 },
+    ]);
+  });
+
+  test('접미가 둘에 걸려도 접두가 포개지면 짧은 쪽 — `/api` 와 `/api/v1`', () => {
+    const edges = resolveImports({
+      paths: [FRONT, CTRL, PY],
+      files: [
+        { path: FRONT, imports: [{ specifier: '/fortune/comprehensive', form: 'http-post', line: 21 }] },
+        { path: CTRL, imports: [spec('/api/fortune', 'route-base'), { specifier: '/comprehensive', form: 'route-post', line: 37 }] },
+        { path: PY, imports: [{ specifier: '/api/v1/fortune/comprehensive', form: 'route-post', line: 94 }] },
+      ],
+    });
+    expect(lines(edges)).toStrictEqual([`${FRONT} -> ${CTRL} (http)`]);
+  });
+
+  test('파이썬은 스크립트가 있는 디렉터리도 루트다 — `AI_API/main.py` 의 `from services.x`', () => {
+    const edges = one(PY, [spec('services.comprehensive_service', 'from')], { paths: [PY, PY_SVC] });
+    expect(lines(edges)).toStrictEqual([`${PY} -> ${PY_SVC} (static)`]);
+  });
+
+  test('호출·스키마 캡처는 파일 간선이 아니다', () => {
+    const edges = one(JAVA_SVC, [
+      { specifier: 'user', form: 'local', line: 3, ctx: { type: 'User' } },
+      { specifier: 'findByLoginId', form: 'call', line: 4, ctx: { recv: 'userDao' } },
+      { specifier: 'users', form: 'ddl-table', line: 5 },
+    ], { paths: [JAVA_SVC, 'BACK/src/main/java/com/a/service/user.java'] });
+    expect(edges).toStrictEqual([]);
+  });
+
+  test('라우트 없는 호출과 부르는 곳 없는 라우트를 이름 붙여 돌려준다', () => {
+    const input = {
+      paths: [FRONT, CTRL],
+      files: [
+        { path: FRONT, imports: [{ specifier: '/emotions/stats', form: 'http-get', line: 65 }] },
+        { path: CTRL, imports: [spec('/api/emotions', 'route-base'), { specifier: '/list', form: 'route-get', line: 30 }] },
+      ],
+    };
+    expect(httpMisses(input)).toStrictEqual([{ path: FRONT, line: 65, verb: 'GET', route: '/emotions/stats' }]);
+    expect(routeDecls(input.files)).toStrictEqual([{ path: CTRL, line: 30, route: 'GET /api/emotions/list' }]);
   });
 });

@@ -435,3 +435,101 @@ describe('증분 재파생', () => {
     expect(row.site_count).toBe(3);
   });
 });
+
+describe('메서드 줄기 · 스키마 · 죽은 갈래 (D168 · D169)', () => {
+  const FE = 'FRONT/src/services/authService.js';
+  const CTRL = 'BACK/src/main/java/com/a/controller/AuthController.java';
+  const SVC = 'BACK/src/main/java/com/a/service/AuthService.java';
+  const DDL = 'BACK/schema.sql';
+  const LOST = 'FRONT/src/services/emotionService.js';
+
+  /** 캡처 한 건 — 줄과 이름을 마음대로. `_imports`·`_blocks` 둘 다 이것으로 심는다. */
+  function cap(path: string, queryId: string, matchId: number, name: string, form: string | null,
+    line: number, excerpt: string, endLine = line, patternIndex = 0): void {
+    db.prepare(statements['facts.capture_insert']).run(toSqliteBindings({
+      repoId: 1, path, queryId, matchId, patternIndex, name, form, nodeKind: 'x', inError: false,
+      startByte: 0, endByte: excerpt.length, startLine: line, endLine, startCol: 0, endCol: excerpt.length, excerpt,
+    }));
+  }
+  const block = (path: string, id: number, name: string, from: number, to: number, form: string | null): void => {
+    cap(path, '_blocks', id, 'block.function', form, from, 'x', to);
+    cap(path, '_blocks', id, 'block.name', form, from, name);
+  };
+
+  function seed(): void {
+    for (const [i, path] of [FE, CTRL, SVC, DDL, LOST].entries()) {
+      db.prepare(statements['facts.file_upsert']).run(toSqliteBindings({
+        repoId: 1, path, lang: null, grammar: path.endsWith('.java') ? 'java' : path.endsWith('.sql') ? 'sql' : 'javascript',
+        lineCount: 20, byteSize: 100, contentHash: `h-${i}`, headOid: `h-${i}`, isDirty: false, parseQuality: 'ok',
+        skipReason: null, updatedAt: T,
+      }));
+    }
+    block(FE, 1, 'login', 3, 8, null);
+    cap(FE, '_imports', 1, 'import.source', 'http-post', 5, "'/auth/login'");
+    cap(CTRL, '_imports', 1, 'import.source', 'route-base', 2, '"/api/auth"');
+    cap(CTRL, '_imports', 2, 'import.source', 'route-post', 10, '"/login"', 10, 1);
+    block(CTRL, 1, 'login', 9, 12, 'method');
+    cap(CTRL, '_imports', 3, 'ctx.type', 'field', 4, 'AuthService', 4, 2);
+    cap(CTRL, '_imports', 3, 'import.source', 'field', 4, 'authService', 4, 2);
+    cap(CTRL, '_imports', 4, 'ctx.recv', 'call', 11, 'authService', 11, 3);
+    cap(CTRL, '_imports', 4, 'import.source', 'call', 11, 'login', 11, 3);
+    block(SVC, 1, 'login', 5, 9, 'method');
+    cap(DDL, '_imports', 1, 'import.source', 'ddl-table', 1, '`users`');
+    cap(DDL, '_imports', 2, 'ctx.table', 'ddl-column', 1, '`users`', 1, 1);
+    cap(DDL, '_imports', 2, 'ctx.type', 'ddl-column', 2, 'BIGINT', 2, 1);
+    cap(DDL, '_imports', 2, 'import.source', 'ddl-column', 2, '`user_id`', 2, 1);
+    cap(LOST, '_imports', 1, 'import.source', 'http-get', 1, "'/emotions/stats'");
+  }
+
+  test('요청 줄기가 메서드 단위로 저장된다 — 프론트 → 컨트롤러 메서드 → 서비스 메서드', async () => {
+    seed();
+    const out = await deriveRepo(dict, options);
+    expect(out.paths).toBe(1);
+    const rows = db.prepare(
+      `SELECT f.path, h.name, h.line_start, h.line_end, h.called_line, h.depth, h.kind
+         FROM request_hop h JOIN file f ON f.id = h.file_id ORDER BY h.ord`,
+    ).all() as { path: string; name: string; line_start: number; line_end: number; called_line: number | null; depth: number; kind: string | null }[];
+    expect(rows).toEqual([
+      { path: FE, name: 'login', line_start: 3, line_end: 8, called_line: null, depth: 0, kind: null },
+      { path: CTRL, name: 'login', line_start: 9, line_end: 12, called_line: 5, depth: 1, kind: 'http' },
+      { path: SVC, name: 'login', line_start: 5, line_end: 9, called_line: 11, depth: 2, kind: 'call' },
+    ]);
+    const head = db.prepare('SELECT label, hop_count, unit_id FROM request_path').get() as { label: string; hop_count: number; unit_id: number | null };
+    expect(head.label).toBe('POST /auth/login');
+    expect(head.hop_count).toBe(3);
+    expect(head.unit_id).not.toBeNull();
+  });
+
+  test('챕터가 「이 파일의 이 줄들만」을 읽는다 — 파일이 아니라 블록 범위다', async () => {
+    seed();
+    await deriveRepo(dict, options);
+    const unit = db.prepare(`SELECT id FROM unit WHERE name = 'auth'`).get() as { id: number };
+    const ranges = db.prepare(statements['path.ranges_by_unit']).all(toSqliteBindings({ unitId: unit.id })) as { path: string; line_start: number; line_end: number }[];
+    expect(ranges.map((r) => `${r.path.split('/').pop()}:${r.line_start}-${r.line_end}`)).toStrictEqual([
+      'AuthController.java:9-12', 'AuthService.java:5-9', 'authService.js:3-8',
+    ]);
+  });
+
+  test('DDL 이 표와 열로 남고, 라우트 없는 호출이 죽은 갈래로 남는다', async () => {
+    seed();
+    const out = await deriveRepo(dict, options);
+    expect(out.tables).toBe(1);
+    const cols = db.prepare('SELECT t.name AS t, c.name AS c, c.type FROM db_column c JOIN db_table t ON t.id = c.table_id').all();
+    expect(cols).toEqual([{ t: 'users', c: 'user_id', type: 'BIGINT' }]);
+    const dead = db.prepare(statements['path.dead_list']).all(toSqliteBindings({ repoId: 1 })) as { kind: string; path: string; label: string }[];
+    expect(dead.filter((d) => d.kind === 'unreached-call')).toEqual([
+      expect.objectContaining({ path: LOST, label: 'GET /emotions/stats' }),
+    ]);
+  });
+
+  test('다시 돌려도 줄기·표·갈래가 늘지 않는다 — 리포 단위로 지우고 다시 쓴다', async () => {
+    seed();
+    await deriveRepo(dict, options);
+    await deriveRepo(dict, options);
+    const n = (sql: string): number => (db.prepare(sql).get() as { n: number }).n;
+    expect(n('SELECT COUNT(*) AS n FROM request_path')).toBe(1);
+    expect(n('SELECT COUNT(*) AS n FROM request_hop')).toBe(3);
+    expect(n('SELECT COUNT(*) AS n FROM db_table')).toBe(1);
+    expect(n('SELECT COUNT(*) AS n FROM dead_branch WHERE kind = \'unreached-call\'')).toBe(1);
+  });
+});

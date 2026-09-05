@@ -55,3 +55,15 @@
    arguments: (arguments . [(string) (template_string)] @import.source))
  (#eq? @ctx.verb "delete") (#match? @import.source "^[\"'`]/")
  (#set! form "http-delete"))
+
+; ── 호출 그래프 (D168) ───────────────────────────────────────────────
+; `authStore.login(…)` → 수신자 + 이름. JS 는 수신자의 타입이 없으므로 TS(`calls.ts`)가
+; **이 파일이 import 한 파일들** 중 같은 이름의 블록을 찾고, 둘 이상이면 수신자 이름과 파일
+; 이름(`authStore` ↔ `authStore.js`)으로 가른다. `api.post("/…")` 도 여기 걸리지만 그 이름의
+; 블록이 없어 자연히 간선이 안 선다 — 이름으로 거르지 않는다.
+((call_expression
+   function: (member_expression object: (identifier) @ctx.recv property: (property_identifier) @import.source))
+ (#set! form "call"))
+; `helper()` · `confirm({…})` — 같은 파일이거나 이름으로 import 한 것.
+((call_expression function: (identifier) @import.source)
+ (#set! form "call-self"))

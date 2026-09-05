@@ -8,3 +8,4 @@ _imports · quality=ok · lines=8
 m1 p0 @import.source   form=static          string                 1:27-1:38 inError=false
 m2 p0 @import.source   form=static          string                 2:26-2:41 inError=false
 m3 p0 @import.source   form=static          string                 3:22-3:32 inError=false
+m4 p10 @import.source   form=call-self       identifier             6:9-6:18 inError=false

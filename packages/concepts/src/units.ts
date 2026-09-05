@@ -110,11 +110,24 @@ export interface FeatureUnit {
   files: string[];
 }
 
-/** `authService.js` → `auth`. 접미 `Service`·`Api`·`Client` 는 기능 이름이 아니다. */
+/**
+ * `authService.js` → `auth` · `CoinSchedulerService.java` → `coin`. 접미 `Service`·`Api`·`Client`·
+ * `Scheduler` 는 기능 이름이 아니라 층 이름이라 벗긴다(겹쳐 붙은 것도). 첫 글자는 소문자로 —
+ * 자바 파일에서 온 이름이 JS 에서 온 이름(`auth`·`dream`)과 같은 모양이어야 홈에서 한 줄로 선다.
+ */
 function featureName(entry: string): string {
   const base = (entry.split('/').pop() ?? '').replace(/\.[a-z]+$/, '');
-  return base.replace(/(Service|Api|Client)$/, '') || base;
+  let name = base;
+  for (let prev = ''; prev !== name;) {
+    prev = name;
+    name = name.replace(/(Service|Api|Client|Scheduler)$/, '');
+  }
+  name = name || base;
+  return name.charAt(0).toLowerCase() + name.slice(1);
 }
+
+/** HTTP 호출 말고 다른 문으로 들어오는 기능의 시작 파일 — `@Scheduled` 메서드가 있는 파일 (D168). */
+export interface EntrySeed { path: string }
 
 /**
  * **기능 = HTTP 진입점에서 도달하는 것** (D160).
@@ -132,12 +145,15 @@ function featureName(entry: string): string {
  * 13개가 그랬고(`UserDao` 는 로그인이자 회원정보다), 1:1 로 접으면 어느 쪽으로 접어도
  * 정보가 사라진다. `unit_file` 의 기본키가 `(unit_id, file_id)` 라 저장은 이미 N:M 이다.
  */
-export function entryUnits(edges: readonly ResolvedEdge[]): FeatureUnit[] {
+export function entryUnits(edges: readonly ResolvedEdge[], seeds: readonly EntrySeed[] = []): FeatureUnit[] {
   const out = new Map<string, string[]>();
   for (const e of edges) out.set(e.from, [...(out.get(e.from) ?? []), e.to]);
 
-  const entries = [...new Set(edges.filter((e) => e.kind === 'http').map((e) => e.from))];
-  const units = entries.map((entry) => {
+  const candidates = [...new Set([
+    ...edges.filter((e) => e.kind === 'http').map((e) => e.from),
+    ...seeds.map((s) => s.path),
+  ])].sort();
+  const closureOf = (entry: string): Set<string> => {
     const seen = new Set<string>([entry]);
     const stack = [entry];
     for (let at = stack.pop(); at !== undefined; at = stack.pop()) {
@@ -147,8 +163,23 @@ export function entryUnits(edges: readonly ResolvedEdge[]): FeatureUnit[] {
         stack.push(next);
       }
     }
-    return { name: featureName(entry), entry, files: [...seen].sort() };
+    return seen;
+  };
+  const closures = new Map(candidates.map((c) => [c, closureOf(c)]));
+  // **다른 진입점에서 닿는 후보는 진입점이 아니다** (D168). 서버가 서버를 부르는 자리
+  // (`FortuneService.java` → FastAPI)도 HTTP 호출이지만, 그 파일은 프론트의 `fortuneService.js`
+  // 에서 이미 닿는다 — 자기 대지를 세우면 같은 기능이 둘로 갈린다. 서로 닿으면 큰 쪽이 남는다.
+  const dominated = (c: string): boolean => candidates.some((d) => {
+    if (d === c || !(closures.get(d) as Set<string>).has(c)) return false;
+    const back = (closures.get(c) as Set<string>).has(d);
+    if (!back) return true;
+    const dc = (closures.get(d) as Set<string>).size - (closures.get(c) as Set<string>).size;
+    return dc > 0 || (dc === 0 && d < c);
   });
+  const entries = candidates.filter((c) => !dominated(c));
+  const units = entries.map((entry) => ({
+    name: featureName(entry), entry, files: [...(closures.get(entry) as Set<string>)].sort(),
+  }));
   // 위로 한 단 (D163). 폐포는 진입점에서 **아래로만** 가는데, 기능의 일부인데 위쪽에 있는
   // 것이 있다 — Spring 필터 체인이 그렇다(`JwtAuthenticationFilter` 가 `JwtUtil` 을 쓴다).
   //
@@ -180,6 +211,8 @@ export function entryUnits(edges: readonly ResolvedEdge[]): FeatureUnit[] {
 export interface PlanOptions {
   /** `proto/` 개념의 근거 낱말. 1번 챕터를 사전이 고르는 데 쓴다 (D162). */
   protoMarks?: readonly string[];
+  /** HTTP 말고 다른 문 — `@Scheduled` 가 있는 파일 (D168). */
+  entries?: readonly EntrySeed[];
 }
 
 /** 기능 대지와 디렉터리 대지를 합친 것 (D160). */
@@ -217,7 +250,7 @@ export function planUnits(
   // 이름에 안 드러나는 리포에서는 아무것도 안 걸리고 규칙(새로 여는 파일 적은 순)이 정한다.
   const hits = new Map<string, number>();
   const marks = opts.protoMarks ?? [];
-  const features = entryUnits(edges);
+  const features = entryUnits(edges, opts.entries ?? []);
   if (marks.length > 0) {
     for (const u of features) {
       for (const f of u.files) {

@@ -8,7 +8,7 @@ import { OTHER_UNIT, entryUnits, planUnits } from './units.js';
 
 describe('기능 대지 — HTTP 진입점에서 도달하는 것 (D160)', () => {
   const edge = (from: string, to: string, kind: 'static' | 'http' = 'static') =>
-    ({ from, to, kind, confidence: 'syntactic' as const });
+    ({ from, to, kind, confidence: 'syntactic' as const, line: 1 });
 
   const FE = 'FRONT/src/services/authService.js';
   const CTRL = 'BACK/src/main/java/com/ssafy/app/controller/AuthController.java';
@@ -59,7 +59,7 @@ describe('기능 대지 — HTTP 진입점에서 도달하는 것 (D160)', () =>
 
 describe('기능 + 디렉터리 합치기 (D160)', () => {
   const edge = (from: string, to: string, kind: 'static' | 'http' = 'static') =>
-    ({ from, to, kind, confidence: 'syntactic' as const });
+    ({ from, to, kind, confidence: 'syntactic' as const, line: 1 });
   const FE = 'FRONT/src/services/authService.js';
   const CTRL = 'BACK/src/main/java/com/ssafy/app/controller/AuthController.java';
   const SVC = 'BACK/src/main/java/com/ssafy/app/service/AuthService.java';
@@ -100,7 +100,7 @@ describe('기능 + 디렉터리 합치기 (D160)', () => {
 
 describe('위로 한 단 (D163)', () => {
   const edge = (from: string, to: string, kind: 'static' | 'http' = 'static') =>
-    ({ from, to, kind, confidence: 'syntactic' as const });
+    ({ from, to, kind, confidence: 'syntactic' as const, line: 1 });
   const FE = 'FRONT/src/services/authService.js';
   const CTRL = 'BACK/controller/AuthController.java';
   const JWT = 'BACK/security/JwtUtil.java';
@@ -135,7 +135,7 @@ describe('위로 한 단 (D163)', () => {
 
 describe('코스 순서와 origin (D162)', () => {
   const edge = (from: string, to: string, kind: 'static' | 'http' = 'static') =>
-    ({ from, to, kind, confidence: 'syntactic' as const });
+    ({ from, to, kind, confidence: 'syntactic' as const, line: 1 });
 
   test('기능은 origin=entry · 나머지는 dir', () => {
     const FE = 'FRONT/src/services/authService.js';
@@ -169,5 +169,34 @@ describe('코스 순서와 origin (D162)', () => {
       { protoMarks: ['없는낱말'] },
     );
     expect(units[0]?.name).toBe('b');
+  });
+});
+
+describe('진입점 넓히기 (D168)', () => {
+  const FE = 'FRONT/src/services/fortuneService.js';
+  const CTRL = 'BACK/src/main/java/com/a/controller/FortuneController.java';
+  const SVC = 'BACK/src/main/java/com/a/service/FortuneService.java';
+  const PY = 'AI_API/main.py';
+  const SCHED = 'BACK/src/main/java/com/a/service/CoinSchedulerService.java';
+  const DAO = 'BACK/src/main/java/com/a/model/dao/UserDao.java';
+  const edge = (from: string, to: string, kind: 'static' | 'http' = 'static') =>
+    ({ from, to, kind, confidence: 'syntactic' as const, line: 1 });
+
+  test('서버가 서버를 부르는 자리는 진입점이 아니다 — 프론트 진입점에서 이미 닿는다', () => {
+    const units = entryUnits([edge(FE, CTRL, 'http'), edge(CTRL, SVC), edge(SVC, PY, 'http')]);
+    expect(units.map((u) => `${u.name}:${u.files.length}`)).toStrictEqual(['fortune:4']);
+  });
+
+  test('`@Scheduled` 파일은 HTTP 없이도 기능이다 — 이름은 층 접미를 벗기고 소문자로', () => {
+    const units = entryUnits([edge(SCHED, DAO)], [{ path: SCHED }]);
+    expect(units.map((u) => `${u.name}:${u.entry}`)).toStrictEqual([`coin:${SCHED}`]);
+  });
+
+  test('서로 닿는 두 진입점은 큰 쪽이 남는다', () => {
+    const a = 'FRONT/src/services/aService.js';
+    const b = 'FRONT/src/services/bService.js';
+    const extra = 'FRONT/src/x.js';
+    const units = entryUnits([edge(a, CTRL, 'http'), edge(b, CTRL, 'http'), edge(a, b), edge(b, a), edge(a, extra)]);
+    expect(units.map((u) => u.name)).toStrictEqual(['a']);
   });
 });

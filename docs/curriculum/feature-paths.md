@@ -179,6 +179,26 @@ Django 리포라면 티어 A 전부 + 파이썬 import 그래프까지 되고, H
 **첫 조각은 1+2 다** — 그것만 되면 이 리포에서 로그인 경로가 실제로 그려지는지 눈으로 본다.
 안 그려지면 나머지 넷을 짓기 전에 알게 된다.
 
+### 7.1 그 뒤 — 메서드 단위와 스키마 (D168 · D169)
+
+위 여섯 중 1·2·4·5 가 서고 나서 잰 것: 파일 간선만으로는 줄기의 **둘째 칸부터** 로그인과 회원가입이 같았고
+줄 번호는 `import` 줄이었다. 그래서 캡처를 한 층 더 내렸다 — `_imports.scm` 이 호출(수신자 + 이름)·
+필드 타입·`@Scheduled`·`.uri("…")` 를 내보내고, `calls.ts` 가 블록 단위 호출 그래프를, `methodPaths`
+가 화면 핸들러에서 매퍼 문까지의 줄기를 세운다. 실측(`MonggleMonggle`):
+
+| 무엇 | 값 |
+|---|---|
+| 호출 그래프 | 블록 794 · 간선 630 (호출 549 · HTTP 39 · 매퍼 42) |
+| 로그인 등뼈 | `LandingView.vue#handleSubmit → authStore.js#login → authService.js#login → AuthController.java#login → AuthService.java#login → UserDao.java#findByLoginId → UserMapper.xml#findByLoginId` (7칸) |
+| 회원가입 | 첫 칸부터 다른 줄기 — `#signup` 으로 갈린다 |
+| FastAPI | `FortuneController → FortuneService → main.py#get_comprehensive_fortune → comprehensive_service.py …` (서버가 서버를 부르는 자리가 이어진다) |
+| 진입점 | HTTP 39 + `@Scheduled` 1(`coin` 챕터). 서버→서버 호출 파일은 진입점이 아니다 |
+| 스키마 | 표 9 · 외래키 10 · 열↔필드 74 (표까지 붙은 것 66) — 덤프 사본 셋 중 `BACK/dream_DB.sql` 하나가 정본 |
+| 죽은 갈래 | 라우트 없는 호출 2(`GET /emotions/stats` 포함) · 부르는 곳 없는 라우트 4 · 호출 0 인 함수 31(후보) · 고아 파일 1 |
+
+`.vue` 의 `<script setup>` 이 `'<svg>…</path>'` 문자열의 `</` 에서 끊기던 것을 고치고 나서야 화면 핸들러가
+줄기에 들어왔다 — 그 전에는 `LandingView.vue` 1,527줄 중 로그인 핸들러(467~515)가 아예 안 읽혔다.
+
 ---
 
 ## 8. 정본에 요구하는 것 (사용자가 고친다)
