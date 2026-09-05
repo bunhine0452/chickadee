@@ -6,7 +6,7 @@
  * 불변 규칙이고, 조사 하드코딩은 값이 무엇인지 모르는 채로 반드시 틀린다 (03 §4.3).
  */
 import { mapProse } from './prose.js';
-import { koOf, type LangMeta, type Locale, type SourceConcept } from './schema.js';
+import { isLinkedGrammar, koOf, type LangMeta, type Locale, type SourceConcept } from './schema.js';
 import { keyOf, type Dict } from './load.js';
 
 export interface LintIssue {
@@ -83,6 +83,24 @@ function checkLang(lang: string, meta: LangMeta, dict: Dict, issues: LintIssue[]
       if (!dict.queries.has(keyOf(id, grammar))) add('system-query', `${grammar}/${id}.scm 이 없다`);
     }
   }
+  for (const grammar of meta.grammars) checkLinked(grammar, add);
+}
+
+/**
+ * 파서가 없는 문법을 조용히 통과시키지 않는다 (D187 ⑨).
+ *
+ * `grammarSchema` 는 **이름의 규약**(D19)이라 아직 안 링크된 문법도 받는다. 그래서
+ * `_lang.yaml` 에 `grammars: [c_sharp]` 를 적으면 스키마도 로드도 통과하고 **캡처만 0곳**이
+ * 되는데, 0곳은 「사용처가 없는 리포」와 화면에서 구별되지 않는다. 세는 자리가 없으니
+ * 아무 데서도 안 터지고, 그 상태로 사전 한 벌을 다 쓰게 된다.
+ */
+function checkLinked(grammar: string, add: (rule: string, detail: string) => void): void {
+  if (isLinkedGrammar(grammar)) return;
+  add(
+    'grammar-not-linked',
+    `${grammar}: 문법이 이 빌드에 안 링크돼 있다 — 캡처가 0곳이다.`
+      + ' crates/parse/Cargo.toml 과 langs.rs 에 먼저 넣고 schema.ts 의 GRAMMARS 를 true 로 올려라',
+  );
 }
 
 function checkConcept(concept: SourceConcept, dict: Dict, issues: LintIssue[]): void {
@@ -95,11 +113,22 @@ function checkConcept(concept: SourceConcept, dict: Dict, issues: LintIssue[]): 
   if (concept.universal !== null && !dict.sources.has(concept.universal)) {
     add('reference-exists', concept.universal);
   }
+  // 쪼개진 개념 (D187 ④). 가리키는 곳이 있어야 하고, 자기 자신이면 안 되고, 대체본이 또
+  // 대체됐으면 안 된다 — 사슬이 되면 「새 참조는 무엇을 쓰나」가 한 번에 안 읽힌다.
+  for (const ref of concept.superseded_by) {
+    if (!dict.sources.has(ref)) add('reference-exists', ref);
+    else if (ref === concept.id) add('superseded-target', '자기 자신을 가리킨다');
+    else if ((dict.sources.get(ref)?.superseded_by.length ?? 0) > 0) {
+      add('superseded-target', `${ref} 도 쪼개진 개념이다`);
+    }
+  }
   for (const grammar of concept.grammars) {
     if (concept.queries.length > 0 && !dict.queries.has(keyOf(concept.id, grammar))) {
       add('query-for-grammar', grammar);
     }
   }
+  const named = new Set<string>([...concept.grammars, ...concept.queries.flatMap((q) => q.grammars)]);
+  for (const grammar of named) checkLinked(grammar, add);
 
   const { picks, hasHole, ctxNames } = queryFacts(concept, dict);
 

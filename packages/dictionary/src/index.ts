@@ -5,9 +5,9 @@ export { ALLOWED_TAGS, authoringDebt, debtTable, lintDict, revealsToken } from '
 export type { DebtCheck, LintIssue } from './lint.js';
 export { resolveConcept, resolveLangMeta } from './resolve.js';
 export {
-  SUPPORTED_SCHEMA, blankSchema, conceptIdSchema, conceptSchema, conceptSourceSchema,
-  grammarSchema, isLocalized, kindOf, koOf, langMetaSchema, langMetaSourceSchema, langOf,
-  localizedSchema, meaningSchema, pointSchema, textOf, whyGateSchema,
+  GRAMMARS, SUPPORTED_SCHEMA, UNLINKED_GRAMMARS, blankSchema, conceptIdSchema, conceptSchema,
+  conceptSourceSchema, grammarSchema, isLinkedGrammar, isLocalized, kindOf, koOf, langMetaSchema,
+  langMetaSourceSchema, langOf, localizedSchema, meaningSchema, pointSchema, textOf, whyGateSchema,
 } from './schema.js';
 export type {
   Concept, Grammar, LangMeta, Locale, Localized, SourceConcept, SourceLangMeta,

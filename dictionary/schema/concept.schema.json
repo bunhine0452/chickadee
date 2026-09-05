@@ -26,6 +26,13 @@
           ],
           "default": null
         },
+        "superseded_by": {
+          "type": "array",
+          "items": {
+            "$ref": "#/properties/id"
+          },
+          "default": []
+        },
         "name": {
           "type": "object",
           "properties": {
@@ -65,18 +72,18 @@
               "python",
               "go",
               "rust",
-              "swift",
-              "dart",
               "sql",
-              "c",
-              "cpp",
               "java",
-              "c_sharp",
               "vue",
               "xml",
               "mybatis_sql",
               "css",
-              "vue_style"
+              "vue_style",
+              "swift",
+              "dart",
+              "c",
+              "cpp",
+              "c_sharp"
             ]
           },
           "default": []
@@ -546,18 +553,18 @@
               "python",
               "go",
               "rust",
-              "swift",
-              "dart",
               "sql",
-              "c",
-              "cpp",
               "java",
-              "c_sharp",
               "vue",
               "xml",
               "mybatis_sql",
               "css",
-              "vue_style"
+              "vue_style",
+              "swift",
+              "dart",
+              "c",
+              "cpp",
+              "c_sharp"
             ]
           },
           "minItems": 1
@@ -577,18 +584,18 @@
               "python",
               "go",
               "rust",
-              "swift",
-              "dart",
               "sql",
-              "c",
-              "cpp",
               "java",
-              "c_sharp",
               "vue",
               "xml",
               "mybatis_sql",
               "css",
-              "vue_style"
+              "vue_style",
+              "swift",
+              "dart",
+              "c",
+              "cpp",
+              "c_sharp"
             ]
           }
         },
@@ -609,18 +616,18 @@
               "python",
               "go",
               "rust",
-              "swift",
-              "dart",
               "sql",
-              "c",
-              "cpp",
               "java",
-              "c_sharp",
               "vue",
               "xml",
               "mybatis_sql",
               "css",
-              "vue_style"
+              "vue_style",
+              "swift",
+              "dart",
+              "c",
+              "cpp",
+              "c_sharp"
             ]
           }
         },

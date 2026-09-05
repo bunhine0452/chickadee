@@ -336,7 +336,7 @@ D157 의 근거가 「언어별로 두면 같은 개념을 열 번 배운다」�
 | `cs/transaction-isolation` | 도중에 남이 보면 무엇이 보이나 / Transaction isolation | 심화 | race-condition | sql | 경쟁 조건의 데이터베이스판. 「전부 되거나 전부 안 되거나」 |
 | `cs/bounds` | 끝을 넘어 읽으면 / Bounds | 중심 | contiguous-vs-linked · memory-address | c | 경계를 언어가 검사하는지 안 하는지. 검사 안 하면 남의 값이 읽히고 그것이 조용하다 |
 
-**총 43개** (기초 11 · 중심 18 · 심화 14).
+**총 43개** (기초 11 · 중심 18 · 심화 14). §10.5 의 둘을 더해 **실물은 45장**이다(§11).
 
 ### 10.3 안 받은 것과 그 이유
 
@@ -351,6 +351,20 @@ D157 의 근거가 「언어별로 두면 같은 개념을 열 번 배운다」�
 | `cs/static-vs-dynamic-dispatch` | rs | `cs/dynamic-dispatch` 로 받았다(둘을 한 개념의 두 끝으로 본다) |
 | `cs/contiguous-array` | go | `cs/contiguous-vs-linked` 와 같다 |
 
+### 10.5 0부가 낸 신규 후보 셋 — **둘 신설, 하나는 `common/` 으로** (D187 ⑤·⑥)
+
+[`README.md`](./README.md) §9 가 0부 여덟 축을 43장에 대 보고 **축 5(연산자)·축 6(형 변환)에
+답할 장이 없다**고 적으며 후보 셋을 냈다. 판정은 §10.3 과 같은 기준 — 「기계의 성질인가,
+언어가 고른 규칙인가」 — 이고, 그래서 셋이 둘과 하나로 갈렸다.
+
+| 후보 | 판정 | 근거 |
+|---|---|---|
+| `cs/operator-precedence` | **신설** | 세기와 방향은 식을 나무로 접는 규칙이고, 산술 식의 이 부분은 열 언어가 같다(`2 + 3 * 4` = 14). 평가 트리 그림(`EvalTree` · `diagrams.md` §3)이 「왜 이 모양인가」를 물을 개념이 없어 그림만 있고 개념이 없었다 |
+| `cs/type-conversion` | **신설** | 넓힘·좁힘·암묵·명시 넷은 타입을 가진 모든 언어에서 같은 축이다. `cs/type` 은 「타입이 무엇인가」, `cs/static-vs-dynamic-typing` 은 「언제 확인하나」라 **다른 타입 둘이 만났을 때**를 답하는 장이 없었다. 타입 변환 사다리(`diagrams.md` §3 신규 4)의 뒷받침이 통째로 이 장이다 |
+| `cs/truthiness` | **안 받는다 — `common/truthiness` 로** | §10.3 이 `cs/null-terminated-string` 을 되돌린 기준 그대로다. 「무엇이 참으로 쳐지나」는 기계가 정하지 않는다 — 파이썬은 `if []` 에 안 들어가고, 자바스크립트는 `if ([])` 에 **들어가며**, 자바는 컴파일을 멈춘다. 셋이 같은 기계 위에서 다른 답을 내면 그것은 **언어 설계**다 |
+
+`cs/search-tree` 는 §10.3 의 **보류가 그대로다** — 0부가 안 쓰므로 이 판에서도 안 정한다.
+
 ### 10.4 SQL 이 가장 적게 물려받고 가장 많이 보탠다
 
 SQL 의 `common/` 재사용은 **10/30(33%)** 으로 열 중 최저다(최고는 C# 27/30). 문법 층에서는 거의
@@ -362,10 +376,15 @@ SQL 의 `common/` 재사용은 **10/30(33%)** 으로 열 중 최저다(최고는
 
 ---
 
-## 11. 실물 — 43장이 났다 (D167)
+## 11. 실물 — 43장이 났고 45장이 됐다 (D167 · D187 ⑥)
 
-`dictionary/cs/<id>.yaml` **43장**을 냈다. §3~§5 의 33 + §10.2 의 10 이고, §10.3 이 보류로 적은
-`cs/search-tree` 는 안 만들었다.
+`dictionary/cs/<id>.yaml` **45장**이 있다. 처음 낸 43장(§3~§5 의 33 + §10.2 의 10)에
+§10.5 의 둘(`operator-precedence` · `type-conversion`)이 2026-09-05 에 더해졌다.
+§10.3 이 보류로 적은 `cs/search-tree` 는 안 만들었다.
+
+`dict.test.ts` 의 「cs/ 개념은 전부 exec/ 와 같은 껍데기다」가 **45장 전량**에 껍데기 여섯을
+건다 — 새 둘도 `universal: null` · `grammars: []` · `queries: []` · `track_default: t0` ·
+`essential: false` · `confusions: []` 이고 문항은 뜻 고르기 하나뿐이다.
 
 ### 11.1 껍데기 — `exec/order.yaml` 을 그대로
 
@@ -374,7 +393,8 @@ universal: null      grammars: []      queries: []
 track_default: t0    essential: false  confusions: []
 ```
 
-`dict.test.ts` 의 「cs/ 개념은 전부 exec/ 와 같은 껍데기다」가 43장 전량에 이 여섯을 건다.
+`dict.test.ts` 의 「cs/ 개념은 전부 exec/ 와 같은 껍데기다」가 **45장** 전량에 이 여섯을 건다
+(래칫도 43 → 45 로 올렸다).
 `COMPUTED_NAMESPACES` 는 D159 가 `proto/` 를 넣으면서 이미 넷을 다섯으로 늘려 뒀고(`schema.ts:54`),
 `isComputed` 하나를 린트·부채·시험이 함께 읽는다 — §7 이 요구한 「접두어를 상수 하나로」가 그 자리다.
 `dictionary/schema/concept.schema.json` 은 재생성해도 **한 글자도 안 바뀐다.**
@@ -404,6 +424,7 @@ track_default: t0    essential: false  confusions: []
 | `ts/for-of` · `ts/array-method-chain` · `py/while-loop` | `complexity` |
 | `ts/async-await` · `ts/promise-then` | `blocking-and-async` |
 | `ts/arithmetic` · `py/arithmetic` | `floating-point` |
+| `py/arithmetic` | `operator-precedence` · `type-conversion` (D187 ⑥ · 2026-09-05) |
 | `ts/comparison` · `py/comparison` | `identity-vs-equality` |
 | `ts/call-expression` · `py/function-definition` | `call-stack` |
 | `ts/function-declaration` · `py/function-definition` | `abstraction` |
@@ -426,8 +447,9 @@ C·Rust·SQL 사전이 들어오면 그쪽에서 간선이 선다. 지금 사전
 
 ### 11.4 재 본 것
 
-- **43장 전량이 뜻 고르기 판으로 나온다 — 드롭 0.** 빌린 창을 손에 쥔 상태를 지어서
-  `genMeaning` 에 넣었다(`t0-proto.test.ts`). 보기 넷 · 진단 셋이 43장에서 다 성립한다.
+- **전량이 뜻 고르기 판으로 나온다 — 드롭 0.** 빌린 창을 손에 쥔 상태를 지어서
+  `genMeaning` 에 넣었다(`t0-proto.test.ts`). 보기 넷 · 진단 셋이 전량에서 성립한다 —
+  처음엔 43장이었고, 2026-09-05 에 더한 둘도 같은 껍데기·같은 문항 구성이라 같은 시험을 탄다.
 - **큐 후보에 든다.** `siteCount: 0` 인 `cs/*` 가 D154 가지를 그대로 통과하고 같은 깊이의
   어휘 개념 **뒤에** 선다(`new-rank.test.ts`). 큐 SQL 도 순위 규칙도 안 고쳤다.
 - **0장 후보 수는 안 변한다.** `zero-chapter.test.ts` 의 깊이는 `essential` 안에서만 세므로
@@ -443,4 +465,5 @@ C·Rust·SQL 사전이 들어오면 그쪽에서 간선이 선다. 지금 사전
 2. **겹 귀속**(§9-2) — 빌린 창에서 푼 판의 겹이 `cs/` 에 쌓이나 언어 개념에 쌓이나.
 3. **0장 배분**(§9-3) — §11.4 대로 아직 안 걸렸으니 재는 것이 먼저다.
 4. §10.2 의 단계별 수(기초 11 · 중심 18 · 심화 14)는 실물과 한 장씩 어긋난다 —
-   실물은 **기초 11 · 중심 17 · 심화 15** 다. 총계 43은 같다.
+   실물은 **기초 11 · 중심 17 · 심화 15** 였다. 여기에 §10.5 의 둘(둘 다 중심)이 붙어
+   지금은 **기초 11 · 중심 19 · 심화 15 = 45** 다.

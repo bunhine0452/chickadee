@@ -110,6 +110,51 @@ describe('언어별 검사 (D118)', () => {
   });
 });
 
+describe('파서 없는 문법 (D187 ⑨)', () => {
+  /** C# 사전을 흉내 낸다 — 이름은 스키마에 있고 크레이트는 없다. */
+  const csharpLang = (): LangMeta => langMetaSchema.parse({
+    lang: 'csharp',
+    version: '0.0.0',
+    grammars: ['c_sharp'],
+    grammar_abi: { c_sharp: 15 },
+    extensions: { c_sharp: ['.cs'] },
+    thin_threshold: { min_files: 1, min_sites: 1, small_repo_files: 1 },
+    diag_default: { point: '짚은 자리', blank: '넣은 것' },
+    essential: [],
+  });
+
+  test('_lang.yaml 이 안 링크된 문법을 걸면 오류다 — 로드는 통과하고 캡처만 0곳이 되던 자리', () => {
+    const issues = lintDict({
+      locale: 'ko',
+      langs: new Map([['csharp', csharpLang()]]),
+      concepts: new Map(),
+      sources: new Map(),
+      queries: new Map([['_imports::c_sharp', ''], ['_blocks::c_sharp', '']]),
+      problems: [],
+    });
+    const hit = issues.find((i) => i.rule === 'grammar-not-linked');
+    expect(hit?.at).toBe('csharp');
+    expect(hit?.detail).toContain('c_sharp');
+  });
+
+  test('개념이 안 링크된 문법에 쿼리를 걸어도 오류다', () => {
+    const concept = conceptWith({
+      id: 'csharp/assignment',
+      grammars: ['c_sharp'],
+      queries: [{ grammars: ['c_sharp'], file: 'assignment.scm' }],
+    });
+    const issues = lintDict({
+      ...dictOf(concept),
+      queries: new Map([['csharp/assignment::c_sharp', '(identifier) @site']]),
+    });
+    expect(issues.filter((i) => i.rule === 'grammar-not-linked')).toHaveLength(1);
+  });
+
+  test('링크된 문법은 안 걸린다', () => {
+    expect(rulesOf(conceptWith({ grammars: ['typescript'] }))).not.toContain('grammar-not-linked');
+  });
+});
+
 describe('사전 저작 부채 (D145)', () => {
   /** `essential` 하나짜리 언어. 부채 표는 `_lang.yaml` 을 봐야 대상이 정해진다. */
   const langWith = (essential: string[]): LangMeta => langMetaSchema.parse({

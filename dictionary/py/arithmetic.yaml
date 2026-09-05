@@ -7,7 +7,10 @@ grammars: [python]
 framework: null
 essential: true
 difficulty: 1
-prereq: [cs/floating-point]
+# `cs/operator-precedence` 는 `2 + 3 * 4` 가 접히는 순서를, `cs/type-conversion` 은 파이썬의
+# `/` 가 정수 둘에서도 소수를 내는 이유(암묵 넓힘)를 댄다 — 둘 다 D187 ⑥ 의 신설이고
+# 이 개념이 그 둘에 창을 빌려 준다 (D157 ②).
+prereq: [cs/floating-point, cs/operator-precedence, cs/type-conversion]
 # 빈칸 오답(== · = · and)이 개념으로 없거나 토큰이 안 맞아 혼동 쌍으로 못 묶는다.
 confusions: []
 
@@ -188,9 +191,24 @@ examples:
     expect: { sites: 1, form: arith, hole: "+", picks: { 1: "+", 2: "price", 3: "shipping" } }
   - code: "half = total / 2"
     expect: { sites: 1, form: arith, hole: "/", picks: { 1: "/", 2: "total", 3: "2" } }
+  # 오른쪽이 계산 결과면 나누기를 잡는다 — 평균이 그 자리다.
+  - code: "avg = sum(xs) / len(xs)"
+    expect: { sites: 1, form: arith, hole: "/", picks: { 1: "/", 2: "sum(xs)", 3: "len(xs)" } }
   - code: "same = a == b"
     expect: none
   # `//` 를 일부러 안 잡는다 — 이 개념의 규칙(「나누기는 늘 소수를 낸다」)이 몫 나누기에서
   # 거짓이 되기 때문이다. 쿼리에서 빼는 결정을 여기서 못박는다 (`assignment` 의 `obj.attr` 과 같은 자리).
   - code: "pages = total // size"
+    expect: none
+  # 아래 다섯이 2026-09-05 에 더한 음성이다. 셋은 `binary_operator` 인데 셈이 아니고
+  # (경로 결합·이어붙이기·되풀이·서식), 그 넷이 사용자 리포 실측 오검출의 전부였다.
+  - code: 'settings = base / "config.json"'
+    expect: none
+  - code: "log = root / name"
+    expect: none
+  - code: 'greeting = "hi " + name'
+    expect: none
+  - code: 'bar = "-" * 40'
+    expect: none
+  - code: 'label = "%s" % name'
     expect: none

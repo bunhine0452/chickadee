@@ -1,0 +1,94 @@
+schema: 1
+id: common/float-literal
+universal: null
+name: { ko: 소수 값, en: "Decimal value" }
+token: null
+grammars: []
+essential: false
+difficulty: 1
+confusions: [common/integer-literal]
+queries: []
+dict:
+  one_liner:
+    ko: "소수점을 찍어 적은 값. 담기는 순간 대개 근사값이 된다."
+    en: "A value written with a decimal point. Storing it usually makes it approximate."
+  why:
+    ko: >-
+      소수는 정수와 <b>담기는 방식이 다릅니다</b>. 자릿수를 늘리는 것이 아니라 「몇 자리에서
+      소수점이 몇 칸 움직인다」로 나눠 담아요. 그래서 두 자리 체계로 정확히 못 적는 값이 생깁니다 —
+      <code>0.1</code> 이 그런 값이고, <code>0.1 + 0.2</code> 는
+      <code>0.30000000000000004</code> 가 됩니다. 오류가 아니라 담을 때 이미 어긋난 것이에요.
+      대신 정수와 달리 <b>끝이 없습니다</b> — 넘치면 뒤집히는 게 아니라 <code>inf</code> 가 되고,
+      대신 <b>정밀도</b>를 잃어 <code>0.1 + 0.2 == 0.3</code> 이 거짓이 됩니다.
+    en: >-
+      A decimal is <b>stored differently</b> from a whole number. Instead of widening the slots it
+      splits the value into digits plus how far the point moves. Some values then cannot be written
+      exactly in base two — <code>0.1</code> is one, and <code>0.1 + 0.2</code> comes out
+      <code>0.30000000000000004</code>. Nothing broke; it was already off when stored. Unlike whole
+      numbers there is <b>no wrap</b> — overflow becomes <code>inf</code> — but you pay in
+      <b>precision</b>, which is why <code>0.1 + 0.2 == 0.3</code> is false.
+  trace: []
+rule:
+  ko: "<b>소수는 담는 순간 근사값이다.</b> 같은지를 묻지 말고 얼마나 가까운지를 묻는다."
+  en: "<b>A decimal is approximate the moment it is stored.</b> Ask how close, not whether equal."
+ok:
+  ko: >-
+    소수점이 있는 값은 근사로 담깁니다. 돈처럼 정확해야 하는 자리는 정수로 세거나 십진 전용
+    타입을 씁니다.
+  en: >-
+    A value with a decimal point is stored approximately. Where exactness matters — money — count in
+    whole numbers or use a decimal type.
+misconceptions:
+  - ko: "소수는 전부 부정확하다 — 0.5 와 0.25 는 정확히 담깁니다. 두 자리 체계로 떨어지는 값이라서요."
+    en: "All decimals are inexact — 0.5 and 0.25 store exactly, because base two divides them evenly."
+  - ko: "반올림해서 보여 주면 값도 정리된다 — 보이는 글자만 바뀌고 담긴 값은 그대로입니다."
+    en: "Rounding the display tidies the value — only the shown digits change; the stored value stays."
+  - ko: "정수처럼 넘치면 뒤집힌다 — 소수는 뒤집히지 않고 inf 가 됩니다."
+    en: "It wraps like a whole number on overflow — a decimal does not wrap; it becomes inf."
+meaning:
+  - q:
+      ko: "<code>0.1 + 0.2 == 0.3</code> 이 거짓으로 나옵니다. <b>어디서 어긋났을까요?</b>"
+      en: "<code>0.1 + 0.2 == 0.3</code> comes out false. <b>Where did it drift?</b>"
+    hint:
+      ko: "더하기 전에 이미 무슨 일이 있었는지 보세요."
+      en: "Look at what already happened before the addition."
+    options:
+      - t:
+          ko: "0.1 과 0.2 를 담는 순간 이미 아주 조금 다른 값이었다"
+          en: "0.1 and 0.2 were already slightly off the moment they were stored"
+      - t:
+          ko: "더하는 계산에서 자릿수가 밀렸다"
+          en: "The addition shifted a digit"
+        diag:
+          t:
+            ko: "덧셈은 <b>담긴 두 값을 정확히</b> 더합니다. 어긋남은 그 앞, 담을 때 생겼어요."
+            en: "The addition adds <b>the two stored values exactly</b>. The drift came earlier, at storage."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 담을 때냐 더할 때냐", en: "The sharpest spot — storing or adding" }
+            code:
+              - "0.1 만 담아 봐도    → 0.1000000000000000055…"
+              - "더하기는 그 뒤의 일이다"
+      - t:
+          ko: "비교 기호가 소수를 못 다룬다"
+          en: "The comparison symbol cannot handle decimals"
+        diag:
+          t:
+            ko: "비교는 <b>담긴 값 그대로</b>를 봅니다. 값이 다르니 다르다고 답한 것이에요."
+            en: "The comparison looks at the <b>stored values as they are</b>. They differ, so it said so."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 비교냐 담긴 값이냐", en: "The sharpest spot — the comparison or the value" }
+            code:
+              - "0.1 + 0.2  → 0.30000000000000004"
+              - "0.3        → 0.29999999999999998…"
+      - t:
+          ko: "자릿수가 넘쳐서 뒤집혔다"
+          en: "It overflowed and wrapped"
+        diag:
+          t:
+            ko: "소수는 <b>뒤집히지 않습니다</b>. 넘치면 <code>inf</code> 가 되고, 여기서는 넘치지도 않았어요."
+            en: "A decimal <b>does not wrap</b>. Overflow gives <code>inf</code>, and nothing overflowed here."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 넘침이냐 정밀도냐", en: "The sharpest spot — overflow or precision" }
+            code:
+              - "넘침:   1e308 * 10 → inf"
+              - "정밀도: 0.1 + 0.2  → 0.30000000000000004"

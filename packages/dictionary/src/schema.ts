@@ -24,22 +24,62 @@ export const SUPPORTED_SCHEMA = [1] as const;
  */
 export type Locale = 'ko' | 'en';
 
-/** tree-sitter 문법 키 (D19). 사전 네임스페이스 `lang` 과 다른 축이다. */
-export const grammarSchema = z.enum([
-  'typescript', 'tsx', 'javascript', 'python', 'go', 'rust', 'swift', 'dart', 'sql',
+/**
+ * tree-sitter 문법 키 (D19) → **이 빌드에 파서가 링크돼 있나.** 사전 네임스페이스 `lang` 과
+ * 다른 축이다.
+ *
+ * 값이 `false` 인 것은 **이름만 있고 파서가 없다**. 사전이 그 문법을 걸면 스키마도 린트도
+ * 통과하는데 캡처가 **0곳**이고, 사용처가 0이면 카드가 안 구워진다 — 「곧 됩니다」가 아니라
+ * 그 언어가 안 서는 것이다(`csharp.md` §0.7 이 C# 에서 실제로 밟은 자리). 그래서
+ * `lint.ts` 의 `grammar-not-linked` 가 그것을 **오류**로 찍는다.
+ *
+ * **하드코딩은 이 표 하나다.** 링크 여부의 정본은 `crates/parse/src/langs.rs` 의 `LANGS`
+ * 이고, `crates/parse/tests/quality.rs` 가 이 표를 그 목록과 양방향으로 대조한다 —
+ * 크레이트를 넣고 이 표를 안 고치면 빨개지고, 이 표만 고쳐도 빨개진다. 예전에는 그 못이
+ * `swift`·`dart` **두 이름만** 지켜서 C# 문법이 아무 경고 없이 들어올 수 있었다.
+ */
+export const GRAMMARS = {
+  typescript: true,
+  tsx: true,
+  javascript: true,
+  python: true,
+  go: true,
+  rust: true,
+  sql: true,
+  java: true,
+  // Vue SFC. 문법이 따로 있는 게 아니라 자바스크립트를 `<script>` 구간에만 돌린다 (D159).
+  vue: true,
+  // MyBatis 매퍼. 속성값이 자바 클래스 이름이라 해석은 자바와 같은 규칙을 쓴다 (D159).
+  xml: true,
+  // 매퍼 안의 SQL. 문법은 sql 이고 읽는 자리만 문 본문으로 좁힌다 (D159).
+  mybatis_sql: true,
+  // `.css` 와 `.vue` 의 `<style>` (D159).
+  css: true,
+  vue_style: true,
+  // ── 아래는 이름만 있다. 크레이트가 `crates/parse/Cargo.toml` 에 없다. ──
+  // 03 §2.2 가 적은 위험(수십 MB `parser.c`) 때문에 3-OS 빌드에 얹기 전에 따로 판단할 일이다.
+  swift: false,
+  dart: false,
   // D156 의 열 언어. `c_sharp` 은 tree-sitter 크레이트가 쓰는 키이고 사전 네임스페이스는
   // `csharp` 이다 — `cs/` 를 기초 CS 사전이 가져갔다 (D157).
-  'c', 'cpp', 'java', 'c_sharp',
-  // Vue SFC. 문법이 따로 있는 게 아니라 자바스크립트를 `<script>` 구간에만 돌린다 (D159).
-  'vue',
-  // MyBatis 매퍼. 속성값이 자바 클래스 이름이라 해석은 자바와 같은 규칙을 쓴다 (D159).
-  'xml',
-  // 매퍼 안의 SQL. 문법은 sql 이고 읽는 자리만 문 본문으로 좁힌다 (D159).
-  'mybatis_sql',
-  // `.css` 와 `.vue` 의 `<style>` (D159).
-  'css', 'vue_style',
-]);
+  c: false,
+  cpp: false,
+  c_sharp: false,
+} as const satisfies Record<string, boolean>;
+
+const grammarNames = Object.keys(GRAMMARS) as [keyof typeof GRAMMARS, ...(keyof typeof GRAMMARS)[]];
+
+export const grammarSchema = z.enum(grammarNames);
 export type Grammar = z.infer<typeof grammarSchema>;
+
+/** 이 빌드에 파서가 있나. 없으면 사전이 그 문법에 거는 쿼리는 캡처를 0곳 낸다. */
+export const isLinkedGrammar = (grammar: string): boolean =>
+  (GRAMMARS as Record<string, boolean>)[grammar] === true;
+
+/** 이름은 아는데 파서가 없는 문법. 린트 메시지와 Rust 쪽 못이 같은 목록을 본다. */
+export const UNLINKED_GRAMMARS: readonly string[] = Object.entries(GRAMMARS)
+  .filter(([, linked]) => !linked)
+  .map(([name]) => name);
 
 /**
  * 쿼리 없이 사는 네임스페이스 (D157 §7). 세 번은 각자 하드코딩했고 넷째에서 모았다.
@@ -172,6 +212,15 @@ function conceptShape<T extends Localized>(make: (cap?: Cap) => z.ZodType<T, z.Z
       id: conceptIdSchema,
       /** 보편 개념 id, 또는 언어 고유면 `null` — 개념 전이의 근거다 (03 §3.1). */
       universal: conceptIdSchema.nullable().default(null),
+      /**
+       * 이 개념이 **쪼개졌다·대체됐다** (D187 ④). 새 참조는 여기 적힌 개념들을 쓴다.
+       *
+       * 지우지 않는 이유: 개념 id 는 원장의 `concept` 행 키이고 겹(`mastery`)이 거기 쌓인다
+       * (D4). 지우면 이미 배운 사람의 겹이 갈 곳을 잃는다. 그래서 개념은 그대로 로드되고
+       * 카드도 그대로 나며, **기존 참조는 안 깨진다** — 바뀌는 것은 「새로 걸 때 무엇을
+       * 가리키나」뿐이고 린트가 그 한 가지만 막는다(`superseded-target`).
+       */
+      superseded_by: z.array(conceptIdSchema).default([]),
       /**
        * 두 언어를 다 들고 다닌다 — 원장의 `concept.name_ko`·`name_en` 두 열로 갈라져
        * 들어가므로 로케일이 풀려도 한쪽을 버리지 않는다 (D118 · 마이그레이션 0002).

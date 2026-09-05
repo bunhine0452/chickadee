@@ -154,30 +154,36 @@ C# 90% → SQL 33% 로 세 배 가까이 벌어진다. `common/` 30개의 다수
 
 | # | 무엇 | 자리 | 짚은 편 | 상태 |
 |---|---|---|---|---|
-| 1 | `grammarSchema` enum 에 `c`·`cpp`·`java`·`c_sharp` 가 없다 — 넷은 로드 단계에서 막힌다 | `packages/dictionary/src/schema.ts:29` | C · C++ · Java · C# | **열었다** |
+| 1 | `grammarSchema` enum 에 `c`·`cpp`·`java`·`c_sharp` 가 없다 — 넷은 로드 단계에서 막힌다 | `packages/dictionary/src/schema.ts` | C · C++ · Java · C# | **열었다.** 다만 열기만 해서 12번이 생겼다 |
 | 2 | `grammar_abi` 가 언어당 하나인데 `ts` 는 문법 셋이라 이미 틀려 있었다 | `dictionary/{ts,react,py}/_lang.yaml` · `schema.ts` | TS · Rust · Swift · Go | **문법별 표로 바꾸고 대조 시험을 세웠다** |
 | 3 | `framework:` 필드에 **읽는 코드가 없다**. 실제 게이트는 `detect.dependency` 인데 `package.json` 만 본다 — Swift·Java·C# 에는 없는 파일이다 | `schema.ts:155·235` · `load.ts:85` | Swift · Java · C# | 남음 — `detect` 를 무엇으로 넓힐지가 결정거리 |
 | 4 | `grammarOf()` 가 확장자 표를 좁게 복사해 모르면 `typescript` 로 폴백 — `.pyi` 가 이미 샜다 | `apps/desktop/src/session-flow.ts` | C# | **고쳤다** (표로 바꾸고 `.pyi` + 새 언어 여덟) |
 | 5 | `in_error` 가 조상을 넷까지만 봐서 큰 복구 영역 안의 캡처가 통과한다 | `crates/parse/src/query.rs:171` | C | 남음 — 깊이를 늘리면 전 언어 인제스트 비용이 바뀐다 |
 | 6 | `commentPrefix()` 가 파이썬 아니면 전부 `//` — SQL 은 `--` 다 | `packages/cards/src/t1-block.ts` | SQL | **고쳤다** (`isContinuedHeader` 도 함께) |
-| 7 | `py/arithmetic.scm` 이 `//` 를 잡는데 규칙은 「나누기는 늘 소수를 낸다」 | `dictionary/py/arithmetic.{scm,yaml}` | Python | **고쳤다** (쿼리에서 빼고 예시로 못박음) |
+| 7 | `py/arithmetic.scm` 이 `//` 를 잡는데 규칙은 「나누기는 늘 소수를 낸다」 | `dictionary/py/arithmetic.{scm,yaml}` | Python | **고쳤다** (쿼리에서 빼고 예시로 못박음). 그 뒤 13번이 같은 쿼리에서 더 큰 것을 찾았다 |
 | 8 | `py/_blocks.scm` 이 `function_definition` 에 붙어 데코레이터 줄이 블록 밖 | `dictionary/py/_blocks.scm` · `derive.ts` | Python | **고쳤다** (`decorated_definition` + 「끝과 이름이 같으면 바깥」 접기) |
 | 9 | `:name` 자리표가 `binary_expression(field, ERROR, field)` 로 파싱되는데 캡처는 정상 매치된다 | tree-sitter-sequel | SQL | **못 고친다 — 아직 `dictionary/sql/` 이 없다.** `sql/comparison` 을 쓸 때의 제약으로 [`sql.md`](./sql.md) §8 에 남았다 |
 | 10 | progmiscon.org 에 **Python·Java·JavaScript·Scratch 넷뿐** — 나머지 여섯 언어의 오개념은 근거가 얇다 | — | C · C++ · C# · Rust · Swift · Go | 남음 |
 | 11 | Exercism 트랙 성숙도가 제각각 — SQL 은 트랙 자체가 404, C 는 개념 연습 0, Rust 는 `ownership` 이 개념 목록에 없다 | — | SQL · C · Rust | 남음 |
+| 12 | `grammarSchema` 가 **파서 없는 언어를 조용히 받는다.** 사전이 `grammars: [c_sharp]` 를 걸면 스키마도 린트도 통과하고 캡처만 0곳이다. 그 사실을 지키는 못은 `swift`·`dart` **두 이름만** 봤다 | `packages/dictionary/src/schema.ts` · `crates/parse/tests/quality.rs` | C# · Swift | **고쳤다** (2026-09-05 · D187 ⑨ — 아래 방벽 표) |
+| 13 | `py/arithmetic` 사용처의 **83 %가 셈이 아니다.** `binary_operator` 를 그대로 잡아 `pathlib` 경로 결합·글자 이어붙이기·되풀이가 전부 들어온다 | `dictionary/py/arithmetic.scm` | Python | **고쳤다** (피연산자 종류 열거 — 실측 1,621곳 → 277곳, 정밀도 16.7 % → 94.9 %) |
 
 10·11 은 D148 이 세운 두 근거(오개념 출처 · 목록 출처)가 **TS·파이썬 밖에서는 안 선다**는 뜻이다.
 나머지 여덟 언어는 사전 산문의 근거를 다른 데서 찾아야 한다.
 
-### 세운 방벽 둘
+### 세운 방벽 다섯
 
-고친 것보다 **다시 조용히 틀리지 않게 한 것**이 중요하다. 아홉 결함 중 넷이
-「안 터지고 조용히 틀린다」였다.
+고친 것보다 **다시 조용히 틀리지 않게 한 것**이 중요하다. 코드 결함 열하나 중 여섯이
+「안 터지고 조용히 틀린다」였다 — 2·4·7·9 에 12·13 이 붙었고, 뒤의 둘은 세는 자리조차
+없어서 「사용처가 0인 리포」·「사용처가 많은 개념」과 화면에서 구별되지 않았다.
 
 | 시험 | 어디 | 지금 값 |
 |---|---|---|
 | `declared_grammar_abi_matches_the_linked_grammar` | `crates/parse/tests/dictionary.rs` | `_lang.yaml` 의 `grammar_abi` 를 링크된 문법의 `abi_version()` 과 대조. 옛 값(`15` 셋)으로 되돌려 실패하는 것을 확인했다 |
 | 0장 후보가 **전부 든다** (D184) | `packages/concepts/src/zero-chapter.test.ts` | 언어마다 판 수 = essential ∧ 깊이 ≤ 2 인 개념 수. 상한을 다시 넣으면 걸린다 |
+| `the_dictionary_schema_agrees_with_the_grammars_actually_linked` | `crates/parse/tests/quality.rs` | `schema.ts` 의 `GRAMMARS` 표(문법 키 → 링크됐나)를 `chickadee_parse::languages()` 와 **양방향**으로 대조. `c_sharp: false` 를 `true` 로 바꿔 빨개지는 것을 확인했다 |
+| `grammar-not-linked` | `packages/dictionary/src/lint.ts` · `lint.test.ts` | `_lang.yaml` 이나 개념이 안 링크된 문법을 걸면 **오류**. C# 사전을 흉내 낸 `_lang.yaml`(`grammars: [c_sharp]`)이 걸리는 것을 시험이 지킨다 |
+| `py/arithmetic` 음성 골든 다섯 | `dictionary/py/arithmetic.yaml` · `crates/parse/tests/dictionary.rs` | 경로 결합 둘 · 이어붙이기 · 되풀이 · 서식이 `expect: none` 이다. 쿼리를 되돌리면 골든이 걸린다 |
 
 ## 7. 사용자 결정이 필요한 것 셋
 
@@ -211,10 +217,10 @@ C# 90% → SQL 33% 로 세 배 가까이 벌어진다. `common/` 30개의 다수
 
 | # | 축 | 묻는 것 | id 조각 (열 언어 공통) | `universal` | 주 그림 |
 |---|---|---|---|---|---|
-| 1 | **정수** | 자릿수가 정해져 있고, 가장 큰 값 다음이 가장 작은 값이다 | `integer-literal` | `common/number-literal` | 비트 배열 |
-| 2 | **실수** | 2진수로 못 적는 소수가 있어 `0.1 + 0.2 != 0.3` 이다 | `float-literal` | `common/number-literal` | 비트 배열 |
+| 1 | **정수** | 자릿수가 정해져 있고, 가장 큰 값 다음이 가장 작은 값이다 | `integer-literal` | `common/integer-literal` | 비트 배열 |
+| 2 | **실수** | 2진수로 못 적는 소수가 있어 `0.1 + 0.2 != 0.3` 이다 | `float-literal` | `common/float-literal` | 비트 배열 |
 | 3 | **문자** | 한 글자가 한 바이트가 아니다. 길이를 어느 쪽으로 세는가 | `text-literal` | `common/text-literal` | 값 상자 |
-| 4 | **참거짓** | 참·거짓 말고 **무엇이 참으로 쳐지는가**가 언어마다 다르다 | `boolean-literal` | `common/boolean-value` | 평가 트리 |
+| 4 | **참거짓** | 참·거짓 말고 **무엇이 참으로 쳐지는가**가 언어마다 다르다 | `boolean-literal` | `common/boolean-value` · `common/truthiness` | 평가 트리 |
 | 5 | **연산자** | 괄호를 안 쓰면 무엇이 먼저 묶이나 | `operator-precedence` | `common/arithmetic` | **평가 트리** |
 | 6 | **형 변환** | 타입이 다른 둘을 만나면 오류인가, 조용히 맞추나 | `type-conversion` | `common/type-cast`(신규 후보) | **타입 변환 사다리** |
 | 7 | **대입** | 이름에 붙는 것이 값인가 자리인가 | `assignment` | `common/variable-binding` · `common/reassignment` | 값 상자 · 메모리 줄 |
@@ -244,12 +250,13 @@ SQL 이 그 축을 깨는 자리가 **어디까지가 「언어의 동작 원리
 
 ---
 
-## 9. `cs/` 43장과 0부의 연결
+## 9. `cs/` 45장과 0부의 연결
 
-0부는 `cs/`(D157·D167, 43장) 위에 선다 — 축마다 「문법 아래에 깔린 기계」가 하나씩 있다.
-**43장 중 0부가 쓰는 것은 12장이고, 없어서 새로 필요한 것이 셋이다.**
+0부는 `cs/`(D157·D167) 위에 선다 — 축마다 「문법 아래에 깔린 기계」가 하나씩 있다.
+**처음 43장 중 0부가 쓰는 것은 12장이었고, 없어서 새로 필요한 것이 셋이었다.**
+셋 중 둘이 `cs/` 로 들어와 **45장**이 됐고(0부가 쓰는 것도 **14장**이 된다), 하나는 `common/` 으로 갔다.
 
-### 쓰는 것 — 12 / 43
+### 쓰는 것 — 14 / 45
 
 | 축 | `cs/` |
 |---|---|
@@ -257,32 +264,44 @@ SQL 이 그 축을 깨는 자리가 **어디까지가 「언어의 동작 원리
 | 2 실수 | `floating-point` |
 | 3 문자 | `text-encoding` |
 | 4 참거짓 | `type` |
-| 5 연산자 | **없다** → 아래 |
-| 6 형 변환 | **없다** → 아래 |
+| 5 연산자 | `operator-precedence` — 43장에 없어서 **냈다**(아래) |
+| 6 형 변환 | `type-conversion` — 43장에 없어서 **냈다**(아래) |
 | 7 대입 | `state` · `value-vs-reference` · `immutability` |
 | 8 비교 | `identity-vs-equality` |
 | 바탕 | `compile-and-run` · `static-vs-dynamic-typing` |
 
 SQL 은 여기에 다섯을 더 쓴다 — `set-vs-sequence` · `three-valued-logic` · `declarative-vs-imperative` ·
-`eager-vs-lazy` · `null-reference`(대비용). **43장 중 SQL 이 밀어 넣은 여섯 중 넷을 0부에서 도로 쓴다**
+`eager-vs-lazy` · `null-reference`(대비용). **처음 43장에 SQL 이 밀어 넣은 여섯 중 넷을 0부에서 도로 쓴다**
 ([`cs.md`](./cs.md) §10.4 가 「SQL 이 가장 적게 물려받고 가장 많이 보탠다」고 적은 자리의 회수다).
 
-### 없는 것 — 신규 후보 셋 + 보류 하나
+### 없던 것 — **넷을 냈고 하나는 보류다** (2026-09-05 · D187 ④·⑤·⑥)
 
-**`cs.md` 몫이다. 언어 문서가 임의로 만들지 않는다** — cs.md §10.1 이 잰 사고가 그렇게 났다.
+이 절은 「후보 셋 + 보류 하나」의 목록이었다. 판정이 났고 실물이 났으므로 결과로 고쳐 적는다.
+**판정 기준은 cs.md §10.3 의 것 하나** — 기계의 성질인가, 언어가 고른 규칙인가.
 
-| id | 한 줄 | 요구하는 축 | 왜 43장으로 안 되나 |
+| id | 한 줄 | 요구하는 축 | 결과 |
 |---|---|---|---|
-| `cs/operator-precedence` | 괄호를 안 쓰면 무엇이 먼저 묶이나 | **축 5 · 열 언어 전부** | 43장에 평가 순서를 다루는 장이 없다. **평가 트리 그림이 이것 없이는 「왜 이 모양인가」를 못 답한다** — 그림만 있고 개념이 없다 |
-| `cs/type-conversion` | 넓힘·좁힘·암묵·명시 | **축 6 · 열 언어 전부** + `sql/implicit-cast` | `cs/type` 은 「타입이 무엇인가」, `cs/static-vs-dynamic-typing` 은 「언제 확인하나」다. **다른 타입 둘이 만났을 때 무엇이 일어나나**를 답하는 장이 없다. 타입 변환 사다리 그림의 뒷받침이 통째로 빈다 |
-| `cs/truthiness` | 무엇이 참으로 쳐지나 (`0`·`""`·`nil`·빈 배열) | 축 4 | **약한 후보다.** cs.md §10.3 이 `cs/null-terminated-string` 을 「C 의 선택이지 기계의 성질이 아니다」로 되돌린 기준을 그대로 대면 이것도 되돌려진다 — 언어 설계이지 기계가 아니다. **판단을 cs.md 에 넘긴다** |
-| `cs/search-tree` | 정렬해 둔 곁표로 반씩 줄여 찾기 | (0부 아님) | cs.md §10.3 의 **보류가 그대로다.** `sql/index`·`sql/query-plan` 이 요구하는데 0부는 안 쓰므로 이 판에서도 안 정한다 |
+| `cs/operator-precedence` | 괄호를 안 쓰면 무엇이 먼저 묶이나 | **축 5 · 열 언어 전부** | **냈다.** 43장에 평가 순서를 다루는 장이 없었고, 평가 트리 그림이 그것 없이는 「왜 이 모양인가」를 못 답했다 — 그림만 있고 개념이 없던 자리다 |
+| `cs/type-conversion` | 넓힘·좁힘·암묵·명시 | **축 6 · 열 언어 전부** + `sql/implicit-cast` | **냈다.** `cs/type` 은 「타입이 무엇인가」, `cs/static-vs-dynamic-typing` 은 「언제 확인하나」라 **다른 타입 둘이 만났을 때**를 답하는 장이 없었다. 타입 변환 사다리 그림의 뒷받침이 이 장이다 |
+| `common/truthiness` | 무엇이 참으로 쳐지나 (`0`·`""`·`nil`·빈 배열) | 축 4 | **`cs/` 가 아니라 `common/` 에 냈다** (D187 ⑤). 파이썬은 `if []` 에 안 들어가고 자바스크립트는 `if ([])` 에 **들어가며** 자바는 컴파일을 멈춘다 — 같은 기계 위에서 답이 셋으로 갈리면 그것은 언어 설계다 |
+| `cs/search-tree` | 정렬해 둔 곁표로 반씩 줄여 찾기 | (0부 아님) | **보류 그대로.** `sql/index`·`sql/query-plan` 이 요구하는데 0부는 안 쓴다 |
 
-**`common/` 쪽에도 하나 빈다** — 축 6 의 `common/type-cast`. 31장에 명시 변환이 없다
+`cs/` 는 43 → **45장**이 됐다(cs.md §10.5·§11). 둘 다 껍데기 여섯을 그대로 쓰고 문항은
+뜻 고르기 하나뿐이라 새 트랙도 새 `card.kind` 도 마이그레이션도 안 생겼다.
+빌려 줄 창은 `py/arithmetic` 이 먼저 걸었다 — 파이썬의 `/` 가 정수 둘에서도 소수를 내는 것이
+암묵 넓힘이고, `2 + 3 * 4` 가 그 자리에서 접힌다.
+
+**`common/number-literal` 은 쪼갰다** (D187 ④). 정수와 실수는 담기는 방식도 넘칠 때의 행동도
+다른데(`cs/integer-overflow` 대 `cs/floating-point`) 보편형이 하나라 D4 전이가 둘을 한 겹으로
+쌓고 있었다. `common/integer-literal` · `common/float-literal` 을 냈고, 옛 개념은 **지우지 않고**
+새 필드 `superseded_by: [둘]` 로 표시했다 — 개념 id 는 원장 `concept` 행의 키이고 겹이 거기
+쌓이므로(D4) 지우면 이미 배운 사람의 겹이 갈 곳을 잃는다. **기존 참조**(`ts/number-literal` 의
+`universal`)**는 안 깨지고**, 바뀌는 것은 새로 걸 때 무엇을 가리키나 하나다. 린트가 그 하나만
+막는다(`superseded-target` — 대체본이 또 대체됐거나 자기 자신이면 오류).
+
+**아직 비어 있는 것 하나** — 축 6 의 `common/type-cast`. 32장에 명시 변환이 없다
 (JS `Number(x)` · Python `int(x)` · Java `(int)x` · Rust `as` · Go `int(x)` · Swift `Int(x)` — 여섯에서 성립한다).
-그리고 **`common/number-literal` 하나가 축 1·2 를 같이 덮고 있다** — 정수와 실수는 다른 기계인데
-(`cs/integer-overflow` 대 `cs/floating-point`) 보편형이 하나라 D4 전이가 둘을 한 겹으로 쌓는다.
-**쪼갤지는 이 문서가 정하지 않는다** — 기존 개념을 바꾸는 일이고 `dictionary/**` 는 이 판의 범위 밖이다.
+`cs/type-conversion` 이 **왜**를 대므로 급하지는 않지만 보편형 자리는 그대로 비어 있다.
 
 ---
 
@@ -425,8 +444,10 @@ I1(형식) · I2(그림) · I3(py·ts·java) · I4(c·cpp·rs) · I5(go·swift·
 
 ### 아직 못 정한 것
 
-1. **`common/number-literal` 을 정수와 실수로 쪼갤지** (§9). 기존 개념 변경이라 `dictionary/**` 몫이다.
-2. **`cs/truthiness` 가 기계인가 언어 설계인가** (§9). cs.md §10.3 의 기준을 대면 되돌려진다.
+1. ~~**`common/number-literal` 을 정수와 실수로 쪼갤지**~~ → **쪼갰다 (D187 ④ · §9).**
+   `common/integer-literal` · `common/float-literal` 을 내고 옛 개념에 `superseded_by` 를 달았다.
+2. ~~**`cs/truthiness` 가 기계인가 언어 설계인가**~~ → **언어 설계다 (D187 ⑤ · §9).**
+   `common/truthiness` 로 냈다.
 3. **0부를 0장(프롤로그)에 넣을지.** → **답이 됐다(D184): 넣는다.** 상한이 없으니 경쟁이 없다 —
    `essential` 이면 0장에 든다. 「동작 원리부터」가 프롤로그 첫 판들이다.
 4. **C 를 앞으로 당길지** (§10 ③). 0부를 가장 잘 가르치는 언어인데 표본 리포에 파일이 0장이다.
