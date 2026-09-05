@@ -9,6 +9,7 @@ export const course = {
 
   'chapter.tocLabel': 'Course contents',
   'chapter.count': '{{done}} / {{total}} chapters passed',
+  'chapter.countExtraOnly': 'No feature chapters · {{n}} interludes',
   'chapter.pct': 'Course progress {{n}}%',
   'chapter.secChapters': 'Chapters',
   'chapter.secExtra': 'Interludes · Appendices',
@@ -58,6 +59,14 @@ export const course = {
   'chapter.today': 'Today, 15 min',
   'chapter.todayPlain': '= due rechecks → next stage of today’s chapter',
   'chapter.todayNone': 'Nothing to do today — the course is done or the repo is not read yet.',
+  'chapter.todayNoneDone': 'You have walked the course to the end. Nothing is due for recheck today either.',
+  'chapter.todayReading':
+    'The next stage of “{{name}}” is reading (stage 1) — no new vocabulary to ink here, '
+    + 'so one judgement passes it.',
+  'chapter.todayNoCards':
+    'Chapter “{{name}}” has no questions yet — nothing here to build them from (no request paths, '
+    + 'no place where a value changes). Re-reading the repo looks again.',
+  'chapter.reingest': 'Re-read the repo',
   'chapter.todayRecheckOnly': 'Today starts with overdue rechecks. The next stage waits in the same place tomorrow.',
   'chapter.todayMin': '{{n}} questions · about {{min}} min',
   'chapter.qRecheck': 'recheck',
@@ -100,6 +109,7 @@ export const course = {
   'chapter.placeAt': 'before line {{n}}',
   'chapter.placeEnd': 'at the end',
   'chapter.reimplSig': 'Signature',
+  'chapter.reimplAsk': 'Read the signature and what must hold below, then write the body yourself.',
   'chapter.reimplHold': 'Must hold',
   'chapter.reimplContext': 'Neighbour layer — {{file}}',
   'chapter.reimplEditor': 'rebuild editor',
@@ -153,7 +163,7 @@ export const course = {
   'chapter.orderQ': 'From {{first}} to {{last}} — stack them in the order they run.',
   'chapter.orderHint': 'Stack the cards top to bottom and press <b>⌘↵</b> to grade. Every adjacent pair that is right adds to the score.',
   'chapter.orderOk': 'Right order. The order is not memorised, it is written in the code — that line in one card calls the next.',
-  'chapter.orderRule': 'Rule — read the order off the call sites.',
+  'chapter.orderRule': 'Read the order off the call sites.',
   'chapter.orderFacts': 'Why each piece sits where it sits',
   'chapter.orderFactHop': '{{here}}:{{line}} calls {{next}} ({{edge}})',
   'chapter.orderFactLast': 'Nothing is called from here — end of the path',
@@ -169,7 +179,7 @@ export const course = {
   'chapter.traceQ': '{{file}} — when does the box {{name}} points at change? Fill the blanks.',
   'chapter.traceHint': 'Only the cells where the value changes are blank. The filled ones are what you predict from.',
   'chapter.traceOk': 'At line {{line}}, {{name}} starts pointing at a different box. The name moved; the first box did not change.',
-  'chapter.traceRule': 'Rule — a reference points at a box, it does not hold one.',
+  'chapter.traceRule': 'A reference points at a box, it does not hold one.',
   'chapter.traceCaption': 'Rows are line numbers, columns are what is being followed',
   'chapter.traceWhen': 'When',
   'chapter.traceColBox': 'box {{name}} points at',

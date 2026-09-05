@@ -12,6 +12,11 @@ const STEP_KEY = {
 
 export interface CoachBandProps {
   step: CoachStep;
+  /**
+   * 이 판이 사전 예제인가 (D137 · D186 ④). 첫 걸음의 문장이 「당신 리포에서 그대로 떠 온
+   * 줄」이라 합성 판에서는 그 한 줄이 거짓이 된다 — 그때만 다른 문장을 쓴다.
+   */
+  synthetic?: boolean | undefined;
 }
 
 /**
@@ -22,11 +27,12 @@ export interface CoachBandProps {
  * 다음 버튼도 없다). 판은 진짜 판이라 채점도 겹도 그대로다 — 틀려도 다시 찍기 한 장이
  * 오늘 큐에 들어갈 뿐이다 (정본 §3-1).
  */
-export function CoachBand({ step }: CoachBandProps) {
+export function CoachBand({ step, synthetic }: CoachBandProps) {
+  const key = step === 1 && synthetic === true ? 'coach.pickSynthetic' : STEP_KEY[step];
   return (
     <aside className="coach" aria-label={t('coach.label')}>
       <span className="coach-n" aria-hidden="true">{t('coach.step', { n: String(step) })}</span>
-      <RichText as="p" html={t(STEP_KEY[step])} />
+      <RichText as="p" html={t(key)} />
     </aside>
   );
 }

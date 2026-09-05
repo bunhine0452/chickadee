@@ -42,6 +42,21 @@ export interface OrderPlateProps {
   after?: React.ReactNode;
 }
 
+/**
+ * 판 머리의 출처 줄. 조각의 **보이는 글자**(`t`)로 가른다 — `id` 는 노드 키라 화면에 낼 것이
+ * 아니고, 실제로 그것을 파일 경로 자리에 넣어 「내 코드 a」가 떴다 (실측 · S2 스크린샷).
+ *
+ * 재료가 둘이다 (`packages/cards/src/order.ts`): 홉 줄기는 `파일.확장자:줄` 이고, 0부 사다리는
+ * 코드 조각이라 파일이 없다 — 뒤쪽은 「사전 예제」라고 적는다. 없는 파일을 가리키면 그것이
+ * 거짓말이다 (D186 ④).
+ */
+const HOP_NODE = /^(\S+\.[A-Za-z0-9]+):(\d+)$/;
+
+export function orderSource(first: string): string {
+  const m = HOP_NODE.exec(first.trim());
+  return m === null ? t('t0.syntheticSource') : sourceOf(m[1] as string, Number(m[2]));
+}
+
 export function OrderPlate(props: OrderPlateProps): React.JSX.Element | null {
   const { card, verdict } = props;
   const p = card.payload;
@@ -100,7 +115,7 @@ export function OrderPlate(props: OrderPlateProps): React.JSX.Element | null {
       conceptName={props.conceptName}
       layer={props.layer}
       verdict={verdict}
-      source={sourceOf(p.pieces[0]?.id ?? '', null)}
+      source={orderSource(p.pieces[0]?.t ?? '')}
       hint={answered ? t('session.hintNextPlate') : t('chapter.hintOrder')}
       stuckOpen={props.stuckOpen}
       onDunno={props.onDunno}

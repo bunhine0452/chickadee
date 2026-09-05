@@ -12,5 +12,5 @@
 
 .map-status b {
   color: var(--text);
-  font-weight: 600;
+  font-weight: var(--fw-medium);
 }

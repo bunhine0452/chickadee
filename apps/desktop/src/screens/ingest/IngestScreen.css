@@ -100,3 +100,13 @@
 @media (width <= 760px) {
   .ingest-h { font-size: var(--fs-5); }
 }
+
+/* 다 읽은 뒤의 동작 줄 (D186 ①) — 「학습 시작」이 primary 하나이고 「홈으로」는 그 옆 ghost 다.
+   `.l-row` 의 `--gap`(16~32px)은 화면 칸 사이의 값이라 단추 둘 사이로는 넓다 — 짝을 이루는
+   단추는 `--s-3` 로 붙여 **한 덩어리**로 읽히게 하고, 위로는 큐에서 한 칸 띄운다. */
+.ingest-acts {
+  --gap: var(--s-3);
+
+  margin-top: var(--s-5);
+  align-items: center;
+}

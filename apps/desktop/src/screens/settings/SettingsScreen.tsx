@@ -49,6 +49,7 @@ function activeRepoId(): number | null {
  * 먼저 굳어, 언어를 바꾼 뒤에도 옛 말이 남는다 (D117).
  */
 const themeOptions = () => [
+  { v: 'system' as const, label: t('settings.look.themeSystem') },
   { v: 'light' as const, label: t('settings.look.themeLight') },
   { v: 'dark' as const, label: t('settings.look.themeDark') },
 ];
@@ -293,7 +294,7 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
   const s = settings ?? { ...DEFAULTS, tz: Intl.DateTimeFormat().resolvedOptions().timeZone };
 
   return (
-    <Page className="settings" head={(
+    <Page className="settings" focusOnMount head={(
       <header className="set-head l-row">
         <h1>
           {t('settings.title')}
@@ -433,11 +434,12 @@ export function SettingsScreen({ onBack }: SettingsScreenProps): React.JSX.Eleme
           <span className="set-k">{t('settings.look.process')}</span>
           <Switch
             options={themeOptions()}
-            value={appearance.theme}
+            value={appearance.themeMode}
             label={t('settings.look.themeSwitch')}
             onChange={appearance.setTheme}
           />
         </div>
+        <p className="set-note">{t('settings.look.themeNote')}</p>
         <div className="set-row">
           <span className="set-k">{t('settings.look.motion')}</span>
           <Switch

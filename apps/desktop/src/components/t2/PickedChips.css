@@ -15,7 +15,7 @@
   color: var(--on-accent);
   font-family: var(--font-mono);
   font-size: var(--fs-1);
-  font-weight: 600;
+  font-weight: var(--fw-medium);
 }
 
 .picked .none {

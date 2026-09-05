@@ -29,6 +29,9 @@ export const run: Record<string, string> = {
   'run.reason.notDetected': 'Not checked yet.',
   'run.reason.dialectUnsupported': 'This app carries one database, SQLite. This statement is another dialect and does not run here.',
   'run.reason.noFixtureDb': 'There is no data to run against. The tables are here but the rows are empty.',
+  'run.reason.toolchainMissingPy': 'No python3 on this computer. Python questions are not graded.',
+  'run.reason.toolchainMissingTs': 'No node on this computer. TypeScript questions are not graded.',
+  'run.reason.toolchainMissingJava': 'No javac/java on this computer. Java questions are not graded.',
 
   'run.detected': 'JDK {{jdk}} · Gradle {{gradle}}',
   'run.detectedJdk': 'JDK {{jdk}}',

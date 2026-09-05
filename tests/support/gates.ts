@@ -174,12 +174,22 @@ export async function toSummary(page: Page, app: AppDb): Promise<void> {
   throw new Error(`판 ${MAX_PLATES}장을 답했는데도 요약이 안 떴다 — 큐가 안 줄고 있다`);
 }
 
-/** 야간반 (05 §4.3). 스위치는 마스트헤드에 있고 `<html data-theme>` 하나만 바뀐다. */
+/**
+ * 야간반 (05 §4.3). 밝기는 **설정 화면**에서 고른다 — 헤더에는 스위치가 없다 (D187 ⑫).
+ * 기본은 「시스템 따름」이고 여기서 고른 값이 그것을 덮어쓴다. `<html data-theme>` 하나만
+ * 바뀌고, 고른 뒤에는 홈으로 돌아온다 — 이 함수를 부르는 게이트가 재는 것은 홈이다.
+ */
 export async function toNight(page: Page): Promise<void> {
-  const sw = page.getByRole('switch', { name: '밝게 · 어둡게 전환' });
-  await sw.focus();
+  await page.getByRole('button', { name: /^설정$|^Settings$/ }).first().focus();
+  await page.keyboard.press('Enter');
+  const dark = page.getByRole('radio', { name: /^어둡게$|^Dark$/ });
+  await dark.waitFor();
+  await dark.focus();
   await page.keyboard.press('Space');
   await page.waitForFunction(() => document.documentElement.dataset['theme'] === 'dark');
+  await page.getByRole('button', { name: /^홈으로$|^Home$/ }).first().focus();
+  await page.keyboard.press('Enter');
+  await page.locator('.masthead').waitFor();
   await settled(page);
 }
 

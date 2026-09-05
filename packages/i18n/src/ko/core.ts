@@ -85,9 +85,14 @@ export const core = {
   'settings.look.title': '모양',
   'settings.look.plain': '= 화면 밝기와 움직임',
   'settings.look.process': '화면',
+  'settings.look.themeSystem': '시스템 따름',
   'settings.look.themeLight': '밝게',
   'settings.look.themeDark': '어둡게',
-  'settings.look.themeSwitch': '밝게 · 어둡게 전환',
+  'settings.look.themeSwitch': '화면 밝기 — 시스템 따름 · 밝게 · 어둡게',
+  // D187 ⑫ — 기본이 시스템 따름이고, 여기서 고른 것이 그것을 덮어쓴다. 헤더에는 스위치가 없다.
+  'settings.look.themeNote':
+    '기본은 「시스템 따름」입니다 — 이 컴퓨터가 밤에 어두워지면 앱도 같이 어두워집니다. '
+    + '밝게·어둡게를 고르면 시스템과 상관없이 그대로 고정됩니다.',
   'settings.look.note':
     '여기서 고른 것은 저장되어 다음에 열 때도 그대로입니다. 밝기를 바꿔도 글자와 배치는 '
     + '1px 도 바뀌지 않습니다.',

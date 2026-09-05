@@ -58,6 +58,8 @@ vi.mock('../../data/settings.js', () => ({
   loadScheduler: () => Promise.resolve({}),
   // 판이 편집 보조 설정을 스스로 읽는다 (D143). 이 화면의 시험은 그 값과 무관하다.
   useEditorAssist: () => 'stage',
+  // Monaco 의 테마는 `<html data-theme>` 을 따른다 — jsdom 에서는 늘 밝게다.
+  useResolvedTheme: () => 'light',
 }));
 
 vi.mock('../../flow.js', () => ({ report: () => undefined, todayKey: () => '2026-09-04' }));

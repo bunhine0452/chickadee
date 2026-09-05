@@ -1,5 +1,6 @@
 import { t, type Locale } from '@chickadee/i18n';
 import { PressButton, Switch } from '@chickadee/ui';
+import { useEffect, useRef } from 'react';
 
 import { CloneField } from '../repos/CloneField.js';
 import './empty.css';
@@ -27,6 +28,14 @@ export interface FirstRunProps {
  * 리포를 넣는 문이 시각적으로 가장 크다 — 이 화면에서 할 일이 그것 하나다.
  */
 export function FirstRun({ onPick, locale, onLocale, newcomer, onNewcomer }: FirstRunProps) {
+  // 앱을 처음 여는 화면이라 포커스가 `<body>` 면 첫 걸음을 키보드로 뗄 수 없다 (정본 §3-8).
+  // 「리포 등록」에 바로 주지 않고 문맥(`<main>`)에 준다 — 읽을 것이 먼저이고, Tab 한 번이면
+  // 그 단추다.
+  const main = useRef<HTMLElement>(null);
+  useEffect(() => {
+    main.current?.focus({ preventScroll: true });
+  }, []);
+
   // 언어 이름은 그 언어로 적는다 — 못 읽는 언어로 적힌 이름은 고를 수가 없다.
   const options = [
     { v: 'ko' as const, label: t('locale.ko') },
@@ -35,7 +44,7 @@ export function FirstRun({ onPick, locale, onLocale, newcomer, onNewcomer }: Fir
 
   return (
     <div className="firstrun">
-      <main className="firstrun-in" tabIndex={-1}>
+      <main className="firstrun-in" tabIndex={-1} ref={main}>
         <h1 className="firstrun-title">Chickadee</h1>
         <p className="firstrun-note">{t('firstRun.note')}</p>
         {/* 대상 경계를 **먼저** 말한다 (D139·D147). 묻지 않고 잠그지 않는다 —

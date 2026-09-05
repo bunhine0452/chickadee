@@ -303,32 +303,42 @@ export function StageOverlay(props: StageOverlayProps): React.JSX.Element {
     </JobBand>
   );
 
+  /**
+   * **정직성** (D186 ④). 2단인데 값 추적 판이 없으면 그 사실을 말한다 — 판을 숨기면
+   * 학습자는 앱이 그것을 재고 있다고 믿는다. 그 챕터는 경로 판만으로 이 단을 통과한다.
+   *
+   * 판 **안**에 넣는다. 작업대(`.bench`)의 직계 자식으로 두면 가운데 정렬된 한 줄이 판 위에
+   * 따로 떠서 「이 화면에 종이 한 장」(정본 §3-9)이 깨진다 (실측 · S2 스크린샷).
+   */
+  const noTrace = spec.kind === 'first' && spec.stage === 2
+    && !cards.some((c) => c.type === 'trace-table');
+  const honest = noTrace ? <p className="note cc-honest">{t('chapter.traceMissing')}</p> : null;
+
   const plateProps = card === null ? null : {
     card, no: pos + 1, unitName: spec.unitName,
     conceptName: conceptName(dict, card.conceptId),
     layer: layers.get(card.conceptId) ?? 0,
     verdict, stuckOpen: stuck !== null,
     onGrade: grade, onNext: next, onDunno: pressDunno,
-    ...(stuck === null ? {} : {
+    ...(stuck === null && honest === null ? {} : {
       after: (
-        <StuckPanel
-          view={stuck}
-          onQueueConcept={queueConcept}
-          onCopyPrompt={copyPrompt}
-          onClose={() => setStuck(null)}
-          onLeave={onExit}
-        />
+        <>
+          {honest}
+          {stuck === null ? null : (
+            <StuckPanel
+              view={stuck}
+              onQueueConcept={queueConcept}
+              onCopyPrompt={copyPrompt}
+              onClose={() => setStuck(null)}
+              onLeave={onExit}
+            />
+          )}
+        </>
       ),
     }),
   };
 
   const nextDue = done?.advance.next.dueAt ?? null;
-  /**
-   * **정직성** (D186 ④). 2단인데 값 추적 판이 없으면 그 사실을 판 자리에서 말한다 — 판을
-   * 숨기면 학습자는 앱이 그것을 재고 있다고 믿는다. 그 챕터는 경로 판만으로 이 단을 통과한다.
-   */
-  const noTrace = spec.kind === 'first' && spec.stage === 2
-    && !cards.some((c) => c.type === 'trace-table');
 
   return (
     <div className="course-run">
@@ -339,7 +349,6 @@ export function StageOverlay(props: StageOverlayProps): React.JSX.Element {
         live={live}
         onExit={onExit}
       >
-        {noTrace ? <p className="note cc-honest">{t('chapter.traceMissing')}</p> : null}
         {done !== null ? (
           <StageDone
             stage={spec.stage}

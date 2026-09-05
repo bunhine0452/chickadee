@@ -21,7 +21,7 @@ import {
 import { baseName, loadLadder, rebuildPrompt, type LadderData } from '../../data/ladder.js';
 import { loadMastery, type Plate } from '../../data/session.js';
 import type { Track } from '@chickadee/store-sql';
-import { loadSettings, saveSetting } from '../../data/settings.js';
+import { loadSettings, saveSetting, useResolvedTheme } from '../../data/settings.js';
 import { loadSummary, markLifersShown, type SummaryData } from '../../data/summary.js';
 import {
   answerPlate, backFromPrereq, completeSession, finishT1Plate, finishT2Plate, gradeT1Plate,
@@ -105,8 +105,13 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
   /** 0장에 담긴 개념들 (D138). 세션을 열 때 한 번 긷고 「먼저 읽기」가 이것만 본다. */
   const [firstMeeting, setFirstMeeting] = useState<ReadonlySet<string>>(EMPTY_SET);
   const [summary, setSummary] = useState<SummaryData | null>(null);
-  /** Monaco 는 CSS 변수를 못 받아 테마를 hex 로 받는다 (05 §8) — 설정에서 한 번 읽는다. */
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  /*
+   * Monaco 는 CSS 변수를 못 받아 테마를 hex 로 받는다 (05 §8). 값은 `<html data-theme>` 에서
+   * 읽는다 — `settings.theme` 은 **마지막으로 고른 것의 기록**이라 「시스템 따름」인 채
+   * 한 번도 안 고른 사람에게는 기본 `light` 가 들어 있고, 그러면 판은 어둡고 편집기만
+   * 밝은 화면이 난다 (실측 · S2 스크린샷).
+   */
+  const theme = useResolvedTheme();
 
   // ── T1 판 하나가 들고 있는 것 (05 §5 · 04 §4~§6). 판이 바뀌면 아래 효과가 비운다.
   const [t1View, setT1View] = useState<T1View>('edit');
@@ -160,7 +165,6 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
 
   useEffect(() => {
     void loadSettings().then((s) => {
-      setTheme(s.theme);
       setCoach(!s.tutorialSeen);
     });
   }, []);

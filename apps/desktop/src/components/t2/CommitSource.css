@@ -27,7 +27,7 @@
 
 .commit p b {
   color: var(--text);
-  font-weight: 600;
+  font-weight: var(--fw-medium);
 }
 
 .commit .msg {

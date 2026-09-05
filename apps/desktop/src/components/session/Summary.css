@@ -108,11 +108,14 @@
   border-top: 1px solid var(--border);
 }
 
+/* 행은 산문이 아니다 — `reset.css` 의 `li{max-width:36em}` 이 여기 걸리면 「다음 복습」
+   칸이 카드 한가운데에서 끝나고 오른쪽 절반이 빈다(실측: 2560 에서 1120px 칸 안 573px). */
 .shift {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--s-3);
+  max-width: none;
   padding: var(--s-3) 0;
   border-bottom: 1px solid var(--border);
 }

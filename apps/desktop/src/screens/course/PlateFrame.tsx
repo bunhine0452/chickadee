@@ -72,7 +72,7 @@ export function PlateFrame(props: PlateFrameProps): React.JSX.Element {
               ...(verdict.rule === null ? {} : { rule: verdict.rule }),
               ...(pct === null || card.type === 'exec' || card.stageNo === 1
                 ? {}
-                : { result: { label: t('chapter.grade'), value: t('chapter.pctOf', { n: String(pct) }), note: '' } }),
+                : { score: { label: t('chapter.grade'), value: t('chapter.pctOf', { n: String(pct) }) } }),
             })}
       />
 

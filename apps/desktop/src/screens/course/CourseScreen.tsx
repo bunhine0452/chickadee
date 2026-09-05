@@ -14,10 +14,11 @@ import type { ConceptId, StageNo } from '@chickadee/store-sql';
 import { FlatButton, PressButton } from '@chickadee/ui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { focusOrFallback } from '../../components/session/focus.js';
 import { Page, Split } from '../../components/shell/Page.js';
 import { TimeQueue, type QueueItem } from '../../components/shell/TimeQueue.js';
-import { loadSettings } from '../../data/settings.js';
-import { report, todayKey } from '../../flow.js';
+import { loadSettings, useResolvedTheme } from '../../data/settings.js';
+import { ingest, report, todayKey } from '../../flow.js';
 import { useUi } from '../../store.js';
 import { ChapterPanel } from './ChapterPanel.js';
 import { ChapterToc, GRAD_ID } from './ChapterToc.js';
@@ -47,6 +48,41 @@ const DEAD_KEY = {
   'orphan-file': 'chapter.deadOrphan',
 } as const;
 
+/**
+ * 계획이 비었을 때 **왜** 비었나 (D186 ①·④).
+ *
+ * 이유가 넷이고 넷의 다음 행동이 다르다 — 코스를 다 밟았거나 · 1단이 판정만 남았거나 ·
+ * 챕터는 남았는데 문제를 못 구웠거나 · 그 밖(오늘은 접음 등)이다. 하나로 뭉쳐 적으면
+ * 그중 셋은 거짓이 되고, 「오늘 15분」 칸에 다음 행동이 없다 (실측: tiny 리포에서 이
+ * 칸이 「코스가 끝났거나 리포를 읽기 전」이라고 말하면서 단추를 하나도 안 냈다).
+ */
+export type TodayGap =
+  | { kind: 'done' }
+  | { kind: 'reading'; chapter: ChapterView }
+  | { kind: 'no-cards'; chapter: ChapterView }
+  | { kind: 'other' };
+
+export function todayGap(data: CourseData): TodayGap {
+  const c = data.todayUnitId === null
+    ? undefined
+    : data.chapters.find((x) => x.unitId === data.todayUnitId);
+  if (c === undefined) return data.due.length === 0 ? { kind: 'done' } : { kind: 'other' };
+  // 1단은 판이 아니라 어휘가 재료다. 찍을 어휘가 없으면 남은 것은 판정 한 번뿐이다.
+  if (c.row.stageReached === 0 && c.vocab.zero.length === 0) return { kind: 'reading', chapter: c };
+  if (([1, 2, 3, 4, 5] as const).every((s) => c.counts[s] === 0)) return { kind: 'no-cards', chapter: c };
+  return { kind: 'other' };
+}
+
+/** 「오늘 밟을 것이 없다」의 실제 이유 한 줄. */
+export function emptyToday(gap: TodayGap): string {
+  switch (gap.kind) {
+    case 'done': return t('chapter.todayNoneDone');
+    case 'reading': return t('chapter.todayReading', { name: gap.chapter.name });
+    case 'no-cards': return t('chapter.todayNoCards', { name: gap.chapter.name });
+    default: return t('chapter.todayNone');
+  }
+}
+
 export function CourseScreen(props: CourseScreenProps): React.JSX.Element {
   const { repoId, rootPath } = props;
   const version = useCourse((s) => s.version);
@@ -57,12 +93,14 @@ export function CourseScreen(props: CourseScreenProps): React.JSX.Element {
   const [paths, setPaths] = useState<PathRow[]>([]);
   const [ranges, setRanges] = useState<RangeRow[]>([]);
   const [busy, setBusy] = useState(false);
-  const [env, setEnv] = useState({ tz: 'UTC', rolloverHour: 4, theme: 'light' as 'light' | 'dark' });
+  const [env, setEnv] = useState({ tz: 'UTC', rolloverHour: 4 });
+  /** Monaco 의 테마는 `<html data-theme>` 을 따른다 — 저장값이 아니다 (S2 회귀). */
+  const theme = useResolvedTheme();
   const dict = useMemo(() => dictNow(), []);
   const dayKey = todayKey();
 
   useEffect(() => {
-    void loadSettings().then((s) => setEnv({ tz: s.tz, rolloverHour: s.rolloverHour, theme: s.theme })).catch(() => undefined);
+    void loadSettings().then((s) => setEnv({ tz: s.tz, rolloverHour: s.rolloverHour })).catch(() => undefined);
   }, []);
 
   // 코스 한 벌. 세션이 닫힐 때도 다시 읽는다 — 관문이 올린 겹이 어휘 줄에 닿아야 한다.
@@ -110,8 +148,24 @@ export function CourseScreen(props: CourseScreenProps): React.JSX.Element {
     return () => { alive = false; };
   }, [selected, repoId, rootPath, dict]);
 
+  /*
+   * 포커스가 `<body>` 로 떨어졌으면 다시 화면 안으로 (05 §9 「포커스 유실」 · 실측 D186 감사).
+   *
+   * 이 화면에서 그것이 나는 자리가 둘이다 — ① 「읽기 단 판정하기」처럼 **누른 단추가 그
+   * 자리에서 사라지는** 걸음(1단 → 2단), ② 단 오버레이를 Esc 로 닫은 뒤. 둘 다 다시 그려진
+   * **뒤에** 옮겨야 하므로 마운트 때 한 번이 아니라 `data`·`run` 이 바뀔 때마다 확인한다.
+   * 이미 어딘가에 포커스가 있으면 손대지 않는다 — 사용자가 옮긴 자리를 뺏지 않는다.
+   */
+  useEffect(() => {
+    if (data === null) return;
+    const at = document.activeElement;
+    if (at !== null && at !== document.body) return;
+    focusOrFallback(document.querySelector('.cc-acts button, .cc-today button'), 'main.cc');
+  }, [data, run]);
+
   const chapter = data?.chapters.find((c) => c.unitId === selected) ?? null;
   const dueSet = useMemo(() => new Set(data?.due.map((d) => d.unitId) ?? []), [data]);
+  const gap = data === null ? { kind: 'other' as const } : todayGap(data);
 
   const gate = useCallback(async (c: ChapterView) => {
     const g = data?.gates.get(c.unitId) ?? null;
@@ -222,6 +276,7 @@ export function CourseScreen(props: CourseScreenProps): React.JSX.Element {
       <div inert={run !== null ? true : undefined}>
         <Page
           className="cc chapters"
+          focusOnMount
           head={(
             <header className="cc-head l-row">
               <h1>{t('chapter.title')}<span className="pl">{t('chapter.plain')}</span></h1>
@@ -259,7 +314,19 @@ export function CourseScreen(props: CourseScreenProps): React.JSX.Element {
                 <section className="cc-today" aria-label={t('chapter.today')}>
                   <h2>{t('chapter.today')}<span className="pl">{t('chapter.todayPlain')}</span></h2>
                   {data.plan.length === 0 ? (
-                    <p className="note">{t('chapter.todayNone')}</p>
+                    <>
+                      <p className="note">{emptyToday(gap)}</p>
+                      {/* 이유만 적고 단추를 안 두면 여기가 막힌 칸이 된다 (D186 ①). */}
+                      {gap.kind === 'reading' ? (
+                        <PressButton disabled={busy} onClick={() => void judge(gap.chapter)}>
+                          {t('chapter.startToday')}
+                        </PressButton>
+                      ) : gap.kind === 'no-cards' ? (
+                        <PressButton disabled={busy} onClick={() => void ingest('incremental')}>
+                          {t('chapter.reingest')}
+                        </PressButton>
+                      ) : null}
+                    </>
                   ) : (
                     <>
                       <TimeQueue items={todayItems} pos={0} labels />
@@ -303,6 +370,7 @@ export function CourseScreen(props: CourseScreenProps): React.JSX.Element {
                     onJudgeReading={() => void judge(chapter)}
                     onStart={(stage) => void start(chapter, stage)}
                     onRecheck={() => void recheck(chapter)}
+                    onReingest={() => void ingest('incremental')}
                   />
                 )}
               </div>
@@ -320,7 +388,7 @@ export function CourseScreen(props: CourseScreenProps): React.JSX.Element {
           dayKey={dayKey}
           tz={env.tz}
           rolloverHour={env.rolloverHour}
-          theme={env.theme}
+          theme={theme}
           hasNext={hasNext}
           onNextStage={(stage) => {
             const c = data?.chapters.find((x) => x.unitId === run.unitId);

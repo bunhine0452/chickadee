@@ -180,6 +180,7 @@ describe('en 스모크 — 홈 · 인제스트 · components/home', () => {
         done={false}
         onCancel={() => undefined}
         onDone={() => undefined}
+        onStart={() => undefined}
       />,
     );
     const ingestLeft = ownText(ingest.container).match(HANGUL) ?? [];

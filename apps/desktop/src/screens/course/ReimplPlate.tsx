@@ -121,7 +121,7 @@ export function ReimplPlate(props: ReimplPlateProps): React.JSX.Element | null {
         </PressButton>
       )}
     >
-      <Ask q={reimpl.question} hint={t('chapter.reimplSig')} />
+      <Ask q={reimpl.question} hint={t('chapter.reimplAsk')} />
       {answered && !isHandoff ? <RunStrip phase={props.phase} needsRun={needsRun(p)} /> : null}
       <dl className="cc-spec">
         <dt>{t('chapter.reimplSig')}</dt>

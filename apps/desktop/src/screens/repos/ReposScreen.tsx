@@ -120,7 +120,7 @@ export function ReposScreen({ onBack }: ReposScreenProps) {
   };
 
   return (
-    <Page className="shelf" width="wide" head={(
+    <Page className="shelf" width="wide" focusOnMount head={(
       <header className="shelf-head l-row">
         <h1>
           {t('repos.title')}

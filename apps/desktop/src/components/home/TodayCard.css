@@ -55,11 +55,14 @@ section.today {
   padding-top: var(--s-4);
 }
 
+/* 행은 산문이 아니다 — `reset.css` 의 `li{max-width:36em}` 이 걸리면 「새 문제」 이름표가
+   카드 한가운데에서 끝나고 오른쪽 절반이 빈다(실측: 2560 에서 1120px 카드 안 541px). */
 .today-list li {
   display: grid;
   grid-template-columns: 1.6em minmax(0, 1fr) auto;
   align-items: baseline;
   gap: var(--s-2);
+  max-width: none;
   font-size: var(--fs-2);
   min-width: 0;
 }

@@ -28,7 +28,7 @@
   margin: 0;
   font-family: var(--font-mono);
   font-size: var(--fs-3);
-  font-weight: 600;
+  font-weight: var(--fw-medium);
 }
 
 .dq-q .n {

@@ -78,9 +78,13 @@ export const core: Record<string, string> = {
   'settings.look.title': 'Look',
   'settings.look.plain': '= screen brightness and motion',
   'settings.look.process': 'Screen',
+  'settings.look.themeSystem': 'Follow the system',
   'settings.look.themeLight': 'Light',
   'settings.look.themeDark': 'Dark',
-  'settings.look.themeSwitch': 'Light \u00b7 dark',
+  'settings.look.themeSwitch': 'Screen brightness \u2014 follow the system, light, or dark',
+  'settings.look.themeNote':
+    'The default follows the system: when this computer turns dark at night, so does the app. '
+    + 'Picking light or dark pins it regardless of the system.',
   'settings.look.note':
     'What you pick here is saved and comes back next time. Changing the brightness moves '
     + 'nothing \u2014 not one pixel of the type or the layout.',

@@ -235,13 +235,18 @@ describe('SettingsScreen', () => {
       .toBe('15');
   });
 
-  it('모양 스위치가 <html> 을 세우고 저장한다 (E7)', async () => {
+  it('밝기는 라디오 셋이고 고른 것이 <html> 을 세우고 저장한다 (E7 · D187 ⑫)', async () => {
     const user = userEvent.setup();
     await drawn();
-    await user.click(screen.getByRole('switch', { name: '밝게 · 어둡게 전환' }));
+    // 기본은 「시스템 따름」이다 — 한 번도 안 고른 사람이 방의 밝기를 따른다.
+    expect(screen.getByRole('radio', { name: '시스템 따름' }).getAttribute('aria-checked')).toBe('true');
+    await user.click(screen.getByRole('radio', { name: '어둡게' }));
 
     expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
     await waitFor(() => {
+      const mode = db.prepare("SELECT value_json FROM settings WHERE key = 'theme_mode'").get() as
+        { value_json: string } | undefined;
+      expect(mode?.value_json).toBe('"dark"');
       const row = db.prepare("SELECT value_json FROM settings WHERE key = 'theme'").get() as
         { value_json: string } | undefined;
       expect(row?.value_json).toBe('"dark"');

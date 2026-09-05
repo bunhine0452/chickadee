@@ -17,6 +17,8 @@ import { clone } from './en/clone.js';
 import { course } from './en/course.js';
 import { run } from './en/run.js';
 import { diagram } from './en/diagram.js';
+import { fund } from './en/fund.js';
+import { drill } from './en/drill.js';
 import type { MessageKey } from './ko.js';
 
 export const en: Partial<Record<MessageKey, string>> = {
@@ -31,4 +33,6 @@ export const en: Partial<Record<MessageKey, string>> = {
   ...course,
   ...run,
   ...diagram,
+  ...fund,
+  ...drill,
 };

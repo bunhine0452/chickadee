@@ -159,12 +159,116 @@ export type Trim = Settings['trim'];
 export type Motion = Settings['motion'];
 
 /**
+ * 사용자가 고르는 값 (D187 ⑫). `settings.theme` 은 **계산된 결과**(light|dark)를 들고,
+ * 고른 것이 「시스템 따름」인지는 이 값이 든다 — 그래야 밤이 되어 시스템이 바뀔 때
+ * 화면이 따라가고, 그 사이에 저장된 값이 사용자의 선택을 덮어쓰지 않는다.
+ */
+export type ThemeMode = 'system' | Theme;
+
+/** 기본은 시스템 따름이다 (D187 ⑫). 스위치를 한 번도 안 누른 사람이 방의 밝기를 따른다. */
+export const THEME_MODE_DEFAULT: ThemeMode = 'system';
+
+/** `Settings` 밖의 키. `EDITOR_ASSIST_KEY` 와 같은 규약이다 — 모르는 키는 읽는 쪽이 건너뛴다. */
+const THEME_MODE_KEY = 'theme_mode';
+
+const isThemeMode = (v: unknown): v is ThemeMode => v === 'system' || v === 'light' || v === 'dark';
+
+/** 시스템이 지금 어둡나. 매체 질의를 못 쓰는 환경(jsdom 일부)에서는 밝게로 본다. */
+export function systemTheme(): Theme {
+  const mq = typeof window.matchMedia === 'function'
+    ? window.matchMedia('(prefers-color-scheme: dark)')
+    : null;
+  return mq !== null && mq.matches ? 'dark' : 'light';
+}
+
+/** 고른 값 → 실제로 `<html data-theme>` 에 설 값. */
+export const resolveTheme = (mode: ThemeMode): Theme => (mode === 'system' ? systemTheme() : mode);
+
+export async function loadThemeMode(): Promise<ThemeMode> {
+  try {
+    const rows = await ipc.store.query('settings.get_all', {});
+    const row = rows.find((r) => r.key === THEME_MODE_KEY);
+    if (row === undefined) return THEME_MODE_DEFAULT;
+    const value: unknown = JSON.parse(row.value_json);
+    return isThemeMode(value) ? value : THEME_MODE_DEFAULT;
+  } catch {
+    return THEME_MODE_DEFAULT;
+  }
+}
+
+export async function saveThemeMode(mode: ThemeMode, now: number): Promise<void> {
+  await ipc.store.exec('settings.set', {
+    key: THEME_MODE_KEY,
+    valueJson: JSON.stringify(mode),
+    updatedAt: now,
+  });
+}
+
+/**
+ * 지금 고른 값. **모듈 하나가 든다** — 부팅(`boot.ts`)과 설정 화면(`useAppearance`)이 같은
+ * 값을 봐야 시스템 변경을 따라갈지 말지가 갈리지 않는다. 헤더에 스위치가 없어진 뒤로
+ * (D187 ⑫) 훅을 든 화면이 설정 하나뿐이라, 훅에만 두면 홈은 아무도 안 세운다.
+ */
+let themeMode: ThemeMode = THEME_MODE_DEFAULT;
+
+/** `<html data-theme>` 이 바뀌면 듣는 곳 — Monaco 처럼 CSS 밖에서 색을 드는 것들. */
+const themeSubs = new Set<(theme: Theme) => void>();
+
+/** 지금 화면에 선 밝기. 속성이 진실이다 — 저장값이 아니라 여기서 읽는다. */
+export function currentTheme(): Theme {
+  const at = document.documentElement.getAttribute('data-theme');
+  return at === 'dark' || at === 'light' ? at : resolveTheme(themeMode);
+}
+
+/**
+ * CSS 밖에서 색을 드는 컴포넌트가 쓰는 훅 (Monaco · 캔버스).
+ *
+ * `loadSettings().theme` 을 읽으면 안 된다 — 그 열은 **계산된 결과의 마지막 기록**이라
+ * 「시스템 따름」인 채 한 번도 안 고른 사람에게는 기본값 `light` 가 들어 있고, 그러면
+ * 판은 어둡고 편집기만 밝은(또는 그 반대) 화면이 난다 (실측 · S2 스크린샷).
+ */
+export function useResolvedTheme(): Theme {
+  const [theme, setTheme] = useState<Theme>(currentTheme);
+  useEffect(() => {
+    setTheme(currentTheme());
+    themeSubs.add(setTheme);
+    return () => {
+      themeSubs.delete(setTheme);
+    };
+  }, []);
+  return theme;
+}
+
+/**
+ * 부팅이 밝기를 세운다 (D187 ⑫ · 창을 보이기 전에).
+ *
+ * 여기가 없으면 `<html data-theme>` 을 세우는 것이 설정 화면의 훅뿐이라, 설정에 들어갔다
+ * 나오기 전에는 홈도 세션도 밝게로 굳는다 — S2 의 스크린샷 144장 중 어둡게 23화면이
+ * 밝게와 바이트까지 같았던 것이 그것이다.
+ *
+ * 「시스템 따름」인 동안에는 매체 질의를 듣는다. 리스너는 한 번만 달고 **그때의 모드**가
+ * 아니라 `themeMode` 를 그 자리에서 읽는다 — 설정에서 고정으로 바꾸면 그 뒤로는 안 따라간다.
+ */
+export async function startTheme(): Promise<void> {
+  themeMode = await loadThemeMode().catch(() => THEME_MODE_DEFAULT);
+  applyTheme(resolveTheme(themeMode));
+  if (typeof window.matchMedia !== 'function') return;
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (themeMode !== 'system') return;
+    applyTheme(systemTheme());
+  });
+}
+
+/**
  * `<html data-theme>` 을 세우는 **유일한** 자리 (05 §4.3 — 테마는 이 속성 하나로만 바뀐다).
  *
  * `measured` 는 사용자가 스위치를 눌렀을 때만 참이다. 마운트와 부팅 복원은 전환이 아니라
  * 화면 전체의 첫 조판이라 같은 이름으로 세면 예산이 늘 초과로 보인다(실측 138ms 대 237ms).
  */
 export function applyTheme(theme: Theme, measured = false): void {
+  const notify = (): void => {
+    for (const sub of themeSubs) sub(theme);
+  };
   const set = (): void => {
     document.documentElement.setAttribute('data-theme', theme);
     // 05 §10 `theme:switch` 예산 100ms — 토큰을 갈아 끼우고 **다시 계산까지** 끝나는 데까지다.
@@ -173,6 +277,7 @@ export function applyTheme(theme: Theme, measured = false): void {
   };
   if (measured) measure('theme:switch', set);
   else document.documentElement.setAttribute('data-theme', theme);
+  notify();
 }
 
 /** `<html data-trim>` 을 세우는 유일한 자리. 텍스트·레이아웃은 1px 도 바뀌지 않는다 (05 §4.3). */
@@ -210,10 +315,13 @@ export function applyLocale(locale: Locale): void {
 }
 
 export interface Appearance {
+  /** 지금 화면에 선 밝기. 「시스템 따름」이면 시스템이 정한 값이다. */
   theme: Theme;
+  /** 사용자가 고른 것 — `system` 이 기본 (D187 ⑫). */
+  themeMode: ThemeMode;
   trim: Trim;
   motion: Motion;
-  setTheme: (v: Theme) => void;
+  setTheme: (v: ThemeMode) => void;
   setTrim: (v: Trim) => void;
   setMotion: (v: Motion) => void;
 }
@@ -221,40 +329,55 @@ export interface Appearance {
 /**
  * 테마·부속을 `settings` 테이블에 넣고 켤 때 도로 읽는다 (E7 — 재실행해도 야간반이 유지된다).
  *
- * 마스트헤드와 설정 화면이 같이 쓴다. 둘은 App 이 서로 배타적으로 그리므로 한 번에 하나만
- * 산다 — 그래서 상태를 전역으로 올리지 않았다. 읽기에 실패하면 기본값으로 뜨고 화면은 산다.
+ * 밝기는 값이 둘이 아니라 셋이다 (D187 ⑫): 고른 것(`theme_mode`)과 그 결과(`theme`).
+ * 「시스템 따름」이면 `prefers-color-scheme` 을 듣고 있다가 방이 어두워지면 따라 바뀐다 —
+ * 저장하는 것은 고른 값이고, `settings.theme` 에는 결과를 같이 적는다(코스 오버레이처럼
+ * 계산된 값을 읽는 자리가 있다).
+ *
+ * 설정 화면만 쓴다 — 헤더에는 스위치가 없다 (D187 ⑫). 읽기에 실패하면 기본값으로 뜨고
+ * 화면은 산다.
  */
 export function useAppearance(): Appearance {
-  const [theme, setThemeState] = useState<Theme>(DEFAULTS.theme);
+  const [mode, setModeState] = useState<ThemeMode>(THEME_MODE_DEFAULT);
+  const [theme, setThemeState] = useState<Theme>(resolveTheme(THEME_MODE_DEFAULT));
   const [trim, setTrimState] = useState<Trim>(DEFAULTS.trim);
   const [motion, setMotionState] = useState<Motion>(DEFAULTS.motion);
 
   useEffect(() => {
     let live = true;
-    applyTheme(DEFAULTS.theme);
     applyTrim(DEFAULTS.trim);
     applyMotion(DEFAULTS.motion);
+    // 밝기는 **여기서 세우지 않는다** — 부팅(`startTheme`)이 창을 보이기 전에 이미 세웠다.
+    // 훅이 다시 세우면 설정 화면을 연 순간에만 값이 맞는 지금의 결함이 되돌아온다.
+    setModeState(themeMode);
+    setThemeState(currentTheme());
     void loadSettings().then(
       (s) => {
         if (!live) return;
-        setThemeState(s.theme);
         setTrimState(s.trim);
         setMotionState(s.motion);
-        applyTheme(s.theme);
         applyTrim(s.trim);
         applyMotion(s.motion);
       },
       () => log.warn('설정을 읽지 못해 기본 모양으로 연다'),
     );
+    // 시스템이 바뀌면 `startTheme` 의 리스너가 속성을 갈고, 그 알림으로 이 칸도 따라간다.
+    themeSubs.add(setThemeState);
     return () => {
       live = false;
+      themeSubs.delete(setThemeState);
     };
   }, []);
 
-  const setTheme = useCallback((v: Theme) => {
-    setThemeState(v);
-    applyTheme(v, true);
-    void saveSetting('theme', v, Date.now()).catch(() => log.warn('테마를 저장하지 못했다'));
+  const setTheme = useCallback((v: ThemeMode) => {
+    const next = resolveTheme(v);
+    // 모듈이 든 모드를 함께 갈아야 부팅이 단 매체 질의 리스너가 그 뒤로 안 따라간다.
+    themeMode = v;
+    setModeState(v);
+    applyTheme(next, true);
+    const now = Date.now();
+    void saveThemeMode(v, now).catch(() => log.warn('밝기 설정을 저장하지 못했다'));
+    void saveSetting('theme', next, now).catch(() => log.warn('테마를 저장하지 못했다'));
   }, []);
 
   const setTrim = useCallback((v: Trim) => {
@@ -269,7 +392,7 @@ export function useAppearance(): Appearance {
     void saveSetting('motion', v, Date.now()).catch(() => log.warn('모션 설정을 저장하지 못했다'));
   }, []);
 
-  return { theme, trim, motion, setTheme, setTrim, setMotion };
+  return { theme, themeMode: mode, trim, motion, setTheme, setTrim, setMotion };
 }
 
 /**

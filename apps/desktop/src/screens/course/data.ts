@@ -357,13 +357,16 @@ export async function runStageAnswer(input: {
   if (lang === null) return null;
   const chunk = await ipc.file.readLines({ rootPath: input.rootPath, relPath: win.file, from: 1, to: RUN_FILE_MAX_LINES });
   const text = spliceWindow(chunk.lines, win);
-  return runTests({
+  const result = await runTests({
     repoId: input.repoId,
     lang,
     files: [{ path: win.file, text }],
     tests: testsOf(input.payload).map((t) => ({ path: t.path, text: t.text })),
     timeoutMs: RUN_TIMEOUT_MS,
   });
+  // `RunStatus` 는 표준 입력 러너 때문에 `compile-error` 로 넓어졌지만(D186 ⑧) 4·5단의
+  // `StageRun` 은 아직 다섯이다. 이 자리에서 둘의 뜻은 같다 — 답을 돌려 보지 못했다.
+  return { ...result, status: result.status === 'compile-error' ? 'error' : result.status };
 }
 
 /** 개념 이름 한 줄. 사전에 없으면 id 그대로 — 화면이 빈 칸을 내지 않는다. */

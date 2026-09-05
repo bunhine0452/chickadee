@@ -13,7 +13,7 @@
  *
  * 색·활자·간격은 하나도 정하지 않는다 — 그것은 `tokens.css` 와 화면 자신의 몫이다.
  */
-import type { ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 
 export interface PageProps {
   /** `<main>` 에 붙는 화면 이름. 기존 화면의 선택자(`.board`·`.shelf` …)를 그대로 쓴다. */
@@ -30,17 +30,34 @@ export interface PageProps {
    */
   width?: 'read' | 'wide' | 'full' | undefined;
   busy?: boolean | undefined;
+  /**
+   * 화면이 뜰 때 포커스를 이 `<main>` 에 둔다 (정본 §3-8 · 05 §9).
+   *
+   * 홈 말고는 전부 켠다. 안 켜면 화면을 바꾼 직후 포커스가 `<body>` 로 떨어져 Tab 이
+   * 브라우저 크로뮴부터 다시 돈다 — 실측으로 코스·설정·서가 셋이 그랬다. 홈은 App 이
+   * 세션에서 나온 자리를 따로 잡으므로(D111) 여기서 손대지 않는다.
+   */
+  focusOnMount?: boolean | undefined;
   children: ReactNode;
 }
 
 const WRAP = { read: '', wide: ' l-wrap-wide', full: ' l-wrap-full' } as const;
 
 export function Page({
-  className, label, head, width = 'read', busy, children,
+  className, label, head, width = 'read', busy, focusOnMount, children,
 }: PageProps): React.JSX.Element {
   const wrap = `l-wrap${WRAP[width]}`;
+  const main = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (focusOnMount !== true) return;
+    // `preventScroll` — 옮기는 것이 목적이고 스크롤은 목적이 아니다 (App.tsx 의 홈 복귀와 같다).
+    main.current?.focus({ preventScroll: true });
+  }, [focusOnMount]);
+
   return (
     <main
+      ref={main}
       className={`l-page${className === undefined ? '' : ` ${className}`}`}
       tabIndex={-1}
       {...(label === undefined ? {} : { 'aria-label': label })}

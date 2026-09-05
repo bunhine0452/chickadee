@@ -28,6 +28,8 @@ export interface ChapterPanelProps {
   onJudgeReading: () => void;
   onStart: (stage: StageNo) => void;
   onRecheck: () => void;
+  /** 리포를 다시 읽는다. 판이 없는 단에서 **유일한 다음 행동**이다 (D186 ①). */
+  onReingest: () => void;
 }
 
 /** 이 단의 판이 몇 분인가 — 카드 종류를 모르니 단의 평균으로 어림한다. */
@@ -105,7 +107,13 @@ export function ChapterPanel(props: ChapterPanelProps): React.JSX.Element {
 
           {next !== null && next >= 2 ? (
             startable === null ? (
-              <p className="note">{t('chapter.noCards')}</p>
+              // 이유만 적고 끝내면 여기가 막힌 화면이다 — 다시 읽는 문을 그 자리에 낸다.
+              <>
+                <p className="note">{t('chapter.noCards')}</p>
+                <PressButton disabled={props.busy} onClick={props.onReingest}>
+                  {t('chapter.reingest')}
+                </PressButton>
+              </>
             ) : (
               <PressButton disabled={props.busy} onClick={() => props.onStart(startable)}>
                 {t('chapter.startStage', {

@@ -21,6 +21,9 @@ export const course = {
   // ───────── 목차 ─────────
   'chapter.tocLabel': '코스 목차',
   'chapter.count': '{{done}} / {{total}} 챕터 통과',
+  // 기능 챕터가 0개면 「0 / 0 통과」와 0% 막대는 진도가 아니라 잡음이다 — 목차에는 막간이
+  // 보이는데 셈만 비어 있으면 화면이 자기 목록과 다른 말을 한다.
+  'chapter.countExtraOnly': '기능 챕터 없음 · 막간·부록 {{n}}개',
   'chapter.pct': '코스 진행률 {{n}}%',
   'chapter.secChapters': '챕터',
   'chapter.secExtra': '막간 · 부록',
@@ -71,7 +74,17 @@ export const course = {
   // ───────── 오늘 ─────────
   'chapter.today': '오늘 15분',
   'chapter.todayPlain': '= 만기 재검 → 오늘 챕터의 다음 단',
+  // 「없다」는 이유가 셋이고 셋의 다음 행동이 다르다 (D186 ①·④). 하나로 뭉치면 그중
+  // 둘은 거짓말이 되고, 어느 경우든 화면에 다음 행동이 없다.
   'chapter.todayNone': '오늘 밟을 것이 없습니다 — 코스가 끝났거나 리포를 읽기 전입니다.',
+  'chapter.todayNoneDone': '코스를 끝까지 밟았습니다. 오늘 만기인 재검도 없습니다.',
+  'chapter.todayReading':
+    '「{{name}}」 챕터의 다음 단은 읽기(1단)입니다 — 이 챕터에 새로 찍을 어휘가 없어 '
+    + '판정 한 번이면 통과합니다.',
+  'chapter.todayNoCards':
+    '「{{name}}」 챕터에 아직 문제가 없습니다 — 이 챕터에서 문제를 뽑을 재료(요청 줄기·값이 '
+    + '바뀌는 자리)를 못 찾았습니다. 리포를 다시 읽으면 그때 다시 찾습니다.',
+  'chapter.reingest': '리포 다시 읽기',
   'chapter.todayRecheckOnly': '오늘은 밀린 재검부터입니다. 다음 단은 내일 그 자리에 그대로 있습니다.',
   'chapter.todayMin': '{{n}}문제 · 약 {{min}}분',
   'chapter.qRecheck': '재검',
@@ -115,6 +128,9 @@ export const course = {
   'chapter.placeAt': '{{n}}번째 줄 앞',
   'chapter.placeEnd': '맨 끝',
   'chapter.reimplSig': '시그니처',
+  // 물음 밑의 곁말. 아래 `<dt>` 가 같은 자리에서 「시그니처」라고 다시 적어 30px 사이로
+  // 같은 낱말이 두 번 떴다 (실측 · S2 스크린샷) — 여기는 **무엇을 하라**를 적는다.
+  'chapter.reimplAsk': '아래 시그니처와 지켜야 할 것을 읽고, 몸통을 직접 쓰세요.',
   'chapter.reimplHold': '지킬 것',
   'chapter.reimplContext': '이웃 층 — {{file}}',
   'chapter.reimplEditor': '재구현 편집기',
@@ -169,7 +185,9 @@ export const course = {
   'chapter.orderQ': '{{first}} 에서 {{last}} 까지 — 도는 순서대로 세우세요.',
   'chapter.orderHint': '카드를 위에서 아래로 세우고 <b>⌘↵</b> 로 채점합니다. 붙어 있는 두 장이 맞을 때마다 점수가 오릅니다.',
   'chapter.orderOk': '순서가 맞습니다. 이 순서는 외운 것이 아니라 코드가 정한 것입니다 — 앞 칸의 그 줄이 다음 칸을 부릅니다.',
-  'chapter.orderRule': '규칙 — 순서는 부르는 자리에서 읽습니다.',
+  // 판정란이 「규칙」이라는 말머리를 이미 붙인다(`FeedbackSlot`) — 여기서 또 붙이면
+  // 화면에 「규칙 — 규칙 — …」이 뜬다 (실측 · D186 감사).
+  'chapter.orderRule': '순서는 부르는 자리에서 읽습니다.',
   'chapter.orderFacts': '조각마다 왜 그 자리인가',
   'chapter.orderFactHop': '{{here}}:{{line}} 이 {{next}} 을 {{edge}} 로 부릅니다',
   'chapter.orderFactLast': '여기서 더 부르는 곳이 없습니다 — 줄기의 끝입니다',
@@ -186,7 +204,7 @@ export const course = {
   'chapter.traceQ': '{{file}} — {{name}} 이 가리키는 상자가 언제 바뀌나. 빈 칸을 채우세요.',
   'chapter.traceHint': '값이 바뀌는 칸만 비어 있습니다. 채워진 칸이 예측의 재료입니다.',
   'chapter.traceOk': '{{line}} 줄에서 {{name}} 이 다른 상자를 가리키게 됩니다. 이름이 옮겨 간 것이지 앞 상자가 바뀐 것이 아닙니다.',
-  'chapter.traceRule': '규칙 — 참조는 상자를 가리킬 뿐 상자를 들고 있지 않습니다.',
+  'chapter.traceRule': '참조는 상자를 가리킬 뿐 상자를 들고 있지 않습니다.',
   'chapter.traceCaption': '세로는 줄 번호, 가로는 좇는 것',
   'chapter.traceWhen': '언제',
   'chapter.traceColBox': '{{name}} 이 가리키는 상자',

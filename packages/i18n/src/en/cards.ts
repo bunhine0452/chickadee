@@ -27,6 +27,7 @@ export const cards: Record<string, string> = {
     'This is not in your code — another idiom took the job. Seeing the original shape here '
     + 'is what makes the one your code picked readable.',
   't0.syntheticFile': 'dictionary example',
+  't0.syntheticSource': 'Dictionary example — <b>not a line lifted from your code</b>',
   't0.noExample': 'the dictionary has no usable example',
   't0.noSiteUsable': 'no usable site',
   't0.dropNoHole': 'this site has no hole (@hole)',

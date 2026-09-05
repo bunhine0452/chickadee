@@ -40,11 +40,14 @@
   list-style: none;
 }
 
+/* 행은 산문이 아니다 — `reset.css` 의 `li{max-width:36em}` 이 걸리면 인제스트 화면의
+   시간 비례 목록이 1120px 칸 안에서 576px 로 눌리고 오른쪽이 텅 빈다(2560 실측). */
 .qi {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 10px;
   align-items: center;
+  max-width: none;
   padding: 6px 0;
   border-top: 1px dashed var(--border);
   font-size: var(--fs-2);
@@ -56,7 +59,7 @@
 .qi .nm {
   overflow: hidden;
   color: var(--text);
-  font-weight: 600;
+  font-weight: var(--fw-medium);
   letter-spacing: -0.015em;
   text-overflow: ellipsis;
   white-space: nowrap;

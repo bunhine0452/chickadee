@@ -39,6 +39,11 @@ export interface FeedbackSlotProps {
   rule?: string | undefined;
   /** 「이 줄이 끝난 뒤」의 값. */
   result?: { label: string; value: string; note: string } | undefined;
+  /**
+   * 채점 결과 한 줄 — 코스의 단 (D171). `result` 를 빌려 쓰면 「이 줄이 끝난 뒤 · 채점
+   * = 0% —」처럼 말머리도 꼬리표도 안 맞는 줄이 뜬다 (실측 · D186 감사).
+   */
+  score?: { label: string; value: string } | undefined;
   /** 아래층에서 올라올 때 이어 붙는 다리 문장. */
   bridge?: string | undefined;
   gain?: FeedbackGain | undefined;
@@ -69,6 +74,7 @@ export function FeedbackSlot({
   edge,
   rule,
   result,
+  score,
   bridge,
   gain,
   lifer,
@@ -126,7 +132,14 @@ export function FeedbackSlot({
               <p className="fb-rule">
                 <b>{t('plate.afterLine')}</b> · <code><RichText html={result.label} /></code>
                 {' = '}
-                <code><RichText html={result.value} /></code> — <RichText html={result.note} />
+                <code><RichText html={result.value} /></code>
+                {result.note === '' ? null : <> — <RichText html={result.note} /></>}
+              </p>
+            )}
+
+            {score === undefined ? null : (
+              <p className="fb-rule">
+                <b>{score.label}</b> · <code>{score.value}</code>
               </p>
             )}
 

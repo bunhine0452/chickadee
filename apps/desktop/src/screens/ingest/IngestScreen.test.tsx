@@ -15,6 +15,7 @@ const base = {
   done: false,
   onCancel: () => undefined,
   onDone: () => undefined,
+  onStart: () => undefined,
 };
 
 describe('4단계 매핑 (D47)', () => {

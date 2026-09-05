@@ -42,6 +42,11 @@ export const run = {
   // 러너는 언어마다 하나가 아니라 **방언마다** 하나다 (정본 §5). 이 앱이 든 것은 하나다.
   'run.reason.dialectUnsupported': '이 앱이 든 데이터베이스는 SQLite 하나입니다. 이 문장은 다른 방언이라 여기서는 안 돕니다.',
   'run.reason.noFixtureDb': '돌려 볼 데이터가 없습니다. 표는 있는데 행이 비어 있어요.',
+  // 표준 입력 러너 (D186 ⑧ ④). 언어마다 따로 적는다 — 「러너 없음」 한 마디로 접으면
+  // 파이썬은 되는데 자바가 없는 컴퓨터에서 두 사실이 같은 문장이 된다.
+  'run.reason.toolchainMissingPy': '이 컴퓨터에서 python3 을 찾지 못했습니다. 파이썬 문제는 채점하지 않습니다.',
+  'run.reason.toolchainMissingTs': '이 컴퓨터에서 node 를 찾지 못했습니다. 타입스크립트 문제는 채점하지 않습니다.',
+  'run.reason.toolchainMissingJava': '이 컴퓨터에서 javac·java 를 찾지 못했습니다. 자바 문제는 채점하지 않습니다.',
 
   // ───────── 곁들이 ─────────
   'run.detected': 'JDK {{jdk}} · Gradle {{gradle}}',

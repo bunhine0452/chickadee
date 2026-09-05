@@ -77,13 +77,18 @@ export function App(): React.JSX.Element {
   useEffect(() => {
     if (inSession || ui.screen !== 'home') return;
     const id = requestAnimationFrame(() => {
+      // **포커스를 잃었을 때만** 옮긴다. `ui.home` 이 바뀔 때마다(세션 뒤 새로 읽기·판 만들기)
+      // 이 효과가 다시 도는데, 그때 사용자가 앉아 있던 자리를 뺏으면 안 된다.
+      if (document.activeElement !== null && document.activeElement !== document.body) return;
       // `preventScroll` — 포커스를 옮기는 것이 목적이고 스크롤은 목적이 아니다. 뿌리에
       // 포커스를 주면 브라우저가 그것을 화면 맨 위로 끌어올리는데, 창 크로뮴 여백(D126)이
       // 생긴 뒤로는 그 28px 이 스크롤로 접혀 종이가 신호등 밑으로 들어갔다.
       document.querySelector<HTMLElement>('.press')?.focus({ preventScroll: true });
     });
     return () => cancelAnimationFrame(id);
-  }, [inSession, ui.screen]);
+    // `ui.home` 이 든 이유: 첫 부팅에서 이 효과가 도는 순간에는 홈이 아직 `aria-busy` 한 장이라
+    // `.press` 가 없다. 그대로 두면 앱을 켠 직후 포커스가 `<body>` 에 남는다 (실측 D186 감사).
+  }, [inSession, ui.screen, ui.home]);
 
   // 세션이 닫히면 오늘 할 것을 다시 읽는다 — 부분 갱신보다 통째로 다시 읽는 편이 싸다 (05 §3).
   useEffect(() => {
@@ -111,6 +116,11 @@ export function App(): React.JSX.Element {
           error={ui.error}
           onCancel={() => void cancelIngest()}
           onDone={() => useUi.getState().go('home')}
+          onStart={() => {
+            // 홈으로 옮긴 **뒤에** 연다 — 세션은 라우트가 아니라 홈 위의 오버레이다 (05 §2.3).
+            useUi.getState().go('home');
+            void start(repo.id, repo.rootPath);
+          }}
         />
         <Toast msg={ui.toast ?? ''} on={ui.toast !== undefined} />
       </>

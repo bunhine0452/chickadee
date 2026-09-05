@@ -87,8 +87,14 @@ test('15 키보드만으로 1~13', async ({ page, app }) => {
   await page.locator('.masthead').waitFor();
   await expect(page.locator('.proof')).toHaveCount(0);
 
-  // ── 12. 야간반도 키보드로 — 스위치는 `role=switch` 이고 `←→` 로 넘어간다.
-  await tabTo(page, 'button.sw[aria-label="밝게 · 어둡게 전환"]');
+  // ── 12. 야간반도 키보드로. 밝기는 설정 화면에 있다 (D187 ⑫) — 라디오 셋이고 `←→` 로
+  //        넘어간다. 헤더에는 스위치가 없다.
+  await expect(page.locator('header.masthead [role="switch"]')).toHaveCount(0);
+  await page.getByRole('button', { name: '설정' }).focus();
+  await page.keyboard.press('Enter');
+  await page.locator('main.settings').waitFor();
+  await page.getByRole('radio', { name: '시스템 따름' }).focus();
+  await page.keyboard.press('ArrowRight');
   await page.keyboard.press('ArrowRight');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 

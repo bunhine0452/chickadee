@@ -170,8 +170,9 @@ export const home: Record<string, string> = {
   // ── Today's plan ────────────────────────────────────────────────────────
   'home.todayTitle': 'Today’s plan',
   'home.todayEmpty':
-    'No questions for today. Dig into the repo some more, or come back tomorrow — '
-    + 'nothing gets padded out to fill the time.',
+    'Today’s share is done. If you want more, make a question from “Grammar you have not met yet” '
+    + 'below, or take the next stage under “Course” at the top. Nothing gets padded out to fill '
+    + 'the time — coming back tomorrow is fine.',
   'home.todayCount': '<b>{{plates}}</b> questions · about <b>{{mins}}</b> min',
   'home.todayList': 'Questions queued for today',
   'home.todayStart': 'Start studying',

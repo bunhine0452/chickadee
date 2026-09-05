@@ -59,22 +59,34 @@ export function ChapterToc(props: ChapterTocProps): React.JSX.Element {
 
   return (
     <div className="cc-toc">
+      {/* 기능 챕터가 0개면 「0 / 0 통과」와 0% 막대를 그리지 않는다 — 목차에는 막간이
+          보이는데 셈만 0/0 이면 화면이 자기 목록과 다른 말을 한다 (D186 ④). */}
       <div className="cc-toc-head">
-        <b>{t('chapter.count', { done: String(passed), total: String(entry.length) })}</b>
-        <div
-          className="cc-bar"
-          role="img"
-          aria-label={t('chapter.pct', { n: String(pct) })}
-          style={{ '--pct': `${pct}%` } as React.CSSProperties}
-        >
-          <i aria-hidden="true" />
-        </div>
+        {entry.length === 0 ? (
+          <b>{t('chapter.countExtraOnly', { n: String(extra.length) })}</b>
+        ) : (
+          <>
+            <b>{t('chapter.count', { done: String(passed), total: String(entry.length) })}</b>
+            <div
+              className="cc-bar"
+              role="img"
+              aria-label={t('chapter.pct', { n: String(pct) })}
+              style={{ '--pct': `${pct}%` } as React.CSSProperties}
+            >
+              <i aria-hidden="true" />
+            </div>
+          </>
+        )}
       </div>
 
-      <h3>{t('chapter.secChapters')}</h3>
-      <ol className="cc-rows">
-        {entry.map((c, i) => row(c, t('chapter.no', { n: String(i + 1) })))}
-      </ol>
+      {entry.length === 0 ? null : (
+        <>
+          <h3>{t('chapter.secChapters')}</h3>
+          <ol className="cc-rows">
+            {entry.map((c, i) => row(c, t('chapter.no', { n: String(i + 1) })))}
+          </ol>
+        </>
+      )}
 
       {extra.length === 0 ? null : (
         <>

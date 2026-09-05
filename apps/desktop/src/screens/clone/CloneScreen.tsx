@@ -18,7 +18,7 @@ import { FlatButton, Kbd, RichText } from '@chickadee/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Page, Split } from '../../components/shell/Page.js';
-import { loadSettings } from '../../data/settings.js';
+import { useResolvedTheme } from '../../data/settings.js';
 import { report } from '../../flow.js';
 import { useUi } from '../../store.js';
 import { CourseDone, CoursePlateView, type CourseView } from './CoursePlateView.js';
@@ -75,7 +75,8 @@ export function CloneScreen(props: CloneScreenProps): React.JSX.Element {
   const [empty, setEmpty] = useState<Empty | null>(null);
   const [finished, setFinished] = useState(false);
   const [recut, setRecut] = useState(false);
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  /** Monaco 의 테마는 `<html data-theme>` 을 따른다 — 저장값이 아니다 (S2 회귀). */
+  const theme = useResolvedTheme();
 
   // ── 조각 하나가 들고 있는 것. 조각이 바뀌면 `loadNext` 가 통째로 갈아 끼운다.
   const [view, setView] = useState<CourseView>('edit');
@@ -103,10 +104,6 @@ export function CloneScreen(props: CloneScreenProps): React.JSX.Element {
     draft,
     elapsed,
   };
-
-  useEffect(() => {
-    void loadSettings().then((s) => setTheme(s.theme)).catch(() => undefined);
-  }, []);
 
   /** 다음 조각을 걸고 판 상태를 통째로 갈아 끼운다. 초안은 원장에 있던 것으로 되돌린다. */
   const loadNext = useCallback(async (

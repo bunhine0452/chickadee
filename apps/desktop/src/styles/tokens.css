@@ -1,7 +1,10 @@
 /* 생성 파일 — 직접 고치지 마세요.
  * 원본:   design/system/tokens.css 의 :root{…} · [data-theme="dark"]{…}
- * 생성기: scripts/sync-design.mjs (05 §12 · D182)
+ * 생성기: scripts/sync-design.mjs (05 §12 · D182 · D187 ⑫)
  * 갱신:   pnpm design:sync   /   검사: pnpm design:check (CI 드리프트 게이트)
+ *
+ * 블록 셋 — 밝게 · 어둡게(설정) · 어둡게(시스템 따름). 셋째는 둘째와 **같은 값**이고
+ * 값의 출처는 원본 한 곳뿐이다.
  */
 
 /* ───────── 토큰 : 밝게 ───────── */
@@ -140,4 +143,45 @@
   --focus: #7FB6FF;
   --shadow-1: 0 1px 2px rgba(0,0,0,.44),0 1px 1px rgba(0,0,0,.30);
   --shadow-2: 0 6px 16px rgba(0,0,0,.52),0 1px 3px rgba(0,0,0,.36);
+}
+
+/* ───────── 토큰 : 어둡게 (시스템 따름 — D187 ⑫) ───────── */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --bg: #0F1114;
+    --surface: #16191D;
+    --surface-2: #1C2025;
+    --surface-3: #23282E;
+    --border: #2C323A;
+    --border-strong: #6E7885;
+    --overlay: rgba(0,0,0,.62);
+    --text: #E8EBEF;
+    --text-muted: #AFB7C1;
+    --text-faint: #8B94A2;
+    --text-inverse: #0F1114;
+    --accent: #8CBCFF;
+    --accent-hover: #ADD0FF;
+    --accent-weak: #142A46;
+    --on-accent: #0B1A33;
+    --ok: #6ADFA0;
+    --ok-bg: #102B1C;
+    --bad: #FF9B93;
+    --bad-bg: #3A1917;
+    --warn: #F2C14E;
+    --warn-bg: #33270E;
+    --info: #A8B6E8;
+    --info-bg: #1E2440;
+    --code-bg: #11151A;
+    --syn-key: #D9A2F0;
+    --syn-str: #86DDA6;
+    --syn-num: #F0AF7A;
+    --syn-com: #98A3B2;
+    --syn-type: #6FD3D8;
+    --syn-fn: #9DBBFF;
+    --focus: #7FB6FF;
+    --shadow-1: 0 1px 2px rgba(0,0,0,.44),0 1px 1px rgba(0,0,0,.30);
+    --shadow-2: 0 6px 16px rgba(0,0,0,.52),0 1px 3px rgba(0,0,0,.36);
+  }
 }

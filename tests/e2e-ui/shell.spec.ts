@@ -86,9 +86,13 @@ test('12 어둡게 — 조판은 1px 도 안 움직이고 대비는 7:1 이다',
   await expect.poll(async () => (await contrast()).below7, { timeout: 5_000 }).toEqual([]);
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
 
-  // 야간반으로.
-  await page.getByRole('switch', { name: '밝게 · 어둡게 전환' }).click();
+  // 야간반으로. 밝기는 **설정 화면**에서 고른다 — 헤더에는 스위치가 없다 (D187 ⑫).
+  await expect(page.locator('header.masthead [role="switch"]')).toHaveCount(0);
+  await page.getByRole('button', { name: '설정' }).click();
+  await page.getByRole('radio', { name: '어둡게' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await page.getByRole('button', { name: '홈으로' }).first().click();
+  await page.locator('.masthead').waitFor();
   expect(await boxes()).toEqual(day);
 
   // 「장식 보이기 · 숨기기」 스위치는 D182 로 없어졌다 — 장식을 토큰째 지웠으니 끌 것이

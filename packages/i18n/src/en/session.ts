@@ -146,6 +146,9 @@ export const session: Record<string, string> = {
   'coach.pick':
     'Pick <b>one of the four choices</b> — number keys <b>1~4</b> work too. The code above is '
     + 'not a made-up example; it is <b>a line lifted straight out of your repo</b>.',
+  'coach.pickSynthetic':
+    'Pick <b>one of the four</b> — number keys <b>1–4</b> work too. The code above is a '
+    + '<b>dictionary example</b>: this construct is not in your code yet, so you meet it in its simplest shape first.',
   'coach.confirm':
     'Press <b>Enter</b> to submit. Getting it wrong costs you nothing — one question to do again '
     + "joins today's list, that is all. If you are stuck, <b>Not sure · do it again</b> at the "
