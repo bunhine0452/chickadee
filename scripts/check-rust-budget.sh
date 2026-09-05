@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # locks thin Rust in with CI — checks all 4 devices of 01 §1.1 in one pass.
-#   1. line budget      crates/*/src/** + apps/desktop/src-tauri/src/** code lines <= BUDGET
+#   1. line census      crates/*/src/** + apps/desktop/src-tauri/src/** code lines — REPORTED, NOT ENFORCED (D181)
 #   2. forbidden words  no domain vocabulary in Rust identifiers or strings
 #   3. no SQL           no SQL literal in Rust source (SQL runs by name from the TS catalog)
 #   4. no git binary    Command::new("git")
@@ -9,37 +9,28 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-# 2800 is the ceiling the owner settled on in D129, replacing the 2300 of D68 (which had
-# replaced the 1500 that 01 §1.1 and 정본 §5 carried until M1). D68's 2300 was measured at
-# 2043 with 67 lines of slack, and two milestones spent all of it: D109 landed on exactly
-# 2300/2300, D121 dropped a `git config` read rather than reopen the cap, and D120 routed
-# around it with "Rust is 0 lines here". A cap that turns into friction that fast is set
-# too tight, so D129 raised it against an itemised count instead of a round number:
+# The line cap is GONE (D181). It moved three times — 1500 → 2300 (D68) → 2800 (D129) — and
+# every move was "there is not enough room", never "thin broke". D68 wrote it plainly: the
+# count is a proxy. By 2026-09-05 the slack was 31 lines and the multi-language survey found
+# three things that could not all fit inside it: a language census (10-15), a node test
+# runner (10-14), an Astro grammar (18). Registering a grammar costs three lines, so the
+# next language was about to be chosen by arithmetic rather than by design.
 #
-#   measured 2300 + still unwritten ~305 = ~2605, leaving ~195 (7%) of headroom.
-#     clone_into + repo_clone ~90 (D129) · repo_glob_read ~30 (D65, M6) · dict_* ~65 (D66)
-#     llm_ask + reqwest ~70 (D106, 0.2) · local model provider ~40 · git config identity ~10
+# What keeps Rust thin is the seven walls, not the number: no domain vocabulary, no SQL
+# literal, no git binary, no raw output, one crate = one wrapping, forbid(unsafe_code),
+# clippy::pedantic. Checks 2-5 below enforce four of them here and Cargo enforces the rest.
 #
-# Why not something much larger: the cap's job is not to be unreachable, it is to force
-# "is this Rust or TypeScript?" at the moment the code is written — that question produced
-# D14 (AST comparison stays in TS) and D87 (TS counts the ERROR ratio). A cap that never
-# binds stops asking it.
-#
-# Per-crate caps in 01 §4 add up to exactly this number: git 560 · parse 400 · store 380 ·
-# app 1460. D129 re-split them because the old split had gone stale — app was at 1135
-# against its 1080 while the total was still green, since only the total is enforced here.
-# The split is printed every run so growth stays attributable.
-#
-# Raise either only with a decision row — the line count is a proxy, and the walls that
-# actually keep Rust thin are the four checks below. D129 moved the proxy and left all
-# four untouched.
-BUDGET=${RUST_LINE_BUDGET:-2800}
+# The count is still printed, per crate and in total, so growth stays visible and
+# attributable — a person reads it and asks "is this Rust or TypeScript?", which is the
+# question the cap was standing in for. Set RUST_LINE_BUDGET to get the old hard failure
+# back locally; CI does not set it.
+BUDGET=${RUST_LINE_BUDGET:-}
 SRC_GLOBS=(crates/*/src apps/desktop/src-tauri/src)
 fail=0
 
 files() { find "${SRC_GLOBS[@]}" -name '*.rs' -type f 2>/dev/null | sort; }
 
-# ── 1. line budget ── comments and blank lines excluded. use tokei if present, else the same rule in awk.
+# ── 1. line census ── comments and blank lines excluded. use tokei if present, else the same rule in awk.
 count_lines() {
   if command -v tokei >/dev/null 2>&1; then
     tokei --output json "${SRC_GLOBS[@]}" 2>/dev/null \
@@ -61,10 +52,14 @@ for dir in "${SRC_GLOBS[@]}"; do
     /^[[:space:]]*\/\*/ { inblk=1 } inblk { if ($0 ~ /\*\//) inblk=0; next } { n++ } END { print n+0 }')
   printf '     %-34s %s\n' "$dir" "$n"
 done
-if [ "$LINES" -gt "$BUDGET" ]; then
-  echo "FAIL line budget: ${LINES} lines of Rust code > ${BUDGET} (01 §1.1)"; fail=1
+if [ -n "$BUDGET" ]; then
+  if [ "$LINES" -gt "$BUDGET" ]; then
+    echo "FAIL line budget: ${LINES} lines of Rust code > ${BUDGET} (RUST_LINE_BUDGET is set)"; fail=1
+  else
+    echo "ok   line budget: ${LINES}/${BUDGET} lines"
+  fi
 else
-  echo "ok   line budget: ${LINES}/${BUDGET} lines"
+  echo "note line census: ${LINES} lines of Rust code — reported, not enforced (D181)"
 fi
 
 # ── 2. forbidden words ── Rust knows no domain vocabulary. only files · bytes · commits · diffs · AST nodes · captures · lines.

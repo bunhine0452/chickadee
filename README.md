@@ -144,7 +144,7 @@ your repo (read-only)                     grammar dictionary (YAML + tree-sitter
       ▼                                                  ▼
 ┌─ thin Rust ─────────────────────────────────────────────────────────┐
 │  git2 · tree-sitter · rusqlite — writes only FACTS to SQLite:       │
-│  file · capture · commit · commit_file.  ≤ 2800 lines, CI-enforced. │
+│  file · capture · commit · commit_file.  Walls, not a line cap.    │
 └──────────────────────────────┬──────────────────────────────────────┘
                                ▼
 ┌─ thick TypeScript ──────────────────────────────────────────────────┐
