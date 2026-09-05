@@ -245,12 +245,14 @@ D4 전이의 반대 방향이고, 이것이 이 부가 하는 일 중 하나다.
 | 3부 | 10~12 | 5~6 |
 | **합** | **52~54** | **27~28** |
 
-> **사전이 선 뒤의 실측 (2026-09-05 · S6).** 위 표는 설계 수이고, 오늘 `dictionary/py/` 에 실제로
-> 있는 것은 **24장**이다 — 0부 18 전부와 1부 여섯(`if-statement`·`list-literal`·`reference-binding`·
-> `while-loop`·`function-definition`·`return-statement`). 1부의 나머지 넷(`none-value`·`for-in`·
-> `call-expression`·`import`)과 2부 열넷은 아직 저작 전이고, `_lang.yaml` 의 `essential` 은
-> **있는 것만** 든다. 24장 전부가 선행 깊이 ≤ 2 라 프롤로그(0장) 후보도 **24/24**이고,
-> 하루 두 장이면 **12일**이다 (D184 로 상한이 없어져 자를 것이 없다).
+> **사전이 선 뒤의 실측 (2026-09-05 · S6).** 위 표는 설계 수이고, 그날 `dictionary/py/` 에 실제로
+> 있던 것은 **24장**이었다 — 0부 18 전부와 1부 여섯(`if-statement`·`list-literal`·`reference-binding`·
+> `while-loop`·`function-definition`·`return-statement`).
+>
+> **2026-09-06 에 0·1·2부가 다 섰다 — 42장이다.** 1부의 나머지 넷과 2부 열넷을 저작했고,
+> `essential` 과 `PY_PARTS` 가 18 + 10 + 14 로 같은 순서를 든다. 선행 깊이 ≤ 2 가 **40/42**,
+> 하루 두 장이면 프롤로그가 **20일**이다(깊이 3 은 `with-statement`·`decorator` 둘).
+> 실측과 어긋난 자리는 **§12** 가 든다.
 
 0부 이전은 42~44판 = **21~22일**이었다. **0부가 더하는 것은 열흘**이고, 그 열흘 뒤에 사용자는
 「`0.1 + 0.2` 가 왜 안 떨어지나」에 답할 수 있다. 열흘이 맞는 값인지는 **사용자 결정이다** —
@@ -813,3 +815,149 @@ progmiscon.org 의 이름만 참조로 붙였다 — **문장은 가져오지 �
 800줄 상한 때문에 갈라 냈다 → **[`py-learning.md`](./py-learning.md)**.
 표기 기계 한 문장 · 교재 넷의 순서 대조 · 이 언어 특유의 연습(`pedagogy.md` §4 의 세 시험) ·
 오개념 32건과 계산된 진단의 한계 · 실측 · §2~§5 에 낼 diff 일곱.
+
+---
+
+## §12 실물이 된 것 — 실측 (2026-09-06)
+
+`dictionary/py/` 와 `packages/course/src/parts/py.ts` 를 세어 나온 값이다. §1~§11 은 조사와 설계이고
+이 절은 **디스크 위에 있는 것**이다. 어긋난 자리는 아래 「문서와 어긋나 바꾼 자리」가 든다.
+
+### §12.1 장수와 줄 수
+
+| 부 | 이름 | 개념 | 줄 |
+|---|---|---:|---:|
+| 0부 | 이 언어의 값과 식 | 18 | 4,294 |
+| 1부 | 흐름과 묶기 | 10 | 2,530 |
+| 2부 | 자료구조와 객체 | 14 | 4,239 |
+| 3부 | 프레임워크 | **0** | — |
+| **합** | | **42** | **11,063** |
+
+한 장 평균 **263줄**이다. [`README.md`](./README.md) §11 이 첫 물결에서 잰 213줄보다 23 % 길다 —
+2부 열넷이 평균 302줄이라 그쪽이 끌어올렸다(`meaning` 문항의 오답 진단 셋에 `edge` 코드가 다 붙어서다).
+
+`_lang.yaml` 129줄 · `.scm` 44장 1,016줄(개념 42 + 시스템 둘). `essential` 42 = `PY_PARTS` 의
+0·1·2부 전량이고 순서도 같다 — `packages/course/src/parts/index.test.ts` 가 대조한다.
+
+선행 깊이 분포(`essential` 안에서만 센다): 0:15 · 1:13 · 2:12 · 3:2. **깊이 ≤ 2 가 40/42** 이고
+하루 두 장(D12)이면 프롤로그가 **20일**이다. 깊이 3 인 둘은 `with-statement`(← `try-except`)와
+`decorator`(← `lambda`)다.
+
+### §12.2 골든
+
+개념마다 `examples[]` 에 양성 2 이상 · 음성(`expect: none`) 1 이상을 뒀다. **양성 132 · 음성 75 ·
+합 207**이고 미달인 개념은 없다. `crates/parse/tests/dictionary.rs` 의
+`no_pattern_is_dead_and_every_example_matches_what_it_says` 가 42장 전부를 실제 문법에 돌린다.
+
+전 판에서 미달이던 셋을 보강했다 — `function-definition` 1→3(인자 없는 정의 · `async def`) ·
+`if-statement` 1→3(`not` 조건 · `else` 가지) · `while-loop` 1→3(진릿값 조건 · `while True` + `break`).
+`if-statement` 의 `else` 케이스는 **선택 캡처가 사용처를 안 늘린다**는 것도 함께 지킨다.
+
+### §12.3 표본 리포별 사용처 — tree-sitter 실측
+
+방법: `crates/parse/tests/` 에 임시 시험을 하나 써서 `chickadee_parse::{compile, Spec, scan}` 으로
+`dictionary/py/*.scm` 42장을 표본 리포의 `.py`·`.pyi` 전량에 돌리고 `@site` 캡처를 셌다.
+**시험은 재고 나서 지웠다.** 정규식이 아니라 파스 트리라 §1.5.3 의 하한 계수와 값이 다르다.
+
+표본: `adelie` 139파일 · `ECC` 63 · `MonggleMonggle` 16 · `ai-pm` 5 — **223파일**.
+단위는 **곳/파일**이다.
+
+| 개념 | adelie | ECC | Monggle | ai-pm |
+|---|---:|---:|---:|---:|
+| `string-literal` | 11,679/131 | 4,110/57 | 863/14 | 334/5 |
+| `attribute-access` | 9,195/126 | 3,093/51 | 984/12 | 204/5 |
+| `call-expression` | 7,676/128 | 3,091/53 | 1,026/14 | 204/5 |
+| `assignment` | 4,471/131 | 1,549/55 | 385/14 | 83/5 |
+| `type-hint` | 1,832/83 | 651/41 | 345/14 | 5/2 |
+| `f-string` | 1,664/80 | 557/27 | 435/12 | 57/5 |
+| `function-definition` | 1,630/129 | 524/52 | 87/12 | 10/5 |
+| `if-statement` | 1,619/83 | 496/37 | 97/12 | 43/5 |
+| `import` | 1,606/130 | 284/55 | 141/14 | 25/5 |
+| `class-definition` | 1,479/89 | 256/31 | 50/4 | **0/0** |
+| `comparison` | 1,321/115 | 483/40 | 24/10 | 25/5 |
+| `return-statement` | 1,190/109 | 335/41 | 82/12 | 22/5 |
+| `list-literal` | 1,129/121 | 458/48 | 68/14 | 74/5 |
+| `dict-literal` | 996/105 | 322/37 | 70/10 | 61/3 |
+| `index-access` | 961/94 | 482/37 | 106/11 | 50/5 |
+| `boolean-literal` | 893/109 | 306/42 | 78/12 | 38/5 |
+| `set-and-membership` | 679/98 | 220/32 | 14/7 | 20/4 |
+| `number-literal` | 531/93 | 214/28 | 50/12 | 11/4 |
+| `truthiness` | 524/70 | 164/23 | 53/8 | 9/3 |
+| `for-in` | 451/81 | 139/23 | 15/8 | 12/5 |
+| `try-except` | 410/79 | 153/30 | 141/12 | 8/5 |
+| `list-append` | 393/68 | 182/20 | 14/4 | 7/4 |
+| `text-length` | 311/82 | 49/9 | 5/3 | **0/0** |
+| `is-identity` | 283/63 | 79/27 | 6/2 | 1/1 |
+| `explicit-conversion` | 213/59 | 72/21 | 32/9 | 5/2 |
+| `list-comprehension` | 211/62 | 121/24 | 10/4 | 15/5 |
+| `default-argument` | 204/59 | 77/30 | 62/4 | **0/0** |
+| `arithmetic` | 193/56 | 72/13 | 12/6 | 13/3 |
+| `decorator` | 170/58 | 64/17 | 12/4 | **0/0** |
+| `with-statement` | 149/35 | 57/21 | 10/2 | 3/3 |
+| `reference-binding` | 142/52 | 126/19 | 6/5 | 2/2 |
+| `tuple-unpacking` | 130/45 | 56/15 | 8/6 | 5/3 |
+| `none-value` | 105/33 | 53/17 | 16/6 | **0/0** |
+| `bool-op-value` | 59/29 | 23/12 | 2/2 | 2/1 |
+| `lambda` | 54/22 | 25/10 | 8/6 | 6/3 |
+| `float-inexact` | 19/9 | 12/1 | 2/2 | 3/1 |
+| `while-loop` | 15/12 | 4/2 | 2/2 | **0/0** |
+| `operator-precedence` | 15/3 | 9/4 | **0/0** | **0/0** |
+| `integer-division` | 10/4 | 5/2 | 2/2 | 1/1 |
+| `value-bits` | 3/2 | 4/1 | **0/0** | 52/1 |
+| `integer-limit` | 2/1 | 1/1 | **0/0** | **0/0** |
+| `implicit-conversion` | **0/0** | **0/0** | **0/0** | **0/0** |
+
+**네 리포 전부에서 0곳인 것은 `implicit-conversion` 하나**다. §1.5.3 이 「실행 없이는 못 재는 개념」으로
+적어 둔 그 자리이고, `_lang.yaml` 의 주석이 사유를 `idiom` 으로 못박고 있다(그 자리를
+`explicit-conversion` 이 가져갔다 — adelie 213곳).
+
+리포 하나에서만 0곳인 것 여덟(`class-definition`·`text-length`·`default-argument`·`decorator`·
+`none-value`·`while-loop`·`value-bits`·`integer-limit`)은 **부재가 아니다.** 전부 `ai-pm`(py 5파일)
+이나 `MonggleMonggle`(16파일)에서만 0이고, 표본이 작은 리포에서 0이 나오는 것은
+`thin_threshold.small_repo_files`(20)가 이미 다루는 자리다.
+
+**새로 얇아진 것 여섯** — `none-value` 105/53 · `tuple-unpacking` 130/56 · `default-argument` 204/77 ·
+`with-statement` 149/57 · `lambda` 54/25 · `decorator` 170/64. 얇음의 선은 `_lang.yaml` 이
+적은 것 그대로(두 리포 중 한쪽에서라도 100곳 미만)이고, `essential` 의 순서가 이 여섯을 흩어 놓았다 —
+얇은 판이 셋 이상 붙는 자리가 42줄에 한 곳도 없다(가장 긴 연속은 마지막 `with-statement`·`decorator` 둘).
+
+### §12.4 파서 ERROR 비율 — 0 %
+
+같은 실측에서 `Scan.quality` 를 함께 셌다(`crates/parse/tests/quality.rs` 의 `measure` 와 같은 셈 —
+ERROR·MISSING 노드가 있으면 `poor` 다). **223파일 중 ERROR 가 든 파일은 0장, 0 %** 다.
+리포별로도 adelie 0/139 · ECC 0/63 · MonggleMonggle 0/16 · ai-pm 0/5 다.
+`tree-sitter-python 0.23.6`(ABI 14)이 표본의 실코드를 한 파일도 안 흘린다.
+
+### §12.5 쿼리에서 좁힌 자리 셋 — 정밀도
+
+`py/arithmetic` 이 `pathlib` 의 `/` 에서 83 % 오탐이던 사고(README §6 #13) 뒤로, **정적으로 종류를
+못 가리는 자리는 열거로 좁힌다**가 이 사전의 규칙이다. 새 개념 중 그 규칙이 실제로 걸린 것이 셋이다.
+
+| 개념 | 무엇이 샐 뻔했나 | 어떻게 좁혔나 | 확인 |
+|---|---|---|---|
+| `index-access` | 타입 힌트 `list[int]`·`Dict[str, int]` 가 `xs[0]` 과 **같은 `subscript` 노드**다 (§8 ②) | 대괄호 안을 `(integer)`·`(unary_operator -)`·`(string)` 셋으로 열거하고 **이름은 안 받는다** | 1,599곳에서 79번째마다 20곳을 눈으로 봄 — 전부 진짜 꺼내기·키 접근, 타입 힌트 0곳 |
+| `attribute-access` | `a.b.c` 가 안쪽·바깥쪽 둘로 잡혀 한 줄에 카드가 두 장 | `object:` 를 `identifier`·`call`·`subscript`·`parenthesized_expression` 넷으로 좁혀 `(attribute)` 를 뺐다 | 13,476곳에서 701번째마다 19곳 — 전부 한 겹 꺼내기 |
+| `list-append` | `pop`·`sort` 는 사전·집합에도 있어 「목록을 고친다」가 그 줄에서 참인지 못 가린다 | 이름을 `append`·`extend`·`insert` 셋으로 못박았다 | — (열거라 샐 자리가 없다) |
+
+`d[key]` 처럼 대괄호 안이 이름인 자리를 `index-access` 가 못 보는 것이 그 대가다.
+잃는 쪽이 얼마인지는 **안 쟀다** — 타입 힌트와 노드가 완전히 같아 세는 방법이 쿼리로는 없다.
+
+### §12.6 문서와 어긋나 바꾼 자리
+
+| # | 문서 | 문서가 적은 것 | 사전이 한 것 | 왜 |
+|---|---|---|---|---|
+| 1 | §3 #22 | `py/import` 의 선행이 `py/call-expression`·`py/attribute-access` | **`py/call-expression` 하나** | `import` 는 1부(§1.5.4)이고 `attribute-access` 는 2부다. 그대로 두면 1부가 2부를 선행으로 갖고 위상 정렬이 부를 거슬러 올라간다 |
+| 2 | §1.5.4 1부 목록 | `none-value` · `if` · `while` · `for-in` · `list` · `reference-binding` · `function` · `call` · `return` · `import` | 같은 열이되 **순서가 다르다** — `none-value` 를 `reference-binding` 뒤로, `while-loop` 을 `for-in` 뒤로 | `_lang.yaml` 의 배열 규칙(얇은 판을 셋 이상 안 잇댄다). 문서의 나열은 얇은 둘(`none-value` 105/53 · `while-loop` 15/4)을 나란히 둔다 |
+| 3 | §1.5.4 2부 목록 | `attribute-access` … `decorator` 열넷 | 같은 열넷이되 **순서가 다르다** — `lambda` 를 `list-comprehension` 앞으로, `with-statement` 를 `try-except` 뒤로 | 같은 배열 규칙 + 선행 방향(`with-statement` ← `try-except`) |
+| 4 | §4 #27 | `py/default-argument` 의 `universal` 이 `common/default-parameter` | **`null`** | [`py-learning.md`](./py-learning.md) §11.6 ⑥ 의 결정이다 — 「정의 시점에 한 번」과 JS 의 「호출마다」를 한 보편형으로 묶으면 D4 전이가 **틀린 것을 물려준다** |
+| 5 | §6 신규 `common/` 열 | `key-value-map`·`index-access`·`module-import`·`scoped-cleanup`·`type-annotation` 다섯을 제안 | 다섯 다 **아직 없어서 `universal: null`** 로 뒀다 | `common/` 신설은 이 사전의 몫이 아니다(README §12 규약 4). 후보로만 남긴다 |
+| 6 | §2.5 | 심화 여섯(`async-await`·`generator-yield`·`args-kwargs`·`conditional-expression`·`augmented-assign`·`slicing`)을 부 밖으로 | 그대로 **안 만들었다** | §1.5.4 의 부 배치가 정본이고 그 표에 이 여섯이 없다. `essential` 에 없으므로 린트 `essential-exists` 도 안 걸린다 |
+
+### §12.7 안 만든 것
+
+| 무엇 | 왜 |
+|---|---|
+| 3부 `pyapp/` · `pyweb/`(§3.2, 10~12장) | 프레임워크 사전 네임스페이스가 아직 없다. `PY_PARTS` 의 3부는 빈 목록이고, `parts/index.test.ts` 가 「3부는 그 언어 프레임워크 사전 전량이거나 비어 있다」로 그것을 허용한다 |
+| §4 심화 셋 — `args-kwargs` · `generator-yield` · `async-await` | §1.5.4 의 부 배치에 자리가 없다(§2.5 가 부 밖으로 뺀 여섯 중 셋). 만들면 `essential` 과 `PY_PARTS` 가 어긋나거나 부 없는 개념이 생긴다 |
+| §2.5 의 나머지 셋 — `conditional-expression` · `augmented-assign` · `slicing` | 같음. `augmented-assign`(`+=`)은 §2 ⓐ 가 「`assignment.scm` 이 못 본다」고 지적한 자리이고, 세울 근거(adelie 180곳/42파일)는 이미 있다 — 다음 판의 첫 후보다 |
+| `alternatives:`(「AI 가 대신 쓴 표기」) | 여전히 비어 있다. `_lang.yaml` 주석의 근거가 그대로다 — 가장 그럴듯한 짝(`x == True` ↔ `if x:`)이 표본에 한쪽만 있다 |

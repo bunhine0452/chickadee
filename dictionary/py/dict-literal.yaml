@@ -1,0 +1,300 @@
+schema: 1
+id: py/dict-literal
+universal: null
+name: { ko: 키로 담기, en: Key-value literal }
+token: "{"
+grammars: [python]
+framework: null
+essential: true
+difficulty: 1
+prereq: [py/string-literal, py/list-literal, cs/hash-table]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "키와 값을 짝지어 담는다. 키는 넣은 순서를 그대로 지킨다."
+    en: "Holds values paired with keys. Keys keep the order they went in."
+  why:
+    ko: >-
+      {{site.line}}행의 묶음은 <b>자리 번호가 아니라 키</b>로 찾습니다. 그래서 {{pick.2|code}} 같은
+      키가 안에서 무엇을 가리키는지가 그 줄에 그대로 적혀 있고, 짝을 잇는 것은 {{pick.3|code}} 입니다.
+    en: >-
+      The group on line {{site.line}} is looked up <b>by key rather than by position</b>. What a key
+      such as {{pick.2|code}} stands for is written right there, and {{pick.3|code}} is what joins
+      the pair.
+  trace:
+    - ko: "{{site.line}}행에서 {{pick.1|code}}{{pick.1|josa:이,가}} 키로 찾는 묶음을 연다."
+      en: "On line {{site.line}}, {{pick.1|code}} opens a group looked up by key."
+    - ko: "{{pick.2|code}} 뒤의 {{pick.3|code}}{{pick.3|josa:이,가}} 키와 값을 잇는다."
+      en: "The {{pick.3|code}} after {{pick.2|code}} joins the key to its value."
+    - ko: "짝이 넣은 순서대로 남는다 — {{site.line}}행 아래에서 훑으면 그 순서로 나온다."
+      en: "Pairs stay in the order they went in — walking it below line {{site.line}} yields that order."
+
+rule:
+  ko: "<b>찾는 열쇠가 자리 번호가 아니라 키다.</b> 그리고 넣은 순서를 지킨다."
+  en: "<b>The lookup key is a key, not a position.</b> And the order things went in is kept."
+result:
+  label:
+    ko: "{{site.line}}행이 만든 묶음"
+    en: "the group made on line {{site.line}}"
+  value: "{{pick.2}} → 그 뒤의 값"
+  note:
+    ko: "자리 번호로는 못 찾는다"
+    en: "a position number will not find it"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:을,를}} 열쇠로 그 뒤의 값을 꺼낼 수 있게 됐습니다. 같은 키를 두 번
+    적으면 <b>뒤엣것만 남아요.</b>
+  en: >-
+    The value after {{pick.2|code}} can now be reached with that key. Write the same key twice and
+    <b>only the later one survives</b>.
+payoff:
+  ko: >-
+    이걸 알면 API 응답을 읽는 일이 풀립니다 — 서버가 준 것은 대개 이 모양이고, 키 이름만 알면
+    자리 번호를 안 세도 됩니다.
+  en: >-
+    This unlocks reading an API response — that is usually the shape a server hands back, and
+    knowing the key names means never counting positions.
+bridge:
+  ko: >-
+    같은 괄호가 <b>비면 이 묶음, 짝 없이 값만 있으면 집합</b>입니다. 빈 집합을 적는 문법은 없고
+    함수로 만들어야 해요 — 그 비대칭이 이 기호의 유일한 함정입니다.
+  en: >-
+    The same brackets make <b>this kind when empty, and a set when they hold bare values</b>. There
+    is no syntax for an empty set; a function makes it — that asymmetry is this symbol's one trap.
+misconceptions:
+  # py.md §9 #14 — 근거가 얇다고 문서가 스스로 적은 자리다. 실측으로는 못 확인했다.
+  - ko: >-
+      빈 괄호 쌍은 빈 집합이다 — <b>빈 사전</b>입니다. 빈 집합은 문법이 아니라 <code>set()</code>
+      으로만 만들어요.
+    en: >-
+      An empty pair of these brackets is an empty set — it is an <b>empty mapping</b>. An empty set
+      has no syntax; only <code>set()</code> makes one.
+  - ko: >-
+      순서가 없다 — 3.7 부터 <b>넣은 순서를 지킵니다.</b> 「순서가 없다」는 그 이전 판의 사실이고
+      아직 돌아다녀요.
+    en: >-
+      It has no order — since 3.7 it <b>keeps insertion order</b>. “No order” was true of older
+      versions and still circulates.
+  - ko: >-
+      키는 글자여야 한다 — 숫자·튜플도 키가 됩니다. <b>고칠 수 있는 값</b>만 안 되고, 그래서
+      목록은 키가 못 돼요.
+    en: >-
+      Keys must be text — numbers and tuples work too. Only <b>values that can be changed</b> are
+      barred, which is why a list cannot be a key.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>키로 찾는 묶음을 여는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that opens a group looked up by key</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} <b>키 하나</b>입니다. 키가 있다는 것만으로는 묶음이
+            안 되고, 무엇으로 묶었는지가 그 앞의 기호에 적혀 있어요.
+          en: >-
+            {{pick.2|code}} is <b>one key</b>. A key alone does not make a group; what kind of group
+            it is was written by the symbol before it.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 키와 묶음"
+            en: "The sharpest spot — a key and a group"
+          code:
+            - '"name"              # 글자 하나'
+            - '{"name": "kim"}     # 키로 찾는 묶음'
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} <b>키와 값을 잇는</b> 기호입니다. 잇기만 하고 묶음을
+            열지는 않아서, 짝이 하나도 없어도 묶음은 성립해요.
+          en: >-
+            {{pick.3|code}} <b>joins a key to its value</b>. Joining does not open the group; a group
+            with no pairs at all is still a group.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 잇기와 열기"
+            en: "The sharpest spot — joining and opening"
+          code:
+            - '{}                  # 짝이 없어도 묶음'
+            - '{"a": 1}            # 짝이 하나'
+
+meaning:
+  - q:
+      ko: "{{site.line}}행의 괄호 안을 통째로 비우면 무엇이 만들어질까요?"
+      en: "If you empty the brackets on line {{site.line}} entirely, what gets made?"
+    hint:
+      ko: "같은 기호가 <b>두 가지</b>를 만듭니다."
+      en: "The same symbol makes <b>two</b> different things."
+    options:
+      - t:
+          ko: "빈 사전 — 키로 찾는 묶음이 비어 있는 것"
+          en: "An empty mapping — a key-lookup group with nothing in it"
+      - t:
+          ko: "빈 집합"
+          en: "An empty set"
+        diag:
+          t:
+            ko: >-
+              같은 괄호가 집합도 만들지만 그것은 <b>짝 없는 값이 들어 있을 때</b>입니다. 비면 사전
+              쪽으로 정해져 있고, 빈 집합은 함수로만 만들어요.
+            en: >-
+              These brackets do make a set, but only when they hold <b>bare values</b>. Empty is
+              settled as the mapping, and an empty set comes only from a function.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 비었을 때 무엇이 되나"
+              en: "The sharpest spot — what empty means"
+            code:
+              - "type({})       # dict"
+              - "type(set())    # set"
+      - t:
+          ko: "아무것도 아닌 값"
+          en: "A value that is nothing"
+        diag:
+          t:
+            ko: >-
+              비어 있는 것과 없는 것은 <b>다릅니다.</b> 항목이 0개인 묶음은 멀쩡한 값이라 나중에
+              채울 수 있어요.
+            en: >-
+              Empty and absent are <b>different</b>. A group with zero items is a proper value that
+              can be filled later.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 비어 있음과 없음"
+              en: "The sharpest spot — empty and absent"
+            code:
+              - "d = {}; d['a'] = 1     # 된다"
+              - "d = None; d['a'] = 1   # TypeError"
+      - t:
+          ko: "빈 목록"
+          en: "An empty list"
+        diag:
+          t:
+            ko: >-
+              목록은 <b>다른 괄호</b>로 만듭니다. 둘 다 비면 거짓이 되는 것이 같아서 헷갈리지만,
+              꺼내는 방법이 자리 번호냐 키냐로 갈려요.
+            en: >-
+              A list uses <b>different brackets</b>. Both are false when empty, which blurs them, but
+              they differ in whether you look things up by position or by key.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 자리로 찾나 키로 찾나"
+              en: "The sharpest spot — lookup by position or by key"
+            code:
+              - "[][0]       # IndexError"
+              - "{}['a']     # KeyError"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 {{pick.2|code}} 같은 <b>키</b>로 찾는 묶음을 만듭니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} makes a group looked up by a <b>key</b>
+        such as {{pick.2|code}}.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "{", mono: true }
+      - t: "["
+        mono: true
+        diag:
+          t:
+            ko: >-
+              대괄호는 <b>자리 번호</b>로 찾는 묶음입니다. 안에 키와 값을 적으면 그 짝을 잇는 기호가
+              문법에 안 맞아 그 자리에서 멈춰요.
+            en: >-
+              Square brackets make a group looked up <b>by position</b>. Writing key-value pairs
+              inside leaves the joining symbol invalid, and it stops right there.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 자리로 찾나 키로 찾나"
+              en: "The sharpest spot — lookup by position or by key"
+            code:
+              - '{"a": 1}["a"]      # 키로'
+              - "[10, 20][0]        # 자리로"
+      - t: "("
+        mono: true
+        diag:
+          t:
+            ko: >-
+              그 괄호는 <b>고칠 수 없는 묶음</b>이거나 그냥 계산 순서를 적는 자리입니다. 키와 값을
+              잇는 기호가 안에 오면 문법이 안 맞아요.
+            en: >-
+              Those brackets make a group that <b>cannot be changed</b>, or simply mark evaluation
+              order. A key-joining symbol inside them does not hold together.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 고칠 수 있나"
+              en: "The sharpest spot — can it be changed"
+            code:
+              - '{"a": 1}["a"] = 2   # 된다'
+              - "(1, 2)[0] = 9       # TypeError"
+      - t: "<"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              그 기호는 파이썬에서 <b>견주기</b>입니다. 묶음을 여는 데 쓰이지 않아서, 그 줄은 두 값을
+              크기로 견주는 식으로 읽혀요.
+            en: >-
+              In Python that symbol <b>compares</b>. It never opens a group, so the line would read as
+              weighing two values against each other.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 묶음과 견주기"
+              en: "The sharpest spot — a group and a comparison"
+            code:
+              - '{"a": 1}     # 묶음'
+              - "a < 1        # 견주기"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 목록이 아니라 키로 찾는 묶음을 썼을까요?"
+    en: "Why does line {{site.line}} use a key-lookup group rather than a list?"
+  choices:
+    - t:
+        ko: "꺼낼 때 자리 번호가 아니라 이름으로 찾아야 해서 — 항목 순서가 바뀌어도 코드가 안 깨진다"
+        en: "Because things are found by name, not position — reordering does not break the code"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 묶음에서 값을 꺼내는 줄을 찾아 그 키를 짚어 보세요."
+        en: "That is the direction. Find the line that takes a value out and point at its key."
+    - t:
+        ko: "항목이 여러 개라서"
+        en: "Because there are several items"
+      ok: false
+      fb:
+        ko: "여러 개는 목록도 담습니다. 갈리는 것은 개수가 아니라 <b>꺼낼 때 무엇으로 찾느냐</b>예요."
+        en: "A list holds several too. What differs is <b>what you look things up by</b>, not how many."
+    - t:
+        ko: "순서를 안 지켜도 되는 자료라서"
+        en: "Because the order of this data does not matter"
+      ok: false
+      fb:
+        ko: >-
+          이 묶음도 넣은 순서를 지킵니다. 순서를 버리는 것은 집합이고, 그것은 또 다른 문법이에요.
+        en: >-
+          This kind keeps insertion order too. The one that drops order is a set, and that is yet
+          another form.
+
+queries:
+  - { grammars: [python], file: ./dict-literal.scm }
+
+examples:
+  - code: 'payload = {"name": "kim", "price": 0}'
+    expect: { sites: 1, form: pairs, hole: "{", picks: { 1: "{", 2: '"name"', 3: ":" } }
+  - code: "seen = {}"
+    expect: { sites: 1, form: empty, hole: "{", picks: { 1: "{", 2: "}" } }
+  - code: 'row = {"id": item_id}'
+    expect: { sites: 1, form: pairs, hole: "{", picks: { 1: "{", 2: '"id"', 3: ":" } }
+  # 짝이 없으면 집합이다 — `py/set-and-membership` 의 자리다.
+  - code: 'tags = {"a", "b"}'
+    expect: none
+  # 컴프리헨션은 노드가 다르다 — `py/list-comprehension` 의 자리다.
+  - code: "byid = {r.id: r for r in rows}"
+    expect: none

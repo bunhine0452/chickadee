@@ -1,0 +1,320 @@
+schema: 1
+id: py/class-definition
+universal: common/class-definition
+name: { ko: 틀 만들고 자기 자신 받기, en: Defining a type and its receiver }
+token: "class"
+grammars: [python]
+framework: null
+essential: true
+difficulty: 3
+prereq: [py/function-definition, py/attribute-access, cs/abstraction]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "같은 모양의 값을 여럿 찍어 낼 틀을 만든다. 안의 함수는 받는 쪽을 직접 적는다."
+    en: "A mould that stamps out values of one shape. Its functions name the receiver."
+  why:
+    ko: >-
+      파이썬은 <b>수신자를 매개변수로 직접 적습니다</b>. {{site.line}}행의 {{pick.2|code}} 안에 있는
+      함수는 첫 자리에 자기 자신을 받고, 부를 때는 그것을 <b>안 넘겨요</b> — 넘겨 주는 일은
+      점 왼쪽 값이 대신 합니다.
+    en: >-
+      Python <b>writes the receiver out as a parameter</b>. A function inside {{pick.2|code}} on line
+      {{site.line}} takes itself in the first slot, and callers <b>do not pass it</b> — the value on
+      the left of the dot supplies it.
+  trace:
+    - ko: "{{site.line}}행에서 {{pick.2|code}} 라는 틀이 만들어진다."
+      en: "On line {{site.line}}, a mould named {{pick.2|code}} is made."
+    - ko: "그 틀을 부르면 값 하나가 찍혀 나온다 — 그때는 아직 속성이 없다."
+      en: "Calling the mould stamps out one value — with no attributes on it yet."
+    - ko: "안의 함수가 돌면서 점 왼쪽에 이름을 넣을 때마다 속성이 그 자리에서 생긴다."
+      en: "As its functions run, each putting on the left of a dot makes an attribute right there."
+
+rule:
+  ko: "<b>속성은 미리 적어 두는 자리가 없다.</b> 넣는 줄이 도는 순간 그 자리에서 생긴다."
+  en: "<b>There is no place to declare attributes ahead of time.</b> One appears when a putting line runs."
+result:
+  label:
+    ko: "{{site.line}}행이 만든 {{pick.2}}"
+    en: "the {{pick.2}} made on line {{site.line}}"
+  value: "값을 찍어 내는 틀"
+  note:
+    ko: "찍혀 나온 값마다 속성이 따로 붙는다"
+    en: "each stamped value carries its own attributes"
+ok:
+  ko: >-
+    {{pick.2|code}} 라는 틀이 생겼습니다. 이 틀로 찍은 값마다 <b>자기 속성</b>을 따로 갖고,
+    안의 함수는 그 값을 첫 매개변수로 받아요.
+  en: >-
+    A mould named {{pick.2|code}} now exists. Each value stamped from it carries <b>its own
+    attributes</b>, and the functions inside take that value as their first parameter.
+payoff:
+  ko: >-
+    이걸 알면 「부를 때는 안 넘기는데 왜 적혀 있지」가 풀립니다 — 점 왼쪽 값이 <b>첫 매개변수로
+    자동으로 들어가고</b>, 그래서 정의 쪽에는 있고 부르는 쪽에는 없습니다.
+  en: >-
+    This untangles “why is it written when nobody passes it” — the value on the left of the dot
+    <b>goes in as the first parameter</b>, so it appears where the function is defined and not where
+    it is called.
+bridge:
+  ko: >-
+    자바·C# 은 수신자를 안 적고 예약어로 씁니다. 파이썬은 적게 해서 <b>규칙 하나를 줄였어요</b> —
+    안의 함수도 바깥 함수와 똑같은 함수이고, 다른 것은 첫 매개변수뿐입니다.
+  en: >-
+    Java and C# leave the receiver unwritten and give it a keyword. Python writes it out and
+    <b>drops one rule</b> — a function inside is the same kind of function as one outside, differing
+    only in its first parameter.
+misconceptions:
+  - ko: >-
+      속성을 위에 미리 적어야 한다 — 적는 자리가 <b>없습니다.</b> 넣는 줄이 처음 도는 순간
+      그 속성이 생겨요.
+    en: >-
+      Attributes must be declared at the top — there is <b>no such place</b>. An attribute appears
+      the first time a putting line runs.
+  # py.md §9 #20 · `SelfAssignable`.
+  - ko: >-
+      첫 매개변수에 다시 넣으면 부른 쪽의 값이 바뀐다 — 그것도 <b>이름표</b>라, 다시 넣으면
+      그 함수 안의 이름만 옮겨 갑니다.
+    en: >-
+      Putting a new value in the first parameter changes the caller's value — it is also just a
+      <b>name</b>, so putting only moves the name inside that function.
+  - ko: >-
+      안에 적은 이름은 값마다 따로 생긴다 — 함수 <b>몸통 밖</b>에 적은 이름은 틀에 하나만 있고
+      찍혀 나온 값들이 그것을 함께 봅니다. 목록을 거기 두면 모두가 같은 목록을 고쳐요.
+    en: >-
+      Names written inside belong to each stamped value — a name written <b>outside any function
+      body</b> lives once on the mould and is shared. Put a list there and every value edits the same
+      one.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>값을 찍어 낼 틀을 여는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that opens a mould for stamping values</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} <b>틀의 이름</b>입니다. 이름은 나중에 이 틀을 찾을 때
+            쓰이고, 틀을 여는 일은 그 앞의 낱말이 해요.
+          en: >-
+            {{pick.2|code}} is <b>the mould's name</b>. The name is how you reach it later; opening
+            the mould is done by the word before it.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 이름과 여는 일"
+            en: "The sharpest spot — the name and the opening"
+          code:
+            - "Item              # 이름일 뿐"
+            - "class Item:       # 틀이 생긴다"
+      pick.3:
+        t:
+          ko: >-
+            그 괄호 안은 <b>물려받을 것</b>을 적는 자리입니다. 없어도 틀은 만들어지므로, 틀을 여는
+            일과는 다른 일이에요.
+          en: >-
+            Those brackets hold <b>what is inherited</b>. A mould is made without them, so that is a
+            different job from opening one.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 틀 열기와 물려받기"
+            en: "The sharpest spot — opening and inheriting"
+          code:
+            - "class Item:            # 물려받는 것 없음"
+            - "class Item(BaseModel): # 있음"
+      pick.4:
+        t:
+          ko: >-
+            그 안쪽은 <b>몸통</b>입니다. 몸통은 틀이 열린 뒤에 오는 것이라, 무엇을 여는지는 첫 낱말이
+            이미 정해 놓았어요.
+          en: >-
+            That part is <b>the body</b>. A body comes after the opening, so what is being opened was
+            already settled by the first word.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 여는 줄과 몸통"
+            en: "The sharpest spot — the opening line and the body"
+          code:
+            - "class Item:"
+            - "    name: str      # 몸통"
+
+meaning:
+  - q:
+      ko: "{{pick.2|code}} 안의 함수가 첫 매개변수를 적는데, 부를 때는 왜 그 자리에 아무것도 안 넘길까요?"
+      en: "A function inside {{pick.2|code}} writes a first parameter — why does a caller pass nothing there?"
+    hint:
+      ko: "부르는 줄에서 <b>점 왼쪽</b>에 무엇이 있는지 봅니다."
+      en: "Look at what sits <b>on the left of the dot</b> in the calling line."
+    options:
+      - t:
+          ko: "점 왼쪽 값이 그 자리로 자동으로 들어간다"
+          en: "The value on the left of the dot goes into that slot automatically"
+      - t:
+          ko: "그 매개변수는 비어 있는 채로 돈다"
+          en: "That parameter simply stays empty"
+        diag:
+          t:
+            ko: >-
+              비어 있으면 안의 줄들이 <b>어느 값</b>의 속성을 볼지 못 정합니다. 실제로는 채워져
+              들어오고, 그것을 채우는 것이 점 왼쪽이에요.
+            en: >-
+              If it were empty, the lines inside could not tell <b>whose</b> attributes to read. It
+              does arrive filled, and the left of the dot fills it.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 누구의 속성인가"
+              en: "The sharpest spot — whose attributes"
+            code:
+              - "a.label()      # a 가 들어간다"
+              - "b.label()      # b 가 들어간다"
+      - t:
+          ko: "파이썬이 그 이름을 특별하게 알아본다"
+          en: "Python recognizes that name specially"
+        diag:
+          t:
+            ko: >-
+              이름은 <b>아무 이름이나</b> 됩니다. 특별한 것은 이름이 아니라 <b>첫 자리</b>이고,
+              관례로 같은 이름을 쓰는 것뿐이에요.
+            en: >-
+              The name can be <b>anything</b>. What is special is the <b>first slot</b>, not the name;
+              everyone simply uses the same one by convention.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 이름과 자리"
+              en: "The sharpest spot — the name and the slot"
+            code:
+              - "def label(self): ..."
+              - "def label(me): ...    # 똑같이 돈다"
+      - t:
+          ko: "틀에서 부를 때만 넘기고 값에서 부를 때는 안 넘긴다"
+          en: "You pass it when calling on the mould, not when calling on a value"
+        diag:
+          t:
+            ko: >-
+              그 말은 <b>절반이 맞습니다.</b> 틀에서 직접 부르면 실제로 손으로 넘겨야 하고, 그 대비가
+              「자동으로 들어간다」를 가장 잘 보여 줘요.
+            en: >-
+              That is <b>half right</b>. Calling on the mould does require passing it by hand, and
+              that contrast is the clearest proof it is filled automatically otherwise.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 값에서와 틀에서"
+              en: "The sharpest spot — from a value and from the mould"
+            code:
+              - "item.label()          # 자동"
+              - "Item.label(item)      # 손으로"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 {{pick.2|code}} 라는 <b>틀</b>을 만듭니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} makes a <b>mould</b> named
+        {{pick.2|code}}.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "class", mono: true }
+      - t: "def"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              그 낱말은 <b>함수</b>를 만듭니다. 부르면 값을 찍어 내는 것이 아니라 몸통이 한 번 돌고
+              결과 하나가 나와요.
+            en: >-
+              That word makes a <b>function</b>. Calling it runs the body once and yields one result
+              rather than stamping out a value with attributes.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 함수와 틀"
+              en: "The sharpest spot — a function and a mould"
+            code:
+              - "class Item: ..."
+              - "def item(): ...       # 함수"
+      - t: "struct"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              파이썬에 그런 낱말은 <b>없습니다.</b> 값처럼 구는 틀이 필요하면 데코레이터를 붙여
+              만들지, 문법을 따로 두지 않아요.
+            en: >-
+              Python has no such word. When a value-like mould is wanted, a decorator makes one;
+              there is no separate grammar for it.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 문법과 도구"
+              en: "The sharpest spot — grammar and tooling"
+            code:
+              - "class Item: ..."
+              - "@dataclass\nclass Item: ..."
+      - t: "type"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              그 이름은 <b>값의 종류를 묻는 함수</b>입니다. 문법 낱말이 아니라 이름이라, 그 자리에
+              두면 이름 하나가 놓인 줄로 읽혀요.
+            en: >-
+              That name is a <b>function that asks a value's kind</b>. It is a name rather than a
+              grammar word, so the line reads as a name sitting there.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 문법 낱말과 이름"
+              en: "The sharpest spot — a grammar word and a name"
+            code:
+              - "class Item: ..."
+              - "type(item)            # 종류를 묻는다"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 함수 몇 개 대신 틀을 만들었을까요?"
+    en: "Why does line {{site.line}} make a mould instead of a few functions?"
+  choices:
+    - t:
+        ko: "같은 값들이 같은 속성과 같은 일을 갖고 다녀야 해서 — 한자리에 묶어 두면 찾는 데가 하나다"
+        en: "Because those values must carry the same attributes and work — one place to look"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 틀로 찍은 값이 어느 줄에서 만들어지는지도 짚어 보세요."
+        en: "That is the direction. Point also at the line where a value is stamped from this mould."
+    - t:
+        ko: "파이썬은 틀 없이는 속성을 못 붙여서"
+        en: "Because Python cannot attach attributes without a mould"
+      ok: false
+      fb:
+        ko: >-
+          붙일 수 있습니다 — 사전 하나로도 되고 그렇게 쓴 코드도 많아요. 갈리는 것은 그 값에
+          딸린 <b>일</b>이 함께 있느냐입니다.
+        en: >-
+          It can — a mapping does the job, and plenty of code uses one. What differs is whether the
+          <b>work</b> that belongs to the value lives with it.
+    - t:
+        ko: "객체 지향으로 써야 좋은 코드라서"
+        en: "Because good code is object-oriented"
+      ok: false
+      fb:
+        ko: >-
+          그것은 이유가 아니라 이름입니다. 이 줄이 실제로 무엇을 묶어 두었는지 — 속성과 일 —
+          를 대면 근거가 됩니다.
+        en: >-
+          That is a label, not a reason. Naming what this line actually groups — attributes and work
+          — turns it into one.
+
+queries:
+  - { grammars: [python], file: ./class-definition.scm }
+
+examples:
+  - code: "class Item(BaseModel):\n    name: str"
+    expect: { sites: 1, form: class, hole: "class", picks: { 1: "class", 2: "Item", 3: "(BaseModel)" } }
+  - code: "class Store:\n    pass"
+    expect: { sites: 1, form: class, hole: "class", picks: { 1: "class", 2: "Store" } }
+  - code: "class Store:\n    def label(self, sep):\n        return sep"
+    expect: { sites: 2 }
+  - code: "def label(sep):\n    return sep"
+    expect: none

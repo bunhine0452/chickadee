@@ -1,0 +1,300 @@
+schema: 1
+id: py/call-expression
+universal: common/function-call
+name: { ko: 함수 부르기, en: Calling a function }
+token: "("
+grammars: [python]
+framework: null
+essential: true
+difficulty: 1
+prereq: [py/function-definition, cs/call-stack]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "이름 뒤에 괄호가 붙어야 돈다. 안 붙이면 함수 자체가 값으로 남는다."
+    en: "A name runs only when a bracket pair follows it. Otherwise it stays a value."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.2|code}}{{pick.2|josa:은,는}} 이름일 뿐이고, 도는 일은 <b>그 뒤의 기호</b>가
+      시킵니다. 파이썬에서는 함수도 값이라 기호를 빠뜨린 줄도 문법에 맞아서 <b>오류 없이 지나갑니다.</b>
+    en: >-
+      On line {{site.line}}, {{pick.2|code}} is only a name; what makes it run is <b>the symbol
+      after it</b>. Functions are values in Python, so a line missing that symbol is still valid and
+      <b>passes without an error</b>.
+  trace:
+    - ko: "{{site.line}}행에서 {{pick.3|code}}{{pick.3|josa:이,가}} 먼저 값이 된다."
+      en: "On line {{site.line}}, {{pick.3|code}} becomes a value first."
+    - ko: "{{pick.2|code}}의 몸통이 그 값을 받아 돈다."
+      en: "The body of {{pick.2|code}} runs with that value."
+    - ko: "몸통이 돌려준 것이 {{site.line}}행의 이 자리에 놓인다."
+      en: "What the body hands back is put in this spot on line {{site.line}}."
+
+rule:
+  ko: "<b>도는 것은 이름이 아니라 기호다.</b> 이름만 적으면 함수가 값 그대로 남는다."
+  en: "<b>The symbol makes it run, not the name.</b> A bare name leaves the function sitting there as a value."
+result:
+  label:
+    ko: "{{site.line}}행의 {{pick.2}} 자리"
+    en: "the {{pick.2}} spot on line {{site.line}}"
+  value: "{{pick.2}} 의 결과"
+  note:
+    ko: "몸통이 다 돈 뒤에야 정해진다"
+    en: "decided only after the body has run"
+ok:
+  ko: >-
+    {{pick.2|code}}의 몸통이 한 번 돌고, 그 결과가 이 자리에 놓입니다. 이름만 적었다면 몸통은
+    한 줄도 안 돌아요.
+  en: >-
+    The body of {{pick.2|code}} runs once and its result lands in this spot. Had the name stood
+    alone, the body would not have run a single line.
+payoff:
+  ko: >-
+    이걸 알면 「왜 아무 일도 안 일어나지」가 풀립니다 — 기호를 빠뜨린 줄은 값을 하나 만들었다가
+    버리고 끝나며, 그 사이 <b>어떤 오류도 안 납니다.</b>
+  en: >-
+    This untangles “why did nothing happen” — a line missing that symbol makes one value, drops it
+    and ends, and <b>no error appears anywhere</b> along the way.
+bridge:
+  ko: >-
+    이 기호는 <code>py/function-definition</code> 이 세운 몸통으로 들어가는 문입니다. 정의는
+    문을 만들고, 여기는 그 문을 엽니다.
+  en: >-
+    This symbol is the door into the body that <code>py/function-definition</code> built. Defining
+    makes the door; this opens it.
+misconceptions:
+  # py.md §9 #10 — `ParenthesesOnlyIfArgument`.
+  - ko: >-
+      넘길 것이 없으면 기호도 생략한다 — 넘길 것이 없어도 <b>기호는 있어야</b> 돕니다.
+      생략하면 함수가 값으로 남아요.
+    en: >-
+      With nothing to pass you may drop the symbol — it must <b>still be there</b> for the body to
+      run. Drop it and the function stays a value.
+  # py.md §9 #19 — `OutsideInFunctionNesting`.
+  - ko: >-
+      겹쳐 부르면 바깥부터 돈다 — <b>안쪽이 먼저</b> 값이 되고 그 값이 바깥으로 갑니다.
+      바깥은 안쪽 결과를 받아야 시작할 수 있어요.
+    en: >-
+      Nested calls run outside first — the <b>inner one</b> becomes a value first and that value
+      goes outward. The outer cannot start until it has that result.
+  - ko: >-
+      돌려주는 값이 없으면 그 자리에 아무것도 안 남는다 — 「없음」이 남습니다. 그래서 그 결과를
+      이름에 담아도 그 줄은 멈추지 않아요.
+    en: >-
+      A body that hands nothing back leaves the spot empty — it leaves absence there. That is why
+      keeping such a result in a name does not stop the line.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>{{pick.2|code}}{{pick.2|josa:을,를}} 실제로 돌리는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that actually runs {{pick.2|code}}</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 이름만 적힌 줄도 문법에 맞아서 그대로
+            지나가고, 몸통은 한 줄도 안 돌아요.
+          en: >-
+            {{pick.2|code}} is <b>the name</b>. A line with only the name is still valid and simply
+            passes; the body does not run a line.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 이름과 부르기"
+            en: "The sharpest spot — the name and the call"
+          code:
+            - "send        # 함수가 값으로 남는다"
+            - "send()      # 몸통이 돈다"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} <b>넘기는 값</b>입니다. 넘길 것이 하나도 없어도 부르기는
+            일어나므로, 부르는 일을 짓는 것은 이 값이 아니에요.
+          en: >-
+            {{pick.3|code}} is <b>what gets passed</b>. Calling happens even with nothing to pass, so
+            the value is not what makes the call.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 넘기는 값과 부르는 일"
+            en: "The sharpest spot — the passed value and the call"
+          code:
+            - "send(row)   # 값이 있다"
+            - "send()      # 값이 없어도 돈다"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행에서 {{pick.2|code}} 뒤의 기호를 지우면 어떻게 될까요?"
+      en: "What happens if you delete the symbol after {{pick.2|code}} on line {{site.line}}?"
+    hint:
+      ko: "파이썬에서는 함수도 <b>값</b>입니다."
+      en: "In Python a function is also a <b>value</b>."
+    options:
+      - t:
+          ko: "오류 없이 지나간다 — 함수 자체가 값으로 놓였다가 버려진다"
+          en: "It passes with no error — the function itself is placed as a value and dropped"
+      - t:
+          ko: "문법 오류로 멈춘다"
+          en: "It stops with a syntax error"
+        diag:
+          t:
+            ko: >-
+              이름 하나만 적힌 줄은 <b>문법에 맞습니다.</b> 값을 하나 적어 놓고 아무 데도 안 담은
+              것이고, 그런 줄을 파이썬은 막지 않아요.
+            en: >-
+              A line holding just a name is <b>valid</b>. It writes one value down and keeps it
+              nowhere, and Python does not block that.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 멈추는 줄과 지나가는 줄"
+              en: "The sharpest spot — a line that stops and a line that passes"
+            code:
+              - "send        # 지나간다"
+              - "send(       # 여기서 멈춘다"
+      - t:
+          ko: "넘길 것이 없는 것으로 보고 그냥 돈다"
+          en: "It treats it as having nothing to pass and runs anyway"
+        diag:
+          t:
+            ko: >-
+              넘길 것이 없는 부르기도 <b>기호는 적습니다.</b> 기호가 곧 부르는 일이라, 그것이 없으면
+              부르는 일 자체가 없어요.
+            en: >-
+              A call with nothing to pass <b>still writes the symbol</b>. The symbol is the calling;
+              without it there is no call at all.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 빈 부르기와 이름"
+              en: "The sharpest spot — an empty call and a bare name"
+            code:
+              - "send()      # 돈다"
+              - "send        # 안 돈다"
+      - t:
+          ko: "함수를 아직 안 만들었다며 멈춘다"
+          en: "It stops, saying the function was never made"
+        diag:
+          t:
+            ko: >-
+              그 말이 맞는 자리는 <b>이름 자체가 없을 때</b>입니다. 이름이 있으면 읽는 것까지는
+              문제없이 되고, 읽힌 값이 함수예요.
+            en: >-
+              That holds when <b>the name itself does not exist</b>. If it does, reading it works
+              fine — and what gets read is the function.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 없는 이름과 있는 이름"
+              en: "The sharpest spot — a missing name and a present one"
+            code:
+              - "sned        # NameError"
+              - "send        # 값으로 읽힌다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 {{pick.2|code}}의 몸통을 <b>실제로 돌립니다</b>."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} <b>actually runs</b> the body of
+        {{pick.2|code}}.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "(", mono: true }
+      - t: "["
+        mono: true
+        diag:
+          t:
+            ko: >-
+              대괄호는 <b>안에서 하나를 꺼내는</b> 기호입니다. 함수에 그것을 붙이면 「꺼내라」가 되어
+              그 자리에서 멈춰요.
+            en: >-
+              Square brackets <b>take one thing out</b> of something. Put them on a function and it
+              reads as “take from it,” which stops right there.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 꺼내기와 부르기"
+              en: "The sharpest spot — taking out and calling"
+            code:
+              - "send(row)     # 돈다"
+              - "send[row]     # TypeError"
+      - t: "."
+        mono: true
+        diag:
+          t:
+            ko: >-
+              점은 <b>안의 이름</b>을 꺼내는 기호입니다. 꺼낸 것이 함수여도 그것만으로는 안 돌고,
+              돌리려면 뒤에 부르는 기호가 또 있어야 해요.
+            en: >-
+              A dot takes <b>a name from inside</b>. Even if what comes out is a function it does not
+              run; a calling symbol has to follow.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 꺼내기와 그 뒤"
+              en: "The sharpest spot — taking out, and what follows"
+            code:
+              - "obj.send      # 꺼내기만"
+              - "obj.send()    # 꺼내고 돌린다"
+      - t: "->"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              그 기호는 <b>돌려줄 것의 종류</b>를 적는 자리라 정의하는 줄에만 나옵니다. 부르는 줄에는
+              오지 않아요.
+            en: >-
+              That symbol writes <b>the kind of thing handed back</b>, so it appears only on the line
+              that defines. It does not appear on a line that calls.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 정의하는 줄과 부르는 줄"
+              en: "The sharpest spot — the defining line and the calling line"
+            code:
+              - "def send(r) -> bool:   # 정의"
+              - "send(row)              # 부르기"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 {{pick.2|code}}{{pick.2|josa:을,를}} 여기서 돌릴까요?"
+    en: "Why does line {{site.line}} run {{pick.2|code}} right here?"
+  choices:
+    - t:
+        ko: "이 줄 아래가 그 결과를 써야 해서 — 결과가 나오는 시점이 여기여야 한다"
+        en: "Because the lines below need its result, so this is where the result has to appear"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 결과를 실제로 쓰는 줄이 어디인지도 함께 짚어 보세요."
+        en: "That is the direction. Point also at the line that actually uses the result."
+    - t:
+        ko: "이름을 적었으니 파이썬이 알아서 돌려서"
+        en: "Because writing the name makes Python run it"
+      ok: false
+      fb:
+        ko: "이름만으로는 안 돕니다. 이 줄에서 돌게 만든 것은 이름 뒤의 기호예요."
+        en: "A name alone does not run. What makes it run here is the symbol after the name."
+    - t:
+        ko: "함수는 만들어 두면 언젠가 한 번은 돌아야 해서"
+        en: "Because a function that exists has to run at some point"
+      ok: false
+      fb:
+        ko: >-
+          안 돌아도 됩니다. 한 번도 안 불린 함수는 그냥 값으로 남고, 그것을 파이썬은 문제 삼지 않아요.
+        en: >-
+          It does not have to. A function never called simply stays a value, and Python has no
+          complaint about that.
+
+queries:
+  - { grammars: [python], file: ./call-expression.scm }
+
+examples:
+  - code: "total = compute(rows)"
+    expect: { sites: 1, form: call, hole: "(", picks: { 1: "(", 2: "compute", 3: "rows" } }
+  - code: "app = FastAPI()"
+    expect: { sites: 1, form: noarg, hole: "(", picks: { 1: "(", 2: "FastAPI", 3: ")" } }
+  - code: 'text = payload.decode("utf-8")'
+    expect: { sites: 1, form: method, hole: "(", picks: { 1: "(", 2: "decode", 3: '"utf-8"' } }
+  # 이름만 적은 줄 — 문법에 맞고, 부르는 일이 없다. 이 개념이 가르치려는 함정 그 자체다.
+  - code: "handler = compute"
+    expect: none
+  - code: "xs = [1, 2]"
+    expect: none

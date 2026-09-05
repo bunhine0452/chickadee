@@ -1,0 +1,299 @@
+schema: 1
+id: py/index-access
+universal: null
+name: { ko: 대괄호로 꺼내기, en: Subscript }
+token: "[0]"
+grammars: [python]
+framework: null
+essential: true
+difficulty: 2
+prereq: [py/list-literal, py/dict-literal, cs/bounds]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "자리나 키 하나로 안에서 값을 꺼낸다. 없으면 그 자리에서 멈춘다."
+    en: "Takes one value out by position or by key. A missing one stops the line."
+  why:
+    ko: >-
+      같은 기호가 <b>두 가지 일</b>을 합니다. {{site.line}}행에서 무엇을 꺼내는지는
+      {{pick.2|code}}{{pick.2|josa:이,가}} 정해요 — 순서 있는 묶음이면 자리 번호로, 키로 찾는 묶음이면
+      키로 읽힙니다.
+    en: >-
+      One symbol does <b>two jobs</b>. What is taken on line {{site.line}} is decided by
+      {{pick.2|code}} — an ordered group reads it as a position, a key-lookup group reads it as a key.
+  trace:
+    - ko: "{{site.line}}행에서 {{pick.2|code}}{{pick.2|josa:이,가}} 먼저 값이 된다."
+      en: "On line {{site.line}}, {{pick.2|code}} becomes a value first."
+    - ko: "{{pick.3|code}}{{pick.3|josa:을,를}} 그 값 안에서 찾는다."
+      en: "{{pick.3|code}} is looked for inside that value."
+    - ko: "찾은 것이 {{site.line}}행의 이 자리에 놓인다. 없으면 여기서 멈춘다."
+      en: "What is found lands in this spot on line {{site.line}}. If nothing is there, it stops here."
+
+rule:
+  ko: "<b>무엇을 꺼내는지는 왼쪽이 정한다.</b> 자리 번호는 0부터이고, 음수는 뒤에서 센다."
+  en: "<b>The left side decides what is taken.</b> Positions start at zero, and negatives count from the back."
+result:
+  label:
+    ko: "{{site.line}}행의 {{pick.2}} 에서 꺼낸 것"
+    en: "what was taken from {{pick.2}} on line {{site.line}}"
+  value: "{{pick.3}} 자리의 값"
+  note:
+    ko: "없으면 값이 아니라 멈춤"
+    en: "if absent, not a value but a stop"
+ok:
+  ko: >-
+    {{pick.2|code}} 안에서 {{pick.3|code}} 자리의 값이 나왔습니다. 이 기호는 <b>꺼내기와 넣기</b>를
+    둘 다 하므로, 넣는 줄의 왼쪽에 오면 그 자리를 고칩니다.
+  en: >-
+    The value at {{pick.3|code}} inside {{pick.2|code}} came out. This symbol does <b>taking and
+    putting</b>; on the left of a putting line it changes that slot.
+payoff:
+  ko: >-
+    이걸 알면 「몇 번째부터 세는 거지」가 사라집니다 — 0부터이고, 마지막은 길이를 안 구해도
+    <b>음수 하나</b>로 잡힙니다.
+  en: >-
+    This makes “which number does counting start at” disappear — zero — and the last one needs no
+    length, just <b>a negative</b>.
+bridge:
+  ko: >-
+    자름(<code>xs[1:]</code>)은 겉이 거의 같은데 <b>새 묶음</b>을 만듭니다. 하나를 꺼내는 것과
+    잘라 새로 만드는 것은 결과의 종류부터 달라요.
+  en: >-
+    A slice (<code>xs[1:]</code>) looks almost the same but makes a <b>new group</b>. Taking one
+    thing and cutting out a new group differ in the kind of result they leave behind.
+misconceptions:
+  - ko: >-
+      첫 자리는 1 이다 — <b>0</b> 입니다. 그래서 항목이 셋이면 마지막 자리 번호는 2 이고,
+      3 을 적으면 그 자리에서 멈춰요.
+    en: >-
+      The first position is one — it is <b>zero</b>. With three items the last position is two, and
+      writing three stops the line.
+  - ko: >-
+      없는 자리를 꺼내면 「없음」이 온다 — <b>그 자리에서 멈춥니다.</b> 없어도 되는 자리는
+      키로 찾는 묶음의 <code>.get()</code> 처럼 따로 적어야 해요.
+    en: >-
+      Taking a missing position yields absence — it <b>stops there</b>. Where absence is acceptable
+      you write it out, as with <code>.get()</code> on a key-lookup group.
+  - ko: >-
+      음수는 오류다 — <b>뒤에서 셉니다.</b> 마지막 항목이 −1 이고, 그래서 길이를 구해서 1 을 빼는
+      줄이 파이썬에는 안 나와요.
+    en: >-
+      A negative is an error — it <b>counts from the back</b>. The last item is −1, which is why
+      Python code does not compute a length and subtract one.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>{{pick.2|code}} 안에서 하나를 꺼내는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that takes one thing out of {{pick.2|code}}</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} <b>꺼낼 대상</b>입니다. 대상은 무엇을 꺼낼지의 종류만
+            정하고, 꺼내는 일 자체는 그 뒤의 기호가 해요.
+          en: >-
+            {{pick.2|code}} is <b>what is taken from</b>. It settles the kind of lookup, but the
+            taking itself is done by the symbol after it.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 대상과 꺼내기"
+            en: "The sharpest spot — the group and the taking"
+          code:
+            - "rows           # 묶음 전체"
+            - "rows[0]        # 그 안의 하나"
+      pick.3:
+        t:
+          ko: >-
+            {{pick.3|code}}{{pick.3|josa:은,는}} <b>어느 것</b>인지를 적은 자리입니다. 그것만 따로 적으면
+            그냥 값 하나이고, 꺼내라고 말하는 것은 그것을 감싼 기호예요.
+          en: >-
+            {{pick.3|code}} says <b>which one</b>. On its own it is just a value; what says to take is
+            the symbol around it.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 어느 것과 꺼내기"
+            en: "The sharpest spot — which one, and the taking"
+          code:
+            - "0              # 숫자 하나"
+            - "rows[0]        # 꺼낸다"
+
+meaning:
+  - q:
+      ko: "{{pick.2|code}} 에 그 자리가 없으면 {{site.line}}행은 어떻게 될까요?"
+      en: "If {{pick.2|code}} has no such slot, what happens on line {{site.line}}?"
+    hint:
+      ko: "파이썬은 없는 것을 <b>조용히 넘기지</b> 않습니다."
+      en: "Python does not <b>quietly skip</b> what is missing."
+    options:
+      - t:
+          ko: "그 자리에서 멈추고 무엇을 못 찾았는지 말해 준다"
+          en: "It stops right there and says what could not be found"
+      - t:
+          ko: "「없음」이 나오고 다음 줄로 넘어간다"
+          en: "Absence comes out and the next line runs"
+        diag:
+          t:
+            ko: >-
+              그것은 다른 언어의 행동입니다. 파이썬이 멈추는 덕에 <b>터진 줄이 곧 원인 줄</b>이 되고,
+              없어도 되는 자리는 사람이 적어야 해요.
+            en: >-
+              That is another language's behaviour. Because Python stops, <b>the failing line is the
+              causing line</b> — and you write out where absence is allowed.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 멈춤과 조용한 없음"
+              en: "The sharpest spot — a stop and a quiet absence"
+            code:
+              - 'd["missing"]          # 멈춘다'
+              - 'd.get("missing")      # 없음이 온다'
+      - t:
+          ko: "가장 가까운 자리의 값을 대신 준다"
+          en: "It hands back the nearest slot instead"
+        diag:
+          t:
+            ko: >-
+              대신 주는 일은 <b>없습니다.</b> 자리 하나를 정확히 집는 기호라, 가까운 것을 고르는
+              판단이 여기 들어 있지 않아요.
+            en: >-
+              Nothing is handed back <b>in its place</b>. This symbol picks one exact slot; no
+              judgement about nearness lives in it.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 정확한 자리"
+              en: "The sharpest spot — one exact slot"
+            code:
+              - "[10, 20][2]      # IndexError"
+              - "[10, 20][-1]     # 20"
+      - t:
+          ko: "그 자리가 새로 만들어진다"
+          en: "The slot is created"
+        diag:
+          t:
+            ko: >-
+              새로 만드는 것은 <b>넣는 줄의 왼쪽</b>에 왔을 때이고, 그것도 키로 찾는 묶음에서만
+              됩니다. 순서 있는 묶음은 없는 자리에 못 넣어요.
+            en: >-
+              Creating happens on <b>the left of a putting line</b>, and only for a key-lookup group.
+              An ordered group cannot be filled at a slot that does not exist.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 키 묶음과 순서 묶음"
+              en: "The sharpest spot — a key group and an ordered group"
+            code:
+              - 'd["new"] = 1      # 만들어진다'
+              - "xs[5] = 1         # IndexError"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 {{pick.2|code}} <b>안에서 하나</b>를 꺼냅니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} takes <b>one thing</b> out of
+        {{pick.2|code}}.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "[", mono: true }
+      - t: "("
+        mono: true
+        diag:
+          t:
+            ko: >-
+              그 괄호는 <b>부르는</b> 기호입니다. 묶음에 붙이면 「이것을 돌려라」가 되고, 묶음은
+              돌릴 수 있는 것이 아니라 그 자리에서 멈춰요.
+            en: >-
+              Those brackets <b>call</b>. Put them on a group and the line says “run this,” but a
+              group is not runnable, so it stops there.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 꺼내기와 부르기"
+              en: "The sharpest spot — taking and calling"
+            code:
+              - "rows[0]      # 꺼낸다"
+              - "rows(0)      # TypeError"
+      - t: "."
+        mono: true
+        diag:
+          t:
+            ko: >-
+              점 뒤에는 <b>글자로 적은 이름</b>이 옵니다. 자리 번호나 값이 든 이름은 못 오고,
+              그래서 꺼낼 것이 그때그때 달라지는 자리에는 안 맞아요.
+            en: >-
+              After a dot comes a <b>name written out</b>. A position number or a name holding one
+              cannot follow, so it does not fit where the target varies at run time.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 적어 둔 이름과 값으로 정하는 자리"
+              en: "The sharpest spot — a written name and a computed one"
+            code:
+              - "row.name       # 이름을 적어 둔다"
+              - "row[key]       # 값으로 정한다"
+      - t: "{"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              그 괄호는 <b>새 묶음을 만드는</b> 기호입니다. 꺼내는 자리에 오면 문법이 안 맞아 그 줄이
+              성립하지 않아요.
+            en: >-
+              Those brackets <b>make a new group</b>. In a taking spot they leave the line ill-formed,
+              and it does not hold together.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 만들기와 꺼내기"
+              en: "The sharpest spot — making and taking"
+            code:
+              - '{"a": 1}      # 만든다'
+              - 'd["a"]        # 꺼낸다'
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 묶음 전체가 아니라 하나만 꺼낼까요?"
+    en: "Why does line {{site.line}} take one thing rather than the whole group?"
+  choices:
+    - t:
+        ko: "아래에서 쓰는 것이 그 하나라서 — 나머지는 이 줄 다음에 필요 없다"
+        en: "Because the lines below use just that one — the rest is not needed after this line"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 꺼낸 값을 실제로 쓰는 줄이 어디인지도 짚어 보세요."
+        en: "That is the direction. Point also at the line that actually uses what came out."
+    - t:
+        ko: "묶음째로는 못 쓰기 때문에"
+        en: "Because a whole group cannot be used"
+      ok: false
+      fb:
+        ko: "묶음째로도 씁니다 — 넘기거나 훑을 수 있어요. 하나만 꺼낸 것은 그 하나만 필요해서입니다."
+        en: "A whole group can be passed or walked. Taking one means only that one was needed."
+    - t:
+        ko: "메모리를 아끼려고"
+        en: "To save memory"
+      ok: false
+      fb:
+        ko: >-
+          꺼낸다고 나머지가 사라지지 않습니다. 묶음은 그대로 있고, 이 줄은 그중 하나를 가리키는
+          이름을 하나 더 만들 뿐이에요.
+        en: >-
+          Taking one does not remove the rest. The group stays, and this line only adds one more name
+          pointing at one of its values.
+
+queries:
+  - { grammars: [python], file: ./index-access.scm }
+
+examples:
+  - code: "first = rows[0]"
+    expect: { sites: 1, form: index, hole: "[", picks: { 1: "[", 2: "rows", 3: "0" } }
+  - code: "last = rows[-1]"
+    expect: { sites: 1, form: back, hole: "[", picks: { 1: "[", 2: "rows", 3: "-1" } }
+  - code: 'who = payload["name"]'
+    expect: { sites: 1, form: key, hole: "[", picks: { 1: "[", 2: "payload", 3: '"name"' } }
+  # 타입 힌트는 같은 `subscript` 노드다 (`py.md` §8 ②). 대괄호 안이 이름이라 안 잡힌다.
+  - code: "def load(rows: list[int]) -> None:\n    return None"
+    expect: none
+  - code: "who = payload.name"
+    expect: none

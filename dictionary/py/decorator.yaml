@@ -1,0 +1,301 @@
+schema: 1
+id: py/decorator
+universal: null
+name: { ko: 함수를 감싸 바꾸기, en: Decorator }
+token: "@"
+grammars: [python]
+framework: null
+essential: true
+difficulty: 4
+prereq: [py/lambda, py/call-expression, cs/dynamic-dispatch]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "아래 함수를 다른 함수로 감싸 바꿔치기한다. 정의하는 순간 그 일이 실제로 일어난다."
+    en: "Wraps the function below and takes over its name. This happens at definition."
+  why:
+    ko: >-
+      {{site.line}}행 한 줄이 <b>정의 시점에 실제로 돕니다.</b> 아래 함수가 만들어지자마자
+      {{pick.2|code}}{{pick.2|josa:이,가}} 그것을 받아 바꾼 것을 돌려주고, 그 바꾼 것이 원래 이름을
+      차지해요. 웹 라우트가 붙는 자리가 정확히 여기입니다.
+    en: >-
+      One line at {{site.line}} <b>actually runs at definition time</b>. The moment the function below
+      is made, {{pick.2|code}} takes it and hands back something else, and that something takes over
+      the original name. This is exactly where a web route attaches.
+  trace:
+    - ko: "아래의 함수가 먼저 만들어진다."
+      en: "The function below is made first."
+    - ko: "{{site.line}}행의 {{pick.2|code}}{{pick.2|josa:이,가}} 그 함수를 받아 돈다 — 여기가 정의 시점이다."
+      en: "{{pick.2|code}} on line {{site.line}} runs on it — this is definition time."
+    - ko: "돌려준 것이 원래 이름을 차지한다. 이제 그 이름은 감싼 쪽을 가리킨다."
+      en: "What it hands back takes over the original name, which now points at the wrapper."
+
+rule:
+  ko: "<b>정의하는 순간에 돈다.</b> 이 한 줄이 아래 함수를 받아 바꾼 것을 그 이름에 다시 넣는다."
+  en: "<b>It runs at definition.</b> This line takes the function below and puts a replacement in its name."
+result:
+  label:
+    ko: "{{site.line}}행 아래 함수의 이름"
+    en: "the name of the function below line {{site.line}}"
+  value: "{{pick.2}} 의 결과"
+  note:
+    ko: "원래 함수가 아니다"
+    en: "no longer the original function"
+ok:
+  ko: >-
+    아래 함수가 {{pick.2|code}}{{pick.2|josa:을,를}} 거쳐 <b>다른 것으로 바뀌어</b> 그 이름에 들어갔습니다.
+    이 일은 파일을 읽는 순간 일어나고, 그 함수를 부를 때가 아니에요.
+  en: >-
+    The function below went through {{pick.2|code}} and <b>something else</b> took its name. This
+    happens as the file is read, not when the function is called.
+payoff:
+  ko: >-
+    이걸 알면 라우트가 어떻게 등록되는지가 풀립니다 — 부른 적 없는 함수가 서버에 등록돼 있는 것은
+    이 한 줄이 <b>파일을 읽을 때 이미 돌았기</b> 때문입니다.
+  en: >-
+    This explains how a route gets registered — a function nobody ever called is already known to the
+    server because this line <b>already ran while the file was read</b>.
+bridge:
+  ko: >-
+    <code>py/function-definition</code> 의 규칙 「정의한 자리에서는 돌지 않는다」가 <b>깨지는 유일한
+    자리</b>입니다. 몸통은 여전히 안 돌지만, 이 줄 자체는 그때 돕니다.
+  en: >-
+    This is the <b>one place</b> where the rule of <code>py/function-definition</code> — nothing runs
+    where a function is defined — breaks. The body still waits; this line does not.
+misconceptions:
+  # py.md §2 ⓓ — `function-definition` 의 규칙이 이 자리에서 깨진다.
+  - ko: >-
+      이 줄도 함수를 부를 때 돈다 — <b>정의할 때</b> 돕니다. 파일을 가져오기만 해도 이미 돌아 있어요.
+    en: >-
+      This line runs when the function is called — it runs <b>at definition</b>. Merely bringing the
+      file in has already run it.
+  - ko: >-
+      원래 함수는 그대로 남는다 — 그 이름이 가리키는 것이 <b>바뀝니다.</b> 원래 함수는 감싼 쪽
+      안에서만 남고, 바깥에서는 그 이름으로 못 찾아요.
+    en: >-
+      The original function survives untouched — what its <b>name points at changes</b>. The original
+      lives on inside the wrapper and is unreachable by that name from outside.
+  - ko: >-
+      괄호가 붙은 것과 안 붙은 것이 같다 — 괄호가 붙으면 <b>먼저 부르고</b> 그 결과가 감쌉니다.
+      한 겹이 더 있어요.
+    en: >-
+      With and without brackets is the same — with them, it is <b>called first</b> and its result does
+      the wrapping. There is one more layer.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>아래 함수를 감싸게 만드는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that makes the function below get wrapped</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: >-
+            {{pick.2|code}}{{pick.2|josa:은,는}} <b>감쌀 쪽</b>입니다. 같은 이름을 그냥 적으면 값 하나를
+            읽는 줄이 되고, 아래 함수와 이어 주는 것은 그 앞의 기호예요.
+          en: >-
+            {{pick.2|code}} is <b>the wrapper</b>. Written plainly it would just read a value; the
+            symbol before it is what joins it to the function below.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 값 읽기와 감싸기"
+            en: "The sharpest spot — reading a value and wrapping"
+          code:
+            - "staticmethod          # 값 하나"
+            - "@staticmethod         # 아래를 감싼다"
+      pick.3:
+        t:
+          ko: >-
+            그 괄호는 <b>감쌀 쪽을 먼저 부르는</b> 자리입니다. 없어도 감싸기는 일어나므로, 감싸는 일을
+            짓는 것은 이 괄호가 아니에요.
+          en: >-
+            Those brackets <b>call the wrapper first</b>. Wrapping happens without them too, so they
+            are not what makes it wrap.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 한 겹과 두 겹"
+            en: "The sharpest spot — one layer and two"
+          code:
+            - "@staticmethod         # 그대로 감싼다"
+            - '@app.get("/x")        # 부른 결과가 감싼다'
+
+meaning:
+  - q:
+      ko: "{{site.line}}행이 붙은 함수를 <b>한 번도 안 불러도</b> 무슨 일이 일어날까요?"
+      en: "What happens even if the function under line {{site.line}} is <b>never called</b>?"
+    hint:
+      ko: "이 줄이 <b>언제</b> 도는지가 답을 정합니다."
+      en: "The answer turns on <b>when</b> this line runs."
+    options:
+      - t:
+          ko: "이 줄은 이미 돌았다 — 파일을 읽을 때 감싸기가 끝난다"
+          en: "This line has already run — the wrapping finished as the file was read"
+      - t:
+          ko: "아무 일도 안 일어난다"
+          en: "Nothing happens at all"
+        diag:
+          t:
+            ko: >-
+              이 한 줄은 <b>함수와 별개</b>로 돕니다. 그래서 라우트 등록처럼 아무도 안 부른 일이
+              이미 끝나 있어요.
+            en: >-
+              This line runs <b>independently of the function</b>. That is how work nobody called —
+              registering a route, for instance — is already done.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 안 불러도 도는 줄"
+              en: "The sharpest spot — a line that runs uncalled"
+            code:
+              - '@app.get("/items")'
+              - "# 가져오기만 해도 등록된다"
+      - t:
+          ko: "그 함수를 처음 부를 때 한 번 돈다"
+          en: "It runs once, the first time the function is called"
+        diag:
+          t:
+            ko: >-
+              처음 부를 때 도는 것은 <b>몸통</b>입니다. 이 줄은 그보다 훨씬 앞, 함수가 만들어지는
+              바로 그 순간에 돌아요.
+            en: >-
+              What runs on the first call is <b>the body</b>. This line runs much earlier, at the very
+              moment the function is made.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 만들어질 때와 불릴 때"
+              en: "The sharpest spot — being made and being called"
+            code:
+              - "@log            # 정의할 때"
+              - "def f(): ...    # 몸통은 부를 때"
+      - t:
+          ko: "그 함수가 안 만들어진다"
+          en: "The function is never made"
+        diag:
+          t:
+            ko: >-
+              만들어집니다 — <b>먼저</b> 만들어져야 감쌀 것이 있어요. 순서는 함수 만들기 다음에
+              감싸기입니다.
+            en: >-
+              It is made — it must be made <b>first</b> for there to be anything to wrap. The order is
+              make, then wrap.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 순서"
+              en: "The sharpest spot — the order"
+            code:
+              - "def f(): ...    # ① 만들어진다"
+              - "f = log(f)      # ② 감싼다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 아래 함수를 {{pick.2|code}}{{pick.2|josa:으로,로}} <b>감쌉니다</b>."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} <b>wraps</b> the function below with
+        {{pick.2|code}}.
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "@", mono: true }
+      - t: "#"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              그 기호는 <b>주석</b>입니다. 뒤에 무엇을 적어도 안 돌아서, 아래 함수가 감싸이지 않은
+              채 그대로 남아요.
+            en: >-
+              That symbol makes a <b>note</b>. Whatever follows never runs, so the function below is
+              left unwrapped.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 도는 줄과 안 도는 줄"
+              en: "The sharpest spot — a line that runs and one that does not"
+            code:
+              - "@log        # 돈다"
+              - "# log       # 안 돈다"
+      - t: "$"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              파이썬 문법에 그 기호는 <b>없습니다.</b> 그 자리에서 문법이 안 맞아 파일이 아예 안
+              읽혀요.
+            en: >-
+              Python's grammar has <b>no such symbol</b>. The line does not hold together and the file
+              is not read at all.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 문법에 있는 기호"
+              en: "The sharpest spot — symbols the grammar has"
+            code:
+              - "@log"
+              - "$log        # SyntaxError"
+      - t: "&"
+        mono: true
+        diag:
+          t:
+            ko: >-
+              그 기호는 <b>비트를 겹치는</b> 셈입니다. 값 둘 사이에 오는 것이라 함수 정의 위에
+              혼자 서면 문법이 안 맞아요.
+            en: >-
+              That symbol <b>overlays bits</b>. It goes between two values, so standing alone above a
+              definition does not hold together.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 감싸기와 셈"
+              en: "The sharpest spot — wrapping and arithmetic"
+            code:
+              - "@log"
+              - "flags & MASK    # 셈"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 함수 몸통 안에 적지 않고 위에 한 줄로 붙었을까요?"
+    en: "Why is line {{site.line}} a line above rather than something inside the body?"
+  choices:
+    - t:
+        ko: "몸통이 하는 일과 다른 일이라서 — 감싸는 일은 함수마다 되풀이되고 몸통과 섞이면 둘 다 흐려진다"
+        en: "Because it is different work — wrapping repeats across functions and mixing it blurs both"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 파일에서 같은 감싸기가 또 붙은 함수가 있는지 찾아보세요."
+        en: "That is the direction. Look for another function in this file carrying the same wrapper."
+    - t:
+        ko: "몸통 안에서는 그 일을 못 해서"
+        en: "Because the body cannot do that work"
+      ok: false
+      fb:
+        ko: >-
+          할 수 있습니다 — 함수 아래에 <code>f = log(f)</code> 를 적으면 같은 일이에요. 이 줄은
+          그것을 <b>정의 옆에</b> 두어 읽는 사람이 함께 보게 한 것입니다.
+        en: >-
+          It can — writing <code>f = log(f)</code> below the function does the same. This line puts it
+          <b>beside the definition</b> so the reader sees both at once.
+    - t:
+        ko: "파이썬 문법이 그렇게 하도록 강제해서"
+        en: "Because Python's grammar forces it"
+      ok: false
+      fb:
+        ko: >-
+          강제하지 않습니다. 손으로 적어도 되고, 이 줄은 <b>짧게 적는 길</b>일 뿐이에요.
+        en: >-
+          Nothing is forced. Writing it by hand works; this line is only <b>a shorter way</b> to say
+          the same thing.
+
+queries:
+  - { grammars: [python], file: ./decorator.scm }
+
+examples:
+  - code: "@app.get(\"/items\")\ndef read_items():\n    return []"
+    expect: { sites: 1, form: call, hole: "@", picks: { 1: "@", 2: "app.get", 3: '("/items")' } }
+  - code: "@staticmethod\ndef helper():\n    return 1"
+    expect: { sites: 1, form: plain, hole: "@", picks: { 1: "@", 2: "staticmethod" } }
+  - code: "@property\ndef name(self):\n    return self._name"
+    expect: { sites: 1, form: plain, hole: "@", picks: { 1: "@", 2: "property" } }
+  # 손으로 감싸는 줄은 사용처가 아니다 — 같은 일이지만 노드가 다르다.
+  - code: "read_items = log(read_items)"
+    expect: none
