@@ -3,6 +3,11 @@
 `ts` 는 **이미 36개가 서 있다**(`essential` 30 + 표기 짝 6). 그래서 이 문서는 목록을 새로 만들지 않고,
 선 것을 재검토하고 지금 없는 축을 더한다. 조사일 2026-09-04.
 
+> **2026-09-05 — 3부 앞에 0부 「이 언어의 값과 식」을 붙이고, 부 배치를 처음 세웠다(1.5).**
+> 사용자 요청(「기초부터 심화까지 · 언어의 동작 원리부터 · 정수형·실수형·연산식」)이 지금 코스에
+> 자리가 없어서다. 0부는 `cs/` 43장(D157)에 간선을 걸어 「왜」를 대고, `essential` 30 중 열 장과
+> §3·§4 의 넷을 가져간다. **1.5.4 가 0·1·2·3부 배치의 정본**이다.
+
 ---
 
 ## 1. 언어 좌표
@@ -28,6 +33,305 @@ Electron·Tauri 앱, 그리고 이 리포 자신.
 | `grammars` | `typescript` · `tsx` · `javascript` |
 | 확장자 | `typescript`: `.ts .mts .cts` / `tsx`: `.tsx` / `javascript`: `.js .mjs .cjs .jsx` |
 | 프레임워크 | 별도 네임스페이스 `react` (`detect: { dependency: react }`) — 개념 **1장**. 그 위층(프레임워크·진입점·실행 러너)의 계획은 [`docs/plan/js-framework-axis.md`](../plan/js-framework-axis.md) 로 갈라 뒀다 |
+
+---
+
+## 1.5 0부 「이 언어의 값과 식」 — 정식 코스 3부 앞에 붙는 부
+
+**결정 등록부 초안 (번호 미정 — 오케스트레이터가 매긴다).** 정본 §4 의 정식 코스는 3부(바닥·객체·
+프레임워크)이고, 자바는 D177 로 그 셋이 실제로 섰다. **JS/TS 에는 부 배치 자체가 아직 없다** —
+`ts/_lang.yaml` 의 `essential` 30줄이 평평하게 늘어서 있고 어디까지가 바닥인지가 주석 위치로만
+표시된다(§2). 이 절이 하는 일은 둘이다. ① **0부를 세운다** ② 남은 것을 1·2·3부로 나눈다.
+
+**0부가 왜 필요한가 — 이 언어에서 특히.** 지금 `ts/arithmetic` 의 규칙은 「`+` 하나가 더하기이자
+잇기다 — `1 + '1'` 이 멈추지 않고 `'11'` 이 된다」이고, 이것은 **무슨 일이 일어나는지**의 답이지
+**왜**의 답이 아니다. 왜의 답은 「JS 에는 숫자 타입이 하나뿐이고 연산자가 타입을 강제 변환한다」이고,
+그 문장은 문법 층에 없다. 답은 `cs/` 43장(D157 · [`cs.md`](./cs.md))에 있다 — 이미 서 있는 층이다.
+
+**그리고 §4 가 이미 이것을 알고 있었다.** 심화 아홉 중 앞의 넷(`number-is-double` ·
+`type-erasure` · `type-assertion` · `prototype-chain`)을 「**버그를 설명**한다」로 묶어 뒀는데,
+`number-is-double` 은 심화가 아니라 **바닥이다.** 숫자가 한 종류뿐이라는 것을 모르면 `0.1 + 0.2` 도
+`7 / 2` 도 `MAX_SAFE_INTEGER` 도 설명이 안 된다. 0부가 그 셋을 앞으로 끌어온다.
+
+### 1.5.1 축 여덟 · 21판
+
+각 행의 다섯 열이 이 부의 계약이다 — **어느 기계에 걸리나**(`cs/`) · **어떤 그림이 그것을 보이나**
+(그림 계약은 I2 세션이 `design/system/diagrams.md` 에 만드는 중: 비트 배열 · 평가 트리 · 값 상자 ·
+메모리 줄 · 스택 프레임 · 타입 변환 사다리) · **초보가 실제로 틀리는 자리**(문항의 씨앗) ·
+**문항 형식**(형식 계약은 I1 세션이 `docs/program/fundamentals.md` 에 확정 중 — `value` 값 적기 ·
+`step` 한 걸음씩 · `bits` 비트로 보기 · `table` 표 채우기 · `build` 거꾸로 만들기 ·
+`predict` 예측 후 실행). **4지선다가 아니다.**
+
+**출처 표시** — `기존` 은 `_lang.yaml` 의 `essential` 30 에 이미 있는 것, `중심↑`/`심화↑` 는 §3·§4 의
+제안에서 올라온 것, `신규` 는 이 절이 새로 세우는 것.
+
+#### 축 A — 정수형과 그 한계 (2판)
+
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
+|---|---|---|---|---|---|
+| `ts/value-bits` **신규** | 값은 켜짐·꺼짐의 묶음이고, JS 는 그 묶음이 **64비트 하나뿐**이다 | `binary-representation` · `bit-and-byte` · `type` | 비트 배열 | `0b1010` 을 「천십」으로 읽는다. `1 << 31` 이 음수가 되는 이유(비트 연산만 32비트로 내려간다)를 버그로 안다 | `bits` |
+| `ts/number-literal` `기존` | `0x2A` · `1_000` · `1e3` · `42` 가 **전부 같은 타입**이다 | `type` | 값 상자 | `1` 은 정수이고 `1.5` 는 실수라고 믿는다. `typeof 1 === typeof 1.5` 다 | `value` |
+
+#### 축 B — 실수형과 왜 안 떨어지나 (3판)
+
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
+|---|---|---|---|---|---|
+| `ts/number-is-double` `심화↑` | 정수 타입이 **없다.** `MAX_SAFE_INTEGER`(2⁵³−1) 위는 조용히 어긋난다 | `floating-point` · `integer-overflow` | 비트 배열 (부호·지수·가수) | `9007199254740993` 을 찍고 마지막 자리가 바뀐 것을 오타로 안다. DB 의 `bigint` id 를 JSON 으로 받으면 이 자리에서 값이 상한다 | `bits` |
+| `ts/float-inexact` **신규** | `0.1 + 0.2 !== 0.3` — 2진수로 `0.1` 을 정확히 못 적는다 | `floating-point` · `binary-representation` | 비트 배열 | `toFixed(2)` 가 **문자열**을 낸다는 것을 모르고 다시 더해 `"0.300.30"` 을 만든다 | `value` |
+| `ts/integer-division` **신규** | `/` 가 늘 소수를 낸다. 버림은 `Math.floor`(아래)와 `Math.trunc`(0 쪽)로 **갈린다** | `floating-point` | 타입 변환 사다리 | `7 / 2` 를 `3` 으로 예상한다(자바·C 를 먼저 배운 사람). `Math.floor(-7/2)` 는 `-4`, `Math.trunc(-7/2)` 는 `-3` | `table` |
+
+#### 축 C — 문자열과 인코딩 (3판)
+
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
+|---|---|---|---|---|---|
+| `ts/string-literal` `기존` | 따옴표 셋(`'` `"` `` ` ``)이 같은 값이다 | `text-encoding` | 값 상자 | 백틱이 다른 타입이라고 믿는다 | `value` |
+| `ts/template-literal` `기존` | `${}` 안이 **식**이라 그 자리에서 계산된다 | — | 평가 트리 | 작은따옴표에 `${}` 를 써서 글자 그대로 남는다 — 오류가 아니라 조용히 틀린 문자열이 로그에 찍힌다 | `predict` |
+| `ts/text-length` **신규** | `.length` 는 글자 수가 아니라 **UTF-16 코드 단위** 수다 | `text-encoding` · `bit-and-byte` | 비트 배열 | `'👍'.length` 를 1 로 예상한다(실제 2). `'가'.length` 는 1 인데 UTF-8 바이트로는 3 — 「길이」가 셋인 것을 모른다 | `value` |
+
+#### 축 D — 참·거짓 (3판)
+
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
+|---|---|---|---|---|---|
+| `ts/boolean-literal` `기존` | `true`/`false` 두 값 | `type` | 값 상자 | `Boolean("false")` 가 `true` 다 — 빈 문자열만 거짓이다 | `value` |
+| `ts/truthy-falsy` `중심↑` | 거짓이 되는 값이 **여섯**(`false 0 '' null undefined NaN`)이고 `[]`·`{}` 는 참이다 | — | 값 상자 (거짓 여섯 칸) | `if (arr)` 로 빈 배열을 거르려 한다. `if (arr.length)` 여야 한다 | `table` |
+| `ts/undefined-null` `기존` | 「없음」이 **둘**이고 뜻이 다르다 — 안 넣은 것과 없다고 넣은 것 | `null-reference` | 값 상자 | `undefined == null` 은 참인데 `undefined === null` 은 거짓 — 어느 쪽이 답인지 모른다 | `table` |
+
+#### 축 E — 연산자와 우선순위 (3판)
+
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
+|---|---|---|---|---|---|
+| `ts/arithmetic` `기존` | `+` 하나가 더하기이자 잇기다 | — | 평가 트리 | `1 + '1'` 은 `'11'` 인데 `'3' - 1` 은 `2` 다 — `+` 만 문자열 쪽으로 기운다 | `predict` |
+| `ts/operator-precedence` **신규** | `2 + 3 * 4` 가 어떤 순서로 접히나. `&&` 가 `\|\|` 보다 세고 둘 다 **단락 평가**한다 | — | 평가 트리 | `a \|\| b && c` 를 왼쪽부터 읽는다. 실제는 `a \|\| (b && c)` 다 | `step` |
+| `ts/conditional-ternary` `기존` | `? :` 는 **식**이라 값을 낸다. 중첩하면 **오른쪽부터** 묶인다 | — | 평가 트리 | 중첩 삼항을 왼쪽부터 묶어 읽는다 | `step` |
+
+#### 축 F — 형 변환 (2판)
+
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
+|---|---|---|---|---|---|
+| `ts/implicit-conversion` **신규** | 타입이 다르면 **언어가 한쪽을 바꿔서** 계산한다 | `type` · `static-vs-dynamic-typing` | 타입 변환 사다리 | `'5' * 2 === 10` 인데 `'5' + 2 === '52'` 다. 연산자마다 어느 쪽으로 바뀌는지가 다르다 | `predict` |
+| `ts/explicit-conversion` **신규** | `Number()` · `parseInt()` · `String()` · `!!` 는 **새 값을 만든다** | `type` | 타입 변환 사다리 | `Number('')` 가 `0` 이고 `Number(null)` 도 `0` 인데 `Number(undefined)` 는 `NaN` 이다. `parseInt('12px')` 는 `12`, `Number('12px')` 는 `NaN` | `table` |
+
+#### 축 G — 대입과 이름 (3판)
+
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
+|---|---|---|---|---|---|
+| `ts/const-declaration` `기존` | 만드는 낱말이 **나중 일까지** 정한다 | `scope-and-lifetime` | 메모리 줄 | `const` 를 「값이 안 바뀜」으로 읽는다. **이름만** 묶는다 | `predict` |
+| `ts/reassignment` `기존` | 다시 넣기는 이름이 가리키는 곳을 바꾼다 | `state` | 메모리 줄 | `const` 에 다시 넣어 그 자리에서 멈춘다 | `step` |
+| `ts/reference-sharing` `중심↑` | `b = a` 는 **가리키는 곳만** 복사한다 | `value-vs-reference` · `aliasing` | 메모리 줄 (화살표 둘이 한 상자로) | `{ ...obj }` 가 안쪽까지 새로 만든다고 믿는다. **한 겹**뿐이다 | `predict` |
+
+#### 축 H — 비교와 같음 (2판)
+
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
+|---|---|---|---|---|---|
+| `ts/comparison` `기존` | `===` 는 타입까지 같아야 참이다 | `identity-vs-equality` | 값 상자 | 객체 둘을 `===` 로 견주고 내용이 같으면 참일 거라 믿는다. 객체는 **자리**를 견준다 | `value` |
+| `ts/loose-equality` `중심↑` | `==` 는 타입이 다르면 한쪽을 바꿔 견준다. **`NaN !== NaN`** 이다 | `identity-vs-equality` | 표 (강제 변환표) | `NaN === NaN` 을 참으로 예상한다. `0 == ''` 참, `0 == []` 참인데 `'' == []` 도 참이고 `null == 0` 은 거짓 | `table` |
+
+**그림 여섯 중 다섯만 쓴다.** 비트 배열 · 평가 트리 · 값 상자 · 메모리 줄 · 타입 변환 사다리.
+**스택 프레임은 0부에 없다** — 함수가 아직 안 나왔다. 1부 `ts/function-declaration`·
+`ts/return-statement` 가 그 그림의 첫 소비자이고, 2부 `ts/closure`·3부 `await-resume` 이 그 위에 쌓인다.
+
+### 1.5.2 언어마다 다른 자리
+
+세 언어(파이썬 · JS/TS · 자바)를 같은 여덟 축으로 대조한다. **JS/TS 열이 이 문서의 몫**이고
+나머지 둘은 [`py.md`](./py.md) §1.5 · [`java.md`](./java.md) §1.5 가 같은 표를 든다.
+이 표가 0부의 존재 이유다 — 같은 축에서 세 언어의 답이 **서로 다르고**, 그 차이를 모르면
+두 번째 언어에서 첫 언어의 습관이 그대로 틀린 답이 된다.
+
+| 축 | 파이썬 | **JS / TS** | 자바 |
+|---|---|---|---|
+| 정수형 | 자릿수 한계가 없다 — `2**100` 이 그대로 | **정수 타입이 없다.** 전부 64비트 부동소수이고 `MAX_SAFE_INTEGER`(2⁵³−1) 위는 조용히 어긋난다 | `int` 32비트 고정. `MAX_VALUE + 1` 이 가장 작은 음수 |
+| 나눗셈 | `/` 는 늘 `float`, `//` 는 **아래로** 버림 (`-7 // 2 == -4`) | **`/` 는 늘 소수.** 버림이 `Math.floor`(아래)와 `Math.trunc`(0 쪽)로 갈린다 | `/` 가 정수끼리면 **0 쪽으로** 버림 (`-7 / 2 == -3`) |
+| 실수 | `0.1 + 0.2 != 0.3`. 정확한 소수는 표준 라이브러리 `decimal` | 같음. **정수도 같은 타입이라 큰 정수까지 샌다** | 같음. `float`/`double` 둘이고 리터럴 기본이 `double`. 돈은 `BigDecimal` |
+| 문자열 길이 | `len` 이 **코드 포인트** — `len("가") == 1` | **`.length` 가 UTF-16 코드 단위** — `'👍'.length === 2` | `.length()` 도 UTF-16 코드 단위. **`char` 타입이 따로 있고** 이모지 하나가 `char` 둘 |
+| 참·거짓 | `bool` ⊂ `int` (`True + True == 2`). 빈 것이 거짓 | **거짓이 여섯**(`false 0 '' null undefined NaN`)이고 `[]`·`{}` 는 참 | `boolean` 이 숫자가 **아니고** 조건 자리에 `boolean` 말고는 못 온다 |
+| 형 변환 | 수 사이는 올라가지만 **문자열과 숫자는 안 섞인다** (`"1" + 1` 이 멈춘다) | **자동으로 섞인다** — `1 + '1' === '11'`, `'3' - 1 === 2` | 넓히기는 자동, 좁히기는 `(int)` 명시. 문자열은 `+` 로만 자동 |
+| 대입 | 대입은 **문**이라 값이 없다 (`:=` 만 식) | **대입이 식** — `a = b = 0` 이 된다 | 대입이 **식** — `if (done = true)` 가 `boolean` 일 때만 통과한다 |
+| 같음 | `==` 는 값, `is` 는 자리 | **`===` 는 타입까지, `==` 는 강제 변환. `NaN !== NaN`** | `==` 는 **자리**, `.equals` 는 내용. `Integer` 는 −128~127 만 캐시 |
+
+**이 표에서 JS/TS 가 혼자인 자리 셋.** ① 숫자 타입이 하나뿐 ② 문자열과 숫자가 자동으로 섞임
+③ 같음이 두 개의 연산자로 갈림. 셋 다 **다른 언어에서 오는 사람이 가장 크게 틀리는 자리**이고,
+동시에 **JS 를 먼저 배운 사람이 다음 언어에서 틀리는 자리**다 — `7 / 2` 를 `3.5` 로 예상하고
+자바에서 `3` 을 받는다. 0부 문항이 다른 언어의 답을 오답 선택지로 쓴다.
+
+### 1.5.3 실측 — 0부 개념이 사용자 리포에 몇 곳 나오나
+
+`ECC`(js 410파일 127,786줄) · `ai-pm`(ts 322 + tsx 291 = 613파일 125,376줄) 두 리포를 정규식으로 셌다.
+**주석과 문자열·템플릿·정규식 리터럴을 먼저 지우고** 셌다. 정규식은 tree-sitter 보다 헐거우므로
+**하한**으로 읽는다.
+
+| 0부 판 | 근거 모양 | `ECC` js (410) | `ai-pm` ts·tsx (613) | 판정 |
+|---|---|---|---|---|
+| `value-bits` · `number-literal` | 정수 리터럴 | 8,837곳 / 375파일 | 7,699 / 493 | 내 코드에서 확인 |
+| `number-is-double` | `BigInt` · `MAX_SAFE_INTEGER` · 2⁶³ 넘는 리터럴 | 7곳 / 1파일 | **0곳** | **합성 + 「네 코드엔 없다」**(`scale`) |
+| `float-inexact` | `.toFixed(` | 4곳 / 3파일 | 4 / 3 | 얇다 — `thin_threshold`(min_sites 3)에 걸린다 |
+| `integer-division` | `Math.floor` · `Math.trunc` · `Math.round` | 42곳 / 26파일 | 81 / 52 | 내 코드에서 확인 |
+| `string-literal` · `template-literal` | 문자열·템플릿 리터럴 | 4,882 / 362 · 백틱 4,267 / 356 | 38,265 / 604 · 백틱 915 / 263 | 내 코드에서 확인 |
+| `text-length` | `.length` · `charCodeAt` · `codePointAt` · `normalize` | `.length` 1,412 / 245 · 인코딩 26 / 18 | 1,132 / 272 · 35 / 20 | 내 코드에서 확인 |
+| `boolean-literal` | `true` · `false` | 3,164곳 / 297파일 | 2,788 / 358 | 내 코드에서 확인 |
+| `truthy-falsy` | 비교 없는 `if (x)` | 1,512곳 / 229파일 | 1,139 / 282 | 내 코드에서 확인 |
+| `undefined-null` | `??` · `?.` | 231곳 / 68파일 | 1,786 / 308 | 내 코드에서 확인 |
+| `arithmetic` | 나눗셈(피연산자 사이의 `/`) | 571곳 / 196파일 | 148 / 73 | 내 코드에서 확인 |
+| `operator-precedence` | `+` 와 `*` 가 섞인 식 | 157곳 / 65파일 | 177 / 84 | 내 코드에서 확인 |
+| `conditional-ternary` | `? :` | 1,039곳 / 296파일 | 1,721 / 328 | 내 코드에서 확인 |
+| `implicit-conversion` | (두 피연산자의 타입을 알아야 한다) | **못 쟀다** | **못 쟀다** | 아래 |
+| `explicit-conversion` | `Number(` · `parseInt(` · `String(` · `Boolean(` · `!!` | 531곳 / 131파일 | 222 / 92 | 내 코드에서 확인 |
+| `const-declaration` · `reassignment` | `const`/`let`/`var` · 재대입 | 15,989 / 405 · 재대입 1,515 / 268 | 9,311 / 581 · 5,963 / 343 | 내 코드에서 확인 |
+| `reference-sharing` | `...` 펼치기 | 761곳 / 206파일 | 1,036 / 234 | 내 코드에서 확인 |
+| `comparison` | `===` · `!==` | 3,026곳 / 305파일 | 2,651 / 356 | 내 코드에서 확인 |
+| `loose-equality` | `==` · `!=` | **1곳 / 1파일** | 375 / 120 | **리포마다 갈린다** — 아래 |
+
+**세 가지가 읽힌다.**
+
+**① `loose-equality` 가 리포에 따라 0 이 되거나 375 가 된다.** `ECC` 는 410파일에 `==` 가 **1곳**뿐이고
+(ESLint `eqeqeq` 가 도는 리포로 보인다) `ai-pm` 은 613파일에 375곳이다. §3 이 이 개념을 「AI 가 한
+파일에서 `==`·`===` 를 섞는다」로 제안했는데 **그것은 `ai-pm` 에서만 참이다.** `ECC` 에서는
+`alternatives:` 짝(§3 의 `gap: ts/comparison, present: ts/loose-equality`)이 부기할 것이 없다.
+0부에서는 그래도 가르친다 — 「이 리포는 한쪽만 쓴다」 자체가 배울 것이고, D158 ②의 `idiom` 사유다.
+
+**② `number-is-double` 이 `ai-pm` 에서 0곳이다.** 613파일에 `BigInt` 도 `MAX_SAFE_INTEGER` 도 2⁶³ 넘는
+리터럴도 없다. 이것이 이 부가 존재하는 이유의 자리다 — 리포가 안 쓰니 옛 방식(리포가 쓰는 문법만)
+으로는 영영 못 가르치는데, **모르면 DB id 를 JSON 으로 받는 날 값이 상한다.** 합성으로 가르치고
+「네 코드엔 없다」를 명시한다. 사유는 `scale`.
+
+**③ `float-inexact` 는 둘 다 얇다.** `toFixed` 가 각 4곳이다. 소수를 다루는 코드가 거의 없다는 뜻이고,
+그것 자체가 「없어서 안 만나는 버그」다. 얇은 대로 두되 합성이 정본이다.
+
+**못 잰 것 하나.** `implicit-conversion`(`'5' * 2` · `1 + '1'`)은 정규식으로 못 센다 — 두 피연산자의
+타입을 알아야 하는데 정규식도 tree-sitter 도 모른다(§8 의 파싱 함정과 같은 뿌리다).
+**실행 없이는 못 재는 개념**이고, 그러면 사용처 대신 합성이 정본이다.
+
+### 1.5.4 부 배치 — 이 문서가 처음 세운다
+
+`ts/_lang.yaml` 의 `essential` 30 은 순서만 있고 부가 없다. 0부를 세우면서 나머지도 나눈다.
+**자바(D177)·파이썬과 같은 규칙 셋**이 걸린다 — ① 개념마다 내 코드의 자리를 짚고 없으면 사유를
+댄다 ② 3부는 내 코드가 먼저다 ③ 순서는 개념 그래프의 위상 정렬이다.
+
+| 부 | 이름 | 판 | 담기는 것 |
+|---|---|---|---|
+| **0부** | 이 언어의 값과 식 | **21** | 위 축 여덟. 기존 10(`const-declaration`·`reassignment`·`boolean-literal`·`comparison`·`arithmetic`·`string-literal`·`number-literal`·`undefined-null`·`template-literal`·`conditional-ternary`) + §3·§4 에서 올린 4(`truthy-falsy`·`loose-equality`·`reference-sharing`·`number-is-double`) + 신규 7 |
+| **1부** | 흐름과 묶기 | **13** | `if-statement` · `while-loop` · `for-of` · `function-declaration` · `arrow-function` · `return-statement` · `call-expression` · `property-access` · `array-basics` · `array-destructuring` · `object-destructuring` · `try-catch` · `object-literal`(§3 신규) |
+| **2부** | 타입과 객체 | **18** | `object-spread` · `optional-chaining` · `nullish-coalescing` · `array-map-immutable` · `array-filter` · `array-method-chain` · `async-await` · `generics` + §3 신규 10(`closure` · `import-export` · `throw-error` · `callback-argument` · `array-reduce` · `class-declaration` · `type-annotation` · `interface-type` · `union-type` · `narrowing`) |
+| **3부** | 프레임워크 | **9 또는 6** | 리포가 정한다 — React 면 `react/` 9([`js-framework-axis.md`](../plan/js-framework-axis.md) §2.2), Node CLI 면 `node/` 6(§2.3). 둘 다면 15 |
+
+**`essential` 30 이 전량 배치된다** — 0부 10 · 1부 12 · 2부 8. 1부의 `object-literal` 과 2부의 열은
+§3 이 제안한 신규이고 아직 사전에 없다. **§4 심화 아홉 중 하나
+(`number-is-double`)만 0부로 올라가고 나머지 여덟은 부 밖에 남는다** — `type-erasure` ·
+`type-assertion` · `prototype-chain` · `structural-typing` · `generic-constraint` · `any-unknown` ·
+`this-binding` · `await-resume`. 파이썬이 심화 열을 `essential` 밖에 둔 것과 같은 판단이다(§5 의 반례).
+
+**판 수와 일수** (하루 새 판 2장 · D12 · 정본 §2 의 하루 15분):
+
+| 부 | 판 | 일 |
+|---|---|---|
+| 0부 | 21 | **11** (마지막 날 1장) |
+| 1부 | 13 | 7 (마지막 날 1장) |
+| 2부 | 18 | 9 |
+| 3부 | 6~15 | 3~8 |
+| **합** | **58~67** | **30~35** |
+
+**`ai-pm`(React) 이면 61판 = 31일**, **`ECC`(Node CLI) 면 58판 = 29일**이다. 그 뒤로 기능 챕터가
+이어진다. 자바가 부 셋 43판 = 22일이었고 0부를 더하면 58판 = 29일이니([`java.md`](./java.md) §1.5.4)
+세 언어가 29~31일로 붙는다. **한 달이 맞는 값인지는 사용자 결정이다** — 줄이려면 0부의 축 A·B 를
+각 1판으로 접어 17판(9일)까지 내려간다. 접으면 잃는 것은 비트 배열 그림이 걸리는 자리 셋
+(`value-bits` · `number-is-double` · `float-inexact`)이 하나로 뭉쳐, 「숫자가 한 종류뿐」과
+「소수가 안 떨어진다」를 한 판에서 둘 다 보여야 한다는 것이다.
+
+### 1.5.5 0장(프롤로그)과의 관계 — 안 건드린다
+
+`ZERO_CHAPTER_MAX = 24` 의 0장과 이 0부는 **다른 것**이다. 0장은 `zeroChapterPlates` 가 `_lang.yaml` 의
+`essential` 에서 깊이 ≤ 2 를 뽑아 만드는 예고이고, 0부는 코스의 부다. 이름이 닮아 헷갈리므로 적어 둔다.
+
+TS 의 0장 후보는 지금 **21/24** 이고(§5 · `zero-chapter.test.ts` 가 잰다) 마진이 셋이다.
+0부의 신규 일곱을 `essential` 에 올리면 **28** 이 되어 상한이 넷을 자르고, 넷째 정렬 키(id 알파벳순)가
+실제로 돌기 시작한다 — D147 이 피하려던 자리다. [`py.md`](./py.md) §1.5.5 와 **같은 결정**이고
+[`cs.md`](./cs.md) §6 의 미해결과도 같다. **세 갈래(0부를 `essential` 밖에 두기 / 상한을 30 으로
+올리기 / 입력을 두 목록으로 가르기)를 함께 재야 하고, 이 문서에서는 안 정했다.**
+
+---
+
+### 1.5.6 I6 조정 규약 — 공통 id 조각 · 0부 상한 · `cs/` 신청
+
+세 언어(그리고 나머지 일곱)가 **같은 축에 같은 id 조각**을 쓴다. 조각이 같으면 `universal` 로
+`common/` 에 묶기 쉽고, 다르면 [`cs.md`](./cs.md) §10.1 이 적은 사고 — 「같은 기계에 여덟 가지 이름이
+붙었다」 — 가 0부에서 되풀이된다.
+
+| 조각 | 축 | `py` | **`ts`** | `java` |
+|---|---|---|---|---|
+| `value-bits` | A | `py/value-bits` **신규** | `ts/value-bits` **신규** | `java/value-bits` **신규** |
+| `integer-literal` | A | `py/number-literal` | `ts/number-literal` | `java/variable-declaration` |
+| `integer-limit` | A | `py/integer-limit` **신규** | `ts/number-is-double` | `java/integer-limit` **신규** |
+| `float-type` | B | `py/number-literal` 이 겸한다 | `ts/number-is-double` 이 겸한다 | `java/floating-type` **신규** |
+| `float-inexact` | B | `py/float-inexact` **신규** | `ts/float-inexact` **신규** | `java/float-inexact` **신규** |
+| `integer-division` | B | `py/integer-division` **신규** | `ts/integer-division` **신규** | `java/arithmetic` 이 겸한다 |
+| `string-literal` | C | `py/string-literal` | `ts/string-literal` | `java/string-literal` |
+| `string-interpolation` | C | `py/f-string` | `ts/template-literal` | **없다** — `java/string-concat` 이 그 자리 |
+| `text-length` | C | `py/text-length` **신규** | `ts/text-length` **신규** | `java/text-length` **신규** |
+| `boolean-literal` | D | `py/boolean-literal` | `ts/boolean-literal` | `java/boolean-literal` |
+| `truthiness` | D | `py/truthiness` | `ts/truthy-falsy` | `java/boolean-only-condition` **신규** (반대 방향 — 못 한다는 규칙) |
+| `absent-value` | D | 1부 `py/none-value` | `ts/undefined-null` | 2부 `java/null` |
+| `arithmetic` | E | `py/arithmetic` | `ts/arithmetic` | `java/arithmetic` |
+| `operator-precedence` | E | `py/operator-precedence` **신규** | `ts/operator-precedence` **신규** | `java/operator-precedence` **신규** |
+| `logical-operator-value` | E | `py/bool-op-value` **신규** | `ts/operator-precedence` 가 겸한다 | **없다** — `&&` 가 `boolean` 만 낸다 |
+| `conditional-expression` | E | 부 밖 (심화) | `ts/conditional-ternary` | 부 밖 (표본 13곳) |
+| `implicit-conversion` | F | `py/implicit-conversion` **신규** | `ts/implicit-conversion` **신규** | `java/implicit-conversion` **신규** |
+| `explicit-conversion` | F | `py/explicit-conversion` **신규** | `ts/explicit-conversion` **신규** | `java/explicit-conversion` **신규** |
+| `assignment` | G | `py/assignment` | `ts/const-declaration` · `ts/reassignment` | `java/assignment` |
+| `reference-binding` | G | `py/reference-binding` **신규** | `ts/reference-sharing` | `java/reference-binding` **신규** |
+| `comparison` | H | `py/comparison` | `ts/comparison` | `java/comparison` |
+| `identity-equality` | H | `py/is-identity` | `ts/loose-equality` | `java/reference-equality` |
+
+**이 표가 드러내는 구멍 셋.** ① 자바에는 문자열 보간이 없다(JEP 430 철회) — `string-concat` 이
+그 자리를 진다. ② 자바의 `&&` 는 `boolean` 만 내므로 `logical-operator-value` 조각이 안 선다.
+③ `truthiness` 는 자바에서 **반대 방향**이다 — 파이썬·JS 는 「무엇이 거짓이 되나」이고 자바는
+「`boolean` 말고는 못 온다」다. 같은 조각 이름을 쓰되 `universal` 은 안 건다.
+
+#### 0부 상한 — 언어당 12장
+
+I6 규약: 0부가 `essential` 에 새로 올리는 개념은 **언어당 12장까지**다. 근거는 0장 상한 24 에서
+기초 8 을 뺀 값이고, 이 상한이 없으면 1.5.5 가 적은 「후보가 넘쳐 id 알파벳순이 실제로 돈다」가
+그대로 일어난다.
+
+`essential` 에 새로 드는 것은 **열한 장**이다 — 신규 일곱(`value-bits` · `float-inexact` ·
+`integer-division` · `text-length` · `operator-precedence` · `implicit-conversion` ·
+`explicit-conversion`)과 §3·§4 가 제안했으나 아직 사전에 없는 넷(`truthy-falsy` · `loose-equality` ·
+`reference-sharing` · `number-is-double`). 나머지 열은 `essential` 30 에 **이미 들어 있고** 부만
+옮긴 것이라 0장 후보를 안 늘린다. **11 ≤ 12 — 상한을 지킨다.**
+
+**0부의 판 수(21)와 이 12는 다른 수다.** 판은 **코스에서 며칠 걸리나**를 재고,
+12는 **0장 후보와 구멍 지도 분모가 얼마나 커지나**를 잰다. 이미 `essential`(30)에 있던 것을
+0부로 옮기는 것은 후자를 한 톨도 안 늘린다 — 부는 **교재 축**이고 `essential` 은 **분모 축**이다.
+
+#### `cs/` 에 없는 것 셋 — 신청 목록
+
+`cs/` 43장(D157)을 0부의 간선으로 쓰려고 대조했더니 **셋이 없다.**
+
+| 신청 `cs/` id | 한 줄 | 이 문서에서 이것을 요구하는 판 | 그림 |
+|---|---|---|---|
+| `cs/operator-precedence` | 식은 왼쪽부터 읽히지 않는다 — 연산자마다 세기와 방향이 있고, 그것이 **접히는 순서**를 정한다 | `ts/operator-precedence` · `ts/arithmetic` | **평가 트리** |
+| `cs/type-conversion` | 타입이 다른 값을 만나면 ① 언어가 바꾸거나 ② 사람이 적거나 ③ 멈춘다 — 셋 중 무엇이냐가 언어를 가른다 | `ts/implicit-conversion` · `ts/explicit-conversion` | **타입 변환 사다리** |
+| `cs/truthiness` | 참·거짓이 아닌 값을 조건 자리에 두면 무슨 일이 일어나나 | `ts/truthy-falsy` | 값 상자 |
+
+**앞의 둘이 특히 크다** — I2 세션이 만드는 그림 여섯 중 **평가 트리와 타입 변환 사다리 둘이
+이 두 개념의 그림**이다. `cs/` 에 개념이 없으면 그 그림이 걸릴 데가 없고, 언어마다 따로 그리면
+`cs.md` §10.1 이 경고한 「같은 기계에 여러 이름」이 그림 층에서 되풀이된다.
+
+셋을 세우는 것은 `dictionary/cs/**` 와 `docs/curriculum/cs.md` 의 일이라 **이 문서의 범위 밖**이다.
+여기 적어 두는 것이 신청이다. 셋이 서기 전까지 위 표의 해당 칸은 「없음」으로 두고, 판은
+`cs/` 간선 없이 선다 — 판은 뜨되 「왜」의 아래층이 비어 있다.
+
+#### 파서 — 이 언어는 오늘 실제로 파싱된다
+
+I6 이 찾은 것: `packages/dictionary/src/schema.ts:29` 의 `grammarSchema` 열거값에는 `c`·`cpp`·
+`c_sharp`·`swift`·`dart` 가 있는데 `crates/parse/Cargo.toml` 의 `lang-*` 기능에는 없다. 그 다섯은
+**사전이 로드되고 린트도 통과하는데 캡처가 0곳**이 된다 — [`README.md`](./README.md) §6 표의
+「열었다」는 로드 단계이지 파서가 아니다.
+
+**이 문서의 언어는 그 자리가 아니다.** `Cargo.toml` 을 직접 확인했다 — 문법 `typescript` · `tsx` · `javascript` 는
+`lang-typescript` = `tree-sitter-typescript 0.23` · `lang-javascript` = `tree-sitter-javascript 0.25` 로 실제 링크되어 있고, 1.5.3 의 실측이 그 위에서 돈 것이 아니라 **정규식으로 돈 것**이므로
+(정규식은 파서 유무와 무관하다) 두 사실을 섞지 않는다. 파서가 붙어 있다는 것은 **0부 판이
+사용처를 실제로 얻는다**는 뜻이고, 사용처가 0 인 판(1.5.3 의 「합성 + 「네 코드엔 없다」」)은
+파서가 없어서가 아니라 **그 코드가 리포에 없어서** 0 이다. 그 둘은 다른 결론으로 이어진다 —
+앞의 것은 크레이트를 붙이면 풀리고, 뒤의 것은 D177 규칙 ①(합성 + 사유 명시)이 답이다.
 
 ---
 

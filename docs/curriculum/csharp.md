@@ -1,6 +1,8 @@
 # C# 커리큘럼 조사 — 네임스페이스 `csharp`
 
-조사일 2026-09-04. 파일 하나만 쓴다(`dictionary/**` 는 건드리지 않았다).
+조사일 2026-09-04 · **0부 「이 언어의 값과 식」 추가 2026-09-05**(정본 §1·§4 · README §8 의 공통 축).
+파일 하나만 쓴다(`dictionary/**` 는 건드리지 않았다). **§0 의 값은 .NET 10.0.302 로 실행해 잰 것**이고,
+나머지 절의 「확인 못 함」 표시는 그대로다.
 
 ---
 
@@ -75,18 +77,246 @@ Unity 쪽은 `_lang.yaml` 의 **`alternatives`** 로 흡수한다 — 「AI 가 
 
 ---
 
-## §2 기초 — 바닥 여덟
+## §0 0부 — 이 언어의 값과 식
+
+축 여덟의 정의와 id 조각은 [`README.md`](./README.md) §8 에 있다. **여기는 C# 에서 어긋나는
+자리만** 쓴다. 여덟 축이 전부 서고 어긋남 판은 따로 안 세웠다 — **8 / 12**(상한 §8). C# 의 어긋남
+넷(`checked` · `decimal` · 값/참조 타입 · `==` 가 타입마다)이 전부 축 안에서 표현된다.
+
+**이 절의 값은 이 기계에서 실행해 잰 것이다** — .NET SDK **10.0.302**, `dotnet new console` →
+`dotnet run`, 2026-09-05. 세 언어 중 C# 와 Swift 만 툴체인이 있었고 Go 는 없었다(go.md §0.4).
+**이 문서의 §1 「생김새」는 여전히 템플릿·설문에 기댄 판단이고, §0 만 실측이다.**
+
+### §0.1 여덟 장
+
+| # | id | name.ko / en | 한 줄 | `cs/` | 그림 | 초보가 실제로 틀리는 자리 |
+|---|---|---|---|---|---|---|
+| 0-1 | `csharp/integer-literal` | 정수 값과 그 폭 / Integer literal | 폭이 정해져 있고, **넘칠 때 무엇이 일어날지를 코드가 고른다**(`checked`/`unchecked`) | `bit-and-byte` · `integer-overflow` | 비트 배열 | **「넘치면 예외가 난다」고 믿는다.** 기본은 **조용히 감긴다** — 실측 `int.MaxValue + 1` = **−2147483648**. `checked` 를 적었을 때만 `OverflowException` 이다 |
+| 0-2 | `csharp/float-literal` | 실수 값이 **셋** / Float literal | `float`(2진 32) · `double`(2진 64) · `decimal`(**10진 128**). 접미사가 타입을 정한다 | `floating-point` · `binary-representation` | 비트 배열 | **돈을 `double` 로 담는다.** 실측 `0.1 + 0.2 == 0.3` → **False**, `0.1m + 0.2m == 0.3m` → **True**. 접미사 `m` 하나가 답을 뒤집는다 |
+| 0-3 | `csharp/text-literal` | 글자 값 — `char` 와 `string` / Text literal | **따옴표 하나가 타입을 가른다** — `'a'` 는 `char`(값형 · UTF-16 코드 단위 하나), `"a"` 는 `string`(참조형) | `text-encoding` | 값 상자 · **메모리 줄** | **`.Length` 가 사람이 보는 글자 수라고 믿는다.** 실측 이모지 하나가 **11** 이다 — UTF-16 코드 단위를 센다 |
+| 0-4 | `csharp/boolean-literal` | 참·거짓 값 / Boolean literal | 조건 자리에 `bool` 만 온다 — 「참 같은 값」이 **없다** | `type` · **`cs/truthiness` 없음** | 평가 트리 | **`if (count)`·`if (obj)` 를 쓴다** (§9 ③) |
+| 0-5 | `csharp/operator-precedence` | 무엇이 먼저 묶이고, 결과 타입은 누가 정하나 / Operator precedence | 결과 타입을 **값이 아니라 피연산자의 타입**이 정한다 | **`cs/operator-precedence` 없음** (`type` 로 임시) | 평가 트리 | **`5 / 2` 를 2.5 로 안다.** 실측 **2** — `5.0 / 2` 라야 2.5 다 (§9 ②). 그리고 `1 << 2 + 3` 은 **32** 인데 Go·Swift 는 7 이라 그쪽에서 온 손이 여기서 틀린다 |
+| 0-6 | `csharp/type-conversion` | 넓히기는 저절로, 좁히기는 손으로 / Type conversion | 그리고 **캐스트는 조용히 값을 바꾼다** — `checked` 를 적어야 터진다 | **`cs/type-conversion` 없음** · `static-vs-dynamic-typing` · `compile-and-run` | 타입 변환 사다리 | **`(int)` 캐스트가 안전하다고 믿는다.** 실측 `(int)3000000000L` = **−1294967296**(unchecked), `checked` 면 `OverflowException`. `(int)2.9` 는 **2** 다 — 반올림이 아니라 버림이다 |
+| 0-7 | `csharp/assignment` | 이름에 붙는 것이 값인가 자리인가 / Binding and assignment | 이름을 **만드는** 줄에는 낱말이 하나 더 있다(타입 이름 또는 `var`). 그리고 `=` 가 **struct 면 값 전체를, class 면 화살표만** 복사한다 | `state` · `value-vs-reference` · `stack-and-heap` | 값 상자 · 메모리 줄 · **스택 프레임** | **`class` 를 넘기면 복사된다고 믿는다.** 실측: struct 를 다른 이름에 넣고 고치면 원본 `X` = **1**, class 는 **9** (§9 ⑥·⑦) |
+| 0-8 | `csharp/equality` | 같은 것인가 같은 값인가 / Equality | **`==` 가 정적 타입에 따라 다른 질문을 한다** | `identity-vs-equality` · `value-vs-reference` | 평가 트리 · 값 상자 | **`==` 는 언제나 내용을 견준다고 믿는다.** 실측: 같은 두 문자열이 `string ==` 로는 **True**, 변수 타입을 `object` 로 바꾸면 같은 값에 **False**. 코드는 한 글자도 안 바뀌고 **선언한 타입만 바뀌었다** (§9 ⑤) |
+
+**`cs/` 에 없는 것 셋이 이 표에 굵게 나온다** — `cs/operator-precedence` · `cs/type-conversion` ·
+`cs/truthiness`. 셋 다 README §9 의 「없는 것」 표에 이미 올라 있다(I6). 규약 5 대로 이 문서는
+새 `cs/` 를 만들지 않는다. C# 에서 가장 크게 비는 것은 **`cs/type-conversion`** 이다 —
+이 언어는 변환 규칙이 넷으로 갈리는데(암묵 넓힘 · 명시 좁힘 · `checked` 좁힘 · 박싱) 0-6 의
+타입 변환 사다리가 그 넷을 한 그림에 놓으려면 「다른 타입 둘이 만나면 무엇이 일어나나」를 답하는
+기계 개념이 있어야 하고, 43장에 없다.
+
+### §0.2 형식과 `universal` — 규약 4·6
+
+| # | 형식 (I1) | `universal` |
+|---|---|---|
+| 0-1 | `bits` → **`predict`** | `common/number-literal` |
+| 0-2 | `value` | `common/number-literal` |
+| 0-3 | `table` | `common/text-literal` |
+| 0-4 | `predict` | `common/boolean-value` |
+| 0-5 | `step` | `common/arithmetic` |
+| 0-6 | `build` | `common/type-cast`(신규 후보 · README §8) |
+| 0-7 | `step` | `common/variable-binding` · `common/reassignment` |
+| 0-8 | **`predict`** | `common/comparison` |
+
+**여섯 형식이 전부 쓰인다** — 안 쓰는 것이 없다(규약 6). 그림도 여섯이 전부 쓰인다:
+스택 프레임은 0-7 에서 「struct 를 메서드에 넘기면 프레임에 복사본이 하나 더 선다」를 그린다.
+
+**C# 에서 `predict` 가 가장 센 자리가 0-1 과 0-8 이다.** 둘 다 예측과 실제가 갈리고, **갈리는
+원인이 코드에 안 적혀 있다** — `checked` 를 안 적었다는 사실, 그리고 변수의 정적 타입.
+오답 진단은 정본 §3 ② 대로 **「당신이 고른 그것이 참이 되는 조건」**을 낸다: 「예외가 나는 답은
+`checked` 를 적었을 때 참이다」 + 그 한 줄. **예측이 틀리는 순간이 곧 「`checked` 라는 낱말이
+왜 있나」의 답이다.**
+
+### §0.3 C# 라서 다른 네 자리 — 전부 실측
+
+| 자리 | C# | 견줄 것 | 축 |
+|---|---|---|---|
+| **`checked` / `unchecked`** | 기본은 감김(`int.MaxValue + 1` = −2147483648). `checked(…)` 면 `OverflowException`. **넘칠 때 무엇이 일어날지를 코드가 고른다** | Swift 는 고를 여지 없이 **죽는다**(종료 코드 133 · swift.md §0.4) — 감으려면 `&+`. Go 는 언제나 감기고 고를 낱말이 없다 | 0-1 |
+| **`decimal` 이라는 세 번째 실수형** | 실측 `1.0m / 3` = `0.3333333333333333333333333333`(28~29자리), `1.0 / 3` = `0.3333333333333333`, `1.0f / 3` = `0.33333334` | Go 도 Swift 도 10진 실수형이 **언어에 없다.** 돈은 라이브러리로 간다 | 0-2 |
+| **값 타입과 참조 타입** | 실측 struct 복사 후 원본 `X` = 1, class 는 9. `record` 는 class 인데 `==` 가 내용 비교다(실측 True) | Swift 도 struct/class 로 같은 축을 갖되 `==`/`===` 로 **낱말이 갈려 있다**. Go 는 struct 가 값이고 참조는 포인터로 **눈에 보이게** 적는다 | 0-7 |
+| **`==` 가 타입마다 다르게 동작** | `string` 은 내용, 보통의 `class` 는 참조, `record` 는 내용. **같은 두 값이라도 변수를 `object` 로 선언하면 참조 비교로 바뀐다**(실측 True → False) | Swift 는 낱말로 갈랐고, Go 는 견줄 수 없는 타입을 아예 컴파일에서 막는다 | 0-8 |
+
+셋을 한 줄에 놓으면 이렇게 된다 — **정수가 넘칠 때 C# 는 고르게 하고, Swift 는 죽고, Go 는 감긴다.**
+`cs/integer-overflow` 가 셋을 한 기계로 묶고 언어 장 셋은 「이 언어는 그때 무엇을 하기로 했나」만
+다르게 적는다. **D4 전이가 여기서 값을 하되 위험도 여기서 난다** — 「감긴다」를 3겹 쌓고 온 사람이
+Swift 에서 1겹으로 시작하면 가장 중요한 차이가 겹 아래로 숨는다. §6 이 제네릭(소거 대 reified)에서
+이미 짚은 것과 같은 종류의 문제이고, **`common/number-literal` 하나에 세 언어의 반대되는 답이
+걸린다는 것이 새로 드러난 자리다.**
+
+### §0.4 실측표 — 재현 방법을 붙여서
+
+| 물음 | 값 | 비고 |
+|---|---:|---|
+| `int.MaxValue` · `sizeof(int)` · `sizeof(long)` | `2147483647` · `4` · `8` | |
+| `unchecked(int.MaxValue + 1)` | `-2147483648` | **기본값이 이것이다** |
+| `checked(int.MaxValue + 1)` | `OverflowException` | 「Arithmetic operation resulted in an overflow.」 |
+| `byte 250 + 10` (unchecked) | `4` | 폭이 8비트라 한 바퀴 |
+| `5 / 2` · `5.0 / 2` | `2` · `2.5` | 피연산자 타입이 정한다 |
+| `-7 / 2` · `-7 % 2` | `-3` · `-1` | 0 쪽으로 버림 |
+| `0.1 + 0.2` | `0.30000000000000004` | `== 0.3` → **False** |
+| `0.1m + 0.2m` | `0.3` | `== 0.3m` → **True** |
+| `1.0f / 3` · `1.0 / 3` · `1.0m / 3` | `0.33333334` · `0.3333333333333333` · `0.3333333333333333333333333333` | 자릿수가 셋 다 다르다 |
+| `1.0 / 0` · `0.0 / 0.0` | `∞` · `NaN` | **예외가 아니다** |
+| `1m / 0m` · `1 / 0`(변수) | 둘 다 `DivideByZeroException` | 상수 `0` 으로 나누면 **컴파일 오류**(CS0020)라 변수로 재야 한다 |
+| `"가나다".Length` · UTF-8 바이트 | `3` · `9` | |
+| `"👨‍👩‍👧‍👦"` Length/Rune/StringInfo/UTF-8 | `11` / `7` / `1` / `25` | **「길이」가 넷이다** |
+| `2 + 3 * 4` · `1 << 2 + 3` | `14` · **`32`** | Go·Swift 는 `7` |
+| `true \|\| false && false` | `True` | `&&` 가 위 |
+| `(int)2.9` · `(int)-2.9` | `2` · `-2` | 버림 |
+| `unchecked((int)3000000000L)` | `-1294967296` | `checked` 면 `OverflowException` |
+| `int.Parse("12")` · `int.TryParse("12a", …)` | `12` · `False` | |
+| struct 복사 후 원본 · class 복사 후 원본 | `1` · `9` | |
+| `string ==` · `object ==` (같은 내용) | `True` · **`False`** | `.Equals` 는 둘 다 `True` |
+| `record ==` | `True` | |
+
+### §0.5 0부 → 1부 → 2부 → 3부 — 겹침 정리
+
+**겹치는 쪽은 0부가 가져가고 §2·§3 에서 뺀다.** 경계는 하나다 — **값 하나를 만들고·보고·견주는
+것까지가 0부**, 흐름을 나누는 문은 1부다. C# 는 §2 여덟 중 **다섯이 값 층위**로, 셋 중 가장 많다.
+
+| 0부 장 | 어디에 있었나 | 부기 |
+|---|---|---|
+| `csharp/boolean-literal` | §2 ③ | **id 가 같다** — 자리만 올라간다 |
+| `csharp/operator-precedence` | §2 ④ `csharp/arithmetic` | |
+| `csharp/equality` | §2 ⑤ `csharp/comparison` | `if-statement` 의 prereq 를 `csharp/equality` 로 다시 건다 |
+| `csharp/assignment` | §2 ① `csharp/local-declaration` + §2 ② `csharp/assignment` | 둘을 한 장으로 묶는다 — 축 7 의 `universal` 이 `variable-binding` 과 `reassignment` **둘**이라 원래 한 축이다 |
+| `csharp/text-literal` | §3 ⑩ `csharp/string-literal` | 보간(`$"…"`)은 §3 ⑭ 가 계속 받는다 |
+| `csharp/float-literal` | §3 ⑪ `csharp/number-literal` | 「접미사가 타입을 정한다」가 이 장의 전반부다 |
+| `csharp/integer-literal` | **없었다** | 신규 |
+| `csharp/type-conversion` | **없었다** | 신규 |
+
+**§3 ⑯ `csharp/value-vs-reference` 는 2부에 남긴다.** 0-7 이 「대입이 무엇을 복사하나」를 값 층위에서
+보이고, 「그래서 `struct` 와 `class` 중 무엇을 언제 쓰나」는 2부의 몫이다 — §3 이 그것을 「이 언어의
+중심축」이라고 적어 둔 그대로다. 0부는 **그 축의 입구**만 연다.
+
+새로 서는 둘이 요점이다. **지금 계획에 `checked` 도 캐스트도 장이 없었다** — §7 이 `cs/` 로 밀어
+뒀는데 `cs/` 는 쿼리가 없어 스스로 안 뜨고 언어 개념이 `prereq` 로 걸어야 산다(cs.md §8).
+**걸 데가 없었다.** (부기: §7 의 `cs/integer-representation`·`cs/compile-time-and-runtime`·
+`cs/lazy-and-eager`·`cs/value-and-boxing` 은 실재 id 가 아니다 — 실물 이름은 `integer-overflow`·
+`compile-and-run`·`eager-vs-lazy` 이고 박싱은 43장에 별도 장이 없다. §0.1 은 실재하는 이름만 썼다.)
+
+| 부 | 무엇 | 장 | 교재 |
+|---|---|---:|---|
+| **0부 값과 식** | 위 여덟 | **8** | 사전 `examples[]` (§0.7) |
+| **1부 바닥** | `if-statement` · `method-declaration` · `return-statement` | **3** | 합성 + 내 코드 짚기 |
+| **2부 C# 의 타입과 흐름** | §3 중심 남은 열넷 + §4 심화 열 | **24** | 합성 + 내 코드 |
+| **3부 프레임워크** | **없다 — 네임스페이스가 아직 없다** | **0** | 내 코드 중심 |
+
+**1부가 셋인 것이 이 언어의 사실을 하나 드러낸다.** C# 에는 자유 함수가 없어(§2 ⑦) 「문」의 바닥이
+`if`·메서드 선언·`return` 셋뿐이고, 나머지는 전부 **타입과 값** 쪽이다. §2 가 「바인딩을 둘로 가른다」
+며 여덟 중 둘을 쓴 판단이 0부에서는 한 장으로 합쳐진다 — 가르는 것이 값이 아니라 **문의 모양**이라서다.
+
+**3부를 어떻게 채울지는 안 정했다.** §1 이 ASP.NET Core minimal API 를 기준 모양으로 잡았으니
+3부의 재료는 그쪽이다 — 라우팅 · 의존성 주입 · 미들웨어 파이프라인 · 모델 바인딩 · EF Core 매핑이
+자바 `spring/` 15장에 대응하는 자리다. 그 목록을 짜고 `aspnet/` 같은 네임스페이스를 여는 것이
+다음 물결이고, **그때까지 3부는 0판이라 코스는 2부 끝에서 곧장 기능 챕터로 넘어간다**(java.md §2 의
+「스프링이 아닌 자바 리포」와 같은 자리).
+
+**0장 적재량 24 → 26. 상한 24 를 두 장 넘긴다.** 0부 여덟은 전부 깊이 ≤ 2 이고 흡수된 여섯은
+원래도 §5 의 깊이 0~2 스물넷 안에 있었으므로 순증은 새로 선 둘이다. §5 가 「24/24 는
+`zero-chapter.ts` 가 원하는 상태」라고 적어 둔 균형이 0부로 깨진다.
+Swift 가 25 → 29 로 더 크게 넘치므로(swift.md §0.5) **이것은 C# 만의 문제가 아니라 축이 겹친
+문제다** — 0장(프롤로그, 상한 24)과 0부(코스의 첫 부)는 다른 것인데 `essential` 하나를 같이 쓴다.
+결정거리 둘은 swift.md §0.5 와 README §11 미결 3번에 적힌 그대로다 — ⓐ 0부를 0장 정렬 밖에
+두거나 ⓑ 상한을 올린다.
+
+### §0.6 판 수와 일수
+
+정본 §2 — 하루 15분, 새 판 2장(D12). 판 수는 개념 수와 1:1 로 잡았다(java.md §2 와 같은 셈).
+
+| 부 | 판 | 일 |
+|---|---:|---:|
+| 0부 | 8 | **4** |
+| 1부 | 3 | 2 |
+| 2부 | 24 | 12 |
+| 3부 | 0 (미정) | 0 |
+| **합** | **35** | **18** |
+
+**18일은 하한이다.** 만기 재검이 먼저 예산을 먹으므로(정본 §2) 실제 달력은 더 길고, 얼마나
+길어지는지는 **안 쟀다.** 3부가 서면 `aspnet/` 개수만큼 더 붙는다 — 자바 `spring/` 이 15장이니
+같은 자릿수라면 8일쯤인데 **추정이고 안 쟀다.**
+
+### §0.7 문법 현황 — **로드는 통과하고 캡처가 0 이다. 그리고 §8 의 「안 열린 세 곳」은 낡았다**
+
+| 자리 | 상태 | 근거 |
+|---|---|---|
+| `crates/parse` 문법 | ❌ **없다.** `tree-sitter-c-sharp` 크레이트도 `lang-csharp` 피처도 없다 | `crates/parse/Cargo.toml` · `langs.rs` |
+| 그 사실을 지키는 못 | ❌ **없다.** `quality.rs` 의 시험은 **`swift` 와 `dart` 만** 지킨다 | `crates/parse/tests/quality.rs:130` |
+| `grammarSchema` | ✅ **이미 열려 있다 — 다만 이름이 `c_sharp` 이다** | `packages/dictionary/src/schema.ts:32` |
+| `grammarOf('.cs')` | ✅ **고쳐졌다** — `c_sharp` 로 간다 | `apps/desktop/src/session-flow.ts` |
+| 사전을 쓰면 | **스키마도 린트도 통과하고 캡처만 0곳** | I6 확인 |
+| 파싱을 시키면 | `ParseError::UnsupportedLang("c_sharp")` — 조용히 TS 로 새지는 않는다 | `crates/parse/src/lib.rs:128` |
+| `dictionary/csharp/**` | ❌ 없다 | `ls dictionary/` |
+
+**두 자리를 고쳐 적는다.** ① §8 의 「`grammarSchema` 에 `csharp` 가 없다」와 「`grammarOf` 가
+`.cs` 를 몰라 `typescript` 로 폴백한다」는 **둘 다 이미 닫혔다**(README §6 의 1번·4번).
+② §8 이 제안한 문법 키 `csharp` 는 **채택되지 않았다** — 코드가 쓰는 이름은 `c_sharp` 이고 그 이유가
+`schema.ts` 주석에 적혀 있다(크레이트가 쓰는 키). 사전 네임스페이스는 `csharp` 그대로다.
+D19 의 `lang` ≠ `grammar` 가 이 언어에서 **양쪽 다** 벌어진 셈이다 — `csharp` / `c_sharp` / `.cs`.
+
+**「스키마에 있으니 열려 있다」가 아니다.** `dictionary/csharp/_lang.yaml` 에 `grammars: [c_sharp]` 를
+적으면 로드 단계는 통과하는데 파서가 없어 **캡처가 0곳**이고, 사용처가 0이면 카드가 안 구워진다.
+**「곧 됩니다」가 아니라 순서가 있다.**
+
+**C# 를 세우려면 이 순서다.**
+
+1. `crates/parse/Cargo.toml` 에 `tree-sitter-c-sharp = "=0.23.5"` 를 **판을 못 박아** 넣고
+   `lang-csharp` 피처와 `langs.rs` 한 줄(`("c_sharp", …)` — 스키마와 같은 이름)을 더한다.
+   캐럿(`"0.23"`)으로 적으면 안 된다 — **같은 마이너 안에서 ABI 가 14 → 15 로 올라간 언어다**(§8).
+2. **`quality.rs:130` 의 목록에 `"c_sharp"` 을 더한다.** 지금 그 시험은 `swift`·`dart` 만 지켜서
+   C# 문법은 **아무 경고 없이 들어올 수 있다.** 1번 전에 이 한 줄을 넣어야 순서가 뒤집히지 않는다.
+   (범위 밖이라 이 세션에서는 안 고쳤다.)
+3. 실코드 20파일 ERROR 비율을 재고 03 §2.3 의 5 % 게이트를 통과하는지 본다. **안 쟀다.**
+   특히 전처리기(`#if`)가 든 파일과 `partial` 클래스가 어떻게 나오는지를 여기서 본다(§8).
+4. `grammar_abi` 를 `_lang.yaml` 에 **15** 로 적는다(0.23.5 실측 · §8).
+5. 시스템 쿼리 둘 — `_imports.scm` · `_blocks.scm`. `_blocks.scm` 은 **`global_statement`**(최상위 문)를
+   반드시 넣는다. ASP.NET Core 모양을 기준으로 잡았으므로 **그 노드가 첫 화면의 대부분**이다(§8 ⑥).
+6. 확장자는 `.cs` 만. `.csx` 는 빼고(이슈 #241), `.cshtml`·`.razor` 는 **이 문법이 아예 못 읽는다.**
+7. 그다음에야 `dictionary/csharp/**` 다.
+
+**0부가 문법 없이 서는가 — 반만 그렇다.** 0부 판은 사전의 `examples[]` 로 카드를 굽고 파싱을
+안 한다(`packages/cards/src/t0-synthetic.ts`, `SYNTHETIC_SITE_ID = -1`). 그런데 그 파일의 두 문이
+**둘 다 「내 코드」 쪽 인자를 요구한다** — `makeSyntheticCard` 는 `previewSiteId`(「곧 여기서
+봅니다」로 예고할 실제 사용처)가 **필수**이고, `makeAbsentCard` 는 `AbsenceReason`(framework ·
+library · scale · idiom)이 필수다. 문법이 없으면 앞의 것을 못 만들고, 뒤의 것을 쓰면 **「네 코드엔
+없다」와 「우리가 못 읽는다」가 섞여** D137 이 막으려던 자리로 되돌아간다.
+**문법 없이 0부를 세우려면 세 번째 문이 필요하고 오늘 그것은 없다.**
+채점 쪽은 덜 급하다 — 여섯 형식 중 파서를 쓰는 것은 `build` 하나이고, 그것도 문법이 없으면
+정규식 정규화 폴백으로 떨어진다(정본 §5).
+
+**표본이 없다는 것의 값 — 티어 한 줄.** 정본 §5 의 셋 중 **A(모든 리포)만 선다.**
+0·1부는 합성 교재로 설 수 있고 `cs/` 간선 열둘(§7)이 붙는다. **B 는 통째로 비어 있다** —
+문법이 없어 HTTP 간선도 기능 폐포도 스키마 추출도 없고 실행 러너도 없다.
+그 위에 C# 만의 구멍이 하나 더 있다 — **`.cshtml`·`.razor` 를 못 읽으므로 Blazor 리포에서는
+B 이전에 UI 파일이 통째로 안 보인다.** 그리고 이 리포에 `.cs` 가 **0개**라 §1 의 「생김새」는
+템플릿·설문에 기댄 판단이고(§10), 오개념 열둘도 명세와 커뮤니티 문헌 기반이다.
+**코스는 위 순서 3번에서 멈춘다** — ERROR 비율을 재기 전에는 0부조차 실물로 못 세우고,
+2부는 사용자가 C# 리포를 가져온 뒤에야 「내 코드」 절반이 채워진다.
+
+---
+
+## §2 기초 — 바닥 여덟 → **1부 바닥 셋** (0부가 다섯을 가져갔다)
+
+①~⑤ 가 값 층위라 §0.5 대로 0부로 올라간다. 아래 표는 여덟 그대로 두되 올라간 다섯에 **↑0부**를
+붙였고, 1부에 남는 것은 `if-statement` · `method-declaration` · `return-statement` 셋이다.
+**셋인 것이 이 언어의 사실이다** — 자유 함수가 없어 「문」의 바닥이 그만큼뿐이고 나머지는 값 쪽이다.
 
 | # | id | name.ko / en | token | universal | diff | prereq | **C# 라서 다른 것** |
 |---|---|---|---|---|---|---|---|
-| 1 | `csharp/local-declaration` | 타입을 적고 이름 만들기 / Local declaration | `int x = 0;` | `common/variable-binding` | 1 | — | 이름을 **만드는 줄에는 낱말이 하나 더** 있다 — 타입 이름 또는 `var`. 그것이 있으면 만드는 줄, 없으면 옮기는 줄이다 |
-| 2 | `csharp/assignment` | 이름에 값 다시 넣기 / Assignment | `=` | `common/reassignment` | 1 | `csharp/local-declaration` | 이름에 **타입이 붙어 있다**. `var n = 0;` 다음 `n = "hi";` 는 컴파일이 막는다(CS0029) — `var` 는 동적 타입이 아니다 |
-| 3 | `csharp/boolean-literal` | 참·거짓 값 / Boolean literal | `true` `false` | `common/boolean-value` | 1 | — | C# 에는 **「참 같은 값」이 없다**. 조건 자리에 오는 것은 오직 `bool` 이라 `if (count)` 도 `if (obj)` 도 컴파일 오류다 |
-| 4 | `csharp/arithmetic` | 셈하기 / Arithmetic | `+ - * / %` | `common/arithmetic` | 1 | — | `5 / 2` 가 **2** 다. 값이 아니라 **피연산자의 타입**이 정한다 — `5.0 / 2` 라야 2.5 다 |
-| 5 | `csharp/comparison` | 두 값 견주기 / Comparison | `== != < >` | `common/comparison` | 1 | `csharp/boolean-literal` | `==` 가 **타입마다 다른 질문**을 한다. `string` 은 내용을, 보통의 `class` 는 같은 객체인지를 묻는다 |
+| 1 ↑0부 | `csharp/local-declaration` → 0부에서 §2 ② 와 한 장(`csharp/assignment`) | 타입을 적고 이름 만들기 / Local declaration | `int x = 0;` | `common/variable-binding` | 1 | — | 이름을 **만드는 줄에는 낱말이 하나 더** 있다 — 타입 이름 또는 `var`. 그것이 있으면 만드는 줄, 없으면 옮기는 줄이다 |
+| 2 ↑0부 | `csharp/assignment` → 0부에서 §2 ① 과 한 장 | 이름에 값 다시 넣기 / Assignment | `=` | `common/reassignment` | 1 | `csharp/local-declaration` | 이름에 **타입이 붙어 있다**. `var n = 0;` 다음 `n = "hi";` 는 컴파일이 막는다(CS0029) — `var` 는 동적 타입이 아니다 |
+| 3 ↑0부 | `csharp/boolean-literal` | 참·거짓 값 / Boolean literal | `true` `false` | `common/boolean-value` | 1 | — | C# 에는 **「참 같은 값」이 없다**. 조건 자리에 오는 것은 오직 `bool` 이라 `if (count)` 도 `if (obj)` 도 컴파일 오류다 |
+| 4 ↑0부 | `csharp/arithmetic` → 0부에서 `csharp/operator-precedence` | 셈하기 / Arithmetic | `+ - * / %` | `common/arithmetic` | 1 | — | `5 / 2` 가 **2** 다. 값이 아니라 **피연산자의 타입**이 정한다 — `5.0 / 2` 라야 2.5 다 |
+| 5 ↑0부 | `csharp/comparison` → 0부에서 `csharp/equality` | 두 값 견주기 / Comparison | `== != < >` | `common/comparison` | 1 | `csharp/boolean-literal` | `==` 가 **타입마다 다른 질문**을 한다. `string` 은 내용을, 보통의 `class` 는 같은 객체인지를 묻는다 |
 | 6 | `csharp/if-statement` | 조건으로 흐름 나누기 / If statement | `if` | `common/conditional-branch` | 1 | `csharp/boolean-literal` | 중괄호가 **선택**이라 없으면 **다음 한 문장만** 딸려 온다. 들여쓰기는 아무 의미가 없다 |
 | 7 | `csharp/method-declaration` | 타입 안에 메서드 만들기 / Method declaration | `int F(int a)` | `common/function-definition` | 1 | `csharp/class-declaration` | **자유 함수가 없다.** 모든 메서드는 타입 안에 살고, 이름 앞에 **반환 타입을 먼저** 적는다 |
 | 8 | `csharp/return-statement` | 값 돌려주기 / Return | `return` | `common/return-value` | 1 | `csharp/method-declaration` | 값 반환 메서드에서 빠뜨리면 **컴파일이 막는다**(CS0161) — 파이썬처럼 조용히 `None` 이 가지 않는다 |
+
+**0부가 이 절의 판단 하나를 접는다.** 아래 「바인딩을 둘로 가른다」는 §2 안에서는 옳지만
+0부에서는 한 장으로 합쳐진다 — 가르는 것이 값이 아니라 **문의 모양**이고(만드는 줄에 낱말이 하나 더),
+축 7 의 `universal` 이 `variable-binding` 과 `reassignment` 둘이라 원래 한 축이기 때문이다(§0.5).
 
 **여덟을 이렇게 고른 이유 둘.**
 
@@ -112,15 +342,19 @@ Exercism C# 트랙(개념 72 · 개념 연습 42)의 깊이 0~3 은 13개다 —
 
 ---
 
-## §3 중심 — 16개
+## §3 중심 — 16개 → **2부 열넷** (0부가 둘을 가져갔다)
+
+⑩ `string-literal` · ⑪ `number-literal` 둘이 0부로 올라간다(§0.5). **⑯ `value-vs-reference` 는
+여기 남는다** — 0부 0-7 이 「대입이 무엇을 복사하나」를 값 층위에서 보이고, 「그래서 `struct` 와
+`class` 중 무엇을 언제 쓰나」는 2부의 몫이다. 남는 열넷이 §4 심화 열과 합쳐 **2부 스물넷**이 된다.
 
 「이 개념이 없으면 C# 로 짠 코드를 왜 못 읽나」를 마지막 열 앞에 한 줄로 붙였다.
 
 | # | id | name.ko / en | token | universal | diff | prereq | 없으면 못 읽는 것 / **C# 라서 다른 것** |
 |---|---|---|---|---|---|---|---|
 | 9 | `csharp/class-declaration` | 이름 붙인 타입 만들기 / Class declaration | `class` | **신규** `common/type-definition` | 1 | — | 모든 코드가 이 껍데기 안에 있다 · **C# 는 「함수 정의」가 뿌리가 아니다** — 그 위에 타입 선언이 한 겹 더 있다 |
-| 10 | `csharp/string-literal` | 글자 값 / Text literal | `"…"` | `common/text-literal` | 1 | — | 문자열이 어디부터 어디까지인지 · **따옴표 하나가 타입을 가른다** — `"a"` 는 `string`(참조형), `'a'` 는 `char`(값형) |
-| 11 | `csharp/number-literal` | 숫자 값 / Number literal | `1` `1.5m` | `common/number-literal` | 1 | — | 셈의 결과 타입 · **접미사가 타입을 정한다** — `1.0` 은 `double`, `1.0f` 는 `float`, `1.0m` 은 `decimal` 이고 돈은 `decimal` 이다 |
+| 10 ↑0부 | `csharp/string-literal` → 0부에서 `csharp/text-literal` | 글자 값 / Text literal | `"…"` | `common/text-literal` | 1 | — | 문자열이 어디부터 어디까지인지 · **따옴표 하나가 타입을 가른다** — `"a"` 는 `string`(참조형), `'a'` 는 `char`(값형) |
+| 11 ↑0부 | `csharp/number-literal` → 0부에서 `csharp/float-literal` | 숫자 값 / Number literal | `1` `1.5m` | `common/number-literal` | 1 | — | 셈의 결과 타입 · **접미사가 타입을 정한다** — `1.0` 은 `double`, `1.0f` 는 `float`, `1.0m` 은 `decimal` 이고 돈은 `decimal` 이다 |
 | 12 | `csharp/member-access` | 안의 이름 꺼내기 / Member access | `.` | `common/member-access` | 1 | `csharp/local-declaration` | 점 뒤가 무엇인지 · 점 하나가 **필드·프로퍼티·메서드**를 다 가리켜서, 읽기만으로는 그 자리에 코드가 도는지 안 도는지 모른다 |
 | 13 | `csharp/method-call` | 메서드 부르기 / Method call | `()` | `common/function-call` | 1 | `csharp/member-access` | 그 줄에서 실제로 무엇이 도는지 · **같은 이름이 여럿일 수 있다**(오버로딩) — 어느 것이 불릴지는 인자 타입이 정한다 |
 | 14 | `csharp/interpolated-string` | 문장에 값 끼워 넣기 / Interpolated string | `$"…{x}…"` | `common/string-interpolation` | 2 | `csharp/string-literal` | 로그·응답 문구 · **`$` 를 빠뜨리면 조용히 틀린다** — 중괄호가 글자 그대로 남고 오류는 안 난다 |
@@ -176,7 +410,7 @@ Exercism C# 트랙(개념 72 · 개념 연습 42)의 깊이 0~3 은 13개다 —
 | 3 | 7 | `foreach-loop` · `interface` · `generics` · `try-catch` · `linq-where` · `linq-select` · `switch-expression` |
 | 4 | 3 | `deferred-execution` · `async-await` · `using-disposable` |
 
-**깊이 ≤ 2 = 24/24.** TS 21/24 · 파이썬 19/24 보다 꽉 찬다. 이유는 하나다 — C# 는 뿌리가 하나 더 있다.
+**깊이 ≤ 2 = 24/24.** (**0부를 붙이면 26 이 되어 두 장 넘친다** — 셈은 §0.5 마지막 문단.) TS 21/24 · 파이썬 19/24 보다 꽉 찬다. 이유는 하나다 — C# 는 뿌리가 하나 더 있다.
 `class-declaration` 이 깊이 0 에 서면서 `method-declaration`·`property`·`value-vs-reference` 셋을 깊이 1 로
 끌어올렸다. 파이썬·TS 에서는 `function-definition` 이 뿌리라 그 위에 아무것도 없었다.
 
@@ -359,13 +593,20 @@ ABI 15 를 이미 쓰고 있다(`tree-sitter-javascript = "0.25"`). 버전을 �
 7. **`partial` 클래스.** Blazor·WinForms·소스 생성기가 한 타입을 여러 파일에 흩는다. 사용처 세기가 파일
    경계를 넘는다 — 지금 파이프라인이 파일 단위라 어떻게 되는지 **확인하지 않았다**.
 
-### 아직 안 열린 세 곳
+### 아직 안 열린 세 곳 — **둘은 닫혔고 하나는 이름이 바뀌었다 (2026-09-05 재확인)**
 
-| 파일 | 무엇이 없나 |
-|---|---|
-| `crates/parse/Cargo.toml` · `crates/parse/src/langs.rs` | `lang-csharp` 피처와 등록 두 줄이 없다 (D129 예산 영향은 5줄 안쪽) |
-| `packages/dictionary/src/schema.ts:29` | `grammarSchema` 에 `csharp` 가 없다 |
-| `apps/desktop/src/session-flow.ts:559` | `grammarOf` 가 `.cs` 를 모르고 `typescript` 로 폴백한다 |
+| 파일 | 조사 때 | 지금 |
+|---|---|---|
+| `crates/parse/Cargo.toml` · `crates/parse/src/langs.rs` | `lang-csharp` 피처와 등록 두 줄이 없다 | **그대로 없다.** 판을 `=0.23.5` 로 못 박아야 한다(위 ABI 표) · D129 줄 예산은 **폐지됐다**(정본 §5 · D181) |
+| `packages/dictionary/src/schema.ts` | `grammarSchema` 에 `csharp` 가 없다 | **열렸다. 다만 이름이 `csharp` 가 아니라 `c_sharp` 이다** — 아래 제안이 채택되지 않았다 |
+| `apps/desktop/src/session-flow.ts` | `grammarOf` 가 `.cs` 를 모르고 `typescript` 로 폴백한다 | **고쳐졌다** — `.cs` → `c_sharp` |
+
+**문법 키 제안(`csharp`)은 채택되지 않았다.** 코드가 쓰는 이름은 `c_sharp` 이고 근거가 `schema.ts`
+주석에 있다(크레이트가 쓰는 키). 사전 네임스페이스는 `csharp` 그대로라, 이 언어만 **`csharp` /
+`c_sharp` / `.cs`** 셋이 다 다르다. 위 §1 의 「문법 키 표」에서 `grammar` 행을 `c_sharp` 로 읽어야 한다.
+
+**그리고 못이 없다.** `crates/parse/tests/quality.rs:130` 의 시험은 `swift`·`dart` 만 지켜서
+C# 문법은 아무 경고 없이 들어올 수 있다 — 넣기 전 순서는 §0.7 에 적었다.
 
 ---
 
@@ -387,6 +628,11 @@ ABI 15 를 이미 쓰고 있다(`tree-sitter-javascript = "0.25"`). 버전을 �
 | 10 | 급하면 `.Result`·`.Wait()` 로 꺼내면 된다 | UI 스레드나 구형 ASP.NET 요청 스레드에서는 **교착**한다. 이어질 코드가 그 스레드로 돌아오려는데 그 스레드가 기다리며 잠겨 있다. ASP.NET Core 에는 동기화 컨텍스트가 없어 안 터지므로 「내 웹 프로젝트에서는 됐는데」가 생긴다 |
 | 11 | `Dispose`·`using` 은 메모리를 반환한다 | 메모리는 GC 가 맡는다. `Dispose` 는 파일·소켓·잠금처럼 **GC 가 모르는 자원**을 놓는 일이다 |
 | 12 | 제네릭은 Java 처럼 지워진다 | 실행 시각까지 남는다. `typeof(T)`·`new T[]`·`is List<string>` 이 전부 되고, 값 타입은 타입마다 전용 코드가 나온다 |
+
+**이 열둘은 1·2부의 것이다.** 값 층위는 ②(나누기)·③(조건 자리)·⑤(`==`)·⑥(복사) 넷뿐이고
+**0부 여덟 장의 오개념은 §0.1 의 마지막 열에 따로 세웠다** — 그중 넷(`checked` 를 안 적으면
+조용히 감김 · `double` 로 담은 돈 · `.Length` 가 글자 수 · `(int)` 캐스트가 안전함)은 §9 에 없던
+것이고 **이 세션에서 .NET 10 으로 실행해 확인했다**(§0.4).
 
 **출처에 대한 정직한 기록.** `progmiscon.org` 의 오개념 목록에는 Java(52)·Python(33)·Scratch(14)·
 JavaScript(6)만 있고 **C# 는 없다**. C# 전용 오개념을 다룬 동료 심사 연구를 찾지 못했다 — 위 12개는

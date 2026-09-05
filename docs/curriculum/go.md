@@ -1,6 +1,7 @@
 # Go 커리큘럼 조사 — 네임스페이스 `go`
 
-조사일 2026-09-04. 사전을 쓰기 전에 **무엇을 넣을지와 왜 그것인지**를 정한다.
+조사일 2026-09-04 · **0부 「이 언어의 값과 식」 추가 2026-09-05**(정본 §1·§4 · 사용자 요청
+「기초부터, 언어의 동작 원리부터」). 사전을 쓰기 전에 **무엇을 넣을지와 왜 그것인지**를 정한다.
 
 숫자의 출처는 셋이다. ① 실제 Go 애플리케이션 둘 — `cli/cli`(GitHub CLI, `pkg/` 아래 비테스트
 429 파일 · 87,875줄)와 `lazygit`(964 파일 · 115,321줄). ② 이 리포가 고정한 문법
@@ -64,16 +65,188 @@ lazygit 도 같다 — `go func` 14곳/10파일, `select` 29곳/12파일, 포인
 
 ---
 
-## §2 기초 — 바닥 여덟
+## §0 0부 — 이 언어의 값과 식
 
-여덟 중 넷(`if`·`for`·`func`·`return`)이 문(statement) 수준이다.
+축 여덟의 정의와 id 조각은 [`README.md`](./README.md) §8 에 있다. **여기는 Go 에서 어긋나는 자리만**
+쓴다. 여덟 축이 전부 서고 어긋남 판은 따로 안 세웠다 — **8 / 12**(상한 §8). Go 의 어긋남 다섯이
+전부 축 안에서 표현되기 때문이고, 표현이 안 되는 것이 나오면 그때 아홉째를 세운다.
+
+**Go 값은 실행으로 확인한 것이 하나도 없다.** 이 기계에 툴체인이 없다(`which go` → not found,
+2026-09-05). 아래 값은 명세로 계산하고 2의 보수·UTF-8 부분만 파이썬으로 교차 검산했다.
+같은 날 Swift(6.3.3)와 C#(.NET 10.0.302)은 실행해 쟀다 — **세 문서의 근거 강도가 다르다.**
+
+### §0.1 여덟 장
+
+| # | id | name.ko / en | 한 줄 | `cs/` | 그림 | 초보가 실제로 틀리는 자리 |
+|---|---|---|---|---|---|---|
+| 0-1 | `go/integer-literal` | 정수 값과 그 폭 / Integer literal | 적힌 숫자는 **타입 없는 상수**이고, 이름에 담기는 순간 폭이 정해진다 | `bit-and-byte` · `integer-overflow` | 비트 배열 | **`int` 와 `int64` 를 같은 것으로 안다.** 64비트 빌드에서 크기는 같은데 **다른 타입**이라 `var a int; var b int64; a + b` 는 컴파일이 멈춘다 |
+| 0-2 | `go/float-literal` | 실수 값과 근사 / Float literal | `float64` 는 2진수로 근사한 값이라 십진 소수를 정확히 못 담는다 | `floating-point` · `binary-representation` | 비트 배열 | **`float64` 를 `==` 로 견준다.** `0.1 + 0.2 == 0.3` 이 거짓인 것을 언어의 결함으로 읽는다 |
+| 0-3 | `go/text-literal` | 글자 값 — 바이트와 rune / Text literal | `string` 은 **바이트열**이고 `len` 은 바이트를 센다. rune 단위로 도는 것은 `range` 뿐이다 | `text-encoding` | 값 상자 · **메모리 줄** | **`len("가나다")` 를 3 으로 안다.** 9 다. 그리고 `s[0]` 은 글자가 아니라 바이트 `234` 다 |
+| 0-4 | `go/boolean-literal` | 참·거짓 값 / Boolean literal | 조건 자리에 `bool` 만 온다 — 「참 같은 값」이 이 언어에 **없다** | `type` · **`cs/truthiness` 없음** | 평가 트리 | **`if n {`** — 파이썬·JS 에서 되던 것이 컴파일에서 멈춘다 (§9 ③) |
+| 0-5 | `go/operator-precedence` | 무엇이 먼저 묶이나 / Operator precedence | 이항 연산자가 **다섯 단**뿐이고, `<<` 가 `+` 보다 **위**에 있다 | **`cs/operator-precedence` 없음** (`type` 로 임시) | 평가 트리 | **`1 << 2 + 3` 을 32 로 읽는다.** Go 는 **7** 이다 — C·자바·C# 에서 온 손이 정확히 여기서 틀린다 |
+| 0-6 | `go/type-conversion` | 타입은 손으로만 바꾼다 / Type conversion | **암묵 변환이 아예 없다.** 넓히는 변환조차 없고 `T(x)` 를 적어야 한다 | **`cs/type-conversion` 없음** · `static-vs-dynamic-typing` | 타입 변환 사다리 | **`var f float64 = 1` 은 되는데 `var n int = 1; var f float64 = n` 은 안 된다.** 리터럴은 타입 없는 상수라 되고 변수는 안 된다 — 같은 `1` 인데 답이 갈린다 |
+| 0-7 | `go/assignment` | 이름에 값 넣기와 제로 값 / Assignment and the zero value | 선언하는 순간 **제로 값**이 들어간다 — 「아직 값이 없는 이름」이 이 언어에 없다 | `state` · `value-vs-reference` | 값 상자 · 메모리 줄 | **`var m map[string]int` 뒤 `m["a"] = 1` 이 터진다.** nil 맵은 읽기는 되고 쓰기는 죽는다 (§9 ②) |
+| 0-8 | `go/equality` | 같은 값인가, 견줄 수는 있나 / Equality | 견줄 수 있는 타입이 정해져 있다 | `identity-vs-equality` · `value-vs-reference` | 평가 트리 | **슬라이스를 `==` 로 견준다.** 런타임 오류가 아니라 **컴파일이 멈춘다** — `== nil` 만 된다 |
+
+**`cs/` 에 없는 것 셋이 이 표에 굵게 나온다** — `cs/operator-precedence` · `cs/type-conversion` ·
+`cs/truthiness`. 셋 다 README §9 의 「없는 것」 표에 이미 올라 있다(I6). 규약 5 대로 이 문서는
+새 `cs/` 를 만들지 않는다. **`cs/type-conversion` 이 없으면 0-6 의 타입 변환 사다리 그림이
+「왜 이 계단은 저절로 오르고 저 계단은 손으로 올라야 하나」를 못 답한다** — Go 는 계단이 하나도
+저절로 안 올라가는 언어라, 셋 중 이것이 Go 에서 가장 크게 빈다.
+
+### §0.2 형식과 `universal` — 규약 4·6
+
+| # | 형식 (I1) | `universal` |
+|---|---|---|
+| 0-1 | `bits` → `predict` | `common/number-literal` |
+| 0-2 | `value` | `common/number-literal` |
+| 0-3 | `table` | `common/text-literal` |
+| 0-4 | `predict` | `common/boolean-value` |
+| 0-5 | `step` | `common/arithmetic` |
+| 0-6 | `build` | `common/type-cast`(신규 후보 · README §8) |
+| 0-7 | `table` | `common/variable-binding` · `common/reassignment` |
+| 0-8 | `predict` | `common/comparison` |
+
+**여섯 형식이 전부 쓰인다** — 안 쓰는 것이 없다(규약 6). 그림 여섯 중 **스택 프레임만 안 쓴다**:
+0부에는 함수가 아직 안 나오고(1부의 `go/func-declaration`), 프레임을 그릴 값이 없다.
+`bits → predict` 는 순서다 — 비트로 먼저 보이고 그다음 「`int8` 127 에 1 을 더하면?」을 예측시킨다.
+
+### §0.3 Go 라서 다른 다섯 자리
+
+| 자리 | Go | 견줄 것 | 축 |
+|---|---|---|---|
+| **암묵 변환이 아예 없다** | `int` + `int64` 도, `int` + `float64` 도 컴파일이 멈춘다. 넓히는 변환조차 없다 | C# 는 `int` → `long` → `double` 을 자동으로 넓힌다. Swift 도 안 섞지만 **리터럴은 섞인다**(`1 + 2.0` = 3.0, 실측) | 0-6 |
+| **`rune` 과 바이트** | `len` 은 바이트, `range` 만 rune. `s[0]`=바이트, `[]rune(s)[0]`=글자 | 같은 이모지 하나의 「길이」가 **Go 25 · C# 11 · Swift 1** 이다(셋 다 §0.4 표) | 0-3 |
+| **제로 값** | 선언하는 순간 값이 들어간다. 「아직 값이 없는 이름」이 언어에 **없다** | C# 는 안 넣고 읽으면 컴파일 오류(CS0165). Swift 도 `var x: Int` 만 적고 읽으면 오류 | 0-7 |
+| **`:=` 와 `var`** | 만드는 낱말이 둘이고 주는 것이 다르다 — `:=` 는 타입을 추론하고 `var` 는 타입을 적고 제로 값을 준다 | C# 는 하나(`int x = 0` 과 `var x = 0` 이 같은 문). Swift 는 `let`/`var` 로 **가변성**을 가른다 | 0-7 (0부) · `go/short-var-decl` (1부) |
+| **정수 나눗셈** | `7 / 2` 는 **3**. 값이 아니라 **피연산자의 타입**이 정한다 | C# 도 2, Swift 도 3(실측). 파이썬만 2.5 — `common/arithmetic` 으로 전이 오는 사용자가 여기서 틀린다 | 0-1 · 0-5 |
+
+마지막 줄이 D4 전이의 함정이다. **같은 `universal` 인데 답이 반대인 자리**라 「표기 차이 카드 먼저」
+로는 안 덮인다 — 파이썬에서 3겹 쌓고 온 사용자가 1겹으로 시작해도 첫 답이 2.5 다. 대책은 0-1 의
+`predict` 를 정수 나눗셈에 한 번 더 쓰는 것이고, **그렇게 할지는 I1 의 형식 설계가 정한다.**
+
+### §0.4 값 — 계산한 것이지 실행한 것이 아니다
+
+| 물음 | 값 | 어떻게 얻었나 |
+|---|---:|---|
+| `int8(127) + 1` | `-128` | 2의 보수, 파이썬 검산 |
+| `int32(2147483647) + 1` | `-2147483648` | 같음 |
+| `7 / 2` · `-7 / 2` · `-7 % 2` | `3` · `-3` · `-1` | 명세 — 정수 나눗셈은 0 쪽으로 버림 |
+| `0.1 + 0.2` | `0.30000000000000004` | IEEE 754 binary64 — 언어와 무관, 파이썬 검산 |
+| `len("가나다")` | `9` | UTF-8 3바이트 × 3, 파이썬 검산 |
+| `utf8.RuneCountInString("가나다")` | `3` | 같음 |
+| `"가나다"[0]` | `234` (`0xEA`) | U+AC00 의 UTF-8 첫 바이트 |
+| `len("👨‍👩‍👧‍👦")` · rune 수 | `25` · `7` | 파이썬 검산 (ZWJ 넷 포함) |
+| `1 << 2 + 3` | `7` | 명세 우선순위 표 — `<<` 는 5단, `+` 는 4단 |
+| `unsafe.Sizeof(int(0))` | **못 쟀다** | 명세가 「32 또는 64」로만 정한다. 64비트 빌드에서 8이라고 믿지만 확인 안 했다 |
+
+Go 의 우선순위 표가 **다섯 단뿐**인 것이 0부에서 값을 한다 — C 는 15단이라 표를 외우는 것이 과제가
+되는데 Go 는 다섯 줄이라 **평가 트리 그림 한 장에 표 전체가 들어간다.** 다만 그 다섯 줄이 C 와
+어긋나는 자리가 하나 있고(`<<`), 그것이 위 표의 `1 << 2 + 3` 이다.
+
+### §0.5 0부 → 1부 → 2부 — 겹침 정리
+
+**겹치는 쪽은 0부가 가져가고 §2·§3 에서 뺀다.** 경계는 하나다 — **값 하나를 만들고·보고·견주는
+것까지가 0부**, 이름이 여러 줄에 걸쳐 사는 규칙(재선언·가리기)과 흐름을 나누는 문은 1부다.
+
+| 0부 장 | 어디에 있었나 | 부기 |
+|---|---|---|
+| `go/boolean-literal` | §2 ③ | **id 가 같다** — 자리만 올라간다 |
+| `go/equality` | §2 ④ `go/comparison` | `if-statement`·`for-loop` 의 prereq 를 `go/equality` 로 다시 건다 |
+| `go/assignment` | §3 ⑨ `go/assignment` + §2 ② `go/var-zero-value` | 둘을 한 장으로 묶는다. **`go/short-var-decl`(§2 ①)은 1부에 남는다** — 재선언·가리기는 스코프 규칙이지 값이 아니다 |
+| `go/operator-precedence` | §3 ⑩ `go/arithmetic` | |
+| `go/integer-literal` | §3 ⑪ `go/number-literal` 의 전반부 | 「타입 없는 상수」가 이 장으로 온다 |
+| `go/text-literal` | §3 ⑫ `go/string-literal` | `fmt.Sprintf` 이야기는 `go/call-expression`(§3 ⑬)이 받는다 |
+| `go/float-literal` | **없었다** | 신규 |
+| `go/type-conversion` | **없었다** | 신규 |
+
+새로 서는 둘이 요점이다. **지금 계획에 정수의 폭도 실수의 근사도 형 변환도 장이 없었다** —
+§7 이 `cs/integer-width`·`cs/floating-point` 로 밀어 뒀는데 `cs/` 는 쿼리가 없어 스스로 안 뜨고
+언어 개념이 `prereq` 로 걸어야 산다(cs.md §8). **걸 데가 없었다.**
+
+| 부 | 무엇 | 장 | 교재 |
+|---|---|---:|---|
+| **0부 값과 식** | 위 여덟 | **8** | 사전 `examples[]` (§0.7) |
+| **1부 바닥** | `short-var-decl` · `if-statement` · `for-loop` · `func-declaration` · `return-multi` | **5** | 합성 + 내 코드 짚기 |
+| **2부 Go 의 값** | §3 중심 남은 열둘 + §4 심화 여덟 | **20** | 합성 + 내 코드 |
+| **3부 프레임워크** | **없다 — 네임스페이스 후보가 없다** | **0** | — |
+
+3부가 0판인 이유는 자바에서 이미 본 자리다 — 스프링이 아닌 자바 리포에서 `spring/` 이 로드되지
+않아 3부가 0판이 되는 것과 같다(java.md §2). Go 에는 `spring/` 에 해당하는 네임스페이스가 아직
+없고, `net/http`·chi·gin 중 무엇을 덮을지가 결정거리다. **정본 §5 의 티어 B 에 Go 가 한 줄도 없다는
+뜻이고**, 코스는 2부 끝에서 곧장 기능 챕터로 넘어간다.
+
+**0장 적재량 22 → 24 / 24.** 0부 여덟은 전부 깊이 ≤ 2 이고, 여섯은 원래도 깊이 ≤ 2 였으므로
+순증은 새로 선 둘(`float-literal`·`type-conversion`)이다. **상한에 정확히 붙되 안 넘긴다** —
+Swift(25 → 29)와 C#(24 → 26)은 넘긴다. 셋 중 Go 만 안 넘기는 이유는 §3 에서 넷을 0부로 올려
+`essential` 총수가 24 → 25 로만 늘기 때문이다.
+
+### §0.6 판 수와 일수
+
+정본 §2 — 하루 15분, 새 판 2장(D12). 판 수는 개념 수와 1:1 로 잡았다(java.md §2 와 같은 셈).
+
+| 부 | 판 | 일 |
+|---|---:|---:|
+| 0부 | 8 | **4** |
+| 1부 | 5 | 3 |
+| 2부 | 20 | 10 |
+| 3부 | 0 | 0 |
+| **합** | **33** | **17** |
+
+**17일은 하한이다.** 만기 재검이 먼저 예산을 먹으므로(정본 §2) 실제 달력은 더 길고, 얼마나
+길어지는지는 **안 쟀다.**
+
+### §0.7 문법 현황 — **셋 중 Go 만 오늘 파싱된다**
+
+| 자리 | Go | Swift | C# |
+|---|---|---|---|
+| `crates/parse` 문법 | ✅ `lang-go` **기본 켜짐**, abi 14 | ❌ 크레이트 없음 | ❌ 크레이트 없음 |
+| `grammarSchema` | ✅ `go` | ✅ `swift` | ✅ `c_sharp` |
+| `grammarOf` | ✅ `.go` | ✅ `.swift` | ✅ `.cs` |
+| 사전을 쓰면 | **캡처가 난다** | **로드는 통과하고 캡처 0** | 같음 |
+
+**「스키마에 있으니 열려 있다」가 아니다.** `grammarSchema`(`schema.ts:29-32`)는 파서에 안 붙은
+문법도 받아 주므로, `dictionary/swift/_lang.yaml` 에 `grammars: [swift]` 를 적으면 스키마도 린트도
+통과하고 **캡처만 0곳**이 된다(I6 확인). Go 에는 그 함정이 없다 — `langs.rs:26` 에 실제로 등록돼 있다.
+
+**Go 에서 막는 것은 `.scm` 과 YAML 뿐이다.** 시스템 쿼리 둘이 필요하다 — `_imports.scm` ·
+`_blocks.scm`(메서드는 이름 필드가 `field_identifier` 라 한 줄로 못 쓴다 · §8). T2 배선은 이미
+서 있다(`resolveGo`·`goLeadFiles` — `resolve-imports.ts:269`).
+
+**0부가 문법 없이 서는가 — 반만 그렇다.** 0부 판은 사전의 `examples[]` 로 카드를 굽고 파싱을
+안 한다(`packages/cards/src/t0-synthetic.ts`, `SYNTHETIC_SITE_ID = -1`). 그런데 그 파일의 두 문이
+**둘 다 「내 코드」 쪽 인자를 요구한다** — `makeSyntheticCard` 는 `previewSiteId`(「곧 여기서
+봅니다」로 예고할 실제 사용처)가 **필수**이고, `makeAbsentCard` 는 `AbsenceReason`(framework ·
+library · scale · idiom)이 필수다. 문법이 없으면 앞의 것을 못 만들고, 뒤의 것을 쓰면 **「네 코드엔
+없다」와 「우리가 못 읽는다」가 섞여** D137 이 막으려던 자리로 되돌아간다. **문법 없이 0부를 세우려면
+세 번째 문이 필요하고 오늘 그것은 없다** — Go 는 이 문단이 여유이고 Swift·C# 에서는 코스가
+서느냐 마느냐다(swift.md §0.7 · csharp.md §0.7 의 순서표).
+
+형식 여섯 중 채점에 파서를 쓰는 것은 `build` 하나다. 나머지 다섯은 답이 값이라 파서가 필요 없고,
+`build` 도 문법이 없으면 정규식 정규화 폴백으로 떨어진다(정본 §5).
+
+**표본이 없다는 것의 값 — 티어 한 줄.** Go 는 셋 중 형편이 가장 낫다. **A(모든 리포)는 선다** —
+어휘 33장이 공개 리포 둘(`cli/cli` 87,875줄 · `lazygit` 115,321줄)의 실측 위에 서고 `cs/` 간선
+열하나가 붙는다(§7). **B(덮은 스택만)는 한 줄도 없다** — 라우팅 규칙이 없어 기능 폐포가 안 나오고
+실행 러너도 없다(§0.4 가 Go 값을 하나도 실행으로 못 잰 것과 같은 원인이다). **C** 는 설계 의도 그대로.
+다만 **사용자 리포에 `.go` 가 0개**라는 사실은 남는다 — 위 실측은 남의 리포이고, 「내가 만든 코드가
+교재」(정본 §1)는 사용자가 Go 리포를 가져올 때 비로소 성립한다. 그때까지 0·1부는 온전히 서고
+2부의 「네 리포의 여기가 그것이다」 절반이 빈다.
+
+---
+
+## §2 기초 — 바닥 여덟 → **1부 바닥 다섯** (0부가 셋을 가져갔다)
+
+여덟 중 넷(`if`·`for`·`func`·`return`)이 문(statement) 수준이다. **그 「문 수준」이 0부를 붙인 뒤의
+경계선이 됐다** — 값 층위인 ②·③·④(`var-zero-value`·`boolean-literal`·`comparison`)는 §0.5 대로
+0부로 올라가고 여기 남는 것은 다섯이다. 아래 표는 여덟 그대로 두되 올라간 셋에 **↑0부**를 붙였다.
 
 | # | id | name.ko / en | token | universal | diff | prereq | **Go 라서 다른 것** |
 |---|---|---|---|---|---|---|---|
 | 1 | `go/short-var-decl` | 이름 만들며 값 넣기 / Short variable declaration | `:=` | `common/variable-binding` | 1 | — | 같은 블록에 이름이 이미 있고 왼쪽에 새 이름이 하나라도 있으면 **새로 만들지 않고 값만 넣는다**. 안쪽 블록이면 반대로 바깥을 **가린다** |
-| 2 | `go/var-zero-value` | 타입만 적고 이름 만들기 / Declaration by type | `var` | `null` | 1 | — | `var n int` 은 비어 있지 않다. 선언하는 순간 **제로 값**이 들어간다 — 「아직 값이 없는 이름」이 이 언어에 없다 |
-| 3 | `go/boolean-literal` | 참·거짓 값 / Boolean literal | `true` | `common/boolean-value` | 1 | — | 조건 자리에 `bool` 만 온다. `if n {` 는 파이썬·JS 에선 되고 Go 에선 **컴파일이 멈춘다** |
-| 4 | `go/comparison` | 두 값 견주기 / Comparison | `==` | `common/comparison` | 1 | 3 | 슬라이스·맵·함수는 `==` 로 **못 견준다**(`== nil` 만 된다) |
+| 2 ↑0부 | `go/var-zero-value` | 타입만 적고 이름 만들기 / Declaration by type → 0부에서 `go/assignment` 와 한 장 | `var` | `null` | 1 | — | `var n int` 은 비어 있지 않다. 선언하는 순간 **제로 값**이 들어간다 — 「아직 값이 없는 이름」이 이 언어에 없다 |
+| 3 ↑0부 | `go/boolean-literal` | 참·거짓 값 / Boolean literal (0부에서 **id 그대로**) | `true` | `common/boolean-value` | 1 | — | 조건 자리에 `bool` 만 온다. `if n {` 는 파이썬·JS 에선 되고 Go 에선 **컴파일이 멈춘다** |
+| 4 ↑0부 | `go/comparison` | 두 값 견주기 / Comparison → 0부에서 `go/equality` | `==` | `common/comparison` | 1 | 3 | 슬라이스·맵·함수는 `==` 로 **못 견준다**(`== nil` 만 된다) |
 | 5 | `go/if-statement` | 조건으로 흐름 나누기 / If statement | `if` | `common/conditional-branch` | 1 | 4 | 조건에 괄호가 없고 중괄호는 필수다. **여는 중괄호가 같은 줄에 있어야 한다** — 내리면 다른 프로그램이 된다(§8) |
 | 6 | `go/for-loop` | 되풀이하기 / Looping | `for` | `common/loop-while` | 2 | 1, 4 | 반복 낱말이 **하나뿐**이다. `while` 이 없어 `for cond {}` 가 while 이고 `for {}` 가 무한 반복이다 |
 | 7 | `go/func-declaration` | 함수 정의하기 / Function declaration | `func` | `common/function-definition` | 1 | — | **타입이 이름 뒤**에 오고 반환 타입은 괄호 뒤에 온다. `func f(a, b int)` 은 인자 둘이 타입 하나를 나눠 쓴 것이다 |
@@ -83,16 +256,24 @@ lazygit 도 같다 — `go func` 14곳/10파일, `select` 29곳/12파일, 포인
 `common/arithmetic` 으로 TS·파이썬에서 전이(D4)된다. 여덟 자리는 **전이할 데가 없는 것**에
 쓰는 편이 낫다 — `go/var-zero-value` 가 그것이다.
 
+**0부가 이 판단을 반쯤 뒤집는다.** 「산술이 아니라 타입 체계의 사실」이 맞고, 그래서 그 사실을
+가르칠 자리가 §2 가 아니라 **0부의 `go/integer-literal`·`go/operator-precedence`** 다. `common/arithmetic`
+으로 전이 오는 파이썬 사용자가 `7 / 2` 에서 틀리는 것은 D4 의 「표기 차이」가 아니라 **답이 반대**인
+자리라, 1겹으로 시작시키는 것만으로는 안 덮인다(§0.3 마지막 문단).
+
 ---
 
-## §3 중심 — 16개
+## §3 중심 — 16개 → **2부 열둘** (0부가 넷을 가져갔다)
+
+⑨ `assignment` · ⑩ `arithmetic` · ⑪ `number-literal` · ⑫ `string-literal` 넷이 0부로 올라간다(§0.5).
+여기 남는 것은 열둘이고, §4 심화 여덟과 합쳐 **2부 스물**이 된다.
 
 | # | id | name.ko / en | token | universal | diff | prereq | **없으면 왜 못 읽나** |
 |---|---|---|---|---|---|---|---|
-| 9 | `go/assignment` | 이름에 값 다시 넣기 / Assignment | `=` | `common/reassignment` | 1 | 1 | `=` 는 **있는 이름에만** 쓴다. 없는 이름에 `=` 해도, 다 있는 이름에 `:=` 해도 멈춘다. 파이썬은 이 구별이 아예 없고(D152 ⓐ) Go 는 토큰 둘로 갈랐다 — 같은 축의 정반대 답 |
-| 10 | `go/arithmetic` | 셈하기 / Arithmetic | `+` | `common/arithmetic` | 1 | 11 | 정수끼리 나누면 **정수**가 나온다(`7/2 == 3`). 파이썬 「딱 떨어져도 소수」의 거울 |
-| 11 | `go/number-literal` | 숫자 값 / Number literal | `1` | `common/number-literal` | 1 | — | 적힌 숫자는 **타입 없는 상수**라 `var f float64 = 1` 이 되는데, `int` 변수를 넣으면 안 된다 |
-| 12 | `go/string-literal` | 글자 값 / Text literal | `"…"` | `common/text-literal` | 1 | — | 끼워 넣기 문법이 없다. 값이 든 문장은 전부 `fmt.Sprintf` 라는 **함수 호출**이다 |
+| 9 ↑0부 | `go/assignment` | 이름에 값 다시 넣기 / Assignment → 0부에서 `go/var-zero-value` 와 한 장 | `=` | `common/reassignment` | 1 | 1 | `=` 는 **있는 이름에만** 쓴다. 없는 이름에 `=` 해도, 다 있는 이름에 `:=` 해도 멈춘다. 파이썬은 이 구별이 아예 없고(D152 ⓐ) Go 는 토큰 둘로 갈랐다 — 같은 축의 정반대 답 |
+| 10 ↑0부 | `go/arithmetic` | 셈하기 / Arithmetic → 0부에서 `go/operator-precedence` | `+` | `common/arithmetic` | 1 | 11 | 정수끼리 나누면 **정수**가 나온다(`7/2 == 3`). 파이썬 「딱 떨어져도 소수」의 거울 |
+| 11 ↑0부 | `go/number-literal` | 숫자 값 / Number literal → 0부에서 `go/integer-literal`(+ 형 변환은 `go/type-conversion`) | `1` | `common/number-literal` | 1 | — | 적힌 숫자는 **타입 없는 상수**라 `var f float64 = 1` 이 되는데, `int` 변수를 넣으면 안 된다 |
+| 12 ↑0부 | `go/string-literal` | 글자 값 / Text literal → 0부에서 `go/text-literal` | `"…"` | `common/text-literal` | 1 | — | 끼워 넣기 문법이 없다. 값이 든 문장은 전부 `fmt.Sprintf` 라는 **함수 호출**이다 |
 | 13 | `go/call-expression` | 함수 부르기 / Calling a function | `f()` | `common/function-call` | 1 | 7 | 인자는 **언제나 값 복사**다. 바꾸려면 포인터를 명시적으로 넘긴다 |
 | 14 | `go/selector` | 점 찍어 꺼내기 / Selector | `.` | `common/member-access` | 1 | 15, 13 | 같은 점이 **패키지**(`fmt.Println`)에도 **필드**(`x.Name`)에도 쓰인다. `->` 가 없어 포인터여도 점이다 |
 | 15 | `go/struct-type` | 칸에 이름 붙여 묶기 / Struct type | `struct` | `null` | 2 | 2 | 구조체는 **값**이다. 대입하면 통째로 복사되고 함수에 넘겨도 복사본이 간다 |
@@ -171,7 +352,8 @@ Go 키워드는 25개로 셋 중 가장 적은데 개념 수는 안 줄었다. �
 
 \* 는 §4 라 `essential` 밖. 사이클은 없다.
 
-**0장 적재량 = 22 / 24.** TS 21/24 · 파이썬 19/24 보다 높다. 뿌리가 6개로 넓고 사슬이 짧기
+**0장 적재량 = 22 / 24.** (**0부를 붙이면 24 / 24 로 상한에 붙는다** — 셈은 §0.5 마지막 문단.)
+TS 21/24 · 파이썬 19/24 보다 높다. 뿌리가 6개로 넓고 사슬이 짧기
 때문이다 — Go 에는 옵셔널 체이닝 → 널 병합 → 삼항 같은 **표기가 표기를 요구하는 사슬**이
 없어 `if` 의 선행은 `comparison` 하나에서 끝난다.
 
@@ -365,6 +547,10 @@ gofmt 가 고정하는 것은 공백·정렬이고 T1 이 재는 것은 「어�
 
 nil 관련이 넷(2·5·8·12 중 2·8), 값 복사 관련이 넷(4·5·10·11)이다. 오답 진단(`diag`)의 재료가
 여기서 나온다.
+
+**이 열둘은 1·2부의 것이다.** 값 층위 오개념은 여기 둘뿐이라(② 제로 값 · ③ 조건 자리) **0부 여덟
+장의 것을 §0.1 의 마지막 열에 따로 세웠다** — 폭·넘침 · 실수 근사 · 바이트 대 rune · 우선순위 ·
+암묵 변환 없음 · 견줄 수 없는 타입 여섯이다. 근거의 한계는 §10 그대로다(progmiscon.org 에 Go 가 없다).
 
 ---
 

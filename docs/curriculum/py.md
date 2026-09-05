@@ -9,6 +9,11 @@
 > 사용처 수와 그 위에 세운 부 배치다. **부 배치는 그쪽이 정본**이고 여기 §2.5 가 요약이다.
 > 실측이 이 문서를 고친 자리 셋: ⓐ `py/arithmetic` 사용처의 51 %가 셈이 아니다(§2 ⓑ 의 확대판)
 > ⓑ `py/type-hint` 은 심화가 아니라 2부다(2,926곳) ⓒ `py/set-and-membership` 이 새로 선다.
+>
+> **2026-09-05 — 3부 앞에 0부 「이 언어의 값과 식」을 붙였다(§1.5).** 사용자 요청
+> (「기초부터 심화까지 · 언어의 동작 원리부터 · 정수형·실수형·연산식」)이 지금 코스에 자리가
+> 없어서다. 0부는 `cs/` 43장(D157)에 간선을 걸어 「왜」를 대고, **1부에서 일곱 장 · 2부에서 두 장을
+> 가져간다** — §2.5 의 부 배치가 §1.5.4 로 갱신됐다.
 
 ---
 
@@ -52,6 +57,294 @@ async def read_item(item_id: int) -> Item:   # async def + 힌트 + 반환 힌�
 여기서 실제로 사용처가 생길 개념은 `import` · `class` · 타입 힌트 · 데코레이터 · `async def` ·
 `try/except` · `with` · f-string · 컴프리헨션 · `None` · 진리값 판정 · dict/list 리터럴 · 인덱싱이다.
 TS 판에서 중심이던 것들(구조 분해 · 옵셔널 체이닝 · 스프레드)은 여기서 거의 안 나온다 — §6 이 그 자리를 센다.
+
+---
+
+## §1.5 0부 「이 언어의 값과 식」 — 정식 코스 3부 앞에 붙는 부
+
+**결정 등록부 초안 (번호 미정 — 오케스트레이터가 매긴다).** 정본 §4 의 정식 코스는 3부(바닥·객체·
+프레임워크)인데, 그 1부가 이미 「변수·조건·반복·함수」로 시작한다. **값이 무엇인지를 안 가르치고
+값을 옮기는 문법부터 가르친다.** 사용자 요청은 「정수형·실수형·연산식을 이해하고 말 그대로 언어를
+이해한다는 느낌」이고, 그 자리가 지금 비어 있다. 0부는 그 자리다.
+
+**지금 사전이 무엇을 못 하는지 한 줄로.** `py/arithmetic` 의 규칙은 「나누기가 딱 떨어져도 소수를
+낸다」이고, 이것은 **무슨 일이 일어나는지**의 답이지 **왜**의 답이 아니다. 「왜 자바에서는 `7/2` 가
+`3` 인데 파이썬은 `3.5` 인가」·「`0.1 + 0.2` 가 왜 안 떨어지나」·「`2 + 3 * 4` 가 어떤 순서로 접히나」는
+문법 층에 답이 없다. 답은 `cs/` 43장(D157 · [`cs.md`](./cs.md))에 있고 **그 층은 이미 서 있다.**
+0부가 하는 일은 새 이론을 만드는 것이 아니라 **파이썬 개념과 `cs/` 를 간선으로 잇고 그 간선마다
+판을 하나씩 세우는 것**이다.
+
+### §1.5.1 축 여덟 · 19판
+
+각 행의 다섯 열이 이 부의 계약이다 — **어느 기계에 걸리나**(`cs/`) · **어떤 그림이 그것을 보이나**
+(그림 계약은 I2 세션이 `design/system/diagrams.md` 에 만드는 중) · **초보가 실제로 틀리는 자리**
+(문항의 씨앗) · **문항 형식**(형식 계약은 I1 세션이 `docs/program/fundamentals.md` 에 확정 중 —
+`value` 값 적기 · `step` 한 걸음씩 · `bits` 비트로 보기 · `table` 표 채우기 · `build` 거꾸로 만들기 ·
+`predict` 예측 후 실행).
+
+**출처 표시** — `1부↑`/`2부↑` 는 §2.5 의 부 배치에서 올라온 것, `신규` 는 이 문서가 새로 세우는 것.
+
+#### 축 A — 정수형과 그 한계 (3판)
+
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
+|---|---|---|---|---|---|
+| `py/value-bits` **신규** | 값은 켜짐·꺼짐의 묶음이고, 같은 묶음을 타입이 다르게 읽는다 | `binary-representation` · `bit-and-byte` · `type` | 비트 배열 | `0b1010` 을 「천십」으로 읽는다 | `bits` |
+| `py/number-literal` `1부↑` | `1` 과 `1.0` 은 **다른 종류**다 | `type` | 값 상자 | `1 == 1.0` 은 참인데 `type(1) is type(1.0)` 은 거짓 — 둘을 같은 사실로 안다 | `value` |
+| `py/integer-limit` **신규** | 파이썬 정수에는 자릿수 한계가 없다. **그것이 예외다** | `integer-overflow` | 비트 배열 (자리가 늘어난다) | `2**100` 이 되는 것을 「컴퓨터는 원래 그렇다」로 일반화한다 — 다음 언어에서 되감기를 만난다 | `bits` |
+
+#### 축 B — 실수형과 왜 안 떨어지나 (2판)
+
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
+|---|---|---|---|---|---|
+| `py/float-inexact` **신규** | `0.1 + 0.2` 가 `0.30000000000000004` 다 — 2진수로 `0.1` 을 정확히 못 적는다 | `floating-point` · `binary-representation` | 비트 배열 (부호·지수·가수 세 칸) | `round(a+b, 2) == 0.3` 으로 넘어가고 `==` 로 소수를 견주는 습관이 남는다 | `value` |
+| `py/integer-division` **신규** | 나누기가 **둘**이다 — `/` 는 늘 `float`, `//` 는 **아래로** 버린다 | `floating-point` · `integer-overflow` | 타입 변환 사다리 | `-7 // 2` 를 `-3` 으로 예상한다. 실제는 `-4` — 0 쪽이 아니라 **아래**로 내린다 | `table` |
+
+#### 축 C — 문자열과 인코딩 (3판)
+
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
+|---|---|---|---|---|---|
+| `py/string-literal` `1부↑` | 따옴표 넷이 같은 값이고, **붙여 쓴 두 리터럴이 연산자 없이 이어진다** | `text-encoding` | 값 상자 | 리스트에서 콤마 하나가 빠지면 항목 둘이 조용히 한 문자열이 된다 | `value` |
+| `py/f-string` `2부↑` | 중괄호 안이 **식**이라 그 자리에서 계산된다 | — | 평가 트리 | 앞의 `f` 가 빠지면 오류가 아니라 중괄호가 글자로 남는다 | `predict` |
+| `py/text-length` **신규** | `str` 은 글자, `bytes` 는 바이트. `.encode()` 가 그 사이의 다리다 | `text-encoding` · `bit-and-byte` | 타입 변환 사다리 | `len("가")` 는 1 인데 `len("가".encode())` 는 3 — 「길이」가 둘인 것을 모른다 | `value` |
+
+#### 축 D — 참·거짓 (2판)
+
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
+|---|---|---|---|---|---|
+| `py/boolean-literal` `1부↑` | 첫 글자가 대문자이고, **`bool` 은 `int` 의 부분집합**이다 | `type` | 값 상자 | `True + True == 2` · `sum([True, False, True]) == 2` 를 오류로 예상한다 | `value` |
+| `py/truthiness` `1부↑` | 빈 것이 거짓이다 — 빈 리스트·빈 글자·`0` | — | 값 상자 (참 칸·거짓 칸) | `x = 0` 일 때 `if x:` 와 `if x is not None:` 이 갈린다 | `table` |
+
+#### 축 E — 연산자와 우선순위 (3판)
+
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
+|---|---|---|---|---|---|
+| `py/arithmetic` `1부↑` | 연산자가 값 둘을 받아 값 하나를 낸다 | — | 평가 트리 | `"ab" * 3` 이 되는 줄 몰라 `+` 로만 잇는다. `[0] * n` 도 같은 자리다 | `step` |
+| `py/operator-precedence` **신규** | `2 + 3 * 4` 가 어떤 순서로 접히나 | — | 평가 트리 | `2 ** 3 ** 2` 를 왼쪽부터 접어 64 로 읽는다. `**` 만 **오른쪽부터**라 512 다 | `step` |
+| `py/bool-op-value` **신규** | `and`/`or` 는 참·거짓이 아니라 **피연산자 하나**를 돌려준다 | — | 평가 트리 (가지 하나가 안 열린다) | `x = a or 0` 이 `a = 0` 일 때도 `0` 이라 「기본값」이 안 먹는다 | `value` |
+
+#### 축 F — 형 변환 (2판)
+
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
+|---|---|---|---|---|---|
+| `py/implicit-conversion` **신규** | 섞으면 넓은 쪽으로 올라간다 — `bool` ⊂ `int` ⊂ `float` | `type` | 타입 변환 사다리 | `1 + 2.0` 을 `3` 으로 예상한다. 실제는 `3.0` 이고, **문자열과 숫자는 자동으로 안 섞인다**(`"1" + 1` 이 그 자리에서 멈춘다) | `table` |
+| `py/explicit-conversion` **신규** | `int()`·`float()`·`str()` 은 바꾸는 것이 아니라 **새 값을 만든다** | `type` · `static-vs-dynamic-typing` | 타입 변환 사다리 | `int("3.7")` 을 3 으로 예상한다. `int(3.7)` 은 3 이지만 `int("3.7")` 은 `ValueError` 다 | `predict` |
+
+#### 축 G — 대입과 이름 (2판)
+
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
+|---|---|---|---|---|---|
+| `py/assignment` `1부↑` | 만드는 줄과 옮기는 줄이 같은 모양이다 | `state` | 메모리 줄 | 대입이 **문**이라 값이 없다 — `if x = 1:` 이 문법 오류인 이유(자바·JS 는 통과한다) | `step` |
+| `py/reference-binding` **신규** | 이름은 값을 **담지 않고 가리킨다** | `value-vs-reference` · `aliasing` | 메모리 줄 (화살표 둘이 한 상자로) | `b = a` 로 리스트를 복사했다고 믿는다. `b.append(1)` 뒤 `a` 도 늘어난다 | `predict` |
+
+#### 축 H — 비교와 같음 (2판)
+
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
+|---|---|---|---|---|---|
+| `py/comparison` `1부↑` | `==` 는 값을 견주고, **연쇄 비교**가 문법으로 있다 | — | 평가 트리 | `a == b == c` 를 `(a == b) == c` 로 읽는다. 파이썬은 `a == b and b == c` 다 | `step` |
+| `py/is-identity` `2부↑` | `is` 는 같은 **자리**냐를 묻는다 | `identity-vs-equality` · `value-vs-reference` | 메모리 줄 | 작은 정수·짧은 문자열에서 `is` 가 우연히 맞아 습관이 굳는다. `256 is 256` 은 참, `257 is 257` 은 구현에 따라 갈린다 | `predict` |
+
+**그림 여섯 중 다섯만 쓴다.** 비트 배열 · 평가 트리 · 값 상자 · 메모리 줄 · 타입 변환 사다리.
+**스택 프레임은 0부에 없다** — 함수가 아직 안 나왔다. 1부 `py/function-definition`·
+`py/return-statement` 가 그 그림의 첫 소비자다.
+
+### §1.5.2 언어마다 다른 자리
+
+세 언어(파이썬 · JS/TS · 자바)를 같은 여덟 축으로 대조한다. **파이썬 열이 이 문서의 몫**이고
+나머지 둘은 [`ts.md`](./ts.md) §1.5 · [`java.md`](./java.md) §1.5 가 같은 표를 든다.
+이 표가 0부의 존재 이유다 — 같은 축에서 세 언어의 답이 **서로 다르고**, 그 차이를 모르면
+두 번째 언어에서 첫 언어의 습관이 그대로 틀린 답이 된다.
+
+| 축 | **파이썬** | JS / TS | 자바 |
+|---|---|---|---|
+| 정수형 | **자릿수 한계가 없다** — `2**100` 이 그대로 | 정수 타입이 **없다**. 전부 64비트 부동소수이고 `MAX_SAFE_INTEGER`(2⁵³−1) 위는 조용히 어긋난다 | `int` 32비트 고정. `MAX_VALUE + 1` 이 가장 작은 음수 |
+| 나눗셈 | `/` 는 늘 `float`, `//` 는 **아래로** 버림 (`-7 // 2 == -4`) | `/` 는 늘 소수. 버림은 `Math.floor`(아래) 와 `Math.trunc`(0 쪽)로 갈린다 | `/` 가 정수끼리면 **0 쪽으로** 버림 (`-7 / 2 == -3`) |
+| 실수 | `0.1 + 0.2 != 0.3`. 정확한 소수는 표준 라이브러리 `decimal` | 같음. 정수도 같은 타입이라 **큰 정수까지 샌다** | 같음. `float`/`double` 둘이고 리터럴 기본이 `double`. 돈은 `BigDecimal` |
+| 문자열 길이 | `len` 이 **코드 포인트** — `len("가") == 1`, 바이트는 `.encode()` 로 3 | `.length` 가 **UTF-16 코드 단위** — `'👍'.length === 2` | `.length()` 도 UTF-16 코드 단위. **`char` 타입이 따로 있고** 이모지 하나가 `char` 둘 |
+| 참·거짓 | `bool` ⊂ `int` (`True + True == 2`). 빈 것이 거짓 | 거짓이 **여섯**(`false 0 '' null undefined NaN`)이고 `[]`·`{}` 는 참 | `boolean` 이 숫자가 **아니고** 조건 자리에 `boolean` 말고는 못 온다 |
+| 형 변환 | 수 사이는 자동으로 올라가지만 **문자열과 숫자는 안 섞인다** (`"1" + 1` 이 멈춘다) | **자동으로 섞인다** — `1 + '1' === '11'`, `'3' - 1 === 2` | 넓히기는 자동, 좁히기는 `(int)` 명시. 문자열은 `+` 로만 자동 |
+| 대입 | 대입은 **문**이라 값이 없다 (`:=` 만 식) | 대입이 **식** — `a = b = 0` 이 된다 | 대입이 **식** — `if (done = true)` 가 `boolean` 일 때만 통과한다 |
+| 같음 | `==` 는 값, `is` 는 자리. `is` 가 작은 정수에서 우연히 맞는다 | `===` 는 타입까지, `==` 는 강제 변환. `NaN !== NaN` | `==` 는 **자리**, `.equals` 는 내용. `Integer` 는 −128~127 만 캐시 |
+
+**이 표에서 파이썬이 혼자인 자리 둘.** ① 정수에 한계가 없는 것 ② 대입이 문인 것.
+둘 다 「파이썬이 관대하다」로 배우면 다음 언어에서 정확히 그 자리에서 막힌다.
+0부 `integer-limit` 과 `assignment` 의 문항이 **다른 언어의 답을 오답 선택지로 쓴다** —
+D4 전이의 반대 방향이고, 이것이 이 부가 하는 일 중 하나다.
+
+### §1.5.3 실측 — 0부 개념이 사용자 리포에 몇 곳 나오나
+
+`adelie`(py 139파일 35,553줄) · `ECC`(py 63파일 10,901줄) 두 리포를 정규식으로 셌다.
+**주석과 문자열을 먼저 지우고** 셌으므로 §1.6 의 원시 계수와 값이 다르다. 정규식은 tree-sitter 보다
+헐거우므로 **하한**으로 읽는다.
+
+| 0부 판 | 근거 모양 | `adelie` (py 139) | `ECC` py (63) | 판정 |
+|---|---|---|---|---|
+| `value-bits` · `number-literal` | 정수 리터럴 | 2,157곳 / 118파일 | 718 / 45 | 내 코드에서 확인 |
+| `integer-limit` | `**` · 2⁶³ 넘는 정수 리터럴 | `**` **0곳** · 2⁶³ 초과 **0개** | `**` 1곳 · 2⁶³ 초과 **0개** | **합성 + 「네 코드엔 없다」**(`scale`) |
+| `float-inexact` | `round(` · `decimal` | `round` 11 / 4 · `decimal` **0곳** | 둘 다 **0곳** | **합성 + 「네 코드엔 없다」**(`scale`) |
+| `integer-division` | `//` | 10곳 / 4파일 | 5 / 2 | 얇다 — `thin_threshold`(min_sites 3)를 겨우 넘는다 |
+| `string-literal` | 따옴표 리터럴 | 14,197곳 / 135파일 | 4,792 / 59 | 내 코드에서 확인 |
+| `f-string` | `f"` · `f'` | 1,276곳 / 80파일 | 377 / 27 | 내 코드에서 확인 |
+| `text-length` | `.encode(` · `.decode(` · `encoding=` | 310곳 / 82파일 | 49 / 9 | 내 코드에서 확인 |
+| `boolean-literal` | `True` · `False` | 891곳 / 109파일 | 306 / 42 | 내 코드에서 확인 |
+| `truthiness` | 비교 없는 `if x:` | 438곳 / 68파일 | 134 / 22 | 내 코드에서 확인 |
+| `arithmetic` | `/` (셈하기 대표) | 899곳 / 86파일 | 240 / 17 | 내 코드에서 확인 |
+| `operator-precedence` | `+` 와 `*` 가 섞인 식 | 10곳 / 5파일 | 10 / 3 | 얇다 |
+| `bool-op-value` | `and` · `or` · `not` | 1,076곳 / 104파일 | 346 / 40 | 내 코드에서 확인 |
+| `implicit-conversion` | (정수·실수가 섞인 식) | **못 쟀다** | **못 쟀다** | 아래 |
+| `explicit-conversion` | `int(` · `float(` · `str(` · `bool(` | 208곳 / 59파일 | 70 / 21 | 내 코드에서 확인 |
+| `assignment` · `reference-binding` | 대입 | 6,396곳 / 131파일 | 2,078 / 56 | 내 코드에서 확인 |
+| `comparison` | `==` · `!=` | 1,053곳 / 106파일 | 403 / 39 | 내 코드에서 확인 |
+| `is-identity` | `is` · `is not` | 283곳 / 63파일 | 79 / 27 | 내 코드에서 확인 |
+
+**19판 중 셋이 사용처가 없거나 얇다** — `integer-limit`(0) · `float-inexact`(0~11) · `integer-division`(5~10).
+셋 다 **정확히 이 부가 존재하는 이유의 자리**다. 리포에 없어서 옛 방식(리포가 쓰는 문법만)으로는
+영영 못 가르치던 것들이고, D177 규칙 ①(합성으로 가르치고 「네 코드엔 없다」를 명시)이 그대로 걸린다.
+사유는 셋 다 `scale` 이다 — 웹 API 서버는 큰 정수도 정밀 소수도 안 쓴다.
+
+**못 잰 것 하나.** `implicit-conversion`(`1 + 2.0`)은 정규식으로 못 센다 — 두 피연산자의 타입을 알아야
+하는데 정규식은 모른다. tree-sitter 로도 못 센다(`binary_operator` 가 타입을 모른다 — §2 ⓑ 가 같은
+이유로 지적한 자리다). **실행 없이는 못 재는 개념**이고, 그러면 사용처 대신 합성이 정본이다.
+
+### §1.5.4 부 배치가 어떻게 바뀌나 — 겹침 정리
+
+0부는 새 개념 열 장을 세우고 **아홉 장을 위에서 내려받는다.** 내려받은 자리는 원래 부에서 **지운다** —
+같은 개념이 두 부에 서면 판이 두 번 나오고, 그 순간 「기초부터 심화까지 이어진다」가 깨진다.
+
+| 어디서 | 무엇이 0부로 | 몇 장 |
+|---|---|---|
+| §2.5 1부 바닥 (16장) | `assignment` · `number-literal` · `string-literal` · `boolean-literal` · `arithmetic` · `comparison` · `truthiness` | **7** |
+| §2.5 2부 자료구조와 객체 (16장) | `f-string` · `is-identity` | **2** |
+| 신규 | `value-bits` · `integer-limit` · `float-inexact` · `integer-division` · `text-length` · `operator-precedence` · `bool-op-value` · `implicit-conversion` · `explicit-conversion` · `reference-binding` | **10** |
+
+**부 경계가 「값과 식」 / 「흐름과 묶기」 / 「자료구조와 객체」로 다시 그어진다.** 이 선은 임의가
+아니라 [`README.md`](./README.md) §2 가 이미 적어 둔 것이다 — 기초 단계에 「식(expression)만이 아니라
+문(statement)이 들어간다」. 0부가 식을 가져가면 1부에 문만 남고, 그것이 이 부의 경계다.
+
+| 부 | 이름 | 판 | 담기는 것 |
+|---|---|---|---|
+| **0부** | 이 언어의 값과 식 | **19** | 위 축 여덟 |
+| **1부** | 흐름과 묶기 | **9** | `none-value` · `if-statement` · `while-loop` · `for-in` · `list-literal` · `function-definition` · `call-expression` · `return-statement` · `import` |
+| **2부** | 자료구조와 객체 | **14** | `attribute-access` · `dict-literal` · `index-access` · `set-and-membership` · `tuple-unpacking` · `list-append` · `list-comprehension` · `type-hint` · `class-definition` · `default-argument` · `try-except` · `with-statement` · `lambda` · `decorator` |
+| **3부** | 프레임워크 | 10~12 | `pyapp/` · `pyweb/` (§3.2 — 변경 없음) |
+
+**판 수와 일수** (하루 새 판 2장 · D12 · 정본 §2 의 하루 15분):
+
+| 부 | 판 | 일 |
+|---|---|---|
+| 0부 | 19 | **10** (마지막 날 1장) |
+| 1부 | 9 | 5 (마지막 날 1장) |
+| 2부 | 14 | 7 |
+| 3부 | 10~12 | 5~6 |
+| **합** | **52~54** | **27~28** |
+
+0부 이전은 42~44판 = **21~22일**이었다. **0부가 더하는 것은 열흘**이고, 그 열흘 뒤에 사용자는
+「`0.1 + 0.2` 가 왜 안 떨어지나」에 답할 수 있다. 열흘이 맞는 값인지는 **사용자 결정이다** —
+줄이려면 축 A·B 를 각 1판으로 접어 15판(8일)까지 내려간다. 접으면 잃는 것은 비트 배열 그림이 걸리는
+자리 셋(`value-bits`·`integer-limit`·`float-inexact`)이 하나로 뭉쳐 「값은 비트다」를 한 판에서
+정수와 실수 둘 다로 보여야 한다는 것이다.
+
+### §1.5.5 0장(프롤로그)과의 관계 — 안 건드린다
+
+`ZERO_CHAPTER_MAX = 24` 의 0장과 이 0부는 **다른 것**이다. 0장은 `zeroChapterPlates` 가 `_lang.yaml` 의
+`essential` 에서 깊이 ≤ 2 를 뽑아 만드는 예고이고, 0부는 코스의 부다. 이름이 닮아 헷갈리므로 적어 둔다.
+
+다만 하나가 걸린다 — `essential` 을 24 로 두었을 때 0장 후보가 정확히 **24/24** 였다(§5).
+0부가 신규 열 장을 `essential` 에 올리면 후보가 **34** 가 되어 상한이 열을 자르고, 자르는 순서의
+넷째 키(id 알파벳순)가 실제로 돌기 시작한다 — D147 이 피하려던 자리다. **세 갈래가 있다.**
+
+1. 0부 신규 열 장을 `essential` **밖**에 둔다. 그러면 0장은 지금 그대로 24/24 이고 0부는 코스에서만
+   돈다. 대신 구멍 지도(03 §6)의 분모에서 빠진다.
+2. `essential` 에 넣고 `ZERO_CHAPTER_MAX` 를 30 으로 올린다 — 0장이 12일에서 15일이 된다.
+3. `zeroChapterPlates` 의 입력을 「`essential` + 0부」로 갈라 두 목록으로 만든다.
+
+**안 정했다.** 세 갈래의 비용을 재려면 `zeroChapterPlates` 를 실제로 돌려야 하고 그것은 이 문서의
+범위 밖이다. [`cs.md`](./cs.md) §6 의 미해결(「상한이 24판인데 `cs/` 깊이 ≤ 2 만 23이다」)과 **같은
+결정**이라 함께 재는 것이 맞다.
+
+---
+
+### §1.5.6 I6 조정 규약 — 공통 id 조각 · 0부 상한 · `cs/` 신청
+
+세 언어(그리고 나머지 일곱)가 **같은 축에 같은 id 조각**을 쓴다. 조각이 같으면 `universal` 로
+`common/` 에 묶기 쉽고, 다르면 [`cs.md`](./cs.md) §10.1 이 적은 사고 — 「같은 기계에 여덟 가지 이름이
+붙었다」 — 가 0부에서 되풀이된다.
+
+| 조각 | 축 | **`py`** | `ts` | `java` |
+|---|---|---|---|---|
+| `value-bits` | A | `py/value-bits` **신규** | `ts/value-bits` **신규** | `java/value-bits` **신규** |
+| `integer-literal` | A | `py/number-literal` | `ts/number-literal` | `java/variable-declaration` |
+| `integer-limit` | A | `py/integer-limit` **신규** | `ts/number-is-double` | `java/integer-limit` **신규** |
+| `float-type` | B | `py/number-literal` 이 겸한다 | `ts/number-is-double` 이 겸한다 | `java/floating-type` **신규** |
+| `float-inexact` | B | `py/float-inexact` **신규** | `ts/float-inexact` **신규** | `java/float-inexact` **신규** |
+| `integer-division` | B | `py/integer-division` **신규** | `ts/integer-division` **신규** | `java/arithmetic` 이 겸한다 |
+| `string-literal` | C | `py/string-literal` | `ts/string-literal` | `java/string-literal` |
+| `string-interpolation` | C | `py/f-string` | `ts/template-literal` | **없다** — `java/string-concat` 이 그 자리 |
+| `text-length` | C | `py/text-length` **신규** | `ts/text-length` **신규** | `java/text-length` **신규** |
+| `boolean-literal` | D | `py/boolean-literal` | `ts/boolean-literal` | `java/boolean-literal` |
+| `truthiness` | D | `py/truthiness` | `ts/truthy-falsy` | `java/boolean-only-condition` **신규** (반대 방향 — 못 한다는 규칙) |
+| `absent-value` | D | 1부 `py/none-value` | `ts/undefined-null` | 2부 `java/null` |
+| `arithmetic` | E | `py/arithmetic` | `ts/arithmetic` | `java/arithmetic` |
+| `operator-precedence` | E | `py/operator-precedence` **신규** | `ts/operator-precedence` **신규** | `java/operator-precedence` **신규** |
+| `logical-operator-value` | E | `py/bool-op-value` **신규** | `ts/operator-precedence` 가 겸한다 | **없다** — `&&` 가 `boolean` 만 낸다 |
+| `conditional-expression` | E | 부 밖 (심화) | `ts/conditional-ternary` | 부 밖 (표본 13곳) |
+| `implicit-conversion` | F | `py/implicit-conversion` **신규** | `ts/implicit-conversion` **신규** | `java/implicit-conversion` **신규** |
+| `explicit-conversion` | F | `py/explicit-conversion` **신규** | `ts/explicit-conversion` **신규** | `java/explicit-conversion` **신규** |
+| `assignment` | G | `py/assignment` | `ts/const-declaration` · `ts/reassignment` | `java/assignment` |
+| `reference-binding` | G | `py/reference-binding` **신규** | `ts/reference-sharing` | `java/reference-binding` **신규** |
+| `comparison` | H | `py/comparison` | `ts/comparison` | `java/comparison` |
+| `identity-equality` | H | `py/is-identity` | `ts/loose-equality` | `java/reference-equality` |
+
+**이 표가 드러내는 구멍 셋.** ① 자바에는 문자열 보간이 없다(JEP 430 철회) — `string-concat` 이
+그 자리를 진다. ② 자바의 `&&` 는 `boolean` 만 내므로 `logical-operator-value` 조각이 안 선다.
+③ `truthiness` 는 자바에서 **반대 방향**이다 — 파이썬·JS 는 「무엇이 거짓이 되나」이고 자바는
+「`boolean` 말고는 못 온다」다. 같은 조각 이름을 쓰되 `universal` 은 안 건다.
+
+#### 0부 상한 — 언어당 12장
+
+I6 규약: 0부가 `essential` 에 새로 올리는 개념은 **언어당 12장까지**다. 근거는 0장 상한 24 에서
+기초 8 을 뺀 값이고, 이 상한이 없으면 §1.5.5 가 적은 「후보가 넘쳐 id 알파벳순이 실제로 돈다」가
+그대로 일어난다.
+
+`essential` 에 새로 드는 것은 **신규 열 장**이다 — `value-bits` · `integer-limit` ·
+`float-inexact` · `integer-division` · `text-length` · `operator-precedence` · `bool-op-value` ·
+`implicit-conversion` · `explicit-conversion` · `reference-binding`. 나머지 아홉은 §5 가 제안한
+`essential` 24 에 **이미 들어 있고** 부만 옮긴 것이라 0장 후보를 안 늘린다. **10 ≤ 12 — 상한을 지킨다.**
+
+**0부의 판 수(19)와 이 12는 다른 수다.** 판은 **코스에서 며칠 걸리나**를 재고,
+12는 **0장 후보와 구멍 지도 분모가 얼마나 커지나**를 잰다. 이미 `essential`(24)에 있던 것을
+0부로 옮기는 것은 후자를 한 톨도 안 늘린다 — 부는 **교재 축**이고 `essential` 은 **분모 축**이다.
+
+#### `cs/` 에 없는 것 셋 — 신청 목록
+
+`cs/` 43장(D157)을 0부의 간선으로 쓰려고 대조했더니 **셋이 없다.**
+
+| 신청 `cs/` id | 한 줄 | 이 문서에서 이것을 요구하는 판 | 그림 |
+|---|---|---|---|
+| `cs/operator-precedence` | 식은 왼쪽부터 읽히지 않는다 — 연산자마다 세기와 방향이 있고, 그것이 **접히는 순서**를 정한다 | `py/operator-precedence` · `py/arithmetic` | **평가 트리** |
+| `cs/type-conversion` | 타입이 다른 값을 만나면 ① 언어가 바꾸거나 ② 사람이 적거나 ③ 멈춘다 — 셋 중 무엇이냐가 언어를 가른다 | `py/implicit-conversion` · `py/explicit-conversion` | **타입 변환 사다리** |
+| `cs/truthiness` | 참·거짓이 아닌 값을 조건 자리에 두면 무슨 일이 일어나나 | `py/truthiness` | 값 상자 |
+
+**앞의 둘이 특히 크다** — I2 세션이 만드는 그림 여섯 중 **평가 트리와 타입 변환 사다리 둘이
+이 두 개념의 그림**이다. `cs/` 에 개념이 없으면 그 그림이 걸릴 데가 없고, 언어마다 따로 그리면
+`cs.md` §10.1 이 경고한 「같은 기계에 여러 이름」이 그림 층에서 되풀이된다.
+
+셋을 세우는 것은 `dictionary/cs/**` 와 `docs/curriculum/cs.md` 의 일이라 **이 문서의 범위 밖**이다.
+여기 적어 두는 것이 신청이다. 셋이 서기 전까지 위 표의 해당 칸은 「없음」으로 두고, 판은
+`cs/` 간선 없이 선다 — 판은 뜨되 「왜」의 아래층이 비어 있다.
+
+#### 파서 — 이 언어는 오늘 실제로 파싱된다
+
+I6 이 찾은 것: `packages/dictionary/src/schema.ts:29` 의 `grammarSchema` 열거값에는 `c`·`cpp`·
+`c_sharp`·`swift`·`dart` 가 있는데 `crates/parse/Cargo.toml` 의 `lang-*` 기능에는 없다. 그 다섯은
+**사전이 로드되고 린트도 통과하는데 캡처가 0곳**이 된다 — [`README.md`](./README.md) §6 표의
+「열었다」는 로드 단계이지 파서가 아니다.
+
+**이 문서의 언어는 그 자리가 아니다.** `Cargo.toml` 을 직접 확인했다 — 문법 `python` 은
+`lang-python` = `tree-sitter-python 0.23` 로 실제 링크되어 있고, §1.5.3 의 실측이 그 위에서 돈 것이 아니라 **정규식으로 돈 것**이므로
+(정규식은 파서 유무와 무관하다) 두 사실을 섞지 않는다. 파서가 붙어 있다는 것은 **0부 판이
+사용처를 실제로 얻는다**는 뜻이고, 사용처가 0 인 판(§1.5.3 의 「합성 + 「네 코드엔 없다」」)은
+파서가 없어서가 아니라 **그 코드가 리포에 없어서** 0 이다. 그 둘은 다른 결론으로 이어진다 —
+앞의 것은 크레이트를 붙이면 풀리고, 뒤의 것은 D177 규칙 ①(합성 + 사유 명시)이 답이다.
 
 ---
 
@@ -117,6 +410,11 @@ TS 판에서 중심이던 것들(구조 분해 · 옵셔널 체이닝 · 스프�
 ## §2.5 코스 3부 — 부 배치 (2026-09-05 실측)
 
 정본 §4 · D177 의 파이썬판. 전체 근거와 비용은 [`docs/plan/python-axis.md`](../plan/python-axis.md).
+
+> **이 절의 1·2부 목록은 0부가 생기기 전의 것이다.** 0부(§1.5)가 1부에서 일곱 장
+> (`assignment`·`number-literal`·`string-literal`·`boolean-literal`·`arithmetic`·`comparison`·
+> `truthiness`) · 2부에서 두 장(`f-string`·`is-identity`)을 가져갔다. **갱신된 배치는 §1.5.4 의
+> 표**이고 아래 표는 그 뺄셈의 원본으로 남긴다.
 
 | 부 | 교재 | 장 | 담기는 것 |
 |---|---|---|---|

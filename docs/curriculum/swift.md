@@ -1,7 +1,9 @@
 # Swift 커리큘럼 조사
 
-네임스페이스 `swift` · 문법 키 `swift` · 조사일 2026-09-04.
+네임스페이스 `swift` · 문법 키 `swift` · 조사일 2026-09-04 ·
+**0부 「이 언어의 값과 식」 추가 2026-09-05**(정본 §1·§4 · 사용자 요청 「기초부터, 언어의 동작 원리부터」).
 이 문서는 제안이다 — `dictionary/swift/**` 는 아직 없고, 이 문서도 아무 파일을 고치지 않는다.
+**§0 의 값은 이 기계의 Swift 6.3.3 으로 실행해 잰 것**이고, 나머지 절의 「추정」 표시는 그대로다.
 
 ---
 
@@ -74,18 +76,237 @@ Swift 에는 `package.json` 이 없고, SwiftUI 는 의존성이 아니라 **OS 
 
 ---
 
-## §2 기초 — 바닥 여덟
+## §0 0부 — 이 언어의 값과 식
+
+축 여덟의 정의와 id 조각은 [`README.md`](./README.md) §8 에 있다. **여기는 Swift 에서 어긋나는
+자리만** 쓴다. 여덟 축이 전부 서고 어긋남 판은 따로 안 세웠다 — **8 / 12**(상한 §8). Swift 의
+어긋남 넷(넘침 크래시 · `Int`/`Double` 못 섞음 · 옵셔널 · 자소 뭉치)이 셋은 축 안에서 표현되고,
+표현이 안 되는 하나(옵셔널)는 0부가 **문만 열고** `swift/optional-type`(§3 ⑤)에 넘긴다.
+
+**이 절의 값은 이 기계에서 실행해 잰 것이다** — Apple Swift **6.3.3**(swiftlang-6.3.3.1.3),
+target `arm64-apple-macosx26.0`, 2026-09-05. 세 언어 중 Swift 와 C# 만 툴체인이 있었고
+Go 는 없었다(go.md §0.4). **이 문서의 §1 「생김새」는 여전히 추정이고, §0 만 실측이다.**
+
+### §0.1 여덟 장
+
+| # | id | name.ko / en | 한 줄 | `cs/` | 그림 | 초보가 실제로 틀리는 자리 |
+|---|---|---|---|---|---|---|
+| 0-1 | `swift/integer-literal` | 정수 값과 그 폭 / Integer literal | 폭이 정해져 있고, **넘치면 감기지 않고 그 자리에서 죽는다** | `bit-and-byte` · `integer-overflow` | 비트 배열 | **「넘치면 감긴다」를 C·자바에서 물려온다.** 실측 종료 코드 **133**(SIGTRAP). 감으려면 `&+` 를 손으로 적어야 한다 |
+| 0-2 | `swift/float-literal` | 실수 값과 근사 / Float literal | 2진수로 근사한 값이라 십진 소수를 정확히 못 담는다 | `floating-point` · `binary-representation` | 비트 배열 | **`Float` 는 정확하다고 믿는다.** 실측에서 `Double` 은 `0.1 + 0.2 = 0.30000000000000004` 인데 `Float` 는 **`0.3`** 으로 찍힌다 — 정확해진 게 아니라 **자릿수가 적어 반올림이 오차를 가린 것**이다 |
+| 0-3 | `swift/text-literal` | 글자 값 — 자소 뭉치 / Text literal | `String` 은 **자소 뭉치의 모음**이고 `count` 는 사람이 보는 글자를 센다 | `text-encoding` | 값 상자 · **메모리 줄** | **`s[0]` 으로 첫 글자를 꺼내려 한다.** 컴파일이 멈춘다 — 실측 `'subscript(_:)' is unavailable: cannot subscript String with an Int` |
+| 0-4 | `swift/boolean-literal` | 참·거짓 값 / Boolean literal | 조건 자리에 `Bool` 말고는 **아무것도 못 온다** | `type` · **`cs/truthiness` 없음** | 평가 트리 | **`if 1`·`if name` 을 쓴다.** 「참 같은 값」이 Swift 에 없다 |
+| 0-5 | `swift/operator-precedence` | 무엇이 먼저 묶이나 / Operator precedence | 우선순위가 언어가 아니라 **표준 라이브러리의 `precedencegroup` 선언**에 있다 | **`cs/operator-precedence` 없음** (`type`·`abstraction` 로 임시) | 평가 트리 | **`1 << 2 + 3` 을 32 로 읽는다.** 실측 **7** — Swift 는 `<<`(`BitwiseShiftPrecedence`)를 `+` 보다 **위**에 뒀고 C·자바·C# 은 아래에 뒀다 |
+| 0-6 | `swift/type-conversion` | 종류가 다른 숫자는 손으로만 섞는다 / Type conversion | 변수끼리는 못 섞고 **리터럴끼리는 섞인다** | **`cs/type-conversion` 없음** · `static-vs-dynamic-typing` | 타입 변환 사다리 | **`1 + 2.0` 은 되는데 `a + b` 는 안 된다.** 실측: 리터럴끼리는 `3.0`, `let a = 1; let b = 2.0` 뒤의 `a + b` 는 `binary operator '+' cannot be applied to operands of type 'Int' and 'Double'` |
+| 0-7 | `swift/assignment` | 이름을 만들며 바뀔지까지 정한다 / Binding and assignment | 이름을 만드는 줄에 `let`/`var` 를 **골라야만** 줄이 완성된다 | `state` · `immutability` · `value-vs-reference` | 값 상자 · 메모리 줄 · **스택 프레임** | **`let` 이면 안쪽까지 못 바꾼다고 믿는다.** class 를 `let` 으로 묶으면 **다른 상자로 못 바꾸는 것**이고 안은 바뀐다. struct 면 안쪽도 안 바뀐다 — 같은 낱말이 두 결과를 낸다 (§9 ④) |
+| 0-8 | `swift/equality` | 같은 값인가, 같은 상자인가 / Equality | 물음이 **낱말로** 갈려 있다 — `==` 와 `===` | `identity-vs-equality` · `value-vs-reference` | 평가 트리 · 값 상자 | **`==` 와 `===` 를 같은 물음으로 읽는다.** 실측: struct 둘의 `==` 는 참, class 둘의 `===` 는 거짓. 그리고 `1 == 1.0` 이 **참**이다(리터럴이 `Double` 로 추론된다) — 0-6 과 정반대로 보여 여기서 한 번 더 막힌다 |
+
+**`cs/` 에 없는 것 셋이 이 표에 굵게 나온다** — `cs/operator-precedence` · `cs/type-conversion` ·
+`cs/truthiness`. 셋 다 README §9 의 「없는 것」 표에 이미 올라 있다(I6). 규약 5 대로 이 문서는
+새 `cs/` 를 만들지 않는다. Swift 에서 가장 크게 비는 것은 **`cs/type-conversion`** 이다 —
+0-6 의 타입 변환 사다리가 「리터럴은 왜 저절로 오르고 변수는 왜 못 오르나」를 답해야 하는데,
+그 답(리터럴의 타입이 늦게 정해진다)을 받쳐 줄 기계 개념이 43장에 없다.
+
+### §0.2 형식과 `universal` — 규약 4·6
+
+| # | 형식 (I1) | `universal` |
+|---|---|---|
+| 0-1 | `bits` → **`predict`** | `common/number-literal` |
+| 0-2 | `value` | `common/number-literal` |
+| 0-3 | `table` | `common/text-literal` |
+| 0-4 | `predict` | `common/boolean-value` |
+| 0-5 | `step` | `common/arithmetic` |
+| 0-6 | `build` | `common/type-cast`(신규 후보 · README §8) |
+| 0-7 | `step` | `common/variable-binding` · `common/reassignment` |
+| 0-8 | `predict` | `common/comparison` |
+
+**여섯 형식이 전부 쓰인다** — 안 쓰는 것이 없다(규약 6). 그림도 여섯이 전부 쓰인다:
+스택 프레임은 0-7 에서 「struct 를 함수에 넘기면 프레임에 복사본이 하나 더 선다」를 그린다.
+
+**0-1 이 이 언어에서 `predict` 가 가장 센 자리다.** 예측(「감기겠지」)과 실제(죽는다)가 갈리고,
+그 간격이 곧 교훈이다. 오답 진단은 정본 §3 ② 대로 「틀렸다」가 아니라 **「당신이 고른 그것이 참이
+되는 조건」**을 낸다 — 「감기는 답은 `&+` 를 적었을 때 참이다」 + `&+` 한 줄.
+
+### §0.3 Swift 라서 다른 네 자리 — 전부 실측
+
+| 자리 | Swift | 견줄 것 | 축 |
+|---|---|---|---|
+| **넘침이 기본으로 크래시** | `var x: Int8 = 127; x + 1` → 종료 코드 **133**. `x &+ 1` → **−128** | C# 는 기본이 감김이고 `checked` 로 켠다(csharp.md §0.4). Go 는 언제나 감기고 고를 낱말이 없다 | 0-1 |
+| **`Int` 와 `Double` 을 못 섞는다** | `a + b` 컴파일 오류. `Double(a) / b` = **1.5** | Go 도 못 섞지만 **리터럴도 못 섞는다** — Swift 는 `1 + 2.0` 이 된다. C# 는 자동으로 넓힌다 | 0-6 |
+| **옵셔널이 타입에 박혀 있다** | `Int("12")` = `Optional(12)`, `Int("12a")` = `nil` (실측) | C# `int.TryParse` 는 `bool` 을 돌려주고 값을 `out` 으로 흘린다. Go 는 `(int, error)` 둘을 돌려준다 | 0부는 **문만 연다** — 0-6 의 「문자열을 숫자로」가 옵셔널의 첫 노출이고, 개념은 `swift/optional-type`(§3 ⑤)이 받는다 |
+| **문자열이 자소 뭉치 단위** | `"👨‍👩‍👧‍👦".count` = **1**, `utf16.count` = **11**, `utf8.count` = **25**, `unicodeScalars.count` = **7**. `"e" + U+0301` 은 `count` **1** 이고 `"é"` 와 **같다** | C# `.Length` 는 같은 이모지에 **11**(UTF-16 코드 단위). Go `len` 은 **25**(바이트) | 0-3 |
+
+세 언어를 한 줄에 놓으면 이렇게 된다 — **같은 이모지 하나의 「길이」가 Swift 1 · C# 11 · Go 25 다.**
+`cs/text-encoding` 이 셋을 한 기계로 묶고 언어 장 셋은 「이 언어는 어느 단위를 센다」만 다르게 적는다.
+D4 전이가 여기서 값을 한다 — 세 번 배울 것을 한 번 배우고 표기 차이 카드 셋으로 끝난다.
+
+**0부가 옵셔널을 안 갖는 이유.** 옵셔널은 축 여덟 중 어디에도 안 들어간다(값도 식도 아니고
+**타입 구성자**다). 0부에 아홉째 장으로 세우면 상한 12 안에는 들지만, 그것을 배우려면 `if let`·
+`guard let`·`??`·`?.` 넷이 곧바로 따라와야 하고 그것은 2부 다섯 장이다. **0부는 「이런 것이 있다」만
+보이고 개념을 열지 않는다** — 0-6 의 `Int("12")` 가 그 한 번의 노출이다.
+
+### §0.4 실측표 — 재현 방법을 붙여서
+
+`swift <파일>` 로 돌렸다. 런타임 함정 둘은 `swiftc -Onone` 으로 빌드해 종료 코드를 봤다.
+
+| 물음 | 값 | 비고 |
+|---|---:|---|
+| `Int.max` | `9223372036854775807` | `MemoryLayout<Int>.size` = 8 |
+| `Int8.max` · `Int8.min` | `127` · `-128` | |
+| `Int8(127) &+ 1` | `-128` | `&+` 는 감긴다 |
+| `Int8(127) + 1` | **종료 코드 133** | SIGTRAP. `-Onone` 빌드에서도 stdout 은 안 남았다 |
+| `7 / 2` · `-7 / 2` · `-7 % 2` | `3` · `-3` · `-1` | 0 쪽으로 버림 |
+| `0.1 + 0.2` | `0.30000000000000004` | `== 0.3` → **false** |
+| `Float(0.1) + Float(0.2)` | `0.3` | 정확해진 게 아니다 (0-2) |
+| `1e16 + 1` | `1e+16` | 더했는데 안 늘었다 |
+| `"가나다"` count/utf8/utf16/scalars | `3` / `9` / `3` / `3` | |
+| `"👨‍👩‍👧‍👦"` count/utf8/utf16/scalars | `1` / `25` / `11` / `7` | |
+| `2 + 3 * 4` · `1 << 2 + 3` | `14` · **`7`** | C 계열은 `32` |
+| `true \|\| false && false` | `true` | `&&` 가 위 |
+| `Int(2.9)` · `Int(-2.9)` | `2` · `-2` | 0 쪽으로 버림 |
+| `Int("12")` · `Int("12a")` | `Optional(12)` · `nil` | |
+| `[1,2,3][5]` | **종료 코드 133** | `Fatal error: Index out of range` |
+| struct `==` · class `===` | `true` · `false` | |
+| `1 == 1.0` | `true` | 리터럴 `1` 이 `Double` 로 추론된다 |
+
+### §0.5 0부 → 1부 → 2부 → 3부 — 겹침 정리
+
+**겹치는 쪽은 0부가 가져가고 §2·§3 에서 뺀다.** 경계는 하나다 — **값 하나를 만들고·보고·견주는
+것까지가 0부**, 흐름을 나누는 문은 1부다. Swift 는 §2 여덟 중 **넷이 값 층위**다.
+
+| 0부 장 | 어디에 있었나 | 부기 |
+|---|---|---|
+| `swift/boolean-literal` | §2 ② | **id 가 같다** — 자리만 올라간다 |
+| `swift/operator-precedence` | §2 ③ `swift/arithmetic` | 넘침·정수 나눗셈은 0-1 과 0-5 로 갈라 들어간다 |
+| `swift/equality` | §2 ④ `swift/comparison` | `if-statement` 의 prereq 를 `swift/equality` 로 다시 건다 |
+| `swift/assignment` | §2 ① `swift/let-var` + §3 ① `swift/assignment` | 둘을 한 장으로 묶는다 — 축 7 의 `universal` 이 `variable-binding` 과 `reassignment` **둘**이라 원래 한 축이다 |
+| `swift/integer-literal` | **없었다** | 신규 |
+| `swift/float-literal` | **없었다** | 신규 |
+| `swift/text-literal` | **없었다** | 신규. §3 ③ `array-subscript` 의 「문자열은 번호로 못 꺼낸다」가 여기로 온다 |
+| `swift/type-conversion` | **없었다** | 신규 |
+
+새로 서는 넷이 요점이다. **지금 계획에 정수의 폭도 자소 뭉치도 형 변환도 장이 없었다** —
+§7 이 `cs/integer-overflow`·`cs/unicode-text` 로 밀어 뒀는데 `cs/` 는 쿼리가 없어 스스로 안 뜨고
+언어 개념이 `prereq` 로 걸어야 산다(cs.md §8). **걸 데가 없었다.**
+(부기: §7 의 `cs/unicode-text`·`cs/static-types`·`cs/value-and-reference`·`cs/reference-counting` 는
+실재 id 가 아니다 — `dictionary/cs/` 의 이름은 `text-encoding`·`static-vs-dynamic-typing`·
+`value-vs-reference`·`garbage-collection` 이다. §0.1 은 실재하는 이름만 썼다.)
+
+| 부 | 무엇 | 장 | 교재 |
+|---|---|---:|---|
+| **0부 값과 식** | 위 여덟 | **8** | 사전 `examples[]` (§0.7) |
+| **1부 바닥** | `if-statement` · `for-in-loop` · `function-declaration` · `return-statement` | **4** | 합성 + 내 코드 짚기 |
+| **2부 Swift 의 타입** | §3 중심 남은 열다섯 + §4 심화 열 | **25** | 합성 + 내 코드 |
+| **3부 프레임워크 `swiftui/`** | **아직 한 장도 안 짰다** | **0** | 내 코드 중심 |
+
+1부가 넷으로 얇은 것은 Swift 가 얕아서가 아니라 **이 언어의 바닥이 값 쪽에 몰려 있어서**다.
+옵셔널·struct/class·프로토콜이 전부 「값이 무엇인가」의 갈래이고, 흐름을 나누는 문은 정말로 넷뿐이다.
+
+**3부를 어떻게 채울지는 안 정했다.** §1 이 `swiftui/` 로 가르기로 결정했지만 그 네임스페이스의
+개념 목록은 이 문서에 없다. §4 심화 셋(`property-wrapper` · `result-builder` · `some-any`)은
+**언어 기능이라 `swift/` 에 남기고**, 3부는 `@State`·`body`·수식어 사슬 같은 **프레임워크 관습**으로
+따로 짠다. 그 목록을 짜는 것이 다음 물결이다.
+
+**0장 적재량 25 → 29. 상한 24 를 다섯 장 넘긴다.** 0부 여덟은 전부 깊이 ≤ 2 이고 흡수된 넷은
+원래도 깊이 ≤ 2 였으므로 순증은 새로 선 넷이다. Swift 는 0부 이전에 **이미 25 로 유일하게 넘친
+언어**였고(README §5 ①) 0부가 간격을 벌린다.
+
+**여기서 축 하나가 겹쳐 있다는 것이 드러난다 — 「0장」과 「0부」는 다른 것이다.**
+0장(프롤로그)은 `zeroChapterPlates` 가 **사용처가 있는 `essential` 중 깊이 얕은 것 24판**을 고른
+것이고, 0부는 **코스의 첫 부**다. 0부를 `essential` 에 넣으면 0장 후보가 되어 상한을 두고 경쟁하고,
+**지면 「정수에 폭이 있다」가 프롤로그에서 빠진다.** D147 이 상한을 8→24 로 올리며 세운 뜻과 반대다.
+결정거리 둘 — ⓐ 0부를 0장 정렬 밖에 두고 코스가 순서를 직접 든다 ⓑ 상한을 올린다.
+README §11 의 미결 3번이 같은 물음이고, **Swift 가 그 물음이 가장 아픈 언어다.**
+**어느 다섯이 잘릴지는 안 쟀다** — 이 리포에 `.swift` 가 0개라 정렬 첫 키(사용처 있음)가 전부 0이고,
+그때 `zeroChapterPlates` 가 무엇을 내는지 확인하지 않았다.
+
+### §0.6 판 수와 일수
+
+정본 §2 — 하루 15분, 새 판 2장(D12). 판 수는 개념 수와 1:1 로 잡았다(java.md §2 와 같은 셈).
+
+| 부 | 판 | 일 |
+|---|---:|---:|
+| 0부 | 8 | **4** |
+| 1부 | 4 | 2 |
+| 2부 | 25 | 13 |
+| 3부 | 0 (미정) | 0 |
+| **합** | **37** | **19** |
+
+**19일은 하한이다.** 만기 재검이 먼저 예산을 먹으므로(정본 §2) 실제 달력은 더 길고, 얼마나
+길어지는지는 **안 쟀다.** 3부가 서면 `swiftui/` 개수만큼 더 붙는다.
+
+### §0.7 문법 현황 — **로드는 통과하고 캡처가 0 이다**
+
+| 자리 | 상태 | 근거 |
+|---|---|---|
+| `crates/parse` 문법 | ❌ **없다.** 크레이트가 `Cargo.toml` 에 아예 없다 | `crates/parse/Cargo.toml` · `langs.rs` |
+| 그 사실을 지키는 못 | ✅ `swift_and_dart_are_not_in_the_build_yet` — 넣으면 빨개진다 | `crates/parse/tests/quality.rs:125` |
+| `grammarSchema` | ✅ `swift` 가 이미 있다 | `packages/dictionary/src/schema.ts:29` |
+| `grammarOf('.swift')` | ✅ `swift` | `apps/desktop/src/session-flow.ts` |
+| 사전을 쓰면 | **스키마도 린트도 통과하고 캡처만 0곳** | I6 확인 |
+| 파싱을 시키면 | `ParseError::UnsupportedLang("swift")` — 조용히 TS 로 새지는 않는다 | `crates/parse/src/lib.rs:128` |
+| `dictionary/swift/**` | ❌ 없다 | `ls dictionary/` |
+
+**「스키마에 있으니 열려 있다」가 아니다.** `dictionary/swift/_lang.yaml` 에 `grammars: [swift]` 를
+적으면 로드 단계는 통과하는데 파서가 없어 **캡처가 0곳**이고, 사용처가 0이면 카드가 안 구워진다.
+**「곧 됩니다」가 아니라 순서가 있다.**
+
+**Swift 를 세우려면 이 순서다.**
+
+1. `crates/parse/Cargo.toml` 에 `tree-sitter-swift`(0.7.3 · MIT · alex-pinkus)를 넣고 `lang-swift`
+   피처와 `langs.rs` 한 줄을 더한다. `parser.c` 가 **20.6 MB** 라 빌드 시간이 늘어난다(§8).
+2. 그 순간 `quality.rs:125` 가 빨개진다. **실코드 20파일 ERROR 비율을 재고 03 §2.3 의 5 % 게이트를
+   통과하는지 본다.** 통과 못 하면 여기서 멈춘다(00 §6-2 「기본 보류」). **이 세션에서도 안 쟀다.**
+3. `grammar_abi` 를 `_lang.yaml` 에 **15** 로 적는다(실측 · §8). 크레이트의 dev-dependency 가
+   `tree-sitter 0.23.0` 인데 이 리포는 0.25.10 이라 그 조합이 시험된 적이 없다는 것도 여기서 확인한다.
+4. 시스템 쿼리 둘 — `_imports.scm`(모듈 이름) · `_blocks.scm`(`function_declaration` ·
+   `init_declaration` · `class_declaration` 을 `declaration_kind` 별로 · **`computed_property`**).
+   마지막 것을 빼면 SwiftUI 의 `var body` 가 블록으로 안 잡힌다(§8).
+5. Monaco 에 `basic-languages/swift` 한 줄(있는 것을 확인했다 · §8). 안 더하면 T1 화면이 plaintext 로
+   떨어진다.
+6. 그다음에야 `dictionary/swift/**` 다.
+
+**0부가 문법 없이 서는가 — 반만 그렇다.** 0부 판은 사전의 `examples[]` 로 카드를 굽고 파싱을
+안 한다(`packages/cards/src/t0-synthetic.ts`, `SYNTHETIC_SITE_ID = -1`). 그런데 그 파일의 두 문이
+**둘 다 「내 코드」 쪽 인자를 요구한다** — `makeSyntheticCard` 는 `previewSiteId`(「곧 여기서
+봅니다」로 예고할 실제 사용처)가 **필수**이고, `makeAbsentCard` 는 `AbsenceReason`(framework ·
+library · scale · idiom)이 필수다. 문법이 없으면 앞의 것을 못 만들고, 뒤의 것을 쓰면 **「네 코드엔
+없다」와 「우리가 못 읽는다」가 섞여** D137 이 막으려던 자리로 되돌아간다.
+**문법 없이 0부를 세우려면 세 번째 문이 필요하고 오늘 그것은 없다.**
+채점 쪽은 덜 급하다 — 여섯 형식 중 파서를 쓰는 것은 `build` 하나이고, 그것도 문법이 없으면
+정규식 정규화 폴백으로 떨어진다(정본 §5).
+
+**표본이 없다는 것의 값 — 티어 한 줄.** 정본 §5 의 셋 중 **A(모든 리포)만 선다.**
+0·1부는 합성 교재로 설 수 있고 `cs/` 간선 아홉(§7)이 붙는다. **B 는 통째로 비어 있다** —
+문법이 없으니 HTTP 간선도 기능 폐포도 스키마 추출도 없고 실행 러너도 없다.
+그리고 이 리포에 `.swift` 가 **0개**라 **「내가 만든 코드가 교재」(정본 §1)가 이 언어에서는 설계
+단계부터 성립하지 않았다** — §1 의 「생김새」가 추정인 것, 0장 정렬의 첫 키를 못 재는 것(§0.5),
+오개념 열둘의 근거가 얇은 것(§9)이 전부 같은 구멍에서 나온다.
+**코스는 위 순서 2번에서 멈춘다** — ERROR 비율을 재기 전에는 0부조차 실물로 못 세우고,
+2부는 사용자가 Swift 리포를 가져온 뒤에야 「내 코드」 절반이 채워진다.
+
+---
+
+## §2 기초 — 바닥 여덟 → **1부 바닥 넷** (0부가 넷을 가져갔다)
+
+①·②·③·④ 는 값 층위라 §0.5 대로 0부로 올라간다. 아래 표는 여덟 그대로 두되 올라간 넷에
+**↑0부**를 붙였고, 1부에 남는 것은 `if-statement` · `for-in-loop` · `function-declaration` ·
+`return-statement` 넷이다.
 
 | # | id | name.ko / en | token | universal | diff | prereq | 이 언어라서 다른 것 |
 |---|---|---|---|---|---|---|---|
-| 1 | `swift/let-var` | 이름에 값 묶고 바뀔지 정하기 / Binding with let or var | `let` | `common/variable-binding` | 1 | — | 이름을 만드는 줄에 **바뀔 이름인지까지 함께 적는다.** 안 바꿀 거면 `let`, 바꿀 거면 `var` — 골라야만 줄이 완성된다 |
-| 2 | `swift/boolean-literal` | 참·거짓 값 / Boolean literal | `true` | `common/boolean-value` | 1 | — | 조건 자리에 `Bool` 말고는 **아무것도 못 온다.** `if 1` 도 `if name` 도 컴파일이 멈춘다 — 다른 언어의 「참 같은 값」이 Swift 에는 없다 |
-| 3 | `swift/arithmetic` | 셈하기 / Arithmetic | `+` | `common/arithmetic` | 1 | — | **종류가 다른 숫자는 그냥 못 더한다.** `let a = 1`·`let b = 2.0` 뒤의 `a + b` 가 오류다(리터럴끼리인 `1 + 2.0` 은 된다 — 그래서 더 헷갈린다). 그리고 정수끼리 나누면 소수를 버리고, 넘치면 감기지 않고 **그 자리에서 죽는다** |
-| 4 | `swift/comparison` | 두 값 견주기 / Comparison | `==` | `common/comparison` | 1 | `swift/boolean-literal` | **`==` 와 `===` 가 다른 물음이다** — 값이 같은가와 같은 상자인가. `struct` 에는 `===` 를 쓸 수조차 없다 |
+| 1 ↑0부 | `swift/let-var` → 0부에서 §3 ① `swift/assignment` 와 한 장 | 이름에 값 묶고 바뀔지 정하기 / Binding with let or var | `let` | `common/variable-binding` | 1 | — | 이름을 만드는 줄에 **바뀔 이름인지까지 함께 적는다.** 안 바꿀 거면 `let`, 바꿀 거면 `var` — 골라야만 줄이 완성된다 |
+| 2 ↑0부 | `swift/boolean-literal` (0부에서 **id 그대로**) | 참·거짓 값 / Boolean literal | `true` | `common/boolean-value` | 1 | — | 조건 자리에 `Bool` 말고는 **아무것도 못 온다.** `if 1` 도 `if name` 도 컴파일이 멈춘다 — 다른 언어의 「참 같은 값」이 Swift 에는 없다 |
+| 3 ↑0부 | `swift/arithmetic` → 0부에서 `swift/operator-precedence`(+ 넘침은 `swift/integer-literal`) | 셈하기 / Arithmetic | `+` | `common/arithmetic` | 1 | — | **종류가 다른 숫자는 그냥 못 더한다.** `let a = 1`·`let b = 2.0` 뒤의 `a + b` 가 오류다(리터럴끼리인 `1 + 2.0` 은 된다 — 그래서 더 헷갈린다). 그리고 정수끼리 나누면 소수를 버리고, 넘치면 감기지 않고 **그 자리에서 죽는다** |
+| 4 ↑0부 | `swift/comparison` → 0부에서 `swift/equality` | 두 값 견주기 / Comparison | `==` | `common/comparison` | 1 | `swift/boolean-literal` | **`==` 와 `===` 가 다른 물음이다** — 값이 같은가와 같은 상자인가. `struct` 에는 `===` 를 쓸 수조차 없다 |
 | 5 | `swift/if-statement` | 조건으로 흐름 나누기 / If statement | `if` | `common/conditional-branch` | 1 | `swift/boolean-literal` | 조건의 **괄호는 없어도 되고 몸통의 중괄호는 한 줄이어도 반드시 있다.** C·자바에서 온 손이 정확히 반대로 쓴다 |
 | 6 | `swift/for-in-loop` | 하나씩 훑기 / For-in loop | `for` | `common/iterate` | 2 | `swift/let-var` | Swift 에는 `for (i = 0; i < n; i++)` 가 **없다.** 3.0 에서 삭제됐고 `for i in 0..<n` 이 그 자리를 전부 가져갔다 |
 | 7 | `swift/function-declaration` | 함수 정의하기 / Function declaration | `func` | `common/function-definition` | 1 | — | **인자마다 부르는 이름이 따로 있다.** `func greet(to name: String)` 를 `greet(to: "곽")` 로 부른다 — 정의에 적힌 이름과 부를 때 쓰는 이름이 다르다 |
 | 8 | `swift/return-statement` | 값 돌려주기 / Return | `return` | `common/return-value` | 1 | `swift/function-declaration` | 몸통이 **한 줄이면 `return` 을 안 적는다.** SwiftUI 의 `var body` 에 `return` 이 없는 이유가 이것이다 |
+
+**0부가 이 절의 전제를 하나 바꾼다.** ③ `swift/arithmetic` 의 마지막 열이 「넘치면 감기지 않고
+그 자리에서 죽는다」인데, 그것은 산술이 아니라 **정수에 폭이 있다는 사실**이다. 0부가 그 사실을
+`swift/integer-literal` 로 따로 세우고(실측 종료 코드 133), 여기 남는 것은 우선순위와
+정수 나눗셈이다.
 
 **여덟에서 뺀 것 둘과 그 이유.** ① `while` — 바이브 코딩 SwiftUI 코드에 거의 안 나온다. 사용처가
 0이면 카드가 안 구워지므로 §3 으로 내렸다. ② 재대입(`x = 5`) — 파이썬과 달리 Swift 는 만드는 줄과
@@ -93,11 +314,14 @@ Swift 에는 `package.json` 이 없고, SwiftUI 는 의존성이 아니라 **OS 
 
 ---
 
-## §3 중심 (16)
+## §3 중심 (16) → **2부 열다섯** (0부가 하나를 가져갔다)
+
+① `swift/assignment` 가 §2 ① `let-var` 와 한 장으로 묶여 0부로 올라간다(§0.5). 남는 열다섯이
+§4 심화 열과 합쳐 **2부 스물다섯**이 된다.
 
 | # | id | name.ko / en | token | universal | diff | prereq | 이 언어라서 다른 것 · 없으면 왜 못 읽나 |
 |---|---|---|---|---|---|---|---|
-| 1 | `swift/assignment` | 이름에 값 다시 넣기 / Reassignment | `=` | `common/reassignment` | 1 | `swift/let-var` | `let` 에 다시 넣으면 **돌리기 전에** 멈춘다. 실행 오류가 아니라 빌드 오류다 — 없으면 「왜 어떤 줄은 `var` 인가」가 영영 안 풀린다 |
+| 1 ↑0부 | `swift/assignment` | 이름에 값 다시 넣기 / Reassignment → 0부에서 `let-var` 와 한 장 | `=` | `common/reassignment` | 1 | `swift/let-var` | `let` 에 다시 넣으면 **돌리기 전에** 멈춘다. 실행 오류가 아니라 빌드 오류다 — 없으면 「왜 어떤 줄은 `var` 인가」가 영영 안 풀린다 |
 | 2 | `swift/string-interpolation` | 문장에 값 끼워 넣기 / String interpolation | `\(` | `common/string-interpolation` | 2 | `swift/let-var` | `\(...)` 안에 **아무 식이나** 온다. Swift 에서 글자에 값을 넣는 사실상 유일한 표기 — `+` 로 잇는 코드는 거의 안 나온다 |
 | 3 | `swift/array-subscript` | 순서 있는 목록에서 꺼내기 / Array subscript | `[` | `common/list` | 2 | `swift/let-var` | **같은 대괄호인데 배열은 죽고 딕셔너리는 옵셔널을 준다.** `arr[5]` 는 크래시, `dict["k"]` 는 `V?` — 없으면 옵셔널이 어디서 튀어나오는지 못 짚는다 |
 | 4 | `swift/while-repeat` | 조건이 참인 동안 되풀이 / While and repeat | `while` | `common/loop-while` | 2 | `swift/comparison` | 다른 언어의 `do-while` 이 여기서는 **`repeat-while`** 이다 — Swift 의 `do` 는 오류를 받는 블록이라 이름을 뺏겼다 |
@@ -150,6 +374,7 @@ Swift 에는 `package.json` 이 없고, SwiftUI 는 의존성이 아니라 **OS 
 | 5 | 1 | `result-builder` |
 
 **깊이 ≤ 2 = 25개. 상한은 24 다 — 처음으로 넘쳤다.**
+(**0부를 붙이면 29 가 된다 — 다섯 장 넘친다.** 셈과 결정거리 ⓐ/ⓑ 는 §0.5 마지막 문단.)
 
 | 언어 | 깊이 ≤ 2 / 상한 |
 |---|---|
@@ -390,6 +615,12 @@ progmiscon.org 는 Python·Java·JavaScript·Scratch 넷만 다루고 **Swift �
 | 10 | `try` 를 적으면 오류를 처리한 것이다 | `try` 는 **여기서 터질 수 있다는 표시**일 뿐이다. 받는 것은 `do`/`catch` 나 `try?` 다 |
 | 11 | `async` 함수를 부르면 백그라운드로 넘어간다 | `await` 는 그 흐름을 **거기서 멈춰 두고 자리를 내주는 것**이다. 다른 스레드로 옮기는 표시가 아니다 |
 | 12 | `switch` 에 `default` 를 적어 두면 안전하다 | 오히려 나중에 `case` 가 늘었을 때 **컴파일러가 안 알려 준다.** Swift 는 빠뜨린 경우를 세어 주는데, `default` 가 그 눈을 가린다 |
+
+**이 열둘은 1·2부의 것이다.** 옵셔널·ARC·SwiftUI 쪽에 몰려 있고 **값 층위는 ④ 하나뿐**이라
+(`let` 이 안쪽까지 잠그지 않는다) **0부 여덟 장의 오개념을 §0.1 의 마지막 열에 따로 세웠다** —
+넘치면 감긴다는 믿음 · `Float` 가 정확하다는 믿음 · `s[0]` · 참 같은 값 · `1 << 2 + 3` ·
+리터럴은 섞이는데 변수는 안 섞임 · `==` 와 `===` 일곱이다. 그 일곱 중 여섯은 **이 세션에서
+Swift 6.3.3 으로 실행해 확인했다**(§0.4) — 근거가 얇다는 위 단서가 0부에는 덜 걸린다.
 
 ---
 

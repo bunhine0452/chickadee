@@ -5,6 +5,7 @@
 
 이 편은 **이 리포의 SQL 실물 21파일(2,432줄)을 세어서** 썼다 — 명령문 178개(`packages/store-sql/statements/`)와
 이행 6판(`migrations/`, 표 34개). §1·§8 의 숫자는 추정이 아니라 계수와 실제 파싱 결과다.
+**§0 은 표본을 하나 더 잰다**(`MonggleMonggle` · MySQL · 매퍼 9파일) — 무엇이 표본 특유이고 무엇이 SQL 특유인지 가르려고.
 
 ---
 
@@ -42,6 +43,187 @@
 여기서 세 가지가 나온다. ① **문장이 짧다** — 중앙값 3줄, 최대 25줄. T0 창 하나에 문장 하나가 통째로 들어간다.
 ② **읽기와 쓰기가 반반이다** — `SELECT` 51% 대 `INSERT`+`UPDATE`+`DELETE` 46%. 「SQL = 조회」가 아니다.
 ③ **고급 구문이 안 나온다** — 윈도 함수 0, CTE 2, `HAVING` 1. 심화 개념 몇은 이 리포에서 카드가 0장이다(§4).
+
+---
+
+## §0 0부 — 값 하나가 아니라 표 하나
+
+사용자 요청은 「기초부터 심화까지, **언어의 동작 원리부터**」다. 아홉 언어는 그 0부를 공통 축 여덟
+(정수·실수·문자·참거짓·연산자·형 변환·대입·비교)으로 쓴다 — [`README.md`](./README.md) §8 이 그 뼈대다.
+**SQL 은 그 축을 안 쓴다.** 억지로 맞추면 절반이 빈칸이 되고, 빈칸이 아니라 **다른 것이 들어가야 한다는 것**이
+이 언어의 동작 원리다.
+
+이 절은 §2(기초 — 절 여덟)의 **아래**다. §2 는 「어떻게 적나」이고 §0 은 「그 절이 무엇을 다루나」다.
+
+---
+
+### §0.1 아홉의 축은 SQL 에서 셋만 그대로 선다
+
+| 공통 축 (아홉) | SQL | 왜 |
+|---|---|---|
+| **정수** — 자릿수가 정해져 있다 | 자리가 옮겨간다 | 타입이 값이 아니라 **열**에 붙는다. 벗은 정수 리터럴이 오는 자리는 `LIMIT` 뒤·`DEFAULT` 뒤·`VALUES` 안뿐이다 |
+| **실수** — 근사값이다 | 거의 안 선다 | 표본 둘 다 부동소수 열이 **0개**다 (MonggleMonggle 9표에 `double`·`float` 0 · 이 리포 34표에 `REAL` 0). 돈·점수를 `INTEGER`·`DECIMAL` 로 잡아서다 |
+| **문자** — 글자와 바이트는 다르다 | 그대로 선다 | `VARCHAR(30)` 이 30글자인지 30바이트인지가 방언·collation 마다 다르다 |
+| **참거짓** | **셋이 된다** | 참·거짓·**모름**. 이 한 축이 SQL 0부의 절반이다 |
+| **연산자** — 우선순위 | 그대로 선다 | `AND` 가 `OR` 보다 먼저 묶인다. 괄호 없는 `WHERE a=1 OR b=2 AND c=3` 은 `a=1 OR (b=2 AND c=3)` 이다 |
+| **형 변환** | 그대로 서되 더 조용하다 | 명시 변환(`CAST`/`CONVERT`)이 **두 표본 합쳐 0곳**이다. 일어나는 변환은 전부 암묵이라 화면에 안 보인다 |
+| **대입** — 이름에 값 붙이기 | **없다** | 변수가 없다. `=` 는 묻는 일이고, `UPDATE … SET` 안에서만 넣는 일이다 |
+| **비교** | 값 하나가 아니라 **행마다 한 번씩** | 식을 한 번 적으면 행 수만큼 평가된다. 반복을 적을 자리가 아예 없다 |
+
+**셋이 그대로 서고(문자·연산자·형 변환), 하나가 사라지고(대입), 넷이 다른 것이 된다.** 그 넷이 아래 여덟의 뼈대다.
+
+---
+
+### §0.2 SQL 의 0부 여덟
+
+「이 여덟을 모르면 §2 의 절 여덟이 **왜 그렇게 도는지**를 못 배우고 외우게 된다」가 고른 기준이다.
+`cs/` 열은 [`cs.md`](./cs.md) 의 43장 중 이 개념이 요구하는 것이고, **굵은 것은 아직 없는 장**이다.
+
+| # | id | name.ko / en | 한 줄 | `cs/` | 그림 | 초보가 실제로 틀리는 자리 |
+|---|---|---|---|---|---|---|
+| 0-1 | `sql/row-and-set` | 단위는 행이다 / Rows, not values | 다루는 것이 값 하나가 아니라 **행의 모음**이고, 그 모음에는 순서가 없다 | `set-vs-sequence` · `declarative-vs-imperative` | **행 격자**(신규) | 「첫 행」이 있다고 믿는다. `ORDER BY` 없는 `LIMIT` 이 이 리포 26곳·MonggleMonggle 140곳인데 그중 순서를 약속받는 것은 `ORDER BY` 가 붙은 것뿐이다 |
+| 0-2 | `sql/column-type` | 타입은 값이 아니라 열에 붙는다 / Types live on columns | 값을 적을 때 타입을 안 적는다. 자리가 타입을 이미 정해 놨다 | `type` · `static-vs-dynamic-typing` | 타입 변환 사다리 | MySQL 에 불리언 타입이 **없어** `TINYINT(1)` 이다(MonggleMonggle 3곳). SQLite 는 열 타입이 **권고**라 `INTEGER` 열에 글자가 들어가고 오류가 안 난다 |
+| 0-3 | `sql/value-and-name` | 따옴표가 값과 이름을 가른다 / Literal or identifier | `'…'` 는 값, 그 밖은 이름. 어느 따옴표가 이름인지는 방언이 정한다 | `text-encoding` | 값 상자(값/이름 두 칸) | `WHERE name = "bob"` 은 `bob` 이라는 **열**과 견주라는 뜻이다. MySQL 은 백틱이 이름(MonggleMonggle 898곳)이고, SQLite 는 그 이름이 없으면 조용히 글자로 봐준다 |
+| 0-4 | `sql/null-unknown` | 없음이 아니라 모름 / Unknown, not empty | `NULL` 은 「빈 값」이 아니라 「값을 모른다」는 표시다. 모름끼리는 같은지도 모른다 | **`three-valued-logic`** · `null-reference`(대비) | **진리표 3×3**(신규) | `= NULL` 은 오류가 아니라 **아무 행도 안 맞는다**. MonggleMonggle 매퍼 9파일 중 **6파일**이 `IS NULL` 을 쓰고(23곳) 그 앱의 삭제 기능 전체가 이 한 개념 위에 서 있다 |
+| 0-5 | `sql/three-valued-comparison` | 견주기가 내는 답이 셋 / Three-valued comparison | 비교의 결과가 참·거짓·**모름**이고, `WHERE` 는 참만 남긴다 — 모름은 거짓과 **같이** 버려지는데 `NOT` 을 씌우면 갈린다 | **`three-valued-logic`** | 평가 트리(3색) | `NOT IN (서브쿼리)` 안에 `NULL` 이 하나라도 있으면 결과가 **0행**이다. `NOT EXISTS` 는 그러지 않는다 |
+| 0-6 | `sql/implicit-cast` | 타입이 다르면 조용히 맞춘다 / Implicit conversion | 양쪽 타입이 다르면 오류가 아니라 한쪽을 바꿔서 견준다. 어느 쪽을 바꾸는지가 방언마다 다르다 | **`type-conversion`(없다 — §0.5)** | 타입 변환 사다리 | `CAST`·`CONVERT` 가 **두 표본 합쳐 0곳**이다 — 일어나는 변환이 전부 코드에 안 보인다. 글자로 견주면 `'10' < '9'` 가 참이다 |
+| 0-7 | `sql/expression-per-row` | 식 하나가 행마다 한 번 / One expression, every row | 한 번 적은 식이 행 수만큼 평가된다. 그래서 반복문을 적을 자리가 없고, 여러 행을 한꺼번에 봐야 아는 것은 이 층에서 못 묻는다 | `declarative-vs-imperative` | 행 격자 + 평가 트리 | 「반복문은 어디 쓰나」. 그리고 `WHERE COUNT(*) > 3` — `WHERE` 시점에는 아직 다른 행을 못 본다 |
+| 0-8 | `sql/clause-order` | 적는 순서와 도는 순서가 다르다 / Written order, run order | `FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY`. 적기는 `SELECT` 가 먼저인데 돌기는 다섯 번째다 | `eager-vs-lazy` · `exec/order` | **절 파이프 6칸**(신규) | `SELECT` 에서 붙인 별칭을 `WHERE` 에서 못 쓴다. Miedema et al. 2021 이 참가자들이 절 순서를 바꿔 적는 것을 관찰한 자리다(§9 오개념 2) |
+
+**깊이는 얕다.** 0-1·0-2·0-3 이 루트(선행 없음)이고, 0-4 ← 0-3, 0-5 ← 0-4, 0-6 ← 0-2, 0-7 ← 0-1,
+0-8 ← 0-7 이다. **여덟 전부가 깊이 ≤ 2** 라 0장 상한 24(D147)에 그대로 들어간다 — §5 가 잰 기초 14 와 합쳐 **22/24** 다.
+
+### 0부 여덟이 §2 의 절 여덟에 어떻게 걸리나
+
+0부를 먼저 두면 §2 의 「이 언어라서 다른 것」 칸 중 넷이 **거기서 설명되지 않고 아래에서 설명된다.**
+§2 의 `prereq` 에 아래 한 줄씩을 더한다.
+
+| §2 의 절 | 새 선행 | 지금 §2 가 혼자 짊어지고 있는 것 |
+|---|---|---|
+| 1 `sql/text-literal` | `sql/value-and-name` | 「작은따옴표는 값, 큰따옴표는 이름」 |
+| 4 `sql/comparison` | `sql/three-valued-comparison` · `sql/implicit-cast` | 「같은 `=` 가 절에 따라 묻는 일도 넣는 일도 된다」 |
+| 5 `sql/where-filter` | `sql/expression-per-row` | 「행을 하나씩 따로 본다」 |
+| 6 `sql/null-check` | `sql/null-unknown` | 「거짓이 아니라 모름이라서 버려진다」 |
+| 7 `sql/order-by` | `sql/row-and-set` | 「이걸 안 쓰면 순서가 없다」 |
+| 3 `sql/select-list` | `sql/clause-order` | 「적히기는 위인데 나중에 돈다」 |
+
+---
+
+### §0.3 표본 둘째 — MonggleMonggle 실측 (읽기만)
+
+§1 의 계수는 **이 리포 하나**(SQLite · 명령문 178개)였고 §10 이 「표본 1」이라고 적어 뒀다.
+표본을 하나 더 재서 무엇이 표본 특유이고 무엇이 SQL 특유인지 갈랐다.
+대상은 `MonggleMonggle`(Spring + MyBatis + **MySQL**) — `.sql` **27파일 2,953줄**(내용 해시로는 **14개** —
+`AI_API`/`AI_API_GEMINI` 가 서로 사본이다)과 매퍼 XML **9파일 581줄**, 문장 태그 **49개**(select 23 · update 16 · insert 8 · delete 2).
+
+| 0부 개념 | 이 리포 (SQLite) | MonggleMonggle (MySQL) | 판정 |
+|---|---|---|---|
+| 0-4 `null-unknown` | `IS NULL` 이 사전 3장 중 하나로 이미 서 있다 | `IS NULL` **22** + `IS NOT NULL` **1**, 매퍼 **6/9 파일** | **SQL 특유.** 두 표본 다 최상위. 소프트 삭제(`deleted_date IS NULL`)가 이 앱의 뼈대다 |
+| 0-5 `three-valued-comparison` | — | `=` **97곳**(매퍼 본문) · `!=` 1 · `<`/`>`/`<=`/`>=` **0** | **SQL 특유.** 견주기의 97%가 등호 하나다. 삼값이 드러나는 자리는 전부 `NULL` 쪽이다 |
+| 0-2 `column-type` | 열 타입이 권고(SQLite) | 9표 타입 분포 — `datetime` 21 · `bigint` 17 · `text` 10 · `int` 9 · `tinyint` 3 · `longtext` 2 · `date` 2. **불리언 타입 없음** | **방언 특유.** 같은 개념인데 함정이 정반대다 — SQLite 는 「안 지킨다」, MySQL 은 「불리언이 정수다」 |
+| 0-6 `implicit-cast` | `CAST` 0곳 | `CAST`·`CONVERT` **0곳**, 날짜 함수 비교 20곳(`DATE(x) < #{today}`) | **SQL 특유.** 두 표본 다 명시 변환이 0이다. 변환은 늘 일어나고 늘 안 보인다 |
+| 0-1 `row-and-set` | `LIMIT` 26 · `ORDER BY` 56 | `LIMIT` **140** · `ORDER BY` **22** | **SQL 특유**, 다만 크기가 뒤집힌다. MonggleMonggle 은 `LIMIT` 이 `ORDER BY` 보다 6배 많다 — 순서를 약속받지 않는 「아무 N개」가 그만큼 흔하다 |
+| 0-3 `value-and-name` | 큰따옴표 이름 | 백틱 식별자 **898곳** · 매퍼 안 문자 리터럴 1곳 | **방언 특유.** 이름 따옴표가 방언마다 다르다 |
+| 0-7 `expression-per-row` | — | 집계 27곳 · `GROUP BY` 3 · `HAVING` **1** | 두 표본 다 같다 — §1 이 잰 `HAVING` 1 과 정확히 같은 숫자다 |
+| 0-8 `clause-order` | — | 서브쿼리 148곳(대부분 자료 덤프) · 조인 **11곳** | 조인이 얇다(§0.4) |
+
+**조인은 두 표본 다 얇다.** MonggleMonggle 매퍼 전체에서 **서로 다른 조인 줄이 셋뿐**이다 —
+`INNER JOIN dream_results dr ON d.dream_id = dr.dream_id` · `LEFT JOIN emotion_scores e ON …` ·
+`LEFT JOIN dreams d ON u.user_id = d.user_id AND d.deleted_date IS NULL`.
+**마지막 하나가 §9 오개념 7 의 정답 판이다** — 짝 없는 행을 남기려면 `NULL` 조건이 `WHERE` 가 아니라
+`ON` 에 있어야 하는데, 이 리포는 그것을 맞게 썼다. 「틀린 자리」가 아니라 「맞게 쓴 자리」로 가르칠 수 있는
+드문 실물이라 3단(예측)의 재료로 좋다.
+
+**안 나온 것.** `CASE WHEN` 0 · `WITH`(CTE) 0 · `OVER (` 0 · `DISTINCT` 0 · `LIKE` 0 · 트랜잭션 구문 0 ·
+`EXPLAIN` 0. §4 의 심화 여덟 중 다섯이 이 표본에서도 **카드 0장**이다. 표본 둘이 같은 말을 한다 —
+**바이브 코딩으로 나온 SQL 은 고급 구문을 안 쓴다.**
+
+### 방언이 뒤집힌다 — §8 을 반만 확인했다
+
+§8 은 `tree-sitter-sequel 0.3.11` 이 「합집합 문법이지 SQLite 가 아니다」라고 재 놨다. MySQL 조각으로 다시 재면
+**같은 문법이 MonggleMonggle 에는 잘 맞는다.** 조각 14개를 실제로 파싱했다(ABI 14 · 노드 종류 729, §8 과 같은 값).
+
+| 잘 되는 것 (ERROR 0) | 깨지는 것 |
+|---|---|
+| `AUTO_INCREMENT` · `ENGINE=InnoDB DEFAULT CHARSET=utf8mb4` · 백틱 식별자 · `TINYINT(1)` | **`#{userId}` (MyBatis 자리표)** — ERROR 노드 4개 |
+| `REFERENCES … ON DELETE CASCADE` · `ON DUPLICATE KEY UPDATE` · `IFNULL` | `DATE(x) < #{today}` — ERROR 4개 (자리표 때문) |
+| `LEFT JOIN … ON … AND d.deleted_date IS NULL` · 집계+`GROUP BY`+`HAVING` · 서브쿼리 · `ORDER BY`/`LIMIT` | `:id` (SQLite 자리표) — ERROR 1개 |
+
+§8 이 「`AUTOINCREMENT` 가 깨진다」고 적은 것은 **SQLite 철자**다. MySQL 의 `AUTO_INCREMENT` 는 통과한다.
+**이 문법의 진짜 사각지대는 방언이 아니라 자리표 하나**라는 것이 표본 둘로 확정됐다.
+
+그리고 **`#{}` 는 `:name` 보다 나쁘게 깨진다.** `:name` 은 `binary_expression` 안에 `(ERROR)` 를 형제로 남기는데,
+`#{}` 는 오른쪽을 `unary_expression` 으로 **재해석**한다.
+
+```
+WHERE id = #{userId}
+→ (binary_expression left: (field (identifier))
+     right: (unary_expression operator: (op_unary_other)
+                              (ERROR (UNEXPECTED '{'))
+                              operand: (field (identifier))))   ← userId 가 열 참조
+```
+
+`binary_expression` 이 살아 있으므로 `sql/comparison` 캡처가 **정상 매치되고 `userId` 를 열 이름이라고 가르친다.**
+§8 의 「해야 할 일 셋」 ① 이 `:name` 만 보고 있었는데 **`#{}` 도 같은 배제 앵커가 필요하다** — 그리고 매퍼 XML 안의
+SQL 은 D159 의 MyBatis 간선이 이미 읽는 자리라 그냥 지나칠 수 없다. 이 리포에 `#{…}` 가 **114곳 / 8파일**이다.
+
+---
+
+### §0.4 형식 여섯 중 SQL 이 쓰는 것 — 다섯
+
+형식 이름은 I1 이 확정한 것을 그대로 쓴다(`value`·`step`·`bits`·`table`·`build`·`predict`).
+
+| 형식 | SQL | 어떻게 |
+|---|---|---|
+| `value` | 쓴다 | 「이 식이 **이 행에서** 무엇을 내나」. 답이 셋이다 — 참·거짓·**모름** |
+| `step` | 쓴다 — **가장 잘 맞는다** | 절 파이프를 한 칸씩 돌린다. `FROM` 뒤 몇 행 → `WHERE` 뒤 몇 행 → `GROUP BY` 뒤 몇 행 |
+| `bits` | **안 쓴다** | 값의 비트 표현이 언어 표면에 없다. `1` 이 32비트인지 64비트인지를 SQL 로는 물을 자리가 없다 |
+| `table` | 쓴다 — **0-4·0-5 의 유일한 형식** | 삼값 진리표. `AND`/`OR`/`NOT` 을 3×3 으로 채우게 한다 |
+| `build` | 쓴다 | 절 조각을 순서대로 놓기. 오답이 「도는 순서와 다른 배치」다 |
+| `predict` | 쓴다 | 「`WHERE` 를 빼면 몇 행이 바뀌나」 · 「`LEFT` 를 `INNER` 로 바꾸면 몇 줄이 주나」 |
+
+**여섯 중 `bits` 하나를 안 쓴다.** 나머지 아홉 언어가 `bits` 로 정수·실수 축을 세우는데 SQL 에는 그 축이 없어서다(§0.1).
+
+### §0.5 그림 여섯 중 SQL 이 쓰는 것 — 셋, 그리고 새로 넷
+
+그림 이름은 I2 가 만드는 것을 그대로 쓴다(비트 배열 · 평가 트리 · 값 상자 · 메모리 줄 · 스택 프레임 · 타입 변환 사다리).
+
+| 그림 | SQL | 왜 |
+|---|---|---|
+| 비트 배열 | **안 쓴다** | `bits` 형식과 같은 이유 |
+| 평가 트리 | 쓴다 — **3색으로** | 잎이 「이 행의 열 값」이고 마디 결과가 참·거짓·모름 셋이다. 두 색짜리로는 0-5 를 못 그린다 |
+| 값 상자 | 쓴다 — **두 칸으로** | 「값」과 「이름」을 나란히 놓아 0-3 을 그린다 |
+| 메모리 줄 | **안 쓴다** | SQL 에 주소가 없다 |
+| 스택 프레임 | **안 쓴다** | 호출 스택이 없다 |
+| 타입 변환 사다리 | 쓴다 | 0-2·0-6 이 이 하나를 같이 쓴다 |
+
+**새로 필요한 넷.** 이것이 I2 에게 거는 요청이다 — 없으면 0부 여덟 중 넷을 그림 없이 써야 한다.
+
+| 그림 | 무엇을 그리나 | 쓰는 개념 |
+|---|---|---|
+| **행 격자** | 상자 하나가 값이 아니라 **행**이고, 격자에 순서 표시가 **없다** | 0-1 · 0-7 |
+| **진리표 3×3** | `AND`/`OR`/`NOT` 을 참·거짓·모름으로 채운 표 | 0-4 · 0-5 |
+| **절 파이프 6칸** | `FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY`. 칸마다 **남은 행 수**가 붙는다 | 0-8 · §3 의 aggregate·group-by·having |
+| **곱 격자** | 왼쪽 m행 × 오른쪽 n행에서 짝이 맞는 칸만 남는 그림. 결과가 왜 늘어나는지 | §3 의 join-inner·join-left (0부는 아니지만 같은 그림이 필요하다) |
+
+행 격자와 절 파이프 둘은 **아홉 언어에서 안 쓴다.** SQL 하나를 위해 그리는 값이 있는지는 I2 의 판단 몫이고,
+없으면 0-1·0-7·0-8 은 표로만 간다.
+
+---
+
+### §0.6 못 정한 것 — 0부
+
+1. **`cs/type-conversion` 이 없다.** 43장 중 형 변환을 다루는 장이 없다 — `cs/type` 은 「타입이 무엇인가」이고
+   `cs/static-vs-dynamic-typing` 은 「언제 확인하나」다. **암묵 변환이 조용히 답을 바꾸는 것**을 설명할 장이 없다.
+   SQL 만의 문제가 아니라 아홉 언어의 공통 축 여섯째가 통째로 이 자리를 요구한다 —
+   [`README.md`](./README.md) §9 에 신규 후보로 올렸다.
+2. **`cs/search-tree` 는 여전히 보류다** (cs.md §10.3). §4 의 `index`·`query-plan` 이 요구하는데 0부는 안 쓴다 —
+   그래서 이 세션에서도 안 정했다.
+3. **`sql/null-unknown` 과 `sql/null-check` 를 한 장으로 접을지.** 지금은 두 장이다(0부·기초). 접으면 판이 하나 줄고,
+   나누면 「무엇인가」와 「어떻게 적나」가 갈린다. §6 이 이미 정한 규칙(**차이가 표기면 전이하고 의미면 끊는다**)의
+   층 버전이므로 나눠 뒀지만, 하루 15분 예산에서 판 하나의 값은 반나절이다.
+4. **`#{}` 자리표를 언제 고칠지.** §8 의 「해야 할 일 셋」에 `:name` 만 적혀 있고 `#{}` 는 이 절이 처음 잰다.
+   `sql/comparison` 은 **오늘 사전에 실물로 있는 3장 중 하나**라 이미 노출된 자리다.
 
 ---
 
@@ -122,6 +304,7 @@ SQL 에는 `if`·`while`·함수 정의가 없으므로 여덟 자리를 **읽�
 | 5 | 1 | having |
 
 **깊이 ≤ 2 = 14/24.** TS 21/24 · 파이썬 19/24 와 견주면 **눈에 띄게 얕다.**
+(§0 의 0부 여덟은 전부 깊이 ≤ 2 라 이 수는 **22/24** 가 된다 — 상한에 붙지만 안 넘는다.)
 
 왜 이렇게 나오나. TS·파이썬은 깊이 0~1 에 **평평한 어휘 층**이 있다 — 리터럴·연산자·속성 접근은 서로를
 안 부르므로 열 몇 개가 한꺼번에 루트에 선다. SQL 에는 그 층이 없다. 절 하나하나가 **이미 성립한 문장 안에서만**
@@ -339,6 +522,10 @@ SQLite 전용 문법(`tree-sitter-sqlite` 계열)으로 갈아탈지를 별도 �
 - 파싱 실측 — 이 리포 SQL 21파일과 조각 66개를 `tree-sitter-sequel 0.3.11` 로 직접 파싱. ERROR 646개 / 20파일,
   `POOR_BYTE_RATIO 0.05` 기준 `poor` 1파일
 - 이 리포 계수 — `packages/store-sql/statements/*.sql`(명령문 178) · `migrations/*.sql`(표 34)
+- **표본 둘째 계수 (§0.3)** — `MonggleMonggle` `.sql` 27파일 2,953줄(내용 해시 유니크 14) · 매퍼 XML 9파일 581줄 ·
+  문장 태그 49 · `#{…}` 114곳/8파일. **읽기만 했다** (`git ls-files` · `grep` · `md5`, 쓰기 0)
+- **표본 둘째 파싱 (§0.3)** — MySQL·MyBatis 조각 14개를 `tree-sitter-sequel 0.3.11` 로 직접 파싱.
+  ABI 14 · 노드 종류 729 로 §8 과 같은 값이 나왔고, ERROR 가 난 것은 자리표 셋(`#{}`·`:name`)뿐이다
 - Miedema, Aivaloglou, Fletcher (2021) *Identifying SQL Misconceptions of Novices: Findings from a Think-Aloud Study*,
   ICER '21. DOI <https://doi.org/10.1145/3446871.3469759> (CC BY 4.0, ICER '21 Honorable Mention).
   네 범주(선행 과목 지식 · 일반화 · 언어 · 불완전한 심성 모형)와 학생 21명 규모까지 확인
@@ -360,5 +547,7 @@ SQLite 전용 문법(`tree-sitter-sqlite` 계열)으로 갈아탈지를 별도 �
   §9 의 2·3·4 는 검색 결과에 인용된 요약에 근거하며 **원문 대조를 못 했다.** CC BY 4.0 이므로 접근만 되면 인용 가능하다
 - Ahadi et al. 2016 본문 — 초록과 2차 인용만 봤다
 - progmiscon.org — D148 대로 **재사용 라이선스가 없어** 열지 않았다
-- 「바이브 코딩 SQL 의 생김새」는 **이 리포 한 개**의 계수다. 표본 1이다. ORM 을 쓰는 리포·Postgres 리포는
-  분포가 다를 것이 거의 확실하다 — 특히 `:name` 대신 `$1`(Postgres)이나 `?`(MySQL)를 쓰면 §8 의 가장 큰 문제가 사라진다
+- 「바이브 코딩 SQL 의 생김새」는 이제 **표본 둘**이다(이 리포 SQLite · `MonggleMonggle` MySQL+MyBatis).
+  둘 다 개인 프로젝트라 **Postgres 리포와 ORM 만 쓰는 리포는 여전히 안 쟀다.**
+  §0.3 이 확인한 것 — 자리표 문제는 안 사라지고 **모양만 바뀐다**(`:name` → `#{}`, 더 나쁘게 깨진다).
+  안 확인한 것 — 표본 둘 다 한 사람이 만든 리포이므로 「바이브 코딩 SQL」의 분포라기보다 **이 두 리포의 분포**일 수 있다

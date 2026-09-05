@@ -4,6 +4,12 @@
 
 이 문서는 두 겹이다. **§2 가 코스의 정본**이고 — 무엇을 어느 부에서 어떤 교재로 가르치는가 —
 §3~§5 는 그 부에 담기는 개념의 설계표, §6 이하는 그것을 짜기 전의 조사 기록이다.
+
+> **2026-09-05 — 3부 앞에 0부 「이 언어의 값과 식」을 붙였다(§1.5).** 사용자 요청
+> (「기초부터 심화까지 · 언어의 동작 원리부터 · 정수형·실수형·연산식」)이 지금 코스에 자리가
+> 없어서다. 0부는 §8 이 초안으로 적어 둔 `cs/` 간선마다 판을 세우고, **1부에서 다섯 장 ·
+> 「아직 안 세운 것」에서 세 장 · §5 심화에서 한 장**을 가져간다. **§1.5.4 가 0·1·2·3부 배치의
+> 정본**이고 §2 의 부 배치는 그 뺄셈의 원본으로 남는다.
 2026-09-05 개정에서 옛 「기초 / 중심 / 심화」 세 절이 §2 의 부 배치로 대체됐고 그 뒤 절 번호가
 하나씩 밀렸다(옛 §5 → 지금 §6 …).
 
@@ -50,6 +56,323 @@ Java 에 같은 것을 하려면 `spring/` 네임스페이스가 필요하고 **
 `lang` 과 `grammar` 가 우연히 같다(D19 의 예외가 아니라 우연이다 — `ts`↔`typescript` 처럼 갈릴 일이 없을 뿐).
 `.jsh`(JShell)·`.jsp`·`.kt` 는 이 문법이 아니다.
 
+
+---
+
+## §1.5 0부 「이 언어의 값과 식」 — 정식 코스 3부 앞에 붙는 부
+
+**결정 등록부 초안 (번호 미정 — 오케스트레이터가 매긴다).** D177 이 세운 3부(바닥·객체·프레임워크)의
+1부는 `class-declaration` 으로 시작해 `variable-declaration` → `assignment` → `arithmetic` 으로 간다.
+**값이 무엇인지를 안 가르치고 값을 옮기는 문법부터 가르친다.** 사용자 요청은 「정수형·실수형·
+연산식을 이해하고 말 그대로 언어를 이해한다는 느낌」이고, 그 자리가 지금 코스에 없다.
+
+**자바에서 이 구멍이 가장 크다.** §3 의 `java/arithmetic` 규칙은 「`7 / 2` 가 `3` 이다. 정수끼리
+나누면 소수를 **버린다**」이고, 이것은 **무슨 일이 일어나는지**의 답이지 **왜**의 답이 아니다.
+왜의 답은 「`int` 는 32비트 정수 타입이고 두 `int` 의 연산 결과도 `int` 다」이며 그 문장은 자바 문법
+어디에도 없다. 답은 `cs/` 43장(D157 · [`cs.md`](./cs.md))에 있고 **그 층은 이미 서 있다.**
+§8 이 이미 열 개의 간선을 초안으로 적어 뒀다 — 0부는 그 간선마다 판을 하나씩 세우는 일이다.
+
+**그리고 §2 의 「아직 안 세운 것」 표가 세 장을 여기서 해소한다** — `java/string-literal` ·
+`java/reference-equality` · `java/string-concat`. 셋 다 「1·2부에 있어야 하는데 지금 없다」로 적혀
+있었고, 세 장 모두 **값과 식**의 개념이라 0부가 제 자리다.
+
+### §1.5.1 축 여덟 · 19판
+
+각 행의 다섯 열이 이 부의 계약이다 — **어느 기계에 걸리나**(`cs/`) · **어떤 그림이 그것을 보이나**
+(그림 계약은 I2 세션이 `design/system/diagrams.md` 에 만드는 중: 비트 배열 · 평가 트리 · 값 상자 ·
+메모리 줄 · 스택 프레임 · 타입 변환 사다리) · **초보가 실제로 틀리는 자리**(문항의 씨앗) ·
+**문항 형식**(형식 계약은 I1 세션이 `docs/program/fundamentals.md` 에 확정 중 — `value` 값 적기 ·
+`step` 한 걸음씩 · `bits` 비트로 보기 · `table` 표 채우기 · `build` 거꾸로 만들기 ·
+`predict` 예측 후 실행). **4지선다가 아니다.**
+
+**출처 표시** — `1부↑` 는 §2 의 부 배치 1부 열셋에서 올라온 것, `대기↑` 는 §2 「아직 안 세운 것」에서,
+`심화↑` 는 §5 에서, `신규` 는 이 절이 새로 세우는 것.
+
+#### 축 A — 정수형과 그 한계 (3판)
+
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
+|---|---|---|---|---|---|
+| `java/value-bits` **신규** | 값은 켜짐·꺼짐의 묶음이고, `int` 는 **정확히 32칸**이다 | `binary-representation` · `bit-and-byte` · `type` | 비트 배열 | 「`int` 의 크기는 컴퓨터마다 다르다」로 안다(C 에서는 맞지만 자바는 **명세가 고정**한다) | `bits` |
+| `java/variable-declaration` `1부↑` | 이름 **앞에** 타입이 오고, 그 뒤로 못 바꾼다 | `type` · `static-vs-dynamic-typing` | 값 상자 | `var` 를 「타입이 없다」로 읽는다. 추론일 뿐이고 타입은 그 자리에서 못 박힌다 | `value` |
+| `java/integer-limit` **신규** | 자리가 정해져 있어 **가장 큰 값 다음이 가장 작은 값**이다 | `integer-overflow` · `bit-and-byte` | 비트 배열 (자리가 도는 그림) | `Integer.MAX_VALUE + 1` 을 오류로 예상한다. 조용히 `-2147483648` 이 되고 아무도 안 막는다 | `bits` |
+
+#### 축 B — 실수형과 왜 안 떨어지나 (2판)
+
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
+|---|---|---|---|---|---|
+| `java/floating-type` **신규** | 실수 타입이 **둘**이고 리터럴의 기본은 `double` 이다 | `floating-point` · `bit-and-byte` | 비트 배열 (32칸 대 64칸) | `float f = 1.5;` 가 컴파일 안 되는 이유를 모른다 — `1.5` 는 `double` 이고 좁히기는 명시해야 한다(`1.5f`) | `bits` |
+| `java/float-inexact` **신규** | `0.1 + 0.2 != 0.3` — 2진수로 `0.1` 을 정확히 못 적는다 | `floating-point` · `binary-representation` | 비트 배열 (부호·지수·가수) | 소수를 `==` 로 견준다. 돈 계산에 `double` 을 써서 1원이 사라진다 — 그래서 `BigDecimal` 이 있다 | `value` |
+
+#### 축 C — 문자열과 인코딩 (2판)
+
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
+|---|---|---|---|---|---|
+| `java/string-literal` `대기↑` | **큰따옴표만** 글자 묶음이다 | `text-encoding` | 값 상자 | `'ab'` 를 문자열로 쓴다. 작은따옴표는 **글자 한 개**(`char`)라 컴파일이 멈춘다 | `value` |
+| `java/text-length` **신규** | `char` 은 16비트 코드 단위 **하나**다 — 글자 하나가 아니다 | `text-encoding` · `bit-and-byte` | 비트 배열 | `"😀".length()` 를 1 로 예상한다(실제 2). `'a' + 'b'` 가 `"ab"` 가 아니라 `195`(`int`) 다 | `value` |
+
+#### 축 D — 참·거짓 (2판)
+
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
+|---|---|---|---|---|---|
+| `java/boolean-literal` `1부↑` | `boolean` 은 숫자가 **아니다** | `type` | 값 상자 | `true == 1` 도 `(int) true` 도 컴파일이 안 된다. 파이썬의 `True + 1 == 2` 와 정반대다 | `value` |
+| `java/boolean-only-condition` **신규** | 조건 자리에 `boolean` 말고는 **못 온다** | `static-vs-dynamic-typing` | 표 (세 언어 대조) | `if (list)` · `if (count)` · `if (name)` 을 쓴다. 파이썬·JS 습관이 그대로 넘어와 전부 그 자리에서 멈춘다 | `table` |
+
+#### 축 E — 연산자와 우선순위 (3판)
+
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
+|---|---|---|---|---|---|
+| `java/arithmetic` `1부↑` | 정수끼리 나누면 소수를 **버린다** — `7 / 2` 가 `3` 이다 | `integer-overflow` · `type` | 평가 트리 | `1 / 2 * 2.0` 을 `1.0` 으로 예상한다. `1 / 2` 가 먼저 `0` 이 되어 답은 `0.0` 이다. **버림은 0 쪽**이라 `-7 / 2` 가 `-3` 이다(파이썬 `//` 는 `-4`) | `step` |
+| `java/operator-precedence` **신규** | `2 + 3 * 4` 가 어떤 순서로 접히나. `&&` 는 **단락 평가**한다 | — | 평가 트리 | `if (s != null && s.length() > 0)` 의 두 항을 바꿔도 된다고 믿는다. 바꾸면 NPE 다 | `step` |
+| `java/string-concat` `대기↑` | `+` 가 더하기와 잇기를 겸하고 **왼쪽부터** 접힌다 | `text-encoding` | 평가 트리 | `1 + 2 + "a"` 는 `"3a"` 인데 `"a" + 1 + 2` 는 `"a12"` 다. 자바에는 문자열 보간이 없어(JEP 430 철회) 이 자리를 피할 수 없다 | `step` |
+
+#### 축 F — 형 변환 (3판)
+
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
+|---|---|---|---|---|---|
+| `java/implicit-conversion` **신규** | 좁은 타입 → 넓은 타입은 **자동**이다 (`int` → `long` → `float` → `double`) | `type` | 타입 변환 사다리 | `int` 를 `double` 자리에 그냥 넣는 것이 왜 되는지 모른다. 규칙이지 예외가 아니다 | `table` |
+| `java/explicit-conversion` **신규** | 넓은 → 좁은 은 `(int)` 를 적어야 하고 **자른다** | `integer-overflow` | 타입 변환 사다리 | `(int) 3.9` 를 4 로 예상한다. 반올림이 아니라 **버림**이라 3 이다. `(byte) 300` 은 `44` 다 | `value` |
+| `java/autoboxing` `심화↑` | `int` 와 `Integer` 가 소리 없이 오간다 | `value-vs-reference` · `null-reference` · `type` | 타입 변환 사다리 + 메모리 줄 | `Integer` 가 `null` 인데 `int` 에 넣어 NPE 가 난다 — 「숫자인데 왜 NPE 냐」에서 멈춘다 | `predict` |
+
+#### 축 G — 대입과 이름 (2판)
+
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
+|---|---|---|---|---|---|
+| `java/assignment` `1부↑` | 대입이 **식**이라 값을 낸다 | `state` | 메모리 줄 | `if (done = true)` 가 통과한다 — `boolean` 일 때만 열리는 문이고, `=`/`==` 실수가 살아남는 자바의 유일한 자리다 | `predict` |
+| `java/reference-binding` **신규** | 원시는 **값이** 복사되고 참조는 **자리가** 복사된다 | `value-vs-reference` · `aliasing` · `stack-and-heap` | 메모리 줄 (스택 칸 · 힙 상자) | 메서드에 객체를 넘기면 복사된다고 믿는다. `int` 는 복사되고 `List` 는 안 된다 — 같은 문법에 다른 규칙 | `predict` |
+
+#### 축 H — 비교와 같음 (2판)
+
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
+|---|---|---|---|---|---|
+| `java/comparison` `1부↑` | `<`·`>` 는 **숫자에만** 쓴다 | — | 평가 트리 | 글자를 `<` 로 견주려 한다. 문자열은 `compareTo` 다 | `value` |
+| `java/reference-equality` `대기↑` | `==` 는 「같은 상자냐」, `.equals` 는 「내용이 같냐」 | `identity-vs-equality` · `value-vs-reference` | 메모리 줄 | `new String("a") == "a"` 가 거짓이다. `Integer a = 1000, b = 1000` 이면 `a == b` 가 거짓인데 `127` 이면 참이다(캐시 −128~127) | `predict` |
+
+**그림 여섯 중 다섯만 쓴다.** 비트 배열 · 평가 트리 · 값 상자 · 메모리 줄 · 타입 변환 사다리.
+**스택 프레임은 0부에 없다** — 메서드가 아직 안 나왔다. 1부 `java/method-declaration`·
+`java/return-statement` 가 그 그림의 첫 소비자다. 다만 `reference-binding` 의 메모리 줄이
+스택 칸과 힙 상자를 함께 그리므로 **그 그림이 스택 프레임의 예고 노릇을 한다.**
+
+### §1.5.2 언어마다 다른 자리
+
+세 언어(파이썬 · JS/TS · 자바)를 같은 여덟 축으로 대조한다. **자바 열이 이 문서의 몫**이고
+나머지 둘은 [`py.md`](./py.md) §1.5 · [`ts.md`](./ts.md) §1.5 가 같은 표를 든다.
+이 표가 0부의 존재 이유다 — 같은 축에서 세 언어의 답이 **서로 다르고**, 그 차이를 모르면
+두 번째 언어에서 첫 언어의 습관이 그대로 틀린 답이 된다.
+
+| 축 | 파이썬 | JS / TS | **자바** |
+|---|---|---|---|
+| 정수형 | 자릿수 한계가 없다 — `2**100` 이 그대로 | 정수 타입이 **없다**. 전부 64비트 부동소수 | **`int` 32비트 고정.** `MAX_VALUE + 1` 이 가장 작은 음수 |
+| 나눗셈 | `/` 는 늘 `float`, `//` 는 **아래로** 버림 (`-7 // 2 == -4`) | `/` 는 늘 소수. 버림이 `Math.floor`(아래)와 `Math.trunc`(0 쪽)로 갈린다 | **`/` 가 정수끼리면 0 쪽으로 버림** (`-7 / 2 == -3`) |
+| 실수 | `0.1 + 0.2 != 0.3`. 정확한 소수는 `decimal` | 같음. 정수도 같은 타입이라 큰 정수까지 샌다 | 같음. **`float`/`double` 둘이고 리터럴 기본이 `double`.** 돈은 `BigDecimal` |
+| 문자열 길이 | `len` 이 **코드 포인트** — `len("가") == 1` | `.length` 가 UTF-16 코드 단위 — `'👍'.length === 2` | `.length()` 도 UTF-16 코드 단위. **`char` 타입이 따로 있고** 이모지 하나가 `char` 둘 |
+| 참·거짓 | `bool` ⊂ `int` (`True + True == 2`). 빈 것이 거짓 | 거짓이 **여섯**이고 `[]`·`{}` 는 참 | **`boolean` 이 숫자가 아니고** 조건 자리에 `boolean` 말고는 **못 온다** |
+| 형 변환 | 수 사이는 올라가지만 **문자열과 숫자는 안 섞인다** | **자동으로 섞인다** — `1 + '1' === '11'` | **넓히기는 자동, 좁히기는 `(int)` 명시.** 문자열은 `+` 로만 자동 |
+| 대입 | 대입은 **문**이라 값이 없다 (`:=` 만 식) | 대입이 **식** — `a = b = 0` | 대입이 **식** — `if (done = true)` 가 **`boolean` 일 때만** 통과 |
+| 같음 | `==` 는 값, `is` 는 자리 | `===` 는 타입까지, `==` 는 강제 변환. `NaN !== NaN` | **`==` 는 자리, `.equals` 는 내용.** `Integer` 는 −128~127 만 캐시 |
+
+**이 표에서 자바가 혼자인 자리 셋.** ① 조건 자리에 `boolean` 말고는 못 오는 것 ② `char` 이 별도
+타입인 것 ③ 좁히기 변환을 사람이 적어야 하는 것. 셋 다 **파이썬·JS 를 먼저 배운 사람이 자바에서
+컴파일 오류로 처음 만나는 자리**다. 컴파일 오류라 조용히 틀리지는 않지만, **왜 막는지를 모르면
+`(int)` 를 아무 데나 붙여 통과시키는 습관이 든다** — 그때 `(int) 3.9 == 3` 이 조용한 버그가 된다.
+
+반대 방향도 있다. `java/arithmetic` 의 「`7 / 2 == 3`」을 배운 사람이 파이썬에서 `7 / 2` 를 `3` 으로
+예상하고 `3.5` 를 받는다. **0부 문항이 다른 언어의 답을 오답 선택지로 쓴다** — D4 전이의 반대
+방향이고, 이것이 이 부가 하는 일 중 하나다.
+
+### §1.5.3 실측 — 0부 개념이 사용자 리포에 몇 곳 나오나
+
+`MonggleMonggle`(java 99파일 4,908줄)을 정규식으로 셌다. **주석과 문자열 리터럴을 먼저 지우고**
+셌으므로 §2 의 원시 계수와 값이 다르다 — `/` 가 그 차이를 가장 크게 낸다.
+
+| 0부 판 | 근거 모양 | `MonggleMonggle` | 판정 |
+|---|---|---|---|
+| `value-bits` · `variable-declaration` | `int`/`long`/`short`/`byte` 선언 · 정수 리터럴 | 선언 31곳 / 13파일 · 리터럴 37 / 14 | 내 코드에서 확인 |
+| `integer-limit` | `MAX_VALUE` · `MIN_VALUE` · `long` | **2곳 / 1파일** | **합성 + 「네 코드엔 없다」**(`scale`) |
+| `floating-type` | `double`/`float`/`BigDecimal` | 9곳 / 3파일 | 얇다 — `thin_threshold`(min_files 2 · min_sites 3)를 겨우 넘는다 |
+| `float-inexact` | 실수 리터럴 | 3곳 / 2파일 | **합성 + 「네 코드엔 없다」**(`scale`) |
+| `string-literal` | 큰따옴표 리터럴 | 560곳 / 66파일 | 내 코드에서 확인 |
+| `text-length` | `char` · `charAt(` · `Character` | **0곳 / 0파일** | **합성 + 「네 코드엔 없다」**(`idiom` — `String` 이 그 자리를 다 가져갔다) |
+| `boolean-literal` | `true`/`false` · `boolean`/`Boolean` | 27곳 / 15파일 · 타입 18 / 15 | 내 코드에서 확인 |
+| `boolean-only-condition` | (없는 것에 대한 주장이라 사용처가 안 생긴다) | — | 합성이 정본 |
+| `arithmetic` | 나눗셈 `/` · 나머지 `%` | **0곳 / 0파일 (둘 다)** | **합성 + 「네 코드엔 없다」**(`scale`) |
+| `operator-precedence` | `+` 와 `*` 가 섞인 식 · `&&`/`\|\|` | 섞인 식 5 / 3 · `&&`/`\|\|` 20 / 10 | 얇다 |
+| `string-concat` | `"" +` · `+ ""` | 15곳 / 9파일 | 내 코드에서 확인 |
+| `implicit-conversion` · `explicit-conversion` | `(int)` 류 캐스트 | **캐스트 0곳** · `parseInt`/`valueOf` 6 / 4 | **합성 + 「네 코드엔 없다」**(`scale`) |
+| `autoboxing` | `Integer`/`Long`/`Double`/`Boolean`/`Character` | **256곳 / 65파일** | 내 코드에서 확인 |
+| `assignment` | 선언 대입 · 재대입 | 선언 187 / 34 · 재대입 17 / 9 | 내 코드에서 확인 |
+| `reference-binding` | (대입·매개변수와 같은 노드) | 위와 같음 | 내 코드에서 확인 |
+| `comparison` | `==` · `!=` | 46곳 / 14파일 | 내 코드에서 확인 |
+| `reference-equality` | `.equals(` · `Objects.equals` | 15곳 / 5파일 | 내 코드에서 확인 |
+
+**19판 중 여섯이 사용처 0 이거나 그에 가깝다** — `integer-limit`(2) · `float-inexact`(3) ·
+`text-length`(**0**) · `arithmetic` 의 나눗셈(**0**) · 캐스트(**0**) · `floating-type`(9).
+
+**이것이 D177 의 가장 강한 증거다.** §2 가 이미 「`for (;;)` 0곳 · 배열 1곳 · `abstract class` 0곳」으로
+같은 논증을 했는데, **0부에서는 그 비율이 더 높다** — 19판 중 여섯(32%)이다. 사칙연산의 나눗셈이
+99파일에 한 곳도 없는 리포에서 「`7 / 2` 가 왜 `3` 인가」를 내 코드로 가르칠 방법은 없다.
+옛 방식(리포가 쓰는 문법만)이었다면 이 여섯은 코스에 아예 없었을 것이고, 사용자는
+**정수 나눗셈을 모른 채 자바를 「배웠다」**가 된다.
+
+사유(`AbsenceReason` · `packages/cards/src/t0-synthetic.ts`)는 다섯이 `scale`, 하나가 `idiom` 이다.
+`scale` 은 「이 규모에서는 필요가 안 생겼다」 — CRUD API 서버는 산술도 캐스트도 큰 수도 안 쓴다.
+`idiom` 은 `char` 이고, 그 자리를 `String` 이 다 가져갔다(`String` 리터럴 560곳).
+
+**반대로 `autoboxing` 이 256곳 / 65파일이다.** §5 가 이것을 **심화**(난이도 4)에 두었는데, 표본에서
+0부의 어떤 판보다도 많다. 65/99 파일에 `Integer`·`Long`·`Boolean` 이 있다 — JPA 엔티티와 DTO 가
+전부 래퍼 타입을 쓰기 때문이고, 그것이 요즘 자바다. **심화에 두면 사용자는 자기 코드 3분의 2에
+있는 문법을 코스 끝까지 안 배운다.** 0부 축 F 로 올린 근거가 이 수치다.
+
+### §1.5.4 부 배치가 어떻게 바뀌나 — 겹침 정리
+
+0부는 새 개념 열한 장을 세우고 **여덟 장을 다른 데서 받는다.** 받은 자리는 원래 부에서 **지운다** —
+같은 개념이 두 부에 서면 판이 두 번 나오고, 그 순간 「기초부터 심화까지 이어진다」가 깨진다.
+
+| 어디서 | 무엇이 0부로 | 몇 장 |
+|---|---|---|
+| §2 1부 바닥 (13장) | `variable-declaration` · `assignment` · `arithmetic` · `boolean-literal` · `comparison` | **5** |
+| §2 「아직 안 세운 것」 | `string-literal` · `reference-equality` · `string-concat` | **3** |
+| §5 심화 | `autoboxing` | **1** |
+| 신규 | `value-bits` · `integer-limit` · `floating-type` · `float-inexact` · `text-length` · `boolean-only-condition` · `operator-precedence` · `implicit-conversion` · `explicit-conversion` · `reference-binding` | **10** |
+
+**2부 열여섯은 한 장도 안 움직인다.** 2부는 「클래스와 객체」축이고 0부는 「값과 식」축이라 겹치는
+개념이 없다. 겹치는 것처럼 보이는 둘을 짚어 둔다 — ① `java/null`(2부)은 0부 `autoboxing` 과
+`reference-binding` 이 함께 만드는 자리지만, 2부의 것은 **`new` 로 만든 것이 없는 상태**이고
+0부의 것은 **원시와 참조가 다른 규칙을 따른다**는 것이라 층이 다르다. `null` 의 `prereq` 에
+`reference-binding` 을 걸면 순서가 스스로 선다. ② `java/equals-hashcode`(2부)는 0부
+`reference-equality` 를 선행으로 갖는다 — 0부가 「`==` 와 `.equals` 가 다르다」를 맡고, 2부가
+「내가 `.equals` 를 정할 때 `hashCode` 도 같이 정해야 한다」를 맡는다.
+
+| 부 | 이름 | 판 | 담기는 것 |
+|---|---|---|---|
+| **0부** | 이 언어의 값과 식 | **19** | 위 축 여덟 |
+| **1부** | 흐름과 묶기 | **8** | `class-declaration` · `if-statement` · `method-declaration` · `return-statement` · `array` · `for-loop` · `for-each` · `import` |
+| **2부** | 객체 | **16** | §2 그대로 (`access-modifier` … `annotation`) |
+| **3부** | 프레임워크 | **15** | `spring/` 전량 (D176). 표본에서는 14 — `spring/bean-lifecycle` 이 안 선다 |
+
+**1부가 여덟으로 줄어든 것이 이 배치의 값이다.** 지금 1부는 「값·타입·조건·반복·메서드·배열」
+열셋이라 안에 축이 둘 섞여 있다. 0부가 값 축을 가져가면 1부에 **흐름과 묶기**만 남는다 —
+`class-declaration`(코드가 사는 상자) · `method-declaration`(묶기) · `if`/`for`/`for-each`(흐름) ·
+`array`(모으기) · `import`(파일 사이). 이 여덟은 서로 선행이 걸려 한 덩어리다.
+
+**판 수와 일수** (하루 새 판 2장 · D12 · 정본 §2 의 하루 15분):
+
+| 부 | 판 | 일 |
+|---|---|---|
+| 0부 | 19 | **10** (마지막 날 1장) |
+| 1부 | 8 | 4 |
+| 2부 | 16 | 8 |
+| 3부 | 15 (표본 14) | 8 (표본 7) |
+| **합** | **58** (표본 **57**) | **29** |
+
+0부 이전은 §2 가 잰 **43판 = 22일**이었다. **0부가 더하는 것은 이레**(19판 중 다섯은 1부에서
+옮겨온 것이라 순증은 14판)다. 그 이레 뒤에 사용자는 「`7 / 2` 가 왜 `3` 인가」·「`Integer` 가 왜
+NPE 를 내나」에 답할 수 있다. 이레가 맞는 값인지는 **사용자 결정이다** — 줄이려면 축 A·B 를
+각 2판·1판으로 접어 16판(8일)까지 내려간다. 접으면 잃는 것은 비트 배열 그림이 걸리는 자리 넷
+(`value-bits`·`integer-limit`·`floating-type`·`float-inexact`)이 둘로 뭉쳐, 「32칸이 도는 것」과
+「소수가 안 떨어지는 것」을 한 판에서 둘 다 보여야 한다는 것이다.
+
+### §1.5.5 0장(프롤로그)과의 관계 — 안 건드린다
+
+`ZERO_CHAPTER_MAX = 24` 의 0장과 이 0부는 **다른 것**이다. 0장은 `zeroChapterPlates` 가 `_lang.yaml` 의
+`essential` 에서 깊이 ≤ 2 를 뽑아 만드는 예고이고, 0부는 코스의 부다. 이름이 닮아 헷갈리므로 적어 둔다.
+
+자바의 0장 후보는 §6 이 **24/24** 로 쟀다 — 마진이 0 이다. 0부의 신규 열 장을 `essential` 에 올리면
+**34** 가 되어 상한이 열을 자르고, 넷째 정렬 키(id 알파벳순)가 실제로 돌기 시작한다.
+[`py.md`](./py.md) §1.5.5 · [`ts.md`](./ts.md) §1.5.5 와 **같은 결정**이고 [`cs.md`](./cs.md) §6 의
+미해결과도 같다. **세 갈래(0부를 `essential` 밖에 두기 / 상한을 30 으로 올리기 / 입력을 두 목록으로
+가르기)를 함께 재야 하고, 이 문서에서는 안 정했다.**
+
+**하나 더 — `packages/course/src/curriculum.ts` 의 `JAVA_PARTS`.** §2 가 「`_lang.yaml` 의 `essential`
+순서가 곧 1·2부의 순서이고 `JAVA_PARTS` 가 같은 목록을 든다. 시험이 둘을 대조한다」고 적어 뒀다.
+0부를 세우면 **그 상수에 부가 하나 늘고 시험도 함께 바뀐다.** 이 문서는 명세이고 그 변경은
+`packages/**` 라 범위 밖이다 — 여기 적어 두는 것이 인계다.
+
+---
+
+### §1.5.6 I6 조정 규약 — 공통 id 조각 · 0부 상한 · `cs/` 신청
+
+세 언어(그리고 나머지 일곱)가 **같은 축에 같은 id 조각**을 쓴다. 조각이 같으면 `universal` 로
+`common/` 에 묶기 쉽고, 다르면 [`cs.md`](./cs.md) §10.1 이 적은 사고 — 「같은 기계에 여덟 가지 이름이
+붙었다」 — 가 0부에서 되풀이된다.
+
+| 조각 | 축 | `py` | `ts` | **`java`** |
+|---|---|---|---|---|
+| `value-bits` | A | `py/value-bits` **신규** | `ts/value-bits` **신규** | `java/value-bits` **신규** |
+| `integer-literal` | A | `py/number-literal` | `ts/number-literal` | `java/variable-declaration` |
+| `integer-limit` | A | `py/integer-limit` **신규** | `ts/number-is-double` | `java/integer-limit` **신규** |
+| `float-type` | B | `py/number-literal` 이 겸한다 | `ts/number-is-double` 이 겸한다 | `java/floating-type` **신규** |
+| `float-inexact` | B | `py/float-inexact` **신규** | `ts/float-inexact` **신규** | `java/float-inexact` **신규** |
+| `integer-division` | B | `py/integer-division` **신규** | `ts/integer-division` **신규** | `java/arithmetic` 이 겸한다 |
+| `string-literal` | C | `py/string-literal` | `ts/string-literal` | `java/string-literal` |
+| `string-interpolation` | C | `py/f-string` | `ts/template-literal` | **없다** — `java/string-concat` 이 그 자리 |
+| `text-length` | C | `py/text-length` **신규** | `ts/text-length` **신규** | `java/text-length` **신규** |
+| `boolean-literal` | D | `py/boolean-literal` | `ts/boolean-literal` | `java/boolean-literal` |
+| `truthiness` | D | `py/truthiness` | `ts/truthy-falsy` | `java/boolean-only-condition` **신규** (반대 방향 — 못 한다는 규칙) |
+| `absent-value` | D | 1부 `py/none-value` | `ts/undefined-null` | 2부 `java/null` |
+| `arithmetic` | E | `py/arithmetic` | `ts/arithmetic` | `java/arithmetic` |
+| `operator-precedence` | E | `py/operator-precedence` **신규** | `ts/operator-precedence` **신규** | `java/operator-precedence` **신규** |
+| `logical-operator-value` | E | `py/bool-op-value` **신규** | `ts/operator-precedence` 가 겸한다 | **없다** — `&&` 가 `boolean` 만 낸다 |
+| `conditional-expression` | E | 부 밖 (심화) | `ts/conditional-ternary` | 부 밖 (표본 13곳) |
+| `implicit-conversion` | F | `py/implicit-conversion` **신규** | `ts/implicit-conversion` **신규** | `java/implicit-conversion` **신규** |
+| `explicit-conversion` | F | `py/explicit-conversion` **신규** | `ts/explicit-conversion` **신규** | `java/explicit-conversion` **신규** |
+| `assignment` | G | `py/assignment` | `ts/const-declaration` · `ts/reassignment` | `java/assignment` |
+| `reference-binding` | G | `py/reference-binding` **신규** | `ts/reference-sharing` | `java/reference-binding` **신규** |
+| `comparison` | H | `py/comparison` | `ts/comparison` | `java/comparison` |
+| `identity-equality` | H | `py/is-identity` | `ts/loose-equality` | `java/reference-equality` |
+
+**이 표가 드러내는 구멍 셋.** ① 자바에는 문자열 보간이 없다(JEP 430 철회) — `string-concat` 이
+그 자리를 진다. ② 자바의 `&&` 는 `boolean` 만 내므로 `logical-operator-value` 조각이 안 선다.
+③ `truthiness` 는 자바에서 **반대 방향**이다 — 파이썬·JS 는 「무엇이 거짓이 되나」이고 자바는
+「`boolean` 말고는 못 온다」다. 같은 조각 이름을 쓰되 `universal` 은 안 건다.
+
+#### 0부 상한 — 언어당 12장
+
+I6 규약: 0부가 `essential` 에 새로 올리는 개념은 **언어당 12장까지**다. 근거는 0장 상한 24 에서
+기초 8 을 뺀 값이고, 이 상한이 없으면 §1.5.5 가 적은 「후보가 넘쳐 id 알파벳순이 실제로 돈다」가
+그대로 일어난다.
+
+`essential` 에 새로 드는 것을 세면 **열넷**이다 — 신규 열에 `string-literal` ·
+`reference-equality` · `string-concat` · `autoboxing` 넷(§2 「아직 안 세운 것」과 §5 심화)이 붙는다.
+**둘이 넘으므로 둘을 `essential` 밖에 둔다** — `java/string-concat`(표본 15곳 / 9파일)과
+`java/autoboxing`(256곳 / 65파일). 둘 다 사용처가 넉넉해 **카드는 그대로 서고**, 빠지는 것은
+구멍 지도(03 §6)의 분모와 0장 후보뿐이다. 파이썬이 심화 열 개를 `essential` 밖에 둔 것과 같은
+판단이다(§5 의 반례). **12 ≤ 12 — 상한을 지킨다.**
+
+**0부의 판 수(19)와 이 12는 다른 수다.** 판은 **코스에서 며칠 걸리나**를 재고,
+12는 **0장 후보와 구멍 지도 분모가 얼마나 커지나**를 잰다. 이미 `essential`(29)에 있던 것을
+0부로 옮기는 것은 후자를 한 톨도 안 늘린다 — 부는 **교재 축**이고 `essential` 은 **분모 축**이다.
+
+#### `cs/` 에 없는 것 셋 — 신청 목록
+
+`cs/` 43장(D157)을 0부의 간선으로 쓰려고 대조했더니 **셋이 없다.**
+
+| 신청 `cs/` id | 한 줄 | 이 문서에서 이것을 요구하는 판 | 그림 |
+|---|---|---|---|
+| `cs/operator-precedence` | 식은 왼쪽부터 읽히지 않는다 — 연산자마다 세기와 방향이 있고, 그것이 **접히는 순서**를 정한다 | `java/operator-precedence` · `java/arithmetic` | **평가 트리** |
+| `cs/type-conversion` | 타입이 다른 값을 만나면 ① 언어가 바꾸거나 ② 사람이 적거나 ③ 멈춘다 — 셋 중 무엇이냐가 언어를 가른다 | `java/implicit-conversion` · `java/explicit-conversion` | **타입 변환 사다리** |
+| `cs/truthiness` | 참·거짓이 아닌 값을 조건 자리에 두면 무슨 일이 일어나나 | `java/boolean-only-condition` | 값 상자 |
+
+**앞의 둘이 특히 크다** — I2 세션이 만드는 그림 여섯 중 **평가 트리와 타입 변환 사다리 둘이
+이 두 개념의 그림**이다. `cs/` 에 개념이 없으면 그 그림이 걸릴 데가 없고, 언어마다 따로 그리면
+`cs.md` §10.1 이 경고한 「같은 기계에 여러 이름」이 그림 층에서 되풀이된다.
+
+셋을 세우는 것은 `dictionary/cs/**` 와 `docs/curriculum/cs.md` 의 일이라 **이 문서의 범위 밖**이다.
+여기 적어 두는 것이 신청이다. 셋이 서기 전까지 위 표의 해당 칸은 「없음」으로 두고, 판은
+`cs/` 간선 없이 선다 — 판은 뜨되 「왜」의 아래층이 비어 있다.
+
+#### 파서 — 이 언어는 오늘 실제로 파싱된다
+
+I6 이 찾은 것: `packages/dictionary/src/schema.ts:29` 의 `grammarSchema` 열거값에는 `c`·`cpp`·
+`c_sharp`·`swift`·`dart` 가 있는데 `crates/parse/Cargo.toml` 의 `lang-*` 기능에는 없다. 그 다섯은
+**사전이 로드되고 린트도 통과하는데 캡처가 0곳**이 된다 — [`README.md`](./README.md) §6 표의
+「열었다」는 로드 단계이지 파서가 아니다.
+
+**이 문서의 언어는 그 자리가 아니다.** `Cargo.toml` 을 직접 확인했다 — 문법 `java` 는
+`lang-java` = `tree-sitter-java 0.23` 로 실제 링크되어 있고, §1.5.3 의 실측이 그 위에서 돈 것이 아니라 **정규식으로 돈 것**이므로
+(정규식은 파서 유무와 무관하다) 두 사실을 섞지 않는다. 파서가 붙어 있다는 것은 **0부 판이
+사용처를 실제로 얻는다**는 뜻이고, 사용처가 0 인 판(§1.5.3 의 「합성 + 「네 코드엔 없다」」)은
+파서가 없어서가 아니라 **그 코드가 리포에 없어서** 0 이다. 그 둘은 다른 결론으로 이어진다 —
+앞의 것은 크레이트를 붙이면 풀리고, 뒤의 것은 D177 규칙 ①(합성 + 사유 명시)이 답이다.
 
 ---
 
@@ -111,6 +434,10 @@ Java 에 같은 것을 하려면 `spring/` 네임스페이스가 필요하고 **
 
 `dictionary/java/_lang.yaml` 의 `essential` 순서가 곧 1·2부의 순서이고,
 `packages/course/src/curriculum.ts` 의 `JAVA_PARTS` 가 같은 목록을 든다. 시험이 둘을 대조한다.
+
+> **0부(§1.5)가 1부에서 다섯 장을 가져갔다** — `variable-declaration` · `assignment` ·
+> `arithmetic` · `boolean-literal` · `comparison`. 아래 열셋은 그 뺄셈의 원본이고 갱신된 1부는
+> 여덟 장(§1.5.4)이다.
 
 **1부 바닥 열셋** — `class-declaration` · `variable-declaration` · `assignment` · `arithmetic` ·
 `boolean-literal` · `comparison` · `if-statement` · `method-declaration` · **`return-statement`** ·
