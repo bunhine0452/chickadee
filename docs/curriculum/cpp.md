@@ -271,7 +271,7 @@ D177 규칙 ②(「3부는 내 코드가 먼저이고 합성은 그 모양이 �
 | 19 | `cpp/smart-pointer` | 소유를 타입에 적기 / Smart pointer | `std::unique_ptr` | *null* | 4 | 17,9 | 언어가 소유권을 말해 주는 **몇 안 되는 자리** — `unique_ptr` 은 복사하려 하면 컴파일이 멈춘다 |
 | 20 | `cpp/move` | 옮겨도 된다고 표시하기 / std::move | `std::move` | *null* | 4 | 19,13 | **아무것도 옮기지 않는다.** 표를 붙일 뿐이고 실제 이동은 받는 쪽이 한다 |
 | 21 | `cpp/stream-output` | 밖으로 흘려보내기 / Stream output | `<<` | *null* | 2 | 9 | **비트 옮기기 기호가 출력**이 된다 — 연산자에 다른 뜻을 붙일 수 있다는 사실의 첫 노출 |
-| 22 | `cpp/exception-handling` | 터진 것을 받아 잇기 / Exceptions | `catch` | `common/try-catch` | 4 | 17 | 던지면 사이의 **지역 객체 소멸자가 전부 불린다**. `catch` 에서 `&` 를 빼면 예외가 잘려 나간다 |
+| 22 | `cpp/exception-handling` | 터진 것을 받아 잇기 / Exceptions | `catch` | `common/try-catch` | 4 | 17 | 던지면 사이의 **지역 객체 소멸자가 전부 불린다**. `catch` 에서 `&` 를 빼면 예외가 잘려 나간다. **이 순서를 묻는 것이 C++ 에서만 성립하는 판이다** — 나머지 아홉은 걷힐 때 도는 사용자 코드가 없다([`cpp-learning.md`](./cpp-learning.md) §11.3 ②) |
 | 23 | `cpp/enum-class` | 정해진 값들에 이름 붙이기 / enum class | `enum class` | `common/enum`(신규) | 2 | 1 | C 의 `enum` 과 달리 **정수로 안 변하고 이름이 갇혀 있다** — `Color::Red` 로만 쓴다 |
 
 **`alternatives` — AI 가 대신 쓴 것.** C 관용과 현대 C++ 가 한 파일에 섞인다.
@@ -463,6 +463,9 @@ curl -sL https://raw.githubusercontent.com/tree-sitter/tree-sitter-cpp/v0.23.4/s
 | C++26 완료(2026-03-28) · GCC 16.1 | herbsutter.com 2026-03-29 트립 리포트 · isocpp.org/blog/2026/04/gcc-16.1 |
 | progmiscon.org 언어 목록에 C++ 없음(Java·JS·Python·Scratch) | progmiscon.org |
 | `grammarSchema` 에 `cpp` 없음 | `packages/dictionary/src/schema.ts:28` |
+| Stroustrup, *Programming: Principles and Practice Using C++* 3판, 2024 — 목차 전문 (2장 Objects/Types/Values · 3.6 `vector` · 15장 Free Store · 16장 Arrays, Pointers, and References) | stroustrup.com `PPP3_TOC.pdf` |
+| learncpp.com 목차 — 12장 References and Pointers · 16장 `std::vector` · 19장 Dynamic Allocation | learncpp.com |
+| C++ Core Guidelines In.not · In.target — **교육 지침이 없다**는 부정 결과 | isocpp.github.io/CppCoreGuidelines |
 
 **확인 못 함**
 
@@ -471,6 +474,7 @@ curl -sL https://raw.githubusercontent.com/tree-sitter/tree-sitter-cpp/v0.23.4/s
 - 0.23.4 의 파싱 시간·메모리. `STATE_COUNT` 가 우리가 쓰는 문법 중 가장 커서 `ingest.file_p95` 예산에 걸릴 수 있다. 실측 안 함.
 - LLM C++ 산출물의 관용 분포(스마트 포인터 대 raw `new` 비율). LLM-HPC++(arXiv 2512.17023)이 「스마트 포인터를 자주 잘못 다룬다」고 보고하지만 **비율 수치는 확인 못 했다** — §1 의 「혼용한다」는 그 논문의 정성 서술과 이 문서 저자의 관찰이다.
 - Milne & Rowe(2002)·Bruce-Lockhart & Norvell 은 초록·2차 인용으로만 확인했고 **원문 전문은 안 읽었다.**
+- learncpp 가 포인터를 12장에 둔 **이유**. 사이트에 근거 서술이 있는지 못 찾았다 — 순서만 확인했다.
 
 ---
 

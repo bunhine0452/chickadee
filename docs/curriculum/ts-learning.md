@@ -349,20 +349,23 @@ TS 의 0장 후보는 지금 **21/24** 이고 0부 신규 일곱을 `essential` 
 
 ### §11.6 바꿀 것 — diff
 
-**본문은 안 고쳤다.**
+**여덟을 전부 처분했다** (2026-09-05 · D187 ⑰). 다섯은 `ts.md` 본문에 반영했고, 셋(③④⑧)은
+**개념 자체가 사전에 없어** 순서 결정만 본문에 박아 두었다 — 「저작이 먼저」다.
 
-| # | 무엇을 | 어디서 → 어디로 | 근거 |
-|---|---|---|---|
-| ① | `ts.md` §1.5.1 형식 열의 `bits` · `predict` | → `table` · `value` | `fundamentals.md` §2.1·§2.2 가 둘을 **형식에서 내렸다**. §1.5.1 의 형식 열에 `bits` 2곳 · `predict` 5곳이 남아 있고 머리말의 형식 목록까지 세면 3곳 · 6곳이다 — 문서가 폐기된 형식을 가리킨다 |
-| ② | `ts.md` §9 머리말 「progmiscon 의 JavaScript 항목은 여섯이다」 | → 「**33건**(공개 6 · 초안 27)」 | §11.1 — 2026-09-05 정적 API 실측. 여섯은 공개분만이다 |
-| ③ | `ts/prototype-chain` 의 prereq `class-declaration` | → `property-access` 만 남기고 `class-declaration` 을 **뺀다**. 방향을 뒤집어 `class-declaration` 이 `prototype-chain` 을 선행으로 갖는다 | §11.2 ③ + §11.5 ② — 교재 셋이 전부 프로토타입 먼저이고, 실측이 `ts.md` 의 재료 근거를 부순다(`ECC` `class` 1곳 대 `prototype` 36곳) |
-| ④ | `ts/narrowing` | 중심 **#14**(2부 끝) → 중심 앞쪽, `if-statement` **직후** | §11.2 ④ — 다섯 자료 중 이유를 적은 유일한 곳(TS Handbook)이 「JS 의 런타임 제어 흐름 위에 겹친다」로 그 자리를 정한다. **비용**: `narrowing` 의 선행 `union-type` 도 함께 앞으로 와야 한다(2판 이동) |
-| ⑤ | `ts.md` §9 에 오개념 여섯 추가 | — → `NullAndUndefinedAreTheSame` · `TypeofNullIsNull` · `StringRepetitionOperator` · `EqualityOperatorComparesObjectsValues` · `PrototypesAreClasses` · `MapInPlace` (전부 **초안**이라고 표시) | §11.4 — 0부 축 D 에 붙일 오개념이 지금 하나도 없다 |
-| ⑥ | 0부 축 A·B 의 배치 | 축 A 2판 + 축 B 3판을 **연속으로 두지 않는다** | §11.5 — 사용처 얇은 셋(`number-is-double`·`float-inexact`·`integer-division`)이 그 다섯 안에 몰려 있어 **3~4일 연속으로 「네 코드엔 없다」만** 나온다. D177 규칙 ①이 그 기간 동안 한 번도 안 걸린다 |
-| ⑦ | `ts/this-binding`·`ts/prototype-chain` 의 사유 | (없음) → **`idiom`** | §11.5 ① — 「스케일이 작아서」가 아니라 「LLM 이 화살표로 짜서」다. D158 의 사유 축에서 갈리는 자리 |
-| ⑧ | 새 `alternatives:` 짝 하나 | — → `gap: ts/narrowing, present: ts/typeof-guard` | §11.5 ④ — `ECC`(JS) 283곳/108파일. 같은 모양이 한쪽에서는 타입을 좁히고 한쪽에서는 값을 가른다 |
+| # | 무엇을 | 어디서 → 어디로 | 근거 | 반영 · 어디 |
+|---|---|---|---|---|
+| ① | `ts.md` §1.5.1 형식 열의 `bits` · `predict` | → `table` · `value` | `fundamentals.md` §2.1·§2.2 가 둘을 **형식에서 내렸다**. §1.5.1 의 형식 열에 `bits` 2곳 · `predict` 5곳이 남아 있고 머리말의 형식 목록까지 세면 3곳 · 6곳이다 — 문서가 폐기된 형식을 가리킨다 | **반영** · `ts.md` §1.5.1 — 표에서 `bits` **2곳** → `table`(비트 칸 배치) · `predict` **5곳** → `value`(예측 판정란), 머리말 형식 목록도 다시 씀 |
+| ② | `ts.md` §9 머리말 「progmiscon 의 JavaScript 항목은 여섯이다」 | → 「**33건**(공개 6 · 초안 27)」 | §11.1 — 2026-09-05 정적 API 실측. 여섯은 공개분만이다 | **반영** · `ts.md` §9 머리말 (「이벤트 루프 0건」도 함께) |
+| ③ | `ts/prototype-chain` 의 prereq `class-declaration` | → `property-access` 만 남기고 `class-declaration` 을 **뺀다**. 방향을 뒤집어 `class-declaration` 이 `prototype-chain` 을 선행으로 갖는다 | §11.2 ③ + §11.5 ② — 교재 셋이 전부 프로토타입 먼저이고, 실측이 `ts.md` 의 재료 근거를 부순다(`ECC` `class` 1곳 대 `prototype` 36곳) | **저작이 먼저** · 두 개념이 `dictionary/ts/` 에 **없다**. `ts.md` §1.5.4 「선행 방향 하나」가 방향을 박았고, §4 심화 4행의 prereq 열에서 `class-declaration` 을 뺐다 |
+| ④ | `ts/narrowing` | 중심 **#14**(2부 끝) → 중심 앞쪽, `if-statement` **직후** | §11.2 ④ — 다섯 자료 중 이유를 적은 유일한 곳(TS Handbook)이 「JS 의 런타임 제어 흐름 위에 겹친다」로 그 자리를 정한다. **비용**: `narrowing` 의 선행 `union-type` 도 함께 앞으로 와야 한다(2판 이동) | **저작이 먼저** · 셋 다 사전에 없다. `ts.md` §3 「순서 하나」가 순서를 박았고 §1.5.4 2부 목록이 그 순서로 다시 적혔다. **비용은 2판이 아니라 3판이다** — `union-type` 의 선행 `type-annotation` 도 위상 정렬에 끌려온다 |
+| ⑤ | `ts.md` §9 에 오개념 여섯 추가 | — → `NullAndUndefinedAreTheSame` · `TypeofNullIsNull` · `StringRepetitionOperator` · `EqualityOperatorComparesObjectsValues` · `PrototypesAreClasses` · `MapInPlace` (전부 **초안**이라고 표시) | §11.4 — 0부 축 D 에 붙일 오개념이 지금 하나도 없다 | **반영** · `ts.md` §9 11~16 행(제목도 「오개념 16개」로) + 「전부 초안」 한 줄 |
+| ⑥ | 0부 축 A·B 의 배치 | 축 A 2판 + 축 B 3판을 **연속으로 두지 않는다** | §11.5 — 사용처 얇은 셋(`number-is-double`·`float-inexact`·`integer-division`)이 그 다섯 안에 몰려 있어 **3~4일 연속으로 「네 코드엔 없다」만** 나온다. D177 규칙 ①이 그 기간 동안 한 번도 안 걸린다 | **반영** · `ts.md` §1.5.4 끝에 「섞는 규칙 하나」 — 축 묶음은 두고 **내는 날만** 흩는다 |
+| ⑦ | `ts/this-binding`·`ts/prototype-chain` 의 사유 | (없음) → **`idiom`** | §11.5 ① — 「스케일이 작아서」가 아니라 「LLM 이 화살표로 짜서」다. D158 의 사유 축에서 갈리는 자리 | **반영** · `ts.md` §4 심화 4행·8행 |
+| ⑧ | 새 `alternatives:` 짝 하나 | — → `gap: ts/narrowing, present: ts/typeof-guard` | §11.5 ④ — `ECC`(JS) 283곳/108파일. 같은 모양이 한쪽에서는 타입을 좁히고 한쪽에서는 값을 가른다 | **저작이 먼저** · `ts.md` §3 「새 `alternatives:` 짝」 표에 행을 올렸다. 표기 개념이 둘 → **셋**(`ts/typeof-guard` 추가)이 됐고 셋 다 사전에 없다 |
 
 #### 다른 문서에 내는 신청
+
+`docs/curriculum/**` 밖이라 **안 반영했다** — 그 문서의 소유 세션에 넘긴다.
 
 | 어디 | 무엇 |
 |---|---|

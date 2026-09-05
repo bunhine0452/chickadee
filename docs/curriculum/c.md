@@ -109,8 +109,11 @@ C·C++ 에서는 **답이 없다는 것이 답인 문항**이 섞인다. 같은 
 C 계열에서 `predict` 가 가장 센 형식인데, 잘못 내면 **틀린 모형을 가르친다.** 규칙 다섯.
 
 **① 정답을 값으로 두지 않는다.** `int x = INT_MAX; x + 1` 의 정답은 −2147483648 이 아니다. 정답은
-「이 식은 답을 약속하지 않는다」이고, 그 선택지가 0부 내내 **항상** 답란에 있어야 한다. 없다가
-UB 판에서만 나타나면 그 등장 자체가 힌트가 된다.
+「이 식은 답을 약속하지 않는다」이다. **`value` 는 자유 텍스트라 선택지가 없다** — 그래서 「없다가
+UB 판에서만 선택지가 나타나면 그 등장 자체가 힌트가 된다」는 걱정이 이 형식에서는 성립하지 않고,
+규칙 ①이 저절로 지켜진다. 드는 것은 `fundamentals.md` §3.2 정규화 표에 **행 하나**뿐이다 —
+「약속 없음」·`UB`·`undefined` 를 한 값으로 접는다. **새 형식이 필요 없다**
+([`c-learning.md`](./c-learning.md) §11.3).
 
 **② 「아무 값이나 나온다」로 가르치면 안 된다.** 그렇게 배운 학습자는 `if (x + 1 < x)` 로 넘침을
 검사할 수 있다고 믿는다. 실제로는 컴파일러가 「부호 있는 넘침은 없다」를 가정하고 그 `if` 를 통째로
@@ -161,6 +164,11 @@ C 는 이 앱의 열 언어 중 기계가 눈에 보이는 유일한 자리다(�
 | 평가 트리 | `arithmetic` `comparison` `operator-precedence` | `*p++` 를 트리로 그리면 `++` 가 `p` 에 붙는 것이 눈에 보인다 |
 | 값 상자 | `declaration` `assignment` `number-literal` `truthiness` | 상자에 타입 이름을 적어 두면 `int x;` 의 상자가 **비어 있지 않고 쓰레기가 들어 있다**를 그릴 수 있다 |
 | 타입 변환 사다리 | `conversion` | `char` → `int` → `unsigned` → `long` 을 계단으로 그리고, `-1 < 1u` 에서 `-1` 이 어느 칸으로 올라가는지를 화살표로 |
+
+**오개념 여섯을 이 그림 하나가 덮는다.** 메모리 줄 하나가 §9 의 2(칸은 있고 내용이 안 정해졌다) ·
+3 · 4 · 5(`\0` 한 칸) · 8 · 9(칸은 돌려줬는데 번호는 남았다)를 전부 맡는다 — 다른 어느 그림도
+오개념을 여섯씩 덮지 못하고, `diagrams.md` §3 이 메모리 줄을 명세 다섯 중 **1번**으로 둔 근거가
+이 셈이다([`c-learning.md`](./c-learning.md) §11.1).
 
 **막힌 것 둘 — 필요한 그림 넷이 아직 컴포넌트가 없다.** `design/system/diagrams.md` §3 은 만든 것
 셋(비트 배열 · 평가 트리 · 값 상자)과 명세만 있는 넷(메모리 줄 · 스택 프레임 · 타입 변환 사다리 ·
@@ -373,8 +381,9 @@ C 가 처음으로 천장에 닿는다. `zero-chapter.ts` 가 깊이 2 를 고�
 주의 둘. ① `essential` 에 이 24개를 다 적어야 한다 — `zeroChapterPlates` 는 `essential` 밖을
 안 본다(파이썬 8개, TS 30개). ② **깊이가 어려움을 재지 않는다.** `c/integer-promotion` 이
 깊이 2 인데 선행이 얕을 뿐 실제로는 C 에서 가장 자주 무는 자리다. 큐 순위(02 §6.2)는 깊이·미지·
-사용처 수·id 만 보고 `difficulty` 를 안 본다 — 정수 승격이 0장 후반에 뜨는 것이 옳은지는
-**사용자 결정이 필요한 자리**다.
+사용처 수·id 만 보고 `difficulty` 를 안 본다. **이 자리는 닫혔다**(D184) — 상한이 없어 순위가
+프롤로그 포함 여부를 안 정한다. 깊이 ≤ 2 인 `c/integer-promotion` 은 어차피 프롤로그에 들고,
+남는 것은 **그 안에서의 판 순서**뿐이다.
 
 ---
 
@@ -548,11 +557,18 @@ C 를 붙이기 전에 정해야 한다.
 | 10 | 정수는 넘치면 커진 채로 남는다 | 부호 있는 정수의 넘침은 정의되지 않은 동작이다. 되돌아가는 것은 부호 없는 쪽뿐이다 |
 | 11 | `-1 < 1u` 는 참이다 | 거짓이다. `-1` 이 `unsigned` 로 올라가 아주 큰 수가 된다 |
 | 12 | 컴파일이 되면 맞는 코드다 | UB 가 있으면 최적화가 검사 코드를 지우기도 한다 |
+| 13 | 배열 이름은 포인터다 | `a` 는 `int[3]`, `&a` 는 `int(*)[3]`, `a` 를 값으로 쓰면 `int*` 로 **바뀐다**. 붕괴는 자리에서 일어나는 일이지 정체가 아니고 `sizeof(a)` 가 그 증거다 |
+| 14 | 문자열은 타입이다 | `char[]`(내 칸) · `char*`(남의 칸) · 문자열 리터럴(고쳐 쓰면 UB) 셋이 다르다. 5번은 길이의 문제이고 이것은 **소유의 문제**다 |
+| 15 | UB 는 이식성 문제다 | 「컴파일러마다 다르다」가 아니라 **같은 컴파일러에서도 최적화 수준마다 다르다.** §0.3 ③이 잡은 것이다 |
 
 3번만 논문 근거가 있다 — Kaczmarczyk 외(SIGCSE '10)가 아홉 개념 중 첫째로 Memory Model /
 References / Pointers 를 두고, 주제 1을 「언어 요소와 메모리 사용의 관계를 오해한다」로 꼽았다.
 나머지는 **규격·교재에서 확인한 사실**이고 「학습자가 실제로 그렇게 믿는다」는 빈도 자료는 못
 찾았다. 사전 `misconceptions:` 에 넣을 때 이 구별을 지켜야 한다.
+
+**13~15 는 2026-09-05 에 붙었다**([`c-learning.md`](./c-learning.md) §11.4). 셋 다 같은 규약을
+따른다 — 규격에서 나온 사실이고 빈도 자료는 없다. Qian & Lehman 2018 리뷰에도 UB 오개념의
+빈도 자료는 **없다**.
 
 ---
 
@@ -570,6 +586,11 @@ References / Pointers 를 두고, 주제 1을 「언어 요소와 메모리 사�
 | Kaczmarczyk·Petrick·East·Herman, "Identifying student misconceptions of programming", SIGCSE '10, 107–111 | https://doi.org/10.1145/1734263.1734299 | **확인**(서지·요지) |
 | Adcock·Bucci·Heym·Hollingsworth·Long·Weide, "Which pointer errors do students make?", SIGCSE '07 | https://doi.org/10.1145/1227310.1227317 | 서지만 **확인**(Crossref·Semantic Scholar). **초록·본문이 유료라 확인 못 함** — 내용을 인용하지 않았다 |
 | progmiscon.org | https://progmiscon.org/ | **확인** — Java·Python·JavaScript·Scratch 넷뿐, **C 는 없다** |
+| Sorva, *Notional Machines and Introductory Programming Education*, TOCE 13(2) 2013 | https://doi.org/10.1145/2483710.2483713 | **확인**(초록·인용) — §11.1 의 notional machine 정의 |
+| Craig & Petersen, *Student difficulties with pointer concepts in C*, ACSW 2016 | https://doi.org/10.1145/2843043.2843348 | **초록만** — 전문 유료라 포인터 분류 항목을 인용하지 않았다 |
+| Cunningham 외, *Using Tracing and Sketching to Solve Programming Problems*, ICER 2017 | https://www.gvu.gatech.edu/sites/default/files/related_project_files/p164-cunningham.pdf | **전문 확인** — Trace 82.1%(n=95) 대 Blank 60.7%(n=135), N=65. **상관이지 개입이 아니다.** 「고치기」 문제에서는 반대(46% 대 69%, p=0.06) |
+| Gustedt, *Modern C* 3판, Manning 2024 | 저자 배포 PDF | **확인** — 서문·Level 1 규칙 직접 읽음 |
+| Seacord, *Effective C* 2판, No Starch 2024 | https://nostarch.com/effective-c-2nd-edition | **목차만** — 본문 안 봤다 |
 | C 규격(UB·정수 승격) | ISO/IEC 9899 | 원문이 **유료라 직접 확인 못 함**. §4·§9 서술은 널리 알려진 규칙에 기댔고 사전에 넣기 전 절 번호를 붙여야 한다 |
 
 Exercism C 트랙에 개념 연습이 없어 D148 ⑤의 「같은 모양의 config.json」 가정이 C 에서 깨진다 —

@@ -161,7 +161,7 @@ cs/memory-address 가 그 창(D155 의 window_unknown 이 고른 40줄)에 올�
 | `cs/race-condition` | 순서가 안 정해져 있으면 / Race condition | 4 | aliasing · concurrency-vs-parallelism | 같은 코드가 대개 맞고 가끔 틀리는 자리 | `go/mutex` · `java/synchronized` · `rs/send-sync` |
 | `cs/deadlock` | 서로를 기다리며 멈추기 / Deadlock | 4 | race-condition | 아무도 안 터지는데 아무것도 안 도는 상태 | `csharp/task-result` · `go/channel` |
 | `cs/invariant` | 언제나 참이어야 하는 것 / Invariant | 3 | state | 「이 값은 절대 음수가 아니다」를 어디서 지키나 | `rs/newtype` · `java/constructor` · `arch/role` |
-| `cs/undefined-behavior` | 언어가 답을 약속하지 않는 자리 / Undefined behaviour | 4 | memory-address | 틀린 답이 아니라 **답이 없다.** 최적화가 코드를 지워도 규칙 위반이 아니다 | `c/ub` · `cpp/ub` · `rs/unsafe` |
+| `cs/undefined-behavior` | 언어가 답을 약속하지 않는 자리 / Undefined behaviour | 4 | memory-address | 틀린 답이 아니라 **답이 없다.** 최적화가 코드를 지워도 규칙 위반이 아니다 | `c/ub` · `cpp/ub` · `rs/unsafe` · **`rs/move`** |
 
 ---
 
@@ -265,6 +265,12 @@ D137 의 「예고할 자리가 없으면 만들지 않는다」가 그대로 �
 | `cs/` 개념 | 이 개념을 요구하는 언어가 | 없는 언어 |
 |---|---|---|
 | `memory-address` · `pointer-indirection` · `memory-layout` · `undefined-behavior` | C · C++ · Rust | Python · Java · C# · Go · Swift · SQL · TS |
+
+**`cs/undefined-behavior` 는 두 언어가 반대 방향에서 쓴다** (2026-09-05 · D187 ⑰ ·
+[`rs-learning.md`](./rs-learning.md) §11.2 ②). C 에서는 「**내 코드가** UB 를 낸다」이고 Rust 에서는
+「**컴파일러가 막은 것이** 무엇이었나」다. 그래서 「사용 언어」 열에 `rs/unsafe` 만 있던 자리에
+**`rs/move`** 를 더했다 — `rs.md` §0.6 이 2부의 첫 소유권 개념인 `rs/move` 의 선행으로 이 장을
+걸었기 때문이다. UB 를 한 번도 안 보여 주면 빌림 검사기가 스타일 규칙으로 보인다(`rs.md` §9 첫 행).
 | `stack-and-heap` · `garbage-collection` | C · C++ · Rust · Java · C# · Go · Swift | SQL |
 | `value-vs-reference` · `aliasing` | **전부** (SQL 제외) | SQL |
 | `null-reference` | Java · C# · C · C++ · Go · Swift · TS · Python | Rust(타입으로 없앴다) · SQL(삼치 논리로 다르다) |

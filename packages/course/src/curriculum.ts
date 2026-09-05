@@ -27,8 +27,11 @@
  * 통째로 가져간다. 챕터마다 붙던 관문 1~n(챕터당 6판)만 남고, 그것도 **부가 이미 가르친
  * 개념은 안 센다** — {@link chapterGates} 가 그 뺄셈이다.
  */
-import type { AbsenceReason } from '@chickadee/cards';
-import { topoOrder, type BestSite, type Chapter } from '@chickadee/concepts';
+import { coverOf, drillsAfterPart0, type AbsenceReason } from '@chickadee/cards';
+// 문제 자체의 타입은 사전의 것이다 — `cards` 는 그것을 판으로 바꿀 뿐이다.
+import type { Drill, DrillLang } from '@chickadee/dictionary';
+import { topoOrder, type BestSite, type Chapter, type RootResult } from '@chickadee/concepts';
+import type { StageNo } from '@chickadee/store-sql';
 
 /**
  * 부 번호. **0 값과 식** · 1 흐름과 묶기 · 2 객체 · 3 프레임워크.
@@ -288,12 +291,18 @@ export type OutlineEntry =
     /** 그중 「네 코드엔 없다」로 서는 판. */
     absent: number;
   }
+  | DrillsEntry
   | { kind: 'chapter'; order: number; chapter: string; gate: number; files: number };
 
 export interface OutlineInput {
   parts: readonly CurriculumPart[];
   gates: readonly ChapterGate[];
   chapters: readonly Chapter[];
+  /**
+   * {@link drillEntry} 가 낸 줄. 0부 **뒤**·1부 **앞**에 끼운다. `null` 이면 안 끼운다 —
+   * 러너가 아는 언어 셋(`DRILL_LANGS`) 밖이면 이 층 자체가 없다.
+   */
+  drills?: DrillsEntry | null;
   /**
    * {@link foldsPart1} 의 값. 참이면 1부가 목차에서 빠진다.
    *
@@ -327,5 +336,191 @@ export function courseOutline(input: OutlineInput): OutlineEntry[] {
     gate: gateOf.get(c.order) ?? 0,
     files: c.files.length,
   }));
+  // 작은 문제 층은 **0부 뒤·1부 앞**이다 (D186 ⑧). 1부가 접혀도(`foldPart1`) 자리는
+  // 0부 뒤 그대로다 — 이 층이 딛는 것은 1부가 아니라 0부이기 때문이다.
+  const drills = input.drills ?? null;
+  if (drills !== null) {
+    const after = parts.findLastIndex((e) => e.kind === 'part' && e.part === 0);
+    parts.splice(after + 1, 0, drills);
+  }
   return [...parts, ...chapters];
+}
+
+// ───────── 단별 탈출 (D187 ⑭) ─────────
+
+/**
+ * 그 단의 **첫 몇 판**을 본다. 0장의 `rootCleared` 가 뿌리 넉 장을 보는 것과 같은 자리이고,
+ * 수를 둘로 줄인 것은 단 하나가 넉 장보다 짧기 때문이다 — `course.md` §5.1 에서 3단(예측)은
+ * 요청 하나에 2분이다.
+ */
+export const STAGE_ESCAPE_OPENERS = 2;
+
+/**
+ * 그 챕터의 어휘 관문이 이 겹 이상이어야 단을 접는다. **1 이 아니라 2 인 것이 요점**이다 —
+ * 전이(D4)는 첫 노출을 1겹에서 시작시키므로(`TRANSFER_LAYER`), 1 로 두면 다른 언어를 아는
+ * 것만으로 이 챕터의 단이 열리기 전에 접힌다. 2겹은 「전이로 받은 뒤 한 번은 스스로 맞혔다」다.
+ */
+export const STAGE_ESCAPE_GATE_LAYER = 2;
+
+/**
+ * 접지 않는 단. **5단(재구현)** 이다 — `course.md` §5.2 가 「챕터가 끝났다」를 「다섯 단을
+ * 통과하고 5단에서 컨트롤러 한 장을 도움 없이 다시 쓴다」로 정의하므로, 5단이 접히면
+ * 끝남의 유일한 증거가 사라진다.
+ */
+export const STAGE_NEVER_FOLDED: StageNo = 5;
+
+export interface StageFoldInput {
+  /** 몇째 단인가 (1 읽기 · 2 추적 · 3 예측 · 4 수정 · 5 재구현 — `course.md` §5.1). */
+  stage: StageNo;
+  /** 그 단에서 이미 채점된 판 — **낸 순서대로**. 아직 안 푼 단은 빈 배열이다. */
+  results: readonly RootResult[];
+  /** 그 챕터의 어휘 관문에 담긴 개념의 잉크 겹. 관문이 비면 빈 배열. */
+  gateLayers: readonly number[];
+  /** 첫 실행의 한 문항 (D147). 참이면 **안 접는다** — `foldsPart1`·`zeroChapterDone` 과 같다. */
+  declaredNewcomer: boolean;
+}
+
+/**
+ * 이 단을 접는가 — **74일은 상한이지 길이가 아니다** (D187 ⑭ · `course.md` §5.3).
+ *
+ * `foldsPart1` 과 보는 것이 다르다. 저쪽은 **겹만** 본다(1부 전체가 1겹 이상) — 전이가
+ * 채운 겹으로도 접히고, 그래서 첫 실행의 한 문항이 그 앞을 막는다. 이쪽은 **이 챕터에서
+ * 방금 낸 답**을 본다:
+ *
+ *   ① 그 단의 첫 {@link STAGE_ESCAPE_OPENERS} 판을 **연속으로** 맞혔다 (「모르겠어요」는 오답 취급).
+ *   ② 그 챕터의 어휘 관문이 전부 {@link STAGE_ESCAPE_GATE_LAYER} 겹 이상이다.
+ *   ③ 5단이 아니다.
+ *
+ * ①이 증거이고 ②는 그 증거를 챕터 어휘로 받친다. 둘을 함께 요구하는 이유는 한쪽만으로는
+ * 각각 새는 자리가 있기 때문이다 — ①만이면 운으로 두 판을 맞힌 사람이 챕터를 건너뛰고,
+ * ②만이면 어휘는 아는데 이 리포의 배선은 처음인 사람이 읽기 단을 못 본다.
+ *
+ * 접힌 단은 **사라지지 않고 완료로 남는다** — 0장의 칩이 완료 도장과 함께 남는 것과 같다
+ * (D136). 잠그는 것은 없고, 다시 열면 남은 판이 그대로 있다.
+ */
+export function foldsStage(input: StageFoldInput): boolean {
+  if (input.declaredNewcomer) return false;
+  if (input.stage === STAGE_NEVER_FOLDED) return false;
+  const openers = input.results.slice(0, STAGE_ESCAPE_OPENERS);
+  if (openers.length < STAGE_ESCAPE_OPENERS) return false;
+  if (!openers.every((r) => r.ok && !r.dunno)) return false;
+  return input.gateLayers.every((l) => l >= STAGE_ESCAPE_GATE_LAYER);
+}
+
+/** 챕터 하나가 실제로 밟는 단 — 접힌 것을 뺀 나머지. */
+export interface ChapterEscape {
+  chapter: string;
+  /** 밟는 단. */
+  stages: StageNo[];
+  /** 접힌 단. */
+  folded: StageNo[];
+}
+
+export interface ChapterEscapeInput {
+  chapter: string;
+  /** 1~5 단 순서대로의 판정 입력. `stage` 는 이 배열이 정한다. */
+  stages: readonly Omit<StageFoldInput, 'stage' | 'declaredNewcomer'>[];
+  declaredNewcomer: boolean;
+}
+
+/** 다섯 단 중 무엇이 접히나. 순서는 1 → 5 그대로다. */
+export function chapterEscape(input: ChapterEscapeInput): ChapterEscape {
+  const stages: StageNo[] = [];
+  const folded: StageNo[] = [];
+  input.stages.forEach((s, i) => {
+    const stage = (i + 1) as StageNo;
+    const fold = foldsStage({ ...s, stage, declaredNewcomer: input.declaredNewcomer });
+    (fold ? folded : stages).push(stage);
+  });
+  return { chapter: input.chapter, stages, folded };
+}
+
+// ───────── 0부 뒤의 작은 문제 층 (D186 ⑧ · D187 ⑧) ─────────
+
+/**
+ * 알고리즘은 트랙을 새로 만들지 않고 **stdin 러너 + 우리가 쓴 작은 문제 층**으로만 낸다
+ * (D187 ⑧). 문제는 `dictionary/drills/**` 에 있고, 언어를 입혀 판으로 바꾸는 것과 순서는
+ * `packages/cards/src/drill.ts` 가 한다. **여기가 하는 일은 하나뿐이다 — 꽂을 자리.**
+ *
+ * 자리는 **0부 끝과 1부 시작 사이**다. 0부는 「`7 / 2` 뒤 `a` 는?」에 값을 적게 해서 규칙을
+ * 아는지 재고, **그 규칙을 써서 무엇을 만드는가**는 안 잰다. 이 층이 그 자리다. 1부 앞인
+ * 이유는 1부가 「흐름과 묶기」라서다 — 반복과 배열을 배우기 전에 그것이 필요한 문제를 내면
+ * 순서가 뒤집힌다.
+ */
+
+/** {@link coverOf} 에 넘길 0부 개념 한 줄. 사전 행에서 세 필드만 뽑은 것이다. */
+export interface DrillConcept {
+  id: string;
+  universal?: string | null;
+  prereq?: readonly string[];
+}
+
+/**
+ * 러너가 이 언어를 못 켰을 때 화면이 읽을 문구 키 (D186 ④).
+ *
+ * **언어마다 다른 문장이어야 한다** — 「러너가 없다」로 뭉치면 무엇이 없는지가 사라진다.
+ * 값은 `packages/i18n/src/{ko,en}/run.ts` 의 것이고 `RunnerReason` 의
+ * `toolchain-missing:<lang>` 과 짝이다(`apps/desktop/src/data/runner.ts` 가 그 짝을 든다).
+ * 키만 나르고 푸는 것은 화면이 한다 — 이 패키지는 `@chickadee/i18n` 을 안 물고 있다.
+ */
+export const DRILL_TOOLCHAIN_KEY: Readonly<Record<DrillLang, string>> = {
+  py: 'run.reason.toolchainMissingPy',
+  ts: 'run.reason.toolchainMissingTs',
+  java: 'run.reason.toolchainMissingJava',
+};
+
+/** 목차의 작은 문제 층 한 줄. */
+export interface DrillsEntry {
+  kind: 'drills';
+  lang: DrillLang;
+  /** 낼 판 수 — 문제 하나 × 이 언어 하나. */
+  plates: number;
+  /** 안 낸 문제와 사유. **조용히 사라지지 않는다** (D186 ④). */
+  drops: readonly { drillId: string; reason: string }[];
+  /**
+   * 러너가 이 언어를 못 켜서 **채점이 안 되나.** 참이어도 줄은 **그대로 선다** — 숨기면
+   * 학습자는 그 층이 있었다는 것조차 모른다(D186 ④). 빠지는 것은 채점뿐이다.
+   */
+  ungraded: boolean;
+  /** `ungraded` 일 때 화면이 읽을 문구 키. 아니면 `null`. */
+  reasonKey: string | null;
+}
+
+export interface DrillsInput {
+  /** 이 코스의 언어. 러너가 아는 셋(`DRILL_LANGS`) 안이어야 한다. */
+  lang: DrillLang;
+  /** 0부 개념 전부. `coverOf` 가 id·`universal`·`prereq` 를 한 집합으로 접는다. */
+  part0: Iterable<DrillConcept>;
+  /**
+   * 러너가 이 언어를 켰나. `detectStdin`(`@chickadee/grading`)이 답을 안다 —
+   * 이 패키지는 프로세스를 안 띄우므로 **판정을 받아만 쓴다.**
+   */
+  runnerReady: boolean;
+  /** 문제를 밖에서 넣고 싶을 때(시험). 생략하면 번들에 든 것 전부. */
+  drills?: readonly Drill[];
+}
+
+/**
+ * 0부 뒤에 설 한 줄을 낸다.
+ *
+ * `coverOf` 가 있는 이유가 여기서 보인다 — 문제의 `needs` 는 **보편 개념**
+ * (`common/arithmetic` · `cs/integer-overflow`)으로 적혀 있고 0부의 판은 **언어 개념**
+ * (`java/arithmetic`)이라, 둘을 그냥 견주면 한 문제도 안 걸린다. 개념마다 자기 id 와
+ * `universal` 과 `prereq` 를 다 넣어야 `cs/integer-overflow` 가 0부의 `essential` 이
+ * 아니라 그 **선행**이라는 사실을 넘어설 수 있다.
+ */
+export function drillEntry(input: DrillsInput): DrillsEntry {
+  const { items, drops } = drillsAfterPart0({
+    lang: input.lang,
+    covered: coverOf(input.part0),
+    ...(input.drills === undefined ? {} : { drills: input.drills }),
+  });
+  return {
+    kind: 'drills',
+    lang: input.lang,
+    plates: items.length,
+    drops,
+    ungraded: !input.runnerReady,
+    reasonKey: input.runnerReady ? null : DRILL_TOOLCHAIN_KEY[input.lang],
+  };
 }

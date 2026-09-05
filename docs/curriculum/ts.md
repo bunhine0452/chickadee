@@ -58,9 +58,11 @@ Electron·Tauri 앱, 그리고 이 리포 자신.
 각 행의 다섯 열이 이 부의 계약이다 — **어느 기계에 걸리나**(`cs/`) · **어떤 그림이 그것을 보이나**
 (그림 계약은 I2 세션이 `design/system/diagrams.md` 에 만드는 중: 비트 배열 · 평가 트리 · 값 상자 ·
 메모리 줄 · 스택 프레임 · 타입 변환 사다리) · **초보가 실제로 틀리는 자리**(문항의 씨앗) ·
-**문항 형식**(형식 계약은 I1 세션이 `docs/program/fundamentals.md` 에 확정 중 — `value` 값 적기 ·
-`step` 한 걸음씩 · `bits` 비트로 보기 · `table` 표 채우기 · `build` 거꾸로 만들기 ·
-`predict` 예측 후 실행). **4지선다가 아니다.**
+**문항 형식**(형식 계약은 I1 최종본 `docs/program/fundamentals.md` §2.1·§2.2 — `value` 값 적기 ·
+`step` 한 걸음씩 · `table` 표 채우기 · `build` 거꾸로 만들기, 그리고 J0 가 낸 `order`·`trace-table`).
+**`bits` 와 `predict` 는 형식에서 내려갔다** — `bits` 는 `table` 의 한 배치이고 `predict` 는
+`value` 의 **판정란**이다. 아래 「형식」 열은 그 결정에 맞춰 다시 적었다
+([`ts-learning.md`](./ts-learning.md) §11.6 ①). **4지선다가 아니다.**
 
 **출처 표시** — `기존` 은 `_lang.yaml` 의 `essential` 30 에 이미 있는 것, `중심↑`/`심화↑` 는 §3·§4 의
 제안에서 올라온 것, `신규` 는 이 절이 새로 세우는 것.
@@ -69,14 +71,14 @@ Electron·Tauri 앱, 그리고 이 리포 자신.
 
 | id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 | 사전 |
 |---|---|---|---|---|---|---|
-| `ts/value-bits` **신규** | 값은 켜짐·꺼짐의 묶음이고, JS 는 그 묶음이 **64비트 하나뿐**이다 | `binary-representation` · `bit-and-byte` · `type` | 비트 배열 | `0b1010` 을 「천십」으로 읽는다. `1 << 31` 이 음수가 되는 이유(비트 연산만 32비트로 내려간다)를 버그로 안다 | `bits` | **있음** · 117곳/23파일 · 26곳/8파일 |
+| `ts/value-bits` **신규** | 값은 켜짐·꺼짐의 묶음이고, JS 는 그 묶음이 **64비트 하나뿐**이다 | `binary-representation` · `bit-and-byte` · `type` | 비트 배열 | `0b1010` 을 「천십」으로 읽는다. `1 << 31` 이 음수가 되는 이유(비트 연산만 32비트로 내려간다)를 버그로 안다 | `table`(비트 칸 배치) | **있음** · 117곳/23파일 · 26곳/8파일 |
 | `ts/number-literal` `기존` | `0x2A` · `1_000` · `1e3` · `42` 가 **전부 같은 타입**이다 | `type` | 값 상자 | `1` 은 정수이고 `1.5` 는 실수라고 믿는다. `typeof 1 === typeof 1.5` 다 | `value` | **있음** · 9,399곳/377파일 · 8,208곳/494파일 |
 
 #### 축 B — 실수형과 왜 안 떨어지나 (3판)
 
 | id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 | 사전 |
 |---|---|---|---|---|---|---|
-| `ts/number-is-double` `심화↑` | 정수 타입이 **없다.** `MAX_SAFE_INTEGER`(2⁵³−1) 위는 조용히 어긋난다 | `floating-point` · `integer-overflow` | 비트 배열 (부호·지수·가수) | `9007199254740993` 을 찍고 마지막 자리가 바뀐 것을 오타로 안다. DB 의 `bigint` id 를 JSON 으로 받으면 이 자리에서 값이 상한다 | `bits` | **있음** · 52곳/29파일 · 5곳/5파일 |
+| `ts/number-is-double` `심화↑` | 정수 타입이 **없다.** `MAX_SAFE_INTEGER`(2⁵³−1) 위는 조용히 어긋난다 | `floating-point` · `integer-overflow` | 비트 배열 (부호·지수·가수) | `9007199254740993` 을 찍고 마지막 자리가 바뀐 것을 오타로 안다. DB 의 `bigint` id 를 JSON 으로 받으면 이 자리에서 값이 상한다 | `table`(비트 칸 배치) | **있음** · 52곳/29파일 · 5곳/5파일 |
 | `ts/float-inexact` **신규** | `0.1 + 0.2 !== 0.3` — 2진수로 `0.1` 을 정확히 못 적는다 | `floating-point` · `binary-representation` | 비트 배열 | `toFixed(2)` 가 **문자열**을 낸다는 것을 모르고 다시 더해 `"0.300.30"` 을 만든다 | `value` | **있음** · 11곳/7파일 · 14곳/10파일 |
 | `ts/integer-division` **신규** | `/` 가 늘 소수를 낸다. 버림은 `Math.floor`(아래)와 `Math.trunc`(0 쪽)로 **갈린다** | `floating-point` | 타입 변환 사다리 | `7 / 2` 를 `3` 으로 예상한다(자바·C 를 먼저 배운 사람). `Math.floor(-7/2)` 는 `-4`, `Math.trunc(-7/2)` 는 `-3` | `table` | **있음** · 49곳/29파일 · 89곳/54파일 |
 
@@ -85,7 +87,7 @@ Electron·Tauri 앱, 그리고 이 리포 자신.
 | id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 | 사전 |
 |---|---|---|---|---|---|---|
 | `ts/string-literal` `기존` | 따옴표 셋(`'` `"` `` ` ``)이 같은 값이다 | `text-encoding` | 값 상자 | 백틱이 다른 타입이라고 믿는다 | `value` | **있음** · 46,354곳/410파일 · 46,929곳/603파일 |
-| `ts/template-literal` `기존` | `${}` 안이 **식**이라 그 자리에서 계산된다 | — | 평가 트리 | 작은따옴표에 `${}` 를 써서 글자 그대로 남는다 — 오류가 아니라 조용히 틀린 문자열이 로그에 찍힌다 | `predict` | **있음** · 5,509곳/351파일 · 1,297곳/258파일 |
+| `ts/template-literal` `기존` | `${}` 안이 **식**이라 그 자리에서 계산된다 | — | 평가 트리 | 작은따옴표에 `${}` 를 써서 글자 그대로 남는다 — 오류가 아니라 조용히 틀린 문자열이 로그에 찍힌다 | `value`(예측 판정란) | **있음** · 5,509곳/351파일 · 1,297곳/258파일 |
 | `ts/text-length` **신규** | `.length` 는 글자 수가 아니라 **UTF-16 코드 단위** 수다 | `text-encoding` · `bit-and-byte` | 비트 배열 | `'👍'.length` 를 1 로 예상한다(실제 2). `'가'.length` 는 1 인데 UTF-8 바이트로는 3 — 「길이」가 셋인 것을 모른다 | `value` | **있음** · 94곳/38파일 · 35곳/24파일 |
 
 #### 축 D — 참·거짓 (3판)
@@ -100,7 +102,7 @@ Electron·Tauri 앱, 그리고 이 리포 자신.
 
 | id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 | 사전 |
 |---|---|---|---|---|---|---|
-| `ts/arithmetic` `기존` | `+` 하나가 더하기이자 잇기다 | — | 평가 트리 | `1 + '1'` 은 `'11'` 인데 `'3' - 1` 은 `2` 다 — `+` 만 문자열 쪽으로 기운다 | `predict` | **있음** · 1,236곳/215파일 · 1,541곳/270파일 |
+| `ts/arithmetic` `기존` | `+` 하나가 더하기이자 잇기다 | — | 평가 트리 | `1 + '1'` 은 `'11'` 인데 `'3' - 1` 은 `2` 다 — `+` 만 문자열 쪽으로 기운다 | `value`(예측 판정란) | **있음** · 1,236곳/215파일 · 1,541곳/270파일 |
 | `ts/operator-precedence` **신규** | `2 + 3 * 4` 가 어떤 순서로 접히나. `&&` 가 `\|\|` 보다 세고 둘 다 **단락 평가**한다 | — | 평가 트리 | `a \|\| b && c` 를 왼쪽부터 읽는다. 실제는 `a \|\| (b && c)` 다 | `step` | **있음** · 57곳/20파일 · 61곳/30파일 |
 | `ts/conditional-ternary` `기존` | `? :` 는 **식**이라 값을 낸다. 중첩하면 **오른쪽부터** 묶인다 | — | 평가 트리 | 중첩 삼항을 왼쪽부터 묶어 읽는다 | `step` | **있음** · 1,364곳/303파일 · 2,697곳/339파일 |
 
@@ -108,16 +110,16 @@ Electron·Tauri 앱, 그리고 이 리포 자신.
 
 | id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 | 사전 |
 |---|---|---|---|---|---|---|
-| `ts/implicit-conversion` **신규** | 타입이 다르면 **언어가 한쪽을 바꿔서** 계산한다 | `type` · `static-vs-dynamic-typing` | 타입 변환 사다리 | `'5' * 2 === 10` 인데 `'5' + 2 === '52'` 다. 연산자마다 어느 쪽으로 바뀌는지가 다르다 | `predict` | **있음** · 0곳 · 합성(`idiom`) |
+| `ts/implicit-conversion` **신규** | 타입이 다르면 **언어가 한쪽을 바꿔서** 계산한다 | `type` · `static-vs-dynamic-typing` | 타입 변환 사다리 | `'5' * 2 === 10` 인데 `'5' + 2 === '52'` 다. 연산자마다 어느 쪽으로 바뀌는지가 다르다 | `value`(예측 판정란) | **있음** · 0곳 · 합성(`idiom`) |
 | `ts/explicit-conversion` **신규** | `Number()` · `parseInt()` · `String()` · `!!` 는 **새 값을 만든다** | `type` | 타입 변환 사다리 | `Number('')` 가 `0` 이고 `Number(null)` 도 `0` 인데 `Number(undefined)` 는 `NaN` 이다. `parseInt('12px')` 는 `12`, `Number('12px')` 는 `NaN` | `table` | **있음** · 537곳/135파일 · 255곳/95파일 |
 
 #### 축 G — 대입과 이름 (3판)
 
 | id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 | 사전 |
 |---|---|---|---|---|---|---|
-| `ts/const-declaration` `기존` | 만드는 낱말이 **나중 일까지** 정한다 | `scope-and-lifetime` | 메모리 줄 | `const` 를 「값이 안 바뀜」으로 읽는다. **이름만** 묶는다 | `predict` | **있음** · 16,223곳/405파일 · 9,235곳/578파일 |
+| `ts/const-declaration` `기존` | 만드는 낱말이 **나중 일까지** 정한다 | `scope-and-lifetime` | 메모리 줄 | `const` 를 「값이 안 바뀜」으로 읽는다. **이름만** 묶는다 | `value`(예측 판정란) | **있음** · 16,223곳/405파일 · 9,235곳/578파일 |
 | `ts/reassignment` `기존` | 다시 넣기는 이름이 가리키는 곳을 바꾼다 | `state` | 메모리 줄 | `const` 에 다시 넣어 그 자리에서 멈춘다 | `step` | **있음** · 659곳/141파일 · 533곳/152파일 |
-| `ts/reference-sharing` `중심↑` | `b = a` 는 **가리키는 곳만** 복사한다 | `value-vs-reference` · `aliasing` | 메모리 줄 (화살표 둘이 한 상자로) | `{ ...obj }` 가 안쪽까지 새로 만든다고 믿는다. **한 겹**뿐이다 | `predict` | **있음** · 33곳/23파일 · 43곳/32파일 |
+| `ts/reference-sharing` `중심↑` | `b = a` 는 **가리키는 곳만** 복사한다 | `value-vs-reference` · `aliasing` | 메모리 줄 (화살표 둘이 한 상자로) | `{ ...obj }` 가 안쪽까지 새로 만든다고 믿는다. **한 겹**뿐이다 | `value`(예측 판정란) | **있음** · 33곳/23파일 · 43곳/32파일 |
 
 #### 축 H — 비교와 같음 (2판)
 
@@ -226,7 +228,7 @@ Electron·Tauri 앱, 그리고 이 리포 자신.
 |---|---|---|---|
 | **0부** | 이 언어의 값과 식 | **21** | 위 축 여덟. 기존 10(`const-declaration`·`reassignment`·`boolean-literal`·`comparison`·`arithmetic`·`string-literal`·`number-literal`·`undefined-null`·`template-literal`·`conditional-ternary`) + §3·§4 에서 올린 4(`truthy-falsy`·`loose-equality`·`reference-sharing`·`number-is-double`) + 신규 7 |
 | **1부** | 흐름과 묶기 | **13** | `if-statement` · `while-loop` · `for-of` · `function-declaration` · `arrow-function` · `return-statement` · `call-expression` · `property-access` · `array-basics` · `array-destructuring` · `object-destructuring` · `try-catch` · `object-literal`(§3 신규) |
-| **2부** | 타입과 객체 | **18** | `object-spread` · `optional-chaining` · `nullish-coalescing` · `array-map-immutable` · `array-filter` · `array-method-chain` · `async-await` · `generics` + §3 신규 10(`closure` · `import-export` · `throw-error` · `callback-argument` · `array-reduce` · `class-declaration` · `type-annotation` · `interface-type` · `union-type` · `narrowing`) |
+| **2부** | 타입과 객체 | **18** | **타입 축 셋이 맨 앞이다**(§3 「순서 하나」 · D187 ⑰) — `type-annotation` → `union-type` → `narrowing`. 그다음 `object-spread` · `optional-chaining` · `nullish-coalescing` · `array-map-immutable` · `array-filter` · `array-method-chain` · `async-await` · `generics` + §3 신규 나머지 7(`closure` · `import-export` · `throw-error` · `callback-argument` · `array-reduce` · `class-declaration` · `interface-type`) |
 | **3부** | 프레임워크 | **9 또는 6** | 리포가 정한다 — React 면 `react/` 9([`js-framework-axis.md`](../plan/js-framework-axis.md) §2.2), Node CLI 면 `node/` 6(§2.3). 둘 다면 15 |
 
 **`essential` 30 이 전량 배치된다** — 0부 10 · 1부 12 · 2부 8. 1부의 `object-literal` 과 2부의 열은
@@ -251,6 +253,18 @@ Electron·Tauri 앱, 그리고 이 리포 자신.
 각 1판으로 접어 17판(9일)까지 내려간다. 접으면 잃는 것은 비트 배열 그림이 걸리는 자리 셋
 (`value-bits` · `number-is-double` · `float-inexact`)이 하나로 뭉쳐, 「숫자가 한 종류뿐」과
 「소수가 안 떨어진다」를 한 판에서 둘 다 보여야 한다는 것이다.
+
+**축 A·B 다섯 판을 연속으로 두지 않는다** (D187 ⑰ · [`ts-learning.md`](./ts-learning.md) §11.5).
+축 A 2판 + 축 B 3판이 붙어 있는데 그 다섯 중 셋이 이 리포에서 **얇다** — `number-is-double`
+52곳/29파일 · `float-inexact` 11곳/7파일, 그리고 `Math.trunc` 는 **0~2곳**인데 `Math.floor` 는
+25~30곳이라 `integer-division` 의 두 방향 중 하나가 재료가 없다. 다섯을 연속으로 내면
+**사흘에서 나흘 연속으로 「네 코드엔 없다」만** 나오고, 그동안 D177 규칙 ①(내 코드의 자리를 짚는다)이
+한 번도 안 걸린다.
+
+**섞는 규칙 하나** — 축 A·B 의 얇은 셋 사이에 두꺼운 축의 판을 끼운다. 0부의 두꺼운 자리는
+`string-literal`(46,354곳) · `const-declaration`(16,223곳) · `template-literal`(5,509곳) ·
+`comparison`(4,422곳)이다. 축의 **묶음은 그대로 두고 내는 날만 흩는다** — 축이 여덟인 것은
+설계의 단위이지 하루치가 아니다.
 
 ### 1.5.5 0장(프롤로그)과의 관계 — 안 건드린다
 
@@ -435,6 +449,30 @@ TS 는 만드는 낱말과 옮기는 낱말이 갈려 노드가 둘이다. `foun
 | 13 | `union-type` | 여럿 중 하나 / Union type | `\|` | **new** `common/union-type` | 2 | `type-annotation` | 값 자체가 타입이 된다 — `'idle' \| 'loading'` 은 그 두 문자열만 허용한다 | 상태 기계·API 응답이 전부 유니온으로 온다. 다음 항목의 전제다 |
 | 14 | `narrowing` | 타입 좁히기 / Narrowing | `typeof` · `in` | **new** `common/type-narrowing` | 3 | `union-type` · `if-statement` | `if` 한 줄이 **아래에서 할 수 있는 일**을 바꾼다. 조건이 흐름만이 아니라 타입도 가른다 | 「위에선 빨간 줄이 있었는데 `if` 안에선 없다」가 TS 초심자의 첫 질문이다 |
 
+### 순서 하나 — `union-type`·`narrowing` 을 앞으로 (D187 ⑰ · 저작이 먼저)
+
+위 표의 번호는 **설계 순서**이고 실제 코스 순서는 부 안의 위상 정렬이 정한다(§1.5.4 규칙 ③).
+그 순서를 여기서 못박는다: **`narrowing` 은 2부의 끝(#14)이 아니라 `if-statement` 직후다.**
+
+**근거는 이유를 적은 유일한 자료다.** 다섯 자료 중 배치의 이유를 쓴 것은 TS Handbook 하나이고,
+그 책은 좁히기를 본편 **셋째**(Everyday Types → Narrowing → More on Functions)에 두면서 이유를
+「JS 의 런타임 제어 흐름 **위에 겹친다**」로 적는다. `if` 를 배운 직후가 그 겹침이 처음 보이는
+자리다. javascript.info 는 이벤트 루프를 Part 2 브라우저 → 기타로 밀었고 순서의 이유는 안 적는다
+([`ts-learning.md`](./ts-learning.md) §11.2 ④).
+
+**비용은 3판 이동이다** — 원래 진단이 2판(`union-type`·`narrowing`)이었는데 재 보니 셋이다.
+`narrowing` 의 선행이 `union-type` 이고 `union-type` 의 선행이 `type-annotation` 이라, 위상 정렬이
+`type-annotation` 도 함께 끌어올린다. 셋을 앞으로 옮기면 2부의 첫 셋이 타입 축이 되고, 그것이
+**TS 파일 모든 줄에 있는 것**(`: string`)을 2부 끝이 아니라 시작에서 만나게 한다.
+
+**사전 저작이 먼저다.** 2026-09-05 현재 `dictionary/ts/` 에 `type-annotation.yaml` ·
+`union-type.yaml` · `narrowing.yaml` 이 **하나도 없다** — `_lang.yaml` 의 `essential` 에도 없다.
+그래서 이 판은 순서만 적어 둔다:
+
+> 셋을 저작할 때 `essential` 에서 `ts/type-annotation` → `ts/union-type` → `ts/narrowing` 을
+> `ts/if-statement` **바로 뒤**에 둔다. `ts/interface-type` 은 따라오지 않는다 —
+> `narrowing` 의 선행이 아니고, `interface` 가 없어도 `'idle' | 'loading'` 은 좁혀진다.
+
 ### 새 `alternatives:` 짝 다섯
 
 기존 다섯에 더한다. 조건은 「같은 일을 하는 다른 표기를 쿼리로 셀 수 있을 것」이다.
@@ -446,8 +484,9 @@ TS 는 만드는 낱말과 옮기는 낱말이 갈려 노드가 둘이다. `foun
 | `ts/array-reduce` | `ts/for-of` | 같은 합계를 한쪽은 접고 한쪽은 쌓는다 |
 | `ts/import-export` | **new** `ts/require-call` | ESM 과 CJS 가 한 리포에 섞였다 |
 | `ts/template-literal` | **new** `ts/string-concat` | `+` 로 잇기와 백틱이 같은 파일에 있다 |
+| `ts/narrowing` | **new** `ts/typeof-guard` | 같은 `typeof` 가 한쪽에서는 **타입을 좁히고** 한쪽에서는 **값을 가른다**. `ECC`(JS) 283곳/108파일 — TS 가 아닌 파일에서 이 모양이 그만큼 나온다([`ts-learning.md`](./ts-learning.md) §11.5 ④) |
 
-표기 개념 둘(`ts/require-call` · `ts/string-concat`)이 더 필요하다. `promise-then`·`logical-or-default`
+표기 개념 셋(`ts/require-call` · `ts/string-concat` · `ts/typeof-guard`)이 더 필요하다. `promise-then`·`logical-or-default`
 처럼 `essential: false` 로 둔다 — 분모가 아니라 **부기**다.
 
 ---
@@ -459,11 +498,11 @@ TS 는 만드는 낱말과 옮기는 낱말이 갈려 노드가 둘이다. `foun
 | 1 | `number-is-double` | 숫자가 한 종류뿐 / One number type | `0.1 + 0.2` | `null` | 3 | `arithmetic` · `number-literal` | 정수 타입이 **없다.** `1` 도 `1.5` 도 같은 64비트 부동소수라 `0.1 + 0.2 !== 0.3` 이고 큰 정수가 조용히 어긋난다 |
 | 2 | `type-erasure` | 타입은 돌기 전에 사라진다 / Type erasure | `tsc` | `null` | 2 | `type-annotation` | 실행 중에는 타입이 **없다.** API 응답이 `interface` 와 달라도 아무도 안 막는다 |
 | 3 | `type-assertion` | `as` 는 검사를 끄는 것 / Type assertion | `as` | `null` | 3 | `type-annotation` · `type-erasure` | 변환이 아니다. 값은 그대로 두고 **컴파일러 입만 막는다** |
-| 4 | `prototype-chain` | class 뒤의 사슬 / Prototype chain | `prototype` | `null` | 3 | `class-declaration` · `property-access` | 속성을 못 찾으면 **위로 한 칸 올라가** 다시 찾는다. `class` 는 이 사슬을 짓는 설탕이다 |
+| 4 | `prototype-chain` | class 뒤의 사슬 / Prototype chain | `prototype` | `null` | 3 | `property-access` (**`class-declaration` 을 뺐다** — 방향이 반대다, §1.5.4 「선행 방향 하나」) | 속성을 못 찾으면 **위로 한 칸 올라가** 다시 찾는다. `class` 는 이 사슬을 짓는 설탕이다. **자리가 없을 때의 사유는 `idiom`** — `ECC` 422파일에 `prototype` 36곳이 있으므로 「스케일이 작아서」가 아니다 |
 | 5 | `structural-typing` | 이름 말고 모양이 맞으면 / Structural typing | — | `null`(§6) | 4 | `interface-type` | 두 `interface` 가 이름이 달라도 모양이 같으면 대입된다. Java·C# 을 알던 사람이 가장 크게 헷갈린다 |
 | 6 | `generic-constraint` | 타입 자리에 조건 걸기 / Generic constraint | `T extends` | `common/generics` | 4 | `generics` · `interface-type` | `extends` 가 상속이 아니라 **「적어도 이 모양은 되어야 한다」**다. 같은 낱말이 `class` 에서는 상속이다 |
 | 7 | `any-unknown` | `any` 와 `unknown` / any and unknown | `unknown` | `null` | 4 | `type-annotation` · `narrowing` | 둘 다 「모른다」인데 `any` 는 검사를 끄고 전염되며 `unknown` 은 **좁히기를 강제한다** |
-| 8 | `this-binding` | `this` 가 가리키는 것 / this binding | `this` | `null` | 4 | `class-declaration` · `callback-argument` | 정의한 자리가 아니라 **부른 자리**가 정한다. `cb = obj.m; cb()` 의 `this` 는 `obj` 가 아니다 |
+| 8 | `this-binding` | `this` 가 가리키는 것 / this binding | `this` | `null` | 4 | `class-declaration` · `callback-argument` | 정의한 자리가 아니라 **부른 자리**가 정한다. `cb = obj.m; cb()` 의 `this` 는 `obj` 가 아니다. **자리가 없을 때의 사유는 `idiom`** — 실측 `this` **85곳/16파일** 대 화살표 **16,063곳**이라, 없는 이유가 규모가 아니라 **LLM 이 화살표로 짜기 때문**이다(D158 의 사유 축에서 `scale` 과 갈리는 자리) |
 | 9 | `await-resume` | `await` 다음 줄은 언제 도나 / When await resumes | `await` | `null` | 4 | `async-await` · `callback-argument` | 함수가 그 줄에서 **접히고** 나머지는 마이크로태스크 대기줄로 간다 — `setTimeout(…, 0)` 보다 먼저 온다 |
 
 앞의 넷은 **버그를 설명**하고(부동소수·타입 소거·`as`·프로토타입) 뒤의 다섯은 **설계를 설명**한다.
@@ -625,11 +664,14 @@ TS 가 **남에게서 물려받은 것은 0개**다. `universal: null` 은 `ts/i
 
 ---
 
-## 9. 오개념 10개
+## 9. 오개념 16개
 
-progmiscon.org 의 JavaScript 항목은 여섯이다(`AssignmentCopiesObject` · `ClassDefinesType` ·
-`ConstReferenceImpliesImmutability` · `NoAtomicExpression` · `NullIsObject` · `ThisAssignable`).
-이 중 넷이 아래와 겹친다 — **이름만 인용하고 문장은 가져오지 않는다**(재사용 라이선스 없음, D148).
+progmiscon.org 의 JavaScript 항목은 **33건**이다 — 공개 6 · **초안 27**(2026-09-05 정적 API 실측 ·
+[`ts-learning.md`](./ts-learning.md) §11.1). 전에 「여섯」이라 적었던 것은 공개분만 센 값이다.
+공개 여섯은 `AssignmentCopiesObject` · `ClassDefinesType` · `ConstReferenceImpliesImmutability` ·
+`NoAtomicExpression` · `NullIsObject` · `ThisAssignable` 이고 그중 넷이 아래와 겹친다 —
+**이름만 인용하고 문장은 가져오지 않는다**(재사용 라이선스 없음, D148). **이벤트 루프 항목은
+33건 중 0건**이다 — 이 리포 `await` 1,472곳의 축을 받쳐 줄 오개념 연구가 없다.
 
 | # | 믿는 것 | 실제로는 | 걸리는 개념 |
 |---|---|---|---|
@@ -643,6 +685,16 @@ progmiscon.org 의 JavaScript 항목은 여섯이다(`AssignmentCopiesObject` ·
 | 8 | `as` 를 쓰면 그 타입으로 바뀐다 | 값은 그대로다. 컴파일러 입만 막으므로 다음 줄에서 런타임에 터진다 | `type-assertion` |
 | 9 | 메서드를 변수에 담아 불러도 `this` 는 같다 | 부른 자리가 정한다. `cb = obj.m; cb()` 의 `this` 는 `obj` 가 아니다 (`ThisAssignable`) | `this-binding` |
 | 10 | `await` 가 프로그램 전체를 멈춘다 | 그 함수만 접힌다. 나머지는 계속 돌고 접힌 쪽은 마이크로태스크 대기줄에서 이어진다 | `await-resume` |
+| 11 **초안** | `null` 과 `undefined` 는 같은 것이다 | 다르다 — 안 넣은 것(`undefined`)과 없다고 넣은 것(`null`)이다. `==` 로만 같고 `===` 로는 다르다 (`NullAndUndefinedAreTheSame`) | `undefined-null` |
+| 12 **초안** | `typeof null` 은 `'null'` 이다 | `'object'` 다. 첫 판의 버그가 표준에 남았다 (`TypeofNullIsNull`) | `undefined-null` · `implicit-conversion` |
+| 13 **초안** | `'ab' * 3` 이 문자열을 세 번 잇는다 | `NaN` 이다. JS 에는 문자열 반복 연산자가 없고 `repeat(3)` 이 그 자리다 (`StringRepetitionOperator`) | `implicit-conversion` · `arithmetic` |
+| 14 **초안** | `==` 는 객체의 **값**을 견준다 | 객체끼리는 `==` 도 `===` 도 **자리**를 견준다. 강제 변환은 타입이 다를 때만 돈다 (`EqualityOperatorComparesObjectsValues`) | `loose-equality` · `reference-sharing` |
+| 15 **초안** | 프로토타입은 클래스다 | 사슬로 이어진 **객체**다. `class` 가 그 사슬을 짓는 설탕이고 실측이 반대 방향을 가리킨다 — `ECC` 422파일에 `class` 1곳 대 `prototype` 36곳 (`PrototypesAreClasses`) | `prototype-chain` · `class-declaration` |
+| 16 **초안** | `map` 은 원본을 고친다 | 새 배열을 만든다. 원본을 고치는 것은 `forEach` 안의 대입이나 `sort`·`splice` 다 (`MapInPlace`) | `array-map-immutable` |
+
+**11~16 은 전부 progmiscon 의 초안(draft) 항목이다** — 공개분이 아니라서 「초안」이라고 표시했다.
+더한 이유는 **0부 축 D(참·거짓)에 붙일 오개념이 하나도 없었기** 때문이고, 11·12·14 가 그 자리를
+채운다([`ts-learning.md`](./ts-learning.md) §11.4).
 
 1·4·10 은 이미 기존 YAML 의 `misconceptions:` 한 줄로 들어가 있다. 한 줄과 개념은 다르다 —
 **한 줄에는 카드도 사용처도 겹도 안 붙는다.** §3 이 넷(`reference-sharing`·`truthy-falsy`·

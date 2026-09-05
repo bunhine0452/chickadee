@@ -109,21 +109,26 @@ Unity 쪽은 `_lang.yaml` 의 **`alternatives`** 로 흡수한다 — 「AI 가 
 
 ### §0.2 형식과 `universal` — 규약 4·6
 
-| # | 형식 (I1) | `universal` |
-|---|---|---|
-| 0-1 | `bits` → **`predict`** | `common/number-literal` |
-| 0-2 | `value` | `common/number-literal` |
-| 0-3 | `table` | `common/text-literal` |
-| 0-4 | `predict` | `common/boolean-value` |
-| 0-5 | `step` | `common/arithmetic` |
-| 0-6 | `build` | `common/type-cast`(신규 후보 · README §8) |
-| 0-7 | `step` | `common/variable-binding` · `common/reassignment` |
-| 0-8 | **`predict`** | `common/comparison` |
+`fundamentals.md` §2.1·§2.2 가 **`bits` 와 `predict` 를 형식에서 내렸다.** `bits` 는 `table` 의
+한 배치이고 `predict` 는 형식이 아니라 **`value` 의 판정란**이다 — 「예측하게 한다」는 물음의
+성질이지 답을 받는 모양이 아니다. 아래 표를 그 결정에 맞춰 다시 적었다
+([`csharp-learning.md`](./csharp-learning.md) §11.6 ②).
 
-**여섯 형식이 전부 쓰인다** — 안 쓰는 것이 없다(규약 6). 그림도 여섯이 전부 쓰인다:
+| # | 형식 (I1) | 배치 · 판정란 | `universal` |
+|---|---|---|---|
+| 0-1 | `table` | 비트 칸 배치 + **예측 판정란** | `common/number-literal` |
+| 0-2 | `value` | — | `common/number-literal` |
+| 0-3 | `table` | — | `common/text-literal` |
+| 0-4 | `value` | **예측 판정란** | `common/boolean-value` |
+| 0-5 | `step` | — | `common/arithmetic` |
+| 0-6 | `build` | — | `common/type-cast`(신규 후보 · README §8) |
+| 0-7 | `step` | — | `common/variable-binding` · `common/reassignment` |
+| 0-8 | `value` | **예측 판정란** | `common/comparison` |
+
+**남은 형식이 전부 쓰인다** — 안 쓰는 것이 없다(규약 6). 그림도 여섯이 전부 쓰인다:
 스택 프레임은 0-7 에서 「struct 를 메서드에 넘기면 프레임에 복사본이 하나 더 선다」를 그린다.
 
-**C# 에서 `predict` 가 가장 센 자리가 0-1 과 0-8 이다.** 둘 다 예측과 실제가 갈리고, **갈리는
+**C# 에서 예측 판정란이 가장 센 자리가 0-1 과 0-8 이다.** 둘 다 예측과 실제가 갈리고, **갈리는
 원인이 코드에 안 적혀 있다** — `checked` 를 안 적었다는 사실, 그리고 변수의 정적 타입.
 오답 진단은 정본 §3 ② 대로 **「당신이 고른 그것이 참이 되는 조건」**을 낸다: 「예외가 나는 답은
 `checked` 를 적었을 때 참이다」 + 그 한 줄. **예측이 틀리는 순간이 곧 「`checked` 라는 낱말이

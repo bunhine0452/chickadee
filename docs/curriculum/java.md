@@ -150,7 +150,25 @@ Java 에 같은 것을 하려면 `spring/` 네임스페이스가 필요하고 **
 | id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 | 사전 |
 |---|---|---|---|---|---|---|
 | `java/comparison` `1부↑` | `<`·`>` 는 **숫자에만** 쓴다 | — | 평가 트리 | 글자를 `<` 로 견주려 한다. 문자열은 `compareTo` 다 | `value` | **있음** · 51/15 |
-| `java/reference-equality` `대기↑` | `==` 는 「같은 상자냐」, `.equals` 는 「내용이 같냐」 | `identity-vs-equality` · `value-vs-reference` | 메모리 줄 | `new String("a") == "a"` 가 거짓이다. `Integer a = 1000, b = 1000` 이면 `a == b` 가 **정해져 있지 않고**(대개 거짓) `127` 이면 참이다(캐시 −128~127 만 보장, JLS 5.1.7) | `predict` | **있음** · 15/5 |
+| `java/reference-equality` `대기↑` | `==` 는 「같은 상자냐」, `.equals` 는 「내용이 같냐」 | `identity-vs-equality` · `value-vs-reference` | 메모리 줄 | **대표 예는 `Integer` 캐시다** — `Integer a = 127, b = 127` 이면 `a == b` 가 **참으로 보장**되고, `128` 이면 **명세가 안 정한다**(JLS SE21 §5.1.7 — 공유를 허용하되 요구하지 않는다). `.equals` 는 둘 다 참이다 | `predict` | **있음** · 15/5 |
+
+**축 H 의 대표 예에서 `new` 를 뺐다** (2026-09-05 · D187 ⑰ · [`java-learning.md`](./java-learning.md) §12.6 ②).
+전에 쓰던 `new String("a") == "a"` 는 **0부가 2부 문법을 쓰는** 자리였다 — `java/new-expression` 은
+§4 #16 이다. 고른 답은 **「H 를 1부로 내린다」가 아니라 「예를 `new` 없이 쓴다」**이고 근거는 넷이다.
+
+1. **축이 쪼개진다.** 축 H 는 「비교와 같음」 두 판이고 짝이 `java/comparison` 이다. `==` 와 `<` 를
+   다른 부에서 만나면 이 축이 잡으려는 오개념(「`==` 로 문자열을 견준다」)이 짝을 잃는다.
+2. **부 배치는 사전 순서에 매여 있다.** `JAVA_PARTS` 의 0부는 `_lang.yaml` 의 `essential` 순서를
+   한 글자도 안 어긋나게 옮긴 것이고 시험이 그것을 대조한다(`curriculum.test.ts`). H 를 내리려면
+   `essential` 순서를 바꿔야 하고, 그것은 문서가 사전을 흔드는 일이다.
+3. **실측이 반대쪽을 가리킨다.** 오토박싱 사용처는 표본 리포에 **256곳/65파일**이고 `new String`
+   은 **0곳**이다. 「내 코드가 교재」가 서는 쪽은 `Integer` 다 — `new String("a")` 는 어느 리포에도
+   안 나오고 IDE 가 경고까지 하는 합성이다.
+4. **선행이 0부 안에서 닫힌다.** `Integer` 캐시는 축 F 의 `java/autoboxing`(같은 0부, 앞 축)에
+   기대므로 부를 넘지 않는다. `new` 는 두 부를 넘는다.
+
+대가도 적는다 — `.equals` 대 `==` 를 **객체**로 보이는 자리가 0부에서 없어진다. 그것은 2부
+`java/equals-hashcode` 가 받고, 0부는 「같은 상자냐」를 상자 둘이 이미 있는 `Integer` 로 묻는다.
 
 **그림 여섯 중 다섯만 쓴다.** 비트 배열 · 평가 트리 · 값 상자 · 메모리 줄 · 타입 변환 사다리.
 **스택 프레임은 0부에 없다** — 메서드가 아직 안 나왔다. 1부 `java/method-declaration`·
@@ -928,10 +946,21 @@ _multiline_string_literal)` 이라 `"""…"""` 도 같은 노드다. LLM 이 SQL
 | 11 | `if (done = true)` 는 견주기다 | 넣고 나서 그 값을 조건으로 쓴다. Java 는 `boolean` 일 때**만** 이것을 통과시킨다 — `=`/`==` 실수가 살아남는 유일한 자리다 | `assignment` · `comparison` |
 | 12 | `a && b` 는 `b` 를 언제나 계산한다 | `a` 가 거짓이면 `b` 는 실행되지 않는다. `if (s != null && s.length() > 0)` 이 성립하는 이유다 | `if-statement` · `null` |
 | 13 | `Integer a = 1000, b = 1000;` 이면 `a == b` 가 참이다 | −128~127 은 캐시가 **보장**되어 참이고, 그 밖은 **정해져 있지 않다** — JLS 5.1.7 은 공유를 허용하되 요구하지 않는다(`allows but does not require sharing`). 대개 거짓이지만 `false` 로 **채점하면 안 된다**(java-learning.md §12.4 정정) | `autoboxing` · `reference-equality` |
+| 14 | 변수가 객체를 **담는다** | 담는 것은 자리 번호다(`VariablesHoldObjects` · `ReferenceToVariable`). #1·#2 는 이 오해의 **결과**이고 이것이 원인이다 | `reference-binding` |
+| 15 | `char` 은 글자라 숫자가 아니다 | `'a' + 'b'` 는 `"ab"` 가 아니라 **`195`(`int`)** 다(`CharNotNumeric`) | `text-length` |
+| 16 | `+` 는 문자열을 만나면 처음부터 잇기다 | 왼쪽부터 접히고, 문자열을 만나기 **전까지는 숫자로** 접힌다 — `1 + 2 + "a"` 는 `"3a"`, `"a" + 1 + 2` 는 `"a12"` 다(`StringPlusStringifiesExpression` · `ArithmeticPlusPrecedes`) | `string-concat` · `operator-precedence` |
+| 17 | 소수 리터럴은 `float` 다 | `1.5` 는 `double` 이라 `float f = 1.5;` 가 막힌다. 큰 정수 리터럴도 같다 — `long x = 10000000000;` 은 접미 `L` 이 없으면 멈춘다(`NoFloatLiterals` · `NoLongLiterals` · `LargeIntegerLong`) | `floating-type` · `integer-limit` |
+| 18 | 재귀 호출은 같은 프레임을 쓰고, `return` 은 여러 겹을 한 번에 벗긴다 | 호출마다 **프레임이 새로 선다.** `return` 은 **한 겹**만 벗긴다 — 반복문 안의 `return` 이 Lister 외 2004 의 12문항 중 두 번째로 어려웠다(정답률 42%, 기관·국가를 가로질러 일관)(`RecursiveActivationsShareFrame` · `ReturnUnwindsMultipleFrames`) | `return-statement` · `method-declaration` |
+| 19 | `static` 메서드 안에도 `this` 가 있다 | 없다(`ThisExistsInStaticMethod`). #5 「필드를 못 읽는다」는 결과이고 이것이 원인이다 | `static` |
 
 1·5·6·7 은 Ragonis & Ben-Ari 의 장기 조사(2005, 초심자 OOP 이해)가 「클래스 대 객체 / 생성과
 생성자 / 프로그램 흐름」 세 덩어리로 묶어 보고한 것과 겹친다. 우리 목록은 그 논문의 분류를
 확인용으로만 쓰고 문장은 가져오지 않았다.
+
+**14~19 는 2026-09-05 에 붙었다**([`java-learning.md`](./java-learning.md) §12.4). progmiscon.org
+자바 목록 **55건** 중 이 표가 안 들고 있던 것이고, 셋(14·18·19)은 §10 이 이미 든 항목의 **원인**
+쪽이다 — 결과만 들면 오답 진단이 「그래서 왜」에서 멈춘다. 18 은 **스택 프레임 그림의 첫
+소비자**이기도 하다.
 
 ---
 
@@ -949,7 +978,7 @@ _multiline_string_literal)` 이라 `"""…"""` 도 같은 노드다. LLM 이 SQL
 | TIOBE 2026-08 | `https://www.tiobe.com/tiobe-index/` | 확인(경유: TechRepublic 2026-08 기사). Java 4위 8.25% |
 | progmiscon.org Java 오개념 55건 | `https://progmiscon.org/misconceptions/Java/` | 확인. **이름만** 참고. 재사용 라이선스가 없어 문장은 안 가져왔다(D148) |
 | Ragonis & Ben-Ari, *A long-term investigation of the comprehension of OOP concepts by novices*, Computer Science Education 15(3), 2005 | `https://doi.org/10.1080/08993400500224310` | **초록 수준만 확인.** 본문 58개 항목의 원문은 못 봤다 — 분류(클래스 대 객체 / 생성과 생성자 / 프로그램 흐름)만 대조에 썼다 |
-| `Integer` 캐시 −128~127 | JLS §5.1.7 | **확인 못 함(문서 원문 미열람).** 널리 알려진 사실이고 오개념 13 의 근거지만 사전에 넣기 전에 JLS 원문을 봐야 한다 |
+| `Integer` 캐시 −128~127 | JLS SE21 §5.1.7 Boxing Conversion · `https://docs.oracle.com/javase/specs/jls/se21/html/jls-5.html` | **확인**(해당 절 전문, 2026-09-05). 보장은 **상수 식 또는 −128~127** 뿐이고, 범위 밖은 「allows (but does not require) sharing」 — 즉 **거짓이 아니라 미정**이다. 오개념 13 이 그렇게 고쳐졌다 |
 | Spring Boot 이 LLM Java 출력의 기본값이라는 것 | — | **수치 없음.** 벤치마크로 확인하지 못했다. §1 은 관찰이지 측정이 아니다. `spring/` 네임스페이스를 실제로 만들기 전에 리포 표본으로 세야 한다 |
 
 ---

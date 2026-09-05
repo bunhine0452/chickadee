@@ -98,7 +98,7 @@ lazygit 도 같다 — `go func` 14곳/10파일, `select` 29곳/12파일, 포인
 
 | # | 형식 (I1) | `universal` |
 |---|---|---|
-| 0-1 | `bits` → `predict` | `common/number-literal` |
+| 0-1 | `bits` → `predict` (+ `event` 값 **`compile error`**) | `common/number-literal` |
 | 0-2 | `value` | `common/number-literal` |
 | 0-3 | `table` | `common/text-literal` |
 | 0-4 | `predict` | `common/boolean-value` |
@@ -110,6 +110,9 @@ lazygit 도 같다 — `go func` 14곳/10파일, `select` 29곳/12파일, 포인
 **여섯 형식이 전부 쓰인다** — 안 쓰는 것이 없다(규약 6). 그림 여섯 중 **스택 프레임만 안 쓴다**:
 0부에는 함수가 아직 안 나오고(1부의 `go/func-declaration`), 프레임을 그릴 값이 없다.
 `bits → predict` 는 순서다 — 비트로 먼저 보이고 그다음 「`int8` 127 에 1 을 더하면?」을 예측시킨다.
+**0-1 의 답이 값이 아닌 자리가 있다** — `var x int8 = 128` 은 상수 넘침이라 컴파일이 멈춘다.
+0-6 과 §9 ③(`if n {`)도 같다. 세 자리의 정답은 값이 아니라 **사건**이므로 `EVENTS` 에
+`compile error` 한 줄이 필요하다(신청은 `packages/cards/src/fundamentals.ts` 로 나갔다).
 
 ### §0.3 Go 라서 다른 다섯 자리
 
@@ -277,13 +280,13 @@ library · scale · idiom)이 필수다. 문법이 없으면 앞의 것을 못 �
 | 13 | `go/call-expression` | 함수 부르기 / Calling a function | `f()` | `common/function-call` | 1 | 7 | 인자는 **언제나 값 복사**다. 바꾸려면 포인터를 명시적으로 넘긴다 |
 | 14 | `go/selector` | 점 찍어 꺼내기 / Selector | `.` | `common/member-access` | 1 | 15, 13 | 같은 점이 **패키지**(`fmt.Println`)에도 **필드**(`x.Name`)에도 쓰인다. `->` 가 없어 포인터여도 점이다 |
 | 15 | `go/struct-type` | 칸에 이름 붙여 묶기 / Struct type | `struct` | `null` | 2 | 2 | 구조체는 **값**이다. 대입하면 통째로 복사되고 함수에 넘겨도 복사본이 간다 |
-| 16 | `go/slice` | 순서 있는 목록 / Slice | `[]T` | `common/list` | 2 | 2, 11 | 목록이 아니라 **뒷배열을 보는 창**이다. `s[1:3]` 은 복사가 아니라 같은 배열의 다른 창이다 |
-| 17 | `go/append` | 목록 뒤에 붙이기 / Append | `append` | `null` | 2 | 16 | **반환값을 다시 담지 않으면 아무 일도 안 난다.** 담더라도 용량이 남으면 원본을 고치고 모자라면 새 배열이 생긴다 |
+| 16 | `go/slice` | 순서 있는 목록 / Slice | `[]T` | `common/list` | 2 | 2, 11 | 목록이 아니라 **뒷배열을 보는 창**이다. 「슬라이스는 공유된다」로 넓게 적지 않는다 — 그렇게 적으면 C·C++ 의 포인터 별칭과 같은 문장이 되어 T1(이식) 에서 탈락한다. Go 만의 것은 **`cap` 이 남으면 원본을 고치고 모자라면 새 배열이 선다**는 조건부다 |
+| 17 | `go/append` | 목록 뒤에 붙이기 / Append | `append` | `null` | 2 | 16 | **반환값을 다시 담지 않으면 아무 일도 안 난다.** 담더라도 **`cap` 이 남으면 원본을 고치고** 모자라면 새 배열이 생긴다 — 같은 코드가 용량에 따라 다르게 도는 것이 판의 요점이고, 좁힌 이 문장만 T1 을 통과한다([`go-learning.md`](./go-learning.md) §11.3) |
 | 18 | `go/map-type` | 열쇠로 값 찾기 / Map | `map[K]V` | `null` | 2 | 2, 12 | 없는 열쇠를 읽으면 오류가 아니라 **제로 값**이다. 있었는지는 `v, ok := m[k]` 로만 안다. nil 맵은 읽기는 되고 쓰기는 터진다 |
 | 19 | `go/range-loop` | 하나씩 훑기 / Range loop | `range` | `common/iterate` | 2 | 6, 16 | 맵을 훑으면 **순서가 매번 다를 수 있다**(명세). 값 변수는 **복사본**이라 고쳐도 원본이 안 바뀐다 |
 | 20 | `go/nil` | 값이 없음 / Nil | `nil` | `common/absent-value` | 2 | 2, 21 | `nil` 이 여섯 가지다 — 포인터·슬라이스·맵·채널·함수·인터페이스. nil 슬라이스는 `append` 가 되고 nil 맵은 쓰기가 터진다 |
 | 21 | `go/pointer` | 값 있는 자리 가리키기 / Pointer | `*` `&` | `null` | 2 | 2 | 값 복사가 기본이라, 바꾸거나 큰 것을 안 베끼려면 **주소를 명시적으로** 넘긴다. 산술은 못 한다 |
-| 22 | `go/method-receiver` | 타입에 함수 붙이기 / Method with a receiver | `func (r T)` | `null` | 2 | 7, 15, 21 | 이름 앞에 **받는 값**을 하나 더 적은 함수다. 값 리시버는 복사본, 포인터 리시버는 원본. 실코드는 포인터가 83%(cli)~98%(lazygit) |
+| 22 | `go/method-receiver` | 타입에 함수 붙이기 / Method with a receiver | `func (r T)` | `null` | 2 | 7, 15, 21 | 이름 앞에 **받는 값**을 하나 더 적은 함수다. 값 리시버는 복사본, 포인터 리시버는 원본. 실코드는 포인터가 83%(cli)~98%(lazygit). **`T` 의 메서드 집합에 `*T` 리시버가 안 든다**(명세 「Method sets」)를 §9 ⑩ 과 한 판으로 묶는다 — 좁힌 이 판이 T1 을 통과하는 유일한 인터페이스 물음이다 |
 | 23 | `go/func-literal` | 값으로서의 함수 / Function literal | `func(){}` | `common/function-value` | 2 | 7 | 이름 없는 함수가 값이다. `http.HandlerFunc` 과 `go func()` 이 전부 이 위에 선다 |
 | 24 | `go/error-check` | 실패를 값으로 받아 확인하기 / Checking the returned error | `if err != nil` | `null` | 2 | 5, 8, 20 | **예외가 없다.** 실패는 던져지지 않고 마지막 반환값으로 온다. 안 보고 지나가도 컴파일이 안 멈춘다 — 가장 흔한 세 줄이자 가장 조용한 함정 |
 
@@ -301,7 +304,7 @@ Go 가 작은 언어라 심화가 얇다는 예상은 반만 맞다. 문법으�
 
 | # | id | name.ko / en | token | universal | diff | prereq | **Go 라서 다른 것** | 밀도(cli) |
 |---|---|---|---|---|---|---|---|---|
-| 25 | `go/defer` | 나중에 할 일 미뤄 두기 / Defer | `defer` | `null` | 3 | 13, 7 | **인자는 지금 계산되어 저장된다.** 호출만 함수 끝으로 미뤄지고, 여럿이면 **역순**이다 | 191 / 99파일 |
+| 25 | `go/defer` | **인자는 지금 계산된다** / Defer evaluates its arguments now | `defer` | `null` | 3 | 13, 7 | 호출만 함수 끝으로 미뤄지고 **인자는 `defer` 를 만나는 그 줄에서 계산되어 저장된다.** 여럿이면 역순이다. 제목이 「나중에 할 일 미뤄 두기」가 아닌 이유는 T1 이다 — 미루기는 Swift `defer`·C# `finally` 에도 있고, 인자 평가 시점만 Go 의 것이다(§11.4.3 의 Swift 대조) | 191 / 99파일 |
 | 26 | `go/package-visibility` | 첫 글자로 공개 정하기 / Exported names | `Name` | `null` | 3 | 7, 15 | `public`·`private` 낱말이 없다. **첫 글자가 대문자인가**가 패키지 밖에서 보이는지를 정한다 | 전 파일 |
 | 27 | `go/interface-implicit` | 적지 않고 만족하기 / Implicit interfaces | `interface` | `null` | 3 | 22, 15 | `implements` 를 **어디에도 안 적는다**. 어떤 타입이 어떤 인터페이스를 만족하는지 파일을 봐서는 모른다 | 선언 92 / 69파일 |
 | 28 | `go/nil-interface` | 비었는데 비지 않은 것 / The non-nil nil interface | `!= nil` | `null` | 4 | 27, 20, 21 | 인터페이스는 (타입, 값) **둘**이다. nil 포인터를 담으면 값은 nil 인데 타입이 남아 `!= nil` 이 참이 된다 | 쿼리로 못 잡음(§10) |
@@ -547,6 +550,12 @@ gofmt 가 고정하는 것은 공백·정렬이고 T1 이 재는 것은 「어�
 
 nil 관련이 넷(2·5·8·12 중 2·8), 값 복사 관련이 넷(4·5·10·11)이다. 오답 진단(`diag`)의 재료가
 여기서 나온다.
+
+**출처는 명세·FAQ·설문, 그리고 실무서 하나다.** 넷째는 Harsanyi 의 `100 Go Mistakes`(100go.co,
+**2차 · 실무서**)이고 이 표에 준 것은 자료형 13개 쪽뿐이다(④⑤). 그 책은 100개 중 **17개가
+동시성**인데 이 표에는 동시성이 0이다 — 대상이 다르기 때문이고(실무 개발자 대 바이브 코딩
+코드를 읽는 사람), §1 실측(`go func` 이 파일의 4.4%)이 후자 쪽 근거다. **동시성을 더하지 않는
+것이 맞다**([`go-learning.md`](./go-learning.md) §11.4.1).
 
 **이 열둘은 1·2부의 것이다.** 값 층위 오개념은 여기 둘뿐이라(② 제로 값 · ③ 조건 자리) **0부 여덟
 장의 것을 §0.1 의 마지막 열에 따로 세웠다** — 폭·넘침 · 실수 근사 · 바이트 대 rune · 우선순위 ·

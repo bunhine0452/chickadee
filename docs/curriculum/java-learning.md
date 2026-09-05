@@ -431,22 +431,31 @@ Line1 이 돌든 안 돌든 Line2 의 결과가 같다. 저자들이 제안한 �
 
 ### §12.6 바꿀 것 — diff
 
-**본문은 안 고쳤다.** 아래는 제안이고 등록부 행 번호는 오케스트레이터가 매긴다.
+**`java.md` 쪽 넷(②③⑦⑨)을 반영했다** (2026-09-05 · D187 ⑰). 나머지 다섯은 `docs/curriculum/**`
+밖이라 그 문서의 소유 세션에 넘긴다 — 마지막 열이 어디로 갔는지다.
 
-| # | 무엇을 | 어디서 → 어디로 | 근거 |
-|---|---|---|---|
-| ① | 「메모리 줄」의 언어 열에 `java` 를 더한다 (새 그림이 아니다) | `diagrams.md` §3 명세만 표 `C·C++·Rust·Go` → `+ java` | `java.md` §1.5.1 이 이미 넉 장에 걸었다(명세와 불일치) · §12.1 표의 오개념 아홉이 이 그림에 걸린다 · Holliday & Luginbuhl 2004 |
-| ② | 0부 축 H `reference-equality` 의 대표 예를 `new String("a") == "a"` → **`Integer` 캐시**로 | `java.md` §1.5.1 축 H 행 | `new-expression` 이 2부(§4 #16)라 0부가 2부 문법을 쓴다 · 오토박싱 사용처 256곳/65파일 |
-| ③ | §10 #13 을 「그 밖은 거짓」 → **「명세가 정하지 않는다. 보장은 상수 식 −128~127 뿐」**으로 | `java.md` §10 · §11 의 「확인 못 함」 행 제거 | JLS SE21 §5.1.7 원문 (§12.4) |
-| ④ | `FundValue` 에 `{t:'compile-error'}` · `{t:'unspecified'}` 두 변형 | `fundamentals.md` §6 payload · `packages/grading/src/fundamentals.ts` | §12.3 의 통과 연습 셋이 컴파일 오류를 답으로 갖는다 · ③ · `fundamentals.md` §9 의 UB 항목이 이미 요구 |
-| ⑤ | 카탈로그에 **`javaAlt`** 한 칸 (자바 안의 다른 규칙이 내는 값 + 오개념 이름) | `packages/cards/src/fundamentals.ts` | §12.4 진단 표 — 열하나 중 넷이 `siblings` 로 안 잡힌다 |
-| ⑥ | **판별력 검사** — 후보 식의 `siblings`·`javaAlt` 값이 정답과 전부 달라야 문항으로 낸다 | 같은 파일 `buildValueItems` | Ma 외 후속 연구의 실패 사례 (§12.4) |
-| ⑦ | §10 에 오개념 여섯 추가 | `java.md` §10 | progmiscon 자바 55 중 §10 이 안 든 것 (§12.4) |
-| ⑧ | 로그인 챕터 2단에 `trace-table` 한 판 (`AuthService.java:78~106`) | `chapter-login.md` §3 | `pedagogy.md` §1.2 의 구멍 · CS2023 SDF CS Core 주제 2 · §12.5 |
-| ⑨ | §2 의 부 배치 · `course.md` §5.1 의 일수 — **안 바꾼다** | — | objects-first 논쟁의 근거가 「같은 이득, 체감만 다름」이라 순서를 바꿀 근거가 없다. CS2023 SDF 주제 순서와 우리 0·1·2부가 이미 맞는다 (§12.2) |
+| # | 무엇을 | 어디서 → 어디로 | 근거 | 반영 · 어디 |
+|---|---|---|---|---|
+| ① | 「메모리 줄」의 언어 열에 `java` 를 더한다 (새 그림이 아니다) | `diagrams.md` §3 명세만 표 `C·C++·Rust·Go` → `+ java` | `java.md` §1.5.1 이 이미 넉 장에 걸었다(명세와 불일치) · §12.1 표의 오개념 아홉이 이 그림에 걸린다 · Holliday & Luginbuhl 2004 | **범위 밖** · `design/system/diagrams.md` (curriculum `README.md` §13 이 「반영함」으로 적었다) |
+| ② | 0부 축 H `reference-equality` 의 대표 예를 `new String("a") == "a"` → **`Integer` 캐시**로 | `java.md` §1.5.1 축 H 행 | `new-expression` 이 2부(§4 #16)라 0부가 2부 문법을 쓴다 · 오토박싱 사용처 256곳/65파일 | **반영** · `java.md` §1.5.1 축 H 행 + 그 아래 근거 문단 넷. **「H 를 1부로 내린다」는 안 골랐다** — 아래 |
+| ③ | §10 #13 을 「그 밖은 거짓」 → **「명세가 정하지 않는다. 보장은 상수 식 −128~127 뿐」**으로 | `java.md` §10 · §11 의 「확인 못 함」 행 제거 | JLS SE21 §5.1.7 원문 (§12.4) | **반영** · `java.md` §10 #13 은 이미 고쳐져 있었고, 남아 있던 `java.md` §11 「확인 못 함」 행을 **확인**으로 갈았다 |
+| ④ | `FundValue` 에 `{t:'compile-error'}` · `{t:'unspecified'}` 두 변형 | `fundamentals.md` §6 payload · `packages/grading/src/fundamentals.ts` | §12.3 의 통과 연습 셋이 컴파일 오류를 답으로 갖는다 · ③ · `fundamentals.md` §9 의 UB 항목이 이미 요구 | **범위 밖** · `docs/program/fundamentals.md` · `packages/grading` |
+| ⑤ | 카탈로그에 **`javaAlt`** 한 칸 (자바 안의 다른 규칙이 내는 값 + 오개념 이름) | `packages/cards/src/fundamentals.ts` | §12.4 진단 표 — 열하나 중 넷이 `siblings` 로 안 잡힌다 | **범위 밖** · `packages/cards`. 이름은 **`langAlt`** 로 간다(`csharp-learning.md` §11.6 ④ 가 같은 구멍을 냈다) |
+| ⑥ | **판별력 검사** — 후보 식의 `siblings`·`javaAlt` 값이 정답과 전부 달라야 문항으로 낸다 | 같은 파일 `buildValueItems` | Ma 외 후속 연구의 실패 사례 (§12.4) | **범위 밖** · `packages/cards` |
+| ⑦ | §10 에 오개념 여섯 추가 | `java.md` §10 | progmiscon 자바 55 중 §10 이 안 든 것 (§12.4) | **반영** · `java.md` §10 에 14~19 행 + 근거 문단 |
+| ⑧ | 로그인 챕터 2단에 `trace-table` 한 판 (`AuthService.java:78~106`) | `chapter-login.md` §3 | `pedagogy.md` §1.2 의 구멍 · CS2023 SDF CS Core 주제 2 · §12.5 | **범위 밖** · `docs/program/chapter-login.md` |
+| ⑨ | §2 의 부 배치 · `course.md` §5.1 의 일수 — **안 바꾼다** | — | objects-first 논쟁의 근거가 「같은 이득, 체감만 다름」이라 순서를 바꿀 근거가 없다. CS2023 SDF 주제 순서와 우리 0·1·2부가 이미 맞는다 (§12.2) | **반영(변경 0)** · `java.md` §2 · `course.md` §5.1 의 **일수는 그대로**다. `course.md` 에 붙은 §5.3 은 74일을 바꾸지 않고 「아는 사람은 며칠인가」를 더한 것이다(D187 ⑭) |
 
 ⑨ 를 표에 넣은 이유는 **바꾸지 않는 것도 판단이기 때문**이다. 이 조사의 결과로 부 배치가 흔들릴
 것을 예상했는데, 흔들리지 않았다.
+
+**② 의 두 갈래 중 무엇을 골랐나 — 예를 고쳤다.** 「축 H 를 1부로 내린다」는 대안이 있었고 안
+골랐다. 근거 넷은 `java.md` §1.5.1 축 H 표 아래에 적었다: ⓐ 축 H 는 `comparison` 과 짝인 두 판이라
+쪼개면 이 축이 잡으려는 오개념이 짝을 잃는다 ⓑ `JAVA_PARTS` 0부가 `_lang.yaml` 의 `essential`
+순서를 한 글자도 안 어긋나게 옮긴 것이고 시험이 대조하므로, 내리려면 **사전을 흔들어야 한다**
+ⓒ 실측이 반대다 — 오토박싱 256곳/65파일 대 `new String` 0곳 ⓓ `Integer` 캐시의 선행(축 F
+`java/autoboxing`)이 **같은 0부 안**이라 부를 안 넘는다. 대가는 `.equals` 대 `==` 를 객체로 보이는
+자리가 0부에서 없어지는 것이고, 2부 `java/equals-hashcode` 가 받는다.
 
 ---
 

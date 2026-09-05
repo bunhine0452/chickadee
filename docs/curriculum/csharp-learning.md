@@ -254,18 +254,19 @@ C# 에서는 **못 한다.** 3부도 0판이다(`aspnet/` 네임스페이스가 
 
 ### §11.6 바꿀 것 — diff
 
-**본문은 안 고쳤다.** 등록부 행 번호는 오케스트레이터가 매긴다.
-①은 `java-learning.md` §12.6 ①과 **같은 한 줄**이다.
+**②·⑦ 을 반영했다** (2026-09-05 · D187 ⑰). 나머지 다섯은 `docs/curriculum/**` 밖(`diagrams.md` ·
+`fundamentals.md` · `pedagogy.md` · `packages/cards`)이라 그 문서의 소유 세션에 넘긴다 —
+아래 마지막 열이 어디로 갔는지다. ①은 `java-learning.md` §12.6 ①과 **같은 한 줄**이다.
 
-| # | 무엇을 | 어디서 → 어디로 | 근거 |
-|---|---|---|---|
-| ① | 「메모리 줄」의 언어 열에 `csharp` 를 더한다 (자바와 같은 신청) | `diagrams.md` §3 명세만 표 | `csharp.md` §0.1 이 이미 0-3·0-7 에 걸었다 — 명세와 불일치 |
-| ② | §0.2 의 형식 표에서 `bits` → `table` 의 한 배치, `predict` → `value` 의 판정란으로 고쳐 적는다 | `csharp.md` §0.2 (0-1·0-4·0-8 행) | `fundamentals.md` §2.1·§2.2 가 둘을 형식에서 내렸다 |
-| ③ | `FUND_DIALECTS` 의 csharp 행 「확인」을 **명세 → 실측**으로 | `fundamentals.md` §3.3 표 · §10 실측 1번의 「일곱」 → 「여섯」 | `csharp.md` §0.4 가 .NET 10.0.302 로 네 식을 전부 쟀다 |
-| ④ | 카탈로그의 언어 안 오답 칸 이름을 **`langAlt`** 로 (자바 전용 `javaAlt` 가 아니라) | `packages/cards/src/fundamentals.ts` · `java-learning.md` §12.6 ⑤ | 자바 넷과 C# 넷이 같은 모양의 구멍이다 (§11.4) |
-| ⑤ | `FundValue` 에 `{t:'compile-error'}` — C# 에서도 필요 | `fundamentals.md` §6 payload | CS0029 · CS0161 · CS0020 이 「컴파일이 안 된다」를 정답으로 갖는다 |
-| ⑥ | 성질 게이트를 만들 때 **「파서가 없는 언어는 건너뛴다」**를 규칙에 넣는다 | `pedagogy.md` §6 물음 3 | C# 은 분모가 0이라 게이트가 안 돈다 (§11.5) |
-| ⑦ | §0.5 의 부 배치 · §0.6 의 18일 — **안 바꾼다** | — | MS Learn 과 우리가 클래스를 미루는 데서 이미 같고, 갈리는 다섯은 §0.4 실측이 근거다 (§11.2) |
+| # | 무엇을 | 어디서 → 어디로 | 근거 | 반영 · 어디 |
+|---|---|---|---|---|
+| ① | 「메모리 줄」의 언어 열에 `csharp` 를 더한다 (자바와 같은 신청) | `diagrams.md` §3 명세만 표 | `csharp.md` §0.1 이 이미 0-3·0-7 에 걸었다 — 명세와 불일치 | **범위 밖** · `design/system/diagrams.md` |
+| ② | §0.2 의 형식 표에서 `bits` → `table` 의 한 배치, `predict` → `value` 의 판정란으로 고쳐 적는다 | `csharp.md` §0.2 (0-1·0-4·0-8 행) | `fundamentals.md` §2.1·§2.2 가 둘을 형식에서 내렸다 | **반영** · `csharp.md` §0.2 표를 「형식 · 배치 · 판정란」 세 열로 다시 씀 |
+| ③ | `FUND_DIALECTS` 의 csharp 행 「확인」을 **명세 → 실측**으로 | `fundamentals.md` §3.3 표 · §10 실측 1번의 「일곱」 → 「여섯」 | `csharp.md` §0.4 가 .NET 10.0.302 로 네 식을 전부 쟀다 | **범위 밖** · `docs/program/fundamentals.md` |
+| ④ | 카탈로그의 언어 안 오답 칸 이름을 **`langAlt`** 로 (자바 전용 `javaAlt` 가 아니라) | `packages/cards/src/fundamentals.ts` · `java-learning.md` §12.6 ⑤ | 자바 넷과 C# 넷이 같은 모양의 구멍이다 (§11.4) | **범위 밖** · `packages/cards` |
+| ⑤ | `FundValue` 에 `{t:'compile-error'}` — C# 에서도 필요 | `fundamentals.md` §6 payload | CS0029 · CS0161 · CS0020 이 「컴파일이 안 된다」를 정답으로 갖는다 | **범위 밖** · `docs/program/fundamentals.md` |
+| ⑥ | 성질 게이트를 만들 때 **「파서가 없는 언어는 건너뛴다」**를 규칙에 넣는다 | `pedagogy.md` §6 물음 3 | C# 은 분모가 0이라 게이트가 안 돈다 (§11.5) | **범위 밖** · `docs/program/pedagogy.md` (D187 ㉑ 이 이미 받았다) |
+| ⑦ | §0.5 의 부 배치 · §0.6 의 18일 — **안 바꾼다** | — | MS Learn 과 우리가 클래스를 미루는 데서 이미 같고, 갈리는 다섯은 §0.4 실측이 근거다 (§11.2) | **반영(변경 0)** · `csharp.md` §0.5·§0.6 그대로 |
 
 ---
 

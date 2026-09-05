@@ -548,6 +548,12 @@ SQLite 전용 문법(`tree-sitter-sqlite` 계열)으로 갈아탈지를 별도 �
 - Miedema, Aivaloglou, Fletcher (2021) *Identifying SQL Misconceptions of Novices: Findings from a Think-Aloud Study*,
   ICER '21. DOI <https://doi.org/10.1145/3446871.3469759> (CC BY 4.0, ICER '21 Honorable Mention).
   네 범주(선행 과목 지식 · 일반화 · 언어 · 불완전한 심성 모형)와 학생 21명 규모까지 확인
+- **Miedema (2024) *On Learning SQL*, TU/e 박사학위논문(오픈액세스) — 전문 확인.** 4장이 위 ICER '21
+  논문이고 6장이 그 열둘의 **유병률 조사**(n = 249)다. §9 의 13·14·15 가 여기서 왔고 출처 열에 절 번호와
+  유병률을 적었다 — `scoping_with` §4.5.1·§6.4.4 **26 %** · `scoping_selfjoin` §6.4.11 **14 %** ·
+  `distinct` §4.5.1·§6.4.5 **11 %**. 읽기에서 살아남는 넷 중 우리에게 있던 것은 `missing_join`(52 %)
+  하나뿐이었다 ([`sql-learning.md`](./sql-learning.md) §11.4.1)
+- Taipalus & Seppänen (2020) — 「자기 조인이 전체에서 가장 어려운 쿼리 개념」(SE2, 네 편). §3 24-a 의 근거
 - Taipalus (2020) *Explaining Causes Behind SQL Query Formulation Errors*, FIE 2020.
   DOI <https://doi.org/10.1109/FIE44824.2020.9274114> — 전문 확인. 4코호트 987명, 오류 분류 4계층/18범주/105오류,
   §9 의 빈도 수치(0.40 · 0.12 · 0.07)는 이 논문의 표 III·VII
@@ -562,8 +568,9 @@ SQLite 전용 문법(`tree-sitter-sqlite` 계열)으로 갈아탈지를 별도 �
 
 **확인 못 함**
 
-- Miedema et al. 의 **개별 오개념 목록**(번호와 문장) — ACM·TU/e 양쪽 모두 403/Cloudflare 로 본문을 못 열었다.
-  §9 의 2·3·4 는 검색 결과에 인용된 요약에 근거하며 **원문 대조를 못 했다.** CC BY 4.0 이므로 접근만 되면 인용 가능하다
+- ~~Miedema et al. 의 **개별 오개념 목록**(번호와 문장)~~ → **열었다** (2026-09-05). 학위논문
+  *On Learning SQL* 로 우회해 열두 라벨과 유병률을 전부 대조했다([`sql-learning.md`](./sql-learning.md) §11.4.1).
+  §9 의 2·3·4 는 여전히 ICER '21 요약에 근거하지만, 그 요약이 학위논문 4장과 어긋나지 않는 것까지 확인했다
 - Ahadi et al. 2016 본문 — 초록과 2차 인용만 봤다
 - progmiscon.org — D148 대로 **재사용 라이선스가 없어** 열지 않았다
 - 「바이브 코딩 SQL 의 생김새」는 이제 **표본 둘**이다(이 리포 SQLite · `MonggleMonggle` MySQL+MyBatis).

@@ -43,6 +43,18 @@ rules:
       (`Safe navigation` ↔ `Optional chaining`, `Callback chain` ↔
       `Promise chain with .then` …). 짝은 아래 표의 `universal` 열이 보여 준다.
       짝끼리 이름을 맞추지 않는다 — 맞추면 첫 규칙의 충돌이 24건이 된다.
+  - id: framework-proper-noun
+    rule: |
+      프레임워크 고유 이름은 **번역하지 않는다** (D187 ⑮). Bean · Controller · Repository ·
+      Autowired · Interceptor 는 스프링이 지은 이름이고, 학습자가 자기 코드에서 보는 글자도
+      그것이다. `common/**` 의 「평이한 설명」 규칙은 보편 개념의 것이지 프레임워크의 것이
+      아니다 — 「스프링이 들고 있는 객체」를 en 에서 "Managed object" 로 옮기면 앱이 부르는
+      이름과 코드가 쓰는 이름이 갈린다. **ko 는 그대로 풀어 쓴다**: 한국어 이름은 처음 보는
+      사람에게 그 이름이 무엇인지 말해야 하고, 고유 이름은 en 열과 본문 코드가 든다.
+    applied:
+      # 고칠 것이 없었다 — `dictionary/spring/*.yaml` 열다섯의 `name.en` 이 이미 원어다.
+      # 이 규칙은 그것을 잠그고, 다음 프레임워크 사전(`react/`·`mybatis/`)에 미리 건다.
+      - spring/**:            "변경 0건" — 아래 표가 그 name.en 을 그대로 옮긴 것이다
 
 # ── 개념 이름 ─────────────────────────────────────────────────────────────
 # ko 가 정본이다. en 을 고치면 해당 YAML 의 name.en 도 같이 고친다.
@@ -363,3 +375,53 @@ concepts:
   - id: ts/value-bits
     ko: "값과 비트"
     en: "Values and bits"
+
+  # ── spring/ 열다섯 (D176 · D187 ⑮) ───────────────────────────────────────
+  # ko 는 「무엇을 하는 자리인가」를 풀어 쓰고, en 은 스프링이 지은 이름 그대로다
+  # (rules 의 `framework-proper-noun`). `universal` 은 붙지 않는다 — 프레임워크 개념은
+  # 다른 언어로 전이되지 않는다(D4 의 전이는 `universal` 이 같은 언어 개념 사이의 것이다).
+  - id: spring/bean-and-container
+    ko: "스프링이 들고 있는 객체"
+    en: "Bean and container"
+  - id: spring/bean-lifecycle
+    ko: "빈이 태어나고 죽는 순서"
+    en: "Bean lifecycle"
+  - id: spring/bean-validation
+    ko: "들어온 값을 메서드 앞에서 검사하기"
+    en: "Bean validation"
+  - id: spring/component-scan
+    ko: "패키지를 훑어 빈을 찾기"
+    en: "Component scan"
+  - id: spring/configuration-binding
+    ko: "설정 파일의 값이 코드로 들어오는 길"
+    en: "Configuration binding"
+  - id: spring/connection-and-tx-boundary
+    ko: "연결을 빌려 쓰는 구간"
+    en: "Connection and transaction boundary"
+  - id: spring/controller-mapping
+    ko: "주소를 메서드에 배정하기"
+    en: "Controller mapping"
+  - id: spring/dependency-injection
+    ko: "필요한 것을 밖에서 받기"
+    en: "Dependency injection"
+  - id: spring/exception-handler
+    ko: "던진 예외가 응답이 되는 자리"
+    en: "Exception handler"
+  - id: spring/filter-vs-interceptor
+    ko: "컨트롤러 앞에 서는 두 자리"
+    en: "Filter and interceptor"
+  - id: spring/persistence-mapping
+    ko: "표의 열과 객체의 필드를 맞춰 두기"
+    en: "Persistence mapping"
+  - id: spring/proxy-and-aop
+    ko: "내 객체 대신 나가는 프록시"
+    en: "Proxy and AOP"
+  - id: spring/repository-pattern
+    ko: "저장소를 인터페이스 뒤에 두기"
+    en: "Repository pattern"
+  - id: spring/request-dispatch
+    ko: "요청 하나가 메서드까지 가는 길"
+    en: "Request dispatch"
+  - id: spring/transaction-propagation
+    ko: "이미 열린 트랜잭션을 만났을 때"
+    en: "Transaction propagation"

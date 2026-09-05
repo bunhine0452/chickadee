@@ -83,6 +83,12 @@ E0381(초기화 전 사용). 소유권 오류(E0382·E0499)는 그다음이다.
 | 10 | **`rs/operator-precedence`** 신규 | 어느 것이 먼저 묶이나 | — | 평가 트리 | `step`+`build` | 2 | `x as u8 + 1` 을 「`x` 를 `u8+1` 로」로 읽는다. `as` 가 이항 연산자보다 세서 `(x as u8) + 1` 이다. 그리고 **`&` 가 두 뜻**이라 `&v[0]` 은 `&(v[0])` 이지 `(&v)[0]` 이 아니고, `..` 가 가장 약해 `0..n+1` 은 `0..(n+1)` 이다 |
 | 11 | **`rs/cast-as`** 신규 | 변환은 셋 중 하나다 | `cs/type` · `cs/integer-overflow` | 타입 변환 사다리 | `table`+`predict`+`value` | 3 | `as` 를 「타입을 맞춰 주는 낱말」로 읽는다. **말없이 자른다** — `300u32 as u8` 은 44 다. 셋을 갈라야 한다: `as`(잃어도 조용) · `From`/`Into`(안 잃는 것만) · `TryFrom`/`try_into`(실패가 `Result` 로 온다). 실측에서 `as` 563곳 대 `try_into`/`TryFrom` 12곳 — **47배**다(§0.7) |
 
+**`rs/cast-as` 와 `rs/operator-precedence` 는 The Book 3장에 없다.** 「데이터 타입」 장에 `as` 가
+안 나오고 우선순위는 부록 B 의 연산자 표뿐이다. **없는 그 둘이 우리 실측이 가장 크게 잡은
+자리다** — `as` 563곳 대 `try_into`/`TryFrom` 12곳으로 47배(§0.7), 그리고 `x as u8 + 1` 의 결합
+(#10). 0부가 The Book 3장의 복제가 아니라는 근거가 여기 있다
+([`rs-learning.md`](./rs-learning.md) §11.2).
+
 **판 22장.** 개념마다 형식 수를 세어 합한 값이다. C 23 · C++ 27 보다 적은데, Rust 는 **폭·부호가
 이름에 적혀 있어 표가 짧기** 때문이다. 대신 `overflow`·`char-and-byte`·`cast-as` 셋이 3판을 받는다 —
 셋 다 「방법이 여럿인데 뜻이 다르다」라 표 하나로 안 끝난다.
@@ -114,7 +120,13 @@ E0381(초기화 전 사용). 소유권 오류(E0382·E0499)는 그다음이다.
 
 C·C++ 의 `predict` 는 「답이 없다는 것이 답」인 문항이 섞인다(`c.md` §0.3). **Rust 에서는 안 섞인다** —
 `rs/unsafe-block`(심화) 밖에서 정의되지 않은 동작이 안 나오기 때문이다. 그래서 같은 형식 이름이
-여기서는 답이 하나인 문항이다. 다만 **답이 하나인데 조건이 붙는** 자리가 셋 있고, 그 셋이 Rust
+여기서는 답이 하나인 문항이다.
+
+**그런데 그것이 교육적으로 뒤집힌다.** UB 를 한 번도 안 보여 주면 빌림 검사기가 **스타일 규칙**으로
+보이고, 그것이 §9 의 첫 행(「막는 건 스타일 문제다」)이다. 그래서 **2부의 첫 판이 UB 다** —
+`rs/move` 의 선행에 `cs/undefined-behavior` 를 건다(§0.6 · Brown 실험판 4.1 의 첫 소절이 UB 인
+것과 같은 이유: 「왜 이 프로그램이 거부되나」의 답은 「거부 안 하면 무슨 일이 나나」다).
+0부가 아니라 2부인 것이 요점이다 — 0부에 걸면 깊이 4 짜리가 프롤로그로 끌려 올라온다. 다만 **답이 하나인데 조건이 붙는** 자리가 셋 있고, 그 셋이 Rust
 `predict` 의 값이 나오는 곳이다.
 
 | 무엇 | 예측의 정답 | 왜 이것이 교훈인가 |
@@ -180,7 +192,8 @@ Rust 0부가 가르쳐야 하는 것은 **화살표 종류가 셋이고 자동�
 | | | **41** | | **105** | **53** |
 
 1부(7) `if-expression` `function-item` `tail-expression` `string-literal` `vec` `for-in` `format-macro`
-2부(14) rust-axis §2.1 그대로 — `borrow-shared` `move` `clone` `borrow-mut` `string-vs-str`
+2부(14) **`rs/move` 부터 열고 그 선행에 `cs/undefined-behavior` 를 건다**(§0.3 · D187 ⑰) —
+`borrow-shared` `move` `clone` `borrow-mut` `string-vs-str`
 `struct-item` `impl-method` `enum-item` `match` `option` `result` `question-mark` `module-visibility`
 `closure-capture`
 3부(9) `iterator-adapters` `async-await`(rust-axis 가 `async-fn` 을 여기 합쳤다) `trait-item`
@@ -519,7 +532,7 @@ attribute > token_tree` 다. 「이 구조체가 `Clone` 을 구현한다」를 
 별도 노드가 아니라 `if_expression` 의 condition 이 `let_condition` 인 형태이고(`if_let` 노드 없음),
 `let … else` 는 `let_declaration` 의 `alternative` 필드다.
 
-## §9 오개념 12
+## §9 오개념 14
 
 | 무엇을 믿나 | 실제로는 | 오류 |
 |---|---|---|
@@ -535,6 +548,12 @@ attribute > token_tree` 다. 「이 구조체가 `Clone` 을 구현한다」를 
 | `unsafe` 는 검사를 끈다 | 빌림 검사기는 그대로 돈다. 풀리는 것은 원시 포인터 역참조 같은 몇 가지 금지뿐이다 | — |
 | `Rc<RefCell<T>>` 를 쓰면 규칙에서 벗어난다 | 규칙이 실행 시로 옮겨간 것뿐이라 어기면 컴파일 대신 **패닉**한다 | (런타임) |
 | 이터레이터 어댑터를 부르면 돈다 | `.map()` 은 아무것도 안 한다. `collect`·`for`·`sum` 이 와야 한 항목이라도 흐른다 | `#[must_use]` |
+| 거부된 프로그램은 실행하면 반드시 터진다 | 거부는 **증명 실패**다 — 실제로 안전한데 검사기가 정밀도를 잃어 거부하는 경우가 있다(Brown 4.3 여섯 사례 중 둘). 「컴파일러의 수용」과 「실제 안전성」은 다른 것이다 | — |
+| `unsafe` 함수를 **부르는 줄**이 위험한 줄이다 | 매달린 포인터를 돌려주는 함수를 부르기만 하고 **값을 안 쓰면 아무 일도 안 난다.** UB 는 **쓰는 자리**에서 난다 | — |
+
+**13·14 는 2026-09-05 에 붙었다**([`rs-learning.md`](./rs-learning.md) §11.4). 이 표에서
+**1차 실측 근거가 붙는 유일한 둘**이다(Crichton 외 OOPSLA 2023 · Brown 실험판). 13 은
+**정답을 맞히면서 성립하는 오개념**이라 「컴파일 되나」 두 칸으로는 안 잡히고 반례 문항이 있어야 한다.
 
 「컴파일러가 교사」인 것이 이 앱의 모델과 맞물리는 자리: 오답 진단 `diag` 에 **오류 코드를 그대로
 적는 것**이 다른 언어에 없는 자산이다. 학습자가 실제로 만나는 문장이 정해져 있고, 사용자가 자기
@@ -563,6 +582,10 @@ D148 ③ 대로 목록만 참고했고, 여기서는 **겹치지 않는 쪽이 �
 - JetBrains, *The Most Common Rust Compiler Errors as Encountered in RustRover*(2023-12) — E0277 32% · E0308 30% · E0599 27.5% · E0425 20.5% · E0433 17.5%. **표본 크기와 기간이 공개돼 있지 않다.**
 - progmiscon.org — **Rust 항목이 없다**(Python·Java·JavaScript·Scratch 만, 총 247건). 재사용 라이선스 명시도 없어 인용만 한다(Chiodini 외, ITiCSE '21, DOI 10.1145/3430665.3456343). Rust 오개념의 1차 출처는 위 OOPSLA 논문으로 대신했다.
 - 이 리포 실측 — 비시험 21파일 2,884줄에 대한 grep 계수. `while` 7 등 일부는 주석·문자열 안의 것을 포함할 수 있다(상한값으로 읽을 것).
+- Brown 대학 실험판 The Book(*Rust Book Experiment*) — https://rust-book.cs.brown.edu/ . 3장은 그대로 두고 **4장만** 갈아 끼워 Ownership Inventory 48→57%(N=342 · d=0.56). 그림 읽기 83~93% 대 추상 추론 44~47%. §0.3·§9 13·14 의 근거.
+- Zhu 외, *Learning and Programming Challenges of Rust*, ICSE 2022 — https://doi.org/10.1145/3510003.3510164 . 설문·인터뷰. 소유권·수명이 가장 큰 벽이라는 보고.
+- Becker 외, *Compiler Error Messages Considered Unhelpful*, ITiCSE-WGR 2019 — https://doi.org/10.1145/3344429.3372508 . 「컴파일러가 교사」의 반대편 근거 — 오류 문구가 저절로 가르치지는 않는다.
+- Rustlings 연습 순서 — https://github.com/rust-lang/rustlings . `variables → functions → if → primitive_types → vecs → move_semantics → structs → enums → strings → modules → hashmaps → options → error_handling → generics → traits → lifetimes` . **0부에 해당하는 자리가 `variables`·`primitive_types` 둘뿐**이라 우리 열하나와 안 겹친다.
 
 **확인 못 한 것**
 

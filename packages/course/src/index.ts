@@ -15,10 +15,12 @@ export { lineDiff, DIFF_CELLS, DIFF_CONTEXT } from './diff.js';
 export { borrowedInput, evidenceBlock, lenders, pickLender } from './borrow.js';
 export type { LenderSite } from './borrow.js';
 export {
-  COURSE_GATE_MAX, GATE_PER_CHAPTER, JAVA_PARTS, buildCurriculum, chapterGates, courseOutline,
-  foldsPart1,
+  COURSE_GATE_MAX, DRILL_TOOLCHAIN_KEY, GATE_PER_CHAPTER, JAVA_PARTS, STAGE_ESCAPE_GATE_LAYER,
+  STAGE_ESCAPE_OPENERS, STAGE_NEVER_FOLDED, buildCurriculum, chapterEscape, chapterGates,
+  courseOutline, drillEntry, foldsPart1, foldsStage,
 } from './curriculum.js';
 export type {
-  ChapterGate, CurriculumInput, CurriculumPart, CurriculumPlate, FoldInput, GateInput,
-  OutlineEntry, OutlineInput, PartAssignment, PartNo,
+  ChapterEscape, ChapterEscapeInput, ChapterGate, CurriculumInput, CurriculumPart, CurriculumPlate,
+  DrillConcept, DrillsEntry, DrillsInput, FoldInput, GateInput, OutlineEntry, OutlineInput,
+  PartAssignment, PartNo, StageFoldInput,
 } from './curriculum.js';

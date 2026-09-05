@@ -95,7 +95,7 @@ Go 는 없었다(go.md §0.4). **이 문서의 §1 「생김새」는 여전히 
 | 0-2 | `swift/float-literal` | 실수 값과 근사 / Float literal | 2진수로 근사한 값이라 십진 소수를 정확히 못 담는다 | `floating-point` · `binary-representation` | 비트 배열 | **`Float` 는 정확하다고 믿는다.** 실측에서 `Double` 은 `0.1 + 0.2 = 0.30000000000000004` 인데 `Float` 는 **`0.3`** 으로 찍힌다 — 정확해진 게 아니라 **자릿수가 적어 반올림이 오차를 가린 것**이다 |
 | 0-3 | `swift/text-literal` | 글자 값 — 자소 뭉치 / Text literal | `String` 은 **자소 뭉치의 모음**이고 `count` 는 사람이 보는 글자를 센다 | `text-encoding` | 값 상자 · **메모리 줄** | **`s[0]` 으로 첫 글자를 꺼내려 한다.** 컴파일이 멈춘다 — 실측 `'subscript(_:)' is unavailable: cannot subscript String with an Int` |
 | 0-4 | `swift/boolean-literal` | 참·거짓 값 / Boolean literal | 조건 자리에 `Bool` 말고는 **아무것도 못 온다** | `type` · **`cs/truthiness` 없음** | 평가 트리 | **`if 1`·`if name` 을 쓴다.** 「참 같은 값」이 Swift 에 없다 |
-| 0-5 | `swift/operator-precedence` | 무엇이 먼저 묶이나 / Operator precedence | 우선순위가 언어가 아니라 **표준 라이브러리의 `precedencegroup` 선언**에 있다 | **`cs/operator-precedence` 없음** (`type`·`abstraction` 로 임시) | 평가 트리 | **`1 << 2 + 3` 을 32 로 읽는다.** 실측 **7** — Swift 는 `<<`(`BitwiseShiftPrecedence`)를 `+` 보다 **위**에 뒀고 C·자바·C# 은 아래에 뒀다 |
+| 0-5 | `swift/operator-precedence` | 무엇이 먼저 묶이나 / Operator precedence | 우선순위가 언어가 아니라 **표준 라이브러리의 `precedencegroup` 선언**에 있다. **애플 *TSPL* 은 이것을 마지막 장(`AdvancedOperators`)에 두고 우리는 0부에 둔다** — 그쪽 절은 `precedencegroup` 을 **선언하는 사람**의 지식이고, 우리가 묻는 `1 << 2 + 3` 은 **읽는 사람**의 지식이다. 순서를 비교한 연구는 못 찾았다(판단이다 · [`swift-learning.md`](./swift-learning.md) §11.2 갈림 ①) | **`cs/operator-precedence` 없음** (`type`·`abstraction` 로 임시) | 평가 트리 | **`1 << 2 + 3` 을 32 로 읽는다.** 실측 **7** — Swift 는 `<<`(`BitwiseShiftPrecedence`)를 `+` 보다 **위**에 뒀고 C·자바·C# 은 아래에 뒀다 |
 | 0-6 | `swift/type-conversion` | 종류가 다른 숫자는 손으로만 섞는다 / Type conversion | 변수끼리는 못 섞고 **리터럴끼리는 섞인다** | **`cs/type-conversion` 없음** · `static-vs-dynamic-typing` | 타입 변환 사다리 | **`1 + 2.0` 은 되는데 `a + b` 는 안 된다.** 실측: 리터럴끼리는 `3.0`, `let a = 1; let b = 2.0` 뒤의 `a + b` 는 `binary operator '+' cannot be applied to operands of type 'Int' and 'Double'` |
 | 0-7 | `swift/assignment` | 이름을 만들며 바뀔지까지 정한다 / Binding and assignment | 이름을 만드는 줄에 `let`/`var` 를 **골라야만** 줄이 완성된다 | `state` · `immutability` · `value-vs-reference` | 값 상자 · 메모리 줄 · **스택 프레임** | **`let` 이면 안쪽까지 못 바꾼다고 믿는다.** class 를 `let` 으로 묶으면 **다른 상자로 못 바꾸는 것**이고 안은 바뀐다. struct 면 안쪽도 안 바뀐다 — 같은 낱말이 두 결과를 낸다 (§9 ④) |
 | 0-8 | `swift/equality` | 같은 값인가, 같은 상자인가 / Equality | 물음이 **낱말로** 갈려 있다 — `==` 와 `===` | `identity-vs-equality` · `value-vs-reference` | 평가 트리 · 값 상자 | **`==` 와 `===` 를 같은 물음으로 읽는다.** 실측: struct 둘의 `==` 는 참, class 둘의 `===` 는 거짓. 그리고 `1 == 1.0` 이 **참**이다(리터럴이 `Double` 로 추론된다) — 0-6 과 정반대로 보여 여기서 한 번 더 막힌다 |
@@ -110,17 +110,22 @@ Go 는 없었다(go.md §0.4). **이 문서의 §1 「생김새」는 여전히 
 
 | # | 형식 (I1) | `universal` |
 |---|---|---|
-| 0-1 | `bits` → **`predict`** | `common/number-literal` |
+| 0-1 | `bits` → **`predict`** (+ `event` 값 **`compile error`**) | `common/number-literal` |
 | 0-2 | `value` | `common/number-literal` |
-| 0-3 | `table` | `common/text-literal` |
+| 0-3 | `table` (+ `event` 값 **`compile error`**) | `common/text-literal` |
 | 0-4 | `predict` | `common/boolean-value` |
 | 0-5 | `step` | `common/arithmetic` |
-| 0-6 | `build` | `common/type-cast`(신규 후보 · README §8) |
+| 0-6 | `build` (+ `event` 값 **`compile error`**) | `common/type-cast`(신규 후보 · README §8) |
 | 0-7 | `step` | `common/variable-binding` · `common/reassignment` |
 | 0-8 | `predict` | `common/comparison` |
 
 **여섯 형식이 전부 쓰인다** — 안 쓰는 것이 없다(규약 6). 그림도 여섯이 전부 쓰인다:
 스택 프레임은 0-7 에서 「struct 를 함수에 넘기면 프레임에 복사본이 하나 더 선다」를 그린다.
+
+**셋의 정답이 값이 아니라 컴파일 정지다** (실측 · D187 ⑰). `s[0]`(0-3) · `a + b`(0-6) ·
+`var x: Int8 = 128`(0-1)이 전부 빌드에서 멈춘다. 그래서 `EVENTS` 에 `compile error` 한 줄이
+필요하고, 같은 코드의 한 글자 다른 판을 나르는 **`FundItem.variants`** 도 함께 신청한다 —
+`&+` 대 `+`, `try?` 대 `try` 가 그 모양이다(신청은 `packages/cards/src/fundamentals.ts` 로 나갔다).
 
 **0-1 이 이 언어에서 `predict` 가 가장 센 자리다.** 예측(「감기겠지」)과 실제(죽는다)가 갈리고,
 그 간격이 곧 교훈이다. 오답 진단은 정본 §3 ② 대로 「틀렸다」가 아니라 **「당신이 고른 그것이 참이
@@ -143,6 +148,12 @@ D4 전이가 여기서 값을 한다 — 세 번 배울 것을 한 번 배우고
 **타입 구성자**다). 0부에 아홉째 장으로 세우면 상한 12 안에는 들지만, 그것을 배우려면 `if let`·
 `guard let`·`??`·`?.` 넷이 곧바로 따라와야 하고 그것은 2부 다섯 장이다. **0부는 「이런 것이 있다」만
 보이고 개념을 열지 않는다** — 0-6 의 `Int("12")` 가 그 한 번의 노출이다.
+
+**이 논증은 우리 것이었는데 정본 둘이 독립적으로 같은 자리를 골랐다**
+([`swift-learning.md`](./swift-learning.md) §11.2). 애플 *TSPL* 1장 「The Basics」의 절 열다섯 중
+`Optionals` 는 **열두 번째**이고 그 앞 열한 절이 우리 0부 여덟과 거의 일대일이다(정수 0-1 ·
+실수 0-2 · 형 변환 0-6 · 참거짓 0-4 · 대입 0-7). Hudson 의 *100 Days of SwiftUI* 는 언어
+warm-up 14일 중 **14일째**가 옵셔널이다. **옵셔널은 「값과 타입이 앉은 뒤」**라는 것이 둘의 배치다.
 
 ### §0.4 실측표 — 재현 방법을 붙여서
 
@@ -328,7 +339,7 @@ library · scale · idiom)이 필수다. 문법이 없으면 앞의 것을 못 �
 | 2 | `swift/string-interpolation` | 문장에 값 끼워 넣기 / String interpolation | `\(` | `common/string-interpolation` | 2 | `swift/let-var` | `\(...)` 안에 **아무 식이나** 온다. Swift 에서 글자에 값을 넣는 사실상 유일한 표기 — `+` 로 잇는 코드는 거의 안 나온다 |
 | 3 | `swift/array-subscript` | 순서 있는 목록에서 꺼내기 / Array subscript | `[` | `common/list` | 2 | `swift/let-var` | **같은 대괄호인데 배열은 죽고 딕셔너리는 옵셔널을 준다.** `arr[5]` 는 크래시, `dict["k"]` 는 `V?` — 없으면 옵셔널이 어디서 튀어나오는지 못 짚는다 |
 | 4 | `swift/while-repeat` | 조건이 참인 동안 되풀이 / While and repeat | `while` | `common/loop-while` | 2 | `swift/comparison` | 다른 언어의 `do-while` 이 여기서는 **`repeat-while`** 이다 — Swift 의 `do` 는 오류를 받는 블록이라 이름을 뺏겼다 |
-| 5 | `swift/optional-type` | 없을 수 있는 값 / Optional type | `?` | `common/absent-value` | 2 | `swift/let-var` | **`String` 과 `String?` 은 다른 타입이다.** 없음이 값이 아니라 타입에 적힌다 — 없으면 「왜 이 줄에 `?` 가 붙었나」가 전부 미궁이다 |
+| 5 | `swift/optional-type` | 없을 수 있는 값 / Optional type | `?` | `common/absent-value` | 2 | `swift/let-var` | **`String` 과 `String?` 은 다른 타입이다.** 없음이 값이 아니라 타입에 적힌다 — 없으면 「왜 이 줄에 `?` 가 붙었나」가 전부 미궁이다. **그리고 옵셔널은 겹친다** — `?.` 는 평탄해지는데(`a?.b.c` 는 `C?`) 딕셔너리 첨자는 안 그렇다. `y["k"] ?? 7` 에서 `y` 가 `[String: Int?]` 면 값이 `Int?` 라 `??` 가 바깥 한 겹만 벗기고 결과가 `nil` 이다 — 이 언어에서 가장 좋은 `value` 판이 여기 있다(실측) |
 | 6 | `swift/if-let` | 없음을 벗겨 이름 붙이기 / Optional binding | `if let` | `common/unwrap-binding`(신규) | 2 | `swift/optional-type` · `swift/if-statement` | 벗겨진 값에 **새 이름**이 생긴다. `if let name = name` 의 안쪽 `name` 은 바깥과 다른 이름이다 |
 | 7 | `swift/guard-let` | 아니면 여기서 나가기 / Guard | `guard` | null | 3 | `swift/if-let` · `swift/return-statement` | **성공한 값만 아래로 내보내고, `else` 안에서는 반드시 나가야 한다** — 안 나가면 컴파일이 멈춘다. Swift 함수가 「검사 → 검사 → 본문」 모양인 이유 |
 | 8 | `swift/nil-coalescing` | 없을 때 채우기 / Nil coalescing | `??` | `common/nullish-default` | 2 | `swift/optional-type` | 왼쪽을 벗긴 타입과 오른쪽 타입이 같아야 하고, **결과는 더 이상 옵셔널이 아니다.** 타입이 한 겹 벗겨지는 것이 눈에 보인다 |
@@ -609,6 +620,7 @@ progmiscon.org 는 Python·Java·JavaScript·Scratch 넷만 다루고 **Swift �
 | 1 | 옵셔널은 「비어 있을 수도 있는 같은 타입」이다 | `String?` 과 `String` 은 **다른 타입**이다. `Int("3") + 1` 이 컴파일 오류인 이유가 이것이다 |
 | 2 | `!` 는 옵셔널을 켜는 스위치다 | 「값이 있다고 내가 보증한다」는 문장이다. 없으면 그 줄에서 **앱이 끝난다** |
 | 3 | `if let name = name` 의 안쪽 `name` 은 바깥 것이다 | 안쪽은 **벗겨진 새 이름**이고 바깥은 여전히 옵셔널이다. 블록을 나가면 새 이름은 사라진다 |
+| 1·2·3 보강 | **옵셔널은 한 겹뿐이다** | **겹친다.** `?.` 사슬은 평탄해지지만 딕셔너리 첨자는 안 그래서 `[String: Int?]` 의 값이 `Int??` 로 온다 — `??` 한 번으로 안 벗겨지고, 「벗겼는데 왜 아직 옵셔널인가」에서 셋이 한꺼번에 무너진다 (실측) |
 | 4 | `let` 으로 묶으면 안쪽 값도 못 바꾼다 | class 를 `let` 으로 묶으면 **다른 상자로 못 바꾸는 것**이지 상자 안은 바꿀 수 있다. struct 라면 안쪽도 못 바꾼다 — 같은 낱말이 두 결과를 낸다 |
 | 5 | struct 를 다른 이름에 넣으면 같은 것을 가리킨다 | **복사된다.** 한쪽을 바꿔도 다른 쪽은 그대로다 |
 | 6 | `mutating` 은 「이 메서드는 위험하다」는 표시다 | 값 타입은 기본이 못 바꾸는 것이고, `mutating` 은 **자기 자신을 새 값으로 바꿔 담겠다**는 선언이다. `let` 으로 묶인 값에는 부를 수 없다 |
@@ -618,6 +630,9 @@ progmiscon.org 는 Python·Java·JavaScript·Scratch 넷만 다루고 **Swift �
 | 10 | `try` 를 적으면 오류를 처리한 것이다 | `try` 는 **여기서 터질 수 있다는 표시**일 뿐이다. 받는 것은 `do`/`catch` 나 `try?` 다 |
 | 11 | `async` 함수를 부르면 백그라운드로 넘어간다 | `await` 는 그 흐름을 **거기서 멈춰 두고 자리를 내주는 것**이다. 다른 스레드로 옮기는 표시가 아니다 |
 | 12 | `switch` 에 `default` 를 적어 두면 안전하다 | 오히려 나중에 `case` 가 늘었을 때 **컴파일러가 안 알려 준다.** Swift 는 빠뜨린 경우를 세어 주는데, `default` 가 그 눈을 가린다 |
+
+**열둘을 늘리지 않았다** — ①②③ 에 「겹치는 옵셔널」 한 줄을 보강했을 뿐이다(D187 ⑰). 근거가
+실측이고 이 표는 이미 옵셔널에 셋을 썼다.
 
 **이 열둘은 1·2부의 것이다.** 옵셔널·ARC·SwiftUI 쪽에 몰려 있고 **값 층위는 ④ 하나뿐**이라
 (`let` 이 안쪽까지 잠그지 않는다) **0부 여덟 장의 오개념을 §0.1 의 마지막 열에 따로 세웠다** —
