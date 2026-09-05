@@ -97,6 +97,9 @@ const ABSENCE: Readonly<Record<string, AbsenceReason>> = {
   'java/equals-hashcode': 'framework',
   // 부르기만 하지 직접 짜지 않는 것. 표본 리포에서 `<T extends …>` 0곳 · `? extends` 0곳.
   'java/generic-bound': 'library',
+  // 자기 타입 자리를 여는 선언(`<T>` 꼴 `type_parameters`)이 MonggleMonggle 99파일에서 0곳 —
+  // 남이 연 자리를 채우는 쪽(`List<…>`)은 101곳/41파일이다. `generic-bound` 와 같은 사유 (D190 자바 세션).
+  'java/generics-erasure': 'library',
   // 이 규모에서는 계층이 안 생겼다. 표본 리포에서 `abstract class` 0곳,
   // `extends` 9곳 중 8곳이 예외 계층이다.
   'java/abstract-class': 'scale',
