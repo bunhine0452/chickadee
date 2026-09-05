@@ -127,6 +127,9 @@ const ABSENCE: Readonly<Record<string, AbsenceReason>> = {
   'sql/cte': 'scale',
   'sql/exists': 'scale',
   'sql/self-join': 'scale',
+  // C# 2부 — 표본 eShopOnWeb 254파일에서 0곳 (D190 csharp 세션). 자리를 다른 문법이 가져갔다 —
+  // 같은 리포에 `switch` 가 한 번 나오는데 식이 아니라 문이고, 갈래는 `if` 142곳과 삼항 4곳이 쓴다.
+  'csharp/switch-expression': 'idiom',
   // 다른 문법이 자리를 가져갔다. 표본 리포에서 `for (;;)` 0곳 · for-each 1곳 · 배열 1곳이고,
   // 그 자리를 스트림(9곳)과 람다(53곳)가 다 쓴다.
   'java/for-loop': 'idiom',
