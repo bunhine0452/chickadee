@@ -121,7 +121,7 @@ const CARD_T0: Card = {
     transferFrom: CID.universal, previewSiteId: 1,
   },
   snapshot: [{ n: 42, t: "const nick = res.user?.profile?.nickname ?? '손님'", target: true }],
-  genVersion: 1, contentHash: 'hash-t0', createdAt: T, retiredAt: null,
+  genVersion: 1, contentHash: 'hash-t0', createdAt: T, retiredAt: null, stageNo: null,
 };
 
 const CARD_T1: Card = {
@@ -135,7 +135,7 @@ const CARD_T1: Card = {
       choices: [{ t: '아무것도 안 돌아온다', ok: true, fb: '맞습니다' }, { t: '터진다', ok: false, fb: '터지지는 않아요' }],
     },
   },
-  snapshot: null, genVersion: 1, contentHash: 'hash-t1', createdAt: T, retiredAt: T + 10,
+  snapshot: null, genVersion: 1, contentHash: 'hash-t1', createdAt: T, retiredAt: T + 10, stageNo: null,
 };
 
 const CARD_T2: Card = {
@@ -149,7 +149,24 @@ const CARD_T2: Card = {
     core: { 'src/a.ts': ['+12', '-3'] }, sec: { 'src/b.ts': ['+1', '-0'] },
     trap: { 'src/c.ts': '이 커밋과 무관' }, hints: ['라우터부터 보세요'],
   },
-  snapshot: null, genVersion: 2, contentHash: 'hash-t2', createdAt: T, retiredAt: null,
+  snapshot: null, genVersion: 2, contentHash: 'hash-t2', createdAt: T, retiredAt: null, stageNo: null,
+};
+
+/** 코스 선택형 (D164) — `track` 열은 t3, `stage_no` 가 단이다. */
+const CARD_T3: Card = {
+  id: 4, repoId: 1, unitId: 1, track: 't3', kind: 'cut', conceptId: CID.ts,
+  level: 1, siteId: null, fileId: 1, commitId: null,
+  payload: {
+    track: 't3', kind: 'cut', stage: 3, file: 'src/features/auth/useLogin.ts', focus: 41,
+    lines: [{ n: 41, t: 'if (!res.ok) return null', target: true }, { n: 42, t: 'const nick = 1' }],
+    q: '41행을 지우면 무엇이 달라질까요?', hint: '그 줄이 막던 입력을 생각해 보세요.',
+    options: [{ t: '실패 응답에서도 아래 줄이 돈다' }, { t: '아무것도 달라지지 않는다' }],
+    answer: 0, why: [null, { t: '그 줄은 실패 응답을 막고 있었습니다.' }],
+    ok: '그 줄이 실패를 걸러 냅니다.', rule: '가드는 지우면 그 입력이 통과한다.',
+    promptLines: ['if (!res.ok) return null', 'const nick = 1'],
+    reason: { q: '왜 그런가요?', options: [{ t: '가드라서' }, { t: '주석이라서' }], answer: 0, why: [null, { t: '주석이 아닙니다.' }] },
+  },
+  snapshot: null, genVersion: 1, contentHash: 'hash-t3', createdAt: T, retiredAt: null, stageNo: 3,
 };
 
 const SESSION: Session = {
@@ -323,12 +340,13 @@ function seed(): void {
     ast_json: json(BLOCK.ast), is_alive: 1, updated_at: BLOCK.updatedAt,
   });
 
-  for (const c of [CARD_T0, CARD_T1, CARD_T2]) {
+  for (const c of [CARD_T0, CARD_T1, CARD_T2, CARD_T3]) {
     insert(db, 'card', {
       id: c.id, repo_id: c.repoId, unit_id: c.unitId, track: c.track, kind: c.kind, concept_id: c.conceptId,
       level: c.level, site_id: c.siteId, file_id: c.fileId, commit_id: c.commitId,
       payload_json: json(c.payload), snapshot_json: c.snapshot === null ? null : json(c.snapshot),
       gen_version: c.genVersion, content_hash: c.contentHash, created_at: c.createdAt, retired_at: c.retiredAt,
+      stage_no: c.stageNo ?? null,
     });
   }
 
@@ -411,9 +429,10 @@ beforeAll(() => {
 // ───────── 왕복 ─────────
 
 describe('fromXxxRow 왕복 (인메모리 SQLite + 마이그레이션 전부)', () => {
-  test('마이그레이션이 35개 테이블을 만든다', () => {
+  // 0007 까지 35 · 0009(경로·스키마·죽은 코드, D168·D169)가 7 을 더했다. 0008 은 표를 다시 만들 뿐 수를 안 바꾼다.
+  test('마이그레이션이 42개 테이블을 만든다', () => {
     const rows = db.prepare(statements['store.table_names']).all() as { name: string }[];
-    expect(rows).toHaveLength(35);
+    expect(rows).toHaveLength(42);
     expect(db.pragma('user_version')).toEqual([{ user_version: SCHEMA_VERSION }]);
   });
 
@@ -429,7 +448,7 @@ describe('fromXxxRow 왕복 (인메모리 SQLite + 마이그레이션 전부)', 
     expect(fromMasteryRow(one(db, 'mastery', "concept_id = 'ts/optional-chaining'"))).toStrictEqual(MASTERY);
   });
 
-  test.each([[CARD_T0], [CARD_T1], [CARD_T2]])('card #%# — payload/snapshot JSON', (card: Card) => {
+  test.each([[CARD_T0], [CARD_T1], [CARD_T2], [CARD_T3]])('card #%# — payload/snapshot JSON · stage_no (D164)', (card: Card) => {
     expect(fromCardRow(one(db, 'card', `id = ${card.id}`))).toStrictEqual(card);
   });
 

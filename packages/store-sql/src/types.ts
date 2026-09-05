@@ -53,11 +53,20 @@ export type CardKind =
   | 'transcribe'                                                    // t1
   | 'placement' | 'radius' | 'flow' | 'direction'                   // t2
   | 'entry' | 'role'                                                // t2 — 리포 지도 (D142)
-  | 'repair' | 'reimpl';                                            // t3 (payload 없음)
+  | 'repair' | 'reimpl'                                             // t3 — 코스 4·5단 (D164)
+  | 'twin' | 'origin' | 'cut' | 'reorder' | 'contract';             // t3 — 코스 선택형 (D164)
+
+/** 코스의 단 (D164 · `card.stage_no`). `card_state.stage`(T1 페이딩 1~3)와 다른 축이다. */
+export type StageNo = 1 | 2 | 3 | 4 | 5;
+/** 코스 4·5단의 세부 유형 — `card.kind` 는 `repair`·`reimpl` 이고 `payload.type` 이 셋씩 가른다. */
+export type RepairType = 'patch-line' | 'patch-place' | 'rollback';
+export type ReimplType = 'reimpl-spec' | 'reimpl-layer' | 'handoff';
 
 export interface Card { id: number; repoId: number; unitId: number | null; track: Track; kind: CardKind; conceptId: ConceptId;
   level: 1 | 2 | 3; siteId: number | null; fileId: number | null; commitId: number | null;
-  payload: CardPayload; snapshot: CodeLine[] | null; genVersion: number; contentHash: string; createdAt: number; retiredAt: number | null; }
+  payload: CardPayload; snapshot: CodeLine[] | null; genVersion: number; contentHash: string; createdAt: number; retiredAt: number | null;
+  /** 코스의 단. `null` 이면 코스 밖의 판 — 0008 이전 행도 그렇다 (D164). 선택인 것은 예전 리터럴을 안 깨려고. */
+  stageNo?: StageNo | null; }
 
 export type CodeLine = { n: number; t: string; target?: true } | { n: number; seg: Seg[]; target?: true };
 export type Seg = { t: string; pick?: number } | { hole: true };
@@ -91,7 +100,36 @@ export type CardPayload =
       flow?: { answer: string[]; deck: string[] };
       pairs?: { a: string; b: string; answer: 0 | 1 | 2 | 3 }[];
       // D142 — 폴더 역할 4지. 보기는 `bands` 의 네 라벨이라 따로 싣지 않는다.
-      role?: { folder: string; answer: number } };
+      role?: { folder: string; answer: number } }
+  // ───────── 코스 문항 (D164 · `docs/program/exercises.md` §2) ─────────
+  // `payload.track` 은 **화면 모양**이다. 코스 카드의 열 `card.track` 은 전부 `t3` 이고(어느 큐가
+  // 내나 — t0·t1·t2 는 예전 일일 큐, t3 는 코스), 2단 `hop`·`caller` 처럼 T2 지도 모양을 빌리는
+  // 판은 payload 가 `t2` 다. 아래 셋은 `t3` 모양 — t0 변형의 `kind` 를 넓히지 않는 이유는 D164.
+  //
+  // 선택형 — 1단 `twin` · 2단 `origin` · 3단 `cut`·`reorder`·`contract`. 보기가 파일 자리를
+  // 가리키면 `f`·`l` 이 붙는다. `contract` 는 둘째 물음(이유 4지)을 `reason` 에 싣는다.
+  | { track: 't3'; kind: 'twin' | 'origin' | 'cut' | 'reorder' | 'contract'; stage: 1 | 2 | 3;
+      file: string; focus: number; lines: CodeLine[]; q: string; hint: string;
+      options: { t: string; mono?: boolean; f?: string; l?: number }[]; answer: number;
+      why: (null | { t: string })[]; ok: string; rule: string; promptLines: string[];
+      reason?: { q: string; options: { t: string }[]; answer: number; why: (null | { t: string })[] } }
+  // 4단 수정 — 실제 `fix:` 커밋의 hunk 가 참조 답이다. `lines` 는 편집 창(파일 줄 `from` 부터),
+  // `target` 은 `patch-line`·`rollback` 에서 고칠 줄(창 안 0-based), `patch-place` 에서 정답 삽입
+  // 자리(0..lines.length). `accept` 는 `patch-place` 의 스코프 검사가 허용하는 자리 전부.
+  | { track: 't3'; kind: 'repair'; type: RepairType; stage: 4; q: string;
+      file: string; grammar: string; goal: string; commit: { h: string; d: string; m: string };
+      lines: string[]; from: number; target: number; expected: string[]; accept?: number[];
+      promptLines: string[] }
+  // 5단 재구현 — `reimpl-spec` 은 시그니처와 `mustHold` 만 주고, `reimpl-layer` 는 이웃 층
+  // (`context`)을 사양으로 주며 `links` 로 연결을 검사한다. `handoff` 는 채점이 없다.
+  | { track: 't3'; kind: 'reimpl'; type: ReimplType; stage: 5;
+      file: string; grammar: string; fn: string; original: string[]; from: number;
+      signature: string[]; mustHold: { text: string; source: 'user' | 'dict' | 'ast'; anchor: number[] }[];
+      links: string[]; context: { file: string; lines: string[] }[]; question: string;
+      promptLines: string[]; blockId: number | null };
+
+/** 코스 문항의 payload 만 (D164). 화면이 단 화면을 고를 때 이 셋으로 좁힌다. */
+export type StagePayload = Extract<CardPayload, { track: 't3' }>;
 
 /**
  * `session.plan_json` 의 원소. §8.2 는 `Session.plan: PlannedItem[]` 을 쓰면서 `PlannedItem` 을

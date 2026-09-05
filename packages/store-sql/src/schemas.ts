@@ -184,8 +184,85 @@ const t2PayloadSchema = z.object({
   role: z.object({ folder: z.string(), answer: int() }).optional(),
 });
 
-/** `card.payload_json` (02 §8.2 · 05 가 그대로 렌더한다). */
-export const cardPayloadSchema = z.discriminatedUnion('track', [t0PayloadSchema, t1PayloadSchema, t2PayloadSchema]);
+// ───────── 코스 문항 (D164) ─────────
+// 셋 다 `track: 't3'` 라 `discriminatedUnion('track')` 에 못 든다 — 바깥을 `z.union` 으로 감싼다.
+// 예전 셋은 `track` 으로 먼저 갈리고, `t3` 는 `kind` 가 다시 가른다.
+
+/** 코스의 단 1~5 (`card.stage_no`). */
+export const stageNoSchema = z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5)]);
+export const repairTypeSchema = z.enum(['patch-line', 'patch-place', 'rollback']);
+export const reimplTypeSchema = z.enum(['reimpl-spec', 'reimpl-layer', 'handoff']);
+
+const plainWhySchema = z.array(z.union([z.null(), z.object({ t: z.string() })]));
+
+const stageChoiceSchema = z.object({
+  track: z.literal('t3'),
+  kind: z.enum(['twin', 'origin', 'cut', 'reorder', 'contract']),
+  stage: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+  file: z.string(),
+  focus: int(),
+  lines: z.array(codeLineSchema),
+  q: z.string(),
+  hint: z.string(),
+  options: z.array(z.object({
+    t: z.string(), mono: z.boolean().optional(), f: z.string().optional(), l: int().optional(),
+  })),
+  answer: int(),
+  why: plainWhySchema,
+  ok: z.string(),
+  rule: z.string(),
+  promptLines: z.array(z.string()),
+  reason: z.object({
+    q: z.string(), options: z.array(z.object({ t: z.string() })), answer: int(), why: plainWhySchema,
+  }).optional(),
+});
+
+const stageRepairSchema = z.object({
+  track: z.literal('t3'),
+  kind: z.literal('repair'),
+  type: repairTypeSchema,
+  stage: z.literal(4),
+  q: z.string(),
+  file: z.string(),
+  grammar: z.string(),
+  goal: z.string(),
+  commit: z.object({ h: z.string(), d: z.string(), m: z.string() }),
+  lines: z.array(z.string()),
+  from: int(),
+  target: int(),
+  expected: z.array(z.string()),
+  accept: z.array(int()).optional(),
+  promptLines: z.array(z.string()),
+});
+
+const stageReimplSchema = z.object({
+  track: z.literal('t3'),
+  kind: z.literal('reimpl'),
+  type: reimplTypeSchema,
+  stage: z.literal(5),
+  file: z.string(),
+  grammar: z.string(),
+  fn: z.string(),
+  original: z.array(z.string()),
+  from: int(),
+  signature: z.array(z.string()),
+  mustHold: z.array(z.object({
+    text: z.string(), source: z.enum(['user', 'dict', 'ast']), anchor: z.array(int()),
+  })),
+  links: z.array(z.string()),
+  context: z.array(z.object({ file: z.string(), lines: z.array(z.string()) })),
+  question: z.string(),
+  promptLines: z.array(z.string()),
+  blockId: z.union([int(), z.null()]),
+});
+
+/** `card.payload_json` (02 §8.2 · 05 가 그대로 렌더한다). 코스 셋은 D164. */
+export const cardPayloadSchema = z.union([
+  z.discriminatedUnion('track', [t0PayloadSchema, t1PayloadSchema, t2PayloadSchema]),
+  stageChoiceSchema,
+  stageRepairSchema,
+  stageReimplSchema,
+]);
 
 // ───────── 세션 · 원장 ─────────
 
@@ -343,9 +420,27 @@ export const settingsValueSchema = (field: SettingsField): z.ZodTypeAny => setti
 
 // ───────── JSON 열 파싱 ─────────
 
-/** zod 문제 목록 → `'경로:코드'` — **값은 넣지 않는다** (01 §6). */
+/**
+ * zod 문제 목록 → `'경로:코드'` — **값은 넣지 않는다** (01 §6).
+ *
+ * `z.union` 은 문제를 `invalid_union` 하나로 접고 갈래별 문제를 `unionErrors` 에 숨긴다
+ * (`cardPayloadSchema`, D164). 접힌 채로 내면 「payload 가 틀렸다」밖에 못 말하므로 갈래 안의
+ * 문제를 펼친다 — 가장 적게 틀린 갈래가 실제로 뜻한 모양이라 그 갈래의 경로를 앞에 둔다.
+ */
 function issuePaths(error: z.ZodError): string[] {
-  return error.issues.slice(0, 8).map((i) => `${i.path.join('.') || '<root>'}:${i.code}`);
+  const flat = (issues: readonly z.ZodIssue[]): string[] => {
+    const out: string[] = [];
+    for (const i of issues) {
+      if (i.code === 'invalid_union') {
+        const branches = i.unionErrors.map((e) => flat(e.issues)).sort((a, b) => a.length - b.length);
+        for (const b of branches) out.push(...b);
+      } else {
+        out.push(`${i.path.join('.') || '<root>'}:${i.code}`);
+      }
+    }
+    return out;
+  };
+  return [...new Set(flat(error.issues))].slice(0, 8);
 }
 
 /**
