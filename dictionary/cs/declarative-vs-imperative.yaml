@@ -1,0 +1,89 @@
+schema: 1
+id: cs/declarative-vs-imperative
+universal: null
+name: { ko: "무엇을 말하나 어떻게를 말하나", en: "Declarative and imperative" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+# SQL 편이 밀어낸 것 (cs.md §10.2).
+track_default: t0
+essential: false
+difficulty: 2
+prereq: []
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "순서를 내가 쓰는 코드와, 원하는 결과만 쓰고 순서는 맡기는 코드."
+    en: "You write the order, or you write the result and leave the order."
+  why:
+    ko: >-
+      반복문은 「먼저 이걸 하고 다음에 저걸 하라」입니다 — <b>어떻게</b>를 적어요.
+      질의문·화면 선언·스타일 규칙은 「결과가 이래야 한다」입니다 — <b>무엇을</b>만 적고
+      순서는 다른 층이 정합니다. 이 차이를 모르면 질의문에서 「왜 내가 쓴 순서대로 안 도나」를
+      묻게 되고, 답이 없어요. <b>애초에 순서를 약속한 적이 없기 때문</b>입니다.
+      대신 얻는 것은 그 층이 더 나은 순서를 고를 자유이고, 잃는 것은 순서를 내가 못 정하는 것입니다.
+    en: >-
+      A loop says “do this, then that” — it writes <b>how</b>. A query, a view declaration, a style
+      rule says “the result should look like this” — it writes only <b>what</b>, and another layer
+      picks the order. Without this distinction you end up asking why a query does not run in the
+      order you wrote, and there is no answer: <b>no order was ever promised</b>. What you gain is
+      that layer's freedom to pick a better order; what you lose is picking it yourself.
+  trace: []
+rule:
+  ko: "<b>순서를 안 적었으면 순서를 묻지 않는다.</b> 약속한 것은 결과뿐이다."
+  en: "<b>If you did not write the order, do not ask about it.</b> Only the result was promised."
+ok:
+  ko: >-
+    같은 일을 두 방식으로 적을 수 있습니다. 순서가 중요하면 적고, 결과만 중요하면 맡깁니다.
+    한 프로그램 안에 두 방식이 섞여 있는 것이 보통입니다.
+  en: >-
+    The same job can be written either way. Write the order when it matters; hand it over when
+    only the result does. Most programs mix both.
+misconceptions:
+  - ko: "선언형이 더 느리다 — 순서를 고르는 층이 사람보다 나은 순서를 찾기도 합니다."
+    en: "Declarative is slower — the layer picking the order often picks better than a person."
+  - ko: "선언형에는 순서가 없다 — 순서는 있고, 내가 정하지 않을 뿐입니다."
+    en: "Declarative has no order — there is an order; you just do not choose it."
+  - ko: "둘 중 하나를 골라야 한다 — 한 프로그램 안에 둘 다 있는 것이 보통입니다."
+    en: "You must pick one — most programs contain both."
+meaning:
+  - q:
+      ko: "질의문을 쓴 순서대로 도는지 물었더니 「그건 정해져 있지 않다」는 답이 왔습니다. <b>왜인가요?</b>"
+      en: "You asked whether a query runs in the order you wrote it and were told it is not fixed. <b>Why?</b>"
+    hint:
+      ko: "그 글이 약속한 것이 무엇인지부터 봅니다."
+      en: "Start from what that text actually promised."
+    options:
+      - t: { ko: "그 글은 결과만 적었고 순서는 다른 층이 고른다", en: "The text states the result; another layer picks the order" }
+      - t: { ko: "질의문은 원래 순서가 없는 언어다", en: "Queries are a language without order" }
+        diag:
+          t:
+            ko: "실행에는 반드시 순서가 있습니다. 없는 것은 순서가 아니라 <b>순서에 대한 약속</b>이에요."
+            en: "Execution always has an order. What is missing is not order but the <b>promise about it</b>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 없는 것과 안 약속한 것", en: "The sharpest spot — absent or unpromised" }
+            code:
+              - "순서: 실행에는 언제나 있다"
+              - "약속: 그 글이 안 했다"
+      - t: { ko: "질의문이 너무 짧아서 순서를 적을 자리가 없다", en: "The query is too short to hold an order" }
+        diag:
+          t:
+            ko: "길이의 문제가 아닙니다. 아주 긴 질의문도 <b>무엇을</b>만 적어요 — 적는 종류가 다른 것입니다."
+            en: "It is not about length. A very long query still states only <b>what</b> — the kind of statement differs."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 길이냐 종류냐", en: "The sharpest spot — length or kind" }
+            code:
+              - "반복문: 짧아도 순서를 적는다"
+              - "질의문: 길어도 결과를 적는다"
+      - t: { ko: "데이터베이스가 순서를 지킬 만큼 똑똑하지 않아서", en: "The database is not smart enough to keep the order" }
+        diag:
+          t:
+            ko: "반대입니다. 순서를 <b>고를 수 있게</b> 열어 둔 덕에 더 빠른 순서를 찾습니다."
+            en: "The opposite: leaving the order <b>open to choose</b> is what lets it find a faster one."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 못 지키나 안 묶었나", en: "The sharpest spot — unable or unbound" }
+            code:
+              - "안 묶었다: 더 나은 순서를 고른다"
+              - "묶었다면: 내가 쓴 순서가 상한이다"

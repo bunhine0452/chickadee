@@ -182,4 +182,33 @@ describe('사용처 없이 카드만 있는 후보 (D154)', () => {
   test('사용처가 있는데 죽어 best 가 없으면 그대로 걸러진다 — 예전 행동이 안 바뀐다', () => {
     expect(rank([{ conceptId: 'ts/dead', siteCount: 3 }])).toEqual([]);
   });
+
+  /**
+   * 기계 개념도 같은 가지로 들어온다 (D157 · D167). `cs/` 는 캡처가 없어 `siteCount` 가 0 이고,
+   * 창은 자기를 `prereq` 로 가리키는 언어 개념에서 빌린다 — 큐 SQL 도 순위 규칙도
+   * 한 글자 안 고친다. `exec/` 와 **같은 자리에 같은 값으로** 서는지만 본다.
+   */
+  test('cs/ 도 사용처 없이 후보로 남고 어휘 뒤에 선다', () => {
+    expect(rank([{ conceptId: 'cs/memory-address', siteCount: 0 }])).toEqual(['cs/memory-address']);
+    expect(rank([
+      { conceptId: 'cs/memory-address', siteCount: 0 },
+      { conceptId: 'ts/a', siteCount: 5 },
+    ])).toEqual(['ts/a', 'cs/memory-address']);
+  });
+
+  /**
+   * 빌린 창의 선행은 여전히 순위를 정한다 — `cs/pointer-indirection` 은 `cs/memory-address`
+   * 뒤다. 사용처가 없다고 깊이가 죽지 않는다는 것을 못박는다.
+   */
+  test('cs/ 끼리는 선행 깊이가 그대로 순서를 정한다', () => {
+    const ranked = rankNewConcepts({
+      candidates: [
+        { conceptId: 'cs/pointer-indirection', siteCount: 0 },
+        { conceptId: 'cs/memory-address', siteCount: 0 },
+      ],
+      bestSiteOf: () => null,
+      prereqOf: (id) => (id === 'cs/pointer-indirection' ? ['cs/memory-address'] : []),
+    });
+    expect(ranked.map((c) => c.conceptId)).toEqual(['cs/memory-address', 'cs/pointer-indirection']);
+  });
 });

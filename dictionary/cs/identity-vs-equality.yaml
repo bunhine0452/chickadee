@@ -1,0 +1,91 @@
+schema: 1
+id: cs/identity-vs-equality
+universal: null
+name: { ko: "같은 것인가 같은 값인가", en: "Identity and equality" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+# 파이썬·C# 편이 밀어낸 것 (cs.md §10.2).
+track_default: t0
+essential: false
+difficulty: 2
+prereq: [cs/value-vs-reference]
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "「그 물건인가」와 「내용이 같은가」는 다른 질문이고, 답이 언어마다 뒤집힌다."
+    en: "“The same thing” and “the same contents” are different questions."
+  why:
+    ko: >-
+      쌍둥이 둘은 <b>내용이 같지만 같은 사람이 아닙니다</b>. 값도 그렇습니다.
+      「같은 자리에 있는 그것인가」와 「담긴 내용이 같은가」는 다른 물음이에요.
+      비교를 적을 때 어느 쪽을 묻는지 정해야 하는데, 언어마다 기본이 다르고 심지어
+      <b>같은 언어 안에서도 타입마다 다릅니다</b>. 작은 수를 미리 만들어 두고 돌려쓰는 언어에서는
+      「내용이 같으면 같은 물건이기도 한」 우연이 생기고, 그 우연을 규칙으로 착각하면
+      큰 수에서 갑자기 답이 달라집니다.
+    en: >-
+      Twins have <b>the same contents and are not the same person</b>. Values are alike. “Is it
+      that one, in that place?” and “are the contents equal?” are different questions. Writing a
+      comparison means choosing one, and the default differs by language — and even <b>by type
+      inside one language</b>. Where small numbers are pre-made and reused, equal contents happen
+      to be the same object; mistake that coincidence for a rule and larger numbers will flip the
+      answer.
+  trace: []
+rule:
+  ko: "<b>내용이 같아도 같은 물건은 아니다.</b> 어느 쪽을 물었는지 먼저 정한다."
+  en: "<b>Equal contents is not the same object.</b> Decide which you asked."
+ok:
+  ko: >-
+    대개는 내용이 같은지를 묻습니다. 같은 물건인지를 물어야 하는 자리는 「누가 이 값을
+    들고 있나」를 따질 때예요.
+  en: >-
+    Most of the time you mean equal contents. You mean the same object when the question is who
+    is holding this value.
+misconceptions:
+  - ko: "내용이 같으면 같은 물건이다 — 우연히 그럴 때가 있고 그것을 규칙으로 믿으면 어긋납니다."
+    en: "Equal contents means one object — sometimes true by chance, and believing it breaks later."
+  - ko: "비교 연산자 하나면 충분하다 — 언어마다 두 질문을 다른 표기로 나눠 둡니다."
+    en: "One comparison operator suffices — languages split the two questions into different notations."
+  - ko: "같은 물건이면 내용도 같다 — 맞습니다. 반대가 성립하지 않는 것이 요점입니다."
+    en: "Same object implies equal contents — yes. The point is that the converse fails."
+meaning:
+  - q:
+      ko: "작은 수 둘을 비교하면 「같은 물건」이라 나오고 큰 수 둘은 아니라고 나옵니다. <b>왜인가요?</b>"
+      en: "Two small numbers compare as the same object; two large ones do not. <b>Why?</b>"
+    hint:
+      ko: "작은 수는 미리 만들어 두고 돌려쓰는 경우가 있습니다."
+      en: "Small numbers are often pre-made and reused."
+    options:
+      - t: { ko: "작은 수는 미리 만들어 둔 하나를 돌려써서 자리가 같다", en: "Small numbers reuse one pre-made object, so the place matches" }
+      - t: { ko: "큰 수는 비교가 정확하지 않아서", en: "Comparison is inexact for large numbers" }
+        diag:
+          t:
+            ko: "정수 비교는 크기와 무관하게 정확합니다. 갈린 것은 <b>무엇을 물었느냐</b>예요 — 내용을 물었다면 둘 다 같다고 나옵니다."
+            en: "Integer comparison is exact at any size. What split them is <b>which question you asked</b> — by contents, both are equal."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 정확도냐 질문이냐", en: "The sharpest spot — accuracy or question" }
+            code:
+              - "내용: 두 경우 다 같다"
+              - "물건: 작은 수만 같다"
+      - t: { ko: "큰 수는 담을 자리가 모자라서", en: "Large numbers do not fit" }
+        diag:
+          t:
+            ko: "담기지 않았다면 값 자체가 <b>달라졌을</b> 것입니다. 값은 맞게 나오는데 「같은 물건인가」만 갈렸어요."
+            en: "Not fitting would have changed the <b>value</b>. The values are right; only “same object” differs."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값이냐 자리냐", en: "The sharpest spot — value or place" }
+            code:
+              - "값: 둘 다 맞다"
+              - "자리: 미리 만든 것만 공유"
+      - t: { ko: "비교하는 방법을 언어가 자동으로 바꿔서", en: "The language silently switched comparison methods" }
+        diag:
+          t:
+            ko: "방법은 그대로였습니다 — 같은 방법이 <b>다른 답</b>을 낸 것이 요점이에요. 그래서 미리 만드는 범위가 문제가 됩니다."
+            en: "The method never changed — the point is one method giving <b>different answers</b>. Hence the pre-made range matters."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 방법이냐 대상이냐", en: "The sharpest spot — method or subject" }
+            code:
+              - "방법: 같다"
+              - "대상: 하나는 공유, 하나는 새로 만듦"

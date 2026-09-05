@@ -7,7 +7,7 @@ grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 3
-prereq: [ts/call-expression, ts/arrow-function]
+prereq: [ts/call-expression, ts/arrow-function, cs/blocking-and-async]
 confusions: [ts/promise-then, ts/try-catch]
 
 dict:

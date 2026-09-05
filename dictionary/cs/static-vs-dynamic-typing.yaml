@@ -1,0 +1,88 @@
+schema: 1
+id: cs/static-vs-dynamic-typing
+universal: null
+name: { ko: "언제 확인하나", en: "Static or dynamic typing" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+track_default: t0
+essential: false
+difficulty: 2
+prereq: [cs/type, cs/compile-and-run]
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "미리 막느냐 돌다가 멈추느냐. 확인의 시점이 갈린다."
+    en: "Stopped in advance, or stopped mid-run. The moment of checking differs."
+  why:
+    ko: >-
+      「이 값에 이 일을 해도 되나」는 어차피 확인됩니다. 갈리는 것은 <b>언제</b>예요.
+      번역할 때 확인하면 코드를 돌리기 전에 알 수 있고, 대신 <b>타입을 적어야</b> 합니다.
+      돌 때 확인하면 적을 것이 적고 빨리 써 볼 수 있는 대신, 안 지나가 본 갈래의 문제는
+      그 갈래를 지나갈 때까지 안 보입니다. 어느 쪽이 낫다기보다 <b>무엇을 언제 알 것인가</b>의
+      거래이고, 그래서 한 언어 안에서도 두 방식을 섞어 쓰는 일이 흔합니다.
+    en: >-
+      “May this operation apply to this value” gets checked either way. What differs is <b>when</b>.
+      Check at translation and you know before running, at the price of <b>writing the types</b>.
+      Check at run time and there is less to write and faster trying, at the price that a branch
+      you never took hides its problem until you take it. Less better-or-worse than a trade about
+      <b>what you learn when</b> — which is why one language often uses both.
+  trace: []
+rule:
+  ko: "<b>확인은 사라지지 않고 옮겨 다닌다.</b> 앞으로 옮기면 적을 것이 늘고, 뒤로 미루면 갈래가 남는다."
+  en: "<b>Checks move; they never vanish.</b> Move them earlier and you write more; later and branches stay unchecked."
+ok:
+  ko: >-
+    미리 확인하는 언어에서도 돌 때만 알 수 있는 것이 있습니다. 사용자가 넣은 값이 그렇고,
+    그래서 두 확인이 겹치지 않고 나뉩니다.
+  en: >-
+    Even languages that check early leave some things to run time — user input, for one. The two
+    checks divide the work rather than overlap.
+misconceptions:
+  - ko: "미리 확인하면 돌 때 오류가 없다 — 값에서 오는 오류는 그대로 남습니다."
+    en: "Early checking removes run-time errors — errors that come from values remain."
+  - ko: "타입을 안 적으면 타입이 없다 — 추론해 주는 언어에도 타입은 있습니다."
+    en: "No written types means no types — languages that infer still have them."
+  - ko: "둘 중 하나를 골라야 한다 — 한 언어 안에서 섞어 쓰는 것이 흔합니다."
+    en: "You must pick one — mixing both inside one language is common."
+meaning:
+  - q:
+      ko: "테스트에서 안 지나간 갈래의 타입 문제가 배포 뒤에 나타났습니다. <b>어느 방식이었나요?</b>"
+      en: "A type problem in an untested branch appeared after release. <b>Which scheme was in use?</b>"
+    hint:
+      ko: "지나가 봐야 아는 확인은 언제 도나요."
+      en: "A check that needs the branch to be taken runs when?"
+    options:
+      - t: { ko: "돌 때 확인하는 방식 — 지나가야 확인된다", en: "Checked at run time — the branch must be taken" }
+      - t: { ko: "번역할 때 확인하는 방식인데 확인이 새어 나갔다", en: "Checked at translation, and the check leaked" }
+        diag:
+          t:
+            ko: "번역 때 확인은 <b>지나가 보지 않아도</b> 모든 갈래를 봅니다. 안 지나간 갈래에서 났다는 것이 표시예요."
+            en: "Translation-time checking sees every branch <b>without taking it</b>. Failing on an untaken branch is the tell."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 지나가야 보나", en: "The sharpest spot — must it be taken" }
+            code:
+              - "번역 때: 안 지나가도 본다"
+              - "돌 때: 지나가야 본다"
+      - t: { ko: "테스트를 안 써서 생긴 문제이고 방식과 무관하다", en: "A testing gap, unrelated to the scheme" }
+        diag:
+          t:
+            ko: "테스트가 더 있으면 좋았겠지만 <b>번역 때 확인하는 언어</b>였다면 테스트 없이도 걸렸을 것입니다."
+            en: "More tests would help, but a <b>translation-checked</b> language would have caught it without any."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 테스트냐 확인 시점이냐", en: "The sharpest spot — tests or the moment" }
+            code:
+              - "테스트: 지나간 갈래만 본다"
+              - "번역 때 확인: 전부 본다"
+      - t: { ko: "배포 환경이 개발 환경과 달라서", en: "The release environment differs from development" }
+        diag:
+          t:
+            ko: "환경 차이도 실제 원인이 되지만, <b>같은 환경에서도</b> 그 갈래를 안 지나가면 똑같이 늦게 보입니다."
+            en: "Environment gaps are real causes, but <b>in the same environment</b> an untaken branch hides just as long."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 환경이냐 갈래냐", en: "The sharpest spot — environment or branch" }
+            code:
+              - "환경: 어디서 도나"
+              - "갈래: 그 줄을 지나갔나"

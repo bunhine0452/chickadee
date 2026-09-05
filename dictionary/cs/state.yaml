@@ -1,0 +1,88 @@
+schema: 1
+id: cs/state
+universal: null
+name: { ko: "시간에 따라 변하는 것", en: "State" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+track_default: t0
+essential: false
+difficulty: 1
+prereq: []
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "같은 코드가 같은 답을 안 내면, 대개 값이 아니라 시점이 다른 것이다."
+    en: "Same code, different answers — usually the moment differs, not the code."
+  why:
+    ko: >-
+      코드를 읽을 때 우리는 「이 줄이 무엇을 한다」를 봅니다. 그런데 그 줄이 보는 값은
+      <b>그 줄에 닿기까지 무슨 일이 있었는지</b>에 달려 있어요. 같은 함수가 어떤 때는
+      맞고 어떤 때는 안 맞으면, 함수를 백 번 다시 읽어도 답이 안 나옵니다 —
+      찾아야 하는 것은 <b>그 값이 언제 어디서 바뀌었는가</b>예요.
+      디버깅이 「코드 읽기」가 아니라 「시간 되짚기」가 되는 지점이 여기입니다.
+    en: >-
+      Reading code, we look at what a line does. But the values that line sees depend on
+      <b>everything that happened before reaching it</b>. If the same function is right sometimes
+      and not others, re-reading the function a hundred times will not tell you why — what you
+      need is <b>when and where that value changed</b>. This is where debugging stops being
+      reading code and becomes retracing time.
+  trace: []
+rule:
+  ko: "<b>같은 코드, 다른 시점, 다른 답.</b> 안 맞으면 코드가 아니라 시점부터 의심한다."
+  en: "<b>Same code, different moment, different answer.</b> Suspect the moment before the code."
+ok:
+  ko: >-
+    값이 바뀌는 자리를 세어 두면 됩니다. 바뀌는 자리가 적을수록 되짚을 시점도 적어지고,
+    그래서 「안 바꾸기」가 그 자체로 도구가 됩니다.
+  en: >-
+    Count the places a value changes. Fewer places means fewer moments to retrace — which is why
+    “do not change it” is itself a tool.
+misconceptions:
+  - ko: "코드를 다시 읽으면 원인이 보인다 — 원인이 <b>다른 시점</b>에 있으면 그 줄에는 없습니다."
+    en: "Re-reading the code will show the cause — if the cause is at <b>another moment</b>, it is not on that line."
+  - ko: "값이 이상하면 그 값을 만든 줄이 범인이다 — 만든 뒤에 고친 줄일 수도 있습니다."
+    en: "A strange value means the line that made it is guilty — a line that changed it later can be."
+  - ko: "재현이 안 되면 없는 문제다 — 시점에 걸린 문제는 대개 가끔만 재현됩니다."
+    en: "If it does not reproduce, there is no problem — time-dependent problems reproduce only sometimes."
+meaning:
+  - q:
+      ko: "같은 함수가 어제는 맞고 오늘은 안 맞습니다. <b>먼저 무엇을 찾아야 하나요?</b>"
+      en: "The same function was right yesterday and is not today. <b>What do you look for first?</b>"
+    hint:
+      ko: "함수의 글자는 그대로입니다. 그러면 달라진 것은 무엇일까요."
+      en: "The letters of the function did not move. So what did?"
+    options:
+      - t: { ko: "그 함수가 보는 값이 그 사이 어디서 바뀌었는지", en: "Where the values it reads were changed in between" }
+      - t: { ko: "함수 안에 숨은 문법 실수", en: "A hidden syntax mistake inside the function" }
+        diag:
+          t:
+            ko: "문법 실수는 어제도 오늘도 <b>똑같이</b> 나타납니다. 어제 맞았다면 그 자리는 아니에요."
+            en: "A syntax mistake shows up <b>the same</b> both days. If yesterday was fine, that is not the spot."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 늘 그런가 가끔 그런가", en: "The sharpest spot — always or sometimes" }
+            code:
+              - "문법: 언제나 같은 결과"
+              - "상태: 시점마다 다른 결과"
+      - t: { ko: "함수를 부르는 횟수", en: "How many times the function is called" }
+        diag:
+          t:
+            ko: "횟수 자체는 답이 아니지만 <b>가까운 자리</b>입니다. 문제가 되는 것은 부르는 사이에 값이 남아 있느냐예요."
+            en: "The count itself is not the answer, though it is <b>nearby</b>. What matters is whether values persist between calls."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 횟수냐 남는 값이냐", en: "The sharpest spot — count or carry-over" }
+            code:
+              - "횟수: 몇 번 불렀나"
+              - "상태: 부른 사이에 무엇이 남았나"
+      - t: { ko: "기계가 어제와 다른 답을 내기 시작한 것", en: "The machine started giving different answers" }
+        diag:
+          t:
+            ko: "같은 입력에 같은 계산이면 기계는 같은 답을 냅니다. 달라진 것은 <b>입력에 닿기까지의 이력</b>이에요."
+            en: "Same input, same computation, same answer. What changed is <b>the history leading to the input</b>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 계산이냐 이력이냐", en: "The sharpest spot — computation or history" }
+            code:
+              - "계산: 같은 입력 → 같은 답"
+              - "상태: 입력에 닿기까지가 다르다"

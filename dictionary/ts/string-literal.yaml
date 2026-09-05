@@ -7,7 +7,7 @@ grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 1
-prereq: []
+prereq: [cs/text-encoding]
 confusions: [ts/template-literal]
 
 dict:

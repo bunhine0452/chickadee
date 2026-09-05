@@ -7,7 +7,7 @@ grammars: [python]
 framework: null
 essential: true
 difficulty: 1
-prereq: []
+prereq: [cs/abstraction, cs/call-stack]
 confusions: []
 
 dict:

@@ -7,7 +7,7 @@ grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 1
-prereq: [ts/property-access]
+prereq: [ts/property-access, cs/call-stack]
 confusions: [ts/property-access]
 
 dict:

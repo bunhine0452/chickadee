@@ -79,7 +79,8 @@ function build(options: LoadOptions): Dict {
   for (const lang of bundledLangs()) {
     if (wanted && !wanted.has(lang)) continue;
     const files = bundledFiles(lang);
-    // `_lang.yaml` 이 없는 네임스페이스(`common/`·`arch/`)는 개념만 싣는다.
+    // `_lang.yaml` 이 없는 네임스페이스(`COMPUTED_NAMESPACES`)는 개념만 싣는다 —
+    // 문법에 매이지 않아 `grammars`·`extensions`·`essential` 을 댈 것이 없다 (D157 §7).
     const meta = readMeta(lang, files, problems);
     // 감지 신호가 선언돼 있으면 그 의존성이 있는 리포에서만 쓴다 (D59).
     if (meta?.detect && !deps.has(meta.detect.dependency)) continue;

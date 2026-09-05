@@ -7,7 +7,7 @@ grammars: [python]
 framework: null
 essential: true
 difficulty: 1
-prereq: []
+prereq: [cs/value-vs-reference, cs/state]
 # 빈칸 오답(== · += · :=)이 개념으로 존재하지 않는 낱말이라 혼동 쌍으로 못 묶는다.
 confusions: []
 

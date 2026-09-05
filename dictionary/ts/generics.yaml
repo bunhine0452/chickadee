@@ -7,7 +7,7 @@ grammars: [typescript, tsx]
 framework: null
 essential: true
 difficulty: 4
-prereq: [ts/call-expression, ts/array-basics]
+prereq: [ts/call-expression, ts/array-basics, cs/static-vs-dynamic-typing]
 confusions: [ts/array-map-immutable]
 
 dict:

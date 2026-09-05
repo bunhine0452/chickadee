@@ -7,7 +7,7 @@ grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 1
-prereq: []
+prereq: [cs/state]
 # 빈칸 오답 셋이 이 셋의 토큰이다 (`===` · `=>` · `+`).
 confusions: [ts/comparison, ts/arrow-function, ts/arithmetic, ts/const-declaration]
 

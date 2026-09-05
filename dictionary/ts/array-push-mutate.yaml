@@ -7,7 +7,7 @@ grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: false
 difficulty: 2
-prereq: [ts/array-basics, ts/call-expression]
+prereq: [ts/array-basics, ts/call-expression, cs/aliasing]
 confusions: [ts/array-map-immutable, ts/array-filter, ts/array-foreach]
 
 dict:

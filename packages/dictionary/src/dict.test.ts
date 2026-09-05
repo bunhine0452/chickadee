@@ -63,6 +63,52 @@ describe('사전이 실제로 담고 있는 것', () => {
     }
   });
 
+  /**
+   * `cs/` 는 문법 아래의 기계다 (D157 · D167). 껍데기가 `exec/order.yaml` 과 같아야
+   * 새 트랙도 새 `card.kind` 도 마이그레이션도 안 생긴다 — 하나라도 어긋나면 그 값이
+   * 어딘가에서 갈라진다.
+   */
+  test('cs/ 개념은 전부 exec/ 와 같은 껍데기다 (D157 ①)', () => {
+    const cs = [...dict.concepts.values()].filter((c) => c.id.startsWith('cs/'));
+    expect(cs.length).toBeGreaterThanOrEqual(43);
+    for (const concept of cs) {
+      expect(concept.universal, concept.id).toBeNull();
+      expect(concept.grammars, concept.id).toEqual([]);
+      expect(concept.queries, concept.id).toEqual([]);
+      expect(concept.track_default, concept.id).toBe('t0');
+      expect(concept.essential, concept.id).toBe(false);
+      // 문항은 뜻 고르기 하나뿐이다 — 지목형은 짚을 자리가, 빈칸형은 뚫을 구멍이 있어야 한다.
+      expect(concept.meaning.length, concept.id).toBeGreaterThan(0);
+      expect(concept.point, concept.id).toEqual([]);
+      expect(concept.blank, concept.id).toEqual([]);
+    }
+  });
+
+  /**
+   * 사용처 빌림 (D157 ②). `cs/` 는 자기 캡처가 없으므로 **자기를 `prereq` 로 가리키는
+   * 언어 개념의 창**에 얹힌다. 빌려 줄 언어 개념이 하나도 없는 `cs/` 는 그 리포에서 안 뜨고
+   * 그것이 맞다 — 가비지 컬렉션을 C 만 쓰는 사용자에게 안 가르치는 것과 같다.
+   *
+   * 여기서 잡는 것은 **빌려 준다고 적어 놓고 빌려 줄 창이 없는** 경우다: 가리키는 쪽이
+   * 전부 쿼리 없는 개념이면 얹힐 자리가 영영 안 생긴다.
+   */
+  test('cs/ 를 가리키는 언어 개념은 빌려 줄 창이 있다 (D157 ②)', () => {
+    const lenders = new Map<string, string[]>();
+    for (const concept of dict.concepts.values()) {
+      if (isComputed(concept.id)) continue; // cs/ 안에서의 선행은 빌림이 아니다
+      for (const ref of concept.prereq) {
+        if (ref.startsWith('cs/')) lenders.set(ref, [...(lenders.get(ref) ?? []), concept.id]);
+      }
+    }
+    expect(lenders.size).toBeGreaterThan(0);
+    for (const [csId, ids] of lenders) {
+      expect(dict.concepts.has(csId), csId).toBe(true);
+      // 빌려 주는 쪽 중 적어도 하나는 캡처가 있어야 얹힐 창이 생긴다.
+      const withSites = ids.filter((id) => (dict.concepts.get(id)?.queries.length ?? 0) > 0);
+      expect(withSites.length, `${csId} ← ${ids.join(' · ')}`).toBeGreaterThan(0);
+    }
+  });
+
   test('구조 개념 넷은 t2 트랙이다', () => {
     for (const slug of ['placement', 'radius', 'flow', 'direction']) {
       expect(dict.concepts.get(`arch/${slug}`)?.track_default).toBe('t2');
@@ -102,16 +148,17 @@ describe('사전이 실제로 담고 있는 것', () => {
  * 것보다 나쁘다. 문법이 더 나은 길을 줄 때 채운다.
  */
 const DEBT_RATCHET: Record<string, number> = {
-  // 39 → 42(java 셋) → 44(sql 둘) → 49(java 여덟) → 50(sql/comparison) → **52**(css 둘).
-  'blank-or-reason': 52,
-  'point-picks': 47,
-  'why-gate': 52,
+  // 39 → 42(java 셋) → 44(sql 둘) → 49(java 여덟) → 50(sql/comparison) → 52(css 둘)
+  // → **65**(D166, java 관문 0 과 OOP 축 열셋).
+  'blank-or-reason': 65,
+  'point-picks': 59,
+  'why-gate': 65,
   // 6 → 11(D147) → 18(D148) → 26(D150) → **33**(D152, 파이썬 바닥 여덟). D150 이 「먼저 읽기」를
   // 0장 소속에서 「겹 0」으로 넓혀 `essential` 전량이 대상이 됐다. 새로 든 넷(`array-filter`
   // 의 `filter` · `array-map-immutable` 의 `map` · `arrow-function` 의 `=>` · 그리고
   // `array-destructuring` 은 영문 관사 `a` 가 정답 토큰과 겹쳤다)을 고쳐 채웠다.
-  // 33 → 36(java 바닥 셋) → 38(sql 바닥 둘) → **42**(java 바닥 여덟 완성).
-  'zero-one-liner': 44,
+  // 33 → 36(java 바닥 셋) → 38(sql 바닥 둘) → 42(java 바닥 여덟 완성) → **57**(D166).
+  'zero-one-liner': 57,
 };
 
 describe('사전 저작 부채 (D145)', () => {

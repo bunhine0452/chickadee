@@ -7,7 +7,7 @@ grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 2
-prereq: [ts/array-basics, ts/const-declaration]
+prereq: [ts/array-basics, ts/const-declaration, cs/complexity]
 confusions: [ts/array-foreach, ts/array-method-chain]
 
 dict:

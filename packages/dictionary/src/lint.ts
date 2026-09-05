@@ -334,6 +334,10 @@ export function authoringDebt(dict: Dict): DebtCheck[] {
   for (const id of essential) {
     const concept = dict.sources.get(id) as SourceConcept;
     const { hasHole } = queryFacts(concept, dict);
+    // 쿼리 없는 네임스페이스(`COMPUTED_NAMESPACES` — `exec/`·`proto/`·`cs/`)는 `@hole` 을
+    // **가질 수 없다**: 뚫을 구멍이 있으려면 짚을 노드가 있어야 한다. 그래서 그쪽이
+    // `essential` 로 들어오면 통과하는 길이 `no_hole_reason` 하나뿐이고, 그것이 맞다 —
+    // 「아직 안 썼다」와 「이 층에는 구멍이 없다」를 사람이 한 줄로 갈라 적는 자리다 (D145 · D157).
     const filled = concept.blank.length > 0 && hasHole;
     if (!filled && concept.no_hole_reason === null) {
       blankGaps.push(`${id}(${concept.blank.length === 0 ? 'blank 없음' : '@hole 없음'})`);

@@ -1,0 +1,90 @@
+schema: 1
+id: cs/hash-table
+universal: null
+name: { ko: "키로 곧장 찾기", en: "Hash table" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+track_default: t0
+essential: false
+difficulty: 3
+prereq: [cs/contiguous-vs-linked]
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "키를 자리 번호로 바꿔 한 번에 간다. 대신 훑는 순서를 약속하지 않는다."
+    en: "The key becomes a slot number, so one hop finds it. Order is not promised."
+  why:
+    ko: >-
+      목록에서 무언가를 찾으려면 훑어야 합니다. 그런데 키를 <b>셈으로 자리 번호로 바꿀 수</b> 있으면
+      훑지 않고 그 자리로 곧장 갑니다 — 항목이 백만 개여도 한 걸음이에요.
+      대가가 둘 있습니다. 첫째, 자리 번호를 <b>셈으로 정하므로 담긴 순서가 뒤섞입니다</b> —
+      그래서 훑는 순서가 약속되지 않아요. 둘째, 서로 다른 키가 <b>같은 번호</b>가 되는 일이 생기고
+      그때는 그 자리에서 조금 훑어야 합니다. 이 둘을 알면 「왜 빠른가」와 「왜 순서가 없나」가
+      한 사실의 앞뒤라는 것이 보입니다.
+    en: >-
+      Finding something in a list means scanning. But if a key can be <b>turned into a slot number
+      by arithmetic</b>, you skip the scan and go straight there — one step even among a million.
+      Two prices. First, the slot is decided by arithmetic, so <b>the stored order is scrambled</b>
+      and iteration order is not promised. Second, different keys can land on <b>the same number</b>,
+      and then a little scanning happens at that slot. See both and “why fast” and “why unordered”
+      become two sides of one fact.
+  trace: []
+rule:
+  ko: "<b>자리를 셈으로 정하니 순서가 뜻을 잃는다.</b> 빠름과 무순서는 같은 사실이다."
+  en: "<b>Arithmetic picks the slot, so order loses meaning.</b> Fast and unordered are one fact."
+ok:
+  ko: >-
+    키로 넣고 키로 꺼내면 한 걸음입니다. 순서가 필요하면 꺼낸 뒤에 정렬하거나 순서를
+    따로 들고 다니면 됩니다.
+  en: >-
+    Put by key, get by key, one step. If you need an order, sort after reading or keep the order
+    alongside.
+misconceptions:
+  - ko: "넣은 순서대로 나온다 — 순서를 따로 지키는 구현에서만 그렇습니다."
+    en: "It comes out in insertion order — only where an implementation keeps that separately."
+  - ko: "언제나 한 걸음이다 — 같은 번호가 몰리면 그 자리에서 훑습니다."
+    en: "It is always one step — when keys pile on one slot, that slot is scanned."
+  - ko: "키를 아무거나 써도 된다 — 키가 도중에 바뀌면 그 항목을 못 찾게 됩니다."
+    en: "Any key will do — a key that changes afterwards loses its item."
+meaning:
+  - q:
+      ko: "키로 찾는 것은 아주 빠른데 훑는 순서가 매번 다릅니다. <b>둘은 무슨 관계인가요?</b>"
+      en: "Lookup is fast, yet iteration order differs each time. <b>How are the two related?</b>"
+    hint:
+      ko: "자리를 정하는 방법이 무엇이었는지 봅니다."
+      en: "Look at how the slot was chosen."
+    options:
+      - t: { ko: "자리를 셈으로 정하니 빠르고, 그래서 순서가 뜻을 잃는다", en: "Arithmetic picks the slot: hence fast, hence unordered" }
+      - t: { ko: "관계없다 — 순서는 구현이 게을러서 안 지킨 것이다", en: "Unrelated — the order is just an implementation shortcut" }
+        diag:
+          t:
+            ko: "순서를 지키려면 <b>따로 들고 다녀야</b> 합니다. 안 들고 다니는 것이 빠름의 조건이에요."
+            en: "Keeping order means <b>carrying it separately</b>. Not carrying it is a condition of the speed."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 게으름이냐 대가냐", en: "The sharpest spot — laziness or price" }
+            code:
+              - "순서 유지: 따로 든다"
+              - "안 듦: 그래서 싸다"
+      - t: { ko: "관계없다 — 순서는 항목 수에 따라 달라진다", en: "Unrelated — order depends on the item count" }
+        diag:
+          t:
+            ko: "항목 수가 바뀌면 자리 배치도 바뀌니 <b>가까운 자리</b>입니다. 다만 근본 원인은 자리를 셈으로 정한다는 것이에요."
+            en: "Changing the count reshuffles slots, so this is <b>close</b>. The root cause is still that arithmetic picks the slot."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 개수냐 방법이냐", en: "The sharpest spot — count or method" }
+            code:
+              - "개수: 배치를 흔든다"
+              - "방법: 애초에 순서를 안 정한다"
+      - t: { ko: "빠른 대신 정확도를 포기한 것이다", en: "Speed was bought with accuracy" }
+        diag:
+          t:
+            ko: "찾는 결과는 <b>언제나 정확합니다</b>. 포기한 것은 정확도가 아니라 순서에 대한 약속이에요."
+            en: "Lookups are <b>always exact</b>. What was given up is not accuracy but the promise of order."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 무엇을 포기했나", en: "The sharpest spot — what was given up" }
+            code:
+              - "정확도: 그대로다"
+              - "순서 약속: 없다"

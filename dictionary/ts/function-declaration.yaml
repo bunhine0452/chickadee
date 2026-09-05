@@ -7,7 +7,7 @@ grammars: [typescript, tsx, javascript, vue]
 framework: null
 essential: true
 difficulty: 1
-prereq: []
+prereq: [cs/abstraction]
 # 빈칸 오답(const·class·return)은 개념으로 존재하지 않는 낱말이라 혼동 쌍으로 묶을 수 없다.
 # `ts/const-declaration`(오답 let·var·readonly)과 같은 자리다.
 confusions: []

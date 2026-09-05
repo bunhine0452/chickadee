@@ -359,3 +359,88 @@ SQL 의 `common/` 재사용은 **10/30(33%)** 으로 열 중 최저다(최고는
 그런데 `cs/` 로 밀어낸 것은 여섯(`set-vs-sequence` · `three-valued-logic` · `declarative-vs-imperative` ·
 `cardinality` · `transaction-isolation` · `search-tree`)으로 열 중 최다다.
 **전이가 문법 층에서 끊긴 자리가 기계 층에서는 오히려 두껍다** — 이것이 `cs/` 층을 판 값을 가장 잘 보여 준다.
+
+---
+
+## 11. 실물 — 43장이 났다 (D167)
+
+`dictionary/cs/<id>.yaml` **43장**을 냈다. §3~§5 의 33 + §10.2 의 10 이고, §10.3 이 보류로 적은
+`cs/search-tree` 는 안 만들었다.
+
+### 11.1 껍데기 — `exec/order.yaml` 을 그대로
+
+```yaml
+universal: null      grammars: []      queries: []
+track_default: t0    essential: false  confusions: []
+```
+
+`dict.test.ts` 의 「cs/ 개념은 전부 exec/ 와 같은 껍데기다」가 43장 전량에 이 여섯을 건다.
+`COMPUTED_NAMESPACES` 는 D159 가 `proto/` 를 넣으면서 이미 넷을 다섯으로 늘려 뒀고(`schema.ts:54`),
+`isComputed` 하나를 린트·부채·시험이 함께 읽는다 — §7 이 요구한 「접두어를 상수 하나로」가 그 자리다.
+`dictionary/schema/concept.schema.json` 은 재생성해도 **한 글자도 안 바뀐다.**
+
+### 11.2 문항은 뜻 고르기 하나뿐
+
+지목형은 짚을 자리가, 빈칸형은 뚫을 구멍이 있어야 하는데 기계에는 둘 다 없다 —
+`proto/`(D159)와 같은 이유다. `misconceptions` 는 개념마다 셋을 채웠다.
+
+**템플릿 변수를 안 쓴다.** `{{site.line}}` 은 §2 ③의 빌린 창에서 오는 줄인데, 그 줄이 그 기계를
+짚는다는 보장이 없다 — `c/pointer-dereference` 의 창을 빌린 `cs/memory-address` 는 맞지만
+`ts/arithmetic` 의 창을 빌린 `cs/floating-point` 는 그 줄이 `+` 하나일 수 있다.
+창은 판에 그대로 뜨고(`payload.lines`) 문장은 기계를 묻는다.
+
+### 11.3 사용처 빌림 — 언어 쪽에서 건다
+
+`ts/*` 21편 · `py/*` 5편의 `prereq` 에 `cs/…` 를 더했다. 자바는 A3 세션이 잡고 있어 안 건드렸다
+(넣어야 할 간선은 이 판의 보고서에 표로 있다).
+
+| 빌려 준 쪽 | 빌린 `cs/` |
+|---|---|
+| `ts/array-basics` | `value-vs-reference` · `contiguous-vs-linked` |
+| `ts/array-push-mutate` | `aliasing` |
+| `ts/array-map-immutable` · `ts/object-spread` | `immutability` |
+| `ts/undefined-null` · `ts/optional-chaining` | `null-reference` |
+| `ts/arrow-function` | `closure-capture` |
+| `ts/for-of` · `ts/array-method-chain` · `py/while-loop` | `complexity` |
+| `ts/async-await` · `ts/promise-then` | `blocking-and-async` |
+| `ts/arithmetic` · `py/arithmetic` | `floating-point` |
+| `ts/comparison` · `py/comparison` | `identity-vs-equality` |
+| `ts/call-expression` · `py/function-definition` | `call-stack` |
+| `ts/function-declaration` · `py/function-definition` | `abstraction` |
+| `ts/reassignment` · `py/assignment` | `state` |
+| `ts/const-declaration` | `type` · `ts/number-literal` → `binary-representation` |
+| `ts/string-literal` | `text-encoding` · `ts/generics` → `static-vs-dynamic-typing` |
+| `ts/try-catch` | `error-vs-bug` · `py/assignment` → `value-vs-reference` |
+
+**16장은 아직 빌릴 창이 없다** — 주소 계열 넷(`memory-address` · `pointer-indirection` ·
+`memory-layout` · `undefined-behavior`)과 `stack-and-heap` · `garbage-collection` · `bounds` ·
+`integer-overflow` · `hash-table` · `set-vs-sequence` · `three-valued-logic` ·
+`declarative-vs-imperative` · `cardinality` · `transaction-isolation` · `dynamic-dispatch` ·
+`erasure-and-reification` · `eager-vs-lazy` · `concurrency-vs-parallelism` · `race-condition` ·
+`deadlock` · `invariant` · `compile-and-run` · `linking` · `scope-and-lifetime`.
+**이것이 결함이 아니다** — §2 ③이 「빌릴 창이 하나도 없으면 그 개념은 안 뜬다」고 정했고,
+C·Rust·SQL 사전이 들어오면 그쪽에서 간선이 선다. 지금 사전이 `ts`·`py`·`java` 뿐이라 그렇다.
+
+린트가 잡는 것은 **빌려 준다고 적어 놓고 빌려 줄 창이 없는** 경우다: 가리키는 쪽이 전부
+쿼리 없는 개념이면 얹힐 자리가 영영 안 생긴다(`dict.test.ts` 의 「빌려 줄 창이 있다」).
+
+### 11.4 재 본 것
+
+- **43장 전량이 뜻 고르기 판으로 나온다 — 드롭 0.** 빌린 창을 손에 쥔 상태를 지어서
+  `genMeaning` 에 넣었다(`t0-proto.test.ts`). 보기 넷 · 진단 셋이 43장에서 다 성립한다.
+- **큐 후보에 든다.** `siteCount: 0` 인 `cs/*` 가 D154 가지를 그대로 통과하고 같은 깊이의
+  어휘 개념 **뒤에** 선다(`new-rank.test.ts`). 큐 SQL 도 순위 규칙도 안 고쳤다.
+- **0장 후보 수는 안 변한다.** `zero-chapter.test.ts` 의 깊이는 `essential` 안에서만 세므로
+  (`prereqDepth` 의 `known`) `cs/` 간선이 깊이를 안 밀어 내린다 — §6 의 미해결(24판 상한)은
+  **아직 안 걸렸다.** 0장이 `cs/` 를 받으려면 `zeroChapterPlates` 의 입력을 넓혀야 하고,
+  그것은 이 판에서 안 했다.
+
+### 11.5 남은 것
+
+1. **`bestSiteOf` 의 역방향 조회** — §2 ③의 빌림이 아직 코드에 없다. 지금 `cs/` 는 카드를
+   구울 이가 없어 큐 가지의 「카드가 이미 구워져 있을 것」을 못 넘는다. 문은 열려 있고
+   들어갈 사람이 없는 상태가 그대로다.
+2. **겹 귀속**(§9-2) — 빌린 창에서 푼 판의 겹이 `cs/` 에 쌓이나 언어 개념에 쌓이나.
+3. **0장 배분**(§9-3) — §11.4 대로 아직 안 걸렸으니 재는 것이 먼저다.
+4. §10.2 의 단계별 수(기초 11 · 중심 18 · 심화 14)는 실물과 한 장씩 어긋난다 —
+   실물은 **기초 11 · 중심 17 · 심화 15** 다. 총계 43은 같다.

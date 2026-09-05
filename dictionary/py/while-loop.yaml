@@ -7,7 +7,7 @@ grammars: [python]
 framework: null
 essential: true
 difficulty: 2
-prereq: [py/comparison]
+prereq: [py/comparison, cs/complexity]
 confusions: []
 
 dict:

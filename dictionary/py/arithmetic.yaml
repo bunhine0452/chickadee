@@ -7,7 +7,7 @@ grammars: [python]
 framework: null
 essential: true
 difficulty: 1
-prereq: []
+prereq: [cs/floating-point]
 # 빈칸 오답(== · = · and)이 개념으로 없거나 토큰이 안 맞아 혼동 쌍으로 못 묶는다.
 confusions: []
 

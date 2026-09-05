@@ -1,0 +1,88 @@
+schema: 1
+id: cs/pointer-indirection
+universal: null
+name: { ko: "값 대신 자리를 들고 다니기", en: "Indirection" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+track_default: t0
+essential: false
+difficulty: 3
+prereq: [cs/memory-address]
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "한 번 더 건너가서 값에 닿는다. 건너갈 곳이 없으면 거기서 멈춘다."
+    en: "One more hop to reach the value. No hop to take, and it stops there."
+  why:
+    ko: >-
+      값을 직접 들고 있으면 바로 씁니다. 값이 놓인 <b>자리</b>를 들고 있으면 한 번 건너가야 해요.
+      이 한 걸음이 주는 것은 큽니다 — 자리를 바꿔 끼우면 들고 있는 쪽을 안 고치고도 다른 값을
+      보게 할 수 있고, 여러 곳이 한 값을 공유할 수 있습니다. 대신 걸음마다 <b>거기 정말 있나</b>를
+      물어야 해요. 없는데 건너가면 프로그램이 그 자리에서 멈춥니다.
+      「층을 하나 더 두면 유연해지고 대신 확인할 것이 늘어난다」가 이 개념의 전부입니다.
+    en: >-
+      Hold the value and you use it. Hold the <b>place</b> and you take one hop first. That hop
+      buys a lot: swap what is at the place and holders see a different value without changing;
+      several holders can share one value. The price is that every hop asks <b>is anything really
+      there</b>. Hop into nothing and the program stops right there. One extra layer buys
+      flexibility and costs a check — that is the whole idea.
+  trace: []
+rule:
+  ko: "<b>한 걸음마다 확인이 하나 는다.</b> 유연함의 값이 그 확인이다."
+  en: "<b>Every hop adds a check.</b> That check is the price of flexibility."
+ok:
+  ko: >-
+    건너갈 자리가 있으면 그 값을 읽고 씁니다. 자리를 다른 값으로 바꿔 끼우면 들고 있던 쪽은
+    아무것도 안 고쳐도 새 값을 봅니다.
+  en: >-
+    If the place holds something, you read and write it. Swap what the place holds and the holder
+    sees the new value with nothing changed on its side.
+misconceptions:
+  - ko: "건너가기는 공짜다 — 걸음마다 메모리를 한 번 더 읽습니다."
+    en: "A hop is free — each hop reads memory once more."
+  - ko: "자리를 들고 있으면 값이 안 사라진다 — 자리는 그대로인데 값이 치워질 수 있습니다."
+    en: "Holding a place keeps the value alive — the place can outlast the value."
+  - ko: "층을 더 쌓으면 언제나 유연해진다 — 확인할 자리도 층마다 늘어납니다."
+    en: "More layers is always more flexible — checks grow with every layer."
+meaning:
+  - q:
+      ko: "자리를 들고 있는데 건너가는 순간 프로그램이 멈췄습니다. <b>무엇이 없었나요?</b>"
+      en: "You held a place, and hopping brought the program down. <b>What was missing?</b>"
+    hint:
+      ko: "자리를 들고 있는 것과 그 자리에 값이 있는 것은 다릅니다."
+      en: "Holding a place is not the same as the place holding a value."
+    options:
+      - t: { ko: "건너간 자리에 값이 없었다", en: "There was no value at the place you hopped to" }
+      - t: { ko: "들고 있던 자리 자체가 없었다", en: "The place you held did not exist" }
+        diag:
+          t:
+            ko: "들고 있던 것은 있었습니다 — 그러니까 건너갈 수 있었어요. 없었던 것은 <b>건너간 뒤</b>의 값입니다."
+            en: "What you held existed — that is why the hop happened. What was missing is the value <b>after</b> the hop."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 손에 있나 저쪽에 있나", en: "The sharpest spot — in hand or over there" }
+            code:
+              - "손: 자리는 들고 있었다"
+              - "저쪽: 닿은 곳이 비어 있었다"
+      - t: { ko: "타입이 안 맞았다", en: "The types did not match" }
+        diag:
+          t:
+            ko: "타입이 안 맞으면 대개 <b>번역할 때</b> 걸립니다. 돌다가 멈춘 것은 그때의 값 문제예요."
+            en: "A type mismatch is usually caught <b>at translation</b>. Stopping mid-run is a value problem."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 번역 때냐 돌 때냐", en: "The sharpest spot — translation or run" }
+            code:
+              - "타입: 대개 돌기 전에 걸린다"
+              - "빈 자리: 돌다가 걸린다"
+      - t: { ko: "값이 너무 커서 건너가지 못했다", en: "The value was too large to hop to" }
+        diag:
+          t:
+            ko: "건너가는 비용은 <b>값의 크기와 무관합니다</b> — 자리 번호를 따라가는 한 걸음이에요."
+            en: "The hop costs the same <b>whatever the size</b> — it follows one slot number."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 크기냐 존재냐", en: "The sharpest spot — size or existence" }
+            code:
+              - "크기: 한 걸음에 영향 없다"
+              - "존재: 있느냐가 전부다"

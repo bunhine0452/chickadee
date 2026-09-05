@@ -1,0 +1,89 @@
+schema: 1
+id: cs/cardinality
+universal: null
+name: { ko: "하나가 여럿과 만나면 몇 줄인가", en: "Cardinality" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+# SQL 편이 밀어낸 것 (cs.md §10.2).
+track_default: t0
+essential: false
+difficulty: 3
+prereq: [cs/set-vs-sequence]
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "붙이면 줄이 늘어난다. 한쪽이 여럿이면 반대쪽이 그만큼 되풀이된다."
+    en: "Joining multiplies rows: one side having many repeats the other."
+  why:
+    ko: >-
+      주문 하나에 상품이 셋 붙어 있으면, 둘을 이어 붙인 결과는 <b>세 줄</b>입니다.
+      주문 정보가 세 번 되풀이돼 나와요. 이 되풀이를 모르면 합계가 세 배가 되고,
+      개수를 세면 주문 수가 아니라 상품 수가 나옵니다. 「분명히 주문은 하나인데 왜 3이 나오지」의 답이 이것입니다.
+      그래서 이어 붙이기 전에 <b>한쪽이 몇 개와 만나는지</b>를 먼저 세는 습관이 필요해요.
+      1:1 이면 줄 수가 그대로이고, 1:다 이면 늘고, 다:다 이면 곱해집니다.
+    en: >-
+      One order with three items joins into <b>three rows</b>: the order's information repeats
+      three times. Miss the repetition and a total triples, and a count returns items rather than
+      orders. That is the answer to “there is one order, so why does it say 3”. Hence the habit of
+      counting <b>how many the other side meets</b> before joining. One-to-one keeps the row count,
+      one-to-many raises it, many-to-many multiplies it.
+  trace: []
+rule:
+  ko: "<b>붙이기 전에 몇 개와 만나는지 센다.</b> 줄 수는 그 곱이다."
+  en: "<b>Count how many it meets before joining.</b> The row count is the product."
+ok:
+  ko: >-
+    양쪽이 하나씩 만나면 줄 수가 안 늘어납니다. 늘어나야 한다면 그 되풀이를 알고 합계를
+    내는 방법을 따로 정하면 돼요.
+  en: >-
+    One to one keeps the count. When it must grow, know the repetition and decide separately how
+    to total.
+misconceptions:
+  - ko: "붙여도 줄 수는 그대로다 — 한쪽이 여럿이면 그만큼 늘어납니다."
+    en: "Joining keeps the row count — many on one side raises it."
+  - ko: "합계가 이상하면 데이터가 잘못됐다 — 되풀이된 줄을 그대로 더한 경우가 흔합니다."
+    en: "An off total means bad data — usually it is repeated rows added as-is."
+  - ko: "개수를 세면 원래 것의 수다 — 붙인 뒤에는 붙은 쪽의 수입니다."
+    en: "A count gives the original count — after a join it gives the joined side's count."
+meaning:
+  - q:
+      ko: "주문 하나를 상품과 이어 붙였더니 줄이 셋 나왔습니다. <b>무엇이 셋인가요?</b>"
+      en: "Joining one order to items produced three rows. <b>What is three?</b>"
+    hint:
+      ko: "주문은 하나입니다. 그런데 무엇이 셋이었을까요."
+      en: "There is one order. So what came in threes?"
+    options:
+      - t: { ko: "그 주문에 달린 상품이 셋이라 주문이 세 번 되풀이됐다", en: "The order has three items, so it repeats three times" }
+      - t: { ko: "주문이 사실 셋이었다", en: "There were three orders after all" }
+        diag:
+          t:
+            ko: "주문 표만 세면 <b>하나</b>입니다. 셋이 된 것은 붙이고 나서예요."
+            en: "Counted on the orders table alone it is <b>one</b>. Three appears only after the join."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 붙이기 전이냐 후냐", en: "The sharpest spot — before or after the join" }
+            code:
+              - "붙이기 전: 주문 1"
+              - "붙인 뒤: 줄 3"
+      - t: { ko: "같은 줄이 잘못 세 번 읽혔다", en: "The same row was read three times by mistake" }
+        diag:
+          t:
+            ko: "되풀이는 <b>정상 동작</b>입니다 — 붙는 쪽이 셋이면 세 줄이 나오는 것이 정의예요."
+            en: "The repetition is <b>correct behaviour</b> — three on the other side means three rows by definition."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 사고냐 정의냐", en: "The sharpest spot — accident or definition" }
+            code:
+              - "사고: 고쳐야 한다"
+              - "정의: 알고 합계를 내면 된다"
+      - t: { ko: "정렬을 안 해서 순서가 늘어난 것이다", en: "Rows grew because nothing was sorted" }
+        diag:
+          t:
+            ko: "정렬은 <b>순서</b>를 정할 뿐 줄 수를 안 바꿉니다. 늘어난 것은 만나는 개수 때문이에요."
+            en: "Sorting fixes <b>order</b>, never the row count. The growth comes from how many were met."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 순서냐 개수냐", en: "The sharpest spot — order or count" }
+            code:
+              - "정렬: 순서만 바뀐다"
+              - "붙이기: 줄 수가 곱해진다"

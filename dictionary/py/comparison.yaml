@@ -7,7 +7,7 @@ grammars: [python]
 framework: null
 essential: true
 difficulty: 1
-prereq: [py/boolean-literal]
+prereq: [py/boolean-literal, cs/identity-vs-equality]
 confusions: []
 
 dict:

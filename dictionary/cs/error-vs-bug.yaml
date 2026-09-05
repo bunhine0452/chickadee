@@ -1,0 +1,88 @@
+schema: 1
+id: cs/error-vs-bug
+universal: null
+name: { ko: "예상한 실패와 안 예상한 실패", en: "Expected failure and defect" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+track_default: t0
+essential: false
+difficulty: 2
+prereq: []
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "파일이 없는 것은 세상의 일이고, 없을 수 있다는 걸 안 다룬 것은 내 일이다."
+    en: "A missing file is the world's doing. Not handling that it might be is yours."
+  why:
+    ko: >-
+      네트워크가 끊기고 파일이 없고 사용자가 이상한 값을 넣습니다. 이것들은 <b>일어나기로 되어 있는 일</b>이에요 —
+      코드가 아무리 좋아도 없어지지 않습니다. 반면 「없을 수 있다는 것을 안 다룬 것」은
+      <b>내가 안 쓴 줄</b>입니다. 앞의 것은 <b>다루는 경로를 더해서</b> 해결하고,
+      뒤의 것은 <b>줄을 고쳐서</b> 해결해요. 이 둘을 안 가르면 재시도를 넣어야 할 자리에
+      코드를 고치고, 코드를 고쳐야 할 자리에 재시도를 넣게 됩니다.
+    en: >-
+      Networks drop, files go missing, users type odd things. These are <b>meant to happen</b> —
+      no amount of good code removes them. Not handling that a file might be missing is a
+      <b>line you did not write</b>. The first is solved by <b>adding a path</b>, the second by
+      <b>fixing a line</b>. Confuse them and you rewrite code where a retry belonged, and add a
+      retry where the code was at fault.
+  trace: []
+rule:
+  ko: "<b>세상의 일은 경로로 다루고 내 일은 줄로 고친다.</b> 섞으면 둘 다 안 낫는다."
+  en: "<b>Handle the world with a path; fix your own with a line.</b> Mixing cures neither."
+ok:
+  ko: >-
+    일어날 수 있는 실패를 미리 세어 두고 각각에 갈 길을 내 줍니다. 세어 두지 않은 실패가
+    나면, 그때 세는 것이 고치는 일입니다.
+  en: >-
+    List the failures that can happen and give each a path. When one you did not list shows up,
+    listing it is the fix.
+misconceptions:
+  - ko: "모든 실패는 결함이다 — 네트워크가 끊기는 것은 코드로 못 없앱니다."
+    en: "Every failure is a defect — no code removes a dropped network."
+  - ko: "예외를 잡으면 다 해결된다 — 잡기만 하고 갈 길이 없으면 그대로 감춘 것입니다."
+    en: "Catching handles it — catching without a path just hides it."
+  - ko: "결함은 메시지가 크게 뜬다 — 조용히 잘못된 값을 내는 결함이 더 흔합니다."
+    en: "Defects announce themselves — quietly producing a bad value is more common."
+meaning:
+  - q:
+      ko: "서버가 응답하지 않아 화면이 비었습니다. <b>이 상황을 어떻게 나눠야 하나요?</b>"
+      en: "A server did not answer and the screen is blank. <b>How should this be split?</b>"
+    hint:
+      ko: "응답이 없는 것과, 없을 때 무엇을 보일지 안 정한 것은 다른 일입니다."
+      en: "No answer is one thing; not deciding what to show then is another."
+    options:
+      - t: { ko: "응답 없음은 일어날 일이고, 그때 보일 것을 안 정한 것이 내 몫이다", en: "No answer is expected; not deciding what to show is mine" }
+      - t: { ko: "둘 다 서버 쪽 문제다", en: "Both are the server's problem" }
+        diag:
+          t:
+            ko: "서버가 응답하는 날에도 <b>빈 화면 자리</b>는 그대로 비어 있습니다. 서버를 고쳐도 안 없어지는 부분이 있어요."
+            en: "Even on a day the server answers, the <b>blank-screen branch</b> stays empty. Some of it does not go away by fixing the server."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 서버가 고쳐지면 남나", en: "The sharpest spot — does it survive a server fix" }
+            code:
+              - "응답 없음: 서버가 고쳐지면 준다"
+              - "빈 화면: 여전히 안 정해져 있다"
+      - t: { ko: "둘 다 내 코드의 결함이다", en: "Both are defects in my code" }
+        diag:
+          t:
+            ko: "응답이 없는 것은 <b>코드로 없앨 수 없습니다</b>. 없앨 수 없는 일을 결함으로 부르면 고칠 곳이 안 보여요."
+            en: "No code removes a server not answering. Calling the unremovable a defect hides where to fix."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 없앨 수 있나", en: "The sharpest spot — can it be removed" }
+            code:
+              - "없앨 수 없다: 경로를 낸다"
+              - "없앨 수 있다: 줄을 고친다"
+      - t: { ko: "화면이 비었을 뿐 아무 문제도 없다", en: "The screen is blank; nothing is amiss" }
+        diag:
+          t:
+            ko: "일부러 비워 두기로 <b>정했다면</b> 맞는 말입니다. 정한 적이 없는 빈 화면은 안 다룬 자리예요."
+            en: "If blank was <b>chosen</b>, that is true. A blank nobody chose is an unhandled branch."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 정했나 안 정했나", en: "The sharpest spot — chosen or not" }
+            code:
+              - "정했다: 설계"
+              - "안 정했다: 안 쓴 줄"

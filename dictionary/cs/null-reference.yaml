@@ -1,0 +1,90 @@
+schema: 1
+id: cs/null-reference
+universal: null
+name: { ko: "가리킬 것이 없는 자리", en: "Null reference" }
+token: null
+grammars: []
+framework: null
+# 짚을 노드가 없다 — 창은 이 개념을 `prereq` 로 가리키는 언어 개념에서 빌린다 (D157).
+# 선행이 `pointer-indirection` 이 아니라 `value-vs-reference` 인 이유는 cs.md §6 에 있다.
+track_default: t0
+essential: false
+difficulty: 2
+prereq: [cs/value-vs-reference]
+confusions: []
+queries: []
+dict:
+  one_liner:
+    ko: "「없음」을 값으로 두는 설계와 타입으로 두는 설계가 갈린다."
+    en: "Some designs make absence a value; others make it a type."
+  why:
+    ko: >-
+      값이 아직 없거나 찾지 못했을 때 무엇을 돌려줄까요. 한 갈래는 <b>「없음」이라는 값</b>을
+      만들어 아무 자리에나 넣을 수 있게 합니다 — 편하지만 <b>모든 자리가 없음일 수 있게</b> 됩니다.
+      다른 갈래는 「없을 수 있음」을 <b>타입에 적어</b> 둡니다 — 없을 수 있는 것과 없을 수 없는 것이
+      코드에서 갈리고, 꺼내려면 확인을 거쳐야 해요. 앞의 갈래에서 가장 흔한 사고가
+      「확인 안 하고 꺼내기」이고, 뒤의 갈래는 그 사고를 <b>번역하는 때</b>로 옮깁니다.
+    en: >-
+      What comes back when there is no value yet, or nothing was found? One branch invents
+      <b>a value meaning “absent”</b> that fits anywhere — convenient, but now <b>every slot might
+      be absent</b>. The other branch writes “may be absent” <b>into the type</b>: what can be
+      missing is separated from what cannot, and getting at it requires a check. The commonest
+      accident in the first branch is reading without checking; the second branch moves that
+      accident to <b>translation time</b>.
+  trace: []
+rule:
+  ko: "<b>없음이 값이면 어디에나 들어간다.</b> 타입에 적으면 들어갈 자리가 정해진다."
+  en: "<b>Absence as a value fits everywhere.</b> Absence in the type fits only where it is written."
+ok:
+  ko: >-
+    없을 수 있는 자리에서 꺼내기 전에 확인합니다. 확인을 강제하는 언어에서는 안 하면
+    번역이 안 되고, 강제하지 않는 언어에서는 도는 때에 멈춥니다.
+  en: >-
+    Check before reading where absence is possible. Languages that force the check refuse to
+    translate without it; languages that do not stop you mid-run.
+misconceptions:
+  - ko: "「없음」과 「비어 있음」은 같다 — 빈 목록은 있는 목록이고, 없음은 목록 자체가 없는 것입니다."
+    en: "Absent and empty are the same — an empty list exists; absent means no list at all."
+  - ko: "확인을 한 번 했으면 그 뒤로는 안전하다 — 그 사이에 바뀔 수 있습니다."
+    en: "One check makes it safe afterwards — it can change in between."
+  - ko: "없음을 없앤 언어는 실패를 안 다룬다 — 실패를 <b>타입</b>으로 옮겨 적을 뿐입니다."
+    en: "Languages without null ignore failure — they move failure <b>into the type</b>."
+meaning:
+  - q:
+      ko: "어떤 언어는 확인 없이 꺼내면 번역이 안 되고, 어떤 언어는 돌다가 멈춥니다. <b>무엇이 갈랐나요?</b>"
+      en: "One language refuses to translate an unchecked read; another stops mid-run. <b>What split them?</b>"
+    hint:
+      ko: "「없을 수 있다」가 어디에 적혀 있는지를 봅니다."
+      en: "Look at where “may be absent” is written down."
+    options:
+      - t: { ko: "「없을 수 있음」을 타입에 적었는지 값으로 뒀는지", en: "Whether “may be absent” is in the type or is a value" }
+      - t: { ko: "한쪽이 더 엄격한 언어라서", en: "One language is simply stricter" }
+        diag:
+          t:
+            ko: "엄격함은 결과이지 원인이 아닙니다. 엄격해질 수 있었던 것은 <b>적을 자리가 있었기</b> 때문이에요."
+            en: "Strictness is the result, not the cause. It could be strict because there was <b>somewhere to write it</b>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 태도냐 자리냐", en: "The sharpest spot — attitude or place" }
+            code:
+              - "적을 자리 없음: 돌 때 안다"
+              - "타입에 적음: 미리 안다"
+      - t: { ko: "한쪽은 값이 실제로 없고 다른 쪽은 있어서", en: "In one the value is really absent, in the other it is not" }
+        diag:
+          t:
+            ko: "두 언어에서 <b>똑같이 없습니다</b>. 다른 것은 없다는 사실을 언제 아느냐예요."
+            en: "It is <b>equally absent</b> in both. What differs is when you learn it."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 없음이냐 앎이냐", en: "The sharpest spot — absence or knowledge" }
+            code:
+              - "없음: 두 언어가 같다"
+              - "아는 시점: 갈린다"
+      - t: { ko: "확인 코드를 사람이 썼는지 안 썼는지", en: "Whether a person wrote the check or not" }
+        diag:
+          t:
+            ko: "안 쓴 것은 <b>양쪽 다 같습니다</b> — 그래서 물음이 성립해요. 갈린 것은 안 썼을 때 무슨 일이 일어나느냐입니다."
+            en: "Nobody wrote it in <b>either</b> case — that is the premise. What differs is what happens then."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 안 썼을 때 무엇이 막나", en: "The sharpest spot — what stops you when unwritten" }
+            code:
+              - "값: 아무것도 안 막는다"
+              - "타입: 번역이 막는다"
