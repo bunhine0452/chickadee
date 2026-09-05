@@ -53,7 +53,6 @@ export function Masthead({ repoName, today, streak, masthead, onSettings, onCour
           <div className="wordmark" data-w="CHICKADEE">
             <span>CHICKADEE</span>
           </div>
-          <div className="brand-sub">Risograph Study Press</div>
           <div className="brand-line">{t('home.brandLine')}</div>
         </div>
       </div>

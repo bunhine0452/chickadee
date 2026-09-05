@@ -3,6 +3,13 @@
 조사 시점 2026-09-04. 바닥 여덟은 이미 서 있다(D152, 커밋 `f8d00da`) — §2 는 새로 짓는 목록이 아니라
 **이미 있는 것의 재검토**다. 새로 제안하는 것은 §3 부터다.
 
+> **2026-09-05 — 코스 3부와 실측이 [`docs/plan/python-axis.md`](../plan/python-axis.md) 에 있다.**
+> 이 문서는 사용자 리포를 **안 보고** 짠 설계표이고(§3·§4 의 34개), 그쪽은 사용자 리포 셋
+> (`adelie` 139파일 · `ECC` 63 · `MonggleMonggle` 16, 코드 38,550줄)을 `ast` 로 전부 파싱해 잰
+> 사용처 수와 그 위에 세운 부 배치다. **부 배치는 그쪽이 정본**이고 여기 §2.5 가 요약이다.
+> 실측이 이 문서를 고친 자리 셋: ⓐ `py/arithmetic` 사용처의 51 %가 셈이 아니다(§2 ⓑ 의 확대판)
+> ⓑ `py/type-hint` 은 심화가 아니라 2부다(2,926곳) ⓒ `py/set-and-membership` 이 새로 선다.
+
 ---
 
 ## §1 언어 좌표
@@ -101,6 +108,35 @@ TS 판에서 중심이던 것들(구조 분해 · 옵셔널 체이닝 · 스프�
 블록 범위로 잘리면 `@app.get(...)` 가 화면에서 사라진다 — FastAPI 코드에서 그 한 줄이 함수가 무엇인지
 말하는 유일한 줄이다. `(decorated_definition definition: (function_definition ...)) @block.function` 로
 바꿔 잡는 것이 맞는지 확인이 필요하다.
+
+> **ⓔ 는 고쳐졌다** — 2026-09-05 기준 `_blocks.scm` 이 `decorated_definition` 판 둘을 함께 잡고
+> 쿼리 주석이 이유를 적고 있다. 겹쳐 잡히는 것은 `derive.ts` 가 「끝과 이름이 같으면 바깥을 남긴다」로 접는다.
+
+---
+
+## §2.5 코스 3부 — 부 배치 (2026-09-05 실측)
+
+정본 §4 · D177 의 파이썬판. 전체 근거와 비용은 [`docs/plan/python-axis.md`](../plan/python-axis.md).
+
+| 부 | 교재 | 장 | 담기는 것 |
+|---|---|---|---|
+| **1부 바닥** | 합성 예제 | **16** | `assignment` · `number-literal` · `string-literal` · `boolean-literal` · `none-value` · `arithmetic` · `comparison` · `truthiness` · `if-statement` · `list-literal` · `for-in` · `while-loop` · `function-definition` · `call-expression` · `return-statement` · `import` |
+| **2부 자료구조와 객체** | 합성 + 내 코드 | **16** | `attribute-access` · `f-string` · `dict-literal` · `index-access` · `set-and-membership` · `tuple-unpacking` · `list-append` · `list-comprehension` · `is-identity` · `type-hint` · `class-definition` · `default-argument` · `try-except` · `with-statement` · `lambda` · `decorator` |
+| **3부 프레임워크** | 내 코드 중심 | 10~12 | `pyapp/`(패키지·진입점·가상환경·설정·dataclass·enum·ABC·pytest) 먼저, `pyweb/`(FastAPI) 그 위 |
+
+1부가 자바(13장)보다 큰 이유는 파이썬에 타입 선언문이 없어서다 — 자바가 `variable-declaration`
+한 장으로 배우는 것을 파이썬은 리터럴 넷이 나눠 진다.
+
+**부 밖으로 뺀 심화** — `async-await`(65곳) · `generator-yield`(10) · `args-kwargs`(44) ·
+`conditional-expression`(214) · `augmented-assign`(268) · `slicing`(263). `essential` 을 34 로 키우면
+0장 후보가 30/24 가 되어 상한이 여섯을 임의로 자른다(§5 의 반례가 그대로 성립한다).
+
+**정식 코스가 필요한 근거 — 표본 218파일에 0곳인 것**: 왈러스 `:=` · `match` 문 ·
+호출 자리 언패킹 `f(*xs)` · `async for` · `async with` · `yield from` · `for … else`.
+집합 리터럴은 48곳/23파일이라 사용처만으로는 카드가 안 선다.
+
+**반대로 이미 있는 여덟 중 하나가 거의 죽어 있다** — `while` 21곳(16파일)이고 `for-in` 은 605곳이다.
+D152 가 TS 의 바닥 여덟을 그대로 옮긴 자리이고, 파이썬에서 반복의 자리는 `for-in` 과 컴프리헨션이 가져갔다.
 
 ---
 

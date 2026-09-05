@@ -37,6 +37,11 @@ html { scroll-padding-top: var(--chrome-top); }
 .wordmark {
   margin: 0;
   font-family: var(--f-poster);
+
+  /* Black Han Sans 는 400 하나뿐이다. h1~h3 의 기본 굵게가 합성 굵게를 부르면
+     획 사이가 메워져 한글이 검은 상자가 된다(늘·분·로·제). 굵기를 못박는다. */
+  font-weight: 400;
+  font-synthesis-weight: none;
   font-size: var(--fs-poster);
   line-height: var(--lh-tight);
   color: var(--ink);

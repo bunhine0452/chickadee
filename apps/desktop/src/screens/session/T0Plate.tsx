@@ -241,8 +241,8 @@ export function T0Plate(props: T0PlateProps): React.JSX.Element | null {
           ? {}
           : {
               stamp: result.correct
-                ? { text: t('session.exact'), sub: 'in register', tone: 'pink' as const }
-                : { text: t('session.differ'), sub: 'off register', tone: 'blue' as const },
+                ? { text: t('session.exact'), tone: 'pink' as const }
+                : { text: t('session.differ'), tone: 'blue' as const },
               title: result.correct ? t('session.right') : t('session.wrong'),
               body: result.correct ? payload.ok : diag?.t,
               ...(diag?.edge ? { edge: diag.edge } : {}),

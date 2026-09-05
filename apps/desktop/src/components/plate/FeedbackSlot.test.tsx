@@ -22,7 +22,7 @@ function Above() {
 
 const GRADED = {
   state: 'wrong' as const,
-  stamp: { text: '어긋남', sub: 'OFF REGISTER', tone: 'yellow' as const, rotate: 5 },
+  stamp: { text: '다름', tone: 'yellow' as const, rotate: 5 },
   title: '어긋났습니다 — <code>items</code> 를 골랐습니다',
   body: '<b>items</b> 가 참이 되는 조건은 앞이 이미 객체일 때뿐입니다.',
   rule: '앞이 <code>null</code> 이면 뒤를 건너뛴다.',

@@ -11,6 +11,8 @@
   flex: 0 0 auto;
   color: var(--ink-soft);
   font-family: var(--f-poster);
+  font-weight: 400;
+  font-synthesis-weight: none;
   font-size: var(--fs-24);
   line-height: 1;
 }

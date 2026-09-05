@@ -23,6 +23,8 @@
 
 .done-head h2 {
   font-family: var(--f-poster);
+  font-weight: 400;
+  font-synthesis-weight: none;
   font-size: var(--fs-poster);
   letter-spacing: .01em;
   line-height: .94;
@@ -70,6 +72,8 @@
 .tally .v {
   margin-top: 4px;
   font-family: var(--f-poster);
+  font-weight: 400;
+  font-synthesis-weight: none;
   font-size: var(--fs-poster-s);
   letter-spacing: .01em;
   line-height: 1;

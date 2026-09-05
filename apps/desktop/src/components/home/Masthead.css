@@ -33,6 +33,8 @@
   display: inline-block;
   color: var(--ink);
   font-family: var(--f-poster);
+  font-weight: 400;
+  font-synthesis-weight: none;
   font-size: var(--fs-poster);
   line-height: .94;
   letter-spacing: .005em;
@@ -61,15 +63,6 @@
 [data-trim="on"] .wordmark::before,
 [data-trim="on"] .wordmark::after { display: none }
 
-.brand-sub {
-  margin-top: 5px;
-  color: var(--ink-soft);
-  font-family: var(--f-mono);
-  font-size: var(--fs-13);
-  font-weight: 600;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-}
 
 .brand-line {
   margin-top: 1px;

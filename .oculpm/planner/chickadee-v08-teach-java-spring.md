@@ -52,7 +52,7 @@ owner: claude-code
 ## G · 통합·검증 {#g}
 - [x] MonggleMonggle 로 1부→3부→로그인 챕터가 끝까지 서는지 {#g-course}
 - [x] 전체 게이트 · e2e · CI 초록 {#g-gates}
-- [ ] 커밋·푸시·CI 확인 {#g-ship}
+- [x] 커밋·푸시·CI 확인 {#g-ship}
 
 <!-- oculpm:plan-log begin v1 -->
 | 시각 | 항목 | 에이전트 | 변화 | 일지 | 메모 |
@@ -90,4 +90,5 @@ owner: claude-code
 | 2026-09-05T13:46:34+09:00 | #b-evidence | claude-code | !→x | .oculpm/journal/20260905/Features_to_add/1346_feature_spring-lifecycle-and-conditional-prereq.md | 되돌림 — 낱말·실측은 끝(15/15 재료). 남은 배선 셋은 C6 항목으로 따로 봐야 한다: bake.ts:335/:345 · t0-synthetic.ts ABSENCE |
 | 2026-09-05T13:51:26+09:00 | #g-gates | claude-code | ☐→x | .oculpm/journal/20260905/Features_to_add/1351_feature_v08-canon-revision-and-integration.md | unit 2305/0 · cargo 20 · rust 2769/2800 · dict 16 · gates 114 · e2e-ui 26 · 디자인·대비·모션·버전·라이선스 통과 |
 | 2026-09-05T13:51:29+09:00 | #g-course | claude-code | ☐→x | .oculpm/journal/20260905/Features_to_add/1351_feature_v08-canon-revision-and-integration.md | C3 실측 — 1부 13판·2부 16·3부 14 → 로그인 챕터, 부가 어휘를 다 흡수해 챕터 관문 자바 0개. 총 74일 |
+| 2026-09-05T14:09:54+09:00 | #g-ship | claude-code | ☐→x | .oculpm/journal/20260905/Bugs/1402_bug_real-binary-e2e-missed-plain-language.md | 커밋 9개 푸시(a1f127a), CI run 33946176944 8잡 전부 초록 — 실제 바이너리 e2e 포함 |
 <!-- oculpm:plan-log end -->

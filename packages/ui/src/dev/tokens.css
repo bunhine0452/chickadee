@@ -121,6 +121,8 @@
 
 .gallery h1 {
   font-family: var(--f-poster);
+  font-weight: 400;
+  font-synthesis-weight: none;
   font-size: var(--fs-poster);
   line-height: 1;
 }

@@ -45,7 +45,6 @@ test('01 홈 → 인쇄 시작 → 1판 정답', async ({ page, app }) => {
 
   // 정합 도장 — 은유와 평문을 같이 찍는다.
   await expect(page.locator('.fb .stampbox .stamp')).toContainText('같음');
-  await expect(page.locator('.fb .stampbox .stamp')).toContainText('in register');
   // `+1겹` — 겹이 움직인 것을 이득으로 (05 §5 `ProofSheet`).
   await expect(page.locator('.ps-rail .plus')).toHaveText('+1단계');
   await expect(page.locator('.ps-rail .plus')).toHaveClass(/\bon\b/);

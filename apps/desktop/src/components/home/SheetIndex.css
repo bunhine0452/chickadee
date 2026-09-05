@@ -52,6 +52,8 @@
   grid-area: no;
   color: var(--ink);
   font-family: var(--f-poster);
+  font-weight: 400;
+  font-synthesis-weight: none;
   font-size: var(--fs-18);
   line-height: 1;
 }

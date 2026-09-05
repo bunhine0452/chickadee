@@ -68,6 +68,7 @@ export const session: Record<string, string> = {
 
   'band.label': 'Progress bar',
   'band.title': 'Today’s study',
+  'band.runNo': 'Session {{n}}',
   'band.now': 'Now',
   'band.seconds': '{{n}}s',
   'band.minutes': '{{n}} min',

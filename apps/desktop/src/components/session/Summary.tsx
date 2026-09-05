@@ -214,7 +214,7 @@ export function Summary({
               </h4>
               <RichText as="p" html={lifer.where} />
             </div>
-            <Stamp text={t('lifer.stamp')} sub="LIFER" rotate={LIFER_STAMP_ROTATE} />
+            <Stamp text={t('lifer.stamp')} rotate={LIFER_STAMP_ROTATE} />
           </div>
         )}
 

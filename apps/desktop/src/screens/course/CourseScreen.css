@@ -28,6 +28,8 @@
   margin: 0;
   color: var(--ink);
   font-family: var(--f-poster);
+  font-weight: 400;
+  font-synthesis-weight: none;
   font-size: var(--fs-poster-s);
   line-height: var(--lh-tight);
 }
@@ -200,6 +202,8 @@
   margin: 0;
   color: var(--ink);
   font-family: var(--f-poster);
+  font-weight: 400;
+  font-synthesis-weight: none;
   font-size: var(--fs-24);
   line-height: var(--lh-tight);
 }
@@ -494,6 +498,8 @@
 .cc-done h2 {
   margin: 0;
   font-family: var(--f-poster);
+  font-weight: 400;
+  font-synthesis-weight: none;
   font-size: var(--fs-24);
   line-height: var(--lh-tight);
 }

@@ -45,7 +45,7 @@ export function LiferNote({ concept, code, where, serial }: LiferNoteProps) {
         <RichText as="p" html={where} />
         <div className="lifer-serial">{serial}</div>
       </div>
-      <Stamp text={t('lifer.stamp')} sub="LIFER" rotate={STAMP_ROTATE} hit />
+      <Stamp text={t('lifer.stamp')} rotate={STAMP_ROTATE} hit />
     </div>
   );
 }

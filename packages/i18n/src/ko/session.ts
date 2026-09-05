@@ -83,6 +83,7 @@ export const session = {
   // ───────── 진행 띠 ─────────
   'band.label': '진행 띠',
   'band.title': '오늘 학습',
+  'band.runNo': '{{n}}번째 학습',
   'band.now': '지금',
   'band.seconds': '{{n}}초',
   'band.minutes': '{{n}}분',

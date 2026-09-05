@@ -27,7 +27,7 @@ Electron·Tauri 앱, 그리고 이 리포 자신.
 | `lang` | `ts` |
 | `grammars` | `typescript` · `tsx` · `javascript` |
 | 확장자 | `typescript`: `.ts .mts .cts` / `tsx`: `.tsx` / `javascript`: `.js .mjs .cjs .jsx` |
-| 프레임워크 | 별도 네임스페이스 `react` (`detect: { dependency: react }`) |
+| 프레임워크 | 별도 네임스페이스 `react` (`detect: { dependency: react }`) — 개념 **1장**. 그 위층(프레임워크·진입점·실행 러너)의 계획은 [`docs/plan/js-framework-axis.md`](../plan/js-framework-axis.md) 로 갈라 뒀다 |
 
 ---
 

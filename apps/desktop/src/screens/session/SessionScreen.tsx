@@ -419,7 +419,7 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
 
   const band = (
     <JobBand
-      runNo={`Run ${session.seqInDay}`}
+      runNo={t('band.runNo', { n: String(session.seqInDay) })}
       repo={repoName}
       queue={plates.map(toQueueItem)}
       pos={done ? plates.length : pos}
@@ -440,7 +440,7 @@ export function SessionScreen({ repoId, repoName }: SessionScreenProps): React.J
       >
         {done && summary !== null ? (
           <Summary
-            runNo={`Run ${session.seqInDay}`}
+            runNo={t('band.runNo', { n: String(session.seqInDay) })}
             repo={repoName}
             date={session.dayKey}
             day={session.dayKey.slice(-2)}

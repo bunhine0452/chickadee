@@ -33,6 +33,8 @@
 .firstrun-title {
   color: var(--ink);
   font-family: var(--f-poster);
+  font-weight: 400;
+  font-synthesis-weight: none;
   font-size: var(--fs-poster);
   letter-spacing: .005em;
   line-height: .94;

@@ -67,8 +67,8 @@ export function PlateFrame(props: PlateFrameProps): React.JSX.Element {
           ? {}
           : {
               stamp: verdict.ok
-                ? { text: t('session.exact'), sub: 'in register', tone: 'pink' as const }
-                : { text: t('session.differ'), sub: 'off register', tone: 'blue' as const },
+                ? { text: t('session.exact'), tone: 'pink' as const }
+                : { text: t('session.differ'), tone: 'blue' as const },
               title: verdict.ok ? t('session.right') : t('session.wrong'),
               body: (verdict.ok ? verdict.okText : verdict.diagnosis) ?? verdict.rule ?? verdict.okText ?? '',
               ...(verdict.rule === null ? {} : { rule: verdict.rule }),
