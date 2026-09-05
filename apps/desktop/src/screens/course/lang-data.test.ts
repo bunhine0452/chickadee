@@ -82,8 +82,9 @@ describe('부 넷 (D177 · D190)', () => {
     expect(newcomer.find((p) => p.part === 1)?.folded).toBe(false);
   });
 
-  test('저작 전 언어는 부가 비어 있다 — 거짓 코스를 세우지 않는다', () => {
-    expect(partViews({ ...base, lang: 'rs', hasFiles: false })).toEqual([]);
+  test('코스 언어가 아니면 부가 비어 있다 — 거짓 코스를 세우지 않는다', () => {
+    // 열 언어가 전부 저작된 뒤로 「저작 전」 표본은 없다 — 곁문법과 모르는 글자로 잰다.
     expect(partViews({ ...base, lang: 'css', hasFiles: false })).toEqual([]);
+    expect(partViews({ ...base, lang: 'dart', hasFiles: false })).toEqual([]);
   });
 });
