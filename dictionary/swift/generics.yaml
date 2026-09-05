@@ -1,0 +1,167 @@
+schema: 1
+id: swift/generics
+universal: common/generics
+name: { ko: 타입 자리 비워 두기, en: Generics }
+token: "<>"
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 4
+prereq: [swift/protocol-conformance, cs/erasure-and-reification]
+confusions: []
+dict:
+  one_liner:
+    ko: "타입을 하나 비워 두고 쓰는 쪽이 채우게 하되, 그 자리에 조건을 걸 수 있다."
+    en: "A type slot is left blank for the caller to fill, and it may carry a condition."
+  why:
+    ko: >-
+      같은 일을 타입만 바꿔 여러 번 적는 대신, 타입 자리를 하나 <b>비워 두고</b> 쓰는 쪽이
+      채우게 합니다. 비워 둔 자리에는 이름을 붙이고, 그 이름을 몸통 안에서 타입처럼 씁니다.
+      Swift 의 요점은 <b>그 자리에 조건을 걸 수 있다</b>는 것입니다 — 「아무 타입이나」가 아니라
+      「이 규약을 지키는 아무 타입」이에요. 조건을 걸면 몸통 안에서 그 규약의 능력을 쓸 수 있고,
+      안 걸면 못 씁니다. 그래서 조건이 없는 자리는 할 수 있는 일이 거의 없어요.
+      채워진 타입은 <b>부르는 자리마다 정해집니다</b> — 값이 아니라 코드가 갈립니다.
+      표본에서 25곳/9파일로 이 언어에서 드문 편입니다.
+    en: >-
+      Instead of writing the same work once per type, one type slot is <b>left blank</b> and the
+      user fills it. The blank gets a name, and that name is used as a type inside the body.
+      Swift's point is that <b>the blank may carry a condition</b> — not "any type" but "any type
+      that keeps this contract". With a condition the body may use that contract's abilities;
+      without one it may not, which is why an unconstrained blank can do almost nothing.
+      The filled type is settled <b>at each call site</b>: the code splits, not the value.
+      The sample has 25 of these across 9 files — rare for this language.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.1|code}} 라는 빈 타입 자리를 만든다."
+      en: "Line {{site.line}} makes a blank type slot called {{pick.1|code}}."
+    - ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 그 자리에 걸린 조건이다."
+      en: "{{pick.3|code}} is the condition on that slot."
+    - ko: "{{pick.2|code}}{{pick.2|josa:을,를}} 부르는 자리마다 그 타입이 정해진다."
+      en: "Each call to {{pick.2|code}} settles what that type is."
+rule:
+  ko: "<b>비워 둔 자리에 조건을 걸 수 있다.</b> 조건이 없으면 몸통에서 할 수 있는 일이 없다."
+  en: "<b>A blank may carry a condition.</b> Without one, the body can do almost nothing with it."
+result:
+  label: { ko: "{{site.line}}행의 빈 자리", en: "the blank on line {{site.line}}" }
+  value: "{{pick.1}}: {{pick.3}}"
+  note: { ko: "부르는 자리가 채운다", en: "the call site fills it" }
+ok:
+  ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 부르는 자리가 채우는 타입입니다."
+  en: "{{pick.1|code}} is a type the call site fills in."
+payoff:
+  ko: "이걸 알면 「같은 함수가 왜 여러 타입에서 도나」가 풀립니다 — 자리를 비워 둔 겁니다."
+  en: "This untangles “why does one function work on many types” — a slot was left blank."
+bridge:
+  ko: >-
+    자바에도 조건 거는 자리가 있습니다. 다른 것은 자바가 돌 때 타입을 <b>지운다</b>는 점이고,
+    Swift 는 안 지워요.
+  en: >-
+    Java has conditions on blanks too. What differs is that Java <b>erases</b> the type at run
+    time; Swift does not.
+misconceptions:
+  - ko: "비워 두면 아무 타입이나 온다 — 조건을 걸면 그 규약을 지키는 타입만 옵니다."
+    en: "A blank takes any type — with a condition only types keeping that contract fit."
+  - ko: "조건이 없어도 몸통에서 다 쓸 수 있다 — 조건이 없으면 할 수 있는 일이 거의 없습니다."
+    en: "The body can do anything without a condition — without one it can do almost nothing."
+  - ko: "타입은 돌 때 정해진다 — 부르는 자리마다 빌드에서 정해집니다."
+    en: "The type is settled at run time — each call site settles it at build time."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>비워 둔 타입 자리의 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name of the blank type slot</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 함수나 타입의 <b>이름</b>입니다. 비워 둔 자리는 꺾쇠 안에 있어요."
+          en: "{{pick.2|code}} names the function or type. The blank sits inside the angle brackets."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 빈 자리냐", en: "The sharpest spot — the name or the blank" }
+          code:
+            - "func pick<T>(_ a: T) -> T { a }"
+            - "func pick(_ a: Int) -> Int { a }   // 비운 자리가 없다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 그 자리에 걸린 <b>조건</b>입니다. 비워 둔 자리 자체는 그 앞에 있어요."
+          en: "{{pick.3|code}} is the <b>condition</b> on the slot. The slot itself is in front of it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 자리냐 조건이냐", en: "The sharpest spot — the slot or the condition" }
+          code:
+            - "func pick<T: Equatable>(_ a: T) { }"
+            - "func pick<T>(_ a: T) { }   // 조건이 없다"
+meaning:
+  - q:
+      ko: "비워 둔 자리에 조건을 <b>안 걸면</b> 몸통에서 그 값으로 무엇을 할 수 있을까요?"
+      en: "With <b>no condition</b> on the blank, what can the body do with such a value?"
+    options:
+      - t:
+          ko: "거의 아무것도 못 한다 — 무엇을 할 수 있는 타입인지 모른다"
+          en: "Almost nothing — nothing is known about what it can do"
+      - t:
+          ko: "견주기와 셈은 할 수 있다"
+          en: "Comparing and arithmetic still work"
+        diag:
+          t:
+            ko: "견주기도 셈도 규약이 있어야 합니다. 조건을 안 걸면 그 능력이 없다고 봐서 빌드가 멈춰요."
+            en: "Comparing and arithmetic both come from contracts. Without a condition they are assumed absent and the build stops."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 조건이 있나", en: "The sharpest spot — is there a condition" }
+            code:
+              - "func f<T: Equatable>(_ a: T, _ b: T) { a == b }"
+              - "func f<T>(_ a: T, _ b: T) { a == b }   // 빌드가 멈춘다"
+      - t:
+          ko: "돌 때 타입을 물어보면 된다"
+          en: "The type can be asked for at run time"
+        diag:
+          t:
+            ko: "물어볼 수는 있지만 그것으로 빌드가 통과하지는 않습니다. 몸통이 쓰는 능력은 <b>빌드에서</b> 보장돼야 해요."
+            en: "It can be asked, but that does not make the build pass. Abilities the body uses must be guaranteed <b>at build time</b>."
+      - t:
+          ko: "아무 능력이나 다 쓸 수 있다"
+          en: "Every ability is available"
+        diag:
+          t:
+            ko: "정반대입니다. 조건이 없으면 <b>아무 능력도 없다</b>고 보는 것이 이 표기의 규칙이에요."
+            en: "It is the opposite. No condition means <b>no abilities</b> are assumed."
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 개념의 정답은 비워 둔 자리의 **이름**인데 그 글자는 사용처마다 사람이
+  아무렇게나 짓는다(표본에서 `T`·`Item`·`Element`·`Value`). 보기를 고정할 수 없고, 꺾쇠 한 글자를
+  구멍으로 삼으면 빈칸형이 생성 단계에서 떨어진다(`MIN_HOLE`). 조건이 있고 없고를 묻는 판은
+  뜻 고르기가 진다.
+why_gate:
+  q:
+    ko: "Swift 는 왜 비워 둔 자리에 <b>조건을 걸게</b> 할까요?"
+    en: "Why does Swift let a blank <b>carry a condition</b>?"
+  choices:
+    - t:
+        ko: "몸통이 쓰는 능력이 채워질 타입에 정말 있는지를 부르기 전에 확인해야, 부르는 자리마다 터지지 않기 때문"
+        en: "So the abilities the body uses can be checked before any call, instead of breaking at each call site"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 조건이 없을 때 몸통이 무엇을 못 하는지도 적어 보세요."
+        en: "That is the direction. Say what the body cannot do without one, too."
+    - t:
+        ko: "조건이 있으면 더 빨라서"
+        en: "Because a condition makes it faster"
+      ok: false
+      fb:
+        ko: "속도가 이유는 아닙니다. 능력을 미리 보장한다는 것이 이유예요."
+        en: "Speed is not the reason. Guaranteeing abilities in advance is."
+    - t:
+        ko: "타입을 하나로 정하려고"
+        en: "To pin the type to one"
+      ok: false
+      fb:
+        ko: "하나로 정하는 것은 다른 표기의 몫입니다. 조건은 <b>여럿을 허용하되 능력을 요구</b>해요."
+        en: "Pinning to one is another notation's job. A condition <b>allows many but demands abilities</b>."
+queries:
+  - { grammars: [swift], file: ./generics.scm }
+examples:
+  - code: "func pick<T: Equatable>(_ a: T) -> T { a }"
+    expect: { sites: 1, form: generic-func, picks: { 1: "T", 2: "pick", 3: "Equatable" } }
+  - code: "struct Box<Item> { var v: Item }"
+    expect: { sites: 1, form: generic-type, picks: { 1: "Item", 2: "Box" } }
+  - code: "func plain(_ a: Int) -> Int { a }"
+    expect: none

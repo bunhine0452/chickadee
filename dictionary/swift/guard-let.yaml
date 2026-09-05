@@ -1,0 +1,192 @@
+schema: 1
+id: swift/guard-let
+universal: null
+name: { ko: 아니면 여기서 나가기, en: Guard }
+token: "guard"
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 3
+prereq: [swift/if-let, swift/return-statement]
+confusions: []
+dict:
+  one_liner:
+    ko: "성공한 값만 아래로 내보내고, 실패한 쪽 블록에서는 반드시 나가야 한다."
+    en: "It sends the successful value onward; its failing block must leave."
+  why:
+    ko: >-
+      벗기는 표기 둘의 차이는 <b>성공한 값이 어디로 가느냐</b>입니다. 앞의 것은 성공한 값을
+      중괄호 <b>안</b>에 두고, 이것은 <b>바깥</b>으로 내보냅니다. 그래서 함수가 「검사 → 검사 →
+      본문」 모양이 되고, 본문이 오른쪽으로 계단처럼 밀리지 않아요.
+      값을 바깥으로 내보내려면 실패한 쪽이 <b>돌아오지 않아야</b> 합니다. 그래서 실패 블록에서
+      나가지 않으면 <b>빌드가 멈춥니다</b> — 이 규칙이 이 표기의 값 전부입니다. 표본에서
+      255곳/77파일이에요.
+    en: >-
+      The two unwrapping notations differ in <b>where the successful value goes.</b> The first
+      keeps it <b>inside</b> the braces; this one sends it <b>outside</b>. So a function reads
+      "check, check, body" and the body never steps rightwards.
+      Sending the value outward only works if the failing side <b>never comes back</b>. So a
+      failing block that does not leave <b>stops the build</b> — that rule is the whole value of
+      this notation. The sample has it in 255 places across 77 files.
+  trace:
+    - ko: "{{site.line}}행이 값이 있는지 본다."
+      en: "Line {{site.line}} checks whether a value is there."
+    - ko: "있으면 {{pick.2|code}}{{pick.2|josa:이,가}} 아래 줄부터 쓸 수 있는 이름이 된다."
+      en: "If so, {{pick.2|code}} becomes a name usable from the next line on."
+    - ko: "없으면 {{pick.3|code}} 안이 돌고 함수를 나간다."
+      en: "If not, the inside of {{pick.3|code}} runs and the function is left."
+rule:
+  ko: "<b>성공한 값이 바깥으로 나간다.</b> 실패한 블록은 반드시 나가야 하고 아니면 빌드가 멈춘다."
+  en: "<b>The successful value survives outside.</b> The failing block must leave, or the build stops."
+result:
+  label: { ko: "{{site.line}}행 아래의 {{pick.2}}", en: "{{pick.2}} below line {{site.line}}" }
+  value: "{{pick.2}}"
+  note: { ko: "벗겨진 채로 아래로 간다", en: "it goes onward unwrapped" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 아래 줄부터 벗겨진 값입니다."
+  en: "From the next line on, {{pick.2|code}} is the unwrapped value."
+payoff:
+  ko: "이걸 알면 「함수가 왜 검사부터 시작하지」가 풀립니다 — 본문을 평평하게 두려는 겁니다."
+  en: "This untangles “why does the function open with checks” — to keep the body flat."
+bridge:
+  ko: >-
+    다른 언어에서는 실패를 먼저 돌려보내는 것이 <b>관습</b>입니다. Swift 는 그것을 문법으로
+    못 박고 안 지키면 빌드를 멈춰요.
+  en: >-
+    Elsewhere returning early is a <b>convention</b>. Swift wrote it into the grammar and stops
+    the build when it is broken.
+misconceptions:
+  - ko: "성공한 값도 블록 안에서만 산다 — 바깥으로 나갑니다. 그것이 앞의 표기와의 차이예요."
+    en: "The successful value lives inside too — it survives outside; that is the difference."
+  - ko: "실패 블록에서 안 나가도 된다 — 안 나가면 빌드가 멈춥니다."
+    en: "The failing block may fall through — falling through stops the build."
+  - ko: "조건이 뒤집혀 있다 — 조건은 <b>성공</b> 조건이고 블록이 실패 쪽입니다."
+    en: "The test is inverted — the test is the success case; the block is the failing side."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>아래 줄부터 쓸 수 있게 되는 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name that becomes usable from the next line</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>낱말</b>입니다. 이 모양이라는 것만 알리고 어떤 이름이 나가는지는 뒤가 정해요."
+          en: "{{pick.1|code}} is the <b>word</b>. It announces the shape; which name survives is settled after it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 낱말이냐 이름이냐", en: "The sharpest spot — the word or the name" }
+          code:
+            - "guard let u = user else { return }"
+            - "u.name   // 아래에서 쓸 수 있다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>실패한 쪽</b>입니다. 여기서는 나가야 하고, 이름이 나가는 것과는 반대쪽이에요."
+          en: "{{pick.3|code}} is the <b>failing side</b>. It has to leave, and it is the opposite of the surviving name."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 성공이냐 실패냐", en: "The sharpest spot — success or failure" }
+          code:
+            - "guard let u = user else { return }"
+            - "guard let u = user else { }   // 빌드가 멈춘다"
+meaning:
+  - q:
+      ko: "실패한 쪽 블록에서 함수를 안 나가면 어떻게 될까요?"
+      en: "What happens when the failing block does not leave the function?"
+    options:
+      - t:
+          ko: "빌드가 멈춘다 — 나가는 것이 규칙이다"
+          en: "The build stops — leaving is the rule"
+      - t:
+          ko: "그냥 아래로 이어진다"
+          en: "It simply falls through"
+        diag:
+          t:
+            ko: "이어지면 벗긴 이름이 값이 없는 채로 아래에 있게 됩니다. 그래서 이 모양이 그것을 <b>못 하게</b> 막아요."
+            en: "Falling through would leave the unwrapped name below with no value, so this shape <b>forbids</b> it."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 나가나 이어지나", en: "The sharpest spot — leave or fall through" }
+            code:
+              - "guard let u = user else { return }"
+              - "guard let u = user else { g() }   // 빌드가 멈춘다"
+      - t:
+          ko: "이름이 「없음」인 채로 아래에서 쓰인다"
+          en: "The name is used below with absence in it"
+        diag:
+          t:
+            ko: "그런 상태를 만들지 않으려고 나가라고 요구하는 것입니다. 벗긴 이름은 언제나 값이 있어요."
+            en: "Requiring the exit is exactly what prevents that state. The unwrapped name always has a value."
+      - t:
+          ko: "돌다가 멈춘다"
+          en: "It stops while running"
+        diag:
+          t:
+            ko: "돌기 전에 막힙니다. 나가는지 안 나가는지는 빌드 단계에서 볼 수 있어요."
+            en: "It is caught before it runs. Whether the block leaves is visible at build time."
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 성공한 값을 <b>아래로 내보냅니다</b>."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>sends the successful value onward</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "guard", mono: true }
+      - t: "if"
+        mono: true
+        diag:
+          t:
+            ko: "이 낱말도 벗기지만 성공한 값이 <b>중괄호 안</b>에만 남습니다. 검사가 쌓이면 본문이 오른쪽으로 밀려요."
+            en: "That word unwraps too, but the value stays <b>inside the braces</b>. Stacked checks push the body rightwards."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 안이냐 밖이냐", en: "The sharpest spot — inside or outside" }
+            code:
+              - "if let u = user { use(u) }"
+              - "guard let u = user else { return }; use(u)"
+      - t: "while"
+        mono: true
+        diag:
+          t:
+            ko: "이 낱말은 <b>되풀이</b>입니다. 값이 있는 동안 계속 돌게 되어 검사와는 다른 일을 해요."
+            en: "That word makes a <b>loop</b>. It would keep running while a value is there — a different job."
+      - t: "switch"
+        mono: true
+        diag:
+          t:
+            ko: "이 낱말은 <b>여러 갈래</b>를 적습니다. 벗기기도 되지만 갈래를 다 적어야 하고 나가라는 요구가 없어요."
+            en: "That word writes <b>many branches</b>. It can unwrap, but every case has to be written and nothing forces an exit."
+why_gate:
+  q:
+    ko: "Swift 는 왜 실패한 블록에 <b>나가라고 요구할까요</b>?"
+    en: "Why does Swift <b>require the failing block to leave</b>?"
+  choices:
+    - t:
+        ko: "성공한 값을 아래로 내보내려면 실패한 흐름이 그 아래에 도달하지 않는다는 것이 보장돼야 하기 때문"
+        en: "Because sending the value onward is only safe if the failing flow provably never reaches below"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 보장이 없을 때 아래 줄이 어떤 상태가 되는지도 적어 보세요."
+        en: "That is the direction. Say what state the lines below would be in without it."
+    - t:
+        ko: "나가는 편이 빨라서"
+        en: "Because leaving is faster"
+      ok: false
+      fb:
+        ko: "속도 문제가 아닙니다. 아래 줄의 이름이 값을 갖는다는 보장이 이유예요."
+        en: "Speed is not it. The guarantee about the name below is."
+    - t:
+        ko: "본문 들여쓰기를 줄이려고"
+        en: "To reduce indentation in the body"
+      ok: false
+      fb:
+        ko: "들여쓰기는 <b>결과</b>입니다. 요구의 이유는 아래 줄의 보장이에요."
+        en: "The indentation is a <b>consequence</b>. The reason is the guarantee below."
+queries:
+  - { grammars: [swift], file: ./guard-let.scm }
+examples:
+  - code: "func f() { guard let u = user else { return } }"
+    expect: { sites: 1, form: guardlet, hole: "guard", picks: { 1: "guard", 2: "u", 3: "return" } }
+  - code: "func f() { guard let client = signInClient else { stop(); return } }"
+    expect: { sites: 1, form: guardlet, hole: "guard", picks: { 1: "guard", 2: "client" } }
+  - code: "func f() { if let u = user { g(u) } }"
+    expect: none

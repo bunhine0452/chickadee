@@ -1,0 +1,201 @@
+schema: 1
+id: swift/equality
+# 0부 축 8. 보편형은 `common/comparison` (README §8).
+universal: common/comparison
+name: { ko: 같은 값인가 같은 상자인가, en: Equality }
+token: "==="
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cs/identity-vs-equality, cs/value-vs-reference]
+confusions: []
+dict:
+  one_liner:
+    ko: "값이 같은지 묻는 기호와 같은 상자인지 묻는 기호가 따로 있다."
+    en: "One symbol asks whether the values match, another whether they are one box."
+  why:
+    ko: >-
+      물음이 둘입니다 — 「담긴 것이 같은가」와 「같은 상자인가」. 많은 언어가 이 둘을 한 기호에
+      욱여넣고 종류에 따라 뜻이 달라지게 두었는데, Swift 는 <b>낱말을 갈라 두었습니다.</b>
+      기호 둘짜리는 값을 묻고, 셋짜리는 상자를 묻습니다.
+      갈라 둔 대가로 규칙이 하나 생깁니다: <b>값으로 도는 종류에는 셋짜리를 쓸 수조차 없습니다.</b>
+      상자가 없으니 물음이 성립하지 않아서예요. 그리고 코드에 직접 적은 수는 종류가 자리에 맞게
+      정해지므로, 정수와 소수를 견주는 한 줄이 <b>참</b>이 됩니다 — 이름끼리는 못 섞는데
+      직접 적은 수는 견줄 수 있다는 것이 여기서 한 번 더 걸립니다.
+    en: >-
+      There are two questions — "is what they hold the same" and "are they one box". Many
+      languages push both into one symbol and let the meaning shift with the type. Swift
+      <b>splits the words.</b> Two characters ask about the value; three ask about the box.
+      Splitting them costs one rule: <b>a kind that travels as a value cannot use the three-character
+      form at all</b>, because there is no box to ask about. And a number typed into the code takes
+      the kind its slot asks for, so a line comparing a whole number with a fraction comes out
+      <b>true</b> — the same trap as before, from the other side.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:이,가}} 각각 한 값으로 접힌다."
+      en: "{{pick.2|code}} and {{pick.3|code}} on line {{site.line}} each fold to one value."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 둘을 어떤 물음으로 견줄지 정한다."
+      en: "{{pick.1|code}} settles which question the two are weighed with."
+    - ko: "결과는 참·거짓 하나다."
+      en: "The result is one of true or false."
+rule:
+  ko: "<b>값을 묻는 기호와 상자를 묻는 기호가 다르다.</b> 값으로 도는 종류에는 뒤의 것이 아예 없다."
+  en: "<b>Different symbols ask about the value and about the box.</b> Value kinds have no second one."
+result:
+  label: { ko: "{{site.line}}행의 견줌", en: "the comparison on line {{site.line}}" }
+  value: "{{pick.2}} {{pick.1}} {{pick.3}}"
+  note: { ko: "결과는 참·거짓 하나", en: "one of true or false" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:을,를}} {{pick.1|code}} 의 물음으로 견주었습니다."
+  en: "{{pick.2|code}} and {{pick.3|code}} were weighed with the question {{pick.1|code}} asks."
+payoff:
+  ko: "이걸 알면 「같은 내용인데 왜 안 같다고 하지」가 풀립니다 — 물음이 다른 겁니다."
+  en: "This untangles “same contents but it says no” — the question was a different one."
+bridge:
+  ko: >-
+    자바는 값을 묻는 자리에 <b>메서드</b>를 부르고 기호는 상자를 묻습니다. Swift 는 둘 다
+    기호이고 글자 수로 갈려요.
+  en: >-
+    Java calls a <b>method</b> to ask about the value and keeps the symbol for the box. Swift uses
+    symbols for both, told apart by length.
+misconceptions:
+  # swift.md §0.1 0-8 · §0.4 실측 (struct `==` true · class `===` false · `1 == 1.0` true).
+  - ko: "기호 둘과 셋은 같은 물음이다 — 다릅니다. 하나는 값, 하나는 상자를 묻습니다."
+    en: "The two-character and three-character forms ask the same thing — they do not: value against box."
+  - ko: "어느 종류에나 셋짜리를 쓸 수 있다 — 값으로 도는 종류에는 아예 없습니다."
+    en: "The three-character form works on any kind — value kinds do not have it at all."
+  - ko: >-
+      정수와 소수는 못 견준다 — 직접 적은 수끼리는 견줍니다. 종류가 자리에 맞게 정해져서예요.
+    en: >-
+      A whole number and a fraction cannot be compared — written-out ones can. The kind is settled
+      by the slot.
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>어떤 물음으로 견줄지 정하는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that settles which question is asked</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 왼쪽 <b>재료</b>입니다. 재료는 물음을 안 정해요 — 정하는 것은 가운데 기호입니다."
+          en: "{{pick.2|code}} is the left <b>input</b>. Inputs do not settle the question; the symbol between does."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 재료냐 물음이냐", en: "The sharpest spot — an input or the question" }
+          code:
+            - "a == b    // 값을 묻는다"
+            - "a === b   // 상자를 묻는다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 오른쪽 <b>재료</b>입니다. 둘을 어떻게 견줄지는 가운데가 정해요."
+          en: "{{pick.3|code}} is the right <b>input</b>. How the two are weighed is settled in the middle."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 오른쪽이냐 가운데냐", en: "The sharpest spot — the right side or the middle" }
+          code:
+            - "x == 1"
+            - "x != 1"
+meaning:
+  - q:
+      ko: "내용이 똑같은 값 둘을 상자를 묻는 기호로 견주면 어떻게 될까요?"
+      en: "What comes out when two values with identical contents are weighed with the box question?"
+    options:
+      - t:
+          ko: "상자가 다르면 거짓이 나온다 — 내용은 안 본다"
+          en: "Different boxes give false — the contents are not looked at"
+      - t:
+          ko: "내용이 같으니 참이 나온다"
+          en: "Same contents, so it comes out true"
+        diag:
+          t:
+            ko: "그건 값을 묻는 기호의 답입니다. 상자를 묻는 쪽은 내용을 아예 안 봐요 — 그래서 갈라 둔 겁니다."
+            en: "That is what the value question answers. The box question never looks at contents — that is why they are split."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 내용이냐 상자냐", en: "The sharpest spot — contents or box" }
+            code:
+              - "C() == C()    // 내용이 같으면 참"
+              - "C() === C()   // 새 상자 둘, 거짓"
+      - t:
+          ko: "종류에 따라 뜻이 바뀐다"
+          en: "The meaning shifts with the type"
+        diag:
+          t:
+            ko: "뜻이 바뀌는 언어가 있어서 헷갈리는 자리입니다. Swift 는 기호를 갈라 두어 뜻이 안 바뀌어요."
+            en: "Some languages do shift, which is why this trips people. Swift split the symbols so the meaning holds."
+      - t:
+          ko: "빌드가 멈춘다"
+          en: "The build stops"
+        diag:
+          t:
+            ko: "상자를 가리키는 종류라면 멈추지 않습니다. 멈추는 것은 <b>값으로 도는</b> 종류에 이 기호를 썼을 때예요."
+            en: "For a box-pointing kind it does not stop. It stops when this symbol is used on a <b>value</b> kind."
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>같은 상자인지</b>를 묻습니다."
+      en: "Choose what goes in the blank. Line {{site.line}} asks whether the two are <b>one box</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "===", mono: true }
+      - t: "=="
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>값</b>을 묻습니다. 상자가 달라도 내용이 같으면 참이 나와서, 같은 것 하나인지는 못 가려요."
+            en: "That asks about the <b>value</b>. Different boxes with equal contents come out true, so it cannot tell them apart."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값이냐 상자냐", en: "The sharpest spot — value or box" }
+            code:
+              - "a == b    // 내용이 같으면 참"
+              - "a === b   // 같은 상자여야 참"
+      - t: "!="
+        mono: true
+        diag:
+          t:
+            ko: "이건 값이 <b>다른지</b>를 묻습니다. 물음의 방향이 뒤집힌 데다 여전히 상자가 아니라 값을 봐요."
+            en: "That asks whether the <b>values differ</b>. The direction is flipped and it still looks at the value, not the box."
+      - t: "="
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>넣는</b> 기호입니다. 묻지 않고 값을 옮기며, 조건 자리에 두면 빌드가 멈춰요."
+            en: "That <b>puts</b> a value. It asks nothing, and in a condition it stops the build."
+why_gate:
+  q:
+    ko: "Swift 는 왜 물음 둘을 <b>기호 둘로 갈라</b> 두었을까요?"
+    en: "Why did Swift <b>split the two questions into two symbols</b>?"
+  choices:
+    - t:
+        ko: "한 기호에 두 뜻을 담으면 어느 뜻인지가 종류에 따라 달라져서, 읽는 사람이 종류를 먼저 알아야 하기 때문"
+        en: "Because one symbol with two meanings makes the meaning depend on the type, so the reader has to know the type first"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 갈라 둔 대가로 못 쓰게 된 자리가 어디인지도 적어 보세요."
+        en: "That is the direction. Say where the split closes a door, too."
+    - t:
+        ko: "상자를 묻는 쪽이 더 빨라서"
+        en: "Because the box question is faster"
+      ok: false
+      fb:
+        ko: "속도 문제가 아닙니다. 읽는 사람이 종류를 몰라도 뜻이 정해진다는 것이 이유예요."
+        en: "Speed is not it. The reason is that the meaning holds without knowing the type."
+    - t:
+        ko: "값으로 도는 종류에는 상자가 없어서"
+        en: "Because value kinds have no box"
+      ok: false
+      fb:
+        ko: "그건 <b>결과</b>이지 이유가 아닙니다. 갈라 두었기 때문에 그쪽에서 한 기호가 사라진 거예요."
+        en: "That is a <b>consequence</b>, not the reason. One symbol disappears there because they were split."
+queries:
+  - { grammars: [swift], file: ./equality.scm }
+examples:
+  - code: "func f() { if a === b { g() } }"
+    expect: { sites: 1, form: equal, hole: "===", picks: { 1: "===", 2: "a", 3: "b" } }
+  - code: "let same = (name == \"곽\")"
+    expect: { sites: 1, form: equal, hole: "==", picks: { 1: "==", 2: "name", 3: "\"곽\"" } }
+  - code: "let other = (n != 0)"
+    expect: { sites: 1, form: equal, hole: "!=", picks: { 1: "!=", 2: "n", 3: "0" } }
+  - code: "let bigger = (n > 0)"
+    expect: none

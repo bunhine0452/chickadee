@@ -1,0 +1,195 @@
+schema: 1
+id: swift/enum-associated-value
+# `common/tagged-union` 은 아직 없다 — swift.md §6 이 신규 보편형으로 제안했고 규약 4 대로
+# 이 사전은 새 `common/` 을 만들지 않는다. `null` 로 두고 후보로 보고한다.
+universal: null
+name: { ko: 경우마다 값 데리고 다니기, en: Enum with associated values }
+token: "case"
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 3
+prereq: [swift/struct-declaration]
+confusions: []
+dict:
+  one_liner:
+    ko: "갈래마다 다른 값을 딸려 보낼 수 있어서, 상태와 그 상태의 재료가 한 타입에 붙는다."
+    en: "Every branch may carry its own values, tying a state to that state's data."
+  why:
+    ko: >-
+      다른 언어의 갈래 목록은 <b>이름표 하나</b>입니다 — 성공, 실패, 대기. Swift 는 갈래마다
+      <b>다른 값</b>을 데리고 다닐 수 있어요. 성공이면 결과를, 실패면 오류를 들고 다닙니다.
+      그래서 「상태가 성공인데 결과가 없는」 상태를 <b>만들 수 없습니다.</b> 값이 상태에 붙어
+      있으니까요. 상태 하나와 값 여러 개를 따로 두면 안 맞는 조합이 생기는데, 이 표기는 그 조합을
+      애초에 못 적게 합니다.
+      꺼낼 때는 어느 갈래인지 물으면서 값에 이름을 붙입니다 — 갈래를 안 물으면 값에 못 닿아요.
+      표본에서 206곳/43파일입니다.
+    en: >-
+      In most languages a case list is <b>just a label</b> — success, failure, waiting. In Swift a
+      case may carry <b>values of its own</b>: success carries a result, failure carries an error.
+      So a state of "success with no result" <b>cannot be built</b> — the data is attached to the
+      state. Keeping one state field and several data fields apart makes impossible combinations
+      writable; this notation removes them from the language.
+      Reading one means asking which case it is and naming the value in the same breath — without
+      the question the value is out of reach.
+      The sample has 206 of them across 43 files.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}} 라는 갈래를 적는다."
+      en: "Line {{site.line}} writes a case called {{pick.2|code}}."
+    - ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 그 갈래가 데리고 다니는 값이다."
+      en: "{{pick.3|code}} is what that case carries."
+    - ko: "다른 갈래는 다른 값을 데리고 다닌다."
+      en: "Another case carries something else."
+rule:
+  ko: "<b>값이 갈래에 붙어 있다.</b> 갈래를 묻지 않으면 값에 닿을 수 없다."
+  en: "<b>The data is attached to the case.</b> Without asking the case, the data is unreachable."
+result:
+  label: { ko: "{{site.line}}행의 갈래", en: "the case on line {{site.line}}" }
+  value: "{{pick.2}}{{pick.3}}"
+  note: { ko: "이 갈래만 이 값을 든다", en: "only this case carries this data" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} {{pick.3|code}}{{pick.3|josa:을,를}} 데리고 다닙니다."
+  en: "{{pick.2|code}} carries {{pick.3|code}} with it."
+payoff:
+  ko: "이걸 알면 「왜 상태 변수와 값 변수를 따로 안 두지」가 풀립니다 — 안 맞는 조합이 사라집니다."
+  en: "This untangles “why not separate state and data fields” — impossible combinations disappear."
+bridge:
+  ko: >-
+    자바·C 의 갈래 목록은 <b>이름표뿐</b>이라 값을 따로 들어야 합니다. Rust 는 Swift 와 같아요.
+  en: >-
+    Java and C case lists are <b>labels only</b>, so data lives apart. Rust works like Swift.
+misconceptions:
+  - ko: "갈래 목록은 이름표뿐이다 — Swift 는 값을 데리고 다닐 수 있습니다."
+    en: "A case list is only labels — in Swift a case may carry values."
+  - ko: "값에 곧장 닿을 수 있다 — 어느 갈래인지 물어야 닿습니다."
+    en: "The data is directly reachable — only by asking which case."
+  - ko: "갈래마다 같은 값을 든다 — 갈래마다 다른 값을 들 수 있습니다."
+    en: "Every case carries the same data — each may carry its own."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>이 갈래가 데리고 다니는 값</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>what this case carries</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.3
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 갈래를 적는 <b>낱말</b>입니다. 데리고 다니는 값은 이름 뒤 괄호 안이에요."
+          en: "{{pick.1|code}} is the <b>word</b> that writes a case. What it carries is in the brackets after the name."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 낱말이냐 값이냐", en: "The sharpest spot — the word or the payload" }
+          code:
+            - "case success(User)"
+            - "case waiting          // 아무것도 안 든다"
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 갈래의 <b>이름</b>입니다. 이름은 어떤 값을 드는지 안 정해요."
+          en: "{{pick.2|code}} is the case's <b>name</b>. A name does not settle what it carries."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 값이냐", en: "The sharpest spot — the name or the payload" }
+          code:
+            - "case success(User)"
+            - "case success(Data)   // 같은 이름, 다른 값"
+meaning:
+  - q:
+      ko: "갈래마다 다른 값을 들 수 있으면 무엇이 안 생길까요?"
+      en: "When each case carries its own data, what becomes impossible?"
+    options:
+      - t:
+          ko: "상태와 값이 안 맞는 조합"
+          en: "Combinations where the state and the data disagree"
+      - t:
+          ko: "갈래가 여럿인 타입"
+          en: "A type with several cases"
+        diag:
+          t:
+            ko: "여럿인 것은 그대로 됩니다. 사라지는 것은 <b>안 맞는 조합</b>이에요 — 성공인데 결과가 없는 상태 같은 것요."
+            en: "Several cases stay possible. What disappears is the <b>disagreeing</b> combination — success with no result."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 갈래냐 조합이냐", en: "The sharpest spot — cases or combinations" }
+            code:
+              - "var ok = true; var user: User?   // 안 맞는 조합이 생긴다"
+              - "case success(User), failure(Error)"
+      - t:
+          ko: "값이 없는 갈래"
+          en: "A case with no data"
+        diag:
+          t:
+            ko: "값 없는 갈래도 그대로 씁니다. 데리고 다닐 수 <b>있다</b>는 것이지 반드시 든다는 뜻은 아니에요."
+            en: "Cases with no data are still fine. Carrying is <b>allowed</b>, not required."
+      - t:
+          ko: "갈래를 나중에 늘리는 것"
+          en: "Adding cases later"
+        diag:
+          t:
+            ko: "늘릴 수 있습니다. 늘리면 <b>다 적었는지</b>를 컴파일러가 다시 세어 주는 것이 이 표기의 이웃 규칙이에요."
+            en: "They can be added. When they are, the compiler recounts whether every case is handled — the neighbouring rule."
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>갈래 하나</b>를 적습니다."
+      en: "Choose what goes in the blank. Line {{site.line}} writes <b>one case</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "case", mono: true }
+      - t: "var"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>저장 속성</b>을 만듭니다. 갈래 목록 안에서는 값을 저장할 수 없어서 다른 것이 돼요."
+            en: "That makes a <b>stored field</b>. A case list cannot store one, so it becomes something else."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 갈래냐 속성이냐", en: "The sharpest spot — a case or a field" }
+            code:
+              - "enum R { case ok(User) }"
+              - "struct R { var user: User }"
+      - t: "func"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>부를 수 있는 것</b>을 만듭니다. 갈래 목록 안에도 쓸 수 있지만 갈래를 적는 자리는 아니에요."
+            en: "That makes something <b>callable</b>. It is allowed inside a case list but is not how a case is written."
+      - t: "let"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>안 바뀌는 이름</b>을 만듭니다. 갈래를 꺼낼 때 값에 이름을 붙이는 데는 쓰이지만 갈래 자체는 아니에요."
+            en: "That makes a <b>fixed name</b>. It names a payload when a case is read, but it is not the case itself."
+why_gate:
+  q:
+    ko: "왜 상태와 값을 <b>따로 두지 않고</b> 갈래에 붙일까요?"
+    en: "Why attach the data <b>to the case</b> instead of keeping it in separate fields?"
+  choices:
+    - t:
+        ko: "따로 두면 상태와 값이 안 맞는 조합을 적을 수 있고, 그 조합을 코드가 매번 손으로 막아야 하기 때문"
+        en: "Because separate fields let disagreeing combinations be written, and the code then has to rule them out by hand"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 붙였을 때 값에 닿는 방법이 어떻게 바뀌는지도 적어 보세요."
+        en: "That is the direction. Say how reaching the data changes once it is attached, too."
+    - t:
+        ko: "붙이면 메모리를 덜 써서"
+        en: "Because attaching uses less memory"
+      ok: false
+      fb:
+        ko: "메모리 문제가 아닙니다. 못 적게 하는 조합이 이유예요."
+        en: "Memory is not it. The combinations it removes are."
+    - t:
+        ko: "Swift 에 저장 속성이 없어서"
+        en: "Because Swift has no stored fields"
+      ok: false
+      fb:
+        ko: "있습니다. 갈래 목록 안에 못 두는 것뿐이에요."
+        en: "It has them. They just cannot live inside a case list."
+queries:
+  - { grammars: [swift], file: ./enum-associated-value.scm }
+examples:
+  - code: "enum Result2 { case success(User) }"
+    expect: { sites: 1, form: assoc, hole: "case", picks: { 1: "case", 2: "success", 3: "(User)" } }
+  - code: "enum Load { case done(Data, Int) }"
+    expect: { sites: 1, form: assoc, hole: "case", picks: { 1: "case", 2: "done", 3: "(Data, Int)" } }
+  - code: "enum Kind { case one }"
+    expect: none

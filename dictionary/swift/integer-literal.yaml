@@ -1,0 +1,234 @@
+schema: 1
+id: swift/integer-literal
+# 0부 축 1 (`docs/curriculum/README.md` §8). 보편형은 `common/integer-literal` 이다 —
+# D187 ④ 가 `common/number-literal` 을 정수와 실수로 쪼갠 뒤의 값이고, `swift.md` §0.2 가
+# 적어 둔 `common/number-literal` 은 그 쪼갬 이전의 값이라 여기서는 안 쓴다 (보고에 적었다).
+universal: common/integer-literal
+name: { ko: 정수 값과 그 폭, en: Integer literal }
+token: "42"
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 1
+prereq: [cs/binary-representation, cs/bit-and-byte, cs/integer-overflow]
+# 빈칸 오답(Double·String·Bool)이 이 사전에 개념으로 있지만 혼동 쌍으로 묶으면
+# 오답 목록이 그 셋으로 고정된다 — 여기서는 자유롭게 고른다.
+confusions: []
+dict:
+  one_liner:
+    ko: "정수는 칸 수가 정해진 값이고, 칸을 넘으면 감기지 않고 그 자리에서 죽는다."
+    en: "A whole number has a fixed slot count, and going past it stops the program."
+  why:
+    ko: >-
+      Swift 의 정수는 <b>칸 수가 못 박힌</b> 값입니다. 이름 앞뒤에 종류를 안 적으면 기계의 폭
+      (요즘은 64칸)을 쓰고, 적으면 그 종류가 칸 수를 정합니다 — 8칸·16칸·32칸·64칸입니다.
+      칸이 정해져 있으니 담을 수 있는 가장 큰 값도 정해져 있어요. 그리고 여기서 Swift 가
+      C·자바와 갈립니다: 가장 큰 값에 1을 더하면 <b>가장 작은 값으로 감기는 게 아니라 그 줄에서
+      프로그램이 멈춥니다.</b> 이 기계에서 실행해 보면 종료 코드 133 이 나옵니다.
+      감기는 셈을 원하면 <code>&amp;+</code> 라고 손으로 적어야 합니다.
+    en: >-
+      A whole number in Swift has a <b>fixed slot count</b>. Write no type and it takes the
+      machine's width (64 slots today); write one and that type fixes the count — 8, 16, 32 or 64.
+      Fixed slots mean a fixed largest value. This is where Swift parts from C and Java: adding 1
+      to the largest value does <b>not wrap round to the smallest — the program stops on that
+      line.</b> Run it on this machine and the exit code is 133. Wrapping arithmetic has to be
+      spelled out as <code>&amp;+</code>.
+  trace:
+    - ko: "{{site.line}}행이 이름 {{pick.2|code}}{{pick.2|josa:을,를}} 세운다."
+      en: "Line {{site.line}} sets up the name {{pick.2|code}}."
+    - ko: "칸 수는 적힌 종류가 정하고, 안 적혔으면 기계의 폭이다."
+      en: "The slot count comes from the type written there, or from the machine width if none is."
+    - ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 그 칸 안에 담기고, 넘치는 값은 담기지 않는다."
+      en: "{{pick.1|code}} lands inside those slots; a value past them does not land at all."
+rule:
+  ko: "<b>칸 수는 종류가 정한다.</b> 넘치면 감기지 않고 그 줄에서 멈춘다."
+  en: "<b>The type fixes the slot count.</b> Past the last slot it stops, it does not wrap."
+result:
+  label: { ko: "{{site.line}}행의 이름", en: "the name on line {{site.line}}" }
+  value: "{{pick.2}} = {{pick.1}}"
+  note: { ko: "칸 수가 여기서 정해진다", en: "the slot count is settled here" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 이제 칸 수가 정해진 이름입니다."
+  en: "{{pick.2|code}} is now a name with a settled number of slots."
+payoff:
+  ko: "이걸 알면 「수를 더했는데 앱이 죽었다」가 풀립니다 — 칸이 모자란 겁니다."
+  en: "This untangles “I added a number and the app died” — the slots ran out."
+bridge:
+  ko: >-
+    C·자바는 넘치면 <b>감깁니다</b>. Swift 는 같은 자리에서 멈춰요 — 같은 코드가 언어에 따라
+    조용히 이상한 값을 내거나 크게 터집니다.
+  en: >-
+    C and Java <b>wrap</b> on overflow. Swift stops instead — the same code either goes quietly
+    strange or loudly dead, depending on the language.
+misconceptions:
+  # `swift.md` §0.1 0-1 의 「초보가 실제로 틀리는 자리」 — 실측(종료 코드 133).
+  - ko: "넘치면 감긴다 — C·자바에서는 참입니다. Swift 는 그 줄에서 멈춥니다."
+    en: "Overflow wraps — true in C and Java. In Swift it stops on that line."
+  - ko: "큰 수를 넣으면 칸이 늘어난다 — 안 늘어납니다. 파이썬만 그렇습니다."
+    en: "Bigger numbers get more slots — they do not. Only Python works that way."
+  - ko: >-
+      종류를 안 적으면 칸 수가 없다 — 안 적어도 <b>있습니다</b>. 안 적었을 때의 값이 기계의
+      폭이라는 것뿐이에요.
+    en: >-
+      No type written means no slot count — the count is <b>still there</b>; it is just the
+      machine width when nothing is written.
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>칸 수를 정하는 글자</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that fixes the slot count</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.3
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 담기는 <b>값</b>입니다. 값이 작아도 칸은 종류가 정한 만큼 잡혀요."
+          en: "{{pick.1|code}} is the <b>value</b> that lands. Small values still take all the slots the type asks for."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값이냐 칸이냐", en: "The sharpest spot — the value or the slots" }
+          code:
+            - "var a: Int8 = 1     // 8칸"
+            - "var b: Int64 = 1    // 같은 값, 64칸"
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 이름을 길게 지어도 칸은 그대로예요."
+          en: "{{pick.2|code}} is the <b>name</b>. A longer name gets no more slots."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 종류냐", en: "The sharpest spot — the name or the type" }
+          code:
+            - "var n: Int8 = 1"
+            - "var reallyLongName: Int8 = 1"
+meaning:
+  - q:
+      ko: "{{site.line}}행의 값이 담을 수 있는 가장 큰 수를 넘으면 어떻게 될까요?"
+      en: "What happens if the value on line {{site.line}} goes past the largest it can hold?"
+    hint:
+      ko: "Swift 는 C·자바와 여기서 갈립니다."
+      en: "This is where Swift parts from C and Java."
+    options:
+      - t:
+          ko: "그 줄에서 프로그램이 멈춘다"
+          en: "The program stops on that line"
+      - t:
+          ko: "가장 작은 값으로 감긴다"
+          en: "It wraps round to the smallest value"
+        diag:
+          t:
+            ko: >-
+              감기는 답은 <code>&amp;+</code> 를 적었을 때 참입니다. 그냥 더하기는 Swift 에서
+              멈추는 쪽이고, C·자바가 감기는 쪽이에요.
+            en: >-
+              Wrapping is what <code>&amp;+</code> gives you. Plain addition stops in Swift;
+              C and Java are the ones that wrap.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 감기냐 멈추냐", en: "The sharpest spot — wrap or stop" }
+            code:
+              - "Int8(127) &+ 1   // -128"
+              - "Int8(127) + 1    // 종료 코드 133"
+      - t:
+          ko: "칸이 저절로 늘어나 더 큰 수를 담는다"
+          en: "The slots grow so the bigger number fits"
+        diag:
+          t:
+            ko: "칸은 안 늘어납니다. 늘어나는 언어는 파이썬이고, 그쪽은 애초에 칸이라는 개념이 없어요."
+            en: "The slots do not grow. Python is the language where they do, and it has no slot count to begin with."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 늘어나나", en: "The sharpest spot — do slots grow" }
+            code:
+              - "# Python: 2 ** 100 도 그대로"
+              - "// Swift: 종류가 정한 칸이 끝"
+      - t:
+          ko: "값이 가장 큰 수에서 멈춰 그대로 남는다"
+          en: "The value sticks at the largest and stays there"
+        diag:
+          t:
+            ko: "그렇게 붙잡아 주는 셈은 따로 이름이 있습니다. 기본 더하기는 붙잡지 않고 프로그램을 멈춰요."
+            en: "Arithmetic that clamps has its own name. Plain addition does not clamp — it stops the program."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 붙잡나 멈추나", en: "The sharpest spot — clamp or stop" }
+            code:
+              - "Int8(127) + 1     // 멈춘다"
+              - "min(127 + 1, 127) // 손으로 붙잡은 것"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>8칸짜리 정수</b> 이름을 세웁니다."
+      en: "Choose what goes in the blank. Line {{site.line}} sets up an <b>8-slot whole number</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "Int8", mono: true }
+      - t: "Double"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>소수</b> 종류라 64칸을 쓰고 근사값을 담습니다. 정수를 담아도 값이 <code>3.0</code> 처럼 나와요."
+            en: "That is the <b>fraction</b> type — 64 slots holding an approximation. Even whole values come out like <code>3.0</code>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 정수냐 소수냐", en: "The sharpest spot — whole or fraction" }
+            code:
+              - "let a: Int8 = 3     // 3"
+              - "let b: Double = 3   // 3.0"
+      - t: "String"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>글자 묶음</b>이라 칸 수가 고정이 아닙니다. 글자가 늘면 자리도 늘고, 셈에는 못 씁니다."
+            en: "That is a <b>run of characters</b> and its size is not fixed. It grows with the text and does no arithmetic."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 수냐 글자냐", en: "The sharpest spot — a number or text" }
+            code:
+              - "let a: Int8 = 1 + 2"
+              - "let b: String = \"3\""
+      - t: "Bool"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>참·거짓</b> 종류라 수를 못 담습니다. Swift 에서 참·거짓과 수는 서로 오가지도 않아요."
+            en: "That is the <b>true/false</b> type and holds no number. In Swift the two never convert into each other."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 수냐 참·거짓이냐", en: "The sharpest spot — a number or a truth value" }
+            code:
+              - "let a: Int8 = 1"
+              - "let b: Bool = true"
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 <b>칸 수를 먼저 정하고</b> 값을 넣을까요?"
+    en: "Why does line {{site.line}} <b>settle the slot count first</b> and put the value in after?"
+  choices:
+    - t:
+        ko: "값이 놓이기 전에 자리를 얼마나 잡을지 정해져야 하고, 그래야 넘치는 순간도 정해지기 때문"
+        en: "Because the room has to be settled before the value lands, and that is what makes overflow a definite moment"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 자리를 나중에 정하면 못 정하는 것이 무엇인지도 한 줄 적어 보세요."
+        en: "That is the direction. Add a line on what could not be settled if the room came later."
+    - t:
+        ko: "Swift 가 읽기 좋게 하려고 고른 순서라서"
+        en: "Because Swift picked that order to read nicely"
+      ok: false
+      fb:
+        ko: "읽기 문제가 아닙니다. 자리가 먼저 정해져야 값이 담길 곳이 생깁니다."
+        en: "It is not about reading. The room has to exist before a value can land in it."
+    - t:
+        ko: "값을 보면 칸 수를 알 수 있어서"
+        en: "Because the value tells you the slot count"
+      ok: false
+      fb:
+        ko: "값으로는 못 압니다. <code>1</code> 하나만 봐도 8칸일 수도 64칸일 수도 있어요."
+        en: "The value cannot tell you. A bare <code>1</code> may sit in 8 slots or in 64."
+queries:
+  - { grammars: [swift], file: ./integer-literal.scm }
+examples:
+  # 값을 든 예 — 식 · 값 · 종류 (`docs/program/fundamentals.md` §8 이 카탈로그로 걷어 갈 재료).
+  - code: "var m: Int8 = 127"
+    expect: { sites: 1, form: intlit, hole: "Int8", picks: { 1: "127", 2: "m", 3: "Int8" } }
+  - code: "let n = 42"
+    expect: { sites: 1, form: intlit, picks: { 1: "42", 2: "n" } }
+  - code: "let biggest = Int.max"
+    expect: { sites: 1, form: limit, picks: { 1: "max", 3: "Int" } }
+  - code: "func f(count: Int) { }"
+    expect: { sites: 1, form: intparam, hole: "Int", picks: { 2: "count", 3: "Int" } }
+  - code: "let ratio = 4.5"
+    expect: none

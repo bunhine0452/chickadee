@@ -1,0 +1,196 @@
+schema: 1
+id: swift/boolean-literal
+# 0부 축 4. 보편형은 `common/boolean-value` 하나다 — README §8 이 축 4 에 `common/truthiness` 도
+# 걸어 뒀지만 Swift 에는 「참 같은 값」이 **없어서** 그 보편형을 걸면 거짓이 전이된다 (D4).
+universal: common/boolean-value
+name: { ko: 참·거짓 값, en: Boolean literal }
+token: "true"
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 1
+prereq: [cs/type]
+confusions: []
+dict:
+  one_liner:
+    ko: "조건 자리에는 참·거짓 종류만 올 수 있고, 다른 값은 참으로 안 쳐진다."
+    en: "Only the truth type may stand in a condition; nothing else counts as holding."
+  why:
+    ko: >-
+      많은 언어에는 「참처럼 쓰이는 값」이 있습니다 — 0 이 아니면 참, 빈 글자면 거짓 같은 규칙이죠.
+      Swift 에는 <b>그 규칙이 없습니다.</b> 조건 자리에 올 수 있는 것은 참·거짓 종류의 값
+      하나뿐이고, 수나 글자나 없을 수 있는 값을 그대로 놓으면 <b>빌드가 그 줄에서 멈춥니다.</b>
+      그래서 조건을 읽을 때 「이 값이 참으로 쳐질까」를 따질 필요가 없어요 — 이미 참·거짓입니다.
+      대신 견주는 식을 손으로 적어야 합니다.
+    en: >-
+      Many languages have values that stand in for truth — nonzero is true, empty text is false.
+      Swift has <b>no such rule.</b> A condition takes one thing only, a value of the truth type;
+      put a number, a piece of text or a possibly-absent value there and <b>the build stops on
+      that line.</b> So reading a condition never means asking "does this count as true" — it
+      already is true or false. The comparison has to be written out instead.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 참·거짓 하나로 접힌다."
+      en: "{{pick.1|code}} on line {{site.line}} folds to one of true or false."
+    - ko: "다른 종류였다면 이 줄은 빌드에서 막혔을 것이다."
+      en: "Any other type here and the line would not have built."
+    - ko: "그래서 이 자리에서 「참으로 쳐지나」를 따질 일이 없다."
+      en: "So nothing here has to be weighed for truthiness."
+rule:
+  ko: "<b>조건 자리는 참·거짓 종류만 받는다.</b> 수도 글자도 없음도 그대로는 못 온다."
+  en: "<b>A condition takes the truth type only.</b> Numbers, text and absence cannot stand there."
+result:
+  label: { ko: "{{site.line}}행의 조건", en: "the condition on line {{site.line}}" }
+  value: "{{pick.1}}"
+  note: { ko: "참이거나 거짓, 둘뿐이다", en: "true or false, nothing else" }
+ok:
+  ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 참·거짓 하나로 접혔습니다."
+  en: "{{pick.1|code}} folded to one of true or false."
+payoff:
+  ko: "이걸 알면 「조건에 이름만 적었더니 빌드가 멈춘다」가 풀립니다 — 견주는 식을 안 적은 겁니다."
+  en: "This untangles “I put a name in the condition and the build stopped” — the comparison is missing."
+bridge:
+  ko: >-
+    파이썬은 빈 목록을 거짓으로 보고 JS 는 빈 배열을 참으로 봅니다. Swift 는 둘 다 <b>안 받고</b>
+    그 자리에서 멈춰요.
+  en: >-
+    Python reads an empty list as false, JS reads an empty array as true. Swift <b>takes neither</b>
+    and stops right there.
+misconceptions:
+  # swift.md §0.1 0-4.
+  - ko: "0 이 아니면 참이다 — C 에서는 참입니다. Swift 에서는 수가 조건 자리에 못 옵니다."
+    en: "Nonzero means true — true in C. In Swift a number cannot stand in a condition."
+  - ko: "이름만 적어도 「값이 있으면 참」이 된다 — 없을 수 있는 값은 벗겨야 조건이 됩니다."
+    en: "A bare name means “true if present” — a possibly-absent value has to be unwrapped first."
+  - ko: "빈 글자 묶음은 거짓이다 — 참·거짓이 아닙니다. 비었는지 묻는 식을 따로 적어야 해요."
+    en: "Empty text is false — it is not a truth value. Ask whether it is empty, explicitly."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>참·거짓으로 접히는 것</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the part that folds to true or false</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 이름은 값을 받는 쪽이지 참·거짓으로 접히는 식이 아니에요."
+          en: "{{pick.2|code}} is the <b>name</b> — the side that receives, not the part that folds."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 값이냐", en: "The sharpest spot — the name or the value" }
+          code:
+            - "let isOn = true"
+            - "if isOn { }"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>종류</b>입니다. 종류는 무엇이 올 수 있는지를 정할 뿐 값은 아니에요."
+          en: "{{pick.3|code}} is the <b>type</b>. It settles what may stand there; it is not the value."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 종류냐 값이냐", en: "The sharpest spot — the type or the value" }
+          code:
+            - "let a: Bool = true"
+            - "let b = true       // 종류를 안 적어도 같다"
+meaning:
+  - q:
+      ko: "조건 자리에 참·거짓이 아닌 값을 놓으면 어떻게 될까요?"
+      en: "What happens if something other than a truth value stands in a condition?"
+    options:
+      - t:
+          ko: "빌드가 그 줄에서 멈춘다"
+          en: "The build stops on that line"
+      - t:
+          ko: "0 이 아니면 참으로 쳐진다"
+          en: "Anything nonzero counts as true"
+        diag:
+          t:
+            ko: "그 규칙은 C 계열의 것입니다. Swift 는 수를 참·거짓으로 안 바꿔 줘서 견주는 식을 손으로 적어야 해요."
+            en: "That rule belongs to the C family. Swift never turns a number into a truth value; the comparison has to be written."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 수냐 견줌이냐", en: "The sharpest spot — a number or a comparison" }
+            code:
+              - "if n { }        // 빌드가 멈춘다"
+              - "if n != 0 { }   // 견주는 식"
+      - t:
+          ko: "값이 있으면 참, 없으면 거짓이 된다"
+          en: "Present means true, absent means false"
+        diag:
+          t:
+            ko: "없을 수 있는 값도 조건 자리에 그대로는 못 옵니다. 벗겨서 이름을 붙이거나 없음과 견주어야 해요."
+            en: "A possibly-absent value cannot stand there either. Unwrap it into a name, or compare it with absence."
+      - t:
+          ko: "돌다가 멈춘다"
+          en: "It stops while running"
+        diag:
+          t:
+            ko: "돌기 전에 막힙니다. 종류가 안 맞는 것은 빌드 단계에서 걸려 실행까지 가지 않아요."
+            en: "It is caught before it runs. A type mismatch fails at build time and never reaches execution."
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>참·거짓</b> 이름을 세웁니다."
+      en: "Choose what goes in the blank. Line {{site.line}} sets up a <b>truth</b> name."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "Bool", mono: true }
+      - t: "Int"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>정수</b> 종류입니다. 정수를 조건 자리에 놓으면 빌드가 멈춰요 — Swift 는 수를 참·거짓으로 안 바꿉니다."
+            en: "That is the <b>whole number</b> type. A number in a condition stops the build — Swift never converts one to truth."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 수냐 참·거짓이냐", en: "The sharpest spot — a number or a truth value" }
+            code:
+              - "let a: Bool = true"
+              - "let b: Int = 1     // 조건 자리엔 못 온다"
+      - t: "String"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>글자 묶음</b>입니다. 빈 글자를 거짓으로 보는 언어가 있지만 Swift 는 그 규칙을 안 씁니다."
+            en: "That is <b>text</b>. Some languages read empty text as false; Swift does not use that rule."
+      - t:
+          "Double"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>소수</b> 종류입니다. 수는 어느 폭이든 조건 자리에 못 옵니다."
+            en: "That is the <b>fraction</b> type. A number of any width cannot stand in a condition."
+why_gate:
+  q:
+    ko: "Swift 는 왜 조건 자리에 <b>참·거짓 말고는 안 받을까요</b>?"
+    en: "Why does Swift <b>take nothing but a truth value</b> in a condition?"
+  choices:
+    - t:
+        ko: "무엇이 참으로 쳐지는지가 언어마다 달라서, 읽는 사람이 그 규칙을 외우지 않아도 되게 하려고"
+        en: "Because what counts as true differs per language, and the reader should not have to memorise the rule"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 대신 코드에 늘어나는 것이 무엇인지도 적어 보세요."
+        en: "That is the direction. Say what the code gains in exchange, too."
+    - t:
+        ko: "참·거짓이 다른 값보다 빨라서"
+        en: "Because truth values are faster than others"
+      ok: false
+      fb:
+        ko: "속도 문제가 아닙니다. 읽는 사람이 규칙을 몰라도 되게 하는 것이 이유예요."
+        en: "Speed is not it. The reason is that the reader should not need the rule."
+    - t:
+        ko: "Swift 에 수를 참·거짓으로 바꾸는 방법이 없어서"
+        en: "Because Swift has no way to turn a number into a truth value"
+      ok: false
+      fb:
+        ko: "방법은 있습니다 — 견주는 식을 적으면 돼요. 안 열어 둔 것은 <b>저절로 바뀌는</b> 길입니다."
+        en: "There is a way — write the comparison. What is closed is the <b>automatic</b> path."
+queries:
+  - { grammars: [swift], file: ./boolean-literal.scm }
+examples:
+  - code: "let isOn: Bool = true"
+    expect: { sites: 1, form: boollit, hole: "Bool", picks: { 1: "true", 2: "isOn", 3: "Bool" } }
+  - code: "let done = false"
+    expect: { sites: 1, form: boollit, picks: { 1: "false", 2: "done" } }
+  - code: "func f() { if n > 0 { g() } }"
+    expect: { sites: 1, form: ifcond, picks: { 1: "n > 0" } }
+  - code: "let n = 42"
+    expect: none

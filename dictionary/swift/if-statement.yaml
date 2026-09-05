@@ -1,0 +1,186 @@
+schema: 1
+id: swift/if-statement
+universal: common/conditional-branch
+name: { ko: 조건으로 흐름 나누기, en: If statement }
+token: "if"
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 1
+prereq: [swift/boolean-literal]
+confusions: []
+dict:
+  one_liner:
+    ko: "참일 때만 도는 묶음을 만들고, 그 묶음의 중괄호는 한 줄이어도 빠뜨릴 수 없다."
+    en: "It runs a block only when the test holds; the braces are never optional."
+  why:
+    ko: >-
+      조건을 읽는 자리는 <b>매번 그 줄에 닿을 때</b>입니다. 참이면 중괄호 안이 돌고, 거짓이면
+      통째로 건너뜁니다. Swift 에서 다른 언어와 손이 어긋나는 자리가 둘 있어요 —
+      <b>조건에 괄호를 안 씁니다</b>(써도 되지만 아무도 안 씁니다). 그리고 몸통이 한 줄이어도
+      <b>중괄호를 반드시 적습니다.</b> C·자바에서 온 손이 정확히 반대로 씁니다. 괄호를 빼고
+      중괄호를 넣는 것이 이 언어의 손버릇입니다.
+    en: >-
+      The test is read <b>every time the line is reached</b>. Holding runs the braces; not holding
+      skips them whole. Two habits differ from other languages: Swift <b>puts no brackets round
+      the test</b> (they are allowed, nobody writes them), and the braces are <b>required even for
+      one line</b>. A hand trained on C or Java writes exactly the opposite. Drop the brackets,
+      keep the braces.
+  trace:
+    - ko: "{{site.line}}행에 닿으면 {{pick.2|code}}{{pick.2|josa:을,를}} 먼저 본다."
+      en: "Reaching line {{site.line}} reads {{pick.2|code}} first."
+    - ko: "참이면 {{pick.3|code}} 안이 돈다."
+      en: "If it holds, the inside of {{pick.3|code}} runs."
+    - ko: "거짓이면 그 묶음을 통째로 건너뛴다."
+      en: "If it does not, the whole block is skipped."
+rule:
+  ko: "<b>조건은 그 줄에 닿을 때마다 본다.</b> 거짓이면 몸통은 한 번도 안 돈다."
+  en: "<b>The test is read each time the line is reached.</b> False means the body never runs."
+result:
+  label: { ko: "{{site.line}}행의 갈림", en: "the branch on line {{site.line}}" }
+  value: "{{pick.1}} {{pick.2}}"
+  note: { ko: "참일 때만 안이 돈다", en: "the inside runs only when it holds" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 참이면 안이 돌고 아니면 건너뜁니다."
+  en: "When {{pick.2|code}} holds the inside runs; otherwise it is skipped."
+payoff:
+  ko: "이걸 알면 「이 줄이 왜 안 돌지」가 풀립니다 — 위 조건을 그 순간의 값으로 읽으면 됩니다."
+  en: "This untangles “why did this line not run” — read the test above with the values of that moment."
+bridge:
+  ko: "C·자바는 조건에 괄호를 두르고 한 줄이면 중괄호를 뺍니다. Swift 는 정확히 반대예요."
+  en: "C and Java bracket the test and drop braces for one line. Swift does exactly the opposite."
+misconceptions:
+  - ko: "조건은 한 번만 본다 — 그 줄에 닿을 때마다 봅니다."
+    en: "The test is read once — it is read each time the line is reached."
+  - ko: "한 줄이면 중괄호를 빼도 된다 — Swift 에서는 빼면 빌드가 멈춥니다."
+    en: "One line means the braces can go — in Swift dropping them stops the build."
+  - ko: "조건에 괄호를 둘러야 한다 — 안 둘러도 됩니다. 두르면 오히려 경고가 붙을 수 있어요."
+    en: "The test needs brackets — it does not; adding them can even draw a warning."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>참·거짓으로 접혀 갈림을 정하는 부분</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the part that folds to a truth value and settles the branch</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>낱말</b>입니다. 갈림이 있다는 것만 알리고 어느 쪽으로 갈지는 안 정해요."
+          en: "{{pick.1|code}} is the <b>word</b>. It announces a branch; it does not settle which way."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 낱말이냐 조건이냐", en: "The sharpest spot — the word or the test" }
+          code:
+            - "if n > 0 { }   // 갈림을 정하는 것은 뒤"
+            - "if n < 0 { }   // 같은 낱말, 다른 갈림"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 참일 때 도는 <b>몸통</b>입니다. 몸통은 갈림의 결과이지 원인이 아니에요."
+          en: "{{pick.3|code}} is the <b>body</b> that runs when it holds — the result of the branch, not its cause."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 원인이냐 결과냐", en: "The sharpest spot — cause or result" }
+          code:
+            - "if ready { go() }"
+            - "if !ready { go() }   // 몸통은 같고 갈림만 뒤집힌다"
+meaning:
+  - q:
+      ko: "{{site.line}}행의 조건이 처음부터 거짓이면 몸통은 몇 번 돌까요?"
+      en: "If the test on line {{site.line}} is false from the start, how many times does the body run?"
+    options:
+      - t:
+          ko: "한 번도 안 돈다"
+          en: "Never"
+      - t:
+          ko: "적어도 한 번은 돈다"
+          en: "At least once"
+        diag:
+          t:
+            ko: "적어도 한 번 도는 모양은 따로 있습니다 — 조건을 <b>뒤에서</b> 보는 되풀이가 그것이고, 이 모양은 앞에서 봐요."
+            en: "There is a shape that runs at least once — the loop that reads its test <b>at the end</b>. This one reads it first."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 앞에서 보나 뒤에서 보나", en: "The sharpest spot — test first or test last" }
+            code:
+              - "if false { go() }        // 0번"
+              - "repeat { go() } while false  // 1번"
+      - t:
+          ko: "빌드가 멈춘다"
+          en: "The build stops"
+        diag:
+          t:
+            ko: "멈추지 않습니다. 늘 거짓인 조건도 올바른 코드예요 — 경고가 붙을 수는 있습니다."
+            en: "It does not stop. An always-false test is valid code, though it may draw a warning."
+      - t:
+          ko: "조건을 한 번 더 보고 정한다"
+          en: "It reads the test once more and decides"
+        diag:
+          t:
+            ko: "한 번만 봅니다. 여러 번 보는 것은 되풀이이고, 갈림은 한 번 보고 지나가요."
+            en: "It reads once. Reading repeatedly is what a loop does; a branch reads once and moves on."
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>참일 때만 한 번</b> 안을 돌립니다."
+      en: "Choose what goes in the blank. Line {{site.line}} runs the inside <b>once, only if the test holds</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "if", mono: true }
+      - t: "while"
+        mono: true
+        diag:
+          t:
+            ko: "이건 참인 <b>동안</b> 되풀이합니다. 한 번이 아니라 조건이 거짓이 될 때까지 돌아서, 안에서 값을 안 바꾸면 안 끝나요."
+            en: "That repeats <b>while</b> the test holds — not once but until it fails, so it never ends if nothing inside changes."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 한 번이냐 되풀이냐", en: "The sharpest spot — once or repeatedly" }
+            code:
+              - "if ok { go() }      // 한 번"
+              - "while ok { go() }   // 거짓이 될 때까지"
+      - t: "guard"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>아니면 나가는</b> 모양입니다. 몸통이 성공한 쪽이 아니라 실패한 쪽이고, 그 안에서 반드시 나가야 해요."
+            en: "That is the <b>otherwise leave</b> shape. Its body is the failing side, and it must leave."
+      - t: "switch"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>여러 갈래</b>를 한 번에 적는 모양이라 참·거짓 하나로는 안 씁니다. 빠뜨린 경우가 있으면 빌드가 멈춰요."
+            en: "That writes <b>many branches</b> at once, not a single truth test, and a missing case stops the build."
+why_gate:
+  q:
+    ko: "Swift 는 왜 몸통이 한 줄이어도 <b>중괄호를 요구할까요</b>?"
+    en: "Why does Swift <b>require the braces</b> even for a one-line body?"
+  choices:
+    - t:
+        ko: "중괄호가 없으면 나중에 줄을 하나 더 넣었을 때 그 줄이 갈림 안인지 밖인지가 들여쓰기로만 보이기 때문"
+        en: "Because without braces, a line added later is inside or outside the branch by indentation alone"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 실수가 실제로 어떤 모양으로 나타나는지도 적어 보세요."
+        en: "That is the direction. Say what that mistake actually looks like, too."
+    - t:
+        ko: "중괄호가 있으면 더 빨라서"
+        en: "Because braces are faster"
+      ok: false
+      fb:
+        ko: "속도는 같습니다. 읽는 사람과 나중에 고치는 사람을 위한 규칙이에요."
+        en: "The speed is the same. The rule is for the reader and for whoever edits later."
+    - t:
+        ko: "조건에 괄호를 안 쓰기 때문에 짝을 맞추려고"
+        en: "To balance out the missing brackets round the test"
+      ok: false
+      fb:
+        ko: "짝을 맞추는 문제가 아닙니다. 둘은 서로 다른 이유로 정해졌어요."
+        en: "It is not about balance. The two were settled for different reasons."
+queries:
+  - { grammars: [swift], file: ./if-statement.scm }
+examples:
+  - code: "func f() { if n > 0 { g() } }"
+    expect: { sites: 1, form: if, hole: "if", picks: { 1: "if", 2: "n > 0", 3: "g()" } }
+  - code: "func f() { if ready && open { g() } }"
+    expect: { sites: 1, form: if, hole: "if", picks: { 1: "if", 2: "ready && open" } }
+  - code: "func f() { if let name = u { g(name) } }"
+    expect: none

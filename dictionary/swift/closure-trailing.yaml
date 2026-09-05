@@ -1,0 +1,164 @@
+schema: 1
+id: swift/closure-trailing
+universal: common/function-value
+name: { ko: 마지막 인자를 괄호 밖에, en: Trailing closure }
+token: "{ }"
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 2
+prereq: [swift/function-declaration, cs/closure-capture]
+confusions: []
+dict:
+  one_liner:
+    ko: "마지막 인자가 함수면 괄호 밖 중괄호로 나오고, 인자가 그것뿐이면 괄호가 사라진다."
+    en: "A final function argument moves outside the brackets, and alone removes them."
+  why:
+    ko: >-
+      함수에 넘기는 마지막 인자가 <b>함수</b>일 때, 그 인자를 괄호 밖 중괄호로 적을 수 있습니다.
+      인자가 그것 하나뿐이면 <b>괄호가 통째로 사라집니다.</b> 그래서 화면을 짜는 코드가
+      「이름 + 중괄호」 모양이 되고, 처음 보면 그것이 <b>함수 호출로 안 보입니다.</b>
+      표본 428파일에서 2,550곳/244파일 — 이 언어에서 두 번째로 흔한 사용처입니다.
+      중괄호 안은 나중에 도는 코드라 <b>바깥 이름을 붙잡아 둡니다.</b> 그것이 다음 두 장의 문제예요.
+    en: >-
+      When the last argument to a function is itself a <b>function</b>, it can be written as
+      braces outside the brackets. If it is the only argument, <b>the brackets vanish.</b> That is
+      why screen-building code reads as "name plus braces" and, on first sight, <b>does not look
+      like a call at all.</b>
+      The sample has 2,550 of these across 244 files — the second commonest site in the language.
+      What is inside the braces runs later, so it <b>holds on to outer names.</b> That is the
+      subject of the next two plates.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}}{{pick.2|josa:을,를}} 부른다."
+      en: "Line {{site.line}} calls {{pick.2|code}}."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 마지막 인자이고 괄호 밖에 적혀 있다."
+      en: "{{pick.1|code}} is the final argument, written outside the brackets."
+    - ko: "{{pick.3|code}} 안은 지금이 아니라 나중에 돈다."
+      en: "The inside of {{pick.3|code}} runs later, not now."
+rule:
+  ko: "<b>괄호 밖 중괄호도 인자다.</b> 안은 지금이 아니라 나중에 돈다."
+  en: "<b>Braces outside the brackets are still an argument.</b> The inside runs later, not now."
+result:
+  label: { ko: "{{site.line}}행의 호출", en: "the call on line {{site.line}}" }
+  value: "{{pick.2}} {{pick.1}}"
+  note: { ko: "중괄호가 마지막 인자다", en: "the braces are the last argument" }
+ok:
+  ko: "{{pick.2|code}}에 {{pick.1|code}}{{pick.1|josa:이,가}} 인자로 넘어갔습니다."
+  en: "{{pick.1|code}} went into {{pick.2|code}} as an argument."
+payoff:
+  ko: "이걸 알면 「이 중괄호는 뭐지」가 풀립니다 — 괄호 밖으로 나온 인자입니다."
+  en: "This untangles “what is this brace doing here” — an argument that moved outside."
+bridge:
+  ko: >-
+    JS 는 마지막 인자가 함수여도 괄호 안에 둡니다. Swift 는 <b>밖으로 꺼내고</b> 하나뿐이면
+    괄호를 지워요.
+  en: >-
+    JS keeps a final function argument inside the brackets. Swift <b>moves it out</b> and drops
+    the brackets when it is alone.
+misconceptions:
+  - ko: "중괄호는 블록이지 인자가 아니다 — 인자입니다. 괄호 밖으로 나온 것뿐이에요."
+    en: "The braces are a block, not an argument — they are an argument that moved out."
+  - ko: "안이 지금 돈다 — 나중에 돕니다. 넘겨진 뒤 부르는 쪽이 정한 때에 돌아요."
+    en: "The inside runs now — it runs later, when the receiver decides."
+  - ko: "괄호가 없으면 호출이 아니다 — 인자가 중괄호 하나뿐이면 괄호가 사라집니다."
+    en: "No brackets means no call — with only the braces as argument the brackets vanish."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>괄호 밖으로 나온 인자</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the argument that moved outside the brackets</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>부르는 대상</b>입니다. 인자는 그 뒤에 있어요."
+          en: "{{pick.2|code}} is <b>what is being called</b>. The argument comes after it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 대상이냐 인자냐", en: "The sharpest spot — the callee or the argument" }
+          code:
+            - "VStack { Text(\"a\") }"
+            - "VStack(spacing: 8) { Text(\"a\") }"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 중괄호 <b>안</b>입니다. 인자는 중괄호를 포함한 덩어리예요."
+          en: "{{pick.3|code}} is what is <b>inside</b> the braces. The argument is the braces and all."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 안이냐 덩어리냐", en: "The sharpest spot — the inside or the whole" }
+          code:
+            - "run { work() }"
+            - "run(work)      // 같은 일, 다른 모양"
+meaning:
+  - q:
+      ko: "괄호 밖 중괄호 안의 코드는 언제 돌까요?"
+      en: "When does the code inside the trailing braces run?"
+    options:
+      - t:
+          ko: "지금이 아니라 받는 쪽이 부를 때 돈다"
+          en: "Not now — when the receiver calls it"
+      - t:
+          ko: "그 줄에 닿을 때 바로 돈다"
+          en: "Right away, when the line is reached"
+        diag:
+          t:
+            ko: "그 줄에서 도는 것은 <b>넘기는 일</b>까지입니다. 안의 코드는 받는 쪽이 부를 때 돌아요 — 버튼을 누를 때처럼요."
+            en: "What the line does is <b>hand it over</b>. The inside runs when the receiver calls it — when the button is pressed, say."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 넘김이냐 실행이냐", en: "The sharpest spot — handing over or running" }
+            code:
+              - "Button(\"t\") { n += 1 }   // 누를 때 돈다"
+              - "n += 1                    // 지금 돈다"
+      - t:
+          ko: "한 번도 안 돌 수도 있다"
+          en: "It may never run"
+        diag:
+          t:
+            ko: "그럴 수도 있습니다 — 다만 그것은 받는 쪽이 안 부른 경우이지 이 모양의 규칙은 아니에요."
+            en: "It may — but that is the receiver never calling it, not a rule of this shape."
+      - t:
+          ko: "괄호가 없으면 안 돈다"
+          en: "It does not run without brackets"
+        diag:
+          t:
+            ko: "괄호가 없어도 호출입니다. 인자가 중괄호 하나뿐이면 괄호가 사라지는 것뿐이에요."
+            en: "It is a call without brackets too. The brackets simply vanish when the braces are the only argument."
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 개념의 정답은 「중괄호가 인자다」라는 **자리**이고 그 안의 글자는 사용처마다
+  전부 다르다(표본 2,550곳). 여는 중괄호 한 글자를 구멍으로 삼으면 빈칸형이 생성 단계에서
+  떨어진다(`MIN_HOLE`). 자리를 묻는 판은 지목형이 진다.
+why_gate:
+  q:
+    ko: "Swift 는 왜 마지막 인자를 <b>괄호 밖으로</b> 꺼내게 할까요?"
+    en: "Why does Swift let the final argument move <b>outside the brackets</b>?"
+  choices:
+    - t:
+        ko: "여러 줄짜리 코드가 인자로 들어가면 닫는 괄호가 그 뒤에 남아 읽기 어렵고, 밖으로 빼면 블록처럼 읽히기 때문"
+        en: "Because a multi-line argument leaves a closing bracket dangling after it, while outside it reads as a block"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 대신 처음 읽는 사람이 무엇을 놓치는지도 적어 보세요."
+        en: "That is the direction. Say what a first-time reader misses in exchange, too."
+    - t:
+        ko: "괄호 밖이 더 빨라서"
+        en: "Because outside the brackets is faster"
+      ok: false
+      fb:
+        ko: "속도는 같습니다. 읽히는 모양을 위한 규칙이에요."
+        en: "The speed is the same. The rule is about how it reads."
+    - t:
+        ko: "괄호 안에는 함수를 못 넣어서"
+        en: "Because a function cannot go inside the brackets"
+      ok: false
+      fb:
+        ko: "넣을 수 있습니다 — 안에 적어도 같은 호출이에요. 밖으로 뺄 수 있게 한 것이 결정입니다."
+        en: "It can — written inside it is the same call. Allowing it outside is the decision."
+queries:
+  - { grammars: [swift], file: ./closure-trailing.scm }
+examples:
+  - code: "let v = VStack { Text(\"a\") }"
+    expect: { sites: 1, form: trailing, picks: { 2: "VStack", 3: "Text(\"a\")" } }
+  - code: "let w = items.forEach { g($0) }"
+    expect: { sites: 1, form: trailing-method, picks: { 2: "forEach", 3: "g($0)" } }
+  - code: "let x = load(1)"
+    expect: none

@@ -1,0 +1,186 @@
+schema: 1
+id: swift/string-interpolation
+universal: common/string-interpolation
+name: { ko: 글자에 값 끼워 넣기, en: String interpolation }
+token: "\\("
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 2
+prereq: [swift/text-literal, swift/assignment]
+confusions: []
+dict:
+  one_liner:
+    ko: "글자 묶음 안에 값을 계산해 넣는 자리를 열고, 그 안에는 아무 식이나 온다."
+    en: "It opens a slot inside text where a value is computed into characters."
+  why:
+    ko: >-
+      Swift 에서 글자에 값을 넣는 길은 사실상 이것 하나입니다. 표본 리포에서 이 표기가
+      375곳/101파일인데 글자를 더하기로 잇는 코드는 거의 안 보여요.
+      열린 자리 안에는 <b>아무 식이나</b> 올 수 있습니다 — 이름, 셈, 호출, 심지어 또 다른 글자
+      묶음까지요. 값은 이 자리에서 <b>글자로 바뀝니다.</b> 그래서 종류가 달라도 여기서는
+      섞이는 것처럼 보이지만, 바뀌는 것이지 섞이는 것이 아닙니다.
+    en: >-
+      This is effectively the only way text takes a value in Swift. The sample repository has this
+      notation in 375 places across 101 files; joining text with addition barely appears.
+      <b>Any expression</b> may stand in the opened slot — a name, arithmetic, a call, even
+      another piece of text. The value is <b>turned into text</b> right there. So kinds seem to
+      mix here, but they are being converted, not mixed.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.3|code}}까지를 글자 그대로 담는다."
+      en: "Line {{site.line}} takes {{pick.3|code}} as literal text."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 값을 계산해 넣을 자리를 연다."
+      en: "{{pick.1|code}} opens the slot where a value is computed."
+    - ko: "{{pick.2|code}}{{pick.2|josa:을,를}} 계산해 글자로 바꾼 뒤 이어 붙인다."
+      en: "{{pick.2|code}} is computed, turned into text, and joined in."
+rule:
+  ko: "<b>열린 자리 안에서 값이 글자가 된다.</b> 종류가 섞이는 것이 아니라 바뀌는 것이다."
+  en: "<b>Inside the slot a value becomes text.</b> Nothing mixes; something is converted."
+result:
+  label: { ko: "{{site.line}}행의 글자", en: "the text on line {{site.line}}" }
+  value: "{{pick.3}}{{pick.1}}{{pick.2}})"
+  note: { ko: "값이 글자로 바뀌어 들어간다", en: "the value goes in as text" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 계산되어 글자로 들어갔습니다."
+  en: "{{pick.2|code}} was computed and went in as text."
+payoff:
+  ko: "이걸 알면 「종류가 다른데 왜 여기서는 되지」가 풀립니다 — 바뀌어 들어가는 겁니다."
+  en: "This untangles “why do kinds work here” — they are converted on the way in."
+bridge:
+  ko: "JS 는 백틱과 달러 중괄호, 파이썬은 f 를 앞에 붙입니다. 하는 일은 같아요."
+  en: "JS uses backticks with a dollar brace, Python an f in front. The job is the same."
+misconceptions:
+  - ko: "이름만 넣을 수 있다 — 아무 식이나 넣을 수 있습니다."
+    en: "Only names may go in — any expression may."
+  - ko: "종류가 저절로 섞인다 — 글자로 <b>바뀌는</b> 것이고 밖에서는 여전히 안 섞입니다."
+    en: "Kinds mix on their own — they are <b>converted</b> here; outside they still do not mix."
+  - ko: "없을 수 있는 값도 그냥 넣으면 된다 — 넣으면 「없음」이라는 글자가 그대로 찍힙니다."
+    en: "A possibly-absent value can just go in — it does, and prints the word for absence."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>값을 계산해 넣을 자리를 여는 표시</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the mark that opens the computed slot</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 자리 <b>안의 식</b>입니다. 자리를 여는 표시는 그 앞에 있어요."
+          en: "{{pick.2|code}} is the <b>expression inside</b> the slot. The mark that opens it sits in front."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 여는 표시냐 안의 식이냐", en: "The sharpest spot — the opener or the expression" }
+          code:
+            - "\"수: \\(n)\"      // n 이 계산된다"
+            - "\"수: n\"          // 글자 그대로 찍힌다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 글자 <b>그대로</b> 나가는 부분입니다. 계산되는 자리는 그 뒤예요."
+          en: "{{pick.3|code}} is the part that goes out <b>as written</b>. The computed slot comes after it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 그대로냐 계산이냐", en: "The sharpest spot — literal or computed" }
+          code:
+            - "\"안녕 \\(name)\""
+            - "\"안녕 name\""
+meaning:
+  - q:
+      ko: "열린 자리 안에 종류가 다른 값을 넣으면 어떻게 될까요?"
+      en: "What happens when a value of another kind goes into the slot?"
+    options:
+      - t:
+          ko: "그 자리에서 글자로 바뀌어 들어간다"
+          en: "It is turned into text right there"
+      - t:
+          ko: "종류가 달라 빌드가 멈춘다"
+          en: "The build stops because the kinds differ"
+        diag:
+          t:
+            ko: "이 자리만은 안 멈춥니다. 값을 글자로 바꾸는 일이 이 표기의 몫이라서예요 — 밖에서는 여전히 안 섞입니다."
+            en: "Not in this one spot. Turning a value into text is what the notation is for — outside, kinds still do not mix."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 안이냐 밖이냐", en: "The sharpest spot — inside or outside" }
+            code:
+              - "\"n: \\(n)\"   // 된다"
+              - "\"n: \" + n     // 빌드가 멈춘다"
+      - t:
+          ko: "가장 가까운 종류로 맞춰진다"
+          en: "It is matched to the nearest kind"
+        diag:
+          t:
+            ko: "맞추는 것이 아니라 <b>글자로 바꾸는</b> 것입니다. 결과는 언제나 글자 묶음이에요."
+            en: "Nothing is matched; it is <b>turned into text</b>. The result is always text."
+      - t:
+          ko: "값이 아니라 이름이 찍힌다"
+          en: "The name prints instead of the value"
+        diag:
+          t:
+            ko: "이름이 찍히는 것은 자리를 <b>안 열었을</b> 때입니다. 열면 계산된 값이 들어가요."
+            en: "The name prints when the slot is <b>not opened</b>. Opened, the computed value goes in."
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 글자 안에서 <b>값을 계산할 자리</b>를 엽니다."
+      en: "Choose what goes in the blank. Line {{site.line}} opens a <b>computed slot</b> inside text."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "\\(", mono: true }
+      - t: "${"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>JS</b> 의 표기입니다. Swift 글자 묶음 안에서는 그냥 글자 두 개로 찍혀요."
+            en: "That is the <b>JS</b> notation. Inside Swift text it prints as two plain characters."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 어느 언어의 표기냐", en: "The sharpest spot — whose notation" }
+            code:
+              - "\"n: \\(n)\"   // 값이 들어간다"
+              - "\"n: ${n}\"     // 글자 그대로"
+      - t: "{{"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>틀 문법</b>의 표기입니다. 언어가 아니라 라이브러리가 읽는 것이라 Swift 는 글자로 봅니다."
+            en: "That is <b>template</b> notation read by a library, not the language. Swift sees plain characters."
+      - t: "%@"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>서식 문자열</b>의 자리표입니다. 값을 따로 넘겨야 채워지고, 글자 안에서 저절로 계산되지 않아요."
+            en: "That is a <b>format string</b> placeholder. It is filled by a separate argument, not computed in place."
+why_gate:
+  q:
+    ko: "Swift 는 왜 글자 이어 붙이기 대신 <b>이 표기</b>를 쓸까요?"
+    en: "Why does Swift use <b>this notation</b> instead of joining text with addition?"
+  choices:
+    - t:
+        ko: "글자와 값이 한 줄에서 보이면 결과 문장의 모양이 코드에 그대로 남고, 종류를 옮기는 호출도 안 적어도 되기 때문"
+        en: "Because text and value in one line keep the sentence's shape visible, and no conversion call is needed"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이어 붙이기로 적었을 때 무엇이 늘어나는지도 적어 보세요."
+        en: "That is the direction. Say what grows when it is written as joins, too."
+    - t:
+        ko: "이어 붙이기가 느려서"
+        en: "Because joining is slow"
+      ok: false
+      fb:
+        ko: "속도가 이유는 아닙니다. 읽히는 모양과 종류 옮김이 이유예요."
+        en: "Speed is not the reason. The shape and the conversion are."
+    - t:
+        ko: "Swift 에 글자를 더하는 기호가 없어서"
+        en: "Because Swift has no symbol for adding text"
+      ok: false
+      fb:
+        ko: "있습니다 — 글자끼리는 더할 수 있어요. 안 쓰는 것이지 없는 것이 아닙니다."
+        en: "There is one — text can be added. It is unused, not missing."
+queries:
+  - { grammars: [swift], file: ./string-interpolation.scm }
+examples:
+  - code: "let s = \"눌린 횟수: \\(count)\""
+    expect: { sites: 1, form: interp, hole: "\\(", picks: { 1: "\\(", 2: "count", 3: "눌린 횟수: " } }
+  - code: "let t = \"합: \\(a + b)\""
+    expect: { sites: 1, form: interp, hole: "\\(", picks: { 1: "\\(", 2: "a + b", 3: "합: " } }
+  - code: "let u = \"그냥 글자\""
+    expect: none

@@ -1,0 +1,195 @@
+schema: 1
+id: swift/mutating-method
+universal: null
+name: { ko: 자기 값을 바꾸는 메서드, en: Mutating method }
+token: "mutating"
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 3
+prereq: [swift/struct-declaration, cs/immutability]
+confusions: []
+dict:
+  one_liner:
+    ko: "값으로 도는 묶음이 자기 속성을 고치려면 그렇게 하겠다고 앞에 적어야 한다."
+    en: "A value bundle that edits its own fields must say so in front of the method."
+  why:
+    ko: >-
+      값으로 도는 묶음은 기본이 <b>못 바꾸는 것</b>입니다. 안의 속성을 고치는 메서드를 만들려면
+      그 낱말을 앞에 적어야 하고, 안 적으면 <b>빌드가 멈춥니다.</b>
+      이 낱말의 뜻은 「위험하다」가 아니라 <b>「자기 자신을 새 값으로 바꿔 담겠다」</b>입니다.
+      값은 고쳐지는 것이 아니라 통째로 새것이 되고, 그 새것이 원래 이름에 다시 담깁니다.
+      그래서 규칙이 하나 따라옵니다 — <b>안 바꾸기로 한 이름에는 이 메서드를 부를 수조차
+      없습니다.</b> 담을 자리가 없으니까요.
+      표본 428파일에서 <b>2곳/1파일</b>이라 실코드에서 만나기는 드뭅니다.
+    en: >-
+      A value bundle is <b>unchangeable by default</b>. A method that edits its own fields has to
+      say so in front, and without the word <b>the build stops.</b>
+      The word does not mean "dangerous". It means <b>"I will replace myself with a new value".</b>
+      The value is not edited in place; it becomes a whole new one, put back into the same name.
+      One rule follows: <b>the method cannot even be called on a fixed name</b>, because there is
+      nowhere to put the new value.
+      In the 428-file sample it appears <b>twice, in one file</b> — meeting it in real code is rare.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.2|code}}{{pick.2|josa:은,는}} 자기 속성을 고치겠다고 적혀 있다."
+      en: "{{pick.2|code}} on line {{site.line}} declares that it edits its own fields."
+    - ko: "{{pick.3|code}} 안에서 새 값이 만들어진다."
+      en: "A new value is made inside {{pick.3|code}}."
+    - ko: "그 값이 원래 이름에 다시 담긴다."
+      en: "That value is put back into the same name."
+rule:
+  ko: "<b>고쳐지는 것이 아니라 새것이 담긴다.</b> 안 바꾸기로 한 이름에는 부를 수 없다."
+  en: "<b>Nothing is edited; a new value is put back.</b> A fixed name cannot call it at all."
+result:
+  label: { ko: "{{site.line}}행의 메서드", en: "the method on line {{site.line}}" }
+  value: "{{pick.1}} {{pick.2}}"
+  note: { ko: "자기 자신이 새 값이 된다", en: "the value replaces itself" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 자기 자신을 새 값으로 바꿔 담습니다."
+  en: "{{pick.2|code}} replaces itself with a new value."
+payoff:
+  ko: "이걸 알면 「이 메서드를 왜 못 부르지」가 풀립니다 — 담을 자리가 없는 이름입니다."
+  en: "This untangles “why can this method not be called” — the name has nowhere to put it."
+bridge:
+  ko: >-
+    Rust 에 비슷한 표시가 있고 나머지 아홉에는 <b>없습니다</b>. 자바·C# 은 상자를 고치는
+    것이라 이런 선언이 필요 없어요.
+  en: >-
+    Rust has a similar marker; the other nine <b>do not</b>. Java and C# edit a box, so no such
+    declaration is needed.
+misconceptions:
+  # swift.md §9 ⑥.
+  - ko: "이 낱말은 「위험하다」는 표시다 — 「자기 자신을 새 값으로 바꿔 담는다」는 선언입니다."
+    en: "The word marks danger — it declares replacing itself with a new value."
+  - ko: "안 적어도 속성을 고칠 수 있다 — 값 쪽에서는 빌드가 멈춥니다."
+    en: "Fields can be edited without it — on the value side the build stops."
+  - ko: "안 바꾸기로 한 이름에도 부를 수 있다 — 부를 수조차 없습니다."
+    en: "It can still be called on a fixed name — it cannot be called at all."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>자기 속성을 고치겠다는 표시</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the marker that declares editing its own fields</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 메서드 <b>이름</b>입니다. 이름을 어떻게 짓든 표시가 없으면 못 고쳐요."
+          en: "{{pick.2|code}} is the method's <b>name</b>. Whatever it is called, no marker means no editing."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 표시냐", en: "The sharpest spot — the name or the marker" }
+          code:
+            - "mutating func move() { x += 1 }"
+            - "func move() { x += 1 }   // 빌드가 멈춘다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 고치는 <b>몸통</b>입니다. 몸통이 고친다는 것을 앞에서 미리 선언해야 해요."
+          en: "{{pick.3|code}} is the <b>body</b> that edits. The editing has to be declared in front of it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 몸통이냐 선언이냐", en: "The sharpest spot — the body or the declaration" }
+          code:
+            - "mutating func inc() { n += 1 }"
+            - "func read() -> Int { n }   // 안 고치면 표시가 없다"
+meaning:
+  - q:
+      ko: "안 바꾸기로 만든 이름에 이 메서드를 부르면 어떻게 될까요?"
+      en: "What happens when this method is called on a fixed name?"
+    options:
+      - t:
+          ko: "빌드가 멈춘다 — 새 값을 담을 자리가 없다"
+          en: "The build stops — there is nowhere to put the new value"
+      - t:
+          ko: "돌긴 하는데 바뀐 값이 안 남는다"
+          en: "It runs but the change does not stick"
+        diag:
+          t:
+            ko: "돌지도 않습니다. 새 값을 담을 자리가 없다는 것이 <b>빌드 단계</b>에서 보이거든요."
+            en: "It does not even run. That there is nowhere to put the value is visible <b>at build time</b>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 도나 못 도나", en: "The sharpest spot — runs or not" }
+            code:
+              - "var q = Q(); q.inc()   // 된다"
+              - "let q = Q(); q.inc()   // 빌드가 멈춘다"
+      - t:
+          ko: "복사본에 적용된다"
+          en: "It applies to a copy"
+        diag:
+          t:
+            ko: "복사본을 만들어 주지 않습니다. 담을 자리를 만드는 것은 <b>바꿀 수 있는 이름</b>으로 선언하는 일이에요."
+            en: "No copy is made for you. Making a place to put it means declaring a <b>movable</b> name."
+      - t:
+          ko: "상자 쪽처럼 안이 바뀐다"
+          en: "The inside changes, as on the box side"
+        diag:
+          t:
+            ko: "값 쪽에는 안이 따로 없습니다. 자기 자신이 통째로 새 값이 되는 것이라 담을 자리가 필요해요."
+            en: "The value side has no separate inside. The whole value is replaced, so a place to put it is required."
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행의 메서드는 <b>자기 속성을 고칩니다</b>."
+      en: "Choose what goes in the blank. The method on line {{site.line}} <b>edits its own fields</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "mutating", mono: true }
+      - t: "static"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>타입에 붙는</b> 메서드를 만듭니다. 자기 값이라는 것이 없어서 고칠 속성도 없어요."
+            en: "That attaches the method <b>to the type</b>. There is no self value, so there are no fields to edit."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값에 붙나 타입에 붙나", en: "The sharpest spot — on the value or on the type" }
+            code:
+              - "mutating func inc() { n += 1 }"
+              - "static func make() -> Q { Q() }"
+      - t: "private"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>누가 부를 수 있나</b>를 정합니다. 고칠 수 있는지와는 다른 축이라 붙여도 빌드가 멈춰요."
+            en: "That settles <b>who may call it</b> — a different axis, so the build still stops."
+      - t: "nonmutating"
+        mono: true
+        diag:
+          t:
+            ko: "이건 정확히 <b>반대</b>를 적는 낱말입니다. 고치지 않겠다는 선언이라 안에서 속성을 고치면 멈춰요."
+            en: "That declares exactly the <b>opposite</b>. It promises not to edit, so editing inside stops the build."
+why_gate:
+  q:
+    ko: "값으로 도는 묶음은 왜 <b>고치겠다고 미리 적게</b> 할까요?"
+    en: "Why must a value bundle <b>declare in advance</b> that it edits?"
+  choices:
+    - t:
+        ko: "값이 통째로 새것이 되므로 담을 자리가 있어야 하고, 그 자리가 있는지는 부르는 쪽에서 정해지기 때문"
+        en: "Because the value is replaced whole, so a place to put it is needed — and the caller is what has it"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그래서 부를 수 없는 이름이 어떤 것인지도 적어 보세요."
+        en: "That is the direction. Say which names cannot call it, too."
+    - t:
+        ko: "고치는 메서드가 느려서"
+        en: "Because editing methods are slow"
+      ok: false
+      fb:
+        ko: "속도 문제가 아닙니다. 새 값을 담을 자리가 필요하다는 것이 이유예요."
+        en: "Speed is not it. Needing a place to put the new value is."
+    - t:
+        ko: "실수로 고치는 것을 막으려고"
+        en: "To prevent accidental edits"
+      ok: false
+      fb:
+        ko: "막는 효과는 있지만 <b>이유</b>는 아닙니다. 값이 통째로 바뀐다는 사실이 먼저예요."
+        en: "It does prevent them, but that is not the <b>reason</b>. Whole-value replacement comes first."
+queries:
+  - { grammars: [swift], file: ./mutating-method.scm }
+examples:
+  - code: "struct Q { var n = 0; mutating func inc() { n += 1 } }"
+    expect: { sites: 1, form: mutating, hole: "mutating", picks: { 1: "mutating", 2: "inc", 3: "n += 1" } }
+  - code: "struct R { var n = 0; mutating func reset() { n = 0 } }"
+    expect: { sites: 1, form: mutating, hole: "mutating", picks: { 1: "mutating", 2: "reset" } }
+  - code: "struct S { func read() -> Int { 0 } }"
+    expect: none

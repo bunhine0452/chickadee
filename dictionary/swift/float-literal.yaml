@@ -1,0 +1,200 @@
+schema: 1
+id: swift/float-literal
+# 0부 축 2. 보편형은 `common/float-literal` 이다 (D187 ④ 로 쪼개진 뒤의 값).
+# 근사값이 되는 기계는 IEEE-754 하나라 세 언어가 같은 값을 낸다 — 다시 배울 것은 종류 이름뿐이다.
+universal: common/float-literal
+name: { ko: 소수 값과 근사, en: Float literal }
+token: "0.1"
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cs/floating-point, cs/binary-representation]
+confusions: []
+dict:
+  one_liner:
+    ko: "십진 소수는 2진 분수로 딱 안 떨어져서, 담기는 것은 가장 가까운 값이다."
+    en: "A decimal fraction has no exact base-two form; the nearest value lands."
+  why:
+    ko: >-
+      소수는 <b>2진 분수의 합</b>으로 담깁니다. 십진수 0.1 은 그 합으로 정확히 못 적어요 —
+      십진수로 3분의 1을 못 적는 것과 같은 일입니다. 그래서 담기는 값은 사람이 적은 것이
+      아니라 <b>그것에 가장 가까운 값</b>이고, 둘을 더하면 이 기계에서
+      <code>0.30000000000000004</code> 가 나옵니다. 여기서 <b>소수를 같음 기호로 견주면</b>
+      조건이 안 맞습니다. 그리고 좁은 종류가 정확한 것이 아닙니다 — 실측에서 좁은 쪽은
+      <code>0.3</code> 으로 찍히는데, 정확해진 게 아니라 자릿수가 적어 반올림이 오차를 가린 겁니다.
+    en: >-
+      A fraction is stored as a <b>sum of binary fractions</b>. Base ten 0.1 has no exact form
+      there — the same way base ten cannot write one third. What lands is not what a person wrote
+      but <b>the nearest value to it</b>, and adding two of them gives
+      <code>0.30000000000000004</code> on this machine. So <b>comparing fractions with the
+      equality sign</b> fails. And the narrower type is not the exact one — it prints
+      <code>0.3</code> because it has fewer digits, so rounding hides the gap.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 이미 그 자체로 근사값이다."
+      en: "{{pick.1|code}} on line {{site.line}} is already an approximation."
+    - ko: "담길 때 가장 가까운 값이 대신 들어갔다."
+      en: "The nearest representable value went in instead."
+    - ko: "{{pick.2|code}}{{pick.2|josa:을,를}} 그대로 찍으면 사람이 적은 것과 다를 수 있다."
+      en: "Printing {{pick.2|code}} can differ from what a person wrote."
+rule:
+  ko: "<b>소수는 근사값이다.</b> 같음 기호로 견주지 않고 차이의 크기로 본다."
+  en: "<b>Fractions are approximations.</b> Compare them by the size of the gap, not by equality."
+result:
+  label: { ko: "{{site.line}}행의 소수", en: "the fraction on line {{site.line}}" }
+  value: "{{pick.2}} = {{pick.1}}"
+  note: { ko: "적힌 값이 아니라 가장 가까운 값이 담긴다", en: "the nearest value lands, not the written one" }
+ok:
+  ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 가장 가까운 값으로 담겼습니다."
+  en: "{{pick.1|code}} landed as the nearest representable value."
+payoff:
+  ko: "이걸 알면 「합계가 소수점 열여섯째 자리에서 어긋난다」가 풀립니다 — 셈이 샌 게 아닙니다."
+  en: "This untangles “the total is off in the sixteenth decimal” — nothing leaked."
+bridge:
+  ko: "파이썬·자바·JS 도 같은 기계라 같은 값이 나옵니다. 다른 것은 정확한 소수를 담는 도구뿐입니다."
+  en: "Python, Java and JS run the same machine and print the same value. Only the exact-decimal tool differs."
+misconceptions:
+  # swift.md §0.1 0-2 의 「초보가 실제로 틀리는 자리」 — 실측(6.3.3).
+  - ko: "좁은 종류는 정확하다 — 아닙니다. 자릿수가 적어 반올림이 오차를 가릴 뿐입니다."
+    en: "The narrow type is exact — it is not; fewer digits only let rounding hide the gap."
+  - ko: "자릿수를 늘리면 정확해진다 — 넓은 종류도 근사값입니다. 자릿수만 늘어납니다."
+    en: "More digits fixes it — the wider type is still an approximation, only with more digits."
+  - ko: "Swift 의 셈이 새는 것이다 — 어느 언어도 같은 값을 냅니다. 2진수로 못 적는 값이라서예요."
+    en: "Swift's arithmetic leaks — every language prints the same. The value has no base-two form."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>근사값으로 담기는 값</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the value that lands as an approximation</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 이름은 값을 안 바꿔요 — 어긋남은 담기는 값에서 이미 생깁니다."
+          en: "{{pick.2|code}} is the <b>name</b>. A name changes nothing — the gap appears when the value lands."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 값이냐", en: "The sharpest spot — the name or the value" }
+          code:
+            - "let a = 0.1     // 0.1 에 가장 가까운 값"
+            - "let bbb = 0.1   // 같은 값, 다른 이름"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>종류</b>입니다. 종류는 자릿수를 정할 뿐 어긋남 자체를 없애지 못해요."
+          en: "{{pick.3|code}} is the <b>type</b>. A type sets the digit count; it does not remove the gap."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 종류냐 값이냐", en: "The sharpest spot — the type or the value" }
+          code:
+            - "let a: Float = 0.1"
+            - "let b: Double = 0.1   // 둘 다 근사값"
+meaning:
+  - q:
+      ko: "{{site.line}}행의 소수를 같음 기호로 견주면 왜 안 맞을까요?"
+      en: "Why does comparing the fraction on line {{site.line}} with equality fail?"
+    options:
+      - t:
+          ko: "담긴 것이 적은 값이 아니라 그것에 가장 가까운 값이어서"
+          en: "Because what was stored is the nearest value, not the one written"
+      - t:
+          ko: "Swift 의 셈이 반올림을 한 자리 잘못해서"
+          en: "Because Swift's arithmetic rounds one digit off"
+        diag:
+          t:
+            ko: "셈은 규격대로입니다. 어긋난 것은 셈이 아니라 <b>담김</b>이에요 — 값이 들어가는 순간 이미 가장 가까운 값으로 바뀝니다."
+            en: "The arithmetic follows the standard. What shifted is <b>storage</b> — the value became the nearest one as it went in."
+      - t:
+          ko: "칸이 모자라서 — 더 넓은 종류를 쓰면 딱 떨어진다"
+          en: "The slots ran out — a wider type would land exactly"
+        diag:
+          t:
+            ko: "넓혀도 안 떨어집니다. 자릿수가 늘어날 뿐, 십진 0.1 은 어떤 폭에서도 2진 분수로 안 떨어져요."
+            en: "Widening does not help. It only adds digits; base ten 0.1 has no exact base-two form at any width."
+      - t:
+          ko: "화면에 찍을 때 글자로 바꾸면서 어긋나서"
+          en: "Because printing turns it into text and drifts"
+        diag:
+          t:
+            ko: "찍기는 담긴 값을 그대로 보여 준 겁니다. 값 자체가 다르고, 견주어 봐도 안 같아요."
+            en: "Printing showed exactly what was stored. The value itself differs, and a comparison says so too."
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>64칸짜리 소수</b> 이름을 세웁니다."
+      en: "Choose what goes in the blank. Line {{site.line}} sets up a <b>64-slot fraction</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "Double", mono: true }
+      - t: "Float"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>32칸</b>짜리라 자릿수가 절반입니다. 정확해지는 게 아니라 어긋남이 반올림에 가려질 뿐이고, 큰 값에서 먼저 무너져요."
+            en: "That one has <b>32 slots</b>, half the digits. It is not more exact — rounding just hides the gap, and it breaks sooner on large values."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 자릿수냐 정확함이냐", en: "The sharpest spot — digits or exactness" }
+            code:
+              - "Float(0.1) + Float(0.2)   // 0.3 으로 찍힌다"
+              - "0.1 + 0.2                 // 0.30000000000000004"
+      - t: "Int"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>정수</b> 종류라 소수점을 아예 못 담습니다. 소수를 넣으면 빌드가 그 줄에서 멈춰요."
+            en: "That is the <b>whole number</b> type and holds no decimal point at all. Put a fraction in and the build stops on that line."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 정수냐 소수냐", en: "The sharpest spot — whole or fraction" }
+            code:
+              - "let a: Double = 0.5"
+              - "let b: Int = 0.5    // 빌드가 멈춘다"
+      - t: "String"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>글자 묶음</b>이라 셈에 안 씁니다. 더하면 이어 붙고, 크기를 견줄 때도 수가 아니라 글자 순서로 봐요."
+            en: "That is a <b>run of characters</b> and does no arithmetic. Adding joins, and comparing goes by character order, not by size."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 수냐 글자냐", en: "The sharpest spot — a number or text" }
+            code:
+              - "let a: Double = 0.1 + 0.2"
+              - "let b: String = \"0.1\""
+why_gate:
+  q:
+    ko: "{{site.line}}행 같은 소수를 왜 <b>같음 기호로 견주면 안 될까요</b>?"
+    en: "Why should a fraction like the one on line {{site.line}} <b>not be compared with equality</b>?"
+  choices:
+    - t:
+        ko: "담긴 값이 사람이 적은 값과 마지막 자리에서 다를 수 있고, 같음 기호는 그 한 자리도 다르다고 보기 때문"
+        en: "Because the stored value can differ in the last digit, and equality counts that digit"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그럼 무엇으로 견줄지도 한 줄 적어 보세요."
+        en: "That is the direction. Add a line on what to compare with instead."
+    - t:
+        ko: "소수 견주기가 느려서"
+        en: "Because comparing fractions is slow"
+      ok: false
+      fb:
+        ko: "속도 문제가 아닙니다. 값이 다르다는 것이 문제예요."
+        en: "Speed is not it. The problem is that the values differ."
+    - t:
+        ko: "Swift 가 소수 견주기를 막아 놓아서"
+        en: "Because Swift forbids comparing fractions"
+      ok: false
+      fb:
+        ko: "막지 않습니다. 빌드도 되고 돌기도 합니다 — 조건이 안 맞을 뿐이에요."
+        en: "It is not forbidden. It builds and runs — the condition simply does not hold."
+queries:
+  - { grammars: [swift], file: ./float-literal.scm }
+examples:
+  - code: "let d: Double = 0.1"
+    expect: { sites: 1, form: floatlit, hole: "Double", picks: { 1: "0.1", 2: "d", 3: "Double" } }
+  - code: "let sum = 0.1 + 0.2"
+    expect: { sites: 1, form: floatop, picks: { 1: "0.1", 2: "sum" } }
+  - code: "var scale: Float = 0.3"
+    expect: { sites: 1, form: floatlit, hole: "Float", picks: { 1: "0.3", 2: "scale", 3: "Float" } }
+  - code: "func f(width: CGFloat) { }"
+    expect: { sites: 1, form: floatparam, hole: "CGFloat", picks: { 2: "width", 3: "CGFloat" } }
+  - code: "let n = 42"
+    expect: none

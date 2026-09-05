@@ -1,0 +1,171 @@
+schema: 1
+id: swift/result-builder
+universal: null
+name: { ko: 줄줄이 세워 두면 합쳐 주는 것, en: Result builder }
+token: "@Builder"
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 5
+prereq: [swift/closure-trailing, swift/property-wrapper]
+confusions: []
+dict:
+  one_liner:
+    ko: "중괄호 안에 값을 쉼표도 낱말도 없이 세워 두면 컴파일러가 합치는 호출로 바꾼다."
+    en: "Values stacked in braces with no commas are rewritten into calls that join them."
+  why:
+    ko: >-
+      화면 코드가 Swift 처럼 안 보이는 <b>마지막 조각</b>입니다. 중괄호 안에 값을 줄줄이
+      세워 두면 — 쉼표도 없고 돌려주는 낱말도 없이 — 컴파일러가 그것을 <b>합치는 호출로 다시
+      씁니다.</b> 우리가 보는 것은 목록처럼 보이는 문장 여럿이고, 컴파일러가 만드는 것은
+      그것들을 하나로 묶는 코드예요.
+      그래서 이 중괄호 안은 평범한 코드 블록이 <b>아닙니다.</b> 갈래를 적으면 그것도 합치는
+      호출로 다시 쓰이고, 되풀이는 아예 다른 이름으로 적어야 합니다.
+      문법에는 흔적이 거의 없어서 <b>읽는 사람이 붙잡을 표시가 둘뿐</b>입니다 — 화면을 내주는
+      계산 속성의 반환 타입, 그리고 함수 앞에 붙은 표시. 표본에서 429곳/187파일입니다.
+    en: >-
+      This is the <b>last piece</b> that makes screen code stop looking like Swift. Values stacked
+      inside braces — no commas, no returning word — are <b>rewritten by the compiler into calls
+      that join them.</b> What a person sees is several statements that read like a list; what the
+      compiler makes is code that folds them into one.
+      So these braces are <b>not</b> an ordinary code block. A branch inside is rewritten too, and
+      repetition has to be written with a different name entirely.
+      The grammar keeps almost no trace of this, so <b>a reader has only two anchors</b>: the
+      return type of the computed property that yields a screen, and the marker in front of a
+      function. The sample has 429 such places across 187 files.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.2|code}}{{pick.2|josa:이,가}} {{pick.1|code}}{{pick.1|josa:을,를}} 내놓는다고 적혀 있다."
+      en: "{{pick.2|code}} on line {{site.line}} says it yields {{pick.1|code}}."
+    - ko: "{{pick.3|code}} 안은 값을 줄줄이 세워 둔 것이다."
+      en: "Inside {{pick.3|code}} the values are simply stacked."
+    - ko: "컴파일러가 그것을 합치는 호출로 다시 쓴다."
+      en: "The compiler rewrites them into calls that join them."
+rule:
+  ko: "<b>이 중괄호는 코드 블록이 아니다.</b> 세워 둔 값들을 합치는 호출로 다시 쓰인다."
+  en: "<b>These braces are not a code block.</b> The stacked values become joining calls."
+result:
+  label: { ko: "{{site.line}}행이 내놓는 것", en: "what line {{site.line}} yields" }
+  value: "{{pick.1}}"
+  note: { ko: "안의 값들이 하나로 합쳐진다", en: "the stacked values are folded into one" }
+ok:
+  ko: "{{pick.3|code}} 안의 값들이 하나로 합쳐져 {{pick.1|code}}{{pick.1|josa:이,가}} 됩니다."
+  en: "The values inside {{pick.3|code}} are folded into one {{pick.1|code}}."
+payoff:
+  ko: "이걸 알면 「쉼표도 없는데 왜 되지」가 풀립니다 — 다시 쓰이는 중괄호입니다."
+  en: "This untangles “no commas and it still works” — these braces get rewritten."
+bridge:
+  ko: >-
+    JSX 도 값을 늘어놓지만 그것은 <b>다른 문법</b>입니다. Swift 는 평범한 문 목록을 그대로 두고
+    뜻만 바꿔요.
+  en: >-
+    JSX also stacks values, but as <b>separate syntax</b>. Swift keeps ordinary statements and
+    changes only what they mean.
+misconceptions:
+  # swift.md §9 ⑨ 의 이웃 — 「문법에 흔적이 없다」(§8 실측).
+  - ko: "중괄호 안이 평범한 코드 블록이다 — 합치는 호출로 다시 쓰이는 자리입니다."
+    en: "The braces are an ordinary block — they are rewritten into joining calls."
+  - ko: "값들이 순서대로 실행된다 — 실행이 아니라 <b>합쳐질 재료</b>로 모입니다."
+    en: "The values run in order — they are gathered as <b>material to fold</b>, not run."
+  - ko: "되풀이를 그대로 적을 수 있다 — 다른 이름으로 적어야 합니다."
+    en: "A loop can be written as usual — it needs a different name entirely."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>합쳐진 결과의 타입 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the type name of the folded result</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 무엇으로 합쳐지는지는 타입 쪽이 정해요."
+          en: "{{pick.2|code}} is the <b>name</b>. What it folds into is settled by the type."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 타입이냐", en: "The sharpest spot — the name or the type" }
+          code:
+            - "var body: some View { … }"
+            - "var toolbar: some ToolbarContent { … }"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 세워 둔 <b>값들</b>입니다. 그것들이 무엇으로 합쳐지는지는 위에 적혀 있어요."
+          en: "{{pick.3|code}} is the <b>stacked values</b>. What they fold into is written above."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 재료냐 결과냐", en: "The sharpest spot — the material or the result" }
+          code:
+            - "var body: some View { Text(\"a\") }"
+            - "var body: some View { Text(\"a\"); Text(\"b\") }"
+meaning:
+  - q:
+      ko: "이 중괄호 안에 값 둘을 쉼표 없이 세워 두면 무엇이 될까요?"
+      en: "Two values stacked in these braces with no comma — what do they become?"
+    options:
+      - t:
+          ko: "둘을 합치는 호출로 다시 쓰인다"
+          en: "They are rewritten into a call that joins the two"
+      - t:
+          ko: "둘째 값만 남고 첫째는 버려진다"
+          en: "The second survives and the first is thrown away"
+        diag:
+          t:
+            ko: "평범한 블록이라면 그럴 수 있습니다. 이 중괄호는 세워 둔 값을 <b>전부 모아</b> 합치는 호출로 다시 쓰여요."
+            en: "In an ordinary block, perhaps. These braces <b>gather every</b> stacked value into a joining call."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 블록이냐 다시 쓰기냐", en: "The sharpest spot — a block or a rewrite" }
+            code:
+              - "func f() -> Int { 1; 2 }          // 2 만 돌아간다"
+              - "var body: some View { A(); B() }  // 둘 다 합쳐진다"
+      - t:
+          ko: "빌드가 멈춘다"
+          en: "The build stops"
+        diag:
+          t:
+            ko: "멈추지 않습니다. 합치는 호출이 있는 한 값이 몇이든 통과해요 — 개수에 상한은 있습니다."
+            en: "It does not. With joining calls available any number passes — though there is an upper bound."
+      - t:
+          ko: "목록 하나가 만들어진다"
+          en: "A list is built"
+        diag:
+          t:
+            ko: "목록이 아니라 <b>합쳐진 값 하나</b>입니다. 그래서 타입이 하나로 정해질 수 있어요."
+            en: "Not a list but <b>one folded value</b>. That is what lets the type narrow to one."
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 개념의 정답은 「이 중괄호가 다시 쓰인다」는 **사실**이지 코드에 적힌 글자가
+  아니다 — swift.md §8 이 실측으로 「결과 빌더는 문법에 흔적이 없다」고 적은 자리이고, 앵커 둘
+  (반환 타입과 함수 앞 표시)은 사용처마다 이름이 다르다(`View`·`ToolbarContent`·`ViewBuilder`).
+  다시 쓰인다는 사실을 묻는 판은 뜻 고르기가 진다.
+why_gate:
+  q:
+    ko: "화면 코드는 왜 <b>쉼표도 낱말도 없이</b> 값을 세워 둘까요?"
+    en: "Why does screen code stack values with <b>no commas and no words</b>?"
+  choices:
+    - t:
+        ko: "화면의 생김새가 코드의 생김새와 같아 보이게 하려고, 문법을 새로 만들지 않고 문 목록의 뜻만 바꾼 것"
+        en: "To make the code's shape match the screen's, by changing what a statement list means instead of adding syntax"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 대신 그 중괄호 안에서 못 쓰게 된 것이 무엇인지도 적어 보세요."
+        en: "That is the direction. Say what stops working inside those braces, too."
+    - t:
+        ko: "쉼표를 적으면 느려서"
+        en: "Because commas are slower"
+      ok: false
+      fb:
+        ko: "속도와 무관합니다. 읽히는 모양이 이유예요."
+        en: "It has nothing to do with speed. The shape that reads is the reason."
+    - t:
+        ko: "Swift 에 목록 문법이 없어서"
+        en: "Because Swift has no list syntax"
+      ok: false
+      fb:
+        ko: "있습니다. 목록을 안 쓰고 <b>문 목록의 뜻을 바꾼</b> 것이 이 장치입니다."
+        en: "It has one. This device changes <b>what a statement list means</b> instead of using it."
+queries:
+  - { grammars: [swift], file: ./result-builder.scm }
+examples:
+  - code: "struct P { var body: some View { Text(\"a\") } }"
+    expect: { sites: 1, form: body, picks: { 1: "View", 2: "body", 3: "Text(\"a\")" } }
+  - code: "@ViewBuilder func make() -> some View { Text(\"a\") }"
+    expect: { sites: 1, form: builder-func, picks: { 1: "ViewBuilder", 2: "make", 3: "Text(\"a\")" } }
+  - code: "struct P { var n = 0 }"
+    expect: none

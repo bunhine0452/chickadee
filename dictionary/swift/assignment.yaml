@@ -1,0 +1,202 @@
+schema: 1
+id: swift/assignment
+# 0부 축 7. `swift.md` §0.5 대로 §2 ① `let-var` 와 §3 ① `assignment` 를 **한 장으로 묶었다** —
+# 축 7 의 보편형이 `variable-binding` 과 `reassignment` 둘이라 원래 한 축이다.
+# `universal` 은 하나만 걸 수 있어 앞의 것을 건다 (뒤의 것은 이 장의 `rebind` 사용처가 진다).
+universal: common/variable-binding
+name: { ko: 이름을 만들며 바뀔지 정하기, en: Binding and assignment }
+token: "let"
+grammars: [swift]
+framework: null
+essential: true
+difficulty: 1
+prereq: [cs/state, cs/immutability, cs/value-vs-reference]
+confusions: []
+dict:
+  one_liner:
+    ko: "이름을 만드는 줄에서 그 이름이 나중에 바뀔 수 있는지까지 함께 고른다."
+    en: "The line that makes a name also settles whether that name may move later."
+  why:
+    ko: >-
+      많은 언어에서 이름을 만드는 낱말은 하나입니다. Swift 에는 <b>둘</b>이고 반드시 골라야 해요 —
+      안 바꿀 이름과 바꿀 이름의 낱말이 다릅니다. 안 바꾸기로 한 이름에 나중에 다른 값을 넣으면
+      <b>돌기 전에</b> 멈춥니다. 실행 오류가 아니라 빌드 오류예요.
+      한 가지가 헷갈립니다. 안 바꾸기로 한 것은 <b>이름이 가리키는 대상</b>이지 그 안이 아닙니다.
+      상자를 가리키는 종류라면 상자를 <b>바꿔 끼우지 못하는 것</b>이고 상자 안은 바뀝니다.
+      값으로 도는 종류라면 안까지 못 바꿔요 — 같은 낱말이 두 결과를 냅니다.
+    en: >-
+      Most languages have one word for making a name. Swift has <b>two</b> and one must be chosen:
+      a name that will not move and a name that may. Put another value into the first and it stops
+      <b>before it runs</b> — a build error, not a runtime one.
+      One thing trips people. What is fixed is <b>what the name points at</b>, not what is inside.
+      For a kind that points at a box, the box cannot be <b>swapped</b> but its contents can change.
+      For a kind that travels as a value, the inside is fixed too — one word, two outcomes.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.3|code}}{{pick.3|josa:을,를}} 먼저 한 값으로 접는다."
+      en: "Line {{site.line}} folds {{pick.3|code}} to one value first."
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 그 값에 붙는다."
+      en: "{{pick.2|code}} is bound to it."
+    - ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 그 이름이 나중에 옮겨 갈 수 있는지를 정한다."
+      en: "{{pick.1|code}} settles whether the name may move later."
+rule:
+  ko: "<b>이름을 만드는 줄이 바뀔지도 정한다.</b> 안 바꾸기로 했으면 빌드가 그것을 지킨다."
+  en: "<b>The line that makes a name settles whether it moves.</b> The build enforces the choice."
+result:
+  label: { ko: "{{site.line}}행 아래의 {{pick.2}}", en: "{{pick.2}} below line {{site.line}}" }
+  value: "{{pick.3}}"
+  note: { ko: "바뀔 수 있는지는 앞의 낱말이 정한다", en: "the word in front settles whether it moves" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 이제 {{pick.3|code}}{{pick.3|josa:을,를}} 가리킵니다."
+  en: "{{pick.2|code}} now points at {{pick.3|code}}."
+payoff:
+  ko: "이걸 알면 「이 줄은 왜 낱말이 다르지」가 풀립니다 — 아래에서 옮겨 가는지 보면 됩니다."
+  en: "This untangles “why is this line's word different” — look below for a line that moves it."
+bridge:
+  ko: >-
+    파이썬·JS 는 만드는 줄에서 그 선택을 안 합니다. Swift 는 <b>고르지 않으면 줄이 완성되지도</b>
+    않아요.
+  en: >-
+    Python and JS do not make that choice on the line. In Swift the line <b>is not even complete</b>
+    without it.
+misconceptions:
+  # swift.md §9 ④ — 「같은 낱말이 두 결과를 낸다」. §11.3.1 이 네 칸 세 결과로 실측했다.
+  - ko: >-
+      안 바꾸기로 하면 안쪽 값도 못 바꾼다 — 상자를 가리키는 종류면 <b>상자만</b> 못 바꿉니다.
+      안은 바뀌어요.
+    en: >-
+      A fixed name freezes the contents too — for a kind that points at a box, only the <b>box</b>
+      is fixed. The contents still change.
+  - ko: "다시 넣는 줄은 만드는 줄과 같다 — 다른 줄입니다. 만드는 줄에만 앞에 낱말이 붙어요."
+    en: "The line that moves a name looks like the line that makes it — it does not; only the making line has the word."
+  - ko: "안 바꾸기로 한 이름에 넣으면 돌다가 멈춘다 — 돌기 전에 멈춥니다."
+    en: "Putting a value into a fixed name stops at runtime — it stops before it runs."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>이름에 값이 붙는 자리</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the place where the name gets its value</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 이름은 스스로 무엇을 가리킬지 못 정해요."
+          en: "{{pick.2|code}} is the <b>name</b>. A name cannot choose what it points at."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름만으로는 아무 일도 안 난다", en: "The sharpest spot — a name alone does nothing" }
+          code:
+            - "count          // 없는 이름이면 빌드가 멈춘다"
+            - "var count = 0  // 이 줄이 이름을 만든다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 붙을 <b>값</b>입니다. 값은 어디로 갈지 모르고, 그것을 정하는 자리는 앞쪽이에요."
+          en: "{{pick.3|code}} is the <b>value</b> to bind. A value does not know where it goes; the front of the line decides."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값이냐 붙임이냐", en: "The sharpest spot — the value or the binding" }
+          code:
+            - "0              // 계산되고 사라진다"
+            - "let count = 0  // 이름이 남는다"
+meaning:
+  - q:
+      ko: "안 바꾸기로 만든 이름이 상자를 가리킬 때, 그 상자 안의 값을 고칠 수 있을까요?"
+      en: "When a fixed name points at a box, can the value inside the box be changed?"
+    options:
+      - t:
+          ko: "고칠 수 있다 — 못 바꾸는 것은 어느 상자를 가리키느냐다"
+          en: "Yes — what is fixed is which box it points at"
+      - t:
+          ko: "못 고친다 — 안까지 잠긴다"
+          en: "No — the inside is locked too"
+        diag:
+          t:
+            ko: "값으로 도는 종류였다면 그 말이 맞습니다. 상자를 가리키는 종류에서는 상자만 고정되고 안은 바뀌어요 — 같은 낱말이 두 결과를 냅니다."
+            en: "For a kind that travels as a value, yes. For a kind that points at a box only the box is fixed — one word, two outcomes."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값이냐 상자냐", en: "The sharpest spot — a value or a box" }
+            code:
+              - "let a = [C()]; a[0].n = 42   // 42"
+              - "let b = [P()]; b[0].n = 42   // 빌드가 멈춘다"
+      - t:
+          ko: "고칠 수 있지만 원본에는 안 남는다"
+          en: "Yes, but the change does not stick"
+        diag:
+          t:
+            ko: "상자를 가리키는 종류라면 남습니다 — 같은 상자를 가리키는 다른 이름에서도 보여요."
+            en: "For a box-pointing kind it does stick — another name pointing at the same box sees it."
+      - t:
+          ko: "돌다가 멈춘다"
+          en: "It stops while running"
+        diag:
+          t:
+            ko: "이 갈림은 빌드 단계에서 이미 정해집니다. 되는 쪽은 그냥 돌고, 안 되는 쪽은 돌기 전에 막혀요."
+            en: "This is settled at build time. The allowed side just runs; the disallowed side never starts."
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행의 이름은 <b>나중에 다른 값으로 옮겨 가지 않습니다</b>."
+      en: "Choose what goes in the blank. The name on line {{site.line}} <b>never moves to another value</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "let", mono: true }
+      - t: "var"
+        mono: true
+        diag:
+          t:
+            ko: "이 낱말은 <b>옮겨 갈 수 있는</b> 이름을 만듭니다. 아래에서 아무도 안 옮기면 컴파일러가 바꾸라고 알려 줘요."
+            en: "That word makes a name that <b>may move</b>. If nothing below moves it, the compiler suggests the other word."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 옮기나 안 옮기나", en: "The sharpest spot — moves or not" }
+            code:
+              - "var n = 0; n = 5   // 된다"
+              - "let n = 0; n = 5   // 빌드가 멈춘다"
+      - t: "func"
+        mono: true
+        diag:
+          t:
+            ko: "이 낱말은 <b>함수</b>를 만듭니다. 값 하나에 이름을 붙이는 자리가 아니라 부를 수 있는 것을 만드는 자리예요."
+            en: "That word makes a <b>function</b> — something to call, not a name for one value."
+      - t: "case"
+        mono: true
+        diag:
+          t:
+            ko: "이 낱말은 <b>갈래</b>를 적는 자리에 씁니다. 이름을 만드는 줄이 아니라 종류 안이나 갈래를 고르는 자리에 서요."
+            en: "That word writes a <b>case</b>. It stands inside a type or in branching, not on a line that makes a name."
+why_gate:
+  q:
+    ko: "Swift 는 왜 이름을 만드는 줄에서 <b>바뀔지까지 고르게</b> 할까요?"
+    en: "Why does Swift make you choose <b>whether a name moves</b> on the line that makes it?"
+  choices:
+    - t:
+        ko: "읽는 사람이 그 줄만 보고 아래에서 값이 바뀌는지 알 수 있어야 하고, 그 약속을 빌드가 지켜 주기 때문"
+        en: "So the reader can tell from that line alone whether the value changes below, with the build keeping the promise"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 약속을 안 지키면 무엇이 언제 걸리는지도 적어 보세요."
+        en: "That is the direction. Say what catches a broken promise, and when."
+    - t:
+        ko: "안 바뀌는 이름이 빨라서"
+        en: "Because fixed names are faster"
+      ok: false
+      fb:
+        ko: "속도가 이유는 아닙니다. 읽는 사람이 그 줄에서 안다는 것이 이유예요."
+        en: "Speed is not the reason. The reason is what the reader learns from that line."
+    - t:
+        ko: "Swift 에 이름을 옮기는 방법이 없어서"
+        en: "Because Swift has no way to move a name"
+      ok: false
+      fb:
+        ko: "있습니다 — 다른 낱말로 만들면 돼요. 고르게 하는 것이 요점입니다."
+        en: "There is one — make it with the other word. The point is that you choose."
+queries:
+  - { grammars: [swift], file: ./assignment.scm }
+examples:
+  - code: "let count = 0"
+    expect: { sites: 1, form: bind, hole: "let", picks: { 1: "let", 2: "count", 3: "0" } }
+  - code: "var cursor = next(items)"
+    expect: { sites: 1, form: bind, hole: "var", picks: { 1: "var", 2: "cursor", 3: "next(items)" } }
+  - code: "func f() { n = 5 }"
+    expect: { sites: 1, form: rebind, picks: { 1: "=", 2: "n", 3: "5" } }
+  - code: "func f() { obj.attr = 1 }"
+    expect: none
