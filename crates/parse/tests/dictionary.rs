@@ -271,7 +271,8 @@ fn no_pattern_is_dead_and_every_example_matches_what_it_says() {
             for example in &concept.examples {
                 let caps = run(grammar, &concept.id, &scm, &example.code);
                 let sites = caps.iter().filter(|c| c.name == "site").count();
-                let outcome = std::panic::catch_unwind(|| check(&concept.id, example, sites, &caps));
+                let outcome =
+                    std::panic::catch_unwind(|| check(&concept.id, example, sites, &caps));
                 if let Err(payload) = outcome {
                     let msg = payload
                         .downcast_ref::<String>()
