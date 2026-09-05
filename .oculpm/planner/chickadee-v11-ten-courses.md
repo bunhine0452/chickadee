@@ -23,7 +23,7 @@ owner: claude-code
 - [x] sql — 바닥 남은 다섯 + 중심, parts/sql.ts {#l-sql}
 - [~] rs — 0부 11 + 1·2부 전량 신규(사전 0장 → 표본 ai-pm 280장), parts/rs.ts {#l-rs}
 - [x] go — 0부 + 1·2부 전량 신규, 표본은 공개 리포, parts/go.ts {#l-go}
-- [~] c — 0부(기계 층) + 1·2부 전량 신규, 파서 ERROR 비율 실측, parts/c.ts {#l-c}
+- [x] c — 0부(기계 층) + 1·2부 전량 신규, 파서 ERROR 비율 실측, parts/c.ts {#l-c}
 - [~] cpp — 0부 + 1·2부 전량 신규, 파서 ERROR 비율 실측, parts/cpp.ts {#l-cpp}
 - [~] csharp — 0부 + 1·2부 전량 신규, 파서 ERROR 비율 실측, parts/csharp.ts {#l-csharp}
 - [~] swift — 0부 + 1·2부 전량 신규, 파서 ERROR 비율 실측, parts/swift.ts {#l-swift}
@@ -64,4 +64,5 @@ owner: claude-code
 | 2026-09-06T01:30:10+09:00 | #l-py | claude-code | ~→x |  | 42장(0부 18·1부 10·2부 14) · 골든 132/75 · ERROR 0% · 병합 06f68ca · 래칫 155/159/155/146 |
 | 2026-09-06T04:39:43+09:00 | #l-sql | claude-code | ~→x |  | 40장(0부 8·1부 8·2부 24) · 골든 90/55 · ABSENCE 6 · 병합 5dafc8f · 래칫 184/166/184/175 |
 | 2026-09-06T04:47:41+09:00 | #l-go | claude-code | ~→x |  | 33장(0부 8·1부 5·2부 20) · 골든 79/33 · cli/cli 429파일 ERROR 1.6% · 병합 fb372bb · 래칫 217/199/217/208 |
+| 2026-09-06T04:48:58+09:00 | #l-c | claude-code | ~→x |  | 38장(0부 12·1부 8·2부 18) · 골든 116/62 · jq ERROR 17.8%(poor 3 빼면 0.44%) · 병합 2e22dc6 · 래칫 255/237/255/246 |
 <!-- oculpm:plan-log end -->
