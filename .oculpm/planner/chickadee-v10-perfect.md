@@ -23,12 +23,12 @@ owner: claude-code
 - [x] S10 그림 — 명세만 다섯 제작 + 신청 여섯 + 권한 줄 교체 + diagram.* i18n {#w1-diagrams}
 
 ## W2 · 둘째 물결 (여섯 동시 — W1 의 UI 가 선 뒤) {#w2}
-- [ ] S1 UX 감사와 수리 — 학습자 여정을 실제로 밟고 막힘 0 · e9-journey e2e · ux-audit.md 갱신 (.tsx·i18n) {#w2-ux}
-- [ ] S2 디자인 QA — 화면 전수 스크린샷 6판 · 이상한 곳 수리 · 코드 창 16px · 2단 상한 · 밝게/어둡게 설정 (.css·tokens) {#w2-design}
-- [ ] S6 파이썬 0부 사전 — py.md §1.5 의 19개 + v06 B 바닥 여덟 + reference-binding 이동 {#w2-py-dict}
-- [ ] S9 stdin 러너 + 작은 문제 층 — 자바 먼저, 0부 뒤 다섯 줄짜리 열다섯, 저작권 없는 우리 문제 {#w2-runner}
-- [ ] S11 커리큨럼 적용 — §N.6 diff 열 편 반영 · curriculum.ts JAVA_PARTS · 74일 단별 탈출 · 글로서리 en {#w2-curriculum}
-- [ ] S12 카탈로그 확장 — 언어별 식 늘리기 · variants · langAlt · compile-error/unspecified · 재출제 다른 식 {#w2-catalog}
+- [x] S1 UX 감사와 수리 — 학습자 여정을 실제로 밟고 막힘 0 · e9-journey e2e · ux-audit.md 갱신 (.tsx·i18n) {#w2-ux}
+- [x] S2 디자인 QA — 화면 전수 스크린샷 6판 · 이상한 곳 수리 · 코드 창 16px · 2단 상한 · 밝게/어둡게 설정 (.css·tokens) {#w2-design}
+- [x] S6 파이썬 0부 사전 — py.md §1.5 의 19개 + v06 B 바닥 여덟 + reference-binding 이동 {#w2-py-dict}
+- [x] S9 stdin 러너 + 작은 문제 층 — 자바 먼저, 0부 뒤 다섯 줄짜리 열다섯, 저작권 없는 우리 문제 {#w2-runner}
+- [x] S11 커리큨럼 적용 — §N.6 diff 열 편 반영 · curriculum.ts JAVA_PARTS · 74일 단별 탈출 · 글로서리 en {#w2-curriculum}
+- [x] S12 카탈로그 확장 — 언어별 식 늘리기 · variants · langAlt · compile-error/unspecified · 재출제 다른 식 {#w2-catalog}
 
 ## K · 통합과 세 게이트 {#k-gates}
 - [ ] 성질 게이트 셋(내 코드 비율 · 값 추적 있음 · 진단 계산) + 정직성 게이트 — tests/gates {#k-quality-gates}
@@ -54,4 +54,16 @@ owner: claude-code
 | 2026-09-05T20:49:44+09:00 | #w1-java-dict | claude-code | ~→x |  | 신규 14 + 갱신 5, 골든 65 · 사용처 13/합성 6(멤버 정정: text-length 7곳 있음, reference-binding 1곳) · essential 41, 0장 후보 33(17일) · Integer 캐시 미정으로 · curriculum.ts JAVA_PARTS 0부 17 삽입 · 전부 초록 · ABSENCE 여섯 행 → 합류 |
 | 2026-09-05T20:51:16+09:00 | #w1-diagrams | claude-code | ~→x |  | 컴포넌트 7(합 11) · 시험 +37(171) · i18n 49×2 · 여섯 폭 × 두 테마 넘침 0 · 대비 142 · 권한 줄 표기 재구현(색 없이도 갈림) · 겹친 비트는 접지 않고 칸을 좁힘 · 열다섯 격자는 스크롤(행=시간축) |
 | 2026-09-05T20:56:50+09:00 | #w1-sql | claude-code | ~→x |  | 0부 8 + self-join, essential 3→11 · #{} 결함은 파서 앞 params.rs 가 같은 너비 글자값으로 가림 → comparison 6→53 사용처, ERROR 800→92 · sqlite 러너(store crate 엔진, 문항마다 새로 세움, 5초, 결과 표가 이긴다) · 시드 101행 · ff93223 은 4·5단 정답지 탈락 · 전부 초록 |
+| 2026-09-05T21:06:43+09:00 | #w2-ux | claude-code | ☐→~ |  | S1 Opus 착수 — 여정·정직성 게이트 포함 |
+| 2026-09-05T21:06:45+09:00 | #w2-design | claude-code | ☐→~ |  | S2 Opus 착수 — 전수 스크린샷·shots 게이트 포함 |
+| 2026-09-05T21:06:48+09:00 | #w2-py-dict | claude-code | ☐→~ |  | S6 Opus 착수 — v06 B 여덟 포함 |
+| 2026-09-05T21:06:50+09:00 | #w2-runner | claude-code | ☐→~ |  | S9 Opus 착수 — build 형식 포함 |
+| 2026-09-05T21:06:54+09:00 | #w2-curriculum | claude-code | ☐→~ |  | S11 Opus 착수 |
+| 2026-09-05T21:06:56+09:00 | #w2-catalog | claude-code | ☐→~ |  | S12 Opus 착수 — 성질 게이트 셋 포함 |
+| 2026-09-05T21:35:23+09:00 | #w2-curriculum | claude-code | ~→x |  | diff 42행 반영 · 단별 탈출(foldsStage·chapterEscape, 74→42일, 시험 12) · 용어집 spring 15행 · 축 H 는 new 없는 예로 · drillsAfterPart0 배선은 S9 뒤 S11 재개로 |
+| 2026-09-05T21:45:40+09:00 | #w2-runner | claude-code | ~→x |  | stdin.rs 251줄(한 호출에 걸음 여럿) · 문제 14/케이스 56, 정답은 reference.py 가 냄 · build 형식 유보 해제(과제 6×3, 자유 텍스트) · py 17ms·node 57ms, 자바 미검증(JDK 없음, toolchain-missing 처리 확인) · 시험 103 · fmt 무출력 |
+| 2026-09-05T23:31:14+09:00 | #w2-ux | claude-code | ~→x | 20260905/Features_to_add/2331_feature_ux-journey-audit-and-gates-d186.md | 막힘 3→0 · 포커스 유실 5→0 · 첫 판 클릭 3→2 · journey/honesty/e9 게이트 신설 |
+| 2026-09-05T23:37:18+09:00 | #w2-py-dict | claude-code | ~→x |  | py 8→24장, 골든 123 · 23장 사용처 있음/합성 1 · essential 24, 0장 후보 24(12일) · reference-binding 을 list-literal 뒤로 · bake.ts 대여자 선택이 리포 언어를 안 보던 구조 결함 수리 · 쿼리 넷 좁힘 · t1-line 파이썬 분기 · 래칫 120/100/120/111 → 합류 때 |
+| 2026-09-05T23:38:38+09:00 | #w2-catalog | claude-code | ~→x |  | 카탈로그 38→249장(식 4→27, 1식 0개) · siblings 219·variants 204·langAlt 6, 없음 0 · 재출제 다른 식 · meaning→value 40장(1부 합성만) · 성질 게이트 셋: 내 코드 100%(문턱 50) · 값 추적 침묵 0 · 진단 249/249 · vitest 에 두고 Playwright 는 읽기만 |
+| 2026-09-05T23:43:57+09:00 | #w2-design | claude-code | ~→x |  | shoot-screens 24화면×6=144장 · shots 게이트(목록이 코드에서 옴) · 이상한 곳 19→고침 14 · 넘침 0 · 2560 ≤2단 · 대비 142 · 코드 창 16px 은 720 높이에 10.4줄(스크롤이 답) · 발견: 어둡게가 설정 밖에서 안 걸림(S1 재개) · 그림 일곱은 아직 어느 화면에도 안 마운트 |
 <!-- oculpm:plan-log end -->
