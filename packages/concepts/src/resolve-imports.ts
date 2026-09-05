@@ -44,6 +44,13 @@ export interface ResolveInput {
 export interface ResolvedEdge {
   from: string; to: string; kind: EdgeKind; confidence: 'syntactic' | 'heuristic';
   /**
+   * 라우트가 **선언된** 줄 (`to` 기준 1-based). HTTP 간선에만 있다.
+   *
+   * 2단 추적의 둘째 칸이 이것을 쓴다 — 없으면 `import` 줄을 가리키게 되고, 그러면 로그인과
+   * 회원가입이 같은 칸을 보게 된다. 라우트 줄이면 둘이 갈린다 (D162).
+   */
+  toLine?: number;
+  /**
    * 이 간선을 만든 지정자가 적힌 줄 (`from` 기준 1-based).
    *
    * `import_edge` 에는 안 실린다 — 2단 추적 문항이 「어느 파일 **어느 줄**」을 묻는데
@@ -54,7 +61,7 @@ export interface ResolvedEdge {
 }
 
 /** 해석 결과 하나. `kind` 가 있으면 `form` 대신 그것이 이긴다 (http 엣지). */
-interface Hit { to: string; kind?: EdgeKind; confidence?: 'syntactic' | 'heuristic'; }
+interface Hit { to: string; kind?: EdgeKind; confidence?: 'syntactic' | 'heuristic'; toLine?: number }
 
 type Lang = 'ts' | 'py' | 'go' | 'rs' | 'dart' | 'swift' | 'java';
 
@@ -82,8 +89,8 @@ const RS_DIR_MODULE = new Set(['mod', 'lib', 'main']);
 
 interface Ctx {
   files: ReadonlySet<string>;
-  /** `"POST /api/auth/login"` → 그 라우트를 선언한 파일 (D159). */
-  routes: ReadonlyMap<string, string>;
+  /** `"POST /api/auth/login"` → 그 라우트를 선언한 파일과 줄 (D159 · D162). */
+  routes: ReadonlyMap<string, RouteAt>;
   /** go 패키지 디렉터리 → 그 패키지의 대표 파일. `resolveGo` 주석 참조. */
   goLead: ReadonlyMap<string, Hit>;
   tsconfig: TsconfigPaths | null; packageImports: Readonly<Record<string, string>> | null;
@@ -131,7 +138,10 @@ export function resolveImports(input: ResolveInput): ResolvedEdge[] {
       const key = kind === 'http' ? `${from} ${to} http ${raw.line}` : `${from} ${to} ${kind}`;
       if (seen.has(key)) continue;
       seen.add(key);
-      edges.push({ from, to, kind, confidence: hit.confidence ?? 'syntactic', line: raw.line });
+      edges.push({
+        from, to, kind, confidence: hit.confidence ?? 'syntactic', line: raw.line,
+        ...(hit.toLine === undefined ? {} : { toLine: hit.toLine }),
+      });
     }
   }
   edges.sort(byEdge);
@@ -266,8 +276,11 @@ function nextRoute(spec: string, ctx: Ctx): Hit | null {
  * 키에 HTTP 메서드를 넣는 이유: 경로만 맞고 메서드가 다른 짝을 잇지 않기 위해서다
  * (`GET /api/auth/me` 와 `DELETE /api/auth/me` 는 다른 자리다 — 이 리포에 실제로 둘 다 있다).
  */
-function routeIndex(files: readonly FileImports[]): Map<string, string> {
-  const out = new Map<string, string>();
+/** 라우트가 선언된 자리. 줄은 2단 추적의 둘째 칸이 쓴다 (D162). */
+interface RouteAt { path: string; line: number }
+
+function routeIndex(files: readonly FileImports[]): Map<string, RouteAt> {
+  const out = new Map<string, RouteAt>();
   for (const file of files) {
     if (langOf(file.path) !== 'java') continue;
     const base = file.imports.find((r) => r.form === 'route-base')?.specifier ?? '';
@@ -277,7 +290,7 @@ function routeIndex(files: readonly FileImports[]): Map<string, string> {
       // 경로 없는 애너테이션(`@GetMapping`)은 지정자가 애너테이션 **이름**이다 — 경로는 기본 경로다.
       const leaf = m[1] === undefined ? raw.specifier : '';
       const key = `${(m[2] as string).toUpperCase()} ${normPath(joinRoute(base, leaf))}`;
-      if (!out.has(key)) out.set(key, file.path);
+      if (!out.has(key)) out.set(key, { path: file.path, line: raw.line });
     }
   }
   return out;
@@ -310,17 +323,19 @@ function joinRoute(base: string, leaf: string): string {
 function routeHit(verb: string, spec: string, ctx: Ctx): Hit | null {
   const path = normPath(spec.split(/[?#]/)[0] ?? '');
   const exact = ctx.routes.get(`${verb} ${path}`);
-  if (exact !== undefined) return { to: exact, kind: 'http' };
+  if (exact !== undefined) return { to: exact.path, kind: 'http', toLine: exact.line };
 
   const prefix = `${verb} `;
-  let found: string | null = null;
-  for (const [key, to] of ctx.routes) {
+  let found: RouteAt | null = null;
+  for (const [key, at] of ctx.routes) {
     if (!key.startsWith(prefix)) continue;
     if (!key.slice(prefix.length).endsWith(path)) continue;
-    if (found !== null && found !== to) return null;
-    found = to;
+    if (found !== null && found.path !== at.path) return null;
+    found = at;
   }
-  return found === null ? null : { to: found, kind: 'http', confidence: 'heuristic' };
+  return found === null
+    ? null
+    : { to: found.path, kind: 'http', confidence: 'heuristic', toLine: found.line };
 }
 
 /**

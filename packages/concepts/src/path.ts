@@ -40,7 +40,13 @@ export function requestPaths(edges: readonly ResolvedEdge[]): Hop[][] {
   const out: Hop[][] = [];
   for (const call of edges.filter((e) => e.kind === 'http')) {
     const rest = pathFrom(call.to, edges);
-    out.push([{ path: call.from, line: call.line, kind: 'http' }, ...rest]);
+    // 둘째 칸은 **라우트가 선언된 줄**이다 — 없으면 `import` 줄을 가리켜 로그인과 회원가입이
+    // 같은 자리를 보게 된다 (D162).
+    const [entered, ...tail] = rest;
+    const second: Hop[] = entered === undefined
+      ? []
+      : [{ ...entered, ...(call.toLine === undefined ? {} : { line: call.toLine }) }];
+    out.push([{ path: call.from, line: call.line, kind: 'http' }, ...second, ...tail]);
   }
   return out.sort((a, b) => (a[0]?.path ?? '').localeCompare(b[0]?.path ?? '')
     || (a[0]?.line ?? 0) - (b[0]?.line ?? 0));

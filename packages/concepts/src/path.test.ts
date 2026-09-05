@@ -47,6 +47,24 @@ describe('줄기', () => {
     for (const p of paths) expect(p.map((h) => h.path)).toStrictEqual([FE, CTRL, SVC, DAO, MAP]);
   });
 
+  test('둘째 칸은 라우트가 선언된 줄이다 — 요청마다 갈린다', () => {
+    // 없으면 `import` 줄을 가리켜 로그인과 회원가입이 같은 자리를 본다. 실측에서
+    // 여섯 요청이 `AuthController.java:44·56·64·73·83·94` 로 갈렸다.
+    const login: ResolvedEdge = { ...edge(FE, CTRL, 21, 'http'), toLine: 56 };
+    const signup: ResolvedEdge = { ...edge(FE, CTRL, 12, 'http'), toLine: 44 };
+    const paths = requestPaths([login, signup, ...CHAIN]);
+    const at = (n: number) => paths.find((p) => p[0]?.line === n)?.[1];
+    expect(at(21)?.line).toBe(56);
+    expect(at(12)?.line).toBe(44);
+    // 꼬리는 아직 파일 단위라 같다.
+    expect(paths[0]?.slice(2).map((h) => h.path)).toStrictEqual([SVC, DAO, MAP]);
+  });
+
+  test('라우트 줄을 모르면 그 자리는 import 줄로 남는다', () => {
+    const paths = requestPaths([edge(FE, CTRL, 21, 'http'), ...CHAIN]);
+    expect(paths[0]?.[1]?.line).toBe(20);
+  });
+
   test('사이클이 있어도 멈춘다', () => {
     const p = featurePath(FE, [edge(FE, CTRL, 1, 'http'), edge(CTRL, SVC, 2), edge(SVC, CTRL, 3)]);
     expect(p.map((h) => h.path)).toStrictEqual([FE, CTRL, SVC]);
