@@ -7,7 +7,7 @@ export type { Span } from './lines.js';
 export { GEN_VERSION } from './payload.js';
 export { generateKind, generateT0, prefer } from './t0.js';
 export { genBlank } from './t0-blank.js';
-export { genMeaning } from './t0-meaning.js';
+export { genMeaning, isValueComputed } from './t0-meaning.js';
 export { genPoint } from './t0-point.js';
 export {
   ABSENCE_MESSAGE_KEY, absenceReason, isSynthetic, makeAbsentCard, makeSyntheticCard,
@@ -97,8 +97,21 @@ export {
 
 // 기초 문항 — 고르지 않고 적는다 (`docs/program/fundamentals.md`)
 export {
-  buildAllValueItems, buildValueItems, valueText, FUND_DIALECTS, FUND_LANGS, FUND_SITE_ID,
+  buildAllValueItems, buildValueItems, fundCensus, fundConceptId, planFundRetry, valueNoteKey,
+  valueText, verifiedNoteKey,
+  ERRORS, EVENTS, event, FUND_AXES, FUND_DIALECTS, FUND_LANGS, FUND_NOTE_KEY, FUND_SITE_ID,
 } from './fundamentals.js';
 export type {
-  FoldStep, FundDialect, FundDrop, FundItem, FundLang, FundType, FundValue, OverflowRule,
+  DeclKind, FoldStep, FundAlt, FundAxis, FundCensus, FundCensusLang, FundDiagnosis, FundDialect,
+  FundDrop, FundItem, FundLang, FundRetry, FundType, FundValue, OverflowRule,
 } from './fundamentals.js';
+export { CATALOG as FUND_CATALOG } from './fundamentals-catalog.js';
+export type { ExprSpec as FundExprSpec } from './fundamentals-catalog.js';
+
+// 작은 문제 층 — 0부 끝과 1부 시작 사이 (D186 ⑧)
+export { coverOf, drillsAfterPart0, toDrillItem } from './drill.js';
+export type { DrillItem, DrillPlaceInput, DrillPlacement } from './drill.js';
+
+// 형식 다섯째 — `build`, 「이 값이 나오게 식을 써라」 (D187 ①)
+export { BUILD_LANGS, buildBuildItems, buildConcepts, toBuildItem, wantText } from './build.js';
+export type { BuildItem, BuildLang, BuildTask } from './build.js';

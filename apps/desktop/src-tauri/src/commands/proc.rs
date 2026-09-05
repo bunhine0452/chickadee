@@ -66,7 +66,7 @@ pub struct ProcOut {
     pub duration_ms: u64,
 }
 
-fn io(e: &std::io::Error) -> IpcError {
+pub(crate) fn io(e: &std::io::Error) -> IpcError {
     // Only the kind — no path reaches the message (01 §6).
     IpcError::new("FS_PERMISSION", e.kind().to_string(), false)
 }
@@ -76,7 +76,7 @@ fn bad(message: &'static str) -> IpcError {
 }
 
 /// Root-relative, no `..`, no root, no drive prefix.
-fn under(root: &Path, rel: &str) -> Result<PathBuf, IpcError> {
+pub(crate) fn under(root: &Path, rel: &str) -> Result<PathBuf, IpcError> {
     let p = Path::new(rel);
     let plain = !rel.is_empty() && p.components().all(|c| matches!(c, Component::Normal(_)));
     if plain {
@@ -146,7 +146,7 @@ fn mirror(src: &Path, dst: &Path) -> Result<(), IpcError> {
 
 /// Reading past the cap and throwing it away is deliberate: a full pipe blocks the
 /// child, and a blocked child never reaches its own timeout.
-fn drain<R: Read + Send + 'static>(
+pub(crate) fn drain<R: Read + Send + 'static>(
     mut r: R,
     cap: usize,
 ) -> std::thread::JoinHandle<(Vec<u8>, bool)> {
@@ -170,7 +170,7 @@ fn drain<R: Read + Send + 'static>(
 /// running. `unsafe_code` is forbidden workspace-wide, so `killpg` is out and the
 /// group signal goes through `kill(1)` instead.
 #[cfg(unix)]
-fn stop(child: &mut Child) {
+pub(crate) fn stop(child: &mut Child) {
     drop(
         Command::new("kill")
             .args(["-KILL", &format!("-{}", child.id())])
@@ -182,7 +182,7 @@ fn stop(child: &mut Child) {
 }
 
 #[cfg(not(unix))]
-fn stop(child: &mut Child) {
+pub(crate) fn stop(child: &mut Child) {
     drop(child.kill());
 }
 

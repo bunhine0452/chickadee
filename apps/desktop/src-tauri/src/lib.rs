@@ -2,6 +2,8 @@ mod commands;
 pub mod error;
 // The runner test drives the process layer directly, as the pipeline test does jobs.
 pub use commands::proc;
+// The stdin runner test drives the step layer directly, the same way.
+pub use commands::stdin;
 mod panic;
 // The integration test drives the job directly (06 §1.4).
 pub mod jobs;
@@ -32,6 +34,7 @@ pub fn run() {
             commands::app::app_version,
             commands::proc::t3_run,
             commands::sqlrun::sql_run,
+            commands::stdin::stdin_run,
             commands::maint::secret_set,
             commands::maint::secret_delete,
             commands::maint::secret_has,

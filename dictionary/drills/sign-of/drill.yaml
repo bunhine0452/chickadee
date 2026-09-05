@@ -1,0 +1,18 @@
+# 작은 문제 하나 (D186 ⑧). 지문은 우리가 썼고 케이스의 답은 reference.py 가 낸다.
+schema: 1
+id: sign-of
+topic: branch
+statement:
+  ko: "정수 하나가 주어집니다. 양수면 positive, 음수면 negative, 0 이면 zero 를 출력하세요."
+  en: "One integer is given. Print positive if it is above zero, negative if below, zero if it is zero."
+needs: [common/conditional-branch, common/comparison]
+langs: [py, ts, java]
+cases:
+  - stdin: "5\n"
+    stdout: "positive\n"
+  - stdin: "-5\n"
+    stdout: "negative\n"
+  - stdin: "0\n"
+    stdout: "zero\n"
+  - stdin: "-2147483648\n"
+    stdout: "negative\n"

@@ -10,8 +10,9 @@
  */
 import type { MessageKey } from '@chickadee/i18n';
 import {
-  detectRunner, FIRST_RUN_TIMEOUT_MS, runTests, RUN_TIMEOUT_MS, sawDownload,
-  type RunFailure, type RunResult, type RunSpec, type RunnerProbe, type RunnerReason,
+  detectRunner, FIRST_RUN_TIMEOUT_MS, runStdin, runTests, RUN_TIMEOUT_MS, sawDownload,
+  type CaseOut, type RunFailure, type RunResult, type RunSpec, type RunnerProbe,
+  type RunnerReason, type StdinResult, type StdinRunSpec,
 } from '@chickadee/grading';
 import { ipc, log } from '@chickadee/ipc-client';
 import type { RepoId } from '@chickadee/ipc-client';
@@ -38,6 +39,11 @@ const REASON: Record<RunnerReason, MessageKey> = {
   'not-detected': 'run.reason.notDetected',
   'dialect-unsupported': 'run.reason.dialectUnsupported',
   'no-fixture-db': 'run.reason.noFixtureDb',
+  // 표준 입력 러너 (D186 ⑧ ④). 언어마다 다른 문장이라야 「파이썬은 되는데 자바가 없다」가
+  // 화면에서 갈린다.
+  'toolchain-missing:py': 'run.reason.toolchainMissingPy',
+  'toolchain-missing:ts': 'run.reason.toolchainMissingTs',
+  'toolchain-missing:java': 'run.reason.toolchainMissingJava',
 };
 
 export function reasonKey(reason: RunnerReason): MessageKey {
@@ -160,4 +166,55 @@ export async function runStage(spec: RunSpec, rootPath: string): Promise<RunView
   // 않는다: 아무것도 안 만들었다.
   if (view.kind !== 'ask-download' && view.kind !== 'no-runner') built.add(spec.repoId);
   return view;
+}
+
+/**
+ * 작은 문제 판이 보는 실행 상태 (D186 ⑧).
+ *
+ * `RunView` 와 갈래가 다르다. 4·5단은 「테스트 n개 중 몇 개」가 결과의 전부지만 이쪽은
+ * **케이스마다의 표**가 결과다 — 어느 입력에서 무엇이 나왔는지를 보여야 학습자가 다음에
+ * 무엇을 고칠지 안다. `ask-download` 가 없는 것도 차이다: 내려받는 것이 없으므로 물을
+ * 것도 없다 (D175 ① 은 다운로드가 있을 때의 규칙이다).
+ */
+export type DrillView =
+  | { kind: 'idle' }
+  | { kind: 'running' }
+  | { kind: 'no-runner'; reason: RunnerReason }
+  /** 문법이 아니라 아예 못 돌렸다 — 케이스는 하나도 안 돌았다. */
+  | { kind: 'compile-error'; log: string }
+  | { kind: 'timeout'; cases: readonly CaseOut[]; durationMs: number; log: string }
+  | { kind: 'passed'; cases: readonly CaseOut[]; durationMs: number }
+  | {
+      kind: 'failed'; cases: readonly CaseOut[]; passed: number; failed: number;
+      durationMs: number; log: string;
+    };
+
+export function drillViewOf(r: StdinResult): DrillView {
+  switch (r.status) {
+    case 'passed':
+      return { kind: 'passed', cases: r.cases, durationMs: r.durationMs };
+    case 'failed':
+      return {
+        kind: 'failed', cases: r.cases, passed: r.passed, failed: r.failed,
+        durationMs: r.durationMs, log: r.log,
+      };
+    case 'timeout':
+      return { kind: 'timeout', cases: r.cases, durationMs: r.durationMs, log: r.log };
+    case 'compile-error':
+      return { kind: 'compile-error', log: r.log };
+    default:
+      return { kind: 'no-runner', reason: r.reason ?? 'not-detected' };
+  }
+}
+
+/**
+ * 한 번의 실행. 던지지 않는다 — 화면이 죽는 것보다 「못 쟀다」가 정확하다.
+ * 탐지는 `runStdin` 안에서 언어마다 한 번만 돈다.
+ */
+export async function runDrill(spec: StdinRunSpec): Promise<DrillView> {
+  try {
+    return drillViewOf(await runStdin(spec));
+  } catch {
+    return { kind: 'no-runner', reason: 'not-detected' };
+  }
 }

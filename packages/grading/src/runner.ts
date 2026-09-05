@@ -14,9 +14,22 @@ import type { RepoId } from '@chickadee/ipc-client';
 
 import { detectJava, runJava } from './java-runner.js';
 import { detectSql, runSql, type SqlCase, type SqlDialect } from './sql-runner.js';
+import { runStdin, STDIN_LANGS, type StdinCase, type StdinLang } from './stdin-runner.js';
 
-export type RunLang = 'java' | 'sql';
-export type RunStatus = 'passed' | 'failed' | 'error' | 'no-runner' | 'timeout';
+/**
+ * 러너가 아는 언어. **방언·툴체인마다 하나**이지 언어마다 하나가 아니다 (정본 §5) —
+ * `sql` 은 sqlite 하나이고, `py`·`ts`·`java` 는 표준 입력 러너가 각자의 툴체인으로 든다
+ * (D186 ⑧). `java` 가 둘에 걸치는 이유는 물음이 다르기 때문이다: 리포의 5단은 Gradle 로
+ * 테스트를 돌리고, 0부 뒤의 작은 문제는 `javac`+`java` 로 프로그램 한 장을 돌린다.
+ */
+export type RunLang = 'java' | 'sql' | 'py' | 'ts';
+/**
+ * `compile-error` 는 표준 입력 러너가 낸 값이다 (D186 ⑧). `error` 와 갈라 둔 이유는
+ * 화면이 할 말이 다르기 때문이다 — `error` 는 「돌리지 못했다」이고 `compile-error` 는
+ * **답 안에 이유가 있다**. 자바 러너의 `error` 도 컴파일 실패였지만(D175) 그때는 게이트에
+ * 이름이 없었고, 이제 이름이 있으므로 그 자리는 그대로 두고 새 층만 이 값을 쓴다.
+ */
+export type RunStatus = 'passed' | 'failed' | 'error' | 'no-runner' | 'timeout' | 'compile-error';
 
 /**
  * 러너를 못 켠 이유. 화면 문구는 `run.reason.*` 키로 붙는다 (평문, 정본 §6).
@@ -31,7 +44,15 @@ export type RunnerReason =
   | 'unsupported-lang'
   | 'not-detected'
   | 'dialect-unsupported'
-  | 'no-fixture-db';
+  | 'no-fixture-db'
+  /**
+   * 표준 입력 러너가 낸 갈래 셋 (D186 ⑧ ④). 언어마다 다른 값인 이유는 화면이 「러너 없음」
+   * 대신 **어느 언어가 이 컴퓨터에 없는지**를 말해야 해서다. 하나로 접으면 파이썬은 되는데
+   * 자바가 없는 컴퓨터에서 두 사실이 같은 문장이 된다.
+   */
+  | 'toolchain-missing:py'
+  | 'toolchain-missing:ts'
+  | 'toolchain-missing:java';
 
 export interface RunSpec {
   repoId: RepoId;
@@ -52,6 +73,14 @@ export interface RunSpec {
   db?: string[];
   /** `lang: 'sql'` 일 때 판정할 문항들. 하나가 쿼리 하나와 기대 표 하나다. */
   cases?: SqlCase[];
+  /**
+   * `lang: 'py' | 'ts' | 'java'` 를 **표준 입력 러너**로 돌릴 때의 재료 (D186 ⑧).
+   *
+   * 이 갈래는 `repoId` 도 `files` 도 `tests` 도 안 본다 — 프로그램 한 장과 케이스뿐이다.
+   * 그래서 `runTests` 는 이 필드가 있는지부터 본다: 같은 `lang: 'java'` 라도 리포의 5단과
+   * 0부 뒤의 작은 문제는 다른 러너로 간다.
+   */
+  stdin?: { source: string; cases: readonly StdinCase[] };
 }
 
 /**
@@ -97,6 +126,8 @@ export interface RunnerProbe {
   gradle?: string;
   /** SQL 러너가 켜졌을 때 어느 방언인지. 화면이 「sqlite 로 돌린 결과」라고 말할 근거다. */
   dialect?: SqlDialect;
+  /** 표준 입력 러너가 본 툴체인의 첫 줄 — `Python 3.13.12` · `v26.7.0` (D186 ⑧). */
+  tool?: string;
 }
 
 /** 화면과 원장에 담기는 로그 상한. Rust 가 이미 스트림당 128 KiB 에서 자른다. */
@@ -144,6 +175,7 @@ export function emptyResult(status: RunStatus, reason?: RunnerReason | string, d
 const REASONS = new Set<RunnerReason>([
   'no-jdk', 'no-gradle-wrapper', 'unsupported-lang', 'not-detected',
   'dialect-unsupported', 'no-fixture-db',
+  'toolchain-missing:py', 'toolchain-missing:ts', 'toolchain-missing:java',
 ]);
 
 /**
@@ -166,6 +198,19 @@ export async function detectRunner(
  */
 export async function runTests(spec: RunSpec): Promise<RunResult> {
   if (spec.lang === 'sql') return runSql(spec);
+  // 재료가 「프로그램 한 장 + 케이스」면 표준 입력 러너다 (D186 ⑧). `lang` 보다 이것이
+  // 먼저인 이유는 자바가 두 러너에 걸쳐 있어서다.
+  if (spec.stdin !== undefined) {
+    if (!(STDIN_LANGS as readonly string[]).includes(spec.lang)) {
+      return emptyResult('no-runner', 'unsupported-lang');
+    }
+    return runStdin({
+      lang: spec.lang as StdinLang,
+      source: spec.stdin.source,
+      cases: spec.stdin.cases,
+      timeoutMs: spec.timeoutMs,
+    });
+  }
   if (spec.lang !== 'java') return emptyResult('no-runner', 'unsupported-lang');
   const seen = known.get(spec.repoId);
   if (!seen?.probe.ok) return emptyResult('no-runner');

@@ -100,4 +100,15 @@ export type {
 
 // 기초 문항 채점 — 값 일치 (`docs/program/fundamentals.md` §4·§5)
 export { gradeValue, normalizeFloat, normalizeInt, MISS_MESSAGE_KEY } from './fundamentals.js';
-export type { FundGradeInput, FundVerdict, MissKind } from './fundamentals.js';
+export type { FundAlt, FundGradeInput, FundVerdict, MissKind } from './fundamentals.js';
+
+// 표준 입력 러너 — 셋째 러너 (D186 ⑧)
+export {
+  detectStdin, forgetStdinProbes, lastLine, MAX_STDIN_CASES, normalizeOut, outMessage, runStdin,
+  sameOut, STDIN_LANGS, STDIN_TIMEOUT_MS, TOOLCHAIN_MISSING,
+} from './stdin-runner.js';
+export type { CaseOut, StdinCase, StdinLang, StdinResult, StdinRunSpec } from './stdin-runner.js';
+
+// `build` 형식의 채점 — 식을 돌려서 나온 값으로 (D187 ①)
+export { BUILD_MESSAGE_KEY, checkExpr, gradeBuild, usesToken, wrapExpr } from './build.js';
+export type { BuildGradeInput, BuildMiss, BuildVerdict } from './build.js';

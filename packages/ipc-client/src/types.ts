@@ -220,6 +220,50 @@ export interface AskOut {
   durationMs: number;
 }
 
+/**
+ * `stdin_run` (D186 ⑧ · D187 ①). Rust 는 걸음 목록과 상한만 안다 — 무엇을 돌리고 나온 글이
+ * 맞는지는 `@chickadee/grading` 의 `stdin-runner.ts` 가 정한다.
+ *
+ * 작업 디렉터리는 이 호출 안에서 만들어졌다가 **지워진다**. 학습자 리포는 열지도 않으므로
+ * 「원본은 읽기만 한다」가 「원본을 안 본다」가 된다 (sqlite 러너와 같은 자리).
+ * 내려받는 것이 없어 D175 ④ 의 동의 게이트는 이 길에 없다.
+ */
+export interface StepSpec {
+  /** `PATH` 를 타는 이름 하나. 경로 구분자가 들면 거부된다. */
+  program: string;
+  args: string[];
+  /** 표준 입력으로 넣어 줄 글. 다 넣고 파이프를 닫아 프로그램의 읽기가 끝에 닿는다. */
+  feed: string;
+  /** 0 으로 안 끝나면 **뒤 걸음을 시작하지 않는다**. 부르는 쪽이 컴파일 걸음에 건다. */
+  mustPass: boolean;
+}
+
+export interface StdinSpec {
+  /** 첫 걸음 전에 작업 디렉터리에 쓸 것. 경로는 상대이고 `..` 는 거부된다. */
+  files: [path: string, text: string][];
+  steps: StepSpec[];
+  env: [name: string, value: string][];
+  /** **걸음마다**의 상한이지 전체가 아니다. Rust 가 5초에서 깎는다. */
+  timeoutMs: number;
+}
+
+export interface StepOut {
+  /** 신호로 죽었으면 `null`. 시간 초과가 그 경우다. */
+  code: number | null;
+  stdout: string;
+  stderr: string;
+  truncated: boolean;
+  timedOut: boolean;
+  durationMs: number;
+}
+
+export interface StdinOut {
+  /** 시작된 걸음마다 하나, 순서대로. 시간 초과·`mustPass` 실패·못 시작에서 짧아진다. */
+  steps: StepOut[];
+  /** 시작조차 못 한 걸음. **오류가 아니라 사실이다** — 대개 「그 언어가 안 깔렸다」. */
+  spawnFailed: number | null;
+}
+
 export interface ReadLinesReq { rootPath: string; relPath: string; from: number; to: number; rev?: string }
 export interface ReadBlockReq { rootPath: string; relPath: string; startByte: number; endByte: number; rev?: string }
 

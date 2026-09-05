@@ -7,7 +7,7 @@ import type { BatchOp, ParamsOf, RowOf, StatementName } from './statements.js';
 import type {
   AppPaths, AppVersion, AskOut, AskSpec, BlameHunk, Block, Catalog, ExecInfo, IngestDone, IngestProgress,
   FileDiff, IngestSpec, JobId, LangInfo, LinesChunk, ProcOut, ProcSpec, ReadBlockReq,
-  ReadLinesReq, RepoProbe, SnippetReq, SnippetResult, StoreInfo,
+  ReadLinesReq, RepoProbe, SnippetReq, SnippetResult, StdinOut, StdinSpec, StoreInfo,
 } from './types.js';
 
 /** STORE_BUSY 재시도 (01 §6): 3회, 50ms 백오프. 여기가 유일한 자동 재시도다. */
@@ -163,6 +163,16 @@ export const ipc = {
    */
   sql: {
     run: (spec: AskSpec) => call<AskOut>('sql_run', { spec }),
+  },
+  /**
+   * 짧은 프로그램 여럿을 표준 입력을 물려 돌린다 (D186 ⑧). 여기는 **걸음 한 겹**이고,
+   * 무엇을 돌릴지·나온 글이 기대와 맞는지는 `@chickadee/grading` 의 `runStdin` 이 정한다.
+   *
+   * 안 깔린 언어는 오류가 아니다 — `spawnFailed` 로 돌아온다. 던지는 것은 입출력 실패
+   * (`RUN_IO`)와 규칙 밖 인자(`BAD_INPUT`)뿐이다.
+   */
+  stdin: {
+    run: (spec: StdinSpec) => call<StdinOut>('stdin_run', { spec }),
   },
 } as const;
 
