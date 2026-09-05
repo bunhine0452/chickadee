@@ -1,0 +1,54 @@
+[
+  {
+    "queryId": "java/collection-generic",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "site",
+    "form": "return",
+    "startLine": 4,
+    "startCol": 4,
+    "endLine": 6,
+    "endCol": 5,
+    "nodeKind": "method_declaration",
+    "inError": false
+  },
+  {
+    "queryId": "java/collection-generic",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "pick.1",
+    "form": "return",
+    "startLine": 4,
+    "startCol": 11,
+    "endLine": 4,
+    "endCol": 25,
+    "nodeKind": "type_identifier",
+    "inError": false
+  },
+  {
+    "queryId": "java/collection-generic",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "pick.2",
+    "form": "return",
+    "startLine": 4,
+    "startCol": 26,
+    "endLine": 4,
+    "endCol": 39,
+    "nodeKind": "type_identifier",
+    "inError": false
+  },
+  {
+    "queryId": "java/collection-generic",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "pick.3",
+    "form": "return",
+    "startLine": 4,
+    "startCol": 41,
+    "endLine": 4,
+    "endCol": 46,
+    "nodeKind": "identifier",
+    "inError": false
+  }
+]

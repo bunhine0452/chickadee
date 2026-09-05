@@ -7,7 +7,7 @@ grammars: [java]
 framework: null
 essential: true
 difficulty: 1
-prereq: []
+prereq: [cs/identity-vs-equality]
 confusions: []
 dict:
   one_liner:

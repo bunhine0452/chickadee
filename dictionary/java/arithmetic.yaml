@@ -7,7 +7,7 @@ grammars: [java]
 framework: null
 essential: true
 difficulty: 1
-prereq: []
+prereq: [cs/integer-overflow, cs/floating-point]
 confusions: []
 dict:
   one_liner:

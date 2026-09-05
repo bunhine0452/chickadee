@@ -1,0 +1,80 @@
+[
+  {
+    "queryId": "java/interface",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "site",
+    "form": "implements",
+    "startLine": 3,
+    "startCol": 17,
+    "endLine": 3,
+    "endCol": 48,
+    "nodeKind": "super_interfaces",
+    "inError": false
+  },
+  {
+    "queryId": "java/interface",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.1",
+    "form": "implements",
+    "startLine": 3,
+    "startCol": 17,
+    "endLine": 3,
+    "endCol": 27,
+    "nodeKind": "implements",
+    "inError": false
+  },
+  {
+    "queryId": "java/interface",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.2",
+    "form": "implements",
+    "startLine": 3,
+    "startCol": 28,
+    "endLine": 3,
+    "endCol": 36,
+    "nodeKind": "type_identifier",
+    "inError": false
+  },
+  {
+    "queryId": "java/interface",
+    "matchId": 2,
+    "patternIndex": 1,
+    "name": "site",
+    "form": "implements",
+    "startLine": 3,
+    "startCol": 17,
+    "endLine": 3,
+    "endCol": 48,
+    "nodeKind": "super_interfaces",
+    "inError": false
+  },
+  {
+    "queryId": "java/interface",
+    "matchId": 2,
+    "patternIndex": 1,
+    "name": "pick.1",
+    "form": "implements",
+    "startLine": 3,
+    "startCol": 17,
+    "endLine": 3,
+    "endCol": 27,
+    "nodeKind": "implements",
+    "inError": false
+  },
+  {
+    "queryId": "java/interface",
+    "matchId": 2,
+    "patternIndex": 1,
+    "name": "pick.2",
+    "form": "implements",
+    "startLine": 3,
+    "startCol": 38,
+    "endLine": 3,
+    "endCol": 48,
+    "nodeKind": "type_identifier",
+    "inError": false
+  }
+]

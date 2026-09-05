@@ -1,0 +1,67 @@
+[
+  {
+    "queryId": "java/new-expression",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "new",
+    "startLine": 5,
+    "startCol": 27,
+    "endLine": 5,
+    "endCol": 44,
+    "nodeKind": "object_creation_expression",
+    "inError": false
+  },
+  {
+    "queryId": "java/new-expression",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "new",
+    "startLine": 5,
+    "startCol": 27,
+    "endLine": 5,
+    "endCol": 30,
+    "nodeKind": "new",
+    "inError": false
+  },
+  {
+    "queryId": "java/new-expression",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "hole",
+    "form": "new",
+    "startLine": 5,
+    "startCol": 27,
+    "endLine": 5,
+    "endCol": 30,
+    "nodeKind": "new",
+    "inError": false
+  },
+  {
+    "queryId": "java/new-expression",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "new",
+    "startLine": 5,
+    "startCol": 31,
+    "endLine": 5,
+    "endCol": 42,
+    "nodeKind": "generic_type",
+    "inError": false
+  },
+  {
+    "queryId": "java/new-expression",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "new",
+    "startLine": 5,
+    "startCol": 42,
+    "endLine": 5,
+    "endCol": 44,
+    "nodeKind": "argument_list",
+    "inError": false
+  }
+]

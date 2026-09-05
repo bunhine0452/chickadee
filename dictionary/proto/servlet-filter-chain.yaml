@@ -1,0 +1,88 @@
+schema: 1
+id: proto/servlet-filter-chain
+universal: null
+name: { ko: 컨트롤러 앞에 줄 선 검사대, en: Servlet filter chain }
+token: null
+grammars: []
+framework: null
+track_default: t0
+essential: false
+difficulty: 3
+prereq: []
+confusions: []
+dict:
+  one_liner:
+    ko: "요청은 컨트롤러로 바로 안 간다. 줄 선 검사대를 정해진 차례로 지난다."
+    en: "A request meets checkpoints in a fixed order before the controller."
+  why:
+    ko: >-
+      컨트롤러 메서드만 읽으면 <b>이미 통과한 사람</b>만 보입니다. 그 앞에 검사대가 여럿 서
+      있고 요청은 하나씩 지나며, <b>어느 검사대도 여기서 끊을 수 있어요</b>. 그래서 로그인
+      정보를 꺼내는 곳은 컨트롤러가 아니라 그중 하나입니다 — 컨트롤러가 시작할 때는 이미
+      「누구인지」가 정해져 있어요. 차례가 중요한 이유가 여기 있습니다: 검사하는 자리보다
+      <b>앞에</b> 서야 그 결과를 쓸 수 있습니다.
+    en: >-
+      Read only the controller method and you see <b>whoever already got through</b>. Several
+      checkpoints stand in front of it, the request passes them one at a time, and <b>any of them
+      can stop it there</b>. So the place that reads who you are is not the controller but one of
+      them — by the time the controller starts, that is already settled. This is why order matters:
+      a checkpoint has to stand <b>before</b> the one that uses its result.
+  trace: []
+rule:
+  ko: "<b>차례가 곧 규칙이다.</b> 앞선 검사대가 끊으면 뒤의 것도 컨트롤러도 안 돈다."
+  en: "<b>The order is the rule.</b> If an earlier checkpoint stops the request, nothing after it runs."
+ok:
+  ko: >-
+    요청이 검사대를 차례로 지나고 마지막에 컨트롤러가 돕니다. 그때는 「누구인지」가 이미 정해져 있어요.
+  en: >-
+    The request passes the checkpoints in order, and the controller runs last. By then, who you are
+    is already settled.
+misconceptions:
+  - ko: "컨트롤러가 가장 먼저 돈다 — 앞의 검사대가 먼저고, 거기서 끊기면 컨트롤러는 안 불립니다."
+    en: "The controller runs first — the checkpoints run first, and if one stops the request the controller never runs."
+  - ko: "검사대의 차례는 적힌 순서다 — 어디에 끼워 넣을지를 <b>따로 지정</b>해야 정해집니다."
+    en: "Their order is the order they were written — where each one slots in has to be stated <b>on purpose</b>."
+  - ko: "검사대는 요청만 본다 — 컨트롤러가 답을 만든 뒤 돌아오는 길에도 같은 자리를 지납니다."
+    en: "A checkpoint only sees the request — the answer passes back through the same spots on its way out."
+  - ko: "검사대가 없으면 아무나 들어온다 — 막는 규칙은 또 다른 자리에 적히고, 이 줄은 그저 순서입니다."
+    en: "Without checkpoints anyone gets in — what to block is written elsewhere; this line is only the order."
+evidence: ["OncePerRequestFilter", "addFilterBefore", "doFilterInternal", "SecurityFilterChain", "filterChain.doFilter", "FilterChain"]
+meaning:
+  - q:
+      ko: "{{site.line}}행의 검사대가 요청을 <b>여기서 끊으면</b> 컨트롤러는 어떻게 될까요?"
+      en: "If the checkpoint on line {{site.line}} <b>stops the request there</b>, what happens to the controller?"
+    hint:
+      ko: "요청은 줄을 <b>끝까지</b> 지나야 컨트롤러에 닿습니다."
+      en: "A request reaches the controller only by passing the <b>whole</b> line."
+    options:
+      - t: { ko: "한 번도 안 불린다 — 줄이 끝까지 안 갔다", en: "It is never called — the line was cut short" }
+      - t: { ko: "그래도 불리고 안에서 다시 검사한다", en: "It is called anyway and checks again inside" }
+        diag:
+          t:
+            ko: "그러면 검사대가 있을 이유가 없습니다. 앞에서 끊는 것이 이 줄의 <b>목적</b>이에요 — 뒤의 코드는 통과한 요청만 봅니다."
+            en: "Then the checkpoint would have no reason to exist. Cutting it off early is the <b>point</b> of the line — the code behind it only sees requests that got through."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 끊기냐 통과냐", en: "The sharpest spot — stopped or passed" }
+            code:
+              - "끊음: 컨트롤러 안 돎"
+              - "통과: 다음 검사대 → 컨트롤러"
+      - t: { ko: "컨트롤러가 먼저 돌고 검사대가 나중에 본다", en: "The controller runs first and the checkpoint looks later" }
+        diag:
+          t:
+            ko: "차례가 반대입니다. 검사대는 <b>앞</b>에 서요 — 뒤에 서면 이미 일이 벌어진 뒤라 막을 것이 없습니다."
+            en: "That is the order reversed. A checkpoint stands <b>in front</b> — behind, the work is already done and there is nothing left to stop."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 앞이냐 뒤냐", en: "The sharpest spot — in front or behind" }
+            code:
+              - "요청 → 검사대 → 컨트롤러"
+              - "(반대로는 막을 수 없다)"
+      - t: { ko: "다음 검사대만 건너뛰고 컨트롤러는 돈다", en: "Only the next checkpoint is skipped; the controller still runs" }
+        diag:
+          t:
+            ko: "줄은 하나입니다. 중간에서 끊기면 그 뒤가 <b>통째로</b> 안 돌아요 — 컨트롤러는 줄의 끝에 있습니다."
+            en: "There is one line. Cut in the middle and <b>everything</b> behind it is skipped — the controller sits at the end of that line."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 하나만이냐 그 뒤 전부냐", en: "The sharpest spot — one, or all that follow" }
+            code:
+              - "검사대2 에서 끊음"
+              - "→ 검사대3 · 컨트롤러 안 돎"

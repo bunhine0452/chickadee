@@ -1,0 +1,245 @@
+schema: 1
+id: java/interface
+universal: null
+name: { ko: 할 줄 아는 것의 목록, en: Interface }
+token: "interface"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 3
+prereq: [java/class-declaration, java/method-declaration]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "할 줄 아는 것의 목록. 무엇을 하는지만 적고 어떻게 하는지는 안 적는다."
+    en: "A list of what something can do. It states what, never how."
+  why:
+    ko: >-
+      쓰는 쪽은 <b>무엇을 할 줄 아는지</b>만 알면 됩니다 — 어떻게 하는지는 몰라도 돼요.
+      {{site.line}}행이 그 목록이고, 목록을 받겠다는 클래스가 따로 적어야 그 이름으로 받아집니다.
+      여기가 자바의 날카로운 자리예요: 메서드 모양이 <b>다 맞아도</b> 「받겠다」고 안 적었으면
+      그 이름으로 못 넘깁니다. 그래서 코드를 읽을 때 「이 자리에 무엇이 올 수 있나」는 목록을
+      찾아 <b>적었다고 선언한 클래스</b>를 세는 일이 됩니다.
+    en: >-
+      The caller only needs to know <b>what it can do</b> — never how. Line {{site.line}} is that list,
+      and a class has to say out loud that it takes the list before it can be passed under that name.
+      This is Java's sharp spot: even when every method shape <b>matches</b>, a class that did not say
+      so cannot be passed under that name. So reading “what can go in this slot” means finding the list
+      and counting the classes that <b>declared</b> they take it.
+  trace:
+    - ko: "{{pick.2|code}} 목록에는 할 줄 아는 것의 이름과 모양만 적힌다."
+      en: "The {{pick.2|code}} list carries only names and shapes of what can be done."
+    - ko: "{{pick.3|code}} 안에는 몸통이 없다 — 어떻게 하는지는 받는 쪽이 적는다."
+      en: "There are no bodies in {{pick.3|code}} — how is written by whoever takes it."
+    - ko: "「받겠다」고 적은 클래스만 {{site.line}}행의 이름으로 넘겨진다."
+      en: "Only a class that declared it takes the list is passed under the name on line {{site.line}}."
+
+rule:
+  ko: "<b>적었다고 선언해야 받아진다.</b> 메서드 모양이 다 맞아도 안 적었으면 그 이름으로 못 넘긴다."
+  en: "<b>You must declare that you take it.</b> Matching every method shape is not enough."
+ok:
+  ko: >-
+    {{pick.2|code}} 목록은 「무엇을 할 줄 아는가」만 정합니다. 어떻게 하는지는 받는 쪽이 채워요.
+  en: >-
+    The {{pick.2|code}} list settles only what can be done. How is filled in by whoever takes it.
+payoff:
+  ko: >-
+    이걸 알면 「이 자리에 실제로 무엇이 오나」를 찾을 길이 생깁니다 — 목록 이름으로 리포를 뒤져
+    「받겠다」고 적은 클래스를 세면 돼요.
+  en: >-
+    Knowing this gives you a way to answer “what actually shows up in this slot” — search the repo for
+    the list's name and count the classes that declared they take it.
+bridge:
+  ko: >-
+    Go 는 모양만 맞으면 <b>적지 않아도</b> 받아집니다. 자바는 정반대예요 — 적어야만 받아지므로
+    「누가 이것을 받는가」가 코드에 글자로 남습니다.
+  en: >-
+    In Go, matching the shape is enough <b>without declaring</b>. Here it is the opposite: declaring is
+    required, so “who takes this” stays written in the code.
+misconceptions:
+  - ko: "메서드 모양만 맞으면 받아진다 — 「받겠다」고 <b>적어야</b> 합니다. Go 와 정반대예요."
+    en: "Matching the method shapes is enough — you have to <b>declare</b> it. The opposite of Go."
+  - ko: "목록은 상자를 만들 수 있다 — 만들 수 없습니다. 채운 클래스가 있어야 상자가 생겨요."
+    en: "The list itself can make a box — it cannot. A class that filled it in must exist first."
+  - ko: "목록 안에는 몸통을 못 적는다 — 요즘은 적을 수 있지만, 기본은 여전히 <b>모양만</b>입니다."
+    en: "No bodies may be written inside — some may nowadays, but the default is still <b>shape only</b>."
+  - ko: "하나만 받을 수 있다 — 여러 목록을 한꺼번에 받을 수 있습니다. 물려받는 틀은 하나뿐이지만요."
+    en: "Only one may be taken — several lists can be taken at once, though only one mould is inherited."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>목록의 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name of the list</b>."
+    hint:
+      ko: "중괄호가 열리기 <b>전</b>에 오는 이름입니다."
+      en: "It is the name that comes <b>before</b> the brace opens."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>무엇을 적는 자리인지</b>를 말하는 낱말입니다. 이름은 그 뒤에 와요."
+          en: "{{pick.1|code}} says <b>what kind of thing is being written</b>. The name comes after it."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 종류냐 이름이냐"
+            en: "The sharpest spot — the kind or the name"
+          code:
+            - "앞 낱말: 무엇을 적는 자리인가"
+            - "뒤 이름: 그 목록의 이름"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>목록의 내용</b>입니다. 이름은 여는 중괄호 앞에 있어요."
+          en: "{{pick.3|code}} is <b>the list's contents</b>. The name sits before the opening brace."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 이름이냐 내용이냐"
+            en: "The sharpest spot — the name or the contents"
+          code:
+            - "interface UserDao { … }"
+            - "//        ^이름   ^내용"
+
+meaning:
+  - q:
+      ko: "메서드 모양이 목록과 <b>전부 같은</b> 클래스가 있는데, 「받겠다」고 안 적었다면 그 이름으로 넘길 수 있을까요?"
+      en: "A class matches <b>every</b> shape in the list but never declared it takes the list — can it be passed under that name?"
+    hint:
+      ko: "자바는 이 자리에서 글자로 적힌 것만 봅니다."
+      en: "Java looks only at what is written here."
+    options:
+      - t:
+          ko: "못 넘긴다 — 적어야만 받아진다"
+          en: "No — it must be declared"
+      - t:
+          ko: "넘길 수 있다 — 모양이 같으면 같은 것이다"
+          en: "Yes — matching shapes make it the same thing"
+        diag:
+          t:
+            ko: "그것은 Go 의 규칙입니다. 자바는 <b>적힌 선언</b>을 보고, 우연히 모양이 같은 것을 같은 것으로 치지 않아요."
+            en: "That is Go's rule. Java reads the <b>written declaration</b> and does not treat an accidental shape match as the same thing."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 모양이냐 선언이냐"
+              en: "The sharpest spot — the shape or the declaration"
+            code:
+              - "Go:   모양이 맞으면 된다"
+              - "자바: 적어야 된다"
+      - t:
+          ko: "넘길 수는 있는데 실행할 때 멈춘다"
+          en: "It can be passed, but stops at run time"
+        diag:
+          t:
+            ko: "실행까지 안 갑니다. <b>컴파일할 때</b> 「그 이름으로 못 받는다」고 걸려요."
+            en: "It never reaches run time. <b>At compile time</b> it is refused under that name."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 번역할 때냐 돌 때냐"
+              en: "The sharpest spot — translating or running"
+            code:
+              - "javac: 여기서 막힌다"
+      - t:
+          ko: "메서드를 하나라도 빠뜨렸을 때만 못 넘긴다"
+          en: "Only a missing method blocks it"
+        diag:
+          t:
+            ko: "빠뜨린 것이 없어도 안 됩니다. 빠진 것은 메서드가 아니라 <b>선언</b>이에요."
+            en: "Even with nothing missing it fails. What is missing is not a method but the <b>declaration</b>."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 무엇이 빠졌나"
+              en: "The sharpest spot — what is missing"
+            code:
+              - "메서드: 다 있다"
+              - "선언:   없다 → 못 넘긴다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>할 줄 아는 것의 목록</b>을 적는 자리를 엽니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} opens a place to write <b>a list of what can be done</b>.
+    hint:
+      ko: "보기 넷은 전부 같은 자리에 설 수 있는 낱말입니다."
+      en: "All four can stand in the same slot."
+    options:
+      - { t: "interface", mono: true }
+      - t: "class"
+        mono: true
+        diag:
+          t:
+            ko: "<code>class</code> 는 <b>어떻게 하는지까지</b> 적는 틀입니다. 상자를 만들 수 있고, 목록은 못 만들어요."
+            en: "<code>class</code> is a mould that also writes <b>how</b>. It can make boxes; a list cannot."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 어떻게까지 적나"
+              en: "The sharpest spot — is the how written too"
+            code:
+              - "class: 무엇을 · 어떻게"
+              - "목록:  무엇을만"
+      - t: "enum"
+        mono: true
+        diag:
+          t:
+            ko: "<code>enum</code> 은 <b>정해진 값 몇 개</b>를 늘어놓는 자리입니다. 할 줄 아는 것의 목록이 아니에요."
+            en: "<code>enum</code> lists <b>a fixed set of values</b>. It is not a list of what can be done."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 값 목록이냐 능력 목록이냐"
+              en: "The sharpest spot — a list of values or of abilities"
+            code:
+              - "enum Role { USER, ADMIN }"
+              - "목록: 무엇을 할 줄 아나"
+      - t: "record"
+        mono: true
+        diag:
+          t:
+            ko: "<code>record</code> 는 <b>값을 담는 것</b>을 짧게 적는 틀입니다. 능력이 아니라 데이터를 적어요."
+            en: "<code>record</code> is a short way to write something that <b>holds values</b>. It writes data, not ability."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 담는 것이냐 하는 것이냐"
+              en: "The sharpest spot — what it holds or what it does"
+            code:
+              - "record P(int x, int y) {}"
+              - "목록: 하는 것만 적는다"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행의 목록을 <b>왜</b> 따로 두었을까요 — 클래스 하나면 될 텐데."
+    en: "<b>Why</b> keep the list on line {{site.line}} separate, when one class would do?"
+  choices:
+    - t:
+        ko: "쓰는 쪽이 <b>어떻게 하는지 모르게</b> 하려고 — 그래야 구현을 바꿔도 안 깨진다"
+        en: "So the caller <b>never learns how</b> — then the implementation can change without breaking"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 무엇을 바꿀 여지를 남겼는지도 적어 보세요."
+        en: "That is the direction. Add what room to change was preserved."
+    - t:
+        ko: "코드를 정리해 보기 좋게 하려고"
+        en: "To tidy the code up"
+      ok: false
+      fb:
+        ko: "정리는 곁다리입니다. 남기는 것은 <b>바꿀 여지</b>예요."
+        en: "Tidiness is a side effect. What it preserves is <b>room to change</b>."
+    - t:
+        ko: "자바가 이것 없이는 메서드를 못 불러서"
+        en: "Because Java cannot call methods without it"
+      ok: false
+      fb:
+        ko: "클래스로 직접 불러도 됩니다. 두는 것은 선택이에요."
+        en: "Calling through the class works fine. Adding this is a choice."
+
+queries:
+  - { grammars: [java], file: ./interface.scm }
+
+examples:
+  - code: "interface UserDao { void insert(String id); }"
+    expect:
+      sites: 1
+      form: declare
+      hole: "interface"
+      picks: { 1: "interface", 2: "UserDao" }
+  - code: "class F extends B implements Runnable { }"
+    expect: { sites: 1, form: implements, picks: { 1: "implements", 2: "Runnable" } }
+  - code: "class C { void run() {} }"
+    expect: none

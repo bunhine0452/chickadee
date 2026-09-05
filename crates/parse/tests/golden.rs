@@ -162,7 +162,7 @@ fn the_golden_files_still_describe_what_the_queries_capture() {
 /// 개념이 적어 하한만 지킨다.
 #[test]
 fn each_grammar_brings_its_concepts_and_its_three_traps() {
-    for (dir, least) in [("ts", 20usize), ("tsx", 3), ("sql", 3)] {
+    for (dir, least) in [("ts", 20usize), ("tsx", 3), ("sql", 3), ("java", 13)] {
         let cases = support::cases_of(dir);
         let concepts: BTreeSet<&str> = cases
             .iter()

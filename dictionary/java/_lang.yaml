@@ -8,8 +8,14 @@ grammar_abi: { java: 14 }
 extensions:
   java: [.java]
 
-# 바닥 여덟 (`docs/curriculum/java.md` §2) 전량. 순서는 읽는 순서이고 0장에 담기는 순서는
-# `prereq` 깊이가 정한다.
+# 바닥 여덟 (`docs/curriculum/java.md` §2) 전량 + 관문 0 과 OOP 축 (D166). 순서는 읽는
+# 순서이고 0장에 담기는 순서는 `prereq` 깊이가 정한다.
+#
+# 뒤의 열셋은 「로그인 챕터의 첫 파일이 열리는 최소 사전」이다 (`docs/program/course.md` §3.1).
+# `AuthController.java` 104줄에서 바닥 여덟이 잡는 것은 넷뿐이고, 못 읽히던 것이
+# 애너테이션(백엔드 718회)·제네릭(111회)·`import`·접근 제어자·롬복이 지운 생성자였다.
+# 순서는 파일을 위에서 아래로 읽는 차례를 따른다 — 맨 위의 `import`, 그다음 클래스에 붙는
+# 낱말들, 필드, 만들기, 그리고 흐름과 표시.
 essential:
   - java/class-declaration
   - java/variable-declaration
@@ -19,6 +25,19 @@ essential:
   - java/comparison
   - java/if-statement
   - java/method-declaration
+  - java/import
+  - java/access-modifier
+  - java/field-declaration
+  - java/new-expression
+  - java/constructor
+  - java/static
+  - java/null
+  - java/for-loop
+  - java/collection-generic
+  - java/interface
+  - java/inheritance-override
+  - java/try-catch
+  - java/annotation
 
 alternatives: []
 

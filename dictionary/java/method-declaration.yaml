@@ -7,7 +7,7 @@ grammars: [java]
 framework: null
 essential: true
 difficulty: 2
-prereq: [java/class-declaration]
+prereq: [java/class-declaration, cs/abstraction, cs/call-stack]
 confusions: []
 
 dict:

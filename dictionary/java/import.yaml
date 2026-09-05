@@ -1,0 +1,246 @@
+schema: 1
+id: java/import
+universal: null
+name: { ko: 바깥 이름을 이 파일에 들이기, en: Import declaration }
+token: "import"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 1
+prereq: [cs/linking]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "남이 만든 이름을 짧게 쓰겠다고 파일 맨 위에 적어 둔다."
+    en: "A line at the top says a name from elsewhere may be written short here."
+  why:
+    ko: >-
+      자바의 이름은 원래 <b>폴더 경로까지 붙은 긴 이름</b>입니다. 그 긴 이름을 줄마다 적으면
+      코드가 안 읽히니, 맨 위에 한 번 적어 두고 아래에서는 <b>마지막 조각만</b> 씁니다.
+      {{site.line}}행의 {{pick.2|code}}{{pick.2|josa:이,가}} 폴더 쪽이고 {{pick.3|code}}{{pick.3|josa:이,가}}
+      아래에서 쓸 짧은 이름이에요. 이 줄들이 곧 <b>이 파일이 무엇에 기대는지의 목록</b>이라,
+      파일을 처음 열었을 때 여기부터 읽으면 무엇을 다루는 코드인지 절반은 압니다.
+    en: >-
+      A Java name is really a <b>long name with its folder path attached</b>. Writing that on every
+      line makes code unreadable, so it is written once at the top and only the <b>last piece</b> is
+      used below. On line {{site.line}}, {{pick.2|code}} is the folder side and {{pick.3|code}} is the
+      short name used below. These lines are <b>the list of what this file leans on</b>, so reading
+      them first tells you half of what the file is about.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 그 이름이 사는 폴더 경로다."
+      en: "{{pick.2|code}} is the folder path where that name lives."
+    - ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 아래에서 그대로 쓸 짧은 이름이다."
+      en: "{{pick.3|code}} is the short name written below."
+    - ko: "이 줄 자체는 아무것도 실행하지 않는다 — 이름을 줄여 주기만 한다."
+      en: "The line itself runs nothing — it only shortens the name."
+
+rule:
+  ko: "<b>이 줄은 실행되지 않는다.</b> 긴 이름을 짧게 쓰게 해 줄 뿐, 코드를 끌어오지 않는다."
+  en: "<b>This line does not run.</b> It only lets a long name be written short; it pulls in no code."
+ok:
+  ko: >-
+    {{pick.3|code}}{{pick.3|josa:을,를}} 아래에서 짧게 쓸 수 있게 됩니다. 실행되는 것은 아무것도 없어요.
+  en: >-
+    {{pick.3|code}} can now be written short below. Nothing here executes.
+payoff:
+  ko: >-
+    이걸 알면 파일 맨 위의 열댓 줄이 <b>읽을 거리</b>가 됩니다 — 이 파일이 무엇에 기대는지가
+    거기 다 적혀 있어요.
+  en: >-
+    Knowing this turns the dozen lines at the top into <b>something to read</b> — what the file leans
+    on is all written there.
+bridge:
+  ko: >-
+    파이썬·자바스크립트는 이 줄이 <b>실제로 파일을 읽어 옵니다</b>. 자바는 안 읽어요 — 이름만
+    줄여 주고, 진짜 코드는 컴파일할 때 이미 다 모여 있습니다.
+  en: >-
+    In Python and JavaScript this line <b>really loads a file</b>. In Java it does not — it shortens a
+    name, and the actual code was already gathered at compile time.
+misconceptions:
+  - ko: "이 줄이 파일을 읽어 온다 — 이름만 줄여 줍니다. 지워도 긴 이름으로 적으면 그대로 돌아갑니다."
+    en: "The line loads a file — it only shortens a name. Delete it, write the long name, and it still runs."
+  - ko: "이 줄이 많으면 프로그램이 무거워진다 — 실행에 아무 영향이 없습니다."
+    en: "More of these lines make the program heavier — they have no effect at run time."
+  - ko: "같은 폴더의 이름도 적어야 한다 — 같은 폴더는 <b>안 적어도</b> 쓸 수 있습니다."
+    en: "Names in the same folder need a line too — the same folder is usable <b>without one</b>."
+  - ko: "여기 적힌 것은 다 쓰인다 — 안 쓰는 줄이 남아 있는 경우가 흔합니다."
+    en: "Everything listed here is used — unused lines are left behind all the time."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>아래 코드가 실제로 적을 짧은 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the short name the code below will write</b>."
+    hint:
+      ko: "점으로 나뉜 조각 중 <b>마지막</b> 하나입니다."
+      en: "It is the <b>last</b> of the dot-separated pieces."
+    answer: pick.3
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>어디에 사는지</b>입니다. 아래 코드에는 이 조각이 안 나와요."
+          en: "{{pick.2|code}} says <b>where it lives</b>. This piece does not appear in the code below."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 사는 곳이냐 쓰는 이름이냐"
+            en: "The sharpest spot — where it lives or what it is called"
+          code:
+            - "com.ssafy.dto  ← 사는 곳"
+            - "LoginRequest   ← 아래에서 쓰는 이름"
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>줄의 종류</b>를 말하는 낱말입니다. 이름이 아니에요."
+          en: "{{pick.1|code}} names <b>what kind of line</b> this is. It is not a name."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 줄의 종류냐 이름이냐"
+            en: "The sharpest spot — the kind of line or the name"
+          code:
+            - "맨 앞 낱말: 줄의 종류"
+            - "맨 뒤 조각: 쓰게 될 이름"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행을 지우고 아래에서 <b>긴 이름을 그대로</b> 적으면 어떻게 될까요?"
+      en: "Delete line {{site.line}} and write <b>the long name in full</b> below — what happens?"
+    hint:
+      ko: "이 줄이 하는 일은 이름을 줄여 주는 것 하나입니다."
+      en: "The one job of this line is shortening a name."
+    options:
+      - t:
+          ko: "그대로 돌아간다 — 줄여 주는 줄이 없어졌을 뿐이다"
+          en: "It still runs — only the shortening line is gone"
+      - t:
+          ko: "그 이름을 못 찾아 컴파일이 멈춘다"
+          en: "The name cannot be found and compiling stops"
+        diag:
+          t:
+            ko: "긴 이름은 <b>그 자체로 완전한 이름</b>입니다. 줄여 주는 줄이 없어도 찾아가요."
+            en: "The long name is <b>complete on its own</b>. It resolves with no shortening line."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 이름이 완전하냐"
+              en: "The sharpest spot — is the name complete"
+            code:
+              - "com.ssafy.dto.LoginRequest r;  // 된다"
+              - "LoginRequest r;                // 줄이 있어야 된다"
+      - t:
+          ko: "실행할 때 그 파일을 못 읽어 멈춘다"
+          en: "It stops at run time because the file cannot be read"
+        diag:
+          t:
+            ko: "이 줄은 <b>파일을 읽지 않습니다</b>. 코드를 모으는 일은 컴파일 때 이미 끝나 있어요."
+            en: "This line <b>reads no file</b>. Gathering the code finished at compile time."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 읽어 오나 이름만 줄이나"
+              en: "The sharpest spot — loading or just shortening"
+            code:
+              - "이 줄: 이름 줄이기"
+              - "코드 모으기: 컴파일 때"
+      - t:
+          ko: "느려진다 — 매번 긴 이름을 찾아야 해서"
+          en: "It gets slower — the long name has to be looked up each time"
+        diag:
+          t:
+            ko: "찾는 일은 <b>컴파일할 때 한 번</b>입니다. 돌아가는 코드는 두 경우가 똑같아요."
+            en: "The lookup happens <b>once, at compile time</b>. The running code is identical either way."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 언제 찾나"
+              en: "The sharpest spot — when the lookup happens"
+            code:
+              - "찾기: 컴파일 때 한 번"
+              - "실행: 두 경우가 같은 코드"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 바깥의 긴 이름을 아래에서 짧게 쓰게 해 줍니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} lets a long outside name be written short below.
+    hint:
+      ko: "자바가 이 자리에 쓰는 낱말은 하나뿐입니다."
+      en: "Java has exactly one word for this slot."
+    options:
+      - { t: "import", mono: true }
+      - t: "include"
+        mono: true
+        diag:
+          t:
+            ko: "<code>include</code> 는 C 계열이 쓰는 낱말이고, 거기서는 <b>파일 내용을 그 자리에 붙여 넣습니다</b>. 자바의 이 줄은 붙여 넣지 않아요."
+            en: "<code>include</code> belongs to the C family, where it <b>pastes the file's text in place</b>. This Java line pastes nothing."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 붙여 넣나 이름만 줄이나"
+              en: "The sharpest spot — pasting or shortening"
+            code:
+              - "C: 파일 내용이 그 자리에 들어온다"
+              - "자바: 이름만 짧아진다"
+      - t: "package"
+        mono: true
+        diag:
+          t:
+            ko: "<code>package</code> 는 <b>이 파일이 어디 사는지</b>를 적는 줄입니다. 파일마다 하나이고 맨 첫 줄이에요."
+            en: "<code>package</code> states <b>where this file lives</b>. There is one per file, and it comes first."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 내 자리냐 남의 이름이냐"
+              en: "The sharpest spot — my place or someone else's name"
+            code:
+              - "package com.ssafy;   // 내가 사는 곳"
+              - "import com.x.Y;      // 남의 이름"
+      - t: "using"
+        mono: true
+        diag:
+          t:
+            ko: "<code>using</code> 은 C# 이 같은 자리에 쓰는 낱말입니다. 하는 일은 비슷하지만 자바는 이 낱말을 모릅니다."
+            en: "<code>using</code> is what C# writes in this slot. The job is similar, but Java does not know this word."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 어느 언어의 낱말이냐"
+              en: "The sharpest spot — whose word it is"
+            code:
+              - "C#:   using System.Text;"
+              - "자바: 다른 낱말을 쓴다"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행이 <b>없으면</b> 이 파일에서 무엇이 달라질까요?"
+    en: "What changes in this file if line {{site.line}} <b>were not there</b>?"
+  choices:
+    - t:
+        ko: "아래에서 그 이름을 <b>긴 이름으로</b> 다 적어야 한다 — 돌아가기는 한다"
+        en: "The name below has to be written <b>in full</b> — it would still run"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 줄은 편의이지 필수가 아니에요."
+        en: "That is the direction. This line is a convenience, not a requirement."
+    - t:
+        ko: "그 코드가 프로그램에 안 들어와 실행할 때 멈춘다"
+        en: "That code would not join the program and it would stop at run time"
+      ok: false
+      fb:
+        ko: "코드를 모으는 것은 이 줄이 아닙니다. 컴파일할 때 이미 다 모여 있어요."
+        en: "This line does not gather code. It was all gathered at compile time."
+    - t:
+        ko: "아무 차이가 없다"
+        en: "Nothing would change"
+      ok: false
+      fb:
+        ko: "짧은 이름이 안 통합니다 — 아래를 전부 긴 이름으로 고쳐야 해요."
+        en: "The short name stops working — everything below has to be rewritten in full."
+
+queries:
+  - { grammars: [java], file: ./import.scm }
+
+examples:
+  - code: "import com.ssafy.dto.LoginRequest;"
+    expect:
+      sites: 1
+      form: import
+      hole: "import"
+      picks: { 1: "import", 2: "com.ssafy.dto", 3: "LoginRequest" }
+  - code: "import static java.util.Arrays.asList;"
+    expect: { sites: 1, form: import }
+  - code: "package com.ssafy.controller;"
+    expect: none

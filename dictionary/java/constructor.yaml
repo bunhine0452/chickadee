@@ -1,0 +1,210 @@
+schema: 1
+id: java/constructor
+universal: null
+name: { ko: 만들 때 한 번 하는 준비, en: Constructor }
+token: null
+grammars: [java]
+framework: null
+essential: true
+difficulty: 2
+prereq: [java/new-expression, java/field-declaration]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "이미 만들어진 상자를 채우는 준비. 이름이 클래스와 같고 돌려줄 타입 칸이 없다."
+    en: "Fills a box already made. Its name matches the class; there is no return slot."
+  why:
+    ko: >-
+      상자를 만드는 것은 이 자리가 아닙니다 — 만드는 일이 먼저 끝나고, 여기서는
+      <b>이미 만들어진 것을 채웁니다</b>. 그래서 돌려줄 타입 칸이 아예 없어요: 돌려줄 것이 없으니까요.
+      이 규칙을 알면 {{site.line}}행이 왜 메서드처럼 생겼는데 타입이 없는지가 풀립니다. 그리고
+      하나도 안 적으면 자바가 <b>빈 것을 공짜로</b> 주는데, 하나라도 적으면 그 공짜가 사라집니다 —
+      값 없이 만들던 코드가 그때 깨져요.
+    en: >-
+      Making the box is not this spot's job — that finishes first, and here <b>what already exists gets
+      filled</b>. Which is why there is no return-type slot at all: there is nothing to return. With
+      that rule, line {{site.line}} stops being a method with a missing type. And writing none of these
+      gets an empty one <b>for free</b> from Java, while writing even one takes the free one away —
+      that is when code that made boxes with no values breaks.
+  trace:
+    - ko: "상자가 먼저 만들어지고, 그다음 {{site.line}}행이 돈다."
+      en: "The box is made first, and then line {{site.line}} runs."
+    - ko: "{{pick.2|code}} 자리로 들어온 값들이 필드에 옮겨진다."
+      en: "The values arriving through {{pick.2|code}} are moved into the fields."
+    - ko: "{{pick.3|code}} 안의 일이 끝나면 채워진 상자가 부른 쪽으로 간다."
+      en: "When {{pick.3|code}} ends, the filled box goes back to the caller."
+
+rule:
+  ko: "<b>만드는 것은 다른 자리다.</b> 여기는 채우기만 하고, 그래서 돌려줄 타입 칸이 없다."
+  en: "<b>Making happens elsewhere.</b> This only fills, and that is why there is no return-type slot."
+ok:
+  ko: >-
+    만들어진 상자의 필드가 {{pick.2|code}} 자리로 받은 값으로 채워집니다. 돌려주는 것은 없어요.
+  en: >-
+    The fields of the made box are filled from what {{pick.2|code}} received. Nothing is returned.
+payoff:
+  ko: >-
+    이걸 알면 「값 없이 만들던 코드가 왜 갑자기 안 되지」가 풀립니다 — 하나를 적는 순간 공짜로
+    받던 빈 것이 사라져요.
+  en: >-
+    Knowing this untangles “why did making it with no values suddenly stop working” — writing one
+    takes away the free empty one.
+bridge:
+  ko: >-
+    파이썬의 <code>__init__</code> 도 같은 일을 하지만 <code>self</code> 를 <b>손으로 받습니다</b>.
+    자바는 그 자리를 문법이 숨겨 두어 매개변수 칸이 곧 받는 값입니다.
+  en: >-
+    Python's <code>__init__</code> does the same job but <b>takes <code>self</code> by hand</b>. Here the
+    grammar hides that slot, so the parameter list is exactly what arrives.
+misconceptions:
+  - ko: "이것이 상자를 만들어 돌려준다 — 만드는 것은 앞 단계이고, 여기는 <b>이미 만들어진 것</b>을 채웁니다."
+    en: "This makes the box and returns it — making happened before; this fills <b>what already exists</b>."
+  - ko: "돌려줄 타입을 안 적었을 뿐이다 — 칸 자체가 <b>없습니다</b>. 적으면 그 순간 평범한 메서드가 돼요."
+    en: "The return type was merely omitted — the slot <b>does not exist</b>. Write one and it becomes an ordinary method."
+  - ko: "하나 적어도 빈 것은 그대로 쓸 수 있다 — 하나라도 적으면 공짜로 주던 빈 것이 사라집니다."
+    en: "Writing one keeps the empty one available — writing even one takes the free empty one away."
+  - ko: "롬복 표시가 붙어 있으면 이 자리가 소스 어딘가에 있다 — <b>소스에 없습니다</b>. 컴파일할 때 만들어져요."
+    en: "With a Lombok marker there is one somewhere in the source — <b>there is not</b>. It is made at compile time."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>클래스 이름과 같아야 하는 자리</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the part that must match the class name</b>."
+    hint:
+      ko: "괄호 바로 <b>앞</b>입니다."
+      en: "It is directly <b>before</b> the parentheses."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>받는 값의 목록</b>입니다. 클래스 이름과는 상관이 없어요."
+          en: "{{pick.2|code}} is the <b>list of values it takes</b>. It has nothing to do with the class name."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 이름이냐 받는 값이냐"
+            en: "The sharpest spot — the name or what it takes"
+          code:
+            - "JwtUtil(String secret)"
+            - "//  ^이름   ^받는 값"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>채우는 일</b>이 적힌 몸통입니다. 이름은 그 앞에 있어요."
+          en: "{{pick.3|code}} is the body where the <b>filling</b> is written. The name is before it."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 이름이냐 하는 일이냐"
+            en: "The sharpest spot — the name or the work"
+          code:
+            - "이름: 클래스와 같아야 한다"
+            - "몸통: 무엇을 채우나"
+      pick.4:
+        t:
+          ko: "{{pick.4|code}}{{pick.4|josa:은,는}} <b>보이는 범위</b> 같은 것을 적은 낱말입니다. 이름이 아니에요."
+          en: "{{pick.4|code}} words say things like <b>how far it is visible</b>. They are not the name."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 앞 낱말이냐 이름이냐"
+            en: "The sharpest spot — the leading words or the name"
+          code:
+            - "public JwtUtil(…)"
+            - "// ^앞 낱말 ^이름"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행을 통째로 지우면 <code>new</code> 로 상자를 만들 수 있을까요?"
+      en: "Delete line {{site.line}} entirely — can a box still be made with <code>new</code>?"
+    hint:
+      ko: "하나도 안 적혀 있으면 자바가 대신 하나를 줍니다."
+      en: "When none is written, Java hands one over instead."
+    options:
+      - t:
+          ko: "값 없이 만드는 것만 된다 — 자바가 빈 것을 대신 준다"
+          en: "Only with no values — Java supplies an empty one"
+      - t:
+          ko: "아예 못 만든다"
+          en: "It cannot be made at all"
+        diag:
+          t:
+            ko: "하나도 안 적으면 자바가 <b>빈 것을 공짜로</b> 줍니다. 못 만드는 것은 값을 넣어 만들 때예요."
+            en: "With none written, Java supplies an empty one <b>for free</b>. What fails is making one with values."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 하나도 없냐 하나라도 있냐"
+              en: "The sharpest spot — none at all, or at least one"
+            code:
+              - "하나도 없음: 빈 것을 공짜로 받는다"
+              - "하나라도 있음: 그 공짜가 사라진다"
+      - t:
+          ko: "그대로 다 된다 — 값을 넣어 만드는 것도"
+          en: "Everything still works, including making one with values"
+        diag:
+          t:
+            ko: "공짜로 받는 것은 <b>값을 안 받는</b> 것 하나뿐입니다. 값을 넣던 자리는 그때 깨져요."
+            en: "The free one takes <b>no values</b>. Places that passed values break at that moment."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 공짜로 받는 것의 모양"
+              en: "The sharpest spot — what the free one looks like"
+            code:
+              - "공짜로 받는 것: 괄호가 빈 것 하나"
+      - t:
+          ko: "만들어지지만 필드가 쓰레기 값이 된다"
+          en: "It is made, but the fields hold garbage"
+        diag:
+          t:
+            ko: "필드는 <b>기본값</b>을 받습니다. 정해지지 않은 값이 되는 일은 없어요."
+            en: "Fields get <b>defaults</b>. They never end up undetermined."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 기본값이냐 미정이냐"
+              en: "The sharpest spot — a default or nothing determined"
+            code:
+              - "int  → 0"
+              - "상자 → 가리키는 데 없음"
+
+no_hole_reason: >-
+  지울 고정 낱말이 없다. 이 자리의 특징은 「없는 것」 둘이고(돌려줄 타입 칸이 없다·따로 붙는
+  낱말이 없다) 이름은 클래스마다 달라 보기를 고정할 수 없다. 빈칸으로 물을 것이 아니라
+  지목형과 뜻 고르기로 「무엇이 없는가」를 묻는 자리다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행을 <b>왜</b> 두었을까요 — 필드에 하나씩 넣어도 되는데."
+    en: "<b>Why</b> is line {{site.line}} there, when the fields could be set one at a time?"
+  choices:
+    - t:
+        ko: "값이 <b>다 갖춰지기 전의 상자</b>가 밖에 돌아다니지 않게 하려고"
+        en: "So a box <b>missing some of its values</b> never gets out"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 어느 값이 없으면 곤란한지도 적어 보세요."
+        en: "That is the direction. Add which value would hurt if missing."
+    - t:
+        ko: "코드를 짧게 하려고"
+        en: "To make the code shorter"
+      ok: false
+      fb:
+        ko: "짧아지는 것은 곁다리입니다. 지키는 것은 <b>완성된 상태</b>예요."
+        en: "Shortness is a side effect. What it guards is a <b>complete state</b>."
+    - t:
+        ko: "자바가 이것 없이는 상자를 못 만들어서"
+        en: "Because Java cannot make a box without it"
+      ok: false
+      fb:
+        ko: "하나도 안 적으면 자바가 빈 것을 대신 줍니다. 적는 것은 선택이에요."
+        en: "With none written Java supplies an empty one. Writing it is a choice."
+
+queries:
+  - { grammars: [java], file: ./constructor.scm }
+
+examples:
+  - code: "class JwtUtil { public JwtUtil(String secret) { this.secret = secret; } }"
+    expect:
+      sites: 1
+      form: ctor
+      picks: { 1: "JwtUtil", 2: "(String secret)", 4: "public" }
+  - code: "class C { C() {} }"
+    expect: { sites: 1, form: ctor, picks: { 1: "C", 2: "()" } }
+  - code: "class C { void C() {} }"
+    expect: none

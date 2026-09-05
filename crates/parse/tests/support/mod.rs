@@ -45,6 +45,12 @@ pub const DIRS: &[Dir] = &[
         ext: "sql",
         lang: None,
     },
+    Dir {
+        name: "java",
+        grammar: "java",
+        ext: "java",
+        lang: Some("java"),
+    },
 ];
 
 pub fn root() -> PathBuf {

@@ -1,0 +1,88 @@
+schema: 1
+id: proto/unauthorized-vs-forbidden
+universal: null
+name: { ko: 「누구세요」와 「안 됩니다」, en: Unauthorized versus forbidden }
+token: null
+grammars: []
+framework: null
+track_default: t0
+essential: false
+difficulty: 2
+prereq: []
+confusions: []
+dict:
+  one_liner:
+    ko: "누구인지 모르겠다와, 누구인지 알지만 못 하게 한다는 서로 다른 답이다."
+    en: "“I do not know you” and “I know, and you may not” are different answers."
+  why:
+    ko: >-
+      막히는 이유가 둘인데 답이 하나면 <b>다음에 할 일</b>을 못 정합니다. 신분을 못 밝혔으면
+      로그인하면 풀리고, 밝혔는데 권한이 모자라면 로그인을 다시 해도 그대로예요. 화면이 두 경우에
+      같은 말을 하면 사용자는 로그인을 되풀이합니다. 그래서 서버는 <b>숫자로</b> 갈라 줍니다 —
+      앞의 것은 「밝히고 다시 오세요」, 뒤의 것은 「밝혔지만 여기까지입니다」. 그리고 남의 자원이
+      <b>있다는 사실</b>조차 숨기고 싶을 때는 일부러 「없다」고 답하기도 합니다.
+    en: >-
+      Two reasons for being blocked and one answer means <b>what to do next</b> is unknowable.
+      Failing to identify yourself is fixed by logging in; identifying yourself and still lacking the
+      right is not fixed by logging in again. If the screen says the same thing in both cases, people
+      keep retrying the login. So the server splits them <b>by number</b> — the first says “identify
+      yourself and come back”, the second says “you did, and this is as far as you go”. And when even
+      the <b>existence</b> of someone else's thing should stay hidden, “not there” is answered on purpose.
+  trace: []
+rule:
+  ko: "<b>둘을 가르는 것은 다음에 할 일이다.</b> 로그인이 푸는 것과 로그인으로 안 풀리는 것."
+  en: "<b>What splits them is what to do next.</b> One is fixed by logging in; the other is not."
+ok:
+  ko: >-
+    신분을 못 밝힌 것이면 밝히고 다시 오면 됩니다. 밝혔는데 막힌 것이면 다시 와도 같습니다.
+  en: >-
+    If you were not identified, identify yourself and return. If you were, returning changes nothing.
+misconceptions:
+  - ko: "둘 다 「권한 없음」이니 같은 숫자면 된다 — 다음에 할 일이 달라서 화면이 다른 말을 해야 합니다."
+    en: "Both are “no permission”, so one number is enough — what to do next differs, so the screen must say different things."
+  - ko: "로그인만 하면 다 풀린다 — 신분을 밝혀도 그 자원에 손댈 자격은 따로입니다."
+    en: "Logging in unblocks everything — being identified and being allowed are separate."
+  - ko: "숨길 것이 없으니 그냥 「못 한다」고 하면 된다 — 그 답이 <b>그것이 있다</b>는 사실을 알려 주기도 합니다."
+    en: "Nothing to hide, so “you may not” is fine — that answer can itself reveal that the thing exists."
+  - ko: "본문에 이유를 적으면 숫자는 아무거나 된다 — 브라우저와 중간 장치는 <b>숫자만</b> 봅니다."
+    en: "Explain it in the body and any number works — browsers and middleboxes read <b>only the number</b>."
+evidence: ["UNAUTHORIZED", "FORBIDDEN", "AccessDeniedException", "AuthenticationEntryPoint", "AuthenticationException", "permitAll", "authenticated()"]
+meaning:
+  - q:
+      ko: "{{site.line}}행에서 막힌 사람이 <b>로그인을 다시 해도</b> 그대로라면, 어느 쪽 답이어야 할까요?"
+      en: "If someone blocked at line {{site.line}} stays blocked <b>after logging in again</b>, which answer fits?"
+    hint:
+      ko: "가르는 기준은 「로그인이 이것을 푸는가」입니다."
+      en: "The test is whether logging in fixes it."
+    options:
+      - t: { ko: "밝혔지만 못 한다 쪽 — 로그인으로는 안 풀린다", en: "The “identified but not allowed” answer — logging in will not help" }
+      - t: { ko: "누구인지 모르겠다 쪽 — 다시 밝히라고 한다", en: "The “I do not know you” answer — asking them to identify themselves" }
+        diag:
+          t:
+            ko: "그 답은 「밝히면 풀린다」는 뜻입니다. 안 풀리는데 그렇게 답하면 사용자가 로그인을 되풀이해요."
+            en: "That answer promises “identify yourself and it opens”. When it will not open, people just log in again and again."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 풀리는가", en: "The sharpest spot — does it open" }
+            code:
+              - "밝히면 풀림 → 밝히라고 답한다"
+              - "밝혀도 그대로 → 못 한다고 답한다"
+      - t: { ko: "없다고 답한다 — 어차피 못 보니 같은 말이다", en: "Answer “not there” — they cannot see it anyway" }
+        diag:
+          t:
+            ko: "그 답은 <b>있다는 사실을 숨기려 할 때</b>의 선택입니다. 숨길 이유가 없으면 진짜 이유를 말해야 다음 행동이 정해져요."
+            en: "That answer is a choice made <b>to hide that the thing exists</b>. With nothing to hide, the real reason is what tells them what to do."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 숨기느냐 알리느냐", en: "The sharpest spot — hide it or say it" }
+            code:
+              - "숨김이 목적 → 없다고 답한다"
+              - "그 외 → 이유를 그대로 답한다"
+      - t: { ko: "서버 쪽 문제라고 답한다", en: "Answer that the server had a problem" }
+        diag:
+          t:
+            ko: "서버는 <b>제대로 판단했습니다</b>. 규칙대로 막은 것은 보낸 쪽 사정이라 서버 잘못으로 답하면 고칠 곳을 잘못 가리켜요."
+            en: "The server <b>decided correctly</b>. A block by the rules is about the sender, so blaming the server aims the fix at the side that is fine."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 누구를 고치나", en: "The sharpest spot — which side gets fixed" }
+            code:
+              - "규칙대로 막음 → 보낸 쪽"
+              - "서버가 터짐 → 받은 쪽"

@@ -1,0 +1,67 @@
+[
+  {
+    "queryId": "java/static",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "field",
+    "startLine": 4,
+    "startCol": 4,
+    "endLine": 4,
+    "endCol": 51,
+    "nodeKind": "field_declaration",
+    "inError": false
+  },
+  {
+    "queryId": "java/static",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "field",
+    "startLine": 4,
+    "startCol": 12,
+    "endLine": 4,
+    "endCol": 18,
+    "nodeKind": "static",
+    "inError": false
+  },
+  {
+    "queryId": "java/static",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "hole",
+    "form": "field",
+    "startLine": 4,
+    "startCol": 12,
+    "endLine": 4,
+    "endCol": 18,
+    "nodeKind": "static",
+    "inError": false
+  },
+  {
+    "queryId": "java/static",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "field",
+    "startLine": 4,
+    "startCol": 25,
+    "endLine": 4,
+    "endCol": 31,
+    "nodeKind": "type_identifier",
+    "inError": false
+  },
+  {
+    "queryId": "java/static",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "field",
+    "startLine": 4,
+    "startCol": 32,
+    "endLine": 4,
+    "endCol": 38,
+    "nodeKind": "identifier",
+    "inError": false
+  }
+]

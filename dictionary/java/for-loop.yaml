@@ -1,0 +1,258 @@
+schema: 1
+id: java/for-loop
+universal: common/loop-while
+name: { ko: 세 칸짜리 되풀이, en: for loop }
+token: "for"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 2
+prereq: [java/assignment, java/comparison, cs/complexity]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "괄호 안이 세 칸이다 — 시작 · 계속할 조건 · 한 바퀴 끝에 할 일."
+    en: "Three slots in the parentheses: start, the test to keep going, the per-lap step."
+  why:
+    ko: >-
+      되풀이가 언제 끝나는지를 알려면 <b>세 가지</b>를 알아야 합니다 — 어디서 시작하고, 언제까지
+      돌고, 한 바퀴마다 무엇이 달라지는가. 이 셋이 흩어져 있으면 끝을 찾느라 몸통을 다 읽어야
+      하는데, {{site.line}}행은 그 셋을 <b>한 줄에 모아</b> 둡니다. 그래서 몸통을 안 읽고도
+      「몇 바퀴 도나」를 셀 수 있어요. 도는 차례도 셋이 정합니다 — {{pick.2|code}}{{pick.2|josa:이,가}} 한 번,
+      그다음 {{pick.3|code}}{{pick.3|josa:을,를}} 보고, 돌고 나서 {{pick.4|code}} 차례입니다.
+    en: >-
+      To know when a loop ends you need <b>three things</b> — where it starts, how long it keeps going,
+      and what changes each lap. Scattered, finding the end means reading the whole body; line
+      {{site.line}} <b>gathers all three on one line</b>. So the number of laps can be counted without
+      reading the body. The three also set the order — {{pick.2|code}} once, then {{pick.3|code}} is
+      read, and after the lap comes {{pick.4|code}}.
+  trace:
+    - ko: "{{pick.2|code}} 자리가 딱 한 번 돈다."
+      en: "{{pick.2|code}} runs exactly once."
+    - ko: "{{pick.3|code}}{{pick.3|josa:을,를}} 보고 참이면 {{pick.5|code}}{{pick.5|josa:이,가}} 한 바퀴 돈다."
+      en: "{{pick.3|code}} is read, and while it holds, {{pick.5|code}} runs a lap."
+    - ko: "한 바퀴가 끝날 때마다 {{pick.4|code}}{{pick.4|josa:이,가}} 돌고 다시 조건으로 간다."
+      en: "At the end of each lap {{pick.4|code}} runs and it goes back to the test."
+
+rule:
+  ko: "<b>조건은 매 바퀴 시작에 본다.</b> 처음부터 거짓이면 몸통은 한 번도 안 돈다."
+  en: "<b>The test is read at the start of every lap.</b> False from the outset means the body never runs."
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:이,가}} 한 번, 그다음부터는 {{pick.3|code}}{{pick.3|josa:이,가}} 참인 동안
+    {{pick.5|code}}{{pick.5|josa:과,와}} {{pick.4|code}}{{pick.4|josa:이,가}} 번갈아 돕니다.
+  en: >-
+    {{pick.2|code}} once, then while {{pick.3|code}} holds, {{pick.5|code}} and {{pick.4|code}} take
+    turns.
+payoff:
+  ko: >-
+    이걸 알면 「무한 반복」이 어디서 나는지가 보입니다 — 셋 중 <b>매 바퀴 달라지는 것</b>이
+    조건과 안 맞물리면 끝나지 않아요.
+  en: >-
+    Knowing this shows where an endless loop comes from — when <b>the thing that changes each lap</b>
+    does not meet the test, it never ends.
+bridge:
+  ko: >-
+    파이썬에는 이 세 칸짜리 모양이 <b>없습니다</b>. 범위를 만들어 하나씩 훑거나 조건만으로 돌죠.
+    자바는 셋을 한 줄에 모아 두는 쪽을 골랐습니다.
+  en: >-
+    Python <b>has no</b> three-slot shape like this; it walks a range or loops on a test alone. Java
+    chose to gather the three on one line.
+misconceptions:
+  - ko: "가운데 칸이 「몇 번 돌지」다 — <b>계속할 조건</b>입니다. 참인 동안 도는 것이지 횟수가 아니에요."
+    en: "The middle slot is “how many times” — it is <b>the test to keep going</b>, not a count."
+  - ko: "마지막 칸은 몸통보다 먼저 돈다 — 한 바퀴가 <b>끝난 뒤</b>에 돕니다."
+    en: "The last slot runs before the body — it runs <b>after</b> a lap."
+  - ko: "첫 칸에서 만든 이름을 바깥에서도 쓸 수 있다 — 괄호 안에서 만들었으면 <b>이 되풀이 안</b>에서만 삽니다."
+    en: "The name made in the first slot is usable outside — made in the parentheses, it lives only <b>inside the loop</b>."
+  - ko: "몸통은 적어도 한 번은 돈다 — 조건이 처음부터 거짓이면 <b>한 번도</b> 안 돕니다."
+    en: "The body runs at least once — false from the outset means it runs <b>never</b>."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>매 바퀴 끝에 도는 칸</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the slot that runs at the end of each lap</b>."
+    hint:
+      ko: "괄호 안 세 칸 중 <b>마지막</b>입니다."
+      en: "It is the <b>last</b> of the three slots in the parentheses."
+    answer: pick.4
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>딱 한 번</b> 도는 첫 칸입니다. 매 바퀴 도는 것이 아니에요."
+          en: "{{pick.2|code}} is the first slot and runs <b>exactly once</b>, not every lap."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 한 번이냐 매 바퀴냐"
+            en: "The sharpest spot — once or every lap"
+          code:
+            - "첫 칸:   시작할 때 한 번"
+            - "셋째 칸: 바퀴마다 한 번"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>계속할지 묻는</b> 칸입니다. 매 바퀴 보긴 하지만 바꾸는 일은 안 해요."
+          en: "{{pick.3|code}} is the slot that <b>asks whether to continue</b>. It is read each lap but changes nothing."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 묻기냐 바꾸기냐"
+            en: "The sharpest spot — asking or changing"
+          code:
+            - "가운데 칸: 참인지 묻는다"
+            - "셋째 칸:   값을 바꾼다"
+      pick.5:
+        t:
+          ko: "{{pick.5|code}}{{pick.5|josa:은,는}} <b>몸통</b>입니다. 괄호 밖에 있어요."
+          en: "{{pick.5|code}} is the <b>body</b>. It sits outside the parentheses."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 괄호 안이냐 밖이냐"
+            en: "The sharpest spot — inside or outside the parentheses"
+          code:
+            - "괄호 안: 세 칸"
+            - "괄호 밖: 몸통"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행의 가운데 칸이 <b>처음부터 거짓</b>이면 몸통은 몇 번 돌까요?"
+      en: "If the middle slot on line {{site.line}} is <b>false from the outset</b>, how many times does the body run?"
+    hint:
+      ko: "조건을 보는 시점이 몸통보다 앞입니다."
+      en: "The test is read before the body."
+    options:
+      - t:
+          ko: "한 번도 안 돈다"
+          en: "Never"
+      - t:
+          ko: "한 번은 돈 뒤에 멈춘다"
+          en: "Once, then it stops"
+        diag:
+          t:
+            ko: "그것은 <b>몸통을 먼저 돌리는</b> 다른 모양의 되풀이입니다. 이 모양은 묻고 나서 돌아요."
+            en: "That is a different loop shape that <b>runs the body first</b>. This one asks, then runs."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 묻고 도나 돌고 묻나"
+              en: "The sharpest spot — ask then run, or run then ask"
+            code:
+              - "이 모양:   묻는다 → 돈다"
+              - "do-while: 돈다 → 묻는다"
+      - t:
+          ko: "첫 칸 때문에 조건이 참이 되어 돈다"
+          en: "The first slot makes the test true, so it runs"
+        diag:
+          t:
+            ko: "첫 칸이 먼저 돌기는 하지만, 그러고 나서 <b>본 조건</b>이 거짓이면 그대로 끝납니다."
+            en: "The first slot does run first, but if the test read <b>after it</b> is false, that is the end."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 순서"
+              en: "The sharpest spot — the order"
+            code:
+              - "첫 칸 → 조건 → (참이면) 몸통"
+      - t:
+          ko: "컴파일이 멈춘다"
+          en: "Compiling stops"
+        diag:
+          t:
+            ko: "문법에는 아무 문제가 없습니다. <b>안 도는 것</b>은 오류가 아니라 결과예요."
+            en: "The grammar is fine here. <b>Not running</b> is a result, not an error."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 문법이냐 결과냐"
+              en: "The sharpest spot — grammar or outcome"
+            code:
+              - "for (int i=0; false; i++) {}"
+              - "// 컴파일 된다. 안 돌 뿐"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 괄호 안에 <b>세 칸</b>을 두고 되풀이합니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} repeats with <b>three slots</b> in its parentheses.
+    hint:
+      ko: "보기 넷은 전부 괄호를 달고 같은 자리에 설 수 있는 낱말입니다."
+      en: "All four take parentheses and can stand in the same slot."
+    options:
+      - { t: "for", mono: true }
+      - t: "while"
+        mono: true
+        diag:
+          t:
+            ko: "<code>while</code> 의 괄호 안은 <b>한 칸</b>입니다. 시작과 매 바퀴 할 일은 밖에 흩어져요."
+            en: "<code>while</code> takes <b>one slot</b>. The start and the per-lap step scatter outside it."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 한 칸이냐 세 칸이냐"
+              en: "The sharpest spot — one slot or three"
+            code:
+              - "int i = 0; while (i < 3) { i++; }"
+              - "//  ^밖    ^한 칸       ^밖"
+      - t: "if"
+        mono: true
+        diag:
+          t:
+            ko: "<code>if</code> 는 <b>한 번</b> 갈라질 뿐 되풀이하지 않습니다. 괄호 안도 한 칸이에요."
+            en: "<code>if</code> splits <b>once</b> and does not repeat. Its parentheses hold one slot too."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 한 번이냐 되풀이냐"
+              en: "The sharpest spot — once or repeated"
+            code:
+              - "if:  한 번 갈린다"
+              - "이것: 조건이 거짓이 될 때까지"
+      - t: "switch"
+        mono: true
+        diag:
+          t:
+            ko: "<code>switch</code> 는 <b>값이 무엇인지</b>로 여러 갈래를 냅니다. 되풀이도 아니고 괄호 안도 한 칸이에요."
+            en: "<code>switch</code> branches by <b>what the value is</b>. It neither repeats nor takes three slots."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 값이냐 조건 셋이냐"
+              en: "The sharpest spot — a value or three slots"
+            code:
+              - "switch (day) { … }"
+              - "이것: 시작 · 조건 · 다음"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행이 셋을 <b>한 줄에 모아</b> 둔 것은 무엇을 위해서일까요?"
+    en: "What is gained by line {{site.line}} <b>gathering the three on one line</b>?"
+  choices:
+    - t:
+        ko: "몸통을 안 읽고도 <b>언제 끝나는지</b>를 알 수 있게 하려고"
+        en: "So <b>when it ends</b> can be read without reading the body"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 되풀이가 몇 바퀴 도는지도 세어 보세요."
+        en: "That is the direction. Count how many laps this one runs."
+    - t:
+        ko: "빠르게 돌게 하려고"
+        en: "To make it run faster"
+      ok: false
+      fb:
+        ko: "속도는 같습니다. 달라지는 것은 <b>읽는 사람</b>이 아는 것이에요."
+        en: "The speed is the same. What changes is what <b>the reader</b> knows."
+    - t:
+        ko: "자바에 다른 되풀이가 없어서"
+        en: "Because Java has no other loop"
+      ok: false
+      fb:
+        ko: "다른 모양이 여럿 있습니다. 이 모양을 고른 것은 선택이에요."
+        en: "Several other shapes exist. Choosing this one is a choice."
+
+queries:
+  - { grammars: [java], file: ./for-loop.scm }
+
+examples:
+  - code: "for (int i = 0; i < 3; i++) { total += i; }"
+    expect:
+      sites: 1
+      form: for
+      hole: "for"
+      picks: { 1: "for", 2: "int i = 0;", 3: "i < 3", 4: "i++" }
+  - code: "for (int i = n; i > 0; i--) sum += i;"
+    expect: { sites: 1, form: for, picks: { 3: "i > 0" } }
+  - code: "for (String s : list) { print(s); }"
+    expect: none

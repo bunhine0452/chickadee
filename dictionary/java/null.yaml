@@ -1,0 +1,209 @@
+schema: 1
+id: java/null
+universal: common/absent-value
+name: { ko: 가리키는 것이 없음, en: The null reference }
+token: "null"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 2
+prereq: [java/new-expression, cs/null-reference]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "값이 아니라 <b>가리키는 데가 없다</b>는 표시. 점을 찍으면 그 자리에서 터진다."
+    en: "Not a value but a mark for <b>pointing nowhere</b>. A dot on it blows up there."
+  why:
+    ko: >-
+      상자를 가리키는 이름은 <b>아무 데도 안 가리키는</b> 상태일 수 있습니다. {{site.line}}행의
+      표시가 그 상태예요. 헷갈리는 자리는 여기입니다 — 그것은 「빈 목록」도 「빈 글자」도 「0」도
+      아닙니다. 셋은 <b>있는</b> 상자이고, 이것은 상자가 <b>없는</b> 것이에요. 그래서 점을 찍어
+      뭔가 부르려는 순간 프로그램이 그 줄에서 멈춥니다. 그리고 숫자·참거짓 같은 원시 타입에는
+      아예 못 들어갑니다 — 그것들은 가리키는 이름이 아니라 값 자체를 담으니까요.
+    en: >-
+      A name that points at a box can be in a state of <b>pointing nowhere</b>. The mark on line
+      {{site.line}} is that state. Here is the confusing part: it is not an empty list, an empty string,
+      or a zero. Those three are boxes that <b>exist</b>; this is the absence of one. So the moment a
+      dot tries to call something on it, the program stops on that line. And it cannot go into a number
+      or a truth value at all — those hold the value itself, not a pointer to a box.
+  trace:
+    - ko: "{{site.line}}행의 이 자리는 어떤 상자도 가리키지 않는다."
+      en: "This spot on line {{site.line}} points at no box."
+    - ko: "여기에 점을 찍어 무엇을 부르면 그 줄에서 프로그램이 멈춘다."
+      en: "Put a dot here and call something, and the program stops on that line."
+    - ko: "멈추기 전에 물어보려면 「가리키는 데가 있는가」를 먼저 견줘야 한다."
+      en: "To ask before it stops, first compare whether it points anywhere."
+
+rule:
+  ko: "<b>비어 있는 것과 없는 것은 다르다.</b> 빈 목록은 있는 상자이고, 이것은 상자가 없는 것이다."
+  en: "<b>Empty and absent differ.</b> An empty list is a box that exists; this is no box at all."
+ok:
+  ko: >-
+    {{site.line}}행은 「가리킬 것이 아직 없다」를 적어 둔 자리입니다. 값이 0 이라는 뜻이 아니에요.
+  en: >-
+    Line {{site.line}} records “there is nothing to point at yet”. It does not mean the value is zero.
+payoff:
+  ko: >-
+    이걸 알면 실행이 멈춘 자리에서 <b>어느 이름이 비어 있었는지</b>를 곧바로 찾습니다 —
+    점 앞의 이름을 보면 돼요.
+  en: >-
+    Knowing this makes the crash site readable — look at the name before the dot to see <b>which one
+    was pointing nowhere</b>.
+bridge:
+  ko: >-
+    파이썬의 <code>None</code> 은 <b>진짜 객체</b>라 조건 자리에 넣으면 거짓으로 읽힙니다.
+    자바에서는 조건 자리에 넣으면 컴파일이 멈춰요 — 참·거짓이 아니니까요.
+  en: >-
+    Python's <code>None</code> is a <b>real object</b>, so it reads as false in a condition. Here putting
+    it in a condition stops the compiler — it is not a truth value.
+misconceptions:
+  - ko: "이것도 객체라 메서드를 부를 수 있다 — 가리키는 데가 없어서, 부르는 순간 그 줄에서 멈춥니다."
+    en: "It is an object too, so methods can be called — it points nowhere, and calling stops the program there."
+  - ko: "빈 글자·빈 목록과 같다 — 그 둘은 <b>있는</b> 상자입니다. 길이를 물어보면 답이 나와요."
+    en: "It is the same as an empty string or list — those are boxes that <b>exist</b>. Ask their length and you get an answer."
+  - ko: "숫자 자리에도 넣을 수 있다 — 원시 타입에는 못 들어갑니다. 상자를 가리키는 이름이 아니거든요."
+    en: "It fits in a number slot too — not into a primitive. Those are not pointers to boxes."
+  - ko: "조건 자리에 그냥 넣어도 된다 — 참·거짓이 아니라 컴파일이 멈춥니다. 견주기를 적어야 해요."
+    en: "It can sit in a condition as is — it is not a truth value, so the compiler stops. A comparison has to be written."
+
+meaning:
+  - q:
+      ko: "{{site.line}}행의 표시와 <b>빈 글자</b>는 무엇이 다를까요?"
+      en: "How does the mark on line {{site.line}} differ from an <b>empty string</b>?"
+    hint:
+      ko: "한쪽은 상자가 있고 한쪽은 없습니다."
+      en: "One has a box; the other has none."
+    options:
+      - t:
+          ko: "빈 글자는 있는 상자고, 이것은 가리키는 상자가 없다"
+          en: "An empty string is a box that exists; this points at no box"
+      - t:
+          ko: "둘 다 비어 있다는 뜻이고 쓰임만 다르다"
+          en: "Both mean empty; only the usage differs"
+        diag:
+          t:
+            ko: "빈 글자에는 <b>길이를 물어볼 수 있습니다</b>. 물어볼 상대가 있다는 뜻이에요 — 이쪽은 물어볼 상대가 없습니다."
+            en: "An empty string <b>can be asked its length</b> — there is something to ask. Here there is nothing to ask."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 물어볼 상대가 있나"
+              en: "The sharpest spot — is there anything to ask"
+            code:
+              - "\"\".length()   → 0"
+              - "가리키는 데 없음.length() → 멈춘다"
+      - t:
+          ko: "빈 글자가 메모리를 더 쓴다는 것 말고는 같다"
+          en: "They are the same apart from the empty string using memory"
+        diag:
+          t:
+            ko: "차이는 메모리가 아니라 <b>상대가 있느냐</b>입니다. 한쪽은 점을 찍을 수 있고 한쪽은 못 찍어요."
+            en: "The difference is not memory but <b>whether there is anything there</b>. One takes a dot; the other cannot."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 점을 찍을 수 있나"
+              en: "The sharpest spot — can a dot be put on it"
+            code:
+              - "빈 글자: 점을 찍어도 된다"
+              - "이것:   찍으면 멈춘다"
+      - t:
+          ko: "빈 글자는 거짓으로, 이것은 참으로 읽힌다"
+          en: "An empty string reads false and this reads true"
+        diag:
+          t:
+            ko: "자바에서는 <b>둘 다</b> 참·거짓으로 안 읽힙니다. 조건 자리에 그냥 넣으면 컴파일이 멈춰요."
+            en: "In Java <b>neither</b> reads as a truth value. Put either in a condition and the compiler stops."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 참거짓으로 읽히나"
+              en: "The sharpest spot — does it read as truth"
+            code:
+              - "if (s) {}     // 컴파일 안 됨"
+              - "if (s != …) {} // 이렇게 물어야 한다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>아직 가리킬 상자가 없다</b>를 적어 둡니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} records that <b>there is no box to point at yet</b>.
+    hint:
+      ko: "보기 셋은 「비었다」로 착각되는 다른 값들입니다."
+      en: "Three of the choices are values often mistaken for “empty”."
+    options:
+      - { t: "null", mono: true }
+      - t: "0"
+        mono: true
+        diag:
+          t:
+            ko: "<code>0</code> 은 <b>있는 값</b>입니다. 숫자 자리에는 들어가지만 상자를 가리키는 이름 자리에는 못 들어가요."
+            en: "<code>0</code> is a value that <b>exists</b>. It fits a number slot, not a slot that points at a box."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 값이냐 자리 없음이냐"
+              en: "The sharpest spot — a value or an absence"
+            code:
+              - "int n = 0;        // 값이 0"
+              - "String s = …;     // 가리킬 것이 없다"
+      - t: '""'
+        mono: true
+        diag:
+          t:
+            ko: "빈 글자는 <b>길이가 0 인 글자</b>이고 상자가 있습니다. 점을 찍어도 멈추지 않아요."
+            en: "An empty string is a <b>string of length zero</b> and it has a box. A dot on it does not stop anything."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 길이를 물어볼 수 있나"
+              en: "The sharpest spot — can it be asked its length"
+            code:
+              - "\"\".isEmpty()  → 참"
+      - t: "false"
+        mono: true
+        diag:
+          t:
+            ko: "<code>false</code> 는 <b>참·거짓 값</b>입니다. 자바에서는 이것과 종류가 아예 달라서 서로 자리를 바꿀 수 없어요."
+            en: "<code>false</code> is a <b>truth value</b>. In Java it is a different kind entirely and the two slots never swap."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 참거짓이냐 가리킴이냐"
+              en: "The sharpest spot — a truth value or a pointer"
+            code:
+              - "boolean b = false;  // 참거짓"
+              - "User u = …;         // 가리킴"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행이 값을 넣지 않고 <b>이 표시를 둔</b> 이유는 무엇일까요?"
+    en: "Why does line {{site.line}} leave <b>this mark</b> instead of a value?"
+  choices:
+    - t:
+        ko: "아직 정할 수 없어서 — 「없다」를 <b>드러내 놓고</b> 적어 둔 것이다"
+        en: "Because it cannot be settled yet — “nothing here” is written <b>out in the open</b>"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 언제 채워지는지도 한 줄 적어 보세요."
+        en: "That is the direction. Add a line on when it gets filled."
+    - t:
+        ko: "메모리를 아끼려고"
+        en: "To save memory"
+      ok: false
+      fb:
+        ko: "아끼는 양은 무시할 만합니다. 적어 두는 이유는 <b>상태를 드러내려고</b>예요."
+        en: "The saving is negligible. It is written to <b>make the state visible</b>."
+    - t:
+        ko: "자바가 여기에 값을 넣게 해 주지 않아서"
+        en: "Because Java does not allow a value here"
+      ok: false
+      fb:
+        ko: "넣을 수 있습니다. 안 넣기로 한 것은 선택이에요."
+        en: "A value is allowed. Leaving it out is a choice."
+
+queries:
+  - { grammars: [java], file: ./null.scm }
+
+examples:
+  - code: "String role = null;"
+    expect: { sites: 1, hole: "null", picks: { 1: "null" } }
+  - code: "if (bearerToken != null) { return bearerToken; }"
+    expect: { sites: 1, picks: { 1: "null" } }
+  - code: "String role = \"\";"
+    expect: none

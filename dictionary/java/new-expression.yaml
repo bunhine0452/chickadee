@@ -1,0 +1,244 @@
+schema: 1
+id: java/new-expression
+universal: null
+name: { ko: 상자 새로 만들기, en: Object creation }
+token: "new"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 2
+prereq: [java/class-declaration, cs/aliasing]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "틀에서 상자를 하나 만들어 낸다. 이름은 그 상자를 가리키기만 한다."
+    en: "Makes one box from the mould. A name only points at that box."
+  why:
+    ko: >-
+      클래스는 <b>틀</b>이고 여기서 만들어지는 것이 <b>상자</b>입니다. 틀은 하나여도 상자는 몇
+      개든 만들 수 있고, 상자마다 필드를 따로 지녀요. 그리고 자바에서 이름이 담는 것은 상자가
+      아니라 <b>상자가 있는 데</b>입니다 — 그래서 이름을 다른 이름에 넣어도 상자는 복사되지
+      않고, 둘이 같은 것을 가리킵니다. {{site.line}}행에서 만들어진 것은
+      {{pick.2|code}} 틀에서 나온 상자 하나예요.
+    en: >-
+      A class is the <b>mould</b>; what is made here is a <b>box</b>. One mould, as many boxes as you
+      like, each with its own fields. And in Java a name holds not the box but <b>where the box is</b>
+      — so assigning one name to another copies no box; the two point at the same one. What line
+      {{site.line}} made is one box from the {{pick.2|code}} mould.
+  trace:
+    - ko: "{{pick.2|code}} 틀에서 상자 하나가 만들어진다."
+      en: "One box is made from the {{pick.2|code}} mould."
+    - ko: "{{pick.3|code}} 안의 값들이 그 상자의 준비에 넘어간다."
+      en: "The values in {{pick.3|code}} go into preparing that box."
+    - ko: "만들어진 상자가 있는 자리가 이 식의 값이 된다."
+      en: "Where the finished box sits becomes this expression's value."
+
+rule:
+  ko: "<b>이름은 상자가 아니라 상자가 있는 데를 담는다.</b> 넘겨도 복사되지 않는다."
+  en: "<b>A name holds where the box is, not the box.</b> Passing it copies nothing."
+ok:
+  ko: >-
+    {{pick.2|code}} 틀에서 상자 하나가 생기고, 그 자리를 가리키는 값이 남습니다.
+  en: >-
+    One box comes out of the {{pick.2|code}} mould, and what remains is a value pointing at it.
+payoff:
+  ko: >-
+    이걸 알면 「분명히 <code>b</code> 만 고쳤는데 <code>a</code> 도 바뀌었다」가 풀립니다 —
+    둘이 같은 상자를 가리키고 있었던 거예요.
+  en: >-
+    Knowing this untangles “I only changed <code>b</code>, but <code>a</code> changed too” — the two
+    were pointing at the same box.
+bridge:
+  ko: >-
+    파이썬은 이 낱말 없이 <code>Foo()</code> 로 만듭니다. 자바는 낱말을 하나 두어 <b>만드는 자리</b>가
+    코드에서 눈에 띕니다.
+  en: >-
+    Python makes one with <code>Foo()</code> and no keyword. Java spends a word on it, so <b>where a box
+    is made</b> stands out in the code.
+misconceptions:
+  - ko: "이름에 상자가 통째로 담긴다 — 담기는 것은 <b>있는 자리</b>입니다. 그래서 넘겨도 복사가 안 돼요."
+    en: "The name holds the whole box — it holds <b>where it is</b>. That is why passing copies nothing."
+  - ko: "같은 틀에서 만든 둘은 같다 — 안이 똑같아도 <b>다른 상자</b>입니다."
+    en: "Two from the same mould are equal — identical inside, still <b>different boxes</b>."
+  - ko: "이 식이 준비 코드를 만들어 낸다 — 상자를 만드는 것이 이 식이고, 준비는 <b>이미 만들어진 것</b>을 채웁니다."
+    en: "This expression creates the preparation code — this expression makes the box; the preparation fills a box that already exists."
+  - ko: "이름을 지우면 상자도 곧 사라진다 — 아무도 안 가리키게 되면 <b>언젠가</b> 치워집니다. 그 시점은 정해져 있지 않아요."
+    en: "Dropping the name removes the box at once — once nothing points at it, it is cleared <b>eventually</b>. That moment is not fixed."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>어느 틀에서 만드는지</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>which mould it is made from</b>."
+    hint:
+      ko: "괄호 <b>앞</b>에 오는 이름입니다."
+      en: "It is the name <b>before</b> the parentheses."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>만들라</b>는 신호입니다. 무엇에서 만드는지는 그 뒤에 옵니다."
+          en: "{{pick.1|code}} is the signal to <b>make one</b>. What it is made from comes after."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 신호냐 틀이냐"
+            en: "The sharpest spot — the signal or the mould"
+          code:
+            - "앞 낱말: 만들라는 신호"
+            - "뒤 이름: 어느 틀에서"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 준비에 <b>넘기는 값</b>입니다. 어느 틀인지는 그 앞의 이름이 말해요."
+          en: "{{pick.3|code}} is the <b>values handed</b> to the preparation. Which mould is said by the name in front."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 무엇에서냐 무엇을 넣냐"
+            en: "The sharpest spot — from what, or with what"
+          code:
+            - "틀 이름: 무엇에서 만드나"
+            - "괄호 안: 만들며 넘기는 값"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행에서 만든 상자를 <b>다른 이름에 넣으면</b> 상자는 몇 개가 될까요?"
+      en: "Put the box made on line {{site.line}} <b>into another name</b> — how many boxes are there?"
+    hint:
+      ko: "이름이 담는 것은 상자가 아닙니다."
+      en: "What a name holds is not the box."
+    options:
+      - t:
+          ko: "하나 — 두 이름이 같은 상자를 가리킨다"
+          en: "One — two names point at the same box"
+      - t:
+          ko: "둘 — 넣을 때 상자가 복사된다"
+          en: "Two — assigning copies the box"
+        diag:
+          t:
+            ko: "복사되는 것은 <b>가리키는 자리</b>뿐입니다. 그래서 한쪽으로 안을 고치면 다른 쪽에서도 바뀐 것이 보여요."
+            en: "What is copied is only <b>where it points</b>. Change the inside through one name and the other sees the change."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 상자냐 가리키는 자리냐"
+              en: "The sharpest spot — the box or the pointer"
+            code:
+              - "b = a;  b.x = 1;"
+              - "a.x 도 1 이 된다"
+      - t:
+          ko: "둘 — 다만 안의 값은 나눠 쓴다"
+          en: "Two — but they share the inner values"
+        diag:
+          t:
+            ko: "상자가 애초에 하나입니다. 「둘인데 안을 나눠 쓴다」가 아니라 <b>같은 하나</b>를 둘이 부르는 것이에요."
+            en: "There was only ever one box. Not “two sharing insides” but <b>one</b> called by two names."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 둘이 나누나 하나를 부르나"
+              en: "The sharpest spot — two sharing or one named twice"
+            code:
+              - "a == b  →  참 (같은 상자)"
+      - t:
+          ko: "이름 수만큼 — 이름마다 상자가 하나씩 붙는다"
+          en: "As many as there are names — one box per name"
+        diag:
+          t:
+            ko: "상자를 만드는 것은 <b>이 식뿐</b>입니다. 이름을 몇 개 붙여도 상자는 늘지 않아요."
+            en: "Only <b>this expression</b> makes boxes. Adding names does not add boxes."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 무엇이 상자를 만드나"
+              en: "The sharpest spot — what makes a box"
+            code:
+              - "이름 붙이기: 상자 안 늘어남"
+              - "이 식:      상자 하나 생김"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 {{pick.2|code}} 틀에서 상자를 하나 만듭니다."
+      en: >-
+        Choose what goes in the blank. Line {{site.line}} makes one box from the {{pick.2|code}} mould.
+    hint:
+      ko: "자바가 이 자리에 쓰는 낱말은 하나뿐입니다."
+      en: "Java has exactly one word for this slot."
+    options:
+      - { t: "new", mono: true }
+      - t: "make"
+        mono: true
+        diag:
+          t:
+            ko: "<code>make</code> 는 자바 문법이 모르는 낱말입니다. 여기 적으면 <b>이름</b>으로 읽혀 컴파일이 멈춰요."
+            en: "<code>make</code> is not a word Java's grammar knows. Written here it reads as a <b>name</b> and stops the compiler."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 문법의 낱말이냐 그냥 이름이냐"
+              en: "The sharpest spot — a word of the grammar or just a name"
+            code:
+              - "문법의 낱말: 상자를 만든다"
+              - "그냥 이름:   찾을 수 없다고 한다"
+      - t: "class"
+        mono: true
+        diag:
+          t:
+            ko: "<code>class</code> 는 <b>틀을 정의할 때</b>의 낱말입니다. 여기는 이미 있는 틀에서 만드는 자리예요."
+            en: "<code>class</code> is the word for <b>defining</b> a mould. This slot makes one from a mould that exists."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 틀을 정하나 상자를 만드나"
+              en: "The sharpest spot — defining a mould or making a box"
+            code:
+              - "class C { }   // 틀을 정한다"
+              - "… C()         // 상자를 만든다"
+      - t: "init"
+        mono: true
+        diag:
+          t:
+            ko: "<code>init</code> 은 스위프트가 <b>준비</b>에 쓰는 이름입니다. 상자를 만드는 낱말이 아니에요."
+            en: "<code>init</code> is what Swift calls the <b>preparation</b>. It is not a word for making a box."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 만들기냐 준비냐"
+              en: "The sharpest spot — making or preparing"
+            code:
+              - "만들기: 자리를 잡는다"
+              - "준비:   잡힌 자리를 채운다"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행에서 상자를 <b>여기서</b> 만든 이유는 무엇일까요?"
+    en: "Why is a box made <b>here</b>, on line {{site.line}}?"
+  choices:
+    - t:
+        ko: "이 자리에서 <b>자기만의 상태</b>가 필요해서 — 남과 섞이면 안 되는 값이 있다"
+        en: "Because this spot needs <b>state of its own</b> — a value that must not mix with anyone else's"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 상자가 무엇을 기억하는지도 한 줄로 적어 보세요."
+        en: "That is the direction. Add a line on what that box remembers."
+    - t:
+        ko: "자바는 상자 없이는 아무것도 못 해서"
+        en: "Because Java can do nothing without a box"
+      ok: false
+      fb:
+        ko: "상태가 없는 일은 상자 없이도 됩니다. 만드는 것은 선택이에요."
+        en: "Work with no state needs no box. Making one is a choice."
+    - t:
+        ko: "빠르게 하려고"
+        en: "To make it faster"
+      ok: false
+      fb:
+        ko: "상자를 만드는 것은 오히려 비용입니다. 이유는 속도가 아니라 <b>상태</b>예요."
+        en: "Making a box is a cost, not a saving. The reason is <b>state</b>, not speed."
+
+queries:
+  - { grammars: [java], file: ./new-expression.scm }
+
+examples:
+  - code: "PasswordEncoder e = new BCryptPasswordEncoder();"
+    expect:
+      sites: 1
+      form: new
+      hole: "new"
+      picks: { 1: "new", 2: "BCryptPasswordEncoder", 3: "()" }
+  - code: "Date d = new Date(now.getTime() + 1000);"
+    expect: { sites: 1, form: new, picks: { 2: "Date" } }
+  - code: "Date d = Date.from(instant);"
+    expect: none

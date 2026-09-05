@@ -1,0 +1,41 @@
+[
+  {
+    "queryId": "java/field-declaration",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "field",
+    "startLine": 4,
+    "startCol": 4,
+    "endLine": 4,
+    "endCol": 21,
+    "nodeKind": "field_declaration",
+    "inError": false
+  },
+  {
+    "queryId": "java/field-declaration",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "field",
+    "startLine": 4,
+    "startCol": 4,
+    "endLine": 4,
+    "endCol": 7,
+    "nodeKind": "integral_type",
+    "inError": false
+  },
+  {
+    "queryId": "java/field-declaration",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "field",
+    "startLine": 4,
+    "startCol": 8,
+    "endLine": 4,
+    "endCol": 14,
+    "nodeKind": "identifier",
+    "inError": false
+  }
+]

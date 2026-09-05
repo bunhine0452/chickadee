@@ -1,0 +1,89 @@
+schema: 1
+id: proto/rest-resource
+universal: null
+name: { ko: 주소가 가리키는 것, en: REST resource }
+token: null
+grammars: []
+framework: null
+track_default: t0
+essential: false
+difficulty: 2
+prereq: []
+confusions: []
+dict:
+  one_liner:
+    ko: "주소는 <b>무엇</b>을 가리키는 이름이지 <b>무엇을 할지</b>를 적는 자리가 아니다."
+    en: "An address names <b>a thing</b>; it is not where you write <b>what to do</b>."
+  why:
+    ko: >-
+      주소에 동사를 넣기 시작하면 하나의 것에 이름이 여럿 생깁니다. 대신 <b>이름은 것에</b>,
+      <b>행동은 낱말에</b> 나누면 이름이 하나로 유지되고 무엇을 할지는 그 옆에서 말해요. 그리고
+      주소는 <b>계층</b>을 이룹니다 — 앞쪽 조각은 묶음, 뒤쪽 조각은 그 안의 하나입니다. 그래서
+      같은 자리에 붙는 여러 갈래를 클래스가 <b>공통 앞머리</b> 하나로 묶고 메서드마다 뒷조각만
+      다르게 붙일 수 있어요. 이 규칙이 서 있으면 주소만 보고도 무엇을 다루는 코드인지 압니다.
+    en: >-
+      Put verbs in addresses and one thing ends up with several names. Split it instead — <b>names
+      for things</b>, <b>a word for the act</b> — and the name stays one while what to do is said
+      beside it. Addresses also form a <b>hierarchy</b>: earlier segments are the collection, later
+      ones a single item inside it. That is why several routes at the same spot can share <b>one
+      prefix</b> on the class and differ only in the tail on each method. With this rule holding, the
+      address alone says what the code is about.
+  trace: []
+rule:
+  ko: "<b>주소는 명사, 행동은 그 옆의 낱말.</b> 앞 조각은 묶음이고 뒤 조각은 그 안의 하나다."
+  en: "<b>Nouns in the address, the act beside it.</b> Earlier segments are the collection, later ones one item."
+ok:
+  ko: >-
+    앞머리와 뒷조각이 합쳐져 하나의 주소가 되고, 무엇을 할지는 그 주소가 아니라 옆의 낱말이 말합니다.
+  en: >-
+    A prefix and a tail join into one address, and what to do is said by the word beside it, not by
+    the address.
+misconceptions:
+  - ko: "주소마다 코드가 하나다 — 같은 주소에 낱말만 다른 코드가 여럿 붙습니다."
+    en: "One address, one piece of code — several can sit at the same address, differing only in the word."
+  - ko: "주소에 동사를 넣으면 읽기 쉽다 — 같은 것에 이름이 여럿 생겨 어느 것이 정본인지 흐려집니다."
+    en: "Verbs in the address read better — one thing gets several names and none of them is canonical."
+  - ko: "앞머리는 장식이다 — 앞머리가 없으면 뒷조각만으로는 어느 묶음의 것인지 모릅니다."
+    en: "The prefix is decoration — without it, a tail alone does not say which collection it belongs to."
+  - ko: "주소가 파일 경로와 같다 — 주소는 <b>이름</b>이고 파일이 어디 있는지와 아무 관계가 없습니다."
+    en: "The address mirrors the file path — an address is a <b>name</b> and says nothing about where files sit."
+evidence: ["@RestController", "@RequestMapping", "@PathVariable", "@RequestBody", "@GetMapping", "@PostMapping"]
+meaning:
+  - q:
+      ko: "{{site.line}}행이 붙은 클래스의 앞머리가 바뀌면 <b>무엇이</b> 달라질까요?"
+      en: "If the prefix on the class at line {{site.line}} changes, <b>what</b> changes?"
+    hint:
+      ko: "주소는 앞머리와 뒷조각이 합쳐진 하나입니다."
+      en: "An address is one thing, made of a prefix plus a tail."
+    options:
+      - t: { ko: "그 안의 모든 자리의 주소가 함께 바뀐다", en: "Every route inside moves with it" }
+      - t: { ko: "앞머리를 안 적은 자리만 바뀐다", en: "Only the routes that wrote no tail move" }
+        diag:
+          t:
+            ko: "뒷조각을 적었든 안 적었든 <b>앞머리에 이어 붙습니다</b>. 뒷조각은 앞머리 다음 자리를 말할 뿐이에요."
+            en: "Tail or no tail, everything <b>hangs off the prefix</b>. A tail only names the spot after it."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 이어 붙나 갈리나", en: "The sharpest spot — joined or separate" }
+            code:
+              - "앞머리 + 뒷조각 = 주소 하나"
+              - "뒷조각이 없으면 앞머리가 곧 주소"
+      - t: { ko: "아무것도 안 바뀐다 — 메서드에 적은 것이 진짜 주소다", en: "Nothing changes — the real address is on the method" }
+        diag:
+          t:
+            ko: "메서드에 적은 것은 <b>주소의 뒷부분</b>입니다. 앞부분은 클래스가 대고 있어요 — 그래서 파일을 두 자리에서 읽어야 합니다."
+            en: "What the method carries is the <b>tail</b> of the address. The class supplies the front — which is why the file has to be read in two places."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 한 자리냐 두 자리냐", en: "The sharpest spot — one place or two" }
+            code:
+              - "클래스: 앞머리"
+              - "메서드: 뒷조각"
+      - t: { ko: "주소는 그대로고 부르는 낱말만 달라진다", en: "The address stays and only the word used to call changes" }
+        diag:
+          t:
+            ko: "낱말은 <b>다른 축</b>입니다. 앞머리를 고치면 이름이 바뀌고, 낱말은 그 이름을 어떻게 다룰지를 말해요."
+            en: "The word is a <b>different axis</b>. Changing the prefix changes the name; the word says how that name is handled."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 이름이냐 행동이냐", en: "The sharpest spot — the name or the act" }
+            code:
+              - "주소: 무엇을"
+              - "낱말: 무엇을 할지"

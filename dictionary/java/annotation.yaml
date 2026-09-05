@@ -1,0 +1,198 @@
+schema: 1
+id: java/annotation
+universal: null
+name: { ko: 코드에 붙인 표시, en: Annotation }
+token: "@"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 4
+prereq: [java/interface, java/method-declaration]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "코드에 붙여 두는 표시. 붙이는 것만으로는 아무 일도 일어나지 않는다."
+    en: "A marker attached to code. Attaching it alone makes nothing happen."
+  why:
+    ko: >-
+      {{site.line}}행의 표시는 <b>실행되는 코드가 아닙니다</b>. 자바 문법 어디를 봐도 그것이 무슨
+      일을 하는지 안 적혀 있어요 — 누군가 <b>읽어 주기 전까지</b> 그냥 붙어 있는 쪽지입니다.
+      그 「누군가」가 스프링이고, 스프링이 시작할 때 클래스들을 훑어 이 표시를 보고
+      「이 메서드는 바깥 요청이 오면 부른다」 같은 결정을 합니다. 그래서 표시가 붙은 메서드는
+      <b>이 파일 안 어디에서도 불리지 않는데</b> 실행됩니다 — 부르는 자리를 찾아도 안 나오는
+      이유가 여기 있어요.
+    en: >-
+      The marker on line {{site.line}} <b>is not code that runs</b>. Nowhere in Java's grammar does it
+      say what it does — until something <b>reads</b> it, it is a note stuck to the code. That
+      something is Spring: at startup it walks the classes, sees the marker, and decides things like
+      “call this method when a request arrives”. Which is why a marked method runs while <b>nothing in
+      this file calls it</b> — that is why looking for the call site turns up nothing.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 표시의 이름이다. 자바는 그 이름의 뜻을 모른다."
+      en: "{{pick.2|code}} is the marker's name. Java does not know what it means."
+    - ko: "프로그램이 시작할 때 프레임워크가 클래스를 훑으며 이 표시를 읽는다."
+      en: "At startup the framework walks the classes and reads the marker."
+    - ko: "{{site.line}}행 아래의 코드는 그 결정에 따라 불린다 — 이 파일이 부르지 않는다."
+      en: "The code below line {{site.line}} is called by that decision, not by this file."
+
+rule:
+  ko: "<b>표시는 실행되지 않는다.</b> 읽어 주는 쪽이 있어야 뜻이 생기고, 그 쪽은 자바가 아니다."
+  en: "<b>A marker does not run.</b> It means something only when something reads it, and that is not Java."
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:은,는}} 프레임워크가 읽어 갈 쪽지입니다. 자바는 그것을 그냥 적어만 둡니다.
+  en: >-
+    {{pick.2|code}} is a note for the framework to pick up. Java merely records it.
+payoff:
+  ko: >-
+    이걸 알면 「이 메서드를 누가 부르지」가 풀립니다 — 부르는 자리는 <b>내 코드 밖</b>에 있고,
+    표시가 그 다리예요.
+  en: >-
+    Knowing this settles “who calls this method” — the caller is <b>outside your code</b>, and the
+    marker is the bridge.
+bridge:
+  ko: >-
+    파이썬·자바스크립트의 데코레이터는 <b>실행되는 함수</b>라 붙이는 순간 뭔가 일어납니다.
+    자바의 표시는 그렇지 않아요 — 읽히기를 기다릴 뿐입니다.
+  en: >-
+    A decorator in Python or JavaScript is a <b>function that runs</b>, so attaching it does something
+    at once. This is not that — it waits to be read.
+misconceptions:
+  - ko: "표시를 붙이면 그 자리에서 코드가 돈다 — 아무것도 안 돕니다. 읽는 쪽이 있어야 뜻이 생겨요."
+    en: "Attaching a marker runs code there — nothing runs. It means something only once something reads it."
+  - ko: "표시가 지운 생성자는 코드 어딘가에 있다 — <b>소스에 없습니다</b>. 롬복이 컴파일할 때 만들어 넣어요. 그래서 리포를 뒤져도 안 나옵니다."
+    en: "A constructor a marker replaced is somewhere in the code — it is <b>not in the source</b>. Lombok makes it at compile time, so searching the repo finds nothing."
+  - ko: "표시의 이름이 다르면 다른 종류다 — 이름은 이름일 뿐이고, 읽는 쪽이 그 이름을 알아야 뜻이 있습니다."
+    en: "A different marker name means a different kind — a name is just a name; it means something only if the reader knows it."
+  - ko: "표시가 붙은 메서드는 이 파일 어딘가에서 불린다 — 부르는 자리가 이 파일 밖입니다."
+    en: "A marked method is called somewhere in this file — the call site is outside it."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>프레임워크가 읽어 갈 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name the framework will read</b>."
+    hint:
+      ko: "앞의 기호는 「여기부터 표시」라는 신호일 뿐입니다."
+      en: "The symbol in front only signals “a marker starts here”."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>표시가 시작된다</b>는 신호입니다. 무엇을 하라는 이름은 그 뒤에 옵니다."
+          en: "{{pick.1|code}} signals that <b>a marker begins</b>. The name that says what to do comes after it."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 신호냐 이름이냐"
+            en: "The sharpest spot — the signal or the name"
+          code:
+            - "앞 기호: 여기부터 표시"
+            - "뒤 이름: 무엇을 하라는지"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 표시에 <b>딸려 보내는 값</b>입니다. 무엇을 할지는 앞의 이름이 정해요."
+          en: "{{pick.3|code}} is the <b>value handed along</b> with the marker. What to do is set by the name in front."
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 무엇을 하나 어떻게 하나"
+            en: "The sharpest spot — what it does or how"
+          code:
+            - "이름: 무엇을 하는 표시인가"
+            - "괄호 안: 그 표시에 딸려 가는 값"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행의 표시를 지우면 <b>언제</b> 무엇이 달라질까요?"
+      en: "Remove the marker on line {{site.line}} — <b>when</b> does something change?"
+    hint:
+      ko: "표시를 읽는 쪽은 자바가 아니라 프레임워크입니다."
+      en: "What reads the marker is not Java but the framework."
+    options:
+      - t:
+          ko: "컴파일은 그대로 되고, 프로그램이 시작할 때 그 결정이 사라진다"
+          en: "It still compiles; the decision disappears when the program starts"
+      - t:
+          ko: "그 줄에서 컴파일이 멈춘다"
+          en: "Compiling stops at that line"
+        diag:
+          t:
+            ko: "표시는 <b>있어도 없어도</b> 문법에 맞습니다. 자바는 그 뜻을 모르니 없다고 탓하지도 않아요."
+            en: "The marker is grammatical <b>present or absent</b>. Java does not know its meaning, so it does not miss it."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 문법이냐 뜻이냐"
+              en: "The sharpest spot — grammar or meaning"
+            code:
+              - "문법: 표시는 선택"
+              - "뜻: 읽는 쪽이 정한다"
+      - t:
+          ko: "메서드가 불릴 때 그 자리에서 멈춘다"
+          en: "It stops at that spot when the method is called"
+        diag:
+          t:
+            ko: "메서드가 <b>애초에 안 불립니다</b>. 부를지 말지를 정하던 표시가 없어졌으니까요."
+            en: "The method is <b>never called at all</b> — the marker that decided to call it is gone."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 부르다 멈추나 안 부르나"
+              en: "The sharpest spot — stopping mid-call or never called"
+            code:
+              - "표시 있음: 프레임워크가 부른다"
+              - "표시 없음: 아무도 안 부른다"
+      - t:
+          ko: "아무 차이가 없다 — 실행되는 코드가 아니니까"
+          en: "Nothing changes — it is not code that runs"
+        diag:
+          t:
+            ko: "실행되지 않는 것은 맞지만, <b>읽히기는 합니다</b>. 읽고 내린 결정이 사라지는 것이 차이예요."
+            en: "It does not run, true — but it <b>is read</b>. What disappears is the decision made from reading it."
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 도느냐 읽히느냐"
+              en: "The sharpest spot — running or being read"
+            code:
+              - "안 돈다: 맞다"
+              - "안 읽힌다: 아니다 → 결정이 바뀐다"
+
+no_hole_reason: >-
+  빈칸의 정답이 사용처마다 갈린다 — 이 줄에서 뜻을 지는 것은 표시의 이름이고 그것이
+  RestController·Override·PostMapping 처럼 매번 다르다. 여는 기호 하나만 지우는 빈칸은
+  캡처 이름 규약(03 §3.2)이 그 글자를 캡처 이름으로 읽어 만들 수 없다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행의 표시를 <b>왜</b> 여기에 붙였을까요?"
+    en: "<b>Why</b> is the marker on line {{site.line}} put here?"
+  choices:
+    - t:
+        ko: "이 아래 코드를 <b>바깥에서 부를 수 있게</b> 프레임워크에 알리려고"
+        en: "To tell the framework this code may be <b>called from outside</b>"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 무엇을 알리는 표시인지도 한 줄로 적어 보세요."
+        en: "That is the direction. Add one line saying what it announces."
+    - t:
+        ko: "사람이 읽기 쉽게 하려고 — 주석 같은 것이다"
+        en: "To make it easier for people to read — like a comment"
+      ok: false
+      fb:
+        ko: "주석은 버려지고 이 표시는 남아서 읽힙니다. 하는 일이 달라요."
+        en: "A comment is discarded; this stays and gets read. They do different work."
+    - t:
+        ko: "코드를 빠르게 하려고"
+        en: "To make the code faster"
+      ok: false
+      fb:
+        ko: "속도와 관계가 없습니다. 정하는 것은 <b>누가 언제 부르는가</b>예요."
+        en: "It has nothing to do with speed. What it settles is <b>who calls it, and when</b>."
+
+queries:
+  - { grammars: [java], file: ./annotation.scm }
+
+examples:
+  - code: "@Override public String toString() { return \"x\"; }"
+    expect: { sites: 1, form: marker, picks: { 1: "@Override", 2: "Override" } }
+  - code: "@RequestMapping(\"/api/auth\") class C {}"
+    expect: { sites: 1, form: with-args, picks: { 2: "RequestMapping", 3: "(\"/api/auth\")" } }
+  - code: "int at = 1;"
+    expect: none

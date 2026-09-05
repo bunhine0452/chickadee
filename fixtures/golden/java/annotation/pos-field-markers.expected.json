@@ -1,0 +1,93 @@
+[
+  {
+    "queryId": "java/annotation",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "site",
+    "form": "with-args",
+    "startLine": 4,
+    "startCol": 4,
+    "endLine": 4,
+    "endCol": 32,
+    "nodeKind": "annotation",
+    "inError": false
+  },
+  {
+    "queryId": "java/annotation",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.1",
+    "form": "with-args",
+    "startLine": 4,
+    "startCol": 4,
+    "endLine": 4,
+    "endCol": 32,
+    "nodeKind": "annotation",
+    "inError": false
+  },
+  {
+    "queryId": "java/annotation",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.2",
+    "form": "with-args",
+    "startLine": 4,
+    "startCol": 5,
+    "endLine": 4,
+    "endCol": 10,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "java/annotation",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.3",
+    "form": "with-args",
+    "startLine": 4,
+    "startCol": 10,
+    "endLine": 4,
+    "endCol": 32,
+    "nodeKind": "annotation_argument_list",
+    "inError": false
+  },
+  {
+    "queryId": "java/annotation",
+    "matchId": 2,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "marker",
+    "startLine": 7,
+    "startCol": 4,
+    "endLine": 7,
+    "endCol": 9,
+    "nodeKind": "marker_annotation",
+    "inError": false
+  },
+  {
+    "queryId": "java/annotation",
+    "matchId": 2,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "marker",
+    "startLine": 7,
+    "startCol": 4,
+    "endLine": 7,
+    "endCol": 9,
+    "nodeKind": "marker_annotation",
+    "inError": false
+  },
+  {
+    "queryId": "java/annotation",
+    "matchId": 2,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "marker",
+    "startLine": 7,
+    "startCol": 5,
+    "endLine": 7,
+    "endCol": 9,
+    "nodeKind": "identifier",
+    "inError": false
+  }
+]

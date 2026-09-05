@@ -1,0 +1,67 @@
+[
+  {
+    "queryId": "java/import",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "import",
+    "startLine": 3,
+    "startCol": 0,
+    "endLine": 3,
+    "endCol": 28,
+    "nodeKind": "import_declaration",
+    "inError": false
+  },
+  {
+    "queryId": "java/import",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "import",
+    "startLine": 3,
+    "startCol": 0,
+    "endLine": 3,
+    "endCol": 6,
+    "nodeKind": "import",
+    "inError": false
+  },
+  {
+    "queryId": "java/import",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "hole",
+    "form": "import",
+    "startLine": 3,
+    "startCol": 0,
+    "endLine": 3,
+    "endCol": 6,
+    "nodeKind": "import",
+    "inError": false
+  },
+  {
+    "queryId": "java/import",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "import",
+    "startLine": 3,
+    "startCol": 7,
+    "endLine": 3,
+    "endCol": 22,
+    "nodeKind": "scoped_identifier",
+    "inError": false
+  },
+  {
+    "queryId": "java/import",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "import",
+    "startLine": 3,
+    "startCol": 23,
+    "endLine": 3,
+    "endCol": 27,
+    "nodeKind": "identifier",
+    "inError": false
+  }
+]
