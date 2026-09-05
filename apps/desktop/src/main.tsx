@@ -4,7 +4,8 @@ import { createRoot } from 'react-dom/client';
 import './styles/tokens.css';
 import './styles/reset.css';
 import './styles/fonts.css';
-import './styles/physics.css';
+// 배치 층 (D182). 리셋 뒤·화면 CSS 앞이다 — 뼈대는 화면이 언제든 덮을 수 있어야 한다.
+import './styles/layout.css';
 import './styles/app.css';
 
 import { App } from './App.js';

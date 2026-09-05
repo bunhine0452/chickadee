@@ -152,8 +152,11 @@ describe('the rendered file', () => {
     const text = render();
     expect(text).toContain('| react | 19.2.8 | MIT |');
     expect(text).toContain('| serde | 1.0.0 | MIT OR Apache-2.0 |');
-    expect(text).toContain('OFL-BlackHanSans.txt');
     expect(text).toContain('OFL-Plex.txt');
+    // D182 로 디스플레이 서체(Black Han Sans)를 지웠다. 그 파일이 다시 목록에 나타나면
+    // 번들에 서체가 늘었다는 뜻이므로 여기서 막는다 — 고지는 실제 번들과 같아야 한다.
+    expect(text).not.toContain('OFL-BlackHanSans.txt');
+    expect(text).toContain('Two font families are bundled');
   });
 
   test('no path from the machine that generated it', () => {

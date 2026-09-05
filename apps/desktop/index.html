@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Chickadee</title>
 
-    <!-- 서체 4개만 미리 받는다 — 본문 400·700, Mono 400, 포스터 400 (05 §1.4).
-         나머지 5개(500·600)는 필요한 화면에서 받는다. 네트워크 요청은 0 — 전부 번들 파일이다. -->
+    <!-- 서체 4개만 미리 받는다 — 본문 400·500·700, Mono 400 (05 §1.4 · D182).
+         나머지 4개는 필요한 화면에서 받는다. 네트워크 요청은 0 — 전부 번들 파일이다.
+         디스플레이 서체는 없다(D182·D183) — 큰 제목도 같은 Plex Sans KR 로 그린다. -->
     <link rel="preload" as="font" type="font/woff2" crossorigin href="/src/assets/fonts/IBMPlexSansKR-Regular.woff2" />
     <link rel="preload" as="font" type="font/woff2" crossorigin href="/src/assets/fonts/IBMPlexSansKR-Bold.woff2" />
     <link rel="preload" as="font" type="font/woff2" crossorigin href="/src/assets/fonts/IBMPlexMono-Regular.woff2" />
-    <link rel="preload" as="font" type="font/woff2" crossorigin href="/src/assets/fonts/BlackHanSans-Regular.woff2" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/src/assets/fonts/IBMPlexSansKR-Medium.woff2" />
   </head>
   <body>
     <div id="root"></div>
