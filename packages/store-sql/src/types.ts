@@ -116,17 +116,21 @@ export type CardPayload =
   // 4단 수정 — 실제 `fix:` 커밋의 hunk 가 참조 답이다. `lines` 는 편집 창(파일 줄 `from` 부터),
   // `target` 은 `patch-line`·`rollback` 에서 고칠 줄(창 안 0-based), `patch-place` 에서 정답 삽입
   // 자리(0..lines.length). `accept` 는 `patch-place` 의 스코프 검사가 허용하는 자리 전부.
+  // `tests` 는 실행 판정의 정답지다 (D180) — 비었으면 그 판은 게이트에서 빠진다.
   | { track: 't3'; kind: 'repair'; type: RepairType; stage: 4; q: string;
       file: string; grammar: string; goal: string; commit: { h: string; d: string; m: string };
       lines: string[]; from: number; target: number; expected: string[]; accept?: number[];
-      promptLines: string[] }
+      promptLines: string[]; tests?: JudgeTestPayload[] }
   // 5단 재구현 — `reimpl-spec` 은 시그니처와 `mustHold` 만 주고, `reimpl-layer` 는 이웃 층
   // (`context`)을 사양으로 주며 `links` 로 연결을 검사한다. `handoff` 는 채점이 없다.
   | { track: 't3'; kind: 'reimpl'; type: ReimplType; stage: 5;
       file: string; grammar: string; fn: string; original: string[]; from: number;
       signature: string[]; mustHold: { text: string; source: 'user' | 'dict' | 'ast'; anchor: number[] }[];
       links: string[]; context: { file: string; lines: string[] }[]; question: string;
-      promptLines: string[]; blockId: number | null };
+      promptLines: string[]; blockId: number | null; tests?: JudgeTestPayload[] };
+
+/** 판정용 테스트 한 장이 payload 에 실린 모양 (D180). 러너의 `RunSpec.tests` 로 그대로 간다. */
+export interface JudgeTestPayload { path: string; text: string; source: 'commit' | 'repo' | 'contract' }
 
 /** 코스 문항의 payload 만 (D164). 화면이 단 화면을 고를 때 이 셋으로 좁힌다. */
 export type StagePayload = Extract<CardPayload, { track: 't3' }>;

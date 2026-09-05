@@ -217,6 +217,13 @@ const stageChoiceSchema = z.object({
   }).optional(),
 });
 
+/** 판정용 테스트 한 장 (D180). 4·5단 payload 에 실려 러너로 간다. */
+const judgeTestSchema = z.object({
+  path: z.string(),
+  text: z.string(),
+  source: z.enum(['commit', 'repo', 'contract']),
+});
+
 const stageRepairSchema = z.object({
   track: z.literal('t3'),
   kind: z.literal('repair'),
@@ -233,6 +240,7 @@ const stageRepairSchema = z.object({
   expected: z.array(z.string()),
   accept: z.array(int()).optional(),
   promptLines: z.array(z.string()),
+  tests: z.array(judgeTestSchema).optional(),
 });
 
 const stageReimplSchema = z.object({
@@ -254,6 +262,7 @@ const stageReimplSchema = z.object({
   question: z.string(),
   promptLines: z.array(z.string()),
   blockId: z.union([int(), z.null()]),
+  tests: z.array(judgeTestSchema).optional(),
 });
 
 /** `card.payload_json` (02 §8.2 · 05 가 그대로 렌더한다). 코스 셋은 D164. */

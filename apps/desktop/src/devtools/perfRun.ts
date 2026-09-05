@@ -67,10 +67,10 @@ async function waitFor(ok: () => boolean, timeoutMs: number): Promise<boolean> {
   return ok();
 }
 
-/** 주간반 ↔ 야간반을 두 번 눌러 전환 비용을 두 표본 남긴다. */
+/** 밝게 ↔ 어둡게를 두 번 눌러 전환 비용을 두 표본 남긴다. */
 async function toggleTheme(): Promise<void> {
   // 두 갈래 스위치는 **버튼 자신이** `.sw` 다 (05 §5 — 2개면 `role=switch`).
-  const sw = document.querySelector<HTMLElement>('button.sw[aria-label*="야간반"]');
+  const sw = document.querySelector<HTMLElement>('button.sw[aria-label*="어둡게"]');
   if (!sw) {
     await step('theme-switch-missing');
     return;

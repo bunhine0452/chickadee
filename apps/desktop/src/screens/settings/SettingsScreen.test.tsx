@@ -238,7 +238,7 @@ describe('SettingsScreen', () => {
   it('모양 스위치가 <html> 을 세우고 저장한다 (E7)', async () => {
     const user = userEvent.setup();
     await drawn();
-    await user.click(screen.getByRole('switch', { name: '주간반 · 야간반 전환' }));
+    await user.click(screen.getByRole('switch', { name: '밝게 · 어둡게 전환' }));
 
     expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
     await waitFor(() => {
@@ -331,7 +331,7 @@ describe('SettingsScreen', () => {
     const sec = screen.getByRole('region', { name: /프라이버시 노트/ });
     const text = sec.textContent ?? '';
     expect(text).toContain('당신의 코드는 이 컴퓨터를 떠나지 않습니다.');
-    expect(text).toContain('이 판은 인터넷을 아예 쓰지 않습니다');
+    expect(text).toContain('이 버전은 인터넷을 아예 쓰지 않습니다');
     expect(text).toContain('앱이 스스로 보내지 않습니다.');
     expect(text).toContain('사용 통계·오류 보고를 보내지 않고, 업데이트도 확인하지 않습니다.');
     expect(text).toContain('「설정 → 전부 지우기」로 모든 기록을 삭제할 수 있습니다.');

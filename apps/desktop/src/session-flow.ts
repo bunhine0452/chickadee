@@ -216,7 +216,7 @@ export async function answerPlate(input: AnswerInput): Promise<PlateResult | nul
 const maxRung = (rungs: readonly number[]): 1 | 2 | 3 | 4 =>
   (rungs.length === 0 ? 1 : Math.max(...rungs)) as 1 | 2 | 3 | 4;
 
-/** 「잉크 N겹 · 다음 인쇄 …」 — `applyOutcome` 결과로만 그린다 (05 §3). */
+/** 「숙련도 N단계 · 다음 복습 …」 — `applyOutcome` 결과로만 그린다 (05 §3 · D178). */
 function gainText(
   before: Layer,
   after: Layer,
@@ -225,9 +225,9 @@ function gainText(
   settings: { tz: string; rolloverHour: number },
 ): string {
   const next = labelFor(dueAt, now, settings.tz, settings.rolloverHour);
-  if (after > before) return `잉크 ${after}겹 · 다음 인쇄 ${next}`;
-  if (after < before) return `잉크 ${after}겹으로 내려갑니다 · 다음 인쇄 ${next}`;
-  return `잉크 ${after}겹 그대로 · 다음 인쇄 ${next}`;
+  if (after > before) return `숙련도 ${after}단계 · 다음 복습 ${next}`;
+  if (after < before) return `숙련도 ${after}단계로 내려갑니다 · 다음 복습 ${next}`;
+  return `숙련도 ${after}단계 그대로 · 다음 복습 ${next}`;
 }
 
 // ───────── T1 채점 (04 §4~§6 · 02 §4) ─────────

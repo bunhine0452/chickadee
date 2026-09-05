@@ -56,8 +56,8 @@ docs/program/ 넉 장을 코드로 옮긴다 — 문항 16유형 · 챕터 통�
 - [x] 인제스트 배선 — writeUnits 가 entryUnits N:M + 디렉터리 규칙, 챕터·경로가 MonggleMonggle 에서 끝까지 서는지 {#g-ingest}
 - [x] 전체 게이트 — typecheck · lint · test:unit · cargo test · dict:lint · check:rust · test:gates · test:e2e-ui {#g-gates}
 - [x] IPC 덤프 재생성·커밋 {#g-ipc}
-- [ ] 커밋(영어) · 푸시 · gh run watch 초록 확인 {#g-ship}
-- [ ] 정본 갱신 요청 목록 — D159·D162·D170 이 정본 §2·§4·§9 에 요구하는 것을 사용자에게 {#g-canon}
+- [x] 커밋(영어) · 푸시 · gh run watch 초록 확인 {#g-ship}
+- [x] 정본 갱신 요청 목록 — D159·D162·D170 이 정본 §2·§4·§9 에 요구하는 것을 사용자에게 {#g-canon}
 
 <!-- oculpm:plan-log begin v1 -->
 | 시각 | 항목 | 에이전트 | 변화 | 일지 | 메모 |
@@ -97,4 +97,6 @@ docs/program/ 넉 장을 코드로 옮긴다 — 문항 16유형 · 챕터 통�
 | 2026-09-05T11:55:23+09:00 | #f-flow | claude-code | ☐→x |  | App.tsx 코스 분기 · flow.ts openCourse/closeCourse + 인제스트 뒤 bakeCourse/bakeSiteless |
 | 2026-09-05T12:08:29+09:00 | #g-gates | claude-code | ☐→x | .oculpm/journal/20260905/Features_to_add/1207_feature_v07-course-parallel-integration.md | typecheck·lint·unit 2231·cargo·clippy·rust 2524·dict:lint·design·contrast·motion·gates 114·e2e-ui 26 전부 통과, D173 처방 포함 |
 | 2026-09-05T12:08:32+09:00 | #g-ipc | claude-code | ☐→x | .oculpm/journal/20260905/Features_to_add/1207_feature_v07-course-parallel-integration.md | 파이프라인 시험 16 ok 로 fixtures/ipc 재생성(t2.json·captures-all.json), 커밋에 포함 |
+| 2026-09-05T12:28:55+09:00 | #g-ship | claude-code | ☐→x | .oculpm/journal/20260905/Bugs/1220_bug_ci-red-first-run-switch-and-shelf-webkit.md | 커밋 11개 푸시(caa75da), CI run 33941608974 8잡 전부 초록 — 여섯 푸시째 빨갰던 e2e-linux·design-gates 포함 |
+| 2026-09-05T12:28:58+09:00 | #g-canon | claude-code | ☐→x | .oculpm/journal/20260905/Features_to_add/1207_feature_v07-course-parallel-integration.md | 정본 갱신 요청 목록을 최종 보고로 사용자에게 전달 — §2 트랙 표·코어 루프, §4 조건부 예외, §9 범용성 세 티어 |
 <!-- oculpm:plan-log end -->

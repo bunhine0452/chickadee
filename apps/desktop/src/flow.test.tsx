@@ -220,7 +220,7 @@ describe('리포 하나를 등록하면', () => {
     expect(screen.getAllByText('cart').length).toBeGreaterThan(0);
     expect(screen.getAllByText(/옵셔널 체이닝/).length).toBeGreaterThan(0);
     // 「판이 없는 문법」 — 내 코드엔 3곳 있는데 아직 판이 없다
-    expect(screen.getByText(/판이 없는 문법/)).toBeDefined();
+    expect(screen.getByText(/아직 안 배운 문법/)).toBeDefined();
     expect(screen.getByText(/번 등장/).textContent).toContain('3');
   });
 
