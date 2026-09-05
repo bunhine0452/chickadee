@@ -18,7 +18,7 @@ owner: claude-code
 
 ## L · 언어 열 — 워크트리 세션 하나씩 {#l-langs}
 - [~] py — 1부 남은 셋·2부 저작, parts/py.ts, 골든·린트·ABI 초록 {#l-py}
-- [~] ts — 2부 채우기(narrowing·union·class·prototype 등), parts/ts.ts {#l-ts}
+- [x] ts — 2부 채우기(narrowing·union·class·prototype 등), parts/ts.ts {#l-ts}
 - [x] java — 0·1·2·3부 이미 섬. 남은 것(string-concat·autoboxing 자리, 골든 보강) 점검 {#l-java}
 - [~] sql — 바닥 남은 다섯 + 중심, parts/sql.ts {#l-sql}
 - [~] rs — 0부 11 + 1·2부 전량 신규(사전 0장 → 표본 ai-pm 280장), parts/rs.ts {#l-rs}
@@ -60,4 +60,5 @@ owner: claude-code
 | 2026-09-06T00:53:50+09:00 | #l-csharp | claude-code | ☐→~ |  | Opus 워크트리 세션 출발 — 공개 리포 표본, ERROR 비율 실측 |
 | 2026-09-06T00:54:14+09:00 | #l-swift | claude-code | ☐→~ |  | Opus 워크트리 세션 출발 — 커뮤니티 문법 ERROR 비율이 첫 발견 |
 | 2026-09-06T01:05:29+09:00 | #l-java | claude-code | ~→x |  | 47장(0부 19·1부 8·2부 20) · 골든 114/47 · string-concat·autoboxing 0부 복귀 · ERROR 0% · 병합 f69d8e1, 남은 것 map-and-set |
+| 2026-09-06T01:21:10+09:00 | #l-ts | claude-code | ~→x |  | 69장(0부 21·1부 13·2부 18) · 골든 164/84 · ERROR 0% · 병합 c2898f6 · 래칫 137/141/137/128 |
 <!-- oculpm:plan-log end -->

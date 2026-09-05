@@ -204,16 +204,18 @@ const DEBT_RATCHET: Record<string, number> = {
   //   `generics-erasure` 넷 신설 + `string-concat`·`autoboxing` 둘이 `essential` 로 들어왔다.
   //   **열 언어가 동시에 저작 중이라 이 값은 자바 세션 하나만 본 것**이고, 합류 뒤에 표가
   //   찍는 `충족/대상` 으로 다시 잠가야 한다).
-  'blank-or-reason': 126,
-  'point-picks': 116,
-  'why-gate': 126,
+  // → **137**(셋째 물결, ts 합류 — 2부·심화·표기 짝 22장 신설로 essential 41 → 52. one_liner 128.
+  //   point-picks 는 `ts/call-expression`(2) 하나가 남아 141/142). 언어가 합류할 때마다 여기서 다시 잠근다.
+  'blank-or-reason': 137,
+  'point-picks': 141,
+  'why-gate': 137,
   // 6 → 11(D147) → 18(D148) → 26(D150) → **33**(D152, 파이썬 바닥 여덟). D150 이 「먼저 읽기」를
   // 0장 소속에서 「겹 0」으로 넓혀 `essential` 전량이 대상이 됐다. 새로 든 넷(`array-filter`
   // 의 `filter` · `array-map-immutable` 의 `map` · `arrow-function` 의 `=>` · 그리고
   // `array-destructuring` 은 영문 관사 `a` 가 정답 토큰과 겹쳤다)을 고쳐 채웠다.
   // 33 → 36(java 바닥 셋) → 38(sql 바닥 둘) → 42(java 바닥 여덟 완성) → 57(D166) → **65**(D177).
   // 111 → **117**(셋째 물결의 자바 몫 여섯. 위와 같은 단서가 붙는다).
-  'zero-one-liner': 117,
+  'zero-one-liner': 128,
 };
 
 describe('사전 저작 부채 (D145)', () => {
