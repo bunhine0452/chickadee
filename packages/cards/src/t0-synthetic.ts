@@ -133,6 +133,9 @@ const ABSENCE: Readonly<Record<string, AbsenceReason>> = {
   // Rust 2부 — `file_converter` 45파일 0곳 · `PySpace` 8파일 1곳 (D190 rs 세션). 리포가
   // `forbid(unsafe_code)` 로 막는 관습이 그 자리를 가져갔다 — ai-pm 에는 6곳/4파일 있다.
   'rs/unsafe-block': 'idiom',
+  // C++ 2부 — 표본 fmt 47 + nlohmann/json 480 파일에서 `auto [` 0곳 (D190 cpp 세션). 둘 다 C++11 을
+  // 바닥 표준으로 지켜 C++17 문법을 안 쓴다 — 그 자리를 `first`/`second` 와 반복자 역참조가 가져갔다.
+  'cpp/structured-binding': 'idiom',
   // 다른 문법이 자리를 가져갔다. 표본 리포에서 `for (;;)` 0곳 · for-each 1곳 · 배열 1곳이고,
   // 그 자리를 스트림(9곳)과 람다(53곳)가 다 쓴다.
   'java/for-loop': 'idiom',
