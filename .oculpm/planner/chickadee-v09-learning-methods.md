@@ -13,16 +13,16 @@ owner: claude-code
 ## J · 언어별 학습법 조사 (Opus 다섯, 동시) {#j-research}
 - [x] J0 — 언어 무관 학습 과학 근거 목록과 다섯 단·형식 넷 대조 · 「언어 특유」 판정 기준 → docs/program/pedagogy.md {#j0-pedagogy}
 - [x] J1 — 파이썬·JS/TS: 기계 한 문장 · 교재 수렴 순서 · 특유 연습 · 오개념 연구 · diff → py.md·ts.md §N {#j1-py-ts}
-- [~] J2 — 자바·C#: objects-first 논쟁 결론 · DI 추적 · 로그인 챕터가 기계를 쓰는지 → java-learning.md·csharp.md {#j2-java-cs}
-- [~] J3 — C·C++·러스트: 하나의 기계 · Brown 실험판 Rust Book 근거 · UB 연습 · C 를 가르칠 자격 판단 → c.md·cpp.md·rs.md {#j3-c-cpp-rs}
-- [~] J4 — Go·Swift·SQL: SQL 의 「추적」「수정」 정의 · Miedema 오개념 대조 · 고루틴 비결정론 형식 → go.md·swift.md·sql.md {#j4-go-swift-sql}
+- [x] J2 — 자바·C#: objects-first 논쟁 결론 · DI 추적 · 로그인 챕터가 기계를 쓰는지 → java-learning.md·csharp.md {#j2-java-cs}
+- [x] J3 — C·C++·러스트: 하나의 기계 · Brown 실험판 Rust Book 근거 · UB 연습 · C 를 가르칠 자격 판단 → c.md·cpp.md·rs.md {#j3-c-cpp-rs}
+- [x] J4 — Go·Swift·SQL: SQL 의 「추적」「수정」 정의 · Miedema 오개념 대조 · 고루틴 비결정론 형식 → go.md·swift.md·sql.md {#j4-go-swift-sql}
 
 ## K · 통합 — 다섯 보고를 하나의 결정으로 {#k-integrate}
-- [ ] J0 의 「언어 특유」 기준으로 J1~J4 의 특유 연습 주장을 거른다 — 통과·탈락 표 {#k-conflicts}
-- [ ] 새 형식 제안을 모아 fundamentals.md 에 후보 표로 — 결정론 채점 가능한 것과 LLM 필요한 것을 가른다 {#k-formats}
-- [ ] 각 언어 §N.6 diff 를 등록부 행 하나(D185)로 묶고, 순서 변경은 curriculum 문서 본문에 반영 {#k-diffs}
-- [ ] docs/curriculum/<lang>.md 의 「상한 24」 언급을 D184 로 고친다 (세션 중 충돌 회피로 미뤄 둔 것) {#k-cap-mentions}
-- [ ] docs/curriculum/README.md 에 §13 학습법 요약 표(언어 · 기계 한 문장 · 특유 연습 · 근거 강도) · docs/program/README.md 에 pedagogy.md 행 {#k-readme}
+- [x] J0 의 「언어 특유」 기준으로 J1~J4 의 특유 연습 주장을 거른다 — 통과·탈락 표 {#k-conflicts}
+- [x] 새 형식 제안을 모아 fundamentals.md 에 후보 표로 — 결정론 채점 가능한 것과 LLM 필요한 것을 가른다 {#k-formats}
+- [x] 각 언어 §N.6 diff 를 등록부 행 하나(D185)로 묶고, 순서 변경은 curriculum 문서 본문에 반영 {#k-diffs}
+- [x] docs/curriculum/<lang>.md 의 「상한 24」 언급을 D184 로 고친다 (세션 중 충돌 회피로 미뤄 둔 것) {#k-cap-mentions}
+- [x] docs/curriculum/README.md 에 §13 학습법 요약 표(언어 · 기계 한 문장 · 특유 연습 · 근거 강도) · docs/program/README.md 에 pedagogy.md 행 {#k-readme}
 - [ ] typecheck · lint · test:unit · gates · design:check · contrast · motion → 커밋(영어) → 푸시 → gh run watch {#k-gates}
 
 ## Q · 사용자 결정 (멈춤표) {#q-user}
@@ -42,4 +42,12 @@ owner: claude-code
 | 2026-09-05T19:02:34+09:00 | #j4-go-swift-sql | claude-code | ☐→~ |  | Opus 세션 착수 — SQL 먼저, Miedema 2022 필독 지시 |
 | 2026-09-05T19:07:51+09:00 | #j0-pedagogy | claude-code | ~→x | .oculpm/journal/20260905/Chores/1906_chore_pedagogy-evidence-baseline.md | pedagogy.md 303줄 · 근거 20 중 재현 10, 앱에 6 · 2단에 값 추적 없음 · order/trace-table 제안 · 기준: 옮기면 답이 사라져야 특유 |
 | 2026-09-05T19:24:24+09:00 | #j1-py-ts | claude-code | ~→x |  | py-learning.md 463 · ts-learning.md 427 · py 기계 하나(명세 근거) · JS 기계 셋, 인벤토리 33건 중 이벤트 루프 0 · 축 E·G·H 는 형식의 한계 · 1차 94% |
+| 2026-09-05T19:27:46+09:00 | #j3-c-cpp-rs | claude-code | ~→x |  | C 기계 둘(바이트+주소 / 약속만 지키는 컴파일러) · Brown: 순서 아니라 4장 내용(48→57%, d=.56) · 소유권 첫 장은 UB · 권한 줄로 그림 교체 신청 · C 는 기계 설명만, C++ 코스 안 염 · 1차 83% |
+| 2026-09-05T19:29:07+09:00 | #j4-go-swift-sql | claude-code | ~→x |  | SQL 기계가 오개념 12/12 설명 · SQL 이 값 추적 빈자리를 채우는 첫 언어 · 러너는 방언마다(sqlite 자기 리포 OK, 표본 MySQL 표 0) · 고루틴은 table 배치(후보 K × 가능/불가능) · variants 진단 · sql/self-join 부재 · 1차 68% |
+| 2026-09-05T19:31:10+09:00 | #j2-java-cs | claude-code | ~→x |  | 자바 기계 하나가 오개념 9/13(Ma 2007) · objects-first 근거 무방향, CS2023 SDF 에 paradigm 0회 → 순서 유지 · 로그인 챕터에 값 추적 자리(user 상자 A/B) · 정정: Integer 캐시 밖은 false 아니라 미정(JLS 5.1.7) · java↔csharp siblings 불가 → langAlt · 1차 26/28 |
+| 2026-09-05T19:34:56+09:00 | #k-conflicts | claude-code | ☐→x |  | J0 기준을 J1~J4 에 중계해 각 §N.3 에 통과/탈락 열이 들어갔다. README §13 표에 통과한 것만 모음 |
+| 2026-09-05T19:34:59+09:00 | #k-diffs | claude-code | ☐→x |  | D185 행 작성. 순서 변경 diff 는 적용 안 함 — README §13 「적용하지 않았다」 목록으로 사용자 결정에 |
+| 2026-09-05T19:35:01+09:00 | #k-cap-mentions | claude-code | ☐→x |  | py·ts·c·cpp·rs·swift·java·csharp 의 결정 지점에 D184 메모. go·sql 은 원래 안 넘쳐 손 안 댐 |
+| 2026-09-05T19:35:03+09:00 | #k-readme | claude-code | ☐→x |  | README §13 (기계 표 · 겹친 자리 다섯 · 미적용 diff · 그림 신청 · 근거 한계) · program/README 에 pedagogy 행(J0) |
+| 2026-09-05T19:35:20+09:00 | #k-formats | claude-code | ☐→x |  | fundamentals.md §13 — 새 형식 둘(order·trace-table) · 확장 여섯 · table 배치 셋 · 안 만들 것 둘 |
 <!-- oculpm:plan-log end -->
