@@ -1,0 +1,167 @@
+schema: 1
+id: csharp/switch-expression
+# `csharp.md` §6 이 `common/pattern-match` 를 신규로 제안했는데 아직 `common/` 에 없다.
+# 없는 id 를 걸면 린트가 잡으므로 `null` 로 두고 후보로만 보고한다 — 다른 언어 근거는
+# Rust `match` · Python `match` · Swift `switch case let` 셋이다.
+universal: null
+name: { ko: 모양으로 갈래 고르기, en: Switch expression }
+token: "switch"
+grammars: [c_sharp]
+framework: null
+essential: true
+difficulty: 3
+prereq: [csharp/conditional-ternary, csharp/value-vs-reference]
+confusions: []
+dict:
+  one_liner:
+    ko: "갈래마다 값을 하나씩 내고, 그 전체가 값 하나가 된다."
+    en: "Each branch yields one value, and the whole thing becomes one value."
+  why:
+    ko: >-
+      같은 낱말이 <b>문일 수도 식일 수도</b> 있는데, 갈리는 표시는 <b>어순</b>입니다 —
+      {{site.line}}행처럼 재는 값이 <b>앞</b>에 오면 식이에요. 식 쪽은 갈래마다 값을 하나씩
+      내야 하고, 그래서 그 전체를 대입의 오른쪽이나 인자 자리에 그대로 놓을 수 있습니다.
+      값이 아니라 <b>모양</b>으로 고를 수 있고(타입·범위·속성), 빠진 경우가 있으면 컴파일러가
+      경고합니다 — 조건문 사슬에는 없던 안전망입니다.
+    en: >-
+      The same word can be a <b>statement or an expression</b>, and what splits them is
+      <b>word order</b>: when the value being weighed comes <b>first</b>, as on line
+      {{site.line}}, it is an expression. Each branch then has to yield a value, so the whole
+      thing can sit on the right of an assignment or in an argument slot. Branches are chosen
+      by <b>shape</b> — type, range, property — and the compiler warns about cases left out,
+      a safety net a chain of conditions never had.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.2|code}}{{pick.2|josa:이,가}} 먼저 값이 된다."
+      en: "{{pick.2|code}} on line {{site.line}} becomes a value first."
+    - ko: "{{pick.3|code}}부터 위에서 아래로 모양이 맞는 갈래를 찾는다."
+      en: "From {{pick.3|code}} down, the first branch whose shape fits is found."
+    - ko: "맞은 갈래의 값 하나가 이 자리 전체의 값이 된다."
+      en: "That branch's single value becomes the value of the whole thing."
+rule:
+  ko: "<b>재는 값이 앞에 오면 식이다.</b> 갈래마다 값을 내야 하고, 빠진 경우는 경고가 난다."
+  en: "<b>Value first means expression.</b> Every branch must yield, and gaps get a warning."
+ok:
+  ko: "{{pick.2|code}} 쪽 모양에 맞는 갈래 하나가 값을 냅니다."
+  en: "One branch matching the shape of {{pick.2|code}} yields the value."
+payoff:
+  ko: "이걸 알면 「조건문 사슬을 값 하나로 접는 법」이 생깁니다."
+  en: "This gives you a way to fold a chain of conditions into one value."
+bridge:
+  ko: >-
+    러스트의 <code>match</code>·파이썬의 <code>match</code>와 같은 자리입니다.
+    러스트는 빠진 경우를 <b>오류</b>로 막고 C# 은 <b>경고</b>에 그칩니다.
+  en: >-
+    Same spot as Rust's and Python's <code>match</code>. Rust makes a missing case an
+    <b>error</b>; C# stops at a <b>warning</b>.
+misconceptions:
+  # 출처 — `csharp.md` §4 ㉞.
+  - ko: "낱말이 같으면 같은 것이다 — 재는 값이 앞이면 식, 뒤면 문이고 규칙이 다릅니다."
+    en: "Same word means the same thing — value first is an expression, value after is a statement, with different rules."
+  - ko: "빠진 경우가 있으면 컴파일이 막힌다 — 경고까지입니다. 실행 중에 예외로 터져요."
+    en: "A missing case stops the build — it only warns, and throws at run time."
+  - ko: "갈래는 값만 고른다 — 타입·범위·속성 같은 모양으로도 고릅니다."
+    en: "Branches match values only — they also match shapes: types, ranges, properties."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>모양을 견줄 대상</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>what the shapes are matched against</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.2
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>갈래를 고르라는 낱말</b>입니다. 견줄 대상은 그 앞에 있어요 — 그 어순이 식이라는 표시입니다."
+          en: "{{pick.1|code}} is the <b>word that says choose</b>. What is matched sits before it, and that order is the mark of an expression."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 앞이냐 뒤냐", en: "The sharpest spot — before or after" }
+          code:
+            - "n switch { … }     // 식"
+            - "switch (n) { … }   // 문"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>갈래 하나</b>입니다. 갈래는 자기가 무엇과 견주어지는지 모릅니다."
+          en: "{{pick.3|code}} is <b>one branch</b>. A branch does not know what it is matched against."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 갈래냐 대상이냐", en: "The sharpest spot — a branch or the subject" }
+          code:
+            - "1 => \"one\",        // 갈래"
+            - "n switch { … }     // 대상은 n"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 갈래마다 값을 내어 <b>전체가 값 하나</b>가 됩니다."
+      en: "Choose what goes in the blank. On line {{site.line}} every branch yields, and <b>the whole is one value</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "switch", mono: true }
+      - t: "if"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>문</b>이라 값을 못 냅니다. 대입의 오른쪽에 그대로 놓을 수 없어요."
+            en: "That is a <b>statement</b> and yields no value; it cannot sit on the right of an assignment."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 문이냐 식이냐", en: "The sharpest spot — statement or expression" }
+            code:
+              - "var s = n switch { … };   // 값"
+              - "var s = if (n) { … };     // 문법이 아니다"
+      - t: "while"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>되풀이</b>하는 자리라 갈래를 고르지 않습니다. 값도 안 내요."
+            en: "That <b>repeats</b> and chooses no branch. It yields nothing either."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 고르나 되풀이하나", en: "The sharpest spot — choosing or repeating" }
+            code:
+              - "n switch { … }        // 한 번 고른다"
+              - "while (n > 0) { }     // 되풀이한다"
+      - t: "try"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>터진 것</b>을 갈라 받는 자리라 값의 모양으로 고르는 것이 아닙니다."
+            en: "That splits on <b>failures</b>, not on the shape of a value."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값이냐 예외냐", en: "The sharpest spot — a value or a failure" }
+            code:
+              - "n switch { … }"
+              - "try { } catch (E) { }"
+why_gate:
+  q:
+    ko: "조건문 사슬로도 되는데 왜 <b>값을 내는</b> 갈래를 따로 두었을까요?"
+    en: "A chain of conditions would do — why a branching form that <b>yields a value</b>?"
+  choices:
+    - t:
+        ko: "갈래마다 값을 내게 하면 빠진 경우를 컴파일러가 셀 수 있고, 결과를 담을 이름을 안 만들어도 되기 때문"
+        en: "Because making every branch yield lets the compiler count the gaps, and no holding name is needed"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 사슬로 적었을 때 컴파일러가 무엇을 못 세는지도 적어 보세요."
+        en: "That is the direction. Add what the compiler cannot count when it is written as a chain."
+    - t:
+        ko: "사슬보다 빨라서"
+        en: "Because it is faster than a chain"
+      ok: false
+      fb:
+        ko: "대개 같은 코드가 나옵니다. 얻는 것은 속도가 아니라 <b>빠진 경우가 보이는 것</b>이에요."
+        en: "Usually the same code comes out. What is gained is not speed but <b>visible gaps</b>."
+    - t:
+        ko: "조건문이 여러 갈래를 못 다뤄서"
+        en: "Because conditions cannot handle many branches"
+      ok: false
+      fb:
+        ko: "다룰 수 있습니다. 갈리는 것은 갈래 수가 아니라 <b>값을 내나</b>예요."
+        en: "They can. What splits is not the number of branches but <b>whether it yields</b>."
+queries:
+  - { grammars: [c_sharp], file: ./switch-expression.scm }
+examples:
+  - code: "class A { void F(int n) { var r = n switch { 1 => \"one\", _ => \"other\" }; } }"
+    expect: { sites: 1, form: switch-expr, hole: "switch", picks: { 1: "switch", 2: "n", 3: "1 => \"one\"" } }
+  - code: "class A { string F(object o) { return o switch { int i => \"int\", _ => \"other\" }; } }"
+    expect: { sites: 1, form: switch-expr, hole: "switch", picks: { 1: "switch", 2: "o" } }
+  - code: "class A { void F(int n) { switch (n) { case 1: break; } } }"
+    expect: none

@@ -1,0 +1,163 @@
+schema: 1
+id: csharp/linq-where
+universal: common/filter-select
+name: { ko: 조건으로 골라내기, en: Where }
+token: "Where"
+grammars: [c_sharp]
+framework: null
+essential: true
+difficulty: 3
+prereq: [csharp/lambda, csharp/list]
+confusions: []
+dict:
+  one_liner:
+    ko: "항목마다 조건을 재서 참인 것만 남긴 새 모음을 낸다."
+    en: "It weighs each item and yields a new sequence of the ones that hold."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} {{pick.2|code}} 쪽에 적힌
+      메서드가 <b>아닙니다</b> — 다른 곳에 정의된 <b>확장 메서드</b>이고, 그래서
+      <code>using System.Linq;</code>가 없으면 같은 코드가 컴파일되지 않아요. 점 뒤에 있다고
+      그 타입의 것이 아니라는 첫 사례입니다. 그리고 원본을 <b>안 바꿉니다</b> — 남긴 것만 든
+      새 모음이 나오고, 그 모음은 아직 <b>돌지도 않았습니다</b>(계획만 만들어집니다).
+    en: >-
+      {{pick.1|code}} on line {{site.line}} is <b>not</b> a method of {{pick.2|code}} — it is an
+      <b>extension method</b> defined elsewhere, so without <code>using System.Linq;</code> the
+      same code does not compile. This is the first place where sitting after a dot does not
+      mean belonging to that type. It also <b>leaves the original alone</b>: a new sequence of
+      the survivors comes out, and it <b>has not run yet</b> — only a plan was made.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.2|code}}{{pick.2|josa:이,가}} 훑을 대상이 된다."
+      en: "{{pick.2|code}} on line {{site.line}} becomes what will be walked."
+    - ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 항목마다 참·거짓을 낸다."
+      en: "{{pick.3|code}} yields a truth value per item."
+    - ko: "참인 것만 든 새 모음이 나오고 원본은 그대로다."
+      en: "A new sequence of the survivors comes out and the original is untouched."
+rule:
+  ko: "<b>확장 메서드라 가져오는 줄이 있어야 한다.</b> 원본은 안 바뀌고 새 모음이 나온다."
+  en: "<b>It is an extension method and needs its import.</b> The original is untouched."
+ok:
+  ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 참인 항목만 남은 모음이 나옵니다."
+  en: "Out comes a sequence of the items for which {{pick.3|code}} holds."
+payoff:
+  ko: "이걸 알면 「같은 코드가 저 파일에서는 컴파일이 안 된다」가 풀립니다 — 가져오는 줄입니다."
+  en: "This untangles “the same code will not compile in that file” — the import line."
+bridge:
+  ko: >-
+    파이썬의 <code>filter</code>·컴프리헨션과 같은 일입니다. 다른 것은 <b>어디에 정의돼 있나</b>
+    — C# 은 목록의 메서드가 아니라 밖에서 붙인 것이에요.
+  en: >-
+    Same job as Python's <code>filter</code> or a comprehension. What differs is <b>where it is
+    defined</b>: in C# it is attached from outside, not a method of the list.
+misconceptions:
+  # 출처 — `csharp.md` §4 ㉙ · §9 ⑧.
+  - ko: "목록의 메서드다 — 확장 메서드라 가져오는 줄이 없으면 안 보입니다."
+    en: "It is a method of the list — it is an extension method and vanishes without its import."
+  - ko: "그 자리에서 돈다 — 계획만 만들어지고 훑을 때 돕니다."
+    en: "It runs right there — only a plan is made; it runs when walked."
+  - ko: "원본이 걸러진다 — 원본은 그대로이고 새 모음이 나옵니다."
+    en: "The original gets filtered — it is untouched and a new sequence comes out."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>항목마다 재는 조건</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the test weighed per item</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.3
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>골라내라는 이름</b>입니다. 무엇으로 고를지는 괄호 안이에요."
+          en: "{{pick.1|code}} is the <b>name that says filter</b>. What to filter by is in the brackets."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 조건이냐", en: "The sharpest spot — the name or the test" }
+          code:
+            - "xs.Where(x => x > 0)"
+            - "//        ^재는 것"
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 훑을 <b>대상</b>입니다. 대상이 조건을 정하지는 않아요."
+          en: "{{pick.2|code}} is <b>what gets walked</b>. The source does not supply the test."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 대상이냐 조건이냐", en: "The sharpest spot — the source or the test" }
+          code:
+            - "xs.Where(x => x > 0)"
+            - "// ^대상        ^조건"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 조건이 <b>참인 항목만</b> 남깁니다."
+      en: "Choose what goes in the blank. Line {{site.line}} keeps <b>only the items that hold</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "Where", mono: true }
+      - t: "Select"
+        mono: true
+        diag:
+          t:
+            ko: "이건 항목을 <b>바꿔서</b> 냅니다. 개수는 그대로이고 내용이 달라져요."
+            en: "That <b>transforms</b> each item: the count is unchanged and the contents differ."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 고르나 바꾸나", en: "The sharpest spot — filtering or mapping" }
+            code:
+              - "xs.Where(x => x > 0)     // 개수가 준다"
+              - "xs.Select(x => x * 2)    // 개수는 같다"
+      - t: "Any"
+        mono: true
+        diag:
+          t:
+            ko: "이건 모음이 아니라 <b>참·거짓 하나</b>를 냅니다. 뒤에 다른 모음 연산을 못 붙여요."
+            en: "That yields <b>one truth value</b>, not a sequence, so no further sequence step can follow."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 모음이냐 참·거짓이냐", en: "The sharpest spot — a sequence or a truth value" }
+            code:
+              - "xs.Where(p).Select(f)    // 이어진다"
+              - "xs.Any(p).Select(f)      // 안 된다"
+      - t: "First"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>항목 하나</b>를 냅니다. 맞는 것이 없으면 그 자리에서 터져요."
+            en: "That yields <b>one item</b>, and throws right there when nothing matches."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 모음이냐 하나냐", en: "The sharpest spot — a sequence or one item" }
+            code:
+              - "xs.Where(p)      // 0개여도 된다"
+              - "xs.First(p)      // 0개면 터진다"
+why_gate:
+  q:
+    ko: "이 연산은 왜 목록의 메서드가 아니라 <b>밖에서 붙인</b> 것일까요?"
+    en: "Why is this step <b>attached from outside</b> instead of being a method of the list?"
+  choices:
+    - t:
+        ko: "훑을 수 있는 모든 타입에 같은 연산을 한 번만 정의해 붙이려고 — 타입마다 다시 안 적는다"
+        en: "So the same step is defined once for every walkable type instead of per type"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 대가로 코드를 읽을 때 무엇이 헷갈리는지도 적어 보세요."
+        en: "That is the direction. Add what gets confusing to read in exchange."
+    - t:
+        ko: "목록을 못 고쳐서"
+        en: "Because the list class cannot be edited"
+      ok: false
+      fb:
+        ko: "고칠 수 있어도 이렇게 합니다. 대상이 목록 하나가 아니라 훑을 수 있는 <b>모든 타입</b>이에요."
+        en: "Even if it could, this is the design: the target is <b>every walkable type</b>, not one list."
+    - t:
+        ko: "밖에서 붙이면 빨라서"
+        en: "Because attaching from outside is faster"
+      ok: false
+      fb:
+        ko: "같은 정적 메서드 호출입니다. 속도는 그대로예요."
+        en: "It compiles to the same static call; speed is unchanged."
+queries:
+  - { grammars: [c_sharp], file: ./linq-where.scm }
+examples:
+  - code: "class A { void F(List<int> xs) { var r = xs.Where(x => x > 0); } }"
+    expect: { sites: 1, form: where, hole: "Where", picks: { 1: "Where", 2: "xs", 3: "x => x > 0" } }
+  - code: "class A { void F(List<Item> items) { var r = items.Where(i => i.Ok); } }"
+    expect: { sites: 1, form: where, picks: { 1: "Where", 2: "items", 3: "i => i.Ok" } }
+  - code: "class A { void F(List<int> xs) { var r = xs.Select(x => x); } }"
+    expect: none

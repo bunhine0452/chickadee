@@ -1,0 +1,221 @@
+schema: 1
+id: csharp/equality
+# 0부 축 8. 보편형은 `common/comparison` 을 자바·파이썬·TS 와 공유한다. 다만 `csharp.md` §6 이
+# 적었듯 **자바와 답이 반대인 자리**가 있어(자바는 객체 `==` 가 언제나 참조) 오답 진단에 그
+# 차이를 박아 둔다 — 보편형만으로는 못 덮는다.
+universal: common/comparison
+name: { ko: 같은 것인가 같은 값인가, en: Equality }
+token: "=="
+grammars: [c_sharp]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cs/identity-vs-equality, csharp/boolean-literal]
+confusions: []
+dict:
+  one_liner:
+    ko: "같은지 묻는 자리이고, 무엇을 묻는지는 변수에 적힌 타입이 정한다."
+    en: "It asks whether two things match, and the declared type decides which question."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 한 가지 물음이 아닙니다.
+      <code>string</code>이면 <b>내용</b>을, 보통의 <code>class</code>면 <b>같은 객체인지</b>를,
+      <code>record</code>면 다시 <b>내용</b>을 묻습니다. 갈리는 근거가 코드에 안 적혀 있고
+      <b>변수의 정적 타입</b>에 있어서, 실측 같은 두 문자열이
+      <code>string ==</code>로는 <b>True</b>인데 변수 타입만 <code>object</code>로 바꾸면
+      <b>False</b>가 됩니다 — <b>코드는 한 글자도 안 바뀌었는데</b>요.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} is not one question. For <code>string</code> it
+      asks about <b>content</b>, for an ordinary <code>class</code> whether it is the
+      <b>same object</b>, for a <code>record</code> about content again. What splits them is
+      not in the code but in the <b>declared type</b>: measured, two equal strings compare
+      <b>True</b> as <code>string</code> and <b>False</b> once the variable is declared
+      <code>object</code> — with <b>not one character of the code changed</b>.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:이,가}} 각각 값이 된다."
+      en: "{{pick.2|code}} and {{pick.3|code}} on line {{site.line}} each become a value."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 둘을 견주어 참·거짓 하나를 낸다."
+      en: "{{pick.1|code}} weighs the two and yields one truth value."
+    - ko: "무엇을 견줄지는 두 이름에 적힌 타입이 이미 정해 두었다."
+      en: "What gets weighed was already settled by the types written on the two names."
+rule:
+  ko: "<b>같음의 뜻은 정적 타입이 정한다.</b> 코드가 같아도 선언이 다르면 답이 갈린다."
+  en: "<b>The declared type defines equality.</b> Same code, different declaration, different answer."
+result:
+  label: { ko: "{{site.line}}행의 견주기", en: "the comparison on line {{site.line}}" }
+  value: "{{pick.2}} {{pick.1}} {{pick.3}}"
+  note: { ko: "참이거나 거짓 하나가 나온다", en: "one truth value comes out" }
+ok:
+  ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 두 값을 견주어 참·거짓 하나를 냅니다."
+  en: "{{pick.1|code}} weighs the two values and yields one truth value."
+payoff:
+  ko: "이걸 알면 「같은 값인데 같지 않다고 나온다」가 풀립니다 — 선언한 타입을 보세요."
+  en: "This untangles “equal values reported as unequal” — look at the declared type."
+bridge:
+  ko: >-
+    자바는 이 자리에서 <b>답이 반대</b>입니다 — 객체 견주기가 언제나 참조 비교라
+    <code>String</code>도 그렇습니다. 자바에서 온 손이 여기서 걸립니다.
+  en: >-
+    Java gives the <b>opposite</b> answer here: object comparison is always by reference,
+    <code>String</code> included. Hands coming from Java trip on this.
+misconceptions:
+  # 출처 — `csharp.md` §9 ⑤ · §0.4 실측(string == True / object == False).
+  - ko: "<code>==</code>는 언제나 내용을 견준다 — 보통의 <code>class</code>는 같은 객체인지를 묻습니다."
+    en: "<code>==</code> always compares content — for an ordinary <code>class</code> it asks about identity."
+  - ko: "같은 값이면 언제나 같다고 나온다 — 실측 변수를 <code>object</code>로 선언하면 False 가 됩니다."
+    en: "Equal values always compare equal — measured, declaring the variable <code>object</code> gives False."
+  - ko: "<code>.Equals</code>와 <code>==</code>는 같다 — 앞의 것은 실행 시각 타입을, 뒤의 것은 선언 타입을 봅니다."
+    en: "<code>.Equals</code> and <code>==</code> are the same — one follows the runtime type, the other the declared one."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>두 값을 견주는 자리</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>where the two values are weighed</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 한쪽 <b>값</b>입니다. 값 혼자서는 아무것도 묻지 않아요."
+          en: "{{pick.2|code}} is one <b>value</b>. A value on its own asks nothing."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값이냐 묻는 자리냐", en: "The sharpest spot — a value or the question" }
+          code:
+            - "a;          // 값 하나"
+            - "a == b;     // 참·거짓 하나"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 다른 쪽 <b>값</b>입니다. 둘을 견주는 일은 가운데가 해요."
+          en: "{{pick.3|code}} is the other <b>value</b>. The weighing happens between them."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값이냐 견주기냐", en: "The sharpest spot — a value or the weighing" }
+          code:
+            - "b;"
+            - "a == b;"
+meaning:
+  - q:
+      ko: "내용이 같은 두 문자열을 견주는데, 변수를 <code>object</code>로 선언하면 어떻게 될까요?"
+      en: "Two strings with equal content are compared, but the variables are declared <code>object</code>. What happens?"
+    hint:
+      ko: "코드는 한 글자도 안 바뀝니다."
+      en: "Not one character of the code changes."
+    options:
+      - t:
+          ko: "거짓이 된다 — 견주는 질문이 내용에서 같은 객체인지로 바뀐다"
+          en: "It becomes false — the question shifts from content to identity"
+      - t:
+          ko: "그대로 참이다 — 값이 안 바뀌었으니까"
+          en: "It stays true — the values did not change"
+        diag:
+          t:
+            ko: "값은 그대로입니다. 바뀐 것은 <b>어느 견주기가 불리는가</b>예요 — 선언 타입이 그것을 고릅니다."
+            en: "The values are unchanged. What moved is <b>which comparison gets called</b>, and the declared type picks it."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값이냐 선언이냐", en: "The sharpest spot — the value or the declaration" }
+            code:
+              - "string a = ..., b = ...;   // True"
+              - "object a = ..., b = ...;   // False"
+      - t:
+          ko: "컴파일이 막힌다"
+          en: "It stops at compile time"
+        diag:
+          t:
+            ko: "막히지 않습니다. 잘 컴파일되고 잘 돌아요 — 그래서 이 자리가 조용히 어긋납니다."
+            en: "It compiles and runs fine — which is exactly why this spot slips by unnoticed."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 막히나 도나", en: "The sharpest spot — blocked or running" }
+            code:
+              - "object a = \"x\";"
+              - "if (a == b) { }   // 돈다"
+      - t:
+          ko: "<code>.Equals</code>도 같이 거짓이 된다"
+          en: "<code>.Equals</code> turns false as well"
+        diag:
+          t:
+            ko: "그쪽은 <b>참</b>입니다. 실행 시각 타입을 따라가므로 문자열 견주기가 그대로 불려요."
+            en: "That one stays <b>true</b>: it follows the runtime type, so the string comparison is still what runs."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 선언이냐 실행 시각이냐", en: "The sharpest spot — declared or runtime" }
+            code:
+              - "a == b;          // False"
+              - "a.Equals(b);     // True"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 두 값이 <b>같은지 묻습니다</b>."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>asks whether</b> two values match."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "==", mono: true }
+      - t: "="
+        mono: true
+        diag:
+          t:
+            ko: "기호 하나짜리는 <b>넣기</b>라 묻지 않습니다. 조건 자리에 쓰면 참·거짓이 아니라며 컴파일이 막아요."
+            en: "The one-symbol form <b>puts</b>; it does not ask. In a condition it stops at compile time for not being a truth value."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 넣는가 묻는가", en: "The sharpest spot — putting or asking" }
+            code:
+              - "if (a == b) { }   // 묻는다"
+              - "if (a = b) { }    // CS0029"
+      - t: "!="
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>다른지</b> 묻는 기호라 답이 정확히 뒤집힙니다. 같은 두 값에 거짓을 내요."
+            en: "That asks whether they <b>differ</b>, so the answer flips. Equal values give false."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 같은가 다른가", en: "The sharpest spot — same or different" }
+            code:
+              - "1 == 1;   // True"
+              - "1 != 1;   // False"
+      - t: ">="
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>크기</b>를 견주는 기호라 순서가 있는 값에만 씁니다. 객체 둘에는 못 써요."
+            en: "That weighs <b>size</b> and applies only to ordered values. It does not apply to two objects."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 같음이냐 크기냐", en: "The sharpest spot — sameness or size" }
+            code:
+              - "a == b;    // 객체에도 된다"
+              - "a >= b;    // 수·날짜 같은 것만"
+why_gate:
+  q:
+    ko: "같은 <code>==</code>인데 왜 <b>타입마다 다른 질문</b>을 할까요?"
+    en: "Why does the same <code>==</code> ask a <b>different question per type</b>?"
+  choices:
+    - t:
+        ko: "타입마다 「같다」의 뜻이 달라서, 각 타입이 그 뜻을 스스로 정하게 두었기 때문"
+        en: "Because sameness means different things per type, and each type gets to define it"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그러면 읽는 사람이 그 줄만 봐서는 무엇을 못 아는지도 적어 보세요."
+        en: "That is the direction. Add what the reader cannot tell from that line alone."
+    - t:
+        ko: "실행 시각에 값을 보고 알아서 고르기 때문"
+        en: "Because it inspects the value at run time and picks"
+      ok: false
+      fb:
+        ko: "값이 아니라 <b>선언한 타입</b>이 컴파일 시각에 고릅니다. 그래서 선언만 바꿔도 답이 갈려요."
+        en: "The <b>declared type</b> picks, at compile time. That is why changing only the declaration flips the answer."
+    - t:
+        ko: "옛 판과의 호환 때문에 남은 예외라서"
+        en: "It is a leftover exception kept for compatibility"
+      ok: false
+      fb:
+        ko: "예외가 아니라 규칙입니다. 연산자를 타입이 다시 정의할 수 있게 한 설계예요."
+        en: "It is the rule, not an exception: the design lets a type redefine the operator."
+queries:
+  - { grammars: [c_sharp], file: ./equality.scm }
+examples:
+  - code: "bool same = a == b;                     // same -> 선언 타입이 정한다 (bool)"
+    expect: { sites: 1, form: compare, hole: "==", picks: { 1: "==", 2: "a", 3: "b" } }
+  - code: "bool diff = n != 0;                     // diff -> n 이 0 이 아니면 참 (bool)"
+    expect: { sites: 1, form: compare, hole: "!=", picks: { 1: "!=", 2: "n", 3: "0" } }
+  - code: "class A { void F() { var e = a.Equals(b); } }  // e -> 실행 시각 타입이 정한다 (bool)"
+    expect: { sites: 1, form: equals, picks: { 1: "Equals", 2: "a", 3: "b" } }
+  - code: "int n = 1 + 2;                          // n -> 3 (int)"
+    expect: none

@@ -245,17 +245,25 @@ Swift 가 25 → 29 로 더 크게 넘치므로(swift.md §0.5) **이것은 C# �
 길어지는지는 **안 쟀다.** 3부가 서면 `aspnet/` 개수만큼 더 붙는다 — 자바 `spring/` 이 15장이니
 같은 자릿수라면 8일쯤인데 **추정이고 안 쟀다.**
 
-### §0.7 문법 현황 — **로드는 통과하고 캡처가 0 이다. 그리고 §8 의 「안 열린 세 곳」은 낡았다**
+### §0.7 문법 현황 — **일곱 걸음이 다 끝났다 (2026-09-06 · D190)**
+
+이 절은 「로드는 통과하고 캡처가 0」이던 상태의 기록이었다. **그 상태가 끝났으므로 실측으로
+고쳐 적는다.** 아래 순서 일곱은 그대로 두고 상태만 갱신한다 — 지나온 길이 근거이기 때문이다.
 
 | 자리 | 상태 | 근거 |
 |---|---|---|
-| `crates/parse` 문법 | ❌ **없다.** `tree-sitter-c-sharp` 크레이트도 `lang-csharp` 피처도 없다 | `crates/parse/Cargo.toml` · `langs.rs` |
-| 그 사실을 지키는 못 | ❌ **없다.** `quality.rs` 의 시험은 **`swift` 와 `dart` 만** 지킨다 | `crates/parse/tests/quality.rs:130` |
-| `grammarSchema` | ✅ **이미 열려 있다 — 다만 이름이 `c_sharp` 이다** | `packages/dictionary/src/schema.ts:32` |
-| `grammarOf('.cs')` | ✅ **고쳐졌다** — `c_sharp` 로 간다 | `apps/desktop/src/session-flow.ts` |
-| 사전을 쓰면 | **스키마도 린트도 통과하고 캡처만 0곳** | I6 확인 |
-| 파싱을 시키면 | `ParseError::UnsupportedLang("c_sharp")` — 조용히 TS 로 새지는 않는다 | `crates/parse/src/lib.rs:128` |
-| `dictionary/csharp/**` | ❌ 없다 | `ls dictionary/` |
+| `crates/parse` 문법 | ✅ **링크됐다.** `tree-sitter-c-sharp = "0.23"`(잠긴 값 **0.23.5**) · `lang-csharp` 피처 · `langs.rs` 의 `("c_sharp", …)` | `crates/parse/Cargo.toml:27·63` · `langs.rs:51` · `Cargo.lock` |
+| 그 사실을 지키는 못 | ✅ **섰다.** `schema.ts` 의 `GRAMMARS` 표를 `chickadee_parse::languages()` 와 **양방향** 대조 | `crates/parse/tests/quality.rs` |
+| `grammarSchema` | ✅ 열려 있다 — 이름은 `c_sharp` | `packages/dictionary/src/schema.ts` |
+| `grammarOf('.cs')` | ✅ 고쳐졌다 — `c_sharp` 로 간다 | `apps/desktop/src/session-flow.ts` |
+| 사전을 쓰면 | ✅ **캡처가 난다.** 표본 254파일에서 35개념 합 **9,000곳 남짓**(§12.4) | 이 저장소의 실측 |
+| 파싱을 시키면 | ✅ 판다. **ERROR 0 %** (20파일·254파일 둘 다) | §12.3 |
+| `grammar_abi` | ✅ **15.** `parser.c` 의 `#define LANGUAGE_VERSION` 직접 확인 + 시험이 대조 | `dictionary/csharp/_lang.yaml` · `crates/parse/tests/dictionary.rs` |
+| `dictionary/csharp/**` | ✅ **35개념 · 5,884줄** + `.scm` 37 + `_lang.yaml` | §12.1 |
+
+**아래 일곱 걸음 중 3번(ERROR 비율)에서 멈춰 있던 것이 이 판에서 풀렸다** — 재어 보니 0 %라
+00 §6-2 의 게이트를 통과했고, 그 뒤 4~7번을 이어서 끝냈다. 다만 **표본이 사용자 리포가 아니다**
+— 그 한계는 §12.7 에 적었다.
 
 **두 자리를 고쳐 적는다.** ① §8 의 「`grammarSchema` 에 `csharp` 가 없다」와 「`grammarOf` 가
 `.cs` 를 몰라 `typescript` 로 폴백한다」는 **둘 다 이미 닫혔다**(README §6 의 1번·4번).
@@ -289,7 +297,9 @@ D19 의 `lang` ≠ `grammar` 가 이 언어에서 **양쪽 다** 벌어진 셈�
 봅니다」로 예고할 실제 사용처)가 **필수**이고, `makeAbsentCard` 는 `AbsenceReason`(framework ·
 library · scale · idiom)이 필수다. 문법이 없으면 앞의 것을 못 만들고, 뒤의 것을 쓰면 **「네 코드엔
 없다」와 「우리가 못 읽는다」가 섞여** D137 이 막으려던 자리로 되돌아간다.
-**문법 없이 0부를 세우려면 세 번째 문이 필요하고 오늘 그것은 없다.**
+~~**문법 없이 0부를 세우려면 세 번째 문이 필요하다.**~~ → 문법이 섰으므로 이 문제는 안 생겼다.
+`previewSiteId` 는 사용자 리포가 오면 채워지고, 그 전까지 0곳인 한 개념
+(`csharp/switch-expression`)은 `makeAbsentCard` 쪽 사유 `idiom` 으로 간다(§12.4 ①).
 채점 쪽은 덜 급하다 — 여섯 형식 중 파서를 쓰는 것은 `build` 하나이고, 그것도 문법이 없으면
 정규식 정규화 폴백으로 떨어진다(정본 §5).
 
@@ -299,8 +309,10 @@ library · scale · idiom)이 필수다. 문법이 없으면 앞의 것을 못 �
 그 위에 C# 만의 구멍이 하나 더 있다 — **`.cshtml`·`.razor` 를 못 읽으므로 Blazor 리포에서는
 B 이전에 UI 파일이 통째로 안 보인다.** 그리고 이 리포에 `.cs` 가 **0개**라 §1 의 「생김새」는
 템플릿·설문에 기댄 판단이고(§10), 오개념 열둘도 명세와 커뮤니티 문헌 기반이다.
-**코스는 위 순서 3번에서 멈춘다** — ERROR 비율을 재기 전에는 0부조차 실물로 못 세우고,
-2부는 사용자가 C# 리포를 가져온 뒤에야 「내 코드」 절반이 채워진다.
+~~**코스는 위 순서 3번에서 멈춘다**~~ → **3번을 지났다** (2026-09-06). ERROR 비율이 0 %라
+0·1·2부 35판이 실물로 섰다(§12). **B 는 여전히 비어 있다** — 사용자 리포에 `.cs` 가 0장이라
+HTTP 간선도 기능 폐포도 실행 러너도 못 세운다. 2부의 「내 코드」 절반은 사용자가 C# 리포를
+가져온 뒤에야 채워진다. `.cshtml`·`.razor` 를 못 읽는 구멍도 그대로다.
 
 ---
 
@@ -695,3 +707,139 @@ Microsoft Learn 의 언어 참조·명세와 널리 인용되는 커뮤니티 �
 없다는 것 · T1/T2/T3 판정(통과는 `checked` 와 `==` 둘) · 자바와 C# 이 서로의 `siblings` 로 못
 쓰인다는 것 · diff 일곱이 거기 있다. §0.2 의 형식 표가 `fundamentals.md` 와 어긋나 있다는 지적도
 그 문서 §11.6 ②에 있다.
+
+---
+
+## §12 실물이 된 것 — 실측 (2026-09-06)
+
+`dictionary/csharp/**` 와 `packages/course/src/parts/csharp.ts` 가 섰다. 이 절은 **잰 것만** 적는다.
+
+### §12.1 장수와 줄 수
+
+| 부 | 개념 | 판 근거 |
+|---|---:|---|
+| 0부 값과 식 | **8** | §0.1 여덟 축 그대로 |
+| 1부 흐름과 묶기 | **3** | §2 — 자유 함수가 없어 문의 바닥이 셋 |
+| 2부 타입과 흐름 | **24** | §3 중심 열넷 + §4 심화 열 |
+| 3부 프레임워크 | **0** | `aspnet/` 네임스페이스가 없다 (§0.5) |
+| **합** | **35** | `essential` 35 = `CSHARP_PARTS` 0·1·2부 |
+
+개념 YAML **35장 · 5,884줄**(한 장 **168줄**), `.scm` **37개 · 738줄**(개념 35 + `_imports` ·
+`_blocks`), `_lang.yaml` 104줄. 한 장 168줄은 첫 물결 실측(213줄, README §11)보다 **21% 적다** —
+0부 여덟에만 `meaning` 을 넣고 2부는 지목형·빈칸형·`why_gate` 로 갔기 때문이다.
+
+문항: 지목형 35 · 빈칸형 26 · `meaning` 8 · `why_gate` 35. 빈칸형이 26 인 것은 구멍이
+**한 글자이거나 사용처마다 다른** 아홉이 `no_hole_reason` 으로 갔기 때문이다 —
+`member-access`(점) · `null-conditional`(물음표) · `nullable-reference`(물음표) ·
+`conditional-ternary`(물음표·쌍점) · `method-declaration`(반환 타입) · `method-call`(인자 목록) ·
+`property`(접근자 목록) · `list`(바깥 이름) · `generics`(타입 변수 이름).
+
+### §12.2 골든
+
+양성 **81** · 음성(`expect: none`) **35**. 개념마다 음성 하나 이상, 양성 둘 이상이다.
+`crates/parse/tests/dictionary.rs` 의 여섯 시험이 전부 초록이다 —
+`no_pattern_is_dead_and_every_example_matches_what_it_says` 가 죽은 패턴이 없음을 지킨다.
+
+### §12.3 파서 — **ERROR 0 %**
+
+§0.7 이 「로드는 통과하고 캡처가 0」이라고 적은 자리가 D190 으로 열렸다.
+`tree-sitter-c-sharp` **0.23.5**(ABI **15**, `parser.c` 의 `#define LANGUAGE_VERSION` 직접 확인)가
+`crates/parse` 에 링크돼 있고 `_lang.yaml` 의 `grammar_abi: { c_sharp: 15 }` 를
+`declared_grammar_abi_matches_the_linked_grammar` 가 대조한다.
+
+| 무엇 | 값 |
+|---|---|
+| 표본 | `dotnet-architecture/eShopOnWeb` (`--depth 1` 클론, `.cs` **254장**, `obj`·`bin` 제외) |
+| **실코드 20파일 ERROR 비율** | **0 / 20 = 0 %** |
+| 전량 254파일 ERROR 비율 | **0 / 254 = 0 %** |
+| `quality == "poor"` (03 §2.3 의 20 % 경계) | 20파일 0곳 · 254파일 0곳 |
+
+**00 §6-2 의 품질 게이트(5 %)를 통과한다.** 재는 방법은 `crates/parse/tests/quality.rs` 의
+`measure` 와 같은 셈이고(`chickadee_parse::scan` 의 `quality`), 그와 별개로
+`tree_sitter::Node::has_error()` 로 「ERROR 노드를 하나라도 든 파일」을 따로 셌다 — 둘 다 0 이다.
+임시 시험 `crates/parse/tests/tmp_csharp_measure.rs` 로 쟀고 **재고 나서 지웠다.**
+
+전처리기·`partial` 은 이 표본에서 안 물렸다. §8 ①·⑦ 이 경고한 두 자리는 Unity·Blazor 쪽이라
+**이 표본으로는 못 쟀다.**
+
+### §12.4 개념 사용처 — 표본 리포 실측 (곳/파일)
+
+사용자 리포에 `.cs` 가 **0장**이라(§0.7) 공개 리포 하나를 스크래치패드에 클론해 읽기만 했다.
+방법은 `chickadee_parse::{compile, scan}` 으로 `.scm` 마다 254파일을 훑어 `@site` 캡처를 센 것이다.
+
+| 개념 | 곳 | 파일 | | 개념 | 곳 | 파일 |
+|---|---:|---:|---|---|---:|---:|
+| `member-access` | 3,291 | 165 | | `null-conditional` | 45 | 18 |
+| `method-call` | 2,282 | 146 | | `operator-precedence` | 32 | 13 |
+| `assignment` | 767 | 123 | | `float-literal` | 29 | 22 |
+| `async-await` | 474 | 70 | | `list` | 22 | 17 |
+| `method-declaration` | 316 | 145 | | `null-coalescing` | 22 | 12 |
+| `property` | 307 | 102 | | `generics` | 21 | 14 |
+| `lambda` | 291 | 63 | | `boolean-literal` | 20 | 15 |
+| `text-literal` | 242 | 101 | | `foreach-loop` | 16 | 13 |
+| `class-declaration` | 239 | 235 | | `interface` | 16 | 16 |
+| `value-vs-reference` | 239 | 235 | | `linq-select` | 13 | 9 |
+| `return-statement` | 226 | 76 | | `linq-where` | 12 | 11 |
+| `equality` | 155 | 48 | | `deferred-execution` | 8 | 6 |
+| `if-statement` | 142 | 45 | | `type-conversion` | 7 | 6 |
+| `nullable-reference` | 112 | 43 | | `try-catch` | 6 | 6 |
+| `interpolated-string` | 77 | 20 | | `conditional-ternary` | 4 | 3 |
+| `integer-literal` | 76 | 45 | | `using-disposable` | 4 | 3 |
+| | | | | `record` | 1 | 1 |
+| | | | | `while-loop` | 1 | 1 |
+| | | | | **`switch-expression`** | **0** | **0** |
+
+**이 표가 말하는 것 넷.**
+
+**① 사용처 0곳은 하나다 — `switch-expression`.** 없어서가 아니라 그 자리를 다른 문법이
+가져가서다: 같은 리포에 `switch` 가 **딱 한 번** 나오는데 그것도 식이 아니라 **문**이고
+(`BlazorAdmin/Helpers/ToastComponent.cs:58`), 나머지 갈래는 `if`(142곳)와 삼항(4곳)이 쓴다.
+사유는 `idiom` 이다.
+
+**② `value-vs-reference` 239곳이 전부 `class` 쪽이다.** `class-declaration` 과 곳수·파일수가
+글자까지 같은 것이 그 증거다 — 이 리포에 `struct` 선언이 **0곳**이고, 값형은
+`readonly record struct` **한 곳**뿐이다(`ApplicationCore/Entities/CatalogItem.cs:66`).
+§0.3 이 「값 타입과 참조 타입」을 C# 의 축으로 잡았는데 **실코드에서는 한쪽 날개만 보인다.**
+
+**③ 반복의 자리를 `foreach` 와 LINQ 가 가져갔다.** `while` 이 **1곳**, `foreach` 16곳,
+`Where`+`Select` 25곳이다. §2 가 「맨 `while` 은 드물다」며 `while` 을 바닥 여덟에서 뺀 판단이
+이 표본에서 맞았다.
+
+**④ 얇은 열둘이 `_lang.yaml` 의 배열 규칙을 실제로 물렸다.** 20곳 미만이 열둘이라
+「얇은 판을 셋 이상 잇대지 않는다」가 2부 순서를 §3·§4 순서와 다르게 만들었다 —
+`essential` 주석에 그 배치가 적혀 있다.
+
+### §12.5 문서와 어긋나 바꾼 자리 — 여섯
+
+| # | 문서가 적은 것 | 실물 | 왜 |
+|---|---|---|---|
+| ① | §2 ⑦ `method-declaration` 의 선행은 `csharp/class-declaration` | 선행을 `cs/call-stack` 으로 | 그 개념은 §0.5 가 **2부**로 보낸 것이라 1부 판이 2부를 선행으로 갖게 된다. `csharp-learning.md` §11.2 가 「클래스 껍데기는 보여 주되 안 가르친다」로 이미 정리했다 |
+| ② | §3 ⑱ `while-loop` 의 선행은 `csharp/comparison` | 선행을 `csharp/equality` 로 | §0.5 가 `comparison` 을 `equality` 로 올려 흡수했다. 이름만 따라간 것이다 |
+| ③ | §1 의 `alternatives` 짝 넷 | **비워 뒀다** | present 쪽 개념 넷(`coroutine-yield`·`public-field`·`foreach-accumulate`·`array`)이 사전에 없다. 없는 id 를 적으면 린트 `alternatives-exists` 가 잡는다. Unity 표본을 재고 나서 올린다 |
+| ④ | §6 이 낸 새 `common/` 여섯 | 그중 다섯을 `universal: null` 로 | `common/value-vs-reference`·`interface-contract`·`lazy-sequence`·`scoped-cleanup`·`pattern-match` 가 아직 `dictionary/common/` 에 없다. 여섯째 `common/type-definition` 은 **이미 있는 이름이 달랐다** — `common/class-definition` 을 걸었다(자바도 같다) |
+| ⑤ | §0.2 축 6 의 `common/type-cast` | `universal: null` | README §9 가 「아직 비어 있는 것 하나」로 적어 둔 그 자리다. 자바 `explicit-conversion` 도 같은 이유로 비어 있다 |
+| ⑥ | §0.2 축 4·7 이 보편형을 **둘씩** 적음 | 하나만 걸었다 | 스키마의 `universal` 이 값 하나다(`conceptIdSchema.nullable()`). 축 4 는 `common/boolean-value`(C# 에는 truthiness 가 없어 `common/truthiness` 를 걸면 거짓이 전이된다), 축 7 은 `common/variable-binding`(세우는 줄에 낱말이 하나 더 붙는 것이 이 언어의 어긋남이라) |
+
+§0.5 가 예고한 흡수는 **그대로 됐다.** §2 ①②(`local-declaration`+`assignment`) → `csharp/assignment`
+한 장, §2 ④ → `csharp/operator-precedence`, §2 ⑤ → `csharp/equality`, §3 ⑩ →
+`csharp/text-literal`, §3 ⑪ → `csharp/float-literal`. 그래서 §2·§3 표의 id 다섯
+(`csharp/local-declaration`·`arithmetic`·`comparison`·`string-literal`·`number-literal`)은
+**사전에 없다** — 없는 것이 맞다.
+
+### §12.6 안 만든 것
+
+| 무엇 | 왜 |
+|---|---|
+| 3부 (`aspnet/` 15장쯤) | 네임스페이스가 없다(§0.5). 라우팅·의존성 주입·미들웨어·모델 바인딩·EF Core 매핑이 자바 `spring/` 15장에 대응하는 자리이고 다음 물결의 몫이다 |
+| `csharp/extension-method` · 델리게이트 · 연산자 오버로딩 · 박싱 | §4 「여기에 넣지 않고 미룬 것」 그대로 |
+| Unity 짝 넷 (`alternatives`) | 위 §12.5 ③ |
+| `.csx`·`.cshtml`·`.razor` | §8 그대로 — 앞의 것은 이슈 #241, 뒤의 둘은 이 문법이 못 읽는다 |
+| 넓히기(암묵 변환) 쿼리 | 정적으로 볼 자리가 없다. `long ms = 3;` 은 낱말이 안 적혀서 소스에 표가 없고, 그래서 `csharp/type-conversion` 은 **좁히기 캐스트만** 잡는다(자바·파이썬이 `implicit-conversion` 을 0곳으로 낸 것과 같은 자리) |
+
+### §12.7 「내 코드가 교재」 — 표본이 남의 것이라는 한계
+
+§11.5 가 「못 잰다」고 적은 자리를 **반쯤** 열었다. 파서가 서서 사용처는 쟀지만 그 리포는
+**사용자 것이 아니다.** 그러므로 자바가 낸 수치(0·1·2부 43판 중 30판이 내 코드를 짚는다 = 70%,
+`java-learning.md` §12.5)에 대응하는 C# 값은 **여전히 없다** — 사용자가 C# 리포를 가져와야 잰다.
+위 표가 말하는 것은 「ASP.NET Core 모양의 리포에서 이 개념들이 실제로 얼마나 나오나」이고,
+§1 이 그 모양을 기준으로 잡은 판단이 **표본 하나에서 지지된다**는 것까지다.
