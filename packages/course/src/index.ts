@@ -24,3 +24,6 @@ export type {
   DrillConcept, DrillsEntry, DrillsInput, FoldInput, GateInput, OutlineEntry, OutlineInput,
   PartAssignment, PartNo, StageFoldInput,
 } from './curriculum.js';
+// 언어별 부 배치의 등록부 (D190) — 사용자가 언어를 고르면 그 언어의 부가 선다.
+export { COURSE_LANGS, PARTS_BY_LANG, hasParts, isCourseLang, partsOf } from './parts/index.js';
+export type { CourseLang } from './parts/index.js';

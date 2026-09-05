@@ -42,6 +42,16 @@ pub const LANGS: &[(&str, Load)] = &[
     // `.vue` 의 `<style>`. 같은 css 문법을 그 구간에만 돌린다.
     #[cfg(feature = "lang-css")]
     ("vue_style", || tree_sitter_css::LANGUAGE.into()),
+    // D190 — the last four of the ten languages. Keys follow the crate names; the
+    // dictionary namespace for `c_sharp` is `csharp` (`cs/` belongs to the CS dictionary, D157).
+    #[cfg(feature = "lang-c")]
+    ("c", || tree_sitter_c::LANGUAGE.into()),
+    #[cfg(feature = "lang-cpp")]
+    ("cpp", || tree_sitter_cpp::LANGUAGE.into()),
+    #[cfg(feature = "lang-csharp")]
+    ("c_sharp", || tree_sitter_c_sharp::LANGUAGE.into()),
+    #[cfg(feature = "lang-swift")]
+    ("swift", || tree_sitter_swift::LANGUAGE.into()),
 ];
 
 #[derive(Debug, Clone, Serialize)]

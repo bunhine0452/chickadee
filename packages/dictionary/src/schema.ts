@@ -56,15 +56,16 @@ export const GRAMMARS = {
   // `.css` 와 `.vue` 의 `<style>` (D159).
   css: true,
   vue_style: true,
+  // D190 — 열 언어의 마지막 넷. 크레이트가 링크됐다(`crates/parse/Cargo.toml` `lang-c`·`lang-cpp`·
+  // `lang-csharp`·`lang-swift`). `c_sharp` 은 tree-sitter 크레이트가 쓰는 키이고 사전 네임스페이스는
+  // `csharp` 이다 — `cs/` 를 기초 CS 사전이 가져갔다 (D157). 03 §2.2 가 적은 위험(수십 MB
+  // `parser.c`)은 빌드 시간으로 치른다 — 3-OS 빌드가 그 값을 잰다.
+  c: true,
+  cpp: true,
+  c_sharp: true,
+  swift: true,
   // ── 아래는 이름만 있다. 크레이트가 `crates/parse/Cargo.toml` 에 없다. ──
-  // 03 §2.2 가 적은 위험(수십 MB `parser.c`) 때문에 3-OS 빌드에 얹기 전에 따로 판단할 일이다.
-  swift: false,
   dart: false,
-  // D156 의 열 언어. `c_sharp` 은 tree-sitter 크레이트가 쓰는 키이고 사전 네임스페이스는
-  // `csharp` 이다 — `cs/` 를 기초 CS 사전이 가져갔다 (D157).
-  c: false,
-  cpp: false,
-  c_sharp: false,
 } as const satisfies Record<string, boolean>;
 
 const grammarNames = Object.keys(GRAMMARS) as [keyof typeof GRAMMARS, ...(keyof typeof GRAMMARS)[]];
