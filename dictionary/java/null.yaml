@@ -7,7 +7,9 @@ grammars: [java]
 framework: null
 essential: true
 difficulty: 2
-prereq: [java/new-expression, cs/null-reference]
+# `java/reference-binding`(0부 축 G)이 「원시는 값, 참조는 자리」를 먼저 세운다 —
+# 없음은 그 자리가 비어 있는 상태라 순서가 스스로 선다 (java.md §1.5.4 <1>).
+prereq: [java/reference-binding, java/new-expression, cs/null-reference]
 confusions: []
 
 dict:

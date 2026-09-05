@@ -1,0 +1,28 @@
+[
+  {
+    "queryId": "java/boolean-only-condition",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "site",
+    "form": "whilecond",
+    "startLine": 5,
+    "startCol": 8,
+    "endLine": 7,
+    "endCol": 9,
+    "nodeKind": "while_statement",
+    "inError": false
+  },
+  {
+    "queryId": "java/boolean-only-condition",
+    "matchId": 1,
+    "patternIndex": 1,
+    "name": "pick.1",
+    "form": "whilecond",
+    "startLine": 5,
+    "startCol": 15,
+    "endLine": 5,
+    "endCol": 22,
+    "nodeKind": "identifier",
+    "inError": false
+  }
+]

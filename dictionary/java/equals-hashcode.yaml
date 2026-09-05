@@ -7,7 +7,9 @@ grammars: [java]
 framework: null
 essential: true
 difficulty: 4
-prereq: [java/comparison, java/inheritance-override]
+# 0부 `java/reference-equality` 가 「같은 상자냐 같은 내용이냐」를 맡고, 이 판은
+# 「내가 내용을 정할 때 무엇이 함께 따라오나」를 맡는다 (java.md §1.5.4 <2>).
+prereq: [java/reference-equality, java/comparison, java/inheritance-override]
 confusions: []
 
 dict:

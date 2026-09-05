@@ -7,7 +7,7 @@ grammars: [sql, mybatis_sql]
 framework: null
 essential: true
 difficulty: 2
-prereq: []
+prereq: [sql/null-unknown]
 confusions: []
 
 dict:

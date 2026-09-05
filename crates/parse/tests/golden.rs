@@ -162,7 +162,12 @@ fn the_golden_files_still_describe_what_the_queries_capture() {
 /// 개념이 적어 하한만 지킨다.
 #[test]
 fn each_grammar_brings_its_concepts_and_its_three_traps() {
-    for (dir, least) in [("ts", 20usize), ("tsx", 3), ("sql", 3), ("java", 13)] {
+    // java 하한 34 — 2·3부 스물하나에 **0부 「값과 식」 열셋**이 붙었다
+    // (`docs/curriculum/java.md` §1.5). 0부 열아홉 중 나머지 여섯은 표본 리포에 사용처가
+    // 없거나 얇아(`integer-limit` 2곳 · `floating-type` 1 · `reference-binding` 1 ·
+    // `float-inexact`·`implicit-conversion`·`explicit-conversion` 0) 골든을 안 둔다 —
+    // 그쪽은 사전 `examples[]` 와 합성 카드가 그물이다 (D177 규칙 <1>).
+    for (dir, least) in [("ts", 20usize), ("tsx", 3), ("sql", 3), ("java", 34)] {
         let cases = support::cases_of(dir);
         let concepts: BTreeSet<&str> = cases
             .iter()

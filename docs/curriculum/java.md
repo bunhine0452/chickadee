@@ -85,67 +85,72 @@ Java 에 같은 것을 하려면 `spring/` 네임스페이스가 필요하고 **
 `step` 한 걸음씩 · `bits` 비트로 보기 · `table` 표 채우기 · `build` 거꾸로 만들기 ·
 `predict` 예측 후 실행). **4지선다가 아니다.**
 
+**「사전」 열** — `dictionary/java/**` 에 실물이 있는가와, 표본 리포
+`MonggleMonggle`(99파일)에서 그 개념의 `.scm` 이 잡는 `곳/파일`. 「얇다」는
+`thin_threshold`(min_files 2 · min_sites 3) 아래, 「합성」은 0곳이라는 뜻이다.
+정규식으로 잰 §1.5.3 과 다른 자리는 §1.5.3 아래 표가 따로 적는다.
+
 **출처 표시** — `1부↑` 는 §2 의 부 배치 1부 열셋에서 올라온 것, `대기↑` 는 §2 「아직 안 세운 것」에서,
 `심화↑` 는 §5 에서, `신규` 는 이 절이 새로 세우는 것.
 
 #### 축 A — 정수형과 그 한계 (3판)
 
-| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
-|---|---|---|---|---|---|
-| `java/value-bits` **신규** | 값은 켜짐·꺼짐의 묶음이고, `int` 는 **정확히 32칸**이다 | `binary-representation` · `bit-and-byte` · `type` | 비트 배열 | 「`int` 의 크기는 컴퓨터마다 다르다」로 안다(C 에서는 맞지만 자바는 **명세가 고정**한다) | `bits` |
-| `java/variable-declaration` `1부↑` | 이름 **앞에** 타입이 오고, 그 뒤로 못 바꾼다 | `type` · `static-vs-dynamic-typing` | 값 상자 | `var` 를 「타입이 없다」로 읽는다. 추론일 뿐이고 타입은 그 자리에서 못 박힌다 | `value` |
-| `java/integer-limit` **신규** | 자리가 정해져 있어 **가장 큰 값 다음이 가장 작은 값**이다 | `integer-overflow` · `bit-and-byte` | 비트 배열 (자리가 도는 그림) | `Integer.MAX_VALUE + 1` 을 오류로 예상한다. 조용히 `-2147483648` 이 되고 아무도 안 막는다 | `bits` |
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 | 사전 |
+|---|---|---|---|---|---|---|
+| `java/value-bits` **신규** | 값은 켜짐·꺼짐의 묶음이고, `int` 는 **정확히 32칸**이다 | `binary-representation` · `bit-and-byte` · `type` | 비트 배열 | 「`int` 의 크기는 컴퓨터마다 다르다」로 안다(C 에서는 맞지만 자바는 **명세가 고정**한다) | `bits` | **있음** · 23/11 |
+| `java/variable-declaration` `1부↑` | 이름 **앞에** 타입이 오고, 그 뒤로 못 바꾼다 | `type` · `static-vs-dynamic-typing` | 값 상자 | `var` 를 「타입이 없다」로 읽는다. 추론일 뿐이고 타입은 그 자리에서 못 박힌다 | `value` | **있음** · 189/34 |
+| `java/integer-limit` **신규** | 자리가 정해져 있어 **가장 큰 값 다음이 가장 작은 값**이다 | `integer-overflow` · `bit-and-byte` | 비트 배열 (자리가 도는 그림) | `Integer.MAX_VALUE + 1` 을 오류로 예상한다. 조용히 `-2147483648` 이 되고 아무도 안 막는다 | `bits` | **있음** · 얇다 2/1 |
 
 #### 축 B — 실수형과 왜 안 떨어지나 (2판)
 
-| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
-|---|---|---|---|---|---|
-| `java/floating-type` **신규** | 실수 타입이 **둘**이고 리터럴의 기본은 `double` 이다 | `floating-point` · `bit-and-byte` | 비트 배열 (32칸 대 64칸) | `float f = 1.5;` 가 컴파일 안 되는 이유를 모른다 — `1.5` 는 `double` 이고 좁히기는 명시해야 한다(`1.5f`) | `bits` |
-| `java/float-inexact` **신규** | `0.1 + 0.2 != 0.3` — 2진수로 `0.1` 을 정확히 못 적는다 | `floating-point` · `binary-representation` | 비트 배열 (부호·지수·가수) | 소수를 `==` 로 견준다. 돈 계산에 `double` 을 써서 1원이 사라진다 — 그래서 `BigDecimal` 이 있다 | `value` |
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 | 사전 |
+|---|---|---|---|---|---|---|
+| `java/floating-type` **신규** | 실수 타입이 **둘**이고 리터럴의 기본은 `double` 이다 | `floating-point` · `bit-and-byte` | 비트 배열 (32칸 대 64칸) | `float f = 1.5;` 가 컴파일 안 되는 이유를 모른다 — `1.5` 는 `double` 이고 좁히기는 명시해야 한다(`1.5f`) | `bits` | **있음** · 얇다 1/1 |
+| `java/float-inexact` **신규** | `0.1 + 0.2 != 0.3` — 2진수로 `0.1` 을 정확히 못 적는다 | `floating-point` · `binary-representation` | 비트 배열 (부호·지수·가수) | 소수를 `==` 로 견준다. 돈 계산에 `double` 을 써서 1원이 사라진다 — 그래서 `BigDecimal` 이 있다 | `value` | **있음** · 합성 0/0 |
 
 #### 축 C — 문자열과 인코딩 (2판)
 
-| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
-|---|---|---|---|---|---|
-| `java/string-literal` `대기↑` | **큰따옴표만** 글자 묶음이다 | `text-encoding` | 값 상자 | `'ab'` 를 문자열로 쓴다. 작은따옴표는 **글자 한 개**(`char`)라 컴파일이 멈춘다 | `value` |
-| `java/text-length` **신규** | `char` 은 16비트 코드 단위 **하나**다 — 글자 하나가 아니다 | `text-encoding` · `bit-and-byte` | 비트 배열 | `"😀".length()` 를 1 로 예상한다(실제 2). `'a' + 'b'` 가 `"ab"` 가 아니라 `195`(`int`) 다 | `value` |
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 | 사전 |
+|---|---|---|---|---|---|---|
+| `java/string-literal` `대기↑` | **큰따옴표만** 글자 묶음이다 | `text-encoding` | 값 상자 | `'ab'` 를 문자열로 쓴다. 작은따옴표는 **글자 한 개**(`char`)라 컴파일이 멈춘다 | `value` | **있음** · 170/23 |
+| `java/text-length` **신규** | `char` 은 16비트 코드 단위 **하나**다 — 글자 하나가 아니다 | `text-encoding` · `bit-and-byte` | 비트 배열 | `"😀".length()` 를 1 로 예상한다(실제 2). `'a' + 'b'` 가 `"ab"` 가 아니라 `195`(`int`) 다 | `value` | **있음** · 7/4 |
 
 #### 축 D — 참·거짓 (2판)
 
-| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
-|---|---|---|---|---|---|
-| `java/boolean-literal` `1부↑` | `boolean` 은 숫자가 **아니다** | `type` | 값 상자 | `true == 1` 도 `(int) true` 도 컴파일이 안 된다. 파이썬의 `True + 1 == 2` 와 정반대다 | `value` |
-| `java/boolean-only-condition` **신규** | 조건 자리에 `boolean` 말고는 **못 온다** | `static-vs-dynamic-typing` | 표 (세 언어 대조) | `if (list)` · `if (count)` · `if (name)` 을 쓴다. 파이썬·JS 습관이 그대로 넘어와 전부 그 자리에서 멈춘다 | `table` |
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 | 사전 |
+|---|---|---|---|---|---|---|
+| `java/boolean-literal` `1부↑` | `boolean` 은 숫자가 **아니다** | `type` | 값 상자 | `true == 1` 도 `(int) true` 도 컴파일이 안 된다. 파이썬의 `True + 1 == 2` 와 정반대다 | `value` | **있음** · 27/15 |
+| `java/boolean-only-condition` **신규** | 조건 자리에 `boolean` 말고는 **못 온다** | `static-vs-dynamic-typing` | 표 (세 언어 대조) | `if (list)` · `if (count)` · `if (name)` 을 쓴다. 파이썬·JS 습관이 그대로 넘어와 전부 그 자리에서 멈춘다 | `table` | **있음** · 57/16 |
 
 #### 축 E — 연산자와 우선순위 (3판)
 
-| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
-|---|---|---|---|---|---|
-| `java/arithmetic` `1부↑` | 정수끼리 나누면 소수를 **버린다** — `7 / 2` 가 `3` 이다 | `integer-overflow` · `type` | 평가 트리 | `1 / 2 * 2.0` 을 `1.0` 으로 예상한다. `1 / 2` 가 먼저 `0` 이 되어 답은 `0.0` 이다. **버림은 0 쪽**이라 `-7 / 2` 가 `-3` 이다(파이썬 `//` 는 `-4`) | `step` |
-| `java/operator-precedence` **신규** | `2 + 3 * 4` 가 어떤 순서로 접히나. `&&` 는 **단락 평가**한다 | — | 평가 트리 | `if (s != null && s.length() > 0)` 의 두 항을 바꿔도 된다고 믿는다. 바꾸면 NPE 다 | `step` |
-| `java/string-concat` `대기↑` | `+` 가 더하기와 잇기를 겸하고 **왼쪽부터** 접힌다 | `text-encoding` | 평가 트리 | `1 + 2 + "a"` 는 `"3a"` 인데 `"a" + 1 + 2` 는 `"a12"` 다. 자바에는 문자열 보간이 없어(JEP 430 철회) 이 자리를 피할 수 없다 | `step` |
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 | 사전 |
+|---|---|---|---|---|---|---|
+| `java/arithmetic` `1부↑` | 정수끼리 나누면 소수를 **버린다** — `7 / 2` 가 `3` 이다 | `integer-overflow` · `type` | 평가 트리 | `1 / 2 * 2.0` 을 `1.0` 으로 예상한다. `1 / 2` 가 먼저 `0` 이 되어 답은 `0.0` 이다. **버림은 0 쪽**이라 `-7 / 2` 가 `-3` 이다(파이썬 `//` 는 `-4`) | `step` | **있음** · 19/11 |
+| `java/operator-precedence` **신규** | `2 + 3 * 4` 가 어떤 순서로 접히나. `&&` 는 **단락 평가**한다 | — | 평가 트리 | `if (s != null && s.length() > 0)` 의 두 항을 바꿔도 된다고 믿는다. 바꾸면 NPE 다 | `step` | **있음** · 20/10 |
+| `java/string-concat` `대기↑` | `+` 가 더하기와 잇기를 겸하고 **왼쪽부터** 접힌다 | `text-encoding` | 평가 트리 | `1 + 2 + "a"` 는 `"3a"` 인데 `"a" + 1 + 2` 는 `"a12"` 다. 자바에는 문자열 보간이 없어(JEP 430 철회) 이 자리를 피할 수 없다 | `step` | **있음** · 16/9 |
 
 #### 축 F — 형 변환 (3판)
 
-| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
-|---|---|---|---|---|---|
-| `java/implicit-conversion` **신규** | 좁은 타입 → 넓은 타입은 **자동**이다 (`int` → `long` → `float` → `double`) | `type` | 타입 변환 사다리 | `int` 를 `double` 자리에 그냥 넣는 것이 왜 되는지 모른다. 규칙이지 예외가 아니다 | `table` |
-| `java/explicit-conversion` **신규** | 넓은 → 좁은 은 `(int)` 를 적어야 하고 **자른다** | `integer-overflow` | 타입 변환 사다리 | `(int) 3.9` 를 4 로 예상한다. 반올림이 아니라 **버림**이라 3 이다. `(byte) 300` 은 `44` 다 | `value` |
-| `java/autoboxing` `심화↑` | `int` 와 `Integer` 가 소리 없이 오간다 | `value-vs-reference` · `null-reference` · `type` | 타입 변환 사다리 + 메모리 줄 | `Integer` 가 `null` 인데 `int` 에 넣어 NPE 가 난다 — 「숫자인데 왜 NPE 냐」에서 멈춘다 | `predict` |
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 | 사전 |
+|---|---|---|---|---|---|---|
+| `java/implicit-conversion` **신규** | 좁은 타입 → 넓은 타입은 **자동**이다 (`int` → `long` → `float` → `double`) | `type` | 타입 변환 사다리 | `int` 를 `double` 자리에 그냥 넣는 것이 왜 되는지 모른다. 규칙이지 예외가 아니다 | `table` | **있음** · 합성 0/0 |
+| `java/explicit-conversion` **신규** | 넓은 → 좁은 은 `(int)` 를 적어야 하고 **자른다** | `integer-overflow` | 타입 변환 사다리 | `(int) 3.9` 를 4 로 예상한다. 반올림이 아니라 **버림**이라 3 이다. `(byte) 300` 은 `44` 다 | `value` | **있음** · 합성 0/0 |
+| `java/autoboxing` `심화↑` | `int` 와 `Integer` 가 소리 없이 오간다 | `value-vs-reference` · `null-reference` · `type` | 타입 변환 사다리 + 메모리 줄 | `Integer` 가 `null` 인데 `int` 에 넣어 NPE 가 난다 — 「숫자인데 왜 NPE 냐」에서 멈춘다 | `predict` | **있음** · 246/64 |
 
 #### 축 G — 대입과 이름 (2판)
 
-| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
-|---|---|---|---|---|---|
-| `java/assignment` `1부↑` | 대입이 **식**이라 값을 낸다 | `state` | 메모리 줄 | `if (done = true)` 가 통과한다 — `boolean` 일 때만 열리는 문이고, `=`/`==` 실수가 살아남는 자바의 유일한 자리다 | `predict` |
-| `java/reference-binding` **신규** | 원시는 **값이** 복사되고 참조는 **자리가** 복사된다 | `value-vs-reference` · `aliasing` · `stack-and-heap` | 메모리 줄 (스택 칸 · 힙 상자) | 메서드에 객체를 넘기면 복사된다고 믿는다. `int` 는 복사되고 `List` 는 안 된다 — 같은 문법에 다른 규칙 | `predict` |
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 | 사전 |
+|---|---|---|---|---|---|---|
+| `java/assignment` `1부↑` | 대입이 **식**이라 값을 낸다 | `state` | 메모리 줄 | `if (done = true)` 가 통과한다 — `boolean` 일 때만 열리는 문이고, `=`/`==` 실수가 살아남는 자바의 유일한 자리다 | `predict` | **있음** · 8/4 |
+| `java/reference-binding` **신규** | 원시는 **값이** 복사되고 참조는 **자리가** 복사된다 | `value-vs-reference` · `aliasing` · `stack-and-heap` | 메모리 줄 (스택 칸 · 힙 상자) | 메서드에 객체를 넘기면 복사된다고 믿는다. `int` 는 복사되고 `List` 는 안 된다 — 같은 문법에 다른 규칙 | `predict` | **있음** · 얇다 1/1 |
 
 #### 축 H — 비교와 같음 (2판)
 
-| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 |
-|---|---|---|---|---|---|
-| `java/comparison` `1부↑` | `<`·`>` 는 **숫자에만** 쓴다 | — | 평가 트리 | 글자를 `<` 로 견주려 한다. 문자열은 `compareTo` 다 | `value` |
-| `java/reference-equality` `대기↑` | `==` 는 「같은 상자냐」, `.equals` 는 「내용이 같냐」 | `identity-vs-equality` · `value-vs-reference` | 메모리 줄 | `new String("a") == "a"` 가 거짓이다. `Integer a = 1000, b = 1000` 이면 `a == b` 가 **정해져 있지 않고**(대개 거짓) `127` 이면 참이다(캐시 −128~127 만 보장, JLS 5.1.7) | `predict` |
+| id | 한 줄 | `cs/` 간선 | 그림 | 초보가 틀리는 자리 | 형식 | 사전 |
+|---|---|---|---|---|---|---|
+| `java/comparison` `1부↑` | `<`·`>` 는 **숫자에만** 쓴다 | — | 평가 트리 | 글자를 `<` 로 견주려 한다. 문자열은 `compareTo` 다 | `value` | **있음** · 51/15 |
+| `java/reference-equality` `대기↑` | `==` 는 「같은 상자냐」, `.equals` 는 「내용이 같냐」 | `identity-vs-equality` · `value-vs-reference` | 메모리 줄 | `new String("a") == "a"` 가 거짓이다. `Integer a = 1000, b = 1000` 이면 `a == b` 가 **정해져 있지 않고**(대개 거짓) `127` 이면 참이다(캐시 −128~127 만 보장, JLS 5.1.7) | `predict` | **있음** · 15/5 |
 
 **그림 여섯 중 다섯만 쓴다.** 비트 배열 · 평가 트리 · 값 상자 · 메모리 줄 · 타입 변환 사다리.
 **스택 프레임은 0부에 없다** — 메서드가 아직 안 나왔다. 1부 `java/method-declaration`·
@@ -203,6 +208,40 @@ Java 에 같은 것을 하려면 `spring/` 네임스페이스가 필요하고 **
 | `reference-binding` | (대입·매개변수와 같은 노드) | 위와 같음 | 내 코드에서 확인 |
 | `comparison` | `==` · `!=` | 46곳 / 14파일 | 내 코드에서 확인 |
 | `reference-equality` | `.equals(` · `Objects.equals` | 15곳 / 5파일 | 내 코드에서 확인 |
+
+#### 사전이 선 뒤 — 파서로 다시 잰 값 (2026-09-05)
+
+위 표는 **정규식**으로 센 것이고, 아래는 `dictionary/java/*.scm` 열아홉을 실제로 컴파일해
+같은 리포 99파일에 돌린 값이다(`곳/파일`). 둘이 다른 자리가 이 절의 값이다 — 정규식은
+개념의 경계를 모른다.
+
+| 판 | 정규식 | **쿼리** | 왜 다른가 |
+|---|---|---|---|
+| `value-bits` | 31/13 | **23/11** | 쿼리는 선언·필드·매개변수만 세고 리터럴을 안 센다 |
+| `variable-declaration` | — | **189/34** | |
+| `integer-limit` | 2/1 | **2/1** | 같다. 둘 다 `long` 두 곳이고 `MAX_VALUE` 는 0곳이다 |
+| `floating-type` | 9/3 | **1/1** | 정규식이 `BigDecimal` 여덟 곳을 함께 셌다. 실수 타입은 한 곳뿐 |
+| `float-inexact` | 3/2 | **0/0** | 실수 리터럴이 든 셈도 실수 리터럴 선언도 없다 |
+| `string-literal` | 560/66 | **170/23** | 쿼리는 선언·필드·인자만 센다. 애너테이션 안의 리터럴은 뺀다 |
+| `text-length` | **0/0** | **7/4** | **정정** — 정규식이 `char`·`charAt(`·`Character` 만 셌다. 길이를 묻는 호출이 일곱 곳이다 |
+| `boolean-literal` | 27/15 | **27/15** | 같다 |
+| `boolean-only-condition` | (안 셈) | **57/16** | 갈림길 자체는 있다. 없는 것은 「참·거짓이 아닌 값을 넣은 자리」다 |
+| `arithmetic` | 0/0 (나눗셈) | **19/11** | 나눗셈은 여전히 0곳이고, 나머지 셈이 열아홉 곳 |
+| `operator-precedence` | 20/10 | **20/10** | 같다 |
+| `string-concat` | 15/9 | **16/9** | |
+| `implicit-conversion` | 0/0 | **0/0** | 같다 |
+| `explicit-conversion` | 0/0 | **0/0** | **정정** — 캐스트 문법 자체는 **4곳/3파일** 있는데 전부 참조 다운캐스트(`(Long)`·`(String)`·`(Number)`)다. 원시 좁히기는 0곳이고, 쿼리가 원시 타입만 잡으므로 0 이 맞다 |
+| `autoboxing` | 256/65 | **246/64** | 정규식이 문자열·주석 안의 타입 이름도 셌다 |
+| `assignment` | 17/9 | **8/4** | 쿼리는 이름에 다시 넣는 줄만 세고 필드 대입(`this.x = …`)을 뺀다 |
+| `reference-binding` | (대입과 같음) | **1/1** | 이름을 이름에 넣는 줄이 한 곳뿐이다. 생성자 주입과 빌더가 그 자리를 가져갔다 |
+| `comparison` | 46/14 | **51/15** | |
+| `reference-equality` | 15/5 | **15/5** | 같다 |
+
+**여섯은 그대로 여섯인데 멤버가 바뀐다.** 얇거나 없는 여섯은
+`integer-limit`(2/1) · `floating-type`(1/1) · `reference-binding`(1/1) ·
+`float-inexact`(0) · `implicit-conversion`(0) · `explicit-conversion`(0) 이다 —
+`thin_threshold`(min_files 2 · min_sites 3) 아래다. `text-length` 는 여기서 빠지고
+`reference-binding` 이 들어온다. 32% 라는 비율은 안 바뀐다.
 
 **19판 중 여섯이 사용처 0 이거나 그에 가깝다** — `integer-limit`(2) · `float-inexact`(3) ·
 `text-length`(**0**) · `arithmetic` 의 나눗셈(**0**) · 캐스트(**0**) · `floating-type`(9).
@@ -288,6 +327,12 @@ NPE 를 내나」에 답할 수 있다. 이레가 맞는 값인지는 **사용�
 순서가 곧 1·2부의 순서이고 `JAVA_PARTS` 가 같은 목록을 든다. 시험이 둘을 대조한다」고 적어 뒀다.
 0부를 세우면 **그 상수에 부가 하나 늘고 시험도 함께 바뀐다.** 이 문서는 명세이고 그 변경은
 `packages/**` 라 범위 밖이다 — 여기 적어 두는 것이 인계다.
+
+→ **처리됐다(2026-09-05, 사전을 세우면서).** `PartNo` 가 `0 | 1 | 2 | 3` 이 되고 `JAVA_PARTS` 에
+0부 열일곱이 앞에 섰다. 시험은 「0·1·2부를 합치면 `essential` 전량」으로 바뀌었다.
+**남은 결정 하나** — `courseOutline` 의 접기(`foldPart1`)는 지금 1부만 접는다. 0부를 접을지는
+코스 화면의 결정이라 안 건드렸다. 안 접는 근거는 §1.5.2 에 있다: 파이썬을 아는 사람의 겹이
+0부를 채우지 않는다(오히려 `7 / 2` 를 `3.5` 로 예상한다).
 
 ---
 
@@ -509,7 +554,7 @@ I6 이 찾은 것: `packages/dictionary/src/schema.ts:29` 의 `grammarSchema` �
 ## §3 1부에 담기는 것 — 설계표 (바닥 여덟 + 그 뒤 다섯)
 
 | # | id | name.ko / en | token | universal | diff | prereq | 이 언어라서 다른 것 |
-|---|---|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|---|---|
 | 1 | `java/class-declaration` | 코드가 사는 상자 / Class declaration | `class` | `common/class-definition` **(신규)** | 1 | — | 실행되는 코드가 파일 맨 위에 올 수 없다. 그리고 `public` 클래스 이름은 **파일 이름과 같아야** 한다 — 클래스 이름을 고치면 파일 이름도 고쳐야 한다 |
 | 2 | `java/variable-declaration` | 타입 붙여 이름 만들기 / Typed declaration | `int` | `common/variable-binding` | 1 | — | 이름 **앞에** 타입 낱말이 온다. `int x` 는 「x 는 정수만 담는다」는 약속이고 그 뒤로 못 바꾼다 |
 | 3 | `java/assignment` | 이름에 값 다시 넣기 / Assignment | `=` | `common/reassignment` | 1 | `variable-declaration` | 넣는 것이 **식**이라 값을 낸다. 그래서 `a = b = 0` 이 되고, `boolean` 이면 `if (done = true)` 까지 통과한다 |
@@ -564,7 +609,7 @@ JEP 445(21 프리뷰) → 463(22) → 477(23) → 495(24) → 512(25 정식)의 
 ## §4 2부에 담기는 것 — 설계표 (중심)
 
 | # | id | name.ko / en | token | universal | diff | prereq | 이 언어라서 다른 것 · 없으면 왜 못 읽나 |
-|---|---|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|---|---|
 | 9 | `java/return-statement` | 값 돌려주기 / return | `return` | `common/return-value` | 2 | `method-declaration` | 타입이 `void` 가 아닌데 빠뜨리면 **컴파일이 멈춘다**. 파이썬은 조용히 `None` 을 보낸다 — 없으면 「값이 안 왔다」를 어디서 찾을지 모른다 |
 | 10 | `java/main-method` | 프로그램이 시작하는 자리 / Entry point | `main` | `common/entry-point` **(신규)** | 2 | `method-declaration` | 다섯 낱말이 각각 다른 개념이고 지금 알 것은 하나다. 없으면 어느 파일부터 읽을지를 못 정한다 |
 | 11 | `java/string-literal` | 글자 값 / String literal | `"` | `common/text-literal` | 1 | — | 큰따옴표만 글자 묶음이다. 작은따옴표는 **글자 한 개**(`char`)라 `'ab'` 는 오류다 |
@@ -588,7 +633,7 @@ JEP 445(21 프리뷰) → 463(22) → 477(23) → 495(24) → 512(25 정식)의 
 ## §5 심화 — 2부 뒤쪽과 아직 안 세운 것
 
 | # | id | name.ko / en | token | universal | diff | prereq | 이 언어라서 다른 것 |
-|---|---|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|---|---|
 | 25 | `java/try-catch` | 터진 것을 받아 잇기 / try-catch | `catch` | `common/try-catch` | 3 | `inheritance-override` | 잡을 것을 **타입으로** 적는다. 무엇이 잡히는지가 예외 클래스의 **상속 관계**로 정해져 `catch (Exception e)` 가 거의 다 삼킨다 |
 | 26 | `java/checked-exception` | 문법이 시키는 예외 처리 / Checked exceptions | `throws` | `null` | 4 | `try-catch` | 잡거나 `throws` 로 넘기거나 **둘 중 하나를 문법이 강제**한다. 주류 언어 중 Java 만 그렇고, 그래서 LLM 코드에 뜻 없는 `try { … } catch (Exception e) { }` 가 쌓인다 |
 | 27 | `java/autoboxing` | 원시 값과 상자 값 / Autoboxing | `Integer` | `null` | 4 | `null` · `collection-generic` | `int` 와 `Integer` 가 소리 없이 오간다. `List<int>` 는 못 쓰고 `List<Integer>` 만 되며, `null` 인 `Integer` 를 `int` 에 넣는 순간 그 줄에서 NPE 가 난다 |

@@ -1,0 +1,220 @@
+schema: 1
+id: ts/explicit-conversion
+universal: null
+name: { ko: 적어 놓는 타입 변환, en: Conversion you write down }
+token: "Number()"
+grammars: [typescript, tsx, javascript, vue]
+framework: null
+essential: true
+difficulty: 2
+prereq: [ts/string-literal, cs/type-conversion]
+confusions: [ts/number-literal, ts/string-literal]
+
+dict:
+  one_liner:
+    ko: "종류를 바꾸는 일을 사람이 적어 둔 자리다. 원래 값은 그대로 남는다."
+    en: "A person wrote the change of kind down here. The original value stays as it is."
+  why:
+    ko: >-
+      언어가 알아서 바꾸면 어느 쪽으로 바뀌었는지 코드에 안 남습니다. {{site.line}}행처럼
+      적어 두면 <b>어느 종류로 만들 셈인지</b>가 그 줄에 보이고, 읽는 사람이 다음 줄의
+      셈을 예측할 수 있어요.
+    en: >-
+      When the language converts on its own, nothing in the code says which way it went. Written out
+      as on line {{site.line}}, <b>which kind is intended</b> shows on that line, and the next
+      reader can predict the arithmetic below.
+  trace:
+    - ko: "{{site.line}}행에서 {{pick.3|code}} 의 값을 읽는다."
+      en: "Line {{site.line}} reads the value of {{pick.3|code}}."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 그 값을 보고 <b>새 값</b>을 만든다."
+      en: "{{pick.1|code}} looks at it and makes a <b>new value</b>."
+    - ko: "원래 값은 그대로다 — 나온 것이 다른 종류일 뿐이다."
+      en: "The original is untouched — only what comes out is of another kind."
+
+rule:
+  ko: >-
+    <b>바꾸는 것이 아니라 만드는 것이다.</b> 이름마다 못 읽는 값을 다루는 방식이 다르다.
+  en: >-
+    <b>It makes a value rather than changing one.</b> Each name deals with an unreadable input in
+    its own way.
+result:
+  label:
+    ko: "{{site.line}}행이 내놓는 것"
+    en: "What line {{site.line}} yields"
+  value: "{{pick.1}}({{pick.3}})"
+  note:
+    ko: "새로 만들어진 값"
+    en: "a newly made value"
+ok:
+  ko: >-
+    {{pick.1|code}}{{pick.1|josa:은,는}} 받은 값을 <b>다른 종류의 새 값</b>으로 만듭니다.
+    받은 값은 그대로 남아 있어요.
+  en: >-
+    {{pick.1|code}} makes a <b>new value of another kind</b> out of what it is given. What it was
+    given is left as it was.
+payoff:
+  ko: >-
+    주소나 입력칸에서 온 값을 셈에 넣기 전에 이 한 줄을 두면, 합계가 이어 붙는 사고가
+    코드 한 곳에서 막힙니다.
+  en: >-
+    Put this one line before a value from a URL or an input box enters arithmetic and the
+    running-together accident is stopped in one place.
+bridge:
+  ko: >-
+    안 적어도 언어가 알아서 바꿉니다 — 다만 그때는 방향을 기호가 정하고 코드에 안 남아요.
+  en: >-
+    Left unwritten the language converts anyway — only then the direction is set by a symbol and
+    nothing in the code records it.
+misconceptions:
+  - ko: "빈 값은 못 읽어서 <code>NaN</code> 이 된다 — 빈 문자열은 <code>0</code> 이 됩니다."
+    en: "An empty input cannot be read and gives <code>NaN</code> — an empty string gives <code>0</code>."
+  - ko: "이름이 달라도 결과는 같다 — 앞에서부터 읽는 이름과 통째로 읽는 이름이 다르게 답합니다."
+    en: >-
+      The names all give the same result — the one that reads from the front and the one that reads
+      the whole answer differently.
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>새 값을 만들어 내는 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name that makes the new value</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 실제로 일을 <b>시작하게</b> 하는 표시입니다. 무엇을 만들지는 그 앞의 이름이 정해요."
+          en: >-
+            {{pick.2|code}} is the mark that <b>sets the work going</b>. What gets made is decided by
+            the name in front of it.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 시작 표시와 하는 일"
+            en: "The sharpest spot — the starting mark or the work"
+          code:
+            - "Number('12px')     // NaN"
+            - "parseInt('12px')   // 12"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 재료입니다. 재료는 그대로 남고, 새 값은 따로 생겨요."
+          en: >-
+            {{pick.3|code}} is the input. The input is left as it was and the new value appears
+            beside it.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 재료와 산물"
+            en: "The sharpest spot — the input or the product"
+          code:
+            - "const s = '7'; Number(s)   // 7"
+            - "s                          // 여전히 '7'"
+
+meaning:
+  - q:
+      ko: "<code>Number('')</code> · <code>Number(null)</code> · <code>Number(undefined)</code> 는 각각 무엇이 될까요?"
+      en: "What do <code>Number('')</code>, <code>Number(null)</code> and <code>Number(undefined)</code> each become?"
+    hint:
+      ko: "「비어 있음」과 「아직 없음」은 다르게 다뤄집니다."
+      en: "“Empty” and “not yet there” are handled differently."
+    options:
+      - t:
+          ko: "<code>0</code> · <code>0</code> · <code>NaN</code>"
+          en: "<code>0</code>, <code>0</code>, <code>NaN</code>"
+      - t:
+          ko: "셋 다 <code>NaN</code>"
+          en: "All three are <code>NaN</code>"
+        diag:
+          t:
+            ko: "읽을 것이 없으니 그럴 법합니다. 빈 문자열과 「비었다고 적어 둔 값」은 <code>0</code> 으로 정해져 있고, 「아직 없음」만 <code>NaN</code> 이에요."
+            en: >-
+              With nothing to read that seems fair. The empty string and the written-down emptiness
+              are fixed at <code>0</code>; only “not yet there” gives <code>NaN</code>.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 두 가지 없음이 갈린다"
+              en: "The sharpest spot — the two absences part"
+            code:
+              - "Number(null)        // 0"
+              - "Number(undefined)   // NaN"
+      - t:
+          ko: "셋 다 <code>0</code>"
+          en: "All three are <code>0</code>"
+        diag:
+          t:
+            ko: "앞의 둘은 그렇습니다. 「아직 넣지 않았다」는 수로 읽을 수 없다고 정해져 있어서 그 자리만 다릅니다."
+            en: >-
+              The first two are. “Nothing was put here yet” is fixed as unreadable as a number, so
+              that one differs.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 하나만 다르다"
+              en: "The sharpest spot — only one differs"
+            code:
+              - "Number('')          // 0"
+              - "Number(undefined)   // NaN"
+      - t:
+          ko: "빈 값을 넣으면 멈춘다"
+          en: "An empty input makes it stop"
+        diag:
+          t:
+            ko: "멈추지 않습니다. 읽을 수 없을 때도 값 하나가 나오고, 그 값이 셈에 들어가면 결과가 조용히 <code>NaN</code> 이 됩니다."
+            en: >-
+              Nothing stops. Even when it cannot be read a value comes out, and once that value
+              enters arithmetic the result quietly becomes <code>NaN</code>.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 멈추지 않고 번진다"
+              en: "The sharpest spot — it spreads instead of stopping"
+            code:
+              - "Number('abc') + 1   // NaN"
+              - "Number('12') + 1    // 13"
+
+no_hole_reason: >-
+  구멍에 들어갈 것이 표준 라이브러리 이름이라 지우면 이름을 외웠는지 묻는 물음이 된다.
+  이 개념이 재는 것은 이름이 아니라 「그 이름이 못 읽는 값에서 무엇을 내나」다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 종류를 바꾸는 일을 적어 두었을까요?"
+    en: "Why does line {{site.line}} write the change of kind down?"
+  choices:
+    - t:
+        ko: "값이 어느 종류로 들어올지 모르는 자리라서 — 적어 두면 아래 셈이 예측된다"
+        en: "Because the kind arriving here is unknown — written down, the arithmetic below becomes predictable"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 안 적었을 때 어느 기호가 방향을 정하게 되는지도 적어 보세요."
+        en: "That is the direction. Add which symbol would set the direction if it were left unwritten."
+    - t:
+        ko: "값을 그 자리에서 바꾸려고"
+        en: "To change the value in place"
+      ok: false
+      fb:
+        ko: "원래 값은 그대로입니다. 나오는 것은 새 값이고, 받아 두지 않으면 그대로 사라져요."
+        en: >-
+          The original is untouched. What comes out is a new value, and it is gone unless something
+          holds it.
+    - t:
+        ko: "타입 오류를 없애려고"
+        en: "To silence a type error"
+      ok: false
+      fb:
+        ko: "검사기를 조용하게 만들 수는 있지만 그것이 이유는 아닙니다. 이유는 <b>돌 때</b> 값이 무엇이냐입니다."
+        en: >-
+          It can quiet the checker, but that is not the reason. The reason is what the value actually
+          is <b>while running</b>.
+
+queries:
+  - { grammars: [typescript, tsx, javascript, vue], file: ./explicit-conversion.scm }
+
+examples:
+  - code: "const n = Number(raw)"
+    expect: { sites: 1, form: cast, picks: { 1: "Number", 2: "(", 3: "raw" } }
+  - code: "const page = parseInt(query, 10)"
+    expect: { sites: 1, form: cast, picks: { 1: "parseInt", 2: "(", 3: "query" } }
+  - code: "const has = !!user"
+    expect: { sites: 1, form: double-negate, picks: { 1: "!", 2: "!", 3: "user" } }
+  - code: "const n = count + 1"
+    expect: none
+  - code: "const list = toArray(raw)"
+    expect: none

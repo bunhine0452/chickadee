@@ -7,7 +7,9 @@ grammars: [java]
 framework: null
 essential: true
 difficulty: 1
-prereq: [cs/integer-overflow, cs/floating-point]
+# 0부 축 E (java.md §1.5.1). `cs/type` 이 「두 int 의 결과도 int」의 아래층이고,
+# `cs/operator-precedence` 는 `1 / 2 * 2.0` 이 왜 0.0 인가의 아래층이다.
+prereq: [cs/integer-overflow, cs/floating-point, cs/type, cs/operator-precedence]
 confusions: []
 dict:
   one_liner:
@@ -149,7 +151,12 @@ why_gate:
 queries:
   - { grammars: [java], file: ./arithmetic.scm }
 examples:
-  - code: "class A { void f() { int s = a + b; } }"
+  # 값을 든 예 — 식 · 값 · 타입 (`docs/program/fundamentals.md` §8 의 재료).
+  - code: "class A { void f() { int q = 7 / 2; } }        // 7 / 2 -> 3 (int)"
+    expect: { sites: 1, form: arith, hole: "/", picks: { 1: "/", 2: "7", 3: "2" } }
+  - code: "class A { void f(int a) { int q = a % 2; } }   // -7 % 2 -> -1 (int)"
+    expect: { sites: 1, form: arith, hole: "%", picks: { 1: "%", 2: "a", 3: "2" } }
+  - code: "class A { void f(int a, int b) { int s = a + b; } }  // 1 + 2 -> 3 (int)"
     expect: { sites: 1, form: arith, hole: "+", picks: { 1: "+", 2: "a", 3: "b" } }
-  - code: "class A { void f() { boolean t = a == b; } }"
+  - code: "class A { void f(int a, int b) { boolean t = a == b; } }  // 1 == 2 -> false (boolean)"
     expect: none

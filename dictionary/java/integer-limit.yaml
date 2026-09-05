@@ -1,0 +1,156 @@
+schema: 1
+id: java/integer-limit
+# 0부 축 A. 보편형은 `common/integer-literal` 이다 — 그 판의 `why` 가 「끝에서 하나 더하면
+# 처음으로 돌아간다」를 이미 가르치므로 자바에서 다시 배울 것은 **어느 값에서**뿐이다 (D4).
+universal: common/integer-literal
+name: { ko: 정수의 한계, en: Integer limits }
+token: "MAX"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cs/integer-overflow, cs/bit-and-byte]
+confusions: []
+dict:
+  one_liner:
+    ko: "자리가 정해져 있어 가장 큰 값 다음이 가장 작은 값이다."
+    en: "The slots are fixed, so the largest value is followed by the smallest."
+  why:
+    ko: >-
+      32칸으로 적을 수 있는 수는 <code>-2147483648</code> 부터 <code>2147483647</code> 까지입니다.
+      그 끝에서 하나를 더하면 <b>오류가 나지 않고</b> 맨 앞으로 돌아갑니다 —
+      <code>2147483647 + 1</code> 이 <code>-2147483648</code> 이에요. 자바는 이 자리에서
+      아무 말도 안 합니다. 러스트는 개발 빌드에서 멈추고 스위프트는 트랩을 걸지만,
+      자바는 조용히 감깁니다. 그래서 밀리초·바이트 수·합계처럼 커질 수 있는 값은
+      64칸 타입을 씁니다.
+    en: >-
+      Thirty-two slots hold <code>-2147483648</code> through <code>2147483647</code>. Add one at
+      that end and <b>nothing is raised</b> — the value comes back around, so
+      <code>2147483647 + 1</code> is <code>-2147483648</code>. Java says nothing here. Rust stops
+      in a debug build and Swift traps; Java wraps in silence. That is why milliseconds, byte
+      counts and running totals use the 64-slot type.
+  trace:
+    - ko: "{{site.line}}행은 {{pick.2|code}}{{pick.2|josa:을,를}} 세운다."
+      en: "Line {{site.line}} sets up {{pick.2|code}}."
+    - ko: "그 자리는 칸이 더 필요해서 넓은 쪽을 골랐다."
+      en: "That spot needed more slots, so the wider type was chosen."
+    - ko: "좁은 쪽이었다면 어느 값에서 감기는지가 이 판의 물음이다."
+      en: "Had it been the narrow one, the question is at which value it wraps."
+rule:
+  ko: "<b>끝에서 하나 더하면 처음으로 돌아간다.</b> 자바는 그 자리에서 안 멈춘다."
+  en: "<b>One past the end comes back to the start.</b> Java does not stop there."
+result:
+  label: { ko: "{{site.line}}행이 고른 칸 수", en: "the slot count chosen on line {{site.line}}" }
+  value: "{{pick.1}} {{pick.2}}"
+  note: { ko: "감기는 자리가 여기서 정해진다", en: "where it wraps is decided here" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 넓은 칸을 받았습니다 — 감기는 자리가 훨씬 멀어요."
+  en: "{{pick.2|code}} got the wider slots, so the wrap-around is much further away."
+payoff:
+  ko: "이걸 알면 「합계가 갑자기 음수가 됐다」가 풀립니다 — 예외가 아니라 감긴 겁니다."
+  en: "This untangles “the total suddenly went negative” — nothing was raised, it wrapped."
+bridge:
+  ko: "파이썬은 자릿수 한계가 없어 이 판이 아예 안 생깁니다. 자바는 칸이 먼저 정해집니다."
+  en: "Python has no digit limit, so this plate never arises. In Java the slots come first."
+misconceptions:
+  - ko: "끝을 넘기면 예외가 난다 — 자바는 조용히 감깁니다. 예외는 러스트의 개발 빌드에서 나는 일입니다."
+    en: "Going past the end raises something — Java wraps in silence. Rust does that, in a debug build."
+  - ko: "값이 크면 자바가 알아서 넓은 타입을 고른다 — 안 고릅니다. 타입은 그 줄에 적힌 대로입니다."
+    en: "Java picks a wider type for a big value — it does not. The type is what the line says."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>감기는 자리를 정하는 글자</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that decides where it wraps</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 이름은 한계와 무관해요 — 같은 이름이라도 앞에 붙는 타입이 바뀌면 한계가 바뀝니다."
+          en: "{{pick.2|code}} is the <b>name</b>, and names carry no limit. The same name gets a different limit when the type in front changes."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 타입이냐", en: "The sharpest spot — the name or the type" }
+          code:
+            - "int ms;      // 2147483647 에서 감긴다"
+            - "long ms;     // 훨씬 뒤에서 감긴다"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>64칸</b>이 필요한 값을 담습니다."
+      en: "Choose what goes in the blank. Line {{site.line}} holds a value that needs <b>64 slots</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "long", mono: true }
+      - t: "int"
+        mono: true
+        diag:
+          t:
+            ko: "32칸이라 <code>2147483647</code> 에서 감깁니다. 밀리초 단위 시각은 그 값을 1970년 기준 25일쯤에 이미 넘어요."
+            en: "Thirty-two slots wrap at <code>2147483647</code>. A millisecond clock passes that about 25 days after 1970."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 32칸이냐 64칸이냐", en: "The sharpest spot — 32 slots or 64" }
+            code:
+              - "int ms = 2147483647;   // 여기가 끝"
+              - "long ms = 2147483648L; // 여유가 있다"
+      - t: "short"
+        mono: true
+        diag:
+          t:
+            ko: "16칸이라 <code>32767</code> 에서 감깁니다. 32칸보다도 훨씬 앞이에요."
+            en: "Sixteen slots wrap at <code>32767</code> — far sooner than 32 slots do."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 16칸이냐 64칸이냐", en: "The sharpest spot — 16 slots or 64" }
+            code:
+              - "short n = 32767;   // 여기가 끝"
+              - "long n = 32768;    // 여유가 있다"
+      - t: "double"
+        mono: true
+        diag:
+          t:
+            ko: "칸은 64개지만 <b>실수</b>라 큰 정수에서 정확도를 잃습니다. 세는 값에는 정수 타입을 씁니다."
+            en: "It has 64 slots but it is a <b>decimal</b> type and loses exactness on large whole numbers. Counting uses a whole-number type."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 정수 64칸이냐 실수 64칸이냐", en: "The sharpest spot — 64 whole slots or 64 decimal slots" }
+            code:
+              - "long n = 9007199254740993L;   // 그대로"
+              - "double d = 9007199254740993.0; // 한 칸 밀린다"
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 <b>넓은 쪽 타입</b>을 골랐을까요?"
+    en: "Why did line {{site.line}} choose <b>the wider type</b>?"
+  choices:
+    - t:
+        ko: "이 값이 32칸의 끝을 넘길 수 있고, 넘겨도 아무 데서도 안 멈추기 때문"
+        en: "Because this value can pass the end of 32 slots, and nothing stops it when it does"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 넘긴 순간 값이 무엇이 되는지도 한 줄로 적어 보세요."
+        en: "That is the direction. Add one line on what the value becomes at that moment."
+    - t:
+        ko: "넓은 타입이 계산이 더 빠르기 때문"
+        en: "Because the wider type computes faster"
+      ok: false
+      fb:
+        ko: "속도 때문이 아닙니다. 넓은 쪽은 자리를 두 배 쓰고, 고르는 이유는 <b>범위</b>예요."
+        en: "Speed is not it. The wider type takes twice the room; the reason is <b>range</b>."
+    - t:
+        ko: "소수를 담아야 해서"
+        en: "Because it has to hold a fraction"
+      ok: false
+      fb:
+        ko: "소수는 못 담습니다. 이것도 정수 타입이고 넓은 것뿐이에요."
+        en: "It holds no fraction. This is still a whole-number type, only a wider one."
+queries:
+  - { grammars: [java], file: ./integer-limit.scm }
+examples:
+  - code: "class A { void f() { long ms = 2147483648L; } }   // ms -> 2147483648 (long)"
+    expect: { sites: 1, form: wider, hole: "long", picks: { 1: "long", 2: "ms", 3: "2147483648L" } }
+  - code: "class A { void f() { int top = Integer.MAX_VALUE; } }  // top -> 2147483647 (int)"
+    expect: { sites: 1, form: limit, picks: { 1: "MAX_VALUE", 2: "Integer" } }
+  - code: "class A { private long total; }                   // total -> 0 (long)"
+    expect: { sites: 1, form: wider-field, hole: "long", picks: { 1: "long", 2: "total" } }
+  - code: "class A { void f() { int n = 1; } }               // n -> 1 (int)"
+    expect: none

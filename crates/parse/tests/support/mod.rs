@@ -43,7 +43,16 @@ pub const DIRS: &[Dir] = &[
         name: "sql",
         grammar: "sql",
         ext: "sql",
-        lang: None,
+        lang: Some("sql"),
+    },
+    // `MyBatis` mappers. Same dictionary queries as `sql`, run on the statement bodies of
+    // an XML file (`sfc.rs`) — that is the only place the placeholder blanking of
+    // `params.rs` can be caught regressing.
+    Dir {
+        name: "mybatis",
+        grammar: "mybatis_sql",
+        ext: "xml",
+        lang: Some("sql"),
     },
     Dir {
         name: "java",

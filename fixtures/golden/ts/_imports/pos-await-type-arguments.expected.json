@@ -1,0 +1,93 @@
+[
+  {
+    "queryId": "_imports",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "import.source",
+    "form": "static",
+    "startLine": 2,
+    "startCol": 20,
+    "endLine": 2,
+    "endCol": 30,
+    "nodeKind": "string",
+    "inError": false
+  },
+  {
+    "queryId": "_imports",
+    "matchId": 2,
+    "patternIndex": 0,
+    "name": "import.source",
+    "form": "static",
+    "startLine": 3,
+    "startCol": 23,
+    "endLine": 3,
+    "endCol": 46,
+    "nodeKind": "string",
+    "inError": false
+  },
+  {
+    "queryId": "_imports",
+    "matchId": 3,
+    "patternIndex": 9,
+    "name": "ctx.recv",
+    "form": "call",
+    "startLine": 6,
+    "startCol": 21,
+    "endLine": 6,
+    "endCol": 24,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "_imports",
+    "matchId": 3,
+    "patternIndex": 9,
+    "name": "import.source",
+    "form": "call",
+    "startLine": 6,
+    "startCol": 25,
+    "endLine": 6,
+    "endCol": 28,
+    "nodeKind": "property_identifier",
+    "inError": false
+  },
+  {
+    "queryId": "_imports",
+    "matchId": 4,
+    "patternIndex": 4,
+    "name": "ctx.verb",
+    "form": "http-get",
+    "startLine": 6,
+    "startCol": 25,
+    "endLine": 6,
+    "endCol": 28,
+    "nodeKind": "property_identifier",
+    "inError": false
+  },
+  {
+    "queryId": "_imports",
+    "matchId": 4,
+    "patternIndex": 4,
+    "name": "import.source",
+    "form": "http-get",
+    "startLine": 6,
+    "startCol": 35,
+    "endLine": 6,
+    "endCol": 49,
+    "nodeKind": "template_string",
+    "inError": false
+  },
+  {
+    "queryId": "_imports",
+    "matchId": 5,
+    "patternIndex": 10,
+    "name": "import.source",
+    "form": "call-self",
+    "startLine": 7,
+    "startCol": 20,
+    "endLine": 7,
+    "endCol": 26,
+    "nodeKind": "identifier",
+    "inError": false
+  }
+]

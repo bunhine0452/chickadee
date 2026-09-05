@@ -16,39 +16,72 @@ extensions:
   vue: [.vue]
 
 # 「필수 문법」 — 구멍 지도가 세는 대상이자 위상 정렬 동률 시의 순서다 (03 §6).
+#
+# **순서는 0부 → 1부 → 2부다** (`docs/curriculum/ts.md` §1.5.4). 앞의 21줄이 0부 「이 언어의
+# 값과 식」이고, 그 안의 배열 규칙이 하나 더 있다 (`ts-learning.md` §11.6 ⑥ · D187 ⑰):
+#
+#   **사용처가 얇은 판을 둘 이상 잇대지 않는다.** 얇음의 선은 두 표본 리포(`ECC` js 410 ·
+#   `ai-pm` ts·tsx 613) 중 **한쪽에서라도 사용처 100곳 미만**이고, 두꺼운 판(양쪽 1,000곳
+#   이상)이 그 앞뒤를 감싼다. 안 그러면 축 A·B 가 붙어 있어 「네 코드엔 없다」만 사흘 내리
+#   나온다 — D177 규칙 ①이 그동안 한 번도 안 걸린다.
+#
+# 얇은 아홉(2026-09-05 tree-sitter 실측, ECC / ai-pm): value-bits 117/26 ·
+# text-length 94/35 · loose-equality 1/390 · integer-division 49/89 · float-inexact 11/14 ·
+# number-is-double 52/5 · operator-precedence 57/61 · implicit-conversion 0/0 ·
+# reference-sharing 33/43. 아래에서 이 아홉은 3·5·8·10·12·14·16·18·21 번째에 놓인다.
 essential:
+  # ── 0부 「이 언어의 값과 식」 21판 (ts.md §1.5.4) ──────────────────────────
+  # 축 G — 대입과 이름
   - ts/const-declaration
+  # 축 A — 정수형과 그 한계
+  - ts/number-literal
+  - ts/value-bits            # 얇다
+  # 축 C — 문자열과 인코딩
+  - ts/string-literal
+  - ts/text-length           # 얇다
+  # 축 D·H — 참·거짓과 같음
+  - ts/boolean-literal
+  - ts/comparison
+  - ts/loose-equality        # 얇다 (ECC 1곳 — 리포가 한쪽 표기만 쓴다)
+  # 축 E·B — 셈과 나눗셈
+  - ts/arithmetic
+  - ts/integer-division      # 얇다
+  - ts/undefined-null
+  - ts/float-inexact         # 얇다
+  - ts/template-literal
+  - ts/number-is-double      # 얇다
+  - ts/truthy-falsy
+  - ts/operator-precedence   # 얇다
+  - ts/conditional-ternary
+  - ts/implicit-conversion   # 사용처 0곳 — 합성이 정본이다 (아래 주석)
+  # 축 F·G — 형 변환과 별칭
+  - ts/explicit-conversion
+  - ts/reassignment
+  - ts/reference-sharing     # 얇다
+  # ── 1부 「흐름과 묶기」 ────────────────────────────────────────────────────
   # D147 의 바닥 개념 여덟. 목록은 Exercism JS 트랙의 깊이 0~3 을 참고했고(D148) 선행은
   # 우리가 다시 매긴다 — 그쪽 `prerequisites` 는 연습문제를 여는 조건이지 이해의 선행이
   # 아니다. 여기 순서는 읽는 순서이고, 0장에 담기는 순서는 `prereq` 깊이가 정한다.
-  - ts/reassignment
-  - ts/boolean-literal
-  - ts/comparison
-  - ts/arithmetic
   - ts/if-statement
   - ts/while-loop
   - ts/function-declaration
   - ts/return-statement
-  - ts/string-literal
-  - ts/number-literal
   - ts/property-access
   - ts/call-expression
   - ts/arrow-function
-  - ts/undefined-null
   - ts/array-basics
-  - ts/template-literal
-  - ts/object-spread
-  - ts/conditional-ternary
-  - ts/for-of
-  - ts/optional-chaining
-  - ts/nullish-coalescing
   - ts/array-destructuring
   - ts/object-destructuring
+  - ts/try-catch
+  - ts/for-of
+  # ── 2부 「타입과 객체」 ────────────────────────────────────────────────────
+  - ts/object-spread
+  - ts/optional-chaining
+  - ts/nullish-coalescing
   - ts/array-map-immutable
   - ts/array-filter
   - ts/array-method-chain
   - ts/async-await
-  - ts/try-catch
   - ts/generics
 
 # 「AI 가 대신 쓴 것」 — 구멍 개념 ↔ 같은 일을 하는 다른 표기.
@@ -59,6 +92,23 @@ alternatives:
   - { gap: ts/optional-chaining, present: ts/logical-and-guard }
   - { gap: ts/array-destructuring, present: ts/index-access-pair }
   - { gap: ts/array-map-immutable, present: ts/array-push-mutate }
+  # 같은 리포 안에서 두 표기가 섞인다. `ECC` 는 410파일에 느슨한 쪽이 **1곳**뿐이고
+  # `ai-pm` 은 613파일에 390곳이다 — 짝이 부기할 것이 리포마다 통째로 다른 유일한 자리다.
+  - { gap: ts/comparison, present: ts/loose-equality, note: { ko: "견주는 방법이 둘인데 규칙이 다릅니다 — AI 가 섞어 썼습니다", en: "Two ways to weigh, two different rules — the AI mixed them" } }
+
+# 「네 코드엔 없다」 — 0부에서 사용처가 **0곳**인 판 하나 (D177 규칙 ① · D186 ④).
+#
+# `ts/implicit-conversion` 은 두 표본 1,035파일에서 캡처가 0곳이다. 없어서 0곳이 아니라
+# **정적으로 볼 수 있는 자리가 0곳**이다: 이 개념이 성립하려면 두 피연산자의 타입을 알아야
+# 하는데 tree-sitter 도 정규식도 모르므로, 쿼리는 **한쪽이 리터럴로 적힌 식**(`'5' * 2`)만
+# 잡는다. 실제 리포에서 강제 변환은 `'…' + name` 처럼 한쪽이 이름인 꼴로 일어나고 그 이름의
+# 타입은 소스에 없다.
+#
+# 사유는 `idiom` 이다 — `scale` 이 아니다. 그 자리를 명시 변환이 가져갔다:
+# `ts/explicit-conversion` 이 ECC 537곳/135파일 · ai-pm 255곳/95파일이고, TS 쪽은
+# 타입 검사기가 리터럴 혼합을 미리 막는다. `packages/cards/src/t0-synthetic.ts` 의
+# `ABSENCE` 표에 `'ts/implicit-conversion': 'idiom'` 한 줄이 서야 합성 판이 그 사유를
+# 화면에 말할 수 있다 (그 파일은 이 사전의 소유가 아니라 아직 안 섰다).
 
 thin_threshold: { min_files: 2, min_sites: 3, small_repo_files: 20 }
 

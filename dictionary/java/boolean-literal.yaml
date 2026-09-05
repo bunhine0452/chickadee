@@ -7,7 +7,8 @@ grammars: [java]
 framework: null
 essential: true
 difficulty: 1
-prereq: []
+# 0부 축 D (java.md §1.5.1).
+prereq: [cs/type]
 confusions: []
 dict:
   one_liner:
@@ -122,7 +123,12 @@ why_gate:
 queries:
   - { grammars: [java], file: ./boolean-literal.scm }
 examples:
-  - code: "class A { void f() { boolean ok = true; } }"
+  # 값을 든 예 — 식 · 값 · 타입.
+  - code: "class A { void f() { boolean ok = true; } }        // ok -> true (boolean)"
     expect: { sites: 1, picks: { 1: "true" } }
-  - code: "class A { void f() { int n = 1; } }"
+  - code: "class A { void f() { boolean off = false; } }      // off -> false (boolean)"
+    expect: { sites: 1, picks: { 1: "false" } }
+  - code: "class A { void f(boolean a, boolean b) { boolean c = a && true; } }  // true && true -> true (boolean)"
+    expect: { sites: 1, picks: { 1: "true" } }
+  - code: "class A { void f() { int n = 1; } }                // n -> 1 (int, 참·거짓이 아니다)"
     expect: none

@@ -1,0 +1,67 @@
+[
+  {
+    "queryId": "java/operator-precedence",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "shortcircuit",
+    "startLine": 5,
+    "startCol": 12,
+    "endLine": 5,
+    "endCol": 26,
+    "nodeKind": "binary_expression",
+    "inError": false
+  },
+  {
+    "queryId": "java/operator-precedence",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "shortcircuit",
+    "startLine": 5,
+    "startCol": 12,
+    "endLine": 5,
+    "endCol": 17,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "java/operator-precedence",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "shortcircuit",
+    "startLine": 5,
+    "startCol": 18,
+    "endLine": 5,
+    "endCol": 20,
+    "nodeKind": "||",
+    "inError": false
+  },
+  {
+    "queryId": "java/operator-precedence",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "hole",
+    "form": "shortcircuit",
+    "startLine": 5,
+    "startCol": 18,
+    "endLine": 5,
+    "endCol": 20,
+    "nodeKind": "||",
+    "inError": false
+  },
+  {
+    "queryId": "java/operator-precedence",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "shortcircuit",
+    "startLine": 5,
+    "startCol": 21,
+    "endLine": 5,
+    "endCol": 26,
+    "nodeKind": "identifier",
+    "inError": false
+  }
+]

@@ -1,0 +1,163 @@
+schema: 1
+id: java/string-literal
+universal: common/text-literal
+name: { ko: 글자 묶음, en: String literal }
+token: "\"\""
+grammars: [java]
+framework: null
+essential: true
+difficulty: 1
+prereq: [cs/text-encoding]
+confusions: []
+dict:
+  one_liner:
+    ko: "글자 묶음은 큰따옴표로만 연다 — 작은따옴표는 글자 한 개다."
+    en: "Only double quotes open a run of text; single quotes hold one code unit."
+  why:
+    ko: >-
+      자바에는 따옴표가 <b>둘</b>이고 뜻이 다릅니다. 큰따옴표는 <b>글자 묶음</b>이고
+      작은따옴표는 <b>글자 한 개</b>예요. 그래서 <code>'ab'</code> 는 그 줄에서 멈춥니다 —
+      한 칸에 두 글자를 넣은 셈이기 때문입니다. 파이썬·JS 는 둘을 같은 뜻으로 쓰므로
+      그 습관이 그대로 넘어오면 자바에서 컴파일이 안 됩니다. 그리고 글자 묶음은 만든 뒤에
+      <b>안 바뀝니다</b> — 바꾸는 것처럼 보이는 메서드는 전부 새 묶음을 만들어 돌려줍니다.
+    en: >-
+      Java has <b>two</b> quote marks and they mean different things. Double quotes make a
+      <b>run of text</b>; single quotes hold <b>one code unit</b>. So <code>'ab'</code> stops the
+      line — it puts two things in a one-slot spot. Python and JS use both marks for the same
+      thing, and that habit carried over does not compile in Java. A run of text is also
+      <b>never changed</b> after it is made — every method that looks like a change returns a
+      new one.
+  trace:
+    - ko: "{{site.line}}행은 이름 {{pick.2|code}} 에 글자 묶음을 넣는다."
+      en: "Line {{site.line}} puts a run of text into {{pick.2|code}}."
+    - ko: "값 {{pick.3|code}}{{pick.3|josa:은,는}} 큰따옴표로 열려 있다."
+      en: "The value {{pick.3|code}} is opened with double quotes."
+    - ko: "그 묶음은 이 뒤로 바뀌지 않는다 — 바꾸려면 새 묶음이 나온다."
+      en: "That run never changes afterwards — changing it makes a new one."
+rule:
+  ko: "<b>큰따옴표만 글자 묶음이다.</b> 작은따옴표는 글자 한 개이고 종류가 다르다."
+  en: "<b>Double quotes make text.</b> Single quotes make one code unit, a different type."
+result:
+  label: { ko: "{{site.line}}행의 글자 묶음", en: "the text on line {{site.line}}" }
+  value: "{{pick.3}}"
+  note: { ko: "만든 뒤에 안 바뀐다", en: "never changed once made" }
+ok:
+  ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 큰따옴표로 연 글자 묶음입니다."
+  en: "{{pick.3|code}} is a run of text opened with double quotes."
+payoff:
+  ko: "이걸 알면 「따옴표를 바꿨더니 컴파일이 안 된다」가 풀립니다 — 종류가 달라진 겁니다."
+  en: "This untangles “I swapped the quotes and it stopped compiling” — the type changed."
+bridge:
+  ko: "파이썬·JS 는 두 따옴표가 같은 뜻입니다. 자바에서만 종류가 갈립니다."
+  en: "In Python and JS both marks mean the same. Only Java splits the type."
+misconceptions:
+  - ko: "따옴표 두 종류가 같은 뜻이다 — 자바에서는 종류가 갈립니다. 작은따옴표는 한 칸입니다."
+    en: "Both quote marks mean the same — in Java they split the type. Single quotes are one slot."
+  - ko: "글자 묶음을 바꿀 수 있다 — 못 바꿉니다. 바꾸는 메서드는 새 묶음을 돌려줍니다."
+    en: "Text can be edited in place — it cannot. Those methods return a new run."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>글자 묶음을 담는 타입</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the type that holds a run of text</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 이름은 종류를 안 정해요 — 앞에 붙은 타입이 정합니다."
+          en: "{{pick.2|code}} is the <b>name</b>, and names do not set the type. The word in front does."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 타입이냐", en: "The sharpest spot — the name or the type" }
+          code:
+            - "String s = \"a\";   // 묶음"
+            - "char s = 'a';     // 한 글자"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 담기는 <b>값</b>입니다. 값의 따옴표와 앞에 적은 타입이 서로 맞아야 그 줄이 섭니다."
+          en: "{{pick.3|code}} is the <b>value</b>. Its quote mark and the type in front have to agree for the line to stand."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값이냐 타입이냐", en: "The sharpest spot — the value or the type" }
+          code:
+            - "String s = \"a\";"
+            - "String s = 'a';   // 멈춘다"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>큰따옴표로 연 값</b>을 담습니다."
+      en: "Choose what goes in the blank. Line {{site.line}} holds a value <b>opened with double quotes</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "String", mono: true }
+      - t: "char"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>글자 한 개</b> 타입이라 큰따옴표로 연 값을 못 받습니다. 작은따옴표로 연 값만 들어가요."
+            en: "That is the <b>one code unit</b> type and takes no double-quoted value. Only a single-quoted one fits."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 한 개냐 묶음이냐", en: "The sharpest spot — one unit or a run" }
+            code:
+              - "char c = 'a';"
+              - "String s = \"a\";"
+      - t: "int"
+        mono: true
+        diag:
+          t:
+            ko: "정수 타입이라 글자를 못 담습니다. 자바는 글자와 수를 조용히 안 바꿔 줘요."
+            en: "A whole-number type holds no text. Java does not quietly turn one into the other."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 수냐 글자냐", en: "The sharpest spot — a number or text" }
+            code:
+              - "int n = 1;"
+              - "String s = \"1\";"
+      - t: "boolean"
+        mono: true
+        diag:
+          t:
+            ko: "참·거짓 타입이라 두 값만 담습니다. 글자 묶음은 그 둘 중 하나가 아니에요."
+            en: "The truth-value type holds two values only, and a run of text is neither."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 참·거짓이냐 글자냐", en: "The sharpest spot — a truth value or text" }
+            code:
+              - "boolean b = true;"
+              - "String s = \"true\";"
+why_gate:
+  q:
+    ko: "{{site.line}}행의 값은 왜 <b>큰따옴표</b>로 열려 있을까요?"
+    en: "Why is the value on line {{site.line}} opened with <b>double quotes</b>?"
+  choices:
+    - t:
+        ko: "글자가 여럿이고, 자바에서 여럿을 한 값으로 묶는 표시가 그것뿐이기 때문"
+        en: "Because there is more than one character, and that is Java's only mark for holding many as one value"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 글자가 하나뿐이었다면 어느 쪽을 써도 되는지도 적어 보세요."
+        en: "That is the direction. Say whether either mark would do if there were only one character."
+    - t:
+        ko: "자바는 작은따옴표를 아예 안 쓰기 때문"
+        en: "Because Java has no single quotes at all"
+      ok: false
+      fb:
+        ko: "씁니다. 글자 한 개를 적을 때 쓰고, 그때는 큰따옴표가 안 됩니다."
+        en: "It has them — for one code unit, and there double quotes will not do."
+    - t:
+        ko: "안이 바뀔 수 있는 값이라서"
+        en: "Because the contents may change later"
+      ok: false
+      fb:
+        ko: "반대입니다. 글자 묶음은 만든 뒤로 안 바뀌어요."
+        en: "The opposite. A run of text never changes once made."
+queries:
+  - { grammars: [java], file: ./string-literal.scm }
+examples:
+  - code: "class A { void f() { String s = \"ab\"; } }        // s -> \"ab\" (String, 코드 단위 2)"
+    expect: { sites: 1, form: strdecl, hole: "String", picks: { 1: "String", 2: "s", 3: "\"ab\"" } }
+  - code: "class A { private String name = \"kim\"; }        // name -> \"kim\" (String)"
+    expect: { sites: 1, form: strfield, hole: "String", picks: { 1: "String", 2: "name", 3: "\"kim\"" } }
+  - code: "class A { void f(java.util.Map m) { m.get(\"id\"); } }  // 인자 -> \"id\" (String)"
+    expect: { sites: 1, form: strarg, picks: { 1: "get", 3: "\"id\"" } }
+  - code: "class A { void f() { int n = 1; } }              // n -> 1 (int)"
+    expect: none

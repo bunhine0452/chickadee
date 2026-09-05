@@ -7,6 +7,7 @@ grammars: [java]
 framework: null
 essential: true
 difficulty: 1
+# 0부 축 G (java.md §1.5.1).
 prereq: [cs/state]
 confusions: []
 dict:
@@ -154,7 +155,12 @@ why_gate:
 queries:
   - { grammars: [java], file: ./assignment.scm }
 examples:
-  - code: "class A { void f() { int n = 1; n = 2; } }"
+  # 값을 든 예 — 식 · 값 · 타입. 대입이 **식**이라 그 자체로도 값을 낸다.
+  - code: "class A { void f() { int n = 1; n = 2; } }         // n = 2 -> 2 (int)"
     expect: { sites: 1, form: assign, hole: "=", picks: { 1: "=", 2: "n", 3: "2" } }
-  - code: "class A { void f() { int n = 1; } }"
+  - code: "class A { void f(int n) { n = n + 1; } }           // n = 1 + 1 -> 2 (int)"
+    expect: { sites: 1, form: assign, hole: "=", picks: { 1: "=", 2: "n", 3: "n + 1" } }
+  - code: "class A { void f(boolean done) { done = true; } }  // done = true -> true (boolean)"
+    expect: { sites: 1, form: assign, hole: "=", picks: { 1: "=", 2: "done", 3: "true" } }
+  - code: "class A { void f() { int n = 1; } }                // 선언 — 다시 넣기가 아니다"
     expect: none

@@ -30,8 +30,14 @@
 import type { AbsenceReason } from '@chickadee/cards';
 import { topoOrder, type BestSite, type Chapter } from '@chickadee/concepts';
 
-/** 부 번호. 1 바닥 · 2 객체 · 3 프레임워크. */
-export type PartNo = 1 | 2 | 3;
+/**
+ * 부 번호. **0 값과 식** · 1 흐름과 묶기 · 2 객체 · 3 프레임워크.
+ *
+ * 0 이 는 것은 `docs/curriculum/java.md` §1.5 다 — 1부가 `class-declaration` 으로 시작해
+ * `arithmetic` 까지 가면서 **값이 무엇인지를 안 가르치고 값을 옮기는 문법부터** 가르쳤다.
+ * 0부가 그 축을 가져가서 1부에는 흐름과 묶기 여덟만 남는다(§1.5.4).
+ */
+export type PartNo = 0 | 1 | 2 | 3;
 
 /**
  * 한 챕터 앞에 붙는 어휘 관문의 상한. `course.md` §3.2 의 값 그대로다 — 관문 0 은
@@ -77,16 +83,35 @@ export interface PartAssignment {
  * 사람에게는 건너뛸 것이다 — 사전은 그 판단을 모른다. 반면 최소 예제와 문항은 개념마다
  * 다르므로 사전(`examples[]`)에 남는다. 두 번 물어서 갈라 둔 자리다.
  *
+ * **0부가 앞에 붙었다** (java.md §1.5). 목록은 `_lang.yaml` 의 `essential` 순서를 그대로
+ * 옮긴 것이고, 0·1·2부를 이으면 `essential` 전량이 된다 — 시험이 그것을 대조한다.
+ *
  * 3부는 비어 있지 않다 — `spring/` 15개(D176)가 그 자리이고, 목록은 그 사전이 로드된
  * 리포에서만 채워진다. 스프링이 아닌 자바 리포에서는 3부가 0판이고 코스는 2부에서
  * 기능 챕터로 넘어간다.
  */
 export const JAVA_PARTS: readonly PartAssignment[] = [
   {
+    // 0부 「이 언어의 값과 식」 — 축 A~H (java.md §1.5.1). 열아홉 판 중 열일곱이
+    // `essential` 이고, `java/string-concat`·`java/autoboxing` 둘은 0부의 `essential`
+    // 상한 열둘 때문에 밖에 있다. 둘은 이 목록에도 안 든다 — 이 상수는 `essential` 과
+    // 한 글자도 어긋나면 안 되고, 그 대조를 시험이 한다.
+    part: 0,
+    concepts: [
+      'java/value-bits', 'java/variable-declaration', 'java/integer-limit',
+      'java/floating-type', 'java/float-inexact',
+      'java/string-literal', 'java/text-length',
+      'java/boolean-literal', 'java/boolean-only-condition',
+      'java/arithmetic', 'java/operator-precedence',
+      'java/implicit-conversion', 'java/explicit-conversion',
+      'java/assignment', 'java/reference-binding',
+      'java/comparison', 'java/reference-equality',
+    ],
+  },
+  {
     part: 1,
     concepts: [
-      'java/class-declaration', 'java/variable-declaration', 'java/assignment', 'java/arithmetic',
-      'java/boolean-literal', 'java/comparison', 'java/if-statement', 'java/method-declaration',
+      'java/class-declaration', 'java/if-statement', 'java/method-declaration',
       'java/return-statement', 'java/array', 'java/for-loop', 'java/for-each', 'java/import',
     ],
   },
@@ -269,12 +294,19 @@ export interface OutlineInput {
   parts: readonly CurriculumPart[];
   gates: readonly ChapterGate[];
   chapters: readonly Chapter[];
-  /** {@link foldsPart1} 의 값. 참이면 1부가 목차에서 빠진다. */
+  /**
+   * {@link foldsPart1} 의 값. 참이면 1부가 목차에서 빠진다.
+   *
+   * **0부는 안 접는다.** 0부는 「그 언어를 아는가」가 아니라 「값이 무엇인지 아는가」를
+   * 묻고, 그 답은 다른 언어의 겹으로 채워지지 않는다 — 오히려 반대다(java.md §1.5.2:
+   * 파이썬을 아는 사람이 `7 / 2` 를 `3.5` 로 예상한다). 접을지를 다시 재려면 그것은
+   * 코스 화면의 결정이다.
+   */
   foldPart1: boolean;
 }
 
 /**
- * 「1부 → 2부 → 3부 → 로그인 챕터」 목차. 이 순서가 정본 §4 의 마지막 문장이다 —
+ * 「0부 → 1부 → 2부 → 3부 → 로그인 챕터」 목차. 이 순서가 정본 §4 의 마지막 문장이다 —
  * 3부가 끝나면 코스는 **내 리포의 기능 챕터**로 넘어간다.
  */
 export function courseOutline(input: OutlineInput): OutlineEntry[] {

@@ -30,15 +30,19 @@ function input(over: Partial<CurriculumInput> = {}): CurriculumInput {
 }
 
 describe('부 배치는 사전과 어긋나지 않는다', () => {
-  test('1·2부를 합치면 java essential 전량이고 순서도 같다', () => {
+  test('0·1·2부를 합치면 java essential 전량이고 순서도 같다', () => {
     const essential = dict.langs.get('java')?.essential ?? [];
-    const assigned = [...JAVA_PARTS[0]?.concepts ?? [], ...JAVA_PARTS[1]?.concepts ?? []];
+    const assigned = [
+      ...JAVA_PARTS[0]?.concepts ?? [],
+      ...JAVA_PARTS[1]?.concepts ?? [],
+      ...JAVA_PARTS[2]?.concepts ?? [],
+    ];
     expect(assigned).toEqual([...essential]);
   });
 
   test('3부는 spring/ 사전 전량이다 — 하나라도 빠지면 못 가르치는 개념이 생긴다', () => {
     const spring = [...dict.concepts.keys()].filter((id) => id.startsWith('spring/')).sort();
-    expect([...(JAVA_PARTS[2]?.concepts ?? [])].sort()).toEqual(spring);
+    expect([...(JAVA_PARTS[3]?.concepts ?? [])].sort()).toEqual(spring);
   });
 
   test('부 배치의 개념은 전부 사전에 있다', () => {
@@ -115,7 +119,8 @@ describe('개념마다 자리를 짚는다 (규칙 ①)', () => {
 });
 
 describe('아는 것은 건너뛴다 — 배치고사는 없다', () => {
-  const part1 = JAVA_PARTS[0]?.concepts ?? [];
+  // 접는 대상은 **1부**다 — 0부는 다른 언어의 겹으로 안 채워진다 (java.md §1.5.2).
+  const part1 = JAVA_PARTS[1]?.concepts ?? [];
 
   test('1부가 전부 1겹 이상이면 접는다', () => {
     expect(foldsPart1({ part1, layerOf: () => 1, declaredNewcomer: false })).toBe(true);
@@ -192,14 +197,16 @@ describe('목차 — 1부 → 3부 → 기능 챕터', () => {
     const rows = courseOutline({
       parts, gates: [], chapters, foldPart1: false,
     });
-    expect(rows.map((r) => r.kind)).toEqual(['part', 'part', 'part', 'chapter', 'chapter']);
+    expect(rows.map((r) => r.kind)).toEqual(['part', 'part', 'part', 'part', 'chapter', 'chapter']);
     expect(rows.at(-2)).toMatchObject({ kind: 'chapter', chapter: 'auth' });
   });
 
-  test('1부를 접으면 목차에서 빠진다', () => {
+  test('1부를 접으면 목차에서 빠진다 — 0부는 남는다', () => {
     const parts = buildCurriculum(input());
     const rows = courseOutline({ parts, gates: [], chapters, foldPart1: true });
-    expect(rows.filter((r) => r.kind === 'part')).toHaveLength(2);
+    const shown = rows.filter((r) => r.kind === 'part');
+    expect(shown).toHaveLength(3);
+    expect(shown.map((r) => (r.kind === 'part' ? r.part : -1))).toEqual([0, 2, 3]);
   });
 
   test('부마다 「내 코드」와 「없다」의 수가 목차에 뜬다', () => {

@@ -1,0 +1,166 @@
+schema: 1
+id: java/operator-precedence
+# 0부 축 E. `universal: null` — 세기 표는 언어마다 다르고, 자바의 `&&`·`||` 는 참·거짓만
+# 내므로 파이썬·JS 의 「단락 평가가 값을 낸다」가 여기서는 성립하지 않는다 (§1.5.6 ②).
+universal: null
+name: { ko: 접히는 순서, en: How an expression folds }
+token: "&&"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cs/operator-precedence]
+confusions: []
+dict:
+  one_liner:
+    ko: "괄호가 없으면 세기가 센 쪽이 먼저 묶이고, 오른쪽은 안 볼 수도 있다."
+    en: "Without parentheses the stronger binds first; the right side may be skipped."
+  why:
+    ko: >-
+      식은 왼쪽부터 차례로 읽히지 <b>않습니다</b>. 연산자마다 세기가 있어서
+      <code>2 + 3 * 4</code> 는 <code>3 * 4</code> 가 먼저 접히고 답이 <code>14</code> 예요.
+      그리고 <b>단락 평가</b>가 있습니다 — <code>a &amp;&amp; b</code> 에서 왼쪽이 거짓이면
+      오른쪽을 <b>아예 안 봅니다</b>. 그래서
+      <code>s != null &amp;&amp; s.length() &gt; 0</code> 의 두 항을 바꾸면 없음일 때
+      오른쪽이 먼저 돌아 그 자리에서 터집니다. 순서가 안전장치인 자리예요.
+    en: >-
+      An expression is <b>not</b> read left to right in order. Operators have strengths, so in
+      <code>2 + 3 * 4</code> the <code>3 * 4</code> folds first and the answer is
+      <code>14</code>. There is also <b>short-circuiting</b> — in <code>a &amp;&amp; b</code>, if
+      the left is false the right is <b>never evaluated</b>. Swap the two halves of
+      <code>s != null &amp;&amp; s.length() &gt; 0</code> and the right runs first on an absent
+      value and blows up there. Here the order is the guard.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 양쪽을 잇는다."
+      en: "The {{pick.1|code}} on line {{site.line}} joins the two sides."
+    - ko: "먼저 {{pick.2|code}}{{pick.2|josa:을,를}} 본다."
+      en: "It looks at {{pick.2|code}} first."
+    - ko: "거기서 답이 정해지면 오른쪽은 안 본다."
+      en: "If that settles the answer, the right side is never looked at."
+rule:
+  ko: "<b>세기가 센 쪽이 먼저 접힌다.</b> 그리고 왼쪽에서 답이 나면 오른쪽은 안 돈다."
+  en: "<b>The stronger operator folds first.</b> And if the left settles it, the right never runs."
+result:
+  label: { ko: "{{site.line}}행이 접히는 순서", en: "the fold order on line {{site.line}}" }
+  value: "{{pick.2}} {{pick.1}} {{pick.3}}"
+  note: { ko: "왼쪽이 먼저다", en: "the left goes first" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:을,를}} 먼저 보고, 필요할 때만 {{pick.3|code}}{{pick.3|josa:으로,로}} 갑니다."
+  en: "{{pick.2|code}} is looked at first, and {{pick.3|code}} only when needed."
+payoff:
+  ko: "이걸 알면 「두 항 순서를 바꿨더니 터진다」가 풀립니다 — 왼쪽이 오른쪽을 지키고 있었어요."
+  en: "This untangles “I swapped the two halves and it blew up” — the left was guarding the right."
+bridge:
+  ko: "JS 의 <code>&amp;&amp;</code> 는 값을 그대로 냅니다. 자바는 참·거짓만 내요."
+  en: "In JS <code>&amp;&amp;</code> yields a value. In Java it yields only a truth value."
+misconceptions:
+  - ko: "왼쪽부터 차례로 계산한다 — 세기가 센 것이 먼저 접힙니다."
+    en: "It computes strictly left to right — the stronger operator folds first."
+  - ko: "두 항의 순서를 바꿔도 같다 — 오른쪽이 먼저 돌면 없음을 못 걸러 그 자리에서 터집니다."
+    en: "The two halves can be swapped — put the right first and nothing guards the absent value."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>오른쪽을 볼지 말지를 정하는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that decides whether the right side is read</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 먼저 보는 <b>왼쪽 항</b>입니다. 오른쪽을 볼지 말지를 정하는 것은 그 뒤의 기호예요."
+          en: "{{pick.2|code}} is the <b>left half</b>, read first. What decides about the right is the symbol after it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 항이냐 잇는 기호냐", en: "The sharpest spot — a half or the joining symbol" }
+          code:
+            - "s != null;"
+            - "s != null && s.length() > 0;"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} <b>오른쪽 항</b>이고, 왼쪽 결과에 따라 아예 안 돌 수 있습니다."
+          en: "{{pick.3|code}} is the <b>right half</b>, and it may never run at all depending on the left."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 늘 도는가 아닌가", en: "The sharpest spot — always run or not" }
+          code:
+            - "s.length() > 0;          // 늘 돈다"
+            - "s != null && s.length() > 0;   // 조건부로 돈다"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 왼쪽이 거짓이면 <b>오른쪽을 안 봅니다</b>."
+      en: "Choose what goes in the blank. On line {{site.line}}, a false left means the right is <b>never read</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "&&", mono: true }
+      - t: "||"
+        mono: true
+        diag:
+          t:
+            ko: "이것도 단락 평가를 하지만 <b>반대 방향</b>입니다 — 왼쪽이 참이면 오른쪽을 안 봐요. 없음을 거르는 자리에 쓰면 거꾸로 갑니다."
+            en: "It short-circuits too, but the <b>other way</b> — a true left skips the right. As a guard against absence it runs backwards."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 어느 쪽에서 멈추나", en: "The sharpest spot — which side stops it" }
+            code:
+              - "a && b     // 왼쪽이 거짓이면 멈춘다"
+              - "a || b     // 왼쪽이 참이면 멈춘다"
+      - t: "=="
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>견주기</b>라 양쪽을 다 봅니다. 단락 평가가 없어서 오른쪽이 늘 돌아요."
+            en: "That <b>weighs</b> and reads both sides. It does not short-circuit, so the right always runs."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 안 볼 수 있나 없나", en: "The sharpest spot — skippable or not" }
+            code:
+              - "a && b     // 오른쪽을 건너뛸 수 있다"
+              - "a == b     // 둘 다 본다"
+      - t: "&"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>양쪽을 다 보는</b> 판이라 없음을 못 걸러 줍니다. 글자 하나 차이로 안전장치가 사라져요."
+            en: "That reads <b>both sides</b> and stops guarding against absence. One character removes the guard."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 한 글자 차이", en: "The sharpest spot — one character apart" }
+            code:
+              - "s != null && s.length() > 0;"
+              - "s != null & s.length() > 0;   // 오른쪽이 늘 돈다"
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 <b>이 순서로</b> 두 항을 적었을까요?"
+    en: "Why are the two halves on line {{site.line}} written <b>in this order</b>?"
+  choices:
+    - t:
+        ko: "왼쪽에서 답이 나면 오른쪽을 안 보므로, 위험한 쪽을 오른쪽에 두면 그것이 안전장치가 되기 때문"
+        en: "Because a settled left skips the right, so putting the risky half on the right makes it a guard"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 순서를 바꿨을 때 무엇이 터지는지도 한 줄로 적어 보세요."
+        en: "That is the direction. Add a line on what breaks when the order is swapped."
+    - t:
+        ko: "읽는 사람이 익숙한 순서라서"
+        en: "Because that is the order readers expect"
+      ok: false
+      fb:
+        ko: "취향이 아닙니다. 순서를 바꾸면 도는 코드가 실제로 달라져요."
+        en: "It is not taste. Swapping the order changes what actually runs."
+    - t:
+        ko: "자바가 왼쪽부터 적으라고 정해서"
+        en: "Because Java requires the left one first"
+      ok: false
+      fb:
+        ko: "요구하지 않습니다. 둘 다 적을 수 있고, 그래서 어느 쪽을 왼쪽에 둘지가 선택이에요."
+        en: "It does not require it. Both orders compile, which is why the choice matters."
+queries:
+  - { grammars: [java], file: ./operator-precedence.scm }
+examples:
+  - code: "class A { void f(String s) { boolean b = s != null && s.length() > 0; } }  // b -> true 또는 false (boolean)"
+    expect: { sites: 1, form: shortcircuit, hole: "&&", picks: { 1: "&&", 2: "s != null", 3: "s.length() > 0" } }
+  - code: "class A { void f() { int n = 2 + 3 * 4; } }        // n -> 14 (int)"
+    expect: { sites: 1, form: mixed, picks: { 1: "+", 2: "2", 3: "3 * 4" } }
+  - code: "class A { void f(boolean a, boolean b) { boolean c = a || b; } }  // c -> true 또는 false (boolean)"
+    expect: { sites: 1, form: shortcircuit, hole: "||", picks: { 1: "||", 2: "a", 3: "b" } }
+  - code: "class A { void f() { int n = 1 + 2; } }            // n -> 3 (int)"
+    expect: none

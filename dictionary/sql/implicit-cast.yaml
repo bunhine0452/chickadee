@@ -1,0 +1,194 @@
+schema: 1
+id: sql/implicit-cast
+universal: null
+name: { ko: 타입이 다르면 조용히 맞춘다, en: Implicit conversion }
+token: "<"
+grammars: [sql, mybatis_sql]
+framework: null
+essential: true
+difficulty: 2
+prereq: [sql/column-type]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "크고 작음을 묻는 자리. 양쪽 종류가 다르면 한쪽을 바꿔서 견준다."
+    en: "Asks which is larger. When the two kinds differ, one is changed to fit."
+  why:
+    ko: >-
+      {{site.line}}행은 같은지가 아니라 <b>어느 쪽이 큰지</b>를 묻습니다. 그 물음은
+      <b>무엇으로 견주느냐</b>에 따라 답이 뒤집혀요 — 수로 견주면 <code>9 &lt; 10</code> 인데
+      글자로 견주면 <code>'10' &lt; '9'</code> 입니다. 그리고 어느 쪽으로 갈지는
+      {{pick.2|code}} 의 선언이 정하지 <b>이 줄에는 안 적혀 있습니다</b>.
+      명시적으로 바꾸는 낱말은 두 표본 리포 합쳐 한 곳도 없어요 — 변환은 늘 일어나고 늘 안 보입니다.
+    en: >-
+      Line {{site.line}} asks not whether two things are the same but <b>which is larger</b>, and
+      that answer flips with <b>what they are weighed as</b> — as numbers <code>9 &lt; 10</code>,
+      as text <code>'10' &lt; '9'</code>. Which way it goes is settled by the declaration of
+      {{pick.2|code}}, and <b>that is not on this line</b>. Neither sample repository writes an
+      explicit conversion anywhere: the conversion always happens and is never visible.
+  trace:
+    - ko: "이 행에서 {{pick.2|code}} 값과 {{pick.3|code}} 값을 꺼낸다."
+      en: "{{pick.2|code}} and {{pick.3|code}} are taken from this row."
+    - ko: "종류가 다르면 한쪽을 말없이 바꾼다."
+      en: "If the kinds differ, one is changed without a word."
+    - ko: "그다음에야 크고 작음을 견준다."
+      en: "Only then are they weighed for size."
+
+rule:
+  ko: "<b>종류가 다르면 오류가 아니라 변환이다.</b> 무엇으로 견줬는지가 답을 정하고, 그것은 이 줄에 안 적혀 있다."
+  en: "<b>Different kinds bring a conversion, not an error.</b> What they were weighed as decides the answer, and this line does not say."
+result:
+  label:
+    ko: "{{site.line}}행이 묻는 것"
+    en: "what line {{site.line}} asks"
+  value: "{{pick.2}} {{pick.1}} {{pick.3}}"
+  note:
+    ko: "무엇으로 견줄지는 열이 정한다"
+    en: "the column decides what they are weighed as"
+ok:
+  ko: >-
+    왼쪽이 오른쪽보다 작은 쪽인 행만 남습니다. 그 「작다」의 뜻은 {{pick.2|code}} 열의 종류가 정해요.
+  en: >-
+    Only rows where {{pick.2|code}} falls on the smaller side of {{pick.3|code}} remain. What
+    “smaller” means is settled by the kind of {{pick.2|code}}.
+payoff:
+  ko: >-
+    이걸 알면 「분명히 큰 값인데 왜 작다고 나오지」가 풀립니다 — 글자 순서로 견줬기 때문이에요.
+  en: >-
+    This untangles “that number is clearly bigger, why is it smaller here” — they were weighed in text order.
+bridge:
+  ko: >-
+    다른 언어는 종류가 다르면 대개 <b>멈춰서 알려 줍니다</b>. 여기서는 말없이 맞춰 놓고 답을 돌려줘요.
+  en: >-
+    Other languages usually <b>stop and tell you</b> when kinds differ. Here they are quietly aligned and an answer comes back.
+misconceptions:
+  - ko: "종류가 다르면 오류가 난다 — 대개 조용히 바꿔서 견줍니다."
+    en: "Different kinds raise an error — usually they are quietly changed and weighed."
+  - ko: "글자와 수의 크기 순서는 같다 — <code>'10'</code> 은 <code>'9'</code> 보다 <b>작습니다</b>."
+    en: "Text and numbers order the same way — <code>'10'</code> is <b>smaller</b> than <code>'9'</code>."
+  - ko: "변환이 일어나면 코드에 보인다 — 안 보입니다. 바꾸라고 적은 낱말이 두 표본에 0곳이에요."
+    en: "A conversion shows up in the code — it does not. Neither sample repository writes one, anywhere."
+
+meaning:
+  - q:
+      ko: "{{pick.2|code}} 열이 글자로 다뤄진다면 이 물음은 어떻게 될까요?"
+      en: "What if {{pick.2|code}} is a column handled as text?"
+    hint:
+      ko: "글자는 <b>사전 순</b>으로 견줍니다."
+      en: "Text is weighed in <b>dictionary order</b>."
+    options:
+      - t:
+          ko: "사전 순으로 견주게 되어 수로 볼 때와 다른 행이 남는다"
+          en: "It is weighed in dictionary order and different rows remain than with numbers"
+      - t:
+          ko: "달라지는 것은 없다"
+          en: "Nothing is different"
+        diag:
+          t:
+            ko: >-
+              <code>'10'</code> 과 <code>'9'</code> 의 순서가 뒤집힙니다 — 첫 글자부터 견주기 때문이에요.
+            en: >-
+              <code>'10'</code> and <code>'9'</code> swap places — they are weighed from the first character.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 수냐 글자냐", en: "The sharpest spot — numbers or text" }
+            code:
+              - "9 < 10        -- 수"
+              - "'10' < '9'    -- 글자"
+      - t:
+          ko: "데이터베이스가 수로 바꿔서 견준다 — 언제나"
+          en: "The database converts to numbers and weighs — always"
+        diag:
+          t:
+            ko: >-
+              어느 쪽으로 맞출지는 <b>데이터베이스마다</b> 다릅니다. 언제나 수 쪽인 것은 아니에요.
+            en: >-
+              Which side gives way <b>differs by database</b>. It is not always the numeric side.
+          edge:
+            h: { ko: "가장 날카로운 자리 — 한 규칙이냐 여러 규칙이냐", en: "The sharpest spot — one rule or many" }
+            code:
+              - "-- 방언마다 다르다"
+              - "-- 그래서 열의 종류를 봐야 한다"
+      - t:
+          ko: "견줄 수 없다고 오류가 난다"
+          en: "It errors as uncomparable"
+        diag:
+          t:
+            ko: "막지 않습니다. 조용히 맞춰 놓고 <b>답을 돌려줘요</b> — 그 답이 뒤집혀 있을 뿐입니다."
+            en: "Nothing is blocked. They are quietly aligned and <b>an answer comes back</b> — only flipped."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 막느냐 답을 내느냐", en: "The sharpest spot — blocking or answering" }
+            code:
+              - "-- 오류 없음"
+              - "-- 다른 행이 나올 뿐"
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>크고 작음을 묻는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the sign that asks about size</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 견줄 <b>한쪽</b>입니다. 무엇으로 견줄지를 정하는 것이 이 쪽의 종류예요."
+          en: "{{pick.2|code}} is <b>one side</b>. Its kind is what settles how the two are weighed."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 견줄 것이냐 견주기냐", en: "The sharpest spot — a side or the weighing" }
+          code:
+            - "created_at"
+            - "created_at < 100"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 견줄 <b>다른 쪽</b>입니다. 종류가 다르면 이쪽이 바뀔 수도 있어요."
+          en: "{{pick.3|code}} is <b>the other side</b>. If the kinds differ, this side may be the one that changes."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 바뀌는 쪽이냐 묻는 기호냐", en: "The sharpest spot — the side that changes or the sign" }
+          code:
+            - "100"
+            - "created_at < 100"
+
+no_hole_reason: >-
+  변환은 이 줄에 글자로 없다 — 어느 쪽이 어떤 종류인지는 표를 만든 줄이 정하고, 여기에는 그 사실이
+  한 글자도 안 나온다. 그래서 뚫을 자리가 없다. 이 층이 묻는 것은 「어느 낱말이냐」가 아니라
+  「무엇으로 견줬느냐가 답을 바꾼다」이고, 그것은 뜻 고르기가 묻는다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 <b>같은지</b>가 아니라 <b>크고 작음</b>을 물을까요?"
+    en: "Why does line {{site.line}} ask about <b>size</b> rather than <b>sameness</b>?"
+  choices:
+    - t:
+        ko: "찾는 것이 값 하나가 아니라 범위라서 — 같은지만 물으면 그 범위가 안 나온다"
+        en: "Because it wants a range, not one value — asking only about sameness cannot express it"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 열이 글자로 다뤄진다면 그 범위가 어떻게 어긋나는지도 적어 보세요."
+        en: "That is the direction. Now say how that range shifts if this column is handled as text."
+    - t:
+        ko: "같은지 묻는 기호가 SQL 에 없어서"
+        en: "Because SQL has no sign for sameness"
+      ok: false
+      fb:
+        ko: "있습니다. 여기서 안 쓴 이유는 <b>묻는 것이 다르기</b> 때문이에요."
+        en: "It has one. It is unused here because <b>the question is different</b>."
+    - t:
+        ko: "크기 견주기가 더 빨라서"
+        en: "Because size comparison is faster"
+      ok: false
+      fb:
+        ko: "속도와는 무관합니다. 어느 쪽이 빠른지는 색인이 정해요."
+        en: "Speed has nothing to do with it. Which is faster is settled by indexes."
+
+queries:
+  - { grammars: [sql, mybatis_sql], file: ./implicit-cast.scm }
+
+examples:
+  - code: "SELECT * FROM cart WHERE created_at < 100"
+    expect: { sites: 1, form: size-compare, picks: { 1: "<", 2: "created_at", 3: "100" } }
+  - code: "SELECT * FROM cart WHERE qty >= '18'"
+    expect: { sites: 1, form: size-compare, picks: { 1: ">=", 2: "qty", 3: "'18'" } }
+  - code: "SELECT * FROM cart WHERE status = 'open'"
+    expect: none

@@ -7,7 +7,8 @@ grammars: [sql, mybatis_sql]
 framework: null
 essential: true
 difficulty: 1
-prereq: []
+# 0-6 하나만 건다 — 0-5 까지 걸면 깊이 3 이 되어 프롤로그에서 빠진다 (`_lang.yaml` 주석).
+prereq: [sql/implicit-cast]
 confusions: []
 dict:
   one_liner:
@@ -151,5 +152,11 @@ queries:
 examples:
   - code: "SELECT * FROM users WHERE login_id = 'abc'"
     expect: { sites: 1, form: compare, hole: "=", picks: { 1: "=", 2: "login_id", 3: "'abc'" } }
+  # 자리표가 값 자리로 잡힌다 — 파서에게만 같은 너비의 글자 값으로 가려져 들어가고
+  # (`crates/parse/src/params.rs`) 학습자가 보는 글은 원문 그대로다.
   - code: "SELECT * FROM users WHERE login_id = #{loginId}"
+    expect: { sites: 1, form: compare, hole: "=", picks: { 1: "=", 2: "login_id", 3: "#{loginId}" } }
+  - code: "SELECT * FROM users WHERE login_id = :loginId"
+    expect: { sites: 1, form: compare, hole: "=", picks: { 1: "=", 2: "login_id", 3: ":loginId" } }
+  - code: "INSERT INTO users (login_id) VALUES ('abc')"
     expect: none

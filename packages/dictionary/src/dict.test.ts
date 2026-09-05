@@ -81,7 +81,10 @@ describe('사전이 실제로 담고 있는 것', () => {
    */
   test('cs/ 개념은 전부 exec/ 와 같은 껍데기다 (D157 ①)', () => {
     const cs = [...dict.concepts.values()].filter((c) => c.id.startsWith('cs/'));
-    expect(cs.length).toBeGreaterThanOrEqual(43);
+    // 43 → **45** (D187 ⑥ — `operator-precedence`·`type-conversion`). 0부의 축 5·6 이
+    // 43장 안에 답이 없어서 낸 둘이고, 같은 판에서 제안된 `truthiness` 는 기계가 아니라
+    // 언어 설계라 `common/` 으로 갔다 (D187 ⑤).
+    expect(cs.length).toBeGreaterThanOrEqual(45);
     for (const concept of cs) {
       expect(concept.universal, concept.id).toBeNull();
       expect(concept.grammars, concept.id).toEqual([]);
@@ -182,18 +185,29 @@ describe('사전이 실제로 담고 있는 것', () => {
  * `(a.b || c)()` 같은 모양을 조용히 놓친다 — **조용한 커버리지 손실**은 이 표가 막으려는
  * 것보다 나쁘다. 문법이 더 나은 길을 줄 때 채운다.
  */
+/**
+ * 2026-09-05 — 73 → 76 → **104**(`blank-or-reason`·`why-gate`) · 67 → 87 → **100**(`point-picks`) ·
+ * 65 → 68 → **95**(`zero-one-liner`). 마지막 올림은 SQL 0부 여덟 + `sql/self-join` 이 든 뒤의 실측이다.
+ *
+ * **이 상수는 합류 시점에 한 번 더 올려야 한다.** 0부 저작(java·ts·py·sql)이 병렬로 도는
+ * 중이라 대상 수가 분 단위로 움직이고, 「다 채운 규칙은 래칫을 대상 전량으로 올려 잠근다」는
+ * 하드 규칙이라 **대상보다 작은 어떤 값도 실패한다.** 즉 어느 한 세션도 이 값을 확정할 수
+ * 없다 — 사전이 멈춘 뒤 표가 찍는 `충족/대상` 을 그대로 옮겨 적는 것이 유일한 방법이다.
+ */
 const DEBT_RATCHET: Record<string, number> = {
   // 39 → 42(java 셋) → 44(sql 둘) → 49(java 여덟) → 50(sql/comparison) → 52(css 둘)
   // → 65(D166, java 관문 0 과 OOP 축 열셋) → **73**(D177, 정식 자바 코스 3부의 자바 개념 여덟).
-  'blank-or-reason': 73,
-  'point-picks': 67,
-  'why-gate': 73,
+  // → **104**(D187 — 0부 「값과 식」: java 14 신설+5 갱신 · ts 11 · sql 9 · common 3 · cs 2. 첫 물결 합류 시점의
+  //   `충족/대상` 을 그대로 옮겼다 — 병렬 저작 중엔 어느 세션도 확정할 수 없어서 오케스트레이터가 잠근다).
+  'blank-or-reason': 104,
+  'point-picks': 100,
+  'why-gate': 104,
   // 6 → 11(D147) → 18(D148) → 26(D150) → **33**(D152, 파이썬 바닥 여덟). D150 이 「먼저 읽기」를
   // 0장 소속에서 「겹 0」으로 넓혀 `essential` 전량이 대상이 됐다. 새로 든 넷(`array-filter`
   // 의 `filter` · `array-map-immutable` 의 `map` · `arrow-function` 의 `=>` · 그리고
   // `array-destructuring` 은 영문 관사 `a` 가 정답 토큰과 겹쳤다)을 고쳐 채웠다.
   // 33 → 36(java 바닥 셋) → 38(sql 바닥 둘) → 42(java 바닥 여덟 완성) → 57(D166) → **65**(D177).
-  'zero-one-liner': 65,
+  'zero-one-liner': 95,
 };
 
 describe('사전 저작 부채 (D145)', () => {

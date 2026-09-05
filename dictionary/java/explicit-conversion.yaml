@@ -1,0 +1,168 @@
+schema: 1
+id: java/explicit-conversion
+# 0부 축 F. `universal: null` — 「좁히기를 사람이 적는다」는 자바가 세 언어 중 혼자다
+# (§1.5.2 「이 표에서 자바가 혼자인 자리 셋」 ③).
+universal: null
+name: { ko: 적어서 좁히기, en: Narrowing by hand }
+token: "(int)"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cs/type-conversion, cs/integer-overflow]
+confusions: []
+dict:
+  one_liner:
+    ko: "넓은 값을 좁은 자리에 넣으려면 사람이 적어야 하고, 남는 부분은 잘린다."
+    en: "A wide value into a narrow spot is written by hand, and the excess is cut."
+  why:
+    ko: >-
+      사다리를 <b>내려가는</b> 변환은 값을 잃을 수 있어서 자바가 대신 안 해 줍니다. 괄호에
+      타입을 적으면 그때 내려가요. 그리고 <b>잘립니다 — 반올림이 아닙니다.</b>
+      <code>(int) 3.9</code> 는 <code>4</code> 가 아니라 <code>3</code> 이고,
+      <code>(int) -3.9</code> 는 <code>-3</code> 입니다. 소수점 아래를 버리는 것이지 가까운
+      쪽으로 가는 것이 아니에요. 정수끼리 좁힐 때는 더 사납습니다 — <code>(byte) 300</code> 은
+      <code>44</code> 입니다. 남는 비트를 그냥 버리기 때문이고, 아무도 안 막습니다.
+    en: >-
+      Going <b>down</b> the ladder can lose value, so Java will not do it for you. Writing a
+      type in parentheses does it. And it <b>cuts — it does not round</b>.
+      <code>(int) 3.9</code> is <code>3</code>, not <code>4</code>, and <code>(int) -3.9</code>
+      is <code>-3</code>. The part after the point is dropped, not moved to the nearest whole
+      number. Between whole numbers it is harsher still — <code>(byte) 300</code> is
+      <code>44</code>, because the leftover bits are simply discarded, and nothing warns you.
+  trace:
+    - ko: "{{site.line}}행의 괄호 안 {{pick.1|code}}{{pick.1|josa:이,가}} 갈 자리를 정한다."
+      en: "The {{pick.1|code}} in the parentheses on line {{site.line}} names the destination."
+    - ko: "값 {{pick.3|code}}{{pick.3|josa:이,가}} 그 자리에 맞게 잘린다."
+      en: "The value {{pick.3|code}} is cut to fit that spot."
+    - ko: "버려지는 부분은 반올림되지 않고 그냥 사라진다."
+      en: "What is dropped is not rounded — it simply goes."
+rule:
+  ko: "<b>좁히기는 사람이 적고, 잘린다.</b> 반올림이 아니라 버림이다."
+  en: "<b>Narrowing is written by hand and it cuts.</b> It drops, it does not round."
+result:
+  label: { ko: "{{site.line}}행의 좁히기", en: "the narrowing on line {{site.line}}" }
+  value: "({{pick.1}}) {{pick.3}}"
+  note: { ko: "남는 부분은 버려진다", en: "the excess is dropped" }
+ok:
+  ko: "{{pick.3|code}}{{pick.3|josa:이,가}} {{pick.1|code}} 자리에 맞게 잘렸습니다."
+  en: "{{pick.3|code}} was cut to fit the {{pick.1|code}} spot."
+payoff:
+  ko: "이걸 알면 「3.9 를 넣었는데 3 이 나온다」가 풀립니다 — 반올림이 아니라 버림이에요."
+  en: "This untangles “I put in 3.9 and got 3” — it drops, it does not round."
+bridge:
+  ko: "파이썬의 <code>int(3.9)</code> 도 버립니다. 다른 것은 <b>자바는 안 적으면 아예 안 된다</b>는 점이에요."
+  en: "Python's <code>int(3.9)</code> also drops. What differs is that <b>Java refuses unless you write it</b>."
+misconceptions:
+  - ko: "가까운 쪽으로 반올림한다 — 버립니다. 3.9 는 3 이고 -3.9 는 -3 입니다."
+    en: "It rounds to the nearest — it drops. 3.9 gives 3 and -3.9 gives -3."
+  - ko: "안 들어가면 오류가 난다 — 안 납니다. 남는 비트를 버리고 조용히 다른 값이 됩니다."
+    en: "It raises when the value will not fit — it does not. Leftover bits go and a different value stays."
+  - ko: "괄호는 그냥 묶는 표시다 — 여기서는 <b>변환하라는 지시</b>이고 값이 바뀝니다."
+    en: "The parentheses only group — here they are an <b>instruction to convert</b>, and the value changes."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>값이 잘려 들어갈 자리를 정하는 글자</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that names the spot the value is cut into</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>여는 괄호</b>입니다. 괄호는 이 자리가 변환이라는 표시일 뿐, 어디로 갈지는 안에 적힌 글자가 정해요."
+          en: "{{pick.2|code}} is the <b>opening bracket</b>. It marks that a conversion happens; where it goes is the word inside."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 표시냐 목적지냐", en: "The sharpest spot — the mark or the destination" }
+          code:
+            - "(int) 3.9;     // 3"
+            - "(byte) 300;    // 44"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 잘리는 <b>값</b>입니다. 얼마나 잘릴지는 값이 아니라 괄호 안 타입이 정해요."
+          en: "{{pick.3|code}} is the <b>value</b> being cut. How much is cut is set by the type in the brackets, not by the value."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값이냐 목적지냐", en: "The sharpest spot — the value or the destination" }
+          code:
+            - "(int) 300;     // 300"
+            - "(byte) 300;    // 44"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 값을 <b>32칸 정수</b>로 잘라 넣습니다."
+      en: "Choose what goes in the blank. Line {{site.line}} cuts the value into a <b>32-slot whole number</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "int", mono: true }
+      - t: "byte"
+        mono: true
+        diag:
+          t:
+            ko: "8칸이라 훨씬 사납게 잘립니다 — <code>300</code> 을 넣으면 <code>44</code> 가 돼요. 같은 버림이지만 남는 비트가 훨씬 많습니다."
+            en: "Eight slots cut far harder — <code>300</code> comes out as <code>44</code>. Same dropping, many more bits gone."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 32칸이냐 8칸이냐", en: "The sharpest spot — 32 slots or 8" }
+            code:
+              - "(int) 300;     // 300"
+              - "(byte) 300;    // 44"
+      - t: "double"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>넓히는</b> 쪽이라 안 적어도 됩니다. 적어도 되지만 값이 안 잘려요 — 소수가 그대로 남습니다."
+            en: "That goes <b>wider</b>, so it need not be written. Writing it changes nothing — the fraction stays."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 올라가나 내려가나", en: "The sharpest spot — climbing or descending" }
+            code:
+              - "(int) 3.9;      // 3"
+              - "(double) 3.9;   // 3.9"
+      - t: "long"
+        mono: true
+        diag:
+          t:
+            ko: "정수 쪽으로는 잘리지만 칸이 64개라 <b>32칸이 아닙니다</b>. 소수는 버려지되 큰 정수는 그대로 남아요."
+            en: "It cuts to a whole number but with 64 slots, <b>not 32</b>. The fraction goes, yet large values survive."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 32칸이냐 64칸이냐", en: "The sharpest spot — 32 slots or 64" }
+            code:
+              - "(int) 3000000000.0;    // 감긴 값"
+              - "(long) 3000000000.0;   // 3000000000"
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 이 변환을 <b>손으로 적어야</b> 했을까요?"
+    en: "Why did the conversion on line {{site.line}} have to be <b>written by hand</b>?"
+  choices:
+    - t:
+        ko: "값이 잘릴 수 있어서, 잃어도 좋다는 결정을 사람이 코드에 남기게 하려고"
+        en: "Because value can be lost, and the decision to accept that has to be left in the code by a person"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 줄에서 실제로 무엇이 잘리는지도 적어 보세요."
+        en: "That is the direction. Say what is actually cut on this line."
+    - t:
+        ko: "자바가 실수 계산을 못 믿어서"
+        en: "Because Java does not trust decimal arithmetic"
+      ok: false
+      fb:
+        ko: "믿고 말고의 문제가 아닙니다. 정수끼리 좁힐 때도 똑같이 적어야 해요."
+        en: "Trust is not it. Narrowing between whole numbers needs the same mark."
+    - t:
+        ko: "괄호를 안 쓰면 실행 중에 예외가 나서"
+        en: "Because leaving it out raises while running"
+      ok: false
+      fb:
+        ko: "실행까지 못 갑니다. 컴파일이 그 줄에서 멈춰요."
+        en: "It never gets to run. Compilation stops on that line."
+queries:
+  - { grammars: [java], file: ./explicit-conversion.scm }
+examples:
+  - code: "class A { void f() { int n = (int) 3.9; } }      // (int) 3.9 -> 3 (int)"
+    expect: { sites: 1, form: narrow, hole: "int", picks: { 1: "int", 2: "(", 3: "3.9" } }
+  - code: "class A { void f() { byte b = (byte) 300; } }    // (byte) 300 -> 44 (byte)"
+    expect: { sites: 1, form: narrow, hole: "byte", picks: { 1: "byte", 2: "(", 3: "300" } }
+  - code: "class A { void f(double d) { float g = (float) d; } }  // (float) 1.0E40 -> Infinity (float)"
+    expect: { sites: 1, form: narrow-float, hole: "float", picks: { 1: "float", 2: "(", 3: "d" } }
+  - code: "class A { void f() { double d = 1; } }           // d -> 1.0 (double)"
+    expect: none

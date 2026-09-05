@@ -1,0 +1,213 @@
+schema: 1
+id: ts/reference-sharing
+universal: null
+name: { ko: 같은 것을 가리키기, en: Pointing at the same thing }
+token: "b = a"
+grammars: [typescript, tsx, javascript, vue]
+framework: null
+essential: true
+difficulty: 3
+prereq: [ts/const-declaration, cs/value-vs-reference, cs/aliasing]
+confusions: [ts/const-declaration, ts/reassignment]
+
+dict:
+  one_liner:
+    ko: "이름 하나를 다른 이름에 넣으면 가리키는 곳만 복사된다. 상자는 하나 그대로다."
+    en: "Put one name into another and only the pointing is copied. One box remains."
+  why:
+    ko: >-
+      값이 상자에 담겨 옮겨 다닌다고 생각하면 {{site.line}}행 뒤의 일이 안 맞습니다.
+      {{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:은,는}} 같은 것을
+      가리키고 있어서, 한쪽으로 안을 고치면 다른 쪽에서도 보여요.
+    en: >-
+      Think of a value as riding inside a box and what happens after line {{site.line}} will not
+      add up. {{pick.2|code}} and {{pick.3|code}} point at the same thing, so a change made through
+      one shows through the other.
+  trace:
+    - ko: "{{site.line}}행에서 {{pick.3|code}}{{pick.3|josa:이,가}} 가리키는 곳을 읽는다."
+      en: "Line {{site.line}} reads where {{pick.3|code}} points."
+    - ko: "{{pick.2|code}} 에 그 <b>가리킴</b>을 넣는다 — 안쪽을 베끼지는 않는다."
+      en: "That <b>pointing</b> goes into {{pick.2|code}} — the inside is not copied."
+    - ko: "이제 이름이 둘이고 가리켜지는 것은 하나다."
+      en: "Now there are two names and one thing being pointed at."
+
+rule:
+  ko: >-
+    <b>이름을 넣는 것과 값을 베끼는 것은 다르다.</b> 안쪽을 새로 만들려면 따로 만들어야 한다.
+  en: >-
+    <b>Putting a name in is not copying a value.</b> Making a fresh inside takes a separate step.
+result:
+  label:
+    ko: "{{site.line}}행 뒤의 상태"
+    en: "The state after line {{site.line}}"
+  value: "{{pick.2}} → {{pick.3}}"
+  note:
+    ko: "이름 둘, 가리켜지는 것 하나"
+    en: "two names, one thing pointed at"
+ok:
+  ko: >-
+    {{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:은,는}} <b>같은 것</b>을
+    가리킵니다. 수나 글자였다면 고칠 안쪽이 없어서 이 차이가 안 보여요.
+  en: >-
+    {{pick.2|code}} and {{pick.3|code}} point at the <b>same thing</b>. Had it been a number or a
+    piece of text there would be no inside to change, and the difference would not show.
+payoff:
+  ko: >-
+    화면이 안 바뀌는 버그와 남의 데이터가 같이 바뀌는 버그가 둘 다 이 자리에서 나옵니다.
+    어느 쪽인지 알면 고칠 곳이 한 줄로 좁혀져요.
+  en: >-
+    Both the bug where the screen never updates and the bug where somebody else's data changes come
+    from here. Knowing which narrows the fix to one line.
+bridge:
+  ko: >-
+    펼치기로 새로 만들어도 <b>한 겹</b>만 새것입니다 — 안쪽에 또 객체가 있으면 그것은
+    여전히 같은 것을 가리켜요.
+  en: >-
+    Even a fresh copy made by spreading is new for <b>one layer</b> — an object nested inside still
+    points at the same thing.
+misconceptions:
+  - ko: "이름을 넣으면 값이 복사된다 — 가리킴만 복사됩니다."
+    en: "Putting a name in copies the value — only the pointing is copied."
+  - ko: "만드는 낱말이 값을 잠근다 — 이름만 묶습니다. 안쪽은 얼마든지 바뀌어요."
+    en: "The declaring word locks the value — it binds only the name. The inside can change freely."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>이미 있던 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name that already existed</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.3
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 이름을 <b>새로 만드는</b> 낱말입니다. 이미 있던 쪽은 오른편에 적혀 있어요."
+          en: >-
+            {{pick.1|code}} is the word that <b>makes a new</b> name. The one that already existed is
+            written on the right.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 만드는 낱말과 이미 있던 이름"
+            en: "The sharpest spot — the making word or the existing name"
+          code:
+            - "const b = a    // a 가 먼저 있었다"
+            - "const a = {}   // 여기서 만들어졌다"
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 여기서 <b>처음 생기는</b> 이름입니다. 가리키는 곳을 받아 오는 쪽이에요."
+          en: >-
+            {{pick.2|code}} is the name that <b>first appears</b> on this line. It is the side
+            receiving the pointing.
+        edge:
+          h:
+            ko: "가장 날카로운 자리 — 받는 쪽과 주는 쪽"
+            en: "The sharpest spot — the receiving side or the giving side"
+          code:
+            - "const b = a    // b 가 새 이름"
+            - "b.qty = 2      // a 에서도 보인다"
+
+meaning:
+  - q:
+      ko: "<code>const b = a</code> 뒤에 <code>b.qty = 2</code> 를 하면 <code>a.qty</code> 는 어떻게 될까요?"
+      en: "After <code>const b = a</code>, doing <code>b.qty = 2</code> — what happens to <code>a.qty</code>?"
+    hint:
+      ko: "복사된 것은 안쪽이 아니라 가리킴입니다."
+      en: "What was copied is the pointing, not the inside."
+    options:
+      - t:
+          ko: "<code>2</code> 가 된다 — 둘이 같은 것을 가리킨다"
+          en: "It becomes <code>2</code> — both point at the same thing"
+      - t:
+          ko: "그대로다 — 사본을 고쳤으니까"
+          en: "It stays — the copy was the thing changed"
+        diag:
+          t:
+            ko: "수나 글자였다면 그 말이 맞습니다. 그때는 안쪽이 없어서 고칠 것도 없고 값이 통째로 복사돼요."
+            en: >-
+              For a number or a piece of text that holds. There is no inside to change there, and the
+              whole value is copied.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 안쪽이 있는가"
+              en: "The sharpest spot — is there an inside"
+            code:
+              - "let x = 1; let y = x; y = 2   // x 는 1"
+              - "const a = {}; const b = a; b.n = 2   // a.n 은 2"
+      - t:
+          ko: "만드는 낱말로 묶여 있어서 멈춘다"
+          en: "The declaring word locked it, so it stops"
+        diag:
+          t:
+            ko: "묶이는 것은 <b>이름</b>입니다. 다른 것을 가리키게 바꾸는 것은 막지만, 가리켜진 것의 안쪽은 못 막아요."
+            en: >-
+              What is bound is the <b>name</b>. It blocks pointing somewhere else; it cannot block a
+              change inside what is pointed at.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 이름과 안쪽"
+              en: "The sharpest spot — the name or the inside"
+            code:
+              - "const a = {}; a.n = 1   // 된다"
+              - "const a = {}; a = {}    // 여기서 멈춘다"
+      - t:
+          ko: "<code>undefined</code> 가 된다"
+          en: "It becomes <code>undefined</code>"
+        diag:
+          t:
+            ko: "이름을 넣는다고 원래 쪽이 비워지지는 않습니다. 가리킴이 하나 더 생길 뿐이에요."
+            en: >-
+              Putting a name in never empties the original. It only adds one more pointing.
+          edge:
+            h:
+              ko: "가장 날카로운 자리 — 옮기는가 늘리는가"
+              en: "The sharpest spot — moving or adding"
+            code:
+              - "const b = a   // a 는 그대로다"
+              - "a === b       // true"
+
+no_hole_reason: >-
+  이 줄에서 지울 만한 기호는 만드는 낱말뿐이고 그것은 다른 개념이 이미 재고 있다.
+  여기서 재는 것은 「이 줄 뒤에 상자가 몇 개인가」이고, 그것은 값으로 물어야 한다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 이름을 하나 더 두었을까요?"
+    en: "Why does line {{site.line}} introduce one more name?"
+  choices:
+    - t:
+        ko: "같은 것을 짧은 이름으로 부르려고 — 사본을 만든 것이 아니다"
+        en: "To call the same thing by a shorter name — no copy was made"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 정말 사본이 필요했다면 무엇을 더 적어야 하는지도 적어 보세요."
+        en: "That is the direction. Add what else would be needed if a real copy were wanted."
+    - t:
+        ko: "원본을 지키려고 사본을 만들었다"
+        en: "A copy was made to keep the original safe"
+      ok: false
+      fb:
+        ko: "사본은 안 생겼습니다. 안쪽을 고치면 원본에서도 그대로 보여요."
+        en: "No copy appeared. Change the inside and it shows in the original too."
+    - t:
+        ko: "이름이 둘이면 더 빠르니까"
+        en: "Because two names run faster"
+      ok: false
+      fb:
+        ko: "속도는 갈리지 않습니다. 갈리는 것은 읽는 사람이 사본이라고 믿느냐입니다."
+        en: "Speed does not part ways. What parts ways is whether the reader believes it is a copy."
+
+queries:
+  - { grammars: [typescript, tsx, javascript, vue], file: ./reference-sharing.scm }
+
+examples:
+  - code: "const target = source"
+    expect: { sites: 1, form: alias, picks: { 1: "const", 2: "target", 3: "source" } }
+  - code: "let current = first"
+    expect: { sites: 1, form: alias, picks: { 1: "let", 2: "current", 3: "first" } }
+  - code: "const cart = state"
+    expect: { sites: 1, form: alias, picks: { 1: "const", 2: "cart", 3: "state" } }
+  - code: "const copy = { ...source }"
+    expect: none
+  - code: "const total = 0"
+    expect: none

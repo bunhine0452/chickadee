@@ -7,7 +7,9 @@ grammars: [java]
 framework: null
 essential: true
 difficulty: 1
-prereq: [cs/type, cs/value-vs-reference]
+# 0부 축 A (java.md §1.5.1). `static-vs-dynamic-typing` 이 「타입이 그 자리에서 못 박힌다」의
+# 아래층이다 — `var` 를 「타입이 없다」로 읽는 오개념이 그 층에서 풀린다.
+prereq: [cs/type, cs/static-vs-dynamic-typing, cs/value-vs-reference]
 confusions: []
 dict:
   one_liner:
@@ -149,7 +151,12 @@ why_gate:
 queries:
   - { grammars: [java], file: ./variable-declaration.scm }
 examples:
-  - code: "class A { void f() { int n = 1; } }"
+  # 값을 든 예 — 식 · 값 · 타입.
+  - code: "class A { void f() { int n = 1; } }            // n -> 1 (int)"
     expect: { sites: 1, form: decl, picks: { 1: "int", 2: "n", 3: "1" } }
-  - code: "class A { void f() { n = 1; } }"
+  - code: "class A { void f() { double d = 7 / 2; } }     // d -> 3.0 (double, 나눗셈이 먼저다)"
+    expect: { sites: 1, form: decl, picks: { 1: "double", 2: "d", 3: "7 / 2" } }
+  - code: "class A { void f() { var v = 1; } }            // v -> 1 (int, 추론일 뿐 타입은 못 박힌다)"
+    expect: { sites: 1, form: decl, picks: { 1: "var", 2: "v", 3: "1" } }
+  - code: "class A { void f() { n = 1; } }                // 다시 넣기 — 선언이 아니다"
     expect: none

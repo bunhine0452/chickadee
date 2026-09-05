@@ -1,0 +1,67 @@
+[
+  {
+    "queryId": "java/arithmetic",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "arith",
+    "startLine": 5,
+    "startCol": 19,
+    "endLine": 5,
+    "endCol": 32,
+    "nodeKind": "binary_expression",
+    "inError": false
+  },
+  {
+    "queryId": "java/arithmetic",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "arith",
+    "startLine": 5,
+    "startCol": 19,
+    "endLine": 5,
+    "endCol": 24,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "java/arithmetic",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "arith",
+    "startLine": 5,
+    "startCol": 25,
+    "endLine": 5,
+    "endCol": 26,
+    "nodeKind": "/",
+    "inError": false
+  },
+  {
+    "queryId": "java/arithmetic",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "hole",
+    "form": "arith",
+    "startLine": 5,
+    "startCol": 25,
+    "endLine": 5,
+    "endCol": 26,
+    "nodeKind": "/",
+    "inError": false
+  },
+  {
+    "queryId": "java/arithmetic",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "arith",
+    "startLine": 5,
+    "startCol": 27,
+    "endLine": 5,
+    "endCol": 32,
+    "nodeKind": "identifier",
+    "inError": false
+  }
+]

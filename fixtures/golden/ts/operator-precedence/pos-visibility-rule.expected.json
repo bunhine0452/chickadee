@@ -1,0 +1,67 @@
+[
+  {
+    "queryId": "ts/operator-precedence",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "site",
+    "form": "and-first",
+    "startLine": 3,
+    "startCol": 9,
+    "endLine": 3,
+    "endCol": 34,
+    "nodeKind": "binary_expression",
+    "inError": false
+  },
+  {
+    "queryId": "ts/operator-precedence",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "pick.2",
+    "form": "and-first",
+    "startLine": 3,
+    "startCol": 9,
+    "endLine": 3,
+    "endCol": 15,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "ts/operator-precedence",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "pick.1",
+    "form": "and-first",
+    "startLine": 3,
+    "startCol": 16,
+    "endLine": 3,
+    "endCol": 18,
+    "nodeKind": "||",
+    "inError": false
+  },
+  {
+    "queryId": "ts/operator-precedence",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "pick.3",
+    "form": "and-first",
+    "startLine": 3,
+    "startCol": 19,
+    "endLine": 3,
+    "endCol": 34,
+    "nodeKind": "binary_expression",
+    "inError": false
+  },
+  {
+    "queryId": "ts/operator-precedence",
+    "matchId": 1,
+    "patternIndex": 2,
+    "name": "hole",
+    "form": "and-first",
+    "startLine": 3,
+    "startCol": 25,
+    "endLine": 3,
+    "endCol": 27,
+    "nodeKind": "&&",
+    "inError": false
+  }
+]

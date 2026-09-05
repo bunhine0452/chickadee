@@ -1,0 +1,161 @@
+schema: 1
+id: java/boolean-only-condition
+# 0부 축 D. `universal: null` — `common/truthiness` 는 「참으로 쳐지는 것이 무엇인가」이고
+# 자바는 **반대 방향**이라 그 자리에 아무것도 안 쳐진다. 같은 조각 이름을 쓰되 보편형은
+# 안 건다 (`docs/curriculum/java.md` §1.5.6 ③).
+universal: null
+name: { ko: 조건 자리의 규칙, en: What a condition takes }
+token: "boolean"
+grammars: [java]
+framework: null
+essential: true
+difficulty: 1
+prereq: [cs/static-vs-dynamic-typing, cs/type]
+confusions: [java/boolean-literal, java/comparison]
+dict:
+  one_liner:
+    ko: "갈림길에는 참·거짓 말고 아무것도 못 온다."
+    en: "A fork in Java takes a truth value and nothing else."
+  why:
+    ko: >-
+      파이썬은 <code>if items:</code> 로 빈 목록을 거짓으로 봅니다. JS 는 <code>if (name)</code>
+      로 빈 글자를 거짓으로 봐요. <b>자바는 둘 다 안 됩니다</b> — 조건 자리에 참·거짓이 아닌
+      값이 오면 그 줄에서 컴파일이 멈춥니다. 그래서 <code>if (list)</code> 대신
+      <code>if (!list.isEmpty())</code>, <code>if (count)</code> 대신
+      <code>if (count &gt; 0)</code> 을 적어야 해요. 대신 얻는 것이 있습니다: 「무엇이 거짓으로
+      쳐지나」를 외울 일이 없고, 조건이 무엇을 묻는지가 코드에 그대로 적힙니다.
+    en: >-
+      Python reads <code>if items:</code> and treats an empty list as false. JS reads
+      <code>if (name)</code> and treats empty text as false. <b>Java does neither</b> — a
+      condition holding anything but a truth value stops the compiler on that line. So
+      <code>if (list)</code> becomes <code>if (!list.isEmpty())</code> and
+      <code>if (count)</code> becomes <code>if (count &gt; 0)</code>. There is something gained:
+      no table of falsy values to memorise, and the question the condition asks is written out.
+  trace:
+    - ko: "{{site.line}}행의 갈림길은 참·거짓 하나를 받는다."
+      en: "The fork on line {{site.line}} takes one truth value."
+    - ko: "괄호 안 {{pick.1|code}}{{pick.1|josa:이,가}} 그 값을 내야 한다."
+      en: "The {{pick.1|code}} in the parentheses has to produce it."
+    - ko: "목록·수·글자를 그대로 두면 그 줄에서 컴파일이 멈춘다."
+      en: "Leave a list, a number or text there and the compiler stops on that line."
+rule:
+  ko: "<b>조건 자리는 참·거짓만 받는다.</b> 무엇이 거짓으로 쳐지나 하는 목록이 자바에는 없다."
+  en: "<b>A condition takes only a truth value.</b> Java has no list of falsy things."
+result:
+  label: { ko: "{{site.line}}행의 조건", en: "the condition on line {{site.line}}" }
+  value: "{{pick.1}}"
+  note: { ko: "참·거짓 하나가 나와야 한다", en: "must produce one truth value" }
+ok:
+  ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 참·거짓을 냅니다 — 그래서 이 갈림길이 섭니다."
+  en: "{{pick.1|code}} produces a truth value, which is why this fork stands."
+payoff:
+  ko: "이걸 알면 「파이썬처럼 적었더니 컴파일이 안 된다」가 풀립니다 — 막힌 것이 아니라 규칙입니다."
+  en: "This untangles “I wrote it like Python and it will not compile” — that is the rule, not a block."
+bridge:
+  ko: "파이썬은 빈 것을 거짓으로 봅니다. 자바는 무엇이 거짓인지를 <b>안 정합니다</b> — 물을 수 없어요."
+  en: "Python calls empty things false. Java <b>defines no such set</b> — the question cannot be asked."
+misconceptions:
+  - ko: "빈 목록이 거짓이다 — 자바에서는 거짓도 참도 아닙니다. 조건 자리에 아예 못 옵니다."
+    en: "An empty list is false — in Java it is neither. It cannot stand in a condition at all."
+  - ko: "0 이 거짓이다 — 자바에서 수와 참·거짓은 서로 안 바뀝니다. 견주어야 참·거짓이 나옵니다."
+    en: "Zero is false — in Java numbers and truth values never convert. A comparison makes one."
+  - ko: "이 규칙은 불편하기만 하다 — 대신 「무엇이 거짓인가」 목록을 외울 일이 없습니다."
+    en: "The rule is only friction — in exchange there is no falsy table to memorise."
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 개념이 가르치는 것은 조건 자리에 **못 오는 것**이라 정답이 코드에
+  글자로 안 남는다 — 빈칸에 넣을 원문이 없다. 조건이 어떤 값을 내는지를 묻는 판은
+  뜻 고르기로 낸다.
+meaning:
+  - q:
+      ko: "{{site.line}}행의 괄호 안에 <b>목록 이름 하나</b>만 적으면 어떻게 될까요?"
+      en: "What happens if the parentheses on line {{site.line}} hold <b>just a list name</b>?"
+    options:
+      - t:
+          ko: "그 줄에서 컴파일이 멈춘다 — 목록은 참·거짓이 아니기 때문"
+          en: "The compiler stops on that line — a list is not a truth value"
+      - t:
+          ko: "목록이 비어 있으면 거짓, 아니면 참으로 돈다"
+          en: "It runs as false when the list is empty and true otherwise"
+        diag:
+          t:
+            ko: "그 답은 <b>파이썬</b>에서 참입니다. 자바에는 무엇이 거짓으로 쳐지나 하는 규칙이 아예 없어요 — 빈지 아닌지를 물으려면 <code>isEmpty()</code> 를 적습니다."
+            en: "That answer is true in <b>Python</b>. Java has no rule for what counts as false — asking about emptiness means writing <code>isEmpty()</code>."
+      - t:
+          ko: "목록이 <code>null</code> 이면 거짓, 아니면 참으로 돈다"
+          en: "It runs as false when the list is <code>null</code> and true otherwise"
+        diag:
+          t:
+            ko: "그 답은 <b>JS</b> 에서 참입니다. 자바는 없음 여부도 조건 자리에서 자동으로 안 봐요 — <code>list != null</code> 이라고 적어야 참·거짓이 나옵니다."
+            en: "That answer is true in <b>JS</b>. Java does not read absence in a condition either — <code>list != null</code> is what makes a truth value."
+      - t:
+          ko: "돌기는 하는데 결과가 그때그때 다르다"
+          en: "It runs, but the result varies from run to run"
+        diag:
+          t:
+            ko: "돌지 않습니다. 이건 실행 중에 갈리는 일이 아니라 <b>컴파일 때</b> 걸리는 규칙이에요 — 프로그램이 아예 안 만들어집니다."
+            en: "It does not run. This is caught <b>at compile time</b>, not during a run — the program is never built."
+  - q:
+      ko: "{{site.line}}행의 조건을 <code>count</code> 라는 수 하나로 바꾸면 무엇이 필요할까요?"
+      en: "If the condition on line {{site.line}} became the number <code>count</code>, what would it need?"
+    options:
+      - t:
+          ko: "견주는 기호를 붙여 참·거짓을 만들어야 한다 — 예를 들어 0 보다 큰지"
+          en: "A comparison to make a truth value — whether it is above zero, say"
+      - t:
+          ko: "그대로 두면 0 일 때만 거짓으로 돈다"
+          en: "Left as is, it runs as false only at zero"
+        diag:
+          t:
+            ko: "그 답은 <b>C</b>·<b>파이썬</b>에서 참입니다. 자바는 수를 참·거짓으로 안 바꿔요 — 견주는 기호가 그 일을 합니다."
+            en: "That answer is true in <b>C</b> and <b>Python</b>. Java turns no number into a truth value — a comparison does that."
+      - t:
+          ko: "앞에 느낌표를 붙이면 된다"
+          en: "Putting an exclamation mark in front is enough"
+        diag:
+          t:
+            ko: "느낌표도 참·거짓을 받습니다. 수 앞에 붙이면 같은 자리에서 또 멈춰요."
+            en: "The exclamation mark also takes a truth value. In front of a number it stops at the same spot."
+      - t:
+          ko: "수를 참·거짓 타입으로 캐스트하면 된다"
+          en: "Casting the number to the truth-value type is enough"
+        diag:
+          t:
+            ko: "그 캐스트는 자바에 없습니다. 수와 참·거짓 사이에는 좁히기도 넓히기도 없어요 — 둘은 아예 다른 갈래입니다."
+            en: "No such cast exists in Java. There is neither widening nor narrowing between numbers and truth values — they are separate families."
+why_gate:
+  q:
+    ko: "자바는 왜 조건 자리에 <b>참·거짓만</b> 받게 했을까요?"
+    en: "Why does Java take <b>only a truth value</b> in a condition?"
+  choices:
+    - t:
+        ko: "그 자리에 아무 값이나 받으면 「무엇이 거짓인가」를 언어가 정해야 하고, 그 표를 사람이 외워야 하기 때문"
+        en: "Because taking any value would make the language define what counts as false, and people would have to memorise that table"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 표가 있는 언어에서 실제로 헷갈리는 값을 하나 적어 보세요."
+        en: "That is the direction. Name one value that trips people in a language that has that table."
+    - t:
+        ko: "참·거짓만 받는 편이 빠르기 때문"
+        en: "Because taking only truth values runs faster"
+      ok: false
+      fb:
+        ko: "속도 문제가 아닙니다. 이건 컴파일 때 걸리는 규칙이고 실행 비용과 무관해요."
+        en: "Speed is not it. The rule is checked at compile time and costs nothing at run time."
+    - t:
+        ko: "옛 자바에는 참·거짓 타입이 없어서"
+        en: "Because early Java had no truth-value type"
+      ok: false
+      fb:
+        ko: "처음부터 있었습니다. 오히려 그 타입이 <b>수와 안 섞이게</b> 만든 것이 이 규칙이에요."
+        en: "It was there from the start. The rule exists to keep that type <b>from mixing with numbers</b>."
+queries:
+  - { grammars: [java], file: ./boolean-only-condition.scm }
+examples:
+  - code: "class A { void f(int n) { if (n > 0) { } } }        // n > 0 -> true 또는 false (boolean)"
+    expect: { sites: 1, form: ifcond, picks: { 1: "n > 0" } }
+  - code: "class A { void f(boolean ok) { while (ok) { } } }   // ok -> true 또는 false (boolean)"
+    expect: { sites: 1, form: whilecond, picks: { 1: "ok" } }
+  - code: "class A { void f(String s) { if (s != null) { } } } // s != null -> true 또는 false (boolean)"
+    expect: { sites: 1, form: ifcond, picks: { 1: "s != null" } }
+  - code: "class A { void f() { int n = 1; } }                 // n -> 1 (int)"
+    expect: none

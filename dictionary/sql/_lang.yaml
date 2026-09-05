@@ -11,12 +11,24 @@ extensions:
   # 캡처는 양쪽에서 다 나온다 (`jobs.rs` 의 `grammars_of`).
   mybatis_sql: [.xml]
 
-# 바닥 여덟 중 셋 (`docs/curriculum/sql.md` §2). 남은 다섯은 다음 판이다.
+# 0부 여덟 (`docs/curriculum/sql.md` §0.2) + 바닥 여덟 중 셋 (§2). 바닥의 남은 다섯은 다음 판이다.
 #
-# `sql/comparison` 은 **자리표가 있는 사용처를 빼고** 연다 — 노드 종류로는 못 거른다(진짜 조인도
-# 오른쪽이 `field` 다). 사용처의 글자에 `:`·`#` 이 남아 있으면 빼는 것이 실측으로 리터럴·조인·
-# 숫자를 살리고 자리표 둘만 뺀다 (`comparison.scm` 의 주석).
+# 자리표(`:name` · `#{name}`)는 이제 **파서에게만** 같은 너비의 글자 값으로 가려진다
+# (`crates/parse/src/params.rs`). 그래서 `sql/comparison` 이 자리표가 있는 사용처를 빼지 않고도
+# 값 자리를 값이라고 가르친다 — 표본 리포 매퍼 9파일에서 6 → 53 사용처.
+#
+# 선행은 §0.2 의 표를 따르되 **한 칸만 다르다**: `sql/comparison` 에 0-5 와 0-6 을 둘 다 걸면
+# 깊이가 3 이 되어 D184 의 프롤로그(깊이 ≤ 2)에서 빠진다. 0-6 하나만 걸고 0-5 는
+# `sql/null-check` 쪽 사슬(0-3 → 0-4 → 0-5)에 남겼다.
 essential:
+  - sql/row-and-set
+  - sql/column-type
+  - sql/value-and-name
+  - sql/null-unknown
+  - sql/three-valued-comparison
+  - sql/implicit-cast
+  - sql/expression-per-row
+  - sql/clause-order
   - sql/from-table
   - sql/comparison
   - sql/null-check

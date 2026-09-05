@@ -1,0 +1,54 @@
+[
+  {
+    "queryId": "ts/integer-division",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "site",
+    "form": "truncate",
+    "startLine": 3,
+    "startCol": 17,
+    "endLine": 3,
+    "endCol": 38,
+    "nodeKind": "call_expression",
+    "inError": false
+  },
+  {
+    "queryId": "ts/integer-division",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.1",
+    "form": "truncate",
+    "startLine": 3,
+    "startCol": 17,
+    "endLine": 3,
+    "endCol": 21,
+    "nodeKind": "identifier",
+    "inError": false
+  },
+  {
+    "queryId": "ts/integer-division",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.2",
+    "form": "truncate",
+    "startLine": 3,
+    "startCol": 22,
+    "endLine": 3,
+    "endCol": 27,
+    "nodeKind": "property_identifier",
+    "inError": false
+  },
+  {
+    "queryId": "ts/integer-division",
+    "matchId": 1,
+    "patternIndex": 0,
+    "name": "pick.3",
+    "form": "truncate",
+    "startLine": 3,
+    "startCol": 28,
+    "endLine": 3,
+    "endCol": 37,
+    "nodeKind": "binary_expression",
+    "inError": false
+  }
+]

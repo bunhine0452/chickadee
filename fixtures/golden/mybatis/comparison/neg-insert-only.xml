@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mapper namespace="shop.ItemMapper">
+  <insert id="add">
+    INSERT INTO item (sku, qty) VALUES (#{sku}, #{qty})
+  </insert>
+</mapper>

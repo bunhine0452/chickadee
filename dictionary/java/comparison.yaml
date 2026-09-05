@@ -7,6 +7,7 @@ grammars: [java]
 framework: null
 essential: true
 difficulty: 1
+# 0부 축 H (java.md §1.5.1).
 prereq: [cs/identity-vs-equality]
 confusions: []
 dict:
@@ -149,7 +150,12 @@ why_gate:
 queries:
   - { grammars: [java], file: ./comparison.scm }
 examples:
-  - code: "class A { void f() { boolean t = n == 2; } }"
+  # 값을 든 예 — 식 · 값 · 타입. 견주기는 언제나 참·거짓을 낸다.
+  - code: "class A { void f(int n) { boolean t = n == 2; } }  // 2 == 2 -> true (boolean)"
     expect: { sites: 1, form: compare, hole: "==", picks: { 1: "==", 2: "n", 3: "2" } }
-  - code: "class A { void f() { int s = a + b; } }"
+  - code: "class A { void f(int n) { boolean t = n < 2; } }   // 3 < 2 -> false (boolean)"
+    expect: { sites: 1, form: compare, hole: "<", picks: { 1: "<", 2: "n", 3: "2" } }
+  - code: "class A { void f(int n) { boolean t = n != 2; } }  // 3 != 2 -> true (boolean)"
+    expect: { sites: 1, form: compare, hole: "!=", picks: { 1: "!=", 2: "n", 3: "2" } }
+  - code: "class A { void f(int a, int b) { int s = a + b; } }  // 1 + 2 -> 3 (int, 셈이지 견주기가 아니다)"
     expect: none
