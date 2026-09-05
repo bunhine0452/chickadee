@@ -70,7 +70,10 @@ fn skipped(src: &[u8], at: usize) -> Option<usize> {
 }
 
 fn find(src: &[u8], from: usize, byte: u8) -> Option<usize> {
-    src.get(from..)?.iter().position(|b| *b == byte).map(|i| i + from)
+    src.get(from..)?
+        .iter()
+        .position(|b| *b == byte)
+        .map(|i| i + from)
 }
 
 fn close_comment(src: &[u8], from: usize) -> usize {
@@ -116,7 +119,10 @@ mod tests {
     #[test]
     fn a_clock_value_inside_a_string_is_left_alone() {
         assert!(blanked("sql", b"WHERE t = '12:30' AND u = :id").is_some());
-        assert_eq!(text("WHERE t = '12:30' AND u = :id"), "WHERE t = '12:30' AND u = 'i'");
+        assert_eq!(
+            text("WHERE t = '12:30' AND u = :id"),
+            "WHERE t = '12:30' AND u = 'i'"
+        );
     }
 
     #[test]

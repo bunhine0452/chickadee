@@ -171,7 +171,11 @@ mod tests {
 
     #[test]
     fn rows_come_back_as_text_with_absence_kept_apart() {
-        let out = ask(&spec(&[SCHEMA, SEED], &["select id, name from t order by id"])).unwrap();
+        let out = ask(&spec(
+            &[SCHEMA, SEED],
+            &["select id, name from t order by id"],
+        ))
+        .unwrap();
         assert_eq!(out.failed_at, None);
         let table = &out.tables[0];
         assert_eq!(table.columns, vec!["id", "name"]);
