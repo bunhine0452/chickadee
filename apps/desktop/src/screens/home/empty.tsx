@@ -49,7 +49,7 @@ export function FirstRun({ onPick, locale, onLocale, newcomer, onNewcomer }: Fir
 
         {/* 한 문항 (D147). **레벨을 고르게 하지 않는다** — 대상 경계 안쪽인지만 묻고,
             바꾸는 것은 0장의 길이 하나다. E-5 「별도 배치고사를 만들지 않는다」는 그대로다. */}
-        <div className="firstrun-lang">
+        <div className="firstrun-lang firstrun-newcomer">
           <span className="firstrun-lang-k">{t('firstRun.newcomerQ')}</span>
           <Switch
             options={[
@@ -62,7 +62,10 @@ export function FirstRun({ onPick, locale, onLocale, newcomer, onNewcomer }: Fir
           />
         </div>
         <p className="firstrun-scope">{t('firstRun.newcomerAsk')}</p>
-        <div className="firstrun-lang">
+        {/* Two switches share the `.firstrun-lang` layout; the extra class is what the
+            real-binary E2E (tests/e2e) addresses — a bare `.firstrun-lang [role=switch]`
+            picked the newcomer question above and flipped that instead of the locale. */}
+        <div className="firstrun-lang firstrun-locale">
           <span className="firstrun-lang-k">{t('firstRun.language')}</span>
           <Switch
             options={options}

@@ -28,7 +28,7 @@ describe('E1 첫 실행', () => {
     // 맞춰 둔다 — 이것이 없어 main 에서도 E1 셋이 계속 빨갰다. 스위치는 ko↔en 토글이다.
     const note = await shown('.firstrun-note');
     if (!(await note.getText()).includes('읽기만 하고')) {
-      await (await shown('.firstrun-lang [role="switch"]')).click();
+      await (await shown('.firstrun-locale [role="switch"]')).click();
     }
   });
 
@@ -53,7 +53,7 @@ describe('E1 첫 실행', () => {
 
   it('0단계 — 언어를 English 로 바꾸면 그 자리에서 문단이 영어다 (D117)', async () => {
     const swap = async (): Promise<void> => {
-      const sw = await shown('.firstrun-lang [role="switch"]');
+      const sw = await shown('.firstrun-locale [role="switch"]');
       await sw.click();
     };
 

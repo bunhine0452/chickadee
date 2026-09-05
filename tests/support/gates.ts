@@ -200,9 +200,20 @@ export async function toNight(page: Page): Promise<void> {
  * 이 화면으로 가는 길 자체가 마우스 없이 열려야 한다.
  */
 export async function toShelf(page: Page): Promise<void> {
-  await page.locator('button.repo-switch').focus();
-  await page.keyboard.press('Enter');
-  await page.locator('ul[role="listbox"]').waitFor();
+  // The first test of a file on CI's Linux WebKit sometimes presses Enter before the
+  // switcher's handler is live and the listbox never opens. Retrying the same keystroke
+  // keeps the path keyboard-only; a click here would stop measuring what this gate is for.
+  const list = page.locator('ul[role="listbox"]');
+  for (let attempt = 0; ; attempt += 1) {
+    await page.locator('button.repo-switch').focus();
+    await page.keyboard.press('Enter');
+    try {
+      await list.waitFor({ timeout: 4_000 });
+      break;
+    } catch (e) {
+      if (attempt >= 4) throw e;
+    }
+  }
   await page.keyboard.press('End');
   await page.keyboard.press('Enter');
   // 목록이 설 때까지 기다린다 — `main.shelf` 는 머리말만으로도 먼저 뜨므로 여기서 멈추면
