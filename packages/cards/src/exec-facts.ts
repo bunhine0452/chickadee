@@ -59,8 +59,23 @@ const py: Dialect = {
   fn: new Set(['function_definition', 'lambda']),
 };
 
+/**
+ * 자바 (D164 — 코스 2·3단이 컨트롤러·서비스 블록에서 실행 순서와 선언–사용을 읽는다).
+ * 이름은 `tree-sitter-java` 0.23.5 의 `node-types.json` 에서 확인했다. 람다는 함수다 — 본문이
+ * 부를 때 돈다. `switch_expression` 은 문과 식이 한 이름이다.
+ */
+const java: Dialect = {
+  block: new Set(['block']),
+  terminator: new Set(['return_statement', 'throw_statement', 'break_statement', 'continue_statement']),
+  branching: new Set([
+    'if_statement', 'while_statement', 'for_statement', 'enhanced_for_statement', 'do_statement',
+    'switch_expression', 'try_statement',
+  ]),
+  fn: new Set(['method_declaration', 'constructor_declaration', 'lambda_expression']),
+};
+
 export const DIALECTS: Readonly<Record<string, Dialect>> = {
-  typescript: ts, tsx: ts, javascript: ts, python: py,
+  typescript: ts, tsx: ts, javascript: ts, vue: ts, python: py, java,
 };
 
 export const dialectOf = (grammar: string): Dialect | null => DIALECTS[grammar] ?? null;

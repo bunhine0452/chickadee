@@ -60,3 +60,20 @@ export type {
   AnswerKey, Band, CommitFileRow, CommitRow, Graph, GraphEdge, GraphFile,
   T2Card, T2Kind, T2Payload, T2Request,
 } from './t2-types.js';
+
+// 코스 문항 16유형 (D164)
+export { buildCourseCards, buildStageCards, conceptsOnPath, TYPES_OF_STAGE } from './stage.js';
+export {
+  buildContracts, buildCuts, buildOrigins, buildReorders, buildTwins, findGuards, swapPairs,
+  MAX_CONTRACT, MAX_CUT, MAX_ORIGIN, MAX_REORDER, MAX_TWIN,
+} from './stage-choice.js';
+export { buildCallers, buildExecs, buildHops, layerOf, splitHops, MAX_CALLER, MAX_EXEC, MAX_HOP } from './stage-trace.js';
+export {
+  buildReimpls, buildRepairs, fixSubject, linksBetween, MAX_PER_TYPE, MAX_REIMPL_LINES, MIN_REIMPL_LINES,
+} from './stage-edit.js';
+export { finishStage, hopOrder, identsOf, nodeId, stageSeed, STAGE_CONCEPTS } from './stage-common.js';
+export { KIND_OF, STAGE_OF } from './stage-types.js';
+export type {
+  Hunk, HunkLine, NameUse, ResponseKey, StageBlock, StageCard, StageCommit, StageDrop, StageEdge, StageFile,
+  StageRequest, StageResult, StageSite, StageType,
+} from './stage-types.js';

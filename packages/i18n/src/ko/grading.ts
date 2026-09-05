@@ -59,4 +59,22 @@ export const grading = {
 
   // D142 — 폴더 역할 4지의 정답 문장. 보기 라벨이 곧 지도의 층 이름이다.
   'grading.roleNote': '이 폴더는 «{{label}}» 층입니다.',
+
+  // ───────── 코스 문항 채점 (D164) ─────────
+  'grading.stageHopPartial': '순서를 전부 맞혀야 통과입니다 — 지금 {{pct}}% 입니다.',
+  'grading.stageCallerPartial': '부르는 파일을 다 짚고 아닌 것을 안 짚어야 통과입니다.',
+  'grading.stageReasonWrong': '자리는 맞았지만 이유가 다릅니다.',
+  'grading.stagePatchOk': '참조 답과 같은 뜻입니다.',
+  'grading.stagePatchDiffer': '고친 줄이 참조 답과 다릅니다 — {{reason}}',
+  'grading.stagePatchNoLine': '고칠 줄이 비어 있습니다.',
+  'grading.stagePlaceOk': '그 자리도 됩니다 — 만드는 줄 뒤, 쓰는 줄 앞입니다.',
+  'grading.stagePlaceBeforeDecl': '거기서는 «{{name}}» 이 아직 없습니다 — 그 이름은 {{line}}행이 만듭니다.',
+  'grading.stagePlaceAfterUse': '{{line}}행이 이미 «{{name}}» 을 씁니다 — 그보다 앞이어야 합니다.',
+  'grading.stagePlaceOff': '문법은 서지만 뜻이 달라집니다 — 원래 자리는 {{line}}행 다음입니다.',
+  'grading.stageLinks': '연결 검사 {{ok}}/{{n}}',
+  'grading.stageLinkMissing': '연결이 끊겼습니다 — «{{name}}» 이 답에 없습니다.',
+  'grading.stageHandoff': '채점하지 않습니다. 프롬프트를 복사해 들고 나가세요.',
+  'grading.handoffMine': '제가 쓴 코드:',
+  'grading.handoffOriginal': '원본 {{file}} {{from}}행부터:',
+  'grading.stageWrongShape': '이 판에 맞지 않는 답 모양입니다.',
 } as const;

@@ -75,3 +75,7 @@ export type { T2Kind as T2QuestionKind } from './t2-types.js';
 // T2 — 「이것도 맞다」 (04 §8.4)
 export { draftT2Appeal, pickRelation, promoteToSec, t2PatternKey, PROMOTE_MIN } from './t2-appeal.js';
 export type { PickRelation, T2AppealDraft, T2AppealInput } from './t2-appeal.js';
+
+// 코스 문항 채점 (D164)
+export { buildHandoffPrompt, checkLinks, checkPlace, declaredName, gradeStage } from './stage.js';
+export type { PlaceCheck, StageAnswer, StageDetail, StageOptions, StageVerdict } from './stage.js';
