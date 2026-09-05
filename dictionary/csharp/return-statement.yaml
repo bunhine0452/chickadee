@@ -1,0 +1,165 @@
+schema: 1
+id: csharp/return-statement
+universal: common/return-value
+name: { ko: 값 돌려주기, en: Return }
+token: "return"
+grammars: [c_sharp]
+framework: null
+essential: true
+difficulty: 1
+prereq: [csharp/method-declaration]
+confusions: []
+dict:
+  one_liner:
+    ko: "이 줄에서 메서드가 끝나고, 옆에 적힌 것이 부른 쪽 손에 남는다."
+    en: "The method ends here, and what stands beside it lands in the caller's hand."
+  why:
+    ko: >-
+      {{site.line}}행은 <b>두 가지</b>를 동시에 합니다 — 값을 실어 보내는 것과 <b>거기서
+      끝내는 것</b>. 그래서 아래에 코드가 더 있어도 안 돕니다. 그리고 값을 돌려주기로 적어
+      놓은 메서드에서 이 줄을 <b>빠뜨리면</b> 파이썬처럼 조용히 없음이 가는 것이 아니라
+      컴파일이 막습니다(CS0161). 모든 갈래가 값을 내야 통과해요 — <code>if</code>만 적고
+      <code>else</code>를 안 적으면 거기서 걸립니다.
+    en: >-
+      Line {{site.line}} does <b>two things</b> at once: it sends a value back and it
+      <b>ends things there</b>. Code below it does not run. And <b>leaving this line out</b>
+      of a method that promised a value does not quietly yield nothing as in Python — it stops
+      at compile time (CS0161). Every branch has to produce a value, so an <code>if</code>
+      without an <code>else</code> is caught right there.
+  trace:
+    - ko: "{{site.line}}행에서 {{pick.2|code}}{{pick.2|josa:이,가}} 먼저 값이 된다."
+      en: "On line {{site.line}}, {{pick.2|code}} becomes a value first."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 그 값을 부른 쪽으로 보낸다."
+      en: "{{pick.1|code}} sends that value back to the caller."
+    - ko: "이 메서드는 여기서 끝나고 아래는 안 돈다."
+      en: "The method ends here; nothing below it runs."
+rule:
+  ko: "<b>이 줄은 보내고 끝낸다.</b> 값을 적어 놓은 메서드는 모든 갈래에서 이 줄이 필요하다."
+  en: "<b>This line sends and ends.</b> A method that promised a value needs it on every branch."
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 부른 쪽 손에 남고 이 메서드는 끝납니다."
+  en: "{{pick.2|code}} lands in the caller's hand and this method is done."
+payoff:
+  ko: "이걸 알면 「이 아래 줄이 왜 안 도나」가 풀립니다 — 위에서 이미 끝났습니다."
+  en: "This untangles “why does the line below never run” — it already ended above."
+bridge:
+  ko: >-
+    파이썬은 이 줄이 없으면 <code>None</code>이 조용히 갑니다. C# 은 <b>안 보냅니다</b> —
+    컴파일이 막아요.
+  en: >-
+    In Python a missing return quietly sends <code>None</code>. C# sends <b>nothing</b> —
+    it stops at compile time.
+misconceptions:
+  # 출처 — `csharp.md` §2 ⑧ (CS0161).
+  - ko: "빠뜨리면 조용히 없음이 간다 — 컴파일이 막습니다(CS0161)."
+    en: "Leaving it out quietly yields nothing — it stops at compile time (CS0161)."
+  - ko: "이 줄 아래도 마저 돈다 — 안 돕니다. 이 줄에서 메서드가 끝납니다."
+    en: "The lines below still run — they do not. The method ends here."
+  - ko: "값을 안 돌려주는 메서드에는 못 쓴다 — 값 없이 <code>return;</code>으로 끝낼 수 있습니다."
+    en: "It cannot appear in a method that returns nothing — a bare <code>return;</code> ends it."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>값을 부른 쪽으로 보내는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that sends the value back</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 보낼 <b>값</b>입니다. 값만 적어 놓으면 계산만 되고 아무 데도 안 갑니다."
+          en: "{{pick.2|code}} is the <b>value</b> to send. Written alone it is computed and goes nowhere."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값이냐 보내기냐", en: "The sharpest spot — the value or the sending" }
+          code:
+            - "a + b;          // 계산만 된다"
+            - "return a + b;   // 손에 남는다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 문을 <b>닫는 기호</b>입니다. 보내는 일은 앞의 낱말이 해요."
+          en: "{{pick.3|code}} <b>closes the statement</b>. The sending is done by the word before it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 닫기냐 보내기냐", en: "The sharpest spot — closing or sending" }
+          code:
+            - "G();       // 닫기만"
+            - "return;    // 끝낸다"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 값을 <b>부른 쪽으로 보내고</b> 메서드를 끝냅니다."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>sends the value back</b> and ends the method."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "return", mono: true }
+      - t: "yield"
+        mono: true
+        diag:
+          t:
+            ko: "이건 값을 <b>하나씩 내주면서</b> 메서드를 안 끝냅니다. 훑는 쪽이 다음을 달라고 하면 이어서 돌아요."
+            en: "That hands values out <b>one at a time</b> without ending the method — it resumes when the next one is asked for."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 끝내나 이어 가나", en: "The sharpest spot — end or resume" }
+            code:
+              - "return 1;         // 끝난다"
+              - "yield return 1;   // 이어 간다"
+      - t: "throw"
+        mono: true
+        diag:
+          t:
+            ko: "이건 값이 아니라 <b>예외</b>를 올려 보냅니다. 부른 쪽은 값을 못 받고 <code>catch</code>로 갑니다."
+            en: "That sends an <b>exception</b> up instead of a value. The caller gets no value and lands in a <code>catch</code>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값이냐 예외냐", en: "The sharpest spot — a value or an exception" }
+            code:
+              - "return x;               // 값"
+              - "throw new Exception();  // 예외"
+      - t: "break"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>되풀이만</b> 끝냅니다. 메서드는 계속 돌고 값도 안 보내요."
+            en: "That ends only the <b>loop</b>. The method keeps running and no value is sent."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 되풀이냐 메서드냐", en: "The sharpest spot — the loop or the method" }
+            code:
+              - "break;      // 되풀이만"
+              - "return x;   // 메서드까지"
+why_gate:
+  q:
+    ko: "이 언어는 왜 값을 적어 놓은 메서드에서 이 줄을 <b>빠뜨리면 막을까요</b>?"
+    en: "Why does this language <b>refuse</b> a method that promises a value and omits this line?"
+  choices:
+    - t:
+        ko: "부른 쪽이 값이 있다고 믿고 쓰는데, 없으면 그 믿음이 실행 시각에 깨지기 때문"
+        en: "Because the caller relies on a value being there, and without it that breaks at run time"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 막지 않는 언어에서는 그 자리에서 무엇이 오는지도 적어 보세요."
+        en: "That is the direction. Add what arrives instead in a language that does not refuse."
+    - t:
+        ko: "빠뜨리면 느려져서"
+        en: "Because omitting it is slow"
+      ok: false
+      fb:
+        ko: "속도 문제가 아닙니다. 아예 컴파일이 안 되므로 돌 일이 없어요."
+        en: "Speed is not it — it never compiles, so it never runs."
+    - t:
+        ko: "메서드가 안 끝나서"
+        en: "Because the method would never end"
+      ok: false
+      fb:
+        ko: "끝나기는 합니다. 문제는 <b>손에 무엇이 남나</b>가 안 정해지는 것이에요."
+        en: "It does end. The problem is that <b>what is left in the hand</b> is undefined."
+queries:
+  - { grammars: [c_sharp], file: ./return-statement.scm }
+examples:
+  - code: "class A { int F() { return 1; } }"
+    expect: { sites: 1, form: value, hole: "return", picks: { 1: "return", 2: "1" } }
+  - code: "class A { int G(int a) { return a + 1; } }"
+    expect: { sites: 1, form: value, picks: { 1: "return", 2: "a + 1" } }
+  - code: "class A { void H() { return; } }"
+    expect: { sites: 1, form: bare, picks: { 1: "return", 3: ";" } }
+  - code: "int n = 1;"
+    expect: none

@@ -1,0 +1,165 @@
+schema: 1
+id: csharp/async-await
+universal: common/async-await
+name: { ko: 기다렸다 값 꺼내기, en: Async-await }
+token: "await"
+grammars: [c_sharp]
+framework: null
+essential: true
+difficulty: 3
+prereq: [cs/blocking-and-async, csharp/method-declaration, csharp/generics]
+confusions: []
+dict:
+  one_liner:
+    ko: "기다리는 동안 스레드를 놓아 주고, 값은 한 겹 감싸여 돌아온다."
+    en: "It hands the thread back while waiting, and the value returns wrapped."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} <b>빨리 도는 표시가 아닙니다.</b>
+      기다리는 동안 스레드를 놓아 주어 다른 일이 그 스레드를 쓰게 하는 것이고,
+      그 앞까지는 <b>부른 스레드에서 그대로</b> 돕니다. 대가로 반환 타입이 한 겹
+      감싸져요 — <code>int</code>가 아니라 <code>Task&lt;int&gt;</code>입니다.
+      그 겹을 안 벗기면 값이 아니라 「아직 오지 않은 것」이 손에 남고, 급하다고
+      <code>.Result</code>로 꺼내면 스레드가 서로를 기다려 <b>교착</b>합니다.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} is <b>not a mark that makes things fast.</b>
+      It hands the thread back while waiting so other work can use it, and up to that point
+      the code runs <b>on the calling thread as before</b>. The price is one wrapping layer
+      on the return type: <code>Task&lt;int&gt;</code>, not <code>int</code>. Leave the layer
+      on and what stays in your hand is "not here yet"; reach past it with
+      <code>.Result</code> and two threads wait on each other — a <b>deadlock</b>.
+  trace:
+    - ko: "{{site.line}}행까지는 부른 스레드에서 그대로 돈다."
+      en: "Up to line {{site.line}} the code runs on the calling thread."
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 아직 안 끝났으면 스레드를 놓아 준다."
+      en: "If {{pick.2|code}} has not finished, the thread is handed back."
+    - ko: "끝나면 이어질 코드가 다시 잡혀 돌고 겹이 벗겨진 값이 남는다."
+      en: "When it does, the rest is picked up again and the unwrapped value is left."
+rule:
+  ko: "<b>빨라지는 것이 아니라 스레드를 놓는 것이다.</b> 반환 타입은 한 겹 감싸진다."
+  en: "<b>Not faster — the thread is handed back.</b> The return type gains one layer."
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 끝난 뒤의 값이 이 자리에 남습니다."
+  en: "What is left here is the value {{pick.2|code}} finished with."
+payoff:
+  ko: "이걸 알면 「값 대신 Task 가 찍힌다」가 풀립니다 — 겹을 안 벗긴 겁니다."
+  en: "This untangles “it printed a Task instead of the value” — the layer is still on."
+bridge:
+  ko: >-
+    자바에는 이 표기가 <b>없습니다</b> — 가상 스레드가 막는 코드를 그대로 씁니다.
+    자바스크립트와는 낱말도 기계도 거의 같아요.
+  en: >-
+    Java has <b>no</b> such form; virtual threads keep blocking code as it is.
+    JavaScript uses nearly the same word and the same machine.
+misconceptions:
+  # 출처 — `csharp.md` §9 ⑨·⑩ · §4 ㉜.
+  - ko: "붙이면 빨라지거나 다른 스레드에서 돈다 — 기다리는 동안 스레드를 놓아 주는 것뿐입니다."
+    en: "It makes things faster or moves to another thread — it only hands the thread back while waiting."
+  - ko: "급하면 <code>.Result</code>로 꺼내면 된다 — UI 나 구형 요청 스레드에서는 교착합니다."
+    en: "Reaching in with <code>.Result</code> is fine when in a hurry — on a UI or legacy request thread it deadlocks."
+  - ko: "겹을 안 벗겨도 값이 나온다 — 값이 아니라 「아직 오지 않은 것」이 나옵니다."
+    en: "The value comes out without unwrapping — what comes out is “not here yet”."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>기다리는 동안 스레드를 놓는 자리</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>where the thread is handed back while waiting</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 기다릴 <b>대상</b>입니다. 대상만 적으면 겹이 그대로 남아요."
+          en: "{{pick.2|code}} is <b>what is waited on</b>. Written alone it leaves the layer on."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 대상이냐 기다리기냐", en: "The sharpest spot — the target or the waiting" }
+          code:
+            - "Task<int> t = F();     // 겹이 남는다"
+            - "int n = await F();     // 벗겨진다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 메서드 <b>이름</b>입니다. 이름은 언제 놓아 주는지를 안 정해요."
+          en: "{{pick.3|code}} is the method <b>name</b>. A name does not decide when the thread is handed back."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 표시냐", en: "The sharpest spot — the name or the mark" }
+          code:
+            - "Task<int> LoadAsync()   // 이름만 Async"
+            - "async Task<int> Load()  // 표시는 앞에"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>끝날 때까지 스레드를 놓고</b> 값을 꺼냅니다."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>hands the thread back</b> until the value is there."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "await", mono: true }
+      - t: "return"
+        mono: true
+        diag:
+          t:
+            ko: "이건 값을 <b>부른 쪽으로 보내고</b> 메서드를 끝냅니다. 기다리는 일과는 다른 일이에요."
+            en: "That <b>sends a value back</b> and ends the method. Waiting is a different job."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 기다리나 보내나", en: "The sharpest spot — waiting or sending" }
+            code:
+              - "var n = await F();   // 기다린다"
+              - "return F();          // 겹째로 보낸다"
+      - t: "yield"
+        mono: true
+        diag:
+          t:
+            ko: "이건 값을 <b>하나씩 내주는</b> 자리라 훑는 쪽이 필요합니다. 기다리는 표시가 아니에요."
+            en: "That hands values out <b>one at a time</b> and needs a walker. It is not a waiting mark."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 기다리나 내주나", en: "The sharpest spot — waiting or yielding" }
+            code:
+              - "await F();          // 한 값을 기다린다"
+              - "yield return 1;     // 값을 내준다"
+      - t: "lock"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>한 번에 하나만</b> 들어오게 막는 자리입니다. 스레드를 놓는 것이 아니라 붙잡아요."
+            en: "That keeps <b>one at a time</b> inside; it holds the thread rather than handing it back."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 놓나 붙잡나", en: "The sharpest spot — release or hold" }
+            code:
+              - "await F();        // 놓아 준다"
+              - "lock (gate) { }   // 붙잡는다"
+why_gate:
+  q:
+    ko: "이 표시는 왜 <b>반환 타입까지</b> 바꿀까요?"
+    en: "Why does this mark change the <b>return type</b> as well?"
+  choices:
+    - t:
+        ko: "부른 쪽으로 곧장 돌아가야 하는데 값은 아직 없어서, 값 대신 「나중에 온다」를 돌려주기 때문"
+        en: "Because it must return at once while the value is not there, so it hands back “later” instead"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 겹을 안 벗기면 무엇이 손에 남는지도 적어 보세요."
+        en: "That is the direction. Add what stays in your hand when the layer is left on."
+    - t:
+        ko: "다른 스레드에서 돌기 때문에"
+        en: "Because it runs on another thread"
+      ok: false
+      fb:
+        ko: "표시 앞까지는 같은 스레드입니다. 바뀌는 것은 <b>언제 돌아오나</b>예요."
+        en: "Up to the mark it is the same thread. What changes is <b>when it comes back</b>."
+    - t:
+        ko: "예외를 담아야 해서"
+        en: "Because exceptions have to be carried"
+      ok: false
+      fb:
+        ko: "예외도 그 겹에 담기는 것은 맞지만 결과입니다. 이유는 값이 아직 없다는 것이에요."
+        en: "Exceptions do ride in that layer, but that is a consequence. The reason is that the value is not there yet."
+queries:
+  - { grammars: [c_sharp], file: ./async-await.scm }
+examples:
+  - code: "class A { async Task<int> F() { return 1; } }"
+    expect: { sites: 1, form: async, picks: { 1: "async", 2: "Task<int>", 3: "F" } }
+  - code: "class A { void F() { await G(); } }"
+    expect: { sites: 1, form: await, hole: "await", picks: { 1: "await", 2: "G()" } }
+  - code: "class A { void F() { G(); } }"
+    expect: none

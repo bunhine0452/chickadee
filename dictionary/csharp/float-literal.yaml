@@ -1,0 +1,221 @@
+schema: 1
+id: csharp/float-literal
+# 0부 축 2. 보편형은 `common/float-literal` — 근사값이 되는 기계는 IEEE-754 하나라
+# 파이썬·자바·JS 가 같은 값을 낸다. C# 에서 다시 배울 것은 **10진 실수형이 언어에 있다**는
+# 것이다(고·스위프트에는 없다).
+universal: common/float-literal
+name: { ko: 실수 값이 셋, en: Three kinds of fraction }
+token: "0.1m"
+grammars: [c_sharp]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cs/floating-point, cs/binary-representation]
+confusions: []
+dict:
+  one_liner:
+    ko: "소수를 담는 타입이 셋이고, 둘은 2진이라 안 떨어지고 하나는 10진이라 떨어진다."
+    en: "Three types hold fractions: two use base two and miss, one uses base ten."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 어느 기계를 쓸지 정합니다.
+      <code>float</code>과 <code>double</code>은 값을 <b>2진 분수의 합</b>으로 담는데,
+      10진수 <code>0.1</code>은 그 합으로 정확히 못 적어요 — 10진수로 <code>1/3</code>을
+      못 적는 것과 같은 일입니다. 실측 <code>0.1 + 0.2 == 0.3</code>은 <b>False</b>입니다.
+      <code>decimal</code>은 <b>10진</b> 128비트라 같은 식이 <b>True</b>가 됩니다.
+      접미사 <code>m</code> 한 글자가 답을 뒤집고, 그래서 돈은 이쪽에 담습니다.
+    en: >-
+      On line {{site.line}}, {{pick.1|code}} picks which machine runs. <code>float</code> and
+      <code>double</code> store a value as a <b>sum of binary fractions</b>, and base ten
+      <code>0.1</code> has no exact form there — the same way base ten cannot write
+      <code>1/3</code>. Measured, <code>0.1 + 0.2 == 0.3</code> is <b>False</b>.
+      <code>decimal</code> is <b>base ten</b> in 128 bits, so the same test is <b>True</b>.
+      One suffix letter <code>m</code> flips the answer, which is why money goes there.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.2|code}}{{pick.2|josa:을,를}} 소수 담는 이름으로 세운다."
+      en: "Line {{site.line}} sets {{pick.2|code}} up as a name that holds a fraction."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 2진으로 담을지 10진으로 담을지 정한다."
+      en: "{{pick.1|code}} decides whether it is stored in base two or base ten."
+    - ko: "2진 쪽이면 담기는 순간 이미 가장 가까운 값으로 바뀐다."
+      en: "On the base-two side the value becomes the nearest representable one as it lands."
+rule:
+  ko: "<b>2진 실수는 근사값이다.</b> 같음 기호로 견주지 말고, 돈은 10진 쪽에 담는다."
+  en: "<b>Binary fractions are approximations.</b> Do not test them with equality; money goes in base ten."
+result:
+  label: { ko: "{{site.line}}행의 소수 이름", en: "the fraction name on line {{site.line}}" }
+  value: "{{pick.1}} {{pick.2}}"
+  note: { ko: "어느 기계로 담을지가 여기서 정해진다", en: "which machine stores it is decided here" }
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 이제 정해진 기계로 소수를 담는 이름입니다."
+  en: "{{pick.2|code}} now holds fractions on the machine that was chosen."
+payoff:
+  ko: "이걸 알면 「합계가 0.30000000000000004 로 찍힌다」가 풀립니다 — 셈이 새는 게 아닙니다."
+  en: "This untangles “the total prints as 0.30000000000000004” — nothing leaked."
+bridge:
+  ko: >-
+    고와 스위프트에는 10진 실수형이 <b>언어에 없습니다</b>. 돈은 라이브러리로 가요.
+    C# 은 그것을 타입 하나로 들고 있습니다.
+  en: >-
+    Go and Swift have <b>no</b> base-ten fraction type in the language; money goes to a
+    library. C# carries it as one type.
+misconceptions:
+  # 출처 — `csharp.md` §0.1 0-2 · §0.4 실측(.NET SDK 10.0.302, 2026-09-05).
+  - ko: "돈을 2진 실수에 담아도 된다 — 실측 <code>0.1 + 0.2 == 0.3</code>은 False 이고, 접미사 <code>m</code>을 붙이면 True 입니다."
+    en: "Money is fine in a binary fraction — measured, <code>0.1 + 0.2 == 0.3</code> is False, and True with the <code>m</code> suffix."
+  - ko: "자릿수를 늘리면 정확해진다 — 넓은 쪽도 근사값입니다. 자릿수만 늡니다."
+    en: "More digits fixes it — the wider type is still an approximation, only with more digits."
+  - ko: "0 으로 나누면 예외가 난다 — 2진 실수는 <code>∞</code>와 <code>NaN</code>을 냅니다. 예외는 10진 쪽에서만 납니다."
+    en: "Dividing by zero throws — binary fractions give <code>∞</code> and <code>NaN</code>. Only the base-ten type throws."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>어느 기계로 소수를 담을지 정하는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that picks which machine stores the fraction</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 이름은 자릿수도 기계도 안 바꿔요."
+          en: "{{pick.2|code}} is the <b>name</b>. A name changes neither the digits nor the machine."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 타입이냐", en: "The sharpest spot — the name or the type" }
+          code:
+            - "double price = 0.1;    // 2진, 근사값"
+            - "decimal price = 0.1m;  // 10진, 정확"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 처음 들어가는 <b>값</b>입니다. 값이 같아도 담는 기계가 다르면 견주기 결과가 갈려요."
+          en: "{{pick.3|code}} is the starting <b>value</b>. The same digits on a different machine give a different comparison."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값이냐 기계냐", en: "The sharpest spot — the value or the machine" }
+          code:
+            - "0.1 + 0.2 == 0.3      // False"
+            - "0.1m + 0.2m == 0.3m   // True"
+meaning:
+  - q:
+      ko: "{{site.line}}행의 타입이 <code>double</code>이라면, 담긴 값은 사람이 적은 값과 어떤 관계일까요?"
+      en: "If the type on line {{site.line}} is <code>double</code>, how does the stored value relate to what was written?"
+    hint:
+      ko: "2진 분수의 합으로 적을 수 있는 값만 정확합니다."
+      en: "Only values expressible as a sum of binary fractions land exactly."
+    options:
+      - t:
+          ko: "적은 값에 가장 가까운 값이 대신 들어간다 — 값에 따라 정확할 수도 있다"
+          en: "The nearest representable value goes in — for some values that is exact"
+      - t:
+          ko: "언제나 적은 값 그대로 들어간다"
+          en: "Whatever was written always goes in unchanged"
+        diag:
+          t:
+            ko: "<code>0.5</code>나 <code>1.5</code>라면 맞습니다 — 그 둘은 2진 분수로 떨어져요. <code>0.1</code>은 안 떨어집니다."
+            en: "For <code>0.5</code> or <code>1.5</code> that holds — those land in base two. <code>0.1</code> does not."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 떨어지나 안 떨어지나", en: "The sharpest spot — lands or not" }
+            code:
+              - "0.5 + 0.25 == 0.75    // True"
+              - "0.1 + 0.2 == 0.3      // False"
+      - t:
+          ko: "화면에 찍을 때만 어긋나고 담긴 값은 정확하다"
+          en: "It drifts only when printed; what is stored is exact"
+        diag:
+          t:
+            ko: "찍기는 담긴 값을 그대로 보여 준 것입니다. 견주어 봐도 안 같으니 담긴 값 자체가 다릅니다."
+            en: "Printing showed exactly what was stored. A comparison says the same, so the stored value itself differs."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 찍기냐 담기냐", en: "The sharpest spot — printing or storing" }
+            code:
+              - "Console.WriteLine(0.1 + 0.2);  // 0.30000000000000004"
+              - "(0.1 + 0.2) == 0.3;            // False"
+      - t:
+          ko: "C# 의 셈이 반올림을 한 자리 잘못한 것이다"
+          en: "C#'s arithmetic rounds one digit off"
+        diag:
+          t:
+            ko: "셈은 규격대로입니다. 어긋난 것은 셈이 아니라 <b>담기</b>예요 — 어느 언어든 같은 기계에서 같은 값이 나옵니다."
+            en: "The arithmetic follows the standard. What shifted is <b>storage</b> — every language on this machine prints the same."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 셈이냐 담기냐", en: "The sharpest spot — arithmetic or storage" }
+            code:
+              - "// C#, 파이썬, 자바 모두"
+              - "0.1 + 0.2 -> 0.30000000000000004"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 <b>소수를 담는</b> 이름을 세웁니다."
+      en: "Choose what goes in the blank. Line {{site.line}} sets up a name that <b>holds a fraction</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "decimal", mono: true }
+      - t: "int"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>정수</b> 타입이라 소수를 못 담습니다. <code>0.5</code>를 넣으려 하면 컴파일이 막아요."
+            en: "That is the <b>whole number</b> type and holds no fraction. Putting <code>0.5</code> in it stops at compile time."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 소수를 담나", en: "The sharpest spot — does it hold a fraction" }
+            code:
+              - "decimal d = 0.5m;   // 된다"
+              - "int n = 0.5;        // CS0266"
+      - t: "string"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>글자 묶음</b>이라 셈이 안 됩니다. 더하기 기호를 쓰면 이어붙이기가 돼요."
+            en: "That is a <b>run of characters</b> and does no arithmetic. The plus sign joins instead."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 수냐 글자냐", en: "The sharpest spot — a number or text" }
+            code:
+              - "decimal d = 1 + 2;     // 3"
+              - "string s = \"1\" + \"2\";  // 12"
+      - t: "bool"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>참·거짓</b> 타입이라 수를 못 담습니다. C# 에서 둘은 서로 오가지 않아요."
+            en: "That is the <b>true/false</b> type and holds no number. In C# the two never convert."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 수냐 참·거짓이냐", en: "The sharpest spot — a number or a truth value" }
+            code:
+              - "decimal d = 1.5m;"
+              - "bool b = true;"
+why_gate:
+  q:
+    ko: "이 언어는 왜 소수 타입을 <b>셋이나</b> 두었을까요?"
+    en: "Why does this language carry <b>three</b> fraction types?"
+  choices:
+    - t:
+        ko: "빠르지만 안 떨어지는 2진 기계와, 느리지만 10진으로 떨어지는 기계 중 고르게 하려고"
+        en: "So you can choose between a fast base-two machine that misses and a slower base-ten one that lands"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 어느 자리에 어느 쪽이 맞는지도 한 줄로 적어 보세요."
+        en: "That is the direction. Add a line on which side fits which job."
+    - t:
+        ko: "옛 판과의 호환 때문에 남아 있는 것이라 새 코드에서는 하나만 쓴다"
+        en: "They are leftovers kept for compatibility, so new code uses only one"
+      ok: false
+      fb:
+        ko: "셋 다 지금도 쓰입니다. 돈은 10진, 좌표·통계는 2진 쪽이 맞습니다."
+        en: "All three are in use today. Money goes base ten; coordinates and statistics go base two."
+    - t:
+        ko: "자릿수만 다르고 하는 일은 같아서"
+        en: "They differ only in digits and otherwise do the same thing"
+      ok: false
+      fb:
+        ko: "같지 않습니다. 같은 식이 한쪽에서 False, 다른 쪽에서 True 가 됩니다."
+        en: "They are not the same. The same test is False on one side and True on the other."
+queries:
+  - { grammars: [c_sharp], file: ./float-literal.scm }
+examples:
+  - code: "double total = 0.1 + 0.2;                       // total -> 0.30000000000000004 (double)"
+    expect: { sites: 1, form: floatdecl, hole: "double", picks: { 1: "double", 2: "total", 3: "0.1 + 0.2" } }
+  - code: "class A { public decimal Price { get; set; } }  // Price -> 0 (decimal, 10진)"
+    expect: { sites: 1, form: floatprop, picks: { 1: "decimal", 2: "Price" } }
+  - code: "class A { private float _rate; }                // _rate -> 0 (float, 2진 32)"
+    expect: { sites: 1, form: floatfield, picks: { 1: "float", 2: "_rate" } }
+  - code: "int n = 3;                                      // n -> 3 (int)"
+    expect: none

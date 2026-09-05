@@ -1,0 +1,125 @@
+schema: 1
+id: csharp/member-access
+universal: common/member-access
+name: { ko: 안의 이름 꺼내기, en: Member access }
+token: "."
+grammars: [c_sharp]
+framework: null
+essential: true
+difficulty: 1
+prereq: [csharp/assignment]
+confusions: []
+dict:
+  one_liner:
+    ko: "왼쪽이 가리키는 것 안에서 오른쪽 이름 하나를 꺼낸다."
+    en: "It reaches into whatever the left side points at and takes one name from inside."
+  why:
+    ko: >-
+      {{site.line}}행의 점 하나가 <b>필드·프로퍼티·메서드</b>를 다 가리킵니다. 그래서 읽기만
+      해서는 그 자리에 <b>코드가 도는지 안 도는지</b> 모릅니다 — {{pick.3|code}}{{pick.3|josa:이,가}}
+      필드면 값을 그냥 꺼내는 것이고, 프로퍼티면 <b>메서드 하나가 도는</b> 것이에요.
+      C# 에서 이 차이가 특히 큰 이유는 자동 프로퍼티가 흔해서 <code>x.Name</code>이
+      대부분 프로퍼티이기 때문입니다.
+    en: >-
+      One dot on line {{site.line}} reaches at <b>fields, properties and methods</b> alike.
+      Reading alone will not tell you whether <b>code runs</b> there: if {{pick.3|code}} is a
+      field the value is simply taken, and if it is a property <b>a method runs</b>. The gap
+      matters in C# because auto-properties are common, so <code>x.Name</code> is usually a
+      property.
+  trace:
+    - ko: "{{site.line}}행에서 {{pick.2|code}}{{pick.2|josa:이,가}} 먼저 값이 된다."
+      en: "On line {{site.line}}, {{pick.2|code}} becomes a value first."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 그 안으로 들어간다."
+      en: "{{pick.1|code}} reaches inside it."
+    - ko: "{{pick.3|code}} 하나가 꺼내진다 — 그 자리에서 코드가 돌 수도 있다."
+      en: "One {{pick.3|code}} comes out — and code may have run to produce it."
+rule:
+  ko: "<b>점 뒤가 무엇인지는 점만 봐서는 모른다.</b> 필드일 수도 도는 프로퍼티일 수도 있다."
+  en: "<b>The dot does not say what follows.</b> It may be a field or a property that runs."
+ok:
+  ko: "{{pick.2|code}} 안의 {{pick.3|code}} 하나가 나왔습니다."
+  en: "One {{pick.3|code}} came out of {{pick.2|code}}."
+payoff:
+  ko: "이걸 알면 「이 줄이 왜 느리지」가 풀립니다 — 점 뒤에서 코드가 돌고 있을 수 있습니다."
+  en: "This untangles “why is this line slow” — code may be running behind the dot."
+bridge:
+  ko: >-
+    파이썬도 <code>@property</code>로 같은 일을 합니다. 다른 것은 <b>빈도</b>예요 —
+    C# 은 자동 프로퍼티가 관용이라 점 뒤가 대개 프로퍼티입니다.
+  en: >-
+    Python does the same with <code>@property</code>. What differs is <b>how often</b>:
+    auto-properties are idiomatic in C#, so most dots land on one.
+misconceptions:
+  # 출처 — `csharp.md` §3 ⑫·⑮.
+  - ko: "점 뒤는 값을 꺼내는 것이라 공짜다 — 프로퍼티면 그 자리에서 메서드가 돕니다."
+    en: "A dot is free because it just takes a value — on a property a method runs there."
+  - ko: "점 뒤 이름은 그 타입에 적힌 것뿐이다 — 확장 메서드는 다른 파일에 정의돼 있어도 점 뒤에 나옵니다."
+    en: "Only names written in that type appear after a dot — extension methods appear too, defined elsewhere."
+  - ko: "왼쪽이 없음이어도 점을 쓸 수 있다 — <code>NullReferenceException</code>이 납니다."
+    en: "A dot works even on absence — it raises <code>NullReferenceException</code>."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>안에서 꺼내지는 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name taken from inside</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.3
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>들어가는 기호</b>입니다. 꺼내지는 것은 그 뒤의 이름이에요."
+          en: "{{pick.1|code}} is the <b>reaching-in symbol</b>. What comes out is the name after it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 들어가기냐 꺼내는 것이냐", en: "The sharpest spot — reaching in or what comes out" }
+          code:
+            - "order.Total     // Total 이 나온다"
+            - "order           // 상자 자체"
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>들어갈 상자</b>입니다. 상자 자체는 꺼내지는 것이 아니에요."
+          en: "{{pick.2|code}} is the <b>box being reached into</b>, not what comes out of it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 상자냐 안의 이름이냐", en: "The sharpest spot — the box or the name inside" }
+          code:
+            - "order;          // 상자"
+            - "order.Total;    // 안의 값"
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 개념의 구멍은 점 **한 글자**인데 빈칸형은 두 글자 이상을 요구한다
+  (`packages/cards/src/t0-blank.ts` 의 `MIN_HOLE`). 한 글자 구멍은 지목형으로 보낸다는 것이
+  그 파일의 규칙이고, 위 지목형이 정확히 그 자리를 묻는다.
+why_gate:
+  q:
+    ko: "이 언어는 왜 필드와 프로퍼티를 <b>같은 점</b>으로 꺼내게 했을까요?"
+    en: "Why does this language reach at fields and properties through <b>the same dot</b>?"
+  choices:
+    - t:
+        ko: "쓰는 쪽 코드를 안 고치고도 필드를 프로퍼티로 바꿀 수 있게 하려고"
+        en: "So a field can become a property without touching the code that uses it"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 대가로 읽는 사람이 무엇을 못 보게 되는지도 적어 보세요."
+        en: "That is the direction. Add what the reader loses in exchange."
+    - t:
+        ko: "점이 메서드 호출보다 빨라서"
+        en: "Because a dot is faster than a method call"
+      ok: false
+      fb:
+        ko: "프로퍼티는 실제로 메서드입니다. 빠른 것은 점이 아니라 인라인 최적화예요."
+        en: "A property is a method. What is fast is inlining, not the dot."
+    - t:
+        ko: "괄호를 덜 쓰게 하려고"
+        en: "To write fewer brackets"
+      ok: false
+      fb:
+        ko: "글자 수 문제가 아닙니다. 바꾸는 쪽의 자유를 사려고 읽는 쪽의 정보를 내준 거래예요."
+        en: "It is not about characters. It trades the reader's information for the author's freedom to change."
+queries:
+  - { grammars: [c_sharp], file: ./member-access.scm }
+examples:
+  - code: "class A { void F() { var n = order.Total; } }"
+    expect: { sites: 1, form: member, picks: { 1: ".", 2: "order", 3: "Total" } }
+  - code: "class A { void F() { var s = item.Name; } }"
+    expect: { sites: 1, form: member, picks: { 1: ".", 2: "item", 3: "Name" } }
+  - code: "int n = 1 + 2;"
+    expect: none

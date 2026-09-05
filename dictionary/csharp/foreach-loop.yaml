@@ -1,0 +1,172 @@
+schema: 1
+id: csharp/foreach-loop
+universal: common/iterate
+name: { ko: 하나씩 훑기, en: Foreach }
+token: "foreach"
+grammars: [c_sharp]
+framework: null
+essential: true
+difficulty: 2
+prereq: [csharp/list, csharp/assignment]
+confusions: []
+dict:
+  one_liner:
+    ko: "모음에서 하나씩 꺼내 이름에 넣고, 도는 동안 원본을 고치면 터진다."
+    en: "It takes one item at a time into a name; editing the source mid-walk blows up."
+  why:
+    ko: >-
+      {{site.line}}행은 몇 바퀴 도는지를 <b>안 적습니다</b> — {{pick.3|code}}{{pick.3|josa:이,가}}
+      끝날 때까지 돕니다. 그래서 자리 번호를 잘못 세는 실수가 아예 없어요. 대신 규칙이 하나
+      붙습니다: 도는 동안 {{pick.3|code}}{{pick.3|josa:을,를}} 고치면
+      <code>InvalidOperationException</code>으로 <b>터집니다</b>. 조용히 이상해지지 않고
+      그 자리에서 멈춰요 — 그 자리를 지나치지 말라는 뜻입니다.
+    en: >-
+      Line {{site.line}} <b>does not say</b> how many laps it takes; it runs until
+      {{pick.3|code}} is exhausted, which removes off-by-one mistakes entirely. One rule comes
+      with it: editing {{pick.3|code}} during the walk <b>blows up</b> with
+      <code>InvalidOperationException</code>. It does not go quietly strange — it stops right
+      there, which is the point.
+  trace:
+    - ko: "{{site.line}}행이 {{pick.3|code}}에서 값을 하나 꺼낸다."
+      en: "Line {{site.line}} takes one value out of {{pick.3|code}}."
+    - ko: "{{pick.2|code}}{{pick.2|josa:이,가}} 그 값을 가리킨다."
+      en: "{{pick.2|code}} points at that value."
+    - ko: "{{pick.5|code}}{{pick.5|josa:이,가}} 한 바퀴 돌고 다음 값으로 간다."
+      en: "{{pick.5|code}} runs one lap and moves to the next value."
+rule:
+  ko: "<b>바퀴 수를 안 적는다.</b> 그리고 도는 동안 원본을 고치면 그 자리에서 터진다."
+  en: "<b>No lap count is written.</b> And editing the source mid-walk stops it right there."
+ok:
+  ko: "{{pick.3|code}} 안의 값이 하나씩 {{pick.2|code}}{{pick.2|josa:을,를}} 거쳐 갑니다."
+  en: "The values in {{pick.3|code}} pass one at a time through {{pick.2|code}}."
+payoff:
+  ko: "이걸 알면 「도는 중에 지웠더니 예외가 난다」가 풀립니다 — 막아 둔 겁니다."
+  en: "This untangles “deleting during the walk threw” — it is guarded on purpose."
+bridge:
+  ko: >-
+    파이썬의 <code>for … in</code>과 같은 자리인데, 파이썬은 도는 중에 고쳐도 <b>안 터지고</b>
+    조용히 건너뜁니다. C# 은 멈춥니다.
+  en: >-
+    Same spot as Python's <code>for … in</code>, except Python <b>does not throw</b> on a
+    mid-walk edit and quietly skips. C# stops.
+misconceptions:
+  # 출처 — `csharp.md` §4 ㉕.
+  - ko: "도는 중에 원본을 고쳐도 된다 — <code>InvalidOperationException</code>으로 터집니다."
+    en: "Editing the source mid-walk is fine — it throws <code>InvalidOperationException</code>."
+  - ko: "꺼낸 이름에 값을 넣으면 원본이 바뀐다 — 그 이름은 못 바꾸게 막혀 있습니다."
+    en: "Assigning to the taken name edits the source — that name cannot be assigned at all."
+  - ko: "몇 바퀴 도는지 미리 안다 — 지연 실행 모음이면 도는 동안 정해집니다."
+    en: "The lap count is known in advance — with a deferred sequence it is decided as it goes."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>값을 꺼내 오는 쪽</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>where the values come from</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.3
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} <b>훑으라는 낱말</b>입니다. 어디서 꺼낼지는 그 뒤 괄호 안이에요."
+          en: "{{pick.1|code}} is the <b>word that says walk</b>. Where the values come from is in the brackets."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 낱말이냐 모음이냐", en: "The sharpest spot — the word or the source" }
+          code:
+            - "foreach (var x in xs)"
+            - "//                 ^여기서 꺼낸다"
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 꺼낸 값을 <b>받는 이름</b>입니다. 값이 나오는 곳은 그 뒤예요."
+          en: "{{pick.2|code}} is the <b>name receiving</b> each value. The source comes after it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 받는 이름이냐 모음이냐", en: "The sharpest spot — the receiving name or the source" }
+          code:
+            - "foreach (var x in xs)"
+            - "//           ^받는 이름"
+      pick.5:
+        t:
+          ko: "{{pick.5|code}}{{pick.5|josa:은,는}} 되풀이되는 <b>몸통</b>입니다. 값이 오는 곳은 괄호 안이에요."
+          en: "{{pick.5|code}} is the repeating <b>body</b>. Where values come from is inside the brackets."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 몸통이냐 모음이냐", en: "The sharpest spot — the body or the source" }
+          code:
+            - "{ Use(x); }        // 몸통"
+            - "xs                 // 모음"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 모음에서 <b>하나씩 꺼내</b> 돕니다."
+      en: "Choose what goes in the blank. Line {{site.line}} walks a source <b>one item at a time</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "foreach", mono: true }
+      - t: "for"
+        mono: true
+        diag:
+          t:
+            ko: "이건 괄호 안에 <b>칸이 셋</b>이라 자리 번호를 직접 셉니다. 「하나씩 무엇에서」 모양이 아니에요."
+            en: "That wants <b>three slots</b> and counts positions itself. It is not the “one at a time from what” shape."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 번호냐 값이냐", en: "The sharpest spot — indices or values" }
+            code:
+              - "for (int i = 0; i < xs.Count; i++)"
+              - "foreach (var x in xs)"
+      - t: "while"
+        mono: true
+        diag:
+          t:
+            ko: "이건 괄호 안에 <b>참·거짓</b>이 와야 합니다. 모음을 그냥 넣으면 컴파일이 막아요."
+            en: "That wants a <b>truth value</b> in the brackets; a bare collection stops at compile time."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 조건이냐 모음이냐", en: "The sharpest spot — a test or a source" }
+            code:
+              - "while (i < n)"
+              - "foreach (var x in xs)"
+      - t: "switch"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>갈래를 고르는</b> 자리라 되풀이하지 않습니다."
+            en: "That <b>picks a branch</b> and does not repeat."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 되풀이냐 고르기냐", en: "The sharpest spot — repeating or choosing" }
+            code:
+              - "foreach (var x in xs) { }"
+              - "switch (n) { case 1: ... }"
+why_gate:
+  q:
+    ko: "번호를 직접 세는 모양도 있는데 왜 <b>하나씩 꺼내는</b> 모양을 쓸까요?"
+    en: "Counting indices works too — why use the <b>one at a time</b> shape?"
+  choices:
+    - t:
+        ko: "번호를 안 다루니 처음과 끝을 잘못 세는 실수가 아예 없고, 번호가 없는 모음에도 쓸 수 있어서"
+        en: "Because no indices means no off-by-one, and it also works on sources that have no indices"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 번호가 필요한 자리에는 무엇을 쓸지도 적어 보세요."
+        en: "That is the direction. Add what to use where an index is actually needed."
+    - t:
+        ko: "더 빨라서"
+        en: "Because it is faster"
+      ok: false
+      fb:
+        ko: "목록에서는 비슷하고 지연 실행 모음에서는 오히려 느릴 수 있습니다."
+        en: "On a list it is similar, and on a deferred sequence it can be slower."
+    - t:
+        ko: "원본을 고칠 수 있어서"
+        en: "Because it lets you edit the source"
+      ok: false
+      fb:
+        ko: "반대입니다. 고치면 그 자리에서 터집니다."
+        en: "The opposite — editing it throws right there."
+queries:
+  - { grammars: [c_sharp], file: ./foreach-loop.scm }
+examples:
+  - code: "class A { void F(List<int> xs) { foreach (var x in xs) { } } }"
+    expect: { sites: 1, form: foreach, hole: "foreach", picks: { 1: "foreach", 2: "x", 3: "xs", 4: "var", 5: "{ }" } }
+  - code: "class A { void F(List<int> xs) { foreach (int x in xs) Use(x); } }"
+    expect: { sites: 1, form: foreach, picks: { 1: "foreach", 2: "x", 3: "xs", 4: "int", 5: "Use(x);" } }
+  - code: "class A { void F() { while (true) { } } }"
+    expect: none

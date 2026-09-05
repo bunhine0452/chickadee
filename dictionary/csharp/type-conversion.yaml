@@ -1,0 +1,222 @@
+schema: 1
+id: csharp/type-conversion
+# 0부 축 6. 축의 보편형 `common/type-cast` 은 **아직 없다**(README §9 「아직 비어 있는 것
+# 하나」). 그것이 서면 여기에 건다. 자바도 `explicit-conversion` 을 `universal: null` 로
+# 두었으므로 두 언어가 같은 자리를 비워 두고 있다.
+universal: null
+name: { ko: 손으로 적는 좁히기, en: Explicit conversion }
+token: "(int)"
+grammars: [c_sharp]
+framework: null
+essential: true
+difficulty: 2
+prereq: [cs/type-conversion, csharp/integer-literal]
+confusions: []
+dict:
+  one_liner:
+    ko: "넓은 자리로는 저절로 가고, 좁은 자리로 갈 때만 사람이 괄호로 적어야 한다."
+    en: "Widening happens by itself; only narrowing is written by hand in brackets."
+  why:
+    ko: >-
+      값이 넓은 칸으로 가는 것은 잃을 것이 없어 컴파일러가 <b>말없이</b> 해 줍니다. 반대로
+      좁은 칸으로 가면 <b>잘릴 수 있어서</b> 사람이 {{pick.2|code}} 뒤에 타입을 적어
+      「알고 한다」고 말해야 해요. 그런데 여기가 함정입니다 — 적어 두면 컴파일러는 더 안 막고
+      값을 <b>조용히</b> 바꿉니다. 실측 <code>unchecked((int)3000000000L)</code>은
+      <b>−1294967296</b>이고, 실수에서 정수로 갈 때는 반올림이 아니라 <b>버림</b>이라
+      <code>(int)2.9</code>가 <b>2</b>, <code>(int)-2.9</code>가 <b>−2</b>입니다.
+    en: >-
+      Moving into a wider slot loses nothing, so the compiler does it <b>silently</b>. Moving
+      into a narrower one <b>can cut</b>, so a person writes the type after {{pick.2|code}} to
+      say "I know." That is the trap — once it is written the compiler stops objecting and
+      changes the value <b>quietly</b>. Measured,
+      <code>unchecked((int)3000000000L)</code> is <b>-1294967296</b>, and going from a
+      fraction to a whole number <b>truncates</b> rather than rounds: <code>(int)2.9</code>
+      is <b>2</b> and <code>(int)-2.9</code> is <b>-2</b>.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.3|code}}{{pick.3|josa:이,가}} 먼저 값이 된다."
+      en: "{{pick.3|code}} on line {{site.line}} becomes a value first."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 그 값을 담을 칸을 정한다."
+      en: "{{pick.1|code}} picks the slot that value has to fit."
+    - ko: "칸이 좁으면 남는 비트는 버려지고 아무 말도 안 나온다."
+      en: "If the slot is narrow the extra bits are dropped and nothing is said."
+rule:
+  ko: "<b>좁히기는 손으로 적고, 적으면 조용히 잘린다.</b> 터지게 하려면 <code>checked</code>가 필요하다."
+  en: "<b>Narrowing is written by hand, and once written it cuts silently.</b> Only <code>checked</code> makes it throw."
+result:
+  label: { ko: "{{site.line}}행의 값", en: "the value on line {{site.line}}" }
+  value: "{{pick.2}}{{pick.1}}) {{pick.3}}"
+  note: { ko: "좁은 칸에 맞춰 잘릴 수 있다", en: "it may be cut to fit the narrower slot" }
+ok:
+  ko: "{{pick.3|code}}{{pick.3|josa:이,가}} {{pick.1|code}} 칸에 맞춰졌습니다."
+  en: "{{pick.3|code}} has been fitted into the {{pick.1|code}} slot."
+payoff:
+  ko: "이걸 알면 「캐스트를 넣었더니 오류는 사라지고 값이 이상해졌다」가 풀립니다."
+  en: "This untangles “the cast removed the error and left a strange value.”"
+bridge:
+  ko: >-
+    러스트는 같은 자리에서 <code>as</code>를 쓰고 역시 조용히 자릅니다. 스위프트는
+    <b>아예 못 하게</b> 막고 생성자를 쓰게 해요.
+  en: >-
+    Rust writes <code>as</code> here and also cuts silently. Swift <b>forbids</b> it and makes
+    you go through an initialiser.
+misconceptions:
+  # 출처 — `csharp.md` §0.1 0-6 · §0.4 실측(.NET SDK 10.0.302, 2026-09-05).
+  - ko: "캐스트를 적으면 안전해진다 — 컴파일러가 더 안 막을 뿐입니다. 실측 <code>(int)3000000000L</code>은 −1294967296 이에요."
+    en: "Writing the cast makes it safe — it only silences the compiler. Measured, <code>(int)3000000000L</code> is -1294967296."
+  - ko: "실수를 정수로 바꾸면 반올림된다 — <b>버립니다</b>. <code>(int)2.9</code>는 2 입니다."
+    en: "A fraction rounds when it becomes a whole number — it <b>truncates</b>. <code>(int)2.9</code> is 2."
+  - ko: "넘치면 예외가 난다 — 기본은 조용합니다. <code>checked</code>를 적었을 때만 <code>OverflowException</code>입니다."
+    en: "Overflow throws — by default it is silent. Only under <code>checked</code> is there an <code>OverflowException</code>."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>값이 맞춰질 칸을 정하는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that picks the slot the value must fit</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>여는 괄호</b>일 뿐입니다. 칸을 정하는 것은 그 안에 적힌 이름이에요."
+          en: "{{pick.2|code}} is just the <b>opening bracket</b>. The name inside is what picks the slot."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 괄호냐 타입이냐", en: "The sharpest spot — the bracket or the type" }
+          code:
+            - "(x + 1) * 2;    // 그냥 묶기"
+            - "(int)(x + 1);   // 칸을 정한다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 맞춰질 <b>값</b>입니다. 값은 자기가 어디로 갈지 모르고, 정하는 것은 괄호 안이에요."
+          en: "{{pick.3|code}} is the <b>value</b> being fitted. A value does not choose its slot; the bracket does."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값이냐 칸이냐", en: "The sharpest spot — the value or the slot" }
+          code:
+            - "(int)2.9;      // 2"
+            - "(long)2.9;     // 2, 칸만 넓다"
+meaning:
+  - q:
+      ko: "{{site.line}}행처럼 좁은 칸으로 캐스트했는데 값이 안 들어가면 어떻게 될까요?"
+      en: "What happens when a value cast into a narrower slot does not fit?"
+    hint:
+      ko: "C# 의 기본값이 무엇인지 떠올려 보세요."
+      en: "Recall what C#'s default is."
+    options:
+      - t:
+          ko: "남는 비트가 버려지고 아무 말도 안 나온다"
+          en: "The extra bits are dropped and nothing is said"
+      - t:
+          ko: "<code>OverflowException</code>이 난다"
+          en: "An <code>OverflowException</code> is raised"
+        diag:
+          t:
+            ko: "<code>checked</code>를 적었거나 프로젝트 스위치를 켰다면 맞습니다. 기본값에서는 조용해요."
+            en: "That holds under <code>checked</code> or with the project switch on. By default it is silent."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 적었나 안 적었나", en: "The sharpest spot — written or not" }
+            code:
+              - "(int)3000000000L            // -1294967296"
+              - "checked((int)3000000000L)   // OverflowException"
+      - t:
+          ko: "담을 수 있는 가장 큰 값으로 멈춘다"
+          en: "It stops at the largest value that fits"
+        diag:
+          t:
+            ko: "그렇게 동작하는 시스템도 있지만 C# 은 아닙니다. 비트를 잘라 내므로 <b>부호까지 뒤집힐</b> 수 있어요."
+            en: "Some systems saturate; C# does not. It cuts bits, so <b>even the sign</b> can flip."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 멈추나 자르나", en: "The sharpest spot — saturate or cut" }
+            code:
+              - "(int)3000000000L    // -1294967296"
+              - "// 멈췄다면 2147483647"
+      - t:
+          ko: "컴파일이 막힌다"
+          en: "It stops at compile time"
+        diag:
+          t:
+            ko: "캐스트를 <b>안 적었을 때</b> 막힙니다. 적는 순간 「알고 한다」가 되어 통과해요."
+            en: "It stops when the cast is <b>not</b> written. Writing it declares intent and it passes."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 적었나 안 적었나", en: "The sharpest spot — written or not" }
+            code:
+              - "int n = someLong;        // CS0266"
+              - "int n = (int)someLong;   // 통과"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 값을 <b>32칸 정수</b>에 맞춥니다."
+      en: "Choose what goes in the blank. Line {{site.line}} fits the value into a <b>32-slot whole number</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "int", mono: true }
+      - t: "long"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>64칸</b>이라 좁히기가 아니라 넓히기입니다. 넓히기는 괄호로 적지 않아도 저절로 돼요."
+            en: "That is <b>64 slots</b>, so it widens rather than narrows — and widening needs no brackets at all."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 넓히나 좁히나", en: "The sharpest spot — widen or narrow" }
+            code:
+              - "long big = 3;        // 저절로"
+              - "int n = (int)big;    // 손으로"
+      - t: "double"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>실수</b> 칸이라 소수가 남습니다. 소수를 버리려면 정수 칸을 적어야 해요."
+            en: "That is a <b>fraction</b> slot and keeps the decimals. Dropping them needs a whole-number slot."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 남기나 버리나", en: "The sharpest spot — keep or drop" }
+            code:
+              - "(double)2.9;   // 2.9"
+              - "(int)2.9;      // 2"
+      - t: "string"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>글자 묶음</b>이라 수를 이 방식으로 못 바꿉니다. 글자로 만들려면 <code>ToString()</code>이에요."
+            en: "That is a <b>run of characters</b> and a number cannot become one this way. Use <code>ToString()</code>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 캐스트냐 변환이냐", en: "The sharpest spot — cast or convert" }
+            code:
+              - "(int)2.9;          // 캐스트"
+              - "2.9.ToString();    // 변환"
+why_gate:
+  q:
+    ko: "넓히기는 저절로 되는데 왜 좁히기만 <b>손으로 적게</b> 했을까요?"
+    en: "Widening is automatic — why must narrowing be <b>written by hand</b>?"
+  choices:
+    - t:
+        ko: "좁히기는 값을 잃을 수 있어서, 잃어도 좋다는 사람의 결정이 코드에 남아야 하기 때문"
+        en: "Because narrowing can lose value, and the decision to accept that has to stay in the code"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 결정이 적힌 뒤에는 컴파일러가 무엇을 더 안 하는지도 적어 보세요."
+        en: "That is the direction. Add what the compiler stops doing once that decision is written."
+    - t:
+        ko: "좁히기가 느려서 눈에 띄게 하려고"
+        en: "Because narrowing is slow and should be visible"
+      ok: false
+      fb:
+        ko: "속도 문제가 아닙니다. 비트를 자르는 것은 오히려 싼 일이에요."
+        en: "Speed is not it — cutting bits is cheap."
+    - t:
+        ko: "옛 C 문법을 그대로 가져와서"
+        en: "Because the old C syntax was carried over"
+      ok: false
+      fb:
+        ko: "모양은 닮았지만 이유는 다릅니다. C 는 안 적어도 통과하고 C# 은 막습니다."
+        en: "The shape is similar but the reason is not: C compiles without it, C# does not."
+queries:
+  - { grammars: [c_sharp], file: ./type-conversion.scm }
+examples:
+  - code: "int n = (int)2.9;         // n -> 2 (int) — 반올림이 아니라 버림"
+    expect: { sites: 1, form: narrow, hole: "int", picks: { 1: "int", 2: "(", 3: "2.9" } }
+  - code: "byte b = (byte)300;       // b -> 44 (byte, 8칸)"
+    expect: { sites: 1, form: narrow, hole: "byte", picks: { 1: "byte", 2: "(", 3: "300" } }
+  - code: "int m = (int)-2.9;        // m -> -2 (int)"
+    expect: { sites: 1, form: narrow, picks: { 1: "int", 3: "-2.9" } }
+  - code: "object o = (Order)item;   // 참조 다운캐스트는 이 판이 아니다"
+    expect: none

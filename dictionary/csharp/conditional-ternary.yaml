@@ -1,0 +1,125 @@
+schema: 1
+id: csharp/conditional-ternary
+universal: common/conditional-expression
+name: { ko: 조건으로 값 고르기, en: Ternary }
+token: "?:"
+grammars: [c_sharp]
+framework: null
+essential: true
+difficulty: 2
+prereq: [csharp/if-statement, csharp/assignment]
+confusions: []
+dict:
+  one_liner:
+    ko: "갈림이 문이 아니라 값이라, 이 자리 전체가 값 하나가 된다."
+    en: "The branch is an expression, not a statement, so the whole becomes one value."
+  why:
+    ko: >-
+      {{site.line}}행은 흐름을 나누는 것이 아니라 <b>값 하나를 고릅니다</b>. 그래서 대입의
+      오른쪽이나 인자 자리처럼 <b>값이 와야 하는 곳</b>에 그대로 놓입니다. 대신 조건이 붙어요 —
+      {{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}} 두 쪽의 <b>타입이 맞아야</b>
+      컴파일됩니다. 한쪽만 <code>null</code>이면 어느 타입인지 못 정해 거기서 막혀요.
+      값을 고르는 것과 흐름을 나누는 것은 다른 일이고, 이 자리가 앞의 것입니다.
+    en: >-
+      Line {{site.line}} does not split the flow; it <b>picks one value</b>. That is why it sits
+      where a value is expected — the right of an assignment, an argument slot. In exchange it
+      carries a condition: the <b>types</b> of {{pick.2|code}} and {{pick.3|code}} have to
+      agree. With <code>null</code> on only one side the type cannot be settled and it stops
+      there. Picking a value and splitting the flow are different jobs, and this is the former.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 먼저 참·거짓이 된다."
+      en: "{{pick.1|code}} on line {{site.line}} becomes a truth value first."
+    - ko: "참이면 {{pick.2|code}}, 거짓이면 {{pick.3|code}} 쪽 값이 나온다."
+      en: "If it holds the value is {{pick.2|code}}; otherwise {{pick.3|code}}."
+    - ko: "안 고른 쪽은 계산조차 안 한다."
+      en: "The side not picked is never evaluated."
+rule:
+  ko: "<b>이 자리 전체가 값 하나다.</b> 양쪽 갈래의 타입이 맞아야 컴파일된다."
+  en: "<b>The whole thing is one value.</b> Both branches must agree on type to compile."
+ok:
+  ko: "{{pick.1|code}} 하나로 두 값 중 하나가 골라집니다."
+  en: "{{pick.1|code}} alone picks one of the two values."
+payoff:
+  ko: "이걸 알면 「한쪽에 null 을 넣었더니 컴파일이 막힌다」가 풀립니다 — 타입을 못 정합니다."
+  en: "This untangles “putting null on one side stopped the build” — the type cannot be settled."
+bridge:
+  ko: >-
+    파이썬은 순서가 다릅니다(<code>a if c else b</code>). 기계는 같고, 안 고른 쪽을
+    계산 안 하는 것도 같습니다.
+  en: >-
+    Python writes it in another order (<code>a if c else b</code>). The machine is the same,
+    including not evaluating the branch that loses.
+misconceptions:
+  # 출처 — `csharp.md` §3 ⑳.
+  - ko: "양쪽 타입이 달라도 된다 — 맞아야 합니다. 한쪽만 <code>null</code>이면 거기서 막혀요."
+    en: "The two branches may differ in type — they must agree; <code>null</code> on one side stops it."
+  - ko: "양쪽이 다 계산된다 — 고른 쪽만 계산합니다."
+    en: "Both sides are evaluated — only the chosen one is."
+  - ko: "짧게 적은 조건문이다 — 조건문은 문이고 이건 값입니다. 값이 필요한 자리에 놓을 수 있어요."
+    en: "It is a short if — an if is a statement and this is a value, usable where a value is needed."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>둘 중 하나를 고르게 하는 것</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>what makes the choice between the two</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 참일 때의 <b>값</b>입니다. 고르는 일은 앞의 조건이 해요."
+          en: "{{pick.2|code}} is the <b>value</b> when it holds. The choosing is done by the condition in front."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값이냐 고르기냐", en: "The sharpest spot — a value or the choice" }
+          code:
+            - "\"yes\";                 // 값 하나"
+            - "ok ? \"yes\" : \"no\";     // 고른다"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 거짓일 때의 <b>값</b>입니다. 이 값이 고르는 것은 아니에요."
+          en: "{{pick.3|code}} is the <b>value</b> when it does not hold. It does no choosing."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 값이냐 조건이냐", en: "The sharpest spot — a value or the condition" }
+          code:
+            - "\"no\";"
+            - "ok ? \"yes\" : \"no\";"
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이 표기를 이루는 기호가 물음표와 쌍점 **각각 한 글자**라 빈칸형이
+  요구하는 두 글자를 못 채우고(`packages/cards/src/t0-blank.ts` 의 `MIN_HOLE`), 둘을 한
+  구멍으로 묶으면 사이에 값이 끼어 있어 이어진 글자가 아니다. 지목형이 그 자리를 묻는다.
+why_gate:
+  q:
+    ko: "조건문으로도 되는데 왜 <b>값으로 고르는</b> 모양을 따로 두었을까요?"
+    en: "An if would do — why is there a form that picks a <b>value</b>?"
+  choices:
+    - t:
+        ko: "값이 와야 하는 자리에 갈림을 그대로 놓을 수 있어, 이름을 하나 안 만들어도 되기 때문"
+        en: "Because a branch can sit where a value is expected, so no extra name is needed"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 조건문으로 적었을 때 무엇이 하나 더 생기는지도 적어 보세요."
+        en: "That is the direction. Add what extra thing appears when it is written as an if."
+    - t:
+        ko: "조건문보다 빨라서"
+        en: "Because it is faster than an if"
+      ok: false
+      fb:
+        ko: "같은 코드가 나옵니다. 다른 것은 <b>어디에 놓을 수 있나</b>예요."
+        en: "The same code comes out. What differs is <b>where it can sit</b>."
+    - t:
+        ko: "조건문이 값을 못 내서 대신 쓰라고"
+        en: "Because an if cannot yield a value"
+      ok: false
+      fb:
+        ko: "사실은 맞지만 이유의 절반입니다. 그래서 <b>무엇이 편해지나</b>까지 적어야 합니다."
+        en: "True, but only half the reason. Say what that makes easier."
+queries:
+  - { grammars: [c_sharp], file: ./conditional-ternary.scm }
+examples:
+  - code: "class A { void F(bool ok) { var label = ok ? \"yes\" : \"no\"; } }"
+    expect: { sites: 1, form: ternary, picks: { 1: "ok", 2: "\"yes\"", 3: "\"no\"" } }
+  - code: "class A { void F(int a, int b) { var n = a > b ? a : b; } }"
+    expect: { sites: 1, form: ternary, picks: { 1: "a > b", 2: "a", 3: "b" } }
+  - code: "int n = 1;"
+    expect: none

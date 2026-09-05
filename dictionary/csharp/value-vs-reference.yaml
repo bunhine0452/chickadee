@@ -1,0 +1,167 @@
+schema: 1
+id: csharp/value-vs-reference
+# `csharp.md` §6 이 `common/value-vs-reference` 를 신규로 제안했는데 아직 `common/` 에 없다.
+# 없는 id 를 걸면 린트가 잡으므로 `null` 로 두고 후보로만 보고한다 — 다른 언어 근거는
+# Go 값 대 포인터 · Swift struct 대 class 다.
+universal: null
+name: { ko: 복사되는 값과 가리키는 값, en: Value vs reference }
+token: "struct"
+grammars: [c_sharp]
+framework: null
+essential: true
+difficulty: 3
+prereq: [cs/value-vs-reference, cs/stack-and-heap, csharp/class-declaration]
+confusions: []
+dict:
+  one_liner:
+    ko: "이 낱말 하나가 대입이 값 전체를 복사할지 화살표만 복사할지 정한다."
+    en: "One word decides whether assignment copies the whole value or just the arrow."
+  why:
+    ko: >-
+      C# 을 이해한다는 것은 이 한 문장입니다 — <b>값인지 자리인지를 이름이 아니라 타입 선언이
+      정한다.</b> {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 그 선언이에요.
+      실측: 같은 대입을 하고 원본을 보면 값형은 <b>1</b>, 참조형은 <b>9</b>입니다.
+      자바에는 이 선택이 <b>없습니다</b> — 원시 여덟만 값이고 나머지는 전부 자리라
+      사용자가 새 값형을 못 만들어요. 그래서 자바에서 온 손은 이 축을 처음 만납니다.
+    en: >-
+      Understanding C# comes down to one sentence: <b>whether a name holds the value or a
+      place is settled by the type declaration, not by the name.</b> {{pick.1|code}} on line
+      {{site.line}} is that declaration. Measured: after the same assignment the original
+      reads <b>1</b> for a value type and <b>9</b> for a reference type. Java has <b>no</b>
+      such choice — eight primitives are values and everything else is a place, so a user
+      cannot make a new value type. Hands coming from Java meet this axis for the first time.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 상자의 성질을 정한다."
+      en: "{{pick.1|code}} on line {{site.line}} sets what kind of box this is."
+    - ko: "{{pick.2|code}} 값을 다른 이름에 넣으면 그 성질대로 복사된다."
+      en: "Putting a {{pick.2|code}} value into another name copies it accordingly."
+    - ko: "{{pick.3|code}} 안의 필드를 고쳤을 때 원본이 따라 바뀌는지가 거기서 갈린다."
+      en: "Whether the original follows a change to a field in {{pick.3|code}} splits right there."
+rule:
+  ko: "<b>선언 낱말이 복사 규칙을 정한다.</b> 값형은 통째로, 참조형은 화살표만."
+  en: "<b>The declaring word sets the copy rule.</b> A value type copies whole; a reference copies the arrow."
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 이제 복사 규칙이 정해진 타입입니다."
+  en: "{{pick.2|code}} is now a type whose copy rule is settled."
+payoff:
+  ko: "이걸 알면 「메서드에 넘겼는데 원본이 바뀐다」가 풀립니다 — 화살표가 갔습니다."
+  en: "This untangles “I passed it in and the original changed” — the arrow travelled."
+bridge:
+  ko: >-
+    고는 값과 포인터를 <b>눈에 보이게</b> 적고, 스위프트는 같은 두 낱말을 쓰되 견주기 기호까지
+    갈라 두었습니다. 자바에는 이 선택이 아예 없습니다.
+  en: >-
+    Go writes value and pointer <b>visibly</b>; Swift uses the same two words and splits the
+    comparison operators as well. Java has no such choice at all.
+misconceptions:
+  # 출처 — `csharp.md` §9 ⑥·⑦ · §0.4 실측(struct 1 / class 9).
+  - ko: "객체를 넘기면 복사된다 — 참조형은 화살표만 갑니다. 실측 원본이 9 로 바뀝니다."
+    en: "Passing an object copies it — a reference passes only the arrow. Measured, the original reads 9."
+  - ko: "값형은 언제나 스택에 산다 — 참조형 안의 필드면 힙에 같이 삽니다."
+    en: "Value types always live on the stack — as a field of a reference type they live on the heap with it."
+  - ko: "값형을 쓰면 언제나 빠르다 — 크면 복사 비용이 커져 오히려 느립니다."
+    en: "Value types are always faster — a large one costs more to copy and can be slower."
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>복사 규칙을 정하는 낱말</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the word that sets the copy rule</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>이름</b>입니다. 이름을 <code>Value</code>로 지어도 복사 규칙은 안 바뀌어요."
+          en: "{{pick.2|code}} is the <b>name</b>. Calling it <code>Value</code> does not change the copy rule."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 선언 낱말이냐", en: "The sharpest spot — the name or the declaring word" }
+          code:
+            - "class Point { }     // 화살표만"
+            - "struct Point { }    // 통째로"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 상자 <b>안</b>입니다. 안에 무엇이 있든 복사 규칙은 앞 낱말이 정합니다."
+          en: "{{pick.3|code}} is the box's <b>inside</b>. Whatever is in it, the word in front sets the copy rule."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 안이냐 선언 낱말이냐", en: "The sharpest spot — the inside or the word" }
+          code:
+            - "struct P { int X; }   // 통째로"
+            - "class  P { int X; }   // 화살표만"
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 대입하면 <b>값 전체가 복사되는</b> 상자를 만듭니다."
+      en: "Choose what goes in the blank. Line {{site.line}} makes a box whose assignment <b>copies the whole value</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "struct", mono: true }
+      - t: "class"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>참조형</b>이라 화살표만 복사됩니다. 복사본을 고치면 원본도 같이 바뀌어요 — 실측 9 입니다."
+            en: "That is a <b>reference type</b>: only the arrow is copied, so changing the copy changes the original — measured, 9."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 통째냐 화살표냐", en: "The sharpest spot — whole or arrow" }
+            code:
+              - "struct P { public int X; }   // 원본 1"
+              - "class  P { public int X; }   // 원본 9"
+      - t: "interface"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>약속</b>이라 값을 담지 않습니다. 담을 것이 없으니 복사할 것도 없어요."
+            en: "That is a <b>promise</b> and holds no value, so there is nothing to copy."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 담나 약속하나", en: "The sharpest spot — holding or promising" }
+            code:
+              - "struct P { public int X; }"
+              - "interface IP { int X { get; } }"
+      - t: "record"
+        mono: true
+        diag:
+          t:
+            ko: "이건 기본이 <b>참조형</b>입니다. 견주기만 내용으로 바뀌고 복사는 여전히 화살표예요."
+            en: "That is a <b>reference type</b> by default: only comparison moves to content, and copying is still the arrow."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 견주기냐 복사냐", en: "The sharpest spot — comparing or copying" }
+            code:
+              - "record A(int X);         // == 는 내용"
+              - "record struct A(int X);  // 복사도 통째로"
+why_gate:
+  q:
+    ko: "이 언어는 왜 사용자가 <b>값형을 직접 만들게</b> 두었을까요?"
+    en: "Why does this language let a user <b>define a value type</b>?"
+  choices:
+    - t:
+        ko: "작고 자주 만드는 값을 화살표 없이 다뤄, 딸린 관리 비용을 안 내게 하려고"
+        en: "So small, frequently made values travel without an arrow and its bookkeeping cost"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그 대가로 커졌을 때 무엇이 비싸지는지도 적어 보세요."
+        en: "That is the direction. Add what gets expensive once such a value grows."
+    - t:
+        ko: "값형이 언제나 빨라서"
+        en: "Because value types are always faster"
+      ok: false
+      fb:
+        ko: "언제나는 아닙니다. 커지면 복사 비용이 화살표 하나보다 큽니다."
+        en: "Not always — once large, copying costs more than one arrow."
+    - t:
+        ko: "자바와 다르게 보이려고"
+        en: "To look different from Java"
+      ok: false
+      fb:
+        ko: "취향이 아니라 기계의 선택입니다. 값이 어디에 놓이나가 달라집니다."
+        en: "It is a machine choice, not taste: where the value sits changes."
+queries:
+  - { grammars: [c_sharp], file: ./value-vs-reference.scm }
+examples:
+  - code: "struct Point { public int X; }"
+    expect: { sites: 1, form: value-type, hole: "struct", picks: { 1: "struct", 2: "Point", 3: "{ public int X; }" } }
+  - code: "class Basket { public int Id; }"
+    expect: { sites: 1, form: reference-type, hole: "class", picks: { 1: "class", 2: "Basket", 3: "{ public int Id; }" } }
+  - code: "interface IX { }"
+    expect: none
