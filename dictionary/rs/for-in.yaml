@@ -1,0 +1,186 @@
+schema: 1
+id: rs/for-in
+# 1부 (`rs.md` §3 · §0.6). 보편형은 `common/iterate` — `while` 대신 이 개념이 보편형을 받는다(§2:
+# 이 리포 32 대 7). Rust 에서 다시 배울 것은 `for x in v` 가 **`v` 를 먹는다**는 것 — `&v` 나
+# `v.iter()` 를 안 쓰면 반복 뒤 `v` 가 사라져 있다. 초심자의 첫 E0382 가 대개 여기다.
+universal: common/iterate
+name: { ko: 하나씩 훑기, en: Walking a collection }
+token: "for"
+grammars: [rust]
+framework: null
+essential: true
+difficulty: 2
+prereq: [rs/vec]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "목록을 하나씩 꺼내 묶음을 돌린다. 목록 자체를 주면 반복이 끝난 뒤 그 목록은 사라진다."
+    en: "Takes items one by one; hand over the list itself and it is gone afterwards."
+  why:
+    ko: >-
+      {{site.line}}행은 {{pick.3|code}} 에서 항목을 하나씩 꺼내 {{pick.2|code}} 라 부르고 {{pick.4|code}}{{pick.4|josa:을,를}}
+      돌립니다. 다른 언어와 같아 보이는데 한 가지가 다릅니다 — {{pick.3|code}} 자리에 목록 이름을
+      <b>그대로</b> 적으면 목록이 반복에 <b>먹혀서</b> 그 뒤로는 못 씁니다(E0382). 훑기만 하려면
+      `&v` 로 빌려 주거나 `v.iter()` 를 쓰고, 항목을 고치려면 `&mut v` 예요. 세 모양의 차이가
+      「이 반복이 목록을 가져가나, 빌리나」이고, 초심자가 처음 만나는 소유권 오류가 대개 여기입니다.
+    en: >-
+      Line {{site.line}} takes items out of {{pick.3|code}} one at a time, calls each {{pick.2|code}}, and
+      runs {{pick.4|code}}. It looks like other languages, with one difference — write the list's name
+      <b>as it is</b> in the {{pick.3|code}} slot and the loop <b>consumes</b> the list, so it cannot be
+      used afterwards (E0382). To only walk it, lend it with `&v` or use `v.iter()`; to change items,
+      `&mut v`. The three shapes differ in whether the loop takes the list or borrows it, and this is
+      where beginners usually meet their first ownership error.
+  trace:
+    - ko: "{{pick.3|code}}{{pick.3|josa:이,가}} 훑을 것이 된다 — 가져가느냐 빌리느냐가 여기서 정해진다."
+      en: "{{pick.3|code}} becomes the thing walked — taken or borrowed is decided right here."
+    - ko: "항목이 하나씩 {{pick.2|code}} 에 묶이고 {{pick.4|code}}{{pick.4|josa:이,가}} 돈다."
+      en: "Each item is tied to {{pick.2|code}} in turn and {{pick.4|code}} runs."
+    - ko: "다 꺼내면 끝난다. 목록을 가져갔다면 {{site.line}}행 아래에서 그 목록은 없다."
+      en: "It ends when the items run out. If the list was taken, it no longer exists below line {{site.line}}."
+
+rule:
+  ko: "<b>목록을 그대로 주면 먹힌다.</b> 훑기만 하려면 & 로 빌려 주고, 고치려면 &mut 로 빌려 준다."
+  en: "<b>Handing over the list consumes it.</b> Lend it with & to only walk, with &mut to change items."
+result:
+  label:
+    ko: "{{site.line}}행의 되풀이"
+    en: "the loop on line {{site.line}}"
+  value: "{{pick.2}} in {{pick.3}}"
+  note:
+    ko: "가져가나 빌리나가 셋째 자리에 있다"
+    en: "taken or borrowed is in the third slot"
+ok:
+  ko: "{{pick.3|code}} 의 항목마다 {{pick.2|code}} 라는 이름으로 {{pick.4|code}}{{pick.4|josa:이,가}} 한 번씩 돕니다."
+  en: "For every item of {{pick.3|code}}, {{pick.4|code}} runs once with the item named {{pick.2|code}}."
+payoff:
+  ko: "이걸 알면 「반복 뒤에 목록을 썼는데 왜 막히나」(E0382)가 풀립니다 — 반복이 목록을 가져간 겁니다."
+  en: "This untangles “why is the list refused after the loop” (E0382) — the loop took it."
+bridge:
+  ko: "파이썬 `for x in items:` 는 items 를 그대로 둡니다. Rust 는 같은 모양이 items 를 <b>가져가고</b>, 두려면 `&` 를 적습니다."
+  en: "Python's `for x in items:` leaves items alone. The same shape in Rust <b>takes</b> items; write `&` to keep it."
+misconceptions:
+  - ko: "반복은 목록을 안 건드린다 — 이름을 그대로 주면 <b>먹습니다</b>(E0382). `&v` 여야 남아요."
+    en: "A loop leaves the list alone — given the bare name it <b>consumes</b> it (E0382). `&v` keeps it."
+  - ko: "`for i in 0..n` 의 n 은 포함된다 — 안 됩니다. 포함하려면 `0..=n` 이에요."
+    en: "In `for i in 0..n` the value n is included — it is not. Include it with `0..=n`."
+  - ko: "색인으로 도는 것이 기본이다 — 항목으로 돕니다. 색인이 필요하면 `.enumerate()` 예요."
+    en: "Looping by index is the default — it loops by item. For an index, `.enumerate()`."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>훑을 것이 적힌 자리</b>를 짚어 보세요 — 가져가나 빌리나가 거기서 갈립니다."
+      en: "On line {{site.line}}, point at <b>the slot naming what is walked</b> — taken or borrowed is decided there."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.3
+    diag:
+      pick.1:
+        t:
+          ko: "{{pick.1|code}}{{pick.1|josa:은,는}} 되풀이를 <b>여는 낱말</b>입니다. 무엇을 훑는지는 뒤에 적혀요."
+          en: "{{pick.1|code}} is the word that <b>opens</b> the loop. What gets walked is written later."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 낱말이냐 대상이냐", en: "The sharpest spot — the word or the target" }
+          code:
+            - "for item in &items { … }"
+            - "// ^낱말      ^대상"
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 항목 하나에 붙는 <b>이름</b>입니다. 바퀴마다 새로 묶여요."
+          en: "{{pick.2|code}} is the <b>name</b> given to one item. It is tied afresh each lap."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 항목이냐 목록이냐", en: "The sharpest spot — the item or the list" }
+          code:
+            - "for item in &items"
+            - "//   ^항목     ^목록"
+      pick.4:
+        t:
+          ko: "{{pick.4|code}}{{pick.4|josa:은,는}} 바퀴마다 도는 <b>몸통</b>입니다. 목록을 가져갔는지는 몸통이 아니라 셋째 자리가 정해요."
+          en: "{{pick.4|code}} is the <b>body</b> run each lap. Whether the list was taken is decided by the third slot, not the body."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 몸통이냐 대상이냐", en: "The sharpest spot — the body or the target" }
+          code:
+            - "for x in v { … }      // v 를 먹는다"
+            - "for x in &v { … }     // v 를 빌린다"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 목록의 항목을 <b>하나씩 꺼내</b> 돌립니다."
+      en: "Choose what goes in the blank. Line {{site.line}} <b>takes items one by one</b> and runs."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "for", mono: true }
+      - t: "while"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>조건</b>으로 돕니다. 항목을 꺼내 주지 않아 색인과 길이를 손으로 다뤄야 해요."
+            en: "That loops on a <b>condition</b>. It hands over no items, so index and length are yours to manage."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 항목이냐 조건이냐", en: "The sharpest spot — items or a condition" }
+            code:
+              - "for x in &v { }"
+              - "while i < v.len() { i += 1; }"
+      - t: "loop"
+        mono: true
+        diag:
+          t:
+            ko: "이건 조건도 대상도 없이 <b>끝없이</b> 돕니다. `in` 을 못 붙여요."
+            en: "That runs <b>forever</b> with no condition and no target. It takes no `in`."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 끝이 있나", en: "The sharpest spot — is there an end" }
+            code:
+              - "for x in &v { }   // 항목이 끝나면 끝"
+              - "loop { }          // break 가 있어야 끝"
+      - t: "each"
+        mono: true
+        diag:
+          t:
+            ko: "Rust 에 이 낱말은 <b>없습니다</b>. 비슷한 것은 메서드 `for_each` 예요."
+            en: "Rust <b>has no</b> such word. The closest thing is the method `for_each`."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 없는 낱말", en: "The sharpest spot — a word that is not there" }
+            code:
+              - "for x in &v { }"
+              - "v.iter().for_each(|x| { })"
+
+why_gate:
+  q:
+    ko: "{{site.line}}행은 왜 목록을 <b>{{pick.3|code}}{{pick.3|josa:으로,로}}</b> 적었을까요?"
+    en: "Why does line {{site.line}} write the target as <b>{{pick.3|code}}</b>?"
+  choices:
+    - t:
+        ko: "반복 뒤에도 목록을 써야 하는지, 항목을 고쳐야 하는지가 그 표기에 적히기 때문에 — 셋 중 하나를 고른 것이다"
+        en: "Because whether the list is needed afterwards, or its items changed, is written in that spelling — one of three was chosen"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 반복 아래에서 이 목록이 다시 쓰이는지 찾아보세요."
+        en: "That is the direction. Check whether the list is used again below the loop."
+    - t:
+        ko: "그 표기만 컴파일되어서"
+        en: "Because only that spelling compiles"
+      ok: false
+      fb:
+        ko: "셋 다 컴파일됩니다. 뒤에 무엇이 오느냐에 따라 하나만 맞을 뿐이에요."
+        en: "All three compile. Only one is right for what comes after."
+    - t:
+        ko: "빨라서"
+        en: "Because it is faster"
+      ok: false
+      fb:
+        ko: "속도가 아니라 소유권의 문제예요."
+        en: "Not speed — ownership."
+
+queries:
+  - { grammars: [rust], file: ./for-in.scm }
+
+examples:
+  - code: "fn f() { for item in &items { show(item); } }   // 빌려 훑는다 — items 가 남는다"
+    expect: { sites: 1, form: for, hole: "for", picks: { 1: "for", 2: "item", 3: "&items", 4: "{ show(item); }" } }
+  - code: "fn f() { for i in 0..3 { } }                    // 0, 1, 2"
+    expect: { sites: 1, form: for, picks: { 1: "for", 2: "i", 3: "0..3" } }
+  - code: "fn f() { while i < 3 { } }                      // 조건 반복 — 항목이 없다"
+    expect: none

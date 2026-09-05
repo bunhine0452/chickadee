@@ -1,0 +1,178 @@
+schema: 1
+id: rs/module-visibility
+# 2부 (`rs.md` §4 심화 · §0.6 이 2부에 둔다). 보편형은 없다 — `rs.md` §6 이 `common/module-export`
+# 를 신규 후보로 냈고(TS `export` · Go 대문자 · Dart `library`) 아직 없다. **모든 것이 기본 비공개**다.
+universal: null
+name: { ko: 밖에 낼 것만 내보내기, en: Exposing only what is meant to be seen }
+token: "pub"
+grammars: [rust]
+framework: null
+essential: true
+difficulty: 3
+prereq: [rs/function-item, cs/compile-and-run, cs/linking]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "파일이 곧 모듈이고 안의 것은 전부 기본 비공개다. 밖에서 쓸 것에만 표시를 붙이고, 파일은 등록해야 컴파일된다."
+    en: "Everything is private by default; mark what is used outside, and register files."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} {{pick.2|code}}{{pick.2|josa:을,를}} <b>밖에서 볼 수 있게</b> 합니다.
+      표시가 없으면 같은 모듈 안에서만 보이고, 옆 모듈이 부르면 E0603 이에요 — 자바의 `private` 이
+      기본인 셈입니다. 그리고 파일 하나가 모듈 하나인데 <b>`mod 이름;` 으로 등록하지 않으면</b> 그 파일은
+      컴파일 대상에 아예 안 들어요. 「파일을 만들었는데 왜 못 찾나」의 답이 그것입니다. 부모가
+      `mod x;` 로 등록하고, 안에서 `pub` 으로 내보내고, 쓰는 쪽이 `use` 로 가져오는 세 단계예요.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} makes {{pick.2|code}} <b>visible from outside</b>. Without the
+      mark it is visible only inside its own module, and a call from a sibling module is E0603 — Java's
+      `private` as the default. And each file is one module, but <b>unless a parent registers it with
+      `mod name;`</b> the file is not even compiled. That is the answer to “I made the file, why is it
+      not found.” Three steps: the parent registers with `mod x;`, the file exports with `pub`, and the
+      user imports with `use`.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} {{pick.2|code}}{{pick.2|josa:을,를}} 모듈 밖으로 낸다."
+      en: "{{pick.1|code}} on line {{site.line}} exposes {{pick.2|code}} beyond its module."
+    - ko: "이 파일은 부모의 mod 줄이 등록해야 컴파일에 든다."
+      en: "This file enters the build only through the parent's mod line."
+    - ko: "쓰는 쪽은 use 로 경로를 가져와 {{pick.2|code}}{{pick.2|josa:을,를}} 부른다."
+      en: "The user brings the path in with use and calls {{pick.2|code}}."
+
+rule:
+  ko: "<b>기본은 비공개, 파일은 등록해야 산다.</b> mod 로 등록, pub 으로 내보냄, use 로 가져옴."
+  en: "<b>Private by default, and a file lives only when registered.</b> mod registers, pub exports, use imports."
+result:
+  label:
+    ko: "{{site.line}}행의 {{pick.2}}"
+    en: "{{pick.2}} on line {{site.line}}"
+  value: "{{pick.1}} {{pick.3}} {{pick.2}}"
+  note:
+    ko: "밖에서 보인다"
+    en: "visible from outside"
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 이제 이 모듈 밖에서도 부를 수 있습니다. 표시 없는 나머지는 안에서만 보여요."
+  en: "{{pick.2|code}} can now be called from outside this module. Everything unmarked stays inside."
+payoff:
+  ko: "이걸 알면 「함수는 있는데 왜 E0603 인가」와 「파일을 만들었는데 왜 못 찾나」가 함께 풀립니다."
+  en: "This untangles both “the function exists, why E0603” and “I made the file, why is it not found.”"
+bridge:
+  ko: "파이썬은 파일을 두면 곧 `import` 됩니다. Rust 는 <b>등록</b>해야 컴파일되고, TS 의 `export` 가 여기서는 `pub` 이에요."
+  en: "In Python a file is importable the moment it exists. Rust needs it <b>registered</b> to compile, and TS's `export` is `pub` here."
+misconceptions:
+  - ko: "파일을 만들면 모듈이 된다 — 부모가 `mod 이름;` 으로 등록해야 컴파일에 듭니다."
+    en: "Making a file makes a module — the parent must register it with `mod name;` or it is not compiled."
+  - ko: "`pub` 이 없어도 같은 크레이트면 보인다 — 같은 <b>모듈</b>과 그 자식에서만 보입니다. 옆 모듈은 E0603 이에요."
+    en: "Without `pub` it is still visible within the crate — only inside the same <b>module</b> and its children. A sibling gets E0603."
+  - ko: "`use` 가 파일을 불러온다 — `use` 는 이미 등록된 경로를 <b>짧게 부르는</b> 것뿐입니다. 등록은 `mod` 예요."
+    en: "`use` loads the file — `use` only <b>shortens a path</b> that is already registered. Registering is `mod`."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>밖에서 보이게 하는 표시</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the mark that makes it visible outside</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 내보내지는 <b>이름</b>입니다. 이름 자체는 보이는 범위를 못 정하고, 앞의 표시가 정해요."
+          en: "{{pick.2|code}} is the <b>name</b> being exposed. A name cannot set its own visibility; the mark in front does."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 표시냐", en: "The sharpest spot — the name or the mark" }
+          code:
+            - "fn run() {}       // 안에서만"
+            - "pub fn run() {}   // 밖에서도"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 항목의 <b>종류</b>를 적는 낱말입니다. 보이는 범위는 그 앞에 붙어요."
+          en: "{{pick.3|code}} is the word naming the item's <b>kind</b>. Visibility attaches before it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 종류냐 범위냐", en: "The sharpest spot — the kind or the reach" }
+          code:
+            - "pub fn run()"
+            - "// ^범위 ^종류"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행의 항목은 <b>다른 모듈에서도</b> 부릅니다."
+      en: "Choose what goes in the blank. The item on line {{site.line}} is called <b>from other modules too</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "pub", mono: true }
+      - t: "mod"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>모듈을 만들거나 등록</b>하는 낱말입니다. 항목을 밖으로 내지 않아요."
+            en: "That <b>makes or registers a module</b>. It does not expose an item."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 등록이냐 내보냄이냐", en: "The sharpest spot — registering or exporting" }
+            code:
+              - "mod util;         // util.rs 를 등록"
+              - "pub fn run() {}   // run 을 내보냄"
+      - t: "use"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>가져오는</b> 낱말입니다. 내보내는 쪽이 아니라 쓰는 쪽에 적어요."
+            en: "That <b>imports</b>. It goes on the using side, not the exporting side."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 어느 쪽에 적나", en: "The sharpest spot — which side writes it" }
+            code:
+              - "pub fn run() {}      // 내보내는 쪽"
+              - "use crate::util::run;   // 쓰는 쪽"
+      - t: "extern"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>다른 언어나 크레이트</b>의 것을 가리키는 낱말입니다. 내 항목의 범위와 무관해요."
+            en: "That points at things from <b>another language or crate</b>. Nothing to do with my item's reach."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 안이냐 바깥 세계냐", en: "The sharpest spot — mine or the outside world" }
+            code:
+              - "extern \"C\" { fn abs(x: i32) -> i32; }"
+              - "pub fn run() {}"
+
+why_gate:
+  q:
+    ko: "Rust 는 왜 <b>비공개를 기본</b>으로 두었을까요?"
+    en: "Why is <b>private the default</b> in Rust?"
+  choices:
+    - t:
+        ko: "밖에 낸 것만 약속이 되게 해서, 안의 것은 마음대로 고쳐도 다른 모듈이 안 깨지게 하려고"
+        en: "So that only what is exposed becomes a promise, and the rest can change freely without breaking other modules"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 모듈에서 밖에 낸 것이 몇 개인지 세어 보세요."
+        en: "That is the direction. Count how many items this module exposes."
+    - t:
+        ko: "컴파일을 빠르게 하려고"
+        en: "To compile faster"
+      ok: false
+      fb:
+        ko: "속도가 아닙니다. 어디까지가 약속이냐예요."
+        en: "Not speed. Where the promise ends."
+    - t:
+        ko: "`pub` 을 많이 쓰게 하려고"
+        en: "To make you write `pub` a lot"
+      ok: false
+      fb:
+        ko: "반대입니다. 적게 쓰게 하려는 거예요."
+        en: "The opposite. It is meant to be written sparingly."
+
+queries:
+  - { grammars: [rust], file: ./module-visibility.scm }
+
+examples:
+  - code: "pub fn run() { }                                // 밖에서 부른다"
+    expect: { sites: 1, form: pub-fn, hole: "pub", picks: { 1: "pub", 2: "run", 3: "fn" } }
+  - code: "mod util;                                       // util.rs 를 등록한다"
+    expect: { sites: 1, form: mod-file, picks: { 1: "mod", 2: "util", 3: ";" } }
+  - code: "pub struct Config { pub name: String }          // 타입도 필드도 밖에"
+    expect: { sites: 2, form: pub-struct, picks: { 1: "pub", 2: "Config", 3: "struct" } }
+  - code: "fn run() { }                                    // 안에서만"
+    expect: none

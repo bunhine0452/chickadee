@@ -1,0 +1,194 @@
+schema: 1
+id: rs/move
+# 2부의 **첫 판** (`rs.md` §0.3 · §0.6 · D187 ⑰). 선행에 `cs/undefined-behavior` 가 걸려 있다 — 「왜 이
+# 프로그램이 거부되나」의 답은 「거부 안 하면 무슨 일이 나나」이고(Brown 4.1), UB 를 안 보여 주면 빌림
+# 검사기가 스타일 규칙으로 보인다(§9 첫 행). 보편형은 없다 — 대응물이 C++ 이동 하나뿐이다(§6).
+#
+# 구문 노드가 없다(§5). 쿼리는 「이름 하나를 다른 이름에」와 「이름 하나를 그대로 넘김」을 잡는데
+# 그 자리가 이동인지 복사인지는 타입이 정하므로 카드는 정답을 규칙으로 낸다 — `Copy` 면 복사.
+universal: null
+name: { ko: 값째로 넘기기, en: Handing a value over }
+token: null
+grammars: [rust]
+framework: null
+essential: true
+difficulty: 3
+prereq: [rs/let-binding, cs/undefined-behavior, cs/stack-and-heap, cs/garbage-collection]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "이름 하나를 다른 이름이나 함수에 그대로 주면 값의 주인이 옮겨 간다. 값은 그대로 있고 옛 이름만 닫힌다."
+    en: "Hand a name over as it is and ownership passes on; only the old name closes."
+  why:
+    ko: >-
+      {{site.line}}행은 {{pick.1|code}}{{pick.1|josa:을,를}} <b>그대로</b> 넘깁니다 — `&` 가 없어요. Rust 에서 그것은
+      값의 <b>주인이 옮겨 간다</b>는 뜻이고, 그 뒤로 {{pick.1|code}} 라는 이름은 못 씁니다(E0382). 값이
+      사라진 것이 아닙니다 — 값은 그대로 있고 <b>권한만</b> 새 이름으로 갔어요. 왜 이렇게 하나. 주인이
+      둘이면 둘 다 값을 치우려 들고, 그것이 C 에서 이중 해제(UB)로 터지는 자리이고 다른 언어에서는
+      GC 가 대신 세어 주는 자리입니다. Rust 는 세지 않고 <b>주인을 하나로</b> 못박아 그 UB 를 컴파일
+      단계에서 없앱니다. 단, 정수처럼 복사가 싼 타입(`Copy`)은 옮기지 않고 복사합니다 — 그 갈림은
+      이름이 아니라 <b>타입</b>이 정해요.
+    en: >-
+      Line {{site.line}} hands {{pick.1|code}} over <b>as it is</b> — no `&`. In Rust that means
+      <b>ownership passes on</b>, and the name {{pick.1|code}} cannot be used afterwards (E0382). The
+      value did not vanish — it is still there; only the <b>permission</b> went to the new name. Why? Two
+      owners would both try to clean the value up, which is where C explodes with a double free (UB) and
+      where other languages let a GC count instead. Rust neither counts nor allows it: <b>one owner</b>,
+      and that UB is gone at compile time. One exception: cheap-to-copy types like integers (`Copy`) are
+      copied, not moved — and that split is decided by <b>the type</b>, not the name.
+  trace:
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 값 하나의 주인이다."
+      en: "{{pick.1|code}} owns one value."
+    - ko: "{{site.line}}행이 그 이름을 그대로 넘긴다 — 타입이 Copy 가 아니면 주인이 옮겨 간다."
+      en: "Line {{site.line}} hands the name over as it is — unless the type is Copy, ownership moves."
+    - ko: "아래에서 {{pick.1|code}}{{pick.1|josa:을,를}} 다시 쓰면 E0382 다. 값은 새 주인에게 살아 있다."
+      en: "Using {{pick.1|code}} again below is E0382. The value lives on with its new owner."
+
+rule:
+  ko: "<b>& 없이 넘기면 주인이 옮겨 간다.</b> 옛 이름은 닫히고, Copy 타입만 예외로 복사된다."
+  en: "<b>Handed over without &, ownership moves.</b> The old name closes; only Copy types are copied instead."
+result:
+  label:
+    ko: "{{site.line}}행 아래의 {{pick.1}}"
+    en: "{{pick.1}} below line {{site.line}}"
+  value: "{{pick.1}}"
+  note:
+    ko: "Copy 가 아니면 못 쓴다"
+    en: "unusable unless Copy"
+ok:
+  ko: "{{pick.1|code}} 의 값은 이제 새 주인의 것입니다. Copy 타입이 아니라면 이 이름은 여기서 닫혔어요."
+  en: "The value of {{pick.1|code}} now belongs to its new owner. Unless the type is Copy, this name closed here."
+payoff:
+  ko: "이걸 알면 첫 소유권 오류 「value used after move」(E0382)가 풀립니다 — 그리고 `.clone()` 이 왜 통하는지도요."
+  en: "This untangles the first ownership error, “value used after move” (E0382) — and why `.clone()` makes it go away."
+bridge:
+  ko: "파이썬·JS 는 `b = a` 뒤에 둘 다 씁니다 — GC 가 셉니다. C++ 은 복사합니다. Rust 는 <b>옮기고 옛 이름을 닫습니다</b>."
+  en: "Python and JS keep both names after `b = a` — a GC counts. C++ copies. Rust <b>moves and closes the old name</b>."
+misconceptions:
+  - ko: "이동한 값은 메모리에서 사라진다 — 값은 그대로 있고 <b>이름의 권한만</b> 옮겨 갑니다. 옛 이름을 못 쓰게 막는 것이 전부예요."
+    en: "A moved value is gone from memory — the value stays; only <b>the name's permission</b> moves. Blocking the old name is all that happens."
+  - ko: "빌림 검사기가 막는 건 스타일 문제다 — 막는 것은 <b>실행 시 UB</b> 입니다. 주인이 둘이면 이중 해제예요."
+    en: "The borrow checker enforces style — what it blocks is <b>run-time UB</b>. Two owners mean a double free."
+  - ko: "`let b = a;` 는 늘 이동이다 — 정수·참·거짓·`&T` 같은 Copy 타입은 복사됩니다. 타입이 정해요."
+    en: "`let b = a;` always moves — Copy types like integers, booleans and `&T` are copied. The type decides."
+  - ko: "`.clone()` 을 붙이면 해결된다 — 오류는 사라지지만 값이 <b>둘</b>이 됩니다. 한쪽을 고쳐도 다른 쪽은 그대로예요."
+    en: "Adding `.clone()` fixes it — the error goes, but now there are <b>two</b> values. Changing one leaves the other as it was."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>주인이 옮겨 가는 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name whose ownership moves</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 값을 <b>받는 쪽</b>입니다. 옮겨 가는 것은 넘겨진 이름의 권한이에요."
+          en: "{{pick.2|code}} is the <b>receiving side</b>. What moves is the permission of the name handed over."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 주는 쪽이냐 받는 쪽이냐", en: "The sharpest spot — giver or receiver" }
+          code:
+            - "let t = s;    // s 의 주인이 t 로"
+            - "takes(s);     // s 의 주인이 함수로"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 넘기는 <b>자리의 표시</b>입니다. 무엇이 넘어가는지는 그 뒤의 이름이에요."
+          en: "{{pick.3|code}} <b>marks the slot</b> where the handing over happens. What is handed over is the name after it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 자리냐 이름이냐", en: "The sharpest spot — the slot or the name" }
+          code:
+            - "takes(s)"
+            - "//   ^자리 ^이름"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행 아래에서 {{pick.1|code}}{{pick.1|josa:을,를}} 다시 쓰면 어떻게 될까요? ({{pick.1|code}}{{pick.1|josa:은,는}} String 이라고 합시다)"
+      en: "What happens when {{pick.1|code}} is used again below line {{site.line}}? (Say {{pick.1|code}} is a String.)"
+    hint:
+      ko: "String 은 Copy 가 아닙니다."
+      en: "String is not Copy."
+    options:
+      - t:
+          ko: "컴파일이 멈춘다 — 값은 새 주인에게 있고 이 이름은 닫혔다 (E0382)"
+          en: "Compiling stops — the value is with its new owner and this name has closed (E0382)"
+      - t:
+          ko: "그대로 쓸 수 있다 — 값이 복사됐다"
+          en: "It can be used — the value was copied"
+        diag:
+          t:
+            ko: "정수라면 그렇습니다. String 은 힙의 버퍼를 갖고 있어 복사가 싸지 않고, 그래서 <b>옮깁니다</b>."
+            en: "For an integer, yes. A String owns a heap buffer, copying is not cheap, so it <b>moves</b>."
+          edge:
+            h: { ko: "가장 날카로운 자리 — Copy 냐 아니냐", en: "The sharpest spot — Copy or not" }
+            code:
+              - "let b = a;  // a: i32 → 복사"
+              - "let t = s;  // s: String → 이동"
+      - t:
+          ko: "실행 중에 터진다 — 해제된 메모리를 읽는다"
+          en: "It crashes at run time — reading freed memory"
+        diag:
+          t:
+            ko: "그것이 C 에서 나는 일이고 Rust 가 <b>막는</b> 일입니다. 실행까지 안 가요."
+            en: "That is what happens in C and exactly what Rust <b>prevents</b>. It never gets to run."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 언제 막히나", en: "The sharpest spot — when it is blocked" }
+            code:
+              - "C:    실행 중 UB"
+              - "Rust: 컴파일 E0382"
+      - t:
+          ko: "빈 문자열이 된다"
+          en: "It becomes an empty string"
+        diag:
+          t:
+            ko: "값이 바뀌지 않습니다. 옛 이름이 <b>닫혔을</b> 뿐, 그 이름으로는 아무 값도 못 봐요."
+            en: "The value does not change. The old name merely <b>closed</b>; through it you can see nothing."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 값이냐 이름이냐", en: "The sharpest spot — the value or the name" }
+            code:
+              - "let t = s;   // 값은 하나"
+              - "s            // E0382 — 이름이 닫혔다"
+
+no_hole_reason: >-
+  구멍을 못 뚫는다. 이동에는 낱말이 없다 — `&` 가 **없는** 것이 표시라, 빈칸에 넣을 글자가
+  없다. 「& 를 붙일까 말까」를 묻는 판은 `rs/borrow-shared` 의 자리다.
+
+why_gate:
+  q:
+    ko: "Rust 는 왜 `let b = a;` 뒤에 <b>a 를 못 쓰게</b> 할까요?"
+    en: "Why does Rust <b>close a</b> after `let b = a;`?"
+  choices:
+    - t:
+        ko: "주인이 둘이면 둘 다 값을 치우려 들어 이중 해제가 나므로 — 세는 대신 주인을 하나로 못박았다"
+        en: "Because two owners would both try to free the value, a double free — instead of counting, it pins one owner"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 그럼 둘 다 써야 할 때 무엇을 적는지도 한 줄로 적어 보세요."
+        en: "That is the direction. Add a line on what to write when both are needed."
+    - t:
+        ko: "메모리를 아끼려고"
+        en: "To save memory"
+      ok: false
+      fb:
+        ko: "메모리는 같습니다. 값은 하나뿐이니까요. 문제는 누가 치우느냐예요."
+        en: "Memory is the same — there is only one value. The question is who cleans it up."
+    - t:
+        ko: "이름 둘이 헷갈려서"
+        en: "Because two names are confusing"
+      ok: false
+      fb:
+        ko: "가독성 문제가 아닙니다. 실행 시 안전의 문제예요."
+        en: "Not readability — run-time safety."
+
+queries:
+  - { grammars: [rust], file: ./move.scm }
+
+examples:
+  - code: "fn f() { let s = String::from(\"hi\"); let t = s; }   // s 의 주인이 t 로 — 아래에서 s 는 E0382"
+    expect: { sites: 1, form: rebind, picks: { 1: "s", 2: "t", 3: "let" } }
+  - code: "fn f() { takes(msg); }                          // & 가 없다 — msg 의 주인이 함수로"
+    expect: { sites: 1, form: pass-by-value, picks: { 1: "msg", 2: "takes", 3: "(" } }
+  - code: "fn f() { takes(&msg); }                         // 빌렸다 — rs/borrow-shared"
+    expect: none

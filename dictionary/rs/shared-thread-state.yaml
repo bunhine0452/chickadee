@@ -1,0 +1,183 @@
+schema: 1
+id: rs/shared-thread-state
+# 2부 끝 (`rs.md` §4). 보편형은 없다. AI 가 스레드를 쓰면 거의 반드시 나오는 두 겹 `Arc&lt;Mutex&lt;T&gt;&gt;` —
+# 표본 리포 300곳으로 `Box`/`Rc` 26곳의 열 배라, 선행에서 `smart-pointer` 를 뺐다(rust-axis §2.3 ②:
+# `Arc` 는 있고 `Box` 는 없는 리포에서 선행이 걸리면 이 카드가 영영 안 뜬다).
+universal: null
+name: { ko: 스레드끼리 나눠 갖기, en: Sharing across threads }
+token: "Arc"
+grammars: [rust]
+framework: null
+essential: true
+difficulty: 4
+prereq: [rs/borrow-mut, cs/race-condition, cs/blocking-and-async]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "한 값을 여러 스레드가 갖게 하려면 두 겹이 필요하다. 바깥은 주인을 세고, 안은 고치는 손을 한 번에 하나로 줄인다."
+    en: "Sharing one value across threads takes two layers: count owners, then one hand."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 값의 주인을 <b>스레드 사이에서</b> 셉니다 — 마지막 스레드가 놓을
+      때 값이 치워져요. 그런데 세는 것만으로는 고칠 수 없습니다. 고치는 손이 둘이면 경쟁 조건이고, 그것을
+      막는 것이 안쪽의 `Mutex` — <b>잠근 스레드 하나만</b> 고치고, 잠금은 돌려받은 보호자(guard)가
+      사라질 때 풀립니다. 그래서 두 겹이에요: `Arc` 가 「누가 갖나」, `Mutex` 가 「누가 고치나」.
+      `Rc`·`RefCell` 은 스레드 사이에서 쓰면 컴파일이 막힙니다(E0277) — `Send`/`Sync` 라는 약속이
+      없어서고, 그것이 데이터 경쟁을 <b>컴파일 시에</b> 없애는 기계예요. AI 가 스레드를 쓰면 거의
+      반드시 이 두 겹이 나오고, 이 리포에도 300곳입니다.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} counts a value's owners <b>across threads</b> — when the last
+      thread lets go, the value is freed. But counting alone does not allow changing. Two changing hands
+      are a race condition, and the inner `Mutex` prevents it — <b>only the thread holding the lock</b>
+      may change, and the lock is released when the returned guard goes away. Hence two layers: `Arc`
+      says who holds, `Mutex` says who changes. Use `Rc` or `RefCell` across threads and the build stops
+      (E0277) — they lack the `Send`/`Sync` promises, and that is the machine that removes data races
+      <b>at compile time</b>. An AI writing threads almost always produces this pair; this repo has it at
+      300 sites.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} 값 하나를 여러 스레드가 갖게 한다."
+      en: "{{pick.1|code}} on line {{site.line}} lets several threads hold one value."
+    - ko: "고치려면 잠근다 — lock() 이 보호자를 주고, 그동안 다른 스레드는 기다린다."
+      en: "To change it, lock — lock() hands a guard, and other threads wait meanwhile."
+    - ko: "보호자가 사라지면 풀리고 다음 스레드가 잠근다."
+      en: "When the guard goes the lock opens and the next thread takes it."
+
+rule:
+  ko: "<b>갖는 것과 고치는 것은 다른 겹이다.</b> Arc 가 주인을 세고 Mutex 가 손을 하나로, Send/Sync 가 없는 것은 스레드를 못 건넌다."
+  en: "<b>Holding and changing are separate layers.</b> Arc counts owners, Mutex allows one hand; anything without Send/Sync cannot cross a thread."
+result:
+  label:
+    ko: "{{site.line}}행의 나눔"
+    en: "the sharing on line {{site.line}}"
+  value: "{{pick.1}}<…>"
+  note:
+    ko: "여러 스레드가 갖는다"
+    en: "held by several threads"
+ok:
+  ko: "{{pick.1|code}} 안의 값은 이제 여러 스레드의 것입니다. 고치는 손은 잠금이 한 번에 하나로 줄여요."
+  en: "The value inside {{pick.1|code}} now belongs to several threads. The lock keeps the changing hands to one at a time."
+payoff:
+  ko: "이걸 알면 「`Rc` 를 스레드에 넘겼더니 왜 E0277 인가」와 「왜 두 겹이나 감싸나」가 함께 풀립니다."
+  en: "This untangles both “I sent an `Rc` to a thread, why E0277” and “why wrap it twice.”"
+bridge:
+  ko: "다른 언어는 공유 값을 잠그는 것을 <b>잊어도 컴파일됩니다</b>. Rust 는 잠금 없이는 고칠 수 없고, 잠그지 않은 공유는 타입이 막습니다."
+  en: "Other languages <b>compile even when you forget</b> to lock shared state. Rust cannot change it without a lock, and unlocked sharing is refused by the type."
+misconceptions:
+  - ko: "`Arc` 만 있으면 고칠 수 있다 — 주인을 셀 뿐 <b>읽기만</b> 됩니다. 고치려면 안에 `Mutex` 예요."
+    en: "`Arc` alone allows changing — it only counts owners and allows <b>reading</b>. Changing needs a `Mutex` inside."
+  - ko: "`lock()` 은 값을 돌려준다 — <b>보호자</b>를 돌려주고, 그것이 사라질 때 잠금이 풀립니다. 오래 들고 있으면 다른 스레드가 멈춰요."
+    en: "`lock()` returns the value — it returns a <b>guard</b>, and the lock opens when the guard goes. Hold it long and other threads stall."
+  - ko: "`Rc&lt;RefCell&lt;T&gt;&gt;` 도 스레드에 넘길 수 있다 — E0277 입니다. 스레드에는 `Arc&lt;Mutex&lt;T&gt;&gt;` 예요."
+    en: "`Rc&lt;RefCell&lt;T&gt;&gt;` can cross into a thread — E0277. Across threads it is `Arc&lt;Mutex&lt;T&gt;&gt;`."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>여러 스레드가 갖게 하는 이름</b>을 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the name that lets several threads hold the value</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 안쪽 겹이거나 만드는 함수입니다. 스레드 사이에서 주인을 세는 것은 바깥의 이름이에요."
+          en: "{{pick.2|code}} is the inner layer or the constructor. Counting owners across threads is the outer name's job."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 바깥이냐 안이냐", en: "The sharpest spot — the outer or the inner" }
+          code:
+            - "Arc<Mutex<i32>>"
+            - "// ^갖기 ^고치기"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 꺾쇠나 인자입니다. 나눠 갖게 하는 것은 그 앞의 이름이에요."
+          en: "{{pick.3|code}} is a bracket or an argument. The sharing is done by the name before it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 이름이냐 괄호냐", en: "The sharpest spot — the name or the bracket" }
+          code:
+            - "Arc::new(Mutex::new(0))"
+            - "// ^이름"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 값의 주인을 <b>스레드 사이에서</b> 셉니다."
+      en: "Choose what goes in the blank. Line {{site.line}} counts a value's owners <b>across threads</b>."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "Arc", mono: true }
+      - t: "Rc"
+        mono: true
+        diag:
+          t:
+            ko: "이것도 주인을 세지만 <b>한 스레드 안에서만</b>입니다. 스레드에 넘기면 E0277 이에요."
+            en: "That counts owners too, but <b>within one thread only</b>. Sending it to a thread is E0277."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 스레드를 건너나", en: "The sharpest spot — does it cross a thread" }
+            code:
+              - "Rc<T>    // 한 스레드"
+              - "Arc<T>   // 여러 스레드"
+      - t: "Mutex"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>고치는 손을 하나로</b> 줄이는 안쪽 겹입니다. 주인을 세지 않아요 — 혼자서는 한 스레드만 갖습니다."
+            en: "That is the inner layer that <b>limits changing to one hand</b>. It counts no owners — alone, one thread holds it."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 갖기냐 고치기냐", en: "The sharpest spot — holding or changing" }
+            code:
+              - "Mutex<i32>        // 고치는 손 하나"
+              - "Arc<Mutex<i32>>   // + 주인 여럿"
+      - t: "Box"
+        mono: true
+        diag:
+          t:
+            ko: "이건 주인 <b>하나</b>가 힙의 값을 갖는 상자입니다. 나눠 갖지 않아요."
+            en: "That is a wrapper where <b>one</b> owner holds a heap value. It does not share."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 주인이 몇인가", en: "The sharpest spot — how many owners" }
+            code:
+              - "Box<T>   // 하나"
+              - "Arc<T>   // 여럿"
+
+why_gate:
+  q:
+    ko: "Rust 는 왜 `Rc` 를 <b>스레드에 못 넘기게</b> 할까요?"
+    en: "Why does Rust <b>refuse to send `Rc`</b> to a thread?"
+  choices:
+    - t:
+        ko: "주인 수를 세는 셈이 원자적이지 않아 두 스레드가 동시에 세면 수가 틀리기 때문에 — 그 사실이 Send 라는 약속의 부재로 타입에 적혀 있다"
+        en: "Because its owner count is not atomic, so two threads counting at once corrupt it — and that fact is written into the type as the absence of Send"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 값이 실제로 몇 스레드에서 쓰이는지도 찾아보세요."
+        en: "That is the direction. Find how many threads actually use this value."
+    - t:
+        ko: "`Rc` 가 느려서"
+        en: "Because `Rc` is slow"
+      ok: false
+      fb:
+        ko: "반대입니다. `Rc` 가 더 빠르고, 그래서 한 스레드에서는 `Rc` 를 써요."
+        en: "The other way round. `Rc` is faster, which is why it is used within one thread."
+    - t:
+        ko: "스레드는 값을 못 나눠서"
+        en: "Because threads cannot share values"
+      ok: false
+      fb:
+        ko: "나눌 수 있습니다 — `Arc` 가 그거예요."
+        en: "They can — that is `Arc`."
+
+queries:
+  - { grammars: [rust], file: ./shared-thread-state.scm }
+
+examples:
+  - code: "fn f() { let counter = Arc::new(Mutex::new(0)); }   // 두 겹 — 갖기와 고치기"
+    expect: { sites: 2, form: shared-new, hole: "Arc", picks: { 1: "Arc", 2: "new", 3: "(Mutex::new(0))" } }
+  - code: "fn f() { let mut n = counter.lock().unwrap(); }    // 잠근다 — 보호자를 받는다"
+    expect: { sites: 1, form: lock, picks: { 1: "lock", 2: "counter", 3: "()" } }
+  - code: "fn f() { let h = thread::spawn(move || work()); }  // 스레드를 띄운다"
+    expect: { sites: 1, form: spawn, picks: { 1: "spawn", 2: "thread", 3: "(move || work())" } }
+  - code: "fn f() { let b = Box::new(1); }                    // 주인 하나 — rs/smart-pointer"
+    expect: none

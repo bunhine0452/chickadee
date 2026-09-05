@@ -1,0 +1,184 @@
+schema: 1
+id: rs/arithmetic
+# 0부 축 E (`rs.md` §0.1 #9). 보편형은 `common/arithmetic`. Rust 에서 다시 배울 것은 둘 — 정수 나눗셈이
+# 0 쪽으로 자른다(파이썬과 반대)와 **타입이 다르면 못 더한다**(E0308). 넘침은 `rs/overflow` 의 몫.
+universal: common/arithmetic
+name: { ko: 셈하기, en: Arithmetic }
+token: "/"
+grammars: [rust]
+framework: null
+essential: true
+difficulty: 1
+prereq: [rs/integer-type, cs/integer-overflow]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "같은 타입끼리만 셈한다. 정수끼리 나누면 소수점 아래를 버리고 0 쪽으로 자른다."
+    en: "Only equal types compute together; whole-number division cuts toward zero."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} {{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:을,를}}
+      셈합니다. 두 가지가 다른 언어와 다릅니다. 첫째, <b>타입이 같아야</b> 해요 — `i32` 와 `i64` 는
+      더하지 못하고(E0308), `as` 나 `into()` 로 한쪽을 바꿔야 합니다. 그래서 셈 앞에 붙은 `as` 는
+      장식이 아닙니다. 둘째, <b>정수끼리 나누면 정수</b>가 나옵니다 — `7 / 2` 는 3 이고 `-7 / 2` 는 -3
+      이에요(0 쪽으로 자른다). 파이썬의 `/` 가 늘 소수를 내는 것과 정반대입니다.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} computes {{pick.2|code}} with {{pick.3|code}}. Two things
+      differ from other languages. First, <b>the types must match</b> — an `i32` and an `i64` do not add
+      (E0308); convert one with `as` or `into()`. So an `as` in front of arithmetic is not decoration.
+      Second, <b>whole numbers divide to a whole number</b> — `7 / 2` is 3 and `-7 / 2` is -3 (cut toward
+      zero). The exact opposite of Python's `/`, which always yields a decimal.
+  trace:
+    - ko: "{{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:이,가}} 값이 된다 — 같은 타입이어야 한다."
+      en: "{{pick.2|code}} and {{pick.3|code}} become values — of the same type."
+    - ko: "{{pick.1|code}}{{pick.1|josa:이,가}} 둘로 새 값을 만든다. 정수 나눗셈이면 소수점 아래를 버린다."
+      en: "{{pick.1|code}} makes a new value from them. Whole-number division drops the fraction."
+    - ko: "넘치면 디버그는 패닉, 릴리스는 감싼다 — 그건 다른 판이다."
+      en: "On overflow debug panics and release wraps — that is another plate."
+
+rule:
+  ko: "<b>셈은 같은 타입끼리, 정수 나눗셈은 자른다.</b> 타입이 다르면 사람이 한쪽을 바꿔 적는다."
+  en: "<b>Arithmetic is between equal types, and whole-number division cuts.</b> Different types mean you convert one side yourself."
+result:
+  label:
+    ko: "{{site.line}}행의 셈"
+    en: "the arithmetic on line {{site.line}}"
+  value: "{{pick.2}} {{pick.1}} {{pick.3}}"
+  note:
+    ko: "같은 타입의 새 값"
+    en: "a new value of the same type"
+ok:
+  ko: "{{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}}{{pick.3|josa:으로,로}} 새 값 하나가 나옵니다 — 타입은 재료와 같습니다."
+  en: "{{pick.2|code}} and {{pick.3|code}} make one new value — of the same type as the inputs."
+payoff:
+  ko: "이걸 알면 「7 / 2 가 왜 3 인가」와 「길이와 수를 더했는데 왜 막히나」(E0308)가 함께 풀립니다."
+  en: "This untangles both “why is 7 / 2 equal to 3” and “why is adding a length to a number refused” (E0308)."
+bridge:
+  ko: "파이썬은 `7 / 2` 가 3.5 이고 `1 + 1.0` 도 됩니다. Rust 는 둘 다 <b>사람이 적어야</b> 합니다 — `7.0 / 2.0` · `1.0 + 1.0`."
+  en: "Python gives 3.5 for `7 / 2` and accepts `1 + 1.0`. Rust makes you <b>write both out</b> — `7.0 / 2.0`, `1.0 + 1.0`."
+misconceptions:
+  - ko: "`7 / 2` 는 3.5 다 — 3 입니다. 정수끼리는 정수가 나오고 0 쪽으로 잘려요."
+    en: "`7 / 2` is 3.5 — it is 3. Whole numbers give a whole number, cut toward zero."
+  - ko: "정수와 실수는 더할 수 있다 — E0308 입니다. `n as f64 + 0.5` 처럼 한쪽을 바꿔야 해요."
+    en: "A whole number and a decimal add — E0308. Convert one side, as in `n as f64 + 0.5`."
+  - ko: "`-7 / 2` 는 -4 다(파이썬처럼) — -3 입니다. 0 쪽으로 자르지 아래로 내리지 않아요."
+    en: "`-7 / 2` is -4 (as in Python) — it is -3. It cuts toward zero, not downward."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>두 값으로 새 값을 만드는 기호</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the symbol that makes a new value from two</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} <b>재료</b>입니다. 재료는 그대로 있고, 새 값을 만드는 것은 가운데 기호예요."
+          en: "{{pick.2|code}} is an <b>input</b>. It stays as it is; the symbol between makes the new value."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 재료냐 셈이냐", en: "The sharpest spot — the input or the arithmetic" }
+          code:
+            - "7          // 값 하나"
+            - "7 / 2      // 새 값 3"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 다른 쪽 <b>재료</b>입니다. 왼쪽과 타입이 같아야 셈이 돼요."
+          en: "{{pick.3|code}} is the other <b>input</b>. It must share the left one's type for the arithmetic to go through."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 타입이 같은가", en: "The sharpest spot — same type" }
+          code:
+            - "n + 1        // n 이 정수면 된다"
+            - "n + 1.0      // n 이 정수면 E0308"
+
+meaning:
+  - q:
+      ko: "{{site.line}}행에서 {{pick.2|code}}{{pick.2|josa:과,와}} {{pick.3|code}} 의 <b>타입이 다르면</b> 어떻게 될까요?"
+      en: "What happens on line {{site.line}} if {{pick.2|code}} and {{pick.3|code}} are of <b>different types</b>?"
+    hint:
+      ko: "Rust 에는 조용히 맞춰 주는 변환이 없습니다."
+      en: "Rust has no quiet conversion."
+    options:
+      - t:
+          ko: "컴파일이 멈춘다 — 한쪽을 `as` 나 `into()` 로 바꿔 적어야 한다 (E0308)"
+          en: "Compiling stops — one side must be converted with `as` or `into()` (E0308)"
+      - t:
+          ko: "넓은 쪽으로 맞춰서 셈한다"
+          en: "It widens to the larger type and computes"
+        diag:
+          t:
+            ko: "C·자바가 그렇게 합니다. Rust 에는 <b>자동으로 도는 넓힘이 없어요</b> — 넓힘도 사람이 적습니다."
+            en: "C and Java do that. Rust has <b>no automatic widening</b> — even widening is written by hand."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 자동이냐 손이냐", en: "The sharpest spot — automatic or by hand" }
+            code:
+              - "a + b              // i32 + i64: E0308"
+              - "i64::from(a) + b   // 된다"
+      - t:
+          ko: "실행 중에 오류가 난다"
+          en: "It fails at run time"
+        diag:
+          t:
+            ko: "실행까지 안 갑니다. 타입은 <b>컴파일러</b>가 보고, 프로그램은 만들어지지도 않아요."
+            en: "It never runs. Types are checked by the <b>compiler</b>; the program is not built."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 언제 막히나", en: "The sharpest spot — when it is blocked" }
+            code:
+              - "컴파일: E0308"
+              - "실행:   시작도 안 한다"
+      - t:
+          ko: "왼쪽 타입으로 잘라서 셈한다"
+          en: "It truncates to the left type and computes"
+        diag:
+          t:
+            ko: "자르는 변환은 `as` 를 적었을 때만 일어납니다. 안 적으면 아무 일도 안 나고 막혀요."
+            en: "Truncating happens only when you write `as`. Without it nothing happens — it is refused."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 적어야 자른다", en: "The sharpest spot — cutting must be written" }
+            code:
+              - "a + b          // E0308"
+              - "a + b as i32   // 자른다 — 적었으니까"
+
+no_hole_reason: >-
+  구멍을 못 뚫는다. 셈 기호가 한 글자라 빈칸형이 생성 단계에서 떨어진다(`MIN_HOLE` = 2). 값을
+  묻는 판은 기초 문항(`docs/program/fundamentals.md` §2 `value`)의 몫이고, 「7 / 2 는?」이 그 판이다.
+
+why_gate:
+  q:
+    ko: "{{site.line}}행처럼 정수끼리 나눌 때 Rust 는 왜 <b>소수점 아래를 버릴까요</b>?"
+    en: "Why does Rust <b>drop the fraction</b> when whole numbers divide, as on line {{site.line}}?"
+  choices:
+    - t:
+        ko: "셈의 결과가 재료와 같은 타입이어야 해서 — 정수 둘에서 실수가 나오면 타입이 바뀐다"
+        en: "Because the result must have the inputs' type — two whole numbers yielding a decimal would change the type"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 소수가 필요했다면 이 줄을 어떻게 고쳐야 할지도 적어 보세요."
+        en: "That is the direction. Say how this line would change if a decimal were wanted."
+    - t:
+        ko: "소수 나눗셈이 느려서"
+        en: "Because decimal division is slow"
+      ok: false
+      fb:
+        ko: "속도 문제가 아닙니다. 결과의 타입이 재료를 따라야 해서예요."
+        en: "Not speed. The result's type follows the inputs."
+    - t:
+        ko: "Rust 가 실수를 못 나눠서"
+        en: "Because Rust cannot divide decimals"
+      ok: false
+      fb:
+        ko: "나눕니다 — `7.0 / 2.0` 은 3.5 예요. 정수끼리일 때만 자릅니다."
+        en: "It can — `7.0 / 2.0` is 3.5. Only whole numbers cut."
+
+queries:
+  - { grammars: [rust], file: ./arithmetic.scm }
+
+examples:
+  - code: "fn f() { let half = 7 / 2; }                  // half -> 3 (i32) — 0 쪽으로 자른다"
+    expect: { sites: 1, form: arith, picks: { 1: "/", 2: "7", 3: "2" } }
+  - code: "fn f() { total += n; }                        // 셈과 넣기가 한 기호 — mut 이어야 한다"
+    expect: { sites: 1, form: compound, picks: { 1: "+=", 2: "total", 3: "n" } }
+  - code: "fn f() { let ok = a < b; }                    // 견주기 — rs/comparison"
+    expect: none

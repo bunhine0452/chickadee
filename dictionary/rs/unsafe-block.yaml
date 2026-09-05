@@ -1,0 +1,181 @@
+schema: 1
+id: rs/unsafe-block
+# 2부 끝 (`rs.md` §4). 보편형은 없다. 검사를 끄는 게 아니라 「컴파일러가 확인하던 것을 내가 보증한다」는
+# 표시다 — 빌림 검사기는 그대로 돈다. 네 리포 합쳐 11곳, `forbid(unsafe_code)` 인 리포도 있다 —
+# **합성이 정본**. 기계는 `cs/undefined-behavior` 이고 `rs/move` 와 반대 방향에서 같은 장을 쓴다.
+universal: null
+name: { ko: 내가 대신 보증하기, en: Vouching in place of the compiler }
+token: "unsafe"
+grammars: [rust]
+framework: null
+essential: true
+difficulty: 4
+prereq: [rs/borrow-mut, cs/undefined-behavior]
+confusions: []
+
+dict:
+  one_liner:
+    ko: "컴파일러가 증명 못 하는 몇 가지를 내가 보증한다는 표시. 빌림 검사는 그대로 돌고, 틀리면 실행 시 정의되지 않은 동작이다."
+    en: "A mark that I vouch for what the compiler cannot prove; other checks still run."
+  why:
+    ko: >-
+      {{site.line}}행의 {{pick.1|code}}{{pick.1|josa:은,는}} 「{{pick.2|code}} 안에서 하는 일은 <b>내가 보증한다</b>」는 표시입니다.
+      검사를 끄는 것이 아니에요 — 빌림 검사기·타입 검사는 그대로 돌고, 풀리는 것은 다섯뿐입니다:
+      원시 포인터 역참조, `unsafe fn` 호출, 가변 정적 변수 접근, `unsafe` 트레이트 구현, `union` 필드
+      읽기. 그 다섯이 정확히 컴파일러가 <b>증명할 수 없는</b> 것이고, 이 블록 안에서 그 증명은 사람의
+      몫이 됩니다. 틀리면 C 와 똑같은 정의되지 않은 동작이에요 — 그리고 그 UB 는 이 블록을 <b>부르는
+      줄</b>이 아니라 잘못된 값을 <b>쓰는 자리</b>에서 납니다(rs.md §9 #14). 표본 리포에는 11곳뿐이고
+      `forbid(unsafe_code)` 로 아예 막은 리포도 있습니다.
+    en: >-
+      {{pick.1|code}} on line {{site.line}} says “<b>I vouch</b> for what happens inside {{pick.2|code}}.”
+      It does not switch checks off — the borrow checker and type checker still run, and only five
+      things are unlocked: dereferencing a raw pointer, calling an `unsafe fn`, touching a mutable
+      static, implementing an `unsafe` trait, reading a `union` field. Those five are exactly what the
+      compiler <b>cannot prove</b>, and inside this block the proof becomes the writer's job. Vouch
+      falsely and it is the same undefined behaviour as C — and that UB happens not at the line that
+      <b>calls</b> this block but where the bad value is <b>used</b> (rs.md §9 #14). The sample repos have
+      11 sites, and one forbids it outright with `forbid(unsafe_code)`.
+  trace:
+    - ko: "{{site.line}}행의 {{pick.1|code}}{{pick.1|josa:이,가}} {{pick.2|code}}{{pick.2|josa:을,를}} 연다 — 보증의 범위가 이 블록이다."
+      en: "{{pick.1|code}} on line {{site.line}} opens {{pick.2|code}} — the vouch covers this block."
+    - ko: "안에서 다섯 가지 중 하나를 한다. 그 밖의 검사는 전부 그대로다."
+      en: "Inside, one of the five things happens. Every other check still applies."
+    - ko: "보증이 틀리면 UB 이고, 터지는 자리는 값을 쓰는 곳이다."
+      en: "A false vouch is UB, and it explodes where the value is used."
+
+rule:
+  ko: "<b>끄는 게 아니라 떠맡는 것이다.</b> 풀리는 것은 다섯뿐, 나머지 검사는 그대로, 틀리면 UB 는 쓰는 자리에서 난다."
+  en: "<b>Not switching off — taking over.</b> Five things unlock, every other check stays, and a false vouch is UB where the value is used."
+result:
+  label:
+    ko: "{{site.line}}행의 블록"
+    en: "the block on line {{site.line}}"
+  value: "{{pick.1}} {{pick.2}}"
+  note:
+    ko: "이 안의 증명은 사람의 몫"
+    en: "the proof inside is the writer's"
+ok:
+  ko: "{{pick.2|code}} 안에서는 컴파일러가 증명 못 하는 다섯 가지를 할 수 있습니다 — 그 증명은 이제 당신의 것입니다."
+  en: "Inside {{pick.2|code}} the five things the compiler cannot prove are allowed — the proof is now yours."
+payoff:
+  ko: "이걸 알면 「왜 `unsafe` 를 써도 빌림 오류가 나나」가 풀립니다 — 검사는 안 꺼졌고, 풀린 것은 다섯뿐이니까요."
+  en: "This untangles “why do I still get borrow errors inside `unsafe`” — nothing was switched off; only five things unlocked."
+bridge:
+  ko: "C 는 <b>모든 코드</b>가 이 블록 안에 있는 셈입니다. Rust 는 그 부분을 이름 붙여 좁혀, 찾아 읽어야 할 자리를 코드에 남깁니다."
+  en: "In C <b>all code</b> is effectively inside this block. Rust names and narrows it, leaving the spots to audit visible in the code."
+misconceptions:
+  - ko: "`unsafe` 는 검사를 끈다 — 빌림 검사기는 그대로 돕니다. 풀리는 것은 원시 포인터 역참조 같은 다섯뿐이에요."
+    en: "`unsafe` switches checks off — the borrow checker still runs. Only five things unlock, like dereferencing a raw pointer."
+  - ko: "`unsafe` 함수를 부르는 줄이 위험한 줄이다 — 매달린 포인터를 돌려받기만 하고 <b>안 쓰면</b> 아무 일도 안 납니다. UB 는 쓰는 자리에서 나요."
+    en: "The line calling an `unsafe` function is the dangerous line — receive a dangling pointer and <b>never use it</b>, nothing happens. UB happens where it is used."
+  - ko: "`unsafe` 를 쓰면 빨라진다 — 속도와 무관합니다. 증명의 주체가 바뀔 뿐이에요."
+    en: "`unsafe` makes code faster — speed is unrelated. Only who holds the proof changes."
+
+point:
+  - q:
+      ko: "{{site.line}}행에서 <b>내가 보증한다는 표시</b>를 짚어 보세요."
+      en: "On line {{site.line}}, point at <b>the mark that says I vouch for this</b>."
+    hint:
+      ko: "점선이 그어진 곳을 클릭하거나 <kbd>←</kbd> <kbd>→</kbd> 로 옮겨 가며 고릅니다."
+      en: "Click a dotted spot, or move between them with <kbd>←</kbd> <kbd>→</kbd> and choose."
+    answer: pick.1
+    diag:
+      pick.2:
+        t:
+          ko: "{{pick.2|code}}{{pick.2|josa:은,는}} 보증이 미치는 <b>범위</b>입니다. 보증한다고 말하는 것은 그 앞의 낱말이에요."
+          en: "{{pick.2|code}} is the <b>range</b> the vouch covers. Saying “I vouch” is the word before it."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 낱말이냐 범위냐", en: "The sharpest spot — the word or the range" }
+          code:
+            - "unsafe { *ptr }"
+            - "// ^낱말  ^범위"
+      pick.3:
+        t:
+          ko: "{{pick.3|code}}{{pick.3|josa:은,는}} 블록을 <b>여는 괄호</b>이거나 인자 목록입니다. 보증의 뜻은 그 앞 낱말에 있어요."
+          en: "{{pick.3|code}} is the <b>opening brace</b> or the parameter list. The vouching is in the word before."
+        edge:
+          h: { ko: "가장 날카로운 자리 — 괄호냐 낱말이냐", en: "The sharpest spot — the brace or the word" }
+          code:
+            - "unsafe { … }"
+            - "//     ^괄호"
+
+blank:
+  - q:
+      ko: "빈칸에 들어갈 것을 고르세요. {{site.line}}행은 컴파일러가 증명 못 하는 일을 <b>내가 보증한다</b>고 적습니다."
+      en: "Choose what goes in the blank. Line {{site.line}} says <b>I vouch</b> for something the compiler cannot prove."
+    hint:
+      ko: "고르는 즉시 코드에 써집니다. 제출하면 채점합니다."
+      en: "Your choice is written into the code at once. Submit to have it marked."
+    options:
+      - { t: "unsafe", mono: true }
+      - t: "extern"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>바깥 언어의 함수</b>를 선언하는 낱말입니다. 그것을 부르는 자리에는 다시 보증 표시가 필요해요."
+            en: "That <b>declares functions from another language</b>. Calling them still needs the vouching mark."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 선언이냐 보증이냐", en: "The sharpest spot — declaring or vouching" }
+            code:
+              - "extern \"C\" { fn abs(x: i32) -> i32; }"
+              - "unsafe { abs(-1) }"
+      - t: "const"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>컴파일 시 상수</b>의 낱말입니다. 보증과 무관해요."
+            en: "That is the word for a <b>compile-time constant</b>. Nothing to do with vouching."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 다른 자리의 낱말", en: "The sharpest spot — a word from another slot" }
+            code:
+              - "const MAX: u32 = 10;"
+              - "unsafe { *ptr }"
+      - t: "static"
+        mono: true
+        diag:
+          t:
+            ko: "이건 <b>프로그램 내내 사는 자리</b>를 만드는 낱말입니다. `static mut` 을 읽는 것이 보증이 필요한 다섯 중 하나일 뿐이에요."
+            en: "That makes <b>a place that lives for the whole program</b>. Reading a `static mut` is merely one of the five things that need the vouch."
+          edge:
+            h: { ko: "가장 날카로운 자리 — 자리냐 보증이냐", en: "The sharpest spot — the place or the vouch" }
+            code:
+              - "static mut COUNT: u32 = 0;"
+              - "unsafe { COUNT += 1 }"
+
+why_gate:
+  q:
+    ko: "Rust 는 왜 이 블록 안에서도 <b>빌림 검사를 계속 돌릴까요</b>?"
+    en: "Why does Rust <b>keep the borrow check running</b> even inside this block?"
+  choices:
+    - t:
+        ko: "사람이 떠맡는 증명을 다섯으로 좁혀 나머지는 여전히 컴파일러가 지키게 하려고 — 그래야 찾아 읽을 자리가 작다"
+        en: "To narrow the proof a human takes over to five things while the compiler keeps guarding the rest — so the spots to audit stay small"
+      ok: true
+      fb:
+        ko: "그 방향입니다. 이 블록 안에서 다섯 중 무엇을 하는지도 적어 보세요."
+        en: "That is the direction. Say which of the five happens inside this block."
+    - t:
+        ko: "검사를 끄는 법이 없어서"
+        en: "Because there is no way to switch checks off"
+      ok: false
+      fb:
+        ko: "법이 없는 게 아니라 안 두기로 한 겁니다. 좁혀야 값이 있어서요."
+        en: "Not impossible — deliberately absent. Narrowing is what makes it worth anything."
+    - t:
+        ko: "빠르게 하려고"
+        en: "To go faster"
+      ok: false
+      fb:
+        ko: "속도와 무관합니다. 누가 증명하느냐의 문제예요."
+        en: "Unrelated to speed. It is about who holds the proof."
+
+queries:
+  - { grammars: [rust], file: ./unsafe-block.scm }
+
+examples:
+  - code: "fn f() { let v = unsafe { *ptr }; }               // 원시 포인터 역참조 — 다섯 중 하나"
+    expect: { sites: 1, form: unsafe-block, hole: "unsafe", picks: { 1: "unsafe", 2: "{ *ptr }", 3: "{" } }
+  - code: "unsafe fn raw_read(p: *const u8) -> u8 { *p }     // 부르는 쪽이 보증해야 하는 함수"
+    expect: { sites: 1, form: unsafe-fn, picks: { 1: "unsafe", 2: "raw_read", 3: "(p: *const u8)" } }
+  - code: "fn f() { let v = *r; }                            // 참조 역참조 — 보증이 필요 없다"
+    expect: none
