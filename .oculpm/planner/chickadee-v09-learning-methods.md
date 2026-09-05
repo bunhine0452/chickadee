@@ -26,11 +26,11 @@ owner: claude-code
 - [x] typecheck · lint · test:unit · gates · design:check · contrast · motion → 커밋(영어) → 푸시 → gh run watch {#k-gates}
 
 ## Q · 사용자 결정 (멈춤표) {#q-user}
-- [ ] 물을 것 — build 형식(거꾸로 만들기)을 열려면 러너를 리포 밖 스니펫·자바 외 언어로 넓혀야 한다. 지금 여나 {#q-build-format}
-- [ ] 물을 것 — 알고리즘 첫 단계(표준 입력 러너 + 우리가 쓴 작은 문제 층)를 다음 판에 넣나 {#q-stdin-runner}
-- [ ] 물을 것 — 사전 실제 저작의 첫 언어 (순서는 TS → SQL → 파이썬 → 자바 → 러스트, 첫 언어 23~31일) {#q-first-lang}
-- [ ] 물을 것 — cs/ 에 없는 셋(operator-precedence · type-conversion · truthiness)을 43→46 으로 신설하나 {#q-cs-three}
-- [ ] 물을 것 — 새 결함 둘 수리 시점: grammarSchema 가 파서 없는 언어를 통과시키는 것 · MyBatis #{} 자리표가 sql/comparison 에 틀린 답을 내는 것 {#q-defects}
+- [x] 물을 것 — build 형식(거꾸로 만들기)을 열려면 러너를 리포 밖 스니펫·자바 외 언어로 넓혀야 한다. 지금 여나 {#q-build-format}
+- [x] 물을 것 — 알고리즘 첫 단계(표준 입력 러너 + 우리가 쓴 작은 문제 층)를 다음 판에 넣나 {#q-stdin-runner}
+- [x] 물을 것 — 사전 실제 저작의 첫 언어 (순서는 TS → SQL → 파이썬 → 자바 → 러스트, 첫 언어 23~31일) {#q-first-lang}
+- [x] 물을 것 — cs/ 에 없는 셋(operator-precedence · type-conversion · truthiness)을 43→46 으로 신설하나 {#q-cs-three}
+- [x] 물을 것 — 새 결함 둘 수리 시점: grammarSchema 가 파서 없는 언어를 통과시키는 것 · MyBatis #{} 자리표가 sql/comparison 에 틀린 답을 내는 것 {#q-defects}
 
 <!-- oculpm:plan-log begin v1 -->
 | 시각 | 항목 | 에이전트 | 변화 | 일지 | 메모 |
@@ -51,4 +51,9 @@ owner: claude-code
 | 2026-09-05T19:35:03+09:00 | #k-readme | claude-code | ☐→x |  | README §13 (기계 표 · 겹친 자리 다섯 · 미적용 diff · 그림 신청 · 근거 한계) · program/README 에 pedagogy 행(J0) |
 | 2026-09-05T19:35:20+09:00 | #k-formats | claude-code | ☐→x |  | fundamentals.md §13 — 새 형식 둘(order·trace-table) · 확장 여섯 · table 배치 셋 · 안 만들 것 둘 |
 | 2026-09-05T19:42:27+09:00 | #k-gates | claude-code | ☐→x | .oculpm/journal/20260905/Chores/1934_chore_ten-language-learning-methods-integration.md | 로컬 게이트 전부 초록 · 푸시 2904898 · CI 8잡 성공 (run 33961093472) |
+| 2026-09-06T00:13:45+09:00 | #q-build-format | claude-code | ☐→x |  | D187 ① 유보 → S9 가 stdin 러너와 함께 유보 해제(D188 ⑥) |
+| 2026-09-06T00:13:55+09:00 | #q-stdin-runner | claude-code | ☐→x |  | D187 ⑧ → S9 stdin 러너 + 문제 열넷 (1d6dffb) |
+| 2026-09-06T00:14:04+09:00 | #q-first-lang | claude-code | ☐→x |  | D187 ⑦ — java·ts·py·sql 동시 저작(S4·S5·S6·S7) |
+| 2026-09-06T00:14:13+09:00 | #q-cs-three | claude-code | ☐→x |  | D187 ⑤⑥ — cs/ 둘 신설(43→45), truthiness 는 common/ (S8) |
+| 2026-09-06T00:14:22+09:00 | #q-defects | claude-code | ☐→x |  | D187 ⑨ — grammarSchema 미링크 거부(S8) · MyBatis #{} 파서 앞 가림(S7) |
 <!-- oculpm:plan-log end -->

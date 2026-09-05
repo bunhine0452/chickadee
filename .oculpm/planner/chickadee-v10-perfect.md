@@ -2,7 +2,7 @@
 oculpm_plan: v1
 id: chickadee-v10-perfect
 title: "1.0 「완벽한 학습 소프트웨어」 — 셋을 게이트로: UX · 디자인 · 학습질 (D186 · D187)"
-status: active
+status: done
 created: 2026-09-05
 updated: 2026-09-05
 owner: claude-code
@@ -31,10 +31,10 @@ owner: claude-code
 - [x] S12 카탈로그 확장 — 언어별 식 늘리기 · variants · langAlt · compile-error/unspecified · 재출제 다른 식 {#w2-catalog}
 
 ## K · 통합과 세 게이트 {#k-gates}
-- [ ] 성질 게이트 셋(내 코드 비율 · 값 추적 있음 · 진단 계산) + 정직성 게이트 — tests/gates {#k-quality-gates}
-- [ ] 화면 전수 스크린샷 모음 design/system/shots — 사용자에게 전송 {#k-shots}
-- [ ] typecheck · lint · test:unit · gates · e2e-ui · design:check · contrast · motion → 커밋 → 푸시 → CI 초록 {#k-verify}
-- [ ] 최종 보고 — 세 게이트의 수치와 못 한 것 {#k-report}
+- [x] 성질 게이트 셋(내 코드 비율 · 값 추적 있음 · 진단 계산) + 정직성 게이트 — tests/gates {#k-quality-gates}
+- [x] 화면 전수 스크린샷 모음 design/system/shots — 사용자에게 전송 {#k-shots}
+- [x] typecheck · lint · test:unit · gates · e2e-ui · design:check · contrast · motion → 커밋 → 푸시 → CI 초록 {#k-verify}
+- [x] 최종 보고 — 세 게이트의 수치와 못 한 것 {#k-report}
 
 <!-- oculpm:plan-log begin v1 -->
 | 시각 | 항목 | 에이전트 | 변화 | 일지 | 메모 |
@@ -66,4 +66,8 @@ owner: claude-code
 | 2026-09-05T23:37:18+09:00 | #w2-py-dict | claude-code | ~→x |  | py 8→24장, 골든 123 · 23장 사용처 있음/합성 1 · essential 24, 0장 후보 24(12일) · reference-binding 을 list-literal 뒤로 · bake.ts 대여자 선택이 리포 언어를 안 보던 구조 결함 수리 · 쿼리 넷 좁힘 · t1-line 파이썬 분기 · 래칫 120/100/120/111 → 합류 때 |
 | 2026-09-05T23:38:38+09:00 | #w2-catalog | claude-code | ~→x |  | 카탈로그 38→249장(식 4→27, 1식 0개) · siblings 219·variants 204·langAlt 6, 없음 0 · 재출제 다른 식 · meaning→value 40장(1부 합성만) · 성질 게이트 셋: 내 코드 100%(문턱 50) · 값 추적 침묵 0 · 진단 249/249 · vitest 에 두고 Playwright 는 읽기만 |
 | 2026-09-05T23:43:57+09:00 | #w2-design | claude-code | ~→x |  | shoot-screens 24화면×6=144장 · shots 게이트(목록이 코드에서 옴) · 이상한 곳 19→고침 14 · 넘침 0 · 2560 ≤2단 · 대비 142 · 코드 창 16px 은 720 높이에 10.4줄(스크롤이 답) · 발견: 어둡게가 설정 밖에서 안 걸림(S1 재개) · 그림 일곱은 아직 어느 화면에도 안 마운트 |
+| 2026-09-06T00:00:39+09:00 | #k-quality-gates | claude-code | ☐→x |  | quality.spec(성질 셋: 내 코드 100%/문턱 50 · 값 추적 침묵 0 · 진단 249/249) + honesty.spec(7×2) + journey.spec(8×2) + shots.spec |
+| 2026-09-06T00:00:54+09:00 | #k-shots | claude-code | ☐→x |  | design/system/shots/README.md 가 144장 격자 색인 · 파일 전송 도구가 이 세션에서 없어져 경로로 안내 |
+| 2026-09-06T00:07:32+09:00 | #k-verify | claude-code | ☐→x |  | 로컬 전부 초록(unit 2,582 · gates 206 · e2e-ui 26 · quality · cargo · clippy 0 · fmt · 방벽 넷) · 푸시 0bae082 · CI 8잡 성공(run 33973515663) |
+| 2026-09-06T00:07:40+09:00 | #k-report | claude-code | ☐→x |  | 최종 보고 — 게이트 넷 수치 · 못 한 것 넷(그림 미마운트 · 0부 형식 원장 없음 · 자바 러너 미검증 · 4·5단 미관찰) · 스크린샷 보관 방식 미결 |
 <!-- oculpm:plan-log end -->

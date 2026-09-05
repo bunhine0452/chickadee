@@ -2,7 +2,7 @@
 oculpm_plan: v1
 id: chickadee-v07-course
 title: "0.7 코스 — 기능 경로를 다섯 단으로 가르친다 (D162 완성) + UX 감사"
-status: active
+status: done
 created: 2026-09-05
 updated: 2026-09-05
 owner: claude-code

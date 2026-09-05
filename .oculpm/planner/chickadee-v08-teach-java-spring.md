@@ -2,7 +2,7 @@
 oculpm_plan: v1
 id: chickadee-v08-teach-java-spring
 title: "0.8 자바·스프링을 실제로 가르친다 — 실행 · 정식 코스 · 은유 제거 (D174)"
-status: active
+status: done
 created: 2026-09-05
 updated: 2026-09-05
 owner: claude-code
