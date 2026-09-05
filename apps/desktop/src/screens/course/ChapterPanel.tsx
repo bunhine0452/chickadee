@@ -32,10 +32,10 @@ export interface ChapterPanelProps {
 
 /** 이 단의 판이 몇 분인가 — 카드 종류를 모르니 단의 평균으로 어림한다. */
 const STAGE_EST: Readonly<Record<StageNo, number>> = {
-  1: 0.5, 2: (EST_MIN.exec + EST_MIN.hop + EST_MIN.origin + EST_MIN.caller) / 4,
+  1: 0.5, 2: (EST_MIN.exec + EST_MIN.hop + EST_MIN.origin + EST_MIN.caller + EST_MIN['trace-table']) / 5,
   3: (EST_MIN.cut + EST_MIN.reorder + EST_MIN.contract) / 3,
   4: (EST_MIN['patch-line'] + EST_MIN['patch-place'] + EST_MIN.rollback) / 3,
-  5: (EST_MIN['reimpl-spec'] + EST_MIN['reimpl-layer'] + EST_MIN.handoff) / 3,
+  5: (EST_MIN['reimpl-spec'] + EST_MIN['reimpl-layer'] + EST_MIN.handoff + EST_MIN.order) / 4,
 };
 
 /** 다음에 걸 수 있는 단 — 판이 있는 첫 단. 4단이 비면 5단으로 건너뛴다. */

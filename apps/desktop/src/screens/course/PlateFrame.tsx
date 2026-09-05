@@ -57,7 +57,7 @@ export function PlateFrame(props: PlateFrameProps): React.JSX.Element {
       kind={t('chapter.kindAndStage', { kind: t(typeKey(card.type)), stage: t(stageKey(card.stageNo)) })}
       source={props.source}
       ly={[props.layer, props.layer]}
-      width={card.type === 'hop' || card.type === 'caller' || card.stageNo >= 4 ? 'wide' : 'normal'}
+      width={card.type === 'hop' || card.type === 'caller' || card.type === 'trace-table' || card.stageNo >= 4 ? 'wide' : 'normal'}
       {...(props.focusOnMount === undefined ? {} : { focusOnMount: props.focusOnMount })}
     >
       {props.children}

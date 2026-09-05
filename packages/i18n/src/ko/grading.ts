@@ -86,4 +86,14 @@ export const grading = {
   'grading.stageRunFailedAt': '{{test}} — {{message}}',
   'grading.stageRunTimeout': '시간 안에 끝나지 않았습니다 — 끝나지 않는 반복이 없는지 보세요.',
   'grading.stageRunError': '빌드하지 못했습니다 — 컴파일 오류부터 보세요.',
+
+  // 형식 둘 (D187 ⑱) — 진단은 재료의 사실에서 계산한다.
+  'grading.orderMissWhy': '순서가 반대입니다 — {{first}} 다음이 {{second}} 입니다. {{fact}}.',
+  'grading.orderMissUnknown': '정답에 없는 자리입니다 — {{a}} 다음 {{b}}.',
+  'grading.orderMissEmpty': '세운 것이 없습니다.',
+  'grading.traceBlank': '{{row}} 줄의 「{{col}}」 칸이 비었습니다.',
+  'grading.traceValue': '{{row}} 줄의 「{{col}}」 칸 — 적으신 것은 {{mine}} 입니다.',
+  'grading.traceCarry': '{{row}} 줄의 「{{col}}」 칸은 {{from}} 줄에서 값이 바뀌지 않았습니다 — 거기 쓴 {{want}} 가 그대로여야 하는데 {{mine}} 입니다.',
+  'grading.traceReused': '{{row}} 줄의 「{{col}}」 칸에서 상자가 바뀝니다 — {{mine}} 은 앞에서 이미 쓴 이름입니다.',
+  'grading.traceEmpty': '채운 칸이 없습니다.',
 } as const;

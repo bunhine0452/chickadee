@@ -7,9 +7,11 @@
  */
 import type { StageNo } from '@chickadee/store-sql';
 
+import { buildOrders } from './order.js';
 import { buildContracts, buildCuts, buildOrigins, buildReorders, buildTwins, conceptsOnPath } from './stage-choice.js';
 import { buildReimpls, buildRepairs } from './stage-edit.js';
 import { buildCallers, buildExecs, buildHops } from './stage-trace.js';
+import { buildTraces } from './trace-table.js';
 import type { StageCard, StageDrop, StageRequest, StageResult, StageType } from './stage-types.js';
 
 type Builder = (req: StageRequest) => { cards: StageCard[]; drops: StageDrop[] };
@@ -17,19 +19,19 @@ type Builder = (req: StageRequest) => { cards: StageCard[]; drops: StageDrop[] }
 /** 단마다 도는 생성기 — 표의 순서가 판의 순서다 (`exercises.md` §2). */
 const BUILDERS: Readonly<Record<StageNo, readonly Builder[]>> = {
   1: [buildTwins],
-  2: [buildExecs, buildHops, buildOrigins, buildCallers],
+  2: [buildExecs, buildHops, buildOrigins, buildCallers, buildTraces],
   3: [buildCuts, buildReorders, buildContracts],
   4: [buildRepairs],
-  5: [buildReimpls],
+  5: [buildReimpls, buildOrders],
 };
 
 /** 그 단이 낼 수 있는 유형 — 화면의 「이 단에 없는 문항」 목록과 진도의 「4단 문항이 있는가」가 본다. */
 export const TYPES_OF_STAGE: Readonly<Record<StageNo, readonly StageType[]>> = {
   1: ['point', 'twin', 'blank'],
-  2: ['exec', 'hop', 'origin', 'caller'],
+  2: ['exec', 'hop', 'origin', 'caller', 'trace-table'],
   3: ['cut', 'reorder', 'contract'],
   4: ['patch-line', 'patch-place', 'rollback'],
-  5: ['reimpl-spec', 'reimpl-layer', 'handoff'],
+  5: ['reimpl-spec', 'reimpl-layer', 'handoff', 'order'],
 };
 
 export function buildStageCards(req: StageRequest, stageNo: StageNo): StageResult {

@@ -88,6 +88,13 @@ export {
 } from './stage-tests.js';
 export type { JudgeTestInput, MethodContract } from './stage-tests.js';
 
+// 형식 둘 — `order`(Parsons) · `trace-table`(시간 × 열 격자) (D187 ⑱)
+export { buildLadderOrders, buildOrders, hopPieces, shuffleDeck, MAX_ORDER, ORDER_MAX, ORDER_MIN } from './order.js';
+export {
+  boundName, buildLadderTrace, buildTraces, pickRows, scanNames,
+  BOX_LABELS, MAX_TRACE, MAX_TRACE_COLS, MAX_TRACE_ROWS,
+} from './trace-table.js';
+
 // 기초 문항 — 고르지 않고 적는다 (`docs/program/fundamentals.md`)
 export {
   buildAllValueItems, buildValueItems, valueText, FUND_DIALECTS, FUND_LANGS, FUND_SITE_ID,

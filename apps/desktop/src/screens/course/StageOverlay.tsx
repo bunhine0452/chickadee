@@ -33,8 +33,10 @@ import {
   queueConceptPlate, runStageAnswer, type JudgeDeps,
 } from './data.js';
 import { HopPlate } from './HopPlate.js';
+import { OrderPlate } from './OrderPlate.js';
 import { ReimplPlate } from './ReimplPlate.js';
 import { RepairPlate } from './RepairPlate.js';
+import { TraceTablePlate } from './TraceTablePlate.js';
 import {
   foldFlow, plannedMin, queueKindOf, stageKey, tally, typeKey,
   type RunPhase, type RunSpec, type StageCardView,
@@ -321,6 +323,12 @@ export function StageOverlay(props: StageOverlayProps): React.JSX.Element {
   };
 
   const nextDue = done?.advance.next.dueAt ?? null;
+  /**
+   * **정직성** (D186 ④). 2단인데 값 추적 판이 없으면 그 사실을 판 자리에서 말한다 — 판을
+   * 숨기면 학습자는 앱이 그것을 재고 있다고 믿는다. 그 챕터는 경로 판만으로 이 단을 통과한다.
+   */
+  const noTrace = spec.kind === 'first' && spec.stage === 2
+    && !cards.some((c) => c.type === 'trace-table');
 
   return (
     <div className="course-run">
@@ -331,6 +339,7 @@ export function StageOverlay(props: StageOverlayProps): React.JSX.Element {
         live={live}
         onExit={onExit}
       >
+        {noTrace ? <p className="note cc-honest">{t('chapter.traceMissing')}</p> : null}
         {done !== null ? (
           <StageDone
             stage={spec.stage}
@@ -350,6 +359,10 @@ export function StageOverlay(props: StageOverlayProps): React.JSX.Element {
           <HopPlate {...plateProps} folded={folded[pos] === true} />
         ) : card.type === 'caller' ? (
           <CallerPlate {...plateProps} />
+        ) : card.type === 'trace-table' ? (
+          <TraceTablePlate {...plateProps} />
+        ) : card.type === 'order' ? (
+          <OrderPlate {...plateProps} />
         ) : card.stageNo === 4 ? (
           <RepairPlate {...plateProps} phase={phases[pos] ?? { kind: 'off' }} />
         ) : card.stageNo === 5 ? (

@@ -95,6 +95,16 @@ const ABSENCE: Readonly<Record<string, AbsenceReason>> = {
   // 이 규모에서는 계층이 안 생겼다. 표본 리포에서 `abstract class` 0곳,
   // `extends` 9곳 중 8곳이 예외 계층이다.
   'java/abstract-class': 'scale',
+  // 0부 「값과 식」 — 표본 리포(java 99파일) 실측(S4 · 2026-09-05). 자리는 `java.md` §1.5.3.
+  'java/float-inexact': 'scale',        // 실수 리터럴이 든 셈 0곳
+  'java/implicit-conversion': 'scale',  // 넓히기는 코드에 안 적힌다 — 보이는 자리 0곳
+  'java/explicit-conversion': 'scale',  // 원시 좁히기 캐스트 0곳 (참조 다운캐스트는 4곳/3파일)
+  'java/integer-limit': 'scale',        // 2곳/1파일
+  'java/floating-type': 'scale',        // 1곳/1파일
+  'java/reference-binding': 'idiom',    // 1곳 — 생성자 주입과 빌더가 그 자리를 가져갔다
+  // TS 0부 — `ai-pm` 613 · `ECC` 410파일에서 0곳(S5). 쿼리가 잡는 것은 한쪽이 리터럴인 식뿐이고
+  // 실제 강제 변환은 `'…' + name` 꼴이라 소스에 타입이 없다 — 명시 변환과 타입 검사기가 가져갔다.
+  'ts/implicit-conversion': 'idiom',
   // 다른 문법이 자리를 가져갔다. 표본 리포에서 `for (;;)` 0곳 · for-each 1곳 · 배열 1곳이고,
   // 그 자리를 스트림(9곳)과 람다(53곳)가 다 쓴다.
   'java/for-loop': 'idiom',

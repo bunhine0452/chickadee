@@ -60,7 +60,9 @@ export function ChoicePlate(props: ChoicePlateProps): React.JSX.Element | null {
 
   const answered = verdict !== null;
   const pickable = p.track === 't0';
-  const reason = p.track === 't3' && p.kind !== 'repair' && p.kind !== 'reimpl' ? p.reason ?? null : null;
+  const reason = p.track === 't3'
+    && p.kind !== 'repair' && p.kind !== 'reimpl' && p.kind !== 'order' && p.kind !== 'trace'
+    ? p.reason ?? null : null;
   const options = optionsOf(card);
   const canSubmit = sel !== null && (reason === null || reasonSel !== null);
 
@@ -87,7 +89,11 @@ export function ChoicePlate(props: ChoicePlateProps): React.JSX.Element | null {
   }, [answered]);
 
   if (p.track !== 't0' && p.track !== 't3') return null;
-  if (p.track === 't3' && (p.kind === 'repair' || p.kind === 'reimpl')) return null;
+  // `t3` 인데 선택형이 **아닌** 판 — 4·5단 편집기 둘과 형식 둘(D187 ⑱). 집합이 아니라 비교로
+  // 적는 이유는 좁히기다: `Set.has` 는 `payload` 를 안 좁히고 `!==` 연쇄는 좁힌다.
+  if (p.track === 't3' && (p.kind === 'repair' || p.kind === 'reimpl' || p.kind === 'order' || p.kind === 'trace')) {
+    return null;
+  }
 
   const answer = p.answer;
   const selectedPick = sel === null ? null : sel + 1;

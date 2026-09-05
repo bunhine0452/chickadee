@@ -265,12 +265,63 @@ const stageReimplSchema = z.object({
   tests: z.array(judgeTestSchema).optional(),
 });
 
-/** `card.payload_json` (02 §8.2 · 05 가 그대로 렌더한다). 코스 셋은 D164. */
+/** 격자의 열 축 (D187 ⑱). 다섯 중 `var`·`obj` 둘만 생성기가 낸다. */
+export const traceAxisSchema = z.enum(['var', 'obj', 'addr', 'place', 'row']);
+
+/** 격자 칸 하나의 답. `box` 는 글자가 아니라 **분할**이 정답이다 (`schemas` 는 모양만 본다). */
+export const traceCellSchema = z.union([
+  z.object({ t: z.literal('int'), v: z.string() }),
+  z.object({ t: z.literal('float'), v: z.string() }),
+  z.object({ t: z.literal('bool'), v: z.boolean() }),
+  z.object({ t: z.literal('string'), v: z.string() }),
+  z.object({ t: z.literal('box'), label: z.string(), accept: z.array(z.string()) }),
+  z.object({ t: z.literal('none'), accept: z.array(z.string()) }),
+  z.object({ t: z.literal('unknown'), accept: z.array(z.string()) }),
+]);
+
+/** `order` — 조각의 순열 (D187 ⑱). `fact` 가 오답 진단의 재료다. */
+const stageOrderSchema = z.object({
+  track: z.literal('t3'),
+  kind: z.literal('order'),
+  stage: z.literal(5),
+  q: z.string(),
+  hint: z.string(),
+  pieces: z.array(z.object({ id: z.string(), t: z.string(), fact: z.string() })),
+  answer: z.array(z.string()),
+  deck: z.array(z.string()),
+  ok: z.string(),
+  rule: z.string(),
+  promptLines: z.array(z.string()),
+});
+
+/** `trace-table` — 시간 × 열 격자 (D187 ⑱). */
+const stageTraceSchema = z.object({
+  track: z.literal('t3'),
+  kind: z.literal('trace'),
+  stage: z.literal(2),
+  q: z.string(),
+  hint: z.string(),
+  file: z.string(),
+  lines: z.array(codeLineSchema),
+  cols: z.array(z.object({ k: z.string(), axis: traceAxisSchema, t: z.string() })),
+  rows: z.array(z.object({ k: z.string(), line: z.union([int(), z.null()]), t: z.string() })),
+  cells: z.array(z.object({
+    r: z.string(), c: z.string(), v: traceCellSchema, carry: z.union([z.string(), z.null()]),
+  })),
+  hidden: z.array(z.string()),
+  ok: z.string(),
+  rule: z.string(),
+  promptLines: z.array(z.string()),
+});
+
+/** `card.payload_json` (02 §8.2 · 05 가 그대로 렌더한다). 코스 셋은 D164, 뒤 둘은 D187 ⑱. */
 export const cardPayloadSchema = z.union([
   z.discriminatedUnion('track', [t0PayloadSchema, t1PayloadSchema, t2PayloadSchema]),
   stageChoiceSchema,
   stageRepairSchema,
   stageReimplSchema,
+  stageOrderSchema,
+  stageTraceSchema,
 ]);
 
 // ───────── 세션 · 원장 ─────────

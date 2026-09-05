@@ -69,4 +69,14 @@ export const grading: Record<string, string> = {
   'grading.stageRunFailedAt': '{{test}} — {{message}}',
   'grading.stageRunTimeout': 'Did not finish in time — look for a loop that never ends.',
   'grading.stageRunError': 'Did not build — start with the compile error.',
+
+  // Two formats (D187 ⑱) — the diagnosis is computed from the material's own facts.
+  'grading.orderMissWhy': 'Reversed — {{second}} comes after {{first}}. {{fact}}.',
+  'grading.orderMissUnknown': 'That pair is not in the answer — {{a}} then {{b}}.',
+  'grading.orderMissEmpty': 'Nothing was stacked.',
+  'grading.traceBlank': 'Line {{row}}, column "{{col}}" is empty.',
+  'grading.traceValue': 'Line {{row}}, column "{{col}}" — you wrote {{mine}}.',
+  'grading.traceCarry': 'Line {{row}}, column "{{col}}" did not change since line {{from}} — it should still be {{want}}, but you wrote {{mine}}.',
+  'grading.traceReused': 'Line {{row}}, column "{{col}}" is where the box changes — {{mine}} is a name you already used.',
+  'grading.traceEmpty': 'No cell was filled.',
 };

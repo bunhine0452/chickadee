@@ -127,7 +127,51 @@ export type CardPayload =
       file: string; grammar: string; fn: string; original: string[]; from: number;
       signature: string[]; mustHold: { text: string; source: 'user' | 'dict' | 'ast'; anchor: number[] }[];
       links: string[]; context: { file: string; lines: string[] }[]; question: string;
-      promptLines: string[]; blockId: number | null; tests?: JudgeTestPayload[] };
+      promptLines: string[]; blockId: number | null; tests?: JudgeTestPayload[] }
+  // ───────── 형식 둘 (D187 ⑱ · `docs/program/fundamentals.md` §13) ─────────
+  // `order` — 조각 N(3~7)의 순열. 5단의 **1겹**(T1 페이딩 앞)이고 채점은 2단 `hop` 과 같은
+  // 인접쌍 비율이다. 조각마다 `fact` 를 싣는 이유가 이 형식의 전부다 — 오답 진단
+  // (「B 가 A 보다 먼저인 이유」)을 사람이 적지 않고 **채점기가 그 사실로 계산한다**.
+  | { track: 't3'; kind: 'order'; stage: 5; q: string; hint: string;
+      pieces: { id: string; t: string; fact: string }[];
+      answer: string[]; deck: string[];
+      ok: string; rule: string; promptLines: string[] }
+  // `trace-table` — **시간 × 열** 격자. 2단의 넷(`exec`·`hop`·`origin`·`caller`)이 전부 경로라
+  // 값을 굴리는 판이 없던 자리다 (`pedagogy.md` §1.2). 열 축은 파라미터다 — 지금 서는 것은
+  // `var`·`obj` 둘이고 나머지 셋은 타입에만 자리가 있다.
+  | { track: 't3'; kind: 'trace'; stage: 2; q: string; hint: string;
+      file: string; lines: CodeLine[];
+      cols: { k: string; axis: TraceAxis; t: string }[];
+      rows: { k: string; line: number | null; t: string }[];
+      cells: { r: string; c: string; v: TraceCell; carry: string | null }[];
+      /** 예측 모드에서 비우는 칸 `"<row>|<col>"` — **바뀐 칸만**이다 (I2 규칙). */
+      hidden: string[];
+      ok: string; rule: string; promptLines: string[] };
+
+/**
+ * 격자의 열이 무엇의 축인가 (D187 ⑱ · `fundamentals.md` §13). 다섯 중 **둘만 구현했다** —
+ * `var`(이 시점에 이 이름에 값이 있나)와 `obj`(이 이름이 가리키는 상자). 나머지 셋은
+ * c·cpp·rs 셋과 sql 이 독립적으로 요구한 자리이고 여기 이름만 서 있다.
+ */
+export type TraceAxis = 'var' | 'obj' | 'addr' | 'place' | 'row';
+
+/**
+ * 칸 하나의 답.
+ *
+ * `box` 는 **상자 라벨**이고 글자가 아니라 **분할**이 정답이다 — 학습자가 A·B 라 쓰든 1·2 라
+ * 쓰든 「같은 상자끼리 같은 이름」이면 맞다. `accept` 는 그 언어·화면이 미리 찍어 둔 표기이고,
+ * 첫 칸의 라벨이 정해지면 뒤 칸은 그 라벨을 **이월**한다.
+ */
+export type TraceCell =
+  | { t: 'int'; v: string }
+  | { t: 'float'; v: string }
+  | { t: 'bool'; v: boolean }
+  | { t: 'string'; v: string }
+  | { t: 'box'; label: string; accept: string[] }
+  /** 이름이 아직 없다 · 값이 아직 없다. */
+  | { t: 'none'; accept: string[] }
+  /** 코드만 보고는 못 정한다 — 러너와 데이터가 있어야 한다 (`java-learning.md` §12.5). */
+  | { t: 'unknown'; accept: string[] };
 
 /** 판정용 테스트 한 장이 payload 에 실린 모양 (D180). 러너의 `RunSpec.tests` 로 그대로 간다. */
 export interface JudgeTestPayload { path: string; text: string; source: 'commit' | 'repo' | 'contract' }

@@ -15,30 +15,45 @@ import type { AstLite, CardKind, CardPayload, ConceptId, ConceptSite, EdgeKind, 
 import type { BlockConcept } from './t1-types.js';
 import type { FocusLine, LineWindow } from './types.js';
 
-/** 16유형 (exercises.md §2 표의 행 이름 그대로). */
+/**
+ * 18유형 — 16(exercises.md §2 표의 행 이름 그대로) + **형식 둘**(D187 ⑱).
+ *
+ * `trace-table` 은 2단에 붙는다 — 넷이 전부 경로라 값을 굴리는 판이 없던 자리다
+ * (`pedagogy.md` §1.2). `order` 는 5단의 **1겹**(T1 페이딩 앞)이고 4·5단 「사이」가 아니다
+ * (`pedagogy.md` §2.2 — 단을 여섯으로 늘리면 `stage_reached BETWEEN 0 AND 5` 가 깨진다).
+ */
 export type StageType =
   | 'point' | 'twin' | 'blank'
-  | 'exec' | 'hop' | 'origin' | 'caller'
+  | 'exec' | 'hop' | 'origin' | 'caller' | 'trace-table'
   | 'cut' | 'reorder' | 'contract'
   | 'patch-line' | 'patch-place' | 'rollback'
-  | 'reimpl-spec' | 'reimpl-layer' | 'handoff';
+  | 'reimpl-spec' | 'reimpl-layer' | 'handoff' | 'order';
 
 /** 유형 → 단. 1단 셋은 예전 T0 카드를 그대로 쓰므로(D164 ③) 여기서 새로 굽는 것은 `twin` 뿐이다. */
 export const STAGE_OF: Readonly<Record<StageType, StageNo>> = {
   point: 1, twin: 1, blank: 1,
-  exec: 2, hop: 2, origin: 2, caller: 2,
+  exec: 2, hop: 2, origin: 2, caller: 2, 'trace-table': 2,
   cut: 3, reorder: 3, contract: 3,
   'patch-line': 4, 'patch-place': 4, rollback: 4,
-  'reimpl-spec': 5, 'reimpl-layer': 5, handoff: 5,
+  'reimpl-spec': 5, 'reimpl-layer': 5, handoff: 5, order: 5,
 };
 
-/** 유형 → `card.kind` (exercises.md §5 표). */
+/**
+ * 유형 → `card.kind` (exercises.md §5 표).
+ *
+ * **형식 둘은 있는 값을 빌린다 — 마이그레이션이 0줄이다.** `card.kind` 의 CHECK
+ * (`0001_init.sql`)를 늘리려면 표를 다시 만들어야 하고(D146), 빌릴 값이 뜻에 맞으면 D151 의
+ * 길이 더 싸다: `trace-table` 은 2단 추적이라 `hop` 과 같은 `flow`, `order` 는 순서를 묻는
+ * 판이라 `reorder` 다. 화면과 채점기는 `card.kind` 가 아니라 `payload.kind`(`order`·`trace`)로
+ * 갈리므로 두 뜻이 섞이지 않는다. `fundamentals.md` §6 이 설계한 `kind='value'` 는 그 마이그레이션
+ * (`0010`)이 서면 옮겨 갈 자리다.
+ */
 export const KIND_OF: Readonly<Record<StageType, CardKind>> = {
   point: 'point', twin: 'twin', blank: 'blank',
-  exec: 'point', hop: 'flow', origin: 'origin', caller: 'radius',
+  exec: 'point', hop: 'flow', origin: 'origin', caller: 'radius', 'trace-table': 'flow',
   cut: 'cut', reorder: 'reorder', contract: 'contract',
   'patch-line': 'repair', 'patch-place': 'repair', rollback: 'repair',
-  'reimpl-spec': 'reimpl', 'reimpl-layer': 'reimpl', handoff: 'reimpl',
+  'reimpl-spec': 'reimpl', 'reimpl-layer': 'reimpl', handoff: 'reimpl', order: 'reorder',
 };
 
 /** 파일 하나의 원문. `lines[].n` 은 파일 기준 1-based 다. */

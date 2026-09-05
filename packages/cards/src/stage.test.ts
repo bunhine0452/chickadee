@@ -258,9 +258,9 @@ describe('1단 · 읽기', () => {
 });
 
 describe('2단 · 추적', () => {
-  test('exec·hop·origin·caller 가 다 나온다', () => {
+  test('exec·hop·origin·caller 와 값 추적이 다 나온다', () => {
     const types = typesOf(2);
-    expect(new Set(types)).toEqual(new Set(['exec', 'hop', 'origin', 'caller']));
+    expect(new Set(types)).toEqual(new Set(['exec', 'hop', 'origin', 'caller', 'trace-table']));
   });
 
   test('hop — 노드가 path:line 이고 함정은 같은 파일의 다른 요청 줄이다', () => {
@@ -325,6 +325,84 @@ describe('2단 · 추적', () => {
     expect(layerOf(CTRL, 1, 5)).toBe(1);
     expect(layerOf(SVC, 2, 5)).toBe(2);
     expect(layerOf(MAPPER, 4, 5)).toBe(3);
+  });
+});
+
+describe('형식 둘 — 값 추적과 섞기 (D187 ⑱)', () => {
+  test('로그인 챕터에서 값 추적 판이 실제로 구워진다 — 재료는 AuthService.login 이다', () => {
+    const { cards } = buildStageCards(REQ, 2);
+    const traces = cards.filter((c) => c.type === 'trace-table');
+    // 2단은 경로 판이 이미 넷이라 격자는 한 장이다 (`MAX_TRACE`).
+    expect(traces).toHaveLength(1);
+    const card = traces[0];
+    if (card?.payload.track !== 't3' || card.payload.kind !== 'trace') throw new Error('shape');
+    const p = card.payload;
+    expect(card.stageNo).toBe(2);
+    expect(card.conceptId).toBe('common/reassignment');
+    expect(p.file).toBe(SVC);
+    // 열은 `java-learning.md` §12.5 가 찾아 둔 셋이다 — user 의 상자, role 이 있나, token 이 있나.
+    expect(p.cols.map((c) => c.k)).toEqual(['c_user', 'c_role', 'c_token']);
+    expect(p.cols[0]?.axis).toBe('obj');
+    expect(p.cols[1]?.axis).toBe('var');
+    // 시간축에 재대입 줄과 그 **직전 읽기**가 다 있다 — 87 이 빠지면 「DB 만 바뀐다」를 못 묻는다.
+    const at = p.rows.map((r) => r.line);
+    expect(at).toContain(78);
+    expect(at).toContain(84);
+    expect(at).toContain(85);
+    expect(at.length).toBeLessThanOrEqual(8);
+  });
+
+  test('예측 모드는 바뀐 칸만 가린다 — user 는 두 칸, 나머지는 재료로 남는다', () => {
+    const card = buildStageCards(REQ, 2).cards.find((c) => c.type === 'trace-table');
+    if (card?.payload.track !== 't3' || card.payload.kind !== 'trace') throw new Error('shape');
+    const p = card.payload;
+    const changed = p.cells.filter((c) => c.carry === null).map((c) => `${c.r}|${c.c}`);
+    expect(new Set(p.hidden)).toEqual(new Set(changed));
+    // 상자 열은 「없음 → A」와 「A → B」 두 자리에서만 바뀐다.
+    expect(p.hidden.filter((k) => k.endsWith('|c_user'))).toHaveLength(2);
+    expect(p.hidden.length).toBeLessThan(p.cells.length);
+  });
+
+  test('상자 라벨은 대입 순서대로 A · B 다', () => {
+    const card = buildStageCards(REQ, 2).cards.find((c) => c.type === 'trace-table');
+    if (card?.payload.track !== 't3' || card.payload.kind !== 'trace') throw new Error('shape');
+    const user = card.payload.cells.filter((c) => c.c === 'c_user');
+    const labels = user.map((c) => (c.v.t === 'box' ? c.v.label : c.v.t));
+    expect(labels[0]).toBe('A');
+    expect(labels[labels.length - 1]).toBe('B');
+  });
+
+  test('order — 줄기마다 한 장, 상한 둘. 조각의 사실이 부르는 방향이다', () => {
+    const { cards } = buildStageCards(REQ, 5);
+    const orders = cards.filter((c) => c.type === 'order');
+    expect(orders).toHaveLength(2);
+    const first = orders[0];
+    if (first?.payload.track !== 't3' || first.payload.kind !== 'order') throw new Error('shape');
+    const p = first.payload;
+    expect(first.stageNo).toBe(5);
+    expect(first.kind).toBe('reorder');
+    expect(p.answer).toEqual([`${FRONT}:21`, `${CTRL}:56`, `${SVC}:20`, `${DAO}:5`, MAPPER]);
+    expect([...p.deck].sort()).toEqual([...p.answer].sort());
+    expect(p.deck).not.toEqual(p.answer);
+    expect(p.pieces[0]?.fact).toContain('AuthController.java');
+  });
+
+  test('줄기가 짧으면 사유와 함께 안 낸다', () => {
+    const short = { ...REQ, paths: [[hop(FRONT, 21, 'http'), hop(CTRL, null, null)]] };
+    const { cards, dropped } = buildStageCards(short, 5);
+    expect(cards.filter((c) => c.type === 'order')).toHaveLength(0);
+    expect(dropped.some((d) => d.type === 'order')).toBe(true);
+  });
+
+  test('재대입이 없는 챕터는 값 추적을 못 굽고 사유를 남긴다 (D186 ④)', () => {
+    const noRebind: StageRequest = {
+      ...REQ,
+      blocks: [BLOCKS[1] as StageBlock],
+      paths: [[hop(JWT, 30, 'static'), hop(MAPPER, null, null)]],
+    };
+    const { cards, dropped } = buildStageCards(noRebind, 2);
+    expect(cards.filter((c) => c.type === 'trace-table')).toHaveLength(0);
+    expect(dropped.find((d) => d.type === 'trace-table')?.reason).toContain('대입');
   });
 });
 
@@ -403,7 +481,8 @@ describe('4단 · 수정', () => {
 describe('5단 · 재구현', () => {
   test('reimpl-spec · handoff 는 같은 블록, reimpl-layer 는 이웃 층과의 연결을 든다', () => {
     const { cards } = buildStageCards(REQ, 5);
-    expect(cards.map((c) => c.type)).toEqual(['reimpl-spec', 'handoff', 'reimpl-layer']);
+    // 뒤 둘은 5단의 1겹 — 섞기(`order`)가 페이딩 앞에 선다 (D187 ⑱ · `pedagogy.md` §2.2).
+    expect(cards.map((c) => c.type)).toEqual(['reimpl-spec', 'handoff', 'reimpl-layer', 'order', 'order']);
     const spec = cards[0];
     if (spec?.payload.kind !== 'reimpl') throw new Error('shape');
     expect(spec.payload.original).toHaveLength(14);

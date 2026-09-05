@@ -19,6 +19,7 @@
 import { t } from '@chickadee/i18n';
 import type { CardPayload } from '@chickadee/store-sql';
 
+import { gradeOrder, type OrderVerdict } from './order.js';
 import { gradeT0, type T0Verdict } from './t0.js';
 import type { AstPair } from './t1-ast.js';
 import { compareLine, type LineCompare } from './t1-line.js';
@@ -27,10 +28,13 @@ import { gradeT1 } from './t1-result.js';
 import type { T1Result } from './t1-types.js';
 import { gradeFlow, gradePicks } from './t2.js';
 import type { T2Result } from './t2-types.js';
+import { gradeTrace as gradeCells, type TraceVerdict } from './trace-table.js';
 
 type Choice = Extract<CardPayload, { kind: 'twin' | 'origin' | 'cut' | 'reorder' | 'contract' }>;
 type Repair = Extract<CardPayload, { kind: 'repair' }>;
 type Reimpl = Extract<CardPayload, { kind: 'reimpl' }>;
+type Order = Extract<CardPayload, { kind: 'order' }>;
+type Trace = Extract<CardPayload, { kind: 'trace' }>;
 
 /** 화면이 넘기는 답. 판 모양마다 하나씩 — 모양이 안 맞으면 `wrong-shape` 로 떨어진다. */
 export type StageAnswer =
@@ -39,7 +43,9 @@ export type StageAnswer =
   | { kind: 'picks'; selected: readonly string[]; hints?: number }
   | { kind: 'lines'; lines: readonly string[] }
   | { kind: 'place'; at: number }
-  | { kind: 'handoff'; lines?: readonly string[] };
+  | { kind: 'handoff'; lines?: readonly string[] }
+  /** 격자의 칸 — 키는 `"<row>|<col>"` (D187 ⑱). */
+  | { kind: 'cells'; cells: Readonly<Record<string, string>> };
 
 export type StageDetail =
   | { kind: 'choice'; sel: number; answer: number; reasonOk: boolean | null }
@@ -50,6 +56,8 @@ export type StageDetail =
   | { kind: 't1'; result: T1Result; links: { name: string; ok: boolean }[] }
   | { kind: 'links'; links: { name: string; ok: boolean }[] }
   | { kind: 'handoff'; prompt: string }
+  | { kind: 'order'; result: OrderVerdict }
+  | { kind: 'trace'; result: TraceVerdict }
   | { kind: 'wrong-shape' };
 
 export interface StageVerdict {
@@ -131,6 +139,8 @@ export function gradeStage(payload: CardPayload, answer: StageAnswer, opts: Stag
     case 't3':
       if (payload.kind === 'repair') return gradeRepair(payload, answer, opts);
       if (payload.kind === 'reimpl') return gradeReimpl(payload, answer);
+      if (payload.kind === 'order') return gradeOrderPlate(payload, answer);
+      if (payload.kind === 'trace') return gradeTracePlate(payload, answer);
       return gradeChoice(payload, answer);
     default:
       return wrongShape();
@@ -154,6 +164,37 @@ function gradeChoice(payload: Choice, answer: StageAnswer): StageVerdict {
     ok, pct: ok ? 100 : placeOk ? 50 : 0, diagnosis, okText: payload.ok, rule: payload.rule,
     detail: { kind: 'choice', sel: answer.sel, answer: payload.answer, reasonOk },
     gated: true, run: null,
+  };
+}
+
+// ───────── 형식 둘 (D187 ⑱) ─────────
+
+/**
+ * `order` — 인접 쌍 비율이 표시값이고 **통과는 전부 맞음**이다. 5단의 1겹이라 부분 점수로
+ * 진급시키면 「섞인 것을 대충 세운 것」이 통과가 된다.
+ */
+function gradeOrderPlate(payload: Order, answer: StageAnswer): StageVerdict {
+  if (answer.kind !== 'order') return wrongShape();
+  const result = gradeOrder(payload, answer.ordered);
+  return {
+    ok: result.ok, pct: result.pct, diagnosis: result.diagnosis,
+    okText: result.okText, rule: result.rule,
+    detail: { kind: 'order', result }, gated: true, run: null,
+  };
+}
+
+/**
+ * `trace-table` — 칸의 부분 점수를 **보이되** 통과는 전부 맞음이다. 2단이 원래 그렇고
+ * (`mastery.md` §3.2 · `stagePasses`), 값 추적에서 한 칸을 놓치면 「값이 언제 바뀌나」를
+ * 놓친 것이다. 격자를 못 구운 챕터는 이 판이 아예 없으므로 경로 판만으로 그 단을 통과한다.
+ */
+function gradeTracePlate(payload: Trace, answer: StageAnswer): StageVerdict {
+  if (answer.kind !== 'cells') return wrongShape();
+  const result = gradeCells(payload, answer.cells);
+  return {
+    ok: result.ok, pct: result.pct, diagnosis: result.diagnosis,
+    okText: result.okText, rule: result.rule,
+    detail: { kind: 'trace', result }, gated: true, run: null,
   };
 }
 

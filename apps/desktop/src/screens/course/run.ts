@@ -43,10 +43,10 @@ export interface RunSpec {
  */
 export const EST_MIN: Readonly<Record<StageType, number>> = {
   point: 0.5, twin: 1, blank: 0.5,
-  exec: 1, hop: 2, origin: 1, caller: 2,
+  exec: 1, hop: 2, origin: 1, caller: 2, 'trace-table': 2,
   cut: 1, reorder: 1, contract: 1.5,
   'patch-line': 3, 'patch-place': 2, rollback: 3,
-  'reimpl-spec': 6, 'reimpl-layer': 6, handoff: 4,
+  'reimpl-spec': 6, 'reimpl-layer': 6, handoff: 4, order: 2,
 };
 
 /** 관문 판(T0) 한 장의 예상 분. 정본 §3-5 의 「T0 30초 칸」. */
@@ -59,6 +59,8 @@ export function typeOf(payload: CardPayload): StageType | null {
     case 't2': return payload.kind === 'flow' ? 'hop' : payload.kind === 'radius' ? 'caller' : null;
     case 't3':
       if (payload.kind === 'repair' || payload.kind === 'reimpl') return payload.type;
+      // 형식 둘은 payload 의 이름과 유형 이름이 한 자리 다르다 (D187 ⑱ · `stage-types.ts`).
+      if (payload.kind === 'trace') return 'trace-table';
       return payload.kind;
     default: return null;
   }
@@ -87,6 +89,7 @@ const TYPE_KEY = {
   cut: 'chapter.tCut', reorder: 'chapter.tReorder', contract: 'chapter.tContract',
   'patch-line': 'chapter.tPatchLine', 'patch-place': 'chapter.tPatchPlace', rollback: 'chapter.tRollback',
   'reimpl-spec': 'chapter.tReimplSpec', 'reimpl-layer': 'chapter.tReimplLayer', handoff: 'chapter.tHandoff',
+  'trace-table': 'chapter.tTraceTable', order: 'chapter.tOrder',
 } as const satisfies Record<StageType, MessageKey>;
 
 export const typeKey = (type: StageType): MessageKey => TYPE_KEY[type];
@@ -203,7 +206,9 @@ export function foldFlow(payload: Extract<CardPayload, { track: 't2' }>): Extrac
 /** 세션 큐 칸의 색 — 판 모양을 트랙 별칭으로 접는다 (`TimeQueue` 의 `kind`). */
 export function queueKindOf(type: StageType): 't0' | 't1' | 't2' {
   if (type === 'exec' || type === 'point' || type === 'blank' || type === 'twin') return 't0';
-  if (type === 'hop' || type === 'caller') return 't2';
+  if (type === 'hop' || type === 'caller' || type === 'trace-table') return 't2';
+  // `order` 는 5단의 1겹이라 재구현과 같은 색이다 — 섞기·페이딩·백지가 한 줄이다.
+  if (type === 'order') return 't1';
   if (type.startsWith('reimpl') || type === 'handoff' || type.startsWith('patch') || type === 'rollback') return 't1';
   // 선택형 다섯은 T0 판과 같은 모양이라 같은 색이다.
   return 't0';

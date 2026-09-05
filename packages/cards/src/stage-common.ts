@@ -25,9 +25,11 @@ import { baseName } from './vars.js';
 export const STAGE_CONCEPTS: Readonly<Record<StageType, string>> = {
   point: 'exec/order', twin: 'exec/order', blank: 'exec/order',
   exec: 'exec/order', hop: 'arch/flow', origin: 'common/variable-binding', caller: 'arch/radius',
+  'trace-table': 'common/reassignment',
   cut: 'common/conditional-branch', reorder: 'exec/order', contract: 'proto/http-method',
   'patch-line': 'arch/flow', 'patch-place': 'exec/order', rollback: 'arch/flow',
   'reimpl-spec': 'arch/flow', 'reimpl-layer': 'arch/flow', handoff: 'arch/flow',
+  order: 'exec/order',
 };
 
 export const conceptFor = (req: StageRequest, type: StageType): ConceptId =>

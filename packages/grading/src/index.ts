@@ -90,6 +90,14 @@ export {
 } from './stage.js';
 export type { PlaceCheck, StageAnswer, StageDetail, StageOptions, StageRun, StageVerdict } from './stage.js';
 
+// 형식 둘 — `order`(인접 쌍) · `trace-table`(격자 + 이월) (D187 ⑱)
+export { gradeOrder } from './order.js';
+export type { OrderGradeInput, OrderMiss, OrderPiece, OrderVerdict } from './order.js';
+export { cellKey, gradeTrace } from './trace-table.js';
+export type {
+  TraceCellSpec, TraceCellValue, TraceGradeInput, TraceMiss, TraceMissKind, TraceVerdict,
+} from './trace-table.js';
+
 // 기초 문항 채점 — 값 일치 (`docs/program/fundamentals.md` §4·§5)
 export { gradeValue, normalizeFloat, normalizeInt, MISS_MESSAGE_KEY } from './fundamentals.js';
 export type { FundGradeInput, FundVerdict, MissKind } from './fundamentals.js';
