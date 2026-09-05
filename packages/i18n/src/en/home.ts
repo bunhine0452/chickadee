@@ -1,8 +1,8 @@
 /**
  * `ko/home.ts` 의 영어 짝. 없는 키는 `ko` 로 폴백한다 (D117). 조사 필터는 쓰지 않는다.
  *
- * 인쇄소 은유(대지 = sheet · 판 = plate · 겹 = layer · 인쇄 = print)를 그대로 간다 —
- * 화면 전체가 그 은유 위에 서 있어서 여기만 평범한 낱말로 풀면 나머지와 어긋난다.
+ * 낱말은 평문이다 (D178 · 정본 §6) — unit · question · mastery level · today's plan.
+ * 인쇄소 어휘(sheet · plate · ink layer · print)는 화면 문구에서 전량 빠졌다.
  * 행 길이는 05 §9 의 로케일 축(본문 45~68자)을 따른다.
  */
 export const home: Record<string, string> = {
@@ -13,7 +13,7 @@ export const home: Record<string, string> = {
   'ingest.gitSub': 'Commits and excerpts',
   'ingest.deriveLabel': 'Concepts',
   'ingest.deriveSub': 'Finding where your code uses them',
-  'ingest.cardsLabel': 'Setting plates',
+  'ingest.cardsLabel': 'Writing questions',
   'ingest.cardsSub': 'Choosing what becomes a card',
 
   'ingest.done': 'Finished reading',
@@ -40,21 +40,21 @@ export const home: Record<string, string> = {
   // ── Shared ──────────────────────────────────────────────────────────────
   'home.back': 'Home',
 
-  // ── Ink layer names ─────────────────────────────────────────────────────
-  'home.layer0N': '0 layers',
-  'home.layer0K': 'Unprinted',
-  'home.layer0Plain': 'silhouette only',
-  'home.layer1N': '1 layer',
-  'home.layer1K': 'First pass',
-  'home.layer1Plain': 'faint halftone',
-  'home.layer2N': '2 layers',
-  'home.layer2K': 'Black plate',
-  'home.layer2Plain': 'the outline holds',
-  'home.layer3N': '3 layers',
-  'home.layer3K': '+ Cyan',
-  'home.layer3Plain': 'colour arrives',
-  'home.layer4N': '4 layers',
-  'home.layer4K': '+ Crimson',
+  // ── Mastery levels 0–4 ──────────────────────────────────────────────────
+  'home.layer0N': 'Level 0',
+  'home.layer0K': 'Not yet',
+  'home.layer0Plain': 'never got it right',
+  'home.layer1N': 'Level 1',
+  'home.layer1K': 'First time',
+  'home.layer1Plain': 'right once',
+  'home.layer2N': 'Level 2',
+  'home.layer2K': 'Learning',
+  'home.layer2Plain': 'right again after a gap',
+  'home.layer3N': 'Level 3',
+  'home.layer3K': 'Settled',
+  'home.layer3Plain': 'right after a long gap',
+  'home.layer4N': 'Level 4',
+  'home.layer4K': 'Learned',
   'home.layer4Plain': 'finished',
 
   'home.trackT0': 'T0 Grammar',
@@ -62,19 +62,19 @@ export const home: Record<string, string> = {
   'home.trackT2': 'T2 Structure',
   'home.trackT3': 'T3',
 
-  'home.run0': 'Unprinted',
-  'home.run1': 'First pass',
-  'home.run2': '1 pass',
-  'home.run3': '2 passes',
-  'home.run4': '3 passes',
+  'home.run0': 'Level 0',
+  'home.run1': 'Level 1',
+  'home.run2': 'Level 2',
+  'home.run3': 'Level 3',
+  'home.run4': 'Level 4',
 
-  // ── Layer and due labels ────────────────────────────────────────────────
-  'home.layerLabel': '{{n}} {{k}}',
-  'home.layerN': '{{n}} layers',
-  'home.layerText': 'Ink {{n}} of 4 · {{k}} · {{plain}}',
-  'home.layerTextShort': 'Ink {{n}} of 4',
-  'home.railLabel': 'Plate {{no}} · {{run}}',
-  'home.passesLabel': '{{track}} · ink {{n}} layers',
+  // ── Mastery and due labels ──────────────────────────────────────────────
+  'home.layerLabel': '{{n}} · {{k}}',
+  'home.layerN': 'Level {{n}}',
+  'home.layerText': 'Mastery {{n}} of 4 · {{k}} · {{plain}}',
+  'home.layerTextShort': 'Mastery {{n}} of 4',
+  'home.railLabel': 'Unit {{no}} · avg {{run}}',
+  'home.passesLabel': '{{track}} · mastery level {{n}}',
 
   'home.dueNone': 'Not scheduled',
   'home.dueToday': 'Today',
@@ -89,91 +89,84 @@ export const home: Record<string, string> = {
   'home.reingestPlain': '= the repo has to be read again',
   'home.reingestNote':
     'One of the grammar, queries, card generator or dictionary changed. Reading the repo '
-    + 'again rebuilds the cards and their sites — <b>the layers you earned stay, '
-    + 'because they belong to the concept</b>.',
+    + 'again rebuilds the cards and their sites — <b>the mastery you earned stays, '
+    + 'because it belongs to the concept</b>.',
 
-  'home.boardTitle': '<em>{{repo}}</em> sheets',
+  'home.boardTitle': '<em>{{repo}}</em> units',
   'home.boardPlain': '= the feature map of your repo',
   'home.boardNote':
     'One unit is one real feature of your repo. Of the {{concepts}} concepts pulled from '
-    + 'your commits and files, <b>{{printed}} are printed</b>.',
+    + 'your commits and files, <b>{{printed}} are learned</b>.',
 
-  'home.inkTitle': 'Ink layers',
+  'home.inkTitle': 'Mastery',
   'home.inkPlain': '= how much has stuck',
-  'home.inkTag': '4 layers = finished',
+  'home.inkTag': 'Level 4 = learned',
   'home.inkNote':
-    'The bird sharpens as a concept sticks. Layers count <b>times you got it right after '
-    + 'a gap</b>, not <b>times you got it right</b>. Pressing “No idea” drops one '
-    + 'layer and brings the plate back sooner.',
+    'Mastery counts <b>times you got it right after a gap</b>, not <b>times you got it '
+    + 'right</b>. Pressing “No idea” drops one level and brings the question back sooner.',
 
-  'home.gapsTitle': 'Grammar without a plate',
-  'home.gapsPlain': '= in your code, not yet printed',
+  'home.gapsTitle': 'Grammar not covered yet',
+  'home.gapsPlain': '= in your code, no question for it yet',
   'home.gapsNote':
-    'A line the AI wrote still counts — make a plate and it joins that day’s run. '
+    'A line the AI wrote still counts — make a question and it joins that day’s list. '
     + 'Starting with the most frequent one covers several files at once.',
 
-  'home.noSheets': 'No sheets yet. Reading the repo lays one sheet per feature.',
+  'home.noSheets': 'No units yet. Reading the repo makes one unit per feature.',
   'home.noSheetsRead':
-    'Read {{n}} files, but no sheet yet — a folder needs at least three files to become one '
-    + 'feature sheet. Plates are still set; see “Today’s print” on the left.',
+    'Read {{n}} files, but no unit yet — a folder needs at least three files to become one '
+    + 'feature. Questions are still written; see “Today’s plan” on the left.',
   'home.boardNoteNoSheets':
-    'One unit is one real feature of your repo. This repo has no sheets yet, so concepts are '
-    + 'not counted per sheet.',
+    'One unit is one real feature of your repo. This repo has no units yet, so concepts are '
+    + 'not counted per unit.',
 
   // ── Masthead ────────────────────────────────────────────────────────────
-  'home.brandLine': 'A print shop where your code is the textbook',
-  'home.ticket': 'Job ticket',
+  'home.brandLine': 'Your own code is the textbook',
+  'home.ticket': 'Today at a glance',
   'home.tkRepo': 'Repo',
   'home.tkDate': 'Date',
-  'home.tkStreak': 'Printing streak',
+  'home.tkStreak': 'Study streak',
   'home.tkDay': 'd',
-  'home.tkInk': 'Concept ink',
-  'home.tkAvgLayer': 'layers avg',
+  'home.tkInk': 'Average mastery',
+  'home.tkAvgLayer': 'level',
   'home.settings': 'Settings',
 
-  // ── Legend ──────────────────────────────────────────────────────────────
-  'home.legend': 'Ink legend',
-  'home.legendT0': 'Grammar',
-  'home.legendT1': 'Clone coding',
-  'home.legendT2': 'Structure',
-
-  // ── Ink scale ───────────────────────────────────────────────────────────
-  'home.inkScaleSaid': 'Ink layers, five steps. {{parts}}.',
+  // ── Mastery scale ───────────────────────────────────────────────────────
+  'home.inkScaleSaid': 'Mastery, five levels. {{parts}}.',
   'home.inkScalePart': '{{n}} {{k}} {{count}}',
   // 한국어는 수 뒤에 세는 말이 붙고 영어는 붙지 않는다. 빈 값은 폴백을 타지 않는다.
   'home.countUnit': '',
 
   // ── Colour bar ──────────────────────────────────────────────────────────
-  'home.barTitle': 'Last 14 days · ink density',
-  'home.barNote': 'One cell is a day. Darker means a longer run.',
-  'home.barSaid': 'Ink density over 14 days. {{printed}} days printed, {{total}} minutes.',
+  'home.barTitle': 'Last 14 days · time studied',
+  'home.barNote': 'One cell is a day. Darker means a longer session.',
+  'home.barSaid': 'Time studied over 14 days. {{printed}} days, {{total}} minutes.',
   'home.barToday': 'Today',
   'home.barDaysAgo': '{{n}} days ago',
   'home.barCell': '{{when}} · {{amount}}',
   'home.barRest': 'rest',
   'home.mins': '{{n}} min',
 
-  // ── Concepts to reprint ─────────────────────────────────────────────────
-  'home.retake': 'Concepts to print again',
-  'home.retakeEmpty': 'Nothing to print again yet. The first plate fills this in.',
+  // ── Concepts to redo ────────────────────────────────────────────────────
+  'home.retake': 'Concepts to do again',
+  'home.retakeEmpty': 'Nothing to do again yet. The first question fills this in.',
 
   // ── Forecast ────────────────────────────────────────────────────────────
-  'home.forecastNext': 'Sheet {{n}} –',
+  'home.forecastNext': 'Unit {{n}} –',
   'home.forecastCannot':
-    '<b>No placement plate yet.</b> Its answer key is a real commit, and there are '
-    + '<b>{{n}}</b> so far. Radius, flow and direction plates come from import edges and join '
-    + 'today’s print.',
+    '<b>No placement question yet.</b> Its answer key is a real commit, and there are '
+    + '<b>{{n}}</b> so far. Radius, flow and direction questions come from import edges and '
+    + 'join today’s plan.',
   'home.forecastLater':
-    '<b>No plate set yet.</b> As commits build up the source is read again and sheets are '
-    + 'added. <b>{{n}}</b> files have been read so far.',
+    '<b>No question written yet.</b> As commits build up the source is read again and units '
+    + 'are added. <b>{{n}}</b> files have been read so far.',
   'home.forecastMarkCannot': 'not yet',
-  'home.forecastMarkLater': 'unset',
+  'home.forecastMarkLater': 'in progress',
 
   // ── Gaps panel ──────────────────────────────────────────────────────────
-  'home.gapsEmpty': 'No gaps. Every piece of grammar in your code has a plate.',
+  'home.gapsEmpty': 'No gaps. Every piece of grammar in your code has a question.',
   'home.gapsCount': '<b>{{n}}</b> uses',
-  'home.gapsMake': 'Make a plate',
-  'home.gapsMakeFor': 'Make a plate for {{label}}',
+  'home.gapsMake': 'Make a question',
+  'home.gapsMakeFor': 'Make a question for {{label}}',
 
   // ── Not open yet ────────────────────────────────────────────────────────
   'home.locked': 'Not open yet',
@@ -181,17 +174,17 @@ export const home: Record<string, string> = {
   'home.lockedBody':
     'This opens once some of the repo’s grammar has stuck. Right now every block has '
     + 'too much unfamiliar grammar, and transcribing would just be typing practice.',
-  'home.lockedHow': 'Print grammar plates (T0) for a few days and those blocks open.',
+  'home.lockedHow': 'Answer grammar questions (T0) for a few days and those blocks open.',
 
   // ── Newcomer notice ─────────────────────────────────────────────────────
   'home.newcomer': 'Read this first',
   'home.newcomerSuspect':
-    'A root-concept plate stalled today, and there was nothing below it to step down to.',
+    'A root-concept question stalled today, and there was nothing below it to step down to.',
   'home.newcomerConfirmed':
-    'A root-concept plate stalled two sessions running, with nothing below to step down to.',
+    'A root-concept question stalled two sessions running, with nothing below to step down to.',
   'home.newcomerBody':
     'The root concepts have not stuck yet. Start with “Chapter 0 — the floor of this '
-    + 'language” on the home sheet: conditionals, functions and loops, pointed at through '
+    + 'language” on the home screen: conditionals, functions and loops, pointed at through '
     + 'the simplest lines in your own code. To go slower, switch Settings › Learning to '
     + '“programming is new” and Chapter 0 gets longer. Nothing is locked.',
 
@@ -199,55 +192,62 @@ export const home: Record<string, string> = {
   'home.zeroChapter': 'Chapter 0 — the floor of this language',
   'home.zeroChapterSig': 'Ch. 0',
   'home.zeroChapterLead':
-    'This language is new to you. {{n}} plates from the roots first — two a day, '
-    + 'so four days. After that it is like any other sheet.',
-  'home.zeroChapterMeta': '{{n}} plates · a prologue with an end',
+    'This language is new to you. {{n}} chapters from the roots first — two a day, '
+    + 'so four days. After that it is like any other unit.',
+  'home.zeroChapterMeta': '{{n}} questions · an opening with an end',
   'home.zeroChapterDone': 'Chapter 0 is done. You can reopen it any time.',
 
-  // ── Node sticker ────────────────────────────────────────────────────────
+  // ── Concept node ────────────────────────────────────────────────────────
   'home.nodeLabel': '{{name}}. {{track}}. {{layer}}. {{state}}.',
-  'home.stateDone': 'printed',
+  'home.stateDone': 'learned',
   'home.stateCurrent': 'you are here',
-  'home.stateLocked': 'no plate hung yet',
+  'home.stateLocked': 'no question yet',
   'home.stateOpen': 'up next',
 
-  // ── Node detail ─────────────────────────────────────────────────────────
+  // ── Concept detail ──────────────────────────────────────────────────────
   'home.detail': '{{name}} detail',
-  'home.detailTitleLocked': '{{name}} — no plate hung yet',
+  'home.detailTitleLocked': '{{name}} — no question yet',
   'home.detailLockedBody':
-    'The plate before this one comes first. Print it and this sticker is cut out right '
+    'The question before this one comes first. Answer it and this concept opens right '
     + 'away. The order comes from how the concepts depend on each other.',
-  'home.detailDone': 'Four layers, so it is finished. It fades in time and comes back then.',
-  'home.detailNext': 'Next print is {{due}}. Getting it right makes {{n}} layers.',
-  'home.detailGo': 'Print this plate',
+  'home.detailDone': 'Level 4, so it is learned. It drops a level in time and comes back then.',
+  'home.detailNext': 'Next review is {{due}}. Getting it right makes level {{n}}.',
+  'home.detailGo': 'Answer this question',
   'home.detailClose': 'Close',
 
-  // ── Sheet ───────────────────────────────────────────────────────────────
-  'home.sheetIndex': 'Sheet index',
-  'home.sheetChip': 'Sheet {{no}} · {{name}} · {{done}} of {{all}} printed',
-  'home.sheetStamp': 'PRINTED',
-  'home.sheetSig': 'Sheet {{n}}',
+  // ── Unit ────────────────────────────────────────────────────────────────
+  'home.sheetIndex': 'Unit list',
+  'home.sheetChip': 'Unit {{no}} · {{name}} · {{done}} of {{all}} learned',
+  'home.sheetStamp': 'DONE',
+  'home.sheetSig': 'Unit {{n}}',
   'home.sheetFeature': 'Feature {{n}}',
   'home.sheetNoPath': 'no path',
   'home.sheetMeta': '{{where}} · {{files}} files · {{concepts}} concepts',
-  'home.sheetStatusLocked': 'Sheet {{n}} first',
-  'home.sheetStatusPrinting': 'Printing {{done}} / {{all}}',
+  'home.sheetStatusLocked': 'Unit {{n}} first',
+  'home.sheetStatusPrinting': 'In progress {{done}} / {{all}}',
 
-  // ── Today's run ─────────────────────────────────────────────────────────
-  'home.todayTitle': 'Today’s run',
-  'home.todayPlain': '= the plates for today',
+  // ── Today's plan ────────────────────────────────────────────────────────
+  'home.todayTitle': 'Today’s plan',
+  'home.todayPlain': '= the questions for today',
   'home.todayEmpty':
-    'No plates to print today. Dig into the repo some more, or come back tomorrow — '
+    'No questions for today. Dig into the repo some more, or come back tomorrow — '
     + 'nothing gets padded out to fill the time.',
-  'home.todayCount': '<b>{{plates}}</b> plates · about <b>{{mins}}</b> min',
-  'home.todayList': 'Plates queued for today',
-  'home.todayDays': 'Printing record for the last {{n}} days',
-  'home.todayStart': 'Start printing',
-  'home.previewNewT0': 'New syntax plate',
+  'home.todayCount': '<b>{{plates}}</b> questions · about <b>{{mins}}</b> min',
+  'home.todayList': 'Questions queued for today',
+  'home.todayDays': 'Study record for the last {{n}} days',
+  'home.todayStart': 'Start studying',
+  'home.previewNewT0': 'New syntax question',
   'home.previewT1': 'One transcription',
-  'home.previewT2': 'One structure plate',
-  'home.todayResume': 'Carry on · from plate {{n}}',
+  'home.previewT2': 'One structure question',
+  'home.todayResume': 'Carry on · from question {{n}}',
 
-  'home.sheetCourse': 'Copy this whole sheet',
+  'home.sheetCourse': 'Copy this whole unit',
   'home.course': 'Course',
+
+  'home.startEmpty': 'Nothing to practice today. Read more of the repo, or come back tomorrow.',
+  'home.makeNoPlate': 'A question for "{{label}}" cannot be built yet. The reason is listed under "Not learned yet".',
+  'home.makeFailed': 'Could not queue a question for "{{label}}".',
+  'home.makeNoQueue': 'Built a question for "{{label}}". There is nothing scheduled today, so it was not added to the list.',
+  'home.makeReused': 'A question for "{{label}}" is already number {{n}} today.',
+  'home.makeQueued': 'Added a question for "{{label}}" as number {{n}} today.',
 };

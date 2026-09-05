@@ -24,10 +24,10 @@ export const repos: Record<string, string> = {
     + 'the repo, and registers it. A large repo takes a few minutes.',
   'repos.note':
     'Every repo keeps its own study record. Switching repos leaves a session where it was, '
-    + 'and coming back picks it up at the same plate.',
+    + 'and coming back picks it up at the same question.',
   'repos.empty':
     'No repo registered yet. Register a folder and Chickadee reads its commits and files '
-    + 'and sets plates from them.',
+    + 'and writes questions from them.',
   'repos.open': 'Open {{name}}',
   'repos.active': 'Open now',
 
@@ -38,14 +38,14 @@ export const repos: Record<string, string> = {
   'repos.lastIngest': 'Last read',
   'repos.never': 'Not yet',
   'repos.concepts': 'concepts',
-  'repos.avgLayer': 'layers on average',
+  'repos.avgLayer': 'average mastery',
   'repos.due': 'Due today',
 
   'repos.missingNote':
     'Nothing at this path. If you moved the folder, point us at the new place — your '
     + 'study record follows it.',
   'repos.detachedNote':
-    'This repo is off the list. Register the same folder again and its layers and study '
+    'This repo is off the list. Register the same folder again and its mastery and study '
     + 'record come back.',
   'repos.locate': 'Point at the new place',
   'repos.mismatch': 'That is a different repo — its first commit does not match.',
@@ -58,13 +58,13 @@ export const repos: Record<string, string> = {
     + 'registering the same folder picks it back up.',
   'repos.purgeAsk':
     'Erases the files, commits and concept sites of {{name}}. Cards are retired, not '
-    + 'deleted — what you printed and when hangs off the card, so deleting cards would cut '
+    + 'deleted — what you answered and when hangs off the card, so deleting cards would cut '
     + 'the study record.',
   'repos.confirmRemove': 'Take it off',
   'repos.confirmPurge': 'Erase',
   'repos.cancel': 'Never mind',
   'repos.removed': 'Took {{name}} off the list.',
-  'repos.purged': 'Erased {{name}}. What you printed stays.',
+  'repos.purged': 'Erased {{name}}. What you studied stays.',
 
   'repos.switch': 'Switch repo',
   'repos.all': 'See all',

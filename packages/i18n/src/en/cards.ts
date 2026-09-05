@@ -12,6 +12,20 @@ export const cards: Record<string, string> = {
   't0.pointDiag': '«{{pick}}» sits in the {{role}} slot. The answer is «{{answer}}».',
 
   't0.noSiteInRepo': 'this grammar is used nowhere in the repo',
+
+  // 「네 코드엔 없다」 넷 (D177). 사과문이 아니라 안내문이다 — 왜 없는지와 어디서 다시 만나는지.
+  't0.absentFramework':
+    'This is not in your code — the framework does it for you. Writing it out once here '
+    + 'is what lets you read, later, what that annotation took away.',
+  't0.absentLibrary':
+    'This is not in your code — a library already has it, so you never wrote it yourself. '
+    + 'Write it once here and you will see what that one call stands in for.',
+  't0.absentScale':
+    'This is not in your code — a repo this size never needed it. Learn it now and you '
+    + 'will recognise the shape when the code grows into it.',
+  't0.absentIdiom':
+    'This is not in your code — another idiom took the job. Seeing the original shape here '
+    + 'is what makes the one your code picked readable.',
   't0.syntheticFile': 'dictionary example',
   't0.noExample': 'the dictionary has no usable example',
   't0.noSiteUsable': 'no usable site',
@@ -46,7 +60,7 @@ export const cards: Record<string, string> = {
   't1.dropLineCount': '{{n}} lines — a transcription block is {{min}}–{{max}}',
   't1.dropNoConcepts': 'no grammar concept lands in this block',
   't1.dropTooManyUnknown': '{{n}} unknown concepts — at most {{max}} per block',
-  't1.dropFirstPrintTooLong': 'a first print runs to {{max}} lines ({{n}})',
+  't1.dropFirstPrintTooLong': 'a first showing runs to {{max}} lines ({{n}})',
   't1.dropNoDictConcept': 'no required grammar concept in the block is in the dictionary',
   't1.dropNothingToMask': 'stage 2 has nothing to hide — signature, comments and closers only',
 
@@ -79,7 +93,7 @@ export const cards: Record<string, string> = {
     'This feature spans <b>{{n}} of {{bands}} bands</b>. Changing the screen alone does not '
     + 'finish it.',
   't2.hintNoNewFiles': 'No file was created in this commit. Only existing ones changed.',
-  't2.hintNewFiles': '<b>{{n}} files were created.</b> The map marks them “new plate”.',
+  't2.hintNewFiles': '<b>{{n}} files were created.</b> The map marks them “new file”.',
   't2.hintCoreCount': '<b>{{n}} files</b> have to change.',
   't2.hintCoreCountBonus': '{{count}} (＋ {{n}} bonus)',
   't2.commitStat': '{{files}} files · +{{ins}} −{{del}}',
@@ -112,7 +126,7 @@ export const cards: Record<string, string> = {
   't2.noCommits': '{{n}} candidate commits — {{min}} are needed',
   't2.noCommitFiles': 'no changed files on the candidate commit',
   't2.mapTooSmall': '{{n}} map nodes — too small',
-  't2.noRadiusTarget': 'no sheet file has an incoming arrow',
+  't2.noRadiusTarget': 'no unit file has an incoming arrow',
   't2.noFlowPath': 'no path runs through {{n}} or more files',
   't2.noDirectionPairs': 'fewer than {{n}} pairs to ask a direction about',
 
@@ -136,7 +150,7 @@ export const cards: Record<string, string> = {
   't2.roleHint2': 'The importing side sits above. Only incoming arrows means the bottom row.',
   't2.roleHint3': 'It holds {{n}} files.',
 
-  't2.noRepoMap': 'the repo folds into a single «other» sheet — no repo map stands',
+  't2.noRepoMap': 'the repo folds into a single «other» unit — no repo map stands',
   't2.smallRepoMap': 'the repo map has only {{n}} nodes',
   't2.entryNone': 'doors cover more than half the map, or none at all (nodes {{n}})',
   // ───────── Execution tracing (D151) ─────────

@@ -76,5 +76,14 @@ export const grading = {
   'grading.stageHandoff': '채점하지 않습니다. 프롬프트를 복사해 들고 나가세요.',
   'grading.handoffMine': '제가 쓴 코드:',
   'grading.handoffOriginal': '원본 {{file}} {{from}}행부터:',
-  'grading.stageWrongShape': '이 판에 맞지 않는 답 모양입니다.',
+  'grading.stageWrongShape': '이 문제에 맞지 않는 답 모양입니다.',
+  // 4·5단 실행 판정 (D180)
+  'grading.stageNoTests': '채점하지 않습니다 — 이 문제를 판정할 테스트를 리포에서 찾지 못했습니다. 통과 판정에는 들지 않습니다.',
+  'grading.stageNoRunner': '채점하지 않습니다 — 이 컴퓨터에서 코드를 실행할 수 없습니다. 통과 판정에는 들지 않습니다.',
+  'grading.stageRunPassed': '테스트 {{n}}개가 통과했습니다.',
+  'grading.stageRunPassedOffSpec': '테스트 {{n}}개가 통과했습니다 — 원본과 쓴 방식은 다르지만 도는 것은 같습니다.',
+  'grading.stageRunFailed': '테스트 {{n}}개가 실패했습니다.',
+  'grading.stageRunFailedAt': '{{test}} — {{message}}',
+  'grading.stageRunTimeout': '시간 안에 끝나지 않았습니다 — 끝나지 않는 반복이 없는지 보세요.',
+  'grading.stageRunError': '빌드하지 못했습니다 — 컴파일 오류부터 보세요.',
 } as const;

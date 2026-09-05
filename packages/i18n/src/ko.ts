@@ -16,6 +16,7 @@ import { home } from './ko/home.js';
 import { repos } from './ko/repos.js';
 import { clone } from './ko/clone.js';
 import { course } from './ko/course.js';
+import { run } from './ko/run.js';
 
 export const ko = {
   ...core,
@@ -27,6 +28,7 @@ export const ko = {
   ...repos,
   ...clone,
   ...course,
+  ...run,
 } as const;
 
 /** 카탈로그가 가진 키 전부. `en` 은 이 중 일부만 가진다. */

@@ -60,4 +60,13 @@ export const grading: Record<string, string> = {
   'grading.handoffMine': 'My code:',
   'grading.handoffOriginal': 'Original {{file}} from line {{from}}:',
   'grading.stageWrongShape': 'This answer shape does not fit the card.',
+  // Stage 4/5 judged by running (D180)
+  'grading.stageNoTests': 'Not graded — no test in this repo can judge this question. It does not count toward passing.',
+  'grading.stageNoRunner': 'Not graded — this machine cannot run the code. It does not count toward passing.',
+  'grading.stageRunPassed': '{{n}} test(s) passed.',
+  'grading.stageRunPassedOffSpec': '{{n}} test(s) passed — written differently from the original, same behaviour.',
+  'grading.stageRunFailed': '{{n}} test(s) failed.',
+  'grading.stageRunFailedAt': '{{test}} — {{message}}',
+  'grading.stageRunTimeout': 'Did not finish in time — look for a loop that never ends.',
+  'grading.stageRunError': 'Did not build — start with the compile error.',
 };

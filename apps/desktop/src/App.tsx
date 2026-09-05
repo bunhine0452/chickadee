@@ -248,7 +248,7 @@ export function App(): React.JSX.Element {
 async function start(repoId: number, rootPath: string): Promise<void> {
   const opened = await startSession(repoId, rootPath);
   if (!opened) {
-    useUi.getState().say('오늘은 인쇄할 판이 없습니다 — 리포를 더 파거나 내일 다시 오세요.');
+    useUi.getState().say(t('home.startEmpty'));
   }
 }
 
@@ -278,21 +278,19 @@ async function place(
   if (!result.ok) {
     // `no-plate` 의 사유는 `gap.reason` 에 적혔고 「판이 없는 문법」이 그것을 보인다 (04 §1.4).
     say(result.reason === 'no-plate'
-      ? `「${label}」 판은 아직 만들 수 없습니다 — 사유는 「판이 없는 문법」에 적힙니다.`
-      : `「${label}」 판을 걸지 못했습니다.`);
+      ? t('home.makeNoPlate', { label })
+      : t('home.makeFailed', { label }));
     return;
   }
 
   await refreshHome();
   if (result.opened) return;
   if (result.pos === null) {
-    say(`「${label}」 판을 만들었습니다. 오늘은 인쇄할 큐가 없어 큐에 넣지는 못했습니다.`);
+    say(t('home.makeNoQueue', { label }));
     return;
   }
-  const where = `오늘 큐 ${result.pos + 1}번째`;
-  say(result.reused
-    ? `「${label}」 판은 이미 ${where}에 있습니다.`
-    : `「${label}」 판을 ${where}에 넣었습니다.`);
+  const n = String(result.pos + 1);
+  say(result.reused ? t('home.makeReused', { label, n }) : t('home.makeQueued', { label, n }));
 }
 
 
